@@ -1,9 +1,7 @@
 package no.nav.melosys.saksflyt
 
 import mu.KotlinLogging
-import no.nav.melosys.saksflytapi.domain.ProsessStatus
-import no.nav.melosys.saksflytapi.domain.Prosessinstans
-import no.nav.melosys.saksflytapi.domain.SedLåsReferanse
+import no.nav.melosys.saksflytapi.domain.*
 import org.springframework.context.event.EventListener
 import org.springframework.stereotype.Component
 import java.time.LocalDateTime
@@ -18,17 +16,34 @@ class ProsessinstansFerdigListener(
     @EventListener
     fun prosessinstansFerdig(prosessinstansFerdigEvent: ProsessinstansFerdigEvent) {
         log.info("Prosessinstans {} ferdig", prosessinstansFerdigEvent.uuid)
-        if (prosessinstansFerdigEvent.låsReferanse != null && !finnesAktivReferanse(prosessinstansFerdigEvent.låsReferanse)) {
+        if (prosessinstansFerdigEvent.låsReferanse != null && finnesIkkeAktivReferanse(prosessinstansFerdigEvent)) {
             startNesteProsessinstans(prosessinstansFerdigEvent)
         }
     }
 
-    private fun finnesAktivReferanse(referanse: String): Boolean =
-        prosessinstansRepository.existsByStatusNotInAndLåsReferanse(setOf(ProsessStatus.FERDIG), referanse)
+    private fun finnesIkkeAktivReferanse(prosessinstansFerdigEvent: ProsessinstansFerdigEvent): Boolean {
+        if (!prosessinstansRepository.existsByStatusNotInAndLåsReferanse(setOf(ProsessStatus.FERDIG), prosessinstansFerdigEvent.låsReferanse)) {
+            log.info("Det finnes ingen aktiv prosessinstans med låsreferanse {}", prosessinstansFerdigEvent.låsReferanse)
+            return true
+        }
+        log.info("Det finnes en aktiv prosessinstans med låsreferanse {}", prosessinstansFerdigEvent.låsReferanse)
+        return finnesProssesserMedSammeLåsReferanseOgForskjelligIdpåVent(prosessinstansFerdigEvent)
+    }
+
+    private fun finnesProssesserMedSammeLåsReferanseOgForskjelligIdpåVent(prosessinstansFerdigEvent: ProsessinstansFerdigEvent): Boolean =
+        // Dette bør ryddes mer i og det er egen oppgave for å fikse sed synkronisering med samme
+        // låsreferanse: https://jira.adeo.no/browse/MELOSYS-6365
+        prosessinstansRepository.findAllByIdNotAndStatusNotInAndLåsReferanseStartingWith(
+            prosessinstansFerdigEvent.uuid,
+            setOf(ProsessStatus.FERDIG),
+            prosessinstansFerdigEvent.låsReferanse
+        ).filter { it.prosessStatus == ProsessStatus.PÅ_VENT && it.låsReferanse == prosessinstansFerdigEvent.låsReferanse }.apply {
+            log.info("$size prosessinstanser med nøyaktig samme låsreferanse ${prosessinstansFerdigEvent.låsReferanse} er på vent")
+        }.isNotEmpty()
 
     private fun startNesteProsessinstans(prosessinstansFerdigEvent: ProsessinstansFerdigEvent) {
         log.info("Forsøker å starte neste prosessinstans, låsreferanse {}", prosessinstansFerdigEvent.låsReferanse)
-        val ferdigReferanse = SedLåsReferanse(prosessinstansFerdigEvent.låsReferanse)
+        val ferdigReferanse = LåsReferanseFactory.lagLåsReferanse(prosessinstansFerdigEvent.låsReferanse)
 
         prosessinstansRepository.findAllByStatus(ProsessStatus.PÅ_VENT)
             .filter { harSammeReferanse(it, ferdigReferanse) }
@@ -38,16 +53,15 @@ class ProsessinstansFerdigListener(
     }
 
     private fun oppdaterStatusOgBehandleProsessinstans(prosessinstans: Prosessinstans) {
-        log.info("Prosessinstans {} startes opp etter å ha vært på vent", prosessinstans.id)
+        log.info("Prosessinstans {} med låsreferanse {} startes opp etter å ha vært på vent", prosessinstans.id, prosessinstans.låsReferanse)
         prosessinstans.status = ProsessStatus.KLAR
         prosessinstans.endretDato = LocalDateTime.now()
         prosessinstansRepository.save(prosessinstans)
         prosessinstansBehandler.behandleProsessinstans(prosessinstans)
     }
 
-    private fun harSammeReferanse(prosessinstans: Prosessinstans, ferdigLåsreferanse: SedLåsReferanse): Boolean {
-        val låsReferanse = SedLåsReferanse(prosessinstans.låsReferanse)
-        // referanse er her rina saksnummer så må støtte dette når vi lager felles interface
+    private fun harSammeReferanse(prosessinstans: Prosessinstans, ferdigLåsreferanse: LåsReferanse): Boolean {
+        val låsReferanse = LåsReferanseFactory.lagLåsReferanse(prosessinstans.låsReferanse)
         return låsReferanse.referanse == ferdigLåsreferanse.referanse
     }
 }

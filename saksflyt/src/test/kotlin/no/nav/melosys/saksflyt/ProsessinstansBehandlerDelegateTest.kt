@@ -2,9 +2,7 @@ package no.nav.melosys.saksflyt
 
 import io.kotest.matchers.shouldBe
 import io.mockk.*
-import no.nav.melosys.saksflytapi.domain.ProsessStatus
-import no.nav.melosys.saksflytapi.domain.Prosessinstans
-import no.nav.melosys.saksflytapi.domain.ProsessinstansInfo
+import no.nav.melosys.saksflytapi.domain.*
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.TestInstance
@@ -43,7 +41,7 @@ internal class ProsessinstansBehandlerDelegateTest {
     }
 
     @Test
-    fun oppdaterStatusOmSkalPåVent_finnesProsessMedSammeReferanseUnderBehandling_settesIkkePåVent() {
+    fun `har SED låsReferanse - oppdaterStatusOmSkalPåVent finnesProsessMedSammeReferanseUnderBehandling settesIkkePåVent`() {
         prosessinstans.status = ProsessStatus.KLAR
         val låsReferanse = "12_12_1"
         prosessinstans.låsReferanse = låsReferanse
@@ -58,6 +56,26 @@ internal class ProsessinstansBehandlerDelegateTest {
 
 
         prosessinstans.status.shouldBe(ProsessStatus.KLAR)
+    }
+
+    @Test
+    fun `Har OpprettManglendeInnbetalingBehandlingLåsReferanse låsReferanse og aktiv behandling med samme referanse skal da settes på vent`() {
+        prosessinstans.status = ProsessStatus.KLAR
+        val låsReferanse = "${LåsReferanseType.UBETALT}_ABC_123"
+        prosessinstans.låsReferanse = låsReferanse
+
+        val eksisterendeProsessinstans = lagProsessinstans(låsReferanse)
+        every {
+            prosessinstansRepository.findAllByIdNotAndStatusNotInAndLåsReferanseStartingWith(prosessinstans.id, any(), any())
+        } returns setOf(eksisterendeProsessinstans.tilProsessinstansInfo())
+        every { prosessinstansRepository.save(any()) } returns prosessinstans
+
+
+        prosessinstansBehandlerDelegate.oppdaterStatusOmSkalPåVent(prosessinstans)
+
+
+        verify { prosessinstansRepository.save(prosessinstans) }
+        prosessinstans.status.shouldBe(ProsessStatus.PÅ_VENT)
     }
 
     @Test

@@ -4,7 +4,7 @@ import io.kotest.assertions.throwables.shouldThrow
 import io.kotest.matchers.shouldBe
 import org.junit.jupiter.api.Test
 
-internal class SedLåsReferanseTest {
+class SedLåsReferanseTest {
 
     @Test
     fun initierSedLåsReferanse_gyldigReferanseString_verifiserParsing() {

@@ -1,9 +1,13 @@
 package no.nav.melosys.itest
 
+import ch.qos.logback.classic.Level
 import com.ninjasquad.springmockk.MockkBean
+import io.kotest.matchers.optional.shouldBePresent
+import io.kotest.matchers.shouldBe
 import io.mockk.every
 import io.mockk.mockk
 import no.nav.melosys.Application
+import no.nav.melosys.LoggingTestUtils
 import no.nav.melosys.domain.Behandling
 import no.nav.melosys.domain.Fagsak
 import no.nav.melosys.domain.RegistreringsInfo
@@ -15,6 +19,7 @@ import no.nav.melosys.domain.kodeverk.Sakstyper
 import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingsstatus
 import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingstema
 import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingstyper
+import no.nav.melosys.exception.TekniskException
 import no.nav.melosys.integrasjon.joark.saf.SafConsumer
 import no.nav.melosys.integrasjon.joark.saf.dto.journalpost.*
 import no.nav.melosys.melosysmock.sak.SakRepo
@@ -27,8 +32,7 @@ import no.nav.melosys.saksflytapi.domain.ProsessType
 import no.nav.melosys.saksflytapi.domain.Prosessinstans
 import no.nav.melosys.sikkerhet.context.ThreadLocalAccessInfo
 import no.nav.security.token.support.spring.test.EnableMockOAuth2Server
-import org.assertj.core.api.Assertions.assertThat
-import org.awaitility.Awaitility
+import org.awaitility.kotlin.await
 import org.junit.jupiter.api.AfterEach
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
@@ -86,6 +90,10 @@ internal class SaksflytOppstartIT(
     fun after() {
         ThreadLocalAccessInfo.afterExecuteProcess(processUUID)
         oAuthMockServer.stop()
+        // Skaper trøbbel og ha prosessinstans med status PÅ_VENT liggende
+        prosessinstansRepository.findAllByLåsReferanseStartingWith(LÅSREFERANSE_PROSESSINSTANS_SOM_IKKE_SKAL_REKJØRES_ENDA).forEach {
+            prosessinstansRepository.delete(it)
+        }
     }
 
     @Test
@@ -94,32 +102,51 @@ internal class SaksflytOppstartIT(
         val behandling = lagBehandling(fagsak).also { behandlingRepository.save(it) }
 
         val prosessinstansSomTrengerRekjøring = lagProsessinstans(
-            ProsessType.MOTTAK_SED, ProsessStatus.PÅ_VENT, behandling, LocalDateTime.now().minusDays(2)
+            ProsessType.MOTTAK_SED,
+            ProsessStatus.PÅ_VENT,
+            behandling,
+            LocalDateTime.now().minusDays(2),
+            LÅSREFERANSE_PROSESSINSTANS_SOM_TRENGER_REKJØRING
+        ).apply {
+            this.setData(ProsessDataKey.EESSI_MELDING, eessiMelding())
+        }.also { prosessinstansRepository.save(it) }
+
+        val prosessinstansSomIkkeSkalRekjøresEnda = lagProsessinstans(
+            ProsessType.MOTTAK_SED,
+            ProsessStatus.PÅ_VENT,
+            behandling,
+            LocalDateTime.now().minusHours(3),
+            LÅSREFERANSE_PROSESSINSTANS_SOM_IKKE_SKAL_REKJØRES_ENDA
         ).apply {
             this.setData(ProsessDataKey.EESSI_MELDING, eessiMelding())
         }.also { prosessinstansRepository.save(it) }
 
         lagProsessinstans(
-            ProsessType.MOTTAK_SED, ProsessStatus.PÅ_VENT, behandling, LocalDateTime.now().minusHours(3)
-        ).also { prosessinstansRepository.save(it) }
-
-        lagProsessinstans(
-            ProsessType.UTPEKING_AVVIS, ProsessStatus.FERDIG, behandling, LocalDateTime.now().minusDays(4)
+            ProsessType.UTPEKING_AVVIS, ProsessStatus.FERDIG, behandling, LocalDateTime.now().minusDays(4), null
         ).also { prosessinstansRepository.save(it) }
 
         every { safConsumer.hentJournalpost(eessiMelding().journalpostId) } returns journalpost()
 
 
-        applicationEventPublisher.publishEvent(applicationReadyEvent())
-        Awaitility.await().timeout(Duration.ofMinutes(1)).pollInterval(Duration.ofSeconds(2)).until {
-            prosessinstansRepository.findAllByStatusIn(
-                ProsessStatus.hentAktiveStatuser(),
-            ).size == 1
+        LoggingTestUtils.withLogCapture { logEvents ->
+            applicationEventPublisher.publishEvent(applicationReadyEvent())
+            await.timeout(Duration.ofMinutes(1)).pollInterval(Duration.ofSeconds(2)).until {
+                prosessinstansRepository.findAllByStatusIn(
+                    ProsessStatus.hentAktiveStatuser(),
+                ).size == 1 || logEvents.none { it.level != Level.ERROR }
+            }
+            logEvents.firstOrNull { it.level == Level.ERROR }?.let {
+                throw TekniskException("ProsessinstansBehandler feilet med melding: ${it.formattedMessage}")
+            }
         }
 
 
-        assertThat(prosessinstansRepository.findById(prosessinstansSomTrengerRekjøring.id)).isPresent.get()
-            .matches { it.status == ProsessStatus.FERDIG }
+        prosessinstansRepository.findById(prosessinstansSomTrengerRekjøring.id).shouldBePresent {
+            it.status shouldBe ProsessStatus.FERDIG
+        }
+        prosessinstansRepository.findById(prosessinstansSomIkkeSkalRekjøresEnda.id).shouldBePresent {
+            it.status shouldBe ProsessStatus.PÅ_VENT
+        }
     }
 
     private fun journalpost(): Journalpost = Journalpost(
@@ -137,7 +164,10 @@ internal class SaksflytOppstartIT(
     )
 
     private fun lagProsessinstans(
-        type: ProsessType, status: ProsessStatus, behandling: Behandling? = null, endretDato: LocalDateTime
+        type: ProsessType, status: ProsessStatus,
+        behandling: Behandling? = null,
+        endretDato: LocalDateTime,
+        låsReferanse: String?
     ): Prosessinstans {
         return Prosessinstans().apply {
             this.behandling = behandling
@@ -145,7 +175,7 @@ internal class SaksflytOppstartIT(
             this.status = status
             sistFullførtSteg = null
             registrertDato = endretDato
-            låsReferanse = if (status === ProsessStatus.PÅ_VENT) "123_dummy_1" else null
+            this.låsReferanse = låsReferanse
             this.endretDato = endretDato
         }
     }
@@ -182,5 +212,11 @@ internal class SaksflytOppstartIT(
         registrertDato = Instant.now()
         endretDato = Instant.now()
         endretAv = "bla"
+    }
+
+    companion object {
+        val LÅSREFERANSE_PROSESSINSTANS_SOM_IKKE_SKAL_REKJØRES_ENDA = "234_dummy_2"
+        val LÅSREFERANSE_PROSESSINSTANS_SOM_TRENGER_REKJØRING = "123_dummy_1"
+
     }
 }

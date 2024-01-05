@@ -1,10 +1,7 @@
 package no.nav.melosys.saksflyt
 
 import mu.KotlinLogging
-import no.nav.melosys.saksflytapi.domain.ProsessStatus
-import no.nav.melosys.saksflytapi.domain.Prosessinstans
-import no.nav.melosys.saksflytapi.domain.ProsessinstansInfo
-import no.nav.melosys.saksflytapi.domain.SedLåsReferanse
+import no.nav.melosys.saksflytapi.domain.*
 import org.springframework.stereotype.Component
 import java.time.LocalDateTime
 import java.util.UUID
@@ -29,42 +26,34 @@ class ProsessinstansBehandlerDelegate(
             prosessinstans.status = ProsessStatus.PÅ_VENT
             prosessinstans.endretDato = LocalDateTime.now()
             prosessinstansRepository.save(prosessinstans)
-            log.info("Prosessinstans {} satt på vent", prosessinstans.id)
+            log.info("Prosessinstans {} med låsreferanse {} satt på vent", prosessinstans.id, prosessinstans.låsReferanse)
         }
     }
 
     /*
-    Settes på vent om det finnes en prosessinstans med samme referanse,
-     men ikke lik identifikator i prosess (ikke på vent/ferdig).
+    Settes på vent om det finnes en prosessinstans med samme referanse, som ikke er på vent/ferdig.
 
     Settes ikke på vent om
         1. Prosessinstansen ikke har en låsreferanse
         2. Det finnes ingen prosessinstans med samme referanse
-        3. Det finnes en prosessinstans med lik referanse og identifikator.
+
+        Når det gjelder sed mottak, så settes ikke prosessinstanser med samme låsreferanse på vent
+        siden også subprosesser lages med samme låsreferanse som parent prosessen.
+        Dette må fikses for å løse https://jira.adeo.no/browse/MELOSYS-6365
      */
     private fun skalSettesPåVent(prosessinstans: Prosessinstans): Boolean {
         if (prosessinstans.låsReferanse == null) {
             return false
         }
 
-        // TODO: finn riktig type fra prosessinstans.låsReferanse
-        val låsReferanse = SedLåsReferanse(prosessinstans.låsReferanse)
-        val aktiveLåsReferanser = finnAndreAktiveLåsMedSammeReferanse(prosessinstans.id, låsReferanse)
-
-        if (aktiveLåsReferanser.contains(låsReferanse)) {
-            return false
-        }
-        // Dette bør ikke være nødvending da equals brukes ved contains over?
-        // Lager flere tester og fjerne det i egen pr.
-        return aktiveLåsReferanser.any { it.referanse == låsReferanse.referanse }
+        val låsReferanse: LåsReferanse = LåsReferanseFactory.lagLåsReferanse(prosessinstans.låsReferanse)
+        val andreAktiveLåsMedSammeReferanse = finnAndreAktiveLåsMedSammeReferanse(prosessinstans.id, låsReferanse.referanse)
+        return låsReferanse.skalSettesPåVent(andreAktiveLåsMedSammeReferanse)
     }
 
-    internal fun finnAndreAktiveLåsMedSammeReferanse(
-        id: UUID,
-        låsReferanse: SedLåsReferanse
-    ): Collection<SedLåsReferanse> {
+    internal fun finnAndreAktiveLåsMedSammeReferanse(id: UUID, låsReferanseStarterMed: String): Collection<String> {
         return prosessinstansRepository.findAllByIdNotAndStatusNotInAndLåsReferanseStartingWith(
-            id, setOf(ProsessStatus.PÅ_VENT, ProsessStatus.FERDIG), låsReferanse.referanse
-        ).map { p: ProsessinstansInfo -> SedLåsReferanse(p.låsReferanse) }.toSet()
+            id, setOf(ProsessStatus.PÅ_VENT, ProsessStatus.FERDIG), låsReferanseStarterMed
+        ).map { it.låsReferanse }.toSet()
     }
 }
