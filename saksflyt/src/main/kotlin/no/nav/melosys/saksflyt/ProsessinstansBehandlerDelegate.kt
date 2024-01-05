@@ -51,9 +51,9 @@ class ProsessinstansBehandlerDelegate(
         return låsReferanse.skalSettesPåVent(andreAktiveLåsMedSammeReferanse)
     }
 
-    internal fun finnAndreAktiveLåsMedSammeReferanse(id: UUID, låsReferansePrefix: String): Collection<String> {
+    internal fun finnAndreAktiveLåsMedSammeReferanse(id: UUID, låsReferanseStarterMed: String): Collection<String> {
         return prosessinstansRepository.findAllByIdNotAndStatusNotInAndLåsReferanseStartingWith(
-            id, setOf(ProsessStatus.PÅ_VENT, ProsessStatus.FERDIG), låsReferansePrefix
+            id, setOf(ProsessStatus.PÅ_VENT, ProsessStatus.FERDIG), låsReferanseStarterMed
         ).map { it.låsReferanse }.toSet()
     }
 }
