@@ -29,7 +29,7 @@ class LåsReferanseFactoryTest {
         )
         val låsReferanse = LåsReferanseFactory.lagLåsReferanse(sedLåsReferanseString)
 
-        låsReferanse.shouldBeInstanceOf<OpprettManglendeInnbetalingBehandlingLåsReferanse>()
+        låsReferanse.shouldBeInstanceOf<ManglendeInnbetalingBehandlingLåsReferanse>()
             .låsReferanse.shouldBe("UBETALT_01HHFM03YMHHQAVZ4SQF9Y29E4_123456789")
     }
 }

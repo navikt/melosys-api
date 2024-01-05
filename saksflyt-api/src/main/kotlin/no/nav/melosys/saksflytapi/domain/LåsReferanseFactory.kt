@@ -11,7 +11,7 @@ object LåsReferanseFactory {
 
         return when (låsReferanseType) {
             LåsReferanseType.SED -> SedLåsReferanse(låsReferanse)
-            LåsReferanseType.UBETALT -> OpprettManglendeInnbetalingBehandlingLåsReferanse(låsReferanse)
+            LåsReferanseType.UBETALT -> ManglendeInnbetalingBehandlingLåsReferanse(låsReferanse)
         }
     }
 

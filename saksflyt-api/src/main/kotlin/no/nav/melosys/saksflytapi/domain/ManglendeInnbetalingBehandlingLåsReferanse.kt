@@ -1,6 +1,6 @@
 package no.nav.melosys.saksflytapi.domain
 
-class OpprettManglendeInnbetalingBehandlingLåsReferanse(val låsReferanse: String) : LåsReferanse {
+class ManglendeInnbetalingBehandlingLåsReferanse(val låsReferanse: String) : LåsReferanse {
     val fakturaserieReferanse: String
     val fakturanummer: String
 
