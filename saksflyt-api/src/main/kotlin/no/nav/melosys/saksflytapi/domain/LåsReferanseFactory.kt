@@ -11,13 +11,13 @@ object LåsReferanseFactory {
 
         return when (låsReferanseType) {
             LåsReferanseType.SED -> SedLåsReferanse(referanse)
-            LåsReferanseType.OMIB -> OpprettManglendeInnbetalingBehandlingLåsReferanse(referanse)
+            LåsReferanseType.UBETALT -> OpprettManglendeInnbetalingBehandlingLåsReferanse(referanse)
         }
     }
 
     @JvmStatic
     fun lagStringFraManglendeFakturabetalingMelding(manglendeFakturabetalingMelding: ManglendeFakturabetalingMelding): String =
         manglendeFakturabetalingMelding.let {
-            "${LåsReferanseType.OMIB}_${it.fakturaserieReferanse}_${it.fakturanummer}"
+            "${LåsReferanseType.UBETALT}_${it.fakturaserieReferanse}_${it.fakturanummer}"
         }
 }

@@ -22,7 +22,7 @@ class OpprettManglendeInnbetalingBehandlingLåsReferanseTest {
     }
 
     companion object {
-        private const val PREFIX = "OMIB"
+        private val PREFIX = LåsReferanseType.UBETALT.toString()
         private const val FAKTURASERIE_REFERANSE = "01HHFM03YMHHQAVZ4SQF9Y29E4"
         private const val FAKTURANUMMER = "123456789"
     }

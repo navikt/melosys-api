@@ -61,7 +61,7 @@ internal class ProsessinstansBehandlerDelegateTest {
     @Test
     fun `Har OpprettManglendeInnbetalingBehandlingLåsReferanse låsReferanse og aktiv behandling med samme referanse skal da settes på vent`() {
         prosessinstans.status = ProsessStatus.KLAR
-        val låsReferanse = "${LåsReferanseType.OMIB}_ABC_123"
+        val låsReferanse = "${LåsReferanseType.UBETALT}_ABC_123"
         prosessinstans.låsReferanse = låsReferanse
 
         val eksisterendeProsessinstans = lagProsessinstans(låsReferanse)
