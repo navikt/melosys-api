@@ -6,7 +6,7 @@ object LåsReferanseFactory {
 
     fun lagLåsReferanse(referanse: String): LåsReferanse {
         val låsReferanseType: LåsReferanseType = LåsReferanseType.values().find {
-            referanse.matches(Regex(it.prefixRegexString))
+            it.erGyldigReferanse(referanse)
         } ?: throw IllegalArgumentException("$referanse er ikke gyldig låsreferanse")
 
         return when (låsReferanseType) {
