@@ -5,6 +5,7 @@ import com.github.tomakehurst.wiremock.client.WireMock
 import com.github.tomakehurst.wiremock.core.WireMockConfiguration
 import io.kotest.matchers.collections.shouldContain
 import io.kotest.matchers.nulls.shouldNotBeNull
+import no.nav.melosys.AwaitUtil.awaitWithFailOnLogErrors
 import no.nav.melosys.domain.arkiv.ArkivDokument
 import no.nav.melosys.domain.kodeverk.Avsendertyper
 import no.nav.melosys.domain.kodeverk.Landkoder
@@ -20,7 +21,6 @@ import no.nav.melosys.service.journalforing.JournalfoeringService
 import no.nav.melosys.service.journalforing.dto.*
 import no.nav.melosys.service.oppgave.OppgaveService
 import no.nav.melosys.sikkerhet.context.ThreadLocalAccessInfo
-import org.awaitility.kotlin.await
 import org.awaitility.kotlin.untilNotNull
 import org.junit.jupiter.api.AfterEach
 import org.junit.jupiter.api.BeforeEach
@@ -80,7 +80,7 @@ class JournalfoeringBase(
         val jfrOppgave: Oppgave = lagJfrOppgave()
         val lagJournalfoeringOpprettDto = lagJournalfoeringOpprettDto(jfrOppgave, journalfoeringOpprettDto)
 
-        return executeAndWait(ProsessType.JFR_NY_SAK_BRUKER, alsoWaitForprosessType) {
+        return executeAndWait(waitFor, alsoWaitForprosessType) {
             journalføringService.journalførOgOpprettSak(lagJournalfoeringOpprettDto)
             oppgaveService.ferdigstillOppgave(lagJournalfoeringOpprettDto.oppgaveID)
         }
@@ -99,19 +99,22 @@ class JournalfoeringBase(
     }
 
     protected fun finnProsess(prosessType: ProsessType, startTid: LocalDateTime): UUID {
-        await.pollDelay(1, TimeUnit.SECONDS)
-            .timeout(30, TimeUnit.SECONDS)
-            .untilNotNull {
-                prosessinstansRepository.findAllAfterDate(startTid)
-            }.map { it.type }.shouldContain(prosessType)
+        awaitWithFailOnLogErrors {
+            pollDelay(1, TimeUnit.SECONDS)
+                .timeout(30, TimeUnit.SECONDS)
+                .untilNotNull {
+                    prosessinstansRepository.findAllAfterDate(startTid)
+                }.map { it.type }.shouldContain(prosessType)
+        }
 
-        return await
-            .timeout(30, TimeUnit.SECONDS)
-            .pollInterval(1, TimeUnit.SECONDS)
-            .untilNotNull {
-                prosessinstansRepository.findAllAfterDate(startTid)
-                    .find { it.type == prosessType && it.status == ProsessStatus.FERDIG }?.id
-            }
+        return awaitWithFailOnLogErrors {
+            timeout(30, TimeUnit.SECONDS)
+                .pollInterval(1, TimeUnit.SECONDS)
+                .untilNotNull {
+                    prosessinstansRepository.findAllAfterDate(startTid)
+                        .find { it.type == prosessType && it.status == ProsessStatus.FERDIG }?.id
+                }
+        }
     }
 
     protected fun lagJfrOppgave(): Oppgave =

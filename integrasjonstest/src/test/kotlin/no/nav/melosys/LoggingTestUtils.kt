@@ -7,33 +7,31 @@ import org.slf4j.LoggerFactory
 
 object LoggingTestUtils {
     inline fun <reified T> captureLog(block: () -> Unit): List<ILoggingEvent> {
-        val listAppender = ListAppender<ILoggingEvent>().apply {
-            start()
-            (LoggerFactory.getLogger(T::class.java) as Logger).addAppender(this)
-        }
+        val logger = LoggerFactory.getLogger(T::class.java) as Logger
+        val listAppender = ListAppender<ILoggingEvent>().apply { start() }
+        logger.addAppender(listAppender)
         try {
             block()
         } finally {
-            (LoggerFactory.getLogger(T::class.java) as Logger).detachAppender(listAppender)
+            logger.detachAppender(listAppender)
         }
         return listAppender.list
     }
 
-    fun <R> Collection<ILoggingEvent>.check(block: (next: () -> ILoggingEvent) -> R): R {
+    fun <T> Collection<ILoggingEvent>.check(block: (next: () -> ILoggingEvent) -> T): T {
         var i = 0
         val iLoggingEventList = toList()
         return block { iLoggingEventList[i++] }
     }
 
-    inline fun withLogCapture(block: (logEvents: List<ILoggingEvent>) -> Unit) {
-        val listAppender = ListAppender<ILoggingEvent>().apply {
-            start()
-            (LoggerFactory.getLogger(Logger.ROOT_LOGGER_NAME) as Logger).addAppender(this)
-        }
+    fun <T> withLogCapture(block: (logEvents: List<ILoggingEvent>) -> T): T {
+        val logger = LoggerFactory.getLogger(Logger.ROOT_LOGGER_NAME) as Logger
+        val listAppender = ListAppender<ILoggingEvent>().apply { start() }
+        logger.addAppender(listAppender)
         try {
-            block(listAppender.list)
+            return block(listAppender.list)
         } finally {
-            (LoggerFactory.getLogger(Logger.ROOT_LOGGER_NAME) as Logger).detachAppender(listAppender)
+            logger.detachAppender(listAppender)
         }
     }
 }

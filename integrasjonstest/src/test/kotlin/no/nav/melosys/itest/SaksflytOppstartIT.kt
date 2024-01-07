@@ -1,13 +1,12 @@
 package no.nav.melosys.itest
 
-import ch.qos.logback.classic.Level
 import com.ninjasquad.springmockk.MockkBean
 import io.kotest.matchers.optional.shouldBePresent
 import io.kotest.matchers.shouldBe
 import io.mockk.every
 import io.mockk.mockk
 import no.nav.melosys.Application
-import no.nav.melosys.LoggingTestUtils
+import no.nav.melosys.AwaitUtil
 import no.nav.melosys.domain.Behandling
 import no.nav.melosys.domain.Fagsak
 import no.nav.melosys.domain.RegistreringsInfo
@@ -19,7 +18,6 @@ import no.nav.melosys.domain.kodeverk.Sakstyper
 import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingsstatus
 import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingstema
 import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingstyper
-import no.nav.melosys.exception.TekniskException
 import no.nav.melosys.integrasjon.joark.saf.SafConsumer
 import no.nav.melosys.integrasjon.joark.saf.dto.journalpost.*
 import no.nav.melosys.melosysmock.sak.SakRepo
@@ -32,7 +30,6 @@ import no.nav.melosys.saksflytapi.domain.ProsessType
 import no.nav.melosys.saksflytapi.domain.Prosessinstans
 import no.nav.melosys.sikkerhet.context.ThreadLocalAccessInfo
 import no.nav.security.token.support.spring.test.EnableMockOAuth2Server
-import org.awaitility.kotlin.await
 import org.junit.jupiter.api.AfterEach
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
@@ -50,6 +47,7 @@ import java.time.Instant
 import java.time.LocalDate
 import java.time.LocalDateTime
 import java.util.*
+
 
 @ActiveProfiles("test")
 @SpringBootTest(
@@ -127,19 +125,15 @@ internal class SaksflytOppstartIT(
 
         every { safConsumer.hentJournalpost(eessiMelding().journalpostId) } returns journalpost()
 
-
-        LoggingTestUtils.withLogCapture { logEvents ->
-            applicationEventPublisher.publishEvent(applicationReadyEvent())
-            await.timeout(Duration.ofMinutes(1)).pollInterval(Duration.ofSeconds(2)).until {
-                prosessinstansRepository.findAllByStatusIn(
-                    ProsessStatus.hentAktiveStatuser(),
-                ).size == 1 || logEvents.none { it.level != Level.ERROR }
-            }
-            logEvents.firstOrNull { it.level == Level.ERROR }?.let {
-                throw TekniskException("ProsessinstansBehandler feilet med melding: ${it.formattedMessage}")
-            }
+        applicationEventPublisher.publishEvent(applicationReadyEvent())
+        AwaitUtil.awaitWithFailOnLogErrors {
+            timeout(Duration.ofMinutes(1)).pollInterval(Duration.ofSeconds(2))
+                .until {
+                    prosessinstansRepository.findAllByStatusIn(
+                        ProsessStatus.hentAktiveStatuser(),
+                    ).size == 1
+                }
         }
-
 
         prosessinstansRepository.findById(prosessinstansSomTrengerRekjøring.id).shouldBePresent {
             it.status shouldBe ProsessStatus.FERDIG
