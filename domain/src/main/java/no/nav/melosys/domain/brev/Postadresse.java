@@ -38,13 +38,17 @@ public record Postadresse(
         return new Postadresse(
             coAdressenavn,
             sammenslå(strukturertAdresse.getGatenavn(), strukturertAdresse.getHusnummerEtasjeLeilighet()),
-            strukturertAdresse.getPostboks(),
+            lagPostboksAddresselinje(strukturertAdresse.getPostboks()),
             null,
             null,
             strukturertAdresse.getPostnummer(),
             strukturertAdresse.getPoststed(),
             strukturertAdresse.getLandkode(),
             strukturertAdresse.getRegion());
+    }
+
+    private static String lagPostboksAddresselinje(String postboks) {
+        return postboks != null ? String.format("Postboks %s", postboks) : null;
     }
 
     public static Postadresse lagPostadresse(String coAdressenavn, SemistrukturertAdresse semistrukturertAdresse) {
