@@ -199,11 +199,6 @@ public class ProsessinstansService {
         lagre(prosessinstans);
     }
 
-
-    private static boolean skalSendesForvaltningsmelding(JournalfoeringRequest journalfoeringRequest) {
-        return journalfoeringRequest.getForvaltningsmeldingMottaker() != null && !journalfoeringRequest.getForvaltningsmeldingMottaker().equals(ForvaltningsmeldingMottaker.INGEN);
-    }
-
     private static String getSaksbehandlerIdent() {
         String saksbehandlerIdent = SubjectHandler.getInstance().getUserID();
         if (saksbehandlerIdent != null) return saksbehandlerIdent;

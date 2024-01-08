@@ -55,6 +55,7 @@ public class DokumentServiceFasade {
         brevbestillingDto.setBegrunnelseKode(begrunnelseKode);
         brevbestillingDto.setBestillersId(avsenderId);
         brevbestillingDto.setOrgnr(mottaker.getOrgnr());
+        brevbestillingDto.setAnnenMottakerIdent(mottaker.getPersonIdent());
 
         dokgenService.produserOgDistribuerBrev(behandlingId, brevbestillingDto);
     }

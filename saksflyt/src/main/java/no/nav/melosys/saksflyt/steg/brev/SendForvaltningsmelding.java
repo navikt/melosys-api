@@ -54,17 +54,17 @@ public class SendForvaltningsmelding implements StegBehandler {
             } else {
                 String avsenderID = prosessinstans.getData(AVSENDER_ID, String.class);
                 boolean avsenderErOrganisasjon = avsenderID.length() == 9;
+                Mottaker mottaker;
 
                 if (avsenderErOrganisasjon) {
-                    var mottaker = Mottaker.medRolle(Mottakerroller.ANNEN_ORGANISASJON);
+                    mottaker = Mottaker.medRolle(Mottakerroller.ANNEN_ORGANISASJON);
                     mottaker.setOrgnr(avsenderID);
-
-                    brevBestiller.bestill(MELDING_FORVENTET_SAKSBEHANDLINGSTID_SOKNAD, List.of(mottaker), null,
-                        saksbehandler, null, behandling);
                 } else {
-                    throw new FunksjonellException("Støtter ikke personavsender");
+                    mottaker = Mottaker.medRolle(Mottakerroller.ANNEN_PERSON);
+                    mottaker.setPersonIdent(avsenderID);
                 }
-
+                brevBestiller.bestill(MELDING_FORVENTET_SAKSBEHANDLINGSTID_SOKNAD, List.of(mottaker), null,
+                    saksbehandler, null, behandling);
             }
             log.info("Sendt forvaltningsmelding for behandling {}", prosessinstans.getBehandling().getId());
         } else {

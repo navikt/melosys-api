@@ -56,6 +56,7 @@ class DokgenServiceTest {
 
     public static final String FNR = "99887766554";
     public static final String ORGNR = "987654321";
+    public static final String ANNEN_PERSON_IDENT = "21075114491";
 
     @Mock
     private DokgenConsumer mockDokgenConsumer;
@@ -366,6 +367,46 @@ class DokgenServiceTest {
             DokgenBrevbestilling::getProduserbartdokument,
             DokgenBrevbestilling::getBehandlingId
         ).containsExactly(MELDING_FORVENTET_SAKSBEHANDLINGSTID_SOKNAD, 123L);
+    }
+
+    @Test
+    void skalProdusereOgDistribuereBrevTilAnnenOrganisasjonGirRiktigMottaker() {
+        when(mockBehandlingsService.hentBehandlingMedSaksopplysninger(anyLong())).thenReturn(new Behandling());
+
+        var brevbestillingDto = new BrevbestillingDto();
+        brevbestillingDto.setProduserbardokument(MELDING_FORVENTET_SAKSBEHANDLINGSTID_SOKNAD);
+        brevbestillingDto.setMottaker(Mottakerroller.ANNEN_ORGANISASJON);
+        brevbestillingDto.setOrgnr(ORGNR);
+        brevbestillingDto.setBestillersId("Z123456");
+
+
+        dokgenService.produserOgDistribuerBrev(123L, brevbestillingDto);
+
+
+        Mottaker forventetMottaker = Mottaker.medRolle(Mottakerroller.ANNEN_ORGANISASJON);
+        forventetMottaker.setOrgnr(ORGNR);
+        verify(mockProsessinstansService).opprettProsessinstansOpprettOgDistribuerBrev(any(Behandling.class), eq(forventetMottaker),
+            any(DokgenBrevbestilling.class));
+    }
+
+    @Test
+    void skalProdusereOgDistribuereBrevTilAnnenPersonGirRiktigMottaker() {
+        when(mockBehandlingsService.hentBehandlingMedSaksopplysninger(anyLong())).thenReturn(new Behandling());
+
+        var brevbestillingDto = new BrevbestillingDto();
+        brevbestillingDto.setProduserbardokument(MELDING_FORVENTET_SAKSBEHANDLINGSTID_SOKNAD);
+        brevbestillingDto.setMottaker(Mottakerroller.ANNEN_PERSON);
+        brevbestillingDto.setAnnenMottakerIdent(ANNEN_PERSON_IDENT);
+        brevbestillingDto.setBestillersId("Z123456");
+
+
+        dokgenService.produserOgDistribuerBrev(123L, brevbestillingDto);
+
+
+        Mottaker forventetMottaker = Mottaker.medRolle(Mottakerroller.ANNEN_PERSON);
+        forventetMottaker.setPersonIdent(ANNEN_PERSON_IDENT);
+        verify(mockProsessinstansService).opprettProsessinstansOpprettOgDistribuerBrev(any(Behandling.class), eq(forventetMottaker),
+            any(DokgenBrevbestilling.class));
     }
 
     @Test
