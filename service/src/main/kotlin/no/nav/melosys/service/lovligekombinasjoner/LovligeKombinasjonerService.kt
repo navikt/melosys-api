@@ -8,6 +8,7 @@ import no.nav.melosys.domain.kodeverk.Aktoersroller
 import no.nav.melosys.domain.kodeverk.Saksstatuser
 import no.nav.melosys.domain.kodeverk.Sakstemaer
 import no.nav.melosys.domain.kodeverk.Sakstyper
+import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingsaarsaktyper
 import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingsstatus
 import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingstema
 import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingstyper
@@ -255,6 +256,23 @@ class LovligeKombinasjonerService(
         }
 
         return behandlingstyper
+    }
+
+    /**
+     * Henter mulige behandlingsårsaker
+     *
+     * @param behandlingstype   Allerede valgt behandlingstype.
+     */
+    fun hentMuligeBehandlingsårsaker(behandlingstype: Behandlingstyper): List<Behandlingsaarsaktyper> {
+        if (behandlingstype == Behandlingstyper.MANGLENDE_INNBETALING_TRYGDEAVGIFT) {
+            return listOf(Behandlingsaarsaktyper.MELDING_OM_MANGLENDE_INNBETALING)
+        }
+        return listOf(
+            Behandlingsaarsaktyper.SØKNAD,
+            Behandlingsaarsaktyper.SED,
+            Behandlingsaarsaktyper.HENVENDELSE,
+            Behandlingsaarsaktyper.FRITEKST
+        )
     }
 
     fun hentMuligeBehandlingStatuser(): Set<Behandlingsstatus> = LovligeBehandlingstatus.ALLE_MULIGE_BEHANDLINGSTATUSER

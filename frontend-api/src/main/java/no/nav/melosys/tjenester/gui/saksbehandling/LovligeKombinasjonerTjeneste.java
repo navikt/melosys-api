@@ -1,5 +1,6 @@
 package no.nav.melosys.tjenester.gui.saksbehandling;
 
+import java.util.List;
 import java.util.Set;
 
 import io.swagger.annotations.Api;
@@ -7,6 +8,7 @@ import io.swagger.annotations.ApiOperation;
 import no.nav.melosys.domain.kodeverk.Aktoersroller;
 import no.nav.melosys.domain.kodeverk.Sakstemaer;
 import no.nav.melosys.domain.kodeverk.Sakstyper;
+import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingsaarsaktyper;
 import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingstema;
 import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingstyper;
 import no.nav.melosys.service.lovligekombinasjoner.LovligeKombinasjonerService;
@@ -72,5 +74,11 @@ public class LovligeKombinasjonerTjeneste {
         @RequestParam(value = "sisteBehandlingsID", required = false) Long sisteBehandlingsID
     ) {
         return ResponseEntity.ok(lovligeKombinasjonerService.hentMuligeBehandlingstyper(hovedpart, sakstype, sakstema, behandlingstema, aktivBehandlingID, sisteBehandlingsID));
+    }
+
+    @GetMapping("/behandlingsaarsaker/hent-lovlige-kombinasjoner")
+    @ApiOperation(value = "Henter alle mulige behandlingstyper basert på sakstype, sakstema og behandlingstema", notes = ("Henter alle mulige behandlingsårsaker basert på valgt behandlingstype"))
+    public ResponseEntity<List<Behandlingsaarsaktyper>> hentAlleMuligeBehandlingstyper(@RequestParam("behandlingstype") Behandlingstyper behandlingstype) {
+        return ResponseEntity.ok(lovligeKombinasjonerService.hentMuligeBehandlingsårsaker(behandlingstype));
     }
 }
