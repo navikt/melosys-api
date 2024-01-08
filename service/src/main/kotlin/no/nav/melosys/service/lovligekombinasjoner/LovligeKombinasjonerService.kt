@@ -20,10 +20,10 @@ import org.springframework.stereotype.Service
 
 @Service
 class LovligeKombinasjonerService(
-    val fagsakService: FagsakService,
-    val behandlingService: BehandlingService,
-    val behandlingsresultatService: BehandlingsresultatService,
-    val unleash: Unleash
+    private val fagsakService: FagsakService,
+    private val behandlingService: BehandlingService,
+    private val behandlingsresultatService: BehandlingsresultatService,
+    private val unleash: Unleash
 ) {
 
     /**
