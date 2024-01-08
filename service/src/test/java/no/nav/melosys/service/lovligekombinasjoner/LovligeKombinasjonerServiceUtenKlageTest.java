@@ -299,7 +299,7 @@ class LovligeKombinasjonerServiceUtenKlageTest {
         sisteBehandling.setStatus(UNDER_BEHANDLING);
 
 
-        Set<Behandlingstyper> muligeBehandlingstyper = lovligeKombinasjonerService.hentMuligeBehandlingstyper(Aktoersroller.BRUKER, EU_EOS, MEDLEMSKAP_LOVVALG, UTSENDT_ARBEIDSTAKER, null, sisteBehandling, null);
+        Set<Behandlingstyper> muligeBehandlingstyper = lovligeKombinasjonerService.hentMuligeBehandlingstyper(Aktoersroller.BRUKER, EU_EOS, MEDLEMSKAP_LOVVALG, UTSENDT_ARBEIDSTAKER, null, sisteBehandling, new Behandlingsresultat());
 
 
         assertThat(muligeBehandlingstyper).isEmpty();
