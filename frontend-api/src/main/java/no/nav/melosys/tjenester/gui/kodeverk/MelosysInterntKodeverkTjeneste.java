@@ -61,12 +61,12 @@ public class MelosysInterntKodeverkTjeneste {
             medlemskapsperiodeService.hentGyldigeTrygdedekninger(),
             Comparator.comparingInt(c -> definedOrderTrygdedekning.indexOf(c.getKode()))));
         kodeverdier.put(Vilkaar.class.getSimpleName(), tilKodeDto(Vilkaar.values()));
-        kodeverdier.put(InnvilgelsesResultat.class.getSimpleName(), tilKodeDto(filtrerteInnvilgelsesResultat(behandlingID)));
+        kodeverdier.put(InnvilgelsesResultat.class.getSimpleName(), tilKodeDto(filtrerInnvilgelsesResultat(behandlingID)));
         kodeverdier.put("begrunnelser", lagBegrunnelser());
         return ResponseEntity.ok(kodeverdier);
     }
 
-    private List<InnvilgelsesResultat> filtrerteInnvilgelsesResultat(Long behandlingID) {
+    private List<InnvilgelsesResultat> filtrerInnvilgelsesResultat(Long behandlingID) {
         return Arrays.stream(InnvilgelsesResultat.values())
             .filter(kode -> !kode.equals(InnvilgelsesResultat.DELVIS_INNVILGET))
             .filter(kode -> !kode.equals(InnvilgelsesResultat.OPPHØRT) ||
