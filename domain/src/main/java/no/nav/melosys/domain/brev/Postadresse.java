@@ -38,7 +38,7 @@ public record Postadresse(
         return new Postadresse(
             coAdressenavn,
             sammenslå(strukturertAdresse.getGatenavn(), strukturertAdresse.getHusnummerEtasjeLeilighet()),
-            strukturertAdresse.getPostboks(),
+            sammenslå("Postboks", strukturertAdresse.getPostboks()),
             null,
             null,
             strukturertAdresse.getPostnummer(),
