@@ -194,8 +194,6 @@ public class ProsessinstansService {
             prosessinstans.setData(ProsessDataKey.SØKNADSPERIODE, journalfoeringRequest.getFagsak().getSoknadsperiode());
         }
 
-        prosessinstans.setDataHvisIkkeTom(ProsessDataKey.ARBEIDSGIVER, journalfoeringRequest.getArbeidsgiverID());
-
         lagre(prosessinstans);
     }
 

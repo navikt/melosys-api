@@ -80,7 +80,6 @@ class JournalfoeringTjenesteTest {
         journalføringDto.setVirksomhetOrgnr(null);
         journalføringDto.setBrukerID(SAMPLE_FNR);
         journalføringDto.setBehandlingstemaKode(Behandlingstema.ARBEID_FLERE_LAND.getKode());
-        journalføringDto.setArbeidsgiverID(SAMPLE_ORGNR);
 
         mockMvc.perform(post(BASE_URL + "/opprett")
                 .contentType(MediaType.APPLICATION_JSON)
@@ -98,7 +97,6 @@ class JournalfoeringTjenesteTest {
         journalføringDto.setVirksomhetOrgnr(null);
         journalføringDto.setBrukerID(SAMPLE_FNR);
         journalføringDto.setBehandlingstemaKode(Behandlingstema.ARBEID_FLERE_LAND.getKode());
-        journalføringDto.setArbeidsgiverID(SAMPLE_ORGNR);
 
         mockMvc.perform(post(BASE_URL + "/opprett")
                 .contentType(MediaType.APPLICATION_JSON)
@@ -116,7 +114,6 @@ class JournalfoeringTjenesteTest {
         journalføringDto.setVirksomhetOrgnr(SAMPLE_ORGNR);
         journalføringDto.setBrukerID(null);
         journalføringDto.setBehandlingstemaKode(Behandlingstema.ARBEID_FLERE_LAND.getKode());
-        journalføringDto.setArbeidsgiverID(SAMPLE_ORGNR);
 
         mockMvc.perform(post(BASE_URL + "/opprett")
                 .contentType(MediaType.APPLICATION_JSON)

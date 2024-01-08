@@ -117,7 +117,6 @@ class JournalfoeringServiceTest {
         opprettDto.setAvsenderType(Avsendertyper.UTENLANDSK_TRYGDEMYNDIGHET);
         opprettDto.setBrukerID("setBrukerID");
         opprettDto.setHoveddokument(new DokumentDto("3333", "setDokumenttittel"));
-        opprettDto.setArbeidsgiverID("123456789");
         opprettDto.setBehandlingstemaKode(UTSENDT_ARBEIDSTAKER.getKode());
         opprettDto.setBehandlingstypeKode(Behandlingstyper.FØRSTEGANG.getKode());
 

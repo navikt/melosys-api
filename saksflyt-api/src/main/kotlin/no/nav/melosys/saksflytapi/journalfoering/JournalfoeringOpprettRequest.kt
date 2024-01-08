@@ -20,7 +20,6 @@ data class JournalfoeringOpprettRequest(
     var behandlingstemaKode: String? = null,
     var behandlingstypeKode: String? = null,
     val fagsak: Fagsak? = null,
-    val arbeidsgiverID: String? = null,
 ) : JournalfoeringRequest {
 }
 

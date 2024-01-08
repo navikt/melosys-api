@@ -9,8 +9,6 @@ import no.nav.melosys.service.felles.dto.SoeknadslandDto;
 
 public class JournalfoeringOpprettDto extends JournalfoeringDto {
     private FagsakDto fagsak;
-    @Deprecated(since = "Fjernes snarest med tilfølgende kode. Sendes aldri fra frontend")
-    private String arbeidsgiverID;
 
     public FagsakDto getFagsak() {
         return fagsak;
@@ -18,14 +16,6 @@ public class JournalfoeringOpprettDto extends JournalfoeringDto {
 
     public void setFagsak(FagsakDto fagsak) {
         this.fagsak = fagsak;
-    }
-
-    public String getArbeidsgiverID() {
-        return arbeidsgiverID;
-    }
-
-    public void setArbeidsgiverID(String arbeidsgiverID) {
-        this.arbeidsgiverID = arbeidsgiverID;
     }
 
     public JournalfoeringOpprettRequest tilJournalfoeringOpprettRequest() {
@@ -45,8 +35,7 @@ public class JournalfoeringOpprettDto extends JournalfoeringDto {
             behandlingstemaKode,
             behandlingstypeKode,
             new Fagsak(fagsak.getSakstema(), fagsak.getSakstype(),
-                getSoknadsperiode(), getLand()),
-            arbeidsgiverID
+                getSoknadsperiode(), getLand())
         );
     }
 

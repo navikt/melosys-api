@@ -152,7 +152,6 @@ class JournalfoeringBase(
             virksomhetOrgnr = null
             vedlegg = emptyList()
             mottattDato = LocalDate.now()
-            arbeidsgiverID = null
             forvaltningsmeldingMottaker = ForvaltningsmeldingMottaker.BRUKER
             avsenderType = Avsendertyper.PERSON
             isSkalTilordnes = true
