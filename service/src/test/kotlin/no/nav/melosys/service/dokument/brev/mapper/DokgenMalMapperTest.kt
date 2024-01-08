@@ -366,7 +366,7 @@ internal class DokgenMalMapperTest {
                 medlemskapsperioder = listOf(Medlemskapsperiode().apply {
                     fom = LocalDate.now().minusMonths(1)
                     tom = LocalDate.now()
-                    innvilgelsesresultat = InnvilgelsesResultat.INNVILGET
+                    innvilgelsesresultat = InnvilgelsesResultat.OPPHØRT
                 })
             }
         }

@@ -198,7 +198,8 @@ class FtrlVedtakServiceTest {
                 referanse = Avklartefaktatyper.FULLSTENDIG_MANGLENDE_INNBETALING.kode
             })
             medlemAvFolketrygden = MedlemAvFolketrygden()
-            medlemAvFolketrygden.medlemskapsperioder = mutableSetOf(Medlemskapsperiode())
+            medlemAvFolketrygden.medlemskapsperioder =
+                mutableSetOf(Medlemskapsperiode().apply { innvilgelsesresultat = InnvilgelsesResultat.INNVILGET })
             utfallRegistreringUnntak = Utfallregistreringunntak.GODKJENT
             nyVurderingBakgrunn = "blah"
             innledningFritekst = "blah"
@@ -224,7 +225,7 @@ class FtrlVedtakServiceTest {
             begrunnelseFritekst.shouldBe(request.begrunnelseFritekst)
             fastsattAvLand.shouldBe(Land_iso2.NO)
             medlemAvFolketrygden.bestemmelse.shouldBe(Folketrygdloven_kap2_bestemmelser.FTRL_KAP2_2_15_ANDRE_LEDD)
-            medlemAvFolketrygden.medlemskapsperioder.shouldBeEmpty()
+            medlemAvFolketrygden.medlemskapsperioder.shouldHaveSize(1).first()!!.innvilgelsesresultat.shouldBe(InnvilgelsesResultat.OPPHØRT)
             avklartefakta.shouldHaveSize(1)
             utfallRegistreringUnntak.shouldBeNull()
             nyVurderingBakgrunn.shouldBeNull()
