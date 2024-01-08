@@ -86,7 +86,6 @@ class JournalfoeringServiceTest {
     private UtenlandskMyndighetService utenlandskMyndighetService;
 
     private final FakeUnleash unleash = new FakeUnleash();
-    private final LovligeKombinasjonerService lovligeKombinasjonerService = new LovligeKombinasjonerService(fagsakService, behandlingService, behandlingsresultatService, unleash);
 
     private JournalfoeringService journalfoeringService;
     private JournalfoeringOpprettDto opprettDto;
@@ -99,6 +98,8 @@ class JournalfoeringServiceTest {
 
     @BeforeEach
     public void setup() {
+        LovligeKombinasjonerService lovligeKombinasjonerService = new LovligeKombinasjonerService(fagsakService, behandlingService, behandlingsresultatService, unleash);
+
         saksbehandlingRegler = new SaksbehandlingRegler(behandlingsresultatRepository, unleash);
         SpringSubjectHandler.set(new TestSubjectHandler());
 
