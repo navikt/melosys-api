@@ -117,7 +117,6 @@ data class Personopplysninger(
             )
         }
 
-    //TODO fiks her
     private fun lagPostadresseFraKontaktadresse(kontaktadresse: Kontaktadresse): Postadresse? {
         if (kontaktadresse.strukturertAdresse() != null) {
             return Postadresse.lagPostadresse(kontaktadresse.coAdressenavn(), kontaktadresse.strukturertAdresse())
