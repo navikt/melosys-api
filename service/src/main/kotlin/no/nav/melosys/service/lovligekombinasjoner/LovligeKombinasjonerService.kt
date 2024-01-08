@@ -80,6 +80,7 @@ class LovligeKombinasjonerService(
      * mulige behandlingstemaer for SED. (MELOSYS-5223)
      * @param sakstype            Allerede valgt sakstype.
      * @param sakstema            Allerede valgt sakstema.
+     * @param aktivBehandlingID   Nåværende behandling i fagsaken. (default = null) Brukt ved endring av sak.
      * @param sistBehandlingstema Behandlingstema til forrige behandling i fagsaken. (default = null)
      * Brukt ved knytting til eksisterende sak.
      */
@@ -87,16 +88,17 @@ class LovligeKombinasjonerService(
         hovedpart: Aktoersroller?,
         sakstype: Sakstyper,
         sakstema: Sakstemaer,
-        sistBehandlingstema: Behandlingstema?
+        aktivBehandlingID: Long?,
+        sistBehandlingstema: Behandlingstema?,
     ): Set<Behandlingstema> {
         if (hovedpart == null) {
-            return hentMuligeBehandlingstemaer(Aktoersroller.BRUKER, sakstype, sakstema, sistBehandlingstema) +
-                hentMuligeBehandlingstemaer(Aktoersroller.VIRKSOMHET, sakstype, sakstema, sistBehandlingstema) +
+            return hentMuligeBehandlingstemaer(Aktoersroller.BRUKER, sakstype, sakstema, aktivBehandlingID, sistBehandlingstema) +
+                hentMuligeBehandlingstemaer(Aktoersroller.VIRKSOMHET, sakstype, sakstema, aktivBehandlingID, sistBehandlingstema) +
                 hentMuligeBehandlingstemaerSED(sakstype, sakstema)
         }
 
         return when (hovedpart) {
-            Aktoersroller.BRUKER -> behandlingstemaForBruker(sakstype, sakstema, sistBehandlingstema)
+            Aktoersroller.BRUKER -> behandlingstemaForBruker(sakstype, sakstema, aktivBehandlingID, sistBehandlingstema)
             Aktoersroller.VIRKSOMHET -> LovligeSakskombinasjoner.muligeSaksKombinasjonerVirksomhet.getOrDefault(sakstype, emptySet())
                 .filter { it.sakstema == sakstema }
                 .flatMap { it.behandlingstemaBehandlingstyperKombinasjoner }
@@ -107,7 +109,12 @@ class LovligeKombinasjonerService(
         }
     }
 
-    private fun behandlingstemaForBruker(sakstype: Sakstyper, sakstema: Sakstemaer, sistBehandlingstema: Behandlingstema?): Set<Behandlingstema> {
+    private fun behandlingstemaForBruker(
+        sakstype: Sakstyper,
+        sakstema: Sakstemaer,
+        aktivBehandlingID: Long?,
+        sistBehandlingstema: Behandlingstema?
+    ): Set<Behandlingstema> {
         val behandlingstemaer = LovligeSakskombinasjoner.muligeSaksKombinasjonerBruker.getOrDefault(sakstype, emptySet())
             .filter { it.sakstema == sakstema }
             .flatMap { it.behandlingstemaBehandlingstyperKombinasjoner }
@@ -123,6 +130,11 @@ class LovligeKombinasjonerService(
             )
         ) {
             return setOf(sistBehandlingstema!!)
+        }
+
+        val aktivBehandling = if (aktivBehandlingID != null) behandlingService.hentBehandling(aktivBehandlingID) else null
+        if (aktivBehandling?.erManglendeInnbetalingTrygdeavgift() == true) {
+            return setOf(aktivBehandling.tema)
         }
 
         return behandlingstemaer
@@ -271,7 +283,7 @@ class LovligeKombinasjonerService(
         behandlingstype: Behandlingstyper
     ) {
         validerSakstema(hovedpart, sakstype, sakstema)
-        validerBehandlingstema(hovedpart, sakstype, sakstema, behandlingstema, null)
+        validerBehandlingstema(hovedpart, sakstype, sakstema, behandlingstema, aktivBehandling, null)
         validerBehandlingstype(hovedpart, sakstype, sakstema, behandlingstema, behandlingstype, aktivBehandling, null, null)
     }
 
@@ -282,7 +294,7 @@ class LovligeKombinasjonerService(
         behandlingstema: Behandlingstema,
         behandlingstype: Behandlingstyper
     ) {
-        validerBehandlingstema(fagsak.hovedpartRolle, fagsak.type, fagsak.tema, behandlingstema, sistBehandling.tema)
+        validerBehandlingstema(fagsak.hovedpartRolle, fagsak.type, fagsak.tema, behandlingstema, null, sistBehandling.tema)
         validerBehandlingstype(
             fagsak.hovedpartRolle,
             fagsak.type,
@@ -306,9 +318,10 @@ class LovligeKombinasjonerService(
         sakstype: Sakstyper,
         sakstema: Sakstemaer,
         behandlingstema: Behandlingstema,
+        aktivBehandling: Behandling?,
         sistBehandlingstema: Behandlingstema?
     ) {
-        if (!hentMuligeBehandlingstemaer(hovedpart, sakstype, sakstema, sistBehandlingstema).contains(behandlingstema)) {
+        if (!hentMuligeBehandlingstemaer(hovedpart, sakstype, sakstema, aktivBehandling?.id, sistBehandlingstema).contains(behandlingstema)) {
             throw FunksjonellException("$behandlingstema er ikke et lovlig behandlingstema med de andre valgte verdiene")
         }
     }

@@ -332,7 +332,7 @@ class LovligeKombinasjonerServiceTest {
 
     @Test
     void hentMuligeBehandlingstemaer_hovedpartVIRKSOMHETIkkeTrygdeavgift_skalReturnereBehandlingsTemaVIRKSOMHET() {
-        Set<Behandlingstema> behandlingstemas = lovligeKombinasjonerService.hentMuligeBehandlingstemaer(Aktoersroller.VIRKSOMHET, TRYGDEAVTALE, MEDLEMSKAP_LOVVALG, null);
+        Set<Behandlingstema> behandlingstemas = lovligeKombinasjonerService.hentMuligeBehandlingstemaer(Aktoersroller.VIRKSOMHET, TRYGDEAVTALE, MEDLEMSKAP_LOVVALG, null, null);
         assertThat(behandlingstemas)
             .hasSize(1)
             .containsExactlyInAnyOrder(VIRKSOMHET);
@@ -340,7 +340,7 @@ class LovligeKombinasjonerServiceTest {
 
     @Test
     void hentMuligeBehandlingstemaer_hovedpartVIRKSOMHETTrygdeavgift_skalReturnereBehandlingsTemaYRKESAKTIV() {
-        Set<Behandlingstema> behandlingstemas = lovligeKombinasjonerService.hentMuligeBehandlingstemaer(Aktoersroller.VIRKSOMHET, TRYGDEAVTALE, TRYGDEAVGIFT, null);
+        Set<Behandlingstema> behandlingstemas = lovligeKombinasjonerService.hentMuligeBehandlingstemaer(Aktoersroller.VIRKSOMHET, TRYGDEAVTALE, TRYGDEAVGIFT, null, null);
         assertThat(behandlingstemas)
             .hasSize(1)
             .containsExactlyInAnyOrder(YRKESAKTIV);
@@ -348,10 +348,10 @@ class LovligeKombinasjonerServiceTest {
 
     @Test
     void hentMuligeBehandlingstemaer_ingenHovedpart_skalReturnereSammeSomHovedpartVIRKSOMHETogBRUKER() {
-        Set<Behandlingstema> behandlingstemaer = lovligeKombinasjonerService.hentMuligeBehandlingstemaer(null, TRYGDEAVTALE, TRYGDEAVGIFT, null);
+        Set<Behandlingstema> behandlingstemaer = lovligeKombinasjonerService.hentMuligeBehandlingstemaer(null, TRYGDEAVTALE, TRYGDEAVGIFT, null, null);
 
-        Set<Behandlingstema> behandlingstemaerVirksomhet = lovligeKombinasjonerService.hentMuligeBehandlingstemaer(Aktoersroller.VIRKSOMHET, TRYGDEAVTALE, TRYGDEAVGIFT, null);
-        Set<Behandlingstema> behandlingstemaerBruker = lovligeKombinasjonerService.hentMuligeBehandlingstemaer(Aktoersroller.BRUKER, TRYGDEAVTALE, TRYGDEAVGIFT, null);
+        Set<Behandlingstema> behandlingstemaerVirksomhet = lovligeKombinasjonerService.hentMuligeBehandlingstemaer(Aktoersroller.VIRKSOMHET, TRYGDEAVTALE, TRYGDEAVGIFT, null, null);
+        Set<Behandlingstema> behandlingstemaerBruker = lovligeKombinasjonerService.hentMuligeBehandlingstemaer(Aktoersroller.BRUKER, TRYGDEAVTALE, TRYGDEAVGIFT, null, null);
 
         assertThat(behandlingstemaer)
             .containsAll(behandlingstemaerVirksomhet)
@@ -360,7 +360,7 @@ class LovligeKombinasjonerServiceTest {
 
     @Test
     void hentMuligeBehandlingstemaer_ingenHovedpartMedlemskapLovvalg_skalReturnereSedBehandlingstema() {
-        Set<Behandlingstema> behandlingstemaer = lovligeKombinasjonerService.hentMuligeBehandlingstemaer(null, EU_EOS, MEDLEMSKAP_LOVVALG, null);
+        Set<Behandlingstema> behandlingstemaer = lovligeKombinasjonerService.hentMuligeBehandlingstemaer(null, EU_EOS, MEDLEMSKAP_LOVVALG, null, null);
 
         assertThat(behandlingstemaer)
             .contains(BESLUTNING_LOVVALG_NORGE);
@@ -368,7 +368,7 @@ class LovligeKombinasjonerServiceTest {
 
     @Test
     void hentMuligeBehandlingstemaer_ingenHovedpartUnntak_skalReturnereSedBehandlingstema() {
-        Set<Behandlingstema> behandlingstemaer = lovligeKombinasjonerService.hentMuligeBehandlingstemaer(null, EU_EOS, UNNTAK, null);
+        Set<Behandlingstema> behandlingstemaer = lovligeKombinasjonerService.hentMuligeBehandlingstemaer(null, EU_EOS, UNNTAK, null, null);
 
         assertThat(behandlingstemaer)
             .contains(REGISTRERING_UNNTAK_NORSK_TRYGD_UTSTASJONERING, REGISTRERING_UNNTAK_NORSK_TRYGD_ØVRIGE, BESLUTNING_LOVVALG_ANNET_LAND, ANMODNING_OM_UNNTAK_HOVEDREGEL);
@@ -376,7 +376,7 @@ class LovligeKombinasjonerServiceTest {
 
     @Test
     void hentMuligeBehandlingstemaer_ingenHovedpartTrygdeavgift_skalReturnereIngenSedBehandlingstema() {
-        Set<Behandlingstema> behandlingstemaer = lovligeKombinasjonerService.hentMuligeBehandlingstemaer(null, EU_EOS, TRYGDEAVGIFT, null);
+        Set<Behandlingstema> behandlingstemaer = lovligeKombinasjonerService.hentMuligeBehandlingstemaer(null, EU_EOS, TRYGDEAVGIFT, null, null);
 
         assertThat(behandlingstemaer)
             .isNotEmpty()
@@ -385,11 +385,36 @@ class LovligeKombinasjonerServiceTest {
 
     @Test
     void hentMuligeBehandlingstemaer_EuEosUnntak_skalReturnereA1AnmodningOmUnntakPapir() {
-        Set<Behandlingstema> behandlingstemaer = lovligeKombinasjonerService.hentMuligeBehandlingstemaer(Aktoersroller.BRUKER, EU_EOS, UNNTAK, null);
+        Set<Behandlingstema> behandlingstemaer = lovligeKombinasjonerService.hentMuligeBehandlingstemaer(Aktoersroller.BRUKER, EU_EOS, UNNTAK, null, null);
 
         assertThat(behandlingstemaer)
             .isNotEmpty()
             .containsExactlyInAnyOrder(A1_ANMODNING_OM_UNNTAK_PAPIR, FORESPØRSEL_TRYGDEMYNDIGHET);
+    }
+
+    @Test
+    void hentMuligeBehandlingstemaer_manglendeInnbetalingTrygdeavgift_skalKunReturnereEksisterendeBehTema() {
+        Behandling aktivBehandling = new Behandling();
+        aktivBehandling.setTema(YRKESAKTIV);
+        aktivBehandling.setType(MANGLENDE_INNBETALING_TRYGDEAVGIFT);
+        when(behandlingService.hentBehandling(1L)).thenReturn(aktivBehandling);
+
+        Set<Behandlingstema> behandlingstemaer = lovligeKombinasjonerService.hentMuligeBehandlingstemaer(Aktoersroller.BRUKER, FTRL, MEDLEMSKAP_LOVVALG, 1L, null);
+
+        assertThat(behandlingstemaer)
+            .isNotEmpty()
+            .hasSize(1)
+            .containsExactly(YRKESAKTIV);
+    }
+
+    @Test
+    void hentMuligeBehandlingstemaer_sistBehandlingstemaErSedTema_skalKunReturnereSistBehandlingstema() {
+        Set<Behandlingstema> behandlingstemaer = lovligeKombinasjonerService.hentMuligeBehandlingstemaer(Aktoersroller.BRUKER, EU_EOS, UNNTAK, null, ANMODNING_OM_UNNTAK_HOVEDREGEL);
+
+        assertThat(behandlingstemaer)
+            .isNotEmpty()
+            .hasSize(1)
+            .containsExactly(ANMODNING_OM_UNNTAK_HOVEDREGEL);
     }
 
     @Test

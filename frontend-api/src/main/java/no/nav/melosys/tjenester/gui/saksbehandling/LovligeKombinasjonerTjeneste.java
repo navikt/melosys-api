@@ -55,9 +55,10 @@ public class LovligeKombinasjonerTjeneste {
         @RequestParam(value = "hovedpart", required = false) Aktoersroller hovedpart,
         @RequestParam("sakstype") Sakstyper sakstype,
         @RequestParam("sakstema") Sakstemaer sakstema,
+        @RequestParam(value = "aktivBehandlingID", required = false) Long aktivBehandlingID,
         @RequestParam(value = "sistBehandlingstema", required = false) Behandlingstema sistBehandlingstema
     ) {
-        return ResponseEntity.ok(lovligeKombinasjonerService.hentMuligeBehandlingstemaer(hovedpart, sakstype, sakstema, sistBehandlingstema));
+        return ResponseEntity.ok(lovligeKombinasjonerService.hentMuligeBehandlingstemaer(hovedpart, sakstype, sakstema, aktivBehandlingID, sistBehandlingstema));
     }
 
     @GetMapping("/behandlingstyper/hent-lovlige-kombinasjoner")
