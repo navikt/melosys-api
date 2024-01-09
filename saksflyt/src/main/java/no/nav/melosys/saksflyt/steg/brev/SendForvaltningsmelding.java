@@ -2,9 +2,12 @@ package no.nav.melosys.saksflyt.steg.brev;
 
 import java.util.List;
 
+import no.nav.melosys.domain.Aktoer;
 import no.nav.melosys.domain.Behandling;
 import no.nav.melosys.domain.brev.Mottaker;
+import no.nav.melosys.domain.kodeverk.ForvaltningsmeldingMottaker;
 import no.nav.melosys.domain.kodeverk.Mottakerroller;
+import no.nav.melosys.exception.FunksjonellException;
 import no.nav.melosys.saksflyt.brev.BrevBestiller;
 import no.nav.melosys.saksflyt.steg.StegBehandler;
 import no.nav.melosys.saksflytapi.domain.ProsessSteg;
@@ -14,9 +17,10 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Component;
 
+import static no.nav.melosys.domain.kodeverk.ForvaltningsmeldingMottaker.AVSENDER;
+import static no.nav.melosys.domain.kodeverk.ForvaltningsmeldingMottaker.BRUKER;
 import static no.nav.melosys.domain.kodeverk.brev.Produserbaredokumenter.MELDING_FORVENTET_SAKSBEHANDLINGSTID_SOKNAD;
-import static no.nav.melosys.saksflytapi.domain.ProsessDataKey.SAKSBEHANDLER;
-import static no.nav.melosys.saksflytapi.domain.ProsessDataKey.SKAL_SENDES_FORVALTNINGSMELDING;
+import static no.nav.melosys.saksflytapi.domain.ProsessDataKey.*;
 import static no.nav.melosys.saksflytapi.domain.ProsessSteg.SEND_FORVALTNINGSMELDING;
 
 @Component
@@ -39,17 +43,36 @@ public class SendForvaltningsmelding implements StegBehandler {
 
     @Override
     public void utfør(Prosessinstans prosessinstans) {
-        if (skalSendeForvaltningsmelding(prosessinstans)) {
+        var forvaltningsmeldingMottaker = prosessinstans.getData(FORVALTNINGSMELDING_MOTTAKER, ForvaltningsmeldingMottaker.class);
+        if (skalSendeForvaltningsmelding(forvaltningsmeldingMottaker)) {
             Behandling behandling = behandlingService.hentBehandlingMedSaksopplysninger(prosessinstans.getBehandling().getId());
             String saksbehandler = prosessinstans.getData(SAKSBEHANDLER);
-            brevBestiller.bestill(MELDING_FORVENTET_SAKSBEHANDLINGSTID_SOKNAD, List.of(Mottaker.medRolle(Mottakerroller.BRUKER)), null, saksbehandler, null, behandling);
+
+            if (forvaltningsmeldingMottaker.equals(BRUKER)) {
+                brevBestiller.bestill(MELDING_FORVENTET_SAKSBEHANDLINGSTID_SOKNAD, List.of(Mottaker.medRolle(Mottakerroller.BRUKER)), null,
+                    saksbehandler, null, behandling);
+            } else {
+                String avsenderID = prosessinstans.getData(AVSENDER_ID, String.class);
+                boolean avsenderErOrganisasjon = avsenderID.length() == 9;
+                Mottaker mottaker;
+
+                if (avsenderErOrganisasjon) {
+                    mottaker = Mottaker.medRolle(Mottakerroller.ANNEN_ORGANISASJON);
+                    mottaker.setOrgnr(avsenderID);
+                } else {
+                    mottaker = Mottaker.medRolle(Mottakerroller.ANNEN_PERSON);
+                    mottaker.setPersonIdent(avsenderID);
+                }
+                brevBestiller.bestill(MELDING_FORVENTET_SAKSBEHANDLINGSTID_SOKNAD, List.of(mottaker), null,
+                    saksbehandler, null, behandling);
+            }
             log.info("Sendt forvaltningsmelding for behandling {}", prosessinstans.getBehandling().getId());
         } else {
             log.info("Ikke sendt forvaltningsmelding for behandling {}", prosessinstans.getBehandling().getId());
         }
     }
 
-    private boolean skalSendeForvaltningsmelding(Prosessinstans prosessinstans) {
-        return prosessinstans.getData(SKAL_SENDES_FORVALTNINGSMELDING, Boolean.class, Boolean.FALSE);
+    private boolean skalSendeForvaltningsmelding(ForvaltningsmeldingMottaker forvaltningsmeldingMottaker) {
+        return BRUKER.equals(forvaltningsmeldingMottaker) || AVSENDER.equals(forvaltningsmeldingMottaker);
     }
 }

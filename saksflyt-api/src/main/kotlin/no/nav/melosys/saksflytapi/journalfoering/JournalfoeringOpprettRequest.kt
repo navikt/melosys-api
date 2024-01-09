@@ -1,7 +1,7 @@
 package no.nav.melosys.saksflytapi.journalfoering
 
 import no.nav.melosys.domain.kodeverk.Avsendertyper
-import no.nav.melosys.domain.kodeverk.Fullmaktstype
+import no.nav.melosys.domain.kodeverk.ForvaltningsmeldingMottaker
 import java.time.LocalDate
 
 data class JournalfoeringOpprettRequest(
@@ -16,15 +16,10 @@ data class JournalfoeringOpprettRequest(
     override var vedlegg: List<DokumentRequest> = emptyList(),
     override var skalTilordnes: Boolean = false,
     override var mottattDato: LocalDate? = null,
-    override var ikkeSendForvaltingsmelding: Boolean? = null,
+    override var forvaltningsmeldingMottaker: ForvaltningsmeldingMottaker? = null,
     var behandlingstemaKode: String? = null,
     var behandlingstypeKode: String? = null,
     val fagsak: Fagsak? = null,
-    val arbeidsgiverID: String? = null,
-    val fullmektigID: String? = null,
-    val fullmakter: List<Fullmaktstype>? = null,
-    val fullmektigKontaktperson: String? = null,
-    val fullmektigKontaktOrgnr: String? = null,
 ) : JournalfoeringRequest {
 }
 

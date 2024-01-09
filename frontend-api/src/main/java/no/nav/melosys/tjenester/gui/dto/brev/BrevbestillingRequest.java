@@ -72,6 +72,7 @@ public record BrevbestillingRequest(
             null,
             null,
             null,
+            null,
             null
         );
     }

@@ -338,27 +338,27 @@ class ProsessinstansServiceTest {
     }
 
     @Test
-    void opprettProsessinstansJournalføring_ikkeSendForvaltningsmeldingFalse_settesIProsessinstans() {
+    void opprettProsessinstansJournalføring_FORVALTNINGSMELDING_MOTTAKERbruker_settesIProsessinstans() {
         JournalfoeringOpprettRequest journalfoeringOpprettRequest = lagJournalfoeringOpprettRequest();
 
-        journalfoeringOpprettRequest.setIkkeSendForvaltingsmelding(false);
+        journalfoeringOpprettRequest.setForvaltningsmeldingMottaker(ForvaltningsmeldingMottaker.BRUKER);
 
         Prosessinstans prosessinstans = prosessinstansService.lagJournalføringProsessinstans(ProsessType.ANMODNING_OM_UNNTAK, journalfoeringOpprettRequest, null);
 
-        assertThat(prosessinstans.getData(ProsessDataKey.SKAL_SENDES_FORVALTNINGSMELDING, Boolean.class)).isTrue();
+        assertThat(prosessinstans.getData(ProsessDataKey.FORVALTNINGSMELDING_MOTTAKER, ForvaltningsmeldingMottaker.class)).isEqualTo(ForvaltningsmeldingMottaker.BRUKER);
     }
 
     @Test
-    void opprettProsessinstansJournalføring_ikkeSendForvaltningsmeldingTrue_settesIProsessinstans() {
+    void opprettProsessinstansJournalføring_FORVALTNINGSMELDING_MOTTAKERingen_settesIProsessinstans() {
         JournalfoeringOpprettRequest journalfoeringOpprettRequest = lagJournalfoeringOpprettRequest();
 
-        journalfoeringOpprettRequest.setIkkeSendForvaltingsmelding(true);
+        journalfoeringOpprettRequest.setForvaltningsmeldingMottaker(ForvaltningsmeldingMottaker.INGEN);
 
 
         Prosessinstans prosessinstans = prosessinstansService.lagJournalføringProsessinstans(ProsessType.ANMODNING_OM_UNNTAK, journalfoeringOpprettRequest, null);
 
 
-        assertThat(prosessinstans.getData(ProsessDataKey.SKAL_SENDES_FORVALTNINGSMELDING, Boolean.class)).isFalse();
+        assertThat(prosessinstans.getData(ProsessDataKey.FORVALTNINGSMELDING_MOTTAKER, ForvaltningsmeldingMottaker.class)).isEqualTo(ForvaltningsmeldingMottaker.INGEN);
     }
 
     @Test
@@ -682,7 +682,7 @@ class ProsessinstansServiceTest {
         Prosessinstans prosessinstans = piCaptor.getValue();
         assertThat(prosessinstans.getType()).isEqualTo(ProsessType.MOTTAK_SOKNAD_ALTINN);
         assertThat(prosessinstans.getData(ProsessDataKey.MOTTATT_SOKNAD_ID)).isEqualTo("søknadID");
-        assertThat(prosessinstans.getData(ProsessDataKey.SKAL_SENDES_FORVALTNINGSMELDING, Boolean.class)).isTrue();
+        assertThat(prosessinstans.getData(ProsessDataKey.FORVALTNINGSMELDING_MOTTAKER, ForvaltningsmeldingMottaker.class)).isEqualTo(ForvaltningsmeldingMottaker.BRUKER);
     }
 
     @Test
@@ -693,13 +693,13 @@ class ProsessinstansServiceTest {
     }
 
     @Test
-    void opprettProsessinstansSøknadMottatt_mottakEldreEnnNoenDager_ikkeSendForvaltningsmelding() {
+    void opprettProsessinstansSøknadMottatt_mottakEldreEnnNoenDager_FORVALTNINGSMELDING_MOTTAKERingen() {
         prosessinstansService.opprettProsessinstansSøknadMottatt("søknadID", false, true);
 
 
         verify(prosessinstansRepo).save(piCaptor.capture());
         Prosessinstans prosessinstans = piCaptor.getValue();
-        assertThat(prosessinstans.getData(ProsessDataKey.SKAL_SENDES_FORVALTNINGSMELDING, Boolean.class)).isFalse();
+        assertThat(prosessinstans.getData(ProsessDataKey.FORVALTNINGSMELDING_MOTTAKER, ForvaltningsmeldingMottaker.class)).isEqualTo(ForvaltningsmeldingMottaker.INGEN);
     }
 
     @Test

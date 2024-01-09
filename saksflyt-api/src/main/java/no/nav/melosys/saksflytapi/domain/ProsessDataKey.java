@@ -6,8 +6,6 @@ package no.nav.melosys.saksflytapi.domain;
 public enum ProsessDataKey {
 
     AKTØR_ID("aktoerID"),
-    @Deprecated(since = "melosys.fullmektig.trygdeavgift")
-    ARBEIDSGIVER("arbeidsgiver"),
     ARBEIDSGIVER_SKAL_HA_KOPI("arbeidsgiverSkalHaKopi"),
     ARKIVSYSTEM("arkivsystem"),
     ARKIV_ID("arkivId"),
@@ -34,10 +32,6 @@ public enum ProsessDataKey {
     EESSI_MOTTAKERE("eessiMottakere"),
     ER_OPPDATERT_SED("erOppdatertSed"),
     FYSISKE_VEDLEGG("fysiskeVedlegg"),
-    FULLMEKTIG("fullmektig"),
-    FULLMAKTER("fullmakter"),
-    FULLMEKTIG_KONTAKTPERSON("fullmektigKontaktperson"),
-    FULLMEKTIG_KONTAKT_ORGNR("fullmektigKontaktOrgnr"),
     GSAK_SAK_ID("gsakSakID"),
     HOVEDDOKUMENT_TITTEL("hoveddokumentTittel"),
     INSTITUSJON_ID("institusjonsID"),
@@ -64,7 +58,6 @@ public enum ProsessDataKey {
     SAKSTYPE("sakstype"),
     SAKSTEMA("sakstema"),
     SED_DOKUMENT("sedDokument"),
-    SKAL_SENDES_FORVALTNINGSMELDING("skalSendesForvaltningsmelding"),
     SKAL_TILORDNES("skalTilordnes"),
     STATSBORGERSKAP("statsborgerskap"),
     SØKNADSLAND("land"),
@@ -77,7 +70,8 @@ public enum ProsessDataKey {
     VARSLE_UTLAND("varsleUtland"),
     VEDLEGG_SED("vedleggTilSed"),
     VIRKSOMHET_ORGNR("virksomhetOrgnr"),
-    YTTERLIGERE_INFO_SED("ytterligereInformasjonSed");
+    YTTERLIGERE_INFO_SED("ytterligereInformasjonSed"),
+    FORVALTNINGSMELDING_MOTTAKER("forvaltningsmeldingMottaker");
 
     private final String kode;
 

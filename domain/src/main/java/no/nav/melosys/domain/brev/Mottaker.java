@@ -67,7 +67,7 @@ public final class Mottaker {
 
     public boolean erOrganisasjon() {
         return switch (rolle) {
-            case BRUKER -> false;
+            case BRUKER, ANNEN_PERSON -> false;
             case FULLMEKTIG -> orgnr != null;
             default -> true;
         };
