@@ -41,7 +41,7 @@ public final class BrevbestillingDto {
     private Betalingsstatus betalingsstatus;
     private String fullmektigForBetaling;
     private LocalDate betalingsfrist;
-    private String annenMottakerIdent;
+    private String annenPersonMottakerIdent;
 
     public BrevbestillingDto() {
     }
@@ -76,7 +76,7 @@ public final class BrevbestillingDto {
         Betalingsstatus betalingsstatus,
         String fullmektigForBetaling,
         LocalDate betalingsfrist,
-        String annenMottakerIdent) {
+        String annenPersonMottakerIdent) {
 
         this.produserbardokument = produserbardokument;
         this.mottaker = mottaker;
@@ -107,7 +107,7 @@ public final class BrevbestillingDto {
         this.betalingsstatus = betalingsstatus;
         this.fullmektigForBetaling = fullmektigForBetaling;
         this.betalingsfrist = betalingsfrist;
-        this.annenMottakerIdent = annenMottakerIdent;
+        this.annenPersonMottakerIdent = annenPersonMottakerIdent;
     }
 
 
@@ -382,12 +382,12 @@ public final class BrevbestillingDto {
             Objects.equals(begrunnelseKode, that.begrunnelseKode) && Objects.equals(ytterligereInformasjon, that.ytterligereInformasjon) &&
             Objects.equals(fakturanummer, that.fakturanummer) && betalingsstatus == that.betalingsstatus &&
             Objects.equals(fullmektigForBetaling, that.fullmektigForBetaling) && Objects.equals(betalingsfrist, that.betalingsfrist) &&
-            Objects.equals(annenMottakerIdent, that.annenMottakerIdent);
+            Objects.equals(annenPersonMottakerIdent, that.annenPersonMottakerIdent);
     }
 
     @Override
     public int hashCode() {
-        return Objects.hash(produserbardokument, mottaker, orgnr, orgnrNorskMyndighet, institusjonId, innledningFritekst, manglerFritekst, begrunnelseFritekst, ektefelleFritekst, barnFritekst, trygdeavgiftFritekst, kontaktpersonNavn, kopiMottakere, bestillersId, fritekstTittel, fritekst, distribusjonstype, kontaktopplysninger, nyVurderingBakgrunn, saksVedlegg, fritekstvedlegg, dokumentTittel, saksbehandlerNrToIdent, begrunnelseKode, ytterligereInformasjon, fakturanummer, betalingsstatus, fullmektigForBetaling, betalingsfrist, annenMottakerIdent);
+        return Objects.hash(produserbardokument, mottaker, orgnr, orgnrNorskMyndighet, institusjonId, innledningFritekst, manglerFritekst, begrunnelseFritekst, ektefelleFritekst, barnFritekst, trygdeavgiftFritekst, kontaktpersonNavn, kopiMottakere, bestillersId, fritekstTittel, fritekst, distribusjonstype, kontaktopplysninger, nyVurderingBakgrunn, saksVedlegg, fritekstvedlegg, dokumentTittel, saksbehandlerNrToIdent, begrunnelseKode, ytterligereInformasjon, fakturanummer, betalingsstatus, fullmektigForBetaling, betalingsfrist, annenPersonMottakerIdent);
     }
 
     @Override
@@ -422,7 +422,7 @@ public final class BrevbestillingDto {
             ", betalingsstatus=" + betalingsstatus +
             ", fullmektigForBetaling='" + fullmektigForBetaling + '\'' +
             ", betalingsfrist=" + betalingsfrist +
-            ", annenMottakerIdent='" + annenMottakerIdent + '\'' +
+            ", annenPersonMottakerIdent='" + annenPersonMottakerIdent + '\'' +
             '}';
     }
 
@@ -458,11 +458,11 @@ public final class BrevbestillingDto {
         this.betalingsfrist = betalingsfrist;
     }
 
-    public String getAnnenMottakerIdent() {
-        return annenMottakerIdent;
+    public String getAnnenPersonMottakerIdent() {
+        return annenPersonMottakerIdent;
     }
 
-    public void setAnnenMottakerIdent(String annenMottakerIdent) {
-        this.annenMottakerIdent = annenMottakerIdent;
+    public void setAnnenPersonMottakerIdent(String annenPersonMottakerIdent) {
+        this.annenPersonMottakerIdent = annenPersonMottakerIdent;
     }
 }

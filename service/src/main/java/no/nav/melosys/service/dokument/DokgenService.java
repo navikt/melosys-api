@@ -165,7 +165,7 @@ public class DokgenService {
         boolean erBrevTilOrganisasjon = hasText(brevbestillingDto.getOrgnr());
         boolean erBrevTilNorskMyndighet = Mottakerroller.NORSK_MYNDIGHET.equals(brevbestillingDto.getMottaker())
             && !brevbestillingDto.getOrgnrNorskMyndighet().isEmpty();
-        boolean erBrevTilAnnenPerson = hasText(brevbestillingDto.getAnnenMottakerIdent());
+        boolean erBrevTilAnnenPerson = hasText(brevbestillingDto.getAnnenPersonMottakerIdent());
 
 
         if (erBrevTilOrganisasjon) {
@@ -174,7 +174,7 @@ public class DokgenService {
             mottakere.add(mottaker);
         } else if (erBrevTilAnnenPerson) {
             Mottaker mottaker = Mottaker.medRolle(brevbestillingDto.getMottaker());
-            mottaker.setPersonIdent(brevbestillingDto.getAnnenMottakerIdent());
+            mottaker.setPersonIdent(brevbestillingDto.getAnnenPersonMottakerIdent());
             mottakere.add(mottaker);
         } else if (erBrevTilNorskMyndighet) {
             for (String orgNr : brevbestillingDto.getOrgnrNorskMyndighet()) {

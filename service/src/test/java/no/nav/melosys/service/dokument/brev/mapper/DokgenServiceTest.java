@@ -396,7 +396,7 @@ class DokgenServiceTest {
         var brevbestillingDto = new BrevbestillingDto();
         brevbestillingDto.setProduserbardokument(MELDING_FORVENTET_SAKSBEHANDLINGSTID_SOKNAD);
         brevbestillingDto.setMottaker(Mottakerroller.ANNEN_PERSON);
-        brevbestillingDto.setAnnenMottakerIdent(ANNEN_PERSON_IDENT);
+        brevbestillingDto.setAnnenPersonMottakerIdent(ANNEN_PERSON_IDENT);
         brevbestillingDto.setBestillersId("Z123456");
 
 

@@ -60,7 +60,7 @@ public class DokumentServiceFasade {
         // for å unngå uønsket funksjonalitet dersom man tar i bruk denne metoden i fremtiden.
         if (produserbartDokument.equals(MELDING_FORVENTET_SAKSBEHANDLINGSTID_SOKNAD)) {
             brevbestillingDto.setOrgnr(mottaker.getOrgnr());
-            brevbestillingDto.setAnnenMottakerIdent(mottaker.getPersonIdent());
+            brevbestillingDto.setAnnenPersonMottakerIdent(mottaker.getPersonIdent());
         }
 
         dokgenService.produserOgDistribuerBrev(behandlingId, brevbestillingDto);
