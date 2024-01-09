@@ -123,8 +123,9 @@ class FtrlVedtakService(
         behandlingsresultat.trygdeavgiftFritekst = null
         vilkaarsresultatService.tømVilkårForBehandlingsresultat(behandlingsresultat)
 
-        behandlingsresultat.avklartefakta = setOf(fullstendigManglendeInnbetaling)
-        behandlingsresultat.medlemAvFolketrygden.medlemskapsperioder = behandlingsresultat.medlemAvFolketrygden.medlemskapsperioder
+        behandlingsresultat.avklartefakta.clear()
+        behandlingsresultat.avklartefakta.add(fullstendigManglendeInnbetaling)
+        behandlingsresultat.medlemAvFolketrygden.medlemskapsperioder
             .filter { it.erInnvilget() }
             .onEach { it.innvilgelsesresultat = InnvilgelsesResultat.OPPHØRT }
         behandlingsresultat.medlemAvFolketrygden.bestemmelse = Folketrygdloven_kap2_bestemmelser.FTRL_KAP2_2_15_ANDRE_LEDD
