@@ -22,8 +22,7 @@ class AuditRepository {
     @PersistenceContext
     private val entityManager: EntityManager? = null
 
-    private val auditReader: AuditReader
-        get() = AuditReaderFactory.get(entityManager)
+    private val auditReader: AuditReader = AuditReaderFactory.get(entityManager)
 
     @Transactional(readOnly = true)
     fun <T> getRevisions(tClass: Class<T>, propertiesMap: Map<String, Any>): List<EntityRevision<T>> {
@@ -33,11 +32,30 @@ class AuditRepository {
             require(!(!StringUtils.hasText(key) || Objects.isNull(value))) { "Invalid property in map: key or value is null or empty." }
         }
 
-        val auditQuery = auditReader.createQuery()
-            .forRevisionsOfEntity(tClass, false, true)
+        val auditQuery = auditReader.createQuery().forRevisionsOfEntity(tClass, false, true)
         for ((key, value) in propertiesMap) {
             auditQuery.add(AuditEntity.property(key).eq(value))
         }
+
+        val resultList = auditQuery.resultList as List<Array<Any>>
+        return resultList.map { array -> EntityRevision(array[0] as T, array[1] as DefaultRevisionEntity, array[2] as RevisionType) }
+    }
+
+    @Transactional(readOnly = true)
+    fun <T> getRevisionsBeforeOrAtDate(tClass: Class<T>, propertiesMap: Map<String, Any>, dateTime: LocalDateTime): List<EntityRevision<T>> {
+        require(propertiesMap.isNotEmpty()) { "Invalid params." }
+
+        for ((key, value) in propertiesMap) {
+            require(!(!StringUtils.hasText(key) || Objects.isNull(value))) { "Invalid property in map: key or value is null or empty." }
+        }
+
+        val auditQuery = auditReader.createQuery().forRevisionsOfEntity(tClass, false, false)
+        for ((key, value) in propertiesMap) {
+            auditQuery.add(AuditEntity.property(key).eq(value))
+        }
+
+        val timestamp = dateTime.atZone(ZoneId.of(EUROPE_OSLO)).toInstant().toEpochMilli()
+        auditQuery.add(AuditEntity.revisionProperty("timestamp").le(timestamp))
 
         val resultList = auditQuery.resultList as List<Array<Any>>
         return resultList.map { array -> EntityRevision(array[0] as T, array[1] as DefaultRevisionEntity, array[2] as RevisionType) }

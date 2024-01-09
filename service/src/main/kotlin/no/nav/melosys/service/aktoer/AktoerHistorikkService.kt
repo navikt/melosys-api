@@ -11,12 +11,21 @@ import org.springframework.stereotype.Service
 import org.springframework.transaction.annotation.Transactional
 import java.time.LocalDateTime
 
-internal const val EUROPE_OSLO = "Europe/Oslo"
-
 @Service
 class AktoerHistorikkService(
     private val auditRepository: AuditRepository
 ) {
+
+    @Transactional(readOnly = true)
+    fun hentGyldigeAktørerPåTidspunkt(fagsak: Fagsak, rolle: Aktoersroller, tidspunkt: LocalDateTime): List<Aktoer> {
+        val revisions: List<EntityRevision<Aktoer>> =
+            auditRepository.getRevisionsBeforeOrAtDate(Aktoer::class.java, mapOf("fagsak_saksnummer" to fagsak.saksnummer, "rolle" to rolle), tidspunkt)
+
+        return revisions.filter { it.revisionType != RevisionType.DEL }
+            .groupBy { it.entity.id }
+            .map { (_, revisionList) -> revisionList.maxByOrNull { it.revisionInfo.timestamp }?.entity }
+            .filterNotNull()
+    }
 
     @Transactional(readOnly = true)
     fun hentAktørHistorikk(fagsak: Fagsak, rolle: Aktoersroller): List<AktoerHistorikk> {
