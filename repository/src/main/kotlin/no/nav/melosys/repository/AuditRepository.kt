@@ -1,6 +1,5 @@
 package no.nav.melosys.repository
 
-import org.hibernate.envers.AuditReader
 import org.hibernate.envers.AuditReaderFactory
 import org.hibernate.envers.DefaultRevisionEntity
 import org.hibernate.envers.RevisionType
@@ -20,9 +19,9 @@ internal const val EUROPE_OSLO = "Europe/Oslo"
 @Repository
 class AuditRepository {
     @PersistenceContext
-    private val entityManager: EntityManager? = null
+    private lateinit var entityManager: EntityManager
 
-    private val auditReader: AuditReader = AuditReaderFactory.get(entityManager)
+    private val auditReader get() = AuditReaderFactory.get(entityManager)
 
     @Transactional(readOnly = true)
     fun <T> getRevisions(tClass: Class<T>, propertiesMap: Map<String, Any>): List<EntityRevision<T>> {
