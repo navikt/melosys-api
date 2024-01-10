@@ -263,7 +263,7 @@ class LovligeKombinasjonerService(
      *
      * @param behandlingstype   Allerede valgt behandlingstype.
      */
-    fun hentMuligeBehandlingsårsaker(behandlingstype: Behandlingstyper): List<Behandlingsaarsaktyper> {
+    fun hentMuligeBehandlingsårsaktyper(behandlingstype: Behandlingstyper): List<Behandlingsaarsaktyper> {
         if (behandlingstype == Behandlingstyper.MANGLENDE_INNBETALING_TRYGDEAVGIFT) {
             return listOf(Behandlingsaarsaktyper.MELDING_OM_MANGLENDE_INNBETALING)
         }

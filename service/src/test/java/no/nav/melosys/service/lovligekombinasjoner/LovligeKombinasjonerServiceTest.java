@@ -1,14 +1,12 @@
 package no.nav.melosys.service.lovligekombinasjoner;
 
-import java.util.List;
-import java.util.Set;
-
 import io.getunleash.FakeUnleash;
 import no.nav.melosys.domain.Anmodningsperiode;
 import no.nav.melosys.domain.Behandling;
 import no.nav.melosys.domain.Behandlingsresultat;
 import no.nav.melosys.domain.Fagsak;
 import no.nav.melosys.domain.kodeverk.Aktoersroller;
+import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingsaarsaktyper;
 import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingsstatus;
 import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingstema;
 import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingstyper;
@@ -21,6 +19,9 @@ import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
+
+import java.util.List;
+import java.util.Set;
 
 import static no.nav.melosys.domain.kodeverk.Sakstemaer.*;
 import static no.nav.melosys.domain.kodeverk.Sakstyper.*;
@@ -217,7 +218,6 @@ class LovligeKombinasjonerServiceTest {
         var muligeTyper = lovligeKombinasjonerService
             .hentMuligeBehandlingstyper(Aktoersroller.BRUKER, FTRL, MEDLEMSKAP_LOVVALG, PENSJONIST, null, null);
 
-        // TODO: Gir det mening at pensjonist/ingenflyt får velge alle disse typene?
         assertThat(muligeTyper).containsExactlyInAnyOrder(NY_VURDERING, FØRSTEGANG, HENVENDELSE, KLAGE);
     }
 
@@ -516,6 +516,18 @@ class LovligeKombinasjonerServiceTest {
 
 
         assertThat(muligeBehandlingstyper).isNotEmpty().doesNotContain(FØRSTEGANG);
+    }
+
+    @Test
+    void hentMuligeBehandlingsårsaktyper_behandlingstypeErManglendeInnbetalingTrygdeavgift() {
+        var typer = lovligeKombinasjonerService.hentMuligeBehandlingsårsaktyper(MANGLENDE_INNBETALING_TRYGDEAVGIFT);
+        assertThat(typer).containsExactly(Behandlingsaarsaktyper.MELDING_OM_MANGLENDE_INNBETALING);
+    }
+
+    @Test
+    void hentMuligeBehandlingsårsaktyper_behandlingstypeErAnnetEnnManglendeInnbetalingTrygdeavgift() {
+        var typer = lovligeKombinasjonerService.hentMuligeBehandlingsårsaktyper(FØRSTEGANG);
+        assertThat(typer).containsExactly(Behandlingsaarsaktyper.SØKNAD, Behandlingsaarsaktyper.SED, Behandlingsaarsaktyper.HENVENDELSE, Behandlingsaarsaktyper.FRITEKST);
     }
 
     @Test

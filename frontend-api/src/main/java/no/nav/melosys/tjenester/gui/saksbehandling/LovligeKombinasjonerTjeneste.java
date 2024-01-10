@@ -76,9 +76,9 @@ public class LovligeKombinasjonerTjeneste {
         return ResponseEntity.ok(lovligeKombinasjonerService.hentMuligeBehandlingstyper(hovedpart, sakstype, sakstema, behandlingstema, aktivBehandlingID, sisteBehandlingsID));
     }
 
-    @GetMapping("/behandlingsaarsaker/hent-lovlige-kombinasjoner")
-    @ApiOperation(value = "Henter alle mulige behandlingstyper basert på sakstype, sakstema og behandlingstema", notes = ("Henter alle mulige behandlingsårsaker basert på valgt behandlingstype"))
-    public ResponseEntity<List<Behandlingsaarsaktyper>> hentAlleMuligeBehandlingstyper(@RequestParam("behandlingstype") Behandlingstyper behandlingstype) {
-        return ResponseEntity.ok(lovligeKombinasjonerService.hentMuligeBehandlingsårsaker(behandlingstype));
+    @GetMapping("/behandlingsaarsaktyper/hent-lovlige-kombinasjoner")
+    @ApiOperation(value = "Henter alle mulige behandlingsårsaktyper basert på valgt behandlingstype", notes = ("Henter alle mulige behandlingsårsaktyper basert på valgt behandlingstype"))
+    public ResponseEntity<List<Behandlingsaarsaktyper>> hentAlleMuligeBehandlingsårsaktyper(@RequestParam("behandlingstype") Behandlingstyper behandlingstype) {
+        return ResponseEntity.ok(lovligeKombinasjonerService.hentMuligeBehandlingsårsaktyper(behandlingstype));
     }
 }
