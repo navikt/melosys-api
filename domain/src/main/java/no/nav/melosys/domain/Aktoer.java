@@ -192,6 +192,7 @@ public class Aktoer extends RegistreringsInfo {
         return Objects.equals(this.fagsak, that.fagsak)
             && Objects.equals(this.aktørId, that.aktørId)
             && Objects.equals(this.orgnr, that.orgnr)
+            && Objects.equals(this.personIdent, that.personIdent)
             && Objects.equals(this.institusjonId, that.institusjonId)
             && Objects.equals(this.trygdemyndighetLand, that.trygdemyndighetLand)
             && Objects.equals(this.utenlandskPersonId, that.utenlandskPersonId)
@@ -200,6 +201,6 @@ public class Aktoer extends RegistreringsInfo {
 
     @Override
     public int hashCode() {
-        return Objects.hash(fagsak, aktørId, orgnr, utenlandskPersonId, rolle, institusjonId);
+        return Objects.hash(fagsak, personIdent, aktørId, institusjonId, trygdemyndighetLand, orgnr, rolle, utenlandskPersonId);
     }
 }
