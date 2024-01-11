@@ -41,7 +41,7 @@ class AuditRepository {
     }
 
     @Transactional(readOnly = true)
-    fun <T> getRevisionsBeforeOrAtDate(tClass: Class<T>, propertiesMap: Map<String, Any>, dateTime: LocalDateTime): List<EntityRevision<T>> {
+    fun <T> getRevisionsBeforeOrAtDate(tClass: Class<T>, propertiesMap: Map<String, Any>, instant: Instant): List<EntityRevision<T>> {
         require(propertiesMap.isNotEmpty()) { "Invalid params." }
 
         for ((key, value) in propertiesMap) {
@@ -53,8 +53,7 @@ class AuditRepository {
             auditQuery.add(AuditEntity.property(key).eq(value))
         }
 
-        val timestamp = dateTime.atZone(ZoneId.of(EUROPE_OSLO)).toInstant().toEpochMilli()
-        auditQuery.add(AuditEntity.revisionProperty("timestamp").le(timestamp))
+        auditQuery.add(AuditEntity.revisionProperty("timestamp").le(instant.toEpochMilli()))
 
         val resultList = auditQuery.resultList as List<Array<Any>>
         return resultList.map { array -> EntityRevision(array[0] as T, array[1] as DefaultRevisionEntity, array[2] as RevisionType) }
