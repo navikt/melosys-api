@@ -13,13 +13,15 @@ import org.springframework.http.MediaType;
 import org.springframework.test.web.servlet.MockMvc;
 
 import static no.nav.melosys.domain.kodeverk.Trygdedekninger.*;
+import static org.hamcrest.Matchers.equalTo;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
 @WebMvcTest(controllers = {MelosysInterntKodeverkTjeneste.class})
-public class MelosysInterntKodeverkTjenesteTest {
+class MelosysInterntKodeverkTjenesteTest {
 
     @MockBean
     private MedlemskapsperiodeService medlemskapsperiodeService;
@@ -39,6 +41,7 @@ public class MelosysInterntKodeverkTjenesteTest {
         mockMvc.perform(get(BASE_URL + "/folketrygden")
                 .contentType(MediaType.APPLICATION_JSON))
             .andExpect(status().isOk())
+            .andExpect(jsonPath("$.InnvilgelsesResultat.length()", equalTo(3)))
             .andReturn();
 
         verify(medlemskapsperiodeService).hentGyldigeTrygdedekninger();
