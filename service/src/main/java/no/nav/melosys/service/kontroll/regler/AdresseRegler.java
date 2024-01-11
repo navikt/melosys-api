@@ -35,4 +35,16 @@ public final class AdresseRegler {
     public static boolean manglerForetakUtlandNavn(ForetakUtland foretakUtland) {
         return foretakUtland == null || StringUtils.isBlank(foretakUtland.navn);
     }
+
+    public static boolean manglerForetakUtlandPostnummer(ForetakUtland foretakUtland) {
+        return foretakUtland == null || StringUtils.isBlank(foretakUtland.adresse.getPostnummer());
+    }
+
+    public static boolean manglerForetakUtlandPoststed(ForetakUtland foretakUtland) {
+        return foretakUtland == null || StringUtils.isBlank(foretakUtland.adresse.getPoststed());
+    }
+
+    public static boolean manglerForetakUtlandGatenavn(ForetakUtland foretakUtland) {
+        return foretakUtland == null || StringUtils.isBlank(foretakUtland.adresse.getGatenavn());
+    }
 }

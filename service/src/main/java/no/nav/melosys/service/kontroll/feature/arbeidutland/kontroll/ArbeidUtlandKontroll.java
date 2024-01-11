@@ -16,6 +16,10 @@ public class ArbeidUtlandKontroll {
     static String ARBEIDSSTED_LAND = "mottatteopplysninger.arbeidPaaLand.fysiskeArbeidssteder[%d].adresse.landkode";
     static String FORETAK_UTLAND_NAVN = "mottatteopplysninger.foretakUtland[%d].navn";
     static String FORETAK_UTLAND_LAND = "mottatteopplysninger.foretakUtland[%d].adresse.landkode";
+    static String FORETAK_UTLAND_GATENAVN = "mottatteopplysninger.foretakUtland[%d].adresse.gatenavn";
+    static String FORETAK_UTLAND_POSTNUMMER = "mottatteopplysninger.foretakUtland[%d].adresse.postnummer";
+    static String FORETAK_UTLAND_POSTSTED = "mottatteopplysninger.foretakUtland[%d].adresse.poststed";
+
 
     public static Kontrollfeil arbeidsstedManglerFelter(MottatteOpplysningerData mottatteOpplysningerData) {
         List<FysiskArbeidssted> fysiskArbeidsstedListe = mottatteOpplysningerData.arbeidPaaLand.fysiskeArbeidssteder;
@@ -40,6 +44,7 @@ public class ArbeidUtlandKontroll {
         List<String> felterMedFeil = new ArrayList<>();
         for (int i = 0; i < foretakUtlandListe.size(); i++) {
             ForetakUtland foretakUtland = foretakUtlandListe.get(i);
+
             if (AdresseRegler.manglerForetakUtlandNavn(foretakUtland)) {
                 felterMedFeil.add(String.format(FORETAK_UTLAND_NAVN, i));
             }
@@ -47,7 +52,24 @@ public class ArbeidUtlandKontroll {
                 felterMedFeil.add(String.format(FORETAK_UTLAND_LAND, i));
             }
         }
+
         return felterMedFeil.isEmpty() ? null
             : new Kontrollfeil(Kontroll_begrunnelser.MANGLENDE_OPPL_ANDRE_ARBEIDSFORHOLD_UTL, felterMedFeil, KontrolldataFeilType.FEIL);
+    }
+
+    public static Kontrollfeil foretakUtlandUfullstendigAdresse(MottatteOpplysningerData mottatteOpplysningerData) {
+        List<ForetakUtland> foretakUtlandListe = mottatteOpplysningerData.foretakUtland;
+
+        boolean erUfullstendigAdresse = false;
+        for (int i = 0; i < foretakUtlandListe.size(); i++) {
+            ForetakUtland foretakUtland = foretakUtlandListe.get(i);
+
+            if(AdresseRegler.manglerForetakUtlandPoststed(foretakUtland) || AdresseRegler.manglerForetakUtlandGatenavn(foretakUtland) || AdresseRegler.manglerForetakUtlandPostnummer(foretakUtland)){
+                erUfullstendigAdresse = true;
+            }
+        }
+
+        return erUfullstendigAdresse ? new Kontrollfeil(Kontroll_begrunnelser.MANGLENDE_OPPL_ADRESSE_ARBEIDSFORHOLD_UTL, KontrolldataFeilType.FEIL)
+            : null;
     }
 }

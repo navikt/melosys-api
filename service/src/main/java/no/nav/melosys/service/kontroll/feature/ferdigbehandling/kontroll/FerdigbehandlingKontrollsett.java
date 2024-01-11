@@ -36,6 +36,7 @@ public class FerdigbehandlingKontrollsett {
         FerdigbehandlingKontroll::periodeManglerSluttdato,
         FerdigbehandlingKontroll::arbeidsstedManglerFelter,
         FerdigbehandlingKontroll::foretakUtlandManglerFelter,
+        FerdigbehandlingKontroll::foretakUtlandUfullstendigAdresse,
         FerdigbehandlingKontroll::orgnrErOpphørt
     );
 

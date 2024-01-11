@@ -135,6 +135,10 @@ final class FerdigbehandlingKontroll {
         return ArbeidUtlandKontroll.foretakUtlandManglerFelter(kontrollData.mottatteOpplysningerData());
     }
 
+    static Kontrollfeil foretakUtlandUfullstendigAdresse(FerdigbehandlingKontrollData kontrollData) {
+        return ArbeidUtlandKontroll.foretakUtlandUfullstendigAdresse(kontrollData.mottatteOpplysningerData());
+    }
+
     static Kontrollfeil representantIUtlandetMangler(FerdigbehandlingKontrollData kontrollData) {
         var lovvalgsperiode = kontrollData.lovvalgsperiode();
         var søknad = (SøknadNorgeEllerUtenforEØS) kontrollData.mottatteOpplysningerData();
