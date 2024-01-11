@@ -101,7 +101,6 @@ class OpprettLovvalgsperiodeService(
 
         lovvalgsperiode.apply {
             this.fom = fom
-            this.fom = fom
             this.tom = tom
             this.bestemmelse = bestemmelse
             this.innvilgelsesresultat = InnvilgelsesResultat.INNVILGET
