@@ -12,6 +12,7 @@ import no.nav.melosys.saksflytapi.ProsessinstansService
 import no.nav.melosys.service.aktoer.AktoerHistorikkService
 import no.nav.melosys.service.behandling.BehandlingService
 import no.nav.melosys.service.behandling.BehandlingsresultatService
+import no.nav.melosys.service.sak.TrygdeavgiftOppsummeringService
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.extension.ExtendWith
@@ -28,13 +29,21 @@ internal class FaktureringEventListenerTest {
     @MockK
     private lateinit var aktoerHistorikkService: AktoerHistorikkService
     @MockK
+    private lateinit var trygdeavgiftOppsummeringService: TrygdeavgiftOppsummeringService
+    @MockK
     private lateinit var prosessinstansService: ProsessinstansService
 
     private lateinit var faktureringEventListener: FaktureringEventListener
 
     @BeforeEach
     fun setup() {
-        faktureringEventListener = FaktureringEventListener(behandlingService, behandlingsresultatService, aktoerHistorikkService, prosessinstansService)
+        faktureringEventListener = FaktureringEventListener(
+            behandlingService,
+            behandlingsresultatService,
+            aktoerHistorikkService,
+            trygdeavgiftOppsummeringService,
+            prosessinstansService
+        )
 
 
     }
@@ -92,6 +101,7 @@ internal class FaktureringEventListenerTest {
                 avsluttetBehandling.registrertDato
             )
         } returns listOf(historiskFullmektig)
+        every { trygdeavgiftOppsummeringService.harFagsakBehandlingerMedTrygdeavgift(fagsak.saksnummer) } returns true
         every { prosessinstansService.opprettProsessinstansOppdaterFaktura(fagsak.saksnummer) } just runs
 
 
@@ -153,15 +163,6 @@ internal class FaktureringEventListenerTest {
         }
 
         every { behandlingsresultatService.hentBehandlingsresultat(avsluttetBehandling.id) } returns behandlingsresultat
-        every { behandlingService.hentBehandling(avsluttetBehandling.id) } returns avsluttetBehandling
-        every {
-            aktoerHistorikkService.hentHistoriskeAktørerPåTidspunkt(
-                fagsak,
-                Aktoersroller.FULLMEKTIG,
-                avsluttetBehandling.registrertDato
-            )
-        } returns listOf(historiskFullmektig)
-        every { prosessinstansService.opprettProsessinstansOppdaterFaktura(fagsak.saksnummer) } just runs
 
 
         faktureringEventListener.oppdaterFakturaMottakerHvisNødvendig(
@@ -216,6 +217,7 @@ internal class FaktureringEventListenerTest {
                 avsluttetBehandling.registrertDato
             )
         } returns listOf(historiskFullmektig)
+        every { trygdeavgiftOppsummeringService.harFagsakBehandlingerMedTrygdeavgift(fagsak.saksnummer) } returns true
         every { prosessinstansService.opprettProsessinstansOppdaterFaktura(fagsak.saksnummer) } just runs
 
 

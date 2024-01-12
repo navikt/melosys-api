@@ -9,6 +9,7 @@ import no.nav.melosys.saksflytapi.ProsessinstansService
 import no.nav.melosys.service.aktoer.AktoerHistorikkService
 import no.nav.melosys.service.behandling.BehandlingService
 import no.nav.melosys.service.behandling.BehandlingsresultatService
+import no.nav.melosys.service.sak.TrygdeavgiftOppsummeringService
 import org.springframework.context.event.EventListener
 import org.springframework.stereotype.Component
 import org.springframework.transaction.annotation.Transactional
@@ -18,6 +19,7 @@ class FaktureringEventListener(
     val behandlingService: BehandlingService,
     val behandlingsresultatService: BehandlingsresultatService,
     val aktoerHistorikkService: AktoerHistorikkService,
+    val trygdeavgiftOppsummeringService: TrygdeavgiftOppsummeringService,
     val prosessinstansService: ProsessinstansService
 ) {
     @EventListener
@@ -39,14 +41,17 @@ class FaktureringEventListener(
             aktoerHistorikkService.hentHistoriskeAktørerPåTidspunkt(fagsak, Aktoersroller.FULLMEKTIG, behandling.registrertDato)
                 .filter { it.fullmaktstyper.contains(Fullmaktstype.FULLMEKTIG_TRYGDEAVGIFT) }
 
-        if (fakturaMottakerMåOppdateres(fullmektigForTrygdeavgift, gjeldendeFullmektigerNårBehandlingBleOpprettet)) {
+        if (fullmektigForBetalingAvTrygdeavgiftBleEndret(
+                fullmektigForTrygdeavgift, gjeldendeFullmektigerNårBehandlingBleOpprettet
+            ) && trygdeavgiftOppsummeringService.harFagsakBehandlingerMedTrygdeavgift(fagsak.saksnummer)
+        ) {
             // Bestill prosess i stedet for å kalle faktureringskomponent direkte, for å få støtte for feilhåndtering og rekjøring
             prosessinstansService.opprettProsessinstansOppdaterFaktura(fagsak.saksnummer)
         }
     }
 
     // Sjekk om fullmektig for betaling av trygdeavgift ble endret siden behandlingen ble opprettet.
-    private fun fakturaMottakerMåOppdateres(
+    private fun fullmektigForBetalingAvTrygdeavgiftBleEndret(
         fullmektigForTrygdeavgift: Aktoer?, tidligereFullmektigerForTrygdeavgift: List<Aktoer>
     ): Boolean = when {
         fullmektigForTrygdeavgift == null -> tidligereFullmektigerForTrygdeavgift.isNotEmpty() // Fullmektig må ev. fjernes i faktureringskomponent
