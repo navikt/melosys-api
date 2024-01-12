@@ -44,6 +44,8 @@ class OpprettFakturaserie(
             return
         }
 
+        //TODO NY_VURDERING
+
         val behandlingsId = prosessinstans.behandling.id
         val saksbehandlerIdent = prosessinstans.getData(ProsessDataKey.SAKSBEHANDLER)
         val behandlingsresultat = behandlingsresultatService.hentBehandlingsresultat(behandlingsId)
@@ -55,6 +57,10 @@ class OpprettFakturaserie(
         } else if (skalOppretteFakturaserie(behandlingsresultat)) {
             log.info("Oppretter fakturaserie for behandling: $behandlingsId")
             opprettFakturaserieOgLagreReferanse(behandlingsresultat, mapFakturaserieDto(behandlingsresultat, prosessinstans), saksbehandlerIdent)
+        } else if (prosessinstans.behandling.type.kode == "NY_VURDERING") {
+            log.info("Kansellerer fakturaserie for behandling: $behandlingsId med fakturaseriereferanse: ${behandlingsresultat.fakturaserieReferanse}")
+
+            kansellerFakturaserieOgLagreReferanse(behandlingsresultat, saksbehandlerIdent)
         }
     }
 
