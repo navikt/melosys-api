@@ -30,7 +30,7 @@ public class VedtakTjeneste {
         this.aksesskontroll = aksesskontroll;
     }
 
-    @PostMapping("{behandlingID}/fatt")
+    @PostMapping("{behandlingID}/fatt") //TODO
     @ApiOperation(value = "Fatter et vedtak for en gitt behandling")
     public ResponseEntity<Void> fattVedtak(@PathVariable("behandlingID") long behandlingID,
                                            @RequestBody FattVedtakDto fattVedtakDto) throws ValideringException {

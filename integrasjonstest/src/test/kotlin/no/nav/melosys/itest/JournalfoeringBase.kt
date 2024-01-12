@@ -87,6 +87,20 @@ class JournalfoeringBase(
         }
     }
 
+
+
+    protected fun journalførAndregangsOgVentTilProsesserErFerdige(
+        journalfoeringTilordneDto: JournalfoeringTilordneDto,
+        waitFor: ProsessType = ProsessType.JFR_NY_SAK_BRUKER,
+        alsoWaitForprosessType: List<ProsessType> = listOf()
+    ): Prosessinstans {
+        val jfrOppgave: Oppgave = lagJfrOppgave()
+
+        return executeAndWait(ProsessType.JFR_ANDREGANG_NY_BEHANDLING) {
+            journalføringService.journalførOgOpprettAndregangsBehandling(journalfoeringTilordneDto)
+        }
+    }
+
     protected fun executeAndWait(
         waitForprosessType: ProsessType,
         alsoWaitForprosessType: List<ProsessType> = listOf(),
