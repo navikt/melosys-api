@@ -33,16 +33,13 @@ class FaktureringEventListener(
 
         val behandling = behandlingService.hentBehandling(event.behandling.id)
         val fagsak = behandling.fagsak
-        val fullmektigForTrygdeavgift = fagsak.finnFullmektig(Fullmaktstype.FULLMEKTIG_TRYGDEAVGIFT).orElse(null)
-        // TODO Trenger vi sjekk om saken gjelder trygdeavgift i tillegg? (ev. fakturaserieReferanse på behandlingsresultater)
-        if (fullmektigForTrygdeavgift == null) {
-            return
-        }
 
+        val fullmektigForTrygdeavgift = fagsak.finnFullmektig(Fullmaktstype.FULLMEKTIG_TRYGDEAVGIFT).orElse(null)
         val gyldigeFullmektigerNårBehandlingBleOpprettet =
             aktoerHistorikkService.hentGyldigeAktørerPåTidspunkt(fagsak, Aktoersroller.FULLMEKTIG, behandling.registrertDato)
                 .filter { it.fullmaktstyper.contains(Fullmaktstype.FULLMEKTIG_TRYGDEAVGIFT) }
 
+        // TODO Trenger sjekk om saken gjelder trygdeavgift i tillegg (ev. fakturaserieReferanse på behandlingsresultater)
         if (fakturaMottakerMåOppdateres(fullmektigForTrygdeavgift, gyldigeFullmektigerNårBehandlingBleOpprettet)) {
             // Bestill prosess i stedet for å kalle faktureringskomponent direkte, for å få støtte for feilhåndtering og rekjøring
             prosessinstansService.opprettProsessinstansOppdaterFaktura(fagsak.saksnummer)
@@ -51,8 +48,11 @@ class FaktureringEventListener(
 
     // Sjekk om fullmektig for betaling av trygdeavgift ble endret siden behandlingen ble opprettet.
     private fun fakturaMottakerMåOppdateres(
-        fullmektigForTrygdeavgift: Aktoer, tidligereFullmektigerForTrygdeavgift: List<Aktoer>
+        fullmektigForTrygdeavgift: Aktoer?, tidligereFullmektigerForTrygdeavgift: List<Aktoer>
     ): Boolean {
+        if (fullmektigForTrygdeavgift == null) {
+            return tidligereFullmektigerForTrygdeavgift.isNotEmpty()
+        }
         if (tidligereFullmektigerForTrygdeavgift.size != 1) {
             return true
         }

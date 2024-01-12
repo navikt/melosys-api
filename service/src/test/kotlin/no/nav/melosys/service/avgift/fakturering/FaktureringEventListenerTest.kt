@@ -174,4 +174,59 @@ internal class FaktureringEventListenerTest {
 
         verify { prosessinstansService wasNot called }
     }
+
+    @Test
+    fun `hvis tidligere fullmektig ble fjernet, skal bruker få fakturaer`() {
+        val fagsak = Fagsak().apply {
+            saksnummer = "MEL-test"
+            aktører = setOf()
+        }
+        val avsluttetBehandling = Behandling().apply {
+            id = 1
+            status = AVSLUTTET
+            registrertDato = Instant.EPOCH
+            this.fagsak = fagsak
+        }
+        val behandlingsresultat = Behandlingsresultat().apply {
+            behandling = avsluttetBehandling
+            vedtakMetadata = null
+        }
+
+        val historiskFullmektig = Aktoer().apply {
+            id = 1
+            registrertDato = LocalDate.of(2023, 12, 1).atStartOfDay(ZoneId.of("Europe/Oslo")).toInstant()
+            endretDato = LocalDate.of(2023, 12, 2).atStartOfDay(ZoneId.of("Europe/Oslo")).toInstant()
+            orgnr = "999999999"
+            rolle = Aktoersroller.FULLMEKTIG
+        }
+        val historiskFullmakt = Fullmakt().apply {
+            aktoer = historiskFullmektig
+            type = Fullmaktstype.FULLMEKTIG_TRYGDEAVGIFT
+        }
+        historiskFullmektig.apply {
+            fullmakter = setOf(historiskFullmakt)
+        }
+
+        every { behandlingsresultatService.hentBehandlingsresultat(avsluttetBehandling.id) } returns behandlingsresultat
+        every { behandlingService.hentBehandling(avsluttetBehandling.id) } returns avsluttetBehandling
+        every {
+            aktoerHistorikkService.hentGyldigeAktørerPåTidspunkt(
+                fagsak,
+                Aktoersroller.FULLMEKTIG,
+                avsluttetBehandling.registrertDato
+            )
+        } returns listOf(historiskFullmektig)
+        every { prosessinstansService.opprettProsessinstansOppdaterFaktura(fagsak.saksnummer) } just runs
+
+
+        faktureringEventListener.oppdaterFakturaMottakerHvisNødvendig(
+            BehandlingEndretStatusEvent(
+                AVSLUTTET,
+                avsluttetBehandling
+            )
+        )
+
+
+        verify { prosessinstansService.opprettProsessinstansOppdaterFaktura(fagsak.saksnummer) }
+    }
 }
