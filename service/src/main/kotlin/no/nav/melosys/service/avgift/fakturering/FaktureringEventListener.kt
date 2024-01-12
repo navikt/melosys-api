@@ -8,6 +8,7 @@ import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingsstatus
 import no.nav.melosys.saksflytapi.ProsessinstansService
 import no.nav.melosys.service.aktoer.AktoerHistorikkService
 import no.nav.melosys.service.behandling.BehandlingService
+import no.nav.melosys.service.behandling.BehandlingsresultatService
 import org.springframework.context.event.EventListener
 import org.springframework.stereotype.Component
 import org.springframework.transaction.annotation.Transactional
@@ -15,6 +16,7 @@ import org.springframework.transaction.annotation.Transactional
 @Component
 class FaktureringEventListener(
     val behandlingService: BehandlingService,
+    val behandlingsresultatService: BehandlingsresultatService,
     val aktoerHistorikkService: AktoerHistorikkService,
     val prosessinstansService: ProsessinstansService
 ) {
@@ -22,6 +24,10 @@ class FaktureringEventListener(
     @Transactional
     fun oppdaterFakturaMottakerHvisNødvendig(event: BehandlingEndretStatusEvent) {
         if (event.behandlingsstatus != Behandlingsstatus.AVSLUTTET) {
+            return
+        }
+        if (behandlingsresultatService.hentBehandlingsresultat(event.behandling.id).vedtakMetadata != null) {
+            // Ved vedtak med fakturering opprettes fakturaserie med riktig mottaker allerede
             return
         }
 
