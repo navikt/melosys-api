@@ -1,6 +1,10 @@
 package no.nav.melosys.service.medlemskapsperiode;
 
 
+import java.time.LocalDate;
+import java.util.Collection;
+import java.util.List;
+
 import no.nav.melosys.domain.Behandlingsresultat;
 import no.nav.melosys.domain.Medlemskapsperiode;
 import no.nav.melosys.domain.folketrygden.MedlemAvFolketrygden;
@@ -9,10 +13,6 @@ import no.nav.melosys.domain.kodeverk.Medlemskapstyper;
 import no.nav.melosys.domain.kodeverk.Trygdedekninger;
 import no.nav.melosys.domain.mottatteopplysninger.data.Periode;
 import org.junit.jupiter.api.Test;
-
-import java.time.LocalDate;
-import java.util.Collection;
-import java.util.List;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.tuple;
@@ -284,6 +284,39 @@ class UtledMedlemskapsperioderTest {
 
 
         assertThat(response).isEmpty();
+    }
+
+    @Test
+    void lagMedlemskapsperioderForManglendeInnbetaling_finnesMedlemskapsperioder_filtrererBortAvslåtteMenTarVarePåOpphørte() {
+        var fom = LocalDate.parse("2023-06-01");
+        var tom = LocalDate.parse("2024-06-01");
+        var innvilgetMedlemskapsperiode = lagMedlemskapsperiode(fom, tom, InnvilgelsesResultat.INNVILGET, Trygdedekninger.FTRL_2_9_FØRSTE_LEDD_B_PENSJON);
+        var avslåttMedlemskapsperiode = lagMedlemskapsperiode(fom, tom, InnvilgelsesResultat.AVSLAATT, Trygdedekninger.FTRL_2_9_FØRSTE_LEDD_A_HELSE);
+        var opphørtMedlemskapsperiode = lagMedlemskapsperiode(fom, tom, InnvilgelsesResultat.OPPHØRT, Trygdedekninger.FTRL_2_9_FØRSTE_LEDD_A_HELSE);
+
+        var opprinneligBehandlingsresultat = new Behandlingsresultat();
+        opprinneligBehandlingsresultat.setMedlemAvFolketrygden(new MedlemAvFolketrygden());
+        opprinneligBehandlingsresultat.getMedlemAvFolketrygden().setMedlemskapsperioder(List.of(innvilgetMedlemskapsperiode, avslåttMedlemskapsperiode, opphørtMedlemskapsperiode));
+
+
+        Collection<Medlemskapsperiode> response = utledMedlemskapsperioder.lagMedlemskapsperioderForManglendeInnbetaling(opprinneligBehandlingsresultat);
+
+
+        assertThat(response).hasSize(2)
+            .extracting(
+                Medlemskapsperiode::getFom, Medlemskapsperiode::getTom,
+                Medlemskapsperiode::getTrygdedekning, Medlemskapsperiode::getInnvilgelsesresultat
+            )
+            .containsExactlyInAnyOrder(
+                tuple(
+                    fom, tom,
+                    innvilgetMedlemskapsperiode.getTrygdedekning(), InnvilgelsesResultat.INNVILGET
+                ),
+                tuple(
+                    fom, tom,
+                    opphørtMedlemskapsperiode.getTrygdedekning(), InnvilgelsesResultat.OPPHØRT
+                )
+            );
     }
 
     private Medlemskapsperiode lagMedlemskapsperiode(LocalDate fom, LocalDate tom, InnvilgelsesResultat innvilgelsesResultat, Trygdedekninger trygdedekning) {
