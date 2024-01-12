@@ -116,6 +116,10 @@ class FtrlVedtakService(
             .firstOrNull { Avklartefaktatyper.FULLSTENDIG_MANGLENDE_INNBETALING.kode == it.referanse && Avklartefaktatyper.FULLSTENDIG_MANGLENDE_INNBETALING == it.type }
             ?: throw FunksjonellException("Forventer at fullstendigManglendeInnbetaling er satt ved fatting av vedtak for behandlingstype OPPHØRT")
 
+        val opphørteMedlemskapsperioder = behandlingsresultat.medlemAvFolketrygden.medlemskapsperioder
+            .filter { it.erInnvilget() || it.erOpphørt() }
+            .onEach { it.innvilgelsesresultat = InnvilgelsesResultat.OPPHØRT }
+
         log.info("Fjerner vilkårsresultater, fritekstfelt, trygdeavgift, og virksomheter fra behandlingsresultat med behandlingsid: $behandlingID")
         behandlingsresultat.utfallRegistreringUnntak = null
         behandlingsresultat.nyVurderingBakgrunn = null
@@ -125,10 +129,9 @@ class FtrlVedtakService(
 
         behandlingsresultat.avklartefakta.clear()
         behandlingsresultat.avklartefakta.add(fullstendigManglendeInnbetaling)
-        behandlingsresultat.medlemAvFolketrygden.medlemskapsperioder
-            .filter { it.erInnvilget() }
-            .onEach { it.innvilgelsesresultat = InnvilgelsesResultat.OPPHØRT }
-        behandlingsresultat.medlemAvFolketrygden.bestemmelse = Folketrygdloven_kap2_bestemmelser.FTRL_KAP2_2_15_ANDRE_LEDD
+        behandlingsresultat.medlemAvFolketrygden.medlemskapsperioder.clear()
+        behandlingsresultat.medlemAvFolketrygden.medlemskapsperioder.addAll(opphørteMedlemskapsperioder)
+        behandlingsresultat.medlemAvFolketrygden.bestemmelse = Folketrygdloven_kap2_bestemmelser.FTRL_KAP2_2_15_ANDRE_LEDD // TODO: Flytt denne til hver enkelt medlemskapsperiode
 
         behandlingsresultat.type = Behandlingsresultattyper.OPPHØRT
         behandlingsresultat.settVedtakMetadata(request.vedtakstype, LocalDate.now().plusWeeks(VedtaksfattingFasade.FRIST_KLAGE_UKER.toLong()))
