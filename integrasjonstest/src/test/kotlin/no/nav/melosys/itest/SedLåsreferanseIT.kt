@@ -8,8 +8,10 @@ import io.mockk.every
 import io.mockk.mockk
 import mu.KotlinLogging
 import no.nav.melosys.Application
+import no.nav.melosys.AwaitUtil.throwOnLogError
 import no.nav.melosys.LoggingTestUtils
 import no.nav.melosys.LoggingTestUtils.check
+import no.nav.melosys.LoggingTestUtils.match
 import no.nav.melosys.domain.eessi.melding.MelosysEessiMelding
 import no.nav.melosys.saksflyt.ProsessinstansBehandler
 import no.nav.melosys.saksflyt.ProsessinstansRepository
@@ -20,6 +22,7 @@ import no.nav.melosys.saksflytapi.domain.ProsessSteg
 import no.nav.melosys.saksflytapi.domain.Prosessinstans
 import no.nav.security.token.support.spring.test.EnableMockOAuth2Server
 import org.awaitility.kotlin.await
+import org.junit.jupiter.api.AfterEach
 import org.junit.jupiter.api.Disabled
 import org.junit.jupiter.api.Test
 import org.springframework.beans.factory.annotation.Autowired
@@ -54,9 +57,15 @@ internal class SedLåsreferanseIT(
     @Autowired private val prosessinstansService: ProsessinstansService,
 ) : OracleTestContainerBase() {
 
+    @AfterEach
+    fun afterEach() {
+        prosessinstansRepository.findAllByLåsReferanseStartingWith("111_222_")
+            .forEach { prosessinstansRepository.deleteById(it.id) }
+    }
+
     @Test
-    fun `ikke kjør samtidig når sed har samme rinaSaksnummer men forsjellig sedId, sedVersjon`() {
-        val logItems = LoggingTestUtils.captureLog<ProsessinstansBehandler> {
+    fun `ikke kjør samtidig når sed har samme rinaSaksnummer men forskjellig sedId, sedVersjon`() {
+        LoggingTestUtils.withLogCapture { logItems ->
             val låsReferanser = lagProsesser(
                 listOf(
                     MelosysEessiMelding().apply {
@@ -73,20 +82,21 @@ internal class SedLåsreferanseIT(
             )
 
             await.timeout(Duration.ofSeconds(30)).pollInterval(Duration.ofSeconds(1))
+                .throwOnLogError(logItems)
                 .until {
                     prosessinstansRepository.findAll()
                         .filter { it.låsReferanse in låsReferanser }
                         .all { it.status == ProsessStatus.FERDIG }
                 }
-        }
 
-        logItems.shouldHaveSize(6).check { next ->
-            next().formattedMessage shouldMatch Regex("Starter behandling av prosessinstans .*? med lås 111_222_1")
-            next().formattedMessage shouldStartWith "Utfører steg SED_MOTTAK_RUTING"
-            next().message shouldStartWith "Prosessinstans {} behandlet ferdig"
-            next().formattedMessage shouldMatch Regex("Starter behandling av prosessinstans .*? med lås 111_222_2")
-            next().formattedMessage shouldStartWith "Utfører steg SED_MOTTAK_RUTING"
-            next().message shouldStartWith "Prosessinstans {} behandlet ferdig"
+            logItems.match<ProsessinstansBehandler>().shouldHaveSize(6).check { next ->
+                next().formattedMessage shouldMatch Regex("Starter behandling av prosessinstans .*? med lås 111_222_1")
+                next().formattedMessage shouldStartWith "Utfører steg SED_MOTTAK_RUTING"
+                next().message shouldStartWith "Prosessinstans {} behandlet ferdig"
+                next().formattedMessage shouldMatch Regex("Starter behandling av prosessinstans .*? med lås 111_222_2")
+                next().formattedMessage shouldStartWith "Utfører steg SED_MOTTAK_RUTING"
+                next().message shouldStartWith "Prosessinstans {} behandlet ferdig"
+            }
         }
     }
 
@@ -95,7 +105,7 @@ internal class SedLåsreferanseIT(
     // Er laget oppgave for å fikse dette: https://jira.adeo.no/browse/MELOSYS-6365 og da er denne testen grei å ha
     @Disabled("Denne testen feiler noen ganger siden den ikke er synkronisert, så log linjene kan komme i en annen rekkefølge")
     fun `kjør samtidig når sed har samme rinaSaksnummer, sedId og sedVersjon`() {
-        val logItems = LoggingTestUtils.captureLog<ProsessinstansBehandler> {
+        LoggingTestUtils.withLogCapture { logItems ->
             val låsReferanser = lagProsesser(
                 listOf(
                     MelosysEessiMelding().apply {
@@ -111,21 +121,23 @@ internal class SedLåsreferanseIT(
                 )
             )
 
+
             await.timeout(Duration.ofSeconds(30)).pollInterval(Duration.ofSeconds(1))
+                .throwOnLogError(logItems)
                 .until {
                     prosessinstansRepository.findAll()
                         .filter { it.låsReferanse in låsReferanser }
                         .all { it.status == ProsessStatus.FERDIG }
                 }
-        }
 
-        logItems.shouldHaveSize(6).check { next ->
-            next().formattedMessage shouldMatch Regex("Starter behandling av prosessinstans .*? med lås 111_222_1")
-            next().formattedMessage shouldMatch Regex("Starter behandling av prosessinstans .*? med lås 111_222_1")
-            next().formattedMessage shouldStartWith "Utfører steg SED_MOTTAK_RUTING"
-            next().formattedMessage shouldStartWith "Utfører steg SED_MOTTAK_RUTING"
-            next().message shouldStartWith "Prosessinstans {} behandlet ferdig"
-            next().message shouldStartWith "Prosessinstans {} behandlet ferdig"
+            logItems.match<ProsessinstansBehandler>().shouldHaveSize(6).check { next ->
+                next().formattedMessage shouldMatch Regex("Starter behandling av prosessinstans .*? med lås 111_222_1")
+                next().formattedMessage shouldMatch Regex("Starter behandling av prosessinstans .*? med lås 111_222_1")
+                next().formattedMessage shouldStartWith "Utfører steg SED_MOTTAK_RUTING"
+                next().formattedMessage shouldStartWith "Utfører steg SED_MOTTAK_RUTING"
+                next().message shouldStartWith "Prosessinstans {} behandlet ferdig"
+                next().message shouldStartWith "Prosessinstans {} behandlet ferdig"
+            }
         }
     }
 
