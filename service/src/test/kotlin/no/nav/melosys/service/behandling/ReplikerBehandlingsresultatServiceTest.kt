@@ -268,6 +268,7 @@ class ReplikerBehandlingsresultatServiceTest {
         val opphørtMedlemskapsperiodeOrig = medlemAvFolketrygdenOrig.medlemskapsperioder.filter { it.erOpphørt() }.first()
         behandlingsresultatReplika.medlemAvFolketrygden.medlemskapsperioder
             .shouldHaveSize(2)
+            .sortedBy { it.innvilgelsesresultat }
             .run {
                 first().run {
                     medlemAvFolketrygden.shouldBe(behandlingsresultatReplika.medlemAvFolketrygden)
