@@ -53,6 +53,6 @@ internal class ArbeidUtlandKontrollTest {
     @Test
     fun utførKontroller_foretakUtlandManglerFelter_returnererKode() {
         val kontrollfeil = foretakUtlandManglerFelter(mottatteOpplysningerData!!)!!
-        assert(kontrollfeil.kode == Kontroll_begrunnelser.MANGLENDE_OPPL_ANDRE_ARBEIDSFORHOLD_UTL)
+        assert(kontrollfeil.kode == Kontroll_begrunnelser.MANGLENDE_OPPL_ARBEIDSFORHOLD_UTL)
     }
 }

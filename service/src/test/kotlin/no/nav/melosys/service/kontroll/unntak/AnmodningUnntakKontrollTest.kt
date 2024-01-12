@@ -104,7 +104,7 @@ internal class AnmodningUnntakKontrollTest {
         val resultat = anmodningUnntakKontrollService!!.utførKontroller(behandlingID)
         Assertions.assertThat(resultat)
             .extracting<Kontroll_begrunnelser, RuntimeException> { obj: Kontrollfeil -> obj.kode }
-            .containsExactly(Kontroll_begrunnelser.MANGLENDE_OPPL_ANDRE_ARBEIDSFORHOLD_UTL)
+            .containsExactly(Kontroll_begrunnelser.MANGLENDE_OPPL_ARBEIDSFORHOLD_UTL)
     }
 
     @Test

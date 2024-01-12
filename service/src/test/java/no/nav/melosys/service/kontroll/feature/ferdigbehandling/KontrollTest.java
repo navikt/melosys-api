@@ -326,7 +326,7 @@ class KontrollTest {
 
         assertThat(resultat)
             .extracting(Kontrollfeil::getKode)
-            .contains(Kontroll_begrunnelser.MANGLENDE_OPPL_ANDRE_ARBEIDSFORHOLD_UTL);
+            .contains(Kontroll_begrunnelser.MANGLENDE_OPPL_ARBEIDSFORHOLD_UTL);
     }
 
     @Test
