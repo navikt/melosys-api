@@ -38,7 +38,7 @@ class FaktureringEventListener(
                 .filter { it.fullmaktstyper.contains(Fullmaktstype.FULLMEKTIG_TRYGDEAVGIFT) }
 
         if (fakturaMottakerMåOppdateres(fullmektigForTrygdeavgift, gyldigeFullmektigerNårBehandlingBleOpprettet)) {
-            // Bestill prosess i stedet for å kalle faktureringskomponent for feilhåndtering og rekjøring
+            // Bestill prosess i stedet for å kalle faktureringskomponent direkte, for å få støtte for feilhåndtering og rekjøring
             prosessinstansService.opprettProsessinstansOppdaterFaktura(fagsak.saksnummer)
         }
     }
