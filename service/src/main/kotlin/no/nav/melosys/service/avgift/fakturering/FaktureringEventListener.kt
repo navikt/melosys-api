@@ -51,12 +51,13 @@ class FaktureringEventListener(
         fullmektigForTrygdeavgift: Aktoer?, tidligereFullmektigerForTrygdeavgift: List<Aktoer>
     ): Boolean {
         if (fullmektigForTrygdeavgift == null) {
+            // Fullmektig må ev. fjernes i faktureringskomponent
             return tidligereFullmektigerForTrygdeavgift.isNotEmpty()
         }
+
         if (tidligereFullmektigerForTrygdeavgift.size != 1) {
             return true
         }
-        val tidligereFullmektigForTrygdeavgift = tidligereFullmektigerForTrygdeavgift.single()
-        return fullmektigForTrygdeavgift != tidligereFullmektigForTrygdeavgift
+        return fullmektigForTrygdeavgift != tidligereFullmektigerForTrygdeavgift.single()
     }
 }

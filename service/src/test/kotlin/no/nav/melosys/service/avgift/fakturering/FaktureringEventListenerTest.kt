@@ -176,7 +176,7 @@ internal class FaktureringEventListenerTest {
     }
 
     @Test
-    fun `hvis tidligere fullmektig ble fjernet, skal bruker få fakturaer`() {
+    fun `Hvis tidligere fullmektig ble fjernet, skal bruker få fakturaer`() {
         val fagsak = Fagsak().apply {
             saksnummer = "MEL-test"
             aktører = setOf()
