@@ -308,7 +308,7 @@ class KontrollTest {
 
         assertThat(resultat)
             .extracting(Kontrollfeil::getKode)
-            .contains(Kontroll_begrunnelser.MANGLENDE_OPPL_ARBEIDSSTED);
+            .contains(Kontroll_begrunnelser.MANGLENDE_OPPL_ARBEIDSSTED_LAND);
     }
 
     @Test

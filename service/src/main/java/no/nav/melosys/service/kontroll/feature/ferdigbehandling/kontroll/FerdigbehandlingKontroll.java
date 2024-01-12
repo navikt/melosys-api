@@ -128,17 +128,20 @@ final class FerdigbehandlingKontroll {
     }
 
     static Kontrollfeil arbeidsstedManglerFelter(FerdigbehandlingKontrollData kontrollData) {
-        return ArbeidUtlandKontroll.arbeidsstedManglerFelter(kontrollData.mottatteOpplysningerData());
+        return ArbeidUtlandKontroll.arbeidsstedLandManglerFelter(kontrollData.mottatteOpplysningerData());
+    }
+
+    static Kontrollfeil maritimtManglerFelter(FerdigbehandlingKontrollData kontrollData) {
+        return ArbeidUtlandKontroll.maritimtArbeidsstedManglerFelter(kontrollData.mottatteOpplysningerData());
+    }
+
+    static Kontrollfeil luftfartManglerFelter(FerdigbehandlingKontrollData kontrollData) {
+        return ArbeidUtlandKontroll.luftfartArbeidsstedManglerFelter(kontrollData.mottatteOpplysningerData());
     }
 
     static Kontrollfeil foretakUtlandManglerFelter(FerdigbehandlingKontrollData kontrollData) {
         return ArbeidUtlandKontroll.foretakUtlandManglerFelter(kontrollData.mottatteOpplysningerData());
     }
-
-    static Kontrollfeil foretakUtlandUfullstendigAdresse(FerdigbehandlingKontrollData kontrollData) {
-        return ArbeidUtlandKontroll.foretakUtlandUfullstendigAdresse(kontrollData.mottatteOpplysningerData());
-    }
-
     static Kontrollfeil representantIUtlandetMangler(FerdigbehandlingKontrollData kontrollData) {
         var lovvalgsperiode = kontrollData.lovvalgsperiode();
         var søknad = (SøknadNorgeEllerUtenforEØS) kontrollData.mottatteOpplysningerData();
