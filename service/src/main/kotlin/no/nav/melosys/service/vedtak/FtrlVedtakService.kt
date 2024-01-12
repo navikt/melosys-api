@@ -37,11 +37,10 @@ class FtrlVedtakService(
             throw FunksjonellException("Det finnes allerede en vedtak-prosess for behandling $behandlingID")
         }
 
-        behandling.fagsak.status =
-            if (request.behandlingsresultatTypeKode == Behandlingsresultattyper.OPPHØRT) Saksstatuser.OPPHØRT else Saksstatuser.MEDLEMSKAP_AVKLART
-
+        val nyStatus =
+            if (request.behandlingsresultatTypeKode == Behandlingsresultattyper.OPPHØRT) Saksstatuser.OPPHØRT else Saksstatuser.LOVVALG_AVKLART
         behandlingService.endreStatus(behandling, Behandlingsstatus.IVERKSETTER_VEDTAK)
-        prosessinstansService.opprettProsessinstansIverksettVedtakFTRL(behandling, request.tilVedtakRequest())
+        prosessinstansService.opprettProsessinstansIverksettVedtakFTRL(behandling, request.tilVedtakRequest(), nyStatus)
         dokgenService.produserOgDistribuerBrev(behandlingID, lagBrevbestilling(request))
         oppgaveService.ferdigstillOppgaveMedSaksnummer(behandling.fagsak.saksnummer)
     }

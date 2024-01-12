@@ -104,7 +104,7 @@ class FtrlVedtakServiceTest {
 
         verify { behandlingsresultatService.lagre(capture(behandlingsresultatSlot)) }
         verify { behandlingService.endreStatus(capture(behandlingSlot), Behandlingsstatus.IVERKSETTER_VEDTAK) }
-        verify { prosessinstansService.opprettProsessinstansIverksettVedtakFTRL(any(), eq(request.tilVedtakRequest())) }
+        verify { prosessinstansService.opprettProsessinstansIverksettVedtakFTRL(any(), request.tilVedtakRequest(), Saksstatuser.LOVVALG_AVKLART) }
         verify { oppgaveService.ferdigstillOppgaveMedSaksnummer(SAKSNUMMER) }
         verify { dokgenService.produserOgDistribuerBrev(BEH_ID, capture(brevbestillingRequestSlot)) }
 
@@ -113,7 +113,7 @@ class FtrlVedtakServiceTest {
             begrunnelseFritekst.shouldBe(request.begrunnelseFritekst)
             fastsattAvLand.shouldBe(Land_iso2.NO)
         }
-        behandlingSlot.captured.shouldNotBeNull().fagsak.status.shouldBe(Saksstatuser.MEDLEMSKAP_AVKLART)
+        behandlingSlot.captured.shouldNotBeNull()
         brevbestillingRequestSlot.captured.shouldNotBeNull().run {
             produserbardokument.shouldBe(Produserbaredokumenter.INNVILGELSE_FOLKETRYGDLOVEN)
             bestillersId.shouldBe("Z990007")
@@ -140,7 +140,7 @@ class FtrlVedtakServiceTest {
 
         verify { behandlingsresultatService.lagre(capture(behandlingsresultatSlot)) }
         verify { behandlingService.endreStatus(capture(behandlingSlot), Behandlingsstatus.IVERKSETTER_VEDTAK) }
-        verify { prosessinstansService.opprettProsessinstansIverksettVedtakFTRL(any(), eq(request.tilVedtakRequest())) }
+        verify { prosessinstansService.opprettProsessinstansIverksettVedtakFTRL(any(), request.tilVedtakRequest(), Saksstatuser.LOVVALG_AVKLART) }
         verify { oppgaveService.ferdigstillOppgaveMedSaksnummer(SAKSNUMMER) }
         verify { dokgenService.produserOgDistribuerBrev(BEH_ID, capture(brevbestillingRequestSlot)) }
 
@@ -149,7 +149,7 @@ class FtrlVedtakServiceTest {
             begrunnelseFritekst.shouldBe(request.begrunnelseFritekst)
             fastsattAvLand.shouldBe(Land_iso2.NO)
         }
-        behandlingSlot.captured.shouldNotBeNull().fagsak.status.shouldBe(Saksstatuser.MEDLEMSKAP_AVKLART)
+        behandlingSlot.captured.shouldNotBeNull()
         brevbestillingRequestSlot.captured.shouldNotBeNull().run {
             produserbardokument.shouldBe(Produserbaredokumenter.AVSLAG_MANGLENDE_OPPLYSNINGER)
             bestillersId.shouldBe("Z990007")
@@ -170,7 +170,7 @@ class FtrlVedtakServiceTest {
 
         verify { behandlingsresultatService.lagre(capture(behandlingsresultatSlot)) }
         verify { behandlingService.endreStatus(capture(behandlingSlot), Behandlingsstatus.IVERKSETTER_VEDTAK) }
-        verify { prosessinstansService.opprettProsessinstansIverksettVedtakFTRL(any(), eq(request.tilVedtakRequest())) }
+        verify { prosessinstansService.opprettProsessinstansIverksettVedtakFTRL(any(), request.tilVedtakRequest(), Saksstatuser.LOVVALG_AVKLART) }
         verify { oppgaveService.ferdigstillOppgaveMedSaksnummer(SAKSNUMMER) }
         verify { dokgenService.produserOgDistribuerBrev(BEH_ID, capture(brevbestillingRequestSlot)) }
         verify(exactly = 0) { vilkaarsresultatService.tømVilkårForBehandlingsresultat(any()) }
@@ -180,7 +180,7 @@ class FtrlVedtakServiceTest {
             begrunnelseFritekst.shouldBe(request.begrunnelseFritekst)
             fastsattAvLand.shouldBe(Land_iso2.NO)
         }
-        behandlingSlot.captured.shouldNotBeNull().fagsak.status.shouldBe(Saksstatuser.MEDLEMSKAP_AVKLART)
+        behandlingSlot.captured.shouldNotBeNull()
         brevbestillingRequestSlot.captured.shouldNotBeNull().run {
             produserbardokument.shouldBe(Produserbaredokumenter.VEDTAK_OPPHOERT_MEDLEMSKAP)
             bestillersId.shouldBe("Z990007")
@@ -226,7 +226,7 @@ class FtrlVedtakServiceTest {
 
         verify { behandlingsresultatService.lagre(capture(behandlingsresultatSlot)) }
         verify { behandlingService.endreStatus(capture(behandlingSlot), Behandlingsstatus.IVERKSETTER_VEDTAK) }
-        verify { prosessinstansService.opprettProsessinstansIverksettVedtakFTRL(any(), eq(request.tilVedtakRequest())) }
+        verify { prosessinstansService.opprettProsessinstansIverksettVedtakFTRL(any(), request.tilVedtakRequest(), Saksstatuser.OPPHØRT) }
         verify { oppgaveService.ferdigstillOppgaveMedSaksnummer(SAKSNUMMER) }
         verify { dokgenService.produserOgDistribuerBrev(BEH_ID, capture(brevbestillingRequestSlot)) }
         verify { vilkaarsresultatService.tømVilkårForBehandlingsresultat(any()) }
@@ -246,7 +246,7 @@ class FtrlVedtakServiceTest {
             begrunnelseFritekst.shouldBe(request.begrunnelseFritekst)
             vedtakMetadata.vedtakstype.shouldBe(request.vedtakstype)
         }
-        behandlingSlot.captured.shouldNotBeNull().fagsak.status.shouldBe(Saksstatuser.OPPHØRT)
+        behandlingSlot.captured.shouldNotBeNull()
         brevbestillingRequestSlot.captured.shouldNotBeNull().run {
             produserbardokument.shouldBe(Produserbaredokumenter.VEDTAK_OPPHOERT_MEDLEMSKAP)
             bestillersId.shouldBe("Z990007")
