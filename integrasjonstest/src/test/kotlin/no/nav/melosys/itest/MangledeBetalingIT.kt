@@ -109,6 +109,8 @@ class MangledeBetalingIT(
         oAuthMockServer.stop()
         MedlRepo.repo.clear()
         journalpostRepo.repo.clear()
+        prosessinstansRepository.findAllByLåsReferanseStartingWith("UBETALT_01HHFM03YMHHQAVZ4SQF9Y29E4")
+            .forEach { prosessinstansRepository.deleteById(it.id) }
     }
 
     @Test
@@ -137,6 +139,9 @@ class MangledeBetalingIT(
                     behandlingsårsak.type shouldBe Behandlingsaarsaktyper.HENVENDELSE
                 }
             }
+
+        // TODO: feil med Finner ikke behandlingsresultat med fakturaserie-referanse: 01HHFM03YMHHQAVZ4SQF9Y29E4
+        // Må legge inn fakturaserie-referanse i behandlingsresultat
 
         executeAndWait(ProsessType.OPPRETT_NY_BEHANDLING_MANGLENDE_INNBETALING) {
             ManglendeFakturabetalingMelding(
