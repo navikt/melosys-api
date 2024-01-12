@@ -318,11 +318,13 @@ public class DokgenService {
             case IKKE_YRKESAKTIV_VEDTAKSBREV ->
                 new IkkeYrkesaktivBrevbestilling.Builder().medDistribusjonstype(Distribusjonstype.VEDTAK);
             case VARSELBREV_MANGLENDE_INNBETALING -> new VarselbrevManglendeInnbetalingBrevbestilling.Builder()
+                .medDistribusjonstype(Distribusjonstype.VIKTIG)
                 .medFakturanummer(brevbestillingDto.getFakturanummer())
                 .medBetalingsstatus(brevbestillingDto.getBetalingsstatus())
                 .medFullmektigForBetaling(brevbestillingDto.getFullmektigForBetaling())
                 .medBetalingsfrist(brevbestillingDto.getBetalingsfrist());
             case VEDTAK_OPPHOERT_MEDLEMSKAP -> new VedtakOpphoertMedlemskapBrevbestilling.Builder()
+                .medDistribusjonstype(Distribusjonstype.VEDTAK)
                 .medOpphørtDato(brevbestillingDto.getOpphørsdato())
                 .medOpphørtBegrunnelseFritekst(brevbestillingDto.getBegrunnelseFritekst());
 
