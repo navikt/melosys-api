@@ -10,18 +10,14 @@ import io.kotest.matchers.types.shouldBeInstanceOf
 import io.mockk.every
 import io.mockk.impl.annotations.MockK
 import io.mockk.junit5.MockKExtension
-import no.nav.melosys.domain.Behandlingsresultat
-import no.nav.melosys.domain.Medlemskapsperiode
 import no.nav.melosys.domain.brev.*
 import no.nav.melosys.domain.dokument.arbeidsforhold.Aktoertype
 import no.nav.melosys.domain.dokument.felles.Periode
 import no.nav.melosys.domain.dokument.organisasjon.adresse.GeografiskAdresse
 import no.nav.melosys.domain.dokument.organisasjon.adresse.SemistrukturertAdresse
-import no.nav.melosys.domain.folketrygden.MedlemAvFolketrygden
 import no.nav.melosys.domain.kodeverk.*
 import no.nav.melosys.domain.kodeverk.begrunnelser.Nyvurderingbakgrunner
 import no.nav.melosys.domain.kodeverk.begrunnelser.folketrygdloven.Ftrl_2_8_naer_tilknytning_norge_begrunnelser
-import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingsresultattyper
 import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingstyper
 import no.nav.melosys.domain.kodeverk.brev.Produserbaredokumenter
 import no.nav.melosys.domain.kodeverk.lovvalgsbestemmelser.trygdeavtale.Lovvalgsbestemmelser_trygdeavtale_gb
@@ -360,19 +356,8 @@ internal class DokgenMalMapperTest {
 
     @Test
     fun skalMappeVedtakOpphørtMedlemskapTilBrukerMedRiktigOpphørsdato() {
-        val behandlingsResultat = Behandlingsresultat().apply {
-            type = Behandlingsresultattyper.OPPHØRT
-            medlemAvFolketrygden = MedlemAvFolketrygden().apply {
-                medlemskapsperioder = listOf(Medlemskapsperiode().apply {
-                    fom = LocalDate.now().minusMonths(1)
-                    tom = LocalDate.now()
-                    innvilgelsesresultat = InnvilgelsesResultat.OPPHØRT
-                })
-            }
-        }
         every { mockDokgenMapperDatahenter.hentPersondata(any()) } returns DokgenTestData.lagPersondata()
         every { mockDokgenMapperDatahenter.hentPersonMottaker(any()) } returns DokgenTestData.lagPersondata()
-        every { mockDokgenMapperDatahenter.hentBehandlingsresultat(any<Long>()) } returns behandlingsResultat
         every { mockDokgenMapperDatahenter.hentNorskPoststed(any()) } returns "Andeby"
         every { mockDokgenMapperDatahenter.hentLandnavnFraLandkode(Landkoder.NO.kode) } returns Landkoder.NO.beskrivelse
 
@@ -383,59 +368,14 @@ internal class DokgenMalMapperTest {
             .medOrg(DokgenTestData.lagOrg())
             .medKontaktopplysning(DokgenTestData.lagKontaktOpplysning())
             .medForsendelseMottatt(Instant.now())
-            .medOpphoertBegrunnelseFritekst("Dummy")
+            .medOpphørtBegrunnelseFritekst("Dummy")
+            .medOpphørtDato(LocalDate.now())
             .build()
 
         dokgenMalMapper.mapBehandling(
             brevbestilling,
             DokgenTestData.lagMottaker(Mottakerroller.BRUKER)
         ).shouldBeInstanceOf<VedtakOpphoertMedlemskap>()
-            .apply {
-                opphoertDato.shouldBe(behandlingsResultat.medlemAvFolketrygden.medlemskapsperioder.first().fom)
-            }
-    }
-
-    @Test
-    fun skalMappeVedtakDelvisOpphørtMedlemskapTilBrukerMedRiktigOpphørsdato() {
-        val behandlingsResultat = Behandlingsresultat().apply {
-            type = Behandlingsresultattyper.DELVIS_OPPHØRT
-            medlemAvFolketrygden = MedlemAvFolketrygden().apply {
-                medlemskapsperioder = listOf(
-                    Medlemskapsperiode().apply {
-                        fom = LocalDate.now().minusMonths(2)
-                        tom = LocalDate.now().minusMonths(1).minusDays(1)
-                        innvilgelsesresultat = InnvilgelsesResultat.INNVILGET
-                    },
-                    Medlemskapsperiode().apply {
-                        fom = LocalDate.now().minusMonths(1)
-                        tom = LocalDate.now()
-                        innvilgelsesresultat = InnvilgelsesResultat.OPPHØRT
-                    })
-            }
-
-        }
-        every { mockDokgenMapperDatahenter.hentPersondata(any()) } returns DokgenTestData.lagPersondata()
-        every { mockDokgenMapperDatahenter.hentPersonMottaker(any()) } returns DokgenTestData.lagPersondata()
-        every { mockDokgenMapperDatahenter.hentBehandlingsresultat(any<Long>()) } returns behandlingsResultat
-        every { mockDokgenMapperDatahenter.hentNorskPoststed(any()) } returns "Andeby"
-        every { mockDokgenMapperDatahenter.hentLandnavnFraLandkode(Landkoder.NO.kode) } returns Landkoder.NO.beskrivelse
-
-        val behandling = DokgenTestData.lagBehandling(DokgenTestData.lagFagsak(true))
-        val brevbestilling: DokgenBrevbestilling = VedtakOpphoertMedlemskapBrevbestilling.Builder()
-            .medProduserbartdokument(Produserbaredokumenter.VEDTAK_OPPHOERT_MEDLEMSKAP)
-            .medBehandling(behandling)
-            .medOrg(DokgenTestData.lagOrg())
-            .medKontaktopplysning(DokgenTestData.lagKontaktOpplysning())
-            .medForsendelseMottatt(Instant.now())
-            .medOpphoertBegrunnelseFritekst("Dummy")
-            .build()
-        dokgenMalMapper.mapBehandling(
-            brevbestilling,
-            DokgenTestData.lagMottaker(Mottakerroller.BRUKER)
-        ).shouldBeInstanceOf<VedtakOpphoertMedlemskap>()
-            .apply {
-                opphoertDato.shouldBe(behandlingsResultat.medlemAvFolketrygden.medlemskapsperioder.last().fom)
-            }
     }
 
     @Test

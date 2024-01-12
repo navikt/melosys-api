@@ -4,6 +4,7 @@ import no.nav.melosys.domain.brev.utkast.KopiMottakerUtkast
 import no.nav.melosys.domain.kodeverk.Mottakerroller
 import no.nav.melosys.domain.kodeverk.Vedtakstyper
 import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingsresultattyper
+import java.time.LocalDate
 
 data class VedtakRequest(
     val behandlingsresultatTypeKode: Behandlingsresultattyper,
@@ -20,7 +21,8 @@ data class VedtakRequest(
     val kopiTilArbeidsgiver: Boolean?,
     val bestillersId: String,
     val nyVurderingBakgrunn: String?,
-    val betalingsintervall: String? //TODO Eksisterer som enum FaktureringsIntervall i integrasjons modul
+    val betalingsintervall: String?, //TODO Eksisterer som enum FaktureringsIntervall i integrasjons modul
+    val opphørsdato: LocalDate?
 )
 
 @JvmRecord

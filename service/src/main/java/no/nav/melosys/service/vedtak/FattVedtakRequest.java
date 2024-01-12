@@ -1,14 +1,15 @@
 package no.nav.melosys.service.vedtak;
 
-import java.util.Collections;
-import java.util.List;
-import java.util.Set;
-
 import no.nav.melosys.domain.kodeverk.Vedtakstyper;
 import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingsresultattyper;
 import no.nav.melosys.integrasjon.faktureringskomponenten.dto.FaktureringsIntervall;
 import no.nav.melosys.saksflytapi.journalfoering.VedtakRequest;
 import no.nav.melosys.service.dokument.brev.KopiMottakerDto;
+
+import java.time.LocalDate;
+import java.util.Collections;
+import java.util.List;
+import java.util.Set;
 
 public class FattVedtakRequest {
     private final Behandlingsresultattyper behandlingsresultatTypeKode;
@@ -26,6 +27,7 @@ public class FattVedtakRequest {
     private final String bestillersId;
     private final String nyVurderingBakgrunn;
     private final FaktureringsIntervall betalingsintervall;
+    private final LocalDate opphørsdato;
 
     public FaktureringsIntervall getBetalingsintervall() {
         return betalingsintervall;
@@ -79,6 +81,10 @@ public class FattVedtakRequest {
         return bestillersId;
     }
 
+    public LocalDate getOpphørsdato() {
+        return opphørsdato;
+    }
+
     protected FattVedtakRequest(Builder builder) {
         this.behandlingsresultatTypeKode = builder.behandlingsresultatTypeKode;
         this.vedtakstype = builder.vedtakstype;
@@ -95,6 +101,7 @@ public class FattVedtakRequest {
         this.bestillersId = builder.bestillersId;
         this.nyVurderingBakgrunn = builder.nyVurderingBakgrunn;
         this.betalingsintervall = builder.betalingsintervall;
+        this.opphørsdato = builder.opphørsdato;
     }
 
     public Behandlingsresultattyper getBehandlingsresultatTypeKode() {
@@ -121,7 +128,8 @@ public class FattVedtakRequest {
             kopiTilArbeidsgiver,
             bestillersId,
             nyVurderingBakgrunn,
-            betalingsintervall != null ? betalingsintervall.toString() : null // TODO: map enum?
+            betalingsintervall != null ? betalingsintervall.toString() : null, // TODO: map enum?
+            opphørsdato
         );
     }
 
@@ -141,6 +149,7 @@ public class FattVedtakRequest {
         private Boolean kopiTilArbeidsgiver;
         private String bestillersId;
         private FaktureringsIntervall betalingsintervall;
+        private LocalDate opphørsdato;
 
         public Builder medBehandlingsresultatType(Behandlingsresultattyper behandlingsresultatTypeKode) {
             this.behandlingsresultatTypeKode = behandlingsresultatTypeKode;
@@ -162,37 +171,37 @@ public class FattVedtakRequest {
             return this;
         }
 
-        public String getFritekst() {
-            return fritekst;
-        }
-
-        public void setFritekst(final String fritekst) {
-            this.fritekst = fritekst;
-        }
-
-        public String getFritekstSed() {
-            return fritekstSed;
-        }
-
-        public void setFritekstSed(String fritekstSed) {
-            this.fritekstSed = fritekstSed;
-        }
-
-        public Set<String> getMottakerinstitusjoner() {
-            return mottakerinstitusjoner;
-        }
-
-        public void setMottakerinstitusjoner(Set<String> mottakerinstitusjoner) {
-            this.mottakerinstitusjoner = mottakerinstitusjoner;
-        }
-
-        public String getNyVurderingBakgrunn() {
-            return nyVurderingBakgrunn;
-        }
-
-        public void setNyVurderingBakgrunn(String nyVurderingBakgrunn) {
-            this.nyVurderingBakgrunn = nyVurderingBakgrunn;
-        }
+//        public String getFritekst() {
+//            return fritekst;
+//        }
+//
+//        public void setFritekst(final String fritekst) {
+//            this.fritekst = fritekst;
+//        }
+//
+//        public String getFritekstSed() {
+//            return fritekstSed;
+//        }
+//
+//        public void setFritekstSed(String fritekstSed) {
+//            this.fritekstSed = fritekstSed;
+//        }
+//
+//        public Set<String> getMottakerinstitusjoner() {
+//            return mottakerinstitusjoner;
+//        }
+//
+//        public void setMottakerinstitusjoner(Set<String> mottakerinstitusjoner) {
+//            this.mottakerinstitusjoner = mottakerinstitusjoner;
+//        }
+//
+//        public String getNyVurderingBakgrunn() {
+//            return nyVurderingBakgrunn;
+//        }
+//
+//        public void setNyVurderingBakgrunn(String nyVurderingBakgrunn) {
+//            this.nyVurderingBakgrunn = nyVurderingBakgrunn;
+//        }
 
         public Builder medMottakerInstitusjoner(Set<String> mottakerInstitusjoner) {
             this.mottakerinstitusjoner = mottakerInstitusjoner;
@@ -246,6 +255,11 @@ public class FattVedtakRequest {
 
         public Builder medBetalingsIntervall(FaktureringsIntervall betalingsintervall) {
             this.betalingsintervall = betalingsintervall;
+            return this;
+        }
+
+        public Builder medOpphørsdato(LocalDate opphørsdato) {
+            this.opphørsdato = opphørsdato;
             return this;
         }
 

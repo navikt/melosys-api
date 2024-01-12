@@ -33,6 +33,9 @@ class FtrlVedtakService(
         log.info("Fatter vedtak for (FTRL) sak: ${behandling.fagsak.saksnummer} behandling: $behandlingID")
 
         oppdaterBehandlingsresultat(behandlingID, request)
+
+        validerRequest(behandlingID, request)
+
         if (prosessinstansService.harVedtakInstans(behandlingID)) {
             throw FunksjonellException("Det finnes allerede en vedtak-prosess for behandling $behandlingID")
         }
@@ -44,6 +47,15 @@ class FtrlVedtakService(
         prosessinstansService.opprettProsessinstansIverksettVedtakFTRL(behandling, request.tilVedtakRequest())
         dokgenService.produserOgDistribuerBrev(behandlingID, lagBrevbestilling(request))
         oppgaveService.ferdigstillOppgaveMedSaksnummer(behandling.fagsak.saksnummer)
+    }
+
+    private fun validerRequest(behandlingID: Long, request: FattVedtakRequest) {
+        if (request.behandlingsresultatTypeKode in listOf(Behandlingsresultattyper.OPPHØRT, Behandlingsresultattyper.DELVIS_OPPHØRT)) {
+            val forventetOpphørsdato = behandlingsresultatService.hentBehandlingsresultat(behandlingID).medlemAvFolketrygden.utledOpphørtDato()
+            if (forventetOpphørsdato != request.opphørsdato) {
+                throw FunksjonellException("Medsendt opphørsdato: ${request.opphørsdato} er ikke lik forventet opphørsdato: $forventetOpphørsdato")
+            }
+        }
     }
 
     private fun lagBrevbestilling(request: FattVedtakRequest): BrevbestillingDto {
@@ -64,6 +76,7 @@ class FtrlVedtakService(
             kopiMottakere = request.kopiMottakere
             begrunnelseFritekst = request.begrunnelseFritekst
             bestillersId = request.bestillersId
+            opphørsdato = request.opphørsdato
         }
 
 

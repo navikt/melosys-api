@@ -1,5 +1,6 @@
 package no.nav.melosys.tjenester.gui.dto;
 
+import java.time.LocalDate;
 import java.util.List;
 import java.util.Set;
 
@@ -23,6 +24,7 @@ public class FattVedtakDto {
     private List<KopiMottakerDto> kopiMottakere;
     private FaktureringsIntervall betalingsintervall;
     private Boolean kopiTilArbeidsgiver;
+    private LocalDate opphørsdato;
 
     public FaktureringsIntervall getBetalingsintervall() {
         return betalingsintervall;
@@ -134,5 +136,13 @@ public class FattVedtakDto {
 
     public void setVedtakstype(Vedtakstyper vedtakstype) {
         this.vedtakstype = vedtakstype;
+    }
+
+    public LocalDate getOpphørsdato() {
+        return opphørsdato;
+    }
+
+    public void setOpphørsdato(LocalDate opphørsdato) {
+        this.opphørsdato = opphørsdato;
     }
 }
