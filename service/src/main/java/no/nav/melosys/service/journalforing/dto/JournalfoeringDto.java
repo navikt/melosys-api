@@ -5,8 +5,10 @@ import java.util.ArrayList;
 import java.util.List;
 
 import no.nav.melosys.domain.kodeverk.Avsendertyper;
+import no.nav.melosys.domain.kodeverk.ForvaltningsmeldingMottaker;
 
-import static java.lang.Boolean.FALSE;
+import static no.nav.melosys.domain.kodeverk.ForvaltningsmeldingMottaker.AVSENDER;
+import static no.nav.melosys.domain.kodeverk.ForvaltningsmeldingMottaker.BRUKER;
 
 public abstract class JournalfoeringDto {
     protected String journalpostID;
@@ -19,10 +21,10 @@ public abstract class JournalfoeringDto {
     protected DokumentDto hoveddokument;
     protected List<DokumentDto> vedlegg = new ArrayList<>();
     protected boolean skalTilordnes;
-    protected Boolean ikkeSendForvaltingsmelding;
     protected LocalDate mottattDato;
     protected String behandlingstemaKode;
     protected String behandlingstypeKode;
+    protected ForvaltningsmeldingMottaker forvaltningsmeldingMottaker;
 
     public String getJournalpostID() {
         return journalpostID;
@@ -104,14 +106,6 @@ public abstract class JournalfoeringDto {
         this.skalTilordnes = skalTilordnes;
     }
 
-    public Boolean isIkkeSendForvaltingsmelding() {
-        return ikkeSendForvaltingsmelding;
-    }
-
-    public void setIkkeSendForvaltingsmelding(Boolean ikkeSendForvaltingsmelding) {
-        this.ikkeSendForvaltingsmelding = ikkeSendForvaltingsmelding;
-    }
-
     public LocalDate getMottattDato() {
         return mottattDato;
     }
@@ -137,6 +131,14 @@ public abstract class JournalfoeringDto {
     }
 
     public boolean skalSendeForvaltningsmelding() {
-        return FALSE.equals(ikkeSendForvaltingsmelding);
+        return BRUKER.equals(forvaltningsmeldingMottaker) || AVSENDER.equals(forvaltningsmeldingMottaker);
+    }
+
+    public ForvaltningsmeldingMottaker getForvaltningsmeldingMottaker() {
+        return forvaltningsmeldingMottaker;
+    }
+
+    public void setForvaltningsmeldingMottaker(ForvaltningsmeldingMottaker forvaltningsmeldingMottaker) {
+        this.forvaltningsmeldingMottaker = forvaltningsmeldingMottaker;
     }
 }

@@ -32,7 +32,6 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
-import org.springframework.util.CollectionUtils;
 
 import static no.nav.melosys.domain.Fagsak.erSakstypeEøs;
 import static no.nav.melosys.domain.kodeverk.Sakstemaer.MEDLEMSKAP_LOVVALG;
@@ -147,9 +146,6 @@ public class JournalfoeringService {
             hovedpart, sakstype, sakstema, behandlingstema, behandlingstype);
         if (journalfoeringDto.getAvsenderType() == Avsendertyper.UTENLANDSK_TRYGDEMYNDIGHET) {
             validerSakstypeForTrygdemyndighet(sakstype, journalfoeringDto.getAvsenderID());
-        }
-        if (StringUtils.isNotEmpty(journalfoeringDto.getFullmektigID()) && CollectionUtils.isEmpty(journalfoeringDto.getFullmakter())) {
-            throw new FunksjonellException("Fullmektig har ingen fullmakter");
         }
     }
 

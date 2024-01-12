@@ -140,6 +140,10 @@ public class Medlemskapsperiode implements ErPeriode, HarBestemmelse<Folketrygdl
         return innvilgelsesresultat == InnvilgelsesResultat.INNVILGET;
     }
 
+    public boolean erOpphørt() {
+        return innvilgelsesresultat == InnvilgelsesResultat.OPPHØRT;
+    }
+
     @Override
     public boolean equals(Object o) {
         if (this == o) return true;

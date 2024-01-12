@@ -6,7 +6,6 @@ import no.nav.melosys.domain.kodeverk.Fullmaktstype
 import no.nav.melosys.domain.kodeverk.Land_iso2
 import no.nav.melosys.domain.kodeverk.Landkoder
 import no.nav.melosys.domain.kodeverk.Mottakerroller
-import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingsresultattyper
 import no.nav.melosys.domain.kodeverk.brev.Produserbaredokumenter
 import no.nav.melosys.domain.mottatteopplysninger.SøknadIkkeYrkesaktiv
 import no.nav.melosys.exception.FunksjonellException
@@ -201,13 +200,8 @@ class DokgenMalMapper(
             )
 
             Produserbaredokumenter.VEDTAK_OPPHOERT_MEDLEMSKAP -> VedtakOpphoertMedlemskap.Builder(brevbestilling as VedtakOpphoertMedlemskapBrevbestilling)
-                .opphoertDato(
-                    with(dokgenMapperDatahenter.hentBehandlingsresultat(brevbestilling.behandlingId)) {
-                        if (type === Behandlingsresultattyper.OPPHØRT)
-                            medlemAvFolketrygden.utledMedlemskapsperiodeFom()
-                        else medlemAvFolketrygden.utledMedlemskapsperiodeTom().plusDays(1)
-                    }
-                ).build()
+                .opphoertDato(dokgenMapperDatahenter.hentBehandlingsresultat(brevbestilling.behandlingId).medlemAvFolketrygden.utledOpphørtDato())
+                .build()
 
             else -> throw FunksjonellException("ProduserbartDokument ${brevbestilling.produserbartdokument} er ikke støttet av melosys-dokgen")
         }

@@ -366,7 +366,7 @@ internal class DokgenMalMapperTest {
                 medlemskapsperioder = listOf(Medlemskapsperiode().apply {
                     fom = LocalDate.now().minusMonths(1)
                     tom = LocalDate.now()
-                    innvilgelsesresultat = InnvilgelsesResultat.INNVILGET
+                    innvilgelsesresultat = InnvilgelsesResultat.OPPHØRT
                 })
             }
         }
@@ -400,11 +400,17 @@ internal class DokgenMalMapperTest {
         val behandlingsResultat = Behandlingsresultat().apply {
             type = Behandlingsresultattyper.DELVIS_OPPHØRT
             medlemAvFolketrygden = MedlemAvFolketrygden().apply {
-                medlemskapsperioder = listOf(Medlemskapsperiode().apply {
-                    fom = LocalDate.now().minusMonths(1)
-                    tom = LocalDate.now()
-                    innvilgelsesresultat = InnvilgelsesResultat.INNVILGET
-                })
+                medlemskapsperioder = listOf(
+                    Medlemskapsperiode().apply {
+                        fom = LocalDate.now().minusMonths(2)
+                        tom = LocalDate.now().minusMonths(1).minusDays(1)
+                        innvilgelsesresultat = InnvilgelsesResultat.INNVILGET
+                    },
+                    Medlemskapsperiode().apply {
+                        fom = LocalDate.now().minusMonths(1)
+                        tom = LocalDate.now()
+                        innvilgelsesresultat = InnvilgelsesResultat.OPPHØRT
+                    })
             }
 
         }
@@ -428,7 +434,7 @@ internal class DokgenMalMapperTest {
             DokgenTestData.lagMottaker(Mottakerroller.BRUKER)
         ).shouldBeInstanceOf<VedtakOpphoertMedlemskap>()
             .apply {
-                opphoertDato.shouldBe(behandlingsResultat.medlemAvFolketrygden.medlemskapsperioder.first().tom.plusDays(1))
+                opphoertDato.shouldBe(behandlingsResultat.medlemAvFolketrygden.medlemskapsperioder.last().fom)
             }
     }
 

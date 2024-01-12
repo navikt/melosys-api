@@ -173,6 +173,7 @@ public class FagsakService {
         }
 
         FullmektigDto fullmektig = opprettSakRequest.getFullmektig();
+
         if (fullmektig != null) {
             Aktoer aktørFullmektig = new Aktoer();
             aktørFullmektig.setOrgnr(fullmektig.getOrgnr());

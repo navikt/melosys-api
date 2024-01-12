@@ -8,6 +8,7 @@ import io.kotest.matchers.nulls.shouldNotBeNull
 import no.nav.melosys.AwaitUtil.awaitWithFailOnLogErrors
 import no.nav.melosys.domain.arkiv.ArkivDokument
 import no.nav.melosys.domain.kodeverk.Avsendertyper
+import no.nav.melosys.domain.kodeverk.ForvaltningsmeldingMottaker
 import no.nav.melosys.domain.kodeverk.Landkoder
 import no.nav.melosys.melosysmock.oppgave.Oppgave
 import no.nav.melosys.melosysmock.sak.SakRepo
@@ -154,11 +155,7 @@ class JournalfoeringBase(
             virksomhetOrgnr = null
             vedlegg = emptyList()
             mottattDato = LocalDate.now()
-            arbeidsgiverID = null
-            fullmektigID = null
-            fullmektigKontaktOrgnr = null
-            fullmektigKontaktperson = null
-            isIkkeSendForvaltingsmelding = false
+            forvaltningsmeldingMottaker = ForvaltningsmeldingMottaker.BRUKER
             avsenderType = Avsendertyper.PERSON
             isSkalTilordnes = true
             fagsak = FagsakDto().apply {
@@ -200,7 +197,7 @@ class JournalfoeringBase(
             virksomhetOrgnr = null
             vedlegg = emptyList()
             mottattDato = LocalDate.now()
-            isIkkeSendForvaltingsmelding = false
+            forvaltningsmeldingMottaker = ForvaltningsmeldingMottaker.BRUKER
             avsenderType = Avsendertyper.PERSON
             isSkalTilordnes = true
         }

@@ -97,8 +97,9 @@ class OpprettLovvalgsperiodeService(
             val behandlingsresultat = behandlingsresultatService.hentBehandlingsresultat(behandling.id)
             this.behandlingsresultat = behandlingsresultat
             behandlingsresultat.lovvalgsperioder.add(this)
-        }.apply {
-            this.fom = fom
+        }
+
+        lovvalgsperiode.apply {
             this.fom = fom
             this.tom = tom
             this.bestemmelse = bestemmelse

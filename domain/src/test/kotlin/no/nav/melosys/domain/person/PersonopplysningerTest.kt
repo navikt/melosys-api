@@ -6,7 +6,6 @@ import no.nav.melosys.domain.adresse.StrukturertAdresse
 import no.nav.melosys.domain.person.adresse.Bostedsadresse
 import no.nav.melosys.domain.person.adresse.Kontaktadresse
 import no.nav.melosys.domain.person.adresse.Oppholdsadresse
-import org.assertj.core.api.Assertions
 import org.junit.jupiter.api.Test
 import java.time.LocalDateTime
 
@@ -27,6 +26,27 @@ internal class PersonopplysningerTest {
             emptyList(),
             lagBostedsadresse()
         ).hentGjeldendePostadresse()!!.adresselinje1.shouldBe("gatenavnFraBostedsadresse")
+    }
+
+    @Test
+    fun hentGjeldendePostadresse_medKontaktadresser_lagPostadresseMedBostboks() {
+        lagPersonopplysninger(
+            setOf(
+                Kontaktadresse(
+                    null,
+                    null,
+                    null,
+                    null,
+                    null,
+                    Master.PDL.name,
+                    null,
+                    LocalDateTime.MAX,
+                    false
+                )
+            ),
+            emptyList(),
+            lagBostedsadresseVer2()
+        ).hentGjeldendePostadresse()!!.adresselinje2.shouldBe("Postboks 11")
     }
 
     @Test
@@ -78,6 +98,13 @@ internal class PersonopplysningerTest {
     private fun lagBostedsadresse(): Bostedsadresse {
         return Bostedsadresse(
             StrukturertAdresse("gatenavnFraBostedsadresse", null, "2040", null, null, "NO"),
+            null, null, null, null, null, false
+        )
+    }
+
+    private fun lagBostedsadresseVer2(): Bostedsadresse {
+        return Bostedsadresse(
+            StrukturertAdresse("gatenavnFraBostedsadresse", null, "2040", "11", null, "NO", null, null),
             null, null, null, null, null, false
         )
     }
