@@ -35,12 +35,12 @@ class FaktureringEventListener(
         val fagsak = behandling.fagsak
 
         val fullmektigForTrygdeavgift = fagsak.finnFullmektig(Fullmaktstype.FULLMEKTIG_TRYGDEAVGIFT).orElse(null)
-        val gyldigeFullmektigerNårBehandlingBleOpprettet =
-            aktoerHistorikkService.hentGyldigeAktørerPåTidspunkt(fagsak, Aktoersroller.FULLMEKTIG, behandling.registrertDato)
+        val gjeldendeFullmektigerNårBehandlingBleOpprettet =
+            aktoerHistorikkService.hentHistoriskeAktørerPåTidspunkt(fagsak, Aktoersroller.FULLMEKTIG, behandling.registrertDato)
                 .filter { it.fullmaktstyper.contains(Fullmaktstype.FULLMEKTIG_TRYGDEAVGIFT) }
 
         // TODO Trenger sjekk om saken gjelder trygdeavgift i tillegg (ev. fakturaserieReferanse på behandlingsresultater)
-        if (fakturaMottakerMåOppdateres(fullmektigForTrygdeavgift, gyldigeFullmektigerNårBehandlingBleOpprettet)) {
+        if (fakturaMottakerMåOppdateres(fullmektigForTrygdeavgift, gjeldendeFullmektigerNårBehandlingBleOpprettet)) {
             // Bestill prosess i stedet for å kalle faktureringskomponent direkte, for å få støtte for feilhåndtering og rekjøring
             prosessinstansService.opprettProsessinstansOppdaterFaktura(fagsak.saksnummer)
         }

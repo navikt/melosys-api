@@ -86,7 +86,7 @@ internal class FaktureringEventListenerTest {
         every { behandlingsresultatService.hentBehandlingsresultat(avsluttetBehandling.id) } returns behandlingsresultat
         every { behandlingService.hentBehandling(avsluttetBehandling.id) } returns avsluttetBehandling
         every {
-            aktoerHistorikkService.hentGyldigeAktørerPåTidspunkt(
+            aktoerHistorikkService.hentHistoriskeAktørerPåTidspunkt(
                 fagsak,
                 Aktoersroller.FULLMEKTIG,
                 avsluttetBehandling.registrertDato
@@ -155,7 +155,7 @@ internal class FaktureringEventListenerTest {
         every { behandlingsresultatService.hentBehandlingsresultat(avsluttetBehandling.id) } returns behandlingsresultat
         every { behandlingService.hentBehandling(avsluttetBehandling.id) } returns avsluttetBehandling
         every {
-            aktoerHistorikkService.hentGyldigeAktørerPåTidspunkt(
+            aktoerHistorikkService.hentHistoriskeAktørerPåTidspunkt(
                 fagsak,
                 Aktoersroller.FULLMEKTIG,
                 avsluttetBehandling.registrertDato
@@ -210,7 +210,7 @@ internal class FaktureringEventListenerTest {
         every { behandlingsresultatService.hentBehandlingsresultat(avsluttetBehandling.id) } returns behandlingsresultat
         every { behandlingService.hentBehandling(avsluttetBehandling.id) } returns avsluttetBehandling
         every {
-            aktoerHistorikkService.hentGyldigeAktørerPåTidspunkt(
+            aktoerHistorikkService.hentHistoriskeAktørerPåTidspunkt(
                 fagsak,
                 Aktoersroller.FULLMEKTIG,
                 avsluttetBehandling.registrertDato

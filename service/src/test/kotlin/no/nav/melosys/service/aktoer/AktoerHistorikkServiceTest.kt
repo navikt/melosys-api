@@ -53,7 +53,7 @@ internal class AktoerHistorikkServiceTest {
 
 
         val tidspunkt = LocalDate.of(2023, 12, 2).atStartOfDay(ZoneId.of("Europe/Oslo")).toInstant()
-        val result = aktoerHistorikkService.hentGyldigeAktørerPåTidspunkt(Fagsak(), Aktoersroller.FULLMEKTIG, tidspunkt)
+        val result = aktoerHistorikkService.hentHistoriskeAktørerPåTidspunkt(Fagsak(), Aktoersroller.FULLMEKTIG, tidspunkt)
 
 
         result.shouldHaveSize(2)

@@ -18,7 +18,7 @@ class AktoerHistorikkService(
 ) {
 
     @Transactional(readOnly = true)
-    fun hentGyldigeAktørerPåTidspunkt(fagsak: Fagsak, rolle: Aktoersroller, tidspunkt: Instant): List<Aktoer> {
+    fun hentHistoriskeAktørerPåTidspunkt(fagsak: Fagsak, rolle: Aktoersroller, tidspunkt: Instant): List<Aktoer> {
         val revisions: List<EntityRevision<Aktoer>> =
             auditRepository.getRevisionsBeforeOrAtDate(Aktoer::class.java, mapOf("fagsak_saksnummer" to fagsak.saksnummer, "rolle" to rolle), tidspunkt)
 
