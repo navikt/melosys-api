@@ -24,6 +24,10 @@ object LoggingTestUtils {
         return block { iLoggingEventList[i++] }
     }
 
+    inline fun <reified T : Any> Collection<ILoggingEvent>.match(): Collection<ILoggingEvent> {
+        return filter { it.loggerName == T::class.java.name }
+    }
+
     fun <T> withLogCapture(block: (logEvents: List<ILoggingEvent>) -> T): T {
         val logger = LoggerFactory.getLogger(Logger.ROOT_LOGGER_NAME) as Logger
         val listAppender = ListAppender<ILoggingEvent>().apply { start() }
