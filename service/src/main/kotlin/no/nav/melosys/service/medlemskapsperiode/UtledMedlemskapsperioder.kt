@@ -28,6 +28,21 @@ class UtledMedlemskapsperioder {
                 }
             }
 
+    fun lagMedlemskapsperioderForManglendeInnbetaling(opprinneligBehandlingsresultat: Behandlingsresultat): Collection<Medlemskapsperiode> =
+        opprinneligBehandlingsresultat.medlemAvFolketrygden.medlemskapsperioder
+            .filter { it.erInnvilget() || it.erOpphørt() }
+            .map {
+                Medlemskapsperiode().apply {
+                    fom = it.fom
+                    tom = it.tom
+                    arbeidsland = it.arbeidsland
+                    innvilgelsesresultat = it.innvilgelsesresultat
+                    medlemskapstype = it.medlemskapstype
+                    trygdedekning = it.trygdedekning
+                    medlPeriodeID = it.medlPeriodeID
+                }
+            }
+
     fun lagMedlemskapsperioder(dto: UtledMedlemskapsperioderDto): Collection<Medlemskapsperiode> {
         val søknadsperiode = dto.søknadsperiode
 
