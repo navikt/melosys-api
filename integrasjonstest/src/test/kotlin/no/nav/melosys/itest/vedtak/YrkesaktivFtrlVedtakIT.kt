@@ -109,8 +109,7 @@ class YrkesaktivFtrlVedtakIT(
                 behandlingstypeKode = Behandlingstyper.NY_VURDERING.kode
             }
         )
-
-        val behandling2 = journalførAndregangsOgVentTilProsesserErFerdige(
+        val behandling = journalførAndregangsOgVentTilProsesserErFerdige(
             journalfoeringTilordneDto,
             waitFor = ProsessType.JFR_ANDREGANG_NY_BEHANDLING
         ).behandling
@@ -125,7 +124,7 @@ class YrkesaktivFtrlVedtakIT(
         executeAndWait(
             waitForprosessType = ProsessType.IVERKSETT_VEDTAK_FTRL
         ) {
-            vedtaksfattingFasade.fattVedtak(behandling2.id, vedtakRequest)
+            vedtaksfattingFasade.fattVedtak(behandling.id, vedtakRequest)
         }
 
     }

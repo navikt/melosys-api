@@ -58,8 +58,7 @@ class OpprettFakturaserie(
             log.info("Oppretter fakturaserie for behandling: $behandlingsId")
             opprettFakturaserieOgLagreReferanse(behandlingsresultat, mapFakturaserieDto(behandlingsresultat, prosessinstans), saksbehandlerIdent)
         } else if (prosessinstans.behandling.type.kode == "NY_VURDERING") {
-            log.info("Kansellerer fakturaserie for behandling: $behandlingsId med fakturaseriereferanse: ${behandlingsresultat.fakturaserieReferanse}")
-            kansellerFakturaserieOgLagreReferanse(behandlingsresultat, saksbehandlerIdent)
+
         }
     }
 
