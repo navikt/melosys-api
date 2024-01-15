@@ -24,7 +24,7 @@ public enum ProsessType {
     MOTTAK_SED("MOTTAK_SED", "Mottak av SED for journalføring og videre ruting"),
     MOTTAK_SED_JOURNALFØRING("MOTTAK_SED_JOURNALFØRING", "Mottak av SED som kun skal journalføres"),
     MOTTAK_SOKNAD_ALTINN("MOTTAK_SOKNAD_ALTINN", "Mottak av elektronisk søknad fra altinn"),
-    OPPDATER_FAKTURA("OPPDATER_FAKTURA", "Oppdaterer eventuell faktura som finnes på sak"),
+    OPPDATER_FAKTURAMOTTAKER("OPPDATER_FAKTURAMOTTAKER", "Oppdaterer fakturamottaker i faktureringskomponent"),
     OPPRETT_NY_BEHANDLING_FOR_SAK("OPPRETT_NY_BEHANDLING_FOR_SAK", "Oppretter ny behandling og ny oppgave for eksisterende sak"),
     OPPRETT_NY_SAK_EOS_FRA_OPPGAVE("OPPRETT_NY_SAK_EOS_FRA_OPPGAVE", "Oppretter ny sak (fra journalført dokument) for EU/EØS"),
     OPPRETT_NY_SAK_FTRL_TRYGDEAVTALE_FRA_OPPGAVE("OPPRETT_NY_SAK_FTRL_TRYGDEAVTALE_FRA_OPPGAVE", "Oppretter ny sak (fra journalført dokument) for FTRL og Trygdeavtale"),
