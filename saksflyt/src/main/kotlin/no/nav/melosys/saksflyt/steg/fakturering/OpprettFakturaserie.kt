@@ -7,6 +7,7 @@ import no.nav.melosys.domain.Behandlingsresultat
 import no.nav.melosys.domain.avgift.Trygdeavgiftsperiode
 import no.nav.melosys.domain.kodeverk.Fullmaktstype
 import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingsresultattyper
+import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingstyper
 import no.nav.melosys.exception.FunksjonellException
 import no.nav.melosys.featuretoggle.ToggleName
 import no.nav.melosys.integrasjon.faktureringskomponenten.FaktureringskomponentenConsumer
@@ -53,12 +54,15 @@ class OpprettFakturaserie(
         if (behandlingsresultat.type === Behandlingsresultattyper.OPPHØRT) {
             log.info("Kansellerer fakturaserie for behandling: $behandlingsId med fakturaseriereferanse: ${behandlingsresultat.fakturaserieReferanse}")
             kansellerFakturaserieOgLagreReferanse(behandlingsresultat, saksbehandlerIdent)
-
         } else if (skalOppretteFakturaserie(behandlingsresultat)) {
             log.info("Oppretter fakturaserie for behandling: $behandlingsId")
             opprettFakturaserieOgLagreReferanse(behandlingsresultat, mapFakturaserieDto(behandlingsresultat, prosessinstans), saksbehandlerIdent)
-        } else if (prosessinstans.behandling.type.kode == "NY_VURDERING") {
-
+        } else if (prosessinstans.behandling.type === Behandlingstyper.NY_VURDERING
+            && !trygdeavgiftMottakerService.skalBetalesTilNav(behandlingsresultat.medlemAvFolketrygden.fastsattTrygdeavgift.trygdeavgiftsgrunnlag)) {
+            val fakturaserie = faktureringskomponentenConsumer.getFakturaSerie(behandlingsresultat.fakturaserieReferanse)
+            val fom = behandlingsresultat.medlemAvFolketrygden.fastsattTrygdeavgift.trygdeavgiftsperioder.first().periodeFra
+            val tom = behandlingsresultat.medlemAvFolketrygden.fastsattTrygdeavgift.trygdeavgiftsperioder.last().periodeTil
+            //Find the lowest startdato and sluttdato in perioder
         }
     }
 
