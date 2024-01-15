@@ -18,6 +18,7 @@ import no.nav.melosys.domain.eessi.melding.Adresse
 import no.nav.melosys.domain.eessi.melding.Arbeidssted
 import no.nav.melosys.domain.kodeverk.Landkoder
 import no.nav.melosys.domain.kodeverk.begrunnelser.Kontroll_begrunnelser
+import no.nav.melosys.domain.person.PersonMedHistorikk
 import no.nav.melosys.integrasjon.medl.PeriodestatusMedl
 import no.nav.melosys.service.kontroll.feature.ufm.data.UfmKontrollData
 import no.nav.melosys.service.kontroll.feature.ufm.kontroll.InntektTestFactory.createInntektForTest
@@ -185,7 +186,7 @@ class UfmKontrollTest {
 
         return UfmKontrollData(
             sedDokument, personDokument, medlemskapDokument, inntektDokument,
-            utbetalingDokument, null, personhistorikkDokumenter
+            utbetalingDokument, null, personhistorikkDokumenter, null
         )
     }
 }
