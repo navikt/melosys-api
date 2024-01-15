@@ -127,14 +127,21 @@ final class FerdigbehandlingKontroll {
             ? new Kontrollfeil(Kontroll_begrunnelser.MER_ENN_12_MD, KontrolldataFeilType.FEIL) : null;
     }
 
-    static Kontrollfeil arbeidsstedManglerFelter(FerdigbehandlingKontrollData kontrollData) {
-        return ArbeidUtlandKontroll.arbeidsstedManglerFelter(kontrollData.mottatteOpplysningerData());
+    static Kontrollfeil arbeidsstedLandManglerFelter(FerdigbehandlingKontrollData kontrollData) {
+        return ArbeidUtlandKontroll.arbeidsstedLandManglerFelter(kontrollData.mottatteOpplysningerData());
+    }
+
+    static Kontrollfeil arbeidsstedMaritimtManglerFelter(FerdigbehandlingKontrollData kontrollData) {
+        return ArbeidUtlandKontroll.maritimtArbeidsstedManglerFelter(kontrollData.mottatteOpplysningerData());
+    }
+
+    static Kontrollfeil arbeidsstedLuftfartManglerFelter(FerdigbehandlingKontrollData kontrollData) {
+        return ArbeidUtlandKontroll.luftfartArbeidsstedManglerFelter(kontrollData.mottatteOpplysningerData());
     }
 
     static Kontrollfeil foretakUtlandManglerFelter(FerdigbehandlingKontrollData kontrollData) {
         return ArbeidUtlandKontroll.foretakUtlandManglerFelter(kontrollData.mottatteOpplysningerData());
     }
-
     static Kontrollfeil representantIUtlandetMangler(FerdigbehandlingKontrollData kontrollData) {
         var lovvalgsperiode = kontrollData.lovvalgsperiode();
         var søknad = (SøknadNorgeEllerUtenforEØS) kontrollData.mottatteOpplysningerData();
