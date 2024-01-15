@@ -1,5 +1,6 @@
 package no.nav.melosys.service.kontroll.ferdigbehandling
 
+import no.nav.melosys.domain.kodeverk.begrunnelser.Fartsomrader
 import no.nav.melosys.domain.kodeverk.begrunnelser.Kontroll_begrunnelser
 import no.nav.melosys.domain.mottatteopplysninger.MottatteOpplysningerData
 import no.nav.melosys.domain.mottatteopplysninger.data.ForetakUtland
@@ -23,13 +24,16 @@ internal class ArbeidUtlandKontrollTest {
         val fysiskArbeidssted = FysiskArbeidssted()
         val maritimtArbeid = MaritimtArbeid()
         val luftfartBase = LuftfartBase()
+        val foretakUtland = ForetakUtland();
         fysiskArbeidssted.virksomhetNavn = " "
         maritimtArbeid.enhetNavn = " "
         luftfartBase.hjemmebaseNavn = " "
+        foretakUtland.selvstendigNæringsvirksomhet = false
+        maritimtArbeid.fartsomradeKode = Fartsomrader.INNENRIKS
         mottatteOpplysningerData!!.arbeidPaaLand.fysiskeArbeidssteder = listOf(fysiskArbeidssted)
         mottatteOpplysningerData!!.maritimtArbeid = listOf(maritimtArbeid)
         mottatteOpplysningerData!!.luftfartBaser = listOf(luftfartBase)
-        mottatteOpplysningerData!!.foretakUtland = listOf(ForetakUtland())
+        mottatteOpplysningerData!!.foretakUtland = listOf(foretakUtland)
     }
 
     @Test

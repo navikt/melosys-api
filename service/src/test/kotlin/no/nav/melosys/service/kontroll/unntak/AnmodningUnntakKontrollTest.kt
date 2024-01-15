@@ -97,7 +97,9 @@ internal class AnmodningUnntakKontrollTest {
     @Test
     fun utførKontroller_foretakUtlandManglerFelter_returnererKode() {
         val mottatteOpplysningerData = MottatteOpplysningerData()
-        mottatteOpplysningerData.foretakUtland = listOf(ForetakUtland())
+        val foretakUtland = ForetakUtland()
+        foretakUtland.selvstendigNæringsvirksomhet = false
+        mottatteOpplysningerData.foretakUtland = listOf(foretakUtland)
         Mockito.`when`(behandlingService!!.hentBehandlingMedSaksopplysninger(behandlingID))
             .thenReturn(SaksbehandlingDataFactory.lagBehandling(mottatteOpplysningerData))
 
