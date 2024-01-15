@@ -318,7 +318,9 @@ class KontrollTest {
         lovvalgsperiode.setFom(LocalDate.now());
         lovvalgsperiode.setTom(LocalDate.now().plusYears(1));
 
-        mottatteOpplysningerData.foretakUtland = List.of(new ForetakUtland());
+        var foretakUtland = new ForetakUtland();
+        foretakUtland.selvstendigNæringsvirksomhet = false;
+        mottatteOpplysningerData.foretakUtland = List.of(foretakUtland);
 
 
         Collection<Kontrollfeil> resultat = kontroll.utførKontroller(behandlingID, Sakstyper.EU_EOS, Behandlingsresultattyper.FASTSATT_LOVVALGSLAND);
