@@ -303,12 +303,13 @@ public class ProsessinstansService {
         lagre(prosessinstans);
     }
 
-    public void opprettProsessinstansIverksettVedtakFTRL(Behandling behandling, VedtakRequest request) {
+    public void opprettProsessinstansIverksettVedtakFTRL(Behandling behandling, VedtakRequest request, Saksstatuser saksstatus) {
         Prosessinstans prosessinstans = new ProsessinstansBuilder()
             .medType(ProsessType.IVERKSETT_VEDTAK_FTRL)
             .medBehandling(behandling)
             .build();
 
+        prosessinstans.setData(SAKSSTATUS, saksstatus);
         prosessinstans.setData(BETALINGSINTERVALL, request.getBetalingsintervall());
 
         lagre(prosessinstans);

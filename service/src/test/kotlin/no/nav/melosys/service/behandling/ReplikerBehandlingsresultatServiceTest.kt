@@ -1,5 +1,7 @@
 package no.nav.melosys.service.behandling
 
+import io.kotest.matchers.collections.shouldHaveSize
+import io.kotest.matchers.shouldBe
 import io.mockk.every
 import io.mockk.mockk
 import io.mockk.slot
@@ -12,6 +14,7 @@ import no.nav.melosys.domain.folketrygden.MedlemAvFolketrygden
 import no.nav.melosys.domain.kodeverk.*
 import no.nav.melosys.domain.kodeverk.begrunnelser.Kontroll_begrunnelser
 import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingsresultattyper
+import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingstyper
 import no.nav.melosys.domain.kodeverk.lovvalgsbestemmelser.Lovvalgbestemmelser_883_2004
 import no.nav.melosys.domain.kodeverk.lovvalgsbestemmelser.Tilleggsbestemmelser_883_2004
 import org.assertj.core.api.Assertions
@@ -62,6 +65,7 @@ class ReplikerBehandlingsresultatServiceTest {
 
         val behandlingReplika = Behandling()
         behandlingReplika.id = 2L
+        behandlingReplika.type = Behandlingstyper.NY_VURDERING
 
         every { behandlingsresultatService.hentBehandlingsresultat(tidligsteInaktiveBehandling.id) } returns behandlingsresultatOrig
         val slot = slot<Behandlingsresultat>()
@@ -158,7 +162,7 @@ class ReplikerBehandlingsresultatServiceTest {
             .matches { it.id == null }
             .matches { it.bestemmelse == medlemAvFolketrygdenOrig.bestemmelse }
 
-        Assertions.assertThat(medlemAvFolketrygdenOrig.medlemskapsperioder).hasSize(2)
+        Assertions.assertThat(medlemAvFolketrygdenOrig.medlemskapsperioder).hasSize(3)
         val innvilgetMedlemskapsperiodeOrig = medlemAvFolketrygdenOrig.medlemskapsperioder.filter { it.erInnvilget() }.first()
         Assertions.assertThat(behandlingsresultatReplika.medlemAvFolketrygden.medlemskapsperioder)
             .singleElement()
@@ -220,6 +224,77 @@ class ReplikerBehandlingsresultatServiceTest {
             .matches { it.grunnlagSkatteforholdTilNorge.skatteplikttype == skatteforholdTilNorgeOrig.skatteplikttype }
     }
 
+    @Test
+    @Throws(
+        NoSuchMethodException::class,
+        InstantiationException::class,
+        IllegalAccessException::class,
+        InvocationTargetException::class
+    )
+    fun replikerBehandlingOgBehandlingsresultat_manglendeInnbetalingTrygdeavgift_replikererBehandlingsresultatObjekterOgCollections() {
+        val tidligsteInaktiveBehandling = Behandling()
+        tidligsteInaktiveBehandling.id = 1L
+        behandlingsresultatOrig = opprettBehandlingsresultatMedData(tidligsteInaktiveBehandling)
+        val avklartefaktaOrig = opprettAvklartefakta()
+        behandlingsresultatOrig.avklartefakta.add(avklartefaktaOrig)
+        val vilkaarsresultatOrig = opprettVilkaarsresultat()
+        behandlingsresultatOrig.vilkaarsresultater.add(vilkaarsresultatOrig)
+        val lovvalgsperiodeOrig = opprettLovvalgsperiode()
+        behandlingsresultatOrig.lovvalgsperioder.add(lovvalgsperiodeOrig)
+        behandlingsresultatOrig.behandlingsresultatBegrunnelser.add(opprettBehandlingsresultatBegrunnelse())
+        behandlingsresultatOrig.kontrollresultater.add(opprettKontrollresultat())
+        val anmodningsperiodeOrig = opprettAnmodningsperiode()
+        behandlingsresultatOrig.anmodningsperioder.add(anmodningsperiodeOrig)
+        val utpekingsperiodeOrig = opprettUtpekingsperiode()
+        behandlingsresultatOrig.utpekingsperioder.add(utpekingsperiodeOrig)
+        val medlemAvFolketrygdenOrig = opprettMedlemAvFolketrygden()
+        behandlingsresultatOrig.medlemAvFolketrygden = medlemAvFolketrygdenOrig
+
+        val behandlingReplika = Behandling()
+        behandlingReplika.id = 2L
+        behandlingReplika.type = Behandlingstyper.MANGLENDE_INNBETALING_TRYGDEAVGIFT
+
+        every { behandlingsresultatService.hentBehandlingsresultat(tidligsteInaktiveBehandling.id) } returns behandlingsresultatOrig
+        val slot = slot<Behandlingsresultat>()
+        every { behandlingsresultatService.lagre(capture(slot)) } returnsArgument 0
+
+
+        replikerBehandlingsresultatService.replikerBehandlingsresultat(tidligsteInaktiveBehandling, behandlingReplika)
+
+
+        val behandlingsresultatReplika = slot.captured
+        medlemAvFolketrygdenOrig.medlemskapsperioder.shouldHaveSize(3)
+        val innvilgetMedlemskapsperiodeOrig = medlemAvFolketrygdenOrig.medlemskapsperioder.filter { it.erInnvilget() }.first()
+        val opphørtMedlemskapsperiodeOrig = medlemAvFolketrygdenOrig.medlemskapsperioder.filter { it.erOpphørt() }.first()
+        behandlingsresultatReplika.medlemAvFolketrygden.medlemskapsperioder
+            .shouldHaveSize(2)
+            .sortedBy { it.innvilgelsesresultat }
+            .run {
+                first().run {
+                    medlemAvFolketrygden.shouldBe(behandlingsresultatReplika.medlemAvFolketrygden)
+                    id.shouldBe(null)
+                    fom.shouldBe(innvilgetMedlemskapsperiodeOrig.fom)
+                    tom.shouldBe(innvilgetMedlemskapsperiodeOrig.tom)
+                    arbeidsland.shouldBe(innvilgetMedlemskapsperiodeOrig.arbeidsland)
+                    medlemskapstype.shouldBe(innvilgetMedlemskapsperiodeOrig.medlemskapstype)
+                    innvilgelsesresultat.shouldBe(innvilgetMedlemskapsperiodeOrig.innvilgelsesresultat)
+                    trygdedekning.shouldBe(innvilgetMedlemskapsperiodeOrig.trygdedekning)
+                    medlPeriodeID.shouldBe(innvilgetMedlemskapsperiodeOrig.medlPeriodeID)
+                }
+                last().run {
+                    medlemAvFolketrygden.shouldBe(behandlingsresultatReplika.medlemAvFolketrygden)
+                    id.shouldBe(null)
+                    fom.shouldBe(opphørtMedlemskapsperiodeOrig.fom)
+                    tom.shouldBe(opphørtMedlemskapsperiodeOrig.tom)
+                    arbeidsland.shouldBe(opphørtMedlemskapsperiodeOrig.arbeidsland)
+                    medlemskapstype.shouldBe(opphørtMedlemskapsperiodeOrig.medlemskapstype)
+                    innvilgelsesresultat.shouldBe(opphørtMedlemskapsperiodeOrig.innvilgelsesresultat)
+                    trygdedekning.shouldBe(opphørtMedlemskapsperiodeOrig.trygdedekning)
+                    medlPeriodeID.shouldBe(opphørtMedlemskapsperiodeOrig.medlPeriodeID)
+                }
+            }
+    }
+
     private fun opprettMedlemAvFolketrygden(): MedlemAvFolketrygden {
         val medlemAvFolketrygden = MedlemAvFolketrygden()
         medlemAvFolketrygden.behandlingsresultat = behandlingsresultatOrig
@@ -227,6 +302,7 @@ class ReplikerBehandlingsresultatServiceTest {
         medlemAvFolketrygden.bestemmelse = Folketrygdloven_kap2_bestemmelser.FTRL_KAP2_2_8_FØRSTE_LEDD_A
         medlemAvFolketrygden.addMedlemskapsperiode(opprettMedlemskapsperiode(InnvilgelsesResultat.INNVILGET))
         medlemAvFolketrygden.addMedlemskapsperiode(opprettMedlemskapsperiode(InnvilgelsesResultat.AVSLAATT))
+        medlemAvFolketrygden.addMedlemskapsperiode(opprettMedlemskapsperiode(InnvilgelsesResultat.OPPHØRT))
         medlemAvFolketrygden.fastsattTrygdeavgift = opprettFastsattTrygdeavgift(medlemAvFolketrygden)
         return medlemAvFolketrygden
     }
