@@ -34,9 +34,9 @@ public class FerdigbehandlingKontrollsett {
         FerdigbehandlingKontroll::overlappendePeriode,
         FerdigbehandlingKontroll::periodeOver24Mnd,
         FerdigbehandlingKontroll::periodeManglerSluttdato,
-        FerdigbehandlingKontroll::arbeidsstedManglerFelter,
-        FerdigbehandlingKontroll::maritimtManglerFelter,
-        FerdigbehandlingKontroll::luftfartManglerFelter,
+        FerdigbehandlingKontroll::arbeidsstedLandManglerFelter,
+        FerdigbehandlingKontroll::arbeidsstedMaritimtManglerFelter,
+        FerdigbehandlingKontroll::arbeidsstedLuftfartManglerFelter,
         FerdigbehandlingKontroll::foretakUtlandManglerFelter,
         FerdigbehandlingKontroll::orgnrErOpphørt
     );
@@ -53,7 +53,7 @@ public class FerdigbehandlingKontrollsett {
         FerdigbehandlingKontroll::periodeOverTreÅr,
         FerdigbehandlingKontroll::periodeOverFemÅr,
         FerdigbehandlingKontroll::periodeManglerSluttdato,
-        FerdigbehandlingKontroll::arbeidsstedManglerFelter,
+        FerdigbehandlingKontroll::arbeidsstedLandManglerFelter,
         FerdigbehandlingKontroll::representantIUtlandetMangler
     );
 

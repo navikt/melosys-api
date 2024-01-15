@@ -15,8 +15,7 @@ open class ArbeidUtlandKontroll {
             val fysiskArbeidsstedListe = mottatteOpplysningerData.arbeidPaaLand.fysiskeArbeidssteder
             var erUfullstendigUtfyllt = false
 
-            for (i in fysiskArbeidsstedListe.indices) {
-                val fysiskArbeidssted = fysiskArbeidsstedListe[i]
+            for (fysiskArbeidssted in fysiskArbeidsstedListe) {
                 val manglerArbeidsstedVirksomhetsnavn = AdresseRegler.manglerArbeidsstedVirksomhetsnavn(fysiskArbeidssted)
                 val manglerArbeidsstedLandkode = AdresseRegler.manglerArbeidsstedLandkode(fysiskArbeidssted)
 
@@ -39,9 +38,8 @@ open class ArbeidUtlandKontroll {
 
             var erUfullstendigUtfyllt = false
 
-            for (i in maritimtArbeidListe.indices) {
+            for (maritimtArbeid in maritimtArbeidListe) {
 
-                val maritimtArbeid = maritimtArbeidListe[i]
                 val manglerArbeidsstedVirksomhetsnavnInnretningEnhetNavn =
                     AdresseRegler.manglerArbeidsstedVirksomhetsnavnInnretningEnhetNavn(maritimtArbeid)
                 val manglerArbeidsstedVirksomhetsnavnInnretningLandssokkel =
@@ -83,8 +81,7 @@ open class ArbeidUtlandKontroll {
 
             var erUfullstendigUtfyllt = false
 
-            for (i in luftfartBaseListe.indices) {
-                val luftfartBase = luftfartBaseListe[i]
+            for (luftfartBase in luftfartBaseListe) {
                 val manglerArbeidsstedVirksomhetsnavnLuftfartBaseHjemmebaseNavn =
                     AdresseRegler.manglerArbeidsstedVirksomhetsnavnLuftfartBaseHjemmebaseNavn(luftfartBase)
                 val manglerArbeidsstedVirksomhetsnavnLuftfartBaseHjemmebaseLand =
@@ -104,9 +101,7 @@ open class ArbeidUtlandKontroll {
 
             var erUfullstendigUtfyllt = false
 
-            for (i in foretakUtlandListe.indices) {
-                val foretakUtland = foretakUtlandListe[i]
-
+            for (foretakUtland in foretakUtlandListe) {
                 val manglerForetakUtlandNavn = AdresseRegler.manglerForetakUtlandNavn(foretakUtland)
                 val manglerForetakUtlandLandkode = AdresseRegler.manglerForetakUtlandLandkode(foretakUtland)
                 val manglerForetakUtlandPoststed = AdresseRegler.manglerForetakUtlandPoststed(foretakUtland)

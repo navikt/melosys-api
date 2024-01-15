@@ -127,15 +127,15 @@ final class FerdigbehandlingKontroll {
             ? new Kontrollfeil(Kontroll_begrunnelser.MER_ENN_12_MD, KontrolldataFeilType.FEIL) : null;
     }
 
-    static Kontrollfeil arbeidsstedManglerFelter(FerdigbehandlingKontrollData kontrollData) {
+    static Kontrollfeil arbeidsstedLandManglerFelter(FerdigbehandlingKontrollData kontrollData) {
         return ArbeidUtlandKontroll.arbeidsstedLandManglerFelter(kontrollData.mottatteOpplysningerData());
     }
 
-    static Kontrollfeil maritimtManglerFelter(FerdigbehandlingKontrollData kontrollData) {
+    static Kontrollfeil arbeidsstedMaritimtManglerFelter(FerdigbehandlingKontrollData kontrollData) {
         return ArbeidUtlandKontroll.maritimtArbeidsstedManglerFelter(kontrollData.mottatteOpplysningerData());
     }
 
-    static Kontrollfeil luftfartManglerFelter(FerdigbehandlingKontrollData kontrollData) {
+    static Kontrollfeil arbeidsstedLuftfartManglerFelter(FerdigbehandlingKontrollData kontrollData) {
         return ArbeidUtlandKontroll.luftfartArbeidsstedManglerFelter(kontrollData.mottatteOpplysningerData());
     }
 
