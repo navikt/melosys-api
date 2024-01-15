@@ -36,8 +36,10 @@ public class FerdigbehandlingKontrollsett {
         FerdigbehandlingKontroll::periodeManglerSluttdato,
         FerdigbehandlingKontroll::arbeidsstedLandManglerFelter,
         FerdigbehandlingKontroll::arbeidsstedMaritimtManglerFelter,
+        FerdigbehandlingKontroll::arbeidsstedOffshoreManglerFelter,
         FerdigbehandlingKontroll::arbeidsstedLuftfartManglerFelter,
         FerdigbehandlingKontroll::foretakUtlandManglerFelter,
+        FerdigbehandlingKontroll::selvstendigUtlandManglerFelter,
         FerdigbehandlingKontroll::orgnrErOpphørt
     );
 

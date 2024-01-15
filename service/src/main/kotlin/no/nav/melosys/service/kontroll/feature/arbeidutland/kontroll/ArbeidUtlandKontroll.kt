@@ -37,13 +37,10 @@ open class ArbeidUtlandKontroll {
             }
 
             var erUfullstendigUtfyllt = false
-
             for (maritimtArbeid in maritimtArbeidListe) {
 
                 val manglerArbeidsstedVirksomhetsnavnInnretningEnhetNavn =
                     AdresseRegler.manglerArbeidsstedVirksomhetsnavnInnretningEnhetNavn(maritimtArbeid)
-                val manglerArbeidsstedVirksomhetsnavnInnretningLandssokkel =
-                    AdresseRegler.manglerArbeidsstedVirksomhetsnavnInnretningLandssokkel(maritimtArbeid)
                 val manglerArbeidsstedVirksomhetsnavnInnretningLandsTerritorialFarvann =
                     AdresseRegler.manglerArbeidsstedVirksomhetsnavnInnretningLandsTerritorialFarvann(maritimtArbeid)
                 val manglerArbeidsstedVirksomhetsnavnInnretningFlaggstat =
@@ -51,11 +48,7 @@ open class ArbeidUtlandKontroll {
 
                 val erSkip = maritimtArbeid.fartsomradeKode != null
 
-                if (!erSkip) {
-                    if (manglerArbeidsstedVirksomhetsnavnInnretningEnhetNavn || manglerArbeidsstedVirksomhetsnavnInnretningLandssokkel) {
-                        erUfullstendigUtfyllt = true
-                    }
-                } else {
+                if(erSkip) {
                     if (maritimtArbeid.fartsomradeKode == Fartsomrader.INNENRIKS) {
                         if (manglerArbeidsstedVirksomhetsnavnInnretningEnhetNavn || manglerArbeidsstedVirksomhetsnavnInnretningLandsTerritorialFarvann) {
                             erUfullstendigUtfyllt = true
@@ -67,9 +60,41 @@ open class ArbeidUtlandKontroll {
                     }
                 }
             }
+
             return if (erUfullstendigUtfyllt) Kontrollfeil(Kontroll_begrunnelser.MANGLENDE_OPPL_ARBEIDSSTED_MARITIM, KontrolldataFeilType.FEIL)
             else null
         }
+
+        @JvmStatic
+        fun offshoreArbeidsstedManglerFelter(mottatteOpplysningerData: MottatteOpplysningerData): Kontrollfeil? {
+            val maritimtArbeidListe = mottatteOpplysningerData.maritimtArbeid
+
+            if (maritimtArbeidListe.isEmpty()) {
+                return null
+            }
+
+            var erUfullstendigUtfyllt = false
+            for (maritimtArbeid in maritimtArbeidListe) {
+
+                val manglerArbeidsstedVirksomhetsnavnInnretningEnhetNavn =
+                    AdresseRegler.manglerArbeidsstedVirksomhetsnavnInnretningEnhetNavn(maritimtArbeid)
+                val manglerArbeidsstedVirksomhetsnavnInnretningLandssokkel =
+                    AdresseRegler.manglerArbeidsstedVirksomhetsnavnInnretningLandssokkel(maritimtArbeid)
+
+                val erSkip = maritimtArbeid.fartsomradeKode != null
+
+                if (!erSkip) {
+                    if (manglerArbeidsstedVirksomhetsnavnInnretningEnhetNavn || manglerArbeidsstedVirksomhetsnavnInnretningLandssokkel) {
+                        erUfullstendigUtfyllt = true
+                    }
+                }
+            }
+
+            return if (erUfullstendigUtfyllt) Kontrollfeil(Kontroll_begrunnelser.MANGLENDE_OPPL_ARBEIDSSTED_OFFSHORE, KontrolldataFeilType.FEIL)
+            else null
+        }
+
+
 
         @JvmStatic
         fun luftfartArbeidsstedManglerFelter(mottatteOpplysningerData: MottatteOpplysningerData): Kontrollfeil? {
@@ -110,11 +135,38 @@ open class ArbeidUtlandKontroll {
 
 
                 if (manglerForetakUtlandNavn || manglerForetakUtlandLandkode || manglerForetakUtlandPoststed || manglerForetakUtlandPostnummer || manglerForetakUtlandAdresse) {
-                    erUfullstendigUtfyllt = true
+                    if(!foretakUtland.selvstendigNæringsvirksomhet) {
+                        erUfullstendigUtfyllt = true
+                    }
                 }
             }
 
             return if (erUfullstendigUtfyllt) Kontrollfeil(Kontroll_begrunnelser.MANGLENDE_OPPL_ARBEIDSFORHOLD_UTL, KontrolldataFeilType.FEIL)
+            else null
+        }
+
+        @JvmStatic
+        fun selvstendigUtlandManglerFelter(mottatteOpplysningerData: MottatteOpplysningerData): Kontrollfeil? {
+            val foretakUtlandListe = mottatteOpplysningerData.foretakUtland
+
+            var erUfullstendigUtfyllt = false
+
+            for (foretakUtland in foretakUtlandListe) {
+                val manglerForetakUtlandNavn = AdresseRegler.manglerForetakUtlandNavn(foretakUtland)
+                val manglerForetakUtlandLandkode = AdresseRegler.manglerForetakUtlandLandkode(foretakUtland)
+                val manglerForetakUtlandPoststed = AdresseRegler.manglerForetakUtlandPoststed(foretakUtland)
+                val manglerForetakUtlandPostnummer = AdresseRegler.manglerForetakUtlandPostnummer(foretakUtland)
+                val manglerForetakUtlandAdresse = AdresseRegler.manglerForetakUtlandAdresse(foretakUtland)
+
+
+                if (manglerForetakUtlandNavn || manglerForetakUtlandLandkode || manglerForetakUtlandPoststed || manglerForetakUtlandPostnummer || manglerForetakUtlandAdresse) {
+                    if(foretakUtland.selvstendigNæringsvirksomhet) {
+                        erUfullstendigUtfyllt = true
+                    }
+                }
+            }
+
+            return if (erUfullstendigUtfyllt) Kontrollfeil(Kontroll_begrunnelser.MANGLENDE_OPPL_SELVSTENDIG_ARBEIDSFORHOLD_UTL, KontrolldataFeilType.FEIL)
             else null
         }
     }

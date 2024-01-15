@@ -135,6 +135,10 @@ final class FerdigbehandlingKontroll {
         return ArbeidUtlandKontroll.maritimtArbeidsstedManglerFelter(kontrollData.mottatteOpplysningerData());
     }
 
+    static Kontrollfeil arbeidsstedOffshoreManglerFelter(FerdigbehandlingKontrollData kontrollData) {
+        return ArbeidUtlandKontroll.offshoreArbeidsstedManglerFelter(kontrollData.mottatteOpplysningerData());
+    }
+
     static Kontrollfeil arbeidsstedLuftfartManglerFelter(FerdigbehandlingKontrollData kontrollData) {
         return ArbeidUtlandKontroll.luftfartArbeidsstedManglerFelter(kontrollData.mottatteOpplysningerData());
     }
@@ -142,6 +146,11 @@ final class FerdigbehandlingKontroll {
     static Kontrollfeil foretakUtlandManglerFelter(FerdigbehandlingKontrollData kontrollData) {
         return ArbeidUtlandKontroll.foretakUtlandManglerFelter(kontrollData.mottatteOpplysningerData());
     }
+
+    static Kontrollfeil selvstendigUtlandManglerFelter(FerdigbehandlingKontrollData kontrollData) {
+        return ArbeidUtlandKontroll.selvstendigUtlandManglerFelter(kontrollData.mottatteOpplysningerData());
+    }
+
     static Kontrollfeil representantIUtlandetMangler(FerdigbehandlingKontrollData kontrollData) {
         var lovvalgsperiode = kontrollData.lovvalgsperiode();
         var søknad = (SøknadNorgeEllerUtenforEØS) kontrollData.mottatteOpplysningerData();
