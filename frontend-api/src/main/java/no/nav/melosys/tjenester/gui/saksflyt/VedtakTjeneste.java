@@ -71,7 +71,7 @@ public class VedtakTjeneste {
             .medVedtakstype(fattVedtakDto.getVedtakstype())
             .medBestillersId(bestillersId)
             .medBetalingsIntervall(fattVedtakDto.getBetalingsintervall())
-            .medOpphørsdato(fattVedtakDto.getOpphørsdato())
+            .medOpphørsdato(fattVedtakDto.getOpphoerDato())
             .medKopiTilArbeidsgiver(fattVedtakDto.getKopiTilArbeidsgiver())
             .build();
     }

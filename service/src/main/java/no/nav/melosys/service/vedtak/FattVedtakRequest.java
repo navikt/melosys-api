@@ -171,38 +171,6 @@ public class FattVedtakRequest {
             return this;
         }
 
-//        public String getFritekst() {
-//            return fritekst;
-//        }
-//
-//        public void setFritekst(final String fritekst) {
-//            this.fritekst = fritekst;
-//        }
-//
-//        public String getFritekstSed() {
-//            return fritekstSed;
-//        }
-//
-//        public void setFritekstSed(String fritekstSed) {
-//            this.fritekstSed = fritekstSed;
-//        }
-//
-//        public Set<String> getMottakerinstitusjoner() {
-//            return mottakerinstitusjoner;
-//        }
-//
-//        public void setMottakerinstitusjoner(Set<String> mottakerinstitusjoner) {
-//            this.mottakerinstitusjoner = mottakerinstitusjoner;
-//        }
-//
-//        public String getNyVurderingBakgrunn() {
-//            return nyVurderingBakgrunn;
-//        }
-//
-//        public void setNyVurderingBakgrunn(String nyVurderingBakgrunn) {
-//            this.nyVurderingBakgrunn = nyVurderingBakgrunn;
-//        }
-
         public Builder medMottakerInstitusjoner(Set<String> mottakerInstitusjoner) {
             this.mottakerinstitusjoner = mottakerInstitusjoner;
             return this;

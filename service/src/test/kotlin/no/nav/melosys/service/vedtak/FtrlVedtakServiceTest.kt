@@ -220,10 +220,12 @@ class FtrlVedtakServiceTest {
                 Medlemskapsperiode().apply {
                     id = 2
                     innvilgelsesresultat = InnvilgelsesResultat.OPPHØRT
+                    fom = LocalDate.now()
                 },
                 Medlemskapsperiode().apply {
                     id = 3
                     innvilgelsesresultat = InnvilgelsesResultat.AVSLAATT
+                    fom = LocalDate.now()
                 })
             utfallRegistreringUnntak = Utfallregistreringunntak.GODKJENT
             nyVurderingBakgrunn = "blah"

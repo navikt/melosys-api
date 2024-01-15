@@ -24,7 +24,7 @@ public class FattVedtakDto {
     private List<KopiMottakerDto> kopiMottakere;
     private FaktureringsIntervall betalingsintervall;
     private Boolean kopiTilArbeidsgiver;
-    private LocalDate opphørsdato;
+    private LocalDate opphoerDato;
 
     public FaktureringsIntervall getBetalingsintervall() {
         return betalingsintervall;
@@ -138,11 +138,11 @@ public class FattVedtakDto {
         this.vedtakstype = vedtakstype;
     }
 
-    public LocalDate getOpphørsdato() {
-        return opphørsdato;
+    public LocalDate getOpphoerDato() {
+        return opphoerDato;
     }
 
-    public void setOpphørsdato(LocalDate opphørsdato) {
-        this.opphørsdato = opphørsdato;
+    public void setOpphoerDto(LocalDate opphoerDato) {
+        this.opphoerDato = opphoerDato;
     }
 }
