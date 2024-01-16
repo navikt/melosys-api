@@ -162,6 +162,7 @@ class FtrlVedtakServiceTest {
 
     @Test
     fun fattVedtak_delvis_opphørt_fatterVedtak() {
+        every { behandlingsresultatService.lagre(any()) } returnsArgument 0
         every { behandlingsresultatService.hentBehandlingsresultat(BEH_ID) } returns Behandlingsresultat().apply {
             medlemAvFolketrygden = MedlemAvFolketrygden().apply {
                 medlemskapsperioder = listOf(Medlemskapsperiode().apply {
@@ -205,6 +206,7 @@ class FtrlVedtakServiceTest {
 
     @Test
     fun fattVedtak_opphørt_fatterVedtak() {
+        every { behandlingsresultatService.lagre(any()) } returnsArgument 0
         val behandlingsresultat = Behandlingsresultat().apply {
             avklartefakta = mutableSetOf(Avklartefakta(), Avklartefakta().apply {
                 type = Avklartefaktatyper.FULLSTENDIG_MANGLENDE_INNBETALING
@@ -295,6 +297,7 @@ class FtrlVedtakServiceTest {
 
     @Test
     fun fattVedtak_opphørt_feilOpphørtDato_kasterFeil() {
+        every { behandlingsresultatService.lagre(any()) } returnsArgument 0
         val behandlingsresultat = Behandlingsresultat().apply {
             avklartefakta = mutableSetOf(Avklartefakta(), Avklartefakta().apply {
                 type = Avklartefaktatyper.FULLSTENDIG_MANGLENDE_INNBETALING
