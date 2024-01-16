@@ -26,6 +26,14 @@ class AktoerService(private val aktørRepository: AktoerRepository) {
         if (aktoerDto.rolleKode == null) {
             throw FunksjonellException("Kan ikke lagre aktør uten rolle. Saksnummer: " + fagsak.saksnummer)
         }
+        if (aktoerDto.fullmakter != null && aktoerDto.fullmakter.isNotEmpty()) {
+            val fullmektiger = aktørRepository.findByFagsakAndFullmakterIsNotEmpty(fagsak)
+            val fullmektigMedLikFullmakt = fullmektiger.find { it.fullmaktstyper.intersect(aktoerDto.fullmakter).isNotEmpty() }
+            if (fullmektigMedLikFullmakt != null && fullmektigMedLikFullmakt.id != aktoerDto.databaseID) {
+                throw FunksjonellException("Det skal kun være en fullmektig per fullmakstype. Saksnummer: " + fagsak.saksnummer)
+            }
+        }
+
 
         val aktoer = if (aktoerDto.databaseID == null) {
             Aktoer()

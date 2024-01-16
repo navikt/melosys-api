@@ -12,6 +12,7 @@ import io.mockk.slot
 import io.mockk.verify
 import no.nav.melosys.domain.Aktoer
 import no.nav.melosys.domain.Fagsak
+import no.nav.melosys.domain.Fullmakt
 import no.nav.melosys.domain.kodeverk.Aktoersroller
 import no.nav.melosys.domain.kodeverk.Fullmaktstype
 import no.nav.melosys.exception.FunksjonellException
@@ -75,6 +76,23 @@ internal class AktoerServiceTest {
         assertAktoerData(aktoerDto, fagsak, aktoerCaptured)
         aktoerCaptured.id shouldBe aktoerDto.databaseID
         databaseId shouldBe aktoerDto.databaseID
+    }
+
+    @Test
+    fun `bare en fullmektig per fullmakstype`() {
+        val aktoerDto = lagAktoerDto().apply {
+            fullmakter = setOf(Fullmaktstype.FULLMEKTIG_TRYGDEAVGIFT)
+        }
+        val fagsak = lagFagsak()
+        val aktoer = lagAktoer().apply {
+            fullmakter = setOf(Fullmakt().apply { type = Fullmaktstype.FULLMEKTIG_TRYGDEAVGIFT })
+        }
+
+        every { aktoerRepository.findByFagsakAndFullmakterIsNotEmpty(fagsak) } returns listOf(aktoer)
+
+
+        val exception = shouldThrow<FunksjonellException> { aktoerService.lagEllerOppdaterAktoer(fagsak, aktoerDto) }
+        exception.message shouldContain "en fullmektig per fullmakstype"
     }
 
     @Test
