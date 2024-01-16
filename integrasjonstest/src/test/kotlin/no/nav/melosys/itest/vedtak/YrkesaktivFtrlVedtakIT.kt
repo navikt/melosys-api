@@ -10,6 +10,7 @@ import io.kotest.matchers.nulls.shouldNotBeNull
 import io.kotest.matchers.shouldBe
 import io.kotest.matchers.types.shouldBeInstanceOf
 import no.nav.melosys.domain.kodeverk.*
+import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingsaarsaktyper
 import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingsresultattyper
 import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingstema
 import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingstyper
@@ -24,7 +25,9 @@ import no.nav.melosys.melosysmock.testdata.TestDataGenerator
 import no.nav.melosys.repository.BehandlingRepository
 import no.nav.melosys.repository.FagsakRepository
 import no.nav.melosys.saksflyt.ProsessinstansRepository
+import no.nav.melosys.saksflytapi.ProsessinstansService
 import no.nav.melosys.saksflytapi.domain.ProsessType
+import no.nav.melosys.saksflytapi.journalfoering.OpprettSakRequest
 import no.nav.melosys.service.MedlemAvFolketrygdenService
 import no.nav.melosys.service.avgift.TrygdeavgiftsgrunnlagService
 import no.nav.melosys.service.avgift.dto.InntektskildeRequest
@@ -39,7 +42,6 @@ import no.nav.melosys.service.medlemskapsperiode.MedlemskapsperiodeService
 import no.nav.melosys.service.medlemskapsperiode.OpprettMedlemskapsperiodeService
 import no.nav.melosys.service.mottatteopplysninger.MottatteOpplysningerService
 import no.nav.melosys.service.oppgave.OppgaveService
-import no.nav.melosys.service.sak.OpprettBehandlingForSak
 import no.nav.melosys.service.saksopplysninger.OppfriskSaksopplysningerService
 import no.nav.melosys.service.vedtak.FattVedtakRequest
 import no.nav.melosys.service.vedtak.VedtaksfattingFasade
@@ -74,7 +76,7 @@ class YrkesaktivFtrlVedtakIT(
     @Autowired private val unleash: FakeUnleash,
     @Autowired private val journalpostRepo: JournalpostRepo,
     @Autowired private val trygdeavgiftsgrunnlagService: TrygdeavgiftsgrunnlagService,
-    @Autowired private val opprettBehandlingForSak: OpprettBehandlingForSak,
+    @Autowired private val prosessinstansService: ProsessinstansService,
 ) : JournalfoeringBase(testDataGenerator, journalføringService, oppgaveService, prosessinstansRepository) {
 
     @BeforeEach
@@ -102,18 +104,22 @@ class YrkesaktivFtrlVedtakIT(
     fun `yrkesaktiv vedtak - FTRL - test`() {
         val saksnummer = lagFørstegangsBehandling()
 
-        val journalfoeringTilordneDto = lagJournalfoeringOppgaveOgTilordneDto(
-            saksnummer = saksnummer,
-            journalfoeringTilordneDto = defaultJournalfoeringTilordneDto().apply {
-                behandlingstemaKode = Behandlingstema.YRKESAKTIV.kode
-                behandlingstypeKode = Behandlingstyper.NY_VURDERING.kode
-            }
+        val opprettSakRequest = OpprettSakRequest(
+            sakstema = Sakstemaer.MEDLEMSKAP_LOVVALG,
+            behandlingstema = Behandlingstema.YRKESAKTIV,
+            behandlingstype = Behandlingstyper.NY_VURDERING,
+            behandlingsaarsakType = Behandlingsaarsaktyper.SØKNAD,
+            skalTilordnes = true,
+            behandlingsaarsakFritekst = "test",
+            mottaksdato = LocalDate.now()
         )
-        val behandling = journalførAndregangsOgVentTilProsesserErFerdige(
-            journalfoeringTilordneDto,
-            waitFor = ProsessType.JFR_ANDREGANG_NY_BEHANDLING
-        ).behandling
 
+        val behandlingsId = executeAndWait(waitForprosessType = ProsessType.OPPRETT_REPLIKERT_BEHANDLING_FOR_SAK) {
+            prosessinstansService.opprettOgReplikerBehandlingForSak(
+                saksnummer,
+                opprettSakRequest
+            )
+        }.behandling.id
 
         val vedtakRequest = FattVedtakRequest.Builder()
             .medBehandlingsresultatType(Behandlingsresultattyper.MEDLEM_I_FOLKETRYGDEN)
@@ -124,7 +130,7 @@ class YrkesaktivFtrlVedtakIT(
         executeAndWait(
             waitForprosessType = ProsessType.IVERKSETT_VEDTAK_FTRL
         ) {
-            vedtaksfattingFasade.fattVedtak(behandling.id, vedtakRequest)
+            vedtaksfattingFasade.fattVedtak(behandlingsId, vedtakRequest)
         }
 
     }

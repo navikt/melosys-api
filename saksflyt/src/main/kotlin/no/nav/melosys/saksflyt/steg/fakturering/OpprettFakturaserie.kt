@@ -45,24 +45,17 @@ class OpprettFakturaserie(
             return
         }
 
-        //TODO NY_VURDERING
-
         val behandlingsId = prosessinstans.behandling.id
         val saksbehandlerIdent = prosessinstans.getData(ProsessDataKey.SAKSBEHANDLER)
         val behandlingsresultat = behandlingsresultatService.hentBehandlingsresultat(behandlingsId)
 
-        if (behandlingsresultat.type === Behandlingsresultattyper.OPPHØRT) {
+        if (behandlingsresultat.type === Behandlingsresultattyper.OPPHØRT ||
+            (prosessinstans.behandling.type === Behandlingstyper.NY_VURDERING && skalKansellereFakturaSerie(behandlingsresultat))) {
             log.info("Kansellerer fakturaserie for behandling: $behandlingsId med fakturaseriereferanse: ${behandlingsresultat.fakturaserieReferanse}")
             kansellerFakturaserieOgLagreReferanse(behandlingsresultat, saksbehandlerIdent)
         } else if (skalOppretteFakturaserie(behandlingsresultat)) {
             log.info("Oppretter fakturaserie for behandling: $behandlingsId")
             opprettFakturaserieOgLagreReferanse(behandlingsresultat, mapFakturaserieDto(behandlingsresultat, prosessinstans), saksbehandlerIdent)
-        } else if (prosessinstans.behandling.type === Behandlingstyper.NY_VURDERING
-            && !trygdeavgiftMottakerService.skalBetalesTilNav(behandlingsresultat.medlemAvFolketrygden.fastsattTrygdeavgift.trygdeavgiftsgrunnlag)) {
-            val fakturaserie = faktureringskomponentenConsumer.getFakturaSerie(behandlingsresultat.fakturaserieReferanse)
-            val fom = behandlingsresultat.medlemAvFolketrygden.fastsattTrygdeavgift.trygdeavgiftsperioder.first().periodeFra
-            val tom = behandlingsresultat.medlemAvFolketrygden.fastsattTrygdeavgift.trygdeavgiftsperioder.last().periodeTil
-            //Find the lowest startdato and sluttdato in perioder
         }
     }
 
@@ -85,6 +78,10 @@ class OpprettFakturaserie(
     private fun skalOppretteFakturaserie(behandlingsresultat: Behandlingsresultat): Boolean {
         return trygdeavgiftsperioderMedAvgift(behandlingsresultat).isNotEmpty()
             && trygdeavgiftMottakerService.skalBetalesTilNav(behandlingsresultat.medlemAvFolketrygden.fastsattTrygdeavgift.trygdeavgiftsgrunnlag)
+    }
+
+    private fun skalKansellereFakturaSerie(behandlingsresultat: Behandlingsresultat): Boolean {
+        return !trygdeavgiftMottakerService.skalBetalesTilNav(behandlingsresultat.medlemAvFolketrygden.fastsattTrygdeavgift.trygdeavgiftsgrunnlag)
     }
 
     private fun trygdeavgiftsperioderMedAvgift(behandlingsresultat: Behandlingsresultat): List<Trygdeavgiftsperiode> {

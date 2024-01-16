@@ -91,13 +91,11 @@ class JournalfoeringBase(
 
     protected fun journalførAndregangsOgVentTilProsesserErFerdige(
         journalfoeringTilordneDto: JournalfoeringTilordneDto,
-        waitFor: ProsessType = ProsessType.JFR_NY_SAK_BRUKER,
+        waitFor: ProsessType = ProsessType.JFR_KNYTT,
         alsoWaitForprosessType: List<ProsessType> = listOf()
     ): Prosessinstans {
-        val jfrOppgave: Oppgave = lagJfrOppgave()
-
-        return executeAndWait(ProsessType.JFR_ANDREGANG_NY_BEHANDLING) {
-            journalføringService.journalførOgOpprettAndregangsBehandling(journalfoeringTilordneDto)
+        return executeAndWait(ProsessType.JFR_KNYTT) {
+            journalføringService.journalførOgKnyttTilEksisterendeSak(journalfoeringTilordneDto)
         }
     }
 
