@@ -53,9 +53,6 @@ class FaktureringEventListener(
     // Sjekk om fullmektig for betaling av trygdeavgift ble endret siden behandlingen ble opprettet.
     private fun fullmektigForBetalingAvTrygdeavgiftBleEndret(
         fullmektigForTrygdeavgift: Aktoer?, tidligereFullmektigerForTrygdeavgift: List<Aktoer>
-    ): Boolean = when {
-        fullmektigForTrygdeavgift == null -> tidligereFullmektigerForTrygdeavgift.isNotEmpty() // Fullmektig må ev. fjernes i faktureringskomponent
-        tidligereFullmektigerForTrygdeavgift.size != 1 -> true
-        else -> fullmektigForTrygdeavgift != tidligereFullmektigerForTrygdeavgift.single()
-    }
+    ): Boolean = fullmektigForTrygdeavgift?.let { it != tidligereFullmektigerForTrygdeavgift.singleOrNull() }
+        ?: tidligereFullmektigerForTrygdeavgift.isNotEmpty() // Fullmektig må ev. fjernes i faktureringskomponent
 }
