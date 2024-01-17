@@ -23,7 +23,7 @@ class TrygdeavgiftMottakerService {
         else -> Trygdeavgiftmottaker.TRYGDEAVGIFT_BETALES_TIL_NAV_OG_SKATT
     }
 
-    private fun betalerKunTrygdeavgiftTilSkatt(trygdeavgiftsgrunnlag: Trygdeavgiftsgrunnlag): Boolean {
+     fun betalerKunTrygdeavgiftTilSkatt(trygdeavgiftsgrunnlag: Trygdeavgiftsgrunnlag): Boolean {
         return ((trygdeavgiftsgrunnlag.skatteforholdTilNorge.stream().allMatch {
             skatteforholdTilNorge: SkatteforholdTilNorge -> skatteforholdTilNorge.skatteplikttype == Skatteplikttype.SKATTEPLIKTIG }
             && trygdeavgiftsgrunnlag.inntektsperioder.stream().allMatch{

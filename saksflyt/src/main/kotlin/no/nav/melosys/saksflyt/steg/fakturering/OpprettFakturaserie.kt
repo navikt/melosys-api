@@ -81,7 +81,7 @@ class OpprettFakturaserie(
     }
 
     private fun skalKansellereFakturaSerie(behandlingsresultat: Behandlingsresultat): Boolean {
-        return !trygdeavgiftMottakerService.skalBetalesTilNav(behandlingsresultat.medlemAvFolketrygden.fastsattTrygdeavgift.trygdeavgiftsgrunnlag)
+        return trygdeavgiftMottakerService.betalerKunTrygdeavgiftTilSkatt(behandlingsresultat.medlemAvFolketrygden.fastsattTrygdeavgift.trygdeavgiftsgrunnlag)
     }
 
     private fun trygdeavgiftsperioderMedAvgift(behandlingsresultat: Behandlingsresultat): List<Trygdeavgiftsperiode> {

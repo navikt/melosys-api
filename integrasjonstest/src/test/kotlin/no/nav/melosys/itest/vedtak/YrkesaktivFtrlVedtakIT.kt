@@ -9,6 +9,7 @@ import io.getunleash.FakeUnleash
 import io.kotest.matchers.nulls.shouldNotBeNull
 import io.kotest.matchers.shouldBe
 import io.kotest.matchers.types.shouldBeInstanceOf
+import io.mockk.impl.annotations.MockK
 import no.nav.melosys.domain.kodeverk.*
 import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingsaarsaktyper
 import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingsresultattyper
@@ -19,16 +20,13 @@ import no.nav.melosys.domain.mottatteopplysninger.data.Periode
 import no.nav.melosys.domain.mottatteopplysninger.data.Soeknadsland
 import no.nav.melosys.itest.JournalfoeringBase
 import no.nav.melosys.itest.OAuthMockServer
-import no.nav.melosys.melosysmock.journalpost.JournalpostRepo
 import no.nav.melosys.melosysmock.medl.MedlRepo
 import no.nav.melosys.melosysmock.testdata.TestDataGenerator
-import no.nav.melosys.repository.BehandlingRepository
 import no.nav.melosys.repository.FagsakRepository
 import no.nav.melosys.saksflyt.ProsessinstansRepository
-import no.nav.melosys.saksflytapi.ProsessinstansService
 import no.nav.melosys.saksflytapi.domain.ProsessType
-import no.nav.melosys.saksflytapi.journalfoering.OpprettSakRequest
 import no.nav.melosys.service.MedlemAvFolketrygdenService
+import no.nav.melosys.service.avgift.TrygdeavgiftsberegningService
 import no.nav.melosys.service.avgift.TrygdeavgiftsgrunnlagService
 import no.nav.melosys.service.avgift.dto.InntektskildeRequest
 import no.nav.melosys.service.avgift.dto.OppdaterTrygdeavgiftsgrunnlagRequest
@@ -37,19 +35,23 @@ import no.nav.melosys.service.avklartefakta.AvklartefaktaDto
 import no.nav.melosys.service.avklartefakta.AvklartefaktaService
 import no.nav.melosys.service.behandling.BehandlingsresultatService
 import no.nav.melosys.service.journalforing.JournalfoeringService
-import no.nav.melosys.service.kontroll.feature.ferdigbehandling.FerdigbehandlingKontrollFacade
 import no.nav.melosys.service.medlemskapsperiode.MedlemskapsperiodeService
 import no.nav.melosys.service.medlemskapsperiode.OpprettMedlemskapsperiodeService
 import no.nav.melosys.service.mottatteopplysninger.MottatteOpplysningerService
 import no.nav.melosys.service.oppgave.OppgaveService
+import no.nav.melosys.service.sak.OpprettBehandlingForSak
+import no.nav.melosys.service.sak.OpprettSakDto
 import no.nav.melosys.service.saksopplysninger.OppfriskSaksopplysningerService
 import no.nav.melosys.service.vedtak.FattVedtakRequest
 import no.nav.melosys.service.vedtak.VedtaksfattingFasade
 import no.nav.melosys.service.vilkaar.VilkaarDto
 import no.nav.melosys.service.vilkaar.VilkaarsresultatService
+import no.nav.melosys.sikkerhet.context.SpringSubjectHandler
+import no.nav.melosys.sikkerhet.context.SubjectHandler
 import org.junit.jupiter.api.AfterEach
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
+import org.mockito.Mockito
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.context.annotation.Import
 import java.time.LocalDate
@@ -63,20 +65,18 @@ class YrkesaktivFtrlVedtakIT(
     @Autowired private val avklartefaktaService: AvklartefaktaService,
     @Autowired private val behandlingsresultatService: BehandlingsresultatService,
     @Autowired private val fagsakRepository: FagsakRepository,
-    @Autowired private val behandlingRepository: BehandlingRepository,
     @Autowired private val oAuthMockServer: OAuthMockServer,
     @Autowired private val mottatteOpplysningerService: MottatteOpplysningerService,
     @Autowired private val vilkaarsresultatService: VilkaarsresultatService,
     @Autowired private val medlemskapsperiodeService: MedlemskapsperiodeService,
     @Autowired private val opprettMedlemskapsperiodeService: OpprettMedlemskapsperiodeService,
     @Autowired private val medlemAvFolketrygdenService: MedlemAvFolketrygdenService,
-    @Autowired private val ferdigbehandlingKontrollFacade: FerdigbehandlingKontrollFacade,
     @Autowired private val oppfriskSaksopplysningerService: OppfriskSaksopplysningerService,
     @Autowired private val vedtaksfattingFasade: VedtaksfattingFasade,
     @Autowired private val unleash: FakeUnleash,
-    @Autowired private val journalpostRepo: JournalpostRepo,
+    @Autowired private val opprettBehandlingForSak: OpprettBehandlingForSak,
     @Autowired private val trygdeavgiftsgrunnlagService: TrygdeavgiftsgrunnlagService,
-    @Autowired private val prosessinstansService: ProsessinstansService,
+    @MockK private val trygdeavgiftsberegningService: TrygdeavgiftsberegningService,
 ) : JournalfoeringBase(testDataGenerator, journalføringService, oppgaveService, prosessinstansRepository) {
 
     @BeforeEach
@@ -92,6 +92,19 @@ class YrkesaktivFtrlVedtakIT(
                     .withBody(ByteArray(0))
             )
         )
+
+
+        /*val expectedResponse = listOf(
+            TrygdeavgiftsberegningResponse(
+                TrygdeavgiftsperiodeDto(
+                    DatoPeriodeDto(LocalDate.of(2023, 1, 1), LocalDate.of(2023, 2, 1)),
+                    6.8.toBigDecimal(), PengerDto(1000.toBigDecimal() , NOK)
+                ),
+                TrygdeavgiftsgrunnlagDto(UUID.randomUUID(), UUID.randomUUID(), UUID.randomUUID())
+            )
+        )
+
+        every { trygdeavgiftConsumer.beregnTrygdeavgift(any()) } returns expectedResponse*/
     }
 
     @AfterEach
@@ -102,24 +115,41 @@ class YrkesaktivFtrlVedtakIT(
 
     @Test
     fun `yrkesaktiv vedtak - FTRL - test`() {
+        val saksbehandler = "Z123456"
+        val subjectHandler: SubjectHandler = Mockito.mock(SpringSubjectHandler::class.java)
+        SubjectHandler.set(subjectHandler)
+        Mockito.`when`(subjectHandler.getUserID()).thenReturn(saksbehandler)
+
         val saksnummer = lagFørstegangsBehandling()
 
-        val opprettSakRequest = OpprettSakRequest(
-            sakstema = Sakstemaer.MEDLEMSKAP_LOVVALG,
-            behandlingstema = Behandlingstema.YRKESAKTIV,
-            behandlingstype = Behandlingstyper.NY_VURDERING,
-            behandlingsaarsakType = Behandlingsaarsaktyper.SØKNAD,
-            skalTilordnes = true,
-            behandlingsaarsakFritekst = "test",
-            mottaksdato = LocalDate.now()
-        )
-
         val behandlingsId = executeAndWait(waitForprosessType = ProsessType.OPPRETT_REPLIKERT_BEHANDLING_FOR_SAK) {
-            prosessinstansService.opprettOgReplikerBehandlingForSak(
+            opprettBehandlingForSak.opprettBehandling(
                 saksnummer,
-                opprettSakRequest
+                lagOpprettSakDto()
             )
         }.behandling.id
+
+        trygdeavgiftsgrunnlagService.oppdaterTrygdeavgiftsgrunnlag(
+            behandlingsId,
+            OppdaterTrygdeavgiftsgrunnlagRequest(
+                skatteforholdTilNorgeList = listOf(
+                    SkatteforholdTilNorgeRequest(
+                        fomDato = LocalDate.of(2023, 1, 1),
+                        tomDato = LocalDate.of(2023, 2, 1),
+                        skatteplikttype = Skatteplikttype.SKATTEPLIKTIG
+                    )
+                ),
+                inntektskilder = listOf(
+                    InntektskildeRequest(
+                        type = Inntektskildetype.INNTEKT_FRA_UTLANDET,
+                        arbeidsgiversavgiftBetales = true,
+                        avgiftspliktigInntektMnd = 10000.toBigDecimal(),
+                        fomDato = LocalDate.of(2023, 1, 1),
+                        tomDato = LocalDate.of(2023, 2, 1)
+                    )
+                )
+            )
+        )
 
         val vedtakRequest = FattVedtakRequest.Builder()
             .medBehandlingsresultatType(Behandlingsresultattyper.MEDLEM_I_FOLKETRYGDEN)
@@ -132,7 +162,15 @@ class YrkesaktivFtrlVedtakIT(
         ) {
             vedtaksfattingFasade.fattVedtak(behandlingsId, vedtakRequest)
         }
+    }
 
+    private fun lagOpprettSakDto(): OpprettSakDto {
+        val opprettsakdto = OpprettSakDto()
+        opprettsakdto.behandlingstema = Behandlingstema.YRKESAKTIV
+        opprettsakdto.behandlingstype = Behandlingstyper.NY_VURDERING
+        opprettsakdto.mottaksdato = LocalDate.now()
+        opprettsakdto.behandlingsaarsakType = Behandlingsaarsaktyper.SØKNAD
+        return opprettsakdto
     }
 
     fun lagFørstegangsBehandling(): String {
@@ -234,6 +272,8 @@ class YrkesaktivFtrlVedtakIT(
                 )
             )
         )
+
+        //trygdeavgiftsberegningService.beregnOgLagreTrygdeavgift(behandling.id)
 
         val vedtakRequest = FattVedtakRequest.Builder()
             .medBehandlingsresultatType(Behandlingsresultattyper.MEDLEM_I_FOLKETRYGDEN)
