@@ -1,13 +1,5 @@
 package no.nav.melosys.service.dokument;
 
-import java.time.Instant;
-import java.time.LocalDate;
-import java.time.ZoneId;
-import java.util.ArrayList;
-import java.util.Collection;
-import java.util.Collections;
-import java.util.List;
-
 import no.nav.melosys.domain.Behandling;
 import no.nav.melosys.domain.arkiv.Distribusjonstype;
 import no.nav.melosys.domain.arkiv.Journalpost;
@@ -34,6 +26,14 @@ import no.nav.melosys.service.dokument.brev.mapper.DokgenMalMapper;
 import no.nav.melosys.service.dokument.brev.mapper.DokumentproduksjonsInfoMapper;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+
+import java.time.Instant;
+import java.time.LocalDate;
+import java.time.ZoneId;
+import java.util.ArrayList;
+import java.util.Collection;
+import java.util.Collections;
+import java.util.List;
 
 import static org.springframework.util.StringUtils.hasText;
 
@@ -323,10 +323,10 @@ public class DokgenService {
                 .medBetalingsstatus(brevbestillingDto.getBetalingsstatus())
                 .medFullmektigForBetaling(brevbestillingDto.getFullmektigForBetaling())
                 .medBetalingsfrist(brevbestillingDto.getBetalingsfrist());
-            case VEDTAK_OPPHOERT_MEDLEMSKAP ->
-                new VedtakOpphoertMedlemskapBrevbestilling.Builder()
-                    .medDistribusjonstype(Distribusjonstype.VEDTAK)
-                    .medOpphoertBegrunnelseFritekst(brevbestillingDto.getBegrunnelseFritekst());
+            case VEDTAK_OPPHOERT_MEDLEMSKAP -> new VedtakOpphoertMedlemskapBrevbestilling.Builder()
+                .medDistribusjonstype(Distribusjonstype.VEDTAK)
+                .medOpphørtDato(brevbestillingDto.getOpphørtDato())
+                .medOpphørtBegrunnelseFritekst(brevbestillingDto.getBegrunnelseFritekst());
 
             default -> new DokgenBrevbestilling.Builder<>().medDistribusjonstype(Distribusjonstype.VIKTIG);
         };

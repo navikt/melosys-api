@@ -167,8 +167,8 @@ public final class InnvilgelsesbrevMapper implements BrevDataMapper {
             case FØRSTEGANGSVEDTAK -> VedtaksTypeKode.FOERSTEGANGSVEDTAK;
             case KORRIGERT_VEDTAK -> VedtaksTypeKode.KORRIGERT_VEDTAK;
             case OMGJØRINGSVEDTAK -> VedtaksTypeKode.OMGJOERINGSVEDTAK;
-            case OPPHØRSVEDTAK -> throw new FunksjonellException("Vi støtter ikke OPPHØRSVEDTAK enda");
             case ENDRINGSVEDTAK -> null; //Brev har ikke koder for ENDRINGSVEDTAK
+            default -> throw new TekniskException("Vedtakstype " + vedtakstype + " kan ikke mappes til VedtaksTypeKode");
         };
     }
 

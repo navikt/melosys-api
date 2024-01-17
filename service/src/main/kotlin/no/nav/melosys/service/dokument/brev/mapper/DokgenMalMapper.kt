@@ -199,9 +199,7 @@ class DokgenMalMapper(
                 brevbestilling as VarselbrevManglendeInnbetalingBrevbestilling
             )
 
-            Produserbaredokumenter.VEDTAK_OPPHOERT_MEDLEMSKAP -> VedtakOpphoertMedlemskap.Builder(brevbestilling as VedtakOpphoertMedlemskapBrevbestilling)
-                .opphoertDato(dokgenMapperDatahenter.hentBehandlingsresultat(brevbestilling.behandlingId).medlemAvFolketrygden.utledOpphørtDato() )
-                .build()
+            Produserbaredokumenter.VEDTAK_OPPHOERT_MEDLEMSKAP -> VedtakOpphoertMedlemskap(brevbestilling as VedtakOpphoertMedlemskapBrevbestilling)
 
             else -> throw FunksjonellException("ProduserbartDokument ${brevbestilling.produserbartdokument} er ikke støttet av melosys-dokgen")
         }

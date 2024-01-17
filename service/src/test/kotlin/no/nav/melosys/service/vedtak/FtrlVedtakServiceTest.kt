@@ -37,6 +37,7 @@ import no.nav.melosys.sikkerhet.context.TestSubjectHandler
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.extension.ExtendWith
+import java.time.LocalDate
 
 @ExtendWith(MockKExtension::class)
 class FtrlVedtakServiceTest {
@@ -161,8 +162,20 @@ class FtrlVedtakServiceTest {
 
     @Test
     fun fattVedtak_delvis_opphørt_fatterVedtak() {
-        every { behandlingsresultatService.hentBehandlingsresultat(BEH_ID) } returns Behandlingsresultat()
-        val request = lagFattVedtakRequest(type = Behandlingsresultattyper.DELVIS_OPPHØRT, begrunnelseFritekst = "fritekst for begrunnelse")
+        every { behandlingsresultatService.lagre(any()) } returnsArgument 0
+        every { behandlingsresultatService.hentBehandlingsresultat(BEH_ID) } returns Behandlingsresultat().apply {
+            medlemAvFolketrygden = MedlemAvFolketrygden().apply {
+                medlemskapsperioder = listOf(Medlemskapsperiode().apply {
+                    innvilgelsesresultat = InnvilgelsesResultat.OPPHØRT
+                    fom = LocalDate.now()
+                })
+            }
+        }
+        val request = lagFattVedtakRequest(
+            type = Behandlingsresultattyper.DELVIS_OPPHØRT,
+            begrunnelseFritekst = "fritekst for begrunnelse",
+            opphørtDato = LocalDate.now()
+        )
 
 
         ftrlVedtakService.fattVedtak(lagBehandling(), request)
@@ -186,30 +199,35 @@ class FtrlVedtakServiceTest {
             bestillersId.shouldBe("Z990007")
             mottaker.shouldBe(Mottakerroller.BRUKER)
             begrunnelseFritekst.shouldBe(request.begrunnelseFritekst)
+            opphørtDato.shouldBe(request.opphørtDato)
             kopiMottakere.shouldBeEmpty()
         }
     }
 
     @Test
     fun fattVedtak_opphørt_fatterVedtak() {
+        every { behandlingsresultatService.lagre(any()) } returnsArgument 0
         val behandlingsresultat = Behandlingsresultat().apply {
             avklartefakta = mutableSetOf(Avklartefakta(), Avklartefakta().apply {
                 type = Avklartefaktatyper.FULLSTENDIG_MANGLENDE_INNBETALING
                 referanse = Avklartefaktatyper.FULLSTENDIG_MANGLENDE_INNBETALING.kode
             })
             medlemAvFolketrygden = MedlemAvFolketrygden()
-            medlemAvFolketrygden.medlemskapsperioder = mutableSetOf(
+            medlemAvFolketrygden.medlemskapsperioder = mutableListOf(
                 Medlemskapsperiode().apply {
                     id = 1
                     innvilgelsesresultat = InnvilgelsesResultat.INNVILGET
+                    fom = LocalDate.now()
                 },
                 Medlemskapsperiode().apply {
                     id = 2
                     innvilgelsesresultat = InnvilgelsesResultat.OPPHØRT
+                    fom = LocalDate.now()
                 },
                 Medlemskapsperiode().apply {
                     id = 3
                     innvilgelsesresultat = InnvilgelsesResultat.AVSLAATT
+                    fom = LocalDate.now()
                 })
             utfallRegistreringUnntak = Utfallregistreringunntak.GODKJENT
             nyVurderingBakgrunn = "blah"
@@ -218,7 +236,11 @@ class FtrlVedtakServiceTest {
             trygdeavgiftFritekst = "blah"
         }
         every { behandlingsresultatService.hentBehandlingsresultat(BEH_ID) } returns behandlingsresultat
-        val request = lagFattVedtakRequest(type = Behandlingsresultattyper.OPPHØRT, begrunnelseFritekst = "fritekst for begrunnelse")
+        val request = lagFattVedtakRequest(
+            type = Behandlingsresultattyper.OPPHØRT,
+            begrunnelseFritekst = "fritekst for begrunnelse",
+            opphørtDato = LocalDate.now()
+        )
 
 
         ftrlVedtakService.fattVedtak(lagBehandling(), request)
@@ -252,6 +274,7 @@ class FtrlVedtakServiceTest {
             bestillersId.shouldBe("Z990007")
             mottaker.shouldBe(Mottakerroller.BRUKER)
             begrunnelseFritekst.shouldBe(request.begrunnelseFritekst)
+            opphørtDato.shouldBe(request.opphørtDato)
             kopiMottakere.shouldBeEmpty()
         }
     }
@@ -259,13 +282,46 @@ class FtrlVedtakServiceTest {
     @Test
     fun fattVedtak_opphørt_manglerAvklartFakta_kasterFeil() {
         every { behandlingsresultatService.hentBehandlingsresultat(BEH_ID) } returns Behandlingsresultat()
-        val request = lagFattVedtakRequest(type = Behandlingsresultattyper.OPPHØRT, begrunnelseFritekst = "fritekst for begrunnelse")
+        val request = lagFattVedtakRequest(
+            type = Behandlingsresultattyper.OPPHØRT,
+            begrunnelseFritekst = "fritekst for begrunnelse",
+            opphørtDato = LocalDate.now()
+        )
         val behandling = lagBehandling()
 
 
         shouldThrow<FunksjonellException> {
             ftrlVedtakService.fattVedtak(behandling, request)
         }.shouldHaveMessage("Forventer at fullstendigManglendeInnbetaling er satt ved fatting av vedtak for behandlingstype OPPHØRT")
+    }
+
+    @Test
+    fun fattVedtak_opphørt_feilOpphørtDato_kasterFeil() {
+        every { behandlingsresultatService.lagre(any()) } returnsArgument 0
+        val behandlingsresultat = Behandlingsresultat().apply {
+            avklartefakta = mutableSetOf(Avklartefakta(), Avklartefakta().apply {
+                type = Avklartefaktatyper.FULLSTENDIG_MANGLENDE_INNBETALING
+                referanse = Avklartefaktatyper.FULLSTENDIG_MANGLENDE_INNBETALING.kode
+            })
+            medlemAvFolketrygden = MedlemAvFolketrygden()
+            medlemAvFolketrygden.medlemskapsperioder =
+                mutableSetOf(Medlemskapsperiode().apply {
+                    innvilgelsesresultat = InnvilgelsesResultat.INNVILGET
+                    fom = LocalDate.now()
+                })
+        }
+        every { behandlingsresultatService.hentBehandlingsresultat(BEH_ID) } returns behandlingsresultat
+        val request = lagFattVedtakRequest(
+            type = Behandlingsresultattyper.OPPHØRT,
+            begrunnelseFritekst = "fritekst for begrunnelse",
+            opphørtDato = LocalDate.now().plusDays(1)
+        )
+        val behandling = lagBehandling()
+
+
+        shouldThrow<FunksjonellException> {
+            ftrlVedtakService.fattVedtak(behandling, request)
+        }.shouldHaveMessage("Medsendt opphørsdato: ${request.opphørtDato} er ikke lik forventet opphørsdato: ${behandlingsresultat.medlemAvFolketrygden.utledOpphørtDato()}")
     }
 
 
@@ -277,6 +333,7 @@ class FtrlVedtakServiceTest {
         begrunnelseFritekst: String? = null,
         ekteFelleFritekst: String? = null,
         barnFritekst: String? = null,
+        opphørtDato: LocalDate? = null,
         kopiMottakere: List<KopiMottakerDto> = emptyList()
     ): FattVedtakRequest =
         FattVedtakRequest.Builder()
@@ -287,6 +344,7 @@ class FtrlVedtakServiceTest {
             .medBegrunnelseFritekst(begrunnelseFritekst)
             .medEktefelleFritekst(ekteFelleFritekst)
             .medBarnFritekst(barnFritekst)
+            .medOpphørtDato(opphørtDato)
             .medKopiMottakere(kopiMottakere)
             .medBestillersId(SubjectHandler.getInstance().getUserID())
             .build()
