@@ -21,6 +21,7 @@ import no.nav.melosys.domain.mottatteopplysninger.MottatteOpplysninger;
 import no.nav.melosys.domain.mottatteopplysninger.MottatteOpplysningerData;
 import no.nav.melosys.domain.mottatteopplysninger.data.Soeknadsland;
 import no.nav.melosys.exception.TekniskException;
+import no.nav.melosys.service.aktoer.UtenlandskMyndighetService;
 import no.nav.melosys.service.behandling.BehandlingService;
 import no.nav.melosys.service.brev.BrevAdresse;
 import no.nav.melosys.service.brev.BrevmalListeService;
@@ -51,6 +52,8 @@ class BrevmalListeByggerTest {
     private BehandlingService behandlingService;
     @Mock
     private SaksbehandlingRegler saksbehandlingRegler;
+    @Mock
+    private UtenlandskMyndighetService utenlandskMyndighetService;
 
     private BrevmalListeBygger brevmalListeBygger;
 
@@ -63,7 +66,7 @@ class BrevmalListeByggerTest {
             hentMuligeProduserbaredokumenterService,
             hentBrevAdresseTilMottakereService);
 
-        brevmalListeBygger = new BrevmalListeBygger(brevmalListeService, behandlingService, saksbehandlingRegler);
+        brevmalListeBygger = new BrevmalListeBygger(brevmalListeService, behandlingService, saksbehandlingRegler, utenlandskMyndighetService);
     }
 
     @Test

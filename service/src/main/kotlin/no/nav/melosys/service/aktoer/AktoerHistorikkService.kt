@@ -23,7 +23,7 @@ class AktoerHistorikkService(
                 registretTil = null,
                 aktørId = it.entity.aktørId,
                 personIdent = it.entity.personIdent,
-                institusjonID = it.entity.institusjonId,
+                institusjonID = it.entity.institusjonID,
                 orgnr = it.entity.orgnr,
                 rolle = it.entity.rolle,
                 fullmakter = emptySet()

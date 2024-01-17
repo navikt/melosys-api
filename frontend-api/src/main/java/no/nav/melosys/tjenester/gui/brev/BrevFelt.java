@@ -45,6 +45,14 @@ class BrevFelt {
         .medFeltType(FeltType.FRITEKSTVEDLEGG)
         .build();
 
+    static BrevmalFeltDto lagUtenlandskTrygdemyndighetMottakerFelt(FeltValgDto valg) {
+        return new BrevmalFeltDto.Builder()
+            .medKodeOgBeskrivelse(BrevmalFeltKode.UTENLANDSK_TRYGDEMYNDIGHET_MOTTAKER)
+            .medValg(valg)
+            .erPåkrevd()
+            .build();
+    }
+
     static BrevmalFeltDto lagBrevTittelFelt(FeltValgDto valg) {
         return new BrevmalFeltDto.Builder()
             .medKodeOgBeskrivelse(BrevmalFeltKode.BREV_TITTEL)

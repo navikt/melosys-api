@@ -84,10 +84,10 @@ public class DokgenService {
         Produserbaredokumenter produserbartdokument = brevbestillingDto.getProduserbardokument();
         Behandling behandling = behandlingService.hentBehandlingMedSaksopplysninger(behandlingId);
         Mottaker mottaker;
-        if (hasText(brevbestillingDto.getOrgnr()) || hasText(brevbestillingDto.getInstitusjonId())) {
+        if (hasText(brevbestillingDto.getOrgnr()) || hasText(brevbestillingDto.getInstitusjonID())) {
             mottaker = Mottaker.medRolle(brevbestillingDto.getMottaker());
             mottaker.setOrgnr(brevbestillingDto.getOrgnr());
-            mottaker.setInstitusjonID(brevbestillingDto.getInstitusjonId());
+            mottaker.setInstitusjonID(brevbestillingDto.getInstitusjonID());
         } else {
             mottaker = brevmottakerService.avklarMottakere(produserbartdokument,
                 Mottaker.medRolle(brevbestillingDto.getMottaker()), behandling, true, false).get(0);
@@ -153,7 +153,7 @@ public class DokgenService {
             } else {
                 mottaker.setOrgnr(kopiMottaker.orgnr());
                 mottaker.setAktørId(kopiMottaker.aktørId());
-                mottaker.setInstitusjonID(kopiMottaker.institusjonId());
+                mottaker.setInstitusjonID(kopiMottaker.institusjonID());
             }
             brevbestilling.medBestillKopi(true);
             produserOgDistribuerBrev(behandling, mottaker, brevbestilling.build());

@@ -28,10 +28,10 @@ data class KopiMottaker(
     val rolle: Mottakerroller,
     val orgnr: String?,
     val aktørId: String?,
-    val institusjonId: String?
+    val institusjonID: String?
 ) {
     fun tilUtkast(): KopiMottakerUtkast {
-        return KopiMottakerUtkast(rolle, orgnr, aktørId, institusjonId)
+        return KopiMottakerUtkast(rolle, orgnr, aktørId, institusjonID)
     }
 
     companion object {

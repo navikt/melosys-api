@@ -143,9 +143,9 @@ class DistribuerJournalpostTest {
     @Test
     void utførDistribuerJournalpostMedUtenlandskMyndighet() {
         final String journalpostId = "12345";
-        final String institusjonId = "GB:A100";
+        final String institusjonID = "GB:A100";
         Prosessinstans prosessinstans = setupHappypath(journalpostId, Mottakerroller.UTENLANDSK_TRYGDEMYNDIGHET, Distribusjonstype.VIKTIG);
-        prosessinstans.setData(ProsessDataKey.INSTITUSJON_ID, institusjonId);
+        prosessinstans.setData(ProsessDataKey.INSTITUSJON_ID, institusjonID);
 
         var utenlandskMyndighet = new UtenlandskMyndighet();
         utenlandskMyndighet.landkode = Land_iso2.GB;

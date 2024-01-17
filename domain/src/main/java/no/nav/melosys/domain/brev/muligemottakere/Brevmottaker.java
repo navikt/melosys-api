@@ -8,7 +8,7 @@ public class Brevmottaker {
     private final Mottakerroller rolle;
     private final String orgnr;
     private final String aktørId;
-    private final String institusjonId;
+    private final String institusjonID;
 
     private Brevmottaker(Builder builder) {
         this.mottakerNavn = builder.mottakerNavn;
@@ -16,7 +16,7 @@ public class Brevmottaker {
         this.rolle = builder.rolle;
         this.orgnr = builder.orgnr;
         this.aktørId = builder.aktørId;
-        this.institusjonId = builder.institusjonId;
+        this.institusjonID = builder.institusjonID;
     }
 
     public String getMottakerNavn() {
@@ -39,8 +39,8 @@ public class Brevmottaker {
         return aktørId;
     }
 
-    public String getInstitusjonId() {
-        return institusjonId;
+    public String getInstitusjonID() {
+        return institusjonID;
     }
 
     public static final class Builder {
@@ -49,7 +49,7 @@ public class Brevmottaker {
         private Mottakerroller rolle;
         private String orgnr;
         private String aktørId;
-        private String institusjonId;
+        private String institusjonID;
 
         public Builder medMottakerNavn(String mottakerNavn) {
             this.mottakerNavn = mottakerNavn;
@@ -76,8 +76,8 @@ public class Brevmottaker {
             return this;
         }
 
-        public Builder medInstitusjonId(String institusjonId) {
-            this.institusjonId = institusjonId;
+        public Builder medInstitusjonID(String institusjonID) {
+            this.institusjonID = institusjonID;
             return this;
         }
 

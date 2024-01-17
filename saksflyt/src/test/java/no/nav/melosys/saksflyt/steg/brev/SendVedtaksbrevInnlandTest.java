@@ -377,7 +377,7 @@ class SendVedtaksbrevInnlandTest {
         Aktoer myndighet = new Aktoer();
         myndighet.setAktørId("2");
         myndighet.setRolle(Aktoersroller.TRYGDEMYNDIGHET);
-        myndighet.setInstitusjonId("SE:sesese123");
+        myndighet.setInstitusjonID("SE:sesese123");
 
         Aktoer arbeidsgiver = new Aktoer();
         arbeidsgiver.setRolle(Aktoersroller.ARBEIDSGIVER);

@@ -44,7 +44,7 @@ public class AktoerService {
         }
 
         aktoer.setFagsak(fagsak);
-        aktoer.setInstitusjonId(aktoerDto.getInstitusjonsID());
+        aktoer.setInstitusjonID(aktoerDto.getInstitusjonsID());
         aktoer.setUtenlandskPersonId(aktoerDto.getUtenlandskPersonID());
         aktoer.setOrgnr(aktoerDto.getOrgnr());
         aktoer.setRolle(Aktoersroller.valueOf(aktoerDto.getRolleKode()));

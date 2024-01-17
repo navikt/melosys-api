@@ -182,7 +182,7 @@ class AktoerServiceTest {
 
     private void assertAktoerData(AktoerDto aktoerDto, Fagsak fagsak, Aktoer aktoer) {
         assertThat(aktoer.getFagsak()).isEqualTo(fagsak);
-        assertThat(aktoer.getInstitusjonId()).isEqualTo(aktoerDto.getInstitusjonsID());
+        assertThat(aktoer.getInstitusjonID()).isEqualTo(aktoerDto.getInstitusjonsID());
         assertThat(aktoer.getUtenlandskPersonId()).isEqualTo(aktoerDto.getUtenlandskPersonID());
         assertThat(aktoer.getOrgnr()).isEqualTo(aktoerDto.getOrgnr());
         assertThat(aktoer.getRolle()).hasToString(aktoerDto.getRolleKode());
