@@ -21,10 +21,10 @@ class AktoerHistorikkService(
         val revisions: List<EntityRevision<Aktoer>> =
             auditRepository.getRevisionsBeforeOrAtDate(Aktoer::class.java, mapOf("fagsak_saksnummer" to fagsak.saksnummer, "rolle" to rolle), tidspunkt)
 
-        return revisions.filter { it.revisionType != RevisionType.DEL }
-            .groupBy { it.entity.id }
-            .map { (_, revisionList) -> revisionList.maxByOrNull { it.revisionInfo.timestamp }?.entity }
-            .filterNotNull()
+        return revisions.groupBy { it.entity.id }
+            .mapNotNull { (_, revisionList) -> revisionList.maxByOrNull { it.revisionInfo.timestamp }}
+            .filter { it.revisionType != RevisionType.DEL }
+            .map { it.entity }
     }
 
     @Transactional(readOnly = true)
