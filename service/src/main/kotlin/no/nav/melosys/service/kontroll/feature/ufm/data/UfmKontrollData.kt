@@ -6,6 +6,7 @@ import no.nav.melosys.domain.dokument.person.PersonhistorikkDokument
 import no.nav.melosys.domain.dokument.sed.SedDokument
 import no.nav.melosys.domain.dokument.utbetaling.UtbetalingDokument
 import no.nav.melosys.domain.mottatteopplysninger.MottatteOpplysningerData
+import no.nav.melosys.domain.person.PersonMedHistorikk
 import no.nav.melosys.domain.person.Persondata
 import java.util.*
 
@@ -18,5 +19,6 @@ data class UfmKontrollData(
     val inntektDokument: InntektDokument,
     val utbetalingDokument: UtbetalingDokument,
     val mottatteOpplysningerData: Optional<MottatteOpplysningerData>? = null,
-    val personhistorikkDokumenter: List<PersonhistorikkDokument?>
+    val personhistorikkDokumenter: List<PersonhistorikkDokument?>,
+    val persondataMedHistorikk: Optional<PersonMedHistorikk>? = null
 )
