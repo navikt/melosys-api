@@ -242,6 +242,9 @@ class YrkesaktivFtrlVedtakIT(
             behandling.id
         ).single().id
 
+        //TODO Brute force lagring av medlem av folketrygden, manglende info fra tidligere steg.
+        medlemAvFolketrygdenService.lagre(medlemAvFolketrygden)
+
         medlemskapsperiodeService.oppdaterMedlemskapsperiode(
             behandling.id,
             medlemskapsperiodeId,
