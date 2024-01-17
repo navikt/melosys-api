@@ -35,7 +35,7 @@ class AktoerHistorikkService(
         return lagHistorikk(revisions)
     }
 
-    fun lagHistorikk(revisions: List<EntityRevision<Aktoer>>): List<AktoerHistorikk> {
+    private fun lagHistorikk(revisions: List<EntityRevision<Aktoer>>): List<AktoerHistorikk> {
         val sortedRevisions = revisions.sortedBy { it.revisionInfo.timestamp }
         val revisionAndNextPairs = sortedRevisions.mapIndexed { index, revision ->
             val nextRevision = sortedRevisions.drop(index + 1).firstOrNull { it.entity.id == revision.entity.id }
