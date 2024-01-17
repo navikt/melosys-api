@@ -27,11 +27,7 @@ class AktoerService(private val aktørRepository: AktoerRepository) {
             throw FunksjonellException("Kan ikke lagre aktør uten rolle. Saksnummer: " + fagsak.saksnummer)
         }
         if (aktoerDto.fullmakter != null && aktoerDto.fullmakter.isNotEmpty()) {
-            val fullmektiger = aktørRepository.findByFagsakAndFullmakterIsNotEmpty(fagsak)
-            val fullmektigMedLikFullmakt = fullmektiger.find { it.fullmaktstyper.intersect(aktoerDto.fullmakter).isNotEmpty() }
-            if (fullmektigMedLikFullmakt != null && fullmektigMedLikFullmakt.id != aktoerDto.databaseID) {
-                throw FunksjonellException("Det skal kun være en fullmektig per fullmakstype. Saksnummer: " + fagsak.saksnummer)
-            }
+            validerFullmakter(fagsak, aktoerDto)
         }
 
 
@@ -54,6 +50,14 @@ class AktoerService(private val aktørRepository: AktoerRepository) {
         }
 
         return aktørRepository.save(aktoer).id
+    }
+
+    private fun validerFullmakter(fagsak: Fagsak, aktoerDto: AktoerDto) {
+        val fullmektiger = aktørRepository.findByFagsakAndFullmakterIsNotEmpty(fagsak)
+        val fullmektigMedLikFullmakt = fullmektiger.find { it.fullmaktstyper.intersect(aktoerDto.fullmakter).isNotEmpty() }
+        if (fullmektigMedLikFullmakt != null && fullmektigMedLikFullmakt.id != aktoerDto.databaseID) {
+            throw FunksjonellException("Det skal kun være en fullmektig per fullmakstype. Saksnummer: " + fagsak.saksnummer)
+        }
     }
 
     @Transactional
