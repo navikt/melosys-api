@@ -52,8 +52,8 @@ class FtrlVedtakService(
     private fun validerRequest(behandlingsresultat: Behandlingsresultat, request: FattVedtakRequest) {
         if (request.behandlingsresultatTypeKode in listOf(Behandlingsresultattyper.OPPHØRT, Behandlingsresultattyper.DELVIS_OPPHØRT)) {
             val forventetOpphørsdato = behandlingsresultat.medlemAvFolketrygden.utledOpphørtDato()
-            if (forventetOpphørsdato != request.opphørsdato) {
-                throw FunksjonellException("Medsendt opphørsdato: ${request.opphørsdato} er ikke lik forventet opphørsdato: $forventetOpphørsdato")
+            if (forventetOpphørsdato != request.opphørtDato) {
+                throw FunksjonellException("Medsendt opphørsdato: ${request.opphørtDato} er ikke lik forventet opphørsdato: $forventetOpphørsdato")
             }
         }
     }
@@ -76,7 +76,7 @@ class FtrlVedtakService(
             kopiMottakere = request.kopiMottakere
             begrunnelseFritekst = request.begrunnelseFritekst
             bestillersId = request.bestillersId
-            opphørsdato = request.opphørsdato
+            opphørtDato = request.opphørtDato
         }
 
 

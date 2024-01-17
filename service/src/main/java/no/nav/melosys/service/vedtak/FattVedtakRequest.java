@@ -27,7 +27,7 @@ public class FattVedtakRequest {
     private final String bestillersId;
     private final String nyVurderingBakgrunn;
     private final FaktureringsIntervall betalingsintervall;
-    private final LocalDate opphørsdato;
+    private final LocalDate opphørtDato;
 
     public FaktureringsIntervall getBetalingsintervall() {
         return betalingsintervall;
@@ -81,8 +81,8 @@ public class FattVedtakRequest {
         return bestillersId;
     }
 
-    public LocalDate getOpphørsdato() {
-        return opphørsdato;
+    public LocalDate getOpphørtDato() {
+        return opphørtDato;
     }
 
     protected FattVedtakRequest(Builder builder) {
@@ -101,7 +101,7 @@ public class FattVedtakRequest {
         this.bestillersId = builder.bestillersId;
         this.nyVurderingBakgrunn = builder.nyVurderingBakgrunn;
         this.betalingsintervall = builder.betalingsintervall;
-        this.opphørsdato = builder.opphørsdato;
+        this.opphørtDato = builder.opphørtDato;
     }
 
     public Behandlingsresultattyper getBehandlingsresultatTypeKode() {
@@ -129,7 +129,7 @@ public class FattVedtakRequest {
             bestillersId,
             nyVurderingBakgrunn,
             betalingsintervall != null ? betalingsintervall.toString() : null,
-            opphørsdato
+            opphørtDato
         );
     }
 
@@ -149,7 +149,7 @@ public class FattVedtakRequest {
         private Boolean kopiTilArbeidsgiver;
         private String bestillersId;
         private FaktureringsIntervall betalingsintervall;
-        private LocalDate opphørsdato;
+        private LocalDate opphørtDato;
 
         public Builder medBehandlingsresultatType(Behandlingsresultattyper behandlingsresultatTypeKode) {
             this.behandlingsresultatTypeKode = behandlingsresultatTypeKode;
@@ -226,8 +226,8 @@ public class FattVedtakRequest {
             return this;
         }
 
-        public Builder medOpphørsdato(LocalDate opphørsdato) {
-            this.opphørsdato = opphørsdato;
+        public Builder medOpphørtDato(LocalDate opphørtDato) {
+            this.opphørtDato = opphørtDato;
             return this;
         }
 

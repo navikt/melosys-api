@@ -199,7 +199,7 @@ class FtrlVedtakServiceTest {
             bestillersId.shouldBe("Z990007")
             mottaker.shouldBe(Mottakerroller.BRUKER)
             begrunnelseFritekst.shouldBe(request.begrunnelseFritekst)
-            opphørsdato.shouldBe(request.opphørsdato)
+            opphørtDato.shouldBe(request.opphørtDato)
             kopiMottakere.shouldBeEmpty()
         }
     }
@@ -274,7 +274,7 @@ class FtrlVedtakServiceTest {
             bestillersId.shouldBe("Z990007")
             mottaker.shouldBe(Mottakerroller.BRUKER)
             begrunnelseFritekst.shouldBe(request.begrunnelseFritekst)
-            opphørsdato.shouldBe(request.opphørsdato)
+            opphørtDato.shouldBe(request.opphørtDato)
             kopiMottakere.shouldBeEmpty()
         }
     }
@@ -321,7 +321,7 @@ class FtrlVedtakServiceTest {
 
         shouldThrow<FunksjonellException> {
             ftrlVedtakService.fattVedtak(behandling, request)
-        }.shouldHaveMessage("Medsendt opphørsdato: ${request.opphørsdato} er ikke lik forventet opphørsdato: ${behandlingsresultat.medlemAvFolketrygden.utledOpphørtDato()}")
+        }.shouldHaveMessage("Medsendt opphørsdato: ${request.opphørtDato} er ikke lik forventet opphørsdato: ${behandlingsresultat.medlemAvFolketrygden.utledOpphørtDato()}")
     }
 
 
@@ -344,7 +344,7 @@ class FtrlVedtakServiceTest {
             .medBegrunnelseFritekst(begrunnelseFritekst)
             .medEktefelleFritekst(ekteFelleFritekst)
             .medBarnFritekst(barnFritekst)
-            .medOpphørsdato(opphørtDato)
+            .medOpphørtDato(opphørtDato)
             .medKopiMottakere(kopiMottakere)
             .medBestillersId(SubjectHandler.getInstance().getUserID())
             .build()

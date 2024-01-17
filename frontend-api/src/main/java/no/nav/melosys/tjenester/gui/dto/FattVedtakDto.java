@@ -142,7 +142,7 @@ public class FattVedtakDto {
         return opphoerDato;
     }
 
-    public void setOpphoerDto(LocalDate opphoerDato) {
+    public void setOpphoerDato(LocalDate opphoerDato) {
         this.opphoerDato = opphoerDato;
     }
 }

@@ -42,7 +42,7 @@ public final class BrevbestillingDto {
     private String fullmektigForBetaling;
     private LocalDate betalingsfrist;
     private String annenPersonMottakerIdent;
-    private LocalDate opphørsdato;
+    private LocalDate opphørtDato;
 
     public BrevbestillingDto() {
     }
@@ -78,7 +78,7 @@ public final class BrevbestillingDto {
         String fullmektigForBetaling,
         LocalDate betalingsfrist,
         String annenPersonMottakerIdent,
-        LocalDate opphørsdato) {
+        LocalDate opphørtDato) {
 
         this.produserbardokument = produserbardokument;
         this.mottaker = mottaker;
@@ -110,7 +110,7 @@ public final class BrevbestillingDto {
         this.fullmektigForBetaling = fullmektigForBetaling;
         this.betalingsfrist = betalingsfrist;
         this.annenPersonMottakerIdent = annenPersonMottakerIdent;
-        this.opphørsdato = opphørsdato;
+        this.opphørtDato = opphørtDato;
     }
 
 
@@ -375,12 +375,12 @@ public final class BrevbestillingDto {
         return kontaktopplysninger;
     }
 
-    public LocalDate getOpphørsdato() {
-        return opphørsdato;
+    public LocalDate getOpphørtDato() {
+        return opphørtDato;
     }
 
-    public void setOpphørsdato(LocalDate opphørsdato) {
-        this.opphørsdato = opphørsdato;
+    public void setOpphørtDato(LocalDate opphørtDato) {
+        this.opphørtDato = opphørtDato;
     }
 
     @Override
@@ -402,12 +402,12 @@ public final class BrevbestillingDto {
             Objects.equals(begrunnelseKode, that.begrunnelseKode) && Objects.equals(ytterligereInformasjon, that.ytterligereInformasjon) &&
             Objects.equals(fakturanummer, that.fakturanummer) && betalingsstatus == that.betalingsstatus &&
             Objects.equals(fullmektigForBetaling, that.fullmektigForBetaling) && Objects.equals(betalingsfrist, that.betalingsfrist) &&
-            Objects.equals(annenPersonMottakerIdent, that.annenPersonMottakerIdent) && Objects.equals(opphørsdato, that.opphørsdato);
+            Objects.equals(annenPersonMottakerIdent, that.annenPersonMottakerIdent) && Objects.equals(opphørtDato, that.opphørtDato);
     }
 
     @Override
     public int hashCode() {
-        return Objects.hash(produserbardokument, mottaker, orgnr, orgnrNorskMyndighet, institusjonId, innledningFritekst, manglerFritekst, begrunnelseFritekst, ektefelleFritekst, barnFritekst, trygdeavgiftFritekst, kontaktpersonNavn, kopiMottakere, bestillersId, fritekstTittel, fritekst, distribusjonstype, kontaktopplysninger, nyVurderingBakgrunn, saksVedlegg, fritekstvedlegg, dokumentTittel, saksbehandlerNrToIdent, begrunnelseKode, ytterligereInformasjon, fakturanummer, betalingsstatus, fullmektigForBetaling, betalingsfrist, annenPersonMottakerIdent, opphørsdato);
+        return Objects.hash(produserbardokument, mottaker, orgnr, orgnrNorskMyndighet, institusjonId, innledningFritekst, manglerFritekst, begrunnelseFritekst, ektefelleFritekst, barnFritekst, trygdeavgiftFritekst, kontaktpersonNavn, kopiMottakere, bestillersId, fritekstTittel, fritekst, distribusjonstype, kontaktopplysninger, nyVurderingBakgrunn, saksVedlegg, fritekstvedlegg, dokumentTittel, saksbehandlerNrToIdent, begrunnelseKode, ytterligereInformasjon, fakturanummer, betalingsstatus, fullmektigForBetaling, betalingsfrist, annenPersonMottakerIdent, opphørtDato);
     }
 
     @Override
@@ -443,7 +443,7 @@ public final class BrevbestillingDto {
             ", fullmektigForBetaling='" + fullmektigForBetaling + '\'' +
             ", betalingsfrist=" + betalingsfrist +
             ", annenPersonMottakerIdent='" + annenPersonMottakerIdent + '\'' +
-            ", opphørsdato='" + opphørsdato + '\'' +
+            ", opphørtDato='" + opphørtDato + '\'' +
             '}';
     }
 

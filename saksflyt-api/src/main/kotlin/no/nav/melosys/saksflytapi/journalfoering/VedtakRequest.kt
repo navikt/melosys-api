@@ -22,7 +22,7 @@ data class VedtakRequest(
     val bestillersId: String,
     val nyVurderingBakgrunn: String?,
     val betalingsintervall: String?,
-    val opphørsdato: LocalDate?
+    val opphørtDato: LocalDate?
 )
 
 @JvmRecord

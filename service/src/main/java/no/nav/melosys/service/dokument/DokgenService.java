@@ -325,7 +325,7 @@ public class DokgenService {
                 .medBetalingsfrist(brevbestillingDto.getBetalingsfrist());
             case VEDTAK_OPPHOERT_MEDLEMSKAP -> new VedtakOpphoertMedlemskapBrevbestilling.Builder()
                 .medDistribusjonstype(Distribusjonstype.VEDTAK)
-                .medOpphørtDato(brevbestillingDto.getOpphørsdato())
+                .medOpphørtDato(brevbestillingDto.getOpphørtDato())
                 .medOpphørtBegrunnelseFritekst(brevbestillingDto.getBegrunnelseFritekst());
 
             default -> new DokgenBrevbestilling.Builder<>().medDistribusjonstype(Distribusjonstype.VIKTIG);
