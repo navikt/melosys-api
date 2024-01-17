@@ -128,7 +128,7 @@ public class FattVedtakRequest {
             kopiTilArbeidsgiver,
             bestillersId,
             nyVurderingBakgrunn,
-            betalingsintervall != null ? betalingsintervall.toString() : null, // TODO: map enum?
+            betalingsintervall != null ? betalingsintervall.toString() : null,
             opphørsdato
         );
     }

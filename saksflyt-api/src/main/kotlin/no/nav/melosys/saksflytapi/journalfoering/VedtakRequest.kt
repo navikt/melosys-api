@@ -21,7 +21,7 @@ data class VedtakRequest(
     val kopiTilArbeidsgiver: Boolean?,
     val bestillersId: String,
     val nyVurderingBakgrunn: String?,
-    val betalingsintervall: String?, //TODO Eksisterer som enum FaktureringsIntervall i integrasjons modul
+    val betalingsintervall: String?,
     val opphørsdato: LocalDate?
 )
 
