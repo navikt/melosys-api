@@ -8,6 +8,7 @@ import no.nav.melosys.domain.kodeverk.Aktoersroller
 import no.nav.melosys.domain.kodeverk.Fullmaktstype
 import no.nav.melosys.domain.kodeverk.Vedtakstyper
 import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingsstatus.AVSLUTTET
+import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingsstatus.VURDER_DOKUMENT
 import no.nav.melosys.saksflytapi.ProsessinstansService
 import no.nav.melosys.service.aktoer.AktoerHistorikkService
 import no.nav.melosys.service.behandling.BehandlingService
@@ -114,6 +115,22 @@ internal class FaktureringEventListenerTest {
 
 
         verify { prosessinstansService.opprettProsessinstansOppdaterFaktura(avsluttetBehandling) }
+    }
+
+    @Test
+    fun `Ikke oppdater fakturamottaker hvis behandling ikke er avsluttet`() {
+        val behandling = Behandling().apply {
+            id = 7
+        }
+
+        faktureringEventListener.oppdaterFakturaMottakerHvisNødvendig(
+            BehandlingEndretStatusEvent(
+                VURDER_DOKUMENT,
+                behandling
+            )
+        )
+
+        verify { prosessinstansService wasNot called }
     }
 
     @Test
