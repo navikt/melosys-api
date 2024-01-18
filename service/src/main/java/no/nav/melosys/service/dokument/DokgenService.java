@@ -161,30 +161,50 @@ public class DokgenService {
     }
 
     private List<Mottaker> hentMottakere(BrevbestillingDto brevbestillingDto, Produserbaredokumenter produserbartDokument, Behandling behandling) {
-        List<Mottaker> mottakere = new ArrayList<>();
         boolean erBrevTilOrganisasjon = hasText(brevbestillingDto.getOrgnr());
         boolean erBrevTilNorskMyndighet = Mottakerroller.NORSK_MYNDIGHET.equals(brevbestillingDto.getMottaker())
             && !brevbestillingDto.getOrgnrNorskMyndighet().isEmpty();
         boolean erBrevTilAnnenPerson = hasText(brevbestillingDto.getAnnenPersonMottakerIdent());
+        boolean erBrevTilUtenlandskTrygdemyndighetFraBehandlingUtenFlyt = hasText(brevbestillingDto.getInstitusjonID());
 
-
-        if (erBrevTilOrganisasjon) {
-            Mottaker mottaker = Mottaker.medRolle(brevbestillingDto.getMottaker());
-            mottaker.setOrgnr(brevbestillingDto.getOrgnr());
-            mottakere.add(mottaker);
+        if (erBrevTilUtenlandskTrygdemyndighetFraBehandlingUtenFlyt) {
+            return hentMottakerForUtenlandskTrygdemyndighet(brevbestillingDto);
+        } else if (erBrevTilOrganisasjon) {
+            return hentMottakerForOrganisasjon(brevbestillingDto);
         } else if (erBrevTilAnnenPerson) {
-            Mottaker mottaker = Mottaker.medRolle(brevbestillingDto.getMottaker());
-            mottaker.setPersonIdent(brevbestillingDto.getAnnenPersonMottakerIdent());
-            mottakere.add(mottaker);
+            return hentMottakerForAnnenPerson(brevbestillingDto);
         } else if (erBrevTilNorskMyndighet) {
-            for (String orgNr : brevbestillingDto.getOrgnrNorskMyndighet()) {
-                Mottaker mottaker = Mottaker.medRolle(brevbestillingDto.getMottaker());
-                mottaker.setOrgnr(orgNr);
-                mottakere.add(mottaker);
-            }
+            return hentMottakereForNorskMyndighet(brevbestillingDto);
         } else {
-            mottakere = brevmottakerService.avklarMottakere(produserbartDokument,
+            return brevmottakerService.avklarMottakere(produserbartDokument,
                 Mottaker.medRolle(brevbestillingDto.getMottaker()), behandling, false, false);
+        }
+    }
+
+    private List<Mottaker> hentMottakerForUtenlandskTrygdemyndighet(BrevbestillingDto brevbestillingDto) {
+        var mottaker = Mottaker.medRolle(brevbestillingDto.getMottaker());
+        mottaker.setInstitusjonID(brevbestillingDto.getInstitusjonID());
+        return List.of(mottaker);
+    }
+
+    private List<Mottaker> hentMottakerForOrganisasjon(BrevbestillingDto brevbestillingDto) {
+        var mottaker = Mottaker.medRolle(brevbestillingDto.getMottaker());
+        mottaker.setOrgnr(brevbestillingDto.getOrgnr());
+        return List.of(mottaker);
+    }
+
+    private List<Mottaker> hentMottakerForAnnenPerson(BrevbestillingDto brevbestillingDto) {
+        var mottaker = Mottaker.medRolle(brevbestillingDto.getMottaker());
+        mottaker.setPersonIdent(brevbestillingDto.getAnnenPersonMottakerIdent());
+        return List.of(mottaker);
+    }
+
+    private List<Mottaker> hentMottakereForNorskMyndighet(BrevbestillingDto brevbestillingDto) {
+        List<Mottaker> mottakere = new ArrayList<>();
+        for (String orgNr : brevbestillingDto.getOrgnrNorskMyndighet()) {
+            var mottaker = Mottaker.medRolle(brevbestillingDto.getMottaker());
+            mottaker.setOrgnr(orgNr);
+            mottakere.add(mottaker);
         }
         return mottakere;
     }
