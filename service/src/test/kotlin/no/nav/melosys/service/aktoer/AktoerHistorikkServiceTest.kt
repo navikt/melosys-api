@@ -38,9 +38,9 @@ internal class AktoerHistorikkServiceTest {
 
     @Test
     fun `fullmektig endres, hent gjeldende aktører på et gitt tidspunkt`() {
-        val bruker = lagAktør(1, Aktoersroller.BRUKER, "aktørID", LocalDate.of(2023, 11, 1), LocalDate.of(2023, 11, 1))
-        val fullmektigV1 = lagFullmektig(2, Fullmaktstype.FULLMEKTIG_SØKNAD, "888888888", LocalDate.of(2023, 12, 1), LocalDate.of(2023, 12, 1))
-        val fullmektigV2 = lagFullmektig(2, Fullmaktstype.FULLMEKTIG_TRYGDEAVGIFT, "999999999", LocalDate.of(2023, 12, 1), LocalDate.of(2023, 12, 2))
+        val bruker = lagAktør(1, Aktoersroller.BRUKER, "aktørID", registrert = LocalDate.of(2023, 11, 1), endret = LocalDate.of(2023, 11, 1))
+        val fullmektigV1 = lagFullmektig(2, Fullmaktstype.FULLMEKTIG_SØKNAD, "888888888", registrert = LocalDate.of(2023, 12, 1), endret = LocalDate.of(2023, 12, 1))
+        val fullmektigV2 = lagFullmektig(2, Fullmaktstype.FULLMEKTIG_TRYGDEAVGIFT, "999999999", registrert = LocalDate.of(2023, 12, 1), endret = LocalDate.of(2023, 12, 2))
         // Denne ville ikke returneres fordi etter 2/12/2023:
         // val aktoer3 = lagFullmektig(3, Fullmaktstype.FULLMEKTIG_SØKNAD, "333333333", LocalDate.of(2023, 12, 1), LocalDate.of(2023, 12, 4))
 
@@ -63,10 +63,10 @@ internal class AktoerHistorikkServiceTest {
 
     @Test
     fun `fullmektiger slettes endres, hent gjeldende aktører på et gitt tidspunkt`() {
-        val bruker = lagAktør(1, Aktoersroller.BRUKER, "aktørID", LocalDate.of(2023, 11, 1), LocalDate.of(2023, 11, 1))
-        val fullmektig1Slettes = lagFullmektig(2, Fullmaktstype.FULLMEKTIG_TRYGDEAVGIFT, "888888888", LocalDate.of(2023, 12, 1), LocalDate.of(2023, 12, 1))
-        val fullmektig2 = lagFullmektig(3, Fullmaktstype.FULLMEKTIG_TRYGDEAVGIFT, "999999999", LocalDate.of(2023, 12, 1), LocalDate.of(2023, 12, 2))
-        val fullmektig3 = lagFullmektig(4, Fullmaktstype.FULLMEKTIG_SØKNAD, "333333333", LocalDate.of(2023, 12, 1), LocalDate.of(2023, 12, 4))
+        val bruker = lagAktør(1, Aktoersroller.BRUKER, "aktørID", registrert = LocalDate.of(2023, 11, 1), endret = LocalDate.of(2023, 11, 1))
+        val fullmektig1Slettes = lagFullmektig(2, Fullmaktstype.FULLMEKTIG_TRYGDEAVGIFT, "888888888", registrert = LocalDate.of(2023, 12, 1), endret = LocalDate.of(2023, 12, 1))
+        val fullmektig2 = lagFullmektig(3, Fullmaktstype.FULLMEKTIG_TRYGDEAVGIFT, "999999999", registrert = LocalDate.of(2023, 12, 1), endret = LocalDate.of(2023, 12, 2))
+        val fullmektig3 = lagFullmektig(4, Fullmaktstype.FULLMEKTIG_SØKNAD, "333333333", registrert = LocalDate.of(2023, 12, 1), endret = LocalDate.of(2023, 12, 4))
 
         val entityRevision0 = entityRevision(0, bruker, RevisionType.ADD)
         val entityRevision1 = entityRevision(1, fullmektig1Slettes, RevisionType.ADD)
