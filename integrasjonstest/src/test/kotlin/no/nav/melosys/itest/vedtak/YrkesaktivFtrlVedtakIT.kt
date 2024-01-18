@@ -6,16 +6,15 @@ import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule
 import com.fasterxml.jackson.module.kotlin.jacksonObjectMapper
 import com.github.tomakehurst.wiremock.client.WireMock
 import io.getunleash.FakeUnleash
+import io.kotest.assertions.withClue
 import io.kotest.matchers.nulls.shouldNotBeNull
 import io.kotest.matchers.shouldBe
 import io.kotest.matchers.types.shouldBeInstanceOf
+import no.nav.melosys.domain.Behandlingsmaate
 import no.nav.melosys.domain.avgift.Penger
 import no.nav.melosys.domain.avgift.Trygdeavgiftsperiode
 import no.nav.melosys.domain.kodeverk.*
-import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingsaarsaktyper
-import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingsresultattyper
-import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingstema
-import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingstyper
+import no.nav.melosys.domain.kodeverk.behandlinger.*
 import no.nav.melosys.domain.mottatteopplysninger.SøknadNorgeEllerUtenforEØS
 import no.nav.melosys.domain.mottatteopplysninger.data.Periode
 import no.nav.melosys.domain.mottatteopplysninger.data.Soeknadsland
@@ -25,11 +24,10 @@ import no.nav.melosys.itest.JournalfoeringBase
 import no.nav.melosys.itest.OAuthMockServer
 import no.nav.melosys.melosysmock.medl.MedlRepo
 import no.nav.melosys.melosysmock.testdata.TestDataGenerator
-import no.nav.melosys.repository.FagsakRepository
+import no.nav.melosys.repository.BehandlingRepository
 import no.nav.melosys.saksflyt.ProsessinstansRepository
 import no.nav.melosys.saksflytapi.domain.ProsessType
 import no.nav.melosys.service.MedlemAvFolketrygdenService
-import no.nav.melosys.service.avgift.TrygdeavgiftsberegningService
 import no.nav.melosys.service.avgift.TrygdeavgiftsgrunnlagService
 import no.nav.melosys.service.avgift.dto.InntektskildeRequest
 import no.nav.melosys.service.avgift.dto.OppdaterTrygdeavgiftsgrunnlagRequest
@@ -68,7 +66,7 @@ class YrkesaktivFtrlVedtakIT(
     @Autowired prosessinstansRepository: ProsessinstansRepository,
     @Autowired private val avklartefaktaService: AvklartefaktaService,
     @Autowired private val behandlingsresultatService: BehandlingsresultatService,
-    @Autowired private val fagsakRepository: FagsakRepository,
+    @Autowired private val behandlingRepository: BehandlingRepository,
     @Autowired private val oAuthMockServer: OAuthMockServer,
     @Autowired private val mottatteOpplysningerService: MottatteOpplysningerService,
     @Autowired private val vilkaarsresultatService: VilkaarsresultatService,
@@ -80,18 +78,14 @@ class YrkesaktivFtrlVedtakIT(
     @Autowired private val unleash: FakeUnleash,
     @Autowired private val opprettBehandlingForSak: OpprettBehandlingForSak,
     @Autowired private val trygdeavgiftsgrunnlagService: TrygdeavgiftsgrunnlagService,
-    @Autowired private val trygdeavgiftsberegningService: TrygdeavgiftsberegningService,
 ) : JournalfoeringBase(testDataGenerator, journalføringService, oppgaveService, prosessinstansRepository) {
-
-    val uuid1 = UUID.randomUUID()
-    val uuid2 = UUID.randomUUID()
-    val uuid3 = UUID.randomUUID()
 
     @BeforeEach
     fun setup() {
         oAuthMockServer.start()
         unleash.enableAll()
         MedlRepo.repo.clear()
+        WireMock.configureFor("localhost", mockServer.port());
         mockServer.stubFor(
             WireMock.post("/api/v1/mal/innvilgelse_ftrl/lag-pdf?somKopi=false&utkast=false").willReturn(
                 WireMock.aResponse()
@@ -107,7 +101,7 @@ class YrkesaktivFtrlVedtakIT(
                     DatoPeriodeDto(LocalDate.of(2023, 1, 1), LocalDate.of(2023, 2, 1)),
                     6.8.toBigDecimal(), PengerDto(1000.toBigDecimal() , NOK)
                 ),
-                TrygdeavgiftsgrunnlagDto(uuid1, uuid2, uuid3)
+                TrygdeavgiftsgrunnlagDto(UUID.randomUUID(), UUID.randomUUID(), UUID.randomUUID())
             )
         )
 
@@ -195,6 +189,25 @@ class YrkesaktivFtrlVedtakIT(
         ) {
             vedtaksfattingFasade.fattVedtak(behandlingsId, vedtakRequest)
         }
+
+        WireMock.verify(1, WireMock.deleteRequestedFor(WireMock.urlEqualTo("/fakturaserier/test")));
+
+        behandlingsresultatService.hentBehandlingsresultat(behandlingsId).apply {
+            type.shouldBe(Behandlingsresultattyper.MEDLEM_I_FOLKETRYGDEN)
+            behandlingsmåte.shouldBe(Behandlingsmaate.MANUELT)
+            fastsattAvLand.shouldBe(Land_iso2.NO)
+        }
+        behandlingRepository.findById(behandlingsId).orElse(null)
+            .shouldNotBeNull().apply {
+                withClue("Behandlingsstatus skal være AVSLUTTET") {
+                    status.shouldBe(Behandlingsstatus.AVSLUTTET)
+                }
+                fagsak.apply {
+                    withClue("Saksstatus skal være LOVVALG_AVKLART") {
+                        status.shouldBe(Saksstatuser.LOVVALG_AVKLART)
+                    }
+                }
+            }
     }
 
     private fun lagOpprettSakDto(): OpprettSakDto {
@@ -285,6 +298,8 @@ class YrkesaktivFtrlVedtakIT(
         ) {
             vedtaksfattingFasade.fattVedtak(behandling.id, vedtakRequest)
         }
+
+        WireMock.verify(1, WireMock.postRequestedFor(WireMock.urlEqualTo("/fakturaserier")));
         return behandling.fagsak.saksnummer
     }
 
