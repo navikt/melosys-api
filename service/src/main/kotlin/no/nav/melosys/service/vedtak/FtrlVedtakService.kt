@@ -1,6 +1,7 @@
 package no.nav.melosys.service.vedtak
 
 import no.nav.melosys.domain.Behandling
+import no.nav.melosys.domain.Behandlingsresultat
 import no.nav.melosys.domain.kodeverk.*
 import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingsresultattyper
 import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingsstatus
@@ -32,18 +33,29 @@ class FtrlVedtakService(
         val behandlingID = behandling.id
         log.info("Fatter vedtak for (FTRL) sak: ${behandling.fagsak.saksnummer} behandling: $behandlingID")
 
-        oppdaterBehandlingsresultat(behandlingID, request)
+        val behandlingsresultat = oppdaterBehandlingsresultat(behandlingID, request)
+
+        validerRequest(behandlingsresultat, request)
+
         if (prosessinstansService.harVedtakInstans(behandlingID)) {
             throw FunksjonellException("Det finnes allerede en vedtak-prosess for behandling $behandlingID")
         }
 
-        behandling.fagsak.status =
-            if (request.behandlingsresultatTypeKode == Behandlingsresultattyper.OPPHØRT) Saksstatuser.OPPHØRT else Saksstatuser.MEDLEMSKAP_AVKLART
-
+        val nyStatus =
+            if (request.behandlingsresultatTypeKode == Behandlingsresultattyper.OPPHØRT) Saksstatuser.OPPHØRT else Saksstatuser.LOVVALG_AVKLART
         behandlingService.endreStatus(behandling, Behandlingsstatus.IVERKSETTER_VEDTAK)
-        prosessinstansService.opprettProsessinstansIverksettVedtakFTRL(behandling, request.tilVedtakRequest())
+        prosessinstansService.opprettProsessinstansIverksettVedtakFTRL(behandling, request.tilVedtakRequest(), nyStatus)
         dokgenService.produserOgDistribuerBrev(behandlingID, lagBrevbestilling(request))
         oppgaveService.ferdigstillOppgaveMedSaksnummer(behandling.fagsak.saksnummer)
+    }
+
+    private fun validerRequest(behandlingsresultat: Behandlingsresultat, request: FattVedtakRequest) {
+        if (request.behandlingsresultatTypeKode in listOf(Behandlingsresultattyper.OPPHØRT, Behandlingsresultattyper.DELVIS_OPPHØRT)) {
+            val forventetOpphørsdato = behandlingsresultat.medlemAvFolketrygden.utledOpphørtDato()
+            if (forventetOpphørsdato != request.opphørtDato) {
+                throw FunksjonellException("Medsendt opphørsdato: ${request.opphørtDato} er ikke lik forventet opphørsdato: $forventetOpphørsdato")
+            }
+        }
     }
 
     private fun lagBrevbestilling(request: FattVedtakRequest): BrevbestillingDto {
@@ -64,6 +76,7 @@ class FtrlVedtakService(
             kopiMottakere = request.kopiMottakere
             begrunnelseFritekst = request.begrunnelseFritekst
             bestillersId = request.bestillersId
+            opphørtDato = request.opphørtDato
         }
 
 
@@ -91,30 +104,34 @@ class FtrlVedtakService(
         }
 
 
-    private fun oppdaterBehandlingsresultat(behandlingID: Long, request: FattVedtakRequest) {
+    private fun oppdaterBehandlingsresultat(behandlingID: Long, request: FattVedtakRequest): Behandlingsresultat {
         if (request.behandlingsresultatTypeKode == Behandlingsresultattyper.OPPHØRT) {
-            oppdaterBehandlingsresultatForOpphørt(behandlingID, request)
-        } else {
-            val behandlingsresultat = behandlingsresultatService.hentBehandlingsresultat(behandlingID)
-
-            behandlingsresultat.type = request.behandlingsresultatTypeKode
-            behandlingsresultat.settVedtakMetadata(request.vedtakstype, LocalDate.now().plusWeeks(VedtaksfattingFasade.FRIST_KLAGE_UKER.toLong()))
-            behandlingsresultat.nyVurderingBakgrunn = request.nyVurderingBakgrunn
-            behandlingsresultat.begrunnelseFritekst = request.begrunnelseFritekst
-            behandlingsresultat.innledningFritekst = request.innledningFritekst
-            behandlingsresultat.trygdeavgiftFritekst = request.trygdeavgiftFritekst
-            behandlingsresultat.fastsattAvLand = Land_iso2.NO
-
-            behandlingsresultatService.lagre(behandlingsresultat)
+            return oppdaterBehandlingsresultatForOpphørt(behandlingID, request)
         }
+
+        val behandlingsresultat = behandlingsresultatService.hentBehandlingsresultat(behandlingID)
+
+        behandlingsresultat.type = request.behandlingsresultatTypeKode
+        behandlingsresultat.settVedtakMetadata(request.vedtakstype, LocalDate.now().plusWeeks(VedtaksfattingFasade.FRIST_KLAGE_UKER.toLong()))
+        behandlingsresultat.nyVurderingBakgrunn = request.nyVurderingBakgrunn
+        behandlingsresultat.begrunnelseFritekst = request.begrunnelseFritekst
+        behandlingsresultat.innledningFritekst = request.innledningFritekst
+        behandlingsresultat.trygdeavgiftFritekst = request.trygdeavgiftFritekst
+        behandlingsresultat.fastsattAvLand = Land_iso2.NO
+
+        return behandlingsresultatService.lagre(behandlingsresultat)
     }
 
-    private fun oppdaterBehandlingsresultatForOpphørt(behandlingID: Long, request: FattVedtakRequest) {
+    private fun oppdaterBehandlingsresultatForOpphørt(behandlingID: Long, request: FattVedtakRequest): Behandlingsresultat {
         val behandlingsresultat = behandlingsresultatService.hentBehandlingsresultat(behandlingID)
 
         val fullstendigManglendeInnbetaling = behandlingsresultat.avklartefakta
             .firstOrNull { Avklartefaktatyper.FULLSTENDIG_MANGLENDE_INNBETALING.kode == it.referanse && Avklartefaktatyper.FULLSTENDIG_MANGLENDE_INNBETALING == it.type }
             ?: throw FunksjonellException("Forventer at fullstendigManglendeInnbetaling er satt ved fatting av vedtak for behandlingstype OPPHØRT")
+
+        val opphørteMedlemskapsperioder = behandlingsresultat.medlemAvFolketrygden.medlemskapsperioder
+            .filter { it.erInnvilget() || it.erOpphørt() }
+            .onEach { it.innvilgelsesresultat = InnvilgelsesResultat.OPPHØRT }
 
         log.info("Fjerner vilkårsresultater, fritekstfelt, trygdeavgift, og virksomheter fra behandlingsresultat med behandlingsid: $behandlingID")
         behandlingsresultat.utfallRegistreringUnntak = null
@@ -125,15 +142,14 @@ class FtrlVedtakService(
 
         behandlingsresultat.avklartefakta.clear()
         behandlingsresultat.avklartefakta.add(fullstendigManglendeInnbetaling)
-        behandlingsresultat.medlemAvFolketrygden.medlemskapsperioder
-            .filter { it.erInnvilget() }
-            .onEach { it.innvilgelsesresultat = InnvilgelsesResultat.OPPHØRT }
-        behandlingsresultat.medlemAvFolketrygden.bestemmelse = Folketrygdloven_kap2_bestemmelser.FTRL_KAP2_2_15_ANDRE_LEDD
+        behandlingsresultat.medlemAvFolketrygden.medlemskapsperioder.clear()
+        behandlingsresultat.medlemAvFolketrygden.medlemskapsperioder.addAll(opphørteMedlemskapsperioder)
+        behandlingsresultat.medlemAvFolketrygden.bestemmelse = Folketrygdloven_kap2_bestemmelser.FTRL_KAP2_2_15_ANDRE_LEDD // TODO: Flytt denne til hver enkelt medlemskapsperiode
 
         behandlingsresultat.type = Behandlingsresultattyper.OPPHØRT
         behandlingsresultat.settVedtakMetadata(request.vedtakstype, LocalDate.now().plusWeeks(VedtaksfattingFasade.FRIST_KLAGE_UKER.toLong()))
         behandlingsresultat.begrunnelseFritekst = request.begrunnelseFritekst
         behandlingsresultat.fastsattAvLand = Land_iso2.NO
-        behandlingsresultatService.lagre(behandlingsresultat)
+        return behandlingsresultatService.lagre(behandlingsresultat)
     }
 }

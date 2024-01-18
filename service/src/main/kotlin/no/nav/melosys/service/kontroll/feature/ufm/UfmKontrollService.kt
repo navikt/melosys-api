@@ -75,6 +75,7 @@ class UfmKontrollService(
                 .map { a: Saksopplysning -> a.dokument as PersonhistorikkDokument }
                 .toList()
         val ufmKontrollData = lagUfmKontrollData(behandling, personhistorikkDokumenter, sedDokument)
+
         return utførKontroller(ufmKontrollData, sedType)
     }
 
@@ -84,6 +85,7 @@ class UfmKontrollService(
         sedDokument: SedDokument
     ): UfmKontrollData {
         val persondata = persondataFasade.hentPerson(behandling.fagsak.hentBrukersAktørID())
+        val persondataMedHistorikk = persondataFasade.hentPersonMedHistorikk(behandling.fagsak.hentBrukersAktørID())
         val medlemskapDokument = behandling.hentMedlemskapDokument()
         val inntektDokument = behandling.hentInntektDokument()
         val utbetalingDokument = behandling.finnUtbetalingDokument().orElse(null)
@@ -95,7 +97,8 @@ class UfmKontrollService(
             inntektDokument,
             utbetalingDokument,
             optionalMottatteOpplysningerData,
-            personhistorikkDokumenter
+            personhistorikkDokumenter,
+            Optional.of(persondataMedHistorikk)
         )
     }
 

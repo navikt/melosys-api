@@ -1,6 +1,9 @@
 package no.nav.melosys.service.kontroll.feature.ufm.kontroll;
 
 import java.time.LocalDate;
+import java.util.Collection;
+import java.util.Collections;
+import java.util.List;
 import java.util.Optional;
 import java.util.stream.Collectors;
 
@@ -12,6 +15,7 @@ import no.nav.melosys.domain.mottatteopplysninger.SedGrunnlag;
 import no.nav.melosys.domain.person.adresse.Bostedsadresse;
 import no.nav.melosys.service.kontroll.feature.ufm.data.UfmKontrollData;
 import no.nav.melosys.service.kontroll.regler.*;
+import no.nav.melosys.service.persondata.PersondataFasade;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -135,6 +139,10 @@ class UfmKontroll {
         LocalDate sedFra = kontrollData.sedDokument().getLovvalgsperiode().getFom();
         LocalDate sedTil = kontrollData.sedDokument().getLovvalgsperiode().getTom();
 
+        var historiskeBostedAdresser = kontrollData.persondataMedHistorikk().isPresent() ? kontrollData.persondataMedHistorikk().get().bostedsadresser() : Collections.EMPTY_LIST;
+        var historiskeOppholdsAdresser = kontrollData.persondataMedHistorikk().isPresent() ? kontrollData.persondataMedHistorikk().get().oppholdsadresser() : Collections.EMPTY_LIST;
+
+
         var bostedAdressePeriode = kontrollData.personhistorikkDokumenter()
             .stream()
             .flatMap(a -> a.bostedsadressePeriodeListe.stream())
@@ -142,7 +150,7 @@ class UfmKontroll {
 
         Optional<Bostedsadresse> personBostedsadresse = kontrollData.persondata().finnBostedsadresse();
 
-        return PersonRegler.personBosattINorgeIPeriode(bostedAdressePeriode, personBostedsadresse, sedFra, sedTil) ?
+        return PersonRegler.personBosattINorgeIPeriode(bostedAdressePeriode, personBostedsadresse, historiskeBostedAdresser, historiskeOppholdsAdresser, sedFra, sedTil) ?
             Kontroll_begrunnelser.BOSATT_I_NORGE_I_PERIODEN : null;
     }
 
