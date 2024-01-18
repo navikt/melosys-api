@@ -62,7 +62,7 @@ internal class AktoerHistorikkServiceTest {
     }
 
     @Test
-    fun `fullmektiger slettes endres, hent gjeldende aktører på et gitt tidspunkt`() {
+    fun `fullmektiger slettes, hent gjeldende aktører på et gitt tidspunkt`() {
         val bruker = lagAktør(1, Aktoersroller.BRUKER, "aktørID", registrert = LocalDate.of(2023, 11, 1), endret = LocalDate.of(2023, 11, 1))
         val fullmektig1Slettes = lagFullmektig(2, Fullmaktstype.FULLMEKTIG_TRYGDEAVGIFT, "888888888", registrert = LocalDate.of(2023, 12, 1), endret = LocalDate.of(2023, 12, 1))
         val fullmektig2 = lagFullmektig(3, Fullmaktstype.FULLMEKTIG_TRYGDEAVGIFT, "999999999", registrert = LocalDate.of(2023, 12, 1), endret = LocalDate.of(2023, 12, 2))
