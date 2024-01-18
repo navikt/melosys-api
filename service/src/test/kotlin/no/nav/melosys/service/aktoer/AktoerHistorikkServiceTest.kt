@@ -52,8 +52,8 @@ internal class AktoerHistorikkServiceTest {
         every { auditRepository.getRevisionsBeforeOrAtDate(eq(Aktoer::class.java), any(), any()) } returns revisions
 
 
-        val tidspunkt = LocalDate.of(2023, 12, 2).atStartOfDay(ZoneId.of("Europe/Oslo")).toLocalDateTime()
-        val result = aktoerHistorikkService.hentGyldigeAktørerPåTidspunkt(Fagsak(), Aktoersroller.FULLMEKTIG, tidspunkt)
+        val tidspunkt = LocalDate.of(2023, 12, 2).atStartOfDay(ZoneId.of("Europe/Oslo")).toInstant()
+        val result = aktoerHistorikkService.hentHistoriskeAktørerPåTidspunkt(Fagsak(), Aktoersroller.FULLMEKTIG, tidspunkt)
 
 
         result.shouldHaveSize(2)
@@ -78,8 +78,8 @@ internal class AktoerHistorikkServiceTest {
         every { auditRepository.getRevisionsBeforeOrAtDate(eq(Aktoer::class.java), any(), any()) } returns revisions
 
 
-        val tidspunkt = LocalDate.of(2023, 12, 4).atStartOfDay(ZoneId.of("Europe/Oslo")).toLocalDateTime()
-        val result = aktoerHistorikkService.hentGyldigeAktørerPåTidspunkt(Fagsak(), Aktoersroller.FULLMEKTIG, tidspunkt)
+        val tidspunkt = LocalDate.of(2023, 12, 4).atStartOfDay(ZoneId.of("Europe/Oslo")).toInstant()
+        val result = aktoerHistorikkService.hentHistoriskeAktørerPåTidspunkt(Fagsak(), Aktoersroller.FULLMEKTIG, tidspunkt)
 
 
         result.shouldHaveSize(3)

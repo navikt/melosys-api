@@ -9,6 +9,7 @@ import no.nav.melosys.repository.EntityRevision
 import org.hibernate.envers.RevisionType
 import org.springframework.stereotype.Service
 import org.springframework.transaction.annotation.Transactional
+import java.time.Instant
 import java.time.LocalDateTime
 
 @Service
@@ -17,7 +18,7 @@ class AktoerHistorikkService(
 ) {
 
     @Transactional(readOnly = true)
-    fun hentGyldigeAktørerPåTidspunkt(fagsak: Fagsak, rolle: Aktoersroller, tidspunkt: LocalDateTime): List<Aktoer> {
+    fun hentHistoriskeAktørerPåTidspunkt(fagsak: Fagsak, rolle: Aktoersroller, tidspunkt: Instant): List<Aktoer> {
         val revisions: List<EntityRevision<Aktoer>> =
             auditRepository.getRevisionsBeforeOrAtDate(Aktoer::class.java, mapOf("fagsak_saksnummer" to fagsak.saksnummer, "rolle" to rolle), tidspunkt)
 
