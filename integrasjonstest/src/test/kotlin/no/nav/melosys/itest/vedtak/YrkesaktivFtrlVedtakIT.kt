@@ -9,7 +9,8 @@ import io.getunleash.FakeUnleash
 import io.kotest.matchers.nulls.shouldNotBeNull
 import io.kotest.matchers.shouldBe
 import io.kotest.matchers.types.shouldBeInstanceOf
-import io.mockk.impl.annotations.MockK
+import no.nav.melosys.domain.avgift.Penger
+import no.nav.melosys.domain.avgift.Trygdeavgiftsperiode
 import no.nav.melosys.domain.kodeverk.*
 import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingsaarsaktyper
 import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingsresultattyper
@@ -18,6 +19,8 @@ import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingstyper
 import no.nav.melosys.domain.mottatteopplysninger.SøknadNorgeEllerUtenforEØS
 import no.nav.melosys.domain.mottatteopplysninger.data.Periode
 import no.nav.melosys.domain.mottatteopplysninger.data.Soeknadsland
+import no.nav.melosys.integrasjon.faktureringskomponenten.NyFakturaserieResponseDto
+import no.nav.melosys.integrasjon.trygdeavgift.dto.*
 import no.nav.melosys.itest.JournalfoeringBase
 import no.nav.melosys.itest.OAuthMockServer
 import no.nav.melosys.melosysmock.medl.MedlRepo
@@ -55,6 +58,7 @@ import org.mockito.Mockito
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.context.annotation.Import
 import java.time.LocalDate
+import java.util.*
 
 @Import(OAuthMockServer::class)
 class YrkesaktivFtrlVedtakIT(
@@ -76,8 +80,12 @@ class YrkesaktivFtrlVedtakIT(
     @Autowired private val unleash: FakeUnleash,
     @Autowired private val opprettBehandlingForSak: OpprettBehandlingForSak,
     @Autowired private val trygdeavgiftsgrunnlagService: TrygdeavgiftsgrunnlagService,
-    @MockK private val trygdeavgiftsberegningService: TrygdeavgiftsberegningService,
+    @Autowired private val trygdeavgiftsberegningService: TrygdeavgiftsberegningService,
 ) : JournalfoeringBase(testDataGenerator, journalføringService, oppgaveService, prosessinstansRepository) {
+
+    val uuid1 = UUID.randomUUID()
+    val uuid2 = UUID.randomUUID()
+    val uuid3 = UUID.randomUUID()
 
     @BeforeEach
     fun setup() {
@@ -93,18 +101,43 @@ class YrkesaktivFtrlVedtakIT(
             )
         )
 
-
-        /*val expectedResponse = listOf(
+        val expectedResponse = listOf(
             TrygdeavgiftsberegningResponse(
                 TrygdeavgiftsperiodeDto(
                     DatoPeriodeDto(LocalDate.of(2023, 1, 1), LocalDate.of(2023, 2, 1)),
                     6.8.toBigDecimal(), PengerDto(1000.toBigDecimal() , NOK)
                 ),
-                TrygdeavgiftsgrunnlagDto(UUID.randomUUID(), UUID.randomUUID(), UUID.randomUUID())
+                TrygdeavgiftsgrunnlagDto(uuid1, uuid2, uuid3)
             )
         )
 
-        every { trygdeavgiftConsumer.beregnTrygdeavgift(any()) } returns expectedResponse*/
+        mockServer.stubFor(
+            WireMock.post("/api/v2/beregn")
+                .willReturn(WireMock.aResponse()
+                    .withStatus(200)
+                    .withHeader("Content-Type", "application/json")
+                    .withBody(expectedResponse.toJsonNode.toString())
+                )
+        )
+
+        val fakturaResponse = NyFakturaserieResponseDto("test")
+
+        mockServer.stubFor(
+            WireMock.post("/fakturaserier")
+                .willReturn(WireMock.aResponse()
+                    .withStatus(200)
+                    .withHeader("Content-Type", "application/json")
+                    .withBody(fakturaResponse.toJsonNode.toString())
+                )
+        )
+        mockServer.stubFor(
+            WireMock.delete("/fakturaserier/test")
+                .willReturn(WireMock.aResponse()
+                    .withStatus(200)
+                    .withHeader("Content-Type", "application/json")
+                    .withBody(fakturaResponse.toJsonNode.toString())
+                )
+        )
     }
 
     @AfterEach
@@ -238,24 +271,40 @@ class YrkesaktivFtrlVedtakIT(
         }
         vilkaarsresultatService.registrerVilkår(behandling.id, listOf(vilkaar))
 
+        simulerTrygdeavgiftBeregning(behandling.id);
+
+        val vedtakRequest = FattVedtakRequest.Builder()
+            .medBehandlingsresultatType(Behandlingsresultattyper.MEDLEM_I_FOLKETRYGDEN)
+            .medVedtakstype(Vedtakstyper.FØRSTEGANGSVEDTAK)
+            .medBestillersId("komponent test")
+            .build()
+
+        executeAndWait(
+            waitForprosessType = ProsessType.IVERKSETT_VEDTAK_FTRL,
+            alsoWaitForprosessType = listOf(ProsessType.OPPRETT_OG_DISTRIBUER_BREV)
+        ) {
+            vedtaksfattingFasade.fattVedtak(behandling.id, vedtakRequest)
+        }
+        return behandling.fagsak.saksnummer
+    }
+
+    //Simulerer steget før vedtak
+    private fun simulerTrygdeavgiftBeregning(behandlingId: Long) {
         val medlemskapsperiodeId = opprettMedlemskapsperiodeService.opprettForslagPåMedlemskapsperioder(
-            behandling.id
+            behandlingId
         ).single().id
 
-        //TODO Brute force lagring av medlem av folketrygden, manglende info fra tidligere steg.
-        medlemAvFolketrygdenService.lagre(medlemAvFolketrygden)
-
-        medlemskapsperiodeService.oppdaterMedlemskapsperiode(
-            behandling.id,
+        val medlemskapsperiode = medlemskapsperiodeService.oppdaterMedlemskapsperiode(
+            behandlingId,
             medlemskapsperiodeId,
             LocalDate.of(2023, 1, 1),
             LocalDate.of(2023, 2, 1),
             InnvilgelsesResultat.INNVILGET,
             Trygdedekninger.FTRL_2_9_FØRSTE_LEDD_A_HELSE
-        ).apply { medlemskapstype.shouldBe(Medlemskapstyper.FRIVILLIG) }
+        )
 
         trygdeavgiftsgrunnlagService.oppdaterTrygdeavgiftsgrunnlag(
-            behandling.id,
+            behandlingId,
             OppdaterTrygdeavgiftsgrunnlagRequest(
                 skatteforholdTilNorgeList = listOf(
                     SkatteforholdTilNorgeRequest(
@@ -276,181 +325,26 @@ class YrkesaktivFtrlVedtakIT(
             )
         )
 
-        //trygdeavgiftsberegningService.beregnOgLagreTrygdeavgift(behandling.id)
+        val medlemAvFolketrygden = medlemAvFolketrygdenService.hentMedlemAvFolketrygden(behandlingId)
 
-        val vedtakRequest = FattVedtakRequest.Builder()
-            .medBehandlingsresultatType(Behandlingsresultattyper.MEDLEM_I_FOLKETRYGDEN)
-            .medVedtakstype(Vedtakstyper.FØRSTEGANGSVEDTAK)
-            .medBestillersId("komponent test")
-            .build()
-
-        executeAndWait(
-            waitForprosessType = ProsessType.IVERKSETT_VEDTAK_FTRL,
-            alsoWaitForprosessType = listOf(ProsessType.OPPRETT_OG_DISTRIBUER_BREV)
-        ) {
-            vedtaksfattingFasade.fattVedtak(behandling.id, vedtakRequest)
-        }
-        return behandling.fagsak.saksnummer
-    }
-
-    /*@Test
-    @Disabled
-    fun `yrkesaktiv vedtak - FTRL - innvilgelse nytt vedtak`() {
-        val saksbehandler = "Z123456"
-        val subjectHandler: SubjectHandler = Mockito.mock(SpringSubjectHandler::class.java)
-        SubjectHandler.set(subjectHandler)
-        Mockito.`when`(subjectHandler.getUserID()).thenReturn(saksbehandler)
-
-        val behandling = journalførOgVentTilProsesserErFerdige(
-            defaultJournalføringDto().apply {
-                fagsak.sakstype = Sakstyper.FTRL.kode
-                fagsak.sakstema = Sakstemaer.MEDLEMSKAP_LOVVALG.kode
-                behandlingstypeKode = Behandlingstyper.FØRSTEGANG.kode
-                behandlingstemaKode = Behandlingstema.YRKESAKTIV.kode
-            },
-            waitFor = ProsessType.JFR_NY_SAK_BRUKER,
-            alsoWaitForprosessType = listOf(ProsessType.OPPRETT_OG_DISTRIBUER_BREV)
-        ).behandling
-
-        val mottatteOpplysninger =
-            mottatteOpplysningerService.hentEllerOpprettMottatteOpplysninger(behandling.id, true)
-                .shouldNotBeNull()
-                .mottatteOpplysningerData.apply {
-                    periode = Periode(
-                        LocalDate.of(2023, 1, 1),
-                        LocalDate.of(2023, 2, 1),
-                    )
-                    soeknadsland = Soeknadsland(listOf(Landkoder.BE.kode), false)
-                }
-        mottatteOpplysningerService.oppdaterMottatteOpplysninger(behandling.id, mottatteOpplysninger.toJsonNode)
-        oppfriskSaksopplysningerService.oppfriskSaksopplysning(behandling.id, false)
-
-        val yrkesgruppe = AvklartefaktaDto(
-            listOf("ORDINAER"), "YRKESGRUPPE"
-        ).apply {
-            avklartefaktaType = Avklartefaktatyper.YRKESGRUPPE
-            subjektID = null
-            begrunnelseKoder = emptyList()
-            begrunnelseFritekst = null
-        }
-        val virksomhet = AvklartefaktaDto(
-            listOf("TRUE"), "VIRKSOMHET"
-        ).apply {
-            avklartefaktaType = Avklartefaktatyper.VIRKSOMHET
-            subjektID = "999999999"
-            begrunnelseKoder = emptyList()
-            begrunnelseFritekst = null
-        }
-        val yrkesaktivitet = AvklartefaktaDto(
-            listOf("ORDINAER_ARBEIDSTAKER"), "YRKESAKTIVITET"
-        ).apply {
-            avklartefaktaType = null
-            subjektID = null
-            begrunnelseKoder = emptyList()
-            begrunnelseFritekst = null
-        }
-        avklartefaktaService.lagreAvklarteFakta(behandling.id, setOf(yrkesgruppe, virksomhet, yrkesaktivitet))
-
-        val forutgåendeMedlemskap = VilkaarDto().apply {
-            vilkaar = "ART12_1_FORUTGAAENDE_MEDLEMSKAP"
-            isOppfylt = true
-        }
-        val vesentlingVirksomhet = VilkaarDto().apply {
-            vilkaar = "ART12_1_VESENTLIG_VIRKSOMHET"
-            isOppfylt = true
-        }
-        val art12_1 = VilkaarDto().apply {
-            vilkaar = "FO_883_2004_ART12_1"
-            isOppfylt = true
-        }
-        vilkaarsresultatService.registrerVilkår(behandling.id, listOf(forutgåendeMedlemskap, vesentlingVirksomhet, art12_1))
-
-        lovvalgsperiodeService.lagreLovvalgsperioder(behandling.id, listOf(Lovvalgsperiode().apply {
-            innvilgelsesresultat = InnvilgelsesResultat.INNVILGET
-            bestemmelse = Lovvalgbestemmelser_883_2004.FO_883_2004_ART12_1
-            lovvalgsland = Land_iso2.BE
-            medlemskapstype = Medlemskapstyper.PLIKTIG
-            dekning = Trygdedekninger.FULL_DEKNING
-
-            fom = LocalDate.of(2023, 1, 1)
-            tom = LocalDate.of(2023, 2, 1)
-        }))
-
-        ferdigbehandlingKontrollFacade.kontroller(behandling.id, false, null, setOf())
-
-        val vedtakRequest = FattVedtakRequest.Builder()
-            .medBehandlingsresultatType(Behandlingsresultattyper.FERDIGBEHANDLET)
-            .medVedtakstype(Vedtakstyper.FØRSTEGANGSVEDTAK)
-            .medBestillersId("komponent test")
-            .medBetalingsIntervall(FaktureringsIntervall.MANEDLIG)
-            .build()
-
-
-        executeAndWait(
-            waitForprosessType = ProsessType.IVERKSETT_VEDTAK_FTRL
-        ) {
-            vedtaksfattingFasade.fattVedtak(behandling.id, vedtakRequest)
-        }
-
-        val journalfoeringTilordneDto = lagJournalfoeringOppgaveOgTilordneDto(
-            saksnummer = behandling.fagsak.saksnummer,
-            journalfoeringTilordneDto = defaultJournalfoeringTilordneDto().apply {
-                behandlingstemaKode = Behandlingstema.YRKESAKTIV.kode
-                behandlingstypeKode = Behandlingstyper.NY_VURDERING.kode
+        val trygdeavgiftsperioder = HashSet<Trygdeavgiftsperiode>()
+        trygdeavgiftsperioder.add(
+            Trygdeavgiftsperiode().apply {
+                periodeFra = LocalDate.of(2023, 1, 1)
+                periodeTil = LocalDate.of(2023, 2, 1)
+                trygdesats = 6.8.toBigDecimal()
+                trygdeavgiftsbeløpMd = Penger(1000.toBigDecimal(), "nok")
+                fastsattTrygdeavgift = medlemAvFolketrygden.fastsattTrygdeavgift
+                grunnlagMedlemskapsperiode = medlemskapsperiode
+                grunnlagSkatteforholdTilNorge = medlemAvFolketrygden.fastsattTrygdeavgift.trygdeavgiftsgrunnlag.skatteforholdTilNorge.first()
+                grunnlagInntekstperiode = medlemAvFolketrygden.fastsattTrygdeavgift.trygdeavgiftsgrunnlag.inntektsperioder.first()
             }
         )
 
-        val behandling2 = journalførAndregangsOgVentTilProsesserErFerdige(
-            journalfoeringTilordneDto,
-            waitFor = ProsessType.JFR_ANDREGANG_NY_BEHANDLING
-        ).behandling
-
-        executeAndWait(
-            waitForprosessType = ProsessType.IVERKSETT_VEDTAK_FTRL
-        ) {
-            vedtaksfattingFasade.fattVedtak(behandling2.id, vedtakRequest)
-        }
-
-        val vedtakRequest2 = FattVedtakRequest.Builder()
-            .medBehandlingsresultatType(Behandlingsresultattyper.MEDLEM_I_FOLKETRYGDEN)
-            .medVedtakstype(Vedtakstyper.ENDRINGSVEDTAK)
-            .medBestillersId("komponent test")
-            .build()
-
-
-        executeAndWait(
-            waitForprosessType = ProsessType.IVERKSETT_VEDTAK_FTRL
-        ) {
-            vedtaksfattingFasade.fattVedtak(behandling.id, vedtakRequest2)
-        }
-
-
-        behandlingsresultatService.hentBehandlingsresultat(behandling2.id).apply {
-            type shouldBe Behandlingsresultattyper.FERDIGBEHANDLET
-            behandlingsmåte shouldBe Behandlingsmaate.MANUELT
-            fastsattAvLand shouldBe Land_iso2.NO
-        }
-        lovvalgsperiodeService.hentLovvalgsperiode(behandling2.id).apply {
-            innvilgelsesresultat shouldBe InnvilgelsesResultat.INNVILGET
-            bestemmelse shouldBe Lovvalgbestemmelser_883_2004.FO_883_2004_ART12_1
-            lovvalgsland shouldBe Land_iso2.BE
-            medlemskapstype shouldBe Medlemskapstyper.PLIKTIG
-            dekning shouldBe Trygdedekninger.FULL_DEKNING
-            fom shouldBe LocalDate.of(2023, 1, 1)
-            tom shouldBe LocalDate.of(2023, 2, 1)
-        }
-        behandlingRepository.findById(behandling.id).orElse(null)
-            .shouldNotBeNull().apply {
-                withClue("Behandlingsstatus skal være AVSLUTTET") {
-                    status shouldBe Behandlingsstatus.AVSLUTTET
-                }
-                fagsak.apply {
-                    withClue("Saksstatus skal være LOVVALG_AVKLART") {
-                        status shouldBe Saksstatuser.LOVVALG_AVKLART
-                    }
-                }
-            }
-    }*/
+        medlemAvFolketrygden.fastsattTrygdeavgift.trygdeavgiftsperioder = trygdeavgiftsperioder
+        //Simulerer TrygdeavgiftBergeginingservice.beregnOgLagreTrygdeavgift()
+        medlemAvFolketrygdenService.lagre(medlemAvFolketrygden)
+    }
 
     private val Any.toJsonNode: JsonNode
         get() {
