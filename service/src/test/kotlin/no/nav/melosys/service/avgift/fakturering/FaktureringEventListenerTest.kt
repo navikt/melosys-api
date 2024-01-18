@@ -102,7 +102,7 @@ internal class FaktureringEventListenerTest {
             )
         } returns listOf(historiskFullmektig)
         every { trygdeavgiftOppsummeringService.harFagsakBehandlingerMedTrygdeavgift(fagsak.saksnummer) } returns true
-        every { prosessinstansService.opprettProsessinstansOppdaterFaktura(fagsak.saksnummer) } just runs
+        every { prosessinstansService.opprettProsessinstansOppdaterFaktura(avsluttetBehandling) } just runs
 
 
         faktureringEventListener.oppdaterFakturaMottakerHvisNødvendig(
@@ -113,7 +113,7 @@ internal class FaktureringEventListenerTest {
         )
 
 
-        verify { prosessinstansService.opprettProsessinstansOppdaterFaktura(fagsak.saksnummer) }
+        verify { prosessinstansService.opprettProsessinstansOppdaterFaktura(avsluttetBehandling) }
     }
 
     @Test
@@ -218,7 +218,7 @@ internal class FaktureringEventListenerTest {
             )
         } returns listOf(historiskFullmektig)
         every { trygdeavgiftOppsummeringService.harFagsakBehandlingerMedTrygdeavgift(fagsak.saksnummer) } returns true
-        every { prosessinstansService.opprettProsessinstansOppdaterFaktura(fagsak.saksnummer) } just runs
+        every { prosessinstansService.opprettProsessinstansOppdaterFaktura(avsluttetBehandling) } just runs
 
 
         faktureringEventListener.oppdaterFakturaMottakerHvisNødvendig(
@@ -229,6 +229,6 @@ internal class FaktureringEventListenerTest {
         )
 
 
-        verify { prosessinstansService.opprettProsessinstansOppdaterFaktura(fagsak.saksnummer) }
+        verify { prosessinstansService.opprettProsessinstansOppdaterFaktura(avsluttetBehandling) }
     }
 }
