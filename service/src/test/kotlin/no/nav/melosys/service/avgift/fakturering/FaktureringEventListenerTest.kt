@@ -117,7 +117,7 @@ internal class FaktureringEventListenerTest {
     }
 
     @Test
-    fun `Ikke oppdater fakturamottaker hvis en behandling avsluttes uten å fatte vedtak`() {
+    fun `Ikke oppdater fakturamottaker hvis en behandling avsluttes med vedtak, siden fakturamottaker oppdateres ifm vedtak allerede`() {
         val nåværendeFullmektigAvgift = Aktoer().apply {
             id = 1
             registrertDato =  LocalDate.of(2023, 12, 1).atStartOfDay(ZoneId.of("Europe/Oslo")).toInstant()
