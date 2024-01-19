@@ -6,8 +6,6 @@ import java.util.List;
 import java.util.Objects;
 
 import no.nav.melosys.domain.Behandling;
-import no.nav.melosys.domain.UtenlandskMyndighet;
-import no.nav.melosys.domain.kodeverk.Land_iso2;
 import no.nav.melosys.domain.kodeverk.Mottakerroller;
 import no.nav.melosys.domain.kodeverk.Sakstemaer;
 import no.nav.melosys.domain.kodeverk.Trygdeavtale_myndighetsland;
@@ -259,10 +257,11 @@ public class BrevmalListeBygger {
     }
 
     private FeltValgDto hentUtenlandskMyndighetMottakerValg() {
+        List<String> trygdeavtaleLandkoder = Arrays.stream(Trygdeavtale_myndighetsland.values()).map(Trygdeavtale_myndighetsland::getKode).toList();
+
         return new FeltValgDto(
-            Arrays.stream(Trygdeavtale_myndighetsland.values())
-                .filter(trygdeavtaleMyndighetsland -> !trygdeavtaleMyndighetsland.getKode().equals("ME"))
-                .map(trygdeavtaleMyndighetsland -> utenlandskMyndighetService.hentUtenlandskMyndighet(Land_iso2.valueOf(trygdeavtaleMyndighetsland.getKode())))
+            utenlandskMyndighetService.hentAlleUtenlandskeMyndigheterMedGyldigAdresse().stream()
+                .filter(utenlandskMyndighet -> trygdeavtaleLandkoder.contains(utenlandskMyndighet.landkode.getKode()))
                 .map(utenlandskMyndighet -> {
                     String beskrivelse = "Trygdemyndighetene i %s".formatted(utenlandskMyndighet.landkode.getBeskrivelse());
                     return new FeltvalgAlternativDto(utenlandskMyndighet.hentInstitusjonID(), beskrivelse, true);
