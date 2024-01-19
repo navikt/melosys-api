@@ -29,6 +29,7 @@ import no.nav.melosys.service.avgift.TrygdeavgiftMottakerService
 import no.nav.melosys.service.behandling.BehandlingService
 import no.nav.melosys.service.behandling.BehandlingsresultatService
 import no.nav.melosys.service.persondata.PersondataService
+import no.nav.melosys.service.sak.TrygdeavgiftOppsummeringService
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.extension.ExtendWith
@@ -52,6 +53,9 @@ class OpprettFakturaserieTest {
 
     @RelaxedMockK
     lateinit var pdlService: PersondataService
+
+    @RelaxedMockK
+    lateinit var trygdeavgiftOppsummeringService: TrygdeavgiftOppsummeringService
 
     lateinit var trygdeavgiftMottakerService: TrygdeavgiftMottakerService
 
@@ -78,6 +82,7 @@ class OpprettFakturaserieTest {
             faktureringskomponentenConsumer,
             pdlService,
             trygdeavgiftMottakerService,
+            trygdeavgiftOppsummeringService,
             unleash
         )
     }

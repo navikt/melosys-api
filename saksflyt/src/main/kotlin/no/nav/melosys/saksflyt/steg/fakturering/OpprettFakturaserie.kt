@@ -20,6 +20,7 @@ import no.nav.melosys.service.avgift.TrygdeavgiftMottakerService
 import no.nav.melosys.service.behandling.BehandlingService
 import no.nav.melosys.service.behandling.BehandlingsresultatService
 import no.nav.melosys.service.persondata.PersondataService
+import no.nav.melosys.service.sak.TrygdeavgiftOppsummeringService
 import org.springframework.stereotype.Component
 import java.time.ZoneId
 import java.time.format.DateTimeFormatter
@@ -33,6 +34,7 @@ class OpprettFakturaserie(
     private val faktureringskomponentenConsumer: FaktureringskomponentenConsumer,
     private val pdlService: PersondataService,
     private val trygdeavgiftMottakerService: TrygdeavgiftMottakerService,
+    private val trygdeavgiftOppsummeringService: TrygdeavgiftOppsummeringService,
     private val unleash: Unleash
 ) : StegBehandler {
 
@@ -48,8 +50,9 @@ class OpprettFakturaserie(
         val behandlingsId = prosessinstans.behandling.id
         val saksbehandlerIdent = prosessinstans.getData(ProsessDataKey.SAKSBEHANDLER)
         val behandlingsresultat = behandlingsresultatService.hentBehandlingsresultat(behandlingsId)
+        val opprinneligBehandlingsresultat = behandlingsresultatService.hentBehandlingsresultat(prosessinstans.behandling.id)
 
-        if (resultatErOpphørtEllerSkalIkkeBetaleTrygdeavgiftTilNav(behandlingsresultat, prosessinstans.behandling.type)) {
+        if (resultatErOpphørt(behandlingsresultat) || resultatErOpphørtEllerSkalIkkeBetaleTrygdeavgiftTilNav(behandlingsresultat, prosessinstans.behandling.type, opprinneligBehandlingsresultat)) {
             log.info("Kansellerer fakturaserie for behandling: $behandlingsId med fakturaseriereferanse: ${behandlingsresultat.fakturaserieReferanse}")
             kansellerFakturaserieOgLagreReferanse(behandlingsresultat, saksbehandlerIdent)
         } else if (skalOppretteFakturaserie(behandlingsresultat)) {
@@ -79,10 +82,14 @@ class OpprettFakturaserie(
             && trygdeavgiftMottakerService.skalBetalesTilNav(behandlingsresultat.medlemAvFolketrygden.fastsattTrygdeavgift.trygdeavgiftsgrunnlag)
     }
 
-    private fun resultatErOpphørtEllerSkalIkkeBetaleTrygdeavgiftTilNav(behandlingsresultat: Behandlingsresultat, behandlingstype: Behandlingstyper): Boolean {
+    private fun resultatErOpphørtEllerSkalIkkeBetaleTrygdeavgiftTilNav(behandlingsresultat: Behandlingsresultat, behandlingstype: Behandlingstyper, opprinneligBehandlingsresultat: Behandlingsresultat): Boolean {
+        trygdeavgiftOppsummeringService.harTrygdeavgiftOgBestiltFaktura(opprinneligBehandlingsresultat)
         val trygdeavgiftsGrunnlag = behandlingsresultat.medlemAvFolketrygden.fastsattTrygdeavgift.trygdeavgiftsgrunnlag
-        return behandlingsresultat.type === Behandlingsresultattyper.OPPHØRT ||
-            (behandlingstype === Behandlingstyper.NY_VURDERING && trygdeavgiftMottakerService.betalerKunTrygdeavgiftTilSkatt(trygdeavgiftsGrunnlag))
+        return(behandlingstype === Behandlingstyper.NY_VURDERING && trygdeavgiftMottakerService.betalerKunTrygdeavgiftTilSkatt(trygdeavgiftsGrunnlag))
+    }
+
+    private fun resultatErOpphørt(behandlingsresultat: Behandlingsresultat): Boolean {
+        return behandlingsresultat.type === Behandlingsresultattyper.OPPHØRT
     }
 
     private fun trygdeavgiftsperioderMedAvgift(behandlingsresultat: Behandlingsresultat): List<Trygdeavgiftsperiode> {
