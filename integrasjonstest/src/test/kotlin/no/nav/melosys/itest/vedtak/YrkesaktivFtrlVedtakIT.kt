@@ -10,6 +10,8 @@ import io.kotest.assertions.withClue
 import io.kotest.matchers.nulls.shouldNotBeNull
 import io.kotest.matchers.shouldBe
 import io.kotest.matchers.types.shouldBeInstanceOf
+import io.mockk.every
+import io.mockk.mockk
 import no.nav.melosys.domain.Behandlingsmaate
 import no.nav.melosys.domain.avgift.Penger
 import no.nav.melosys.domain.avgift.Trygdeavgiftsperiode
@@ -52,7 +54,6 @@ import no.nav.melosys.sikkerhet.context.SubjectHandler
 import org.junit.jupiter.api.AfterEach
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
-import org.mockito.Mockito
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.context.annotation.Import
 import java.time.LocalDate
@@ -125,7 +126,7 @@ class YrkesaktivFtrlVedtakIT(
                 )
         )
         mockServer.stubFor(
-            WireMock.delete("/fakturaserier/test")
+            WireMock.delete(WireMock.urlMatching("/fakturaserier/.*"))
                 .willReturn(WireMock.aResponse()
                     .withStatus(200)
                     .withHeader("Content-Type", "application/json")
@@ -143,9 +144,10 @@ class YrkesaktivFtrlVedtakIT(
     @Test
     fun `yrkesaktiv vedtak - FTRL - opprett fakturaserie for førstegangsbehandling og kanseller fakturaserie i ny vurdering`() {
         val saksbehandler = "Z123456"
-        val subjectHandler: SubjectHandler = Mockito.mock(SpringSubjectHandler::class.java)
+        val subjectHandler: SubjectHandler = mockk<SpringSubjectHandler>()
         SubjectHandler.set(subjectHandler)
-        Mockito.`when`(subjectHandler.getUserID()).thenReturn(saksbehandler)
+        every { subjectHandler.userID } returns saksbehandler
+        every { subjectHandler.userName } returns "test"
 
         val saksnummer = lagFørstegangsBehandling()
 
