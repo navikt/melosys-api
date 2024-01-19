@@ -23,7 +23,7 @@ class LagreMedlemsperiodeMedl(
         val behandlingsresultat = behandlingsresultatService.hentBehandlingsresultat(behandlingId)
 
         val innvilgedeMedlemskapsperioder = behandlingsresultat.finnMedlemskapsperioder()
-            .stream().filter { obj: Medlemskapsperiode -> obj.erInnvilget() }.toList()
+            .filter(Medlemskapsperiode::erInnvilget).toList()
         if ((behandling.erNyVurdering() || behandling.erManglendeInnbetalingTrygdeavgift()) && behandling.opprinneligBehandling != null) {
             medlemskapsperiodeService.erstattMedlemskapsperioder(
                 innvilgedeMedlemskapsperioder,
