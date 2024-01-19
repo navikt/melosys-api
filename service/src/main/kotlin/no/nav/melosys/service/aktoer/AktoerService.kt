@@ -39,7 +39,7 @@ class AktoerService(private val aktørRepository: AktoerRepository) {
         }
 
         aktoer.fagsak = fagsak
-        aktoer.institusjonId = aktoerDto.institusjonsID
+        aktoer.institusjonID = aktoerDto.institusjonsID
         aktoer.utenlandskPersonId = aktoerDto.utenlandskPersonID
         aktoer.orgnr = aktoerDto.orgnr
         aktoer.rolle = Aktoersroller.valueOf(aktoerDto.rolleKode)
