@@ -90,6 +90,8 @@ class DokgenServiceTest {
     private UtledMottaksdato mockUtledMottaksdato;
     @Captor
     private ArgumentCaptor<DokgenBrevbestilling> brevbestillingCaptor;
+    @Captor
+    private ArgumentCaptor<Mottaker> mottakerCaptor;
 
     private DokgenService dokgenService;
 
@@ -533,6 +535,24 @@ class DokgenServiceTest {
         verify(mockProsessinstansService, times(2)).opprettProsessinstansOpprettOgDistribuerBrev(any(Behandling.class), any(Mottaker.class), brevbestillingCaptor.capture());
         FritekstbrevBrevbestilling brevbestilling = (FritekstbrevBrevbestilling) brevbestillingCaptor.getValue();
         assertThat(brevbestilling.isBrukerSkalHaKopi()).isTrue();
+    }
+
+    @Test
+    void produserOgDistribuerBrev_UtenlandskTrygdemyndighet_OppretterProsessinstansMedForventetMottaker() {
+        when(mockBehandlingsService.hentBehandlingMedSaksopplysninger(anyLong())).thenReturn(new Behandling());
+
+        var brevbestillingDto = new BrevbestillingDto();
+        brevbestillingDto.setProduserbardokument(UTENLANDSK_TRYGDEMYNDIGHET_FRITEKSTBREV);
+        brevbestillingDto.setInstitusjonID("GB");
+        brevbestillingDto.setMottaker(Mottakerroller.UTENLANDSK_TRYGDEMYNDIGHET);
+
+        dokgenService.produserOgDistribuerBrev(123L, brevbestillingDto);
+
+        verify(mockProsessinstansService, times(1)).opprettProsessinstansOpprettOgDistribuerBrev(any(Behandling.class), mottakerCaptor.capture(),
+            any());
+        Mottaker mottaker = mottakerCaptor.getValue();
+        assertThat(mottaker.getInstitusjonID()).isEqualTo("GB");
+        assertThat(mottaker.getRolle()).isEqualTo(Mottakerroller.UTENLANDSK_TRYGDEMYNDIGHET);
     }
 
     @Test

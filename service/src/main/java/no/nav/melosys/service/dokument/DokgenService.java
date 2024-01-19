@@ -165,7 +165,8 @@ public class DokgenService {
         boolean erBrevTilNorskMyndighet = Mottakerroller.NORSK_MYNDIGHET.equals(brevbestillingDto.getMottaker())
             && !brevbestillingDto.getOrgnrNorskMyndighet().isEmpty();
         boolean erBrevTilAnnenPerson = hasText(brevbestillingDto.getAnnenPersonMottakerIdent());
-        boolean erBrevTilUtenlandskTrygdemyndighetFraBehandlingMedIngenFlyt = hasText(brevbestillingDto.getInstitusjonID());
+        boolean erBrevTilUtenlandskTrygdemyndighetFraBehandlingMedIngenFlyt =
+            hasText(brevbestillingDto.getInstitusjonID()) && produserbartDokument.equals(Produserbaredokumenter.UTENLANDSK_TRYGDEMYNDIGHET_FRITEKSTBREV);
 
         if (erBrevTilUtenlandskTrygdemyndighetFraBehandlingMedIngenFlyt) {
             return hentMottakerForUtenlandskTrygdemyndighet(brevbestillingDto);

@@ -4,14 +4,13 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 import java.util.Set;
+import java.util.stream.Collectors;
 
 import no.nav.melosys.domain.Aktoer;
 import no.nav.melosys.domain.Behandling;
 import no.nav.melosys.domain.Fagsak;
-import no.nav.melosys.domain.kodeverk.Aktoersroller;
-import no.nav.melosys.domain.kodeverk.Land_iso2;
-import no.nav.melosys.domain.kodeverk.Sakstemaer;
-import no.nav.melosys.domain.kodeverk.Sakstyper;
+import no.nav.melosys.domain.UtenlandskMyndighet;
+import no.nav.melosys.domain.kodeverk.*;
 import no.nav.melosys.domain.kodeverk.begrunnelser.Kontroll_begrunnelser;
 import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingstema;
 import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingstyper;
@@ -536,6 +535,95 @@ class BrevmalListeByggerTest {
                 false,
                 ANNET.getKode(),
                 false);
+    }
+
+    @Test
+    void byggBrevmalDtoListe_trygdeavtale_behandlingUtenFlyt_lagerRiktigeFeltForUtenlandskTrygdeMyndighetFritekstbrev() {
+        Behandling behandlingTrygdeavtale = lagBehandling(Behandlingstyper.HENVENDELSE);
+        behandlingTrygdeavtale.getFagsak().setType(Sakstyper.TRYGDEAVTALE);
+        MottatteOpplysninger mottatteOpplysninger = new MottatteOpplysninger();
+        AnmodningEllerAttest anmodningEllerAttest = new AnmodningEllerAttest();
+        mottatteOpplysninger.setMottatteOpplysningerData(anmodningEllerAttest);
+        behandlingTrygdeavtale.setMottatteOpplysninger(mottatteOpplysninger);
+        var utenlandskMyndighet = new UtenlandskMyndighet();
+        utenlandskMyndighet.landkode = Land_iso2.AU;
+
+        when(behandlingService.hentBehandlingMedSaksopplysninger(anyLong())).thenReturn(behandlingTrygdeavtale);
+        when(behandlingService.hentBehandling(anyLong())).thenReturn(behandlingTrygdeavtale);
+        when(saksbehandlingRegler.harIngenFlyt(behandlingTrygdeavtale)).thenReturn(true);
+        when(utenlandskMyndighetService.hentAlleUtenlandskeMyndigheterMedGyldigAdresse()).thenReturn(List.of(utenlandskMyndighet));
+
+
+        List<BrevmalResponse> tilgjengeligeMaler = brevmalListeBygger.byggBrevmalDtoListe(123L);
+
+
+        List<BrevmalResponse> utenlandskTrygdemyndighetBrevmal = tilgjengeligeMaler.stream()
+            .filter(mal -> mal.getMottaker().getRolle().equals(Mottakerroller.UTENLANDSK_TRYGDEMYNDIGHET))
+            .limit(2)
+            .toList();
+        assertThat(utenlandskTrygdemyndighetBrevmal).hasSize(1);
+        assertThat(utenlandskTrygdemyndighetBrevmal.get(0).getBrevTyper()).hasSize(1);
+        assertThat(utenlandskTrygdemyndighetBrevmal.get(0).getBrevTyper().get(0).getFelter().get(0).getKode()).isEqualTo(BrevmalFeltKode.UTENLANDSK_TRYGDEMYNDIGHET_MOTTAKER.getKode());
+        assertThat(utenlandskTrygdemyndighetBrevmal.get(0).getBrevTyper().get(0).getFelter().get(0).getValg().getValgAlternativer())
+            .hasSize(1)
+            .flatExtracting(
+                FeltvalgAlternativDto::getKode,
+                FeltvalgAlternativDto::getBeskrivelse
+            ).containsExactly(
+                Land_iso2.AU.getKode(),
+            "Trygdemyndighetene i " + Land_iso2.AU.getBeskrivelse()
+            );
+    }
+
+    @Test
+    void byggBrevmalDtoListe_trygdeavtale_behandlingMedFlyt_lagerRiktigeFeltForUtenlandskTrygdeMyndighetFritekstbrev() {
+        Behandling behandlingTrygdeavtale = lagBehandling(Behandlingstyper.FØRSTEGANG);
+        behandlingTrygdeavtale.getFagsak().setType(Sakstyper.TRYGDEAVTALE);
+        MottatteOpplysninger mottatteOpplysninger = new MottatteOpplysninger();
+        AnmodningEllerAttest anmodningEllerAttest = new AnmodningEllerAttest();
+        anmodningEllerAttest.setLovvalgsland(Land_iso2.AU);
+        mottatteOpplysninger.setMottatteOpplysningerData(anmodningEllerAttest);
+        behandlingTrygdeavtale.setMottatteOpplysninger(mottatteOpplysninger);
+
+        when(behandlingService.hentBehandlingMedSaksopplysninger(anyLong())).thenReturn(behandlingTrygdeavtale);
+        when(behandlingService.hentBehandling(anyLong())).thenReturn(behandlingTrygdeavtale);
+        when(saksbehandlingRegler.harIngenFlyt(behandlingTrygdeavtale)).thenReturn(false);
+
+        List<BrevmalResponse> tilgjengeligeMaler = brevmalListeBygger.byggBrevmalDtoListe(123L);
+
+
+        List<BrevmalResponse> utenlandskTrygdemyndighetBrevmal = tilgjengeligeMaler.stream()
+            .filter(mal -> mal.getMottaker().getRolle().equals(Mottakerroller.UTENLANDSK_TRYGDEMYNDIGHET))
+            .limit(2)
+            .toList();
+        assertThat(utenlandskTrygdemyndighetBrevmal).hasSize(1);
+        assertThat(utenlandskTrygdemyndighetBrevmal.get(0).getBrevTyper()).hasSize(1);
+        List<BrevmalFeltDto> felter = utenlandskTrygdemyndighetBrevmal.get(0).getBrevTyper().get(0).getFelter();
+        assertThat(felter.stream().filter(brevmalFeltDto -> brevmalFeltDto.getKode().equals(BrevmalFeltKode.UTENLANDSK_TRYGDEMYNDIGHET_MOTTAKER.getKode()))).isEmpty();
+    }
+
+    @Test
+    void byggBrevmalDtoListe_trygdeavtale_behandlingUtenLand_lagerFeilmeldingForUtenlandskTrygdeMyndighetMottaker() {
+        Behandling behandlingTrygdeavtale = lagBehandling(Behandlingstyper.FØRSTEGANG);
+        behandlingTrygdeavtale.getFagsak().setType(Sakstyper.TRYGDEAVTALE);
+        MottatteOpplysninger mottatteOpplysninger = new MottatteOpplysninger();
+        AnmodningEllerAttest anmodningEllerAttest = new AnmodningEllerAttest();
+        mottatteOpplysninger.setMottatteOpplysningerData(anmodningEllerAttest);
+        behandlingTrygdeavtale.setMottatteOpplysninger(mottatteOpplysninger);
+        when(behandlingService.hentBehandlingMedSaksopplysninger(anyLong())).thenReturn(behandlingTrygdeavtale);
+        when(behandlingService.hentBehandling(anyLong())).thenReturn(behandlingTrygdeavtale);
+
+
+        List<BrevmalResponse> tilgjengeligeMaler = brevmalListeBygger.byggBrevmalDtoListe(123L);
+
+
+        List<BrevmalResponse> utenlandskTrygdemyndighetBrevmal = tilgjengeligeMaler.stream()
+            .filter(mal -> mal.getMottaker().getRolle().equals(Mottakerroller.UTENLANDSK_TRYGDEMYNDIGHET))
+            .limit(2)
+            .toList();
+        assertThat(utenlandskTrygdemyndighetBrevmal).hasSize(1);
+        assertThat(utenlandskTrygdemyndighetBrevmal.get(0).getMottaker().getFeilmelding().tittel()).isEqualTo("Du må velge land på inngangssteget " +
+            "for å kunne sende brev til utenlandsk trygdemyndighet.");
     }
 
     @Test
