@@ -141,7 +141,7 @@ class YrkesaktivFtrlVedtakIT(
     }
 
     @Test
-    fun `yrkesaktiv vedtak - FTRL - opprett fakturaserie fra førstegangsbehandling og kanseller fakturaserie i ny vurdering`() {
+    fun `yrkesaktiv vedtak - FTRL - opprett fakturaserie for førstegangsbehandling og kanseller fakturaserie i ny vurdering`() {
         val saksbehandler = "Z123456"
         val subjectHandler: SubjectHandler = Mockito.mock(SpringSubjectHandler::class.java)
         SubjectHandler.set(subjectHandler)
