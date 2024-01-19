@@ -87,18 +87,6 @@ class JournalfoeringBase(
         }
     }
 
-
-
-    protected fun journalførAndregangsOgVentTilProsesserErFerdige(
-        journalfoeringTilordneDto: JournalfoeringTilordneDto,
-        waitFor: ProsessType = ProsessType.JFR_KNYTT,
-        alsoWaitForprosessType: List<ProsessType> = listOf()
-    ): Prosessinstans {
-        return executeAndWait(ProsessType.JFR_KNYTT) {
-            journalføringService.journalførOgKnyttTilEksisterendeSak(journalfoeringTilordneDto)
-        }
-    }
-
     protected fun executeAndWait(
         waitForprosessType: ProsessType,
         alsoWaitForprosessType: List<ProsessType> = listOf(),
