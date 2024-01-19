@@ -142,14 +142,14 @@ internal class AktoerHistorikkServiceTest {
         result.shouldContainExactly(
             AktoerHistorikk(
                 registrertFra = LocalDate.of(2023, 12, 1).atStartOfDay(ZoneId.of(EUROPE_OSLO)).toLocalDateTime(),
-                registretTil = LocalDate.of(2023, 12, 2).atStartOfDay(ZoneId.of(EUROPE_OSLO)).toLocalDateTime(),
+                registrertTil = LocalDate.of(2023, 12, 2).atStartOfDay(ZoneId.of(EUROPE_OSLO)).toLocalDateTime(),
                 rolle = Aktoersroller.FULLMEKTIG,
                 orgnr = "888888888",
                 fullmakter = setOf(Fullmaktstype.FULLMEKTIG_SØKNAD)
             ),
             AktoerHistorikk(
                 registrertFra = LocalDate.of(2023, 12, 2).atStartOfDay(ZoneId.of(EUROPE_OSLO)).toLocalDateTime(),
-                registretTil = null,
+                registrertTil = null,
                 rolle = Aktoersroller.FULLMEKTIG,
                 orgnr = "999999999",
                 fullmakter = setOf(Fullmaktstype.FULLMEKTIG_TRYGDEAVGIFT)

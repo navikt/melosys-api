@@ -42,7 +42,7 @@ class AktoerHistorikkTjeneste(
         return aktører.map {
             AktoerHistorikkDto(
                 registrertFra = it.registrertFra,
-                registretTil = it.registretTil,
+                registretTil = it.registrertTil,
                 rolle = it.rolle,
                 aktoerID = it.aktørId,
                 personIdent = it.personIdent,

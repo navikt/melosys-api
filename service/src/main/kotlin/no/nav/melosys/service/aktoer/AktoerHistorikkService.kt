@@ -47,7 +47,7 @@ class AktoerHistorikkService(
             .map { (revision, next) ->
                 AktoerHistorikk(
                     registrertFra = revision.revisionLocalDateTime,
-                    registretTil = next?.revisionLocalDateTime,
+                    registrertTil = next?.revisionLocalDateTime,
                     aktørId = revision.entity.aktørId,
                     personIdent = revision.entity.personIdent,
                     institusjonID = revision.entity.institusjonId,
@@ -61,7 +61,7 @@ class AktoerHistorikkService(
 
 data class AktoerHistorikk(
     val registrertFra: LocalDateTime,
-    val registretTil: LocalDateTime?,
+    val registrertTil: LocalDateTime?,
     val aktørId: String? = null,
     val personIdent: String? = null,
     val institusjonID: String? = null,
