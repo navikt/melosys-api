@@ -4,7 +4,6 @@ import no.nav.melosys.domain.kodeverk.Saksstatuser
 import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingsresultattyper
 import no.nav.melosys.service.behandling.BehandlingsresultatService
 import no.nav.melosys.service.oppgave.OppgaveService
-import no.nav.melosys.saksflytapi.ProsessinstansService
 import org.springframework.stereotype.Service
 import org.springframework.transaction.annotation.Transactional
 
@@ -13,7 +12,6 @@ class FerdigbehandleSakService(
     private val fagsakService: FagsakService,
     private val behandlingsresultatService: BehandlingsresultatService,
     private val oppgaveService: OppgaveService,
-    private val prosessinstansService: ProsessinstansService,
 ) {
     @Transactional
     fun ferdigbehandleSak(saksnummer: String) {
@@ -24,6 +22,5 @@ class FerdigbehandleSakService(
         fagsakService.avsluttFagsakOgBehandling(fagsak, behandling, nyStatus)
         behandlingsresultatService.oppdaterBehandlingsresultattype(behandling.id, Behandlingsresultattyper.FERDIGBEHANDLET)
         oppgaveService.ferdigstillOppgaveMedSaksnummer(fagsak.saksnummer)
-        prosessinstansService.opprettProsessinstansOppdaterFaktura(behandling)
     }
 }
