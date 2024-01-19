@@ -190,7 +190,6 @@ class YrkesaktivFtrlVedtakIT(
             vedtaksfattingFasade.fattVedtak(behandlingsId, vedtakRequest)
         }
 
-        WireMock.verify(1, WireMock.deleteRequestedFor(WireMock.urlEqualTo("/fakturaserier/test")));
 
         behandlingsresultatService.hentBehandlingsresultat(behandlingsId).apply {
             type.shouldBe(Behandlingsresultattyper.MEDLEM_I_FOLKETRYGDEN)
@@ -208,6 +207,7 @@ class YrkesaktivFtrlVedtakIT(
                     }
                 }
             }
+        WireMock.verify(1, WireMock.deleteRequestedFor(WireMock.urlEqualTo("/fakturaserier/test")));
     }
 
     private fun lagOpprettSakDto(): OpprettSakDto {

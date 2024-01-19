@@ -49,8 +49,7 @@ class OpprettFakturaserie(
         val saksbehandlerIdent = prosessinstans.getData(ProsessDataKey.SAKSBEHANDLER)
         val behandlingsresultat = behandlingsresultatService.hentBehandlingsresultat(behandlingsId)
 
-        if (behandlingsresultat.type === Behandlingsresultattyper.OPPHØRT ||
-            (prosessinstans.behandling.type === Behandlingstyper.NY_VURDERING && skalKansellereFakturaSerie(behandlingsresultat))) {
+        if (skalKansellereFakturaSerie(behandlingsresultat, prosessinstans.behandling.type)) {
             log.info("Kansellerer fakturaserie for behandling: $behandlingsId med fakturaseriereferanse: ${behandlingsresultat.fakturaserieReferanse}")
             kansellerFakturaserieOgLagreReferanse(behandlingsresultat, saksbehandlerIdent)
         } else if (skalOppretteFakturaserie(behandlingsresultat)) {
@@ -80,8 +79,10 @@ class OpprettFakturaserie(
             && trygdeavgiftMottakerService.skalBetalesTilNav(behandlingsresultat.medlemAvFolketrygden.fastsattTrygdeavgift.trygdeavgiftsgrunnlag)
     }
 
-    private fun skalKansellereFakturaSerie(behandlingsresultat: Behandlingsresultat): Boolean {
-        return trygdeavgiftMottakerService.betalerKunTrygdeavgiftTilSkatt(behandlingsresultat.medlemAvFolketrygden.fastsattTrygdeavgift.trygdeavgiftsgrunnlag)
+    private fun skalKansellereFakturaSerie(behandlingsresultat: Behandlingsresultat, behandlingstype: Behandlingstyper): Boolean {
+        val trygdeavgiftsGrunnlag = behandlingsresultat.medlemAvFolketrygden.fastsattTrygdeavgift.trygdeavgiftsgrunnlag
+        return behandlingsresultat.type === Behandlingsresultattyper.OPPHØRT ||
+            (behandlingstype === Behandlingstyper.NY_VURDERING && trygdeavgiftMottakerService.betalerKunTrygdeavgiftTilSkatt(trygdeavgiftsGrunnlag))
     }
 
     private fun trygdeavgiftsperioderMedAvgift(behandlingsresultat: Behandlingsresultat): List<Trygdeavgiftsperiode> {
