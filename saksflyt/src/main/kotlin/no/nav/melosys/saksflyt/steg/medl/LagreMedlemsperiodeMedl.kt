@@ -19,20 +19,19 @@ class LagreMedlemsperiodeMedl(
 
     override fun utfør(prosessinstans: Prosessinstans) {
         val behandling = prosessinstans.behandling
-        val behandlingId = prosessinstans.behandling.id
-        val behandlingsresultat = behandlingsresultatService.hentBehandlingsresultat(behandlingId)
+        val behandlingID = prosessinstans.behandling.id
+        val behandlingsresultat = behandlingsresultatService.hentBehandlingsresultat(behandlingID)
 
-        val innvilgedeMedlemskapsperioder = behandlingsresultat.finnMedlemskapsperioder()
-            .filter(Medlemskapsperiode::erInnvilget).toList()
+        val innvilgedeMedlemskapsperioder = behandlingsresultat.finnMedlemskapsperioder().filter(Medlemskapsperiode::erInnvilget)
         if ((behandling.erNyVurdering() || behandling.erManglendeInnbetalingTrygdeavgift()) && behandling.opprinneligBehandling != null) {
             medlemskapsperiodeService.erstattMedlemskapsperioder(
                 innvilgedeMedlemskapsperioder,
                 behandling.opprinneligBehandling.id,
-                behandlingId
+                behandlingID
             )
         } else {
-            for (medlemskapsperiode in innvilgedeMedlemskapsperioder) {
-                medlemskapsperiodeService.opprettEllerOppdaterMedlPeriode(behandlingId, medlemskapsperiode)
+            innvilgedeMedlemskapsperioder.forEach {
+                medlemskapsperiodeService.opprettEllerOppdaterMedlPeriode(behandlingID, it)
             }
         }
     }
