@@ -384,8 +384,8 @@ public final class ProsessflytDefinisjon {
         );
 
         PROSESS_FLYT_MAP.put(
-            ProsessType.OPPDATER_FAKTURA,
-            new ProsessFlyt(ProsessType.OPPDATER_FAKTURA,
+            ProsessType.OPPDATER_FAKTURAMOTTAKER,
+            new ProsessFlyt(ProsessType.OPPDATER_FAKTURAMOTTAKER,
                 OPPDATER_FAKTURAMOTTAKER
             )
         );

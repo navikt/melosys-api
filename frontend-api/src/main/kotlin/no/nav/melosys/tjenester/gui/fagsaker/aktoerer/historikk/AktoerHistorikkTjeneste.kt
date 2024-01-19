@@ -13,7 +13,6 @@ import org.springframework.web.bind.annotation.PathVariable
 import org.springframework.web.bind.annotation.RequestMapping
 import org.springframework.web.bind.annotation.RestController
 import org.springframework.web.context.WebApplicationContext
-import java.time.LocalDate
 
 @Protected
 @RestController
@@ -42,7 +41,8 @@ class AktoerHistorikkTjeneste(
 
         return aktører.map {
             AktoerHistorikkDto(
-                registrertFra = LocalDate.now(),
+                registrertFra = it.registrertFra,
+                registretTil = it.registrertTil,
                 rolle = it.rolle,
                 aktoerID = it.aktørId,
                 personIdent = it.personIdent,
