@@ -37,11 +37,4 @@ open class FaktureringskomponentenConsumer(private val webClient: WebClient) : J
             .retrieve()
             .bodyToMono<Void>()
             .block()
-
-    fun getFakturaSerie(referanse: String) =
-        webClient.get()
-            .uri("/fakturaserier/{referanse}", referanse)
-            .retrieve()
-            .bodyToMono<FakturaserieDto>()
-            .block()
 }
