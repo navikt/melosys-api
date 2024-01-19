@@ -40,7 +40,7 @@ class InnvilgelseFtrlMapper(
             .behandlingstype(behandlingsresultat.behandling.type)
             .avgiftsperioder(mapAvgiftsPerioder(medlemAvFolketrygden))
             .medlemskapsperioder(mapMedlemskapsPerioder(medlemAvFolketrygden))
-            .bestemmelse(medlemAvFolketrygden.bestemmelse)
+            .bestemmelse(medlemAvFolketrygden.medlemskapsperioder.sortedBy { it.fom }.first().bestemmelse)
             .avslåttHelsedelFørMottaksdato(
                 erAvslåttHelsedelFørMottaksdato(
                     brevbestilling.forsendelseMottatt,

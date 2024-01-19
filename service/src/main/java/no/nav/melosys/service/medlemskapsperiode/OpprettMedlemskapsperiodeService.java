@@ -7,6 +7,7 @@ import java.util.Optional;
 import no.nav.melosys.domain.Behandlingsresultat;
 import no.nav.melosys.domain.Fagsak;
 import no.nav.melosys.domain.Medlemskapsperiode;
+import no.nav.melosys.domain.folketrygden.MedlemAvFolketrygden;
 import no.nav.melosys.domain.kodeverk.Folketrygdloven_kap2_bestemmelser;
 import no.nav.melosys.domain.kodeverk.Vilkaar;
 import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingstema;
@@ -35,11 +36,10 @@ public class OpprettMedlemskapsperiodeService {
     }
 
     @Transactional
-    public Collection<Medlemskapsperiode> opprettForslagPåMedlemskapsperioder(long behandlingID) {
+    public Collection<Medlemskapsperiode> opprettForslagPåMedlemskapsperioder(long behandlingID, Folketrygdloven_kap2_bestemmelser bestemmelse) {
         var behandlingsresultat = behandlingsresultatService.hentBehandlingsresultat(behandlingID);
         var behandling = behandlingsresultat.getBehandling();
-        var medlemAvFolketrygden = behandlingsresultat.getMedlemAvFolketrygden();
-        var bestemmelse = medlemAvFolketrygden.getBestemmelse();
+        var medlemAvFolketrygden = hentEllerOpprettMedlemAvFolketrygden(behandlingsresultat);
 
         validerSakstype(behandling.getFagsak());
         validerBestemmelse(bestemmelse, behandling.getTema());
@@ -51,10 +51,10 @@ public class OpprettMedlemskapsperiodeService {
 
             if (behandling.erNyVurdering() && opprinneligBehandling != null) {
                 var opprinneligBehandlingsresultat = behandlingsresultatService.hentBehandlingsresultat(opprinneligBehandling.getId());
-                medlemskapsperioder = new UtledMedlemskapsperioder().lagMedlemskapsperioderForNyVurdering(opprinneligBehandlingsresultat);
+                medlemskapsperioder = new UtledMedlemskapsperioder().lagMedlemskapsperioderForNyVurdering(opprinneligBehandlingsresultat, bestemmelse);
             } else if (behandling.erManglendeInnbetalingTrygdeavgift() && opprinneligBehandling != null) {
                 var opprinneligBehandlingsresultat = behandlingsresultatService.hentBehandlingsresultat(opprinneligBehandling.getId());
-                medlemskapsperioder = new UtledMedlemskapsperioder().lagMedlemskapsperioderForManglendeInnbetaling(opprinneligBehandlingsresultat);
+                medlemskapsperioder = new UtledMedlemskapsperioder().lagMedlemskapsperioderForManglendeInnbetaling(opprinneligBehandlingsresultat, bestemmelse);
             } else {
                 SøknadNorgeEllerUtenforEØS søknad = (SøknadNorgeEllerUtenforEØS) behandling.getMottatteOpplysninger().getMottatteOpplysningerData();
                 medlemskapsperioder = new UtledMedlemskapsperioder().lagMedlemskapsperioder(
@@ -62,15 +62,32 @@ public class OpprettMedlemskapsperiodeService {
                         søknad.periode,
                         søknad.getTrygdedekning(),
                         utledMottaksdato.getMottaksdato(behandling),
-                        søknad.hentArbeidsland())
+                        søknad.hentArbeidsland(),
+                        bestemmelse)
                 );
             }
-
             medlemAvFolketrygden.getMedlemskapsperioder().addAll(medlemskapsperioder);
             medlemskapsperioder.forEach(m -> m.setMedlemAvFolketrygden(medlemAvFolketrygden));
+        } else {
+            medlemAvFolketrygden.getMedlemskapsperioder().forEach(medlemskapsperiode -> {
+                if (!medlemskapsperiode.erOpphørt()) {
+                    medlemskapsperiode.setBestemmelse(bestemmelse);
+                }
+            });
         }
 
         return medlemAvFolketrygdenRepository.save(medlemAvFolketrygden).getMedlemskapsperioder();
+    }
+
+
+    private MedlemAvFolketrygden hentEllerOpprettMedlemAvFolketrygden(Behandlingsresultat behandlingsresultat) {
+        if (behandlingsresultat.getMedlemAvFolketrygden() != null) {
+            return behandlingsresultat.getMedlemAvFolketrygden();
+        }
+
+        var medlemAvFolketrygden = new MedlemAvFolketrygden();
+        medlemAvFolketrygden.setBehandlingsresultat(behandlingsresultat);
+        return medlemAvFolketrygden;
     }
 
     private void validerSakstype(Fagsak fagsak) {

@@ -84,7 +84,7 @@ class MedlemskapsperiodeServiceTest {
 
 
         medlemskapsperiodeService.opprettMedlemskapsperiode(behandlingsresultatID, LocalDate.now().minusYears(1), LocalDate.now(),
-            InnvilgelsesResultat.AVSLAATT, Trygdedekninger.FTRL_2_9_FØRSTE_LEDD_A_HELSE);
+            InnvilgelsesResultat.AVSLAATT, Trygdedekninger.FTRL_2_9_FØRSTE_LEDD_A_HELSE, Folketrygdloven_kap2_bestemmelser.FTRL_KAP2_2_8_ANDRE_LEDD);
 
 
         verify(medlemskapsperiodeRepositoryMock).save(medlemskapsperiodeCaptor.capture());
@@ -94,11 +94,13 @@ class MedlemskapsperiodeServiceTest {
                 Medlemskapsperiode::getArbeidsland,
                 Medlemskapsperiode::getInnvilgelsesresultat,
                 Medlemskapsperiode::getTrygdedekning,
+                Medlemskapsperiode::getBestemmelse,
                 Medlemskapsperiode::getMedlemskapstype)
             .containsExactly(
                 Land_iso2.AU.getKode(),
                 InnvilgelsesResultat.AVSLAATT,
                 Trygdedekninger.FTRL_2_9_FØRSTE_LEDD_A_HELSE,
+                Folketrygdloven_kap2_bestemmelser.FTRL_KAP2_2_8_ANDRE_LEDD,
                 Medlemskapstyper.FRIVILLIG);
     }
 
@@ -112,14 +114,23 @@ class MedlemskapsperiodeServiceTest {
 
         LocalDate nå = LocalDate.now();
         medlemskapsperiodeService.oppdaterMedlemskapsperiode(behandlingsresultatID, medlemskapsperiodeID, nå, nå,
-            InnvilgelsesResultat.AVSLAATT, Trygdedekninger.FTRL_2_9_FØRSTE_LEDD_C_ANDRE_LEDD_HELSE_PENSJON_SYKE_FORELDREPENGER);
+            InnvilgelsesResultat.AVSLAATT, Trygdedekninger.FTRL_2_9_FØRSTE_LEDD_C_ANDRE_LEDD_HELSE_PENSJON_SYKE_FORELDREPENGER, Folketrygdloven_kap2_bestemmelser.FTRL_KAP2_2_1_FØRSTE_LEDD);
 
         verify(medlemskapsperiodeRepositoryMock).save(medlemskapsperiode);
         verifyNoInteractions(trygdeavgiftsgrunnlagServiceMock);
         assertThat(medlemskapsperiode)
-            .extracting(Medlemskapsperiode::getFom, Medlemskapsperiode::getTom,
-                Medlemskapsperiode::getInnvilgelsesresultat, Medlemskapsperiode::getTrygdedekning)
-            .containsExactly(nå, nå, InnvilgelsesResultat.AVSLAATT, Trygdedekninger.FTRL_2_9_FØRSTE_LEDD_C_ANDRE_LEDD_HELSE_PENSJON_SYKE_FORELDREPENGER);
+            .extracting(
+                Medlemskapsperiode::getFom,
+                Medlemskapsperiode::getTom,
+                Medlemskapsperiode::getInnvilgelsesresultat,
+                Medlemskapsperiode::getBestemmelse,
+                Medlemskapsperiode::getTrygdedekning)
+            .containsExactly(
+                nå,
+                nå,
+                InnvilgelsesResultat.AVSLAATT,
+                Folketrygdloven_kap2_bestemmelser.FTRL_KAP2_2_1_FØRSTE_LEDD,
+                Trygdedekninger.FTRL_2_9_FØRSTE_LEDD_C_ANDRE_LEDD_HELSE_PENSJON_SYKE_FORELDREPENGER);
     }
 
     @Test
@@ -133,7 +144,7 @@ class MedlemskapsperiodeServiceTest {
 
         LocalDate nå = LocalDate.now();
         medlemskapsperiodeService.oppdaterMedlemskapsperiode(behandlingsresultatID, medlemskapsperiodeID, nå, nå,
-            InnvilgelsesResultat.AVSLAATT, Trygdedekninger.FTRL_2_9_FØRSTE_LEDD_C_ANDRE_LEDD_HELSE_PENSJON_SYKE_FORELDREPENGER);
+            InnvilgelsesResultat.AVSLAATT, Trygdedekninger.FTRL_2_9_FØRSTE_LEDD_C_ANDRE_LEDD_HELSE_PENSJON_SYKE_FORELDREPENGER, Folketrygdloven_kap2_bestemmelser.FTRL_KAP2_2_8_ANDRE_LEDD);
 
         verify(medlemskapsperiodeRepositoryMock).save(medlemskapsperiode);
         assertThat(medlemskapsperiode)
@@ -177,7 +188,7 @@ class MedlemskapsperiodeServiceTest {
 
         assertThatExceptionOfType(FunksjonellException.class)
             .isThrownBy(() -> medlemskapsperiodeService.oppdaterMedlemskapsperiode(behandlingsresultatID, medlemskapsperiodeID, LocalDate.now(),
-                LocalDate.now(), InnvilgelsesResultat.AVSLAATT, Trygdedekninger.FULL_DEKNING_EOSFO))
+                LocalDate.now(), InnvilgelsesResultat.AVSLAATT, Trygdedekninger.FULL_DEKNING_EOSFO, Folketrygdloven_kap2_bestemmelser.FTRL_KAP2_2_8_ANDRE_LEDD))
             .withMessageContaining("støttes ikke for en medlemskapsperiode");
     }
 
@@ -189,19 +200,31 @@ class MedlemskapsperiodeServiceTest {
 
         assertThatExceptionOfType(FunksjonellException.class)
             .isThrownBy(() -> medlemskapsperiodeService.oppdaterMedlemskapsperiode(behandlingsresultatID, medlemskapsperiodeID, LocalDate.now(),
-                LocalDate.now().minusDays(1), InnvilgelsesResultat.AVSLAATT, Trygdedekninger.FTRL_2_9_FØRSTE_LEDD_C_HELSE_PENSJON))
+                LocalDate.now().minusDays(1), InnvilgelsesResultat.AVSLAATT, Trygdedekninger.FTRL_2_9_FØRSTE_LEDD_C_HELSE_PENSJON, Folketrygdloven_kap2_bestemmelser.FTRL_KAP2_2_8_ANDRE_LEDD))
             .withMessageContaining("kan ikke være før");
     }
 
     @Test
-    void oppdaterMedlemskapsperiode_utenTrygdedekning_oppdateres() {
+    void oppdaterMedlemskapsperiode_utenTrygdedekning_kasterFeil() {
         when(medlemAvFolketrygdenServiceMock.hentMedlemAvFolketrygden(behandlingsresultatID))
             .thenReturn(lagMedlemAvFolketrygden(lagMedlemskapsperiode()));
 
         LocalDate nå = LocalDate.now();
         assertThatExceptionOfType(FunksjonellException.class)
             .isThrownBy(() -> medlemskapsperiodeService.oppdaterMedlemskapsperiode(behandlingsresultatID, medlemskapsperiodeID, nå, nå,
-                InnvilgelsesResultat.AVSLAATT, null))
+                InnvilgelsesResultat.AVSLAATT, null, Folketrygdloven_kap2_bestemmelser.FTRL_KAP2_2_15_ANDRE_LEDD))
+            .withMessageContaining("er påkrevd");
+    }
+
+    @Test
+    void oppdaterMedlemskapsperiode_utenBestemmelse_kasterFeil() {
+        when(medlemAvFolketrygdenServiceMock.hentMedlemAvFolketrygden(behandlingsresultatID))
+            .thenReturn(lagMedlemAvFolketrygden(lagMedlemskapsperiode()));
+
+        LocalDate nå = LocalDate.now();
+        assertThatExceptionOfType(FunksjonellException.class)
+            .isThrownBy(() -> medlemskapsperiodeService.oppdaterMedlemskapsperiode(behandlingsresultatID, medlemskapsperiodeID, nå, nå,
+                InnvilgelsesResultat.AVSLAATT, Trygdedekninger.FTRL_2_9_FØRSTE_LEDD_C_HELSE_PENSJON, null))
             .withMessageContaining("er påkrevd");
     }
 
@@ -211,7 +234,7 @@ class MedlemskapsperiodeServiceTest {
             .thenReturn(lagMedlemAvFolketrygden());
         assertThatExceptionOfType(FunksjonellException.class)
             .isThrownBy(() -> medlemskapsperiodeService.oppdaterMedlemskapsperiode(behandlingsresultatID, 0, LocalDate.now(),
-                LocalDate.now(), InnvilgelsesResultat.DELVIS_INNVILGET, Trygdedekninger.FTRL_2_9_FØRSTE_LEDD_C_HELSE_PENSJON))
+                LocalDate.now(), InnvilgelsesResultat.DELVIS_INNVILGET, Trygdedekninger.FTRL_2_9_FØRSTE_LEDD_C_HELSE_PENSJON, Folketrygdloven_kap2_bestemmelser.FTRL_KAP2_2_8_ANDRE_LEDD))
             .withMessageContaining("har ingen");
     }
 
@@ -273,7 +296,6 @@ class MedlemskapsperiodeServiceTest {
     private MedlemAvFolketrygden lagMedlemAvFolketrygden(Medlemskapsperiode... medlemskapsperioder) {
         MedlemAvFolketrygden medlemAvFolketrygden = new MedlemAvFolketrygden();
         medlemAvFolketrygden.setMedlemskapsperioder(new LinkedList<>(Arrays.asList(medlemskapsperioder)));
-        medlemAvFolketrygden.setBestemmelse(Folketrygdloven_kap2_bestemmelser.FTRL_KAP2_2_8_ANDRE_LEDD);
         return medlemAvFolketrygden;
     }
 
@@ -285,6 +307,7 @@ class MedlemskapsperiodeServiceTest {
         medlemskapsperiode.setTrygdedekning(Trygdedekninger.FULL_DEKNING_FTRL);
         medlemskapsperiode.setMedlemskapstype(Medlemskapstyper.PLIKTIG);
         medlemskapsperiode.setArbeidsland("BR");
+        medlemskapsperiode.setBestemmelse(Folketrygdloven_kap2_bestemmelser.FTRL_KAP2_2_8_ANDRE_LEDD);
         return medlemskapsperiode;
     }
 }
