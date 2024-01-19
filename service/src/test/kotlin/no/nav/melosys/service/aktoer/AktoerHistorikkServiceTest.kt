@@ -52,8 +52,8 @@ internal class AktoerHistorikkServiceTest {
         every { auditRepository.getRevisionsBeforeOrAtDate(eq(Aktoer::class.java), any(), any()) } returns revisions
 
 
-        val tidspunkt = LocalDate.of(2023, 12, 2).atStartOfDay(ZoneId.of("Europe/Oslo")).toLocalDateTime()
-        val result = aktoerHistorikkService.hentGyldigeAktørerPåTidspunkt(Fagsak(), Aktoersroller.FULLMEKTIG, tidspunkt)
+        val tidspunkt = LocalDate.of(2023, 12, 2).atStartOfDay(ZoneId.of("Europe/Oslo")).toInstant()
+        val result = aktoerHistorikkService.hentHistoriskeAktørerPåTidspunkt(Fagsak(), Aktoersroller.FULLMEKTIG, tidspunkt)
 
 
         result.shouldHaveSize(2)
@@ -78,8 +78,8 @@ internal class AktoerHistorikkServiceTest {
         every { auditRepository.getRevisionsBeforeOrAtDate(eq(Aktoer::class.java), any(), any()) } returns revisions
 
 
-        val tidspunkt = LocalDate.of(2023, 12, 4).atStartOfDay(ZoneId.of("Europe/Oslo")).toLocalDateTime()
-        val result = aktoerHistorikkService.hentGyldigeAktørerPåTidspunkt(Fagsak(), Aktoersroller.FULLMEKTIG, tidspunkt)
+        val tidspunkt = LocalDate.of(2023, 12, 4).atStartOfDay(ZoneId.of("Europe/Oslo")).toInstant()
+        val result = aktoerHistorikkService.hentHistoriskeAktørerPåTidspunkt(Fagsak(), Aktoersroller.FULLMEKTIG, tidspunkt)
 
 
         result.shouldHaveSize(3)
@@ -142,14 +142,14 @@ internal class AktoerHistorikkServiceTest {
         result.shouldContainExactly(
             AktoerHistorikk(
                 registrertFra = LocalDate.of(2023, 12, 1).atStartOfDay(ZoneId.of(EUROPE_OSLO)).toLocalDateTime(),
-                registretTil = LocalDate.of(2023, 12, 2).atStartOfDay(ZoneId.of(EUROPE_OSLO)).toLocalDateTime(),
+                registrertTil = LocalDate.of(2023, 12, 2).atStartOfDay(ZoneId.of(EUROPE_OSLO)).toLocalDateTime(),
                 rolle = Aktoersroller.FULLMEKTIG,
                 orgnr = "888888888",
                 fullmakter = setOf(Fullmaktstype.FULLMEKTIG_SØKNAD)
             ),
             AktoerHistorikk(
                 registrertFra = LocalDate.of(2023, 12, 2).atStartOfDay(ZoneId.of(EUROPE_OSLO)).toLocalDateTime(),
-                registretTil = null,
+                registrertTil = null,
                 rolle = Aktoersroller.FULLMEKTIG,
                 orgnr = "999999999",
                 fullmakter = setOf(Fullmaktstype.FULLMEKTIG_TRYGDEAVGIFT)

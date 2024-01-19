@@ -647,7 +647,7 @@ public class ProsessinstansService {
 
     public void opprettProsessinstansOppdaterFaktura(Behandling behandling) {
         Prosessinstans prosessinstans = new ProsessinstansBuilder()
-            .medType(ProsessType.OPPDATER_FAKTURA)
+            .medType(ProsessType.OPPDATER_FAKTURAMOTTAKER)
             .medBehandling(behandling)
             .build();
         prosessinstans.setData(SAKSNUMMER, behandling.getFagsak().getSaksnummer());
