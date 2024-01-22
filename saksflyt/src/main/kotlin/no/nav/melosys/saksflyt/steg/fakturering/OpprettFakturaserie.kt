@@ -50,9 +50,8 @@ class OpprettFakturaserie(
         val behandlingsId = prosessinstans.behandling.id
         val saksbehandlerIdent = prosessinstans.getData(ProsessDataKey.SAKSBEHANDLER)
         val behandlingsresultat = behandlingsresultatService.hentBehandlingsresultat(behandlingsId)
-        val opprinneligBehandlingsresultat = behandlingsresultatService.hentBehandlingsresultat(prosessinstans.behandling.id)
 
-        if (resultatErOpphørt(behandlingsresultat) || resultatErOpphørtEllerSkalIkkeBetaleTrygdeavgiftTilNav(behandlingsresultat, prosessinstans.behandling.type, opprinneligBehandlingsresultat)) {
+        if (resultatErOpphørt(behandlingsresultat) || erNyVurderingOgskalIkkeBetaleTrygdeavgiftTilNav(behandlingsresultat, prosessinstans)) {
             log.info("Kansellerer fakturaserie for behandling: $behandlingsId med fakturaseriereferanse: ${behandlingsresultat.fakturaserieReferanse}")
             kansellerFakturaserieOgLagreReferanse(behandlingsresultat, saksbehandlerIdent)
         } else if (skalOppretteFakturaserie(behandlingsresultat)) {
@@ -82,10 +81,15 @@ class OpprettFakturaserie(
             && trygdeavgiftMottakerService.skalBetalesTilNav(behandlingsresultat.medlemAvFolketrygden.fastsattTrygdeavgift.trygdeavgiftsgrunnlag)
     }
 
-    private fun resultatErOpphørtEllerSkalIkkeBetaleTrygdeavgiftTilNav(behandlingsresultat: Behandlingsresultat, behandlingstype: Behandlingstyper, opprinneligBehandlingsresultat: Behandlingsresultat): Boolean {
-        trygdeavgiftOppsummeringService.harTrygdeavgiftOgBestiltFaktura(opprinneligBehandlingsresultat)
-        val trygdeavgiftsGrunnlag = behandlingsresultat.medlemAvFolketrygden.fastsattTrygdeavgift.trygdeavgiftsgrunnlag
-        return(behandlingstype === Behandlingstyper.NY_VURDERING && trygdeavgiftMottakerService.betalerKunTrygdeavgiftTilSkatt(trygdeavgiftsGrunnlag))
+    private fun erNyVurderingOgskalIkkeBetaleTrygdeavgiftTilNav(behandlingsresultat: Behandlingsresultat, prosessinstans: Prosessinstans): Boolean {
+        val opprinneligBehandlingsresultat = behandlingsresultatService.hentBehandlingsresultat(prosessinstans.behandling.opprinneligBehandling.id)
+        val opprinneligBehandlingHarTrygdeavgift = opprinneligBehandlingsresultat != null
+            && trygdeavgiftOppsummeringService.harTrygdeavgiftOgBestiltFaktura(opprinneligBehandlingsresultat)
+
+        val trygdeavgiftsGrunnlag = behandlingsresultat.medlemAvFolketrygden?.fastsattTrygdeavgift?.trygdeavgiftsgrunnlag
+        val betalerKunTrygdeavgiftTilSkatt = trygdeavgiftsGrunnlag != null && trygdeavgiftMottakerService.betalerKunTrygdeavgiftTilSkatt(trygdeavgiftsGrunnlag)
+
+        return (prosessinstans.behandling.type === Behandlingstyper.NY_VURDERING && opprinneligBehandlingHarTrygdeavgift && betalerKunTrygdeavgiftTilSkatt)
     }
 
     private fun resultatErOpphørt(behandlingsresultat: Behandlingsresultat): Boolean {
