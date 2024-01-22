@@ -96,6 +96,12 @@ class YrkesaktivFtrlVedtakIT(
             )
         )
 
+        val saksbehandler = "Z123456"
+        val subjectHandler: SubjectHandler = mockk<SpringSubjectHandler>()
+        SubjectHandler.set(subjectHandler)
+        every { subjectHandler.userID } returns saksbehandler
+        every { subjectHandler.userName } returns "test"
+
         val expectedResponse = listOf(
             TrygdeavgiftsberegningResponse(
                 TrygdeavgiftsperiodeDto(
@@ -142,15 +148,15 @@ class YrkesaktivFtrlVedtakIT(
     }
 
     @Test
-    fun `yrkesaktiv vedtak - FTRL - opprett fakturaserie for førstegangsbehandling og kanseller fakturaserie i ny vurdering`() {
-        val saksbehandler = "Z123456"
-        val subjectHandler: SubjectHandler = mockk<SpringSubjectHandler>()
-        SubjectHandler.set(subjectHandler)
-        every { subjectHandler.userID } returns saksbehandler
-        every { subjectHandler.userName } returns "test"
+    fun `yrkesaktiv vedtak - FTRL - skal hverken opprette fakturaserier eller kansellere dersom det ikke eksisterer førstegangsbehandling`() {
+        lagFørstegangsBehandling(Skatteplikttype.SKATTEPLIKTIG, true)
+        WireMock.verify(0, WireMock.deleteRequestedFor(WireMock.urlEqualTo("/fakturaserier/test")));
+        WireMock.verify(0, WireMock.postRequestedFor(WireMock.urlEqualTo("/fakturaserier")));
+    }
 
-        val saksnummer = lagFørstegangsBehandling()
-        WireMock.verify(1, WireMock.postRequestedFor(WireMock.urlEqualTo("/fakturaserier")));
+    @Test
+    fun `yrkesaktiv vedtak - FTRL - opprett fakturaserie for førstegangsbehandling og kanseller fakturaserie i ny vurdering`() {
+        val saksnummer = lagFørstegangsBehandling(Skatteplikttype.IKKE_SKATTEPLIKTIG, false)
 
         val behandlingsId = executeAndWait(waitForprosessType = ProsessType.OPPRETT_REPLIKERT_BEHANDLING_FOR_SAK) {
             opprettBehandlingForSak.opprettBehandling(
@@ -210,6 +216,8 @@ class YrkesaktivFtrlVedtakIT(
                     }
                 }
             }
+
+        WireMock.verify(1, WireMock.postRequestedFor(WireMock.urlEqualTo("/fakturaserier")));
         WireMock.verify(1, WireMock.deleteRequestedFor(WireMock.urlEqualTo("/fakturaserier/test")));
     }
 
@@ -222,7 +230,7 @@ class YrkesaktivFtrlVedtakIT(
         return opprettsakdto
     }
 
-    fun lagFørstegangsBehandling(): String {
+    fun lagFørstegangsBehandling(skatteplikttype: Skatteplikttype, arbeidsgiversavgiftBetales: Boolean): String {
         val behandling = journalførOgVentTilProsesserErFerdige(
             defaultJournalføringDto().apply {
                 fagsak.sakstype = Sakstyper.FTRL.name
@@ -287,7 +295,7 @@ class YrkesaktivFtrlVedtakIT(
         }
         vilkaarsresultatService.registrerVilkår(behandling.id, listOf(vilkaar))
 
-        simulerTrygdeavgiftBeregning(behandling.id);
+        simulerTrygdeavgiftBeregning(behandling.id, skatteplikttype, arbeidsgiversavgiftBetales);
 
         val vedtakRequest = FattVedtakRequest.Builder()
             .medBehandlingsresultatType(Behandlingsresultattyper.MEDLEM_I_FOLKETRYGDEN)
@@ -306,7 +314,7 @@ class YrkesaktivFtrlVedtakIT(
     }
 
     //Simulerer steget før vedtak
-    private fun simulerTrygdeavgiftBeregning(behandlingId: Long) {
+    private fun simulerTrygdeavgiftBeregning(behandlingId: Long, skatteplikttype: Skatteplikttype, arbeidsgiversavgiftBetales: Boolean) {
         val medlemskapsperiodeId = opprettMedlemskapsperiodeService.opprettForslagPåMedlemskapsperioder(
             behandlingId
         ).single().id
@@ -327,13 +335,13 @@ class YrkesaktivFtrlVedtakIT(
                     SkatteforholdTilNorgeRequest(
                         fomDato = LocalDate.of(2023, 1, 1),
                         tomDato = LocalDate.of(2023, 2, 1),
-                        skatteplikttype = Skatteplikttype.IKKE_SKATTEPLIKTIG
+                        skatteplikttype = skatteplikttype
                     )
                 ),
                 inntektskilder = listOf(
                     InntektskildeRequest(
                         type = Inntektskildetype.INNTEKT_FRA_UTLANDET,
-                        arbeidsgiversavgiftBetales = false,
+                        arbeidsgiversavgiftBetales = arbeidsgiversavgiftBetales,
                         avgiftspliktigInntektMnd = 10000.toBigDecimal(),
                         fomDato = LocalDate.of(2023, 1, 1),
                         tomDato = LocalDate.of(2023, 2, 1)
