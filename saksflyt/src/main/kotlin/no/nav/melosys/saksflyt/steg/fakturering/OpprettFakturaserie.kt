@@ -82,17 +82,21 @@ class OpprettFakturaserie(
     }
 
     private fun erNyVurderingOgskalIkkeBetaleTrygdeavgiftTilNav(behandlingsresultat: Behandlingsresultat, prosessinstans: Prosessinstans): Boolean {
+        return erNyVurdering(prosessinstans) && harOpprinneligBehandlingMedTrygdeavgift(prosessinstans) && betalerKunTilSkatt(behandlingsresultat)
+    }
+
+    private fun harOpprinneligBehandlingMedTrygdeavgift(prosessinstans: Prosessinstans): Boolean {
         val opprinneligBehandling = prosessinstans.behandling.opprinneligBehandling
-        val opprinneligBehandlingHarTrygdeavgift = opprinneligBehandling?.let {
+        return opprinneligBehandling?.let {
             trygdeavgiftOppsummeringService.harTrygdeavgiftOgBestiltFaktura(behandlingsresultatService.hentBehandlingsresultat(it.id))
         } ?: false
+    }
 
+    private fun betalerKunTilSkatt(behandlingsresultat: Behandlingsresultat): Boolean {
         val trygdeavgiftsGrunnlag = behandlingsresultat.medlemAvFolketrygden?.fastsattTrygdeavgift?.trygdeavgiftsgrunnlag
-        val betalerKunTilSkatt = trygdeavgiftsGrunnlag?.let {
+        return trygdeavgiftsGrunnlag?.let {
             trygdeavgiftMottakerService.betalerKunTrygdeavgiftTilSkatt(it)
         } ?: false
-
-        return erNyVurdering(prosessinstans) && opprinneligBehandlingHarTrygdeavgift && betalerKunTilSkatt
     }
 
     private fun erNyVurdering(prosessinstans: Prosessinstans): Boolean {
