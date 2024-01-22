@@ -150,6 +150,7 @@ class YrkesaktivFtrlVedtakIT(
         every { subjectHandler.userName } returns "test"
 
         val saksnummer = lagFørstegangsBehandling()
+        WireMock.verify(1, WireMock.postRequestedFor(WireMock.urlEqualTo("/fakturaserier")));
 
         val behandlingsId = executeAndWait(waitForprosessType = ProsessType.OPPRETT_REPLIKERT_BEHANDLING_FOR_SAK) {
             opprettBehandlingForSak.opprettBehandling(
@@ -301,7 +302,6 @@ class YrkesaktivFtrlVedtakIT(
             vedtaksfattingFasade.fattVedtak(behandling.id, vedtakRequest)
         }
 
-        WireMock.verify(1, WireMock.postRequestedFor(WireMock.urlEqualTo("/fakturaserier")));
         return behandling.fagsak.saksnummer
     }
 
