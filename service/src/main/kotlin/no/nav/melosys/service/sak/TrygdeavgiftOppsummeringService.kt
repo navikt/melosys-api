@@ -20,7 +20,7 @@ class TrygdeavgiftOppsummeringService(
     }
 
      fun harTrygdeavgiftOgBestiltFaktura(behandlingsresultat: Behandlingsresultat): Boolean {
-        val harTrygdeavgift =
+         val harTrygdeavgift =
             behandlingsresultat.medlemAvFolketrygden?.fastsattTrygdeavgift?.trygdeavgiftsperioder?.filter { trygdeavgiftsperiodeHarAvgift(it) }
                 ?.isNotEmpty() ?: false
         val bestiltFaktura = behandlingsresultat.fakturaserieReferanse?.isNotBlank() ?: false
