@@ -245,6 +245,7 @@ public final class MedlPeriodeKonverter {
 
     public static DekningMedl tilMedlTrygdeDekning(Trygdedekninger dekning, Folketrygdloven_kap2_bestemmelser bestemmelse) {
         return switch (bestemmelse) {
+            //TODO: MELOSYS-6373 - FTRL_KAP2_2_7_FØRSTE_LEDD, FTRL_KAP2_2_7A, FTRL_KAP2_2_7_FJERDE_LEDD
             case FTRL_KAP2_2_8_FØRSTE_LEDD_A, FTRL_KAP2_2_8_ANDRE_LEDD -> mapForFtrlKap2_8(dekning);
             default -> throw new TekniskException("Bestemmelse støttes ikke for FTRL: " + bestemmelse.getKode());
         };

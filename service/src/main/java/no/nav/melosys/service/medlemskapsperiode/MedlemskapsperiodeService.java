@@ -3,6 +3,7 @@ package no.nav.melosys.service.medlemskapsperiode;
 import java.time.LocalDate;
 import java.util.*;
 
+import io.getunleash.Unleash;
 import no.nav.melosys.domain.Medlemskapsperiode;
 import no.nav.melosys.domain.folketrygden.MedlemAvFolketrygden;
 import no.nav.melosys.domain.kodeverk.InnvilgelsesResultat;
@@ -11,6 +12,7 @@ import no.nav.melosys.domain.kodeverk.Trygdedekninger;
 import no.nav.melosys.domain.mottatteopplysninger.SøknadNorgeEllerUtenforEØS;
 import no.nav.melosys.exception.FunksjonellException;
 import no.nav.melosys.exception.IkkeFunnetException;
+import no.nav.melosys.featuretoggle.ToggleName;
 import no.nav.melosys.repository.MedlemskapsperiodeRepository;
 import no.nav.melosys.service.MedlemAvFolketrygdenService;
 import no.nav.melosys.service.avgift.TrygdeavgiftsgrunnlagService;
@@ -25,25 +27,39 @@ import static no.nav.melosys.service.kontroll.regler.PeriodeRegler.feilIPeriode;
 @Service
 public class MedlemskapsperiodeService {
 
-    private static final Collection<Trygdedekninger> GYLDIGE_TRYGDEDEKNINGER = Set.of(FTRL_2_9_FØRSTE_LEDD_A_HELSE, FTRL_2_9_FØRSTE_LEDD_A_ANDRE_LEDD_HELSE_SYKE_FORELDREPENGER,
-        FTRL_2_9_FØRSTE_LEDD_B_PENSJON, FTRL_2_9_FØRSTE_LEDD_C_HELSE_PENSJON, FTRL_2_9_FØRSTE_LEDD_C_ANDRE_LEDD_HELSE_PENSJON_SYKE_FORELDREPENGER);
+    public static final Collection<Trygdedekninger> GYLDIGE_TRYGDEDEKNINGER_2_7 = Set.of(
+        FULL_DEKNING_FTRL,
+        FTRL_2_7_TREDJE_LEDD_B_HELSE_SYKE_FORELDREPENGER,
+        FTRL_2_7A_ANDRE_LEDD_B_HELSE_SYKE_FORELDREPENGER
+    );
+
+    public static final Collection<Trygdedekninger> GYLDIGE_TRYGDEDEKNINGER_2_8
+        = Set.of(
+        FTRL_2_9_FØRSTE_LEDD_A_HELSE,
+        FTRL_2_9_FØRSTE_LEDD_A_ANDRE_LEDD_HELSE_SYKE_FORELDREPENGER,
+        FTRL_2_9_FØRSTE_LEDD_B_PENSJON,
+        FTRL_2_9_FØRSTE_LEDD_C_HELSE_PENSJON,
+        FTRL_2_9_FØRSTE_LEDD_C_ANDRE_LEDD_HELSE_PENSJON_SYKE_FORELDREPENGER);
 
     private final MedlemskapsperiodeRepository medlemskapsperiodeRepository;
     private final MedlemAvFolketrygdenService medlemAvFolketrygdenService;
     private final TrygdeavgiftsgrunnlagService trygdeavgiftsgrunnlagService;
     private final BehandlingsresultatService behandlingsresultatService;
     private final MedlPeriodeService medlPeriodeService;
+    private final Unleash unleash;
 
     public MedlemskapsperiodeService(MedlemskapsperiodeRepository medlemskapsperiodeRepository,
                                      MedlemAvFolketrygdenService medlemAvFolketrygdenService,
                                      TrygdeavgiftsgrunnlagService trygdeavgiftsgrunnlagService,
                                      BehandlingsresultatService behandlingsresultatService,
-                                     MedlPeriodeService medlPeriodeService) {
+                                     MedlPeriodeService medlPeriodeService,
+                                     Unleash unleash) {
         this.medlemskapsperiodeRepository = medlemskapsperiodeRepository;
         this.medlemAvFolketrygdenService = medlemAvFolketrygdenService;
         this.trygdeavgiftsgrunnlagService = trygdeavgiftsgrunnlagService;
         this.behandlingsresultatService = behandlingsresultatService;
         this.medlPeriodeService = medlPeriodeService;
+        this.unleash = unleash;
     }
 
     @Transactional(readOnly = true)
@@ -110,7 +126,7 @@ public class MedlemskapsperiodeService {
                                             Trygdedekninger trygdedekning) {
         if (fom == null || innvilgelsesResultat == null || trygdedekning == null) {
             throw new FunksjonellException("Fom-dato, innvilgelsesresultat og trygdedekning er påkrevd");
-        } else if (!GYLDIGE_TRYGDEDEKNINGER.contains(trygdedekning)) {
+        } else if (!GYLDIGE_TRYGDEDEKNINGER_2_8.contains(trygdedekning)) {
             throw new FunksjonellException("Trygedekning " + trygdedekning + " støttes ikke for en medlemskapsperiode");
         } else if (feilIPeriode(fom, tom)) {
             throw new FunksjonellException("Tom-dato kan ikke være før fom-dato");
@@ -171,7 +187,12 @@ public class MedlemskapsperiodeService {
     }
 
     public Collection<Trygdedekninger> hentGyldigeTrygdedekninger() {
-        return GYLDIGE_TRYGDEDEKNINGER;
+        if (unleash.isEnabled(ToggleName.MELOSYS_FOLKETRYGDEN_2_7)) {
+            return new ArrayList<>(GYLDIGE_TRYGDEDEKNINGER_2_8) {{
+                addAll(GYLDIGE_TRYGDEDEKNINGER_2_7);
+            }};
+        }
+        return GYLDIGE_TRYGDEDEKNINGER_2_8;
     }
 
 }

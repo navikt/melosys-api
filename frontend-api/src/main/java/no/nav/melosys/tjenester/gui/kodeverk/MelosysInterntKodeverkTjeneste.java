@@ -33,11 +33,14 @@ import static no.nav.melosys.domain.kodeverk.Trygdedekninger.*;
 public class MelosysInterntKodeverkTjeneste {
 
     private static final List<String> definedOrderTrygdedekning = List.of(
+        FULL_DEKNING_FTRL.getKode(),
         FTRL_2_9_FØRSTE_LEDD_A_HELSE.getKode(),
         FTRL_2_9_FØRSTE_LEDD_A_ANDRE_LEDD_HELSE_SYKE_FORELDREPENGER.getKode(),
         FTRL_2_9_FØRSTE_LEDD_B_PENSJON.getKode(),
         FTRL_2_9_FØRSTE_LEDD_C_HELSE_PENSJON.getKode(),
-        FTRL_2_9_FØRSTE_LEDD_C_ANDRE_LEDD_HELSE_PENSJON_SYKE_FORELDREPENGER.getKode());
+        FTRL_2_9_FØRSTE_LEDD_C_ANDRE_LEDD_HELSE_PENSJON_SYKE_FORELDREPENGER.getKode(),
+        FTRL_2_7_TREDJE_LEDD_B_HELSE_SYKE_FORELDREPENGER.getKode(),
+        FTRL_2_7A_ANDRE_LEDD_B_HELSE_SYKE_FORELDREPENGER.getKode());
 
     private static final List<InnvilgelsesResultat> gyldigeInnvilgelsesResultat = Arrays.stream(InnvilgelsesResultat.values())
         .filter(kode -> !kode.equals(InnvilgelsesResultat.DELVIS_INNVILGET))
