@@ -25,9 +25,9 @@ class LagreMedlemsperiodeMedl(
         val innvilgedeMedlemskapsperioder = behandlingsresultat.finnMedlemskapsperioder().filter(Medlemskapsperiode::erInnvilget)
         if ((behandling.erNyVurdering() || behandling.erManglendeInnbetalingTrygdeavgift()) && behandling.opprinneligBehandling != null) {
             medlemskapsperiodeService.erstattMedlemskapsperioder(
-                innvilgedeMedlemskapsperioder,
+                behandlingID,
                 behandling.opprinneligBehandling.id,
-                behandlingID
+                innvilgedeMedlemskapsperioder
             )
         } else {
             innvilgedeMedlemskapsperioder.forEach {

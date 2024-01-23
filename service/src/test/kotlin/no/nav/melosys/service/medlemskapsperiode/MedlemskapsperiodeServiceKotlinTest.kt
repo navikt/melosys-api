@@ -70,7 +70,7 @@ class MedlemskapsperiodeServiceKotlinTest {
 
         every { behandlingsresultatService.hentBehandlingsresultat(1L) } returns Behandlingsresultat()
 
-        medlemskapsperiodeService.erstattMedlemskapsperioder(nyListe, 1L, 2L)
+        medlemskapsperiodeService.erstattMedlemskapsperioder(2L, 1L, nyListe)
 
         verify(exactly = 1) { medlPeriodeService.opprettPeriodeEndelig(2L, medlemskapsperiode1) }
         verify(exactly = 1) { medlPeriodeService.opprettPeriodeEndelig(2L, medlemskapsperiode2) }
@@ -90,7 +90,7 @@ class MedlemskapsperiodeServiceKotlinTest {
             this.medlemAvFolketrygden = medlemAvFolketrygden
         }
 
-        medlemskapsperiodeService.erstattMedlemskapsperioder(emptyList(), 1L, 2L)
+        medlemskapsperiodeService.erstattMedlemskapsperioder(2L, 1L, emptyList())
 
         verify(exactly = 1) { medlPeriodeService.avvisPeriodeOpphørt(1L) }
         verify(exactly = 0) { medlPeriodeService.opprettPeriodeEndelig(any<Long>(), any()) }
@@ -110,7 +110,7 @@ class MedlemskapsperiodeServiceKotlinTest {
         }
         val nyMedlemskapsperiode = Medlemskapsperiode()
 
-        medlemskapsperiodeService.erstattMedlemskapsperioder(listOf(nyMedlemskapsperiode), 1L, 2L)
+        medlemskapsperiodeService.erstattMedlemskapsperioder(2L, 1L, listOf(nyMedlemskapsperiode))
 
         verify(exactly = 1) { medlPeriodeService.avvisPeriodeOpphørt(1L) }
         verify(exactly = 1) { medlPeriodeService.opprettPeriodeEndelig(2L, nyMedlemskapsperiode) }
@@ -136,7 +136,7 @@ class MedlemskapsperiodeServiceKotlinTest {
             this.medlemAvFolketrygden = medlemAvFolketrygden
         }
 
-        medlemskapsperiodeService.erstattMedlemskapsperioder(nyListe, 1L, 2L)
+        medlemskapsperiodeService.erstattMedlemskapsperioder(2L, 1L, nyListe)
 
         verify(exactly = 1) { medlPeriodeService.oppdaterPeriodeEndelig(2L, fellesMedlemskapsperiode) }
         verify(exactly = 1) { medlPeriodeService.avvisPeriodeOpphørt(2L) }
@@ -161,7 +161,7 @@ class MedlemskapsperiodeServiceKotlinTest {
             this.medlemAvFolketrygden = medlemAvFolketrygden
         }
 
-        medlemskapsperiodeService.erstattMedlemskapsperioder(emptyList(), 1L, 2L)
+        medlemskapsperiodeService.erstattMedlemskapsperioder(2L, 1L, emptyList())
 
         verify(exactly = 1) { medlPeriodeService.avvisPeriodeOpphørt(1L) }
         verify(exactly = 0) { medlPeriodeService.avvisPeriodeOpphørt(2L) }

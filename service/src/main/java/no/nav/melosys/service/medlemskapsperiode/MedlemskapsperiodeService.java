@@ -140,9 +140,7 @@ public class MedlemskapsperiodeService {
     }
 
     @Transactional
-    public void erstattMedlemskapsperioder(List<Medlemskapsperiode> nyeInnvilgedeMedlemskapsperioder,
-                                           long opprinneligBehandlingId,
-                                           long nyBehandlingId) {
+    public void erstattMedlemskapsperioder(long nyBehandlingId, long opprinneligBehandlingId, List<Medlemskapsperiode> nyeInnvilgedeMedlemskapsperioder) {
         var opprinneligeInnvilgedeMedlemskapsperioder =
             behandlingsresultatService.hentBehandlingsresultat(opprinneligBehandlingId)
                 .finnMedlemskapsperioder().stream().filter(Medlemskapsperiode::erInnvilget).toList();

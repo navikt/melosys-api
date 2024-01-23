@@ -49,7 +49,7 @@ internal class LagreMedlemsperiodeMedlTest {
 
     @Test
     fun utfør_ingenInnvilgedeMedlemskapsperioder_erAvslag_gjørIngenting() {
-        val medlemskapsperioder = java.util.List.of(
+        val medlemskapsperioder = listOf(
             lagMedlemskapsperiode(InnvilgelsesResultat.AVSLAATT),
             lagMedlemskapsperiode(InnvilgelsesResultat.AVSLAATT)
         )
@@ -95,7 +95,7 @@ internal class LagreMedlemsperiodeMedlTest {
         lagreMedlemsperiodeMedl.utfør(prosessinstans)
 
 
-        verify { medlemskapsperiodeService.erstattMedlemskapsperioder(listOf(innvilgetMedlemskapsperiode), 1L, BEHANDLING_ID) }
+        verify { medlemskapsperiodeService.erstattMedlemskapsperioder(BEHANDLING_ID, 1L, listOf(innvilgetMedlemskapsperiode)) }
     }
 
     @Test
@@ -115,7 +115,7 @@ internal class LagreMedlemsperiodeMedlTest {
         lagreMedlemsperiodeMedl.utfør(prosessinstans)
 
 
-        verify { medlemskapsperiodeService.erstattMedlemskapsperioder(emptyList(), 1L, BEHANDLING_ID) }
+        verify { medlemskapsperiodeService.erstattMedlemskapsperioder(BEHANDLING_ID,  1L, emptyList()) }
     }
 
     @Test
@@ -136,7 +136,7 @@ internal class LagreMedlemsperiodeMedlTest {
         lagreMedlemsperiodeMedl.utfør(prosessinstans)
 
 
-        verify { medlemskapsperiodeService.erstattMedlemskapsperioder(listOf(innvilgetMedlemskapsperiode), 1L, BEHANDLING_ID) }
+        verify { medlemskapsperiodeService.erstattMedlemskapsperioder(BEHANDLING_ID, 1L, listOf(innvilgetMedlemskapsperiode)) }
     }
 
     private fun lagProsessInstans(): Prosessinstans {
