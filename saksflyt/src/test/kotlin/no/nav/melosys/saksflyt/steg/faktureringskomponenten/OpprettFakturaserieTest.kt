@@ -122,21 +122,13 @@ class OpprettFakturaserieTest {
     }
 
     @Test
-    fun `Kanseller betaling når resultat er opphørt ny vurdering og trygdeavgift betales til skatt`() {
+    fun `Ikke Kanseller betaling når resultat er ny vurdering og trygdeavgift ikke betales til NAV`() {
         val OPPRINNELIG_BEHANDLING_ID = 3L
         lagTestData(setOf(lagAktoerBruker())).apply {
             behandlingsresultat.vedtakMetadata.vedtakstype = Vedtakstyper.ENDRINGSVEDTAK
             prosessinstans.behandling.type = Behandlingstyper.NY_VURDERING
             behandlingsresultat.fakturaserieReferanse = FAKTURASERIE_REFERANSE
             prosessinstans.behandling.opprinneligBehandling = lagBehandling(fagsak).apply { id = OPPRINNELIG_BEHANDLING_ID }
-            behandlingsresultat.medlemAvFolketrygden.fastsattTrygdeavgift.trygdeavgiftsgrunnlag.inntektsperioder.first()
-                .apply {
-                    isArbeidsgiversavgiftBetalesTilSkatt = true
-                }
-            behandlingsresultat.medlemAvFolketrygden.fastsattTrygdeavgift.trygdeavgiftsgrunnlag.skatteforholdTilNorge.first()
-                .apply {
-                    skatteplikttype = Skatteplikttype.SKATTEPLIKTIG
-                }
         }
         every { behandlingsresultatService.hentBehandlingsresultat(BEHANDLING_ID) } returns behandlingsresultat
         every { behandlingService.hentBehandling(BEHANDLING_ID) } returns behandling
@@ -147,7 +139,7 @@ class OpprettFakturaserieTest {
 
         opprettFakturaserie.utfør(prosessinstans)
 
-        verify(exactly = 1) { faktureringskomponentenConsumer.kansellerFakturaserie(eq(FAKTURASERIE_REFERANSE), eq(SAKSBEHANDLER_IDENT)) }
+        verify(exactly = 0) { faktureringskomponentenConsumer.kansellerFakturaserie(eq(FAKTURASERIE_REFERANSE), eq(SAKSBEHANDLER_IDENT)) }
     }
 
     @Test
