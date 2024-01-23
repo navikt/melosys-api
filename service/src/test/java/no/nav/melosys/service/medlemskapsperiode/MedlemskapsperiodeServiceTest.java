@@ -23,7 +23,6 @@ import no.nav.melosys.exception.FunksjonellException;
 import no.nav.melosys.repository.MedlemskapsperiodeRepository;
 import no.nav.melosys.service.MedlemAvFolketrygdenService;
 import no.nav.melosys.service.avgift.TrygdeavgiftsgrunnlagService;
-import no.nav.melosys.service.behandling.BehandlingsresultatService;
 import no.nav.melosys.service.medl.MedlPeriodeService;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -48,11 +47,7 @@ class MedlemskapsperiodeServiceTest {
     @Mock
     private TrygdeavgiftsgrunnlagService trygdeavgiftsgrunnlagServiceMock;
     @Mock
-    private BehandlingsresultatService behandlingsresultatService;
-    @Mock
     private MedlPeriodeService medlPeriodeService;
-
-    private FakeUnleash fakeUnleash;
 
     private MedlemskapsperiodeService medlemskapsperiodeService;
 
@@ -67,9 +62,9 @@ class MedlemskapsperiodeServiceTest {
         medlemskapsperiodeService = new MedlemskapsperiodeService(medlemskapsperiodeRepositoryMock,
             medlemAvFolketrygdenServiceMock,
             trygdeavgiftsgrunnlagServiceMock,
-            behandlingsresultatService,
             medlPeriodeService,
-            fakeUnleash);
+            new FakeUnleash()
+        );
     }
 
     @Test

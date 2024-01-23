@@ -25,6 +25,7 @@ import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.extension.ExtendWith
 import java.time.LocalDate
+import java.util.*
 
 @ExtendWith(MockKExtension::class)
 class MedlemskapsperiodeServiceKotlinTest {
@@ -54,7 +55,6 @@ class MedlemskapsperiodeServiceKotlinTest {
             medlemskapsperiodeRepository,
             medlemAvFolketrygdenService,
             trygdeavgiftsgrunnlagService,
-            behandlingsresultatService,
             medlPeriodeService,
             fakeUnleash
         )
@@ -68,9 +68,11 @@ class MedlemskapsperiodeServiceKotlinTest {
         val medlemskapsperiode2 = Medlemskapsperiode().apply { fom = LocalDate.now().plusDays(1) }
         val nyListe = listOf(medlemskapsperiode1, medlemskapsperiode2)
 
-        every { behandlingsresultatService.hentBehandlingsresultat(1L) } returns Behandlingsresultat()
+        every { medlemAvFolketrygdenService.finnMedlemAvFolketrygden(1L) } returns Optional.empty()
+
 
         medlemskapsperiodeService.erstattMedlemskapsperioder(2L, 1L, nyListe)
+
 
         verify(exactly = 1) { medlPeriodeService.opprettPeriodeEndelig(2L, medlemskapsperiode1) }
         verify(exactly = 1) { medlPeriodeService.opprettPeriodeEndelig(2L, medlemskapsperiode2) }
@@ -86,11 +88,11 @@ class MedlemskapsperiodeServiceKotlinTest {
         val gammelListe = listOf(gammelMedlemskapsperiode)
         val medlemAvFolketrygden = MedlemAvFolketrygden().apply { medlemskapsperioder = gammelListe }
 
-        every { behandlingsresultatService.hentBehandlingsresultat(1L) } returns Behandlingsresultat().apply {
-            this.medlemAvFolketrygden = medlemAvFolketrygden
-        }
+        every { medlemAvFolketrygdenService.finnMedlemAvFolketrygden(1L) } returns Optional.of(medlemAvFolketrygden)
+
 
         medlemskapsperiodeService.erstattMedlemskapsperioder(2L, 1L, emptyList())
+
 
         verify(exactly = 1) { medlPeriodeService.avvisPeriodeOpphørt(1L) }
         verify(exactly = 0) { medlPeriodeService.opprettPeriodeEndelig(any<Long>(), any()) }
@@ -105,12 +107,12 @@ class MedlemskapsperiodeServiceKotlinTest {
             innvilgelsesresultat = InnvilgelsesResultat.INNVILGET
         }
         val medlemAvFolketrygden = MedlemAvFolketrygden().apply { medlemskapsperioder = listOf(gammelMedlemskapsperiode) }
-        every { behandlingsresultatService.hentBehandlingsresultat(1L) } returns Behandlingsresultat().apply {
-            this.medlemAvFolketrygden = medlemAvFolketrygden
-        }
+        every { medlemAvFolketrygdenService.finnMedlemAvFolketrygden(1L) } returns Optional.of(medlemAvFolketrygden)
         val nyMedlemskapsperiode = Medlemskapsperiode()
 
+
         medlemskapsperiodeService.erstattMedlemskapsperioder(2L, 1L, listOf(nyMedlemskapsperiode))
+
 
         verify(exactly = 1) { medlPeriodeService.avvisPeriodeOpphørt(1L) }
         verify(exactly = 1) { medlPeriodeService.opprettPeriodeEndelig(2L, nyMedlemskapsperiode) }
@@ -132,11 +134,11 @@ class MedlemskapsperiodeServiceKotlinTest {
         val nyMedlemskapsperiode = Medlemskapsperiode()
         val nyListe = listOf(fellesMedlemskapsperiode, nyMedlemskapsperiode)
         val medlemAvFolketrygden = MedlemAvFolketrygden().apply { medlemskapsperioder = gammelListe }
-        every { behandlingsresultatService.hentBehandlingsresultat(1L) } returns Behandlingsresultat().apply {
-            this.medlemAvFolketrygden = medlemAvFolketrygden
-        }
+        every { medlemAvFolketrygdenService.finnMedlemAvFolketrygden(1L) } returns Optional.of(medlemAvFolketrygden)
+
 
         medlemskapsperiodeService.erstattMedlemskapsperioder(2L, 1L, nyListe)
+
 
         verify(exactly = 1) { medlPeriodeService.oppdaterPeriodeEndelig(2L, fellesMedlemskapsperiode) }
         verify(exactly = 1) { medlPeriodeService.avvisPeriodeOpphørt(2L) }
@@ -157,11 +159,11 @@ class MedlemskapsperiodeServiceKotlinTest {
         val gammelListe = listOf(gammelMedlemskapsperiodeInnvilget, gammelMedlemskapsperiodeAvslag)
         val medlemAvFolketrygden = MedlemAvFolketrygden().apply { medlemskapsperioder = gammelListe }
 
-        every { behandlingsresultatService.hentBehandlingsresultat(1L) } returns Behandlingsresultat().apply {
-            this.medlemAvFolketrygden = medlemAvFolketrygden
-        }
+        every { medlemAvFolketrygdenService.finnMedlemAvFolketrygden(1L) } returns Optional.of(medlemAvFolketrygden)
+
 
         medlemskapsperiodeService.erstattMedlemskapsperioder(2L, 1L, emptyList())
+
 
         verify(exactly = 1) { medlPeriodeService.avvisPeriodeOpphørt(1L) }
         verify(exactly = 0) { medlPeriodeService.avvisPeriodeOpphørt(2L) }

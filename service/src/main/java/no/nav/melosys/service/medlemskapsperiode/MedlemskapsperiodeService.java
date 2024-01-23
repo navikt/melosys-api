@@ -16,7 +16,6 @@ import no.nav.melosys.featuretoggle.ToggleName;
 import no.nav.melosys.repository.MedlemskapsperiodeRepository;
 import no.nav.melosys.service.MedlemAvFolketrygdenService;
 import no.nav.melosys.service.avgift.TrygdeavgiftsgrunnlagService;
-import no.nav.melosys.service.behandling.BehandlingsresultatService;
 import no.nav.melosys.service.medl.MedlPeriodeService;
 import org.apache.commons.collections4.CollectionUtils;
 import org.springframework.stereotype.Service;
@@ -45,20 +44,17 @@ public class MedlemskapsperiodeService {
     private final MedlemskapsperiodeRepository medlemskapsperiodeRepository;
     private final MedlemAvFolketrygdenService medlemAvFolketrygdenService;
     private final TrygdeavgiftsgrunnlagService trygdeavgiftsgrunnlagService;
-    private final BehandlingsresultatService behandlingsresultatService;
     private final MedlPeriodeService medlPeriodeService;
     private final Unleash unleash;
 
     public MedlemskapsperiodeService(MedlemskapsperiodeRepository medlemskapsperiodeRepository,
                                      MedlemAvFolketrygdenService medlemAvFolketrygdenService,
                                      TrygdeavgiftsgrunnlagService trygdeavgiftsgrunnlagService,
-                                     BehandlingsresultatService behandlingsresultatService,
                                      MedlPeriodeService medlPeriodeService,
                                      Unleash unleash) {
         this.medlemskapsperiodeRepository = medlemskapsperiodeRepository;
         this.medlemAvFolketrygdenService = medlemAvFolketrygdenService;
         this.trygdeavgiftsgrunnlagService = trygdeavgiftsgrunnlagService;
-        this.behandlingsresultatService = behandlingsresultatService;
         this.medlPeriodeService = medlPeriodeService;
         this.unleash = unleash;
     }
@@ -141,9 +137,7 @@ public class MedlemskapsperiodeService {
 
     @Transactional
     public void erstattMedlemskapsperioder(long nyBehandlingId, long opprinneligBehandlingId, List<Medlemskapsperiode> nyeInnvilgedeMedlemskapsperioder) {
-        var opprinneligeInnvilgedeMedlemskapsperioder =
-            behandlingsresultatService.hentBehandlingsresultat(opprinneligBehandlingId)
-                .finnMedlemskapsperioder().stream().filter(Medlemskapsperiode::erInnvilget).toList();
+        var opprinneligeInnvilgedeMedlemskapsperioder = hentMedlemskapsperioder(opprinneligBehandlingId).stream().filter(Medlemskapsperiode::erInnvilget).toList();
 
         for (Medlemskapsperiode medlemskapsperiode : opprinneligeInnvilgedeMedlemskapsperioder) {
             if (!finnesMedlIdIMedlemskapsperioder(nyeInnvilgedeMedlemskapsperioder, medlemskapsperiode.getMedlPeriodeID())) {
