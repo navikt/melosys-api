@@ -136,8 +136,9 @@ public class MedlemskapsperiodeService {
     }
 
     @Transactional
-    public void erstattMedlemskapsperioder(long nyBehandlingId, long opprinneligBehandlingId, List<Medlemskapsperiode> nyeInnvilgedeMedlemskapsperioder) {
+    public void erstattMedlemskapsperioder(long nyBehandlingId, long opprinneligBehandlingId, List<Medlemskapsperiode> nyeMedlemskapsperioder) {
         var opprinneligeInnvilgedeMedlemskapsperioder = hentMedlemskapsperioder(opprinneligBehandlingId).stream().filter(Medlemskapsperiode::erInnvilget).toList();
+        var nyeInnvilgedeMedlemskapsperioder = nyeMedlemskapsperioder.stream().filter(Medlemskapsperiode::erInnvilget).toList();
 
         for (Medlemskapsperiode medlemskapsperiode : opprinneligeInnvilgedeMedlemskapsperioder) {
             if (!finnesMedlIdIMedlemskapsperioder(nyeInnvilgedeMedlemskapsperioder, medlemskapsperiode.getMedlPeriodeID())) {

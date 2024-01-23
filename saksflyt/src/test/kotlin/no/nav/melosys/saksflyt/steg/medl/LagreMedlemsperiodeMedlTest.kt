@@ -95,7 +95,7 @@ internal class LagreMedlemsperiodeMedlTest {
         lagreMedlemsperiodeMedl.utfør(prosessinstans)
 
 
-        verify { medlemskapsperiodeService.erstattMedlemskapsperioder(BEHANDLING_ID, 1L, listOf(innvilgetMedlemskapsperiode)) }
+        verify { medlemskapsperiodeService.erstattMedlemskapsperioder(BEHANDLING_ID, 1L, medlemskapsperioder) }
     }
 
     @Test
@@ -121,7 +121,9 @@ internal class LagreMedlemsperiodeMedlTest {
     @Test
     fun `erstatt medlemskapsperioder ved manglende innbetaling av trygdeavgift og delvis opphør`() {
         val innvilgetMedlemskapsperiode = lagMedlemskapsperiode(InnvilgelsesResultat.INNVILGET)
-        val medlemskapsperioder = listOf(innvilgetMedlemskapsperiode)
+        val opphørtMedlemskapsperiode = lagMedlemskapsperiode(InnvilgelsesResultat.OPPHØRT)
+        val medlemskapsperioder = listOf(innvilgetMedlemskapsperiode, opphørtMedlemskapsperiode)
+
         val opprinneligBehandling = Behandling()
         opprinneligBehandling.id = 1L
         val prosessinstans = lagProsessInstans().apply {
@@ -136,7 +138,7 @@ internal class LagreMedlemsperiodeMedlTest {
         lagreMedlemsperiodeMedl.utfør(prosessinstans)
 
 
-        verify { medlemskapsperiodeService.erstattMedlemskapsperioder(BEHANDLING_ID, 1L, listOf(innvilgetMedlemskapsperiode)) }
+        verify { medlemskapsperiodeService.erstattMedlemskapsperioder(BEHANDLING_ID, 1L, medlemskapsperioder) }
     }
 
     private fun lagProsessInstans(): Prosessinstans {

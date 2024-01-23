@@ -64,8 +64,14 @@ class MedlemskapsperiodeServiceKotlinTest {
     fun `erstattMedlemskapsperioder skal kun opprette nye perioder når gammel liste er tom`() {
         setupHappyPathBehandling()
         every { medlemskapsperiodeRepository.save(any()) } returns Medlemskapsperiode()
-        val medlemskapsperiode1 = Medlemskapsperiode().apply { fom = LocalDate.now().minusDays(1) }
-        val medlemskapsperiode2 = Medlemskapsperiode().apply { fom = LocalDate.now().plusDays(1) }
+        val medlemskapsperiode1 = Medlemskapsperiode().apply {
+            fom = LocalDate.now().minusDays(1)
+            innvilgelsesresultat = InnvilgelsesResultat.INNVILGET
+        }
+        val medlemskapsperiode2 = Medlemskapsperiode().apply {
+            fom = LocalDate.now().plusDays(1)
+            innvilgelsesresultat = InnvilgelsesResultat.INNVILGET
+        }
         val nyListe = listOf(medlemskapsperiode1, medlemskapsperiode2)
 
         every { medlemAvFolketrygdenService.finnMedlemAvFolketrygden(1L) } returns Optional.empty()
@@ -108,7 +114,7 @@ class MedlemskapsperiodeServiceKotlinTest {
         }
         val medlemAvFolketrygden = MedlemAvFolketrygden().apply { medlemskapsperioder = listOf(gammelMedlemskapsperiode) }
         every { medlemAvFolketrygdenService.finnMedlemAvFolketrygden(1L) } returns Optional.of(medlemAvFolketrygden)
-        val nyMedlemskapsperiode = Medlemskapsperiode()
+        val nyMedlemskapsperiode = Medlemskapsperiode().apply { innvilgelsesresultat = InnvilgelsesResultat.INNVILGET }
 
 
         medlemskapsperiodeService.erstattMedlemskapsperioder(2L, 1L, listOf(nyMedlemskapsperiode))
@@ -131,7 +137,7 @@ class MedlemskapsperiodeServiceKotlinTest {
             innvilgelsesresultat = InnvilgelsesResultat.INNVILGET
         }
         val gammelListe = listOf(fellesMedlemskapsperiode, gammelMedlemskapsperiode)
-        val nyMedlemskapsperiode = Medlemskapsperiode()
+        val nyMedlemskapsperiode = Medlemskapsperiode().apply { innvilgelsesresultat = InnvilgelsesResultat.INNVILGET }
         val nyListe = listOf(fellesMedlemskapsperiode, nyMedlemskapsperiode)
         val medlemAvFolketrygden = MedlemAvFolketrygden().apply { medlemskapsperioder = gammelListe }
         every { medlemAvFolketrygdenService.finnMedlemAvFolketrygden(1L) } returns Optional.of(medlemAvFolketrygden)
