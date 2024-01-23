@@ -19,8 +19,6 @@ import no.nav.melosys.service.medlemskapsperiode.MedlemskapsperiodeService
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.extension.ExtendWith
-import org.mockito.ArgumentMatchers
-import org.mockito.Mockito
 
 @ExtendWith(MockKExtension::class)
 internal class LagreMedlemsperiodeMedlTest {
@@ -70,27 +68,20 @@ internal class LagreMedlemsperiodeMedlTest {
             lagMedlemskapsperiode(InnvilgelsesResultat.INNVILGET),
             lagMedlemskapsperiode(InnvilgelsesResultat.INNVILGET)
         )
-        Mockito.`when`(behandlingsresultatService.hentBehandlingsresultat(BEHANDLING_ID))
-            .thenReturn(lagBehandlingsresulat(medlemskapsperioder))
+        every { behandlingsresultatService.hentBehandlingsresultat(BEHANDLING_ID) } returns lagBehandlingsresulat(medlemskapsperioder)
 
 
         lagreMedlemsperiodeMedl.utfør(lagProsessInstans())
 
 
-        Mockito.verify(medlemskapsperiodeService, Mockito.times(2)).opprettEllerOppdaterMedlPeriode(
-            ArgumentMatchers.eq(
-                BEHANDLING_ID
-            ), ArgumentMatchers.any(
-                Medlemskapsperiode::class.java
-            )
-        )
+        verify(exactly = 2) { medlemskapsperiodeService.opprettEllerOppdaterMedlPeriode(BEHANDLING_ID, any()) }
     }
 
     @Test
     fun utfør_avslutterMedlemskapsperioder_nårDetErNyVurderingOgInnvilgelse() {
         val innvilgetMedlemskapsperiode = lagMedlemskapsperiode(InnvilgelsesResultat.INNVILGET)
         val medlemskapsperioder =
-            java.util.List.of(lagMedlemskapsperiode(InnvilgelsesResultat.AVSLAATT), innvilgetMedlemskapsperiode)
+            listOf(lagMedlemskapsperiode(InnvilgelsesResultat.AVSLAATT), innvilgetMedlemskapsperiode)
         val opprinneligBehandling = Behandling()
         opprinneligBehandling.id = 1L
         val prosessinstans = lagProsessInstans()
@@ -98,19 +89,19 @@ internal class LagreMedlemsperiodeMedlTest {
         prosessinstans.behandling.opprinneligBehandling = opprinneligBehandling
         val behandlingsresultat = lagBehandlingsresulat(medlemskapsperioder)
         behandlingsresultat.behandling = prosessinstans.behandling
-        Mockito.`when`(behandlingsresultatService.hentBehandlingsresultat(BEHANDLING_ID))
-            .thenReturn(behandlingsresultat)
+        every { behandlingsresultatService.hentBehandlingsresultat(BEHANDLING_ID) } returns behandlingsresultat
+
 
         lagreMedlemsperiodeMedl.utfør(prosessinstans)
 
-        Mockito.verify(medlemskapsperiodeService)
-            .erstattMedlemskapsperioder(java.util.List.of(innvilgetMedlemskapsperiode), 1L, BEHANDLING_ID)
+
+        verify { medlemskapsperiodeService.erstattMedlemskapsperioder(listOf(innvilgetMedlemskapsperiode), 1L, BEHANDLING_ID) }
     }
 
     @Test
     fun utfør_avslutterMedlemskapsperioder_nårDetErManglendeInnbetalingTrygdeavgiftOgViSkalIkkeOpphøre() {
         val innvilgetMedlemskapsperiode = lagMedlemskapsperiode(InnvilgelsesResultat.INNVILGET)
-        val medlemskapsperioder = java.util.List.of(innvilgetMedlemskapsperiode)
+        val medlemskapsperioder = listOf(innvilgetMedlemskapsperiode)
         val opprinneligBehandling = Behandling()
         opprinneligBehandling.id = 1L
         val prosessinstans = lagProsessInstans()
@@ -118,13 +109,13 @@ internal class LagreMedlemsperiodeMedlTest {
         prosessinstans.behandling.opprinneligBehandling = opprinneligBehandling
         val behandlingsresultat = lagBehandlingsresulat(medlemskapsperioder)
         behandlingsresultat.behandling = prosessinstans.behandling
-        Mockito.`when`(behandlingsresultatService.hentBehandlingsresultat(BEHANDLING_ID))
-            .thenReturn(behandlingsresultat)
+        every { behandlingsresultatService.hentBehandlingsresultat(BEHANDLING_ID) } returns behandlingsresultat
+
 
         lagreMedlemsperiodeMedl.utfør(prosessinstans)
 
-        Mockito.verify(medlemskapsperiodeService)
-            .erstattMedlemskapsperioder(java.util.List.of(innvilgetMedlemskapsperiode), 1L, BEHANDLING_ID)
+
+        verify { medlemskapsperiodeService.erstattMedlemskapsperioder(listOf(innvilgetMedlemskapsperiode), 1L, BEHANDLING_ID) }
     }
 
     @Test
@@ -136,14 +127,13 @@ internal class LagreMedlemsperiodeMedlTest {
         prosessinstans.behandling.opprinneligBehandling = opprinneligBehandling
         val behandlingsresultat = lagBehandlingsresulat(emptyList())
         behandlingsresultat.behandling = prosessinstans.behandling
-        Mockito.`when`(behandlingsresultatService.hentBehandlingsresultat(BEHANDLING_ID))
-            .thenReturn(behandlingsresultat)
+        every { behandlingsresultatService.hentBehandlingsresultat(BEHANDLING_ID) } returns behandlingsresultat
 
 
         lagreMedlemsperiodeMedl.utfør(prosessinstans)
 
 
-        Mockito.verify(medlemskapsperiodeService).erstattMedlemskapsperioder(emptyList(), 1L, BEHANDLING_ID)
+        verify { medlemskapsperiodeService.erstattMedlemskapsperioder(emptyList(), 1L, BEHANDLING_ID) }
     }
 
     private fun lagProsessInstans(): Prosessinstans {
