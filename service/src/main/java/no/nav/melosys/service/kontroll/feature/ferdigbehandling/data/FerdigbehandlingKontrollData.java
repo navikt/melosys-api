@@ -1,10 +1,7 @@
 package no.nav.melosys.service.kontroll.feature.ferdigbehandling.data;
 
-import java.util.List;
-
 import no.nav.melosys.domain.Aktoer;
 import no.nav.melosys.domain.Lovvalgsperiode;
-import no.nav.melosys.domain.Medlemskapsperiode;
 import no.nav.melosys.domain.dokument.medlemskap.MedlemskapDokument;
 import no.nav.melosys.domain.dokument.organisasjon.OrganisasjonDokument;
 import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingstema;
@@ -22,7 +19,7 @@ public record FerdigbehandlingKontrollData(
     Aktoer fullmektig,
     OrganisasjonDokument organisasjonDokument,
     Persondata persondataTilFullmektig,
-    List<Medlemskapsperiode> medlemskapsperioder
+    MedlemskapsperiodeData medlemskapsperiodeData
     ) {
 
     public static FerdigbehandlingKontrollData lagKontrollDataForAvslag(Persondata persondata,
@@ -37,7 +34,7 @@ public record FerdigbehandlingKontrollData(
                                                                       Aktoer fullmektig,
                                                                       OrganisasjonDokument organisasjonDokument,
                                                                       Persondata persondataTilFullmektig,
-                                                                      List<Medlemskapsperiode> medlemskapsperioder) {
-        return new FerdigbehandlingKontrollData(medlemskapDokument, persondata, mottatteOpplysningerData, null, null, null, null, fullmektig, organisasjonDokument, persondataTilFullmektig, medlemskapsperioder);
+                                                                      MedlemskapsperiodeData medlemskapsperiodeData) {
+        return new FerdigbehandlingKontrollData(medlemskapDokument, persondata, mottatteOpplysningerData, null, null, null, null, fullmektig, organisasjonDokument, persondataTilFullmektig, medlemskapsperiodeData);
     }
 }

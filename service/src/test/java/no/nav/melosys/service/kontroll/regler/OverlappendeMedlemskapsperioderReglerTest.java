@@ -16,6 +16,7 @@ import no.nav.melosys.domain.kodeverk.Landkoder;
 import no.nav.melosys.domain.kodeverk.Medlemskapstyper;
 import no.nav.melosys.domain.kodeverk.Trygdedekninger;
 import no.nav.melosys.integrasjon.medl.PeriodestatusMedl;
+import no.nav.melosys.service.kontroll.feature.ferdigbehandling.data.MedlemskapsperiodeData;
 import org.junit.jupiter.api.Test;
 
 import static no.nav.melosys.service.kontroll.regler.OverlappendeMedlemskapsperioderRegler.*;
@@ -280,8 +281,8 @@ class OverlappendeMedlemskapsperioderReglerTest {
         );
         assertFalse(OverlappendeMedlemskapsperioderRegler.harOverlappendePeriode(
             medlemskapDokument,
-            kontrollMedlemskapsperioder)
-        );
+            new MedlemskapsperiodeData(kontrollMedlemskapsperioder, Collections.emptyList())
+        ));
     }
 
     @Test
@@ -294,8 +295,8 @@ class OverlappendeMedlemskapsperioderReglerTest {
         );
         assertFalse(OverlappendeMedlemskapsperioderRegler.harOverlappendePeriode(
             medlemskapDokument,
-            kontrollMedlemskapsperioder)
-        );
+            new MedlemskapsperiodeData(kontrollMedlemskapsperioder, Collections.emptyList())
+        ));
     }
 
     @Test
@@ -309,8 +310,8 @@ class OverlappendeMedlemskapsperioderReglerTest {
 
         assertFalse(OverlappendeMedlemskapsperioderRegler.harOverlappendePeriode(
             medlemskapDokument,
-            kontrollMedlemskapsperioder)
-        );
+            new MedlemskapsperiodeData(kontrollMedlemskapsperioder, Collections.emptyList())
+        ));
     }
 
     @Test
@@ -323,8 +324,8 @@ class OverlappendeMedlemskapsperioderReglerTest {
 
         assertTrue(OverlappendeMedlemskapsperioderRegler.harOverlappendePeriode(
             medlemskapDokument,
-            kontrollMedlemskapsperioder)
-        );
+            new MedlemskapsperiodeData(kontrollMedlemskapsperioder, Collections.emptyList())
+        ));
     }
 
     @Test
@@ -336,8 +337,8 @@ class OverlappendeMedlemskapsperioderReglerTest {
 
         assertFalse(OverlappendeMedlemskapsperioderRegler.harOverlappendePeriode(
             medlemskapDokument,
-            kontrollMedlemskapsperioder)
-        );
+            new MedlemskapsperiodeData(kontrollMedlemskapsperioder, Collections.emptyList())
+        ));
     }
 
     @Test
@@ -349,8 +350,8 @@ class OverlappendeMedlemskapsperioderReglerTest {
 
         assertTrue(OverlappendeMedlemskapsperioderRegler.harOverlappendePeriode(
             medlemskapDokument,
-            kontrollMedlemskapsperioder)
-        );
+            new MedlemskapsperiodeData(kontrollMedlemskapsperioder, Collections.emptyList())
+        ));
     }
 
     @Test
@@ -372,8 +373,8 @@ class OverlappendeMedlemskapsperioderReglerTest {
 
         assertFalse(OverlappendeMedlemskapsperioderRegler.harOverlappendePeriode(
             medlemskapDokument,
-            kontrollMedlemskapsperioder)
-        );
+            new MedlemskapsperiodeData(kontrollMedlemskapsperioder, Collections.emptyList())
+        ));
     }
 
 

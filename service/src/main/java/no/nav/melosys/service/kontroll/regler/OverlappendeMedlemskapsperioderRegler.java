@@ -1,16 +1,15 @@
 package no.nav.melosys.service.kontroll.regler;
 
+import java.util.Objects;
+
 import no.nav.melosys.domain.ErPeriode;
 import no.nav.melosys.domain.Lovvalgsperiode;
-import no.nav.melosys.domain.Medlemskapsperiode;
 import no.nav.melosys.domain.PeriodeOmLovvalg;
 import no.nav.melosys.domain.dokument.medlemskap.MedlemskapDokument;
 import no.nav.melosys.domain.dokument.medlemskap.Medlemsperiode;
 import no.nav.melosys.domain.dokument.sed.SedDokument;
 import no.nav.melosys.integrasjon.medl.PeriodestatusMedl;
-
-import java.util.List;
-import java.util.Objects;
+import no.nav.melosys.service.kontroll.feature.ferdigbehandling.data.MedlemskapsperiodeData;
 
 public final class OverlappendeMedlemskapsperioderRegler {
 
@@ -42,10 +41,11 @@ public final class OverlappendeMedlemskapsperioderRegler {
     }
 
     public static boolean harOverlappendePeriode(MedlemskapDokument medlemskapDokument,
-                                                 List<Medlemskapsperiode> kontrollMedlemskapsperioder) {
-        return kontrollMedlemskapsperioder.stream().anyMatch(kontrollperiode ->
+                                                 MedlemskapsperiodeData medlemskapsperiodeData) {
+        return medlemskapsperiodeData.getNyeMedlemskapsperioder().stream().anyMatch(kontrollperiode ->
             medlemskapDokument.hentMedlemsperioderHvorKildeIkkeLånekassen().stream()
                 .filter(medlemsperiode -> !PeriodestatusMedl.AVST.getKode().equals(medlemsperiode.status))
+                .filter(medlemsperiode -> !medlemskapsperiodeData.medlIdEksistererPåTidligereMedlemskapsperiode(medlemsperiode.id))
                 .anyMatch(medlemsperiode ->
                     PeriodeRegler.periodeOverlapper(kontrollperiode, medlemsperiode.getPeriode())
                         && (kontrollperiode.getMedlPeriodeID() == null || !Objects.equals(kontrollperiode.getMedlPeriodeID(), medlemsperiode.id))

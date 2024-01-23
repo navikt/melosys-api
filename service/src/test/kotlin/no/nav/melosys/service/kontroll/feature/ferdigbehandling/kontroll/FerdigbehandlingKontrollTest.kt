@@ -19,6 +19,7 @@ import no.nav.melosys.domain.mottatteopplysninger.MottatteOpplysningerData
 import no.nav.melosys.domain.mottatteopplysninger.data.Soeknadsland
 import no.nav.melosys.exception.KontrolldataFeilType
 import no.nav.melosys.service.kontroll.feature.ferdigbehandling.data.FerdigbehandlingKontrollData
+import no.nav.melosys.service.kontroll.feature.ferdigbehandling.data.MedlemskapsperiodeData
 import no.nav.melosys.service.persondata.PersonopplysningerObjectFactory
 import org.junit.jupiter.api.Test
 import java.time.LocalDate
@@ -151,7 +152,7 @@ class FerdigbehandlingKontrollTest {
             null,
             null,
             null,
-            ikkeOverlappendeMedlemskapsperioder
+            MedlemskapsperiodeData(ikkeOverlappendeMedlemskapsperioder, emptyList())
         )
 
 
@@ -191,7 +192,7 @@ class FerdigbehandlingKontrollTest {
             null,
             null,
             null,
-            overlappendeMedlemskapsperioder
+            MedlemskapsperiodeData(overlappendeMedlemskapsperioder, emptyList())
         )
 
 
@@ -200,6 +201,51 @@ class FerdigbehandlingKontrollTest {
 
         kontrollfeil.kode.shouldBe(Kontroll_begrunnelser.OVERLAPPENDE_MEDL_PERIODER)
         kontrollfeil.type.shouldBe(KontrolldataFeilType.FEIL)
+    }
+
+    @Test
+    fun `medlemskapsperioder med overlapping, men som hører til samme fagsak skal ikke gi kontrollfeil`() {
+        val medlemskapsDokument = MedlemskapDokument().apply {
+            medlemsperiode = listOf(
+                Medlemsperiode().apply {
+                    id = 12345
+                    land = "SWE"
+                    status = "GYLD"
+                    periode = Periode(LocalDate.now(), LocalDate.now().plusDays(4))
+                }
+            )
+        }
+
+        val overlappendeMedlemskapsperioder = listOf(
+            lagMedlemskapsperiode(
+                LocalDate.now().plusDays(1), LocalDate.now().plusDays(10)
+            )
+        )
+        val tidligereMedlemskapsperioder = listOf(
+            lagMedlemskapsperiode(
+                LocalDate.now().plusDays(1), LocalDate.now().plusDays(10)
+            ).apply { medlPeriodeID = 12345 }
+        )
+
+
+        val kontrollData = FerdigbehandlingKontrollData(
+            medlemskapsDokument,
+            null,
+            null,
+            null,
+            null,
+            null,
+            null,
+            null,
+            null,
+            null,
+            MedlemskapsperiodeData(overlappendeMedlemskapsperioder, tidligereMedlemskapsperioder)
+        )
+
+
+        val kontrollfeil = FerdigbehandlingKontroll.overlappendePeriode(kontrollData)
+
+        kontrollfeil.shouldBeNull()
     }
 
     @Test
@@ -239,7 +285,7 @@ class FerdigbehandlingKontrollTest {
             null,
             null,
             null,
-            overlappendeMedlemskapsperioder
+            MedlemskapsperiodeData(overlappendeMedlemskapsperioder, emptyList())
         )
 
 
