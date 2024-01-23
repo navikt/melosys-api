@@ -1,5 +1,6 @@
 package no.nav.melosys.service.medlemskapsperiode
 
+import io.getunleash.FakeUnleash
 import io.mockk.every
 import io.mockk.impl.annotations.MockK
 import io.mockk.impl.annotations.RelaxedMockK
@@ -10,12 +11,15 @@ import no.nav.melosys.domain.folketrygden.MedlemAvFolketrygden
 import no.nav.melosys.domain.kodeverk.Aktoersroller
 import no.nav.melosys.domain.kodeverk.InnvilgelsesResultat
 import no.nav.melosys.domain.kodeverk.Sakstyper
+import no.nav.melosys.domain.kodeverk.Trygdedekninger
 import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingstema
+import no.nav.melosys.featuretoggle.ToggleName
 import no.nav.melosys.repository.MedlemskapsperiodeRepository
 import no.nav.melosys.service.MedlemAvFolketrygdenService
 import no.nav.melosys.service.avgift.TrygdeavgiftsgrunnlagService
 import no.nav.melosys.service.behandling.BehandlingsresultatService
 import no.nav.melosys.service.medl.MedlPeriodeService
+import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.extension.ExtendWith
@@ -36,6 +40,8 @@ class MedlemskapsperiodeServiceKotlinTest {
     @MockK
     lateinit var medlemskapsperiodeRepository: MedlemskapsperiodeRepository
 
+    val fakeUnleash: FakeUnleash = FakeUnleash()
+
     @RelaxedMockK
     lateinit var medlPeriodeService: MedlPeriodeService
 
@@ -48,7 +54,8 @@ class MedlemskapsperiodeServiceKotlinTest {
             medlemAvFolketrygdenService,
             trygdeavgiftsgrunnlagService,
             behandlingsresultatService,
-            medlPeriodeService
+            medlPeriodeService,
+            fakeUnleash
         )
     }
 
@@ -167,6 +174,31 @@ class MedlemskapsperiodeServiceKotlinTest {
         medlemskapsperiodeService.opprettEllerOppdaterMedlPeriode(1L, medlemskapsperiodeUtenMedlId)
 
         verify(exactly = 1) { medlPeriodeService.opprettPeriodeEndelig(1L, medlemskapsperiodeUtenMedlId) }
+    }
+
+
+    @Test
+    fun `hentGyldigeTrygdedekninger returnerer GYLDIGE_TRYGDEDEKNINGER_2_7 og GYLDIGE_TRYGDEDEKNINGER_2_8 når MELOSYS_FOLKETRYGDEN_2_7 er enabled`() {
+        fakeUnleash.enable(ToggleName.MELOSYS_FOLKETRYGDEN_2_7)
+
+        val forventet = ArrayList<Trygdedekninger>(MedlemskapsperiodeService.GYLDIGE_TRYGDEDEKNINGER_2_8).apply {
+            addAll(MedlemskapsperiodeService.GYLDIGE_TRYGDEDEKNINGER_2_7)
+        }
+
+        val result = medlemskapsperiodeService.hentGyldigeTrygdedekninger()
+
+        assertEquals(forventet, result)
+    }
+
+    @Test
+    fun `hentGyldigeTrygdedekninger returnerer GYLDIGE_TRYGDEDEKNINGER_2_8 når MELOSYS_FOLKETRYGDEN_2_7 er disabled`() {
+        fakeUnleash.disable(ToggleName.MELOSYS_FOLKETRYGDEN_2_7)
+
+        val expected = MedlemskapsperiodeService.GYLDIGE_TRYGDEDEKNINGER_2_8
+
+        val result = medlemskapsperiodeService.hentGyldigeTrygdedekninger()
+
+        assertEquals(expected, result)
     }
 
     @Test

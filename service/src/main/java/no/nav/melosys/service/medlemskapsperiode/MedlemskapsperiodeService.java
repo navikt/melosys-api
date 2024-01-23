@@ -27,13 +27,13 @@ import static no.nav.melosys.service.kontroll.regler.PeriodeRegler.feilIPeriode;
 @Service
 public class MedlemskapsperiodeService {
 
-    private static final Collection<Trygdedekninger> GYLDIGE_TRYGDEDEKNINGER_2_7 = Set.of(
+    public static final Collection<Trygdedekninger> GYLDIGE_TRYGDEDEKNINGER_2_7 = Set.of(
         FULL_DEKNING_FTRL,
         FTRL_2_7_TREDJE_LEDD_B_HELSE_SYKE_FORELDREPENGER,
         FTRL_2_7A_ANDRE_LEDD_B_HELSE_SYKE_FORELDREPENGER
     );
 
-    private static final Collection<Trygdedekninger> GYLDIGE_TRYGDEDEKNINGER_2_8
+    public static final Collection<Trygdedekninger> GYLDIGE_TRYGDEDEKNINGER_2_8
         = Set.of(
         FTRL_2_9_FØRSTE_LEDD_A_HELSE,
         FTRL_2_9_FØRSTE_LEDD_A_ANDRE_LEDD_HELSE_SYKE_FORELDREPENGER,
@@ -188,8 +188,8 @@ public class MedlemskapsperiodeService {
 
     public Collection<Trygdedekninger> hentGyldigeTrygdedekninger() {
         if (unleash.isEnabled(ToggleName.MELOSYS_FOLKETRYGDEN_2_7)) {
-            return new ArrayList<>(GYLDIGE_TRYGDEDEKNINGER_2_7) {{
-                addAll(GYLDIGE_TRYGDEDEKNINGER_2_8);
+            return new ArrayList<>(GYLDIGE_TRYGDEDEKNINGER_2_8) {{
+                addAll(GYLDIGE_TRYGDEDEKNINGER_2_7);
             }};
         }
         return GYLDIGE_TRYGDEDEKNINGER_2_8;
