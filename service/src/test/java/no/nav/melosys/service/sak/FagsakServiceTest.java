@@ -177,7 +177,7 @@ class FagsakServiceTest {
         verify(fagsakRepo).save(captor.capture());
         Fagsak oppdaterFagsak = captor.getValue();
         assertThat(oppdaterFagsak.getAktører().stream()
-            .map(Aktoer::getInstitusjonId)
+            .map(Aktoer::getInstitusjonID)
             .collect(Collectors.toList())).isSubsetOf(nyeInstitusjonsIder);
     }
 
@@ -200,7 +200,7 @@ class FagsakServiceTest {
         Fagsak oppdaterFagsak = captor.getValue();
 
         assertThat(oppdaterFagsak.getAktører())
-            .extracting(Aktoer::getRolle, Aktoer::getAktørId, Aktoer::getInstitusjonId)
+            .extracting(Aktoer::getRolle, Aktoer::getAktørId, Aktoer::getInstitusjonID)
             .containsExactlyInAnyOrder(
                 tuple(Aktoersroller.BRUKER, "1234", null),
                 tuple(Aktoersroller.TRYGDEMYNDIGHET, null, "Ny institusjonsid")
@@ -282,7 +282,7 @@ class FagsakServiceTest {
         Fagsak fagsak = lagFagsak();
 
         Aktoer aktoer = new Aktoer();
-        aktoer.setInstitusjonId("Gammel institusjonsid");
+        aktoer.setInstitusjonID("Gammel institusjonsid");
         aktoer.setFagsak(fagsak);
         aktoer.setRolle(Aktoersroller.TRYGDEMYNDIGHET);
         fagsak.setAktører(new HashSet<>(Collections.singleton(aktoer)));

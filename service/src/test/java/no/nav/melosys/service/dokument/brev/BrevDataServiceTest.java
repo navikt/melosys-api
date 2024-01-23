@@ -121,7 +121,7 @@ class BrevDataServiceTest {
     private static Aktoer lagAktoerMyndighet() {
         Aktoer myndighet = new Aktoer();
         myndighet.setRolle(Aktoersroller.TRYGDEMYNDIGHET);
-        myndighet.setInstitusjonId(INSTITUSJON_ID);
+        myndighet.setInstitusjonID(INSTITUSJON_ID);
         return myndighet;
     }
 

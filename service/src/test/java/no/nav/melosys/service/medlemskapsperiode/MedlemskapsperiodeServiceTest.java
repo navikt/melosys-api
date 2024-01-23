@@ -5,6 +5,7 @@ import java.util.Arrays;
 import java.util.LinkedList;
 import java.util.List;
 
+import io.getunleash.FakeUnleash;
 import no.nav.melosys.domain.Behandling;
 import no.nav.melosys.domain.Behandlingsresultat;
 import no.nav.melosys.domain.Medlemskapsperiode;
@@ -51,6 +52,8 @@ class MedlemskapsperiodeServiceTest {
     @Mock
     private MedlPeriodeService medlPeriodeService;
 
+    private FakeUnleash fakeUnleash;
+
     private MedlemskapsperiodeService medlemskapsperiodeService;
 
     @Captor
@@ -65,7 +68,8 @@ class MedlemskapsperiodeServiceTest {
             medlemAvFolketrygdenServiceMock,
             trygdeavgiftsgrunnlagServiceMock,
             behandlingsresultatService,
-            medlPeriodeService);
+            medlPeriodeService,
+            fakeUnleash);
     }
 
     @Test

@@ -76,6 +76,7 @@ class TrygdeavgiftsberegningsRequestMapper {
     }
 
     private fun avgiftsdekningerFraTrygdedekning(trygdedekning: Trygdedekninger): Set<Avgiftsdekning> {
+        //TODO: MELOSYS-6371
         return when (trygdedekning) {
             Trygdedekninger.FTRL_2_9_FØRSTE_LEDD_A_HELSE ->
                 setOf(Avgiftsdekning.HELSEDEL_UTEN_SYKEPENGER)

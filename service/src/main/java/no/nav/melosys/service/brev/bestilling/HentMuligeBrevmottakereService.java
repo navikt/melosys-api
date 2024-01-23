@@ -59,17 +59,20 @@ public class HentMuligeBrevmottakereService {
         Mottakerliste mottakerliste = brevmottakerService.hentMottakerliste(produserbaredokumenter, requestDto.behandlingID());
 
         Behandling behandling = behandlingService.hentBehandlingMedSaksopplysninger(requestDto.behandlingID());
-        Brevmottaker hovedMottaker = lagHovedMottakerMuligMottakerDto(produserbaredokumenter, behandling, mottakerliste.getHovedMottaker(), requestDto.orgnr());
+        Brevmottaker hovedMottaker = lagHovedMottakerMuligMottakerDto(produserbaredokumenter, behandling, mottakerliste.getHovedMottaker(),
+            requestDto.orgnr(), requestDto.institusjonID());
         List<Brevmottaker> kopiMottakere = lagKopiMottakereMuligMottakerDtos(produserbaredokumenter, behandling, mottakerliste.getKopiMottakere(), mottakerliste.getHovedMottaker());
         List<Brevmottaker> fasteMottakere = lagFasteMottakereMuligMottakerDtos(produserbaredokumenter, behandling, mottakerliste.getFasteMottakere());
 
         return new ResponseDto(hovedMottaker, kopiMottakere, fasteMottakere);
     }
 
-    private Brevmottaker lagHovedMottakerMuligMottakerDto(Produserbaredokumenter produserbaredokumenter, Behandling behandling, Mottakerroller hovedmottaker, String orgnrTilValgtArbeidsgiver) {
+    private Brevmottaker lagHovedMottakerMuligMottakerDto(Produserbaredokumenter produserbaredokumenter, Behandling behandling,
+                                                          Mottakerroller hovedmottaker, String orgnrTilValgtArbeidsgiver,
+                                                          String institusjonID) {
         return new Brevmottaker.Builder()
             .medDokumentNavn(dokumentNavnService.utledDokumentNavnForProduserbaredokumenterOgMottakerrolle(behandling, produserbaredokumenter, hovedmottaker))
-            .medMottakerNavn(hentMottakerNavn(produserbaredokumenter, behandling, hovedmottaker, orgnrTilValgtArbeidsgiver))
+            .medMottakerNavn(hentMottakerNavn(produserbaredokumenter, behandling, hovedmottaker, orgnrTilValgtArbeidsgiver, institusjonID))
             .medRolle(hovedmottaker)
             .build();
     }
@@ -119,7 +122,8 @@ public class HentMuligeBrevmottakereService {
         }
     }
 
-    private String hentMottakerNavn(Produserbaredokumenter produserbaredokumenter, Behandling behandling, Mottakerroller hovedmottaker, String orgnr) {
+    private String hentMottakerNavn(Produserbaredokumenter produserbaredokumenter, Behandling behandling, Mottakerroller hovedmottaker,
+                                    String orgnr, String institusjonID) {
         switch (hovedmottaker) {
             case BRUKER -> {
                 Mottaker avklartMottaker = brevmottakerService.avklarMottaker(produserbaredokumenter, Mottaker.medRolle(Mottakerroller.BRUKER), behandling);
@@ -143,9 +147,13 @@ public class HentMuligeBrevmottakereService {
             }
             case UTENLANDSK_TRYGDEMYNDIGHET -> {
                 if (produserbaredokumenter == UTENLANDSK_TRYGDEMYNDIGHET_FRITEKSTBREV) {
-                    Mottaker avklartMottaker = brevmottakerService.avklarMottaker(produserbaredokumenter, Mottaker.medRolle(Mottakerroller.UTENLANDSK_TRYGDEMYNDIGHET), behandling);
-                    var utenlandskMyndighet = utenlandskMyndighetService.hentUtenlandskMyndighet(avklartMottaker.hentMyndighetLandkode(), produserbaredokumenter);
-                    return utenlandskMyndighet.navn;
+                    if (institusjonID != null) {
+                        return utenlandskMyndighetService.hentUtenlandskMyndighetForInstitusjonID(institusjonID).navn;
+                    } else {
+                        Mottaker avklartMottaker = brevmottakerService.avklarMottaker(produserbaredokumenter, Mottaker.medRolle(Mottakerroller.UTENLANDSK_TRYGDEMYNDIGHET), behandling);
+                        var utenlandskMyndighet = utenlandskMyndighetService.hentUtenlandskMyndighet(avklartMottaker.hentMyndighetLandkode(), produserbaredokumenter);
+                        return utenlandskMyndighet.navn;
+                    }
                 } else {
                     throw new FunksjonellException("Melosys støtter ikke hovedmottakere med rollen " + hovedmottaker);
                 }
@@ -202,7 +210,7 @@ public class HentMuligeBrevmottakereService {
                 .medDokumentNavn(dokumentNavnService.utledDokumentNavnForProduserbaredokumenterOgMottaker(behandling, produserbaredokumenter, avklartKopi, fastTekst))
                 .medMottakerNavn("Utenlandsk trygdemyndighet")
                 .medRolle(avklartKopi.getRolle())
-                .medInstitusjonId(avklartKopi.getInstitusjonID())
+                .medInstitusjonID(avklartKopi.getInstitusjonID())
                 .build());
         }
         return brevmottakere;
@@ -211,7 +219,8 @@ public class HentMuligeBrevmottakereService {
 
     public record RequestDto(Produserbaredokumenter produserbartdokument,
                              long behandlingID,
-                             String orgnr) {
+                             String orgnr,
+                             String institusjonID) {
     }
 
     public record ResponseDto(Brevmottaker hovedMottaker,

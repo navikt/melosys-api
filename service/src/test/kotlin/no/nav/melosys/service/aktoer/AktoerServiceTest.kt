@@ -184,7 +184,7 @@ internal class AktoerServiceTest {
 
     private fun assertAktoerData(aktoerDto: AktoerDto, fagsak: Fagsak, aktoer: Aktoer) {
         aktoer.fagsak shouldBe fagsak
-        aktoer.institusjonId shouldBe aktoerDto.institusjonsID
+        aktoer.institusjonID shouldBe aktoerDto.institusjonsID
         aktoer.utenlandskPersonId shouldBe aktoerDto.utenlandskPersonID
         aktoer.orgnr shouldBe aktoerDto.orgnr
         aktoer.rolle.toString() shouldBe aktoerDto.rolleKode

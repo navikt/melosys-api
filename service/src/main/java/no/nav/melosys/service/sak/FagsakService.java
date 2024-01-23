@@ -94,7 +94,7 @@ public class FagsakService {
     @Transactional
     public void oppdaterMyndigheterForEuEos(String saksnummer, Collection<String> ider) {
         Fagsak fagsak = hentFagsak(saksnummer);
-        fagsak.getAktører().removeIf(aktoer -> !ider.contains(aktoer.getInstitusjonId())
+        fagsak.getAktører().removeIf(aktoer -> !ider.contains(aktoer.getInstitusjonID())
             && aktoer.getRolle() == Aktoersroller.TRYGDEMYNDIGHET);
 
         Collection<Aktoer> nyeMyndigheter = ider.stream()
@@ -124,7 +124,7 @@ public class FagsakService {
         Aktoer aktør = new Aktoer();
         aktør.setFagsak(fagsak);
         aktør.setRolle(Aktoersroller.TRYGDEMYNDIGHET);
-        aktør.setInstitusjonId(ID);
+        aktør.setInstitusjonID(ID);
         return aktør;
     }
 

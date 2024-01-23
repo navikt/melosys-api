@@ -67,7 +67,7 @@ public class DistribuerJournalpost implements StegBehandler {
         var brevbestilling = prosessinstans.getData(BREVBESTILLING, DokgenBrevbestilling.class);
         Mottakerroller mottaker = prosessinstans.getData(MOTTAKER, Mottakerroller.class);
         String orgnr = prosessinstans.getData(ORGNR);
-        String institusjonId = prosessinstans.getData(INSTITUSJON_ID);
+        String institusjonID = prosessinstans.getData(INSTITUSJON_ID);
 
         if (isEmpty(journalpostId)) {
             throw new FunksjonellException("JournalpostId mangler, kan ikke distribuere");
@@ -94,8 +94,8 @@ public class DistribuerJournalpost implements StegBehandler {
                     kodeverkService.dekod(FellesKodeverk.POSTNUMMER, orgAdresse.getPostnummer()));
             }
             bestillingsId = doksysFasade.distribuerJournalpost(journalpostId, orgAdresse, kontaktopplysning, brevbestilling.getKontaktpersonNavn(), brevbestilling.getDistribusjonstype());
-        } else if (hasText(institusjonId)) {
-            Land_iso2 landkode = UtenlandskMyndighet.konverterInstitusjonIdTilLandkode(institusjonId);
+        } else if (hasText(institusjonID)) {
+            Land_iso2 landkode = UtenlandskMyndighet.konverterInstitusjonIdTilLandkode(institusjonID);
             var utenlandskMyndighet =
                 utenlandskMyndighetService.hentUtenlandskMyndighet(landkode, brevbestilling.getProduserbartdokument());
             bestillingsId = doksysFasade.distribuerJournalpost(journalpostId, utenlandskMyndighet.getAdresse(), brevbestilling.getDistribusjonstype());
