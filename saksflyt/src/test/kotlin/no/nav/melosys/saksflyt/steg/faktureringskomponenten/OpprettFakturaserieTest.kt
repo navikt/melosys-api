@@ -20,6 +20,7 @@ import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingsstatus
 import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingstema
 import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingstyper
 import no.nav.melosys.integrasjon.faktureringskomponenten.FaktureringskomponentenConsumer
+import no.nav.melosys.integrasjon.faktureringskomponenten.NyFakturaserieResponseDto
 import no.nav.melosys.integrasjon.faktureringskomponenten.dto.FakturaserieDto
 import no.nav.melosys.integrasjon.faktureringskomponenten.dto.FaktureringsIntervall
 import no.nav.melosys.saksflyt.steg.fakturering.OpprettFakturaserie
@@ -29,6 +30,7 @@ import no.nav.melosys.service.avgift.TrygdeavgiftMottakerService
 import no.nav.melosys.service.behandling.BehandlingService
 import no.nav.melosys.service.behandling.BehandlingsresultatService
 import no.nav.melosys.service.persondata.PersondataService
+import no.nav.melosys.service.sak.TrygdeavgiftOppsummeringService
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.extension.ExtendWith
@@ -52,6 +54,9 @@ class OpprettFakturaserieTest {
 
     @RelaxedMockK
     lateinit var pdlService: PersondataService
+
+    @RelaxedMockK
+    lateinit var trygdeavgiftOppsummeringService: TrygdeavgiftOppsummeringService
 
     lateinit var trygdeavgiftMottakerService: TrygdeavgiftMottakerService
 
@@ -78,6 +83,7 @@ class OpprettFakturaserieTest {
             faktureringskomponentenConsumer,
             pdlService,
             trygdeavgiftMottakerService,
+            trygdeavgiftOppsummeringService,
             unleash
         )
     }
@@ -97,6 +103,43 @@ class OpprettFakturaserieTest {
         slotFakturaserieDto.captured.shouldNotBeNull()
         slotFakturaserieDto.captured.referanseBruker.shouldContain("Vedtak om medlemskap datert ")
         slotFakturaserieDto.captured.fakturaserieReferanse.shouldBeNull()
+    }
+
+    @Test
+    fun `Kanseller betaling når resultat er opphørt`() {
+        lagTestData(setOf(lagAktoerBruker())).apply {
+            behandlingsresultat.type = Behandlingsresultattyper.OPPHØRT
+            behandlingsresultat.fakturaserieReferanse = FAKTURASERIE_REFERANSE
+        }
+        every { behandlingsresultatService.hentBehandlingsresultat(BEHANDLING_ID) } returns behandlingsresultat
+        every { behandlingService.hentBehandling(BEHANDLING_ID) } returns behandling
+        every { pdlService.finnFolkeregisterident(BRUKER_FNR) } returns Optional.of(BRUKER_AKTØRID)
+        every { faktureringskomponentenConsumer.kansellerFakturaserie(FAKTURASERIE_REFERANSE, BRUKER_AKTØRID) } returns NyFakturaserieResponseDto(FAKTURASERIE_REFERANSE)
+
+        opprettFakturaserie.utfør(prosessinstans)
+
+        verify(exactly = 1) { faktureringskomponentenConsumer.kansellerFakturaserie(eq(FAKTURASERIE_REFERANSE), eq(SAKSBEHANDLER_IDENT)) }
+    }
+
+    @Test
+    fun `Ikke Kanseller betaling når resultat er ny vurdering og trygdeavgift ikke betales til NAV`() {
+        val OPPRINNELIG_BEHANDLING_ID = 3L
+        lagTestData(setOf(lagAktoerBruker())).apply {
+            behandlingsresultat.vedtakMetadata.vedtakstype = Vedtakstyper.ENDRINGSVEDTAK
+            prosessinstans.behandling.type = Behandlingstyper.NY_VURDERING
+            behandlingsresultat.fakturaserieReferanse = FAKTURASERIE_REFERANSE
+            prosessinstans.behandling.opprinneligBehandling = lagBehandling(fagsak).apply { id = OPPRINNELIG_BEHANDLING_ID }
+        }
+        every { behandlingsresultatService.hentBehandlingsresultat(BEHANDLING_ID) } returns behandlingsresultat
+        every { behandlingService.hentBehandling(BEHANDLING_ID) } returns behandling
+        val opprinneligBehandlingsresultat = lagBehandlingsresultat().apply { fakturaserieReferanse = FAKTURASERIE_REFERANSE }
+        every { behandlingsresultatService.hentBehandlingsresultat(OPPRINNELIG_BEHANDLING_ID) } returns opprinneligBehandlingsresultat
+        every { pdlService.finnFolkeregisterident(BRUKER_FNR) } returns Optional.of(BRUKER_AKTØRID)
+        every { faktureringskomponentenConsumer.kansellerFakturaserie(FAKTURASERIE_REFERANSE, BRUKER_AKTØRID) } returns NyFakturaserieResponseDto(FAKTURASERIE_REFERANSE)
+
+        opprettFakturaserie.utfør(prosessinstans)
+
+        verify(exactly = 0) { faktureringskomponentenConsumer.kansellerFakturaserie(eq(FAKTURASERIE_REFERANSE), eq(SAKSBEHANDLER_IDENT)) }
     }
 
     @Test
@@ -341,5 +384,6 @@ class OpprettFakturaserieTest {
         const val BRUKER_FNR = "11111111111"
         const val BRUKER_AKTØRID = "12345678911"
         const val FULLMEKTIG_IDENT = "123456789"
+        const val FAKTURASERIE_REFERANSE = "1234"
     }
 }
