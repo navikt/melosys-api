@@ -106,7 +106,7 @@ class YrkesaktivFtrlVedtakIT(
             TrygdeavgiftsberegningResponse(
                 TrygdeavgiftsperiodeDto(
                     DatoPeriodeDto(LocalDate.of(2023, 1, 1), LocalDate.of(2023, 2, 1)),
-                    6.8.toBigDecimal(), PengerDto(1000.toBigDecimal() , NOK)
+                    6.8.toBigDecimal(), PengerDto(1000.toBigDecimal(), NOK)
                 ),
                 TrygdeavgiftsgrunnlagDto(UUID.randomUUID(), UUID.randomUUID(), UUID.randomUUID())
             )
@@ -114,10 +114,11 @@ class YrkesaktivFtrlVedtakIT(
 
         mockServer.stubFor(
             WireMock.post("/api/v2/beregn")
-                .willReturn(WireMock.aResponse()
-                    .withStatus(200)
-                    .withHeader("Content-Type", "application/json")
-                    .withBody(expectedResponse.toJsonNode.toString())
+                .willReturn(
+                    WireMock.aResponse()
+                        .withStatus(200)
+                        .withHeader("Content-Type", "application/json")
+                        .withBody(expectedResponse.toJsonNode.toString())
                 )
         )
 
@@ -125,18 +126,20 @@ class YrkesaktivFtrlVedtakIT(
 
         mockServer.stubFor(
             WireMock.post("/fakturaserier")
-                .willReturn(WireMock.aResponse()
-                    .withStatus(200)
-                    .withHeader("Content-Type", "application/json")
-                    .withBody(fakturaResponse.toJsonNode.toString())
+                .willReturn(
+                    WireMock.aResponse()
+                        .withStatus(200)
+                        .withHeader("Content-Type", "application/json")
+                        .withBody(fakturaResponse.toJsonNode.toString())
                 )
         )
         mockServer.stubFor(
             WireMock.delete(WireMock.urlMatching("/fakturaserier/.*"))
-                .willReturn(WireMock.aResponse()
-                    .withStatus(200)
-                    .withHeader("Content-Type", "application/json")
-                    .withBody(fakturaResponse.toJsonNode.toString())
+                .willReturn(
+                    WireMock.aResponse()
+                        .withStatus(200)
+                        .withHeader("Content-Type", "application/json")
+                        .withBody(fakturaResponse.toJsonNode.toString())
                 )
         )
     }
@@ -287,8 +290,6 @@ class YrkesaktivFtrlVedtakIT(
         }
         avklartefaktaService.lagreAvklarteFakta(behandling.id, setOf(yrkesgruppe, virksomhet, yrkesaktivitet))
 
-        medlemAvFolketrygdenService.lagreBestemmelse(behandling.id, Folketrygdloven_kap2_bestemmelser.FTRL_KAP2_2_8_FØRSTE_LEDD_A)
-
         val vilkaar = VilkaarDto().apply {
             vilkaar = "FTRL_2_8_FORUTGÅENDE_TRYGDETID"
             isOppfylt = true
@@ -316,7 +317,8 @@ class YrkesaktivFtrlVedtakIT(
     //Simulerer steget før vedtak
     private fun simulerTrygdeavgiftBeregning(behandlingId: Long, skatteplikttype: Skatteplikttype, arbeidsgiversavgiftBetales: Boolean) {
         val medlemskapsperiodeId = opprettMedlemskapsperiodeService.opprettForslagPåMedlemskapsperioder(
-            behandlingId
+            behandlingId,
+            Folketrygdloven_kap2_bestemmelser.FTRL_KAP2_2_8_FØRSTE_LEDD_A
         ).single().id
 
         val medlemskapsperiode = medlemskapsperiodeService.oppdaterMedlemskapsperiode(
@@ -325,7 +327,8 @@ class YrkesaktivFtrlVedtakIT(
             LocalDate.of(2023, 1, 1),
             LocalDate.of(2023, 2, 1),
             InnvilgelsesResultat.INNVILGET,
-            Trygdedekninger.FTRL_2_9_FØRSTE_LEDD_A_HELSE
+            Trygdedekninger.FTRL_2_9_FØRSTE_LEDD_A_HELSE,
+            Folketrygdloven_kap2_bestemmelser.FTRL_KAP2_2_8_FØRSTE_LEDD_A
         )
 
         trygdeavgiftsgrunnlagService.oppdaterTrygdeavgiftsgrunnlag(
