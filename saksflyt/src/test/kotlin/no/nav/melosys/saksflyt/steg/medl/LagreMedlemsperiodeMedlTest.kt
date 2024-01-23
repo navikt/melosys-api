@@ -30,7 +30,7 @@ internal class LagreMedlemsperiodeMedlTest {
     private lateinit var medlemskapsperiodeService: MedlemskapsperiodeService
 
     private lateinit var lagreMedlemsperiodeMedl: LagreMedlemsperiodeMedl
-    private lateinit  var prosessinstans: Prosessinstans
+    private lateinit var prosessinstans: Prosessinstans
 
     @BeforeEach
     fun setup() {
@@ -99,32 +99,14 @@ internal class LagreMedlemsperiodeMedlTest {
     }
 
     @Test
-    fun utfør_avslutterMedlemskapsperioder_nårDetErManglendeInnbetalingTrygdeavgiftOgViSkalIkkeOpphøre() {
-        val innvilgetMedlemskapsperiode = lagMedlemskapsperiode(InnvilgelsesResultat.INNVILGET)
-        val medlemskapsperioder = listOf(innvilgetMedlemskapsperiode)
-        val opprinneligBehandling = Behandling()
-        opprinneligBehandling.id = 1L
-        val prosessinstans = lagProsessInstans()
-        prosessinstans.behandling.type = Behandlingstyper.NY_VURDERING
-        prosessinstans.behandling.opprinneligBehandling = opprinneligBehandling
-        val behandlingsresultat = lagBehandlingsresulat(medlemskapsperioder)
-        behandlingsresultat.behandling = prosessinstans.behandling
-        every { behandlingsresultatService.hentBehandlingsresultat(BEHANDLING_ID) } returns behandlingsresultat
-
-
-        lagreMedlemsperiodeMedl.utfør(prosessinstans)
-
-
-        verify { medlemskapsperiodeService.erstattMedlemskapsperioder(listOf(innvilgetMedlemskapsperiode), 1L, BEHANDLING_ID) }
-    }
-
-    @Test
-    fun utfør_avslutterMedlemskapsperioder_nårDetErManglendeInnbetalingTrygdeavgiftOgViSkalOpphøre() {
-        val opprinneligBehandling = Behandling()
-        opprinneligBehandling.id = 1L
-        val prosessinstans = lagProsessInstans()
-        prosessinstans.behandling.type = Behandlingstyper.MANGLENDE_INNBETALING_TRYGDEAVGIFT
-        prosessinstans.behandling.opprinneligBehandling = opprinneligBehandling
+    fun `opphør medlemskapsperioder ved manglende innbetaling av trygdeavgift som fører til opphør av medlemskap`() {
+        val opprinneligBehandling = Behandling().apply {
+            id = 1L
+        }
+        val prosessinstans = lagProsessInstans().apply {
+            behandling.type = Behandlingstyper.MANGLENDE_INNBETALING_TRYGDEAVGIFT
+            behandling.opprinneligBehandling = opprinneligBehandling
+        }
         val behandlingsresultat = lagBehandlingsresulat(emptyList())
         behandlingsresultat.behandling = prosessinstans.behandling
         every { behandlingsresultatService.hentBehandlingsresultat(BEHANDLING_ID) } returns behandlingsresultat
@@ -136,13 +118,35 @@ internal class LagreMedlemsperiodeMedlTest {
         verify { medlemskapsperiodeService.erstattMedlemskapsperioder(emptyList(), 1L, BEHANDLING_ID) }
     }
 
-    private fun lagProsessInstans(): Prosessinstans {
-        val behandling = Behandling()
-        behandling.id = BEHANDLING_ID
+    @Test
+    fun `erstatt medlemskapsperioder ved manglende innbetaling av trygdeavgift og delvis opphør`() {
+        val innvilgetMedlemskapsperiode = lagMedlemskapsperiode(InnvilgelsesResultat.INNVILGET)
+        val medlemskapsperioder = listOf(innvilgetMedlemskapsperiode)
+        val opprinneligBehandling = Behandling()
+        opprinneligBehandling.id = 1L
+        val prosessinstans = lagProsessInstans().apply {
+            behandling.type = Behandlingstyper.MANGLENDE_INNBETALING_TRYGDEAVGIFT
+            behandling.opprinneligBehandling = opprinneligBehandling
+        }
+        val behandlingsresultat = lagBehandlingsresulat(medlemskapsperioder)
+        behandlingsresultat.behandling = prosessinstans.behandling
+        every { behandlingsresultatService.hentBehandlingsresultat(BEHANDLING_ID) } returns behandlingsresultat
 
-        val prosessinstans = Prosessinstans()
-        prosessinstans.behandling = behandling
-        return prosessinstans
+
+        lagreMedlemsperiodeMedl.utfør(prosessinstans)
+
+
+        verify { medlemskapsperiodeService.erstattMedlemskapsperioder(listOf(innvilgetMedlemskapsperiode), 1L, BEHANDLING_ID) }
+    }
+
+    private fun lagProsessInstans(): Prosessinstans {
+        val behandling = Behandling().apply {
+            id = BEHANDLING_ID
+        }
+
+        return Prosessinstans().apply {
+            this.behandling = behandling
+        }
     }
 
     private fun lagBehandlingsresulat(medlemskapsperioder: List<Medlemskapsperiode>): Behandlingsresultat {
