@@ -83,7 +83,7 @@ public class AktoerDto {
     public static AktoerDto tilDto(Aktoer aktoer) {
         AktoerDto aktoerDto = new AktoerDto();
         aktoerDto.setAktoerID(aktoer.getAktørId());
-        aktoerDto.setInstitusjonsID(aktoer.getInstitusjonId());
+        aktoerDto.setInstitusjonsID(aktoer.getInstitusjonID());
         aktoerDto.setOrgnr(aktoer.getOrgnr());
         aktoerDto.setRolleKode(aktoer.getRolle().getKode());
         aktoerDto.setUtenlandskPersonID(aktoer.getUtenlandskPersonId());

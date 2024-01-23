@@ -151,7 +151,7 @@ class VideresendSoknadTest {
         Aktoer myndighet = new Aktoer();
         myndighet.setRolle(Aktoersroller.TRYGDEMYNDIGHET);
         myndighet.setAktørId("123");
-        myndighet.setInstitusjonId("SE:id");
+        myndighet.setInstitusjonID("SE:id");
 
         Aktoer bruker = new Aktoer();
         bruker.setRolle(Aktoersroller.BRUKER);

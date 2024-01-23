@@ -37,7 +37,7 @@ public final class Mottaker {
     }
 
     public static Mottaker av(Aktoer aktoer) {
-        return new Mottaker(mottakerrolleAv(aktoer.getRolle()), aktoer.getAktørId(), aktoer.getPersonIdent(), aktoer.getOrgnr(), aktoer.getInstitusjonId(), aktoer.getTrygdemyndighetLand());
+        return new Mottaker(mottakerrolleAv(aktoer.getRolle()), aktoer.getAktørId(), aktoer.getPersonIdent(), aktoer.getOrgnr(), aktoer.getInstitusjonID(), aktoer.getTrygdemyndighetLand());
     }
 
     private static Mottakerroller mottakerrolleAv(Aktoersroller aktoersrolle) {

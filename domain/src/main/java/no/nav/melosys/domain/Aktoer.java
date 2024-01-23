@@ -37,7 +37,7 @@ public class Aktoer extends RegistreringsInfo {
     private String aktørId;
 
     @Column(name = "eu_eos_institusjon_id", updatable = false)
-    private String institusjonId;
+    private String institusjonID;
 
     @Enumerated(EnumType.STRING)
     @Column(name = "trygdemyndighet_land", updatable = false)
@@ -104,12 +104,12 @@ public class Aktoer extends RegistreringsInfo {
         this.rolle = rolle;
     }
 
-    public String getInstitusjonId() {
-        return institusjonId;
+    public String getInstitusjonID() {
+        return institusjonID;
     }
 
-    public void setInstitusjonId(String institusjonId) {
-        this.institusjonId = institusjonId;
+    public void setInstitusjonID(String institusjonID) {
+        this.institusjonID = institusjonID;
     }
 
     public String getUtenlandskPersonId() {
@@ -163,7 +163,7 @@ public class Aktoer extends RegistreringsInfo {
     }
 
     public boolean erUtenlandskMyndighet() {
-        return rolle == Aktoersroller.TRYGDEMYNDIGHET && (institusjonId != null || trygdemyndighetLand != null);
+        return rolle == Aktoersroller.TRYGDEMYNDIGHET && (institusjonID != null || trygdemyndighetLand != null);
     }
 
     public Land_iso2 getTrygdemyndighetLand() {
@@ -176,7 +176,7 @@ public class Aktoer extends RegistreringsInfo {
 
     public Land_iso2 hentMyndighetLandkode() {
         if (erUtenlandskMyndighet()) {
-            return institusjonId != null ? UtenlandskMyndighet.konverterInstitusjonIdTilLandkode(institusjonId) : trygdemyndighetLand;
+            return institusjonID != null ? UtenlandskMyndighet.konverterInstitusjonIdTilLandkode(institusjonID) : trygdemyndighetLand;
         }
         throw new TekniskException("Aktør " + id + " er ikke en utenlandsk myndighet");
     }
@@ -193,7 +193,7 @@ public class Aktoer extends RegistreringsInfo {
             && Objects.equals(this.aktørId, that.aktørId)
             && Objects.equals(this.orgnr, that.orgnr)
             && Objects.equals(this.personIdent, that.personIdent)
-            && Objects.equals(this.institusjonId, that.institusjonId)
+            && Objects.equals(this.institusjonID, that.institusjonID)
             && Objects.equals(this.trygdemyndighetLand, that.trygdemyndighetLand)
             && Objects.equals(this.utenlandskPersonId, that.utenlandskPersonId)
             && Objects.equals(this.rolle, that.rolle);
@@ -201,6 +201,6 @@ public class Aktoer extends RegistreringsInfo {
 
     @Override
     public int hashCode() {
-        return Objects.hash(fagsak, personIdent, aktørId, institusjonId, trygdemyndighetLand, orgnr, rolle, utenlandskPersonId);
+        return Objects.hash(fagsak, personIdent, aktørId, institusjonID, trygdemyndighetLand, orgnr, rolle, utenlandskPersonId);
     }
 }

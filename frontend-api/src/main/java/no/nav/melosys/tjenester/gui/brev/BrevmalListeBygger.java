@@ -1,16 +1,19 @@
 package no.nav.melosys.tjenester.gui.brev;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 import java.util.Objects;
 
 import no.nav.melosys.domain.Behandling;
 import no.nav.melosys.domain.kodeverk.Mottakerroller;
 import no.nav.melosys.domain.kodeverk.Sakstemaer;
+import no.nav.melosys.domain.kodeverk.Trygdeavtale_myndighetsland;
 import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingstyper;
 import no.nav.melosys.domain.kodeverk.brev.Produserbaredokumenter;
 import no.nav.melosys.exception.FunksjonellException;
 import no.nav.melosys.exception.TekniskException;
+import no.nav.melosys.service.aktoer.UtenlandskMyndighetService;
 import no.nav.melosys.service.behandling.BehandlingService;
 import no.nav.melosys.service.brev.BrevAdresse;
 import no.nav.melosys.service.brev.BrevmalListeService;
@@ -26,14 +29,18 @@ import static no.nav.melosys.tjenester.gui.brev.BrevFelt.*;
 @Component
 public class BrevmalListeBygger {
     private static final String ARBEIDSGIVER_MANGLER_ADRESSE = "Finner ikke gyldig adresse til arbeidsgiver(e). Kontroller at arbeidsgiver(e) er lagt inn korrekt i sidemenyen";
+    private static final String UTENLANDSK_TRYGDEMYNDIGHET_BEHANDLING_MANGLER_LAND = "Du må velge land på inngangssteget for å kunne sende " +
+        "brev til utenlandsk trygdemyndighet.";
     private final BrevmalListeService brevmalListeService;
     private final BehandlingService behandlingService;
     private final SaksbehandlingRegler saksbehandlingRegler;
+    private final UtenlandskMyndighetService utenlandskMyndighetService;
 
-    public BrevmalListeBygger(BrevmalListeService brevmalListeService, BehandlingService behandlingService, SaksbehandlingRegler saksbehandlingRegler) {
+    public BrevmalListeBygger(BrevmalListeService brevmalListeService, BehandlingService behandlingService, SaksbehandlingRegler saksbehandlingRegler, UtenlandskMyndighetService utenlandskMyndighetService) {
         this.brevmalListeService = brevmalListeService;
         this.behandlingService = behandlingService;
         this.saksbehandlingRegler = saksbehandlingRegler;
+        this.utenlandskMyndighetService = utenlandskMyndighetService;
     }
 
     public List<BrevmalResponse> byggBrevmalDtoListe(long behandlingId) {
@@ -48,14 +55,11 @@ public class BrevmalListeBygger {
         List<BrevmalTypeDto> typer = produserbareDokumenter.stream().map(dokument -> switch (dokument) {
                 case MELDING_FORVENTET_SAKSBEHANDLINGSTID_SOKNAD, MELDING_FORVENTET_SAKSBEHANDLINGSTID_KLAGE ->
                     lagBrevmalForMELDING_FORVENTET_SAKSBEHANDLINGSTID(dokument);
-                case MANGELBREV_BRUKER, MANGELBREV_ARBEIDSGIVER ->
-                    lagBrevmalForMANGELBREV(dokument, behandlingId);
+                case MANGELBREV_BRUKER, MANGELBREV_ARBEIDSGIVER -> lagBrevmalForMANGELBREV(dokument, behandlingId);
                 case GENERELT_FRITEKSTBREV_BRUKER, GENERELT_FRITEKSTBREV_ARBEIDSGIVER, GENERELT_FRITEKSTBREV_VIRKSOMHET ->
                     lagBrevmalForGENERELT_FRITEKSTBREV(dokument, behandlingId);
-                case UTENLANDSK_TRYGDEMYNDIGHET_FRITEKSTBREV ->
-                    lagBrevmalForUTENLANDSK_TRYGDEMYNDIGHET_FRITEKSTBREV(dokument, behandlingId);
-                case FRITEKSTBREV ->
-                    lagBrevmalForFRITEKSTBREV(dokument);
+                case UTENLANDSK_TRYGDEMYNDIGHET_FRITEKSTBREV -> lagBrevmalForUTENLANDSK_TRYGDEMYNDIGHET_FRITEKSTBREV(dokument, behandlingId);
+                case FRITEKSTBREV -> lagBrevmalForFRITEKSTBREV(dokument);
                 default -> null;
             })
             .filter(Objects::nonNull)
@@ -75,8 +79,8 @@ public class BrevmalListeBygger {
                 if (!saksbehandlingRegler.harIngenFlyt(behandling)) {
                     mottakere.add(lagMottakerMedAdresseOgFeilmelding(behandlingId, Mottakerroller.ARBEIDSGIVER, false));
                 }
-                if (fagsak.erSakstypeTrygdeavtale() && behandling.harLand()) {
-                    mottakere.add(lagMottakerMedRolle(Mottakerroller.UTENLANDSK_TRYGDEMYNDIGHET));
+                if (fagsak.erSakstypeTrygdeavtale()) {
+                    mottakere.add(lagMottakerForUtenlandskTrygdemyndighet(behandling));
                 }
                 mottakere.add(lagMottakerMedRolle(Mottakerroller.ANNEN_ORGANISASJON));
                 mottakere.add(lagMottakerMedRolle(Mottakerroller.NORSK_MYNDIGHET));
@@ -107,6 +111,18 @@ public class BrevmalListeBygger {
         var mottakerDto = new MottakerDto();
         mottakerDto.setRolle(rolle);
         mottakerDto.setType(hentTypeFraRolle(rolle));
+        return mottakerDto;
+    }
+
+    private MottakerDto lagMottakerForUtenlandskTrygdemyndighet(Behandling behandling) {
+        var mottakerDto = new MottakerDto();
+        mottakerDto.setRolle(Mottakerroller.UTENLANDSK_TRYGDEMYNDIGHET);
+        mottakerDto.setType(hentTypeFraRolle(Mottakerroller.UTENLANDSK_TRYGDEMYNDIGHET));
+
+        if (!saksbehandlingRegler.harIngenFlyt(behandling) && !behandling.harLand()) {
+            mottakerDto.setFeilmelding(new FeilmeldingDto(UTENLANDSK_TRYGDEMYNDIGHET_BEHANDLING_MANGLER_LAND));
+        }
+
         return mottakerDto;
     }
 
@@ -189,6 +205,7 @@ public class BrevmalListeBygger {
     }
 
     private BrevmalTypeDto lagBrevmalForGENERELT_FRITEKSTBREV(Produserbaredokumenter produserbartdokument, long behandlingId) {
+
         return new BrevmalTypeDto.Builder()
             .medType(produserbartdokument)
             .medFelter(asList(
@@ -218,17 +235,40 @@ public class BrevmalListeBygger {
     }
 
     private BrevmalTypeDto lagBrevmalForUTENLANDSK_TRYGDEMYNDIGHET_FRITEKSTBREV(Produserbaredokumenter produserbartdokument, long behandlingId) {
+        var behandling = behandlingService.hentBehandling(behandlingId);
+        var felter = new ArrayList<>(List.of(
+            FELT_DISTRIBUSJONSTYPE,
+            lagBrevTittelFelt(hentBrevTittelValg(behandlingId)),
+            FELT_DOKUMENT_TITTEL,
+            FELT_FRITEKST,
+            FELT_VEDLEGG,
+            FELT_FRITEKSTVEDLEGG
+        ));
+
+        if (saksbehandlingRegler.harIngenFlyt(behandling)) {
+            BrevmalFeltDto brevmalFeltDto = lagUtenlandskTrygdemyndighetMottakerFelt(hentUtenlandskMyndighetMottakerValg());
+            felter.add(0, brevmalFeltDto);
+        }
+
         return new BrevmalTypeDto.Builder()
             .medType(produserbartdokument)
-            .medFelter(asList(
-                FELT_DISTRIBUSJONSTYPE,
-                lagBrevTittelFelt(hentBrevTittelValg(behandlingId)),
-                FELT_DOKUMENT_TITTEL,
-                FELT_FRITEKST,
-                FELT_VEDLEGG,
-                FELT_FRITEKSTVEDLEGG
-            ))
+            .medFelter(felter)
             .build();
+    }
+
+    private FeltValgDto hentUtenlandskMyndighetMottakerValg() {
+        List<String> trygdeavtaleLandkoder = Arrays.stream(Trygdeavtale_myndighetsland.values()).map(Trygdeavtale_myndighetsland::getKode).toList();
+
+        return new FeltValgDto(
+            utenlandskMyndighetService.hentAlleUtenlandskeMyndigheterMedGyldigAdresse().stream()
+                .filter(utenlandskMyndighet -> trygdeavtaleLandkoder.contains(utenlandskMyndighet.landkode.getKode()))
+                .map(utenlandskMyndighet -> {
+                    String beskrivelse = "Trygdemyndighetene i %s".formatted(utenlandskMyndighet.landkode.getBeskrivelse());
+                    return new FeltvalgAlternativDto(utenlandskMyndighet.hentInstitusjonID(), beskrivelse, true);
+                })
+                .toList(),
+            FeltValgType.SELECT
+        );
     }
 
     private static FeltValgDto hentBrevTittelValg() {
@@ -250,15 +290,13 @@ public class BrevmalListeBygger {
 
         final List<FeltvalgAlternativDto> valgAlternativer = new ArrayList<>();
         switch (fagsak.getType()) {
-            case EU_EOS ->
-                valgAlternativer.add(new FeltvalgAlternativDto(FeltvalgAlternativKode.HENVENDELSE_OM_TRYGDETILHØRLIGHET));
+            case EU_EOS -> valgAlternativer.add(new FeltvalgAlternativDto(FeltvalgAlternativKode.HENVENDELSE_OM_TRYGDETILHØRLIGHET));
             case FTRL -> {
                 valgAlternativer.add(new FeltvalgAlternativDto(FeltvalgAlternativKode.CONFIRMATION_OF_MEMBERSHIP));
                 valgAlternativer.add(new FeltvalgAlternativDto(FeltvalgAlternativKode.BEKREFTELSE_PÅ_MEDLEMSKAP));
                 valgAlternativer.add(new FeltvalgAlternativDto(FeltvalgAlternativKode.HENVENDELSE_OM_MEDLEMSKAP));
             }
-            case TRYGDEAVTALE ->
-                valgAlternativer.add(new FeltvalgAlternativDto(FeltvalgAlternativKode.ENGELSK_FRITEKSTBREV));
+            case TRYGDEAVTALE -> valgAlternativer.add(new FeltvalgAlternativDto(FeltvalgAlternativKode.ENGELSK_FRITEKSTBREV));
         }
         valgAlternativer.add(new FeltvalgAlternativDto(FeltvalgAlternativKode.FRITEKST, true));
 

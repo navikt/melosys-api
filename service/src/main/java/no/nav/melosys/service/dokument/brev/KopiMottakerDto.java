@@ -7,16 +7,16 @@ import no.nav.melosys.saksflytapi.journalfoering.KopiMottaker;
 public record KopiMottakerDto(Mottakerroller rolle,
                               String orgnr,
                               String aktørId,
-                              String institusjonId) {
+                              String institusjonID) {
     public static KopiMottakerDto av(KopiMottakerUtkast kopiMottakerUtkast) {
         return new KopiMottakerDto(kopiMottakerUtkast.rolle(), kopiMottakerUtkast.orgnr(), kopiMottakerUtkast.aktørID(), kopiMottakerUtkast.institusjonID());
     }
 
     public KopiMottakerUtkast tilUtkast() {
-        return new KopiMottakerUtkast(this.rolle(), this.orgnr(), this.aktørId(), this.institusjonId());
+        return new KopiMottakerUtkast(this.rolle(), this.orgnr(), this.aktørId(), this.institusjonID());
     }
 
     public KopiMottaker tilKopiMottaker() {
-        return new KopiMottaker(rolle, orgnr, aktørId, institusjonId);
+        return new KopiMottaker(rolle, orgnr, aktørId, institusjonID);
     }
 }
