@@ -81,7 +81,7 @@ public class BrevmalListeBygger {
                     mottakere.add(lagMottakerMedAdresseOgFeilmelding(behandlingId, Mottakerroller.ARBEIDSGIVER, false));
                 }
                 if (fagsak.erSakstypeTrygdeavtale() || fagsak.erSakstypeEøs()) {
-                    mottakere.add(lagMottakerForUtenlandskTrygdemyndighet(behandling, fagsak.erSakstypeEøs()));
+                    mottakere.add(lagMottakerForUtenlandskTrygdemyndighet(behandling, fagsak.erSakstypeTrygdeavtale()));
                 }
                 mottakere.add(lagMottakerMedRolle(Mottakerroller.ANNEN_ORGANISASJON));
                 mottakere.add(lagMottakerMedRolle(Mottakerroller.NORSK_MYNDIGHET));
@@ -115,12 +115,12 @@ public class BrevmalListeBygger {
         return mottakerDto;
     }
 
-    private MottakerDto lagMottakerForUtenlandskTrygdemyndighet(Behandling behandling, boolean sakstypeErEøs) {
+    private MottakerDto lagMottakerForUtenlandskTrygdemyndighet(Behandling behandling, boolean erSakstypeTrygdeavtale) {
         var mottakerDto = new MottakerDto();
         mottakerDto.setRolle(Mottakerroller.UTENLANDSK_TRYGDEMYNDIGHET);
         mottakerDto.setType(hentTypeFraRolle(Mottakerroller.UTENLANDSK_TRYGDEMYNDIGHET));
 
-        if (!sakstypeErEøs && !saksbehandlingRegler.harIngenFlyt(behandling) && !behandling.harLand()) {
+        if (erSakstypeTrygdeavtale && !saksbehandlingRegler.harIngenFlyt(behandling) && !behandling.harLand()) {
             mottakerDto.setFeilmelding(new FeilmeldingDto(UTENLANDSK_TRYGDEMYNDIGHET_BEHANDLING_MANGLER_LAND));
         }
 
