@@ -25,8 +25,16 @@ import static no.nav.melosys.service.kontroll.regler.PeriodeRegler.feilIPeriode;
 @Service
 public class MedlemskapsperiodeService {
 
-    private static final Collection<Trygdedekninger> GYLDIGE_TRYGDEDEKNINGER = Set.of(FTRL_2_9_FØRSTE_LEDD_A_HELSE, FTRL_2_9_FØRSTE_LEDD_A_ANDRE_LEDD_HELSE_SYKE_FORELDREPENGER,
-        FTRL_2_9_FØRSTE_LEDD_B_PENSJON, FTRL_2_9_FØRSTE_LEDD_C_HELSE_PENSJON, FTRL_2_9_FØRSTE_LEDD_C_ANDRE_LEDD_HELSE_PENSJON_SYKE_FORELDREPENGER);
+    private static final Collection<Trygdedekninger> GYLDIGE_TRYGDEDEKNINGER
+        = Set.of(
+        FULL_DEKNING_FTRL,
+        FTRL_2_7_TREDJE_LEDD_B_HELSE_SYKE_FORELDREPENGER,
+        FTRL_2_7A_ANDRE_LEDD_B_HELSE_SYKE_FORELDREPENGER,
+        FTRL_2_9_FØRSTE_LEDD_A_HELSE,
+        FTRL_2_9_FØRSTE_LEDD_A_ANDRE_LEDD_HELSE_SYKE_FORELDREPENGER,
+        FTRL_2_9_FØRSTE_LEDD_B_PENSJON,
+        FTRL_2_9_FØRSTE_LEDD_C_HELSE_PENSJON,
+        FTRL_2_9_FØRSTE_LEDD_C_ANDRE_LEDD_HELSE_PENSJON_SYKE_FORELDREPENGER);
 
     private final MedlemskapsperiodeRepository medlemskapsperiodeRepository;
     private final MedlemAvFolketrygdenService medlemAvFolketrygdenService;
