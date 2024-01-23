@@ -382,6 +382,7 @@ class OverlappendeMedlemskapsperioderReglerTest {
         MedlemskapDokument medlemskapDokument = new MedlemskapDokument();
 
         Medlemsperiode medlemsperiode = new Medlemsperiode();
+        medlemsperiode.id = 1L;
         medlemsperiode.status = PeriodestatusMedl.GYLD.getKode();
         medlemsperiode.periode = new Periode(LocalDate.EPOCH, LocalDate.EPOCH.plusYears(2));
         medlemsperiode.land = land;
