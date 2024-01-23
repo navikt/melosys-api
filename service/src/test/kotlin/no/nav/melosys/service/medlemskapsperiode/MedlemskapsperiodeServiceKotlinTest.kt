@@ -1,6 +1,7 @@
 package no.nav.melosys.service.medlemskapsperiode
 
 import io.getunleash.FakeUnleash
+import io.kotest.matchers.collections.shouldContainExactlyInAnyOrder
 import io.mockk.every
 import io.mockk.impl.annotations.MockK
 import io.mockk.impl.annotations.RelaxedMockK
@@ -187,7 +188,7 @@ class MedlemskapsperiodeServiceKotlinTest {
 
         val result = medlemskapsperiodeService.hentGyldigeTrygdedekninger()
 
-        assertEquals(forventet, result)
+        result.shouldContainExactlyInAnyOrder(forventet)
     }
 
     @Test

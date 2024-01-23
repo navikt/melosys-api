@@ -18,6 +18,7 @@ import no.nav.melosys.service.MedlemAvFolketrygdenService;
 import no.nav.melosys.service.avgift.TrygdeavgiftsgrunnlagService;
 import no.nav.melosys.service.behandling.BehandlingsresultatService;
 import no.nav.melosys.service.medl.MedlPeriodeService;
+import org.apache.commons.collections4.CollectionUtils;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -188,9 +189,7 @@ public class MedlemskapsperiodeService {
 
     public Collection<Trygdedekninger> hentGyldigeTrygdedekninger() {
         if (unleash.isEnabled(ToggleName.MELOSYS_FOLKETRYGDEN_2_7)) {
-            return new ArrayList<>(GYLDIGE_TRYGDEDEKNINGER_2_8) {{
-                addAll(GYLDIGE_TRYGDEDEKNINGER_2_7);
-            }};
+            return CollectionUtils.union(GYLDIGE_TRYGDEDEKNINGER_2_7, GYLDIGE_TRYGDEDEKNINGER_2_8);
         }
         return GYLDIGE_TRYGDEDEKNINGER_2_8;
     }
