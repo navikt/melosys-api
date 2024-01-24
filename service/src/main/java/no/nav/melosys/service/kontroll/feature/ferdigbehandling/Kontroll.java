@@ -23,6 +23,7 @@ import no.nav.melosys.service.LovvalgsperiodeService;
 import no.nav.melosys.service.avklartefakta.AvklarteVirksomheterService;
 import no.nav.melosys.service.behandling.BehandlingService;
 import no.nav.melosys.service.kontroll.feature.ferdigbehandling.data.FerdigbehandlingKontrollData;
+import no.nav.melosys.service.kontroll.feature.ferdigbehandling.data.MedlemskapsperiodeData;
 import no.nav.melosys.service.kontroll.feature.ferdigbehandling.data.SaksopplysningerData;
 import no.nav.melosys.service.kontroll.feature.ferdigbehandling.kontroll.FerdigbehandlingKontrollsett;
 import no.nav.melosys.service.medlemskapsperiode.MedlemskapsperiodeService;
@@ -176,6 +177,11 @@ class Kontroll {
         MedlemskapDokument medlemskapDokument = behandling.hentMedlemskapDokument();
 
         List<Medlemskapsperiode> medlemskapsperioder = medlemskapsperiodeService.hentMedlemskapsperioder(behandling.getId()).stream().toList();
+        List<Medlemskapsperiode> tidligereMedlemskapsperioder = behandling.getFagsak().hentInaktiveBehandlinger().stream()
+            .map(p -> medlemskapsperiodeService.hentMedlemskapsperioder(p.getId()))
+            .flatMap(Collection::stream)
+            .toList();
+        MedlemskapsperiodeData medlemskapsperiodeData = new MedlemskapsperiodeData(medlemskapsperioder, tidligereMedlemskapsperioder);
         MottatteOpplysningerData mottatteOpplysningerData = behandling.getMottatteOpplysninger().getMottatteOpplysningerData();
         Persondata persondata = hentPersondata(behandling);
         OrganisasjonDokument organisasjon = null;
@@ -188,7 +194,7 @@ class Kontroll {
             persondataFullmektig = hentPersondata(fullmektig.getPersonIdent());
         }
 
-        return FerdigbehandlingKontrollData.lagKontrollDataForFTRL(persondata, mottatteOpplysningerData, medlemskapDokument, fullmektig, organisasjon, persondataFullmektig, medlemskapsperioder);
+        return FerdigbehandlingKontrollData.lagKontrollDataForFTRL(persondata, mottatteOpplysningerData, medlemskapDokument, fullmektig, organisasjon, persondataFullmektig, medlemskapsperiodeData);
     }
 
     private Persondata hentPersondata(Behandling behandling) {
