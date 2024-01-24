@@ -112,7 +112,7 @@ internal class LagreMedlemsperiodeMedlTest {
         }
         val behandlingsresultat = lagBehandlingsresultat(medlemskapsperioder).apply {
             this.behandling = prosessinstans.behandling
-            type = Behandlingsresultattyper.DELVIS_OPPHØRT
+            type = Behandlingsresultattyper.OPPHØRT
         }
         every { behandlingsresultatService.hentBehandlingsresultat(BEHANDLING_ID) } returns behandlingsresultat
 
