@@ -40,7 +40,7 @@ internal class LagreMedlemsperiodeMedlTest {
 
     @Test
     fun utfør_ingenMedlemskapsperioder_gjørIngenting() {
-        every { behandlingsresultatService.hentBehandlingsresultat(BEHANDLING_ID) } returns lagBehandlingsresulat(emptyList())
+        every { behandlingsresultatService.hentBehandlingsresultat(BEHANDLING_ID) } returns lagBehandlingsresultat(emptyList())
 
         lagreMedlemsperiodeMedl.utfør(prosessinstans)
 
@@ -53,7 +53,7 @@ internal class LagreMedlemsperiodeMedlTest {
             lagMedlemskapsperiode(InnvilgelsesResultat.AVSLAATT),
             lagMedlemskapsperiode(InnvilgelsesResultat.AVSLAATT)
         )
-        every { behandlingsresultatService.hentBehandlingsresultat(BEHANDLING_ID) } returns lagBehandlingsresulat(medlemskapsperioder)
+        every { behandlingsresultatService.hentBehandlingsresultat(BEHANDLING_ID) } returns lagBehandlingsresultat(medlemskapsperioder)
 
 
         lagreMedlemsperiodeMedl.utfør(prosessinstans)
@@ -68,7 +68,7 @@ internal class LagreMedlemsperiodeMedlTest {
             lagMedlemskapsperiode(InnvilgelsesResultat.INNVILGET),
             lagMedlemskapsperiode(InnvilgelsesResultat.INNVILGET)
         )
-        every { behandlingsresultatService.hentBehandlingsresultat(BEHANDLING_ID) } returns lagBehandlingsresulat(medlemskapsperioder)
+        every { behandlingsresultatService.hentBehandlingsresultat(BEHANDLING_ID) } returns lagBehandlingsresultat(medlemskapsperioder)
 
 
         lagreMedlemsperiodeMedl.utfør(lagProsessInstans())
@@ -87,7 +87,7 @@ internal class LagreMedlemsperiodeMedlTest {
         val prosessinstans = lagProsessInstans()
         prosessinstans.behandling.type = Behandlingstyper.NY_VURDERING
         prosessinstans.behandling.opprinneligBehandling = opprinneligBehandling
-        val behandlingsresultat = lagBehandlingsresulat(medlemskapsperioder)
+        val behandlingsresultat = lagBehandlingsresultat(medlemskapsperioder)
         behandlingsresultat.behandling = prosessinstans.behandling
         every { behandlingsresultatService.hentBehandlingsresultat(BEHANDLING_ID) } returns behandlingsresultat
 
@@ -107,7 +107,7 @@ internal class LagreMedlemsperiodeMedlTest {
             behandling.type = Behandlingstyper.MANGLENDE_INNBETALING_TRYGDEAVGIFT
             behandling.opprinneligBehandling = opprinneligBehandling
         }
-        val behandlingsresultat = lagBehandlingsresulat(emptyList())
+        val behandlingsresultat = lagBehandlingsresultat(emptyList())
         behandlingsresultat.behandling = prosessinstans.behandling
         every { behandlingsresultatService.hentBehandlingsresultat(BEHANDLING_ID) } returns behandlingsresultat
 
@@ -130,7 +130,7 @@ internal class LagreMedlemsperiodeMedlTest {
             behandling.type = Behandlingstyper.MANGLENDE_INNBETALING_TRYGDEAVGIFT
             behandling.opprinneligBehandling = opprinneligBehandling
         }
-        val behandlingsresultat = lagBehandlingsresulat(medlemskapsperioder)
+        val behandlingsresultat = lagBehandlingsresultat(medlemskapsperioder)
         behandlingsresultat.behandling = prosessinstans.behandling
         every { behandlingsresultatService.hentBehandlingsresultat(BEHANDLING_ID) } returns behandlingsresultat
 
@@ -151,7 +151,7 @@ internal class LagreMedlemsperiodeMedlTest {
         }
     }
 
-    private fun lagBehandlingsresulat(medlemskapsperioder: List<Medlemskapsperiode>): Behandlingsresultat {
+    private fun lagBehandlingsresultat(medlemskapsperioder: List<Medlemskapsperiode>): Behandlingsresultat {
         val medlemAvFolketrygden = MedlemAvFolketrygden()
         medlemAvFolketrygden.medlemskapsperioder = medlemskapsperioder
         val behandling = Behandling()
