@@ -136,13 +136,13 @@ public class MedlemskapsperiodeService {
     }
 
     @Transactional
-    public void erstattMedlemskapsperioder(long nyBehandlingID, long opprinneligBehandlingID, List<Medlemskapsperiode> nyeMedlemskapsperioder) {
+    public void erstattMedlemskapsperioder(long behandlingID, long opprinneligBehandlingID, List<Medlemskapsperiode> nyeMedlemskapsperioder) {
         var opprinneligeInnvilgedeMedlemskapsperioder = hentMedlemskapsperioder(opprinneligBehandlingID).stream().filter(Medlemskapsperiode::erInnvilget).toList();
         var nyeInnvilgedeMedlemskapsperioder = nyeMedlemskapsperioder.stream().filter(Medlemskapsperiode::erInnvilget).toList();
 
         opphørOpprinneligePerioder(opprinneligeInnvilgedeMedlemskapsperioder, nyeInnvilgedeMedlemskapsperioder);
-        opprettEllerOppdaterInnvilgedePerioder(nyBehandlingID, nyeInnvilgedeMedlemskapsperioder);
-        opprettOpphørtePerioder(nyBehandlingID, nyeMedlemskapsperioder.stream().filter(Medlemskapsperiode::erOpphørt).toList());
+        opprettEllerOppdaterInnvilgedePerioder(behandlingID, nyeInnvilgedeMedlemskapsperioder);
+        opprettOpphørtePerioder(behandlingID, nyeMedlemskapsperioder.stream().filter(Medlemskapsperiode::erOpphørt).toList());
     }
 
     private void opphørOpprinneligePerioder(List<Medlemskapsperiode> opprinneligeInnvilgedeMedlemskapsperioder, List<Medlemskapsperiode> nyeInnvilgedeMedlemskapsperioder) {
@@ -152,12 +152,12 @@ public class MedlemskapsperiodeService {
             .forEach(medlPeriodeService::avvisPeriodeOpphørt);
     }
 
-    private void opprettEllerOppdaterInnvilgedePerioder(long nyBehandlingId, List<Medlemskapsperiode> nyeInnvilgedeMedlemskapsperioder) {
-        nyeInnvilgedeMedlemskapsperioder.forEach(medlemskapsperiode -> opprettEllerOppdaterMedlPeriode(nyBehandlingId, medlemskapsperiode));
+    private void opprettEllerOppdaterInnvilgedePerioder(long behandlingID, List<Medlemskapsperiode> nyeInnvilgedeMedlemskapsperioder) {
+        nyeInnvilgedeMedlemskapsperioder.forEach(medlemskapsperiode -> opprettEllerOppdaterMedlPeriode(behandlingID, medlemskapsperiode));
     }
 
-    private void opprettOpphørtePerioder(long nyBehandlingID, List<Medlemskapsperiode> nyeOpphørteMedlemskapsperioder) {
-        nyeOpphørteMedlemskapsperioder.forEach(medlemskapsperiode -> medlPeriodeService.opprettOpphørtPeriode(nyBehandlingID, medlemskapsperiode));
+    private void opprettOpphørtePerioder(long behandlingID, List<Medlemskapsperiode> nyeOpphørteMedlemskapsperioder) {
+        nyeOpphørteMedlemskapsperioder.forEach(medlemskapsperiode -> medlPeriodeService.opprettOpphørtPeriode(behandlingID, medlemskapsperiode));
     }
 
     private boolean eksistererMedlemskapsperiodeMedID(List<Medlemskapsperiode> medlemskapsperioder,
@@ -167,11 +167,11 @@ public class MedlemskapsperiodeService {
         );
     }
 
-    public void opprettEllerOppdaterMedlPeriode(long behandlingId, Medlemskapsperiode medlemskapsperiode) {
+    public void opprettEllerOppdaterMedlPeriode(long behandlingID, Medlemskapsperiode medlemskapsperiode) {
         if (medlemskapsperiode.getMedlPeriodeID() == null) {
-            medlPeriodeService.opprettPeriodeEndelig(behandlingId, medlemskapsperiode);
+            medlPeriodeService.opprettPeriodeEndelig(behandlingID, medlemskapsperiode);
         } else {
-            medlPeriodeService.oppdaterPeriodeEndelig(behandlingId, medlemskapsperiode);
+            medlPeriodeService.oppdaterPeriodeEndelig(behandlingID, medlemskapsperiode);
         }
     }
 
