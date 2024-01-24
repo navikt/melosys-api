@@ -12,7 +12,6 @@ import no.nav.melosys.domain.folketrygden.MedlemAvFolketrygden
 import no.nav.melosys.domain.kodeverk.Aktoersroller
 import no.nav.melosys.domain.kodeverk.InnvilgelsesResultat
 import no.nav.melosys.domain.kodeverk.Sakstyper
-import no.nav.melosys.domain.kodeverk.Trygdedekninger
 import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingstema
 import no.nav.melosys.featuretoggle.ToggleName
 import no.nav.melosys.repository.MedlemskapsperiodeRepository
@@ -177,6 +176,21 @@ class MedlemskapsperiodeServiceKotlinTest {
     }
 
     @Test
+    fun `erstattMedlemskapsperioder skal opprette nye opphørte perioder`() {
+        setupHappyPathBehandling()
+        val medlemAvFolketrygden = MedlemAvFolketrygden().apply { medlemskapsperioder = emptyList() }
+        every { medlemAvFolketrygdenService.finnMedlemAvFolketrygden(1L) } returns Optional.of(medlemAvFolketrygden)
+        val nyInnvilgetMedlemskapsperiode = Medlemskapsperiode().apply { innvilgelsesresultat = InnvilgelsesResultat.INNVILGET }
+        val nyOpphørtMedlemskapsperiode = Medlemskapsperiode().apply { innvilgelsesresultat = InnvilgelsesResultat.OPPHØRT }
+
+
+        medlemskapsperiodeService.erstattMedlemskapsperioder(2L, 1L, listOf(nyInnvilgetMedlemskapsperiode, nyOpphørtMedlemskapsperiode))
+
+
+        verify(exactly = 1) { medlPeriodeService.opprettOpphørtPeriode(2L, nyOpphørtMedlemskapsperiode) }
+    }
+
+    @Test
     fun `opprettEllerOppdaterMedlPeriode oppretter når medlId ikke finnes`() {
         val medlemskapsperiodeUtenMedlId = Medlemskapsperiode()
 
@@ -189,10 +203,7 @@ class MedlemskapsperiodeServiceKotlinTest {
     @Test
     fun `hentGyldigeTrygdedekninger returnerer GYLDIGE_TRYGDEDEKNINGER_2_7 og GYLDIGE_TRYGDEDEKNINGER_2_8 når MELOSYS_FOLKETRYGDEN_2_7 er enabled`() {
         fakeUnleash.enable(ToggleName.MELOSYS_FOLKETRYGDEN_2_7)
-
-        val forventet = ArrayList<Trygdedekninger>(MedlemskapsperiodeService.GYLDIGE_TRYGDEDEKNINGER_2_8).apply {
-            addAll(MedlemskapsperiodeService.GYLDIGE_TRYGDEDEKNINGER_2_7)
-        }
+        val forventet = listOf(MedlemskapsperiodeService.GYLDIGE_TRYGDEDEKNINGER_2_7, MedlemskapsperiodeService.GYLDIGE_TRYGDEDEKNINGER_2_8).flatten()
 
         val result = medlemskapsperiodeService.hentGyldigeTrygdedekninger()
 
