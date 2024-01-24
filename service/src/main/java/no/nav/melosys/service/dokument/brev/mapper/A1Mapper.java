@@ -36,6 +36,7 @@ class A1Mapper {
     private static final int ANTALL_PÅKREVDE_FELTER_I_LISTE_5_2 = 13;
     static final int MAKS_ANTALL_TEGN_PER_LINJE_5_2 = 70;
     static final String STATSLØS_TEKST = "Stateless";
+    static final String UNKNOWN_TEKST = "UNKNOWN";
     static final String FLERE_UKJENTE_ELLER_IKKE_OPPGITT_LAND = "Various EEA-countries/Switzerland";
 
     private BrevDataA1 brevData;
@@ -114,6 +115,11 @@ class A1Mapper {
         if (statsborgerskap.contains(Land.av(Land.STATSLØS))) {
             return STATSLØS_TEKST;
         }
+
+        if (statsborgerskap.contains(Land.av(Land.UNKNOWN))) {
+            return UNKNOWN_TEKST;
+        }
+
         return statsborgerskap.stream()
             .sorted(Comparator.comparing(Land::getKode))
             .map(s -> IsoLandkodeKonverterer.tilIso2(s.getKode())).collect(Collectors.joining(","));
