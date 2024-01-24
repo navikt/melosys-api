@@ -81,6 +81,21 @@ class UtenlandskMyndighetServiceTest {
     }
 
     @Test
+    void hentAlleUtenlandskeMyndigheterMedGyldigAdresse_GirForventetResultat() {
+        var utenlandskMyndighetUSA = new UtenlandskMyndighet();
+        utenlandskMyndighetUSA.landkode = Land_iso2.US;
+        utenlandskMyndighetUSA.poststed = "Baltimore MD 21215";
+        var utenlandskMyndighetMontenegro = new UtenlandskMyndighet();
+        utenlandskMyndighetMontenegro.landkode = Land_iso2.ME;
+        when(utenlandskMyndighetRepositoryMock.findAll()).thenReturn(List.of(utenlandskMyndighetUSA, utenlandskMyndighetMontenegro));
+
+        assertThat(utenlandskMyndighetService.hentAlleUtenlandskeMyndigheterMedGyldigAdresse())
+            .hasSize(1)
+            .flatExtracting(UtenlandskMyndighet::hentInstitusjonID)
+            .containsExactly("US");
+    }
+
+    @Test
     void avklarUtenlandskMyndighetSomAktørOgLagre_oppdatererMyndigheterForEuEos() {
         behandling.getFagsak().setType(Sakstyper.EU_EOS);
         when(landvelgerServiceMock.hentUtenlandskTrygdemyndighetsland(BEHANDLING_ID)).thenReturn(List.of(Land_iso2.SE));
@@ -232,9 +247,9 @@ class UtenlandskMyndighetServiceTest {
         return behandling;
     }
 
-    private UtenlandskMyndighet lagUtenlandskMyndighet(Land_iso2 landkode, String institusjonId, Preferanse.PreferanseEnum preferanse) {
+    private UtenlandskMyndighet lagUtenlandskMyndighet(Land_iso2 landkode, String institusjonID, Preferanse.PreferanseEnum preferanse) {
         UtenlandskMyndighet utenlandskMyndighet = new UtenlandskMyndighet();
-        utenlandskMyndighet.institusjonskode = institusjonId;
+        utenlandskMyndighet.institusjonskode = institusjonID;
         utenlandskMyndighet.landkode = landkode;
         if (preferanse != null) {
             utenlandskMyndighet.preferanser.add(new Preferanse(1L, preferanse));

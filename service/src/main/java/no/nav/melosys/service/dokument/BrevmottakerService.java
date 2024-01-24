@@ -134,7 +134,7 @@ public class BrevmottakerService {
             case BRUKER -> avklarMottakereForBruker(produserbartDokument, behandling, forhåndsvisning);
             case VIRKSOMHET -> avklarMottakereForVirksomhet(behandling);
             case ARBEIDSGIVER -> avklarMottakereForArbeidsgiver(behandling, kunAvklarteVirksomheter);
-            case UTENLANDSK_TRYGDEMYNDIGHET -> avklarMottakereForUtenlandskTrygdeyndighet(mottaker, behandling, produserbartDokument);
+            case UTENLANDSK_TRYGDEMYNDIGHET -> avklarMottakereForUtenlandskTrygdemyndighet(behandling, produserbartDokument);
             case NORSK_MYNDIGHET -> avklarMottakereForNorskMyndighet(mottaker);
             case FULLMEKTIG -> avklarMottakereForFullmektig(behandling.getFagsak());
             default -> throw new FunksjonellException("%s støttes ikke.".formatted(mottaker.getRolle()));
@@ -238,11 +238,7 @@ public class BrevmottakerService {
         return arbeidsgiver;
     }
 
-    private List<Mottaker> avklarMottakereForUtenlandskTrygdeyndighet(Mottaker mottaker, Behandling behandling, Produserbaredokumenter produserbartDokument) {
-        if (mottaker.getOrgnr() != null) {
-            // Norsk myndighet har orgnummer.
-            return Collections.singletonList(mottaker);
-        } else {
+    private List<Mottaker> avklarMottakereForUtenlandskTrygdemyndighet(Behandling behandling, Produserbaredokumenter produserbartDokument) {
             // Utenlandsk myndighet
             Map<UtenlandskMyndighet, Mottaker> utenlandskMyndighetMottakerMap
                 = utenlandskMyndighetService.lagUtenlandskeMyndigheterFraBehandling(behandling);
@@ -260,7 +256,6 @@ public class BrevmottakerService {
             } else {
                 return new ArrayList<>(utenlandskMyndighetMottakerMap.values());
             }
-        }
     }
 
     private boolean kanReservereMotA1(Behandling behandling) {

@@ -50,7 +50,7 @@ class AktoerHistorikkService(
                     registrertTil = next?.revisionLocalDateTime,
                     aktørId = revision.entity.aktørId,
                     personIdent = revision.entity.personIdent,
-                    institusjonID = revision.entity.institusjonId,
+                    institusjonID = revision.entity.institusjonID,
                     orgnr = revision.entity.orgnr,
                     rolle = revision.entity.rolle,
                     fullmakter = revision.entity.fullmakter.map { it.type }.toSet()

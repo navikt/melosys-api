@@ -9,7 +9,8 @@ public enum BrevmalFeltKode {
     DOKUMENT_TITTEL("Dokumenttittel (valgfritt)"),
     INNLEDNING_FRITEKST("Innledningstekst"),
     STANDARDTEKST_KONTAKTINFORMASJON("Legg til standardtekst med kontaktinformasjon nederst i brevet"),
-    VEDLEGG("Vedlegg");
+    VEDLEGG("Vedlegg"),
+    UTENLANDSK_TRYGDEMYNDIGHET_MOTTAKER("Trygdemyndighet");
 
     private final String beskrivelse;
 
