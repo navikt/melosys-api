@@ -8,18 +8,20 @@ import no.nav.melosys.domain.kodeverk.Folketrygdloven_kap2_bestemmelser
 import no.nav.melosys.domain.kodeverk.InnvilgelsesResultat
 import no.nav.melosys.domain.kodeverk.Medlemskapstyper
 import no.nav.melosys.domain.kodeverk.Trygdedekninger
+import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingstyper
 import no.nav.melosys.exception.FunksjonellException
 import org.springframework.data.util.Pair
 import java.time.LocalDate
 
 class UtledMedlemskapsperioder {
 
-    fun lagMedlemskapsperioderForNyVurdering(
+    fun lagMedlemskapsperioderForAndregangsbehandling(
         opprinneligBehandlingsresultat: Behandlingsresultat,
-        bestemmelse: Folketrygdloven_kap2_bestemmelser
+        bestemmelse: Folketrygdloven_kap2_bestemmelser,
+        type: Behandlingstyper
     ): Collection<Medlemskapsperiode> =
         opprinneligBehandlingsresultat.medlemAvFolketrygden.medlemskapsperioder
-            .filter { it.erInnvilget() }
+            .filter { if (type === Behandlingstyper.MANGLENDE_INNBETALING_TRYGDEAVGIFT) it.erInnvilget() || it.erOpphørt() else it.erInnvilget() }
             .map {
                 Medlemskapsperiode().apply {
                     fom = it.fom
@@ -29,26 +31,7 @@ class UtledMedlemskapsperioder {
                     medlemskapstype = it.medlemskapstype
                     trygdedekning = it.trygdedekning
                     medlPeriodeID = it.medlPeriodeID
-                    this.bestemmelse = bestemmelse
-                }
-            }
-
-    fun lagMedlemskapsperioderForManglendeInnbetaling(
-        opprinneligBehandlingsresultat: Behandlingsresultat,
-        bestemmelse: Folketrygdloven_kap2_bestemmelser
-    ): Collection<Medlemskapsperiode> =
-        opprinneligBehandlingsresultat.medlemAvFolketrygden.medlemskapsperioder
-            .filter { it.erInnvilget() || it.erOpphørt() }
-            .map {
-                Medlemskapsperiode().apply {
-                    fom = it.fom
-                    tom = it.tom
-                    arbeidsland = it.arbeidsland
-                    innvilgelsesresultat = it.innvilgelsesresultat
-                    medlemskapstype = it.medlemskapstype
-                    trygdedekning = it.trygdedekning
-                    medlPeriodeID = it.medlPeriodeID
-                    this.bestemmelse = if (it.erInnvilget()) bestemmelse else it.bestemmelse
+                    this.bestemmelse = if (it.erOpphørt()) it.bestemmelse else bestemmelse
                 }
             }
 

@@ -12,6 +12,7 @@ import no.nav.melosys.domain.kodeverk.Folketrygdloven_kap2_bestemmelser;
 import no.nav.melosys.domain.kodeverk.InnvilgelsesResultat;
 import no.nav.melosys.domain.kodeverk.Medlemskapstyper;
 import no.nav.melosys.domain.kodeverk.Trygdedekninger;
+import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingstyper;
 import no.nav.melosys.domain.mottatteopplysninger.data.Periode;
 import org.junit.jupiter.api.Test;
 
@@ -253,13 +254,14 @@ class UtledMedlemskapsperioderTest {
         var tom = LocalDate.parse("2024-06-01");
         var innvilgetMedlemskapsperiode = lagMedlemskapsperiode(fom, tom, InnvilgelsesResultat.INNVILGET, Trygdedekninger.FTRL_2_9_FØRSTE_LEDD_B_PENSJON, bestemmelse);
         var avslåttMedlemskapsperiode = lagMedlemskapsperiode(fom, tom, InnvilgelsesResultat.AVSLAATT, Trygdedekninger.FTRL_2_9_FØRSTE_LEDD_A_HELSE, bestemmelse);
+        var opphørtMedlemskapsperiode = lagMedlemskapsperiode(fom, tom, InnvilgelsesResultat.OPPHØRT, Trygdedekninger.FTRL_2_9_FØRSTE_LEDD_A_HELSE, bestemmelse);
 
         var opprinneligBehandlingsresultat = new Behandlingsresultat();
         opprinneligBehandlingsresultat.setMedlemAvFolketrygden(new MedlemAvFolketrygden());
-        opprinneligBehandlingsresultat.getMedlemAvFolketrygden().setMedlemskapsperioder(List.of(innvilgetMedlemskapsperiode, avslåttMedlemskapsperiode));
+        opprinneligBehandlingsresultat.getMedlemAvFolketrygden().setMedlemskapsperioder(List.of(innvilgetMedlemskapsperiode, avslåttMedlemskapsperiode, opphørtMedlemskapsperiode));
 
 
-        Collection<Medlemskapsperiode> response = utledMedlemskapsperioder.lagMedlemskapsperioderForNyVurdering(opprinneligBehandlingsresultat, bestemmelse);
+        Collection<Medlemskapsperiode> response = utledMedlemskapsperioder.lagMedlemskapsperioderForAndregangsbehandling(opprinneligBehandlingsresultat, bestemmelse, Behandlingstyper.NY_VURDERING);
 
 
         assertThat(response).hasSize(1)
@@ -282,7 +284,7 @@ class UtledMedlemskapsperioderTest {
         opprinneligBehandlingsresultat.getMedlemAvFolketrygden().setMedlemskapsperioder(List.of());
 
 
-        Collection<Medlemskapsperiode> response = utledMedlemskapsperioder.lagMedlemskapsperioderForNyVurdering(opprinneligBehandlingsresultat, bestemmelse);
+        Collection<Medlemskapsperiode> response = utledMedlemskapsperioder.lagMedlemskapsperioderForAndregangsbehandling(opprinneligBehandlingsresultat, bestemmelse, Behandlingstyper.NY_VURDERING);
 
 
         assertThat(response).isEmpty();
@@ -301,7 +303,7 @@ class UtledMedlemskapsperioderTest {
         opprinneligBehandlingsresultat.getMedlemAvFolketrygden().setMedlemskapsperioder(List.of(innvilgetMedlemskapsperiode, avslåttMedlemskapsperiode, opphørtMedlemskapsperiode));
 
 
-        Collection<Medlemskapsperiode> response = utledMedlemskapsperioder.lagMedlemskapsperioderForManglendeInnbetaling(opprinneligBehandlingsresultat, bestemmelse);
+        Collection<Medlemskapsperiode> response = utledMedlemskapsperioder.lagMedlemskapsperioderForAndregangsbehandling(opprinneligBehandlingsresultat, bestemmelse, Behandlingstyper.MANGLENDE_INNBETALING_TRYGDEAVGIFT);
 
 
         assertThat(response).hasSize(2)

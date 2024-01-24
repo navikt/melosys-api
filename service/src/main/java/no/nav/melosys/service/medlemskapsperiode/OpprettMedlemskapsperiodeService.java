@@ -49,12 +49,9 @@ public class OpprettMedlemskapsperiodeService {
             Collection<Medlemskapsperiode> medlemskapsperioder;
             var opprinneligBehandling = behandling.getOpprinneligBehandling();
 
-            if (behandling.erNyVurdering() && opprinneligBehandling != null) {
+            if ((behandling.erNyVurdering() || behandling.erManglendeInnbetalingTrygdeavgift()) && opprinneligBehandling != null) {
                 var opprinneligBehandlingsresultat = behandlingsresultatService.hentBehandlingsresultat(opprinneligBehandling.getId());
-                medlemskapsperioder = new UtledMedlemskapsperioder().lagMedlemskapsperioderForNyVurdering(opprinneligBehandlingsresultat, bestemmelse);
-            } else if (behandling.erManglendeInnbetalingTrygdeavgift() && opprinneligBehandling != null) {
-                var opprinneligBehandlingsresultat = behandlingsresultatService.hentBehandlingsresultat(opprinneligBehandling.getId());
-                medlemskapsperioder = new UtledMedlemskapsperioder().lagMedlemskapsperioderForManglendeInnbetaling(opprinneligBehandlingsresultat, bestemmelse);
+                medlemskapsperioder = new UtledMedlemskapsperioder().lagMedlemskapsperioderForAndregangsbehandling(opprinneligBehandlingsresultat, bestemmelse, behandling.getType());
             } else {
                 SøknadNorgeEllerUtenforEØS søknad = (SøknadNorgeEllerUtenforEØS) behandling.getMottatteOpplysninger().getMottatteOpplysningerData();
                 medlemskapsperioder = new UtledMedlemskapsperioder().lagMedlemskapsperioder(
