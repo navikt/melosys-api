@@ -114,40 +114,101 @@ class OpprettFakturaserieTest {
         every { behandlingsresultatService.hentBehandlingsresultat(BEHANDLING_ID) } returns behandlingsresultat
         every { behandlingService.hentBehandling(BEHANDLING_ID) } returns behandling
         every { pdlService.finnFolkeregisterident(BRUKER_FNR) } returns Optional.of(BRUKER_AKTØRID)
-        every { faktureringskomponentenConsumer.kansellerFakturaserie(FAKTURASERIE_REFERANSE, BRUKER_AKTØRID) } returns NyFakturaserieResponseDto(FAKTURASERIE_REFERANSE)
+        every { faktureringskomponentenConsumer.kansellerFakturaserie(FAKTURASERIE_REFERANSE, BRUKER_AKTØRID) } returns NyFakturaserieResponseDto(
+            FAKTURASERIE_REFERANSE
+        )
+
 
         opprettFakturaserie.utfør(prosessinstans)
+
 
         verify(exactly = 1) { faktureringskomponentenConsumer.kansellerFakturaserie(eq(FAKTURASERIE_REFERANSE), eq(SAKSBEHANDLER_IDENT)) }
     }
 
     @Test
-    fun `Ikke Kanseller betaling når resultat er ny vurdering og trygdeavgift ikke betales til NAV`() {
-        val OPPRINNELIG_BEHANDLING_ID = 3L
+    fun `Kanseller betaling når manglende innbetaling resulterer i fjerning av trygdeavgift`() {
+        lagTestData(setOf(lagAktoerBruker())).apply {
+            behandling.type = Behandlingstyper.MANGLENDE_INNBETALING_TRYGDEAVGIFT
+            behandling.opprinneligBehandling = Behandling().apply { id = OPPRINNELIG_BEHANDLING_ID }
+            behandlingsresultat.type = Behandlingsresultattyper.MEDLEM_I_FOLKETRYGDEN
+            behandlingsresultat.fakturaserieReferanse = FAKTURASERIE_REFERANSE
+            behandlingsresultat.medlemAvFolketrygden.fastsattTrygdeavgift.trygdeavgiftsperioder.first().apply {
+                grunnlagInntekstperiode.isArbeidsgiversavgiftBetalesTilSkatt = true
+                grunnlagSkatteforholdTilNorge.skatteplikttype = Skatteplikttype.SKATTEPLIKTIG
+            }
+        }
+        val opprinneligBehandlingsresultat = Behandlingsresultat()
+        every { behandlingsresultatService.hentBehandlingsresultat(BEHANDLING_ID) } returns behandlingsresultat
+        every { behandlingsresultatService.hentBehandlingsresultat(OPPRINNELIG_BEHANDLING_ID) } returns opprinneligBehandlingsresultat
+        every { trygdeavgiftOppsummeringService.harTrygdeavgiftOgBestiltFaktura(opprinneligBehandlingsresultat) } returns true
+        every { behandlingService.hentBehandling(BEHANDLING_ID) } returns behandling
+        every { pdlService.finnFolkeregisterident(BRUKER_FNR) } returns Optional.of(BRUKER_AKTØRID)
+        every { faktureringskomponentenConsumer.kansellerFakturaserie(FAKTURASERIE_REFERANSE, BRUKER_AKTØRID) } returns
+            NyFakturaserieResponseDto(FAKTURASERIE_REFERANSE)
+
+
+        opprettFakturaserie.utfør(prosessinstans)
+
+
+        verify(exactly = 1) { faktureringskomponentenConsumer.kansellerFakturaserie(eq(FAKTURASERIE_REFERANSE), eq(SAKSBEHANDLER_IDENT)) }
+    }
+
+    @Test
+    fun `Kanseller betaling når ny vurdering resulterer i fjerning av trygdeavgift`() {
+        lagTestData(setOf(lagAktoerBruker())).apply {
+            behandling.type = Behandlingstyper.NY_VURDERING
+            behandling.opprinneligBehandling = Behandling().apply { id = OPPRINNELIG_BEHANDLING_ID }
+            behandlingsresultat.type = Behandlingsresultattyper.MEDLEM_I_FOLKETRYGDEN
+            behandlingsresultat.fakturaserieReferanse = FAKTURASERIE_REFERANSE
+            behandlingsresultat.medlemAvFolketrygden.fastsattTrygdeavgift.trygdeavgiftsperioder.first().apply {
+                grunnlagInntekstperiode.isArbeidsgiversavgiftBetalesTilSkatt = true
+                grunnlagSkatteforholdTilNorge.skatteplikttype = Skatteplikttype.SKATTEPLIKTIG
+            }
+        }
+        val opprinneligBehandlingsresultat = Behandlingsresultat()
+        every { behandlingsresultatService.hentBehandlingsresultat(BEHANDLING_ID) } returns behandlingsresultat
+        every { behandlingsresultatService.hentBehandlingsresultat(OPPRINNELIG_BEHANDLING_ID) } returns opprinneligBehandlingsresultat
+        every { trygdeavgiftOppsummeringService.harTrygdeavgiftOgBestiltFaktura(opprinneligBehandlingsresultat) } returns true
+        every { behandlingService.hentBehandling(BEHANDLING_ID) } returns behandling
+        every { pdlService.finnFolkeregisterident(BRUKER_FNR) } returns Optional.of(BRUKER_AKTØRID)
+        every { faktureringskomponentenConsumer.kansellerFakturaserie(FAKTURASERIE_REFERANSE, BRUKER_AKTØRID) } returns
+            NyFakturaserieResponseDto(FAKTURASERIE_REFERANSE)
+
+
+        opprettFakturaserie.utfør(prosessinstans)
+
+
+        verify(exactly = 1) { faktureringskomponentenConsumer.kansellerFakturaserie(eq(FAKTURASERIE_REFERANSE), eq(SAKSBEHANDLER_IDENT)) }
+    }
+
+    @Test
+    fun `Ikke kanseller betaling når resultat er ny vurdering og trygdeavgift ikke betales til NAV`() {
         lagTestData(setOf(lagAktoerBruker())).apply {
             behandlingsresultat.vedtakMetadata.vedtakstype = Vedtakstyper.ENDRINGSVEDTAK
-            prosessinstans.behandling.type = Behandlingstyper.NY_VURDERING
+            behandling.type = Behandlingstyper.NY_VURDERING
             behandlingsresultat.fakturaserieReferanse = FAKTURASERIE_REFERANSE
-            prosessinstans.behandling.opprinneligBehandling = lagBehandling(fagsak).apply { id = OPPRINNELIG_BEHANDLING_ID }
+            behandling.opprinneligBehandling = lagBehandling(fagsak).apply { id = OPPRINNELIG_BEHANDLING_ID }
         }
         every { behandlingsresultatService.hentBehandlingsresultat(BEHANDLING_ID) } returns behandlingsresultat
         every { behandlingService.hentBehandling(BEHANDLING_ID) } returns behandling
         val opprinneligBehandlingsresultat = lagBehandlingsresultat().apply { fakturaserieReferanse = FAKTURASERIE_REFERANSE }
         every { behandlingsresultatService.hentBehandlingsresultat(OPPRINNELIG_BEHANDLING_ID) } returns opprinneligBehandlingsresultat
         every { pdlService.finnFolkeregisterident(BRUKER_FNR) } returns Optional.of(BRUKER_AKTØRID)
-        every { faktureringskomponentenConsumer.kansellerFakturaserie(FAKTURASERIE_REFERANSE, BRUKER_AKTØRID) } returns NyFakturaserieResponseDto(FAKTURASERIE_REFERANSE)
+        every { faktureringskomponentenConsumer.kansellerFakturaserie(FAKTURASERIE_REFERANSE, BRUKER_AKTØRID) } returns
+            NyFakturaserieResponseDto(FAKTURASERIE_REFERANSE)
+
 
         opprettFakturaserie.utfør(prosessinstans)
+
 
         verify(exactly = 0) { faktureringskomponentenConsumer.kansellerFakturaserie(eq(FAKTURASERIE_REFERANSE), eq(SAKSBEHANDLER_IDENT)) }
     }
 
     @Test
     fun `Opprett betalingsplan for ny vurdering`() {
-        val OPPRINNELIG_BEHANDLING_ID = 2L
         lagTestData(setOf(lagAktoerBruker()))
         behandling.opprinneligBehandling = Behandling().apply { id = OPPRINNELIG_BEHANDLING_ID }
-        val opprinneligBehandlingsresultat = Behandlingsresultat().apply { fakturaserieReferanse = "3456"}
+        val opprinneligBehandlingsresultat = Behandlingsresultat().apply { fakturaserieReferanse = "3456" }
         every { behandlingsresultatService.hentBehandlingsresultat(BEHANDLING_ID) } returns behandlingsresultat
         every { behandlingsresultatService.hentBehandlingsresultat(OPPRINNELIG_BEHANDLING_ID) } returns opprinneligBehandlingsresultat
         every { behandlingService.hentBehandling(BEHANDLING_ID) } returns behandling
@@ -311,10 +372,11 @@ class OpprettFakturaserieTest {
             medlemskapsperioder = lagMedlemskapsperioder()
             fastsattTrygdeavgift = lagFastsattTrygdeavgift()
             bestemmelse = Folketrygdloven_kap2_bestemmelser.FTRL_KAP2_2_8
-            fastsattTrygdeavgift.trygdeavgiftsperioder.first().grunnlagMedlemskapsperiode =
-                medlemskapsperioder.first()
-            fastsattTrygdeavgift.trygdeavgiftsperioder.first().grunnlagInntekstperiode =
-                fastsattTrygdeavgift.trygdeavgiftsgrunnlag.inntektsperioder.first()
+            fastsattTrygdeavgift.trygdeavgiftsperioder.first().apply {
+                grunnlagMedlemskapsperiode = medlemskapsperioder.first()
+                grunnlagInntekstperiode = fastsattTrygdeavgift.trygdeavgiftsgrunnlag.inntektsperioder.first()
+                grunnlagSkatteforholdTilNorge = fastsattTrygdeavgift.trygdeavgiftsgrunnlag.skatteforholdTilNorge.first()
+            }
         }
     }
 
@@ -381,6 +443,7 @@ class OpprettFakturaserieTest {
     companion object {
         const val SAKSBEHANDLER_IDENT = "S123456"
         const val BEHANDLING_ID = 1L
+        const val OPPRINNELIG_BEHANDLING_ID = 2L
         const val BRUKER_FNR = "11111111111"
         const val BRUKER_AKTØRID = "12345678911"
         const val FULLMEKTIG_IDENT = "123456789"
