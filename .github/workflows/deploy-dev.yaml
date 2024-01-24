@@ -97,7 +97,7 @@ jobs:
           SLACK_COLOR: "${{ job.status == 'success' && 'good' || 'danger' }}"
           SLACK_USERNAME: Github Actions
           SLACK_ICON: https://github.com/github.png?size=48
-          SLACK_TITLE: "melosys-api ${{ job.status == 'success' && 'ble deployet' || 'kunne ikke deployes' }} til dev"
+          SLACK_TITLE: "melosys-api ${{ job.status == 'success' && 'ble deployet' || 'kunne ikke deployes' }} til q1 og q2"
           SLACK_WEBHOOK: ${{ secrets.SLACK_WEBHOOK }}
           SLACK_MESSAGE: ${{ env.COMMIT_MSG }}
       - name: post-deploy
