@@ -45,12 +45,4 @@ public class UtledMedlemskapsperioderDto {
     public Folketrygdloven_kap2_bestemmelser getBestemmelse() {
         return bestemmelse;
     }
-
-//    public static UtledMedlemskapsperioderDto av(UtledMedlemskapsperiodeNyVurderingDto dto) {
-//        return new UtledMedlemskapsperioderDto(dto.getSøknadsperiode(), dto.getTrygdedekning(), dto.getMottaksdatoSøknad(), dto.getArbeidsland(), dto.getBestemmelse());
-//    }
-//
-//    public static UtledMedlemskapsperioderDto av(UtledMedlemskapsperiodeNyVurderingDto dto, ErPeriode søknadsperiode) {
-//        return new UtledMedlemskapsperioderDto(søknadsperiode, dto.getTrygdedekning(), dto.getMottaksdatoSøknad(), dto.getArbeidsland(), dto.getBestemmelse());
-//    }
 }

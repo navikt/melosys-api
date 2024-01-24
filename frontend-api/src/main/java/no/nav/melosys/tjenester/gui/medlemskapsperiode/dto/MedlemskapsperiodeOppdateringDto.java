@@ -8,7 +8,7 @@ import no.nav.melosys.domain.kodeverk.Trygdedekninger;
 
 public record MedlemskapsperiodeOppdateringDto(LocalDate fomDato,
                                                LocalDate tomDato,
+                                               Folketrygdloven_kap2_bestemmelser bestemmelse,
                                                Trygdedekninger trygdedekning,
-                                               InnvilgelsesResultat innvilgelsesResultat,
-                                               Folketrygdloven_kap2_bestemmelser bestemmelse) {
+                                               InnvilgelsesResultat innvilgelsesResultat) {
 }
