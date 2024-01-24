@@ -110,8 +110,10 @@ internal class LagreMedlemsperiodeMedlTest {
             behandling.type = Behandlingstyper.MANGLENDE_INNBETALING_TRYGDEAVGIFT
             behandling.opprinneligBehandling = opprinneligBehandling
         }
-        val behandlingsresultat = lagBehandlingsresultat(medlemskapsperioder)
-        behandlingsresultat.behandling = prosessinstans.behandling
+        val behandlingsresultat = lagBehandlingsresultat(medlemskapsperioder).apply {
+            this.behandling = prosessinstans.behandling
+            type = Behandlingsresultattyper.DELVIS_OPPHØRT
+        }
         every { behandlingsresultatService.hentBehandlingsresultat(BEHANDLING_ID) } returns behandlingsresultat
 
 
@@ -133,7 +135,10 @@ internal class LagreMedlemsperiodeMedlTest {
             behandling.type = Behandlingstyper.MANGLENDE_INNBETALING_TRYGDEAVGIFT
             behandling.opprinneligBehandling = opprinneligBehandling
         }
-        val behandlingsresultat = lagBehandlingsresultat(medlemskapsperioder)
+        val behandlingsresultat = lagBehandlingsresultat(medlemskapsperioder).apply {
+            this.behandling = prosessinstans.behandling
+            type = Behandlingsresultattyper.DELVIS_OPPHØRT
+        }
         behandlingsresultat.behandling = prosessinstans.behandling
         every { behandlingsresultatService.hentBehandlingsresultat(BEHANDLING_ID) } returns behandlingsresultat
 
