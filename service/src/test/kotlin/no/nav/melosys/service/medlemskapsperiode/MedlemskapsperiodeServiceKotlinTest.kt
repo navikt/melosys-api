@@ -111,8 +111,8 @@ class MedlemskapsperiodeServiceKotlinTest {
             medlPeriodeID = 1L
             innvilgelsesresultat = InnvilgelsesResultat.INNVILGET
         }
-        val medlemAvFolketrygden = MedlemAvFolketrygden().apply { medlemskapsperioder = listOf(gammelMedlemskapsperiode) }
-        every { medlemAvFolketrygdenService.finnMedlemAvFolketrygden(1L) } returns Optional.of(medlemAvFolketrygden)
+        val gammelMedlemAvFolketrygden = MedlemAvFolketrygden().apply { medlemskapsperioder = listOf(gammelMedlemskapsperiode) }
+        every { medlemAvFolketrygdenService.finnMedlemAvFolketrygden(1L) } returns Optional.of(gammelMedlemAvFolketrygden)
         val nyMedlemskapsperiode = Medlemskapsperiode().apply { innvilgelsesresultat = InnvilgelsesResultat.INNVILGET }
 
 
