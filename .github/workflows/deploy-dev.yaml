@@ -81,7 +81,7 @@ jobs:
           RESOURCE: nais/nais.yml
           VAR: IMAGE=${{ env.docker_image }}
           VARS: nais/vars-q2.json
-      -   name: Deploy til dev (Q2)
+      -   name: Deploy til dev (Q1)
           uses: nais/deploy/actions/deploy@v1
           env:
               APIKEY: ${{ secrets.NAIS_DEPLOY_APIKEY }}
