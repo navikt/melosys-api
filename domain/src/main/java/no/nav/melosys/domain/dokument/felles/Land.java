@@ -41,6 +41,7 @@ public class Land extends AbstraktKodeverkHjelper {
     public static final String UNGARN = "HUN";
     public static final String ØSTERRIKE = "AUT";
     public static final String ÅLAND = "ALA";
+    public static final String UNKNOWN = "XUK";
 
     // Brukes av JAXB
     public Land() {}
