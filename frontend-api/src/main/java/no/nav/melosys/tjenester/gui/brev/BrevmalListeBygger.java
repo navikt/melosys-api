@@ -6,6 +6,7 @@ import java.util.List;
 import java.util.Objects;
 
 import no.nav.melosys.domain.Behandling;
+import no.nav.melosys.domain.kodeverk.Land_iso2;
 import no.nav.melosys.domain.kodeverk.Mottakerroller;
 import no.nav.melosys.domain.kodeverk.Sakstemaer;
 import no.nav.melosys.domain.kodeverk.Trygdeavtale_myndighetsland;
@@ -79,8 +80,8 @@ public class BrevmalListeBygger {
                 if (!saksbehandlingRegler.harIngenFlyt(behandling)) {
                     mottakere.add(lagMottakerMedAdresseOgFeilmelding(behandlingId, Mottakerroller.ARBEIDSGIVER, false));
                 }
-                if (fagsak.erSakstypeTrygdeavtale()) {
-                    mottakere.add(lagMottakerForUtenlandskTrygdemyndighet(behandling));
+                if (fagsak.erSakstypeTrygdeavtale() || fagsak.erSakstypeEøs()) {
+                    mottakere.add(lagMottakerForUtenlandskTrygdemyndighet(behandling, fagsak.erSakstypeTrygdeavtale()));
                 }
                 mottakere.add(lagMottakerMedRolle(Mottakerroller.ANNEN_ORGANISASJON));
                 mottakere.add(lagMottakerMedRolle(Mottakerroller.NORSK_MYNDIGHET));
@@ -114,12 +115,12 @@ public class BrevmalListeBygger {
         return mottakerDto;
     }
 
-    private MottakerDto lagMottakerForUtenlandskTrygdemyndighet(Behandling behandling) {
+    private MottakerDto lagMottakerForUtenlandskTrygdemyndighet(Behandling behandling, boolean erSakstypeTrygdeavtale) {
         var mottakerDto = new MottakerDto();
         mottakerDto.setRolle(Mottakerroller.UTENLANDSK_TRYGDEMYNDIGHET);
         mottakerDto.setType(hentTypeFraRolle(Mottakerroller.UTENLANDSK_TRYGDEMYNDIGHET));
 
-        if (!saksbehandlingRegler.harIngenFlyt(behandling) && !behandling.harLand()) {
+        if (erSakstypeTrygdeavtale && !saksbehandlingRegler.harIngenFlyt(behandling) && !behandling.harLand()) {
             mottakerDto.setFeilmelding(new FeilmeldingDto(UTENLANDSK_TRYGDEMYNDIGHET_BEHANDLING_MANGLER_LAND));
         }
 
@@ -236,6 +237,7 @@ public class BrevmalListeBygger {
 
     private BrevmalTypeDto lagBrevmalForUTENLANDSK_TRYGDEMYNDIGHET_FRITEKSTBREV(Produserbaredokumenter produserbartdokument, long behandlingId) {
         var behandling = behandlingService.hentBehandling(behandlingId);
+        var fagsak = behandling.getFagsak();
         var felter = new ArrayList<>(List.of(
             FELT_DISTRIBUSJONSTYPE,
             lagBrevTittelFelt(hentBrevTittelValg(behandlingId)),
@@ -245,8 +247,8 @@ public class BrevmalListeBygger {
             FELT_FRITEKSTVEDLEGG
         ));
 
-        if (saksbehandlingRegler.harIngenFlyt(behandling)) {
-            BrevmalFeltDto brevmalFeltDto = lagUtenlandskTrygdemyndighetMottakerFelt(hentUtenlandskMyndighetMottakerValg());
+        if (fagsak.erSakstypeEøs() || saksbehandlingRegler.harIngenFlyt(behandling)) {
+            BrevmalFeltDto brevmalFeltDto = lagUtenlandskTrygdemyndighetMottakerFelt(hentUtenlandskMyndighetMottakerValg(fagsak.erSakstypeEøs()));
             felter.add(0, brevmalFeltDto);
         }
 
@@ -256,9 +258,23 @@ public class BrevmalListeBygger {
             .build();
     }
 
-    private FeltValgDto hentUtenlandskMyndighetMottakerValg() {
-        List<String> trygdeavtaleLandkoder = Arrays.stream(Trygdeavtale_myndighetsland.values()).map(Trygdeavtale_myndighetsland::getKode).toList();
+    private FeltValgDto hentUtenlandskMyndighetMottakerValg(boolean sakstypeErEøs) {
 
+        if (sakstypeErEøs) {
+            var utenlandskMyndighetFærøyene = utenlandskMyndighetService.hentUtenlandskMyndighet(Land_iso2.FO);
+            var utenlandskMyndighetGrønland = utenlandskMyndighetService.hentUtenlandskMyndighet(Land_iso2.GL);
+            return new FeltValgDto(
+                List.of(
+                    new FeltvalgAlternativDto(utenlandskMyndighetFærøyene.hentInstitusjonID(),
+                        "Trygdemyndighetene i %s".formatted(utenlandskMyndighetFærøyene.landkode.getBeskrivelse()), true),
+                    new FeltvalgAlternativDto(utenlandskMyndighetGrønland.hentInstitusjonID(),
+                        "Trygdemyndighetene i %s".formatted(utenlandskMyndighetGrønland.landkode.getBeskrivelse()), true)
+                ),
+                FeltValgType.SELECT
+            );
+        }
+
+        List<String> trygdeavtaleLandkoder = Arrays.stream(Trygdeavtale_myndighetsland.values()).map(Trygdeavtale_myndighetsland::getKode).toList();
         return new FeltValgDto(
             utenlandskMyndighetService.hentAlleUtenlandskeMyndigheterMedGyldigAdresse().stream()
                 .filter(utenlandskMyndighet -> trygdeavtaleLandkoder.contains(utenlandskMyndighet.landkode.getKode()))
