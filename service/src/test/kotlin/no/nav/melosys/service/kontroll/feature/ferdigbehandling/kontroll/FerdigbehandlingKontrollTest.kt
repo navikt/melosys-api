@@ -249,6 +249,52 @@ class FerdigbehandlingKontrollTest {
     }
 
     @Test
+    fun `medlemskapsperioder med overlapping, men som ikke hører til samme fagsak skal gi kontrollfeil`() {
+        val medlemskapsDokument = MedlemskapDokument().apply {
+            medlemsperiode = listOf(
+                Medlemsperiode().apply {
+                    id = 12345
+                    land = "SWE"
+                    status = "GYLD"
+                    periode = Periode(LocalDate.now(), LocalDate.now().plusDays(4))
+                }
+            )
+        }
+
+        val overlappendeMedlemskapsperioder = listOf(
+            lagMedlemskapsperiode(
+                LocalDate.now().plusDays(1), LocalDate.now().plusDays(10)
+            )
+        )
+        val tidligereMedlemskapsperioder = listOf(
+            lagMedlemskapsperiode(
+                LocalDate.now().plusDays(1), LocalDate.now().plusDays(10)
+            ).apply { medlPeriodeID = 666 }
+        )
+
+
+        val kontrollData = FerdigbehandlingKontrollData(
+            medlemskapsDokument,
+            null,
+            null,
+            null,
+            null,
+            null,
+            null,
+            null,
+            null,
+            null,
+            MedlemskapsperiodeData(overlappendeMedlemskapsperioder, tidligereMedlemskapsperioder)
+        )
+
+
+        val kontrollfeil = FerdigbehandlingKontroll.overlappendePeriode(kontrollData)
+
+        kontrollfeil.kode.shouldBe(Kontroll_begrunnelser.OVERLAPPENDE_MEDL_PERIODER)
+        kontrollfeil.type.shouldBe(KontrolldataFeilType.FEIL)
+    }
+
+    @Test
     fun `medlemskapsperioder med overlapping skal gi kontrollfeil med adversel for visse behandlingstema`() {
         val medlemskapsDokument = MedlemskapDokument().apply {
             medlemsperiode = listOf(
