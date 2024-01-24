@@ -100,6 +100,9 @@ internal class LagreMedlemsperiodeMedlTest {
 
     @Test
     fun `opphør medlemskapsperioder ved manglende innbetaling av trygdeavgift som fører til opphør av medlemskap`() {
+        val opphørtMedlemskapsperiode = lagMedlemskapsperiode(InnvilgelsesResultat.OPPHØRT)
+        val medlemskapsperioder = listOf(opphørtMedlemskapsperiode)
+
         val opprinneligBehandling = Behandling().apply {
             id = 1L
         }
@@ -107,7 +110,7 @@ internal class LagreMedlemsperiodeMedlTest {
             behandling.type = Behandlingstyper.MANGLENDE_INNBETALING_TRYGDEAVGIFT
             behandling.opprinneligBehandling = opprinneligBehandling
         }
-        val behandlingsresultat = lagBehandlingsresultat(emptyList())
+        val behandlingsresultat = lagBehandlingsresultat(medlemskapsperioder)
         behandlingsresultat.behandling = prosessinstans.behandling
         every { behandlingsresultatService.hentBehandlingsresultat(BEHANDLING_ID) } returns behandlingsresultat
 
@@ -115,7 +118,7 @@ internal class LagreMedlemsperiodeMedlTest {
         lagreMedlemsperiodeMedl.utfør(prosessinstans)
 
 
-        verify { medlemskapsperiodeService.erstattMedlemskapsperioder(BEHANDLING_ID,  1L, emptyList()) }
+        verify { medlemskapsperiodeService.erstattMedlemskapsperioder(BEHANDLING_ID,  1L, medlemskapsperioder) }
     }
 
     @Test
