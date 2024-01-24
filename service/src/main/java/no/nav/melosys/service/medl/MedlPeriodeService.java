@@ -1,14 +1,15 @@
 package no.nav.melosys.service.medl;
 
 import java.time.LocalDate;
-import java.util.List;
 import java.util.Objects;
 import java.util.Optional;
+import javax.transaction.Transactional;
 
 import no.nav.melosys.domain.*;
 import no.nav.melosys.domain.kodeverk.Sakstyper;
 import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingstema;
 import no.nav.melosys.exception.FunksjonellException;
+import no.nav.melosys.exception.TekniskException;
 import no.nav.melosys.integrasjon.medl.KildedokumenttypeMedl;
 import no.nav.melosys.integrasjon.medl.MedlService;
 import no.nav.melosys.integrasjon.medl.StatusaarsakMedl;
@@ -22,8 +23,6 @@ import no.nav.melosys.service.sak.FagsakService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
-
-import javax.transaction.Transactional;
 
 @Service
 public class MedlPeriodeService {
@@ -99,7 +98,19 @@ public class MedlPeriodeService {
         Long medlPeriodeId = medlService.opprettPeriodeEndelig(fnr, medlemskapsperiode, KildedokumenttypeMedl.HENV_SOKNAD);
 
         if (medlPeriodeId == null) {
-            throw new FunksjonellException(FEIL_VED_OPPDATERING_MEDL + behandlingId);
+            throw new TekniskException(FEIL_VED_OPPDATERING_MEDL + behandlingId);
+        }
+
+        lagreMedlPeriodeId(medlPeriodeId, medlemskapsperiode);
+    }
+
+    public void opprettOpphørtPeriode(long behandlingId, Medlemskapsperiode medlemskapsperiode) {
+        String fnr = hentFnr(behandlingId);
+        log.info("Oppretter opphørt medlemskapsperiode i MEDL for behandling {}", behandlingId);
+        Long medlPeriodeId = medlService.opprettOpphørtPeriode(fnr, medlemskapsperiode, KildedokumenttypeMedl.HENV_SOKNAD);
+
+        if (medlPeriodeId == null) {
+            throw new TekniskException(FEIL_VED_OPPDATERING_MEDL + behandlingId);
         }
 
         lagreMedlPeriodeId(medlPeriodeId, medlemskapsperiode);

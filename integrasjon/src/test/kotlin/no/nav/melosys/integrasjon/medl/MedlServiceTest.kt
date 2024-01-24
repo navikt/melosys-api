@@ -283,6 +283,34 @@ internal class MedlServiceTest {
     }
 
     @Test
+    fun skalOppretteOpphørtPeriodeEndelig() {
+        val medlemskapsperiode = lagMedlemskapsPeriode()
+        val medlemskapsunntakForPostCapturingSlot = slot<MedlemskapsunntakForPost>()
+        every {
+            mockRestConsumer.opprettPeriode(capture(medlemskapsunntakForPostCapturingSlot))
+        }.answers {
+            medlemskapsunntakForPostCapturingSlot.captured.shouldBeEqualToComparingFields(
+                MedlemskapsunntakForPost(
+                    ident = FNR,
+                    fraOgMed = medlemskapsperiode.fom,
+                    tilOgMed = medlemskapsperiode.tom,
+                    status = PeriodestatusMedl.AVST.kode,
+                    statusaarsak = StatusaarsakMedl.OPPHORT.kode,
+                    dekning = DekningMedl.FTRL_2_9_1_LEDD_A.kode,
+                    lovvalgsland = "NOR",
+                    lovvalg = LovvalgMedl.ENDL.kode,
+                    grunnlag = GrunnlagMedl.FTL_2_8_1_ledd_a.kode,
+                    sporingsinformasjon = MedlemskapsunntakForPost.SporingsinformasjonForPost(
+                        kildedokument = KildedokumenttypeMedl.HENV_SOKNAD.getKode()
+                    )
+                )
+            )
+            hentMedlemskapsunntak()
+        }
+        medlService.opprettOpphørtPeriode(FNR, medlemskapsperiode, KildedokumenttypeMedl.HENV_SOKNAD)
+    }
+
+    @Test
     fun skalOppdaterePeriodeForeløpig() {
         every { mockRestConsumer.hentPeriode(any()) } returns hentMedlemskapsunntak()
         val lovvalgsperiode = lagLovvalgsPeriode().apply { medlPeriodeID = 123456L }

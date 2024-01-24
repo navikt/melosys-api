@@ -70,9 +70,22 @@ class MedlService(
         return opprettPeriode(
             fnr,
             periodeMedBestemmelse,
-            PeriodestatusMedl.GYLD,
             LovvalgMedl.ENDL,
-            kildedokumenttypeMedl
+            kildedokumenttypeMedl,
+            PeriodestatusMedl.GYLD
+        )
+    }
+
+    fun opprettOpphørtPeriode(
+        fnr: String, periodeMedBestemmelse: HarBestemmelse<*>, kildedokumenttypeMedl: KildedokumenttypeMedl
+    ): Long? {
+        return opprettPeriode(
+            fnr,
+            periodeMedBestemmelse,
+            LovvalgMedl.ENDL,
+            kildedokumenttypeMedl,
+            PeriodestatusMedl.AVST,
+            StatusaarsakMedl.OPPHORT
         )
     }
 
@@ -80,7 +93,7 @@ class MedlService(
         fnr: String?, periodeOmLovvalg: PeriodeOmLovvalg?, kildedokumenttypeMedl: KildedokumenttypeMedl?
     ): Long? {
         return opprettPeriode(
-            fnr!!, periodeOmLovvalg!!, PeriodestatusMedl.UAVK, LovvalgMedl.UAVK, kildedokumenttypeMedl!!
+            fnr!!, periodeOmLovvalg!!, LovvalgMedl.UAVK, kildedokumenttypeMedl!!, PeriodestatusMedl.UAVK
         )
     }
 
@@ -96,7 +109,7 @@ class MedlService(
         fnr: String?, periodeOmLovvalg: PeriodeOmLovvalg?, kildedokumenttypeMedl: KildedokumenttypeMedl?
     ): Long? {
         return opprettPeriode(
-            fnr!!, periodeOmLovvalg!!, PeriodestatusMedl.UAVK, LovvalgMedl.FORL, kildedokumenttypeMedl!!
+            fnr!!, periodeOmLovvalg!!, LovvalgMedl.FORL, kildedokumenttypeMedl!!, PeriodestatusMedl.UAVK
         )
     }
 
@@ -133,8 +146,9 @@ class MedlService(
     }
 
     private fun opprettPeriode(
-        fnr: String, periodeMedBestemmelse: HarBestemmelse<*>, periodestatusMedl: PeriodestatusMedl,
-        lovvalgMedl: LovvalgMedl, kildedokumenttypeMedl: KildedokumenttypeMedl
+        fnr: String, periodeMedBestemmelse: HarBestemmelse<*>, lovvalgMedl: LovvalgMedl,
+        kildedokumenttypeMedl: KildedokumenttypeMedl, periodestatusMedl: PeriodestatusMedl,
+        statusaarsakMedl: StatusaarsakMedl? = null
     ): Long? {
         val request: MedlemskapsunntakForPost = when (periodeMedBestemmelse) {
             is PeriodeOmLovvalg -> lovvalgRequestForPost(periodeMedBestemmelse)
@@ -145,8 +159,9 @@ class MedlService(
                 kildedokument = kildedokumenttypeMedl.getKode()
             )
             ident = fnr
-            status = periodestatusMedl.kode
             lovvalg = lovvalgMedl.kode
+            status = periodestatusMedl.kode
+            statusaarsak = statusaarsakMedl?.kode
         }
         return medlemskapRestConsumer.opprettPeriode(request).unntakId
     }
