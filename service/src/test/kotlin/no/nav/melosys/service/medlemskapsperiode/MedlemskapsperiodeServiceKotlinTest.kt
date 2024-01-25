@@ -191,20 +191,40 @@ class MedlemskapsperiodeServiceKotlinTest {
     }
 
     @Test
-    fun `erstattMedlemskapsperioder skal kunne oppdatere gamle opphørte perioder`() {
+    fun `erstattMedlemskapsperioder skal kunne oppdatere opphørte perioder som videreføres fra tidligere behandling`() {
         setupHappyPathBehandling()
         val medlemAvFolketrygden = MedlemAvFolketrygden().apply { medlemskapsperioder = emptyList() }
         every { medlemAvFolketrygdenService.finnMedlemAvFolketrygden(1L) } returns Optional.of(medlemAvFolketrygden)
-        val gammelOpphørtMedlemskapsperiode = Medlemskapsperiode().apply {
+        val videreførtOpphørtMedlemskapsperiode = Medlemskapsperiode().apply {
             medlPeriodeID = 456
             innvilgelsesresultat = InnvilgelsesResultat.OPPHØRT
         }
 
 
-        medlemskapsperiodeService.erstattMedlemskapsperioder(2L, 1L, listOf(gammelOpphørtMedlemskapsperiode))
+        medlemskapsperiodeService.erstattMedlemskapsperioder(2L, 1L, listOf(videreførtOpphørtMedlemskapsperiode))
 
 
-        verify(exactly = 1) { medlPeriodeService.oppdaterOpphørtPeriode(2L, gammelOpphørtMedlemskapsperiode) }
+        verify(exactly = 1) { medlPeriodeService.oppdaterOpphørtPeriode(2L, videreførtOpphørtMedlemskapsperiode) }
+    }
+
+    @Test
+    fun `erstattMedlemskapsperioder skal feilregistrere opphørte perioder som ikke videreføres fra tidligere behandling`() {
+        setupHappyPathBehandling()
+        val gammelOpphørtPeriode = Medlemskapsperiode().apply {
+            medlPeriodeID = 12
+            innvilgelsesresultat = InnvilgelsesResultat.OPPHØRT
+        }
+        val medlemAvFolketrygden = MedlemAvFolketrygden().apply { medlemskapsperioder = listOf(gammelOpphørtPeriode) }
+        every { medlemAvFolketrygdenService.finnMedlemAvFolketrygden(1L) } returns Optional.of(medlemAvFolketrygden)
+        val nyMedlemskapsperiode = Medlemskapsperiode().apply {
+            innvilgelsesresultat = InnvilgelsesResultat.INNVILGET
+        }
+
+
+        medlemskapsperiodeService.erstattMedlemskapsperioder(2L, 1L, listOf(nyMedlemskapsperiode))
+
+
+        verify(exactly = 1) { medlPeriodeService.avvisPeriodeFeilregistrert(gammelOpphørtPeriode.medlPeriodeID) }
     }
 
     @Test
