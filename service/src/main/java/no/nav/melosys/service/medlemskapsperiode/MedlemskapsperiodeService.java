@@ -129,7 +129,7 @@ public class MedlemskapsperiodeService {
                                             Folketrygdloven_kap2_bestemmelser bestemmelse) {
         if (fom == null || innvilgelsesResultat == null || bestemmelse == null || trygdedekning == null) {
             throw new FunksjonellException("Fom-dato, innvilgelsesresultat, bestemmelse og trygdedekning er påkrevd");
-        } else if (!GYLDIGE_TRYGDEDEKNINGER_2_8.contains(trygdedekning)) {
+        } else if (!hentGyldigeTrygdedekninger().contains(trygdedekning)) {
             throw new FunksjonellException("Trygedekning " + trygdedekning + " støttes ikke for en medlemskapsperiode");
         } else if (feilIPeriode(fom, tom)) {
             throw new FunksjonellException("Tom-dato kan ikke være før fom-dato");
