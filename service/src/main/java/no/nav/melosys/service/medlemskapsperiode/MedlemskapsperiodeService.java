@@ -142,7 +142,7 @@ public class MedlemskapsperiodeService {
 
         opphørOpprinneligePerioder(opprinneligeInnvilgedeMedlemskapsperioder, nyeInnvilgedeMedlemskapsperioder);
         opprettEllerOppdaterInnvilgedePerioder(behandlingID, nyeInnvilgedeMedlemskapsperioder);
-        opprettOpphørtePerioder(behandlingID, nyeMedlemskapsperioder.stream().filter(Medlemskapsperiode::erOpphørt).toList());
+        opprettEllerOppdaterOpphørtePerioder(behandlingID, nyeMedlemskapsperioder.stream().filter(Medlemskapsperiode::erOpphørt).toList());
     }
 
     private void opphørOpprinneligePerioder(List<Medlemskapsperiode> opprinneligeInnvilgedeMedlemskapsperioder, List<Medlemskapsperiode> nyeInnvilgedeMedlemskapsperioder) {
@@ -156,8 +156,8 @@ public class MedlemskapsperiodeService {
         nyeInnvilgedeMedlemskapsperioder.forEach(medlemskapsperiode -> opprettEllerOppdaterMedlPeriode(behandlingID, medlemskapsperiode));
     }
 
-    private void opprettOpphørtePerioder(long behandlingID, List<Medlemskapsperiode> nyeOpphørteMedlemskapsperioder) {
-        nyeOpphørteMedlemskapsperioder.forEach(medlemskapsperiode -> medlPeriodeService.opprettOpphørtPeriode(behandlingID, medlemskapsperiode));
+    private void opprettEllerOppdaterOpphørtePerioder(long behandlingID, List<Medlemskapsperiode> nyeOpphørteMedlemskapsperioder) {
+        nyeOpphørteMedlemskapsperioder.forEach(medlemskapsperiode -> opprettEllerOppdaterOpphørtMedlPeriode(behandlingID, medlemskapsperiode));
     }
 
     private boolean eksistererMedlemskapsperiodeMedID(List<Medlemskapsperiode> medlemskapsperioder,
@@ -172,6 +172,14 @@ public class MedlemskapsperiodeService {
             medlPeriodeService.opprettPeriodeEndelig(behandlingID, medlemskapsperiode);
         } else {
             medlPeriodeService.oppdaterPeriodeEndelig(behandlingID, medlemskapsperiode);
+        }
+    }
+
+    private void opprettEllerOppdaterOpphørtMedlPeriode(long behandlingID, Medlemskapsperiode medlemskapsperiode) {
+        if (medlemskapsperiode.getMedlPeriodeID() == null) {
+            medlPeriodeService.opprettOpphørtPeriode(behandlingID, medlemskapsperiode);
+        } else {
+            medlPeriodeService.oppdaterOpphørtPeriode(behandlingID, medlemskapsperiode);
         }
     }
 

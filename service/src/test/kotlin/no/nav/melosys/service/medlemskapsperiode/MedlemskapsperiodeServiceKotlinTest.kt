@@ -41,12 +41,12 @@ class MedlemskapsperiodeServiceKotlinTest {
     @MockK
     lateinit var medlemskapsperiodeRepository: MedlemskapsperiodeRepository
 
-    val fakeUnleash: FakeUnleash = FakeUnleash()
+    private val fakeUnleash: FakeUnleash = FakeUnleash()
 
     @RelaxedMockK
     lateinit var medlPeriodeService: MedlPeriodeService
 
-    lateinit var medlemskapsperiodeService: MedlemskapsperiodeService
+    private lateinit var medlemskapsperiodeService: MedlemskapsperiodeService
 
     @BeforeEach
     fun setUp() {
@@ -176,7 +176,7 @@ class MedlemskapsperiodeServiceKotlinTest {
     }
 
     @Test
-    fun `erstattMedlemskapsperioder skal opprette nye opphørte perioder`() {
+    fun `erstattMedlemskapsperioder skal kunne opprette nye opphørte perioder`() {
         setupHappyPathBehandling()
         val medlemAvFolketrygden = MedlemAvFolketrygden().apply { medlemskapsperioder = emptyList() }
         every { medlemAvFolketrygdenService.finnMedlemAvFolketrygden(1L) } returns Optional.of(medlemAvFolketrygden)
@@ -188,6 +188,23 @@ class MedlemskapsperiodeServiceKotlinTest {
 
 
         verify(exactly = 1) { medlPeriodeService.opprettOpphørtPeriode(2L, nyOpphørtMedlemskapsperiode) }
+    }
+
+    @Test
+    fun `erstattMedlemskapsperioder skal kunne oppdatere gamle opphørte perioder`() {
+        setupHappyPathBehandling()
+        val medlemAvFolketrygden = MedlemAvFolketrygden().apply { medlemskapsperioder = emptyList() }
+        every { medlemAvFolketrygdenService.finnMedlemAvFolketrygden(1L) } returns Optional.of(medlemAvFolketrygden)
+        val gammelOpphørtMedlemskapsperiode = Medlemskapsperiode().apply {
+            medlPeriodeID = 456
+            innvilgelsesresultat = InnvilgelsesResultat.OPPHØRT
+        }
+
+
+        medlemskapsperiodeService.erstattMedlemskapsperioder(2L, 1L, listOf(gammelOpphørtMedlemskapsperiode))
+
+
+        verify(exactly = 1) { medlPeriodeService.oppdaterOpphørtPeriode(2L, gammelOpphørtMedlemskapsperiode) }
     }
 
     @Test
