@@ -160,7 +160,6 @@ class ReplikerBehandlingsresultatServiceTest {
         Assertions.assertThat(behandlingsresultatReplika.medlemAvFolketrygden)
             .matches { it.behandlingsresultat == behandlingsresultatReplika }
             .matches { it.id == null }
-            .matches { it.bestemmelse == medlemAvFolketrygdenOrig.bestemmelse }
 
         Assertions.assertThat(medlemAvFolketrygdenOrig.medlemskapsperioder).hasSize(3)
         val innvilgetMedlemskapsperiodeOrig = medlemAvFolketrygdenOrig.medlemskapsperioder.filter { it.erInnvilget() }.first()
@@ -175,6 +174,7 @@ class ReplikerBehandlingsresultatServiceTest {
             .matches { it.innvilgelsesresultat == innvilgetMedlemskapsperiodeOrig.innvilgelsesresultat }
             .matches { it.trygdedekning == innvilgetMedlemskapsperiodeOrig.trygdedekning }
             .matches { it.medlPeriodeID == innvilgetMedlemskapsperiodeOrig.medlPeriodeID }
+            .matches { it.bestemmelse == innvilgetMedlemskapsperiodeOrig.bestemmelse }
 
         Assertions.assertThat(behandlingsresultatReplika.medlemAvFolketrygden.fastsattTrygdeavgift)
             .matches { it.medlemAvFolketrygden == behandlingsresultatReplika.medlemAvFolketrygden }
@@ -280,6 +280,7 @@ class ReplikerBehandlingsresultatServiceTest {
                     innvilgelsesresultat.shouldBe(innvilgetMedlemskapsperiodeOrig.innvilgelsesresultat)
                     trygdedekning.shouldBe(innvilgetMedlemskapsperiodeOrig.trygdedekning)
                     medlPeriodeID.shouldBe(innvilgetMedlemskapsperiodeOrig.medlPeriodeID)
+                    bestemmelse.shouldBe(innvilgetMedlemskapsperiodeOrig.bestemmelse)
                 }
                 last().run {
                     medlemAvFolketrygden.shouldBe(behandlingsresultatReplika.medlemAvFolketrygden)
@@ -291,6 +292,7 @@ class ReplikerBehandlingsresultatServiceTest {
                     innvilgelsesresultat.shouldBe(opphørtMedlemskapsperiodeOrig.innvilgelsesresultat)
                     trygdedekning.shouldBe(opphørtMedlemskapsperiodeOrig.trygdedekning)
                     medlPeriodeID.shouldBe(opphørtMedlemskapsperiodeOrig.medlPeriodeID)
+                    bestemmelse.shouldBe(opphørtMedlemskapsperiodeOrig.bestemmelse)
                 }
             }
     }
@@ -299,7 +301,6 @@ class ReplikerBehandlingsresultatServiceTest {
         val medlemAvFolketrygden = MedlemAvFolketrygden()
         medlemAvFolketrygden.behandlingsresultat = behandlingsresultatOrig
         medlemAvFolketrygden.id = 30L
-        medlemAvFolketrygden.bestemmelse = Folketrygdloven_kap2_bestemmelser.FTRL_KAP2_2_8_FØRSTE_LEDD_A
         medlemAvFolketrygden.addMedlemskapsperiode(opprettMedlemskapsperiode(InnvilgelsesResultat.INNVILGET))
         medlemAvFolketrygden.addMedlemskapsperiode(opprettMedlemskapsperiode(InnvilgelsesResultat.AVSLAATT))
         medlemAvFolketrygden.addMedlemskapsperiode(opprettMedlemskapsperiode(InnvilgelsesResultat.OPPHØRT))
@@ -367,6 +368,7 @@ class ReplikerBehandlingsresultatServiceTest {
         medlemskapsperiode.medlemskapstype = Medlemskapstyper.PLIKTIG
         medlemskapsperiode.trygdedekning = Trygdedekninger.FTRL_2_9_FØRSTE_LEDD_C_HELSE_PENSJON
         medlemskapsperiode.medlPeriodeID = 123L
+        medlemskapsperiode.bestemmelse = Folketrygdloven_kap2_bestemmelser.FTRL_KAP2_2_8_FØRSTE_LEDD_A
         return medlemskapsperiode
     }
 

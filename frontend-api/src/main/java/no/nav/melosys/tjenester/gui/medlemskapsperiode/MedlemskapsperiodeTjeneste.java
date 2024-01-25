@@ -7,6 +7,7 @@ import io.swagger.annotations.Api;
 import no.nav.melosys.service.medlemskapsperiode.MedlemskapsperiodeService;
 import no.nav.melosys.service.medlemskapsperiode.OpprettMedlemskapsperiodeService;
 import no.nav.melosys.service.tilgang.Aksesskontroll;
+import no.nav.melosys.tjenester.gui.medlemskapsperiode.dto.BestemmelseDto;
 import no.nav.melosys.tjenester.gui.medlemskapsperiode.dto.MedlemskapsperiodeDto;
 import no.nav.melosys.tjenester.gui.medlemskapsperiode.dto.MedlemskapsperiodeOppdateringDto;
 import no.nav.security.token.support.core.api.Protected;
@@ -55,7 +56,8 @@ public class MedlemskapsperiodeTjeneste {
                     medlemskapsperiodeOppdateringDto.fomDato(),
                     medlemskapsperiodeOppdateringDto.tomDato(),
                     medlemskapsperiodeOppdateringDto.innvilgelsesResultat(),
-                    medlemskapsperiodeOppdateringDto.trygdedekning())
+                    medlemskapsperiodeOppdateringDto.trygdedekning(),
+                    medlemskapsperiodeOppdateringDto.bestemmelse())
             )
         );
     }
@@ -73,7 +75,8 @@ public class MedlemskapsperiodeTjeneste {
                     medlemskapsperiodeOppdateringDto.fomDato(),
                     medlemskapsperiodeOppdateringDto.tomDato(),
                     medlemskapsperiodeOppdateringDto.innvilgelsesResultat(),
-                    medlemskapsperiodeOppdateringDto.trygdedekning()
+                    medlemskapsperiodeOppdateringDto.trygdedekning(),
+                    medlemskapsperiodeOppdateringDto.bestemmelse()
                 )
             )
         );
@@ -88,11 +91,12 @@ public class MedlemskapsperiodeTjeneste {
     }
 
     @PostMapping("/behandlinger/{behandlingID}/medlemskapsperioder/forslag")
-    public ResponseEntity<Collection<MedlemskapsperiodeDto>> opprettForslagPåMedlemskapsperioder(@PathVariable("behandlingID") long behandlingID) {
+    public ResponseEntity<Collection<MedlemskapsperiodeDto>> opprettForslagPåMedlemskapsperioder(@PathVariable("behandlingID") long behandlingID,
+                                                                                                 @RequestBody BestemmelseDto bestemmelseDto) {
         aksesskontroll.autoriserSkriv(behandlingID);
 
         return ResponseEntity.ok(
-            opprettMedlemskapsperiodeService.opprettForslagPåMedlemskapsperioder(behandlingID)
+            opprettMedlemskapsperiodeService.opprettForslagPåMedlemskapsperioder(behandlingID, bestemmelseDto.bestemmelse())
                 .stream()
                 .map(MedlemskapsperiodeDto::av)
                 .collect(Collectors.toSet())

@@ -131,7 +131,10 @@ class FtrlVedtakService(
 
         val opphørteMedlemskapsperioder = behandlingsresultat.medlemAvFolketrygden.medlemskapsperioder
             .filter { it.erInnvilget() || it.erOpphørt() }
-            .onEach { it.innvilgelsesresultat = InnvilgelsesResultat.OPPHØRT }
+            .onEach {
+                it.innvilgelsesresultat = InnvilgelsesResultat.OPPHØRT
+                it.bestemmelse = Folketrygdloven_kap2_bestemmelser.FTRL_KAP2_2_15_ANDRE_LEDD
+            }
 
         log.info("Fjerner vilkårsresultater, fritekstfelt, trygdeavgift, og virksomheter fra behandlingsresultat med behandlingsid: $behandlingID")
         behandlingsresultat.utfallRegistreringUnntak = null
@@ -144,7 +147,6 @@ class FtrlVedtakService(
         behandlingsresultat.avklartefakta.add(fullstendigManglendeInnbetaling)
         behandlingsresultat.medlemAvFolketrygden.medlemskapsperioder.clear()
         behandlingsresultat.medlemAvFolketrygden.medlemskapsperioder.addAll(opphørteMedlemskapsperioder)
-        behandlingsresultat.medlemAvFolketrygden.bestemmelse = Folketrygdloven_kap2_bestemmelser.FTRL_KAP2_2_15_ANDRE_LEDD // TODO: Flytt denne til hver enkelt medlemskapsperiode
 
         behandlingsresultat.type = Behandlingsresultattyper.OPPHØRT
         behandlingsresultat.settVedtakMetadata(request.vedtakstype, LocalDate.now().plusWeeks(VedtaksfattingFasade.FRIST_KLAGE_UKER.toLong()))

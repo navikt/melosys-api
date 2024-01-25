@@ -371,7 +371,6 @@ class OpprettFakturaserieTest {
         return MedlemAvFolketrygden().apply {
             medlemskapsperioder = lagMedlemskapsperioder()
             fastsattTrygdeavgift = lagFastsattTrygdeavgift()
-            bestemmelse = Folketrygdloven_kap2_bestemmelser.FTRL_KAP2_2_8
             fastsattTrygdeavgift.trygdeavgiftsperioder.first().apply {
                 grunnlagMedlemskapsperiode = medlemskapsperioder.first()
                 grunnlagInntekstperiode = fastsattTrygdeavgift.trygdeavgiftsgrunnlag.inntektsperioder.first()
@@ -387,6 +386,7 @@ class OpprettFakturaserieTest {
             medlemskapstype = Medlemskapstyper.FRIVILLIG
             fom = LocalDate.of(2022, 1, 1)
             tom = LocalDate.of(2023, 5, 31)
+            bestemmelse = Folketrygdloven_kap2_bestemmelser.FTRL_KAP2_2_8
         })
     }
 
