@@ -257,9 +257,16 @@ class FtrlVedtakServiceTest {
             type.shouldBe(Behandlingsresultattyper.OPPHØRT)
             begrunnelseFritekst.shouldBe(request.begrunnelseFritekst)
             fastsattAvLand.shouldBe(Land_iso2.NO)
-            medlemAvFolketrygden.bestemmelse.shouldBe(Folketrygdloven_kap2_bestemmelser.FTRL_KAP2_2_15_ANDRE_LEDD)
-            medlemAvFolketrygden.medlemskapsperioder.shouldHaveSize(2).first()!!.innvilgelsesresultat.shouldBe(InnvilgelsesResultat.OPPHØRT)
-            medlemAvFolketrygden.medlemskapsperioder.shouldHaveSize(2).last()!!.innvilgelsesresultat.shouldBe(InnvilgelsesResultat.OPPHØRT)
+            medlemAvFolketrygden.medlemskapsperioder.shouldHaveSize(2).run {
+                first().run {
+                    innvilgelsesresultat.shouldBe(InnvilgelsesResultat.OPPHØRT)
+                    bestemmelse.shouldBe(Folketrygdloven_kap2_bestemmelser.FTRL_KAP2_2_15_ANDRE_LEDD)
+                }
+                last().run {
+                    innvilgelsesresultat.shouldBe(InnvilgelsesResultat.OPPHØRT)
+                    bestemmelse.shouldBe(Folketrygdloven_kap2_bestemmelser.FTRL_KAP2_2_15_ANDRE_LEDD)
+                }
+            }
             avklartefakta.shouldHaveSize(1)
             utfallRegistreringUnntak.shouldBeNull()
             nyVurderingBakgrunn.shouldBeNull()

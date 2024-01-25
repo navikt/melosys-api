@@ -4,18 +4,24 @@ import no.nav.melosys.domain.Behandlingsresultat
 import no.nav.melosys.domain.ErPeriode
 import no.nav.melosys.domain.Medlemskapsperiode
 import no.nav.melosys.domain.dokument.felles.Periode
+import no.nav.melosys.domain.kodeverk.Folketrygdloven_kap2_bestemmelser
 import no.nav.melosys.domain.kodeverk.InnvilgelsesResultat
 import no.nav.melosys.domain.kodeverk.Medlemskapstyper
 import no.nav.melosys.domain.kodeverk.Trygdedekninger
+import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingstyper
 import no.nav.melosys.exception.FunksjonellException
 import org.springframework.data.util.Pair
 import java.time.LocalDate
 
 class UtledMedlemskapsperioder {
 
-    fun lagMedlemskapsperioderForNyVurdering(opprinneligBehandlingsresultat: Behandlingsresultat): Collection<Medlemskapsperiode> =
+    fun lagMedlemskapsperioderForAndregangsbehandling(
+        opprinneligBehandlingsresultat: Behandlingsresultat,
+        bestemmelse: Folketrygdloven_kap2_bestemmelser,
+        type: Behandlingstyper
+    ): Collection<Medlemskapsperiode> =
         opprinneligBehandlingsresultat.medlemAvFolketrygden.medlemskapsperioder
-            .filter { it.erInnvilget() }
+            .filter { if (type === Behandlingstyper.MANGLENDE_INNBETALING_TRYGDEAVGIFT) it.erInnvilget() || it.erOpphørt() else it.erInnvilget() }
             .map {
                 Medlemskapsperiode().apply {
                     fom = it.fom
@@ -25,21 +31,7 @@ class UtledMedlemskapsperioder {
                     medlemskapstype = it.medlemskapstype
                     trygdedekning = it.trygdedekning
                     medlPeriodeID = it.medlPeriodeID
-                }
-            }
-
-    fun lagMedlemskapsperioderForManglendeInnbetaling(opprinneligBehandlingsresultat: Behandlingsresultat): Collection<Medlemskapsperiode> =
-        opprinneligBehandlingsresultat.medlemAvFolketrygden.medlemskapsperioder
-            .filter { it.erInnvilget() || it.erOpphørt() }
-            .map {
-                Medlemskapsperiode().apply {
-                    fom = it.fom
-                    tom = it.tom
-                    arbeidsland = it.arbeidsland
-                    innvilgelsesresultat = it.innvilgelsesresultat
-                    medlemskapstype = it.medlemskapstype
-                    trygdedekning = it.trygdedekning
-                    medlPeriodeID = it.medlPeriodeID
+                    this.bestemmelse = if (it.erOpphørt()) it.bestemmelse else bestemmelse
                 }
             }
 
@@ -53,7 +45,8 @@ class UtledMedlemskapsperioder {
                     søknadsperiode,
                     dto.trygdedekning,
                     dto.arbeidsland,
-                    InnvilgelsesResultat.INNVILGET
+                    InnvilgelsesResultat.INNVILGET,
+                    dto.bestemmelse
                 )
             )
         }
@@ -64,7 +57,8 @@ class UtledMedlemskapsperioder {
                     søknadsperiode,
                     dto.trygdedekning,
                     dto.arbeidsland,
-                    InnvilgelsesResultat.AVSLAATT
+                    InnvilgelsesResultat.AVSLAATT,
+                    dto.bestemmelse
                 )
             )
         }
@@ -81,7 +75,8 @@ class UtledMedlemskapsperioder {
                     søknadsperiode,
                     dto.trygdedekning,
                     dto.arbeidsland,
-                    InnvilgelsesResultat.INNVILGET
+                    InnvilgelsesResultat.INNVILGET,
+                    dto.bestemmelse
                 )
             )
         }
@@ -96,7 +91,8 @@ class UtledMedlemskapsperioder {
                 splittetPeriode.second,
                 dto.trygdedekning,
                 dto.arbeidsland,
-                InnvilgelsesResultat.INNVILGET
+                InnvilgelsesResultat.INNVILGET,
+                dto.bestemmelse
             )
         )
     }
@@ -112,13 +108,15 @@ class UtledMedlemskapsperioder {
                     periode,
                     fjernPensjonsdel(dto.trygdedekning),
                     dto.arbeidsland,
-                    InnvilgelsesResultat.AVSLAATT
+                    InnvilgelsesResultat.AVSLAATT,
+                    dto.bestemmelse
                 ),
                 lagPeriode(
                     periode,
                     Trygdedekninger.FTRL_2_9_FØRSTE_LEDD_B_PENSJON,
                     dto.arbeidsland,
-                    InnvilgelsesResultat.INNVILGET
+                    InnvilgelsesResultat.INNVILGET,
+                    dto.bestemmelse
                 )
             )
         } else mutableSetOf(
@@ -126,7 +124,8 @@ class UtledMedlemskapsperioder {
                 periode,
                 dto.trygdedekning,
                 dto.arbeidsland,
-                InnvilgelsesResultat.AVSLAATT
+                InnvilgelsesResultat.AVSLAATT,
+                dto.bestemmelse
             )
         )
     }
@@ -135,7 +134,8 @@ class UtledMedlemskapsperioder {
         søknadsperiode: ErPeriode,
         trygdedekning: Trygdedekninger,
         arbeidsland: String,
-        innvilgelsesResultat: InnvilgelsesResultat
+        innvilgelsesResultat: InnvilgelsesResultat,
+        bestemmelse: Folketrygdloven_kap2_bestemmelser
     ): Medlemskapsperiode =
         Medlemskapsperiode().apply {
             this.fom = søknadsperiode.fom
@@ -144,6 +144,7 @@ class UtledMedlemskapsperioder {
             this.innvilgelsesresultat = innvilgelsesResultat
             this.medlemskapstype = Medlemskapstyper.FRIVILLIG
             this.trygdedekning = trygdedekning
+            this.bestemmelse = bestemmelse
         }
 
 
