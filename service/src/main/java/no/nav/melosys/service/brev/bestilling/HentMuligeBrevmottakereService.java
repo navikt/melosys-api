@@ -148,7 +148,11 @@ public class HentMuligeBrevmottakereService {
             case UTENLANDSK_TRYGDEMYNDIGHET -> {
                 if (produserbaredokumenter == UTENLANDSK_TRYGDEMYNDIGHET_FRITEKSTBREV) {
                     if (institusjonID != null) {
-                        return utenlandskMyndighetService.hentUtenlandskMyndighetForInstitusjonID(institusjonID).navn;
+                        var utenlandskMyndighet = utenlandskMyndighetService.hentUtenlandskMyndighetForInstitusjonID(institusjonID);
+                        if (!utenlandskMyndighet.getAdresse().erGyldig()) {
+                            throw new FunksjonellException("Du kan ikke sende brev til trygdemyndigheten i %s, fordi korrekt adresse er ukjent.".formatted(utenlandskMyndighet.landkode.getBeskrivelse()));
+                        }
+                        return utenlandskMyndighet.navn;
                     } else {
                         Mottaker avklartMottaker = brevmottakerService.avklarMottaker(produserbaredokumenter, Mottaker.medRolle(Mottakerroller.UTENLANDSK_TRYGDEMYNDIGHET), behandling);
                         var utenlandskMyndighet = utenlandskMyndighetService.hentUtenlandskMyndighet(avklartMottaker.hentMyndighetLandkode(), produserbaredokumenter);
