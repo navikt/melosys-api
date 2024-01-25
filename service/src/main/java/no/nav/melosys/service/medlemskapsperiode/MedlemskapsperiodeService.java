@@ -140,12 +140,12 @@ public class MedlemskapsperiodeService {
         var opprinneligeInnvilgedeMedlemskapsperioder = hentMedlemskapsperioder(opprinneligBehandlingID).stream().filter(Medlemskapsperiode::erInnvilget).toList();
         var nyeInnvilgedeMedlemskapsperioder = nyeMedlemskapsperioder.stream().filter(Medlemskapsperiode::erInnvilget).toList();
 
-        opphørOpprinneligePerioder(opprinneligeInnvilgedeMedlemskapsperioder, nyeInnvilgedeMedlemskapsperioder);
+        opphørOpprinneligeInnvilgedePerioderSomIkkeVidereføres(opprinneligeInnvilgedeMedlemskapsperioder, nyeInnvilgedeMedlemskapsperioder);
         opprettEllerOppdaterInnvilgedePerioder(behandlingID, nyeInnvilgedeMedlemskapsperioder);
         opprettEllerOppdaterOpphørtePerioder(behandlingID, nyeMedlemskapsperioder.stream().filter(Medlemskapsperiode::erOpphørt).toList());
     }
 
-    private void opphørOpprinneligePerioder(List<Medlemskapsperiode> opprinneligeInnvilgedeMedlemskapsperioder, List<Medlemskapsperiode> nyeInnvilgedeMedlemskapsperioder) {
+    private void opphørOpprinneligeInnvilgedePerioderSomIkkeVidereføres(List<Medlemskapsperiode> opprinneligeInnvilgedeMedlemskapsperioder, List<Medlemskapsperiode> nyeInnvilgedeMedlemskapsperioder) {
         opprinneligeInnvilgedeMedlemskapsperioder.stream()
             .filter(medlemskapsperiode -> !eksistererMedlemskapsperiodeMedID(nyeInnvilgedeMedlemskapsperioder, medlemskapsperiode.getMedlPeriodeID()))
             .mapToLong(Medlemskapsperiode::getMedlPeriodeID)
