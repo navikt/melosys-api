@@ -8,7 +8,7 @@ import no.nav.melosys.exception.FunksjonellException;
 import no.nav.melosys.saksflytapi.ProsessinstansService;
 import no.nav.melosys.service.behandling.BehandlingService;
 import no.nav.melosys.service.behandling.BehandlingsresultatService;
-import no.nav.melosys.service.lovligekombinasjoner.LovligeKombinasjonerService;
+import no.nav.melosys.service.lovligekombinasjoner.LovligeKombinasjonerSaksbehandlingService;
 import no.nav.melosys.service.saksbehandling.SaksbehandlingRegler;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.stereotype.Service;
@@ -19,20 +19,20 @@ public class OpprettBehandlingForSak {
     private final FagsakService fagsakService;
     private final ProsessinstansService prosessinstansService;
     private final SaksbehandlingRegler saksbehandlingRegler;
-    private final LovligeKombinasjonerService lovligeKombinasjonerService;
+    private final LovligeKombinasjonerSaksbehandlingService lovligeKombinasjonerSaksbehandlingService;
     private final BehandlingService behandlingService;
     private final BehandlingsresultatService behandlingsresultatService;
 
     public OpprettBehandlingForSak(FagsakService fagsakService,
                                    ProsessinstansService prosessinstansService,
                                    SaksbehandlingRegler saksbehandlingRegler,
-                                   LovligeKombinasjonerService lovligeKombinasjonerService,
+                                   LovligeKombinasjonerSaksbehandlingService lovligeKombinasjonerSaksbehandlingService,
                                    BehandlingService behandlingService,
                                    BehandlingsresultatService behandlingsresultatService) {
         this.fagsakService = fagsakService;
         this.prosessinstansService = prosessinstansService;
         this.saksbehandlingRegler = saksbehandlingRegler;
-        this.lovligeKombinasjonerService = lovligeKombinasjonerService;
+        this.lovligeKombinasjonerSaksbehandlingService = lovligeKombinasjonerSaksbehandlingService;
         this.behandlingService = behandlingService;
         this.behandlingsresultatService = behandlingsresultatService;
     }
@@ -46,7 +46,7 @@ public class OpprettBehandlingForSak {
         var behandlingstype = opprettSakDto.getBehandlingstype();
 
         valider(fagsak, sistBehandlingsresultat, opprettSakDto);
-        lovligeKombinasjonerService.validerBehandlingstemaOgBehandlingstypeForAndregangsbehandling(fagsak, sistBehandling, sistBehandlingsresultat, behandlingstema, behandlingstype);
+        lovligeKombinasjonerSaksbehandlingService.validerBehandlingstemaOgBehandlingstypeForAndregangsbehandling(fagsak, sistBehandling, sistBehandlingsresultat, behandlingstema, behandlingstype);
 
         if (sistBehandling.erAktiv()) {
             behandlingService.avsluttBehandling(sistBehandling.getId());

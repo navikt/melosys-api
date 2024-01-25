@@ -19,7 +19,7 @@ import no.nav.melosys.saksflytapi.ProsessinstansService;
 import no.nav.melosys.service.journalforing.JournalfoeringService;
 import no.nav.melosys.service.journalforing.UtledBehandlingsaarsak;
 import no.nav.melosys.service.journalforing.dto.PeriodeDto;
-import no.nav.melosys.service.lovligekombinasjoner.LovligeKombinasjonerService;
+import no.nav.melosys.service.lovligekombinasjoner.LovligeKombinasjonerSaksbehandlingService;
 import no.nav.melosys.service.oppgave.OppgaveService;
 import no.nav.melosys.service.saksbehandling.SaksbehandlingRegler;
 import org.apache.commons.lang3.StringUtils;
@@ -36,17 +36,17 @@ public class OpprettSak {
     private final ProsessinstansService prosessinstansService;
     private final SaksbehandlingRegler saksbehandlingRegler;
 
-    private final LovligeKombinasjonerService lovligeKombinasjonerService;
+    private final LovligeKombinasjonerSaksbehandlingService lovligeKombinasjonerSaksbehandlingService;
 
     public OpprettSak(JournalfoeringService journalfoeringService, OppgaveService oppgaveService,
                       @Lazy ProsessinstansService prosessinstansService,
                       SaksbehandlingRegler saksbehandlingRegler,
-                      LovligeKombinasjonerService lovligeKombinasjonerService) {
+                      LovligeKombinasjonerSaksbehandlingService lovligeKombinasjonerSaksbehandlingService) {
         this.journalfoeringService = journalfoeringService;
         this.oppgaveService = oppgaveService;
         this.prosessinstansService = prosessinstansService;
         this.saksbehandlingRegler = saksbehandlingRegler;
-        this.lovligeKombinasjonerService = lovligeKombinasjonerService;
+        this.lovligeKombinasjonerSaksbehandlingService = lovligeKombinasjonerSaksbehandlingService;
     }
 
     @Transactional
@@ -111,7 +111,7 @@ public class OpprettSak {
         var behandlingstema = opprettSakDto.getBehandlingstema();
         var behandlingstype = opprettSakDto.getBehandlingstype();
 
-        lovligeKombinasjonerService.validerOpprettelseOgEndring(
+        lovligeKombinasjonerSaksbehandlingService.validerOpprettelseOgEndring(
             hovedpart, sakstype, sakstema, behandlingstema, behandlingstype);
 
         if (erSakstypeEøs(sakstype)

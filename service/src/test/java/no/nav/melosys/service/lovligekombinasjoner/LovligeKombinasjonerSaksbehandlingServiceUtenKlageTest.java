@@ -30,7 +30,7 @@ import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
 @ExtendWith(MockitoExtension.class)
-class LovligeKombinasjonerServiceUtenKlageTest {
+class LovligeKombinasjonerSaksbehandlingServiceUtenKlageTest {
 
     /*
      *      Tester for når melosys.behandlingstype.klage er disabled
@@ -43,16 +43,16 @@ class LovligeKombinasjonerServiceUtenKlageTest {
     @Mock
     private BehandlingsresultatService behandlingsresultatService;
 
-    private LovligeKombinasjonerService lovligeKombinasjonerService;
+    private LovligeKombinasjonerSaksbehandlingService lovligeKombinasjonerSaksbehandlingService;
 
     @BeforeEach
     void setup() {
-        lovligeKombinasjonerService = new LovligeKombinasjonerService(fagsakService, behandlingService, behandlingsresultatService, new FakeUnleash());
+        lovligeKombinasjonerSaksbehandlingService = new LovligeKombinasjonerSaksbehandlingService(fagsakService, behandlingService, behandlingsresultatService, new FakeUnleash());
     }
 
     @Test
     void hentMuligeSakstyper_saksnummerErNull_returnererAlleSakstyper() {
-        var muligeSakstyper = lovligeKombinasjonerService.hentMuligeSakstyper(null);
+        var muligeSakstyper = lovligeKombinasjonerSaksbehandlingService.hentMuligeSakstyper(null);
 
 
         assertThat(muligeSakstyper).hasSize(3).contains(EU_EOS, FTRL, TRYGDEAVTALE);
@@ -65,7 +65,7 @@ class LovligeKombinasjonerServiceUtenKlageTest {
         when(fagsakService.hentFagsak("saksnummer")).thenReturn(fagsak);
 
 
-        var muligeSakstyper = lovligeKombinasjonerService.hentMuligeSakstyper("saksnummer");
+        var muligeSakstyper = lovligeKombinasjonerSaksbehandlingService.hentMuligeSakstyper("saksnummer");
 
 
         assertThat(muligeSakstyper).hasSize(3).contains(EU_EOS, FTRL, TRYGDEAVTALE);
@@ -80,7 +80,7 @@ class LovligeKombinasjonerServiceUtenKlageTest {
         when(fagsakService.hentFagsak("saksnummer")).thenReturn(fagsak);
 
 
-        var muligeSakstyper = lovligeKombinasjonerService.hentMuligeSakstyper("saksnummer");
+        var muligeSakstyper = lovligeKombinasjonerSaksbehandlingService.hentMuligeSakstyper("saksnummer");
 
 
         assertThat(muligeSakstyper).isEmpty();
@@ -89,7 +89,7 @@ class LovligeKombinasjonerServiceUtenKlageTest {
 
     @Test
     void hentMuligeSakstemaer_saksnummerErNull_returnererLovligeSakstemaer() {
-        var muligeSakstemaer = lovligeKombinasjonerService.hentMuligeSakstemaer(Aktoersroller.VIRKSOMHET, TRYGDEAVTALE, null);
+        var muligeSakstemaer = lovligeKombinasjonerSaksbehandlingService.hentMuligeSakstemaer(Aktoersroller.VIRKSOMHET, TRYGDEAVTALE, null);
 
 
         assertThat(muligeSakstemaer).isNotEmpty();
@@ -102,7 +102,7 @@ class LovligeKombinasjonerServiceUtenKlageTest {
         when(fagsakService.hentFagsak("saksnummer")).thenReturn(fagsak);
 
 
-        var muligeSakstemaer = lovligeKombinasjonerService.hentMuligeSakstemaer(Aktoersroller.VIRKSOMHET, TRYGDEAVTALE, "saksnummer");
+        var muligeSakstemaer = lovligeKombinasjonerSaksbehandlingService.hentMuligeSakstemaer(Aktoersroller.VIRKSOMHET, TRYGDEAVTALE, "saksnummer");
 
 
         assertThat(muligeSakstemaer).isNotEmpty();
@@ -117,7 +117,7 @@ class LovligeKombinasjonerServiceUtenKlageTest {
         when(fagsakService.hentFagsak("saksnummer")).thenReturn(fagsak);
 
 
-        var muligeSakstemaer = lovligeKombinasjonerService.hentMuligeSakstemaer(Aktoersroller.VIRKSOMHET, TRYGDEAVTALE, "saksnummer");
+        var muligeSakstemaer = lovligeKombinasjonerSaksbehandlingService.hentMuligeSakstemaer(Aktoersroller.VIRKSOMHET, TRYGDEAVTALE, "saksnummer");
 
 
         assertThat(muligeSakstemaer).isEmpty();
@@ -125,7 +125,7 @@ class LovligeKombinasjonerServiceUtenKlageTest {
 
     @Test
     void hentMuligeBehandlingstyper_temaArbeidThenestepersonEllerFly_returnererLovligKombinasjon() {
-        var muligeTyper = lovligeKombinasjonerService
+        var muligeTyper = lovligeKombinasjonerSaksbehandlingService
             .hentMuligeBehandlingstyper(Aktoersroller.BRUKER, EU_EOS, MEDLEMSKAP_LOVVALG, ARBEID_TJENESTEPERSON_ELLER_FLY, null, null);
 
 
@@ -134,7 +134,7 @@ class LovligeKombinasjonerServiceUtenKlageTest {
 
     @Test
     void hentMuligeBehandlingstyper_EU_EOS_MEDLEMSKAP_LOVVALG_temaIkkeYrkesAktiv_returnererLovligKombinasjon() {
-        var muligeTyper = lovligeKombinasjonerService
+        var muligeTyper = lovligeKombinasjonerSaksbehandlingService
             .hentMuligeBehandlingstyper(Aktoersroller.BRUKER, EU_EOS, MEDLEMSKAP_LOVVALG, IKKE_YRKESAKTIV, null, null);
 
 
@@ -143,7 +143,7 @@ class LovligeKombinasjonerServiceUtenKlageTest {
 
     @Test
     void hentMuligeBehandlingstyper_EU_EOS_UNNTAK_temaForespørselTrygdemyndighet_returnererLovligKombinasjon() {
-        var muligeTyper = lovligeKombinasjonerService
+        var muligeTyper = lovligeKombinasjonerSaksbehandlingService
             .hentMuligeBehandlingstyper(Aktoersroller.BRUKER, EU_EOS, UNNTAK, FORESPØRSEL_TRYGDEMYNDIGHET, null, null);
 
 
@@ -152,7 +152,7 @@ class LovligeKombinasjonerServiceUtenKlageTest {
 
     @Test
     void hentMuligeBehandlingstyper_EU_EOS_TRYGDEAVGIFT_temaYrkesaktiv_returnererLovligKombinasjon() {
-        var muligeTyper = lovligeKombinasjonerService
+        var muligeTyper = lovligeKombinasjonerSaksbehandlingService
             .hentMuligeBehandlingstyper(Aktoersroller.BRUKER, EU_EOS, TRYGDEAVGIFT, YRKESAKTIV, null, null);
 
 
@@ -161,7 +161,7 @@ class LovligeKombinasjonerServiceUtenKlageTest {
 
     @Test
     void hentMuligeBehandlingstyper_FTRL_LOVVALG_MEDLEMSKAP_temaYrkesaktiv_returnererLovligKombinasjon() {
-        var muligeTyper = lovligeKombinasjonerService
+        var muligeTyper = lovligeKombinasjonerSaksbehandlingService
             .hentMuligeBehandlingstyper(Aktoersroller.BRUKER, FTRL, MEDLEMSKAP_LOVVALG, YRKESAKTIV, null, null);
 
 
@@ -170,7 +170,7 @@ class LovligeKombinasjonerServiceUtenKlageTest {
 
     @Test
     void hentMuligeBehandlingstyper_FTRL_LOVVALG_MEDLEMSKAP_temaPensjonist_returnererLovligKombinasjon() {
-        var muligeTyper = lovligeKombinasjonerService
+        var muligeTyper = lovligeKombinasjonerSaksbehandlingService
             .hentMuligeBehandlingstyper(Aktoersroller.BRUKER, FTRL, MEDLEMSKAP_LOVVALG, PENSJONIST, null, null);
 
 
@@ -179,7 +179,7 @@ class LovligeKombinasjonerServiceUtenKlageTest {
 
     @Test
     void hentMuligeBehandlingstyper_FTRL_TRYGDEAVGIFT_temaPensjonist_returnererLovligKombinasjon() {
-        var muligeTyper = lovligeKombinasjonerService
+        var muligeTyper = lovligeKombinasjonerSaksbehandlingService
             .hentMuligeBehandlingstyper(Aktoersroller.BRUKER, FTRL, TRYGDEAVGIFT, PENSJONIST, null, null);
 
 
@@ -188,7 +188,7 @@ class LovligeKombinasjonerServiceUtenKlageTest {
 
     @Test
     void hentMuligeBehandlingstyper_FTRL_TRYGDEAVGIFT_temaYrkesaktiv_returnererLovligKombinasjon() {
-        var muligeTyper = lovligeKombinasjonerService
+        var muligeTyper = lovligeKombinasjonerSaksbehandlingService
             .hentMuligeBehandlingstyper(Aktoersroller.BRUKER, FTRL, TRYGDEAVGIFT, YRKESAKTIV, null, null);
 
 
@@ -197,7 +197,7 @@ class LovligeKombinasjonerServiceUtenKlageTest {
 
     @Test
     void hentMuligeBehandlingstyper_TRYGDEAVTALE_LOVVALG_MEDLEMSKAP_temaYrkesaktiv_returnererLovligKombinasjon() {
-        var muligeTyper = lovligeKombinasjonerService
+        var muligeTyper = lovligeKombinasjonerSaksbehandlingService
             .hentMuligeBehandlingstyper(Aktoersroller.BRUKER, TRYGDEAVTALE, MEDLEMSKAP_LOVVALG, YRKESAKTIV, null, null);
 
 
@@ -206,7 +206,7 @@ class LovligeKombinasjonerServiceUtenKlageTest {
 
     @Test
     void hentMuligeBehandlingstyper_TRYGDEAVTALE_LOVVALG_MEDLEMSKAP_temaPensjonist_returnererLovligKombinasjon() {
-        var muligeTyper = lovligeKombinasjonerService
+        var muligeTyper = lovligeKombinasjonerSaksbehandlingService
             .hentMuligeBehandlingstyper(Aktoersroller.BRUKER, TRYGDEAVTALE, MEDLEMSKAP_LOVVALG, PENSJONIST, null, null);
 
 
@@ -215,7 +215,7 @@ class LovligeKombinasjonerServiceUtenKlageTest {
 
     @Test
     void hentMuligeBehandlingstyper_TRYGDEAVTALE_UNNTAK_temaForespørselTrygdemyndighet_returnererLovligKombinasjon() {
-        var muligeTyper = lovligeKombinasjonerService
+        var muligeTyper = lovligeKombinasjonerSaksbehandlingService
             .hentMuligeBehandlingstyper(Aktoersroller.BRUKER, TRYGDEAVTALE, UNNTAK, FORESPØRSEL_TRYGDEMYNDIGHET, null, null);
 
 
@@ -224,7 +224,7 @@ class LovligeKombinasjonerServiceUtenKlageTest {
 
     @Test
     void hentMuligeBehandlingstyper_TRYGDEAVTALE_TRYGDEAVGIFT_temaYrkesaktiv_returnererLovligKombinasjon() {
-        var muligeTyper = lovligeKombinasjonerService
+        var muligeTyper = lovligeKombinasjonerSaksbehandlingService
             .hentMuligeBehandlingstyper(Aktoersroller.BRUKER, TRYGDEAVTALE, TRYGDEAVGIFT, YRKESAKTIV, null, null);
 
 
@@ -233,7 +233,7 @@ class LovligeKombinasjonerServiceUtenKlageTest {
 
     @Test
     void hentMuligeBehandlingstyper_TRYGDEAVTALE_TRYGDEAVGIFT_temaPensjonist_returnererLovligKombinasjon() {
-        var muligeTyper = lovligeKombinasjonerService
+        var muligeTyper = lovligeKombinasjonerSaksbehandlingService
             .hentMuligeBehandlingstyper(Aktoersroller.BRUKER, TRYGDEAVTALE, TRYGDEAVGIFT, PENSJONIST, null, null);
 
 
@@ -242,7 +242,7 @@ class LovligeKombinasjonerServiceUtenKlageTest {
 
     @Test
     void hentMuligeBehandlingstemaer_hovedpartVIRKSOMHETIkkeTrygdeavgift_skalReturnereBehandlingsTemaVIRKSOMHET() {
-        Set<Behandlingstema> behandlingstemas = lovligeKombinasjonerService.hentMuligeBehandlingstemaer(Aktoersroller.VIRKSOMHET, TRYGDEAVTALE, MEDLEMSKAP_LOVVALG, null, null);
+        Set<Behandlingstema> behandlingstemas = lovligeKombinasjonerSaksbehandlingService.hentMuligeBehandlingstemaer(Aktoersroller.VIRKSOMHET, TRYGDEAVTALE, MEDLEMSKAP_LOVVALG, null, null);
         assertThat(behandlingstemas)
             .hasSize(1)
             .contains(VIRKSOMHET);
@@ -250,7 +250,7 @@ class LovligeKombinasjonerServiceUtenKlageTest {
 
     @Test
     void hentMuligeBehandlingstemaer_hovedpartVIRKSOMHETTrygdeavgift_skalReturnereBehandlingsTemaYRKESAKTIV() {
-        Set<Behandlingstema> behandlingstemas = lovligeKombinasjonerService.hentMuligeBehandlingstemaer(Aktoersroller.VIRKSOMHET, TRYGDEAVTALE, TRYGDEAVGIFT, null, null);
+        Set<Behandlingstema> behandlingstemas = lovligeKombinasjonerSaksbehandlingService.hentMuligeBehandlingstemaer(Aktoersroller.VIRKSOMHET, TRYGDEAVTALE, TRYGDEAVGIFT, null, null);
         assertThat(behandlingstemas)
             .hasSize(1)
             .contains(YRKESAKTIV);
@@ -258,10 +258,10 @@ class LovligeKombinasjonerServiceUtenKlageTest {
 
     @Test
     void hentMuligeBehandlingstemaer_ingenHovedpart_skalReturnereSammeSomHovedpartVIRKSOMHETgBRUKER() {
-        Set<Behandlingstema> behandlingstemaer = lovligeKombinasjonerService.hentMuligeBehandlingstemaer(null, TRYGDEAVTALE, TRYGDEAVGIFT, null, null);
+        Set<Behandlingstema> behandlingstemaer = lovligeKombinasjonerSaksbehandlingService.hentMuligeBehandlingstemaer(null, TRYGDEAVTALE, TRYGDEAVGIFT, null, null);
 
-        Set<Behandlingstema> behandlingstemaerVirksomhet = lovligeKombinasjonerService.hentMuligeBehandlingstemaer(Aktoersroller.VIRKSOMHET, TRYGDEAVTALE, TRYGDEAVGIFT, null, null);
-        Set<Behandlingstema> behandlingstemaerBruker = lovligeKombinasjonerService.hentMuligeBehandlingstemaer(Aktoersroller.BRUKER, TRYGDEAVTALE, TRYGDEAVGIFT, null, null);
+        Set<Behandlingstema> behandlingstemaerVirksomhet = lovligeKombinasjonerSaksbehandlingService.hentMuligeBehandlingstemaer(Aktoersroller.VIRKSOMHET, TRYGDEAVTALE, TRYGDEAVGIFT, null, null);
+        Set<Behandlingstema> behandlingstemaerBruker = lovligeKombinasjonerSaksbehandlingService.hentMuligeBehandlingstemaer(Aktoersroller.BRUKER, TRYGDEAVTALE, TRYGDEAVGIFT, null, null);
 
         assertThat(behandlingstemaer)
             .containsAll(behandlingstemaerVirksomhet)
@@ -270,7 +270,7 @@ class LovligeKombinasjonerServiceUtenKlageTest {
 
     @Test
     void hentMuligeBehandlingstemaer_ingenHovedpartUnntak_skalReturnereSedBehandlingstema() {
-        Set<Behandlingstema> behandlingstemaer = lovligeKombinasjonerService.hentMuligeBehandlingstemaer(null, EU_EOS, UNNTAK, null, null);
+        Set<Behandlingstema> behandlingstemaer = lovligeKombinasjonerSaksbehandlingService.hentMuligeBehandlingstemaer(null, EU_EOS, UNNTAK, null, null);
 
         assertThat(behandlingstemaer)
             .contains(REGISTRERING_UNNTAK_NORSK_TRYGD_UTSTASJONERING, REGISTRERING_UNNTAK_NORSK_TRYGD_ØVRIGE, BESLUTNING_LOVVALG_ANNET_LAND);
@@ -284,7 +284,7 @@ class LovligeKombinasjonerServiceUtenKlageTest {
         sisteBehandling.setFagsak(fagsak);
         sisteBehandling.setStatus(Behandlingsstatus.AVSLUTTET);
 
-        Set<Behandlingstyper> muligeBehandlingstyper = lovligeKombinasjonerService.hentMuligeBehandlingstyper(Aktoersroller.BRUKER, EU_EOS, MEDLEMSKAP_LOVVALG, UTSENDT_ARBEIDSTAKER, null, sisteBehandling, null);
+        Set<Behandlingstyper> muligeBehandlingstyper = lovligeKombinasjonerSaksbehandlingService.hentMuligeBehandlingstyper(Aktoersroller.BRUKER, EU_EOS, MEDLEMSKAP_LOVVALG, UTSENDT_ARBEIDSTAKER, null, sisteBehandling, null);
         assertThat(muligeBehandlingstyper)
             .hasSize(2)
             .containsExactly(NY_VURDERING, HENVENDELSE);
@@ -299,7 +299,7 @@ class LovligeKombinasjonerServiceUtenKlageTest {
         sisteBehandling.setStatus(UNDER_BEHANDLING);
 
 
-        Set<Behandlingstyper> muligeBehandlingstyper = lovligeKombinasjonerService.hentMuligeBehandlingstyper(Aktoersroller.BRUKER, EU_EOS, MEDLEMSKAP_LOVVALG, UTSENDT_ARBEIDSTAKER, null, sisteBehandling, new Behandlingsresultat());
+        Set<Behandlingstyper> muligeBehandlingstyper = lovligeKombinasjonerSaksbehandlingService.hentMuligeBehandlingstyper(Aktoersroller.BRUKER, EU_EOS, MEDLEMSKAP_LOVVALG, UTSENDT_ARBEIDSTAKER, null, sisteBehandling, new Behandlingsresultat());
 
 
         assertThat(muligeBehandlingstyper).isEmpty();
@@ -318,7 +318,7 @@ class LovligeKombinasjonerServiceUtenKlageTest {
         sisteBehandlingsresultat.getAnmodningsperioder().add(anmodningsperiode);
 
 
-        Set<Behandlingstyper> muligeBehandlingstyper = lovligeKombinasjonerService.hentMuligeBehandlingstyper(Aktoersroller.BRUKER, EU_EOS, MEDLEMSKAP_LOVVALG, UTSENDT_ARBEIDSTAKER, null, sisteBehandling, sisteBehandlingsresultat);
+        Set<Behandlingstyper> muligeBehandlingstyper = lovligeKombinasjonerSaksbehandlingService.hentMuligeBehandlingstyper(Aktoersroller.BRUKER, EU_EOS, MEDLEMSKAP_LOVVALG, UTSENDT_ARBEIDSTAKER, null, sisteBehandling, sisteBehandlingsresultat);
 
 
         assertThat(muligeBehandlingstyper)
@@ -328,7 +328,7 @@ class LovligeKombinasjonerServiceUtenKlageTest {
 
     @Test
     void hentMuligeBehandlingstyper_senderKunMedBehandlingID_henterBehandlingOgBehandlingsresultat() {
-        lovligeKombinasjonerService.hentMuligeBehandlingstyper(Aktoersroller.BRUKER, EU_EOS, MEDLEMSKAP_LOVVALG, UTSENDT_ARBEIDSTAKER, null, 1L);
+        lovligeKombinasjonerSaksbehandlingService.hentMuligeBehandlingstyper(Aktoersroller.BRUKER, EU_EOS, MEDLEMSKAP_LOVVALG, UTSENDT_ARBEIDSTAKER, null, 1L);
 
 
         verify(behandlingService).hentBehandling(1L);
@@ -337,14 +337,14 @@ class LovligeKombinasjonerServiceUtenKlageTest {
 
     @Test
     void hentMuligeBehandlingStatuser_harNøyaktigRekkefølgePåMuligeStatus() {
-        var muligeStatuser = lovligeKombinasjonerService.hentMuligeBehandlingStatuser();
+        var muligeStatuser = lovligeKombinasjonerSaksbehandlingService.hentMuligeBehandlingStatuser();
         assertThat(muligeStatuser)
             .containsExactly(UNDER_BEHANDLING, AVVENT_DOK_PART, AVVENT_DOK_UTL, AVVENT_FAGLIG_AVKLARING);
     }
 
     @Test
     void hentMuligeBehandlingStatuser_avsluttetErIkkeMulig() {
-        var muligeStatuser = lovligeKombinasjonerService.hentMuligeBehandlingStatuser();
+        var muligeStatuser = lovligeKombinasjonerSaksbehandlingService.hentMuligeBehandlingStatuser();
         assertThat(muligeStatuser)
             .containsExactlyInAnyOrder(UNDER_BEHANDLING, AVVENT_DOK_PART, AVVENT_DOK_UTL, AVVENT_FAGLIG_AVKLARING)
             .doesNotContain(AVSLUTTET);
