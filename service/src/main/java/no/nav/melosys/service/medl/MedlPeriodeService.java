@@ -127,6 +127,11 @@ public class MedlPeriodeService {
         medlService.oppdaterPeriodeEndelig(medlemskapsperiode, hentKildedokumenttype(behandlingID));
     }
 
+    public void oppdaterOpphørtPeriode(long behandlingID, Medlemskapsperiode medlemskapsperiode) {
+        log.info("Oppdaterer opphørt MEDL-periode {} for medlemskapsperiode", medlemskapsperiode.getMedlPeriodeID());
+        medlService.oppdaterOpphørtPeriode(medlemskapsperiode, hentKildedokumenttype(behandlingID));
+    }
+
     public void oppdaterPeriodeForeløpig(Lovvalgsperiode lovvalgsperiode) {
         log.info("Oppdaterer MEDL-periode {} til status foreløpig", lovvalgsperiode.getMedlPeriodeID());
         medlService.oppdaterPeriodeForeløpig(lovvalgsperiode,

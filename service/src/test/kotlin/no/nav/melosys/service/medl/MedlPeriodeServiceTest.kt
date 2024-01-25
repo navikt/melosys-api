@@ -180,6 +180,20 @@ class MedlPeriodeServiceTest {
     }
 
     @Test
+    fun oppdaterOpphørtPeriode() {
+        setupHappyPathBehandling(Sakstyper.FTRL, Behandlingstema.YRKESAKTIV)
+        val medlemskapsperiode = Medlemskapsperiode().apply {
+            medlPeriodeID = MEDL_PERIODE_ID
+        }
+
+
+        medlPeriodeService.oppdaterOpphørtPeriode(1, medlemskapsperiode)
+
+
+        verify { medlService.oppdaterOpphørtPeriode(medlemskapsperiode, KildedokumenttypeMedl.HENV_SOKNAD) }
+    }
+
+    @Test
     fun oppdaterPeriodeForeløpig() {
         setupHappyPathBehandling(Sakstyper.EU_EOS, Behandlingstema.UTSENDT_ARBEIDSTAKER)
         val lovvalgsperiode = Lovvalgsperiode().apply {
