@@ -3,6 +3,7 @@ package no.nav.melosys.service.medlemskapsperiode
 import io.getunleash.FakeUnleash
 import no.nav.melosys.domain.kodeverk.Folketrygdloven_kap2_bestemmelser
 import no.nav.melosys.domain.kodeverk.Vilkaar
+import no.nav.melosys.domain.kodeverk.begrunnelser.folketrygdloven.Ftrl_2_7_begrunnelser
 import no.nav.melosys.domain.kodeverk.begrunnelser.folketrygdloven.Ftrl_2_8_naer_tilknytning_norge_begrunnelser
 import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingstema
 import no.nav.melosys.featuretoggle.ToggleName
@@ -104,7 +105,14 @@ class UtledBestemmelserOgVilkårTest {
     fun hentBegrunnelserForVilkår_vilkårErFTRL_2_8_NÆR_TILKNYTNING_NORGE_returnererBegrunnelser() {
         assertThat(utledBestemmelserOgVilkår.hentBegrunnelserForVilkår(Vilkaar.FTRL_2_8_NÆR_TILKNYTNING_NORGE))
             .isNotNull.isNotEmpty
-            .contains(Ftrl_2_8_naer_tilknytning_norge_begrunnelser.ANSATT_I_MULTINASJONALT_SELSKAP.kode)
+            .containsAll(Ftrl_2_8_naer_tilknytning_norge_begrunnelser.values().map { it.kode })
+    }
+
+    @Test
+    fun hentBegrunnelserForVilkår_vilkårErFTRL_2_7_RIMELIGHETSVURDERING_returnererBegrunnelser() {
+        assertThat(utledBestemmelserOgVilkår.hentBegrunnelserForVilkår(Vilkaar.FTRL_2_7_RIMELIGHETSVURDERING))
+            .isNotNull.isNotEmpty
+            .containsAll(Ftrl_2_7_begrunnelser.values().map { it.kode })
     }
 
     @Test

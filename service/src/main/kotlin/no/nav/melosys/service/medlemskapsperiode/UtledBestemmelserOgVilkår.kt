@@ -4,6 +4,7 @@ import io.getunleash.Unleash
 import no.nav.melosys.domain.kodeverk.Folketrygdloven_kap2_bestemmelser
 import no.nav.melosys.domain.kodeverk.Folketrygdloven_kap2_bestemmelser.*
 import no.nav.melosys.domain.kodeverk.Vilkaar
+import no.nav.melosys.domain.kodeverk.begrunnelser.folketrygdloven.Ftrl_2_7_begrunnelser
 import no.nav.melosys.domain.kodeverk.begrunnelser.folketrygdloven.Ftrl_2_8_naer_tilknytning_norge_begrunnelser
 import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingstema
 import no.nav.melosys.domain.util.KodeverkUtils
@@ -135,7 +136,6 @@ class UtledBestemmelserOgVilkår (val unleash: Unleash) {
         }
 
     fun hentIkkeStøttedeBestemmelserOgVilkår(behandlingstema: Behandlingstema): Map<Folketrygdloven_kap2_bestemmelser, Collection<Vilkaar>> =
-        //if toggle is on, do the same for støttetBestemmelser2_7 as well, else only støttetBestemmelser2_8 (filter)
         bestemmelseOgVilkårFraBehandlingstema(behandlingstema).filter {
             !støttetBestemmelser2_8.contains(it.key) && (!unleash.isEnabled(ToggleName.MELOSYS_FOLKETRYGDEN_2_7) || !støttetBestemmelser2_7.contains(it.key))
         }
@@ -143,6 +143,9 @@ class UtledBestemmelserOgVilkår (val unleash: Unleash) {
     fun hentBegrunnelserForVilkår(vilkår: Vilkaar): Collection<String> =
         if (vilkår == Vilkaar.FTRL_2_8_NÆR_TILKNYTNING_NORGE) {
             KodeverkUtils.tilStringCollection(*Ftrl_2_8_naer_tilknytning_norge_begrunnelser.values())
-        } else emptyList()
-
+        }
+        else if (vilkår == Vilkaar.FTRL_2_7_RIMELIGHETSVURDERING) {
+            KodeverkUtils.tilStringCollection(*Ftrl_2_7_begrunnelser.values())
+        }
+        else emptyList()
 }
