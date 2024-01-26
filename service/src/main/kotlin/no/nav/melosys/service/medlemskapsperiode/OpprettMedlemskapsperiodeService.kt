@@ -20,7 +20,8 @@ import org.springframework.transaction.annotation.Transactional
 class OpprettMedlemskapsperiodeService(
     private val medlemAvFolketrygdenRepository: MedlemAvFolketrygdenRepository,
     private val behandlingsresultatService: BehandlingsresultatService,
-    private val utledMottaksdato: UtledMottaksdato
+    private val utledMottaksdato: UtledMottaksdato,
+    private val utledBestemmelserOgVilkår: UtledBestemmelserOgVilkår
 ) {
     @Transactional
     fun opprettForslagPåMedlemskapsperioder(behandlingID: Long, bestemmelse: Folketrygdloven_kap2_bestemmelser?): Collection<Medlemskapsperiode> {
@@ -91,7 +92,7 @@ class OpprettMedlemskapsperiodeService(
     }
 
     fun hentStøttedeBestemmelserMedVilkår(behandlingstema: Behandlingstema): Map<Folketrygdloven_kap2_bestemmelser, Collection<Vilkaar>> =
-        UtledBestemmelserOgVilkår().hentStøttedeBestemmelserOgVilkår(behandlingstema)
+        utledBestemmelserOgVilkår.hentStøttedeBestemmelserOgVilkår(behandlingstema)
 
 
     private fun hentVilkårForBestemmelse(bestemmelse: Folketrygdloven_kap2_bestemmelser, behandlingstema: Behandlingstema): Collection<Vilkaar> =
