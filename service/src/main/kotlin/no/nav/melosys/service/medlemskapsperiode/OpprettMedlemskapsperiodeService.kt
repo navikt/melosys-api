@@ -5,6 +5,7 @@ import no.nav.melosys.domain.Fagsak
 import no.nav.melosys.domain.Medlemskapsperiode
 import no.nav.melosys.domain.folketrygden.MedlemAvFolketrygden
 import no.nav.melosys.domain.kodeverk.Folketrygdloven_kap2_bestemmelser
+import no.nav.melosys.domain.kodeverk.Trygdedekninger
 import no.nav.melosys.domain.kodeverk.Vilkaar
 import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingstema
 import no.nav.melosys.domain.mottatteopplysninger.SøknadNorgeEllerUtenforEØS
@@ -12,6 +13,7 @@ import no.nav.melosys.exception.FunksjonellException
 import no.nav.melosys.repository.MedlemAvFolketrygdenRepository
 import no.nav.melosys.service.behandling.BehandlingsresultatService
 import no.nav.melosys.service.behandling.UtledMottaksdato
+import no.nav.melosys.service.lovligekombinasjoner.LovligeKombinasjonerMedlemskapsperiodeService
 import org.springframework.stereotype.Service
 import org.springframework.transaction.annotation.Transactional
 
@@ -26,12 +28,16 @@ class OpprettMedlemskapsperiodeService(
     fun opprettForslagPåMedlemskapsperioder(behandlingID: Long, bestemmelse: Folketrygdloven_kap2_bestemmelser?): Collection<Medlemskapsperiode> {
         val behandlingsresultat = behandlingsresultatService.hentBehandlingsresultat(behandlingID)
         val behandling = behandlingsresultat.behandling
-        val medlemAvFolketrygden = behandlingsresultat.medlemAvFolketrygden
-            ?: MedlemAvFolketrygden().apply { this.behandlingsresultat = behandlingsresultat }
 
         validerSakstype(behandling.fagsak)
-        validerBestemmelse(bestemmelse, behandling.tema)
+
+        val søknad = behandling.mottatteOpplysninger.mottatteOpplysningerData as SøknadNorgeEllerUtenforEØS
+
+        validerBestemmelse(bestemmelse, behandling.tema, søknad.trygdedekning)
         validerVilkår(behandlingsresultat, bestemmelse!!)
+
+        val medlemAvFolketrygden = behandlingsresultat.medlemAvFolketrygden
+            ?: MedlemAvFolketrygden().apply { this.behandlingsresultat = behandlingsresultat }
 
         if (medlemAvFolketrygden.medlemskapsperioder.isEmpty()) {
             val medlemskapsperioder: Collection<Medlemskapsperiode>
@@ -42,10 +48,10 @@ class OpprettMedlemskapsperiodeService(
                 medlemskapsperioder = UtledMedlemskapsperioder().lagMedlemskapsperioderForAndregangsbehandling(
                     opprinneligBehandlingsresultat,
                     bestemmelse,
+                    søknad.trygdedekning,
                     behandling.type
                 )
             } else {
-                val søknad = behandling.mottatteOpplysninger.mottatteOpplysningerData as SøknadNorgeEllerUtenforEØS
                 medlemskapsperioder = UtledMedlemskapsperioder().lagMedlemskapsperioder(
                     UtledMedlemskapsperioderDto(
                         søknad.periode,
@@ -73,13 +79,21 @@ class OpprettMedlemskapsperiodeService(
         }
     }
 
-    private fun validerBestemmelse(bestemmelse: Folketrygdloven_kap2_bestemmelser?, behandlingstema: Behandlingstema) {
+    private fun validerBestemmelse(
+        bestemmelse: Folketrygdloven_kap2_bestemmelser?,
+        behandlingstema: Behandlingstema,
+        trygdedekning: Trygdedekninger
+    ) {
         if (bestemmelse == null) {
             throw FunksjonellException("Bestemmelse er ikke satt. Krever bestemmelse ved opprettelse av forslag for medlemskapsperioder.")
         }
         val støttedeBestemmelser = hentStøttedeBestemmelserMedVilkår(behandlingstema)
-        if (!støttedeBestemmelser.containsKey(bestemmelse)) {
+        if (bestemmelse !in støttedeBestemmelser) {
             throw FunksjonellException("Støtter ikke perioder med bestemmelse $bestemmelse for behandlingstema $behandlingstema")
+        }
+        val lovligeBestemmelser = LovligeKombinasjonerMedlemskapsperiodeService().hentLovligeBestemmelser(trygdedekning)
+        if (bestemmelse !in lovligeBestemmelser) {
+            throw FunksjonellException("Ulovlig kombinasjon av bestemmelse $bestemmelse og trygdedekning $trygdedekning")
         }
     }
 

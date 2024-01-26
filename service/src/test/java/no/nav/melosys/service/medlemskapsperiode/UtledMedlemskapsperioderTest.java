@@ -258,10 +258,10 @@ class UtledMedlemskapsperioderTest {
         );
     }
 
-    // Ny vurdering
+    // Ny vurdering / Manglende innbetaling
 
     @Test
-    void lagMedlemskapsperiodeNyVurdering_finnesMedlemskapsperioder_filtrererBortAvslåtte() {
+    void lagMedlemskapsperioderForAndregangsbehandling_finnesMedlemskapsperioder_filtrererBortAvslåtte() {
         var fom = LocalDate.parse("2023-06-01");
         var tom = LocalDate.parse("2024-06-01");
         var innvilgetMedlemskapsperiode = lagMedlemskapsperiode(fom, tom, InnvilgelsesResultat.INNVILGET, Trygdedekninger.FTRL_2_9_FØRSTE_LEDD_B_PENSJON, BESTEMMELSE_2_8);
@@ -273,7 +273,7 @@ class UtledMedlemskapsperioderTest {
         opprinneligBehandlingsresultat.getMedlemAvFolketrygden().setMedlemskapsperioder(List.of(innvilgetMedlemskapsperiode, avslåttMedlemskapsperiode, opphørtMedlemskapsperiode));
 
 
-        Collection<Medlemskapsperiode> response = utledMedlemskapsperioder.lagMedlemskapsperioderForAndregangsbehandling(opprinneligBehandlingsresultat, BESTEMMELSE_2_8, Behandlingstyper.NY_VURDERING);
+        Collection<Medlemskapsperiode> response = utledMedlemskapsperioder.lagMedlemskapsperioderForAndregangsbehandling(opprinneligBehandlingsresultat, BESTEMMELSE_2_8, Trygdedekninger.FTRL_2_9_FØRSTE_LEDD_A_HELSE, Behandlingstyper.NY_VURDERING);
 
 
         assertThat(response).hasSize(1)
@@ -290,22 +290,20 @@ class UtledMedlemskapsperioderTest {
     }
 
     @Test
-    void lagMedlemskapsperiodeNyVurdering_ingenMedlemskapsperioder_returnererTomListe() {
+    void lagMedlemskapsperioderForAndregangsbehandling_ingenMedlemskapsperioder_returnererTomListe() {
         var opprinneligBehandlingsresultat = new Behandlingsresultat();
         opprinneligBehandlingsresultat.setMedlemAvFolketrygden(new MedlemAvFolketrygden());
         opprinneligBehandlingsresultat.getMedlemAvFolketrygden().setMedlemskapsperioder(List.of());
 
 
-        Collection<Medlemskapsperiode> response = utledMedlemskapsperioder.lagMedlemskapsperioderForAndregangsbehandling(opprinneligBehandlingsresultat, BESTEMMELSE_2_8, Behandlingstyper.NY_VURDERING);
+        Collection<Medlemskapsperiode> response = utledMedlemskapsperioder.lagMedlemskapsperioderForAndregangsbehandling(opprinneligBehandlingsresultat, BESTEMMELSE_2_8, Trygdedekninger.FTRL_2_9_FØRSTE_LEDD_A_HELSE, Behandlingstyper.NY_VURDERING);
 
 
         assertThat(response).isEmpty();
     }
 
-    // Manglende innbetaling
-
     @Test
-    void lagMedlemskapsperioderForManglendeInnbetaling_finnesMedlemskapsperioder_filtrererBortAvslåtteMenTarVarePåOpphørte() {
+    void lagMedlemskapsperioderForAndregangsbehandling_ulovligKombinasjon_oppdatererTrygdedekning() {
         var fom = LocalDate.parse("2023-06-01");
         var tom = LocalDate.parse("2024-06-01");
         var innvilgetMedlemskapsperiode = lagMedlemskapsperiode(fom, tom, InnvilgelsesResultat.INNVILGET, Trygdedekninger.FTRL_2_9_FØRSTE_LEDD_B_PENSJON, BESTEMMELSE_2_8);
@@ -317,7 +315,36 @@ class UtledMedlemskapsperioderTest {
         opprinneligBehandlingsresultat.getMedlemAvFolketrygden().setMedlemskapsperioder(List.of(innvilgetMedlemskapsperiode, avslåttMedlemskapsperiode, opphørtMedlemskapsperiode));
 
 
-        Collection<Medlemskapsperiode> response = utledMedlemskapsperioder.lagMedlemskapsperioderForAndregangsbehandling(opprinneligBehandlingsresultat, BESTEMMELSE_2_8, Behandlingstyper.MANGLENDE_INNBETALING_TRYGDEAVGIFT);
+        Collection<Medlemskapsperiode> response = utledMedlemskapsperioder.lagMedlemskapsperioderForAndregangsbehandling(opprinneligBehandlingsresultat, BESTEMMELSE_2_7, Trygdedekninger.FULL_DEKNING_FTRL, Behandlingstyper.NY_VURDERING);
+
+
+        assertThat(response).hasSize(1)
+            .extracting(
+                Medlemskapsperiode::getFom, Medlemskapsperiode::getTom,
+                Medlemskapsperiode::getTrygdedekning, Medlemskapsperiode::getInnvilgelsesresultat
+            )
+            .containsExactlyInAnyOrder(
+                tuple(
+                    fom, tom,
+                    Trygdedekninger.FULL_DEKNING_FTRL, InnvilgelsesResultat.INNVILGET
+                )
+            );
+    }
+
+    @Test
+    void lagMedlemskapsperioderForAndregangsbehandling_manglendeInnbetaling_filtrererBortAvslåtteMenTarVarePåOpphørte() {
+        var fom = LocalDate.parse("2023-06-01");
+        var tom = LocalDate.parse("2024-06-01");
+        var innvilgetMedlemskapsperiode = lagMedlemskapsperiode(fom, tom, InnvilgelsesResultat.INNVILGET, Trygdedekninger.FTRL_2_9_FØRSTE_LEDD_B_PENSJON, BESTEMMELSE_2_8);
+        var avslåttMedlemskapsperiode = lagMedlemskapsperiode(fom, tom, InnvilgelsesResultat.AVSLAATT, Trygdedekninger.FTRL_2_9_FØRSTE_LEDD_A_HELSE, BESTEMMELSE_2_8);
+        var opphørtMedlemskapsperiode = lagMedlemskapsperiode(fom, tom, InnvilgelsesResultat.OPPHØRT, Trygdedekninger.FTRL_2_9_FØRSTE_LEDD_A_HELSE, BESTEMMELSE_2_8);
+
+        var opprinneligBehandlingsresultat = new Behandlingsresultat();
+        opprinneligBehandlingsresultat.setMedlemAvFolketrygden(new MedlemAvFolketrygden());
+        opprinneligBehandlingsresultat.getMedlemAvFolketrygden().setMedlemskapsperioder(List.of(innvilgetMedlemskapsperiode, avslåttMedlemskapsperiode, opphørtMedlemskapsperiode));
+
+
+        Collection<Medlemskapsperiode> response = utledMedlemskapsperioder.lagMedlemskapsperioderForAndregangsbehandling(opprinneligBehandlingsresultat, BESTEMMELSE_2_8, Trygdedekninger.FTRL_2_9_FØRSTE_LEDD_A_HELSE, Behandlingstyper.MANGLENDE_INNBETALING_TRYGDEAVGIFT);
 
 
         assertThat(response).hasSize(2)
@@ -332,6 +359,40 @@ class UtledMedlemskapsperioderTest {
                 ),
                 tuple(
                     fom, tom,
+                    opphørtMedlemskapsperiode.getTrygdedekning(), InnvilgelsesResultat.OPPHØRT
+                )
+            );
+    }
+
+    @Test
+    void lagMedlemskapsperioderForAndregangsbehandling_bestemmelseErUlik_oppdatererBestemmelsePåIkkeOpphørte() {
+        var fom = LocalDate.parse("2023-06-01");
+        var tom = LocalDate.parse("2024-06-01");
+        var innvilgetMedlemskapsperiode = lagMedlemskapsperiode(fom, tom, InnvilgelsesResultat.INNVILGET, Trygdedekninger.FTRL_2_9_FØRSTE_LEDD_B_PENSJON, BESTEMMELSE_2_8);
+        var avslåttMedlemskapsperiode = lagMedlemskapsperiode(fom, tom, InnvilgelsesResultat.AVSLAATT, Trygdedekninger.FTRL_2_9_FØRSTE_LEDD_A_HELSE, BESTEMMELSE_2_8);
+        var opphørtMedlemskapsperiode = lagMedlemskapsperiode(fom, tom, InnvilgelsesResultat.OPPHØRT, Trygdedekninger.FTRL_2_9_FØRSTE_LEDD_A_HELSE, BESTEMMELSE_2_8);
+
+        var annen2_8_Bestemmelse = Folketrygdloven_kap2_bestemmelser.FTRL_KAP2_2_8_ANDRE_LEDD;
+        var opprinneligBehandlingsresultat = new Behandlingsresultat();
+        opprinneligBehandlingsresultat.setMedlemAvFolketrygden(new MedlemAvFolketrygden());
+        opprinneligBehandlingsresultat.getMedlemAvFolketrygden().setMedlemskapsperioder(List.of(innvilgetMedlemskapsperiode, avslåttMedlemskapsperiode, opphørtMedlemskapsperiode));
+
+
+        Collection<Medlemskapsperiode> response = utledMedlemskapsperioder.lagMedlemskapsperioderForAndregangsbehandling(opprinneligBehandlingsresultat, annen2_8_Bestemmelse, Trygdedekninger.FTRL_2_9_FØRSTE_LEDD_B_PENSJON, Behandlingstyper.MANGLENDE_INNBETALING_TRYGDEAVGIFT);
+
+
+        assertThat(response).hasSize(2)
+            .extracting(
+                Medlemskapsperiode::getFom, Medlemskapsperiode::getTom, Medlemskapsperiode::getBestemmelse,
+                Medlemskapsperiode::getTrygdedekning, Medlemskapsperiode::getInnvilgelsesresultat
+            )
+            .containsExactlyInAnyOrder(
+                tuple(
+                    fom, tom, annen2_8_Bestemmelse,
+                    innvilgetMedlemskapsperiode.getTrygdedekning(), InnvilgelsesResultat.INNVILGET
+                ),
+                tuple(
+                    fom, tom, BESTEMMELSE_2_8,
                     opphørtMedlemskapsperiode.getTrygdedekning(), InnvilgelsesResultat.OPPHØRT
                 )
             );
