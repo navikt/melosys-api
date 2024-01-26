@@ -11,7 +11,7 @@ import no.nav.melosys.featuretoggle.ToggleName
 import org.springframework.stereotype.Service
 
 @Service
-class UtledBestemmelserOgVilkår(val unleash: Unleash) {
+class UtledBestemmelserOgVilkår (val unleash: Unleash) {
     val støttetBestemmelser2_8 = listOf(
         FTRL_KAP2_2_8_FØRSTE_LEDD_A,
         FTRL_KAP2_2_8_ANDRE_LEDD
@@ -135,8 +135,9 @@ class UtledBestemmelserOgVilkår(val unleash: Unleash) {
         }
 
     fun hentIkkeStøttedeBestemmelserOgVilkår(behandlingstema: Behandlingstema): Map<Folketrygdloven_kap2_bestemmelser, Collection<Vilkaar>> =
+        //if toggle is on, do the same for støttetBestemmelser2_7 as well, else only støttetBestemmelser2_8 (filter)
         bestemmelseOgVilkårFraBehandlingstema(behandlingstema).filter {
-            !støttetBestemmelser2_8.contains(it.key)
+            !støttetBestemmelser2_8.contains(it.key) && (!unleash.isEnabled(ToggleName.MELOSYS_FOLKETRYGDEN_2_7) || !støttetBestemmelser2_7.contains(it.key))
         }
 
     fun hentBegrunnelserForVilkår(vilkår: Vilkaar): Collection<String> =

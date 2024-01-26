@@ -77,9 +77,26 @@ class UtledBestemmelserOgVilkårTest {
     fun hentIkkeStøttede_behandlingstemaYRKESAKTIV_returnererIkkeStøttede() {
         assertThat(utledBestemmelserOgVilkår.hentIkkeStøttedeBestemmelserOgVilkår(Behandlingstema.YRKESAKTIV))
             .isNotEmpty()
+            .containsKeys(
+                Folketrygdloven_kap2_bestemmelser.FTRL_KAP2_2_7_FØRSTE_LEDD,
+                Folketrygdloven_kap2_bestemmelser.FTRL_KAP2_2_7A,
+            )
             .doesNotContainKeys(
                 Folketrygdloven_kap2_bestemmelser.FTRL_KAP2_2_8_FØRSTE_LEDD_A,
                 Folketrygdloven_kap2_bestemmelser.FTRL_KAP2_2_8_ANDRE_LEDD
+            )
+    }
+
+    @Test
+    fun hentIkkeStøttede_behandlingstemaYRKESAKTIV_returnererIkkeStøttedeMedToggle() {
+        fakeUnleash.enableAll()
+        assertThat(utledBestemmelserOgVilkår.hentIkkeStøttedeBestemmelserOgVilkår(Behandlingstema.YRKESAKTIV))
+            .isNotEmpty()
+            .doesNotContainKeys(
+                Folketrygdloven_kap2_bestemmelser.FTRL_KAP2_2_8_FØRSTE_LEDD_A,
+                Folketrygdloven_kap2_bestemmelser.FTRL_KAP2_2_8_ANDRE_LEDD,
+                Folketrygdloven_kap2_bestemmelser.FTRL_KAP2_2_7_FØRSTE_LEDD,
+                Folketrygdloven_kap2_bestemmelser.FTRL_KAP2_2_7A,
             )
     }
 
