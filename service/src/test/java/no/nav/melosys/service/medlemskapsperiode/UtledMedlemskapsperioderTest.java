@@ -14,10 +14,10 @@ import no.nav.melosys.domain.kodeverk.Medlemskapstyper;
 import no.nav.melosys.domain.kodeverk.Trygdedekninger;
 import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingstyper;
 import no.nav.melosys.domain.mottatteopplysninger.data.Periode;
+import no.nav.melosys.exception.FunksjonellException;
 import org.junit.jupiter.api.Test;
 
-import static org.assertj.core.api.Assertions.assertThat;
-import static org.assertj.core.api.Assertions.tuple;
+import static org.assertj.core.api.Assertions.*;
 
 /**
  * Scenarioer definert på https://confluence.adeo.no/pages/viewpage.action?pageId=387109283
@@ -30,6 +30,17 @@ class UtledMedlemskapsperioderTest {
     private final LocalDate mottaksdato = LocalDate.now();
 
     private final UtledMedlemskapsperioder utledMedlemskapsperioder = new UtledMedlemskapsperioder();
+
+    @Test
+    void lagMedlemskapsperioder_ukjentBestemmelse_kasterFeil() {
+        var request = new UtledMedlemskapsperioderDto(new Periode(mottaksdato, mottaksdato.plusYears(1)),
+            Trygdedekninger.FULL_DEKNING_FTRL, mottaksdato, arbeidsland, Folketrygdloven_kap2_bestemmelser.FTRL_KAP2_2_15_ANDRE_LEDD);
+
+        assertThatExceptionOfType(FunksjonellException.class)
+            .isThrownBy(() -> utledMedlemskapsperioder.lagMedlemskapsperioder(request))
+            .withMessageContaining("Støtter ikke bestemmelse");
+    }
+
     //Scenario 1
 
     @Test
