@@ -17,7 +17,7 @@ import no.nav.melosys.domain.mottatteopplysninger.data.Periode
 import no.nav.melosys.domain.mottatteopplysninger.data.Soeknadsland
 import no.nav.melosys.exception.FunksjonellException
 import no.nav.melosys.service.behandling.BehandlingsresultatService
-import no.nav.melosys.service.lovligekombinasjoner.LovligeKombinasjonerService
+import no.nav.melosys.service.lovligekombinasjoner.LovligeKombinasjonerSaksbehandlingService
 import no.nav.melosys.service.mottatteopplysninger.MottatteOpplysningerService
 import no.nav.melosys.service.saksbehandling.SaksbehandlingRegler
 import no.nav.melosys.service.saksopplysninger.OppfriskSaksopplysningerService
@@ -30,7 +30,7 @@ private val log = KotlinLogging.logger { }
 
 @Service
 class EndreSakService(
-    private val lovligeKombinasjonerService: LovligeKombinasjonerService,
+    private val lovligeKombinasjonerSaksbehandlingService: LovligeKombinasjonerSaksbehandlingService,
     private val fagsakService: FagsakService,
     private val behandlingsresultatService: BehandlingsresultatService,
     private val mottatteOpplysningerService: MottatteOpplysningerService,
@@ -135,7 +135,7 @@ class EndreSakService(
             throw FunksjonellException("Behandling ${behandling.id} har sendt anmodning om unntak og kan ikke lenger endres")
         }
 
-        lovligeKombinasjonerService.validerOpprettelseOgEndring(
+        lovligeKombinasjonerSaksbehandlingService.validerOpprettelseOgEndring(
             behandling,
             fagsak.hovedpartRolle,
             nySakstype,

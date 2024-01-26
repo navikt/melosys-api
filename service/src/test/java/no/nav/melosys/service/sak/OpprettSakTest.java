@@ -19,7 +19,7 @@ import no.nav.melosys.saksflytapi.ProsessinstansService;
 import no.nav.melosys.service.felles.dto.SoeknadslandDto;
 import no.nav.melosys.service.journalforing.JournalfoeringService;
 import no.nav.melosys.service.journalforing.dto.PeriodeDto;
-import no.nav.melosys.service.lovligekombinasjoner.LovligeKombinasjonerService;
+import no.nav.melosys.service.lovligekombinasjoner.LovligeKombinasjonerSaksbehandlingService;
 import no.nav.melosys.service.oppgave.OppgaveService;
 import no.nav.melosys.service.saksbehandling.SaksbehandlingRegler;
 import org.jeasy.random.EasyRandom;
@@ -49,7 +49,7 @@ class OpprettSakTest {
     @Mock
     private ProsessinstansService prosessinstansService;
     @Mock
-    private LovligeKombinasjonerService lovligeKombinasjonerService;
+    private LovligeKombinasjonerSaksbehandlingService lovligeKombinasjonerSaksbehandlingService;
     @Mock
     private SaksbehandlingRegler saksbehandlingRegler;
 
@@ -70,7 +70,7 @@ class OpprettSakTest {
 
     @BeforeEach
     public void setUp() {
-        opprettSak = new OpprettSak(journalfoeringService, oppgaveService, prosessinstansService, saksbehandlingRegler, lovligeKombinasjonerService);
+        opprettSak = new OpprettSak(journalfoeringService, oppgaveService, prosessinstansService, saksbehandlingRegler, lovligeKombinasjonerSaksbehandlingService);
     }
 
     @Test
@@ -334,7 +334,7 @@ class OpprettSakTest {
         opprettSakDto.setSakstype(Sakstyper.EU_EOS);
         opprettSakDto.setBehandlingstema(null);
 
-        doThrow(new FunksjonellException("Behandlingstema")).when(lovligeKombinasjonerService).validerOpprettelseOgEndring(any(), any(), any(), any(), any());
+        doThrow(new FunksjonellException("Behandlingstema")).when(lovligeKombinasjonerSaksbehandlingService).validerOpprettelseOgEndring(any(), any(), any(), any(), any());
 
         assertThatExceptionOfType(FunksjonellException.class)
             .isThrownBy(() -> opprettSak.opprettNySakOgBehandlingFraOppgave(opprettSakDto))

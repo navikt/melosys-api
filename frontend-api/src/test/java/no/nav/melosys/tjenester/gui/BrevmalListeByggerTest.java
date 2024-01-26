@@ -566,7 +566,7 @@ class BrevmalListeByggerTest {
         when(behandlingService.hentBehandlingMedSaksopplysninger(anyLong())).thenReturn(behandlingTrygdeavtale);
         when(behandlingService.hentBehandling(anyLong())).thenReturn(behandlingTrygdeavtale);
         when(saksbehandlingRegler.harIngenFlyt(behandlingTrygdeavtale)).thenReturn(true);
-        when(utenlandskMyndighetService.hentAlleUtenlandskeMyndigheterMedGyldigAdresse()).thenReturn(List.of(utenlandskMyndighet));
+        when(utenlandskMyndighetService.hentAlleUtenlandskeMyndigheter()).thenReturn(List.of(utenlandskMyndighet));
 
 
         List<BrevmalResponse> tilgjengeligeMaler = brevmalListeBygger.byggBrevmalDtoListe(123L);
@@ -618,7 +618,7 @@ class BrevmalListeByggerTest {
                 Land_iso2.GL.getKode(),
                 "Trygdemyndighetene i " + Land_iso2.GL.getBeskrivelse()
             );
-        verify(utenlandskMyndighetService, never()).hentAlleUtenlandskeMyndigheterMedGyldigAdresse();
+        verify(utenlandskMyndighetService, never()).hentAlleUtenlandskeMyndigheter();
     }
 
     @Test

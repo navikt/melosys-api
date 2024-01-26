@@ -20,7 +20,7 @@ import no.nav.melosys.service.sak.FagsakService
 import org.springframework.stereotype.Service
 
 @Service
-class LovligeKombinasjonerService(
+class LovligeKombinasjonerSaksbehandlingService(
     private val fagsakService: FagsakService,
     private val behandlingService: BehandlingService,
     private val behandlingsresultatService: BehandlingsresultatService,
