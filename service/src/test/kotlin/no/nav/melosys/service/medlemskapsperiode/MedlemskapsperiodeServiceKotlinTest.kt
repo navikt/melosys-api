@@ -193,18 +193,21 @@ class MedlemskapsperiodeServiceKotlinTest {
     @Test
     fun `erstattMedlemskapsperioder skal kunne oppdatere opphørte perioder som videreføres fra tidligere behandling`() {
         setupHappyPathBehandling()
-        val medlemAvFolketrygden = MedlemAvFolketrygden().apply { medlemskapsperioder = emptyList() }
-        every { medlemAvFolketrygdenService.finnMedlemAvFolketrygden(1L) } returns Optional.of(medlemAvFolketrygden)
-        val videreførtOpphørtMedlemskapsperiode = Medlemskapsperiode().apply {
+        val videreførtMedlemskapsperiode = Medlemskapsperiode().apply {
             medlPeriodeID = 456
+            innvilgelsesresultat = InnvilgelsesResultat.INNVILGET
+        }
+        val medlemAvFolketrygden = MedlemAvFolketrygden().apply { medlemskapsperioder = listOf(videreførtMedlemskapsperiode) }
+        every { medlemAvFolketrygdenService.finnMedlemAvFolketrygden(1L) } returns Optional.of(medlemAvFolketrygden)
+        val videreførtMedlemskapsperiodeOpphøres = videreførtMedlemskapsperiode.apply {
             innvilgelsesresultat = InnvilgelsesResultat.OPPHØRT
         }
 
 
-        medlemskapsperiodeService.erstattMedlemskapsperioder(2L, 1L, listOf(videreførtOpphørtMedlemskapsperiode))
+        medlemskapsperiodeService.erstattMedlemskapsperioder(2L, 1L, listOf(videreførtMedlemskapsperiodeOpphøres))
 
 
-        verify(exactly = 1) { medlPeriodeService.oppdaterOpphørtPeriode(2L, videreførtOpphørtMedlemskapsperiode) }
+        verify(exactly = 1) { medlPeriodeService.oppdaterOpphørtPeriode(2L, videreførtMedlemskapsperiodeOpphøres) }
     }
 
     @Test
