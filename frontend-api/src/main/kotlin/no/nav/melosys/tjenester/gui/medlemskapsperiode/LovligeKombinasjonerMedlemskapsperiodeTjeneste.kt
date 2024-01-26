@@ -24,7 +24,7 @@ class LovligeKombinasjonerMedlemskapsperiodeTjeneste(
 ) {
 
     @GetMapping("{behandlingID}/bestemmelse/lovlige-kombinasjoner")
-    @ApiOperation(value = "Avslår behandling pga manglende opplysninger")
+    @ApiOperation(value = "Henter lovlige bestemmelser basert på trygdedekning")
     fun hentLovligeBestemmelser(
         @RequestParam(
             "trygdedekning",
