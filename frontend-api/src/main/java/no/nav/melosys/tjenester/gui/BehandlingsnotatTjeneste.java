@@ -62,7 +62,7 @@ public class BehandlingsnotatTjeneste {
     public ResponseEntity<BehandlingsnotatGetDto> opprettBehandlingsnotatForFagsak(@PathVariable("saksnummer") String saksnummer,
                                                                                    @RequestBody BehandlingsnotatPostDto behandlingsnotatPostDto) {
         aksesskontroll.autoriserSakstilgang(saksnummer);
-        Behandlingsnotat behandlingsnotat = behandlingsnotatService.opprettNotat(saksnummer, behandlingsnotatPostDto.tekst());
+        Behandlingsnotat behandlingsnotat = behandlingsnotatService.opprettNotat(saksnummer, behandlingsnotatPostDto.tekst);
         return ResponseEntity.ok(
             lagBehandlingsnotatGetDto(behandlingsnotat)
         );
@@ -76,7 +76,7 @@ public class BehandlingsnotatTjeneste {
                                                                            @RequestBody BehandlingsnotatPostDto behandlingsnotatPostDto) {
         aksesskontroll.autoriserSakstilgang(saksnummer);
         return ResponseEntity.ok(
-            lagBehandlingsnotatGetDto(behandlingsnotatService.oppdaterNotat(notatID, behandlingsnotatPostDto.tekst()))
+            lagBehandlingsnotatGetDto(behandlingsnotatService.oppdaterNotat(notatID, behandlingsnotatPostDto.tekst))
         );
     }
 

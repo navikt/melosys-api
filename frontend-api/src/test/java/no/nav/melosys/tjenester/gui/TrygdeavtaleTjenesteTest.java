@@ -118,10 +118,10 @@ class TrygdeavtaleTjenesteTest {
                 TrygdeavtaleResultat::lovvalgsperiodeTom
             )
             .containsExactlyInAnyOrder(
-                trygdeavtaleResultatDto.virksomhet(),
-                trygdeavtaleResultatDto.bestemmelse(),
-                trygdeavtaleResultatDto.lovvalgsperiodeFom(),
-                trygdeavtaleResultatDto.lovvalgsperiodeTom()
+                trygdeavtaleResultatDto.virksomhet,
+                trygdeavtaleResultatDto.bestemmelse,
+                trygdeavtaleResultatDto.lovvalgsperiodeFom,
+                trygdeavtaleResultatDto.lovvalgsperiodeTom
             );
         assertThat(trygdeavtaleResultat.familie().getFamilieIkkeOmfattetAvNorskTrygd())
             .hasSize(2)
@@ -160,17 +160,17 @@ class TrygdeavtaleTjenesteTest {
         verify(trygdeavtaleService, never()).hentFamiliemedlemmer(any());
 
         assertThat(response).isNotNull();
-        assertThat(response.aktoerId()).isEqualTo(behandling.getFagsak().hentBrukersAktørID());
-        assertThat(response.behandlingstema()).isEqualTo(behandling.getTema().getKode());
-        assertThat(response.behandlingstype()).isEqualTo(behandling.getType().getKode());
-        assertThat(response.redigerbart()).isFalse();
+        assertThat(response.aktoerId).isEqualTo(behandling.getFagsak().hentBrukersAktørID());
+        assertThat(response.behandlingstema).isEqualTo(behandling.getTema().getKode());
+        assertThat(response.behandlingstype).isEqualTo(behandling.getType().getKode());
+        assertThat(response.redigerbart).isFalse();
         var mottatteOpplysningerData = behandling.getMottatteOpplysninger().getMottatteOpplysningerData();
-        assertThat(response.periodeFom()).isEqualTo(mottatteOpplysningerData.periode.getFom());
-        assertThat(response.periodeTom()).isEqualTo(mottatteOpplysningerData.periode.getTom());
-        assertThat(response.soeknadsland()).isEqualTo(Trygdeavtale_myndighetsland.GB);
-        assertThat(response.innledningFritekst()).isEqualTo(behandlingsresultat.getInnledningFritekst());
-        assertThat(response.begrunnelseFritekst()).isEqualTo(behandlingsresultat.getBegrunnelseFritekst());
-        assertThat(response.nyVurderingBakgrunn()).isNull();
+        assertThat(response.periodeFom).isEqualTo(mottatteOpplysningerData.periode.getFom());
+        assertThat(response.periodeTom).isEqualTo(mottatteOpplysningerData.periode.getTom());
+        assertThat(response.soeknadsland).isEqualTo(Trygdeavtale_myndighetsland.GB);
+        assertThat(response.innledningFritekst).isEqualTo(behandlingsresultat.getInnledningFritekst());
+        assertThat(response.begrunnelseFritekst).isEqualTo(behandlingsresultat.getBegrunnelseFritekst());
+        assertThat(response.nyVurderingBakgrunn).isNull();
     }
 
     @Test
@@ -194,17 +194,17 @@ class TrygdeavtaleTjenesteTest {
         verify(trygdeavtaleService).hentFamiliemedlemmer(any());
 
         assertThat(response).isNotNull();
-        assertThat(response.aktoerId()).isEqualTo(behandling.getFagsak().hentBrukersAktørID());
-        assertThat(response.behandlingstema()).isEqualTo(behandling.getTema().getKode());
-        assertThat(response.behandlingstype()).isEqualTo(behandling.getType().getKode());
-        assertThat(response.redigerbart()).isFalse();
+        assertThat(response.aktoerId).isEqualTo(behandling.getFagsak().hentBrukersAktørID());
+        assertThat(response.behandlingstema).isEqualTo(behandling.getTema().getKode());
+        assertThat(response.behandlingstype).isEqualTo(behandling.getType().getKode());
+        assertThat(response.redigerbart).isFalse();
         var mottatteOpplysningerData = behandling.getMottatteOpplysninger().getMottatteOpplysningerData();
-        assertThat(response.periodeFom()).isEqualTo(mottatteOpplysningerData.periode.getFom());
-        assertThat(response.periodeTom()).isEqualTo(mottatteOpplysningerData.periode.getTom());
-        assertThat(response.soeknadsland()).isEqualTo(Trygdeavtale_myndighetsland.GB);
-        assertThat(response.innledningFritekst()).isEqualTo(behandlingsresultat.getInnledningFritekst());
-        assertThat(response.begrunnelseFritekst()).isEqualTo(behandlingsresultat.getBegrunnelseFritekst());
-        assertThat(response.nyVurderingBakgrunn()).isNull();
+        assertThat(response.periodeFom).isEqualTo(mottatteOpplysningerData.periode.getFom());
+        assertThat(response.periodeTom).isEqualTo(mottatteOpplysningerData.periode.getTom());
+        assertThat(response.soeknadsland).isEqualTo(Trygdeavtale_myndighetsland.GB);
+        assertThat(response.innledningFritekst).isEqualTo(behandlingsresultat.getInnledningFritekst());
+        assertThat(response.begrunnelseFritekst).isEqualTo(behandlingsresultat.getBegrunnelseFritekst());
+        assertThat(response.nyVurderingBakgrunn).isNull();
     }
 
     @Test
@@ -228,8 +228,8 @@ class TrygdeavtaleTjenesteTest {
         var response = objectMapper.readValue(body, TrygdeavtaleInfoDto.class);
 
         assertThat(response).isNotNull();
-        assertThat(response.behandlingstype()).isEqualTo(Behandlingstyper.NY_VURDERING.getKode());
-        assertThat(response.nyVurderingBakgrunn()).isEqualTo(behandlingsresultat.getNyVurderingBakgrunn());
+        assertThat(response.behandlingstype).isEqualTo(Behandlingstyper.NY_VURDERING.getKode());
+        assertThat(response.nyVurderingBakgrunn).isEqualTo(behandlingsresultat.getNyVurderingBakgrunn());
     }
 
     @Test
@@ -251,7 +251,7 @@ class TrygdeavtaleTjenesteTest {
         var response = objectMapper.readValue(body, TrygdeavtaleInfoDto.class);
 
         assertThat(response).isNotNull();
-        assertThat(response.redigerbart()).isTrue();
+        assertThat(response.redigerbart).isTrue();
     }
 
     @Test

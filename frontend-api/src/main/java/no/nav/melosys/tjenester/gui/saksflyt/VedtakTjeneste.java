@@ -34,7 +34,7 @@ public class VedtakTjeneste {
     @ApiOperation(value = "Fatter et vedtak for en gitt behandling")
     public ResponseEntity<Void> fattVedtak(@PathVariable("behandlingID") long behandlingID,
                                            @RequestBody FattVedtakDto fattVedtakDto) throws ValideringException {
-        if (fattVedtakDto == null || fattVedtakDto.getBehandlingsresultatTypeKode() == null || fattVedtakDto.getVedtakstype() == null) {
+        if (fattVedtakDto == null || fattVedtakDto.behandlingsresultatTypeKode == null || fattVedtakDto.vedtakstype == null) {
             throw new FunksjonellException("BehandlingsresultatTypeKode eller vedtakstype mangler.");
         }
         aksesskontroll.autoriserSkriv(behandlingID);
@@ -47,32 +47,32 @@ public class VedtakTjeneste {
     @ApiOperation(value = "Endrer et vedtak for en gitt behandling")
     public ResponseEntity<Void> endreVedtak(@PathVariable("behandlingID") long behandlingID,
                                             @RequestBody EndreVedtakDto endreVedtakDto) {
-        if (endreVedtakDto.getBegrunnelseKode() == null) {
+        if (endreVedtakDto.begrunnelseKode == null) {
             throw new FunksjonellException("BegrunnelseKode mangler.");
         }
         aksesskontroll.autoriserSkriv(behandlingID);
-        vedtaksfattingFasade.endreVedtak(behandlingID, endreVedtakDto.getBegrunnelseKode(), endreVedtakDto.getFritekst(), endreVedtakDto.getFritekstSed());
+        vedtaksfattingFasade.endreVedtak(behandlingID, endreVedtakDto.begrunnelseKode, endreVedtakDto.fritekst, endreVedtakDto.fritekstSed);
         return ResponseEntity.noContent().build();
     }
 
     private FattVedtakRequest lagFattVedtakRequest(FattVedtakDto fattVedtakDto, String bestillersId) {
         return new FattVedtakRequest.Builder()
-            .medFritekst(fattVedtakDto.getFritekst())
-            .medFritekstSed(fattVedtakDto.getFritekstSed())
-            .medMottakerInstitusjoner(fattVedtakDto.getMottakerinstitusjoner())
-            .medNyVurderingBakgrunn(fattVedtakDto.getNyVurderingBakgrunn())
-            .medInnledningFritekst(fattVedtakDto.getInnledningFritekst())
-            .medBegrunnelseFritekst(fattVedtakDto.getBegrunnelseFritekst())
-            .medEktefelleFritekst(fattVedtakDto.getEktefelleFritekst())
-            .medBarnFritekst(fattVedtakDto.getBarnFritekst())
-            .medTrygdeavgiftFritekst(fattVedtakDto.getTrygdeavgiftFritekst())
-            .medKopiMottakere(fattVedtakDto.getKopiMottakere())
-            .medBehandlingsresultatType(fattVedtakDto.getBehandlingsresultatTypeKode())
-            .medVedtakstype(fattVedtakDto.getVedtakstype())
+            .medFritekst(fattVedtakDto.fritekst)
+            .medFritekstSed(fattVedtakDto.fritekstSed)
+            .medMottakerInstitusjoner(fattVedtakDto.mottakerinstitusjoner)
+            .medNyVurderingBakgrunn(fattVedtakDto.nyVurderingBakgrunn)
+            .medInnledningFritekst(fattVedtakDto.innledningFritekst)
+            .medBegrunnelseFritekst(fattVedtakDto.begrunnelseFritekst)
+            .medEktefelleFritekst(fattVedtakDto.ektefelleFritekst)
+            .medBarnFritekst(fattVedtakDto.barnFritekst)
+            .medTrygdeavgiftFritekst(fattVedtakDto.trygdeavgiftFritekst)
+            .medKopiMottakere(fattVedtakDto.kopiMottakere)
+            .medBehandlingsresultatType(fattVedtakDto.behandlingsresultatTypeKode)
+            .medVedtakstype(fattVedtakDto.vedtakstype)
             .medBestillersId(bestillersId)
-            .medBetalingsIntervall(fattVedtakDto.getBetalingsintervall())
-            .medOpphørtDato(fattVedtakDto.getOpphoerDato())
-            .medKopiTilArbeidsgiver(fattVedtakDto.getKopiTilArbeidsgiver())
+            .medBetalingsIntervall(fattVedtakDto.betalingsintervall)
+            .medOpphørtDato(fattVedtakDto.opphoerDato)
+            .medKopiTilArbeidsgiver(fattVedtakDto.kopiTilArbeidsgiver)
             .build();
     }
 }

@@ -50,7 +50,7 @@ public class KontaktopplysningTjeneste {
                                                @RequestBody KontaktInfoDto kontaktInfoDto) {
         aksesskontroll.autoriserSakstilgang(saksnummer);
         Kontaktopplysning kontaktopplysning = kontaktopplysningService.lagEllerOppdaterKontaktopplysning(saksnummer, orgnr,
-            kontaktInfoDto.kontaktorgnr(), kontaktInfoDto.kontaktnavn(), kontaktInfoDto.kontakttelefon());
+                kontaktInfoDto.kontaktorgnr, kontaktInfoDto.kontaktnavn, kontaktInfoDto.kontakttelefon);
         return ResponseEntity.ok(kontaktopplysning);
     }
 

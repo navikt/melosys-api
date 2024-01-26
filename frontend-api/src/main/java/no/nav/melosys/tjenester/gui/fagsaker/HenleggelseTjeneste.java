@@ -29,7 +29,7 @@ public class HenleggelseTjeneste {
     @ApiOperation(value = "Henlegger en fagsak. Avslutter kun behandling uten endring av saksstatus dersom behandlingtype er NY_VURDERING.")
     public ResponseEntity<Void> henleggFagsak(@PathVariable("saksnr") String saksnummer, @RequestBody HenleggelseDto henleggelseDto) {
         aksesskontroll.autoriserSakstilgang(saksnummer);
-        henleggFagsakService.henleggFagsakEllerBehandling(saksnummer, henleggelseDto.begrunnelseKode(), henleggelseDto.fritekst());
+        henleggFagsakService.henleggFagsakEllerBehandling(saksnummer, henleggelseDto.begrunnelseKode, henleggelseDto.fritekst);
         return ResponseEntity.noContent().build();
     }
 

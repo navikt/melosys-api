@@ -60,8 +60,8 @@ class KontaktopplysningTjenesteTest {
 
     @Test
     void lagKontaktopplysning_kallerPåService() throws Exception {
-        Kontaktopplysning kontaktopplysning = Kontaktopplysning.av(ORG_NUMMER, KONTAKT_INFO.kontaktnavn(), KONTAKT_INFO.kontakttelefon(), KONTAKT_INFO.kontaktorgnr());
-        when(kontaktopplysningService.lagEllerOppdaterKontaktopplysning(SAK_NUMMER, ORG_NUMMER, KONTAKT_INFO.kontaktorgnr(), KONTAKT_INFO.kontaktnavn(), KONTAKT_INFO.kontakttelefon())).thenReturn(kontaktopplysning);
+        Kontaktopplysning kontaktopplysning = Kontaktopplysning.av(ORG_NUMMER, KONTAKT_INFO.kontaktnavn, KONTAKT_INFO.kontakttelefon, KONTAKT_INFO.kontaktorgnr);
+        when(kontaktopplysningService.lagEllerOppdaterKontaktopplysning(SAK_NUMMER, ORG_NUMMER, KONTAKT_INFO.kontaktorgnr, KONTAKT_INFO.kontaktnavn, KONTAKT_INFO.kontakttelefon)).thenReturn(kontaktopplysning);
 
         mockMvc.perform(post(BASE_URL + "/{saksnummer}/kontaktopplysninger/{orgnr}", SAK_NUMMER, ORG_NUMMER)
                 .contentType(MediaType.APPLICATION_JSON)
@@ -70,7 +70,7 @@ class KontaktopplysningTjenesteTest {
             .andExpect(status().isOk())
             .andExpect(responseBody(objectMapper).containsObjectAsJson(kontaktopplysning, Kontaktopplysning.class));
         verify(kontaktopplysningService, times(1))
-            .lagEllerOppdaterKontaktopplysning(SAK_NUMMER, ORG_NUMMER, KONTAKT_INFO.kontaktorgnr(), KONTAKT_INFO.kontaktnavn(), KONTAKT_INFO.kontakttelefon());
+            .lagEllerOppdaterKontaktopplysning(SAK_NUMMER, ORG_NUMMER, KONTAKT_INFO.kontaktorgnr, KONTAKT_INFO.kontaktnavn, KONTAKT_INFO.kontakttelefon);
     }
 
     @Test

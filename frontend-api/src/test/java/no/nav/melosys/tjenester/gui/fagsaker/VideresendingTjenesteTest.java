@@ -38,9 +38,9 @@ class VideresendingTjenesteTest {
     @Test
     void videresend() throws Exception {
         var videresendDto = new VideresendDto();
-        videresendDto.setVedlegg(Collections.singletonList(new VedleggDto("1", "2")));
-        videresendDto.setMottakerinstitusjon("Denmark");
-        videresendDto.setFritekst("Dette er fritekst");
+        videresendDto.vedlegg = Collections.singletonList(new VedleggDto("1", "2"));
+        videresendDto.mottakerinstitusjon = "Denmark";
+        videresendDto.fritekst = "Dette er fritekst";
 
         mockMvc.perform(post(BASE_URL + "/{saksnr}/henlegg-videresend", "123")
                             .contentType(MediaType.APPLICATION_JSON)

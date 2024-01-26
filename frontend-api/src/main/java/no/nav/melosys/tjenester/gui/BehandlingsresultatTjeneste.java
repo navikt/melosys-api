@@ -52,9 +52,9 @@ public class BehandlingsresultatTjeneste {
         return ResponseEntity.ok(BehandlingsresultatDto.av(
             behandlingsresultatService.oppdaterFritekster(
                 behandlingID,
-                lagreFritekstDto.begrunnelseFritekst(),
-                lagreFritekstDto.innledningFritekst(),
-                lagreFritekstDto.trygdeavgiftFritekst())
+                lagreFritekstDto.begrunnelseFritekst,
+                lagreFritekstDto.innledningFritekst,
+                lagreFritekstDto.trygdeavgiftFritekst)
         ));
     }
 
@@ -67,7 +67,7 @@ public class BehandlingsresultatTjeneste {
         aksesskontroll.autoriserSkriv(behandlingID);
 
         return ResponseEntity.ok(BehandlingsresultatDto.av(
-            behandlingsresultatService.oppdaterNyVurderingBakgrunn(behandlingID, nyVurderingBakgrunn.nyVurderingBakgrunn())
+            behandlingsresultatService.oppdaterNyVurderingBakgrunn(behandlingID, nyVurderingBakgrunn.nyVurderingBakgrunn)
         ));
     }
 
@@ -80,7 +80,7 @@ public class BehandlingsresultatTjeneste {
         return ResponseEntity.ok(BehandlingsresultatDto.av(
             behandlingsresultatService.oppdaterUtfallRegistreringUnntak(
                 behandlingID,
-                oppdaterUtfallRegistreringUnntakDto.utfallRegistreringUnntak())
+                oppdaterUtfallRegistreringUnntakDto.utfallRegistreringUnntak)
         ));
     }
 
@@ -91,7 +91,7 @@ public class BehandlingsresultatTjeneste {
         @RequestBody AngiBehandlingsresultattypeDto angiBehandlingsresultattypeDto) {
         aksesskontroll.autoriserSkriv(behandlingID);
 
-        angiBehandlingsresultatService.oppdaterBehandlingsresultattypeOgAvsluttFagsakOgBehandling(behandlingID, angiBehandlingsresultattypeDto.type());
+        angiBehandlingsresultatService.oppdaterBehandlingsresultattypeOgAvsluttFagsakOgBehandling(behandlingID, angiBehandlingsresultattypeDto.type);
 
         return ResponseEntity.noContent().build();
     }

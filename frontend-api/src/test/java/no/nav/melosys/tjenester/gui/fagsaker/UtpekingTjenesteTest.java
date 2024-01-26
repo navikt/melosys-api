@@ -49,6 +49,6 @@ class UtpekingTjenesteTest {
             .andExpect(status().isNoContent());
 
         verify(aksesskontroll).autoriserSakstilgang(fagsak);
-        verify(utpekingService).utpekLovvalgsland(fagsak, utpekDto.mottakerinstitusjoner(), utpekDto.fritekstSed(), utpekDto.fritekstBrev());
+        verify(utpekingService).utpekLovvalgsland(fagsak, utpekDto.mottakerinstitusjoner, utpekDto.fritekstSed, utpekDto.fritekstBrev);
     }
 }

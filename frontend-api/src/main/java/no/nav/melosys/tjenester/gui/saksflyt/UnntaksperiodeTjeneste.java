@@ -33,7 +33,7 @@ public class UnntaksperiodeTjeneste {
         @RequestBody IkkeGodkjennUnntaksperiodeDto ikkeGodkjennUnntaksperiodeDto
     ) {
         aksesskontroll.autoriserSkriv(behandlingID);
-        unntaksperiodeService.ikkeGodkjennPeriode(behandlingID, ikkeGodkjennUnntaksperiodeDto.ikkeGodkjentBegrunnelseKoder(), ikkeGodkjennUnntaksperiodeDto.begrunnelseFritekst());
+        unntaksperiodeService.ikkeGodkjennPeriode(behandlingID, ikkeGodkjennUnntaksperiodeDto.ikkeGodkjentBegrunnelseKoder, ikkeGodkjennUnntaksperiodeDto.begrunnelseFritekst);
         return ResponseEntity.noContent().build();
     }
 

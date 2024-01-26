@@ -30,15 +30,15 @@ public class OrganisasjonSerializer extends StdSerializer<OrganisasjonDokument> 
     public void serialize(OrganisasjonDokument organisasjon, JsonGenerator generator, SerializerProvider provider) throws IOException {
         OrganisasjonDto organisasjonDto = new OrganisasjonDto();
 
-        organisasjonDto.setOrgnr(organisasjon.getOrgnummer());
-        organisasjonDto.setNavn(organisasjon.getNavn());
-        organisasjonDto.setOppstartdato(organisasjon.getOppstartsdato());
+        organisasjonDto.orgnr = organisasjon.getOrgnummer();
+        organisasjonDto.navn = organisasjon.getNavn();
+        organisasjonDto.oppstartdato = organisasjon.getOppstartsdato();
         if (StringUtils.isNotEmpty(organisasjon.getEnhetstype())) {
-            organisasjonDto.setOrganisasjonsform(kodeverkService.dekod(FellesKodeverk.ENHETSTYPER_JURIDISK_ENHET, organisasjon.getEnhetstype()));
+            organisasjonDto.organisasjonsform = kodeverkService.dekod(FellesKodeverk.ENHETSTYPER_JURIDISK_ENHET, organisasjon.getEnhetstype());
         }
 
-        organisasjonDto.setForretningsadresse(tilAdresseDto(organisasjon.getForretningsadresse()));
-        organisasjonDto.setPostadresse(tilAdresseDto(organisasjon.getPostadresse()));
+        organisasjonDto.forretningsadresse = tilAdresseDto(organisasjon.getForretningsadresse());
+        organisasjonDto.postadresse = tilAdresseDto(organisasjon.getPostadresse());
 
         generator.writeObject(organisasjonDto);
     }
@@ -46,24 +46,24 @@ public class OrganisasjonSerializer extends StdSerializer<OrganisasjonDokument> 
     private AdresseDto tilAdresseDto(StrukturertAdresse adresse) {
         AdresseDto dto = new AdresseDto();
         GateadresseDto gateadresse = new GateadresseDto();
-        dto.setGateadresse(gateadresse);
+        dto.gateadresse = gateadresse;
 
         if (adresse == null) {
             // Tomt objekt til frontend (ikke null)
             return dto;
         }
 
-        gateadresse.setGatenavn(adresse.getGatenavn());
+        gateadresse.gatenavn = adresse.getGatenavn();
 
-        dto.setPostnr(adresse.getPostnummer());
+        dto.postnr = adresse.getPostnummer();
         String poststed = StringUtils.isNotEmpty(adresse.getPoststed()) ? adresse.getPoststed()
             : kodeverkService.dekod(FellesKodeverk.POSTNUMMER, adresse.getPostnummer());
-        dto.setPoststed(poststed);
+        dto.poststed = poststed;
 
         final String landISO2 = kodeverkService.dekod(FellesKodeverk.LANDKODER_ISO2, adresse.getLandkode());
         final String landkode = !UKJENT.equals(landISO2) ? landISO2
             :  kodeverkService.dekod(FellesKodeverk.LANDKODER, adresse.getLandkode());
-        dto.setLand(landkode);
+        dto.land = landkode;
 
         return dto;
     }

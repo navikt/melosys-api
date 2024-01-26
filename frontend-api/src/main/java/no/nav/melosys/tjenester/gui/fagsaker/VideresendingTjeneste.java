@@ -42,12 +42,12 @@ public class VideresendingTjeneste {
         Fagsak fagsak = fagsakService.hentFagsak(saksnummer);
         aksesskontroll.autoriserSakstilgang(fagsak);
 
-        if (CollectionUtils.isEmpty(videresendDto.getVedlegg())) {
+        if (CollectionUtils.isEmpty(videresendDto.vedlegg)) {
             throw new FunksjonellException("Kan ikke videresende søknad uten vedlegg!");
         }
 
-        videresendSoknadService.videresend(saksnummer, videresendDto.getMottakerinstitusjon(),
-                                           videresendDto.getFritekst(), videresendDto.getVedlegg().stream().map(
+        videresendSoknadService.videresend(saksnummer, videresendDto.mottakerinstitusjon,
+                videresendDto.fritekst, videresendDto.vedlegg.stream().map(
                 v -> new DokumentReferanse(v.journalpostID(), v.dokumentID())).collect(Collectors.toUnmodifiableSet()));
         return ResponseEntity.noContent().build();
     }

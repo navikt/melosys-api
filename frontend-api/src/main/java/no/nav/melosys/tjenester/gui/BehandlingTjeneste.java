@@ -108,11 +108,11 @@ public class BehandlingTjeneste {
 
     private BehandlingDto tilBehandlingDto(Behandling behandling, String saksbehandler) {
         var behandlingDto = new BehandlingDto();
-        behandlingDto.setBehandlingID(behandling.getId());
+        behandlingDto.behandlingID = behandling.getId();
         behandlingDto.setRedigerbart(aksesskontroll.behandlingKanRedigeresAvSaksbehandler(behandling, saksbehandler));
-        behandlingDto.setOppsummering(tilOppsummeringDto(behandling));
+        behandlingDto.oppsummering = tilOppsummeringDto(behandling);
         var saksopplysningerDto = saksopplysningerTilDto.getSaksopplysningerDto(behandling.getSaksopplysninger());
-        behandlingDto.setSaksopplysninger(saksopplysningerDto);
+        behandlingDto.saksopplysninger = saksopplysningerDto;
         return behandlingDto;
     }
 
@@ -120,16 +120,16 @@ public class BehandlingTjeneste {
         Behandlingsresultat behandlingsresultat = behandlingsresultatService.hentBehandlingsresultat(behandling.getId());
         BehandlingOppsummeringDto behandlingOppsummeringDto = new BehandlingOppsummeringDto();
 
-        behandlingOppsummeringDto.setBehandlingsstatus(behandling.getStatus());
-        behandlingOppsummeringDto.setBehandlingstype(behandling.getType());
-        behandlingOppsummeringDto.setBehandlingstema(behandling.getTema());
-        behandlingOppsummeringDto.setEndretDato(behandling.getEndretDato());
-        behandlingOppsummeringDto.setEndretAvNavn(saksbehandlerService.finnNavnForIdent(behandling.getEndretAv()).orElse(behandling.getEndretAv()));
-        behandlingOppsummeringDto.setRegistrertDato(behandling.getRegistrertDato());
-        behandlingOppsummeringDto.setSisteOpplysningerHentetDato(behandling.getSisteOpplysningerHentetDato());
-        behandlingOppsummeringDto.setSvarFrist(behandling.getDokumentasjonSvarfristDato());
-        behandlingOppsummeringDto.setBehandlingsfrist(behandling.getBehandlingsfrist());
-        behandlingOppsummeringDto.setBehandlingsresultattype(behandlingsresultat.getType());
+        behandlingOppsummeringDto.behandlingsstatus = behandling.getStatus();
+        behandlingOppsummeringDto.behandlingstype = behandling.getType();
+        behandlingOppsummeringDto.behandlingstema = behandling.getTema();
+        behandlingOppsummeringDto.endretDato = behandling.getEndretDato();
+        behandlingOppsummeringDto.endretAvNavn = saksbehandlerService.finnNavnForIdent(behandling.getEndretAv()).orElse(behandling.getEndretAv());
+        behandlingOppsummeringDto.registrertDato = behandling.getRegistrertDato();
+        behandlingOppsummeringDto.sisteOpplysningerHentetDato = behandling.getSisteOpplysningerHentetDato();
+        behandlingOppsummeringDto.svarFrist = behandling.getDokumentasjonSvarfristDato();
+        behandlingOppsummeringDto.behandlingsfrist = behandling.getBehandlingsfrist();
+        behandlingOppsummeringDto.behandlingsresultattype = behandlingsresultat.getType();
         return behandlingOppsummeringDto;
     }
 }

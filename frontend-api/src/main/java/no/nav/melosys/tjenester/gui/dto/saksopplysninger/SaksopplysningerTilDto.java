@@ -37,18 +37,18 @@ public class SaksopplysningerTilDto {
                     if (arbeidsforholdDokument != null && arbeidsforholdDokument.getArbeidsforhold() != null) {
                         arbeidsforholdDokument.getArbeidsforhold().sort(new ArbeidsforholdComparator());
                     }
-                    dto.setArbeidsforhold(arbeidsforholdDokument);
+                    dto.arbeidsforhold = arbeidsforholdDokument;
                 }
-                case ORG -> dto.getOrganisasjoner().add((OrganisasjonDokument) dokument);
+                case ORG -> dto.organisasjoner.add((OrganisasjonDokument) dokument);
                 case MEDL -> {
                     MedlemskapDokument medlemskapDokument = (MedlemskapDokument) dokument;
                     if (medlemskapDokument != null && medlemskapDokument.getMedlemsperiode() != null) {
                         medlemskapDokument.getMedlemsperiode().sort(Comparator.comparing(Medlemsperiode::getType).thenComparing(medlemsperiodeKomparator));
                     }
-                    dto.setMedlemskap(medlemskapDokument);
+                    dto.medlemskap = medlemskapDokument;
                 }
-                case INNTK -> dto.setInntekt(new InntektDto((InntektDokument) dokument));
-                case SEDOPPL -> dto.setSed(SedDokumentDto.fra((SedDokument) dokument));
+                case INNTK -> dto.inntekt = new InntektDto((InntektDokument) dokument);
+                case SEDOPPL -> dto.sed = SedDokumentDto.fra((SedDokument) dokument);
             }
         }
         return dto;

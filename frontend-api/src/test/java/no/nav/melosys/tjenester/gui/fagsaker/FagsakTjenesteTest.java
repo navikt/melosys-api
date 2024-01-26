@@ -416,14 +416,14 @@ class FagsakTjenesteTest {
 
     private FagsakDto lagFagsakDto(Fagsak fagsak) {
         FagsakDto resultat = new FagsakDto();
-        resultat.setEndretDato(fagsak.getEndretDato());
-        resultat.setGsakSaksnummer(fagsak.getGsakSaksnummer());
-        resultat.setRegistrertDato(fagsak.getRegistrertDato());
-        resultat.setSaksnummer(fagsak.getSaksnummer());
-        resultat.setSakstema(fagsak.getTema());
-        resultat.setSakstype(fagsak.getType());
-        resultat.setSaksstatus(fagsak.getStatus());
-        resultat.setHovedpartRolle(fagsak.getHovedpartRolle());
+        resultat.endretDato = fagsak.getEndretDato();
+        resultat.gsakSaksnummer = fagsak.getGsakSaksnummer();
+        resultat.registrertDato = fagsak.getRegistrertDato();
+        resultat.saksnummer = fagsak.getSaksnummer();
+        resultat.sakstema = fagsak.getTema();
+        resultat.sakstype = fagsak.getType();
+        resultat.saksstatus = fagsak.getStatus();
+        resultat.hovedpartRolle = fagsak.getHovedpartRolle();
         return resultat;
     }
 }

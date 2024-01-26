@@ -39,9 +39,9 @@ public class UtpekingTjeneste {
 
         utpekingService.utpekLovvalgsland(
             fagsak,
-            utpekDto.mottakerinstitusjoner(),
-            utpekDto.fritekstSed(),
-            utpekDto.fritekstBrev()
+                utpekDto.mottakerinstitusjoner,
+                utpekDto.fritekstSed,
+                utpekDto.fritekstBrev
         );
 
         return ResponseEntity.noContent().build();

@@ -89,7 +89,7 @@ public class FagsakTjeneste {
         Fagsak fagsak = fagsakService.hentFagsak(saksnummer);
         aksesskontroll.autoriserSakstilgang(fagsak);
         FagsakDto fagsakDto = tilFagsakDto(fagsak);
-        log.info("Henting av sak {} ({})", fagsakDto.getSaksnummer(), fagsakDto.getGsakSaksnummer());
+        log.info("Henting av sak {} ({})", fagsakDto.saksnummer, fagsakDto.gsakSaksnummer);
         return ResponseEntity.ok(fagsakDto);
     }
 
@@ -143,17 +143,17 @@ public class FagsakTjeneste {
         responseContainer = "List")
     public List<FagsakOppsummeringDto> hentFagsaker(@RequestBody FagsakSokDto fagsakSokDto) {
 
-        if (StringUtils.isNotEmpty(fagsakSokDto.ident())) {
-            aksesskontroll.auditAutoriserFolkeregisterIdent(fagsakSokDto.ident(), "Søk på person med ident. Oversikt over saker og behandlinger.");
-            return tilFagsakOppsummeringDtoer(fagsakService.hentFagsakerMedAktør(Aktoersroller.BRUKER, fagsakSokDto.ident()));
-        } else if (StringUtils.isNotEmpty(fagsakSokDto.saksnummer())) {
-            Optional<Fagsak> fagsak = fagsakService.finnFagsakFraSaksnummer(fagsakSokDto.saksnummer());
+        if (StringUtils.isNotEmpty(fagsakSokDto.ident)) {
+            aksesskontroll.auditAutoriserFolkeregisterIdent(fagsakSokDto.ident, "Søk på person med ident. Oversikt over saker og behandlinger.");
+            return tilFagsakOppsummeringDtoer(fagsakService.hentFagsakerMedAktør(Aktoersroller.BRUKER, fagsakSokDto.ident));
+        } else if (StringUtils.isNotEmpty(fagsakSokDto.saksnummer)) {
+            Optional<Fagsak> fagsak = fagsakService.finnFagsakFraSaksnummer(fagsakSokDto.saksnummer);
             if (fagsak.isPresent()) {
                 aksesskontroll.auditAutoriserSakstilgang(fagsak.get(), "Søk på sak med saksnummer. Oversikt over saker og behandlinger.");
                 return tilFagsakOppsummeringDtoer(Collections.singletonList(fagsak.get()));
             }
-        } else if (StringUtils.isNotEmpty(fagsakSokDto.orgnr())) {
-            return tilFagsakOppsummeringDtoer(fagsakService.hentFagsakerMedOrgnr(Aktoersroller.VIRKSOMHET, fagsakSokDto.orgnr()));
+        } else if (StringUtils.isNotEmpty(fagsakSokDto.orgnr)) {
+            return tilFagsakOppsummeringDtoer(fagsakService.hentFagsakerMedOrgnr(Aktoersroller.VIRKSOMHET, fagsakSokDto.orgnr));
         }
 
         return Collections.emptyList();
@@ -172,14 +172,14 @@ public class FagsakTjeneste {
 
     private FagsakDto tilFagsakDto(Fagsak fagsak) {
         FagsakDto fagsakDto = new FagsakDto();
-        fagsakDto.setSaksnummer(fagsak.getSaksnummer());
-        fagsakDto.setGsakSaksnummer(fagsak.getGsakSaksnummer());
-        fagsakDto.setSakstema(fagsak.getTema());
-        fagsakDto.setSakstype(fagsak.getType());
-        fagsakDto.setSaksstatus(fagsak.getStatus());
-        fagsakDto.setRegistrertDato(fagsak.getRegistrertDato());
-        fagsakDto.setEndretDato(fagsak.getEndretDato());
-        fagsakDto.setHovedpartRolle(fagsak.getHovedpartRolle());
+        fagsakDto.saksnummer = fagsak.getSaksnummer();
+        fagsakDto.gsakSaksnummer = fagsak.getGsakSaksnummer();
+        fagsakDto.sakstema = fagsak.getTema();
+        fagsakDto.sakstype = fagsak.getType();
+        fagsakDto.saksstatus = fagsak.getStatus();
+        fagsakDto.registrertDato = fagsak.getRegistrertDato();
+        fagsakDto.endretDato = fagsak.getEndretDato();
+        fagsakDto.hovedpartRolle = fagsak.getHovedpartRolle();
 
         return fagsakDto;
     }
@@ -188,12 +188,12 @@ public class FagsakTjeneste {
         List<FagsakOppsummeringDto> fagsakListe = new ArrayList<>();
         for (Fagsak fagsak : saker) {
             FagsakOppsummeringDto fagsakOppsummeringDto = new FagsakOppsummeringDto();
-            fagsakOppsummeringDto.setSaksnummer(fagsak.getSaksnummer());
-            fagsakOppsummeringDto.setSakstema(fagsak.getTema());
-            fagsakOppsummeringDto.setSakstype(fagsak.getType());
-            fagsakOppsummeringDto.setSaksstatus(fagsak.getStatus());
-            fagsakOppsummeringDto.setOpprettetDato(fagsak.getRegistrertDato());
-            fagsakOppsummeringDto.setHovedpartRolle(fagsak.getHovedpartRolle());
+            fagsakOppsummeringDto.saksnummer = fagsak.getSaksnummer();
+            fagsakOppsummeringDto.sakstema = fagsak.getTema();
+            fagsakOppsummeringDto.sakstype = fagsak.getType();
+            fagsakOppsummeringDto.saksstatus = fagsak.getStatus();
+            fagsakOppsummeringDto.opprettetDato = fagsak.getRegistrertDato();
+            fagsakOppsummeringDto.hovedpartRolle = fagsak.getHovedpartRolle();
 
             List<Behandling> behandlinger = fagsak.hentBehandlingerSortertSynkendePåRegistrertDato();
 
@@ -201,7 +201,7 @@ public class FagsakTjeneste {
                 .map(this::tilBehandlingOversiktDto)
                 .toList();
 
-            fagsakOppsummeringDto.setNavn(hentNavn(behandlinger));
+            fagsakOppsummeringDto.navn = hentNavn(behandlinger);
             fagsakOppsummeringDto.setBehandlingOversikter(behandlingOversiktDtoer);
             fagsakListe.add(fagsakOppsummeringDto);
         }
@@ -213,13 +213,13 @@ public class FagsakTjeneste {
         if (behandling != null) {
             Behandlingsresultat behandlingsresultat = behandlingsresultatService.hentBehandlingsresultat(behandling.getId());
 
-            behandlingOversiktDto.setBehandlingID(behandling.getId());
-            behandlingOversiktDto.setBehandlingsstatus(behandling.getStatus());
-            behandlingOversiktDto.setBehandlingstype(behandling.getType());
-            behandlingOversiktDto.setBehandlingstema(behandling.getTema());
-            behandlingOversiktDto.setOpprettetDato(behandling.getRegistrertDato());
-            behandlingOversiktDto.setBehandlingsresultattype(behandlingsresultat.getType());
-            behandlingOversiktDto.setSvarFrist(behandling.getDokumentasjonSvarfristDato());
+            behandlingOversiktDto.behandlingID = behandling.getId();
+            behandlingOversiktDto.behandlingsstatus = behandling.getStatus();
+            behandlingOversiktDto.behandlingstype = behandling.getType();
+            behandlingOversiktDto.behandlingstema = behandling.getTema();
+            behandlingOversiktDto.opprettetDato = behandling.getRegistrertDato();
+            behandlingOversiktDto.behandlingsresultattype = behandlingsresultat.getType();
+            behandlingOversiktDto.svarFrist = behandling.getDokumentasjonSvarfristDato();
 
             setPeriodeOpplysninger(behandling, behandlingOversiktDto);
         }
@@ -229,10 +229,10 @@ public class FagsakTjeneste {
     private void setPeriodeOpplysninger(Behandling behandling, BehandlingOversiktDto behandlingOversiktDto) {
         saksopplysningerService.finnSedOpplysninger(behandling.getId()).ifPresentOrElse(sedDoument -> {
                 var land = SoeknadslandDto.av(sedDoument.getLovvalgslandKode());
-                behandlingOversiktDto.setLand(land);
+                behandlingOversiktDto.land = land;
 
                 var periode = sedDoument.getLovvalgsperiode();
-                behandlingOversiktDto.setSoknadsperiode(new PeriodeDto(periode.getFom(), periode.getTom()));
+                behandlingOversiktDto.soknadsperiode = new PeriodeDto(periode.getFom(), periode.getTom());
             },
             () -> {
                 var mottatteOpplysninger = mottatteOpplysningerService.finnMottatteOpplysninger(behandling.getId());
@@ -240,11 +240,11 @@ public class FagsakTjeneste {
                     var mottatteOpplysningerData = mottatteOpplysninger.get().getMottatteOpplysningerData();
 
                     var land = SoeknadslandDto.av(hentLand((mottatteOpplysningerData)));
-                    behandlingOversiktDto.setLand(land);
+                    behandlingOversiktDto.land = land;
 
                     var periode = hentPeriode(mottatteOpplysningerData);
                     if (periode != null) {
-                        behandlingOversiktDto.setSoknadsperiode(new PeriodeDto(periode.getFom(), periode.getTom()));
+                        behandlingOversiktDto.soknadsperiode = new PeriodeDto(periode.getFom(), periode.getTom());
                     }
                 }
             });
@@ -253,7 +253,7 @@ public class FagsakTjeneste {
 
         behandlingsResultat.finnLovvalgsperiode().ifPresent(lovvalgsperiode -> {
             var periode = new PeriodeDto(lovvalgsperiode.getFom(), lovvalgsperiode.getTom());
-            behandlingOversiktDto.setLovvalgsperiode(periode);
+            behandlingOversiktDto.lovvalgsperiode = periode;
         });
 
         var medlemAvFolketrygden = medlemAvFolketrygdenService.finnMedlemAvFolketrygdenMedMedlemskapsperioder(behandling.getId());
@@ -262,7 +262,7 @@ public class FagsakTjeneste {
             var periode = new PeriodeDto(
                 medlemAvFolketrygden.get().utledMedlemskapsperiodeFom(),
                 medlemAvFolketrygden.get().utledMedlemskapsperiodeTom());
-            behandlingOversiktDto.setMedlemskapsperiode(periode);
+            behandlingOversiktDto.medlemskapsperiode = periode;
         }
     }
 
