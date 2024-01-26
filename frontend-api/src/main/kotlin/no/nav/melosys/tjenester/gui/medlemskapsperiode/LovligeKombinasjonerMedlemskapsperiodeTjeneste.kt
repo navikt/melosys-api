@@ -23,15 +23,15 @@ class LovligeKombinasjonerMedlemskapsperiodeTjeneste(
     private val lovligeKombinasjonerMedlemskapsperiodeService: LovligeKombinasjonerMedlemskapsperiodeService
 ) {
 
-    @GetMapping("{behandlingID}/bestemmelse/lovlige-kombinasjoner")
+    @GetMapping("/bestemmelse/lovlige-kombinasjoner")
     @ApiOperation(value = "Henter lovlige bestemmelser basert på trygdedekning")
     fun hentLovligeBestemmelser(
         @RequestParam(
             "trygdedekning",
             required = true
-        ) trygdedekninger: Trygdedekninger
+        ) trygdedekning: Trygdedekninger
     ): ResponseEntity<List<Folketrygdloven_kap2_bestemmelser>> {
-        val bestemmelser = lovligeKombinasjonerMedlemskapsperiodeService.hentLovligeBestemmelser(trygdedekninger)
+        val bestemmelser = lovligeKombinasjonerMedlemskapsperiodeService.hentLovligeBestemmelser(trygdedekning)
 
         return ResponseEntity.ok(bestemmelser)
     }
