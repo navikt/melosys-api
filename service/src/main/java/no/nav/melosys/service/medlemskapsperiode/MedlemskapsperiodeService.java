@@ -1,8 +1,5 @@
 package no.nav.melosys.service.medlemskapsperiode;
 
-import java.time.LocalDate;
-import java.util.*;
-
 import io.getunleash.Unleash;
 import no.nav.melosys.domain.Medlemskapsperiode;
 import no.nav.melosys.domain.folketrygden.MedlemAvFolketrygden;
@@ -21,6 +18,9 @@ import no.nav.melosys.service.behandling.BehandlingsresultatService;
 import no.nav.melosys.service.medl.MedlPeriodeService;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+
+import java.time.LocalDate;
+import java.util.*;
 
 import static no.nav.melosys.domain.kodeverk.Trygdedekninger.*;
 import static no.nav.melosys.service.kontroll.regler.PeriodeRegler.feilIPeriode;
@@ -187,6 +187,13 @@ public class MedlemskapsperiodeService {
             .orElseThrow(() -> new IkkeFunnetException("Finner ingen medlemskapsperiode med id " + medlemskapsperiodeID + " for behandling " + behandlingsresultatID));
 
         medlemAvFolketrygden.removeMedlemskapsperioder(medlemskapsperiode);
+        fjernTrygdeavgiftsperioderOmDeFinnes(medlemAvFolketrygden);
+    }
+
+    @Transactional
+    public void slettMedlemskapsperioder(long behandlingsresultatID) {
+        MedlemAvFolketrygden medlemAvFolketrygden = medlemAvFolketrygdenService.hentMedlemAvFolketrygden(behandlingsresultatID);
+        medlemAvFolketrygden.getMedlemskapsperioder().clear();
         fjernTrygdeavgiftsperioderOmDeFinnes(medlemAvFolketrygden);
     }
 

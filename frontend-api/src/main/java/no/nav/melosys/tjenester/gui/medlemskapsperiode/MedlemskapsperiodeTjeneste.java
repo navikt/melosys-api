@@ -90,6 +90,13 @@ public class MedlemskapsperiodeTjeneste {
         return ResponseEntity.noContent().build();
     }
 
+    @DeleteMapping("/behandlinger/{behandlingID}/medlemskapsperioder")
+    public ResponseEntity<Void> slettMedlemskapsperiode(@PathVariable("behandlingID") long behandlingID) {
+        aksesskontroll.autoriserSkriv(behandlingID);
+        medlemskapsperiodeService.slettMedlemskapsperioder(behandlingID);
+        return ResponseEntity.noContent().build();
+    }
+
     @PostMapping("/behandlinger/{behandlingID}/medlemskapsperioder/forslag")
     public ResponseEntity<Collection<MedlemskapsperiodeDto>> opprettForslagPåMedlemskapsperioder(@PathVariable("behandlingID") long behandlingID,
                                                                                                  @RequestBody BestemmelseDto bestemmelseDto) {
