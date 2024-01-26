@@ -2,12 +2,10 @@ package no.nav.melosys.service.lovligekombinasjoner
 
 import no.nav.melosys.domain.kodeverk.Folketrygdloven_kap2_bestemmelser
 import no.nav.melosys.domain.kodeverk.Trygdedekninger
-import no.nav.melosys.domain.mottatteopplysninger.SøknadNorgeEllerUtenforEØS
-import no.nav.melosys.service.behandling.BehandlingService
 import org.springframework.stereotype.Service
 
 @Service
-class LovligeKombinasjonerMedlemskapsperiodeService(val behandlingService: BehandlingService) {
+class LovligeKombinasjonerMedlemskapsperiodeService() {
 
     val pliktigeBestemmelser = listOf(
         Folketrygdloven_kap2_bestemmelser.FTRL_KAP2_2_1_FØRSTE_LEDD,
@@ -58,11 +56,7 @@ class LovligeKombinasjonerMedlemskapsperiodeService(val behandlingService: Behan
         )
     )
 
-    fun hentLovligeBestemmelser(behandlingID: Long): List<Folketrygdloven_kap2_bestemmelser> {
-        val behandling = behandlingService.hentBehandling(behandlingID)
-
-        val trygdedekning = (behandling.mottatteOpplysninger.mottatteOpplysningerData as SøknadNorgeEllerUtenforEØS).trygdedekning
-
+    fun hentLovligeBestemmelser(trygdedekning: Trygdedekninger): List<Folketrygdloven_kap2_bestemmelser> {
         return lovligeKombinasjonerDekningBestemmelse[lovligeKombinasjonerDekningBestemmelse.keys.find { it.contains(trygdedekning) }] ?: emptyList()
     }
 
