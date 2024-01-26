@@ -36,9 +36,9 @@ class UtledMedlemskapsperioder {
             }
 
     fun lagMedlemskapsperioder(dto: UtledMedlemskapsperioderDto): Collection<Medlemskapsperiode> {
-        if (bestemmelseErAvArtikkel(dto.bestemmelse, "2_7")) {
+        if (bestemmelseErParagraf(dto.bestemmelse, "2_7")) {
             return lagMedlemskapsperioder2_7(dto)
-        } else if (bestemmelseErAvArtikkel(dto.bestemmelse, "2_8")) {
+        } else if (bestemmelseErParagraf(dto.bestemmelse, "2_8")) {
             return lagMedlemskapsperioder2_8(dto)
         }
         throw FunksjonellException("Støtter ikke bestemmelse ${dto.bestemmelse}")
@@ -227,6 +227,6 @@ class UtledMedlemskapsperioder {
     private fun datoErTidligereEnn2ÅrFørMottaksdato(dato: LocalDate, mottaksdato: LocalDate) =
         dato.isBefore(mottaksdato.minusYears(2))
 
-    private fun bestemmelseErAvArtikkel(bestemmelse: Folketrygdloven_kap2_bestemmelser, artikkel: String): Boolean =
-        bestemmelse.kode.startsWith("FTRL_KAP2_$artikkel")
+    private fun bestemmelseErParagraf(bestemmelse: Folketrygdloven_kap2_bestemmelser, paragraf: String): Boolean =
+        bestemmelse.kode.startsWith("FTRL_KAP2_$paragraf")
 }
