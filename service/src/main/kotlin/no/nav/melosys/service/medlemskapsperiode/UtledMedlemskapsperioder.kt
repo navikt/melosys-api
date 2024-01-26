@@ -37,14 +37,14 @@ class UtledMedlemskapsperioder {
 
     fun lagMedlemskapsperioder(dto: UtledMedlemskapsperioderDto): Collection<Medlemskapsperiode> {
         if (bestemmelseErParagraf(dto.bestemmelse, "2_7")) {
-            return lagMedlemskapsperioder2_7(dto)
+            return lagMedlemskapsperioderFor2_7(dto)
         } else if (bestemmelseErParagraf(dto.bestemmelse, "2_8")) {
-            return lagMedlemskapsperioder2_8(dto)
+            return lagMedlemskapsperioderFor2_8(dto)
         }
         throw FunksjonellException("Støtter ikke bestemmelse ${dto.bestemmelse}")
     }
 
-    private fun lagMedlemskapsperioder2_7(dto: UtledMedlemskapsperioderDto): Collection<Medlemskapsperiode> {
+    private fun lagMedlemskapsperioderFor2_7(dto: UtledMedlemskapsperioderDto): Collection<Medlemskapsperiode> {
         val søknadsperiode = dto.søknadsperiode
 
         val enMånedFørMottaksdato = dto.mottaksdatoSøknad.minusMonths(1)
@@ -91,7 +91,7 @@ class UtledMedlemskapsperioder {
         )
     }
 
-    private fun lagMedlemskapsperioder2_8(dto: UtledMedlemskapsperioderDto): Collection<Medlemskapsperiode> {
+    private fun lagMedlemskapsperioderFor2_8(dto: UtledMedlemskapsperioderDto): Collection<Medlemskapsperiode> {
         val søknadsperiode = dto.søknadsperiode
 
         val enMånedFørMottaksdato = dto.mottaksdatoSøknad.minusMonths(1)
