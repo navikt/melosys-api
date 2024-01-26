@@ -52,7 +52,7 @@ class MedlemskapsperiodeServiceTest {
     @Mock
     private MedlPeriodeService medlPeriodeService;
 
-    private FakeUnleash fakeUnleash;
+    private final FakeUnleash unleash = new FakeUnleash();
 
     private MedlemskapsperiodeService medlemskapsperiodeService;
 
@@ -69,7 +69,7 @@ class MedlemskapsperiodeServiceTest {
             trygdeavgiftsgrunnlagServiceMock,
             behandlingsresultatService,
             medlPeriodeService,
-            fakeUnleash);
+            unleash);
     }
 
     @Test

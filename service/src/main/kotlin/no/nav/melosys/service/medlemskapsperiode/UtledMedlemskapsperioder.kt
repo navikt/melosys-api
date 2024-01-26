@@ -36,6 +36,62 @@ class UtledMedlemskapsperioder {
             }
 
     fun lagMedlemskapsperioder(dto: UtledMedlemskapsperioderDto): Collection<Medlemskapsperiode> {
+        if (bestemmelseErParagraf(dto.bestemmelse, "2_7")) {
+            return lagMedlemskapsperioderFor2_7(dto)
+        } else if (bestemmelseErParagraf(dto.bestemmelse, "2_8")) {
+            return lagMedlemskapsperioderFor2_8(dto)
+        }
+        throw FunksjonellException("Støtter ikke bestemmelse ${dto.bestemmelse}")
+    }
+
+    private fun lagMedlemskapsperioderFor2_7(dto: UtledMedlemskapsperioderDto): Collection<Medlemskapsperiode> {
+        val søknadsperiode = dto.søknadsperiode
+
+        val enMånedFørMottaksdato = dto.mottaksdatoSøknad.minusMonths(1)
+        if (søknadsperiode.fom == enMånedFørMottaksdato || søknadsperiode.fom.isAfter(enMånedFørMottaksdato)) {
+            return setOf(
+                lagPeriode(
+                    søknadsperiode,
+                    dto.trygdedekning,
+                    dto.arbeidsland,
+                    InnvilgelsesResultat.INNVILGET,
+                    dto.bestemmelse
+                )
+            )
+        }
+
+        if (søknadsperiode.tom != null && søknadsperiode.tom.isBefore(dto.mottaksdatoSøknad)) {
+            return setOf(
+                lagPeriode(
+                    søknadsperiode,
+                    dto.trygdedekning,
+                    dto.arbeidsland,
+                    InnvilgelsesResultat.AVSLAATT,
+                    dto.bestemmelse
+                )
+            )
+        }
+
+        val splittetPeriode = splitPeriode(søknadsperiode, dto.mottaksdatoSøknad)
+        return setOf(
+            lagPeriode(
+                splittetPeriode.first,
+                dto.trygdedekning,
+                dto.arbeidsland,
+                InnvilgelsesResultat.AVSLAATT,
+                dto.bestemmelse
+            ),
+            lagPeriode(
+                splittetPeriode.second,
+                dto.trygdedekning,
+                dto.arbeidsland,
+                InnvilgelsesResultat.INNVILGET,
+                dto.bestemmelse
+            )
+        )
+    }
+
+    private fun lagMedlemskapsperioderFor2_8(dto: UtledMedlemskapsperioderDto): Collection<Medlemskapsperiode> {
         val søknadsperiode = dto.søknadsperiode
 
         val enMånedFørMottaksdato = dto.mottaksdatoSøknad.minusMonths(1)
@@ -171,4 +227,6 @@ class UtledMedlemskapsperioder {
     private fun datoErTidligereEnn2ÅrFørMottaksdato(dato: LocalDate, mottaksdato: LocalDate) =
         dato.isBefore(mottaksdato.minusYears(2))
 
+    private fun bestemmelseErParagraf(bestemmelse: Folketrygdloven_kap2_bestemmelser, paragraf: String): Boolean =
+        bestemmelse.kode.startsWith("FTRL_KAP2_$paragraf")
 }
