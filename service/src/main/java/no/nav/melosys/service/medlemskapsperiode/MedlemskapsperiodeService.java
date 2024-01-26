@@ -1,11 +1,9 @@
 package no.nav.melosys.service.medlemskapsperiode;
 
-import java.time.LocalDate;
-import java.util.*;
-
 import io.getunleash.Unleash;
 import no.nav.melosys.domain.Medlemskapsperiode;
 import no.nav.melosys.domain.folketrygden.MedlemAvFolketrygden;
+import no.nav.melosys.domain.kodeverk.Folketrygdloven_kap2_bestemmelser;
 import no.nav.melosys.domain.kodeverk.InnvilgelsesResultat;
 import no.nav.melosys.domain.kodeverk.Medlemskapstyper;
 import no.nav.melosys.domain.kodeverk.Trygdedekninger;
@@ -20,6 +18,9 @@ import no.nav.melosys.service.medl.MedlPeriodeService;
 import org.apache.commons.collections4.CollectionUtils;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+
+import java.time.LocalDate;
+import java.util.*;
 
 import static no.nav.melosys.domain.kodeverk.Trygdedekninger.*;
 import static no.nav.melosys.service.kontroll.regler.PeriodeRegler.feilIPeriode;
@@ -71,12 +72,13 @@ public class MedlemskapsperiodeService {
                                                         LocalDate fom,
                                                         LocalDate tom,
                                                         InnvilgelsesResultat innvilgelsesResultat,
-                                                        Trygdedekninger trygdedekning) {
+                                                        Trygdedekninger trygdedekning,
+                                                        Folketrygdloven_kap2_bestemmelser bestemmelse) {
         final var medlemAvFolketrygden = medlemAvFolketrygdenService.hentMedlemAvFolketrygden(behandlingsresultatID);
         var søknad = (SøknadNorgeEllerUtenforEØS) medlemAvFolketrygden.getBehandlingsresultat().getBehandling().getMottatteOpplysninger().getMottatteOpplysningerData();
         var nyMedlemskapsperiode = new Medlemskapsperiode();
 
-        oppdaterMedlemskapsperiode(nyMedlemskapsperiode, fom, tom, innvilgelsesResultat, trygdedekning);
+        oppdaterMedlemskapsperiode(nyMedlemskapsperiode, fom, tom, innvilgelsesResultat, trygdedekning, bestemmelse);
         nyMedlemskapsperiode.setArbeidsland(søknad.hentArbeidsland());
         nyMedlemskapsperiode.setMedlemskapstype(Medlemskapstyper.FRIVILLIG);
         medlemAvFolketrygden.addMedlemskapsperiode(nyMedlemskapsperiode);
@@ -93,7 +95,8 @@ public class MedlemskapsperiodeService {
                                                          LocalDate fom,
                                                          LocalDate tom,
                                                          InnvilgelsesResultat innvilgelsesResultat,
-                                                         Trygdedekninger trygdedekning) {
+                                                         Trygdedekninger trygdedekning,
+                                                         Folketrygdloven_kap2_bestemmelser bestemmelse) {
         var medlemskapsperiode = medlemAvFolketrygdenService.hentMedlemAvFolketrygden(behandlingsresultatID)
             .getMedlemskapsperioder()
             .stream()
@@ -101,7 +104,7 @@ public class MedlemskapsperiodeService {
             .findFirst()
             .orElseThrow(() -> new IkkeFunnetException("Behandling " + behandlingsresultatID + " har ingen medlemskapsperiode med id " + medlemskapsperiodeID));
 
-        oppdaterMedlemskapsperiode(medlemskapsperiode, fom, tom, innvilgelsesResultat, trygdedekning);
+        oppdaterMedlemskapsperiode(medlemskapsperiode, fom, tom, innvilgelsesResultat, trygdedekning, bestemmelse);
 
         MedlemAvFolketrygden medlemAvFolketrygden = medlemskapsperiode.getMedlemAvFolketrygden();
         fjernTrygdeavgiftsperioderOmDeFinnes(medlemAvFolketrygden);
@@ -109,7 +112,6 @@ public class MedlemskapsperiodeService {
         return medlemskapsperiodeRepository.save(medlemskapsperiode);
     }
 
-    // TODO: MELOSYS-6148
     private void fjernTrygdeavgiftsperioderOmDeFinnes(MedlemAvFolketrygden medlemAvFolketrygden) {
         if (medlemAvFolketrygden.getFastsattTrygdeavgift() != null) {
             trygdeavgiftsgrunnlagService.fjernTrygdeavgiftsperioderOmDeFinnes(medlemAvFolketrygden.getFastsattTrygdeavgift());
@@ -120,10 +122,11 @@ public class MedlemskapsperiodeService {
                                             LocalDate fom,
                                             LocalDate tom,
                                             InnvilgelsesResultat innvilgelsesResultat,
-                                            Trygdedekninger trygdedekning) {
-        if (fom == null || innvilgelsesResultat == null || trygdedekning == null) {
-            throw new FunksjonellException("Fom-dato, innvilgelsesresultat og trygdedekning er påkrevd");
-        } else if (!GYLDIGE_TRYGDEDEKNINGER_2_8.contains(trygdedekning)) {
+                                            Trygdedekninger trygdedekning,
+                                            Folketrygdloven_kap2_bestemmelser bestemmelse) {
+        if (fom == null || innvilgelsesResultat == null || bestemmelse == null || trygdedekning == null) {
+            throw new FunksjonellException("Fom-dato, innvilgelsesresultat, bestemmelse og trygdedekning er påkrevd");
+        } else if (!hentGyldigeTrygdedekninger().contains(trygdedekning)) {
             throw new FunksjonellException("Trygedekning " + trygdedekning + " støttes ikke for en medlemskapsperiode");
         } else if (feilIPeriode(fom, tom)) {
             throw new FunksjonellException("Tom-dato kan ikke være før fom-dato");
@@ -133,6 +136,7 @@ public class MedlemskapsperiodeService {
         medlemskapsperiode.setFom(fom);
         medlemskapsperiode.setInnvilgelsesresultat(innvilgelsesResultat);
         medlemskapsperiode.setTrygdedekning(trygdedekning);
+        medlemskapsperiode.setBestemmelse(bestemmelse);
     }
 
     @Transactional
@@ -207,6 +211,13 @@ public class MedlemskapsperiodeService {
             .orElseThrow(() -> new IkkeFunnetException("Finner ingen medlemskapsperiode med id " + medlemskapsperiodeID + " for behandling " + behandlingsresultatID));
 
         medlemAvFolketrygden.removeMedlemskapsperioder(medlemskapsperiode);
+        fjernTrygdeavgiftsperioderOmDeFinnes(medlemAvFolketrygden);
+    }
+
+    @Transactional
+    public void slettMedlemskapsperioder(long behandlingsresultatID) {
+        MedlemAvFolketrygden medlemAvFolketrygden = medlemAvFolketrygdenService.hentMedlemAvFolketrygden(behandlingsresultatID);
+        medlemAvFolketrygden.getMedlemskapsperioder().clear();
         fjernTrygdeavgiftsperioderOmDeFinnes(medlemAvFolketrygden);
     }
 

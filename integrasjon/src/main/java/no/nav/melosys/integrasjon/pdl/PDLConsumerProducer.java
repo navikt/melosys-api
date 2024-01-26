@@ -13,8 +13,9 @@ import org.springframework.web.reactive.function.client.WebClient;
 
 @Configuration
 public class PDLConsumerProducer implements WebClientConfig {
-    private static final String TEMA_HEADER = "Tema";
-    private static final String TEMA_HEADER_MEDLEMSKAP_VERDI = "MED";
+
+    private static final String BEHANDLINGSNUMMER = "behandlingsnummer";
+    private static final String MELOSYS_BEHANDLINGSNUMMER = "B358";
 
     @Bean
     public PDLConsumer pdlConsumerForSaksbehandler(WebClient.Builder webclientBuilder,
@@ -38,6 +39,6 @@ public class PDLConsumerProducer implements WebClientConfig {
     private void defaultHeaders(HttpHeaders httpHeaders) {
         httpHeaders.setAccept(Collections.singletonList(MediaType.APPLICATION_JSON));
         httpHeaders.setContentType(MediaType.APPLICATION_JSON);
-        httpHeaders.set(TEMA_HEADER, TEMA_HEADER_MEDLEMSKAP_VERDI);
+        httpHeaders.set(BEHANDLINGSNUMMER, MELOSYS_BEHANDLINGSNUMMER);
     }
 }

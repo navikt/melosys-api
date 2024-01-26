@@ -15,9 +15,15 @@ public final class IsoLandkodeKonverterer {
 
     static {
         Arrays.stream(Locale.getISOCountries())
-            .forEach(c -> ISO2_ISO3.put(c, new Locale("", c).getISO3Country()));
+            .forEach(c -> {
+                ISO2_ISO3.put(c, new Locale("", c).getISO3Country());
+                ISO2_ISO3.put("XU", "XUK");
+            });
         Arrays.stream(Landkoder.values())
-            .forEach(c -> ISO2_TIL_EU_EOS_LANDNAVN.put(c.getKode(), c.getBeskrivelse().toUpperCase()));
+            .forEach(c -> {
+                ISO2_TIL_EU_EOS_LANDNAVN.put(c.getKode(), c.getBeskrivelse().toUpperCase());
+                ISO2_TIL_EU_EOS_LANDNAVN.put("XUk", "XU");
+            });
     }
 
     private IsoLandkodeKonverterer() {

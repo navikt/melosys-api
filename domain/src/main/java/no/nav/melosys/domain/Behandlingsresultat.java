@@ -274,6 +274,10 @@ public class Behandlingsresultat extends RegistreringsInfo {
         return type == Behandlingsresultattyper.ANMODNING_OM_UNNTAK;
     }
 
+    public boolean erOpphørt() {
+        return type == Behandlingsresultattyper.OPPHØRT;
+    }
+
     public boolean erInnvilgelse() {
         if (type == Behandlingsresultattyper.FASTSATT_LOVVALGSLAND
             || type == Behandlingsresultattyper.FORELOEPIG_FASTSATT_LOVVALGSLAND) {

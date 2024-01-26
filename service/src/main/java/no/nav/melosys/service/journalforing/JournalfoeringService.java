@@ -22,7 +22,7 @@ import no.nav.melosys.service.behandling.BehandlingService;
 import no.nav.melosys.service.behandling.BehandlingsresultatService;
 import no.nav.melosys.service.dokument.sed.EessiService;
 import no.nav.melosys.service.journalforing.dto.*;
-import no.nav.melosys.service.lovligekombinasjoner.LovligeKombinasjonerService;
+import no.nav.melosys.service.lovligekombinasjoner.LovligeKombinasjonerSaksbehandlingService;
 import no.nav.melosys.service.persondata.PersondataFasade;
 import no.nav.melosys.service.sak.FagsakService;
 import no.nav.melosys.service.saksbehandling.SaksbehandlingRegler;
@@ -48,7 +48,7 @@ public class JournalfoeringService {
     private final EessiService eessiService;
     private final FagsakService fagsakService;
     private final PersondataFasade persondataFasade;
-    private final LovligeKombinasjonerService lovligeKombinasjonerService;
+    private final LovligeKombinasjonerSaksbehandlingService lovligeKombinasjonerSaksbehandlingService;
     private final SaksbehandlingRegler saksbehandlingRegler;
     private final BehandlingService behandlingService;
     private final BehandlingsresultatService behandlingsresultatService;
@@ -60,7 +60,7 @@ public class JournalfoeringService {
                                  EessiService eessiService,
                                  FagsakService fagsakService,
                                  PersondataFasade persondataFasade,
-                                 LovligeKombinasjonerService lovligeKombinasjonerService,
+                                 LovligeKombinasjonerSaksbehandlingService lovligeKombinasjonerSaksbehandlingService,
                                  SaksbehandlingRegler saksbehandlingRegler,
                                  BehandlingService behandlingService,
                                  BehandlingsresultatService behandlingsresultatService, UtenlandskMyndighetService utenlandskMyndighetService) {
@@ -69,7 +69,7 @@ public class JournalfoeringService {
         this.eessiService = eessiService;
         this.fagsakService = fagsakService;
         this.persondataFasade = persondataFasade;
-        this.lovligeKombinasjonerService = lovligeKombinasjonerService;
+        this.lovligeKombinasjonerSaksbehandlingService = lovligeKombinasjonerSaksbehandlingService;
         this.saksbehandlingRegler = saksbehandlingRegler;
         this.behandlingService = behandlingService;
         this.behandlingsresultatService = behandlingsresultatService;
@@ -142,7 +142,7 @@ public class JournalfoeringService {
         var behandlingstype = Behandlingstyper.valueOf(journalfoeringDto.getBehandlingstypeKode());
         Aktoersroller hovedpart = journalføringGjelder(journalfoeringDto.getBrukerID());
 
-        lovligeKombinasjonerService.validerOpprettelseOgEndring(
+        lovligeKombinasjonerSaksbehandlingService.validerOpprettelseOgEndring(
             hovedpart, sakstype, sakstema, behandlingstema, behandlingstype);
         if (journalfoeringDto.getAvsenderType() == Avsendertyper.UTENLANDSK_TRYGDEMYNDIGHET) {
             validerSakstypeForTrygdemyndighet(sakstype, journalfoeringDto.getAvsenderID());
@@ -271,7 +271,7 @@ public class JournalfoeringService {
         }
 
         fellesValidering(journalfoeringDto);
-        lovligeKombinasjonerService.validerBehandlingstemaOgBehandlingstypeForAndregangsbehandling(fagsak, sistBehandling, sistBehandlingsresultat, behandlingstema, behandlingstype);
+        lovligeKombinasjonerSaksbehandlingService.validerBehandlingstemaOgBehandlingstypeForAndregangsbehandling(fagsak, sistBehandling, sistBehandlingsresultat, behandlingstema, behandlingstype);
 
         if (sistBehandling.erAktiv()) {
             behandlingService.avsluttBehandling(sistBehandling.getId());

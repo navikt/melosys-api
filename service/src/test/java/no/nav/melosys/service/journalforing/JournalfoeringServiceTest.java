@@ -3,7 +3,6 @@ package no.nav.melosys.service.journalforing;
 import java.time.Instant;
 import java.time.LocalDate;
 import java.util.Collections;
-import java.util.List;
 import java.util.Optional;
 import java.util.Set;
 
@@ -28,7 +27,7 @@ import no.nav.melosys.service.behandling.BehandlingsresultatService;
 import no.nav.melosys.service.dokument.sed.EessiService;
 import no.nav.melosys.service.felles.dto.SoeknadslandDto;
 import no.nav.melosys.service.journalforing.dto.*;
-import no.nav.melosys.service.lovligekombinasjoner.LovligeKombinasjonerService;
+import no.nav.melosys.service.lovligekombinasjoner.LovligeKombinasjonerSaksbehandlingService;
 import no.nav.melosys.service.persondata.PersondataFasade;
 import no.nav.melosys.service.sak.FagsakService;
 import no.nav.melosys.service.saksbehandling.SaksbehandlingRegler;
@@ -98,7 +97,7 @@ class JournalfoeringServiceTest {
 
     @BeforeEach
     public void setup() {
-        LovligeKombinasjonerService lovligeKombinasjonerService = new LovligeKombinasjonerService(fagsakService, behandlingService, behandlingsresultatService, unleash);
+        LovligeKombinasjonerSaksbehandlingService lovligeKombinasjonerSaksbehandlingService = new LovligeKombinasjonerSaksbehandlingService(fagsakService, behandlingService, behandlingsresultatService, unleash);
 
         saksbehandlingRegler = new SaksbehandlingRegler(behandlingsresultatRepository, unleash);
         SpringSubjectHandler.set(new TestSubjectHandler());
@@ -109,7 +108,7 @@ class JournalfoeringServiceTest {
         journalpost.setForsendelseMottatt(Instant.EPOCH);
 
         this.journalfoeringService = new JournalfoeringService(joarkFasade, prosessinstansService, eessiService, fagsakService,
-            persondataFasade, lovligeKombinasjonerService, saksbehandlingRegler, behandlingService, behandlingsresultatService, utenlandskMyndighetService);
+            persondataFasade, lovligeKombinasjonerSaksbehandlingService, saksbehandlingRegler, behandlingService, behandlingsresultatService, utenlandskMyndighetService);
         opprettDto = new JournalfoeringOpprettDto();
         opprettDto.setJournalpostID("setJournalpostID");
         opprettDto.setOppgaveID("setOppgaveID");

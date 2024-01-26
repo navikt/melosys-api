@@ -23,7 +23,7 @@ import no.nav.melosys.exception.IkkeFunnetException;
 import no.nav.melosys.repository.BehandlingRepository;
 import no.nav.melosys.repository.TidligereMedlemsperiodeRepository;
 import no.nav.melosys.service.brev.UtkastBrevService;
-import no.nav.melosys.service.lovligekombinasjoner.LovligeKombinasjonerService;
+import no.nav.melosys.service.lovligekombinasjoner.LovligeKombinasjonerSaksbehandlingService;
 import no.nav.melosys.service.oppgave.OppgaveService;
 import org.assertj.core.util.Sets;
 import org.junit.jupiter.api.BeforeEach;
@@ -65,7 +65,7 @@ class BehandlingServiceTest {
     @Mock
     private OppgaveService oppgaveService;
     @Mock
-    private LovligeKombinasjonerService lovligeKombinasjonerService;
+    private LovligeKombinasjonerSaksbehandlingService lovligeKombinasjonerSaksbehandlingService;
     @Mock
     private UtkastBrevService utkastBrevService;
     @Mock
@@ -86,7 +86,7 @@ class BehandlingServiceTest {
 
     @BeforeEach
     public void setUp() {
-        behandlingService = new BehandlingService(behandlingRepository, tidligereMedlemsperiodeRepo, behandlingsresultatService, oppgaveService, lovligeKombinasjonerService, utkastBrevService, applicationEventPublisher, utledMottaksdato, replikerBehandlingsresultatService);
+        behandlingService = new BehandlingService(behandlingRepository, tidligereMedlemsperiodeRepo, behandlingsresultatService, oppgaveService, lovligeKombinasjonerSaksbehandlingService, utkastBrevService, applicationEventPublisher, utledMottaksdato, replikerBehandlingsresultatService);
 
         behandling = new Behandling();
         behandling.setId(BEHANDLING_ID);

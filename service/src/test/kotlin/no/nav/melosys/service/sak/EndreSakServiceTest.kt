@@ -27,7 +27,7 @@ import no.nav.melosys.domain.mottatteopplysninger.data.Soeknadsland
 import no.nav.melosys.exception.FunksjonellException
 import no.nav.melosys.service.SaksbehandlingDataFactory
 import no.nav.melosys.service.behandling.BehandlingsresultatService
-import no.nav.melosys.service.lovligekombinasjoner.LovligeKombinasjonerService
+import no.nav.melosys.service.lovligekombinasjoner.LovligeKombinasjonerSaksbehandlingService
 import no.nav.melosys.service.mottatteopplysninger.MottatteOpplysningerService
 import no.nav.melosys.service.saksbehandling.SaksbehandlingRegler
 import no.nav.melosys.service.saksopplysninger.OppfriskSaksopplysningerService
@@ -42,7 +42,7 @@ import java.util.*
 @ExtendWith(MockKExtension::class)
 internal class EndreSakServiceTest {
     @RelaxedMockK
-    lateinit var lovligeKombinasjonerService: LovligeKombinasjonerService
+    lateinit var lovligeKombinasjonerSaksbehandlingService: LovligeKombinasjonerSaksbehandlingService
 
     @RelaxedMockK
     lateinit var fagsakService: FagsakService
@@ -67,7 +67,7 @@ internal class EndreSakServiceTest {
     @BeforeEach
     fun setUp() {
         endreSakService = EndreSakService(
-            lovligeKombinasjonerService,
+            lovligeKombinasjonerSaksbehandlingService,
             fagsakService,
             behandlingsresultatService,
             mottatteOpplysningerService,

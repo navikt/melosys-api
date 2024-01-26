@@ -23,10 +23,6 @@ public class MedlemAvFolketrygden {
     @JoinColumn(name = "beh_resultat_id", nullable = false, updatable = false)
     private Behandlingsresultat behandlingsresultat;
 
-    @Column(name = "bestemmelse", nullable = false)
-    @Enumerated(EnumType.STRING)
-    private Folketrygdloven_kap2_bestemmelser bestemmelse;
-
     @OneToMany(mappedBy = "medlemAvFolketrygden", cascade = CascadeType.ALL, fetch = FetchType.LAZY, orphanRemoval = true)
     private Collection<Medlemskapsperiode> medlemskapsperioder = new HashSet<>(1);
 
@@ -47,14 +43,6 @@ public class MedlemAvFolketrygden {
 
     public void setBehandlingsresultat(Behandlingsresultat behandlingsresultat) {
         this.behandlingsresultat = behandlingsresultat;
-    }
-
-    public Folketrygdloven_kap2_bestemmelser getBestemmelse() {
-        return bestemmelse;
-    }
-
-    public void setBestemmelse(Folketrygdloven_kap2_bestemmelser bestemmelse) {
-        this.bestemmelse = bestemmelse;
     }
 
     public Collection<Medlemskapsperiode> getMedlemskapsperioder() {

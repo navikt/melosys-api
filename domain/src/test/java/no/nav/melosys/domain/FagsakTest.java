@@ -269,7 +269,7 @@ class FagsakTest {
     void hentMyndighetLandkode_forventGyldigLandkode() {
         Aktoer aktoer = new Aktoer();
         aktoer.setRolle(Aktoersroller.TRYGDEMYNDIGHET);
-        aktoer.setInstitusjonId("SE:gfr");
+        aktoer.setInstitusjonID("SE:gfr");
 
         Fagsak fagsak = new Fagsak();
         fagsak.setAktører(Sets.newLinkedHashSet(aktoer));
@@ -282,7 +282,7 @@ class FagsakTest {
     void hentMyndighetLandkode_aktoerIkkeMyndighet_forventTekniskException() {
         Aktoer aktoer = new Aktoer();
         aktoer.setRolle(Aktoersroller.BRUKER);
-        aktoer.setInstitusjonId("SE:gfr");
+        aktoer.setInstitusjonID("SE:gfr");
 
         Fagsak fagsak = new Fagsak();
         fagsak.setAktører(Sets.newLinkedHashSet(aktoer));

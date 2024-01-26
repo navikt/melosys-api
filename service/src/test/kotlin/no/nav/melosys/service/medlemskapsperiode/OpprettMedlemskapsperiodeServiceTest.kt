@@ -4,6 +4,7 @@ import io.kotest.assertions.throwables.shouldThrow
 import io.kotest.matchers.collections.shouldHaveSize
 import io.kotest.matchers.collections.shouldNotBeEmpty
 import io.kotest.matchers.shouldBe
+import io.kotest.matchers.shouldNotBe
 import io.kotest.matchers.string.shouldContain
 import io.mockk.every
 import io.mockk.impl.annotations.MockK
@@ -39,7 +40,9 @@ class OpprettMedlemskapsperiodeServiceTest {
 
     private lateinit var opprettMedlemskapsperiodeService: OpprettMedlemskapsperiodeService
 
-    private val behandlingsresultatID: Long = 123321
+    private val BEH_RES_ID: Long = 123321
+    private val BESTEMMELSE = Folketrygdloven_kap2_bestemmelser.FTRL_KAP2_2_8_FØRSTE_LEDD_A
+    private val NY_BESTEMMELSE = Folketrygdloven_kap2_bestemmelser.FTRL_KAP2_2_8_ANDRE_LEDD
 
     @BeforeEach
     fun setup() {
@@ -49,49 +52,61 @@ class OpprettMedlemskapsperiodeServiceTest {
 
     @Test
     fun opprettForslagPåMedlemskapsperioder_dataFraSøknadSatt_lagrerMedlemskapsperioder() {
-        val behandlingsresultat = lagBehandlingsresultat().apply {
-            vilkaarsresultater.add(lagVilkår())
-            medlemAvFolketrygden.bestemmelse = Folketrygdloven_kap2_bestemmelser.FTRL_KAP2_2_8_FØRSTE_LEDD_A
-        }
-        every { behandlingsresultatService.hentBehandlingsresultat(behandlingsresultatID) } returns behandlingsresultat
+        val behandlingsresultat = lagBehandlingsresultat().apply { vilkaarsresultater.add(lagVilkår()) }
+        every { behandlingsresultatService.hentBehandlingsresultat(BEH_RES_ID) } returns behandlingsresultat
         every { medlemAvFolketrygdenRepository.save(any()) } returnsArgument 0
         every { utledMottaksdato.getMottaksdato(any()) } returns LocalDate.now()
 
 
-        opprettMedlemskapsperiodeService.opprettForslagPåMedlemskapsperioder(behandlingsresultatID).shouldNotBeEmpty()
+        opprettMedlemskapsperiodeService.opprettForslagPåMedlemskapsperioder(BEH_RES_ID, BESTEMMELSE).shouldNotBeEmpty()
 
 
         verify(exactly = 1) { medlemAvFolketrygdenRepository.save(any()) }
     }
 
     @Test
-    fun opprettForslagPåMedlemskapsperioder_dataFraSøknadSatt_medlemskapsperioderEksisterer() {
+    fun opprettForslagPåMedlemskapsperioder_dataFraSøknadSatt_medlemskapsperioderEksisterer_oppdatererBestemmelse() {
         val behandlingsresultat = lagBehandlingsresultat().apply {
-            vilkaarsresultater.add(lagVilkår())
+            vilkaarsresultater.addAll(lagAlleKrevdeVilkår())
             medlemAvFolketrygden = MedlemAvFolketrygden().apply {
-                addMedlemskapsperiode(Medlemskapsperiode())
-                bestemmelse = Folketrygdloven_kap2_bestemmelser.FTRL_KAP2_2_8_FØRSTE_LEDD_A
+                addMedlemskapsperiode(Medlemskapsperiode().apply {
+                    id = 1L
+                    bestemmelse = BESTEMMELSE
+                })
+                addMedlemskapsperiode(Medlemskapsperiode().apply {
+                    id = 2L
+                    bestemmelse = BESTEMMELSE
+                })
             }
         }
-        every { behandlingsresultatService.hentBehandlingsresultat(behandlingsresultatID) } returns behandlingsresultat
+        every { behandlingsresultatService.hentBehandlingsresultat(BEH_RES_ID) } returns behandlingsresultat
         every { medlemAvFolketrygdenRepository.save(behandlingsresultat.medlemAvFolketrygden) } returns behandlingsresultat.medlemAvFolketrygden
 
 
-        opprettMedlemskapsperiodeService.opprettForslagPåMedlemskapsperioder(behandlingsresultatID).shouldNotBeEmpty()
+        val perioder = opprettMedlemskapsperiodeService.opprettForslagPåMedlemskapsperioder(BEH_RES_ID, NY_BESTEMMELSE)
 
 
+        perioder.shouldNotBeEmpty()
+            .shouldHaveSize(2)
+            .run {
+                first().run {
+                    id.shouldBe(1L)
+                    bestemmelse.shouldBe(NY_BESTEMMELSE)
+                }
+                last().run {
+                    id.shouldBe(2L)
+                    bestemmelse.shouldBe(NY_BESTEMMELSE)
+                }
+            }
         verify(exactly = 1) { medlemAvFolketrygdenRepository.save(any()) }
-
     }
 
     @Test
-    fun opprettForslagPåMedlemskapsperioder_nyVurdering_kopiererTidligereInnvilgedePerioder() {
+    fun opprettForslagPåMedlemskapsperioder_nyVurdering_kopiererTidligereInnvilgedePerioder_oppdatererBestemmelse() {
         val opprinneligBehandlingId = 2L
         val behandlingsresultat = lagBehandlingsresultat().apply {
-            vilkaarsresultater.add(lagVilkår())
-            medlemAvFolketrygden = MedlemAvFolketrygden().apply {
-                bestemmelse = Folketrygdloven_kap2_bestemmelser.FTRL_KAP2_2_8_FØRSTE_LEDD_A
-            }
+            vilkaarsresultater.addAll(lagAlleKrevdeVilkår())
+            medlemAvFolketrygden = MedlemAvFolketrygden()
             behandling.type = Behandlingstyper.NY_VURDERING
             behandling.opprinneligBehandling = Behandling().apply { id = opprinneligBehandlingId }
         }
@@ -100,32 +115,35 @@ class OpprettMedlemskapsperiodeServiceTest {
                 addMedlemskapsperiode(Medlemskapsperiode().apply {
                     innvilgelsesresultat = InnvilgelsesResultat.INNVILGET
                     tom = LocalDate.now().plusMonths(4)
+                    bestemmelse = BESTEMMELSE
                 })
                 addMedlemskapsperiode(Medlemskapsperiode().apply { innvilgelsesresultat = InnvilgelsesResultat.AVSLAATT })
             }
         }
-        every { behandlingsresultatService.hentBehandlingsresultat(behandlingsresultatID) } returns behandlingsresultat
+        every { behandlingsresultatService.hentBehandlingsresultat(BEH_RES_ID) } returns behandlingsresultat
         every { behandlingsresultatService.hentBehandlingsresultat(opprinneligBehandlingId) } returns opprinneligBehandlingsresultat
         every { medlemAvFolketrygdenRepository.save(behandlingsresultat.medlemAvFolketrygden) } returns behandlingsresultat.medlemAvFolketrygden
 
 
-        opprettMedlemskapsperiodeService.opprettForslagPåMedlemskapsperioder(behandlingsresultatID)
+        val perioder = opprettMedlemskapsperiodeService.opprettForslagPåMedlemskapsperioder(BEH_RES_ID, NY_BESTEMMELSE)
+
+
+        perioder
             .shouldHaveSize(1)
             .first().run {
                 tom.shouldBe(LocalDate.now().plusMonths(4))
+                bestemmelse.shouldBe(NY_BESTEMMELSE)
             }
         verify(exactly = 1) { medlemAvFolketrygdenRepository.save(any()) }
         verify(exactly = 0) { utledMottaksdato.getMottaksdato(any()) }
     }
 
     @Test
-    fun opprettForslagPåMedlemskapsperioder_manglendeInnbetalingTrygdeavgift_kopiererTidligereInnvilgedePerioder() {
+    fun opprettForslagPåMedlemskapsperioder_manglendeInnbetalingTrygdeavgift_kopiererTidligereInnvilgedeOgOpphørtePerioder_oppdatererBestemmelsePåInnvilgede() {
         val opprinneligBehandlingId = 2L
         val behandlingsresultat = lagBehandlingsresultat().apply {
-            vilkaarsresultater.add(lagVilkår())
-            medlemAvFolketrygden = MedlemAvFolketrygden().apply {
-                bestemmelse = Folketrygdloven_kap2_bestemmelser.FTRL_KAP2_2_8_FØRSTE_LEDD_A
-            }
+            vilkaarsresultater.addAll(lagAlleKrevdeVilkår())
+            medlemAvFolketrygden = MedlemAvFolketrygden()
             behandling.type = Behandlingstyper.MANGLENDE_INNBETALING_TRYGDEAVGIFT
             behandling.opprinneligBehandling = Behandling().apply { id = opprinneligBehandlingId }
         }
@@ -133,20 +151,38 @@ class OpprettMedlemskapsperiodeServiceTest {
             medlemAvFolketrygden = MedlemAvFolketrygden().apply {
                 addMedlemskapsperiode(Medlemskapsperiode().apply {
                     innvilgelsesresultat = InnvilgelsesResultat.INNVILGET
-                    tom = LocalDate.now().plusMonths(4)
+                    fom = LocalDate.now().plusMonths(4)
+                    bestemmelse = BESTEMMELSE
                 })
                 addMedlemskapsperiode(Medlemskapsperiode().apply { innvilgelsesresultat = InnvilgelsesResultat.AVSLAATT })
+                addMedlemskapsperiode(Medlemskapsperiode().apply {
+                    innvilgelsesresultat = InnvilgelsesResultat.OPPHØRT
+                    fom = LocalDate.now().plusMonths(6)
+                    bestemmelse = Folketrygdloven_kap2_bestemmelser.FTRL_KAP2_2_15_ANDRE_LEDD
+                })
             }
         }
-        every { behandlingsresultatService.hentBehandlingsresultat(behandlingsresultatID) } returns behandlingsresultat
+        every { behandlingsresultatService.hentBehandlingsresultat(BEH_RES_ID) } returns behandlingsresultat
         every { behandlingsresultatService.hentBehandlingsresultat(opprinneligBehandlingId) } returns opprinneligBehandlingsresultat
         every { medlemAvFolketrygdenRepository.save(behandlingsresultat.medlemAvFolketrygden) } returns behandlingsresultat.medlemAvFolketrygden
 
 
-        opprettMedlemskapsperiodeService.opprettForslagPåMedlemskapsperioder(behandlingsresultatID)
-            .shouldHaveSize(1)
-            .first().run {
-                tom.shouldBe(LocalDate.now().plusMonths(4))
+        val perioder = opprettMedlemskapsperiodeService.opprettForslagPåMedlemskapsperioder(BEH_RES_ID, NY_BESTEMMELSE)
+
+
+        perioder.shouldHaveSize(2)
+            .sortedBy { it.fom }
+            .run {
+                first().run {
+                    innvilgelsesresultat.shouldBe(InnvilgelsesResultat.INNVILGET)
+                    fom.shouldBe(LocalDate.now().plusMonths(4))
+                    bestemmelse.shouldBe(NY_BESTEMMELSE)
+                }
+                last().run {
+                    innvilgelsesresultat.shouldBe(InnvilgelsesResultat.OPPHØRT)
+                    fom.shouldBe(LocalDate.now().plusMonths(6))
+                    bestemmelse.shouldNotBe(NY_BESTEMMELSE)
+                }
             }
         verify(exactly = 1) { medlemAvFolketrygdenRepository.save(any()) }
         verify(exactly = 0) { utledMottaksdato.getMottaksdato(any()) }
@@ -154,48 +190,46 @@ class OpprettMedlemskapsperiodeServiceTest {
 
     @Test
     fun opprettForslagPåMedlemskapsperioder_sakstypeEØS_kasterFeil() {
-        every { behandlingsresultatService.hentBehandlingsresultat(behandlingsresultatID) } returns lagBehandlingsresultat().apply {
+        every { behandlingsresultatService.hentBehandlingsresultat(BEH_RES_ID) } returns lagBehandlingsresultat().apply {
             behandling.fagsak.type = Sakstyper.EU_EOS
         }
 
 
         shouldThrow<FunksjonellException> {
-            opprettMedlemskapsperiodeService.opprettForslagPåMedlemskapsperioder(behandlingsresultatID)
+            opprettMedlemskapsperiodeService.opprettForslagPåMedlemskapsperioder(BEH_RES_ID, BESTEMMELSE)
         }.message.shouldContain("Kan ikke opprette medlemskapsperioder for sakstype")
     }
 
     @Test
     fun opprettForslagPåMedlemskapsperioder_oppfyllerIkkeVilkår_kasterFeil() {
-        every { behandlingsresultatService.hentBehandlingsresultat(behandlingsresultatID) } returns lagBehandlingsresultat().apply {
-            medlemAvFolketrygden.bestemmelse = Folketrygdloven_kap2_bestemmelser.FTRL_KAP2_2_8_FØRSTE_LEDD_A
+        every { behandlingsresultatService.hentBehandlingsresultat(BEH_RES_ID) } returns lagBehandlingsresultat().apply {
             vilkaarsresultater.add(lagVilkår(false))
         }
 
 
         shouldThrow<FunksjonellException> {
-            opprettMedlemskapsperiodeService.opprettForslagPåMedlemskapsperioder(behandlingsresultatID)
+            opprettMedlemskapsperiodeService.opprettForslagPåMedlemskapsperioder(BEH_RES_ID, BESTEMMELSE)
         }.message.shouldContain("er påkrevd for bestemmelse")
     }
 
     @Test
     fun opprettForslagPåMedlemskapsperioder_støtterIkkeBestemmelse_kasterFeil() {
-        every { behandlingsresultatService.hentBehandlingsresultat(behandlingsresultatID) } returns lagBehandlingsresultat().apply {
-            medlemAvFolketrygden.bestemmelse = Folketrygdloven_kap2_bestemmelser.FTRL_KAP2_2_8_FØRSTE_LEDD_D
-        }
+        val ustøttetBestemmelse = Folketrygdloven_kap2_bestemmelser.FTRL_KAP2_2_8_FØRSTE_LEDD_D
+        every { behandlingsresultatService.hentBehandlingsresultat(BEH_RES_ID) } returns lagBehandlingsresultat()
 
 
         shouldThrow<FunksjonellException> {
-            opprettMedlemskapsperiodeService.opprettForslagPåMedlemskapsperioder(behandlingsresultatID)
+            opprettMedlemskapsperiodeService.opprettForslagPåMedlemskapsperioder(BEH_RES_ID, ustøttetBestemmelse)
         }.message.shouldContain("Støtter ikke")
     }
 
     @Test
     fun opprettForslagPåMedlemskapsperioder_harIkkeBestemmelse_kasterFeil() {
-        every { behandlingsresultatService.hentBehandlingsresultat(behandlingsresultatID) } returns lagBehandlingsresultat()
+        every { behandlingsresultatService.hentBehandlingsresultat(BEH_RES_ID) } returns lagBehandlingsresultat()
 
 
         shouldThrow<FunksjonellException> {
-            opprettMedlemskapsperiodeService.opprettForslagPåMedlemskapsperioder(behandlingsresultatID)
+            opprettMedlemskapsperiodeService.opprettForslagPåMedlemskapsperioder(BEH_RES_ID, null)
         }.message.shouldContain("Bestemmelse er ikke satt")
     }
 
@@ -221,4 +255,13 @@ class OpprettMedlemskapsperiodeServiceTest {
             vilkaar = Vilkaar.FTRL_2_8_FORUTGÅENDE_TRYGDETID
             isOppfylt = oppfylt
         }
+
+    private fun lagAlleKrevdeVilkår(): List<Vilkaarsresultat> =
+        listOf(Vilkaarsresultat().apply {
+            vilkaar = Vilkaar.FTRL_2_8_FORUTGÅENDE_TRYGDETID
+            isOppfylt = true
+        }, Vilkaarsresultat().apply {
+            vilkaar = Vilkaar.FTRL_2_8_NÆR_TILKNYTNING_NORGE
+            isOppfylt = true
+        })
 }
