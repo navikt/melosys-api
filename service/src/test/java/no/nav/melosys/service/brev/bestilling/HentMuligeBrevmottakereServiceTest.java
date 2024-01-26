@@ -473,6 +473,7 @@ class HentMuligeBrevmottakereServiceTest {
         var utenlandskMyndighetGB = new UtenlandskMyndighet();
         utenlandskMyndighetGB.landkode = Land_iso2.GB;
         utenlandskMyndighetGB.navn = "PT Operations";
+        utenlandskMyndighetGB.postnummer = "123";
         when(utenlandskMyndighetService.hentUtenlandskMyndighetForInstitusjonID("GB:UK010")).thenReturn(utenlandskMyndighetGB);
 
 
