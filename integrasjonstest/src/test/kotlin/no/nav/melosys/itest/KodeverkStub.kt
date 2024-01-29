@@ -1,5 +1,6 @@
 package no.nav.melosys.itest
 
+import mu.KotlinLogging
 import no.nav.melosys.domain.FellesKodeverk
 import no.nav.melosys.integrasjon.kodeverk.Kode
 import no.nav.melosys.integrasjon.kodeverk.KodeOppslag
@@ -11,11 +12,14 @@ import org.springframework.context.annotation.Bean
 import org.springframework.context.annotation.Primary
 import java.time.LocalDate
 
+private val log = KotlinLogging.logger { }
+
 @TestConfiguration
 class KodeverkStub {
     @Bean
     @Primary
     fun kodeverkRegisterStub(): KodeverkRegister? = KodeverkRegister {
+        log.info("KodeverkRegisterStub")
         Kodeverk(
             "DUMMY", mapOf(
                 Pair(
@@ -29,6 +33,7 @@ class KodeverkStub {
     @Bean
     @Primary
     fun kodeOppslagStub(): KodeOppslag? {
+        log.info("kodeOppslagStub")
         open class KodeOppslagImpl : KodeOppslag {
             override fun getTermFraKodeverk(kodeverk: FellesKodeverk, kode: String): String = "DUMMY"
 
