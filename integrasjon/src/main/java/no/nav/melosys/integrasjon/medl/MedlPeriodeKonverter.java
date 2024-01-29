@@ -247,13 +247,12 @@ public final class MedlPeriodeKonverter {
     public static DekningMedl tilMedlTrygdeDekning(Trygdedekninger dekning, Folketrygdloven_kap2_bestemmelser bestemmelse) {
         return switch (bestemmelse) {
             //TODO: MELOSYS-6373 - FTRL_KAP2_2_7_FØRSTE_LEDD, FTRL_KAP2_2_7A, FTRL_KAP2_2_7_FJERDE_LEDD
-            case FTRL_KAP2_2_8_FØRSTE_LEDD_A, FTRL_KAP2_2_8_ANDRE_LEDD -> mapForFtrlKap2_9(dekning);
-            case FTRL_KAP2_2_15_ANDRE_LEDD -> mapForFtrlKap2_9(dekning);
+            case FTRL_KAP2_2_8_FØRSTE_LEDD_A, FTRL_KAP2_2_8_ANDRE_LEDD, FTRL_KAP2_2_15_ANDRE_LEDD -> mapForFtrl(dekning);
             default -> throw new TekniskException("Bestemmelse støttes ikke for FTRL: " + bestemmelse.getKode());
         };
     }
 
-    private static DekningMedl mapForFtrlKap2_9(Trygdedekninger dekning) {
+    private static DekningMedl mapForFtrl(Trygdedekninger dekning) {
         return switch (dekning) {
             case FTRL_2_9_FØRSTE_LEDD_A_HELSE -> DekningMedl.FTRL_2_9_1_LEDD_A;
             case FTRL_2_9_FØRSTE_LEDD_A_ANDRE_LEDD_HELSE_SYKE_FORELDREPENGER -> DekningMedl.FTRL_2_9_2_LEDD_1A;
