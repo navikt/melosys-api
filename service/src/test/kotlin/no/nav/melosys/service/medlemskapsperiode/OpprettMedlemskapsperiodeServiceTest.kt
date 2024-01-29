@@ -116,6 +116,7 @@ class OpprettMedlemskapsperiodeServiceTest {
                     innvilgelsesresultat = InnvilgelsesResultat.INNVILGET
                     tom = LocalDate.now().plusMonths(4)
                     bestemmelse = BESTEMMELSE
+                    trygdedekning = Trygdedekninger.FTRL_2_9_FØRSTE_LEDD_A_HELSE
                 })
                 addMedlemskapsperiode(Medlemskapsperiode().apply { innvilgelsesresultat = InnvilgelsesResultat.AVSLAATT })
             }
@@ -153,12 +154,14 @@ class OpprettMedlemskapsperiodeServiceTest {
                     innvilgelsesresultat = InnvilgelsesResultat.INNVILGET
                     fom = LocalDate.now().plusMonths(4)
                     bestemmelse = BESTEMMELSE
+                    trygdedekning = Trygdedekninger.FTRL_2_9_FØRSTE_LEDD_A_HELSE
                 })
                 addMedlemskapsperiode(Medlemskapsperiode().apply { innvilgelsesresultat = InnvilgelsesResultat.AVSLAATT })
                 addMedlemskapsperiode(Medlemskapsperiode().apply {
                     innvilgelsesresultat = InnvilgelsesResultat.OPPHØRT
                     fom = LocalDate.now().plusMonths(6)
                     bestemmelse = Folketrygdloven_kap2_bestemmelser.FTRL_KAP2_2_15_ANDRE_LEDD
+                    trygdedekning = Trygdedekninger.FTRL_2_9_FØRSTE_LEDD_A_HELSE
                 })
             }
         }
