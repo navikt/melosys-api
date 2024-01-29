@@ -139,10 +139,6 @@ class UfmKontroll {
         LocalDate sedFra = kontrollData.sedDokument().getLovvalgsperiode().getFom();
         LocalDate sedTil = kontrollData.sedDokument().getLovvalgsperiode().getTom();
 
-        if (sedTil == null) {
-            return Kontroll_begrunnelser.BOSATT_I_NORGE_I_PERIODEN;
-        }
-
         var historiskeBostedAdresser = kontrollData.persondataMedHistorikk().isPresent() ? kontrollData.persondataMedHistorikk().get().bostedsadresser() : Collections.EMPTY_LIST;
         var historiskeOppholdsAdresser = kontrollData.persondataMedHistorikk().isPresent() ? kontrollData.persondataMedHistorikk().get().oppholdsadresser() : Collections.EMPTY_LIST;
 
@@ -154,7 +150,7 @@ class UfmKontroll {
 
         Optional<Bostedsadresse> personBostedsadresse = kontrollData.persondata().finnBostedsadresse();
 
-        return PersonRegler.personBosattINorgeIPeriode(bostedAdressePeriode, personBostedsadresse, historiskeBostedAdresser, historiskeOppholdsAdresser, sedFra, sedTil) ?
+        return PersonRegler.personBosattINorgeIPeriode(bostedAdressePeriode, personBostedsadresse, historiskeBostedAdresser, historiskeOppholdsAdresser, sedFra, sedTil == null ? LocalDate.now() : sedTil) ?
             Kontroll_begrunnelser.BOSATT_I_NORGE_I_PERIODEN : null;
     }
 

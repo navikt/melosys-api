@@ -33,6 +33,7 @@ object PersonRegler {
         periodeFra: LocalDate,
         periodeTil: LocalDate
     ): Boolean {
+
         val erGyldigBostedsadresse = bostedsadresseOptional.filter { bostedsadresse: Bostedsadresse ->
             bostedsadresse.strukturertAdresse.landkode != null && NORGE_ISO2_LANDKODE == bostedsadresse.strukturertAdresse.landkode &&
                 filtrerAdressePeriode(bostedsadresse.gyldigFraOgMed, bostedsadresse.gyldigTilOgMed, periodeFra, periodeTil)
