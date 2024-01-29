@@ -482,6 +482,7 @@ class BrevmottakerServiceTest {
         UtenlandskMyndighet utenlandskMyndighet = new UtenlandskMyndighet();
         utenlandskMyndighet.landkode = Land_iso2.CZ;
         utenlandskMyndighet.institusjonskode = "SZUC10416";
+        utenlandskMyndighet.postnummer = "123";
         utenlandskMyndighet.preferanser = Collections.singleton(new Preferanse(1L, Preferanse.PreferanseEnum.RESERVERT_FRA_A1));
 
         return utenlandskMyndighet;
