@@ -284,7 +284,10 @@ internal class MedlServiceTest {
 
     @Test
     fun skalOppretteOpphørtPeriodeEndelig() {
-        val medlemskapsperiode = lagMedlemskapsPeriode()
+        val medlemskapsperiode = lagMedlemskapsPeriode().apply {
+            medlemAvFolketrygden =
+                MedlemAvFolketrygden().apply { bestemmelse = Folketrygdloven_kap2_bestemmelser.FTRL_KAP2_2_15_ANDRE_LEDD }
+        }
         val medlemskapsunntakForPostCapturingSlot = slot<MedlemskapsunntakForPost>()
         every {
             mockRestConsumer.opprettPeriode(capture(medlemskapsunntakForPostCapturingSlot))
@@ -299,7 +302,7 @@ internal class MedlServiceTest {
                     dekning = DekningMedl.FTRL_2_9_1_LEDD_A.kode,
                     lovvalgsland = "NOR",
                     lovvalg = LovvalgMedl.ENDL.kode,
-                    grunnlag = GrunnlagMedl.FTL_2_8_1_ledd_a.kode,
+                    grunnlag = GrunnlagMedl.FTL_2_15_2_ledd.kode,
                     sporingsinformasjon = MedlemskapsunntakForPost.SporingsinformasjonForPost(
                         kildedokument = KildedokumenttypeMedl.HENV_SOKNAD.getKode()
                     )
@@ -313,7 +316,11 @@ internal class MedlServiceTest {
     @Test
     fun skalOppdatereOpphørtPeriode() {
         every { mockRestConsumer.hentPeriode(any()) } returns hentMedlemskapsunntak()
-        val medlemskapsperiode = lagMedlemskapsPeriode().apply { medlPeriodeID = 123456L }
+        val medlemskapsperiode = lagMedlemskapsPeriode().apply {
+            medlPeriodeID = 123456L
+            medlemAvFolketrygden =
+                MedlemAvFolketrygden().apply { bestemmelse = Folketrygdloven_kap2_bestemmelser.FTRL_KAP2_2_15_ANDRE_LEDD }
+        }
         val medlemskapsunntakForPutCapturingSlot = slot<MedlemskapsunntakForPut>()
         every {
             mockRestConsumer.oppdaterPeriode(capture(medlemskapsunntakForPutCapturingSlot))
@@ -328,7 +335,7 @@ internal class MedlServiceTest {
                     dekning = DekningMedl.FTRL_2_9_1_LEDD_A.kode,
                     lovvalgsland = "NOR",
                     lovvalg = LovvalgMedl.ENDL.kode,
-                    grunnlag = GrunnlagMedl.FTL_2_8_1_ledd_a.kode,
+                    grunnlag = GrunnlagMedl.FTL_2_15_2_ledd.kode,
                     sporingsinformasjon = MedlemskapsunntakForPut.SporingsinformasjonForPut(
                         versjon = 1,
                         kildedokument = KildedokumenttypeMedl.HENV_SOKNAD.getKode()
