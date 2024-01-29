@@ -8,10 +8,8 @@ import java.util.Set;
 import no.nav.melosys.domain.Aktoer;
 import no.nav.melosys.domain.Behandling;
 import no.nav.melosys.domain.Fagsak;
-import no.nav.melosys.domain.kodeverk.Aktoersroller;
-import no.nav.melosys.domain.kodeverk.Land_iso2;
-import no.nav.melosys.domain.kodeverk.Sakstemaer;
-import no.nav.melosys.domain.kodeverk.Sakstyper;
+import no.nav.melosys.domain.UtenlandskMyndighet;
+import no.nav.melosys.domain.kodeverk.*;
 import no.nav.melosys.domain.kodeverk.begrunnelser.Kontroll_begrunnelser;
 import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingstema;
 import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingstyper;
@@ -21,6 +19,7 @@ import no.nav.melosys.domain.mottatteopplysninger.MottatteOpplysninger;
 import no.nav.melosys.domain.mottatteopplysninger.MottatteOpplysningerData;
 import no.nav.melosys.domain.mottatteopplysninger.data.Soeknadsland;
 import no.nav.melosys.exception.TekniskException;
+import no.nav.melosys.service.aktoer.UtenlandskMyndighetService;
 import no.nav.melosys.service.behandling.BehandlingService;
 import no.nav.melosys.service.brev.BrevAdresse;
 import no.nav.melosys.service.brev.BrevmalListeService;
@@ -40,7 +39,7 @@ import static no.nav.melosys.tjenester.gui.dto.brev.FeltvalgAlternativKode.*;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyLong;
-import static org.mockito.Mockito.when;
+import static org.mockito.Mockito.*;
 
 @ExtendWith(MockitoExtension.class)
 class BrevmalListeByggerTest {
@@ -51,6 +50,8 @@ class BrevmalListeByggerTest {
     private BehandlingService behandlingService;
     @Mock
     private SaksbehandlingRegler saksbehandlingRegler;
+    @Mock
+    private UtenlandskMyndighetService utenlandskMyndighetService;
 
     private BrevmalListeBygger brevmalListeBygger;
 
@@ -63,25 +64,28 @@ class BrevmalListeByggerTest {
             hentMuligeProduserbaredokumenterService,
             hentBrevAdresseTilMottakereService);
 
-        brevmalListeBygger = new BrevmalListeBygger(brevmalListeService, behandlingService, saksbehandlingRegler);
+        brevmalListeBygger = new BrevmalListeBygger(brevmalListeService, behandlingService, saksbehandlingRegler, utenlandskMyndighetService);
     }
 
     @Test
     void byggBrevmalDtoListe_brukerErHovedpart_returnererTilgjengeligeMaler() {
         when(behandlingService.hentBehandlingMedSaksopplysninger(anyLong())).thenReturn(lagBehandling(Behandlingstyper.FØRSTEGANG));
         when(behandlingService.hentBehandling(anyLong())).thenReturn(lagBehandling(Behandlingstyper.FØRSTEGANG));
-
+        mockUtenlandskTrygdemyndighetServiceMottakerValgKall();
 
         List<BrevmalResponse> tilgjengeligeMaler = brevmalListeBygger.byggBrevmalDtoListe(123L);
 
 
         assertThat(tilgjengeligeMaler)
-            .hasSize(4)
+            .hasSize(5)
             .extracting(brevmalResponse -> brevmalResponse.getMottaker().getType())
             .contains(
                 MottakerType.BRUKER_ELLER_BRUKERS_FULLMEKTIG.getBeskrivelse(),
                 MottakerType.ARBEIDSGIVER_ELLER_ARBEIDSGIVERS_FULLMEKTIG.getBeskrivelse(),
-                MottakerType.ANNEN_ORGANISASJON.getBeskrivelse());
+                MottakerType.UTENLANDSK_TRYGDEMYNDIGHET.getBeskrivelse(),
+                MottakerType.ANNEN_ORGANISASJON.getBeskrivelse(),
+                MottakerType.NORSK_MYNDIGHET.getBeskrivelse()
+            );
 
         assertThat(tilgjengeligeMaler.get(0).getBrevTyper())
             .hasSize(3)
@@ -99,13 +103,19 @@ class BrevmalListeByggerTest {
                 Produserbaredokumenter.GENERELT_FRITEKSTBREV_ARBEIDSGIVER);
 
         assertThat(tilgjengeligeMaler.get(2).getBrevTyper())
+            .hasSize(1)
+            .extracting(BrevmalTypeDto::getType)
+            .contains(
+                Produserbaredokumenter.UTENLANDSK_TRYGDEMYNDIGHET_FRITEKSTBREV);
+
+        assertThat(tilgjengeligeMaler.get(3).getBrevTyper())
             .hasSize(2)
             .extracting(BrevmalTypeDto::getType)
             .contains(
                 Produserbaredokumenter.MANGELBREV_ARBEIDSGIVER,
                 Produserbaredokumenter.GENERELT_FRITEKSTBREV_ARBEIDSGIVER);
 
-        assertThat(tilgjengeligeMaler.get(3).getBrevTyper())
+        assertThat(tilgjengeligeMaler.get(4).getBrevTyper())
             .hasSize(1)
             .extracting(BrevmalTypeDto::getType)
             .contains(
@@ -150,17 +160,21 @@ class BrevmalListeByggerTest {
         when(behandlingService.hentBehandlingMedSaksopplysninger(anyLong())).thenReturn(lagBehandling(Behandlingstyper.HENVENDELSE));
         when(behandlingService.hentBehandling(anyLong())).thenReturn(lagBehandling(Behandlingstyper.HENVENDELSE));
         when(saksbehandlingRegler.harIngenFlyt(any())).thenReturn(true);
+        mockUtenlandskTrygdemyndighetServiceMottakerValgKall();
 
 
         List<BrevmalResponse> tilgjengeligeMaler = brevmalListeBygger.byggBrevmalDtoListe(123L);
 
 
         assertThat(tilgjengeligeMaler)
-            .hasSize(3)
+            .hasSize(4)
             .extracting(brevmalResponse -> brevmalResponse.getMottaker().getType())
             .contains(
                 MottakerType.BRUKER_ELLER_BRUKERS_FULLMEKTIG.getBeskrivelse(),
-                MottakerType.ANNEN_ORGANISASJON.getBeskrivelse())
+                MottakerType.UTENLANDSK_TRYGDEMYNDIGHET.getBeskrivelse(),
+                MottakerType.ANNEN_ORGANISASJON.getBeskrivelse(),
+                MottakerType.NORSK_MYNDIGHET.getBeskrivelse()
+            )
             .doesNotContain(
                 MottakerType.ARBEIDSGIVER_ELLER_ARBEIDSGIVERS_FULLMEKTIG.getBeskrivelse());
     }
@@ -170,12 +184,12 @@ class BrevmalListeByggerTest {
         var behandling = lagBehandling(Behandlingstyper.FØRSTEGANG);
         when(behandlingService.hentBehandlingMedSaksopplysninger(anyLong())).thenReturn(behandling);
         when(behandlingService.hentBehandling(anyLong())).thenReturn(behandling);
-
+        mockUtenlandskTrygdemyndighetServiceMottakerValgKall();
 
         List<BrevmalResponse> tilgjengeligeMaler = brevmalListeBygger.byggBrevmalDtoListe(123L);
 
 
-        assertThat(tilgjengeligeMaler).hasSize(4);
+        assertThat(tilgjengeligeMaler).hasSize(5);
 
         assertThat(tilgjengeligeMaler.get(0).getBrevTyper())
             .hasSize(3)
@@ -198,11 +212,11 @@ class BrevmalListeByggerTest {
     void byggBrevmalDtoListe_brukerAdresseNull_returnererMalMedFeilmelding() {
         when(behandlingService.hentBehandlingMedSaksopplysninger(anyLong())).thenReturn(lagBehandling(Behandlingstyper.FØRSTEGANG));
         when(behandlingService.hentBehandling(anyLong())).thenReturn(lagBehandling(Behandlingstyper.FØRSTEGANG));
-
+        mockUtenlandskTrygdemyndighetServiceMottakerValgKall();
 
         List<BrevmalResponse> tilgjengeligeMaler = brevmalListeBygger.byggBrevmalDtoListe(123L);
 
-        assertThat(tilgjengeligeMaler).hasSize(4);
+        assertThat(tilgjengeligeMaler).hasSize(5);
         assertThat(tilgjengeligeMaler.get(0).getMottaker())
             .extracting(
                 MottakerDto::getType,
@@ -217,12 +231,12 @@ class BrevmalListeByggerTest {
         when(behandlingService.hentBehandlingMedSaksopplysninger(anyLong())).thenReturn(lagBehandling(Behandlingstyper.FØRSTEGANG));
         when(behandlingService.hentBehandling(anyLong())).thenReturn(lagBehandling(Behandlingstyper.FØRSTEGANG));
         when(hentBrevAdresseTilMottakereService.hentBrevAdresseTilMottakere(anyLong(), any())).thenThrow(new TekniskException("Finner ikke arbeidsforholddokument"));
-
+        mockUtenlandskTrygdemyndighetServiceMottakerValgKall();
 
         List<BrevmalResponse> tilgjengeligeMaler = brevmalListeBygger.byggBrevmalDtoListe(123L);
 
 
-        assertThat(tilgjengeligeMaler).hasSize(4);
+        assertThat(tilgjengeligeMaler).hasSize(5);
         assertThat(tilgjengeligeMaler.get(1).getMottaker())
             .extracting(
                 MottakerDto::getType,
@@ -237,12 +251,12 @@ class BrevmalListeByggerTest {
         when(behandlingService.hentBehandlingMedSaksopplysninger(anyLong())).thenReturn(lagBehandling(Behandlingstyper.FØRSTEGANG));
         when(behandlingService.hentBehandling(anyLong())).thenReturn(lagBehandling(Behandlingstyper.FØRSTEGANG));
         when(hentBrevAdresseTilMottakereService.hentBrevAdresseTilMottakere(anyLong(), any())).thenThrow(new TekniskException("En annen feil"));
-
+        mockUtenlandskTrygdemyndighetServiceMottakerValgKall();
 
         List<BrevmalResponse> tilgjengeligeMaler = brevmalListeBygger.byggBrevmalDtoListe(123L);
 
 
-        assertThat(tilgjengeligeMaler).hasSize(4);
+        assertThat(tilgjengeligeMaler).hasSize(5);
         assertThat(tilgjengeligeMaler.get(0).getMottaker())
             .extracting(
                 MottakerDto::getType,
@@ -264,7 +278,7 @@ class BrevmalListeByggerTest {
         var behandling = lagBehandling(Behandlingstyper.FØRSTEGANG);
         when(behandlingService.hentBehandlingMedSaksopplysninger(anyLong())).thenReturn(behandling);
         when(behandlingService.hentBehandling(anyLong())).thenReturn(behandling);
-
+        mockUtenlandskTrygdemyndighetServiceMottakerValgKall();
 
         List<BrevmalResponse> tilgjengeligeMaler = brevmalListeBygger.byggBrevmalDtoListe(123L);
 
@@ -321,6 +335,7 @@ class BrevmalListeByggerTest {
         var behandling = lagBehandling(Behandlingstyper.KLAGE);
         when(behandlingService.hentBehandlingMedSaksopplysninger(anyLong())).thenReturn(behandling);
         when(behandlingService.hentBehandling(anyLong())).thenReturn(behandling);
+        mockUtenlandskTrygdemyndighetServiceMottakerValgKall();
 
 
         List<BrevmalResponse> tilgjengeligeMaler = brevmalListeBygger.byggBrevmalDtoListe(123L);
@@ -377,12 +392,13 @@ class BrevmalListeByggerTest {
         behandlingEUEOS.getFagsak().setType(Sakstyper.EU_EOS);
         when(behandlingService.hentBehandlingMedSaksopplysninger(anyLong())).thenReturn(behandlingEUEOS);
         when(behandlingService.hentBehandling(anyLong())).thenReturn(behandlingEUEOS);
+        mockUtenlandskTrygdemyndighetServiceMottakerValgKall();
 
 
         List<BrevmalResponse> tilgjengeligeMaler = brevmalListeBygger.byggBrevmalDtoListe(123L);
 
 
-        assertThat(tilgjengeligeMaler).hasSize(4);
+        assertThat(tilgjengeligeMaler).hasSize(5);
         assertThat(tilgjengeligeMaler.get(0).getBrevTyper().get(2).getFelter().get(1).getValg().getValgAlternativer())
             .hasSize(2)
             .flatExtracting(
@@ -401,12 +417,13 @@ class BrevmalListeByggerTest {
         behandlingEUEOS.getFagsak().setType(Sakstyper.EU_EOS);
         when(behandlingService.hentBehandlingMedSaksopplysninger(anyLong())).thenReturn(behandlingEUEOS);
         when(behandlingService.hentBehandling(anyLong())).thenReturn(behandlingEUEOS);
+        mockUtenlandskTrygdemyndighetServiceMottakerValgKall();
 
 
         List<BrevmalResponse> tilgjengeligeMaler = brevmalListeBygger.byggBrevmalDtoListe(123L);
 
 
-        assertThat(tilgjengeligeMaler).hasSize(4);
+        assertThat(tilgjengeligeMaler).hasSize(5);
         assertThat(tilgjengeligeMaler.get(0).getBrevTyper().get(2).getFelter().get(0).getValg().getValgAlternativer())
             .hasSize(3)
             .flatExtracting(
@@ -536,9 +553,130 @@ class BrevmalListeByggerTest {
     }
 
     @Test
+    void byggBrevmalDtoListe_trygdeavtale_behandlingUtenFlyt_lagerRiktigeFeltForUtenlandskTrygdeMyndighetFritekstbrev() {
+        Behandling behandlingTrygdeavtale = lagBehandling(Behandlingstyper.HENVENDELSE);
+        behandlingTrygdeavtale.getFagsak().setType(Sakstyper.TRYGDEAVTALE);
+        MottatteOpplysninger mottatteOpplysninger = new MottatteOpplysninger();
+        AnmodningEllerAttest anmodningEllerAttest = new AnmodningEllerAttest();
+        mottatteOpplysninger.setMottatteOpplysningerData(anmodningEllerAttest);
+        behandlingTrygdeavtale.setMottatteOpplysninger(mottatteOpplysninger);
+        var utenlandskMyndighet = new UtenlandskMyndighet();
+        utenlandskMyndighet.landkode = Land_iso2.AU;
+
+        when(behandlingService.hentBehandlingMedSaksopplysninger(anyLong())).thenReturn(behandlingTrygdeavtale);
+        when(behandlingService.hentBehandling(anyLong())).thenReturn(behandlingTrygdeavtale);
+        when(saksbehandlingRegler.harIngenFlyt(behandlingTrygdeavtale)).thenReturn(true);
+        when(utenlandskMyndighetService.hentAlleUtenlandskeMyndigheter()).thenReturn(List.of(utenlandskMyndighet));
+
+
+        List<BrevmalResponse> tilgjengeligeMaler = brevmalListeBygger.byggBrevmalDtoListe(123L);
+
+
+        List<BrevmalResponse> utenlandskTrygdemyndighetBrevmal = tilgjengeligeMaler.stream()
+            .filter(mal -> mal.getMottaker().getRolle().equals(Mottakerroller.UTENLANDSK_TRYGDEMYNDIGHET))
+            .limit(2)
+            .toList();
+        assertThat(utenlandskTrygdemyndighetBrevmal).hasSize(1);
+        assertThat(utenlandskTrygdemyndighetBrevmal.get(0).getBrevTyper()).hasSize(1);
+        assertThat(utenlandskTrygdemyndighetBrevmal.get(0).getBrevTyper().get(0).getFelter().get(0).getKode()).isEqualTo(BrevmalFeltKode.UTENLANDSK_TRYGDEMYNDIGHET_MOTTAKER.getKode());
+        assertThat(utenlandskTrygdemyndighetBrevmal.get(0).getBrevTyper().get(0).getFelter().get(0).getValg().getValgAlternativer())
+            .hasSize(1)
+            .flatExtracting(
+                FeltvalgAlternativDto::getKode,
+                FeltvalgAlternativDto::getBeskrivelse
+            ).containsExactly(
+                Land_iso2.AU.getKode(),
+                "Trygdemyndighetene i " + Land_iso2.AU.getBeskrivelse()
+            );
+    }
+
+    @Test
+    void byggBrevmalDtoListe_eu_eos_lagerRiktigeFeltOgValgForUtenlandskTrygdeMyndighetFritekstbrev() {
+        when(behandlingService.hentBehandlingMedSaksopplysninger(anyLong())).thenReturn(lagBehandling(Behandlingstyper.FØRSTEGANG));
+        when(behandlingService.hentBehandling(anyLong())).thenReturn(lagBehandling(Behandlingstyper.FØRSTEGANG));
+        mockUtenlandskTrygdemyndighetServiceMottakerValgKall();
+
+
+        List<BrevmalResponse> tilgjengeligeMaler = brevmalListeBygger.byggBrevmalDtoListe(123L);
+
+
+        List<BrevmalResponse> utenlandskTrygdemyndighetBrevmal = tilgjengeligeMaler.stream()
+            .filter(mal -> mal.getMottaker().getRolle().equals(Mottakerroller.UTENLANDSK_TRYGDEMYNDIGHET))
+            .limit(2)
+            .toList();
+        assertThat(utenlandskTrygdemyndighetBrevmal).hasSize(1);
+        assertThat(utenlandskTrygdemyndighetBrevmal.get(0).getBrevTyper()).hasSize(1);
+        assertThat(utenlandskTrygdemyndighetBrevmal.get(0).getBrevTyper().get(0).getFelter().get(0).getKode()).isEqualTo(BrevmalFeltKode.UTENLANDSK_TRYGDEMYNDIGHET_MOTTAKER.getKode());
+        assertThat(utenlandskTrygdemyndighetBrevmal.get(0).getBrevTyper().get(0).getFelter().get(0).getValg().getValgAlternativer())
+            .hasSize(2)
+            .flatExtracting(
+                FeltvalgAlternativDto::getKode,
+                FeltvalgAlternativDto::getBeskrivelse
+            ).containsExactly(
+                Land_iso2.FO.getKode(),
+                "Trygdemyndighetene i " + Land_iso2.FO.getBeskrivelse(),
+                Land_iso2.GL.getKode(),
+                "Trygdemyndighetene i " + Land_iso2.GL.getBeskrivelse()
+            );
+        verify(utenlandskMyndighetService, never()).hentAlleUtenlandskeMyndigheter();
+    }
+
+    @Test
+    void byggBrevmalDtoListe_trygdeavtale_behandlingMedFlyt_lagerRiktigeFeltForUtenlandskTrygdeMyndighetFritekstbrev() {
+        Behandling behandlingTrygdeavtale = lagBehandling(Behandlingstyper.FØRSTEGANG);
+        behandlingTrygdeavtale.getFagsak().setType(Sakstyper.TRYGDEAVTALE);
+        MottatteOpplysninger mottatteOpplysninger = new MottatteOpplysninger();
+        AnmodningEllerAttest anmodningEllerAttest = new AnmodningEllerAttest();
+        anmodningEllerAttest.setLovvalgsland(Land_iso2.AU);
+        mottatteOpplysninger.setMottatteOpplysningerData(anmodningEllerAttest);
+        behandlingTrygdeavtale.setMottatteOpplysninger(mottatteOpplysninger);
+
+        when(behandlingService.hentBehandlingMedSaksopplysninger(anyLong())).thenReturn(behandlingTrygdeavtale);
+        when(behandlingService.hentBehandling(anyLong())).thenReturn(behandlingTrygdeavtale);
+        when(saksbehandlingRegler.harIngenFlyt(behandlingTrygdeavtale)).thenReturn(false);
+
+        List<BrevmalResponse> tilgjengeligeMaler = brevmalListeBygger.byggBrevmalDtoListe(123L);
+
+
+        List<BrevmalResponse> utenlandskTrygdemyndighetBrevmal = tilgjengeligeMaler.stream()
+            .filter(mal -> mal.getMottaker().getRolle().equals(Mottakerroller.UTENLANDSK_TRYGDEMYNDIGHET))
+            .limit(2)
+            .toList();
+        assertThat(utenlandskTrygdemyndighetBrevmal).hasSize(1);
+        assertThat(utenlandskTrygdemyndighetBrevmal.get(0).getBrevTyper()).hasSize(1);
+        List<BrevmalFeltDto> felter = utenlandskTrygdemyndighetBrevmal.get(0).getBrevTyper().get(0).getFelter();
+        assertThat(felter.stream().filter(brevmalFeltDto -> brevmalFeltDto.getKode().equals(BrevmalFeltKode.UTENLANDSK_TRYGDEMYNDIGHET_MOTTAKER.getKode()))).isEmpty();
+    }
+
+    @Test
+    void byggBrevmalDtoListe_trygdeavtale_behandlingUtenLand_lagerFeilmeldingForUtenlandskTrygdeMyndighetMottaker() {
+        Behandling behandlingTrygdeavtale = lagBehandling(Behandlingstyper.FØRSTEGANG);
+        behandlingTrygdeavtale.getFagsak().setType(Sakstyper.TRYGDEAVTALE);
+        MottatteOpplysninger mottatteOpplysninger = new MottatteOpplysninger();
+        AnmodningEllerAttest anmodningEllerAttest = new AnmodningEllerAttest();
+        mottatteOpplysninger.setMottatteOpplysningerData(anmodningEllerAttest);
+        behandlingTrygdeavtale.setMottatteOpplysninger(mottatteOpplysninger);
+        when(behandlingService.hentBehandlingMedSaksopplysninger(anyLong())).thenReturn(behandlingTrygdeavtale);
+        when(behandlingService.hentBehandling(anyLong())).thenReturn(behandlingTrygdeavtale);
+
+
+        List<BrevmalResponse> tilgjengeligeMaler = brevmalListeBygger.byggBrevmalDtoListe(123L);
+
+
+        List<BrevmalResponse> utenlandskTrygdemyndighetBrevmal = tilgjengeligeMaler.stream()
+            .filter(mal -> mal.getMottaker().getRolle().equals(Mottakerroller.UTENLANDSK_TRYGDEMYNDIGHET))
+            .limit(2)
+            .toList();
+        assertThat(utenlandskTrygdemyndighetBrevmal).hasSize(1);
+        assertThat(utenlandskTrygdemyndighetBrevmal.get(0).getMottaker().getFeilmelding().tittel()).isEqualTo("Du må velge land på inngangssteget " +
+            "for å kunne sende brev til utenlandsk trygdemyndighet.");
+    }
+
+    @Test
     void byggBrevmalDtoListe_registeOpplysningerNorskAdresseUtenAdresselinjer_returnererMalOK() {
         when(behandlingService.hentBehandlingMedSaksopplysninger(anyLong())).thenReturn(lagBehandling(Behandlingstyper.FØRSTEGANG));
         when(behandlingService.hentBehandling(anyLong())).thenReturn(lagBehandling(Behandlingstyper.FØRSTEGANG));
+        mockUtenlandskTrygdemyndighetServiceMottakerValgKall();
 
         BrevAdresse brevAdresse = new BrevAdresse("Mottaker", null, null, "0010", null, null, Land_iso2.NO.name());
         List<BrevAdresse> brevAdresseList = new ArrayList<>();
@@ -549,7 +687,7 @@ class BrevmalListeByggerTest {
         List<BrevmalResponse> tilgjengeligeMaler = brevmalListeBygger.byggBrevmalDtoListe(123L);
 
 
-        assertThat(tilgjengeligeMaler).hasSize(4);
+        assertThat(tilgjengeligeMaler).hasSize(5);
         assertThat(tilgjengeligeMaler.get(0).getMottaker().getFeilmelding()).isNull();
     }
 
@@ -557,6 +695,7 @@ class BrevmalListeByggerTest {
     void byggBrevmalDtoListe_registeOpplysningerUtenlandskadresseAdresseUtenAdresselinjer_returnererFeilkode() {
         when(behandlingService.hentBehandlingMedSaksopplysninger(anyLong())).thenReturn(lagBehandling(Behandlingstyper.FØRSTEGANG));
         when(behandlingService.hentBehandling(anyLong())).thenReturn(lagBehandling(Behandlingstyper.FØRSTEGANG));
+        mockUtenlandskTrygdemyndighetServiceMottakerValgKall();
 
         BrevAdresse brevAdresse = new BrevAdresse("Mottaker", null, null, "0010", null, null, Land_iso2.SE.name());
         List<BrevAdresse> brevAdresseList = new ArrayList<>();
@@ -567,7 +706,7 @@ class BrevmalListeByggerTest {
         List<BrevmalResponse> tilgjengeligeMaler = brevmalListeBygger.byggBrevmalDtoListe(123L);
 
 
-        assertThat(tilgjengeligeMaler).hasSize(4);
+        assertThat(tilgjengeligeMaler).hasSize(5);
         assertThat(tilgjengeligeMaler.get(0).getMottaker())
             .extracting(
                 MottakerDto::getType,
@@ -590,5 +729,14 @@ class BrevmalListeByggerTest {
         behandling.setTema(Behandlingstema.UTSENDT_ARBEIDSTAKER);
         behandling.setType(type);
         return behandling;
+    }
+
+    private void mockUtenlandskTrygdemyndighetServiceMottakerValgKall() {
+        var utenlandskMyndighetGrønland = new UtenlandskMyndighet();
+        utenlandskMyndighetGrønland.landkode = Land_iso2.GL;
+        var utenlandskMyndighetFærøyene = new UtenlandskMyndighet();
+        utenlandskMyndighetFærøyene.landkode = Land_iso2.FO;
+        when(utenlandskMyndighetService.hentUtenlandskMyndighet(Land_iso2.GL)).thenReturn(utenlandskMyndighetGrønland);
+        when(utenlandskMyndighetService.hentUtenlandskMyndighet(Land_iso2.FO)).thenReturn(utenlandskMyndighetFærøyene);
     }
 }

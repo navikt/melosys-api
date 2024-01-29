@@ -67,7 +67,7 @@ class AktoerTjenesteTest {
         Aktoer aktoerMyndighet = new Aktoer();
         aktoerMyndighet.setId(39L);
         aktoerMyndighet.setAktørId("1235");
-        aktoerMyndighet.setInstitusjonId("INST2");
+        aktoerMyndighet.setInstitusjonID("INST2");
         aktoerMyndighet.setRolle(Aktoersroller.TRYGDEMYNDIGHET);
         aktoerMyndighet.setOrgnr("100");
         aktoerMyndighet.setFagsak(lagFagsak());

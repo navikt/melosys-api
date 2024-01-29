@@ -4,6 +4,7 @@ import no.nav.melosys.domain.dokument.person.adresse.BostedsadressePeriode
 import no.nav.melosys.domain.mottatteopplysninger.MottatteOpplysningerData
 import no.nav.melosys.domain.person.Persondata
 import no.nav.melosys.domain.person.adresse.Bostedsadresse
+import no.nav.melosys.domain.person.adresse.Oppholdsadresse
 import java.time.LocalDate
 import java.util.*
 
@@ -27,6 +28,8 @@ object PersonRegler {
     fun personBosattINorgeIPeriode(
         bostedsadressePerioder: List<BostedsadressePeriode>,
         bostedsadresseOptional: Optional<Bostedsadresse>,
+        historiskBostedadresser: Collection<Bostedsadresse>,
+        historiskOppholdsadresser: Collection<Oppholdsadresse>,
         periodeFra: LocalDate,
         periodeTil: LocalDate
     ): Boolean {
@@ -35,12 +38,11 @@ object PersonRegler {
                 filtrerAdressePeriode(bostedsadresse.gyldigFraOgMed, bostedsadresse.gyldigTilOgMed, periodeFra, periodeTil)
         }.isPresent
 
-        return erGyldigBostedsadresse || bostedsadressePerioder
-            .stream()
-            .anyMatch { a: BostedsadressePeriode ->
-                a.bostedsadresse.tilStrukturertAdresse().landkode == NORGE_ISO2_LANDKODE &&
-                    filtrerAdressePeriode(a.periode.fom, a.periode.tom, periodeFra, periodeTil)
-            }
+        val bostedsadressePerioder = bostedsadressePerioder.stream().anyMatch { a: BostedsadressePeriode -> a.bostedsadresse.tilStrukturertAdresse().landkode == NORGE_ISO2_LANDKODE && filtrerAdressePeriode(a.periode.fom, a.periode.tom, periodeFra, periodeTil) }
+        val historiskBostedadresser = historiskBostedadresser.stream().anyMatch { a -> a.strukturertAdresse.landkode == NORGE_ISO2_LANDKODE && filtrerAdressePeriode(a.gyldigFraOgMed, a.gyldigTilOgMed, periodeFra, periodeTil) }
+        val historiskOppholdsadresser =  historiskOppholdsadresser.stream().anyMatch { a -> a.strukturertAdresse.landkode == NORGE_ISO2_LANDKODE && filtrerAdressePeriode(a.gyldigFraOgMed, a.gyldigTilOgMed, periodeFra, periodeTil) }
+
+        return erGyldigBostedsadresse || bostedsadressePerioder || historiskBostedadresser || historiskOppholdsadresser
     }
 
     private fun filtrerAdressePeriode(

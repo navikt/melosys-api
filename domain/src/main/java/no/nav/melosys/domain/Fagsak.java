@@ -114,6 +114,10 @@ public class Fagsak extends RegistreringsInfo {
         }
     }
 
+    public List<Behandling> hentInaktiveBehandlinger() {
+        return getBehandlinger().stream().filter(Behandling::erInaktiv).toList();
+    }
+
     public List<Behandling> hentBehandlingerSortertSynkendePåRegistrertDato() {
         return getBehandlinger().stream()
             .sorted(Comparator.comparing(RegistreringsInfo::getRegistrertDato).reversed())

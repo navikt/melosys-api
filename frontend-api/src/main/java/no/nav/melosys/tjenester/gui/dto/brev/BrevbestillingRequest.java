@@ -1,9 +1,5 @@
 package no.nav.melosys.tjenester.gui.dto.brev;
 
-import java.util.Collections;
-import java.util.List;
-import java.util.function.Function;
-
 import no.nav.melosys.domain.arkiv.Distribusjonstype;
 import no.nav.melosys.domain.brev.utkast.BrevbestillingUtkast;
 import no.nav.melosys.domain.kodeverk.Mottakerroller;
@@ -14,13 +10,18 @@ import no.nav.melosys.service.dokument.brev.KopiMottakerDto;
 import no.nav.melosys.service.dokument.brev.SaksvedleggDto;
 import no.nav.melosys.sikkerhet.context.SubjectHandler;
 
+import java.time.LocalDate;
+import java.util.Collections;
+import java.util.List;
+import java.util.function.Function;
+
 import static java.util.Optional.ofNullable;
 
 public record BrevbestillingRequest(
     Produserbaredokumenter produserbardokument,
     Mottakerroller mottaker,
     String orgNr,
-    String institusjonId,
+    String institusjonID,
     List<String> orgnrNorskMyndighet,
     String innledningFritekst,
     String manglerFritekst,
@@ -40,7 +41,8 @@ public record BrevbestillingRequest(
     String dokumentTittel,
     String saksbehandlerNrToIdent,
     String begrunnelseKode,
-    String ytterligereInformasjon) {
+    String ytterligereInformasjon,
+    LocalDate opphoerDato) {
 
     public BrevbestillingDto tilBrevbestillingDto(String bestillersId) {
         return new BrevbestillingDto(
@@ -48,7 +50,7 @@ public record BrevbestillingRequest(
             this.mottaker,
             this.orgNr,
             this.orgnrNorskMyndighet,
-            this.institusjonId,
+            this.institusjonID,
             this.innledningFritekst,
             this.manglerFritekst,
             this.begrunnelseFritekst,
@@ -73,7 +75,8 @@ public record BrevbestillingRequest(
             null,
             null,
             null,
-            null
+            null,
+            this.opphoerDato
         );
     }
 
@@ -87,7 +90,7 @@ public record BrevbestillingRequest(
             this.mottaker(),
             this.orgNr(),
             this.orgnrNorskMyndighet(),
-            this.institusjonId(),
+            this.institusjonID(),
             this.innledningFritekst(),
             this.manglerFritekst(),
             this.begrunnelseFritekst(),
@@ -132,6 +135,7 @@ public record BrevbestillingRequest(
             utkast.fritekstVedlegg().stream().map(FritekstvedleggDto::av).toList(),
             utkast.dokumentTittel(),
             utkast.saksbehandlerNrToIdent(),
+            null,
             null,
             null
         );

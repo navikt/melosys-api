@@ -232,7 +232,6 @@ internal class InnvilgelseFtrlMapperTest {
             }
             trygdeavgiftsperioder = lagTrygdeavgiftsperioder()
         }
-        bestemmelse = Folketrygdloven_kap2_bestemmelser.FTRL_KAP2_2_8
     }
 
     private fun lagMedlemskapsperioder(medlemAvFolketrygden: MedlemAvFolketrygden): List<Medlemskapsperiode> =
@@ -243,6 +242,7 @@ internal class InnvilgelseFtrlMapperTest {
             medlemskapstype = Medlemskapstyper.FRIVILLIG
             trygdedekning = Trygdedekninger.FTRL_2_9_FØRSTE_LEDD_C_ANDRE_LEDD_HELSE_PENSJON_SYKE_FORELDREPENGER
             trygdeavgiftsperioder = lagTrygdeavgiftsperioder().toList()
+            bestemmelse = Folketrygdloven_kap2_bestemmelser.FTRL_KAP2_2_8
             this.medlemAvFolketrygden = medlemAvFolketrygden
         })
 

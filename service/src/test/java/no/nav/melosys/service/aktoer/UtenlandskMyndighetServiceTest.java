@@ -232,9 +232,9 @@ class UtenlandskMyndighetServiceTest {
         return behandling;
     }
 
-    private UtenlandskMyndighet lagUtenlandskMyndighet(Land_iso2 landkode, String institusjonId, Preferanse.PreferanseEnum preferanse) {
+    private UtenlandskMyndighet lagUtenlandskMyndighet(Land_iso2 landkode, String institusjonID, Preferanse.PreferanseEnum preferanse) {
         UtenlandskMyndighet utenlandskMyndighet = new UtenlandskMyndighet();
-        utenlandskMyndighet.institusjonskode = institusjonId;
+        utenlandskMyndighet.institusjonskode = institusjonID;
         utenlandskMyndighet.landkode = landkode;
         if (preferanse != null) {
             utenlandskMyndighet.preferanser.add(new Preferanse(1L, preferanse));

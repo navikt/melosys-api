@@ -76,6 +76,10 @@ public class UtenlandskMyndighetService {
         return hentUtenlandskMyndighet(landkode, null);
     }
 
+    public List<UtenlandskMyndighet> hentAlleUtenlandskeMyndigheter() {
+        return utenlandskMyndighetRepository.findAll();
+    }
+
     public UtenlandskMyndighet hentUtenlandskMyndighet(Land_iso2 landkode, Produserbaredokumenter produserbaredokumenter) {
         if (landkode == Land_iso2.US && produserbaredokumenter == Produserbaredokumenter.UTENLANDSK_TRYGDEMYNDIGHET_FRITEKSTBREV) {
             return hentUtenlandskMyndighetUnntakUSA();
@@ -86,10 +90,6 @@ public class UtenlandskMyndighetService {
 
     public UtenlandskMyndighet hentUtenlandskMyndighetForInstitusjonID(String institusjonID) {
         return hentUtenlandskMyndighet(UtenlandskMyndighet.konverterInstitusjonIdTilLandkode(institusjonID));
-    }
-
-    public List<UtenlandskMyndighet> hentAlleUtenlandskMyndigheter() {
-        return utenlandskMyndighetRepository.findAll();
     }
 
     public Map<UtenlandskMyndighet, Mottaker> lagUtenlandskeMyndigheterFraBehandling(Behandling behandling) {

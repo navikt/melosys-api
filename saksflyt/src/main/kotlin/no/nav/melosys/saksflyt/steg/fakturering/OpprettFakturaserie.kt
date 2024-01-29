@@ -6,7 +6,6 @@ import no.nav.melosys.domain.Behandling
 import no.nav.melosys.domain.Behandlingsresultat
 import no.nav.melosys.domain.avgift.Trygdeavgiftsperiode
 import no.nav.melosys.domain.kodeverk.Fullmaktstype
-import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingsresultattyper
 import no.nav.melosys.exception.FunksjonellException
 import no.nav.melosys.featuretoggle.ToggleName
 import no.nav.melosys.integrasjon.faktureringskomponenten.FaktureringskomponentenConsumer
@@ -19,6 +18,7 @@ import no.nav.melosys.service.avgift.TrygdeavgiftMottakerService
 import no.nav.melosys.service.behandling.BehandlingService
 import no.nav.melosys.service.behandling.BehandlingsresultatService
 import no.nav.melosys.service.persondata.PersondataService
+import no.nav.melosys.service.sak.TrygdeavgiftOppsummeringService
 import org.springframework.stereotype.Component
 import java.time.ZoneId
 import java.time.format.DateTimeFormatter
@@ -32,6 +32,7 @@ class OpprettFakturaserie(
     private val faktureringskomponentenConsumer: FaktureringskomponentenConsumer,
     private val pdlService: PersondataService,
     private val trygdeavgiftMottakerService: TrygdeavgiftMottakerService,
+    private val trygdeavgiftOppsummeringService: TrygdeavgiftOppsummeringService,
     private val unleash: Unleash
 ) : StegBehandler {
 
@@ -48,10 +49,9 @@ class OpprettFakturaserie(
         val saksbehandlerIdent = prosessinstans.getData(ProsessDataKey.SAKSBEHANDLER)
         val behandlingsresultat = behandlingsresultatService.hentBehandlingsresultat(behandlingsId)
 
-        if (behandlingsresultat.type === Behandlingsresultattyper.OPPHØRT) {
+        if (behandlingsresultat.erOpphørt() || andregangsvurderingHarFjernetTrygdeavgift(prosessinstans.behandling, behandlingsresultat)) {
             log.info("Kansellerer fakturaserie for behandling: $behandlingsId med fakturaseriereferanse: ${behandlingsresultat.fakturaserieReferanse}")
             kansellerFakturaserieOgLagreReferanse(behandlingsresultat, saksbehandlerIdent)
-
         } else if (skalOppretteFakturaserie(behandlingsresultat)) {
             log.info("Oppretter fakturaserie for behandling: $behandlingsId")
             opprettFakturaserieOgLagreReferanse(behandlingsresultat, mapFakturaserieDto(behandlingsresultat, prosessinstans), saksbehandlerIdent)
@@ -78,6 +78,23 @@ class OpprettFakturaserie(
     private fun skalOppretteFakturaserie(behandlingsresultat: Behandlingsresultat): Boolean {
         return trygdeavgiftsperioderMedAvgift(behandlingsresultat).isNotEmpty()
             && trygdeavgiftMottakerService.skalBetalesTilNav(behandlingsresultat.medlemAvFolketrygden.fastsattTrygdeavgift.trygdeavgiftsgrunnlag)
+    }
+
+    private fun andregangsvurderingHarFjernetTrygdeavgift(behandling: Behandling, behandlingsresultat: Behandlingsresultat): Boolean {
+        val erAndregangsvurdering = behandling.erNyVurdering() || behandling.erManglendeInnbetalingTrygdeavgift()
+        return erAndregangsvurdering && harOpprinneligBehandlingMedTrygdeavgift(behandling) && betalerNåKunTilSkatt(behandlingsresultat)
+    }
+
+    private fun harOpprinneligBehandlingMedTrygdeavgift(behandling: Behandling): Boolean =
+        behandling.opprinneligBehandling?.let {
+            trygdeavgiftOppsummeringService.harTrygdeavgiftOgBestiltFaktura(behandlingsresultatService.hentBehandlingsresultat(it.id))
+        } ?: false
+
+    private fun betalerNåKunTilSkatt(behandlingsresultat: Behandlingsresultat): Boolean {
+        val trygdeavgiftsGrunnlag = behandlingsresultat.medlemAvFolketrygden?.fastsattTrygdeavgift?.trygdeavgiftsgrunnlag
+        return trygdeavgiftsGrunnlag?.let {
+            trygdeavgiftMottakerService.betalerKunTrygdeavgiftTilSkatt(it)
+        } ?: false
     }
 
     private fun trygdeavgiftsperioderMedAvgift(behandlingsresultat: Behandlingsresultat): List<Trygdeavgiftsperiode> {

@@ -1,10 +1,8 @@
 package no.nav.melosys.service.kontroll.feature.ferdigbehandling.kontroll;
 
 import java.util.Arrays;
-import java.util.List;
 
 import no.nav.melosys.domain.Lovvalgsperiode;
-import no.nav.melosys.domain.Medlemskapsperiode;
 import no.nav.melosys.domain.dokument.medlemskap.MedlemskapDokument;
 import no.nav.melosys.domain.dokument.organisasjon.OrganisasjonDokument;
 import no.nav.melosys.domain.kodeverk.LovvalgBestemmelse;
@@ -15,6 +13,7 @@ import no.nav.melosys.domain.mottatteopplysninger.SøknadNorgeEllerUtenforEØS;
 import no.nav.melosys.exception.KontrolldataFeilType;
 import no.nav.melosys.service.kontroll.feature.arbeidutland.kontroll.ArbeidUtlandKontroll;
 import no.nav.melosys.service.kontroll.feature.ferdigbehandling.data.FerdigbehandlingKontrollData;
+import no.nav.melosys.service.kontroll.feature.ferdigbehandling.data.MedlemskapsperiodeData;
 import no.nav.melosys.service.kontroll.regler.ArbeidsstedRegler;
 import no.nav.melosys.service.kontroll.regler.OverlappendeMedlemskapsperioderRegler;
 import no.nav.melosys.service.kontroll.regler.PeriodeRegler;
@@ -37,12 +36,12 @@ final class FerdigbehandlingKontroll {
 
     static Kontrollfeil overlappendePeriode(FerdigbehandlingKontrollData kontrollData) {
         MedlemskapDokument medlemskapDokument = kontrollData.medlemskapDokument();
-        List<Medlemskapsperiode> medlemskapsperioder = kontrollData.medlemskapsperioder();
+        MedlemskapsperiodeData medlemskapsperiodeData = kontrollData.medlemskapsperiodeData();
         Lovvalgsperiode kontrollPeriode = kontrollData.lovvalgsperiode();
         Lovvalgsperiode opprinneligLovvalgsperiode = kontrollData.opprinneligLovvalgsperiode();
 
-        if (medlemskapsperioder != null) {
-            return OverlappendeMedlemskapsperioderRegler.harOverlappendePeriode(medlemskapDokument, medlemskapsperioder)
+        if (medlemskapsperiodeData != null && medlemskapsperiodeData.harNyeMedlemskapsperioder()) {
+            return OverlappendeMedlemskapsperioderRegler.harOverlappendePeriode(medlemskapDokument, medlemskapsperiodeData)
                 ? new Kontrollfeil(Kontroll_begrunnelser.OVERLAPPENDE_MEDL_PERIODER, KontrolldataFeilType.FEIL)
                 : null;
         } else if (harBehandlingstemaMedUnntakForOverlappendePeriode(kontrollPeriode, kontrollData.behandlingstema())
@@ -127,12 +126,28 @@ final class FerdigbehandlingKontroll {
             ? new Kontrollfeil(Kontroll_begrunnelser.MER_ENN_12_MD, KontrolldataFeilType.FEIL) : null;
     }
 
-    static Kontrollfeil arbeidsstedManglerFelter(FerdigbehandlingKontrollData kontrollData) {
-        return ArbeidUtlandKontroll.arbeidsstedManglerFelter(kontrollData.mottatteOpplysningerData());
+    static Kontrollfeil arbeidsstedLandManglerFelter(FerdigbehandlingKontrollData kontrollData) {
+        return ArbeidUtlandKontroll.arbeidsstedLandManglerFelter(kontrollData.mottatteOpplysningerData());
+    }
+
+    static Kontrollfeil arbeidsstedMaritimtManglerFelter(FerdigbehandlingKontrollData kontrollData) {
+        return ArbeidUtlandKontroll.maritimtArbeidsstedManglerFelter(kontrollData.mottatteOpplysningerData());
+    }
+
+    static Kontrollfeil arbeidsstedOffshoreManglerFelter(FerdigbehandlingKontrollData kontrollData) {
+        return ArbeidUtlandKontroll.offshoreArbeidsstedManglerFelter(kontrollData.mottatteOpplysningerData());
+    }
+
+    static Kontrollfeil arbeidsstedLuftfartManglerFelter(FerdigbehandlingKontrollData kontrollData) {
+        return ArbeidUtlandKontroll.luftfartArbeidsstedManglerFelter(kontrollData.mottatteOpplysningerData());
     }
 
     static Kontrollfeil foretakUtlandManglerFelter(FerdigbehandlingKontrollData kontrollData) {
         return ArbeidUtlandKontroll.foretakUtlandManglerFelter(kontrollData.mottatteOpplysningerData());
+    }
+
+    static Kontrollfeil selvstendigUtlandManglerFelter(FerdigbehandlingKontrollData kontrollData) {
+        return ArbeidUtlandKontroll.selvstendigUtlandManglerFelter(kontrollData.mottatteOpplysningerData());
     }
 
     static Kontrollfeil representantIUtlandetMangler(FerdigbehandlingKontrollData kontrollData) {

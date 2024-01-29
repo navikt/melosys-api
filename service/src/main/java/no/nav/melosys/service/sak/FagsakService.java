@@ -20,7 +20,7 @@ import no.nav.melosys.exception.IkkeFunnetException;
 import no.nav.melosys.repository.FagsakRepository;
 import no.nav.melosys.service.aktoer.KontaktopplysningService;
 import no.nav.melosys.service.behandling.BehandlingService;
-import no.nav.melosys.service.lovligekombinasjoner.LovligeKombinasjonerService;
+import no.nav.melosys.service.lovligekombinasjoner.LovligeKombinasjonerSaksbehandlingService;
 import no.nav.melosys.service.persondata.PersondataFasade;
 import org.apache.commons.collections4.CollectionUtils;
 import org.slf4j.Logger;
@@ -40,7 +40,7 @@ public class FagsakService {
     private final BehandlingService behandlingService;
     private final KontaktopplysningService kontaktopplysningService;
     private final PersondataFasade persondataFasade;
-    private final LovligeKombinasjonerService lovligeKombinasjonerService;
+    private final LovligeKombinasjonerSaksbehandlingService lovligeKombinasjonerSaksbehandlingService;
 
     private final Counter sakerOpprettet = Metrics.counter(SAKER_OPPRETTET);
 
@@ -48,12 +48,12 @@ public class FagsakService {
                          BehandlingService behandlingService,
                          KontaktopplysningService kontaktopplysningService,
                          PersondataFasade persondataFasade,
-                         @Lazy LovligeKombinasjonerService lovligeKombinasjonerService) {
+                         @Lazy LovligeKombinasjonerSaksbehandlingService lovligeKombinasjonerSaksbehandlingService) {
         this.fagsakRepository = fagsakRepository;
         this.behandlingService = behandlingService;
         this.kontaktopplysningService = kontaktopplysningService;
         this.persondataFasade = persondataFasade;
-        this.lovligeKombinasjonerService = lovligeKombinasjonerService;
+        this.lovligeKombinasjonerSaksbehandlingService = lovligeKombinasjonerSaksbehandlingService;
     }
 
     public Fagsak hentFagsak(String saksnummer) {
@@ -94,7 +94,7 @@ public class FagsakService {
     @Transactional
     public void oppdaterMyndigheterForEuEos(String saksnummer, Collection<String> ider) {
         Fagsak fagsak = hentFagsak(saksnummer);
-        fagsak.getAktører().removeIf(aktoer -> !ider.contains(aktoer.getInstitusjonId())
+        fagsak.getAktører().removeIf(aktoer -> !ider.contains(aktoer.getInstitusjonID())
             && aktoer.getRolle() == Aktoersroller.TRYGDEMYNDIGHET);
 
         Collection<Aktoer> nyeMyndigheter = ider.stream()
@@ -124,7 +124,7 @@ public class FagsakService {
         Aktoer aktør = new Aktoer();
         aktør.setFagsak(fagsak);
         aktør.setRolle(Aktoersroller.TRYGDEMYNDIGHET);
-        aktør.setInstitusjonId(ID);
+        aktør.setInstitusjonID(ID);
         return aktør;
     }
 
@@ -247,7 +247,7 @@ public class FagsakService {
         }
         var behandlingHarEndring = behandling.getTema() != nyBehandlingstema || behandling.getType() != nyBehandlingstype;
         if (fagsakHarEndring || behandlingHarEndring) {
-            lovligeKombinasjonerService.validerOpprettelseOgEndring(sak.getHovedpartRolle(), nySakstype, nySakstema, nyBehandlingstema, nyBehandlingstype);
+            lovligeKombinasjonerSaksbehandlingService.validerOpprettelseOgEndring(sak.getHovedpartRolle(), nySakstype, nySakstema, nyBehandlingstema, nyBehandlingstype);
         }
     }
 

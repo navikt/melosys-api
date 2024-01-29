@@ -46,7 +46,7 @@ class DataByggerStubs {
         Fagsak fagsak = new Fagsak();
         Aktoer myndighet = new Aktoer();
         myndighet.setRolle(Aktoersroller.TRYGDEMYNDIGHET);
-        myndighet.setInstitusjonId("SE:123321");
+        myndighet.setInstitusjonID("SE:123321");
         fagsak.setAktører(Collections.singleton(myndighet));
         behandling.setFagsak(fagsak);
 

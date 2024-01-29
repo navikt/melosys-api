@@ -1,7 +1,6 @@
 package no.nav.melosys.tjenester.gui.medlemskapsperiode;
 
 import no.nav.melosys.domain.Medlemskapsperiode;
-import no.nav.melosys.domain.folketrygden.MedlemAvFolketrygden;
 import no.nav.melosys.domain.kodeverk.Folketrygdloven_kap2_bestemmelser;
 import no.nav.melosys.domain.kodeverk.InnvilgelsesResultat;
 import no.nav.melosys.domain.kodeverk.Medlemskapstyper;
@@ -9,6 +8,7 @@ import no.nav.melosys.domain.kodeverk.Trygdedekninger;
 import no.nav.melosys.service.medlemskapsperiode.MedlemskapsperiodeService;
 import no.nav.melosys.service.medlemskapsperiode.OpprettMedlemskapsperiodeService;
 import no.nav.melosys.service.tilgang.Aksesskontroll;
+import no.nav.melosys.tjenester.gui.medlemskapsperiode.dto.BestemmelseDto;
 import no.nav.melosys.tjenester.gui.medlemskapsperiode.dto.MedlemskapsperiodeDto;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -65,10 +65,10 @@ class MedlemskapsperiodeTjenesteTest {
 
     @Test
     void opprettForslagPåMedlemskapsperioder() {
-        when(opprettMedlemskapsperiodeService.opprettForslagPåMedlemskapsperioder(behandlingID))
+        when(opprettMedlemskapsperiodeService.opprettForslagPåMedlemskapsperioder(behandlingID, Folketrygdloven_kap2_bestemmelser.FTRL_KAP2_2_5_FØRSTE_LEDD_E))
             .thenReturn(Collections.singleton(lagMedlemskapsperiode()));
 
-        var res = medlemskapsperiodeTjeneste.opprettForslagPåMedlemskapsperioder(behandlingID);
+        var res = medlemskapsperiodeTjeneste.opprettForslagPåMedlemskapsperioder(behandlingID, new BestemmelseDto(Folketrygdloven_kap2_bestemmelser.FTRL_KAP2_2_5_FØRSTE_LEDD_E));
 
         assertThat(res.getStatusCode()).isEqualTo(HttpStatus.OK);
     }
@@ -82,8 +82,7 @@ class MedlemskapsperiodeTjenesteTest {
         medlemskapsperiode.setInnvilgelsesresultat(InnvilgelsesResultat.DELVIS_INNVILGET);
         medlemskapsperiode.setMedlemskapstype(Medlemskapstyper.FRIVILLIG);
         medlemskapsperiode.setTrygdedekning(Trygdedekninger.FTRL_2_9_FØRSTE_LEDD_C_HELSE_PENSJON);
-        medlemskapsperiode.setMedlemAvFolketrygden(new MedlemAvFolketrygden());
-        medlemskapsperiode.getMedlemAvFolketrygden().setBestemmelse(Folketrygdloven_kap2_bestemmelser.FTRL_KAP2_2_5_FØRSTE_LEDD_E);
+        medlemskapsperiode.setBestemmelse(Folketrygdloven_kap2_bestemmelser.FTRL_KAP2_2_5_FØRSTE_LEDD_E);
         return medlemskapsperiode;
     }
 

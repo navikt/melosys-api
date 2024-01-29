@@ -8,9 +8,9 @@ import no.nav.melosys.domain.Behandling
 import no.nav.melosys.domain.Fagsak
 import no.nav.melosys.domain.kodeverk.Saksstatuser
 import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingsresultattyper
+import no.nav.melosys.saksflytapi.ProsessinstansService
 import no.nav.melosys.service.behandling.BehandlingsresultatService
 import no.nav.melosys.service.oppgave.OppgaveService
-import no.nav.melosys.saksflytapi.ProsessinstansService
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.extension.ExtendWith
@@ -35,7 +35,7 @@ class FerdigbehandleSakServiceTest {
 
     @BeforeEach
     fun setup() {
-        ferdigbehandleSakService = FerdigbehandleSakService(fagsakService, behandlingsresultatService, oppgaveService, prosessinstansService)
+        ferdigbehandleSakService = FerdigbehandleSakService(fagsakService, behandlingsresultatService, oppgaveService)
     }
 
     @Test
@@ -52,7 +52,6 @@ class FerdigbehandleSakServiceTest {
         verify { fagsakService.avsluttFagsakOgBehandling(fagsak, behandling, Saksstatuser.AVSLUTTET) }
         verify { behandlingsresultatService.oppdaterBehandlingsresultattype(behandling.id, Behandlingsresultattyper.FERDIGBEHANDLET) }
         verify { oppgaveService.ferdigstillOppgaveMedSaksnummer(fagsak.saksnummer) }
-        verify { prosessinstansService.opprettProsessinstansOppdaterFaktura(behandling) }
     }
 
     @Test
@@ -69,6 +68,5 @@ class FerdigbehandleSakServiceTest {
         verify { fagsakService.avsluttFagsakOgBehandling(fagsak, behandling, Saksstatuser.LOVVALG_AVKLART) }
         verify { behandlingsresultatService.oppdaterBehandlingsresultattype(behandling.id, Behandlingsresultattyper.FERDIGBEHANDLET) }
         verify { oppgaveService.ferdigstillOppgaveMedSaksnummer(fagsak.saksnummer) }
-        verify { prosessinstansService.opprettProsessinstansOppdaterFaktura(behandling) }
     }
 }
