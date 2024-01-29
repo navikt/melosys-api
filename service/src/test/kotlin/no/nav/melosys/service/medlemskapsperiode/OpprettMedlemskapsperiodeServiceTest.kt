@@ -40,7 +40,6 @@ class OpprettMedlemskapsperiodeServiceTest {
     @MockK
     private lateinit var utledMottaksdato: UtledMottaksdato
 
-    @MockK
     private val fakeUnleash = FakeUnleash()
 
     private val utledBestemmelserOgVilkår = UtledBestemmelserOgVilkår(fakeUnleash)
