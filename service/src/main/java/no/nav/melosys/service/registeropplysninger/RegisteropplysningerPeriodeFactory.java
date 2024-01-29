@@ -87,7 +87,7 @@ public class RegisteropplysningerPeriodeFactory {
             tomMnd = YearMonth.from(nå);
         } else { //3. Avsluttet: sjekker hele periode
             fomMnd = YearMonth.from(fom);
-            tomMnd = YearMonth.from(tom == null ? tom.plusYears(2) : tom);
+            tomMnd = YearMonth.from(tom);
         }
 
         return new Periode(fomMnd, tomMnd);
