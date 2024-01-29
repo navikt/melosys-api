@@ -139,6 +139,10 @@ class UfmKontroll {
         LocalDate sedFra = kontrollData.sedDokument().getLovvalgsperiode().getFom();
         LocalDate sedTil = kontrollData.sedDokument().getLovvalgsperiode().getTom();
 
+        if (sedTil == null) {
+            return Kontroll_begrunnelser.BOSATT_I_NORGE_I_PERIODEN;
+        }
+
         var historiskeBostedAdresser = kontrollData.persondataMedHistorikk().isPresent() ? kontrollData.persondataMedHistorikk().get().bostedsadresser() : Collections.EMPTY_LIST;
         var historiskeOppholdsAdresser = kontrollData.persondataMedHistorikk().isPresent() ? kontrollData.persondataMedHistorikk().get().oppholdsadresser() : Collections.EMPTY_LIST;
 
