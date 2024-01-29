@@ -1,5 +1,8 @@
 package no.nav.melosys.service.medlemskapsperiode;
 
+import java.time.LocalDate;
+import java.util.*;
+
 import io.getunleash.Unleash;
 import no.nav.melosys.domain.Medlemskapsperiode;
 import no.nav.melosys.domain.folketrygden.MedlemAvFolketrygden;
@@ -18,9 +21,6 @@ import no.nav.melosys.service.medl.MedlPeriodeService;
 import org.apache.commons.collections4.CollectionUtils;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
-
-import java.time.LocalDate;
-import java.util.*;
 
 import static no.nav.melosys.domain.kodeverk.Trygdedekninger.*;
 import static no.nav.melosys.service.kontroll.regler.PeriodeRegler.feilIPeriode;
@@ -141,13 +141,13 @@ public class MedlemskapsperiodeService {
 
     @Transactional
     public void erstattMedlemskapsperioder(long behandlingID, long opprinneligBehandlingID, List<Medlemskapsperiode> nyeMedlemskapsperioder) {
-        var opprinneligeGjeldendeMedlemskapsperioder = hentMedlemskapsperioder(opprinneligBehandlingID).stream()
-            .filter(it -> it.getInnvilgelsesresultat() != InnvilgelsesResultat.AVSLAATT).toList();
+        var opprinneligeMedlemskapsperioder = hentMedlemskapsperioder(opprinneligBehandlingID).stream()
+            .filter(it -> it.erInnvilget() || it.erOpphørt()).toList();
 
-        opphørOpprinneligeInnvilgedePerioderSomIkkeVidereføres(opprinneligeGjeldendeMedlemskapsperioder, nyeMedlemskapsperioder);
+        opphørOpprinneligeInnvilgedePerioderSomIkkeVidereføres(opprinneligeMedlemskapsperioder, nyeMedlemskapsperioder);
         opprettEllerOppdaterInnvilgedePerioder(behandlingID, nyeMedlemskapsperioder);
 
-        feilregistrerOpprinneligeOpphørtePerioderSomIkkeVidereføres(opprinneligeGjeldendeMedlemskapsperioder, nyeMedlemskapsperioder);
+        feilregistrerOpprinneligeOpphørtePerioderSomIkkeVidereføres(opprinneligeMedlemskapsperioder, nyeMedlemskapsperioder);
         opprettEllerOppdaterOpphørtePerioder(behandlingID, nyeMedlemskapsperioder);
     }
 
