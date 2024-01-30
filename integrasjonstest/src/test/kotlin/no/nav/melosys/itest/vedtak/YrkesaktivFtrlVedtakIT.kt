@@ -148,6 +148,7 @@ class YrkesaktivFtrlVedtakIT(
     fun afterEach() {
         oAuthMockServer.stop()
         MedlRepo.repo.clear()
+        SubjectHandler.set(null)
     }
 
     @Test
