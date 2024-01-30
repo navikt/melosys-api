@@ -1,5 +1,6 @@
 package no.nav.melosys.integrasjon.trygdeavgift
 
+import io.kotest.matchers.collections.shouldContainAll
 import io.kotest.matchers.collections.shouldHaveSize
 import io.kotest.matchers.maps.shouldHaveSize
 import io.kotest.matchers.shouldBe
@@ -24,7 +25,7 @@ class TrygdeavgiftsberegningsRequestMapperTest {
 
         val (request, mapsList) = mapper.map(medlemskapsperioder, skatteforholdTilNorge, inntektsperioder)
         request.medlemskapsperioder.first().run {
-            avgiftsdekninger.containsAll(listOf(Avgiftsdekning.HELSEDEL_MED_SYKEPENGER, Avgiftsdekning.PENSJONSDEL_MED_YRKESSKADETRYGD)) shouldBe true
+            avgiftsdekninger.shouldContainAll(listOf(Avgiftsdekning.HELSEDEL_MED_SYKEPENGER, Avgiftsdekning.PENSJONSDEL_MED_YRKESSKADETRYGD))
             periode.fom shouldBe medlemskapsperioder[0].fom
             periode.tom shouldBe medlemskapsperioder[0].tom
         }
