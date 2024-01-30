@@ -17,7 +17,39 @@ class TrygdeavgiftsberegningsRequestMapperTest {
     fun `sjekk at mapping fra trygdeavgiftBeregning blir mappet som forventet`() {
         val mapper = TrygdeavgiftsberegningsRequestMapper()
 
-        val medlemskapsperioder = listOf(
+        val medlemskapsperioder = createMedlemskapsperioder()
+        val skatteforholdTilNorge = createSkatteforholdTilNorge()
+        val inntektsperioder = createInntektsperioder()
+
+        val (request, mapsList) = mapper.map(medlemskapsperioder, skatteforholdTilNorge, inntektsperioder)
+        assertTrue(request.medlemskapsperioder.first().avgiftsdekninger.containsAll(
+            listOf(Avgiftsdekning.HELSEDEL_MED_SYKEPENGER, Avgiftsdekning.PENSJONSDEL_MED_YRKESSKADETRYGD)))
+        assertEquals(request.medlemskapsperioder.first().periode.fom, medlemskapsperioder[0].fom)
+        assertEquals(request.medlemskapsperioder.first().periode.tom,  medlemskapsperioder[0].tom)
+
+        assertEquals(request.skatteforholdsperioder.first().periode.fom, skatteforholdTilNorge[0].fomDato)
+        assertEquals(request.skatteforholdsperioder.first().periode.tom, skatteforholdTilNorge[0].tomDato)
+        assertEquals(request.skatteforholdsperioder.first().skatteforhold.kode,
+            skatteforholdTilNorge[0].skatteplikttype.kode)
+        assertEquals(request.skatteforholdsperioder.first().skatteforhold.beskrivelse,
+            skatteforholdTilNorge[0].skatteplikttype.beskrivelse)
+
+        assertEquals(request.inntektsperioder[0].trygdeavgiftBetalesTilSkatt,
+            inntektsperioder[0].isOrdinærTrygdeavgiftBetalesTilSkatt)
+        assertEquals(request.inntektsperioder[0].periode.fom, inntektsperioder[0].fomDato)
+        assertEquals(request.inntektsperioder[0].periode.tom, inntektsperioder[0].tomDato)
+        assertEquals(request.inntektsperioder[0].inntektskilde, inntektsperioder[0].type)
+        assertEquals(request.inntektsperioder[0].månedsbeløp?.verdi, inntektsperioder[0].avgiftspliktigInntektMnd.verdi)
+        assertEquals(request.inntektsperioder[0].månedsbeløp?.valuta?.kode, inntektsperioder[0].avgiftspliktigInntektMnd.valuta)
+
+        assertTrue(mapsList.size == 3)
+        assertTrue { mapsList[0].size == 2 }
+        assertTrue { mapsList[1].size == 2 }
+        assertTrue { mapsList[2].size == 2 }
+    }
+
+    private fun createMedlemskapsperioder(): List<Medlemskapsperiode> {
+        return listOf(
             Medlemskapsperiode().apply {
                 id = 1L
                 fom = LocalDate.of(2022, 1, 1)
@@ -40,8 +72,10 @@ class TrygdeavgiftsberegningsRequestMapperTest {
                 bestemmelse = Folketrygdloven_kap2_bestemmelser.FTRL_KAP2_2_7A
                 medlPeriodeID = 1L
             })
+    }
 
-        val skatteforholdTilNorge = listOf(
+    private fun createSkatteforholdTilNorge(): List<SkatteforholdTilNorge> {
+        return listOf(
             SkatteforholdTilNorge().apply {
                 id = 1L
                 fomDato = LocalDate.of(2022, 1, 1)
@@ -55,8 +89,10 @@ class TrygdeavgiftsberegningsRequestMapperTest {
                 skatteplikttype = Skatteplikttype.SKATTEPLIKTIG
             },
         )
+    }
 
-        val inntektsperioder = listOf(
+    private fun createInntektsperioder(): List<Inntektsperiode> {
+        return listOf(
             Inntektsperiode().apply {
                 id = 1L
                 fomDato = LocalDate.of(2020, 1, 1)
@@ -72,30 +108,5 @@ class TrygdeavgiftsberegningsRequestMapperTest {
                 avgiftspliktigInntektMnd = Penger(BigDecimal("2000.00"), "USD")
             }
         )
-
-        val (request, mapsList) = mapper.map(medlemskapsperioder, skatteforholdTilNorge, inntektsperioder)
-
-        assertTrue(request.medlemskapsperioder.first().avgiftsdekninger.containsAll(
-            listOf(Avgiftsdekning.HELSEDEL_MED_SYKEPENGER, Avgiftsdekning.PENSJONSDEL_MED_YRKESSKADETRYGD)))
-        assertEquals(request.medlemskapsperioder.first().periode.fom, medlemskapsperioder[0].fom)
-        assertEquals(request.medlemskapsperioder.first().periode.tom,  medlemskapsperioder[0].tom)
-
-        assertEquals(request.skatteforholdsperioder.first().periode.fom, skatteforholdTilNorge[0].fomDato)
-        assertEquals(request.skatteforholdsperioder.first().periode.tom, skatteforholdTilNorge[0].tomDato)
-        assertEquals(request.skatteforholdsperioder.first().skatteforhold.kode,
-            skatteforholdTilNorge[0].skatteplikttype.kode)
-        assertEquals(request.skatteforholdsperioder.first().skatteforhold.beskrivelse, skatteforholdTilNorge[0].skatteplikttype.beskrivelse)
-
-        assertEquals(request.inntektsperioder[0].trygdeavgiftBetalesTilSkatt, inntektsperioder[0].isOrdinærTrygdeavgiftBetalesTilSkatt)
-        assertEquals(request.inntektsperioder[0].periode.fom, inntektsperioder[0].fomDato)
-        assertEquals(request.inntektsperioder[0].periode.tom, inntektsperioder[0].tomDato)
-        assertEquals(request.inntektsperioder[0].inntektskilde, inntektsperioder[0].type)
-        assertEquals(request.inntektsperioder[0].månedsbeløp?.verdi, inntektsperioder[0].avgiftspliktigInntektMnd.verdi)
-        assertEquals(request.inntektsperioder[0].månedsbeløp?.valuta?.kode, inntektsperioder[0].avgiftspliktigInntektMnd.valuta)
-
-        assertTrue(mapsList.size == 3)
-        assertTrue { mapsList[0].size == 2 }
-        assertTrue { mapsList[1].size == 2 }
-        assertTrue { mapsList[2].size == 2 }
     }
 }
