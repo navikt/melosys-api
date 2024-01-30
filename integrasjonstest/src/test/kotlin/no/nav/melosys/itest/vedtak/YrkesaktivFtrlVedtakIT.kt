@@ -10,7 +10,6 @@ import io.kotest.assertions.withClue
 import io.kotest.matchers.nulls.shouldNotBeNull
 import io.kotest.matchers.shouldBe
 import io.kotest.matchers.types.shouldBeInstanceOf
-import io.mockk.clearMocks
 import io.mockk.every
 import io.mockk.mockk
 import no.nav.melosys.domain.Behandlingsmaate
@@ -83,6 +82,7 @@ class YrkesaktivFtrlVedtakIT(
 ) : JournalfoeringBase(testDataGenerator, journalføringService, oppgaveService, prosessinstansRepository) {
 
     private lateinit var subjectHandler: SubjectHandler
+    private var oldInstance = SubjectHandler.getInstance()
 
     @BeforeEach
     fun setup() {
@@ -151,7 +151,7 @@ class YrkesaktivFtrlVedtakIT(
     fun afterEach() {
         oAuthMockServer.stop()
         MedlRepo.repo.clear()
-        clearMocks(subjectHandler)
+        SubjectHandler.set(oldInstance)
     }
 
     @Test
