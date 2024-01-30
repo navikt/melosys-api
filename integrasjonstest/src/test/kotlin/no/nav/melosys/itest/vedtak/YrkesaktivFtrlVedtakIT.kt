@@ -93,6 +93,9 @@ class YrkesaktivFtrlVedtakIT(
         oAuthMockServer.start()
         unleash.enableAll()
         MedlRepo.repo.clear()
+        val handler = subjectHandler.get()
+        every { handler.userID } returns "Z123456"
+        every { handler.userName } returns "test"
         mockServer.stubFor(
             WireMock.post("/api/v1/mal/innvilgelse_ftrl/lag-pdf?somKopi=false&utkast=false").willReturn(
                 WireMock.aResponse()
@@ -101,11 +104,6 @@ class YrkesaktivFtrlVedtakIT(
                     .withBody(ByteArray(0))
             )
         )
-
-        val saksbehandler = "Z123456"
-        val handler = subjectHandler.get()
-        every { handler.userID } returns saksbehandler
-        every { handler.userName } returns "test"
 
         val expectedResponse = listOf(
             TrygdeavgiftsberegningResponse(
