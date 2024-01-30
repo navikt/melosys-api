@@ -10,7 +10,6 @@ import io.kotest.assertions.withClue
 import io.kotest.matchers.nulls.shouldNotBeNull
 import io.kotest.matchers.shouldBe
 import io.kotest.matchers.types.shouldBeInstanceOf
-import io.mockk.clearMocks
 import io.mockk.every
 import io.mockk.mockk
 import no.nav.melosys.domain.Behandlingsmaate
@@ -82,20 +81,20 @@ class YrkesaktivFtrlVedtakIT(
     @Autowired private val trygdeavgiftsgrunnlagService: TrygdeavgiftsgrunnlagService,
 ) : JournalfoeringBase(testDataGenerator, journalføringService, oppgaveService, prosessinstansRepository) {
 
-    private val subjectHandler: ThreadLocal<SubjectHandler> = ThreadLocal.withInitial {
-        mockk<SpringSubjectHandler>().also {
-            SubjectHandler.set(it)
-        }
-    }
+    private var originalSubjectHandler: SubjectHandler? = null
 
     @BeforeEach
     fun setup() {
         oAuthMockServer.start()
         unleash.enableAll()
         MedlRepo.repo.clear()
-        val handler = subjectHandler.get()
-        every { handler.userID } returns "Z123456"
-        every { handler.userName } returns "test"
+        originalSubjectHandler = SubjectHandler.getInstance()
+
+        // Now set the new state for the test
+        val mockHandler = mockk<SpringSubjectHandler>()
+        SubjectHandler.set(mockHandler)
+        every { mockHandler.userID } returns "Z123456"
+        every { mockHandler.userName } returns "test"
         mockServer.stubFor(
             WireMock.post("/api/v1/mal/innvilgelse_ftrl/lag-pdf?somKopi=false&utkast=false").willReturn(
                 WireMock.aResponse()
@@ -151,8 +150,7 @@ class YrkesaktivFtrlVedtakIT(
     fun afterEach() {
         oAuthMockServer.stop()
         MedlRepo.repo.clear()
-        clearMocks(subjectHandler.get())
-        subjectHandler.remove()
+        SubjectHandler.set(originalSubjectHandler)
     }
 
     @Test
