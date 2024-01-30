@@ -1,5 +1,7 @@
 package no.nav.melosys.integrasjon.trygdeavgift
 
+import io.kotest.matchers.collections.shouldHaveSize
+import io.kotest.matchers.maps.shouldHaveSize
 import io.kotest.matchers.shouldBe
 import no.nav.melosys.domain.Medlemskapsperiode
 import no.nav.melosys.domain.avgift.Inntektsperiode
@@ -43,10 +45,10 @@ class TrygdeavgiftsberegningsRequestMapperTest {
             månedsbeløp?.valuta?.kode shouldBe inntektsperioder[0].avgiftspliktigInntektMnd.valuta
         }
 
-        mapsList.size shouldBe 3
-        mapsList[0].size shouldBe 2
-        mapsList[1].size shouldBe 2
-        mapsList[2].size shouldBe 2
+        mapsList.shouldHaveSize(3)
+        mapsList[0].shouldHaveSize(2)
+        mapsList[1].shouldHaveSize(2)
+        mapsList[2].shouldHaveSize(2)
     }
 
     private fun lagMedlemskapsperioder(): List<Medlemskapsperiode> {
