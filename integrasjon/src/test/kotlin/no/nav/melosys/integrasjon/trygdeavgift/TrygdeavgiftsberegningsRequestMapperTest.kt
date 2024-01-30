@@ -1,5 +1,6 @@
 package no.nav.melosys.integrasjon.trygdeavgift
 
+import io.kotest.matchers.shouldBe
 import no.nav.melosys.domain.Medlemskapsperiode
 import no.nav.melosys.domain.avgift.Inntektsperiode
 import no.nav.melosys.domain.avgift.Penger
@@ -8,8 +9,6 @@ import no.nav.melosys.domain.kodeverk.*
 import java.math.BigDecimal
 import java.time.LocalDate
 import kotlin.test.Test
-import kotlin.test.assertEquals
-import kotlin.test.assertTrue
 
 class TrygdeavgiftsberegningsRequestMapperTest {
 
@@ -22,32 +21,32 @@ class TrygdeavgiftsberegningsRequestMapperTest {
         val inntektsperioder = lagInntektsperioder()
 
         val (request, mapsList) = mapper.map(medlemskapsperioder, skatteforholdTilNorge, inntektsperioder)
-        assertTrue(request.medlemskapsperioder.first().avgiftsdekninger.containsAll(
-            listOf(Avgiftsdekning.HELSEDEL_MED_SYKEPENGER, Avgiftsdekning.PENSJONSDEL_MED_YRKESSKADETRYGD)))
-        assertEquals(request.medlemskapsperioder.first().periode.fom, medlemskapsperioder[0].fom)
-        assertEquals(request.medlemskapsperioder.first().periode.tom,  medlemskapsperioder[0].tom)
+        request.medlemskapsperioder.first().run {
+            avgiftsdekninger.containsAll(listOf(Avgiftsdekning.HELSEDEL_MED_SYKEPENGER, Avgiftsdekning.PENSJONSDEL_MED_YRKESSKADETRYGD)) shouldBe true
+            periode.fom shouldBe medlemskapsperioder[0].fom
+            periode.tom shouldBe medlemskapsperioder[0].tom
+        }
 
-        assertEquals(request.skatteforholdsperioder.first().periode.fom, skatteforholdTilNorge[0].fomDato)
-        assertEquals(request.skatteforholdsperioder.first().periode.tom, skatteforholdTilNorge[0].tomDato)
-        assertEquals(request.skatteforholdsperioder.first().skatteforhold.kode,
-            skatteforholdTilNorge[0].skatteplikttype.kode)
-        assertEquals(request.skatteforholdsperioder.first().skatteforhold.beskrivelse,
-            skatteforholdTilNorge[0].skatteplikttype.beskrivelse)
+        request.skatteforholdsperioder.first().run {
+            periode.fom shouldBe skatteforholdTilNorge[0].fomDato
+            periode.tom shouldBe skatteforholdTilNorge[0].tomDato
+            skatteforhold.kode shouldBe skatteforholdTilNorge[0].skatteplikttype.kode
+            skatteforhold.beskrivelse shouldBe skatteforholdTilNorge[0].skatteplikttype.beskrivelse
+        }
 
-        assertEquals(request.inntektsperioder[0].trygdeavgiftBetalesTilSkatt,
-            inntektsperioder[0].isOrdinærTrygdeavgiftBetalesTilSkatt)
-        assertEquals(request.inntektsperioder[0].periode.fom, inntektsperioder[0].fomDato)
-        assertEquals(request.inntektsperioder[0].periode.tom, inntektsperioder[0].tomDato)
-        assertEquals(request.inntektsperioder[0].inntektskilde, inntektsperioder[0].type)
-        assertEquals(request.inntektsperioder[0].månedsbeløp?.verdi,
-            inntektsperioder[0].avgiftspliktigInntektMnd.verdi)
-        assertEquals(request.inntektsperioder[0].månedsbeløp?.valuta?.kode,
-            inntektsperioder[0].avgiftspliktigInntektMnd.valuta)
+        request.inntektsperioder[0].run {
+            trygdeavgiftBetalesTilSkatt shouldBe inntektsperioder[0].isOrdinærTrygdeavgiftBetalesTilSkatt
+            periode.fom shouldBe inntektsperioder[0].fomDato
+            periode.tom shouldBe inntektsperioder[0].tomDato
+            inntektskilde shouldBe inntektsperioder[0].type
+            månedsbeløp?.verdi shouldBe inntektsperioder[0].avgiftspliktigInntektMnd.verdi
+            månedsbeløp?.valuta?.kode shouldBe inntektsperioder[0].avgiftspliktigInntektMnd.valuta
+        }
 
-        assertTrue(mapsList.size == 3)
-        assertTrue { mapsList[0].size == 2 }
-        assertTrue { mapsList[1].size == 2 }
-        assertTrue { mapsList[2].size == 2 }
+        mapsList.size shouldBe 3
+        mapsList[0].size shouldBe 2
+        mapsList[1].size shouldBe 2
+        mapsList[2].size shouldBe 2
     }
 
     private fun lagMedlemskapsperioder(): List<Medlemskapsperiode> {
