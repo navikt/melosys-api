@@ -21,8 +21,10 @@ import no.nav.melosys.saksflytapi.ProsessinstansService
 import no.nav.melosys.saksflytapi.domain.ProsessStatus
 import no.nav.melosys.saksflytapi.domain.ProsessSteg
 import no.nav.melosys.saksflytapi.domain.Prosessinstans
+import no.nav.melosys.sikkerhet.context.ThreadLocalAccessInfo
 import no.nav.security.token.support.spring.test.EnableMockOAuth2Server
 import org.awaitility.kotlin.await
+import org.junit.jupiter.api.AfterEach
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Disabled
 import org.junit.jupiter.api.Test
@@ -65,6 +67,7 @@ internal class SedLåsreferanseIT(
 
     @BeforeEach
     fun before() {
+        mockServer.start()
         mockServer.stubFor(
             WireMock.get(WireMock.urlPathMatching("/api/v1/kodeverk/.*/koder/betydninger")).willReturn(
                 WireMock.aResponse()
@@ -91,6 +94,12 @@ internal class SedLåsreferanseIT(
             )
         )
     }
+
+    @AfterEach
+    fun after() {
+        mockServer.stop()
+    }
+
 
     @Test
     fun `ikke kjør samtidig når sed har samme rinaSaksnummer men forsjellig sedId, sedVersjon`() {
