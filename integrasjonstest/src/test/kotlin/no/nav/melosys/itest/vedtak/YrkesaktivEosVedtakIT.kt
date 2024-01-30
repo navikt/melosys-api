@@ -9,6 +9,8 @@ import io.kotest.assertions.withClue
 import io.kotest.matchers.collections.shouldHaveSize
 import io.kotest.matchers.nulls.shouldNotBeNull
 import io.kotest.matchers.shouldBe
+import io.mockk.every
+import io.mockk.mockk
 import no.nav.melosys.domain.Behandlingsmaate
 import no.nav.melosys.domain.Lovvalgsperiode
 import no.nav.melosys.domain.kodeverk.*
@@ -39,6 +41,8 @@ import no.nav.melosys.service.vedtak.FattVedtakRequest
 import no.nav.melosys.service.vedtak.VedtaksfattingFasade
 import no.nav.melosys.service.vilkaar.VilkaarDto
 import no.nav.melosys.service.vilkaar.VilkaarsresultatService
+import no.nav.melosys.sikkerhet.context.SpringSubjectHandler
+import no.nav.melosys.sikkerhet.context.SubjectHandler
 import org.junit.jupiter.api.AfterEach
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Disabled
@@ -71,6 +75,13 @@ class YrkesaktivEosVedtakIT(
         oAuthMockServer.start()
         unleash.enableAll()
         MedlRepo.repo.clear()
+
+        //TESTING
+        val saksbehandler = "Z123456"
+        val subjectHandler: SubjectHandler = mockk<SpringSubjectHandler>()
+        SubjectHandler.set(subjectHandler)
+        every { subjectHandler.userID } returns saksbehandler
+        every { subjectHandler.userName } returns "test"
     }
 
     @AfterEach
