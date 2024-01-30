@@ -93,7 +93,6 @@ class YrkesaktivFtrlVedtakIT(
         oAuthMockServer.start()
         unleash.enableAll()
         MedlRepo.repo.clear()
-        WireMock.configureFor("localhost", mockServer.port());
         mockServer.stubFor(
             WireMock.post("/api/v1/mal/innvilgelse_ftrl/lag-pdf?somKopi=false&utkast=false").willReturn(
                 WireMock.aResponse()
@@ -161,8 +160,8 @@ class YrkesaktivFtrlVedtakIT(
     @Test
     fun `yrkesaktiv vedtak - FTRL - skal hverken opprette fakturaserier eller kansellere dersom det ikke eksisterer førstegangsbehandling`() {
         lagFørstegangsBehandling(Skatteplikttype.SKATTEPLIKTIG, true)
-        WireMock.verify(0, WireMock.deleteRequestedFor(WireMock.urlEqualTo("/fakturaserier/test")));
-        WireMock.verify(0, WireMock.postRequestedFor(WireMock.urlEqualTo("/fakturaserier")));
+        mockServer.verify(0, WireMock.deleteRequestedFor(WireMock.urlEqualTo("/fakturaserier/test")));
+        mockServer.verify(0, WireMock.postRequestedFor(WireMock.urlEqualTo("/fakturaserier")));
     }
 
     @Test
@@ -228,8 +227,8 @@ class YrkesaktivFtrlVedtakIT(
                 }
             }
 
-        WireMock.verify(1, WireMock.postRequestedFor(WireMock.urlEqualTo("/fakturaserier")));
-        WireMock.verify(1, WireMock.deleteRequestedFor(WireMock.urlEqualTo("/fakturaserier/test")));
+        mockServer.verify(1, WireMock.postRequestedFor(WireMock.urlEqualTo("/fakturaserier")));
+        mockServer.verify(1, WireMock.deleteRequestedFor(WireMock.urlEqualTo("/fakturaserier/test")));
     }
 
     private fun lagOpprettSakDto(): OpprettSakDto {
