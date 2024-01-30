@@ -39,8 +39,10 @@ class TrygdeavgiftsberegningsRequestMapperTest {
         assertEquals(request.inntektsperioder[0].periode.fom, inntektsperioder[0].fomDato)
         assertEquals(request.inntektsperioder[0].periode.tom, inntektsperioder[0].tomDato)
         assertEquals(request.inntektsperioder[0].inntektskilde, inntektsperioder[0].type)
-        assertEquals(request.inntektsperioder[0].månedsbeløp?.verdi, inntektsperioder[0].avgiftspliktigInntektMnd.verdi)
-        assertEquals(request.inntektsperioder[0].månedsbeløp?.valuta?.kode, inntektsperioder[0].avgiftspliktigInntektMnd.valuta)
+        assertEquals(request.inntektsperioder[0].månedsbeløp?.verdi,
+            inntektsperioder[0].avgiftspliktigInntektMnd.verdi)
+        assertEquals(request.inntektsperioder[0].månedsbeløp?.valuta?.kode,
+            inntektsperioder[0].avgiftspliktigInntektMnd.valuta)
 
         assertTrue(mapsList.size == 3)
         assertTrue { mapsList[0].size == 2 }
