@@ -17,9 +17,9 @@ class TrygdeavgiftsberegningsRequestMapperTest {
     fun `sjekk at mapping fra trygdeavgiftBeregning blir mappet som forventet`() {
         val mapper = TrygdeavgiftsberegningsRequestMapper()
 
-        val medlemskapsperioder = createMedlemskapsperioder()
-        val skatteforholdTilNorge = createSkatteforholdTilNorge()
-        val inntektsperioder = createInntektsperioder()
+        val medlemskapsperioder = lagMedlemskapsperioder()
+        val skatteforholdTilNorge = lagSkatteforholdTilNorge()
+        val inntektsperioder = lagInntektsperioder()
 
         val (request, mapsList) = mapper.map(medlemskapsperioder, skatteforholdTilNorge, inntektsperioder)
         assertTrue(request.medlemskapsperioder.first().avgiftsdekninger.containsAll(
@@ -48,7 +48,7 @@ class TrygdeavgiftsberegningsRequestMapperTest {
         assertTrue { mapsList[2].size == 2 }
     }
 
-    private fun createMedlemskapsperioder(): List<Medlemskapsperiode> {
+    private fun lagMedlemskapsperioder(): List<Medlemskapsperiode> {
         return listOf(
             Medlemskapsperiode().apply {
                 id = 1L
@@ -74,7 +74,7 @@ class TrygdeavgiftsberegningsRequestMapperTest {
             })
     }
 
-    private fun createSkatteforholdTilNorge(): List<SkatteforholdTilNorge> {
+    private fun lagSkatteforholdTilNorge(): List<SkatteforholdTilNorge> {
         return listOf(
             SkatteforholdTilNorge().apply {
                 id = 1L
@@ -91,7 +91,7 @@ class TrygdeavgiftsberegningsRequestMapperTest {
         )
     }
 
-    private fun createInntektsperioder(): List<Inntektsperiode> {
+    private fun lagInntektsperioder(): List<Inntektsperiode> {
         return listOf(
             Inntektsperiode().apply {
                 id = 1L
