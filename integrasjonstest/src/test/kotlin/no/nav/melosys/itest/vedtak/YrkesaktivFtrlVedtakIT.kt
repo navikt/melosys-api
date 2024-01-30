@@ -53,6 +53,7 @@ import no.nav.melosys.sikkerhet.context.SpringSubjectHandler
 import no.nav.melosys.sikkerhet.context.SubjectHandler
 import org.junit.jupiter.api.AfterEach
 import org.junit.jupiter.api.BeforeEach
+import org.junit.jupiter.api.Disabled
 import org.junit.jupiter.api.Test
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.context.annotation.Import
@@ -60,6 +61,7 @@ import java.time.LocalDate
 import java.util.*
 
 @Import(OAuthMockServer::class)
+@Disabled("Test om dette fjerne mock problem som i https://github.com/navikt/melosys-api/pull/2210")
 class YrkesaktivFtrlVedtakIT(
     @Autowired testDataGenerator: TestDataGenerator,
     @Autowired journalføringService: JournalfoeringService,
