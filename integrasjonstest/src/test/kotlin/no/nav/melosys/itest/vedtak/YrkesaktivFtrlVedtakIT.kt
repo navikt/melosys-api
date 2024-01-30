@@ -61,7 +61,7 @@ import java.time.LocalDate
 import java.util.*
 
 @Import(OAuthMockServer::class)
-@Disabled("Test")
+@Disabled("TODO: Fiks. Denne stopper utvikling og merge til master")
 class YrkesaktivFtrlVedtakIT(
     @Autowired testDataGenerator: TestDataGenerator,
     @Autowired journalføringService: JournalfoeringService,
