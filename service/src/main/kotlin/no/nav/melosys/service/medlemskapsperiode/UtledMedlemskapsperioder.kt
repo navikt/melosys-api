@@ -12,10 +12,11 @@ import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingstyper
 import no.nav.melosys.exception.FunksjonellException
 import no.nav.melosys.service.lovligekombinasjoner.LovligeKombinasjonerMedlemskapsperiodeService
 import org.springframework.data.util.Pair
+import org.springframework.stereotype.Component
 import java.time.LocalDate
 
-class UtledMedlemskapsperioder {
-    val lovligeKombinasjonerMedlemskapsperiodeService = LovligeKombinasjonerMedlemskapsperiodeService()
+@Component
+class UtledMedlemskapsperioder(private val lovligeKombinasjonerMedlemskapsperiodeService: LovligeKombinasjonerMedlemskapsperiodeService) {
 
     fun lagMedlemskapsperioderForAndregangsbehandling(
         opprinneligBehandlingsresultat: Behandlingsresultat,

@@ -22,6 +22,7 @@ import no.nav.melosys.exception.FunksjonellException
 import no.nav.melosys.repository.MedlemAvFolketrygdenRepository
 import no.nav.melosys.service.behandling.BehandlingsresultatService
 import no.nav.melosys.service.behandling.UtledMottaksdato
+import no.nav.melosys.service.lovligekombinasjoner.LovligeKombinasjonerMedlemskapsperiodeService
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.extension.ExtendWith
@@ -38,6 +39,10 @@ class OpprettMedlemskapsperiodeServiceTest {
     @MockK
     private lateinit var utledMottaksdato: UtledMottaksdato
 
+    private val utledBestemmelserOgVilkår = UtledBestemmelserOgVilkår()
+    private val lovligeKombinasjonerMedlemskapsperiodeService = LovligeKombinasjonerMedlemskapsperiodeService()
+    private val utledMedlemskapsperioder = UtledMedlemskapsperioder(lovligeKombinasjonerMedlemskapsperiodeService)
+
     private lateinit var opprettMedlemskapsperiodeService: OpprettMedlemskapsperiodeService
 
     private val BEH_RES_ID: Long = 123321
@@ -47,7 +52,14 @@ class OpprettMedlemskapsperiodeServiceTest {
     @BeforeEach
     fun setup() {
         opprettMedlemskapsperiodeService =
-            OpprettMedlemskapsperiodeService(medlemAvFolketrygdenRepository, behandlingsresultatService, utledMottaksdato)
+            OpprettMedlemskapsperiodeService(
+                medlemAvFolketrygdenRepository,
+                behandlingsresultatService,
+                utledMottaksdato,
+                utledMedlemskapsperioder,
+                utledBestemmelserOgVilkår,
+                lovligeKombinasjonerMedlemskapsperiodeService
+            )
     }
 
     @Test

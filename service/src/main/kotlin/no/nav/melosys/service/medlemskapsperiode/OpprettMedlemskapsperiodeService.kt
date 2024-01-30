@@ -22,7 +22,10 @@ import org.springframework.transaction.annotation.Transactional
 class OpprettMedlemskapsperiodeService(
     private val medlemAvFolketrygdenRepository: MedlemAvFolketrygdenRepository,
     private val behandlingsresultatService: BehandlingsresultatService,
-    private val utledMottaksdato: UtledMottaksdato
+    private val utledMottaksdato: UtledMottaksdato,
+    private val utledMedlemskapsperioder: UtledMedlemskapsperioder,
+    private val utledBestemmelserOgVilkår: UtledBestemmelserOgVilkår,
+    private val lovligeKombinasjonerMedlemskapsperiodeService: LovligeKombinasjonerMedlemskapsperiodeService
 ) {
     @Transactional
     fun opprettForslagPåMedlemskapsperioder(behandlingID: Long, bestemmelse: Folketrygdloven_kap2_bestemmelser?): Collection<Medlemskapsperiode> {
@@ -45,14 +48,14 @@ class OpprettMedlemskapsperiodeService(
 
             if ((behandling.erNyVurdering() || behandling.erManglendeInnbetalingTrygdeavgift()) && opprinneligBehandling != null) {
                 val opprinneligBehandlingsresultat = behandlingsresultatService.hentBehandlingsresultat(opprinneligBehandling.id)
-                medlemskapsperioder = UtledMedlemskapsperioder().lagMedlemskapsperioderForAndregangsbehandling(
+                medlemskapsperioder = utledMedlemskapsperioder.lagMedlemskapsperioderForAndregangsbehandling(
                     opprinneligBehandlingsresultat,
                     bestemmelse,
                     søknad.trygdedekning,
                     behandling.type
                 )
             } else {
-                medlemskapsperioder = UtledMedlemskapsperioder().lagMedlemskapsperioder(
+                medlemskapsperioder = utledMedlemskapsperioder.lagMedlemskapsperioder(
                     UtledMedlemskapsperioderDto(
                         søknad.periode,
                         søknad.trygdedekning,
@@ -91,7 +94,7 @@ class OpprettMedlemskapsperiodeService(
         if (bestemmelse !in støttedeBestemmelser) {
             throw FunksjonellException("Støtter ikke perioder med bestemmelse $bestemmelse for behandlingstema $behandlingstema")
         }
-        val lovligeBestemmelser = LovligeKombinasjonerMedlemskapsperiodeService().hentLovligeBestemmelser(trygdedekning)
+        val lovligeBestemmelser = lovligeKombinasjonerMedlemskapsperiodeService.hentLovligeBestemmelser(trygdedekning)
         if (bestemmelse !in lovligeBestemmelser) {
             throw FunksjonellException("Ulovlig kombinasjon av bestemmelse $bestemmelse og trygdedekning $trygdedekning")
         }
@@ -105,7 +108,7 @@ class OpprettMedlemskapsperiodeService(
     }
 
     fun hentStøttedeBestemmelserMedVilkår(behandlingstema: Behandlingstema): Map<Folketrygdloven_kap2_bestemmelser, Collection<Vilkaar>> =
-        UtledBestemmelserOgVilkår().hentStøttedeBestemmelserOgVilkår(behandlingstema)
+        utledBestemmelserOgVilkår.hentStøttedeBestemmelserOgVilkår(behandlingstema)
 
 
     private fun hentVilkårForBestemmelse(bestemmelse: Folketrygdloven_kap2_bestemmelser, behandlingstema: Behandlingstema): Collection<Vilkaar> =

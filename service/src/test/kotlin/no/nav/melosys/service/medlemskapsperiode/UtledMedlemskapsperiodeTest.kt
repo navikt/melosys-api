@@ -1,9 +1,11 @@
 package no.nav.melosys.service.medlemskapsperiode
 
+import io.kotest.assertions.throwables.shouldThrow
 import io.kotest.matchers.collections.shouldBeEmpty
 import io.kotest.matchers.collections.shouldHaveSize
 import io.kotest.matchers.nulls.shouldNotBeNull
 import io.kotest.matchers.shouldBe
+import io.kotest.matchers.string.shouldContain
 import no.nav.melosys.domain.Behandlingsresultat
 import no.nav.melosys.domain.Medlemskapsperiode
 import no.nav.melosys.domain.folketrygden.MedlemAvFolketrygden
@@ -13,7 +15,7 @@ import no.nav.melosys.domain.kodeverk.Trygdedekninger
 import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingstyper
 import no.nav.melosys.domain.mottatteopplysninger.data.Periode
 import no.nav.melosys.exception.FunksjonellException
-import org.assertj.core.api.Assertions
+import no.nav.melosys.service.lovligekombinasjoner.LovligeKombinasjonerMedlemskapsperiodeService
 import org.junit.jupiter.api.Test
 import java.time.LocalDate
 
@@ -28,18 +30,17 @@ internal class UtledMedlemskapsperioderTest {
     private val TRYGDEDEKNING_2_8 = Trygdedekninger.FTRL_2_9_FØRSTE_LEDD_A_HELSE
     private val MOTTAKSDATO = LocalDate.now()
 
-    private val utledMedlemskapsperioder = UtledMedlemskapsperioder()
+    private val utledMedlemskapsperioder = UtledMedlemskapsperioder(LovligeKombinasjonerMedlemskapsperiodeService())
 
     @Test
     fun lagMedlemskapsperioder_ukjentBestemmelse_kasterFeil() {
-        val request = UtledMedlemskapsperioderDto(
-            Periode(MOTTAKSDATO, MOTTAKSDATO.plusYears(1)),
-            Trygdedekninger.FULL_DEKNING_FTRL, MOTTAKSDATO, ARBEIDSLAND, Folketrygdloven_kap2_bestemmelser.FTRL_KAP2_2_15_ANDRE_LEDD
-        )
-        Assertions.assertThatExceptionOfType(FunksjonellException::class.java)
-            .isThrownBy { utledMedlemskapsperioder.lagMedlemskapsperioder(request) }
-            .withMessageContaining("Støtter ikke bestemmelse")
+        shouldThrow<FunksjonellException> {
+            utledMedlemskapsperioder.lagMedlemskapsperioder(
+                UtledMedlemskapsperioderDto(null, null, null, null, Folketrygdloven_kap2_bestemmelser.FTRL_KAP2_2_15_ANDRE_LEDD)
+            )
+        }.message.shouldContain("Støtter ikke bestemmelse")
     }
+
 
     // Frivillig medlemskap etter 2-8
     // Scenario 1
