@@ -32,7 +32,7 @@ import org.junit.jupiter.api.TestInstance
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.context.annotation.Import
 
-@Import(OAuthMockServer::class)
+@Import(OAuthMockServer::class, KodeverkStub::class)
 @TestInstance(TestInstance.Lifecycle.PER_CLASS)
 class JournalfoeringIT(
     @Autowired testDataGenerator: TestDataGenerator,

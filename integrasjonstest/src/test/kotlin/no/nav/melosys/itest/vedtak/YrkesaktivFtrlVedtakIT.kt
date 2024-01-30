@@ -23,6 +23,7 @@ import no.nav.melosys.domain.mottatteopplysninger.data.Soeknadsland
 import no.nav.melosys.integrasjon.faktureringskomponenten.NyFakturaserieResponseDto
 import no.nav.melosys.integrasjon.trygdeavgift.dto.*
 import no.nav.melosys.itest.JournalfoeringBase
+import no.nav.melosys.itest.KodeverkStub
 import no.nav.melosys.itest.OAuthMockServer
 import no.nav.melosys.melosysmock.medl.MedlRepo
 import no.nav.melosys.melosysmock.testdata.TestDataGenerator
@@ -59,7 +60,7 @@ import org.springframework.context.annotation.Import
 import java.time.LocalDate
 import java.util.*
 
-@Import(OAuthMockServer::class)
+@Import(OAuthMockServer::class, KodeverkStub::class)
 class YrkesaktivFtrlVedtakIT(
     @Autowired testDataGenerator: TestDataGenerator,
     @Autowired journalføringService: JournalfoeringService,
