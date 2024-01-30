@@ -71,13 +71,6 @@ class YrkesaktivEosVedtakIT(
         oAuthMockServer.start()
         unleash.enableAll()
         MedlRepo.repo.clear()
-
-        //TESTING
-        /*val saksbehandler = "Z123456"
-        val subjectHandler: SubjectHandler = mockk<SpringSubjectHandler>()
-        SubjectHandler.set(subjectHandler)
-        every { subjectHandler.userID } returns saksbehandler
-        every { subjectHandler.userName } returns "test"*/
     }
 
     @AfterEach

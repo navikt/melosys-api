@@ -10,6 +10,7 @@ import io.kotest.assertions.withClue
 import io.kotest.matchers.nulls.shouldNotBeNull
 import io.kotest.matchers.shouldBe
 import io.kotest.matchers.types.shouldBeInstanceOf
+import io.mockk.clearMocks
 import io.mockk.every
 import io.mockk.mockk
 import no.nav.melosys.domain.Behandlingsmaate
@@ -81,6 +82,8 @@ class YrkesaktivFtrlVedtakIT(
     @Autowired private val trygdeavgiftsgrunnlagService: TrygdeavgiftsgrunnlagService,
 ) : JournalfoeringBase(testDataGenerator, journalføringService, oppgaveService, prosessinstansRepository) {
 
+    private lateinit var subjectHandler: SubjectHandler
+
     @BeforeEach
     fun setup() {
         oAuthMockServer.start()
@@ -97,7 +100,7 @@ class YrkesaktivFtrlVedtakIT(
         )
 
         val saksbehandler = "Z123456"
-        val subjectHandler: SubjectHandler = mockk<SpringSubjectHandler>()
+        subjectHandler = mockk<SpringSubjectHandler>()
         SubjectHandler.set(subjectHandler)
         every { subjectHandler.userID } returns saksbehandler
         every { subjectHandler.userName } returns "test"
@@ -148,7 +151,7 @@ class YrkesaktivFtrlVedtakIT(
     fun afterEach() {
         oAuthMockServer.stop()
         MedlRepo.repo.clear()
-        SubjectHandler.set(null)
+        clearMocks(subjectHandler)
     }
 
     @Test
