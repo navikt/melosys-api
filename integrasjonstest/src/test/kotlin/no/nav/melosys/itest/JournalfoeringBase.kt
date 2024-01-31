@@ -33,7 +33,6 @@ import java.time.LocalDateTime
 import java.util.*
 import java.util.concurrent.TimeUnit
 
-//@Import(KodeverkStub::class)
 class JournalfoeringBase(
     protected val testDataGenerator: TestDataGenerator,
     protected val journalføringService: JournalfoeringService,
@@ -67,7 +66,7 @@ class JournalfoeringBase(
             )
         )
 
-        mockServer.stubFor(
+        mockServer.stubFor( // TODO: flytt dette til controller i melosys-mock for gjennbruk
             WireMock.get(WireMock.urlPathMatching("/api/v1/kodeverk/.*/koder/betydninger")).willReturn(
                 WireMock.aResponse()
                     .withStatus(200)
