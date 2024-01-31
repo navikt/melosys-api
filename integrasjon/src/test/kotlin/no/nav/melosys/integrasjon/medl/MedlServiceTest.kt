@@ -271,7 +271,7 @@ internal class MedlServiceTest {
                     dekning = DekningMedl.FTRL_2_9_1_LEDD_A.kode,
                     lovvalgsland = "NOR",
                     lovvalg = LovvalgMedl.ENDL.kode,
-                    grunnlag = GrunnlagMedl.FTL_2_8_1_ledd_a.kode,
+                    grunnlag = GrunnlagMedl.FTL_2_8_1_LEDD_A.kode,
                     sporingsinformasjon = MedlemskapsunntakForPost.SporingsinformasjonForPost(
                         kildedokument = KildedokumenttypeMedl.HENV_SOKNAD.getKode()
                     )
@@ -302,7 +302,7 @@ internal class MedlServiceTest {
                     dekning = DekningMedl.FTRL_2_9_1_LEDD_A.kode,
                     lovvalgsland = "NOR",
                     lovvalg = LovvalgMedl.ENDL.kode,
-                    grunnlag = GrunnlagMedl.FTL_2_15_2_ledd.kode,
+                    grunnlag = GrunnlagMedl.FTL_2_15_2_LEDD.kode,
                     sporingsinformasjon = MedlemskapsunntakForPost.SporingsinformasjonForPost(
                         kildedokument = KildedokumenttypeMedl.HENV_SOKNAD.getKode()
                     )
@@ -335,7 +335,7 @@ internal class MedlServiceTest {
                     dekning = DekningMedl.FTRL_2_9_1_LEDD_A.kode,
                     lovvalgsland = "NOR",
                     lovvalg = LovvalgMedl.ENDL.kode,
-                    grunnlag = GrunnlagMedl.FTL_2_15_2_ledd.kode,
+                    grunnlag = GrunnlagMedl.FTL_2_15_2_LEDD.kode,
                     sporingsinformasjon = MedlemskapsunntakForPut.SporingsinformasjonForPut(
                         versjon = 1,
                         kildedokument = KildedokumenttypeMedl.HENV_SOKNAD.getKode()

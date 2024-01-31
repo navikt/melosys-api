@@ -1,9 +1,5 @@
 package no.nav.melosys.integrasjon.medl;
 
-import java.util.Collection;
-import java.util.Map;
-import java.util.Set;
-
 import com.google.common.collect.BiMap;
 import com.google.common.collect.HashBiMap;
 import no.nav.melosys.domain.PeriodeOmLovvalg;
@@ -16,6 +12,10 @@ import no.nav.melosys.domain.kodeverk.lovvalgsbestemmelser.Overgangsregelbestemm
 import no.nav.melosys.domain.kodeverk.lovvalgsbestemmelser.Tilleggsbestemmelser_883_2004;
 import no.nav.melosys.domain.kodeverk.lovvalgsbestemmelser.trygdeavtale.*;
 import no.nav.melosys.exception.TekniskException;
+
+import java.util.Collection;
+import java.util.Map;
+import java.util.Set;
 
 import static java.util.Optional.ofNullable;
 
@@ -228,9 +228,11 @@ public final class MedlPeriodeKonverter {
 
 
         ftrlKap2BestemmelserTilGrunnLagMedlTabell = Map.of(
-            Folketrygdloven_kap2_bestemmelser.FTRL_KAP2_2_8_FØRSTE_LEDD_A, GrunnlagMedl.FTL_2_8_1_ledd_a,
-            Folketrygdloven_kap2_bestemmelser.FTRL_KAP2_2_8_ANDRE_LEDD, GrunnlagMedl.FTL_2_8_2_ledd,
-            Folketrygdloven_kap2_bestemmelser.FTRL_KAP2_2_15_ANDRE_LEDD, GrunnlagMedl.FTL_2_15_2_ledd
+            Folketrygdloven_kap2_bestemmelser.FTRL_KAP2_2_8_FØRSTE_LEDD_A, GrunnlagMedl.FTL_2_8_1_LEDD_A,
+            Folketrygdloven_kap2_bestemmelser.FTRL_KAP2_2_8_ANDRE_LEDD, GrunnlagMedl.FTL_2_8_2_LEDD,
+            Folketrygdloven_kap2_bestemmelser.FTRL_KAP2_2_15_ANDRE_LEDD, GrunnlagMedl.FTL_2_15_2_LEDD,
+            Folketrygdloven_kap2_bestemmelser.FTRL_KAP2_2_7A, GrunnlagMedl.FTL_2_7A,
+            Folketrygdloven_kap2_bestemmelser.FTRL_KAP2_2_7_FØRSTE_LEDD, GrunnlagMedl.FTL_2_7_1_LEDD
         );
     }
 
@@ -246,8 +248,7 @@ public final class MedlPeriodeKonverter {
 
     public static DekningMedl tilMedlTrygdeDekning(Trygdedekninger dekning, Folketrygdloven_kap2_bestemmelser bestemmelse) {
         return switch (bestemmelse) {
-            //TODO: MELOSYS-6373 - FTRL_KAP2_2_7_FØRSTE_LEDD, FTRL_KAP2_2_7A, FTRL_KAP2_2_7_FJERDE_LEDD
-            case FTRL_KAP2_2_8_FØRSTE_LEDD_A, FTRL_KAP2_2_8_ANDRE_LEDD, FTRL_KAP2_2_15_ANDRE_LEDD -> mapForFtrl(dekning);
+            case FTRL_KAP2_2_8_FØRSTE_LEDD_A, FTRL_KAP2_2_8_ANDRE_LEDD, FTRL_KAP2_2_15_ANDRE_LEDD, FTRL_KAP2_2_7_FØRSTE_LEDD, FTRL_KAP2_2_7A -> mapForFtrl(dekning);
             default -> throw new TekniskException("Bestemmelse støttes ikke for FTRL: " + bestemmelse.getKode());
         };
     }
@@ -259,6 +260,9 @@ public final class MedlPeriodeKonverter {
             case FTRL_2_9_FØRSTE_LEDD_B_PENSJON -> DekningMedl.FTRL_2_9_1_LEDD_B;
             case FTRL_2_9_FØRSTE_LEDD_C_HELSE_PENSJON -> DekningMedl.FTRL_2_9_1_LEDD_C;
             case FTRL_2_9_FØRSTE_LEDD_C_ANDRE_LEDD_HELSE_PENSJON_SYKE_FORELDREPENGER -> DekningMedl.FTRL_2_9_2_LEDD_1C;
+            case FTRL_2_7_TREDJE_LEDD_B_HELSE_SYKE_FORELDREPENGER -> DekningMedl.FTRL_2_7_3_LEDD_B;
+            case FTRL_2_7A_ANDRE_LEDD_B_HELSE_SYKE_FORELDREPENGER -> DekningMedl.FTRL_2_7A_2_LEDD_B;
+            case FULL_DEKNING_FTRL -> DekningMedl.FULL;
             default -> throw new TekniskException("Dekningstype støttes ikke for FTRL:" + dekning.getKode());
         };
     }
