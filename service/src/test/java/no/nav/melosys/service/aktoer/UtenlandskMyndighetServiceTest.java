@@ -174,9 +174,11 @@ class UtenlandskMyndighetServiceTest {
         UtenlandskMyndighet svenskUtenlandskMyndighet = new UtenlandskMyndighet();
         svenskUtenlandskMyndighet.landkode = Land_iso2.SE;
         svenskUtenlandskMyndighet.institusjonskode = "INSTSE";
+        svenskUtenlandskMyndighet.postnummer = "123";
         UtenlandskMyndighet danskUtenlandskMyndighet = new UtenlandskMyndighet();
         danskUtenlandskMyndighet.landkode = Land_iso2.DK;
         danskUtenlandskMyndighet.institusjonskode = "INSTDK";
+        danskUtenlandskMyndighet.postnummer = "123";
         List<UtenlandskMyndighet> utenlandskMyndighetList = List.of(
             svenskUtenlandskMyndighet, danskUtenlandskMyndighet
         );
@@ -236,6 +238,7 @@ class UtenlandskMyndighetServiceTest {
         UtenlandskMyndighet utenlandskMyndighet = new UtenlandskMyndighet();
         utenlandskMyndighet.institusjonskode = institusjonID;
         utenlandskMyndighet.landkode = landkode;
+        utenlandskMyndighet.postnummer = "123";
         if (preferanse != null) {
             utenlandskMyndighet.preferanser.add(new Preferanse(1L, preferanse));
         }

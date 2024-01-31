@@ -17,7 +17,7 @@ data class UfmKontrollData(
     val persondata: Persondata,
     val medlemskapDokument: MedlemskapDokument,
     val inntektDokument: InntektDokument,
-    val utbetalingDokument: UtbetalingDokument,
+    val utbetalingDokument: UtbetalingDokument? = null,
     val mottatteOpplysningerData: Optional<MottatteOpplysningerData>? = null,
     val personhistorikkDokumenter: List<PersonhistorikkDokument?>,
     val persondataMedHistorikk: Optional<PersonMedHistorikk>? = null
