@@ -50,7 +50,7 @@ class InnvilgelseFtrlMapper(
             .trygdeavgiftMottaker(trygdeavgiftMottakerService.getTrygdeavgiftMottaker(medlemAvFolketrygden.fastsattTrygdeavgift.trygdeavgiftsgrunnlag))
             .fullmektigTrygdeavgift(finnFullmektigTrygdeavgift(behandlingsresultat.behandling))
             .skatteplikttype(medlemAvFolketrygden.utledSkatteplikttype())
-            .ftrl_2_8_begrunnelse(hentFtrlNærTilknytningNorgeBegrunnelse(behandlingsresultat.vilkaarsresultater))
+            .begrunnelse(hentFtrlNærTilknytningNorgeBegrunnelse(behandlingsresultat.vilkaarsresultater))
             .begrunnelseAnnenGrunnFritekst(hentSaerligBegrunnelseFritekst(behandlingsresultat.vilkaarsresultater))
             .nyVurderingBakgrunn(brevbestilling.nyVurderingBakgrunn)
             .innledningFritekst(brevbestilling.innledningFritekst)
