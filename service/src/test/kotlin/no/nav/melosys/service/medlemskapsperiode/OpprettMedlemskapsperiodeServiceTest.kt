@@ -1,5 +1,6 @@
 package no.nav.melosys.service.medlemskapsperiode
 
+import io.getunleash.FakeUnleash
 import io.kotest.assertions.throwables.shouldThrow
 import io.kotest.matchers.collections.shouldHaveSize
 import io.kotest.matchers.collections.shouldNotBeEmpty
@@ -30,6 +31,7 @@ import java.time.LocalDate
 
 @ExtendWith(MockKExtension::class)
 class OpprettMedlemskapsperiodeServiceTest {
+
     @MockK
     private lateinit var medlemAvFolketrygdenRepository: MedlemAvFolketrygdenRepository
 
@@ -39,7 +41,10 @@ class OpprettMedlemskapsperiodeServiceTest {
     @MockK
     private lateinit var utledMottaksdato: UtledMottaksdato
 
-    private val utledBestemmelserOgVilkår = UtledBestemmelserOgVilkår()
+
+    private val fakeUnleash = FakeUnleash()
+
+    private val utledBestemmelserOgVilkår = UtledBestemmelserOgVilkår(fakeUnleash)
     private val lovligeKombinasjonerMedlemskapsperiodeService = LovligeKombinasjonerMedlemskapsperiodeService()
     private val utledMedlemskapsperioder = UtledMedlemskapsperioder(lovligeKombinasjonerMedlemskapsperiodeService)
 

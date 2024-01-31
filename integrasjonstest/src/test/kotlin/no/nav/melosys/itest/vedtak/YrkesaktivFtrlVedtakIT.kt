@@ -20,6 +20,7 @@ import no.nav.melosys.domain.kodeverk.behandlinger.*
 import no.nav.melosys.domain.mottatteopplysninger.SøknadNorgeEllerUtenforEØS
 import no.nav.melosys.domain.mottatteopplysninger.data.Periode
 import no.nav.melosys.domain.mottatteopplysninger.data.Soeknadsland
+import no.nav.melosys.featuretoggle.ToggleName
 import no.nav.melosys.integrasjon.faktureringskomponenten.NyFakturaserieResponseDto
 import no.nav.melosys.integrasjon.trygdeavgift.dto.*
 import no.nav.melosys.itest.JournalfoeringBase
@@ -87,7 +88,7 @@ class YrkesaktivFtrlVedtakIT(
     @BeforeEach
     fun setup() {
         oAuthMockServer.start()
-        unleash.enableAll()
+        unleash.enableAllExcept(ToggleName.MELOSYS_FOLKETRYGDEN_2_7)
         MedlRepo.repo.clear()
         originalSubjectHandler = SubjectHandler.getInstance()
 
@@ -156,8 +157,8 @@ class YrkesaktivFtrlVedtakIT(
     @Test
     fun `yrkesaktiv vedtak - FTRL - skal hverken opprette fakturaserier eller kansellere dersom det ikke eksisterer førstegangsbehandling`() {
         lagFørstegangsBehandling(Skatteplikttype.SKATTEPLIKTIG, true)
-        mockServer.verify(0, WireMock.deleteRequestedFor(WireMock.urlEqualTo("/fakturaserier/test")));
-        mockServer.verify(0, WireMock.postRequestedFor(WireMock.urlEqualTo("/fakturaserier")));
+        mockServer.verify(0, WireMock.deleteRequestedFor(WireMock.urlEqualTo("/fakturaserier/test")))
+        mockServer.verify(0, WireMock.postRequestedFor(WireMock.urlEqualTo("/fakturaserier")))
     }
 
     @Test
@@ -223,8 +224,8 @@ class YrkesaktivFtrlVedtakIT(
                 }
             }
 
-        mockServer.verify(1, WireMock.postRequestedFor(WireMock.urlEqualTo("/fakturaserier")));
-        mockServer.verify(1, WireMock.deleteRequestedFor(WireMock.urlEqualTo("/fakturaserier/test")));
+        mockServer.verify(1, WireMock.postRequestedFor(WireMock.urlEqualTo("/fakturaserier")))
+        mockServer.verify(1, WireMock.deleteRequestedFor(WireMock.urlEqualTo("/fakturaserier/test")))
     }
 
     private fun lagOpprettSakDto(): OpprettSakDto {
@@ -299,7 +300,7 @@ class YrkesaktivFtrlVedtakIT(
         }
         vilkaarsresultatService.registrerVilkår(behandling.id, listOf(vilkaar))
 
-        simulerTrygdeavgiftBeregning(behandling.id, skatteplikttype, arbeidsgiversavgiftBetales);
+        simulerTrygdeavgiftBeregning(behandling.id, skatteplikttype, arbeidsgiversavgiftBetales)
 
         val vedtakRequest = FattVedtakRequest.Builder()
             .medBehandlingsresultatType(Behandlingsresultattyper.MEDLEM_I_FOLKETRYGDEN)
