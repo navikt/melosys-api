@@ -44,7 +44,8 @@ class OpprettMedlemskapsperiodeServiceTest {
 
     private val fakeUnleash = FakeUnleash()
 
-    private val utledBestemmelserOgVilkår = UtledBestemmelserOgVilkår(fakeUnleash)    private val lovligeKombinasjonerMedlemskapsperiodeService = LovligeKombinasjonerMedlemskapsperiodeService()
+    private val utledBestemmelserOgVilkår = UtledBestemmelserOgVilkår(fakeUnleash)
+    private val lovligeKombinasjonerMedlemskapsperiodeService = LovligeKombinasjonerMedlemskapsperiodeService()
     private val utledMedlemskapsperioder = UtledMedlemskapsperioder(lovligeKombinasjonerMedlemskapsperiodeService)
 
     private lateinit var opprettMedlemskapsperiodeService: OpprettMedlemskapsperiodeService

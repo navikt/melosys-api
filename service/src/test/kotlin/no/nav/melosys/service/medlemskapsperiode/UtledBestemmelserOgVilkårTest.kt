@@ -1,14 +1,18 @@
 package no.nav.melosys.service.medlemskapsperiode
 
 import io.getunleash.FakeUnleash
-import io.kotest.matchers.maps.shouldHaveKeys
+import io.kotest.matchers.collections.shouldBeEmpty
+import io.kotest.matchers.collections.shouldContain
+import io.kotest.matchers.collections.shouldContainAll
+import io.kotest.matchers.collections.shouldNotBeEmpty
+import io.kotest.matchers.maps.*
+import io.kotest.matchers.nulls.shouldNotBeNull
 import no.nav.melosys.domain.kodeverk.Folketrygdloven_kap2_bestemmelser
 import no.nav.melosys.domain.kodeverk.Vilkaar
 import no.nav.melosys.domain.kodeverk.begrunnelser.folketrygdloven.Ftrl_2_7_begrunnelser
 import no.nav.melosys.domain.kodeverk.begrunnelser.folketrygdloven.Ftrl_2_8_naer_tilknytning_norge_begrunnelser
 import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingstema
 import no.nav.melosys.featuretoggle.ToggleName
-import org.assertj.core.api.Assertions.assertThat
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
 
@@ -36,8 +40,8 @@ class UtledBestemmelserOgVilkårTest {
     fun hentStøttede_behandlingstemaYRKESAKTIV_returnererStøttedeMedToggle() {
         fakeUnleash.enable(ToggleName.MELOSYS_FOLKETRYGDEN_2_7)
 
-        assertThat(utledBestemmelserOgVilkår.hentStøttedeBestemmelserOgVilkår(Behandlingstema.YRKESAKTIV))
-            .containsOnlyKeys(
+        utledBestemmelserOgVilkår.hentStøttedeBestemmelserOgVilkår(Behandlingstema.YRKESAKTIV)
+            .shouldContainKeys(
                 Folketrygdloven_kap2_bestemmelser.FTRL_KAP2_2_8_FØRSTE_LEDD_A,
                 Folketrygdloven_kap2_bestemmelser.FTRL_KAP2_2_8_ANDRE_LEDD,
                 Folketrygdloven_kap2_bestemmelser.FTRL_KAP2_2_7_FØRSTE_LEDD,
@@ -56,8 +60,11 @@ class UtledBestemmelserOgVilkårTest {
     fun hentStøttede_behandlingstemaIKKE_YRKESAKTIV_returnererFærreMedToggle() {
         fakeUnleash.enable(ToggleName.MELOSYS_FOLKETRYGDEN_2_7)
 
-        assertThat(utledBestemmelserOgVilkår.hentStøttedeBestemmelserOgVilkår(Behandlingstema.IKKE_YRKESAKTIV))
-            .containsOnlyKeys(Folketrygdloven_kap2_bestemmelser.FTRL_KAP2_2_8_ANDRE_LEDD, Folketrygdloven_kap2_bestemmelser.FTRL_KAP2_2_7_FØRSTE_LEDD)
+        utledBestemmelserOgVilkår.hentStøttedeBestemmelserOgVilkår(Behandlingstema.IKKE_YRKESAKTIV)
+            .shouldContainKeys(
+                Folketrygdloven_kap2_bestemmelser.FTRL_KAP2_2_8_ANDRE_LEDD,
+                Folketrygdloven_kap2_bestemmelser.FTRL_KAP2_2_7_FØRSTE_LEDD
+            )
     }
 
     @Test
@@ -89,14 +96,16 @@ class UtledBestemmelserOgVilkårTest {
     @Test
     fun hentIkkeStøttede_behandlingstemaYRKESAKTIV_returnererIkkeStøttedeMedToggle() {
         fakeUnleash.enableAll()
-        assertThat(utledBestemmelserOgVilkår.hentIkkeStøttedeBestemmelserOgVilkår(Behandlingstema.YRKESAKTIV))
-            .isNotEmpty()
-            .doesNotContainKeys(
+        utledBestemmelserOgVilkår.hentIkkeStøttedeBestemmelserOgVilkår(Behandlingstema.YRKESAKTIV).run {
+            shouldNotBeEmpty()
+            shouldNotHaveKeys(
                 Folketrygdloven_kap2_bestemmelser.FTRL_KAP2_2_8_FØRSTE_LEDD_A,
                 Folketrygdloven_kap2_bestemmelser.FTRL_KAP2_2_8_ANDRE_LEDD,
                 Folketrygdloven_kap2_bestemmelser.FTRL_KAP2_2_7_FØRSTE_LEDD,
-                Folketrygdloven_kap2_bestemmelser.FTRL_KAP2_2_7A,
+                Folketrygdloven_kap2_bestemmelser.FTRL_KAP2_2_7A
             )
+        }
+
     }
 
     @Test
@@ -111,9 +120,10 @@ class UtledBestemmelserOgVilkårTest {
 
     @Test
     fun hentBegrunnelserForVilkår_vilkårErFTRL_2_7_RIMELIGHETSVURDERING_returnererBegrunnelser() {
-        assertThat(utledBestemmelserOgVilkår.hentBegrunnelserForVilkår(Vilkaar.FTRL_2_7_RIMELIGHETSVURDERING))
-            .isNotNull.isNotEmpty
-            .containsAll(Ftrl_2_7_begrunnelser.values().map { it.kode })
+        utledBestemmelserOgVilkår.hentBegrunnelserForVilkår(Vilkaar.FTRL_2_7_RIMELIGHETSVURDERING)
+            .shouldNotBeNull()
+            .shouldNotBeEmpty()
+            .shouldContainAll(Ftrl_2_7_begrunnelser.values().map { it.kode })
     }
 
     @Test
