@@ -208,6 +208,45 @@ class UfmKontrollServiceTest {
 
     @Test
     fun
+        utførKontrollerOgRegistrerFeil_A003_lovvalgslandUtenforNorge_boddINorgeIPerioden_sedÅpenPeriodeTil_feilKontrollManuellBehandling() {
+        sedDokument.apply {
+            sedType = SedType.A003
+            lovvalgslandKode = Landkoder.SE
+            avsenderLandkode = Landkoder.SE
+            lovvalgsperiode = Periode(LocalDate.of(2023, 3,23), null)
+            setErEndring(false)
+        }
+
+        personopplysninger.apply {
+            bostedsadresse = Bostedsadresse(
+                StrukturertAdresse().apply { landkode = "NO" }, null, LocalDate.of(2023, 1,2), LocalDate.of(2023,12,20), null,
+                null,
+                false
+            )
+        }
+        every { kontrollresultatRepository.saveAll(capture(kontrollresultatSlot)) }
+            .answers {
+                kontrollresultatSlot.captured.shouldHaveSize(2)
+                    .sortedBy { it.begrunnelse }
+                    .apply {
+                        first().apply {
+                            begrunnelse.shouldBe(Kontroll_begrunnelser.BOSATT_I_NORGE_I_PERIODEN)
+                            behandlingsresultat.id.shouldBe(BEHANDLINGSRESULTAT_ID)
+                        }
+                        last().apply {
+                            begrunnelse.shouldBe(Kontroll_begrunnelser.INGEN_SLUTTDATO)
+                            behandlingsresultat.id.shouldBe(BEHANDLINGSRESULTAT_ID)
+                        }
+                    }
+            }
+        setupMockedTestData()
+
+
+        ufmKontrollService.utførKontrollerOgRegistrerFeil(BEHANDLING_ID)
+    }
+
+    @Test
+    fun
         utførKontrollerOgRegistrerFeil_A003_lovvalgslandUtenforNorge_medOverlappendePeriodeUtenMedlemskap_erOpprinnelig_harUliktLand_ingenYtterligeOpplysninger_feilKontroll() {
         sedDokument.apply {
             sedType = SedType.A003
