@@ -20,6 +20,7 @@ import no.nav.melosys.domain.kodeverk.behandlinger.*
 import no.nav.melosys.domain.mottatteopplysninger.SøknadNorgeEllerUtenforEØS
 import no.nav.melosys.domain.mottatteopplysninger.data.Periode
 import no.nav.melosys.domain.mottatteopplysninger.data.Soeknadsland
+import no.nav.melosys.featuretoggle.ToggleName
 import no.nav.melosys.integrasjon.faktureringskomponenten.NyFakturaserieResponseDto
 import no.nav.melosys.integrasjon.trygdeavgift.dto.*
 import no.nav.melosys.itest.JournalfoeringBase
@@ -87,7 +88,7 @@ class YrkesaktivFtrlVedtakIT(
     @BeforeEach
     fun setup() {
         oAuthMockServer.start()
-        unleash.enableAll()
+        unleash.enableAllExcept(ToggleName.MELOSYS_FOLKETRYGDEN_2_7)
         MedlRepo.repo.clear()
         originalSubjectHandler = SubjectHandler.getInstance()
 
