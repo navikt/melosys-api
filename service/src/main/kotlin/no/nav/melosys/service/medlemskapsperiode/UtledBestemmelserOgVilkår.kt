@@ -14,6 +14,22 @@ import org.springframework.stereotype.Component
 @Component
 class UtledBestemmelserOgVilkår(val unleash: Unleash) {
 
+    val pliktigeBestemmelser = listOf(
+        FTRL_KAP2_2_1_FØRSTE_LEDD,
+        FTRL_KAP2_2_1_FJERDE_LEDD,
+        FTRL_KAP2_2_2,
+        FTRL_KAP2_2_3_ANDRE_LEDD,
+        FTRL_KAP2_2_5_FØRSTE_LEDD_A,
+        FTRL_KAP2_2_5_FØRSTE_LEDD_B,
+        FTRL_KAP2_2_5_FØRSTE_LEDD_C,
+        FTRL_KAP2_2_5_FØRSTE_LEDD_D,
+        FTRL_KAP2_2_5_FØRSTE_LEDD_E,
+        FTRL_KAP2_2_5_FØRSTE_LEDD_F,
+        FTRL_KAP2_2_5_FØRSTE_LEDD_G,
+        FTRL_KAP2_2_5_FØRSTE_LEDD_H,
+        FTRL_KAP2_2_5_ANDRE_LEDD,
+    )
+
     val støttetBestemmelser2_8 = listOf(
         FTRL_KAP2_2_8_FØRSTE_LEDD_A,
         FTRL_KAP2_2_8_ANDRE_LEDD
