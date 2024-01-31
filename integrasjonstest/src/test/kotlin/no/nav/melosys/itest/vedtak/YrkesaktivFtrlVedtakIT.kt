@@ -82,12 +82,20 @@ class YrkesaktivFtrlVedtakIT(
     @Autowired private val trygdeavgiftsgrunnlagService: TrygdeavgiftsgrunnlagService,
 ) : JournalfoeringBase(testDataGenerator, journalføringService, oppgaveService, prosessinstansRepository) {
 
+    private var originalSubjectHandler: SubjectHandler? = null
+
     @BeforeEach
     fun setup() {
         oAuthMockServer.start()
         unleash.enableAll()
         MedlRepo.repo.clear()
-        WireMock.configureFor("localhost", mockServer.port());
+        originalSubjectHandler = SubjectHandler.getInstance()
+
+        // Now set the new state for the test
+        val mockHandler = mockk<SpringSubjectHandler>()
+        SubjectHandler.set(mockHandler)
+        every { mockHandler.userID } returns "Z123456"
+        every { mockHandler.userName } returns "test"
         mockServer.stubFor(
             WireMock.post("/api/v1/mal/innvilgelse_ftrl/lag-pdf?somKopi=false&utkast=false").willReturn(
                 WireMock.aResponse()
@@ -96,12 +104,6 @@ class YrkesaktivFtrlVedtakIT(
                     .withBody(ByteArray(0))
             )
         )
-
-        val saksbehandler = "Z123456"
-        val subjectHandler: SubjectHandler = mockk<SpringSubjectHandler>()
-        SubjectHandler.set(subjectHandler)
-        every { subjectHandler.userID } returns saksbehandler
-        every { subjectHandler.userName } returns "test"
 
         val expectedResponse = listOf(
             TrygdeavgiftsberegningResponse(
@@ -149,13 +151,14 @@ class YrkesaktivFtrlVedtakIT(
     fun afterEach() {
         oAuthMockServer.stop()
         MedlRepo.repo.clear()
+        SubjectHandler.set(originalSubjectHandler)
     }
 
     @Test
     fun `yrkesaktiv vedtak - FTRL - skal hverken opprette fakturaserier eller kansellere dersom det ikke eksisterer førstegangsbehandling`() {
         lagFørstegangsBehandling(Skatteplikttype.SKATTEPLIKTIG, true)
-        WireMock.verify(0, WireMock.deleteRequestedFor(WireMock.urlEqualTo("/fakturaserier/test")));
-        WireMock.verify(0, WireMock.postRequestedFor(WireMock.urlEqualTo("/fakturaserier")));
+        mockServer.verify(0, WireMock.deleteRequestedFor(WireMock.urlEqualTo("/fakturaserier/test")));
+        mockServer.verify(0, WireMock.postRequestedFor(WireMock.urlEqualTo("/fakturaserier")));
     }
 
     @Test
@@ -221,8 +224,8 @@ class YrkesaktivFtrlVedtakIT(
                 }
             }
 
-        WireMock.verify(1, WireMock.postRequestedFor(WireMock.urlEqualTo("/fakturaserier")));
-        WireMock.verify(1, WireMock.deleteRequestedFor(WireMock.urlEqualTo("/fakturaserier/test")));
+        mockServer.verify(1, WireMock.postRequestedFor(WireMock.urlEqualTo("/fakturaserier")));
+        mockServer.verify(1, WireMock.deleteRequestedFor(WireMock.urlEqualTo("/fakturaserier/test")));
     }
 
     private fun lagOpprettSakDto(): OpprettSakDto {
