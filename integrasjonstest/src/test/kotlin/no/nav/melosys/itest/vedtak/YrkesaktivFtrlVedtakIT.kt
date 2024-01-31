@@ -20,9 +20,11 @@ import no.nav.melosys.domain.kodeverk.behandlinger.*
 import no.nav.melosys.domain.mottatteopplysninger.SøknadNorgeEllerUtenforEØS
 import no.nav.melosys.domain.mottatteopplysninger.data.Periode
 import no.nav.melosys.domain.mottatteopplysninger.data.Soeknadsland
+import no.nav.melosys.featuretoggle.ToggleName
 import no.nav.melosys.integrasjon.faktureringskomponenten.NyFakturaserieResponseDto
 import no.nav.melosys.integrasjon.trygdeavgift.dto.*
 import no.nav.melosys.itest.JournalfoeringBase
+import no.nav.melosys.itest.KodeverkStub
 import no.nav.melosys.itest.OAuthMockServer
 import no.nav.melosys.melosysmock.medl.MedlRepo
 import no.nav.melosys.melosysmock.testdata.TestDataGenerator
@@ -59,7 +61,7 @@ import org.springframework.context.annotation.Import
 import java.time.LocalDate
 import java.util.*
 
-@Import(OAuthMockServer::class)
+@Import(OAuthMockServer::class, KodeverkStub::class)
 class YrkesaktivFtrlVedtakIT(
     @Autowired testDataGenerator: TestDataGenerator,
     @Autowired journalføringService: JournalfoeringService,
@@ -81,12 +83,19 @@ class YrkesaktivFtrlVedtakIT(
     @Autowired private val trygdeavgiftsgrunnlagService: TrygdeavgiftsgrunnlagService,
 ) : JournalfoeringBase(testDataGenerator, journalføringService, oppgaveService, prosessinstansRepository) {
 
+    private var originalSubjectHandler: SubjectHandler? = null
+
     @BeforeEach
     fun setup() {
         oAuthMockServer.start()
-        unleash.enableAll()
+        unleash.enableAllExcept(ToggleName.MELOSYS_FOLKETRYGDEN_2_7)
         MedlRepo.repo.clear()
-        WireMock.configureFor("localhost", mockServer.port());
+        originalSubjectHandler = SubjectHandler.getInstance()
+
+        val mockHandler = mockk<SpringSubjectHandler>()
+        SubjectHandler.set(mockHandler)
+        every { mockHandler.userID } returns "Z123456"
+        every { mockHandler.userName } returns "test"
         mockServer.stubFor(
             WireMock.post("/api/v1/mal/innvilgelse_ftrl/lag-pdf?somKopi=false&utkast=false").willReturn(
                 WireMock.aResponse()
@@ -95,12 +104,6 @@ class YrkesaktivFtrlVedtakIT(
                     .withBody(ByteArray(0))
             )
         )
-
-        val saksbehandler = "Z123456"
-        val subjectHandler: SubjectHandler = mockk<SpringSubjectHandler>()
-        SubjectHandler.set(subjectHandler)
-        every { subjectHandler.userID } returns saksbehandler
-        every { subjectHandler.userName } returns "test"
 
         val expectedResponse = listOf(
             TrygdeavgiftsberegningResponse(
@@ -148,13 +151,14 @@ class YrkesaktivFtrlVedtakIT(
     fun afterEach() {
         oAuthMockServer.stop()
         MedlRepo.repo.clear()
+        SubjectHandler.set(originalSubjectHandler)
     }
 
     @Test
     fun `yrkesaktiv vedtak - FTRL - skal hverken opprette fakturaserier eller kansellere dersom det ikke eksisterer førstegangsbehandling`() {
         lagFørstegangsBehandling(Skatteplikttype.SKATTEPLIKTIG, true)
-        WireMock.verify(0, WireMock.deleteRequestedFor(WireMock.urlEqualTo("/fakturaserier/test")));
-        WireMock.verify(0, WireMock.postRequestedFor(WireMock.urlEqualTo("/fakturaserier")));
+        mockServer.verify(0, WireMock.deleteRequestedFor(WireMock.urlEqualTo("/fakturaserier/test")))
+        mockServer.verify(0, WireMock.postRequestedFor(WireMock.urlEqualTo("/fakturaserier")))
     }
 
     @Test
@@ -220,8 +224,8 @@ class YrkesaktivFtrlVedtakIT(
                 }
             }
 
-        WireMock.verify(1, WireMock.postRequestedFor(WireMock.urlEqualTo("/fakturaserier")));
-        WireMock.verify(1, WireMock.deleteRequestedFor(WireMock.urlEqualTo("/fakturaserier/test")));
+        mockServer.verify(1, WireMock.postRequestedFor(WireMock.urlEqualTo("/fakturaserier")))
+        mockServer.verify(1, WireMock.deleteRequestedFor(WireMock.urlEqualTo("/fakturaserier/test")))
     }
 
     private fun lagOpprettSakDto(): OpprettSakDto {
@@ -296,7 +300,7 @@ class YrkesaktivFtrlVedtakIT(
         }
         vilkaarsresultatService.registrerVilkår(behandling.id, listOf(vilkaar))
 
-        simulerTrygdeavgiftBeregning(behandling.id, skatteplikttype, arbeidsgiversavgiftBetales);
+        simulerTrygdeavgiftBeregning(behandling.id, skatteplikttype, arbeidsgiversavgiftBetales)
 
         val vedtakRequest = FattVedtakRequest.Builder()
             .medBehandlingsresultatType(Behandlingsresultattyper.MEDLEM_I_FOLKETRYGDEN)

@@ -11,7 +11,7 @@ import no.nav.melosys.domain.kodeverk.Sakstyper;
 import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingsaarsaktyper;
 import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingstema;
 import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingstyper;
-import no.nav.melosys.service.lovligekombinasjoner.LovligeKombinasjonerService;
+import no.nav.melosys.service.lovligekombinasjoner.LovligeKombinasjonerSaksbehandlingService;
 import no.nav.security.token.support.core.api.Protected;
 import org.springframework.context.annotation.Scope;
 import org.springframework.http.ResponseEntity;
@@ -26,11 +26,11 @@ import org.springframework.web.context.WebApplicationContext;
 @RequestMapping("/saksbehandling")
 @Api(tags = {"saksbehandling"})
 @Scope(value = WebApplicationContext.SCOPE_REQUEST)
-public class LovligeKombinasjonerTjeneste {
-    private final LovligeKombinasjonerService lovligeKombinasjonerService;
+public class LovligeKombinasjonerSaksbehandlingTjeneste {
+    private final LovligeKombinasjonerSaksbehandlingService lovligeKombinasjonerSaksbehandlingService;
 
-    public LovligeKombinasjonerTjeneste(LovligeKombinasjonerService lovligeKombinasjonerService) {
-        this.lovligeKombinasjonerService = lovligeKombinasjonerService;
+    public LovligeKombinasjonerSaksbehandlingTjeneste(LovligeKombinasjonerSaksbehandlingService lovligeKombinasjonerSaksbehandlingService) {
+        this.lovligeKombinasjonerSaksbehandlingService = lovligeKombinasjonerSaksbehandlingService;
     }
 
     @GetMapping("/sakstyper/hent-lovlige-kombinasjoner")
@@ -38,7 +38,7 @@ public class LovligeKombinasjonerTjeneste {
     public ResponseEntity<Set<Sakstyper>> hentAlleMuligeSakstyper(
         @RequestParam(value = "saksnummer", required = false) String saksnummer
     ) {
-        return ResponseEntity.ok(lovligeKombinasjonerService.hentMuligeSakstyper(saksnummer));
+        return ResponseEntity.ok(lovligeKombinasjonerSaksbehandlingService.hentMuligeSakstyper(saksnummer));
     }
 
     @GetMapping("/sakstemaer/hent-lovlige-kombinasjoner")
@@ -48,7 +48,7 @@ public class LovligeKombinasjonerTjeneste {
         @RequestParam("sakstype") Sakstyper sakstype,
         @RequestParam(value = "saksnummer", required = false) String saksnummer
     ) {
-        return ResponseEntity.ok(lovligeKombinasjonerService.hentMuligeSakstemaer(hovedpart, sakstype, saksnummer));
+        return ResponseEntity.ok(lovligeKombinasjonerSaksbehandlingService.hentMuligeSakstemaer(hovedpart, sakstype, saksnummer));
     }
 
     @GetMapping("/behandlingstemaer/hent-lovlige-kombinasjoner")
@@ -60,7 +60,7 @@ public class LovligeKombinasjonerTjeneste {
         @RequestParam(value = "aktivBehandlingID", required = false) Long aktivBehandlingID,
         @RequestParam(value = "sistBehandlingstema", required = false) Behandlingstema sistBehandlingstema
     ) {
-        return ResponseEntity.ok(lovligeKombinasjonerService.hentMuligeBehandlingstemaer(hovedpart, sakstype, sakstema, aktivBehandlingID, sistBehandlingstema));
+        return ResponseEntity.ok(lovligeKombinasjonerSaksbehandlingService.hentMuligeBehandlingstemaer(hovedpart, sakstype, sakstema, aktivBehandlingID, sistBehandlingstema));
     }
 
     @GetMapping("/behandlingstyper/hent-lovlige-kombinasjoner")
@@ -73,12 +73,12 @@ public class LovligeKombinasjonerTjeneste {
         @RequestParam(value = "aktivBehandlingID", required = false) Long aktivBehandlingID,
         @RequestParam(value = "sisteBehandlingsID", required = false) Long sisteBehandlingsID
     ) {
-        return ResponseEntity.ok(lovligeKombinasjonerService.hentMuligeBehandlingstyper(hovedpart, sakstype, sakstema, behandlingstema, aktivBehandlingID, sisteBehandlingsID));
+        return ResponseEntity.ok(lovligeKombinasjonerSaksbehandlingService.hentMuligeBehandlingstyper(hovedpart, sakstype, sakstema, behandlingstema, aktivBehandlingID, sisteBehandlingsID));
     }
 
     @GetMapping("/behandlingsaarsaktyper/hent-lovlige-kombinasjoner")
     @ApiOperation(value = "Henter alle mulige behandlingsårsaktyper basert på valgt behandlingstype", notes = ("Henter alle mulige behandlingsårsaktyper basert på valgt behandlingstype"))
     public ResponseEntity<List<Behandlingsaarsaktyper>> hentAlleMuligeBehandlingsårsaktyper(@RequestParam("behandlingstype") Behandlingstyper behandlingstype) {
-        return ResponseEntity.ok(lovligeKombinasjonerService.hentMuligeBehandlingsårsaktyper(behandlingstype));
+        return ResponseEntity.ok(lovligeKombinasjonerSaksbehandlingService.hentMuligeBehandlingsårsaktyper(behandlingstype));
     }
 }

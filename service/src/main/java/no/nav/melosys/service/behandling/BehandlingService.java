@@ -14,7 +14,7 @@ import no.nav.melosys.integrasjon.oppgave.OppgaveOppdatering;
 import no.nav.melosys.repository.BehandlingRepository;
 import no.nav.melosys.repository.TidligereMedlemsperiodeRepository;
 import no.nav.melosys.service.brev.UtkastBrevService;
-import no.nav.melosys.service.lovligekombinasjoner.LovligeKombinasjonerService;
+import no.nav.melosys.service.lovligekombinasjoner.LovligeKombinasjonerSaksbehandlingService;
 import no.nav.melosys.service.oppgave.OppgaveService;
 import org.apache.commons.beanutils.BeanUtils;
 import org.slf4j.Logger;
@@ -50,7 +50,7 @@ public class BehandlingService {
     private final TidligereMedlemsperiodeRepository tidligereMedlemsperiodeRepository;
     private final BehandlingsresultatService behandlingsresultatService;
     private final OppgaveService oppgaveService;
-    private final LovligeKombinasjonerService lovligeKombinasjonerService;
+    private final LovligeKombinasjonerSaksbehandlingService lovligeKombinasjonerSaksbehandlingService;
     private final UtkastBrevService utkastBrevService;
     private final ApplicationEventPublisher applicationEventPublisher;
     private final UtledMottaksdato utledMottaksdato;
@@ -61,7 +61,7 @@ public class BehandlingService {
                              TidligereMedlemsperiodeRepository tidligereMedlemsperiodeRepository,
                              BehandlingsresultatService behandlingsresultatService,
                              @Lazy OppgaveService oppgaveService,
-                             @Lazy LovligeKombinasjonerService lovligeKombinasjonerService,
+                             @Lazy LovligeKombinasjonerSaksbehandlingService lovligeKombinasjonerSaksbehandlingService,
                              UtkastBrevService utkastBrevService,
                              ApplicationEventPublisher applicationEventPublisher,
                              UtledMottaksdato utledMottaksdato,
@@ -70,7 +70,7 @@ public class BehandlingService {
         this.tidligereMedlemsperiodeRepository = tidligereMedlemsperiodeRepository;
         this.behandlingsresultatService = behandlingsresultatService;
         this.oppgaveService = oppgaveService;
-        this.lovligeKombinasjonerService = lovligeKombinasjonerService;
+        this.lovligeKombinasjonerSaksbehandlingService = lovligeKombinasjonerSaksbehandlingService;
         this.utkastBrevService = utkastBrevService;
         this.applicationEventPublisher = applicationEventPublisher;
         this.utledMottaksdato = utledMottaksdato;
@@ -131,7 +131,7 @@ public class BehandlingService {
             throw new FunksjonellException("Behandlingen må være aktiv for å kunne endres");
         }
         if (nyStatus != null && nyStatus != behandling.getStatus()) {
-            lovligeKombinasjonerService.validerNyStatusMulig(behandling, nyStatus);
+            lovligeKombinasjonerSaksbehandlingService.validerNyStatusMulig(behandling, nyStatus);
             endreStatus(behandling, nyStatus);
         }
         if (nyType != null && nyType != behandling.getType()) {
@@ -398,7 +398,7 @@ public class BehandlingService {
     public Set<Behandlingsstatus> hentMuligeStatuser(long behandlingID) {
         return hentBehandling(behandlingID).erInaktiv()
             ? Collections.emptySet()
-            : lovligeKombinasjonerService.hentMuligeBehandlingStatuser();
+            : lovligeKombinasjonerSaksbehandlingService.hentMuligeBehandlingStatuser();
     }
 
     private void avsluttNyVurdering(Behandling behandling, Behandlingsresultattyper nyBehandlingsResultatType) {

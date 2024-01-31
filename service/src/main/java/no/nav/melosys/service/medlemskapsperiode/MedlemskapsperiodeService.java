@@ -17,8 +17,8 @@ import no.nav.melosys.featuretoggle.ToggleName;
 import no.nav.melosys.repository.MedlemskapsperiodeRepository;
 import no.nav.melosys.service.MedlemAvFolketrygdenService;
 import no.nav.melosys.service.avgift.TrygdeavgiftsgrunnlagService;
-import no.nav.melosys.service.behandling.BehandlingsresultatService;
 import no.nav.melosys.service.medl.MedlPeriodeService;
+import org.apache.commons.collections4.CollectionUtils;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -45,20 +45,17 @@ public class MedlemskapsperiodeService {
     private final MedlemskapsperiodeRepository medlemskapsperiodeRepository;
     private final MedlemAvFolketrygdenService medlemAvFolketrygdenService;
     private final TrygdeavgiftsgrunnlagService trygdeavgiftsgrunnlagService;
-    private final BehandlingsresultatService behandlingsresultatService;
     private final MedlPeriodeService medlPeriodeService;
     private final Unleash unleash;
 
     public MedlemskapsperiodeService(MedlemskapsperiodeRepository medlemskapsperiodeRepository,
                                      MedlemAvFolketrygdenService medlemAvFolketrygdenService,
                                      TrygdeavgiftsgrunnlagService trygdeavgiftsgrunnlagService,
-                                     BehandlingsresultatService behandlingsresultatService,
                                      MedlPeriodeService medlPeriodeService,
                                      Unleash unleash) {
         this.medlemskapsperiodeRepository = medlemskapsperiodeRepository;
         this.medlemAvFolketrygdenService = medlemAvFolketrygdenService;
         this.trygdeavgiftsgrunnlagService = trygdeavgiftsgrunnlagService;
-        this.behandlingsresultatService = behandlingsresultatService;
         this.medlPeriodeService = medlPeriodeService;
         this.unleash = unleash;
     }
@@ -129,7 +126,7 @@ public class MedlemskapsperiodeService {
                                             Folketrygdloven_kap2_bestemmelser bestemmelse) {
         if (fom == null || innvilgelsesResultat == null || bestemmelse == null || trygdedekning == null) {
             throw new FunksjonellException("Fom-dato, innvilgelsesresultat, bestemmelse og trygdedekning er påkrevd");
-        } else if (!GYLDIGE_TRYGDEDEKNINGER_2_8.contains(trygdedekning)) {
+        } else if (!hentGyldigeTrygdedekninger().contains(trygdedekning)) {
             throw new FunksjonellException("Trygedekning " + trygdedekning + " støttes ikke for en medlemskapsperiode");
         } else if (feilIPeriode(fom, tom)) {
             throw new FunksjonellException("Tom-dato kan ikke være før fom-dato");
@@ -143,38 +140,65 @@ public class MedlemskapsperiodeService {
     }
 
     @Transactional
-    public void erstattMedlemskapsperioder(List<Medlemskapsperiode> nyeInnvilgedeMedlemskapsperioder,
-                                           long opprinneligBehandlingId,
-                                           long nyBehandlingId) {
-        var opprinneligeInnvilgedeMedlemskapsperioder =
-            behandlingsresultatService.hentBehandlingsresultat(opprinneligBehandlingId)
-                .finnMedlemskapsperioder().stream().filter(Medlemskapsperiode::erInnvilget).toList();
+    public void erstattMedlemskapsperioder(long behandlingID, long opprinneligBehandlingID, List<Medlemskapsperiode> nyeMedlemskapsperioder) {
+        var opprinneligeMedlemskapsperioder = hentMedlemskapsperioder(opprinneligBehandlingID).stream()
+            .filter(it -> it.erInnvilget() || it.erOpphørt()).toList();
 
-        for (Medlemskapsperiode medlemskapsperiode : opprinneligeInnvilgedeMedlemskapsperioder) {
-            if (!finnesMedlIdIMedlemskapsperioder(nyeInnvilgedeMedlemskapsperioder, medlemskapsperiode.getMedlPeriodeID())) {
-                medlPeriodeService.avvisPeriodeOpphørt(medlemskapsperiode.getMedlPeriodeID());
-            }
-        }
-        for (Medlemskapsperiode medlemskapsperiode : nyeInnvilgedeMedlemskapsperioder) {
-            opprettEllerOppdaterMedlPeriode(nyBehandlingId, medlemskapsperiode);
-        }
+        opphørOpprinneligeInnvilgedePerioderSomIkkeVidereføres(opprinneligeMedlemskapsperioder, nyeMedlemskapsperioder);
+        opprettEllerOppdaterInnvilgedePerioder(behandlingID, nyeMedlemskapsperioder);
+
+        feilregistrerOpprinneligeOpphørtePerioderSomIkkeVidereføres(opprinneligeMedlemskapsperioder, nyeMedlemskapsperioder);
+        opprettEllerOppdaterOpphørtePerioder(behandlingID, nyeMedlemskapsperioder);
     }
 
-    public void opprettEllerOppdaterMedlPeriode(long behandlingId, Medlemskapsperiode medlemskapsperiode) {
-        if (medlemskapsperiode.getMedlPeriodeID() == null) {
-            medlPeriodeService.opprettPeriodeEndelig(behandlingId, medlemskapsperiode);
-        } else {
-            medlPeriodeService.oppdaterPeriodeEndelig(behandlingId, medlemskapsperiode);
-        }
+    private void opphørOpprinneligeInnvilgedePerioderSomIkkeVidereføres(List<Medlemskapsperiode> opprinneligeGjeldendeMedlemskapsperioder, List<Medlemskapsperiode> nyeMedlemskapsperioder) {
+        opprinneligeGjeldendeMedlemskapsperioder.stream()
+            .filter(Medlemskapsperiode::erInnvilget)
+            .filter(medlemskapsperiode -> !eksistererMedlemskapsperiodeMedID(nyeMedlemskapsperioder, medlemskapsperiode.getMedlPeriodeID()))
+            .mapToLong(Medlemskapsperiode::getMedlPeriodeID)
+            .forEach(medlPeriodeService::avvisPeriodeOpphørt);
     }
 
-    private boolean finnesMedlIdIMedlemskapsperioder(List<Medlemskapsperiode> medlemskapsperioder,
-                                                     Long medlPeriodeId) {
+    private void feilregistrerOpprinneligeOpphørtePerioderSomIkkeVidereføres(List<Medlemskapsperiode> opprinneligeGjeldendeMedlemskapsperioder, List<Medlemskapsperiode> nyeMedlemskapsperioder) {
+        opprinneligeGjeldendeMedlemskapsperioder.stream()
+            .filter(Medlemskapsperiode::erOpphørt)
+            .filter(medlemskapsperiode -> !eksistererMedlemskapsperiodeMedID(nyeMedlemskapsperioder, medlemskapsperiode.getMedlPeriodeID()))
+            .mapToLong(Medlemskapsperiode::getMedlPeriodeID)
+            .forEach(medlPeriodeService::avvisPeriodeFeilregistrert);
+    }
+
+    private void opprettEllerOppdaterInnvilgedePerioder(long behandlingID, List<Medlemskapsperiode> nyeInnvilgedeMedlemskapsperioder) {
+        nyeInnvilgedeMedlemskapsperioder.stream().filter(Medlemskapsperiode::erInnvilget)
+            .forEach(medlemskapsperiode -> opprettEllerOppdaterMedlPeriode(behandlingID, medlemskapsperiode));
+    }
+
+    private void opprettEllerOppdaterOpphørtePerioder(long behandlingID, List<Medlemskapsperiode> nyeOpphørteMedlemskapsperioder) {
+        nyeOpphørteMedlemskapsperioder.stream().filter(Medlemskapsperiode::erOpphørt)
+            .forEach(medlemskapsperiode -> opprettEllerOppdaterOpphørtMedlPeriode(behandlingID, medlemskapsperiode));
+    }
+
+    private boolean eksistererMedlemskapsperiodeMedID(List<Medlemskapsperiode> medlemskapsperioder,
+                                                      Long medlPeriodeID) {
         return medlemskapsperioder.stream().anyMatch(periode ->
-            Objects.equals(periode.getMedlPeriodeID(), medlPeriodeId)
+            Objects.equals(periode.getMedlPeriodeID(), medlPeriodeID)
         );
     }
 
+    public void opprettEllerOppdaterMedlPeriode(long behandlingID, Medlemskapsperiode medlemskapsperiode) {
+        if (medlemskapsperiode.getMedlPeriodeID() == null) {
+            medlPeriodeService.opprettPeriodeEndelig(behandlingID, medlemskapsperiode);
+        } else {
+            medlPeriodeService.oppdaterPeriodeEndelig(behandlingID, medlemskapsperiode);
+        }
+    }
+
+    private void opprettEllerOppdaterOpphørtMedlPeriode(long behandlingID, Medlemskapsperiode medlemskapsperiode) {
+        if (medlemskapsperiode.getMedlPeriodeID() == null) {
+            medlPeriodeService.opprettOpphørtPeriode(behandlingID, medlemskapsperiode);
+        } else {
+            medlPeriodeService.oppdaterOpphørtPeriode(behandlingID, medlemskapsperiode);
+        }
+    }
 
     @Transactional
     public void slettMedlemskapsperiode(long behandlingsresultatID, long medlemskapsperiodeID) {
@@ -190,11 +214,16 @@ public class MedlemskapsperiodeService {
         fjernTrygdeavgiftsperioderOmDeFinnes(medlemAvFolketrygden);
     }
 
+    @Transactional
+    public void slettMedlemskapsperioder(long behandlingsresultatID) {
+        MedlemAvFolketrygden medlemAvFolketrygden = medlemAvFolketrygdenService.hentMedlemAvFolketrygden(behandlingsresultatID);
+        medlemAvFolketrygden.getMedlemskapsperioder().clear();
+        fjernTrygdeavgiftsperioderOmDeFinnes(medlemAvFolketrygden);
+    }
+
     public Collection<Trygdedekninger> hentGyldigeTrygdedekninger() {
         if (unleash.isEnabled(ToggleName.MELOSYS_FOLKETRYGDEN_2_7)) {
-            return new ArrayList<>(GYLDIGE_TRYGDEDEKNINGER_2_8) {{
-                addAll(GYLDIGE_TRYGDEDEKNINGER_2_7);
-            }};
+            return CollectionUtils.union(GYLDIGE_TRYGDEDEKNINGER_2_7, GYLDIGE_TRYGDEDEKNINGER_2_8);
         }
         return GYLDIGE_TRYGDEDEKNINGER_2_8;
     }

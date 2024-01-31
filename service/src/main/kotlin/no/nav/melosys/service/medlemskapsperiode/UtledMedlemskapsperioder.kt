@@ -10,14 +10,18 @@ import no.nav.melosys.domain.kodeverk.Medlemskapstyper
 import no.nav.melosys.domain.kodeverk.Trygdedekninger
 import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingstyper
 import no.nav.melosys.exception.FunksjonellException
+import no.nav.melosys.service.lovligekombinasjoner.LovligeKombinasjonerMedlemskapsperiodeService
 import org.springframework.data.util.Pair
+import org.springframework.stereotype.Component
 import java.time.LocalDate
 
-class UtledMedlemskapsperioder {
+@Component
+class UtledMedlemskapsperioder(private val lovligeKombinasjonerMedlemskapsperiodeService: LovligeKombinasjonerMedlemskapsperiodeService) {
 
     fun lagMedlemskapsperioderForAndregangsbehandling(
         opprinneligBehandlingsresultat: Behandlingsresultat,
-        bestemmelse: Folketrygdloven_kap2_bestemmelser,
+        nyBestemmelse: Folketrygdloven_kap2_bestemmelser,
+        nyTrygdedekning: Trygdedekninger,
         type: Behandlingstyper
     ): Collection<Medlemskapsperiode> =
         opprinneligBehandlingsresultat.medlemAvFolketrygden.medlemskapsperioder
@@ -29,13 +33,71 @@ class UtledMedlemskapsperioder {
                     arbeidsland = it.arbeidsland
                     innvilgelsesresultat = it.innvilgelsesresultat
                     medlemskapstype = it.medlemskapstype
-                    trygdedekning = it.trygdedekning
+                    trygdedekning =
+                        if (lovligeKombinasjonerMedlemskapsperiodeService.erGyldigKombinasjon(nyBestemmelse, it.trygdedekning)) it.trygdedekning
+                        else nyTrygdedekning
                     medlPeriodeID = it.medlPeriodeID
-                    this.bestemmelse = if (it.erOpphørt()) it.bestemmelse else bestemmelse
+                    bestemmelse = if (it.erOpphørt()) it.bestemmelse else nyBestemmelse
                 }
             }
 
     fun lagMedlemskapsperioder(dto: UtledMedlemskapsperioderDto): Collection<Medlemskapsperiode> {
+        if (bestemmelseErParagraf(dto.bestemmelse, "2_7")) {
+            return lagMedlemskapsperioderFor2_7(dto)
+        } else if (bestemmelseErParagraf(dto.bestemmelse, "2_8")) {
+            return lagMedlemskapsperioderFor2_8(dto)
+        }
+        throw FunksjonellException("Støtter ikke bestemmelse ${dto.bestemmelse}")
+    }
+
+    private fun lagMedlemskapsperioderFor2_7(dto: UtledMedlemskapsperioderDto): Collection<Medlemskapsperiode> {
+        val søknadsperiode = dto.søknadsperiode
+
+        val enMånedFørMottaksdato = dto.mottaksdatoSøknad.minusMonths(1)
+        if (søknadsperiode.fom == enMånedFørMottaksdato || søknadsperiode.fom.isAfter(enMånedFørMottaksdato)) {
+            return setOf(
+                lagPeriode(
+                    søknadsperiode,
+                    dto.trygdedekning,
+                    dto.arbeidsland,
+                    InnvilgelsesResultat.INNVILGET,
+                    dto.bestemmelse
+                )
+            )
+        }
+
+        if (søknadsperiode.tom != null && søknadsperiode.tom.isBefore(dto.mottaksdatoSøknad)) {
+            return setOf(
+                lagPeriode(
+                    søknadsperiode,
+                    dto.trygdedekning,
+                    dto.arbeidsland,
+                    InnvilgelsesResultat.AVSLAATT,
+                    dto.bestemmelse
+                )
+            )
+        }
+
+        val splittetPeriode = splitPeriode(søknadsperiode, dto.mottaksdatoSøknad)
+        return setOf(
+            lagPeriode(
+                splittetPeriode.first,
+                dto.trygdedekning,
+                dto.arbeidsland,
+                InnvilgelsesResultat.AVSLAATT,
+                dto.bestemmelse
+            ),
+            lagPeriode(
+                splittetPeriode.second,
+                dto.trygdedekning,
+                dto.arbeidsland,
+                InnvilgelsesResultat.INNVILGET,
+                dto.bestemmelse
+            )
+        )
+    }
+
+    private fun lagMedlemskapsperioderFor2_8(dto: UtledMedlemskapsperioderDto): Collection<Medlemskapsperiode> {
         val søknadsperiode = dto.søknadsperiode
 
         val enMånedFørMottaksdato = dto.mottaksdatoSøknad.minusMonths(1)
@@ -171,4 +233,6 @@ class UtledMedlemskapsperioder {
     private fun datoErTidligereEnn2ÅrFørMottaksdato(dato: LocalDate, mottaksdato: LocalDate) =
         dato.isBefore(mottaksdato.minusYears(2))
 
+    private fun bestemmelseErParagraf(bestemmelse: Folketrygdloven_kap2_bestemmelser, paragraf: String): Boolean =
+        bestemmelse.kode.startsWith("FTRL_KAP2_$paragraf")
 }

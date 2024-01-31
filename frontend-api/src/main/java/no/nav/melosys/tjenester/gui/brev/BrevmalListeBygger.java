@@ -1,9 +1,6 @@
 package no.nav.melosys.tjenester.gui.brev;
 
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.List;
-import java.util.Objects;
+import java.util.*;
 
 import no.nav.melosys.domain.Behandling;
 import no.nav.melosys.domain.kodeverk.Land_iso2;
@@ -276,12 +273,13 @@ public class BrevmalListeBygger {
 
         List<String> trygdeavtaleLandkoder = Arrays.stream(Trygdeavtale_myndighetsland.values()).map(Trygdeavtale_myndighetsland::getKode).toList();
         return new FeltValgDto(
-            utenlandskMyndighetService.hentAlleUtenlandskeMyndigheterMedGyldigAdresse().stream()
+            utenlandskMyndighetService.hentAlleUtenlandskeMyndigheter().stream()
                 .filter(utenlandskMyndighet -> trygdeavtaleLandkoder.contains(utenlandskMyndighet.landkode.getKode()))
                 .map(utenlandskMyndighet -> {
                     String beskrivelse = "Trygdemyndighetene i %s".formatted(utenlandskMyndighet.landkode.getBeskrivelse());
                     return new FeltvalgAlternativDto(utenlandskMyndighet.hentInstitusjonID(), beskrivelse, true);
                 })
+                .sorted(Comparator.comparing(FeltvalgAlternativDto::getBeskrivelse))
                 .toList(),
             FeltValgType.SELECT
         );

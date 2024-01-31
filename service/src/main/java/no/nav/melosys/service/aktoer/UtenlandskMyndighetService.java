@@ -76,11 +76,8 @@ public class UtenlandskMyndighetService {
         return hentUtenlandskMyndighet(landkode, null);
     }
 
-    public List<UtenlandskMyndighet> hentAlleUtenlandskeMyndigheterMedGyldigAdresse() {
-        return utenlandskMyndighetRepository.findAll()
-            .stream()
-            .filter(utenlandskMyndighet -> utenlandskMyndighet.getAdresse().erGyldig())
-            .toList();
+    public List<UtenlandskMyndighet> hentAlleUtenlandskeMyndigheter() {
+        return utenlandskMyndighetRepository.findAll();
     }
 
     public UtenlandskMyndighet hentUtenlandskMyndighet(Land_iso2 landkode, Produserbaredokumenter produserbaredokumenter) {

@@ -18,7 +18,7 @@ import no.nav.melosys.repository.FagsakRepository;
 import no.nav.melosys.service.SaksbehandlingDataFactory;
 import no.nav.melosys.service.aktoer.KontaktopplysningService;
 import no.nav.melosys.service.behandling.BehandlingService;
-import no.nav.melosys.service.lovligekombinasjoner.LovligeKombinasjonerService;
+import no.nav.melosys.service.lovligekombinasjoner.LovligeKombinasjonerSaksbehandlingService;
 import no.nav.melosys.service.persondata.PersondataFasade;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -51,7 +51,7 @@ class FagsakServiceTest {
     @Mock
     private PersondataFasade persondataFasade;
     @Mock
-    private LovligeKombinasjonerService lovligeKombinasjonerService;
+    private LovligeKombinasjonerSaksbehandlingService lovligeKombinasjonerSaksbehandlingService;
     private FagsakService fagsakService;
 
     @BeforeEach
@@ -61,7 +61,7 @@ class FagsakServiceTest {
             behandlingService,
             kontaktopplysningService,
             persondataFasade,
-            lovligeKombinasjonerService);
+                lovligeKombinasjonerSaksbehandlingService);
     }
 
     @Test
@@ -149,7 +149,7 @@ class FagsakServiceTest {
         fagsakService.oppdaterFagsakOgBehandling(fagsak.getSaksnummer(), Sakstyper.TRYGDEAVTALE, MEDLEMSKAP_LOVVALG, Behandlingstema.ARBEID_FLERE_LAND, NY_VURDERING, null, null);
 
         verify(fagsakRepo).save(fagsak);
-        verify(lovligeKombinasjonerService).validerOpprettelseOgEndring(fagsak.getHovedpartRolle(), Sakstyper.TRYGDEAVTALE, MEDLEMSKAP_LOVVALG, Behandlingstema.ARBEID_FLERE_LAND, NY_VURDERING);
+        verify(lovligeKombinasjonerSaksbehandlingService).validerOpprettelseOgEndring(fagsak.getHovedpartRolle(), Sakstyper.TRYGDEAVTALE, MEDLEMSKAP_LOVVALG, Behandlingstema.ARBEID_FLERE_LAND, NY_VURDERING);
         verify(behandlingService).endreBehandling(fagsak.hentAktivBehandling().getId(), NY_VURDERING, ARBEID_FLERE_LAND, null, null);
     }
 
@@ -162,7 +162,7 @@ class FagsakServiceTest {
 
         fagsakService.oppdaterFagsakOgBehandling(fagsak.getSaksnummer(), fagsak.getType(), fagsak.getTema(), behandling.getTema(), behandling.getType(), null, null);
 
-        verifyNoInteractions(lovligeKombinasjonerService);
+        verifyNoInteractions(lovligeKombinasjonerSaksbehandlingService);
     }
 
     @Test
