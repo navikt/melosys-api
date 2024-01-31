@@ -63,4 +63,8 @@ class LovligeKombinasjonerMedlemskapsperiodeService() {
     fun hentLovligeTrygdedekninger(bestemmelse: Folketrygdloven_kap2_bestemmelser): List<Trygdedekninger> {
         return lovligeKombinasjonerDekningBestemmelse.filterValues { it.contains(bestemmelse) }.keys.flatten()
     }
+
+    fun erGyldigKombinasjon(bestemmelse: Folketrygdloven_kap2_bestemmelser, trygdedekning: Trygdedekninger): Boolean {
+        return bestemmelse in hentLovligeBestemmelser(trygdedekning)
+    }
 }
