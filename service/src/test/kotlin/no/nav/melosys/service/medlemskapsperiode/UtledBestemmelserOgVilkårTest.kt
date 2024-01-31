@@ -26,14 +26,13 @@ class UtledBestemmelserOgVilkårTest {
 
     @Test
     fun hentStøttede_behandlingstemaYRKESAKTIV_returnererStøttede() {
-        utledBestemmelserOgVilkår.hentStøttedeBestemmelserOgVilkår(Behandlingstema.YRKESAKTIV)
-            .apply {
-                shouldHaveKeys(
-                    Folketrygdloven_kap2_bestemmelser.FTRL_KAP2_2_8_FØRSTE_LEDD_A,
-                    Folketrygdloven_kap2_bestemmelser.FTRL_KAP2_2_8_ANDRE_LEDD,
-                )
-                shouldHaveSize(2)
-            }
+        utledBestemmelserOgVilkår.hentStøttedeBestemmelserOgVilkår(Behandlingstema.YRKESAKTIV).run {
+            shouldHaveKeys(
+                Folketrygdloven_kap2_bestemmelser.FTRL_KAP2_2_8_FØRSTE_LEDD_A,
+                Folketrygdloven_kap2_bestemmelser.FTRL_KAP2_2_8_ANDRE_LEDD,
+            )
+            shouldHaveSize(2)
+        }
 
     }
 
@@ -41,7 +40,7 @@ class UtledBestemmelserOgVilkårTest {
     fun hentStøttede_behandlingstemaYRKESAKTIV_returnererStøttedeMedToggle() {
         fakeUnleash.enable(ToggleName.MELOSYS_FOLKETRYGDEN_2_7)
 
-        utledBestemmelserOgVilkår.hentStøttedeBestemmelserOgVilkår(Behandlingstema.YRKESAKTIV).apply {
+        utledBestemmelserOgVilkår.hentStøttedeBestemmelserOgVilkår(Behandlingstema.YRKESAKTIV).run {
             shouldHaveKeys(
                 Folketrygdloven_kap2_bestemmelser.FTRL_KAP2_2_8_FØRSTE_LEDD_A,
                 Folketrygdloven_kap2_bestemmelser.FTRL_KAP2_2_8_ANDRE_LEDD,
@@ -64,7 +63,7 @@ class UtledBestemmelserOgVilkårTest {
     fun hentStøttede_behandlingstemaIKKE_YRKESAKTIV_returnererFærreMedToggle() {
         fakeUnleash.enable(ToggleName.MELOSYS_FOLKETRYGDEN_2_7)
 
-        utledBestemmelserOgVilkår.hentStøttedeBestemmelserOgVilkår(Behandlingstema.IKKE_YRKESAKTIV).apply {
+        utledBestemmelserOgVilkår.hentStøttedeBestemmelserOgVilkår(Behandlingstema.IKKE_YRKESAKTIV).run {
             shouldHaveKeys(
                 Folketrygdloven_kap2_bestemmelser.FTRL_KAP2_2_8_ANDRE_LEDD,
                 Folketrygdloven_kap2_bestemmelser.FTRL_KAP2_2_7_FØRSTE_LEDD
@@ -75,14 +74,13 @@ class UtledBestemmelserOgVilkårTest {
 
     @Test
     fun hentStøttede_ikkeRelevantBehandlingstema_returnererDefault() {
-        utledBestemmelserOgVilkår.hentStøttedeBestemmelserOgVilkår(Behandlingstema.ARBEID_TJENESTEPERSON_ELLER_FLY)
-            .apply {
-                shouldHaveKeys(
-                    Folketrygdloven_kap2_bestemmelser.FTRL_KAP2_2_8_FØRSTE_LEDD_A,
-                    Folketrygdloven_kap2_bestemmelser.FTRL_KAP2_2_8_ANDRE_LEDD
-                )
-                shouldHaveSize(2)
-            }
+        utledBestemmelserOgVilkår.hentStøttedeBestemmelserOgVilkår(Behandlingstema.ARBEID_TJENESTEPERSON_ELLER_FLY).run {
+            shouldHaveKeys(
+                Folketrygdloven_kap2_bestemmelser.FTRL_KAP2_2_8_FØRSTE_LEDD_A,
+                Folketrygdloven_kap2_bestemmelser.FTRL_KAP2_2_8_ANDRE_LEDD
+            )
+            shouldHaveSize(2)
+        }
     }
 
     @Test
