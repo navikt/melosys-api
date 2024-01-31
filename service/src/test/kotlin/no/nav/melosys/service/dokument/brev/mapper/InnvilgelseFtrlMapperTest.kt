@@ -98,7 +98,7 @@ internal class InnvilgelseFtrlMapperTest {
                 }
                 bestemmelse.shouldBe(Folketrygdloven_kap2_bestemmelser.FTRL_KAP2_2_8)
                 skatteplikttype.shouldBe(Skatteplikttype.SKATTEPLIKTIG)
-                ftrl_2_8_begrunnelse.shouldBe(Ftrl_2_8_naer_tilknytning_norge_begrunnelser.ANNEN_GRUNN)
+                begrunnelse.shouldBe(Ftrl_2_8_naer_tilknytning_norge_begrunnelser.ANNEN_GRUNN)
                 begrunnelseAnnenGrunnFritekst.shouldBe("<p>Vilkårresultat begrunnelse fritekst</p>")
                 arbeidsgivere.shouldHaveSize(1).first().shouldBe(ARBEIDSGIVER_NAVN)
                 arbeidsland.shouldBe(Landkoder.AT.beskrivelse)

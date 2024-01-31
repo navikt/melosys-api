@@ -26,7 +26,7 @@ class InnvilgelseFtrl(
     val trygdeavgiftMottaker: Trygdeavgiftmottaker?,
     val fullmektigTrygdeavgift: String?,
     val skatteplikttype: Skatteplikttype?,
-    val begrunnelse: String?,
+    val begrunnelse: Kodeverk?,
     val begrunnelseAnnenGrunnFritekst: String?,
     val nyVurderingBakgrunn: String?,
     val innledningFritekst: String?,
@@ -48,7 +48,7 @@ class InnvilgelseFtrl(
         private var avslåttHelsedelFørMottaksdato = false
         private var trygdeavgiftMottaker: Trygdeavgiftmottaker? = null
         private var skatteplikttype: Skatteplikttype? = null
-        private var begrunnelse: String? = null
+        private var begrunnelse: Kodeverk? = null
         private var begrunnelseAnnenGrunnFritekst: String? = null
         private var nyVurderingBakgrunn: String? = null
         private var innledningFritekst: String? = null
@@ -100,7 +100,7 @@ class InnvilgelseFtrl(
         }
 
         fun begrunnelse(begrunnelse: Kodeverk?): Builder {
-            this.begrunnelse = begrunnelse?.kode
+            this.begrunnelse = begrunnelse
             return this
         }
 
