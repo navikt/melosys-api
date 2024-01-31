@@ -23,7 +23,22 @@ class UtledBestemmelserOgVilkår(val unleash: Unleash) {
         FTRL_KAP2_2_7A
     )
 
-    val yrkesaktivBestemmelserOgVilkårRestenGammel = mapOf<Folketrygdloven_kap2_bestemmelser, Collection<Vilkaar>>(
+    val yrkesaktivBestemmelserOgVilkårGammel = mapOf<Folketrygdloven_kap2_bestemmelser, Collection<Vilkaar>>(
+        Pair(FTRL_KAP2_2_1_FØRSTE_LEDD, emptySet()),
+        Pair(FTRL_KAP2_2_1_FJERDE_LEDD, emptySet()),
+        Pair(FTRL_KAP2_2_2, emptySet()),
+        Pair(FTRL_KAP2_2_3_FØRSTE_LEDD, emptySet()),
+        Pair(FTRL_KAP2_2_3_ANDRE_LEDD, emptySet()),
+        Pair(FTRL_KAP2_2_5_FØRSTE_LEDD_A, emptySet()),
+        Pair(FTRL_KAP2_2_5_FØRSTE_LEDD_B, emptySet()),
+        Pair(FTRL_KAP2_2_5_FØRSTE_LEDD_C, emptySet()),
+        Pair(FTRL_KAP2_2_5_FØRSTE_LEDD_D, emptySet()),
+        Pair(FTRL_KAP2_2_5_FØRSTE_LEDD_E, emptySet()),
+        Pair(FTRL_KAP2_2_5_FØRSTE_LEDD_F, emptySet()),
+        Pair(FTRL_KAP2_2_5_FØRSTE_LEDD_G, emptySet()),
+        Pair(FTRL_KAP2_2_6_FØRSTE_LEDD_A, emptySet()),
+        Pair(FTRL_KAP2_2_6_FØRSTE_LEDD_B, emptySet()),
+        Pair(FTRL_KAP2_2_6_FØRSTE_LEDD_C, emptySet()),
         Pair(FTRL_KAP2_2_7_FØRSTE_LEDD, emptySet()),
         Pair(FTRL_KAP2_2_7A, emptySet()),
         Pair(
@@ -33,10 +48,25 @@ class UtledBestemmelserOgVilkår(val unleash: Unleash) {
         Pair(
             FTRL_KAP2_2_8_ANDRE_LEDD,
             LinkedHashSet(listOf(Vilkaar.FTRL_2_8_FORUTGÅENDE_TRYGDETID, Vilkaar.FTRL_2_8_NÆR_TILKNYTNING_NORGE))
-        ),
+        )
     )
 
-    val yrkesaktivBestemmelseOgVilkårRestenToggle = mapOf<Folketrygdloven_kap2_bestemmelser, Collection<Vilkaar>>(
+    val yrkesaktivBestemmelserOgVilkårToggle = mapOf<Folketrygdloven_kap2_bestemmelser, Collection<Vilkaar>>(
+        Pair(FTRL_KAP2_2_1_FØRSTE_LEDD, emptySet()),
+        Pair(FTRL_KAP2_2_1_FJERDE_LEDD, emptySet()),
+        Pair(FTRL_KAP2_2_2, emptySet()),
+        Pair(FTRL_KAP2_2_3_FØRSTE_LEDD, emptySet()),
+        Pair(FTRL_KAP2_2_3_ANDRE_LEDD, emptySet()),
+        Pair(FTRL_KAP2_2_5_FØRSTE_LEDD_A, emptySet()),
+        Pair(FTRL_KAP2_2_5_FØRSTE_LEDD_B, emptySet()),
+        Pair(FTRL_KAP2_2_5_FØRSTE_LEDD_C, emptySet()),
+        Pair(FTRL_KAP2_2_5_FØRSTE_LEDD_D, emptySet()),
+        Pair(FTRL_KAP2_2_5_FØRSTE_LEDD_E, emptySet()),
+        Pair(FTRL_KAP2_2_5_FØRSTE_LEDD_F, emptySet()),
+        Pair(FTRL_KAP2_2_5_FØRSTE_LEDD_G, emptySet()),
+        Pair(FTRL_KAP2_2_6_FØRSTE_LEDD_A, emptySet()),
+        Pair(FTRL_KAP2_2_6_FØRSTE_LEDD_B, emptySet()),
+        Pair(FTRL_KAP2_2_6_FØRSTE_LEDD_C, emptySet()),
         Pair(
             FTRL_KAP2_2_7_FØRSTE_LEDD,
             LinkedHashSet(
@@ -77,24 +107,6 @@ class UtledBestemmelserOgVilkår(val unleash: Unleash) {
                 )
             )
         )
-    )
-
-    val yrkesaktivBestemmelserOgVilkår = mapOf<Folketrygdloven_kap2_bestemmelser, Collection<Vilkaar>>(
-        Pair(FTRL_KAP2_2_1_FØRSTE_LEDD, emptySet()),
-        Pair(FTRL_KAP2_2_1_FJERDE_LEDD, emptySet()),
-        Pair(FTRL_KAP2_2_2, emptySet()),
-        Pair(FTRL_KAP2_2_3_FØRSTE_LEDD, emptySet()),
-        Pair(FTRL_KAP2_2_3_ANDRE_LEDD, emptySet()),
-        Pair(FTRL_KAP2_2_5_FØRSTE_LEDD_A, emptySet()),
-        Pair(FTRL_KAP2_2_5_FØRSTE_LEDD_B, emptySet()),
-        Pair(FTRL_KAP2_2_5_FØRSTE_LEDD_C, emptySet()),
-        Pair(FTRL_KAP2_2_5_FØRSTE_LEDD_D, emptySet()),
-        Pair(FTRL_KAP2_2_5_FØRSTE_LEDD_E, emptySet()),
-        Pair(FTRL_KAP2_2_5_FØRSTE_LEDD_F, emptySet()),
-        Pair(FTRL_KAP2_2_5_FØRSTE_LEDD_G, emptySet()),
-        Pair(FTRL_KAP2_2_6_FØRSTE_LEDD_A, emptySet()),
-        Pair(FTRL_KAP2_2_6_FØRSTE_LEDD_B, emptySet()),
-        Pair(FTRL_KAP2_2_6_FØRSTE_LEDD_C, emptySet()),
     )
 
     val ikkeYrkesaktivBestemmelserOgVilkår = mapOf<Folketrygdloven_kap2_bestemmelser, Collection<Vilkaar>>(
@@ -139,10 +151,8 @@ class UtledBestemmelserOgVilkår(val unleash: Unleash) {
     )
 
     private fun bestemmelseOgVilkårFraBehandlingstema(behandlingstema: Behandlingstema): Map<Folketrygdloven_kap2_bestemmelser, Collection<Vilkaar>> {
-        val toggletYrkesAktivBestemmelserOgVilkår =
-            yrkesaktivBestemmelserOgVilkår + (if (unleash.isEnabled(ToggleName.MELOSYS_FOLKETRYGDEN_2_7)) yrkesaktivBestemmelseOgVilkårRestenToggle else yrkesaktivBestemmelserOgVilkårRestenGammel)
         return when (behandlingstema) {
-            Behandlingstema.YRKESAKTIV -> toggletYrkesAktivBestemmelserOgVilkår
+            Behandlingstema.YRKESAKTIV -> if (unleash.isEnabled(ToggleName.MELOSYS_FOLKETRYGDEN_2_7)) yrkesaktivBestemmelserOgVilkårToggle else yrkesaktivBestemmelserOgVilkårGammel
             Behandlingstema.IKKE_YRKESAKTIV -> ikkeYrkesaktivBestemmelserOgVilkår
             Behandlingstema.PENSJONIST -> pensjonistBestemmelserOgVilkår
             else -> defaultBestemmelserOgVilkår
