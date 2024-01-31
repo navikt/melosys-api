@@ -1,10 +1,7 @@
 package no.nav.melosys.service.medlemskapsperiode
 
 import io.getunleash.FakeUnleash
-import io.kotest.matchers.collections.shouldBeEmpty
-import io.kotest.matchers.collections.shouldContain
-import io.kotest.matchers.collections.shouldContainAll
-import io.kotest.matchers.collections.shouldNotBeEmpty
+import io.kotest.matchers.collections.*
 import io.kotest.matchers.maps.*
 import io.kotest.matchers.nulls.shouldNotBeNull
 import no.nav.melosys.domain.kodeverk.Folketrygdloven_kap2_bestemmelser
@@ -30,23 +27,30 @@ class UtledBestemmelserOgVilkårTest {
     @Test
     fun hentStøttede_behandlingstemaYRKESAKTIV_returnererStøttede() {
         utledBestemmelserOgVilkår.hentStøttedeBestemmelserOgVilkår(Behandlingstema.YRKESAKTIV)
-            .shouldHaveKeys(
-                Folketrygdloven_kap2_bestemmelser.FTRL_KAP2_2_8_FØRSTE_LEDD_A,
-                Folketrygdloven_kap2_bestemmelser.FTRL_KAP2_2_8_ANDRE_LEDD,
-            )
+            .apply {
+                shouldHaveKeys(
+                    Folketrygdloven_kap2_bestemmelser.FTRL_KAP2_2_8_FØRSTE_LEDD_A,
+                    Folketrygdloven_kap2_bestemmelser.FTRL_KAP2_2_8_ANDRE_LEDD,
+                )
+                shouldHaveSize(2)
+            }
+
     }
 
     @Test
     fun hentStøttede_behandlingstemaYRKESAKTIV_returnererStøttedeMedToggle() {
         fakeUnleash.enable(ToggleName.MELOSYS_FOLKETRYGDEN_2_7)
 
-        utledBestemmelserOgVilkår.hentStøttedeBestemmelserOgVilkår(Behandlingstema.YRKESAKTIV)
-            .shouldContainKeys(
+        utledBestemmelserOgVilkår.hentStøttedeBestemmelserOgVilkår(Behandlingstema.YRKESAKTIV).apply {
+            shouldHaveKeys(
                 Folketrygdloven_kap2_bestemmelser.FTRL_KAP2_2_8_FØRSTE_LEDD_A,
                 Folketrygdloven_kap2_bestemmelser.FTRL_KAP2_2_8_ANDRE_LEDD,
                 Folketrygdloven_kap2_bestemmelser.FTRL_KAP2_2_7_FØRSTE_LEDD,
                 Folketrygdloven_kap2_bestemmelser.FTRL_KAP2_2_7A
             )
+            shouldHaveSize(4)
+        }
+
     }
 
 
@@ -60,20 +64,25 @@ class UtledBestemmelserOgVilkårTest {
     fun hentStøttede_behandlingstemaIKKE_YRKESAKTIV_returnererFærreMedToggle() {
         fakeUnleash.enable(ToggleName.MELOSYS_FOLKETRYGDEN_2_7)
 
-        utledBestemmelserOgVilkår.hentStøttedeBestemmelserOgVilkår(Behandlingstema.IKKE_YRKESAKTIV)
-            .shouldContainKeys(
+        utledBestemmelserOgVilkår.hentStøttedeBestemmelserOgVilkår(Behandlingstema.IKKE_YRKESAKTIV).apply {
+            shouldHaveKeys(
                 Folketrygdloven_kap2_bestemmelser.FTRL_KAP2_2_8_ANDRE_LEDD,
                 Folketrygdloven_kap2_bestemmelser.FTRL_KAP2_2_7_FØRSTE_LEDD
             )
+            shouldHaveSize(2)
+        }
     }
 
     @Test
     fun hentStøttede_ikkeRelevantBehandlingstema_returnererDefault() {
         utledBestemmelserOgVilkår.hentStøttedeBestemmelserOgVilkår(Behandlingstema.ARBEID_TJENESTEPERSON_ELLER_FLY)
-            .shouldHaveKeys(
-                Folketrygdloven_kap2_bestemmelser.FTRL_KAP2_2_8_FØRSTE_LEDD_A,
-                Folketrygdloven_kap2_bestemmelser.FTRL_KAP2_2_8_ANDRE_LEDD
-            )
+            .apply {
+                shouldHaveKeys(
+                    Folketrygdloven_kap2_bestemmelser.FTRL_KAP2_2_8_FØRSTE_LEDD_A,
+                    Folketrygdloven_kap2_bestemmelser.FTRL_KAP2_2_8_ANDRE_LEDD
+                )
+                shouldHaveSize(2)
+            }
     }
 
     @Test
@@ -114,7 +123,6 @@ class UtledBestemmelserOgVilkårTest {
             .shouldNotBeNull()
             .shouldNotBeEmpty()
             .shouldContain(Ftrl_2_8_naer_tilknytning_norge_begrunnelser.ANSATT_I_MULTINASJONALT_SELSKAP.kode)
-
     }
 
 
