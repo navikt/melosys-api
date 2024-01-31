@@ -1,6 +1,7 @@
 package no.nav.melosys.service.medlemskapsperiode
 
 import io.getunleash.FakeUnleash
+import io.kotest.matchers.collections.shouldContainExactlyInAnyOrder
 import io.mockk.every
 import io.mockk.impl.annotations.MockK
 import io.mockk.impl.annotations.RelaxedMockK
@@ -11,7 +12,6 @@ import no.nav.melosys.domain.folketrygden.MedlemAvFolketrygden
 import no.nav.melosys.domain.kodeverk.Aktoersroller
 import no.nav.melosys.domain.kodeverk.InnvilgelsesResultat
 import no.nav.melosys.domain.kodeverk.Sakstyper
-import no.nav.melosys.domain.kodeverk.Trygdedekninger
 import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingstema
 import no.nav.melosys.featuretoggle.ToggleName
 import no.nav.melosys.repository.MedlemskapsperiodeRepository
@@ -24,6 +24,7 @@ import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.extension.ExtendWith
 import java.time.LocalDate
+import java.util.*
 
 @ExtendWith(MockKExtension::class)
 class MedlemskapsperiodeServiceKotlinTest {
@@ -40,12 +41,12 @@ class MedlemskapsperiodeServiceKotlinTest {
     @MockK
     lateinit var medlemskapsperiodeRepository: MedlemskapsperiodeRepository
 
-    val fakeUnleash: FakeUnleash = FakeUnleash()
+    private val fakeUnleash: FakeUnleash = FakeUnleash()
 
     @RelaxedMockK
     lateinit var medlPeriodeService: MedlPeriodeService
 
-    lateinit var medlemskapsperiodeService: MedlemskapsperiodeService
+    private lateinit var medlemskapsperiodeService: MedlemskapsperiodeService
 
     @BeforeEach
     fun setUp() {
@@ -53,7 +54,6 @@ class MedlemskapsperiodeServiceKotlinTest {
             medlemskapsperiodeRepository,
             medlemAvFolketrygdenService,
             trygdeavgiftsgrunnlagService,
-            behandlingsresultatService,
             medlPeriodeService,
             fakeUnleash
         )
@@ -63,13 +63,21 @@ class MedlemskapsperiodeServiceKotlinTest {
     fun `erstattMedlemskapsperioder skal kun opprette nye perioder når gammel liste er tom`() {
         setupHappyPathBehandling()
         every { medlemskapsperiodeRepository.save(any()) } returns Medlemskapsperiode()
-        val medlemskapsperiode1 = Medlemskapsperiode().apply { fom = LocalDate.now().minusDays(1) }
-        val medlemskapsperiode2 = Medlemskapsperiode().apply { fom = LocalDate.now().plusDays(1) }
+        val medlemskapsperiode1 = Medlemskapsperiode().apply {
+            fom = LocalDate.now().minusDays(1)
+            innvilgelsesresultat = InnvilgelsesResultat.INNVILGET
+        }
+        val medlemskapsperiode2 = Medlemskapsperiode().apply {
+            fom = LocalDate.now().plusDays(1)
+            innvilgelsesresultat = InnvilgelsesResultat.INNVILGET
+        }
         val nyListe = listOf(medlemskapsperiode1, medlemskapsperiode2)
 
-        every { behandlingsresultatService.hentBehandlingsresultat(1L) } returns Behandlingsresultat()
+        every { medlemAvFolketrygdenService.finnMedlemAvFolketrygden(1L) } returns Optional.empty()
 
-        medlemskapsperiodeService.erstattMedlemskapsperioder(nyListe, 1L, 2L)
+
+        medlemskapsperiodeService.erstattMedlemskapsperioder(2L, 1L, nyListe)
+
 
         verify(exactly = 1) { medlPeriodeService.opprettPeriodeEndelig(2L, medlemskapsperiode1) }
         verify(exactly = 1) { medlPeriodeService.opprettPeriodeEndelig(2L, medlemskapsperiode2) }
@@ -85,11 +93,11 @@ class MedlemskapsperiodeServiceKotlinTest {
         val gammelListe = listOf(gammelMedlemskapsperiode)
         val medlemAvFolketrygden = MedlemAvFolketrygden().apply { medlemskapsperioder = gammelListe }
 
-        every { behandlingsresultatService.hentBehandlingsresultat(1L) } returns Behandlingsresultat().apply {
-            this.medlemAvFolketrygden = medlemAvFolketrygden
-        }
+        every { medlemAvFolketrygdenService.finnMedlemAvFolketrygden(1L) } returns Optional.of(medlemAvFolketrygden)
 
-        medlemskapsperiodeService.erstattMedlemskapsperioder(emptyList(), 1L, 2L)
+
+        medlemskapsperiodeService.erstattMedlemskapsperioder(2L, 1L, emptyList())
+
 
         verify(exactly = 1) { medlPeriodeService.avvisPeriodeOpphørt(1L) }
         verify(exactly = 0) { medlPeriodeService.opprettPeriodeEndelig(any<Long>(), any()) }
@@ -103,13 +111,13 @@ class MedlemskapsperiodeServiceKotlinTest {
             medlPeriodeID = 1L
             innvilgelsesresultat = InnvilgelsesResultat.INNVILGET
         }
-        val medlemAvFolketrygden = MedlemAvFolketrygden().apply { medlemskapsperioder = listOf(gammelMedlemskapsperiode) }
-        every { behandlingsresultatService.hentBehandlingsresultat(1L) } returns Behandlingsresultat().apply {
-            this.medlemAvFolketrygden = medlemAvFolketrygden
-        }
-        val nyMedlemskapsperiode = Medlemskapsperiode()
+        val gammelMedlemAvFolketrygden = MedlemAvFolketrygden().apply { medlemskapsperioder = listOf(gammelMedlemskapsperiode) }
+        every { medlemAvFolketrygdenService.finnMedlemAvFolketrygden(1L) } returns Optional.of(gammelMedlemAvFolketrygden)
+        val nyMedlemskapsperiode = Medlemskapsperiode().apply { innvilgelsesresultat = InnvilgelsesResultat.INNVILGET }
 
-        medlemskapsperiodeService.erstattMedlemskapsperioder(listOf(nyMedlemskapsperiode), 1L, 2L)
+
+        medlemskapsperiodeService.erstattMedlemskapsperioder(2L, 1L, listOf(nyMedlemskapsperiode))
+
 
         verify(exactly = 1) { medlPeriodeService.avvisPeriodeOpphørt(1L) }
         verify(exactly = 1) { medlPeriodeService.opprettPeriodeEndelig(2L, nyMedlemskapsperiode) }
@@ -128,14 +136,14 @@ class MedlemskapsperiodeServiceKotlinTest {
             innvilgelsesresultat = InnvilgelsesResultat.INNVILGET
         }
         val gammelListe = listOf(fellesMedlemskapsperiode, gammelMedlemskapsperiode)
-        val nyMedlemskapsperiode = Medlemskapsperiode()
+        val nyMedlemskapsperiode = Medlemskapsperiode().apply { innvilgelsesresultat = InnvilgelsesResultat.INNVILGET }
         val nyListe = listOf(fellesMedlemskapsperiode, nyMedlemskapsperiode)
         val medlemAvFolketrygden = MedlemAvFolketrygden().apply { medlemskapsperioder = gammelListe }
-        every { behandlingsresultatService.hentBehandlingsresultat(1L) } returns Behandlingsresultat().apply {
-            this.medlemAvFolketrygden = medlemAvFolketrygden
-        }
+        every { medlemAvFolketrygdenService.finnMedlemAvFolketrygden(1L) } returns Optional.of(medlemAvFolketrygden)
 
-        medlemskapsperiodeService.erstattMedlemskapsperioder(nyListe, 1L, 2L)
+
+        medlemskapsperiodeService.erstattMedlemskapsperioder(2L, 1L, nyListe)
+
 
         verify(exactly = 1) { medlPeriodeService.oppdaterPeriodeEndelig(2L, fellesMedlemskapsperiode) }
         verify(exactly = 1) { medlPeriodeService.avvisPeriodeOpphørt(2L) }
@@ -156,15 +164,70 @@ class MedlemskapsperiodeServiceKotlinTest {
         val gammelListe = listOf(gammelMedlemskapsperiodeInnvilget, gammelMedlemskapsperiodeAvslag)
         val medlemAvFolketrygden = MedlemAvFolketrygden().apply { medlemskapsperioder = gammelListe }
 
-        every { behandlingsresultatService.hentBehandlingsresultat(1L) } returns Behandlingsresultat().apply {
-            this.medlemAvFolketrygden = medlemAvFolketrygden
-        }
+        every { medlemAvFolketrygdenService.finnMedlemAvFolketrygden(1L) } returns Optional.of(medlemAvFolketrygden)
 
-        medlemskapsperiodeService.erstattMedlemskapsperioder(emptyList(), 1L, 2L)
+
+        medlemskapsperiodeService.erstattMedlemskapsperioder(2L, 1L, emptyList())
+
 
         verify(exactly = 1) { medlPeriodeService.avvisPeriodeOpphørt(1L) }
         verify(exactly = 0) { medlPeriodeService.avvisPeriodeOpphørt(2L) }
         verify(exactly = 0) { medlPeriodeService.opprettPeriodeEndelig(any<Long>(), any()) }
+    }
+
+    @Test
+    fun `erstattMedlemskapsperioder skal kunne opprette nye opphørte perioder`() {
+        setupHappyPathBehandling()
+        val medlemAvFolketrygden = MedlemAvFolketrygden().apply { medlemskapsperioder = emptyList() }
+        every { medlemAvFolketrygdenService.finnMedlemAvFolketrygden(1L) } returns Optional.of(medlemAvFolketrygden)
+        val nyInnvilgetMedlemskapsperiode = Medlemskapsperiode().apply { innvilgelsesresultat = InnvilgelsesResultat.INNVILGET }
+        val nyOpphørtMedlemskapsperiode = Medlemskapsperiode().apply { innvilgelsesresultat = InnvilgelsesResultat.OPPHØRT }
+
+
+        medlemskapsperiodeService.erstattMedlemskapsperioder(2L, 1L, listOf(nyInnvilgetMedlemskapsperiode, nyOpphørtMedlemskapsperiode))
+
+
+        verify(exactly = 1) { medlPeriodeService.opprettOpphørtPeriode(2L, nyOpphørtMedlemskapsperiode) }
+    }
+
+    @Test
+    fun `erstattMedlemskapsperioder skal kunne oppdatere opphørte perioder som videreføres fra tidligere behandling`() {
+        setupHappyPathBehandling()
+        val videreførtMedlemskapsperiode = Medlemskapsperiode().apply {
+            medlPeriodeID = 456
+            innvilgelsesresultat = InnvilgelsesResultat.INNVILGET
+        }
+        val medlemAvFolketrygden = MedlemAvFolketrygden().apply { medlemskapsperioder = listOf(videreførtMedlemskapsperiode) }
+        every { medlemAvFolketrygdenService.finnMedlemAvFolketrygden(1L) } returns Optional.of(medlemAvFolketrygden)
+        val videreførtMedlemskapsperiodeOpphøres = videreførtMedlemskapsperiode.apply {
+            innvilgelsesresultat = InnvilgelsesResultat.OPPHØRT
+        }
+
+
+        medlemskapsperiodeService.erstattMedlemskapsperioder(2L, 1L, listOf(videreførtMedlemskapsperiodeOpphøres))
+
+
+        verify(exactly = 1) { medlPeriodeService.oppdaterOpphørtPeriode(2L, videreførtMedlemskapsperiodeOpphøres) }
+    }
+
+    @Test
+    fun `erstattMedlemskapsperioder skal feilregistrere opphørte perioder som ikke videreføres fra tidligere behandling`() {
+        setupHappyPathBehandling()
+        val gammelOpphørtPeriode = Medlemskapsperiode().apply {
+            medlPeriodeID = 12
+            innvilgelsesresultat = InnvilgelsesResultat.OPPHØRT
+        }
+        val medlemAvFolketrygden = MedlemAvFolketrygden().apply { medlemskapsperioder = listOf(gammelOpphørtPeriode) }
+        every { medlemAvFolketrygdenService.finnMedlemAvFolketrygden(1L) } returns Optional.of(medlemAvFolketrygden)
+        val nyMedlemskapsperiode = Medlemskapsperiode().apply {
+            innvilgelsesresultat = InnvilgelsesResultat.INNVILGET
+        }
+
+
+        medlemskapsperiodeService.erstattMedlemskapsperioder(2L, 1L, listOf(nyMedlemskapsperiode))
+
+
+        verify(exactly = 1) { medlPeriodeService.avvisPeriodeFeilregistrert(gammelOpphørtPeriode.medlPeriodeID) }
     }
 
     @Test
@@ -180,14 +243,11 @@ class MedlemskapsperiodeServiceKotlinTest {
     @Test
     fun `hentGyldigeTrygdedekninger returnerer GYLDIGE_TRYGDEDEKNINGER_2_7 og GYLDIGE_TRYGDEDEKNINGER_2_8 når MELOSYS_FOLKETRYGDEN_2_7 er enabled`() {
         fakeUnleash.enable(ToggleName.MELOSYS_FOLKETRYGDEN_2_7)
-
-        val forventet = ArrayList<Trygdedekninger>(MedlemskapsperiodeService.GYLDIGE_TRYGDEDEKNINGER_2_8).apply {
-            addAll(MedlemskapsperiodeService.GYLDIGE_TRYGDEDEKNINGER_2_7)
-        }
+        val forventet = listOf(MedlemskapsperiodeService.GYLDIGE_TRYGDEDEKNINGER_2_7, MedlemskapsperiodeService.GYLDIGE_TRYGDEDEKNINGER_2_8).flatten()
 
         val result = medlemskapsperiodeService.hentGyldigeTrygdedekninger()
 
-        assertEquals(forventet, result)
+        result.shouldContainExactlyInAnyOrder(forventet)
     }
 
     @Test
