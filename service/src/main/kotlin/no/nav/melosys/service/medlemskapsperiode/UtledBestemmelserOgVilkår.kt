@@ -7,11 +7,11 @@ import no.nav.melosys.domain.kodeverk.Vilkaar
 import no.nav.melosys.domain.kodeverk.begrunnelser.folketrygdloven.Ftrl_2_7_begrunnelser
 import no.nav.melosys.domain.kodeverk.begrunnelser.folketrygdloven.Ftrl_2_8_naer_tilknytning_norge_begrunnelser
 import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingstema
-import no.nav.melosys.domain.util.KodeverkUtils
 import no.nav.melosys.featuretoggle.ToggleName
-import org.springframework.stereotype.Service
+import no.nav.melosys.domain.util.KodeverkUtils
+import org.springframework.stereotype.Component
 
-@Service
+@Component
 class UtledBestemmelserOgVilkår(val unleash: Unleash) {
 
     val støttetBestemmelser2_8 = listOf(

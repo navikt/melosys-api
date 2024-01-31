@@ -10,14 +10,18 @@ import no.nav.melosys.domain.kodeverk.Medlemskapstyper
 import no.nav.melosys.domain.kodeverk.Trygdedekninger
 import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingstyper
 import no.nav.melosys.exception.FunksjonellException
+import no.nav.melosys.service.lovligekombinasjoner.LovligeKombinasjonerMedlemskapsperiodeService
 import org.springframework.data.util.Pair
+import org.springframework.stereotype.Component
 import java.time.LocalDate
 
-class UtledMedlemskapsperioder {
+@Component
+class UtledMedlemskapsperioder(private val lovligeKombinasjonerMedlemskapsperiodeService: LovligeKombinasjonerMedlemskapsperiodeService) {
 
     fun lagMedlemskapsperioderForAndregangsbehandling(
         opprinneligBehandlingsresultat: Behandlingsresultat,
-        bestemmelse: Folketrygdloven_kap2_bestemmelser,
+        nyBestemmelse: Folketrygdloven_kap2_bestemmelser,
+        nyTrygdedekning: Trygdedekninger,
         type: Behandlingstyper
     ): Collection<Medlemskapsperiode> =
         opprinneligBehandlingsresultat.medlemAvFolketrygden.medlemskapsperioder
@@ -29,9 +33,11 @@ class UtledMedlemskapsperioder {
                     arbeidsland = it.arbeidsland
                     innvilgelsesresultat = it.innvilgelsesresultat
                     medlemskapstype = it.medlemskapstype
-                    trygdedekning = it.trygdedekning
+                    trygdedekning =
+                        if (lovligeKombinasjonerMedlemskapsperiodeService.erGyldigKombinasjon(nyBestemmelse, it.trygdedekning)) it.trygdedekning
+                        else nyTrygdedekning
                     medlPeriodeID = it.medlPeriodeID
-                    this.bestemmelse = if (it.erOpphørt()) it.bestemmelse else bestemmelse
+                    bestemmelse = if (it.erOpphørt()) it.bestemmelse else nyBestemmelse
                 }
             }
 

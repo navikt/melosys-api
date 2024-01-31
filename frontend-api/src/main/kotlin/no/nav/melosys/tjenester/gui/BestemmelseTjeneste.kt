@@ -18,7 +18,7 @@ import org.springframework.web.context.WebApplicationContext
 @RestController
 @Api(tags = ["medlemavfolketrygden", "bestemmelser"])
 @Scope(value = WebApplicationContext.SCOPE_REQUEST)
-class BestemmelseTjeneste(val utledBestemmelserOgVilkår: UtledBestemmelserOgVilkår) {
+class BestemmelseTjeneste(private val utledBestemmelserOgVilkår: UtledBestemmelserOgVilkår) {
 
     @GetMapping("/behandlinger/medlemavfolketrygden/bestemmelser/{behandlingstema}")
     fun hentBestemmelserMedVilkaarForBehandlingstema(@PathVariable("behandlingstema") behandlingstema: Behandlingstema): ResponseEntity<FolketrygdlovenBestemmelserDto> {
