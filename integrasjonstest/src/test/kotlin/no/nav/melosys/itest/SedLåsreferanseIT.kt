@@ -1,5 +1,8 @@
 package no.nav.melosys.itest
 
+import com.github.tomakehurst.wiremock.WireMockServer
+import com.github.tomakehurst.wiremock.client.WireMock
+import com.github.tomakehurst.wiremock.core.WireMockConfiguration
 import io.kotest.matchers.collections.shouldHaveSize
 import io.kotest.matchers.string.shouldMatch
 import io.kotest.matchers.string.shouldStartWith
@@ -18,8 +21,11 @@ import no.nav.melosys.saksflytapi.ProsessinstansService
 import no.nav.melosys.saksflytapi.domain.ProsessStatus
 import no.nav.melosys.saksflytapi.domain.ProsessSteg
 import no.nav.melosys.saksflytapi.domain.Prosessinstans
+import no.nav.melosys.sikkerhet.context.ThreadLocalAccessInfo
 import no.nav.security.token.support.spring.test.EnableMockOAuth2Server
 import org.awaitility.kotlin.await
+import org.junit.jupiter.api.AfterEach
+import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Disabled
 import org.junit.jupiter.api.Test
 import org.springframework.beans.factory.annotation.Autowired
@@ -29,6 +35,8 @@ import org.springframework.boot.test.context.TestConfiguration
 import org.springframework.context.annotation.Bean
 import org.springframework.context.annotation.Import
 import org.springframework.context.annotation.Primary
+import org.springframework.http.HttpHeaders
+import org.springframework.http.MediaType
 import org.springframework.kafka.test.context.EmbeddedKafka
 import org.springframework.test.context.ActiveProfiles
 import java.lang.Thread.sleep
@@ -53,6 +61,45 @@ internal class SedLåsreferanseIT(
     @Autowired private val prosessinstansRepository: ProsessinstansRepository,
     @Autowired private val prosessinstansService: ProsessinstansService,
 ) : OracleTestContainerBase() {
+
+    protected val mockServer: WireMockServer =
+        WireMockServer(WireMockConfiguration.wireMockConfig().port(8094))
+
+    @BeforeEach
+    fun before() {
+        mockServer.start()
+        mockServer.stubFor(
+            WireMock.get(WireMock.urlPathMatching("/api/v1/kodeverk/.*/koder/betydninger")).willReturn(
+                WireMock.aResponse()
+                    .withStatus(200)
+                    .withHeader(HttpHeaders.CONTENT_TYPE, MediaType.APPLICATION_JSON_VALUE)
+                    .withBody(
+                        "{\n" +
+                            "    \"betydninger\": {\n" +
+                            "        \"andreSkift\": [\n" +
+                            "            {\n" +
+                            "                \"gyldigFra\": \"2019-01-01\",\n" +
+                            "                \"gyldigTil\": \"9999-12-31\",\n" +
+                            "                \"beskrivelser\": {\n" +
+                            "                    \"nb\": {\n" +
+                            "                        \"term\": \"Andre skift\",\n" +
+                            "                        \"tekst\": \"Andre skift\"\n" +
+                            "                    }\n" +
+                            "                }\n" +
+                            "            }\n" +
+                            "        ]\n" +
+                            "    }\n" +
+                            "}"
+                    )
+            )
+        )
+    }
+
+    @AfterEach
+    fun after() {
+        mockServer.stop()
+    }
+
 
     @Test
     fun `ikke kjør samtidig når sed har samme rinaSaksnummer men forsjellig sedId, sedVersjon`() {
