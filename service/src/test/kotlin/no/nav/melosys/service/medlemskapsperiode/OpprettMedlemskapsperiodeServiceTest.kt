@@ -22,6 +22,7 @@ import no.nav.melosys.exception.FunksjonellException
 import no.nav.melosys.repository.MedlemAvFolketrygdenRepository
 import no.nav.melosys.service.behandling.BehandlingsresultatService
 import no.nav.melosys.service.behandling.UtledMottaksdato
+import no.nav.melosys.service.lovligekombinasjoner.LovligeKombinasjonerMedlemskapsperiodeService
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.extension.ExtendWith
@@ -38,6 +39,10 @@ class OpprettMedlemskapsperiodeServiceTest {
     @MockK
     private lateinit var utledMottaksdato: UtledMottaksdato
 
+    private val utledBestemmelserOgVilkår = UtledBestemmelserOgVilkår()
+    private val lovligeKombinasjonerMedlemskapsperiodeService = LovligeKombinasjonerMedlemskapsperiodeService()
+    private val utledMedlemskapsperioder = UtledMedlemskapsperioder(lovligeKombinasjonerMedlemskapsperiodeService)
+
     private lateinit var opprettMedlemskapsperiodeService: OpprettMedlemskapsperiodeService
 
     private val BEH_RES_ID: Long = 123321
@@ -47,7 +52,14 @@ class OpprettMedlemskapsperiodeServiceTest {
     @BeforeEach
     fun setup() {
         opprettMedlemskapsperiodeService =
-            OpprettMedlemskapsperiodeService(medlemAvFolketrygdenRepository, behandlingsresultatService, utledMottaksdato)
+            OpprettMedlemskapsperiodeService(
+                medlemAvFolketrygdenRepository,
+                behandlingsresultatService,
+                utledMottaksdato,
+                utledMedlemskapsperioder,
+                utledBestemmelserOgVilkår,
+                lovligeKombinasjonerMedlemskapsperiodeService
+            )
     }
 
     @Test
@@ -116,6 +128,7 @@ class OpprettMedlemskapsperiodeServiceTest {
                     innvilgelsesresultat = InnvilgelsesResultat.INNVILGET
                     tom = LocalDate.now().plusMonths(4)
                     bestemmelse = BESTEMMELSE
+                    trygdedekning = Trygdedekninger.FTRL_2_9_FØRSTE_LEDD_A_HELSE
                 })
                 addMedlemskapsperiode(Medlemskapsperiode().apply { innvilgelsesresultat = InnvilgelsesResultat.AVSLAATT })
             }
@@ -153,12 +166,14 @@ class OpprettMedlemskapsperiodeServiceTest {
                     innvilgelsesresultat = InnvilgelsesResultat.INNVILGET
                     fom = LocalDate.now().plusMonths(4)
                     bestemmelse = BESTEMMELSE
+                    trygdedekning = Trygdedekninger.FTRL_2_9_FØRSTE_LEDD_A_HELSE
                 })
                 addMedlemskapsperiode(Medlemskapsperiode().apply { innvilgelsesresultat = InnvilgelsesResultat.AVSLAATT })
                 addMedlemskapsperiode(Medlemskapsperiode().apply {
                     innvilgelsesresultat = InnvilgelsesResultat.OPPHØRT
                     fom = LocalDate.now().plusMonths(6)
                     bestemmelse = Folketrygdloven_kap2_bestemmelser.FTRL_KAP2_2_15_ANDRE_LEDD
+                    trygdedekning = Trygdedekninger.FTRL_2_9_FØRSTE_LEDD_A_HELSE
                 })
             }
         }
