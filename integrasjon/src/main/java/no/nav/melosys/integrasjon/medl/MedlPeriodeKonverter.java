@@ -228,11 +228,11 @@ public final class MedlPeriodeKonverter {
 
 
         ftrlKap2BestemmelserTilGrunnLagMedlTabell = Map.of(
-            Folketrygdloven_kap2_bestemmelser.FTRL_KAP2_2_8_FØRSTE_LEDD_A, GrunnlagMedl.FTL_2_8_1_ledd_a,
-            Folketrygdloven_kap2_bestemmelser.FTRL_KAP2_2_8_ANDRE_LEDD, GrunnlagMedl.FTL_2_8_2_ledd,
-            Folketrygdloven_kap2_bestemmelser.FTRL_KAP2_2_15_ANDRE_LEDD, GrunnlagMedl.FTL_2_15_2_ledd,
+            Folketrygdloven_kap2_bestemmelser.FTRL_KAP2_2_8_FØRSTE_LEDD_A, GrunnlagMedl.FTL_2_8_1_LEDD_A,
+            Folketrygdloven_kap2_bestemmelser.FTRL_KAP2_2_8_ANDRE_LEDD, GrunnlagMedl.FTL_2_8_2_LEDD,
+            Folketrygdloven_kap2_bestemmelser.FTRL_KAP2_2_15_ANDRE_LEDD, GrunnlagMedl.FTL_2_15_2_LEDD,
             Folketrygdloven_kap2_bestemmelser.FTRL_KAP2_2_7A, GrunnlagMedl.FTL_2_7A,
-            Folketrygdloven_kap2_bestemmelser.FTRL_KAP2_2_7_FØRSTE_LEDD, GrunnlagMedl.FTL_2_7_1_ledd
+            Folketrygdloven_kap2_bestemmelser.FTRL_KAP2_2_7_FØRSTE_LEDD, GrunnlagMedl.FTL_2_7_1_LEDD
         );
     }
 
@@ -261,7 +261,7 @@ public final class MedlPeriodeKonverter {
             case FTRL_2_9_FØRSTE_LEDD_C_HELSE_PENSJON -> DekningMedl.FTRL_2_9_1_LEDD_C;
             case FTRL_2_9_FØRSTE_LEDD_C_ANDRE_LEDD_HELSE_PENSJON_SYKE_FORELDREPENGER -> DekningMedl.FTRL_2_9_2_LEDD_1C;
             case FTRL_2_7_TREDJE_LEDD_B_HELSE_SYKE_FORELDREPENGER -> DekningMedl.FTRL_2_7_3_LEDD_B;
-            case FTRL_2_7A_ANDRE_LEDD_B_HELSE_SYKE_FORELDREPENGER -> DekningMedl.FTRL_2_7A_2_ledd_B;
+            case FTRL_2_7A_ANDRE_LEDD_B_HELSE_SYKE_FORELDREPENGER -> DekningMedl.FTRL_2_7A_2_LEDD_B;
             case FULL_DEKNING_FTRL -> DekningMedl.FULL;
             default -> throw new TekniskException("Dekningstype støttes ikke for FTRL:" + dekning.getKode());
         };
