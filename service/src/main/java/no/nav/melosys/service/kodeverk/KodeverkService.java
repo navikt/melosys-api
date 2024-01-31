@@ -30,7 +30,6 @@ public class KodeverkService {
     private KodeOppslag kodeOppslag;
 
     public KodeverkService(KodeverkRegister kodeverkRegister, KodeOppslag kodeOppslag) {
-        log.info("KodeverkService cnst" + kodeverkRegister.getClass().getSimpleName());
         this.kodeverkRegister = kodeverkRegister;
         this.kodeOppslag = kodeOppslag;
         this.kodeverkCache = new HashMap<>();
