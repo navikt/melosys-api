@@ -91,7 +91,6 @@ class YrkesaktivFtrlVedtakIT(
         MedlRepo.repo.clear()
         originalSubjectHandler = SubjectHandler.getInstance()
 
-        // Now set the new state for the test
         val mockHandler = mockk<SpringSubjectHandler>()
         SubjectHandler.set(mockHandler)
         every { mockHandler.userID } returns "Z123456"
