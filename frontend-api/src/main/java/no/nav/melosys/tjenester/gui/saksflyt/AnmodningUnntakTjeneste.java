@@ -38,7 +38,7 @@ public class AnmodningUnntakTjeneste {
         throws ValideringException {
         aksesskontroll.autoriserSkriv(behandlingID);
         anmodningUnntakService.anmodningOmUnntak(behandlingID,
-            anmodningUnntakDto.mottakerinstitusjon,
+            anmodningUnntakDto.getMottakerinstitusjon(),
             anmodningUnntakDto.getVedlegg().stream()
                 .map(v -> new DokumentReferanse(v.journalpostID, v.dokumentID))
                 .collect(Collectors.toUnmodifiableSet()),

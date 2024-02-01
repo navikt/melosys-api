@@ -214,11 +214,11 @@ class FagsakTjenesteTest {
             .andExpect(jsonPath("$[0].hovedpartRolle", equalTo(Aktoersroller.BRUKER.toString())))
             .andExpect(jsonPath("$[0].saksnummer", equalTo(saksnummer)))
             .andExpect(jsonPath("$[0].behandlingOversikter[0].land.landkoder[0]", equalTo(Landkoder.DK.getKode())))
-            .andExpect(jsonPath("$[0].behandlingOversikter[0].land.landkoder[0]", is(not(equalTo(FORVENTET_LOVVALGSPERIODE.lovvalgsland)))))
+            .andExpect(jsonPath("$[0].behandlingOversikter[0].land.landkoder[0]", is(not(equalTo(FORVENTET_LOVVALGSPERIODE.getLovvalgsland())))))
             .andExpect(jsonPath("$[0].behandlingOversikter[0].soknadsperiode.fom", equalTo("2019-01-01")))
             .andExpect(jsonPath("$[0].behandlingOversikter[0].soknadsperiode.tom", equalTo("2019-02-01")))
-            .andExpect(jsonPath("$[0].behandlingOversikter[0].lovvalgsperiode.fom", equalTo(FORVENTET_LOVVALGSPERIODE.periode.fom.toString())))
-            .andExpect(jsonPath("$[0].behandlingOversikter[0].lovvalgsperiode.tom", equalTo(FORVENTET_LOVVALGSPERIODE.periode.tom.toString())))
+            .andExpect(jsonPath("$[0].behandlingOversikter[0].lovvalgsperiode.fom", equalTo(FORVENTET_LOVVALGSPERIODE.getPeriode().getFom().toString())))
+            .andExpect(jsonPath("$[0].behandlingOversikter[0].lovvalgsperiode.tom", equalTo(FORVENTET_LOVVALGSPERIODE.getPeriode().getTom().toString())))
             .andExpect(jsonPath("$[0].behandlingOversikter[0].medlemskapsperiode", equalTo(null)));
     }
 
@@ -250,7 +250,7 @@ class FagsakTjenesteTest {
             .andExpect(jsonPath("$[0].hovedpartRolle", equalTo(Aktoersroller.BRUKER.toString())))
             .andExpect(jsonPath("$[0].saksnummer", equalTo(saksnummer)))
             .andExpect(jsonPath("$[0].behandlingOversikter[0].land.landkoder[0]", equalTo(Landkoder.DK.getKode())))
-            .andExpect(jsonPath("$[0].behandlingOversikter[0].land.landkoder[0]", is(not(equalTo(FORVENTET_LOVVALGSPERIODE.lovvalgsland)))))
+            .andExpect(jsonPath("$[0].behandlingOversikter[0].land.landkoder[0]", is(not(equalTo(FORVENTET_LOVVALGSPERIODE.getLovvalgsland())))))
             .andExpect(jsonPath("$[0].behandlingOversikter[0].soknadsperiode.fom", equalTo("2019-01-01")))
             .andExpect(jsonPath("$[0].behandlingOversikter[0].soknadsperiode.tom", equalTo("2019-02-01")))
             .andExpect(jsonPath("$[0].behandlingOversikter[0].lovvalgsperiode", equalTo(null)))
@@ -394,15 +394,15 @@ class FagsakTjenesteTest {
 
     private Lovvalgsperiode lagLovvalgsPeriode() {
         Lovvalgsperiode lovvalgsperiode = new Lovvalgsperiode();
-        lovvalgsperiode.setFom(FORVENTET_LOVVALGSPERIODE.periode.fom);
-        lovvalgsperiode.setTom(FORVENTET_LOVVALGSPERIODE.periode.tom);
+        lovvalgsperiode.setFom(FORVENTET_LOVVALGSPERIODE.getPeriode().getFom());
+        lovvalgsperiode.setTom(FORVENTET_LOVVALGSPERIODE.getPeriode().getTom());
         lovvalgsperiode.setDekning(Trygdedekninger.FULL_DEKNING_EOSFO);
-        lovvalgsperiode.setLovvalgsland(Land_iso2.valueOf(FORVENTET_LOVVALGSPERIODE.lovvalgsland));
-        lovvalgsperiode.setBestemmelse(Lovvalgbestemmelser_883_2004.valueOf(FORVENTET_LOVVALGSPERIODE.lovvalgsbestemmelse));
-        lovvalgsperiode.setTilleggsbestemmelse(Tilleggsbestemmelser_883_2004.valueOf(FORVENTET_LOVVALGSPERIODE.tilleggBestemmelse));
-        lovvalgsperiode.setInnvilgelsesresultat(InnvilgelsesResultat.valueOf(FORVENTET_LOVVALGSPERIODE.innvilgelsesResultat));
-        lovvalgsperiode.setMedlemskapstype(Medlemskapstyper.valueOf(FORVENTET_LOVVALGSPERIODE.medlemskapstype));
-        lovvalgsperiode.setMedlPeriodeID(Long.valueOf(FORVENTET_LOVVALGSPERIODE.medlemskapsperiodeID));
+        lovvalgsperiode.setLovvalgsland(FORVENTET_LOVVALGSPERIODE.getLovvalgsland());
+        lovvalgsperiode.setBestemmelse(FORVENTET_LOVVALGSPERIODE.getLovvalgsbestemmelse());
+        lovvalgsperiode.setTilleggsbestemmelse(FORVENTET_LOVVALGSPERIODE.getTilleggBestemmelse());
+        lovvalgsperiode.setInnvilgelsesresultat(FORVENTET_LOVVALGSPERIODE.getInnvilgelsesResultat());
+        lovvalgsperiode.setMedlemskapstype(FORVENTET_LOVVALGSPERIODE.getMedlemskapstype());
+        lovvalgsperiode.setMedlPeriodeID(Long.valueOf(FORVENTET_LOVVALGSPERIODE.getMedlemskapsperiodeID()));
 
         return lovvalgsperiode;
     }

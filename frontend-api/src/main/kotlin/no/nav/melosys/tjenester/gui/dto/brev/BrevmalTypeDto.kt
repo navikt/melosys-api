@@ -2,7 +2,7 @@ package no.nav.melosys.tjenester.gui.dto.brev
 
 import no.nav.melosys.domain.kodeverk.brev.Produserbaredokumenter
 
-class BrevmalTypeDto private constructor(@JvmField val type: Produserbaredokumenter?, @JvmField val felter: List<BrevmalFeltDto>?) {
+class BrevmalTypeDto private constructor(val type: Produserbaredokumenter?, val felter: List<BrevmalFeltDto>?) {
     class Builder {
         private var type: Produserbaredokumenter? = null
         private var felter: List<BrevmalFeltDto>? = null

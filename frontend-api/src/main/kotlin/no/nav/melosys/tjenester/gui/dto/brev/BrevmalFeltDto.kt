@@ -7,17 +7,12 @@ package no.nav.melosys.tjenester.gui.dto.brev
  * et valgalternativ fra {@param valg} som har [FeltvalgAlternativDto.isVisFelt] = true.
  */
 class BrevmalFeltDto private constructor(builder: Builder) {
-    @JvmField
     val kode: String?
     val beskrivelse: String?
-    @JvmField
     val feltType: FeltType?
-    @JvmField
     val hjelpetekst: String?
     val isPaakrevd: Boolean
-    @JvmField
     val valg: FeltValgDto?
-    @JvmField
     val tegnBegrensning: Int?
 
     init {

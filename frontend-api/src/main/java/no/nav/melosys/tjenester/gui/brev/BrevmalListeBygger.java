@@ -1,9 +1,6 @@
 package no.nav.melosys.tjenester.gui.brev;
 
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.List;
-import java.util.Objects;
+import java.util.*;
 
 import no.nav.melosys.domain.Behandling;
 import no.nav.melosys.domain.kodeverk.Land_iso2;
@@ -51,7 +48,7 @@ public class BrevmalListeBygger {
     }
 
     private BrevmalResponse mottakerTilBrevmalDto(long behandlingId, MottakerDto mottaker) {
-        List<Produserbaredokumenter> produserbareDokumenter = brevmalListeService.hentMuligeProduserbaredokumenter(behandlingId, mottaker.rolle);
+        List<Produserbaredokumenter> produserbareDokumenter = brevmalListeService.hentMuligeProduserbaredokumenter(behandlingId, mottaker.getRolle());
 
         List<BrevmalTypeDto> typer = produserbareDokumenter.stream().map(dokument -> switch (dokument) {
                 case MELDING_FORVENTET_SAKSBEHANDLINGSTID_SOKNAD, MELDING_FORVENTET_SAKSBEHANDLINGSTID_KLAGE ->
@@ -98,8 +95,8 @@ public class BrevmalListeBygger {
 
     private MottakerDto lagMottakerMedAdresseOgFeilmelding(long behandlingId, Mottakerroller rolle, boolean harBrukerFullmektig) {
         var mottakerDto = new MottakerDto();
-        mottakerDto.type = hentTypeFraRolle(rolle);
-        mottakerDto.rolle = rolle;
+        mottakerDto.setType(hentTypeFraRolle(rolle));
+        mottakerDto.setRolle(rolle);
         if (harBrukerFullmektig) {
             leggTilAdresseOgFeilmelding(mottakerDto, Mottakerroller.FULLMEKTIG, behandlingId);
         } else {
@@ -110,18 +107,18 @@ public class BrevmalListeBygger {
 
     private MottakerDto lagMottakerMedRolle(Mottakerroller rolle) {
         var mottakerDto = new MottakerDto();
-        mottakerDto.rolle = rolle;
-        mottakerDto.type = hentTypeFraRolle(rolle);
+        mottakerDto.setRolle(rolle);
+        mottakerDto.setType(hentTypeFraRolle(rolle));
         return mottakerDto;
     }
 
     private MottakerDto lagMottakerForUtenlandskTrygdemyndighet(Behandling behandling, boolean erSakstypeTrygdeavtale) {
         var mottakerDto = new MottakerDto();
-        mottakerDto.rolle = Mottakerroller.UTENLANDSK_TRYGDEMYNDIGHET;
-        mottakerDto.type = hentTypeFraRolle(Mottakerroller.UTENLANDSK_TRYGDEMYNDIGHET);
+        mottakerDto.setRolle(Mottakerroller.UTENLANDSK_TRYGDEMYNDIGHET);
+        mottakerDto.setType(hentTypeFraRolle(Mottakerroller.UTENLANDSK_TRYGDEMYNDIGHET));
 
         if (erSakstypeTrygdeavtale && !saksbehandlingRegler.harIngenFlyt(behandling) && !behandling.harLand()) {
-            mottakerDto.feilmelding = new FeilmeldingDto(UTENLANDSK_TRYGDEMYNDIGHET_BEHANDLING_MANGLER_LAND);
+            mottakerDto.setFeilmelding(new FeilmeldingDto(UTENLANDSK_TRYGDEMYNDIGHET_BEHANDLING_MANGLER_LAND));
         }
 
         return mottakerDto;
@@ -137,7 +134,7 @@ public class BrevmalListeBygger {
             case NORSK_MYNDIGHET -> MottakerType.NORSK_MYNDIGHET;
             default -> throw new FunksjonellException("Vi støtter ikke brev med mottakerrolle: " + rolle.getKode());
         };
-        return mottakerType.beskrivelse;
+        return mottakerType.getBeskrivelse();
     }
 
     private void leggTilAdresseOgFeilmelding(MottakerDto mottakerDto, Mottakerroller rolle, long behandlingId) {
@@ -148,14 +145,14 @@ public class BrevmalListeBygger {
                 switch (rolle) {
                     case BRUKER -> {
                         String feilmelding = MANGLENDE_REGISTRERTE_ADRESSE_BRUKER.getBeskrivelse().replace("Ingen gyldig adresse funnet. ", "");
-                        mottakerDto.feilmelding = new FeilmeldingDto(MANGLENDE_REGISTRERTE_ADRESSE, feilmelding);
+                        mottakerDto.setFeilmelding(new FeilmeldingDto(MANGLENDE_REGISTRERTE_ADRESSE, feilmelding));
                     }
                     case FULLMEKTIG -> {
                         String feilmelding = MANGLENDE_REGISTRERTE_ADRESSE_REPRESENTANT.getBeskrivelse().replace("\"Ingen gyldig adresse funnet. ", "");
-                        mottakerDto.feilmelding = new FeilmeldingDto(MANGLENDE_REGISTRERTE_ADRESSE, feilmelding);
+                        mottakerDto.setFeilmelding(new FeilmeldingDto(MANGLENDE_REGISTRERTE_ADRESSE, feilmelding));
                     }
-                    case VIRKSOMHET -> mottakerDto.feilmelding = new FeilmeldingDto(MANGLENDE_REGISTRERTE_ADRESSE);
-                    case ARBEIDSGIVER -> mottakerDto.feilmelding = new FeilmeldingDto(ARBEIDSGIVER_MANGLER_ADRESSE);
+                    case VIRKSOMHET -> mottakerDto.setFeilmelding(new FeilmeldingDto(MANGLENDE_REGISTRERTE_ADRESSE));
+                    case ARBEIDSGIVER -> mottakerDto.setFeilmelding(new FeilmeldingDto(ARBEIDSGIVER_MANGLER_ADRESSE));
                     default -> throw new FunksjonellException("Vi har ikke støtte for tom adresse for " + rolle);
                 }
             } else {
@@ -163,11 +160,11 @@ public class BrevmalListeBygger {
             }
         } catch (TekniskException e) {
             if ("Finner ikke arbeidsforholddokument".equals(e.getMessage())) {
-                mottakerDto.feilmelding = new FeilmeldingDto(INGEN_ARBEIDSGIVERE);
+                mottakerDto.setFeilmelding(new FeilmeldingDto(INGEN_ARBEIDSGIVERE));
             } else if (rolle == Mottakerroller.ARBEIDSGIVER) {
-                mottakerDto.feilmelding = new FeilmeldingDto(ARBEIDSGIVER_MANGLER_ADRESSE);
+                mottakerDto.setFeilmelding(new FeilmeldingDto(ARBEIDSGIVER_MANGLER_ADRESSE));
             } else {
-                mottakerDto.feilmelding = new FeilmeldingDto(e.getMessage());
+                mottakerDto.setFeilmelding(new FeilmeldingDto(e.getMessage()));
             }
         }
     }
@@ -282,6 +279,7 @@ public class BrevmalListeBygger {
                     String beskrivelse = "Trygdemyndighetene i %s".formatted(utenlandskMyndighet.landkode.getBeskrivelse());
                     return new FeltvalgAlternativDto(utenlandskMyndighet.hentInstitusjonID(), beskrivelse, true);
                 })
+                .sorted(Comparator.comparing(FeltvalgAlternativDto::getBeskrivelse))
                 .toList(),
             FeltValgType.SELECT
         );

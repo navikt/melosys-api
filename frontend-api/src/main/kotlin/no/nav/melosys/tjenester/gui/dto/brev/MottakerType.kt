@@ -1,6 +1,6 @@
 package no.nav.melosys.tjenester.gui.dto.brev
 
-enum class MottakerType(@JvmField val beskrivelse: String) {
+enum class MottakerType(val beskrivelse: String) {
     BRUKER_ELLER_BRUKERS_FULLMEKTIG("Bruker eller brukers fullmektig"),
     VIRKSOMHET("Virksomheten saken er tilknyttet"),
     ARBEIDSGIVER_ELLER_ARBEIDSGIVERS_FULLMEKTIG("Arbeidsgiver eller arbeidsgivers fullmektig"),

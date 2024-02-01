@@ -92,7 +92,7 @@ class AvklartefaktaTjenesteTest {
     @Test
     void lagreVirksomheterSomAvklarteFakta() throws Exception {
         var virksomheterDto = new VirksomheterDto();
-        virksomheterDto.setVirksomhetIDer(Collections.singletonList("000000000"));
+        virksomheterDto.virksomhetIDer = Collections.singletonList("000000000");
         Set<AvklartefaktaDto> dtos = lagAvklarteFaktaDtoSet();
         when(avklartefaktaService.hentAlleAvklarteFakta(eq(1L))).thenReturn(dtos);
 
@@ -106,7 +106,7 @@ class AvklartefaktaTjenesteTest {
     @Test
     void lagreArbeidslandSomAvklarteFaktaTest() throws Exception {
         var arbeidslandDto = new ArbeidslandDto();
-        arbeidslandDto.setArbeidsland(Collections.singletonList("NO"));
+        arbeidslandDto.arbeidsland = Collections.singletonList("NO");
         Set<AvklartefaktaDto> dtos = lagAvklarteFaktaDtoSet();
         when(avklartefaktaService.hentAlleAvklarteFakta(eq(1L))).thenReturn(dtos);
 

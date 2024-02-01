@@ -15,6 +15,7 @@ class AnmodningsperiodePostDto {
     }
 
     companion object {
+        @JvmStatic
         fun av(anmodningsperioder: Collection<Anmodningsperiode>): AnmodningsperiodePostDto {
             return AnmodningsperiodePostDto(anmodningsperioder)
         }

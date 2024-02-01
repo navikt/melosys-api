@@ -1,9 +1,7 @@
 package no.nav.melosys.tjenester.gui.dto.brev
 
 class FeltvalgAlternativDto {
-    @JvmField
     val kode: String?
-    @JvmField
     val beskrivelse: String?
     val isVisFelt: Boolean
 

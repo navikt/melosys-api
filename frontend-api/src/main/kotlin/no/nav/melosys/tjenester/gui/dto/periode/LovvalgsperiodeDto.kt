@@ -10,8 +10,8 @@ import org.apache.commons.lang3.StringUtils
 import java.time.LocalDate
 
 data class LovvalgsperiodeDto(
-    val periodeID: String,
-    @JsonUnwrapped(suffix = "Dato") val periode: PeriodeDto,
+    val periodeID: String?,
+    @JsonUnwrapped(suffix = "Dato") val periode: PeriodeDto?,
     val lovvalgsbestemmelse: LovvalgBestemmelse?,
     val tilleggBestemmelse: LovvalgBestemmelse?,
     val lovvalgsland: Land_iso2?,
@@ -27,7 +27,7 @@ data class LovvalgsperiodeDto(
         @JsonCreator
         fun fromJson(json: Map<String, String>): LovvalgsperiodeDto {
             return LovvalgsperiodeDto(
-                json["periodeID"]!!,
+                json["periodeID"],
                 PeriodeDto(LocalDate.parse(json["fomDato"]),
                 if (StringUtils.isEmpty(json["tomDato"])) null else LocalDate.parse(json["tomDato"])),
                 konverterLovvalgsBestemmelse(json["lovvalgsbestemmelse"]),
@@ -69,8 +69,8 @@ data class LovvalgsperiodeDto(
 
     fun til(): Lovvalgsperiode {
         val resultat = Lovvalgsperiode()
-        resultat.fom = periode.fom
-        resultat.tom = periode.tom
+        resultat.fom = periode?.fom
+        resultat.tom = periode?.tom
         resultat.lovvalgsland = enumVerdiEllerNull(Land_iso2::class.java, lovvalgsland?.name)
         resultat.bestemmelse = konverterer.convertToEntityAttribute(lovvalgsbestemmelse?.name())
         resultat.tilleggsbestemmelse = konverterer.convertToEntityAttribute(tilleggBestemmelse?.name())

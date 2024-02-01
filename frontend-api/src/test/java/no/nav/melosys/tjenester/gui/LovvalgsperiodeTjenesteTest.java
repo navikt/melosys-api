@@ -154,16 +154,16 @@ final class LovvalgsperiodeTjenesteTest {
 
     private List<Lovvalgsperiode> lagLovvalgsperiode() {
         Lovvalgsperiode lovvalgsperiode = new Lovvalgsperiode();
-        lovvalgsperiode.setId(Long.parseLong(FORVENTET.periodeID));
-        lovvalgsperiode.setFom(FORVENTET.periode.fom);
-        lovvalgsperiode.setTom(FORVENTET.periode.tom);
+        lovvalgsperiode.setId(Long.parseLong(FORVENTET.getPeriodeID()));
+        lovvalgsperiode.setFom(FORVENTET.getPeriode().getFom());
+        lovvalgsperiode.setTom(FORVENTET.getPeriode().getTom());
         lovvalgsperiode.setDekning(Trygdedekninger.FULL_DEKNING_EOSFO);
-        lovvalgsperiode.setLovvalgsland(Land_iso2.valueOf(FORVENTET.lovvalgsland));
-        lovvalgsperiode.setBestemmelse(Lovvalgbestemmelser_883_2004.valueOf(FORVENTET.lovvalgsbestemmelse));
-        lovvalgsperiode.setTilleggsbestemmelse(Tilleggsbestemmelser_883_2004.valueOf(FORVENTET.tilleggBestemmelse));
-        lovvalgsperiode.setInnvilgelsesresultat(InnvilgelsesResultat.valueOf(FORVENTET.innvilgelsesResultat));
-        lovvalgsperiode.setMedlemskapstype(Medlemskapstyper.valueOf(FORVENTET.medlemskapstype));
-        lovvalgsperiode.setMedlPeriodeID(Long.valueOf(FORVENTET.medlemskapsperiodeID));
+        lovvalgsperiode.setLovvalgsland(FORVENTET.getLovvalgsland());
+        lovvalgsperiode.setBestemmelse(FORVENTET.getLovvalgsbestemmelse());
+        lovvalgsperiode.setTilleggsbestemmelse(FORVENTET.getTilleggBestemmelse());
+        lovvalgsperiode.setInnvilgelsesresultat(FORVENTET.getInnvilgelsesResultat());
+        lovvalgsperiode.setMedlemskapstype(FORVENTET.getMedlemskapstype());
+        lovvalgsperiode.setMedlPeriodeID(Long.valueOf(FORVENTET.getMedlemskapsperiodeID()));
 
         return Collections.singletonList(lovvalgsperiode);
     }

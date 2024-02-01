@@ -8,11 +8,9 @@ import java.time.LocalDate
     "fom", "tom"
 )
 class PeriodeDto {
-    @JvmField
     @JsonProperty("fom")
     var fom: LocalDate? = null
 
-    @JvmField
     @JsonProperty("tom")
     var tom: LocalDate? = null
 
