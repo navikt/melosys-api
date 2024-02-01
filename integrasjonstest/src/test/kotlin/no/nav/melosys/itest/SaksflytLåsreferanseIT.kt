@@ -37,7 +37,7 @@ import java.time.LocalDate
 @ActiveProfiles("test")
 @SpringBootTest(
     classes = [Application::class, SaksflytTestConfig::class],
-    webEnvironment = SpringBootTest.WebEnvironment.NONE
+    webEnvironment = SpringBootTest.WebEnvironment.DEFINED_PORT
 )
 @EmbeddedKafka(
     count = 1, controlledShutdown = true, partitions = 1,
@@ -46,7 +46,7 @@ import java.time.LocalDate
 )
 @AutoConfigureTestDatabase(replace = AutoConfigureTestDatabase.Replace.NONE)
 @EnableMockOAuth2Server
-@Import(SaksflytLåsreferanseIT.TestConfig::class, KodeverkStub::class)
+@Import(SaksflytLåsreferanseIT.TestConfig::class)
 internal class SaksflytLåsreferanseIT(
     @Autowired private val prosessinstansRepository: ProsessinstansRepository,
     @Autowired private val prosessinstansService: ProsessinstansService,
