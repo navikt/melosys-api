@@ -14,6 +14,7 @@ import no.nav.melosys.domain.kodeverk.Mottakerroller;
 import no.nav.melosys.domain.kodeverk.brev.Produserbaredokumenter;
 import no.nav.melosys.domain.kodeverk.lovvalgsbestemmelser.Lovvalgbestemmelser_883_2004;
 import no.nav.melosys.domain.kodeverk.lovvalgsbestemmelser.trygdeavtale.Lovvalgsbestemmelser_trygdeavtale_gb;
+import no.nav.melosys.domain.mottatteopplysninger.MottatteOpplysninger;
 import no.nav.melosys.exception.FunksjonellException;
 import no.nav.melosys.exception.IkkeFunnetException;
 import no.nav.melosys.exception.TekniskException;
@@ -218,7 +219,12 @@ public class BrevmottakerService {
     private List<Mottaker> avklarArbeidsgiverFraAlleVirksomheter(Behandling behandling) {
         Set<String> arbeidsgiverOrgnumre = new HashSet<>();
         arbeidsgiverOrgnumre.addAll(finnOrgNummerFraArbeidsforhold(behandling));
-        arbeidsgiverOrgnumre.addAll(behandling.getMottatteOpplysninger().getMottatteOpplysningerData().hentAlleOrganisasjonsnumre());
+
+        var mottatteOpplysninger = behandling.getMottatteOpplysninger();
+        if (mottatteOpplysninger != null) {
+            arbeidsgiverOrgnumre.addAll(mottatteOpplysninger.getMottatteOpplysningerData().hentAlleOrganisasjonsnumre());
+        }
+
         return avklarArbeidsgiver(arbeidsgiverOrgnumre);
     }
 
