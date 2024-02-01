@@ -548,7 +548,7 @@ internal class DokgenMalMapperTest {
             .avslåttHelsedelFørMottaksdato(false)
             .trygdeavgiftMottaker(Trygdeavgiftmottaker.TRYGDEAVGIFT_BETALES_TIL_NAV)
             .skatteplikttype(Skatteplikttype.SKATTEPLIKTIG)
-            .ftrl_2_8_begrunnelse(Ftrl_2_8_naer_tilknytning_norge_begrunnelser.ANSATT_I_MULTINASJONALT_SELSKAP)
+            .begrunnelse(Ftrl_2_8_naer_tilknytning_norge_begrunnelser.ANSATT_I_MULTINASJONALT_SELSKAP)
             .begrunnelseAnnenGrunnFritekst(null)
             .arbeidsgivere(listOf("Egon Olsen AS"))
             .arbeidsland(Land_iso2.US.kode)
