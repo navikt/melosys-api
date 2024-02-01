@@ -1,8 +1,10 @@
 package no.nav.melosys.saksflytapi.domain;
 
+import java.io.IOException;
 import java.time.LocalDate;
 import java.util.Collections;
 import java.util.List;
+import java.util.Properties;
 
 import no.nav.melosys.domain.brev.DokgenBrevbestilling;
 import no.nav.melosys.domain.brev.MangelbrevBrevbestilling;
@@ -24,6 +26,16 @@ class ProsessinstansTest {
         pi2.setData(new PropertiesConverter().convertToEntityAttribute(new PropertiesConverter().convertToDatabaseColumn(pi1.getData())));
 
         assertThat(pi2.getData(AVSENDER_NAVN)).isEqualTo(s);
+    }
+
+    @Test
+    void testDataString2() throws IOException {
+        Prosessinstans pi1 = new Prosessinstans();
+        Properties properties = new Properties();
+        properties.load(this.getClass().getClassLoader().getResourceAsStream("procdata.properties"));
+        pi1.setData(properties);
+
+        assertThat(pi1.getData(AVSENDER_ID, String.class)).isEqualTo("myFnr!");
     }
 
     @Test
