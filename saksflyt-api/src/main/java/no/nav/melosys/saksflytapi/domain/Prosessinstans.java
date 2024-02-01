@@ -127,9 +127,6 @@ public class Prosessinstans {
         if (dataString == null) {
             return null;
         }
-        if (type.getSimpleName().equals("String")) {
-            return (T) getData(key);
-        }
         try {
             return dataMapper.readValue(dataString, type);
         } catch (IOException e) {
