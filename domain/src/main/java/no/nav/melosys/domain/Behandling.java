@@ -379,12 +379,17 @@ public class Behandling extends RegistreringsInfo {
     public boolean erFørstegangsvurdering() {
         return type == Behandlingstyper.FØRSTEGANG;
     }
+
     public boolean erNyVurdering() {
         return type == Behandlingstyper.NY_VURDERING;
     }
 
     public boolean erManglendeInnbetalingTrygdeavgift() {
         return type == Behandlingstyper.MANGLENDE_INNBETALING_TRYGDEAVGIFT;
+    }
+
+    public boolean erAndregangsbehandling() {
+        return erNyVurdering() || erManglendeInnbetalingTrygdeavgift();
     }
 
     public boolean erNorgeUtpekt() {

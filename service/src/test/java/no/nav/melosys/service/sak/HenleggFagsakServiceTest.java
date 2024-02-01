@@ -89,7 +89,23 @@ class HenleggFagsakServiceTest {
 
         henleggFagsakService.henleggFagsakEllerBehandling(saksnummer, "ANNET", "Never say never");
 
-        verify(behandlingService).avsluttNyVurdering(behandlingID, Behandlingsresultattyper.HENLEGGELSE);
+        verify(behandlingService).avsluttAndregangsbehandling(behandlingID, Behandlingsresultattyper.HENLEGGELSE);
+        verify(prosessinstansService).opprettProsessinstansFagsakHenlagt(behandling);
+        verify(oppgaveService).ferdigstillOppgaveMedSaksnummer(fagsak.getSaksnummer());
+        verifyNoMoreInteractions(fagsakService);
+    }
+
+    @Test
+    void henleggFagsak_avslutterKunBehandling_nårBehandlingTypeErManglendeInnbetalingTrygdeavgift() {
+        when(fagsakService.hentFagsak(saksnummer)).thenReturn(fagsak);
+        when(behandlingsresultatService.hentBehandlingsresultat(behandlingID)).thenReturn(behandlingsresultat);
+        behandling.setType(Behandlingstyper.MANGLENDE_INNBETALING_TRYGDEAVGIFT);
+
+
+        henleggFagsakService.henleggFagsakEllerBehandling(saksnummer, "ANNET", "Never say never");
+
+
+        verify(behandlingService).avsluttAndregangsbehandling(behandlingID, Behandlingsresultattyper.HENLEGGELSE);
         verify(prosessinstansService).opprettProsessinstansFagsakHenlagt(behandling);
         verify(oppgaveService).ferdigstillOppgaveMedSaksnummer(fagsak.getSaksnummer());
         verifyNoMoreInteractions(fagsakService);
@@ -155,7 +171,29 @@ class HenleggFagsakServiceTest {
 
         henleggFagsakService.henleggSakEllerBehandlingSomBortfalt(saksnummer);
 
-        verify(behandlingService).avsluttNyVurdering(andreBehandling.getId(), Behandlingsresultattyper.HENLEGGELSE_BORTFALT);
+        verify(behandlingService).avsluttAndregangsbehandling(andreBehandling.getId(), Behandlingsresultattyper.HENLEGGELSE_BORTFALT);
+        verify(oppgaveService).ferdigstillOppgaveMedSaksnummer(saksnummer);
+        verifyNoMoreInteractions(fagsakService, behandlingsresultatService, oppgaveService);
+    }
+
+    @Test
+    void henleggSomBortfalt_avslutterKunBehandling_dersomBehandlingTypeErManglendeInnbetalingTrygdeavgift() {
+        String saksnummer = "saksnummer";
+        Fagsak fagsak = lagFagsak(saksnummer);
+        Behandling førsteBehandling = new Behandling();
+        førsteBehandling.setId(1L);
+        førsteBehandling.setStatus(Behandlingsstatus.AVSLUTTET);
+        Behandling andreBehandling = new Behandling();
+        andreBehandling.setId(2L);
+        andreBehandling.setType(Behandlingstyper.MANGLENDE_INNBETALING_TRYGDEAVGIFT);
+        fagsak.setBehandlinger(Arrays.asList(førsteBehandling, andreBehandling));
+        when(fagsakService.hentFagsak(saksnummer)).thenReturn(fagsak);
+
+
+        henleggFagsakService.henleggSakEllerBehandlingSomBortfalt(saksnummer);
+
+
+        verify(behandlingService).avsluttAndregangsbehandling(andreBehandling.getId(), Behandlingsresultattyper.HENLEGGELSE_BORTFALT);
         verify(oppgaveService).ferdigstillOppgaveMedSaksnummer(saksnummer);
         verifyNoMoreInteractions(fagsakService, behandlingsresultatService, oppgaveService);
     }
