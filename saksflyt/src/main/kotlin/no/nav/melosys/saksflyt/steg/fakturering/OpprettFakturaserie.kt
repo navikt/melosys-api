@@ -81,8 +81,7 @@ class OpprettFakturaserie(
     }
 
     private fun andregangsvurderingHarFjernetTrygdeavgift(behandling: Behandling, behandlingsresultat: Behandlingsresultat): Boolean {
-        val erAndregangsvurdering = behandling.erNyVurdering() || behandling.erManglendeInnbetalingTrygdeavgift()
-        return erAndregangsvurdering && harOpprinneligBehandlingMedTrygdeavgift(behandling) && betalerNåKunTilSkatt(behandlingsresultat)
+        return behandling.erAndregangsbehandling() && harOpprinneligBehandlingMedTrygdeavgift(behandling) && betalerNåKunTilSkatt(behandlingsresultat)
     }
 
     private fun harOpprinneligBehandlingMedTrygdeavgift(behandling: Behandling): Boolean =

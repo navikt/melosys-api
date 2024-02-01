@@ -44,12 +44,12 @@ class OpprettManglendeInnbetalingBehandling(
 
         if (fagsak.harAktivBehandling()) {
             val aktivBehandling = fagsak.hentAktivBehandling()
-            if (aktivBehandling.type == Behandlingstyper.MANGLENDE_INNBETALING_TRYGDEAVGIFT) {
+            if (aktivBehandling.erManglendeInnbetalingTrygdeavgift()) {
                 prosessinstans.behandling = aktivBehandling
                 return
             }
 
-            if (aktivBehandling.type == Behandlingstyper.NY_VURDERING && aktivBehandling.opprinneligBehandling != null) {
+            if (aktivBehandling.erNyVurdering() && aktivBehandling.opprinneligBehandling != null) {
                 aktivBehandling.type = Behandlingstyper.MANGLENDE_INNBETALING_TRYGDEAVGIFT
                 val manglendeInnbetalingFrist = Behandling.utledBehandlingsfrist(aktivBehandling, mottaksDato)
                 if (manglendeInnbetalingFrist.isBefore(aktivBehandling.behandlingsfrist)) {
