@@ -8,8 +8,10 @@ import io.mockk.every
 import io.mockk.mockk
 import mu.KotlinLogging
 import no.nav.melosys.Application
+import no.nav.melosys.AwaitUtil.throwOnLogError
 import no.nav.melosys.LoggingTestUtils
 import no.nav.melosys.LoggingTestUtils.check
+import no.nav.melosys.LoggingTestUtils.match
 import no.nav.melosys.domain.eessi.melding.MelosysEessiMelding
 import no.nav.melosys.saksflyt.ProsessinstansBehandler
 import no.nav.melosys.saksflyt.ProsessinstansRepository
@@ -30,9 +32,11 @@ import org.springframework.context.annotation.Bean
 import org.springframework.context.annotation.Import
 import org.springframework.context.annotation.Primary
 import org.springframework.kafka.test.context.EmbeddedKafka
+import org.springframework.test.annotation.DirtiesContext
 import org.springframework.test.context.ActiveProfiles
 import java.lang.Thread.sleep
 import java.time.Duration
+
 
 private val log = KotlinLogging.logger { }
 
@@ -47,6 +51,7 @@ private val log = KotlinLogging.logger { }
     brokerProperties = ["offsets.topic.replication.factor=1", "transaction.state.log.replication.factor=1", "transaction.state.log.min.isr=1"]
 )
 @AutoConfigureTestDatabase(replace = AutoConfigureTestDatabase.Replace.NONE)
+@DirtiesContext
 @EnableMockOAuth2Server
 @Import(SedLåsreferanseIT.TestConfig::class)
 internal class SedLåsreferanseIT(
@@ -56,7 +61,7 @@ internal class SedLåsreferanseIT(
 
     @Test
     fun `ikke kjør samtidig når sed har samme rinaSaksnummer men forsjellig sedId, sedVersjon`() {
-        val logItems = LoggingTestUtils.captureLog<ProsessinstansBehandler> {
+        LoggingTestUtils.withLogCapture { logItems ->
             val låsReferanser = lagProsesser(
                 listOf(
                     MelosysEessiMelding().apply {
@@ -72,21 +77,22 @@ internal class SedLåsreferanseIT(
                 )
             )
 
-            await.timeout(Duration.ofSeconds(30)).pollInterval(Duration.ofSeconds(1))
+            await.throwOnLogError(logItems)
+                .timeout(Duration.ofSeconds(30)).pollInterval(Duration.ofSeconds(1))
                 .until {
                     prosessinstansRepository.findAll()
                         .filter { it.låsReferanse in låsReferanser }
                         .all { it.status == ProsessStatus.FERDIG }
                 }
-        }
 
-        logItems.shouldHaveSize(6).check { next ->
-            next().formattedMessage shouldMatch Regex("Starter behandling av prosessinstans .*? med lås 111_222_1")
-            next().formattedMessage shouldStartWith "Utfører steg SED_MOTTAK_RUTING"
-            next().message shouldStartWith "Prosessinstans {} behandlet ferdig"
-            next().formattedMessage shouldMatch Regex("Starter behandling av prosessinstans .*? med lås 111_222_2")
-            next().formattedMessage shouldStartWith "Utfører steg SED_MOTTAK_RUTING"
-            next().message shouldStartWith "Prosessinstans {} behandlet ferdig"
+            logItems.match<ProsessinstansBehandler>().shouldHaveSize(6).check { next ->
+                next().formattedMessage shouldMatch Regex("Starter behandling av prosessinstans .*? med lås 111_222_1")
+                next().formattedMessage shouldStartWith "Utfører steg SED_MOTTAK_RUTING"
+                next().message shouldStartWith "Prosessinstans {} behandlet ferdig"
+                next().formattedMessage shouldMatch Regex("Starter behandling av prosessinstans .*? med lås 111_222_2")
+                next().formattedMessage shouldStartWith "Utfører steg SED_MOTTAK_RUTING"
+                next().message shouldStartWith "Prosessinstans {} behandlet ferdig"
+            }
         }
     }
 

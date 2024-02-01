@@ -30,6 +30,7 @@ import org.springframework.context.annotation.Bean
 import org.springframework.context.annotation.Import
 import org.springframework.context.annotation.Primary
 import org.springframework.kafka.test.context.EmbeddedKafka
+import org.springframework.test.annotation.DirtiesContext
 import org.springframework.test.context.ActiveProfiles
 import java.time.Duration
 import java.time.LocalDate
@@ -45,6 +46,7 @@ import java.time.LocalDate
     brokerProperties = ["offsets.topic.replication.factor=1", "transaction.state.log.replication.factor=1", "transaction.state.log.min.isr=1"]
 )
 @AutoConfigureTestDatabase(replace = AutoConfigureTestDatabase.Replace.NONE)
+@DirtiesContext
 @EnableMockOAuth2Server
 @Import(SaksflytLåsreferanseIT.TestConfig::class)
 internal class SaksflytLåsreferanseIT(
