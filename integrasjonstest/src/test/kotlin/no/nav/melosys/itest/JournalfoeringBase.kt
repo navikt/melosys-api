@@ -25,9 +25,6 @@ import no.nav.melosys.sikkerhet.context.ThreadLocalAccessInfo
 import org.awaitility.kotlin.untilNotNull
 import org.junit.jupiter.api.AfterEach
 import org.junit.jupiter.api.BeforeEach
-import org.springframework.context.annotation.Import
-import org.springframework.http.HttpHeaders
-import org.springframework.http.MediaType
 import java.time.LocalDate
 import java.time.LocalDateTime
 import java.util.*
@@ -63,30 +60,6 @@ class JournalfoeringBase(
                     .withStatus(200)
                     .withHeader("Content-Type", "application/json")
                     .withBody(ByteArray(0))
-            )
-        )
-
-        mockServer.stubFor( // TODO: flytt dette til controller i melosys-mock for gjennbruk
-            WireMock.get(WireMock.urlPathMatching("/api/v1/kodeverk/.*/koder/betydninger")).willReturn(
-                WireMock.aResponse()
-                    .withStatus(200)
-                    .withHeader(HttpHeaders.CONTENT_TYPE, MediaType.APPLICATION_JSON_VALUE)
-                    .withBody("{\n" +
-                        "    \"betydninger\": {\n" +
-                        "        \"andreSkift\": [\n" +
-                        "            {\n" +
-                        "                \"gyldigFra\": \"2019-01-01\",\n" +
-                        "                \"gyldigTil\": \"9999-12-31\",\n" +
-                        "                \"beskrivelser\": {\n" +
-                        "                    \"nb\": {\n" +
-                        "                        \"term\": \"Andre skift\",\n" +
-                        "                        \"tekst\": \"Andre skift\"\n" +
-                        "                    }\n" +
-                        "                }\n" +
-                        "            }\n" +
-                        "        ]\n" +
-                        "    }\n" +
-                        "}")
             )
         )
 
