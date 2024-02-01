@@ -52,7 +52,7 @@ public class SendForvaltningsmelding implements StegBehandler {
                 brevBestiller.bestill(MELDING_FORVENTET_SAKSBEHANDLINGSTID_SOKNAD, List.of(Mottaker.medRolle(Mottakerroller.BRUKER)), null,
                     saksbehandler, null, behandling);
             } else {
-                String avsenderID = prosessinstans.getData(AVSENDER_ID, String.class);
+                String avsenderID = prosessinstans.getData(AVSENDER_ID);
                 boolean avsenderErOrganisasjon = avsenderID.length() == 9;
                 Mottaker mottaker;
 
