@@ -5,6 +5,7 @@ import java.time.LocalDateTime;
 import java.util.*;
 import javax.persistence.*;
 
+import com.fasterxml.jackson.core.JsonParseException;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
@@ -129,8 +130,11 @@ public class Prosessinstans {
         try {
             return dataMapper.readValue(dataString, type);
         } catch (IOException e) {
-            // Holder med RTE, siden det skal mye til for at en slik feil kommer ut i prod
-            throw new IllegalStateException("Feil ved deserialisering", e);
+            if (e instanceof JsonParseException) {
+                throw new IllegalStateException("Feil ved deserialisering");
+            } else {
+                throw new IllegalStateException("Feil ved deserialisering", e);
+            }
         }
     }
 
@@ -146,7 +150,11 @@ public class Prosessinstans {
         try {
             return dataMapper.readValue(dataString, type);
         } catch (JsonProcessingException e) {
-            throw new IllegalStateException("Feil ved deserialisering", e);
+            if (e instanceof JsonParseException) {
+                throw new IllegalStateException("Feil ved deserialisering");
+            } else {
+                throw new IllegalStateException("Feil ved deserialisering", e);
+            }
         }
     }
 
