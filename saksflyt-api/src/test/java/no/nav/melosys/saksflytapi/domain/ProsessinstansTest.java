@@ -27,6 +27,14 @@ class ProsessinstansTest {
     }
 
     @Test
+    void testDataString2() {
+        Prosessinstans pi1 = new Prosessinstans();
+        pi1.setData(AVSENDER_ID, "07755668899");
+
+        assertThat(pi1.getData(AVSENDER_ID, String.class)).isEqualTo("07755668899");
+    }
+
+    @Test
     void testDataPeriode() {
         Periode fraNå = new Periode(LocalDate.now(), null);
         Prosessinstans pi1 = new Prosessinstans(), pi2 = new Prosessinstans();

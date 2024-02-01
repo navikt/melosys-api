@@ -127,6 +127,9 @@ public class Prosessinstans {
         if (dataString == null) {
             return null;
         }
+        if (type.getSimpleName().equals("String")) {
+            return (T) dataString;
+        }
         try {
             return dataMapper.readValue(dataString, type);
         } catch (IOException e) {
@@ -150,7 +153,11 @@ public class Prosessinstans {
         try {
             return dataMapper.readValue(dataString, type);
         } catch (JsonProcessingException e) {
-            throw new IllegalStateException("Feil ved deserialisering", e);
+            if (e instanceof JsonParseException) {
+                throw new IllegalStateException("Feil ved deserialisering");
+            } else {
+                throw new IllegalStateException("Feil ved deserialisering", e);
+            }
         }
     }
 
