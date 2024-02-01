@@ -139,11 +139,11 @@ class TrygdeavgiftsgrunnlagService(private val behandlingsresultatService: Behan
         val behandling = behandlingsresultat.behandling
         val trygdeavgiftsgrunnlag = behandlingsresultat.medlemAvFolketrygden?.fastsattTrygdeavgift?.trygdeavgiftsgrunnlag
 
-        if (trygdeavgiftsgrunnlag == null && behandling.erNyVurdering() && behandling.opprinneligBehandling != null) {
+        if (trygdeavgiftsgrunnlag == null && (behandling.erAndregangsbehandling()) && behandling.opprinneligBehandling != null) {
             return hentOgLagreOpprinneligBehandlingTrygdeavgiftsgrunnlag(behandling, behandlingsresultat)
-        } else {
-            return trygdeavgiftsgrunnlag
         }
+
+        return trygdeavgiftsgrunnlag
     }
 
     private fun hentOgLagreOpprinneligBehandlingTrygdeavgiftsgrunnlag(
