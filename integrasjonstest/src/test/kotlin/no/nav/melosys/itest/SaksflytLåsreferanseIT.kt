@@ -6,8 +6,10 @@ import io.kotest.matchers.string.shouldStartWith
 import io.mockk.every
 import io.mockk.mockk
 import no.nav.melosys.Application
+import no.nav.melosys.AwaitUtil.throwOnLogError
 import no.nav.melosys.LoggingTestUtils
 import no.nav.melosys.LoggingTestUtils.check
+import no.nav.melosys.LoggingTestUtils.match
 import no.nav.melosys.domain.manglendebetaling.Betalingsstatus
 import no.nav.melosys.domain.manglendebetaling.ManglendeFakturabetalingMelding
 import no.nav.melosys.saksflyt.ProsessinstansBehandler
@@ -56,57 +58,61 @@ internal class SaksflytLåsreferanseIT(
 
     @Test
     fun `ikke kjør OpprettManglendeInnbetalingBehandling samtidig`() {
-        val logItems = LoggingTestUtils.captureLog<ProsessinstansBehandler> {
+        LoggingTestUtils.withLogCapture { logItems ->
 
             val låsReferanser = lagProsesser(listOf("23004119", "23004118"))
 
-            await.timeout(Duration.ofSeconds(30)).pollInterval(Duration.ofSeconds(1))
+            await.throwOnLogError(logItems)
+                .timeout(Duration.ofSeconds(30)).pollInterval(Duration.ofSeconds(1))
                 .until {
                     prosessinstansRepository.findAll()
                         .filter { it.låsReferanse in låsReferanser }
                         .all { it.status == ProsessStatus.FERDIG }
                 }
+
+            logItems.match<ProsessinstansBehandler>().shouldHaveSize(10).check { next ->
+                next().formattedMessage shouldMatch Regex("Starter behandling av prosessinstans .*? med lås UBETALT_01HHFM03YMHHQAVZ4SQF9Y29E4_23004119")
+                next().formattedMessage shouldStartWith "Utfører steg OPPRETT_MANGLENDE_INNBETALING_BEHANDLING"
+                next().formattedMessage shouldStartWith "Utfører steg OPPRETT_OPPGAVE"
+                next().formattedMessage shouldStartWith "Utfører steg SEND_MANGLENDE_INNBETALING_VARSELBREV"
+                next().message shouldStartWith "Prosessinstans {} behandlet ferdig"
+                next().formattedMessage shouldMatch Regex("Starter behandling av prosessinstans .*? med lås UBETALT_01HHFM03YMHHQAVZ4SQF9Y29E4_23004118")
+                next().formattedMessage shouldStartWith "Utfører steg OPPRETT_MANGLENDE_INNBETALING_BEHANDLING"
+                next().formattedMessage shouldStartWith "Utfører steg OPPRETT_OPPGAVE"
+                next().formattedMessage shouldStartWith "Utfører steg SEND_MANGLENDE_INNBETALING_VARSELBREV"
+                next().message shouldStartWith "Prosessinstans {} behandlet ferdig"
+            }
+
         }
 
-        logItems.shouldHaveSize(10).check { next ->
-            next().formattedMessage shouldMatch Regex("Starter behandling av prosessinstans .*? med lås UBETALT_01HHFM03YMHHQAVZ4SQF9Y29E4_23004119")
-            next().formattedMessage shouldStartWith "Utfører steg OPPRETT_MANGLENDE_INNBETALING_BEHANDLING"
-            next().formattedMessage shouldStartWith "Utfører steg OPPRETT_OPPGAVE"
-            next().formattedMessage shouldStartWith "Utfører steg SEND_MANGLENDE_INNBETALING_VARSELBREV"
-            next().message shouldStartWith "Prosessinstans {} behandlet ferdig"
-            next().formattedMessage shouldMatch Regex("Starter behandling av prosessinstans .*? med lås UBETALT_01HHFM03YMHHQAVZ4SQF9Y29E4_23004118")
-            next().formattedMessage shouldStartWith "Utfører steg OPPRETT_MANGLENDE_INNBETALING_BEHANDLING"
-            next().formattedMessage shouldStartWith "Utfører steg OPPRETT_OPPGAVE"
-            next().formattedMessage shouldStartWith "Utfører steg SEND_MANGLENDE_INNBETALING_VARSELBREV"
-            next().message shouldStartWith "Prosessinstans {} behandlet ferdig"
-        }
     }
 
     @Test
     fun `ikke kjør OpprettManglendeInnbetalingBehandling samtidig med samme låsreferanse`() {
-        val logItems = LoggingTestUtils.captureLog<ProsessinstansBehandler> {
+        LoggingTestUtils.withLogCapture { logItems ->
 
             val låsReferanser = lagProsesser(listOf("23004119", "23004119"))
 
-            await.timeout(Duration.ofSeconds(30)).pollInterval(Duration.ofSeconds(1))
+            await.throwOnLogError(logItems)
+                .timeout(Duration.ofSeconds(30)).pollInterval(Duration.ofSeconds(1))
                 .until {
                     prosessinstansRepository.findAll()
                         .filter { it.låsReferanse in låsReferanser }
                         .all { it.status == ProsessStatus.FERDIG }
                 }
-        }
 
-        logItems.shouldHaveSize(10).check { next ->
-            next().formattedMessage shouldMatch Regex("Starter behandling av prosessinstans .*? med lås UBETALT_01HHFM03YMHHQAVZ4SQF9Y29E4_23004119")
-            next().formattedMessage shouldStartWith "Utfører steg OPPRETT_MANGLENDE_INNBETALING_BEHANDLING"
-            next().formattedMessage shouldStartWith "Utfører steg OPPRETT_OPPGAVE"
-            next().formattedMessage shouldStartWith "Utfører steg SEND_MANGLENDE_INNBETALING_VARSELBREV"
-            next().message shouldStartWith "Prosessinstans {} behandlet ferdig"
-            next().formattedMessage shouldMatch Regex("Starter behandling av prosessinstans .*? med lås UBETALT_01HHFM03YMHHQAVZ4SQF9Y29E4_23004119")
-            next().formattedMessage shouldStartWith "Utfører steg OPPRETT_MANGLENDE_INNBETALING_BEHANDLING"
-            next().formattedMessage shouldStartWith "Utfører steg OPPRETT_OPPGAVE"
-            next().formattedMessage shouldStartWith "Utfører steg SEND_MANGLENDE_INNBETALING_VARSELBREV"
-            next().message shouldStartWith "Prosessinstans {} behandlet ferdig"
+            logItems.match<ProsessinstansBehandler>().shouldHaveSize(10).check { next ->
+                next().formattedMessage shouldMatch Regex("Starter behandling av prosessinstans .*? med lås UBETALT_01HHFM03YMHHQAVZ4SQF9Y29E4_23004119")
+                next().formattedMessage shouldStartWith "Utfører steg OPPRETT_MANGLENDE_INNBETALING_BEHANDLING"
+                next().formattedMessage shouldStartWith "Utfører steg OPPRETT_OPPGAVE"
+                next().formattedMessage shouldStartWith "Utfører steg SEND_MANGLENDE_INNBETALING_VARSELBREV"
+                next().message shouldStartWith "Prosessinstans {} behandlet ferdig"
+                next().formattedMessage shouldMatch Regex("Starter behandling av prosessinstans .*? med lås UBETALT_01HHFM03YMHHQAVZ4SQF9Y29E4_23004119")
+                next().formattedMessage shouldStartWith "Utfører steg OPPRETT_MANGLENDE_INNBETALING_BEHANDLING"
+                next().formattedMessage shouldStartWith "Utfører steg OPPRETT_OPPGAVE"
+                next().formattedMessage shouldStartWith "Utfører steg SEND_MANGLENDE_INNBETALING_VARSELBREV"
+                next().message shouldStartWith "Prosessinstans {} behandlet ferdig"
+            }
         }
     }
 

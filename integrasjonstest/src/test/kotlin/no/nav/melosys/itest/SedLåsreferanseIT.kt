@@ -101,7 +101,7 @@ internal class SedLåsreferanseIT(
     // Er laget oppgave for å fikse dette: https://jira.adeo.no/browse/MELOSYS-6365 og da er denne testen grei å ha
     @Disabled("Denne testen feiler noen ganger siden den ikke er synkronisert, så log linjene kan komme i en annen rekkefølge")
     fun `kjør samtidig når sed har samme rinaSaksnummer, sedId og sedVersjon`() {
-        val logItems = LoggingTestUtils.captureLog<ProsessinstansBehandler> {
+        LoggingTestUtils.withLogCapture { logItems ->
             val låsReferanser = lagProsesser(
                 listOf(
                     MelosysEessiMelding().apply {
@@ -117,21 +117,22 @@ internal class SedLåsreferanseIT(
                 )
             )
 
-            await.timeout(Duration.ofSeconds(30)).pollInterval(Duration.ofSeconds(1))
+            await.throwOnLogError(logItems)
+                .timeout(Duration.ofSeconds(30)).pollInterval(Duration.ofSeconds(1))
                 .until {
                     prosessinstansRepository.findAll()
                         .filter { it.låsReferanse in låsReferanser }
                         .all { it.status == ProsessStatus.FERDIG }
                 }
-        }
 
-        logItems.shouldHaveSize(6).check { next ->
-            next().formattedMessage shouldMatch Regex("Starter behandling av prosessinstans .*? med lås 111_222_1")
-            next().formattedMessage shouldMatch Regex("Starter behandling av prosessinstans .*? med lås 111_222_1")
-            next().formattedMessage shouldStartWith "Utfører steg SED_MOTTAK_RUTING"
-            next().formattedMessage shouldStartWith "Utfører steg SED_MOTTAK_RUTING"
-            next().message shouldStartWith "Prosessinstans {} behandlet ferdig"
-            next().message shouldStartWith "Prosessinstans {} behandlet ferdig"
+            logItems.match<ProsessinstansBehandler>().shouldHaveSize(6).check { next ->
+                next().formattedMessage shouldMatch Regex("Starter behandling av prosessinstans .*? med lås 111_222_1")
+                next().formattedMessage shouldMatch Regex("Starter behandling av prosessinstans .*? med lås 111_222_1")
+                next().formattedMessage shouldStartWith "Utfører steg SED_MOTTAK_RUTING"
+                next().formattedMessage shouldStartWith "Utfører steg SED_MOTTAK_RUTING"
+                next().message shouldStartWith "Prosessinstans {} behandlet ferdig"
+                next().message shouldStartWith "Prosessinstans {} behandlet ferdig"
+            }
         }
     }
 
