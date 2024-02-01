@@ -128,7 +128,7 @@ public class Prosessinstans {
             return null;
         }
         if (type.getSimpleName().equals("String")) {
-            return (T) dataString;
+            return (T) getData(key);
         }
         try {
             return dataMapper.readValue(dataString, type);
