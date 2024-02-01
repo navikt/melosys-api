@@ -22,7 +22,7 @@ import org.springframework.web.context.WebApplicationContext;
 @Api(tags = {"saksflyt", "anmodningsperioder"})
 @Scope(value = WebApplicationContext.SCOPE_REQUEST)
 public class AnmodningUnntakTjeneste {
-    
+
     private final AnmodningUnntakService anmodningUnntakService;
     private final Aksesskontroll aksesskontroll;
 
@@ -38,9 +38,9 @@ public class AnmodningUnntakTjeneste {
         throws ValideringException {
         aksesskontroll.autoriserSkriv(behandlingID);
         anmodningUnntakService.anmodningOmUnntak(behandlingID,
-            anmodningUnntakDto.getMottakerinstitusjon(),
+            anmodningUnntakDto.mottakerinstitusjon,
             anmodningUnntakDto.getVedlegg().stream()
-                .map(v -> new DokumentReferanse(v.journalpostID(), v.dokumentID()))
+                .map(v -> new DokumentReferanse(v.journalpostID, v.dokumentID))
                 .collect(Collectors.toUnmodifiableSet()),
             anmodningUnntakDto.getFritekstSed());
         return ResponseEntity.noContent().build();
@@ -50,7 +50,7 @@ public class AnmodningUnntakTjeneste {
     @ApiOperation(value = "Sender et svar på anmodning om unntak basert på AnmodningsperiodeSvar som er registrert på behandlingen")
     public ResponseEntity<Void> svar(@PathVariable("behandlingID") long behandlingID, @RequestBody AnmodningUnntakSvarDto anmodningUnntakSvarDto) {
         aksesskontroll.autoriserSkriv(behandlingID);
-        anmodningUnntakService.anmodningOmUnntakSvar(behandlingID, anmodningUnntakSvarDto.ytterligereInfo());
+        anmodningUnntakService.anmodningOmUnntakSvar(behandlingID, anmodningUnntakSvarDto.ytterligereInfo);
         return ResponseEntity.noContent().build();
     }
 }

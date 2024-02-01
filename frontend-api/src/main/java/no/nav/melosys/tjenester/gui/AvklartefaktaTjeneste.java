@@ -74,7 +74,7 @@ public class AvklartefaktaTjeneste {
                                                                           @RequestBody VirksomheterDto virksomheter) {
         aksesskontroll.autoriserSkrivTilRessurs(behandlingID, Ressurs.AVKLARTE_FAKTA);
 
-        avklarteVirksomheterService.lagreVirksomheterSomAvklartefakta(behandlingID, virksomheter.getVirksomhetIDer());
+        avklarteVirksomheterService.lagreVirksomheterSomAvklartefakta(behandlingID, virksomheter.virksomhetIDer);
 
         return AvklartefaktaOppsummeringDto.av(avklartefaktaService.hentAlleAvklarteFakta(behandlingID));
     }
@@ -97,7 +97,7 @@ public class AvklartefaktaTjeneste {
                                                                          @RequestBody ArbeidslandDto arbeidsland) {
         aksesskontroll.autoriserSkrivTilRessurs(behandlingID, Ressurs.AVKLARTE_FAKTA);
 
-        avklarteFaktaArbeidslandService.lagreArbeidslandSomAvklartefakta(behandlingID, arbeidsland.getArbeidsland());
+        avklarteFaktaArbeidslandService.lagreArbeidslandSomAvklartefakta(behandlingID, arbeidsland.arbeidsland);
 
         return AvklartefaktaOppsummeringDto.av(avklartefaktaService.hentAlleAvklarteFakta(behandlingID));
     }

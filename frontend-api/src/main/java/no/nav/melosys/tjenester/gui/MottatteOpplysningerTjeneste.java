@@ -47,7 +47,7 @@ public class MottatteOpplysningerTjeneste {
     ) {
 
         aksesskontroll.autoriserSkriv(behandlingID);
-        MottatteOpplysninger mottatteOpplysninger = mottatteOpplysningerService.oppdaterMottatteOpplysninger(behandlingID, mottatteOpplysningerPostDto.getData());
+        MottatteOpplysninger mottatteOpplysninger = mottatteOpplysningerService.oppdaterMottatteOpplysninger(behandlingID, mottatteOpplysningerPostDto.data);
         return ResponseEntity.ok(new MottatteOpplysningerGetDto(mottatteOpplysninger));
     }
 
@@ -58,8 +58,8 @@ public class MottatteOpplysningerTjeneste {
     ) {
         aksesskontroll.autoriserSkriv(behandlingID);
         mottatteOpplysningerService.oppdaterMottatteOpplysningerPeriodeOgLand(behandlingID,
-            new Periode(periodeOgLandPostDto.fom(), periodeOgLandPostDto.tom()),
-            new Soeknadsland(periodeOgLandPostDto.land(), false));
+            new Periode(periodeOgLandPostDto.fom, periodeOgLandPostDto.tom),
+            new Soeknadsland(periodeOgLandPostDto.land, false));
         return ResponseEntity.noContent().build();
     }
 }

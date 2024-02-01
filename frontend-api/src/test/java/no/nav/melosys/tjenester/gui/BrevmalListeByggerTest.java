@@ -78,16 +78,16 @@ class BrevmalListeByggerTest {
 
         assertThat(tilgjengeligeMaler)
             .hasSize(5)
-            .extracting(brevmalResponse -> brevmalResponse.getMottaker().getType())
+            .extracting(brevmalResponse -> brevmalResponse.mottaker.type)
             .contains(
-                MottakerType.BRUKER_ELLER_BRUKERS_FULLMEKTIG.getBeskrivelse(),
-                MottakerType.ARBEIDSGIVER_ELLER_ARBEIDSGIVERS_FULLMEKTIG.getBeskrivelse(),
-                MottakerType.UTENLANDSK_TRYGDEMYNDIGHET.getBeskrivelse(),
-                MottakerType.ANNEN_ORGANISASJON.getBeskrivelse(),
-                MottakerType.NORSK_MYNDIGHET.getBeskrivelse()
+                    MottakerType.BRUKER_ELLER_BRUKERS_FULLMEKTIG.beskrivelse,
+                    MottakerType.ARBEIDSGIVER_ELLER_ARBEIDSGIVERS_FULLMEKTIG.beskrivelse,
+                    MottakerType.UTENLANDSK_TRYGDEMYNDIGHET.beskrivelse,
+                    MottakerType.ANNEN_ORGANISASJON.beskrivelse,
+                    MottakerType.NORSK_MYNDIGHET.beskrivelse
             );
 
-        assertThat(tilgjengeligeMaler.get(0).getBrevTyper())
+        assertThat(tilgjengeligeMaler.get(0).brevTyper)
             .hasSize(3)
             .extracting(BrevmalTypeDto::getType)
             .contains(
@@ -95,27 +95,27 @@ class BrevmalListeByggerTest {
                 Produserbaredokumenter.MANGELBREV_BRUKER,
                 Produserbaredokumenter.GENERELT_FRITEKSTBREV_BRUKER);
 
-        assertThat(tilgjengeligeMaler.get(1).getBrevTyper())
+        assertThat(tilgjengeligeMaler.get(1).brevTyper)
             .hasSize(2)
             .extracting(BrevmalTypeDto::getType)
             .contains(
                 Produserbaredokumenter.MANGELBREV_ARBEIDSGIVER,
                 Produserbaredokumenter.GENERELT_FRITEKSTBREV_ARBEIDSGIVER);
 
-        assertThat(tilgjengeligeMaler.get(2).getBrevTyper())
+        assertThat(tilgjengeligeMaler.get(2).brevTyper)
             .hasSize(1)
             .extracting(BrevmalTypeDto::getType)
             .contains(
                 Produserbaredokumenter.UTENLANDSK_TRYGDEMYNDIGHET_FRITEKSTBREV);
 
-        assertThat(tilgjengeligeMaler.get(3).getBrevTyper())
+        assertThat(tilgjengeligeMaler.get(3).brevTyper)
             .hasSize(2)
             .extracting(BrevmalTypeDto::getType)
             .contains(
                 Produserbaredokumenter.MANGELBREV_ARBEIDSGIVER,
                 Produserbaredokumenter.GENERELT_FRITEKSTBREV_ARBEIDSGIVER);
 
-        assertThat(tilgjengeligeMaler.get(4).getBrevTyper())
+        assertThat(tilgjengeligeMaler.get(4).brevTyper)
             .hasSize(1)
             .extracting(BrevmalTypeDto::getType)
             .contains(
@@ -137,18 +137,18 @@ class BrevmalListeByggerTest {
 
         assertThat(tilgjengeligeMaler)
             .hasSize(2)
-            .extracting(brevmalResponse -> brevmalResponse.getMottaker().getType())
+            .extracting(brevmalResponse -> brevmalResponse.mottaker.type)
             .contains(
-                MottakerType.VIRKSOMHET.getBeskrivelse(),
-                MottakerType.ANNEN_ORGANISASJON.getBeskrivelse());
+                    MottakerType.VIRKSOMHET.beskrivelse,
+                    MottakerType.ANNEN_ORGANISASJON.beskrivelse);
 
-        assertThat(tilgjengeligeMaler.get(0).getBrevTyper())
+        assertThat(tilgjengeligeMaler.get(0).brevTyper)
             .hasSize(1)
             .extracting(BrevmalTypeDto::getType)
             .contains(
                 Produserbaredokumenter.GENERELT_FRITEKSTBREV_VIRKSOMHET);
 
-        assertThat(tilgjengeligeMaler.get(1).getBrevTyper())
+        assertThat(tilgjengeligeMaler.get(1).brevTyper)
             .hasSize(1)
             .extracting(BrevmalTypeDto::getType)
             .contains(
@@ -168,15 +168,15 @@ class BrevmalListeByggerTest {
 
         assertThat(tilgjengeligeMaler)
             .hasSize(4)
-            .extracting(brevmalResponse -> brevmalResponse.getMottaker().getType())
+            .extracting(brevmalResponse -> brevmalResponse.mottaker.type)
             .contains(
-                MottakerType.BRUKER_ELLER_BRUKERS_FULLMEKTIG.getBeskrivelse(),
-                MottakerType.UTENLANDSK_TRYGDEMYNDIGHET.getBeskrivelse(),
-                MottakerType.ANNEN_ORGANISASJON.getBeskrivelse(),
-                MottakerType.NORSK_MYNDIGHET.getBeskrivelse()
+                    MottakerType.BRUKER_ELLER_BRUKERS_FULLMEKTIG.beskrivelse,
+                    MottakerType.UTENLANDSK_TRYGDEMYNDIGHET.beskrivelse,
+                    MottakerType.ANNEN_ORGANISASJON.beskrivelse,
+                    MottakerType.NORSK_MYNDIGHET.beskrivelse
             )
             .doesNotContain(
-                MottakerType.ARBEIDSGIVER_ELLER_ARBEIDSGIVERS_FULLMEKTIG.getBeskrivelse());
+                    MottakerType.ARBEIDSGIVER_ELLER_ARBEIDSGIVERS_FULLMEKTIG.beskrivelse);
     }
 
     @Test
@@ -191,7 +191,7 @@ class BrevmalListeByggerTest {
 
         assertThat(tilgjengeligeMaler).hasSize(5);
 
-        assertThat(tilgjengeligeMaler.get(0).getBrevTyper())
+        assertThat(tilgjengeligeMaler.get(0).brevTyper)
             .hasSize(3)
             .extracting(BrevmalTypeDto::getType)
             .contains(
@@ -199,7 +199,7 @@ class BrevmalListeByggerTest {
                 Produserbaredokumenter.MANGELBREV_BRUKER,
                 Produserbaredokumenter.GENERELT_FRITEKSTBREV_BRUKER);
 
-        assertThat(tilgjengeligeMaler.get(0).getBrevTyper().get(0))
+        assertThat(tilgjengeligeMaler.get(0).brevTyper.get(0))
             .extracting(
                 BrevmalTypeDto::getType,
                 BrevmalTypeDto::getFelter)
@@ -217,12 +217,12 @@ class BrevmalListeByggerTest {
         List<BrevmalResponse> tilgjengeligeMaler = brevmalListeBygger.byggBrevmalDtoListe(123L);
 
         assertThat(tilgjengeligeMaler).hasSize(5);
-        assertThat(tilgjengeligeMaler.get(0).getMottaker())
+        assertThat(tilgjengeligeMaler.get(0).mottaker)
             .extracting(
                 MottakerDto::getType,
-                mottaker -> mottaker.getFeilmelding().tittel())
+                mottaker -> mottaker.feilmelding.tittel)
             .containsExactly(
-                MottakerType.BRUKER_ELLER_BRUKERS_FULLMEKTIG.getBeskrivelse(),
+                    MottakerType.BRUKER_ELLER_BRUKERS_FULLMEKTIG.beskrivelse,
                 Kontroll_begrunnelser.MANGLENDE_REGISTRERTE_ADRESSE.getBeskrivelse());
     }
 
@@ -237,12 +237,12 @@ class BrevmalListeByggerTest {
 
 
         assertThat(tilgjengeligeMaler).hasSize(5);
-        assertThat(tilgjengeligeMaler.get(1).getMottaker())
+        assertThat(tilgjengeligeMaler.get(1).mottaker)
             .extracting(
                 MottakerDto::getType,
-                mottaker -> mottaker.getFeilmelding().tittel())
+                mottaker -> mottaker.feilmelding.tittel)
             .containsExactly(
-                MottakerType.ARBEIDSGIVER_ELLER_ARBEIDSGIVERS_FULLMEKTIG.getBeskrivelse(),
+                    MottakerType.ARBEIDSGIVER_ELLER_ARBEIDSGIVERS_FULLMEKTIG.beskrivelse,
                 Kontroll_begrunnelser.INGEN_ARBEIDSGIVERE.getBeskrivelse());
     }
 
@@ -257,19 +257,19 @@ class BrevmalListeByggerTest {
 
 
         assertThat(tilgjengeligeMaler).hasSize(5);
-        assertThat(tilgjengeligeMaler.get(0).getMottaker())
+        assertThat(tilgjengeligeMaler.get(0).mottaker)
             .extracting(
                 MottakerDto::getType,
-                mottaker -> mottaker.getFeilmelding().tittel())
+                mottaker -> mottaker.feilmelding.tittel)
             .containsExactly(
-                MottakerType.BRUKER_ELLER_BRUKERS_FULLMEKTIG.getBeskrivelse(),
+                    MottakerType.BRUKER_ELLER_BRUKERS_FULLMEKTIG.beskrivelse,
                 "En annen feil");
-        assertThat(tilgjengeligeMaler.get(1).getMottaker())
+        assertThat(tilgjengeligeMaler.get(1).mottaker)
             .extracting(
                 MottakerDto::getType,
-                mottaker -> mottaker.getFeilmelding().tittel())
+                mottaker -> mottaker.feilmelding.tittel)
             .containsExactly(
-                MottakerType.ARBEIDSGIVER_ELLER_ARBEIDSGIVERS_FULLMEKTIG.getBeskrivelse(),
+                    MottakerType.ARBEIDSGIVER_ELLER_ARBEIDSGIVERS_FULLMEKTIG.beskrivelse,
                 "Finner ikke gyldig adresse til arbeidsgiver(e). Kontroller at arbeidsgiver(e) er lagt inn korrekt i sidemenyen");
     }
 
@@ -283,11 +283,11 @@ class BrevmalListeByggerTest {
         List<BrevmalResponse> tilgjengeligeMaler = brevmalListeBygger.byggBrevmalDtoListe(123L);
 
 
-        var mangelbrevMal = tilgjengeligeMaler.get(0).getBrevTyper().get(1);
-        assertThat(mangelbrevMal.getType()).isEqualTo(Produserbaredokumenter.MANGELBREV_BRUKER);
-        assertThat(mangelbrevMal.getFelter()).hasSize(2);
+        var mangelbrevMal = tilgjengeligeMaler.get(0).brevTyper.get(1);
+        assertThat(mangelbrevMal.type).isEqualTo(Produserbaredokumenter.MANGELBREV_BRUKER);
+        assertThat(mangelbrevMal.felter).hasSize(2);
 
-        var innledningFritekstFelt = mangelbrevMal.getFelter().get(0);
+        var innledningFritekstFelt = mangelbrevMal.felter.get(0);
         assertThat(innledningFritekstFelt)
             .extracting(
                 BrevmalFeltDto::getKode,
@@ -301,8 +301,8 @@ class BrevmalListeByggerTest {
                 true,
                 null,
                 null);
-        assertThat(innledningFritekstFelt.getValg().getValgType()).isEqualTo(FeltValgType.RADIO);
-        assertThat(innledningFritekstFelt.getValg().getValgAlternativer())
+        assertThat(innledningFritekstFelt.valg.valgType).isEqualTo(FeltValgType.RADIO);
+        assertThat(innledningFritekstFelt.valg.valgAlternativer)
             .hasSize(2)
             .flatExtracting(
                 FeltvalgAlternativDto::getKode,
@@ -313,7 +313,7 @@ class BrevmalListeByggerTest {
                 FRITEKST.getKode(),
                 true);
 
-        assertThat(mangelbrevMal.getFelter().get(1))
+        assertThat(mangelbrevMal.felter.get(1))
             .extracting(
                 BrevmalFeltDto::getKode,
                 BrevmalFeltDto::getFeltType,
@@ -341,11 +341,11 @@ class BrevmalListeByggerTest {
         List<BrevmalResponse> tilgjengeligeMaler = brevmalListeBygger.byggBrevmalDtoListe(123L);
 
 
-        var mangelbrevMal = tilgjengeligeMaler.get(0).getBrevTyper().get(0);
-        assertThat(mangelbrevMal.getType()).isEqualTo(Produserbaredokumenter.MANGELBREV_BRUKER);
-        assertThat(mangelbrevMal.getFelter()).hasSize(2);
+        var mangelbrevMal = tilgjengeligeMaler.get(0).brevTyper.get(0);
+        assertThat(mangelbrevMal.type).isEqualTo(Produserbaredokumenter.MANGELBREV_BRUKER);
+        assertThat(mangelbrevMal.felter).hasSize(2);
 
-        var innledningFritekstFelt = mangelbrevMal.getFelter().get(0);
+        var innledningFritekstFelt = mangelbrevMal.felter.get(0);
         assertThat(innledningFritekstFelt)
             .extracting(
                 BrevmalFeltDto::getKode,
@@ -359,8 +359,8 @@ class BrevmalListeByggerTest {
                 true,
                 null,
                 null);
-        assertThat(innledningFritekstFelt.getValg().getValgType()).isEqualTo(FeltValgType.RADIO);
-        assertThat(innledningFritekstFelt.getValg().getValgAlternativer())
+        assertThat(innledningFritekstFelt.valg.valgType).isEqualTo(FeltValgType.RADIO);
+        assertThat(innledningFritekstFelt.valg.valgAlternativer)
             .hasSize(1)
             .flatExtracting(
                 FeltvalgAlternativDto::getKode,
@@ -369,7 +369,7 @@ class BrevmalListeByggerTest {
                 FRITEKST.getKode(),
                 true);
 
-        assertThat(mangelbrevMal.getFelter().get(1))
+        assertThat(mangelbrevMal.felter.get(1))
             .extracting(
                 BrevmalFeltDto::getKode,
                 BrevmalFeltDto::getFeltType,
@@ -399,7 +399,7 @@ class BrevmalListeByggerTest {
 
 
         assertThat(tilgjengeligeMaler).hasSize(5);
-        assertThat(tilgjengeligeMaler.get(0).getBrevTyper().get(2).getFelter().get(1).getValg().getValgAlternativer())
+        assertThat(tilgjengeligeMaler.get(0).brevTyper.get(2).felter.get(1).valg.valgAlternativer)
             .hasSize(2)
             .flatExtracting(
                 FeltvalgAlternativDto::getKode,
@@ -424,7 +424,7 @@ class BrevmalListeByggerTest {
 
 
         assertThat(tilgjengeligeMaler).hasSize(5);
-        assertThat(tilgjengeligeMaler.get(0).getBrevTyper().get(2).getFelter().get(0).getValg().getValgAlternativer())
+        assertThat(tilgjengeligeMaler.get(0).brevTyper.get(2).felter.get(0).valg.valgAlternativer)
             .hasSize(3)
             .flatExtracting(
                 FeltvalgAlternativDto::getKode,
@@ -450,7 +450,7 @@ class BrevmalListeByggerTest {
 
 
         assertThat(tilgjengeligeMaler).hasSize(4);
-        assertThat(tilgjengeligeMaler.get(0).getBrevTyper().get(2).getFelter().get(1).getValg().getValgAlternativer())
+        assertThat(tilgjengeligeMaler.get(0).brevTyper.get(2).felter.get(1).valg.valgAlternativer)
             .hasSize(4)
             .flatExtracting(
                 FeltvalgAlternativDto::getKode,
@@ -478,7 +478,7 @@ class BrevmalListeByggerTest {
 
 
         assertThat(tilgjengeligeMaler).hasSize(4);
-        assertThat(tilgjengeligeMaler.get(0).getBrevTyper().get(2).getFelter().get(0).getValg().getValgAlternativer())
+        assertThat(tilgjengeligeMaler.get(0).brevTyper.get(2).felter.get(0).valg.valgAlternativer)
             .hasSize(3)
             .flatExtracting(
                 FeltvalgAlternativDto::getKode,
@@ -509,7 +509,7 @@ class BrevmalListeByggerTest {
 
 
         assertThat(tilgjengeligeMaler).hasSize(5);
-        assertThat(tilgjengeligeMaler.get(0).getBrevTyper().get(2).getFelter().get(1).getValg().getValgAlternativer())
+        assertThat(tilgjengeligeMaler.get(0).brevTyper.get(2).felter.get(1).valg.valgAlternativer)
             .hasSize(2)
             .flatExtracting(
                 FeltvalgAlternativDto::getKode,
@@ -538,7 +538,7 @@ class BrevmalListeByggerTest {
 
 
         assertThat(tilgjengeligeMaler).hasSize(5);
-        assertThat(tilgjengeligeMaler.get(0).getBrevTyper().get(2).getFelter().get(0).getValg().getValgAlternativer())
+        assertThat(tilgjengeligeMaler.get(0).brevTyper.get(2).felter.get(0).valg.valgAlternativer)
             .hasSize(3)
             .flatExtracting(
                 FeltvalgAlternativDto::getKode,
@@ -573,13 +573,13 @@ class BrevmalListeByggerTest {
 
 
         List<BrevmalResponse> utenlandskTrygdemyndighetBrevmal = tilgjengeligeMaler.stream()
-            .filter(mal -> mal.getMottaker().getRolle().equals(Mottakerroller.UTENLANDSK_TRYGDEMYNDIGHET))
+            .filter(mal -> mal.mottaker.rolle.equals(Mottakerroller.UTENLANDSK_TRYGDEMYNDIGHET))
             .limit(2)
             .toList();
         assertThat(utenlandskTrygdemyndighetBrevmal).hasSize(1);
-        assertThat(utenlandskTrygdemyndighetBrevmal.get(0).getBrevTyper()).hasSize(1);
-        assertThat(utenlandskTrygdemyndighetBrevmal.get(0).getBrevTyper().get(0).getFelter().get(0).getKode()).isEqualTo(BrevmalFeltKode.UTENLANDSK_TRYGDEMYNDIGHET_MOTTAKER.getKode());
-        assertThat(utenlandskTrygdemyndighetBrevmal.get(0).getBrevTyper().get(0).getFelter().get(0).getValg().getValgAlternativer())
+        assertThat(utenlandskTrygdemyndighetBrevmal.get(0).brevTyper).hasSize(1);
+        assertThat(utenlandskTrygdemyndighetBrevmal.get(0).brevTyper.get(0).felter.get(0).kode).isEqualTo(BrevmalFeltKode.UTENLANDSK_TRYGDEMYNDIGHET_MOTTAKER.getKode());
+        assertThat(utenlandskTrygdemyndighetBrevmal.get(0).brevTyper.get(0).felter.get(0).valg.valgAlternativer)
             .hasSize(1)
             .flatExtracting(
                 FeltvalgAlternativDto::getKode,
@@ -601,13 +601,13 @@ class BrevmalListeByggerTest {
 
 
         List<BrevmalResponse> utenlandskTrygdemyndighetBrevmal = tilgjengeligeMaler.stream()
-            .filter(mal -> mal.getMottaker().getRolle().equals(Mottakerroller.UTENLANDSK_TRYGDEMYNDIGHET))
+            .filter(mal -> mal.mottaker.rolle.equals(Mottakerroller.UTENLANDSK_TRYGDEMYNDIGHET))
             .limit(2)
             .toList();
         assertThat(utenlandskTrygdemyndighetBrevmal).hasSize(1);
-        assertThat(utenlandskTrygdemyndighetBrevmal.get(0).getBrevTyper()).hasSize(1);
-        assertThat(utenlandskTrygdemyndighetBrevmal.get(0).getBrevTyper().get(0).getFelter().get(0).getKode()).isEqualTo(BrevmalFeltKode.UTENLANDSK_TRYGDEMYNDIGHET_MOTTAKER.getKode());
-        assertThat(utenlandskTrygdemyndighetBrevmal.get(0).getBrevTyper().get(0).getFelter().get(0).getValg().getValgAlternativer())
+        assertThat(utenlandskTrygdemyndighetBrevmal.get(0).brevTyper).hasSize(1);
+        assertThat(utenlandskTrygdemyndighetBrevmal.get(0).brevTyper.get(0).felter.get(0).kode).isEqualTo(BrevmalFeltKode.UTENLANDSK_TRYGDEMYNDIGHET_MOTTAKER.getKode());
+        assertThat(utenlandskTrygdemyndighetBrevmal.get(0).brevTyper.get(0).felter.get(0).valg.valgAlternativer)
             .hasSize(2)
             .flatExtracting(
                 FeltvalgAlternativDto::getKode,
@@ -639,13 +639,13 @@ class BrevmalListeByggerTest {
 
 
         List<BrevmalResponse> utenlandskTrygdemyndighetBrevmal = tilgjengeligeMaler.stream()
-            .filter(mal -> mal.getMottaker().getRolle().equals(Mottakerroller.UTENLANDSK_TRYGDEMYNDIGHET))
+            .filter(mal -> mal.mottaker.rolle.equals(Mottakerroller.UTENLANDSK_TRYGDEMYNDIGHET))
             .limit(2)
             .toList();
         assertThat(utenlandskTrygdemyndighetBrevmal).hasSize(1);
-        assertThat(utenlandskTrygdemyndighetBrevmal.get(0).getBrevTyper()).hasSize(1);
-        List<BrevmalFeltDto> felter = utenlandskTrygdemyndighetBrevmal.get(0).getBrevTyper().get(0).getFelter();
-        assertThat(felter.stream().filter(brevmalFeltDto -> brevmalFeltDto.getKode().equals(BrevmalFeltKode.UTENLANDSK_TRYGDEMYNDIGHET_MOTTAKER.getKode()))).isEmpty();
+        assertThat(utenlandskTrygdemyndighetBrevmal.get(0).brevTyper).hasSize(1);
+        List<BrevmalFeltDto> felter = utenlandskTrygdemyndighetBrevmal.get(0).brevTyper.get(0).felter;
+        assertThat(felter.stream().filter(brevmalFeltDto -> brevmalFeltDto.kode.equals(BrevmalFeltKode.UTENLANDSK_TRYGDEMYNDIGHET_MOTTAKER.getKode()))).isEmpty();
     }
 
     @Test
@@ -664,11 +664,11 @@ class BrevmalListeByggerTest {
 
 
         List<BrevmalResponse> utenlandskTrygdemyndighetBrevmal = tilgjengeligeMaler.stream()
-            .filter(mal -> mal.getMottaker().getRolle().equals(Mottakerroller.UTENLANDSK_TRYGDEMYNDIGHET))
+            .filter(mal -> mal.mottaker.rolle.equals(Mottakerroller.UTENLANDSK_TRYGDEMYNDIGHET))
             .limit(2)
             .toList();
         assertThat(utenlandskTrygdemyndighetBrevmal).hasSize(1);
-        assertThat(utenlandskTrygdemyndighetBrevmal.get(0).getMottaker().getFeilmelding().tittel()).isEqualTo("Du må velge land på inngangssteget " +
+        assertThat(utenlandskTrygdemyndighetBrevmal.get(0).mottaker.feilmelding.tittel).isEqualTo("Du må velge land på inngangssteget " +
             "for å kunne sende brev til utenlandsk trygdemyndighet.");
     }
 
@@ -688,7 +688,7 @@ class BrevmalListeByggerTest {
 
 
         assertThat(tilgjengeligeMaler).hasSize(5);
-        assertThat(tilgjengeligeMaler.get(0).getMottaker().getFeilmelding()).isNull();
+        assertThat(tilgjengeligeMaler.get(0).mottaker.feilmelding).isNull();
     }
 
     @Test
@@ -707,12 +707,12 @@ class BrevmalListeByggerTest {
 
 
         assertThat(tilgjengeligeMaler).hasSize(5);
-        assertThat(tilgjengeligeMaler.get(0).getMottaker())
+        assertThat(tilgjengeligeMaler.get(0).mottaker)
             .extracting(
                 MottakerDto::getType,
-                mottaker -> mottaker.getFeilmelding().tittel())
+                mottaker -> mottaker.feilmelding.tittel)
             .containsExactly(
-                MottakerType.BRUKER_ELLER_BRUKERS_FULLMEKTIG.getBeskrivelse(),
+                    MottakerType.BRUKER_ELLER_BRUKERS_FULLMEKTIG.beskrivelse,
                 Kontroll_begrunnelser.MANGLENDE_REGISTRERTE_ADRESSE.getBeskrivelse());
     }
 

@@ -55,7 +55,7 @@ class AnmodningUnntakTjenesteTest {
 
         verify(aksesskontroll).autoriserSkriv(BEHANDLING_ID);
         verify(anmodningUnntakService).anmodningOmUnntak(BEHANDLING_ID, mottakerInstitusjon,
-            Set.of(new DokumentReferanse(vedleggDto.journalpostID(), vedleggDto.dokumentID())), fritekstSed);
+            Set.of(new DokumentReferanse(vedleggDto.journalpostID, vedleggDto.dokumentID)), fritekstSed);
 
     }
 

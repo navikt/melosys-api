@@ -38,7 +38,7 @@ class LovvalgsperiodeDtoTest {
     @Test
     void mapKonstruktørLagerSammeObjektSomOrdinærKonstruktør() throws Exception {
         Map<String, String> json = new ObjectMapper().readValue(JSON_EKSEMPEL, new TypeReference<>() {});
-        LovvalgsperiodeDto resultat = new LovvalgsperiodeDto(json);
+        LovvalgsperiodeDto resultat = LovvalgsperiodeDto.fromJson(json);
         LovvalgsperiodeDto forventet = lagLovvalgsperiodeDtoFraMap(json);
         Assertions.assertThat(resultat).usingRecursiveComparison().isEqualTo(forventet);
     }
@@ -50,7 +50,7 @@ class LovvalgsperiodeDtoTest {
         json.remove("medlemskapstype");
         json.remove("lovvalgsbestemmelse");
 
-        LovvalgsperiodeDto resultat = new LovvalgsperiodeDto(json);
+        LovvalgsperiodeDto resultat = LovvalgsperiodeDto.fromJson(json);
         LovvalgsperiodeDto forventet = lagLovvalgsperiodeDtoFraMap(json);
         Assertions.assertThat(resultat).usingRecursiveComparison().isEqualTo(forventet);
     }

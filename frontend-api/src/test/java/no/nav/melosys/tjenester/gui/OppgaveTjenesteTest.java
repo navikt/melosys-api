@@ -73,12 +73,12 @@ class OppgaveTjenesteTest {
         when(oppgaveService.hentSistAktiveBehandling(anyString())).thenReturn(behandling);
 
         PlukketOppgaveDto response = new PlukketOppgaveDto();
-        response.setBehandlingID(behandling.getId());
-        response.setBehandlingstype(behandling.getType().getKode());
-        response.setBehandlingstema(behandling.getTema().getKode());
-        response.setJournalpostID(plukket.get().getJournalpostId());
-        response.setOppgaveID(plukket.get().getOppgaveId());
-        response.setSaksnummer(plukket.get().getSaksnummer());
+        response.behandlingID = behandling.getId();
+        response.behandlingstype = behandling.getType().getKode();
+        response.behandlingstema = behandling.getTema().getKode();
+        response.journalpostID = plukket.get().getJournalpostId();
+        response.oppgaveID = plukket.get().getOppgaveId();
+        response.saksnummer = plukket.get().getSaksnummer();
 
         mockMvc.perform(post(BASE_URL + "/plukk")
                 .contentType(MediaType.APPLICATION_JSON)

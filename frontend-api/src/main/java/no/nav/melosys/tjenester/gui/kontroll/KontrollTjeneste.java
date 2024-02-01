@@ -60,19 +60,19 @@ public class KontrollTjeneste {
     @PostMapping("/ferdigbehandling")
     public ResponseEntity<KontrollerFerdigbehandlingResponse> kontrollerFerdigbehandling(@RequestBody FerdigbehandlingKontrollerDto ferdigbehandlingKontrollerDto) {
 
-        if (ferdigbehandlingKontrollerDto.vedtakstype() == null) {
+        if (ferdigbehandlingKontrollerDto.vedtakstype == null) {
             throw new FunksjonellException("Vedtakstype mangler.");
         }
         aksesskontroll.autoriser(
-            ferdigbehandlingKontrollerDto.behandlingID(),
-            ferdigbehandlingKontrollerDto.skalRegisteropplysningerOppdateres() ? Aksesstype.SKRIV : Aksesstype.LES
+                ferdigbehandlingKontrollerDto.behandlingID,
+            ferdigbehandlingKontrollerDto.skalRegisteropplysningerOppdateres ? Aksesstype.SKRIV : Aksesstype.LES
         );
 
         Collection<Kontrollfeil> kontrollfeil = ferdigbehandlingKontrollFacade.kontroller(
-            ferdigbehandlingKontrollerDto.behandlingID(),
-            ferdigbehandlingKontrollerDto.skalRegisteropplysningerOppdateres(),
-            ferdigbehandlingKontrollerDto.behandlingsresultattype(),
-            ferdigbehandlingKontrollerDto.kontrollerSomSkalIgnoreres()
+                ferdigbehandlingKontrollerDto.behandlingID,
+                ferdigbehandlingKontrollerDto.skalRegisteropplysningerOppdateres,
+                ferdigbehandlingKontrollerDto.behandlingsresultattype,
+                ferdigbehandlingKontrollerDto.kontrollerSomSkalIgnoreres
         );
 
         return ResponseEntity.ok(new KontrollerFerdigbehandlingResponse(kontrollfeil.stream().map(Kontrollfeil::tilDto).toList()));

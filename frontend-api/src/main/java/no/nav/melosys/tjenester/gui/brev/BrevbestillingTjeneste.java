@@ -79,7 +79,7 @@ public class BrevbestillingTjeneste {
     public List<MuligBrevmottaker> hentMuligeBrevmottakereNorskMyndighet(@PathVariable long behandlingID,
                                                                          @RequestBody HentMuligeBrevmottakereNorskMyndighetRequest hentMuligeBrevmottakereNorskMyndighetRequest) {
         aksesskontroll.autoriser(behandlingID);
-        var muligeBrevmottakere = brevbestillingFasade.hentMuligeBrevmottakereNorskMyndighet(hentMuligeBrevmottakereNorskMyndighetRequest.orgnrNorskMyndighet());
+        var muligeBrevmottakere = brevbestillingFasade.hentMuligeBrevmottakereNorskMyndighet(hentMuligeBrevmottakereNorskMyndighetRequest.orgnrNorskMyndighet);
         return muligeBrevmottakere.stream().map(MuligBrevmottaker::av).toList();
     }
 

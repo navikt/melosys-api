@@ -55,20 +55,20 @@ public class OppgaveTjeneste {
         if (plukket.isPresent()) {
             Oppgave oppgave = plukket.get();
 
-            dto.setOppgaveID(oppgave.getOppgaveId());
+            dto.oppgaveID = oppgave.getOppgaveId();
             if (oppgave.erBehandling() || oppgave.erVurderDokument() || oppgave.erSedBehandling() || oppgave.erVurderHenvendelse() || oppgave.erManglendeInnbetalingBehandling()) {
-                dto.setSaksnummer(oppgave.getSaksnummer());
+                dto.saksnummer = oppgave.getSaksnummer();
             }
 
             Behandling behandling = oppgaveService.hentSistAktiveBehandling(oppgave.getSaksnummer());
-            dto.setBehandlingID(behandling.getId());
-            dto.setBehandlingstype(behandling.getType().getKode());
-            dto.setBehandlingstema(behandling.getTema().getKode());
-            dto.setJournalpostID(oppgave.getJournalpostId());
+            dto.behandlingID = behandling.getId();
+            dto.behandlingstype = behandling.getType().getKode();
+            dto.behandlingstema = behandling.getTema().getKode();
+            dto.journalpostID = oppgave.getJournalpostId();
 
             return ResponseEntity.ok(dto);
         } else {
-            dto.setAntallUtildelteOppgaver(oppgaveplukker.hentUtildelteOppgaver(plukkDto).size());
+            dto.antallUtildelteOppgaver = oppgaveplukker.hentUtildelteOppgaver(plukkDto).size();
             return ResponseEntity.ok(dto);
         }
     }

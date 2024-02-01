@@ -155,8 +155,8 @@ final class LovvalgsperiodeTjenesteTest {
     private List<Lovvalgsperiode> lagLovvalgsperiode() {
         Lovvalgsperiode lovvalgsperiode = new Lovvalgsperiode();
         lovvalgsperiode.setId(Long.parseLong(FORVENTET.periodeID));
-        lovvalgsperiode.setFom(FORVENTET.periode.getFom());
-        lovvalgsperiode.setTom(FORVENTET.periode.getTom());
+        lovvalgsperiode.setFom(FORVENTET.periode.fom);
+        lovvalgsperiode.setTom(FORVENTET.periode.tom);
         lovvalgsperiode.setDekning(Trygdedekninger.FULL_DEKNING_EOSFO);
         lovvalgsperiode.setLovvalgsland(Land_iso2.valueOf(FORVENTET.lovvalgsland));
         lovvalgsperiode.setBestemmelse(Lovvalgbestemmelser_883_2004.valueOf(FORVENTET.lovvalgsbestemmelse));

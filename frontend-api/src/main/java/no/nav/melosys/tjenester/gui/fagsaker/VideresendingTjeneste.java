@@ -48,7 +48,7 @@ public class VideresendingTjeneste {
 
         videresendSoknadService.videresend(saksnummer, videresendDto.mottakerinstitusjon,
                 videresendDto.fritekst, videresendDto.vedlegg.stream().map(
-                v -> new DokumentReferanse(v.journalpostID(), v.dokumentID())).collect(Collectors.toUnmodifiableSet()));
+                v -> new DokumentReferanse(v.journalpostID, v.dokumentID)).collect(Collectors.toUnmodifiableSet()));
         return ResponseEntity.noContent().build();
     }
 }

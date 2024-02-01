@@ -217,8 +217,8 @@ class FagsakTjenesteTest {
             .andExpect(jsonPath("$[0].behandlingOversikter[0].land.landkoder[0]", is(not(equalTo(FORVENTET_LOVVALGSPERIODE.lovvalgsland)))))
             .andExpect(jsonPath("$[0].behandlingOversikter[0].soknadsperiode.fom", equalTo("2019-01-01")))
             .andExpect(jsonPath("$[0].behandlingOversikter[0].soknadsperiode.tom", equalTo("2019-02-01")))
-            .andExpect(jsonPath("$[0].behandlingOversikter[0].lovvalgsperiode.fom", equalTo(FORVENTET_LOVVALGSPERIODE.periode.getFom().toString())))
-            .andExpect(jsonPath("$[0].behandlingOversikter[0].lovvalgsperiode.tom", equalTo(FORVENTET_LOVVALGSPERIODE.periode.getTom().toString())))
+            .andExpect(jsonPath("$[0].behandlingOversikter[0].lovvalgsperiode.fom", equalTo(FORVENTET_LOVVALGSPERIODE.periode.fom.toString())))
+            .andExpect(jsonPath("$[0].behandlingOversikter[0].lovvalgsperiode.tom", equalTo(FORVENTET_LOVVALGSPERIODE.periode.tom.toString())))
             .andExpect(jsonPath("$[0].behandlingOversikter[0].medlemskapsperiode", equalTo(null)));
     }
 
@@ -394,8 +394,8 @@ class FagsakTjenesteTest {
 
     private Lovvalgsperiode lagLovvalgsPeriode() {
         Lovvalgsperiode lovvalgsperiode = new Lovvalgsperiode();
-        lovvalgsperiode.setFom(FORVENTET_LOVVALGSPERIODE.periode.getFom());
-        lovvalgsperiode.setTom(FORVENTET_LOVVALGSPERIODE.periode.getTom());
+        lovvalgsperiode.setFom(FORVENTET_LOVVALGSPERIODE.periode.fom);
+        lovvalgsperiode.setTom(FORVENTET_LOVVALGSPERIODE.periode.tom);
         lovvalgsperiode.setDekning(Trygdedekninger.FULL_DEKNING_EOSFO);
         lovvalgsperiode.setLovvalgsland(Land_iso2.valueOf(FORVENTET_LOVVALGSPERIODE.lovvalgsland));
         lovvalgsperiode.setBestemmelse(Lovvalgbestemmelser_883_2004.valueOf(FORVENTET_LOVVALGSPERIODE.lovvalgsbestemmelse));

@@ -51,7 +51,7 @@ public class BrevmalListeBygger {
     }
 
     private BrevmalResponse mottakerTilBrevmalDto(long behandlingId, MottakerDto mottaker) {
-        List<Produserbaredokumenter> produserbareDokumenter = brevmalListeService.hentMuligeProduserbaredokumenter(behandlingId, mottaker.getRolle());
+        List<Produserbaredokumenter> produserbareDokumenter = brevmalListeService.hentMuligeProduserbaredokumenter(behandlingId, mottaker.rolle);
 
         List<BrevmalTypeDto> typer = produserbareDokumenter.stream().map(dokument -> switch (dokument) {
                 case MELDING_FORVENTET_SAKSBEHANDLINGSTID_SOKNAD, MELDING_FORVENTET_SAKSBEHANDLINGSTID_KLAGE ->
@@ -98,8 +98,8 @@ public class BrevmalListeBygger {
 
     private MottakerDto lagMottakerMedAdresseOgFeilmelding(long behandlingId, Mottakerroller rolle, boolean harBrukerFullmektig) {
         var mottakerDto = new MottakerDto();
-        mottakerDto.setType(hentTypeFraRolle(rolle));
-        mottakerDto.setRolle(rolle);
+        mottakerDto.type = hentTypeFraRolle(rolle);
+        mottakerDto.rolle = rolle;
         if (harBrukerFullmektig) {
             leggTilAdresseOgFeilmelding(mottakerDto, Mottakerroller.FULLMEKTIG, behandlingId);
         } else {
@@ -110,18 +110,18 @@ public class BrevmalListeBygger {
 
     private MottakerDto lagMottakerMedRolle(Mottakerroller rolle) {
         var mottakerDto = new MottakerDto();
-        mottakerDto.setRolle(rolle);
-        mottakerDto.setType(hentTypeFraRolle(rolle));
+        mottakerDto.rolle = rolle;
+        mottakerDto.type = hentTypeFraRolle(rolle);
         return mottakerDto;
     }
 
     private MottakerDto lagMottakerForUtenlandskTrygdemyndighet(Behandling behandling, boolean erSakstypeTrygdeavtale) {
         var mottakerDto = new MottakerDto();
-        mottakerDto.setRolle(Mottakerroller.UTENLANDSK_TRYGDEMYNDIGHET);
-        mottakerDto.setType(hentTypeFraRolle(Mottakerroller.UTENLANDSK_TRYGDEMYNDIGHET));
+        mottakerDto.rolle = Mottakerroller.UTENLANDSK_TRYGDEMYNDIGHET;
+        mottakerDto.type = hentTypeFraRolle(Mottakerroller.UTENLANDSK_TRYGDEMYNDIGHET);
 
         if (erSakstypeTrygdeavtale && !saksbehandlingRegler.harIngenFlyt(behandling) && !behandling.harLand()) {
-            mottakerDto.setFeilmelding(new FeilmeldingDto(UTENLANDSK_TRYGDEMYNDIGHET_BEHANDLING_MANGLER_LAND));
+            mottakerDto.feilmelding = new FeilmeldingDto(UTENLANDSK_TRYGDEMYNDIGHET_BEHANDLING_MANGLER_LAND);
         }
 
         return mottakerDto;
@@ -137,7 +137,7 @@ public class BrevmalListeBygger {
             case NORSK_MYNDIGHET -> MottakerType.NORSK_MYNDIGHET;
             default -> throw new FunksjonellException("Vi støtter ikke brev med mottakerrolle: " + rolle.getKode());
         };
-        return mottakerType.getBeskrivelse();
+        return mottakerType.beskrivelse;
     }
 
     private void leggTilAdresseOgFeilmelding(MottakerDto mottakerDto, Mottakerroller rolle, long behandlingId) {
@@ -148,14 +148,14 @@ public class BrevmalListeBygger {
                 switch (rolle) {
                     case BRUKER -> {
                         String feilmelding = MANGLENDE_REGISTRERTE_ADRESSE_BRUKER.getBeskrivelse().replace("Ingen gyldig adresse funnet. ", "");
-                        mottakerDto.setFeilmelding(new FeilmeldingDto(MANGLENDE_REGISTRERTE_ADRESSE, feilmelding));
+                        mottakerDto.feilmelding = new FeilmeldingDto(MANGLENDE_REGISTRERTE_ADRESSE, feilmelding);
                     }
                     case FULLMEKTIG -> {
                         String feilmelding = MANGLENDE_REGISTRERTE_ADRESSE_REPRESENTANT.getBeskrivelse().replace("\"Ingen gyldig adresse funnet. ", "");
-                        mottakerDto.setFeilmelding(new FeilmeldingDto(MANGLENDE_REGISTRERTE_ADRESSE, feilmelding));
+                        mottakerDto.feilmelding = new FeilmeldingDto(MANGLENDE_REGISTRERTE_ADRESSE, feilmelding);
                     }
-                    case VIRKSOMHET -> mottakerDto.setFeilmelding(new FeilmeldingDto(MANGLENDE_REGISTRERTE_ADRESSE));
-                    case ARBEIDSGIVER -> mottakerDto.setFeilmelding(new FeilmeldingDto(ARBEIDSGIVER_MANGLER_ADRESSE));
+                    case VIRKSOMHET -> mottakerDto.feilmelding = new FeilmeldingDto(MANGLENDE_REGISTRERTE_ADRESSE);
+                    case ARBEIDSGIVER -> mottakerDto.feilmelding = new FeilmeldingDto(ARBEIDSGIVER_MANGLER_ADRESSE);
                     default -> throw new FunksjonellException("Vi har ikke støtte for tom adresse for " + rolle);
                 }
             } else {
@@ -163,11 +163,11 @@ public class BrevmalListeBygger {
             }
         } catch (TekniskException e) {
             if ("Finner ikke arbeidsforholddokument".equals(e.getMessage())) {
-                mottakerDto.setFeilmelding(new FeilmeldingDto(INGEN_ARBEIDSGIVERE));
+                mottakerDto.feilmelding = new FeilmeldingDto(INGEN_ARBEIDSGIVERE);
             } else if (rolle == Mottakerroller.ARBEIDSGIVER) {
-                mottakerDto.setFeilmelding(new FeilmeldingDto(ARBEIDSGIVER_MANGLER_ADRESSE));
+                mottakerDto.feilmelding = new FeilmeldingDto(ARBEIDSGIVER_MANGLER_ADRESSE);
             } else {
-                mottakerDto.setFeilmelding(new FeilmeldingDto(e.getMessage()));
+                mottakerDto.feilmelding = new FeilmeldingDto(e.getMessage());
             }
         }
     }
