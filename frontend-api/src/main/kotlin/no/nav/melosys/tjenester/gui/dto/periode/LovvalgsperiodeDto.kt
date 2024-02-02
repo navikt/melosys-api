@@ -5,7 +5,6 @@ import com.fasterxml.jackson.annotation.JsonUnwrapped
 import no.nav.melosys.domain.Lovvalgsperiode
 import no.nav.melosys.domain.jpa.LovvalgBestemmelsekonverterer
 import no.nav.melosys.domain.kodeverk.*
-import no.nav.melosys.domain.kodeverk.lovvalgsbestemmelser.Lovvalgbestemmelser_883_2004
 import org.apache.commons.lang3.StringUtils
 import java.time.LocalDate
 
