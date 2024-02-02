@@ -116,8 +116,6 @@ class TrygdeavgiftsgrunnlagService(private val behandlingsresultatService: Behan
                 this.avgiftspliktigInntektMnd =
                     if (inntektskildeRequest.avgiftspliktigInntektMnd == null) null
                     else Penger(inntektskildeRequest.avgiftspliktigInntektMnd)
-                this.isOrdinærTrygdeavgiftBetalesTilSkatt =
-                    !ordinærTrygdeavgiftBetalesTilNav(request, inntektskildeRequest) //TODO fjern når REFAKTORERING_ORDINÆR_TRYGDEAVGIFT toggle er fjernet
             }
         })
 

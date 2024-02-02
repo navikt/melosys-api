@@ -1,0 +1,1 @@
+ALTER TABLE inntektsperiode DROP COLUMN trygdeavgift_betales_til_skatt;

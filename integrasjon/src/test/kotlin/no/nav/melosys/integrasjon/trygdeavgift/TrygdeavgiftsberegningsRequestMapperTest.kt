@@ -38,7 +38,6 @@ class TrygdeavgiftsberegningsRequestMapperTest {
         }
 
         request.inntektsperioder[0].run {
-            trygdeavgiftBetalesTilSkatt shouldBe inntektsperioder[0].isOrdinærTrygdeavgiftBetalesTilSkatt
             periode.fom shouldBe inntektsperioder[0].fomDato
             periode.tom shouldBe inntektsperioder[0].tomDato
             inntektskilde shouldBe inntektsperioder[0].type
