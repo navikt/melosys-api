@@ -15,7 +15,7 @@ import org.springframework.web.reactive.function.client.WebClient;
 public class PDLConsumerProducer implements WebClientConfig {
 
     private static final String BEHANDLINGSNUMMER = "behandlingsnummer";
-    private static final String MELOSYS_BEHANDLINGSNUMMER = "B358";
+    private static final String MELOSYS_BEHANDLINGSNUMMER = "B272";
 
     @Bean
     public PDLConsumer pdlConsumerForSaksbehandler(WebClient.Builder webclientBuilder,
