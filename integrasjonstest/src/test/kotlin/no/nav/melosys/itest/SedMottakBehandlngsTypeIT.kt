@@ -35,7 +35,7 @@ import org.springframework.kafka.core.KafkaTemplate
 import java.time.LocalDate
 import java.util.*
 
-@Import(KodeverkStub::class, OAuthMockServer::class)
+@Import(OAuthMockServer::class)
 class SedMottakBehandlngsTypeIT(
     @Autowired @Qualifier("melosysEessiMelding") private val melosysEessiMeldingKafkaTemplate: KafkaTemplate<String, MelosysEessiMelding>,
     @Autowired private val eessiMeldingTestDataFactory: EessiMeldingTestDataFactory,

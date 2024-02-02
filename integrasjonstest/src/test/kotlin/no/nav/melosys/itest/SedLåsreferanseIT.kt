@@ -1,8 +1,5 @@
 package no.nav.melosys.itest
 
-import com.github.tomakehurst.wiremock.WireMockServer
-import com.github.tomakehurst.wiremock.client.WireMock
-import com.github.tomakehurst.wiremock.core.WireMockConfiguration
 import io.kotest.matchers.collections.shouldHaveSize
 import io.kotest.matchers.string.shouldMatch
 import io.kotest.matchers.string.shouldStartWith
@@ -11,8 +8,10 @@ import io.mockk.every
 import io.mockk.mockk
 import mu.KotlinLogging
 import no.nav.melosys.Application
+import no.nav.melosys.AwaitUtil.throwOnLogError
 import no.nav.melosys.LoggingTestUtils
 import no.nav.melosys.LoggingTestUtils.check
+import no.nav.melosys.LoggingTestUtils.match
 import no.nav.melosys.domain.eessi.melding.MelosysEessiMelding
 import no.nav.melosys.saksflyt.ProsessinstansBehandler
 import no.nav.melosys.saksflyt.ProsessinstansRepository
@@ -21,11 +20,8 @@ import no.nav.melosys.saksflytapi.ProsessinstansService
 import no.nav.melosys.saksflytapi.domain.ProsessStatus
 import no.nav.melosys.saksflytapi.domain.ProsessSteg
 import no.nav.melosys.saksflytapi.domain.Prosessinstans
-import no.nav.melosys.sikkerhet.context.ThreadLocalAccessInfo
 import no.nav.security.token.support.spring.test.EnableMockOAuth2Server
 import org.awaitility.kotlin.await
-import org.junit.jupiter.api.AfterEach
-import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Disabled
 import org.junit.jupiter.api.Test
 import org.springframework.beans.factory.annotation.Autowired
@@ -35,19 +31,19 @@ import org.springframework.boot.test.context.TestConfiguration
 import org.springframework.context.annotation.Bean
 import org.springframework.context.annotation.Import
 import org.springframework.context.annotation.Primary
-import org.springframework.http.HttpHeaders
-import org.springframework.http.MediaType
 import org.springframework.kafka.test.context.EmbeddedKafka
+import org.springframework.test.annotation.DirtiesContext
 import org.springframework.test.context.ActiveProfiles
 import java.lang.Thread.sleep
 import java.time.Duration
+
 
 private val log = KotlinLogging.logger { }
 
 @ActiveProfiles("test")
 @SpringBootTest(
     classes = [Application::class, SaksflytTestConfig::class],
-    webEnvironment = SpringBootTest.WebEnvironment.NONE
+    webEnvironment = SpringBootTest.WebEnvironment.DEFINED_PORT
 )
 @EmbeddedKafka(
     count = 1, controlledShutdown = true, partitions = 1,
@@ -55,6 +51,7 @@ private val log = KotlinLogging.logger { }
     brokerProperties = ["offsets.topic.replication.factor=1", "transaction.state.log.replication.factor=1", "transaction.state.log.min.isr=1"]
 )
 @AutoConfigureTestDatabase(replace = AutoConfigureTestDatabase.Replace.NONE)
+@DirtiesContext
 @EnableMockOAuth2Server
 @Import(SedLåsreferanseIT.TestConfig::class)
 internal class SedLåsreferanseIT(
@@ -62,48 +59,9 @@ internal class SedLåsreferanseIT(
     @Autowired private val prosessinstansService: ProsessinstansService,
 ) : OracleTestContainerBase() {
 
-    protected val mockServer: WireMockServer =
-        WireMockServer(WireMockConfiguration.wireMockConfig().port(8094))
-
-    @BeforeEach
-    fun before() {
-        mockServer.start()
-        mockServer.stubFor(
-            WireMock.get(WireMock.urlPathMatching("/api/v1/kodeverk/.*/koder/betydninger")).willReturn(
-                WireMock.aResponse()
-                    .withStatus(200)
-                    .withHeader(HttpHeaders.CONTENT_TYPE, MediaType.APPLICATION_JSON_VALUE)
-                    .withBody(
-                        "{\n" +
-                            "    \"betydninger\": {\n" +
-                            "        \"andreSkift\": [\n" +
-                            "            {\n" +
-                            "                \"gyldigFra\": \"2019-01-01\",\n" +
-                            "                \"gyldigTil\": \"9999-12-31\",\n" +
-                            "                \"beskrivelser\": {\n" +
-                            "                    \"nb\": {\n" +
-                            "                        \"term\": \"Andre skift\",\n" +
-                            "                        \"tekst\": \"Andre skift\"\n" +
-                            "                    }\n" +
-                            "                }\n" +
-                            "            }\n" +
-                            "        ]\n" +
-                            "    }\n" +
-                            "}"
-                    )
-            )
-        )
-    }
-
-    @AfterEach
-    fun after() {
-        mockServer.stop()
-    }
-
-
     @Test
     fun `ikke kjør samtidig når sed har samme rinaSaksnummer men forsjellig sedId, sedVersjon`() {
-        val logItems = LoggingTestUtils.captureLog<ProsessinstansBehandler> {
+        LoggingTestUtils.withLogCapture { logItems ->
             val låsReferanser = lagProsesser(
                 listOf(
                     MelosysEessiMelding().apply {
@@ -119,21 +77,22 @@ internal class SedLåsreferanseIT(
                 )
             )
 
-            await.timeout(Duration.ofSeconds(30)).pollInterval(Duration.ofSeconds(1))
+            await.throwOnLogError(logItems)
+                .timeout(Duration.ofSeconds(30)).pollInterval(Duration.ofSeconds(1))
                 .until {
                     prosessinstansRepository.findAll()
                         .filter { it.låsReferanse in låsReferanser }
                         .all { it.status == ProsessStatus.FERDIG }
                 }
-        }
 
-        logItems.shouldHaveSize(6).check { next ->
-            next().formattedMessage shouldMatch Regex("Starter behandling av prosessinstans .*? med lås 111_222_1")
-            next().formattedMessage shouldStartWith "Utfører steg SED_MOTTAK_RUTING"
-            next().message shouldStartWith "Prosessinstans {} behandlet ferdig"
-            next().formattedMessage shouldMatch Regex("Starter behandling av prosessinstans .*? med lås 111_222_2")
-            next().formattedMessage shouldStartWith "Utfører steg SED_MOTTAK_RUTING"
-            next().message shouldStartWith "Prosessinstans {} behandlet ferdig"
+            logItems.match<ProsessinstansBehandler>().shouldHaveSize(6).check { next ->
+                next().formattedMessage shouldMatch Regex("Starter behandling av prosessinstans .*? med lås 111_222_1")
+                next().formattedMessage shouldStartWith "Utfører steg SED_MOTTAK_RUTING"
+                next().message shouldStartWith "Prosessinstans {} behandlet ferdig"
+                next().formattedMessage shouldMatch Regex("Starter behandling av prosessinstans .*? med lås 111_222_2")
+                next().formattedMessage shouldStartWith "Utfører steg SED_MOTTAK_RUTING"
+                next().message shouldStartWith "Prosessinstans {} behandlet ferdig"
+            }
         }
     }
 
@@ -142,7 +101,7 @@ internal class SedLåsreferanseIT(
     // Er laget oppgave for å fikse dette: https://jira.adeo.no/browse/MELOSYS-6365 og da er denne testen grei å ha
     @Disabled("Denne testen feiler noen ganger siden den ikke er synkronisert, så log linjene kan komme i en annen rekkefølge")
     fun `kjør samtidig når sed har samme rinaSaksnummer, sedId og sedVersjon`() {
-        val logItems = LoggingTestUtils.captureLog<ProsessinstansBehandler> {
+        LoggingTestUtils.withLogCapture { logItems ->
             val låsReferanser = lagProsesser(
                 listOf(
                     MelosysEessiMelding().apply {
@@ -158,21 +117,22 @@ internal class SedLåsreferanseIT(
                 )
             )
 
-            await.timeout(Duration.ofSeconds(30)).pollInterval(Duration.ofSeconds(1))
+            await.throwOnLogError(logItems)
+                .timeout(Duration.ofSeconds(30)).pollInterval(Duration.ofSeconds(1))
                 .until {
                     prosessinstansRepository.findAll()
                         .filter { it.låsReferanse in låsReferanser }
                         .all { it.status == ProsessStatus.FERDIG }
                 }
-        }
 
-        logItems.shouldHaveSize(6).check { next ->
-            next().formattedMessage shouldMatch Regex("Starter behandling av prosessinstans .*? med lås 111_222_1")
-            next().formattedMessage shouldMatch Regex("Starter behandling av prosessinstans .*? med lås 111_222_1")
-            next().formattedMessage shouldStartWith "Utfører steg SED_MOTTAK_RUTING"
-            next().formattedMessage shouldStartWith "Utfører steg SED_MOTTAK_RUTING"
-            next().message shouldStartWith "Prosessinstans {} behandlet ferdig"
-            next().message shouldStartWith "Prosessinstans {} behandlet ferdig"
+            logItems.match<ProsessinstansBehandler>().shouldHaveSize(6).check { next ->
+                next().formattedMessage shouldMatch Regex("Starter behandling av prosessinstans .*? med lås 111_222_1")
+                next().formattedMessage shouldMatch Regex("Starter behandling av prosessinstans .*? med lås 111_222_1")
+                next().formattedMessage shouldStartWith "Utfører steg SED_MOTTAK_RUTING"
+                next().formattedMessage shouldStartWith "Utfører steg SED_MOTTAK_RUTING"
+                next().message shouldStartWith "Prosessinstans {} behandlet ferdig"
+                next().message shouldStartWith "Prosessinstans {} behandlet ferdig"
+            }
         }
     }
 
