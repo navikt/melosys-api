@@ -40,7 +40,8 @@ public enum ProsessType {
     SEND_BREV("SEND_BREV", "Send brev til én mottaker via doksys"),
     UTPEKING_AVVIS("UTPEKING_AVVIS", "Avviser utpeking mottatt i en A003"),
     VIDERESEND_SOKNAD("VIDERESEND_SOKNAD", "Videresend søknad"),
-    IVERKSETT_VEDTAK_IKKE_YRKESAKTIV("IVERKSETT_VEDTAK_IKKE_YRKESAKTIV", "Iverksett vedtak Ikke yrkesaktiv");
+    IVERKSETT_VEDTAK_IKKE_YRKESAKTIV("IVERKSETT_VEDTAK_IKKE_YRKESAKTIV", "Iverksett vedtak Ikke yrkesaktiv"),
+    ANNULLERE_SAK("ANNULLERE_SAK", "Annullerer en sak, fjerner medl perioder og kansellerer faktura");
 
     private final String kode;
     private final String beskrivelse;

@@ -151,7 +151,8 @@ class SaksbehandlingRegler(
             Behandlingsresultattyper.ANMODNING_OM_UNNTAK,
             Behandlingsresultattyper.AVSLAG_MANGLENDE_OPPL,
             Behandlingsresultattyper.FERDIGBEHANDLET,
-            Behandlingsresultattyper.HENLEGGELSE_BORTFALT
+            Behandlingsresultattyper.HENLEGGELSE_BORTFALT,
+            Behandlingsresultattyper.ANNULLERT
         )
     }
 }

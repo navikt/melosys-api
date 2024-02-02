@@ -114,6 +114,14 @@ public final class ProsessflytDefinisjon {
             )
         );
 
+        PROSESS_FLYT_MAP.put(ProsessType.ANNULLERE_SAK,
+            new ProsessFlyt(ProsessType.ANNULLERE_SAK,
+                LAGRE_MEDLEMSKAPSPERIODE_MEDL,
+                KANSELLER_FAKTURASERIE,
+                AVSLUTT_SAK_OG_BEHANDLING
+                )
+        );
+
         PROSESS_FLYT_MAP.put(ProsessType.JFR_KNYTT,
             new ProsessFlyt(ProsessType.JFR_KNYTT,
                 OPPDATER_OG_FERDIGSTILL_JOURNALPOST,
