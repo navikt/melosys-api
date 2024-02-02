@@ -319,6 +319,8 @@ class YrkesaktivEosVedtakIT(
             .medBestillersId("komponent test")
             .build()
 
+        every { utstedtA1AivenProducer.produserMelding(any()) } returns mockk<UtstedtA1Melding>()
+
 
         executeAndWait(
             waitForprosessType = ProsessType.IVERKSETT_VEDTAK_EOS,
@@ -327,6 +329,8 @@ class YrkesaktivEosVedtakIT(
             vedtaksfattingFasade.fattVedtak(behandling.id, vedtakRequest)
         }
 
+
+        verify(exactly = 1) { utstedtA1AivenProducer.produserMelding(any()) }
 
         behandlingsresultatService.hentBehandlingsresultat(behandling.id).apply {
             type shouldBe Behandlingsresultattyper.FASTSATT_LOVVALGSLAND
