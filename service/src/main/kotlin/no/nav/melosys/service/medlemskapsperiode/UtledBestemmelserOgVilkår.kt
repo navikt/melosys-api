@@ -109,7 +109,7 @@ class UtledBestemmelserOgVilkår(val unleash: Unleash) {
                 listOf(
                     Vilkaar.FTRL_2_1A_TRYGDEKOORDINGERING,
                     Vilkaar.FTRL_2_8_FORUTGÅENDE_TRYGDETID,
-                    Vilkaar.FTRL_2_8_NÆR_TILKNYTNING_NORGE
+                    Vilkaar.FTRL_2_8_FØRSTE_LEDD_NÆR_TILKNYTNING_NORGE
                 )
             )
         ),
