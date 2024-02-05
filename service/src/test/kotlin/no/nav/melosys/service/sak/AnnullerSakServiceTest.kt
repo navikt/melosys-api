@@ -2,14 +2,13 @@ package no.nav.melosys.service.sak
 
 import io.mockk.every
 import io.mockk.impl.annotations.InjectMockKs
-import io.mockk.impl.annotations.MockK
 import io.mockk.impl.annotations.RelaxedMockK
 import io.mockk.junit5.MockKExtension
-import io.mockk.justRun
 import io.mockk.verify
 import no.nav.melosys.domain.Behandling
 import no.nav.melosys.domain.Behandlingsresultat
 import no.nav.melosys.domain.Fagsak
+import no.nav.melosys.domain.folketrygden.MedlemAvFolketrygden
 import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingsresultattyper
 import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingsstatus
 import no.nav.melosys.saksflytapi.ProsessinstansService
@@ -54,6 +53,7 @@ class AnnullerSakServiceTest {
         }
         val behandlingsresultat = Behandlingsresultat().apply {
             id = behandlingId
+            medlemAvFolketrygden = MedlemAvFolketrygden()
         }
 
         every { fagsakService.hentFagsak(saksnummer) } returns fagsak
@@ -66,6 +66,6 @@ class AnnullerSakServiceTest {
         verify { oppgaveService.ferdigstillOppgaveMedSaksnummer(saksnummer) }
         verify { medlemskapsperiodeService.slettMedlemskapsperioder(behandlingId) }
         verify { behandlingsresultatService.oppdaterBehandlingsresultattype(behandlingId, Behandlingsresultattyper.ANNULLERT) }
-        verify { prosessinstansService.opprettAnnullerFagsakProsessflyt(fagsak) }
+        verify { prosessinstansService.opprettAnnullerFagsakProsessflyt(fagsak.hentAktivBehandling()) }
     }
 }

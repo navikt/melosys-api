@@ -13,7 +13,7 @@ class AnnullerSakService(
     private val fagsakService: FagsakService,
     private val medlemskapsperiodeService: MedlemskapsperiodeService,
     private val behandlingsresultatService: BehandlingsresultatService,
-    private val oppgaveService: OppgaveService
+    private val oppgaveService: OppgaveService,
 ) {
     fun annullerSak(saksnummer: String) {
         val fagsak = fagsakService.hentFagsak(saksnummer)
@@ -21,8 +21,11 @@ class AnnullerSakService(
         val behandlingsresultat = behandlingsresultatService.hentBehandlingsresultat(behandling.id)
 
         oppgaveService.ferdigstillOppgaveMedSaksnummer(saksnummer)
-        medlemskapsperiodeService.slettMedlemskapsperioder(behandlingsresultat.id)
+        if (behandlingsresultat.medlemAvFolketrygden != null) {
+            medlemskapsperiodeService.slettMedlemskapsperioder(behandlingsresultat.id)
+        }
         behandlingsresultatService.oppdaterBehandlingsresultattype(behandlingsresultat.id, Behandlingsresultattyper.ANNULLERT)
-        prosessinstansService.opprettAnnullerFagsakProsessflyt(fagsak)
+        prosessinstansService.opprettAnnullerFagsakProsessflyt(behandling)
     }
+
 }

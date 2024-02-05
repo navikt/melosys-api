@@ -158,10 +158,10 @@ public class ProsessinstansService {
     }
 
     @Transactional
-    public void opprettAnnullerFagsakProsessflyt(Fagsak fagsak) {
+    public void opprettAnnullerFagsakProsessflyt(Behandling behandling) {
         Prosessinstans prosessinstans = new Prosessinstans();
-        prosessinstans.setBehandling(fagsak.hentSistAktivBehandling());
-        prosessinstans.setType(ProsessType.ANNULLERE_SAK);
+        prosessinstans.setBehandling(behandling);
+        prosessinstans.setType(ProsessType.ANNULLER_SAK);
         prosessinstans.setData(ProsessDataKey.SAKSSTATUS, Saksstatuser.ANNULLERT);
         lagre(prosessinstans);
     }

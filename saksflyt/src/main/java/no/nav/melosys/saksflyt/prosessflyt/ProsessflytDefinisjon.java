@@ -114,8 +114,8 @@ public final class ProsessflytDefinisjon {
             )
         );
 
-        PROSESS_FLYT_MAP.put(ProsessType.ANNULLERE_SAK,
-            new ProsessFlyt(ProsessType.ANNULLERE_SAK,
+        PROSESS_FLYT_MAP.put(ProsessType.ANNULLER_SAK,
+            new ProsessFlyt(ProsessType.ANNULLER_SAK,
                 LAGRE_MEDLEMSKAPSPERIODE_MEDL,
                 KANSELLER_FAKTURASERIE,
                 AVSLUTT_SAK_OG_BEHANDLING
