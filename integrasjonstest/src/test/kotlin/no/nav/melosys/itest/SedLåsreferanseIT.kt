@@ -22,7 +22,6 @@ import no.nav.melosys.saksflytapi.domain.ProsessSteg
 import no.nav.melosys.saksflytapi.domain.Prosessinstans
 import no.nav.security.token.support.spring.test.EnableMockOAuth2Server
 import org.awaitility.kotlin.await
-import org.junit.jupiter.api.AfterEach
 import org.junit.jupiter.api.Disabled
 import org.junit.jupiter.api.Test
 import org.springframework.beans.factory.annotation.Autowired
@@ -33,16 +32,18 @@ import org.springframework.context.annotation.Bean
 import org.springframework.context.annotation.Import
 import org.springframework.context.annotation.Primary
 import org.springframework.kafka.test.context.EmbeddedKafka
+import org.springframework.test.annotation.DirtiesContext
 import org.springframework.test.context.ActiveProfiles
 import java.lang.Thread.sleep
 import java.time.Duration
+
 
 private val log = KotlinLogging.logger { }
 
 @ActiveProfiles("test")
 @SpringBootTest(
     classes = [Application::class, SaksflytTestConfig::class],
-    webEnvironment = SpringBootTest.WebEnvironment.NONE
+    webEnvironment = SpringBootTest.WebEnvironment.DEFINED_PORT
 )
 @EmbeddedKafka(
     count = 1, controlledShutdown = true, partitions = 1,
@@ -50,6 +51,7 @@ private val log = KotlinLogging.logger { }
     brokerProperties = ["offsets.topic.replication.factor=1", "transaction.state.log.replication.factor=1", "transaction.state.log.min.isr=1"]
 )
 @AutoConfigureTestDatabase(replace = AutoConfigureTestDatabase.Replace.NONE)
+@DirtiesContext
 @EnableMockOAuth2Server
 @Import(SedLåsreferanseIT.TestConfig::class)
 internal class SedLåsreferanseIT(
@@ -57,14 +59,8 @@ internal class SedLåsreferanseIT(
     @Autowired private val prosessinstansService: ProsessinstansService,
 ) : OracleTestContainerBase() {
 
-    @AfterEach
-    fun afterEach() {
-        prosessinstansRepository.findAllByLåsReferanseStartingWith("111_222_")
-            .forEach { prosessinstansRepository.deleteById(it.id) }
-    }
-
     @Test
-    fun `ikke kjør samtidig når sed har samme rinaSaksnummer men forskjellig sedId, sedVersjon`() {
+    fun `ikke kjør samtidig når sed har samme rinaSaksnummer men forsjellig sedId, sedVersjon`() {
         LoggingTestUtils.withLogCapture { logItems ->
             val låsReferanser = lagProsesser(
                 listOf(
@@ -81,8 +77,8 @@ internal class SedLåsreferanseIT(
                 )
             )
 
-            await.timeout(Duration.ofSeconds(30)).pollInterval(Duration.ofSeconds(1))
-                .throwOnLogError(logItems)
+            await.throwOnLogError(logItems)
+                .timeout(Duration.ofSeconds(30)).pollInterval(Duration.ofSeconds(1))
                 .until {
                     prosessinstansRepository.findAll()
                         .filter { it.låsReferanse in låsReferanser }
@@ -121,9 +117,8 @@ internal class SedLåsreferanseIT(
                 )
             )
 
-
-            await.timeout(Duration.ofSeconds(30)).pollInterval(Duration.ofSeconds(1))
-                .throwOnLogError(logItems)
+            await.throwOnLogError(logItems)
+                .timeout(Duration.ofSeconds(30)).pollInterval(Duration.ofSeconds(1))
                 .until {
                     prosessinstansRepository.findAll()
                         .filter { it.låsReferanse in låsReferanser }

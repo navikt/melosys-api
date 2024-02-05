@@ -102,6 +102,7 @@ public class UtenlandskMyndighetService {
         List<UtenlandskMyndighet> utenlandskMyndighetList = utenlandskMyndighetRepository.findByLandkodeIsIn(utenlandskeMyndigheterLandkoder);
 
         return utenlandskMyndighetList.stream()
+            .filter(utenlandskMyndighet -> utenlandskMyndighet.getAdresse().erGyldig())
             .collect(Collectors.toMap(utenlandskMyndighet -> utenlandskMyndighet, this::lagMottaker));
     }
 

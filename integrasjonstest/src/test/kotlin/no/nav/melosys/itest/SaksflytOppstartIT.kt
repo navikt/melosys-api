@@ -6,7 +6,7 @@ import io.kotest.matchers.shouldBe
 import io.mockk.every
 import io.mockk.mockk
 import no.nav.melosys.Application
-import no.nav.melosys.AwaitUtil
+import no.nav.melosys.AwaitUtil.awaitWithFailOnLogErrors
 import no.nav.melosys.domain.Behandling
 import no.nav.melosys.domain.Fagsak
 import no.nav.melosys.domain.RegistreringsInfo
@@ -48,11 +48,10 @@ import java.time.LocalDate
 import java.time.LocalDateTime
 import java.util.*
 
-
 @ActiveProfiles("test")
 @SpringBootTest(
     classes = [Application::class, SaksflytTestConfig::class],
-    webEnvironment = SpringBootTest.WebEnvironment.NONE
+    webEnvironment = SpringBootTest.WebEnvironment.DEFINED_PORT
 )
 @EmbeddedKafka(
     count = 1, controlledShutdown = true, partitions = 1,
@@ -62,7 +61,7 @@ import java.util.*
 @AutoConfigureTestDatabase(replace = AutoConfigureTestDatabase.Replace.NONE)
 @DirtiesContext
 @EnableMockOAuth2Server
-@Import(OAuthMockServer::class, KodeverkStub::class)
+@Import(OAuthMockServer::class)
 internal class SaksflytOppstartIT(
     @Autowired private val fagsakRepository: FagsakRepository,
     @Autowired private val behandlingRepository: BehandlingRepository,
@@ -125,14 +124,14 @@ internal class SaksflytOppstartIT(
 
         every { safConsumer.hentJournalpost(eessiMelding().journalpostId) } returns journalpost()
 
-        applicationEventPublisher.publishEvent(applicationReadyEvent())
-        AwaitUtil.awaitWithFailOnLogErrors {
-            timeout(Duration.ofMinutes(1)).pollInterval(Duration.ofSeconds(2))
-                .until {
-                    prosessinstansRepository.findAllByStatusIn(
-                        ProsessStatus.hentAktiveStatuser(),
-                    ).size == 1
-                }
+
+        awaitWithFailOnLogErrors {
+            applicationEventPublisher.publishEvent(applicationReadyEvent())
+            timeout(Duration.ofMinutes(1)).pollInterval(Duration.ofSeconds(2)).until {
+                prosessinstansRepository.findAllByStatusIn(
+                    ProsessStatus.hentAktiveStatuser(),
+                ).size == 1
+            }
         }
 
         prosessinstansRepository.findById(prosessinstansSomTrengerRekjøring.id).shouldBePresent {

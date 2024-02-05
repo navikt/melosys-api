@@ -25,13 +25,11 @@ import no.nav.melosys.sikkerhet.context.ThreadLocalAccessInfo
 import org.awaitility.kotlin.untilNotNull
 import org.junit.jupiter.api.AfterEach
 import org.junit.jupiter.api.BeforeEach
-import org.springframework.context.annotation.Import
 import java.time.LocalDate
 import java.time.LocalDateTime
 import java.util.*
 import java.util.concurrent.TimeUnit
 
-@Import(KodeverkStub::class)
 class JournalfoeringBase(
     protected val testDataGenerator: TestDataGenerator,
     protected val journalføringService: JournalfoeringService,
@@ -64,6 +62,7 @@ class JournalfoeringBase(
                     .withBody(ByteArray(0))
             )
         )
+
         ThreadLocalAccessInfo.beforeExecuteProcess(processUUID, "steg")
     }
 

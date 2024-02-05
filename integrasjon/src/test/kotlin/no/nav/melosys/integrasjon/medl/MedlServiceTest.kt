@@ -271,7 +271,7 @@ internal class MedlServiceTest {
                     dekning = DekningMedl.FTRL_2_9_1_LEDD_A.kode,
                     lovvalgsland = "NOR",
                     lovvalg = LovvalgMedl.ENDL.kode,
-                    grunnlag = GrunnlagMedl.FTL_2_8_1_ledd_a.kode,
+                    grunnlag = GrunnlagMedl.FTL_2_8_1_LEDD_A.kode,
                     sporingsinformasjon = MedlemskapsunntakForPost.SporingsinformasjonForPost(
                         kildedokument = KildedokumenttypeMedl.HENV_SOKNAD.getKode()
                     )
@@ -280,6 +280,71 @@ internal class MedlServiceTest {
             hentMedlemskapsunntak()
         }
         medlService.opprettPeriodeEndelig(FNR, medlemskapsperiode, KildedokumenttypeMedl.HENV_SOKNAD)
+    }
+
+    @Test
+    fun skalOppretteOpphørtPeriodeEndelig() {
+        val medlemskapsperiode = lagMedlemskapsPeriode().apply {
+            medlemAvFolketrygden =
+                MedlemAvFolketrygden().apply { bestemmelse = Folketrygdloven_kap2_bestemmelser.FTRL_KAP2_2_15_ANDRE_LEDD }
+        }
+        val medlemskapsunntakForPostCapturingSlot = slot<MedlemskapsunntakForPost>()
+        every {
+            mockRestConsumer.opprettPeriode(capture(medlemskapsunntakForPostCapturingSlot))
+        }.answers {
+            medlemskapsunntakForPostCapturingSlot.captured.shouldBeEqualToComparingFields(
+                MedlemskapsunntakForPost(
+                    ident = FNR,
+                    fraOgMed = medlemskapsperiode.fom,
+                    tilOgMed = medlemskapsperiode.tom,
+                    status = PeriodestatusMedl.AVST.kode,
+                    statusaarsak = StatusaarsakMedl.OPPHORT.kode,
+                    dekning = DekningMedl.FTRL_2_9_1_LEDD_A.kode,
+                    lovvalgsland = "NOR",
+                    lovvalg = LovvalgMedl.ENDL.kode,
+                    grunnlag = GrunnlagMedl.FTL_2_15_2_LEDD.kode,
+                    sporingsinformasjon = MedlemskapsunntakForPost.SporingsinformasjonForPost(
+                        kildedokument = KildedokumenttypeMedl.HENV_SOKNAD.getKode()
+                    )
+                )
+            )
+            hentMedlemskapsunntak()
+        }
+        medlService.opprettOpphørtPeriode(FNR, medlemskapsperiode, KildedokumenttypeMedl.HENV_SOKNAD)
+    }
+
+    @Test
+    fun skalOppdatereOpphørtPeriode() {
+        every { mockRestConsumer.hentPeriode(any()) } returns hentMedlemskapsunntak()
+        val medlemskapsperiode = lagMedlemskapsPeriode().apply {
+            medlPeriodeID = 123456L
+            medlemAvFolketrygden =
+                MedlemAvFolketrygden().apply { bestemmelse = Folketrygdloven_kap2_bestemmelser.FTRL_KAP2_2_15_ANDRE_LEDD }
+        }
+        val medlemskapsunntakForPutCapturingSlot = slot<MedlemskapsunntakForPut>()
+        every {
+            mockRestConsumer.oppdaterPeriode(capture(medlemskapsunntakForPutCapturingSlot))
+        }.answers {
+            medlemskapsunntakForPutCapturingSlot.captured.shouldBeEqualToComparingFields(
+                MedlemskapsunntakForPut(
+                    unntakId = 123456,
+                    fraOgMed = medlemskapsperiode.fom,
+                    tilOgMed = medlemskapsperiode.tom,
+                    status = PeriodestatusMedl.AVST.kode,
+                    statusaarsak = StatusaarsakMedl.OPPHORT.kode,
+                    dekning = DekningMedl.FTRL_2_9_1_LEDD_A.kode,
+                    lovvalgsland = "NOR",
+                    lovvalg = LovvalgMedl.ENDL.kode,
+                    grunnlag = GrunnlagMedl.FTL_2_15_2_LEDD.kode,
+                    sporingsinformasjon = MedlemskapsunntakForPut.SporingsinformasjonForPut(
+                        versjon = 1,
+                        kildedokument = KildedokumenttypeMedl.HENV_SOKNAD.getKode()
+                    )
+                )
+            )
+            hentMedlemskapsunntak()
+        }
+        medlService.oppdaterOpphørtPeriode(medlemskapsperiode, KildedokumenttypeMedl.HENV_SOKNAD)
     }
 
     @Test
@@ -365,7 +430,7 @@ internal class MedlServiceTest {
             MedlemAvFolketrygden().apply { bestemmelse = Folketrygdloven_kap2_bestemmelser.FTRL_KAP2_2_8_FØRSTE_LEDD_A }
     }
 
-    fun lagBehandlingsresultatMedOvergangsregelbestemmelser(): Behandlingsresultat {
+    private fun lagBehandlingsresultatMedOvergangsregelbestemmelser(): Behandlingsresultat {
         val behandlingsresultat = Behandlingsresultat()
 
         behandlingsresultat.apply {
@@ -377,9 +442,9 @@ internal class MedlServiceTest {
                 type = Behandlingstyper.FØRSTEGANG
                 status = Behandlingsstatus.VURDER_DOKUMENT
                 mottatteOpplysninger = MottatteOpplysninger().apply {
-                    setMottatteOpplysningerData(SedGrunnlag().apply {
+                    mottatteOpplysningerData = SedGrunnlag().apply {
                         overgangsregelbestemmelser = listOf(Overgangsregelbestemmelser.FO_1408_1971_ART14_2_A)
-                    })
+                    }
                 }
             }
         }

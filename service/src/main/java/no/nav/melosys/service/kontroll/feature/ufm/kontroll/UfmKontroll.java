@@ -150,7 +150,7 @@ class UfmKontroll {
 
         Optional<Bostedsadresse> personBostedsadresse = kontrollData.persondata().finnBostedsadresse();
 
-        return PersonRegler.personBosattINorgeIPeriode(bostedAdressePeriode, personBostedsadresse, historiskeBostedAdresser, historiskeOppholdsAdresser, sedFra, sedTil) ?
+        return PersonRegler.personBosattINorgeIPeriode(bostedAdressePeriode, personBostedsadresse, historiskeBostedAdresser, historiskeOppholdsAdresser, sedFra, sedTil == null ? LocalDate.now() : sedTil) ?
             Kontroll_begrunnelser.BOSATT_I_NORGE_I_PERIODEN : null;
     }
 

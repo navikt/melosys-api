@@ -6,7 +6,6 @@ import com.fasterxml.jackson.databind.annotation.JsonSerialize
 import com.fasterxml.jackson.datatype.jsr310.ser.LocalDateSerializer
 import no.nav.melosys.domain.brev.InnvilgelseFtrlBrevbestilling
 import no.nav.melosys.domain.kodeverk.*
-import no.nav.melosys.domain.kodeverk.begrunnelser.folketrygdloven.Ftrl_2_8_naer_tilknytning_norge_begrunnelser
 import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingstyper
 import no.nav.melosys.integrasjon.dokgen.dto.innvilgelseftrl.AvgiftsperiodeDto
 import no.nav.melosys.integrasjon.dokgen.dto.innvilgelseftrl.MedlemskapsperiodeDto
@@ -27,7 +26,7 @@ class InnvilgelseFtrl(
     val trygdeavgiftMottaker: Trygdeavgiftmottaker?,
     val fullmektigTrygdeavgift: String?,
     val skatteplikttype: Skatteplikttype?,
-    val ftrl_2_8_begrunnelse: Ftrl_2_8_naer_tilknytning_norge_begrunnelser?,
+    val begrunnelse: Kodeverk?,
     val begrunnelseAnnenGrunnFritekst: String?,
     val nyVurderingBakgrunn: String?,
     val innledningFritekst: String?,
@@ -49,7 +48,7 @@ class InnvilgelseFtrl(
         private var avslåttHelsedelFørMottaksdato = false
         private var trygdeavgiftMottaker: Trygdeavgiftmottaker? = null
         private var skatteplikttype: Skatteplikttype? = null
-        private var ftrl_2_8_begrunnelse: Ftrl_2_8_naer_tilknytning_norge_begrunnelser? = null
+        private var begrunnelse: Kodeverk? = null
         private var begrunnelseAnnenGrunnFritekst: String? = null
         private var nyVurderingBakgrunn: String? = null
         private var innledningFritekst: String? = null
@@ -100,8 +99,8 @@ class InnvilgelseFtrl(
             return this
         }
 
-        fun ftrl_2_8_begrunnelse(ftrl_2_8_begrunnelse: Ftrl_2_8_naer_tilknytning_norge_begrunnelser?): Builder {
-            this.ftrl_2_8_begrunnelse = ftrl_2_8_begrunnelse
+        fun begrunnelse(begrunnelse: Kodeverk?): Builder {
+            this.begrunnelse = begrunnelse
             return this
         }
 
@@ -162,7 +161,7 @@ class InnvilgelseFtrl(
                 trygdeavgiftMottaker,
                 fullmektigTrygdeavgift,
                 skatteplikttype,
-                ftrl_2_8_begrunnelse,
+                begrunnelse,
                 begrunnelseAnnenGrunnFritekst,
                 nyVurderingBakgrunn,
                 innledningFritekst,

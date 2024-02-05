@@ -1,6 +1,7 @@
 package no.nav.melosys.tjenester.gui
 
 import io.swagger.annotations.Api
+import no.nav.melosys.domain.kodeverk.Folketrygdloven_kap2_bestemmelser
 import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingstema
 import no.nav.melosys.service.medlemskapsperiode.UtledBestemmelserOgVilkår
 import no.nav.melosys.tjenester.gui.medlemskapsperiode.dto.BestemmelseMedVilkårOgBegrunnelserDto
@@ -18,9 +19,7 @@ import org.springframework.web.context.WebApplicationContext
 @RestController
 @Api(tags = ["medlemavfolketrygden", "bestemmelser"])
 @Scope(value = WebApplicationContext.SCOPE_REQUEST)
-class BestemmelseTjeneste {
-
-    private var utledBestemmelserOgVilkår = UtledBestemmelserOgVilkår()
+class BestemmelseTjeneste(private val utledBestemmelserOgVilkår: UtledBestemmelserOgVilkår) {
 
     @GetMapping("/behandlinger/medlemavfolketrygden/bestemmelser/{behandlingstema}")
     fun hentBestemmelserMedVilkaarForBehandlingstema(@PathVariable("behandlingstema") behandlingstema: Behandlingstema): ResponseEntity<FolketrygdlovenBestemmelserDto> {
@@ -33,5 +32,10 @@ class BestemmelseTjeneste {
         val ustøttede = utledBestemmelserOgVilkår.hentIkkeStøttedeBestemmelserOgVilkår(behandlingstema).keys
 
         return ResponseEntity.ok(FolketrygdlovenBestemmelserDto(støttede, ustøttede))
+    }
+
+    @GetMapping("/behandlinger/medlemavfolketrygden/bestemmelser/pliktige")
+    fun hentPliktigeBestemmelser(): ResponseEntity<Collection<Folketrygdloven_kap2_bestemmelser>> {
+        return ResponseEntity.ok(utledBestemmelserOgVilkår.pliktigeBestemmelser)
     }
 }

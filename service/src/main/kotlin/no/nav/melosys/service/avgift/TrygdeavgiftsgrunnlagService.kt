@@ -116,8 +116,6 @@ class TrygdeavgiftsgrunnlagService(private val behandlingsresultatService: Behan
                 this.avgiftspliktigInntektMnd =
                     if (inntektskildeRequest.avgiftspliktigInntektMnd == null) null
                     else Penger(inntektskildeRequest.avgiftspliktigInntektMnd)
-                this.isOrdinærTrygdeavgiftBetalesTilSkatt =
-                    !ordinærTrygdeavgiftBetalesTilNav(request, inntektskildeRequest) //TODO fjern når REFAKTORERING_ORDINÆR_TRYGDEAVGIFT toggle er fjernet
             }
         })
 
@@ -139,11 +137,11 @@ class TrygdeavgiftsgrunnlagService(private val behandlingsresultatService: Behan
         val behandling = behandlingsresultat.behandling
         val trygdeavgiftsgrunnlag = behandlingsresultat.medlemAvFolketrygden?.fastsattTrygdeavgift?.trygdeavgiftsgrunnlag
 
-        if (trygdeavgiftsgrunnlag == null && behandling.erNyVurdering() && behandling.opprinneligBehandling != null) {
+        if (trygdeavgiftsgrunnlag == null && (behandling.erAndregangsbehandling()) && behandling.opprinneligBehandling != null) {
             return hentOgLagreOpprinneligBehandlingTrygdeavgiftsgrunnlag(behandling, behandlingsresultat)
-        } else {
-            return trygdeavgiftsgrunnlag
         }
+
+        return trygdeavgiftsgrunnlag
     }
 
     private fun hentOgLagreOpprinneligBehandlingTrygdeavgiftsgrunnlag(

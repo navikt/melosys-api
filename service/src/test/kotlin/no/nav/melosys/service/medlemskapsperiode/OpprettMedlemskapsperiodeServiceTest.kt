@@ -1,5 +1,6 @@
 package no.nav.melosys.service.medlemskapsperiode
 
+import io.getunleash.FakeUnleash
 import io.kotest.assertions.throwables.shouldThrow
 import io.kotest.matchers.collections.shouldHaveSize
 import io.kotest.matchers.collections.shouldNotBeEmpty
@@ -22,6 +23,7 @@ import no.nav.melosys.exception.FunksjonellException
 import no.nav.melosys.repository.MedlemAvFolketrygdenRepository
 import no.nav.melosys.service.behandling.BehandlingsresultatService
 import no.nav.melosys.service.behandling.UtledMottaksdato
+import no.nav.melosys.service.lovligekombinasjoner.LovligeKombinasjonerMedlemskapsperiodeService
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.extension.ExtendWith
@@ -29,6 +31,7 @@ import java.time.LocalDate
 
 @ExtendWith(MockKExtension::class)
 class OpprettMedlemskapsperiodeServiceTest {
+
     @MockK
     private lateinit var medlemAvFolketrygdenRepository: MedlemAvFolketrygdenRepository
 
@@ -37,6 +40,13 @@ class OpprettMedlemskapsperiodeServiceTest {
 
     @MockK
     private lateinit var utledMottaksdato: UtledMottaksdato
+
+
+    private val fakeUnleash = FakeUnleash()
+
+    private val utledBestemmelserOgVilkår = UtledBestemmelserOgVilkår(fakeUnleash)
+    private val lovligeKombinasjonerMedlemskapsperiodeService = LovligeKombinasjonerMedlemskapsperiodeService()
+    private val utledMedlemskapsperioder = UtledMedlemskapsperioder(lovligeKombinasjonerMedlemskapsperiodeService)
 
     private lateinit var opprettMedlemskapsperiodeService: OpprettMedlemskapsperiodeService
 
@@ -47,7 +57,14 @@ class OpprettMedlemskapsperiodeServiceTest {
     @BeforeEach
     fun setup() {
         opprettMedlemskapsperiodeService =
-            OpprettMedlemskapsperiodeService(medlemAvFolketrygdenRepository, behandlingsresultatService, utledMottaksdato)
+            OpprettMedlemskapsperiodeService(
+                medlemAvFolketrygdenRepository,
+                behandlingsresultatService,
+                utledMottaksdato,
+                utledMedlemskapsperioder,
+                utledBestemmelserOgVilkår,
+                lovligeKombinasjonerMedlemskapsperiodeService
+            )
     }
 
     @Test
@@ -116,6 +133,7 @@ class OpprettMedlemskapsperiodeServiceTest {
                     innvilgelsesresultat = InnvilgelsesResultat.INNVILGET
                     tom = LocalDate.now().plusMonths(4)
                     bestemmelse = BESTEMMELSE
+                    trygdedekning = Trygdedekninger.FTRL_2_9_FØRSTE_LEDD_A_HELSE
                 })
                 addMedlemskapsperiode(Medlemskapsperiode().apply { innvilgelsesresultat = InnvilgelsesResultat.AVSLAATT })
             }
@@ -153,12 +171,14 @@ class OpprettMedlemskapsperiodeServiceTest {
                     innvilgelsesresultat = InnvilgelsesResultat.INNVILGET
                     fom = LocalDate.now().plusMonths(4)
                     bestemmelse = BESTEMMELSE
+                    trygdedekning = Trygdedekninger.FTRL_2_9_FØRSTE_LEDD_A_HELSE
                 })
                 addMedlemskapsperiode(Medlemskapsperiode().apply { innvilgelsesresultat = InnvilgelsesResultat.AVSLAATT })
                 addMedlemskapsperiode(Medlemskapsperiode().apply {
                     innvilgelsesresultat = InnvilgelsesResultat.OPPHØRT
                     fom = LocalDate.now().plusMonths(6)
                     bestemmelse = Folketrygdloven_kap2_bestemmelser.FTRL_KAP2_2_15_ANDRE_LEDD
+                    trygdedekning = Trygdedekninger.FTRL_2_9_FØRSTE_LEDD_A_HELSE
                 })
             }
         }

@@ -155,6 +155,28 @@ class TrygdeavgiftsgrunnlagServiceTest {
     }
 
     @Test
+    fun hentTrygdeavgiftsgrunnlagEllerOpprinneligTrygdeavgiftsgrunnlag_ingenGrunnlag_manglendeInnbetalingTrygdeavgift_harIkkeMedlemAvFolketrygdenEnda_returnererGammeltGrunnlag() {
+        behandlingsresultat.behandling = Behandling().apply {
+            type = Behandlingstyper.MANGLENDE_INNBETALING_TRYGDEAVGIFT
+            opprinneligBehandling = Behandling().apply { id = OPPRINNELIG_BEHANDLING_ID }
+        }
+        opprinneligBehandlingsresultat.medlemAvFolketrygden = MedlemAvFolketrygden().apply {
+            fastsattTrygdeavgift = FastsattTrygdeavgift().apply {
+                trygdeavgiftsgrunnlag = Trygdeavgiftsgrunnlag().apply {
+                    id = 10
+                }
+            }
+        }
+
+
+        val trygdeavgiftsgrunnlag = trygdeavgiftsgrunnlagService.hentTrygdeavgiftsgrunnlagEllerOpprinneligTrygdeavgiftsgrunnlag(BEHANDLING_ID)
+
+
+        assertEquals(10, trygdeavgiftsgrunnlag?.id)
+        verify(exactly = 0) { mockBehandlingsresultatService.lagre(any()) }
+    }
+
+    @Test
     fun hentTrygdeavgiftsgrunnlagEllerOpprinneligTrygdeavgiftsgrunnlag_grunnlagFinnes_nyVurdering_returnererNyttGrunnlag() {
         behandlingsresultat.behandling = Behandling().apply {
             type = Behandlingstyper.NY_VURDERING
@@ -375,7 +397,6 @@ class TrygdeavgiftsgrunnlagServiceTest {
                     tomDato = tom
                     type = Inntektskildetype.INNTEKT_FRA_UTLANDET
                     isArbeidsgiversavgiftBetalesTilSkatt = false
-                    isOrdinærTrygdeavgiftBetalesTilSkatt = true
                     avgiftspliktigInntektMnd = Penger(BigDecimal.valueOf(30000))
                     trygdeavgiftsgrunnlag =
                         lagretBehandlingsresultat.medlemAvFolketrygden.fastsattTrygdeavgift.trygdeavgiftsgrunnlag
@@ -385,7 +406,6 @@ class TrygdeavgiftsgrunnlagServiceTest {
                     tomDato = tom
                     type = Inntektskildetype.NÆRINGSINNTEKT_FRA_NORGE
                     isArbeidsgiversavgiftBetalesTilSkatt = false
-                    isOrdinærTrygdeavgiftBetalesTilSkatt = true
                     avgiftspliktigInntektMnd = Penger(BigDecimal.valueOf(10000))
                     trygdeavgiftsgrunnlag =
                         lagretBehandlingsresultat.medlemAvFolketrygden.fastsattTrygdeavgift.trygdeavgiftsgrunnlag
@@ -395,7 +415,6 @@ class TrygdeavgiftsgrunnlagServiceTest {
                     tomDato = tom
                     type = Inntektskildetype.ARBEIDSINNTEKT_FRA_NORGE
                     isArbeidsgiversavgiftBetalesTilSkatt = true
-                    isOrdinærTrygdeavgiftBetalesTilSkatt = true
                     avgiftspliktigInntektMnd = null
                     trygdeavgiftsgrunnlag =
                         lagretBehandlingsresultat.medlemAvFolketrygden.fastsattTrygdeavgift.trygdeavgiftsgrunnlag

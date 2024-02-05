@@ -4,13 +4,19 @@ import com.fasterxml.jackson.databind.JsonNode
 import com.fasterxml.jackson.databind.SerializationFeature
 import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule
 import com.fasterxml.jackson.module.kotlin.jacksonObjectMapper
+import com.ninjasquad.springmockk.MockkBean
 import io.getunleash.FakeUnleash
 import io.kotest.assertions.withClue
 import io.kotest.matchers.collections.shouldHaveSize
 import io.kotest.matchers.nulls.shouldNotBeNull
 import io.kotest.matchers.shouldBe
+import io.mockk.every
+import io.mockk.mockk
+import io.mockk.slot
+import io.mockk.verify
 import no.nav.melosys.domain.Behandlingsmaate
 import no.nav.melosys.domain.Lovvalgsperiode
+import no.nav.melosys.statistikk.utstedt_a1.integrasjon.dto.Lovvalgsbestemmelse
 import no.nav.melosys.domain.kodeverk.*
 import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingsresultattyper
 import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingsstatus
@@ -39,6 +45,8 @@ import no.nav.melosys.service.vedtak.FattVedtakRequest
 import no.nav.melosys.service.vedtak.VedtaksfattingFasade
 import no.nav.melosys.service.vilkaar.VilkaarDto
 import no.nav.melosys.service.vilkaar.VilkaarsresultatService
+import no.nav.melosys.statistikk.utstedt_a1.integrasjon.UtstedtA1AivenProducer
+import no.nav.melosys.statistikk.utstedt_a1.integrasjon.dto.UtstedtA1Melding
 import org.junit.jupiter.api.AfterEach
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Disabled
@@ -46,6 +54,7 @@ import org.junit.jupiter.api.Test
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.context.annotation.Import
 import java.time.LocalDate
+
 
 @Import(OAuthMockServer::class)
 class YrkesaktivEosVedtakIT(
@@ -64,7 +73,11 @@ class YrkesaktivEosVedtakIT(
     @Autowired private val oppfriskSaksopplysningerService: OppfriskSaksopplysningerService,
     @Autowired private val vedtaksfattingFasade: VedtaksfattingFasade,
     @Autowired private val unleash: FakeUnleash,
-) : JournalfoeringBase(testDataGenerator, journalføringService, oppgaveService, prosessinstansRepository) {
+
+    ) : JournalfoeringBase(testDataGenerator, journalføringService, oppgaveService, prosessinstansRepository) {
+
+    @MockkBean
+    private lateinit var utstedtA1AivenProducer: UtstedtA1AivenProducer
 
     @BeforeEach
     fun setup() {
@@ -164,6 +177,9 @@ class YrkesaktivEosVedtakIT(
             .medBestillersId("komponent test")
             .build()
 
+        val utstedtA1MeldingCapturingSlot = slot<UtstedtA1Melding>()
+        every { utstedtA1AivenProducer.produserMelding(capture(utstedtA1MeldingCapturingSlot)) } returns mockk<UtstedtA1Melding>()
+
 
         executeAndWait(
             waitForprosessType = ProsessType.IVERKSETT_VEDTAK_EOS,
@@ -172,6 +188,12 @@ class YrkesaktivEosVedtakIT(
             vedtaksfattingFasade.fattVedtak(behandling.id, vedtakRequest)
         }
 
+
+        verify(exactly = 1) { utstedtA1AivenProducer.produserMelding(any()) }
+        utstedtA1MeldingCapturingSlot.captured.apply {
+            behandlingId.shouldBe(behandling.id)
+            artikkel.shouldBe(Lovvalgsbestemmelse.ART_12_1)
+        }
 
         behandlingsresultatService.hentBehandlingsresultat(behandling.id).apply {
             type shouldBe Behandlingsresultattyper.FASTSATT_LOVVALGSLAND
@@ -297,6 +319,8 @@ class YrkesaktivEosVedtakIT(
             .medBestillersId("komponent test")
             .build()
 
+        every { utstedtA1AivenProducer.produserMelding(any()) } returns mockk<UtstedtA1Melding>()
+
 
         executeAndWait(
             waitForprosessType = ProsessType.IVERKSETT_VEDTAK_EOS,
@@ -305,6 +329,8 @@ class YrkesaktivEosVedtakIT(
             vedtaksfattingFasade.fattVedtak(behandling.id, vedtakRequest)
         }
 
+
+        verify(exactly = 1) { utstedtA1AivenProducer.produserMelding(any()) }
 
         behandlingsresultatService.hentBehandlingsresultat(behandling.id).apply {
             type shouldBe Behandlingsresultattyper.FASTSATT_LOVVALGSLAND

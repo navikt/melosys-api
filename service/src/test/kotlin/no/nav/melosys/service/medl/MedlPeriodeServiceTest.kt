@@ -8,12 +8,11 @@ import io.mockk.impl.annotations.RelaxedMockK
 import io.mockk.junit5.MockKExtension
 import io.mockk.verify
 import no.nav.melosys.domain.*
-import no.nav.melosys.domain.folketrygden.MedlemAvFolketrygden
 import no.nav.melosys.domain.kodeverk.Aktoersroller
 import no.nav.melosys.domain.kodeverk.Sakstyper
 import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingsstatus
 import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingstema
-import no.nav.melosys.exception.FunksjonellException
+import no.nav.melosys.exception.TekniskException
 import no.nav.melosys.integrasjon.medl.KildedokumenttypeMedl
 import no.nav.melosys.integrasjon.medl.MedlService
 import no.nav.melosys.integrasjon.medl.StatusaarsakMedl
@@ -132,7 +131,7 @@ class MedlPeriodeServiceTest {
         setupHappyPathBehandling()
         every { medlService.opprettPeriodeEndelig(FNR, any(), any()) } returns null
 
-        shouldThrow<FunksjonellException> {
+        shouldThrow<TekniskException> {
             medlPeriodeService.opprettPeriodeEndelig(1L, Medlemskapsperiode())
         }.message.shouldContain("Opprettelse av periode i MEDL feilet med retur av null medlPeriodeID")
 
@@ -152,6 +151,19 @@ class MedlPeriodeServiceTest {
     }
 
     @Test
+    fun opprettOpphørtPeriode() {
+        setupHappyPathBehandling()
+        val medlemskapsperiode = Medlemskapsperiode()
+        every { medlemskapsperiodeRepository.save(any()) } returns medlemskapsperiode
+
+        medlPeriodeService.opprettOpphørtPeriode(1L, medlemskapsperiode)
+
+        verify { medlService.opprettOpphørtPeriode(FNR, any(), any()) }
+        verify { medlemskapsperiodeRepository.save(medlemskapsperiode) }
+    }
+
+
+    @Test
     fun oppdaterPeriodeEndelig() {
         setupHappyPathBehandling(Sakstyper.EU_EOS, Behandlingstema.UTSENDT_ARBEIDSTAKER)
 
@@ -165,6 +177,20 @@ class MedlPeriodeServiceTest {
 
 
         verify { medlService.oppdaterPeriodeEndelig(lovvalgsperiode, KildedokumenttypeMedl.HENV_SOKNAD) }
+    }
+
+    @Test
+    fun oppdaterOpphørtPeriode() {
+        setupHappyPathBehandling(Sakstyper.FTRL, Behandlingstema.YRKESAKTIV)
+        val medlemskapsperiode = Medlemskapsperiode().apply {
+            medlPeriodeID = MEDL_PERIODE_ID
+        }
+
+
+        medlPeriodeService.oppdaterOpphørtPeriode(1, medlemskapsperiode)
+
+
+        verify { medlService.oppdaterOpphørtPeriode(medlemskapsperiode, KildedokumenttypeMedl.HENV_SOKNAD) }
     }
 
     @Test

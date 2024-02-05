@@ -55,7 +55,7 @@ class HentMuligeProduserbaredokumenterService(private val behandlingService: Beh
             Produserbaredokumenter.MANGELBREV_BRUKER,
             Produserbaredokumenter.GENERELT_FRITEKSTBREV_BRUKER
         )
-        if (fagsak.tema == Sakstemaer.MEDLEMSKAP_LOVVALG && (behandling.erFørstegangsvurdering() || behandling.erNyVurdering())) {
+        if (fagsak.tema == Sakstemaer.MEDLEMSKAP_LOVVALG && (behandling.erFørstegangsvurdering() || behandling.erAndregangsbehandling())) {
             return listOf(Produserbaredokumenter.MELDING_FORVENTET_SAKSBEHANDLINGSTID_SOKNAD) + defaultProduserbaredokumenter
         }
         return defaultProduserbaredokumenter

@@ -57,8 +57,8 @@ public class HenleggFagsakService {
 
         Behandling aktivBehandling = fagsak.hentAktivBehandling();
         oppdaterBehandlingsresultat(aktivBehandling.getId(), begrunnelseKode, fritekst);
-        if (aktivBehandling.erNyVurdering()) {
-            behandlingService.avsluttNyVurdering(aktivBehandling.getId(), Behandlingsresultattyper.HENLEGGELSE);
+        if (aktivBehandling.erAndregangsbehandling()) {
+            behandlingService.avsluttAndregangsbehandling(aktivBehandling.getId(), Behandlingsresultattyper.HENLEGGELSE);
         } else {
             fagsakService.avsluttFagsakOgBehandling(fagsak, Saksstatuser.HENLAGT);
         }
@@ -85,7 +85,7 @@ public class HenleggFagsakService {
         Fagsak fagsak = fagsakService.hentFagsak(saksnummer);
         Behandling aktivBehandling = fagsak.hentAktivBehandling();
 
-        if (aktivBehandling.erNyVurdering()) {
+        if (aktivBehandling.erAndregangsbehandling()) {
             henleggBehandlingSomBortfalt(aktivBehandling.getId(), saksnummer);
         } else {
             henleggSakSomBortfalt(fagsak);
@@ -93,7 +93,7 @@ public class HenleggFagsakService {
     }
 
     private void henleggBehandlingSomBortfalt(long behandlingId, String saksnummer) {
-        behandlingService.avsluttNyVurdering(behandlingId, Behandlingsresultattyper.HENLEGGELSE_BORTFALT);
+        behandlingService.avsluttAndregangsbehandling(behandlingId, Behandlingsresultattyper.HENLEGGELSE_BORTFALT);
         oppgaveService.ferdigstillOppgaveMedSaksnummer(saksnummer);
     }
 

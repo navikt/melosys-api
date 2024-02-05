@@ -22,15 +22,14 @@ class LagreMedlemsperiodeMedl(
         val behandlingID = prosessinstans.behandling.id
         val behandlingsresultat = behandlingsresultatService.hentBehandlingsresultat(behandlingID)
 
-        val innvilgedeMedlemskapsperioder = behandlingsresultat.finnMedlemskapsperioder().filter(Medlemskapsperiode::erInnvilget)
-        if ((behandling.erNyVurdering() || behandling.erManglendeInnbetalingTrygdeavgift()) && behandling.opprinneligBehandling != null) {
+        if (behandling.erAndregangsbehandling() && behandling.opprinneligBehandling != null) {
             medlemskapsperiodeService.erstattMedlemskapsperioder(
-                innvilgedeMedlemskapsperioder,
+                behandlingID,
                 behandling.opprinneligBehandling.id,
-                behandlingID
+                behandlingsresultat.finnMedlemskapsperioder().toList()
             )
         } else {
-            innvilgedeMedlemskapsperioder.forEach {
+            behandlingsresultat.finnMedlemskapsperioder().filter(Medlemskapsperiode::erInnvilget).forEach {
                 medlemskapsperiodeService.opprettEllerOppdaterMedlPeriode(behandlingID, it)
             }
         }

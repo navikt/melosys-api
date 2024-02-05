@@ -48,7 +48,7 @@ import java.util.*
 import java.util.concurrent.TimeUnit
 import java.util.stream.Collectors
 
-@Import(KodeverkStub::class, OAuthMockServer::class)
+@Import(OAuthMockServer::class)
 class SedMottakTestIT(
     @Autowired private val joarkFasade: JoarkFasade,
     @Autowired private val eessiMeldingTestDataFactory: EessiMeldingTestDataFactory,

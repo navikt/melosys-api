@@ -357,9 +357,9 @@ public class BehandlingService {
         applicationEventPublisher.publishEvent(new BehandlingEndretStatusEvent(AVSLUTTET, behandling));
     }
 
-    public void avsluttNyVurdering(long behandlingId, Behandlingsresultattyper nyBehandlingsResultatType) {
+    public void avsluttAndregangsbehandling(long behandlingId, Behandlingsresultattyper nyBehandlingsResultatType) {
         Behandling behandling = hentBehandling(behandlingId);
-        avsluttNyVurdering(behandling, nyBehandlingsResultatType);
+        avsluttAndregangsbehandling(behandling, nyBehandlingsResultatType);
     }
 
     @Transactional(readOnly = true)
@@ -401,9 +401,9 @@ public class BehandlingService {
             : lovligeKombinasjonerSaksbehandlingService.hentMuligeBehandlingStatuser();
     }
 
-    private void avsluttNyVurdering(Behandling behandling, Behandlingsresultattyper nyBehandlingsResultatType) {
-        if (!behandling.erNyVurdering()) {
-            throw new FunksjonellException("Behandling " + behandling.getId() + " er ikke typen NY_VURDERING!");
+    private void avsluttAndregangsbehandling(Behandling behandling, Behandlingsresultattyper nyBehandlingsResultatType) {
+        if (!behandling.erAndregangsbehandling()) {
+            throw new FunksjonellException("Behandling " + behandling.getId() + " er ikke typen NY_VURDERING eller MANGLENDE_INNBETALING_TRYGDEAVGIFT!");
         }
         avsluttBehandling(behandling);
 

@@ -19,6 +19,7 @@ import org.springframework.http.HttpStatus;
 
 import java.time.LocalDate;
 import java.util.Collections;
+import java.util.List;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.Mockito.when;
@@ -46,7 +47,7 @@ class MedlemskapsperiodeTjenesteTest {
     void hentMedlemskapsperioder_validerSchema() {
         final var medlemskapsperiode = lagMedlemskapsperiode();
         when(medlemskapsperiodeService.hentMedlemskapsperioder(behandlingID))
-            .thenReturn(Collections.singleton(medlemskapsperiode));
+            .thenReturn(List.of(medlemskapsperiode));
 
         var res = medlemskapsperiodeTjeneste.hentMedlemskapsperioder(behandlingID);
         assertThat(res.getStatusCode()).isEqualTo(HttpStatus.OK);
