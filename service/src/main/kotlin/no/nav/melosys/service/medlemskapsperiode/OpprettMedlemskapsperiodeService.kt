@@ -46,7 +46,7 @@ class OpprettMedlemskapsperiodeService(
             val medlemskapsperioder: Collection<Medlemskapsperiode>
             val opprinneligBehandling = behandling.opprinneligBehandling
 
-            if ((behandling.erNyVurdering() || behandling.erManglendeInnbetalingTrygdeavgift()) && opprinneligBehandling != null) {
+            if (behandling.erAndregangsbehandling() && opprinneligBehandling != null) {
                 val opprinneligBehandlingsresultat = behandlingsresultatService.hentBehandlingsresultat(opprinneligBehandling.id)
                 medlemskapsperioder = utledMedlemskapsperioder.lagMedlemskapsperioderForAndregangsbehandling(
                     opprinneligBehandlingsresultat,

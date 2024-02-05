@@ -560,7 +560,7 @@ class BehandlingServiceTest {
         behandling.setType(Behandlingstyper.NY_VURDERING);
         when(behandlingRepository.findById(BEHANDLING_ID)).thenReturn(Optional.of(behandling));
 
-        behandlingService.avsluttNyVurdering(BEHANDLING_ID, Behandlingsresultattyper.HENLEGGELSE_BORTFALT);
+        behandlingService.avsluttAndregangsbehandling(BEHANDLING_ID, Behandlingsresultattyper.HENLEGGELSE_BORTFALT);
 
         verify(behandlingRepository).save(behandlingCaptor.capture());
         verify(applicationEventPublisher).publishEvent(behandlingEndretStatusEventCaptor.capture());
@@ -573,13 +573,25 @@ class BehandlingServiceTest {
     }
 
     @Test
-    void avsluttNyVurdering_oppdatererBehandlingsresultattype() {
+    void avsluttAndregangsbehandling_nyVurdering_oppdatererBehandlingsresultattype() {
         Behandling behandling = new Behandling();
         behandling.setId(BEHANDLING_ID);
         behandling.setType(Behandlingstyper.NY_VURDERING);
         when(behandlingRepository.findById(BEHANDLING_ID)).thenReturn(Optional.of(behandling));
 
-        behandlingService.avsluttNyVurdering(BEHANDLING_ID, FERDIGBEHANDLET);
+        behandlingService.avsluttAndregangsbehandling(BEHANDLING_ID, FERDIGBEHANDLET);
+
+        verify(behandlingsresultatService).oppdaterBehandlingsresultattype(BEHANDLING_ID, FERDIGBEHANDLET);
+    }
+
+    @Test
+    void avsluttAndregangsbehandling_manglendeInnbetalingTrygdeavgift_oppdatererBehandlingsresultattype() {
+        Behandling behandling = new Behandling();
+        behandling.setId(BEHANDLING_ID);
+        behandling.setType(MANGLENDE_INNBETALING_TRYGDEAVGIFT);
+        when(behandlingRepository.findById(BEHANDLING_ID)).thenReturn(Optional.of(behandling));
+
+        behandlingService.avsluttAndregangsbehandling(BEHANDLING_ID, FERDIGBEHANDLET);
 
         verify(behandlingsresultatService).oppdaterBehandlingsresultattype(BEHANDLING_ID, FERDIGBEHANDLET);
     }
@@ -645,19 +657,19 @@ class BehandlingServiceTest {
     }
 
     @Test
-    void avsluttNyVurdering_kasterFunksjonellException_dersomBehandlingTypeIkkeErNyVurdering() {
+    void avsluttAndregangsbehandling_kasterFunksjonellException_dersomBehandlingTypeIkkeErNyVurderingEllerManglendeInnbetalingTrygdeavgift() {
         Behandling behandling = new Behandling();
         behandling.setId(BEHANDLING_ID);
         behandling.setStatus(AVSLUTTET);
         when(behandlingRepository.findById(BEHANDLING_ID)).thenReturn(Optional.of(behandling));
 
         assertThatExceptionOfType(FunksjonellException.class)
-            .isThrownBy(() -> behandlingService.avsluttNyVurdering(BEHANDLING_ID, FERDIGBEHANDLET))
-            .withMessageContaining("Behandling " + BEHANDLING_ID + " er ikke typen NY_VURDERING!");
+            .isThrownBy(() -> behandlingService.avsluttAndregangsbehandling(BEHANDLING_ID, FERDIGBEHANDLET))
+            .withMessageContaining("Behandling " + BEHANDLING_ID + " er ikke typen NY_VURDERING eller MANGLENDE_INNBETALING_TRYGDEAVGIFT!");
     }
 
     @Test
-    void avsluttNyVurdering_kasterFunksjonellException_dersomBehandlingErAvsluttet() {
+    void avsluttAndregangsbehandling_kasterFunksjonellException_dersomBehandlingErAvsluttet() {
         Behandling behandling = new Behandling();
         behandling.setId(BEHANDLING_ID);
         behandling.setStatus(AVSLUTTET);
@@ -665,7 +677,7 @@ class BehandlingServiceTest {
         when(behandlingRepository.findById(BEHANDLING_ID)).thenReturn(Optional.of(behandling));
 
         assertThatExceptionOfType(FunksjonellException.class)
-            .isThrownBy(() -> behandlingService.avsluttNyVurdering(BEHANDLING_ID, Behandlingsresultattyper.HENLEGGELSE_BORTFALT))
+            .isThrownBy(() -> behandlingService.avsluttAndregangsbehandling(BEHANDLING_ID, Behandlingsresultattyper.HENLEGGELSE_BORTFALT))
             .withMessageContaining("Behandling " + BEHANDLING_ID + " er allerede avsluttet!");
     }
 
