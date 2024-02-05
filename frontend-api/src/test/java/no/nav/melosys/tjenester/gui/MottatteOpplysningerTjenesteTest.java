@@ -1,6 +1,10 @@
 package no.nav.melosys.tjenester.gui;
 
 
+import java.time.LocalDate;
+import java.util.List;
+import java.util.UUID;
+
 import com.fasterxml.jackson.databind.ObjectMapper;
 import no.nav.melosys.domain.dokument.organisasjon.adresse.GeografiskAdresse;
 import no.nav.melosys.domain.dokument.organisasjon.adresse.SemistrukturertAdresse;
@@ -22,10 +26,6 @@ import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
 import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.http.MediaType;
 import org.springframework.test.web.servlet.MockMvc;
-
-import java.time.LocalDate;
-import java.util.List;
-import java.util.UUID;
 
 import static org.jeasy.random.FieldPredicates.named;
 import static org.jeasy.random.FieldPredicates.ofType;
@@ -72,6 +72,7 @@ class MottatteOpplysningerTjenesteTest {
         MottatteOpplysninger mottatteOpplysninger = new MottatteOpplysninger();
         mottatteOpplysninger.setType(Mottatteopplysningertyper.SØKNAD_A1_YRKESAKTIVE_EØS);
         mottatteOpplysninger.setMottatteOpplysningerData(soeknad);
+        mottatteOpplysninger.setMottaksdato(LocalDate.now());
         when(mottatteOpplysningerService.hentEllerOpprettMottatteOpplysninger(anyLong(), anyBoolean())).thenReturn(mottatteOpplysninger);
 
         mockMvc.perform(get(BASE_URL + "/{behandlingID}", 1L)
@@ -87,6 +88,7 @@ class MottatteOpplysningerTjenesteTest {
         MottatteOpplysninger mottatteOpplysninger = new MottatteOpplysninger();
         mottatteOpplysninger.setType(Mottatteopplysningertyper.SØKNAD_A1_YRKESAKTIVE_EØS);
         mottatteOpplysninger.setMottatteOpplysningerData(soeknad);
+        mottatteOpplysninger.setMottaksdato(LocalDate.now());
         when(mottatteOpplysningerService.oppdaterMottatteOpplysninger(anyLong(), any())).thenReturn(mottatteOpplysninger);
 
         mockMvc.perform(post(BASE_URL + "/{behandlingID}", 1L)
