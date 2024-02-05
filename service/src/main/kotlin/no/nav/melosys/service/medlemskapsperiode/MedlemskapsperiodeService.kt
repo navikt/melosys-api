@@ -29,9 +29,9 @@ class MedlemskapsperiodeService(
     private val unleash: Unleash
 ) {
     @Transactional(readOnly = true)
-    fun hentMedlemskapsperioder(behandlingsresultatID: Long): Collection<Medlemskapsperiode> {
+    fun hentMedlemskapsperioder(behandlingsresultatID: Long): List<Medlemskapsperiode> {
         return medlemAvFolketrygdenService.finnMedlemAvFolketrygden(behandlingsresultatID)
-            .map { it.medlemskapsperioder }
+            .map { it.medlemskapsperioder.toList() }
             .orElse(emptyList())
     }
 
