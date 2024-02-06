@@ -401,7 +401,7 @@ class SedMottakTestIT(
         executeAndWait(ProsessType.UTPEKING_AVVIS) {
             utpekingService.avvisUtpeking(opprettNyVurderingProsessinstans.behandling.id, UtpekingAvvis().apply {
                 begrunnelse = "lol"
-                isEtterspørInformasjon = false
+                etterspørInformasjon = false
             })
         }
 
@@ -461,7 +461,7 @@ class SedMottakTestIT(
         executeAndWait(ProsessType.UTPEKING_AVVIS) {
             utpekingService.avvisUtpeking(prosessinstanserSortert.get(1).behandling.id, UtpekingAvvis().apply {
                 begrunnelse = "lol"
-                isEtterspørInformasjon = false
+                etterspørInformasjon = false
             })
         }
 
