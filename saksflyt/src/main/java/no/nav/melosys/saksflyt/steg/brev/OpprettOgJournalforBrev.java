@@ -2,17 +2,22 @@ package no.nav.melosys.saksflyt.steg.brev;
 
 import java.util.Collections;
 import java.util.List;
+import java.util.Optional;
 import java.util.stream.Stream;
 
+import io.getunleash.Unleash;
+import no.nav.melosys.domain.Aktoer;
 import no.nav.melosys.domain.Behandling;
 import no.nav.melosys.domain.Fagsak;
 import no.nav.melosys.domain.arkiv.*;
 import no.nav.melosys.domain.brev.*;
 import no.nav.melosys.domain.kodeverk.Aktoersroller;
+import no.nav.melosys.domain.kodeverk.Fullmaktstype;
 import no.nav.melosys.domain.kodeverk.Mottakerroller;
 import no.nav.melosys.domain.kodeverk.brev.Produserbaredokumenter;
 import no.nav.melosys.exception.FunksjonellException;
 import no.nav.melosys.exception.IkkeFunnetException;
+import no.nav.melosys.featuretoggle.ToggleName;
 import no.nav.melosys.integrasjon.ereg.EregFasade;
 import no.nav.melosys.integrasjon.joark.JoarkFasade;
 import no.nav.melosys.saksflyt.steg.StegBehandler;
@@ -48,6 +53,7 @@ public class OpprettOgJournalforBrev implements StegBehandler {
     private final DokumentNavnService dokumentNavnService;
     private final DokumentHentingService dokumentHentingService;
     private final OppgaveFactory oppgaveFactory;
+    private final Unleash unleash;
 
     public OpprettOgJournalforBrev(BehandlingService behandlingService,
                                    DokgenService dokgenService,
@@ -57,7 +63,8 @@ public class OpprettOgJournalforBrev implements StegBehandler {
                                    EregFasade eregFasade,
                                    DokumentNavnService dokumentNavnService,
                                    DokumentHentingService dokumentHentingService,
-                                   OppgaveFactory oppgaveFactory) {
+                                   OppgaveFactory oppgaveFactory,
+                                   Unleash unleash) {
         this.behandlingService = behandlingService;
         this.dokgenService = dokgenService;
         this.utenlandskMyndighetService = utenlandskMyndighetService;
@@ -67,6 +74,7 @@ public class OpprettOgJournalforBrev implements StegBehandler {
         this.dokumentNavnService = dokumentNavnService;
         this.dokumentHentingService = dokumentHentingService;
         this.oppgaveFactory = oppgaveFactory;
+        this.unleash = unleash;
     }
 
     @Override
@@ -108,6 +116,10 @@ public class OpprettOgJournalforBrev implements StegBehandler {
             .medVedlegg(vedlegg);
 
         settHovedpart(behandling, bestilling);
+
+        if (unleash.isEnabled(ToggleName.MELOSYS_OVERSTYR_INNSYNSREGLER)) {
+            settOverstyrInnsynsregler(fagsak, bestilling, mottakerID);
+        }
 
         String journalpostId = joarkFasade.opprettJournalpost(OpprettJournalpost.lagJournalpostForBrev(bestilling.build(), oppgaveFactory.utledTema(fagsak.getType(), fagsak.getTema(), behandling.getTema())), true);
 
@@ -167,6 +179,16 @@ public class OpprettOgJournalforBrev implements StegBehandler {
                 .medHovedpartId(persondataFasade.hentFolkeregisterident(fagsak.hentBrukersAktørID()))
                 .medHovedpartIdType(BrukerIdType.FOLKEREGISTERIDENT);
         }
+    }
+
+    private void settOverstyrInnsynsregler(Fagsak fagsak, JournalpostBestilling.Builder bestilling, String mottakerID) {
+        Optional<Aktoer> fullmektig = fagsak.finnFullmektig(Fullmaktstype.FULLMEKTIG_SØKNAD);
+        fullmektig.ifPresent(aktoer -> {
+            if (mottakerID.equals(aktoer.getPersonIdent()) || mottakerID.equals(aktoer.getOrgnr())) {
+                bestilling
+                    .medOverstyrInnsynsregler(OverstyrInnsynsregler.VISES_MASKINELT_GODKJENT);
+            }
+        });
     }
 
     private OpprettJournalpost.KorrespondansepartIdType utledMottakerIdType(MottakerType mottakerType) {

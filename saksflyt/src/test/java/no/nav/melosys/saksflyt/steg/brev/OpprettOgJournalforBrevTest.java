@@ -4,16 +4,15 @@ import java.util.List;
 import java.util.Set;
 import java.util.UUID;
 
+import io.getunleash.FakeUnleash;
+import io.getunleash.Unleash;
 import no.nav.melosys.domain.Aktoer;
 import no.nav.melosys.domain.Behandling;
 import no.nav.melosys.domain.Fagsak;
 import no.nav.melosys.domain.Tema;
 import no.nav.melosys.domain.arkiv.*;
 import no.nav.melosys.domain.brev.*;
-import no.nav.melosys.domain.kodeverk.Aktoersroller;
-import no.nav.melosys.domain.kodeverk.Mottakerroller;
-import no.nav.melosys.domain.kodeverk.Sakstemaer;
-import no.nav.melosys.domain.kodeverk.Sakstyper;
+import no.nav.melosys.domain.kodeverk.*;
 import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingstema;
 import no.nav.melosys.domain.kodeverk.brev.Produserbaredokumenter;
 import no.nav.melosys.exception.FunksjonellException;
@@ -71,6 +70,8 @@ class OpprettOgJournalforBrevTest {
     @Captor
     ArgumentCaptor<OpprettJournalpost> opprettJournalpostCaptor;
 
+    private final FakeUnleash fakeUnleash = new FakeUnleash();
+
     private OpprettOgJournalforBrev opprettJournalforBrev;
 
     private final OppgaveFactory oppgaveFactory = new OppgaveFactory();
@@ -79,9 +80,10 @@ class OpprettOgJournalforBrevTest {
 
     @BeforeEach
     void init() {
+        fakeUnleash.enableAll();
         opprettJournalforBrev = new OpprettOgJournalforBrev(mockBehandlingService, mockDokgenService,
             mockUtenlandskMyndighetService, mockJoarkFasade, mockPersondataFasade, mockEregFasade,
-            mockDokumentNavnService, mockDokumentHentingService, oppgaveFactory);
+            mockDokumentNavnService, mockDokumentHentingService, oppgaveFactory, fakeUnleash);
     }
 
     @Test
@@ -196,6 +198,34 @@ class OpprettOgJournalforBrevTest {
         verify(mockBehandlingService).hentBehandling(anyLong());
         verify(mockDokgenService).produserBrev(any(Mottaker.class), any(DokgenBrevbestilling.class));
         verify(mockJoarkFasade).opprettJournalpost(any(), anyBoolean());
+    }
+
+    @Test
+    void utførOpprettJournalforBrevTilBrukersFullmektigOverstyrerInnsynsregler() {
+        Behandling behandling = TestdataFactory.lagBehandling();
+        behandling.getFagsak().setAktører(lagBrukerOgFullmektigAktoer());
+        when(mockBehandlingService.hentBehandling(anyLong())).thenReturn(behandling);
+        when(mockDokgenService.hentDokumentInfo(any())).thenReturn(TestdataFactory.lagDokumentInfo());
+        when(mockJoarkFasade.opprettJournalpost(any(), anyBoolean())).thenReturn("12234");
+        when(mockEregFasade.hentOrganisasjonNavn(any())).thenReturn("Advokatene AS");
+
+        Mottaker mottaker = Mottaker.medRolle(Mottakerroller.FULLMEKTIG);
+        mottaker.setOrgnr("987654321");
+
+        DokgenBrevbestilling brevbestilling = new DokgenBrevbestilling.Builder<>()
+            .medProduserbartdokument(MELDING_FORVENTET_SAKSBEHANDLINGSTID_SOKNAD)
+            .build();
+
+        Prosessinstans prosessinstans = lagProsessinstansMedOrgnr(behandling, mottaker, brevbestilling);
+
+        opprettJournalforBrev.utfør(prosessinstans);
+
+        verify(mockBehandlingService).hentBehandling(anyLong());
+        verify(mockDokgenService).produserBrev(any(Mottaker.class), any(DokgenBrevbestilling.class));
+        verify(mockJoarkFasade).opprettJournalpost(opprettJournalpostCaptor.capture(), anyBoolean());
+
+        OpprettJournalpost captured = opprettJournalpostCaptor.getValue();
+        assertThat(captured.getOverstyrInnsynsregler()).isEqualTo(OverstyrInnsynsregler.VISES_MASKINELT_GODKJENT);
     }
 
     @Test
@@ -568,5 +598,14 @@ class OpprettOgJournalforBrevTest {
         journalpost.setHoveddokument(arkivDokument);
 
         return journalpost;
+    }
+
+    private static Set<Aktoer> lagBrukerOgFullmektigAktoer() {
+        var brukerAktoer = TestdataFactory.lagBruker();
+        var fullmektigAktoer = new Aktoer();
+        fullmektigAktoer.setRolle(Aktoersroller.FULLMEKTIG);
+        fullmektigAktoer.setFullmaktstype(Fullmaktstype.FULLMEKTIG_SØKNAD);
+        fullmektigAktoer.setOrgnr("987654321");
+        return Set.of(brukerAktoer, fullmektigAktoer);
     }
 }

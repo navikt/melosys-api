@@ -8,10 +8,7 @@ import java.util.List;
 import java.util.stream.Collectors;
 
 import com.fasterxml.jackson.annotation.JsonFormat;
-import no.nav.melosys.domain.arkiv.BrukerIdType;
-import no.nav.melosys.domain.arkiv.FysiskDokument;
-import no.nav.melosys.domain.arkiv.Journalposttype;
-import no.nav.melosys.domain.arkiv.OpprettJournalpost;
+import no.nav.melosys.domain.arkiv.*;
 
 public class OpprettJournalpostRequest {
 
@@ -33,22 +30,25 @@ public class OpprettJournalpostRequest {
     //"Første dokument blir tilknyttet som hoveddokument på journalposten. Øvrige dokumenter tilknyttes som vedlegg. Rekkefølgen på vedlegg beholdes ikke ved uthenting av journalpost."
     private List<Dokument> dokumenter;
 
+    private OverstyrInnsynsregler overstyrInnsynsregler;
+
     @JsonFormat(pattern = "yyyy-MM-dd")
     private LocalDate datoMottatt;
 
     private OpprettJournalpostRequest(JournalpostType journalpostType,
-                                     AvsenderMottaker avsenderMottaker,
-                                     Bruker bruker,
-                                     String tema,
-                                     String behandlingstema,
-                                     String tittel,
-                                     String kanal,
-                                     String journalfoerendeEnhet,
-                                     String eksternReferanseId,
-                                     List<Tilleggsopplysning> tilleggsopplysninger,
-                                     Sak sak,
-                                     List<Dokument> dokumenter,
-                                     LocalDate datoMottatt) {
+                                      AvsenderMottaker avsenderMottaker,
+                                      Bruker bruker,
+                                      String tema,
+                                      String behandlingstema,
+                                      String tittel,
+                                      String kanal,
+                                      String journalfoerendeEnhet,
+                                      String eksternReferanseId,
+                                      List<Tilleggsopplysning> tilleggsopplysninger,
+                                      Sak sak,
+                                      List<Dokument> dokumenter,
+                                      LocalDate datoMottatt,
+                                      OverstyrInnsynsregler overstyrInnsynsregler) {
         this.journalpostType = journalpostType;
         this.avsenderMottaker = avsenderMottaker;
         this.bruker = bruker;
@@ -62,6 +62,7 @@ public class OpprettJournalpostRequest {
         this.sak = sak;
         this.dokumenter = dokumenter;
         this.datoMottatt = datoMottatt;
+        this.overstyrInnsynsregler = overstyrInnsynsregler;
     }
 
     public static OpprettJournalpostRequest av(OpprettJournalpost opprettJournalpost) {
@@ -83,6 +84,7 @@ public class OpprettJournalpostRequest {
             .tilleggsopplysninger(Collections.emptyList())
             .datoMottatt(opprettJournalpost.getForsendelseMottatt() == null ? null
                 : LocalDate.ofInstant(opprettJournalpost.getForsendelseMottatt(), ZoneId.systemDefault()))
+            .overstyrInnsynsregler(opprettJournalpost.getOverstyrInnsynsregler())
             .build();
     }
 
@@ -225,6 +227,7 @@ public class OpprettJournalpostRequest {
         private Sak sak;
         private List<Dokument> dokumenter;
         private LocalDate datoMottatt;
+        private OverstyrInnsynsregler overstyrInnsynsregler;
 
         public OpprettJournalpostRequest.OpprettJournalpostRequestBuilder journalpostType(JournalpostType journalpostType) {
             this.journalpostType = journalpostType;
@@ -291,9 +294,14 @@ public class OpprettJournalpostRequest {
             return this;
         }
 
+        public OpprettJournalpostRequest.OpprettJournalpostRequestBuilder overstyrInnsynsregler(OverstyrInnsynsregler overstyrInnsynsregler) {
+            this.overstyrInnsynsregler = overstyrInnsynsregler;
+            return this;
+        }
+
         public OpprettJournalpostRequest build() {
             return new OpprettJournalpostRequest(journalpostType, avsenderMottaker, bruker, tema, behandlingstema, tittel,
-                kanal, journalfoerendeEnhet, eksternReferanseId, tilleggsopplysninger, sak, dokumenter, datoMottatt);
+                kanal, journalfoerendeEnhet, eksternReferanseId, tilleggsopplysninger, sak, dokumenter, datoMottatt, overstyrInnsynsregler);
         }
     }
 }

@@ -15,6 +15,7 @@ public final class JournalpostBestilling {
     private final byte[] pdf;
     private final List<Vedlegg> vedlegg;
     private final String eksternReferanseId;
+    private final OverstyrInnsynsregler overstyrInnsynsregler;
 
     private JournalpostBestilling(Builder builder) {
         this.tittel = builder.tittel;
@@ -29,6 +30,7 @@ public final class JournalpostBestilling {
         this.pdf = builder.pdf;
         this.vedlegg = builder.vedlegg;
         this.eksternReferanseId = builder.eksternReferanseId;
+        this.overstyrInnsynsregler = builder.overstyrInnsynsregler;
     }
 
     public String getTittel() {
@@ -79,6 +81,10 @@ public final class JournalpostBestilling {
         return eksternReferanseId;
     }
 
+    public OverstyrInnsynsregler getOverstyrInnsynsregler() {
+        return overstyrInnsynsregler;
+    }
+
     public static class Builder {
         private String tittel;
         private String brevkode;
@@ -92,6 +98,7 @@ public final class JournalpostBestilling {
         private byte[] pdf;
         private List<Vedlegg> vedlegg;
         private String eksternReferanseId;
+        private OverstyrInnsynsregler overstyrInnsynsregler;
 
         public Builder medTittel(String tittel) {
             this.tittel = tittel;
@@ -150,6 +157,11 @@ public final class JournalpostBestilling {
 
         public Builder medEksternReferanseId(String eksternReferanseId) {
             this.eksternReferanseId = eksternReferanseId;
+            return this;
+        }
+
+        public Builder medOverstyrInnsynsregler(OverstyrInnsynsregler overstyrInnsynsregler) {
+            this.overstyrInnsynsregler = overstyrInnsynsregler;
             return this;
         }
 

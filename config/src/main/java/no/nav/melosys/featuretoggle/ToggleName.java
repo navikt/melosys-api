@@ -10,4 +10,6 @@ public class ToggleName {
     public static final String MELOSYS_OPPDATER_FAKTURAMOTTAKER = "melosys.oppdater.fakturamottaker";
     public static final String MELOSYS_FOLKETRYGDEN_2_7 = "melosys.folketrygden.2_7";
 
+    public static final String MELOSYS_OVERSTYR_INNSYNSREGLER = "melosys.bau.overstyrInnsynsreglerBrevTilBrukersFullmektig";
+
 }

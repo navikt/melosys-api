@@ -40,6 +40,7 @@ public class OpprettJournalpost extends Journalpost {
     private String korrespondansepartLand;
     private FysiskDokument hoveddokument;
     private List<FysiskDokument> vedlegg;
+    private OverstyrInnsynsregler overstyrInnsynsregler;
 
     public OpprettJournalpost() {
         super(null);
@@ -125,6 +126,7 @@ public class OpprettJournalpost extends Journalpost {
         opprettJournalpost.setKorrespondansepartIdType(bestilling.getMottakerIdType());
         opprettJournalpost.setInnhold(opprettJournalpost.getHoveddokument().getTittel());
         opprettJournalpost.setVedlegg(FysiskDokument.lagFysiskDokumentListeFraVedlegg(bestilling, bestilling.getVedlegg()));
+        opprettJournalpost.setOverstyrInnsynsregler(bestilling.getOverstyrInnsynsregler());
 
         return opprettJournalpost;
     }
@@ -176,5 +178,13 @@ public class OpprettJournalpost extends Journalpost {
 
     public void setVedlegg(List<FysiskDokument> vedlegg) {
         this.vedlegg = vedlegg;
+    }
+
+    public OverstyrInnsynsregler getOverstyrInnsynsregler() {
+        return overstyrInnsynsregler;
+    }
+
+    public void setOverstyrInnsynsregler(OverstyrInnsynsregler overstyrInnsynsregler) {
+        this.overstyrInnsynsregler = overstyrInnsynsregler;
     }
 }
