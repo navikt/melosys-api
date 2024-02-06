@@ -29,7 +29,7 @@ object UtledMedlemskapsperioder {
                     tom = it.tom
                     arbeidsland = it.arbeidsland
                     innvilgelsesresultat = it.innvilgelsesresultat
-                    medlemskapstype = it.medlemskapstype
+                    medlemskapstype = UtledMedlemskapstype.av(nyBestemmelse)
                     trygdedekning =
                         if (LovligeKombinasjonerMedlemskapsperiodeService.erGyldigKombinasjon(nyBestemmelse, it.trygdedekning)) it.trygdedekning
                         else nyTrygdedekning
