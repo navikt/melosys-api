@@ -111,6 +111,7 @@
         <xmlunit.version>2.9.0</xmlunit.version>
         <javax.activation.version>1.1.1</javax.activation.version>
         <org.jboss.logging.annotations.version>2.2.1.Final</org.jboss.logging.annotations.version>
+        <ulid-java>0.1.1</ulid-java>
     </properties>
 
     <!-- Unngå å put scope i dependency management. Sett det heller der det
@@ -651,6 +652,13 @@
                 <version>${mockk.version}</version>
                 <scope>test</scope>
             </dependency>
+            <dependency>
+                <groupId>io.github.jaspeen</groupId>
+                <artifactId>ulid-java</artifactId>
+                <version>${ulid-java}</version>
+                <scope>test</scope>
+            </dependency>
+
         </dependencies>
     </dependencyManagement>
 
