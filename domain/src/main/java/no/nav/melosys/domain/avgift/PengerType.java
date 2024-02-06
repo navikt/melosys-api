@@ -60,8 +60,9 @@ public class PengerType implements CompositeUserType, DynamicParameterizedType {
             penger.setVerdi((BigDecimal) value);
         } else if (property == 1) {
             penger.setValuta((String) value);
+        } else {
+            throw new TekniskException(property + " er en ugyldig property index for PengerType");
         }
-        throw new TekniskException(property + " er en ugyldig property index for PengerType");
     }
 
     @Override
