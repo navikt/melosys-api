@@ -6,17 +6,14 @@ import no.nav.melosys.domain.Medlemskapsperiode
 import no.nav.melosys.domain.dokument.felles.Periode
 import no.nav.melosys.domain.kodeverk.Folketrygdloven_kap2_bestemmelser
 import no.nav.melosys.domain.kodeverk.InnvilgelsesResultat
-import no.nav.melosys.domain.kodeverk.Medlemskapstyper
 import no.nav.melosys.domain.kodeverk.Trygdedekninger
 import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingstyper
 import no.nav.melosys.exception.FunksjonellException
 import no.nav.melosys.service.lovligekombinasjoner.LovligeKombinasjonerMedlemskapsperiodeService
 import org.springframework.data.util.Pair
-import org.springframework.stereotype.Component
 import java.time.LocalDate
 
-@Component
-class UtledMedlemskapsperioder(private val lovligeKombinasjonerMedlemskapsperiodeService: LovligeKombinasjonerMedlemskapsperiodeService) {
+object UtledMedlemskapsperioder {
 
     fun lagMedlemskapsperioderForAndregangsbehandling(
         opprinneligBehandlingsresultat: Behandlingsresultat,
@@ -34,7 +31,7 @@ class UtledMedlemskapsperioder(private val lovligeKombinasjonerMedlemskapsperiod
                     innvilgelsesresultat = it.innvilgelsesresultat
                     medlemskapstype = it.medlemskapstype
                     trygdedekning =
-                        if (lovligeKombinasjonerMedlemskapsperiodeService.erGyldigKombinasjon(nyBestemmelse, it.trygdedekning)) it.trygdedekning
+                        if (LovligeKombinasjonerMedlemskapsperiodeService.erGyldigKombinasjon(nyBestemmelse, it.trygdedekning)) it.trygdedekning
                         else nyTrygdedekning
                     medlPeriodeID = it.medlPeriodeID
                     bestemmelse = if (it.erOpphørt()) it.bestemmelse else nyBestemmelse
@@ -204,7 +201,7 @@ class UtledMedlemskapsperioder(private val lovligeKombinasjonerMedlemskapsperiod
             this.tom = søknadsperiode.tom
             this.arbeidsland = arbeidsland
             this.innvilgelsesresultat = innvilgelsesResultat
-            this.medlemskapstype = Medlemskapstyper.FRIVILLIG
+            this.medlemskapstype = UtledMedlemskapstype.av(bestemmelse)
             this.trygdedekning = trygdedekning
             this.bestemmelse = bestemmelse
         }

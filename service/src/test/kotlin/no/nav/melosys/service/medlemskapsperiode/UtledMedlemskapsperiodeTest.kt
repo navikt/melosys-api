@@ -11,11 +11,11 @@ import no.nav.melosys.domain.Medlemskapsperiode
 import no.nav.melosys.domain.folketrygden.MedlemAvFolketrygden
 import no.nav.melosys.domain.kodeverk.Folketrygdloven_kap2_bestemmelser
 import no.nav.melosys.domain.kodeverk.InnvilgelsesResultat
+import no.nav.melosys.domain.kodeverk.Medlemskapstyper
 import no.nav.melosys.domain.kodeverk.Trygdedekninger
 import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingstyper
 import no.nav.melosys.domain.mottatteopplysninger.data.Periode
 import no.nav.melosys.exception.FunksjonellException
-import no.nav.melosys.service.lovligekombinasjoner.LovligeKombinasjonerMedlemskapsperiodeService
 import org.junit.jupiter.api.Test
 import java.time.LocalDate
 
@@ -30,12 +30,10 @@ internal class UtledMedlemskapsperioderTest {
     private val TRYGDEDEKNING_2_8 = Trygdedekninger.FTRL_2_9_FØRSTE_LEDD_A_HELSE
     private val MOTTAKSDATO = LocalDate.now()
 
-    private val utledMedlemskapsperioder = UtledMedlemskapsperioder(LovligeKombinasjonerMedlemskapsperiodeService())
-
     @Test
     fun lagMedlemskapsperioder_ukjentBestemmelse_kasterFeil() {
         shouldThrow<FunksjonellException> {
-            utledMedlemskapsperioder.lagMedlemskapsperioder(
+            UtledMedlemskapsperioder.lagMedlemskapsperioder(
                 UtledMedlemskapsperioderDto(null, null, null, null, Folketrygdloven_kap2_bestemmelser.FTRL_KAP2_2_15_ANDRE_LEDD)
             )
         }.message.shouldContain("Støtter ikke bestemmelse")
@@ -51,13 +49,14 @@ internal class UtledMedlemskapsperioderTest {
         val request = UtledMedlemskapsperioderDto(søknadsperiode, dekning, MOTTAKSDATO, ARBEIDSLAND, BESTEMMELSE_2_8)
 
 
-        utledMedlemskapsperioder.lagMedlemskapsperioder(request)
+        UtledMedlemskapsperioder.lagMedlemskapsperioder(request)
             .shouldHaveSize(1)
             .single().run {
                 fom.shouldBe(søknadsperiode.fom)
                 tom.shouldBe(søknadsperiode.tom)
                 trygdedekning.shouldBe(dekning)
                 innvilgelsesresultat.shouldBe(InnvilgelsesResultat.INNVILGET)
+                medlemskapstype.shouldBe(Medlemskapstyper.FRIVILLIG)
             }
     }
 
@@ -68,13 +67,14 @@ internal class UtledMedlemskapsperioderTest {
         val request = UtledMedlemskapsperioderDto(søknadsperiode, dekning, MOTTAKSDATO, ARBEIDSLAND, BESTEMMELSE_2_8)
 
 
-        utledMedlemskapsperioder.lagMedlemskapsperioder(request)
+        UtledMedlemskapsperioder.lagMedlemskapsperioder(request)
             .shouldHaveSize(1)
             .single().run {
                 fom.shouldBe(søknadsperiode.fom)
                 tom.shouldBe(søknadsperiode.tom)
                 trygdedekning.shouldBe(dekning)
                 innvilgelsesresultat.shouldBe(InnvilgelsesResultat.INNVILGET)
+                medlemskapstype.shouldBe(Medlemskapstyper.FRIVILLIG)
             }
     }
 
@@ -87,13 +87,14 @@ internal class UtledMedlemskapsperioderTest {
         val request = UtledMedlemskapsperioderDto(søknadsperiode, dekning, MOTTAKSDATO, ARBEIDSLAND, BESTEMMELSE_2_8)
 
 
-        utledMedlemskapsperioder.lagMedlemskapsperioder(request)
+        UtledMedlemskapsperioder.lagMedlemskapsperioder(request)
             .shouldHaveSize(1)
             .single().run {
                 fom.shouldBe(søknadsperiode.fom)
                 tom.shouldBe(søknadsperiode.tom)
                 trygdedekning.shouldBe(dekning)
                 innvilgelsesresultat.shouldBe(InnvilgelsesResultat.AVSLAATT)
+                medlemskapstype.shouldBe(Medlemskapstyper.FRIVILLIG)
             }
     }
 
@@ -106,13 +107,14 @@ internal class UtledMedlemskapsperioderTest {
         val request = UtledMedlemskapsperioderDto(søknadsperiode, dekning, MOTTAKSDATO, ARBEIDSLAND, BESTEMMELSE_2_8)
 
 
-        utledMedlemskapsperioder.lagMedlemskapsperioder(request)
+        UtledMedlemskapsperioder.lagMedlemskapsperioder(request)
             .shouldHaveSize(1)
             .single().run {
                 fom.shouldBe(søknadsperiode.fom)
                 tom.shouldBe(søknadsperiode.tom)
                 trygdedekning.shouldBe(dekning)
                 innvilgelsesresultat.shouldBe(InnvilgelsesResultat.INNVILGET)
+                medlemskapstype.shouldBe(Medlemskapstyper.FRIVILLIG)
             }
     }
 
@@ -123,7 +125,7 @@ internal class UtledMedlemskapsperioderTest {
         val request = UtledMedlemskapsperioderDto(søknadsperiode, dekning, MOTTAKSDATO, ARBEIDSLAND, BESTEMMELSE_2_8)
 
 
-        utledMedlemskapsperioder.lagMedlemskapsperioder(request)
+        UtledMedlemskapsperioder.lagMedlemskapsperioder(request)
             .shouldHaveSize(1)
             .single().run {
                 fom.shouldBe(søknadsperiode.fom)
@@ -140,13 +142,14 @@ internal class UtledMedlemskapsperioderTest {
         val request = UtledMedlemskapsperioderDto(søknadsperiode, dekning, MOTTAKSDATO, ARBEIDSLAND, BESTEMMELSE_2_8)
 
 
-        utledMedlemskapsperioder.lagMedlemskapsperioder(request)
+        UtledMedlemskapsperioder.lagMedlemskapsperioder(request)
             .shouldHaveSize(1)
             .single().run {
                 fom.shouldBe(søknadsperiode.fom)
                 tom.shouldBe(søknadsperiode.tom)
                 trygdedekning.shouldBe(dekning)
                 innvilgelsesresultat.shouldBe(InnvilgelsesResultat.AVSLAATT)
+                medlemskapstype.shouldBe(Medlemskapstyper.FRIVILLIG)
             }
     }
 
@@ -159,7 +162,7 @@ internal class UtledMedlemskapsperioderTest {
         val request = UtledMedlemskapsperioderDto(søknadsperiode, dekning, MOTTAKSDATO, ARBEIDSLAND, BESTEMMELSE_2_8)
 
 
-        utledMedlemskapsperioder.lagMedlemskapsperioder(request)
+        UtledMedlemskapsperioder.lagMedlemskapsperioder(request)
             .shouldHaveSize(3)
             .toList().run {
                 get(0).run {
@@ -167,18 +170,21 @@ internal class UtledMedlemskapsperioderTest {
                     tom.shouldBe(MOTTAKSDATO.minusDays(1))
                     trygdedekning.shouldBe(Trygdedekninger.FTRL_2_9_FØRSTE_LEDD_A_HELSE)
                     innvilgelsesresultat.shouldBe(InnvilgelsesResultat.AVSLAATT)
+                    medlemskapstype.shouldBe(Medlemskapstyper.FRIVILLIG)
                 }
                 get(1).run {
                     fom.shouldBe(søknadsperiode.fom)
                     tom.shouldBe(MOTTAKSDATO.minusDays(1))
                     trygdedekning.shouldBe(Trygdedekninger.FTRL_2_9_FØRSTE_LEDD_B_PENSJON)
                     innvilgelsesresultat.shouldBe(InnvilgelsesResultat.INNVILGET)
+                    medlemskapstype.shouldBe(Medlemskapstyper.FRIVILLIG)
                 }
                 get(2).run {
                     fom.shouldBe(MOTTAKSDATO)
                     tom.shouldBe(søknadsperiode.tom)
                     trygdedekning.shouldBe(dekning)
                     innvilgelsesresultat.shouldBe(InnvilgelsesResultat.INNVILGET)
+                    medlemskapstype.shouldBe(Medlemskapstyper.FRIVILLIG)
                 }
             }
     }
@@ -190,7 +196,7 @@ internal class UtledMedlemskapsperioderTest {
         val request = UtledMedlemskapsperioderDto(søknadsperiode, dekning, MOTTAKSDATO, ARBEIDSLAND, BESTEMMELSE_2_8)
 
 
-        utledMedlemskapsperioder.lagMedlemskapsperioder(request)
+        UtledMedlemskapsperioder.lagMedlemskapsperioder(request)
             .shouldHaveSize(3)
             .toList().run {
                 get(0).run {
@@ -198,18 +204,21 @@ internal class UtledMedlemskapsperioderTest {
                     tom.shouldBe(MOTTAKSDATO.minusDays(1))
                     trygdedekning.shouldBe(Trygdedekninger.FTRL_2_9_FØRSTE_LEDD_A_ANDRE_LEDD_HELSE_SYKE_FORELDREPENGER)
                     innvilgelsesresultat.shouldBe(InnvilgelsesResultat.AVSLAATT)
+                    medlemskapstype.shouldBe(Medlemskapstyper.FRIVILLIG)
                 }
                 get(1).run {
                     fom.shouldBe(søknadsperiode.fom)
                     tom.shouldBe(MOTTAKSDATO.minusDays(1))
                     trygdedekning.shouldBe(Trygdedekninger.FTRL_2_9_FØRSTE_LEDD_B_PENSJON)
                     innvilgelsesresultat.shouldBe(InnvilgelsesResultat.INNVILGET)
+                    medlemskapstype.shouldBe(Medlemskapstyper.FRIVILLIG)
                 }
                 get(2).run {
                     fom.shouldBe(MOTTAKSDATO)
                     tom.shouldBe(søknadsperiode.tom)
                     trygdedekning.shouldBe(dekning)
                     innvilgelsesresultat.shouldBe(InnvilgelsesResultat.INNVILGET)
+                    medlemskapstype.shouldBe(Medlemskapstyper.FRIVILLIG)
                 }
             }
     }
@@ -221,7 +230,7 @@ internal class UtledMedlemskapsperioderTest {
         val request = UtledMedlemskapsperioderDto(søknadsperiode, dekning, MOTTAKSDATO, ARBEIDSLAND, BESTEMMELSE_2_8)
 
 
-        utledMedlemskapsperioder.lagMedlemskapsperioder(request)
+        UtledMedlemskapsperioder.lagMedlemskapsperioder(request)
             .shouldHaveSize(3)
             .toList().run {
                 get(0).run {
@@ -229,18 +238,21 @@ internal class UtledMedlemskapsperioderTest {
                     tom.shouldBe(MOTTAKSDATO.minusDays(1))
                     trygdedekning.shouldBe(Trygdedekninger.FTRL_2_9_FØRSTE_LEDD_A_HELSE)
                     innvilgelsesresultat.shouldBe(InnvilgelsesResultat.AVSLAATT)
+                    medlemskapstype.shouldBe(Medlemskapstyper.FRIVILLIG)
                 }
                 get(1).run {
                     fom.shouldBe(søknadsperiode.fom)
                     tom.shouldBe(MOTTAKSDATO.minusDays(1))
                     trygdedekning.shouldBe(Trygdedekninger.FTRL_2_9_FØRSTE_LEDD_B_PENSJON)
                     innvilgelsesresultat.shouldBe(InnvilgelsesResultat.INNVILGET)
+                    medlemskapstype.shouldBe(Medlemskapstyper.FRIVILLIG)
                 }
                 get(2).run {
                     fom.shouldBe(MOTTAKSDATO)
                     tom.shouldBe(søknadsperiode.tom)
                     trygdedekning.shouldBe(dekning)
                     innvilgelsesresultat.shouldBe(InnvilgelsesResultat.INNVILGET)
+                    medlemskapstype.shouldBe(Medlemskapstyper.FRIVILLIG)
                 }
             }
     }
@@ -252,7 +264,7 @@ internal class UtledMedlemskapsperioderTest {
         val request = UtledMedlemskapsperioderDto(søknadsperiode, dekning, MOTTAKSDATO, ARBEIDSLAND, BESTEMMELSE_2_8)
 
 
-        utledMedlemskapsperioder.lagMedlemskapsperioder(request)
+        UtledMedlemskapsperioder.lagMedlemskapsperioder(request)
             .shouldHaveSize(3)
             .toList().run {
                 get(0).run {
@@ -260,18 +272,21 @@ internal class UtledMedlemskapsperioderTest {
                     tom.shouldBe(MOTTAKSDATO.minusDays(1))
                     trygdedekning.shouldBe(Trygdedekninger.FTRL_2_9_FØRSTE_LEDD_A_HELSE)
                     innvilgelsesresultat.shouldBe(InnvilgelsesResultat.AVSLAATT)
+                    medlemskapstype.shouldBe(Medlemskapstyper.FRIVILLIG)
                 }
                 get(1).run {
                     fom.shouldBe(søknadsperiode.fom)
                     tom.shouldBe(MOTTAKSDATO.minusDays(1))
                     trygdedekning.shouldBe(Trygdedekninger.FTRL_2_9_FØRSTE_LEDD_B_PENSJON)
                     innvilgelsesresultat.shouldBe(InnvilgelsesResultat.INNVILGET)
+                    medlemskapstype.shouldBe(Medlemskapstyper.FRIVILLIG)
                 }
                 get(2).run {
                     fom.shouldBe(MOTTAKSDATO)
                     tom.shouldBe(søknadsperiode.tom)
                     trygdedekning.shouldBe(dekning)
                     innvilgelsesresultat.shouldBe(InnvilgelsesResultat.INNVILGET)
+                    medlemskapstype.shouldBe(Medlemskapstyper.FRIVILLIG)
                 }
             }
     }
@@ -288,7 +303,7 @@ internal class UtledMedlemskapsperioderTest {
         )
 
 
-        utledMedlemskapsperioder.lagMedlemskapsperioder(request)
+        UtledMedlemskapsperioder.lagMedlemskapsperioder(request)
             .shouldHaveSize(2)
             .run {
                 first().run {
@@ -296,12 +311,14 @@ internal class UtledMedlemskapsperioderTest {
                     tom.shouldBe(søknadsperiode.tom)
                     trygdedekning.shouldBe(Trygdedekninger.FTRL_2_9_FØRSTE_LEDD_A_HELSE)
                     innvilgelsesresultat.shouldBe(InnvilgelsesResultat.AVSLAATT)
+                    medlemskapstype.shouldBe(Medlemskapstyper.FRIVILLIG)
                 }
                 last().run {
                     fom.shouldBe(søknadsperiode.fom)
                     tom.shouldBe(søknadsperiode.tom)
                     trygdedekning.shouldBe(Trygdedekninger.FTRL_2_9_FØRSTE_LEDD_B_PENSJON)
                     innvilgelsesresultat.shouldBe(InnvilgelsesResultat.INNVILGET)
+                    medlemskapstype.shouldBe(Medlemskapstyper.FRIVILLIG)
                 }
             }
     }
@@ -318,7 +335,7 @@ internal class UtledMedlemskapsperioderTest {
         )
 
 
-        utledMedlemskapsperioder.lagMedlemskapsperioder(request)
+        UtledMedlemskapsperioder.lagMedlemskapsperioder(request)
             .shouldHaveSize(2)
             .run {
                 first().run {
@@ -326,12 +343,14 @@ internal class UtledMedlemskapsperioderTest {
                     tom.shouldBe(søknadsperiode.tom)
                     trygdedekning.shouldBe(Trygdedekninger.FTRL_2_9_FØRSTE_LEDD_A_ANDRE_LEDD_HELSE_SYKE_FORELDREPENGER)
                     innvilgelsesresultat.shouldBe(InnvilgelsesResultat.AVSLAATT)
+                    medlemskapstype.shouldBe(Medlemskapstyper.FRIVILLIG)
                 }
                 last().run {
                     fom.shouldBe(søknadsperiode.fom)
                     tom.shouldBe(søknadsperiode.tom)
                     trygdedekning.shouldBe(Trygdedekninger.FTRL_2_9_FØRSTE_LEDD_B_PENSJON)
                     innvilgelsesresultat.shouldBe(InnvilgelsesResultat.INNVILGET)
+                    medlemskapstype.shouldBe(Medlemskapstyper.FRIVILLIG)
                 }
             }
     }
@@ -345,7 +364,7 @@ internal class UtledMedlemskapsperioderTest {
         val request = UtledMedlemskapsperioderDto(søknadsperiode, dekning, MOTTAKSDATO, ARBEIDSLAND, BESTEMMELSE_2_8)
 
 
-        utledMedlemskapsperioder.lagMedlemskapsperioder(request)
+        UtledMedlemskapsperioder.lagMedlemskapsperioder(request)
             .shouldHaveSize(2)
             .run {
                 first().run {
@@ -353,12 +372,14 @@ internal class UtledMedlemskapsperioderTest {
                     tom.shouldBe(MOTTAKSDATO.minusDays(1))
                     trygdedekning.shouldBe(dekning)
                     innvilgelsesresultat.shouldBe(InnvilgelsesResultat.AVSLAATT)
+                    medlemskapstype.shouldBe(Medlemskapstyper.FRIVILLIG)
                 }
                 last().run {
                     fom.shouldBe(MOTTAKSDATO)
                     tom.shouldBe(søknadsperiode.tom)
                     trygdedekning.shouldBe(dekning)
                     innvilgelsesresultat.shouldBe(InnvilgelsesResultat.INNVILGET)
+                    medlemskapstype.shouldBe(Medlemskapstyper.FRIVILLIG)
                 }
             }
     }
@@ -370,13 +391,14 @@ internal class UtledMedlemskapsperioderTest {
         val request = UtledMedlemskapsperioderDto(søknadsperiode, dekning, MOTTAKSDATO, ARBEIDSLAND, BESTEMMELSE_2_8)
 
 
-        utledMedlemskapsperioder.lagMedlemskapsperioder(request)
+        UtledMedlemskapsperioder.lagMedlemskapsperioder(request)
             .shouldHaveSize(1)
             .single().run {
                 fom.shouldBe(søknadsperiode.fom)
                 tom.shouldBe(søknadsperiode.tom)
                 trygdedekning.shouldBe(dekning)
                 innvilgelsesresultat.shouldBe(InnvilgelsesResultat.AVSLAATT)
+                medlemskapstype.shouldBe(Medlemskapstyper.FRIVILLIG)
             }
     }
 
@@ -387,13 +409,14 @@ internal class UtledMedlemskapsperioderTest {
         val request = UtledMedlemskapsperioderDto(søknadsperiode, dekning, MOTTAKSDATO, ARBEIDSLAND, BESTEMMELSE_2_8)
 
 
-        utledMedlemskapsperioder.lagMedlemskapsperioder(request)
+        UtledMedlemskapsperioder.lagMedlemskapsperioder(request)
             .shouldHaveSize(1)
             .single().run {
                 fom.shouldBe(søknadsperiode.fom)
                 tom.shouldBe(søknadsperiode.tom)
                 trygdedekning.shouldBe(dekning)
                 innvilgelsesresultat.shouldBe(InnvilgelsesResultat.AVSLAATT)
+                medlemskapstype.shouldBe(Medlemskapstyper.FRIVILLIG)
             }
     }
 
@@ -420,7 +443,7 @@ internal class UtledMedlemskapsperioderTest {
         }
 
 
-        val response = utledMedlemskapsperioder.lagMedlemskapsperioderForAndregangsbehandling(
+        val response = UtledMedlemskapsperioder.lagMedlemskapsperioderForAndregangsbehandling(
             opprinneligBehandlingsresultat,
             BESTEMMELSE_2_8,
             TRYGDEDEKNING_2_8,
@@ -439,7 +462,7 @@ internal class UtledMedlemskapsperioderTest {
         }
 
 
-        val response = utledMedlemskapsperioder.lagMedlemskapsperioderForAndregangsbehandling(
+        val response = UtledMedlemskapsperioder.lagMedlemskapsperioderForAndregangsbehandling(
             opprinneligBehandlingsresultat,
             BESTEMMELSE_2_8,
             TRYGDEDEKNING_2_8,
@@ -464,7 +487,7 @@ internal class UtledMedlemskapsperioderTest {
         }
 
 
-        val response = utledMedlemskapsperioder.lagMedlemskapsperioderForAndregangsbehandling(
+        val response = UtledMedlemskapsperioder.lagMedlemskapsperioderForAndregangsbehandling(
             opprinneligBehandlingsresultat,
             BESTEMMELSE_2_7,
             TRYGDEDEKNING_2_7,
@@ -498,7 +521,7 @@ internal class UtledMedlemskapsperioderTest {
         }
 
 
-        val response = utledMedlemskapsperioder.lagMedlemskapsperioderForAndregangsbehandling(
+        val response = UtledMedlemskapsperioder.lagMedlemskapsperioderForAndregangsbehandling(
             opprinneligBehandlingsresultat,
             BESTEMMELSE_2_8,
             TRYGDEDEKNING_2_8,
@@ -536,7 +559,7 @@ internal class UtledMedlemskapsperioderTest {
         }
 
 
-        val response = utledMedlemskapsperioder.lagMedlemskapsperioderForAndregangsbehandling(
+        val response = UtledMedlemskapsperioder.lagMedlemskapsperioderForAndregangsbehandling(
             opprinneligBehandlingsresultat,
             nyBestemmelse2_8,
             TRYGDEDEKNING_2_8,
@@ -565,7 +588,7 @@ internal class UtledMedlemskapsperioderTest {
         val request = UtledMedlemskapsperioderDto(søknadsperiode, TRYGDEDEKNING_2_7, MOTTAKSDATO, ARBEIDSLAND, BESTEMMELSE_2_7)
 
 
-        utledMedlemskapsperioder.lagMedlemskapsperioder(request)
+        UtledMedlemskapsperioder.lagMedlemskapsperioder(request)
             .shouldHaveSize(1)
             .single().run {
                 fom.shouldBe(søknadsperiode.fom)
@@ -573,6 +596,7 @@ internal class UtledMedlemskapsperioderTest {
                 innvilgelsesresultat.shouldBe(InnvilgelsesResultat.INNVILGET)
                 trygdedekning.shouldBe(TRYGDEDEKNING_2_7)
                 bestemmelse.shouldBe(BESTEMMELSE_2_7)
+                medlemskapstype.shouldBe(Medlemskapstyper.FRIVILLIG)
             }
     }
 
@@ -582,7 +606,7 @@ internal class UtledMedlemskapsperioderTest {
         val request = UtledMedlemskapsperioderDto(søknadsperiode, TRYGDEDEKNING_2_7, MOTTAKSDATO, ARBEIDSLAND, BESTEMMELSE_2_7)
 
 
-        utledMedlemskapsperioder.lagMedlemskapsperioder(request)
+        UtledMedlemskapsperioder.lagMedlemskapsperioder(request)
             .shouldHaveSize(1)
             .single().run {
                 fom.shouldBe(søknadsperiode.fom)
@@ -590,6 +614,7 @@ internal class UtledMedlemskapsperioderTest {
                 innvilgelsesresultat.shouldBe(InnvilgelsesResultat.INNVILGET)
                 trygdedekning.shouldBe(TRYGDEDEKNING_2_7)
                 bestemmelse.shouldBe(BESTEMMELSE_2_7)
+                medlemskapstype.shouldBe(Medlemskapstyper.FRIVILLIG)
             }
     }
 
@@ -601,7 +626,7 @@ internal class UtledMedlemskapsperioderTest {
         val request = UtledMedlemskapsperioderDto(søknadsperiode, TRYGDEDEKNING_2_7, MOTTAKSDATO, ARBEIDSLAND, BESTEMMELSE_2_7)
 
 
-        utledMedlemskapsperioder.lagMedlemskapsperioder(request)
+        UtledMedlemskapsperioder.lagMedlemskapsperioder(request)
             .shouldHaveSize(2)
             .run {
                 first().run {
@@ -610,6 +635,7 @@ internal class UtledMedlemskapsperioderTest {
                     innvilgelsesresultat.shouldBe(InnvilgelsesResultat.AVSLAATT)
                     trygdedekning.shouldBe(TRYGDEDEKNING_2_7)
                     bestemmelse.shouldBe(BESTEMMELSE_2_7)
+                    medlemskapstype.shouldBe(Medlemskapstyper.FRIVILLIG)
                 }
                 last().run {
                     fom.shouldBe(MOTTAKSDATO)
@@ -617,6 +643,7 @@ internal class UtledMedlemskapsperioderTest {
                     innvilgelsesresultat.shouldBe(InnvilgelsesResultat.INNVILGET)
                     trygdedekning.shouldBe(TRYGDEDEKNING_2_7)
                     bestemmelse.shouldBe(BESTEMMELSE_2_7)
+                    medlemskapstype.shouldBe(Medlemskapstyper.FRIVILLIG)
                 }
             }
     }
@@ -632,7 +659,7 @@ internal class UtledMedlemskapsperioderTest {
         )
 
 
-        utledMedlemskapsperioder.lagMedlemskapsperioder(request)
+        UtledMedlemskapsperioder.lagMedlemskapsperioder(request)
             .shouldHaveSize(1)
             .single().run {
                 innvilgelsesresultat.shouldBe(InnvilgelsesResultat.AVSLAATT)

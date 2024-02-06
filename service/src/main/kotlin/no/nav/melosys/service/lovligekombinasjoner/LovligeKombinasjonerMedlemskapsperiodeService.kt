@@ -2,10 +2,8 @@ package no.nav.melosys.service.lovligekombinasjoner
 
 import no.nav.melosys.domain.kodeverk.Folketrygdloven_kap2_bestemmelser
 import no.nav.melosys.domain.kodeverk.Trygdedekninger
-import org.springframework.stereotype.Service
 
-@Service
-class LovligeKombinasjonerMedlemskapsperiodeService() {
+object LovligeKombinasjonerMedlemskapsperiodeService {
 
     val pliktigeBestemmelser = listOf(
         Folketrygdloven_kap2_bestemmelser.FTRL_KAP2_2_1_FØRSTE_LEDD,
@@ -66,5 +64,9 @@ class LovligeKombinasjonerMedlemskapsperiodeService() {
 
     fun erGyldigKombinasjon(bestemmelse: Folketrygdloven_kap2_bestemmelser, trygdedekning: Trygdedekninger): Boolean {
         return bestemmelse in hentLovligeBestemmelser(trygdedekning)
+    }
+
+    fun erPliktigBestemmelse(bestemmelse: Folketrygdloven_kap2_bestemmelser): Boolean {
+        return bestemmelse in pliktigeBestemmelser
     }
 }

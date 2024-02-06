@@ -5,7 +5,6 @@ import no.nav.melosys.domain.Medlemskapsperiode
 import no.nav.melosys.domain.folketrygden.MedlemAvFolketrygden
 import no.nav.melosys.domain.kodeverk.Folketrygdloven_kap2_bestemmelser
 import no.nav.melosys.domain.kodeverk.InnvilgelsesResultat
-import no.nav.melosys.domain.kodeverk.Medlemskapstyper
 import no.nav.melosys.domain.kodeverk.Trygdedekninger
 import no.nav.melosys.domain.mottatteopplysninger.SøknadNorgeEllerUtenforEØS
 import no.nav.melosys.exception.FunksjonellException
@@ -56,7 +55,7 @@ class MedlemskapsperiodeService(
             this.trygdedekning = trygdedekning
             this.bestemmelse = bestemmelse
             arbeidsland = søknad.hentArbeidsland()
-            medlemskapstype = Medlemskapstyper.FRIVILLIG
+            medlemskapstype = UtledMedlemskapstype.av(bestemmelse!!)
         }
         medlemAvFolketrygden.addMedlemskapsperiode(nyMedlemskapsperiode)
 
@@ -86,6 +85,7 @@ class MedlemskapsperiodeService(
             this.innvilgelsesresultat = innvilgelsesResultat
             this.trygdedekning = trygdedekning
             this.bestemmelse = bestemmelse
+            medlemskapstype = UtledMedlemskapstype.av(bestemmelse!!)
         }
 
         fjernTrygdeavgiftsperioderOmDeFinnes(medlemAvFolketrygden)
