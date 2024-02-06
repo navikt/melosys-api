@@ -6,8 +6,11 @@ import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule
 import com.fasterxml.jackson.module.kotlin.jacksonObjectMapper
 import com.github.tomakehurst.wiremock.client.WireMock
 import io.getunleash.FakeUnleash
+import io.github.jaspeen.ulid.ULID
 import io.kotest.assertions.withClue
+import io.kotest.matchers.collections.shouldHaveSize
 import io.kotest.matchers.nulls.shouldNotBeNull
+import io.kotest.matchers.optional.shouldBePresent
 import io.kotest.matchers.shouldBe
 import io.kotest.matchers.types.shouldBeInstanceOf
 import io.mockk.every
@@ -17,6 +20,8 @@ import no.nav.melosys.domain.avgift.Penger
 import no.nav.melosys.domain.avgift.Trygdeavgiftsperiode
 import no.nav.melosys.domain.kodeverk.*
 import no.nav.melosys.domain.kodeverk.behandlinger.*
+import no.nav.melosys.domain.manglendebetaling.Betalingsstatus
+import no.nav.melosys.domain.manglendebetaling.ManglendeFakturabetalingMelding
 import no.nav.melosys.domain.mottatteopplysninger.SøknadNorgeEllerUtenforEØS
 import no.nav.melosys.domain.mottatteopplysninger.data.Periode
 import no.nav.melosys.domain.mottatteopplysninger.data.Soeknadsland
@@ -28,6 +33,7 @@ import no.nav.melosys.itest.OAuthMockServer
 import no.nav.melosys.melosysmock.medl.MedlRepo
 import no.nav.melosys.melosysmock.testdata.TestDataGenerator
 import no.nav.melosys.repository.BehandlingRepository
+import no.nav.melosys.repository.FagsakRepository
 import no.nav.melosys.saksflyt.ProsessinstansRepository
 import no.nav.melosys.saksflytapi.domain.ProsessType
 import no.nav.melosys.service.MedlemAvFolketrygdenService
@@ -56,7 +62,9 @@ import org.junit.jupiter.api.AfterEach
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
 import org.springframework.beans.factory.annotation.Autowired
+import org.springframework.beans.factory.annotation.Qualifier
 import org.springframework.context.annotation.Import
+import org.springframework.kafka.core.KafkaTemplate
 import java.time.LocalDate
 import java.util.*
 
@@ -67,6 +75,7 @@ class YrkesaktivFtrlVedtakIT(
     @Autowired oppgaveService: OppgaveService,
     @Autowired prosessinstansRepository: ProsessinstansRepository,
     @Autowired private val avklartefaktaService: AvklartefaktaService,
+    @Autowired private val fagsakRepository: FagsakRepository,
     @Autowired private val behandlingsresultatService: BehandlingsresultatService,
     @Autowired private val behandlingRepository: BehandlingRepository,
     @Autowired private val oAuthMockServer: OAuthMockServer,
@@ -80,12 +89,16 @@ class YrkesaktivFtrlVedtakIT(
     @Autowired private val unleash: FakeUnleash,
     @Autowired private val opprettBehandlingForSak: OpprettBehandlingForSak,
     @Autowired private val trygdeavgiftsgrunnlagService: TrygdeavgiftsgrunnlagService,
+    @Autowired @Qualifier("manglendeFakturabetalingMelding") private val manglendeFakturabetalingMeldingTemplate: KafkaTemplate<String, ManglendeFakturabetalingMelding>,
 ) : JournalfoeringBase(testDataGenerator, journalføringService, oppgaveService, prosessinstansRepository) {
 
     private var originalSubjectHandler: SubjectHandler? = null
+    private val kafkaTopic = "teammelosys.manglende-fakturabetaling-local"
+    private lateinit var fakturaserieReferanse: String
 
     @BeforeEach
     fun setup() {
+        fakturaserieReferanse = ULID.random().toString()
         oAuthMockServer.start()
         unleash.enableAllExcept(ToggleName.MELOSYS_FOLKETRYGDEN_2_7)
         MedlRepo.repo.clear()
@@ -95,14 +108,6 @@ class YrkesaktivFtrlVedtakIT(
         SubjectHandler.set(mockHandler)
         every { mockHandler.userID } returns "Z123456"
         every { mockHandler.userName } returns "test"
-        mockServer.stubFor(
-            WireMock.post("/api/v1/mal/innvilgelse_ftrl/lag-pdf?somKopi=false&utkast=false").willReturn(
-                WireMock.aResponse()
-                    .withStatus(200)
-                    .withHeader("Content-Type", "application/json")
-                    .withBody(ByteArray(0))
-            )
-        )
 
         val expectedResponse = listOf(
             TrygdeavgiftsberegningResponse(
@@ -124,7 +129,7 @@ class YrkesaktivFtrlVedtakIT(
                 )
         )
 
-        val fakturaResponse = NyFakturaserieResponseDto("test")
+        val fakturaResponse = NyFakturaserieResponseDto(fakturaserieReferanse)
 
         mockServer.stubFor(
             WireMock.post("/fakturaserier")
@@ -158,6 +163,58 @@ class YrkesaktivFtrlVedtakIT(
         lagFørstegangsBehandling(Skatteplikttype.SKATTEPLIKTIG, true)
         mockServer.verify(0, WireMock.deleteRequestedFor(WireMock.urlEqualTo("/fakturaserier/test")))
         mockServer.verify(0, WireMock.postRequestedFor(WireMock.urlEqualTo("/fakturaserier")))
+    }
+
+    @Test
+    fun `Håndtere manglende innbetaling i sak som allerede har en åpen behandling`() {
+        val saksnummer = lagFørstegangsBehandling(Skatteplikttype.IKKE_SKATTEPLIKTIG, false)
+
+        val behandlingsId = executeAndWait(waitForprosessType = ProsessType.OPPRETT_REPLIKERT_BEHANDLING_FOR_SAK) {
+            opprettBehandlingForSak.opprettBehandling(
+                saksnummer,
+                lagOpprettSakDto()
+            )
+        }.behandling.id
+
+        executeAndWait(ProsessType.OPPRETT_NY_BEHANDLING_MANGLENDE_INNBETALING) {
+            val kafkaMelding = ManglendeFakturabetalingMelding(
+                fakturaserieReferanse = fakturaserieReferanse,
+                betalingsstatus = Betalingsstatus.IKKE_BETALT,
+                datoMottatt = LocalDate.of(2023, 12, 13),
+                fakturanummer = "23004119"
+            )
+            manglendeFakturabetalingMeldingTemplate.send(kafkaTopic, kafkaMelding)
+        }
+
+        fagsakRepository.findBySaksnummer(saksnummer)
+            .shouldBePresent()
+            .run {
+                behandlinger.shouldHaveSize(2)
+                hentAktivBehandling().shouldNotBeNull().run {
+                    tema shouldBe Behandlingstema.YRKESAKTIV
+                    type shouldBe Behandlingstyper.MANGLENDE_INNBETALING_TRYGDEAVGIFT
+                    behandlingsårsak.type shouldBe Behandlingsaarsaktyper.SØKNAD
+                }
+            }
+
+        behandlingsresultatService.hentBehandlingsresultat(behandlingsId).apply {
+            type.shouldBe(Behandlingsresultattyper.IKKE_FASTSATT)
+            behandlingsmåte.shouldBe(Behandlingsmaate.MANUELT)
+            fastsattAvLand.shouldBe(Land_iso2.NO)
+        }
+        behandlingRepository.findById(behandlingsId).orElse(null)
+            .shouldNotBeNull().apply {
+                withClue("Behandlingsstatus skal være OPPRETTET") {
+                    status.shouldBe(Behandlingsstatus.OPPRETTET)
+                }
+                fagsak.apply {
+                    withClue("Saksstatus skal være LOVVALG_AVKLART") {
+                        status.shouldBe(Saksstatuser.LOVVALG_AVKLART)
+                    }
+                }
+            }
+
+        mockServer.verify(1, WireMock.postRequestedFor(WireMock.urlEqualTo("/api/v1/mal/varsel_manglende_innbetaling/lag-pdf?somKopi=false&utkast=false")))
     }
 
     @Test
@@ -299,7 +356,7 @@ class YrkesaktivFtrlVedtakIT(
         }
         vilkaarsresultatService.registrerVilkår(behandling.id, listOf(vilkaar))
 
-        simulerTrygdeavgiftBeregning(behandling.id, skatteplikttype, arbeidsgiversavgiftBetales)
+        setupTrygdeavgiftBeregning(behandling.id, skatteplikttype, arbeidsgiversavgiftBetales)
 
         val vedtakRequest = FattVedtakRequest.Builder()
             .medBehandlingsresultatType(Behandlingsresultattyper.MEDLEM_I_FOLKETRYGDEN)
@@ -317,8 +374,7 @@ class YrkesaktivFtrlVedtakIT(
         return behandling.fagsak.saksnummer
     }
 
-    //Simulerer steget før vedtak
-    private fun simulerTrygdeavgiftBeregning(behandlingId: Long, skatteplikttype: Skatteplikttype, arbeidsgiversavgiftBetales: Boolean) {
+    private fun setupTrygdeavgiftBeregning(behandlingId: Long, skatteplikttype: Skatteplikttype, arbeidsgiversavgiftBetales: Boolean) {
         val medlemskapsperiodeId = opprettMedlemskapsperiodeService.opprettForslagPåMedlemskapsperioder(
             behandlingId,
             Folketrygdloven_kap2_bestemmelser.FTRL_KAP2_2_8_FØRSTE_LEDD_A
@@ -373,7 +429,6 @@ class YrkesaktivFtrlVedtakIT(
         )
 
         medlemAvFolketrygden.fastsattTrygdeavgift.trygdeavgiftsperioder = trygdeavgiftsperioder
-        //Simulerer TrygdeavgiftBergeginingservice.beregnOgLagreTrygdeavgift()
         medlemAvFolketrygdenService.lagre(medlemAvFolketrygden)
     }
 
