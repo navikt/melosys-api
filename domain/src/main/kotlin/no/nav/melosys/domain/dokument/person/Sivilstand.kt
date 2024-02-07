@@ -6,7 +6,7 @@ import no.nav.melosys.domain.person.Sivilstandstype
 import org.apache.commons.lang3.StringUtils
 
 
-class Sivilstand : AbstraktKodeverkHjelper() {
+open class Sivilstand : AbstraktKodeverkHjelper() {
     override fun hentKodeverkNavn(): FellesKodeverk {
         return FellesKodeverk.SIVILSTANDER
     }

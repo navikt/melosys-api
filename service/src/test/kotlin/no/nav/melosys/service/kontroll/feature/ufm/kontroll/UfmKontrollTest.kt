@@ -155,6 +155,11 @@ class UfmKontrollTest {
         personDokument.dødsdato = DATE
         personDokument.bostedsadresse = Bostedsadresse()
         personDokument.bostedsadresse!!.land = Land("NOR")
+        personDokument.bostedsadresse!!.postnr = "1234"
+        personDokument.bostedsadresse!!.poststed = "Oslo"
+        personDokument.bostedsadresse!!.gateadresse.gatenavn = "Gatenavn"
+        personDokument.bostedsadresse!!.gateadresse.husnummer = 1
+        personDokument.bostedsadresse!!.gateadresse.husbokstav = "A"
 
         val personhistorikkDokument = PersonhistorikkDokument()
         personhistorikkDokument.bostedsadressePeriodeListe = listOf()

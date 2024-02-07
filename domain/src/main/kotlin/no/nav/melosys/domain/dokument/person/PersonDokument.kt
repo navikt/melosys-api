@@ -105,40 +105,40 @@ class PersonDokument : Persondata {
         return java.util.Set.of(statsborgerskap)
     }
 
-    override fun hentKjønnType(): KjoennType {
+    override fun hentKjønnType(): KjoennType? {
         return KjoennType.avKode(kjønn!!.getKode())
     }
 
-    override fun hentFolkeregisterident(): String {
-        return fnr!!
+    override fun hentFolkeregisterident(): String? {
+        return fnr
     }
 
-    override fun getFornavn(): String {
-        return fornavn!!
+    override fun getFornavn(): String? {
+        return fornavn
     }
 
     fun setFornavn(fornavn: String?) {
         this.fornavn = fornavn
     }
 
-    override fun getMellomnavn(): String {
-        return mellomnavn!!
+    override fun getMellomnavn(): String? {
+        return mellomnavn
     }
 
     fun setMellomnavn(mellomnavn: String?) {
         this.mellomnavn = mellomnavn
     }
 
-    override fun getEtternavn(): String {
-        return etternavn!!
+    override fun getEtternavn(): String? {
+        return etternavn
     }
 
     fun setEtternavn(etternavn: String?) {
         this.etternavn = etternavn
     }
 
-    override fun getSammensattNavn(): String {
-        return sammensattNavn!!
+    override fun getSammensattNavn(): String? {
+        return sammensattNavn
     }
 
     fun setSammensattNavn(sammensattNavn: String?) {
@@ -150,8 +150,8 @@ class PersonDokument : Persondata {
             .collect(Collectors.toUnmodifiableSet())
     }
 
-    override fun getFødselsdato(): LocalDate {
-        return fødselsdato!!
+    override fun getFødselsdato(): LocalDate? {
+        return fødselsdato
     }
 
     fun setFødselsdato(fødselsdato: LocalDate?) {
