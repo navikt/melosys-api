@@ -7,7 +7,7 @@ import no.nav.melosys.domain.dokument.felles.AbstraktKodeverkHjelper
 
 
 class KjoennsType @JsonCreator constructor(
-    @JsonProperty("kode") val kode: String
+    @JsonProperty("kode") private val kode: String
 ) : AbstraktKodeverkHjelper() {
 
     override fun hentKodeverkNavn(): FellesKodeverk = FellesKodeverk.KJØNNSTYPER
