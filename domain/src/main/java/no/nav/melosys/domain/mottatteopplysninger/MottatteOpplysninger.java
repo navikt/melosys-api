@@ -2,7 +2,7 @@ package no.nav.melosys.domain.mottatteopplysninger;
 
 import java.time.Instant;
 import java.time.LocalDate;
-import javax.persistence.*;
+import jakarta.persistence.*;
 
 import no.nav.melosys.domain.Behandling;
 import no.nav.melosys.domain.jpa.MottatteOpplysningerListener;

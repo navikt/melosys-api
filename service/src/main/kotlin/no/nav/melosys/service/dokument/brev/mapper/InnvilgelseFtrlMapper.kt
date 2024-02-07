@@ -22,7 +22,7 @@ import java.math.BigDecimal
 import java.time.Instant
 import java.time.LocalDate
 import java.time.ZoneId
-import javax.transaction.Transactional
+import jakarta.transaction.Transactional
 
 @Component
 class InnvilgelseFtrlMapper(

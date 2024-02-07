@@ -5,7 +5,7 @@ import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule
 import no.nav.melosys.melosysmock.journalpost.intern_modell.JournalpostModell
 import org.springframework.stereotype.Component
 import java.io.File
-import javax.annotation.PreDestroy
+import jakarta.annotation.PreDestroy
 import com.fasterxml.jackson.module.kotlin.jacksonObjectMapper
 import org.slf4j.LoggerFactory
 import org.springframework.beans.factory.annotation.Value

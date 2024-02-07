@@ -12,7 +12,7 @@ import no.nav.melosys.domain.kodeverk.Mottakerroller;
 import no.nav.melosys.domain.person.Persondata;
 import no.nav.melosys.integrasjon.dokgen.dto.felles.Mottaker;
 
-import javax.annotation.Nullable;
+import jakarta.annotation.Nullable;
 
 import static org.springframework.util.StringUtils.hasText;
 

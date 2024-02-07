@@ -4,8 +4,8 @@ import no.nav.melosys.service.AdminTjeneste;
 import no.nav.melosys.sikkerhet.context.ThreadLocalAccessInfo;
 import org.springframework.web.servlet.HandlerInterceptor;
 
-import javax.servlet.http.HttpServletRequest;
-import javax.servlet.http.HttpServletResponse;
+import jakarta.servlet.http.HttpServletRequest;
+import jakarta.servlet.http.HttpServletResponse;
 
 public class RestControllerInterceptor implements HandlerInterceptor {
 

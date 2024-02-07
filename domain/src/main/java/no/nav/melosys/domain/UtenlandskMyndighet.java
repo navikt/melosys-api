@@ -1,7 +1,7 @@
 package no.nav.melosys.domain;
 
 import java.util.*;
-import javax.persistence.*;
+import jakarta.persistence.*;
 
 import no.nav.melosys.domain.adresse.StrukturertAdresse;
 import no.nav.melosys.domain.kodeverk.Land_iso2;

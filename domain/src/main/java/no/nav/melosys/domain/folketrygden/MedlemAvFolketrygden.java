@@ -5,7 +5,7 @@ import no.nav.melosys.domain.Medlemskapsperiode;
 import no.nav.melosys.domain.avgift.SkatteforholdTilNorge;
 import no.nav.melosys.domain.kodeverk.Skatteplikttype;
 
-import javax.persistence.*;
+import jakarta.persistence.*;
 import java.time.LocalDate;
 import java.util.Collection;
 import java.util.Comparator;

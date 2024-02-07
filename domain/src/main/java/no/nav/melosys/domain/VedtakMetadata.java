@@ -3,7 +3,7 @@ package no.nav.melosys.domain;
 import java.time.Instant;
 import java.time.LocalDate;
 import java.util.Objects;
-import javax.persistence.*;
+import jakarta.persistence.*;
 
 import no.nav.melosys.domain.kodeverk.Vedtakstyper;
 import org.springframework.data.jpa.domain.support.AuditingEntityListener;

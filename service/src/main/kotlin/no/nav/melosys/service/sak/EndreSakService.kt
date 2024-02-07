@@ -24,7 +24,7 @@ import no.nav.melosys.service.saksopplysninger.OppfriskSaksopplysningerService
 import org.springframework.context.ApplicationEventPublisher
 import org.springframework.stereotype.Service
 import java.time.LocalDate
-import javax.transaction.Transactional
+import jakarta.transaction.Transactional
 
 private val log = KotlinLogging.logger { }
 

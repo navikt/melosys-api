@@ -1,7 +1,7 @@
 package no.nav.melosys.statistikk.utstedt_a1.integrasjon;
 
 import java.time.LocalDate;
-import javax.annotation.Nullable;
+import jakarta.annotation.Nullable;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.SerializationFeature;

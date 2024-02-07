@@ -2,7 +2,7 @@ package no.nav.melosys.domain.folketrygden;
 
 import java.util.HashSet;
 import java.util.Set;
-import javax.persistence.*;
+import jakarta.persistence.*;
 
 import no.nav.melosys.domain.avgift.Trygdeavgiftsgrunnlag;
 import no.nav.melosys.domain.avgift.Trygdeavgiftsperiode;

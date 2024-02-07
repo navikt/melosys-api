@@ -2,7 +2,7 @@ package no.nav.melosys.domain.avgift;
 
 import java.math.BigDecimal;
 import java.time.LocalDate;
-import javax.persistence.*;
+import jakarta.persistence.*;
 
 import no.nav.melosys.domain.Medlemskapsperiode;
 import no.nav.melosys.domain.folketrygden.FastsattTrygdeavgift;
