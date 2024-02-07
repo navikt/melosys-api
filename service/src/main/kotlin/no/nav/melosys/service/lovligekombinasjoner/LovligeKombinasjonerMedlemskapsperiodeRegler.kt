@@ -3,7 +3,7 @@ package no.nav.melosys.service.lovligekombinasjoner
 import no.nav.melosys.domain.kodeverk.Folketrygdloven_kap2_bestemmelser
 import no.nav.melosys.domain.kodeverk.Trygdedekninger
 
-object LovligeKombinasjonerMedlemskapsperiodeService {
+object LovligeKombinasjonerMedlemskapsperiodeRegler {
 
     val pliktigeBestemmelser = listOf(
         Folketrygdloven_kap2_bestemmelser.FTRL_KAP2_2_1_FØRSTE_LEDD,
