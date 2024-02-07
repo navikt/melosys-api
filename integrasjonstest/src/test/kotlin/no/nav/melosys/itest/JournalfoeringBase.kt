@@ -2,6 +2,7 @@ package no.nav.melosys.itest
 
 import com.github.tomakehurst.wiremock.WireMockServer
 import com.github.tomakehurst.wiremock.client.WireMock
+import com.github.tomakehurst.wiremock.client.WireMock.equalTo
 import com.github.tomakehurst.wiremock.core.WireMockConfiguration
 import io.kotest.matchers.collections.shouldContain
 import io.kotest.matchers.nulls.shouldNotBeNull
@@ -55,7 +56,10 @@ class JournalfoeringBase(
             )
         )
         mockServer.stubFor(
-            WireMock.post("/api/v1/mal/saksbehandlingstid_soknad/lag-pdf?somKopi=false&utkast=false").willReturn(
+            WireMock.post(WireMock.urlPathMatching("/api/v1/mal/.*/lag-pdf"))
+                .withQueryParam("somKopi", equalTo("false"))
+                .withQueryParam("utkast", equalTo("false"))
+                .willReturn(
                 WireMock.aResponse()
                     .withStatus(200)
                     .withHeader("Content-Type", "application/json")
