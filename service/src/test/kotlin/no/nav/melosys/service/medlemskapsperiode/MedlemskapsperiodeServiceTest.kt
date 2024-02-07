@@ -1,10 +1,7 @@
 package no.nav.melosys.service.medlemskapsperiode
 
-import io.getunleash.FakeUnleash
 import io.kotest.assertions.throwables.shouldThrow
 import io.kotest.matchers.collections.shouldBeEmpty
-import io.kotest.matchers.collections.shouldContainExactly
-import io.kotest.matchers.collections.shouldContainExactlyInAnyOrder
 import io.kotest.matchers.collections.shouldHaveSize
 import io.kotest.matchers.nulls.shouldNotBeNull
 import io.kotest.matchers.shouldBe
@@ -24,11 +21,11 @@ import no.nav.melosys.domain.mottatteopplysninger.MottatteOpplysninger
 import no.nav.melosys.domain.mottatteopplysninger.SøknadNorgeEllerUtenforEØS
 import no.nav.melosys.domain.mottatteopplysninger.data.Soeknadsland
 import no.nav.melosys.exception.FunksjonellException
-import no.nav.melosys.featuretoggle.ToggleName
 import no.nav.melosys.repository.MedlemskapsperiodeRepository
 import no.nav.melosys.service.MedlemAvFolketrygdenService
 import no.nav.melosys.service.avgift.TrygdeavgiftsgrunnlagService
 import no.nav.melosys.service.behandling.BehandlingsresultatService
+import no.nav.melosys.service.ftrl.GyldigeTrygdedekningerService
 import no.nav.melosys.service.medl.MedlPeriodeService
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
@@ -54,7 +51,8 @@ class MedlemskapsperiodeServiceTest {
     @RelaxedMockK
     lateinit var medlPeriodeService: MedlPeriodeService
 
-    private val unleash = FakeUnleash()
+    @MockK
+    lateinit var gyldigeTrygdedekningerService: GyldigeTrygdedekningerService
 
     private val BEHANDLING_ID_1 = 1L
     private val BEHANDLING_ID_2 = 2L
@@ -73,7 +71,7 @@ class MedlemskapsperiodeServiceTest {
             medlemAvFolketrygdenService,
             trygdeavgiftsgrunnlagService,
             medlPeriodeService,
-            unleash
+            gyldigeTrygdedekningerService
         )
     }
 
@@ -98,6 +96,7 @@ class MedlemskapsperiodeServiceTest {
 
     @Test
     fun opprettMedlemskapsperiode_lagrerKorrektMedlemskapsperiode() {
+        every { gyldigeTrygdedekningerService.hentTrygdedekninger(BEHANDLING_ID_1) } returns listOf(*Trygdedekninger.values())
         val medlemAvFolketrygden = MedlemAvFolketrygden().apply {
             behandlingsresultat = Behandlingsresultat().apply {
                 behandling = Behandling().apply {
@@ -138,6 +137,7 @@ class MedlemskapsperiodeServiceTest {
 
     @Test
     fun opprettMedlemskapsperiode_harFastsattTrygdeavgift_fjernerTrygdeavgiftsperioderOmDeFinnes() {
+        every { gyldigeTrygdedekningerService.hentTrygdedekninger(BEHANDLING_ID_1) } returns listOf(*Trygdedekninger.values())
         val medlemAvFolketrygden = MedlemAvFolketrygden().apply {
             behandlingsresultat = Behandlingsresultat().apply {
                 behandling = Behandling().apply {
@@ -171,6 +171,7 @@ class MedlemskapsperiodeServiceTest {
 
     @Test
     fun oppdaterMedlemskapsperiode_medlemskapsperiodeFinnes_oppdateres() {
+        every { gyldigeTrygdedekningerService.hentTrygdedekninger(BEHANDLING_ID_1) } returns listOf(*Trygdedekninger.values())
         val medlemAvFolketrygden = MedlemAvFolketrygden().apply {
             medlemskapsperioder = listOf(Medlemskapsperiode().apply { id = MEDLEMSKAPSPERIODE_ID_1 })
         }
@@ -202,6 +203,7 @@ class MedlemskapsperiodeServiceTest {
 
     @Test
     fun oppdaterMedlemskapsperiode_medlemskapsperiodeOgFastsattTrygdeavgiftFinnes_oppdateres() {
+        every { gyldigeTrygdedekningerService.hentTrygdedekninger(BEHANDLING_ID_1) } returns listOf(*Trygdedekninger.values())
         val medlemAvFolketrygden = MedlemAvFolketrygden().apply {
             medlemskapsperioder = listOf(Medlemskapsperiode().apply { id = MEDLEMSKAPSPERIODE_ID_1 })
             fastsattTrygdeavgift = FastsattTrygdeavgift()
@@ -227,6 +229,7 @@ class MedlemskapsperiodeServiceTest {
 
     @Test
     fun oppdaterMedlemskapsperiode_ugyldigTrygdedekning_kasterException() {
+        every { gyldigeTrygdedekningerService.hentTrygdedekninger(BEHANDLING_ID_1) } returns emptyList()
         shouldThrow<FunksjonellException> {
             medlemskapsperiodeService.oppdaterMedlemskapsperiode(
                 BEHANDLING_ID_1,
@@ -242,6 +245,7 @@ class MedlemskapsperiodeServiceTest {
 
     @Test
     fun oppdaterMedlemskapsperiode_tomDatoErFørFomDato_kasterException() {
+        every { gyldigeTrygdedekningerService.hentTrygdedekninger(BEHANDLING_ID_1) } returns listOf(*Trygdedekninger.values())
         shouldThrow<FunksjonellException> {
             medlemskapsperiodeService.oppdaterMedlemskapsperiode(
                 BEHANDLING_ID_1,
@@ -287,6 +291,7 @@ class MedlemskapsperiodeServiceTest {
 
     @Test
     fun oppdaterMedlemskapsperiode_finnerIkkeMedlemskapsperiode_kasterException() {
+        every { gyldigeTrygdedekningerService.hentTrygdedekninger(BEHANDLING_ID_1) } returns listOf(*Trygdedekninger.values())
         every { medlemAvFolketrygdenService.hentMedlemAvFolketrygden(BEHANDLING_ID_1) } returns MedlemAvFolketrygden().apply {
             medlemskapsperioder = mutableListOf(Medlemskapsperiode().apply { id = MEDLEMSKAPSPERIODE_ID_1 })
         }
@@ -569,24 +574,5 @@ class MedlemskapsperiodeServiceTest {
 
         verify { trygdeavgiftsgrunnlagService.fjernTrygdeavgiftsperioderOmDeFinnes(medlemAvFolketrygden.fastsattTrygdeavgift) }
         medlemAvFolketrygden.medlemskapsperioder.shouldBeEmpty()
-    }
-
-    @Test
-    fun `hentGyldigeTrygdedekninger returnerer GYLDIGE_TRYGDEDEKNINGER_2_7 og GYLDIGE_TRYGDEDEKNINGER_2_8 når MELOSYS_FOLKETRYGDEN_2_7 er enabled`() {
-        unleash.enable(ToggleName.MELOSYS_FOLKETRYGDEN_2_7)
-
-        medlemskapsperiodeService.hentGyldigeTrygdedekninger()
-            .shouldContainExactlyInAnyOrder(
-                MedlemskapsperiodeService.GYLDIGE_TRYGDEDEKNINGER_2_7 +
-                    MedlemskapsperiodeService.GYLDIGE_TRYGDEDEKNINGER_2_8
-            )
-    }
-
-    @Test
-    fun `hentGyldigeTrygdedekninger returnerer GYLDIGE_TRYGDEDEKNINGER_2_8 når MELOSYS_FOLKETRYGDEN_2_7 er disabled`() {
-        unleash.disable(ToggleName.MELOSYS_FOLKETRYGDEN_2_7)
-
-        medlemskapsperiodeService.hentGyldigeTrygdedekninger()
-            .shouldContainExactly(MedlemskapsperiodeService.GYLDIGE_TRYGDEDEKNINGER_2_8)
     }
 }
