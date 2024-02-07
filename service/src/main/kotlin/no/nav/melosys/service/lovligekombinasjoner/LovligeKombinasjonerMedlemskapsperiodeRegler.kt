@@ -2,31 +2,16 @@ package no.nav.melosys.service.lovligekombinasjoner
 
 import no.nav.melosys.domain.kodeverk.Folketrygdloven_kap2_bestemmelser
 import no.nav.melosys.domain.kodeverk.Trygdedekninger
+import no.nav.melosys.service.medlemskapsperiode.PliktigeMedlemskapsbestemmelser
 
 object LovligeKombinasjonerMedlemskapsperiodeRegler {
-
-    val pliktigeBestemmelser = listOf(
-        Folketrygdloven_kap2_bestemmelser.FTRL_KAP2_2_1_FØRSTE_LEDD,
-        Folketrygdloven_kap2_bestemmelser.FTRL_KAP2_2_1_FJERDE_LEDD,
-        Folketrygdloven_kap2_bestemmelser.FTRL_KAP2_2_2,
-        Folketrygdloven_kap2_bestemmelser.FTRL_KAP2_2_3_ANDRE_LEDD,
-        Folketrygdloven_kap2_bestemmelser.FTRL_KAP2_2_5_FØRSTE_LEDD_A,
-        Folketrygdloven_kap2_bestemmelser.FTRL_KAP2_2_5_FØRSTE_LEDD_B,
-        Folketrygdloven_kap2_bestemmelser.FTRL_KAP2_2_5_FØRSTE_LEDD_C,
-        Folketrygdloven_kap2_bestemmelser.FTRL_KAP2_2_5_FØRSTE_LEDD_D,
-        Folketrygdloven_kap2_bestemmelser.FTRL_KAP2_2_5_FØRSTE_LEDD_E,
-        Folketrygdloven_kap2_bestemmelser.FTRL_KAP2_2_5_FØRSTE_LEDD_F,
-        Folketrygdloven_kap2_bestemmelser.FTRL_KAP2_2_5_FØRSTE_LEDD_G,
-        Folketrygdloven_kap2_bestemmelser.FTRL_KAP2_2_5_FØRSTE_LEDD_H,
-        Folketrygdloven_kap2_bestemmelser.FTRL_KAP2_2_5_ANDRE_LEDD
-    )
 
     val lovligeKombinasjonerDekningBestemmelse = mapOf(
         listOf(Trygdedekninger.FULL_DEKNING_FTRL) to listOf(
             Folketrygdloven_kap2_bestemmelser.FTRL_KAP2_2_7_FØRSTE_LEDD,
             Folketrygdloven_kap2_bestemmelser.FTRL_KAP2_2_7_FJERDE_LEDD,
             Folketrygdloven_kap2_bestemmelser.FTRL_KAP2_2_7A,
-            *pliktigeBestemmelser.toTypedArray()
+            *PliktigeMedlemskapsbestemmelser.bestemmelser.toTypedArray()
         ),
 
         listOf(Trygdedekninger.FTRL_2_7_TREDJE_LEDD_B_HELSE_SYKE_FORELDREPENGER) to listOf(
@@ -64,9 +49,5 @@ object LovligeKombinasjonerMedlemskapsperiodeRegler {
 
     fun erGyldigKombinasjon(bestemmelse: Folketrygdloven_kap2_bestemmelser, trygdedekning: Trygdedekninger): Boolean {
         return bestemmelse in hentLovligeBestemmelser(trygdedekning)
-    }
-
-    fun erPliktigBestemmelse(bestemmelse: Folketrygdloven_kap2_bestemmelser): Boolean {
-        return bestemmelse in pliktigeBestemmelser
     }
 }
