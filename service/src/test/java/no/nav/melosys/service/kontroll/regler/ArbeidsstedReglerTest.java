@@ -83,11 +83,11 @@ class ArbeidsstedReglerTest {
     private SedDokument lagSedDokument(String landKode, String by) {
         SedDokument sedDokument = new SedDokument();
         Adresse adresse_1 = new Adresse();
-        adresse_1.by = "By_1";
-        adresse_1.land = "XY";
+        adresse_1.setBy("By_1");
+        adresse_1.setLand("XY");
         Adresse adresse_2 = new Adresse();
-        adresse_2.by = by;
-        adresse_2.land = landKode;
+        adresse_2.setBy(by);
+        adresse_2.setLand(landKode);
         Arbeidssted arbeidssted_1 = new Arbeidssted("sted1", adresse_1);
         Arbeidssted arbeidssted_2 = new Arbeidssted("sted2", adresse_2);
         List<Arbeidssted> arbeidssteder = List.of(arbeidssted_1, arbeidssted_2);

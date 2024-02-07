@@ -31,7 +31,7 @@ import static no.nav.melosys.saksflytapi.domain.ProsessStatus.UNDER_BEHANDLING;
 @Component
 public class ProsessinstansBehandler {
 
-    public static final long ANTALL_TIMER_FØR_GJENOPPRETTELSE = 24;
+    private static final long ANTALL_TIMER_FØR_GJENOPPRETTELSE = 24;
     private static final Logger log = LoggerFactory.getLogger(ProsessinstansBehandler.class);
 
     private final Map<ProsessSteg, StegBehandler> stegbehandlerMap = new EnumMap<>(ProsessSteg.class);

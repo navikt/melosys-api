@@ -751,8 +751,7 @@ class ProsessinstansServiceTest {
         periode.setTom(LocalDate.EPOCH.plusYears(1));
         melding.setPeriode(periode);
 
-        Statsborgerskap statsborgerskap = new Statsborgerskap();
-        statsborgerskap.setLandkode("SE");
+        Statsborgerskap statsborgerskap = new Statsborgerskap("SE");
 
         melding.setRinaSaksnummer("r123");
         melding.setSedId("s123");

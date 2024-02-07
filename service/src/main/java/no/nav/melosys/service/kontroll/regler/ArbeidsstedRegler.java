@@ -22,8 +22,8 @@ public final class ArbeidsstedRegler {
                                                                              Pattern.CASE_INSENSITIVE | Pattern.CANON_EQ | Pattern.UNICODE_CASE);
 
     private static final Predicate<Arbeidssted> ARBEIDSSTED_SVALBARD_JAN_MAIEN =
-        arbeidssted -> StringUtils.equals(arbeidssted.adresse.land, Landkoder.SJ.getKode())
-            || StringUtils.equals(arbeidssted.adresse.land, Landkoder.NO.getKode()) && BYER_FRA_SVALBARD_PATTERN.matcher(arbeidssted.adresse.by).find();
+        arbeidssted -> StringUtils.equals(arbeidssted.getAdresse().getLand(), Landkoder.SJ.getKode())
+            || StringUtils.equals(arbeidssted.getAdresse().getLand(), Landkoder.NO.getKode()) && BYER_FRA_SVALBARD_PATTERN.matcher(arbeidssted.getAdresse().getBy()).find();
 
 
     public static boolean representantIUtlandetMangler(RepresentantIUtlandet representantIUtlandet) {
