@@ -161,7 +161,7 @@ class YrkesaktivFtrlVedtakIT(
     @Test
     fun `yrkesaktiv vedtak - FTRL - skal hverken opprette fakturaserier eller kansellere dersom det ikke eksisterer førstegangsbehandling`() {
         lagFørstegangsBehandling(Skatteplikttype.SKATTEPLIKTIG, true)
-        mockServer.verify(0, WireMock.deleteRequestedFor(WireMock.urlEqualTo("/fakturaserier/test")))
+        mockServer.verify(0, WireMock.deleteRequestedFor(WireMock.urlEqualTo("/fakturaserier/$fakturaserieReferanse")))
         mockServer.verify(0, WireMock.postRequestedFor(WireMock.urlEqualTo("/fakturaserier")))
     }
 
@@ -187,8 +187,7 @@ class YrkesaktivFtrlVedtakIT(
         }
 
         fagsakRepository.findBySaksnummer(saksnummer)
-            .shouldBePresent()
-            .run {
+            .shouldBePresent().run {
                 behandlinger.shouldHaveSize(2)
                 hentAktivBehandling().shouldNotBeNull().run {
                     tema shouldBe Behandlingstema.YRKESAKTIV
@@ -197,24 +196,27 @@ class YrkesaktivFtrlVedtakIT(
                 }
             }
 
-        behandlingsresultatService.hentBehandlingsresultat(behandlingsId).apply {
-            type.shouldBe(Behandlingsresultattyper.IKKE_FASTSATT)
-            behandlingsmåte.shouldBe(Behandlingsmaate.MANUELT)
-            fastsattAvLand.shouldBe(Land_iso2.NO)
+        behandlingsresultatService.hentBehandlingsresultat(behandlingsId).run {
+            type shouldBe Behandlingsresultattyper.IKKE_FASTSATT
+            behandlingsmåte shouldBe Behandlingsmaate.MANUELT
+            fastsattAvLand shouldBe Land_iso2.NO
         }
-        behandlingRepository.findById(behandlingsId).orElse(null)
-            .shouldNotBeNull().apply {
+        behandlingRepository.findById(behandlingsId).shouldBePresent()
+            .run {
                 withClue("Behandlingsstatus skal være OPPRETTET") {
-                    status.shouldBe(Behandlingsstatus.OPPRETTET)
+                    status shouldBe Behandlingsstatus.OPPRETTET
                 }
                 fagsak.apply {
                     withClue("Saksstatus skal være LOVVALG_AVKLART") {
-                        status.shouldBe(Saksstatuser.LOVVALG_AVKLART)
+                        status shouldBe Saksstatuser.LOVVALG_AVKLART
                     }
                 }
             }
 
-        mockServer.verify(1, WireMock.postRequestedFor(WireMock.urlEqualTo("/api/v1/mal/varsel_manglende_innbetaling/lag-pdf?somKopi=false&utkast=false")))
+        mockServer.verify(
+            1,
+            WireMock.postRequestedFor(WireMock.urlEqualTo("/api/v1/mal/varsel_manglende_innbetaling/lag-pdf?somKopi=false&utkast=false"))
+        )
     }
 
     @Test
@@ -263,19 +265,19 @@ class YrkesaktivFtrlVedtakIT(
         }
 
 
-        behandlingsresultatService.hentBehandlingsresultat(behandlingsId).apply {
-            type.shouldBe(Behandlingsresultattyper.MEDLEM_I_FOLKETRYGDEN)
-            behandlingsmåte.shouldBe(Behandlingsmaate.MANUELT)
-            fastsattAvLand.shouldBe(Land_iso2.NO)
+        behandlingsresultatService.hentBehandlingsresultat(behandlingsId).run {
+            type shouldBe Behandlingsresultattyper.MEDLEM_I_FOLKETRYGDEN
+            behandlingsmåte shouldBe Behandlingsmaate.MANUELT
+            fastsattAvLand shouldBe Land_iso2.NO
         }
-        behandlingRepository.findById(behandlingsId).orElse(null)
-            .shouldNotBeNull().apply {
+        behandlingRepository.findById(behandlingsId)
+            .shouldBePresent().run {
                 withClue("Behandlingsstatus skal være AVSLUTTET") {
-                    status.shouldBe(Behandlingsstatus.AVSLUTTET)
+                    status shouldBe Behandlingsstatus.AVSLUTTET
                 }
-                fagsak.apply {
+                fagsak.run {
                     withClue("Saksstatus skal være LOVVALG_AVKLART") {
-                        status.shouldBe(Saksstatuser.LOVVALG_AVKLART)
+                        status shouldBe Saksstatuser.LOVVALG_AVKLART
                     }
                 }
             }
