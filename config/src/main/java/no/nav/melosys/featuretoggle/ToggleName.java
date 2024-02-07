@@ -7,7 +7,10 @@ public class ToggleName {
 
     public static final String SAKSBEHANDLING_MANGLENDE_INNBETALING = "melosys.saksbehandling.manglende_innbetaling";
 
+    public static final String MELOSYS_FTRL_IKKE_YRKESAKTIV = "melosys.ftrl.ikke_yrkesaktiv";
+
     public static final String MELOSYS_OPPDATER_FAKTURAMOTTAKER = "melosys.oppdater.fakturamottaker";
+
     public static final String MELOSYS_FOLKETRYGDEN_2_7 = "melosys.folketrygden.2_7";
 
 }
