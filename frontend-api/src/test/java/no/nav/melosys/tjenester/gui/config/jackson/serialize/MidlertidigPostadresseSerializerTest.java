@@ -49,9 +49,9 @@ class MidlertidigPostadresseSerializerTest {
         gateadresse.setGatenavn("SANNERGATA");
         gateadresse.setHusnummer(2);
 
-        midlertidigPostadresse.gateadresse = gateadresse;
-        midlertidigPostadresse.poststed = "0557";
-        midlertidigPostadresse.land = new Land(NORGE);
+        midlertidigPostadresse.setGateadresse(gateadresse);
+        midlertidigPostadresse.setPoststed("0557");
+        midlertidigPostadresse.setLand(new Land(NORGE));
 
         String json = mapper.writeValueAsString(midlertidigPostadresse);
 
@@ -61,10 +61,10 @@ class MidlertidigPostadresseSerializerTest {
     @Test
     void midlertidigPostadresseUtland() throws Exception {
         MidlertidigPostadresseUtland midlertidigPostadresse = new MidlertidigPostadresseUtland();
-        midlertidigPostadresse.adresselinje1 = "42 Mock Road";
-        midlertidigPostadresse.adresselinje2 = "Mock City";
-        midlertidigPostadresse.adresselinje3 = "United Kingdom";
-        midlertidigPostadresse.land = new Land(STORBRITANNIA);
+        midlertidigPostadresse.setAdresselinje1("42 Mock Road");
+        midlertidigPostadresse.setAdresselinje2("Mock City");
+        midlertidigPostadresse.setAdresselinje3("United Kingdom");
+        midlertidigPostadresse.setLand(new Land(STORBRITANNIA));
 
         String json = mapper.writeValueAsString(midlertidigPostadresse);
 

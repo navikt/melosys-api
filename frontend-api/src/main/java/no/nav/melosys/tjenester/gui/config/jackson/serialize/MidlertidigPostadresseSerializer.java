@@ -32,15 +32,15 @@ public class MidlertidigPostadresseSerializer extends StdSerializer<no.nav.melos
 
         if (midlertidigPostadresse instanceof MidlertidigPostadresseNorge adresse) {
             dto.strukturertAdresse = new StrukturertAdresseDto(
-                adresse.gateadresse.getGatenavn(),
+                adresse.getGateadresse().getGatenavn(),
                 Stream.of(
-                    adresse.gateadresse.getHusbokstav(),
-                    adresse.gateadresse.getHusnummer()
+                    adresse.getGateadresse().getHusbokstav(),
+                    adresse.getGateadresse().getHusnummer()
                 ).filter(Objects::nonNull).map(Objects::toString).collect(Collectors.joining(" ")),
-                adresse.poststed,
-                kodeverkService.dekod(POSTNUMMER, adresse.poststed),
+                adresse.getPoststed(),
+                kodeverkService.dekod(POSTNUMMER, adresse.getPoststed()),
                 null,
-                midlertidigPostadresse.land != null ? midlertidigPostadresse.land.getKode() : null
+                midlertidigPostadresse.getLand() != null ? midlertidigPostadresse.getLand().getKode() : null
             );
             dto.adressetype = MidlertidigPostadresseDto.Adressetype.STRUKTURERT;
 

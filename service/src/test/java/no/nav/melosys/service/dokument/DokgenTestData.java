@@ -110,10 +110,10 @@ public final class DokgenTestData {
 
     public static UstrukturertAdresse lagAdresse() {
         UstrukturertAdresse ustrukturertAdresse = new UstrukturertAdresse();
-        ustrukturertAdresse.adresselinje1 = ADRESSELINJE_1_BRUKER;
-        ustrukturertAdresse.postnr = POSTNR_BRUKER;
-        ustrukturertAdresse.poststed = POSTSTED_BRUKER;
-        ustrukturertAdresse.land = new Land(Land.NORGE);
+        ustrukturertAdresse.setAdresselinje1(ADRESSELINJE_1_BRUKER);
+        ustrukturertAdresse.setPostnr(POSTNR_BRUKER);
+        ustrukturertAdresse.setPoststed(POSTSTED_BRUKER);
+        ustrukturertAdresse.setLand(new Land(Land.NORGE));
         return ustrukturertAdresse;
     }
 

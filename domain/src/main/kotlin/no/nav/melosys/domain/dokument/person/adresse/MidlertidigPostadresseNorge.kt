@@ -4,14 +4,14 @@ import no.nav.melosys.domain.dokument.felles.Land
 import no.nav.melosys.domain.dokument.felles.Periode
 import java.time.LocalDateTime
 
-data class MidlertidigPostadresseNorge(
-    val endringstidspunkt: LocalDateTime,
-    val land: Land,
-    val postleveringsPeriode: Periode,
-    val tilleggsadresse: String,
-    val tilleggsadresseType: String,
-    val poststed: String,
-    val bolignummer: String,
-    val kommunenummer: String,
-    val gateadresse: Gateadresse
-)
+class MidlertidigPostadresseNorge(
+    var tilleggsadresse: String? = null,
+    var tilleggsadresseType: String? = null,
+    var poststed: String? = null,
+    var bolignummer: String? = null,
+    var kommunenummer: String? = null,
+    var gateadresse: Gateadresse? = null,
+    endringstidspunkt: LocalDateTime? = null,
+    land: Land? = null,
+    postleveringsPeriode: Periode? = null
+) : MidlertidigPostadresse(endringstidspunkt, land, postleveringsPeriode)

@@ -50,7 +50,7 @@ class PersonDokument : Persondata {
     var statsborgerskapDato: LocalDate? = null
     var bostedsadresse: Bostedsadresse? = Bostedsadresse()
     var postadresse: UstrukturertAdresse? = UstrukturertAdresse()
-    var midlertidigPostadresse = MidlertidigPostadresse()
+    var midlertidigPostadresse: MidlertidigPostadresse? = MidlertidigPostadresse()
     var gjeldendePostadresse = UstrukturertAdresse()
 
     @JsonProperty(defaultValue = "false")

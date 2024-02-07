@@ -27,10 +27,9 @@ class PersonReglerTest {
 
     @Test
     fun personBosattINorge_bosattINorgeIPerioden_true() {
-        val bostedsadressePeriode = BostedsadressePeriode()
-        bostedsadressePeriode.periode = Periode(LocalDate.of(2023, 1, 2), LocalDate.of(2023, 12, 20))
-        bostedsadressePeriode.bostedsadresse = Bostedsadresse()
-        bostedsadressePeriode.bostedsadresse.land = Land(Land.NORGE)
+        val bostedsadressePeriode = BostedsadressePeriode(periode = Periode(LocalDate.of(2023, 1, 2), LocalDate.of(2023, 12, 20)),
+            endringstidspunkt = null,
+            bostedsadresse = Bostedsadresse(land = Land(Land.NORGE)))
 
         val bostedsadressePeriodeList = List.of(bostedsadressePeriode)
 
@@ -58,11 +57,9 @@ class PersonReglerTest {
 
     @Test
     fun personBosattINorge_bosattINorgeIPerioden_false() {
-        val bostedsadressePeriode = BostedsadressePeriode()
-        bostedsadressePeriode.periode = Periode(LocalDate.of(2021, 1, 2), LocalDate.of(2021, 12, 20))
-        bostedsadressePeriode.bostedsadresse = Bostedsadresse()
-        bostedsadressePeriode.bostedsadresse.land = Land(Land.NORGE)
-
+        val bostedsadressePeriode = BostedsadressePeriode(periode = Periode(LocalDate.of(2021, 1, 2), LocalDate.of(2021, 12, 20)),
+            endringstidspunkt = null,
+            bostedsadresse = Bostedsadresse(land = Land(Land.NORGE)))
 
         val bostedsadressePeriodeList = List.of(bostedsadressePeriode)
 
@@ -84,7 +81,7 @@ class PersonReglerTest {
         val personDokument = PersonDokument()
         personDokument.dødsdato = LocalDate.now()
         personDokument.bostedsadresse = Bostedsadresse()
-        personDokument.bostedsadresse.land = Land(Land.NORGE)
+        personDokument.bostedsadresse!!.land = Land(Land.NORGE)
         Assertions.assertThat(personBosattINorge(personDokument)).isTrue()
     }
 
@@ -93,7 +90,7 @@ class PersonReglerTest {
         val personDokument = PersonDokument()
         personDokument.dødsdato = LocalDate.now()
         personDokument.bostedsadresse = Bostedsadresse()
-        personDokument.bostedsadresse.land = Land(Land.SVEITS)
+        personDokument.bostedsadresse!!.land = Land(Land.SVEITS)
         Assertions.assertThat(personBosattINorge(personDokument)).isFalse()
     }
 

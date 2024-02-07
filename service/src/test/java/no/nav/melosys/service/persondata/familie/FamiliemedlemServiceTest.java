@@ -1,5 +1,10 @@
 package no.nav.melosys.service.persondata.familie;
 
+import java.time.LocalDate;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Set;
+
 import no.nav.melosys.domain.dokument.person.PersonDokument;
 import no.nav.melosys.domain.dokument.person.Sivilstand;
 import no.nav.melosys.domain.person.Navn;
@@ -16,11 +21,6 @@ import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
-
-import java.time.LocalDate;
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Set;
 
 import static no.nav.melosys.service.SaksbehandlingDataFactory.lagInaktivBehandlingSomIkkeResulterIVedtak;
 import static no.nav.melosys.service.persondata.PdlObjectFactory.lagPerson;
@@ -142,12 +142,12 @@ class FamiliemedlemServiceTest {
 
     private no.nav.melosys.domain.dokument.person.Familiemedlem lagFamilemedlem(String navn, String fnr, no.nav.melosys.domain.dokument.person.Familierelasjon familierelasjon, Sivilstand sivilstand) {
         no.nav.melosys.domain.dokument.person.Familiemedlem familiemedlem = new no.nav.melosys.domain.dokument.person.Familiemedlem();
-        familiemedlem.fnr = fnr;
-        familiemedlem.navn = navn;
-        familiemedlem.familierelasjon = familierelasjon;
-        familiemedlem.fødselsdato = LocalDate.EPOCH;
-        familiemedlem.fnrAnnenForelder = familierelasjon == no.nav.melosys.domain.dokument.person.Familierelasjon.BARN ? "fnrAnnen" : null;
-        familiemedlem.sivilstand = sivilstand;
+        familiemedlem.setFnr(fnr);
+        familiemedlem.setNavn(navn);
+        familiemedlem.setFamilierelasjon(familierelasjon);
+        familiemedlem.setFødselsdato(LocalDate.EPOCH);
+        familiemedlem.setFnrAnnenForelder(familierelasjon == no.nav.melosys.domain.dokument.person.Familierelasjon.BARN ? "fnrAnnen" : null);
+        familiemedlem.setSivilstand(sivilstand);
         return familiemedlem;
     }
 }

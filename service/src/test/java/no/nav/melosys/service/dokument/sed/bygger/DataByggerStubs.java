@@ -94,9 +94,9 @@ class DataByggerStubs {
         personDokument.setBostedsadresse(bostedsadresse);
 
         Familiemedlem familiemedlem = new Familiemedlem();
-        familiemedlem.navn = "farnavn";
-        familiemedlem.fnr = "111111111";
-        familiemedlem.familierelasjon = Familierelasjon.FARA;
+        familiemedlem.setNavn("farnavn");
+        familiemedlem.setFnr("111111111");
+        familiemedlem.setFamilierelasjon(Familierelasjon.FARA);
         personDokument.setFamiliemedlemmer(Collections.singletonList(familiemedlem));
 
         personDokument.setKjønn(new KjoennsType("M"));

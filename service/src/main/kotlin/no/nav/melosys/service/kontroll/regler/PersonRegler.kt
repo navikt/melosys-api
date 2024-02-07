@@ -39,7 +39,7 @@ object PersonRegler {
                 filtrerAdressePeriode(bostedsadresse.gyldigFraOgMed, bostedsadresse.gyldigTilOgMed, periodeFra, periodeTil)
         }.isPresent
 
-        val bostedsadressePerioder = bostedsadressePerioder.stream().anyMatch { a: BostedsadressePeriode -> a.bostedsadresse.tilStrukturertAdresse().landkode == NORGE_ISO2_LANDKODE && filtrerAdressePeriode(a.periode.fom, a.periode.tom, periodeFra, periodeTil) }
+        val bostedsadressePerioder = bostedsadressePerioder.stream().anyMatch { a: BostedsadressePeriode -> a.bostedsadresse?.tilStrukturertAdresse()?.landkode == NORGE_ISO2_LANDKODE && filtrerAdressePeriode(a.periode?.fom, a.periode?.tom, periodeFra, periodeTil) }
         val historiskBostedadresser = historiskBostedadresser.stream().anyMatch { a -> a.strukturertAdresse.landkode == NORGE_ISO2_LANDKODE && filtrerAdressePeriode(a.gyldigFraOgMed, a.gyldigTilOgMed, periodeFra, periodeTil) }
         val historiskOppholdsadresser =  historiskOppholdsadresser.stream().anyMatch { a -> a.strukturertAdresse.landkode == NORGE_ISO2_LANDKODE && filtrerAdressePeriode(a.gyldigFraOgMed, a.gyldigTilOgMed, periodeFra, periodeTil) }
 
