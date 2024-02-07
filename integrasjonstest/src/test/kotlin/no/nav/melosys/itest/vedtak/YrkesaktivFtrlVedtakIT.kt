@@ -281,7 +281,7 @@ class YrkesaktivFtrlVedtakIT(
             }
 
         mockServer.verify(1, WireMock.postRequestedFor(WireMock.urlEqualTo("/fakturaserier")))
-        mockServer.verify(1, WireMock.deleteRequestedFor(WireMock.urlEqualTo("/fakturaserier/test")))
+        mockServer.verify(1, WireMock.deleteRequestedFor(WireMock.urlEqualTo("/fakturaserier/$fakturaserieReferanse")))
     }
 
     private fun lagOpprettSakDto(): OpprettSakDto {
