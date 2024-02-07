@@ -13,7 +13,7 @@ import no.nav.melosys.exception.FunksjonellException
 import no.nav.melosys.repository.MedlemAvFolketrygdenRepository
 import no.nav.melosys.service.behandling.BehandlingsresultatService
 import no.nav.melosys.service.behandling.UtledMottaksdato
-import no.nav.melosys.service.lovligekombinasjoner.LovligeKombinasjonerMedlemskapsperiodeService
+import no.nav.melosys.service.lovligekombinasjoner.LovligeKombinasjonerMedlemskapsperiodeRegler
 import org.springframework.stereotype.Service
 import org.springframework.transaction.annotation.Transactional
 
@@ -23,10 +23,9 @@ class OpprettMedlemskapsperiodeService(
     private val medlemAvFolketrygdenRepository: MedlemAvFolketrygdenRepository,
     private val behandlingsresultatService: BehandlingsresultatService,
     private val utledMottaksdato: UtledMottaksdato,
-    private val utledMedlemskapsperioder: UtledMedlemskapsperioder,
     private val utledBestemmelserOgVilkår: UtledBestemmelserOgVilkår,
-    private val lovligeKombinasjonerMedlemskapsperiodeService: LovligeKombinasjonerMedlemskapsperiodeService
 ) {
+
     @Transactional
     fun opprettForslagPåMedlemskapsperioder(behandlingID: Long, bestemmelse: Folketrygdloven_kap2_bestemmelser?): Collection<Medlemskapsperiode> {
         val behandlingsresultat = behandlingsresultatService.hentBehandlingsresultat(behandlingID)
@@ -48,14 +47,14 @@ class OpprettMedlemskapsperiodeService(
 
             if (behandling.erAndregangsbehandling() && opprinneligBehandling != null) {
                 val opprinneligBehandlingsresultat = behandlingsresultatService.hentBehandlingsresultat(opprinneligBehandling.id)
-                medlemskapsperioder = utledMedlemskapsperioder.lagMedlemskapsperioderForAndregangsbehandling(
+                medlemskapsperioder = UtledMedlemskapsperioder.lagMedlemskapsperioderForAndregangsbehandling(
                     opprinneligBehandlingsresultat,
                     bestemmelse,
                     søknad.trygdedekning,
                     behandling.type
                 )
             } else {
-                medlemskapsperioder = utledMedlemskapsperioder.lagMedlemskapsperioder(
+                medlemskapsperioder = UtledMedlemskapsperioder.lagMedlemskapsperioder(
                     UtledMedlemskapsperioderDto(
                         søknad.periode,
                         søknad.trygdedekning,
@@ -70,6 +69,7 @@ class OpprettMedlemskapsperiodeService(
         } else {
             medlemAvFolketrygden.medlemskapsperioder.forEach {
                 if (!it.erOpphørt()) it.bestemmelse = bestemmelse
+                it.medlemskapstype = UtledMedlemskapstype.av(bestemmelse)
             }
         }
 
@@ -94,7 +94,7 @@ class OpprettMedlemskapsperiodeService(
         if (bestemmelse !in støttedeBestemmelser) {
             throw FunksjonellException("Støtter ikke perioder med bestemmelse $bestemmelse for behandlingstema $behandlingstema")
         }
-        val lovligeBestemmelser = lovligeKombinasjonerMedlemskapsperiodeService.hentLovligeBestemmelser(trygdedekning)
+        val lovligeBestemmelser = LovligeKombinasjonerMedlemskapsperiodeRegler.hentLovligeBestemmelser(trygdedekning)
         if (bestemmelse !in lovligeBestemmelser) {
             throw FunksjonellException("Ulovlig kombinasjon av bestemmelse $bestemmelse og trygdedekning $trygdedekning")
         }

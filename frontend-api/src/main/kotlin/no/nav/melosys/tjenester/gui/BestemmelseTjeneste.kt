@@ -1,7 +1,6 @@
 package no.nav.melosys.tjenester.gui
 
 import io.swagger.annotations.Api
-import no.nav.melosys.domain.kodeverk.Folketrygdloven_kap2_bestemmelser
 import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingstema
 import no.nav.melosys.service.medlemskapsperiode.UtledBestemmelserOgVilkår
 import no.nav.melosys.tjenester.gui.medlemskapsperiode.dto.BestemmelseMedVilkårOgBegrunnelserDto
@@ -32,10 +31,5 @@ class BestemmelseTjeneste(private val utledBestemmelserOgVilkår: UtledBestemmel
         val ustøttede = utledBestemmelserOgVilkår.hentIkkeStøttedeBestemmelserOgVilkår(behandlingstema).keys
 
         return ResponseEntity.ok(FolketrygdlovenBestemmelserDto(støttede, ustøttede))
-    }
-
-    @GetMapping("/behandlinger/medlemavfolketrygden/bestemmelser/pliktige")
-    fun hentPliktigeBestemmelser(): ResponseEntity<Collection<Folketrygdloven_kap2_bestemmelser>> {
-        return ResponseEntity.ok(utledBestemmelserOgVilkår.pliktigeBestemmelser)
     }
 }

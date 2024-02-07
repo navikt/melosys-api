@@ -64,7 +64,6 @@ class MedlemskapsperiodeServiceTest {
     private val MEDL_ID_2 = 222L
     private val NÅ = LocalDate.now()
 
-
     private lateinit var medlemskapsperiodeService: MedlemskapsperiodeService
 
     @BeforeEach

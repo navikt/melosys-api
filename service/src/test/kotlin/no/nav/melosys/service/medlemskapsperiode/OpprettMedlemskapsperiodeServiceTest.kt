@@ -23,7 +23,6 @@ import no.nav.melosys.exception.FunksjonellException
 import no.nav.melosys.repository.MedlemAvFolketrygdenRepository
 import no.nav.melosys.service.behandling.BehandlingsresultatService
 import no.nav.melosys.service.behandling.UtledMottaksdato
-import no.nav.melosys.service.lovligekombinasjoner.LovligeKombinasjonerMedlemskapsperiodeService
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.extension.ExtendWith
@@ -41,12 +40,9 @@ class OpprettMedlemskapsperiodeServiceTest {
     @MockK
     private lateinit var utledMottaksdato: UtledMottaksdato
 
-
     private val fakeUnleash = FakeUnleash()
 
     private val utledBestemmelserOgVilkår = UtledBestemmelserOgVilkår(fakeUnleash)
-    private val lovligeKombinasjonerMedlemskapsperiodeService = LovligeKombinasjonerMedlemskapsperiodeService()
-    private val utledMedlemskapsperioder = UtledMedlemskapsperioder(lovligeKombinasjonerMedlemskapsperiodeService)
 
     private lateinit var opprettMedlemskapsperiodeService: OpprettMedlemskapsperiodeService
 
@@ -61,9 +57,7 @@ class OpprettMedlemskapsperiodeServiceTest {
                 medlemAvFolketrygdenRepository,
                 behandlingsresultatService,
                 utledMottaksdato,
-                utledMedlemskapsperioder,
-                utledBestemmelserOgVilkår,
-                lovligeKombinasjonerMedlemskapsperiodeService
+                utledBestemmelserOgVilkår
             )
     }
 
@@ -109,10 +103,12 @@ class OpprettMedlemskapsperiodeServiceTest {
                 first().run {
                     id.shouldBe(1L)
                     bestemmelse.shouldBe(NY_BESTEMMELSE)
+                    medlemskapstype.shouldBe(Medlemskapstyper.FRIVILLIG)
                 }
                 last().run {
                     id.shouldBe(2L)
                     bestemmelse.shouldBe(NY_BESTEMMELSE)
+                    medlemskapstype.shouldBe(Medlemskapstyper.FRIVILLIG)
                 }
             }
         verify(exactly = 1) { medlemAvFolketrygdenRepository.save(any()) }
@@ -151,6 +147,7 @@ class OpprettMedlemskapsperiodeServiceTest {
             .first().run {
                 tom.shouldBe(LocalDate.now().plusMonths(4))
                 bestemmelse.shouldBe(NY_BESTEMMELSE)
+                medlemskapstype.shouldBe(Medlemskapstyper.FRIVILLIG)
             }
         verify(exactly = 1) { medlemAvFolketrygdenRepository.save(any()) }
         verify(exactly = 0) { utledMottaksdato.getMottaksdato(any()) }
@@ -197,11 +194,13 @@ class OpprettMedlemskapsperiodeServiceTest {
                     innvilgelsesresultat.shouldBe(InnvilgelsesResultat.INNVILGET)
                     fom.shouldBe(LocalDate.now().plusMonths(4))
                     bestemmelse.shouldBe(NY_BESTEMMELSE)
+                    medlemskapstype.shouldBe(Medlemskapstyper.FRIVILLIG)
                 }
                 last().run {
                     innvilgelsesresultat.shouldBe(InnvilgelsesResultat.OPPHØRT)
                     fom.shouldBe(LocalDate.now().plusMonths(6))
                     bestemmelse.shouldNotBe(NY_BESTEMMELSE)
+                    medlemskapstype.shouldBe(Medlemskapstyper.FRIVILLIG)
                 }
             }
         verify(exactly = 1) { medlemAvFolketrygdenRepository.save(any()) }
