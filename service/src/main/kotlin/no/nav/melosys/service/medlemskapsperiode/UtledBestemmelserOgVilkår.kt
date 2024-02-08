@@ -178,4 +178,11 @@ class UtledBestemmelserOgVilkår(val unleash: Unleash) {
         } else if (vilkår == Vilkaar.FTRL_2_7_RIMELIGHETSVURDERING) {
             KodeverkUtils.tilStringCollection(*Ftrl_2_7_begrunnelser.values())
         } else emptyList()
+
+    companion object {
+        val støttetBestemmelser2_1 = listOf(
+            FTRL_KAP2_2_1_FØRSTE_LEDD,
+            FTRL_KAP2_2_1_FJERDE_LEDD
+        )
+    }
 }

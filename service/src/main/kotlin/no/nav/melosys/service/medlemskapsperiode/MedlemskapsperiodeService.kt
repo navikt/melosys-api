@@ -5,6 +5,7 @@ import no.nav.melosys.domain.Medlemskapsperiode
 import no.nav.melosys.domain.folketrygden.MedlemAvFolketrygden
 import no.nav.melosys.domain.kodeverk.Folketrygdloven_kap2_bestemmelser
 import no.nav.melosys.domain.kodeverk.InnvilgelsesResultat
+import no.nav.melosys.domain.kodeverk.Land_iso2
 import no.nav.melosys.domain.kodeverk.Trygdedekninger
 import no.nav.melosys.domain.mottatteopplysninger.SøknadNorgeEllerUtenforEØS
 import no.nav.melosys.exception.FunksjonellException
@@ -34,6 +35,7 @@ class MedlemskapsperiodeService(
             .orElse(emptyList())
     }
 
+
     @Transactional
     fun opprettMedlemskapsperiode(
         behandlingsresultatID: Long,
@@ -41,12 +43,13 @@ class MedlemskapsperiodeService(
         tom: LocalDate,
         innvilgelsesResultat: InnvilgelsesResultat?,
         trygdedekning: Trygdedekninger?,
-        bestemmelse: Folketrygdloven_kap2_bestemmelser?
+        bestemmelse: Folketrygdloven_kap2_bestemmelser?,
     ): Medlemskapsperiode {
-        validerFelt(fom, tom, innvilgelsesResultat, trygdedekning, bestemmelse)
-
         val medlemAvFolketrygden = medlemAvFolketrygdenService.hentMedlemAvFolketrygden(behandlingsresultatID)
         val søknad = medlemAvFolketrygden.behandlingsresultat.behandling.mottatteOpplysninger.mottatteOpplysningerData as SøknadNorgeEllerUtenforEØS
+
+        validerFelt(fom, tom, innvilgelsesResultat, trygdedekning, bestemmelse, søknad.soeknadsland.landkoder)
+
 
         val nyMedlemskapsperiode = Medlemskapsperiode().apply {
             this.tom = tom
@@ -68,14 +71,15 @@ class MedlemskapsperiodeService(
         behandlingsresultatID: Long,
         medlemskapsperiodeID: Long,
         fom: LocalDate?,
-        tom: LocalDate,
+        tom: LocalDate?,
         innvilgelsesResultat: InnvilgelsesResultat?,
         trygdedekning: Trygdedekninger?,
-        bestemmelse: Folketrygdloven_kap2_bestemmelser?
+        bestemmelse: Folketrygdloven_kap2_bestemmelser?,
     ): Medlemskapsperiode {
-        validerFelt(fom, tom, innvilgelsesResultat, trygdedekning, bestemmelse)
-
         val medlemAvFolketrygden = medlemAvFolketrygdenService.hentMedlemAvFolketrygden(behandlingsresultatID)
+        val søknad = medlemAvFolketrygden.behandlingsresultat.behandling.mottatteOpplysninger.mottatteOpplysningerData as SøknadNorgeEllerUtenforEØS
+        validerFelt(fom, tom, innvilgelsesResultat, trygdedekning, bestemmelse, søknad.soeknadsland.landkoder)
+
         val medlemskapsperiode = medlemAvFolketrygden.medlemskapsperioder.firstOrNull { it.id == medlemskapsperiodeID }
             ?: throw IkkeFunnetException("Behandling $behandlingsresultatID har ingen medlemskapsperiode med id $medlemskapsperiodeID")
 
@@ -97,12 +101,18 @@ class MedlemskapsperiodeService(
 
     private fun validerFelt(
         fom: LocalDate?,
-        tom: LocalDate,
+        tom: LocalDate?,
         innvilgelsesResultat: InnvilgelsesResultat?,
         trygdedekning: Trygdedekninger?,
-        bestemmelse: Folketrygdloven_kap2_bestemmelser?
+        bestemmelse: Folketrygdloven_kap2_bestemmelser?,
+        land: List<String>
     ) {
-        if (fom == null || innvilgelsesResultat == null || bestemmelse == null || trygdedekning == null) {
+        val nullTilOgMedDatoErTillatt =
+            Land_iso2.NO.kode in land && land.size == 1 && bestemmelse in UtledBestemmelserOgVilkår.støttetBestemmelser2_1
+
+        if (tom == null && !nullTilOgMedDatoErTillatt) {
+            throw FunksjonellException("Tom-dato er påkrevd")
+        } else if (innvilgelsesResultat == null || bestemmelse == null || trygdedekning == null) {
             throw FunksjonellException("Fom-dato, innvilgelsesresultat, bestemmelse og trygdedekning er påkrevd")
         } else if (!hentGyldigeTrygdedekninger().contains(trygdedekning)) {
             throw FunksjonellException("Trygedekning $trygdedekning støttes ikke for en medlemskapsperiode")

@@ -41,6 +41,8 @@ object UtledMedlemskapsperioder {
     fun lagMedlemskapsperioder(dto: UtledMedlemskapsperioderDto): Collection<Medlemskapsperiode> {
         if (bestemmelseErParagraf(dto.bestemmelse, "2_7")) {
             return lagMedlemskapsperioderFor2_7(dto)
+        } else if (dto.bestemmelse in PliktigeMedlemskapsbestemmelser.bestemmelser) {
+            return lagMedlemskapsperioderForPliktige(dto)
         } else if (bestemmelseErParagraf(dto.bestemmelse, "2_8")) {
             return lagMedlemskapsperioderFor2_8(dto)
         }
@@ -87,6 +89,18 @@ object UtledMedlemskapsperioder {
             lagPeriode(
                 splittetPeriode.second,
                 dto.trygdedekning,
+                dto.arbeidsland,
+                InnvilgelsesResultat.INNVILGET,
+                dto.bestemmelse
+            )
+        )
+    }
+
+    private fun lagMedlemskapsperioderForPliktige(dto: UtledMedlemskapsperioderDto): Collection<Medlemskapsperiode> {
+        return setOf(
+            lagPeriode(
+                dto.søknadsperiode,
+                Trygdedekninger.FULL_DEKNING_FTRL,
                 dto.arbeidsland,
                 InnvilgelsesResultat.INNVILGET,
                 dto.bestemmelse
