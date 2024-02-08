@@ -209,7 +209,6 @@ class SedDataByggerTest {
     @Test
     void lag_bostedsadresseUtenGateadresse_gatenavnBlirNA() {
         Bostedsadresse bostedsadresse = new Bostedsadresse();
-        bostedsadresse.setGateadresse(null);
         bostedsadresse.setLand(new Land(Land.SVERIGE));
         behandling.hentPersonDokument().setBostedsadresse(bostedsadresse);
 
