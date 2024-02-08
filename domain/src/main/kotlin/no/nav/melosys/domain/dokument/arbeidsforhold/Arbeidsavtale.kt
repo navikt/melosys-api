@@ -25,8 +25,8 @@ class Arbeidsavtale : HarPeriode {
 
     @JsonProperty("fartsomraade")
     var fartsområde: Fartsomraade? = null //"http://nav.no/kodeverk/Kodeverk/Fartsområder"
-    var skipsregister = Skipsregister()
-    var skipstype = Skipstype()
+    var skipsregister: Skipsregister? = null
+    var skipstype: Skipstype? = null
     var maritimArbeidsavtale: Boolean? = null
     var beregnetStillingsprosent: BigDecimal? = null
     var antallTimerGammeltAa: BigDecimal? = null

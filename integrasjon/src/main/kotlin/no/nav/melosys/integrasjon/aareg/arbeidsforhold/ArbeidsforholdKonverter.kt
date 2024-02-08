@@ -106,6 +106,9 @@ class ArbeidsforholdKonverter(
 
                 // Disse ikke er med i ny aareg rest api
                 maritimArbeidsavtale = false
+                skipsregister = null
+                skipstype = null
+                fartsområde = null
             }
         }
     }
