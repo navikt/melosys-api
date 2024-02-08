@@ -45,8 +45,8 @@ class ArbeidsforholdKonverter(
         return antallTimerForTimeloennet.map {
             AntallTimerIPerioden().apply {
                 antallTimer = it.antallTimer()
-                periode = getPeriode(it.periode())
-                rapporteringsperiode = YearMonth.parse(it.rapporteringsperiode())
+                timelonnetPeriode = getPeriode(it.periode())
+                rapporteringsAarMaaned = YearMonth.parse(it.rapporteringsperiode())
             }
         }
     }
