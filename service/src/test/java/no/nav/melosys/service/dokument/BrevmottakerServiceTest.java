@@ -469,7 +469,7 @@ class BrevmottakerServiceTest {
 
     private ArbeidsforholdDokument lagArbeidsforholdDokument(String arbeidsgiverIDOrgNr) {
         var arbeidsforhold = new Arbeidsforhold();
-        arbeidsforhold.arbeidsgiverID = arbeidsgiverIDOrgNr;
+        arbeidsforhold.setArbeidsgiverID(arbeidsgiverIDOrgNr);
         var arbeidsforholdDokument = new ArbeidsforholdDokument();
         arbeidsforholdDokument.arbeidsforhold.add(arbeidsforhold);
         return arbeidsforholdDokument;

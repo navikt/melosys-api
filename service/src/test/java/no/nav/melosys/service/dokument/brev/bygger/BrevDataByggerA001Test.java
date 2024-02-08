@@ -194,8 +194,8 @@ class BrevDataByggerA001Test {
 
     private Arbeidsforhold lagArbeidsforhold(String orgnr, LocalDate fom, LocalDate tom) {
         Arbeidsforhold arbeidsforhold = new Arbeidsforhold();
-        arbeidsforhold.arbeidsgiverID = orgnr;
-        arbeidsforhold.ansettelsesPeriode = new Periode(fom, tom);
+        arbeidsforhold.setArbeidsgiverID(orgnr);
+        arbeidsforhold.setAnsettelsesPeriode(new Periode(fom, tom));
         arbDokument.arbeidsforhold.add(arbeidsforhold);
 
         return arbeidsforhold;
@@ -302,7 +302,7 @@ class BrevDataByggerA001Test {
             LocalDate.of(2017, 10, 23));
 
         BrevDataA001 brevDataA001 = (BrevDataA001) brevDataByggerA001.lag(lagBrevDataGrunnlag(), SAKSBEHANDLER_ID);
-        assertThat((brevDataA001).ansettelsesperiode).contains(forventet.ansettelsesPeriode);
+        assertThat((brevDataA001).ansettelsesperiode).contains(forventet.getAnsettelsesPeriode());
     }
 
     @Test

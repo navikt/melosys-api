@@ -95,7 +95,7 @@ class ArbeidsforholdKonverter(
                 }
                 beregnetAntallTimerPrUke = it.beregnetAntallTimerPrUke()
                 arbeidstidsordning = Arbeidstidsordning()
-                arbeidstidsordning.kode = it.arbeidstidsordning()
+                arbeidstidsordning!!.kode = it.arbeidstidsordning()
                 avloenningstype = "" // Finnes ikke i nytt rest api
                 gyldighetsperiode = getPeriode(it.gyldighetsperiode())
                 beregnetAntallTimerPrUke = it.beregnetAntallTimerPrUke()
@@ -106,9 +106,6 @@ class ArbeidsforholdKonverter(
 
                 // Disse ikke er med i ny aareg rest api
                 maritimArbeidsavtale = false
-                skipsregister = null
-                skipstype = null
-                fartsområde = null
             }
         }
     }

@@ -23,16 +23,16 @@ class SaksopplysningerTilDtoTest {
     void testArbeidsforholdSortering() {
         List<Arbeidsforhold> arbeidsforholdListe = new ArrayList<>();
         Arbeidsforhold a1 = new Arbeidsforhold();
-        a1.ansettelsesPeriode = new Periode(LocalDate.now(), LocalDate.MAX);
+        a1.setAnsettelsesPeriode(new Periode(LocalDate.now(), LocalDate.MAX));
         arbeidsforholdListe.add(a1);
         Arbeidsforhold a2 = new Arbeidsforhold();
-        a2.ansettelsesPeriode = new Periode(LocalDate.now(), null);
+        a2.setAnsettelsesPeriode(new Periode(LocalDate.now(), null));
         arbeidsforholdListe.add(a2);
         Arbeidsforhold a3 = new Arbeidsforhold();
-        a3.ansettelsesPeriode = new Periode(LocalDate.now().plusYears(1), null);
+        a3.setAnsettelsesPeriode(new Periode(LocalDate.now().plusYears(1), null));
         arbeidsforholdListe.add(a3);
         Arbeidsforhold a4 = new Arbeidsforhold();
-        a4.ansettelsesPeriode = new Periode(LocalDate.now().plusYears(2), LocalDate.MAX);
+        a4.setAnsettelsesPeriode(new Periode(LocalDate.now().plusYears(2), LocalDate.MAX));
         arbeidsforholdListe.add(a4);
 
         SaksopplysningerTilDto.ArbeidsforholdComparator arbeidsforholdComparator = new SaksopplysningerTilDto.ArbeidsforholdComparator();

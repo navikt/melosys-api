@@ -104,7 +104,7 @@ class RegisteropplysningerServiceTest {
     @Test
     void hentOgLagreOpplysninger_medAlleOpplysningerIVilkårligRekkefølge_alleBlirHentetOgLagretIRettRekkefølge() {
         Arbeidsforhold arbeidsforhold = new Arbeidsforhold();
-        arbeidsforhold.arbeidsgiverID = "123456789";
+        arbeidsforhold.setArbeidsgiverID("123456789");
 
         ArbeidsforholdDokument arbeidsforholdDokument = new ArbeidsforholdDokument(List.of(arbeidsforhold));
         Saksopplysning saksopplysning = new Saksopplysning();
@@ -261,7 +261,7 @@ class RegisteropplysningerServiceTest {
 
     private ArbeidsforholdDokument lagArbeidsforholdDokument() {
         Arbeidsforhold arbeidsforhold = new Arbeidsforhold();
-        arbeidsforhold.arbeidsgiverID = "123456789";
+        arbeidsforhold.setArbeidsgiverID("123456789");
 
         ArbeidsforholdDokument arbeidsforholdDokument = new ArbeidsforholdDokument(List.of(arbeidsforhold));
         Saksopplysning saksopplysning = new Saksopplysning();
