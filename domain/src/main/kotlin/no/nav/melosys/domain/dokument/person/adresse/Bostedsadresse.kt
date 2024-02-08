@@ -17,7 +17,7 @@ data class Bostedsadresse(
     var postnr: String? = null,
     var poststed: String? = null
 ) {
-    fun erTom(): Boolean = (gateadresse.erTom() || postnr.isNullOrEmpty() || poststed.isNullOrEmpty() || land.kode.isNullOrEmpty())
+    fun erTom(): Boolean = (gateadresse.erTom() && postnr.isNullOrEmpty() && poststed.isNullOrEmpty() && land.kode.isNullOrEmpty())
 
     fun tilStrukturertAdresse(): StrukturertAdresse {
         val adresse = StrukturertAdresse()

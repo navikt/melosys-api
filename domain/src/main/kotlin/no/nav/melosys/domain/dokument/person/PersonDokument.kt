@@ -106,7 +106,7 @@ class PersonDokument : Persondata {
     }
 
     override fun hentKjønnType(): KjoennType? {
-        return KjoennType.avKode(kjønn!!.getKode())
+        return KjoennType.avKode(kjønn?.kode)
     }
 
     override fun hentFolkeregisterident(): String? {
