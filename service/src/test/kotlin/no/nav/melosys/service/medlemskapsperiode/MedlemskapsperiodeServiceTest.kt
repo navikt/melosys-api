@@ -66,6 +66,17 @@ class MedlemskapsperiodeServiceTest {
 
     private lateinit var medlemskapsperiodeService: MedlemskapsperiodeService
 
+    private val mockBehandlingsresultatMedSoeknadsland: Behandlingsresultat = Behandlingsresultat().apply {
+        behandling = Behandling().apply {
+            id = BEHANDLING_ID_1
+            mottatteOpplysninger = MottatteOpplysninger().apply {
+                mottatteOpplysningerData = SøknadNorgeEllerUtenforEØS().apply {
+                    soeknadsland = Soeknadsland(listOf(Land_iso2.AU.kode), false)
+                }
+            }
+        }
+    }
+
     @BeforeEach
     fun setUp() {
         medlemskapsperiodeService = MedlemskapsperiodeService(
@@ -173,6 +184,7 @@ class MedlemskapsperiodeServiceTest {
     fun oppdaterMedlemskapsperiode_medlemskapsperiodeFinnes_oppdateres() {
         val medlemAvFolketrygden = MedlemAvFolketrygden().apply {
             medlemskapsperioder = listOf(Medlemskapsperiode().apply { id = MEDLEMSKAPSPERIODE_ID_1 })
+            behandlingsresultat = mockBehandlingsresultatMedSoeknadsland
         }
         every { medlemAvFolketrygdenService.hentMedlemAvFolketrygden(BEHANDLING_ID_1) } returns medlemAvFolketrygden
         every { medlemskapsperiodeRepository.save(any()) } returnsArgument 0
@@ -205,6 +217,7 @@ class MedlemskapsperiodeServiceTest {
         val medlemAvFolketrygden = MedlemAvFolketrygden().apply {
             medlemskapsperioder = listOf(Medlemskapsperiode().apply { id = MEDLEMSKAPSPERIODE_ID_1 })
             fastsattTrygdeavgift = FastsattTrygdeavgift()
+            behandlingsresultat = mockBehandlingsresultatMedSoeknadsland
         }
         every { medlemAvFolketrygdenService.hentMedlemAvFolketrygden(BEHANDLING_ID_1) } returns medlemAvFolketrygden
         every { medlemskapsperiodeRepository.save(any()) } returnsArgument 0
@@ -227,6 +240,11 @@ class MedlemskapsperiodeServiceTest {
 
     @Test
     fun oppdaterMedlemskapsperiode_ugyldigTrygdedekning_kasterException() {
+        every { medlemAvFolketrygdenService.hentMedlemAvFolketrygden(BEHANDLING_ID_1) } returns MedlemAvFolketrygden().apply {
+            medlemskapsperioder = mutableListOf(Medlemskapsperiode().apply { id = 1L })
+            behandlingsresultat = mockBehandlingsresultatMedSoeknadsland
+        }
+
         shouldThrow<FunksjonellException> {
             medlemskapsperiodeService.oppdaterMedlemskapsperiode(
                 BEHANDLING_ID_1,
@@ -242,6 +260,11 @@ class MedlemskapsperiodeServiceTest {
 
     @Test
     fun oppdaterMedlemskapsperiode_tomDatoErFørFomDato_kasterException() {
+        every { medlemAvFolketrygdenService.hentMedlemAvFolketrygden(BEHANDLING_ID_1) } returns MedlemAvFolketrygden().apply {
+            medlemskapsperioder = mutableListOf(Medlemskapsperiode().apply { id = 1L })
+            behandlingsresultat = mockBehandlingsresultatMedSoeknadsland
+        }
+
         shouldThrow<FunksjonellException> {
             medlemskapsperiodeService.oppdaterMedlemskapsperiode(
                 BEHANDLING_ID_1,
@@ -257,6 +280,11 @@ class MedlemskapsperiodeServiceTest {
 
     @Test
     fun oppdaterMedlemskapsperiode_utenTrygdedekning_kasterFeil() {
+        every { medlemAvFolketrygdenService.hentMedlemAvFolketrygden(BEHANDLING_ID_1) } returns MedlemAvFolketrygden().apply {
+            medlemskapsperioder = mutableListOf(Medlemskapsperiode().apply { id = 1L })
+            behandlingsresultat = mockBehandlingsresultatMedSoeknadsland
+        }
+
         shouldThrow<FunksjonellException> {
             medlemskapsperiodeService.oppdaterMedlemskapsperiode(
                 BEHANDLING_ID_1,
@@ -272,6 +300,11 @@ class MedlemskapsperiodeServiceTest {
 
     @Test
     fun oppdaterMedlemskapsperiode_utenBestemmelse_kasterFeil() {
+        every { medlemAvFolketrygdenService.hentMedlemAvFolketrygden(BEHANDLING_ID_1) } returns MedlemAvFolketrygden().apply {
+            medlemskapsperioder = mutableListOf(Medlemskapsperiode().apply { id = 1L })
+            behandlingsresultat = mockBehandlingsresultatMedSoeknadsland
+        }
+
         shouldThrow<FunksjonellException> {
             medlemskapsperiodeService.oppdaterMedlemskapsperiode(
                 BEHANDLING_ID_1,
@@ -288,9 +321,9 @@ class MedlemskapsperiodeServiceTest {
     @Test
     fun oppdaterMedlemskapsperiode_finnerIkkeMedlemskapsperiode_kasterException() {
         every { medlemAvFolketrygdenService.hentMedlemAvFolketrygden(BEHANDLING_ID_1) } returns MedlemAvFolketrygden().apply {
-            medlemskapsperioder = mutableListOf(Medlemskapsperiode().apply { id = MEDLEMSKAPSPERIODE_ID_1 })
+            medlemskapsperioder = mutableListOf(Medlemskapsperiode().apply { id = 1L })
+            behandlingsresultat = mockBehandlingsresultatMedSoeknadsland
         }
-
 
         shouldThrow<FunksjonellException> {
             medlemskapsperiodeService.oppdaterMedlemskapsperiode(
