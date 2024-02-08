@@ -1,9 +1,6 @@
 package no.nav.melosys.service.dokument;
 
-import java.util.Collections;
-import java.util.List;
-import java.util.Optional;
-import java.util.Set;
+import java.util.*;
 
 import com.google.common.collect.Sets;
 import io.getunleash.FakeUnleash;
@@ -480,10 +477,12 @@ class BrevmottakerServiceTest {
 
     private UtenlandskMyndighet lagUtenlandskMyndighet() {
         UtenlandskMyndighet utenlandskMyndighet = new UtenlandskMyndighet();
-        utenlandskMyndighet.landkode = Land_iso2.CZ;
-        utenlandskMyndighet.institusjonskode = "SZUC10416";
-        utenlandskMyndighet.postnummer = "123";
-        utenlandskMyndighet.preferanser = Collections.singleton(new Preferanse(1L, Preferanse.PreferanseEnum.RESERVERT_FRA_A1));
+        utenlandskMyndighet.setLandkode(Land_iso2.CZ);
+        utenlandskMyndighet.setInstitusjonskode("SZUC10416");
+        utenlandskMyndighet.setPostnummer("123");
+        var preferanser = new HashSet<Preferanse>();
+        preferanser.add(new Preferanse(1L, Preferanse.PreferanseEnum.RESERVERT_FRA_A1));
+        utenlandskMyndighet.setPreferanser(preferanser);
 
         return utenlandskMyndighet;
     }

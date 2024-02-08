@@ -74,10 +74,10 @@ class BrevDataServiceTest {
 
     private UtenlandskMyndighet lagUtenlandskMyndighet() {
         UtenlandskMyndighet myndighet = new UtenlandskMyndighet();
-        myndighet.navn = "navn";
-        myndighet.gateadresse1 = "gateadresse 123";
-        myndighet.gateadresse2 = "institusjon ABC";
-        myndighet.land = "HR";
+        myndighet.setNavn("navn");
+        myndighet.setGateadresse1("gateadresse 123");
+        myndighet.setGateadresse2("institusjon ABC");
+        myndighet.setLand("HR");
         when(utenlandskMyndighetRepository.findByLandkode(Land_iso2.HR)).thenReturn(Optional.of(myndighet));
         return myndighet;
     }
@@ -138,12 +138,12 @@ class BrevDataServiceTest {
         mottaker.setRolle(Mottakerroller.UTENLANDSK_TRYGDEMYNDIGHET);
         mottaker.setInstitusjonID("DE:TEST");
         UtenlandskMyndighet tyskMyndighet = new UtenlandskMyndighet();
-        tyskMyndighet.institusjonskode = "TEST";
+        tyskMyndighet.setInstitusjonskode("TEST");
         when(utenlandskMyndighetRepository.findByLandkode(Land_iso2.DE)).thenReturn(Optional.of(tyskMyndighet));
 
         UtenlandskMyndighet utenlandskMyndighet = service.hentUtenlandskTrygdemyndighetFraMottaker(mottaker);
 
-        assertThat(utenlandskMyndighet.institusjonskode).isEqualTo(tyskMyndighet.institusjonskode);
+        assertThat(utenlandskMyndighet.getInstitusjonskode()).isEqualTo(tyskMyndighet.getInstitusjonskode());
     }
 
     private static no.nav.melosys.domain.brev.Mottaker lagMottaker(Mottakerroller rolle) {
@@ -332,14 +332,14 @@ class BrevDataServiceTest {
         expectedBrevMottaker.setId(INSTITUSJON_ID);
         expectedBrevMottaker.setTypeKode(AktoerType.PERSON);
         expectedBrevMottaker.setBerik(false);
-        expectedBrevMottaker.setNavn(myndighet.navn);
-        expectedBrevMottaker.setKortNavn(myndighet.navn);
+        expectedBrevMottaker.setNavn(myndighet.getNavn());
+        expectedBrevMottaker.setKortNavn(myndighet.getNavn());
         expectedBrevMottaker.setSpraakkode(Spraakkode.NB);
         expectedBrevMottaker.setMottakeradresse(UtenlandskPostadresse.builder()
-            .withAdresselinje1(myndighet.gateadresse1)
-            .withAdresselinje2(myndighet.gateadresse2)
-            .withAdresselinje3(myndighet.postnummer + " " + myndighet.poststed)
-            .withLand(myndighet.land)
+            .withAdresselinje1(myndighet.getGateadresse1())
+            .withAdresselinje2(myndighet.getGateadresse2())
+            .withAdresselinje3(myndighet.getPostnummer() + " " + myndighet.getPoststed())
+            .withLand(myndighet.getLand())
             .build());
 
         assertThat(brevMottaker).isEqualTo(expectedBrevMottaker);

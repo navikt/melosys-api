@@ -1,5 +1,8 @@
 package no.nav.melosys.service.dokument.brev;
 
+import java.util.Collections;
+import java.util.List;
+
 import no.nav.melosys.domain.Behandling;
 import no.nav.melosys.domain.arkiv.FysiskDokument;
 import no.nav.melosys.domain.arkiv.OpprettJournalpost;
@@ -11,9 +14,6 @@ import no.nav.melosys.service.dokument.sed.EessiService;
 import no.nav.melosys.service.oppgave.OppgaveFactory;
 import no.nav.melosys.service.persondata.PersondataFasade;
 import org.springframework.stereotype.Service;
-
-import java.util.Collections;
-import java.util.List;
 
 @Service
 public class SedSomBrevService {
@@ -60,7 +60,7 @@ public class SedSomBrevService {
             sedType,
             sedPdf,
             institusjonID,
-            utenlandskMyndighet.navn,
+            utenlandskMyndighet.getNavn(),
             mottakerland.getKode(),
             vedlegg,
             tema,

@@ -32,12 +32,12 @@ public class UtenlandskMyndighetService {
 
     static {
         var utenlandskMyndighet = new UtenlandskMyndighet();
-        utenlandskMyndighet.navn = "Social Security Administration";
-        utenlandskMyndighet.gateadresse1 = "Division of Training and Program Support";
-        utenlandskMyndighet.gateadresse2 = "International Support Branch, NT 03-A-09 6100 Wabash Avenue";
-        utenlandskMyndighet.poststed = "Baltimore MD 21215";
-        utenlandskMyndighet.land = "USA";
-        utenlandskMyndighet.landkode = Land_iso2.US;
+        utenlandskMyndighet.setNavn("Social Security Administration");
+        utenlandskMyndighet.setGateadresse1("Division of Training and Program Support");
+        utenlandskMyndighet.setGateadresse2("International Support Branch, NT 03-A-09 6100 Wabash Avenue");
+        utenlandskMyndighet.setPoststed("Baltimore MD 21215");
+        utenlandskMyndighet.setLand("USA");
+        utenlandskMyndighet.setLandkode(Land_iso2.US);
         utenlandskMyndighetUnntakUSA = utenlandskMyndighet;
     }
 

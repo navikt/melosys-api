@@ -180,12 +180,12 @@ class DokSysServiceTest {
         Dokumentbestillingsinformasjon dokInfo = hentDokumentBestillingInfoFraCaptor(captor);
         assertThat(dokInfo.getMottaker().isBerik()).isFalse();
         assertThat(dokInfo.getMottaker()).isInstanceOf(Person.class);
-        assertThat(((Person) dokInfo.getMottaker()).getNavn()).isEqualTo(metadata.utenlandskMyndighet.navn);
+        assertThat(((Person) dokInfo.getMottaker()).getNavn()).isEqualTo(metadata.utenlandskMyndighet.getNavn());
 
 
         UtenlandskPostadresse utenlandskPostadresse = (UtenlandskPostadresse) dokInfo.getAdresse();
-        assertThat(utenlandskPostadresse.getAdresselinje1()).isEqualTo(metadata.utenlandskMyndighet.gateadresse1);
-        assertThat(utenlandskPostadresse.getLand().getValue()).isEqualTo(metadata.utenlandskMyndighet.landkode.getKode());
+        assertThat(utenlandskPostadresse.getAdresselinje1()).isEqualTo(metadata.utenlandskMyndighet.getGateadresse1());
+        assertThat(utenlandskPostadresse.getLand().getValue()).isEqualTo(metadata.utenlandskMyndighet.getLandkode().getKode());
     }
 
     @Test
@@ -441,11 +441,11 @@ class DokSysServiceTest {
 
     private UtenlandskMyndighet lagUtenlandskMyndighet() {
         UtenlandskMyndighet utenlandskMyndighet = new UtenlandskMyndighet();
-        utenlandskMyndighet.gateadresse1 = "Stubenstrasse 77";
-        utenlandskMyndighet.postnummer = "0101";
-        utenlandskMyndighet.poststed = "Berlin";
-        utenlandskMyndighet.landkode = Land_iso2.GL;
-        utenlandskMyndighet.institusjonskode = "INST-023%zdf";
+        utenlandskMyndighet.setGateadresse1("Stubenstrasse 77");
+        utenlandskMyndighet.setPostnummer("0101");
+        utenlandskMyndighet.setPoststed("Berlin");
+        utenlandskMyndighet.setLandkode(Land_iso2.GL);
+        utenlandskMyndighet.setInstitusjonskode("INST-023%zdf");
         return utenlandskMyndighet;
     }
 

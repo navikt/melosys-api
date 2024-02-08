@@ -104,12 +104,12 @@ class A001MapperTest {
         no.nav.melosys.service.dokument.brev.mapper.arbeidssted.Arbeidssted maritimtArbeidssted = lagMaritimtArbeidssted();
 
         UtenlandskMyndighet myndighet = new UtenlandskMyndighet();
-        myndighet.navn = "SAV";
-        myndighet.institusjonskode = "23";
-        myndighet.gateadresse1 = "Adresse";
-        myndighet.postnummer = "0165";
-        myndighet.poststed = "Stockholm";
-        myndighet.landkode = Land_iso2.SK;
+        myndighet.setNavn("SAV");
+        myndighet.setInstitusjonskode("23");
+        myndighet.setGateadresse1("Adresse");
+        myndighet.setPostnummer("0165");
+        myndighet.setPoststed("Stockholm");
+        myndighet.setLandkode(Land_iso2.SK);
 
         Vilkaarsresultat vilkår16 = lagVilkaarsresultat(Vilkaar.FO_883_2004_ART16_1, true, UTSENDELSE_MELLOM_24_MN_OG_5_AAR);
         Vilkaarsresultat vilkår16Uten12 = lagVilkaarsresultat(Vilkaar.FO_883_2004_ART16_1, true, SJOEMANNSKIRKEN);
