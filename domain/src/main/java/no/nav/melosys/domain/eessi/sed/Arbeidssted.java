@@ -21,8 +21,8 @@ public class Arbeidssted {
     public FysiskArbeidssted tilFysiskArbeidssted() {
         FysiskArbeidssted fysiskArbeidssted = new FysiskArbeidssted();
 
-        fysiskArbeidssted.adresse = adresse.tilStrukturertAdresse();
-        fysiskArbeidssted.virksomhetNavn = navn;
+        fysiskArbeidssted.setAdresse(adresse.tilStrukturertAdresse());
+        fysiskArbeidssted.setVirksomhetNavn(navn);
 
         return fysiskArbeidssted;
     }

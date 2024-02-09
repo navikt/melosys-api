@@ -9,8 +9,8 @@ public class Ident {
 
     public UtenlandskIdent tilUtenlandskIdent() {
         UtenlandskIdent utenlandskIdent = new UtenlandskIdent();
-        utenlandskIdent.ident = ident;
-        utenlandskIdent.landkode = landkode;
+        utenlandskIdent.setIdent(ident);
+        utenlandskIdent.setLandkode(landkode);
         return utenlandskIdent;
     }
 
