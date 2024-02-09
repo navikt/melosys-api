@@ -13,7 +13,7 @@ import org.springframework.web.context.WebApplicationContext
 @Protected
 @RestController
 @RequestMapping("/ftrl/trygdedekninger")
-@Api(tags = ["ftrl/gyldige-trygdedekninger"])
+@Api(tags = ["ftrl", "trygdedekninger"])
 @Scope(value = WebApplicationContext.SCOPE_REQUEST)
 class GyldigeTrygdedekningerTjeneste(
     private val gyldigeTrygdedekningerService: GyldigeTrygdedekningerService

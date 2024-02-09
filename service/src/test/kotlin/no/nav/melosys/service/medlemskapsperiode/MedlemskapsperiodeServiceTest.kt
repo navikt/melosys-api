@@ -17,6 +17,7 @@ import no.nav.melosys.domain.Medlemskapsperiode
 import no.nav.melosys.domain.folketrygden.FastsattTrygdeavgift
 import no.nav.melosys.domain.folketrygden.MedlemAvFolketrygden
 import no.nav.melosys.domain.kodeverk.*
+import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingstema
 import no.nav.melosys.domain.mottatteopplysninger.MottatteOpplysninger
 import no.nav.melosys.domain.mottatteopplysninger.SøknadNorgeEllerUtenforEØS
 import no.nav.melosys.domain.mottatteopplysninger.data.Soeknadsland
@@ -100,6 +101,7 @@ class MedlemskapsperiodeServiceTest {
         val medlemAvFolketrygden = MedlemAvFolketrygden().apply {
             behandlingsresultat = Behandlingsresultat().apply {
                 behandling = Behandling().apply {
+                    tema = Behandlingstema.YRKESAKTIV
                     mottatteOpplysninger = MottatteOpplysninger().apply {
                         mottatteOpplysningerData = SøknadNorgeEllerUtenforEØS().apply {
                             soeknadsland = Soeknadsland(listOf(Land_iso2.AU.kode), false)
@@ -141,6 +143,7 @@ class MedlemskapsperiodeServiceTest {
         val medlemAvFolketrygden = MedlemAvFolketrygden().apply {
             behandlingsresultat = Behandlingsresultat().apply {
                 behandling = Behandling().apply {
+                    tema = Behandlingstema.YRKESAKTIV
                     mottatteOpplysninger = MottatteOpplysninger().apply {
                         mottatteOpplysningerData = SøknadNorgeEllerUtenforEØS().apply {
                             soeknadsland = Soeknadsland(listOf(Land_iso2.AU.kode), false)
@@ -174,6 +177,7 @@ class MedlemskapsperiodeServiceTest {
         every { gyldigeTrygdedekningerService.hentTrygdedekninger(any()) } returns listOf(*Trygdedekninger.values())
         val medlemAvFolketrygden = MedlemAvFolketrygden().apply {
             medlemskapsperioder = listOf(Medlemskapsperiode().apply { id = MEDLEMSKAPSPERIODE_ID_1 })
+            behandlingsresultat = Behandlingsresultat().apply { behandling = Behandling().apply { tema = Behandlingstema.YRKESAKTIV } }
         }
         every { medlemAvFolketrygdenService.hentMedlemAvFolketrygden(BEHANDLING_ID_1) } returns medlemAvFolketrygden
         every { medlemskapsperiodeRepository.save(any()) } returnsArgument 0
@@ -207,6 +211,7 @@ class MedlemskapsperiodeServiceTest {
         val medlemAvFolketrygden = MedlemAvFolketrygden().apply {
             medlemskapsperioder = listOf(Medlemskapsperiode().apply { id = MEDLEMSKAPSPERIODE_ID_1 })
             fastsattTrygdeavgift = FastsattTrygdeavgift()
+            behandlingsresultat = Behandlingsresultat().apply { behandling = Behandling().apply { tema = Behandlingstema.YRKESAKTIV } }
         }
         every { medlemAvFolketrygdenService.hentMedlemAvFolketrygden(BEHANDLING_ID_1) } returns medlemAvFolketrygden
         every { medlemskapsperiodeRepository.save(any()) } returnsArgument 0
@@ -229,7 +234,13 @@ class MedlemskapsperiodeServiceTest {
 
     @Test
     fun oppdaterMedlemskapsperiode_ugyldigTrygdedekning_kasterException() {
+        every { medlemAvFolketrygdenService.hentMedlemAvFolketrygden(BEHANDLING_ID_1) } returns MedlemAvFolketrygden().apply {
+            medlemskapsperioder = listOf(Medlemskapsperiode().apply { id = MEDLEMSKAPSPERIODE_ID_1 })
+            behandlingsresultat = Behandlingsresultat().apply { behandling = Behandling().apply { tema = Behandlingstema.YRKESAKTIV } }
+        }
         every { gyldigeTrygdedekningerService.hentTrygdedekninger(any()) } returns emptyList()
+
+
         shouldThrow<FunksjonellException> {
             medlemskapsperiodeService.oppdaterMedlemskapsperiode(
                 BEHANDLING_ID_1,
@@ -245,7 +256,13 @@ class MedlemskapsperiodeServiceTest {
 
     @Test
     fun oppdaterMedlemskapsperiode_tomDatoErFørFomDato_kasterException() {
+        every { medlemAvFolketrygdenService.hentMedlemAvFolketrygden(BEHANDLING_ID_1) } returns MedlemAvFolketrygden().apply {
+            medlemskapsperioder = listOf(Medlemskapsperiode().apply { id = MEDLEMSKAPSPERIODE_ID_1 })
+            behandlingsresultat = Behandlingsresultat().apply { behandling = Behandling().apply { tema = Behandlingstema.YRKESAKTIV } }
+        }
         every { gyldigeTrygdedekningerService.hentTrygdedekninger(any()) } returns listOf(*Trygdedekninger.values())
+
+
         shouldThrow<FunksjonellException> {
             medlemskapsperiodeService.oppdaterMedlemskapsperiode(
                 BEHANDLING_ID_1,
@@ -261,6 +278,12 @@ class MedlemskapsperiodeServiceTest {
 
     @Test
     fun oppdaterMedlemskapsperiode_utenTrygdedekning_kasterFeil() {
+        every { medlemAvFolketrygdenService.hentMedlemAvFolketrygden(BEHANDLING_ID_1) } returns MedlemAvFolketrygden().apply {
+            medlemskapsperioder = listOf(Medlemskapsperiode().apply { id = MEDLEMSKAPSPERIODE_ID_1 })
+            behandlingsresultat = Behandlingsresultat().apply { behandling = Behandling().apply { tema = Behandlingstema.YRKESAKTIV } }
+        }
+
+
         shouldThrow<FunksjonellException> {
             medlemskapsperiodeService.oppdaterMedlemskapsperiode(
                 BEHANDLING_ID_1,
@@ -276,6 +299,12 @@ class MedlemskapsperiodeServiceTest {
 
     @Test
     fun oppdaterMedlemskapsperiode_utenBestemmelse_kasterFeil() {
+        every { medlemAvFolketrygdenService.hentMedlemAvFolketrygden(BEHANDLING_ID_1) } returns MedlemAvFolketrygden().apply {
+            medlemskapsperioder = listOf(Medlemskapsperiode().apply { id = MEDLEMSKAPSPERIODE_ID_1 })
+            behandlingsresultat = Behandlingsresultat().apply { behandling = Behandling().apply { tema = Behandlingstema.YRKESAKTIV } }
+        }
+
+
         shouldThrow<FunksjonellException> {
             medlemskapsperiodeService.oppdaterMedlemskapsperiode(
                 BEHANDLING_ID_1,
