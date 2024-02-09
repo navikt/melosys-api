@@ -19,10 +19,12 @@ import no.nav.melosys.domain.Behandlingsresultat
 import no.nav.melosys.domain.Medlemskapsperiode
 import no.nav.melosys.domain.folketrygden.FastsattTrygdeavgift
 import no.nav.melosys.domain.folketrygden.MedlemAvFolketrygden
-import no.nav.melosys.domain.kodeverk.*
+import no.nav.melosys.domain.kodeverk.Folketrygdloven_kap2_bestemmelser
+import no.nav.melosys.domain.kodeverk.InnvilgelsesResultat
+import no.nav.melosys.domain.kodeverk.Medlemskapstyper
+import no.nav.melosys.domain.kodeverk.Trygdedekninger
 import no.nav.melosys.domain.mottatteopplysninger.MottatteOpplysninger
 import no.nav.melosys.domain.mottatteopplysninger.SøknadNorgeEllerUtenforEØS
-import no.nav.melosys.domain.mottatteopplysninger.data.Soeknadsland
 import no.nav.melosys.exception.FunksjonellException
 import no.nav.melosys.featuretoggle.ToggleName
 import no.nav.melosys.repository.MedlemskapsperiodeRepository
@@ -101,11 +103,7 @@ class MedlemskapsperiodeServiceTest {
         val medlemAvFolketrygden = MedlemAvFolketrygden().apply {
             behandlingsresultat = Behandlingsresultat().apply {
                 behandling = Behandling().apply {
-                    mottatteOpplysninger = MottatteOpplysninger().apply {
-                        mottatteOpplysningerData = SøknadNorgeEllerUtenforEØS().apply {
-                            soeknadsland = Soeknadsland(listOf(Land_iso2.AU.kode), false)
-                        }
-                    }
+                    mottatteOpplysninger = MottatteOpplysninger().apply { mottatteOpplysningerData = SøknadNorgeEllerUtenforEØS() }
                 }
             }
         }
@@ -131,7 +129,6 @@ class MedlemskapsperiodeServiceTest {
             innvilgelsesresultat.shouldBe(InnvilgelsesResultat.AVSLAATT)
             trygdedekning.shouldBe(Trygdedekninger.FTRL_2_9_FØRSTE_LEDD_A_HELSE)
             bestemmelse.shouldBe(Folketrygdloven_kap2_bestemmelser.FTRL_KAP2_2_8_ANDRE_LEDD)
-            arbeidsland.shouldBe(Land_iso2.AU.kode)
             medlemskapstype.shouldBe(Medlemskapstyper.FRIVILLIG)
         }
     }
@@ -141,11 +138,7 @@ class MedlemskapsperiodeServiceTest {
         val medlemAvFolketrygden = MedlemAvFolketrygden().apply {
             behandlingsresultat = Behandlingsresultat().apply {
                 behandling = Behandling().apply {
-                    mottatteOpplysninger = MottatteOpplysninger().apply {
-                        mottatteOpplysningerData = SøknadNorgeEllerUtenforEØS().apply {
-                            soeknadsland = Soeknadsland(listOf(Land_iso2.AU.kode), false)
-                        }
-                    }
+                    mottatteOpplysninger = MottatteOpplysninger().apply { mottatteOpplysningerData = SøknadNorgeEllerUtenforEØS() }
                 }
             }
             fastsattTrygdeavgift = FastsattTrygdeavgift()

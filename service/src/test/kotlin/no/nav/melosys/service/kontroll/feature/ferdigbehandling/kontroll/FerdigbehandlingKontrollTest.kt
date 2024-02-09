@@ -637,7 +637,6 @@ class FerdigbehandlingKontrollTest {
             id = 1L
             fom = fraOgMed
             tom = tilOgMed
-            arbeidsland = "BR"
             innvilgelsesresultat = InnvilgelsesResultat.DELVIS_INNVILGET
             medlemskapstype = Medlemskapstyper.FRIVILLIG
             trygdedekning = Trygdedekninger.FTRL_2_9_FØRSTE_LEDD_C_HELSE_PENSJON

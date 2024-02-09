@@ -23,7 +23,6 @@ import java.time.LocalDate
  * Scenarioer definert på https://confluence.adeo.no/pages/viewpage.action?pageId=387109283
  */
 internal class UtledMedlemskapsperioderTest {
-    private val ARBEIDSLAND = "BR"
     private val BESTEMMELSE_2_7 = Folketrygdloven_kap2_bestemmelser.FTRL_KAP2_2_7_FØRSTE_LEDD
     private val BESTEMMELSE_2_8 = Folketrygdloven_kap2_bestemmelser.FTRL_KAP2_2_8_FØRSTE_LEDD_A
     private val TRYGDEDEKNING_2_7 = Trygdedekninger.FULL_DEKNING_FTRL
@@ -34,7 +33,7 @@ internal class UtledMedlemskapsperioderTest {
     fun lagMedlemskapsperioder_ukjentBestemmelse_kasterFeil() {
         shouldThrow<FunksjonellException> {
             UtledMedlemskapsperioder.lagMedlemskapsperioder(
-                UtledMedlemskapsperioderDto(null, null, null, null, Folketrygdloven_kap2_bestemmelser.FTRL_KAP2_2_15_ANDRE_LEDD)
+                UtledMedlemskapsperioderDto(null, null, null, Folketrygdloven_kap2_bestemmelser.FTRL_KAP2_2_15_ANDRE_LEDD)
             )
         }.message.shouldContain("Støtter ikke bestemmelse")
     }
@@ -46,7 +45,7 @@ internal class UtledMedlemskapsperioderTest {
     fun lagMedlemskapsperioder2_8_søknadsperiodeStarterPåMottaksdato_genererMedlemskapsperiodeForHelesøknadsperiodeMedOppgittTrygdedekning() {
         val søknadsperiode = Periode(MOTTAKSDATO, MOTTAKSDATO.plusYears(1))
         val dekning = Trygdedekninger.FULL_DEKNING_FTRL
-        val request = UtledMedlemskapsperioderDto(søknadsperiode, dekning, MOTTAKSDATO, ARBEIDSLAND, BESTEMMELSE_2_8)
+        val request = UtledMedlemskapsperioderDto(søknadsperiode, dekning, MOTTAKSDATO, BESTEMMELSE_2_8)
 
 
         UtledMedlemskapsperioder.lagMedlemskapsperioder(request)
@@ -64,7 +63,7 @@ internal class UtledMedlemskapsperioderTest {
     fun lagMedlemskapsperioder2_8_søknadsperiodeStarter20DagerFørMottaksdato_helePeriodenBlirInnvilgetMedSøktTrygdedekning() {
         val søknadsperiode = Periode(MOTTAKSDATO.minusDays(20), MOTTAKSDATO.plusYears(1))
         val dekning = Trygdedekninger.FTRL_2_9_FØRSTE_LEDD_C_ANDRE_LEDD_HELSE_PENSJON_SYKE_FORELDREPENGER
-        val request = UtledMedlemskapsperioderDto(søknadsperiode, dekning, MOTTAKSDATO, ARBEIDSLAND, BESTEMMELSE_2_8)
+        val request = UtledMedlemskapsperioderDto(søknadsperiode, dekning, MOTTAKSDATO, BESTEMMELSE_2_8)
 
 
         UtledMedlemskapsperioder.lagMedlemskapsperioder(request)
@@ -84,7 +83,7 @@ internal class UtledMedlemskapsperioderTest {
     fun lagMedlemskapsperiode2_8_søknadsperiodeStarterMerEnnToÅrFørMottaksDato_helePeriodenBlirAvslåttMedSøktTrygdedekning() {
         val søknadsperiode = Periode(MOTTAKSDATO.minusYears(3), MOTTAKSDATO)
         val dekning = Trygdedekninger.FTRL_2_9_FØRSTE_LEDD_C_ANDRE_LEDD_HELSE_PENSJON_SYKE_FORELDREPENGER
-        val request = UtledMedlemskapsperioderDto(søknadsperiode, dekning, MOTTAKSDATO, ARBEIDSLAND, BESTEMMELSE_2_8)
+        val request = UtledMedlemskapsperioderDto(søknadsperiode, dekning, MOTTAKSDATO, BESTEMMELSE_2_8)
 
 
         UtledMedlemskapsperioder.lagMedlemskapsperioder(request)
@@ -104,7 +103,7 @@ internal class UtledMedlemskapsperioderTest {
     fun lagMedlemskapsperiode2_8_søknadsperiodenStarter1ÅrFørMottaksdatoTrygdedekningErPensjonsdel_helePeriodenBlirInnvilgetMedPensjonsdel() {
         val søknadsperiode = Periode(MOTTAKSDATO.minusYears(1), MOTTAKSDATO)
         val dekning = Trygdedekninger.FTRL_2_9_FØRSTE_LEDD_B_PENSJON
-        val request = UtledMedlemskapsperioderDto(søknadsperiode, dekning, MOTTAKSDATO, ARBEIDSLAND, BESTEMMELSE_2_8)
+        val request = UtledMedlemskapsperioderDto(søknadsperiode, dekning, MOTTAKSDATO, BESTEMMELSE_2_8)
 
 
         UtledMedlemskapsperioder.lagMedlemskapsperioder(request)
@@ -122,7 +121,7 @@ internal class UtledMedlemskapsperioderTest {
     fun lagMedlemskapsperiode2_8_søknadsperiodenStarter2ÅrFørMottaksdatoTrygdedekningErPensjonsdel_helePeriodenBlirInnvilgetMedPensjonsdel() {
         val søknadsperiode = Periode(MOTTAKSDATO.minusYears(2), MOTTAKSDATO.minusYears(1))
         val dekning = Trygdedekninger.FTRL_2_9_FØRSTE_LEDD_B_PENSJON
-        val request = UtledMedlemskapsperioderDto(søknadsperiode, dekning, MOTTAKSDATO, ARBEIDSLAND, BESTEMMELSE_2_8)
+        val request = UtledMedlemskapsperioderDto(søknadsperiode, dekning, MOTTAKSDATO, BESTEMMELSE_2_8)
 
 
         UtledMedlemskapsperioder.lagMedlemskapsperioder(request)
@@ -139,7 +138,7 @@ internal class UtledMedlemskapsperioderTest {
     fun lagMedlemskapsperiode2_8_søknadsperiodenStarter3ÅrFørMottaksdatoTrygdedekningErPensjonsdel_helePeriodenBlirAvslåttMedPensjonsdel() {
         val søknadsperiode = Periode(MOTTAKSDATO.minusYears(3), MOTTAKSDATO)
         val dekning = Trygdedekninger.FTRL_2_9_FØRSTE_LEDD_B_PENSJON
-        val request = UtledMedlemskapsperioderDto(søknadsperiode, dekning, MOTTAKSDATO, ARBEIDSLAND, BESTEMMELSE_2_8)
+        val request = UtledMedlemskapsperioderDto(søknadsperiode, dekning, MOTTAKSDATO, BESTEMMELSE_2_8)
 
 
         UtledMedlemskapsperioder.lagMedlemskapsperioder(request)
@@ -159,7 +158,7 @@ internal class UtledMedlemskapsperioderTest {
     fun lagMedlemskapsperiode2_8_søknadsperiodenStarter15MndFørMottaksdatoMedHelseOgPensjonsdelSlutter4MndEtterMottaksdato_enAvslåttOgInnvilgetMedSammePeriodeOgEnInnvilgetPeriode() {
         val søknadsperiode = Periode(MOTTAKSDATO.minusMonths(15), MOTTAKSDATO.plusMonths(4))
         val dekning = Trygdedekninger.FTRL_2_9_FØRSTE_LEDD_C_HELSE_PENSJON
-        val request = UtledMedlemskapsperioderDto(søknadsperiode, dekning, MOTTAKSDATO, ARBEIDSLAND, BESTEMMELSE_2_8)
+        val request = UtledMedlemskapsperioderDto(søknadsperiode, dekning, MOTTAKSDATO, BESTEMMELSE_2_8)
 
 
         UtledMedlemskapsperioder.lagMedlemskapsperioder(request)
@@ -193,7 +192,7 @@ internal class UtledMedlemskapsperioderTest {
     fun lagMedlemskapsperiode2_8_søknadsperiodenStarter15MndFørMottaksdatoMedHelseOgPensjonsdelMedSykeOgForeldrepengerSlutter4MndEtterMottaksdato_enAvslåttOgInnvilgetMedSammePeriodeOgEnInnvilgetPeriode() {
         val søknadsperiode = Periode(MOTTAKSDATO.minusMonths(15), MOTTAKSDATO.plusMonths(4))
         val dekning = Trygdedekninger.FTRL_2_9_FØRSTE_LEDD_C_ANDRE_LEDD_HELSE_PENSJON_SYKE_FORELDREPENGER
-        val request = UtledMedlemskapsperioderDto(søknadsperiode, dekning, MOTTAKSDATO, ARBEIDSLAND, BESTEMMELSE_2_8)
+        val request = UtledMedlemskapsperioderDto(søknadsperiode, dekning, MOTTAKSDATO, BESTEMMELSE_2_8)
 
 
         UtledMedlemskapsperioder.lagMedlemskapsperioder(request)
@@ -227,7 +226,7 @@ internal class UtledMedlemskapsperioderTest {
     fun lagMedlemskapsperiode2_8_søknadsperiodenStarter1MndOg1DagFørMottaksdatoMedHelseOgPensjonsdelSlutter4MndEtterMottaksdato_enAvslåttOgInnvilgetMedSammePeriodeOgEnInnvilgetPeriode() {
         val søknadsperiode = Periode(MOTTAKSDATO.minusMonths(1).minusDays(1), MOTTAKSDATO.plusMonths(4))
         val dekning = Trygdedekninger.FTRL_2_9_FØRSTE_LEDD_C_HELSE_PENSJON
-        val request = UtledMedlemskapsperioderDto(søknadsperiode, dekning, MOTTAKSDATO, ARBEIDSLAND, BESTEMMELSE_2_8)
+        val request = UtledMedlemskapsperioderDto(søknadsperiode, dekning, MOTTAKSDATO, BESTEMMELSE_2_8)
 
 
         UtledMedlemskapsperioder.lagMedlemskapsperioder(request)
@@ -261,7 +260,7 @@ internal class UtledMedlemskapsperioderTest {
     fun lagMedlemskapsperiode2_8_søknadsperiodenStarter15MndFørMottaksdatoUtenSluttdatoMedHelseOgPensjonsdel_enAvslåttOgInnvilgetMedSammePeriodeOgEnInnvilgetPeriode() {
         val søknadsperiode = Periode(MOTTAKSDATO.minusMonths(15), null)
         val dekning = Trygdedekninger.FTRL_2_9_FØRSTE_LEDD_C_HELSE_PENSJON
-        val request = UtledMedlemskapsperioderDto(søknadsperiode, dekning, MOTTAKSDATO, ARBEIDSLAND, BESTEMMELSE_2_8)
+        val request = UtledMedlemskapsperioderDto(søknadsperiode, dekning, MOTTAKSDATO, BESTEMMELSE_2_8)
 
 
         UtledMedlemskapsperioder.lagMedlemskapsperioder(request)
@@ -298,7 +297,6 @@ internal class UtledMedlemskapsperioderTest {
             søknadsperiode,
             Trygdedekninger.FTRL_2_9_FØRSTE_LEDD_C_HELSE_PENSJON,
             MOTTAKSDATO,
-            ARBEIDSLAND,
             BESTEMMELSE_2_8
         )
 
@@ -330,7 +328,6 @@ internal class UtledMedlemskapsperioderTest {
             søknadsperiode,
             Trygdedekninger.FTRL_2_9_FØRSTE_LEDD_C_ANDRE_LEDD_HELSE_PENSJON_SYKE_FORELDREPENGER,
             MOTTAKSDATO,
-            ARBEIDSLAND,
             BESTEMMELSE_2_8
         )
 
@@ -361,7 +358,7 @@ internal class UtledMedlemskapsperioderTest {
     fun lagMedlemskapsperiode2_8_søknadsperiodenStarter2MndFørMottaksdatoSluttdato1ÅrEtterMottaksdatoMedHelsedel_toPerioderAvslåttFremTilMottaksdato() {
         val søknadsperiode = Periode(MOTTAKSDATO.minusMonths(2), MOTTAKSDATO.plusYears(1))
         val dekning = Trygdedekninger.FTRL_2_9_FØRSTE_LEDD_A_HELSE
-        val request = UtledMedlemskapsperioderDto(søknadsperiode, dekning, MOTTAKSDATO, ARBEIDSLAND, BESTEMMELSE_2_8)
+        val request = UtledMedlemskapsperioderDto(søknadsperiode, dekning, MOTTAKSDATO, BESTEMMELSE_2_8)
 
 
         UtledMedlemskapsperioder.lagMedlemskapsperioder(request)
@@ -388,7 +385,7 @@ internal class UtledMedlemskapsperioderTest {
     fun lagMedlemskapsperiode2_8_søknadsperiodenStarter30mndFørMottaksdatoSluttdato1ÅrFørMottaksdatoMedHelsedel_enPeriodeAvslått() {
         val søknadsperiode = Periode(MOTTAKSDATO.minusMonths(30), MOTTAKSDATO.minusYears(1))
         val dekning = Trygdedekninger.FTRL_2_9_FØRSTE_LEDD_A_ANDRE_LEDD_HELSE_SYKE_FORELDREPENGER
-        val request = UtledMedlemskapsperioderDto(søknadsperiode, dekning, MOTTAKSDATO, ARBEIDSLAND, BESTEMMELSE_2_8)
+        val request = UtledMedlemskapsperioderDto(søknadsperiode, dekning, MOTTAKSDATO, BESTEMMELSE_2_8)
 
 
         UtledMedlemskapsperioder.lagMedlemskapsperioder(request)
@@ -406,7 +403,7 @@ internal class UtledMedlemskapsperioderTest {
     fun lagMedlemskapsperiode2_8_søknadsperiodenStarter30mndFørMottaksdatoSluttdato1ÅrEtterMottaksdatoMedHelsedel_enPeriodeAvslått() {
         val søknadsperiode = Periode(MOTTAKSDATO.minusMonths(30), MOTTAKSDATO.plusYears(1))
         val dekning = Trygdedekninger.FTRL_2_9_FØRSTE_LEDD_A_ANDRE_LEDD_HELSE_SYKE_FORELDREPENGER
-        val request = UtledMedlemskapsperioderDto(søknadsperiode, dekning, MOTTAKSDATO, ARBEIDSLAND, BESTEMMELSE_2_8)
+        val request = UtledMedlemskapsperioderDto(søknadsperiode, dekning, MOTTAKSDATO, BESTEMMELSE_2_8)
 
 
         UtledMedlemskapsperioder.lagMedlemskapsperioder(request)
@@ -585,7 +582,7 @@ internal class UtledMedlemskapsperioderTest {
     @Test
     fun lagMedlemskapsperioder2_7_søknadsperiodeStarterPåMottaksdato_genererMedlemskapsperiodeForHelesøknadsperiodeMedOppgittTrygdedekning() {
         val søknadsperiode = Periode(MOTTAKSDATO, MOTTAKSDATO.plusYears(1))
-        val request = UtledMedlemskapsperioderDto(søknadsperiode, TRYGDEDEKNING_2_7, MOTTAKSDATO, ARBEIDSLAND, BESTEMMELSE_2_7)
+        val request = UtledMedlemskapsperioderDto(søknadsperiode, TRYGDEDEKNING_2_7, MOTTAKSDATO, BESTEMMELSE_2_7)
 
 
         UtledMedlemskapsperioder.lagMedlemskapsperioder(request)
@@ -603,7 +600,7 @@ internal class UtledMedlemskapsperioderTest {
     @Test
     fun lagMedlemskapsperioder2_7_søknadsperiodeStarter20DagerFørMottaksdato_helePeriodenBlirInnvilgetMedSøktTrygdedekning() {
         val søknadsperiode = Periode(MOTTAKSDATO.minusDays(20), MOTTAKSDATO.plusYears(1))
-        val request = UtledMedlemskapsperioderDto(søknadsperiode, TRYGDEDEKNING_2_7, MOTTAKSDATO, ARBEIDSLAND, BESTEMMELSE_2_7)
+        val request = UtledMedlemskapsperioderDto(søknadsperiode, TRYGDEDEKNING_2_7, MOTTAKSDATO, BESTEMMELSE_2_7)
 
 
         UtledMedlemskapsperioder.lagMedlemskapsperioder(request)
@@ -623,7 +620,7 @@ internal class UtledMedlemskapsperioderTest {
     @Test
     fun lagMedlemskapsperioder2_7_søknadsperiodenStarterFørMottaksdatoMenSlutterEtter_avslåttFørOgInnvilgetEtterPåMottaksdato() {
         val søknadsperiode = Periode(MOTTAKSDATO.minusMonths(6), MOTTAKSDATO.plusMonths(6))
-        val request = UtledMedlemskapsperioderDto(søknadsperiode, TRYGDEDEKNING_2_7, MOTTAKSDATO, ARBEIDSLAND, BESTEMMELSE_2_7)
+        val request = UtledMedlemskapsperioderDto(søknadsperiode, TRYGDEDEKNING_2_7, MOTTAKSDATO, BESTEMMELSE_2_7)
 
 
         UtledMedlemskapsperioder.lagMedlemskapsperioder(request)
@@ -654,7 +651,6 @@ internal class UtledMedlemskapsperioderTest {
             Periode(MOTTAKSDATO.minusYears(1), MOTTAKSDATO.minusMonths(6)),
             TRYGDEDEKNING_2_7,
             MOTTAKSDATO,
-            ARBEIDSLAND,
             BESTEMMELSE_2_7
         )
 

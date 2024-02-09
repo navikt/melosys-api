@@ -30,9 +30,6 @@ public class Medlemskapsperiode implements ErPeriode, HarBestemmelse<Folketrygdl
     @Column(name = "tom_dato")
     private LocalDate tom;
 
-    @Column(name = "arbeidsland", nullable = false)
-    private String arbeidsland;
-
     @Enumerated(EnumType.STRING)
     @Column(name = "innvilgelse_resultat", nullable = false)
     private InnvilgelsesResultat innvilgelsesresultat;
@@ -85,14 +82,6 @@ public class Medlemskapsperiode implements ErPeriode, HarBestemmelse<Folketrygdl
 
     public void setTom(LocalDate tom) {
         this.tom = tom;
-    }
-
-    public String getArbeidsland() {
-        return arbeidsland;
-    }
-
-    public void setArbeidsland(String arbeidsland) {
-        this.arbeidsland = arbeidsland;
     }
 
     public InnvilgelsesResultat getInnvilgelsesresultat() {
@@ -161,7 +150,6 @@ public class Medlemskapsperiode implements ErPeriode, HarBestemmelse<Folketrygdl
             Objects.equals(medlemAvFolketrygden, that.medlemAvFolketrygden) &&
             Objects.equals(fom, that.fom) &&
             Objects.equals(tom, that.tom) &&
-            Objects.equals(arbeidsland, that.arbeidsland) &&
             innvilgelsesresultat == that.innvilgelsesresultat &&
             medlemskapstype == that.medlemskapstype &&
             trygdedekning == that.trygdedekning &&
@@ -170,7 +158,7 @@ public class Medlemskapsperiode implements ErPeriode, HarBestemmelse<Folketrygdl
 
     @Override
     public int hashCode() {
-        return Objects.hash(id, medlemAvFolketrygden, fom, tom, arbeidsland, innvilgelsesresultat, medlemskapstype, trygdedekning, medlPeriodeID);
+        return Objects.hash(id, medlemAvFolketrygden, fom, tom, innvilgelsesresultat, medlemskapstype, trygdedekning, medlPeriodeID);
     }
 
     @Override
@@ -180,7 +168,6 @@ public class Medlemskapsperiode implements ErPeriode, HarBestemmelse<Folketrygdl
             ", medlemAvFolketrygden=" + medlemAvFolketrygden +
             ", fom=" + fom +
             ", tom=" + tom +
-            ", arbeidsland='" + arbeidsland + '\'' +
             ", innvilgelsesresultat=" + innvilgelsesresultat +
             ", medlemskapstype=" + medlemskapstype +
             ", trygdedekning=" + trygdedekning +
