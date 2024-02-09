@@ -21,12 +21,12 @@ class MottatteOpplysningerUtilsTest {
     @Test
     void hentSoeknadsland() {
         Soeknad soeknad = new Soeknad();
-        soeknad.soeknadsland.landkoder = Arrays.asList(Landkoder.BE.getKode(), Landkoder.BG.getKode());
-        soeknad.soeknadsland.erUkjenteEllerAlleEosLand = true;
+        soeknad.soeknadsland.setLandkoder(Arrays.asList(Landkoder.BE.getKode(), Landkoder.BG.getKode()));
+        soeknad.soeknadsland.setErUkjenteEllerAlleEosLand(true);
 
         Soeknadsland soeknadsland = MottatteOpplysningerUtils.hentSøknadsland(soeknad);
-        assertThat(soeknadsland.landkoder).contains(Landkoder.BE.getKode(), Landkoder.BG.getKode());
-        assertThat(soeknadsland.erUkjenteEllerAlleEosLand).isTrue();
+        assertThat(soeknadsland.getLandkoder()).contains(Landkoder.BE.getKode(), Landkoder.BG.getKode());
+        assertThat(soeknadsland.isErUkjenteEllerAlleEosLand()).isTrue();
     }
 
     @Test
@@ -35,14 +35,14 @@ class MottatteOpplysningerUtilsTest {
         StrukturertAdresse oppgittAdresse = new StrukturertAdresse();
         oppgittAdresse.setGatenavn("HjemGata");
         oppgittAdresse.setLandkode("NO");
-        søknad.bosted.oppgittAdresse = oppgittAdresse;
+        søknad.bosted.setOppgittAdresse(oppgittAdresse);
         assertThat(MottatteOpplysningerUtils.hentBostedsadresse(søknad)).isNotNull();
     }
 
     @Test
     void hentOppgittAdresse_somErTom_ErNull() {
         Soeknad søknad = new Soeknad();
-        søknad.bosted.oppgittAdresse = new StrukturertAdresse();
+        søknad.bosted.setOppgittAdresse(new StrukturertAdresse());
         assertThat(MottatteOpplysningerUtils.hentBostedsadresse(søknad)).isNull();
     }
 
@@ -61,7 +61,7 @@ class MottatteOpplysningerUtilsTest {
     @Test
     void hentOppgittBostedsland_landkodeSverige_girLandkode() {
         Soeknad soeknad = new Soeknad();
-        soeknad.bosted.oppgittAdresse.setLandkode("SE");
+        soeknad.bosted.getOppgittAdresse().setLandkode("SE");
 
         Optional<Bostedsland> landkoder = MottatteOpplysningerUtils.hentOppgittBostedsland(soeknad);
         assertThat(landkoder).isPresent()
@@ -78,8 +78,8 @@ class MottatteOpplysningerUtilsTest {
 
     private void leggTilFysiskArbeidssted(Soeknad soeknad) {
         FysiskArbeidssted fysiskArbeidssted = new FysiskArbeidssted();
-        fysiskArbeidssted.adresse = new StrukturertAdresse();
-        fysiskArbeidssted.adresse.setLandkode(Landkoder.BE.getKode());
-        soeknad.arbeidPaaLand.fysiskeArbeidssteder = Collections.singletonList(fysiskArbeidssted);
+        fysiskArbeidssted.setAdresse(new StrukturertAdresse());
+        fysiskArbeidssted.getAdresse().setLandkode(Landkoder.BE.getKode());
+        soeknad.arbeidPaaLand.setFysiskeArbeidssteder(Collections.singletonList(fysiskArbeidssted));
     }
 }

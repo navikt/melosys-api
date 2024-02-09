@@ -135,7 +135,7 @@ open class ArbeidUtlandKontroll {
 
 
                 if (manglerForetakUtlandNavn || manglerForetakUtlandLandkode || manglerForetakUtlandPoststed || manglerForetakUtlandPostnummer || manglerForetakUtlandAdresse) {
-                    if(!foretakUtland.selvstendigNæringsvirksomhet) {
+                    if(foretakUtland.selvstendigNæringsvirksomhet != true) {
                         erUfullstendigUtfyllt = true
                     }
                 }
@@ -160,7 +160,7 @@ open class ArbeidUtlandKontroll {
 
 
                 if (manglerForetakUtlandNavn || manglerForetakUtlandLandkode || manglerForetakUtlandPoststed || manglerForetakUtlandPostnummer || manglerForetakUtlandAdresse) {
-                    if(foretakUtland.selvstendigNæringsvirksomhet) {
+                    if(foretakUtland.selvstendigNæringsvirksomhet == true) {
                         erUfullstendigUtfyllt = true
                     }
                 }

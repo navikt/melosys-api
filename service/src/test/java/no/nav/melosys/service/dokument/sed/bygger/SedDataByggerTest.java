@@ -420,8 +420,8 @@ class SedDataByggerTest {
     @Test
     void lagUtkast_medLuftfartBase_arbeidsstedBlirSatt() {
         LuftfartBase luftfartBase = new LuftfartBase();
-        luftfartBase.hjemmebaseNavn = "hjemmebaseNavn";
-        luftfartBase.hjemmebaseLand = "GB";
+        luftfartBase.setHjemmebaseNavn("hjemmebaseNavn");
+        luftfartBase.setHjemmebaseLand("GB");
 
         SedDataGrunnlagMedSoknad dataGrunnlag = lagGrunnlagMedSøknad();
         dataGrunnlag.getMottatteOpplysningerData().luftfartBaser = List.of(luftfartBase);
@@ -431,19 +431,19 @@ class SedDataByggerTest {
 
         Arbeidssted arbeidssted = sedData.getArbeidssteder().get(1);
 
-        assertThat(arbeidssted.getNavn()).isEqualTo(luftfartBase.hjemmebaseNavn);
+        assertThat(arbeidssted.getNavn()).isEqualTo(luftfartBase.getHjemmebaseNavn());
         assertThat(arbeidssted.getAdresse().getGateadresse()).isEqualTo("N/A");
-        assertThat(arbeidssted.getAdresse().getLand()).isEqualTo(luftfartBase.hjemmebaseLand);
+        assertThat(arbeidssted.getAdresse().getLand()).isEqualTo(luftfartBase.getHjemmebaseLand());
     }
 
     @Test
     void lagUtkast_medUtenlandskSelvstendigForetak_forventAtUtenlandskSelvstendigForetakIkkeSendesSomArbeidsgivendeVirksomhet() {
         ForetakUtland utenlandskSelvstendigForetak = new ForetakUtland();
-        utenlandskSelvstendigForetak.adresse = new StrukturertAdresse();
-        utenlandskSelvstendigForetak.adresse.setLandkode(Landkoder.DE.getKode());
-        utenlandskSelvstendigForetak.selvstendigNæringsvirksomhet = true;
-        utenlandskSelvstendigForetak.navn = "selvstendig";
-        utenlandskSelvstendigForetak.uuid = "123";
+        utenlandskSelvstendigForetak.setAdresse(new StrukturertAdresse());
+        utenlandskSelvstendigForetak.getAdresse().setLandkode(Landkoder.DE.getKode());
+        utenlandskSelvstendigForetak.setSelvstendigNæringsvirksomhet(true);
+        utenlandskSelvstendigForetak.setNavn("selvstendig");
+        utenlandskSelvstendigForetak.setUuid("123");
 
         SedDataGrunnlagMedSoknad dataGrunnlag = lagGrunnlagMedSøknad();
         dataGrunnlag.getMottatteOpplysningerData().foretakUtland = List.of(utenlandskSelvstendigForetak);

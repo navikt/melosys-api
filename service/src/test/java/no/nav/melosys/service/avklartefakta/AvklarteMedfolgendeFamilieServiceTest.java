@@ -322,13 +322,13 @@ class AvklarteMedfolgendeFamilieServiceTest {
     private MottatteOpplysninger lagMottatteOpplysninger(boolean medFolgendeFamilie) {
         MottatteOpplysningerData mottatteOpplysningerData = new MottatteOpplysningerData();
         if (medFolgendeFamilie) {
-            mottatteOpplysningerData.personOpplysninger.medfolgendeFamilie = List.of(
+            mottatteOpplysningerData.personOpplysninger.setMedfolgendeFamilie(List.of(
                 MedfolgendeFamilie.tilMedfolgendeFamilie(uuidBarn, "09080723451", "Bjartmar", MedfolgendeFamilie.Relasjonsrolle.BARN),
                 MedfolgendeFamilie.tilMedfolgendeFamilie(uuidBarn2, "09080723452", "Arnhild", MedfolgendeFamilie.Relasjonsrolle.BARN),
                 MedfolgendeFamilie.tilMedfolgendeFamilie(uuidEktefelleSamboer, "09080656743", "Kari", MedfolgendeFamilie.Relasjonsrolle.EKTEFELLE_SAMBOER)
-            );
+            ));
         } else {
-            mottatteOpplysningerData.personOpplysninger.medfolgendeFamilie = Collections.emptyList();
+            mottatteOpplysningerData.personOpplysninger.setMedfolgendeFamilie(Collections.emptyList());
         }
         MottatteOpplysninger mottatteOpplysninger = new MottatteOpplysninger();
         mottatteOpplysninger.setMottatteOpplysningerData(mottatteOpplysningerData);
@@ -369,7 +369,7 @@ class AvklarteMedfolgendeFamilieServiceTest {
         MedfolgendeFamilie medfolgendeFamilieUuid1 = MedfolgendeFamilie.tilMedfolgendeFamilie(uuidBarn, "fnr1", null, MedfolgendeFamilie.Relasjonsrolle.BARN);
         MedfolgendeFamilie medfolgendeFamilieUuid2 = MedfolgendeFamilie.tilMedfolgendeFamilie(uuidEktefelleSamboer, "fnr2", null, MedfolgendeFamilie.Relasjonsrolle.EKTEFELLE_SAMBOER);
         MottatteOpplysningerData mottatteOpplysningerData = new MottatteOpplysningerData();
-        mottatteOpplysningerData.personOpplysninger.medfolgendeFamilie.addAll(List.of(medfolgendeFamilieUuid1, medfolgendeFamilieUuid2));
+        mottatteOpplysningerData.personOpplysninger.getMedfolgendeFamilie().addAll(List.of(medfolgendeFamilieUuid1, medfolgendeFamilieUuid2));
         MottatteOpplysninger mottatteOpplysninger = new MottatteOpplysninger();
         mottatteOpplysninger.setMottatteOpplysningerData(mottatteOpplysningerData);
         Behandling behandling = new Behandling();

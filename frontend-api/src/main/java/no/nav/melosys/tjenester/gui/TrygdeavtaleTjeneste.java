@@ -78,7 +78,7 @@ public class TrygdeavtaleTjeneste {
         TrygdeavtaleResultat trygdeavtaleResultat = trygdeavtaleService.hentResultat(behandlingId);
         var behandling = behandlingService.hentBehandlingMedSaksopplysninger(behandlingId);
         var mottatteOpplysningerData = behandling.getMottatteOpplysninger().getMottatteOpplysningerData();
-        return ResponseEntity.ok(TrygdeavtaleResultatDto.fra(trygdeavtaleResultat, mottatteOpplysningerData.personOpplysninger.medfolgendeFamilie));
+        return ResponseEntity.ok(TrygdeavtaleResultatDto.fra(trygdeavtaleResultat, mottatteOpplysningerData.personOpplysninger.getMedfolgendeFamilie()));
     }
 
     @PostMapping("resultat/{behandlingID}")

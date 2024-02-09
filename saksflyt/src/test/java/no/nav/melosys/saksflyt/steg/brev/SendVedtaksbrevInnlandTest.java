@@ -193,7 +193,7 @@ class SendVedtaksbrevInnlandTest {
         when(behandlingsresultatService.hentBehandlingsresultat(BEHANDLINGID))
             .thenReturn(lagBehandlingsresultat(lagInnvilgetLovvalgsperiode(FO_883_2004_ART13_1A)));
         ForetakUtland arbeidsgiverUtland = new ForetakUtland();
-        arbeidsgiverUtland.selvstendigNæringsvirksomhet = false;
+        arbeidsgiverUtland.setSelvstendigNæringsvirksomhet(false);
         behandling.getMottatteOpplysninger().getMottatteOpplysningerData().foretakUtland.add(arbeidsgiverUtland);
 
 
@@ -211,7 +211,7 @@ class SendVedtaksbrevInnlandTest {
         behandlingsresultat.getAnmodningsperioder().add(lagAnmodningsperiodeMedSvar());
         when(behandlingsresultatService.hentBehandlingsresultat(BEHANDLINGID)).thenReturn(behandlingsresultat);
         ForetakUtland utenlandskSelvstendigVirksomhet = new ForetakUtland();
-        utenlandskSelvstendigVirksomhet.selvstendigNæringsvirksomhet = true;
+        utenlandskSelvstendigVirksomhet.setSelvstendigNæringsvirksomhet(true);
         behandling.getMottatteOpplysninger().getMottatteOpplysningerData().foretakUtland.add(utenlandskSelvstendigVirksomhet);
 
 

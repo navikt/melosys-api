@@ -79,21 +79,21 @@ class MottatteOpplysningerListenerTest {
         Soeknad søknad = (Soeknad) data;
         JsonNode jsonNode = objectMapper.readTree(json);
         assertKonvertering(jsonNode, søknad);
-        assertThat(søknad.arbeidsgiversBekreftelse.arbeidsgiverBekrefterUtsendelse)
+        assertThat(søknad.getArbeidsgiversBekreftelse().getArbeidsgiverBekrefterUtsendelse())
             .isEqualTo(jsonNode.get("arbeidsgiversBekreftelse").get("arbeidsgiverBekrefterUtsendelse").booleanValue());
-        assertThat(søknad.loennOgGodtgjoerelse.bruttoLoennPerMnd).isEqualTo(
+        assertThat(søknad.getLoennOgGodtgjoerelse().getBruttoLoennPerMnd()).isEqualTo(
             new BigDecimal(jsonNode.get("loennOgGodtgjoerelse").get("bruttoLoennPerMnd").asText()));
     }
 
     private void assertKonvertering(JsonNode jsonNode, MottatteOpplysningerData data) {
-        assertThat(data.arbeidPaaLand.fysiskeArbeidssteder)
+        assertThat(data.arbeidPaaLand.getFysiskeArbeidssteder())
             .hasSize(jsonNode.get("arbeidPaaLand").withArray("fysiskeArbeidssteder").size());
         assertThat(data.foretakUtland).hasSize(jsonNode.withArray("foretakUtland").size());
         assertThat(data.maritimtArbeid).hasSize(jsonNode.withArray("maritimtArbeid").size());
-        assertThat(data.bosted.intensjonOmRetur).isEqualTo(jsonNode.get("bosted").get("intensjonOmRetur").booleanValue());
-        assertThat(data.personOpplysninger.utenlandskIdent)
+        assertThat(data.bosted.getIntensjonOmRetur()).isEqualTo(jsonNode.get("bosted").get("intensjonOmRetur").booleanValue());
+        assertThat(data.personOpplysninger.getUtenlandskIdent())
             .hasSize(jsonNode.get("personOpplysninger").withArray("utenlandskIdent").size());
-        assertThat(data.selvstendigArbeid.selvstendigForetak.get(0).orgnr)
+        assertThat(data.selvstendigArbeid.getSelvstendigForetak().get(0).getOrgnr())
             .isEqualTo(jsonNode.get("selvstendigArbeid").withArray("selvstendigForetak").get(0).get("orgnr").textValue());
     }
 }

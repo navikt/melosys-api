@@ -16,16 +16,17 @@ import no.nav.dok.melosysbrev.felles.melosys_felles.*;
 import no.nav.dok.melosysbrev.felles.melosys_vedlegg.VedleggType;
 import no.nav.melosys.domain.*;
 import no.nav.melosys.domain.avklartefakta.AvklartVirksomhet;
-import no.nav.melosys.domain.mottatteopplysninger.MottatteOpplysningerData;
-import no.nav.melosys.domain.mottatteopplysninger.data.arbeidssteder.MaritimtArbeid;
 import no.nav.melosys.domain.kodeverk.Anmodningsperiodesvartyper;
 import no.nav.melosys.domain.kodeverk.Landkoder;
 import no.nav.melosys.domain.kodeverk.Maritimtyper;
 import no.nav.melosys.domain.kodeverk.Vedtakstyper;
 import no.nav.melosys.domain.kodeverk.begrunnelser.Fartsomrader;
 import no.nav.melosys.domain.kodeverk.begrunnelser.Medfolgende_barn_begrunnelser;
-import no.nav.melosys.domain.person.familie.*;
-import no.nav.melosys.exception.FunksjonellException;
+import no.nav.melosys.domain.mottatteopplysninger.MottatteOpplysningerData;
+import no.nav.melosys.domain.mottatteopplysninger.data.arbeidssteder.MaritimtArbeid;
+import no.nav.melosys.domain.person.familie.AvklarteMedfolgendeFamilie;
+import no.nav.melosys.domain.person.familie.IkkeOmfattetFamilie;
+import no.nav.melosys.domain.person.familie.OmfattetFamilie;
 import no.nav.melosys.exception.TekniskException;
 import no.nav.melosys.service.dokument.brev.BrevData;
 import no.nav.melosys.service.dokument.brev.BrevDataInnvilgelse;
@@ -86,10 +87,10 @@ public final class InnvilgelsesbrevMapper implements BrevDataMapper {
 
         if (!grunnlagData.maritimtArbeid.isEmpty()) {
             MaritimtArbeid maritimtArbeid = grunnlagData.maritimtArbeid.iterator().next();
-            fag.setFlaggland(maritimtArbeid.flaggLandkode);
-            if (Fartsomrader.INNENRIKS == maritimtArbeid.fartsomradeKode) {
+            fag.setFlaggland(maritimtArbeid.getFlaggLandkode());
+            if (Fartsomrader.INNENRIKS == maritimtArbeid.getFartsomradeKode()) {
                 fag.setArbeidPåTerritorialfarvann(JA);
-                fag.setArbeidsland(Landkoder.valueOf(maritimtArbeid.territorialfarvannLandkode).getBeskrivelse());
+                fag.setArbeidsland(Landkoder.valueOf(maritimtArbeid.getTerritorialfarvannLandkode()).getBeskrivelse());
             }
         }
 

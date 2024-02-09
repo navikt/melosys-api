@@ -91,9 +91,9 @@ class A001MapperTest {
         StrukturertAdresse strukturertAdresse = lagStrukturertAdresse();
 
         FysiskArbeidssted arbeidssted = new FysiskArbeidssted();
-        arbeidssted.adresse = strukturertAdresse;
+        arbeidssted.setAdresse(strukturertAdresse);
         Soeknad søknad = new Soeknad();
-        søknad.arbeidPaaLand.fysiskeArbeidssteder = List.of(arbeidssted);
+        søknad.arbeidPaaLand.setFysiskeArbeidssteder(List.of(arbeidssted));
 
         AvklartVirksomhet virksomhet = new AvklartVirksomhet("JARLSBERG AS",
             "123456789",

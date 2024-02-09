@@ -95,7 +95,7 @@ class AttestMapperTest {
         strukturertAdresse.setLandkode(Landkoder.NO.getKode());
 
         FysiskArbeidssted arbeidssted = new FysiskArbeidssted();
-        arbeidssted.adresse = strukturertAdresse;
+        arbeidssted.setAdresse(strukturertAdresse);
 
         OrganisasjonsDetaljer organisasjonsDetaljer = mock(OrganisasjonsDetaljer.class);
         when(organisasjonsDetaljer.hentStrukturertForretningsadresse()).thenReturn(strukturertAdresse);

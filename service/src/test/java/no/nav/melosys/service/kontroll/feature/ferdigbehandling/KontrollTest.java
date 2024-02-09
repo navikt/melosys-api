@@ -300,7 +300,7 @@ class KontrollTest {
 
         lovvalgsperiode.setFom(LocalDate.now());
         lovvalgsperiode.setTom(LocalDate.now().plusYears(1));
-        mottatteOpplysningerData.arbeidPaaLand.fysiskeArbeidssteder = List.of(new FysiskArbeidssted());
+        mottatteOpplysningerData.arbeidPaaLand.setFysiskeArbeidssteder(List.of(new FysiskArbeidssted()));
 
 
         Collection<Kontrollfeil> resultat = kontroll.utførKontroller(behandlingID, Sakstyper.EU_EOS, Behandlingsresultattyper.ANMODNING_OM_UNNTAK);
@@ -319,7 +319,7 @@ class KontrollTest {
         lovvalgsperiode.setTom(LocalDate.now().plusYears(1));
 
         var foretakUtland = new ForetakUtland();
-        foretakUtland.selvstendigNæringsvirksomhet = false;
+        foretakUtland.setSelvstendigNæringsvirksomhet(false);
         mottatteOpplysningerData.foretakUtland = List.of(foretakUtland);
 
 

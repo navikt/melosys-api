@@ -64,12 +64,12 @@ public class BrevDataTestUtils {
 
     public static ForetakUtland lagForetakUtland(Boolean selvstendig) {
         ForetakUtland foretakUtland = new ForetakUtland();
-        foretakUtland.navn = "Company International Ltd.";
-        foretakUtland.orgnr = "12345678910";
-        foretakUtland.uuid = "49m8gf-9dk4j0";
-        foretakUtland.adresse = lagStrukturertAdresse();
-        foretakUtland.adresse.setLandkode("NO");
-        foretakUtland.selvstendigNæringsvirksomhet = selvstendig;
+        foretakUtland.setNavn("Company International Ltd.");
+        foretakUtland.setOrgnr("12345678910");
+        foretakUtland.setUuid("49m8gf-9dk4j0");
+        foretakUtland.setAdresse(lagStrukturertAdresse());
+        foretakUtland.getAdresse().setLandkode("NO");
+        foretakUtland.setSelvstendigNæringsvirksomhet(selvstendig);
         return foretakUtland;
     }
 
@@ -102,8 +102,8 @@ public class BrevDataTestUtils {
 
     public static MaritimtArbeid lagMaritimtArbeid() {
         MaritimtArbeid maritimtArbeid = new MaritimtArbeid();
-        maritimtArbeid.enhetNavn = "Dunfjæder";
-        maritimtArbeid.flaggLandkode = Landkoder.GB.getKode();
+        maritimtArbeid.setEnhetNavn("Dunfjæder");
+        maritimtArbeid.setFlaggLandkode(Landkoder.GB.getKode());
         return maritimtArbeid;
     }
 

@@ -257,12 +257,11 @@ class TrygdeavtaleTjenesteTest {
     @Test
     void hentResultat_byggOppResultat_returnererKorrekt() throws Exception {
         Behandling behandling = lagBehandling();
-        behandling.getMottatteOpplysninger().getMottatteOpplysningerData().personOpplysninger.medfolgendeFamilie =
-            List.of(
-                tilMedfolgendeFamilie(UUID_EKTEFELLE, EKTEFELLE_FNR, EKTEFELLE_NAVN, Relasjonsrolle.EKTEFELLE_SAMBOER),
-                tilMedfolgendeFamilie(UUID_BARN_1, BARN1_FNR, BARN_NAVN_1, MedfolgendeFamilie.Relasjonsrolle.BARN),
-                tilMedfolgendeFamilie(UUID_BARN_2, BARN2_FNR, BARN_NAVN_2, MedfolgendeFamilie.Relasjonsrolle.BARN)
-            );
+        behandling.getMottatteOpplysninger().getMottatteOpplysningerData().personOpplysninger.setMedfolgendeFamilie(List.of(
+            tilMedfolgendeFamilie(UUID_EKTEFELLE, EKTEFELLE_FNR, EKTEFELLE_NAVN, Relasjonsrolle.EKTEFELLE_SAMBOER),
+            tilMedfolgendeFamilie(UUID_BARN_1, BARN1_FNR, BARN_NAVN_1, MedfolgendeFamilie.Relasjonsrolle.BARN),
+            tilMedfolgendeFamilie(UUID_BARN_2, BARN2_FNR, BARN_NAVN_2, MedfolgendeFamilie.Relasjonsrolle.BARN)
+        ));
 
         when(behandlingService.hentBehandlingMedSaksopplysninger(1L)).thenReturn(behandling);
         when(trygdeavtaleService.hentResultat(1L)).thenReturn(lagTrygdeavtaleResultat());
@@ -277,8 +276,7 @@ class TrygdeavtaleTjenesteTest {
     @Test
     void hentResultat_tomtResultat_returnererKorrekt() throws Exception {
         Behandling behandling = lagBehandling();
-        behandling.getMottatteOpplysninger().getMottatteOpplysningerData().personOpplysninger.medfolgendeFamilie =
-            List.of();
+        behandling.getMottatteOpplysninger().getMottatteOpplysningerData().personOpplysninger.setMedfolgendeFamilie(List.of());
 
         TrygdeavtaleResultat tomtTrygdeavtaleResultat = new TrygdeavtaleResultat
             .Builder().familie(new AvklarteMedfolgendeFamilie(Set.of(), Set.of())).build();
@@ -295,7 +293,7 @@ class TrygdeavtaleTjenesteTest {
 
     private static MottatteOpplysninger lagMottatteOpplysninger() {
         var mottatteOpplysningerData = new MottatteOpplysningerData();
-        mottatteOpplysningerData.soeknadsland.landkoder.add(Landkoder.GB.getKode());
+        mottatteOpplysningerData.soeknadsland.getLandkoder().add(Landkoder.GB.getKode());
         mottatteOpplysningerData.periode = new Periode(LocalDate.of(2020, 1, 1), LocalDate.of(2021, 1, 1));
         var mottatteOpplysninger = new MottatteOpplysninger();
         mottatteOpplysninger.setMottatteOpplysningerData(mottatteOpplysningerData);

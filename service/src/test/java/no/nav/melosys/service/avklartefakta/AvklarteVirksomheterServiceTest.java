@@ -124,9 +124,9 @@ class AvklarteVirksomheterServiceTest {
 
     private ForetakUtland lagForetakUtland(String navn, String uuid, String orgnr) {
         ForetakUtland foretakUtland = new ForetakUtland();
-        foretakUtland.navn = navn;
-        foretakUtland.uuid = uuid;
-        foretakUtland.orgnr = orgnr;
+        foretakUtland.setNavn(navn);
+        foretakUtland.setUuid(uuid);
+        foretakUtland.setOrgnr(orgnr);
         return foretakUtland;
     }
 
@@ -357,9 +357,9 @@ class AvklarteVirksomheterServiceTest {
 
     private void forberedValidering() {
         ForetakUtland foretakUtland = new ForetakUtland();
-        foretakUtland.uuid = uuid1;
+        foretakUtland.setUuid(uuid1);
         SelvstendigForetak selvstendigForetak = new SelvstendigForetak();
-        selvstendigForetak.orgnr = orgnr1;
+        selvstendigForetak.setOrgnr(orgnr1);
         Arbeidsforhold arbeidsforhold = new Arbeidsforhold();
         arbeidsforhold.arbeidsgiverID = orgnr3;
         ArbeidsforholdDokument arbeidsforholdDokument = new ArbeidsforholdDokument();
@@ -369,8 +369,8 @@ class AvklarteVirksomheterServiceTest {
         saksopplysning.setDokument(arbeidsforholdDokument);
         MottatteOpplysningerData mottatteOpplysningerData = new MottatteOpplysningerData();
         mottatteOpplysningerData.foretakUtland.add(foretakUtland);
-        mottatteOpplysningerData.selvstendigArbeid.selvstendigForetak.add(selvstendigForetak);
-        mottatteOpplysningerData.juridiskArbeidsgiverNorge.ekstraArbeidsgivere.add(orgnr2);
+        mottatteOpplysningerData.selvstendigArbeid.getSelvstendigForetak().add(selvstendigForetak);
+        mottatteOpplysningerData.juridiskArbeidsgiverNorge.getEkstraArbeidsgivere().add(orgnr2);
         MottatteOpplysninger mottatteOpplysninger = new MottatteOpplysninger();
         mottatteOpplysninger.setMottatteOpplysningerData(mottatteOpplysningerData);
         Behandling behandling = new Behandling();

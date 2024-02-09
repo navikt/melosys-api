@@ -150,12 +150,12 @@ class AnmodningUnntakMapperTest {
         behandling.setFagsak(fagsak);
 
         FysiskArbeidssted fysiskArbeidssted = new FysiskArbeidssted();
-        fysiskArbeidssted.adresse = new StrukturertAdresse();
-        fysiskArbeidssted.adresse.setLandkode("NO");
+        fysiskArbeidssted.setAdresse(new StrukturertAdresse());
+        fysiskArbeidssted.getAdresse().setLandkode("NO");
 
         Soeknad soeknad = new Soeknad();
-        soeknad.arbeidPaaLand.fysiskeArbeidssteder = new ArrayList<>();
-        soeknad.arbeidPaaLand.fysiskeArbeidssteder.add(fysiskArbeidssted);
+        soeknad.arbeidPaaLand.setFysiskeArbeidssteder(new ArrayList<>());
+        soeknad.arbeidPaaLand.getFysiskeArbeidssteder().add(fysiskArbeidssted);
 
         MottatteOpplysninger mottatteOpplysninger = new MottatteOpplysninger();
         mottatteOpplysninger.setMottatteOpplysningerData(soeknad);

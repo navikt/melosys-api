@@ -1,5 +1,8 @@
 package no.nav.melosys.service.dokument;
 
+import java.time.LocalDate;
+import java.util.*;
+
 import io.getunleash.FakeUnleash;
 import no.nav.melosys.domain.*;
 import no.nav.melosys.domain.adresse.StrukturertAdresse;
@@ -68,9 +71,6 @@ import no.nav.melosys.sikkerhet.context.SpringSubjectHandler;
 import no.nav.melosys.sikkerhet.context.TestSubjectHandler;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
-
-import java.time.LocalDate;
-import java.util.*;
 
 import static no.nav.melosys.domain.kodeverk.Mottakerroller.ARBEIDSGIVER;
 import static no.nav.melosys.domain.kodeverk.Mottakerroller.BRUKER;
@@ -292,11 +292,11 @@ final class DokumentServiceTest {
 
         Soeknad søknad = new Soeknad();
         ForetakUtland foretakUtland = new ForetakUtland();
-        foretakUtland.orgnr = "12345678910";
+        foretakUtland.setOrgnr("12345678910");
         søknad.foretakUtland.add(foretakUtland);
         søknad.juridiskArbeidsgiverNorge = new JuridiskArbeidsgiverNorge();
-        søknad.juridiskArbeidsgiverNorge.ekstraArbeidsgivere = Collections.singletonList(ORGNR);
-        søknad.oppholdUtland.oppholdslandkoder.add("DK");
+        søknad.juridiskArbeidsgiverNorge.setEkstraArbeidsgivere(Collections.singletonList(ORGNR));
+        søknad.oppholdUtland.getOppholdslandkoder().add("DK");
 
         MottatteOpplysninger mottatteOpplysninger = new MottatteOpplysninger();
         mottatteOpplysninger.setMottatteOpplysningerData(søknad);
