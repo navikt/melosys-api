@@ -23,61 +23,31 @@ import org.junit.jupiter.api.extension.ExtendWith
 
 @ExtendWith(MockKExtension::class)
 class GyldigeTrygdedekningerServiceTest {
-
-    @MockK
-    lateinit var behandlingService: BehandlingService
-
     private val unleash = FakeUnleash()
 
     private lateinit var gyldigeTrygdedekningerService: GyldigeTrygdedekningerService
 
-    private lateinit var behandling: Behandling
-    private val BEHANDLING_ID = 1L
-
     @BeforeEach
     fun setUp() {
         unleash.resetAll()
-        gyldigeTrygdedekningerService = GyldigeTrygdedekningerService(behandlingService, unleash)
-
-        behandling = Behandling().apply {
-            id = BEHANDLING_ID
-            tema = Behandlingstema.YRKESAKTIV
-            fagsak = Fagsak().apply {
-                type = Sakstyper.FTRL
-            }
-        }
-        every { behandlingService.hentBehandling(BEHANDLING_ID) } returns behandling
-    }
-
-    @Test
-    fun hentTrygdedekninger_sakstypeErIkkeFTRL_kasterFeil() {
-        behandling.fagsak.type = Sakstyper.EU_EOS
-
-
-        shouldThrow<FunksjonellException> {
-            gyldigeTrygdedekningerService.hentTrygdedekninger(BEHANDLING_ID)
-        }.message.shouldContain("Behandling 1 med sakstype EU_EOS har ikke gyldige trygdedekninger")
+        gyldigeTrygdedekningerService = GyldigeTrygdedekningerService(unleash)
     }
 
     @Test
     fun hentTrygdedekninger_temaErIkkeStøttet_kasterFeil() {
-        behandling.tema = Behandlingstema.ANMODNING_OM_UNNTAK_HOVEDREGEL
-
-
         shouldThrow<FunksjonellException> {
-            gyldigeTrygdedekningerService.hentTrygdedekninger(BEHANDLING_ID)
-        }.message.shouldContain("Behandling 1 med behandlingstema ANMODNING_OM_UNNTAK_HOVEDREGEL har ikke gyldige trygdedekninger")
+            gyldigeTrygdedekningerService.hentTrygdedekninger(Behandlingstema.ANMODNING_OM_UNNTAK_HOVEDREGEL)
+        }.message.shouldContain("Behandling med behandlingstema ANMODNING_OM_UNNTAK_HOVEDREGEL har ikke gyldige trygdedekninger")
     }
 
     @Test
     fun hentTrygdedekninger_ikkeYrkesaktivMenToggleErAv_kasterFeil() {
         unleash.disableAll()
-        behandling.tema = Behandlingstema.IKKE_YRKESAKTIV
 
 
         shouldThrow<FunksjonellException> {
-            gyldigeTrygdedekningerService.hentTrygdedekninger(BEHANDLING_ID)
-        }.message.shouldContain("Behandling 1 med behandlingstema Ikke Yrkesaktiv har ikke gyldige trygdedekninger mens toggle er slått av")
+            gyldigeTrygdedekningerService.hentTrygdedekninger(Behandlingstema.IKKE_YRKESAKTIV)
+        }.message.shouldContain("Behandling med behandlingstema Ikke Yrkesaktiv har ikke gyldige trygdedekninger mens toggle er slått av")
     }
 
     @Test
@@ -85,7 +55,7 @@ class GyldigeTrygdedekningerServiceTest {
         unleash.enableAll()
 
 
-        gyldigeTrygdedekningerService.hentTrygdedekninger(BEHANDLING_ID)
+        gyldigeTrygdedekningerService.hentTrygdedekninger(Behandlingstema.YRKESAKTIV)
             .shouldNotBeNull()
             .shouldHaveSize(8)
             .shouldContainExactly(
@@ -105,7 +75,7 @@ class GyldigeTrygdedekningerServiceTest {
         unleash.disableAll()
 
 
-        gyldigeTrygdedekningerService.hentTrygdedekninger(BEHANDLING_ID)
+        gyldigeTrygdedekningerService.hentTrygdedekninger(Behandlingstema.YRKESAKTIV)
             .shouldNotBeNull()
             .shouldHaveSize(5)
             .shouldContainExactly(
@@ -120,9 +90,9 @@ class GyldigeTrygdedekningerServiceTest {
     @Test
     fun hentTrygdedekninger_ikkeYrkesaktiv_returnererKorrektListe() {
         unleash.enableAll()
-        behandling.tema = Behandlingstema.IKKE_YRKESAKTIV
 
-        gyldigeTrygdedekningerService.hentTrygdedekninger(BEHANDLING_ID)
+
+        gyldigeTrygdedekningerService.hentTrygdedekninger(Behandlingstema.IKKE_YRKESAKTIV)
             .shouldNotBeNull()
             .shouldHaveSize(7)
             .run {

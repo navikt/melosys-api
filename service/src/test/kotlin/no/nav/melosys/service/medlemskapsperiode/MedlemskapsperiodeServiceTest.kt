@@ -96,7 +96,7 @@ class MedlemskapsperiodeServiceTest {
 
     @Test
     fun opprettMedlemskapsperiode_lagrerKorrektMedlemskapsperiode() {
-        every { gyldigeTrygdedekningerService.hentTrygdedekninger(BEHANDLING_ID_1) } returns listOf(*Trygdedekninger.values())
+        every { gyldigeTrygdedekningerService.hentTrygdedekninger(any()) } returns listOf(*Trygdedekninger.values())
         val medlemAvFolketrygden = MedlemAvFolketrygden().apply {
             behandlingsresultat = Behandlingsresultat().apply {
                 behandling = Behandling().apply {
@@ -137,7 +137,7 @@ class MedlemskapsperiodeServiceTest {
 
     @Test
     fun opprettMedlemskapsperiode_harFastsattTrygdeavgift_fjernerTrygdeavgiftsperioderOmDeFinnes() {
-        every { gyldigeTrygdedekningerService.hentTrygdedekninger(BEHANDLING_ID_1) } returns listOf(*Trygdedekninger.values())
+        every { gyldigeTrygdedekningerService.hentTrygdedekninger(any()) } returns listOf(*Trygdedekninger.values())
         val medlemAvFolketrygden = MedlemAvFolketrygden().apply {
             behandlingsresultat = Behandlingsresultat().apply {
                 behandling = Behandling().apply {
@@ -171,7 +171,7 @@ class MedlemskapsperiodeServiceTest {
 
     @Test
     fun oppdaterMedlemskapsperiode_medlemskapsperiodeFinnes_oppdateres() {
-        every { gyldigeTrygdedekningerService.hentTrygdedekninger(BEHANDLING_ID_1) } returns listOf(*Trygdedekninger.values())
+        every { gyldigeTrygdedekningerService.hentTrygdedekninger(any()) } returns listOf(*Trygdedekninger.values())
         val medlemAvFolketrygden = MedlemAvFolketrygden().apply {
             medlemskapsperioder = listOf(Medlemskapsperiode().apply { id = MEDLEMSKAPSPERIODE_ID_1 })
         }
@@ -203,7 +203,7 @@ class MedlemskapsperiodeServiceTest {
 
     @Test
     fun oppdaterMedlemskapsperiode_medlemskapsperiodeOgFastsattTrygdeavgiftFinnes_oppdateres() {
-        every { gyldigeTrygdedekningerService.hentTrygdedekninger(BEHANDLING_ID_1) } returns listOf(*Trygdedekninger.values())
+        every { gyldigeTrygdedekningerService.hentTrygdedekninger(any()) } returns listOf(*Trygdedekninger.values())
         val medlemAvFolketrygden = MedlemAvFolketrygden().apply {
             medlemskapsperioder = listOf(Medlemskapsperiode().apply { id = MEDLEMSKAPSPERIODE_ID_1 })
             fastsattTrygdeavgift = FastsattTrygdeavgift()
@@ -229,7 +229,7 @@ class MedlemskapsperiodeServiceTest {
 
     @Test
     fun oppdaterMedlemskapsperiode_ugyldigTrygdedekning_kasterException() {
-        every { gyldigeTrygdedekningerService.hentTrygdedekninger(BEHANDLING_ID_1) } returns emptyList()
+        every { gyldigeTrygdedekningerService.hentTrygdedekninger(any()) } returns emptyList()
         shouldThrow<FunksjonellException> {
             medlemskapsperiodeService.oppdaterMedlemskapsperiode(
                 BEHANDLING_ID_1,
@@ -245,7 +245,7 @@ class MedlemskapsperiodeServiceTest {
 
     @Test
     fun oppdaterMedlemskapsperiode_tomDatoErFørFomDato_kasterException() {
-        every { gyldigeTrygdedekningerService.hentTrygdedekninger(BEHANDLING_ID_1) } returns listOf(*Trygdedekninger.values())
+        every { gyldigeTrygdedekningerService.hentTrygdedekninger(any()) } returns listOf(*Trygdedekninger.values())
         shouldThrow<FunksjonellException> {
             medlemskapsperiodeService.oppdaterMedlemskapsperiode(
                 BEHANDLING_ID_1,
@@ -291,7 +291,7 @@ class MedlemskapsperiodeServiceTest {
 
     @Test
     fun oppdaterMedlemskapsperiode_finnerIkkeMedlemskapsperiode_kasterException() {
-        every { gyldigeTrygdedekningerService.hentTrygdedekninger(BEHANDLING_ID_1) } returns listOf(*Trygdedekninger.values())
+        every { gyldigeTrygdedekningerService.hentTrygdedekninger(any()) } returns listOf(*Trygdedekninger.values())
         every { medlemAvFolketrygdenService.hentMedlemAvFolketrygden(BEHANDLING_ID_1) } returns MedlemAvFolketrygden().apply {
             medlemskapsperioder = mutableListOf(Medlemskapsperiode().apply { id = MEDLEMSKAPSPERIODE_ID_1 })
         }

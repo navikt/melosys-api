@@ -1,16 +1,14 @@
 package no.nav.melosys.service.ftrl
 
 import io.getunleash.Unleash
-import no.nav.melosys.domain.Behandling
 import no.nav.melosys.domain.kodeverk.Trygdedekninger
 import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingstema
 import no.nav.melosys.exception.FunksjonellException
 import no.nav.melosys.featuretoggle.ToggleName
-import no.nav.melosys.service.behandling.BehandlingService
 import org.springframework.stereotype.Service
 
 @Service
-class GyldigeTrygdedekningerService(private val behandlingService: BehandlingService, private val unleash: Unleash) {
+class GyldigeTrygdedekningerService(private val unleash: Unleash) {
 
     private val GYLDIGE_TRYGDEDEKNINGER_YRKESAKTIV = listOf(
         Trygdedekninger.FULL_DEKNING_FTRL,
@@ -41,27 +39,22 @@ class GyldigeTrygdedekningerService(private val behandlingService: BehandlingSer
         Trygdedekninger.FTRL_2_7_TREDJE_LEDD_B_HELSE_SYKE_FORELDREPENGER
     )
 
-    fun hentTrygdedekninger(behandlingID: Long): List<Trygdedekninger> {
-        val behandling = behandlingService.hentBehandling(behandlingID)
-
-        valider(behandling)
+    fun hentTrygdedekninger(behandlingstema: Behandlingstema): List<Trygdedekninger> {
+        valider(behandlingstema)
 
         return when {
-            behandling.tema == Behandlingstema.IKKE_YRKESAKTIV -> GYLDIGE_TRYGDEDEKNINGER_IKKE_YRKESAKTIV
+            behandlingstema == Behandlingstema.IKKE_YRKESAKTIV -> GYLDIGE_TRYGDEDEKNINGER_IKKE_YRKESAKTIV
             unleash.isEnabled(ToggleName.MELOSYS_FOLKETRYGDEN_2_7) -> GYLDIGE_TRYGDEDEKNINGER_YRKESAKTIV
             else -> GYLDIGE_TRYGDEDEKNINGER_YRKESAKTIV_GAMMMEL
         }
     }
 
-    private fun valider(behandling: Behandling) {
-        if (!behandling.fagsak.erSakstypeFtrl()) {
-            throw FunksjonellException("Behandling ${behandling.id} med sakstype ${behandling.fagsak.type} har ikke gyldige trygdedekninger")
+    private fun valider(behandlingstema: Behandlingstema) {
+        if (behandlingstema !in listOf(Behandlingstema.YRKESAKTIV, Behandlingstema.IKKE_YRKESAKTIV)) {
+            throw FunksjonellException("Behandling med behandlingstema $behandlingstema har ikke gyldige trygdedekninger")
         }
-        if (behandling.tema !in listOf(Behandlingstema.YRKESAKTIV, Behandlingstema.IKKE_YRKESAKTIV)) {
-            throw FunksjonellException("Behandling ${behandling.id} med behandlingstema ${behandling.tema} har ikke gyldige trygdedekninger")
-        }
-        if (behandling.tema == Behandlingstema.IKKE_YRKESAKTIV && !unleash.isEnabled(ToggleName.MELOSYS_FTRL_IKKE_YRKESAKTIV)) {
-            throw FunksjonellException("Behandling ${behandling.id} med behandlingstema Ikke Yrkesaktiv har ikke gyldige trygdedekninger mens toggle er slått av")
+        if (behandlingstema == Behandlingstema.IKKE_YRKESAKTIV && !unleash.isEnabled(ToggleName.MELOSYS_FTRL_IKKE_YRKESAKTIV)) {
+            throw FunksjonellException("Behandling med behandlingstema Ikke Yrkesaktiv har ikke gyldige trygdedekninger mens toggle er slått av")
         }
     }
 }
