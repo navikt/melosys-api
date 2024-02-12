@@ -174,7 +174,7 @@ class MedlemskapsperiodeServiceTest {
     fun oppdaterMedlemskapsperiode_medlemskapsperiodeFinnes_oppdateres() {
         val medlemAvFolketrygden = MedlemAvFolketrygden().apply {
             medlemskapsperioder = listOf(Medlemskapsperiode().apply { id = MEDLEMSKAPSPERIODE_ID_1 })
-            behandlingsresultat = lagBehandlingsresultat
+            behandlingsresultat = lagBehandlingsresultat()
         }
         every { medlemAvFolketrygdenService.hentMedlemAvFolketrygden(BEHANDLING_ID_1) } returns medlemAvFolketrygden
         every { medlemskapsperiodeRepository.save(any()) } returnsArgument 0
@@ -207,7 +207,7 @@ class MedlemskapsperiodeServiceTest {
         val medlemAvFolketrygden = MedlemAvFolketrygden().apply {
             medlemskapsperioder = listOf(Medlemskapsperiode().apply { id = MEDLEMSKAPSPERIODE_ID_1 })
             fastsattTrygdeavgift = FastsattTrygdeavgift()
-            behandlingsresultat = lagBehandlingsresultat
+            behandlingsresultat = lagBehandlingsresultat()
         }
         every { medlemAvFolketrygdenService.hentMedlemAvFolketrygden(BEHANDLING_ID_1) } returns medlemAvFolketrygden
         every { medlemskapsperiodeRepository.save(any()) } returnsArgument 0
@@ -246,7 +246,6 @@ class MedlemskapsperiodeServiceTest {
         every { medlemskapsperiodeRepository.save(any()) } returnsArgument 0
 
 
-
         medlemskapsperiodeService.opprettMedlemskapsperiode(
             BEHANDLING_ID_1,
             NÅ,
@@ -255,6 +254,7 @@ class MedlemskapsperiodeServiceTest {
             Trygdedekninger.FTRL_2_9_FØRSTE_LEDD_A_HELSE,
             Folketrygdloven_kap2_bestemmelser.FTRL_KAP2_2_1_FØRSTE_LEDD
         )
+
 
         verify { medlemskapsperiodeRepository.save(any()) }
     }
@@ -292,8 +292,8 @@ class MedlemskapsperiodeServiceTest {
     @Test
     fun oppdaterMedlemskapsperiode_ugyldigTrygdedekning_kasterException() {
         every { medlemAvFolketrygdenService.hentMedlemAvFolketrygden(BEHANDLING_ID_1) } returns MedlemAvFolketrygden().apply {
-            medlemskapsperioder = mutableListOf(Medlemskapsperiode().apply { id = 1L })
-            behandlingsresultat = lagBehandlingsresultat
+            medlemskapsperioder = mutableListOf(Medlemskapsperiode().apply { id = MEDLEMSKAPSPERIODE_ID_1 })
+            behandlingsresultat = lagBehandlingsresultat()
         }
 
         shouldThrow<FunksjonellException> {
@@ -312,8 +312,8 @@ class MedlemskapsperiodeServiceTest {
     @Test
     fun oppdaterMedlemskapsperiode_tomDatoErFørFomDato_kasterException() {
         every { medlemAvFolketrygdenService.hentMedlemAvFolketrygden(BEHANDLING_ID_1) } returns MedlemAvFolketrygden().apply {
-            medlemskapsperioder = mutableListOf(Medlemskapsperiode().apply { id = 1L })
-            behandlingsresultat = lagBehandlingsresultat
+            medlemskapsperioder = mutableListOf(Medlemskapsperiode().apply { id = MEDLEMSKAPSPERIODE_ID_1 })
+            behandlingsresultat = lagBehandlingsresultat()
         }
 
         shouldThrow<FunksjonellException> {
@@ -332,8 +332,8 @@ class MedlemskapsperiodeServiceTest {
     @Test
     fun oppdaterMedlemskapsperiode_utenTrygdedekning_kasterFeil() {
         every { medlemAvFolketrygdenService.hentMedlemAvFolketrygden(BEHANDLING_ID_1) } returns MedlemAvFolketrygden().apply {
-            medlemskapsperioder = mutableListOf(Medlemskapsperiode().apply { id = 1L })
-            behandlingsresultat = lagBehandlingsresultat
+            medlemskapsperioder = mutableListOf(Medlemskapsperiode().apply { id = MEDLEMSKAPSPERIODE_ID_1 })
+            behandlingsresultat = lagBehandlingsresultat()
         }
 
         shouldThrow<FunksjonellException> {
@@ -352,8 +352,8 @@ class MedlemskapsperiodeServiceTest {
     @Test
     fun oppdaterMedlemskapsperiode_utenBestemmelse_kasterFeil() {
         every { medlemAvFolketrygdenService.hentMedlemAvFolketrygden(BEHANDLING_ID_1) } returns MedlemAvFolketrygden().apply {
-            medlemskapsperioder = mutableListOf(Medlemskapsperiode().apply { id = 1L })
-            behandlingsresultat = lagBehandlingsresultat
+            medlemskapsperioder = mutableListOf(Medlemskapsperiode().apply { id = MEDLEMSKAPSPERIODE_ID_1 })
+            behandlingsresultat = lagBehandlingsresultat()
         }
 
         shouldThrow<FunksjonellException> {
@@ -372,8 +372,8 @@ class MedlemskapsperiodeServiceTest {
     @Test
     fun oppdaterMedlemskapsperiode_finnerIkkeMedlemskapsperiode_kasterException() {
         every { medlemAvFolketrygdenService.hentMedlemAvFolketrygden(BEHANDLING_ID_1) } returns MedlemAvFolketrygden().apply {
-            medlemskapsperioder = mutableListOf(Medlemskapsperiode().apply { id = 1L })
-            behandlingsresultat = lagBehandlingsresultat
+            medlemskapsperioder = mutableListOf(Medlemskapsperiode().apply { id = MEDLEMSKAPSPERIODE_ID_1 })
+            behandlingsresultat = lagBehandlingsresultat()
         }
 
         shouldThrow<FunksjonellException> {
@@ -578,12 +578,12 @@ class MedlemskapsperiodeServiceTest {
 
     @Test
     fun slettMedlemskapsperiode_finnerIkkeMedlemskapsperiode_kasterException() {
-        every { medlemAvFolketrygdenService.hentMedlemAvFolketrygden(1L) } returns MedlemAvFolketrygden().apply {
-            medlemskapsperioder = mutableListOf(Medlemskapsperiode().apply { id = 1L })
+        every { medlemAvFolketrygdenService.hentMedlemAvFolketrygden(BEHANDLING_ID_1) } returns MedlemAvFolketrygden().apply {
+            medlemskapsperioder = mutableListOf(Medlemskapsperiode().apply { id = MEDLEMSKAPSPERIODE_ID_1 })
         }
 
 
-        shouldThrow<FunksjonellException> { medlemskapsperiodeService.slettMedlemskapsperiode(1L, 2L) }
+        shouldThrow<FunksjonellException> { medlemskapsperiodeService.slettMedlemskapsperiode(BEHANDLING_ID_1, 2L) }
             .message.shouldBe("Finner ingen medlemskapsperiode med id 2 for behandling 1")
     }
 
@@ -674,7 +674,7 @@ class MedlemskapsperiodeServiceTest {
             .shouldContainExactly(MedlemskapsperiodeService.GYLDIGE_TRYGDEDEKNINGER_2_8)
     }
 
-    private val lagBehandlingsresultat: Behandlingsresultat = Behandlingsresultat().apply {
+    private fun lagBehandlingsresultat(): Behandlingsresultat = Behandlingsresultat().apply {
         behandling = Behandling().apply {
             id = BEHANDLING_ID_1
             mottatteOpplysninger = MottatteOpplysninger().apply {
