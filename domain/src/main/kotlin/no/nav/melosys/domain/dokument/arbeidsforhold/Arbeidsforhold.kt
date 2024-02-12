@@ -31,17 +31,15 @@ class Arbeidsforhold : HarPeriode {
     var antallTimerForTimeloennet: List<AntallTimerIPerioden> = ArrayList()
 
     @JsonIgnore
-    override fun getPeriode(): ErPeriode {
-        return ansettelsesPeriode!!
-    }
+    override fun getPeriode(): ErPeriode = ansettelsesPeriode!!
 
-    fun hentOrgnumre(): List<String?> {
-        val orgnr = ArrayList<String?>()
+    fun hentOrgnumre(): List<String> {
+        val orgnr = ArrayList<String>()
         if (arbeidsgivertype != Aktoertype.PERSON) {
-            orgnr.add(arbeidsgiverID)
+            arbeidsgiverID?.let { orgnr.add(it) }
         }
         if (opplysningspliktigtype != Aktoertype.PERSON) {
-            orgnr.add(opplysningspliktigID)
+            opplysningspliktigID?.let { orgnr.add(it) }
         }
         return orgnr
     }

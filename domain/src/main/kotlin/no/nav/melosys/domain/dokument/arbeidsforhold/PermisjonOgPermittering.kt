@@ -13,8 +13,6 @@ class PermisjonOgPermittering : HarPeriode {
     var permisjonOgPermittering: String? = null
 
     @JsonIgnore
-    override fun getPeriode(): Periode {
-        return permisjonsPeriode!!
-    }
+    override fun getPeriode(): Periode = permisjonsPeriode!!
 }
 

@@ -7,11 +7,7 @@ enum class Fartsomraade(private val kode: String, private val beskrivelse: Strin
     INNENRIKS("innenriks", "Innenriks"),
     UTENRIKS("utenriks", "Utenriks");
 
-    override fun getKode(): String {
-        return kode
-    }
+    override fun getKode(): String = kode
 
-    override fun getBeskrivelse(): String {
-        return beskrivelse
-    }
+    override fun getBeskrivelse(): String = beskrivelse
 }

@@ -89,13 +89,12 @@ class ArbeidsforholdKonverter(
     private fun getArbeidsAvtaler(arbeidsavtalerSrc: List<ArbeidsforholdResponse.Arbeidsavtale>?): List<Arbeidsavtale> {
         if (arbeidsavtalerSrc == null) return emptyList()
         return arbeidsavtalerSrc.map {
-            Arbeidsavtale().apply {
+            Arbeidsavtale(Arbeidstidsordning()).apply {
                 yrke = Yrke(it.yrke()).apply {
                     term = kodeOppslag.getTermFraKodeverk(FellesKodeverk.YRKER, it.yrke())
                 }
                 beregnetAntallTimerPrUke = it.beregnetAntallTimerPrUke()
-                arbeidstidsordning = Arbeidstidsordning()
-                arbeidstidsordning!!.kode = it.arbeidstidsordning()
+                arbeidstidsordning.kode = it.arbeidstidsordning()
                 avloenningstype = "" // Finnes ikke i nytt rest api
                 gyldighetsperiode = getPeriode(it.gyldighetsperiode())
                 beregnetAntallTimerPrUke = it.beregnetAntallTimerPrUke()
