@@ -14,12 +14,12 @@ class Periode : ErPeriode {
         this.tom = tom
     }
 
-    override fun getFom(): LocalDate {
-        return fom!!
+    override fun getFom(): LocalDate? {
+        return fom
     }
 
-    override fun getTom(): LocalDate {
-        return tom!!
+    override fun getTom(): LocalDate? {
+        return tom
     }
 
     override fun toString(): String {
