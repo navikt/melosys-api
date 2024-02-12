@@ -1,6 +1,7 @@
 package no.nav.melosys.service.medlemskapsperiode
 
 import io.getunleash.FakeUnleash
+import io.kotest.assertions.throwables.shouldNotThrow
 import io.kotest.assertions.throwables.shouldThrow
 import io.kotest.matchers.collections.shouldBeEmpty
 import io.kotest.matchers.collections.shouldContainExactly
@@ -261,7 +262,7 @@ class MedlemskapsperiodeServiceTest {
 
     @Test
     fun `opprettMedlemskapsperiode kaster exception når tomDato er null`() {
-        unleash.enable(ToggleName.MELOSYS_FOLKETRYGDEN_2_7)
+        unleash.enable(ToggleName.MELOSYS_FTRL_IKKE_YRKESAKTIV)
         val medlemAvFolketrygden = MedlemAvFolketrygden().apply {
             behandlingsresultat = Behandlingsresultat().apply {
                 behandling = Behandling().apply {
@@ -287,6 +288,36 @@ class MedlemskapsperiodeServiceTest {
                 PliktigeMedlemskapsbestemmelser.bestemmelser[0]
             )
         }.message.shouldContain("Tom-dato er påkrevd")
+    }
+
+    @Test
+    fun `opprettMedlemskapsperiode kaster ikke exception når tomDato er null mens toggle er disabled`() {
+        unleash.disable(ToggleName.MELOSYS_FTRL_IKKE_YRKESAKTIV)
+        val medlemAvFolketrygden = MedlemAvFolketrygden().apply {
+            behandlingsresultat = Behandlingsresultat().apply {
+                behandling = Behandling().apply {
+                    mottatteOpplysninger = MottatteOpplysninger().apply {
+                        mottatteOpplysningerData = SøknadNorgeEllerUtenforEØS().apply {
+                            soeknadsland = Soeknadsland(listOf(Land_iso2.AU.kode), false)
+                        }
+                    }
+                }
+            }
+        }
+        every { medlemAvFolketrygdenService.hentMedlemAvFolketrygden(BEHANDLING_ID_1) } returns medlemAvFolketrygden
+        every { medlemskapsperiodeRepository.save(any()) } returnsArgument 0
+
+
+        shouldNotThrow<FunksjonellException> {
+            medlemskapsperiodeService.opprettMedlemskapsperiode(
+                BEHANDLING_ID_1,
+                NÅ,
+                null,
+                InnvilgelsesResultat.AVSLAATT,
+                Trygdedekninger.FTRL_2_9_FØRSTE_LEDD_A_HELSE,
+                PliktigeMedlemskapsbestemmelser.bestemmelser[0]
+            )
+        }
     }
 
     @Test
