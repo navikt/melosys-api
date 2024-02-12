@@ -30,12 +30,7 @@ public class Inntektsperiode {
     @Enumerated(EnumType.STRING)
     private Inntektskildetype type;
 
-    @Columns(columns = {
-        @Column(name = "avgiftspliktig_inntekt_mnd_verdi"),
-        @Column(name = "avgiftspliktig_inntekt_mnd_valuta")})
-    @Type(type = "no.nav.melosys.domain.avgift.PengerType", parameters = {
-        @Parameter(name = "verdiPropertyName", value = "avgiftspliktig_inntekt_mnd_verdi"),
-        @Parameter(name = "valutaPropertyName", value = "avgiftspliktig_inntekt_mnd_valuta")})
+    @Embedded
     private Penger avgiftspliktigInntektMnd;
 
     @Column(name = "aga_betales_til_skatt")

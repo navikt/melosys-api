@@ -11,6 +11,7 @@ import no.nav.melosys.exception.TekniskException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.http.HttpStatus;
+import org.springframework.http.HttpStatusCode;
 import org.springframework.util.StringUtils;
 import org.springframework.web.client.HttpStatusCodeException;
 
@@ -19,7 +20,7 @@ public abstract class RestErrorHandler {
 
     private final ObjectMapper objectMapper = new ObjectMapper();
 
-    public RuntimeException tilException(String feilmelding, HttpStatus status) {
+    public RuntimeException tilException(String feilmelding, HttpStatusCode status) {
         if (status == HttpStatus.UNAUTHORIZED || status == HttpStatus.FORBIDDEN) {
             return new SikkerhetsbegrensningException(feilmelding);
         } else if (status == HttpStatus.NOT_FOUND) {
@@ -32,7 +33,7 @@ public abstract class RestErrorHandler {
     }
 
     public RuntimeException tilException(HttpStatusCodeException e) {
-        HttpStatus status = e.getStatusCode();
+        HttpStatus status = HttpStatus.valueOf(e.getStatusCode().value());
         String feilmelding = hentFeilmelding(e);
         return tilException(feilmelding, status);
     }

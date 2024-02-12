@@ -3,7 +3,7 @@ package no.nav.melosys.integrasjon.kodeverk.impl;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import javax.ws.rs.NotFoundException;
+import jakarta.ws.rs.NotFoundException;
 
 import no.nav.melosys.integrasjon.kodeverk.Kode;
 import no.nav.melosys.integrasjon.kodeverk.Kodeverk;

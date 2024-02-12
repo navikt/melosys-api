@@ -28,12 +28,7 @@ public class Trygdeavgiftsperiode {
     @Column(name = "periode_til", nullable = false)
     private LocalDate periodeTil;
 
-    @Columns(columns = {
-        @Column(name = "trygdeavgift_beloep_mnd_verdi", nullable = false),
-        @Column(name = "trygdeavgift_beloep_mnd_valuta", nullable = false)})
-    @Type(type = "no.nav.melosys.domain.avgift.PengerType", parameters = {
-        @Parameter(name = "verdiPropertyName", value = "trygdeavgift_beloep_mnd_verdi"),
-        @Parameter(name = "valutaPropertyName", value = "trygdeavgift_beloep_mnd_valuta")})
+    @Embedded
     private Penger trygdeavgiftsbeløpMd;
 
     @Column(name = "trygdesats", nullable = false)

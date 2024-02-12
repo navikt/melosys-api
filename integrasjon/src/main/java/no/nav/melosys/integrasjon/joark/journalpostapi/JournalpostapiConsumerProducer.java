@@ -27,7 +27,7 @@ public class JournalpostapiConsumerProducer {
         RestTemplate restTemplate = restTemplateBuilder
             .uriTemplateHandler(new DefaultUriBuilderFactory(url))
             .interceptors(systemContextClientRequestInterceptor, new CorrelationIdOutgoingInterceptor())
-            .requestFactory(() -> new HttpComponentsClientHttpRequestFactory(HttpClients.createDefault()))
+            .requestFactory(() -> new HttpComponentsClientHttpRequestFactory())
             .build();
 
         return new JournalpostapiConsumerImpl(restTemplate);
