@@ -10,27 +10,25 @@ import no.nav.melosys.domain.dokument.felles.Periode
 import java.math.BigDecimal
 import java.time.LocalDate
 
-class Arbeidsavtale(var arbeidstidsordning: Arbeidstidsordning) : HarPeriode {
-    var avloenningstype: String? = null
-    var yrke: Yrke = Yrke()
-    var gyldighetsperiode: Periode? = null
-    var avtaltArbeidstimerPerUke: BigDecimal? = null
-    var stillingsprosent: BigDecimal? = null
-
-    @JsonView(DokumentView.Database::class)
-    var sisteLoennsendringsdato: LocalDate? = null
-    var beregnetAntallTimerPrUke: BigDecimal? = null
-    var endringsdatoStillingsprosent: LocalDate? = null
-
-    @JsonProperty("fartsomraade")
-    var fartsområde: Fartsomraade? = null
-    var skipsregister: Skipsregister? = null
-    var skipstype: Skipstype? = null
-    var maritimArbeidsavtale: Boolean? = null
-    var beregnetStillingsprosent: BigDecimal? = null
-    var antallTimerGammeltAa: BigDecimal? = null
+class Arbeidsavtale(
+    val arbeidstidsordning: Arbeidstidsordning,
+    val avloenningstype: String? = null,
+    val yrke: Yrke = Yrke(),
+    val gyldighetsperiode: Periode = Periode(),
+    val avtaltArbeidstimerPerUke: BigDecimal? = null,
+    val stillingsprosent: BigDecimal? = null,
+    @JsonView(DokumentView.Database::class) val sisteLoennsendringsdato: LocalDate? = null,
+    val beregnetAntallTimerPrUke: BigDecimal? = null,
+    val endringsdatoStillingsprosent: LocalDate? = null,
+    @JsonProperty("fartsomraade") val fartsområde: Fartsomraade? = null,
+    val skipsregister: Skipsregister? = null,
+    val skipstype: Skipstype? = null,
+    val maritimArbeidsavtale: Boolean? = null,
+    val beregnetStillingsprosent: BigDecimal? = null,
+    val antallTimerGammeltAa: BigDecimal? = null
+) : HarPeriode {
 
     @JsonIgnore
-    override fun getPeriode(): ErPeriode = gyldighetsperiode!!
+    override fun getPeriode(): ErPeriode = gyldighetsperiode
 }
 
