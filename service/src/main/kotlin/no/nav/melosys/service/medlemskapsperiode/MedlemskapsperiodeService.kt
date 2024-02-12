@@ -40,7 +40,7 @@ class MedlemskapsperiodeService(
     fun opprettMedlemskapsperiode(
         behandlingsresultatID: Long,
         fom: LocalDate?,
-        tom: LocalDate,
+        tom: LocalDate?,
         innvilgelsesResultat: InnvilgelsesResultat?,
         trygdedekning: Trygdedekninger?,
         bestemmelse: Folketrygdloven_kap2_bestemmelser?,
