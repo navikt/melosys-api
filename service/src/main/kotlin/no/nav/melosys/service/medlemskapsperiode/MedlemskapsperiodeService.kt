@@ -108,11 +108,14 @@ class MedlemskapsperiodeService(
         land: List<String>
     ) {
         val nullTilOgMedDatoErTillatt =
-            Land_iso2.NO.kode in land && land.size == 1 && bestemmelse in UtledBestemmelserOgVilkår.støttetBestemmelser2_1
+            Land_iso2.NO.kode in land && land.size == 1 && bestemmelse in listOf(
+                Folketrygdloven_kap2_bestemmelser.FTRL_KAP2_2_1_FØRSTE_LEDD,
+                Folketrygdloven_kap2_bestemmelser.FTRL_KAP2_2_1_FJERDE_LEDD
+            )
 
         if (tom == null && !nullTilOgMedDatoErTillatt) {
             throw FunksjonellException("Tom-dato er påkrevd")
-        } else if (innvilgelsesResultat == null || bestemmelse == null || trygdedekning == null) {
+        } else if (fom == null || innvilgelsesResultat == null || bestemmelse == null || trygdedekning == null) {
             throw FunksjonellException("Fom-dato, innvilgelsesresultat, bestemmelse og trygdedekning er påkrevd")
         } else if (!hentGyldigeTrygdedekninger().contains(trygdedekning)) {
             throw FunksjonellException("Trygedekning $trygdedekning støttes ikke for en medlemskapsperiode")
