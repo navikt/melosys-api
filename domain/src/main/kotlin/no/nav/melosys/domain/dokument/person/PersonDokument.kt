@@ -15,7 +15,6 @@ import no.nav.melosys.domain.person.adresse.Oppholdsadresse
 import no.nav.melosys.domain.util.IsoLandkodeKonverterer
 import java.time.LocalDate
 import java.util.*
-import java.util.stream.Collectors
 
 
 /**
@@ -146,8 +145,7 @@ class PersonDokument : Persondata {
     }
 
     override fun hentFamiliemedlemmer(): Set<no.nav.melosys.domain.person.familie.Familiemedlem> {
-        return familiemedlemmer.stream().map { obj: Familiemedlem -> obj.tilDomene() }
-            .collect(Collectors.toUnmodifiableSet())
+        return familiemedlemmer.map { it.tilDomene() }.toSet()
     }
 
     override fun getFødselsdato(): LocalDate? {
