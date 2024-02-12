@@ -153,8 +153,7 @@ class UfmKontrollTest {
 
         val personDokument = PersonDokument()
         personDokument.dødsdato = DATE
-        personDokument.bostedsadresse = Bostedsadresse()
-        personDokument.bostedsadresse?.apply {
+        personDokument.bostedsadresse = Bostedsadresse().apply {
             land = Land("NOR")
             postnr = "1234"
             poststed = "Oslo"
