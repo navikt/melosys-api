@@ -91,7 +91,7 @@ class ArbeidsforholdKonverter(
         return arbeidsavtalerSrc.map {
             Arbeidsavtale(
                 yrke = Yrke(term = kodeOppslag.getTermFraKodeverk(FellesKodeverk.YRKER, it.yrke())),
-                arbeidstidsordning = Arbeidstidsordning(),
+                arbeidstidsordning = Arbeidstidsordning(it.arbeidstidsordning),
                 avloenningstype = "", // Finnes ikke i nytt rest api
                 gyldighetsperiode = getPeriode(it.gyldighetsperiode()),
                 beregnetAntallTimerPrUke = it.beregnetAntallTimerPrUke(),

@@ -5,8 +5,6 @@ import no.nav.melosys.domain.dokument.felles.AbstraktKodeverkHjelper
 
 
 class Skipsregister : AbstraktKodeverkHjelper() {
-    override fun hentKodeverkNavn(): FellesKodeverk {
-        return FellesKodeverk.SKIPSREGISTRE
-    }
+    override fun hentKodeverkNavn(): FellesKodeverk = FellesKodeverk.SKIPSREGISTRE
 }
 
