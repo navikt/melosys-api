@@ -8,6 +8,7 @@ import java.time.LocalDateTime
 
 data class StatsborgerskapPeriode(
     var periode: Periode?,
+    // Attributtet endretAv er på formen "KODE_SYSTEM_KILDE" eller "ENDRET_AV, KODE_SYSTEM_KILDE"
     var endretAv: String = "",
     var endringstidspunkt: LocalDateTime?,
     var statsborgerskap: Land?
