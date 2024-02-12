@@ -7,8 +7,9 @@ import no.nav.melosys.domain.kodeverk.Vilkaar
 import no.nav.melosys.domain.kodeverk.begrunnelser.folketrygdloven.Ftrl_2_7_begrunnelser
 import no.nav.melosys.domain.kodeverk.begrunnelser.folketrygdloven.Ftrl_2_8_naer_tilknytning_norge_begrunnelser
 import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingstema
-import no.nav.melosys.featuretoggle.ToggleName
 import no.nav.melosys.domain.util.KodeverkUtils
+import no.nav.melosys.featuretoggle.ToggleName
+import no.nav.melosys.service.ftrl.bestemmelse.IkkeYrkesaktivBestemmelser
 import org.springframework.stereotype.Component
 
 @Component
@@ -109,23 +110,8 @@ class UtledBestemmelserOgVilkår(val unleash: Unleash) {
         )
     )
 
-    val ikkeYrkesaktivBestemmelserOgVilkår = mapOf<Folketrygdloven_kap2_bestemmelser, Collection<Vilkaar>>(
-        Pair(FTRL_KAP2_2_1_FØRSTE_LEDD, emptySet()),
-        Pair(FTRL_KAP2_2_1_FJERDE_LEDD, emptySet()),
-        Pair(FTRL_KAP2_2_3_FØRSTE_LEDD, emptySet()),
-        Pair(FTRL_KAP2_2_5_FØRSTE_LEDD_C, emptySet()),
-        Pair(FTRL_KAP2_2_5_FØRSTE_LEDD_H, emptySet()),
-        Pair(FTRL_KAP2_2_5_ANDRE_LEDD, emptySet()),
-        Pair(FTRL_KAP2_2_7_FØRSTE_LEDD, emptySet()),
-        Pair(FTRL_KAP2_2_7_FJERDE_LEDD, emptySet()),
-        Pair(FTRL_KAP2_2_8_FØRSTE_LEDD_B, emptySet()),
-        Pair(FTRL_KAP2_2_8_FØRSTE_LEDD_C, emptySet()),
-        Pair(
-            FTRL_KAP2_2_8_ANDRE_LEDD,
-            LinkedHashSet(listOf(Vilkaar.FTRL_2_8_FORUTGÅENDE_TRYGDETID, Vilkaar.FTRL_2_8_NÆR_TILKNYTNING_NORGE))
-        ),
-        Pair(FTRL_KAP2_2_8_FJERDE_LEDD, emptySet()),
-    )
+    val ikkeYrkesaktivBestemmelserOgVilkår: Map<Folketrygdloven_kap2_bestemmelser, Collection<Vilkaar>> =
+        IkkeYrkesaktivBestemmelser.bestemmelser.associateWith { emptySet() }
 
     val pensjonistBestemmelserOgVilkår = mapOf<Folketrygdloven_kap2_bestemmelser, Collection<Vilkaar>>(
         Pair(FTRL_KAP2_2_1_FØRSTE_LEDD, emptySet()),
