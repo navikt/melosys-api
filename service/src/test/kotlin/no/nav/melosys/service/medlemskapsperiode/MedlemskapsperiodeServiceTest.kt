@@ -136,6 +136,7 @@ class MedlemskapsperiodeServiceTest {
         }
     }
 
+
     @Test
     fun opprettMedlemskapsperiode_harFastsattTrygdeavgift_fjernerTrygdeavgiftsperioderOmDeFinnes() {
         val medlemAvFolketrygden = MedlemAvFolketrygden().apply {
@@ -225,6 +226,67 @@ class MedlemskapsperiodeServiceTest {
 
         verify { medlemskapsperiodeRepository.save(any()) }
         verify { trygdeavgiftsgrunnlagService.fjernTrygdeavgiftsperioderOmDeFinnes(medlemAvFolketrygden.fastsattTrygdeavgift) }
+    }
+
+    @Test
+    fun `opprettMedlemskapsperiode kaster ikke exception når tomDato er null, land er Norge og bestemmelse er 2_1`() {
+        unleash.enable(ToggleName.MELOSYS_FOLKETRYGDEN_2_7)
+        val medlemAvFolketrygden = MedlemAvFolketrygden().apply {
+            behandlingsresultat = Behandlingsresultat().apply {
+                behandling = Behandling().apply {
+                    mottatteOpplysninger = MottatteOpplysninger().apply {
+                        mottatteOpplysningerData = SøknadNorgeEllerUtenforEØS().apply {
+                            soeknadsland = Soeknadsland(listOf(Land_iso2.NO.kode), false)
+                        }
+                    }
+                }
+            }
+        }
+        every { medlemAvFolketrygdenService.hentMedlemAvFolketrygden(BEHANDLING_ID_1) } returns medlemAvFolketrygden
+        every { medlemskapsperiodeRepository.save(any()) } returnsArgument 0
+
+
+
+        medlemskapsperiodeService.opprettMedlemskapsperiode(
+            BEHANDLING_ID_1,
+            NÅ,
+            null,
+            InnvilgelsesResultat.AVSLAATT,
+            Trygdedekninger.FTRL_2_9_FØRSTE_LEDD_A_HELSE,
+            Folketrygdloven_kap2_bestemmelser.FTRL_KAP2_2_1_FØRSTE_LEDD
+        )
+
+        verify { medlemskapsperiodeRepository.save(any()) }
+    }
+
+    @Test
+    fun `opprettMedlemskapsperiode kaster exception når tomDato er null`() {
+        unleash.enable(ToggleName.MELOSYS_FOLKETRYGDEN_2_7)
+        val medlemAvFolketrygden = MedlemAvFolketrygden().apply {
+            behandlingsresultat = Behandlingsresultat().apply {
+                behandling = Behandling().apply {
+                    mottatteOpplysninger = MottatteOpplysninger().apply {
+                        mottatteOpplysningerData = SøknadNorgeEllerUtenforEØS().apply {
+                            soeknadsland = Soeknadsland(listOf(Land_iso2.AU.kode), false)
+                        }
+                    }
+                }
+            }
+        }
+        every { medlemAvFolketrygdenService.hentMedlemAvFolketrygden(BEHANDLING_ID_1) } returns medlemAvFolketrygden
+        every { medlemskapsperiodeRepository.save(any()) } returnsArgument 0
+
+
+        shouldThrow<FunksjonellException> {
+            medlemskapsperiodeService.opprettMedlemskapsperiode(
+                BEHANDLING_ID_1,
+                NÅ,
+                null,
+                InnvilgelsesResultat.AVSLAATT,
+                Trygdedekninger.FTRL_2_9_FØRSTE_LEDD_A_HELSE,
+                PliktigeMedlemskapsbestemmelser.bestemmelser[0]
+            )
+        }.message.shouldContain("Tom-dato er påkrevd")
     }
 
     @Test
