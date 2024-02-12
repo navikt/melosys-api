@@ -41,10 +41,10 @@ object UtledMedlemskapsperioder {
     fun lagMedlemskapsperioder(dto: UtledMedlemskapsperioderDto): Collection<Medlemskapsperiode> {
         if (bestemmelseErParagraf(dto.bestemmelse, "2_7")) {
             return lagMedlemskapsperioderFor2_7(dto)
-        } else if (dto.bestemmelse in PliktigeMedlemskapsbestemmelser.bestemmelser) {
-            return lagMedlemskapsperioderForPliktige(dto)
         } else if (bestemmelseErParagraf(dto.bestemmelse, "2_8")) {
             return lagMedlemskapsperioderFor2_8(dto)
+        } else if (dto.bestemmelse in PliktigeMedlemskapsbestemmelser.bestemmelser) {
+            return lagMedlemskapsperioderForPliktige(dto)
         }
         throw FunksjonellException("Støtter ikke bestemmelse ${dto.bestemmelse}")
     }
