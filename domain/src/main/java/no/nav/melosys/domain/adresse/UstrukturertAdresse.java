@@ -3,7 +3,6 @@ package no.nav.melosys.domain.adresse;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
-import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
@@ -34,9 +33,9 @@ public class UstrukturertAdresse implements Adresse {
     }
 
     public static UstrukturertAdresse av(MidlertidigPostadresseUtland adresse) {
-        return new UstrukturertAdresse(adresse.adresselinje1, adresse.adresselinje2,
-                                       adresse.adresselinje3, adresse.adresselinje4,
-                                       adresse.land.getKode());
+        return new UstrukturertAdresse(adresse.getAdresselinje1(), adresse.getAdresselinje2(),
+                                       adresse.getAdresselinje3(), adresse.getAdresselinje4(),
+                                       adresse.getLand().getKode());
     }
 
     public static UstrukturertAdresse av(SemistrukturertAdresse sAdresse) {
@@ -55,11 +54,11 @@ public class UstrukturertAdresse implements Adresse {
 
     public static UstrukturertAdresse av(no.nav.melosys.domain.dokument.person.adresse.UstrukturertAdresse adresse) {
         UstrukturertAdresse ustrukturertAdresse =
-            new UstrukturertAdresse(adresse.adresselinje1, adresse.adresselinje2,
-                                    adresse.adresselinje3, adresse.adresselinje4,
-                                    adresse.land.getKode());
+            new UstrukturertAdresse(adresse.getAdresselinje1(), adresse.getAdresselinje2(),
+                                    adresse.getAdresselinje3(), adresse.getAdresselinje4(),
+                                    adresse.getLand().getKode());
 
-        ustrukturertAdresse.adresselinjer.add(sammenslå(adresse.postnr, adresse.poststed));
+        ustrukturertAdresse.adresselinjer.add(sammenslå(adresse.getPostnr(), adresse.getPoststed()));
         return ustrukturertAdresse;
     }
 

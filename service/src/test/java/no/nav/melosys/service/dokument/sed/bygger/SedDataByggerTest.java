@@ -209,7 +209,6 @@ class SedDataByggerTest {
     @Test
     void lag_bostedsadresseUtenGateadresse_gatenavnBlirNA() {
         Bostedsadresse bostedsadresse = new Bostedsadresse();
-        bostedsadresse.setGateadresse(null);
         bostedsadresse.setLand(new Land(Land.SVERIGE));
         behandling.hentPersonDokument().setBostedsadresse(bostedsadresse);
 
@@ -338,7 +337,9 @@ class SedDataByggerTest {
     @Test
     void lag_brukerErKode6_forventHarSensitiveOpplysninger() {
         SedDataGrunnlagMedSoknad sedDataGrunnlagMedSoknad = lagGrunnlagMedSøknad();
-        sedDataGrunnlagMedSoknad.getBehandling().hentPersonDokument().setDiskresjonskode(new Diskresjonskode("SPSF"));
+        Diskresjonskode diskresjonskode = new Diskresjonskode();
+        diskresjonskode.setKode("SPSF");
+        sedDataGrunnlagMedSoknad.getBehandling().hentPersonDokument().setDiskresjonskode(diskresjonskode);
         SedDataDto sedData = dataBygger.lagUtkast(sedDataGrunnlagMedSoknad, behandlingsresultat, PeriodeType.LOVVALGSPERIODE);
 
         assertThat(sedData).isNotNull();
@@ -349,7 +350,9 @@ class SedDataByggerTest {
     @Test
     void lag_brukerHarKode7_forventHarIkkeSensitiveOpplysninger() {
         SedDataGrunnlagMedSoknad sedDataGrunnlagMedSoknad = lagGrunnlagMedSøknad();
-        sedDataGrunnlagMedSoknad.getBehandling().hentPersonDokument().setDiskresjonskode(new Diskresjonskode("SPSO"));
+        Diskresjonskode diskresjonskode = new Diskresjonskode();
+        diskresjonskode.setKode("SPSO");
+        sedDataGrunnlagMedSoknad.getBehandling().hentPersonDokument().setDiskresjonskode(diskresjonskode);
         SedDataDto sedData = dataBygger.lagUtkast(sedDataGrunnlagMedSoknad, behandlingsresultat, PeriodeType.LOVVALGSPERIODE);
 
         assertThat(sedData).isNotNull();

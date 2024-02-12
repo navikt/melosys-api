@@ -551,7 +551,7 @@ class OppgaveServiceTest {
         PersonDokument personDokument = new PersonDokument();
         personDokument.setFnr("fnr");
         personDokument.setSammensattNavn("sammensattNavn");
-        personDokument.setDiskresjonskode(new Diskresjonskode(null));
+        personDokument.setDiskresjonskode(new Diskresjonskode());
         return personDokument;
     }
 

@@ -18,7 +18,6 @@ import no.nav.melosys.domain.eessi.melding.Adresse
 import no.nav.melosys.domain.eessi.melding.Arbeidssted
 import no.nav.melosys.domain.kodeverk.Landkoder
 import no.nav.melosys.domain.kodeverk.begrunnelser.Kontroll_begrunnelser
-import no.nav.melosys.domain.person.PersonMedHistorikk
 import no.nav.melosys.integrasjon.medl.PeriodestatusMedl
 import no.nav.melosys.service.kontroll.feature.ufm.data.UfmKontrollData
 import no.nav.melosys.service.kontroll.feature.ufm.kontroll.InntektTestFactory.createInntektForTest
@@ -154,8 +153,14 @@ class UfmKontrollTest {
 
         val personDokument = PersonDokument()
         personDokument.dødsdato = DATE
-        personDokument.bostedsadresse = Bostedsadresse()
-        personDokument.bostedsadresse.land = Land("NOR")
+        personDokument.bostedsadresse = Bostedsadresse().apply {
+            land = Land("NOR")
+            postnr = "1234"
+            poststed = "Oslo"
+            gateadresse.gatenavn = "Gatenavn"
+            gateadresse.husnummer = 1
+            gateadresse.husbokstav = "A"
+        }
 
         val personhistorikkDokument = PersonhistorikkDokument()
         personhistorikkDokument.bostedsadressePeriodeListe = listOf()
