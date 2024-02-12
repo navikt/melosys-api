@@ -49,7 +49,7 @@ class Familiemedlem {
             Familierelasjon.EKTE, Familierelasjon.REPA, Familierelasjon.SAM -> no.nav.melosys.domain.person.familie.Familierelasjon.RELATERT_VED_SIVILSTAND
             Familierelasjon.FARA -> no.nav.melosys.domain.person.familie.Familierelasjon.FAR
             Familierelasjon.MORA -> no.nav.melosys.domain.person.familie.Familierelasjon.MOR
-            null -> TODO()
+            null -> throw IllegalArgumentException("Familierelasjon mangler")
         }
     }
 

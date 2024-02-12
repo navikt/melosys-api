@@ -62,13 +62,6 @@ class PersonDokument : Persondata {
         return hentGjeldendePostadresse() == null
     }
 
-    fun hentAnnenForelder(fnrGjeldendeForelder: String): Optional<Familiemedlem> {
-        return familiemedlemmer.stream()
-            .filter { obj: Familiemedlem -> obj.erForelder() }
-            .filter { forelder: Familiemedlem -> fnrGjeldendeForelder != forelder.fnr }
-            .findAny()
-    }
-
     override fun finnBostedsadresse(): Optional<no.nav.melosys.domain.person.adresse.Bostedsadresse> {
         return if (bostedsadresse == null || bostedsadresse!!.erTom()) {
             Optional.empty()
