@@ -81,7 +81,7 @@ class PersonReglerTest {
         val personDokument = PersonDokument()
         personDokument.dødsdato = LocalDate.now()
         personDokument.bostedsadresse = Bostedsadresse()
-        personDokument.bostedsadresse!!.land = Land(Land.NORGE)
+        personDokument.bostedsadresse?.land = Land(Land.NORGE)
         Assertions.assertThat(personBosattINorge(personDokument)).isTrue()
     }
 
@@ -90,7 +90,7 @@ class PersonReglerTest {
         val personDokument = PersonDokument()
         personDokument.dødsdato = LocalDate.now()
         personDokument.bostedsadresse = Bostedsadresse()
-        personDokument.bostedsadresse!!.land = Land(Land.SVEITS)
+        personDokument.bostedsadresse?.land = Land(Land.SVEITS)
         Assertions.assertThat(personBosattINorge(personDokument)).isFalse()
     }
 

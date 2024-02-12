@@ -154,12 +154,14 @@ class UfmKontrollTest {
         val personDokument = PersonDokument()
         personDokument.dødsdato = DATE
         personDokument.bostedsadresse = Bostedsadresse()
-        personDokument.bostedsadresse!!.land = Land("NOR")
-        personDokument.bostedsadresse!!.postnr = "1234"
-        personDokument.bostedsadresse!!.poststed = "Oslo"
-        personDokument.bostedsadresse!!.gateadresse.gatenavn = "Gatenavn"
-        personDokument.bostedsadresse!!.gateadresse.husnummer = 1
-        personDokument.bostedsadresse!!.gateadresse.husbokstav = "A"
+        personDokument.bostedsadresse?.apply {
+            land = Land("NOR")
+            postnr = "1234"
+            poststed = "Oslo"
+            gateadresse.gatenavn = "Gatenavn"
+            gateadresse.husnummer = 1
+            gateadresse.husbokstav = "A"
+        }
 
         val personhistorikkDokument = PersonhistorikkDokument()
         personhistorikkDokument.bostedsadressePeriodeListe = listOf()
