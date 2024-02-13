@@ -39,11 +39,22 @@ object PersonRegler {
                 filtrerAdressePeriode(bostedsadresse.gyldigFraOgMed, bostedsadresse.gyldigTilOgMed, periodeFra, periodeTil)
         }.isPresent
 
-        val bostedsadressePerioder = bostedsadressePerioder.stream().anyMatch { a: BostedsadressePeriode -> a.bostedsadresse.tilStrukturertAdresse().landkode == NORGE_ISO2_LANDKODE && filtrerAdressePeriode(a.periode.fom, a.periode.tom, periodeFra, periodeTil) }
-        val historiskBostedadresser = historiskBostedadresser.stream().anyMatch { a -> a.strukturertAdresse.landkode == NORGE_ISO2_LANDKODE && filtrerAdressePeriode(a.gyldigFraOgMed, a.gyldigTilOgMed, periodeFra, periodeTil) }
-        val historiskOppholdsadresser =  historiskOppholdsadresser.stream().anyMatch { a -> a.strukturertAdresse.landkode == NORGE_ISO2_LANDKODE && filtrerAdressePeriode(a.gyldigFraOgMed, a.gyldigTilOgMed, periodeFra, periodeTil) }
+        val bostedsadressePerioderMatch = bostedsadressePerioder.any {
+            it.bostedsadresse?.tilStrukturertAdresse()?.landkode == NORGE_ISO2_LANDKODE &&
+                filtrerAdressePeriode(it.periode?.fom, it.periode?.tom, periodeFra, periodeTil)
+        }
 
-        return erGyldigBostedsadresse || bostedsadressePerioder || historiskBostedadresser || historiskOppholdsadresser
+        val historiskBostedsadresserMatch = historiskBostedadresser.any {
+            it.strukturertAdresse.landkode == NORGE_ISO2_LANDKODE &&
+                filtrerAdressePeriode(it.gyldigFraOgMed, it.gyldigTilOgMed, periodeFra, periodeTil)
+        }
+
+        val historiskOppholdsadresserMatch = historiskOppholdsadresser.any {
+            it.strukturertAdresse.landkode == NORGE_ISO2_LANDKODE &&
+                filtrerAdressePeriode(it.gyldigFraOgMed, it.gyldigTilOgMed, periodeFra, periodeTil)
+        }
+
+        return erGyldigBostedsadresse || bostedsadressePerioderMatch || historiskBostedsadresserMatch || historiskOppholdsadresserMatch
     }
 
     private fun filtrerAdressePeriode(
