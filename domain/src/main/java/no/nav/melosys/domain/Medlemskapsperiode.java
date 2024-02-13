@@ -146,15 +146,6 @@ public class Medlemskapsperiode implements ErPeriode, HarBestemmelse<Folketrygdl
         return innvilgelsesresultat == InnvilgelsesResultat.AVSLAATT;
     }
 
-    public boolean erHelsedel() {
-        return List.of(
-            Trygdedekninger.FTRL_2_7_TREDJE_LEDD_B_HELSE_SYKE_FORELDREPENGER,
-            Trygdedekninger.FTRL_2_9_FØRSTE_LEDD_A_HELSE,
-            Trygdedekninger.FTRL_2_9_FØRSTE_LEDD_A_ANDRE_LEDD_HELSE_SYKE_FORELDREPENGER,
-            Trygdedekninger.FTRL_2_9_FØRSTE_LEDD_C_ANDRE_LEDD_HELSE_PENSJON_SYKE_FORELDREPENGER
-        ).contains(trygdedekning);
-    }
-
     @Override
     public boolean equals(Object o) {
         if (this == o) return true;

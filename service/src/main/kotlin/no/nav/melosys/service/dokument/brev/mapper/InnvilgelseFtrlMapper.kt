@@ -46,7 +46,7 @@ class InnvilgelseFtrlMapper(
             .bestemmelse(medlemAvFolketrygden.medlemskapsperioder.filter { it.erInnvilget() }.sortedBy { it.fom }.first().bestemmelse)
             .avslåttHelsedelFørMottaksdato(
                 medlemAvFolketrygden.medlemskapsperioder.any {
-                    it.erAvslaatt() && it.erHelsedel() && it.fomErFør(brevbestilling.forsendelseMottatt)
+                    it.erAvslaatt() && it.harHelsedelDekning() && it.fomErFør(brevbestilling.forsendelseMottatt)
                 }
             )
             .avslåttMedlemskapsperiodeFørMottaksdato(
@@ -132,6 +132,13 @@ class InnvilgelseFtrlMapper(
 
     private fun harTrygdeavtaleMedArbeidsland(arbeidsland: String): Boolean =
         Trygdeavtale_myndighetsland.values().any() { it.name == arbeidsland }
+
+    private fun Medlemskapsperiode.harHelsedelDekning(): Boolean = listOf(
+        Trygdedekninger.FTRL_2_7_TREDJE_LEDD_B_HELSE_SYKE_FORELDREPENGER,
+        Trygdedekninger.FTRL_2_9_FØRSTE_LEDD_A_HELSE,
+        Trygdedekninger.FTRL_2_9_FØRSTE_LEDD_A_ANDRE_LEDD_HELSE_SYKE_FORELDREPENGER,
+        Trygdedekninger.FTRL_2_9_FØRSTE_LEDD_C_ANDRE_LEDD_HELSE_PENSJON_SYKE_FORELDREPENGER
+    ).contains(trygdedekning)
 
     private fun Medlemskapsperiode.fomErFør(instant: Instant): Boolean =
         this.fom.isBefore(LocalDate.ofInstant(instant, ZoneId.systemDefault()))
