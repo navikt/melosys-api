@@ -26,7 +26,7 @@ class MottatteOpplysningerUtilsTest {
 
         Soeknadsland soeknadsland = MottatteOpplysningerUtils.hentSøknadsland(soeknad);
         assertThat(soeknadsland.getLandkoder()).contains(Landkoder.BE.getKode(), Landkoder.BG.getKode());
-        assertThat(soeknadsland.isErUkjenteEllerAlleEosLand()).isTrue();
+        assertThat(soeknadsland.isUkjenteEllerAlleEosLand()).isTrue();
     }
 
     @Test

@@ -45,7 +45,7 @@ public class Soeknadsland {
         this.landkoder = landkoder;
     }
 
-    public boolean isErUkjenteEllerAlleEosLand() {
+    public boolean isUkjenteEllerAlleEosLand() {
         return erUkjenteEllerAlleEosLand;
     }
 

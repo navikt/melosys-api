@@ -71,10 +71,7 @@ public class MottatteOpplysningerData {
 
     public List<String> hentUtenlandskeArbeidsgivereLandkode() {
         return foretakUtland.stream()
-            .map(f -> {
-                f.getAdresse();
-                return f.getAdresse().getLandkode();
-            })
+            .map(f -> f.getAdresse().getLandkode())
             .filter(Objects::nonNull)
             .distinct()
             .collect(Collectors.toList());
