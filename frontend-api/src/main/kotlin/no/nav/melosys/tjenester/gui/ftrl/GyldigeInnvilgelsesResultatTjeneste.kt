@@ -21,7 +21,7 @@ import org.springframework.web.context.WebApplicationContext
 class GyldigeInnvilgelsesResultatTjeneste {
 
     @GetMapping
-    fun hentGyldigeTrygdedekninger(
+    fun hentGyldigeInnvilgelsesResultat(
         @RequestParam("behandlingstype", required = true) behandlingstype: Behandlingstyper
     ): ResponseEntity<List<InnvilgelsesResultat>> {
         return ResponseEntity.ok(GyldigeInnvilgelsesResultat.hentInnvilgelsesResultat(behandlingstype))
