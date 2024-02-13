@@ -43,7 +43,7 @@ public final class SaksbehandlingDataFactory {
         FysiskArbeidssted fysiskArbeidssted = new FysiskArbeidssted();
         fysiskArbeidssted.getAdresse().setLandkode("SE");
         soeknad.soeknadsland.getLandkoder().add(Landkoder.DK.getKode());
-        soeknad.soeknadsland.setUkjenteEllerAlleEosLand(false);
+        soeknad.soeknadsland.setErUkjenteEllerAlleEosLand(false);
         soeknad.arbeidPaaLand.setFysiskeArbeidssteder(new ArrayList<>());
         soeknad.arbeidPaaLand.getFysiskeArbeidssteder().add(fysiskArbeidssted);
         soeknad.oppholdUtland.getOppholdslandkoder().add("FI");

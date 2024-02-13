@@ -35,7 +35,7 @@ public class BrevDataByggerA1 implements BrevDataBygger {
         List<Arbeidssted> arbeidssteder = dataGrunnlag.getArbeidsstedGrunnlag().hentArbeidssteder();
         brevData.arbeidssteder = arbeidssteder;
         brevData.arbeidsland = landvelgerService.hentAlleArbeidsland(dataGrunnlag.getBehandling().getId());
-        brevData.erUkjenteEllerAlleEosLand = dataGrunnlag.getMottatteOpplysningerData().soeknadsland.isUkjenteEllerAlleEosLand();
+        brevData.erUkjenteEllerAlleEosLand = dataGrunnlag.getMottatteOpplysningerData().soeknadsland.isErUkjenteEllerAlleEosLand();
 
         brevData.hovedvirksomhet = dataGrunnlag.getAvklarteVirksomheterGrunnlag().hentHovedvirksomhet();
         brevData.bivirksomheter = dataGrunnlag.getAvklarteVirksomheterGrunnlag().hentBivirksomheter();

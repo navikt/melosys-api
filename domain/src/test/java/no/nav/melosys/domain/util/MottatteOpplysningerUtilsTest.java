@@ -22,11 +22,11 @@ class MottatteOpplysningerUtilsTest {
     void hentSoeknadsland() {
         Soeknad soeknad = new Soeknad();
         soeknad.soeknadsland.setLandkoder(Arrays.asList(Landkoder.BE.getKode(), Landkoder.BG.getKode()));
-        soeknad.soeknadsland.setUkjenteEllerAlleEosLand(true);
+        soeknad.soeknadsland.setErUkjenteEllerAlleEosLand(true);
 
         Soeknadsland soeknadsland = MottatteOpplysningerUtils.hentSøknadsland(soeknad);
         assertThat(soeknadsland.getLandkoder()).contains(Landkoder.BE.getKode(), Landkoder.BG.getKode());
-        assertThat(soeknadsland.isUkjenteEllerAlleEosLand()).isTrue();
+        assertThat(soeknadsland.isErUkjenteEllerAlleEosLand()).isTrue();
     }
 
     @Test

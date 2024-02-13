@@ -12,14 +12,14 @@ import no.nav.melosys.exception.TekniskException;
 public class Soeknadsland {
     private List<String> landkoder = new ArrayList<>();
 
-    private boolean isUkjenteEllerAlleEosLand;
+    private boolean erUkjenteEllerAlleEosLand;
 
     public Soeknadsland() {
     }
 
-    public Soeknadsland(List<String> landkoder, boolean isUkjenteEllerAlleEosLand) {
+    public Soeknadsland(List<String> landkoder, boolean erUkjenteEllerAlleEosLand) {
         this.landkoder = landkoder;
-        this.isUkjenteEllerAlleEosLand = isUkjenteEllerAlleEosLand;
+        this.erUkjenteEllerAlleEosLand = erUkjenteEllerAlleEosLand;
     }
 
     public static Soeknadsland av(Land_iso2... lovvalgsland) {
@@ -27,7 +27,7 @@ public class Soeknadsland {
     }
 
     public boolean erGyldig() {
-        return !landkoder.isEmpty() || isUkjenteEllerAlleEosLand;
+        return !landkoder.isEmpty() || erUkjenteEllerAlleEosLand;
     }
 
     public Trygdeavtale_myndighetsland hentSoeknadslandForTrygdeavtale() {
@@ -45,11 +45,11 @@ public class Soeknadsland {
         this.landkoder = landkoder;
     }
 
-    public boolean isUkjenteEllerAlleEosLand() {
-        return isUkjenteEllerAlleEosLand;
+    public boolean isErUkjenteEllerAlleEosLand() {
+        return erUkjenteEllerAlleEosLand;
     }
 
-    public void setUkjenteEllerAlleEosLand(boolean isUkjenteEllerAlleEosLand) {
-        this.isUkjenteEllerAlleEosLand = isUkjenteEllerAlleEosLand;
+    public void setErUkjenteEllerAlleEosLand(boolean isUkjenteEllerAlleEosLand) {
+        this.erUkjenteEllerAlleEosLand = isUkjenteEllerAlleEosLand;
     }
 }

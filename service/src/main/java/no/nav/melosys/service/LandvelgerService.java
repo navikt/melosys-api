@@ -64,7 +64,7 @@ public class LandvelgerService {
 
     public boolean erUkjenteEllerAlleEosLand(long behandlingID) {
         MottatteOpplysningerData grunnlagData = mottatteOpplysningerService.hentMottatteOpplysninger(behandlingID).getMottatteOpplysningerData();
-        return hentSøknadsland(grunnlagData).isUkjenteEllerAlleEosLand();
+        return hentSøknadsland(grunnlagData).isErUkjenteEllerAlleEosLand();
     }
 
     public Collection<Land_iso2> hentAlleArbeidslandUtenMarginaltArbeid(long behandlingID) {
