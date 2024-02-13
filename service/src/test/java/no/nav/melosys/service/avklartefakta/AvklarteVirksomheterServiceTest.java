@@ -361,7 +361,7 @@ class AvklarteVirksomheterServiceTest {
         SelvstendigForetak selvstendigForetak = new SelvstendigForetak();
         selvstendigForetak.orgnr = orgnr1;
         Arbeidsforhold arbeidsforhold = new Arbeidsforhold();
-        arbeidsforhold.arbeidsgiverID = orgnr3;
+        arbeidsforhold.setArbeidsgiverID(orgnr3);
         ArbeidsforholdDokument arbeidsforholdDokument = new ArbeidsforholdDokument();
         arbeidsforholdDokument.arbeidsforhold.add(arbeidsforhold);
         Saksopplysning saksopplysning = new Saksopplysning();

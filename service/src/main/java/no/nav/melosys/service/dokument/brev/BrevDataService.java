@@ -214,8 +214,8 @@ public class BrevDataService {
         mottaker.setId(mottakerUtenlandskTrygdemyndighet.getInstitusjonID());
 
         UtenlandskMyndighet utenlandskMyndighet = hentUtenlandskTrygdemyndighetFraMottaker(mottakerUtenlandskTrygdemyndighet);
-        mottaker.setNavn(utenlandskMyndighet.navn);
-        mottaker.setKortNavn(utenlandskMyndighet.navn);
+        mottaker.setNavn(utenlandskMyndighet.getNavn());
+        mottaker.setKortNavn(utenlandskMyndighet.getNavn());
         mottaker.setSpraakkode(Spraakkode.NB);
         mottaker.setMottakeradresse(lagUtendlanskAdresse(utenlandskMyndighet));
         return mottaker;

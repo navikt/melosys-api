@@ -27,12 +27,12 @@ public final class SaksflytTestUtils {
 
     public static UtenlandskMyndighet lagUtenlandskMyndighet() {
         UtenlandskMyndighet utenlandskMyndighet = new UtenlandskMyndighet();
-        utenlandskMyndighet.institusjonskode = "123456";
-        utenlandskMyndighet.landkode = Land_iso2.SE;
-        utenlandskMyndighet.navn = "Svenska myndighetan";
-        utenlandskMyndighet.gateadresse1 = "Svenskegatan 38";
-        utenlandskMyndighet.poststed = "Svenska stan";
-        utenlandskMyndighet.postnummer = "8080";
+        utenlandskMyndighet.setInstitusjonskode("123456");
+        utenlandskMyndighet.setLandkode(Land_iso2.SE);
+        utenlandskMyndighet.setNavn("Svenska myndighetan");
+        utenlandskMyndighet.setGateadresse1("Svenskegatan 38");
+        utenlandskMyndighet.setPoststed("Svenska stan");
+        utenlandskMyndighet.setPostnummer("8080");
         return utenlandskMyndighet;
     }
 }

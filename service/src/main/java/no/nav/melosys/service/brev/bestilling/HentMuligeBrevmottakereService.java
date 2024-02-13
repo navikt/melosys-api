@@ -150,13 +150,13 @@ public class HentMuligeBrevmottakereService {
                     if (institusjonID != null) {
                         var utenlandskMyndighet = utenlandskMyndighetService.hentUtenlandskMyndighetForInstitusjonID(institusjonID);
                         if (!utenlandskMyndighet.getAdresse().erGyldig()) {
-                            throw new FunksjonellException("Du kan ikke sende brev til trygdemyndigheten i %s, fordi korrekt adresse er ukjent.".formatted(utenlandskMyndighet.landkode.getBeskrivelse()));
+                            throw new FunksjonellException("Du kan ikke sende brev til trygdemyndigheten i %s, fordi korrekt adresse er ukjent.".formatted(utenlandskMyndighet.getLandkode().getBeskrivelse()));
                         }
-                        return utenlandskMyndighet.navn;
+                        return utenlandskMyndighet.getNavn();
                     } else {
                         Mottaker avklartMottaker = brevmottakerService.avklarMottaker(produserbaredokumenter, Mottaker.medRolle(Mottakerroller.UTENLANDSK_TRYGDEMYNDIGHET), behandling);
                         var utenlandskMyndighet = utenlandskMyndighetService.hentUtenlandskMyndighet(avklartMottaker.hentMyndighetLandkode(), produserbaredokumenter);
-                        return utenlandskMyndighet.navn;
+                        return utenlandskMyndighet.getNavn();
                     }
                 } else {
                     throw new FunksjonellException("Melosys støtter ikke hovedmottakere med rollen " + hovedmottaker);

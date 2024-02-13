@@ -490,10 +490,10 @@ class TrygdeavtaleServiceTest {
         arbeidsforholdDokument.arbeidsforhold = orgnumre.stream()
             .map(orgnr -> {
                 var arbeidsforhold = new Arbeidsforhold();
-                arbeidsforhold.arbeidsgivertype = Aktoertype.ORGANISASJON;
-                arbeidsforhold.arbeidsgiverID = orgnr;
-                arbeidsforhold.opplysningspliktigtype = Aktoertype.ORGANISASJON;
-                arbeidsforhold.opplysningspliktigID = "OpplysningspliktigID";
+                arbeidsforhold.setArbeidsgivertype(Aktoertype.ORGANISASJON);
+                arbeidsforhold.setArbeidsgiverID(orgnr);
+                arbeidsforhold.setOpplysningspliktigtype(Aktoertype.ORGANISASJON);
+                arbeidsforhold.setOpplysningspliktigID("OpplysningspliktigID");
                 return arbeidsforhold;
             })
             .toList();

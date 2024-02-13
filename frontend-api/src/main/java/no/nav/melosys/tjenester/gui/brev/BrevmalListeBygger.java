@@ -263,9 +263,9 @@ public class BrevmalListeBygger {
             return new FeltValgDto(
                 List.of(
                     new FeltvalgAlternativDto(utenlandskMyndighetFærøyene.hentInstitusjonID(),
-                        "Trygdemyndighetene i %s".formatted(utenlandskMyndighetFærøyene.landkode.getBeskrivelse()), true),
+                        "Trygdemyndighetene i %s".formatted(utenlandskMyndighetFærøyene.getLandkode().getBeskrivelse()), true),
                     new FeltvalgAlternativDto(utenlandskMyndighetGrønland.hentInstitusjonID(),
-                        "Trygdemyndighetene i %s".formatted(utenlandskMyndighetGrønland.landkode.getBeskrivelse()), true)
+                        "Trygdemyndighetene i %s".formatted(utenlandskMyndighetGrønland.getLandkode().getBeskrivelse()), true)
                 ),
                 FeltValgType.SELECT
             );
@@ -274,9 +274,9 @@ public class BrevmalListeBygger {
         List<String> trygdeavtaleLandkoder = Arrays.stream(Trygdeavtale_myndighetsland.values()).map(Trygdeavtale_myndighetsland::getKode).toList();
         return new FeltValgDto(
             utenlandskMyndighetService.hentAlleUtenlandskeMyndigheter().stream()
-                .filter(utenlandskMyndighet -> trygdeavtaleLandkoder.contains(utenlandskMyndighet.landkode.getKode()))
+                .filter(utenlandskMyndighet -> trygdeavtaleLandkoder.contains(utenlandskMyndighet.getLandkode().getKode()))
                 .map(utenlandskMyndighet -> {
-                    String beskrivelse = "Trygdemyndighetene i %s".formatted(utenlandskMyndighet.landkode.getBeskrivelse());
+                    String beskrivelse = "Trygdemyndighetene i %s".formatted(utenlandskMyndighet.getLandkode().getBeskrivelse());
                     return new FeltvalgAlternativDto(utenlandskMyndighet.hentInstitusjonID(), beskrivelse, true);
                 })
                 .sorted(Comparator.comparing(FeltvalgAlternativDto::getBeskrivelse))
