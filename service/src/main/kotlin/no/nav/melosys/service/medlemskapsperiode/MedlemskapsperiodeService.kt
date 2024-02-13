@@ -1,5 +1,6 @@
 package no.nav.melosys.service.medlemskapsperiode
 
+import io.getunleash.Unleash
 import no.nav.melosys.domain.Medlemskapsperiode
 import no.nav.melosys.domain.folketrygden.MedlemAvFolketrygden
 import no.nav.melosys.domain.kodeverk.Folketrygdloven_kap2_bestemmelser
@@ -10,6 +11,7 @@ import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingstema
 import no.nav.melosys.domain.mottatteopplysninger.SøknadNorgeEllerUtenforEØS
 import no.nav.melosys.exception.FunksjonellException
 import no.nav.melosys.exception.IkkeFunnetException
+import no.nav.melosys.featuretoggle.ToggleName
 import no.nav.melosys.repository.MedlemskapsperiodeRepository
 import no.nav.melosys.service.MedlemAvFolketrygdenService
 import no.nav.melosys.service.avgift.TrygdeavgiftsgrunnlagService
@@ -26,7 +28,8 @@ class MedlemskapsperiodeService(
     private val medlemAvFolketrygdenService: MedlemAvFolketrygdenService,
     private val trygdeavgiftsgrunnlagService: TrygdeavgiftsgrunnlagService,
     private val medlPeriodeService: MedlPeriodeService,
-    private val gyldigeTrygdedekningerService: GyldigeTrygdedekningerService
+    private val gyldigeTrygdedekningerService: GyldigeTrygdedekningerService,
+    private val unleash: Unleash
 ) {
     @Transactional(readOnly = true)
     fun hentMedlemskapsperioder(behandlingsresultatID: Long): List<Medlemskapsperiode> {
@@ -34,7 +37,6 @@ class MedlemskapsperiodeService(
             .map { it.medlemskapsperioder.toList() }
             .orElse(emptyList())
     }
-
 
     @Transactional
     fun opprettMedlemskapsperiode(
@@ -48,7 +50,15 @@ class MedlemskapsperiodeService(
         val medlemAvFolketrygden = medlemAvFolketrygdenService.hentMedlemAvFolketrygden(behandlingsresultatID)
         val søknad = medlemAvFolketrygden.behandlingsresultat.behandling.mottatteOpplysninger.mottatteOpplysningerData as SøknadNorgeEllerUtenforEØS
 
-        validerFelt(medlemAvFolketrygden.behandlingsresultat.behandling.tema, fom, tom, innvilgelsesResultat, trygdedekning, bestemmelse, søknad.soeknadsland.landkoder)
+        validerFelt(
+            medlemAvFolketrygden.behandlingsresultat.behandling.tema,
+            fom,
+            tom,
+            innvilgelsesResultat,
+            trygdedekning,
+            bestemmelse,
+            søknad.soeknadsland.landkoder
+        )
 
         val nyMedlemskapsperiode = Medlemskapsperiode().apply {
             this.tom = tom
@@ -78,7 +88,15 @@ class MedlemskapsperiodeService(
         val medlemAvFolketrygden = medlemAvFolketrygdenService.hentMedlemAvFolketrygden(behandlingsresultatID)
         val søknad = medlemAvFolketrygden.behandlingsresultat.behandling.mottatteOpplysninger.mottatteOpplysningerData as SøknadNorgeEllerUtenforEØS
 
-        validerFelt(medlemAvFolketrygden.behandlingsresultat.behandling.tema, fom, tom, innvilgelsesResultat, trygdedekning, bestemmelse, søknad.soeknadsland.landkoder)
+        validerFelt(
+            medlemAvFolketrygden.behandlingsresultat.behandling.tema,
+            fom,
+            tom,
+            innvilgelsesResultat,
+            trygdedekning,
+            bestemmelse,
+            søknad.soeknadsland.landkoder
+        )
 
         val medlemskapsperiode = medlemAvFolketrygden.medlemskapsperioder.firstOrNull { it.id == medlemskapsperiodeID }
             ?: throw IkkeFunnetException("Behandling $behandlingsresultatID har ingen medlemskapsperiode med id $medlemskapsperiodeID")
