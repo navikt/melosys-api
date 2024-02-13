@@ -66,7 +66,6 @@ class MedlemskapsperiodeService(
             this.innvilgelsesresultat = innvilgelsesResultat
             this.trygdedekning = trygdedekning
             this.bestemmelse = bestemmelse
-            arbeidsland = søknad.hentArbeidsland()
             medlemskapstype = UtledMedlemskapstype.av(bestemmelse!!)
         }
         medlemAvFolketrygden.addMedlemskapsperiode(nyMedlemskapsperiode)

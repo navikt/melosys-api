@@ -422,7 +422,6 @@ internal class MedlServiceTest {
 
     private fun lagMedlemskapsPeriode() = Medlemskapsperiode().apply {
         medlemskapstype = Medlemskapstyper.FRIVILLIG
-        arbeidsland = Landkoder.BE.kode
         trygdedekning = Trygdedekninger.FTRL_2_9_FØRSTE_LEDD_A_HELSE
         fom = LocalDate.now()
         tom = LocalDate.now().plusYears(1)

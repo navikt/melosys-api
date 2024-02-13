@@ -1,5 +1,9 @@
 package no.nav.melosys.tjenester.gui.medlemskapsperiode;
 
+import java.time.LocalDate;
+import java.util.Collections;
+import java.util.List;
+
 import no.nav.melosys.domain.Medlemskapsperiode;
 import no.nav.melosys.domain.kodeverk.Folketrygdloven_kap2_bestemmelser;
 import no.nav.melosys.domain.kodeverk.InnvilgelsesResultat;
@@ -16,10 +20,6 @@ import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.http.HttpStatus;
-
-import java.time.LocalDate;
-import java.util.Collections;
-import java.util.List;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.Mockito.when;
@@ -54,11 +54,11 @@ class MedlemskapsperiodeTjenesteTest {
 
         assertThat(res.getBody()).hasSize(1)
             .flatExtracting(
-                MedlemskapsperiodeDto::id, MedlemskapsperiodeDto::arbeidsland, MedlemskapsperiodeDto::bestemmelse,
+                MedlemskapsperiodeDto::id, MedlemskapsperiodeDto::bestemmelse,
                 MedlemskapsperiodeDto::fomDato, MedlemskapsperiodeDto::tomDato, MedlemskapsperiodeDto::trygdedekning,
                 MedlemskapsperiodeDto::innvilgelsesResultat, MedlemskapsperiodeDto::medlemskapstype)
             .containsExactly(
-                medlemskapsperiode.getId(), medlemskapsperiode.getArbeidsland(), medlemskapsperiode.getBestemmelse(),
+                medlemskapsperiode.getId(), medlemskapsperiode.getBestemmelse(),
                 medlemskapsperiode.getFom(), medlemskapsperiode.getTom(), medlemskapsperiode.getTrygdedekning(),
                 medlemskapsperiode.getInnvilgelsesresultat(), medlemskapsperiode.getMedlemskapstype()
             );
@@ -79,7 +79,6 @@ class MedlemskapsperiodeTjenesteTest {
         medlemskapsperiode.setId(1L);
         medlemskapsperiode.setFom(LocalDate.now());
         medlemskapsperiode.setTom(LocalDate.now().plusYears(1));
-        medlemskapsperiode.setArbeidsland("BR");
         medlemskapsperiode.setInnvilgelsesresultat(InnvilgelsesResultat.DELVIS_INNVILGET);
         medlemskapsperiode.setMedlemskapstype(Medlemskapstyper.FRIVILLIG);
         medlemskapsperiode.setTrygdedekning(Trygdedekninger.FTRL_2_9_FØRSTE_LEDD_C_HELSE_PENSJON);

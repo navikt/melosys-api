@@ -169,7 +169,6 @@ class ReplikerBehandlingsresultatServiceTest {
             .matches { it.id == null }
             .matches { it.fom == innvilgetMedlemskapsperiodeOrig.fom }
             .matches { it.tom == innvilgetMedlemskapsperiodeOrig.tom }
-            .matches { it.arbeidsland == innvilgetMedlemskapsperiodeOrig.arbeidsland }
             .matches { it.medlemskapstype == innvilgetMedlemskapsperiodeOrig.medlemskapstype }
             .matches { it.innvilgelsesresultat == innvilgetMedlemskapsperiodeOrig.innvilgelsesresultat }
             .matches { it.trygdedekning == innvilgetMedlemskapsperiodeOrig.trygdedekning }
@@ -275,7 +274,6 @@ class ReplikerBehandlingsresultatServiceTest {
                     id.shouldBe(null)
                     fom.shouldBe(innvilgetMedlemskapsperiodeOrig.fom)
                     tom.shouldBe(innvilgetMedlemskapsperiodeOrig.tom)
-                    arbeidsland.shouldBe(innvilgetMedlemskapsperiodeOrig.arbeidsland)
                     medlemskapstype.shouldBe(innvilgetMedlemskapsperiodeOrig.medlemskapstype)
                     innvilgelsesresultat.shouldBe(innvilgetMedlemskapsperiodeOrig.innvilgelsesresultat)
                     trygdedekning.shouldBe(innvilgetMedlemskapsperiodeOrig.trygdedekning)
@@ -287,7 +285,6 @@ class ReplikerBehandlingsresultatServiceTest {
                     id.shouldBe(null)
                     fom.shouldBe(opphørtMedlemskapsperiodeOrig.fom)
                     tom.shouldBe(opphørtMedlemskapsperiodeOrig.tom)
-                    arbeidsland.shouldBe(opphørtMedlemskapsperiodeOrig.arbeidsland)
                     medlemskapstype.shouldBe(opphørtMedlemskapsperiodeOrig.medlemskapstype)
                     innvilgelsesresultat.shouldBe(opphørtMedlemskapsperiodeOrig.innvilgelsesresultat)
                     trygdedekning.shouldBe(opphørtMedlemskapsperiodeOrig.trygdedekning)
@@ -364,7 +361,6 @@ class ReplikerBehandlingsresultatServiceTest {
         medlemskapsperiode.medlPeriodeID = 77L
         medlemskapsperiode.fom = LocalDate.now()
         medlemskapsperiode.tom = LocalDate.now()
-        medlemskapsperiode.arbeidsland = "YO"
         medlemskapsperiode.medlemskapstype = Medlemskapstyper.PLIKTIG
         medlemskapsperiode.trygdedekning = Trygdedekninger.FTRL_2_9_FØRSTE_LEDD_C_HELSE_PENSJON
         medlemskapsperiode.medlPeriodeID = 123L

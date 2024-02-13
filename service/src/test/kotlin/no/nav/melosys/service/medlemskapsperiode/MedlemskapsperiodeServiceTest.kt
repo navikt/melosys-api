@@ -128,7 +128,6 @@ class MedlemskapsperiodeServiceTest {
             innvilgelsesresultat.shouldBe(InnvilgelsesResultat.AVSLAATT)
             trygdedekning.shouldBe(Trygdedekninger.FTRL_2_9_FØRSTE_LEDD_A_HELSE)
             bestemmelse.shouldBe(Folketrygdloven_kap2_bestemmelser.FTRL_KAP2_2_8_ANDRE_LEDD)
-            arbeidsland.shouldBe(Land_iso2.AU.kode)
             medlemskapstype.shouldBe(Medlemskapstyper.FRIVILLIG)
         }
     }

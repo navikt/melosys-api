@@ -59,7 +59,6 @@ class OpprettMedlemskapsperiodeService(
                         søknad.periode,
                         søknad.trygdedekning,
                         utledMottaksdato.getMottaksdato(behandling),
-                        søknad.hentArbeidsland(),
                         bestemmelse
                     )
                 )

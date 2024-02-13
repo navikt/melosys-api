@@ -27,7 +27,6 @@ object UtledMedlemskapsperioder {
                 Medlemskapsperiode().apply {
                     fom = it.fom
                     tom = it.tom
-                    arbeidsland = it.arbeidsland
                     innvilgelsesresultat = it.innvilgelsesresultat
                     medlemskapstype = UtledMedlemskapstype.av(nyBestemmelse)
                     trygdedekning =
@@ -58,7 +57,6 @@ object UtledMedlemskapsperioder {
                 lagPeriode(
                     søknadsperiode,
                     dto.trygdedekning,
-                    dto.arbeidsland,
                     InnvilgelsesResultat.INNVILGET,
                     dto.bestemmelse
                 )
@@ -70,7 +68,6 @@ object UtledMedlemskapsperioder {
                 lagPeriode(
                     søknadsperiode,
                     dto.trygdedekning,
-                    dto.arbeidsland,
                     InnvilgelsesResultat.AVSLAATT,
                     dto.bestemmelse
                 )
@@ -82,14 +79,12 @@ object UtledMedlemskapsperioder {
             lagPeriode(
                 splittetPeriode.first,
                 dto.trygdedekning,
-                dto.arbeidsland,
                 InnvilgelsesResultat.AVSLAATT,
                 dto.bestemmelse
             ),
             lagPeriode(
                 splittetPeriode.second,
                 dto.trygdedekning,
-                dto.arbeidsland,
                 InnvilgelsesResultat.INNVILGET,
                 dto.bestemmelse
             )
@@ -101,7 +96,6 @@ object UtledMedlemskapsperioder {
             lagPeriode(
                 dto.søknadsperiode,
                 Trygdedekninger.FULL_DEKNING_FTRL,
-                dto.arbeidsland,
                 InnvilgelsesResultat.INNVILGET,
                 dto.bestemmelse
             )
@@ -117,7 +111,6 @@ object UtledMedlemskapsperioder {
                 lagPeriode(
                     søknadsperiode,
                     dto.trygdedekning,
-                    dto.arbeidsland,
                     InnvilgelsesResultat.INNVILGET,
                     dto.bestemmelse
                 )
@@ -129,7 +122,6 @@ object UtledMedlemskapsperioder {
                 lagPeriode(
                     søknadsperiode,
                     dto.trygdedekning,
-                    dto.arbeidsland,
                     InnvilgelsesResultat.AVSLAATT,
                     dto.bestemmelse
                 )
@@ -147,7 +139,6 @@ object UtledMedlemskapsperioder {
                 lagPeriode(
                     søknadsperiode,
                     dto.trygdedekning,
-                    dto.arbeidsland,
                     InnvilgelsesResultat.INNVILGET,
                     dto.bestemmelse
                 )
@@ -163,7 +154,6 @@ object UtledMedlemskapsperioder {
             lagPeriode(
                 splittetPeriode.second,
                 dto.trygdedekning,
-                dto.arbeidsland,
                 InnvilgelsesResultat.INNVILGET,
                 dto.bestemmelse
             )
@@ -180,14 +170,12 @@ object UtledMedlemskapsperioder {
                 lagPeriode(
                     periode,
                     fjernPensjonsdel(dto.trygdedekning),
-                    dto.arbeidsland,
                     InnvilgelsesResultat.AVSLAATT,
                     dto.bestemmelse
                 ),
                 lagPeriode(
                     periode,
                     Trygdedekninger.FTRL_2_9_FØRSTE_LEDD_B_PENSJON,
-                    dto.arbeidsland,
                     InnvilgelsesResultat.INNVILGET,
                     dto.bestemmelse
                 )
@@ -196,7 +184,6 @@ object UtledMedlemskapsperioder {
             lagPeriode(
                 periode,
                 dto.trygdedekning,
-                dto.arbeidsland,
                 InnvilgelsesResultat.AVSLAATT,
                 dto.bestemmelse
             )
@@ -206,14 +193,12 @@ object UtledMedlemskapsperioder {
     private fun lagPeriode(
         søknadsperiode: ErPeriode,
         trygdedekning: Trygdedekninger,
-        arbeidsland: String,
         innvilgelsesResultat: InnvilgelsesResultat,
         bestemmelse: Folketrygdloven_kap2_bestemmelser
     ): Medlemskapsperiode =
         Medlemskapsperiode().apply {
             this.fom = søknadsperiode.fom
             this.tom = søknadsperiode.tom
-            this.arbeidsland = arbeidsland
             this.innvilgelsesresultat = innvilgelsesResultat
             this.medlemskapstype = UtledMedlemskapstype.av(bestemmelse)
             this.trygdedekning = trygdedekning
