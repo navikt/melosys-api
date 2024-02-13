@@ -98,6 +98,8 @@ internal class InnvilgelseFtrlMapperTest {
                     innvilgelsesResultat.shouldBe(InnvilgelsesResultat.INNVILGET)
                 }
                 bestemmelse.shouldBe(Folketrygdloven_kap2_bestemmelser.FTRL_KAP2_2_8)
+                avslåttHelsedelFørMottaksdato.shouldBe(false)
+                avslåttMedlemskapsperiodeFørMottaksdato.shouldBe(false)
                 skatteplikttype.shouldBe(Skatteplikttype.SKATTEPLIKTIG)
                 begrunnelse.shouldBe(Ftrl_2_8_naer_tilknytning_norge_begrunnelser.ANNEN_GRUNN)
                 begrunnelseAnnenGrunnFritekst.shouldBe("<p>Vilkårresultat begrunnelse fritekst</p>")
@@ -205,6 +207,8 @@ internal class InnvilgelseFtrlMapperTest {
                     innvilgelsesResultat.shouldBe(InnvilgelsesResultat.INNVILGET)
                 }
                 bestemmelse.shouldBe(Folketrygdloven_kap2_bestemmelser.FTRL_KAP2_2_7_FØRSTE_LEDD)
+                avslåttHelsedelFørMottaksdato.shouldBe(false)
+                avslåttMedlemskapsperiodeFørMottaksdato.shouldBe(false)
                 skatteplikttype.shouldBe(Skatteplikttype.SKATTEPLIKTIG)
                 begrunnelse.shouldBe(Ftrl_2_7_begrunnelser.ANNEN_GRUNN)
                 begrunnelseAnnenGrunnFritekst.shouldBe("<p>Vilkårresultat begrunnelse fritekst</p>")
