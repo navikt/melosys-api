@@ -149,9 +149,9 @@ class InnvilgelsesbrevMapperTest {
 
     private static Soeknad lagSoeknadDokument(boolean medFartsområde) {
         Soeknad dokument = new Soeknad();
-        FysiskArbeidssted fysiskArbeidssted = new FysiskArbeidssted();
-        fysiskArbeidssted.setAdresse(new StrukturertAdresse());
-        fysiskArbeidssted.getAdresse().setLandkode(Landkoder.AT.getKode());
+        StrukturertAdresse strukturertAdresse = new StrukturertAdresse();
+        strukturertAdresse.setLandkode("AT");
+        FysiskArbeidssted fysiskArbeidssted = new FysiskArbeidssted(null, strukturertAdresse);
         dokument.arbeidPaaLand.setFysiskeArbeidssteder(Collections.singletonList(fysiskArbeidssted));
         dokument.maritimtArbeid.add(medFartsområde ? lagMaritimtArbeidMedFartsområde() : lagMaritimtArbeidUtenFartsområde());
         return dokument;

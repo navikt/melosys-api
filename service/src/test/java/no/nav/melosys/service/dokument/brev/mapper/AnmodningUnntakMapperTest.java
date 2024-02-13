@@ -149,9 +149,9 @@ class AnmodningUnntakMapperTest {
         fagsak.setType(Sakstyper.EU_EOS);
         behandling.setFagsak(fagsak);
 
-        FysiskArbeidssted fysiskArbeidssted = new FysiskArbeidssted();
-        fysiskArbeidssted.setAdresse(new StrukturertAdresse());
-        fysiskArbeidssted.getAdresse().setLandkode("NO");
+        StrukturertAdresse strukturertAdresse = new StrukturertAdresse();
+        strukturertAdresse.setLandkode("NO");
+        FysiskArbeidssted fysiskArbeidssted = new FysiskArbeidssted(null, strukturertAdresse);
 
         Soeknad soeknad = new Soeknad();
         soeknad.arbeidPaaLand.setFysiskeArbeidssteder(new ArrayList<>());

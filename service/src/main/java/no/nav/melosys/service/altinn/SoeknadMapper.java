@@ -121,12 +121,9 @@ public final class SoeknadMapper {
     }
 
     private static FysiskArbeidssted lagFysiskArbeidssted(no.nav.melosys.soknad_altinn.FysiskArbeidssted fa) {
-        FysiskArbeidssted fysiskArbeidssted = new FysiskArbeidssted();
-        fysiskArbeidssted.setVirksomhetNavn(fa.getFirmanavn());
-        fysiskArbeidssted.setAdresse(new StrukturertAdresse(
+        return new FysiskArbeidssted(fa.getFirmanavn(), new StrukturertAdresse(
             fa.getGatenavn(), null, fa.getPostkode(), fa.getBy(), fa.getRegion(), fa.getLand()
         ));
-        return fysiskArbeidssted;
     }
 
     private static List<MaritimtArbeid> lagOffshoreArbeid(OffshoreEnheter offshoreEnheter) {

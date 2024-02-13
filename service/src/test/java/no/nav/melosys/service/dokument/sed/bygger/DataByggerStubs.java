@@ -65,9 +65,7 @@ class DataByggerStubs {
         selvstendigForetak.setOrgnr("12312312");
         søknadDokument.selvstendigArbeid.setSelvstendigForetak(Collections.singletonList(selvstendigForetak));
         søknadDokument.selvstendigArbeid.setErSelvstendig(true);
-        FysiskArbeidssted fysiskArbeidssted = new FysiskArbeidssted();
-        fysiskArbeidssted.setAdresse(hentStrukturertAddresseStub());
-        fysiskArbeidssted.setVirksomhetNavn("foretaknavn");
+        FysiskArbeidssted fysiskArbeidssted = new FysiskArbeidssted("foretaknavn", hentStrukturertAddresseStub());
         søknadDokument.arbeidPaaLand.setFysiskeArbeidssteder(Lists.newArrayList(fysiskArbeidssted));
         UtenlandskIdent utenlandskIdent = new UtenlandskIdent();
         utenlandskIdent.setIdent("439205843");

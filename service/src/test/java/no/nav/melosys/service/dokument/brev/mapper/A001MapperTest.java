@@ -90,8 +90,7 @@ class A001MapperTest {
 
         StrukturertAdresse strukturertAdresse = lagStrukturertAdresse();
 
-        FysiskArbeidssted arbeidssted = new FysiskArbeidssted();
-        arbeidssted.setAdresse(strukturertAdresse);
+        FysiskArbeidssted arbeidssted = new FysiskArbeidssted(null, strukturertAdresse);
         Soeknad søknad = new Soeknad();
         søknad.arbeidPaaLand.setFysiskeArbeidssteder(List.of(arbeidssted));
 

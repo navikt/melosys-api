@@ -172,9 +172,7 @@ class BrevDataByggerA1Test {
     void lag_ArbeidsstedHosOppdragsgiver_girUtenlandskvirksomhet() {
         mockAvklarteOrganisasjoner(Collections.singletonList(orgnr2));
 
-        FysiskArbeidssted fysiskArbeidssted = new FysiskArbeidssted();
-        fysiskArbeidssted.setVirksomhetNavn("Utenlandsk Oppdragsgiver LTD");
-        fysiskArbeidssted.setAdresse(lagStrukturertAdresse());
+        FysiskArbeidssted fysiskArbeidssted = new FysiskArbeidssted("Utenlandsk Oppdragsgiver LTD", lagStrukturertAdresse());
         søknad.arbeidPaaLand.getFysiskeArbeidssteder().add(fysiskArbeidssted);
 
         BrevDataA1 brevDataDto = (BrevDataA1) brevDataByggerA1.lag(dataGrunnlag, saksbehandler);

@@ -19,12 +19,7 @@ public class Arbeidssted {
     }
 
     public FysiskArbeidssted tilFysiskArbeidssted() {
-        FysiskArbeidssted fysiskArbeidssted = new FysiskArbeidssted();
-
-        fysiskArbeidssted.setAdresse(adresse.tilStrukturertAdresse());
-        fysiskArbeidssted.setVirksomhetNavn(navn);
-
-        return fysiskArbeidssted;
+        return new FysiskArbeidssted(navn, adresse.tilStrukturertAdresse());
     }
 
     public String getNavn() {

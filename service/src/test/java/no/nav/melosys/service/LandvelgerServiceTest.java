@@ -413,9 +413,7 @@ class LandvelgerServiceTest {
     }
 
     private static FysiskArbeidssted lagFysiskArbeidssted() {
-        FysiskArbeidssted fysiskArbeidssted = new FysiskArbeidssted();
-        fysiskArbeidssted.setAdresse(lagUtenlandskAdresse(Landkoder.DE));
-        return fysiskArbeidssted;
+        return new FysiskArbeidssted(null, lagUtenlandskAdresse(Landkoder.DE));
     }
 
     private static ForetakUtland lagForetakUtland(Landkoder landkode) {

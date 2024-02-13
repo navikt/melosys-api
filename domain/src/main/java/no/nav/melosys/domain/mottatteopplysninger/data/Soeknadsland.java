@@ -12,14 +12,14 @@ import no.nav.melosys.exception.TekniskException;
 public class Soeknadsland {
     private List<String> landkoder = new ArrayList<>();
 
-    private boolean erUkjenteEllerAlleEosLand;
+    private boolean isUkjenteEllerAlleEosLand;
 
     public Soeknadsland() {
     }
 
-    public Soeknadsland(List<String> landkoder, boolean erUkjenteEllerAlleEosLand) {
+    public Soeknadsland(List<String> landkoder, boolean isUkjenteEllerAlleEosLand) {
         this.landkoder = landkoder;
-        this.erUkjenteEllerAlleEosLand = erUkjenteEllerAlleEosLand;
+        this.isUkjenteEllerAlleEosLand = isUkjenteEllerAlleEosLand;
     }
 
     public static Soeknadsland av(Land_iso2... lovvalgsland) {
@@ -27,7 +27,7 @@ public class Soeknadsland {
     }
 
     public boolean erGyldig() {
-        return !landkoder.isEmpty() || erUkjenteEllerAlleEosLand;
+        return !landkoder.isEmpty() || isUkjenteEllerAlleEosLand;
     }
 
     public Trygdeavtale_myndighetsland hentSoeknadslandForTrygdeavtale() {
@@ -46,10 +46,10 @@ public class Soeknadsland {
     }
 
     public boolean isUkjenteEllerAlleEosLand() {
-        return erUkjenteEllerAlleEosLand;
+        return isUkjenteEllerAlleEosLand;
     }
 
-    public void setErUkjenteEllerAlleEosLand(boolean erUkjenteEllerAlleEosLand) {
-        this.erUkjenteEllerAlleEosLand = erUkjenteEllerAlleEosLand;
+    public void setUkjenteEllerAlleEosLand(boolean isUkjenteEllerAlleEosLand) {
+        this.isUkjenteEllerAlleEosLand = isUkjenteEllerAlleEosLand;
     }
 }
