@@ -71,8 +71,7 @@ public class AvklarteVirksomheterService {
         }
 
         MottatteOpplysningerData mottatteOpplysningerData = mottatteOpplysninger.getMottatteOpplysningerData();
-        Set<String> organisasjonsnumre = mottatteOpplysningerData.selvstendigArbeid.hentAlleOrganisasjonsnumre()
-            .collect(Collectors.toSet());
+        Set<String> organisasjonsnumre = new HashSet<>(mottatteOpplysningerData.selvstendigArbeid.hentAlleOrganisasjonsnumre());
 
         Set<String> avklarteOrgnumreOgUuider = avklartefaktaService.hentAvklarteOrgnrOgUuid(behandling.getId());
         organisasjonsnumre.retainAll(avklarteOrgnumreOgUuider);

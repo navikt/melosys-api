@@ -42,7 +42,7 @@ public class MottatteOpplysningerData {
     public Set<String> hentAlleOrganisasjonsnumre() {
         return Stream
             .of(
-                selvstendigArbeid.hentAlleOrganisasjonsnumre(),
+                selvstendigArbeid.hentAlleOrganisasjonsnumre().stream(),
                 juridiskArbeidsgiverNorge.hentManueltRegistrerteArbeidsgiverOrgnumre()
             )
             .flatMap(i -> i)
