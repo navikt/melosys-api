@@ -77,7 +77,7 @@ public class BrevDataService {
         if (mottaker.getRolle() == Mottakerroller.BRUKER) {
             if (personManglerAdresseFraRegister(behandling.getFagsak().hentBrukersAktørID())) {
                 MottatteOpplysningerData grunnlagData = behandling.getMottatteOpplysninger().getMottatteOpplysningerData();
-                StrukturertAdresse oppgittAdresse = grunnlagData.bosted.oppgittAdresse;
+                StrukturertAdresse oppgittAdresse = grunnlagData.bosted.getOppgittAdresse();
                 if (oppgittAdresse.erGyldig()) {
                     metadata.berik = false;
                     metadata.postadresse = oppgittAdresse;

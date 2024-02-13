@@ -108,7 +108,7 @@ public class TrygdeavtaleVedtakService {
         if (request.getBehandlingsresultatTypeKode() == Behandlingsresultattyper.AVSLAG_MANGLENDE_OPPL) {
             return lagAvslagMangledeOpplysningerBrevbestilling(request);
         }
-        Optional<Produserbaredokumenter> produserbaredokumenter = behandling.getMottatteOpplysninger().getMottatteOpplysningerData().soeknadsland.landkoder.stream()
+        Optional<Produserbaredokumenter> produserbaredokumenter = behandling.getMottatteOpplysninger().getMottatteOpplysningerData().soeknadsland.getLandkoder().stream()
             .map(Land_iso2::valueOf)
             .findFirst()
             .map(this::utledProduserbartTrygdeavtaleDokument);

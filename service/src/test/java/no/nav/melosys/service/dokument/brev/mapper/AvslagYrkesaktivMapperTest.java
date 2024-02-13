@@ -58,13 +58,11 @@ class AvslagYrkesaktivMapperTest {
     @Test
     void mapTilBrevXML() throws JAXBException, SAXException {
 
-        FysiskArbeidssted fysiskArbeidssted = new FysiskArbeidssted();
-        fysiskArbeidssted.adresse = new StrukturertAdresse();
-        fysiskArbeidssted.adresse.setLandkode("NO");
+        FysiskArbeidssted fysiskArbeidssted = new FysiskArbeidssted("NO", new StrukturertAdresse());
 
         Soeknad soeknad = new Soeknad();
-        soeknad.arbeidPaaLand.fysiskeArbeidssteder = new ArrayList<>();
-        soeknad.arbeidPaaLand.fysiskeArbeidssteder.add(fysiskArbeidssted);
+        soeknad.arbeidPaaLand.setFysiskeArbeidssteder(new ArrayList<>());
+        soeknad.arbeidPaaLand.getFysiskeArbeidssteder().add(fysiskArbeidssted);
 
         MottatteOpplysninger mottatteOpplysninger = new MottatteOpplysninger();
         mottatteOpplysninger.setMottatteOpplysningerData(soeknad);

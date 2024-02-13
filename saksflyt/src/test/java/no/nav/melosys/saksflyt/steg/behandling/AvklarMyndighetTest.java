@@ -69,11 +69,11 @@ class AvklarMyndighetTest {
         behandling.setFagsak(fagsak);
         behandling.setType(Behandlingstyper.FØRSTEGANG);
         Soeknad søknadDokument = new Soeknad();
-        søknadDokument.soeknadsland.landkoder.add("BE");
+        søknadDokument.soeknadsland.getLandkoder().add("BE");
         FysiskArbeidssted fysiskArbeidssted = new FysiskArbeidssted();
-        fysiskArbeidssted.adresse.setLandkode("HR");
-        søknadDokument.arbeidPaaLand.fysiskeArbeidssteder.add(fysiskArbeidssted);
-        søknadDokument.bosted.oppgittAdresse.setLandkode("IT");
+        fysiskArbeidssted.getAdresse().setLandkode("HR");
+        søknadDokument.arbeidPaaLand.getFysiskeArbeidssteder().add(fysiskArbeidssted);
+        søknadDokument.bosted.getOppgittAdresse().setLandkode("IT");
         MottatteOpplysninger mottatteOpplysninger = new MottatteOpplysninger();
         mottatteOpplysninger.setMottatteOpplysningerData(søknadDokument);
         behandling.setMottatteOpplysninger(mottatteOpplysninger);

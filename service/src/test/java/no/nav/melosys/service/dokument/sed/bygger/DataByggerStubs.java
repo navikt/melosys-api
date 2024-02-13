@@ -54,25 +54,23 @@ class DataByggerStubs {
         behandling.setSaksopplysninger(saksopplysninger);
 
         ForetakUtland foretakUtland = new ForetakUtland();
-        foretakUtland.adresse = hentStrukturertAddresseStub();
-        foretakUtland.navn = "navn foretak";
-        foretakUtland.uuid = "uuid";
+        foretakUtland.setAdresse(hentStrukturertAddresseStub());
+        foretakUtland.setNavn("navn foretak");
+        foretakUtland.setUuid("uuid");
 
         Soeknad søknadDokument = new Soeknad();
         søknadDokument.selvstendigArbeid = new SelvstendigArbeid();
         søknadDokument.foretakUtland = Lists.newArrayList(foretakUtland);
         SelvstendigForetak selvstendigForetak = new SelvstendigForetak();
-        selvstendigForetak.orgnr = "12312312";
-        søknadDokument.selvstendigArbeid.selvstendigForetak = Collections.singletonList(selvstendigForetak);
-        søknadDokument.selvstendigArbeid.erSelvstendig = true;
-        FysiskArbeidssted fysiskArbeidssted = new FysiskArbeidssted();
-        fysiskArbeidssted.adresse = hentStrukturertAddresseStub();
-        fysiskArbeidssted.virksomhetNavn = "foretaknavn";
-        søknadDokument.arbeidPaaLand.fysiskeArbeidssteder = Lists.newArrayList(fysiskArbeidssted);
+        selvstendigForetak.setOrgnr("12312312");
+        søknadDokument.selvstendigArbeid.setSelvstendigForetak(Collections.singletonList(selvstendigForetak));
+        søknadDokument.selvstendigArbeid.setErSelvstendig(true);
+        FysiskArbeidssted fysiskArbeidssted = new FysiskArbeidssted("foretaknavn", hentStrukturertAddresseStub());
+        søknadDokument.arbeidPaaLand.setFysiskeArbeidssteder(Lists.newArrayList(fysiskArbeidssted));
         UtenlandskIdent utenlandskIdent = new UtenlandskIdent();
-        utenlandskIdent.ident = "439205843";
-        utenlandskIdent.landkode = "SE";
-        søknadDokument.personOpplysninger.utenlandskIdent.add(utenlandskIdent);
+        utenlandskIdent.setIdent("439205843");
+        utenlandskIdent.setLandkode("SE");
+        søknadDokument.personOpplysninger.getUtenlandskIdent().add(utenlandskIdent);
         behandling.getMottatteOpplysninger().setMottatteOpplysningerData(søknadDokument);
 
         Saksopplysning saksopplysning = new Saksopplysning();
@@ -81,7 +79,7 @@ class DataByggerStubs {
         saksopplysninger.add(saksopplysning);
 
         MaritimtArbeid maritimtArbeid = new MaritimtArbeid();
-        maritimtArbeid.enhetNavn = "enhet";
+        maritimtArbeid.setEnhetNavn("enhet");
         søknadDokument.maritimtArbeid = Collections.singletonList(maritimtArbeid);
 
         PersonDokument personDokument = new PersonDokument();
@@ -119,20 +117,20 @@ class DataByggerStubs {
         Behandling behandling = hentBehandlingStub();
         MottatteOpplysningerData mottatteOpplysningerData = behandling.getMottatteOpplysninger().getMottatteOpplysningerData();
 
-        FysiskArbeidssted fysiskArbeidssted = mottatteOpplysningerData.arbeidPaaLand.fysiskeArbeidssteder.remove(0);
-        fysiskArbeidssted.adresse.setPoststed(null);
+        FysiskArbeidssted fysiskArbeidssted = mottatteOpplysningerData.arbeidPaaLand.getFysiskeArbeidssteder().remove(0);
+        fysiskArbeidssted.getAdresse().setPoststed(null);
         if (fysiskArbeidsstedManglerLandkode) {
-            fysiskArbeidssted.adresse.setLandkode(null);
+            fysiskArbeidssted.getAdresse().setLandkode(null);
         }
-        mottatteOpplysningerData.arbeidPaaLand.fysiskeArbeidssteder.add(fysiskArbeidssted);
+        mottatteOpplysningerData.arbeidPaaLand.getFysiskeArbeidssteder().add(fysiskArbeidssted);
 
         ForetakUtland foretakUtland = mottatteOpplysningerData.foretakUtland.remove(0);
-        foretakUtland.adresse.setPostnummer(null);
-        foretakUtland.adresse.setPoststed(null);
+        foretakUtland.getAdresse().setPostnummer(null);
+        foretakUtland.getAdresse().setPoststed(null);
         if (arbeidsgivendeForetakUtlandManglerLandkode || selvstendigForetakUtlandManglerLandkode) {
-            foretakUtland.adresse.setLandkode(null);
+            foretakUtland.getAdresse().setLandkode(null);
         }
-        foretakUtland.selvstendigNæringsvirksomhet = selvstendigForetakUtlandManglerLandkode;
+        foretakUtland.setSelvstendigNæringsvirksomhet(selvstendigForetakUtlandManglerLandkode);
         mottatteOpplysningerData.foretakUtland.add(foretakUtland);
 
         return behandling;

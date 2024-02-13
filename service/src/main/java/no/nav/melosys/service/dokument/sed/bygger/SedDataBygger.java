@@ -114,7 +114,7 @@ public class SedDataBygger {
         sedDataDto.setFamilieMedlem(grunnlagMedSøknad.getPersondata().hentFamiliemedlemmer().stream()
             .filter(Familiemedlem::erForelder)
             .map(SedDataBygger::lagForelder).toList());
-        sedDataDto.setUtenlandskIdent(grunnlagMedSøknad.getMottatteOpplysningerData().personOpplysninger.utenlandskIdent.stream()
+        sedDataDto.setUtenlandskIdent(grunnlagMedSøknad.getMottatteOpplysningerData().personOpplysninger.getUtenlandskIdent().stream()
             .map(SedDataBygger::tilUtenlandskIdentDto).toList());
 
         var behandling = grunnlagMedSøknad.getBehandling();
@@ -189,8 +189,8 @@ public class SedDataBygger {
 
     private static Ident tilUtenlandskIdentDto(UtenlandskIdent ui) {
         Ident ident = new Ident();
-        ident.setIdent(ui.ident);
-        ident.setLandkode(ui.landkode);
+        ident.setIdent(ui.getIdent());
+        ident.setLandkode(ui.getLandkode());
         return ident;
     }
 

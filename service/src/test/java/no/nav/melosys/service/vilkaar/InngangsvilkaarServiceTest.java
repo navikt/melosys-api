@@ -356,7 +356,7 @@ class InngangsvilkaarServiceTest {
         fagsak.setType(Sakstyper.EU_EOS);
         var behandling = lagBehandlingMedPeriodeOgLand();
         behandling.setFagsak(fagsak);
-        behandling.getMottatteOpplysninger().getMottatteOpplysningerData().soeknadsland.landkoder = Collections.emptyList();
+        behandling.getMottatteOpplysninger().getMottatteOpplysningerData().soeknadsland.setLandkoder(Collections.emptyList());
 
 
         assertThat(inngangsvilkaarService.skalVurdereInngangsvilkår(behandling)).isFalse();

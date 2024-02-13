@@ -26,6 +26,6 @@ public class SøknadNorgeEllerUtenforEØS extends MottatteOpplysningerData {
     }
 
     public String hentArbeidsland() {
-        return soeknadsland.landkoder.stream().collect(onlyElement());
+        return soeknadsland.getLandkoder().stream().collect(onlyElement());
     }
 }

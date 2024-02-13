@@ -149,27 +149,27 @@ class InnvilgelsesbrevMapperTest {
 
     private static Soeknad lagSoeknadDokument(boolean medFartsområde) {
         Soeknad dokument = new Soeknad();
-        FysiskArbeidssted fysiskArbeidssted = new FysiskArbeidssted();
-        fysiskArbeidssted.adresse = new StrukturertAdresse();
-        fysiskArbeidssted.adresse.setLandkode(Landkoder.AT.getKode());
-        dokument.arbeidPaaLand.fysiskeArbeidssteder = Collections.singletonList(fysiskArbeidssted);
+        StrukturertAdresse strukturertAdresse = new StrukturertAdresse();
+        strukturertAdresse.setLandkode("AT");
+        FysiskArbeidssted fysiskArbeidssted = new FysiskArbeidssted(null, strukturertAdresse);
+        dokument.arbeidPaaLand.setFysiskeArbeidssteder(Collections.singletonList(fysiskArbeidssted));
         dokument.maritimtArbeid.add(medFartsområde ? lagMaritimtArbeidMedFartsområde() : lagMaritimtArbeidUtenFartsområde());
         return dokument;
     }
 
     private static MaritimtArbeid lagMaritimtArbeidUtenFartsområde() {
         MaritimtArbeid maritimtArbeid = new MaritimtArbeid();
-        maritimtArbeid.enhetNavn = "Dunfjæder";
-        maritimtArbeid.innretningLandkode = "NO";
+        maritimtArbeid.setEnhetNavn("Dunfjæder");
+        maritimtArbeid.setInnretningLandkode("NO");
         return maritimtArbeid;
     }
 
     private static MaritimtArbeid lagMaritimtArbeidMedFartsområde() {
         MaritimtArbeid maritimtArbeid = new MaritimtArbeid();
-        maritimtArbeid.enhetNavn = "Dunfjæder";
-        maritimtArbeid.innretningLandkode = "NO";
-        maritimtArbeid.territorialfarvannLandkode = "GB";
-        maritimtArbeid.fartsomradeKode = Fartsomrader.INNENRIKS;
+        maritimtArbeid.setEnhetNavn("Dunfjæder");
+        maritimtArbeid.setInnretningLandkode("NO");
+        maritimtArbeid.setTerritorialfarvannLandkode("GB");
+        maritimtArbeid.setFartsomradeKode(Fartsomrader.INNENRIKS);
         return maritimtArbeid;
     }
 

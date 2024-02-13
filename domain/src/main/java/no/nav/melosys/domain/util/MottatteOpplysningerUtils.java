@@ -31,8 +31,8 @@ public final class MottatteOpplysningerUtils {
      */
     public static List<Land_iso2> hentSøknadslandkoder(MottatteOpplysningerData grunnlagdata) {
         Soeknadsland soeknadsland = hentSøknadsland(grunnlagdata);
-        List<String> søknadslandkoder = soeknadsland.landkoder;
-        if (søknadslandkoder.isEmpty() && !soeknadsland.erUkjenteEllerAlleEosLand) {
+        List<String> søknadslandkoder = soeknadsland.getLandkoder();
+        if (søknadslandkoder.isEmpty() && !soeknadsland.isErUkjenteEllerAlleEosLand()) {
             throw new IllegalStateException("Søknad mangler søknadsland og land er ikke markert som ukjente eller alle Eøs-land.");
         }
         return søknadslandkoder.stream()
@@ -55,7 +55,7 @@ public final class MottatteOpplysningerUtils {
     }
 
     public static StrukturertAdresse hentBostedsadresse(MottatteOpplysningerData mottatteOpplysningerData) {
-        StrukturertAdresse oppgittAdresse = mottatteOpplysningerData.bosted.oppgittAdresse;
+        StrukturertAdresse oppgittAdresse = mottatteOpplysningerData.bosted.getOppgittAdresse();
         if ((StringUtils.isNotEmpty(oppgittAdresse.getGatenavn()) ||
             StringUtils.isNotEmpty(oppgittAdresse.getHusnummerEtasjeLeilighet()) ||
             StringUtils.isNotEmpty(oppgittAdresse.getRegion()) ||
@@ -69,6 +69,6 @@ public final class MottatteOpplysningerUtils {
     }
 
     public static Optional<Bostedsland> hentOppgittBostedsland(MottatteOpplysningerData mottatteOpplysningerData) {
-        return Optional.ofNullable(mottatteOpplysningerData.bosted.oppgittAdresse.getLandkode()).map(Bostedsland::new);
+        return Optional.ofNullable(mottatteOpplysningerData.bosted.getOppgittAdresse().getLandkode()).map(Bostedsland::new);
     }
 }

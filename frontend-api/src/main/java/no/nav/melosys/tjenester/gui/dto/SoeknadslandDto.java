@@ -19,7 +19,7 @@ public class SoeknadslandDto {
         if (søknadsland == null) {
             return new SoeknadslandDto(Collections.emptyList(), false);
         }
-        return new SoeknadslandDto(søknadsland.landkoder, søknadsland.erUkjenteEllerAlleEosLand);
+        return new SoeknadslandDto(søknadsland.getLandkoder(), søknadsland.isErUkjenteEllerAlleEosLand());
     }
 
     public static SoeknadslandDto av(Landkoder landkode) {

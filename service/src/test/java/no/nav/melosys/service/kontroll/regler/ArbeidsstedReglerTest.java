@@ -76,7 +76,7 @@ class ArbeidsstedReglerTest {
 
     private RepresentantIUtlandet lagRepresentantIUtlandet(String navn) {
         var representantIUtlandet = new RepresentantIUtlandet();
-        representantIUtlandet.representantNavn = navn;
+        representantIUtlandet.setRepresentantNavn(navn);
         return representantIUtlandet;
     }
 

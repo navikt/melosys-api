@@ -27,7 +27,7 @@ public final class ArbeidsstedRegler {
 
 
     public static boolean representantIUtlandetMangler(RepresentantIUtlandet representantIUtlandet) {
-        return representantIUtlandet == null || representantIUtlandet.representantNavn == null;
+        return representantIUtlandet == null || representantIUtlandet.getRepresentantNavn() == null;
     }
 
     public static boolean erArbeidsstedFraSvalbardOgJanMayen(SedDokument sedDokument) {

@@ -37,15 +37,15 @@ public final class SoeknadMapper {
         soeknad.periode = lagPeriode(innhold);
         soeknad.personOpplysninger = lagPersonopplysninger(innhold);
         lagArbeidssteder(innhold, soeknad);
-        soeknad.loennOgGodtgjoerelse = lagLoennOgGodtgjoerelse(innhold.getMidlertidigUtsendt());
+        soeknad.setLoennOgGodtgjoerelse(lagLoennOgGodtgjoerelse(innhold.getMidlertidigUtsendt()));
         final var virksomhetIUtlandet = innhold.getMidlertidigUtsendt().getVirksomhetIUtlandet();
         if (virksomhetIUtlandet != null
             && StringUtils.isNotBlank(virksomhetIUtlandet.getNavn())) {
             soeknad.foretakUtland.add(lagUtenlandskVirksomhet(virksomhetIUtlandet));
         }
         soeknad.juridiskArbeidsgiverNorge = lagJuridiskArbeidsgiverNorge(innhold.getArbeidsgiver());
-        soeknad.utenlandsoppdraget = lagUtenlandsoppdraget(innhold.getMidlertidigUtsendt().getUtenlandsoppdraget());
-        soeknad.arbeidssituasjonOgOevrig = lagArbeidssituasjonOgOevrig(innhold.getMidlertidigUtsendt());
+        soeknad.setUtenlandsoppdraget(lagUtenlandsoppdraget(innhold.getMidlertidigUtsendt().getUtenlandsoppdraget()));
+        soeknad.setArbeidssituasjonOgOevrig(lagArbeidssituasjonOgOevrig(innhold.getMidlertidigUtsendt()));
         return soeknad;
     }
 
@@ -69,20 +69,20 @@ public final class SoeknadMapper {
     private static OpplysningerOmBrukeren lagPersonopplysninger(Innhold innhold) {
         OpplysningerOmBrukeren personopplysninger = new OpplysningerOmBrukeren();
         if (innhold.getArbeidstaker().getUtenlandskIDnummer() != null) {
-            personopplysninger.utenlandskIdent.add(lagUtenlandskIdent(innhold));
+            personopplysninger.getUtenlandskIdent().add(lagUtenlandskIdent(innhold));
         }
-        personopplysninger.foedestedOgLand = new FoedestedOgLand(
+        personopplysninger.setFoedestedOgLand(new FoedestedOgLand(
             innhold.getArbeidstaker().getFoedested(),
             innhold.getArbeidstaker().getFoedeland()
-        );
-        personopplysninger.medfolgendeFamilie = hentMedfølgendeBarn(innhold);
+        ));
+        personopplysninger.setMedfolgendeFamilie(hentMedfølgendeBarn(innhold));
         return personopplysninger;
     }
 
     private static UtenlandskIdent lagUtenlandskIdent(Innhold innhold) {
         UtenlandskIdent utenlandskIdent = new UtenlandskIdent();
-        utenlandskIdent.ident = innhold.getArbeidstaker().getUtenlandskIDnummer();
-        utenlandskIdent.landkode = innhold.getMidlertidigUtsendt().getArbeidsland();
+        utenlandskIdent.setIdent(innhold.getArbeidstaker().getUtenlandskIDnummer());
+        utenlandskIdent.setLandkode(innhold.getMidlertidigUtsendt().getArbeidsland());
         return utenlandskIdent;
     }
 
@@ -113,20 +113,17 @@ public final class SoeknadMapper {
 
     private static ArbeidPaaLand lagArbeidPåLand(no.nav.melosys.soknad_altinn.ArbeidPaaLand arbeidPaaLandAltinn) {
         ArbeidPaaLand arbeidPaaLand = new ArbeidPaaLand();
-        arbeidPaaLand.fysiskeArbeidssteder = arbeidPaaLandAltinn.getFysiskeArbeidssteder().getFysiskArbeidssted()
-            .stream().map(SoeknadMapper::lagFysiskArbeidssted).collect(Collectors.toList());
-        arbeidPaaLand.erFastArbeidssted = arbeidPaaLandAltinn.isFastArbeidssted();
-        arbeidPaaLand.erHjemmekontor = arbeidPaaLandAltinn.isHjemmekontor();
+        arbeidPaaLand.setFysiskeArbeidssteder(arbeidPaaLandAltinn.getFysiskeArbeidssteder().getFysiskArbeidssted()
+            .stream().map(SoeknadMapper::lagFysiskArbeidssted).collect(Collectors.toList()));
+        arbeidPaaLand.setErFastArbeidssted(arbeidPaaLandAltinn.isFastArbeidssted());
+        arbeidPaaLand.setErHjemmekontor(arbeidPaaLandAltinn.isHjemmekontor());
         return arbeidPaaLand;
     }
 
     private static FysiskArbeidssted lagFysiskArbeidssted(no.nav.melosys.soknad_altinn.FysiskArbeidssted fa) {
-        FysiskArbeidssted fysiskArbeidssted = new FysiskArbeidssted();
-        fysiskArbeidssted.virksomhetNavn = fa.getFirmanavn();
-        fysiskArbeidssted.adresse = new StrukturertAdresse(
+        return new FysiskArbeidssted(fa.getFirmanavn(), new StrukturertAdresse(
             fa.getGatenavn(), null, fa.getPostkode(), fa.getBy(), fa.getRegion(), fa.getLand()
-        );
-        return fysiskArbeidssted;
+        ));
     }
 
     private static List<MaritimtArbeid> lagOffshoreArbeid(OffshoreEnheter offshoreEnheter) {
@@ -136,9 +133,9 @@ public final class SoeknadMapper {
 
     private static MaritimtArbeid lagOffshoreArbeidssted(OffshoreEnheter.OffshoreEnhet offshoreEnhet) {
         MaritimtArbeid maritimtArbeid = new MaritimtArbeid();
-        maritimtArbeid.enhetNavn = offshoreEnhet.getEnhetsNavn();
-        maritimtArbeid.innretningstype = mapInnretningstyper(offshoreEnhet.getEnhetsType());
-        maritimtArbeid.innretningLandkode = offshoreEnhet.getSokkelLand();
+        maritimtArbeid.setEnhetNavn(offshoreEnhet.getEnhetsNavn());
+        maritimtArbeid.setInnretningstype(mapInnretningstyper(offshoreEnhet.getEnhetsType()));
+        maritimtArbeid.setInnretningLandkode(offshoreEnhet.getSokkelLand());
         return maritimtArbeid;
     }
 
@@ -155,10 +152,10 @@ public final class SoeknadMapper {
 
     private static MaritimtArbeid lagArbeidsstedPåSkip(SkipListe.Skip skip) {
         MaritimtArbeid maritimtArbeid = new MaritimtArbeid();
-        maritimtArbeid.enhetNavn = skip.getSkipNavn();
-        maritimtArbeid.fartsomradeKode = Fartsomrader.valueOf(skip.getFartsomraade().toString().toUpperCase());
-        maritimtArbeid.flaggLandkode = skip.getFlaggland();
-        maritimtArbeid.territorialfarvannLandkode = skip.getTerritorialEllerHavnLand();
+        maritimtArbeid.setEnhetNavn(skip.getSkipNavn());
+        maritimtArbeid.setFartsomradeKode(Fartsomrader.valueOf(skip.getFartsomraade().toString().toUpperCase()));
+        maritimtArbeid.setFlaggLandkode(skip.getFlaggland());
+        maritimtArbeid.setTerritorialfarvannLandkode(skip.getTerritorialEllerHavnLand());
         return maritimtArbeid;
     }
 
@@ -204,32 +201,32 @@ public final class SoeknadMapper {
 
     private static ForetakUtland lagUtenlandskVirksomhet(VirksomhetIUtlandet virksomhetIUtlandet) {
         ForetakUtland foretakUtland = new ForetakUtland();
-        foretakUtland.navn = virksomhetIUtlandet.getNavn();
-        foretakUtland.orgnr = virksomhetIUtlandet.getRegistreringsnummer();
+        foretakUtland.setNavn(virksomhetIUtlandet.getNavn());
+        foretakUtland.setOrgnr(virksomhetIUtlandet.getRegistreringsnummer());
         final PostadresseUtland postadresseUtland = virksomhetIUtlandet.getAdresse();
-        foretakUtland.adresse.setGatenavn(postadresseUtland.getGatenavn());
-        foretakUtland.adresse.setPostnummer(postadresseUtland.getPostkode());
-        foretakUtland.adresse.setPoststed(postadresseUtland.getBy());
-        foretakUtland.adresse.setRegion(postadresseUtland.getRegion());
-        foretakUtland.adresse.setLandkode(tilIso2FraEuEosLandnavn(postadresseUtland.getLand()));
+        foretakUtland.getAdresse().setGatenavn(postadresseUtland.getGatenavn());
+        foretakUtland.getAdresse().setPostnummer(postadresseUtland.getPostkode());
+        foretakUtland.getAdresse().setPoststed(postadresseUtland.getBy());
+        foretakUtland.getAdresse().setRegion(postadresseUtland.getRegion());
+        foretakUtland.getAdresse().setLandkode(tilIso2FraEuEosLandnavn(postadresseUtland.getLand()));
         return foretakUtland;
     }
 
     private static JuridiskArbeidsgiverNorge lagJuridiskArbeidsgiverNorge(Arbeidsgiver arbeidsgiver) {
         JuridiskArbeidsgiverNorge juridiskArbeidsgiverNorge = new JuridiskArbeidsgiverNorge();
         if (arbeidsgiver != null) {
-            juridiskArbeidsgiverNorge.erOffentligVirksomhet = arbeidsgiver.isOffentligVirksomhet();
+            juridiskArbeidsgiverNorge.setErOffentligVirksomhet(arbeidsgiver.isOffentligVirksomhet());
 
             if (!arbeidsgiver.isOffentligVirksomhet() && arbeidsgiver.getSamletVirksomhetINorge() != null) {
                 SamletVirksomhetINorge samletVirksomhetINorge = arbeidsgiver.getSamletVirksomhetINorge();
-                juridiskArbeidsgiverNorge.antallAnsatte = samletVirksomhetINorge.getAntallAnsatte().intValue();
-                juridiskArbeidsgiverNorge.antallAdmAnsatte = samletVirksomhetINorge.getAntallAdministrativeAnsatteINorge().intValue();
-                juridiskArbeidsgiverNorge.antallUtsendte = samletVirksomhetINorge.getAntallUtsendte().intValue();
-                juridiskArbeidsgiverNorge.andelOmsetningINorge = new BigDecimal(samletVirksomhetINorge.getAndelOmsetningINorge());
-                juridiskArbeidsgiverNorge.andelOppdragINorge = new BigDecimal(samletVirksomhetINorge.getAndelOppdragINorge());
-                juridiskArbeidsgiverNorge.andelKontrakterINorge = new BigDecimal(samletVirksomhetINorge.getAndelKontrakterInngaasINorge());
-                juridiskArbeidsgiverNorge.andelRekruttertINorge = new BigDecimal(samletVirksomhetINorge.getAndelRekrutteresINorge());
-                juridiskArbeidsgiverNorge.ekstraArbeidsgivere = List.of(arbeidsgiver.getVirksomhetsnummer());
+                juridiskArbeidsgiverNorge.setAntallAnsatte(samletVirksomhetINorge.getAntallAnsatte().intValue());
+                juridiskArbeidsgiverNorge.setAntallAdmAnsatte(samletVirksomhetINorge.getAntallAdministrativeAnsatteINorge().intValue());
+                juridiskArbeidsgiverNorge.setAntallUtsendte(samletVirksomhetINorge.getAntallUtsendte().intValue());
+                juridiskArbeidsgiverNorge.setAndelOmsetningINorge(new BigDecimal(samletVirksomhetINorge.getAndelOmsetningINorge()));
+                juridiskArbeidsgiverNorge.setAndelOppdragINorge(new BigDecimal(samletVirksomhetINorge.getAndelOppdragINorge()));
+                juridiskArbeidsgiverNorge.setAndelKontrakterINorge(new BigDecimal(samletVirksomhetINorge.getAndelKontrakterInngaasINorge()));
+                juridiskArbeidsgiverNorge.setAndelRekruttertINorge(new BigDecimal(samletVirksomhetINorge.getAndelRekrutteresINorge()));
+                juridiskArbeidsgiverNorge.setEkstraArbeidsgivere(List.of(arbeidsgiver.getVirksomhetsnummer()));
             }
         }
         return juridiskArbeidsgiverNorge;
@@ -254,13 +251,13 @@ public final class SoeknadMapper {
 
     private static ArbeidssituasjonOgOevrig lagArbeidssituasjonOgOevrig(MidlertidigUtsendt midlertidigUtsendt) {
         ArbeidssituasjonOgOevrig arbeidssituasjonOgOevrig = new ArbeidssituasjonOgOevrig();
-        arbeidssituasjonOgOevrig.harLoennetArbeidMinstEnMndFoerUtsending = midlertidigUtsendt.isLoennetArbeidMinstEnMnd();
-        arbeidssituasjonOgOevrig.beskrivelseArbeidSisteMnd = midlertidigUtsendt.getBeskrivArbeidSisteMnd();
-        arbeidssituasjonOgOevrig.harAndreArbeidsgivereIUtsendingsperioden = midlertidigUtsendt.isAndreArbeidsgivereIUtsendingsperioden();
-        arbeidssituasjonOgOevrig.beskrivelseAnnetArbeid = midlertidigUtsendt.getBeskrivelseAnnetArbeid();
-        arbeidssituasjonOgOevrig.erSkattepliktig = midlertidigUtsendt.isSkattepliktig();
-        arbeidssituasjonOgOevrig.mottarYtelserNorge = midlertidigUtsendt.isMottaYtelserNorge();
-        arbeidssituasjonOgOevrig.mottarYtelserUtlandet = midlertidigUtsendt.isMottaYtelserUtlandet();
+        arbeidssituasjonOgOevrig.setHarLoennetArbeidMinstEnMndFoerUtsending(midlertidigUtsendt.isLoennetArbeidMinstEnMnd());
+        arbeidssituasjonOgOevrig.setBeskrivelseArbeidSisteMnd(midlertidigUtsendt.getBeskrivArbeidSisteMnd());
+        arbeidssituasjonOgOevrig.setHarAndreArbeidsgivereIUtsendingsperioden(midlertidigUtsendt.isAndreArbeidsgivereIUtsendingsperioden());
+        arbeidssituasjonOgOevrig.setBeskrivelseAnnetArbeid(midlertidigUtsendt.getBeskrivelseAnnetArbeid());
+        arbeidssituasjonOgOevrig.setErSkattepliktig(midlertidigUtsendt.isSkattepliktig());
+        arbeidssituasjonOgOevrig.setMottarYtelserNorge(midlertidigUtsendt.isMottaYtelserNorge());
+        arbeidssituasjonOgOevrig.setMottarYtelserUtlandet(midlertidigUtsendt.isMottaYtelserUtlandet());
         return arbeidssituasjonOgOevrig;
     }
 

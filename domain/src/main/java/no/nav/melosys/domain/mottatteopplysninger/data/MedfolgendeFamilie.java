@@ -10,7 +10,6 @@ import java.util.stream.Stream;
 import no.nav.commons.foedselsnummer.FoedselsNr;
 import no.nav.melosys.exception.FunksjonellException;
 import no.nav.melosys.exception.TekniskException;
-
 public class MedfolgendeFamilie {
     private String uuid;
     private String fnr;

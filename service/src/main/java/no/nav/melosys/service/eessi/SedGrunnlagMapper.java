@@ -24,22 +24,22 @@ public class SedGrunnlagMapper {
         SedGrunnlag sedGrunnlag = new SedGrunnlag();
 
         sedGrunnlag.personOpplysninger = tilPersonopplysninger(sedGrunnlagDto.getUtenlandskIdent());
-        sedGrunnlag.arbeidPaaLand.fysiskeArbeidssteder = tilFysiskeArbeidssteder(sedGrunnlagDto.getArbeidssteder());
+        sedGrunnlag.arbeidPaaLand.setFysiskeArbeidssteder(tilFysiskeArbeidssteder(sedGrunnlagDto.getArbeidssteder()));
         sedGrunnlag.foretakUtland = tilForetakUtland(sedGrunnlagDto.getArbeidsgivendeVirksomheter(), sedGrunnlagDto.getSelvstendigeVirksomheter());
         sedGrunnlag.periode = tilPeriode(sedGrunnlagDto.getLovvalgsperioder());
-        sedGrunnlag.ytterligereInformasjon = sedGrunnlagDto.getYtterligereInformasjon();
+        sedGrunnlag.setYtterligereInformasjon(sedGrunnlagDto.getYtterligereInformasjon());
         if(!sedGrunnlagDto.erA001()) {
-            sedGrunnlag.soeknadsland.landkoder = sedGrunnlagDto.getLovvalgsperioder().stream().map(Lovvalgsperiode::getLovvalgsland).toList();
+            sedGrunnlag.soeknadsland.setLandkoder(sedGrunnlagDto.getLovvalgsperioder().stream().map(Lovvalgsperiode::getLovvalgsland).toList());
         }
 
         if (sedGrunnlagDto.erA003()) {
             SedGrunnlagA003Dto sedGrunnlagA003Dto = (SedGrunnlagA003Dto) sedGrunnlagDto;
-            sedGrunnlag.overgangsregelbestemmelser = mapOvergangsregelbestemmelser(sedGrunnlagA003Dto.getOvergangsregelbestemmelser());
-            sedGrunnlag.juridiskArbeidsgiverNorge.ekstraArbeidsgivere = sedGrunnlagA003Dto
+            sedGrunnlag.setOvergangsregelbestemmelser(mapOvergangsregelbestemmelser(sedGrunnlagA003Dto.getOvergangsregelbestemmelser()));
+            sedGrunnlag.juridiskArbeidsgiverNorge.setEkstraArbeidsgivere(sedGrunnlagA003Dto
                 .getNorskeArbeidsgivendeVirksomheter()
                 .stream()
                 .map(Virksomhet::hentOrgnrEllerNavn)
-                .toList();
+                .toList());
         }
 
         return sedGrunnlag;
@@ -66,7 +66,7 @@ public class SedGrunnlagMapper {
 
     private static OpplysningerOmBrukeren tilPersonopplysninger(List<Ident> utenlandskIdent) {
         OpplysningerOmBrukeren opplysningerOmBrukeren = new OpplysningerOmBrukeren();
-        opplysningerOmBrukeren.utenlandskIdent = tilUtenlandskIdent(utenlandskIdent);
+        opplysningerOmBrukeren.setUtenlandskIdent(tilUtenlandskIdent(utenlandskIdent));
         return opplysningerOmBrukeren;
     }
 

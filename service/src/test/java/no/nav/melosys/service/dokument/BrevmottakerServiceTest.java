@@ -458,9 +458,9 @@ class BrevmottakerServiceTest {
 
     private MottatteOpplysninger lagMottatteOpplysninger(String ekstraArbeidsgivereOrgnr, String foretakUtlandUuid) {
         var mottatteOpplysningerData = new MottatteOpplysningerData();
-        mottatteOpplysningerData.juridiskArbeidsgiverNorge.ekstraArbeidsgivere.add(ekstraArbeidsgivereOrgnr);
+        mottatteOpplysningerData.juridiskArbeidsgiverNorge.getEkstraArbeidsgivere().add(ekstraArbeidsgivereOrgnr);
         var foretakUtland = new ForetakUtland();
-        foretakUtland.uuid = foretakUtlandUuid;
+        foretakUtland.setUuid(foretakUtlandUuid);
         mottatteOpplysningerData.foretakUtland.add(foretakUtland);
         var mottatteOpplysninger = new MottatteOpplysninger();
         mottatteOpplysninger.setMottatteOpplysningerData(mottatteOpplysningerData);

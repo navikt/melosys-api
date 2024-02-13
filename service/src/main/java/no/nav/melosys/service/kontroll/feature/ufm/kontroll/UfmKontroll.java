@@ -163,7 +163,7 @@ class UfmKontroll {
 
     private static boolean harTransitiveRegler(Optional<MottatteOpplysningerData> optionalMottatteOpplysningerData) {
         return optionalMottatteOpplysningerData.isPresent()
-            && !((SedGrunnlag) optionalMottatteOpplysningerData.get()).overgangsregelbestemmelser.isEmpty();
+            && !((SedGrunnlag) optionalMottatteOpplysningerData.get()).getOvergangsregelbestemmelser().isEmpty();
     }
 
     private static boolean harOvergangsregler(SedDokument sedDokument) {
@@ -173,6 +173,6 @@ class UfmKontroll {
     }
 
     private static boolean harMottatteOpplysningerMedYtterligereInformasjon(Optional<MottatteOpplysningerData> optionalMottatteOpplysningerData) {
-        return optionalMottatteOpplysningerData.isPresent() && !isEmpty(((SedGrunnlag) optionalMottatteOpplysningerData.get()).ytterligereInformasjon);
+        return optionalMottatteOpplysningerData.isPresent() && !isEmpty(((SedGrunnlag) optionalMottatteOpplysningerData.get()).getYtterligereInformasjon());
     }
 }

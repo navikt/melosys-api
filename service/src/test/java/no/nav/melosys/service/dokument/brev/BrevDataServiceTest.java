@@ -480,7 +480,7 @@ class BrevDataServiceTest {
 
     private Soeknad lagSøknadDokument() {
         Soeknad søknad = new Soeknad();
-        søknad.bosted.oppgittAdresse = lagStrukturertAdresse();
+        søknad.bosted.setOppgittAdresse(lagStrukturertAdresse());
         return søknad;
     }
 

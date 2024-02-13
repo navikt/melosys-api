@@ -1,18 +1,18 @@
 package no.nav.melosys.domain.mottatteopplysninger.data;
 
-import no.nav.melosys.domain.kodeverk.Land_iso2;
-import no.nav.melosys.domain.kodeverk.Trygdeavtale_myndighetsland;
-import no.nav.melosys.exception.TekniskException;
-
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 import java.util.Objects;
 
-public class Soeknadsland {
-    public List<String> landkoder = new ArrayList<>();
+import no.nav.melosys.domain.kodeverk.Land_iso2;
+import no.nav.melosys.domain.kodeverk.Trygdeavtale_myndighetsland;
+import no.nav.melosys.exception.TekniskException;
 
-    public boolean erUkjenteEllerAlleEosLand;
+public class Soeknadsland {
+    private List<String> landkoder = new ArrayList<>();
+
+    private boolean erUkjenteEllerAlleEosLand;
 
     public Soeknadsland() {
     }
@@ -35,5 +35,21 @@ public class Soeknadsland {
             throw new TekniskException("Trygdeavtale kan kun ha et søknadsland, denne har: " + landkoder.size());
         }
         return landkoder.isEmpty() ? null : Trygdeavtale_myndighetsland.valueOf(landkoder.get(0));
+    }
+
+    public List<String> getLandkoder() {
+        return landkoder;
+    }
+
+    public void setLandkoder(List<String> landkoder) {
+        this.landkoder = landkoder;
+    }
+
+    public boolean isErUkjenteEllerAlleEosLand() {
+        return erUkjenteEllerAlleEosLand;
+    }
+
+    public void setErUkjenteEllerAlleEosLand(boolean isUkjenteEllerAlleEosLand) {
+        this.erUkjenteEllerAlleEosLand = isUkjenteEllerAlleEosLand;
     }
 }

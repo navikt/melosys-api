@@ -34,7 +34,7 @@ public class VurderInngangsvilkaar implements StegBehandler {
 
         if (inngangsvilkaarService.skalVurdereInngangsvilkår(behandling)) {
             var søknadsland = behandling.hentSøknadsLand();
-            var erUkjenteEllerAlleEosLand = behandling.getMottatteOpplysninger().getMottatteOpplysningerData().soeknadsland.erUkjenteEllerAlleEosLand;
+            var erUkjenteEllerAlleEosLand = behandling.getMottatteOpplysninger().getMottatteOpplysningerData().soeknadsland.isErUkjenteEllerAlleEosLand();
             var periode = behandling.hentPeriode();
 
             boolean kvalifisererForEF_883_2004 = inngangsvilkaarService.vurderOgLagreInngangsvilkår(behandlingID, søknadsland, erUkjenteEllerAlleEosLand, periode);
