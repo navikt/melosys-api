@@ -1,6 +1,7 @@
 package no.nav.melosys.service.medlemskapsperiode
 
 import io.getunleash.FakeUnleash
+import io.kotest.assertions.throwables.shouldNotThrow
 import io.kotest.assertions.throwables.shouldThrow
 import io.kotest.matchers.collections.shouldBeEmpty
 import io.kotest.matchers.collections.shouldContainExactly
@@ -136,6 +137,7 @@ class MedlemskapsperiodeServiceTest {
         }
     }
 
+
     @Test
     fun opprettMedlemskapsperiode_harFastsattTrygdeavgift_fjernerTrygdeavgiftsperioderOmDeFinnes() {
         val medlemAvFolketrygden = MedlemAvFolketrygden().apply {
@@ -173,6 +175,7 @@ class MedlemskapsperiodeServiceTest {
     fun oppdaterMedlemskapsperiode_medlemskapsperiodeFinnes_oppdateres() {
         val medlemAvFolketrygden = MedlemAvFolketrygden().apply {
             medlemskapsperioder = listOf(Medlemskapsperiode().apply { id = MEDLEMSKAPSPERIODE_ID_1 })
+            behandlingsresultat = lagBehandlingsresultat()
         }
         every { medlemAvFolketrygdenService.hentMedlemAvFolketrygden(BEHANDLING_ID_1) } returns medlemAvFolketrygden
         every { medlemskapsperiodeRepository.save(any()) } returnsArgument 0
@@ -205,6 +208,7 @@ class MedlemskapsperiodeServiceTest {
         val medlemAvFolketrygden = MedlemAvFolketrygden().apply {
             medlemskapsperioder = listOf(Medlemskapsperiode().apply { id = MEDLEMSKAPSPERIODE_ID_1 })
             fastsattTrygdeavgift = FastsattTrygdeavgift()
+            behandlingsresultat = lagBehandlingsresultat()
         }
         every { medlemAvFolketrygdenService.hentMedlemAvFolketrygden(BEHANDLING_ID_1) } returns medlemAvFolketrygden
         every { medlemskapsperiodeRepository.save(any()) } returnsArgument 0
@@ -226,7 +230,103 @@ class MedlemskapsperiodeServiceTest {
     }
 
     @Test
+    fun `opprettMedlemskapsperiode kaster ikke exception når tomDato er null, land er Norge og bestemmelse er 2_1`() {
+        unleash.enable(ToggleName.MELOSYS_FOLKETRYGDEN_2_7)
+        val medlemAvFolketrygden = MedlemAvFolketrygden().apply {
+            behandlingsresultat = Behandlingsresultat().apply {
+                behandling = Behandling().apply {
+                    mottatteOpplysninger = MottatteOpplysninger().apply {
+                        mottatteOpplysningerData = SøknadNorgeEllerUtenforEØS().apply {
+                            soeknadsland = Soeknadsland(listOf(Land_iso2.NO.kode), false)
+                        }
+                    }
+                }
+            }
+        }
+        every { medlemAvFolketrygdenService.hentMedlemAvFolketrygden(BEHANDLING_ID_1) } returns medlemAvFolketrygden
+        every { medlemskapsperiodeRepository.save(any()) } returnsArgument 0
+
+
+        medlemskapsperiodeService.opprettMedlemskapsperiode(
+            BEHANDLING_ID_1,
+            NÅ,
+            null,
+            InnvilgelsesResultat.AVSLAATT,
+            Trygdedekninger.FTRL_2_9_FØRSTE_LEDD_A_HELSE,
+            Folketrygdloven_kap2_bestemmelser.FTRL_KAP2_2_1_FØRSTE_LEDD
+        )
+
+
+        verify { medlemskapsperiodeRepository.save(any()) }
+    }
+
+    @Test
+    fun `opprettMedlemskapsperiode kaster exception når tomDato er null`() {
+        unleash.enable(ToggleName.MELOSYS_FTRL_IKKE_YRKESAKTIV)
+        val medlemAvFolketrygden = MedlemAvFolketrygden().apply {
+            behandlingsresultat = Behandlingsresultat().apply {
+                behandling = Behandling().apply {
+                    mottatteOpplysninger = MottatteOpplysninger().apply {
+                        mottatteOpplysningerData = SøknadNorgeEllerUtenforEØS().apply {
+                            soeknadsland = Soeknadsland(listOf(Land_iso2.AU.kode), false)
+                        }
+                    }
+                }
+            }
+        }
+        every { medlemAvFolketrygdenService.hentMedlemAvFolketrygden(BEHANDLING_ID_1) } returns medlemAvFolketrygden
+        every { medlemskapsperiodeRepository.save(any()) } returnsArgument 0
+
+
+        shouldThrow<FunksjonellException> {
+            medlemskapsperiodeService.opprettMedlemskapsperiode(
+                BEHANDLING_ID_1,
+                NÅ,
+                null,
+                InnvilgelsesResultat.AVSLAATT,
+                Trygdedekninger.FTRL_2_9_FØRSTE_LEDD_A_HELSE,
+                PliktigeMedlemskapsbestemmelser.bestemmelser[0]
+            )
+        }.message.shouldContain("Tom-dato er påkrevd")
+    }
+
+    @Test
+    fun `opprettMedlemskapsperiode kaster ikke exception når tomDato er null mens toggle er disabled`() {
+        unleash.disable(ToggleName.MELOSYS_FTRL_IKKE_YRKESAKTIV)
+        val medlemAvFolketrygden = MedlemAvFolketrygden().apply {
+            behandlingsresultat = Behandlingsresultat().apply {
+                behandling = Behandling().apply {
+                    mottatteOpplysninger = MottatteOpplysninger().apply {
+                        mottatteOpplysningerData = SøknadNorgeEllerUtenforEØS().apply {
+                            soeknadsland = Soeknadsland(listOf(Land_iso2.AU.kode), false)
+                        }
+                    }
+                }
+            }
+        }
+        every { medlemAvFolketrygdenService.hentMedlemAvFolketrygden(BEHANDLING_ID_1) } returns medlemAvFolketrygden
+        every { medlemskapsperiodeRepository.save(any()) } returnsArgument 0
+
+
+        shouldNotThrow<FunksjonellException> {
+            medlemskapsperiodeService.opprettMedlemskapsperiode(
+                BEHANDLING_ID_1,
+                NÅ,
+                null,
+                InnvilgelsesResultat.AVSLAATT,
+                Trygdedekninger.FTRL_2_9_FØRSTE_LEDD_A_HELSE,
+                PliktigeMedlemskapsbestemmelser.bestemmelser[0]
+            )
+        }
+    }
+
+    @Test
     fun oppdaterMedlemskapsperiode_ugyldigTrygdedekning_kasterException() {
+        every { medlemAvFolketrygdenService.hentMedlemAvFolketrygden(BEHANDLING_ID_1) } returns MedlemAvFolketrygden().apply {
+            medlemskapsperioder = mutableListOf(Medlemskapsperiode().apply { id = MEDLEMSKAPSPERIODE_ID_1 })
+            behandlingsresultat = lagBehandlingsresultat()
+        }
+
         shouldThrow<FunksjonellException> {
             medlemskapsperiodeService.oppdaterMedlemskapsperiode(
                 BEHANDLING_ID_1,
@@ -242,6 +342,11 @@ class MedlemskapsperiodeServiceTest {
 
     @Test
     fun oppdaterMedlemskapsperiode_tomDatoErFørFomDato_kasterException() {
+        every { medlemAvFolketrygdenService.hentMedlemAvFolketrygden(BEHANDLING_ID_1) } returns MedlemAvFolketrygden().apply {
+            medlemskapsperioder = mutableListOf(Medlemskapsperiode().apply { id = MEDLEMSKAPSPERIODE_ID_1 })
+            behandlingsresultat = lagBehandlingsresultat()
+        }
+
         shouldThrow<FunksjonellException> {
             medlemskapsperiodeService.oppdaterMedlemskapsperiode(
                 BEHANDLING_ID_1,
@@ -257,6 +362,11 @@ class MedlemskapsperiodeServiceTest {
 
     @Test
     fun oppdaterMedlemskapsperiode_utenTrygdedekning_kasterFeil() {
+        every { medlemAvFolketrygdenService.hentMedlemAvFolketrygden(BEHANDLING_ID_1) } returns MedlemAvFolketrygden().apply {
+            medlemskapsperioder = mutableListOf(Medlemskapsperiode().apply { id = MEDLEMSKAPSPERIODE_ID_1 })
+            behandlingsresultat = lagBehandlingsresultat()
+        }
+
         shouldThrow<FunksjonellException> {
             medlemskapsperiodeService.oppdaterMedlemskapsperiode(
                 BEHANDLING_ID_1,
@@ -272,6 +382,11 @@ class MedlemskapsperiodeServiceTest {
 
     @Test
     fun oppdaterMedlemskapsperiode_utenBestemmelse_kasterFeil() {
+        every { medlemAvFolketrygdenService.hentMedlemAvFolketrygden(BEHANDLING_ID_1) } returns MedlemAvFolketrygden().apply {
+            medlemskapsperioder = mutableListOf(Medlemskapsperiode().apply { id = MEDLEMSKAPSPERIODE_ID_1 })
+            behandlingsresultat = lagBehandlingsresultat()
+        }
+
         shouldThrow<FunksjonellException> {
             medlemskapsperiodeService.oppdaterMedlemskapsperiode(
                 BEHANDLING_ID_1,
@@ -289,8 +404,8 @@ class MedlemskapsperiodeServiceTest {
     fun oppdaterMedlemskapsperiode_finnerIkkeMedlemskapsperiode_kasterException() {
         every { medlemAvFolketrygdenService.hentMedlemAvFolketrygden(BEHANDLING_ID_1) } returns MedlemAvFolketrygden().apply {
             medlemskapsperioder = mutableListOf(Medlemskapsperiode().apply { id = MEDLEMSKAPSPERIODE_ID_1 })
+            behandlingsresultat = lagBehandlingsresultat()
         }
-
 
         shouldThrow<FunksjonellException> {
             medlemskapsperiodeService.oppdaterMedlemskapsperiode(
@@ -494,12 +609,12 @@ class MedlemskapsperiodeServiceTest {
 
     @Test
     fun slettMedlemskapsperiode_finnerIkkeMedlemskapsperiode_kasterException() {
-        every { medlemAvFolketrygdenService.hentMedlemAvFolketrygden(1L) } returns MedlemAvFolketrygden().apply {
-            medlemskapsperioder = mutableListOf(Medlemskapsperiode().apply { id = 1L })
+        every { medlemAvFolketrygdenService.hentMedlemAvFolketrygden(BEHANDLING_ID_1) } returns MedlemAvFolketrygden().apply {
+            medlemskapsperioder = mutableListOf(Medlemskapsperiode().apply { id = MEDLEMSKAPSPERIODE_ID_1 })
         }
 
 
-        shouldThrow<FunksjonellException> { medlemskapsperiodeService.slettMedlemskapsperiode(1L, 2L) }
+        shouldThrow<FunksjonellException> { medlemskapsperiodeService.slettMedlemskapsperiode(BEHANDLING_ID_1, 2L) }
             .message.shouldBe("Finner ingen medlemskapsperiode med id 2 for behandling 1")
     }
 
@@ -588,5 +703,16 @@ class MedlemskapsperiodeServiceTest {
 
         medlemskapsperiodeService.hentGyldigeTrygdedekninger()
             .shouldContainExactly(MedlemskapsperiodeService.GYLDIGE_TRYGDEDEKNINGER_2_8)
+    }
+
+    private fun lagBehandlingsresultat(): Behandlingsresultat = Behandlingsresultat().apply {
+        behandling = Behandling().apply {
+            id = BEHANDLING_ID_1
+            mottatteOpplysninger = MottatteOpplysninger().apply {
+                mottatteOpplysningerData = SøknadNorgeEllerUtenforEØS().apply {
+                    soeknadsland = Soeknadsland(listOf(Land_iso2.AU.kode), false)
+                }
+            }
+        }
     }
 }
