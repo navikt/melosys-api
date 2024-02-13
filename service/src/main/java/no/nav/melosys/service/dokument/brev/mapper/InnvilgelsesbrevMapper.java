@@ -56,7 +56,7 @@ public final class InnvilgelsesbrevMapper implements BrevDataMapper {
         BrevDataInnvilgelse brevDataInnvilgelse = (BrevDataInnvilgelse) brevdata;
 
         VedleggMapper vedleggMapper = new VedleggMapper(behandling, resultat);
-        vedleggMapper.map(brevDataInnvilgelse.vedleggA1);
+        vedleggMapper.map(brevDataInnvilgelse.getVedleggA1());
 
         Fag fag = mapFag(behandling, resultat, brevDataInnvilgelse);
 
@@ -70,20 +70,20 @@ public final class InnvilgelsesbrevMapper implements BrevDataMapper {
         fag.setBehandlingstype(BehandlingstypeKodeMapper.hentBehandlingstypeKode(behandling));
         fag.setSakstype(SakstypeKode.valueOf(behandling.getFagsak().getType().getKode()));
 
-        AvklartVirksomhet hovedvirksomhet = brevdata.hovedvirksomhet;
+        AvklartVirksomhet hovedvirksomhet = brevdata.getHovedvirksomhet();
         if (hovedvirksomhet.erArbeidsgiver()) {
             fag.setArbeidsgiver(hovedvirksomhet.navn);
         }
         fag.setYrkesaktivitet(YrkesaktivitetsKode.fromValue(hovedvirksomhet.yrkesaktivitet.getKode()));
 
         fag.setInngangsvilkårbegrunnelse(InngangsvilkaarBegrunnelseKode.EOS_BORGER);
-        fag.setBostedsland(brevdata.bostedsland);
-        fag.setTrygdemyndighetsland(brevdata.trygdemyndighetsland);
+        fag.setBostedsland(brevdata.getBostedsland());
+        fag.setTrygdemyndighetsland(brevdata.getTrygdemyndighetsland());
 
         MottatteOpplysningerData grunnlagData = behandling.getMottatteOpplysninger().getMottatteOpplysningerData();
 
-        fag.setArbeidsland(brevdata.arbeidsland);
-        fag.setFlaggland(brevdata.arbeidsland);
+        fag.setArbeidsland(brevdata.getArbeidsland());
+        fag.setFlaggland(brevdata.getArbeidsland());
 
         if (!grunnlagData.maritimtArbeid.isEmpty()) {
             MaritimtArbeid maritimtArbeid = grunnlagData.maritimtArbeid.iterator().next();
@@ -94,10 +94,10 @@ public final class InnvilgelsesbrevMapper implements BrevDataMapper {
             }
         }
 
-        if (brevdata.avklartMaritimType == Maritimtyper.SKIP) {
+        if (brevdata.getAvklartMaritimType() == Maritimtyper.SKIP) {
             fag.setArbeidPåSkip(JA);
         }
-        if (brevdata.avklartMaritimType == Maritimtyper.SOKKEL) {
+        if (brevdata.getAvklartMaritimType() == Maritimtyper.SOKKEL) {
             fag.setArbeidPåSokkel(JA);
         }
 
@@ -110,7 +110,7 @@ public final class InnvilgelsesbrevMapper implements BrevDataMapper {
             .map(AnmodningsPeriodeSvarTypeKode::valueOf)
             .ifPresent(fag::setAnmodningsPeriodeSvarType);
 
-        Lovvalgsperiode periode = brevdata.lovvalgsperiode;
+        Lovvalgsperiode periode = brevdata.getLovvalgsperiode();
         fag.setLovvalgsbestemmelse(LovvalgsbestemmelseKode.fromValue(periode.getBestemmelse().getKode()));
         fag.setLovvalgsperiode(LovvalgsperiodeType.builder()
             .withFomDato(lagXmlDato(periode.getFom()))
@@ -120,38 +120,38 @@ public final class InnvilgelsesbrevMapper implements BrevDataMapper {
         if (periode.getTilleggsbestemmelse() != null) {
             fag.setTilleggsbestemmelse(TilleggsbestemmelseKode.fromValue(periode.getTilleggsbestemmelse().getKode()));
         }
-        if (brevdata.begrunnelseKode != null) {
-            fag.setEndretPeriodeBegrunnelse(EndretPeriodeBegrunnelseKode.fromValue(brevdata.begrunnelseKode));
+        if (brevdata.getBegrunnelseKode() != null) {
+            fag.setEndretPeriodeBegrunnelse(EndretPeriodeBegrunnelseKode.fromValue(brevdata.getBegrunnelseKode()));
         }
 
         Set<VilkaarBegrunnelse> art121Begrunnelser = resultat.hentVilkaarbegrunnelser(FO_883_2004_ART12_1);
         fag.setArt121Begrunnelse(mapArt121BegrunnelseType(art121Begrunnelser));
 
-        if (brevdata.erTuristskip) {
+        if (brevdata.getErTuristskip()) {
             fag.setVilkår(VilkaarKode.FTRL_2_12_UNNTAK_TURISTSKIP);
         }
 
         Set<VilkaarBegrunnelse> art122Begrunnelser = resultat.hentVilkaarbegrunnelser(FO_883_2004_ART12_2);
         fag.setArt122Begrunnelse(mapArt122BegrunnelseType(art122Begrunnelser));
 
-        fag.setFritekst(brevdata.fritekst);
+        fag.setFritekst(brevdata.getFritekst());
 
         if (resultat.getVedtakMetadata() != null) {
             fag.setVedtaksType(tilVedtaksTypeKode(resultat.getVedtakMetadata().getVedtakstype()));
         }
 
-        if (brevdata.erArt16UtenArt12) {
+        if (brevdata.getErArt16UtenArt12()) {
             fag.setArt16UtenArt12(JA);
         }
 
-        if (brevdata.avklarteMedfolgendeBarn.finnes()) {
+        if (brevdata.getAvklarteMedfolgendeBarn().finnes()) {
             fag.setErVurderingLovvalgBarn(JA);
             fag.setAntallBarnOmfattetAvNorskTrygd(
-                BigInteger.valueOf(brevdata.avklarteMedfolgendeBarn.getFamilieOmfattetAvNorskTrygd().size())
+                BigInteger.valueOf(brevdata.getAvklarteMedfolgendeBarn().getFamilieOmfattetAvNorskTrygd().size())
             );
-            fag.setBarnIkkeOmfattetAvNorskTrygdListe(hentBarnIkkeOmfattetAvNorskTrygd(brevdata.avklarteMedfolgendeBarn));
-            fag.setBarnOmfattetAvNorskTrygdListe(hentBarnOmfattetAvNorskTrygd(brevdata.avklarteMedfolgendeBarn));
-            brevdata.avklarteMedfolgendeBarn.hentBegrunnelseFritekst().ifPresent(fag::setMedfoelgendeBarnFritekst);
+            fag.setBarnIkkeOmfattetAvNorskTrygdListe(hentBarnIkkeOmfattetAvNorskTrygd(brevdata.getAvklarteMedfolgendeBarn()));
+            fag.setBarnOmfattetAvNorskTrygdListe(hentBarnOmfattetAvNorskTrygd(brevdata.getAvklarteMedfolgendeBarn()));
+            brevdata.getAvklarteMedfolgendeBarn().hentBegrunnelseFritekst().ifPresent(fag::setMedfoelgendeBarnFritekst);
         } else {
             fag.setAntallBarnOmfattetAvNorskTrygd(BigInteger.valueOf(0));
         }

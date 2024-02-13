@@ -35,9 +35,8 @@ public class AvslagYrkesaktivMapper implements BrevDataMapper {
         BrevDataAvslagYrkesaktiv brevdata = (BrevDataAvslagYrkesaktiv) brevDataFelles;
         Fag fag = mapFag(behandling, resultat, brevdata);
 
-        if (brevdata.anmodningsperiodeSvar.isPresent()) {
-            brevdata.anmodningsperiodeSvar.ifPresent(aps ->
-                mapArt161AvslagFraAnmodningsperiode(fag, aps));
+        if (brevdata.getAnmodningsperiodeSvar() != null) {
+            mapArt161AvslagFraAnmodningsperiode(fag, brevdata.getAnmodningsperiodeSvar());
         } else {
             mapArt161Avslag(fag, brevdata);
         }
@@ -62,11 +61,11 @@ public class AvslagYrkesaktivMapper implements BrevDataMapper {
             throw new TekniskException("Forholdet er ikke dekket av inngangsvilkårene for 883/2004");
         }
 
-        fag.setForetakNavn(brevData.hovedvirksomhet.navn);
+        fag.setForetakNavn(brevData.getHovedvirksomhet().navn);
         // Frilansaktivitet håndteres ikke i Lev 1
-        fag.setYrkesaktivitet(YrkesaktivitetsKode.fromValue(brevData.yrkesaktivitet.getKode()));
+        fag.setYrkesaktivitet(YrkesaktivitetsKode.fromValue(brevData.getYrkesaktivitet().getKode()));
 
-        fag.setArbeidsland(brevData.arbeidsland);
+        fag.setArbeidsland(brevData.getArbeidsland());
         fag.setLovvalgsperiode(lagLovvalgsperiodeType(resultat));
 
         Set<VilkaarBegrunnelse> art121Begrunnelser = resultat.hentVilkaarbegrunnelser(FO_883_2004_ART12_1);
@@ -81,9 +80,9 @@ public class AvslagYrkesaktivMapper implements BrevDataMapper {
         Set<VilkaarBegrunnelse> art122NormalVirksomhetBegrunnelse = resultat.hentVilkaarbegrunnelser(ART12_2_NORMALT_DRIVER_VIRKSOMHET);
         fag.setArt122NormalVirksomhetBegrunnelse(mapArt122NormalVirksomhetBegrunnelseType(art122NormalVirksomhetBegrunnelse));
 
-        fag.setFritekst(brevData.fritekst);
+        fag.setFritekst(brevData.getFritekst());
 
-        brevData.anmodningsperiodeSvar
+        brevData.getAnmodningsperiodeSvar()
             .map(AnmodningsperiodeSvar::getAnmodningsperiodeSvarType)
             .map(Anmodningsperiodesvartyper::getKode)
             .map(AnmodningsPeriodeSvarTypeKode::valueOf)
