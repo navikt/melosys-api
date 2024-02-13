@@ -20,7 +20,7 @@ import org.springframework.web.context.WebApplicationContext
 @Scope(value = WebApplicationContext.SCOPE_REQUEST)
 class GyldigeInnvilgelsesResultatTjeneste {
 
-    @GetMapping()
+    @GetMapping
     fun hentGyldigeTrygdedekninger(
         @RequestParam("behandlingstype", required = true) behandlingstype: Behandlingstyper
     ): ResponseEntity<List<InnvilgelsesResultat>> {
