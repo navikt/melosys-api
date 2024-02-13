@@ -25,6 +25,7 @@ import java.time.LocalDate
 internal class UtledMedlemskapsperioderTest {
     private val BESTEMMELSE_2_7 = Folketrygdloven_kap2_bestemmelser.FTRL_KAP2_2_7_FØRSTE_LEDD
     private val BESTEMMELSE_2_8 = Folketrygdloven_kap2_bestemmelser.FTRL_KAP2_2_8_FØRSTE_LEDD_A
+    private val BESTEMMELSE_PLIKTIG = Folketrygdloven_kap2_bestemmelser.FTRL_KAP2_2_1_FØRSTE_LEDD
     private val TRYGDEDEKNING_2_7 = Trygdedekninger.FULL_DEKNING_FTRL
     private val TRYGDEDEKNING_2_8 = Trygdedekninger.FTRL_2_9_FØRSTE_LEDD_A_HELSE
     private val MOTTAKSDATO = LocalDate.now()
@@ -38,13 +39,31 @@ internal class UtledMedlemskapsperioderTest {
         }.message.shouldContain("Støtter ikke bestemmelse")
     }
 
+    // Pliktig medlemskap
+    @Test
+    fun lagMedlemskapsperioder_pliktig_innvilgerHelePeriodenMedFullDekningUavhengigAvSøktDekning() {
+        val søknadsperiode = Periode(MOTTAKSDATO.minusYears(3), MOTTAKSDATO.plusYears(3))
+        val dekning = Trygdedekninger.FTRL_2_9_FØRSTE_LEDD_A_HELSE
+        val request = UtledMedlemskapsperioderDto(søknadsperiode, dekning, MOTTAKSDATO, BESTEMMELSE_PLIKTIG)
+
+
+        UtledMedlemskapsperioder.lagMedlemskapsperioder(request)
+            .shouldHaveSize(1)
+            .single().run {
+                fom.shouldBe(søknadsperiode.fom)
+                tom.shouldBe(søknadsperiode.tom)
+                trygdedekning.shouldBe(Trygdedekninger.FULL_DEKNING_FTRL)
+                innvilgelsesresultat.shouldBe(InnvilgelsesResultat.INNVILGET)
+                medlemskapstype.shouldBe(Medlemskapstyper.PLIKTIG)
+            }
+    }
 
     // Frivillig medlemskap etter 2-8
     // Scenario 1
     @Test
     fun lagMedlemskapsperioder2_8_søknadsperiodeStarterPåMottaksdato_genererMedlemskapsperiodeForHelesøknadsperiodeMedOppgittTrygdedekning() {
         val søknadsperiode = Periode(MOTTAKSDATO, MOTTAKSDATO.plusYears(1))
-        val dekning = Trygdedekninger.FULL_DEKNING_FTRL
+        val dekning = Trygdedekninger.FTRL_2_9_FØRSTE_LEDD_C_ANDRE_LEDD_HELSE_PENSJON_SYKE_FORELDREPENGER
         val request = UtledMedlemskapsperioderDto(søknadsperiode, dekning, MOTTAKSDATO, BESTEMMELSE_2_8)
 
 

@@ -5,13 +5,17 @@ import no.nav.melosys.domain.Medlemskapsperiode
 import no.nav.melosys.domain.folketrygden.MedlemAvFolketrygden
 import no.nav.melosys.domain.kodeverk.Folketrygdloven_kap2_bestemmelser
 import no.nav.melosys.domain.kodeverk.InnvilgelsesResultat
+import no.nav.melosys.domain.kodeverk.Land_iso2
 import no.nav.melosys.domain.kodeverk.Trygdedekninger
+import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingstema
+import no.nav.melosys.domain.mottatteopplysninger.SøknadNorgeEllerUtenforEØS
 import no.nav.melosys.exception.FunksjonellException
 import no.nav.melosys.exception.IkkeFunnetException
 import no.nav.melosys.featuretoggle.ToggleName
 import no.nav.melosys.repository.MedlemskapsperiodeRepository
 import no.nav.melosys.service.MedlemAvFolketrygdenService
 import no.nav.melosys.service.avgift.TrygdeavgiftsgrunnlagService
+import no.nav.melosys.service.ftrl.GyldigeTrygdedekningerService
 import no.nav.melosys.service.kontroll.regler.PeriodeRegler
 import no.nav.melosys.service.medl.MedlPeriodeService
 import org.springframework.stereotype.Service
@@ -24,6 +28,7 @@ class MedlemskapsperiodeService(
     private val medlemAvFolketrygdenService: MedlemAvFolketrygdenService,
     private val trygdeavgiftsgrunnlagService: TrygdeavgiftsgrunnlagService,
     private val medlPeriodeService: MedlPeriodeService,
+    private val gyldigeTrygdedekningerService: GyldigeTrygdedekningerService,
     private val unleash: Unleash
 ) {
     @Transactional(readOnly = true)
@@ -37,14 +42,23 @@ class MedlemskapsperiodeService(
     fun opprettMedlemskapsperiode(
         behandlingsresultatID: Long,
         fom: LocalDate?,
-        tom: LocalDate,
+        tom: LocalDate?,
         innvilgelsesResultat: InnvilgelsesResultat?,
         trygdedekning: Trygdedekninger?,
         bestemmelse: Folketrygdloven_kap2_bestemmelser?
     ): Medlemskapsperiode {
-        validerFelt(fom, tom, innvilgelsesResultat, trygdedekning, bestemmelse)
-
         val medlemAvFolketrygden = medlemAvFolketrygdenService.hentMedlemAvFolketrygden(behandlingsresultatID)
+        val søknad = medlemAvFolketrygden.behandlingsresultat.behandling.mottatteOpplysninger.mottatteOpplysningerData as SøknadNorgeEllerUtenforEØS
+
+        validerFelt(
+            medlemAvFolketrygden.behandlingsresultat.behandling.tema,
+            fom,
+            tom,
+            innvilgelsesResultat,
+            trygdedekning,
+            bestemmelse,
+            søknad.soeknadsland.landkoder
+        )
 
         val nyMedlemskapsperiode = Medlemskapsperiode().apply {
             this.tom = tom
@@ -65,14 +79,24 @@ class MedlemskapsperiodeService(
         behandlingsresultatID: Long,
         medlemskapsperiodeID: Long,
         fom: LocalDate?,
-        tom: LocalDate,
+        tom: LocalDate?,
         innvilgelsesResultat: InnvilgelsesResultat?,
         trygdedekning: Trygdedekninger?,
         bestemmelse: Folketrygdloven_kap2_bestemmelser?
     ): Medlemskapsperiode {
-        validerFelt(fom, tom, innvilgelsesResultat, trygdedekning, bestemmelse)
-
         val medlemAvFolketrygden = medlemAvFolketrygdenService.hentMedlemAvFolketrygden(behandlingsresultatID)
+        val søknad = medlemAvFolketrygden.behandlingsresultat.behandling.mottatteOpplysninger.mottatteOpplysningerData as SøknadNorgeEllerUtenforEØS
+
+        validerFelt(
+            medlemAvFolketrygden.behandlingsresultat.behandling.tema,
+            fom,
+            tom,
+            innvilgelsesResultat,
+            trygdedekning,
+            bestemmelse,
+            søknad.soeknadsland.landkoder
+        )
+
         val medlemskapsperiode = medlemAvFolketrygden.medlemskapsperioder.firstOrNull { it.id == medlemskapsperiodeID }
             ?: throw IkkeFunnetException("Behandling $behandlingsresultatID har ingen medlemskapsperiode med id $medlemskapsperiodeID")
 
@@ -93,15 +117,25 @@ class MedlemskapsperiodeService(
         medlemAvFolketrygden.fastsattTrygdeavgift?.let { trygdeavgiftsgrunnlagService.fjernTrygdeavgiftsperioderOmDeFinnes(it) }
 
     private fun validerFelt(
+        behandlingstema: Behandlingstema,
         fom: LocalDate?,
-        tom: LocalDate,
+        tom: LocalDate?,
         innvilgelsesResultat: InnvilgelsesResultat?,
         trygdedekning: Trygdedekninger?,
-        bestemmelse: Folketrygdloven_kap2_bestemmelser?
+        bestemmelse: Folketrygdloven_kap2_bestemmelser?,
+        land: List<String>
     ) {
-        if (fom == null || innvilgelsesResultat == null || bestemmelse == null || trygdedekning == null) {
+        val nullTilOgMedDatoErTillatt =
+            Land_iso2.NO.kode in land && land.size == 1 && bestemmelse in listOf(
+                Folketrygdloven_kap2_bestemmelser.FTRL_KAP2_2_1_FØRSTE_LEDD,
+                Folketrygdloven_kap2_bestemmelser.FTRL_KAP2_2_1_FJERDE_LEDD
+            )
+
+        if (unleash.isEnabled(ToggleName.MELOSYS_FTRL_IKKE_YRKESAKTIV) && tom == null && !nullTilOgMedDatoErTillatt) {
+            throw FunksjonellException("Tom-dato er påkrevd")
+        } else if (fom == null || innvilgelsesResultat == null || bestemmelse == null || trygdedekning == null) {
             throw FunksjonellException("Fom-dato, innvilgelsesresultat, bestemmelse og trygdedekning er påkrevd")
-        } else if (!hentGyldigeTrygdedekninger().contains(trygdedekning)) {
+        } else if (trygdedekning !in gyldigeTrygdedekningerService.hentTrygdedekninger(behandlingstema)) {
             throw FunksjonellException("Trygedekning $trygdedekning støttes ikke for en medlemskapsperiode")
         } else if (PeriodeRegler.feilIPeriode(fom, tom)) {
             throw FunksjonellException("Tom-dato kan ikke være før fom-dato")
@@ -183,23 +217,5 @@ class MedlemskapsperiodeService(
         val medlemAvFolketrygden = medlemAvFolketrygdenService.hentMedlemAvFolketrygden(behandlingsresultatID)
         medlemAvFolketrygden.medlemskapsperioder.clear()
         fjernTrygdeavgiftsperioderOmDeFinnes(medlemAvFolketrygden)
-    }
-
-    fun hentGyldigeTrygdedekninger(): Collection<Trygdedekninger> =
-        if (unleash.isEnabled(ToggleName.MELOSYS_FOLKETRYGDEN_2_7)) GYLDIGE_TRYGDEDEKNINGER_2_7 + GYLDIGE_TRYGDEDEKNINGER_2_8 else GYLDIGE_TRYGDEDEKNINGER_2_8
-
-    companion object {
-        val GYLDIGE_TRYGDEDEKNINGER_2_7 = setOf(
-            Trygdedekninger.FULL_DEKNING_FTRL,
-            Trygdedekninger.FTRL_2_7_TREDJE_LEDD_B_HELSE_SYKE_FORELDREPENGER,
-            Trygdedekninger.FTRL_2_7A_ANDRE_LEDD_B_HELSE_SYKE_FORELDREPENGER
-        )
-        val GYLDIGE_TRYGDEDEKNINGER_2_8 = setOf(
-            Trygdedekninger.FTRL_2_9_FØRSTE_LEDD_A_HELSE,
-            Trygdedekninger.FTRL_2_9_FØRSTE_LEDD_A_ANDRE_LEDD_HELSE_SYKE_FORELDREPENGER,
-            Trygdedekninger.FTRL_2_9_FØRSTE_LEDD_B_PENSJON,
-            Trygdedekninger.FTRL_2_9_FØRSTE_LEDD_C_HELSE_PENSJON,
-            Trygdedekninger.FTRL_2_9_FØRSTE_LEDD_C_ANDRE_LEDD_HELSE_PENSJON_SYKE_FORELDREPENGER
-        )
     }
 }
