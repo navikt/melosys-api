@@ -1,14 +1,15 @@
 package no.nav.melosys.tjenester.gui.kodeverk;
 
-import java.util.*;
+import java.util.Collection;
+import java.util.HashMap;
+import java.util.Map;
 import java.util.stream.Stream;
 
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
-import no.nav.melosys.domain.kodeverk.InnvilgelsesResultat;
 import no.nav.melosys.domain.kodeverk.Kodeverk;
-import no.nav.melosys.domain.kodeverk.Vilkaar;
-import no.nav.melosys.domain.kodeverk.begrunnelser.folketrygdloven.*;
+import no.nav.melosys.domain.kodeverk.begrunnelser.folketrygdloven.Ftrl_2_7_begrunnelser;
+import no.nav.melosys.domain.kodeverk.begrunnelser.folketrygdloven.Ftrl_2_8_naer_tilknytning_norge_begrunnelser;
 import no.nav.melosys.service.kodeverk.KodeDto;
 import no.nav.security.token.support.core.api.Protected;
 import org.springframework.context.annotation.Scope;
@@ -25,16 +26,10 @@ import org.springframework.web.context.WebApplicationContext;
 @Scope(value = WebApplicationContext.SCOPE_REQUEST)
 public class MelosysInterntKodeverkTjeneste {
 
-    private static final List<InnvilgelsesResultat> gyldigeInnvilgelsesResultat = Arrays.stream(InnvilgelsesResultat.values())
-        .filter(kode -> !kode.equals(InnvilgelsesResultat.DELVIS_INNVILGET))
-        .toList();
-
     @GetMapping("/folketrygden")
     @ApiOperation(value = "Henter koder fra internt kodeverk til saksbehandling av folketrygden-saker")
     public ResponseEntity<Map<String, Object>> hentKoderTilFolketrygden() {
         Map<String, Object> kodeverdier = new HashMap<>();
-        kodeverdier.put(Vilkaar.class.getSimpleName(), tilKodeDto(Vilkaar.values()));
-        kodeverdier.put(InnvilgelsesResultat.class.getSimpleName(), tilKodeDto(gyldigeInnvilgelsesResultat));
         kodeverdier.put("begrunnelser", lagBegrunnelser());
         return ResponseEntity.ok(kodeverdier);
     }
@@ -42,15 +37,8 @@ public class MelosysInterntKodeverkTjeneste {
     private Map<String, Collection<KodeDto>> lagBegrunnelser() {
         Map<String, Collection<KodeDto>> begrunnelser = new HashMap<>();
         begrunnelser.put(Ftrl_2_8_naer_tilknytning_norge_begrunnelser.class.getSimpleName(), tilKodeDto(Ftrl_2_8_naer_tilknytning_norge_begrunnelser.values()));
-        begrunnelser.put(Ftrl_2_8_forutgaaende_trygdetid_begrunnelser.class.getSimpleName(), tilKodeDto(Ftrl_2_8_forutgaaende_trygdetid_begrunnelser.values()));
-        begrunnelser.put(Medfolgende_barn_begrunnelser_ftrl.class.getSimpleName(), tilKodeDto(Medfolgende_barn_begrunnelser_ftrl.values()));
-        begrunnelser.put(Medfolgende_ektefelle_samboer_begrunnelser_ftrl.class.getSimpleName(), tilKodeDto(Medfolgende_ektefelle_samboer_begrunnelser_ftrl.values()));
         begrunnelser.put(Ftrl_2_7_begrunnelser.class.getSimpleName(), tilKodeDto(Ftrl_2_7_begrunnelser.values()));
         return begrunnelser;
-    }
-
-    private <T extends Kodeverk> Collection<KodeDto> tilKodeDto(Collection<T> kodeverk) {
-        return tilKodeDto(kodeverk.toArray(new Kodeverk[0]));
     }
 
     private Collection<KodeDto> tilKodeDto(Kodeverk... kodeverk) {
