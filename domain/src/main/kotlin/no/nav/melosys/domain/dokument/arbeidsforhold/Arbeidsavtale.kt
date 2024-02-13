@@ -1,7 +1,6 @@
 package no.nav.melosys.domain.dokument.arbeidsforhold
 
 import com.fasterxml.jackson.annotation.JsonIgnore
-import com.fasterxml.jackson.annotation.JsonProperty
 import com.fasterxml.jackson.annotation.JsonView
 import no.nav.melosys.domain.ErPeriode
 import no.nav.melosys.domain.HarPeriode
@@ -20,12 +19,12 @@ class Arbeidsavtale(
     @JsonView(DokumentView.Database::class) val sisteLoennsendringsdato: LocalDate? = null,
     val beregnetAntallTimerPrUke: BigDecimal? = null,
     val endringsdatoStillingsprosent: LocalDate? = null,
-    @JsonProperty("fartsomraade") val fartsområde: Fartsomraade? = null,
     val skipsregister: Skipsregister? = null,
     val skipstype: Skipstype? = null,
     val maritimArbeidsavtale: Boolean? = null,
     val beregnetStillingsprosent: BigDecimal? = null,
-    val antallTimerGammeltAa: BigDecimal? = null
+    val antallTimerGammeltAa: BigDecimal? = null,
+    val fartsomraade: Fartsomraade? = null
 ) : HarPeriode {
 
     @JsonIgnore

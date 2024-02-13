@@ -90,7 +90,7 @@ class ArbeidsforholdKonverter(
         if (arbeidsavtalerSrc == null) return emptyList()
         return arbeidsavtalerSrc.map {
             Arbeidsavtale(
-                yrke = Yrke(term = kodeOppslag.getTermFraKodeverk(FellesKodeverk.YRKER, it.yrke())),
+                yrke = Yrke(term = kodeOppslag.getTermFraKodeverk(FellesKodeverk.YRKER, it.yrke()), kode = it.yrke()),
                 arbeidstidsordning = Arbeidstidsordning().apply { kode = it.arbeidstidsordning },
                 avloenningstype = "", // Finnes ikke i nytt rest api
                 gyldighetsperiode = getPeriode(it.gyldighetsperiode()),
@@ -104,7 +104,7 @@ class ArbeidsforholdKonverter(
                 maritimArbeidsavtale = false,
                 skipsregister = null,
                 skipstype = null,
-                fartsområde = null)
+                fartsomraade = null)
         }
     }
 
