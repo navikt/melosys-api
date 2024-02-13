@@ -4,6 +4,7 @@ import no.nav.melosys.domain.FellesKodeverk
 import no.nav.melosys.domain.dokument.felles.AbstraktKodeverkHjelper
 
 
-class Arbeidstidsordning(val kode: String) : AbstraktKodeverkHjelper() {
+
+class Arbeidstidsordning : AbstraktKodeverkHjelper() {
     override fun hentKodeverkNavn(): FellesKodeverk = FellesKodeverk.ARBEIDSTIDSORDNINGER
 }
