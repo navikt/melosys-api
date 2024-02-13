@@ -96,7 +96,6 @@ object UtledMedlemskapsperioder {
             lagPeriode(
                 dto.søknadsperiode,
                 Trygdedekninger.FULL_DEKNING_FTRL,
-                dto.arbeidsland,
                 InnvilgelsesResultat.INNVILGET,
                 dto.bestemmelse
             )
