@@ -19,7 +19,7 @@ import org.springframework.web.context.WebApplicationContext
 class FtrlBestemmelseTjeneste(private val bestemmelserFraBehandlingstema: BestemmelserFraBehandlingstema) {
 
     @GetMapping("/ftrl/bestemmelser/")
-    fun hentBestemmelser(@RequestParam("behandlingstema") behandlingstema: Behandlingstema?): ResponseEntity<FtrlBestemmelserDto> {
+    fun hentBestemmelser(@RequestParam("behandlingstema", required = false) behandlingstema: Behandlingstema?): ResponseEntity<FtrlBestemmelserDto> {
         return ResponseEntity.ok(FtrlBestemmelserDto(bestemmelserFraBehandlingstema.bestemmelserFraBehandlingstema(behandlingstema)))
     }
 
