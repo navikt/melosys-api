@@ -17,7 +17,7 @@ class BrevDataA1(
     var hovedvirksomhet: AvklartVirksomhet? = null,
     var arbeidssteder: List<Arbeidssted>? = null,
     var arbeidsland: Collection<Land_iso2>? = null,
-    var erUkjenteEllerAlleEosLand: Boolean = false,
+    var ukjenteEllerAlleEosLand: Boolean = false,
     var bostedsadresse: StrukturertAdresse? = null,
     var bivirksomheter: Collection<AvklartVirksomhet>? = null
 ) : BrevData(saksbehandler, fritekst, begrunnelseKode)

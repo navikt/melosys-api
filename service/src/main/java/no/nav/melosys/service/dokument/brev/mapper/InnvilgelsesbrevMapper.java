@@ -127,7 +127,7 @@ public final class InnvilgelsesbrevMapper implements BrevDataMapper {
         Set<VilkaarBegrunnelse> art121Begrunnelser = resultat.hentVilkaarbegrunnelser(FO_883_2004_ART12_1);
         fag.setArt121Begrunnelse(mapArt121BegrunnelseType(art121Begrunnelser));
 
-        if (brevdata.getErTuristskip()) {
+        if (brevdata.getTuristskip()) {
             fag.setVilkår(VilkaarKode.FTRL_2_12_UNNTAK_TURISTSKIP);
         }
 
@@ -140,7 +140,7 @@ public final class InnvilgelsesbrevMapper implements BrevDataMapper {
             fag.setVedtaksType(tilVedtaksTypeKode(resultat.getVedtakMetadata().getVedtakstype()));
         }
 
-        if (brevdata.getErArt16UtenArt12()) {
+        if (brevdata.getArt16UtenArt12()) {
             fag.setArt16UtenArt12(JA);
         }
 

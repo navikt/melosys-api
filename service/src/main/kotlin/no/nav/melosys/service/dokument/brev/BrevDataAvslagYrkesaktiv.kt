@@ -12,7 +12,7 @@ class BrevDataAvslagYrkesaktiv(
     var arbeidsland: String? = null
     var hovedvirksomhet: AvklartVirksomhet? = null
     var yrkesaktivitet: Yrkesaktivitetstyper? = null
-    var anmodningsperiodeSvar: AnmodningsperiodeSvar? = null // Kotlin uses nullability instead of Optional
+    var anmodningsperiodeSvar: AnmodningsperiodeSvar? = null
     var art16Vilkaar: Vilkaarsresultat? = null
-    var erArt16UtenArt12: Boolean = false
+    var art16UtenArt12: Boolean = false
 }

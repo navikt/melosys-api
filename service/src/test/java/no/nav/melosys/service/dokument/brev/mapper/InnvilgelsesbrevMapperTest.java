@@ -97,7 +97,7 @@ class InnvilgelsesbrevMapperTest {
         brevdataInnvilgelse.vedleggA1 = brevdataA1;
         brevdataInnvilgelse.lovvalgsperiode = lagLovvalgsperiode();
         brevdataInnvilgelse.avklartMaritimType = Maritimtyper.SKIP;
-        brevdataInnvilgelse.erTuristskip = true;
+        brevdataInnvilgelse.turistskip = true;
         brevdataInnvilgelse.hovedvirksomhet = virksomhet;
         brevdataInnvilgelse.arbeidsland = "Sverige";
         brevdataInnvilgelse.setAnmodningsperiodesvar(lagAnmodningsperiodeSvarInnvilgelse());

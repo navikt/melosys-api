@@ -18,8 +18,8 @@ class BrevDataInnvilgelse(brevbestillingDto: BrevbestillingDto, saksbehandler: S
     var trygdemyndighetsland: String? = null
     var vedleggA1: BrevDataA1? = null
     var personNavn: String? = null
-    var erArt16UtenArt12: Boolean = false
-    var erTuristskip: Boolean = false
+    var art16UtenArt12: Boolean = false
+    var turistskip: Boolean = false
     var avklarteMedfolgendeBarn: AvklarteMedfolgendeFamilie? = null
 
     fun getAnmodningsperiodesvar(): Optional<AnmodningsperiodeSvar> {

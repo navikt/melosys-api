@@ -215,7 +215,7 @@ internal class A1MapperTest {
 
     @Test
     fun mapTilBrevXML_harUkjentEllerIkkeOppgittArbeidsted_brekkerAdresseOverFlereLinjer() {
-        brevData.erUkjenteEllerAlleEosLand = true
+        brevData.ukjenteEllerAlleEosLand = true
         brevData.arbeidssteder = emptyList()
         brevData.arbeidsland = emptyList()
         val a1 = mapper.mapA1(behandling, behandlingsresultat, brevData)

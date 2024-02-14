@@ -111,8 +111,8 @@ class BrevDataByggerInnvilgelseFlereLandTest {
         BrevDataGrunnlag brevdataressurser = lagBrevressurser();
         BrevDataInnvilgelseFlereLand brevData = (BrevDataInnvilgelseFlereLand) brevDataByggerInnvilgelse.lag(brevdataressurser, saksbehandler);
         assertThat(brevData.saksbehandler).isEqualTo(saksbehandler);
-        assertThat(brevData.harAvklartMaritimTypeSokkel).isTrue();
-        assertThat(brevData.harAvklartMaritimTypeSkip).isFalse();
+        assertThat(brevData.avklartMaritimTypeSokkel).isTrue();
+        assertThat(brevData.avklartMaritimTypeSkip).isFalse();
     }
 
     @Test
@@ -121,8 +121,8 @@ class BrevDataByggerInnvilgelseFlereLandTest {
 
         BrevDataGrunnlag brevdataressurser = lagBrevressurser();
         BrevDataInnvilgelseFlereLand brevData = (BrevDataInnvilgelseFlereLand) brevDataByggerInnvilgelse.lag(brevdataressurser, saksbehandler);
-        assertThat(brevData.harAvklartMaritimTypeSokkel).isFalse();
-        assertThat(brevData.harAvklartMaritimTypeSkip).isFalse();
+        assertThat(brevData.avklartMaritimTypeSokkel).isFalse();
+        assertThat(brevData.avklartMaritimTypeSkip).isFalse();
         assertThat(brevData.trydemyndighetsland).isNull();
     }
 

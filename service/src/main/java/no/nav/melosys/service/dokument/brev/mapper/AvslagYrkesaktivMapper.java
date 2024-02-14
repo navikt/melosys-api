@@ -11,7 +11,6 @@ import no.nav.dok.melosysbrev._000081.LovvalgsperiodeType;
 import no.nav.dok.melosysbrev._000081.ObjectFactory;
 import no.nav.dok.melosysbrev.felles.melosys_felles.*;
 import no.nav.melosys.domain.*;
-import no.nav.melosys.domain.kodeverk.Anmodningsperiodesvartyper;
 import no.nav.melosys.domain.kodeverk.Sakstyper;
 import no.nav.melosys.domain.kodeverk.begrunnelser.Art16_1_avslag;
 import no.nav.melosys.exception.TekniskException;
@@ -82,13 +81,9 @@ public class AvslagYrkesaktivMapper implements BrevDataMapper {
 
         fag.setFritekst(brevData.getFritekst());
 
-        brevData.getAnmodningsperiodeSvar()
-            .map(AnmodningsperiodeSvar::getAnmodningsperiodeSvarType)
-            .map(Anmodningsperiodesvartyper::getKode)
-            .map(AnmodningsPeriodeSvarTypeKode::valueOf)
-            .ifPresent(fag::setAnmodningsPeriodeSvarType);
+        fag.setAnmodningsPeriodeSvarType(AnmodningsPeriodeSvarTypeKode.valueOf(brevData.getAnmodningsperiodeSvar().getAnmodningsperiodeSvarType().getKode()));
 
-        if (brevData.erArt16UtenArt12) {
+        if (brevData.getArt16UtenArt12()) {
             fag.setArt16UtenArt12(JA);
         }
 
@@ -96,7 +91,7 @@ public class AvslagYrkesaktivMapper implements BrevDataMapper {
     }
 
     void mapArt161Avslag(Fag fag, BrevDataAvslagYrkesaktiv brevdata) {
-        Vilkaarsresultat vilkaarsresultat = brevdata.art16Vilkaar;
+        Vilkaarsresultat vilkaarsresultat = brevdata.getArt16Vilkaar();
         Set<VilkaarBegrunnelse> art161Begrunnelser = vilkaarsresultat.getBegrunnelser();
         Art161AvslagBegrunnelse art161AvslagBegrunnelser = lagTomArt161AvslagBegrunnelse();
         for (VilkaarBegrunnelse vilkaarBegrunnelse : art161Begrunnelser) {

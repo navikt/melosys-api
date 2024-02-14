@@ -113,7 +113,7 @@ class BrevDataByggerAvslagYrkesaktivTest {
         assertThat(brevData.hovedvirksomhet.erSelvstendigForetak()).isTrue();
         assertThat(brevData.arbeidsland).isEqualTo(Landkoder.DE.getBeskrivelse());
         assertThat(brevData.anmodningsperiodeSvar).isPresent().get().usingRecursiveComparison().isEqualTo(anmodningsperiodeSvar);
-        assertThat(brevData.erArt16UtenArt12).isTrue();
+        assertThat(brevData.art16UtenArt12).isTrue();
     }
 
     private AnmodningsperiodeSvar lagAnmodningsperiodeSvarAvslag() {

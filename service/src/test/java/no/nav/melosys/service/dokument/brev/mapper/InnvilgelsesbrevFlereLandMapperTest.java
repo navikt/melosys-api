@@ -67,14 +67,14 @@ class InnvilgelsesbrevFlereLandMapperTest {
 
         BrevDataInnvilgelseFlereLand brevdataInnvilgelse = new BrevDataInnvilgelseFlereLand(new BrevbestillingDto(), "SAKSBEHANDLER");
         brevdataInnvilgelse.lovvalgsperiode = lagLovvalgsperiode();
-        brevdataInnvilgelse.harAvklartMaritimTypeSkip = true;
-        brevdataInnvilgelse.harAvklartMaritimTypeSokkel = false;
+        brevdataInnvilgelse.avklartMaritimTypeSkip = true;
+        brevdataInnvilgelse.avklartMaritimTypeSokkel = false;
         brevdataInnvilgelse.arbeidsgivere = norskeVirksomheter;
         brevdataInnvilgelse.bostedsland = "Norge";
         brevdataInnvilgelse.trydemyndighetsland = Landkoder.DE;
         brevdataInnvilgelse.alleArbeidsland = List.of("Sverige", "Danmark", "Finland", "Spania");
-        brevdataInnvilgelse.erMarginaltArbeid = true;
-        brevdataInnvilgelse.erBegrensetPeriode = true;
+        brevdataInnvilgelse.marginaltArbeid = true;
+        brevdataInnvilgelse.begrensetPeriode = true;
         brevdataInnvilgelse.vedleggA1 = lagBrevdataA1(norskeVirksomheter);
         return brevdataInnvilgelse;
     }

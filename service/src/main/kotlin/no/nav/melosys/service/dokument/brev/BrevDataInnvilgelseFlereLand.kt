@@ -10,13 +10,13 @@ class BrevDataInnvilgelseFlereLand(
 ) : BrevData(brevbestillingDto, saksbehandler) {
     var arbeidsgivere: Collection<AvklartVirksomhet> = emptyList()
     var alleArbeidsland: List<String> = emptyList()
-    var erUkjenteEllerAlleEosLand: Boolean = false
+    var ukjenteEllerAlleEosLand: Boolean = false
     var lovvalgsperiode: Lovvalgsperiode? = null
-    var harAvklartMaritimTypeSokkel: Boolean = false
-    var harAvklartMaritimTypeSkip: Boolean = false
+    var avklartMaritimTypeSokkel: Boolean = false
+    var avklartMaritimTypeSkip: Boolean = false
     var bostedsland: String? = null
-    var erBegrensetPeriode: Boolean = false
-    var erMarginaltArbeid: Boolean = false
+    var begrensetPeriode: Boolean = false
+    var marginaltArbeid: Boolean = false
     var trydemyndighetsland: Landkoder? = null
 
     var vedleggA1: BrevDataA1? = null

@@ -43,18 +43,18 @@ public class BrevDataByggerAvslagYrkesaktiv implements BrevDataBygger {
             throw new TekniskException(Kontroll_begrunnelser.IKKE_KUN_EN_VIRKSOMHET.getBeskrivelse());
         }
 
-        brevData.hovedvirksomhet = dataGrunnlag.getAvklarteVirksomheterGrunnlag().hentHovedvirksomhet();
-        brevData.yrkesaktivitet = brevData.hovedvirksomhet.yrkesaktivitet;
-        brevData.arbeidsland = landvelgerService.hentArbeidsland(behandlingID).getBeskrivelse();
-        brevData.art16Vilkaar = hentFørsteGyldigeVilkaarsresultatForArt16(behandlingID);
+        brevData.setHovedvirksomhet(dataGrunnlag.getAvklarteVirksomheterGrunnlag().hentHovedvirksomhet());
+        brevData.setYrkesaktivitet(brevData.getHovedvirksomhet().yrkesaktivitet);
+        brevData.setArbeidsland(landvelgerService.hentArbeidsland(behandlingID).getBeskrivelse());
+        brevData.setArt16Vilkaar(hentFørsteGyldigeVilkaarsresultatForArt16(behandlingID));
 
-        if (!brevData.art16Vilkaar.isOppfylt()) {
-            brevData.anmodningsperiodeSvar = Optional.empty();
+        if (!brevData.getArt16Vilkaar().isOppfylt()) {
+            brevData.setAnmodningsperiodeSvar(Optional.empty());
         } else {
-            brevData.anmodningsperiodeSvar = hentAnmodningsperiodeSvar(behandlingID);
+            brevData.setAnmodningsperiodeSvar(hentAnmodningsperiodeSvar(behandlingID));
         }
 
-        brevData.erArt16UtenArt12 = vilkaarsresultatService.harVilkaarForArtikkel16(behandlingID) && !vilkaarsresultatService.harVilkaarForArtikkel12(behandlingID);
+        brevData.setArt16UtenArt12(vilkaarsresultatService.harVilkaarForArtikkel16(behandlingID) && !vilkaarsresultatService.harVilkaarForArtikkel12(behandlingID));
 
         return brevData;
     }
