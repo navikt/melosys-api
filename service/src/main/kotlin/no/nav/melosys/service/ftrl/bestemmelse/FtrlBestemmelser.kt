@@ -7,8 +7,8 @@ import no.nav.melosys.service.ftrl.LovligeKombinasjonerTrygdedekningBestemmelse
 import org.springframework.stereotype.Component
 
 @Component
-class BestemmelserFraBehandlingstema {
-    fun bestemmelser(behandlingstema: Behandlingstema?, trygdedekning: Trygdedekninger?): List<Folketrygdloven_kap2_bestemmelser> {
+class FtrlBestemmelser {
+    fun hentBestemmelser(behandlingstema: Behandlingstema?, trygdedekning: Trygdedekninger?): List<Folketrygdloven_kap2_bestemmelser> {
         val bestemmelserFraBehandlingstema = bestemmelserFraBehandlingstema(behandlingstema)
 
         if (trygdedekning != null) {
