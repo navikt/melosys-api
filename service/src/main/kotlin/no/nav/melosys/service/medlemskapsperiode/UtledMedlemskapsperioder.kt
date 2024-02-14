@@ -9,7 +9,7 @@ import no.nav.melosys.domain.kodeverk.InnvilgelsesResultat
 import no.nav.melosys.domain.kodeverk.Trygdedekninger
 import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingstyper
 import no.nav.melosys.exception.FunksjonellException
-import no.nav.melosys.service.lovligekombinasjoner.LovligeKombinasjonerMedlemskapsperiodeRegler
+import no.nav.melosys.service.ftrl.LovligeKombinasjonerTrygdedekningBestemmelse
 import org.springframework.data.util.Pair
 import java.time.LocalDate
 
@@ -30,7 +30,7 @@ object UtledMedlemskapsperioder {
                     innvilgelsesresultat = it.innvilgelsesresultat
                     medlemskapstype = UtledMedlemskapstype.av(nyBestemmelse)
                     trygdedekning =
-                        if (LovligeKombinasjonerMedlemskapsperiodeRegler.erGyldigKombinasjon(nyBestemmelse, it.trygdedekning)) it.trygdedekning
+                        if (LovligeKombinasjonerTrygdedekningBestemmelse.erGyldigKombinasjon(nyBestemmelse, it.trygdedekning)) it.trygdedekning
                         else nyTrygdedekning
                     medlPeriodeID = it.medlPeriodeID
                     bestemmelse = if (it.erOpphørt()) it.bestemmelse else nyBestemmelse

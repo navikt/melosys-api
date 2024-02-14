@@ -4,7 +4,7 @@ import io.swagger.annotations.Api
 import io.swagger.annotations.ApiOperation
 import no.nav.melosys.domain.kodeverk.Folketrygdloven_kap2_bestemmelser
 import no.nav.melosys.domain.kodeverk.Trygdedekninger
-import no.nav.melosys.service.lovligekombinasjoner.LovligeKombinasjonerMedlemskapsperiodeRegler
+import no.nav.melosys.service.ftrl.LovligeKombinasjonerTrygdedekningBestemmelse
 import no.nav.security.token.support.core.api.Protected
 import org.springframework.context.annotation.Scope
 import org.springframework.http.ResponseEntity
@@ -29,7 +29,7 @@ class LovligeKombinasjonerMedlemskapsperiodeTjeneste {
             required = true
         ) trygdedekning: Trygdedekninger
     ): ResponseEntity<List<Folketrygdloven_kap2_bestemmelser>> {
-        val bestemmelser = LovligeKombinasjonerMedlemskapsperiodeRegler.hentLovligeBestemmelser(trygdedekning)
+        val bestemmelser = LovligeKombinasjonerTrygdedekningBestemmelse.hentLovligeBestemmelser(trygdedekning)
 
         return ResponseEntity.ok(bestemmelser)
     }
@@ -42,7 +42,7 @@ class LovligeKombinasjonerMedlemskapsperiodeTjeneste {
             required = true
         ) bestemmelse: Folketrygdloven_kap2_bestemmelser
     ): ResponseEntity<List<Trygdedekninger>> {
-        val trygdedekninger = LovligeKombinasjonerMedlemskapsperiodeRegler.hentLovligeTrygdedekninger(bestemmelse)
+        val trygdedekninger = LovligeKombinasjonerTrygdedekningBestemmelse.hentLovligeTrygdedekninger(bestemmelse)
 
         return ResponseEntity.ok(trygdedekninger)
     }

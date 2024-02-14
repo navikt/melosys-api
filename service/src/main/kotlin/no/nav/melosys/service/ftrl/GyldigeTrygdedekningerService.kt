@@ -1,6 +1,7 @@
 package no.nav.melosys.service.ftrl
 
 import io.getunleash.Unleash
+import no.nav.melosys.domain.kodeverk.Folketrygdloven_kap2_bestemmelser
 import no.nav.melosys.domain.kodeverk.Trygdedekninger
 import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingstema
 import no.nav.melosys.exception.FunksjonellException
@@ -39,9 +40,20 @@ class GyldigeTrygdedekningerService(private val unleash: Unleash) {
         Trygdedekninger.FTRL_2_7_TREDJE_LEDD_B_HELSE_SYKE_FORELDREPENGER
     )
 
-    fun hentTrygdedekninger(behandlingstema: Behandlingstema): List<Trygdedekninger> {
+    fun hentTrygdedekninger(behandlingstema: Behandlingstema, bestemmelse: Folketrygdloven_kap2_bestemmelser?): List<Trygdedekninger> {
         valider(behandlingstema)
 
+        val trygdedekningerFraBehandlingstema = trygdedekningerFraBehandlingstema(behandlingstema)
+
+        if (bestemmelse != null) {
+            val trygdedekningerFraBestemmelse = LovligeKombinasjonerTrygdedekningBestemmelse.hentLovligeTrygdedekninger(bestemmelse).toSet()
+            return trygdedekningerFraBehandlingstema.intersect(trygdedekningerFraBestemmelse).toList()
+        }
+
+        return trygdedekningerFraBehandlingstema
+    }
+
+    private fun trygdedekningerFraBehandlingstema(behandlingstema: Behandlingstema): List<Trygdedekninger> {
         return when {
             behandlingstema == Behandlingstema.IKKE_YRKESAKTIV -> GYLDIGE_TRYGDEDEKNINGER_IKKE_YRKESAKTIV
             unleash.isEnabled(ToggleName.MELOSYS_FOLKETRYGDEN_2_7) -> GYLDIGE_TRYGDEDEKNINGER_YRKESAKTIV
