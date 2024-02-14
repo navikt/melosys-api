@@ -95,7 +95,8 @@ class OpprettMedlemskapsperiodeService(
         }
         val lovligeBestemmelser = LovligeKombinasjonerTrygdedekningBestemmelse.hentLovligeBestemmelser(trygdedekning)
         val pliktigeBestemmelser = PliktigeMedlemskapsbestemmelser.bestemmelser
-        if (bestemmelse !in lovligeBestemmelser && bestemmelse !in pliktigeBestemmelser) {
+        val bestemmelseErLovligKombinasjonMedDekningEllerErPliktig = bestemmelse in lovligeBestemmelser || bestemmelse in pliktigeBestemmelser
+        if (!bestemmelseErLovligKombinasjonMedDekningEllerErPliktig) {
             throw FunksjonellException("Ulovlig kombinasjon av bestemmelse $bestemmelse og trygdedekning $trygdedekning")
         }
     }
