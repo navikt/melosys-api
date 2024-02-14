@@ -76,7 +76,7 @@ class AnmodningUnntakMapperTest {
         Set<VilkaarBegrunnelse> begrunnelser = lagAlleVilkaarBegrunnelser(Art16_1_anmodning.class);
         for (VilkaarBegrunnelse begrunnelse : begrunnelser) {
             BrevDataAnmodningUnntak brevdata = lagBrevData(resultat);
-            brevdata.anmodningBegrunnelser = Set.of(begrunnelse);
+            brevdata.setAnmodningBegrunnelser(Set.of(begrunnelse));
             assertThatNoException().isThrownBy(() -> mapper.mapFag(behandling, resultat, brevdata));
         }
     }
@@ -114,18 +114,14 @@ class AnmodningUnntakMapperTest {
     }
 
     private BrevDataAnmodningUnntak lagBrevData(Behandlingsresultat resultat, LovvalgBestemmelse unntakFraBestemmelse) {
-        BrevDataAnmodningUnntak brevData = new BrevDataAnmodningUnntak("Z999999");
+        BrevDataAnmodningUnntak brevData = new BrevDataAnmodningUnntak("Z999999", Landkoder.AT.getBeskrivelse(), new AvklartVirksomhet("Test AS", null, null, Yrkesaktivitetstyper.SELVSTENDIG),
+            Yrkesaktivitetstyper.SELVSTENDIG, Collections.emptySet(), Collections.emptySet(), null);
         Anmodningsperiode anmodningsperiode =
             new Anmodningsperiode(LocalDate.now(), LocalDate.now(),
                 Land_iso2.NO, null, null, Land_iso2.DK,
                 unntakFraBestemmelse, null);
         resultat.setAnmodningsperioder(Sets.newHashSet(anmodningsperiode));
 
-        brevData.hovedvirksomhet = new AvklartVirksomhet("Test AS", null, null, Yrkesaktivitetstyper.SELVSTENDIG);
-        brevData.arbeidsland = Landkoder.AT.getBeskrivelse();
-        brevData.yrkesaktivitet = Yrkesaktivitetstyper.SELVSTENDIG;
-        brevData.anmodningBegrunnelser = Collections.emptySet();
-        brevData.anmodningUtenArt12Begrunnelser = Collections.emptySet();
         return brevData;
     }
 

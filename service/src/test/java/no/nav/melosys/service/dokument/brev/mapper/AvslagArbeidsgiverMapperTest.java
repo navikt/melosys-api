@@ -43,31 +43,31 @@ class AvslagArbeidsgiverMapperTest {
 
         PersonDokument person = new PersonDokument();
         person.setSammensattNavn("Gunnar Granskau");
-        brevData.person = person;
+        brevData.setPerson(person);
 
-        brevData.arbeidsland = "Danmark";
+        brevData.setArbeidsland("Danmark");
 
-        brevData.hovedvirksomhet = new AvklartVirksomhet("Test AS", "123456789", null, Yrkesaktivitetstyper.SELVSTENDIG);
+        brevData.setHovedvirksomhet(new AvklartVirksomhet("Test AS", "123456789", null, Yrkesaktivitetstyper.SELVSTENDIG));
 
         Lovvalgsperiode lovvalgsperiode = new Lovvalgsperiode();
         lovvalgsperiode.setLovvalgsland(Land_iso2.DE);
         lovvalgsperiode.setFom(LocalDate.now());
         lovvalgsperiode.setTom(LocalDate.now());
-        brevData.lovvalgsperiode = lovvalgsperiode;
+        brevData.setLovvalgsperiode(lovvalgsperiode);
 
         Vilkaarsresultat vilkaarsresultat12_1 = new Vilkaarsresultat();
         vilkaarsresultat12_1.setVilkaar(Vilkaar.FO_883_2004_ART12_1);
         VilkaarBegrunnelse begrunnelse12_1 = new VilkaarBegrunnelse();
         begrunnelse12_1.setKode(Art12_1_begrunnelser.IKKE_VESENTLIG_VIRKSOMHET.getKode());
         vilkaarsresultat12_1.setBegrunnelser(Collections.singleton(begrunnelse12_1));
-        brevData.vilkårbegrunnelser121 = vilkaarsresultat12_1.getBegrunnelser();
+        brevData.setVilkårbegrunnelser121(vilkaarsresultat12_1.getBegrunnelser());
 
         VilkaarBegrunnelse vesentligVirksomhetBegrunnelse = new VilkaarBegrunnelse();
         vesentligVirksomhetBegrunnelse.setKode(Art12_1_vesentlig_virksomhet.FOR_LITE_KONTRAKTER_NORGE.getKode());
         Vilkaarsresultat vesentligVirksomhet = new Vilkaarsresultat();
         vesentligVirksomhet.setVilkaar(Vilkaar.ART12_1_VESENTLIG_VIRKSOMHET);
         vesentligVirksomhet.setBegrunnelser(Collections.singleton(vesentligVirksomhetBegrunnelse));
-        brevData.vilkårbegrunnelser121VesentligVirksomhet = vesentligVirksomhet.getBegrunnelser();
+        brevData.setVilkårbegrunnelser121VesentligVirksomhet(vesentligVirksomhet.getBegrunnelser());
 
 
         AvslagArbeidsgiverMapper spy = Mockito.spy(new AvslagArbeidsgiverMapper());

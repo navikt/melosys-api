@@ -147,7 +147,7 @@ internal class A1MapperTest {
 
     @Test
     fun mapTilBrevXML_bostedsAdresseIkkeGyldig_settBostedsadresseSinGateAdresseTom() {
-        brevData.bostedsadresse.gatenavn = null
+        brevData.bostedsadresse?.gatenavn = null
         val a1 = mapper.mapA1(behandling, behandlingsresultat, brevData)
         a1.person.bostedsadresse.gatenavn.shouldBe(" ")
         mapTilBrevXML(brevData).shouldNotBeNull()
@@ -305,16 +305,16 @@ internal class A1MapperTest {
 
     @Test
     fun `mapperA1vedlegg ved utendlandsadresse er ikke postnr obligatorisk fra melosys`() {
-        brevData.bostedsadresse.postnummer = null
-        brevData.bostedsadresse.landkode = "SE"
+        brevData.bostedsadresse?.postnummer = null
+        brevData.bostedsadresse?.landkode = "SE"
         val a1 = mapper.mapA1(behandling, behandlingsresultat, brevData)
         a1.person.bostedsadresse.postnr.shouldBe(" ")
     }
 
     @Test
     fun `mapperA1vedlegg ved norsk adresse er postnr obligatorisk fra melosys`() {
-        brevData.bostedsadresse.postnummer = null
-        brevData.bostedsadresse.landkode = "NO"
+        brevData.bostedsadresse?.postnummer = null
+        brevData.bostedsadresse?.landkode = "NO"
         val a1 = mapper.mapA1(behandling, behandlingsresultat, brevData)
         a1.person.bostedsadresse.postnr.shouldBe(null)
     }

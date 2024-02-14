@@ -8,10 +8,10 @@ import no.nav.melosys.domain.kodeverk.yrker.Yrkesaktivitetstyper
 
 class BrevDataAnmodningUnntak(
     saksbehandler: String,
-    var arbeidsland: String? = null,
-    var hovedvirksomhet: AvklartVirksomhet? = null,
-    var yrkesaktivitet: Yrkesaktivitetstyper? = null,
+    val arbeidsland: String? = null,
+    val hovedvirksomhet: AvklartVirksomhet? = null,
+    val yrkesaktivitet: Yrkesaktivitetstyper? = null,
     var anmodningBegrunnelser: Set<VilkaarBegrunnelse> = emptySet(),
-    var anmodningUtenArt12Begrunnelser: Set<VilkaarBegrunnelse> = emptySet(),
-    var anmodningFritekst: String? = null
+    val anmodningUtenArt12Begrunnelser: Set<VilkaarBegrunnelse> = emptySet(),
+    val anmodningFritekst: String? = null
 ) : BrevData(saksbehandler = saksbehandler)

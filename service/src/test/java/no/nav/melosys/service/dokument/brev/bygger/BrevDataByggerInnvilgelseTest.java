@@ -138,8 +138,8 @@ class BrevDataByggerInnvilgelseTest {
         when(avklartefaktaService.hentMaritimTyper(anyLong())).thenReturn(Set.of(maritimType));
 
         BrevDataInnvilgelse brevData = (BrevDataInnvilgelse) brevDataByggerInnvilgelse.lag(lagBrevdataGrunnlag(), saksbehandler);
-        assertThat(brevData.saksbehandler).isEqualTo(saksbehandler);
-        assertThat(brevData.avklartMaritimType).isEqualTo(Maritimtyper.SOKKEL);
+        assertThat(brevData.getSaksbehandler()).isEqualTo(saksbehandler);
+        assertThat(brevData.getAvklartMaritimType()).isEqualTo(Maritimtyper.SOKKEL);
     }
 
     @Test
@@ -147,7 +147,7 @@ class BrevDataByggerInnvilgelseTest {
         when(avklartefaktaService.hentMaritimTyper(anyLong())).thenReturn(Collections.emptySet());
 
         BrevDataInnvilgelse brevData = (BrevDataInnvilgelse) brevDataByggerInnvilgelse.lag(lagBrevdataGrunnlag(), saksbehandler);
-        assertThat(brevData.avklartMaritimType).isNull();
+        assertThat(brevData.getAvklartMaritimType()).isNull();
     }
 
     @Test
@@ -156,15 +156,15 @@ class BrevDataByggerInnvilgelseTest {
             .thenReturn(true);
 
         BrevDataInnvilgelse brevData = (BrevDataInnvilgelse) brevDataByggerInnvilgelse.lag(lagBrevdataGrunnlag(), saksbehandler);
-        assertThat(brevData.turistskip).isTrue();
+        assertThat(brevData.getTuristskip()).isTrue();
     }
 
     @Test
     void lag_innvilgelsesBrev_harBestillingsinformasjon() {
         BrevData brevData = brevDataByggerInnvilgelse.lag(lagBrevdataGrunnlag(), saksbehandler);
-        assertThat(brevData.begrunnelseKode).isEqualTo(brevbestillingDto.getBegrunnelseKode());
-        assertThat(brevData.fritekst).isEqualTo(brevbestillingDto.getFritekst());
-        assertThat(brevData.saksbehandler).isEqualTo(saksbehandler);
+        assertThat(brevData.getBegrunnelseKode()).isEqualTo(brevbestillingDto.getBegrunnelseKode());
+        assertThat(brevData.getFritekst()).isEqualTo(brevbestillingDto.getFritekst());
+        assertThat(brevData.getSaksbehandler()).isEqualTo(saksbehandler);
     }
 
     @Test
@@ -192,7 +192,7 @@ class BrevDataByggerInnvilgelseTest {
         when(vilkaarsresultatService.harVilkaarForArtikkel16(anyLong())).thenReturn(true);
 
         BrevDataInnvilgelse brevData = (BrevDataInnvilgelse) brevDataByggerInnvilgelse.lag(lagBrevdataGrunnlag(), saksbehandler);
-        assertThat(brevData.art16UtenArt12).isFalse();
+        assertThat(brevData.getArt16UtenArt12()).isFalse();
     }
 
     @Test
@@ -201,7 +201,7 @@ class BrevDataByggerInnvilgelseTest {
         when(vilkaarsresultatService.harVilkaarForArtikkel16(anyLong())).thenReturn(true);
 
         BrevDataInnvilgelse brevData = (BrevDataInnvilgelse) brevDataByggerInnvilgelse.lag(lagBrevdataGrunnlag(), saksbehandler);
-        assertThat(brevData.art16UtenArt12).isTrue();
+        assertThat(brevData.getArt16UtenArt12()).isTrue();
     }
 
     @Test
@@ -221,10 +221,10 @@ class BrevDataByggerInnvilgelseTest {
         when(persondataFasade.hentSammensattNavn(barn2.getFnr())).thenReturn("Navn2");
 
         BrevDataInnvilgelse brevData = (BrevDataInnvilgelse) brevDataByggerInnvilgelse.lag(lagBrevdataGrunnlag(), saksbehandler);
-        assertThat(brevData.avklarteMedfolgendeBarn.getFamilieOmfattetAvNorskTrygd())
+        assertThat(brevData.getAvklarteMedfolgendeBarn().getFamilieOmfattetAvNorskTrygd())
             .extracting("sammensattNavn", "ident")
             .containsExactly(tuple("Navn1", barn1.getFnr()));
-        assertThat(brevData.avklarteMedfolgendeBarn.getFamilieIkkeOmfattetAvNorskTrygd())
+        assertThat(brevData.getAvklarteMedfolgendeBarn().getFamilieIkkeOmfattetAvNorskTrygd())
             .extracting("sammensattNavn")
             .containsExactly("Navn2");
 
@@ -246,9 +246,9 @@ class BrevDataByggerInnvilgelseTest {
         when(mottatteOpplysningerService.hentMottatteOpplysninger(anyLong())).thenReturn(mottatteOpplysninger);
 
         BrevDataInnvilgelse brevData = (BrevDataInnvilgelse) brevDataByggerInnvilgelse.lag(lagBrevdataGrunnlag(), saksbehandler);
-        assertThat(brevData.avklarteMedfolgendeBarn.getFamilieOmfattetAvNorskTrygd())
+        assertThat(brevData.getAvklarteMedfolgendeBarn().getFamilieOmfattetAvNorskTrygd())
             .extracting("sammensattNavn").containsExactly(barn1.getNavn());
-        assertThat(brevData.avklarteMedfolgendeBarn.getFamilieIkkeOmfattetAvNorskTrygd())
+        assertThat(brevData.getAvklarteMedfolgendeBarn().getFamilieIkkeOmfattetAvNorskTrygd())
             .extracting("sammensattNavn").containsExactly(barn2.getNavn());
 
         verify(persondataFasade, never()).hentSammensattNavn(anyString());

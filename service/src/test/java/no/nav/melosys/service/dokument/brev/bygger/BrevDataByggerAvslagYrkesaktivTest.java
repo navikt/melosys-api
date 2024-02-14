@@ -109,11 +109,11 @@ class BrevDataByggerAvslagYrkesaktivTest {
         String saksbehandler = "saksbehandler";
         BrevDataAvslagYrkesaktiv brevData = (BrevDataAvslagYrkesaktiv) brevDataByggerAvslagYrkesaktiv.lag(lagBrevressurser(behandling), saksbehandler);
 
-        assertThat(brevData.hovedvirksomhet.orgnr).isEqualTo("999");
-        assertThat(brevData.hovedvirksomhet.erSelvstendigForetak()).isTrue();
-        assertThat(brevData.arbeidsland).isEqualTo(Landkoder.DE.getBeskrivelse());
-        assertThat(brevData.anmodningsperiodeSvar).isPresent().get().usingRecursiveComparison().isEqualTo(anmodningsperiodeSvar);
-        assertThat(brevData.art16UtenArt12).isTrue();
+        assertThat(brevData.getHovedvirksomhet().orgnr).isEqualTo("999");
+        assertThat(brevData.getHovedvirksomhet().erSelvstendigForetak()).isTrue();
+        assertThat(brevData.getArbeidsland()).isEqualTo(Landkoder.DE.getBeskrivelse());
+        assertThat(brevData.getAnmodningsperiodeSvar()).usingRecursiveComparison().isEqualTo(anmodningsperiodeSvar);
+        assertThat(brevData.getArt16UtenArt12()).isTrue();
     }
 
     private AnmodningsperiodeSvar lagAnmodningsperiodeSvarAvslag() {

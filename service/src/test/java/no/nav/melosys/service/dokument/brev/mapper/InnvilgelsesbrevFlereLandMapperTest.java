@@ -66,31 +66,31 @@ class InnvilgelsesbrevFlereLandMapperTest {
         List<AvklartVirksomhet> norskeVirksomheter = Collections.singletonList(new AvklartVirksomhet("Telenor", "1234", lagStrukturertAdresse(), Yrkesaktivitetstyper.LOENNET_ARBEID));
 
         BrevDataInnvilgelseFlereLand brevdataInnvilgelse = new BrevDataInnvilgelseFlereLand(new BrevbestillingDto(), "SAKSBEHANDLER");
-        brevdataInnvilgelse.lovvalgsperiode = lagLovvalgsperiode();
-        brevdataInnvilgelse.avklartMaritimTypeSkip = true;
-        brevdataInnvilgelse.avklartMaritimTypeSokkel = false;
-        brevdataInnvilgelse.arbeidsgivere = norskeVirksomheter;
-        brevdataInnvilgelse.bostedsland = "Norge";
-        brevdataInnvilgelse.trydemyndighetsland = Landkoder.DE;
-        brevdataInnvilgelse.alleArbeidsland = List.of("Sverige", "Danmark", "Finland", "Spania");
-        brevdataInnvilgelse.marginaltArbeid = true;
-        brevdataInnvilgelse.begrensetPeriode = true;
-        brevdataInnvilgelse.vedleggA1 = lagBrevdataA1(norskeVirksomheter);
+        brevdataInnvilgelse.setLovvalgsperiode(lagLovvalgsperiode());
+        brevdataInnvilgelse.setAvklartMaritimTypeSkip(true);
+        brevdataInnvilgelse.setAvklartMaritimTypeSokkel(false);
+        brevdataInnvilgelse.setArbeidsgivere(norskeVirksomheter);
+        brevdataInnvilgelse.setBostedsland("Norge");
+        brevdataInnvilgelse.setTrydemyndighetsland(Landkoder.DE);
+        brevdataInnvilgelse.setAlleArbeidsland(List.of("Sverige", "Danmark", "Finland", "Spania"));
+        brevdataInnvilgelse.setMarginaltArbeid(true);
+        brevdataInnvilgelse.setBegrensetPeriode(true);
+        brevdataInnvilgelse.setVedleggA1(lagBrevdataA1(norskeVirksomheter));
         return brevdataInnvilgelse;
     }
 
     private static BrevDataA1 lagBrevdataA1(List<AvklartVirksomhet> virksomheter) {
         BrevDataA1 brevdataA1 = new BrevDataA1();
-        brevdataA1.person = lagPersonopplysninger();
-        brevdataA1.bostedsadresse = lagStrukturertAdresse();
-        brevdataA1.yrkesgruppe = Yrkesgrupper.ORDINAER;
-        brevdataA1.hovedvirksomhet = virksomheter.get(0);
+        brevdataA1.setPerson(lagPersonopplysninger());
+        brevdataA1.setBostedsadresse(lagStrukturertAdresse());
+        brevdataA1.setYrkesgruppe(Yrkesgrupper.ORDINAER);
+        brevdataA1.setHovedvirksomhet(virksomheter.get(0));
         ArrayList<AvklartVirksomhet> bivirksomheter = new ArrayList<>(virksomheter);
         bivirksomheter.remove(0);
-        brevdataA1.bivirksomheter = bivirksomheter;
+        brevdataA1.setBivirksomheter(bivirksomheter);
 
-        brevdataA1.arbeidssteder = new ArrayList<>();
-        brevdataA1.arbeidsland = new ArrayList<>();
+        brevdataA1.setArbeidssteder(new ArrayList<>());
+        brevdataA1.setArbeidsland(new ArrayList<>());
         return brevdataA1;
     }
 
