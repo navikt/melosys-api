@@ -5,23 +5,20 @@ import io.kotest.matchers.collections.shouldHaveSize
 import io.kotest.matchers.shouldBe
 import io.kotest.matchers.string.shouldContain
 import io.micrometer.core.instrument.simple.SimpleMeterRegistry
-import org.springframework.boot.actuate.metrics.AutoTimer
-import org.springframework.boot.actuate.metrics.web.reactive.client.DefaultWebClientExchangeTagsProvider
-import org.springframework.boot.actuate.metrics.web.reactive.client.MetricsWebClientFilterFunction
 import org.springframework.boot.test.context.TestConfiguration
-import org.springframework.context.annotation.Bean
-import org.springframework.web.reactive.function.client.WebClient
 
 @TestConfiguration
 class MetricsTestConfig() {
 
-    @Bean
-    fun myBuilder(): WebClient.Builder {
-        val metricsWebClientFilterFunction = MetricsWebClientFilterFunction(
-            meterRegistry, DefaultWebClientExchangeTagsProvider(), "test", AutoTimer.ENABLED
-        )
-        return WebClient.builder().filters { it.add((metricsWebClientFilterFunction)) }
-    }
+//    @Bean
+//    fun myBuilder(): WebClient.Builder {
+//        val metricsWebClientFilterFunction = MetricsWebClientFilterFunction(
+//            meterRegistry, DefaultWebClientExchangeTagsProvider(), "test", AutoTimer.ENABLED
+//        )
+//        return WebClient.builder().filters { it.add((metricsWebClientFilterFunction)) }
+//    }
+
+    //TODO MetricsWebClientFilterFunction finnes ikke lenger, hva er løsningen?
 
     companion object {
         var meterRegistry = SimpleMeterRegistry()

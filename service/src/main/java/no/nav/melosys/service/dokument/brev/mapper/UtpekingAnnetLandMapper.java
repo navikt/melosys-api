@@ -1,7 +1,7 @@
 package no.nav.melosys.service.dokument.brev.mapper;
 
 import javax.xml.bind.JAXBElement;
-import javax.xml.bind.JAXBException;
+import jakarta.xml.bind.JAXBException;
 import javax.xml.datatype.DatatypeConfigurationException;
 
 import no.nav.dok.melosysbrev._000168.BrevdataType;

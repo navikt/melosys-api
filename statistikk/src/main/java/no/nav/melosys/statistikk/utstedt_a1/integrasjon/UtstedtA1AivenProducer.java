@@ -1,5 +1,6 @@
 package no.nav.melosys.statistikk.utstedt_a1.integrasjon;
 
+import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.TimeoutException;
@@ -36,7 +37,7 @@ public class UtstedtA1AivenProducer {
 
     public UtstedtA1Melding produserMelding(UtstedtA1Melding melding) {
         valider(melding);
-        ListenableFuture<SendResult<String, UtstedtA1Melding>> future = aivenKafkaTemplate.send(topicName, melding);
+        CompletableFuture<SendResult<String, UtstedtA1Melding>> future = aivenKafkaTemplate.send(topicName, melding);
 
         try {
             SendResult<String, UtstedtA1Melding> res = future.get(15L, TimeUnit.SECONDS);

@@ -62,7 +62,7 @@
         <commons-text.version>1.10.0</commons-text.version>
         <findbugs.jsr305.version>3.0.2</findbugs.jsr305.version>
         <guava.version>31.1-jre</guava.version>
-        <graphql-java.version>17.5</graphql-java.version>
+        <graphql-java.version>21.3</graphql-java.version>
         <logback.version>1.2.11</logback.version>
         <logstash.version>7.3</logstash.version>
         <hikaricp.version>5.0.1</hikaricp.version>

@@ -5,7 +5,7 @@ import java.util.Collection;
 import java.util.List;
 import java.util.stream.Collectors;
 import javax.xml.bind.JAXBElement;
-import javax.xml.bind.JAXBException;
+import jakarta.xml.bind.JAXBException;
 
 import no.nav.dok.melosysbrev._000083.LovvalgsperiodeType;
 import no.nav.dok.melosysbrev._000083.ObjectFactory;

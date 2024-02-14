@@ -4,7 +4,7 @@ import java.time.Instant;
 import java.time.LocalDate;
 import java.util.*;
 import javax.xml.bind.JAXBElement;
-import javax.xml.bind.JAXBException;
+import jakarta.xml.bind.JAXBException;
 
 import no.nav.dok.melosysbrev._000115.BostedsadresseTypeKode;
 import no.nav.dok.melosysbrev._000116.BrevdataType;
