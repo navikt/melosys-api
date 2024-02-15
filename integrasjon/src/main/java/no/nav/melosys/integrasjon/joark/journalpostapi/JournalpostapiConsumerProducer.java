@@ -2,7 +2,6 @@ package no.nav.melosys.integrasjon.joark.journalpostapi;
 
 import no.nav.melosys.integrasjon.felles.SystemContextClientRequestInterceptor;
 import no.nav.melosys.integrasjon.felles.mdc.CorrelationIdOutgoingInterceptor;
-import org.apache.http.impl.client.HttpClients;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.web.client.RestTemplateBuilder;
 import org.springframework.context.annotation.Bean;
