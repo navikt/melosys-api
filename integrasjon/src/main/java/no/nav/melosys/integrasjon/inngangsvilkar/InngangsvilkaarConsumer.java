@@ -9,5 +9,5 @@ import org.springframework.retry.annotation.Retryable;
 
 @Retryable
 public interface InngangsvilkaarConsumer {
-    InngangsvilkarResponse vurderInngangsvilkår(Set<Land> brukersStatsborgerskap, Set<String> søknadsland, boolean erUkjenteEllerAlleEosLand, ErPeriode søknadsperiode);
+    InngangsvilkarResponse vurderInngangsvilkår(Set<Land> brukersStatsborgerskap, Set<String> søknadsland, boolean flereLandUkjentHvilke, ErPeriode søknadsperiode);
 }

@@ -22,12 +22,12 @@ public class InngangsvilkaarConsumerImpl implements InngangsvilkaarConsumer, Jso
 
     public InngangsvilkarResponse vurderInngangsvilkår(Set<Land> brukersStatsborgerskap,
                                                        Set<String> søknadsland,
-                                                       boolean erUkjenteEllerAlleEosLand,
+                                                       boolean flereLandUkjentHvilke,
                                                        ErPeriode søknadsperiode) {
         var request = new VurderInngangsvilkaarRequest(
             brukersStatsborgerskap.stream().map(Land::getKode).collect(Collectors.toSet()),
             søknadsland,
-            erUkjenteEllerAlleEosLand,
+            flereLandUkjentHvilke,
             søknadsperiode
         );
 

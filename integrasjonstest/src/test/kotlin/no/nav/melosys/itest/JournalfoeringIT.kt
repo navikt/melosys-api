@@ -92,7 +92,7 @@ class JournalfoeringIT(
             .shouldBeEqualToComparingFields(Soeknad().apply {
                 soeknadsland.apply {
                     landkoder = listOf(Landkoder.IE.kode)
-                    isErUkjenteEllerAlleEosLand = false
+                    setFlereLandUkjentHvilke(false)
                 }
                 periode = Periode(
                     periodeFOM,
@@ -147,7 +147,7 @@ class JournalfoeringIT(
             .shouldBeEqualToComparingFields(Soeknad().apply {
                 soeknadsland.apply {
                     landkoder = listOf(Landkoder.IE.kode)
-                    isErUkjenteEllerAlleEosLand = false
+                    setFlereLandUkjentHvilke(false)
                 }
                 periode = Periode(
                     periodeFOM,
@@ -262,7 +262,7 @@ class JournalfoeringIT(
             .shouldBeEqualToComparingFields(Soeknad().apply {
                 soeknadsland.apply {
                     landkoder = listOf()
-                    isErUkjenteEllerAlleEosLand = false
+                    setFlereLandUkjentHvilke(false)
                 }
                 periode = Periode()
             }, FieldsEqualityCheckConfig(ignorePrivateFields = false))
@@ -318,7 +318,7 @@ class JournalfoeringIT(
             .shouldBeEqualToComparingFields(Soeknad().apply {
                 soeknadsland.apply {
                     landkoder = listOf()
-                    isErUkjenteEllerAlleEosLand = false
+                    setFlereLandUkjentHvilke(false)
                 }
                 periode = Periode()
             }, FieldsEqualityCheckConfig(ignorePrivateFields = false))

@@ -38,5 +38,5 @@ data class Periode(
 
 data class Soeknadsland(
     var landkoder: List<String>? = null,
-    var erUkjenteEllerAlleEosLand: Boolean = false,
+    var flereLandUkjentHvilke: Boolean = false,
 )
