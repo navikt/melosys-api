@@ -23,7 +23,7 @@ class GyldigeTrygdedekningerTjeneste(
     private val gyldigeTrygdedekningerService: GyldigeTrygdedekningerService
 ) {
 
-    @GetMapping()
+    @GetMapping
     fun hentGyldigeTrygdedekninger(
         @RequestParam("behandlingstema", required = true) behandlingstema: Behandlingstema,
         @RequestParam("bestemmelse", required = false) bestemmelse: Folketrygdloven_kap2_bestemmelser?
