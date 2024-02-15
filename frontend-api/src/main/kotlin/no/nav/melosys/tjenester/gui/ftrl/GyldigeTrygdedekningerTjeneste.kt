@@ -7,7 +7,10 @@ import no.nav.melosys.service.ftrl.GyldigeTrygdedekningerService
 import no.nav.security.token.support.core.api.Protected
 import org.springframework.context.annotation.Scope
 import org.springframework.http.ResponseEntity
-import org.springframework.web.bind.annotation.*
+import org.springframework.web.bind.annotation.GetMapping
+import org.springframework.web.bind.annotation.RequestMapping
+import org.springframework.web.bind.annotation.RequestParam
+import org.springframework.web.bind.annotation.RestController
 import org.springframework.web.context.WebApplicationContext
 
 @Protected
@@ -19,7 +22,7 @@ class GyldigeTrygdedekningerTjeneste(
     private val gyldigeTrygdedekningerService: GyldigeTrygdedekningerService
 ) {
 
-    @GetMapping()
+    @GetMapping
     fun hentGyldigeTrygdedekninger(
         @RequestParam("behandlingstema", required = true) behandlingstema: Behandlingstema
     ): ResponseEntity<List<Trygdedekninger>> {
