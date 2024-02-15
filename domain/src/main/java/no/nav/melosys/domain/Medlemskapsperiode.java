@@ -11,6 +11,7 @@ import javax.persistence.*;
 import java.time.LocalDate;
 import java.util.Collection;
 import java.util.HashSet;
+import java.util.List;
 import java.util.Objects;
 
 @Entity
@@ -139,6 +140,10 @@ public class Medlemskapsperiode implements ErPeriode, HarBestemmelse<Folketrygdl
 
     public boolean erOpphørt() {
         return innvilgelsesresultat == InnvilgelsesResultat.OPPHØRT;
+    }
+
+    public boolean erAvslaatt() {
+        return innvilgelsesresultat == InnvilgelsesResultat.AVSLAATT;
     }
 
     @Override

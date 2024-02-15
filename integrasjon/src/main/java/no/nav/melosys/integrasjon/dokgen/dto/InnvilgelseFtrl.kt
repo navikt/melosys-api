@@ -23,6 +23,7 @@ class InnvilgelseFtrl(
     val medlemskapsperioder: List<MedlemskapsperiodeDto>,
     val bestemmelse: Folketrygdloven_kap2_bestemmelser?,
     val avslåttHelsedelFørMottaksdato: Boolean,
+    val avslåttMedlemskapsperiodeFørMottaksdato: Boolean,
     val trygdeavgiftMottaker: Trygdeavgiftmottaker?,
     val fullmektigTrygdeavgift: String?,
     val skatteplikttype: Skatteplikttype?,
@@ -46,6 +47,7 @@ class InnvilgelseFtrl(
         private var bestemmelse: Folketrygdloven_kap2_bestemmelser? = null
         private var fullmektigTrygdeavgift: String? = null
         private var avslåttHelsedelFørMottaksdato = false
+        private var avslåttMedlemskapsperiodeFørMottaksdato = false
         private var trygdeavgiftMottaker: Trygdeavgiftmottaker? = null
         private var skatteplikttype: Skatteplikttype? = null
         private var begrunnelse: Kodeverk? = null
@@ -86,6 +88,11 @@ class InnvilgelseFtrl(
 
         fun avslåttHelsedelFørMottaksdato(avslåttHelsedelFørMottaksdato: Boolean): Builder {
             this.avslåttHelsedelFørMottaksdato = avslåttHelsedelFørMottaksdato
+            return this
+        }
+
+        fun avslåttMedlemskapsperiodeFørMottaksdato(avslåttMedlemskapsperiodeFørMottaksdato: Boolean): Builder {
+            this.avslåttMedlemskapsperiodeFørMottaksdato = avslåttMedlemskapsperiodeFørMottaksdato
             return this
         }
 
@@ -158,6 +165,7 @@ class InnvilgelseFtrl(
                 medlemskapsperioder,
                 bestemmelse,
                 avslåttHelsedelFørMottaksdato,
+                avslåttMedlemskapsperiodeFørMottaksdato,
                 trygdeavgiftMottaker,
                 fullmektigTrygdeavgift,
                 skatteplikttype,
