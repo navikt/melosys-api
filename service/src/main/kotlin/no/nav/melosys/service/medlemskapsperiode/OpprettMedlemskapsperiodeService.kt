@@ -93,10 +93,7 @@ class OpprettMedlemskapsperiodeService(
         if (bestemmelse !in støttedeBestemmelser) {
             throw FunksjonellException("Støtter ikke perioder med bestemmelse $bestemmelse for behandlingstema $behandlingstema")
         }
-        val lovligeBestemmelser = LovligeKombinasjonerTrygdedekningBestemmelse.hentLovligeBestemmelser(trygdedekning)
-        val pliktigeBestemmelser = PliktigeMedlemskapsbestemmelser.bestemmelser
-        val bestemmelseErLovligKombinasjonMedDekningEllerErPliktig = bestemmelse in lovligeBestemmelser || bestemmelse in pliktigeBestemmelser
-        if (!bestemmelseErLovligKombinasjonMedDekningEllerErPliktig) {
+        if (!LovligeKombinasjonerTrygdedekningBestemmelse.erBestemmelseGyldig(bestemmelse, trygdedekning)) {
             throw FunksjonellException("Ulovlig kombinasjon av bestemmelse $bestemmelse og trygdedekning $trygdedekning")
         }
     }
