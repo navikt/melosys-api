@@ -19,7 +19,7 @@ import org.springframework.web.context.WebApplicationContext
 @Scope(value = WebApplicationContext.SCOPE_REQUEST)
 class AvklarteFaktaForBestemmelseTjeneste(private val avklarteFaktaForBestemmelse: AvklarteFaktaForBestemmelse) {
 
-    @GetMapping("/ftrl/bestemmelser/{bestemmelseID}/avklartefakta/")
+    @GetMapping("/ftrl/bestemmelser/{bestemmelseID}/avklartefakta")
     fun hentAvklarteFakta(
         @PathVariable bestemmelseID: Folketrygdloven_kap2_bestemmelser,
         @RequestParam("behandlingID", required = true) behandlingID: Long
