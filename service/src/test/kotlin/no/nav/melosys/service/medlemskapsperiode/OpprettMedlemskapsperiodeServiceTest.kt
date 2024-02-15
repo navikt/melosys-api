@@ -268,7 +268,6 @@ class OpprettMedlemskapsperiodeServiceTest {
             }
         }
 
-
     private fun lagVilkår(oppfylt: Boolean = true): Vilkaarsresultat =
         Vilkaarsresultat().apply {
             vilkaar = Vilkaar.FTRL_2_8_FORUTGÅENDE_TRYGDETID

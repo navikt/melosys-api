@@ -104,7 +104,7 @@ class MedlemskapsperiodeServiceTest {
 
     @Test
     fun opprettMedlemskapsperiode_lagrerKorrektMedlemskapsperiode() {
-        every { gyldigeTrygdedekningerService.hentTrygdedekninger(any()) } returns listOf(*Trygdedekninger.values())
+        every { gyldigeTrygdedekningerService.hentTrygdedekninger(any(), any()) } returns listOf(*Trygdedekninger.values())
         val medlemAvFolketrygden = MedlemAvFolketrygden().apply { behandlingsresultat = lagBehandlingsresultat() }
         every { medlemAvFolketrygdenService.hentMedlemAvFolketrygden(BEHANDLING_ID_1) } returns medlemAvFolketrygden
         every { medlemskapsperiodeRepository.save(any()) } returnsArgument 0
@@ -135,7 +135,7 @@ class MedlemskapsperiodeServiceTest {
 
     @Test
     fun opprettMedlemskapsperiode_harFastsattTrygdeavgift_fjernerTrygdeavgiftsperioderOmDeFinnes() {
-        every { gyldigeTrygdedekningerService.hentTrygdedekninger(any()) } returns listOf(*Trygdedekninger.values())
+        every { gyldigeTrygdedekningerService.hentTrygdedekninger(any(), any()) } returns listOf(*Trygdedekninger.values())
         val medlemAvFolketrygden = MedlemAvFolketrygden().apply {
             behandlingsresultat = lagBehandlingsresultat()
             fastsattTrygdeavgift = FastsattTrygdeavgift()
@@ -161,7 +161,7 @@ class MedlemskapsperiodeServiceTest {
 
     @Test
     fun oppdaterMedlemskapsperiode_medlemskapsperiodeFinnes_oppdateres() {
-        every { gyldigeTrygdedekningerService.hentTrygdedekninger(any()) } returns listOf(*Trygdedekninger.values())
+        every { gyldigeTrygdedekningerService.hentTrygdedekninger(any(), any()) } returns listOf(*Trygdedekninger.values())
         val medlemAvFolketrygden = MedlemAvFolketrygden().apply {
             medlemskapsperioder = listOf(Medlemskapsperiode().apply { id = MEDLEMSKAPSPERIODE_ID_1 })
             behandlingsresultat = lagBehandlingsresultat()
@@ -194,7 +194,7 @@ class MedlemskapsperiodeServiceTest {
 
     @Test
     fun oppdaterMedlemskapsperiode_medlemskapsperiodeOgFastsattTrygdeavgiftFinnes_oppdateres() {
-        every { gyldigeTrygdedekningerService.hentTrygdedekninger(any()) } returns listOf(*Trygdedekninger.values())
+        every { gyldigeTrygdedekningerService.hentTrygdedekninger(any(), any()) } returns listOf(*Trygdedekninger.values())
         val medlemAvFolketrygden = MedlemAvFolketrygden().apply {
             medlemskapsperioder = listOf(Medlemskapsperiode().apply { id = MEDLEMSKAPSPERIODE_ID_1 })
             fastsattTrygdeavgift = FastsattTrygdeavgift()
@@ -221,7 +221,7 @@ class MedlemskapsperiodeServiceTest {
 
     @Test
     fun `opprettMedlemskapsperiode kaster ikke exception når tomDato er null, land er Norge og bestemmelse er 2_1`() {
-        every { gyldigeTrygdedekningerService.hentTrygdedekninger(any()) } returns listOf(*Trygdedekninger.values())
+        every { gyldigeTrygdedekningerService.hentTrygdedekninger(any(), any()) } returns listOf(*Trygdedekninger.values())
         unleash.enable(ToggleName.MELOSYS_FOLKETRYGDEN_2_7)
         val medlemAvFolketrygden = MedlemAvFolketrygden().apply { behandlingsresultat = lagBehandlingsresultat(Land_iso2.NO) }
         every { medlemAvFolketrygdenService.hentMedlemAvFolketrygden(BEHANDLING_ID_1) } returns medlemAvFolketrygden
@@ -262,7 +262,7 @@ class MedlemskapsperiodeServiceTest {
 
     @Test
     fun `opprettMedlemskapsperiode kaster ikke exception når tomDato er null mens toggle er disabled`() {
-        every { gyldigeTrygdedekningerService.hentTrygdedekninger(any()) } returns listOf(*Trygdedekninger.values())
+        every { gyldigeTrygdedekningerService.hentTrygdedekninger(any(), any()) } returns listOf(*Trygdedekninger.values())
         unleash.disable(ToggleName.MELOSYS_FTRL_IKKE_YRKESAKTIV)
         val medlemAvFolketrygden = MedlemAvFolketrygden().apply { behandlingsresultat = lagBehandlingsresultat() }
         every { medlemAvFolketrygdenService.hentMedlemAvFolketrygden(BEHANDLING_ID_1) } returns medlemAvFolketrygden
@@ -283,7 +283,7 @@ class MedlemskapsperiodeServiceTest {
 
     @Test
     fun oppdaterMedlemskapsperiode_ugyldigTrygdedekning_kasterException() {
-        every { gyldigeTrygdedekningerService.hentTrygdedekninger(any()) } returns emptyList()
+        every { gyldigeTrygdedekningerService.hentTrygdedekninger(any(), any()) } returns emptyList()
         every { medlemAvFolketrygdenService.hentMedlemAvFolketrygden(BEHANDLING_ID_1) } returns MedlemAvFolketrygden().apply {
             behandlingsresultat = lagBehandlingsresultat()
         }
@@ -299,12 +299,12 @@ class MedlemskapsperiodeServiceTest {
                 Trygdedekninger.UTEN_DEKNING,
                 Folketrygdloven_kap2_bestemmelser.FTRL_KAP2_2_8_ANDRE_LEDD
             )
-        }.message.shouldContain("støttes ikke for en medlemskapsperiode")
+        }.message.shouldContain("støttes ikke")
     }
 
     @Test
     fun oppdaterMedlemskapsperiode_tomDatoErFørFomDato_kasterException() {
-        every { gyldigeTrygdedekningerService.hentTrygdedekninger(any()) } returns listOf(*Trygdedekninger.values())
+        every { gyldigeTrygdedekningerService.hentTrygdedekninger(any(), any()) } returns listOf(*Trygdedekninger.values())
         every { medlemAvFolketrygdenService.hentMedlemAvFolketrygden(BEHANDLING_ID_1) } returns MedlemAvFolketrygden().apply {
             behandlingsresultat = lagBehandlingsresultat()
         }
@@ -364,7 +364,7 @@ class MedlemskapsperiodeServiceTest {
 
     @Test
     fun oppdaterMedlemskapsperiode_finnerIkkeMedlemskapsperiode_kasterException() {
-        every { gyldigeTrygdedekningerService.hentTrygdedekninger(any()) } returns listOf(*Trygdedekninger.values())
+        every { gyldigeTrygdedekningerService.hentTrygdedekninger(any(), any()) } returns listOf(*Trygdedekninger.values())
         every { medlemAvFolketrygdenService.hentMedlemAvFolketrygden(BEHANDLING_ID_1) } returns MedlemAvFolketrygden().apply {
             medlemskapsperioder = mutableListOf(Medlemskapsperiode().apply { id = MEDLEMSKAPSPERIODE_ID_1 })
             behandlingsresultat = lagBehandlingsresultat()
