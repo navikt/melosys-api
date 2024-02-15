@@ -8,7 +8,7 @@ import io.kotest.matchers.collections.shouldHaveSize
 import io.kotest.matchers.nulls.shouldNotBeNull
 import no.nav.melosys.domain.kodeverk.Folketrygdloven_kap2_bestemmelser
 import no.nav.melosys.domain.kodeverk.Trygdedekninger
-import no.nav.melosys.service.medlemskapsperiode.PliktigeMedlemskapsbestemmelser
+import no.nav.melosys.service.ftrl.medlemskapsperiode.PliktigeMedlemskapsbestemmelser
 import org.junit.jupiter.api.Test
 
 class LovligeKombinasjonerTrygdedekningBestemmelseTest {

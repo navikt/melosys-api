@@ -1,4 +1,4 @@
-package no.nav.melosys.tjenester.gui.medlemskapsperiode;
+package no.nav.melosys.tjenester.gui.ftrl.medlemskapsperiode;
 
 import java.time.LocalDate;
 import java.util.Collections;
@@ -9,11 +9,11 @@ import no.nav.melosys.domain.kodeverk.Folketrygdloven_kap2_bestemmelser;
 import no.nav.melosys.domain.kodeverk.InnvilgelsesResultat;
 import no.nav.melosys.domain.kodeverk.Medlemskapstyper;
 import no.nav.melosys.domain.kodeverk.Trygdedekninger;
-import no.nav.melosys.service.medlemskapsperiode.MedlemskapsperiodeService;
-import no.nav.melosys.service.medlemskapsperiode.OpprettMedlemskapsperiodeService;
+import no.nav.melosys.service.ftrl.medlemskapsperiode.MedlemskapsperiodeService;
+import no.nav.melosys.service.ftrl.medlemskapsperiode.OpprettMedlemskapsperiodeService;
 import no.nav.melosys.service.tilgang.Aksesskontroll;
-import no.nav.melosys.tjenester.gui.medlemskapsperiode.dto.BestemmelseDto;
-import no.nav.melosys.tjenester.gui.medlemskapsperiode.dto.MedlemskapsperiodeDto;
+import no.nav.melosys.tjenester.gui.ftrl.medlemskapsperiode.dto.BestemmelseDto;
+import no.nav.melosys.tjenester.gui.ftrl.medlemskapsperiode.dto.MedlemskapsperiodeDto;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;

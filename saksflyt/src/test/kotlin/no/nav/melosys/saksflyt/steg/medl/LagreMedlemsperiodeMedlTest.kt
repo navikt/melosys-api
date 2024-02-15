@@ -15,7 +15,7 @@ import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingstyper
 import no.nav.melosys.saksflytapi.domain.Prosessinstans
 import no.nav.melosys.service.behandling.BehandlingsresultatService
 import no.nav.melosys.service.medl.MedlPeriodeService
-import no.nav.melosys.service.medlemskapsperiode.MedlemskapsperiodeService
+import no.nav.melosys.service.ftrl.medlemskapsperiode.MedlemskapsperiodeService
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.extension.ExtendWith

@@ -5,7 +5,7 @@ import no.nav.melosys.domain.kodeverk.Folketrygdloven_kap2_bestemmelser
 import no.nav.melosys.domain.kodeverk.Trygdedekninger
 import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingstema
 import no.nav.melosys.service.ftrl.bestemmelse.FtrlBestemmelser
-import no.nav.melosys.service.medlemskapsperiode.PliktigeMedlemskapsbestemmelser
+import no.nav.melosys.service.ftrl.medlemskapsperiode.PliktigeMedlemskapsbestemmelser
 import no.nav.security.token.support.core.api.Protected
 import org.springframework.context.annotation.Scope
 import org.springframework.http.ResponseEntity

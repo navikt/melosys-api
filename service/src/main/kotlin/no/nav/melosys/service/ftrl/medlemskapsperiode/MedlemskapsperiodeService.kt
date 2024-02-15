@@ -1,4 +1,4 @@
-package no.nav.melosys.service.medlemskapsperiode
+package no.nav.melosys.service.ftrl.medlemskapsperiode
 
 import io.getunleash.Unleash
 import no.nav.melosys.domain.Medlemskapsperiode

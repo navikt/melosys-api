@@ -1,4 +1,4 @@
-package no.nav.melosys.tjenester.gui.medlemskapsperiode
+package no.nav.melosys.tjenester.gui.ftrl.medlemskapsperiode
 
 import io.swagger.annotations.Api
 import io.swagger.annotations.ApiOperation

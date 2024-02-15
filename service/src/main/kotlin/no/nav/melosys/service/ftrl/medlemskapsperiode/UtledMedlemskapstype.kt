@@ -1,4 +1,4 @@
-package no.nav.melosys.service.medlemskapsperiode
+package no.nav.melosys.service.ftrl.medlemskapsperiode
 
 import no.nav.melosys.domain.kodeverk.Folketrygdloven_kap2_bestemmelser
 import no.nav.melosys.domain.kodeverk.Medlemskapstyper

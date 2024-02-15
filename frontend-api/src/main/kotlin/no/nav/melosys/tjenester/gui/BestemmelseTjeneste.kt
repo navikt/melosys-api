@@ -2,10 +2,10 @@ package no.nav.melosys.tjenester.gui
 
 import io.swagger.annotations.Api
 import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingstema
-import no.nav.melosys.service.medlemskapsperiode.UtledBestemmelserOgVilkår
-import no.nav.melosys.tjenester.gui.medlemskapsperiode.dto.BestemmelseMedVilkårOgBegrunnelserDto
-import no.nav.melosys.tjenester.gui.medlemskapsperiode.dto.FolketrygdlovenBestemmelserDto
-import no.nav.melosys.tjenester.gui.medlemskapsperiode.dto.VilkårOgBegrunnelserDto
+import no.nav.melosys.service.ftrl.medlemskapsperiode.UtledBestemmelserOgVilkår
+import no.nav.melosys.tjenester.gui.ftrl.medlemskapsperiode.dto.BestemmelseMedVilkårOgBegrunnelserDto
+import no.nav.melosys.tjenester.gui.ftrl.medlemskapsperiode.dto.FolketrygdlovenBestemmelserDto
+import no.nav.melosys.tjenester.gui.ftrl.medlemskapsperiode.dto.VilkårOgBegrunnelserDto
 import no.nav.security.token.support.core.api.Protected
 import org.springframework.context.annotation.Scope
 import org.springframework.http.ResponseEntity

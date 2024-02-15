@@ -1,15 +1,15 @@
-package no.nav.melosys.tjenester.gui.medlemskapsperiode;
+package no.nav.melosys.tjenester.gui.ftrl.medlemskapsperiode;
 
 import java.util.Collection;
 import java.util.stream.Collectors;
 
 import io.swagger.annotations.Api;
-import no.nav.melosys.service.medlemskapsperiode.MedlemskapsperiodeService;
-import no.nav.melosys.service.medlemskapsperiode.OpprettMedlemskapsperiodeService;
+import no.nav.melosys.service.ftrl.medlemskapsperiode.MedlemskapsperiodeService;
+import no.nav.melosys.service.ftrl.medlemskapsperiode.OpprettMedlemskapsperiodeService;
 import no.nav.melosys.service.tilgang.Aksesskontroll;
-import no.nav.melosys.tjenester.gui.medlemskapsperiode.dto.BestemmelseDto;
-import no.nav.melosys.tjenester.gui.medlemskapsperiode.dto.MedlemskapsperiodeDto;
-import no.nav.melosys.tjenester.gui.medlemskapsperiode.dto.MedlemskapsperiodeOppdateringDto;
+import no.nav.melosys.tjenester.gui.ftrl.medlemskapsperiode.dto.BestemmelseDto;
+import no.nav.melosys.tjenester.gui.ftrl.medlemskapsperiode.dto.MedlemskapsperiodeDto;
+import no.nav.melosys.tjenester.gui.ftrl.medlemskapsperiode.dto.MedlemskapsperiodeOppdateringDto;
 import no.nav.security.token.support.core.api.Protected;
 import org.springframework.context.annotation.Scope;
 import org.springframework.http.ResponseEntity;

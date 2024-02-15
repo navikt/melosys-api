@@ -2,7 +2,7 @@ package no.nav.melosys.service.ftrl
 
 import no.nav.melosys.domain.kodeverk.Folketrygdloven_kap2_bestemmelser
 import no.nav.melosys.domain.kodeverk.Trygdedekninger
-import no.nav.melosys.service.medlemskapsperiode.PliktigeMedlemskapsbestemmelser
+import no.nav.melosys.service.ftrl.medlemskapsperiode.PliktigeMedlemskapsbestemmelser
 
 object LovligeKombinasjonerTrygdedekningBestemmelse {
 
