@@ -7,6 +7,8 @@ import io.mockk.impl.annotations.MockK
 import io.mockk.junit5.MockKExtension
 import no.nav.melosys.domain.kodeverk.Avklartefaktatyper
 import no.nav.melosys.domain.kodeverk.Folketrygdloven_kap2_bestemmelser
+import no.nav.melosys.domain.kodeverk.Ikkeyrkesaktivrelasjontype
+import no.nav.melosys.domain.kodeverk.Ikkeyrkesaktivrelasjontype.*
 import no.nav.melosys.domain.kodeverk.Landkoder
 import no.nav.melosys.domain.mottatteopplysninger.MottatteOpplysninger
 import no.nav.melosys.domain.mottatteopplysninger.SøknadNorgeEllerUtenforEØS
@@ -64,7 +66,24 @@ class AvklarteFaktaForBestemmelseTest {
         avklarteFaktaForBestemmelse.hentAvklarteFakta(
             Folketrygdloven_kap2_bestemmelser.FTRL_KAP2_2_5_ANDRE_LEDD, 1L
         ).shouldContainExactly(
-            AvklarteFaktaForBestemmelse.AvklarteFaktaType(Avklartefaktatyper.IKKE_YRKESAKTIV_RELASJON, emptyList())
+            AvklarteFaktaForBestemmelse.AvklarteFaktaType(
+                Avklartefaktatyper.IKKE_YRKESAKTIV_RELASJON, listOf(
+                    BARN_2_5_ANDRE_LEDD, EKTEFELLE_2_5_ANDRE_LEDD_A_TIL_B, EKTEFELLE_2_5_ANDRE_LEDD_C_TIL_E
+                ).map(Ikkeyrkesaktivrelasjontype::name)
+            )
+        )
+    }
+
+    @Test
+    fun `avklarte fakta for FTRL_KAP2_2_8_FJERDE_LEDD er IKKE_YRKESAKTIV_RELASJON`() {
+        avklarteFaktaForBestemmelse.hentAvklarteFakta(
+            Folketrygdloven_kap2_bestemmelser.FTRL_KAP2_2_8_FJERDE_LEDD, 1L
+        ).shouldContainExactly(
+            AvklarteFaktaForBestemmelse.AvklarteFaktaType(
+                Avklartefaktatyper.IKKE_YRKESAKTIV_RELASJON, listOf(
+                    BARN_2_8_FJERDE_LEDD, EKTEFELLE_2_8_FJERDE_LEDD
+                ).map(Ikkeyrkesaktivrelasjontype::name)
+            )
         )
     }
 }

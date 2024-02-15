@@ -2,6 +2,7 @@ package no.nav.melosys.service.ftrl.bestemmelse.avklartefakta
 
 import no.nav.melosys.domain.kodeverk.Avklartefaktatyper
 import no.nav.melosys.domain.kodeverk.Folketrygdloven_kap2_bestemmelser
+import no.nav.melosys.domain.kodeverk.Ikkeyrkesaktivrelasjontype
 import no.nav.melosys.domain.kodeverk.Landkoder
 import no.nav.melosys.domain.mottatteopplysninger.data.Soeknadsland
 import no.nav.melosys.service.mottatteopplysninger.MottatteOpplysningerService
@@ -12,8 +13,23 @@ class AvklarteFaktaForBestemmelse(val mottatteOpplysningerService: MottatteOpply
     fun hentAvklarteFakta(bestemmelse: Folketrygdloven_kap2_bestemmelser, behandlingID: Long): List<AvklarteFaktaType> {
         return when (bestemmelse) {
             Folketrygdloven_kap2_bestemmelser.FTRL_KAP2_2_1_FØRSTE_LEDD -> ftrlKap2_1AvklarteFaktaForBehandling(behandlingID)
-            Folketrygdloven_kap2_bestemmelser.FTRL_KAP2_2_5_ANDRE_LEDD -> listOf(AvklarteFaktaType(Avklartefaktatyper.IKKE_YRKESAKTIV_RELASJON, emptyList()))
-            Folketrygdloven_kap2_bestemmelser.FTRL_KAP2_2_8_FJERDE_LEDD -> listOf(AvklarteFaktaType(Avklartefaktatyper.IKKE_YRKESAKTIV_RELASJON, emptyList()))
+            Folketrygdloven_kap2_bestemmelser.FTRL_KAP2_2_5_ANDRE_LEDD -> listOf(
+                AvklarteFaktaType(
+                    Avklartefaktatyper.IKKE_YRKESAKTIV_RELASJON, listOf(
+                        Ikkeyrkesaktivrelasjontype.BARN_2_5_ANDRE_LEDD,
+                        Ikkeyrkesaktivrelasjontype.EKTEFELLE_2_5_ANDRE_LEDD_A_TIL_B,
+                        Ikkeyrkesaktivrelasjontype.EKTEFELLE_2_5_ANDRE_LEDD_C_TIL_E,
+                    ).map(Ikkeyrkesaktivrelasjontype::name)
+                )
+            )
+            Folketrygdloven_kap2_bestemmelser.FTRL_KAP2_2_8_FJERDE_LEDD -> listOf(
+                AvklarteFaktaType(
+                    Avklartefaktatyper.IKKE_YRKESAKTIV_RELASJON, listOf(
+                        Ikkeyrkesaktivrelasjontype.BARN_2_8_FJERDE_LEDD,
+                        Ikkeyrkesaktivrelasjontype.EKTEFELLE_2_8_FJERDE_LEDD,
+                    ).map(Ikkeyrkesaktivrelasjontype::name)
+                )
+            )
             else -> emptyList()
         }
     }
