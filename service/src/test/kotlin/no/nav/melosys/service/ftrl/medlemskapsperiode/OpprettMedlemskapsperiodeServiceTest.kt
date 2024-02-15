@@ -1,4 +1,4 @@
-package no.nav.melosys.service.medlemskapsperiode
+package no.nav.melosys.service.ftrl.medlemskapsperiode
 
 import io.getunleash.FakeUnleash
 import io.kotest.assertions.throwables.shouldThrow

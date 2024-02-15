@@ -1,4 +1,4 @@
-package no.nav.melosys.service.medlemskapsperiode
+package no.nav.melosys.service.ftrl.medlemskapsperiode
 
 import no.nav.melosys.domain.Behandlingsresultat
 import no.nav.melosys.domain.Fagsak
