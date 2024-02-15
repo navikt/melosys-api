@@ -22,6 +22,8 @@ import javax.xml.bind.JAXBElement
 import javax.xml.bind.JAXBException
 import javax.xml.datatype.DatatypeConfigurationException
 
+
+//TODO sjekk alle null safe operasjoner
 open class AvslagYrkesaktivMapper : BrevDataMapper {
 
     companion object {
