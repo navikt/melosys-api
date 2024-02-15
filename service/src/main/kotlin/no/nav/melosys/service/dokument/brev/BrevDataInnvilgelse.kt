@@ -26,7 +26,7 @@ class BrevDataInnvilgelse(brevbestillingDto: BrevbestillingDto, saksbehandler: S
         return Optional.ofNullable(anmodningsperiodesvar)
     }
 
-    fun setAnmodningsperiodesvar(anmodningsperiodesvar: AnmodningsperiodeSvar) {
+    fun setAnmodningsperiodesvar(anmodningsperiodesvar: AnmodningsperiodeSvar?) {
         this.anmodningsperiodesvar = anmodningsperiodesvar
     }
 }
