@@ -1,10 +1,10 @@
-package no.nav.melosys.service.lovligekombinasjoner
+package no.nav.melosys.service.ftrl
 
 import no.nav.melosys.domain.kodeverk.Folketrygdloven_kap2_bestemmelser
 import no.nav.melosys.domain.kodeverk.Trygdedekninger
 import no.nav.melosys.service.medlemskapsperiode.PliktigeMedlemskapsbestemmelser
 
-object LovligeKombinasjonerMedlemskapsperiodeRegler {
+object LovligeKombinasjonerTrygdedekningBestemmelse {
 
     val lovligeKombinasjonerDekningBestemmelse = mapOf(
         listOf(Trygdedekninger.FULL_DEKNING_FTRL) to listOf(
@@ -49,5 +49,12 @@ object LovligeKombinasjonerMedlemskapsperiodeRegler {
 
     fun erGyldigKombinasjon(bestemmelse: Folketrygdloven_kap2_bestemmelser, trygdedekning: Trygdedekninger): Boolean {
         return bestemmelse in hentLovligeBestemmelser(trygdedekning)
+    }
+
+    fun erBestemmelseGyldig(bestemmelse: Folketrygdloven_kap2_bestemmelser, trygdedekning: Trygdedekninger): Boolean {
+        if (bestemmelse in PliktigeMedlemskapsbestemmelser.bestemmelser) {
+            return true
+        }
+        return erGyldigKombinasjon(bestemmelse, trygdedekning)
     }
 }

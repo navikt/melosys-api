@@ -13,7 +13,7 @@ import no.nav.melosys.exception.FunksjonellException
 import no.nav.melosys.repository.MedlemAvFolketrygdenRepository
 import no.nav.melosys.service.behandling.BehandlingsresultatService
 import no.nav.melosys.service.behandling.UtledMottaksdato
-import no.nav.melosys.service.lovligekombinasjoner.LovligeKombinasjonerMedlemskapsperiodeRegler
+import no.nav.melosys.service.ftrl.LovligeKombinasjonerTrygdedekningBestemmelse
 import org.springframework.stereotype.Service
 import org.springframework.transaction.annotation.Transactional
 
@@ -93,8 +93,7 @@ class OpprettMedlemskapsperiodeService(
         if (bestemmelse !in støttedeBestemmelser) {
             throw FunksjonellException("Støtter ikke perioder med bestemmelse $bestemmelse for behandlingstema $behandlingstema")
         }
-        val lovligeBestemmelser = LovligeKombinasjonerMedlemskapsperiodeRegler.hentLovligeBestemmelser(trygdedekning)
-        if (bestemmelse !in lovligeBestemmelser) {
+        if (!LovligeKombinasjonerTrygdedekningBestemmelse.erBestemmelseGyldig(bestemmelse, trygdedekning)) {
             throw FunksjonellException("Ulovlig kombinasjon av bestemmelse $bestemmelse og trygdedekning $trygdedekning")
         }
     }

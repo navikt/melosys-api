@@ -1,6 +1,7 @@
 package no.nav.melosys.tjenester.gui.ftrl
 
 import io.swagger.annotations.Api
+import no.nav.melosys.domain.kodeverk.Folketrygdloven_kap2_bestemmelser
 import no.nav.melosys.domain.kodeverk.Trygdedekninger
 import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingstema
 import no.nav.melosys.service.ftrl.GyldigeTrygdedekningerService
@@ -24,8 +25,9 @@ class GyldigeTrygdedekningerTjeneste(
 
     @GetMapping
     fun hentGyldigeTrygdedekninger(
-        @RequestParam("behandlingstema", required = true) behandlingstema: Behandlingstema
+        @RequestParam("behandlingstema", required = true) behandlingstema: Behandlingstema,
+        @RequestParam("bestemmelse", required = false) bestemmelse: Folketrygdloven_kap2_bestemmelser?
     ): ResponseEntity<List<Trygdedekninger>> {
-        return ResponseEntity.ok(gyldigeTrygdedekningerService.hentTrygdedekninger(behandlingstema))
+        return ResponseEntity.ok(gyldigeTrygdedekningerService.hentTrygdedekninger(behandlingstema, bestemmelse))
     }
 }

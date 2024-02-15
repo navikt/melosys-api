@@ -135,8 +135,8 @@ class MedlemskapsperiodeService(
             throw FunksjonellException("Tom-dato er påkrevd")
         } else if (fom == null || innvilgelsesResultat == null || bestemmelse == null || trygdedekning == null) {
             throw FunksjonellException("Fom-dato, innvilgelsesresultat, bestemmelse og trygdedekning er påkrevd")
-        } else if (trygdedekning !in gyldigeTrygdedekningerService.hentTrygdedekninger(behandlingstema)) {
-            throw FunksjonellException("Trygedekning $trygdedekning støttes ikke for en medlemskapsperiode")
+        } else if (trygdedekning !in gyldigeTrygdedekningerService.hentTrygdedekninger(behandlingstema, bestemmelse)) {
+            throw FunksjonellException("Trygedekning $trygdedekning støttes ikke for behandlingstema $behandlingstema og bestemmelse $bestemmelse")
         } else if (PeriodeRegler.feilIPeriode(fom, tom)) {
             throw FunksjonellException("Tom-dato kan ikke være før fom-dato")
         }
