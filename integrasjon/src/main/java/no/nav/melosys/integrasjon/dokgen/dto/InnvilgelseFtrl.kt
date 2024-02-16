@@ -22,8 +22,8 @@ class InnvilgelseFtrl(
     @JsonInclude(JsonInclude.Include.NON_NULL)
     val medlemskapsperioder: List<MedlemskapsperiodeDto>,
     val bestemmelse: Folketrygdloven_kap2_bestemmelser?,
-    val avslåttHelsedelFørMottaksdato: Boolean,
-    val avslåttMedlemskapsperiodeFørMottaksdato: Boolean,
+    val avslåttMedlemskapsperiodeFørMottaksdatoHelsedel: Boolean,
+    val avslåttMedlemskapsperiodeFørMottaksdatoFullDekning: Boolean,
     val trygdeavgiftMottaker: Trygdeavgiftmottaker?,
     val fullmektigTrygdeavgift: String?,
     val skatteplikttype: Skatteplikttype?,
@@ -46,8 +46,8 @@ class InnvilgelseFtrl(
         private var medlemskapsperioder: List<MedlemskapsperiodeDto> = emptyList()
         private var bestemmelse: Folketrygdloven_kap2_bestemmelser? = null
         private var fullmektigTrygdeavgift: String? = null
-        private var avslåttHelsedelFørMottaksdato = false
-        private var avslåttMedlemskapsperiodeFørMottaksdato = false
+        private var avslåttMedlemskapsperiodeFørMottaksdatoHelsedel = false
+        private var avslåttMedlemskapsperiodeFørMottaksdatoFullDekning = false
         private var trygdeavgiftMottaker: Trygdeavgiftmottaker? = null
         private var skatteplikttype: Skatteplikttype? = null
         private var begrunnelse: Kodeverk? = null
@@ -86,13 +86,13 @@ class InnvilgelseFtrl(
             return this
         }
 
-        fun avslåttHelsedelFørMottaksdato(avslåttHelsedelFørMottaksdato: Boolean): Builder {
-            this.avslåttHelsedelFørMottaksdato = avslåttHelsedelFørMottaksdato
+        fun avslåttMedlemskapsperiodeFørMottaksdatoHelsedel(avslåttMedlemskapsperiodeFørMottaksdatoHelsedel: Boolean): Builder {
+            this.avslåttMedlemskapsperiodeFørMottaksdatoHelsedel = avslåttMedlemskapsperiodeFørMottaksdatoHelsedel
             return this
         }
 
-        fun avslåttMedlemskapsperiodeFørMottaksdato(avslåttMedlemskapsperiodeFørMottaksdato: Boolean): Builder {
-            this.avslåttMedlemskapsperiodeFørMottaksdato = avslåttMedlemskapsperiodeFørMottaksdato
+        fun avslåttMedlemskapsperiodeFørMottaksdatoFullDekning(avslåttMedlemskapsperiodeFørMottaksdatoFullDekning: Boolean): Builder {
+            this.avslåttMedlemskapsperiodeFørMottaksdatoFullDekning = avslåttMedlemskapsperiodeFørMottaksdatoFullDekning
             return this
         }
 
@@ -164,8 +164,8 @@ class InnvilgelseFtrl(
                 avgiftsperioder,
                 medlemskapsperioder,
                 bestemmelse,
-                avslåttHelsedelFørMottaksdato,
-                avslåttMedlemskapsperiodeFørMottaksdato,
+                avslåttMedlemskapsperiodeFørMottaksdatoHelsedel,
+                avslåttMedlemskapsperiodeFørMottaksdatoFullDekning,
                 trygdeavgiftMottaker,
                 fullmektigTrygdeavgift,
                 skatteplikttype,
