@@ -19,13 +19,13 @@ import org.springframework.web.context.WebApplicationContext
 @Scope(value = WebApplicationContext.SCOPE_REQUEST)
 class AvklarteFaktaForBestemmelseTjeneste(private val avklarteFaktaForBestemmelse: AvklarteFaktaForBestemmelse) {
 
-    @GetMapping("/ftrl/bestemmelser/{bestemmelseID}/avklartefakta")
+    @GetMapping("/ftrl/bestemmelser/{bestemmelse}/avklartefakta")
     fun hentAvklarteFakta(
-        @PathVariable bestemmelseID: Folketrygdloven_kap2_bestemmelser,
+        @PathVariable bestemmelse: Folketrygdloven_kap2_bestemmelser,
         @RequestParam("behandlingID", required = true) behandlingID: Long
     ): ResponseEntity<AvklarteFaktaForBestemmelseDto> {
         val avklarteFaktaDtoList =
-            avklarteFaktaForBestemmelse.hentAvklarteFakta(bestemmelseID, behandlingID).map { AvklarteFaktaDto(it.type, it.muligeFakta) }
+            avklarteFaktaForBestemmelse.hentAvklarteFakta(bestemmelse, behandlingID).map { AvklarteFaktaDto(it.type, it.muligeFakta) }
         return ResponseEntity.ok(AvklarteFaktaForBestemmelseDto(avklarteFaktaDtoList))
     }
 
