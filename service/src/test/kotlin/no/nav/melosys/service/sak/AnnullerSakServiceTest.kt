@@ -13,7 +13,7 @@ import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingsresultattyper
 import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingsstatus
 import no.nav.melosys.saksflytapi.ProsessinstansService
 import no.nav.melosys.service.behandling.BehandlingsresultatService
-import no.nav.melosys.service.medlemskapsperiode.MedlemskapsperiodeService
+import no.nav.melosys.service.ftrl.medlemskapsperiode.MedlemskapsperiodeService
 import no.nav.melosys.service.oppgave.OppgaveService
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.extension.ExtendWith

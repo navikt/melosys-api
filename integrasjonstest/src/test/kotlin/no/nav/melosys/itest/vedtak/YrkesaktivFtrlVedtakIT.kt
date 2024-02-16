@@ -45,8 +45,8 @@ import no.nav.melosys.service.avklartefakta.AvklartefaktaDto
 import no.nav.melosys.service.avklartefakta.AvklartefaktaService
 import no.nav.melosys.service.behandling.BehandlingsresultatService
 import no.nav.melosys.service.journalforing.JournalfoeringService
-import no.nav.melosys.service.medlemskapsperiode.MedlemskapsperiodeService
-import no.nav.melosys.service.medlemskapsperiode.OpprettMedlemskapsperiodeService
+import no.nav.melosys.service.ftrl.medlemskapsperiode.MedlemskapsperiodeService
+import no.nav.melosys.service.ftrl.medlemskapsperiode.OpprettMedlemskapsperiodeService
 import no.nav.melosys.service.mottatteopplysninger.MottatteOpplysningerService
 import no.nav.melosys.service.oppgave.OppgaveService
 import no.nav.melosys.service.sak.OpprettBehandlingForSak

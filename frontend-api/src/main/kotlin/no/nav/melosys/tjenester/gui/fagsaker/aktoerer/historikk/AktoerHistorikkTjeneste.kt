@@ -42,7 +42,7 @@ class AktoerHistorikkTjeneste(
         return aktører.map {
             AktoerHistorikkDto(
                 registrertFra = it.registrertFra,
-                registretTil = it.registrertTil,
+                registrertTil = it.registrertTil,
                 rolle = it.rolle,
                 aktoerID = it.aktørId,
                 personIdent = it.personIdent,
@@ -50,6 +50,6 @@ class AktoerHistorikkTjeneste(
                 orgnr = it.orgnr,
                 fullmakter = it.fullmakter,
             )
-        }.sortedBy { it.registrertFra }.toList()
+        }.sortedByDescending { it.registrertFra }.toList()
     }
 }
