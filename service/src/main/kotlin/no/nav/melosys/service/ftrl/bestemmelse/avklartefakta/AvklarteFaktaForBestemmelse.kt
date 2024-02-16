@@ -1,9 +1,6 @@
 package no.nav.melosys.service.ftrl.bestemmelse.avklartefakta
 
-import no.nav.melosys.domain.kodeverk.Avklartefaktatyper
-import no.nav.melosys.domain.kodeverk.Folketrygdloven_kap2_bestemmelser
-import no.nav.melosys.domain.kodeverk.Ikkeyrkesaktivrelasjontype
-import no.nav.melosys.domain.kodeverk.Land_iso2
+import no.nav.melosys.domain.kodeverk.*
 import no.nav.melosys.domain.mottatteopplysninger.data.Soeknadsland
 import no.nav.melosys.service.mottatteopplysninger.MottatteOpplysningerService
 import org.springframework.stereotype.Component
@@ -47,7 +44,15 @@ class AvklarteFaktaForBestemmelse(val mottatteOpplysningerService: MottatteOpply
 
         // Ett eller flere land utenfor Norge. Vi legger alltid til grunn at det gjelder opphold i utlandet ved flere land.
         if (søknadsland.landkoder.filter { it != Land_iso2.NO.toString() }.isNotEmpty() || søknadsland.isErUkjenteEllerAlleEosLand) {
-            return listOf(AvklarteFaktaType(Avklartefaktatyper.IKKE_YRKESAKTIV_FTRL_2_1_OPPHOLD, emptyList()))
+            return listOf(
+                AvklarteFaktaType(
+                    Avklartefaktatyper.IKKE_YRKESAKTIV_FTRL_2_1_OPPHOLD,
+                    listOf(
+                        Ikkeyrkesaktivoppholdtype.MIDLERTIDIG_2_1_FJERDE_LEDD,
+                        Ikkeyrkesaktivoppholdtype.VEKSELVIS_2_1_FJERDE_LEDD
+                    ).map(Ikkeyrkesaktivoppholdtype::name)
+                )
+            )
         }
         return emptyList()
     }

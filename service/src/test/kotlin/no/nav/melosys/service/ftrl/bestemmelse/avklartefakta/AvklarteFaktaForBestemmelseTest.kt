@@ -5,11 +5,10 @@ import io.kotest.matchers.collections.shouldContainExactly
 import io.mockk.every
 import io.mockk.impl.annotations.MockK
 import io.mockk.junit5.MockKExtension
-import no.nav.melosys.domain.kodeverk.Avklartefaktatyper
-import no.nav.melosys.domain.kodeverk.Folketrygdloven_kap2_bestemmelser
-import no.nav.melosys.domain.kodeverk.Ikkeyrkesaktivrelasjontype
+import no.nav.melosys.domain.kodeverk.*
+import no.nav.melosys.domain.kodeverk.Ikkeyrkesaktivoppholdtype.MIDLERTIDIG_2_1_FJERDE_LEDD
+import no.nav.melosys.domain.kodeverk.Ikkeyrkesaktivoppholdtype.VEKSELVIS_2_1_FJERDE_LEDD
 import no.nav.melosys.domain.kodeverk.Ikkeyrkesaktivrelasjontype.*
-import no.nav.melosys.domain.kodeverk.Landkoder
 import no.nav.melosys.domain.mottatteopplysninger.MottatteOpplysninger
 import no.nav.melosys.domain.mottatteopplysninger.SøknadNorgeEllerUtenforEØS
 import no.nav.melosys.domain.mottatteopplysninger.data.Soeknadsland
@@ -43,7 +42,10 @@ class AvklarteFaktaForBestemmelseTest {
         avklarteFaktaForBestemmelse.hentAvklarteFakta(
             Folketrygdloven_kap2_bestemmelser.FTRL_KAP2_2_1_FØRSTE_LEDD, 1L
         ).shouldContainExactly(
-            AvklarteFaktaForBestemmelse.AvklarteFaktaType(Avklartefaktatyper.IKKE_YRKESAKTIV_FTRL_2_1_OPPHOLD, emptyList())
+            AvklarteFaktaForBestemmelse.AvklarteFaktaType(
+                Avklartefaktatyper.IKKE_YRKESAKTIV_FTRL_2_1_OPPHOLD,
+                listOf(MIDLERTIDIG_2_1_FJERDE_LEDD, VEKSELVIS_2_1_FJERDE_LEDD).map(Ikkeyrkesaktivoppholdtype::name)
+            )
         )
     }
 
