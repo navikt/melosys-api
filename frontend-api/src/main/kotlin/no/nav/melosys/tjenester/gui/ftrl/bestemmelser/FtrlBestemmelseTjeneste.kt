@@ -20,7 +20,7 @@ import org.springframework.web.context.WebApplicationContext
 @Scope(value = WebApplicationContext.SCOPE_REQUEST)
 class FtrlBestemmelseTjeneste(private val ftrlBestemmelser: FtrlBestemmelser) {
 
-    @GetMapping("/ftrl/bestemmelser/")
+    @GetMapping("/ftrl/bestemmelser")
     fun hentBestemmelser(
         @RequestParam("behandlingstema", required = false) behandlingstema: Behandlingstema?,
         @RequestParam("trygdedekning", required = false) trygdedekning: Trygdedekninger?
