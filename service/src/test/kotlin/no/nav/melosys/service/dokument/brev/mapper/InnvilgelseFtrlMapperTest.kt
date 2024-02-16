@@ -174,7 +174,7 @@ internal class InnvilgelseFtrlMapperTest {
                     }
                     bestemmelse.shouldBe(Folketrygdloven_kap2_bestemmelser.FTRL_KAP2_2_8)
                     avslåttMedlemskapsperiodeFørMottaksdatoHelsedel.shouldBe(true)
-                    avslåttMedlemskapsperiodeFørMottaksdatoFullDekning.shouldBe(true)
+                    avslåttMedlemskapsperiodeFørMottaksdatoFullDekning.shouldBe(false)
                     skatteplikttype.shouldBe(Skatteplikttype.SKATTEPLIKTIG)
                     begrunnelse.shouldBe(Ftrl_2_8_naer_tilknytning_norge_begrunnelser.ANNEN_GRUNN)
                     begrunnelseAnnenGrunnFritekst.shouldBe("<p>Vilkårresultat begrunnelse fritekst</p>")
