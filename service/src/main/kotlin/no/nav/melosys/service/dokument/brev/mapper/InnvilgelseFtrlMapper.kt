@@ -140,6 +140,7 @@ class InnvilgelseFtrlMapper(
 
     private fun Medlemskapsperiode.harHelsedelDekning(): Boolean = listOf(
         Trygdedekninger.FTRL_2_7_TREDJE_LEDD_B_HELSE_SYKE_FORELDREPENGER,
+        Trygdedekninger.FTRL_2_7A_ANDRE_LEDD_B_HELSE_SYKE_FORELDREPENGER,
         Trygdedekninger.FTRL_2_9_FØRSTE_LEDD_A_HELSE,
         Trygdedekninger.FTRL_2_9_FØRSTE_LEDD_A_ANDRE_LEDD_HELSE_SYKE_FORELDREPENGER,
         Trygdedekninger.FTRL_2_9_FØRSTE_LEDD_C_ANDRE_LEDD_HELSE_PENSJON_SYKE_FORELDREPENGER
