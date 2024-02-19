@@ -92,7 +92,7 @@ class JournalfoeringIT(
             .shouldBeEqualToComparingFields(Soeknad().apply {
                 soeknadsland.apply {
                     landkoder = listOf(Landkoder.IE.kode)
-                    setFlereLandUkjentHvilke(false)
+                    isFlereLandUkjentHvilke = false
                 }
                 periode = Periode(
                     periodeFOM,

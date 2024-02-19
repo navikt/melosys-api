@@ -175,7 +175,7 @@ class EndreSakService(
         if (soeknadsland == null || soeknadsland.landkoder.isEmpty()) {
             return tomSøknadsland
         }
-        if ((nySakstype != EU_EOS) && (soeknadsland.isFlereLandUkjentHvilke() || (soeknadsland.landkoder.size != 1))) {
+        if ((nySakstype != EU_EOS) && (soeknadsland.isFlereLandUkjentHvilke || (soeknadsland.landkoder.size != 1))) {
             return tomSøknadsland
         }
 

@@ -130,7 +130,7 @@ class InngangsvilkaarServiceTest {
     }
 
     @Test
-    void vurderOgLagreInngangsvilkår_ukjenteEllerAlleEosLand() {
+    void vurderOgLagreInngangsvilkår_flereLandUkjentHvilke() {
         final var periode = new no.nav.melosys.domain.mottatteopplysninger.data.Periode(LocalDate.now().plusYears(1), LocalDate.MAX);
         when(behandlingService.hentBehandling(anyLong())).thenReturn(lagBehandling());
         final Set<Statsborgerskap> statsborgerskap = Set.of(

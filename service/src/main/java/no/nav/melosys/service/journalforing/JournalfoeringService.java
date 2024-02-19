@@ -384,9 +384,9 @@ public class JournalfoeringService {
 
         if (Behandling.erBehandlingAvSøknadArbeidIFlereLand(behandlingstemaKode)) {
             if (flereLandUkjentHvilke && antallLand != 0) {
-                throw new FunksjonellException(String.format("Det kan ikke være noen land for behandlingstema %s om ukjenteEllerAlleEosLand er valgt", behandlingstemaKode));
+                throw new FunksjonellException(String.format("Det kan ikke være noen land for behandlingstema %s om flereLandUkjentHvilke er valgt", behandlingstemaKode));
             } else if (!flereLandUkjentHvilke && antallLand < 2) {
-                throw new FunksjonellException(String.format("Det er påkrevd med to eller flere land for behandlingstema %s om ikke ukjenteEllerAlleEosLand er valgt", behandlingstemaKode));
+                throw new FunksjonellException(String.format("Det er påkrevd med to eller flere land for behandlingstema %s om ikke flereLandUkjentHvilke er valgt", behandlingstemaKode));
             }
         } else if (Behandling.erBehandlingAvSøknadUtsendtArbeidstaker(behandlingstemaKode) && antallLand != 1) {
             throw new FunksjonellException("Kun ett søknadsland er tillatt for behandlingstema " + behandlingstemaKode);
