@@ -43,7 +43,7 @@ class AvklarteFaktaForBestemmelse(val mottatteOpplysningerService: MottatteOpply
         }
 
         // Ett eller flere land utenfor Norge. Vi legger alltid til grunn at det gjelder opphold i utlandet ved flere land.
-        if (søknadsland.landkoder.filter { it != Land_iso2.NO.toString() }.isNotEmpty() || søknadsland.isErUkjenteEllerAlleEosLand) {
+        if (søknadsland.landkoder.filter { it != Land_iso2.NO.toString() }.isNotEmpty() || søknadsland.isFlereLandUkjentHvilke) {
             return listOf(
                 AvklarteFaktaType(
                     Avklartefaktatyper.IKKE_YRKESAKTIV_FTRL_2_1_OPPHOLD,

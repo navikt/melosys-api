@@ -78,7 +78,7 @@ class OpprettSakTest {
         OpprettSakDto opprettSakDto = random.nextObject(OpprettSakDto.class);
         opprettSakDto.setSakstype(Sakstyper.EU_EOS);
         opprettSakDto.setBehandlingstema(Behandlingstema.FORESPØRSEL_TRYGDEMYNDIGHET);
-        opprettSakDto.getSoknadDto().land.setErUkjenteEllerAlleEosLand(false);
+        opprettSakDto.getSoknadDto().land.setFlereLandUkjentHvilke(false);
 
         Oppgave oppgave = new Oppgave.Builder().setOppgavetype(Oppgavetyper.BEH_SAK_MK).setJournalpostId("1234").build();
         when(oppgaveService.hentOppgaveMedOppgaveID(opprettSakDto.getOppgaveID())).thenReturn(oppgave);
@@ -284,7 +284,7 @@ class OpprettSakTest {
         opprettSakDto.setSakstype(Sakstyper.EU_EOS);
         opprettSakDto.setBehandlingstema(Behandlingstema.UTSENDT_ARBEIDSTAKER);
         opprettSakDto.setBehandlingstype(Behandlingstyper.HENVENDELSE);
-        opprettSakDto.getSoknadDto().land.setErUkjenteEllerAlleEosLand(false);
+        opprettSakDto.getSoknadDto().land.setFlereLandUkjentHvilke(false);
         opprettSakDto.getSoknadDto().land.getLandkoder().clear();
         opprettSakDto.getSoknadDto().periode = null;
         Oppgave oppgave = new Oppgave.Builder().setOppgavetype(Oppgavetyper.BEH_SAK_MK).setJournalpostId(JP_ID).build();
@@ -323,9 +323,9 @@ class OpprettSakTest {
             .withMessageContaining("kan ikke opprettes på bakgrunn av oppgave med type");
     }
 
-    private SoeknadslandDto lagSoeknadslandDto(boolean erUkjenteEllerAlleEosLand) {
-        List<String> landkoder = erUkjenteEllerAlleEosLand ? Collections.emptyList() : Collections.singletonList("DK");
-        return new SoeknadslandDto(landkoder, erUkjenteEllerAlleEosLand);
+    private SoeknadslandDto lagSoeknadslandDto(boolean flereLandUkjentHvilke) {
+        List<String> landkoder = flereLandUkjentHvilke ? Collections.emptyList() : Collections.singletonList("DK");
+        return new SoeknadslandDto(landkoder, flereLandUkjentHvilke);
     }
 
     @Test
@@ -411,7 +411,7 @@ class OpprettSakTest {
         opprettSakDto.setSakstema(Sakstemaer.MEDLEMSKAP_LOVVALG);
         opprettSakDto.setBehandlingstema(Behandlingstema.UTSENDT_ARBEIDSTAKER);
         opprettSakDto.setBehandlingstype(Behandlingstyper.FØRSTEGANG);
-        opprettSakDto.getSoknadDto().land.setErUkjenteEllerAlleEosLand(false);
+        opprettSakDto.getSoknadDto().land.setFlereLandUkjentHvilke(false);
         opprettSakDto.getSoknadDto().land.getLandkoder().clear();
 
         assertThatExceptionOfType(FunksjonellException.class)
@@ -426,7 +426,7 @@ class OpprettSakTest {
         opprettSakDto.setSakstema(Sakstemaer.MEDLEMSKAP_LOVVALG);
         opprettSakDto.setBehandlingstema(Behandlingstema.UTSENDT_ARBEIDSTAKER);
         opprettSakDto.setBehandlingstype(Behandlingstyper.FØRSTEGANG);
-        opprettSakDto.getSoknadDto().land.setErUkjenteEllerAlleEosLand(true);
+        opprettSakDto.getSoknadDto().land.setFlereLandUkjentHvilke(true);
         opprettSakDto.getSoknadDto().land.setLandkoder(Collections.singletonList("DK"));
 
         assertThatExceptionOfType(FunksjonellException.class)

@@ -53,7 +53,7 @@ public class BrevDataByggerInnvilgelseFlereLand implements BrevDataBygger {
                 dataGrunnlag.getAvklarteVirksomheterGrunnlag().hentUtenlandskeArbeidsgivere());
 
         brevdata.lovvalgsperiode = lovvalgsperiodeService.hentLovvalgsperiode(behandlingID);
-        brevdata.erUkjenteEllerAlleEosLand = landvelgerService.erUkjenteEllerAlleEosLand(behandlingID);
+        brevdata.erUkjenteEllerAlleEosLand = landvelgerService.isFlereLandUkjentHvilke(behandlingID);
         brevdata.alleArbeidsland = landvelgerService.hentAlleArbeidsland(behandlingID).stream()
             .map(Land_iso2::getBeskrivelse)
             .collect(Collectors.toList());
