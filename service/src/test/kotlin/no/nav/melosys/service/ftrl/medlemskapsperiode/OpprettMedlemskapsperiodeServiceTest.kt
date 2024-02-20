@@ -20,9 +20,11 @@ import no.nav.melosys.domain.mottatteopplysninger.MottatteOpplysninger
 import no.nav.melosys.domain.mottatteopplysninger.SøknadNorgeEllerUtenforEØS
 import no.nav.melosys.domain.mottatteopplysninger.data.Periode
 import no.nav.melosys.exception.FunksjonellException
+import no.nav.melosys.featuretoggle.ToggleName
 import no.nav.melosys.repository.MedlemAvFolketrygdenRepository
 import no.nav.melosys.service.behandling.BehandlingsresultatService
 import no.nav.melosys.service.behandling.UtledMottaksdato
+import no.nav.melosys.service.ftrl.bestemmelse.FtrlBestemmelser
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.extension.ExtendWith
@@ -36,6 +38,9 @@ class OpprettMedlemskapsperiodeServiceTest {
 
     @MockK
     private lateinit var behandlingsresultatService: BehandlingsresultatService
+
+    @MockK
+    private lateinit var ftrlBestemmelser: FtrlBestemmelser
 
     @MockK
     private lateinit var utledMottaksdato: UtledMottaksdato
@@ -52,12 +57,15 @@ class OpprettMedlemskapsperiodeServiceTest {
 
     @BeforeEach
     fun setup() {
+        fakeUnleash.resetAll()
         opprettMedlemskapsperiodeService =
             OpprettMedlemskapsperiodeService(
                 medlemAvFolketrygdenRepository,
                 behandlingsresultatService,
+                ftrlBestemmelser,
                 utledMottaksdato,
-                utledBestemmelserOgVilkår
+                utledBestemmelserOgVilkår,
+                fakeUnleash
             )
     }
 
@@ -231,10 +239,24 @@ class OpprettMedlemskapsperiodeServiceTest {
         }.message.shouldContain("er påkrevd for bestemmelse")
     }
 
+    @Deprecated("MELOSYS_FTRL_IKKE_YRKESAKTIV melosys.ftrl.ikke_yrkesaktiv")
     @Test
     fun opprettForslagPåMedlemskapsperioder_støtterIkkeBestemmelse_kasterFeil() {
         val ustøttetBestemmelse = Folketrygdloven_kap2_bestemmelser.FTRL_KAP2_2_8_FØRSTE_LEDD_D
         every { behandlingsresultatService.hentBehandlingsresultat(BEH_RES_ID) } returns lagBehandlingsresultat()
+
+
+        shouldThrow<FunksjonellException> {
+            opprettMedlemskapsperiodeService.opprettForslagPåMedlemskapsperioder(BEH_RES_ID, ustøttetBestemmelse)
+        }.message.shouldContain("Støtter ikke")
+    }
+
+    @Test
+    fun opprettForslagPåMedlemskapsperioder_støtterIkkeBestemmelse_feiler() {
+        fakeUnleash.enable(ToggleName.MELOSYS_FTRL_IKKE_YRKESAKTIV)
+        val ustøttetBestemmelse = Folketrygdloven_kap2_bestemmelser.FTRL_KAP2_2_8_FØRSTE_LEDD_D
+        every { behandlingsresultatService.hentBehandlingsresultat(BEH_RES_ID) } returns lagBehandlingsresultat()
+        every { ftrlBestemmelser.hentBestemmelser(any(), any()) } returns emptyList()
 
 
         shouldThrow<FunksjonellException> {
