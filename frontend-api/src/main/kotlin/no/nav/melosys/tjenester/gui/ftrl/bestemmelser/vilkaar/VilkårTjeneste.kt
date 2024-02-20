@@ -54,7 +54,7 @@ class VilkårTjeneste(private val vilkårForBestemmelse: VilkårForBestemmelse) 
         }
     }
 
-    data class VilkårForBestemmelseDto(val avklarteFakta: List<VilkårOgBegrunnelserDto>)
+    data class VilkårForBestemmelseDto(val vilkår: List<VilkårOgBegrunnelserDto>)
 
     data class VilkårOgBegrunnelserDto(val vilkår: Vilkaar, val defaultOppfylt: Boolean?, val muligeBegrunnelser: Collection<String>)
 }
