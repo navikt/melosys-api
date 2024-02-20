@@ -97,21 +97,30 @@ class OpprettMedlemskapsperiodeService(
 
         if (unleash.isEnabled(ToggleName.MELOSYS_FTRL_IKKE_YRKESAKTIV)) {
             if (bestemmelse !in ftrlBestemmelser.hentBestemmelser(behandlingstema, trygdedekning)) {
-                throw FunksjonellException("Støtter ikke perioder med bestemmelse $bestemmelse for behandlingstema $behandlingstema")
+                throw FunksjonellException("Støtter ikke perioder med bestemmelse $bestemmelse for behandlingstema $behandlingstema og trygdedekning $trygdedekning")
+            }
+
+            // TODO kan fjernes?
+            if (!LovligeKombinasjonerTrygdedekningBestemmelse.erBestemmelseGyldig(bestemmelse, trygdedekning)) {
+                throw FunksjonellException("Ulovlig kombinasjon av bestemmelse $bestemmelse og trygdedekning $trygdedekning")
             }
         } else {
             val støttedeBestemmelser = hentStøttedeBestemmelserMedVilkår(behandlingstema)
             if (bestemmelse !in støttedeBestemmelser) {
                 throw FunksjonellException("Støtter ikke perioder med bestemmelse $bestemmelse for behandlingstema $behandlingstema")
             }
-        }
 
-        if (!LovligeKombinasjonerTrygdedekningBestemmelse.erBestemmelseGyldig(bestemmelse, trygdedekning)) {
-            throw FunksjonellException("Ulovlig kombinasjon av bestemmelse $bestemmelse og trygdedekning $trygdedekning")
+            if (!LovligeKombinasjonerTrygdedekningBestemmelse.erBestemmelseGyldig(bestemmelse, trygdedekning)) {
+                throw FunksjonellException("Ulovlig kombinasjon av bestemmelse $bestemmelse og trygdedekning $trygdedekning")
+            }
         }
     }
 
     private fun validerVilkår(behandlingsresultat: Behandlingsresultat, bestemmelse: Folketrygdloven_kap2_bestemmelser) {
+        if (unleash.isEnabled(ToggleName.MELOSYS_FTRL_IKKE_YRKESAKTIV)) {
+            // TODO validering med ny mapping mellom bestemmelser og vilkår kommer
+            return
+        }
         val vilkårForBestemmelse = hentVilkårForBestemmelse(bestemmelse, behandlingsresultat.behandling.tema)
         if (!behandlingsresultat.oppfyllerVilkår(vilkårForBestemmelse)) {
             throw FunksjonellException("Vilkår $vilkårForBestemmelse er påkrevd for bestemmelse $bestemmelse")
