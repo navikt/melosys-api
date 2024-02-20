@@ -236,7 +236,7 @@ public class ProsessinstansService {
             ProsessType.IVERKSETT_VEDTAK_EOS).isPresent();
     }
 
-    public void lagre(Prosessinstans prosessinstans) { // TODO: må være private
+    void lagre(Prosessinstans prosessinstans) {
         lagre(prosessinstans, getSaksbehandlerIdent(), getSaksbehandlerNavn());
     }
 
@@ -566,10 +566,11 @@ public class ProsessinstansService {
         lagre(prosessinstans);
     }
 
-    public void opprettProsessinstansNySakUnntaksregistrering(MelosysEessiMelding melosysEessiMelding, Behandlingstema behandlingstema, String aktørID) {
+    public void opprettProsessinstansNySakUnntaksregistrering(MelosysEessiMelding melosysEessiMelding, Behandlingstema behandlingstema, String aktørID, String låsReferanse) {
         Prosessinstans prosessinstans = new ProsessinstansBuilder()
             .medType(ProsessType.REGISTRERING_UNNTAK_NY_SAK)
             .medEessiMelding(melosysEessiMelding)
+            .medLåsReferanse(låsReferanse)
             .build();
         prosessinstans.setData(SAKSTEMA, Sakstemaer.UNNTAK);
         prosessinstans.setData(ProsessDataKey.BEHANDLINGSTEMA, behandlingstema);
