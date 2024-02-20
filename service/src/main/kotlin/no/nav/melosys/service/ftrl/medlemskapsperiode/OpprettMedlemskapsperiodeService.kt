@@ -1,5 +1,6 @@
 package no.nav.melosys.service.ftrl.medlemskapsperiode
 
+import io.getunleash.Unleash
 import no.nav.melosys.domain.Behandlingsresultat
 import no.nav.melosys.domain.Fagsak
 import no.nav.melosys.domain.Medlemskapsperiode
@@ -10,10 +11,12 @@ import no.nav.melosys.domain.kodeverk.Vilkaar
 import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingstema
 import no.nav.melosys.domain.mottatteopplysninger.SøknadNorgeEllerUtenforEØS
 import no.nav.melosys.exception.FunksjonellException
+import no.nav.melosys.featuretoggle.ToggleName
 import no.nav.melosys.repository.MedlemAvFolketrygdenRepository
 import no.nav.melosys.service.behandling.BehandlingsresultatService
 import no.nav.melosys.service.behandling.UtledMottaksdato
 import no.nav.melosys.service.ftrl.LovligeKombinasjonerTrygdedekningBestemmelse
+import no.nav.melosys.service.ftrl.bestemmelse.FtrlBestemmelser
 import org.springframework.stereotype.Service
 import org.springframework.transaction.annotation.Transactional
 
@@ -22,8 +25,10 @@ import org.springframework.transaction.annotation.Transactional
 class OpprettMedlemskapsperiodeService(
     private val medlemAvFolketrygdenRepository: MedlemAvFolketrygdenRepository,
     private val behandlingsresultatService: BehandlingsresultatService,
+    private val ftrlBestemmelser: FtrlBestemmelser,
     private val utledMottaksdato: UtledMottaksdato,
     private val utledBestemmelserOgVilkår: UtledBestemmelserOgVilkår,
+    private val unleash: Unleash,
 ) {
 
     @Transactional
@@ -89,10 +94,18 @@ class OpprettMedlemskapsperiodeService(
         if (bestemmelse == null) {
             throw FunksjonellException("Bestemmelse er ikke satt. Krever bestemmelse ved opprettelse av forslag for medlemskapsperioder.")
         }
-        val støttedeBestemmelser = hentStøttedeBestemmelserMedVilkår(behandlingstema)
-        if (bestemmelse !in støttedeBestemmelser) {
-            throw FunksjonellException("Støtter ikke perioder med bestemmelse $bestemmelse for behandlingstema $behandlingstema")
+
+        if (unleash.isEnabled(ToggleName.MELOSYS_FTRL_IKKE_YRKESAKTIV)) {
+            if (bestemmelse !in ftrlBestemmelser.hentBestemmelser(behandlingstema, trygdedekning)) {
+                throw FunksjonellException("Støtter ikke perioder med bestemmelse $bestemmelse for behandlingstema $behandlingstema")
+            }
+        } else {
+            val støttedeBestemmelser = hentStøttedeBestemmelserMedVilkår(behandlingstema)
+            if (bestemmelse !in støttedeBestemmelser) {
+                throw FunksjonellException("Støtter ikke perioder med bestemmelse $bestemmelse for behandlingstema $behandlingstema")
+            }
         }
+
         if (!LovligeKombinasjonerTrygdedekningBestemmelse.erBestemmelseGyldig(bestemmelse, trygdedekning)) {
             throw FunksjonellException("Ulovlig kombinasjon av bestemmelse $bestemmelse og trygdedekning $trygdedekning")
         }
