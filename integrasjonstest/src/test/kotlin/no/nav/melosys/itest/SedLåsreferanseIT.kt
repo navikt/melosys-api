@@ -22,7 +22,6 @@ import no.nav.melosys.saksflytapi.domain.ProsessSteg
 import no.nav.melosys.saksflytapi.domain.Prosessinstans
 import no.nav.security.token.support.spring.test.EnableMockOAuth2Server
 import org.awaitility.kotlin.await
-import org.junit.jupiter.api.Disabled
 import org.junit.jupiter.api.Test
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.boot.test.autoconfigure.jdbc.AutoConfigureTestDatabase
@@ -97,9 +96,6 @@ internal class SedLåsreferanseIT(
     }
 
     @Test
-    // Test som viser dagens logikk, TODO dette bør også kjøre synkront som testen over
-    // Er laget oppgave for å fikse dette: https://jira.adeo.no/browse/MELOSYS-6365 og da er denne testen grei å ha
-    @Disabled("Denne testen feiler noen ganger siden den ikke er synkronisert, så log linjene kan komme i en annen rekkefølge")
     fun `kjør samtidig når sed har samme rinaSaksnummer, sedId og sedVersjon`() {
         LoggingTestUtils.withLogCapture { logItems ->
             val låsReferanser = lagProsesser(
@@ -122,17 +118,19 @@ internal class SedLåsreferanseIT(
                 .until {
                     prosessinstansRepository.findAll()
                         .filter { it.låsReferanse in låsReferanser }
+                        .onEach { println("${it.låsReferanse} status:${it.status}") }
                         .all { it.status == ProsessStatus.FERDIG }
                 }
 
             logItems.match<ProsessinstansBehandler>().shouldHaveSize(6).check { next ->
                 next().formattedMessage shouldMatch Regex("Starter behandling av prosessinstans .*? med lås 111_222_1")
+                next().formattedMessage shouldStartWith "Utfører steg SED_MOTTAK_RUTING"
+                next().message shouldStartWith "Prosessinstans {} behandlet ferdig"
                 next().formattedMessage shouldMatch Regex("Starter behandling av prosessinstans .*? med lås 111_222_1")
                 next().formattedMessage shouldStartWith "Utfører steg SED_MOTTAK_RUTING"
-                next().formattedMessage shouldStartWith "Utfører steg SED_MOTTAK_RUTING"
-                next().message shouldStartWith "Prosessinstans {} behandlet ferdig"
                 next().message shouldStartWith "Prosessinstans {} behandlet ferdig"
             }
+
         }
     }
 
