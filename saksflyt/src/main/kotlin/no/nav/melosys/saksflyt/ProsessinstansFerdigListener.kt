@@ -44,20 +44,18 @@ class ProsessinstansFerdigListener(
         }.isNotEmpty()
 
     private fun startNesteProsessinstans(prosessinstansFerdigEvent: ProsessinstansFerdigEvent) {
-        val ferdigReferanse = LåsReferanseFactory.lagLåsReferanse(prosessinstansFerdigEvent.låsReferanse)
-
         val count = prosessinstansRepository.findAllByStatus(ProsessStatus.PÅ_VENT)
-            .count { harSammeReferanse(it, ferdigReferanse) }
+            .count { LåsReferanseFactory.harSammeReferanse(it.låsReferanse, prosessinstansFerdigEvent.låsReferanse) }
 
         val påVent = prosessinstansRepository.findAllByStatus(ProsessStatus.PÅ_VENT)
-            .filter { harSammeReferanse(it, ferdigReferanse) }
+            .filter { LåsReferanseFactory.harSammeReferanse(it.låsReferanse, prosessinstansFerdigEvent.låsReferanse) }
             .sortedBy { it.registrertDato }
             .firstOrNull()
 
         log.info("$count på vent, neste som kan kjøres ${påVent?.id} for låsreferanse ${prosessinstansFerdigEvent.låsReferanse}")
 
-        påVent?.let {
-            oppdaterStatusOgBehandleProsessinstans(it)
+        if (påVent != null) {
+            oppdaterStatusOgBehandleProsessinstans(påVent)
         }
     }
 
@@ -68,9 +66,5 @@ class ProsessinstansFerdigListener(
         prosessinstansRepository.save(prosessinstans)
         prosessinstansBehandler.behandleProsessinstans(prosessinstans)
     }
-
-    private fun harSammeReferanse(prosessinstans: Prosessinstans, ferdigLåsreferanse: LåsReferanse): Boolean {
-        val låsReferanse = LåsReferanseFactory.lagLåsReferanse(prosessinstans.låsReferanse)
-        return låsReferanse.referanse == ferdigLåsreferanse.referanse
-    }
 }
+
