@@ -13,7 +13,7 @@ class VilkårForBestemmelse(val mottatteOpplysningerService: MottatteOpplysninge
     fun hentVilkår(
         bestemmelse: Folketrygdloven_kap2_bestemmelser,
         avklarteFakta: Map<Avklartefaktatyper, String>,
-        behandlingID: Long
+        behandlingID: Long?
     ): List<Vilkår> {
         return when (bestemmelse) {
             FTRL_KAP2_2_1_FØRSTE_LEDD -> ftrlKap2_1VilkårForBehandling(behandlingID)
@@ -23,7 +23,10 @@ class VilkårForBestemmelse(val mottatteOpplysningerService: MottatteOpplysninge
         }
     }
 
-    private fun ftrlKap2_1VilkårForBehandling(behandlingID: Long): List<Vilkår> {
+    private fun ftrlKap2_1VilkårForBehandling(behandlingID: Long?): List<Vilkår> {
+        if (behandlingID == null) {
+            throw FunksjonellException("BehandlingID trengs for å avgjøre land for ftrlKap2_1")
+        }
         val mottatteOpplysninger = mottatteOpplysningerService.hentMottatteOpplysninger(behandlingID)
         val vilkårForLand = ftrlKap2_1VilkårForLand(mottatteOpplysninger.mottatteOpplysningerData?.soeknadsland)
 
@@ -49,7 +52,7 @@ class VilkårForBestemmelse(val mottatteOpplysningerService: MottatteOpplysninge
     }
 
     private fun ftrlKap2_5VilkårForAvklarteFakta(avklarteFakta: Map<Avklartefaktatyper, String>): List<Vilkår> {
-        val avklarteFamilieRelasjon = avklarteFakta.get(Avklartefaktatyper.IKKE_YRKESAKTIV_RELASJON)
+        val avklarteFamilieRelasjon = avklarteFakta[Avklartefaktatyper.IKKE_YRKESAKTIV_RELASJON]
         validerFamilieRelasjon(avklarteFamilieRelasjon)
         val familieRelasjonType = Ikkeyrkesaktivrelasjontype.valueOf(avklarteFamilieRelasjon!!)
         return when (familieRelasjonType) {
@@ -75,7 +78,7 @@ class VilkårForBestemmelse(val mottatteOpplysningerService: MottatteOpplysninge
         if ((familieRelasjon == null) || familieRelasjon !in Ikkeyrkesaktivrelasjontype.values()
                 .map(Ikkeyrkesaktivrelasjontype::name)
         ) {
-            throw FunksjonellException("")
+            throw FunksjonellException("FamilieRelasjon $familieRelasjon er ugyldig" )
         }
     }
 
