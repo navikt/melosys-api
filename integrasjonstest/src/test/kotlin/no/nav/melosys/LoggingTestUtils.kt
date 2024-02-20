@@ -18,10 +18,10 @@ object LoggingTestUtils {
         return listAppender.list
     }
 
-    fun <T> Collection<ILoggingEvent>.check(block: (next: () -> ILoggingEvent) -> T): T {
+    fun <T> Collection<T>.check(block: (next: () -> T) -> Unit) {
         var i = 0
-        val iLoggingEventList = toList()
-        return block { iLoggingEventList[i++] }
+        val list = toList()
+        block { list[i++] }
     }
 
     inline fun <reified T : Any> Collection<ILoggingEvent>.match(): Collection<ILoggingEvent> {

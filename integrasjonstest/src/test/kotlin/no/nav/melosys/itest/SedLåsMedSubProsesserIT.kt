@@ -2,8 +2,7 @@ package no.nav.melosys.itest
 
 import io.kotest.matchers.collections.shouldContain
 import io.kotest.matchers.collections.shouldHaveSize
-import io.kotest.matchers.string.shouldMatch
-import io.kotest.matchers.string.shouldStartWith
+import io.kotest.matchers.shouldBe
 import io.mockk.CapturingSlot
 import io.mockk.every
 import io.mockk.mockk
@@ -97,42 +96,37 @@ internal class SedLåsMedSubProsesserIT(
                 prosessinstansService.opprettProsessinstansSedMottak(x008)
             }
 
-
-            logItems.filterBuilder
-                .match<ProsessinstansBehandlerDelegate> { it.formattedMessage.endsWith(" på vent") }
-                .match<ProsessinstansBehandler>()
-                .build().forEach {
-                    println(it.formattedMessage)
-                }
             val a009Lås = a009.lagUnikIdentifikator()
             val x0008Lås = x008.lagUnikIdentifikator()
 
             logItems.filterBuilder
                 .match<ProsessinstansBehandlerDelegate> { it.formattedMessage.endsWith(" på vent") }
                 .match<ProsessinstansBehandler>()
-                .build().shouldHaveSize(22).check { next ->
-                    next().formattedMessage shouldMatch Regex("Prosessinstans .*? med låsreferanse $x0008Lås satt på vent")
-                    next().formattedMessage shouldMatch Regex("Prosessinstans .*? med låsreferanse $a009Lås satt på vent")
-                    next().formattedMessage shouldMatch Regex("Prosessinstans .*? med låsreferanse $x0008Lås satt på vent")
-                    next().formattedMessage shouldMatch Regex("Starter behandling av prosessinstans .*? med lås $a009Lås")
-                    next().formattedMessage shouldStartWith "Utfører steg ${ProsessSteg.SED_MOTTAK_RUTING}"
-                    next().message shouldStartWith "Prosessinstans {} behandlet ferdig"
-                    next().formattedMessage shouldMatch Regex("Starter behandling av prosessinstans .*? med lås $x0008Lås")
-                    next().formattedMessage shouldStartWith "Utfører steg ${ProsessSteg.SED_MOTTAK_RUTING}"
-                    next().message shouldStartWith "Prosessinstans {} behandlet ferdig"
-                    next().formattedMessage shouldMatch Regex("Starter behandling av prosessinstans .*? med lås $a009Lås")
-                    next().formattedMessage shouldStartWith "Utfører steg ${ProsessSteg.SED_MOTTAK_FERDIGSTILL_JOURNALPOST}"
-                    next().message shouldStartWith "Prosessinstans {} behandlet ferdig"
-                    next().formattedMessage shouldMatch Regex("Starter behandling av prosessinstans .*? med lås $x0008Lås")
-                    next().formattedMessage shouldStartWith "Utfører steg ${ProsessSteg.SED_MOTTAK_OPPRETT_FAGSAK_OG_BEH}"
-                    next().formattedMessage shouldStartWith "Utfører steg ${ProsessSteg.OPPRETT_ARKIVSAK}"
-                    next().formattedMessage shouldStartWith "Utfører steg ${ProsessSteg.OPPDATER_SAKSRELASJON}"
-                    next().formattedMessage shouldStartWith "Utfører steg ${ProsessSteg.SED_MOTTAK_FERDIGSTILL_JOURNALPOST}"
-                    next().formattedMessage shouldStartWith "Utfører steg ${ProsessSteg.OPPRETT_SEDDOKUMENT}"
-                    next().formattedMessage shouldStartWith "Utfører steg ${ProsessSteg.HENT_REGISTEROPPLYSNINGER}"
-                    next().formattedMessage shouldStartWith "Utfører steg ${ProsessSteg.REGISTERKONTROLL}"
-                    next().formattedMessage shouldStartWith "Utfører steg ${ProsessSteg.BESTEM_BEHANDLINGMÅTE_SED}"
-                    next().message shouldStartWith "Prosessinstans {} behandlet ferdig"
+                .build().shouldHaveSize(22)
+                .map { it.formattedMessage.replace(Regex(" \\w+-\\w+-\\w+-\\w+-\\w+"), "") }
+                .check { next ->
+                    next() shouldBe "Prosessinstans med låsreferanse $x0008Lås satt på vent"
+                    next() shouldBe "Prosessinstans med låsreferanse $a009Lås satt på vent"
+                    next() shouldBe "Prosessinstans med låsreferanse $x0008Lås satt på vent"
+                    next() shouldBe "Starter behandling av prosessinstans med lås $a009Lås"
+                    next() shouldBe "Utfører steg ${ProsessSteg.SED_MOTTAK_RUTING} for prosessinstans"
+                    next() shouldBe "Prosessinstans behandlet ferdig"
+                    next() shouldBe "Starter behandling av prosessinstans med lås $x0008Lås"
+                    next() shouldBe "Utfører steg ${ProsessSteg.SED_MOTTAK_RUTING} for prosessinstans"
+                    next() shouldBe "Prosessinstans behandlet ferdig"
+                    next() shouldBe "Starter behandling av prosessinstans med lås $a009Lås"
+                    next() shouldBe "Utfører steg ${ProsessSteg.SED_MOTTAK_FERDIGSTILL_JOURNALPOST} for prosessinstans"
+                    next() shouldBe "Prosessinstans behandlet ferdig"
+                    next() shouldBe "Starter behandling av prosessinstans med lås $x0008Lås"
+                    next() shouldBe "Utfører steg ${ProsessSteg.SED_MOTTAK_OPPRETT_FAGSAK_OG_BEH} for prosessinstans"
+                    next() shouldBe "Utfører steg ${ProsessSteg.OPPRETT_ARKIVSAK} for prosessinstans"
+                    next() shouldBe "Utfører steg ${ProsessSteg.OPPDATER_SAKSRELASJON} for prosessinstans"
+                    next() shouldBe "Utfører steg ${ProsessSteg.SED_MOTTAK_FERDIGSTILL_JOURNALPOST} for prosessinstans"
+                    next() shouldBe "Utfører steg ${ProsessSteg.OPPRETT_SEDDOKUMENT} for prosessinstans"
+                    next() shouldBe "Utfører steg ${ProsessSteg.HENT_REGISTEROPPLYSNINGER} for prosessinstans"
+                    next() shouldBe "Utfører steg ${ProsessSteg.REGISTERKONTROLL} for prosessinstans"
+                    next() shouldBe "Utfører steg ${ProsessSteg.BESTEM_BEHANDLINGMÅTE_SED} for prosessinstans"
+                    next() shouldBe "Prosessinstans behandlet ferdig"
                 }
         }
     }
