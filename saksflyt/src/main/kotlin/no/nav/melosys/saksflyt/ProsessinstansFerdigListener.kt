@@ -15,7 +15,7 @@ class ProsessinstansFerdigListener(
 ) {
     @EventListener
     fun prosessinstansFerdig(prosessinstansFerdigEvent: ProsessinstansFerdigEvent) {
-        log.info("Prosessinstans {} ferdig", prosessinstansFerdigEvent.uuid)
+        log.info("Prosessinstans {} ferdig låsreferanse {}", prosessinstansFerdigEvent.uuid, prosessinstansFerdigEvent.låsReferanse)
         if (prosessinstansFerdigEvent.låsReferanse != null && finnesIkkeAktivReferanse(prosessinstansFerdigEvent)) {
             startNesteProsessinstans(prosessinstansFerdigEvent)
         }
@@ -26,12 +26,14 @@ class ProsessinstansFerdigListener(
             log.info("Det finnes ingen aktiv prosessinstans med låsreferanse {}", prosessinstansFerdigEvent.låsReferanse)
             return true
         }
-        log.info("Det finnes en aktiv prosessinstans med låsreferanse {}", prosessinstansFerdigEvent.låsReferanse)
-        return finnesProssesserMedSammeLåsReferanseOgForskjelligIdpåVent(prosessinstansFerdigEvent)
+        log.info("Det finnes en aktiv prosessinstans med låsreferanse ${prosessinstansFerdigEvent.låsReferanse}")
+        return finnesProssesserMedSammeLåsReferanseOgForskjelligIdpåVent(prosessinstansFerdigEvent).apply {
+            log.info("finnesIkkeAktivReferanse for ${prosessinstansFerdigEvent.låsReferanse} = $this")
+        }
     }
 
     private fun finnesProssesserMedSammeLåsReferanseOgForskjelligIdpåVent(prosessinstansFerdigEvent: ProsessinstansFerdigEvent): Boolean =
-        // Dette bør ryddes mer i og det er egen oppgave for å fikse sed synkronisering med samme
+    // Dette bør ryddes mer i og det er egen oppgave for å fikse sed synkronisering med samme
         // låsreferanse: https://jira.adeo.no/browse/MELOSYS-6365
         prosessinstansRepository.findAllByIdNotAndStatusNotInAndLåsReferanseStartingWith(
             prosessinstansFerdigEvent.uuid,
@@ -42,14 +44,21 @@ class ProsessinstansFerdigListener(
         }.isNotEmpty()
 
     private fun startNesteProsessinstans(prosessinstansFerdigEvent: ProsessinstansFerdigEvent) {
-        log.info("Forsøker å starte neste prosessinstans, låsreferanse {}", prosessinstansFerdigEvent.låsReferanse)
         val ferdigReferanse = LåsReferanseFactory.lagLåsReferanse(prosessinstansFerdigEvent.låsReferanse)
 
-        prosessinstansRepository.findAllByStatus(ProsessStatus.PÅ_VENT)
+        val count = prosessinstansRepository.findAllByStatus(ProsessStatus.PÅ_VENT)
+            .count { harSammeReferanse(it, ferdigReferanse) }
+
+        val påVent = prosessinstansRepository.findAllByStatus(ProsessStatus.PÅ_VENT)
             .filter { harSammeReferanse(it, ferdigReferanse) }
             .sortedBy { it.registrertDato }
             .firstOrNull()
-            ?.let { oppdaterStatusOgBehandleProsessinstans(it) }
+
+        log.info("$count på vent, neste som kan kjøres ${påVent?.id} for låsreferanse ${prosessinstansFerdigEvent.låsReferanse}")
+
+        påVent?.let {
+            oppdaterStatusOgBehandleProsessinstans(it)
+        }
     }
 
     private fun oppdaterStatusOgBehandleProsessinstans(prosessinstans: Prosessinstans) {
