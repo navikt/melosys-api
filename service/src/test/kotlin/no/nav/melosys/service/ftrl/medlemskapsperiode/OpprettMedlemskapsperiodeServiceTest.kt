@@ -57,6 +57,7 @@ class OpprettMedlemskapsperiodeServiceTest {
 
     @BeforeEach
     fun setup() {
+        fakeUnleash.resetAll()
         opprettMedlemskapsperiodeService =
             OpprettMedlemskapsperiodeService(
                 medlemAvFolketrygdenRepository,
@@ -64,7 +65,7 @@ class OpprettMedlemskapsperiodeServiceTest {
                 ftrlBestemmelser,
                 utledMottaksdato,
                 utledBestemmelserOgVilkår,
-                FakeUnleash()
+                fakeUnleash
             )
     }
 
@@ -255,6 +256,7 @@ class OpprettMedlemskapsperiodeServiceTest {
         fakeUnleash.enable(ToggleName.MELOSYS_FTRL_IKKE_YRKESAKTIV)
         val ustøttetBestemmelse = Folketrygdloven_kap2_bestemmelser.FTRL_KAP2_2_8_FØRSTE_LEDD_D
         every { behandlingsresultatService.hentBehandlingsresultat(BEH_RES_ID) } returns lagBehandlingsresultat()
+        every { ftrlBestemmelser.hentBestemmelser(any(), any()) } returns emptyList()
 
 
         shouldThrow<FunksjonellException> {
