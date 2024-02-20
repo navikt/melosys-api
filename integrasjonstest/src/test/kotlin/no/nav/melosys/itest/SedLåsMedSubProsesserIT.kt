@@ -10,11 +10,9 @@ import io.mockk.mockk
 import mu.KotlinLogging
 import no.nav.melosys.Application
 import no.nav.melosys.AwaitUtil
-import no.nav.melosys.AwaitUtil.throwOnLogError
 import no.nav.melosys.LoggingTestUtils
 import no.nav.melosys.LoggingTestUtils.check
 import no.nav.melosys.LoggingTestUtils.filterBuilder
-import no.nav.melosys.LoggingTestUtils.match
 import no.nav.melosys.domain.eessi.SedType
 import no.nav.melosys.domain.eessi.melding.MelosysEessiMelding
 import no.nav.melosys.saksflyt.ProsessinstansBehandler
@@ -48,8 +46,6 @@ import org.springframework.context.annotation.Primary
 import org.springframework.kafka.test.context.EmbeddedKafka
 import org.springframework.test.annotation.DirtiesContext
 import org.springframework.test.context.ActiveProfiles
-import java.lang.Thread.sleep
-import java.time.Duration
 import java.time.LocalDateTime
 import java.util.*
 import java.util.concurrent.TimeUnit
@@ -175,8 +171,7 @@ internal class SedLåsMedSubProsesserIT(
                         SedType.X008.name -> prosessinstansService.opprettProsessinstansNySakUnntaksregistrering(
                             melosysEessiMelding,
                             null,
-                            "test",
-                            melosysEessiMelding.lagUnikIdentifikator()
+                            "test"
                         )
                     }
                 }

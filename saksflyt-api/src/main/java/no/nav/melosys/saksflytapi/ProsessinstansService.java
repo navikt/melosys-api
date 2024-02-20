@@ -566,11 +566,10 @@ public class ProsessinstansService {
         lagre(prosessinstans);
     }
 
-    public void opprettProsessinstansNySakUnntaksregistrering(MelosysEessiMelding melosysEessiMelding, Behandlingstema behandlingstema, String aktørID, String låsReferanse) {
+    public void opprettProsessinstansNySakUnntaksregistrering(MelosysEessiMelding melosysEessiMelding, Behandlingstema behandlingstema, String aktørID) {
         Prosessinstans prosessinstans = new ProsessinstansBuilder()
             .medType(ProsessType.REGISTRERING_UNNTAK_NY_SAK)
             .medEessiMelding(melosysEessiMelding)
-            .medLåsReferanse(låsReferanse)
             .build();
         prosessinstans.setData(SAKSTEMA, Sakstemaer.UNNTAK);
         prosessinstans.setData(ProsessDataKey.BEHANDLINGSTEMA, behandlingstema);
