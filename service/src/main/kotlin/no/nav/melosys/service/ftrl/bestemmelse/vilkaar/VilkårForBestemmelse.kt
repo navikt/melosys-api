@@ -1,13 +1,10 @@
 package no.nav.melosys.service.ftrl.bestemmelse.vilkaar
 
-import no.nav.melosys.domain.kodeverk.Avklartefaktatyper
-import no.nav.melosys.domain.kodeverk.Folketrygdloven_kap2_bestemmelser
-import no.nav.melosys.domain.kodeverk.Folketrygdloven_kap2_bestemmelser.FTRL_KAP2_2_1_FØRSTE_LEDD
-import no.nav.melosys.domain.kodeverk.Folketrygdloven_kap2_bestemmelser.FTRL_KAP2_2_5_FØRSTE_LEDD_H
-import no.nav.melosys.domain.kodeverk.Land_iso2
-import no.nav.melosys.domain.kodeverk.Vilkaar
+import no.nav.melosys.domain.kodeverk.*
+import no.nav.melosys.domain.kodeverk.Folketrygdloven_kap2_bestemmelser.*
 import no.nav.melosys.domain.kodeverk.Vilkaar.*
 import no.nav.melosys.domain.mottatteopplysninger.data.Soeknadsland
+import no.nav.melosys.exception.FunksjonellException
 import no.nav.melosys.service.mottatteopplysninger.MottatteOpplysningerService
 import org.springframework.stereotype.Component
 
@@ -21,6 +18,7 @@ class VilkårForBestemmelse(val mottatteOpplysningerService: MottatteOpplysninge
         return when (bestemmelse) {
             FTRL_KAP2_2_1_FØRSTE_LEDD -> ftrlKap2_1VilkårForBehandling(behandlingID)
             FTRL_KAP2_2_5_FØRSTE_LEDD_H -> listOf(Vilkår(FTRL_2_5_NORSK_STATSBORGER_EØS_BORGER), Vilkår(FTRL_2_5_LÅN_STIPEND_LÅNEKASSEN))
+            FTRL_KAP2_2_5_ANDRE_LEDD ->  ftrlKap2_5VilkårForAvklarteFakta(avklarteFakta)
             else -> emptyList()
         }
     }
@@ -47,6 +45,37 @@ class VilkårForBestemmelse(val mottatteOpplysningerService: MottatteOpplysninge
             listOf(
                 Vilkår(FTRL_2_1_BOSATT_NORGE)
             )
+        }
+    }
+
+    private fun ftrlKap2_5VilkårForAvklarteFakta(avklarteFakta: Map<Avklartefaktatyper, String>): List<Vilkår> {
+        val avklarteFamilieRelasjon = avklarteFakta.get(Avklartefaktatyper.IKKE_YRKESAKTIV_RELASJON)
+        validerFamilieRelasjon(avklarteFamilieRelasjon)
+        val familieRelasjonType = Ikkeyrkesaktivrelasjontype.valueOf(avklarteFamilieRelasjon!!)
+        return when (familieRelasjonType) {
+            Ikkeyrkesaktivrelasjontype.BARN_2_5_ANDRE_LEDD -> listOf(
+                Vilkår(FTRL_2_5_MEDFØLGENDE_A_E),
+                Vilkår(FTRL_2_5_FORSØRGET_FAMILIEMEDLEM)
+            )
+            Ikkeyrkesaktivrelasjontype.EKTEFELLE_2_5_ANDRE_LEDD_A_TIL_B -> listOf(
+                Vilkår(FTRL_2_5_MEDFØLGENDE_A_E, defaultOppfylt = true),
+                Vilkår(FTRL_2_5_FORSØRGET_FAMILIEMEDLEM),
+                Vilkår(FTRL_2_5_NORSK_STATSBORGER_EØS_BORGER)
+            )
+            Ikkeyrkesaktivrelasjontype.EKTEFELLE_2_5_ANDRE_LEDD_C_TIL_E -> listOf(
+                Vilkår(FTRL_2_5_MEDFØLGENDE_A_E, defaultOppfylt = true),
+                Vilkår(FTRL_2_5_FORSØRGET_FAMILIEMEDLEM),
+                Vilkår(FTRL_FORUTGÅENDE_TRYGDETID)
+            )
+            else -> emptyList()
+        }
+    }
+
+    private fun validerFamilieRelasjon(familieRelasjon: String?) {
+        if ((familieRelasjon == null) || familieRelasjon !in Ikkeyrkesaktivrelasjontype.values()
+                .map(Ikkeyrkesaktivrelasjontype::name)
+        ) {
+            throw FunksjonellException("")
         }
     }
 

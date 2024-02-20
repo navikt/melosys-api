@@ -4,10 +4,7 @@ import io.kotest.matchers.collections.shouldContainExactly
 import io.mockk.every
 import io.mockk.impl.annotations.MockK
 import io.mockk.junit5.MockKExtension
-import no.nav.melosys.domain.kodeverk.Avklartefaktatyper
-import no.nav.melosys.domain.kodeverk.Folketrygdloven_kap2_bestemmelser
-import no.nav.melosys.domain.kodeverk.Ikkeyrkesaktivoppholdtype
-import no.nav.melosys.domain.kodeverk.Land_iso2
+import no.nav.melosys.domain.kodeverk.*
 import no.nav.melosys.domain.kodeverk.Vilkaar.*
 import no.nav.melosys.domain.mottatteopplysninger.MottatteOpplysninger
 import no.nav.melosys.domain.mottatteopplysninger.SøknadNorgeEllerUtenforEØS
@@ -103,6 +100,71 @@ class VilkårForBestemmelseTest {
             ),
             VilkårForBestemmelse.Vilkår(
                 FTRL_2_5_LÅN_STIPEND_LÅNEKASSEN
+            ),
+        )
+    }
+
+    @Test
+    fun `vilkår for FTRL_KAP2_2_5_ANDRE_LEDD, barn`() {
+        val vilkår = vilkårForBestemmelse.hentVilkår(
+            Folketrygdloven_kap2_bestemmelser.FTRL_KAP2_2_5_ANDRE_LEDD,
+            mapOf(Avklartefaktatyper.IKKE_YRKESAKTIV_RELASJON to Ikkeyrkesaktivrelasjontype.BARN_2_5_ANDRE_LEDD.name),
+            1L
+        )
+
+
+        vilkår.shouldContainExactly(
+            VilkårForBestemmelse.Vilkår(
+                FTRL_2_5_MEDFØLGENDE_A_E,
+            ),
+            VilkårForBestemmelse.Vilkår(
+                FTRL_2_5_FORSØRGET_FAMILIEMEDLEM
+            ),
+        )
+    }
+
+    @Test
+    fun `vilkår for FTRL_KAP2_2_5_ANDRE_LEDD, ektefelle a til b`() {
+        val vilkår = vilkårForBestemmelse.hentVilkår(
+            Folketrygdloven_kap2_bestemmelser.FTRL_KAP2_2_5_ANDRE_LEDD,
+            mapOf(Avklartefaktatyper.IKKE_YRKESAKTIV_RELASJON to Ikkeyrkesaktivrelasjontype.EKTEFELLE_2_5_ANDRE_LEDD_A_TIL_B.name),
+            1L
+        )
+
+
+        vilkår.shouldContainExactly(
+            VilkårForBestemmelse.Vilkår(
+                FTRL_2_5_MEDFØLGENDE_A_E,
+                defaultOppfylt = true
+            ),
+            VilkårForBestemmelse.Vilkår(
+                FTRL_2_5_FORSØRGET_FAMILIEMEDLEM
+            ),
+            VilkårForBestemmelse.Vilkår(
+                FTRL_2_5_NORSK_STATSBORGER_EØS_BORGER
+            ),
+        )
+    }
+
+    @Test
+    fun `vilkår for FTRL_KAP2_2_5_ANDRE_LEDD, ektefelle c til e`() {
+        val vilkår = vilkårForBestemmelse.hentVilkår(
+            Folketrygdloven_kap2_bestemmelser.FTRL_KAP2_2_5_ANDRE_LEDD,
+            mapOf(Avklartefaktatyper.IKKE_YRKESAKTIV_RELASJON to Ikkeyrkesaktivrelasjontype.EKTEFELLE_2_5_ANDRE_LEDD_C_TIL_E.name),
+            1L
+        )
+
+
+        vilkår.shouldContainExactly(
+            VilkårForBestemmelse.Vilkår(
+                FTRL_2_5_MEDFØLGENDE_A_E,
+                defaultOppfylt = true
+            ),
+            VilkårForBestemmelse.Vilkår(
+                FTRL_2_5_FORSØRGET_FAMILIEMEDLEM
+            ),
+            VilkårForBestemmelse.Vilkår(
+                FTRL_FORUTGÅENDE_TRYGDETID
             ),
         )
     }
