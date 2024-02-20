@@ -4,6 +4,7 @@ import ch.qos.logback.classic.Logger
 import ch.qos.logback.classic.spi.ILoggingEvent
 import ch.qos.logback.core.read.ListAppender
 import org.slf4j.LoggerFactory
+import java.lang.reflect.Type
 
 object LoggingTestUtils {
     inline fun <reified T> captureLog(block: () -> Unit): List<ILoggingEvent> {
@@ -38,4 +39,19 @@ object LoggingTestUtils {
             logger.detachAppender(listAppender)
         }
     }
+
+    class LogFilterBuilder(val logItems: Collection<ILoggingEvent>) {
+         val result: MutableList<ILoggingEvent> = mutableListOf()
+
+         inline fun <reified T : Any> match(predicate: (ILoggingEvent) -> Boolean = { true }): LogFilterBuilder =
+            apply { result.addAll(logItems.filter { it.loggerName == T::class.java.name && predicate(it) }) }
+
+        fun build(): Collection<ILoggingEvent> = result
+    }
+
+    // Extension function to initialize the builder
+    val Collection<ILoggingEvent>.filterBuilder: LogFilterBuilder
+        get() = LogFilterBuilder(this)
+
+
 }
