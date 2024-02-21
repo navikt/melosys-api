@@ -18,8 +18,6 @@ class SedLåsReferanse(val låsReferanse: String) : LåsReferanse {
         get() = rinaSaksnummer
 
     override fun skalSettesPåVent(aktiveLåsReferanser: Collection<String>): Boolean {
-        // Det er slik vi vi ha det for å hindre at flere prosesser med samme låsreferanse kjører samtidig
-        // Noen sed tester feiler forsatt med dette. WIP å finne ut hvorfor
         return aktiveLåsReferanser.isNotEmpty()
     }
 
