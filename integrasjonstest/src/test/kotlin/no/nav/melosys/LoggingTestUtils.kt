@@ -5,7 +5,6 @@ import ch.qos.logback.classic.spi.ILoggingEvent
 import ch.qos.logback.core.read.ListAppender
 import io.kotest.assertions.withClue
 import io.kotest.matchers.collections.shouldHaveAtLeastSize
-import io.kotest.matchers.shouldBe
 import org.slf4j.LoggerFactory
 
 object LoggingTestUtils {
@@ -64,21 +63,20 @@ object LoggingTestUtils {
                 map[name] = cnt + 1
                 val threadMessages = sorted.filter { it.threadName == name }
                 withClue("Thread $name, count $cnt:") {
-                    threadMessages.shouldHaveAtLeastSize(cnt+1)
+                    threadMessages.shouldHaveAtLeastSize(cnt + 1)
                 }
                 val message: String = threadMessages[cnt].formattedMessage
-                if(regex == null) message else message.replace(regex!!, "")
+                if (regex == null) message else message.replace(regex!!, "")
             }
         }
 
-        fun check(block: (next: (nextLogItem: String) -> Unit) -> Unit) {
+        fun check(block: (next: (nextLogItem: (a: String) -> Unit) -> Unit) -> Unit) {
             val sorted = result.sortedBy { it.timeStamp }
             var i = 0
             block { nextLogItem ->
                 val message = sorted[i++].formattedMessage
-                val replaced = if(regex == null) message else message.replace(regex!!, "")
                 withClue("log message line: $i") {
-                    replaced shouldBe nextLogItem
+                    nextLogItem(if (regex == null) message else message.replace(regex!!, ""))
                 }
             }
         }
