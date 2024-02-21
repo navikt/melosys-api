@@ -17,19 +17,30 @@ class VilkårForBestemmelse(val mottatteOpplysningerService: MottatteOpplysninge
     ): List<Vilkår> {
         return when (bestemmelse) {
             FTRL_KAP2_2_1_FØRSTE_LEDD -> ftrlKap2_1VilkårForBehandling(behandlingID)
-            FTRL_KAP2_2_5_FØRSTE_LEDD_H -> listOf(Vilkår(FTRL_2_5_NORSK_STATSBORGER_EØS_BORGER), Vilkår(FTRL_2_5_LÅN_STIPEND_LÅNEKASSEN))
-            FTRL_KAP2_2_5_ANDRE_LEDD ->  ftrlKap2_5VilkårForAvklarteFakta(avklarteFakta)
+            FTRL_KAP2_2_5_FØRSTE_LEDD_H -> listOf(
+                Vilkår(FTRL_2_5_NORSK_STATSBORGER_EØS_BORGER), Vilkår(FTRL_2_5_LÅN_STIPEND_LÅNEKASSEN)
+            )
+
+            FTRL_KAP2_2_5_ANDRE_LEDD -> ftrlKap2_5VilkårForAvklarteFakta(avklarteFakta)
             FTRL_KAP2_2_7_FJERDE_LEDD -> listOf(
                 Vilkår(FTRL_2_1A_TRYGDEKOORDINGERING),
                 Vilkår(FTRL_2_7_FORSØRGET_FAMILIEMEDLEM),
                 Vilkår(FTRL_2_7_INGEN_SÆRLIGE_GRUNNER_TALER_IMOT)
             )
+
             FTRL_KAP2_2_8_FØRSTE_LEDD_B -> listOf(
                 Vilkår(FTRL_2_1A_TRYGDEKOORDINGERING),
                 Vilkår(FTRL_2_8_STUDENT_UVIVERSITET_HØGSKOLE),
                 Vilkår(FTRL_FORUTGÅENDE_TRYGDETID),
                 Vilkår(FTRL_2_8_NÆR_TILKNYTNING_NORGE)
             )
+
+            FTRL_KAP2_2_8_FØRSTE_LEDD_C -> listOf(
+                Vilkår(FTRL_2_1A_TRYGDEKOORDINGERING),
+                Vilkår(FTRL_FORUTGÅENDE_TRYGDETID),
+                Vilkår(FTRL_2_8_NÆR_TILKNYTNING_NORGE)
+            )
+
             else -> emptyList()
         }
     }
