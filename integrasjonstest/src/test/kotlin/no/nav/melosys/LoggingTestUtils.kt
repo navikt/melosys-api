@@ -70,7 +70,7 @@ object LoggingTestUtils {
             }
         }
 
-        fun check(block: (next: (nextLogItem: (a: String) -> Unit) -> Unit) -> Unit) {
+        fun check(block: (next: (nextLogItem: (message: String) -> Unit) -> Unit) -> Unit) {
             val sorted = result.sortedBy { it.timeStamp }
             var i = 0
             block { nextLogItem ->
