@@ -40,6 +40,7 @@ class VilkårForBestemmelse(val mottatteOpplysningerService: MottatteOpplysninge
                 Vilkår(FTRL_FORUTGÅENDE_TRYGDETID),
                 Vilkår(FTRL_2_8_NÆR_TILKNYTNING_NORGE)
             )
+
             FTRL_KAP2_2_8_FJERDE_LEDD -> ftrlKap2_8_4VilkårForAvklarteFakta(avklarteFakta)
 
             else -> emptyList()
@@ -75,10 +76,8 @@ class VilkårForBestemmelse(val mottatteOpplysningerService: MottatteOpplysninge
     }
 
     private fun ftrlKap2_5VilkårForAvklarteFakta(avklarteFakta: Map<Avklartefaktatyper, String>): List<Vilkår> {
-        val avklarteFamilieRelasjon = avklarteFakta[Avklartefaktatyper.IKKE_YRKESAKTIV_RELASJON]
-        validerFamilieRelasjon(avklarteFamilieRelasjon)
-        val familieRelasjonType = Ikkeyrkesaktivrelasjontype.valueOf(avklarteFamilieRelasjon!!)
-        return when (familieRelasjonType) {
+        val familieRelasjon = hentFamilieRelasjonFraFakta(avklarteFakta)
+        return when (familieRelasjon) {
             Ikkeyrkesaktivrelasjontype.BARN_2_5_ANDRE_LEDD -> listOf(
                 Vilkår(FTRL_2_5_MEDFØLGENDE_A_E),
                 Vilkår(FTRL_2_5_FORSØRGET_FAMILIEMEDLEM)
@@ -98,10 +97,8 @@ class VilkårForBestemmelse(val mottatteOpplysningerService: MottatteOpplysninge
     }
 
     private fun ftrlKap2_8_4VilkårForAvklarteFakta(avklarteFakta: Map<Avklartefaktatyper, String>): List<Vilkår> {
-        val avklarteFamilieRelasjon = avklarteFakta[Avklartefaktatyper.IKKE_YRKESAKTIV_RELASJON]
-        validerFamilieRelasjon(avklarteFamilieRelasjon)
-        val familieRelasjonType = Ikkeyrkesaktivrelasjontype.valueOf(avklarteFamilieRelasjon!!)
-        return when (familieRelasjonType) {
+        val familieRelasjon = hentFamilieRelasjonFraFakta(avklarteFakta)
+        return when (familieRelasjon) {
             Ikkeyrkesaktivrelasjontype.BARN_2_8_FJERDE_LEDD -> listOf(
                 Vilkår(FTRL_2_1A_TRYGDEKOORDINGERING),
                 Vilkår(FTRL_2_8_FORSØRGET_FAMILIEMEDLEM)
@@ -116,12 +113,13 @@ class VilkårForBestemmelse(val mottatteOpplysningerService: MottatteOpplysninge
         }
     }
 
-    private fun validerFamilieRelasjon(familieRelasjon: String?) {
-        if ((familieRelasjon == null) || familieRelasjon !in Ikkeyrkesaktivrelasjontype.values()
-                .map(Ikkeyrkesaktivrelasjontype::name)
-        ) {
-            throw FunksjonellException("FamilieRelasjon $familieRelasjon er ugyldig" )
+    private fun hentFamilieRelasjonFraFakta(avklarteFakta: Map<Avklartefaktatyper, String>): Ikkeyrkesaktivrelasjontype {
+        val avklarteFamilieRelasjon =
+            requireNotNull(avklarteFakta[Avklartefaktatyper.IKKE_YRKESAKTIV_RELASJON]) { "Familierelasjon mangler" }
+        if (!Ikkeyrkesaktivrelasjontype.values().any { it.name == avklarteFamilieRelasjon }) {
+            throw FunksjonellException("FamilieRelasjon $avklarteFamilieRelasjon er ugyldig")
         }
+        return Ikkeyrkesaktivrelasjontype.valueOf(avklarteFamilieRelasjon)
     }
 
     data class Vilkår(
