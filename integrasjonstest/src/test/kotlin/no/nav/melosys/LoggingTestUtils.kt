@@ -70,6 +70,16 @@ object LoggingTestUtils {
             }
         }
 
+        fun check(block: (next: () -> String) -> Unit) {
+            val sorted = result.sortedBy { it.timeStamp }
+            var i = 0
+            block {
+                val message = sorted[i++].formattedMessage
+                if(regex == null) message else message.replace(regex!!, "")
+            }
+        }
+
+
     }
 
     val Collection<ILoggingEvent>.filterBuilder: LogFilterBuilder
