@@ -6,7 +6,7 @@ import java.time.LocalDateTime
 
 data class AktoerHistorikkDto(
     val registrertFra: LocalDateTime,
-    val registretTil: LocalDateTime? = null,
+    val registrertTil: LocalDateTime? = null,
     val aktoerID: String? = null,
     val personIdent: String? = null,
     val institusjonsID: String? = null,

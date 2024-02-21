@@ -93,7 +93,7 @@ public class OppfriskSaksopplysningerService {
             inngangsvilkaarService.vurderOgLagreInngangsvilkår(
                 behandlingID,
                 behandling.hentSøknadsLand(),
-                behandling.getMottatteOpplysninger().getMottatteOpplysningerData().soeknadsland.isErUkjenteEllerAlleEosLand(),
+                behandling.getMottatteOpplysninger().getMottatteOpplysningerData().soeknadsland.isFlereLandUkjentHvilke(),
                 periode
             );
         }
