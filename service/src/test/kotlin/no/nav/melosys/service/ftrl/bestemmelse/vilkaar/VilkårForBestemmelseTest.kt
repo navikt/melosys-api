@@ -237,4 +237,26 @@ class VilkårForBestemmelseTest {
             ),
         )
     }
+
+    @Test
+    fun `vilkår for FTRL_KAP2_2_8_ANDRE_LEDD, særlig grunn`() {
+        val vilkår = vilkårForBestemmelse.hentVilkår(
+            Folketrygdloven_kap2_bestemmelser.FTRL_KAP2_2_8_ANDRE_LEDD,
+            emptyMap(),
+            1L
+        )
+
+
+        vilkår.shouldContainExactly(
+            VilkårForBestemmelse.Vilkår(
+                FTRL_2_1A_TRYGDEKOORDINGERING
+            ),
+            VilkårForBestemmelse.Vilkår(
+                FTRL_FORUTGÅENDE_TRYGDETID
+            ),
+            VilkårForBestemmelse.Vilkår(
+                FTRL_2_8_NÆR_TILKNYTNING_NORGE
+            ),
+        )
+    }
 }
