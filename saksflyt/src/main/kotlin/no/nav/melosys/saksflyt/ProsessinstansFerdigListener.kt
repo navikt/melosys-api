@@ -18,6 +18,8 @@ class ProsessinstansFerdigListener(
         log.info("Prosessinstans {} ferdig låsreferanse {}", prosessinstansFerdigEvent.uuid, prosessinstansFerdigEvent.låsReferanse)
         if (prosessinstansFerdigEvent.låsReferanse != null && finnesIkkeAktivReferanse(prosessinstansFerdigEvent)) {
             startNesteProsessinstans(prosessinstansFerdigEvent)
+        } else if (prosessinstansFerdigEvent.låsReferanse != null) {
+            log.info("Ingen flere prosessinstanser på vent for {}", prosessinstansFerdigEvent.låsReferanse)
         }
     }
 
@@ -44,13 +46,15 @@ class ProsessinstansFerdigListener(
         }.isNotEmpty()
 
     private fun startNesteProsessinstans(prosessinstansFerdigEvent: ProsessinstansFerdigEvent) {
-        val count = prosessinstansRepository.findAllByStatus(ProsessStatus.PÅ_VENT)
+        val allePåVent = prosessinstansRepository.findAllByStatus(ProsessStatus.PÅ_VENT)
+        val count = allePåVent
             .count { LåsReferanseFactory.harSammeReferanse(it.låsReferanse, prosessinstansFerdigEvent.låsReferanse) }
 
-        val påVent = prosessinstansRepository.findAllByStatus(ProsessStatus.PÅ_VENT)
-            .filter { LåsReferanseFactory.harSammeReferanse(it.låsReferanse, prosessinstansFerdigEvent.låsReferanse) }
-            .sortedBy { it.registrertDato }
-            .firstOrNull()
+        val påVent = allePåVent.firstOrNull { it.låsReferanse == prosessinstansFerdigEvent.låsReferanse } // ta barna først
+            ?: allePåVent
+                .filter { LåsReferanseFactory.harSammeReferanse(it.låsReferanse, prosessinstansFerdigEvent.låsReferanse) }
+                .sortedBy { it.registrertDato }
+                .firstOrNull()
 
         log.info("$count på vent, neste som kan kjøres er ${påVent?.låsReferanse} for ferdig låsreferanse ${prosessinstansFerdigEvent.låsReferanse}")
 
