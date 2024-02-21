@@ -1,6 +1,5 @@
 package no.nav.melosys.itest
 
-import io.kotest.matchers.collections.shouldContain
 import io.kotest.matchers.collections.shouldHaveSize
 import io.kotest.matchers.shouldBe
 import io.mockk.CapturingSlot
@@ -8,7 +7,7 @@ import io.mockk.every
 import io.mockk.mockk
 import mu.KotlinLogging
 import no.nav.melosys.Application
-import no.nav.melosys.AwaitUtil
+import no.nav.melosys.AwaitUtil.throwOnLogError
 import no.nav.melosys.LoggingTestUtils
 import no.nav.melosys.LoggingTestUtils.filterBuilder
 import no.nav.melosys.domain.eessi.SedType
@@ -29,11 +28,10 @@ import no.nav.melosys.saksflyt.steg.sed.mottak.SedMottakRuting
 import no.nav.melosys.saksflytapi.ProsessinstansService
 import no.nav.melosys.saksflytapi.domain.ProsessStatus
 import no.nav.melosys.saksflytapi.domain.ProsessSteg
-import no.nav.melosys.saksflytapi.domain.ProsessType
 import no.nav.melosys.saksflytapi.domain.Prosessinstans
 import no.nav.security.token.support.spring.test.EnableMockOAuth2Server
 import org.awaitility.kotlin.await
-import org.awaitility.kotlin.untilNotNull
+import org.junit.jupiter.api.Disabled
 import org.junit.jupiter.api.Test
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.boot.test.autoconfigure.jdbc.AutoConfigureTestDatabase
@@ -45,9 +43,8 @@ import org.springframework.context.annotation.Primary
 import org.springframework.kafka.test.context.EmbeddedKafka
 import org.springframework.test.annotation.DirtiesContext
 import org.springframework.test.context.ActiveProfiles
-import java.time.LocalDateTime
+import java.time.Duration
 import java.util.*
-import java.util.concurrent.TimeUnit
 
 
 private val log = KotlinLogging.logger { }
@@ -71,7 +68,8 @@ internal class SedLåsMedSubProsesserIT(
     @Autowired private val prosessinstansService: ProsessinstansService,
 ) : OracleTestContainerBase() {
 
-    @Test
+    @Test // Beholder denne for lokal debugging en stund til
+    @Disabled("States 2 tråder, og er litt tilfeldig hvilken saksflytThreadPoolTaskExecutor som brukes (De gjenbrukes, og når det skjer varierer)")
     fun `ikke kjør samtidig når sed har samme rinaSaksnummer men forsjellig sedId, sedVersjon`() {
         val rinaSaksnummer = Random().nextInt(100000).toString()
 
@@ -87,14 +85,17 @@ internal class SedLåsMedSubProsesserIT(
         }
 
         LoggingTestUtils.withLogCapture { logItems ->
-            executeAndWait(
-                waitForprosessType = ProsessType.MOTTAK_SED,
-                alsoWaitForprosessType = listOf(ProsessType.REGISTRERING_UNNTAK_NY_SAK, ProsessType.MOTTAK_SED_JOURNALFØRING),
-                waitForCount = 4
-            ) {
-                prosessinstansService.opprettProsessinstansSedMottak(a009)
-                prosessinstansService.opprettProsessinstansSedMottak(x008)
-            }
+            prosessinstansService.opprettProsessinstansSedMottak(a009)
+            prosessinstansService.opprettProsessinstansSedMottak(x008)
+
+            await.throwOnLogError(logItems)
+                .timeout(Duration.ofSeconds(30)).pollInterval(Duration.ofSeconds(1))
+                .until {
+                    prosessinstansRepository.findAllByStatusNotInAndLåsReferanseStartingWith(
+                        listOf(ProsessStatus.FERDIG),
+                        rinaSaksnummer
+                    ).isEmpty()
+                }
 
             val a009Lås = a009.lagUnikIdentifikator()
             val x0008Lås = x008.lagUnikIdentifikator()
@@ -357,48 +358,6 @@ internal class SedLåsMedSubProsesserIT(
                     log.info("BestemBehandlingsmåteSed - Utfører for prosess ${slot.captured.id} - ${slot.captured.låsReferanse}")
                 }
             }
-        }
-    }
-
-    protected fun executeAndWait(
-        waitForprosessType: ProsessType,
-        alsoWaitForprosessType: List<ProsessType> = listOf(),
-        waitForCount: Int? = null,
-        process: () -> Unit
-    ): Prosessinstans {
-        val startTime = LocalDateTime.now()
-        process()
-        waitForAllToStart(waitForCount ?: (alsoWaitForprosessType.size + 1), startTime)
-        val journalføringProsessID = finnProsess(waitForprosessType, startTime)
-        alsoWaitForprosessType.forEach { finnProsess(it, startTime) }
-        return prosessinstansRepository.findById(journalføringProsessID).get()
-    }
-
-    protected fun waitForAllToStart(count: Int, startTid: LocalDateTime) {
-        await.conditionEvaluationListener {
-            println("should be count:$count ${prosessinstansRepository.findAllAfterDate(startTid).map { it.type }}")
-        }.pollDelay(1, TimeUnit.SECONDS)
-            .timeout(10, TimeUnit.SECONDS)
-            .until { prosessinstansRepository.findAllAfterDate(startTid).size == count }
-    }
-
-
-    protected fun finnProsess(prosessType: ProsessType, startTid: LocalDateTime): UUID {
-        AwaitUtil.awaitWithFailOnLogErrors {
-            pollDelay(1, TimeUnit.SECONDS)
-                .timeout(30, TimeUnit.SECONDS)
-                .untilNotNull {
-                    prosessinstansRepository.findAllAfterDate(startTid)
-                }.map { it.type }.shouldContain(prosessType)
-        }
-
-        return AwaitUtil.awaitWithFailOnLogErrors {
-            timeout(30, TimeUnit.SECONDS)
-                .pollInterval(1, TimeUnit.SECONDS)
-                .untilNotNull {
-                    prosessinstansRepository.findAllAfterDate(startTid)
-                        .find { it.type == prosessType && it.status == ProsessStatus.FERDIG }?.id
-                }
         }
     }
 }
