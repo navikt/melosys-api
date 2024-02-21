@@ -24,6 +24,12 @@ class VilkårForBestemmelse(val mottatteOpplysningerService: MottatteOpplysninge
                 Vilkår(FTRL_2_7_FORSØRGET_FAMILIEMEDLEM),
                 Vilkår(FTRL_2_7_INGEN_SÆRLIGE_GRUNNER_TALER_IMOT)
             )
+            FTRL_KAP2_2_8_FØRSTE_LEDD_B -> listOf(
+                Vilkår(FTRL_2_1A_TRYGDEKOORDINGERING),
+                Vilkår(FTRL_2_8_STUDENT_UVIVERSITET_HØGSKOLE),
+                Vilkår(FTRL_FORUTGÅENDE_TRYGDETID),
+                Vilkår(FTRL_2_8_NÆR_TILKNYTNING_NORGE)
+            )
             else -> emptyList()
         }
     }
