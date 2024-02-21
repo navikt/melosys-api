@@ -1,6 +1,5 @@
 package no.nav.melosys.itest
 
-import ch.qos.logback.classic.spi.ILoggingEvent
 import io.kotest.matchers.collections.shouldContain
 import io.kotest.matchers.collections.shouldHaveSize
 import io.kotest.matchers.shouldBe
@@ -100,22 +99,13 @@ internal class SedLåsMedSubProsesserIT(
             val a009Lås = a009.lagUnikIdentifikator()
             val x0008Lås = x008.lagUnikIdentifikator()
 
-            fun Collection<ILoggingEvent>.checkThread(block: (next: (name: String) -> String) -> Unit) {
-                val map = mutableMapOf<String, Int>()
-                block { name ->
-                    val cnt = map[name] ?: 0
-                    map[name] = cnt + 1
-                    filter { it.threadName == name }[cnt].formattedMessage.replace(Regex(" \\w+-\\w+-\\w+-\\w+-\\w+"), "")
-                }
-            }
-
             logItems.filterBuilder
                 .match<ProsessinstansService>()
                 .match<ProsessinstansBehandler>()
                 .match<ProsessinstansBehandlerDelegate>()
                 .match<ProsessinstansFerdigListener>()
-                .build()
-                .checkThread { next ->
+                .remove(Regex("\\s\\w+-\\w+-\\w+-\\w+-\\w+"))
+                .checkWithThreads { next ->
                     next("main") shouldBe "Melosys har opprettet prosessinstans null av type MOTTAK_SED."
                     next("main") shouldBe "låsreferanse: $a009Lås Andre aktive lås med samme referanse: []"
                     next("saksflytThreadPoolTaskExecutor-1") shouldBe "Starter behandling av prosessinstans med lås $a009Lås"

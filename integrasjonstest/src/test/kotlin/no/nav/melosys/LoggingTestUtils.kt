@@ -41,12 +41,29 @@ object LoggingTestUtils {
     }
 
     class LogFilterBuilder(val logItems: Collection<ILoggingEvent>) {
-         val result: MutableList<ILoggingEvent> = mutableListOf()
+        val result: MutableList<ILoggingEvent> = mutableListOf()
+        private var regex: Regex? = null
 
         inline fun <reified T : Any> match(predicate: (ILoggingEvent) -> Boolean = { true }): LogFilterBuilder =
             apply { result.addAll(logItems.filter { it.loggerName == T::class.java.name && predicate(it) }) }
 
-        fun build(): Collection<ILoggingEvent> = result.sortedBy { it.timeStamp }
+        fun remove(regex: Regex) = apply { this.regex = regex }
+
+        fun build(): Collection<ILoggingEvent> {
+            return result.sortedBy { it.timeStamp }
+        }
+
+        fun checkWithThreads(block: (next: (name: String) -> String) -> Unit) {
+            val map = mutableMapOf<String, Int>()
+            val sorted = result.sortedBy { it.timeStamp }
+            block { name ->
+                val cnt = map[name] ?: 0
+                map[name] = cnt + 1
+                val message: String = sorted.filter { it.threadName == name }[cnt].formattedMessage
+                if(regex == null) message else message.replace(regex!!, "")
+            }
+        }
+
     }
 
     val Collection<ILoggingEvent>.filterBuilder: LogFilterBuilder
