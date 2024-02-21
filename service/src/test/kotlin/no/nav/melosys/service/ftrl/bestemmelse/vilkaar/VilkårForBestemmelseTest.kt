@@ -168,4 +168,26 @@ class VilkårForBestemmelseTest {
             ),
         )
     }
+
+    @Test
+    fun `vilkår for FTRL_KAP2_2_7_FJERDE_LEDD`() {
+        val vilkår = vilkårForBestemmelse.hentVilkår(
+            Folketrygdloven_kap2_bestemmelser.FTRL_KAP2_2_7_FJERDE_LEDD,
+            emptyMap(),
+            1L
+        )
+
+
+        vilkår.shouldContainExactly(
+            VilkårForBestemmelse.Vilkår(
+                FTRL_2_1A_TRYGDEKOORDINGERING
+            ),
+            VilkårForBestemmelse.Vilkår(
+                FTRL_2_7_FORSØRGET_FAMILIEMEDLEM
+            ),
+            VilkårForBestemmelse.Vilkår(
+                FTRL_2_7_INGEN_SÆRLIGE_GRUNNER_TALER_IMOT
+            ),
+        )
+    }
 }
