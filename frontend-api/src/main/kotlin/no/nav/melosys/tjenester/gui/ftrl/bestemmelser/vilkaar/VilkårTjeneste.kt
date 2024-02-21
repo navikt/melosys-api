@@ -8,20 +8,17 @@ import no.nav.melosys.domain.kodeverk.Vilkaar
 import no.nav.melosys.exception.FunksjonellException
 import no.nav.melosys.service.ftrl.bestemmelse.vilkaar.VilkårForBestemmelse
 import no.nav.security.token.support.core.api.Protected
-import org.springframework.context.annotation.Scope
 import org.springframework.http.ResponseEntity
 import org.springframework.web.bind.annotation.GetMapping
 import org.springframework.web.bind.annotation.PathVariable
 import org.springframework.web.bind.annotation.RequestParam
 import org.springframework.web.bind.annotation.RestController
-import org.springframework.web.context.WebApplicationContext
 
 private const val BEHANDLING_ID = "behandlingID"
 
 @Protected
 @RestController
 @Api(tags = ["ftrl", "bestemmelser", "avklarte fakta", "vilkår"])
-@Scope(value = WebApplicationContext.SCOPE_REQUEST)
 class VilkårTjeneste(private val vilkårForBestemmelse: VilkårForBestemmelse) {
     private val log = KotlinLogging.logger { }
 
