@@ -24,6 +24,7 @@ object LoggingTestUtils {
         block { list[i++] }
     }
 
+
     inline fun <reified T : Any> Collection<ILoggingEvent>.match(): Collection<ILoggingEvent> {
         return filter { it.loggerName == T::class.java.name }
     }
@@ -42,15 +43,12 @@ object LoggingTestUtils {
     class LogFilterBuilder(val logItems: Collection<ILoggingEvent>) {
          val result: MutableList<ILoggingEvent> = mutableListOf()
 
-         inline fun <reified T : Any> match(predicate: (ILoggingEvent) -> Boolean = { true }): LogFilterBuilder =
+        inline fun <reified T : Any> match(predicate: (ILoggingEvent) -> Boolean = { true }): LogFilterBuilder =
             apply { result.addAll(logItems.filter { it.loggerName == T::class.java.name && predicate(it) }) }
 
-        fun build(): Collection<ILoggingEvent> = result
+        fun build(): Collection<ILoggingEvent> = result.sortedBy { it.timeStamp }
     }
 
-    // Extension function to initialize the builder
     val Collection<ILoggingEvent>.filterBuilder: LogFilterBuilder
         get() = LogFilterBuilder(this)
-
-
 }

@@ -1,5 +1,6 @@
 package no.nav.melosys.itest
 
+import ch.qos.logback.classic.spi.ILoggingEvent
 import io.kotest.matchers.collections.shouldContain
 import io.kotest.matchers.collections.shouldHaveSize
 import io.kotest.matchers.shouldBe
@@ -10,12 +11,12 @@ import mu.KotlinLogging
 import no.nav.melosys.Application
 import no.nav.melosys.AwaitUtil
 import no.nav.melosys.LoggingTestUtils
-import no.nav.melosys.LoggingTestUtils.check
 import no.nav.melosys.LoggingTestUtils.filterBuilder
 import no.nav.melosys.domain.eessi.SedType
 import no.nav.melosys.domain.eessi.melding.MelosysEessiMelding
 import no.nav.melosys.saksflyt.ProsessinstansBehandler
 import no.nav.melosys.saksflyt.ProsessinstansBehandlerDelegate
+import no.nav.melosys.saksflyt.ProsessinstansFerdigListener
 import no.nav.melosys.saksflyt.ProsessinstansRepository
 import no.nav.melosys.saksflyt.steg.behandling.OpprettFagsakOgBehandlingFraSed
 import no.nav.melosys.saksflyt.steg.jfr.FerdigstillJournalpostSed
@@ -99,34 +100,71 @@ internal class SedLåsMedSubProsesserIT(
             val a009Lås = a009.lagUnikIdentifikator()
             val x0008Lås = x008.lagUnikIdentifikator()
 
+            fun Collection<ILoggingEvent>.checkThread(block: (next: (name: String) -> String) -> Unit) {
+                val map = mutableMapOf<String, Int>()
+                block { name ->
+                    val cnt = map[name] ?: 0
+                    map[name] = cnt + 1
+                    filter { it.threadName == name }[cnt].formattedMessage.replace(Regex(" \\w+-\\w+-\\w+-\\w+-\\w+"), "")
+                }
+            }
+
             logItems.filterBuilder
-                .match<ProsessinstansBehandlerDelegate> { it.formattedMessage.endsWith(" på vent") }
+                .match<ProsessinstansService>()
                 .match<ProsessinstansBehandler>()
-                .build().shouldHaveSize(22)
-                .map { it.formattedMessage.replace(Regex(" \\w+-\\w+-\\w+-\\w+-\\w+"), "") }
-                .check { next ->
-                    next() shouldBe "Prosessinstans med låsreferanse $x0008Lås satt på vent"
-                    next() shouldBe "Prosessinstans med låsreferanse $a009Lås satt på vent"
-                    next() shouldBe "Prosessinstans med låsreferanse $x0008Lås satt på vent"
-                    next() shouldBe "Starter behandling av prosessinstans med lås $a009Lås"
-                    next() shouldBe "Utfører steg ${ProsessSteg.SED_MOTTAK_RUTING} for prosessinstans"
-                    next() shouldBe "Prosessinstans behandlet ferdig"
-                    next() shouldBe "Starter behandling av prosessinstans med lås $x0008Lås"
-                    next() shouldBe "Utfører steg ${ProsessSteg.SED_MOTTAK_RUTING} for prosessinstans"
-                    next() shouldBe "Prosessinstans behandlet ferdig"
-                    next() shouldBe "Starter behandling av prosessinstans med lås $a009Lås"
-                    next() shouldBe "Utfører steg ${ProsessSteg.SED_MOTTAK_FERDIGSTILL_JOURNALPOST} for prosessinstans"
-                    next() shouldBe "Prosessinstans behandlet ferdig"
-                    next() shouldBe "Starter behandling av prosessinstans med lås $x0008Lås"
-                    next() shouldBe "Utfører steg ${ProsessSteg.SED_MOTTAK_OPPRETT_FAGSAK_OG_BEH} for prosessinstans"
-                    next() shouldBe "Utfører steg ${ProsessSteg.OPPRETT_ARKIVSAK} for prosessinstans"
-                    next() shouldBe "Utfører steg ${ProsessSteg.OPPDATER_SAKSRELASJON} for prosessinstans"
-                    next() shouldBe "Utfører steg ${ProsessSteg.SED_MOTTAK_FERDIGSTILL_JOURNALPOST} for prosessinstans"
-                    next() shouldBe "Utfører steg ${ProsessSteg.OPPRETT_SEDDOKUMENT} for prosessinstans"
-                    next() shouldBe "Utfører steg ${ProsessSteg.HENT_REGISTEROPPLYSNINGER} for prosessinstans"
-                    next() shouldBe "Utfører steg ${ProsessSteg.REGISTERKONTROLL} for prosessinstans"
-                    next() shouldBe "Utfører steg ${ProsessSteg.BESTEM_BEHANDLINGMÅTE_SED} for prosessinstans"
-                    next() shouldBe "Prosessinstans behandlet ferdig"
+                .match<ProsessinstansBehandlerDelegate>()
+                .match<ProsessinstansFerdigListener>()
+                .build()
+                .checkThread { next ->
+                    next("main") shouldBe "Melosys har opprettet prosessinstans null av type MOTTAK_SED."
+                    next("main") shouldBe "låsreferanse: $a009Lås Andre aktive lås med samme referanse: []"
+                    next("saksflytThreadPoolTaskExecutor-1") shouldBe "Starter behandling av prosessinstans med lås $a009Lås"
+                    next("main") shouldBe "Melosys har opprettet prosessinstans null av type MOTTAK_SED."
+                    next("main") shouldBe "låsreferanse: $x0008Lås Andre aktive lås med samme referanse: [$a009Lås]"
+                    next("main") shouldBe "Prosessinstans med låsreferanse $x0008Lås satt på vent"
+                    next("saksflytThreadPoolTaskExecutor-1") shouldBe "Utfører steg SED_MOTTAK_RUTING for prosessinstans"
+                    next("saksflytThreadPoolTaskExecutor-1") shouldBe "Melosys har opprettet prosessinstans null av type MOTTAK_SED_JOURNALFØRING."
+                    next("saksflytThreadPoolTaskExecutor-1") shouldBe "låsreferanse: $a009Lås Andre aktive lås med samme referanse: [$a009Lås]"
+                    next("saksflytThreadPoolTaskExecutor-1") shouldBe "Prosessinstans med låsreferanse $a009Lås satt på vent"
+                    next("saksflytThreadPoolTaskExecutor-1") shouldBe "Prosessinstans behandlet ferdig"
+                    next("saksflytThreadPoolTaskExecutor-1") shouldBe "Prosessinstans ferdig låsreferanse $a009Lås"
+                    next("saksflytThreadPoolTaskExecutor-1") shouldBe "Det finnes en aktiv prosessinstans med låsreferanse $a009Lås"
+                    next("saksflytThreadPoolTaskExecutor-1") shouldBe "1 prosessinstanser med nøyaktig samme låsreferanse $a009Lås er på vent"
+                    next("saksflytThreadPoolTaskExecutor-1") shouldBe "finnesIkkeAktivReferanse for $a009Lås = true"
+                    next("saksflytThreadPoolTaskExecutor-1") shouldBe "2 på vent, neste som kan kjøres er $x0008Lås for ferdig låsreferanse $a009Lås"
+                    next("saksflytThreadPoolTaskExecutor-1") shouldBe "Prosessinstans med låsreferanse $x0008Lås startes opp etter å ha vært på vent"
+                    next("saksflytThreadPoolTaskExecutor-2") shouldBe "Starter behandling av prosessinstans med lås $x0008Lås"
+                    next("saksflytThreadPoolTaskExecutor-2") shouldBe "Utfører steg SED_MOTTAK_RUTING for prosessinstans"
+                    next("saksflytThreadPoolTaskExecutor-2") shouldBe "Melosys har opprettet prosessinstans null av type REGISTRERING_UNNTAK_NY_SAK."
+                    next("saksflytThreadPoolTaskExecutor-2") shouldBe "låsreferanse: $x0008Lås Andre aktive lås med samme referanse: [$x0008Lås]"
+                    next("saksflytThreadPoolTaskExecutor-2") shouldBe "Prosessinstans med låsreferanse $x0008Lås satt på vent"
+                    next("saksflytThreadPoolTaskExecutor-2") shouldBe "Prosessinstans behandlet ferdig"
+                    next("saksflytThreadPoolTaskExecutor-2") shouldBe "Prosessinstans ferdig låsreferanse $x0008Lås"
+                    next("saksflytThreadPoolTaskExecutor-2") shouldBe "Det finnes en aktiv prosessinstans med låsreferanse $x0008Lås"
+                    next("saksflytThreadPoolTaskExecutor-2") shouldBe "1 prosessinstanser med nøyaktig samme låsreferanse $x0008Lås er på vent"
+                    next("saksflytThreadPoolTaskExecutor-2") shouldBe "finnesIkkeAktivReferanse for $x0008Lås = true"
+                    next("saksflytThreadPoolTaskExecutor-2") shouldBe "2 på vent, neste som kan kjøres er $a009Lås for ferdig låsreferanse $x0008Lås"
+                    next("saksflytThreadPoolTaskExecutor-2") shouldBe "Prosessinstans med låsreferanse $a009Lås startes opp etter å ha vært på vent"
+                    next("saksflytThreadPoolTaskExecutor-3") shouldBe "Starter behandling av prosessinstans med lås $a009Lås"
+                    next("saksflytThreadPoolTaskExecutor-3") shouldBe "Utfører steg SED_MOTTAK_FERDIGSTILL_JOURNALPOST for prosessinstans"
+                    next("saksflytThreadPoolTaskExecutor-3") shouldBe "Prosessinstans behandlet ferdig"
+                    next("saksflytThreadPoolTaskExecutor-3") shouldBe "Prosessinstans ferdig låsreferanse $a009Lås"
+                    next("saksflytThreadPoolTaskExecutor-3") shouldBe "Det finnes ingen aktiv prosessinstans med låsreferanse $a009Lås"
+                    next("saksflytThreadPoolTaskExecutor-3") shouldBe "1 på vent, neste som kan kjøres er $x0008Lås for ferdig låsreferanse $a009Lås"
+                    next("saksflytThreadPoolTaskExecutor-3") shouldBe "Prosessinstans med låsreferanse $x0008Lås startes opp etter å ha vært på vent"
+                    next("saksflytThreadPoolTaskExecutor-1") shouldBe "Starter behandling av prosessinstans med lås $x0008Lås"
+                    next("saksflytThreadPoolTaskExecutor-1") shouldBe "Utfører steg SED_MOTTAK_OPPRETT_FAGSAK_OG_BEH for prosessinstans"
+                    next("saksflytThreadPoolTaskExecutor-1") shouldBe "Utfører steg OPPRETT_ARKIVSAK for prosessinstans"
+                    next("saksflytThreadPoolTaskExecutor-1") shouldBe "Utfører steg OPPDATER_SAKSRELASJON for prosessinstans"
+                    next("saksflytThreadPoolTaskExecutor-1") shouldBe "Utfører steg SED_MOTTAK_FERDIGSTILL_JOURNALPOST for prosessinstans"
+                    next("saksflytThreadPoolTaskExecutor-1") shouldBe "Utfører steg OPPRETT_SEDDOKUMENT for prosessinstans"
+                    next("saksflytThreadPoolTaskExecutor-1") shouldBe "Utfører steg HENT_REGISTEROPPLYSNINGER for prosessinstans"
+                    next("saksflytThreadPoolTaskExecutor-1") shouldBe "Utfører steg REGISTERKONTROLL for prosessinstans"
+                    next("saksflytThreadPoolTaskExecutor-1") shouldBe "Utfører steg BESTEM_BEHANDLINGMÅTE_SED for prosessinstans"
+                    next("saksflytThreadPoolTaskExecutor-1") shouldBe "Prosessinstans behandlet ferdig"
+                    next("saksflytThreadPoolTaskExecutor-1") shouldBe "Prosessinstans ferdig låsreferanse $x0008Lås"
+                    next("saksflytThreadPoolTaskExecutor-1") shouldBe "Det finnes ingen aktiv prosessinstans med låsreferanse $x0008Lås"
+                    next("saksflytThreadPoolTaskExecutor-1") shouldBe "0 på vent, neste som kan kjøres er null for ferdig låsreferanse $x0008Lås"
                 }
         }
     }
@@ -164,8 +202,7 @@ internal class SedLåsMedSubProsesserIT(
 
                         SedType.X008.name -> prosessinstansService.opprettProsessinstansNySakUnntaksregistrering(
                             melosysEessiMelding,
-                            null,
-                            "test"
+                            null, "test"
                         )
                     }
                 }
