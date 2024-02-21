@@ -52,7 +52,7 @@ class ProsessinstansFerdigListener(
             .sortedBy { it.registrertDato }
             .firstOrNull()
 
-        log.info("$count på vent, neste som kan kjøres ${påVent?.id} for låsreferanse ${prosessinstansFerdigEvent.låsReferanse}")
+        log.info("$count på vent, neste som kan kjøres er ${påVent?.låsReferanse} for ferdig låsreferanse ${prosessinstansFerdigEvent.låsReferanse}")
 
         if (påVent != null) {
             oppdaterStatusOgBehandleProsessinstans(påVent)
