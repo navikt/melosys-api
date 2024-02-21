@@ -259,4 +259,48 @@ class VilkårForBestemmelseTest {
             ),
         )
     }
+
+    @Test
+    fun `vilkår for FTRL_KAP2_2_8_FJERDE_LEDD, barn`() {
+        val vilkår = vilkårForBestemmelse.hentVilkår(
+            Folketrygdloven_kap2_bestemmelser.FTRL_KAP2_2_8_FJERDE_LEDD,
+            mapOf(Avklartefaktatyper.IKKE_YRKESAKTIV_RELASJON to Ikkeyrkesaktivrelasjontype.BARN_2_8_FJERDE_LEDD.name),
+            1L
+        )
+
+
+        vilkår.shouldContainExactly(
+            VilkårForBestemmelse.Vilkår(
+                FTRL_2_1A_TRYGDEKOORDINGERING
+            ),
+            VilkårForBestemmelse.Vilkår(
+                FTRL_2_8_FORSØRGET_FAMILIEMEDLEM
+            ),
+        )
+    }
+
+    @Test
+    fun `vilkår for FTRL_KAP2_2_8_FJERDE_LEDD, ektefelle`() {
+        val vilkår = vilkårForBestemmelse.hentVilkår(
+            Folketrygdloven_kap2_bestemmelser.FTRL_KAP2_2_8_FJERDE_LEDD,
+            mapOf(Avklartefaktatyper.IKKE_YRKESAKTIV_RELASJON to Ikkeyrkesaktivrelasjontype.EKTEFELLE_2_8_FJERDE_LEDD.name),
+            1L
+        )
+
+
+        vilkår.shouldContainExactly(
+            VilkårForBestemmelse.Vilkår(
+                FTRL_2_1A_TRYGDEKOORDINGERING
+            ),
+            VilkårForBestemmelse.Vilkår(
+                FTRL_2_8_FORSØRGET_FAMILIEMEDLEM
+            ),
+            VilkårForBestemmelse.Vilkår(
+                FTRL_FORUTGÅENDE_TRYGDETID
+            ),
+            VilkårForBestemmelse.Vilkår(
+                FTRL_2_8_NÆR_TILKNYTNING_NORGE
+            ),
+        )
+    }
 }

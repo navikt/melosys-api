@@ -40,6 +40,7 @@ class VilkårForBestemmelse(val mottatteOpplysningerService: MottatteOpplysninge
                 Vilkår(FTRL_FORUTGÅENDE_TRYGDETID),
                 Vilkår(FTRL_2_8_NÆR_TILKNYTNING_NORGE)
             )
+            FTRL_KAP2_2_8_FJERDE_LEDD -> ftrlKap2_8_4VilkårForAvklarteFakta(avklarteFakta)
 
             else -> emptyList()
         }
@@ -91,6 +92,25 @@ class VilkårForBestemmelse(val mottatteOpplysningerService: MottatteOpplysninge
                 Vilkår(FTRL_2_5_MEDFØLGENDE_A_E, defaultOppfylt = true),
                 Vilkår(FTRL_2_5_FORSØRGET_FAMILIEMEDLEM),
                 Vilkår(FTRL_FORUTGÅENDE_TRYGDETID)
+            )
+            else -> emptyList()
+        }
+    }
+
+    private fun ftrlKap2_8_4VilkårForAvklarteFakta(avklarteFakta: Map<Avklartefaktatyper, String>): List<Vilkår> {
+        val avklarteFamilieRelasjon = avklarteFakta[Avklartefaktatyper.IKKE_YRKESAKTIV_RELASJON]
+        validerFamilieRelasjon(avklarteFamilieRelasjon)
+        val familieRelasjonType = Ikkeyrkesaktivrelasjontype.valueOf(avklarteFamilieRelasjon!!)
+        return when (familieRelasjonType) {
+            Ikkeyrkesaktivrelasjontype.BARN_2_8_FJERDE_LEDD -> listOf(
+                Vilkår(FTRL_2_1A_TRYGDEKOORDINGERING),
+                Vilkår(FTRL_2_8_FORSØRGET_FAMILIEMEDLEM)
+            )
+            Ikkeyrkesaktivrelasjontype.EKTEFELLE_2_8_FJERDE_LEDD -> listOf(
+                Vilkår(FTRL_2_1A_TRYGDEKOORDINGERING),
+                Vilkår(FTRL_2_8_FORSØRGET_FAMILIEMEDLEM),
+                Vilkår(FTRL_FORUTGÅENDE_TRYGDETID),
+                Vilkår(FTRL_2_8_NÆR_TILKNYTNING_NORGE),
             )
             else -> emptyList()
         }
