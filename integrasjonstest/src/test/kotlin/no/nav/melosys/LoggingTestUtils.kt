@@ -5,6 +5,7 @@ import ch.qos.logback.classic.spi.ILoggingEvent
 import ch.qos.logback.core.read.ListAppender
 import io.kotest.assertions.withClue
 import io.kotest.matchers.collections.shouldHaveAtLeastSize
+import io.kotest.matchers.shouldBe
 import org.slf4j.LoggerFactory
 
 object LoggingTestUtils {
@@ -70,16 +71,17 @@ object LoggingTestUtils {
             }
         }
 
-        fun check(block: (next: () -> String) -> Unit) {
+        fun check(block: (next: (nextLogItem: String) -> Unit) -> Unit) {
             val sorted = result.sortedBy { it.timeStamp }
             var i = 0
-            block {
+            block { nextLogItem ->
                 val message = sorted[i++].formattedMessage
-                if(regex == null) message else message.replace(regex!!, "")
+                val replaced = if(regex == null) message else message.replace(regex!!, "")
+                withClue("log message line: $i") {
+                    replaced shouldBe nextLogItem
+                }
             }
         }
-
-
     }
 
     val Collection<ILoggingEvent>.filterBuilder: LogFilterBuilder

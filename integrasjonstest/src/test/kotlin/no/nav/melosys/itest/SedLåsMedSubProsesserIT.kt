@@ -1,7 +1,6 @@
 package no.nav.melosys.itest
 
 import io.kotest.matchers.collections.shouldHaveSize
-import io.kotest.matchers.shouldBe
 import io.mockk.CapturingSlot
 import io.mockk.every
 import io.mockk.mockk
@@ -103,25 +102,25 @@ internal class SedLåsMedSubProsesserIT(
                 .match<ProsessinstansFerdigListener> { it.formattedMessage.contains("på vent, neste som kan kjøres") }
                 .remove(Regex("\\s\\w+-\\w+-\\w+-\\w+-\\w+"))
                 .check { next ->
-                    next() shouldBe "Melosys har opprettet prosessinstans null av type MOTTAK_SED."
-                    next() shouldBe "Melosys har opprettet prosessinstans null av type MOTTAK_SED."
-                    next() shouldBe "Utfører steg SED_MOTTAK_RUTING for prosessinstans"
-                    next() shouldBe "Melosys har opprettet prosessinstans null av type MOTTAK_SED_JOURNALFØRING."
-                    next() shouldBe "2 på vent, neste som kan kjøres er $a009Lås for ferdig låsreferanse $a009Lås"
-                    next() shouldBe "Utfører steg SED_MOTTAK_FERDIGSTILL_JOURNALPOST for prosessinstans"
-                    next() shouldBe "1 på vent, neste som kan kjøres er $x0008Lås for ferdig låsreferanse $a009Lås"
-                    next() shouldBe "Utfører steg SED_MOTTAK_RUTING for prosessinstans"
-                    next() shouldBe "Melosys har opprettet prosessinstans null av type REGISTRERING_UNNTAK_NY_SAK."
-                    next() shouldBe "1 på vent, neste som kan kjøres er $x0008Lås for ferdig låsreferanse $x0008Lås"
-                    next() shouldBe "Utfører steg SED_MOTTAK_OPPRETT_FAGSAK_OG_BEH for prosessinstans"
-                    next() shouldBe "Utfører steg OPPRETT_ARKIVSAK for prosessinstans"
-                    next() shouldBe "Utfører steg OPPDATER_SAKSRELASJON for prosessinstans"
-                    next() shouldBe "Utfører steg SED_MOTTAK_FERDIGSTILL_JOURNALPOST for prosessinstans"
-                    next() shouldBe "Utfører steg OPPRETT_SEDDOKUMENT for prosessinstans"
-                    next() shouldBe "Utfører steg HENT_REGISTEROPPLYSNINGER for prosessinstans"
-                    next() shouldBe "Utfører steg REGISTERKONTROLL for prosessinstans"
-                    next() shouldBe "Utfører steg BESTEM_BEHANDLINGMÅTE_SED for prosessinstans"
-                    next() shouldBe "0 på vent, neste som kan kjøres er null for ferdig låsreferanse $x0008Lås"
+                    next("Melosys har opprettet prosessinstans null av type MOTTAK_SED.")
+                    next("Melosys har opprettet prosessinstans null av type MOTTAK_SED.")
+                    next("Utfører steg SED_MOTTAK_RUTING for prosessinstans")
+                    next("Melosys har opprettet prosessinstans null av type MOTTAK_SED_JOURNALFØRING.")
+                    next("2 på vent, neste som kan kjøres er $a009Lås for ferdig låsreferanse $a009Lås")
+                    next("Utfører steg SED_MOTTAK_FERDIGSTILL_JOURNALPOST for prosessinstans")
+                    next("1 på vent, neste som kan kjøres er $x0008Lås for ferdig låsreferanse $a009Lås")
+                    next("Utfører steg SED_MOTTAK_RUTING for prosessinstans")
+                    next("Melosys har opprettet prosessinstans null av type REGISTRERING_UNNTAK_NY_SAK.")
+                    next("1 på vent, neste som kan kjøres er $x0008Lås for ferdig låsreferanse $x0008Lås")
+                    next("Utfører steg SED_MOTTAK_OPPRETT_FAGSAK_OG_BEH for prosessinstans")
+                    next("Utfører steg OPPRETT_ARKIVSAK for prosessinstans")
+                    next("Utfører steg OPPDATER_SAKSRELASJON for prosessinstans")
+                    next("Utfører steg SED_MOTTAK_FERDIGSTILL_JOURNALPOST for prosessinstans")
+                    next("Utfører steg OPPRETT_SEDDOKUMENT for prosessinstans")
+                    next("Utfører steg HENT_REGISTEROPPLYSNINGER for prosessinstans")
+                    next("Utfører steg REGISTERKONTROLL for prosessinstans")
+                    next("Utfører steg BESTEM_BEHANDLINGMÅTE_SED for prosessinstans")
+                    next("0 på vent, neste som kan kjøres er null for ferdig låsreferanse $x0008Lås")
                 }
         }
     }
