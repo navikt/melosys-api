@@ -75,6 +75,15 @@ class LoggingTestUtilsTest {
                 .build()
                 .shouldHaveSize(2).map { it.message }
                 .shouldContainInOrder("a-2", "b-1")
+
+            logs.filterBuilder
+                .match<SomeClass1> { it.message.contains("a-2") }
+                .match<SomeClass2>() { it.message.contains("b-1") }
+                .remove(Regex("-1"))
+                .checkWithThreads { next ->
+                    next("main").shouldBe("a-2")
+                    next("main").shouldBe("b")
+                }
         }
     }
 }
