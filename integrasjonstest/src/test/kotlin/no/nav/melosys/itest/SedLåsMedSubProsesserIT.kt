@@ -68,8 +68,8 @@ internal class SedLåsMedSubProsesserIT(
     @Autowired private val prosessinstansService: ProsessinstansService,
 ) : OracleTestContainerBase() {
 
-    @Test // Beholder denne for lokal debugging en stund til
-    @Disabled("States 2 tråder, og er litt tilfeldig hvilken saksflytThreadPoolTaskExecutor som brukes (De gjenbrukes, og når det skjer varierer)")
+    @Test // Beholder denne for lokal debugging en stund til TODO: Skriv om til å sjekk at subprosesser blir kjørt først
+    @Disabled("Starter 2 tråder, og er litt tilfeldig hvilken saksflytThreadPoolTaskExecutor som brukes (De gjenbrukes, og når det skjer varierer)")
     fun `ikke kjør samtidig når sed har samme rinaSaksnummer men forsjellig sedId, sedVersjon`() {
         val rinaSaksnummer = Random().nextInt(100000).toString()
 
