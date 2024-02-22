@@ -100,18 +100,22 @@ internal class SedLåsMedSubProsesserIT(
             logItems.filterBuilder
                 .match<ProsessinstansService> { it.formattedMessage.contains("Melosys har opprettet prosessinstans") }
                 .match<ProsessinstansBehandler> { it.formattedMessage.contains("Utfører steg") }
-                .match<ProsessinstansFerdigListener> { it.formattedMessage.contains("på vent, neste som kan kjøres") }
+                .match<ProsessinstansFerdigListener> { it.formattedMessage.contains("på vent med") }
+                .match<ProsessinstansFerdigListener> { it.formattedMessage.contains("på vent, neste") }
                 .remove(Regex("\\s\\w+-\\w+-\\w+-\\w+-\\w+"))
                 .check { next ->
                     next { it shouldBe "Melosys har opprettet prosessinstans null av type MOTTAK_SED." }
                     next { it shouldBe "Melosys har opprettet prosessinstans null av type MOTTAK_SED." }
                     next { it shouldBe "Utfører steg SED_MOTTAK_RUTING for prosessinstans" }
                     next { it shouldBe "Melosys har opprettet prosessinstans null av type MOTTAK_SED_JOURNALFØRING." }
+                    next { it shouldBe "Prosessinstanser på vent med samme låsreferanse: [$a009Lås, $x0008Lås]" }
                     next { it shouldBe "2 på vent, neste som kan kjøres er $a009Lås for ferdig låsreferanse $a009Lås" }
                     next { it shouldBe "Utfører steg SED_MOTTAK_FERDIGSTILL_JOURNALPOST for prosessinstans" }
+                    next { it shouldBe "Prosessinstanser på vent med samme låsreferanse: [$x0008Lås]" }
                     next { it shouldBe "1 på vent, neste som kan kjøres er $x0008Lås for ferdig låsreferanse $a009Lås" }
                     next { it shouldBe "Utfører steg SED_MOTTAK_RUTING for prosessinstans" }
                     next { it shouldBe "Melosys har opprettet prosessinstans null av type REGISTRERING_UNNTAK_NY_SAK." }
+                    next { it shouldBe "Prosessinstanser på vent med samme låsreferanse: [$x0008Lås]" }
                     next { it shouldBe "1 på vent, neste som kan kjøres er $x0008Lås for ferdig låsreferanse $x0008Lås" }
                     next { it shouldBe "Utfører steg SED_MOTTAK_OPPRETT_FAGSAK_OG_BEH for prosessinstans" }
                     next { it shouldBe "Utfører steg OPPRETT_ARKIVSAK for prosessinstans" }
@@ -121,7 +125,7 @@ internal class SedLåsMedSubProsesserIT(
                     next { it shouldBe "Utfører steg HENT_REGISTEROPPLYSNINGER for prosessinstans" }
                     next { it shouldBe "Utfører steg REGISTERKONTROLL for prosessinstans" }
                     next { it shouldBe "Utfører steg BESTEM_BEHANDLINGMÅTE_SED for prosessinstans" }
-//                    next { it shouldBe "0 på vent, neste som kan kjøres er null for ferdig låsreferanse $x0008Lås" }
+                    next { it shouldBe "Prosessinstanser på vent med samme låsreferanse: []" }
                 }
         }
     }

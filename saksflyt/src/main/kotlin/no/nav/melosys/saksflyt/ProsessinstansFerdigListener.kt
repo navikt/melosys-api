@@ -26,12 +26,12 @@ class ProsessinstansFerdigListener(
         }
     }
 
-    private fun kanNesteProsessinstansStartes(prosessinstansFerdigEvent: ProsessinstansFerdigEvent): Boolean {
-        val kanStartes = prosessinstansRepository.findAllByStatus(ProsessStatus.PÅ_VENT).filter {
+    private fun kanNesteProsessinstansStartes(prosessinstansFerdigEvent: ProsessinstansFerdigEvent): Boolean =
+        prosessinstansRepository.findAllByStatus(ProsessStatus.PÅ_VENT).filter {
             LåsReferanseFactory.harSammeGruppePrefiks(it.låsReferanse, prosessinstansFerdigEvent.låsReferanse)
-        }
-        return kanStartes.isNotEmpty()
-    }
+        }.apply {
+            log.info("Prosessinstanser på vent med samme låsreferanse: ${this.map { it.låsReferanse }.sortedBy { it }}")
+        }.isNotEmpty()
 
     private fun startNesteProsessinstans(prosessinstansFerdigEvent: ProsessinstansFerdigEvent) {
         val allePåVent = prosessinstansRepository.findAllByStatus(ProsessStatus.PÅ_VENT)
