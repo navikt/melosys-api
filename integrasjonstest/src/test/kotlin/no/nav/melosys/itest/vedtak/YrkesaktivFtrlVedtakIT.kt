@@ -353,7 +353,7 @@ class YrkesaktivFtrlVedtakIT(
         avklartefaktaService.lagreAvklarteFakta(behandling.id, setOf(yrkesgruppe, virksomhet, yrkesaktivitet))
 
         val vilkaar = VilkaarDto().apply {
-            vilkaar = "FTRL_2_8_FORUTGÅENDE_TRYGDETID"
+            vilkaar = "FTRL_FORUTGÅENDE_TRYGDETID"
             isOppfylt = true
         }
         vilkaarsresultatService.registrerVilkår(behandling.id, listOf(vilkaar))
