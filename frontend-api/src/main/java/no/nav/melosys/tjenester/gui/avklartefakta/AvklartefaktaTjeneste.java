@@ -1,4 +1,4 @@
-package no.nav.melosys.tjenester.gui;
+package no.nav.melosys.tjenester.gui.avklartefakta;
 
 import java.util.Set;
 
@@ -8,9 +8,8 @@ import no.nav.melosys.domain.avklartefakta.Avklartefakta;
 import no.nav.melosys.service.avklartefakta.*;
 import no.nav.melosys.service.tilgang.Aksesskontroll;
 import no.nav.melosys.service.tilgang.Ressurs;
-import no.nav.melosys.tjenester.gui.dto.AvklartefaktaOppsummeringDto;
-import no.nav.melosys.tjenester.gui.dto.oppsummertefakta.VirksomheterDto;
 import no.nav.melosys.tjenester.gui.dto.oppsummertefakta.ArbeidslandDto;
+import no.nav.melosys.tjenester.gui.dto.oppsummertefakta.VirksomheterDto;
 import no.nav.security.token.support.core.api.Protected;
 import org.springframework.context.annotation.Scope;
 import org.springframework.web.bind.annotation.*;
@@ -65,7 +64,7 @@ public class AvklartefaktaTjeneste {
     public AvklartefaktaOppsummeringDto hentAvklarteFaktaStrukturert(@PathVariable("behandlingID") long behandlingID) {
         aksesskontroll.autoriser(behandlingID);
 
-        return AvklartefaktaOppsummeringDto.av(avklartefaktaService.hentAlleAvklarteFakta(behandlingID));
+        return new AvklartefaktaOppsummeringDto(avklartefaktaService.hentAlleAvklarteFakta(behandlingID));
     }
 
     @PostMapping("{behandlingID}/virksomheter")
@@ -76,7 +75,7 @@ public class AvklartefaktaTjeneste {
 
         avklarteVirksomheterService.lagreVirksomheterSomAvklartefakta(behandlingID, virksomheter.getVirksomhetIDer());
 
-        return AvklartefaktaOppsummeringDto.av(avklartefaktaService.hentAlleAvklarteFakta(behandlingID));
+        return new AvklartefaktaOppsummeringDto(avklartefaktaService.hentAlleAvklarteFakta(behandlingID));
     }
 
     @PostMapping("{behandlingID}/innbetalingsstatus")
@@ -88,7 +87,7 @@ public class AvklartefaktaTjeneste {
         avklartManglendeInnbetalingService.lagreFullstendigManglendeInnbetalingSomAvklartFakta(behandlingID,
             fullstendigManglendeInnbetaling);
 
-        return AvklartefaktaOppsummeringDto.av(avklartefaktaService.hentAlleAvklarteFakta(behandlingID));
+        return new AvklartefaktaOppsummeringDto(avklartefaktaService.hentAlleAvklarteFakta(behandlingID));
     }
 
     @PostMapping("{behandlingID}/arbeidsland")
@@ -99,6 +98,6 @@ public class AvklartefaktaTjeneste {
 
         avklarteFaktaArbeidslandService.lagreArbeidslandSomAvklartefakta(behandlingID, arbeidsland.getArbeidsland());
 
-        return AvklartefaktaOppsummeringDto.av(avklartefaktaService.hentAlleAvklarteFakta(behandlingID));
+        return new AvklartefaktaOppsummeringDto(avklartefaktaService.hentAlleAvklarteFakta(behandlingID));
     }
 }
