@@ -27,33 +27,20 @@ class ProsessinstansFerdigListener(
     }
 
     private fun kanNesteProsessinstansStartes(prosessinstansFerdigEvent: ProsessinstansFerdigEvent): Boolean {
-        if (!prosessinstansRepository.existsByStatusNotInAndLåsReferanse(setOf(ProsessStatus.FERDIG), prosessinstansFerdigEvent.låsReferanse)) {
-            log.info("Det finnes ingen aktiv prosessinstans med låsreferanse ${prosessinstansFerdigEvent.låsReferanse}")
-            return true
+        val kanStartes = prosessinstansRepository.findAllByStatus(ProsessStatus.PÅ_VENT).filter {
+            LåsReferanseFactory.harSammeGruppePrefiks(it.låsReferanse, prosessinstansFerdigEvent.låsReferanse)
         }
-
-        return finnesProssesserMedSammeLåsReferanseOgForskjelligIdpåVent(prosessinstansFerdigEvent)
+        return kanStartes.isNotEmpty()
     }
-
-    private fun finnesProssesserMedSammeLåsReferanseOgForskjelligIdpåVent(prosessinstansFerdigEvent: ProsessinstansFerdigEvent): Boolean =
-        prosessinstansRepository.findAllByIdNotAndStatusNotInAndLåsReferanseStartingWith(
-            prosessinstansFerdigEvent.uuid,
-            setOf(ProsessStatus.FERDIG),
-            prosessinstansFerdigEvent.låsReferanse
-        ).filter { it.prosessStatus == ProsessStatus.PÅ_VENT && it.låsReferanse == prosessinstansFerdigEvent.låsReferanse }.apply {
-            log.info("$size prosessinstans(er) med nøyaktig samme låsreferanse ${prosessinstansFerdigEvent.låsReferanse} er på vent")
-        }.apply {
-            if (isEmpty()) log.info("Ingen på vent med nøyaktig samme låsreferanse ${prosessinstansFerdigEvent.låsReferanse}")
-        }.isNotEmpty()
 
     private fun startNesteProsessinstans(prosessinstansFerdigEvent: ProsessinstansFerdigEvent) {
         val allePåVent = prosessinstansRepository.findAllByStatus(ProsessStatus.PÅ_VENT)
         val antallPåVentMedSammeReferanse =
-            allePåVent.count { LåsReferanseFactory.harSammeReferanse(it.låsReferanse, prosessinstansFerdigEvent.låsReferanse) }
+            allePåVent.count { LåsReferanseFactory.harSammeGruppePrefiks(it.låsReferanse, prosessinstansFerdigEvent.låsReferanse) }
 
         val påVent = allePåVent.firstOrNull { it.låsReferanse == prosessinstansFerdigEvent.låsReferanse } // ta sub-prosesser først
             ?: allePåVent
-                .filter { LåsReferanseFactory.harSammeReferanse(it.låsReferanse, prosessinstansFerdigEvent.låsReferanse) }
+                .filter { LåsReferanseFactory.harSammeGruppePrefiks(it.låsReferanse, prosessinstansFerdigEvent.låsReferanse) }
                 .sortedBy { it.registrertDato }
                 .firstOrNull()
 

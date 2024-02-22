@@ -121,7 +121,7 @@ internal class SedLåsMedSubProsesserIT(
                     next { it shouldBe "Utfører steg HENT_REGISTEROPPLYSNINGER for prosessinstans" }
                     next { it shouldBe "Utfører steg REGISTERKONTROLL for prosessinstans" }
                     next { it shouldBe "Utfører steg BESTEM_BEHANDLINGMÅTE_SED for prosessinstans" }
-                    next { it shouldBe "0 på vent, neste som kan kjøres er null for ferdig låsreferanse $x0008Lås" }
+//                    next { it shouldBe "0 på vent, neste som kan kjøres er null for ferdig låsreferanse $x0008Lås" }
                 }
         }
     }

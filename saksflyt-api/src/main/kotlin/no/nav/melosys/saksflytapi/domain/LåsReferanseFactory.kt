@@ -15,7 +15,7 @@ object LåsReferanseFactory {
         }
     }
 
-    fun harSammeReferanse(lhsLåsReferanse: String, rhsLåsReferanse: String): Boolean =
+    fun harSammeGruppePrefiks(lhsLåsReferanse: String, rhsLåsReferanse: String): Boolean =
         lagLåsReferanse(lhsLåsReferanse).gruppePrefiks == lagLåsReferanse(rhsLåsReferanse).gruppePrefiks
 
     @JvmStatic
