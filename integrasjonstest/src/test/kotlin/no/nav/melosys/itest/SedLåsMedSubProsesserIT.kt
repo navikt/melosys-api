@@ -67,7 +67,7 @@ internal class SedLåsMedSubProsesserIT(
 ) : OracleTestContainerBase() {
 
     @Test
-    fun `ved lås må sub-prosesser første første kjøres før neste sed blir kjørt`() {
+    fun `ved lås må sub-prosesser fra første sed kjøres før neste sed blir kjørt`() {
         val rinaSaksnummer = Random().nextInt(100000).toString()
 
         val a009 = MelosysEessiMelding().apply {
