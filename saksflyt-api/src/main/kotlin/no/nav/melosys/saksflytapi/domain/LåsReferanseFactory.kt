@@ -16,7 +16,7 @@ object LåsReferanseFactory {
     }
 
     fun harSammeReferanse(lhsLåsReferanse: String, rhsLåsReferanse: String): Boolean =
-        lagLåsReferanse(lhsLåsReferanse).referanse == lagLåsReferanse(rhsLåsReferanse).referanse
+        lagLåsReferanse(lhsLåsReferanse).gruppePrefiks == lagLåsReferanse(rhsLåsReferanse).gruppePrefiks
 
     @JvmStatic
     fun lagString(manglendeFakturabetalingMelding: ManglendeFakturabetalingMelding): String =

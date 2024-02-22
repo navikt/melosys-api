@@ -14,7 +14,7 @@ class SedLåsReferanse(val låsReferanse: String) : LåsReferanse {
         }
     }
 
-    override val referanse: String
+    override val gruppePrefiks: String
         get() = rinaSaksnummer
 
     override fun skalSettesPåVent(aktiveLåsReferanser: Collection<String>): Boolean {
