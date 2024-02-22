@@ -51,13 +51,13 @@ object LoggingTestUtils {
 
         fun remove(regex: Regex) = apply { this.regex = regex }
 
-        fun build(): Collection<ILoggingEvent> {
-            return result.sortedBy { it.timeStamp }
+        fun build(): List<ILoggingEvent> {
+            return logItems.filter { it in result }
         }
 
         fun checkWithThreads(block: (next: (name: String) -> String) -> Unit) {
             val map = mutableMapOf<String, Int>()
-            val sorted = result.sortedBy { it.timeStamp }
+            val sorted = build()
             block { name ->
                 val cnt = map[name] ?: 0
                 map[name] = cnt + 1
@@ -71,7 +71,7 @@ object LoggingTestUtils {
         }
 
         fun check(block: (next: (nextLogItem: (message: String) -> Unit) -> Unit) -> Unit) {
-            val sorted = result.sortedBy { it.timeStamp }
+            val sorted = build()
             var i = 0
             block { nextLogItem ->
                 withClue("log item count ${sorted.size} \n${sorted.joinToString("\n") { "${it.formattedMessage} - ${it.timeStamp}" }}\n") {
