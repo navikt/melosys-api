@@ -62,7 +62,7 @@ object LoggingTestUtils {
                 val cnt = map[name] ?: 0
                 map[name] = cnt + 1
                 val threadMessages = sorted.filter { it.threadName == name }
-                withClue("Thread $name, count $cnt:") {
+                withClue("Thread $name, count $cnt:" ) {
                     threadMessages.shouldHaveAtLeastSize(cnt + 1)
                 }
                 val message: String = threadMessages[cnt].formattedMessage
@@ -75,7 +75,7 @@ object LoggingTestUtils {
             var i = 0
             block { nextLogItem ->
                 val message = sorted[i++].formattedMessage
-                withClue("log message line: $i") {
+                withClue("log message line: $i\n${sorted.joinToString("\n") {"${it.formattedMessage} - ${it.timeStamp}"} }\n") {
                     nextLogItem(if (regex == null) message else message.replace(regex!!, ""))
                 }
             }
