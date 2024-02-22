@@ -38,16 +38,18 @@ internal class ProsessinstansFerdigListenerTest {
     }
 
     @Test
-    fun prosesssinstansFerdig_harLåsFinnesAktiveReferanser_gjørIngenting() {
+    fun prosesssinstansFerdig_harLåsFinnesIngenPåVent_gjørIngenting() {
         val ferdigProsessinstans = lagProsessInstans { låsReferanse = "12_12_1" }
-        every { prosessinstansRepository.existsByStatusNotInAndLåsReferanse(any(), any()) } returns true
-        every { prosessinstansRepository.findAllByIdNotAndStatusNotInAndLåsReferanseStartingWith(any(), any(), any()) } returns emptySet()
+        every { prosessinstansRepository.findAllByStatus(ProsessStatus.PÅ_VENT) } returns emptySet()
 
 
         prosessinstansFerdigListener.prosessinstansFerdig(ProsessinstansFerdigEvent(ferdigProsessinstans))
 
 
-        verify(exactly = 1) { prosessinstansRepository.existsByStatusNotInAndLåsReferanse(any(), any()) }
+        verify { prosessinstansRepository.findAllByStatus(ProsessStatus.PÅ_VENT) }
+        verify {
+            prosessinstansBehandler wasNot Called
+        }
     }
 
     @Test
