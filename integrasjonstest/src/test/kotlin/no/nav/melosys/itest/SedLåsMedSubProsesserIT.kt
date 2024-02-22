@@ -184,7 +184,7 @@ internal class SedLåsMedSubProsesserIT(
 
         @Bean
         @Primary
-        fun opprettProsessinstansNySakUnntaksregistreringTest(): FerdigstillJournalpostSed {
+        fun ferdigstillJournalpostSedTest(): FerdigstillJournalpostSed {
             return mockk<FerdigstillJournalpostSed>().apply {
                 every { inngangsSteg() } answers {
                     log.info { "inngangsSteg - ${ProsessSteg.SED_MOTTAK_FERDIGSTILL_JOURNALPOST}" }
@@ -242,22 +242,6 @@ internal class SedLåsMedSubProsesserIT(
                 val slot = CapturingSlot<Prosessinstans>()
                 every { utfør(capture(slot)) } answers {
                     log.info("OppdaterSaksrelasjon - Utfører for prosess ${slot.captured.id} - ${slot.captured.låsReferanse}")
-                }
-            }
-        }
-
-        @Bean
-        @Primary
-        fun ferdigstillJournalpostSedTest(): FerdigstillJournalpostSed {
-            return mockk<FerdigstillJournalpostSed>().apply {
-                every { inngangsSteg() } answers {
-                    log.info { "inngangsSteg - ${ProsessSteg.SED_MOTTAK_FERDIGSTILL_JOURNALPOST}" }
-                    ProsessSteg.SED_MOTTAK_FERDIGSTILL_JOURNALPOST
-                }
-
-                val slot = CapturingSlot<Prosessinstans>()
-                every { utfør(capture(slot)) } answers {
-                    log.info("FerdigstillJournalpostSed - Utfører for prosess ${slot.captured.id} - ${slot.captured.låsReferanse}")
                 }
             }
         }
