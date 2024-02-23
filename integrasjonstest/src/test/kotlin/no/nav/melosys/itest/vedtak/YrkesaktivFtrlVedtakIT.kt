@@ -46,7 +46,7 @@ import no.nav.melosys.service.avklartefakta.AvklartefaktaService
 import no.nav.melosys.service.behandling.BehandlingsresultatService
 import no.nav.melosys.service.journalforing.JournalfoeringService
 import no.nav.melosys.service.ftrl.medlemskapsperiode.MedlemskapsperiodeService
-import no.nav.melosys.service.ftrl.medlemskapsperiode.OpprettMedlemskapsperiodeService
+import no.nav.melosys.service.ftrl.medlemskapsperiode.OpprettForslagMedlemskapsperiodeService
 import no.nav.melosys.service.mottatteopplysninger.MottatteOpplysningerService
 import no.nav.melosys.service.oppgave.OppgaveService
 import no.nav.melosys.service.sak.OpprettBehandlingForSak
@@ -82,7 +82,7 @@ class YrkesaktivFtrlVedtakIT(
     @Autowired private val mottatteOpplysningerService: MottatteOpplysningerService,
     @Autowired private val vilkaarsresultatService: VilkaarsresultatService,
     @Autowired private val medlemskapsperiodeService: MedlemskapsperiodeService,
-    @Autowired private val opprettMedlemskapsperiodeService: OpprettMedlemskapsperiodeService,
+    @Autowired private val opprettForslagMedlemskapsperiodeService: OpprettForslagMedlemskapsperiodeService,
     @Autowired private val medlemAvFolketrygdenService: MedlemAvFolketrygdenService,
     @Autowired private val oppfriskSaksopplysningerService: OppfriskSaksopplysningerService,
     @Autowired private val vedtaksfattingFasade: VedtaksfattingFasade,
@@ -377,7 +377,7 @@ class YrkesaktivFtrlVedtakIT(
     }
 
     private fun setupTrygdeavgiftBeregning(behandlingId: Long, skatteplikttype: Skatteplikttype, arbeidsgiversavgiftBetales: Boolean) {
-        val medlemskapsperiodeId = opprettMedlemskapsperiodeService.opprettForslagPåMedlemskapsperioder(
+        val medlemskapsperiodeId = opprettForslagMedlemskapsperiodeService.opprettForslagPåMedlemskapsperioder(
             behandlingId,
             Folketrygdloven_kap2_bestemmelser.FTRL_KAP2_2_8_FØRSTE_LEDD_A
         ).single().id
