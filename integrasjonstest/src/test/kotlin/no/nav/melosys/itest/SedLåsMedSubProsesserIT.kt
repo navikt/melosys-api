@@ -85,8 +85,8 @@ internal class SedLåsMedSubProsesserIT(
         }
 
         LoggingTestUtils.withLogCapture { logItems ->
-            val a009Prosess = prosessLaget.nyProsessLaget("a009Prosess") { prosessinstansService.opprettProsessinstansSedMottak(a009) }
-            val x008Prosess = prosessLaget.nyProsessLaget("x008Prosess") { prosessinstansService.opprettProsessinstansSedMottak(x008) }
+            prosessLaget.nyProsessLaget("a009Prosess") { prosessinstansService.opprettProsessinstansSedMottak(a009) }
+            prosessLaget.nyProsessLaget("x008Prosess") { prosessinstansService.opprettProsessinstansSedMottak(x008) }
 
             await.throwOnLogError(logItems)
                 .timeout(Duration.ofSeconds(30)).pollInterval(Duration.ofSeconds(1))
@@ -104,10 +104,7 @@ internal class SedLåsMedSubProsesserIT(
                 .match<ProsessinstansBehandler> { it.formattedMessage.contains("Utfører steg") }
                 .match<ProsessinstansFerdigListener> { it.formattedMessage.contains("på vent med") }
                 .match<ProsessinstansFerdigListener> { it.formattedMessage.contains("på vent, neste") }
-                .replace(a009Prosess.toString(), "<a009Prosess>")
-                .replace(x008Prosess.toString(), "<x008Prosess>")
-                .replace(prosessLaget.idFromName("sub-prosess av a009Prosess").toString(), "<sub-prosess av a009Prosess>")
-                .replace(prosessLaget.idFromName("sub-prosess av x008Prosess").toString(), "<sub-prosess av x008Prosess>")
+                .replace(prosessLaget.prosessIdStringToName())
                 .replace(a009Lås, "<a009Lås>")
                 .replace(x0008Lås, "<x0008Lås>")
                 .check { next ->
@@ -149,8 +146,8 @@ internal class SedLåsMedSubProsesserIT(
         val a009Lås = a009.lagUnikIdentifikator()
 
         LoggingTestUtils.withLogCapture { logItems ->
-            val førsteProsess = prosessLaget.nyProsessLaget("førsteProsessID") { prosessinstansService.opprettProsessinstansSedMottak(a009) }
-            val duplikatProsess = prosessLaget.nyProsessLaget("duplikatProsessID") { prosessinstansService.opprettProsessinstansSedMottak(a009) }
+            prosessLaget.nyProsessLaget("førsteProsessID") { prosessinstansService.opprettProsessinstansSedMottak(a009) }
+            prosessLaget.nyProsessLaget("duplikatProsessID") { prosessinstansService.opprettProsessinstansSedMottak(a009) }
 
             await.throwOnLogError(logItems)
                 .timeout(Duration.ofSeconds(30)).pollInterval(Duration.ofSeconds(1))
@@ -164,10 +161,7 @@ internal class SedLåsMedSubProsesserIT(
                 .match<ProsessinstansBehandler> { it.formattedMessage.contains("Utfører steg") }
                 .match<ProsessinstansFerdigListener> { it.formattedMessage.contains("på vent med") }
                 .match<ProsessinstansFerdigListener> { it.formattedMessage.contains("på vent, neste") }
-                .replace(førsteProsess.toString(), "<førsteProsessID>")
-                .replace(duplikatProsess.toString(), "<duplikatProsessID>")
-                .replace(prosessLaget.idFromName("sub-prosess av førsteProsessID").toString(), "<sub-prosess av førsteProsessID>")
-                .replace(prosessLaget.idFromName("sub-prosess av duplikatProsessID").toString(), "<sub-prosess av duplikatProsessID>")
+                .replace(prosessLaget.prosessIdStringToName())
                 .replace(a009Lås, "<a009Lås>")
                 .check { next ->
                     next { it shouldBe "Melosys har opprettet prosessinstans <førsteProsessID> av type MOTTAK_SED." }
@@ -191,20 +185,20 @@ internal class SedLåsMedSubProsesserIT(
     }
 
     class ProsessLaget {
-        private val map = mutableMapOf<UUID, String>()
+        private val idToName = mutableMapOf<UUID, String>()
 
         fun nyProsessLaget(name: String, block: () -> UUID): UUID {
-            if (idFromName(name) != null) throw IllegalStateException("name: $name already exists in map")
+            idToName.values.firstOrNull { it == name }?.let { throw IllegalStateException("$name er alt registrert ") }
             return block().apply {
-                map[this] = name
+                idToName[this] = name
             }
         }
 
-        fun nameFromId(uuid: UUID) = map[uuid]
+        fun nameFromId(uuid: UUID) = idToName[uuid]
 
-        fun idFromName(name: String) = map.filter { it.value == name }.keys.singleOrNull()
+        fun prosessIdStringToName(): Map<String, String> = idToName.map { it.key.toString() to it.value }.toMap()
 
-        fun clear() = map.clear()
+        fun clear() = idToName.clear()
     }
 
     @TestConfiguration

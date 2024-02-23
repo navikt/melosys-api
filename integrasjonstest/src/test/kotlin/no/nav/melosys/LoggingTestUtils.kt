@@ -54,14 +54,15 @@ object LoggingTestUtils {
         fun remove(regex: Regex) = apply { this.regex = regex }
         fun replace(regex: Regex, replacement: String) = apply { replacementsRegex.add(regex to replacement) }
         fun replace(regex: String, replacement: String) = apply { replacementsString.add(regex to replacement) }
+        fun replace(map: Map<String, String>) = apply { map.forEach { replacementsString.add(it.key to "<${it.value}>") } }
 
         fun build(): List<LogItem> {
             return logItems.filter { it in result }.map {
                 LogItem(
                     message = it.message,
                     formattedMessage = resultMessage(it),
-                    timeStamp =  it.timeStamp,
-                    threadName =  it.threadName
+                    timeStamp = it.timeStamp,
+                    threadName = it.threadName
                 )
             }
         }
