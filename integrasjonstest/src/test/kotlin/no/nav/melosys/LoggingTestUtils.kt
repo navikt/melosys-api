@@ -45,17 +45,41 @@ object LoggingTestUtils {
     class LogFilterBuilder(val logItems: Collection<ILoggingEvent>) {
         val result: MutableList<ILoggingEvent> = mutableListOf()
         private var regex: Regex? = null
+        private var replacementsRegex = mutableListOf<Pair<Regex, String>>()
+        private var replacementsString = mutableListOf<Pair<String, String>>()
 
         inline fun <reified T : Any> match(predicate: (ILoggingEvent) -> Boolean = { true }): LogFilterBuilder =
             apply { result.addAll(logItems.filter { it.loggerName == T::class.java.name && predicate(it) }) }
 
         fun remove(regex: Regex) = apply { this.regex = regex }
+        fun replace(regex: Regex, replacement: String) = apply { replacementsRegex.add(regex to replacement) }
+        fun replace(regex: String, replacement: String) = apply { replacementsString.add(regex to replacement) }
 
-        fun build(): List<ILoggingEvent> {
-            return logItems.filter { it in result }
+        fun build(): List<LogItem> {
+            return logItems.filter { it in result }.map {
+                LogItem(
+                    message = it.message,
+                    formattedMessage = resultMessage(it),
+                    timeStamp =  it.timeStamp,
+                    threadName =  it.threadName
+                )
+            }
         }
 
-        fun checkWithThreads(block: (next: (name: String) -> String) -> Unit) {
+        private fun resultMessage(it: ILoggingEvent): String {
+            var message = if (regex == null) it.formattedMessage else it.formattedMessage.replace(regex!!, "")
+            replacementsRegex.forEach { (regex, replacement) ->
+                message = message.replace(regex, replacement)
+            }
+            replacementsString.forEach { (text, replacement) ->
+                message = message.replace(text, replacement)
+            }
+            return message
+        }
+
+        class LogItem(val message: String, val formattedMessage: String, val timeStamp: Long, val threadName: String)
+
+        fun checkWithThreads(block: (next: (name: String) -> String) -> Unit) = apply {
             val map = mutableMapOf<String, Int>()
             val sorted = build()
             block { name ->
@@ -65,21 +89,19 @@ object LoggingTestUtils {
                 withClue("Thread $name, count $cnt:") {
                     threadMessages.shouldHaveAtLeastSize(cnt + 1)
                 }
-                val message: String = threadMessages[cnt].formattedMessage
-                if (regex == null) message else message.replace(regex!!, "")
+                threadMessages[cnt].formattedMessage
             }
         }
 
-        fun check(block: (next: (nextLogItem: (message: String) -> Unit) -> Unit) -> Unit) {
+        fun check(block: (next: (nextLogItem: (message: String) -> Unit) -> Unit) -> Unit) = apply {
             val sorted = build()
             var i = 0
             block { nextLogItem ->
                 withClue("log item count ${sorted.size} \n${sorted.joinToString("\n") { "${it.formattedMessage} - ${it.timeStamp}" }}\n") {
                     sorted.shouldHaveAtLeastSize(i + 1)
                 }
-                val message = sorted[i++].formattedMessage
                 withClue("log message line: $i\n${sorted.joinToString("\n") { "${it.formattedMessage} - ${it.timeStamp}" }}\n") {
-                    nextLogItem(if (regex == null) message else message.replace(regex!!, ""))
+                    nextLogItem(sorted[i++].formattedMessage)
                 }
             }
         }
