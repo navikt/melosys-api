@@ -5,19 +5,19 @@ import no.nav.melosys.service.avklartefakta.AvklartefaktaDto
 import no.nav.melosys.tjenester.gui.dto.oppsummertefakta.ArbeidslandDto
 import no.nav.melosys.tjenester.gui.dto.oppsummertefakta.VirksomheterDto
 
-data class AvklartefaktaOppsummeringDto private constructor(
+data class AvklartefaktaOppsummeringDto internal constructor(
     val virksomheter: VirksomheterDto,
     val arbeidsland: ArbeidslandDto,
-    val familieRelasjonType: String?,
     val fullstendigManglendeInnbetaling: Boolean?,
-    val oppholdType: String?,
+    val ikkeYrkesaktivFamileRelasjonstype: String?,
+    val ikkeYrkesaktivOppholdstype: String?,
 ) {
     constructor(avklartefakta: Set<AvklartefaktaDto>) : this(
         virksomheter = VirksomheterDto.av(avklartefakta),
         arbeidsland = ArbeidslandDto.av(avklartefakta),
-        familieRelasjonType = hentFamileRelasjonType(avklartefakta),
         fullstendigManglendeInnbetaling = hentFullstendigManglendeInnbetaling(avklartefakta),
-        oppholdType = hentOppholdType(avklartefakta)
+        ikkeYrkesaktivFamileRelasjonstype = hentFamileRelasjonType(avklartefakta),
+        ikkeYrkesaktivOppholdstype = hentOppholdType(avklartefakta)
     )
 
     companion object {
@@ -25,7 +25,7 @@ data class AvklartefaktaOppsummeringDto private constructor(
             it.avklartefaktaType == Avklartefaktatyper.IKKE_YRKESAKTIV_RELASJON
         }?.fakta?.firstOrNull()
 
-        fun hentFullstendigManglendeInnbetaling(avklartefakta: Set<AvklartefaktaDto>): Boolean? = avklartefakta.firstOrNull {
+        fun hentFullstendigManglendeInnbetaling(avklartefakta: Set<AvklartefaktaDto>): Boolean = avklartefakta.firstOrNull {
             it.avklartefaktaType == Avklartefaktatyper.FULLSTENDIG_MANGLENDE_INNBETALING
         }?.fakta?.single().toBoolean()
 
