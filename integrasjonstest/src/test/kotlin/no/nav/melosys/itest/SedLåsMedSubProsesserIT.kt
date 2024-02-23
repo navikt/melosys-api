@@ -14,7 +14,6 @@ import no.nav.melosys.domain.eessi.SedType
 import no.nav.melosys.domain.eessi.melding.MelosysEessiMelding
 import no.nav.melosys.saksflyt.ProsessinstansBehandler
 import no.nav.melosys.saksflyt.ProsessinstansFerdigListener
-import no.nav.melosys.saksflyt.ProsessinstansRepository
 import no.nav.melosys.saksflyt.steg.behandling.OpprettFagsakOgBehandlingFraSed
 import no.nav.melosys.saksflyt.steg.jfr.FerdigstillJournalpostSed
 import no.nav.melosys.saksflyt.steg.jfr.OpprettArkivsak
@@ -25,7 +24,6 @@ import no.nav.melosys.saksflyt.steg.sed.OppdaterSaksrelasjon
 import no.nav.melosys.saksflyt.steg.sed.OpprettSedDokument
 import no.nav.melosys.saksflyt.steg.sed.mottak.SedMottakRuting
 import no.nav.melosys.saksflytapi.ProsessinstansService
-import no.nav.melosys.saksflytapi.domain.ProsessStatus
 import no.nav.melosys.saksflytapi.domain.ProsessSteg
 import no.nav.melosys.saksflytapi.domain.Prosessinstans
 import no.nav.security.token.support.spring.test.EnableMockOAuth2Server
@@ -45,7 +43,6 @@ import org.springframework.test.context.ActiveProfiles
 import java.time.Duration
 import java.util.*
 
-
 private val log = KotlinLogging.logger { }
 
 @ActiveProfiles("test")
@@ -63,7 +60,6 @@ private val log = KotlinLogging.logger { }
 @EnableMockOAuth2Server
 @Import(SedLåsMedSubProsesserIT.TestConfig::class)
 internal class SedLåsMedSubProsesserIT(
-    @Autowired private val prosessinstansRepository: ProsessinstansRepository,
     @Autowired private val prosessinstansService: ProsessinstansService,
     @Autowired private val prosessLaget: ProsessLaget
 ) : OracleTestContainerBase() {
@@ -89,18 +85,16 @@ internal class SedLåsMedSubProsesserIT(
         }
 
         LoggingTestUtils.withLogCapture { logItems ->
-            val a009Prosess = prosessLaget.nyProsessLaget("førsteProsessID") { prosessinstansService.opprettProsessinstansSedMottak(a009) }
-            val x008Prosess = prosessLaget.nyProsessLaget("duplikatProsessID") { prosessinstansService.opprettProsessinstansSedMottak(x008) }
-
+            val a009Prosess = prosessLaget.nyProsessLaget("a009Prosess") { prosessinstansService.opprettProsessinstansSedMottak(a009) }
+            val x008Prosess = prosessLaget.nyProsessLaget("x008Prosess") { prosessinstansService.opprettProsessinstansSedMottak(x008) }
 
             await.throwOnLogError(logItems)
                 .timeout(Duration.ofSeconds(30)).pollInterval(Duration.ofSeconds(1))
                 .until {
-                    prosessinstansRepository.findAllByStatusNotInAndLåsReferanseStartingWith(
-                        listOf(ProsessStatus.FERDIG),
-                        rinaSaksnummer
-                    ).isEmpty()
+                    logItems.filterBuilder.match<ProsessinstansFerdigListener>()
+                        .build().last().formattedMessage.contains("Prosessinstanser på vent med samme låsreferanse: []")
                 }
+
 
             val a009Lås = a009.lagUnikIdentifikator()
             val x0008Lås = x008.lagUnikIdentifikator()
@@ -110,29 +104,34 @@ internal class SedLåsMedSubProsesserIT(
                 .match<ProsessinstansBehandler> { it.formattedMessage.contains("Utfører steg") }
                 .match<ProsessinstansFerdigListener> { it.formattedMessage.contains("på vent med") }
                 .match<ProsessinstansFerdigListener> { it.formattedMessage.contains("på vent, neste") }
-                .remove(Regex("\\s\\w+-\\w+-\\w+-\\w+-\\w+"))
+                .replace(a009Prosess.toString(), "<a009Prosess>")
+                .replace(x008Prosess.toString(), "<x008Prosess>")
+                .replace(prosessLaget.idFromName("sub-prosess av a009Prosess").toString(), "<sub-prosess av a009Prosess>")
+                .replace(prosessLaget.idFromName("sub-prosess av x008Prosess").toString(), "<sub-prosess av x008Prosess>")
+                .replace(a009Lås, "<a009Lås>")
+                .replace(x0008Lås, "<x0008Lås>")
                 .check { next ->
-                    next { it shouldBe "Melosys har opprettet prosessinstans av type MOTTAK_SED." }
-                    next { it shouldBe "Melosys har opprettet prosessinstans av type MOTTAK_SED." }
-                    next { it shouldBe "Utfører steg SED_MOTTAK_RUTING for prosessinstans" }
-                    next { it shouldBe "Melosys har opprettet prosessinstans av type MOTTAK_SED_JOURNALFØRING." }
-                    next { it shouldBe "Prosessinstanser på vent med samme låsreferanse: [$a009Lås, $x0008Lås]" }
-                    next { it shouldBe "2 på vent, neste som kan kjøres er $a009Lås for ferdig låsreferanse $a009Lås" }
-                    next { it shouldBe "Utfører steg SED_MOTTAK_FERDIGSTILL_JOURNALPOST for prosessinstans" }
-                    next { it shouldBe "Prosessinstanser på vent med samme låsreferanse: [$x0008Lås]" }
-                    next { it shouldBe "1 på vent, neste som kan kjøres er $x0008Lås for ferdig låsreferanse $a009Lås" }
-                    next { it shouldBe "Utfører steg SED_MOTTAK_RUTING for prosessinstans" }
-                    next { it shouldBe "Melosys har opprettet prosessinstans av type REGISTRERING_UNNTAK_NY_SAK." }
-                    next { it shouldBe "Prosessinstanser på vent med samme låsreferanse: [$x0008Lås]" }
-                    next { it shouldBe "1 på vent, neste som kan kjøres er $x0008Lås for ferdig låsreferanse $x0008Lås" }
-                    next { it shouldBe "Utfører steg SED_MOTTAK_OPPRETT_FAGSAK_OG_BEH for prosessinstans" }
-                    next { it shouldBe "Utfører steg OPPRETT_ARKIVSAK for prosessinstans" }
-                    next { it shouldBe "Utfører steg OPPDATER_SAKSRELASJON for prosessinstans" }
-                    next { it shouldBe "Utfører steg SED_MOTTAK_FERDIGSTILL_JOURNALPOST for prosessinstans" }
-                    next { it shouldBe "Utfører steg OPPRETT_SEDDOKUMENT for prosessinstans" }
-                    next { it shouldBe "Utfører steg HENT_REGISTEROPPLYSNINGER for prosessinstans" }
-                    next { it shouldBe "Utfører steg REGISTERKONTROLL for prosessinstans" }
-                    next { it shouldBe "Utfører steg BESTEM_BEHANDLINGMÅTE_SED for prosessinstans" }
+                    next { it shouldBe "Melosys har opprettet prosessinstans <a009Prosess> av type MOTTAK_SED." }
+                    next { it shouldBe "Melosys har opprettet prosessinstans <x008Prosess> av type MOTTAK_SED." }
+                    next { it shouldBe "Utfører steg SED_MOTTAK_RUTING for prosessinstans <a009Prosess>" }
+                    next { it shouldBe "Melosys har opprettet prosessinstans <sub-prosess av a009Prosess> av type MOTTAK_SED_JOURNALFØRING." }
+                    next { it shouldBe "Prosessinstanser på vent med samme låsreferanse: [<a009Lås>, <x0008Lås>]" }
+                    next { it shouldBe "2 på vent, neste som kan kjøres er <a009Lås> for ferdig låsreferanse <a009Lås>" }
+                    next { it shouldBe "Utfører steg SED_MOTTAK_FERDIGSTILL_JOURNALPOST for prosessinstans <sub-prosess av a009Prosess>" }
+                    next { it shouldBe "Prosessinstanser på vent med samme låsreferanse: [<x0008Lås>]" }
+                    next { it shouldBe "1 på vent, neste som kan kjøres er <x0008Lås> for ferdig låsreferanse <a009Lås>" }
+                    next { it shouldBe "Utfører steg SED_MOTTAK_RUTING for prosessinstans <x008Prosess>" }
+                    next { it shouldBe "Melosys har opprettet prosessinstans <sub-prosess av x008Prosess> av type REGISTRERING_UNNTAK_NY_SAK." }
+                    next { it shouldBe "Prosessinstanser på vent med samme låsreferanse: [<x0008Lås>]" }
+                    next { it shouldBe "1 på vent, neste som kan kjøres er <x0008Lås> for ferdig låsreferanse <x0008Lås>" }
+                    next { it shouldBe "Utfører steg SED_MOTTAK_OPPRETT_FAGSAK_OG_BEH for prosessinstans <sub-prosess av x008Prosess>" }
+                    next { it shouldBe "Utfører steg OPPRETT_ARKIVSAK for prosessinstans <sub-prosess av x008Prosess>" }
+                    next { it shouldBe "Utfører steg OPPDATER_SAKSRELASJON for prosessinstans <sub-prosess av x008Prosess>" }
+                    next { it shouldBe "Utfører steg SED_MOTTAK_FERDIGSTILL_JOURNALPOST for prosessinstans <sub-prosess av x008Prosess>" }
+                    next { it shouldBe "Utfører steg OPPRETT_SEDDOKUMENT for prosessinstans <sub-prosess av x008Prosess>" }
+                    next { it shouldBe "Utfører steg HENT_REGISTEROPPLYSNINGER for prosessinstans <sub-prosess av x008Prosess>" }
+                    next { it shouldBe "Utfører steg REGISTERKONTROLL for prosessinstans <sub-prosess av x008Prosess>" }
+                    next { it shouldBe "Utfører steg BESTEM_BEHANDLINGMÅTE_SED for prosessinstans <sub-prosess av x008Prosess>" }
                     next { it shouldBe "Prosessinstanser på vent med samme låsreferanse: []" }
                 }
         }
@@ -156,10 +155,8 @@ internal class SedLåsMedSubProsesserIT(
             await.throwOnLogError(logItems)
                 .timeout(Duration.ofSeconds(30)).pollInterval(Duration.ofSeconds(1))
                 .until {
-                    prosessinstansRepository.findAllByStatusNotInAndLåsReferanseStartingWith(
-                        listOf(ProsessStatus.FERDIG),
-                        rinaSaksnummer
-                    ).isEmpty()
+                    logItems.filterBuilder.match<ProsessinstansFerdigListener>()
+                        .build().last().formattedMessage.contains("Prosessinstanser på vent med samme låsreferanse: []")
                 }
 
             logItems.filterBuilder
@@ -194,21 +191,20 @@ internal class SedLåsMedSubProsesserIT(
     }
 
     class ProsessLaget {
-        val map = mutableMapOf<UUID, String>()
+        private val map = mutableMapOf<UUID, String>()
 
         fun nyProsessLaget(name: String, block: () -> UUID): UUID {
             if (idFromName(name) != null) throw IllegalStateException("name: $name already exists in map")
-            val nyID = block()
-
-            map[nyID] = name
-            return nyID
+            return block().apply {
+                map[this] = name
+            }
         }
 
         fun nameFromId(uuid: UUID) = map[uuid]
+
         fun idFromName(name: String) = map.filter { it.value == name }.keys.singleOrNull()
-        fun clear() {
-            map.clear()
-        }
+
+        fun clear() = map.clear()
     }
 
     @TestConfiguration
@@ -216,9 +212,7 @@ internal class SedLåsMedSubProsesserIT(
         @Autowired private val prosessinstansService: ProsessinstansService,
     ) {
         @Bean
-        fun prosessLaget(): ProsessLaget {
-            return ProsessLaget()
-        }
+        fun prosessLaget(): ProsessLaget = ProsessLaget()
 
         @Bean
         @Primary
