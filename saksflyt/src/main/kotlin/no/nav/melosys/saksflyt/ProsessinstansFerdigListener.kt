@@ -35,16 +35,18 @@ class ProsessinstansFerdigListener(
 
     private fun startNesteProsessinstans(prosessinstansFerdigEvent: ProsessinstansFerdigEvent) {
         val allePåVent = prosessinstansRepository.findAllByStatus(ProsessStatus.PÅ_VENT)
-        val antallPåVentMedSammeReferanse =
-            allePåVent.count { LåsReferanseFactory.harSammeGruppePrefiks(it.låsReferanse, prosessinstansFerdigEvent.låsReferanse) }
 
-        val påVent = allePåVent.firstOrNull { it.låsReferanse == prosessinstansFerdigEvent.låsReferanse } // ta sub-prosesser først
+        val påVent = allePåVent.filter { it.låsReferanse == prosessinstansFerdigEvent.låsReferanse } // ta sub-prosesser først
+            .sortedByDescending { it.registrertDato } // sub-prosesser har mest sannsynlig blitt opprettet etter hovedprosessene
+            .firstOrNull()
             ?: allePåVent
                 .filter { LåsReferanseFactory.harSammeGruppePrefiks(it.låsReferanse, prosessinstansFerdigEvent.låsReferanse) }
                 .sortedBy { it.registrertDato }
                 .firstOrNull()
 
-        log.info("$antallPåVentMedSammeReferanse på vent, neste som kan kjøres er ${påVent?.låsReferanse} for ferdig låsreferanse ${prosessinstansFerdigEvent.låsReferanse}")
+        allePåVent.count { LåsReferanseFactory.harSammeGruppePrefiks(it.låsReferanse, prosessinstansFerdigEvent.låsReferanse) }.let {
+            log.info("$it på vent, neste som kan kjøres er ${påVent?.låsReferanse} for ferdig låsreferanse ${prosessinstansFerdigEvent.låsReferanse}")
+        }
 
         if (påVent != null) {
             oppdaterStatusOgBehandleProsessinstans(påVent)
