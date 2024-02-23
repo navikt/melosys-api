@@ -27,7 +27,7 @@ data class AvklartefaktaOppsummeringDto private constructor(
 
         fun hentFullstendigManglendeInnbetaling(avklartefakta: Set<AvklartefaktaDto>): Boolean? = avklartefakta.firstOrNull {
             it.avklartefaktaType == Avklartefaktatyper.FULLSTENDIG_MANGLENDE_INNBETALING
-        }?.fakta?.firstOrNull().toBoolean()
+        }?.fakta?.single().toBoolean()
 
         private fun hentOppholdType(avklartefakta: Set<AvklartefaktaDto>): String? = avklartefakta.firstOrNull {
             it.avklartefaktaType == Avklartefaktatyper.IKKE_YRKESAKTIV_FTRL_2_1_OPPHOLD
