@@ -9,14 +9,14 @@ data class AvklartefaktaOppsummeringDto internal constructor(
     val virksomheter: VirksomheterDto,
     val arbeidsland: ArbeidslandDto,
     val fullstendigManglendeInnbetaling: Boolean?,
-    val ikkeYrkesaktivFamileRelasjonstype: String?,
+    val ikkeYrkesaktivFamilieRelasjonstype: String?,
     val ikkeYrkesaktivOppholdstype: String?,
 ) {
     constructor(avklartefakta: Set<AvklartefaktaDto>) : this(
         virksomheter = VirksomheterDto.av(avklartefakta),
         arbeidsland = ArbeidslandDto.av(avklartefakta),
         fullstendigManglendeInnbetaling = hentFullstendigManglendeInnbetaling(avklartefakta),
-        ikkeYrkesaktivFamileRelasjonstype = hentFamileRelasjonType(avklartefakta),
+        ikkeYrkesaktivFamilieRelasjonstype = hentFamileRelasjonType(avklartefakta),
         ikkeYrkesaktivOppholdstype = hentOppholdType(avklartefakta)
     )
 
