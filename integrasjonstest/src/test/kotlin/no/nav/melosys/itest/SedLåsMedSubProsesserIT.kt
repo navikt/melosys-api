@@ -10,6 +10,7 @@ import no.nav.melosys.Application
 import no.nav.melosys.AwaitUtil.throwOnLogError
 import no.nav.melosys.LoggingTestUtils
 import no.nav.melosys.LoggingTestUtils.filterBuilder
+import no.nav.melosys.ProsessLaget
 import no.nav.melosys.domain.eessi.SedType
 import no.nav.melosys.domain.eessi.melding.MelosysEessiMelding
 import no.nav.melosys.saksflyt.ProsessinstansBehandler
@@ -184,34 +185,15 @@ internal class SedLåsMedSubProsesserIT(
         }
     }
 
-    class ProsessLaget {
-        private val idToName = mutableMapOf<UUID, String>()
-
-        fun nyProsessLaget(name: String, block: () -> UUID): UUID {
-            idToName.values.firstOrNull { it == name }?.let { throw IllegalStateException("$name er alt registrert ") }
-            return block().apply {
-                idToName[this] = name
-            }
-        }
-
-        fun nameFromId(uuid: UUID) = idToName[uuid]
-
-        fun prosessIdStringToName(): Map<String, String> = idToName.map { it.key.toString() to it.value }.toMap()
-
-        fun clear() = idToName.clear()
-    }
-
     @TestConfiguration
     class TestConfig(
         @Autowired private val prosessinstansService: ProsessinstansService,
+        @Autowired private val prosessLaget: ProsessLaget
     ) {
-        @Bean
-        fun prosessLaget(): ProsessLaget = ProsessLaget()
 
         @Bean
         @Primary
         fun opprettSedMottakRutingTest(): SedMottakRuting {
-            val prosessLaget = prosessLaget()
             fun Prosessinstans.navn() = prosessLaget.nameFromId(this.id) ?: throw IllegalStateException("Fant ikke navn for ${this.id}")
 
             return mockk<SedMottakRuting>().apply {
