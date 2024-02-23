@@ -44,21 +44,6 @@
         </dependency>
 
         <dependency>
-            <groupId>com.fasterxml.jackson.jaxrs</groupId>
-            <artifactId>jackson-jaxrs-json-provider</artifactId>
-            <scope>runtime</scope>
-            <exclusions>
-                <exclusion>
-                    <groupId>com.fasterxml.jackson.module</groupId>
-                    <artifactId>jackson-module-jaxb-annotations</artifactId>
-                </exclusion>
-            </exclusions>
-        </dependency>
-        <dependency>
-            <groupId>com.fasterxml.jackson.module</groupId>
-            <artifactId>jackson-module-kotlin</artifactId>
-        </dependency>
-        <dependency>
             <groupId>org.glassfish.jersey.media</groupId>
             <artifactId>jersey-media-json-jackson</artifactId>
             <scope>runtime</scope>
@@ -137,8 +122,7 @@
         <!-- DokSys -->
         <dependency>
             <groupId>no.nav.tjenester</groupId>
-            <artifactId>nav-dokumentproduksjon-v3-tjenestespesifikasjon</artifactId>
-            <classifier>jaxws</classifier>
+            <artifactId>dok-nav-dokumentproduksjon-v3-tjenestespesifikasjon</artifactId>
         </dependency>
 
         <!--Test-->
@@ -163,7 +147,7 @@
             <scope>test</scope>
         </dependency>
         <dependency>
-            <groupId>com.github.tomakehurst</groupId>
+            <groupId>org.wiremock</groupId>
             <artifactId>wiremock-standalone</artifactId>
             <scope>test</scope>
         </dependency>

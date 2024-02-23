@@ -90,7 +90,7 @@ class OppgaveConsumerTest {
             "AAPNET",
             LocalDate.parse("2019-12-26"),
             LocalDate.parse("2019-10-03"),
-            ZonedDateTime.parse("2019-10-03T10:27:26.566Z[UTC]")
+            ZonedDateTime.parse("2019-10-03T10:27:26.566Z")
         );
     }
 

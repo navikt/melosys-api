@@ -7,7 +7,7 @@ import com.github.tomakehurst.wiremock.client.MappingBuilder
 import com.github.tomakehurst.wiremock.client.WireMock
 import com.github.tomakehurst.wiremock.core.WireMockConfiguration
 import io.getunleash.FakeUnleash
-import no.nav.melosys.integrasjon.MetricsTestConfig
+//import no.nav.melosys.integrasjon.MetricsTestConfig
 import no.nav.melosys.integrasjon.OAuthMockServer
 import no.nav.melosys.integrasjon.StsMockServer
 import no.nav.melosys.integrasjon.faktureringskomponenten.dto.*
@@ -77,7 +77,7 @@ class FaktureringskomponentenConsumerTest(
     @AfterEach
     fun after() {
         ThreadLocalAccessInfo.afterExecuteProcess(processUUID)
-        MetricsTestConfig.clearMeterRegistry()
+//        MetricsTestConfig.clearMeterRegistry()
     }
 
     @Test
