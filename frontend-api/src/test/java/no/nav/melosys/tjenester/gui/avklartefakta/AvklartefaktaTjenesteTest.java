@@ -1,4 +1,4 @@
-package no.nav.melosys.tjenester.gui;
+package no.nav.melosys.tjenester.gui.avklartefakta;
 
 import java.util.Collections;
 import java.util.HashSet;
@@ -11,9 +11,8 @@ import no.nav.melosys.domain.avklartefakta.AvklartefaktaRegistrering;
 import no.nav.melosys.domain.kodeverk.Avklartefaktatyper;
 import no.nav.melosys.service.avklartefakta.*;
 import no.nav.melosys.service.tilgang.Aksesskontroll;
-import no.nav.melosys.tjenester.gui.dto.AvklartefaktaOppsummeringDto;
-import no.nav.melosys.tjenester.gui.dto.oppsummertefakta.VirksomheterDto;
 import no.nav.melosys.tjenester.gui.dto.oppsummertefakta.ArbeidslandDto;
+import no.nav.melosys.tjenester.gui.dto.oppsummertefakta.VirksomheterDto;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
@@ -45,6 +44,10 @@ class AvklartefaktaTjenesteTest {
     private Aksesskontroll aksesskontroll;
     @MockBean
     private AvklartManglendeInnbetalingService avklartManglendeInnbetalingService;
+    @MockBean
+    private AvklartFamilieRelasjonTypeService avklartFamilieRelasjonTypeService;
+    @MockBean
+    private AvklartOppholdTypeService avklartOppholdTypeService;
 
     @Autowired
     private MockMvc mockMvc;
@@ -86,7 +89,7 @@ class AvklartefaktaTjenesteTest {
         mockMvc.perform(get(BASE_URL + "/{behandlingID}/oppsummering", 1L)
                 .contentType(MediaType.APPLICATION_JSON))
             .andExpect(status().isOk())
-            .andExpect(responseBody(objectMapper).containsObjectAsJson(AvklartefaktaOppsummeringDto.av(dtos), AvklartefaktaOppsummeringDto.class));
+            .andExpect(responseBody(objectMapper).containsObjectAsJson(new AvklartefaktaOppsummeringDto(dtos), AvklartefaktaOppsummeringDto.class));
     }
 
     @Test
@@ -100,7 +103,7 @@ class AvklartefaktaTjenesteTest {
                 .contentType(MediaType.APPLICATION_JSON)
                 .content(objectMapper.writeValueAsString(virksomheterDto)))
             .andExpect(status().isOk())
-            .andExpect(responseBody(objectMapper).containsObjectAsJson(AvklartefaktaOppsummeringDto.av(dtos), AvklartefaktaOppsummeringDto.class));
+            .andExpect(responseBody(objectMapper).containsObjectAsJson(new AvklartefaktaOppsummeringDto(dtos), AvklartefaktaOppsummeringDto.class));
     }
 
     @Test
@@ -114,7 +117,7 @@ class AvklartefaktaTjenesteTest {
                 .contentType(MediaType.APPLICATION_JSON)
                 .content(objectMapper.writeValueAsString(arbeidslandDto)))
             .andExpect(status().isOk())
-            .andExpect(responseBody(objectMapper).containsObjectAsJson(AvklartefaktaOppsummeringDto.av(dtos), AvklartefaktaOppsummeringDto.class));
+            .andExpect(responseBody(objectMapper).containsObjectAsJson(new AvklartefaktaOppsummeringDto(dtos), AvklartefaktaOppsummeringDto.class));
     }
 
     private static Set<AvklartefaktaDto> lagAvklarteFaktaDtoSet() {
