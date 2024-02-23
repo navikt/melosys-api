@@ -4,6 +4,7 @@ import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Set;
+import java.util.UUID;
 import java.util.stream.Collectors;
 import javax.annotation.Nullable;
 
@@ -236,11 +237,11 @@ public class ProsessinstansService {
             ProsessType.IVERKSETT_VEDTAK_EOS).isPresent();
     }
 
-    void lagre(Prosessinstans prosessinstans) {
-        lagre(prosessinstans, getSaksbehandlerIdent(), getSaksbehandlerNavn());
+    UUID lagre(Prosessinstans prosessinstans) {
+        return lagre(prosessinstans, getSaksbehandlerIdent(), getSaksbehandlerNavn());
     }
 
-    void lagre(Prosessinstans prosessinstans, String saksbehandler, String saksbehandlerNavn) {
+    UUID lagre(Prosessinstans prosessinstans, String saksbehandler, String saksbehandlerNavn) {
         LocalDateTime nå = LocalDateTime.now();
         prosessinstans.setEndretDato(nå);
         prosessinstans.setRegistrertDato(nå);
@@ -248,17 +249,21 @@ public class ProsessinstansService {
         if (saksbehandler != null) {
             prosessinstans.setData(ProsessDataKey.SAKSBEHANDLER, saksbehandler);
             prosessinstans.setData(ProsessDataKey.SAKSBEHANDLER_NAVN, saksbehandlerNavn);
+        }
+        prosessinstans.setData(CORRELATION_ID_SAKSFLYT, MDCOperations.getCorrelationId());
+
+        prosessinstansRepo.save(prosessinstans);
+        if (saksbehandler != null) {
             logger.info("Saksbehandler={} har opprettet prosessinstans {} av type {}.", saksbehandler,
                 prosessinstans.getId(), prosessinstans.getType());
         } else {
             logger.info("Melosys har opprettet prosessinstans {} av type {}.", prosessinstans.getId(),
                 prosessinstans.getType());
         }
-        prosessinstans.setData(CORRELATION_ID_SAKSFLYT, MDCOperations.getCorrelationId());
 
-        prosessinstansRepo.save(prosessinstans);
         applicationEventPublisher.publishEvent(new ProsessinstansOpprettetEvent(prosessinstans));
         prosessinstanserOpprettet.increment();
+        return prosessinstans.getId();
     }
 
     public void opprettProsessinstansAnmodningOmUnntak(Behandling behandling, Set<String> mottakerInstitusjon,
@@ -459,10 +464,10 @@ public class ProsessinstansService {
     }
 
     @Transactional
-    public void opprettProsessinstansSedMottak(MelosysEessiMelding melosysEessiMelding) {
+    public UUID opprettProsessinstansSedMottak(MelosysEessiMelding melosysEessiMelding) {
         Prosessinstans prosessinstans = prosessinstansForSedMottak(melosysEessiMelding);
         prosessinstans.setData(ProsessDataKey.AKTØR_ID, melosysEessiMelding.getAktoerId());
-        lagre(prosessinstans);
+        return lagre(prosessinstans);
     }
 
     public void opprettProsessinstansSedMottak(MelosysEessiMelding eessiMelding, String aktørID) {
@@ -546,14 +551,14 @@ public class ProsessinstansService {
         lagre(prosessinstans);
     }
 
-    public void opprettProsessinstansSedJournalføring(Behandling behandling, MelosysEessiMelding melosysEessiMelding) {
+    public UUID opprettProsessinstansSedJournalføring(Behandling behandling, MelosysEessiMelding melosysEessiMelding) {
         Prosessinstans prosessinstans = new ProsessinstansBuilder()
             .medType(ProsessType.MOTTAK_SED_JOURNALFØRING)
             .medBehandling(behandling)
             .medEessiMelding(melosysEessiMelding)
             .build();
 
-        lagre(prosessinstans);
+        return lagre(prosessinstans);
     }
 
     public void opprettProsessinstansMottattSvarAnmodningUnntak(Behandling behandling, MelosysEessiMelding melosysEessiMelding) {
@@ -566,7 +571,7 @@ public class ProsessinstansService {
         lagre(prosessinstans);
     }
 
-    public void opprettProsessinstansNySakUnntaksregistrering(MelosysEessiMelding melosysEessiMelding, Behandlingstema behandlingstema, String aktørID) {
+    public UUID opprettProsessinstansNySakUnntaksregistrering(MelosysEessiMelding melosysEessiMelding, Behandlingstema behandlingstema, String aktørID) {
         Prosessinstans prosessinstans = new ProsessinstansBuilder()
             .medType(ProsessType.REGISTRERING_UNNTAK_NY_SAK)
             .medEessiMelding(melosysEessiMelding)
@@ -575,7 +580,7 @@ public class ProsessinstansService {
         prosessinstans.setData(ProsessDataKey.BEHANDLINGSTEMA, behandlingstema);
         prosessinstans.setData(ProsessDataKey.AKTØR_ID, aktørID);
 
-        lagre(prosessinstans);
+        return lagre(prosessinstans);
     }
 
     public void opprettProsessinstansNyBehandlingUnntaksregistrering(MelosysEessiMelding melosysEessiMelding, Behandlingstema behandlingstema, Long arkivsakID) {
