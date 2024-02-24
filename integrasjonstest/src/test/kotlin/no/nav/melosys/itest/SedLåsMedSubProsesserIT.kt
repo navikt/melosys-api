@@ -2,7 +2,6 @@ package no.nav.melosys.itest
 
 import io.kotest.matchers.collections.shouldHaveSize
 import io.kotest.matchers.shouldBe
-import io.kotest.matchers.string.shouldStartWith
 import io.mockk.CapturingSlot
 import io.mockk.every
 import io.mockk.mockk
@@ -30,7 +29,6 @@ import no.nav.melosys.saksflytapi.domain.Prosessinstans
 import no.nav.security.token.support.spring.test.EnableMockOAuth2Server
 import org.awaitility.kotlin.await
 import org.junit.jupiter.api.AfterEach
-import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.boot.test.autoconfigure.jdbc.AutoConfigureTestDatabase
@@ -104,13 +102,14 @@ internal class SedLåsMedSubProsesserIT(
                 .replace(prosessLaget.prosessIdStringToName())
                 .replace(a009Lås, "<a009Lås>")
                 .replace(x0008Lås, "<x0008Lås>")
+                .sort(Regex("gruppe-prefiks: \\[(.*?)]"))
                 .check { next ->
                     next { it shouldBe "Melosys har opprettet prosessinstans <a009Prosess> av type MOTTAK_SED." }
                     next { it shouldBe "Melosys har opprettet prosessinstans <x008Prosess> av type MOTTAK_SED." }
                     next { it shouldBe "Utfører steg SED_MOTTAK_RUTING for prosessinstans <a009Prosess>" }
                     next { it shouldBe "Melosys har opprettet prosessinstans <sub-prosess av a009Prosess> av type MOTTAK_SED_JOURNALFØRING." }
                     next { it shouldBe "Prosessinstans <a009Prosess> ferdig, sjekker om neste med låsreferanse:<a009Lås> kan startes" }
-                    next { it shouldStartWith ("Prosessinstans(er) på vent med samme gruppe-prefiks: ") } // 2 stk. // TODO: sorter etter at id er byttet med navn
+                    next { it shouldBe ("Prosessinstans(er) på vent med samme gruppe-prefiks: [<sub-prosess av a009Prosess>, <x008Prosess>]") }
                     next { it shouldBe "Prosessinstans <sub-prosess av a009Prosess> med låsreferanse <a009Lås> startes opp etter å ha vært på vent" }
                     next { it shouldBe "Utfører steg SED_MOTTAK_FERDIGSTILL_JOURNALPOST for prosessinstans <sub-prosess av a009Prosess>" }
                     next { it shouldBe "Prosessinstans <sub-prosess av a009Prosess> ferdig, sjekker om neste med låsreferanse:<a009Lås> kan startes" }
@@ -154,7 +153,7 @@ internal class SedLåsMedSubProsesserIT(
                 .timeout(Duration.ofSeconds(30)).pollInterval(Duration.ofSeconds(1))
                 .until {
                     logItems.filterBuilder.match<ProsessinstansFerdigListener>()
-                        .build().last().formattedMessage.contains("Prosessinstans(er) på vent med samme gruppe-refiks: []")
+                        .build().last().formattedMessage.contains("Prosessinstans(er) på vent med samme gruppe-prefiks: []")
                 }
 
             logItems.filterBuilder
@@ -164,12 +163,13 @@ internal class SedLåsMedSubProsesserIT(
                 .match<ProsessinstansFerdigListener> { it.formattedMessage.contains("på vent, neste") }
                 .replace(prosessLaget.prosessIdStringToName())
                 .replace(a009Lås, "<a009Lås>")
+                .sort(Regex("gruppe-prefiks: \\[(.*?)]"))
                 .check { next ->
                     next { it shouldBe "Melosys har opprettet prosessinstans <førsteProsessID> av type MOTTAK_SED." }
                     next { it shouldBe "Melosys har opprettet prosessinstans <duplikatProsessID> av type MOTTAK_SED." }
                     next { it shouldBe "Utfører steg SED_MOTTAK_RUTING for prosessinstans <førsteProsessID>" }
                     next { it shouldBe "Melosys har opprettet prosessinstans <sub-prosess av førsteProsessID> av type MOTTAK_SED_JOURNALFØRING." }
-                    next { it shouldStartWith "Prosessinstans(er) på vent med samme gruppe-prefiks: " } // 2 stk. TODO: sorter etter at id er byttet med navn
+                    next { it shouldBe "Prosessinstans(er) på vent med samme gruppe-prefiks: [<duplikatProsessID>, <sub-prosess av førsteProsessID>]" }
                     next { it shouldBe "Utfører steg SED_MOTTAK_FERDIGSTILL_JOURNALPOST for prosessinstans <sub-prosess av førsteProsessID>" }
                     next { it shouldBe "Prosessinstans(er) på vent med samme gruppe-prefiks: [<duplikatProsessID>]" }
                     next { it shouldBe "Utfører steg SED_MOTTAK_RUTING for prosessinstans <duplikatProsessID>" }

@@ -86,4 +86,19 @@ class LoggingTestUtilsTest {
                 }
         }
     }
+
+    @Test
+    fun `sort skal sorter ting på komma`() {
+        val someOtherLog1 = LoggerFactory.getLogger(SomeClass1::class.java)
+
+        LoggingTestUtils.withLogCapture { logs ->
+            someOtherLog1.info("Prosessinstans(er) på vent med samme gruppe-prefiks: [<x008Prosess>, <a009Prosess>]")
+
+            logs.filterBuilder
+                .match<SomeClass1>()
+                .sort(Regex("gruppe-prefiks: \\[(.*?)]"))
+                .build().first().formattedMessage
+                .shouldBe("Prosessinstans(er) på vent med samme gruppe-prefiks: [<a009Prosess>, <x008Prosess>]")
+        }
+    }
 }

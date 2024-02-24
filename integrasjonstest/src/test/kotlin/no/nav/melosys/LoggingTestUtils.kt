@@ -45,15 +45,14 @@ object LoggingTestUtils {
     class LogFilterBuilder(val logItems: Collection<ILoggingEvent>) {
         val result: MutableList<ILoggingEvent> = mutableListOf()
         private var regex: Regex? = null
-        private var replacementsRegex = mutableListOf<Pair<Regex, String>>()
         private var replacementsString = mutableListOf<Pair<String, String>>()
+        private var sortList = mutableListOf<Regex>()
 
         inline fun <reified T : Any> match(predicate: (ILoggingEvent) -> Boolean = { true }): LogFilterBuilder =
             apply { result.addAll(logItems.filter { it.loggerName == T::class.java.name && predicate(it) }) }
 
         fun remove(regex: Regex) = apply { this.regex = regex }
-        fun replace(regex: Regex, replacement: String) = apply { replacementsRegex.add(regex to replacement) }
-        fun replace(regex: String, replacement: String) = apply { replacementsString.add(regex to replacement) }
+        fun replace(text: String, replacement: String) = apply { replacementsString.add(text to replacement) }
         fun replace(map: Map<String, String>) = apply { map.forEach { replacementsString.add(it.key to "<${it.value}>") } }
 
         fun build(): List<LogItem> {
@@ -69,14 +68,28 @@ object LoggingTestUtils {
 
         private fun resultMessage(it: ILoggingEvent): String {
             var message = if (regex == null) it.formattedMessage else it.formattedMessage.replace(regex!!, "")
-            replacementsRegex.forEach { (regex, replacement) ->
-                message = message.replace(regex, replacement)
-            }
             replacementsString.forEach { (text, replacement) ->
                 message = message.replace(text, replacement)
             }
+            sortList.forEach {
+                message = sort(it, message)
+            }
             return message
         }
+
+        private fun sort(regex: Regex, input: String): String =
+            regex.find(input)?.let { matchResult: MatchResult ->
+                val contents = matchResult.groups[1]?.value ?: ""
+                val sortedContents = contents.split(",").map { it.trim() }.sorted().joinToString(", ")
+                matchResult.value.replace(contents, sortedContents)
+            }?.let {
+                input.replace(regex, it)
+            } ?: input
+
+        fun sort(regex: Regex) = apply {
+            sortList.add(regex)
+        }
+
 
         class LogItem(val message: String, val formattedMessage: String, val timeStamp: Long, val threadName: String)
 
