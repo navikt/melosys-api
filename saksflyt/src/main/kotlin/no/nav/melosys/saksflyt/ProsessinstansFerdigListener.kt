@@ -30,7 +30,7 @@ class ProsessinstansFerdigListener(
         prosessinstansRepository.findAllByStatus(ProsessStatus.PÅ_VENT).filter {
             LåsReferanseFactory.harSammeGruppePrefiks(it.låsReferanse, prosessinstansFerdigEvent.låsReferanse)
         }.apply {
-            log.info("Prosessinstans(er) på vent med samme gruppe-refiks: ${this.sortedBy { it.registrertDato }.map { it.id }}")
+            log.info("Prosessinstans(er) på vent med samme gruppe-prefiks: ${this.map { it.id }}")
         }.isNotEmpty()
 
     private fun startNesteProsessinstans(prosessinstansFerdigEvent: ProsessinstansFerdigEvent) {
