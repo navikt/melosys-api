@@ -30,7 +30,7 @@ class ProsessinstansFerdigListener(
         prosessinstansRepository.findAllByStatus(ProsessStatus.PÅ_VENT).filter {
             LåsReferanseFactory.harSammeGruppePrefiks(it.låsReferanse, prosessinstansFerdigEvent.låsReferanse)
         }.apply {
-            log.info("Prosessinstanser på vent med samme låsreferanse: ${this.map { it.låsReferanse }.sortedBy { it }}")
+            log.info("Prosessinstans(er) på vent med samme gruppe-refiks: ${this.sortedBy { it.registrertDato }.map { it.id }}")
         }.isNotEmpty()
 
     private fun startNesteProsessinstans(prosessinstansFerdigEvent: ProsessinstansFerdigEvent) {
@@ -43,10 +43,6 @@ class ProsessinstansFerdigListener(
                 .filter { LåsReferanseFactory.harSammeGruppePrefiks(it.låsReferanse, prosessinstansFerdigEvent.låsReferanse) }
                 .sortedBy { it.registrertDato }
                 .firstOrNull()
-
-        allePåVent.count { LåsReferanseFactory.harSammeGruppePrefiks(it.låsReferanse, prosessinstansFerdigEvent.låsReferanse) }.let {
-            log.info("$it på vent, neste som kan kjøres er ${påVent?.låsReferanse} for ferdig låsreferanse ${prosessinstansFerdigEvent.låsReferanse}")
-        }
 
         if (påVent != null) {
             oppdaterStatusOgBehandleProsessinstans(påVent)

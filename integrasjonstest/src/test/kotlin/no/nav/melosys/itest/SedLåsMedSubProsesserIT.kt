@@ -2,6 +2,7 @@ package no.nav.melosys.itest
 
 import io.kotest.matchers.collections.shouldHaveSize
 import io.kotest.matchers.shouldBe
+import io.kotest.matchers.string.shouldStartWith
 import io.mockk.CapturingSlot
 import io.mockk.every
 import io.mockk.mockk
@@ -93,7 +94,7 @@ internal class SedLåsMedSubProsesserIT(
                 .timeout(Duration.ofSeconds(30)).pollInterval(Duration.ofSeconds(1))
                 .until {
                     logItems.filterBuilder.match<ProsessinstansFerdigListener>()
-                        .build().last().formattedMessage.contains("Prosessinstanser på vent med samme låsreferanse: []")
+                        .build().last().formattedMessage.contains("Prosessinstans(er) på vent med samme gruppe-refiks: []")
                 }
 
 
@@ -103,8 +104,7 @@ internal class SedLåsMedSubProsesserIT(
             logItems.filterBuilder
                 .match<ProsessinstansService> { it.formattedMessage.contains("Melosys har opprettet prosessinstans") }
                 .match<ProsessinstansBehandler> { it.formattedMessage.contains("Utfører steg") }
-                .match<ProsessinstansFerdigListener> { it.formattedMessage.contains("på vent med") }
-                .match<ProsessinstansFerdigListener> { it.formattedMessage.contains("på vent, neste") }
+                .match<ProsessinstansFerdigListener>()
                 .replace(prosessLaget.prosessIdStringToName())
                 .replace(a009Lås, "<a009Lås>")
                 .replace(x0008Lås, "<x0008Lås>")
@@ -113,15 +113,18 @@ internal class SedLåsMedSubProsesserIT(
                     next { it shouldBe "Melosys har opprettet prosessinstans <x008Prosess> av type MOTTAK_SED." }
                     next { it shouldBe "Utfører steg SED_MOTTAK_RUTING for prosessinstans <a009Prosess>" }
                     next { it shouldBe "Melosys har opprettet prosessinstans <sub-prosess av a009Prosess> av type MOTTAK_SED_JOURNALFØRING." }
-                    next { it shouldBe "Prosessinstanser på vent med samme låsreferanse: [<a009Lås>, <x0008Lås>]" }
-                    next { it shouldBe "2 på vent, neste som kan kjøres er <a009Lås> for ferdig låsreferanse <a009Lås>" }
+                    next { it shouldBe "Prosessinstans <a009Prosess> ferdig, sjekker om neste med låsreferanse:<a009Lås> kan startes" }
+                    next { it shouldStartWith ("Prosessinstans(er) på vent med samme gruppe-refiks: ") } // 2 stk. // TODO: sorter etter at id er byttet med navn
+                    next { it shouldBe "Prosessinstans <sub-prosess av a009Prosess> med låsreferanse <a009Lås> startes opp etter å ha vært på vent" }
                     next { it shouldBe "Utfører steg SED_MOTTAK_FERDIGSTILL_JOURNALPOST for prosessinstans <sub-prosess av a009Prosess>" }
-                    next { it shouldBe "Prosessinstanser på vent med samme låsreferanse: [<x0008Lås>]" }
-                    next { it shouldBe "1 på vent, neste som kan kjøres er <x0008Lås> for ferdig låsreferanse <a009Lås>" }
+                    next { it shouldBe "Prosessinstans <sub-prosess av a009Prosess> ferdig, sjekker om neste med låsreferanse:<a009Lås> kan startes" }
+                    next { it shouldBe "Prosessinstans(er) på vent med samme gruppe-refiks: [<x008Prosess>]" }
+                    next { it shouldBe "Prosessinstans <x008Prosess> med låsreferanse <x0008Lås> startes opp etter å ha vært på vent" }
                     next { it shouldBe "Utfører steg SED_MOTTAK_RUTING for prosessinstans <x008Prosess>" }
                     next { it shouldBe "Melosys har opprettet prosessinstans <sub-prosess av x008Prosess> av type REGISTRERING_UNNTAK_NY_SAK." }
-                    next { it shouldBe "Prosessinstanser på vent med samme låsreferanse: [<x0008Lås>]" }
-                    next { it shouldBe "1 på vent, neste som kan kjøres er <x0008Lås> for ferdig låsreferanse <x0008Lås>" }
+                    next { it shouldBe "Prosessinstans <x008Prosess> ferdig, sjekker om neste med låsreferanse:<x0008Lås> kan startes" }
+                    next { it shouldBe "Prosessinstans(er) på vent med samme gruppe-refiks: [<sub-prosess av x008Prosess>]" }
+                    next { it shouldBe "Prosessinstans <sub-prosess av x008Prosess> med låsreferanse <x0008Lås> startes opp etter å ha vært på vent" }
                     next { it shouldBe "Utfører steg SED_MOTTAK_OPPRETT_FAGSAK_OG_BEH for prosessinstans <sub-prosess av x008Prosess>" }
                     next { it shouldBe "Utfører steg OPPRETT_ARKIVSAK for prosessinstans <sub-prosess av x008Prosess>" }
                     next { it shouldBe "Utfører steg OPPDATER_SAKSRELASJON for prosessinstans <sub-prosess av x008Prosess>" }
@@ -130,7 +133,8 @@ internal class SedLåsMedSubProsesserIT(
                     next { it shouldBe "Utfører steg HENT_REGISTEROPPLYSNINGER for prosessinstans <sub-prosess av x008Prosess>" }
                     next { it shouldBe "Utfører steg REGISTERKONTROLL for prosessinstans <sub-prosess av x008Prosess>" }
                     next { it shouldBe "Utfører steg BESTEM_BEHANDLINGMÅTE_SED for prosessinstans <sub-prosess av x008Prosess>" }
-                    next { it shouldBe "Prosessinstanser på vent med samme låsreferanse: []" }
+                    next { it shouldBe "Prosessinstans <sub-prosess av x008Prosess> ferdig, sjekker om neste med låsreferanse:<x0008Lås> kan startes" }
+                    next { it shouldBe "Prosessinstans(er) på vent med samme gruppe-refiks: []" }
                 }
         }
     }
@@ -154,7 +158,7 @@ internal class SedLåsMedSubProsesserIT(
                 .timeout(Duration.ofSeconds(30)).pollInterval(Duration.ofSeconds(1))
                 .until {
                     logItems.filterBuilder.match<ProsessinstansFerdigListener>()
-                        .build().last().formattedMessage.contains("Prosessinstanser på vent med samme låsreferanse: []")
+                        .build().last().formattedMessage.contains("Prosessinstans(er) på vent med samme gruppe-refiks: []")
                 }
 
             logItems.filterBuilder
@@ -169,17 +173,14 @@ internal class SedLåsMedSubProsesserIT(
                     next { it shouldBe "Melosys har opprettet prosessinstans <duplikatProsessID> av type MOTTAK_SED." }
                     next { it shouldBe "Utfører steg SED_MOTTAK_RUTING for prosessinstans <førsteProsessID>" }
                     next { it shouldBe "Melosys har opprettet prosessinstans <sub-prosess av førsteProsessID> av type MOTTAK_SED_JOURNALFØRING." }
-                    next { it shouldBe "Prosessinstanser på vent med samme låsreferanse: [<a009Lås>, <a009Lås>]" }
-                    next { it shouldBe "2 på vent, neste som kan kjøres er <a009Lås> for ferdig låsreferanse <a009Lås>" }
+                    next { it shouldStartWith  "Prosessinstans(er) på vent med samme gruppe-refiks: " } // 2 stk. TODO: sorter etter at id er byttet med navn
                     next { it shouldBe "Utfører steg SED_MOTTAK_FERDIGSTILL_JOURNALPOST for prosessinstans <sub-prosess av førsteProsessID>" }
-                    next { it shouldBe "Prosessinstanser på vent med samme låsreferanse: [<a009Lås>]" }
-                    next { it shouldBe "1 på vent, neste som kan kjøres er <a009Lås> for ferdig låsreferanse <a009Lås>" }
+                    next { it shouldBe "Prosessinstans(er) på vent med samme gruppe-refiks: [<duplikatProsessID>]" }
                     next { it shouldBe "Utfører steg SED_MOTTAK_RUTING for prosessinstans <duplikatProsessID>" }
                     next { it shouldBe "Melosys har opprettet prosessinstans <sub-prosess av duplikatProsessID> av type MOTTAK_SED_JOURNALFØRING." }
-                    next { it shouldBe "Prosessinstanser på vent med samme låsreferanse: [<a009Lås>]" }
-                    next { it shouldBe "1 på vent, neste som kan kjøres er <a009Lås> for ferdig låsreferanse <a009Lås>" }
+                    next { it shouldBe "Prosessinstans(er) på vent med samme gruppe-refiks: [<sub-prosess av duplikatProsessID>]" }
                     next { it shouldBe "Utfører steg SED_MOTTAK_FERDIGSTILL_JOURNALPOST for prosessinstans <sub-prosess av duplikatProsessID>" }
-                    next { it shouldBe "Prosessinstanser på vent med samme låsreferanse: []" }
+                    next { it shouldBe "Prosessinstans(er) på vent med samme gruppe-refiks: []" }
                 }
 
         }
