@@ -6,7 +6,6 @@ import io.kotest.matchers.string.shouldStartWith
 import io.mockk.CapturingSlot
 import io.mockk.every
 import io.mockk.mockk
-import mu.KotlinLogging
 import no.nav.melosys.Application
 import no.nav.melosys.AwaitUtil.throwOnLogError
 import no.nav.melosys.LoggingTestUtils
@@ -30,6 +29,7 @@ import no.nav.melosys.saksflytapi.domain.ProsessSteg
 import no.nav.melosys.saksflytapi.domain.Prosessinstans
 import no.nav.security.token.support.spring.test.EnableMockOAuth2Server
 import org.awaitility.kotlin.await
+import org.junit.jupiter.api.AfterEach
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
 import org.springframework.beans.factory.annotation.Autowired
@@ -44,8 +44,6 @@ import org.springframework.test.annotation.DirtiesContext
 import org.springframework.test.context.ActiveProfiles
 import java.time.Duration
 import java.util.*
-
-private val log = KotlinLogging.logger { }
 
 @ActiveProfiles("test")
 @SpringBootTest(
@@ -66,10 +64,8 @@ internal class SedLåsMedSubProsesserIT(
     @Autowired private val prosessLaget: ProsessLaget
 ) : OracleTestContainerBase() {
 
-    @BeforeEach
-    fun setUp() {
-        prosessLaget.clear()
-    }
+    @AfterEach
+    fun setUp() = prosessLaget.clear()
 
     @Test
     fun `ved lås må sub-prosesser fra første sed kjøres før neste sed blir kjørt`() {
@@ -173,7 +169,7 @@ internal class SedLåsMedSubProsesserIT(
                     next { it shouldBe "Melosys har opprettet prosessinstans <duplikatProsessID> av type MOTTAK_SED." }
                     next { it shouldBe "Utfører steg SED_MOTTAK_RUTING for prosessinstans <førsteProsessID>" }
                     next { it shouldBe "Melosys har opprettet prosessinstans <sub-prosess av førsteProsessID> av type MOTTAK_SED_JOURNALFØRING." }
-                    next { it shouldStartWith  "Prosessinstans(er) på vent med samme gruppe-refiks: " } // 2 stk. TODO: sorter etter at id er byttet med navn
+                    next { it shouldStartWith "Prosessinstans(er) på vent med samme gruppe-refiks: " } // 2 stk. TODO: sorter etter at id er byttet med navn
                     next { it shouldBe "Utfører steg SED_MOTTAK_FERDIGSTILL_JOURNALPOST for prosessinstans <sub-prosess av førsteProsessID>" }
                     next { it shouldBe "Prosessinstans(er) på vent med samme gruppe-refiks: [<duplikatProsessID>]" }
                     next { it shouldBe "Utfører steg SED_MOTTAK_RUTING for prosessinstans <duplikatProsessID>" }
@@ -198,36 +194,25 @@ internal class SedLåsMedSubProsesserIT(
             fun Prosessinstans.navn() = prosessLaget.nameFromId(this.id) ?: throw IllegalStateException("Fant ikke navn for ${this.id}")
 
             return mockk<SedMottakRuting>().apply {
-                every { inngangsSteg() } answers {
-                    log.info { "inngangsSteg - ${ProsessSteg.SED_MOTTAK_RUTING}" }
-                    ProsessSteg.SED_MOTTAK_RUTING
-                }
+                every { inngangsSteg() } returns ProsessSteg.SED_MOTTAK_RUTING
 
                 val slot = CapturingSlot<Prosessinstans>()
                 every { utfør(capture(slot)) } answers {
                     val parentProsess = slot.captured
                     val låsReferanse = parentProsess.låsReferanse
-                    log.info("SedMottakRuting - Utfører for prosess ${parentProsess.id} - $låsReferanse")
                     val parts = låsReferanse.split("_").shouldHaveSize(3).toList()
                     val melosysEessiMelding = MelosysEessiMelding().apply {
                         rinaSaksnummer = parts[0]
                         sedId = parts[1]
                         sedVersjon = parts[2]
                     }
-                    log.info("sub-prossess for $låsReferanse - ${melosysEessiMelding.lagUnikIdentifikator()}")
                     when (melosysEessiMelding.sedId) {
                         SedType.A009.name -> prosessLaget.nyProsessLaget("sub-prosess av ${parentProsess.navn()}") {
-                            prosessinstansService.opprettProsessinstansSedJournalføring(
-                                null,
-                                melosysEessiMelding
-                            )
+                            prosessinstansService.opprettProsessinstansSedJournalføring(null, melosysEessiMelding)
                         }
 
                         SedType.X008.name -> prosessLaget.nyProsessLaget("sub-prosess av ${parentProsess.navn()}") {
-                            prosessinstansService.opprettProsessinstansNySakUnntaksregistrering(
-                                melosysEessiMelding,
-                                null, "test"
-                            )
+                            prosessinstansService.opprettProsessinstansNySakUnntaksregistrering(melosysEessiMelding, null, "test")
                         }
                     }
                 }
@@ -238,31 +223,8 @@ internal class SedLåsMedSubProsesserIT(
         @Primary
         fun opprettFerdigstillJournalpostSedTest(): FerdigstillJournalpostSed {
             return mockk<FerdigstillJournalpostSed>().apply {
-                every { inngangsSteg() } answers {
-                    log.info { "inngangsSteg - ${ProsessSteg.SED_MOTTAK_FERDIGSTILL_JOURNALPOST}" }
-                    ProsessSteg.SED_MOTTAK_FERDIGSTILL_JOURNALPOST
-                }
-
-                val slot = CapturingSlot<Prosessinstans>()
-                every { utfør(capture(slot)) } answers {
-                    log.info("FerdigstillJournalpostSed - Utfører for prosess ${slot.captured.id} - ${slot.captured.låsReferanse}")
-                }
-            }
-        }
-
-        @Bean
-        @Primary
-        fun ferdigstillJournalpostSedTest(): FerdigstillJournalpostSed {
-            return mockk<FerdigstillJournalpostSed>().apply {
-                every { inngangsSteg() } answers {
-                    log.info { "inngangsSteg - ${ProsessSteg.SED_MOTTAK_FERDIGSTILL_JOURNALPOST}" }
-                    ProsessSteg.SED_MOTTAK_FERDIGSTILL_JOURNALPOST
-                }
-
-                val slot = CapturingSlot<Prosessinstans>()
-                every { utfør(capture(slot)) } answers {
-                    log.info("FerdigstillJournalpostSed - Utfører for prosess ${slot.captured.id} - ${slot.captured.låsReferanse}")
-                }
+                every { inngangsSteg() } returns  ProsessSteg.SED_MOTTAK_FERDIGSTILL_JOURNALPOST
+                every { utfør(any()) } returns  Unit
             }
         }
 
@@ -270,15 +232,8 @@ internal class SedLåsMedSubProsesserIT(
         @Primary
         fun opprettFagsakOgBehandlingFraSedTest(): OpprettFagsakOgBehandlingFraSed {
             return mockk<OpprettFagsakOgBehandlingFraSed>().apply {
-                every { inngangsSteg() } answers {
-                    log.info { "inngangsSteg - ${ProsessSteg.SED_MOTTAK_OPPRETT_FAGSAK_OG_BEH}" }
-                    ProsessSteg.SED_MOTTAK_OPPRETT_FAGSAK_OG_BEH
-                }
-
-                val slot = CapturingSlot<Prosessinstans>()
-                every { utfør(capture(slot)) } answers {
-                    log.info("OpprettFagsakOgBehandlingFraSed - Utfører for prosess ${slot.captured.id} - ${slot.captured.låsReferanse}")
-                }
+                every { inngangsSteg() } returns  ProsessSteg.SED_MOTTAK_OPPRETT_FAGSAK_OG_BEH
+                every { utfør(any()) } returns  Unit
             }
         }
 
@@ -286,15 +241,8 @@ internal class SedLåsMedSubProsesserIT(
         @Primary
         fun opprettArkivsakTest(): OpprettArkivsak {
             return mockk<OpprettArkivsak>().apply {
-                every { inngangsSteg() } answers {
-                    log.info { "inngangsSteg - ${ProsessSteg.OPPRETT_ARKIVSAK}" }
-                    ProsessSteg.OPPRETT_ARKIVSAK
-                }
-
-                val slot = CapturingSlot<Prosessinstans>()
-                every { utfør(capture(slot)) } answers {
-                    log.info("OpprettArkivsak - Utfører for prosess ${slot.captured.id} - ${slot.captured.låsReferanse}")
-                }
+                every { inngangsSteg() } returns  ProsessSteg.OPPRETT_ARKIVSAK
+                every { utfør(any()) } returns  Unit
             }
         }
 
@@ -302,15 +250,8 @@ internal class SedLåsMedSubProsesserIT(
         @Primary
         fun oppdaterSaksrelasjonTest(): OppdaterSaksrelasjon {
             return mockk<OppdaterSaksrelasjon>().apply {
-                every { inngangsSteg() } answers {
-                    log.info { "inngangsSteg - ${ProsessSteg.OPPDATER_SAKSRELASJON}" }
-                    ProsessSteg.OPPDATER_SAKSRELASJON
-                }
-
-                val slot = CapturingSlot<Prosessinstans>()
-                every { utfør(capture(slot)) } answers {
-                    log.info("OppdaterSaksrelasjon - Utfører for prosess ${slot.captured.id} - ${slot.captured.låsReferanse}")
-                }
+                every { inngangsSteg() } returns  ProsessSteg.OPPDATER_SAKSRELASJON
+                every { utfør(any()) } returns  Unit
             }
         }
 
@@ -318,15 +259,8 @@ internal class SedLåsMedSubProsesserIT(
         @Primary
         fun opprettSedDokumentTest(): OpprettSedDokument {
             return mockk<OpprettSedDokument>().apply {
-                every { inngangsSteg() } answers {
-                    log.info { "inngangsSteg - ${ProsessSteg.OPPRETT_SEDDOKUMENT}" }
-                    ProsessSteg.OPPRETT_SEDDOKUMENT
-                }
-
-                val slot = CapturingSlot<Prosessinstans>()
-                every { utfør(capture(slot)) } answers {
-                    log.info("OpprettSedDokument - Utfører for prosess ${slot.captured.id} - ${slot.captured.låsReferanse}")
-                }
+                every { inngangsSteg() } returns  ProsessSteg.OPPRETT_SEDDOKUMENT
+                every { utfør(any()) } returns  Unit
             }
         }
 
@@ -334,15 +268,8 @@ internal class SedLåsMedSubProsesserIT(
         @Primary
         fun hentRegisteropplysningerTest(): HentRegisteropplysninger {
             return mockk<HentRegisteropplysninger>().apply {
-                every { inngangsSteg() } answers {
-                    log.info { "inngangsSteg - ${ProsessSteg.HENT_REGISTEROPPLYSNINGER}" }
-                    ProsessSteg.HENT_REGISTEROPPLYSNINGER
-                }
-
-                val slot = CapturingSlot<Prosessinstans>()
-                every { utfør(capture(slot)) } answers {
-                    log.info("HentRegisteropplysninger - Utfører for prosess ${slot.captured.id} - ${slot.captured.låsReferanse}")
-                }
+                every { inngangsSteg() } returns  ProsessSteg.HENT_REGISTEROPPLYSNINGER
+                every { utfør(any()) } returns  Unit
             }
         }
 
@@ -350,15 +277,8 @@ internal class SedLåsMedSubProsesserIT(
         @Primary
         fun registerKontrollTest(): RegisterKontroll {
             return mockk<RegisterKontroll>().apply {
-                every { inngangsSteg() } answers {
-                    log.info { "inngangsSteg - ${ProsessSteg.REGISTERKONTROLL}" }
-                    ProsessSteg.REGISTERKONTROLL
-                }
-
-                val slot = CapturingSlot<Prosessinstans>()
-                every { utfør(capture(slot)) } answers {
-                    log.info("RegisterKontroll - Utfører for prosess ${slot.captured.id} - ${slot.captured.låsReferanse}")
-                }
+                every { inngangsSteg() } returns  ProsessSteg.REGISTERKONTROLL
+                every { utfør(any()) } returns  Unit
             }
         }
 
@@ -366,15 +286,8 @@ internal class SedLåsMedSubProsesserIT(
         @Primary
         fun bestemBehandlingsmåteSedTest(): BestemBehandlingsmåteSed {
             return mockk<BestemBehandlingsmåteSed>().apply {
-                every { inngangsSteg() } answers {
-                    log.info { "inngangsSteg - ${ProsessSteg.BESTEM_BEHANDLINGMÅTE_SED}" }
-                    ProsessSteg.BESTEM_BEHANDLINGMÅTE_SED
-                }
-
-                val slot = CapturingSlot<Prosessinstans>()
-                every { utfør(capture(slot)) } answers {
-                    log.info("BestemBehandlingsmåteSed - Utfører for prosess ${slot.captured.id} - ${slot.captured.låsReferanse}")
-                }
+                every { inngangsSteg() } returns  ProsessSteg.BESTEM_BEHANDLINGMÅTE_SED
+                every { utfør(any()) } returns  Unit
             }
         }
     }
