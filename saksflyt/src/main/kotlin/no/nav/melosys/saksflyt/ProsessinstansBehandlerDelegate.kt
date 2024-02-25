@@ -35,7 +35,7 @@ class ProsessinstansBehandlerDelegate(
 
     Settes ikke på vent om
         1. Prosessinstansen ikke har en låsreferanse
-        2. Det finnes ingen prosessinstans med samme referanse
+        2. Det finnes ingen aktiv prosessinstans med samme gruppe prefiks
      */
     private fun skalSettesPåVent(prosessinstans: Prosessinstans): Boolean {
         if (prosessinstans.låsReferanse == null) {
@@ -44,7 +44,7 @@ class ProsessinstansBehandlerDelegate(
 
         val låsReferanse: LåsReferanse = LåsReferanseFactory.lagLåsReferanse(prosessinstans.låsReferanse)
         val andreAktiveLåsMedSammeGruppePrefiks = finnAndreAktiveLåsMedSammegruppePrefiks(prosessinstans.id, låsReferanse.gruppePrefiks)
-        log.info { "låsreferanse: ${prosessinstans.låsReferanse} Andre aktive lås med samme referanse: $andreAktiveLåsMedSammeGruppePrefiks" }
+        log.info { "Låsreferanse: ${prosessinstans.låsReferanse} Andre aktive med samme gruppe prefiks: $andreAktiveLåsMedSammeGruppePrefiks" }
         return låsReferanse.skalSettesPåVent(andreAktiveLåsMedSammeGruppePrefiks)
     }
 
