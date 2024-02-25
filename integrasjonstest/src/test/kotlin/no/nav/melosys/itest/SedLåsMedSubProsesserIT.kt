@@ -36,7 +36,6 @@ import org.springframework.boot.test.context.SpringBootTest
 import org.springframework.boot.test.context.TestConfiguration
 import org.springframework.context.annotation.Bean
 import org.springframework.context.annotation.Import
-import org.springframework.context.annotation.Primary
 import org.springframework.kafka.test.context.EmbeddedKafka
 import org.springframework.test.annotation.DirtiesContext
 import org.springframework.test.context.ActiveProfiles
@@ -193,107 +192,94 @@ internal class SedLåsMedSubProsesserIT(
         @Autowired private val prosessinstansService: ProsessinstansService,
         @Autowired private val prosessLaget: ProsessLaget
     ) {
-
         @Bean
-        @Primary
-        fun opprettSedMottakRutingTest(): SedMottakRuting {
-            fun Prosessinstans.navn() = prosessLaget.nameFromId(this.id) ?: throw IllegalStateException("Fant ikke navn for ${this.id}")
+        fun opprettSedMottakRutingTest(): SedMottakRuting = mockk<SedMottakRuting>().apply {
+            every { inngangsSteg() } returns ProsessSteg.SED_MOTTAK_RUTING
 
-            return mockk<SedMottakRuting>().apply {
-                every { inngangsSteg() } returns ProsessSteg.SED_MOTTAK_RUTING
-
-                val slot = CapturingSlot<Prosessinstans>()
-                every { utfør(capture(slot)) } answers {
-                    val parentProsess = slot.captured
-                    val låsReferanse = parentProsess.låsReferanse
-                    val parts = låsReferanse.split("_").shouldHaveSize(3).toList()
-                    val melosysEessiMelding = MelosysEessiMelding().apply {
-                        rinaSaksnummer = parts[0]
-                        sedId = parts[1]
-                        sedVersjon = parts[2]
+            val slot = CapturingSlot<Prosessinstans>()
+            every { utfør(capture(slot)) } answers {
+                val parentProsess = slot.captured
+                val parentNavn = prosessLaget.nameFromId(parentProsess.id) ?: throw IllegalStateException("Fant ikke navn for ${parentProsess.id}")
+                val låsReferanse = parentProsess.låsReferanse
+                val parts = låsReferanse.split("_").shouldHaveSize(3).toList()
+                val melosysEessiMelding = MelosysEessiMelding().apply {
+                    rinaSaksnummer = parts[0]
+                    sedId = parts[1]
+                    sedVersjon = parts[2]
+                }
+                when (melosysEessiMelding.sedId) {
+                    SedType.A009.name -> prosessLaget.nyProsessLaget("sub-prosess av $parentNavn") {
+                        prosessinstansService.opprettProsessinstansSedJournalføring(null, melosysEessiMelding)
                     }
-                    when (melosysEessiMelding.sedId) {
-                        SedType.A009.name -> prosessLaget.nyProsessLaget("sub-prosess av ${parentProsess.navn()}") {
-                            prosessinstansService.opprettProsessinstansSedJournalføring(null, melosysEessiMelding)
-                        }
 
-                        SedType.X008.name -> prosessLaget.nyProsessLaget("sub-prosess av ${parentProsess.navn()}") {
-                            prosessinstansService.opprettProsessinstansNySakUnntaksregistrering(melosysEessiMelding, null, "test")
-                        }
+                    SedType.X008.name -> prosessLaget.nyProsessLaget("sub-prosess av $parentNavn") {
+                        prosessinstansService.opprettProsessinstansNySakUnntaksregistrering(melosysEessiMelding, null, "test")
                     }
                 }
             }
         }
 
         @Bean
-        @Primary
         fun opprettFerdigstillJournalpostSedTest(): FerdigstillJournalpostSed {
             return mockk<FerdigstillJournalpostSed>().apply {
-                every { inngangsSteg() } returns  ProsessSteg.SED_MOTTAK_FERDIGSTILL_JOURNALPOST
-                every { utfør(any()) } returns  Unit
+                every { inngangsSteg() } returns ProsessSteg.SED_MOTTAK_FERDIGSTILL_JOURNALPOST
+                every { utfør(any()) } returns Unit
             }
         }
 
         @Bean
-        @Primary
         fun opprettFagsakOgBehandlingFraSedTest(): OpprettFagsakOgBehandlingFraSed {
             return mockk<OpprettFagsakOgBehandlingFraSed>().apply {
-                every { inngangsSteg() } returns  ProsessSteg.SED_MOTTAK_OPPRETT_FAGSAK_OG_BEH
-                every { utfør(any()) } returns  Unit
+                every { inngangsSteg() } returns ProsessSteg.SED_MOTTAK_OPPRETT_FAGSAK_OG_BEH
+                every { utfør(any()) } returns Unit
             }
         }
 
         @Bean
-        @Primary
         fun opprettArkivsakTest(): OpprettArkivsak {
             return mockk<OpprettArkivsak>().apply {
-                every { inngangsSteg() } returns  ProsessSteg.OPPRETT_ARKIVSAK
-                every { utfør(any()) } returns  Unit
+                every { inngangsSteg() } returns ProsessSteg.OPPRETT_ARKIVSAK
+                every { utfør(any()) } returns Unit
             }
         }
 
         @Bean
-        @Primary
         fun oppdaterSaksrelasjonTest(): OppdaterSaksrelasjon {
             return mockk<OppdaterSaksrelasjon>().apply {
-                every { inngangsSteg() } returns  ProsessSteg.OPPDATER_SAKSRELASJON
-                every { utfør(any()) } returns  Unit
+                every { inngangsSteg() } returns ProsessSteg.OPPDATER_SAKSRELASJON
+                every { utfør(any()) } returns Unit
             }
         }
 
         @Bean
-        @Primary
         fun opprettSedDokumentTest(): OpprettSedDokument {
             return mockk<OpprettSedDokument>().apply {
-                every { inngangsSteg() } returns  ProsessSteg.OPPRETT_SEDDOKUMENT
-                every { utfør(any()) } returns  Unit
+                every { inngangsSteg() } returns ProsessSteg.OPPRETT_SEDDOKUMENT
+                every { utfør(any()) } returns Unit
             }
         }
 
         @Bean
-        @Primary
         fun hentRegisteropplysningerTest(): HentRegisteropplysninger {
             return mockk<HentRegisteropplysninger>().apply {
-                every { inngangsSteg() } returns  ProsessSteg.HENT_REGISTEROPPLYSNINGER
-                every { utfør(any()) } returns  Unit
+                every { inngangsSteg() } returns ProsessSteg.HENT_REGISTEROPPLYSNINGER
+                every { utfør(any()) } returns Unit
             }
         }
 
         @Bean
-        @Primary
         fun registerKontrollTest(): RegisterKontroll {
             return mockk<RegisterKontroll>().apply {
-                every { inngangsSteg() } returns  ProsessSteg.REGISTERKONTROLL
-                every { utfør(any()) } returns  Unit
+                every { inngangsSteg() } returns ProsessSteg.REGISTERKONTROLL
+                every { utfør(any()) } returns Unit
             }
         }
 
         @Bean
-        @Primary
         fun bestemBehandlingsmåteSedTest(): BestemBehandlingsmåteSed {
             return mockk<BestemBehandlingsmåteSed>().apply {
-                every { inngangsSteg() } returns  ProsessSteg.BESTEM_BEHANDLINGMÅTE_SED
-                every { utfør(any()) } returns  Unit
+                every { inngangsSteg() } returns ProsessSteg.BESTEM_BEHANDLINGMÅTE_SED
+                every { utfør(any()) } returns Unit
             }
         }
     }
