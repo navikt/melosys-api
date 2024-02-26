@@ -10,7 +10,7 @@ import no.nav.melosys.domain.kodeverk.InnvilgelsesResultat;
 import no.nav.melosys.domain.kodeverk.Medlemskapstyper;
 import no.nav.melosys.domain.kodeverk.Trygdedekninger;
 import no.nav.melosys.service.ftrl.medlemskapsperiode.MedlemskapsperiodeService;
-import no.nav.melosys.service.ftrl.medlemskapsperiode.OpprettMedlemskapsperiodeService;
+import no.nav.melosys.service.ftrl.medlemskapsperiode.OpprettForslagMedlemskapsperiodeService;
 import no.nav.melosys.service.tilgang.Aksesskontroll;
 import no.nav.melosys.tjenester.gui.ftrl.medlemskapsperiode.dto.BestemmelseDto;
 import no.nav.melosys.tjenester.gui.ftrl.medlemskapsperiode.dto.MedlemskapsperiodeDto;
@@ -32,7 +32,7 @@ class MedlemskapsperiodeTjenesteTest {
     @Mock
     private Aksesskontroll aksesskontroll;
     @Mock
-    private OpprettMedlemskapsperiodeService opprettMedlemskapsperiodeService;
+    private OpprettForslagMedlemskapsperiodeService opprettForslagMedlemskapsperiodeService;
 
     private MedlemskapsperiodeTjeneste medlemskapsperiodeTjeneste;
 
@@ -40,7 +40,7 @@ class MedlemskapsperiodeTjenesteTest {
 
     @BeforeEach
     void setup() {
-        medlemskapsperiodeTjeneste = new MedlemskapsperiodeTjeneste(medlemskapsperiodeService, opprettMedlemskapsperiodeService, aksesskontroll);
+        medlemskapsperiodeTjeneste = new MedlemskapsperiodeTjeneste(medlemskapsperiodeService, opprettForslagMedlemskapsperiodeService, aksesskontroll);
     }
 
     @Test
@@ -66,7 +66,7 @@ class MedlemskapsperiodeTjenesteTest {
 
     @Test
     void opprettForslagPåMedlemskapsperioder() {
-        when(opprettMedlemskapsperiodeService.opprettForslagPåMedlemskapsperioder(behandlingID, Folketrygdloven_kap2_bestemmelser.FTRL_KAP2_2_5_FØRSTE_LEDD_E))
+        when(opprettForslagMedlemskapsperiodeService.opprettForslagPåMedlemskapsperioder(behandlingID, Folketrygdloven_kap2_bestemmelser.FTRL_KAP2_2_5_FØRSTE_LEDD_E))
             .thenReturn(Collections.singleton(lagMedlemskapsperiode()));
 
         var res = medlemskapsperiodeTjeneste.opprettForslagPåMedlemskapsperioder(behandlingID, new BestemmelseDto(Folketrygdloven_kap2_bestemmelser.FTRL_KAP2_2_5_FØRSTE_LEDD_E));

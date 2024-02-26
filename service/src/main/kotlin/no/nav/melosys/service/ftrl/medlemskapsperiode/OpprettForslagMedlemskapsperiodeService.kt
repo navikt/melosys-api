@@ -22,7 +22,7 @@ import org.springframework.transaction.annotation.Transactional
 
 
 @Service
-class OpprettMedlemskapsperiodeService(
+class OpprettForslagMedlemskapsperiodeService(
     private val medlemAvFolketrygdenRepository: MedlemAvFolketrygdenRepository,
     private val behandlingsresultatService: BehandlingsresultatService,
     private val ftrlBestemmelser: FtrlBestemmelser,
