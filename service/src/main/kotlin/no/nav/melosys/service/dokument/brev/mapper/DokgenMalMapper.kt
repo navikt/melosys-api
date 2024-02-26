@@ -101,6 +101,7 @@ class DokgenMalMapper(
 
         return InnvilgelseIkkeYrkesaktivPliktigFtrl.av(
             brevbestilling.toBuilder()
+                .medFlereLandUkjentHvilke(mottatteOpplysningerData.soeknadsland.isFlereLandUkjentHvilke)
                 .medLand(mottatteOpplysningerData.soeknadsland.landkoder.map { dokgenMapperDatahenter.hentLandnavnFraLandkode(it) })
                 .medBestemmelse(behandlingsresultat.medlemAvFolketrygden.medlemskapsperioder.last().bestemmelse.name)
                 .medNyVurderingBakgrunn(behandlingsresultat.nyVurderingBakgrunn)

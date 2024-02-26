@@ -17,6 +17,7 @@ public class InnvilgelseIkkeYrkesaktivPliktigFtrl extends DokgenDto {
     private final LocalDate datoMottatt;
     private final String sakstype;
     private final String behandlingstype;
+    private final boolean flereLandUkjentHvilke;
     private final List<String> land;
     private final String bestemmelse;
     private final String nyVurderingBakgrunn;
@@ -33,6 +34,7 @@ public class InnvilgelseIkkeYrkesaktivPliktigFtrl extends DokgenDto {
         this.datoMottatt = instantTilLocalDate(brevbestilling.getForsendelseMottatt());
         this.sakstype = fagsak.getType().getKode();
         this.behandlingstype = fagsak.hentSistOppdatertBehandling().getType().getKode();
+        this.flereLandUkjentHvilke = brevbestilling.isFlereLandUkjentHvilke();
         this.land = brevbestilling.getLand();
         this.medlemskapsperiode = brevbestilling.getMedlemskapsperiode();
         this.bestemmelse = brevbestilling.getBestemmelse();
@@ -53,6 +55,9 @@ public class InnvilgelseIkkeYrkesaktivPliktigFtrl extends DokgenDto {
 
     public String getBehandlingstype() {
         return behandlingstype;
+    }
+    public boolean getFlereLandUkjentHvilke() {
+        return flereLandUkjentHvilke;
     }
 
     public List<String> getLand() {

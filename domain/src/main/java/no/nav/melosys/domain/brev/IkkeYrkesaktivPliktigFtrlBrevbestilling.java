@@ -5,6 +5,8 @@ import java.util.List;
 import no.nav.melosys.domain.dokument.felles.Periode;
 
 public class IkkeYrkesaktivPliktigFtrlBrevbestilling extends DokgenBrevbestilling {
+
+    private boolean flereLandUkjentHvilke;
     private List<String> land;
     private String bestemmelse;
     private String nyVurderingBakgrunn;
@@ -21,6 +23,7 @@ public class IkkeYrkesaktivPliktigFtrlBrevbestilling extends DokgenBrevbestillin
 
     private IkkeYrkesaktivPliktigFtrlBrevbestilling(Builder builder) {
         super(builder);
+        this.flereLandUkjentHvilke = builder.flereLandUkjentHvilke;
         this.bestemmelse = builder.bestemmelse;
         this.nyVurderingBakgrunn = builder.nyVurderingBakgrunn;
         this.ikkeYrkesaktivOppholdType = builder.ikkeYrkesaktivOppholdType;
@@ -29,6 +32,10 @@ public class IkkeYrkesaktivPliktigFtrlBrevbestilling extends DokgenBrevbestillin
         this.ikkeYrkesaktivRelasjonType = builder.ikkeYrkesaktivRelasjonType;
         this.medlemskapsperiode = builder.medlemskapsperiode;
         this.land = builder.land;
+    }
+
+    public boolean getFlereLandUkjentHvilke() {
+        return flereLandUkjentHvilke;
     }
 
     public String getBestemmelse() {
@@ -68,6 +75,7 @@ public class IkkeYrkesaktivPliktigFtrlBrevbestilling extends DokgenBrevbestillin
     }
 
     public static final class Builder extends DokgenBrevbestilling.Builder<Builder> {
+        private boolean flereLandUkjentHvilke;
         private List<String> land;
         private String bestemmelse;
         private String nyVurderingBakgrunn;
@@ -82,6 +90,7 @@ public class IkkeYrkesaktivPliktigFtrlBrevbestilling extends DokgenBrevbestillin
 
         public Builder(IkkeYrkesaktivPliktigFtrlBrevbestilling innvilgelseBrevbestilling) {
             super(innvilgelseBrevbestilling);
+            this.flereLandUkjentHvilke = innvilgelseBrevbestilling.flereLandUkjentHvilke;
             this.bestemmelse = innvilgelseBrevbestilling.bestemmelse;
             this.nyVurderingBakgrunn = innvilgelseBrevbestilling.nyVurderingBakgrunn;
             this.innledningFritekst = innvilgelseBrevbestilling.innledningFritekst;
@@ -129,6 +138,11 @@ public class IkkeYrkesaktivPliktigFtrlBrevbestilling extends DokgenBrevbestillin
 
         public Builder medLand(List<String> land) {
             this.land = land;
+            return this;
+        }
+
+        public Builder medFlereLandUkjentHvilke(boolean flereLandUkjentHvilke) {
+            this.flereLandUkjentHvilke = flereLandUkjentHvilke;
             return this;
         }
 
