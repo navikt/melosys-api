@@ -25,7 +25,7 @@ data class AvklartefaktaOppsummeringDto internal constructor(
             it.avklartefaktaType == Avklartefaktatyper.IKKE_YRKESAKTIV_RELASJON
         }?.fakta?.firstOrNull()
 
-        fun hentFullstendigManglendeInnbetaling(avklartefakta: Set<AvklartefaktaDto>): Boolean = avklartefakta.firstOrNull {
+        private fun hentFullstendigManglendeInnbetaling(avklartefakta: Set<AvklartefaktaDto>): Boolean = avklartefakta.firstOrNull {
             it.avklartefaktaType == Avklartefaktatyper.FULLSTENDIG_MANGLENDE_INNBETALING
         }?.fakta?.single().toBoolean()
 
