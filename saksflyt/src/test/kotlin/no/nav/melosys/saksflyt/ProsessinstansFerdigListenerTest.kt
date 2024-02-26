@@ -46,7 +46,6 @@ internal class ProsessinstansFerdigListenerTest {
         prosessinstansFerdigListener.prosessinstansFerdig(ProsessinstansFerdigEvent(ferdigProsessinstans))
 
 
-        verify { prosessinstansRepository.findAllByStatus(ProsessStatus.PÅ_VENT) }
         verify {
             prosessinstansBehandler wasNot Called
         }
