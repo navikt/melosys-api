@@ -33,7 +33,7 @@ public final class MottatteOpplysningerUtils {
         Soeknadsland soeknadsland = hentSøknadsland(grunnlagdata);
         List<String> søknadslandkoder = soeknadsland.getLandkoder();
         if (søknadslandkoder.isEmpty() && !soeknadsland.isFlereLandUkjentHvilke()) {
-            throw new IllegalStateException("Søknad mangler søknadsland og land er ikke markert som ukjente eller alle Eøs-land.");
+            throw new IllegalStateException("Søknad mangler søknadsland og land er ikke markert som flere land ukjent hvilke.");
         }
         return søknadslandkoder.stream()
             .map(Land_iso2::valueOf)
