@@ -5,6 +5,7 @@ import no.nav.melosys.saksflytapi.domain.*
 import org.springframework.context.event.EventListener
 import org.springframework.stereotype.Component
 import java.time.LocalDateTime
+import java.util.UUID
 
 private val log = KotlinLogging.logger { }
 
@@ -33,19 +34,22 @@ class ProsessinstansFerdigListener(
             log.info("Prosessinstans(er) på vent med samme gruppe-prefiks: ${this.map { it.id }}")
         }.isNotEmpty()
 
+    private val Prosessinstans.parentId: UUID?
+        get() = getData(ProsessDataKey.PARENT_ID, UUID::class.java)
+
     private fun startNesteProsessinstans(prosessinstansFerdigEvent: ProsessinstansFerdigEvent) {
-        val allePåVent = prosessinstansRepository.findAllByStatus(ProsessStatus.PÅ_VENT)
+        val alleISameeGruppePåVent = prosessinstansRepository.findAllByStatus(ProsessStatus.PÅ_VENT)
+            .filter { LåsReferanseFactory.harSammeGruppePrefiks(it.låsReferanse, prosessinstansFerdigEvent.låsReferanse) }
 
-        val påVent = allePåVent.filter { it.låsReferanse == prosessinstansFerdigEvent.låsReferanse } // ta sub-prosesser først
-            .sortedByDescending { it.registrertDato } // sub-prosesser har mest sannsynlig blitt opprettet etter hovedprosessene
-            .firstOrNull()
-            ?: allePåVent
-                .filter { LåsReferanseFactory.harSammeGruppePrefiks(it.låsReferanse, prosessinstansFerdigEvent.låsReferanse) }
-                .sortedBy { it.registrertDato }
-                .firstOrNull()
+        val nesteSomSkalStartes =
+            alleISameeGruppePåVent
+                .firstOrNull { it.parentId == prosessinstansFerdigEvent.uuid } // ta sub-prosesser først
+                ?: alleISameeGruppePåVent
+                    .sortedBy { it.registrertDato } // Ta første registrerte root prosess
+                    .firstOrNull()
 
-        if (påVent != null) {
-            oppdaterStatusOgBehandleProsessinstans(påVent)
+        if (nesteSomSkalStartes != null) {
+            oppdaterStatusOgBehandleProsessinstans(nesteSomSkalStartes)
         }
     }
 
