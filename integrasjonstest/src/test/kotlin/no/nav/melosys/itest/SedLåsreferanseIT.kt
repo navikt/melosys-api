@@ -8,7 +8,7 @@ import no.nav.melosys.Application
 import no.nav.melosys.AwaitUtil.throwOnLogError
 import no.nav.melosys.LoggingTestUtils
 import no.nav.melosys.LoggingTestUtils.filterBuilder
-import no.nav.melosys.ProsessLaget
+import no.nav.melosys.ProsessRegister
 import no.nav.melosys.domain.eessi.melding.MelosysEessiMelding
 import no.nav.melosys.saksflyt.ProsessinstansBehandler
 import no.nav.melosys.saksflyt.ProsessinstansFerdigListener
@@ -48,10 +48,10 @@ import java.time.Duration
 @Import(SedLåsreferanseIT.TestConfig::class)
 internal class SedLåsreferanseIT(
     @Autowired private val prosessinstansService: ProsessinstansService,
-    @Autowired private val prosessLaget: ProsessLaget
+    @Autowired private val prosessRegister: ProsessRegister
 ) : OracleTestContainerBase() {
     @AfterEach
-    fun setUp() = prosessLaget.clear()
+    fun setUp() = prosessRegister.clear()
 
     @Test
     fun `ikke kjør samtidig når sed har samme rinaSaksnummer men forsjellig sedId, sedVersjon`() {
@@ -69,8 +69,8 @@ internal class SedLåsreferanseIT(
             val sed1ås = sed1.lagUnikIdentifikator()
             val sed2ås = sed2.lagUnikIdentifikator()
 
-            prosessLaget.nyProsessLaget("sed1Prosess") { prosessinstansService.opprettProsessinstansSedMottak(sed1) }
-            prosessLaget.nyProsessLaget("sed2Prosess") { prosessinstansService.opprettProsessinstansSedMottak(sed2) }
+            prosessRegister.registrer("sed1Prosess") { prosessinstansService.opprettProsessinstansSedMottak(sed1) }
+            prosessRegister.registrer("sed2Prosess") { prosessinstansService.opprettProsessinstansSedMottak(sed2) }
 
 
             await.throwOnLogError(logItems)
@@ -82,7 +82,7 @@ internal class SedLåsreferanseIT(
 
             logItems.filterBuilder
                 .match<ProsessinstansBehandler>()
-                .replace(prosessLaget.prosessIdStringToName())
+                .replace(prosessRegister.prosessIdStringToName())
                 .replace(sed1ås, "<sed1Lås>")
                 .replace(sed2ås, "<sed2Lås>")
                 .check { next ->
@@ -106,8 +106,8 @@ internal class SedLåsreferanseIT(
             }
             val sed1ås = sed1.lagUnikIdentifikator()
 
-            prosessLaget.nyProsessLaget("førsteProsess") { prosessinstansService.opprettProsessinstansSedMottak(sed1) }
-            prosessLaget.nyProsessLaget("duplikatProsess") { prosessinstansService.opprettProsessinstansSedMottak(sed1) }
+            prosessRegister.registrer("førsteProsess") { prosessinstansService.opprettProsessinstansSedMottak(sed1) }
+            prosessRegister.registrer("duplikatProsess") { prosessinstansService.opprettProsessinstansSedMottak(sed1) }
 
             await.throwOnLogError(logItems)
                 .timeout(Duration.ofSeconds(30)).pollInterval(Duration.ofSeconds(1))
@@ -118,7 +118,7 @@ internal class SedLåsreferanseIT(
 
             logItems.filterBuilder
                 .match<ProsessinstansBehandler>()
-                .replace(prosessLaget.prosessIdStringToName())
+                .replace(prosessRegister.prosessIdStringToName())
                 .replace(sed1ås, "<sed1Lås>")
                 .check { next ->
                     next { it shouldBe "Starter behandling av prosessinstans <førsteProsess> med lås <sed1Lås>" }

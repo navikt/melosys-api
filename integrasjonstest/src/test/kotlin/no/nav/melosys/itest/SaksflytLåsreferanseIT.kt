@@ -7,7 +7,7 @@ import no.nav.melosys.Application
 import no.nav.melosys.AwaitUtil.throwOnLogError
 import no.nav.melosys.LoggingTestUtils
 import no.nav.melosys.LoggingTestUtils.filterBuilder
-import no.nav.melosys.ProsessLaget
+import no.nav.melosys.ProsessRegister
 import no.nav.melosys.domain.manglendebetaling.Betalingsstatus
 import no.nav.melosys.domain.manglendebetaling.ManglendeFakturabetalingMelding
 import no.nav.melosys.saksflyt.ProsessinstansBehandler
@@ -51,10 +51,10 @@ import java.time.LocalDate
 @Import(SaksflytLåsreferanseIT.TestConfig::class)
 internal class SaksflytLåsreferanseIT(
     @Autowired private val prosessinstansService: ProsessinstansService,
-    @Autowired private val prosessLaget: ProsessLaget
+    @Autowired private val prosessRegister: ProsessRegister
 ) : OracleTestContainerBase() {
     @AfterEach
-    fun setUp() = prosessLaget.clear()
+    fun setUp() = prosessRegister.clear()
 
     @Test
     fun `ikke kjør OpprettManglendeInnbetalingBehandling samtidig`() {
@@ -76,12 +76,12 @@ internal class SaksflytLåsreferanseIT(
             val manglendeInnbetalingLås1 = LåsReferanseFactory.lagString(manglendeFakturabetalingMelding1)
             val manglendeInnbetalingLås2 = LåsReferanseFactory.lagString(manglendeFakturabetalingMelding2)
 
-            prosessLaget.nyProsessLaget("manglendeInnbetaling-1-Prosess") {
+            prosessRegister.registrer("manglendeInnbetaling-1-Prosess") {
                 prosessinstansService.opprettManglendeInnbetalingProsessflyt(
                     manglendeFakturabetalingMelding1
                 )
             }
-            prosessLaget.nyProsessLaget("manglendeInnbetaling-2-Prosess") {
+            prosessRegister.registrer("manglendeInnbetaling-2-Prosess") {
                 prosessinstansService.opprettManglendeInnbetalingProsessflyt(
                     manglendeFakturabetalingMelding2
                 )
@@ -96,7 +96,7 @@ internal class SaksflytLåsreferanseIT(
 
             logItems.filterBuilder
                 .match<ProsessinstansBehandler>()
-                .replace(prosessLaget.prosessIdStringToName())
+                .replace(prosessRegister.prosessIdStringToName())
                 .replace(manglendeInnbetalingLås1, "<manglendeInnbetalingLås1>")
                 .replace(manglendeInnbetalingLås2, "<manglendeInnbetalingLås2>")
                 .check { next ->
@@ -127,12 +127,12 @@ internal class SaksflytLåsreferanseIT(
             )
             val manglendeInnbetalingLås1 = LåsReferanseFactory.lagString(manglendeFakturabetalingMelding1)
 
-            prosessLaget.nyProsessLaget("manglendeInnbetaling-1-Prosess") {
+            prosessRegister.registrer("manglendeInnbetaling-1-Prosess") {
                 prosessinstansService.opprettManglendeInnbetalingProsessflyt(
                     manglendeFakturabetalingMelding1
                 )
             }
-            prosessLaget.nyProsessLaget("manglendeInnbetaling-1-Duplikat") {
+            prosessRegister.registrer("manglendeInnbetaling-1-Duplikat") {
                 prosessinstansService.opprettManglendeInnbetalingProsessflyt(
                     manglendeFakturabetalingMelding1
                 )
@@ -146,7 +146,7 @@ internal class SaksflytLåsreferanseIT(
 
             logItems.filterBuilder
                 .match<ProsessinstansBehandler>()
-                .replace(prosessLaget.prosessIdStringToName())
+                .replace(prosessRegister.prosessIdStringToName())
                 .replace(manglendeInnbetalingLås1, "<manglendeInnbetalingLås1>")
                 .check { next ->
                     next { it shouldBe "Starter behandling av prosessinstans <manglendeInnbetaling-1-Prosess> med lås <manglendeInnbetalingLås1>" }

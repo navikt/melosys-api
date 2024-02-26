@@ -9,7 +9,7 @@ import no.nav.melosys.Application
 import no.nav.melosys.AwaitUtil.throwOnLogError
 import no.nav.melosys.LoggingTestUtils
 import no.nav.melosys.LoggingTestUtils.filterBuilder
-import no.nav.melosys.ProsessLaget
+import no.nav.melosys.ProsessRegister
 import no.nav.melosys.domain.eessi.SedType
 import no.nav.melosys.domain.eessi.melding.MelosysEessiMelding
 import no.nav.melosys.saksflyt.ProsessinstansBehandler
@@ -58,11 +58,11 @@ import java.util.*
 @Import(SedLåsMedSubProsesserIT.TestConfig::class)
 internal class SedLåsMedSubProsesserIT(
     @Autowired private val prosessinstansService: ProsessinstansService,
-    @Autowired private val prosessLaget: ProsessLaget
+    @Autowired private val prosessRegister: ProsessRegister
 ) : OracleTestContainerBase() {
 
     @AfterEach
-    fun setUp() = prosessLaget.clear()
+    fun setUp() = prosessRegister.clear()
 
     @Test
     fun `ved lås må sub-prosesser fra første sed kjøres før neste sed blir kjørt`() {
@@ -80,8 +80,8 @@ internal class SedLåsMedSubProsesserIT(
         }
 
         LoggingTestUtils.withLogCapture { logItems ->
-            prosessLaget.nyProsessLaget("a009Prosess") { prosessinstansService.opprettProsessinstansSedMottak(a009) }
-            prosessLaget.nyProsessLaget("x008Prosess") { prosessinstansService.opprettProsessinstansSedMottak(x008) }
+            prosessRegister.registrer("a009Prosess") { prosessinstansService.opprettProsessinstansSedMottak(a009) }
+            prosessRegister.registrer("x008Prosess") { prosessinstansService.opprettProsessinstansSedMottak(x008) }
 
             await.throwOnLogError(logItems)
                 .timeout(Duration.ofSeconds(30)).pollInterval(Duration.ofSeconds(1))
@@ -98,7 +98,7 @@ internal class SedLåsMedSubProsesserIT(
                 .match<ProsessinstansService> { it.formattedMessage.contains("Melosys har opprettet prosessinstans") }
                 .match<ProsessinstansBehandler> { it.formattedMessage.contains("Utfører steg") }
                 .match<ProsessinstansFerdigListener>()
-                .replace(prosessLaget.prosessIdStringToName())
+                .replace(prosessRegister.prosessIdStringToName())
                 .replace(a009Lås, "<a009Lås>")
                 .replace(x0008Lås, "<x0008Lås>")
                 .sort(Regex("gruppe-prefiks: \\[(.*?)]"))
@@ -145,8 +145,8 @@ internal class SedLåsMedSubProsesserIT(
         val a009Lås = a009.lagUnikIdentifikator()
 
         LoggingTestUtils.withLogCapture { logItems ->
-            prosessLaget.nyProsessLaget("førsteProsess") { prosessinstansService.opprettProsessinstansSedMottak(a009) }
-            prosessLaget.nyProsessLaget("duplikatProsess") { prosessinstansService.opprettProsessinstansSedMottak(a009) }
+            prosessRegister.registrer("førsteProsess") { prosessinstansService.opprettProsessinstansSedMottak(a009) }
+            prosessRegister.registrer("duplikatProsess") { prosessinstansService.opprettProsessinstansSedMottak(a009) }
 
             await.throwOnLogError(logItems)
                 .timeout(Duration.ofSeconds(30)).pollInterval(Duration.ofSeconds(1))
@@ -159,7 +159,7 @@ internal class SedLåsMedSubProsesserIT(
                 .match<ProsessinstansService> { it.formattedMessage.contains("Melosys har opprettet prosessinstans") }
                 .match<ProsessinstansBehandler> { it.formattedMessage.contains("Utfører steg") }
                 .match<ProsessinstansFerdigListener>()
-                .replace(prosessLaget.prosessIdStringToName())
+                .replace(prosessRegister.prosessIdStringToName())
                 .replace(a009Lås, "<a009Lås>")
                 .sort(Regex("gruppe-prefiks: \\[(.*?)]"))
                 .check { next ->
@@ -190,7 +190,7 @@ internal class SedLåsMedSubProsesserIT(
     @TestConfiguration
     class TestConfig(
         @Autowired private val prosessinstansService: ProsessinstansService,
-        @Autowired private val prosessLaget: ProsessLaget
+        @Autowired private val prosessRegister: ProsessRegister
     ) {
         @Bean
         fun opprettSedMottakRutingTest(): SedMottakRuting = mockk<SedMottakRuting>().apply {
@@ -199,7 +199,7 @@ internal class SedLåsMedSubProsesserIT(
             val slot = CapturingSlot<Prosessinstans>()
             every { utfør(capture(slot)) } answers {
                 val parentProsess = slot.captured
-                val parentNavn = prosessLaget.nameFromId(parentProsess.id) ?: throw IllegalStateException("Fant ikke navn for ${parentProsess.id}")
+                val parentNavn = prosessRegister.nameFromId(parentProsess.id) ?: throw IllegalStateException("Fant ikke navn for ${parentProsess.id}")
                 val låsReferanse = parentProsess.låsReferanse
                 val parts = låsReferanse.split("_").shouldHaveSize(3).toList()
                 val melosysEessiMelding = MelosysEessiMelding().apply {
@@ -208,11 +208,11 @@ internal class SedLåsMedSubProsesserIT(
                     sedVersjon = parts[2]
                 }
                 when (melosysEessiMelding.sedId) {
-                    SedType.A009.name -> prosessLaget.nyProsessLaget("sub-prosess av $parentNavn") {
+                    SedType.A009.name -> prosessRegister.registrer("sub-prosess av $parentNavn") {
                         prosessinstansService.opprettProsessinstansSedJournalføring(null, melosysEessiMelding)
                     }
 
-                    SedType.X008.name -> prosessLaget.nyProsessLaget("sub-prosess av $parentNavn") {
+                    SedType.X008.name -> prosessRegister.registrer("sub-prosess av $parentNavn") {
                         prosessinstansService.opprettProsessinstansNySakUnntaksregistrering(melosysEessiMelding, null, "test")
                     }
                 }

@@ -4,10 +4,10 @@ import org.springframework.stereotype.Component
 import java.util.*
 
 @Component
-class ProsessLaget {
+class ProsessRegister {
     private val idToName = mutableMapOf<UUID, String>()
 
-    fun nyProsessLaget(name: String, block: () -> UUID): UUID {
+    fun registrer(name: String, block: () -> UUID): UUID {
         idToName.values.firstOrNull { it == name }?.let { throw IllegalStateException("$name er alt registrert ") }
         return block().apply {
             idToName[this] = name
