@@ -34,7 +34,7 @@ public class InnvilgelseIkkeYrkesaktivPliktigFtrl extends DokgenDto {
         this.datoMottatt = instantTilLocalDate(brevbestilling.getForsendelseMottatt());
         this.sakstype = fagsak.getType().getKode();
         this.behandlingstype = fagsak.hentSistOppdatertBehandling().getType().getKode();
-        this.flereLandUkjentHvilke = brevbestilling.isFlereLandUkjentHvilke();
+        this.flereLandUkjentHvilke = brevbestilling.getFlereLandUkjentHvilke();
         this.land = brevbestilling.getLand();
         this.medlemskapsperiode = brevbestilling.getMedlemskapsperiode();
         this.bestemmelse = brevbestilling.getBestemmelse();
