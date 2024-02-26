@@ -7,6 +7,7 @@ import no.nav.melosys.domain.kodeverk.*
 import no.nav.melosys.domain.kodeverk.brev.Produserbaredokumenter
 import no.nav.melosys.domain.mottatteopplysninger.Soeknad
 import no.nav.melosys.domain.mottatteopplysninger.SøknadIkkeYrkesaktiv
+import no.nav.melosys.domain.mottatteopplysninger.SøknadNorgeEllerUtenforEØS
 import no.nav.melosys.exception.FunksjonellException
 import no.nav.melosys.integrasjon.dokgen.dto.*
 import no.nav.melosys.integrasjon.dokgen.dto.felles.Mottaker
@@ -88,7 +89,7 @@ class DokgenMalMapper(
     internal fun lagInnvilgelseIkkeYrkesaktivPliktigFtrl(brevbestilling: IkkeYrkesaktivPliktigFtrlBrevbestilling): InnvilgelseIkkeYrkesaktivPliktigFtrl {
         val behandlingsresultat = dokgenMapperDatahenter.hentBehandlingsresultat(brevbestilling.behandling.id)
         val mottatteOpplysningerData =
-            behandlingsresultat.behandling.mottatteOpplysninger.mottatteOpplysningerData as Soeknad
+            behandlingsresultat.behandling.mottatteOpplysninger.mottatteOpplysningerData as SøknadNorgeEllerUtenforEØS
         val ikkeyrkesaktivrelasjonType =
             behandlingsresultat.avklartefakta.filter { it.type == Avklartefaktatyper.IKKE_YRKESAKTIV_RELASJON }.first().fakta
         val ikkeYrkesaktivOppholdType =
