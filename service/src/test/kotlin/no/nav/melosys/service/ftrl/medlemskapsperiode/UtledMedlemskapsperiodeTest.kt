@@ -513,7 +513,68 @@ internal class UtledMedlemskapsperioderTest {
 
         response.shouldHaveSize(1)
             .single().trygdedekning.shouldBe(TRYGDEDEKNING_2_7)
+    }
 
+    @Test
+    fun lagMedlemskapsperioderForAndregangsbehandling_fraFrivilligTilPliktig_oppdatererFelt() {
+        val opprinneligBehandlingsresultat = Behandlingsresultat().apply {
+            medlemAvFolketrygden = MedlemAvFolketrygden().apply {
+                medlemskapsperioder = listOf(
+                    Medlemskapsperiode().apply {
+                        innvilgelsesresultat = InnvilgelsesResultat.INNVILGET
+                        bestemmelse = BESTEMMELSE_2_8
+                        trygdedekning = TRYGDEDEKNING_2_8
+                        medlemskapstype = Medlemskapstyper.FRIVILLIG
+                    })
+            }
+        }
+
+
+        val response = UtledMedlemskapsperioder.lagMedlemskapsperioderForAndregangsbehandling(
+            opprinneligBehandlingsresultat,
+            BESTEMMELSE_PLIKTIG,
+            Trygdedekninger.FULL_DEKNING_FTRL,
+            Behandlingstyper.NY_VURDERING
+        )
+
+
+        response.shouldHaveSize(1)
+            .single().run {
+                bestemmelse.shouldBe(BESTEMMELSE_PLIKTIG)
+                trygdedekning.shouldBe(Trygdedekninger.FULL_DEKNING_FTRL)
+                medlemskapstype.shouldBe(Medlemskapstyper.PLIKTIG)
+            }
+    }
+
+    @Test
+    fun lagMedlemskapsperioderForAndregangsbehandling_fraPliktigTilFrivillig_oppdatererFelt() {
+        val opprinneligBehandlingsresultat = Behandlingsresultat().apply {
+            medlemAvFolketrygden = MedlemAvFolketrygden().apply {
+                medlemskapsperioder = listOf(
+                    Medlemskapsperiode().apply {
+                        innvilgelsesresultat = InnvilgelsesResultat.INNVILGET
+                        bestemmelse = BESTEMMELSE_PLIKTIG
+                        trygdedekning = Trygdedekninger.FULL_DEKNING_FTRL
+                        medlemskapstype = Medlemskapstyper.PLIKTIG
+                    })
+            }
+        }
+
+
+        val response = UtledMedlemskapsperioder.lagMedlemskapsperioderForAndregangsbehandling(
+            opprinneligBehandlingsresultat,
+            BESTEMMELSE_2_8,
+            TRYGDEDEKNING_2_8,
+            Behandlingstyper.NY_VURDERING
+        )
+
+
+        response.shouldHaveSize(1)
+            .single().run {
+                bestemmelse.shouldBe(BESTEMMELSE_2_8)
+                trygdedekning.shouldBe(TRYGDEDEKNING_2_8)
+                medlemskapstype.shouldBe(Medlemskapstyper.FRIVILLIG)
+            }
     }
 
     @Test
