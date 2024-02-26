@@ -7,6 +7,7 @@ import no.nav.melosys.domain.kodeverk.Folketrygdloven_kap2_bestemmelser
 import no.nav.melosys.domain.kodeverk.Vilkaar
 import no.nav.melosys.exception.FunksjonellException
 import no.nav.melosys.service.ftrl.bestemmelse.vilkaar.VilkårForBestemmelse
+import no.nav.melosys.service.tilgang.Aksesskontroll
 import no.nav.security.token.support.core.api.Protected
 import org.springframework.http.ResponseEntity
 import org.springframework.web.bind.annotation.GetMapping
@@ -19,7 +20,7 @@ private const val BEHANDLING_ID = "behandlingID"
 @Protected
 @RestController
 @Api(tags = ["ftrl", "bestemmelser", "avklarte fakta", "vilkår"])
-class VilkårTjeneste(private val vilkårForBestemmelse: VilkårForBestemmelse) {
+class VilkårTjeneste(private val vilkårForBestemmelse: VilkårForBestemmelse, val aksessKontroll: Aksesskontroll) {
     private val log = KotlinLogging.logger { }
 
     private val avklartefaktatyperNavn = Avklartefaktatyper.values().map { it.name }
@@ -30,12 +31,17 @@ class VilkårTjeneste(private val vilkårForBestemmelse: VilkårForBestemmelse) 
         @RequestParam requestParams : Map<String, String>
     ): ResponseEntity<VilkårForBestemmelseDto> {
         validerRequestParams(requestParams)
+        val behandlingID = requestParams[BEHANDLING_ID]?.toLong()
+        if (behandlingID != null) {
+            aksessKontroll.autoriser(behandlingID)
+        }
 
+        val avklarteFakta = requestParams.filterKeys { k -> k in avklartefaktatyperNavn }
+            .mapKeys { (k, _) -> Avklartefaktatyper.valueOf(k) }
         val vilkårDtoList = vilkårForBestemmelse.hentVilkår(
             bestemmelse,
-            requestParams.filterKeys { k -> k in avklartefaktatyperNavn }
-                .mapKeys { (k, _) -> Avklartefaktatyper.valueOf(k) },
-            requestParams[BEHANDLING_ID]?.toLong()
+            avklarteFakta,
+            behandlingID
         ).map { VilkårOgBegrunnelserDto(it.vilkår, it.defaultOppfylt, it.muligeBegrunnelser) }
 
         log.debug { "FTRL vilkår for bestemmelse: $bestemmelse, $requestParams: $vilkårDtoList" }
