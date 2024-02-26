@@ -145,7 +145,7 @@ public class ProsessinstansService {
     }
 
     @Transactional
-    public void opprettManglendeInnbetalingProsessflyt(ManglendeFakturabetalingMelding manglendeFakturabetalingMelding) {
+    public UUID opprettManglendeInnbetalingProsessflyt(ManglendeFakturabetalingMelding manglendeFakturabetalingMelding) {
         Prosessinstans prosessinstans = new Prosessinstans();
         prosessinstans.setType(ProsessType.OPPRETT_NY_BEHANDLING_MANGLENDE_INNBETALING);
 
@@ -155,7 +155,7 @@ public class ProsessinstansService {
         prosessinstans.setData(FAKTURANUMMER, manglendeFakturabetalingMelding.getFakturanummer());
         prosessinstans.setLåsReferanse(LåsReferanseFactory.lagString(manglendeFakturabetalingMelding));
 
-        lagre(prosessinstans);
+        return lagre(prosessinstans);
     }
 
     @Transactional

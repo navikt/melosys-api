@@ -1,28 +1,26 @@
 package no.nav.melosys.itest
 
-import io.kotest.matchers.collections.shouldHaveSize
-import io.kotest.matchers.string.shouldMatch
-import io.kotest.matchers.string.shouldStartWith
+import io.kotest.matchers.shouldBe
 import io.mockk.every
 import io.mockk.mockk
 import no.nav.melosys.Application
 import no.nav.melosys.AwaitUtil.throwOnLogError
 import no.nav.melosys.LoggingTestUtils
-import no.nav.melosys.LoggingTestUtils.check
-import no.nav.melosys.LoggingTestUtils.match
+import no.nav.melosys.LoggingTestUtils.filterBuilder
+import no.nav.melosys.ProsessLaget
 import no.nav.melosys.domain.manglendebetaling.Betalingsstatus
 import no.nav.melosys.domain.manglendebetaling.ManglendeFakturabetalingMelding
 import no.nav.melosys.saksflyt.ProsessinstansBehandler
-import no.nav.melosys.saksflyt.ProsessinstansRepository
+import no.nav.melosys.saksflyt.ProsessinstansFerdigListener
 import no.nav.melosys.saksflyt.steg.behandling.OpprettManglendeInnbetalingBehandling
 import no.nav.melosys.saksflyt.steg.brev.SendManglendeInnbetalingVarselBrev
 import no.nav.melosys.saksflyt.steg.oppgave.OpprettOppgave
 import no.nav.melosys.saksflytapi.ProsessinstansService
 import no.nav.melosys.saksflytapi.domain.LåsReferanseFactory
-import no.nav.melosys.saksflytapi.domain.ProsessStatus
 import no.nav.melosys.saksflytapi.domain.ProsessSteg
 import no.nav.security.token.support.spring.test.EnableMockOAuth2Server
 import org.awaitility.kotlin.await
+import org.junit.jupiter.api.AfterEach
 import org.junit.jupiter.api.Test
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.boot.test.autoconfigure.jdbc.AutoConfigureTestDatabase
@@ -52,67 +50,116 @@ import java.time.LocalDate
 @EnableMockOAuth2Server
 @Import(SaksflytLåsreferanseIT.TestConfig::class)
 internal class SaksflytLåsreferanseIT(
-    @Autowired private val prosessinstansRepository: ProsessinstansRepository,
     @Autowired private val prosessinstansService: ProsessinstansService,
+    @Autowired private val prosessLaget: ProsessLaget
 ) : OracleTestContainerBase() {
+    @AfterEach
+    fun setUp() = prosessLaget.clear()
 
     @Test
     fun `ikke kjør OpprettManglendeInnbetalingBehandling samtidig`() {
         LoggingTestUtils.withLogCapture { logItems ->
+            val fakturaserieReferanse = "01HHFM03YMHHQAVZ4SQF9Y29E4"
 
-            val låsReferanser = lagProsesser(listOf("23004119", "23004118"))
+            val manglendeFakturabetalingMelding1 = ManglendeFakturabetalingMelding(
+                fakturaserieReferanse = fakturaserieReferanse,
+                betalingsstatus = Betalingsstatus.IKKE_BETALT,
+                datoMottatt = LocalDate.of(2023, 12, 13),
+                fakturanummer = "23004119"
+            )
+            val manglendeFakturabetalingMelding2 = ManglendeFakturabetalingMelding(
+                fakturaserieReferanse = fakturaserieReferanse,
+                betalingsstatus = Betalingsstatus.IKKE_BETALT,
+                datoMottatt = LocalDate.of(2023, 12, 13),
+                fakturanummer = "23004118"
+            )
+            val manglendeInnbetalingLås1 = LåsReferanseFactory.lagString(manglendeFakturabetalingMelding1)
+            val manglendeInnbetalingLås2 = LåsReferanseFactory.lagString(manglendeFakturabetalingMelding2)
+
+            prosessLaget.nyProsessLaget("manglendeInnbetaling-1-Prosess") {
+                prosessinstansService.opprettManglendeInnbetalingProsessflyt(
+                    manglendeFakturabetalingMelding1
+                )
+            }
+            prosessLaget.nyProsessLaget("manglendeInnbetaling-2-Prosess") {
+                prosessinstansService.opprettManglendeInnbetalingProsessflyt(
+                    manglendeFakturabetalingMelding2
+                )
+            }
 
             await.throwOnLogError(logItems)
                 .timeout(Duration.ofSeconds(30)).pollInterval(Duration.ofSeconds(1))
                 .until {
-                    prosessinstansRepository.findAll()
-                        .filter { it.låsReferanse in låsReferanser }
-                        .all { it.status == ProsessStatus.FERDIG }
+                    logItems.filterBuilder.match<ProsessinstansFerdigListener>()
+                        .build().last().formattedMessage.contains("Prosessinstans(er) på vent med samme gruppe-prefiks: []")
                 }
 
-            logItems.match<ProsessinstansBehandler>().shouldHaveSize(10).check { next ->
-                next().formattedMessage shouldMatch Regex("Starter behandling av prosessinstans .*? med lås UBETALT_01HHFM03YMHHQAVZ4SQF9Y29E4_23004119")
-                next().formattedMessage shouldStartWith "Utfører steg OPPRETT_MANGLENDE_INNBETALING_BEHANDLING"
-                next().formattedMessage shouldStartWith "Utfører steg OPPRETT_OPPGAVE"
-                next().formattedMessage shouldStartWith "Utfører steg SEND_MANGLENDE_INNBETALING_VARSELBREV"
-                next().message shouldStartWith "Prosessinstans {} behandlet ferdig"
-                next().formattedMessage shouldMatch Regex("Starter behandling av prosessinstans .*? med lås UBETALT_01HHFM03YMHHQAVZ4SQF9Y29E4_23004118")
-                next().formattedMessage shouldStartWith "Utfører steg OPPRETT_MANGLENDE_INNBETALING_BEHANDLING"
-                next().formattedMessage shouldStartWith "Utfører steg OPPRETT_OPPGAVE"
-                next().formattedMessage shouldStartWith "Utfører steg SEND_MANGLENDE_INNBETALING_VARSELBREV"
-                next().message shouldStartWith "Prosessinstans {} behandlet ferdig"
-            }
-
+            logItems.filterBuilder
+                .match<ProsessinstansBehandler>()
+                .replace(prosessLaget.prosessIdStringToName())
+                .replace(manglendeInnbetalingLås1, "<manglendeInnbetalingLås1>")
+                .replace(manglendeInnbetalingLås2, "<manglendeInnbetalingLås2>")
+                .check { next ->
+                    next { it shouldBe "Starter behandling av prosessinstans <manglendeInnbetaling-1-Prosess> med lås <manglendeInnbetalingLås1>" }
+                    next { it shouldBe "Utfører steg OPPRETT_MANGLENDE_INNBETALING_BEHANDLING for prosessinstans <manglendeInnbetaling-1-Prosess>" }
+                    next { it shouldBe "Utfører steg OPPRETT_OPPGAVE for prosessinstans <manglendeInnbetaling-1-Prosess>" }
+                    next { it shouldBe "Utfører steg SEND_MANGLENDE_INNBETALING_VARSELBREV for prosessinstans <manglendeInnbetaling-1-Prosess>" }
+                    next { it shouldBe "Prosessinstans <manglendeInnbetaling-1-Prosess> behandlet ferdig" }
+                    next { it shouldBe "Starter behandling av prosessinstans <manglendeInnbetaling-2-Prosess> med lås <manglendeInnbetalingLås2>" }
+                    next { it shouldBe "Utfører steg OPPRETT_MANGLENDE_INNBETALING_BEHANDLING for prosessinstans <manglendeInnbetaling-2-Prosess>" }
+                    next { it shouldBe "Utfører steg OPPRETT_OPPGAVE for prosessinstans <manglendeInnbetaling-2-Prosess>" }
+                    next { it shouldBe "Utfører steg SEND_MANGLENDE_INNBETALING_VARSELBREV for prosessinstans <manglendeInnbetaling-2-Prosess>" }
+                    next { it shouldBe "Prosessinstans <manglendeInnbetaling-2-Prosess> behandlet ferdig" }
+                }
         }
-
     }
 
     @Test
     fun `ikke kjør OpprettManglendeInnbetalingBehandling samtidig med samme låsreferanse`() {
         LoggingTestUtils.withLogCapture { logItems ->
+            val fakturaserieReferanse = "01HHFM03YMHHQAVZ4SQF9Y29E4"
 
-            val låsReferanser = lagProsesser(listOf("23004119", "23004119"))
+            val manglendeFakturabetalingMelding1 = ManglendeFakturabetalingMelding(
+                fakturaserieReferanse = fakturaserieReferanse,
+                betalingsstatus = Betalingsstatus.IKKE_BETALT,
+                datoMottatt = LocalDate.of(2023, 12, 13),
+                fakturanummer = "23004119"
+            )
+            val manglendeInnbetalingLås1 = LåsReferanseFactory.lagString(manglendeFakturabetalingMelding1)
 
+            prosessLaget.nyProsessLaget("manglendeInnbetaling-1-Prosess") {
+                prosessinstansService.opprettManglendeInnbetalingProsessflyt(
+                    manglendeFakturabetalingMelding1
+                )
+            }
+            prosessLaget.nyProsessLaget("manglendeInnbetaling-1-Duplikat") {
+                prosessinstansService.opprettManglendeInnbetalingProsessflyt(
+                    manglendeFakturabetalingMelding1
+                )
+            }
             await.throwOnLogError(logItems)
                 .timeout(Duration.ofSeconds(30)).pollInterval(Duration.ofSeconds(1))
                 .until {
-                    prosessinstansRepository.findAll()
-                        .filter { it.låsReferanse in låsReferanser }
-                        .all { it.status == ProsessStatus.FERDIG }
+                    logItems.filterBuilder.match<ProsessinstansFerdigListener>()
+                        .build().last().formattedMessage.contains("Prosessinstans(er) på vent med samme gruppe-prefiks: []")
                 }
 
-            logItems.match<ProsessinstansBehandler>().shouldHaveSize(10).check { next ->
-                next().formattedMessage shouldMatch Regex("Starter behandling av prosessinstans .*? med lås UBETALT_01HHFM03YMHHQAVZ4SQF9Y29E4_23004119")
-                next().formattedMessage shouldStartWith "Utfører steg OPPRETT_MANGLENDE_INNBETALING_BEHANDLING"
-                next().formattedMessage shouldStartWith "Utfører steg OPPRETT_OPPGAVE"
-                next().formattedMessage shouldStartWith "Utfører steg SEND_MANGLENDE_INNBETALING_VARSELBREV"
-                next().message shouldStartWith "Prosessinstans {} behandlet ferdig"
-                next().formattedMessage shouldMatch Regex("Starter behandling av prosessinstans .*? med lås UBETALT_01HHFM03YMHHQAVZ4SQF9Y29E4_23004119")
-                next().formattedMessage shouldStartWith "Utfører steg OPPRETT_MANGLENDE_INNBETALING_BEHANDLING"
-                next().formattedMessage shouldStartWith "Utfører steg OPPRETT_OPPGAVE"
-                next().formattedMessage shouldStartWith "Utfører steg SEND_MANGLENDE_INNBETALING_VARSELBREV"
-                next().message shouldStartWith "Prosessinstans {} behandlet ferdig"
-            }
+            logItems.filterBuilder
+                .match<ProsessinstansBehandler>()
+                .replace(prosessLaget.prosessIdStringToName())
+                .replace(manglendeInnbetalingLås1, "<manglendeInnbetalingLås1>")
+                .check { next ->
+                    next { it shouldBe "Starter behandling av prosessinstans <manglendeInnbetaling-1-Prosess> med lås <manglendeInnbetalingLås1>" }
+                    next { it shouldBe "Utfører steg OPPRETT_MANGLENDE_INNBETALING_BEHANDLING for prosessinstans <manglendeInnbetaling-1-Prosess>" }
+                    next { it shouldBe "Utfører steg OPPRETT_OPPGAVE for prosessinstans <manglendeInnbetaling-1-Prosess>" }
+                    next { it shouldBe "Utfører steg SEND_MANGLENDE_INNBETALING_VARSELBREV for prosessinstans <manglendeInnbetaling-1-Prosess>" }
+                    next { it shouldBe "Prosessinstans <manglendeInnbetaling-1-Prosess> behandlet ferdig" }
+                    next { it shouldBe "Starter behandling av prosessinstans <manglendeInnbetaling-1-Duplikat> med lås <manglendeInnbetalingLås1>" }
+                    next { it shouldBe "Utfører steg OPPRETT_MANGLENDE_INNBETALING_BEHANDLING for prosessinstans <manglendeInnbetaling-1-Duplikat>" }
+                    next { it shouldBe "Utfører steg OPPRETT_OPPGAVE for prosessinstans <manglendeInnbetaling-1-Duplikat>" }
+                    next { it shouldBe "Utfører steg SEND_MANGLENDE_INNBETALING_VARSELBREV for prosessinstans <manglendeInnbetaling-1-Duplikat>" }
+                    next { it shouldBe "Prosessinstans <manglendeInnbetaling-1-Duplikat> behandlet ferdig" }
+                }
         }
     }
 
@@ -144,19 +191,6 @@ internal class SaksflytLåsreferanseIT(
                 every { inngangsSteg() } returns ProsessSteg.SEND_MANGLENDE_INNBETALING_VARSELBREV
                 every { utfør(any()) } returns Unit
             }
-        }
-    }
-
-    fun lagProsesser(fakturanummer: List<String>): List<String> {
-        return fakturanummer.map {
-            val manglendeFakturabetalingMelding = ManglendeFakturabetalingMelding(
-                fakturaserieReferanse = "01HHFM03YMHHQAVZ4SQF9Y29E4",
-                betalingsstatus = Betalingsstatus.IKKE_BETALT,
-                datoMottatt = LocalDate.of(2023, 12, 13),
-                fakturanummer = it
-            )
-            prosessinstansService.opprettManglendeInnbetalingProsessflyt(manglendeFakturabetalingMelding)
-            LåsReferanseFactory.lagString(manglendeFakturabetalingMelding)
         }
     }
 }

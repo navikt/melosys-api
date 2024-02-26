@@ -18,6 +18,7 @@ import no.nav.melosys.saksflytapi.domain.ProsessSteg
 import no.nav.melosys.saksflytapi.domain.Prosessinstans
 import no.nav.security.token.support.spring.test.EnableMockOAuth2Server
 import org.awaitility.kotlin.await
+import org.junit.jupiter.api.AfterEach
 import org.junit.jupiter.api.Test
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.boot.test.autoconfigure.jdbc.AutoConfigureTestDatabase
@@ -49,6 +50,8 @@ internal class SedLåsreferanseIT(
     @Autowired private val prosessinstansService: ProsessinstansService,
     @Autowired private val prosessLaget: ProsessLaget
 ) : OracleTestContainerBase() {
+    @AfterEach
+    fun setUp() = prosessLaget.clear()
 
     @Test
     fun `ikke kjør samtidig når sed har samme rinaSaksnummer men forsjellig sedId, sedVersjon`() {
