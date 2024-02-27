@@ -1,7 +1,10 @@
 package no.nav.melosys.service.ftrl.bestemmelse.vilkaar
 
-import no.nav.melosys.domain.kodeverk.*
+import no.nav.melosys.domain.kodeverk.Avklartefaktatyper
+import no.nav.melosys.domain.kodeverk.Folketrygdloven_kap2_bestemmelser
 import no.nav.melosys.domain.kodeverk.Folketrygdloven_kap2_bestemmelser.*
+import no.nav.melosys.domain.kodeverk.Ikkeyrkesaktivrelasjontype
+import no.nav.melosys.domain.kodeverk.Land_iso2
 import no.nav.melosys.domain.kodeverk.Vilkaar.*
 import no.nav.melosys.domain.mottatteopplysninger.data.Soeknadsland
 import no.nav.melosys.exception.FunksjonellException
@@ -9,7 +12,7 @@ import no.nav.melosys.service.mottatteopplysninger.MottatteOpplysningerService
 import org.springframework.stereotype.Component
 
 @Component
-class VilkårForBestemmelse(val mottatteOpplysningerService: MottatteOpplysningerService) {
+class VilkårForBestemmelseIkkeYrkesaktiv(val mottatteOpplysningerService: MottatteOpplysningerService) {
     fun hentVilkår(
         bestemmelse: Folketrygdloven_kap2_bestemmelser,
         avklarteFakta: Map<Avklartefaktatyper, String>,
@@ -116,17 +119,10 @@ class VilkårForBestemmelse(val mottatteOpplysningerService: MottatteOpplysninge
     }
 
     private fun hentFamilieRelasjonFraFakta(avklarteFakta: Map<Avklartefaktatyper, String>): Ikkeyrkesaktivrelasjontype {
-        val avklarteFamilieRelasjon =
-            requireNotNull(avklarteFakta[Avklartefaktatyper.IKKE_YRKESAKTIV_RELASJON]) { "Familierelasjon mangler" }
-        if (!Ikkeyrkesaktivrelasjontype.values().any { it.name == avklarteFamilieRelasjon }) {
+        val avklarteFamilieRelasjon = avklarteFakta[Avklartefaktatyper.IKKE_YRKESAKTIV_RELASJON]
+        if (avklarteFamilieRelasjon == null || !Ikkeyrkesaktivrelasjontype.values().any { it.name == avklarteFamilieRelasjon }) {
             throw FunksjonellException("FamilieRelasjon $avklarteFamilieRelasjon er ugyldig")
         }
         return Ikkeyrkesaktivrelasjontype.valueOf(avklarteFamilieRelasjon)
     }
-
-    data class Vilkår(
-        val vilkår: Vilkaar,
-        val muligeBegrunnelser: Collection<String> = emptyList(),
-        val defaultOppfylt: Boolean? = null
-    )
 }
