@@ -35,16 +35,16 @@ class ProsessinstansFerdigListener(
         }.isNotEmpty()
 
     private val Prosessinstans.parentId: UUID?
-        get() = getData(ProsessDataKey.PARENT_ID, UUID::class.java)
+        get() = getData(ProsessDataKey.PROCESS_PARENT_ID, UUID::class.java)
 
     private fun startNesteProsessinstans(prosessinstansFerdigEvent: ProsessinstansFerdigEvent) {
-        val alleISameeGruppePåVent = prosessinstansRepository.findAllByStatus(ProsessStatus.PÅ_VENT)
+        val alleISammeGruppePåVent = prosessinstansRepository.findAllByStatus(ProsessStatus.PÅ_VENT)
             .filter { LåsReferanseFactory.harSammeGruppePrefiks(it.låsReferanse, prosessinstansFerdigEvent.låsReferanse) }
 
         val nesteSomSkalStartes =
-            alleISameeGruppePåVent
+            alleISammeGruppePåVent
                 .firstOrNull { it.parentId == prosessinstansFerdigEvent.uuid } // ta sub-prosesser først
-                ?: alleISameeGruppePåVent
+                ?: alleISammeGruppePåVent
                     .sortedBy { it.registrertDato } // Ta første registrerte root prosess
                     .firstOrNull()
 

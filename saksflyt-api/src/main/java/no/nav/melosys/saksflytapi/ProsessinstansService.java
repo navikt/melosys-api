@@ -251,7 +251,7 @@ public class ProsessinstansService {
             prosessinstans.setData(ProsessDataKey.SAKSBEHANDLER_NAVN, saksbehandlerNavn);
         }
         prosessinstans.setData(CORRELATION_ID_SAKSFLYT, MDCOperations.getCorrelationId());
-        prosessinstans.setData(PARENT_ID, ThreadLocalAccessInfo.getProcessId());
+        prosessinstans.setData(PROCESS_PARENT_ID, ThreadLocalAccessInfo.getProcessId());
 
         prosessinstansRepo.save(prosessinstans);
         if (saksbehandler != null) {

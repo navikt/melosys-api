@@ -141,7 +141,7 @@ internal class SedLåsMedSubProsesserIT(
                 it.key to prossesInstansRepository.findById(UUID.fromString(it.key)).shouldBePresent().id
             }.toMap()
         val nameToParentId = prosessRegister.prosessIdStringToName().map {
-            it.key to prossesInstansRepository.findById(UUID.fromString(it.key)).shouldBePresent().getData(ProsessDataKey.PARENT_ID, UUID::class.java)
+            it.key to prossesInstansRepository.findById(UUID.fromString(it.key)).shouldBePresent().getData(ProsessDataKey.PROCESS_PARENT_ID, UUID::class.java)
         }.toMap()
 
         nameToParentId["a009Prosess"].shouldBe(null)
