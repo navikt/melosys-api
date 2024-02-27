@@ -55,6 +55,7 @@ class EndreSakService(
 
         val sakEndres = sakEndres(fagsak, nySakstype, nySakstema)
         val behandlingTemaEllerTypeEndres = behandlingTemaTypeEndres(behandling, nyBehandlingstema, nyBehandlingstype)
+        val nyBehandlingstypeErNyVurdering = !behandling.erNyVurdering() && nyBehandlingstype == Behandlingstyper.NY_VURDERING
         if (sakEndres || behandlingTemaEllerTypeEndres) {
             validerEndring(
                 fagsak,
@@ -93,6 +94,12 @@ class EndreSakService(
             if (behandling.sisteOpplysningerHentetDato != null) {
                 oppfriskSaksopplysningerService.oppfriskSaksopplysning(behandling.id, false)
             }
+        }
+
+        if (nyBehandlingstypeErNyVurdering && behandling.opprinneligBehandling == null) {
+            val opprinneligBehandling = saksbehandlingRegler.finnBehandlingSomKanReplikeres(fagsak)
+            log.info { "Setter opprinnelig behandling til ${opprinneligBehandling?.id} på behandling ${behandling.id}" }
+            behandling.opprinneligBehandling = opprinneligBehandling
         }
 
         if (sakEndres) {
