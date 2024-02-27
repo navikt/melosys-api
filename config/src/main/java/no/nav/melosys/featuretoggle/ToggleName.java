@@ -9,6 +9,8 @@ public class ToggleName {
 
     public static final String MELOSYS_FTRL_IKKE_YRKESAKTIV = "melosys.ftrl.ikke_yrkesaktiv";
 
+    public static final String MELOSYS_SETT_OPPRINNELIG_BEHANDLING = "melosys.sett_opprinneligBehandling";
+
     public static final String MELOSYS_OPPDATER_FAKTURAMOTTAKER = "melosys.oppdater.fakturamottaker";
 
     public static final String MELOSYS_A003_MIDLERTIDIG_LOVVALGSBESLUTNING = "melosys.a003.midlertidig_lovvalgsbeslutning";
