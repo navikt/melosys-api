@@ -40,12 +40,12 @@ class ProsessinstansFerdigListener(
     private fun startNesteProsessinstans(prosessinstansFerdigEvent: ProsessinstansFerdigEvent) {
         val alleISammeGruppePåVent = prosessinstansRepository.findAllByStatus(ProsessStatus.PÅ_VENT)
             .filter { LåsReferanseFactory.harSammeGruppePrefiks(it.låsReferanse, prosessinstansFerdigEvent.låsReferanse) }
+            .sortedBy { it.registrertDato } // Ta den eldste først
 
         val nesteSomSkalStartes =
             alleISammeGruppePåVent
                 .firstOrNull { it.parentId == prosessinstansFerdigEvent.uuid } // ta sub-prosesser først
                 ?: alleISammeGruppePåVent
-                    .sortedBy { it.registrertDato } // Ta første registrerte root prosess
                     .firstOrNull()
 
         if (nesteSomSkalStartes != null) {
