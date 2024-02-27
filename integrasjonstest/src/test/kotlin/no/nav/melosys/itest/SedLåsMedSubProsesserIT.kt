@@ -1,6 +1,7 @@
 package no.nav.melosys.itest
 
 import io.kotest.matchers.collections.shouldHaveSize
+import io.kotest.matchers.optional.shouldBePresent
 import io.kotest.matchers.shouldBe
 import io.mockk.CapturingSlot
 import io.mockk.every
@@ -14,6 +15,7 @@ import no.nav.melosys.domain.eessi.SedType
 import no.nav.melosys.domain.eessi.melding.MelosysEessiMelding
 import no.nav.melosys.saksflyt.ProsessinstansBehandler
 import no.nav.melosys.saksflyt.ProsessinstansFerdigListener
+import no.nav.melosys.saksflyt.ProsessinstansRepository
 import no.nav.melosys.saksflyt.steg.behandling.OpprettFagsakOgBehandlingFraSed
 import no.nav.melosys.saksflyt.steg.jfr.FerdigstillJournalpostSed
 import no.nav.melosys.saksflyt.steg.jfr.OpprettArkivsak
@@ -24,6 +26,7 @@ import no.nav.melosys.saksflyt.steg.sed.OppdaterSaksrelasjon
 import no.nav.melosys.saksflyt.steg.sed.OpprettSedDokument
 import no.nav.melosys.saksflyt.steg.sed.mottak.SedMottakRuting
 import no.nav.melosys.saksflytapi.ProsessinstansService
+import no.nav.melosys.saksflytapi.domain.ProsessDataKey
 import no.nav.melosys.saksflytapi.domain.ProsessSteg
 import no.nav.melosys.saksflytapi.domain.Prosessinstans
 import no.nav.security.token.support.spring.test.EnableMockOAuth2Server
@@ -58,7 +61,8 @@ import java.util.*
 @Import(SedLåsMedSubProsesserIT.TestConfig::class)
 internal class SedLåsMedSubProsesserIT(
     @Autowired private val prosessinstansService: ProsessinstansService,
-    @Autowired private val prosessRegister: ProsessRegister
+    @Autowired private val prosessRegister: ProsessRegister,
+    @Autowired private val prossesInstansRepository: ProsessinstansRepository
 ) : OracleTestContainerBase() {
 
     @AfterEach
@@ -131,6 +135,21 @@ internal class SedLåsMedSubProsesserIT(
                     next { it shouldBe "Prosessinstans(er) på vent med samme gruppe-prefiks: []" }
                 }
         }
+
+        val nameToId =
+            prosessRegister.prosessIdStringToName().map {
+                it.key to prossesInstansRepository.findById(UUID.fromString(it.key)).shouldBePresent().id
+            }.toMap()
+        val nameToParentId = prosessRegister.prosessIdStringToName().map {
+            it.key to prossesInstansRepository.findById(UUID.fromString(it.key)).shouldBePresent().getData(ProsessDataKey.PARENT_ID, UUID::class.java)
+        }.toMap()
+
+        nameToParentId["a009Prosess"].shouldBe(null)
+        nameToParentId["x008Prosess"].shouldBe(null)
+        nameToParentId["<sub-prosess av a009Prosess"].shouldBe(nameToId["a009Prosess"])
+        nameToParentId["<sub-prosess av x008Prosess"].shouldBe(nameToId["x008Prosess"])
+
+
     }
 
     @Test
