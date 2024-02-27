@@ -292,13 +292,13 @@ class OpprettForslagMedlemskapsperiodeServiceTest {
 
     private fun lagVilkår(oppfylt: Boolean = true): Vilkaarsresultat =
         Vilkaarsresultat().apply {
-            vilkaar = Vilkaar.FTRL_2_8_FORUTGÅENDE_TRYGDETID
+            vilkaar = Vilkaar.FTRL_FORUTGÅENDE_TRYGDETID
             isOppfylt = oppfylt
         }
 
     private fun lagAlleKrevdeVilkår(): List<Vilkaarsresultat> =
         listOf(Vilkaarsresultat().apply {
-            vilkaar = Vilkaar.FTRL_2_8_FORUTGÅENDE_TRYGDETID
+            vilkaar = Vilkaar.FTRL_FORUTGÅENDE_TRYGDETID
             isOppfylt = true
         }, Vilkaarsresultat().apply {
             vilkaar = Vilkaar.FTRL_2_8_NÆR_TILKNYTNING_NORGE
