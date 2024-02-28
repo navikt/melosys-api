@@ -24,6 +24,7 @@ import no.nav.melosys.integrasjon.faktureringskomponenten.NyFakturaserieResponse
 import no.nav.melosys.integrasjon.faktureringskomponenten.dto.FakturaserieDto
 import no.nav.melosys.integrasjon.faktureringskomponenten.dto.FaktureringsIntervall
 import no.nav.melosys.saksflyt.steg.fakturering.OpprettFakturaserie
+import no.nav.melosys.saksflyt.steg.fakturering.OpprettFakturaserie.Companion.DEFAULT_PENSJON_DEKNING_TEKST_HELSEDEL
 import no.nav.melosys.saksflytapi.domain.ProsessDataKey
 import no.nav.melosys.saksflytapi.domain.Prosessinstans
 import no.nav.melosys.service.avgift.TrygdeavgiftMottakerService
@@ -103,6 +104,52 @@ class OpprettFakturaserieTest {
         slotFakturaserieDto.captured.shouldNotBeNull()
         slotFakturaserieDto.captured.referanseBruker.shouldContain("Vedtak om medlemskap datert ")
         slotFakturaserieDto.captured.fakturaserieReferanse.shouldBeNull()
+    }
+
+    @Test
+    fun `Opprett betalingsplan med riktige verdier når Inntektskildetype er PENSJON_UFØRETRYGD`() {
+        lagTestData(setOf(lagAktoerBruker()))
+        behandlingsresultat.medlemAvFolketrygden.fastsattTrygdeavgift.trygdeavgiftsperioder.forEach{
+            it.grunnlagInntekstperiode.type = Inntektskildetype.PENSJON_UFØRETRYGD
+        }
+        every { behandlingsresultatService.hentBehandlingsresultat(BEHANDLING_ID) } returns behandlingsresultat
+        every { behandlingService.hentBehandling(BEHANDLING_ID) } returns behandling
+        every { pdlService.finnFolkeregisterident(BRUKER_FNR) } returns Optional.of(BRUKER_AKTØRID)
+
+
+        opprettFakturaserie.utfør(prosessinstans)
+
+
+        verify(exactly = 1) { faktureringskomponentenConsumer.lagFakturaserie(capture(slotFakturaserieDto), eq(SAKSBEHANDLER_IDENT)) }
+        slotFakturaserieDto.captured.shouldNotBeNull()
+        slotFakturaserieDto.captured.referanseBruker.shouldContain("Vedtak om medlemskap datert ")
+        slotFakturaserieDto.captured.fakturaserieReferanse.shouldBeNull()
+        slotFakturaserieDto.captured.perioder.forEach() {
+            it.beskrivelse.shouldContain("Dekning: ${DEFAULT_PENSJON_DEKNING_TEKST_HELSEDEL}")
+        }
+    }
+
+    @Test
+    fun `Opprett betalingsplan med riktige verdier når Inntektskildetype er PENSJON_UFØRETRYGD_KILDESKATT`() {
+        lagTestData(setOf(lagAktoerBruker()))
+        behandlingsresultat.medlemAvFolketrygden.fastsattTrygdeavgift.trygdeavgiftsperioder.forEach{
+            it.grunnlagInntekstperiode.type = Inntektskildetype.PENSJON_UFØRETRYGD_KILDESKATT
+        }
+        every { behandlingsresultatService.hentBehandlingsresultat(BEHANDLING_ID) } returns behandlingsresultat
+        every { behandlingService.hentBehandling(BEHANDLING_ID) } returns behandling
+        every { pdlService.finnFolkeregisterident(BRUKER_FNR) } returns Optional.of(BRUKER_AKTØRID)
+
+
+        opprettFakturaserie.utfør(prosessinstans)
+
+
+        verify(exactly = 1) { faktureringskomponentenConsumer.lagFakturaserie(capture(slotFakturaserieDto), eq(SAKSBEHANDLER_IDENT)) }
+        slotFakturaserieDto.captured.shouldNotBeNull()
+        slotFakturaserieDto.captured.referanseBruker.shouldContain("Vedtak om medlemskap datert ")
+        slotFakturaserieDto.captured.fakturaserieReferanse.shouldBeNull()
+        slotFakturaserieDto.captured.perioder.forEach() {
+            it.beskrivelse.shouldContain("Dekning: ${DEFAULT_PENSJON_DEKNING_TEKST_HELSEDEL}")
+        }
     }
 
     @Test

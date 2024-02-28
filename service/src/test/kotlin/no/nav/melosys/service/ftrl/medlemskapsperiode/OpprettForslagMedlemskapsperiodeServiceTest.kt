@@ -31,7 +31,7 @@ import org.junit.jupiter.api.extension.ExtendWith
 import java.time.LocalDate
 
 @ExtendWith(MockKExtension::class)
-class OpprettMedlemskapsperiodeServiceTest {
+class OpprettForslagMedlemskapsperiodeServiceTest {
 
     @MockK
     private lateinit var medlemAvFolketrygdenRepository: MedlemAvFolketrygdenRepository
@@ -49,7 +49,7 @@ class OpprettMedlemskapsperiodeServiceTest {
 
     private val utledBestemmelserOgVilkår = UtledBestemmelserOgVilkår(fakeUnleash)
 
-    private lateinit var opprettMedlemskapsperiodeService: OpprettMedlemskapsperiodeService
+    private lateinit var opprettForslagMedlemskapsperiodeService: OpprettForslagMedlemskapsperiodeService
 
     private val BEH_RES_ID: Long = 123321
     private val BESTEMMELSE = Folketrygdloven_kap2_bestemmelser.FTRL_KAP2_2_8_FØRSTE_LEDD_A
@@ -58,8 +58,8 @@ class OpprettMedlemskapsperiodeServiceTest {
     @BeforeEach
     fun setup() {
         fakeUnleash.resetAll()
-        opprettMedlemskapsperiodeService =
-            OpprettMedlemskapsperiodeService(
+        opprettForslagMedlemskapsperiodeService =
+            OpprettForslagMedlemskapsperiodeService(
                 medlemAvFolketrygdenRepository,
                 behandlingsresultatService,
                 ftrlBestemmelser,
@@ -77,7 +77,7 @@ class OpprettMedlemskapsperiodeServiceTest {
         every { utledMottaksdato.getMottaksdato(any()) } returns LocalDate.now()
 
 
-        opprettMedlemskapsperiodeService.opprettForslagPåMedlemskapsperioder(BEH_RES_ID, BESTEMMELSE).shouldNotBeEmpty()
+        opprettForslagMedlemskapsperiodeService.opprettForslagPåMedlemskapsperioder(BEH_RES_ID, BESTEMMELSE).shouldNotBeEmpty()
 
 
         verify(exactly = 1) { medlemAvFolketrygdenRepository.save(any()) }
@@ -102,7 +102,7 @@ class OpprettMedlemskapsperiodeServiceTest {
         every { medlemAvFolketrygdenRepository.save(behandlingsresultat.medlemAvFolketrygden) } returns behandlingsresultat.medlemAvFolketrygden
 
 
-        val perioder = opprettMedlemskapsperiodeService.opprettForslagPåMedlemskapsperioder(BEH_RES_ID, NY_BESTEMMELSE)
+        val perioder = opprettForslagMedlemskapsperiodeService.opprettForslagPåMedlemskapsperioder(BEH_RES_ID, NY_BESTEMMELSE)
 
 
         perioder.shouldNotBeEmpty()
@@ -147,7 +147,7 @@ class OpprettMedlemskapsperiodeServiceTest {
         every { medlemAvFolketrygdenRepository.save(behandlingsresultat.medlemAvFolketrygden) } returns behandlingsresultat.medlemAvFolketrygden
 
 
-        val perioder = opprettMedlemskapsperiodeService.opprettForslagPåMedlemskapsperioder(BEH_RES_ID, NY_BESTEMMELSE)
+        val perioder = opprettForslagMedlemskapsperiodeService.opprettForslagPåMedlemskapsperioder(BEH_RES_ID, NY_BESTEMMELSE)
 
 
         perioder
@@ -192,7 +192,7 @@ class OpprettMedlemskapsperiodeServiceTest {
         every { medlemAvFolketrygdenRepository.save(behandlingsresultat.medlemAvFolketrygden) } returns behandlingsresultat.medlemAvFolketrygden
 
 
-        val perioder = opprettMedlemskapsperiodeService.opprettForslagPåMedlemskapsperioder(BEH_RES_ID, NY_BESTEMMELSE)
+        val perioder = opprettForslagMedlemskapsperiodeService.opprettForslagPåMedlemskapsperioder(BEH_RES_ID, NY_BESTEMMELSE)
 
 
         perioder.shouldHaveSize(2)
@@ -223,7 +223,7 @@ class OpprettMedlemskapsperiodeServiceTest {
 
 
         shouldThrow<FunksjonellException> {
-            opprettMedlemskapsperiodeService.opprettForslagPåMedlemskapsperioder(BEH_RES_ID, BESTEMMELSE)
+            opprettForslagMedlemskapsperiodeService.opprettForslagPåMedlemskapsperioder(BEH_RES_ID, BESTEMMELSE)
         }.message.shouldContain("Kan ikke opprette medlemskapsperioder for sakstype")
     }
 
@@ -235,7 +235,7 @@ class OpprettMedlemskapsperiodeServiceTest {
 
 
         shouldThrow<FunksjonellException> {
-            opprettMedlemskapsperiodeService.opprettForslagPåMedlemskapsperioder(BEH_RES_ID, BESTEMMELSE)
+            opprettForslagMedlemskapsperiodeService.opprettForslagPåMedlemskapsperioder(BEH_RES_ID, BESTEMMELSE)
         }.message.shouldContain("er påkrevd for bestemmelse")
     }
 
@@ -247,7 +247,7 @@ class OpprettMedlemskapsperiodeServiceTest {
 
 
         shouldThrow<FunksjonellException> {
-            opprettMedlemskapsperiodeService.opprettForslagPåMedlemskapsperioder(BEH_RES_ID, ustøttetBestemmelse)
+            opprettForslagMedlemskapsperiodeService.opprettForslagPåMedlemskapsperioder(BEH_RES_ID, ustøttetBestemmelse)
         }.message.shouldContain("Støtter ikke")
     }
 
@@ -260,7 +260,7 @@ class OpprettMedlemskapsperiodeServiceTest {
 
 
         shouldThrow<FunksjonellException> {
-            opprettMedlemskapsperiodeService.opprettForslagPåMedlemskapsperioder(BEH_RES_ID, ustøttetBestemmelse)
+            opprettForslagMedlemskapsperiodeService.opprettForslagPåMedlemskapsperioder(BEH_RES_ID, ustøttetBestemmelse)
         }.message.shouldContain("Støtter ikke")
     }
 
@@ -270,7 +270,7 @@ class OpprettMedlemskapsperiodeServiceTest {
 
 
         shouldThrow<FunksjonellException> {
-            opprettMedlemskapsperiodeService.opprettForslagPåMedlemskapsperioder(BEH_RES_ID, null)
+            opprettForslagMedlemskapsperiodeService.opprettForslagPåMedlemskapsperioder(BEH_RES_ID, null)
         }.message.shouldContain("Bestemmelse er ikke satt")
     }
 
@@ -292,13 +292,13 @@ class OpprettMedlemskapsperiodeServiceTest {
 
     private fun lagVilkår(oppfylt: Boolean = true): Vilkaarsresultat =
         Vilkaarsresultat().apply {
-            vilkaar = Vilkaar.FTRL_2_8_FORUTGÅENDE_TRYGDETID
+            vilkaar = Vilkaar.FTRL_FORUTGÅENDE_TRYGDETID
             isOppfylt = oppfylt
         }
 
     private fun lagAlleKrevdeVilkår(): List<Vilkaarsresultat> =
         listOf(Vilkaarsresultat().apply {
-            vilkaar = Vilkaar.FTRL_2_8_FORUTGÅENDE_TRYGDETID
+            vilkaar = Vilkaar.FTRL_FORUTGÅENDE_TRYGDETID
             isOppfylt = true
         }, Vilkaarsresultat().apply {
             vilkaar = Vilkaar.FTRL_2_8_NÆR_TILKNYTNING_NORGE

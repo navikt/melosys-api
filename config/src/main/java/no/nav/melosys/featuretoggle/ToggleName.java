@@ -11,6 +11,8 @@ public class ToggleName {
 
     public static final String MELOSYS_OPPDATER_FAKTURAMOTTAKER = "melosys.oppdater.fakturamottaker";
 
+    public static final String MELOSYS_A003_MIDLERTIDIG_LOVVALGSBESLUTNING = "melosys.a003.midlertidig_lovvalgsbeslutning";
+
     public static final String MELOSYS_FOLKETRYGDEN_2_7 = "melosys.folketrygden.2_7";
 
 }
