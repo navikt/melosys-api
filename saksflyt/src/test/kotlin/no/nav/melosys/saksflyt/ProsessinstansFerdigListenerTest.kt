@@ -127,6 +127,45 @@ internal class ProsessinstansFerdigListenerTest {
     }
 
     @Test
+    fun `start sub-prosesser før root-prosessers`() {
+        val lås1 = "12_13_1"
+        val lås2 = "12_14_1"
+
+        val rootProsessinstans1 = lagProsessInstans {
+            låsReferanse = lås1
+        }
+        val tidligstOpprettetProsessinstans = lagProsessInstans {
+            låsReferanse = lås2
+            registrertDato = LocalDateTime.now().minusDays(2)
+        }
+        val subProsessinstansEldst = lagProsessInstans {
+            låsReferanse = lås1
+            setData(ProsessDataKey.PROCESS_PARENT_ID, rootProsessinstans1.id)
+            registrertDato = LocalDateTime.now().minusDays(1)
+        }
+        val subProsessinstansNy = lagProsessInstans {
+            låsReferanse = lås1
+            setData(ProsessDataKey.PROCESS_PARENT_ID, rootProsessinstans1.id)
+            registrertDato = LocalDateTime.now()
+        }
+
+        every { prosessinstansRepository.save(any()) } returns mockk()
+        every { prosessinstansRepository.findAllByStatus(ProsessStatus.PÅ_VENT) } returns setOf(
+            tidligstOpprettetProsessinstans,
+            subProsessinstansNy,
+        )
+        every { prosessinstansBehandler.behandleProsessinstans(any()) } returns Unit
+
+
+        prosessinstansFerdigListener.prosessinstansFerdig(ProsessinstansFerdigEvent(subProsessinstansEldst))
+
+
+        verify(exactly = 1) { prosessinstansBehandler.behandleProsessinstans(subProsessinstansNy) }
+        confirmVerified(prosessinstansBehandler)
+    }
+
+
+    @Test
     fun `start eldste sub-prosesser først når duplikat`() {
         val lås = "12_13_1"
 

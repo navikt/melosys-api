@@ -45,8 +45,8 @@ class ProsessinstansFerdigListener(
         val nesteSomSkalStartes =
             alleISammeGruppePåVent
                 .firstOrNull { it.parentId == prosessinstansFerdigEvent.uuid } // ta sub-prosesser først
-                ?: alleISammeGruppePåVent
-                    .firstOrNull()
+                ?: alleISammeGruppePåVent.firstOrNull { it.parentId != null } // ta også sub-prosesser uten referanse til parent før andre top prosesser
+                ?: alleISammeGruppePåVent.firstOrNull()
 
         if (nesteSomSkalStartes != null) {
             oppdaterStatusOgBehandleProsessinstans(nesteSomSkalStartes)
