@@ -6,7 +6,7 @@ import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingstema
 import org.springframework.stereotype.Component
 
 @Component
-class VilkårForBestemmlse(
+class VilkårForBestemmelse(
     val vilkårForBestemmelseYrkesaktiv: VilkårForBestemmelseYrkesaktiv,
     val vilkårForBestemmelseIkkeYrkesaktiv: VilkårForBestemmelseIkkeYrkesaktiv
 ) {
