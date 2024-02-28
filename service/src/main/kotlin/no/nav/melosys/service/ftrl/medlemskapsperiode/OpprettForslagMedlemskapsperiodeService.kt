@@ -25,7 +25,6 @@ import org.springframework.transaction.annotation.Transactional
 class OpprettForslagMedlemskapsperiodeService(
     private val medlemAvFolketrygdenRepository: MedlemAvFolketrygdenRepository,
     private val behandlingsresultatService: BehandlingsresultatService,
-    private val ftrlBestemmelser: FtrlBestemmelser,
     private val utledMottaksdato: UtledMottaksdato,
     private val utledBestemmelserOgVilkår: UtledBestemmelserOgVilkår,
     private val unleash: Unleash,
