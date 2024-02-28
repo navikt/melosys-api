@@ -96,11 +96,6 @@ class OpprettForslagMedlemskapsperiodeService(
         }
 
         if (unleash.isEnabled(ToggleName.MELOSYS_FTRL_IKKE_YRKESAKTIV)) {
-            if (bestemmelse !in ftrlBestemmelser.hentBestemmelser(behandlingstema, trygdedekning)) {
-                throw FunksjonellException("Støtter ikke perioder med bestemmelse $bestemmelse for behandlingstema $behandlingstema og trygdedekning $trygdedekning")
-            }
-
-            // TODO kan fjernes?
             if (!LovligeKombinasjonerTrygdedekningBestemmelse.erBestemmelseGyldig(bestemmelse, trygdedekning)) {
                 throw FunksjonellException("Ulovlig kombinasjon av bestemmelse $bestemmelse og trygdedekning $trygdedekning")
             }
