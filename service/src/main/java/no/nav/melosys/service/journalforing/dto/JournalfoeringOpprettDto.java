@@ -41,7 +41,7 @@ public class JournalfoeringOpprettDto extends JournalfoeringDto {
 
     private Soeknadsland getLand() {
         SoeknadslandDto land = fagsak.getLand();
-        return new Soeknadsland(land.getLandkoder(), land.erUkjenteEllerAlleEosLand());
+        return new Soeknadsland(land.getLandkoder(), land.isFlereLandUkjentHvilke());
     }
 
     private Periode getSoknadsperiode() {

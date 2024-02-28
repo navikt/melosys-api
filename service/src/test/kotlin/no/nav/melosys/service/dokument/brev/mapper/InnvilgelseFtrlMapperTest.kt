@@ -98,6 +98,8 @@ internal class InnvilgelseFtrlMapperTest {
                     innvilgelsesResultat.shouldBe(InnvilgelsesResultat.INNVILGET)
                 }
                 bestemmelse.shouldBe(Folketrygdloven_kap2_bestemmelser.FTRL_KAP2_2_8)
+                avslåttMedlemskapsperiodeFørMottaksdatoHelsedel.shouldBe(false)
+                avslåttMedlemskapsperiodeFørMottaksdatoFullDekning.shouldBe(false)
                 skatteplikttype.shouldBe(Skatteplikttype.SKATTEPLIKTIG)
                 begrunnelse.shouldBe(Ftrl_2_8_naer_tilknytning_norge_begrunnelser.ANNEN_GRUNN)
                 begrunnelseAnnenGrunnFritekst.shouldBe("<p>Vilkårresultat begrunnelse fritekst</p>")
@@ -131,8 +133,8 @@ internal class InnvilgelseFtrlMapperTest {
             medlemAvFolketrygden.medlemskapsperioder = listOf(
                 medlemAvFolketrygden.medlemskapsperioder.iterator().next(),
                 Medlemskapsperiode().apply {
-                    fom = LocalDate.EPOCH.plusMonths(1)
-                    tom = LocalDate.EPOCH.plusMonths(4)
+                    fom = LocalDate.EPOCH.minusMonths(1)
+                    tom = LocalDate.EPOCH.minusMonths(4)
                     innvilgelsesresultat = InnvilgelsesResultat.AVSLAATT
                     medlemskapstype = Medlemskapstyper.FRIVILLIG
                     trygdedekning = Trygdedekninger.FTRL_2_9_FØRSTE_LEDD_A_HELSE
@@ -142,10 +144,45 @@ internal class InnvilgelseFtrlMapperTest {
         }
 
         innvilgelseFtrlMapper.map(lagInnvilgelseFtrlBrevbestilling()).apply {
-            avgiftsperioder.shouldHaveSize(2)
-            medlemskapsperioder.shouldHaveSize(2)
-                .map { it.innvilgelsesResultat }
-                .shouldContainExactlyInAnyOrder(InnvilgelsesResultat.INNVILGET, InnvilgelsesResultat.AVSLAATT)
+            innvilgelseFtrlMapper.map(lagInnvilgelseFtrlBrevbestilling()).shouldNotBeNull()
+                .apply {
+                    behandlingstype.shouldBe(Behandlingstyper.FØRSTEGANG)
+                    nyVurderingBakgrunn.shouldBe("NYE_OPPLYSNINGER")
+                    saksbehandlerNavn.shouldBe(SAKSBEHANDLER_NAVN)
+                    saksinfo.shouldBeInstanceOf<SaksinfoBruker>().apply {
+                        fnr.shouldBe(DokgenTestData.FNR_BRUKER)
+                        saksnummer().shouldBe(SAKSNUMMER)
+                        navnBruker().shouldBe(DokgenTestData.SAMMENSATT_NAVN_BRUKER)
+                    }
+                    dagensDato.truncatedTo(ChronoUnit.DAYS).shouldBe(Instant.now().truncatedTo(ChronoUnit.DAYS))
+                    mottaker.apply {
+                        adresselinjer().shouldNotBeEmpty()
+                        postnr().shouldBe(DokgenTestData.POSTNR_BRUKER)
+                        poststed().shouldBe(DokgenTestData.POSTSTED_BRUKER)
+                    }
+
+                    datoMottatt.shouldBe(LocalDate.EPOCH)
+                    innledningFritekst.shouldBeNull()
+                    begrunnelseFritekst.shouldBe(BEGRUNNELSE_FRITEKST)
+                    trygdeavgiftFritekst.shouldBe(TRYGDEAVGIFT_FRITEKST)
+                    avgiftsperioder.shouldHaveSize(2)
+                    medlemskapsperioder.shouldHaveSize(2).first().apply {
+                        innvilgelsesResultat.shouldBe(InnvilgelsesResultat.INNVILGET)
+                    }
+                    medlemskapsperioder.shouldHaveSize(2).last().apply {
+                        innvilgelsesResultat.shouldBe(InnvilgelsesResultat.AVSLAATT)
+                    }
+                    bestemmelse.shouldBe(Folketrygdloven_kap2_bestemmelser.FTRL_KAP2_2_8)
+                    avslåttMedlemskapsperiodeFørMottaksdatoHelsedel.shouldBe(true)
+                    avslåttMedlemskapsperiodeFørMottaksdatoFullDekning.shouldBe(false)
+                    skatteplikttype.shouldBe(Skatteplikttype.SKATTEPLIKTIG)
+                    begrunnelse.shouldBe(Ftrl_2_8_naer_tilknytning_norge_begrunnelser.ANNEN_GRUNN)
+                    begrunnelseAnnenGrunnFritekst.shouldBe("<p>Vilkårresultat begrunnelse fritekst</p>")
+                    arbeidsgivere.shouldHaveSize(1).first().shouldBe(ARBEIDSGIVER_NAVN)
+                    arbeidsland.shouldBe(Landkoder.AT.beskrivelse)
+                    trygdeavtaleMedArbeidsland.shouldBeFalse()
+                    betalerArbeidsgiveravgift.shouldBeTrue()
+                }
         }
     }
 
@@ -205,6 +242,8 @@ internal class InnvilgelseFtrlMapperTest {
                     innvilgelsesResultat.shouldBe(InnvilgelsesResultat.INNVILGET)
                 }
                 bestemmelse.shouldBe(Folketrygdloven_kap2_bestemmelser.FTRL_KAP2_2_7_FØRSTE_LEDD)
+                avslåttMedlemskapsperiodeFørMottaksdatoHelsedel.shouldBe(false)
+                avslåttMedlemskapsperiodeFørMottaksdatoFullDekning.shouldBe(false)
                 skatteplikttype.shouldBe(Skatteplikttype.SKATTEPLIKTIG)
                 begrunnelse.shouldBe(Ftrl_2_7_begrunnelser.ANNEN_GRUNN)
                 begrunnelseAnnenGrunnFritekst.shouldBe("<p>Vilkårresultat begrunnelse fritekst</p>")

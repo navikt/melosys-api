@@ -7,7 +7,7 @@ import no.nav.melosys.domain.mottatteopplysninger.data.Utenlandsoppdraget
 
 
 class Soeknad : MottatteOpplysningerData() {
-    var loennOgGodtgjoerelse = LoennOgGodtgjoerelse()
+    var loennOgGodtgjoerelse: LoennOgGodtgjoerelse? = LoennOgGodtgjoerelse()
     var arbeidsgiversBekreftelse = ArbeidsgiversBekreftelse()
     var utenlandsoppdraget = Utenlandsoppdraget()
     var arbeidssituasjonOgOevrig = ArbeidssituasjonOgOevrig()

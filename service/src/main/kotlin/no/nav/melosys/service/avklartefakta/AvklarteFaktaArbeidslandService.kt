@@ -2,12 +2,11 @@ package no.nav.melosys.service.avklartefakta
 
 import no.nav.melosys.domain.avklartefakta.Avklartefakta
 import no.nav.melosys.domain.kodeverk.Avklartefaktatyper
-import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.stereotype.Service
 import org.springframework.transaction.annotation.Transactional
 
 @Service
-class AvklarteFaktaArbeidslandService(@Autowired private val avklartefaktaService: AvklartefaktaService) {
+class AvklarteFaktaArbeidslandService(private val avklartefaktaService: AvklartefaktaService) {
 
     @Transactional
     fun lagreArbeidslandSomAvklartefakta(behandlingID: Long, arbeidsland: List<String?>) {

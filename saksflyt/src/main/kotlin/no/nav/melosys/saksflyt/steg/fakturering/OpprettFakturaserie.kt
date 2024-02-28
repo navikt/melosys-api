@@ -6,6 +6,7 @@ import no.nav.melosys.domain.Behandling
 import no.nav.melosys.domain.Behandlingsresultat
 import no.nav.melosys.domain.avgift.Trygdeavgiftsperiode
 import no.nav.melosys.domain.kodeverk.Fullmaktstype
+import no.nav.melosys.domain.kodeverk.Inntektskildetype
 import no.nav.melosys.exception.FunksjonellException
 import no.nav.melosys.featuretoggle.ToggleName
 import no.nav.melosys.integrasjon.faktureringskomponenten.FaktureringskomponentenConsumer
@@ -139,9 +140,23 @@ class OpprettFakturaserie(
                 it.periodeFra,
                 it.periodeTil,
                 "Inntekt: ${it.grunnlagInntekstperiode.avgiftspliktigInntektMnd.verdi}, " +
-                    "Dekning: ${it.grunnlagMedlemskapsperiode.trygdedekning.beskrivelse}, " +
+                    "Dekning: ${mapDekning(it)}, " +
                     "Sats: ${it.trygdesats} %"
             )
         }
+    }
+
+    private fun mapDekning(trygdeavgiftsperiode: Trygdeavgiftsperiode): String {
+        if (trygdeavgiftsperiode.grunnlagInntekstperiode.type === Inntektskildetype.PENSJON_UFØRETRYGD ||
+            trygdeavgiftsperiode.grunnlagInntekstperiode.type === Inntektskildetype.PENSJON_UFØRETRYGD_KILDESKATT
+        ) {
+            return DEFAULT_PENSJON_DEKNING_TEKST_HELSEDEL
+        }
+
+        return trygdeavgiftsperiode.grunnlagMedlemskapsperiode.trygdedekning.beskrivelse
+    }
+
+    companion object {
+        const val DEFAULT_PENSJON_DEKNING_TEKST_HELSEDEL = "Helsedel"
     }
 }

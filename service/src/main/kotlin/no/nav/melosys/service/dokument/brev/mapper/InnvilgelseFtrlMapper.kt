@@ -6,9 +6,9 @@ import no.nav.melosys.domain.Vilkaarsresultat
 import no.nav.melosys.domain.brev.InnvilgelseFtrlBrevbestilling
 import no.nav.melosys.domain.folketrygden.MedlemAvFolketrygden
 import no.nav.melosys.domain.kodeverk.Fullmaktstype
-import no.nav.melosys.domain.kodeverk.InnvilgelsesResultat
 import no.nav.melosys.domain.kodeverk.Kodeverk
 import no.nav.melosys.domain.kodeverk.Trygdeavtale_myndighetsland
+import no.nav.melosys.domain.kodeverk.Trygdedekninger
 import no.nav.melosys.domain.kodeverk.Vilkaar
 import no.nav.melosys.domain.kodeverk.begrunnelser.folketrygdloven.Ftrl_2_7_begrunnelser
 import no.nav.melosys.domain.kodeverk.begrunnelser.folketrygdloven.Ftrl_2_8_naer_tilknytning_norge_begrunnelser
@@ -43,11 +43,15 @@ class InnvilgelseFtrlMapper(
             .avgiftsperioder(mapAvgiftsPerioder(medlemAvFolketrygden))
             .medlemskapsperioder(mapMedlemskapsPerioder(medlemAvFolketrygden))
             .bestemmelse(medlemAvFolketrygden.medlemskapsperioder.filter { it.erInnvilget() }.sortedBy { it.fom }.first().bestemmelse)
-            .avslåttHelsedelFørMottaksdato(
-                erAvslåttHelsedelFørMottaksdato(
-                    brevbestilling.forsendelseMottatt,
-                    medlemAvFolketrygden
-                )
+            .avslåttMedlemskapsperiodeFørMottaksdatoHelsedel(
+                medlemAvFolketrygden.medlemskapsperioder.any {
+                    it.erAvslaatt() && it.harHelsedelDekning() && it.fomErFør(brevbestilling.forsendelseMottatt)
+                }
+            )
+            .avslåttMedlemskapsperiodeFørMottaksdatoFullDekning(
+                medlemAvFolketrygden.medlemskapsperioder.any {
+                    it.erAvslaatt() && it.harFullDekning() && it.fomErFør(brevbestilling.forsendelseMottatt)
+                }
             )
             .trygdeavgiftMottaker(trygdeavgiftMottakerService.getTrygdeavgiftMottaker(medlemAvFolketrygden.fastsattTrygdeavgift.trygdeavgiftsgrunnlag))
             .fullmektigTrygdeavgift(finnFullmektigTrygdeavgift(behandlingsresultat.behandling))
@@ -86,15 +90,6 @@ class InnvilgelseFtrlMapper(
                 it.innvilgelsesresultat
             )
         }.sortedByDescending { it.fom }
-
-    private fun erAvslåttHelsedelFørMottaksdato(
-        mottaksdato: Instant,
-        medlemAvFolketrygden: MedlemAvFolketrygden
-    ): Boolean =
-        medlemAvFolketrygden.medlemskapsperioder.any {
-            it.innvilgelsesresultat == InnvilgelsesResultat.AVSLAATT
-                && it.fom.isBefore(LocalDate.ofInstant(mottaksdato, ZoneId.systemDefault()))
-        }
 
     private fun erBetalerArbeidsgiveravgift(medlemskapsperioder: Collection<Medlemskapsperiode>) =
         medlemskapsperioder.any { it.trygdeavgiftsperioder.any { it.grunnlagInntekstperiode.isArbeidsgiversavgiftBetalesTilSkatt } }
@@ -136,4 +131,21 @@ class InnvilgelseFtrlMapper(
 
     private fun harTrygdeavtaleMedArbeidsland(arbeidsland: String): Boolean =
         Trygdeavtale_myndighetsland.values().any() { it.name == arbeidsland }
+
+    private fun Medlemskapsperiode.harFullDekning(): Boolean = listOf(
+        Trygdedekninger.FULL_DEKNING,
+        Trygdedekninger.FULL_DEKNING_EOSFO,
+        Trygdedekninger.FULL_DEKNING_FTRL
+    ).contains(trygdedekning)
+
+    private fun Medlemskapsperiode.harHelsedelDekning(): Boolean = listOf(
+        Trygdedekninger.FTRL_2_7_TREDJE_LEDD_B_HELSE_SYKE_FORELDREPENGER,
+        Trygdedekninger.FTRL_2_7A_ANDRE_LEDD_B_HELSE_SYKE_FORELDREPENGER,
+        Trygdedekninger.FTRL_2_9_FØRSTE_LEDD_A_HELSE,
+        Trygdedekninger.FTRL_2_9_FØRSTE_LEDD_A_ANDRE_LEDD_HELSE_SYKE_FORELDREPENGER,
+        Trygdedekninger.FTRL_2_9_FØRSTE_LEDD_C_ANDRE_LEDD_HELSE_PENSJON_SYKE_FORELDREPENGER
+    ).contains(trygdedekning)
+
+    private fun Medlemskapsperiode.fomErFør(instant: Instant): Boolean =
+        this.fom.isBefore(LocalDate.ofInstant(instant, ZoneId.systemDefault()))
 }
