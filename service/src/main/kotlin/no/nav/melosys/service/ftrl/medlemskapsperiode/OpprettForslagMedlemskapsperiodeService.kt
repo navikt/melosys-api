@@ -15,8 +15,7 @@ import no.nav.melosys.featuretoggle.ToggleName
 import no.nav.melosys.repository.MedlemAvFolketrygdenRepository
 import no.nav.melosys.service.behandling.BehandlingsresultatService
 import no.nav.melosys.service.behandling.UtledMottaksdato
-import no.nav.melosys.service.ftrl.LovligeKombinasjonerTrygdedekningBestemmelse
-import no.nav.melosys.service.ftrl.bestemmelse.FtrlBestemmelser
+import no.nav.melosys.service.ftrl.bestemmelse.LovligeKombinasjonerTrygdedekningBestemmelse
 import org.springframework.stereotype.Service
 import org.springframework.transaction.annotation.Transactional
 
@@ -25,7 +24,6 @@ import org.springframework.transaction.annotation.Transactional
 class OpprettForslagMedlemskapsperiodeService(
     private val medlemAvFolketrygdenRepository: MedlemAvFolketrygdenRepository,
     private val behandlingsresultatService: BehandlingsresultatService,
-    private val ftrlBestemmelser: FtrlBestemmelser,
     private val utledMottaksdato: UtledMottaksdato,
     private val utledBestemmelserOgVilkår: UtledBestemmelserOgVilkår,
     private val unleash: Unleash,
@@ -96,12 +94,7 @@ class OpprettForslagMedlemskapsperiodeService(
         }
 
         if (unleash.isEnabled(ToggleName.MELOSYS_FTRL_IKKE_YRKESAKTIV)) {
-            if (bestemmelse !in ftrlBestemmelser.hentBestemmelser(behandlingstema, trygdedekning)) {
-                throw FunksjonellException("Støtter ikke perioder med bestemmelse $bestemmelse for behandlingstema $behandlingstema og trygdedekning $trygdedekning")
-            }
-
-            // TODO kan fjernes?
-            if (!LovligeKombinasjonerTrygdedekningBestemmelse.erBestemmelseGyldig(bestemmelse, trygdedekning)) {
+            if (!LovligeKombinasjonerTrygdedekningBestemmelse.erBestemmelseGyldigForTrygdedekning(bestemmelse, trygdedekning)) {
                 throw FunksjonellException("Ulovlig kombinasjon av bestemmelse $bestemmelse og trygdedekning $trygdedekning")
             }
         } else {
@@ -110,7 +103,7 @@ class OpprettForslagMedlemskapsperiodeService(
                 throw FunksjonellException("Støtter ikke perioder med bestemmelse $bestemmelse for behandlingstema $behandlingstema")
             }
 
-            if (!LovligeKombinasjonerTrygdedekningBestemmelse.erBestemmelseGyldig(bestemmelse, trygdedekning)) {
+            if (!LovligeKombinasjonerTrygdedekningBestemmelse.erBestemmelseGyldigForTrygdedekning(bestemmelse, trygdedekning)) {
                 throw FunksjonellException("Ulovlig kombinasjon av bestemmelse $bestemmelse og trygdedekning $trygdedekning")
             }
         }
