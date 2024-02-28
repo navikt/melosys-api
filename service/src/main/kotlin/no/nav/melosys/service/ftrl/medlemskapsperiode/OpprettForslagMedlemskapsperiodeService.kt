@@ -16,7 +16,6 @@ import no.nav.melosys.repository.MedlemAvFolketrygdenRepository
 import no.nav.melosys.service.behandling.BehandlingsresultatService
 import no.nav.melosys.service.behandling.UtledMottaksdato
 import no.nav.melosys.service.ftrl.LovligeKombinasjonerTrygdedekningBestemmelse
-import no.nav.melosys.service.ftrl.bestemmelse.FtrlBestemmelser
 import org.springframework.stereotype.Service
 import org.springframework.transaction.annotation.Transactional
 
