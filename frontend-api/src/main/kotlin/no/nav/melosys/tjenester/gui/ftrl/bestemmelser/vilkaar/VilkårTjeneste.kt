@@ -1,5 +1,6 @@
 package no.nav.melosys.tjenester.gui.ftrl.bestemmelser.vilkaar
 
+import io.getunleash.Unleash
 import io.swagger.annotations.Api
 import mu.KotlinLogging
 import no.nav.melosys.domain.kodeverk.Avklartefaktatyper
@@ -7,6 +8,7 @@ import no.nav.melosys.domain.kodeverk.Folketrygdloven_kap2_bestemmelser
 import no.nav.melosys.domain.kodeverk.Vilkaar
 import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingstema
 import no.nav.melosys.exception.FunksjonellException
+import no.nav.melosys.featuretoggle.ToggleName
 import no.nav.melosys.service.ftrl.bestemmelse.vilkaar.VilkårForBestemmelse
 import no.nav.melosys.service.tilgang.Aksesskontroll
 import no.nav.security.token.support.core.api.Protected
@@ -22,7 +24,11 @@ private const val BEHANDLING_ID = "behandlingID"
 @Protected
 @RestController
 @Api(tags = ["ftrl", "bestemmelser", "avklarte fakta", "vilkår"])
-class VilkårTjeneste(private val vilkårForBestemmelse: VilkårForBestemmelse, val aksessKontroll: Aksesskontroll) {
+class VilkårTjeneste(
+    private val vilkårForBestemmelse: VilkårForBestemmelse,
+    val aksessKontroll: Aksesskontroll,
+    val unleash: Unleash
+) {
     private val log = KotlinLogging.logger { }
 
     private val avklartefaktatyperNavn = Avklartefaktatyper.values().map { it.name }
@@ -38,7 +44,13 @@ class VilkårTjeneste(private val vilkårForBestemmelse: VilkårForBestemmelse, 
             aksessKontroll.autoriser(behandlingID)
         }
 
-        val behandlingstema = requestParams[BEHANDLINGSTEMA] ?: throw FunksjonellException("?behandlingstema er påkrevd")
+        var behandlingstema: String
+        if (unleash.isEnabled(ToggleName.MELOSYS_FTRL_BESTEMMELSER_2)) {
+            behandlingstema = requestParams[BEHANDLINGSTEMA] ?: throw FunksjonellException("?behandlingstema er påkrevd")
+        } else {
+            behandlingstema = Behandlingstema.IKKE_YRKESAKTIV.name
+        }
+
         val avklarteFakta = requestParams.filterKeys { k -> k in avklartefaktatyperNavn }
             .mapKeys { (k, _) -> Avklartefaktatyper.valueOf(k) }
         val vilkårDtoList = vilkårForBestemmelse.hentVilkår(
