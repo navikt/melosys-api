@@ -1,4 +1,4 @@
-package no.nav.melosys.service.ftrl
+package no.nav.melosys.service.ftrl.bestemmelse
 
 import no.nav.melosys.domain.kodeverk.Folketrygdloven_kap2_bestemmelser
 import no.nav.melosys.domain.kodeverk.Trygdedekninger
