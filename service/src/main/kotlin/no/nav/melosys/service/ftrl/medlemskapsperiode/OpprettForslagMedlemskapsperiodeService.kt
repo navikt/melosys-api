@@ -95,7 +95,7 @@ class OpprettForslagMedlemskapsperiodeService(
         }
 
         if (unleash.isEnabled(ToggleName.MELOSYS_FTRL_IKKE_YRKESAKTIV)) {
-            if (!LovligeKombinasjonerTrygdedekningBestemmelse.erBestemmelseGyldig(bestemmelse, trygdedekning)) {
+            if (!LovligeKombinasjonerTrygdedekningBestemmelse.erBestemmelseGyldigForTrygdedekning(bestemmelse, trygdedekning)) {
                 throw FunksjonellException("Ulovlig kombinasjon av bestemmelse $bestemmelse og trygdedekning $trygdedekning")
             }
         } else {
@@ -104,7 +104,7 @@ class OpprettForslagMedlemskapsperiodeService(
                 throw FunksjonellException("Støtter ikke perioder med bestemmelse $bestemmelse for behandlingstema $behandlingstema")
             }
 
-            if (!LovligeKombinasjonerTrygdedekningBestemmelse.erBestemmelseGyldig(bestemmelse, trygdedekning)) {
+            if (!LovligeKombinasjonerTrygdedekningBestemmelse.erBestemmelseGyldigForTrygdedekning(bestemmelse, trygdedekning)) {
                 throw FunksjonellException("Ulovlig kombinasjon av bestemmelse $bestemmelse og trygdedekning $trygdedekning")
             }
         }

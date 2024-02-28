@@ -57,24 +57,24 @@ class LovligeKombinasjonerTrygdedekningBestemmelseTest {
     }
 
     @Test
-    fun erBestemmelseGyldig_gyldigKombinasjon_returnererTrue() {
-        LovligeKombinasjonerTrygdedekningBestemmelse.erBestemmelseGyldig(
+    fun erBestemmelseGyldigForTrygdedekning_gyldigKombinasjon_returnererTrue() {
+        LovligeKombinasjonerTrygdedekningBestemmelse.erBestemmelseGyldigForTrygdedekning(
             Folketrygdloven_kap2_bestemmelser.FTRL_KAP2_2_8_FØRSTE_LEDD_A,
             Trygdedekninger.FTRL_2_9_FØRSTE_LEDD_A_HELSE
         ).shouldBeTrue()
     }
 
     @Test
-    fun erBestemmelseGyldig_uGyldigKombinasjon_returnererFalse() {
-        LovligeKombinasjonerTrygdedekningBestemmelse.erBestemmelseGyldig(
+    fun erBestemmelseGyldigForTrygdedekning_uGyldigKombinasjon_returnererFalse() {
+        LovligeKombinasjonerTrygdedekningBestemmelse.erBestemmelseGyldigForTrygdedekning(
             Folketrygdloven_kap2_bestemmelser.FTRL_KAP2_2_8_FØRSTE_LEDD_A,
             Trygdedekninger.FTRL_2_7A_ANDRE_LEDD_B_HELSE_SYKE_FORELDREPENGER
         ).shouldBeFalse()
     }
 
     @Test
-    fun erBestemmelseGyldig_uGyldigKombinasjonMenBestemmelseErPliktig_returnererTrue() {
-        LovligeKombinasjonerTrygdedekningBestemmelse.erBestemmelseGyldig(
+    fun erBestemmelseGyldigForTrygdedekning_uGyldigKombinasjonMenBestemmelseErPliktig_returnererTrue() {
+        LovligeKombinasjonerTrygdedekningBestemmelse.erBestemmelseGyldigForTrygdedekning(
             Folketrygdloven_kap2_bestemmelser.FTRL_KAP2_2_1_FØRSTE_LEDD,
             Trygdedekninger.FTRL_2_7A_ANDRE_LEDD_B_HELSE_SYKE_FORELDREPENGER
         ).shouldBeTrue()

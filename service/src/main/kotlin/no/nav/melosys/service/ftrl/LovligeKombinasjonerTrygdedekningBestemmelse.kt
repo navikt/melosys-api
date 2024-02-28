@@ -51,7 +51,7 @@ object LovligeKombinasjonerTrygdedekningBestemmelse {
         return bestemmelse in hentLovligeBestemmelser(trygdedekning)
     }
 
-    fun erBestemmelseGyldig(bestemmelse: Folketrygdloven_kap2_bestemmelser, trygdedekning: Trygdedekninger): Boolean {
+    fun erBestemmelseGyldigForTrygdedekning(bestemmelse: Folketrygdloven_kap2_bestemmelser, trygdedekning: Trygdedekninger): Boolean {
         if (bestemmelse in PliktigeMedlemskapsbestemmelser.bestemmelser) {
             return true
         }
