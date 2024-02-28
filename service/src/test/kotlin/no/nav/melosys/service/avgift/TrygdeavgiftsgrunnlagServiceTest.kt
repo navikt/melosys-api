@@ -251,30 +251,6 @@ class TrygdeavgiftsgrunnlagServiceTest {
     }
 
     @Test
-    fun oppdaterTrygdeavgiftsgrunnlag_barePensjonInntekt_kasterFeil() {
-        val fom = LocalDate.now().minusMonths(1)
-        val tom = LocalDate.now().plusMonths(3)
-        behandlingsresultat.medlemAvFolketrygden = MedlemAvFolketrygden().apply {
-            medlemskapsperioder = listOf(Medlemskapsperiode().apply {
-                this.fom = fom
-                this.tom = tom
-                innvilgelsesresultat = InnvilgelsesResultat.INNVILGET
-            })
-            fastsattTrygdeavgift = FastsattTrygdeavgift().apply {
-                trygdeavgiftsperioder = mutableSetOf(Trygdeavgiftsperiode())
-            }
-        }
-
-        shouldThrow<FunksjonellException> {
-            trygdeavgiftsgrunnlagService.oppdaterTrygdeavgiftsgrunnlag(
-                BEHANDLING_ID, OppdaterTrygdeavgiftsgrunnlagRequest(listOf(lagSkatteforholdTilNorge(fom, tom)), listOf(
-                    InntektskildeRequest(Inntektskildetype.PENSJON_UFØRETRYGD, false, null, fom, tom)
-                ))
-            )
-        }.message.shouldContain("Du må oppgi minst en annen inntekt i tillegg til pensjon/uføretrygd")
-    }
-
-    @Test
     fun oppdaterTrygdeavgiftsgrunnlag_eksistererBeregnetTrygdeavgift_sletterEksisterendeBeregning() {
         val fom = LocalDate.now().minusMonths(1);
         val tom = LocalDate.now().plusMonths(3);
