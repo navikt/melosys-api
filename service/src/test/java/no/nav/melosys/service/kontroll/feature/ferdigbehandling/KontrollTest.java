@@ -213,8 +213,8 @@ class KontrollTest {
         lovvalgsperiode.setInnvilgelsesresultat(InnvilgelsesResultat.INNVILGET);
 
         Medlemsperiode medlemsperiode = new Medlemsperiode();
-        medlemsperiode.periode = new Periode(LocalDate.now().plusMonths(2), LocalDate.now().plusYears(2));
-        medlemsperiode.status = PeriodestatusMedl.GYLD.getKode();
+        medlemsperiode.setPeriode(new Periode(LocalDate.now().plusMonths(2), LocalDate.now().plusYears(2)));
+        medlemsperiode.setStatus(PeriodestatusMedl.GYLD.getKode());
         medlemskapDokument.getMedlemsperiode().add(medlemsperiode);
 
 

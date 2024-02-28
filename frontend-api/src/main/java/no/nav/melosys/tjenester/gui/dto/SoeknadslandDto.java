@@ -7,8 +7,24 @@ import no.nav.melosys.domain.mottatteopplysninger.data.Soeknadsland;
 import no.nav.melosys.domain.kodeverk.Landkoder;
 
 public class SoeknadslandDto {
-    public List<String> landkoder;
-    public boolean flereLandUkjentHvilke;
+    private List<String> landkoder;
+    private boolean flereLandUkjentHvilke;
+
+    public List<String> getLandkoder() {
+        return landkoder;
+    }
+
+    public void setLandkoder(List<String> landkoder) {
+        this.landkoder = landkoder;
+    }
+
+    public boolean isFlereLandUkjentHvilke() {
+        return flereLandUkjentHvilke;
+    }
+
+    public void setFlereLandUkjentHvilke(boolean flereLandUkjentHvilke) {
+        this.flereLandUkjentHvilke = flereLandUkjentHvilke;
+    }
 
     public SoeknadslandDto(List<String> landkoder, boolean flereLandUkjentHvilke) {
         this.landkoder = landkoder;

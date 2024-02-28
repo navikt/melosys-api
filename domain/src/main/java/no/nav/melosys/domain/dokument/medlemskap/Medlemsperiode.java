@@ -7,25 +7,69 @@ public class Medlemsperiode implements HarPeriode {
 
     private static final String KILDE_LÅNEKASSEN = "LAANEKASSEN";
 
-    public Long id;
+    private Long id;
 
-    public Periode periode;
+    private Periode periode;
 
-    public String type; // https://kodeverk-web.dev.adeo.no/kodeverksoversikt/kodeverk/PeriodetypeMedl
+    private String type; // https://kodeverk-web.dev.adeo.no/kodeverksoversikt/kodeverk/PeriodetypeMedl
 
-    public String status; // https://kodeverk-web.dev.adeo.no/kodeverksoversikt/kodeverk/PeriodestatusMedl
+    private String status; // https://kodeverk-web.dev.adeo.no/kodeverksoversikt/kodeverk/PeriodestatusMedl
 
-    public String grunnlagstype; // https://kodeverk-web.dev.adeo.no/kodeverksoversikt/kodeverk/GrunnlagMedl
+    private String grunnlagstype; // https://kodeverk-web.dev.adeo.no/kodeverksoversikt/kodeverk/GrunnlagMedl
 
-    public String land; // ISO3, https://kodeverk-web.dev.adeo.no/kodeverksoversikt/kodeverk/Landkoder
+    private String land; // ISO3, https://kodeverk-web.dev.adeo.no/kodeverksoversikt/kodeverk/Landkoder
 
-    public String lovvalg; // https://kodeverk-web.dev.adeo.no/kodeverksoversikt/kodeverk/LovvalgMedl
+    private String lovvalg; // https://kodeverk-web.dev.adeo.no/kodeverksoversikt/kodeverk/LovvalgMedl
 
-    public String trygdedekning; // https://kodeverk-web.dev.adeo.no/kodeverksoversikt/kodeverk/DekningMedl
+    private String trygdedekning; // https://kodeverk-web.dev.adeo.no/kodeverksoversikt/kodeverk/DekningMedl
 
-    public String kildedokumenttype; // https://kodeverk-web.dev.adeo.no/kodeverksoversikt/kodeverk/KildedokumentMedl
+    private String kildedokumenttype; // https://kodeverk-web.dev.adeo.no/kodeverksoversikt/kodeverk/KildedokumentMedl
 
-    public String kilde; // https://kodeverk-web.dev.adeo.no/kodeverksoversikt/kodeverk/KildesystemMedl
+    private String kilde; // https://kodeverk-web.dev.adeo.no/kodeverksoversikt/kodeverk/KildesystemMedl
+
+    public Long getId() {
+        return id;
+    }
+
+    public void setId(Long id) {
+        this.id = id;
+    }
+
+    public void setPeriode(Periode periode) {
+        this.periode = periode;
+    }
+
+    public void setType(String type) {
+        this.type = type;
+    }
+
+    public void setStatus(String status) {
+        this.status = status;
+    }
+
+    public void setGrunnlagstype(String grunnlagstype) {
+        this.grunnlagstype = grunnlagstype;
+    }
+
+    public void setLand(String land) {
+        this.land = land;
+    }
+
+    public void setLovvalg(String lovvalg) {
+        this.lovvalg = lovvalg;
+    }
+
+    public void setTrygdedekning(String trygdedekning) {
+        this.trygdedekning = trygdedekning;
+    }
+
+    public void setKildedokumenttype(String kildedokumenttype) {
+        this.kildedokumenttype = kildedokumenttype;
+    }
+
+    public void setKilde(String kilde) {
+        this.kilde = kilde;
+    }
 
     @Override
     public Periode getPeriode() {
