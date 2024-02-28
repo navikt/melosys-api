@@ -8,7 +8,7 @@ import no.nav.melosys.domain.person.familie.AvklarteMedfolgendeFamilie
 import java.util.*
 
 
-class BrevDataInnvilgelse(brevbestillingDto: BrevbestillingDto, saksbehandler: String) : BrevData(brevbestillingDto, saksbehandler) {
+class BrevDataInnvilgelse(brevbestillingDto: BrevbestillingDto, saksbehandler: String?) : BrevData(brevbestillingDto, saksbehandler) {
     private var anmodningsperiodesvar: AnmodningsperiodeSvar? = null
     var lovvalgsperiode: Lovvalgsperiode? = null
     var arbeidsland: String? = null

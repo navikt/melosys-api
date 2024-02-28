@@ -13,7 +13,7 @@ open class BrevData(
         brevbestillingDto.begrunnelseKode
     )
 
-    constructor(brevbestillingDto: BrevbestillingDto, saksbehandler: String) : this(
+    constructor(brevbestillingDto: BrevbestillingDto, saksbehandler: String?) : this(
         saksbehandler,
         brevbestillingDto.fritekst,
         brevbestillingDto.begrunnelseKode
