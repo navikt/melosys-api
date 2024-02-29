@@ -65,7 +65,7 @@ class VilkårTjeneste(
     }
 
     private fun validerRequestParams(queryParams: Map<String, String>) {
-        val validKeys = listOf(BEHANDLING_ID) + avklartefaktatyperNavn
+        val validKeys = listOf(BEHANDLING_ID, BEHANDLINGSTEMA) + avklartefaktatyperNavn
 
         val unknownKeys = queryParams.keys.filterNot { key ->  validKeys.any { it.equals(key, ignoreCase = true) } }
         if (unknownKeys.isNotEmpty()) {
