@@ -30,9 +30,6 @@ class KansellerFakturaserieTest {
     @RelaxedMockK
     lateinit var faktureringskomponentenConsumer: FaktureringskomponentenConsumer
 
-    @RelaxedMockK
-    lateinit var trygdeavgiftOppsummeringService: TrygdeavgiftOppsummeringService
-
     @InjectMockKs
     lateinit var kansellerFakturaserie: KansellerFakturaserie
 
@@ -76,7 +73,6 @@ class KansellerFakturaserieTest {
         every { behandlingsresultatService.hentBehandlingsresultat(behandlingId) } returns Behandlingsresultat().apply { id = behandlingId }
         every { behandlingsresultatService.hentBehandlingsresultat(opprinneligBehandlingId) } returns behandlingsresultatOpprinneligBehandling
         every { faktureringskomponentenConsumer.kansellerFakturaserie(fakturaReferanse, SAKSBEHANDLER_IDENT) } returns nyFakturaserieResponseDto
-        every { trygdeavgiftOppsummeringService.harTrygdeavgiftOgBestiltFaktura(behandlingsresultatOpprinneligBehandling) } returns true
 
 
         kansellerFakturaserie.utfør(prosessinstans)
@@ -137,8 +133,6 @@ class KansellerFakturaserieTest {
         every { behandlingsresultatService.hentBehandlingsresultat(behandlingHenvendelseId) } returns Behandlingsresultat().apply { id = behandlingHenvendelseId }
         every { behandlingsresultatService.hentBehandlingsresultat(opprinneligBehandlingId) } returns behandlingsresultatOpprinneligBehandling
         every { faktureringskomponentenConsumer.kansellerFakturaserie(fakturaReferanse, SAKSBEHANDLER_IDENT) } returns nyFakturaserieResponseDto
-        every { trygdeavgiftOppsummeringService.harTrygdeavgiftOgBestiltFaktura(behandlingsresultatOpprinneligBehandling) } returns true
-
 
         kansellerFakturaserie.utfør(prosessinstans)
 
