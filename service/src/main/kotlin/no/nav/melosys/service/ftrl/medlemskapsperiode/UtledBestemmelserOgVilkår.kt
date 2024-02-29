@@ -12,6 +12,7 @@ import no.nav.melosys.featuretoggle.ToggleName
 import no.nav.melosys.service.ftrl.bestemmelse.IkkeYrkesaktivBestemmelser
 import org.springframework.stereotype.Component
 
+@Deprecated("MELOSYS-6470, se no.nav.melosys.service.ftrl.bestemmelse")
 @Component
 class UtledBestemmelserOgVilkår(val unleash: Unleash) {
 
@@ -44,11 +45,11 @@ class UtledBestemmelserOgVilkår(val unleash: Unleash) {
         Pair(FTRL_KAP2_2_7A, emptySet()),
         Pair(
             FTRL_KAP2_2_8_FØRSTE_LEDD_A,
-            setOf(Vilkaar.FTRL_2_8_FORUTGÅENDE_TRYGDETID)
+            setOf(Vilkaar.FTRL_FORUTGÅENDE_TRYGDETID)
         ),
         Pair(
             FTRL_KAP2_2_8_ANDRE_LEDD,
-            LinkedHashSet(listOf(Vilkaar.FTRL_2_8_FORUTGÅENDE_TRYGDETID, Vilkaar.FTRL_2_8_NÆR_TILKNYTNING_NORGE))
+            LinkedHashSet(listOf(Vilkaar.FTRL_FORUTGÅENDE_TRYGDETID, Vilkaar.FTRL_2_8_NÆR_TILKNYTNING_NORGE))
         )
     )
 
@@ -93,7 +94,7 @@ class UtledBestemmelserOgVilkår(val unleash: Unleash) {
             LinkedHashSet(
                 listOf(
                     Vilkaar.FTRL_2_1A_TRYGDEKOORDINGERING,
-                    Vilkaar.FTRL_2_8_FORUTGÅENDE_TRYGDETID,
+                    Vilkaar.FTRL_FORUTGÅENDE_TRYGDETID,
                     Vilkaar.FTRL_2_8_FØRSTE_LEDD_NÆR_TILKNYTNING_NORGE
                 )
             )
@@ -103,7 +104,7 @@ class UtledBestemmelserOgVilkår(val unleash: Unleash) {
             LinkedHashSet(
                 listOf(
                     Vilkaar.FTRL_2_1A_TRYGDEKOORDINGERING,
-                    Vilkaar.FTRL_2_8_FORUTGÅENDE_TRYGDETID,
+                    Vilkaar.FTRL_FORUTGÅENDE_TRYGDETID,
                     Vilkaar.FTRL_2_8_NÆR_TILKNYTNING_NORGE
                 )
             )
@@ -123,16 +124,16 @@ class UtledBestemmelserOgVilkår(val unleash: Unleash) {
         Pair(FTRL_KAP2_2_8_FØRSTE_LEDD_D, emptySet()),
         Pair(
             FTRL_KAP2_2_8_ANDRE_LEDD,
-            LinkedHashSet(listOf(Vilkaar.FTRL_2_8_FORUTGÅENDE_TRYGDETID, Vilkaar.FTRL_2_8_NÆR_TILKNYTNING_NORGE))
+            LinkedHashSet(listOf(Vilkaar.FTRL_FORUTGÅENDE_TRYGDETID, Vilkaar.FTRL_2_8_NÆR_TILKNYTNING_NORGE))
         ),
         Pair(FTRL_KAP2_2_8_FJERDE_LEDD, emptySet()),
     )
 
     val defaultBestemmelserOgVilkår = mapOf<Folketrygdloven_kap2_bestemmelser, Collection<Vilkaar>>(
-        Pair(FTRL_KAP2_2_8_FØRSTE_LEDD_A, setOf(Vilkaar.FTRL_2_8_FORUTGÅENDE_TRYGDETID)),
+        Pair(FTRL_KAP2_2_8_FØRSTE_LEDD_A, setOf(Vilkaar.FTRL_FORUTGÅENDE_TRYGDETID)),
         Pair(
             FTRL_KAP2_2_8_ANDRE_LEDD,
-            LinkedHashSet(listOf(Vilkaar.FTRL_2_8_FORUTGÅENDE_TRYGDETID, Vilkaar.FTRL_2_8_NÆR_TILKNYTNING_NORGE))
+            LinkedHashSet(listOf(Vilkaar.FTRL_FORUTGÅENDE_TRYGDETID, Vilkaar.FTRL_2_8_NÆR_TILKNYTNING_NORGE))
         ),
     )
 

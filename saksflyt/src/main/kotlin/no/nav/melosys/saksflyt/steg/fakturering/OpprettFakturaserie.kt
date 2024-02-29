@@ -6,6 +6,7 @@ import no.nav.melosys.domain.Behandling
 import no.nav.melosys.domain.Behandlingsresultat
 import no.nav.melosys.domain.avgift.Trygdeavgiftsperiode
 import no.nav.melosys.domain.kodeverk.Fullmaktstype
+import no.nav.melosys.domain.kodeverk.Inntektskildetype
 import no.nav.melosys.exception.FunksjonellException
 import no.nav.melosys.featuretoggle.ToggleName
 import no.nav.melosys.integrasjon.faktureringskomponenten.FaktureringskomponentenConsumer
@@ -45,22 +46,28 @@ class OpprettFakturaserie(
             return
         }
 
-        val behandlingsId = prosessinstans.behandling.id
+        val behandling = prosessinstans.behandling
+        val behandlingsId = behandling.id
         val saksbehandlerIdent = prosessinstans.getData(ProsessDataKey.SAKSBEHANDLER)
         val behandlingsresultat = behandlingsresultatService.hentBehandlingsresultat(behandlingsId)
 
-        if (behandlingsresultat.erOpphørt() || andregangsvurderingHarFjernetTrygdeavgift(prosessinstans.behandling, behandlingsresultat)) {
-            log.info("Kansellerer fakturaserie for behandling: $behandlingsId med fakturaseriereferanse: ${behandlingsresultat.fakturaserieReferanse}")
-            kansellerFakturaserieOgLagreReferanse(behandlingsresultat, saksbehandlerIdent)
+        if (behandlingsresultat.erOpphørt() || andregangsvurderingHarFjernetTrygdeavgift(behandling, behandlingsresultat)) {
+            val opprinneligFakturaserieReferanse =
+                behandlingsresultatService.hentBehandlingsresultat(behandling.opprinneligBehandling.id).fakturaserieReferanse
+            log.info("Kansellerer fakturaserie for behandling: $behandlingsId med fakturaseriereferanse: $opprinneligFakturaserieReferanse")
+            kansellerFakturaserieOgLagreReferanse(behandlingsresultat, opprinneligFakturaserieReferanse, saksbehandlerIdent)
         } else if (skalOppretteFakturaserie(behandlingsresultat)) {
             log.info("Oppretter fakturaserie for behandling: $behandlingsId")
             opprettFakturaserieOgLagreReferanse(behandlingsresultat, mapFakturaserieDto(behandlingsresultat, prosessinstans), saksbehandlerIdent)
         }
     }
 
-    private fun kansellerFakturaserieOgLagreReferanse(behandlingsresultat: Behandlingsresultat, saksbehandlerIdent: String) {
-        val fakturaserieResponse =
-            faktureringskomponentenConsumer.kansellerFakturaserie(behandlingsresultat.fakturaserieReferanse, saksbehandlerIdent)
+    private fun kansellerFakturaserieOgLagreReferanse(
+        behandlingsresultat: Behandlingsresultat,
+        opprinneligFakturaserieReferanse: String,
+        saksbehandlerIdent: String
+    ) {
+        val fakturaserieResponse = faktureringskomponentenConsumer.kansellerFakturaserie(opprinneligFakturaserieReferanse, saksbehandlerIdent)
         behandlingsresultat.fakturaserieReferanse = fakturaserieResponse.fakturaserieReferanse
         behandlingsresultatService.lagre(behandlingsresultat)
     }
@@ -139,9 +146,23 @@ class OpprettFakturaserie(
                 it.periodeFra,
                 it.periodeTil,
                 "Inntekt: ${it.grunnlagInntekstperiode.avgiftspliktigInntektMnd.verdi}, " +
-                    "Dekning: ${it.grunnlagMedlemskapsperiode.trygdedekning.beskrivelse}, " +
+                    "Dekning: ${mapDekning(it)}, " +
                     "Sats: ${it.trygdesats} %"
             )
         }
+    }
+
+    private fun mapDekning(trygdeavgiftsperiode: Trygdeavgiftsperiode): String {
+        if (trygdeavgiftsperiode.grunnlagInntekstperiode.type === Inntektskildetype.PENSJON_UFØRETRYGD ||
+            trygdeavgiftsperiode.grunnlagInntekstperiode.type === Inntektskildetype.PENSJON_UFØRETRYGD_KILDESKATT
+        ) {
+            return DEFAULT_PENSJON_DEKNING_TEKST_HELSEDEL
+        }
+
+        return trygdeavgiftsperiode.grunnlagMedlemskapsperiode.trygdedekning.beskrivelse
+    }
+
+    companion object {
+        const val DEFAULT_PENSJON_DEKNING_TEKST_HELSEDEL = "Helsedel"
     }
 }

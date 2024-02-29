@@ -5,7 +5,7 @@ import java.util.stream.Collectors;
 
 import io.swagger.annotations.Api;
 import no.nav.melosys.service.ftrl.medlemskapsperiode.MedlemskapsperiodeService;
-import no.nav.melosys.service.ftrl.medlemskapsperiode.OpprettMedlemskapsperiodeService;
+import no.nav.melosys.service.ftrl.medlemskapsperiode.OpprettForslagMedlemskapsperiodeService;
 import no.nav.melosys.service.tilgang.Aksesskontroll;
 import no.nav.melosys.tjenester.gui.ftrl.medlemskapsperiode.dto.BestemmelseDto;
 import no.nav.melosys.tjenester.gui.ftrl.medlemskapsperiode.dto.MedlemskapsperiodeDto;
@@ -23,14 +23,14 @@ import org.springframework.web.context.WebApplicationContext;
 public class MedlemskapsperiodeTjeneste {
 
     private final MedlemskapsperiodeService medlemskapsperiodeService;
-    private final OpprettMedlemskapsperiodeService opprettMedlemskapsperiodeService;
+    private final OpprettForslagMedlemskapsperiodeService opprettForslagMedlemskapsperiodeService;
     private final Aksesskontroll aksesskontroll;
 
     public MedlemskapsperiodeTjeneste(MedlemskapsperiodeService medlemskapsperiodeService,
-                                      OpprettMedlemskapsperiodeService opprettMedlemskapsperiodeService,
+                                      OpprettForslagMedlemskapsperiodeService opprettForslagMedlemskapsperiodeService,
                                       Aksesskontroll aksesskontroll) {
         this.medlemskapsperiodeService = medlemskapsperiodeService;
-        this.opprettMedlemskapsperiodeService = opprettMedlemskapsperiodeService;
+        this.opprettForslagMedlemskapsperiodeService = opprettForslagMedlemskapsperiodeService;
         this.aksesskontroll = aksesskontroll;
     }
 
@@ -103,7 +103,7 @@ public class MedlemskapsperiodeTjeneste {
         aksesskontroll.autoriserSkriv(behandlingID);
 
         return ResponseEntity.ok(
-            opprettMedlemskapsperiodeService.opprettForslagPåMedlemskapsperioder(behandlingID, bestemmelseDto.bestemmelse())
+            opprettForslagMedlemskapsperiodeService.opprettForslagPåMedlemskapsperioder(behandlingID, bestemmelseDto.bestemmelse())
                 .stream()
                 .map(MedlemskapsperiodeDto::av)
                 .collect(Collectors.toSet())

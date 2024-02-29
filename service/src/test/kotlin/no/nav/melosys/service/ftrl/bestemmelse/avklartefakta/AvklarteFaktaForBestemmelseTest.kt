@@ -31,10 +31,10 @@ class AvklarteFaktaForBestemmelseTest {
 
     @Test
     fun `avklarte fakta for FTRL_KAP2_2_1_FØRSTE_LEDD, ett eller flere land utenfor Norge, er IKKE_YRKESAKTIV_FTRL_2_1_OPPHOLD`() {
-        var mottatteOpplysninger =
+        val mottatteOpplysninger =
             MottatteOpplysninger().apply {
                 mottatteOpplysningerData =
-                    SøknadNorgeEllerUtenforEØS().apply { soeknadsland = Soeknadsland().apply { landkoder = listOf(Landkoder.NO.toString(), "AB", "PR") } }
+                    SøknadNorgeEllerUtenforEØS().apply { soeknadsland = Soeknadsland().apply { landkoder = listOf(Land_iso2.NO.toString(), "AB", "PR") } }
             }
         every {mottatteOpplysningerService.hentMottatteOpplysninger(1L)} returns mottatteOpplysninger
 
@@ -51,10 +51,10 @@ class AvklarteFaktaForBestemmelseTest {
 
     @Test
     fun `avklarte fakta for FTRL_KAP2_2_1_FØRSTE_LEDD, Norge, ingen avklarte fakta`() {
-        var mottatteOpplysninger =
+        val mottatteOpplysninger =
             MottatteOpplysninger().apply {
                 mottatteOpplysningerData =
-                    SøknadNorgeEllerUtenforEØS().apply { soeknadsland = Soeknadsland().apply { landkoder = listOf(Landkoder.NO.toString()) } }
+                    SøknadNorgeEllerUtenforEØS().apply { soeknadsland = Soeknadsland().apply { landkoder = listOf(Land_iso2.NO.toString()) } }
             }
         every {mottatteOpplysningerService.hentMottatteOpplysninger(1L)} returns mottatteOpplysninger
 

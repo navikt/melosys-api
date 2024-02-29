@@ -1,28 +1,24 @@
 package no.nav.melosys.itest
 
-import io.kotest.matchers.collections.shouldHaveSize
-import io.kotest.matchers.string.shouldMatch
-import io.kotest.matchers.string.shouldStartWith
+import io.kotest.matchers.shouldBe
 import io.mockk.CapturingSlot
 import io.mockk.every
 import io.mockk.mockk
-import mu.KotlinLogging
 import no.nav.melosys.Application
 import no.nav.melosys.AwaitUtil.throwOnLogError
 import no.nav.melosys.LoggingTestUtils
-import no.nav.melosys.LoggingTestUtils.check
-import no.nav.melosys.LoggingTestUtils.match
+import no.nav.melosys.LoggingTestUtils.filterBuilder
+import no.nav.melosys.ProsessRegister
 import no.nav.melosys.domain.eessi.melding.MelosysEessiMelding
 import no.nav.melosys.saksflyt.ProsessinstansBehandler
-import no.nav.melosys.saksflyt.ProsessinstansRepository
+import no.nav.melosys.saksflyt.ProsessinstansFerdigListener
 import no.nav.melosys.saksflyt.steg.sed.mottak.SedMottakRuting
 import no.nav.melosys.saksflytapi.ProsessinstansService
-import no.nav.melosys.saksflytapi.domain.ProsessStatus
 import no.nav.melosys.saksflytapi.domain.ProsessSteg
 import no.nav.melosys.saksflytapi.domain.Prosessinstans
 import no.nav.security.token.support.spring.test.EnableMockOAuth2Server
 import org.awaitility.kotlin.await
-import org.junit.jupiter.api.Disabled
+import org.junit.jupiter.api.AfterEach
 import org.junit.jupiter.api.Test
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.boot.test.autoconfigure.jdbc.AutoConfigureTestDatabase
@@ -34,11 +30,7 @@ import org.springframework.context.annotation.Primary
 import org.springframework.kafka.test.context.EmbeddedKafka
 import org.springframework.test.annotation.DirtiesContext
 import org.springframework.test.context.ActiveProfiles
-import java.lang.Thread.sleep
 import java.time.Duration
-
-
-private val log = KotlinLogging.logger { }
 
 @ActiveProfiles("test")
 @SpringBootTest(
@@ -55,91 +47,88 @@ private val log = KotlinLogging.logger { }
 @EnableMockOAuth2Server
 @Import(SedLåsreferanseIT.TestConfig::class)
 internal class SedLåsreferanseIT(
-    @Autowired private val prosessinstansRepository: ProsessinstansRepository,
     @Autowired private val prosessinstansService: ProsessinstansService,
+    @Autowired private val prosessRegister: ProsessRegister
 ) : OracleTestContainerBase() {
+    @AfterEach
+    fun setUp() = prosessRegister.clear()
 
     @Test
     fun `ikke kjør samtidig når sed har samme rinaSaksnummer men forsjellig sedId, sedVersjon`() {
         LoggingTestUtils.withLogCapture { logItems ->
-            val låsReferanser = lagProsesser(
-                listOf(
-                    MelosysEessiMelding().apply {
-                        rinaSaksnummer = "111"
-                        sedId = "222"
-                        sedVersjon = "1"
-                    },
-                    MelosysEessiMelding().apply {
-                        rinaSaksnummer = "111"
-                        sedId = "222"
-                        sedVersjon = "2"
-                    },
-                )
-            )
+            val sed1 = MelosysEessiMelding().apply {
+                rinaSaksnummer = "111"
+                sedId = "222"
+                sedVersjon = "1"
+            }
+            val sed2 = MelosysEessiMelding().apply {
+                rinaSaksnummer = "111"
+                sedId = "222"
+                sedVersjon = "2"
+            }
+            val sed1ås = sed1.lagUnikIdentifikator()
+            val sed2ås = sed2.lagUnikIdentifikator()
+
+            prosessRegister.registrer("sed1Prosess") { prosessinstansService.opprettProsessinstansSedMottak(sed1) }
+            prosessRegister.registrer("sed2Prosess") { prosessinstansService.opprettProsessinstansSedMottak(sed2) }
+
 
             await.throwOnLogError(logItems)
                 .timeout(Duration.ofSeconds(30)).pollInterval(Duration.ofSeconds(1))
                 .until {
-                    prosessinstansRepository.findAll()
-                        .filter { it.låsReferanse in låsReferanser }
-                        .all { it.status == ProsessStatus.FERDIG }
+                    logItems.filterBuilder.match<ProsessinstansFerdigListener>()
+                        .build().last().formattedMessage.contains("Prosessinstans(er) på vent med samme gruppe-prefiks: []")
                 }
 
-            logItems.match<ProsessinstansBehandler>().shouldHaveSize(6).check { next ->
-                next().formattedMessage shouldMatch Regex("Starter behandling av prosessinstans .*? med lås 111_222_1")
-                next().formattedMessage shouldStartWith "Utfører steg SED_MOTTAK_RUTING"
-                next().message shouldStartWith "Prosessinstans {} behandlet ferdig"
-                next().formattedMessage shouldMatch Regex("Starter behandling av prosessinstans .*? med lås 111_222_2")
-                next().formattedMessage shouldStartWith "Utfører steg SED_MOTTAK_RUTING"
-                next().message shouldStartWith "Prosessinstans {} behandlet ferdig"
-            }
+            logItems.filterBuilder
+                .match<ProsessinstansBehandler>()
+                .replace(prosessRegister.prosessIdStringToName())
+                .replace(sed1ås, "<sed1Lås>")
+                .replace(sed2ås, "<sed2Lås>")
+                .check { next ->
+                    next { it shouldBe "Starter behandling av prosessinstans <sed1Prosess> med lås <sed1Lås>" }
+                    next { it shouldBe "Utfører steg SED_MOTTAK_RUTING for prosessinstans <sed1Prosess>" }
+                    next { it shouldBe "Prosessinstans <sed1Prosess> behandlet ferdig" }
+                    next { it shouldBe "Starter behandling av prosessinstans <sed2Prosess> med lås <sed2Lås>" }
+                    next { it shouldBe "Utfører steg SED_MOTTAK_RUTING for prosessinstans <sed2Prosess>" }
+                    next { it shouldBe "Prosessinstans <sed2Prosess> behandlet ferdig" }
+                }
         }
     }
 
     @Test
-    // Test som viser dagens logikk, TODO dette bør også kjøre synkront som testen over
-    // Er laget oppgave for å fikse dette: https://jira.adeo.no/browse/MELOSYS-6365 og da er denne testen grei å ha
-    @Disabled("Denne testen feiler noen ganger siden den ikke er synkronisert, så log linjene kan komme i en annen rekkefølge")
     fun `kjør samtidig når sed har samme rinaSaksnummer, sedId og sedVersjon`() {
         LoggingTestUtils.withLogCapture { logItems ->
-            val låsReferanser = lagProsesser(
-                listOf(
-                    MelosysEessiMelding().apply {
-                        rinaSaksnummer = "111"
-                        sedId = "222"
-                        sedVersjon = "1"
-                    },
-                    MelosysEessiMelding().apply {
-                        rinaSaksnummer = "111"
-                        sedId = "222"
-                        sedVersjon = "1"
-                    },
-                )
-            )
+            val sed1 = MelosysEessiMelding().apply {
+                rinaSaksnummer = "111"
+                sedId = "222"
+                sedVersjon = "1"
+            }
+            val sed1ås = sed1.lagUnikIdentifikator()
+
+            prosessRegister.registrer("førsteProsess") { prosessinstansService.opprettProsessinstansSedMottak(sed1) }
+            prosessRegister.registrer("duplikatProsess") { prosessinstansService.opprettProsessinstansSedMottak(sed1) }
 
             await.throwOnLogError(logItems)
                 .timeout(Duration.ofSeconds(30)).pollInterval(Duration.ofSeconds(1))
                 .until {
-                    prosessinstansRepository.findAll()
-                        .filter { it.låsReferanse in låsReferanser }
-                        .all { it.status == ProsessStatus.FERDIG }
+                    logItems.filterBuilder.match<ProsessinstansFerdigListener>()
+                        .build().last().formattedMessage.contains("Prosessinstans(er) på vent med samme gruppe-prefiks: []")
                 }
 
-            logItems.match<ProsessinstansBehandler>().shouldHaveSize(6).check { next ->
-                next().formattedMessage shouldMatch Regex("Starter behandling av prosessinstans .*? med lås 111_222_1")
-                next().formattedMessage shouldMatch Regex("Starter behandling av prosessinstans .*? med lås 111_222_1")
-                next().formattedMessage shouldStartWith "Utfører steg SED_MOTTAK_RUTING"
-                next().formattedMessage shouldStartWith "Utfører steg SED_MOTTAK_RUTING"
-                next().message shouldStartWith "Prosessinstans {} behandlet ferdig"
-                next().message shouldStartWith "Prosessinstans {} behandlet ferdig"
-            }
+            logItems.filterBuilder
+                .match<ProsessinstansBehandler>()
+                .replace(prosessRegister.prosessIdStringToName())
+                .replace(sed1ås, "<sed1Lås>")
+                .check { next ->
+                    next { it shouldBe "Starter behandling av prosessinstans <førsteProsess> med lås <sed1Lås>" }
+                    next { it shouldBe "Utfører steg SED_MOTTAK_RUTING for prosessinstans <førsteProsess>" }
+                    next { it shouldBe "Prosessinstans <førsteProsess> behandlet ferdig" }
+                    next { it shouldBe "Starter behandling av prosessinstans <duplikatProsess> med lås <sed1Lås>" }
+                    next { it shouldBe "Utfører steg SED_MOTTAK_RUTING for prosessinstans <duplikatProsess>" }
+                    next { it shouldBe "Prosessinstans <duplikatProsess> behandlet ferdig" }
+                }
         }
-    }
-
-    fun lagProsesser(eessiMeldinger: List<MelosysEessiMelding>): List<String> = eessiMeldinger.map {
-        prosessinstansService.opprettProsessinstansSedMottak(it)
-        sleep(10)
-        it.lagUnikIdentifikator()
     }
 
     @TestConfiguration
@@ -151,9 +140,7 @@ internal class SedLåsreferanseIT(
                 every { inngangsSteg() } returns ProsessSteg.SED_MOTTAK_RUTING
 
                 val slot = CapturingSlot<Prosessinstans>()
-                every { utfør(capture(slot)) } answers {
-                    log.info("Utfører for prosess ${slot.captured.id} - ${slot.captured.låsReferanse}")
-                }
+                every { utfør(capture(slot)) } returns Unit
             }
         }
     }

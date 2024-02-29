@@ -26,15 +26,15 @@ public class BrevDataByggerVedlegg implements BrevDataBygger {
         BrevDataVedlegg brevData = new BrevDataVedlegg(saksbehandler);
 
         if (a1Bygger != null) {
-            brevData.brevDataA1 = (BrevDataA1) a1Bygger.lag(dataGrunnlag, saksbehandler);
+            brevData.setBrevDataA1((BrevDataA1) a1Bygger.lag(dataGrunnlag, saksbehandler));
         }
         if (a001Bygger != null) {
-            brevData.brevDataA001 = (BrevDataA001) a001Bygger.lag(dataGrunnlag, saksbehandler);
+            brevData.setBrevDataA001((BrevDataA001) a001Bygger.lag(dataGrunnlag, saksbehandler));
         }
 
         if (brevbestillingDto != null) {
-            brevData.fritekst = brevbestillingDto.getFritekst();
-            brevData.begrunnelseKode = brevbestillingDto.getBegrunnelseKode();
+            brevData.setFritekst(brevbestillingDto.getFritekst());
+            brevData.setBegrunnelseKode(brevbestillingDto.getBegrunnelseKode());
         }
 
         return brevData;

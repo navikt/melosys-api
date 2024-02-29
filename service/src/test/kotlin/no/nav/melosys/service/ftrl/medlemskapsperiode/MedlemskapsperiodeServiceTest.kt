@@ -303,6 +303,30 @@ class MedlemskapsperiodeServiceTest {
     }
 
     @Test
+    fun oppdaterMedlemskapsperiode_opphoertBestemmelse_kasterIkkeException() {
+        every { gyldigeTrygdedekningerService.hentTrygdedekninger(Behandlingstema.YRKESAKTIV, null) } returns
+            listOf(Trygdedekninger.FTRL_2_9_FØRSTE_LEDD_A_HELSE)
+        every { medlemAvFolketrygdenService.hentMedlemAvFolketrygden(BEHANDLING_ID_1) } returns MedlemAvFolketrygden().apply {
+            behandlingsresultat = lagBehandlingsresultat()
+            medlemskapsperioder = listOf(Medlemskapsperiode().apply { id = MEDLEMSKAPSPERIODE_ID_1 })
+        }
+        every { medlemskapsperiodeRepository.save(any()) } returnsArgument 0
+
+
+        shouldNotThrow<FunksjonellException> {
+            medlemskapsperiodeService.oppdaterMedlemskapsperiode(
+                BEHANDLING_ID_1,
+                MEDLEMSKAPSPERIODE_ID_1,
+                NÅ,
+                NÅ,
+                InnvilgelsesResultat.OPPHØRT,
+                Trygdedekninger.FTRL_2_9_FØRSTE_LEDD_A_HELSE,
+                Folketrygdloven_kap2_bestemmelser.FTRL_KAP2_2_15_ANDRE_LEDD
+            )
+        }
+    }
+
+    @Test
     fun oppdaterMedlemskapsperiode_tomDatoErFørFomDato_kasterException() {
         every { gyldigeTrygdedekningerService.hentTrygdedekninger(any(), any()) } returns listOf(*Trygdedekninger.values())
         every { medlemAvFolketrygdenService.hentMedlemAvFolketrygden(BEHANDLING_ID_1) } returns MedlemAvFolketrygden().apply {
@@ -366,7 +390,7 @@ class MedlemskapsperiodeServiceTest {
     fun oppdaterMedlemskapsperiode_finnerIkkeMedlemskapsperiode_kasterException() {
         every { gyldigeTrygdedekningerService.hentTrygdedekninger(any(), any()) } returns listOf(*Trygdedekninger.values())
         every { medlemAvFolketrygdenService.hentMedlemAvFolketrygden(BEHANDLING_ID_1) } returns MedlemAvFolketrygden().apply {
-            medlemskapsperioder = mutableListOf(Medlemskapsperiode().apply { id = MEDLEMSKAPSPERIODE_ID_1 })
+            medlemskapsperioder = listOf(Medlemskapsperiode().apply { id = MEDLEMSKAPSPERIODE_ID_1 })
             behandlingsresultat = lagBehandlingsresultat()
         }
 
