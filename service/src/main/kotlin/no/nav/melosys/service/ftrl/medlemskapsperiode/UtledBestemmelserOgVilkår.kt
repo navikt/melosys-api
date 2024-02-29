@@ -12,6 +12,7 @@ import no.nav.melosys.featuretoggle.ToggleName
 import no.nav.melosys.service.ftrl.bestemmelse.IkkeYrkesaktivBestemmelser
 import org.springframework.stereotype.Component
 
+@Deprecated("MELOSYS-6470, se no.nav.melosys.service.ftrl.bestemmelse")
 @Component
 class UtledBestemmelserOgVilkår(val unleash: Unleash) {
 

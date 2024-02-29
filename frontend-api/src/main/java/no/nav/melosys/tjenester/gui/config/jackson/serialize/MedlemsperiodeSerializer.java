@@ -27,16 +27,16 @@ public class MedlemsperiodeSerializer extends StdSerializer<Medlemsperiode> {
         MedlemsperiodeDto medlemsperiodeDto = new MedlemsperiodeDto();
         Periode periode = medlemsperiode.getPeriode();
 
-        medlemsperiodeDto.periodeID = medlemsperiode.id;
-        medlemsperiodeDto.periodetype = kodeverkService.getKodeverdi(FellesKodeverk.PERIODETYPE_MEDL, medlemsperiode.getType());
-        medlemsperiodeDto.periode = getPeriode(periode);
-        medlemsperiodeDto.land = kodeverkService.getKodeverdi(FellesKodeverk.LANDKODER, medlemsperiode.getLand());
-        medlemsperiodeDto.grunnlagstype = kodeverkService.getKodeverdi(FellesKodeverk.GRUNNLAG_MEDL, medlemsperiode.getGrunnlagstype());
-        medlemsperiodeDto.kilde = new KodeDto(medlemsperiode.getKilde(), medlemsperiode.getKilde());
-        medlemsperiodeDto.kildedokumenttype = kodeverkService.getKodeverdi(FellesKodeverk.KILDEDOKUMENT_MEDL, medlemsperiode.getKildedokumenttype());
-        medlemsperiodeDto.lovvalg = kodeverkService.getKodeverdi(FellesKodeverk.LOVVALG_MEDL, medlemsperiode.getLovvalg());
-        medlemsperiodeDto.status = kodeverkService.getKodeverdi(FellesKodeverk.PERIODESTATUS_MEDL, medlemsperiode.getStatus());
-        medlemsperiodeDto.trygdedekning = kodeverkService.getKodeverdi(FellesKodeverk.DEKNING_MEDL, medlemsperiode.getTrygdedekning());
+        medlemsperiodeDto.setPeriodeID(medlemsperiode.getId());
+        medlemsperiodeDto.setPeriodetype(kodeverkService.getKodeverdi(FellesKodeverk.PERIODETYPE_MEDL, medlemsperiode.getType()));
+        medlemsperiodeDto.setPeriode(getPeriode(periode));
+        medlemsperiodeDto.setLand(kodeverkService.getKodeverdi(FellesKodeverk.LANDKODER, medlemsperiode.getLand()));
+        medlemsperiodeDto.setGrunnlagstype(kodeverkService.getKodeverdi(FellesKodeverk.GRUNNLAG_MEDL, medlemsperiode.getGrunnlagstype()));
+        medlemsperiodeDto.setKilde(new KodeDto(medlemsperiode.getKilde(), medlemsperiode.getKilde()));
+        medlemsperiodeDto.setKildedokumenttype(kodeverkService.getKodeverdi(FellesKodeverk.KILDEDOKUMENT_MEDL, medlemsperiode.getKildedokumenttype()));
+        medlemsperiodeDto.setLovvalg(kodeverkService.getKodeverdi(FellesKodeverk.LOVVALG_MEDL, medlemsperiode.getLovvalg()));
+        medlemsperiodeDto.setStatus(kodeverkService.getKodeverdi(FellesKodeverk.PERIODESTATUS_MEDL, medlemsperiode.getStatus()));
+        medlemsperiodeDto.setTrygdedekning(kodeverkService.getKodeverdi(FellesKodeverk.DEKNING_MEDL, medlemsperiode.getTrygdedekning()));
         generator.writeObject(medlemsperiodeDto);
     }
 

@@ -15,15 +15,15 @@ import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.extension.ExtendWith
 
 @ExtendWith(MockKExtension::class)
-class VilkårForBestemmelseTest {
+class VilkårForBestemmelseIkkeYrkesaktivTest {
     @MockK
     private lateinit var mottatteOpplysningerService: MottatteOpplysningerService
 
-    private lateinit var vilkårForBestemmelse: VilkårForBestemmelse
+    private lateinit var vilkårForBestemmelse: VilkårForBestemmelseIkkeYrkesaktiv
 
     @BeforeEach
     fun setUp() {
-        vilkårForBestemmelse = VilkårForBestemmelse(mottatteOpplysningerService)
+        vilkårForBestemmelse = VilkårForBestemmelseIkkeYrkesaktiv(mottatteOpplysningerService)
     }
 
     @Test
@@ -45,13 +45,13 @@ class VilkårForBestemmelseTest {
 
 
         vilkår.shouldContainExactly(
-            VilkårForBestemmelse.Vilkår(
+            Vilkår(
                 FTRL_2_1_BOSATT_NORGE_FORUT
             ),
-            VilkårForBestemmelse.Vilkår(
+            Vilkår(
                 FTRL_2_1_OPPHOLD_UNDER_12MND
             ),
-            VilkårForBestemmelse.Vilkår(
+            Vilkår(
                 FTRL_2_1_LOVLIG_OPPHOLD
             ),
         )
@@ -76,10 +76,10 @@ class VilkårForBestemmelseTest {
 
 
         vilkår.shouldContainExactly(
-            VilkårForBestemmelse.Vilkår(
+            Vilkår(
                 FTRL_2_1_BOSATT_NORGE
             ),
-            VilkårForBestemmelse.Vilkår(
+            Vilkår(
                 FTRL_2_1_LOVLIG_OPPHOLD
             ),
         )
@@ -95,10 +95,10 @@ class VilkårForBestemmelseTest {
 
 
         vilkår.shouldContainExactly(
-            VilkårForBestemmelse.Vilkår(
+            Vilkår(
                 FTRL_2_5_NORSK_STATSBORGER_EØS_BORGER
             ),
-            VilkårForBestemmelse.Vilkår(
+            Vilkår(
                 FTRL_2_5_LÅN_STIPEND_LÅNEKASSEN
             ),
         )
@@ -114,10 +114,10 @@ class VilkårForBestemmelseTest {
 
 
         vilkår.shouldContainExactly(
-            VilkårForBestemmelse.Vilkår(
+            Vilkår(
                 FTRL_2_5_MEDFØLGENDE_A_E,
             ),
-            VilkårForBestemmelse.Vilkår(
+            Vilkår(
                 FTRL_2_5_FORSØRGET_FAMILIEMEDLEM
             ),
         )
@@ -133,14 +133,14 @@ class VilkårForBestemmelseTest {
 
 
         vilkår.shouldContainExactly(
-            VilkårForBestemmelse.Vilkår(
+            Vilkår(
                 FTRL_2_5_MEDFØLGENDE_A_E,
                 defaultOppfylt = true
             ),
-            VilkårForBestemmelse.Vilkår(
+            Vilkår(
                 FTRL_2_5_FORSØRGET_FAMILIEMEDLEM
             ),
-            VilkårForBestemmelse.Vilkår(
+            Vilkår(
                 FTRL_2_5_NORSK_STATSBORGER_EØS_BORGER
             ),
         )
@@ -156,14 +156,14 @@ class VilkårForBestemmelseTest {
 
 
         vilkår.shouldContainExactly(
-            VilkårForBestemmelse.Vilkår(
+            Vilkår(
                 FTRL_2_5_MEDFØLGENDE_A_E,
                 defaultOppfylt = true
             ),
-            VilkårForBestemmelse.Vilkår(
+            Vilkår(
                 FTRL_2_5_FORSØRGET_FAMILIEMEDLEM
             ),
-            VilkårForBestemmelse.Vilkår(
+            Vilkår(
                 FTRL_FORUTGÅENDE_TRYGDETID
             ),
         )
@@ -179,13 +179,13 @@ class VilkårForBestemmelseTest {
 
 
         vilkår.shouldContainExactly(
-            VilkårForBestemmelse.Vilkår(
+            Vilkår(
                 FTRL_2_1A_TRYGDEKOORDINGERING
             ),
-            VilkårForBestemmelse.Vilkår(
+            Vilkår(
                 FTRL_2_7_FORSØRGET_FAMILIEMEDLEM
             ),
-            VilkårForBestemmelse.Vilkår(
+            Vilkår(
                 FTRL_2_7_INGEN_SÆRLIGE_GRUNNER_TALER_IMOT
             ),
         )
@@ -201,16 +201,16 @@ class VilkårForBestemmelseTest {
 
 
         vilkår.shouldContainExactly(
-            VilkårForBestemmelse.Vilkår(
+            Vilkår(
                 FTRL_2_1A_TRYGDEKOORDINGERING
             ),
-            VilkårForBestemmelse.Vilkår(
+            Vilkår(
                 FTRL_2_8_STUDENT_UVIVERSITET_HØGSKOLE
             ),
-            VilkårForBestemmelse.Vilkår(
+            Vilkår(
                 FTRL_FORUTGÅENDE_TRYGDETID
             ),
-            VilkårForBestemmelse.Vilkår(
+            Vilkår(
                 FTRL_2_8_NÆR_TILKNYTNING_NORGE
             ),
         )
@@ -226,13 +226,13 @@ class VilkårForBestemmelseTest {
 
 
         vilkår.shouldContainExactly(
-            VilkårForBestemmelse.Vilkår(
+            Vilkår(
                 FTRL_2_1A_TRYGDEKOORDINGERING
             ),
-            VilkårForBestemmelse.Vilkår(
+            Vilkår(
                 FTRL_FORUTGÅENDE_TRYGDETID
             ),
-            VilkårForBestemmelse.Vilkår(
+            Vilkår(
                 FTRL_2_8_NÆR_TILKNYTNING_NORGE
             ),
         )
@@ -248,13 +248,13 @@ class VilkårForBestemmelseTest {
 
 
         vilkår.shouldContainExactly(
-            VilkårForBestemmelse.Vilkår(
+            Vilkår(
                 FTRL_2_1A_TRYGDEKOORDINGERING
             ),
-            VilkårForBestemmelse.Vilkår(
+            Vilkår(
                 FTRL_FORUTGÅENDE_TRYGDETID
             ),
-            VilkårForBestemmelse.Vilkår(
+            Vilkår(
                 FTRL_2_8_NÆR_TILKNYTNING_NORGE
             ),
         )
@@ -270,10 +270,10 @@ class VilkårForBestemmelseTest {
 
 
         vilkår.shouldContainExactly(
-            VilkårForBestemmelse.Vilkår(
+            Vilkår(
                 FTRL_2_1A_TRYGDEKOORDINGERING
             ),
-            VilkårForBestemmelse.Vilkår(
+            Vilkår(
                 FTRL_2_8_FORSØRGET_FAMILIEMEDLEM
             ),
         )
@@ -289,16 +289,16 @@ class VilkårForBestemmelseTest {
 
 
         vilkår.shouldContainExactly(
-            VilkårForBestemmelse.Vilkår(
+            Vilkår(
                 FTRL_2_1A_TRYGDEKOORDINGERING
             ),
-            VilkårForBestemmelse.Vilkår(
+            Vilkår(
                 FTRL_2_8_FORSØRGET_FAMILIEMEDLEM
             ),
-            VilkårForBestemmelse.Vilkår(
+            Vilkår(
                 FTRL_FORUTGÅENDE_TRYGDETID
             ),
-            VilkårForBestemmelse.Vilkår(
+            Vilkår(
                 FTRL_2_8_NÆR_TILKNYTNING_NORGE
             ),
         )

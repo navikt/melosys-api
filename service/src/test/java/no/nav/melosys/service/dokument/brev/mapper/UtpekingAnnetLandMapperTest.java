@@ -43,8 +43,8 @@ class UtpekingAnnetLandMapperTest {
 
     private BrevDataUtpekingAnnetLand lagDataUtpekingAnnetLand() {
         BrevDataUtpekingAnnetLand brevDataUtpekingAnnetLand = new BrevDataUtpekingAnnetLand(new BrevbestillingDto(), "Saksbehandler");
-        brevDataUtpekingAnnetLand.utpekingsperiode = new Utpekingsperiode(LocalDate.now(), null, Land_iso2.EE,
-            Lovvalgbestemmelser_883_2004.FO_883_2004_ART13_3, null);
+        brevDataUtpekingAnnetLand.setUtpekingsperiode(new Utpekingsperiode(LocalDate.now(), null, Land_iso2.EE,
+            Lovvalgbestemmelser_883_2004.FO_883_2004_ART13_3, null));
         return brevDataUtpekingAnnetLand;
     }
 }

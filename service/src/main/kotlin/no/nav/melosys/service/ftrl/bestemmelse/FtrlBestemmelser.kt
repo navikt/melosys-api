@@ -3,7 +3,6 @@ package no.nav.melosys.service.ftrl.bestemmelse
 import no.nav.melosys.domain.kodeverk.Folketrygdloven_kap2_bestemmelser
 import no.nav.melosys.domain.kodeverk.Trygdedekninger
 import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingstema
-import no.nav.melosys.service.ftrl.LovligeKombinasjonerTrygdedekningBestemmelse
 import org.springframework.stereotype.Component
 
 @Component

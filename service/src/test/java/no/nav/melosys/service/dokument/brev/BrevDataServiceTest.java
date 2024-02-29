@@ -93,10 +93,10 @@ class BrevDataServiceTest {
         DokumentbestillingMetadata metadata = service.lagBestillingMetadata(ATTEST_A1, mottakerMyndighet, null,
             behandling, brevData);
 
-        assertThat(metadata.brukerID).isEqualTo(FNR);
-        assertThat(metadata.mottakerID).isEqualTo(INSTITUSJON_ID);
-        assertThat(metadata.utenlandskMyndighet).isEqualTo(myndighet);
-        assertThat(metadata.brukerNavn).isEqualTo(sammensattNavn);
+        assertThat(metadata.getBrukerID()).isEqualTo(FNR);
+        assertThat(metadata.getMottakerID()).isEqualTo(INSTITUSJON_ID);
+        assertThat(metadata.getUtenlandskMyndighet()).isEqualTo(myndighet);
+        assertThat(metadata.getBrukerNavn()).isEqualTo(sammensattNavn);
 
         Element element = service.lagBrevXML(ATTEST_A1, mottakerMyndighet, null, behandling, brevData);
 
@@ -111,7 +111,7 @@ class BrevDataServiceTest {
         DokumentbestillingMetadata metadata = service.lagBestillingMetadata(ATTEST_A1, mottakerNorskMyndighet, null,
             behandling, brevData);
 
-        assertThat(metadata.mottakerID).isEqualTo(mottakerNorskMyndighet.getOrgnr());
+        assertThat(metadata.getMottakerID()).isEqualTo(mottakerNorskMyndighet.getOrgnr());
 
         Element element = service.lagBrevXML(ATTEST_A1, mottakerNorskMyndighet, null, behandling, brevData);
 
@@ -189,20 +189,19 @@ class BrevDataServiceTest {
         kontaktopplysning.setKontaktNavn("brev motakker");
         kontaktopplysning.setKontaktOrgnr("KONTAKTORG_999");
 
-        BrevData brevData = new BrevData("Z123456");
+        BrevData brevData = new BrevData("Z123456", "test", null);
         var mottaker = lagMottakerFullmektig(Aktoertype.ORGANISASJON);
-        brevData.fritekst = "Test";
 
         DokumentbestillingMetadata metadata = service.lagBestillingMetadata(INNVILGELSE_YRKESAKTIV, mottaker,
             kontaktopplysning, behandling, brevData);
 
-        assertThat(metadata.brukerID).isEqualTo(FNR);
-        assertThat(metadata.mottakerID).isEqualTo("KONTAKTORG_999");
+        assertThat(metadata.getBrukerID()).isEqualTo(FNR);
+        assertThat(metadata.getMottakerID()).isEqualTo("KONTAKTORG_999");
 
         metadata = service.lagBestillingMetadata(INNVILGELSE_YRKESAKTIV, mottaker, null, behandling, brevData);
 
-        assertThat(metadata.brukerID).isEqualTo(FNR);
-        assertThat(metadata.mottakerID).isEqualTo(REP_ORGNR);
+        assertThat(metadata.getBrukerID()).isEqualTo(FNR);
+        assertThat(metadata.getMottakerID()).isEqualTo(REP_ORGNR);
     }
 
     @Test
@@ -210,42 +209,42 @@ class BrevDataServiceTest {
         when(persondataFasade.hentPerson(anyString())).thenReturn(PersonopplysningerObjectFactory.lagPersonopplysningerUtenAdresser());
 
         Behandling behandling = lagBehandling(lagSøknadDokument());
-        BrevData brevData = new BrevData("Z123456");
+        BrevData brevData = new BrevData("Z123456", null, null);
 
         var mottaker = lagMottaker(Mottakerroller.BRUKER);
         DokumentbestillingMetadata metadata = service.lagBestillingMetadata(INNVILGELSE_YRKESAKTIV, mottaker,
             null, behandling, brevData);
-        assertThat(metadata.postadresse.getGatenavn()).isEqualTo("Strukturert Gate");
-        assertThat(metadata.brukerNavn).isEqualTo(sammensattNavn);
-        assertThat(metadata.berik).isFalse();
+        assertThat(metadata.getPostadresse().getGatenavn()).isEqualTo("Strukturert Gate");
+        assertThat(metadata.getBrukerNavn()).isEqualTo(sammensattNavn);
+        assertThat(metadata.getBerik()).isFalse();
     }
 
     @Test
     void lagBestillingMetadata_medBrukerMedAdresseIRegister_skalIkkeHaBrukerNavnEllerPostAdresse() {
         Behandling behandling = lagBehandling(lagSøknadDokument());
-        BrevData brevData = new BrevData("Z123456");
+        BrevData brevData = new BrevData("Z123456", null, null);
         var mottaker = lagMottaker(Mottakerroller.BRUKER);
         when(persondataFasade.hentPerson(anyString())).thenReturn(PersonopplysningerObjectFactory.lagPersonopplysninger());
 
         DokumentbestillingMetadata metadata = service.lagBestillingMetadata(INNVILGELSE_YRKESAKTIV, mottaker,
             null, behandling, brevData);
-        assertThat(metadata.postadresse).isNull();
-        assertThat(metadata.brukerNavn).isNull();
-        assertThat(metadata.berik).isTrue();
+        assertThat(metadata.getPostadresse()).isNull();
+        assertThat(metadata.getBrukerNavn()).isNull();
+        assertThat(metadata.getBerik()).isTrue();
     }
 
     @Test
     void lagBestillingMetadata_medUtenlandskMyndighet_skalUtfyllesMedBrukerNavn() {
         Behandling behandling = lagBehandling(lagSøknadDokument());
-        BrevData brevData = new BrevData("Z123456");
+        BrevData brevData = new BrevData("Z123456", null, null);
 
         var mottaker = lagMottaker(Mottakerroller.UTENLANDSK_TRYGDEMYNDIGHET);
         DokumentbestillingMetadata metadata = service.lagBestillingMetadata(INNVILGELSE_YRKESAKTIV, mottaker,
             null, behandling, brevData);
-        assertThat(metadata.postadresse).isNull();
-        assertThat(metadata.brukerNavn).isEqualTo(sammensattNavn);
-        assertThat(metadata.utenlandskMyndighet).isNotNull();
-        assertThat(metadata.berik).isFalse();
+        assertThat(metadata.getPostadresse()).isNull();
+        assertThat(metadata.getBrukerNavn()).isEqualTo(sammensattNavn);
+        assertThat(metadata.getUtenlandskMyndighet()).isNotNull();
+        assertThat(metadata.getBerik()).isFalse();
     }
 
     @Test
@@ -254,10 +253,10 @@ class BrevDataServiceTest {
 
 
         DokumentbestillingMetadata metadata = service.lagBestillingMetadata(INNVILGELSE_YRKESAKTIV, mottaker,
-            null, lagBehandling(lagSøknadDokument()), new BrevData("Z123456"));
+            null, lagBehandling(lagSøknadDokument()), new BrevData("Z123456", null, null));
 
 
-        assertThat(metadata.mottakerID).isEqualTo(mottaker.getOrgnr());
+        assertThat(metadata.getMottakerID()).isEqualTo(mottaker.getOrgnr());
     }
 
     @Test
@@ -267,18 +266,18 @@ class BrevDataServiceTest {
         kontaktopplysning.setKontaktNavn("brev motakker");
         kontaktopplysning.setKontaktOrgnr("KONTAKTORG_999");
 
-        BrevData brevData = new BrevData("Z123456");
+        BrevData brevData = new BrevData("Z123456", null, null);
         var mottaker = lagMottaker(Mottakerroller.ARBEIDSGIVER);
-        brevData.fritekst = "Test";
+        brevData.setFritekst("Test");
 
         Behandling behandling = lagBehandling(lagSøknadDokument());
         DokumentbestillingMetadata metadata = service.lagBestillingMetadata(INNVILGELSE_YRKESAKTIV, mottaker,
             kontaktopplysning, behandling, brevData);
-        assertThat(metadata.mottakerID).isEqualTo("KONTAKTORG_999");
+        assertThat(metadata.getMottakerID()).isEqualTo("KONTAKTORG_999");
 
         metadata = service.lagBestillingMetadata(INNVILGELSE_YRKESAKTIV, mottaker, null, behandling, brevData);
-        assertThat(metadata.mottakerID).isEqualTo(ORGNR);
-        assertThat(metadata.berik).isTrue();
+        assertThat(metadata.getMottakerID()).isEqualTo(ORGNR);
+        assertThat(metadata.getBerik()).isTrue();
     }
 
     @Test
@@ -419,27 +418,27 @@ class BrevDataServiceTest {
     private static DokumentbestillingMetadata lagDokumentbestillingMetadata(Produserbaredokumenter doktype,
                                                                             Mottakerroller rolle) {
         DokumentbestillingMetadata forventet = new DokumentbestillingMetadata();
-        forventet.brukerID = FNR;
-        forventet.mottaker = lagMottaker(rolle);
+        forventet.setBrukerID(FNR);
+        forventet.setMottaker(lagMottaker(rolle));
         if (rolle == Mottakerroller.BRUKER) {
-            forventet.mottakerID = FNR;
+            forventet.setMottakerID(FNR);
         } else {
-            forventet.mottakerID = ORGNR;
+            forventet.setMottakerID(ORGNR);
         }
 
-        forventet.dokumenttypeID = DokumenttypeIdMapper.hentID(doktype);
-        forventet.fagområde = "MED";
-        forventet.journalsakID = "123";
-        forventet.saksbehandler = "TEST";
-        forventet.berik = true;
+        forventet.setDokumenttypeID(DokumenttypeIdMapper.hentID(doktype));
+        forventet.setFagområde("MED");
+        forventet.setJournalsakID("123");
+        forventet.setSaksbehandler("TEST");
+        forventet.setBerik(true);
 
         return forventet;
     }
 
     private static BrevData lagBrevData() {
         BrevData brevDataDto = new BrevData();
-        brevDataDto.saksbehandler = "TEST";
-        brevDataDto.fritekst = "Test";
+        brevDataDto.setSaksbehandler("TEST");
+        brevDataDto.setFritekst("Test");
         return brevDataDto;
     }
 

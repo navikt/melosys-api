@@ -20,6 +20,8 @@ import org.springframework.web.context.WebApplicationContext
 @Scope(value = WebApplicationContext.SCOPE_REQUEST)
 class BestemmelseTjeneste(private val utledBestemmelserOgVilkår: UtledBestemmelserOgVilkår) {
 
+
+    @Deprecated("MELOSYS-6470 Bruk /ftrl/bestemmelser endepunkter i stedet")
     @GetMapping("/behandlinger/medlemavfolketrygden/bestemmelser/{behandlingstema}")
     fun hentBestemmelserMedVilkaarForBehandlingstema(@PathVariable("behandlingstema") behandlingstema: Behandlingstema): ResponseEntity<FolketrygdlovenBestemmelserDto> {
         val støttede = utledBestemmelserOgVilkår.hentStøttedeBestemmelserOgVilkår(behandlingstema)

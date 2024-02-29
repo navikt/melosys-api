@@ -24,7 +24,6 @@ import no.nav.melosys.featuretoggle.ToggleName
 import no.nav.melosys.repository.MedlemAvFolketrygdenRepository
 import no.nav.melosys.service.behandling.BehandlingsresultatService
 import no.nav.melosys.service.behandling.UtledMottaksdato
-import no.nav.melosys.service.ftrl.bestemmelse.FtrlBestemmelser
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.extension.ExtendWith
@@ -38,9 +37,6 @@ class OpprettForslagMedlemskapsperiodeServiceTest {
 
     @MockK
     private lateinit var behandlingsresultatService: BehandlingsresultatService
-
-    @MockK
-    private lateinit var ftrlBestemmelser: FtrlBestemmelser
 
     @MockK
     private lateinit var utledMottaksdato: UtledMottaksdato
@@ -62,7 +58,6 @@ class OpprettForslagMedlemskapsperiodeServiceTest {
             OpprettForslagMedlemskapsperiodeService(
                 medlemAvFolketrygdenRepository,
                 behandlingsresultatService,
-                ftrlBestemmelser,
                 utledMottaksdato,
                 utledBestemmelserOgVilkår,
                 fakeUnleash
@@ -252,16 +247,15 @@ class OpprettForslagMedlemskapsperiodeServiceTest {
     }
 
     @Test
-    fun opprettForslagPåMedlemskapsperioder_støtterIkkeBestemmelse_feiler() {
+    fun opprettForslagPåMedlemskapsperioder_støtterIkkeBestemmelseForDekning_kasterFeil() {
         fakeUnleash.enable(ToggleName.MELOSYS_FTRL_IKKE_YRKESAKTIV)
-        val ustøttetBestemmelse = Folketrygdloven_kap2_bestemmelser.FTRL_KAP2_2_8_FØRSTE_LEDD_D
+        val ustøttetBestemmelse = Folketrygdloven_kap2_bestemmelser.FTRL_KAP2_2_7A
         every { behandlingsresultatService.hentBehandlingsresultat(BEH_RES_ID) } returns lagBehandlingsresultat()
-        every { ftrlBestemmelser.hentBestemmelser(any(), any()) } returns emptyList()
 
 
         shouldThrow<FunksjonellException> {
             opprettForslagMedlemskapsperiodeService.opprettForslagPåMedlemskapsperioder(BEH_RES_ID, ustøttetBestemmelse)
-        }.message.shouldContain("Støtter ikke")
+        }.message.shouldContain("Ulovlig kombinasjon av bestemmelse")
     }
 
     @Test
