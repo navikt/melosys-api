@@ -53,9 +53,7 @@ class OpprettFakturaserie(
 
         if (behandlingsresultat.erOpphørt() || andregangsvurderingHarFjernetTrygdeavgift(behandling, behandlingsresultat)) {
             val opprinneligFakturaserieReferanse =
-                if (unleash.isEnabled(ToggleName.MELOSYS_SETT_OPPRINNELIG_BEHANDLING))
-                    behandlingsresultatService.hentBehandlingsresultat(behandling.opprinneligBehandling.id).fakturaserieReferanse
-                else behandlingsresultat.fakturaserieReferanse
+                behandlingsresultatService.hentBehandlingsresultat(behandling.opprinneligBehandling.id).fakturaserieReferanse
             log.info("Kansellerer fakturaserie for behandling: $behandlingsId med fakturaseriereferanse: $opprinneligFakturaserieReferanse")
             kansellerFakturaserieOgLagreReferanse(behandlingsresultat, opprinneligFakturaserieReferanse, saksbehandlerIdent)
         } else if (skalOppretteFakturaserie(behandlingsresultat)) {

@@ -19,7 +19,6 @@ import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingsresultattyper
 import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingsstatus
 import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingstema
 import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingstyper
-import no.nav.melosys.featuretoggle.ToggleName
 import no.nav.melosys.integrasjon.faktureringskomponenten.FaktureringskomponentenConsumer
 import no.nav.melosys.integrasjon.faktureringskomponenten.NyFakturaserieResponseDto
 import no.nav.melosys.integrasjon.faktureringskomponenten.dto.FakturaserieDto
@@ -75,7 +74,7 @@ class OpprettFakturaserieTest {
 
     @BeforeEach
     internal fun setUp() {
-        unleash.enable(ToggleName.MELOSYS_SETT_OPPRINNELIG_BEHANDLING, ToggleName.FOLKETRYGDEN_MVP)
+        unleash.enableAll()
         slotFakturaserieDto.clear()
         trygdeavgiftMottakerService = TrygdeavgiftMottakerService()
 
@@ -151,85 +150,6 @@ class OpprettFakturaserieTest {
         slotFakturaserieDto.captured.perioder.forEach() {
             it.beskrivelse.shouldContain("Dekning: ${DEFAULT_PENSJON_DEKNING_TEKST_HELSEDEL}")
         }
-    }
-
-    @Test
-    fun `Kanseller betaling når resultat er opphørt, toggle av`() {
-        unleash.disable(ToggleName.MELOSYS_SETT_OPPRINNELIG_BEHANDLING)
-        lagTestData(setOf(lagAktoerBruker())).apply {
-            behandlingsresultat.type = Behandlingsresultattyper.OPPHØRT
-            behandlingsresultat.fakturaserieReferanse = FAKTURASERIE_REFERANSE
-        }
-        every { behandlingsresultatService.hentBehandlingsresultat(BEHANDLING_ID) } returns behandlingsresultat
-        every { behandlingService.hentBehandling(BEHANDLING_ID) } returns behandling
-        every { pdlService.finnFolkeregisterident(BRUKER_FNR) } returns Optional.of(BRUKER_AKTØRID)
-        every { faktureringskomponentenConsumer.kansellerFakturaserie(FAKTURASERIE_REFERANSE, BRUKER_AKTØRID) } returns NyFakturaserieResponseDto(
-            FAKTURASERIE_REFERANSE
-        )
-
-
-        opprettFakturaserie.utfør(prosessinstans)
-
-
-        verify(exactly = 1) { faktureringskomponentenConsumer.kansellerFakturaserie(eq(FAKTURASERIE_REFERANSE), eq(SAKSBEHANDLER_IDENT)) }
-    }
-
-    @Test
-    fun `Kanseller betaling når manglende innbetaling resulterer i fjerning av trygdeavgift, toggle av`() {
-        unleash.disable(ToggleName.MELOSYS_SETT_OPPRINNELIG_BEHANDLING)
-        lagTestData(setOf(lagAktoerBruker())).apply {
-            behandling.type = Behandlingstyper.MANGLENDE_INNBETALING_TRYGDEAVGIFT
-            behandling.opprinneligBehandling = Behandling().apply { id = OPPRINNELIG_BEHANDLING_ID }
-            behandlingsresultat.type = Behandlingsresultattyper.MEDLEM_I_FOLKETRYGDEN
-            behandlingsresultat.fakturaserieReferanse = FAKTURASERIE_REFERANSE
-            behandlingsresultat.medlemAvFolketrygden.fastsattTrygdeavgift.trygdeavgiftsperioder.first().apply {
-                grunnlagInntekstperiode.isArbeidsgiversavgiftBetalesTilSkatt = true
-                grunnlagSkatteforholdTilNorge.skatteplikttype = Skatteplikttype.SKATTEPLIKTIG
-            }
-        }
-        val opprinneligBehandlingsresultat = Behandlingsresultat()
-        every { behandlingsresultatService.hentBehandlingsresultat(BEHANDLING_ID) } returns behandlingsresultat
-        every { behandlingsresultatService.hentBehandlingsresultat(OPPRINNELIG_BEHANDLING_ID) } returns opprinneligBehandlingsresultat
-        every { trygdeavgiftOppsummeringService.harTrygdeavgiftOgBestiltFaktura(opprinneligBehandlingsresultat) } returns true
-        every { behandlingService.hentBehandling(BEHANDLING_ID) } returns behandling
-        every { pdlService.finnFolkeregisterident(BRUKER_FNR) } returns Optional.of(BRUKER_AKTØRID)
-        every { faktureringskomponentenConsumer.kansellerFakturaserie(FAKTURASERIE_REFERANSE, BRUKER_AKTØRID) } returns
-            NyFakturaserieResponseDto(FAKTURASERIE_REFERANSE)
-
-
-        opprettFakturaserie.utfør(prosessinstans)
-
-
-        verify(exactly = 1) { faktureringskomponentenConsumer.kansellerFakturaserie(eq(FAKTURASERIE_REFERANSE), eq(SAKSBEHANDLER_IDENT)) }
-    }
-
-    @Test
-    fun `Kanseller betaling når ny vurdering resulterer i fjerning av trygdeavgift, toggle av`() {
-        unleash.disable(ToggleName.MELOSYS_SETT_OPPRINNELIG_BEHANDLING)
-        lagTestData(setOf(lagAktoerBruker())).apply {
-            behandling.type = Behandlingstyper.NY_VURDERING
-            behandling.opprinneligBehandling = Behandling().apply { id = OPPRINNELIG_BEHANDLING_ID }
-            behandlingsresultat.type = Behandlingsresultattyper.MEDLEM_I_FOLKETRYGDEN
-            behandlingsresultat.fakturaserieReferanse = FAKTURASERIE_REFERANSE
-            behandlingsresultat.medlemAvFolketrygden.fastsattTrygdeavgift.trygdeavgiftsperioder.first().apply {
-                grunnlagInntekstperiode.isArbeidsgiversavgiftBetalesTilSkatt = true
-                grunnlagSkatteforholdTilNorge.skatteplikttype = Skatteplikttype.SKATTEPLIKTIG
-            }
-        }
-        val opprinneligBehandlingsresultat = Behandlingsresultat()
-        every { behandlingsresultatService.hentBehandlingsresultat(BEHANDLING_ID) } returns behandlingsresultat
-        every { behandlingsresultatService.hentBehandlingsresultat(OPPRINNELIG_BEHANDLING_ID) } returns opprinneligBehandlingsresultat
-        every { trygdeavgiftOppsummeringService.harTrygdeavgiftOgBestiltFaktura(opprinneligBehandlingsresultat) } returns true
-        every { behandlingService.hentBehandling(BEHANDLING_ID) } returns behandling
-        every { pdlService.finnFolkeregisterident(BRUKER_FNR) } returns Optional.of(BRUKER_AKTØRID)
-        every { faktureringskomponentenConsumer.kansellerFakturaserie(FAKTURASERIE_REFERANSE, BRUKER_AKTØRID) } returns
-            NyFakturaserieResponseDto(FAKTURASERIE_REFERANSE)
-
-
-        opprettFakturaserie.utfør(prosessinstans)
-
-
-        verify(exactly = 1) { faktureringskomponentenConsumer.kansellerFakturaserie(eq(FAKTURASERIE_REFERANSE), eq(SAKSBEHANDLER_IDENT)) }
     }
 
     @Test
