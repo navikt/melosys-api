@@ -1,5 +1,10 @@
 package no.nav.melosys.integrasjon.medl;
 
+import java.util.Collection;
+import java.util.HashMap;
+import java.util.Map;
+import java.util.Set;
+
 import com.google.common.collect.BiMap;
 import com.google.common.collect.HashBiMap;
 import no.nav.melosys.domain.PeriodeOmLovvalg;
@@ -12,10 +17,6 @@ import no.nav.melosys.domain.kodeverk.lovvalgsbestemmelser.Overgangsregelbestemm
 import no.nav.melosys.domain.kodeverk.lovvalgsbestemmelser.Tilleggsbestemmelser_883_2004;
 import no.nav.melosys.domain.kodeverk.lovvalgsbestemmelser.trygdeavtale.*;
 import no.nav.melosys.exception.TekniskException;
-
-import java.util.Collection;
-import java.util.Map;
-import java.util.Set;
 
 import static java.util.Optional.ofNullable;
 
@@ -227,7 +228,7 @@ public final class MedlPeriodeKonverter {
         lovvalgsbestemmelseTilGrunnlagMedlTabell = tbl;
 
 
-        BiMap<Folketrygdloven_kap2_bestemmelser, GrunnlagMedl> tblFtrlKap2 = HashBiMap.create();
+        HashMap<Folketrygdloven_kap2_bestemmelser, GrunnlagMedl> tblFtrlKap2 = new HashMap<>();
         tblFtrlKap2.put(Folketrygdloven_kap2_bestemmelser.FTRL_KAP2_2_8_FØRSTE_LEDD_A, GrunnlagMedl.FTL_2_8_1_LEDD_A);
         tblFtrlKap2.put(Folketrygdloven_kap2_bestemmelser.FTRL_KAP2_2_8_ANDRE_LEDD, GrunnlagMedl.FTL_2_8_2_LEDD);
         tblFtrlKap2.put(Folketrygdloven_kap2_bestemmelser.FTRL_KAP2_2_15_ANDRE_LEDD, GrunnlagMedl.FTL_2_15_2_LEDD);
