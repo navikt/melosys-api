@@ -3,39 +3,29 @@ package no.nav.melosys.domain.dokument.medlemskap
 import no.nav.melosys.domain.HarPeriode
 import no.nav.melosys.domain.util.IsoLandkodeKonverterer
 
-class Medlemsperiode : HarPeriode {
-
+data class Medlemsperiode(
+    var id: Long? = null,
+    private var periode: Periode? = null,
+    var type: String? = null,
+    var status: String? = null,
+    var grunnlagstype: String? = null,
+    var land: String? = null,
+    var lovvalg: String? = null,
+    var trygdedekning: String? = null,
+    var kildedokumenttype: String? = null,
+    var kilde: String? = null,
+) : HarPeriode {
     companion object {
         private const val KILDE_LÅNEKASSEN = "LAANEKASSEN"
     }
 
-    var id: Long? = null
+    override fun getPeriode(): Periode? = periode
 
-    lateinit var periode: Periode
+    fun erKildeLånekassen(): Boolean = kilde == KILDE_LÅNEKASSEN
 
-    var type: String? = null // https://kodeverk-web.dev.adeo.no/kodeverksoversikt/kodeverk/PeriodetypeMedl
+    fun hentLandSomIso2(): String? = if (land != null) IsoLandkodeKonverterer.tilIso2(land) else null
 
-    var status: String? = null // https://kodeverk-web.dev.adeo.no/kodeverksoversikt/kodeverk/PeriodestatusMedl
+    fun erUnntaksperiode(): Boolean = land != "NOR"
 
-    var grunnlagstype: String? = null // https://kodeverk-web.dev.adeo.no/kodeverksoversikt/kodeverk/GrunnlagMedl
-
-    var land: String? = null // ISO3, https://kodeverk-web.dev.adeo.no/kodeverksoversikt/kodeverk/Landkoder
-
-    var lovvalg: String? = null // https://kodeverk-web.dev.adeo.no/kodeverksoversikt/kodeverk/LovvalgMedl
-
-    var trygdedekning: String? = null // https://kodeverk-web.dev.adeo.no/kodeverksoversikt/kodeverk/DekningMedl
-
-    var kildedokumenttype: String? = null // https://kodeverk-web.dev.adeo.no/kodeverksoversikt/kodeverk/KildedokumentMedl
-
-    var kilde: String? = null // https://kodeverk-web.dev.adeo.no/kodeverksoversikt/kodeverk/KildesystemMedl
-
-    override fun getPeriode(): Periode = periode
-
-    fun erKildeLånekassen() = KILDE_LÅNEKASSEN == kilde
-
-    fun hentLandSomIso2(): String? = land?.let { IsoLandkodeKonverterer.tilIso2(it) }
-
-    fun erUnntaksperiode() = "NOR" != land
-
-    fun erMedlemskapsperiode() = "NOR" == land
+    fun erMedlemskapsperiode(): Boolean = land == "NOR"
 }

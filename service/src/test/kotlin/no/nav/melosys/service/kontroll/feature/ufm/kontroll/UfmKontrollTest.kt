@@ -169,8 +169,7 @@ class UfmKontrollTest {
         personhistorikkDokumenter.add(personhistorikkDokument)
 
         val medlemskapDokument = MedlemskapDokument()
-        val medlemsperiode = Medlemsperiode()
-        medlemsperiode.periode = Periode(DATE, DATE.plusYears(2))
+        val medlemsperiode = Medlemsperiode(periode = Periode(DATE, DATE.plusYears(2)))
         medlemsperiode.status = PeriodestatusMedl.UAVK.kode
         medlemskapDokument.getMedlemsperiode().add(medlemsperiode)
 

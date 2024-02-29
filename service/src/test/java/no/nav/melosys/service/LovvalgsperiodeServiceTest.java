@@ -20,6 +20,7 @@ import no.nav.melosys.exception.FunksjonellException;
 import no.nav.melosys.exception.IkkeFunnetException;
 import no.nav.melosys.integrasjon.medl.GrunnlagMedl;
 import no.nav.melosys.integrasjon.medl.MedlPeriodeKonverter;
+import no.nav.melosys.integrasjon.medl.PeriodestatusMedl;
 import no.nav.melosys.repository.BehandlingRepository;
 import no.nav.melosys.repository.BehandlingsresultatRepository;
 import no.nav.melosys.repository.LovvalgsperiodeRepository;
@@ -319,10 +320,8 @@ class LovvalgsperiodeServiceTest {
 
     private Medlemsperiode lagMedlemsperiode(long id, String grunnlagMedlKode) {
         Periode periode = new Periode(LocalDate.now(), LocalDate.now());
-        Medlemsperiode medlemsperiode = new Medlemsperiode();
-        medlemsperiode.setId(id);
-        medlemsperiode.setPeriode(periode);
-        medlemsperiode.setGrunnlagstype(grunnlagMedlKode);
-        return medlemsperiode;
+        return new Medlemsperiode(
+            id, periode, null,
+            PeriodestatusMedl.GYLD.getKode(), grunnlagMedlKode, null, null, null, null, null);
     }
 }
