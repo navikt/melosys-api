@@ -51,11 +51,11 @@ class SaksopplysningerTilDtoTest {
             null, null, null, null, null, null, null);
 
         Medlemsperiode medlemsperiode2 = new Medlemsperiode(
-            null, new no.nav.melosys.domain.dokument.medlemskap.Periode(LocalDate.of(2016, 1, 1), LocalDate.of(2016, 12, 31)), "PMMEDSKP",
+            null, new no.nav.melosys.domain.dokument.medlemskap.Periode(LocalDate.of(2016, 1, 1), LocalDate.of(2016, 12, 31)), "PUMEDSKP",
             null, null, null, null, null, null, null);
 
         Medlemsperiode medlemsperiode3 = new Medlemsperiode(
-            null, new no.nav.melosys.domain.dokument.medlemskap.Periode(LocalDate.of(2017, 1, 1), LocalDate.of(2017, 12, 31)), "PMMEDSKP",
+            null, new no.nav.melosys.domain.dokument.medlemskap.Periode(LocalDate.of(2017, 1, 1), LocalDate.of(2017, 12, 31)), "PUMEDSKP",
             null, null, null, null, null, null, null);
 
         Medlemsperiode medlemsperiode4 = new Medlemsperiode(
