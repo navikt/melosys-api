@@ -26,8 +26,8 @@ private const val BEHANDLING_ID = "behandlingID"
 @Api(tags = ["ftrl", "bestemmelser", "avklarte fakta", "vilkår"])
 class VilkårTjeneste(
     private val vilkårForBestemmelse: VilkårForBestemmelse,
-    val aksessKontroll: Aksesskontroll,
-    val unleash: Unleash
+    private val aksessKontroll: Aksesskontroll,
+    private val unleash: Unleash
 ) {
     private val log = KotlinLogging.logger { }
 
