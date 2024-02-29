@@ -45,7 +45,7 @@ class VilkårTjeneste(
         }
 
         var behandlingstema: String
-        if (unleash.isEnabled(ToggleName.MELOSYS_FTRL_BESTEMMELSER_2)) {
+        if (unleash.isEnabled(ToggleName.MELOSYS_FTRL_YRKESAKTIV_PLIKTIGE_BESTEMMELSER)) {
             behandlingstema = requestParams[BEHANDLINGSTEMA] ?: throw FunksjonellException("?behandlingstema er påkrevd")
         } else {
             behandlingstema = Behandlingstema.IKKE_YRKESAKTIV.name

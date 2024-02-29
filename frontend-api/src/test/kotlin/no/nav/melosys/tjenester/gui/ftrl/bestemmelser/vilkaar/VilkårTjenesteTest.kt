@@ -8,7 +8,7 @@ import io.mockk.justRun
 import no.nav.melosys.domain.kodeverk.Folketrygdloven_kap2_bestemmelser
 import no.nav.melosys.domain.kodeverk.Vilkaar
 import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingstema
-import no.nav.melosys.featuretoggle.ToggleName.MELOSYS_FTRL_BESTEMMELSER_2
+import no.nav.melosys.featuretoggle.ToggleName.MELOSYS_FTRL_YRKESAKTIV_PLIKTIGE_BESTEMMELSER
 import no.nav.melosys.service.ftrl.bestemmelse.vilkaar.Vilkår
 import no.nav.melosys.service.ftrl.bestemmelse.vilkaar.VilkårForBestemmelse
 import no.nav.melosys.service.tilgang.Aksesskontroll
@@ -59,7 +59,7 @@ class VilkårTjenesteTest(@Autowired private val mockMvc: MockMvc) {
         val bestemmelse = Folketrygdloven_kap2_bestemmelser.FTRL_KAP2_2_1_FØRSTE_LEDD
 
         justRun { aksesskontroll.autoriser(any()) }
-        every { unleash.isEnabled(MELOSYS_FTRL_BESTEMMELSER_2) } returns true
+        every { unleash.isEnabled(MELOSYS_FTRL_YRKESAKTIV_PLIKTIGE_BESTEMMELSER) } returns true
         every { vilkårForBestemmelse.hentVilkår(bestemmelse, Behandlingstema.IKKE_YRKESAKTIV, emptyMap(), 1) } returns listOf(
             Vilkår(
                 Vilkaar.FTRL_2_1_BOSATT_NORGE_FORUT
