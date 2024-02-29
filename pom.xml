@@ -41,7 +41,7 @@
         <kotlin.compiler.jvmTarget>${java.version}</kotlin.compiler.jvmTarget>
 
         <!-- Melosys -->
-        <melosys.internt.kodeverk.version>5.15.248-9665f70</melosys.internt.kodeverk.version>
+        <melosys.internt.kodeverk.version>5.15.249</melosys.internt.kodeverk.version>
         <melosys.brev.version>1.2.124</melosys.brev.version>
 
         <!-- NAV -->
