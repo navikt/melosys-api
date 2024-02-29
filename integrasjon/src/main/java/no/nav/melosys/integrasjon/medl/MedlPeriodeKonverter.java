@@ -227,13 +227,21 @@ public final class MedlPeriodeKonverter {
         lovvalgsbestemmelseTilGrunnlagMedlTabell = tbl;
 
 
-        ftrlKap2BestemmelserTilGrunnLagMedlTabell = Map.of(
-            Folketrygdloven_kap2_bestemmelser.FTRL_KAP2_2_8_FØRSTE_LEDD_A, GrunnlagMedl.FTL_2_8_1_LEDD_A,
-            Folketrygdloven_kap2_bestemmelser.FTRL_KAP2_2_8_ANDRE_LEDD, GrunnlagMedl.FTL_2_8_2_LEDD,
-            Folketrygdloven_kap2_bestemmelser.FTRL_KAP2_2_15_ANDRE_LEDD, GrunnlagMedl.FTL_2_15_2_LEDD,
-            Folketrygdloven_kap2_bestemmelser.FTRL_KAP2_2_7A, GrunnlagMedl.FTL_2_7A,
-            Folketrygdloven_kap2_bestemmelser.FTRL_KAP2_2_7_FØRSTE_LEDD, GrunnlagMedl.FTL_2_7_1_LEDD
-        );
+        BiMap<Folketrygdloven_kap2_bestemmelser, GrunnlagMedl> tblFtrlKap2 = HashBiMap.create();
+        tblFtrlKap2.put(Folketrygdloven_kap2_bestemmelser.FTRL_KAP2_2_8_FØRSTE_LEDD_A, GrunnlagMedl.FTL_2_8_1_LEDD_A);
+        tblFtrlKap2.put(Folketrygdloven_kap2_bestemmelser.FTRL_KAP2_2_8_ANDRE_LEDD, GrunnlagMedl.FTL_2_8_2_LEDD);
+        tblFtrlKap2.put(Folketrygdloven_kap2_bestemmelser.FTRL_KAP2_2_15_ANDRE_LEDD, GrunnlagMedl.FTL_2_15_2_LEDD);
+        tblFtrlKap2.put(Folketrygdloven_kap2_bestemmelser.FTRL_KAP2_2_7A, GrunnlagMedl.FTL_2_7A);
+        tblFtrlKap2.put(Folketrygdloven_kap2_bestemmelser.FTRL_KAP2_2_7_FØRSTE_LEDD, GrunnlagMedl.FTL_2_7_1_LEDD);
+        tblFtrlKap2.put(Folketrygdloven_kap2_bestemmelser.FTRL_KAP2_2_5_FØRSTE_LEDD_H, GrunnlagMedl.FTL_2_5_1_LEDD_H);
+        tblFtrlKap2.put(Folketrygdloven_kap2_bestemmelser.FTRL_KAP2_2_5_ANDRE_LEDD, GrunnlagMedl.FTL_2_5_2_LEDD);
+        tblFtrlKap2.put(Folketrygdloven_kap2_bestemmelser.FTRL_KAP2_2_7_FJERDE_LEDD, GrunnlagMedl.FTL_2_7_4_LEDD);
+        tblFtrlKap2.put(Folketrygdloven_kap2_bestemmelser.FTRL_KAP2_2_8_FØRSTE_LEDD_B, GrunnlagMedl.FTL_2_8_1_LEDD_B);
+        tblFtrlKap2.put(Folketrygdloven_kap2_bestemmelser.FTRL_KAP2_2_8_FØRSTE_LEDD_C, GrunnlagMedl.FTL_2_8_1_LEDD_C);
+        tblFtrlKap2.put(Folketrygdloven_kap2_bestemmelser.FTRL_KAP2_2_8_FJERDE_LEDD, GrunnlagMedl.FTL_2_8_4_LEDD);
+        tblFtrlKap2.put(Folketrygdloven_kap2_bestemmelser.FTRL_KAP2_2_1_FØRSTE_LEDD, GrunnlagMedl.FTL_2_1);
+        tblFtrlKap2.put(Folketrygdloven_kap2_bestemmelser.FTRL_KAP2_2_1_FJERDE_LEDD, GrunnlagMedl.FTL_2_1);
+        ftrlKap2BestemmelserTilGrunnLagMedlTabell = tblFtrlKap2;
     }
 
 
@@ -248,7 +256,8 @@ public final class MedlPeriodeKonverter {
 
     public static DekningMedl tilMedlTrygdeDekning(Trygdedekninger dekning, Folketrygdloven_kap2_bestemmelser bestemmelse) {
         return switch (bestemmelse) {
-            case FTRL_KAP2_2_8_FØRSTE_LEDD_A, FTRL_KAP2_2_8_ANDRE_LEDD, FTRL_KAP2_2_15_ANDRE_LEDD, FTRL_KAP2_2_7_FØRSTE_LEDD, FTRL_KAP2_2_7A -> mapForFtrl(dekning);
+            case FTRL_KAP2_2_8_FØRSTE_LEDD_A, FTRL_KAP2_2_8_ANDRE_LEDD, FTRL_KAP2_2_15_ANDRE_LEDD, FTRL_KAP2_2_7_FØRSTE_LEDD, FTRL_KAP2_2_7A ->
+                mapForFtrl(dekning);
             default -> throw new TekniskException("Bestemmelse støttes ikke for FTRL: " + bestemmelse.getKode());
         };
     }
