@@ -23,7 +23,6 @@ import java.time.Instant
 @ExtendWith(MockKExtension::class)
 class KansellerFakturaserieTest {
 
-
     @RelaxedMockK
     lateinit var behandlingsresultatService: BehandlingsresultatService
 
@@ -129,8 +128,12 @@ class KansellerFakturaserieTest {
 
         val nyFakturaserieResponseDto = NyFakturaserieResponseDto(fakturaReferanse)
 
-        every { behandlingsresultatService.hentBehandlingsresultat(nyesteBehandlingId) } returns Behandlingsresultat().apply { id = nyesteBehandlingId }
-        every { behandlingsresultatService.hentBehandlingsresultat(behandlingHenvendelseId) } returns Behandlingsresultat().apply { id = behandlingHenvendelseId }
+        every { behandlingsresultatService.hentBehandlingsresultat(nyesteBehandlingId) } returns Behandlingsresultat().apply {
+            id = nyesteBehandlingId
+        }
+        every { behandlingsresultatService.hentBehandlingsresultat(behandlingHenvendelseId) } returns Behandlingsresultat().apply {
+            id = behandlingHenvendelseId
+        }
         every { behandlingsresultatService.hentBehandlingsresultat(opprinneligBehandlingId) } returns behandlingsresultatOpprinneligBehandling
         every { faktureringskomponentenConsumer.kansellerFakturaserie(fakturaReferanse, SAKSBEHANDLER_IDENT) } returns nyFakturaserieResponseDto
 
