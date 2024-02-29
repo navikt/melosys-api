@@ -17,9 +17,7 @@ import no.nav.melosys.service.dokument.brev.BrevData
 import no.nav.melosys.service.dokument.brev.BrevDataAvslagYrkesaktiv
 import no.nav.melosys.service.dokument.brev.mapper.felles.BrevMapperUtils.convertToXMLGregorianCalendarRemoveTimezone
 import no.nav.melosys.service.dokument.brev.mapper.felles.VilkaarbegrunnelseFactory.*
-import org.xml.sax.SAXException
 import javax.xml.bind.JAXBElement
-import javax.xml.bind.JAXBException
 import javax.xml.datatype.DatatypeConfigurationException
 
 
@@ -31,7 +29,6 @@ open class AvslagYrkesaktivMapper : BrevDataMapper {
         private const val JA = "true"
     }
 
-    @Throws(JAXBException::class, SAXException::class)
     override fun mapTilBrevXML(
         fellesType: FellesType,
         navFelles: MelosysNAVFelles,
@@ -54,8 +51,7 @@ open class AvslagYrkesaktivMapper : BrevDataMapper {
 
     private fun mapArt161AvslagFraAnmodningsperiode(fag: Fag, svar: AnmodningsperiodeSvar) {
         fag.begrunnelseFritekst = svar.begrunnelseFritekst
-        val avslagBegrunnelse = lagTomArt161AvslagBegrunnelse()
-        fag.art161AvslagBegrunnelse = avslagBegrunnelse
+        fag.art161AvslagBegrunnelse = lagTomArt161AvslagBegrunnelse()
     }
 
     private fun mapFag(
