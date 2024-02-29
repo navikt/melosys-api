@@ -37,15 +37,14 @@ class ProsessinstansFerdigListener(
     private val Prosessinstans.parentId: UUID?
         get() = getData(ProsessDataKey.PROCESS_PARENT_ID, UUID::class.java)
 
-    private fun ProsessinstansFerdigEvent.finnSibling(): Prosessinstans? {
-        return prosessinstansRepository.findAllByStatus(ProsessStatus.PÅ_VENT)
+    private fun ProsessinstansFerdigEvent.finnSibling(): Prosessinstans? =
+        prosessinstansRepository.findAllByStatus(ProsessStatus.PÅ_VENT)
             .filter { it.parentId == parentId }
             .filter { it.låsReferanse == låsReferanse }
             .sortedBy { it.registrertDato } // Ta den eldste først
             .firstOrNull().apply {
                 this?.let { log.debug { "Fant sibling ${it.id} til $uuid med parent:$parentId og lås:$låsReferanse" } }
             }
-    }
 
     private fun startNesteProsessinstans(prosessinstansFerdigEvent: ProsessinstansFerdigEvent) {
         val alleISammeGruppePåVent = prosessinstansRepository.findAllByStatus(ProsessStatus.PÅ_VENT)
