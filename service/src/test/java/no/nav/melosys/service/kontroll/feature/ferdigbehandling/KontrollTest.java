@@ -212,9 +212,9 @@ class KontrollTest {
         lovvalgsperiode.setBestemmelse(Lovvalgbestemmelser_883_2004.FO_883_2004_ART12_2);
         lovvalgsperiode.setInnvilgelsesresultat(InnvilgelsesResultat.INNVILGET);
 
-        Medlemsperiode medlemsperiode = new Medlemsperiode();
-        medlemsperiode.periode = new Periode(LocalDate.now().plusMonths(2), LocalDate.now().plusYears(2));
-        medlemsperiode.status = PeriodestatusMedl.GYLD.getKode();
+        Medlemsperiode medlemsperiode = new Medlemsperiode(
+            null, new Periode(LocalDate.now().plusMonths(2), LocalDate.now().plusYears(2)), null,
+            PeriodestatusMedl.GYLD.getKode(), null, null, null, null, null, null);
         medlemskapDokument.getMedlemsperiode().add(medlemsperiode);
 
 

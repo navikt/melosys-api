@@ -114,17 +114,17 @@ class A001MapperTest {
         Vilkaarsresultat vilkår16Uten12 = lagVilkaarsresultat(Vilkaar.FO_883_2004_ART16_1, true, SJOEMANNSKIRKEN);
 
         brevData = new BrevDataA001();
-        brevData.arbeidsgivendeVirksomheter = new ArrayList<>(List.of(virksomhet));   // Hovedvirksomhet
-        brevData.selvstendigeVirksomheter = new ArrayList<>();
-        brevData.arbeidssteder = new ArrayList<>(Arrays.asList(fysiskArbeidssted, maritimtArbeidssted));
-        brevData.persondata = person;
-        brevData.bostedsadresse = boAdresse;
-        brevData.utenlandskMyndighet = myndighet;
-        brevData.anmodningsperioder = List.of(anmodningsperiode);
-        brevData.anmodningBegrunnelser = vilkår16.getBegrunnelser();
-        brevData.anmodningUtenArt12Begrunnelser = vilkår16Uten12.getBegrunnelser();
-        brevData.utenlandskIdent = Optional.empty();
-        brevData.ansettelsesperiode = Optional.empty();
+        brevData.setArbeidsgivendeVirksomheter(new ArrayList<>(List.of(virksomhet)));   // Hovedvirksomhet
+        brevData.setSelvstendigeVirksomheter(new ArrayList<>());
+        brevData.setArbeidssteder(new ArrayList<>(Arrays.asList(fysiskArbeidssted, maritimtArbeidssted)));
+        brevData.setPersondata(person);
+        brevData.setBostedsadresse(boAdresse);
+        brevData.setUtenlandskMyndighet(myndighet);
+        brevData.setAnmodningsperioder(List.of(anmodningsperiode));
+        brevData.setAnmodningBegrunnelser(vilkår16.getBegrunnelser());
+        brevData.setAnmodningUtenArt12Begrunnelser(vilkår16Uten12.getBegrunnelser());
+        brevData.setUtenlandskIdent(null);
+        brevData.setAnsettelsesperiode(null);
     }
 
     @Test
@@ -136,7 +136,7 @@ class A001MapperTest {
         navFelles.getMottaker().setMottakeradresse(lagNorskPostadresse());
         navFelles.setKontaktinformasjon(lagKontaktInformasjon());
 
-        brevData.anmodningUtenArt12Begrunnelser.clear();
+        brevData.getAnmodningUtenArt12Begrunnelser().clear();
 
         String xml = mapTilBrevXML(fellesType, navFelles, brevData);
         assertThat(xml).isNotNull();
@@ -151,7 +151,7 @@ class A001MapperTest {
         navFelles.getMottaker().setMottakeradresse(lagNorskPostadresse());
         navFelles.setKontaktinformasjon(lagKontaktInformasjon());
 
-        brevData.anmodningBegrunnelser.clear();
+        brevData.getAnmodningBegrunnelser().clear();
 
         String xml = mapTilBrevXML(fellesType, navFelles, brevData);
         assertThat(xml).isNotNull();
@@ -172,7 +172,7 @@ class A001MapperTest {
 
     @Test
     void mapSEDA001_kontaktAdresseType_korrektAdresseType() {
-        brevData.bostedsadresseTypeKode = BostedsadresseTypeKode.KONTAKTADRESSE;
+        brevData.setBostedsadresseTypeKode(BostedsadresseTypeKode.KONTAKTADRESSE);
 
         var SEDA001 = mapper.mapSEDA001(brevData);
 
@@ -181,7 +181,7 @@ class A001MapperTest {
 
     @Test
     void mapSEDA001_ingenAdresseType_korrektAdresseType() {
-        brevData.bostedsadresseTypeKode = null;
+        brevData.setBostedsadresseTypeKode(null);
 
         var SEDA001 = mapper.mapSEDA001(brevData);
 

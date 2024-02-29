@@ -38,7 +38,7 @@ public class VideresendSoknadMapperTest {
 
     private BrevDataVideresend lagBrevDataVideresend() {
         BrevDataVideresend brevDataVideresend = new BrevDataVideresend(new BrevbestillingDto(), "Saksbehandler");
-        brevDataVideresend.bostedsland = Landkoder.NO.getBeskrivelse();
+        brevDataVideresend.setBostedsland(Landkoder.NO.getBeskrivelse());
 
         UtenlandskMyndighet utenlandskMyndighet = new UtenlandskMyndighet();
         utenlandskMyndighet.setNavn("Försäkringskassan");
@@ -47,7 +47,7 @@ public class VideresendSoknadMapperTest {
         utenlandskMyndighet.setPoststed("Visby");
         utenlandskMyndighet.setLand("Sverige");
         utenlandskMyndighet.setLandkode(Land_iso2.SE);
-        brevDataVideresend.trygdemyndighet = utenlandskMyndighet;
+        brevDataVideresend.setTrygdemyndighet(utenlandskMyndighet);
         return brevDataVideresend;
     }
 }

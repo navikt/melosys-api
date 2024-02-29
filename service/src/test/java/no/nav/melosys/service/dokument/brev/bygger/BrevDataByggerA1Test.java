@@ -146,7 +146,7 @@ class BrevDataByggerA1Test {
         søknad.selvstendigArbeid.getSelvstendigForetak().add(foretak);
 
         BrevDataA1 brevDataDto = (BrevDataA1) brevDataByggerA1.lag(dataGrunnlag, saksbehandler);
-        assertThat(brevDataDto.hovedvirksomhet.orgnr).isEqualTo(foretak.getOrgnr());
+        assertThat(brevDataDto.getHovedvirksomhet().orgnr).isEqualTo(foretak.getOrgnr());
     }
 
     @Test
@@ -155,7 +155,7 @@ class BrevDataByggerA1Test {
         søknad.juridiskArbeidsgiverNorge.getEkstraArbeidsgivere().add("7777");
 
         BrevDataA1 brevDataDto = (BrevDataA1) brevDataByggerA1.lag(dataGrunnlag, saksbehandler);
-        assertThat(brevDataDto.hovedvirksomhet.orgnr).isEqualTo("7777");
+        assertThat(brevDataDto.getHovedvirksomhet().orgnr).isEqualTo("7777");
     }
 
     private StrukturertAdresse lagStrukturertAdresse() {
@@ -176,8 +176,8 @@ class BrevDataByggerA1Test {
         søknad.arbeidPaaLand.getFysiskeArbeidssteder().add(fysiskArbeidssted);
 
         BrevDataA1 brevDataDto = (BrevDataA1) brevDataByggerA1.lag(dataGrunnlag, saksbehandler);
-        assertThat(brevDataDto.bivirksomheter.stream().map(uv -> uv.navn)).contains(fysiskArbeidssted.getVirksomhetNavn());
-        assertThat(brevDataDto.arbeidssteder.stream()
+        assertThat(brevDataDto.getBivirksomheter().stream().map(uv -> uv.navn)).contains(fysiskArbeidssted.getVirksomhetNavn());
+        assertThat(brevDataDto.getArbeidssteder().stream()
             .filter(no.nav.melosys.service.dokument.brev.mapper.arbeidssted.Arbeidssted::erFysisk)
             .map(no.nav.melosys.service.dokument.brev.mapper.arbeidssted.FysiskArbeidssted.class::cast)
             .map(no.nav.melosys.service.dokument.brev.mapper.arbeidssted.FysiskArbeidssted::getAdresse)).contains(fysiskArbeidssted.getAdresse());

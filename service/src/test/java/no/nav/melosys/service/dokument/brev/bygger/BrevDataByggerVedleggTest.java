@@ -38,14 +38,14 @@ class BrevDataByggerVedleggTest {
     void testByggA1() {
         BrevDataBygger brevDataByggerVedlegg = new BrevDataByggerVedlegg(brevDatabyggerA1, null);
         BrevDataVedlegg brevData = (BrevDataVedlegg) brevDataByggerVedlegg.lag(mock(BrevDataGrunnlag.class), "Z123456");
-        assertThat(brevData.brevDataA1).isNotNull().isEqualTo(brevDataA1);
+        assertThat(brevData.getBrevDataA1()).isNotNull().isEqualTo(brevDataA1);
     }
 
     @Test
     void testByggA001() {
         BrevDataBygger brevDataByggerVedlegg = new BrevDataByggerVedlegg(brevDatabyggerA001, null);
         BrevDataVedlegg brevData = (BrevDataVedlegg) brevDataByggerVedlegg.lag(mock(BrevDataGrunnlag.class), "Z123456");
-        assertThat(brevData.brevDataA001).isNotNull().isEqualTo(brevDataA001);
+        assertThat(brevData.getBrevDataA001()).isNotNull().isEqualTo(brevDataA001);
     }
 
     @Test

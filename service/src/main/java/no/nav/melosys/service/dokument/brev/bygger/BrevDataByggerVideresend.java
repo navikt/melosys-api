@@ -32,8 +32,8 @@ public class BrevDataByggerVideresend implements BrevDataBygger {
         }
 
         BrevDataVideresend brevdata = new BrevDataVideresend(brevbestillingDto, saksbehandler);
-        brevdata.bostedsland = bostedsland.getBeskrivelse();
-        brevdata.trygdemyndighet = utenlandskMyndighetService.hentUtenlandskMyndighet(bostedsland);
+        brevdata.setBostedsland(bostedsland.getBeskrivelse());
+        brevdata.setTrygdemyndighet(utenlandskMyndighetService.hentUtenlandskMyndighet(bostedsland));
 
         return brevdata;
     }

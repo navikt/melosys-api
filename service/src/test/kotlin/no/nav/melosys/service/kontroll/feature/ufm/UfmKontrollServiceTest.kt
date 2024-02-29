@@ -104,8 +104,7 @@ class UfmKontrollServiceTest {
         }
         medlemskapDokument.apply {
             medlemsperiode.add(
-                Medlemsperiode().apply {
-                    periode = Periode(LocalDate.now(), LocalDate.now().plusMonths(1))
+                Medlemsperiode(periode = Periode(LocalDate.now(), LocalDate.now().plusMonths(1))).apply {
                     land = "SWE"
                     type = PeriodeType.PERIODE_UTEN_MEDLEMSKAP
                 }
@@ -140,15 +139,13 @@ class UfmKontrollServiceTest {
         }
         medlemskapDokument.apply {
             medlemsperiode.add(
-                Medlemsperiode().apply {
-                    periode = Periode(LocalDate.now(), LocalDate.now().plusMonths(1))
+                Medlemsperiode(periode = Periode(LocalDate.now(), LocalDate.now().plusMonths(1))).apply {
                     land = "SWE"
                     type = PeriodeType.PERIODE_UTEN_MEDLEMSKAP
                 }
             )
             medlemsperiode.add(
-                Medlemsperiode().apply {
-                    periode = Periode(LocalDate.now().plusDays(15), LocalDate.now().plusMonths(2))
+                Medlemsperiode(periode = Periode(LocalDate.now().plusDays(15), LocalDate.now().plusMonths(2))).apply {
                     land = "SWE"
                     type = PeriodeType.PERIODE_UTEN_MEDLEMSKAP
                 }
@@ -257,11 +254,9 @@ class UfmKontrollServiceTest {
         }
         medlemskapDokument.apply {
             medlemsperiode.add(
-                Medlemsperiode().apply {
-                    periode = Periode(LocalDate.now(), LocalDate.now().plusMonths(1))
-                    land = "DNK"
-                    type = PeriodeType.PERIODE_UTEN_MEDLEMSKAP
-                }
+                Medlemsperiode(periode = Periode(LocalDate.now(), LocalDate.now().plusMonths(1)),
+                    land = "DNK",
+                    type = PeriodeType.PERIODE_UTEN_MEDLEMSKAP)
             )
         }
         personopplysninger.apply {
@@ -300,11 +295,9 @@ class UfmKontrollServiceTest {
         }
         medlemskapDokument.apply {
             medlemsperiode.add(
-                Medlemsperiode().apply {
-                    periode = Periode(LocalDate.now(), LocalDate.now().plusMonths(1))
-                    land = "NOR"
-                    type = PeriodeType.PERIODE_MED_MEDLEMSKAP
-                }
+                Medlemsperiode(periode = Periode(LocalDate.now(), LocalDate.now().plusMonths(1)),
+                    land = "NOR",
+                    type = PeriodeType.PERIODE_MED_MEDLEMSKAP)
             )
         }
         personopplysninger.apply {
@@ -342,16 +335,10 @@ class UfmKontrollServiceTest {
         }
         medlemskapDokument.apply {
             medlemsperiode.add(
-                Medlemsperiode().apply {
-                    periode = Periode(LocalDate.now(), LocalDate.now().plusMonths(1))
-                    land = "SWE"
-                },
+                Medlemsperiode(periode = Periode(LocalDate.now(), LocalDate.now().plusMonths(1)), land = "SWE"),
             )
             medlemsperiode.add(
-                Medlemsperiode().apply {
-                    periode = Periode(LocalDate.now().plusMonths(1), LocalDate.now().plusMonths(2))
-                    land = "SWE"
-                },
+                Medlemsperiode(periode = Periode(LocalDate.now().plusMonths(1), LocalDate.now().plusMonths(2)), land = "SWE"),
             )
             personopplysninger
         }
@@ -385,14 +372,12 @@ class UfmKontrollServiceTest {
         }
         medlemskapDokument.apply {
             medlemsperiode.add(
-                Medlemsperiode().apply {
-                    periode = Periode(LocalDate.now(), LocalDate.now().plusMonths(1))
+                Medlemsperiode(periode = Periode(LocalDate.now(), LocalDate.now().plusMonths(1))).apply {
                     land = "SWE"
                 },
             )
             medlemsperiode.add(
-                Medlemsperiode().apply {
-                    periode = Periode(LocalDate.now().plusMonths(1), LocalDate.now().plusMonths(2))
+                Medlemsperiode(periode = Periode(LocalDate.now().plusMonths(1), LocalDate.now().plusMonths(2))).apply {
                     land = "SWE"
                 },
             )
@@ -439,16 +424,12 @@ class UfmKontrollServiceTest {
         }
         medlemskapDokument.apply {
             medlemsperiode.add(
-                Medlemsperiode().apply {
-                    periode = Periode(LocalDate.now(), LocalDate.now().plusMonths(1))
+                Medlemsperiode(periode = Periode(LocalDate.now(), LocalDate.now().plusMonths(1))).apply {
                     land = "SWE"
                 },
             )
             medlemsperiode.add(
-                Medlemsperiode().apply {
-                    periode = Periode(LocalDate.now().plusMonths(1), LocalDate.now().plusMonths(2))
-                    land = "SWE"
-                },
+                Medlemsperiode(periode = Periode(LocalDate.now().plusMonths(1), LocalDate.now().plusMonths(2)), land = "SWE"),
             )
             personopplysninger
         }
@@ -491,16 +472,12 @@ class UfmKontrollServiceTest {
         }
         medlemskapDokument.apply {
             medlemsperiode.add(
-                Medlemsperiode().apply {
-                    periode = Periode(LocalDate.now(), LocalDate.now().plusMonths(1))
-                    land = "SWE"
-                },
+                Medlemsperiode(periode = Periode(LocalDate.now(), LocalDate.now().plusMonths(1)),
+                    land = "SWE"),
             )
             medlemsperiode.add(
-                Medlemsperiode().apply {
-                    periode = Periode(LocalDate.now().plusMonths(1), LocalDate.now().plusMonths(2))
-                    land = "DNK"
-                },
+                Medlemsperiode(periode = Periode(LocalDate.now().plusMonths(1), LocalDate.now().plusMonths(2)),
+                    land = "DNK"),
             )
             personopplysninger
         }

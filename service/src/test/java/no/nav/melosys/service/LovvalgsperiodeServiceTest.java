@@ -1,5 +1,11 @@
 package no.nav.melosys.service;
 
+import java.time.LocalDate;
+import java.util.Collection;
+import java.util.Collections;
+import java.util.List;
+import java.util.Optional;
+
 import no.nav.melosys.domain.*;
 import no.nav.melosys.domain.dokument.medlemskap.MedlemskapDokument;
 import no.nav.melosys.domain.dokument.medlemskap.Medlemsperiode;
@@ -14,6 +20,7 @@ import no.nav.melosys.exception.FunksjonellException;
 import no.nav.melosys.exception.IkkeFunnetException;
 import no.nav.melosys.integrasjon.medl.GrunnlagMedl;
 import no.nav.melosys.integrasjon.medl.MedlPeriodeKonverter;
+import no.nav.melosys.integrasjon.medl.PeriodestatusMedl;
 import no.nav.melosys.repository.BehandlingRepository;
 import no.nav.melosys.repository.BehandlingsresultatRepository;
 import no.nav.melosys.repository.LovvalgsperiodeRepository;
@@ -24,12 +31,6 @@ import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.ArgumentCaptor;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
-
-import java.time.LocalDate;
-import java.util.Collection;
-import java.util.Collections;
-import java.util.List;
-import java.util.Optional;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatExceptionOfType;
@@ -152,7 +153,7 @@ class LovvalgsperiodeServiceTest {
         medlDokument.getMedlemsperiode().add(medlemsperiodeFeilId);
 
         var behandling = lagBehandlingMedMedlOpplysning(medlDokument);
-        mockTidligereMedlemsperiodeRepository(medlemsperiode.id);
+        mockTidligereMedlemsperiodeRepository(medlemsperiode.getId());
 
 
         assertThat(lovvalgsperiodeService.hentTidligereLovvalgsperioder(behandling))
@@ -163,7 +164,7 @@ class LovvalgsperiodeServiceTest {
                 Lovvalgsperiode::getTom,
                 Lovvalgsperiode::getBestemmelse
             ).containsExactly(
-                medlemsperiode.id,
+                medlemsperiode.getId(),
                 medlemsperiode.getPeriode().getFom(),
                 medlemsperiode.getPeriode().getTom(),
                 MedlPeriodeKonverter.tilLovvalgBestemmelse(GrunnlagMedl.valueOf(medlemsperiode.getGrunnlagstype()))
@@ -178,7 +179,7 @@ class LovvalgsperiodeServiceTest {
         medlDokument.getMedlemsperiode().add(medlemsperiode);
 
         var behandling = lagBehandlingMedMedlOpplysning(medlDokument);
-        mockTidligereMedlemsperiodeRepository(medlemsperiode.id);
+        mockTidligereMedlemsperiodeRepository(medlemsperiode.getId());
 
 
         Collection<Lovvalgsperiode> lovvalgsperioder = lovvalgsperiodeService.hentTidligereLovvalgsperioder(behandling);
@@ -190,7 +191,7 @@ class LovvalgsperiodeServiceTest {
                 Lovvalgsperiode::getMedlPeriodeID,
                 Lovvalgsperiode::getBestemmelse)
             .containsExactly(
-                medlemsperiode.id,
+                medlemsperiode.getId(),
                 Lovvalgbestemmelser_883_2004.FO_883_2004_ANNET);
     }
 
@@ -319,10 +320,8 @@ class LovvalgsperiodeServiceTest {
 
     private Medlemsperiode lagMedlemsperiode(long id, String grunnlagMedlKode) {
         Periode periode = new Periode(LocalDate.now(), LocalDate.now());
-        Medlemsperiode medlemsperiode = new Medlemsperiode();
-        medlemsperiode.id = id;
-        medlemsperiode.periode = periode;
-        medlemsperiode.grunnlagstype = grunnlagMedlKode;
-        return medlemsperiode;
+        return new Medlemsperiode(
+            id, periode, null,
+            PeriodestatusMedl.GYLD.getKode(), grunnlagMedlKode, null, null, null, null, null);
     }
 }

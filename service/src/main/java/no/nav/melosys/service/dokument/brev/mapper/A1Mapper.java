@@ -53,24 +53,24 @@ class A1Mapper {
 
         a1.setLovvalgsperiode(mapLovvalgsperiode(resultat.hentLovvalgsperiode()));
 
-        if (brevData.yrkesgruppe != null) {
-            a1.setYrkesgruppe(YrkesgruppeKode.valueOf(brevData.yrkesgruppe.name()));
+        if (brevData.getYrkesgruppe() != null) {
+            a1.setYrkesgruppe(YrkesgruppeKode.valueOf(brevData.getYrkesgruppe().name()));
         }
 
-        a1.setHovedvirksomhet(mapHovedvirksomhet(brevData.hovedvirksomhet));
+        a1.setHovedvirksomhet(mapHovedvirksomhet(brevData.getHovedvirksomhet()));
 
-        a1.setBivirksomhetListe(mapBivirksomheter(brevData.bivirksomheter, brevData.arbeidssteder));
+        a1.setBivirksomhetListe(mapBivirksomheter(brevData.getBivirksomheter(), brevData.getArbeidssteder()));
 
-        a1.setFysiskArbeidsstedAdresseListe(mapFysiskeAdresser(brevData.arbeidssteder, brevData.arbeidsland));
+        a1.setFysiskArbeidsstedAdresseListe(mapFysiskeAdresser(brevData.getArbeidssteder(), brevData.getArbeidsland()));
 
-        String ikkeFysiskArbeidssted = harIkkeFastArbeidssted(brevData.arbeidssteder) ? "true" : "false";
+        String ikkeFysiskArbeidssted = harIkkeFastArbeidssted(brevData.getArbeidssteder()) ? "true" : "false";
         a1.setIkkeFysiskArbeidssted(ikkeFysiskArbeidssted);
 
         return a1;
     }
 
     private PersonType mapPerson(BrevDataA1 brevDataA1) {
-        final var persondata = brevDataA1.person;
+        final var persondata = brevDataA1.getPerson();
         PersonType person = new PersonType();
         person.setKjoenn(KjoennKode.fromValue(persondata.hentKjønnType().getKode()));
         person.setStatsborgerskap(mapStatsborgerskap(persondata.hentAlleStatsborgerskap()));
@@ -83,7 +83,7 @@ class A1Mapper {
             throw new TekniskException("Konverteringsfeil ved konvertering av fødselsdato", e);
         }
 
-        person.setBostedsadresse(mapBostedAdresse(brevDataA1.bostedsadresse));
+        person.setBostedsadresse(mapBostedAdresse(brevDataA1.getBostedsadresse()));
         person.setMidlertidigOppholdsadresse(mapMidlertidigOppholdsadresse(persondata));
 
         return person;
@@ -194,7 +194,7 @@ class A1Mapper {
 
     private Stream<AdresseType> lagAdresserForArbeidsstederOgLandUtenArbeidssted(List<Arbeidssted> arbeidssteder,
                                                                                  Collection<Land_iso2> arbeidsland) {
-        if (brevData.erUkjenteEllerAlleEosLand) {
+        if (brevData.getUkjenteEllerAlleEosLand()) {
             return lagAdresselinjeForUkjentEllerIkkeOppgittArbeidssted().stream().map(this::tilAdresseType);
         }
 
