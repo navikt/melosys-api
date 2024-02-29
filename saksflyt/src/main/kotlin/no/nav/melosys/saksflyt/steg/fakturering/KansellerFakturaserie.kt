@@ -1,6 +1,7 @@
 package no.nav.melosys.saksflyt.steg.fakturering
 
 import mu.KotlinLogging
+import no.nav.melosys.domain.Behandling
 import no.nav.melosys.integrasjon.faktureringskomponenten.FaktureringskomponentenConsumer
 import no.nav.melosys.saksflyt.steg.StegBehandler
 import no.nav.melosys.saksflytapi.domain.ProsessDataKey
@@ -25,7 +26,7 @@ class KansellerFakturaserie(
         val saksbehandlerIdent = prosessinstans.getData(ProsessDataKey.SAKSBEHANDLER)
         val fagsak = behandling.fagsak
         val sisteBehandlingMedFakturaserieReferanse =
-            fagsak.hentBehandlingerSortertSynkendePåRegistrertDato().firstOrNull { harFakturaserieReferanse(it.id) }
+            fagsak.hentBehandlingerSortertSynkendePåRegistrertDato().firstOrNull { harFakturaserieReferanse(it) }
 
         if (sisteBehandlingMedFakturaserieReferanse != null) {
             val behandlingID = sisteBehandlingMedFakturaserieReferanse.id
@@ -40,8 +41,8 @@ class KansellerFakturaserie(
         }
     }
 
-    private fun harFakturaserieReferanse(behandlingID: Long): Boolean {
-        val behandlingsresultat = behandlingsresultatService.hentBehandlingsresultat(behandlingID)
+    private fun harFakturaserieReferanse(behandling: Behandling): Boolean {
+        val behandlingsresultat = behandlingsresultatService.hentBehandlingsresultat(behandling.id)
         return behandlingsresultat.fakturaserieReferanse != null
     }
 }
