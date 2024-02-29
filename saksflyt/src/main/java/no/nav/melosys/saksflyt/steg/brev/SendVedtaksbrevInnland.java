@@ -1,9 +1,9 @@
 package no.nav.melosys.saksflyt.steg.brev;
 
-import io.getunleash.Unleash;
 import java.util.ArrayList;
 import java.util.List;
 
+import io.getunleash.Unleash;
 import no.nav.melosys.domain.Anmodningsperiode;
 import no.nav.melosys.domain.Behandling;
 import no.nav.melosys.domain.Behandlingsresultat;
@@ -193,7 +193,7 @@ public class SendVedtaksbrevInnland implements StegBehandler {
     private static boolean finnesArbeidsgiverUtland(MottatteOpplysninger mottatteOpplysninger) {
         return !mottatteOpplysninger.getMottatteOpplysningerData().foretakUtland.isEmpty()
             && mottatteOpplysninger.getMottatteOpplysningerData().foretakUtland.stream()
-            .anyMatch(foretakUtland -> Boolean.FALSE.equals(foretakUtland.selvstendigNæringsvirksomhet));
+            .anyMatch(foretakUtland -> Boolean.FALSE.equals(foretakUtland.getSelvstendigNæringsvirksomhet()));
     }
 
     private String hentBegrunnelsekodeTilForkortetPeriode(Behandlingsresultat behandlingsresultat) {

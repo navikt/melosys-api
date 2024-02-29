@@ -47,12 +47,12 @@ public class BrevDataByggerVideresendTest {
         when(landvelgerService.hentBostedsland(eq(1L), any())).thenReturn(new Bostedsland(Landkoder.SE));
 
         UtenlandskMyndighet utenlandskMyndighet = new UtenlandskMyndighet();
-        utenlandskMyndighet.navn = "Försäkringskassan";
-        utenlandskMyndighet.gateadresse1 = "Box 1164";
-        utenlandskMyndighet.postnummer = "SE-621 22";
-        utenlandskMyndighet.poststed = "Visby";
-        utenlandskMyndighet.land = "Sverige";
-        utenlandskMyndighet.landkode = Land_iso2.SE;
+        utenlandskMyndighet.setNavn("Försäkringskassan");
+        utenlandskMyndighet.setGateadresse1("Box 1164");
+        utenlandskMyndighet.setPostnummer("SE-621 22");
+        utenlandskMyndighet.setPoststed("Visby");
+        utenlandskMyndighet.setLand("Sverige");
+        utenlandskMyndighet.setLandkode(Land_iso2.SE);
         when(utenlandskMyndighetService.hentUtenlandskMyndighet(eq(Land_iso2.SE))).thenReturn(utenlandskMyndighet);
 
         brevDataByggerVideresend.lag(brevDataGrunnlag, "Saksbehandler");

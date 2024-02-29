@@ -148,7 +148,7 @@ class DistribuerJournalpostTest {
         prosessinstans.setData(ProsessDataKey.INSTITUSJON_ID, institusjonID);
 
         var utenlandskMyndighet = new UtenlandskMyndighet();
-        utenlandskMyndighet.landkode = Land_iso2.GB;
+        utenlandskMyndighet.setLandkode(Land_iso2.GB);
 
         when(mockUtenlandskMyndighetService.hentUtenlandskMyndighet(eq(Land_iso2.GB), any())).thenReturn(utenlandskMyndighet);
 

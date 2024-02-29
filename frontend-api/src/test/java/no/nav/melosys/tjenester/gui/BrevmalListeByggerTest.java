@@ -561,7 +561,7 @@ class BrevmalListeByggerTest {
         mottatteOpplysninger.setMottatteOpplysningerData(anmodningEllerAttest);
         behandlingTrygdeavtale.setMottatteOpplysninger(mottatteOpplysninger);
         var utenlandskMyndighet = new UtenlandskMyndighet();
-        utenlandskMyndighet.landkode = Land_iso2.AU;
+        utenlandskMyndighet.setLandkode(Land_iso2.AU);
 
         when(behandlingService.hentBehandlingMedSaksopplysninger(anyLong())).thenReturn(behandlingTrygdeavtale);
         when(behandlingService.hentBehandling(anyLong())).thenReturn(behandlingTrygdeavtale);
@@ -733,9 +733,9 @@ class BrevmalListeByggerTest {
 
     private void mockUtenlandskTrygdemyndighetServiceMottakerValgKall() {
         var utenlandskMyndighetGrønland = new UtenlandskMyndighet();
-        utenlandskMyndighetGrønland.landkode = Land_iso2.GL;
+        utenlandskMyndighetGrønland.setLandkode(Land_iso2.GL);
         var utenlandskMyndighetFærøyene = new UtenlandskMyndighet();
-        utenlandskMyndighetFærøyene.landkode = Land_iso2.FO;
+        utenlandskMyndighetFærøyene.setLandkode(Land_iso2.FO);
         when(utenlandskMyndighetService.hentUtenlandskMyndighet(Land_iso2.GL)).thenReturn(utenlandskMyndighetGrønland);
         when(utenlandskMyndighetService.hentUtenlandskMyndighet(Land_iso2.FO)).thenReturn(utenlandskMyndighetFærøyene);
     }

@@ -26,7 +26,7 @@ import no.nav.melosys.service.kontroll.feature.ferdigbehandling.data.Ferdigbehan
 import no.nav.melosys.service.kontroll.feature.ferdigbehandling.data.MedlemskapsperiodeData;
 import no.nav.melosys.service.kontroll.feature.ferdigbehandling.data.SaksopplysningerData;
 import no.nav.melosys.service.kontroll.feature.ferdigbehandling.kontroll.FerdigbehandlingKontrollsett;
-import no.nav.melosys.service.medlemskapsperiode.MedlemskapsperiodeService;
+import no.nav.melosys.service.ftrl.medlemskapsperiode.MedlemskapsperiodeService;
 import no.nav.melosys.service.persondata.PersondataFasade;
 import no.nav.melosys.service.registeropplysninger.OrganisasjonOppslagService;
 import no.nav.melosys.service.saksbehandling.SaksbehandlingRegler;

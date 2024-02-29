@@ -209,7 +209,7 @@ class BrevDataByggerInnvilgelseTest {
         MedfolgendeFamilie barn1 = MedfolgendeFamilie.tilMedfolgendeFamilie(UUID.randomUUID().toString(), "fnr1", null, MedfolgendeFamilie.Relasjonsrolle.BARN);
         MedfolgendeFamilie barn2 = MedfolgendeFamilie.tilMedfolgendeFamilie(UUID.randomUUID().toString(), "fnr2", null, MedfolgendeFamilie.Relasjonsrolle.BARN);
         MottatteOpplysningerData mottatteOpplysningerData = new MottatteOpplysningerData();
-        mottatteOpplysningerData.personOpplysninger.medfolgendeFamilie.addAll(List.of(barn1, barn2));
+        mottatteOpplysningerData.personOpplysninger.getMedfolgendeFamilie().addAll(List.of(barn1, barn2));
         MottatteOpplysninger mottatteOpplysninger = new MottatteOpplysninger();
         mottatteOpplysninger.setMottatteOpplysningerData(mottatteOpplysningerData);
 
@@ -236,7 +236,7 @@ class BrevDataByggerInnvilgelseTest {
         MedfolgendeFamilie barn1 = MedfolgendeFamilie.tilMedfolgendeFamilie(UUID.randomUUID().toString(), null, "Navn1", MedfolgendeFamilie.Relasjonsrolle.BARN);
         MedfolgendeFamilie barn2 = MedfolgendeFamilie.tilMedfolgendeFamilie(UUID.randomUUID().toString(), null, "Navn2", MedfolgendeFamilie.Relasjonsrolle.BARN);
         MottatteOpplysningerData mottatteOpplysningerData = new MottatteOpplysningerData();
-        mottatteOpplysningerData.personOpplysninger.medfolgendeFamilie.addAll(List.of(barn1, barn2));
+        mottatteOpplysningerData.personOpplysninger.getMedfolgendeFamilie().addAll(List.of(barn1, barn2));
         MottatteOpplysninger mottatteOpplysninger = new MottatteOpplysninger();
         mottatteOpplysninger.setMottatteOpplysningerData(mottatteOpplysningerData);
 

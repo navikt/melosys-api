@@ -257,12 +257,12 @@ class TrygdeavtaleServiceTest {
     @Test
     void hentVirksomheter_fraEreg_mappesKorrekt() {
         var selvstendigForetak = new SelvstendigForetak();
-        selvstendigForetak.orgnr = ORGNR_1;
+        selvstendigForetak.setOrgnr(ORGNR_1);
         var selvstendigArbeid = new SelvstendigArbeid();
-        selvstendigArbeid.selvstendigForetak = List.of(selvstendigForetak);
+        selvstendigArbeid.setSelvstendigForetak(List.of(selvstendigForetak));
 
         var juridiskArbeidsgiverNorge = new JuridiskArbeidsgiverNorge();
-        juridiskArbeidsgiverNorge.ekstraArbeidsgivere = List.of(ORGNR_2);
+        juridiskArbeidsgiverNorge.setEkstraArbeidsgivere(List.of(ORGNR_2));
 
         var behandling = lagBehandlingMedVirksomheter(
             selvstendigArbeid,
@@ -427,7 +427,7 @@ class TrygdeavtaleServiceTest {
 
     private Behandling lagBehandlingMedFamilie(List<MedfolgendeFamilie> familie) {
         var personOpplysninger = new OpplysningerOmBrukeren();
-        personOpplysninger.medfolgendeFamilie.addAll(familie);
+        personOpplysninger.getMedfolgendeFamilie().addAll(familie);
 
         var mottatteOpplysningerData = new MottatteOpplysningerData();
         mottatteOpplysningerData.personOpplysninger = personOpplysninger;
@@ -462,8 +462,8 @@ class TrygdeavtaleServiceTest {
         return uuidNavn.entrySet().stream()
             .map(un -> {
                 var foretakUtland = new ForetakUtland();
-                foretakUtland.uuid = un.getKey();
-                foretakUtland.navn = un.getValue();
+                foretakUtland.setUuid(un.getKey());
+                foretakUtland.setNavn(un.getValue());
                 return foretakUtland;
             })
             .toList();
@@ -490,10 +490,10 @@ class TrygdeavtaleServiceTest {
         arbeidsforholdDokument.arbeidsforhold = orgnumre.stream()
             .map(orgnr -> {
                 var arbeidsforhold = new Arbeidsforhold();
-                arbeidsforhold.arbeidsgivertype = Aktoertype.ORGANISASJON;
-                arbeidsforhold.arbeidsgiverID = orgnr;
-                arbeidsforhold.opplysningspliktigtype = Aktoertype.ORGANISASJON;
-                arbeidsforhold.opplysningspliktigID = "OpplysningspliktigID";
+                arbeidsforhold.setArbeidsgivertype(Aktoertype.ORGANISASJON);
+                arbeidsforhold.setArbeidsgiverID(orgnr);
+                arbeidsforhold.setOpplysningspliktigtype(Aktoertype.ORGANISASJON);
+                arbeidsforhold.setOpplysningspliktigID("OpplysningspliktigID");
                 return arbeidsforhold;
             })
             .toList();

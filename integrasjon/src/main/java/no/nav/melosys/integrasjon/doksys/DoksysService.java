@@ -271,7 +271,7 @@ public class DoksysService implements DoksysFasade {
                 if (metadata.mottaker.erUtenlandskMyndighet()) {
                     // Dokprod støtter ikke utenlandske myndigheter så vi lager en falsk person
                     // med mottakerId="11111111111" og dermed blir AvsendMottakId i Joark tom.
-                    return lagPerson(FALSK_MOTTAKER_ID, metadata.utenlandskMyndighet.navn, false);
+                    return lagPerson(FALSK_MOTTAKER_ID, metadata.utenlandskMyndighet.getNavn(), false);
                 } else {
                     return lagOrganisasjon(mottakerID);
                 }

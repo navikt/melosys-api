@@ -14,7 +14,6 @@ import no.nav.melosys.domain.kodeverk.Mottakerroller;
 import no.nav.melosys.domain.kodeverk.brev.Produserbaredokumenter;
 import no.nav.melosys.domain.kodeverk.lovvalgsbestemmelser.Lovvalgbestemmelser_883_2004;
 import no.nav.melosys.domain.kodeverk.lovvalgsbestemmelser.trygdeavtale.Lovvalgsbestemmelser_trygdeavtale_gb;
-import no.nav.melosys.domain.mottatteopplysninger.MottatteOpplysninger;
 import no.nav.melosys.exception.FunksjonellException;
 import no.nav.melosys.exception.IkkeFunnetException;
 import no.nav.melosys.exception.TekniskException;
@@ -273,7 +272,7 @@ public class BrevmottakerService {
 
     private boolean myndighetØnskerA1(UtenlandskMyndighet utenlandskMyndighet) {
         return utenlandskMyndighet
-            .preferanser
+            .getPreferanser()
             .stream()
             .map(Preferanse::getPreferanse)
             .noneMatch(RESERVERT_FRA_A1::equals);

@@ -2,6 +2,7 @@ package no.nav.melosys.itest
 
 import com.fasterxml.jackson.databind.ObjectMapper
 import no.nav.melosys.domain.eessi.melding.MelosysEessiMelding
+import no.nav.melosys.domain.manglendebetaling.ManglendeFakturabetalingMelding
 import org.apache.kafka.common.serialization.StringSerializer
 import org.springframework.beans.factory.annotation.Qualifier
 import org.springframework.boot.autoconfigure.kafka.KafkaProperties
@@ -23,6 +24,18 @@ class KafkaTestConfig {
     ): KafkaTemplate<String, MelosysEessiMelding> {
         val props = kafkaProperties.buildProducerProperties()
         val producerFactory: ProducerFactory<String, MelosysEessiMelding> =
+            DefaultKafkaProducerFactory(props, StringSerializer(), JsonSerializer(objectMapper))
+        return KafkaTemplate(producerFactory)
+    }
+
+    @Bean
+    @Qualifier("manglendeFakturabetalingMelding")
+    fun ManglendeFakturabetalingMeldingKafkaTemplate(
+        kafkaProperties: KafkaProperties,
+        objectMapper: ObjectMapper?
+    ): KafkaTemplate<String, ManglendeFakturabetalingMelding> {
+        val props = kafkaProperties.buildProducerProperties()
+        val producerFactory: ProducerFactory<String, ManglendeFakturabetalingMelding> =
             DefaultKafkaProducerFactory(props, StringSerializer(), JsonSerializer(objectMapper))
         return KafkaTemplate(producerFactory)
     }

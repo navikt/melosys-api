@@ -45,8 +45,8 @@ class ArbeidsforholdKonverter(
         return antallTimerForTimeloennet.map {
             AntallTimerIPerioden().apply {
                 antallTimer = it.antallTimer()
-                periode = getPeriode(it.periode())
-                rapporteringsperiode = YearMonth.parse(it.rapporteringsperiode())
+                timelonnetPeriode = getPeriode(it.periode())
+                rapporteringsAarMaaned = YearMonth.parse(it.rapporteringsperiode())
             }
         }
     }
@@ -89,32 +89,26 @@ class ArbeidsforholdKonverter(
     private fun getArbeidsAvtaler(arbeidsavtalerSrc: List<ArbeidsforholdResponse.Arbeidsavtale>?): List<Arbeidsavtale> {
         if (arbeidsavtalerSrc == null) return emptyList()
         return arbeidsavtalerSrc.map {
-            Arbeidsavtale().apply {
-                yrke = Yrke(it.yrke()).apply {
-                    term = kodeOppslag.getTermFraKodeverk(FellesKodeverk.YRKER, it.yrke())
-                }
-                beregnetAntallTimerPrUke = it.beregnetAntallTimerPrUke()
-                arbeidstidsordning = Arbeidstidsordning()
-                arbeidstidsordning.kode = it.arbeidstidsordning()
-                avloenningstype = "" // Finnes ikke i nytt rest api
-                gyldighetsperiode = getPeriode(it.gyldighetsperiode())
-                beregnetAntallTimerPrUke = it.beregnetAntallTimerPrUke()
-                stillingsprosent = it.stillingsprosent()
-                sisteLoennsendringsdato = it.sistLoennsendring()
-                endringsdatoStillingsprosent = it.sistStillingsendring()
-                avtaltArbeidstimerPerUke = it.antallTimerPrUke()
+            Arbeidsavtale(
+                yrke = Yrke(term = kodeOppslag.getTermFraKodeverk(FellesKodeverk.YRKER, it.yrke()), kode = it.yrke()),
+                arbeidstidsordning = Arbeidstidsordning().apply { kode = it.arbeidstidsordning },
+                avloenningstype = "", // Finnes ikke i nytt rest api
+                gyldighetsperiode = getPeriode(it.gyldighetsperiode()),
+                beregnetAntallTimerPrUke = it.beregnetAntallTimerPrUke(),
+                stillingsprosent = it.stillingsprosent(),
+                sisteLoennsendringsdato = it.sistLoennsendring(),
+                endringsdatoStillingsprosent = it.sistStillingsendring(),
+                avtaltArbeidstimerPerUke = it.antallTimerPrUke(),
 
                 // Disse ikke er med i ny aareg rest api
-                maritimArbeidsavtale = false
-                skipsregister = null
-                skipstype = null
-                fartsområde = null
-            }
+                maritimArbeidsavtale = false,
+                skipsregister = null,
+                skipstype = null,
+                fartsomraade = null)
         }
     }
 
-    private fun getPeriode(periode: ArbeidsforholdResponse.Periode?): Periode? {
-        if (periode == null) return null
+    private fun getPeriode(periode: ArbeidsforholdResponse.Periode): Periode {
         return Periode(periode.fom(), periode.tom())
     }
 }

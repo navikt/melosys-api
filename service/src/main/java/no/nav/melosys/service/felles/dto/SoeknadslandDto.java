@@ -10,15 +10,15 @@ import no.nav.melosys.domain.mottatteopplysninger.data.Soeknadsland;
 public class SoeknadslandDto {
     @JsonProperty("landkoder")
     private List<String> landkoder;
-    @JsonProperty("erUkjenteEllerAlleEosLand")
-    private boolean erUkjenteEllerAlleEosLand;
+    @JsonProperty("flereLandUkjentHvilke")
+    private boolean flereLandUkjentHvilke;
 
     public SoeknadslandDto() {
     }
 
-    public SoeknadslandDto(List<String> landkoder, boolean erUkjenteEllerAlleEosLand) {
+    public SoeknadslandDto(List<String> landkoder, boolean flereLandUkjentHvilke) {
         this.landkoder = landkoder;
-        this.erUkjenteEllerAlleEosLand = erUkjenteEllerAlleEosLand;
+        this.flereLandUkjentHvilke = flereLandUkjentHvilke;
     }
 
     public List<String> getLandkoder() {
@@ -29,17 +29,17 @@ public class SoeknadslandDto {
         this.landkoder = landkoder;
     }
 
-    public boolean erUkjenteEllerAlleEosLand() {
-        return erUkjenteEllerAlleEosLand;
+    public boolean isFlereLandUkjentHvilke() {
+        return flereLandUkjentHvilke;
     }
 
-    public void setErUkjenteEllerAlleEosLand(boolean erUkjenteEllerAlleEosLand) {
-        this.erUkjenteEllerAlleEosLand = erUkjenteEllerAlleEosLand;
+    public void setFlereLandUkjentHvilke(boolean flereLandUkjentHvilke) {
+        this.flereLandUkjentHvilke = flereLandUkjentHvilke;
     }
 
     public boolean erGyldig() {
         if (getLandkoder() == null) return false;
-        if (erUkjenteEllerAlleEosLand()) return getLandkoder().isEmpty();
+        if (isFlereLandUkjentHvilke()) return getLandkoder().isEmpty();
         return !getLandkoder().isEmpty();
     }
 
@@ -48,19 +48,19 @@ public class SoeknadslandDto {
         if (this == o) return true;
         if (!(o instanceof SoeknadslandDto)) return false;
         SoeknadslandDto that = (SoeknadslandDto) o;
-        return this.erUkjenteEllerAlleEosLand == that.erUkjenteEllerAlleEosLand &&
+        return this.flereLandUkjentHvilke == that.flereLandUkjentHvilke &&
             this.getLandkoder().equals(that.getLandkoder());
     }
 
     public no.nav.melosys.saksflytapi.journalfoering.Soeknadsland tilSoknadsland() {
-        return new no.nav.melosys.saksflytapi.journalfoering.Soeknadsland(this.landkoder, erUkjenteEllerAlleEosLand);
+        return new no.nav.melosys.saksflytapi.journalfoering.Soeknadsland(this.landkoder, flereLandUkjentHvilke);
     }
 
     public static SoeknadslandDto av(Soeknadsland søknadsland) {
         if (søknadsland == null) {
             return new SoeknadslandDto(Collections.emptyList(), false);
         }
-        return new SoeknadslandDto(søknadsland.landkoder, søknadsland.erUkjenteEllerAlleEosLand);
+        return new SoeknadslandDto(søknadsland.getLandkoder(), søknadsland.isFlereLandUkjentHvilke());
     }
 
     public static SoeknadslandDto av(Landkoder landkode) {

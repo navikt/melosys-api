@@ -191,7 +191,7 @@ public class UtpekingService {
         if (StringUtils.isEmpty(utpekingAvvis.getBegrunnelse())) {
             throw new FunksjonellException("Du må oppgi en begrunnelse for å kunne avslå en utpeking");
         }
-        if (utpekingAvvis.isEtterspørInformasjon() == null) {
+        if (utpekingAvvis.getEtterspørInformasjon() == null) {
             throw new FunksjonellException("Du må oppgi om forespørsel om mer informasjon vil bli sendt");
         }
     }

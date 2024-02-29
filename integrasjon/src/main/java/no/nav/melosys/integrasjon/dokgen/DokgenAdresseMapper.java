@@ -2,6 +2,7 @@ package no.nav.melosys.integrasjon.dokgen;
 
 import java.util.ArrayList;
 import java.util.List;
+import javax.annotation.Nullable;
 
 import no.nav.melosys.domain.Kontaktopplysning;
 import no.nav.melosys.domain.adresse.StrukturertAdresse;
@@ -11,8 +12,6 @@ import no.nav.melosys.domain.dokument.organisasjon.OrganisasjonDokument;
 import no.nav.melosys.domain.kodeverk.Mottakerroller;
 import no.nav.melosys.domain.person.Persondata;
 import no.nav.melosys.integrasjon.dokgen.dto.felles.Mottaker;
-
-import jakarta.annotation.Nullable;
 
 import static org.springframework.util.StringUtils.hasText;
 
@@ -104,11 +103,11 @@ public final class DokgenAdresseMapper {
         if (mottakerType == Mottakerroller.UTENLANDSK_TRYGDEMYNDIGHET && brevbestilling.getUtenlandskMyndighet() != null) {
             var utenlandskMyndighet = brevbestilling.getUtenlandskMyndighet();
             return new Mottaker(
-                utenlandskMyndighet.navn,
+                utenlandskMyndighet.getNavn(),
                 utenlandskMyndighet.getGateadresseAsList(),
-                utenlandskMyndighet.postnummer,
-                utenlandskMyndighet.poststed,
-                utenlandskMyndighet.land,
+                utenlandskMyndighet.getPostnummer(),
+                utenlandskMyndighet.getPoststed(),
+                utenlandskMyndighet.getLand(),
                 mottakerType.getKode(),
                 null
             );

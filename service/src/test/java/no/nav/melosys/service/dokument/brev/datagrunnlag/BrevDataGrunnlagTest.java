@@ -87,7 +87,7 @@ class BrevDataGrunnlagTest {
         assertThat(arbeidssteder).hasSize(1);
 
         MaritimtArbeidssted arbeidssted = (MaritimtArbeidssted) arbeidssteder.get(0);
-        assertThat(arbeidssted.getEnhetNavn()).isEqualTo(maritimtArbeidISøknad.enhetNavn);
+        assertThat(arbeidssted.getEnhetNavn()).isEqualTo(maritimtArbeidISøknad.getEnhetNavn());
         assertThat(arbeidssted.getForetakNavn()).isNullOrEmpty();
         assertThat(arbeidssted.getIdnummer()).isNullOrEmpty();
         assertThat(arbeidssted.getYrkesgruppe().getKode()).isEqualTo(Yrkesgrupper.SOKKEL_ELLER_SKIP.getKode());

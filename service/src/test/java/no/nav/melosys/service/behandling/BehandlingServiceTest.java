@@ -784,7 +784,7 @@ class BehandlingServiceTest {
     private MottatteOpplysninger opprettMottatteOpplysninger() {
         var mottatteOpplysninger = new MottatteOpplysninger();
         var mottatteOpplysningerData = new MottatteOpplysningerData();
-        mottatteOpplysningerData.soeknadsland.landkoder.add(Landkoder.SE.getKode());
+        mottatteOpplysningerData.soeknadsland.getLandkoder().add(Landkoder.SE.getKode());
         mottatteOpplysningerData.periode = new Periode(LocalDate.of(2020, 1, 1), LocalDate.of(2021, 1, 1));
         mottatteOpplysninger.setMottatteOpplysningerData(mottatteOpplysningerData);
         return mottatteOpplysninger;

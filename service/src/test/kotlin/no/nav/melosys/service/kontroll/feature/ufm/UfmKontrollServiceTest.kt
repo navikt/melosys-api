@@ -604,8 +604,9 @@ class UfmKontrollServiceTest {
             )
         }
         mottatteOpplysningerData.apply {
-            overgangsregelbestemmelser.add(Overgangsregelbestemmelser.FO_1408_1971_ART14A_2)
-            overgangsregelbestemmelser.add(Overgangsregelbestemmelser.FO_1408_1971_ART14_2_B)
+            overgangsregelbestemmelser = arrayListOf(
+                Overgangsregelbestemmelser.FO_1408_1971_ART14A_2, Overgangsregelbestemmelser.FO_1408_1971_ART14_2_B
+            )
         }
         every { kontrollresultatRepository.saveAll(capture(kontrollresultatSlot)) }
             .answers {

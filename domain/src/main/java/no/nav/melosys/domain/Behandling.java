@@ -320,7 +320,7 @@ public class Behandling extends RegistreringsInfo {
             var utenlandskeArbeidsstederLandkoder = mottatteOpplysninger.getMottatteOpplysningerData().hentUtenlandskeArbeidsstederLandkode();
             return utenlandskeArbeidsstederLandkoder.isEmpty() ? Collections.singleton(Landkoder.NO.getKode()) : utenlandskeArbeidsstederLandkoder;
         } else {
-            return mottatteOpplysninger.getMottatteOpplysningerData().soeknadsland.landkoder;
+            return mottatteOpplysninger.getMottatteOpplysningerData().soeknadsland.getLandkoder();
         }
     }
 

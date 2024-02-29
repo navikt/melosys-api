@@ -44,7 +44,7 @@ class VurderInngangsvilkaarTest {
     void utfoerSteg_funker() {
         MottatteOpplysningerData mottatteOpplysningerData = new MottatteOpplysningerData();
         mottatteOpplysningerData.periode = new Periode(LocalDate.now(), LocalDate.now().plusYears(1L));
-        mottatteOpplysningerData.soeknadsland.landkoder = List.of(Landkoder.NO.getKode(), Landkoder.SE.getKode());
+        mottatteOpplysningerData.soeknadsland.setLandkoder(List.of(Landkoder.NO.getKode(), Landkoder.SE.getKode()));
 
         behandling.setMottatteOpplysninger(new MottatteOpplysninger());
         behandling.getMottatteOpplysninger().setMottatteOpplysningerData(mottatteOpplysningerData);
@@ -56,7 +56,7 @@ class VurderInngangsvilkaarTest {
         when(inngangsvilkaarService.skalVurdereInngangsvilkår(any())).thenReturn(true);
         when(inngangsvilkaarService.vurderOgLagreInngangsvilkår(
             behandlingID,
-            mottatteOpplysningerData.soeknadsland.landkoder,
+            mottatteOpplysningerData.soeknadsland.getLandkoder(),
             false,
             mottatteOpplysningerData.periode
         )).thenReturn(true);

@@ -471,9 +471,9 @@ class HentMuligeBrevmottakereServiceTest {
         when(dokumentNavnService.utledDokumentNavnForProduserbaredokumenterOgMottakerrolle(behandling, UTENLANDSK_TRYGDEMYNDIGHET_FRITEKSTBREV,
             UTENLANDSK_TRYGDEMYNDIGHET)).thenReturn("Fritekstbrev");
         var utenlandskMyndighetGB = new UtenlandskMyndighet();
-        utenlandskMyndighetGB.landkode = Land_iso2.GB;
-        utenlandskMyndighetGB.navn = "PT Operations";
-        utenlandskMyndighetGB.postnummer = "123";
+        utenlandskMyndighetGB.setLandkode(Land_iso2.GB);
+        utenlandskMyndighetGB.setNavn("PT Operations");
+        utenlandskMyndighetGB.setPostnummer("123");
         when(utenlandskMyndighetService.hentUtenlandskMyndighetForInstitusjonID("GB:UK010")).thenReturn(utenlandskMyndighetGB);
 
 
@@ -555,9 +555,9 @@ class HentMuligeBrevmottakereServiceTest {
         var dokument = new PersonDokument();
         dokument.setFnr("12345678910");
         dokument.setSammensattNavn("Ola Nordmann");
-        dokument.getGjeldendePostadresse().adresselinje1 = "Gateadresse 43A";
-        dokument.getGjeldendePostadresse().postnr = "0123";
-        dokument.getGjeldendePostadresse().land = Land.av(Land.NORGE);
+        dokument.getGjeldendePostadresse().setAdresselinje1("Gateadresse 43A");
+        dokument.getGjeldendePostadresse().setPostnr("0123");
+        dokument.getGjeldendePostadresse().setLand(Land.av(Land.NORGE));
         var saksopplysning = new Saksopplysning();
         saksopplysning.setDokument(dokument);
         saksopplysning.setType(SaksopplysningType.PERSOPL);

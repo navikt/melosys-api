@@ -438,8 +438,9 @@ class OppgaveServiceTest {
         Behandling behandling = lagBehandling();
         behandling.setMottatteOpplysninger(new MottatteOpplysninger());
         behandling.getMottatteOpplysninger().setMottatteOpplysningerData(new MottatteOpplysningerData());
-        behandling.getMottatteOpplysninger().getMottatteOpplysningerData().personOpplysninger.medfolgendeFamilie
-            = List.of(MedfolgendeFamilie.tilBarnFraFnrOgNavn("fnrBarn", null));
+        behandling.getMottatteOpplysninger().getMottatteOpplysningerData().personOpplysninger.setMedfolgendeFamilie(
+            List.of(MedfolgendeFamilie.tilBarnFraFnrOgNavn("fnrBarn", null))
+        );
         when(persondataFasade.harStrengtFortroligAdresse("aktørID")).thenReturn(false);
         when(persondataFasade.harStrengtFortroligAdresse("fnrBarn")).thenReturn(true);
         when(behandlingService.hentBehandlingMedSaksopplysninger(anyLong())).thenReturn(behandling);
@@ -551,7 +552,7 @@ class OppgaveServiceTest {
         PersonDokument personDokument = new PersonDokument();
         personDokument.setFnr("fnr");
         personDokument.setSammensattNavn("sammensattNavn");
-        personDokument.setDiskresjonskode(new Diskresjonskode(null));
+        personDokument.setDiskresjonskode(new Diskresjonskode());
         return personDokument;
     }
 
@@ -564,13 +565,13 @@ class OppgaveServiceTest {
     private static Soeknad lagSoeknadDokument() {
         Soeknad soeknad = new Soeknad();
         FysiskArbeidssted fysiskArbeidssted = new FysiskArbeidssted();
-        fysiskArbeidssted.adresse.setLandkode(new Land(Land.NORGE).getKode());
-        soeknad.arbeidPaaLand.fysiskeArbeidssteder = Collections.singletonList(fysiskArbeidssted);
+        fysiskArbeidssted.getAdresse().setLandkode(new Land(Land.NORGE).getKode());
+        soeknad.arbeidPaaLand.setFysiskeArbeidssteder(Collections.singletonList(fysiskArbeidssted));
 
-        soeknad.oppholdUtland.oppholdslandkoder = Collections.singletonList(Landkoder.NO.getKode());
-        soeknad.oppholdUtland.oppholdsPeriode = new Periode(LocalDate.now(), LocalDate.of(2018, 12, 12));
+        soeknad.oppholdUtland.setOppholdslandkoder(Collections.singletonList(Landkoder.NO.getKode()));
+        soeknad.oppholdUtland.setOppholdsPeriode(new Periode(LocalDate.now(), LocalDate.of(2018, 12, 12)));
 
-        soeknad.soeknadsland.landkoder.add(Landkoder.BE.getKode());
+        soeknad.soeknadsland.getLandkoder().add(Landkoder.BE.getKode());
         return soeknad;
     }
 }

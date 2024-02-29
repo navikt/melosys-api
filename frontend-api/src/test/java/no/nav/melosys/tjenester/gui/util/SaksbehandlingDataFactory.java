@@ -41,12 +41,12 @@ public final class SaksbehandlingDataFactory {
     public static Soeknad lagSøknadDokument() {
         Soeknad soeknad = new Soeknad();
         FysiskArbeidssted fysiskArbeidssted = new FysiskArbeidssted();
-        fysiskArbeidssted.adresse.setLandkode("SE");
-        soeknad.soeknadsland.landkoder.add(Landkoder.DK.getKode());
-        soeknad.soeknadsland.erUkjenteEllerAlleEosLand = false;
-        soeknad.arbeidPaaLand.fysiskeArbeidssteder = new ArrayList<>();
-        soeknad.arbeidPaaLand.fysiskeArbeidssteder.add(fysiskArbeidssted);
-        soeknad.oppholdUtland.oppholdslandkoder.add("FI");
+        fysiskArbeidssted.getAdresse().setLandkode("SE");
+        soeknad.soeknadsland.getLandkoder().add(Landkoder.DK.getKode());
+        soeknad.soeknadsland.setFlereLandUkjentHvilke(false);
+        soeknad.arbeidPaaLand.setFysiskeArbeidssteder(new ArrayList<>());
+        soeknad.arbeidPaaLand.getFysiskeArbeidssteder().add(fysiskArbeidssted);
+        soeknad.oppholdUtland.getOppholdslandkoder().add("FI");
         soeknad.periode = new no.nav.melosys.domain.mottatteopplysninger.data.Periode(
             LocalDate.of(2019,1,1), LocalDate.of(2019,2,1));
         return soeknad;

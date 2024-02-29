@@ -1,5 +1,7 @@
 package no.nav.melosys.service.dokument;
 
+import java.util.Optional;
+
 import no.nav.melosys.domain.adresse.StrukturertAdresse;
 import no.nav.melosys.domain.kodeverk.Landkoder;
 import no.nav.melosys.domain.mottatteopplysninger.Soeknad;
@@ -8,8 +10,6 @@ import no.nav.melosys.exception.FunksjonellException;
 import no.nav.melosys.service.kodeverk.KodeverkService;
 import no.nav.melosys.service.persondata.PersonopplysningerObjectFactory;
 import org.junit.jupiter.api.Test;
-
-import java.util.Optional;
 
 import static no.nav.melosys.service.persondata.PersonopplysningerObjectFactory.lagPersonopplysninger;
 import static org.assertj.core.api.Assertions.assertThat;
@@ -27,9 +27,9 @@ class BostedGrunnlagTest {
         bostedGrunnlag = new BostedGrunnlag(soeknad, null, null, kodeverkService);
 
         soeknad.bosted = new Bosted();
-        soeknad.bosted.oppgittAdresse = new StrukturertAdresse();
-        soeknad.bosted.oppgittAdresse.setLandkode("SE");
-        soeknad.bosted.oppgittAdresse.setGatenavn("gate");
+        soeknad.bosted.setOppgittAdresse(new StrukturertAdresse());
+        soeknad.bosted.getOppgittAdresse().setLandkode("SE");
+        soeknad.bosted.getOppgittAdresse().setGatenavn("gate");
 
         StrukturertAdresse strukturertAdresse = bostedGrunnlag.hentBostedsadresse();
 
@@ -57,7 +57,7 @@ class BostedGrunnlagTest {
         oppgittBosted.setRegion("Østlandet");
         oppgittBosted.setLandkode("NO");
         soeknad.bosted = new Bosted();
-        soeknad.bosted.oppgittAdresse = oppgittBosted;
+        soeknad.bosted.setOppgittAdresse(oppgittBosted);
 
         Optional<StrukturertAdresse> strukturertAdresse = bostedGrunnlag.finnBostedsadresse();
 

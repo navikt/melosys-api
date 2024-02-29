@@ -1,5 +1,7 @@
 package no.nav.melosys.service.saksopplysninger;
 
+import java.util.Optional;
+
 import no.nav.melosys.domain.Behandling;
 import no.nav.melosys.domain.ErPeriode;
 import no.nav.melosys.domain.dokument.felles.Periode;
@@ -17,8 +19,6 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
-
-import java.util.Optional;
 
 @Service
 public class OppfriskSaksopplysningerService {
@@ -93,7 +93,7 @@ public class OppfriskSaksopplysningerService {
             inngangsvilkaarService.vurderOgLagreInngangsvilkår(
                 behandlingID,
                 behandling.hentSøknadsLand(),
-                behandling.getMottatteOpplysninger().getMottatteOpplysningerData().soeknadsland.erUkjenteEllerAlleEosLand,
+                behandling.getMottatteOpplysninger().getMottatteOpplysningerData().soeknadsland.isFlereLandUkjentHvilke(),
                 periode
             );
         }

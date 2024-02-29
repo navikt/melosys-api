@@ -52,7 +52,7 @@ public class LandvelgerService {
             Behandling behandling = mottatteOpplysninger.getBehandling();
             var søknadsland = grunnlagData.soeknadsland;
 
-            if (behandling.erAnmodningOmUnntak() && søknadsland.landkoder.isEmpty()) {
+            if (behandling.erAnmodningOmUnntak() && søknadsland.getLandkoder().isEmpty()) {
                 alleArbeidsland.add(Land_iso2.valueOf(behandling.hentSedDokument().getUnntakFraLovvalgslandKode().getKode()));
             } else {
                 alleArbeidsland.addAll(hentSøknadslandkoder(grunnlagData));
@@ -62,9 +62,9 @@ public class LandvelgerService {
         return alleArbeidsland;
     }
 
-    public boolean erUkjenteEllerAlleEosLand(long behandlingID) {
+    public boolean isFlereLandUkjentHvilke(long behandlingID) {
         MottatteOpplysningerData grunnlagData = mottatteOpplysningerService.hentMottatteOpplysninger(behandlingID).getMottatteOpplysningerData();
-        return hentSøknadsland(grunnlagData).erUkjenteEllerAlleEosLand;
+        return hentSøknadsland(grunnlagData).isFlereLandUkjentHvilke();
     }
 
     public Collection<Land_iso2> hentAlleArbeidslandUtenMarginaltArbeid(long behandlingID) {

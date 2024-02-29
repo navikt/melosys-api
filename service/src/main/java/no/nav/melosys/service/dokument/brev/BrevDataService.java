@@ -77,7 +77,7 @@ public class BrevDataService {
         if (mottaker.getRolle() == Mottakerroller.BRUKER) {
             if (personManglerAdresseFraRegister(behandling.getFagsak().hentBrukersAktørID())) {
                 MottatteOpplysningerData grunnlagData = behandling.getMottatteOpplysninger().getMottatteOpplysningerData();
-                StrukturertAdresse oppgittAdresse = grunnlagData.bosted.oppgittAdresse;
+                StrukturertAdresse oppgittAdresse = grunnlagData.bosted.getOppgittAdresse();
                 if (oppgittAdresse.erGyldig()) {
                     metadata.berik = false;
                     metadata.postadresse = oppgittAdresse;
@@ -214,8 +214,8 @@ public class BrevDataService {
         mottaker.setId(mottakerUtenlandskTrygdemyndighet.getInstitusjonID());
 
         UtenlandskMyndighet utenlandskMyndighet = hentUtenlandskTrygdemyndighetFraMottaker(mottakerUtenlandskTrygdemyndighet);
-        mottaker.setNavn(utenlandskMyndighet.navn);
-        mottaker.setKortNavn(utenlandskMyndighet.navn);
+        mottaker.setNavn(utenlandskMyndighet.getNavn());
+        mottaker.setKortNavn(utenlandskMyndighet.getNavn());
         mottaker.setSpraakkode(Spraakkode.NB);
         mottaker.setMottakeradresse(lagUtendlanskAdresse(utenlandskMyndighet));
         return mottaker;

@@ -125,14 +125,14 @@ class A001Mapper {
 
     private TrygdemyndighetType mapTrygdemyndighet(UtenlandskMyndighet utenlandskMyndighet) {
         TrygdemyndighetType trygdemyndighet = new TrygdemyndighetType();
-        trygdemyndighet.setTrygdemyndighetsinstitusjon(utenlandskMyndighet.institusjonskode);
-        trygdemyndighet.setInstitusjonsnavn(utenlandskMyndighet.navn);
-        trygdemyndighet.setTrygdemyndighetsland(hentIso3Landkode(utenlandskMyndighet.landkode.getKode()));
+        trygdemyndighet.setTrygdemyndighetsinstitusjon(utenlandskMyndighet.getInstitusjonskode());
+        trygdemyndighet.setInstitusjonsnavn(utenlandskMyndighet.getNavn());
+        trygdemyndighet.setTrygdemyndighetsland(hentIso3Landkode(utenlandskMyndighet.getLandkode().getKode()));
 
         TrygdemyndighetsadresseType adresseBrev = new TrygdemyndighetsadresseType();
         adresseBrev.setGatenavn(utenlandskMyndighet.getKombinertGateadresse());
-        adresseBrev.setPostnummer(utenlandskMyndighet.postnummer);
-        adresseBrev.setPoststed(utenlandskMyndighet.poststed);
+        adresseBrev.setPostnummer(utenlandskMyndighet.getPostnummer());
+        adresseBrev.setPoststed(utenlandskMyndighet.getPoststed());
         trygdemyndighet.setTrygdemyndighetsadresse(adresseBrev);
 
         return trygdemyndighet;

@@ -1,9 +1,7 @@
 package no.nav.melosys.service.kontroll.feature.ufm.kontroll;
 
 import java.time.LocalDate;
-import java.util.Collection;
 import java.util.Collections;
-import java.util.List;
 import java.util.Optional;
 import java.util.stream.Collectors;
 
@@ -15,10 +13,8 @@ import no.nav.melosys.domain.mottatteopplysninger.SedGrunnlag;
 import no.nav.melosys.domain.person.adresse.Bostedsadresse;
 import no.nav.melosys.service.kontroll.feature.ufm.data.UfmKontrollData;
 import no.nav.melosys.service.kontroll.regler.*;
-import no.nav.melosys.service.persondata.PersondataFasade;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-
 
 import static no.nav.melosys.service.kontroll.regler.OverlappendeMedlemskapsperioderRegler.*;
 import static org.apache.cxf.common.util.StringUtils.isEmpty;
@@ -145,7 +141,7 @@ class UfmKontroll {
 
         var bostedAdressePeriode = kontrollData.personhistorikkDokumenter()
             .stream()
-            .flatMap(a -> a.bostedsadressePeriodeListe.stream())
+            .flatMap(a -> a.getBostedsadressePeriodeListe().stream())
             .collect(Collectors.toList());
 
         Optional<Bostedsadresse> personBostedsadresse = kontrollData.persondata().finnBostedsadresse();
@@ -167,7 +163,7 @@ class UfmKontroll {
 
     private static boolean harTransitiveRegler(Optional<MottatteOpplysningerData> optionalMottatteOpplysningerData) {
         return optionalMottatteOpplysningerData.isPresent()
-            && !((SedGrunnlag) optionalMottatteOpplysningerData.get()).overgangsregelbestemmelser.isEmpty();
+            && !((SedGrunnlag) optionalMottatteOpplysningerData.get()).getOvergangsregelbestemmelser().isEmpty();
     }
 
     private static boolean harOvergangsregler(SedDokument sedDokument) {
@@ -177,6 +173,6 @@ class UfmKontroll {
     }
 
     private static boolean harMottatteOpplysningerMedYtterligereInformasjon(Optional<MottatteOpplysningerData> optionalMottatteOpplysningerData) {
-        return optionalMottatteOpplysningerData.isPresent() && !isEmpty(((SedGrunnlag) optionalMottatteOpplysningerData.get()).ytterligereInformasjon);
+        return optionalMottatteOpplysningerData.isPresent() && !isEmpty(((SedGrunnlag) optionalMottatteOpplysningerData.get()).getYtterligereInformasjon());
     }
 }

@@ -121,10 +121,10 @@ class BrevDataByggerA001Test {
         oppgittAdresse.setLandkode(Landkoder.NO.getKode());
 
         søknad = new Soeknad();
-        søknad.bosted.oppgittAdresse = oppgittAdresse;
+        søknad.bosted.setOppgittAdresse(oppgittAdresse);
 
         ForetakUtland foretakUtland = new ForetakUtland();
-        foretakUtland.orgnr = orgnr1;
+        foretakUtland.setOrgnr(orgnr1);
         søknad.foretakUtland.add(foretakUtland);
 
         MedlemskapDokument medlDokument = new MedlemskapDokument();
@@ -194,8 +194,8 @@ class BrevDataByggerA001Test {
 
     private Arbeidsforhold lagArbeidsforhold(String orgnr, LocalDate fom, LocalDate tom) {
         Arbeidsforhold arbeidsforhold = new Arbeidsforhold();
-        arbeidsforhold.arbeidsgiverID = orgnr;
-        arbeidsforhold.ansettelsesPeriode = new Periode(fom, tom);
+        arbeidsforhold.setArbeidsgiverID(orgnr);
+        arbeidsforhold.setAnsettelsesPeriode(new Periode(fom, tom));
         arbDokument.arbeidsforhold.add(arbeidsforhold);
 
         return arbeidsforhold;
@@ -206,16 +206,16 @@ class BrevDataByggerA001Test {
         avklarteOrganisasjoner.add(orgnr1);
 
         SelvstendigForetak foretak = new SelvstendigForetak();
-        foretak.orgnr = orgnr1;
-        søknad.selvstendigArbeid.selvstendigForetak.add(foretak);
+        foretak.setOrgnr(orgnr1);
+        søknad.selvstendigArbeid.getSelvstendigForetak().add(foretak);
 
         SelvstendigForetak foretak2 = new SelvstendigForetak();
-        foretak2.orgnr = orgnr2;
-        søknad.selvstendigArbeid.selvstendigForetak.add(foretak2);
+        foretak2.setOrgnr(orgnr2);
+        søknad.selvstendigArbeid.getSelvstendigForetak().add(foretak2);
 
         BrevDataA001 brevDataA001 = (BrevDataA001) brevDataByggerA001.lag(lagBrevDataGrunnlag(), SAKSBEHANDLER_ID);
         assertThat(brevDataA001.selvstendigeVirksomheter.stream()
-            .map(nv -> nv.orgnr)).containsOnly(foretak.orgnr);
+            .map(nv -> nv.orgnr)).containsOnly(foretak.getOrgnr());
     }
 
     @Test
@@ -223,10 +223,10 @@ class BrevDataByggerA001Test {
         avklarteOrganisasjoner.add(orgnr1);
 
         SelvstendigForetak foretak = new SelvstendigForetak();
-        foretak.orgnr = orgnr1;
-        søknad.selvstendigArbeid.selvstendigForetak.add(foretak);
+        foretak.setOrgnr(orgnr1);
+        søknad.selvstendigArbeid.getSelvstendigForetak().add(foretak);
 
-        søknad.juridiskArbeidsgiverNorge.ekstraArbeidsgivere.add(orgnr1);
+        søknad.juridiskArbeidsgiverNorge.getEkstraArbeidsgivere().add(orgnr1);
 
         BrevDataA001 brevDataA001 = (BrevDataA001) brevDataByggerA001.lag(lagBrevDataGrunnlag(), SAKSBEHANDLER_ID);
         assertThat(brevDataA001.selvstendigeVirksomheter.stream()
@@ -238,8 +238,8 @@ class BrevDataByggerA001Test {
     @Test
     void testIngenAvklarteforetak() {
         SelvstendigForetak foretak = new SelvstendigForetak();
-        foretak.orgnr = orgnr1;
-        søknad.selvstendigArbeid.selvstendigForetak.add(foretak);
+        foretak.setOrgnr(orgnr1);
+        søknad.selvstendigArbeid.getSelvstendigForetak().add(foretak);
 
         BrevDataA001 brevDataA001 = (BrevDataA001) brevDataByggerA001.lag(lagBrevDataGrunnlag(), SAKSBEHANDLER_ID);
         assertThat(brevDataA001.ansettelsesperiode).isEmpty();
@@ -302,7 +302,7 @@ class BrevDataByggerA001Test {
             LocalDate.of(2017, 10, 23));
 
         BrevDataA001 brevDataA001 = (BrevDataA001) brevDataByggerA001.lag(lagBrevDataGrunnlag(), SAKSBEHANDLER_ID);
-        assertThat((brevDataA001).ansettelsesperiode).contains(forventet.ansettelsesPeriode);
+        assertThat((brevDataA001).ansettelsesperiode).contains(forventet.getAnsettelsesPeriode());
     }
 
     @Test

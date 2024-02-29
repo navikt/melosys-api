@@ -67,8 +67,7 @@ class OpprettSedDokumentTest {
         periode.setTom(LocalDate.of(2012, 12, 13));
         melding.setPeriode(periode);
 
-        Statsborgerskap statsborgerskap = new Statsborgerskap();
-        statsborgerskap.setLandkode("SE");
+        Statsborgerskap statsborgerskap = new Statsborgerskap("SE");
 
         melding.setRinaSaksnummer("r123");
         melding.setSedId("s123");

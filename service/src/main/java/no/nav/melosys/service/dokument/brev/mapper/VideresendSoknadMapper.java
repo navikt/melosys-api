@@ -25,7 +25,7 @@ public class VideresendSoknadMapper implements BrevDataMapper {
         fag.setBostedsland(brevDataVideresend.bostedsland);
 
         StrukturertAdresse myndighetensAdresse = brevDataVideresend.trygdemyndighet.getAdresse();
-        String utenlandskMyndighetsNavnOgAdresse = brevDataVideresend.trygdemyndighet.navn + ", " + myndighetensAdresse.toString();
+        String utenlandskMyndighetsNavnOgAdresse = brevDataVideresend.trygdemyndighet.getNavn() + ", " + myndighetensAdresse.toString();
         fag.setTrygdemyndighet(utenlandskMyndighetsNavnOgAdresse);
         fag.setFritekst(brevData.fritekst);
 

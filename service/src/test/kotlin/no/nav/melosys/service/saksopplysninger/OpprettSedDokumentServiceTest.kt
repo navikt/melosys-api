@@ -65,15 +65,12 @@ class OpprettSedDokumentServiceTest {
             journalpostId = "j123"
             lovvalgsland = "SE"
             periode = Periode(LocalDate.of(2012, 12, 12), LocalDate.of(2012, 12, 13))
-            statsborgerskap = listOf(Statsborgerskap().apply { landkode = "SE" })
+            statsborgerskap = listOf(Statsborgerskap("SE"))
             rinaSaksnummer = "r123"
             sedId = "s123"
             sedType = "A009"
             bucType = "LA_BUC_04"
-            anmodningUnntak = AnmodningUnntak().apply {
-                unntakFraLovvalgsland = "NO"
-                unntakFraLovvalgsbestemmelse = "16_1"
-            }
+            anmodningUnntak = AnmodningUnntak("NO", "16_1")
         }
     }
 

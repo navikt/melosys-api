@@ -15,11 +15,11 @@ public class AvklartVirksomhet {
     public final LocalDate opphoersdato;
 
     public AvklartVirksomhet(ForetakUtland foretak) {
-        this.navn = foretak.navn;
-        this.orgnr = foretak.orgnr;
-        this.adresse = foretak.adresse;
+        this.navn = foretak.getNavn();
+        this.orgnr = foretak.getOrgnr();
+        this.adresse = foretak.getAdresse();
         this.adresseErOgsåArbeidssted = false;
-        this.yrkesaktivitet = (Boolean.TRUE.equals(foretak.selvstendigNæringsvirksomhet)) ?
+        this.yrkesaktivitet = (Boolean.TRUE.equals(foretak.getSelvstendigNæringsvirksomhet())) ?
             Yrkesaktivitetstyper.SELVSTENDIG : Yrkesaktivitetstyper.LOENNET_ARBEID;
         this.opphoersdato = null;
     }

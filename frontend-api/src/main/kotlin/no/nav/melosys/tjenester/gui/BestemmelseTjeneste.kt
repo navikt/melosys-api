@@ -1,12 +1,11 @@
 package no.nav.melosys.tjenester.gui
 
 import io.swagger.annotations.Api
-import no.nav.melosys.domain.kodeverk.Folketrygdloven_kap2_bestemmelser
 import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingstema
-import no.nav.melosys.service.medlemskapsperiode.UtledBestemmelserOgVilkår
-import no.nav.melosys.tjenester.gui.medlemskapsperiode.dto.BestemmelseMedVilkårOgBegrunnelserDto
-import no.nav.melosys.tjenester.gui.medlemskapsperiode.dto.FolketrygdlovenBestemmelserDto
-import no.nav.melosys.tjenester.gui.medlemskapsperiode.dto.VilkårOgBegrunnelserDto
+import no.nav.melosys.service.ftrl.medlemskapsperiode.UtledBestemmelserOgVilkår
+import no.nav.melosys.tjenester.gui.ftrl.medlemskapsperiode.dto.BestemmelseMedVilkårOgBegrunnelserDto
+import no.nav.melosys.tjenester.gui.ftrl.medlemskapsperiode.dto.FolketrygdlovenBestemmelserDto
+import no.nav.melosys.tjenester.gui.ftrl.medlemskapsperiode.dto.VilkårOgBegrunnelserDto
 import no.nav.security.token.support.core.api.Protected
 import org.springframework.context.annotation.Scope
 import org.springframework.http.ResponseEntity
@@ -21,6 +20,8 @@ import org.springframework.web.context.WebApplicationContext
 @Scope(value = WebApplicationContext.SCOPE_REQUEST)
 class BestemmelseTjeneste(private val utledBestemmelserOgVilkår: UtledBestemmelserOgVilkår) {
 
+
+    @Deprecated("MELOSYS-6470 Bruk /ftrl/bestemmelser endepunkter i stedet")
     @GetMapping("/behandlinger/medlemavfolketrygden/bestemmelser/{behandlingstema}")
     fun hentBestemmelserMedVilkaarForBehandlingstema(@PathVariable("behandlingstema") behandlingstema: Behandlingstema): ResponseEntity<FolketrygdlovenBestemmelserDto> {
         val støttede = utledBestemmelserOgVilkår.hentStøttedeBestemmelserOgVilkår(behandlingstema)
@@ -32,10 +33,5 @@ class BestemmelseTjeneste(private val utledBestemmelserOgVilkår: UtledBestemmel
         val ustøttede = utledBestemmelserOgVilkår.hentIkkeStøttedeBestemmelserOgVilkår(behandlingstema).keys
 
         return ResponseEntity.ok(FolketrygdlovenBestemmelserDto(støttede, ustøttede))
-    }
-
-    @GetMapping("/behandlinger/medlemavfolketrygden/bestemmelser/pliktige")
-    fun hentPliktigeBestemmelser(): ResponseEntity<Collection<Folketrygdloven_kap2_bestemmelser>> {
-        return ResponseEntity.ok(utledBestemmelserOgVilkår.pliktigeBestemmelser)
     }
 }

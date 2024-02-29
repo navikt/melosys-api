@@ -32,11 +32,11 @@ public class Virksomhet {
     private ForetakUtland tilForetakUtland(boolean erSelvstendig) {
         ForetakUtland foretakUtland = new ForetakUtland();
 
-        foretakUtland.uuid = UUID.randomUUID().toString();
-        foretakUtland.navn = navn;
-        foretakUtland.orgnr = orgnr;
-        foretakUtland.adresse = adresse.tilStrukturertAdresse();
-        foretakUtland.selvstendigNæringsvirksomhet = erSelvstendig;
+        foretakUtland.setUuid(UUID.randomUUID().toString());
+        foretakUtland.setNavn(navn);
+        foretakUtland.setOrgnr(orgnr);
+        foretakUtland.setAdresse(adresse.tilStrukturertAdresse());
+        foretakUtland.setSelvstendigNæringsvirksomhet(erSelvstendig);
 
         return foretakUtland;
     }

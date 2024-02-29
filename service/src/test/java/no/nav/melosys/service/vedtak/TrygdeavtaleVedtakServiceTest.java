@@ -289,7 +289,7 @@ class TrygdeavtaleVedtakServiceTest {
 
     private MottatteOpplysninger lagMottatteOpplysninger() {
         MottatteOpplysningerData mottatteOpplysningerData = new MottatteOpplysningerData();
-        mottatteOpplysningerData.soeknadsland.landkoder = List.of(Land_iso2.GB.getKode());
+        mottatteOpplysningerData.soeknadsland.setLandkoder(List.of(Land_iso2.GB.getKode()));
         MottatteOpplysninger mottatteOpplysninger = new MottatteOpplysninger();
         mottatteOpplysninger.setMottatteOpplysningerData(mottatteOpplysningerData);
         return mottatteOpplysninger;

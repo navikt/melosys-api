@@ -25,17 +25,17 @@ public final class MottatteOpplysningerStub {
         Soeknad søknad = new Soeknad();
         for (String orgnr : selvstendigeForetak) {
             SelvstendigForetak selvstendigForetak = new SelvstendigForetak();
-            selvstendigForetak.orgnr = orgnr;
-            søknad.selvstendigArbeid.selvstendigForetak.add(selvstendigForetak);
+            selvstendigForetak.setOrgnr(orgnr);
+            søknad.selvstendigArbeid.getSelvstendigForetak().add(selvstendigForetak);
         }
 
         FysiskArbeidssted fysiskArbeidssted = new FysiskArbeidssted();
-        fysiskArbeidssted.adresse.setLandkode("DE");
-        søknad.arbeidPaaLand.fysiskeArbeidssteder = new ArrayList<>();
-        søknad.arbeidPaaLand.fysiskeArbeidssteder.add(fysiskArbeidssted);
-        søknad.juridiskArbeidsgiverNorge.ekstraArbeidsgivere = ekstraArbeidsgivere;
+        fysiskArbeidssted.getAdresse().setLandkode("DE");
+        søknad.arbeidPaaLand.setFysiskeArbeidssteder(new ArrayList<>());
+        søknad.arbeidPaaLand.getFysiskeArbeidssteder().add(fysiskArbeidssted);
+        søknad.juridiskArbeidsgiverNorge.setEkstraArbeidsgivere(ekstraArbeidsgivere);
         søknad.foretakUtland = foretakUtland;
-        søknad.soeknadsland.landkoder.add("DE");
+        søknad.soeknadsland.getLandkoder().add("DE");
 
         return søknad;
     }

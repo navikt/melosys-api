@@ -157,6 +157,15 @@ public class ProsessinstansService {
         lagre(prosessinstans);
     }
 
+    @Transactional
+    public void opprettAnnullerFagsakProsessflyt(Behandling behandling) {
+        Prosessinstans prosessinstans = new Prosessinstans();
+        prosessinstans.setBehandling(behandling);
+        prosessinstans.setType(ProsessType.ANNULLER_SAK);
+        prosessinstans.setData(ProsessDataKey.SAKSSTATUS, Saksstatuser.ANNULLERT);
+        lagre(prosessinstans);
+    }
+
     public void opprettProsessinstansJournalføringKnyttTilEksisterende(JournalfoeringTilordneRequest journalfoeringRequest, String saksnummer, Fagsak fagsak, String institusjonID) {
         Prosessinstans prosessinstans = lagJournalføringProsessinstans(ProsessType.JFR_KNYTT, journalfoeringRequest, institusjonID);
         prosessinstans.setBehandling(fagsak.hentSistAktivBehandling());

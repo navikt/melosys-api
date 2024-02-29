@@ -130,7 +130,7 @@ class InngangsvilkaarServiceTest {
     }
 
     @Test
-    void vurderOgLagreInngangsvilkår_ukjenteEllerAlleEosLand() {
+    void vurderOgLagreInngangsvilkår_flereLandUkjentHvilke() {
         final var periode = new no.nav.melosys.domain.mottatteopplysninger.data.Periode(LocalDate.now().plusYears(1), LocalDate.MAX);
         when(behandlingService.hentBehandling(anyLong())).thenReturn(lagBehandling());
         final Set<Statsborgerskap> statsborgerskap = Set.of(
@@ -356,7 +356,7 @@ class InngangsvilkaarServiceTest {
         fagsak.setType(Sakstyper.EU_EOS);
         var behandling = lagBehandlingMedPeriodeOgLand();
         behandling.setFagsak(fagsak);
-        behandling.getMottatteOpplysninger().getMottatteOpplysningerData().soeknadsland.landkoder = Collections.emptyList();
+        behandling.getMottatteOpplysninger().getMottatteOpplysningerData().soeknadsland.setLandkoder(Collections.emptyList());
 
 
         assertThat(inngangsvilkaarService.skalVurdereInngangsvilkår(behandling)).isFalse();

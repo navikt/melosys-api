@@ -57,7 +57,6 @@ class TrygdeavgiftsberegningsRequestMapperTest {
                 id = 1L
                 fom = LocalDate.of(2022, 1, 1)
                 tom = LocalDate.of(2022, 12, 31)
-                arbeidsland = "Norway"
                 innvilgelsesresultat = InnvilgelsesResultat.INNVILGET
                 medlemskapstype = Medlemskapstyper.PLIKTIG
                 trygdedekning = Trygdedekninger.FULL_DEKNING_FTRL
@@ -68,7 +67,6 @@ class TrygdeavgiftsberegningsRequestMapperTest {
                 id = 1L
                 fom = LocalDate.of(2020, 1, 1)
                 tom = LocalDate.of(2021, 12, 31)
-                arbeidsland = "Norway"
                 innvilgelsesresultat = InnvilgelsesResultat.AVSLAATT
                 medlemskapstype = Medlemskapstyper.PLIKTIG
                 trygdedekning = Trygdedekninger.FTRL_2_7A_ANDRE_LEDD_B_HELSE_SYKE_FORELDREPENGER

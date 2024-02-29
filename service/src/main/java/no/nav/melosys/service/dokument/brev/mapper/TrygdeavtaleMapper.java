@@ -238,8 +238,8 @@ public class TrygdeavtaleMapper {
         }
 
         return new RepresentantTrygdeavtale(
-            representantIUtlandet.representantNavn,
-            representantIUtlandet.adresselinjer
+            representantIUtlandet.getRepresentantNavn(),
+            representantIUtlandet.getAdresselinjer()
         );
     }
 

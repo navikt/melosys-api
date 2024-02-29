@@ -8,18 +8,18 @@ import no.nav.melosys.domain.kodeverk.Landkoder;
 
 public class SoeknadslandDto {
     public List<String> landkoder;
-    public boolean erUkjenteEllerAlleEosLand;
+    public boolean flereLandUkjentHvilke;
 
-    public SoeknadslandDto(List<String> landkoder, boolean erUkjenteEllerAlleEosLand) {
+    public SoeknadslandDto(List<String> landkoder, boolean flereLandUkjentHvilke) {
         this.landkoder = landkoder;
-        this.erUkjenteEllerAlleEosLand = erUkjenteEllerAlleEosLand;
+        this.flereLandUkjentHvilke = flereLandUkjentHvilke;
     }
 
     public static SoeknadslandDto av(Soeknadsland søknadsland) {
         if (søknadsland == null) {
             return new SoeknadslandDto(Collections.emptyList(), false);
         }
-        return new SoeknadslandDto(søknadsland.landkoder, søknadsland.erUkjenteEllerAlleEosLand);
+        return new SoeknadslandDto(søknadsland.getLandkoder(), søknadsland.isFlereLandUkjentHvilke());
     }
 
     public static SoeknadslandDto av(Landkoder landkode) {

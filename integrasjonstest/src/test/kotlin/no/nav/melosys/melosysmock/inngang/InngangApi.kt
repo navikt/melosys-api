@@ -26,7 +26,7 @@ class InngangApi {
 data class Request(
     val statsborgerskap: Set<String>? = null,
     val arbeidsland: Set<String>? = null,
-    val erUkjenteEllerAlleEosLand: Boolean = false,
+    val flereLandUkjentHvilke: Boolean = false,
     val periode: ErPeriode? = null,
 )
 

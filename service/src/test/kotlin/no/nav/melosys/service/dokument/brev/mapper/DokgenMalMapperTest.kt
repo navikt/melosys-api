@@ -545,7 +545,7 @@ internal class DokgenMalMapperTest {
             .avgiftsperioder(emptyList())
             .medlemskapsperioder(emptyList())
             .bestemmelse(Folketrygdloven_kap2_bestemmelser.FTRL_KAP2_2_8)
-            .avslåttHelsedelFørMottaksdato(false)
+            .avslåttMedlemskapsperiodeFørMottaksdatoHelsedel(false)
             .trygdeavgiftMottaker(Trygdeavgiftmottaker.TRYGDEAVGIFT_BETALES_TIL_NAV)
             .skatteplikttype(Skatteplikttype.SKATTEPLIKTIG)
             .begrunnelse(Ftrl_2_8_naer_tilknytning_norge_begrunnelser.ANSATT_I_MULTINASJONALT_SELSKAP)

@@ -85,7 +85,7 @@ class UtenlandskMyndighetServiceTest {
         behandling.getFagsak().setType(Sakstyper.EU_EOS);
         when(landvelgerServiceMock.hentUtenlandskTrygdemyndighetsland(BEHANDLING_ID)).thenReturn(List.of(Land_iso2.SE));
         UtenlandskMyndighet utenlandskMyndighet = new UtenlandskMyndighet();
-        utenlandskMyndighet.landkode = Land_iso2.SE;
+        utenlandskMyndighet.setLandkode(Land_iso2.SE);
         when(utenlandskMyndighetRepositoryMock.findByLandkode(Land_iso2.SE))
             .thenReturn(Optional.of(utenlandskMyndighet));
 
@@ -104,11 +104,11 @@ class UtenlandskMyndighetServiceTest {
             .thenReturn(List.of(Land_iso2.SE, Land_iso2.DK));
 
         UtenlandskMyndighet svenskUtenlandskMyndighet = new UtenlandskMyndighet();
-        svenskUtenlandskMyndighet.landkode = Land_iso2.SE;
-        svenskUtenlandskMyndighet.institusjonskode = "INSTITUSJONSKODE";
+        svenskUtenlandskMyndighet.setLandkode(Land_iso2.SE);
+        svenskUtenlandskMyndighet.setInstitusjonskode("INSTITUSJONSKODE");
         UtenlandskMyndighet danskUtenlandskMyndighet = new UtenlandskMyndighet();
-        danskUtenlandskMyndighet.landkode = Land_iso2.DK;
-        danskUtenlandskMyndighet.institusjonskode = null;
+        danskUtenlandskMyndighet.setLandkode(Land_iso2.DK);
+        danskUtenlandskMyndighet.setInstitusjonskode(null);
         when(utenlandskMyndighetRepositoryMock.findByLandkode(Land_iso2.SE)).thenReturn(Optional.of(svenskUtenlandskMyndighet));
         when(utenlandskMyndighetRepositoryMock.findByLandkode(Land_iso2.DK)).thenReturn(Optional.of(danskUtenlandskMyndighet));
 
@@ -162,7 +162,7 @@ class UtenlandskMyndighetServiceTest {
 
 
         verify(fagsakServiceMock).oppdaterMyndigheterForEuEos(eq(behandling.getFagsak().getSaksnummer()), stringListArgumentCaptor.capture());
-        assertThat(stringListArgumentCaptor.getValue()).containsExactlyInAnyOrder(Landkoder.IT + ":" + utenlandskMyndighet.institusjonskode, Landkoder.CZ + ":" + utenlandskMyndighetReservert.institusjonskode);
+        assertThat(stringListArgumentCaptor.getValue()).containsExactlyInAnyOrder(Landkoder.IT + ":" + utenlandskMyndighet.getInstitusjonskode(), Landkoder.CZ + ":" + utenlandskMyndighetReservert.getInstitusjonskode());
     }
 
     @Test
@@ -172,13 +172,13 @@ class UtenlandskMyndighetServiceTest {
             .thenReturn(utenlandskeMyndigheterLandkoder);
 
         UtenlandskMyndighet svenskUtenlandskMyndighet = new UtenlandskMyndighet();
-        svenskUtenlandskMyndighet.landkode = Land_iso2.SE;
-        svenskUtenlandskMyndighet.institusjonskode = "INSTSE";
-        svenskUtenlandskMyndighet.postnummer = "123";
+        svenskUtenlandskMyndighet.setLandkode(Land_iso2.SE);
+        svenskUtenlandskMyndighet.setInstitusjonskode("INSTSE");
+        svenskUtenlandskMyndighet.setPostnummer("123");
         UtenlandskMyndighet danskUtenlandskMyndighet = new UtenlandskMyndighet();
-        danskUtenlandskMyndighet.landkode = Land_iso2.DK;
-        danskUtenlandskMyndighet.institusjonskode = "INSTDK";
-        danskUtenlandskMyndighet.postnummer = "123";
+        danskUtenlandskMyndighet.setLandkode(Land_iso2.DK);
+        danskUtenlandskMyndighet.setInstitusjonskode("INSTDK");
+        danskUtenlandskMyndighet.setPostnummer("123");
         List<UtenlandskMyndighet> utenlandskMyndighetList = List.of(
             svenskUtenlandskMyndighet, danskUtenlandskMyndighet
         );
@@ -220,7 +220,7 @@ class UtenlandskMyndighetServiceTest {
 
 
         assertThat(mottakere).isNotEmpty();
-        assertThat(mottakere.values().iterator().next().getInstitusjonID()).isEqualTo(Landkoder.IT + ":" + utenlandskMyndighet.institusjonskode);
+        assertThat(mottakere.values().iterator().next().getInstitusjonID()).isEqualTo(Landkoder.IT + ":" + utenlandskMyndighet.getInstitusjonskode());
     }
 
 
@@ -236,11 +236,13 @@ class UtenlandskMyndighetServiceTest {
 
     private UtenlandskMyndighet lagUtenlandskMyndighet(Land_iso2 landkode, String institusjonID, Preferanse.PreferanseEnum preferanse) {
         UtenlandskMyndighet utenlandskMyndighet = new UtenlandskMyndighet();
-        utenlandskMyndighet.institusjonskode = institusjonID;
-        utenlandskMyndighet.landkode = landkode;
-        utenlandskMyndighet.postnummer = "123";
+        utenlandskMyndighet.setInstitusjonskode(institusjonID);
+        utenlandskMyndighet.setLandkode(landkode);
+        utenlandskMyndighet.setPostnummer("123");
         if (preferanse != null) {
-            utenlandskMyndighet.preferanser.add(new Preferanse(1L, preferanse));
+            var preferanser = new HashSet<Preferanse>();
+            preferanser.add(new Preferanse(1L, preferanse));
+            utenlandskMyndighet.setPreferanser(preferanser);
         }
         return utenlandskMyndighet;
     }

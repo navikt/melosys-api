@@ -152,7 +152,7 @@ public class OpprettOgJournalforBrev implements StegBehandler {
         return switch (mottakerType) {
             case PERSON_MED_AKTØR_ID, PERSON_MED_FNR -> persondataFasade.hentSammensattNavn(mottakerID);
             case ORGANISASJON -> eregFasade.hentOrganisasjonNavn(mottakerID);
-            case INSTITUSJON -> utenlandskMyndighetService.hentUtenlandskMyndighetForInstitusjonID(mottakerID).navn;
+            case INSTITUSJON -> utenlandskMyndighetService.hentUtenlandskMyndighetForInstitusjonID(mottakerID).getNavn();
         };
     }
 

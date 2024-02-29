@@ -14,8 +14,8 @@ public final class MaritimtArbeidssted extends AbstractArbeidssted implements Ik
     public MaritimtArbeidssted(MaritimtArbeid maritimtArbeid, AvklartMaritimtArbeid avklartMaritimtArbeid) {
         super(null, null, avklartMaritimtArbeid.getLand());
         this.avklartMaritimtArbeid = avklartMaritimtArbeid;
-        this.enhetNavn = maritimtArbeid.enhetNavn;
-        this.flaggLandKode = maritimtArbeid.flaggLandkode;
+        this.enhetNavn = maritimtArbeid.getEnhetNavn();
+        this.flaggLandKode = maritimtArbeid.getFlaggLandkode();
     }
 
     @Override

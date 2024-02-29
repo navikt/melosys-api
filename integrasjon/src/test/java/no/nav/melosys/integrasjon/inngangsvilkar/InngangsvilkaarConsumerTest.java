@@ -37,7 +37,7 @@ class InngangsvilkaarConsumerTest {
     void vurderInngangsvilkår() {
         final Set<Land> statsborgerskap = Set.of(Land.av(Land.NORGE));
         final Set<String> arbeidsland = Set.of(Land.SVERIGE);
-        final boolean erUkjenteEllerAlleEosLand = false;
+        final boolean flereLandUkjentHvilke = false;
         final LocalDate nå = LocalDate.now();
 
         server.expect(requestTo(url + "/inngangsvilkaar"))
@@ -46,7 +46,7 @@ class InngangsvilkaarConsumerTest {
             .andExpect(header(HttpHeaders.ACCEPT, StringContains.containsString(MediaType.APPLICATION_JSON_VALUE)))
             .andRespond(withSuccess("{\"kvalifisererForEf883_2004\": true,\"feilmeldinger\": []}", MediaType.APPLICATION_JSON));
 
-        var response = inngangsvilkaarConsumer.vurderInngangsvilkår(statsborgerskap, arbeidsland, erUkjenteEllerAlleEosLand, new Periode(nå, nå));
+        var response = inngangsvilkaarConsumer.vurderInngangsvilkår(statsborgerskap, arbeidsland, flereLandUkjentHvilke, new Periode(nå, nå));
         assertThat(response).isNotNull().extracting(InngangsvilkarResponse::getKvalifisererForEf883_2004).isEqualTo(Boolean.TRUE);
     }
 }

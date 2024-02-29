@@ -236,7 +236,7 @@ public class EessiService {
         sedDataDto.setUtpekingAvvis(new UtpekingAvvisDto(
             utpekingAvvis.getNyttLovvalgsland(),
             utpekingAvvis.getBegrunnelse(),
-            utpekingAvvis.isEtterspørInformasjon()
+            utpekingAvvis.getEtterspørInformasjon()
         ));
 
         if (behandling.erNyVurdering()) {
