@@ -20,13 +20,7 @@ import no.nav.melosys.service.dokument.brev.mapper.felles.VilkaarbegrunnelseFact
 import javax.xml.bind.JAXBElement
 
 
-//TODO sjekk alle null safe operasjoner
 open class AvslagYrkesaktivMapper : BrevDataMapper {
-
-    companion object {
-        private const val XSD_LOCATION = "melosysbrev/melosys_000081.xsd"
-        private const val JA = "true"
-    }
 
     override fun mapTilBrevXML(
         fellesType: FellesType,
@@ -142,5 +136,10 @@ open class AvslagYrkesaktivMapper : BrevDataMapper {
             this.fag = fag
         }
         return factory.createBrevdata(brevdataType)
+    }
+
+    companion object {
+        private const val XSD_LOCATION = "melosysbrev/melosys_000081.xsd"
+        private const val JA = "true"
     }
 }
