@@ -37,6 +37,16 @@ class ProsessinstansFerdigListener(
     private val Prosessinstans.parentId: UUID?
         get() = getData(ProsessDataKey.PROCESS_PARENT_ID, UUID::class.java)
 
+    private fun ProsessinstansFerdigEvent.finnSibling(): Prosessinstans? {
+        return prosessinstansRepository.findAllByStatus(ProsessStatus.PÅ_VENT)
+            .filter { it.parentId == parentId }
+            .filter { it.låsReferanse == låsReferanse }
+            .sortedBy { it.registrertDato } // Ta den eldste først
+            .firstOrNull().apply {
+                this?.let { log.debug { "Fant sibling ${it.id} til $uuid med parent:$parentId og lås:$låsReferanse" } }
+            }
+    }
+
     private fun startNesteProsessinstans(prosessinstansFerdigEvent: ProsessinstansFerdigEvent) {
         val alleISammeGruppePåVent = prosessinstansRepository.findAllByStatus(ProsessStatus.PÅ_VENT)
             .filter { LåsReferanseFactory.harSammeGruppePrefiks(it.låsReferanse, prosessinstansFerdigEvent.låsReferanse) }
@@ -45,8 +55,8 @@ class ProsessinstansFerdigListener(
         val nesteSomSkalStartes =
             alleISammeGruppePåVent
                 .firstOrNull { it.parentId == prosessinstansFerdigEvent.uuid } // ta sub-prosesser først
-                ?: alleISammeGruppePåVent.firstOrNull { it.parentId != null } // ta også sub-prosesser uten referanse til parent før andre top prosesser
-                ?: alleISammeGruppePåVent.firstOrNull()
+                ?: prosessinstansFerdigEvent.finnSibling() // ta så sibling-prosesser
+                ?: alleISammeGruppePåVent.firstOrNull() // ta hovedprosesser når vi ikke har flere sub/sibling-prosesser på vent
 
         if (nesteSomSkalStartes != null) {
             oppdaterStatusOgBehandleProsessinstans(nesteSomSkalStartes)
