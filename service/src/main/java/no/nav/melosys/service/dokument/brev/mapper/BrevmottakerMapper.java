@@ -45,7 +45,6 @@ public class BrevmottakerMapper {
                 .medHovedMottaker(BRUKER)
                 .medBrevkopiRegler(
                     ARBEIDSGIVER_FÅR_KOPI,
-                    SKATT_FÅR_KOPI,
                     UTENLANDSK_TRYGDEMYNDIGHET_FÅR_KOPI_HVIS_IKKE_ART_8_2
                 ).build()),
 
@@ -53,7 +52,6 @@ public class BrevmottakerMapper {
                 .medHovedMottaker(BRUKER)
                 .medBrevkopiRegler(
                     ARBEIDSGIVER_FÅR_KOPI,
-                    SKATT_FÅR_KOPI,
                     UTENLANDSK_TRYGDEMYNDIGHET_FÅR_KOPI
                 ).build()),
 
@@ -61,7 +59,6 @@ public class BrevmottakerMapper {
                 .medHovedMottaker(BRUKER)
                 .medBrevkopiRegler(
                     ARBEIDSGIVER_FÅR_KOPI,
-                    SKATT_FÅR_KOPI,
                     UTENLANDSK_TRYGDEMYNDIGHET_FÅR_KOPI
                 ).build()),
 
@@ -69,7 +66,6 @@ public class BrevmottakerMapper {
                 .medHovedMottaker(BRUKER)
                 .medBrevkopiRegler(
                     ARBEIDSGIVER_FÅR_KOPI,
-                    SKATT_FÅR_KOPI,
                     UTENLANDSK_TRYGDEMYNDIGHET_FÅR_KOPI
                 ).build()),
 
