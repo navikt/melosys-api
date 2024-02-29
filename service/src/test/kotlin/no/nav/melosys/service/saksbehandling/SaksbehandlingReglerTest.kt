@@ -308,6 +308,19 @@ class SaksbehandlingReglerTest {
                 add(Behandlingstyper.FØRSTEGANG, Behandlingstema.YRKESAKTIV)
             }
         ),
+        arguments(
+            Sakstyper.FTRL,
+            Sakstemaer.MEDLEMSKAP_LOVVALG,
+            Behandlingstyper.MANGLENDE_INNBETALING_TRYGDEAVGIFT,
+            Behandlingstema.YRKESAKTIV,
+            BehandlingHolder().apply {
+                add(
+                    Behandlingstyper.MANGLENDE_INNBETALING_TRYGDEAVGIFT,
+                    Behandlingstema.YRKESAKTIV,
+                    Behandlingsresultattyper.OPPHØRT
+                )
+            }
+        ),
     )
 
     @ParameterizedTest(name = "{0} - {1} - {2} - {3}")

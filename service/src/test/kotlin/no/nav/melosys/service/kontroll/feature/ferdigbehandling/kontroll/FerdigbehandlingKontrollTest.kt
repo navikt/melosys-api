@@ -27,7 +27,7 @@ import java.time.LocalDate
 class FerdigbehandlingKontrollTest {
 
     companion object {
-        val NOW = LocalDate.now()
+        val DATO = LocalDate.parse("2024-01-01")
         const val BRUKER_AKTØRID = "12345678911"
         const val FULLMEKTIG_ORGNR = "123456789"
     }
@@ -36,8 +36,8 @@ class FerdigbehandlingKontrollTest {
     internal fun utførKontroll_USA_ART5_4PeriodenErMerEnn12Måneder_kontrollfeil() {
         val lovvalgsperiode = Lovvalgsperiode().apply {
             bestemmelse = Lovvalgsbestemmelser_trygdeavtale_us.USA_ART5_4
-            fom = NOW
-            tom = NOW.plusMonths(12)
+            fom = DATO
+            tom = DATO.plusMonths(12)
         }
         val kontrollData =
             FerdigbehandlingKontrollData(null, null, null, lovvalgsperiode, null, null, null, null, null, null, null)
@@ -53,8 +53,8 @@ class FerdigbehandlingKontrollTest {
     internal fun utførKontroll_USA_ART5_2PeriodenErMerEnn5År_kontrollfeil() {
         val lovvalgsperiode = Lovvalgsperiode().apply {
             bestemmelse = Lovvalgsbestemmelser_trygdeavtale_us.USA_ART5_2
-            fom = NOW
-            tom = NOW.plusYears(5)
+            fom = DATO
+            tom = DATO.plusYears(5)
         }
         val kontrollData =
             FerdigbehandlingKontrollData(null, null, null, lovvalgsperiode, null, null, null, null, null, null, null)
@@ -70,8 +70,8 @@ class FerdigbehandlingKontrollTest {
     internal fun utførKontroll_USA_ART5_6PeriodenErMerEnn5År_ingenKontrollfeil() {
         val lovvalgsperiode = Lovvalgsperiode().apply {
             bestemmelse = Lovvalgsbestemmelser_trygdeavtale_us.USA_ART5_6
-            fom = NOW
-            tom = NOW.plusYears(5)
+            fom = DATO
+            tom = DATO.plusYears(5)
         }
         val kontrollData =
             FerdigbehandlingKontrollData(null, null, null, lovvalgsperiode, null, null, null, null, null, null, null)
