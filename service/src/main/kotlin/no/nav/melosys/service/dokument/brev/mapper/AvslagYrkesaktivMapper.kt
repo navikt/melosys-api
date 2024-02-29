@@ -18,7 +18,6 @@ import no.nav.melosys.service.dokument.brev.BrevDataAvslagYrkesaktiv
 import no.nav.melosys.service.dokument.brev.mapper.felles.BrevMapperUtils.convertToXMLGregorianCalendarRemoveTimezone
 import no.nav.melosys.service.dokument.brev.mapper.felles.VilkaarbegrunnelseFactory.*
 import javax.xml.bind.JAXBElement
-import javax.xml.datatype.DatatypeConfigurationException
 
 
 //TODO sjekk alle null safe operasjoner
@@ -58,46 +57,32 @@ open class AvslagYrkesaktivMapper : BrevDataMapper {
         behandling: Behandling,
         resultat: Behandlingsresultat,
         brevData: BrevDataAvslagYrkesaktiv
-    ): Fag {
-        val fag = Fag()
-
+    ): Fag = Fag().apply {
         if (behandling.fagsak.type == Sakstyper.EU_EOS) {
-            fag.inngangsvilkårBegrunnelse = InngangsvilkaarBegrunnelseKode.EOS_BORGER
+            inngangsvilkårBegrunnelse = InngangsvilkaarBegrunnelseKode.EOS_BORGER
         } else {
             throw TekniskException("Forholdet er ikke dekket av inngangsvilkårene for 883/2004")
         }
 
-        fag.foretakNavn = brevData.hovedvirksomhet?.navn
-        fag.yrkesaktivitet = YrkesaktivitetsKode.fromValue(brevData.yrkesaktivitet?.kode)
+        foretakNavn = brevData.hovedvirksomhet?.navn
+        yrkesaktivitet = YrkesaktivitetsKode.fromValue(brevData.yrkesaktivitet?.kode)
+        arbeidsland = brevData.arbeidsland
+        lovvalgsperiode = lagLovvalgsperiodeType(resultat)
 
-        fag.arbeidsland = brevData.arbeidsland
-        fag.lovvalgsperiode = lagLovvalgsperiodeType(resultat)
+        art121Begrunnelse = mapArt121BegrunnelseType(resultat.hentVilkaarbegrunnelser(FO_883_2004_ART12_1))
+        art121ForutgåendeBegrunnelse = mapArt121ForutgaaendeBegrunnelseType(resultat.hentVilkaarbegrunnelser(ART12_1_FORUTGAAENDE_MEDLEMSKAP))
+        art122Begrunnelse = mapArt122BegrunnelseType(resultat.hentVilkaarbegrunnelser(FO_883_2004_ART12_2))
+        art122NormalVirksomhetBegrunnelse = mapArt122NormalVirksomhetBegrunnelseType(resultat.hentVilkaarbegrunnelser(ART12_2_NORMALT_DRIVER_VIRKSOMHET))
 
-        val art121Begrunnelser = resultat.hentVilkaarbegrunnelser(FO_883_2004_ART12_1)
-        fag.art121Begrunnelse = mapArt121BegrunnelseType(art121Begrunnelser)
+        fritekst = brevData.fritekst
 
-        val art121ForutgåendeBegrunnelser = resultat.hentVilkaarbegrunnelser(ART12_1_FORUTGAAENDE_MEDLEMSKAP)
-        fag.art121ForutgåendeBegrunnelse = mapArt121ForutgaaendeBegrunnelseType(art121ForutgåendeBegrunnelser)
-
-        val art122Begrunnelser = resultat.hentVilkaarbegrunnelser(FO_883_2004_ART12_2)
-        fag.art122Begrunnelse = mapArt122BegrunnelseType(art122Begrunnelser)
-
-        val art122NormalVirksomhetBegrunnelse = resultat.hentVilkaarbegrunnelser(ART12_2_NORMALT_DRIVER_VIRKSOMHET)
-        fag.art122NormalVirksomhetBegrunnelse = mapArt122NormalVirksomhetBegrunnelseType(art122NormalVirksomhetBegrunnelse)
-
-        fag.fritekst = brevData.fritekst
-
-        fag.anmodningsPeriodeSvarType = brevData.anmodningsperiodeSvar?.anmodningsperiodeSvarType?.let {
-            AnmodningsPeriodeSvarTypeKode.valueOf(
-                it.kode
-            )
+        anmodningsPeriodeSvarType = brevData.anmodningsperiodeSvar?.anmodningsperiodeSvarType?.let {
+            AnmodningsPeriodeSvarTypeKode.valueOf(it.kode)
         }
 
         if (brevData.art16UtenArt12) {
-            fag.art16UtenArt12 = JA
+            art16UtenArt12 = JA
         }
-
-        return fag
     }
 
     public fun mapArt161Avslag(fag: Fag, brevdata: BrevDataAvslagYrkesaktiv) {
@@ -121,12 +106,11 @@ open class AvslagYrkesaktivMapper : BrevDataMapper {
         fag.art161AvslagBegrunnelse = art161AvslagBegrunnelser
     }
 
-    private fun lagTomArt161AvslagBegrunnelse(): Art161AvslagBegrunnelse {
-        return Art161AvslagBegrunnelse.builder().withIngenSpesielleForhold("")
+    private fun lagTomArt161AvslagBegrunnelse(): Art161AvslagBegrunnelse =
+        Art161AvslagBegrunnelse.builder().withIngenSpesielleForhold("")
             .withOver5Aar("")
             .withSaerligAvslagsgrunn("")
             .withSoektForSent("").build()
-    }
 
     private fun validerFritekstbegrunnelse(begrunnelse: String?): String {
         if (!begrunnelse.isNullOrEmpty()) {
@@ -140,12 +124,9 @@ open class AvslagYrkesaktivMapper : BrevDataMapper {
         val lovvalgsperiode = resultat.hentLovvalgsperiode()
         val lovvalgsperiodeType = LovvalgsperiodeType()
 
-        try {
-            lovvalgsperiodeType.fomDato = convertToXMLGregorianCalendarRemoveTimezone(lovvalgsperiode.fom)
-            lovvalgsperiodeType.tomDato = convertToXMLGregorianCalendarRemoveTimezone(lovvalgsperiode.tom)
-        } catch (e: DatatypeConfigurationException) {
-            throw TekniskException(e)
-        }
+        lovvalgsperiodeType.fomDato = convertToXMLGregorianCalendarRemoveTimezone(lovvalgsperiode.fom)
+        lovvalgsperiodeType.tomDato = convertToXMLGregorianCalendarRemoveTimezone(lovvalgsperiode.tom)
+
         return lovvalgsperiodeType
     }
 
