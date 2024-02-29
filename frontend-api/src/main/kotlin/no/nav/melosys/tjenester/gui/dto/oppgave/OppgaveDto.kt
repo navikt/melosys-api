@@ -15,15 +15,13 @@ class OppgaveDto private constructor(val oppgaveID: String) {
 
     companion object {
         @JvmStatic
-        fun av(oppgave: Oppgave): OppgaveDto {
-            val oppgaveDto = OppgaveDto(oppgave.oppgaveId)
-            oppgaveDto.tema = oppgave.tema
-            oppgaveDto.oppgavetype = oppgave.oppgavetype?.beskrivelse ?: ""
-            oppgaveDto.registrertDato = oppgave.opprettetTidspunkt
-            oppgaveDto.frist = oppgave.fristFerdigstillelse
-            oppgaveDto.sakID = oppgave.saksnummer
-            oppgaveDto.journalpostID = oppgave.journalpostId
-            return oppgaveDto
+        fun av(oppgave: Oppgave): OppgaveDto = OppgaveDto(oppgave.oppgaveId).apply {
+            tema = oppgave.tema
+            oppgavetype = oppgave.oppgavetype?.beskrivelse ?: ""
+            registrertDato = oppgave.opprettetTidspunkt
+            frist = oppgave.fristFerdigstillelse
+            sakID = oppgave.saksnummer
+            journalpostID = oppgave.journalpostId
         }
     }
 }
