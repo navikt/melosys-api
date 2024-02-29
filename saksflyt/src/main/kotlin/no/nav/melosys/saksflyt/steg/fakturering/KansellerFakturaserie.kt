@@ -25,7 +25,7 @@ class KansellerFakturaserie(
         val saksbehandlerIdent = prosessinstans.getData(ProsessDataKey.SAKSBEHANDLER)
         val fagsak = behandling.fagsak
         val sisteBehandlingMedFakturaserieReferanse =
-            fagsak.hentBehandlingerSortertSynkendePåRegistrertDato().firstOrNull { hentFakturaserieReferanse(it.id) != null }
+            fagsak.hentBehandlingerSortertSynkendePåRegistrertDato().firstOrNull { harFakturaserieReferanse(it.id) }
 
         if (sisteBehandlingMedFakturaserieReferanse != null) {
             val behandlingID = sisteBehandlingMedFakturaserieReferanse.id
@@ -40,8 +40,8 @@ class KansellerFakturaserie(
         }
     }
 
-    private fun hentFakturaserieReferanse(behandlingID: Long): String? {
+    private fun harFakturaserieReferanse(behandlingID: Long): Boolean {
         val behandlingsresultat = behandlingsresultatService.hentBehandlingsresultat(behandlingID)
-        return behandlingsresultat.fakturaserieReferanse
+        return behandlingsresultat.fakturaserieReferanse != null
     }
 }
