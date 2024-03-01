@@ -622,52 +622,48 @@ class SedMottakTestIT(
         journalpostID: String,
         lovvalgsland: String = "SE",
         isX006NavErFjernet: Boolean = false,
-    ): MelosysEessiMelding {
-        val eessiMelding = MelosysEessiMelding()
-        eessiMelding.aktoerId = "1111111111111"
-        eessiMelding.anmodningUnntak = null
-        eessiMelding.arbeidssteder = emptyList()
-        eessiMelding.bucType = bucType.name
-        eessiMelding.gsakSaksnummer = null
-        eessiMelding.artikkel = artikkel
-        eessiMelding.avsender = Avsender("SE:123", "SE")
-        eessiMelding.dokumentId = null
-        eessiMelding.journalpostId = journalpostID
-        eessiMelding.lovvalgsland = lovvalgsland
-        eessiMelding.periode = periode
-        eessiMelding.sedType = sedType.name
-        eessiMelding.sedId = sedType.name
-        eessiMelding.rinaSaksnummer = rinaSaksnummer
-        eessiMelding.statsborgerskap = emptyList()
-        eessiMelding.sedVersjon = "1"
-        eessiMelding.isX006NavErFjernet = isX006NavErFjernet
-        return eessiMelding
+    ): MelosysEessiMelding = MelosysEessiMelding().apply {
+        aktoerId = "1111111111111"
+        anmodningUnntak = null
+        arbeidssteder = emptyList()
+        this.bucType = bucType.name
+        gsakSaksnummer = null
+        this.artikkel = artikkel
+        avsender = Avsender("SE:123", "SE")
+        dokumentId = null
+        journalpostId = journalpostID
+        this.lovvalgsland = lovvalgsland
+        this.periode = periode
+        this.sedType = sedType.name
+        sedId = sedType.name
+        this.rinaSaksnummer = rinaSaksnummer
+        statsborgerskap = emptyList()
+        sedVersjon = "1"
+        this.isX006NavErFjernet = isX006NavErFjernet
     }
 
     private fun opprettEessiJournalpost(sedType: SedType): String {
-        val request = OpprettJournalpost()
-        val hovedDokument = FysiskDokument()
-        hovedDokument.dokumentKategori = "SED"
-        hovedDokument.tittel = "$sedType-tittel"
-        hovedDokument.brevkode = sedType.name
-        hovedDokument.dokumentVarianter = listOf(
-            DokumentVariant.lagDokumentVariant(
-                ByteArray(0)
-            )
-        )
-        request.setHoveddokument(hovedDokument)
-        request.brukerId = "123123123"
-        request.brukerIdType = BrukerIdType.FOLKEREGISTERIDENT
-        request.journalposttype = Journalposttype.INN
-        request.journalførendeEnhet = "4530"
-        request.tema = "UFM"
-        request.korrespondansepartId = "SE:123"
-        request.korrespondansepartNavn = "Sverige"
-        request.korrespondansepartLand = "SE"
-        request.setKorrespondansepartIdType(OpprettJournalpost.KorrespondansepartIdType.UTENLANDSK_ORGANISASJON)
-        request.mottaksKanal = "EESSI"
-        request.journalposttype = Journalposttype.INN
-        request.innhold = "$sedType-tittel"
+        val hovedDokument = FysiskDokument().apply {
+            dokumentKategori = "SED"
+            tittel = "$sedType-tittel"
+            brevkode = sedType.name
+            dokumentVarianter = listOf(DokumentVariant.lagDokumentVariant(ByteArray(0)))
+        }
+        val request = OpprettJournalpost().apply {
+            setHoveddokument(hovedDokument)
+            brukerId = "123123123"
+            brukerIdType = BrukerIdType.FOLKEREGISTERIDENT
+            journalposttype = Journalposttype.INN
+            journalførendeEnhet = "4530"
+            tema = "UFM"
+            korrespondansepartId = "SE:123"
+            korrespondansepartNavn = "Sverige"
+            korrespondansepartLand = "SE"
+            setKorrespondansepartIdType(OpprettJournalpost.KorrespondansepartIdType.UTENLANDSK_ORGANISASJON)
+            mottaksKanal = "EESSI"
+            journalposttype = Journalposttype.INN
+            innhold = "$sedType-tittel"
+        }
         return joarkFasade.opprettJournalpost(request, false)
     }
 }
