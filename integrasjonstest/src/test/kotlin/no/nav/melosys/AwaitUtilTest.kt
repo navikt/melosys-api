@@ -2,6 +2,7 @@ package no.nav.melosys
 
 import io.kotest.assertions.throwables.shouldThrow
 import io.kotest.matchers.shouldBe
+import io.kotest.matchers.string.shouldContain
 import mu.KotlinLogging
 import no.nav.melosys.AwaitUtil.awaitWithFailOnLogErrors
 import no.nav.melosys.AwaitUtil.throwOnLogError
@@ -26,6 +27,15 @@ class AwaitUtilTest {
                 }
             }
         }.message shouldBe "Fant log entry med level error: error"
+    }
+
+    @Test
+    fun `can use custom assert when timeout from until`() {
+        awaitWithFailOnLogErrors({ e -> e.message.shouldContain("was not fulfilled within 101 milliseconds") }) {
+            atMost(Duration.ofMillis(101)).until {
+                false
+            }
+        }
     }
 
     @Test

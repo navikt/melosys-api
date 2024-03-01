@@ -4,12 +4,20 @@ import ch.qos.logback.classic.Level
 import ch.qos.logback.classic.spi.ILoggingEvent
 import no.nav.melosys.exception.TekniskException
 import org.awaitility.core.ConditionFactory
+import org.awaitility.core.ConditionTimeoutException
 import org.awaitility.kotlin.await
 
 object AwaitUtil {
-    fun <T> awaitWithFailOnLogErrors(block: ConditionFactory.() -> T): T {
+    fun <T> awaitWithFailOnLogErrors(
+        timeoutHandler: (e: ConditionTimeoutException) -> T = { e -> throw TekniskException("Timeout ved await: ${e.message}") },
+        block: ConditionFactory.(log: List<ILoggingEvent>) -> T
+    ): T {
         return LoggingTestUtils.withLogCapture { logEvents ->
-            await.throwOnLogError(logEvents).block()
+            try {
+                await.throwOnLogError(logEvents).block(logEvents)
+            } catch (e: ConditionTimeoutException) {
+                timeoutHandler(e)
+            }
         }
     }
 
