@@ -13,6 +13,8 @@ import io.mockk.mockk
 import io.mockk.slot
 import io.mockk.verify
 import no.nav.melosys.AwaitUtil
+import no.nav.melosys.AwaitUtil.untilMatching
+import no.nav.melosys.LoggingTestUtils.filterBuilder
 import no.nav.melosys.domain.Lovvalgsperiode
 import no.nav.melosys.domain.arkiv.*
 import no.nav.melosys.domain.eessi.*
@@ -27,6 +29,7 @@ import no.nav.melosys.melosysmock.medl.MedlRepo
 import no.nav.melosys.melosysmock.melosyseessi.MelosysEessiRepo
 import no.nav.melosys.melosysmock.sak.SakRepo
 import no.nav.melosys.repository.BehandlingsresultatRepository
+import no.nav.melosys.saksflyt.ProsessinstansFerdigListener
 import no.nav.melosys.saksflyt.ProsessinstansRepository
 import no.nav.melosys.saksflytapi.domain.ProsessStatus
 import no.nav.melosys.saksflytapi.domain.ProsessType
@@ -116,14 +119,11 @@ class SedMottakTestIT(
         melosysEessiMeldingKafkaTemplate.send(kafkaTopic, eessiMeldingA009)
         melosysEessiMeldingKafkaTemplate.send(kafkaTopic, eessiMeldingX008)
 
-        fun aktiveProsessInstanser(): Collection<Prosessinstans> =
-            prosessinstansRepository.findAllByLåsReferanseStartingWith(ref).filterNot { it.status == ProsessStatus.FERDIG }
-
-        AwaitUtil.awaitWithFailOnLogErrors(
-            timeoutHandler = { aktiveProsessInstanser() shouldBe emptyList() }
-        ) {
-            atMost(Duration.ofSeconds(30)).until {
-                aktiveProsessInstanser().isEmpty()
+        AwaitUtil.awaitWithFailOnLogErrors { logItems ->
+            atMost(Duration.ofSeconds(20)).untilMatching(
+                waitFor = "Prosessinstans(er) på vent med samme gruppe-prefiks: []"
+            ) {
+                logItems.filterBuilder.match<ProsessinstansFerdigListener>().build().lastOrNull()?.formattedMessage
             }
         }
 
@@ -174,14 +174,11 @@ class SedMottakTestIT(
         melosysEessiMeldingKafkaTemplate.send(kafkaTopic, eessiMeldingA009)
         melosysEessiMeldingKafkaTemplate.send(kafkaTopic, eessiMeldingX006)
 
-        fun aktiveProsessInstanser(): Collection<Prosessinstans> =
-            prosessinstansRepository.findAllByLåsReferanseStartingWith(ref).filterNot { it.status == ProsessStatus.FERDIG }
-
-        AwaitUtil.awaitWithFailOnLogErrors(
-            timeoutHandler = { aktiveProsessInstanser() shouldBe emptyList() }
-        ) {
-            atMost(Duration.ofSeconds(30)).until {
-                aktiveProsessInstanser().isEmpty()
+        AwaitUtil.awaitWithFailOnLogErrors { logItems ->
+            atMost(Duration.ofSeconds(20)).untilMatching(
+                waitFor = "Prosessinstans(er) på vent med samme gruppe-prefiks: []"
+            ) {
+                logItems.filterBuilder.match<ProsessinstansFerdigListener>().build().lastOrNull()?.formattedMessage
             }
         }
 
@@ -228,14 +225,11 @@ class SedMottakTestIT(
         melosysEessiMeldingKafkaTemplate.send(kafkaTopic, eessiMeldingA003)
         melosysEessiMeldingKafkaTemplate.send(kafkaTopic, eessiMeldingX006)
 
-        fun aktiveProsessInstanser(): Collection<Prosessinstans> =
-            prosessinstansRepository.findAllByLåsReferanseStartingWith(ref).filterNot { it.status == ProsessStatus.FERDIG }
-
-        AwaitUtil.awaitWithFailOnLogErrors(
-            timeoutHandler = { aktiveProsessInstanser() shouldBe emptyList() }
-        ) {
-            atMost(Duration.ofSeconds(30)).until {
-                aktiveProsessInstanser().isEmpty()
+        AwaitUtil.awaitWithFailOnLogErrors { logItems ->
+            atMost(Duration.ofSeconds(20)).untilMatching(
+                waitFor = "Prosessinstans(er) på vent med samme gruppe-prefiks: []"
+            ) {
+                logItems.filterBuilder.match<ProsessinstansFerdigListener>().build().lastOrNull()?.formattedMessage
             }
         }
 
@@ -279,14 +273,11 @@ class SedMottakTestIT(
         melosysEessiMeldingKafkaTemplate.send(kafkaTopic, eessiMeldingA003)
         melosysEessiMeldingKafkaTemplate.send(kafkaTopic, eessiMeldingX008)
 
-        fun aktiveProsessInstanser(): Collection<Prosessinstans> =
-            prosessinstansRepository.findAllByLåsReferanseStartingWith(ref).filterNot { it.status == ProsessStatus.FERDIG }
-
-        AwaitUtil.awaitWithFailOnLogErrors(
-            timeoutHandler = { aktiveProsessInstanser() shouldBe emptyList() }
-        ) {
-            atMost(Duration.ofSeconds(30)).until {
-                aktiveProsessInstanser().isEmpty()
+        AwaitUtil.awaitWithFailOnLogErrors { logItems ->
+            atMost(Duration.ofSeconds(20)).untilMatching(
+                waitFor = "Prosessinstans(er) på vent med samme gruppe-prefiks: []"
+            ) {
+                logItems.filterBuilder.match<ProsessinstansFerdigListener>().build().lastOrNull()?.formattedMessage
             }
         }
 
@@ -332,14 +323,11 @@ class SedMottakTestIT(
         melosysEessiMeldingKafkaTemplate.send(kafkaTopic, eessiMeldingX001)
         melosysEessiMeldingKafkaTemplate.send(kafkaTopic, eessiMeldingX007)
 
-        fun aktiveProsessInstanser(): Collection<Prosessinstans> =
-            prosessinstansRepository.findAllByLåsReferanseStartingWith(rinaSaksnummer).filterNot { it.status == ProsessStatus.FERDIG }
-
-        AwaitUtil.awaitWithFailOnLogErrors(
-            timeoutHandler = { aktiveProsessInstanser() shouldBe emptyList() }
-        ) {
-            atMost(Duration.ofSeconds(30)).until {
-                aktiveProsessInstanser().isEmpty()
+        AwaitUtil.awaitWithFailOnLogErrors { logItems ->
+            atMost(Duration.ofSeconds(20)).untilMatching(
+                waitFor = "Prosessinstans(er) på vent med samme gruppe-prefiks: []"
+            ) {
+                logItems.filterBuilder.match<ProsessinstansFerdigListener>().build().lastOrNull()?.formattedMessage
             }
         }
 
@@ -388,14 +376,11 @@ class SedMottakTestIT(
 
         melosysEessiMeldingKafkaTemplate.send(kafkaTopic, eessiMeldingA003)
 
-        fun aktiveProsessInstanser(): Collection<Prosessinstans> =
-            prosessinstansRepository.findAllByLåsReferanseStartingWith(rinaSaksnummer).filterNot { it.status == ProsessStatus.FERDIG }
-
-        AwaitUtil.awaitWithFailOnLogErrors(
-            timeoutHandler = { aktiveProsessInstanser() shouldBe emptyList() }
-        ) {
-            atMost(Duration.ofSeconds(30)).until {
-                aktiveProsessInstanser().isEmpty()
+        AwaitUtil.awaitWithFailOnLogErrors { logItems ->
+            atMost(Duration.ofSeconds(20)).untilMatching(
+                waitFor = "Prosessinstans(er) på vent med samme gruppe-prefiks: []"
+            ) {
+                logItems.filterBuilder.match<ProsessinstansFerdigListener>().build().lastOrNull()?.formattedMessage
             }
         }
 
@@ -503,14 +488,11 @@ class SedMottakTestIT(
 
         melosysEessiMeldingKafkaTemplate.send(kafkaTopic, eessiMeldingA003)
 
-        fun aktiveProsessInstanser(): Collection<Prosessinstans> =
-            prosessinstansRepository.findAllByLåsReferanseStartingWith(rinaSaksnummer).filterNot { it.status == ProsessStatus.FERDIG }
-
-        AwaitUtil.awaitWithFailOnLogErrors(
-            timeoutHandler = { aktiveProsessInstanser() shouldBe emptyList() }
-        ) {
-            atMost(Duration.ofSeconds(30)).until {
-                aktiveProsessInstanser().isEmpty()
+        AwaitUtil.awaitWithFailOnLogErrors { logItems ->
+            atMost(Duration.ofSeconds(20)).untilMatching(
+                waitFor = "Prosessinstans(er) på vent med samme gruppe-prefiks: []"
+            ) {
+                logItems.filterBuilder.match<ProsessinstansFerdigListener>().build().lastOrNull()?.formattedMessage
             }
         }
 

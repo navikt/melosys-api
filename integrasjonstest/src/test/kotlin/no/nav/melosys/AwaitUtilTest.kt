@@ -2,10 +2,10 @@ package no.nav.melosys
 
 import io.kotest.assertions.throwables.shouldThrow
 import io.kotest.matchers.shouldBe
-import io.kotest.matchers.string.shouldContain
 import mu.KotlinLogging
 import no.nav.melosys.AwaitUtil.awaitWithFailOnLogErrors
 import no.nav.melosys.AwaitUtil.throwOnLogError
+import no.nav.melosys.AwaitUtil.untilMatching
 import no.nav.melosys.LoggingTestUtils.withLogCapture
 import no.nav.melosys.exception.TekniskException
 import org.awaitility.kotlin.await
@@ -30,10 +30,12 @@ class AwaitUtilTest {
     }
 
     @Test
-    fun `can use custom assert when timeout from until`() {
-        awaitWithFailOnLogErrors({ e -> e.message.shouldContain("was not fulfilled within 101 milliseconds") }) {
-            atMost(Duration.ofMillis(101)).until {
-                false
+    fun `untilMatching skal sammenlikne waitFor med lambda`() {
+        awaitWithFailOnLogErrors {
+            atMost(Duration.ofMillis(101)).untilMatching(
+                waitFor = "last log messge"
+            ) {
+                "last log messge"
             }
         }
     }
