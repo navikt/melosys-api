@@ -20,6 +20,7 @@ import no.nav.melosys.domain.dokument.person.adresse.Bostedsadresse;
 import no.nav.melosys.domain.dokument.person.adresse.Gateadresse;
 import no.nav.melosys.domain.kodeverk.Aktoersroller;
 import no.nav.melosys.domain.kodeverk.Landkoder;
+import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingstema;
 import no.nav.melosys.domain.mottatteopplysninger.MottatteOpplysninger;
 import no.nav.melosys.domain.mottatteopplysninger.MottatteOpplysningerData;
 import no.nav.melosys.domain.mottatteopplysninger.Soeknad;
@@ -115,6 +116,7 @@ class DataByggerStubs {
                                                                   boolean arbeidsgivendeForetakUtlandManglerLandkode,
                                                                   boolean selvstendigForetakUtlandManglerLandkode) {
         Behandling behandling = hentBehandlingStub();
+        behandling.setTema(Behandlingstema.UTSENDT_ARBEIDSTAKER);
         MottatteOpplysningerData mottatteOpplysningerData = behandling.getMottatteOpplysninger().getMottatteOpplysningerData();
 
         FysiskArbeidssted fysiskArbeidssted = mottatteOpplysningerData.arbeidPaaLand.getFysiskeArbeidssteder().remove(0);

@@ -113,6 +113,7 @@ class SedDataByggerTest {
         behandlingsresultat.getUtpekingsperioder().add(utpekingsperiode);
 
         behandling = DataByggerStubs.hentBehandlingStub();
+        behandling.setTema(Behandlingstema.UTSENDT_ARBEIDSTAKER);
         behandlingsresultat.setBehandling(behandling);
         dataBygger = new SedDataBygger(behandlingsresultatService, landvelgerService, lovvalgsperiodeService, saksbehandlingRegler, unleash);
 
