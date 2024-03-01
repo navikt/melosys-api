@@ -76,11 +76,14 @@ class SedMottakTestIT(
 
     private val kafkaTopic = "teammelosys.eessi.v1-local"
 
+    private val randomUUID = UUID.randomUUID()
+
     @MockkBean
     private lateinit var utstedtA1AivenProducer: UtstedtA1AivenProducer
 
     @BeforeEach
     fun setup() {
+        ThreadLocalAccessInfo.beforeExecuteProcess(randomUUID, "steg")
         oAuthMockServer.start()
         SakRepo.clear()
         MedlRepo.repo.clear()
@@ -90,6 +93,7 @@ class SedMottakTestIT(
 
     @AfterEach
     fun after() {
+        ThreadLocalAccessInfo.afterExecuteProcess(randomUUID)
         oAuthMockServer.stop()
     }
 
@@ -360,9 +364,6 @@ class SedMottakTestIT(
         val utstedtA1MeldingCapturingSlot = slot<UtstedtA1Melding>()
         every { utstedtA1AivenProducer.produserMelding(capture(utstedtA1MeldingCapturingSlot)) } returns mockk<UtstedtA1Melding>()
 
-        val randomUUID = UUID.randomUUID()
-        ThreadLocalAccessInfo.beforeExecuteProcess(randomUUID, "steg")
-
         val rinaSaksnummer = Random().nextInt(100000).toString()
 
         val datoOmToÅr = LocalDate.now().plusYears(2)
@@ -470,17 +471,12 @@ class SedMottakTestIT(
                 Behandlingsresultattyper.FORELOEPIG_FASTSATT_LOVVALGSLAND
             )
         }
-
-        ThreadLocalAccessInfo.afterExecuteProcess(randomUUID)
     }
 
     @Test
     fun `Motta A003, avvise med A004, ugyldiggjøre avvisning A004 med X008 for så å sende en A012`() {
         val utstedtA1MeldingCapturingSlot = slot<UtstedtA1Melding>()
         every { utstedtA1AivenProducer.produserMelding(capture(utstedtA1MeldingCapturingSlot)) } returns mockk<UtstedtA1Melding>()
-
-        val randomUUID = UUID.randomUUID()
-        ThreadLocalAccessInfo.beforeExecuteProcess(randomUUID, "steg")
 
         val rinaSaksnummer = Random().nextInt(100000).toString()
 
@@ -591,8 +587,6 @@ class SedMottakTestIT(
                 Behandlingsresultattyper.FORELOEPIG_FASTSATT_LOVVALGSLAND
             )
         }
-
-        ThreadLocalAccessInfo.afterExecuteProcess(randomUUID)
     }
 
     protected fun executeAndWait(
