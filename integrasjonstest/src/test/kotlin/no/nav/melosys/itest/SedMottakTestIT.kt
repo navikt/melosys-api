@@ -1,5 +1,6 @@
 package no.nav.melosys.itest
 
+import com.ninjasquad.springmockk.MockkBean
 import io.getunleash.FakeUnleash
 import io.kotest.assertions.extracting
 import io.kotest.matchers.collections.shouldContain
@@ -7,6 +8,10 @@ import io.kotest.matchers.collections.shouldContainExactly
 import io.kotest.matchers.collections.shouldContainInOrder
 import io.kotest.matchers.collections.shouldHaveSize
 import io.kotest.matchers.shouldBe
+import io.mockk.every
+import io.mockk.mockk
+import io.mockk.slot
+import io.mockk.verify
 import no.nav.melosys.AwaitUtil
 import no.nav.melosys.domain.Lovvalgsperiode
 import no.nav.melosys.domain.arkiv.*
@@ -27,13 +32,17 @@ import no.nav.melosys.saksflytapi.domain.ProsessStatus
 import no.nav.melosys.saksflytapi.domain.ProsessType
 import no.nav.melosys.saksflytapi.domain.Prosessinstans
 import no.nav.melosys.service.LovvalgsperiodeService
+import no.nav.melosys.service.avklartefakta.AvklartefaktaDto
+import no.nav.melosys.service.avklartefakta.AvklartefaktaService
 import no.nav.melosys.service.sak.OpprettBehandlingForSak
 import no.nav.melosys.service.sak.OpprettSakDto
 import no.nav.melosys.service.utpeking.UtpekingService
 import no.nav.melosys.service.vedtak.FattVedtakRequest
 import no.nav.melosys.service.vedtak.VedtaksfattingFasade
 import no.nav.melosys.sikkerhet.context.ThreadLocalAccessInfo
-import org.awaitility.kotlin.await
+import no.nav.melosys.statistikk.utstedt_a1.integrasjon.UtstedtA1AivenProducer
+import no.nav.melosys.statistikk.utstedt_a1.integrasjon.dto.Lovvalgsbestemmelse
+import no.nav.melosys.statistikk.utstedt_a1.integrasjon.dto.UtstedtA1Melding
 import org.awaitility.kotlin.untilNotNull
 import org.junit.jupiter.api.AfterEach
 import org.junit.jupiter.api.BeforeEach
@@ -61,10 +70,14 @@ class SedMottakTestIT(
     @Autowired private val lovvalgsperiodeService: LovvalgsperiodeService,
     @Autowired private val behandlingsresultatRepository: BehandlingsresultatRepository,
     @Autowired private val unleash: FakeUnleash,
+    @Autowired private val avklartefaktaService: AvklartefaktaService,
     @Autowired private val oAuthMockServer: OAuthMockServer
 ) : ComponentTestBase() {
 
     private val kafkaTopic = "teammelosys.eessi.v1-local"
+
+    @MockkBean
+    private lateinit var utstedtA1AivenProducer: UtstedtA1AivenProducer
 
     @BeforeEach
     fun setup() {
@@ -344,6 +357,9 @@ class SedMottakTestIT(
 
     @Test
     fun `Motta A003, godkjenne med A012, ugyldiggjøre godkjenning A012 med X008 for så å sende en A004`() {
+        val utstedtA1MeldingCapturingSlot = slot<UtstedtA1Melding>()
+        every { utstedtA1AivenProducer.produserMelding(capture(utstedtA1MeldingCapturingSlot)) } returns mockk<UtstedtA1Melding>()
+
         val randomUUID = UUID.randomUUID()
         ThreadLocalAccessInfo.beforeExecuteProcess(randomUUID, "steg")
 
@@ -393,6 +409,16 @@ class SedMottakTestIT(
             })
         )
 
+        avklartefaktaService.lagreAvklarteFakta(
+            prosessinstanserSortert.get(1).behandling.id, setOf(AvklartefaktaDto(
+                listOf("TRUE"), "VIRKSOMHET"
+            ).apply {
+                avklartefaktaType = Avklartefaktatyper.VIRKSOMHET
+                subjektID = "999999999"
+                begrunnelseKoder = emptyList()
+            })
+        )
+
         val vedtaksProsessInstans = executeAndWait(ProsessType.IVERKSETT_VEDTAK_EOS) {
             vedtaksfattingFasade.fattVedtak(
                 prosessinstanserSortert.get(1).behandling.id, FattVedtakRequest.Builder()
@@ -400,6 +426,11 @@ class SedMottakTestIT(
                     .medVedtakstype(Vedtakstyper.FØRSTEGANGSVEDTAK)
                     .build()
             )
+        }
+
+        verify(exactly = 1) { utstedtA1AivenProducer.produserMelding(any()) }
+        utstedtA1MeldingCapturingSlot.captured.apply {
+            artikkel.shouldBe(Lovvalgsbestemmelse.ART_11_3_a)
         }
 
         val opprettNyVurderingProsessinstans = executeAndWait(ProsessType.OPPRETT_REPLIKERT_BEHANDLING_FOR_SAK) {
@@ -439,6 +470,9 @@ class SedMottakTestIT(
 
     @Test
     fun `Motta A003, avvise med A004, ugyldiggjøre avvisning A004 med X008 for så å sende en A012`() {
+        val utstedtA1MeldingCapturingSlot = slot<UtstedtA1Melding>()
+        every { utstedtA1AivenProducer.produserMelding(capture(utstedtA1MeldingCapturingSlot)) } returns mockk<UtstedtA1Melding>()
+
         val randomUUID = UUID.randomUUID()
         ThreadLocalAccessInfo.beforeExecuteProcess(randomUUID, "steg")
 
@@ -508,6 +542,16 @@ class SedMottakTestIT(
             })
         )
 
+        avklartefaktaService.lagreAvklarteFakta(
+            opprettNyVurderingProsessinstans.behandling.id, setOf(AvklartefaktaDto(
+                listOf("TRUE"), "VIRKSOMHET"
+            ).apply {
+                avklartefaktaType = Avklartefaktatyper.VIRKSOMHET
+                subjektID = "999999999"
+                begrunnelseKoder = emptyList()
+            })
+        )
+
         val vedtaksProsessInstans = executeAndWait(ProsessType.IVERKSETT_VEDTAK_EOS) {
             vedtaksfattingFasade.fattVedtak(
                 opprettNyVurderingProsessinstans.behandling.id, FattVedtakRequest.Builder()
@@ -515,6 +559,11 @@ class SedMottakTestIT(
                     .medVedtakstype(Vedtakstyper.KORRIGERT_VEDTAK)
                     .build()
             )
+        }
+
+        verify(exactly = 1) { utstedtA1AivenProducer.produserMelding(any()) }
+        utstedtA1MeldingCapturingSlot.captured.apply {
+            artikkel.shouldBe(Lovvalgsbestemmelse.ART_11_3_a)
         }
 
         MelosysEessiRepo.sedRepo.get(rinaSaksnummer)!!.shouldContainInOrder(
@@ -546,19 +595,22 @@ class SedMottakTestIT(
     }
 
     protected fun finnProsess(prosessType: ProsessType, startTid: LocalDateTime): UUID {
-        await.pollDelay(1, TimeUnit.SECONDS)
-            .timeout(20, TimeUnit.SECONDS)
-            .untilNotNull {
-                prosessinstansRepository.findAllAfterDate(startTid)
-            }.map { it.type }.shouldContain(prosessType)
+        AwaitUtil.awaitWithFailOnLogErrors {
+            pollDelay(1, TimeUnit.SECONDS)
+                .timeout(30, TimeUnit.SECONDS)
+                .untilNotNull {
+                    prosessinstansRepository.findAllAfterDate(startTid)
+                }.map { it.type }.shouldContain(prosessType)
+        }
 
-        return await
-            .timeout(30, TimeUnit.SECONDS)
-            .pollInterval(1, TimeUnit.SECONDS)
-            .untilNotNull {
-                prosessinstansRepository.findAllAfterDate(startTid)
-                    .find { it.type == prosessType && it.status == ProsessStatus.FERDIG }?.id
-            }
+        return AwaitUtil.awaitWithFailOnLogErrors {
+            timeout(30, TimeUnit.SECONDS)
+                .pollInterval(1, TimeUnit.SECONDS)
+                .untilNotNull {
+                    prosessinstansRepository.findAllAfterDate(startTid)
+                        .find { it.type == prosessType && it.status == ProsessStatus.FERDIG }?.id
+                }
+        }
     }
 
     private fun melosysEessiMelding(
