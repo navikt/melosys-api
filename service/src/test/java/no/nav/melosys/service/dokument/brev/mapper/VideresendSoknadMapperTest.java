@@ -1,7 +1,6 @@
 package no.nav.melosys.service.dokument.brev.mapper;
 
 import jakarta.xml.bind.JAXBException;
-
 import no.nav.dok.melosysbrev.felles.melosys_felles.FellesType;
 import no.nav.dok.melosysbrev.felles.melosys_felles.MelosysNAVFelles;
 import no.nav.melosys.domain.Behandling;
@@ -18,7 +17,7 @@ import static no.nav.melosys.service.dokument.brev.mapper.BrevMappingTestUtils.l
 import static no.nav.melosys.service.dokument.brev.mapper.BrevMappingTestUtils.lagNAVFelles;
 import static org.assertj.core.api.Assertions.assertThat;
 
-public class VideresendSoknadMapperTest {
+class VideresendSoknadMapperTest {
 
     private final VideresendSoknadMapper instans;
 
@@ -27,7 +26,7 @@ public class VideresendSoknadMapperTest {
     }
 
     @Test
-    public void mapTilBrevXML() throws JAXBException, SAXException {
+    void mapTilBrevXML() throws JAXBException, SAXException {
         FellesType fellesType = lagFellesType();
         MelosysNAVFelles navFelles = lagNAVFelles();
 
