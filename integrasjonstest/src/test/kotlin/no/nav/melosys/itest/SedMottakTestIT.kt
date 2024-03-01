@@ -373,11 +373,17 @@ class SedMottakTestIT(
         val bucInformasjon =
             BucInformasjon(rinaSaksnummer, true, "LA_BUC_02", LocalDate.now(), null, listOf(sedInfoA003, sedInfoA012))
         MelosysEessiRepo.opprettBucinformasjon(bucInformasjon)
-        val eessiMeldingA003 = melosysEessiMelding(
-            BucType.LA_BUC_02, rinaSaksnummer, SedType.A003, Periode(LocalDate.now(), LocalDate.now().plusYears(1)),
-            "13_1_a", opprettEessiJournalpost(SedType.A003)
-        )
-        eessiMeldingA003.apply { lovvalgsland = "NO" }
+
+        val eessiMeldingA003 = melosysEessiMelding {
+            bucType = BucType.LA_BUC_02.name
+            this.rinaSaksnummer = rinaSaksnummer
+            sedType = SedType.A003.name
+            sedId = SedType.A003.name
+            periode = Periode(LocalDate.now(), LocalDate.now().plusYears(1))
+            artikkel = "13_1_a"
+            journalpostId = opprettEessiJournalpost(SedType.A003)
+            lovvalgsland = "NO"
+        }
 
         melosysEessiMeldingKafkaTemplate.send(kafkaTopic, eessiMeldingA003)
 
@@ -486,11 +492,18 @@ class SedMottakTestIT(
         val bucInformasjon =
             BucInformasjon(rinaSaksnummer, true, "LA_BUC_02", LocalDate.now(), null, listOf(sedInfoA003, sedInfoA004))
         MelosysEessiRepo.opprettBucinformasjon(bucInformasjon)
-        val eessiMeldingA003 = melosysEessiMelding(
-            BucType.LA_BUC_02, rinaSaksnummer, SedType.A003, Periode(LocalDate.now(), LocalDate.now().plusYears(1)),
-            "13_1_a", opprettEessiJournalpost(SedType.A003)
-        )
-        eessiMeldingA003.apply { lovvalgsland = "NO" }
+
+
+        val eessiMeldingA003 = melosysEessiMelding {
+            bucType = BucType.LA_BUC_02.name
+            this.rinaSaksnummer = rinaSaksnummer
+            sedType = SedType.A003.name
+            sedId = SedType.A003.name
+            periode = Periode(LocalDate.now(), LocalDate.now().plusYears(1))
+            artikkel = "13_1_a"
+            journalpostId = opprettEessiJournalpost(SedType.A003)
+            lovvalgsland = "NO"
+        }
 
         melosysEessiMeldingKafkaTemplate.send(kafkaTopic, eessiMeldingA003)
 
@@ -613,33 +626,18 @@ class SedMottakTestIT(
         }
     }
 
-    private fun melosysEessiMelding(
-        bucType: BucType,
-        rinaSaksnummer: String?,
-        sedType: SedType,
-        periode: Periode?,
-        artikkel: String?,
-        journalpostID: String,
-        lovvalgsland: String = "SE",
-        isX006NavErFjernet: Boolean = false,
-    ): MelosysEessiMelding = MelosysEessiMelding().apply {
+    private fun melosysEessiMelding(block: MelosysEessiMelding.() -> Unit): MelosysEessiMelding = MelosysEessiMelding().apply {
         aktoerId = "1111111111111"
         anmodningUnntak = null
         arbeidssteder = emptyList()
-        this.bucType = bucType.name
         gsakSaksnummer = null
-        this.artikkel = artikkel
         avsender = Avsender("SE:123", "SE")
         dokumentId = null
-        journalpostId = journalpostID
-        this.lovvalgsland = lovvalgsland
-        this.periode = periode
-        this.sedType = sedType.name
-        sedId = sedType.name
-        this.rinaSaksnummer = rinaSaksnummer
         statsborgerskap = emptyList()
         sedVersjon = "1"
-        this.isX006NavErFjernet = isX006NavErFjernet
+        lovvalgsland = "SE"
+        isX006NavErFjernet = false
+        block()
     }
 
     private fun opprettEessiJournalpost(sedType: SedType): String {
