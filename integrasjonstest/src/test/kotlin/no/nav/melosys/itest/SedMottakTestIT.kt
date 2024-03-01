@@ -7,6 +7,7 @@ import io.kotest.matchers.collections.shouldContainExactly
 import io.kotest.matchers.collections.shouldContainInOrder
 import io.kotest.matchers.collections.shouldHaveSize
 import io.kotest.matchers.shouldBe
+import no.nav.melosys.AwaitUtil
 import no.nav.melosys.domain.Lovvalgsperiode
 import no.nav.melosys.domain.arkiv.*
 import no.nav.melosys.domain.eessi.*
@@ -98,13 +99,16 @@ class SedMottakTestIT(
         melosysEessiMeldingKafkaTemplate.send(kafkaTopic, eessiMeldingA009)
         melosysEessiMeldingKafkaTemplate.send(kafkaTopic, eessiMeldingX008)
 
-        await.timeout(Duration.ofSeconds(30)).pollInterval(Duration.ofSeconds(3))
-            .until {
-                prosessinstansRepository.findAllByStatusNotInAndLåsReferanseStartingWith(
-                    listOf(ProsessStatus.FERDIG),
-                    ref
-                ).isEmpty()
+        fun aktiveProsessInstanser(): Collection<Prosessinstans> =
+            prosessinstansRepository.findAllByLåsReferanseStartingWith(ref).filterNot { it.status == ProsessStatus.FERDIG }
+
+        AwaitUtil.awaitWithFailOnLogErrors(
+            timeoutHandler = { aktiveProsessInstanser() shouldBe emptyList() }
+        ) {
+            atMost(Duration.ofSeconds(30)).until {
+                aktiveProsessInstanser().isEmpty()
             }
+        }
 
         val prosessinstanserSortert = prosessinstansRepository.findAllByLåsReferanseStartingWith(ref)
             .sortedBy { it.endretDato }
@@ -127,8 +131,6 @@ class SedMottakTestIT(
                     Behandlingsresultattyper.HENLEGGELSE
                 )
             }
-
-
     }
 
     @Test
@@ -155,13 +157,16 @@ class SedMottakTestIT(
         melosysEessiMeldingKafkaTemplate.send(kafkaTopic, eessiMeldingA009)
         melosysEessiMeldingKafkaTemplate.send(kafkaTopic, eessiMeldingX006)
 
-        await.timeout(Duration.ofSeconds(30)).pollInterval(Duration.ofSeconds(3))
-            .until {
-                prosessinstansRepository.findAllByStatusNotInAndLåsReferanseStartingWith(
-                    listOf(ProsessStatus.FERDIG),
-                    ref
-                ).isEmpty()
+        fun aktiveProsessInstanser(): Collection<Prosessinstans> =
+            prosessinstansRepository.findAllByLåsReferanseStartingWith(ref).filterNot { it.status == ProsessStatus.FERDIG }
+
+        AwaitUtil.awaitWithFailOnLogErrors(
+            timeoutHandler = { aktiveProsessInstanser() shouldBe emptyList() }
+        ) {
+            atMost(Duration.ofSeconds(30)).until {
+                aktiveProsessInstanser().isEmpty()
             }
+        }
 
         val prosessinstanserSortert = prosessinstansRepository.findAllByLåsReferanseStartingWith(ref)
             .sortedBy { it.endretDato }
@@ -206,13 +211,16 @@ class SedMottakTestIT(
         melosysEessiMeldingKafkaTemplate.send(kafkaTopic, eessiMeldingA003)
         melosysEessiMeldingKafkaTemplate.send(kafkaTopic, eessiMeldingX006)
 
-        await.timeout(Duration.ofSeconds(30)).pollInterval(Duration.ofSeconds(3))
-            .until {
-                prosessinstansRepository.findAllByStatusNotInAndLåsReferanseStartingWith(
-                    listOf(ProsessStatus.FERDIG),
-                    ref
-                ).isEmpty()
+        fun aktiveProsessInstanser(): Collection<Prosessinstans> =
+            prosessinstansRepository.findAllByLåsReferanseStartingWith(ref).filterNot { it.status == ProsessStatus.FERDIG }
+
+        AwaitUtil.awaitWithFailOnLogErrors(
+            timeoutHandler = { aktiveProsessInstanser() shouldBe emptyList() }
+        ) {
+            atMost(Duration.ofSeconds(30)).until {
+                aktiveProsessInstanser().isEmpty()
             }
+        }
 
         val prosessinstanserSortert = prosessinstansRepository.findAllByLåsReferanseStartingWith(ref)
             .sortedBy { it.endretDato }
@@ -254,13 +262,16 @@ class SedMottakTestIT(
         melosysEessiMeldingKafkaTemplate.send(kafkaTopic, eessiMeldingA003)
         melosysEessiMeldingKafkaTemplate.send(kafkaTopic, eessiMeldingX008)
 
-        await.timeout(Duration.ofSeconds(30)).pollInterval(Duration.ofSeconds(3))
-            .until {
-                prosessinstansRepository.findAllByStatusNotInAndLåsReferanseStartingWith(
-                    listOf(ProsessStatus.FERDIG),
-                    ref
-                ).isEmpty()
+        fun aktiveProsessInstanser(): Collection<Prosessinstans> =
+            prosessinstansRepository.findAllByLåsReferanseStartingWith(ref).filterNot { it.status == ProsessStatus.FERDIG }
+
+        AwaitUtil.awaitWithFailOnLogErrors(
+            timeoutHandler = { aktiveProsessInstanser() shouldBe emptyList() }
+        ) {
+            atMost(Duration.ofSeconds(30)).until {
+                aktiveProsessInstanser().isEmpty()
             }
+        }
 
         val prosessinstanserSortert = prosessinstansRepository.findAllByLåsReferanseStartingWith(ref)
             .sortedBy { it.endretDato }
@@ -304,14 +315,16 @@ class SedMottakTestIT(
         melosysEessiMeldingKafkaTemplate.send(kafkaTopic, eessiMeldingX001)
         melosysEessiMeldingKafkaTemplate.send(kafkaTopic, eessiMeldingX007)
 
-        await.timeout(Duration.ofSeconds(30)).pollInterval(Duration.ofSeconds(3))
-            .until {
-                prosessinstansRepository.findAllByStatusNotInAndLåsReferanseStartingWith(
-                    listOf(ProsessStatus.FERDIG),
-                    rinaSaksnummer
-                ).isEmpty()
-            }
+        fun aktiveProsessInstanser(): Collection<Prosessinstans> =
+            prosessinstansRepository.findAllByLåsReferanseStartingWith(rinaSaksnummer).filterNot { it.status == ProsessStatus.FERDIG }
 
+        AwaitUtil.awaitWithFailOnLogErrors(
+            timeoutHandler = { aktiveProsessInstanser() shouldBe emptyList() }
+        ) {
+            atMost(Duration.ofSeconds(30)).until {
+                aktiveProsessInstanser().isEmpty()
+            }
+        }
 
         val prosessinstanserSortert = prosessinstansRepository.findAllByLåsReferanseStartingWith(rinaSaksnummer)
             .sortedBy { it.endretDato }
@@ -352,13 +365,16 @@ class SedMottakTestIT(
 
         melosysEessiMeldingKafkaTemplate.send(kafkaTopic, eessiMeldingA003)
 
-        await.timeout(Duration.ofSeconds(30)).pollInterval(Duration.ofSeconds(3))
-            .until {
-                prosessinstansRepository.findAllByStatusNotInAndLåsReferanseStartingWith(
-                    listOf(ProsessStatus.FERDIG),
-                    rinaSaksnummer
-                ).isEmpty()
+        fun aktiveProsessInstanser(): Collection<Prosessinstans> =
+            prosessinstansRepository.findAllByLåsReferanseStartingWith(rinaSaksnummer).filterNot { it.status == ProsessStatus.FERDIG }
+
+        AwaitUtil.awaitWithFailOnLogErrors(
+            timeoutHandler = { aktiveProsessInstanser() shouldBe emptyList() }
+        ) {
+            atMost(Duration.ofSeconds(30)).until {
+                aktiveProsessInstanser().isEmpty()
             }
+        }
 
         val prosessinstanserSortert = prosessinstansRepository.findAllByLåsReferanseStartingWith(rinaSaksnummer)
             .stream()
@@ -444,13 +460,16 @@ class SedMottakTestIT(
 
         melosysEessiMeldingKafkaTemplate.send(kafkaTopic, eessiMeldingA003)
 
-        await.timeout(Duration.ofSeconds(30)).pollInterval(Duration.ofSeconds(3))
-            .until {
-                prosessinstansRepository.findAllByStatusNotInAndLåsReferanseStartingWith(
-                    listOf(ProsessStatus.FERDIG),
-                    rinaSaksnummer
-                ).isEmpty()
+        fun aktiveProsessInstanser(): Collection<Prosessinstans> =
+            prosessinstansRepository.findAllByLåsReferanseStartingWith(rinaSaksnummer).filterNot { it.status == ProsessStatus.FERDIG }
+
+        AwaitUtil.awaitWithFailOnLogErrors(
+            timeoutHandler = { aktiveProsessInstanser() shouldBe emptyList() }
+        ) {
+            atMost(Duration.ofSeconds(30)).until {
+                aktiveProsessInstanser().isEmpty()
             }
+        }
 
         val prosessinstanserSortert = prosessinstansRepository.findAllByLåsReferanseStartingWith(rinaSaksnummer)
             .stream()
