@@ -7,6 +7,7 @@ import io.kotest.matchers.collections.shouldContain
 import io.kotest.matchers.collections.shouldContainExactly
 import io.kotest.matchers.collections.shouldContainInOrder
 import io.kotest.matchers.collections.shouldHaveSize
+import io.kotest.matchers.optional.shouldBePresent
 import io.kotest.matchers.shouldBe
 import io.mockk.every
 import io.mockk.mockk
@@ -141,14 +142,14 @@ class SedMottakTestIT(
                 eessiMeldingX008.lagUnikIdentifikator(),
             )
 
-        prosessinstanserSortert.filter { it.behandling != null }[0]
-            .apply { behandling.status.shouldBe(Behandlingsstatus.AVSLUTTET) }
-            .apply { behandling.fagsak.status.shouldBe(Saksstatuser.ANNULLERT) }
-            .apply {
-                behandlingsresultatRepository.findWithLovvalgsperioderById(behandling.id).get().type.shouldBe(
-                    Behandlingsresultattyper.HENLEGGELSE
-                )
-            }
+        prosessinstanserSortert.first { it.behandling != null }.behandling.apply {
+            status.shouldBe(Behandlingsstatus.AVSLUTTET)
+            fagsak.status.shouldBe(Saksstatuser.ANNULLERT)
+            behandlingsresultatRepository.findWithLovvalgsperioderById(id)
+                .shouldBePresent()
+                .type.shouldBe(Behandlingsresultattyper.HENLEGGELSE)
+        }
+
     }
 
     @Test
@@ -197,14 +198,13 @@ class SedMottakTestIT(
                 eessiMeldingX006.lagUnikIdentifikator(),
             )
 
-        prosessinstanserSortert.filter { it.behandling != null }[0]
-            .apply { behandling.status.shouldBe(Behandlingsstatus.AVSLUTTET) }
-            .apply { behandling.fagsak.status.shouldBe(Saksstatuser.ANNULLERT) }
-            .apply {
-                behandlingsresultatRepository.findWithLovvalgsperioderById(behandling.id).get().type.shouldBe(
-                    Behandlingsresultattyper.HENLEGGELSE
-                )
-            }
+        prosessinstanserSortert.first { it.behandling != null }.behandling.apply {
+            status.shouldBe(Behandlingsstatus.AVSLUTTET)
+            fagsak.status.shouldBe(Saksstatuser.ANNULLERT)
+            behandlingsresultatRepository.findWithLovvalgsperioderById(id)
+                .shouldBePresent()
+                .type.shouldBe(Behandlingsresultattyper.HENLEGGELSE)
+        }
     }
 
     @Test
@@ -249,12 +249,11 @@ class SedMottakTestIT(
                 eessiMeldingX006.lagUnikIdentifikator(),
             )
 
-        prosessinstanserSortert.filter { it.behandling != null }[0].behandling.apply {
+        prosessinstanserSortert.first { it.behandling != null }.behandling.apply {
             status.shouldBe(Behandlingsstatus.VURDER_DOKUMENT)
             fagsak.status.shouldBe(Saksstatuser.OPPRETTET)
-            behandlingsresultatRepository.findWithLovvalgsperioderById(id).get().type.shouldBe(
-                Behandlingsresultattyper.IKKE_FASTSATT
-            )
+            behandlingsresultatRepository.findWithLovvalgsperioderById(id)
+                .shouldBePresent().type.shouldBe(Behandlingsresultattyper.IKKE_FASTSATT)
         }
     }
 
@@ -305,12 +304,11 @@ class SedMottakTestIT(
                 eessiMeldingX008.lagUnikIdentifikator(),
             )
 
-        prosessinstanserSortert.filter { it.behandling != null }[0].behandling.apply {
+        prosessinstanserSortert.first { it.behandling != null }.behandling.apply {
             status.shouldBe(Behandlingsstatus.VURDER_DOKUMENT)
             fagsak.status.shouldBe(Saksstatuser.OPPRETTET)
-            behandlingsresultatRepository.findWithLovvalgsperioderById(id).get().type.shouldBe(
-                Behandlingsresultattyper.IKKE_FASTSATT
-            )
+            behandlingsresultatRepository.findWithLovvalgsperioderById(id).shouldBePresent().type
+                .shouldBe(Behandlingsresultattyper.IKKE_FASTSATT)
         }
     }
 
@@ -468,9 +466,8 @@ class SedMottakTestIT(
         vedtaksProsessInstans.behandling.apply {
             status.shouldBe(Behandlingsstatus.AVSLUTTET)
             fagsak.status.shouldBe(Saksstatuser.LOVVALG_AVKLART)
-            behandlingsresultatRepository.findWithLovvalgsperioderById(id).get().type.shouldBe(
-                Behandlingsresultattyper.FORELOEPIG_FASTSATT_LOVVALGSLAND
-            )
+            behandlingsresultatRepository.findWithLovvalgsperioderById(id).shouldBePresent()
+                .type.shouldBe(Behandlingsresultattyper.FORELOEPIG_FASTSATT_LOVVALGSLAND)
         }
     }
 
