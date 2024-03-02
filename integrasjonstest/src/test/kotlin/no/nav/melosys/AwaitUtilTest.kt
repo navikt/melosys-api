@@ -1,5 +1,7 @@
 package no.nav.melosys
 
+import com.google.common.collect.Range.atMost
+import io.kotest.assertions.AssertionFailedError
 import io.kotest.assertions.throwables.shouldThrow
 import io.kotest.matchers.shouldBe
 import mu.KotlinLogging
@@ -30,17 +32,6 @@ class AwaitUtilTest {
     }
 
     @Test
-    fun `untilMatching skal sammenlikne waitFor med lambda`() {
-        awaitWithFailOnLogErrors {
-            atMost(Duration.ofMillis(101)).untilMatching(
-                waitFor = "last log messge"
-            ) {
-                "last log messge"
-            }
-        }
-    }
-
-    @Test
     fun `awaitWithFailOnLogErrors skal retunere verdi som lages av await`() {
         awaitWithFailOnLogErrors {
             atMost(Duration.ofSeconds(1)).untilNotNull {
@@ -61,5 +52,26 @@ class AwaitUtilTest {
                     }
             }
         }.message shouldBe "Fant log entry med level error: error"
+    }
+
+    @Test
+    fun `untilMatching skal sammenlikne waitFor med lambda`() {
+        await.atMost(Duration.ofMillis(101)).untilMatching(
+            waitFor = "last log messge"
+        ) {
+            "last log messge"
+        }
+    }
+
+
+    @Test
+    fun `untilMatching skal gi assert på forskjellig resultat ved timeout`() {
+        shouldThrow<AssertionFailedError> {
+            await.atMost(Duration.ofMillis(101)).untilMatching(
+                waitFor = "waiting for message"
+            ) {
+                "last log messge"
+            }
+        }.message.shouldBe("expected:<\"waiting for message\"> but was:<\"last log messge\">")
     }
 }
