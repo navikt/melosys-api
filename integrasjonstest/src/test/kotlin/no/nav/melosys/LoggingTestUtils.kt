@@ -20,17 +20,6 @@ object LoggingTestUtils {
         return listAppender.list
     }
 
-    fun <T> Collection<T>.check(block: (next: () -> T) -> Unit) {
-        var i = 0
-        val list = toList()
-        block { list[i++] }
-    }
-
-
-    inline fun <reified T : Any> Collection<ILoggingEvent>.match(): Collection<ILoggingEvent> {
-        return filter { it.loggerName == T::class.java.name }
-    }
-
     fun <T> withLogCapture(block: (logEvents: List<ILoggingEvent>) -> T): T {
         val logger = LoggerFactory.getLogger(Logger.ROOT_LOGGER_NAME) as Logger
         val listAppender = ListAppender<ILoggingEvent>().apply { start() }
@@ -123,4 +112,9 @@ object LoggingTestUtils {
 
     val Collection<ILoggingEvent>.filterBuilder: LogFilterBuilder
         get() = LogFilterBuilder(this)
+
+    inline fun <reified T : Any> Collection<ILoggingEvent>.last(): String? {
+        return filterBuilder.match<T>().build().lastOrNull()?.formattedMessage
+    }
+
 }
