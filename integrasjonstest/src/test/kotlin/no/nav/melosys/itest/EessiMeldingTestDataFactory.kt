@@ -14,6 +14,22 @@ import org.springframework.stereotype.Component
 class EessiMeldingTestDataFactory(
     @Autowired private val joarkFasade: JoarkFasade,
 ) {
+    fun melosysEessiMelding(block: MelosysEessiMelding.() -> Unit): MelosysEessiMelding = MelosysEessiMelding().apply {
+        aktoerId = "1111111111111"
+        anmodningUnntak = null
+        arbeidssteder = emptyList()
+        gsakSaksnummer = null
+        avsender = Avsender("SE:123", "SE")
+        dokumentId = null
+        statsborgerskap = emptyList()
+        sedVersjon = "1"
+        lovvalgsland = "SE"
+        isX006NavErFjernet = false
+        block()
+        if (sedId == null) sedId = sedType
+        if (journalpostId == null) journalpostId = opprettEessiJournalpost(sedType)
+    }
+
     fun melosysEessiMelding(
         bucType: BucType,
         rinaSaksnummer: String?,
@@ -31,7 +47,7 @@ class EessiMeldingTestDataFactory(
         this.artikkel = artikkel
         this.avsender = Avsender("SE:123", "SE")
         this.dokumentId = null
-        this.journalpostId = opprettEessiJournalpost(sedType)
+        this.journalpostId = opprettEessiJournalpost(sedType.name)
         this.lovvalgsland = lovvalgsland
         this.periode = periode
         this.sedType = sedType.name
@@ -42,12 +58,12 @@ class EessiMeldingTestDataFactory(
         this.isX006NavErFjernet = isX006NavErFjernet
     }
 
-    fun opprettEessiJournalpost(sedType: SedType): String {
+    fun opprettEessiJournalpost(sedType: String): String {
         val request = OpprettJournalpost().apply {
             setHoveddokument(FysiskDokument().apply {
                 dokumentKategori = "SED"
                 tittel = "$sedType-tittel"
-                brevkode = sedType.name
+                brevkode = sedType
                 dokumentVarianter = listOf(
                     DokumentVariant.lagDokumentVariant(
                         ByteArray(0)
