@@ -14,7 +14,7 @@ import io.mockk.slot
 import io.mockk.verify
 import no.nav.melosys.AwaitUtil
 import no.nav.melosys.AwaitUtil.untilMatching
-import no.nav.melosys.LoggingTestUtils.filterBuilder
+import no.nav.melosys.LoggingTestUtils.last
 import no.nav.melosys.domain.Lovvalgsperiode
 import no.nav.melosys.domain.arkiv.*
 import no.nav.melosys.domain.eessi.*
@@ -123,7 +123,7 @@ class SedMottakTestIT(
             atMost(Duration.ofSeconds(20)).untilMatching(
                 waitFor = "Prosessinstans(er) på vent med samme gruppe-prefiks: []"
             ) {
-                logItems.filterBuilder.match<ProsessinstansFerdigListener>().build().lastOrNull()?.formattedMessage
+                logItems.last<ProsessinstansFerdigListener>()
             }
         }
 
@@ -178,7 +178,7 @@ class SedMottakTestIT(
             atMost(Duration.ofSeconds(20)).untilMatching(
                 waitFor = "Prosessinstans(er) på vent med samme gruppe-prefiks: []"
             ) {
-                logItems.filterBuilder.match<ProsessinstansFerdigListener>().build().lastOrNull()?.formattedMessage
+                logItems.last<ProsessinstansFerdigListener>()
             }
         }
 
@@ -229,7 +229,7 @@ class SedMottakTestIT(
             atMost(Duration.ofSeconds(20)).untilMatching(
                 waitFor = "Prosessinstans(er) på vent med samme gruppe-prefiks: []"
             ) {
-                logItems.filterBuilder.match<ProsessinstansFerdigListener>().build().lastOrNull()?.formattedMessage
+                logItems.last<ProsessinstansFerdigListener>()
             }
         }
 
@@ -277,7 +277,7 @@ class SedMottakTestIT(
             atMost(Duration.ofSeconds(20)).untilMatching(
                 waitFor = "Prosessinstans(er) på vent med samme gruppe-prefiks: []"
             ) {
-                logItems.filterBuilder.match<ProsessinstansFerdigListener>().build().lastOrNull()?.formattedMessage
+                logItems.last<ProsessinstansFerdigListener>()
             }
         }
 
@@ -327,7 +327,7 @@ class SedMottakTestIT(
             atMost(Duration.ofSeconds(20)).untilMatching(
                 waitFor = "Prosessinstans(er) på vent med samme gruppe-prefiks: []"
             ) {
-                logItems.filterBuilder.match<ProsessinstansFerdigListener>().build().lastOrNull()?.formattedMessage
+                logItems.last<ProsessinstansFerdigListener>()
             }
         }
 
@@ -380,7 +380,7 @@ class SedMottakTestIT(
             atMost(Duration.ofSeconds(20)).untilMatching(
                 waitFor = "Prosessinstans(er) på vent med samme gruppe-prefiks: []"
             ) {
-                logItems.filterBuilder.match<ProsessinstansFerdigListener>().build().lastOrNull()?.formattedMessage
+                logItems.last<ProsessinstansFerdigListener>()
             }
         }
 
@@ -492,7 +492,7 @@ class SedMottakTestIT(
             atMost(Duration.ofSeconds(20)).untilMatching(
                 waitFor = "Prosessinstans(er) på vent med samme gruppe-prefiks: []"
             ) {
-                logItems.filterBuilder.match<ProsessinstansFerdigListener>().build().lastOrNull()?.formattedMessage
+                logItems.last<ProsessinstansFerdigListener>()
             }
         }
 
@@ -602,6 +602,7 @@ class SedMottakTestIT(
         }
     }
 
+    // TODO: bruk EessiMeldingTestDataFactory
     private fun melosysEessiMelding(block: MelosysEessiMelding.() -> Unit): MelosysEessiMelding = MelosysEessiMelding().apply {
         aktoerId = "1111111111111"
         anmodningUnntak = null
