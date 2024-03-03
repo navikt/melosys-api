@@ -52,7 +52,6 @@ import org.springframework.kafka.core.KafkaTemplate
 import java.time.Duration
 import java.time.LocalDate
 import java.util.*
-import java.util.stream.Collectors
 
 @Import(OAuthMockServer::class)
 class SedMottakTestIT(
@@ -396,9 +395,7 @@ class SedMottakTestIT(
         }
 
         val prosessinstanserSortert = prosessinstansRepository.findAllByLåsReferanseStartingWith(rinaSaksnummer)
-            .stream()
-            .sorted(Comparator.comparing { obj: Prosessinstans -> obj.endretDato })
-            .collect(Collectors.toList())
+            .sortedBy { it.endretDato }
 
         lovvalgsperiodeService.lagreLovvalgsperioder(
             prosessinstanserSortert.get(1).behandling.id,
@@ -505,9 +502,7 @@ class SedMottakTestIT(
         }
 
         val prosessinstanserSortert = prosessinstansRepository.findAllByLåsReferanseStartingWith(rinaSaksnummer)
-            .stream()
-            .sorted(Comparator.comparing { obj: Prosessinstans -> obj.endretDato })
-            .collect(Collectors.toList())
+            .sortedBy { it.endretDato }
 
 
         prosessUtil.executeAndWait(ProsessType.UTPEKING_AVVIS) {
