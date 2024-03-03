@@ -29,7 +29,6 @@ import no.nav.melosys.repository.BehandlingsresultatRepository
 import no.nav.melosys.saksflyt.ProsessinstansFerdigListener
 import no.nav.melosys.saksflyt.ProsessinstansRepository
 import no.nav.melosys.saksflytapi.domain.ProsessType
-import no.nav.melosys.saksflytapi.domain.Prosessinstans
 import no.nav.melosys.service.LovvalgsperiodeService
 import no.nav.melosys.service.avklartefakta.AvklartefaktaDto
 import no.nav.melosys.service.avklartefakta.AvklartefaktaService
@@ -138,7 +137,7 @@ class SedMottakTestIT(
                 eessiMeldingX008.lagUnikIdentifikator(),
             )
 
-        prosessinstanserSortert.first { it.behandling != null }.behandling.apply {
+        prosessinstanserSortert.first { it.behandling != null }.behandling.run {
             status.shouldBe(Behandlingsstatus.AVSLUTTET)
             fagsak.status.shouldBe(Saksstatuser.ANNULLERT)
             behandlingsresultatRepository.findWithLovvalgsperioderById(id)
@@ -194,7 +193,7 @@ class SedMottakTestIT(
                 eessiMeldingX006.lagUnikIdentifikator(),
             )
 
-        prosessinstanserSortert.first { it.behandling != null }.behandling.apply {
+        prosessinstanserSortert.first { it.behandling != null }.behandling.run {
             status.shouldBe(Behandlingsstatus.AVSLUTTET)
             fagsak.status.shouldBe(Saksstatuser.ANNULLERT)
             behandlingsresultatRepository.findWithLovvalgsperioderById(id)
@@ -245,7 +244,7 @@ class SedMottakTestIT(
                 eessiMeldingX006.lagUnikIdentifikator(),
             )
 
-        prosessinstanserSortert.first { it.behandling != null }.behandling.apply {
+        prosessinstanserSortert.first { it.behandling != null }.behandling.run {
             status.shouldBe(Behandlingsstatus.VURDER_DOKUMENT)
             fagsak.status.shouldBe(Saksstatuser.OPPRETTET)
             behandlingsresultatRepository.findWithLovvalgsperioderById(id)
@@ -300,7 +299,7 @@ class SedMottakTestIT(
                 eessiMeldingX008.lagUnikIdentifikator(),
             )
 
-        prosessinstanserSortert.first { it.behandling != null }.behandling.apply {
+        prosessinstanserSortert.first { it.behandling != null }.behandling.run {
             status.shouldBe(Behandlingsstatus.VURDER_DOKUMENT)
             fagsak.status.shouldBe(Saksstatuser.OPPRETTET)
             behandlingsresultatRepository.findWithLovvalgsperioderById(id).shouldBePresent().type
@@ -457,7 +456,7 @@ class SedMottakTestIT(
             SedType.X008,
             SedType.A004,
         )
-        vedtaksProsessInstans.behandling.apply {
+        vedtaksProsessInstans.behandling.run {
             status.shouldBe(Behandlingsstatus.AVSLUTTET)
             fagsak.status.shouldBe(Saksstatuser.LOVVALG_AVKLART)
             behandlingsresultatRepository.findWithLovvalgsperioderById(id).shouldBePresent()
