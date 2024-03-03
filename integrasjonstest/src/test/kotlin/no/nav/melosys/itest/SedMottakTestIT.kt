@@ -3,7 +3,6 @@ package no.nav.melosys.itest
 import com.ninjasquad.springmockk.MockkBean
 import io.getunleash.FakeUnleash
 import io.kotest.assertions.extracting
-import io.kotest.matchers.collections.shouldContain
 import io.kotest.matchers.collections.shouldContainExactly
 import io.kotest.matchers.collections.shouldContainInOrder
 import io.kotest.matchers.collections.shouldHaveSize
@@ -29,7 +28,6 @@ import no.nav.melosys.melosysmock.sak.SakRepo
 import no.nav.melosys.repository.BehandlingsresultatRepository
 import no.nav.melosys.saksflyt.ProsessinstansFerdigListener
 import no.nav.melosys.saksflyt.ProsessinstansRepository
-import no.nav.melosys.saksflytapi.domain.ProsessStatus
 import no.nav.melosys.saksflytapi.domain.ProsessType
 import no.nav.melosys.saksflytapi.domain.Prosessinstans
 import no.nav.melosys.service.LovvalgsperiodeService
@@ -44,7 +42,6 @@ import no.nav.melosys.sikkerhet.context.ThreadLocalAccessInfo
 import no.nav.melosys.statistikk.utstedt_a1.integrasjon.UtstedtA1AivenProducer
 import no.nav.melosys.statistikk.utstedt_a1.integrasjon.dto.Lovvalgsbestemmelse
 import no.nav.melosys.statistikk.utstedt_a1.integrasjon.dto.UtstedtA1Melding
-import org.awaitility.kotlin.untilNotNull
 import org.junit.jupiter.api.AfterEach
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
@@ -54,9 +51,7 @@ import org.springframework.context.annotation.Import
 import org.springframework.kafka.core.KafkaTemplate
 import java.time.Duration
 import java.time.LocalDate
-import java.time.LocalDateTime
 import java.util.*
-import java.util.concurrent.TimeUnit
 import java.util.stream.Collectors
 
 @Import(OAuthMockServer::class)
@@ -71,7 +66,9 @@ class SedMottakTestIT(
     @Autowired private val behandlingsresultatRepository: BehandlingsresultatRepository,
     @Autowired private val unleash: FakeUnleash,
     @Autowired private val avklartefaktaService: AvklartefaktaService,
-    @Autowired private val oAuthMockServer: OAuthMockServer
+    @Autowired private val oAuthMockServer: OAuthMockServer,
+    @Autowired private val prosessUtil: ProsessUtil
+
 ) : ComponentTestBase() {
 
     private val kafkaTopic = "teammelosys.eessi.v1-local"
@@ -425,7 +422,7 @@ class SedMottakTestIT(
             })
         )
 
-        val vedtaksProsessInstans = executeAndWait(ProsessType.IVERKSETT_VEDTAK_EOS) {
+        val vedtaksProsessInstans = prosessUtil.executeAndWait(ProsessType.IVERKSETT_VEDTAK_EOS) {
             vedtaksfattingFasade.fattVedtak(
                 prosessinstanserSortert.get(1).behandling.id, FattVedtakRequest.Builder()
                     .medBehandlingsresultatType(Behandlingsresultattyper.FORELOEPIG_FASTSATT_LOVVALGSLAND)
@@ -439,7 +436,7 @@ class SedMottakTestIT(
             artikkel.shouldBe(Lovvalgsbestemmelse.ART_11_3_a)
         }
 
-        val opprettNyVurderingProsessinstans = executeAndWait(ProsessType.OPPRETT_REPLIKERT_BEHANDLING_FOR_SAK) {
+        val opprettNyVurderingProsessinstans = prosessUtil.executeAndWait(ProsessType.OPPRETT_REPLIKERT_BEHANDLING_FOR_SAK) {
             opprettBehandlingForSak.opprettBehandling(
                 prosessinstanserSortert.get(1).behandling.fagsak.saksnummer,
                 OpprettSakDto().apply {
@@ -451,7 +448,7 @@ class SedMottakTestIT(
                 })
         }
 
-        executeAndWait(ProsessType.UTPEKING_AVVIS) {
+        prosessUtil.executeAndWait(ProsessType.UTPEKING_AVVIS) {
             utpekingService.avvisUtpeking(opprettNyVurderingProsessinstans.behandling.id, UtpekingAvvis().apply {
                 begrunnelse = "lol"
                 etterspørInformasjon = false
@@ -513,14 +510,14 @@ class SedMottakTestIT(
             .collect(Collectors.toList())
 
 
-        executeAndWait(ProsessType.UTPEKING_AVVIS) {
+        prosessUtil.executeAndWait(ProsessType.UTPEKING_AVVIS) {
             utpekingService.avvisUtpeking(prosessinstanserSortert.get(1).behandling.id, UtpekingAvvis().apply {
                 begrunnelse = "lol"
                 etterspørInformasjon = false
             })
         }
 
-        val opprettNyVurderingProsessinstans = executeAndWait(ProsessType.OPPRETT_REPLIKERT_BEHANDLING_FOR_SAK) {
+        val opprettNyVurderingProsessinstans = prosessUtil.executeAndWait(ProsessType.OPPRETT_REPLIKERT_BEHANDLING_FOR_SAK) {
             opprettBehandlingForSak.opprettBehandling(
                 prosessinstanserSortert.get(1).behandling.fagsak.saksnummer,
                 OpprettSakDto().apply {
@@ -554,7 +551,7 @@ class SedMottakTestIT(
             })
         )
 
-        val vedtaksProsessInstans = executeAndWait(ProsessType.IVERKSETT_VEDTAK_EOS) {
+        val vedtaksProsessInstans = prosessUtil.executeAndWait(ProsessType.IVERKSETT_VEDTAK_EOS) {
             vedtaksfattingFasade.fattVedtak(
                 opprettNyVurderingProsessinstans.behandling.id, FattVedtakRequest.Builder()
                     .medBehandlingsresultatType(Behandlingsresultattyper.FORELOEPIG_FASTSATT_LOVVALGSLAND)
@@ -579,37 +576,6 @@ class SedMottakTestIT(
             behandlingsresultatRepository.findWithLovvalgsperioderById(id).get().type.shouldBe(
                 Behandlingsresultattyper.FORELOEPIG_FASTSATT_LOVVALGSLAND
             )
-        }
-    }
-
-    protected fun executeAndWait(
-        waitForprosessType: ProsessType,
-        alsoWaitForprosessType: List<ProsessType> = listOf(),
-        process: () -> Unit
-    ): Prosessinstans {
-        val startTime = LocalDateTime.now()
-        process()
-        val journalføringProsessID = finnProsess(waitForprosessType, startTime)
-        alsoWaitForprosessType.forEach { finnProsess(it, startTime) }
-        return prosessinstansRepository.findById(journalføringProsessID).get()
-    }
-
-    protected fun finnProsess(prosessType: ProsessType, startTid: LocalDateTime): UUID {
-        AwaitUtil.awaitWithFailOnLogErrors {
-            pollDelay(1, TimeUnit.SECONDS)
-                .timeout(30, TimeUnit.SECONDS)
-                .untilNotNull {
-                    prosessinstansRepository.findAllAfterDate(startTid)
-                }.map { it.type }.shouldContain(prosessType)
-        }
-
-        return AwaitUtil.awaitWithFailOnLogErrors {
-            timeout(30, TimeUnit.SECONDS)
-                .pollInterval(1, TimeUnit.SECONDS)
-                .untilNotNull {
-                    prosessinstansRepository.findAllAfterDate(startTid)
-                        .find { it.type == prosessType && it.status == ProsessStatus.FERDIG }?.id
-                }
         }
     }
 }
