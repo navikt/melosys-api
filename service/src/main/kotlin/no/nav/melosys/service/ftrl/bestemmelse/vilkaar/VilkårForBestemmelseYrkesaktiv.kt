@@ -18,10 +18,7 @@ class VilkårForBestemmelseYrkesaktiv(val mottatteOpplysningerService: MottatteO
         behandlingID: Long?
     ): List<Vilkår> {
         return when (bestemmelse) {
-            FTRL_KAP2_2_1_FØRSTE_LEDD,
-            FTRL_KAP2_2_1_FJERDE_LEDD,
             FTRL_KAP2_2_2,
-            FTRL_KAP2_2_3_FØRSTE_LEDD,
             FTRL_KAP2_2_3_ANDRE_LEDD,
             FTRL_KAP2_2_5_FØRSTE_LEDD_A,
             FTRL_KAP2_2_5_FØRSTE_LEDD_B,
@@ -29,10 +26,7 @@ class VilkårForBestemmelseYrkesaktiv(val mottatteOpplysningerService: MottatteO
             FTRL_KAP2_2_5_FØRSTE_LEDD_D,
             FTRL_KAP2_2_5_FØRSTE_LEDD_E,
             FTRL_KAP2_2_5_FØRSTE_LEDD_F,
-            FTRL_KAP2_2_5_FØRSTE_LEDD_G,
-            FTRL_KAP2_2_6_FØRSTE_LEDD_A,
-            FTRL_KAP2_2_6_FØRSTE_LEDD_B,
-            FTRL_KAP2_2_6_FØRSTE_LEDD_C -> emptyList()
+            FTRL_KAP2_2_5_FØRSTE_LEDD_G -> emptyList()
 
             FTRL_KAP2_2_7_FØRSTE_LEDD -> listOf(
                 Vilkår(FTRL_2_1A_TRYGDEKOORDINGERING),

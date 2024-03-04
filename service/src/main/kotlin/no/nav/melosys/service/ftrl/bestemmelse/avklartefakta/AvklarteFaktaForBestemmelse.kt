@@ -10,7 +10,7 @@ import org.springframework.stereotype.Component
 class AvklarteFaktaForBestemmelse(val mottatteOpplysningerService: MottatteOpplysningerService) {
     fun hentAvklarteFakta(bestemmelse: Folketrygdloven_kap2_bestemmelser, behandlingID: Long): List<AvklarteFaktaType> {
         return when (bestemmelse) {
-            FTRL_KAP2_2_1_FØRSTE_LEDD -> ftrlKap2_1AvklarteFaktaForBehandling(behandlingID)
+            FTRL_KAP2_2_1 -> ftrlKap2_1AvklarteFaktaForBehandling(behandlingID)
             FTRL_KAP2_2_5_ANDRE_LEDD -> listOf(
                 AvklarteFaktaType(
                     Avklartefaktatyper.IKKE_YRKESAKTIV_RELASJON, listOf(

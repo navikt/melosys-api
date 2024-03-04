@@ -177,7 +177,7 @@ class MedlemskapsperiodeServiceTest {
             NÅ,
             InnvilgelsesResultat.AVSLAATT,
             Trygdedekninger.FTRL_2_9_FØRSTE_LEDD_C_ANDRE_LEDD_HELSE_PENSJON_SYKE_FORELDREPENGER,
-            Folketrygdloven_kap2_bestemmelser.FTRL_KAP2_2_1_FØRSTE_LEDD
+            Folketrygdloven_kap2_bestemmelser.FTRL_KAP2_2_1
         )
 
 
@@ -188,7 +188,7 @@ class MedlemskapsperiodeServiceTest {
             tom.shouldBe(NÅ)
             innvilgelsesresultat.shouldBe(InnvilgelsesResultat.AVSLAATT)
             trygdedekning.shouldBe(Trygdedekninger.FTRL_2_9_FØRSTE_LEDD_C_ANDRE_LEDD_HELSE_PENSJON_SYKE_FORELDREPENGER)
-            bestemmelse.shouldBe(Folketrygdloven_kap2_bestemmelser.FTRL_KAP2_2_1_FØRSTE_LEDD)
+            bestemmelse.shouldBe(Folketrygdloven_kap2_bestemmelser.FTRL_KAP2_2_1)
         }
     }
 
@@ -211,7 +211,7 @@ class MedlemskapsperiodeServiceTest {
             NÅ,
             InnvilgelsesResultat.AVSLAATT,
             Trygdedekninger.FTRL_2_9_FØRSTE_LEDD_C_ANDRE_LEDD_HELSE_PENSJON_SYKE_FORELDREPENGER,
-            Folketrygdloven_kap2_bestemmelser.FTRL_KAP2_2_1_FØRSTE_LEDD
+            Folketrygdloven_kap2_bestemmelser.FTRL_KAP2_2_1
         )
 
 
@@ -234,7 +234,7 @@ class MedlemskapsperiodeServiceTest {
             null,
             InnvilgelsesResultat.AVSLAATT,
             Trygdedekninger.FTRL_2_9_FØRSTE_LEDD_A_HELSE,
-            Folketrygdloven_kap2_bestemmelser.FTRL_KAP2_2_1_FØRSTE_LEDD
+            Folketrygdloven_kap2_bestemmelser.FTRL_KAP2_2_1
         )
 
 

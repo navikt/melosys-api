@@ -27,7 +27,7 @@ class VilkårForBestemmelseIkkeYrkesaktivTest {
     }
 
     @Test
-    fun `vilkår for FTRL_KAP2_2_1_FØRSTE_LEDD, ett eller flere land utenfor Norge`() {
+    fun `vilkår for FTRL_KAP2_2_1, ett eller flere land utenfor Norge`() {
         val mottatteOpplysninger =
             MottatteOpplysninger().apply {
                 mottatteOpplysningerData =
@@ -38,7 +38,7 @@ class VilkårForBestemmelseIkkeYrkesaktivTest {
 
 
         val vilkår = vilkårForBestemmelse.hentVilkår(
-            Folketrygdloven_kap2_bestemmelser.FTRL_KAP2_2_1_FØRSTE_LEDD,
+            Folketrygdloven_kap2_bestemmelser.FTRL_KAP2_2_1,
             mapOf(Avklartefaktatyper.IKKE_YRKESAKTIV_FTRL_2_1_OPPHOLD to Ikkeyrkesaktivoppholdtype.MIDLERTIDIG_2_1_FJERDE_LEDD.name),
             1L
         )
@@ -58,7 +58,7 @@ class VilkårForBestemmelseIkkeYrkesaktivTest {
     }
 
     @Test
-    fun `vilkår for FTRL_KAP2_2_1_FØRSTE_LEDD, kun Norge`() {
+    fun `vilkår for FTRL_KAP2_2_1, kun Norge`() {
         val mottatteOpplysninger =
             MottatteOpplysninger().apply {
                 mottatteOpplysningerData =
@@ -69,7 +69,7 @@ class VilkårForBestemmelseIkkeYrkesaktivTest {
 
 
         val vilkår = vilkårForBestemmelse.hentVilkår(
-            Folketrygdloven_kap2_bestemmelser.FTRL_KAP2_2_1_FØRSTE_LEDD,
+            Folketrygdloven_kap2_bestemmelser.FTRL_KAP2_2_1,
             emptyMap(),
             1L
         )

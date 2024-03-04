@@ -30,7 +30,7 @@ class AvklarteFaktaForBestemmelseTest {
     }
 
     @Test
-    fun `avklarte fakta for FTRL_KAP2_2_1_FØRSTE_LEDD, ett eller flere land utenfor Norge, er IKKE_YRKESAKTIV_FTRL_2_1_OPPHOLD`() {
+    fun `avklarte fakta for FTRL_KAP2_2_1, ett eller flere land utenfor Norge, er IKKE_YRKESAKTIV_FTRL_2_1_OPPHOLD`() {
         val mottatteOpplysninger =
             MottatteOpplysninger().apply {
                 mottatteOpplysningerData =
@@ -40,7 +40,7 @@ class AvklarteFaktaForBestemmelseTest {
 
 
         avklarteFaktaForBestemmelse.hentAvklarteFakta(
-            Folketrygdloven_kap2_bestemmelser.FTRL_KAP2_2_1_FØRSTE_LEDD, 1L
+            Folketrygdloven_kap2_bestemmelser.FTRL_KAP2_2_1, 1L
         ).shouldContainExactly(
             AvklarteFaktaForBestemmelse.AvklarteFaktaType(
                 Avklartefaktatyper.IKKE_YRKESAKTIV_FTRL_2_1_OPPHOLD,
@@ -50,7 +50,7 @@ class AvklarteFaktaForBestemmelseTest {
     }
 
     @Test
-    fun `avklarte fakta for FTRL_KAP2_2_1_FØRSTE_LEDD, Norge, ingen avklarte fakta`() {
+    fun `avklarte fakta for FTRL_KAP2_2_1, Norge, ingen avklarte fakta`() {
         val mottatteOpplysninger =
             MottatteOpplysninger().apply {
                 mottatteOpplysningerData =
@@ -59,7 +59,7 @@ class AvklarteFaktaForBestemmelseTest {
         every {mottatteOpplysningerService.hentMottatteOpplysninger(1L)} returns mottatteOpplysninger
 
         avklarteFaktaForBestemmelse.hentAvklarteFakta(
-            Folketrygdloven_kap2_bestemmelser.FTRL_KAP2_2_1_FØRSTE_LEDD, 1L
+            Folketrygdloven_kap2_bestemmelser.FTRL_KAP2_2_1, 1L
         ).shouldBeEmpty()
     }
 

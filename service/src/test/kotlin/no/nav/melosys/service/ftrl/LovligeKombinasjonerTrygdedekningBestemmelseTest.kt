@@ -52,7 +52,7 @@ class LovligeKombinasjonerTrygdedekningBestemmelseTest {
     @Test
     fun erGyldigKombinasjon_uGyldigKombinasjonPliktigBestemmelse_returnererFalse() {
         LovligeKombinasjonerTrygdedekningBestemmelse.erGyldigKombinasjon(
-            Folketrygdloven_kap2_bestemmelser.FTRL_KAP2_2_1_FØRSTE_LEDD,
+            Folketrygdloven_kap2_bestemmelser.FTRL_KAP2_2_1,
             Trygdedekninger.FTRL_2_7A_ANDRE_LEDD_B_HELSE_SYKE_FORELDREPENGER
         ).shouldBeFalse()
     }
@@ -76,7 +76,7 @@ class LovligeKombinasjonerTrygdedekningBestemmelseTest {
     @Test
     fun erBestemmelseGyldigForTrygdedekning_uGyldigKombinasjonMenBestemmelseErPliktig_returnererTrue() {
         LovligeKombinasjonerTrygdedekningBestemmelse.erBestemmelseGyldigForTrygdedekning(
-            Folketrygdloven_kap2_bestemmelser.FTRL_KAP2_2_1_FØRSTE_LEDD,
+            Folketrygdloven_kap2_bestemmelser.FTRL_KAP2_2_1,
             Trygdedekninger.FTRL_2_7A_ANDRE_LEDD_B_HELSE_SYKE_FORELDREPENGER
         ).shouldBeTrue()
     }

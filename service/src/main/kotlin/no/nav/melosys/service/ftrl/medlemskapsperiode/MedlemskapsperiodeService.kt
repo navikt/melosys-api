@@ -127,8 +127,7 @@ class MedlemskapsperiodeService(
     ) {
         val nullTilOgMedDatoErTillatt =
             Land_iso2.NO.kode in land && land.size == 1 && bestemmelse in listOf(
-                Folketrygdloven_kap2_bestemmelser.FTRL_KAP2_2_1_FØRSTE_LEDD,
-                Folketrygdloven_kap2_bestemmelser.FTRL_KAP2_2_1_FJERDE_LEDD
+                Folketrygdloven_kap2_bestemmelser.FTRL_KAP2_2_1,
             )
 
         if (unleash.isEnabled(ToggleName.MELOSYS_FTRL_IKKE_YRKESAKTIV) && tom == null && !nullTilOgMedDatoErTillatt) {
