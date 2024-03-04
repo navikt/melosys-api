@@ -64,30 +64,30 @@ public class BrevDataService {
         Fagsak fagsak = behandling.getFagsak();
 
         DokumentbestillingMetadata metadata = new DokumentbestillingMetadata();
-        metadata.dokumenttypeID = DokumenttypeIdMapper.hentID(produserbartDokument);
-        metadata.mottaker = mottaker;
-        metadata.mottakerID = avklarMottakerId(mottaker, kontaktopplysning);
-        metadata.brukerID = persondataFasade.hentFolkeregisterident(fagsak.hentBrukersAktørID());
+        metadata.setDokumenttypeID(DokumenttypeIdMapper.hentID(produserbartDokument));
+        metadata.setMottaker(mottaker);
+        metadata.setMottakerID(avklarMottakerId(mottaker, kontaktopplysning));
+        metadata.setBrukerID(persondataFasade.hentFolkeregisterident(fagsak.hentBrukersAktørID()));
 
-        metadata.journalsakID = Long.toString(fagsak.getGsakSaksnummer());
-        metadata.fagområde = Tema.MED.getKode();
-        metadata.saksbehandler = brevData.saksbehandler;
-        metadata.berik = true;
+        metadata.setJournalsakID(Long.toString(fagsak.getGsakSaksnummer()));
+        metadata.setFagområde(Tema.MED.getKode());
+        metadata.setSaksbehandler(brevData.getSaksbehandler());
+        metadata.setBerik(true);
 
         if (mottaker.getRolle() == Mottakerroller.BRUKER) {
             if (personManglerAdresseFraRegister(behandling.getFagsak().hentBrukersAktørID())) {
                 MottatteOpplysningerData grunnlagData = behandling.getMottatteOpplysninger().getMottatteOpplysningerData();
                 StrukturertAdresse oppgittAdresse = grunnlagData.bosted.getOppgittAdresse();
                 if (oppgittAdresse.erGyldig()) {
-                    metadata.berik = false;
-                    metadata.postadresse = oppgittAdresse;
-                    metadata.brukerNavn = persondataFasade.hentSammensattNavn(metadata.brukerID);
+                    metadata.setBerik(false);
+                    metadata.setPostadresse(oppgittAdresse);
+                    metadata.setBrukerNavn(persondataFasade.hentSammensattNavn(metadata.getBrukerID()));
                 }
             }
         } else if (mottaker.erUtenlandskMyndighet()) {
-            metadata.berik = false;
-            metadata.utenlandskMyndighet = hentUtenlandskTrygdemyndighetFraMottaker(mottaker);
-            metadata.brukerNavn = persondataFasade.hentSammensattNavn(metadata.brukerID);
+            metadata.setBerik(false);
+            metadata.setUtenlandskMyndighet(hentUtenlandskTrygdemyndighetFraMottaker(mottaker));
+            metadata.setBrukerNavn(persondataFasade.hentSammensattNavn(metadata.getBrukerID()));
         }
         return metadata;
     }
@@ -163,7 +163,7 @@ public class BrevDataService {
         navFelles.setMottaker(lagMottaker(mottaker, kontaktopplysning));
         navFelles.setSakspart(lagSakspart(behandling));
 
-        Saksbehandler saksbehandler = lagSaksbehandler(brevData.saksbehandler);
+        Saksbehandler saksbehandler = lagSaksbehandler(brevData.getSaksbehandler());
         navFelles.setSignerendeBeslutter(saksbehandler);
         navFelles.setSignerendeSaksbehandler(saksbehandler);
         return navFelles;

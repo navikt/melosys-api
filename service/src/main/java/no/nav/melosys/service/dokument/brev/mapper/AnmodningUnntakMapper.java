@@ -75,11 +75,11 @@ public class AnmodningUnntakMapper implements BrevDataMapper {
             throw new TekniskException(behandling.getFagsak().getType() + " støttes ikke.");
         }
 
-        fag.setForetakNavn(brevData.hovedvirksomhet.navn);
-        fag.setYrkesaktivitet(YrkesaktivitetsKode.fromValue(brevData.yrkesaktivitet.getKode()));
+        fag.setForetakNavn(brevData.getHovedvirksomhet().navn);
+        fag.setYrkesaktivitet(YrkesaktivitetsKode.fromValue(brevData.getYrkesaktivitet().getKode()));
 
         Anmodningsperiode anmodningsperiode = resultat.hentAnmodningsperiode();
-        fag.setArbeidsland(brevData.arbeidsland);
+        fag.setArbeidsland(brevData.getArbeidsland());
         fag.setLovvalgsperiode(lagLovvalgsperiodeType(anmodningsperiode));
 
         if (resultat.manglerVilkår(FO_883_2004_ART12_1) && resultat.manglerVilkår(FO_883_2004_ART12_2)) {
@@ -97,13 +97,13 @@ public class AnmodningUnntakMapper implements BrevDataMapper {
         fag.setArt122NormalVirksomhetBegrunnelse(mapArt122NormalVirksomhetBegrunnelseType(
             resultat.hentVilkaarbegrunnelser(ART12_2_NORMALT_DRIVER_VIRKSOMHET)));
 
-        mapAnmodningBegrunnelser(brevData.anmodningBegrunnelser).ifPresent(fag::setArt161AnmodningBegrunnelse);
+        mapAnmodningBegrunnelser(brevData.getAnmodningBegrunnelser()).ifPresent(fag::setArt161AnmodningBegrunnelse);
 
-        mapAnmodningUtenArt12Begrunnelser(brevData.anmodningUtenArt12Begrunnelser).ifPresent(fag::setArt161AnmodningUtenArt12Begrunnelse);
+        mapAnmodningUtenArt12Begrunnelser(brevData.getAnmodningUtenArt12Begrunnelser()).ifPresent(fag::setArt161AnmodningUtenArt12Begrunnelse);
 
-        fag.setAnmodningFritekst(brevData.anmodningFritekst);
+        fag.setAnmodningFritekst(brevData.getAnmodningFritekst());
 
-        fag.setBegrunnelseFritekst(brevData.fritekst);
+        fag.setBegrunnelseFritekst(brevData.getFritekst());
 
         return fag;
     }

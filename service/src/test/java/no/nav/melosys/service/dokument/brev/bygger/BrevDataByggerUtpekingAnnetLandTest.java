@@ -48,7 +48,7 @@ class BrevDataByggerUtpekingAnnetLandTest {
         when(utpekingService.hentUtpekingsperioder(eq(1L))).thenReturn(List.of(utpekingsperiode));
         final BrevData brevData = brevDataByggerUtpekingAnnetLand.lag(brevDataGrunnlag, "sb");
         assertThat(brevData).isInstanceOf(BrevDataUtpekingAnnetLand.class);
-        assertThat(((BrevDataUtpekingAnnetLand) brevData).utpekingsperiode).isEqualTo(utpekingsperiode);
+        assertThat(((BrevDataUtpekingAnnetLand) brevData).getUtpekingsperiode()).isEqualTo(utpekingsperiode);
     }
 
     @Test

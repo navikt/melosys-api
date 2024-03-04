@@ -26,8 +26,8 @@ private const val BEHANDLING_ID = "behandlingID"
 @Api(tags = ["ftrl", "bestemmelser", "avklarte fakta", "vilkår"])
 class VilkårTjeneste(
     private val vilkårForBestemmelse: VilkårForBestemmelse,
-    val aksessKontroll: Aksesskontroll,
-    val unleash: Unleash
+    private val aksessKontroll: Aksesskontroll,
+    private val unleash: Unleash
 ) {
     private val log = KotlinLogging.logger { }
 
@@ -45,7 +45,7 @@ class VilkårTjeneste(
         }
 
         var behandlingstema: String
-        if (unleash.isEnabled(ToggleName.MELOSYS_FTRL_BESTEMMELSER_2)) {
+        if (unleash.isEnabled(ToggleName.MELOSYS_FTRL_YRKESAKTIV_PLIKTIGE_BESTEMMELSER)) {
             behandlingstema = requestParams[BEHANDLINGSTEMA] ?: throw FunksjonellException("?behandlingstema er påkrevd")
         } else {
             behandlingstema = Behandlingstema.IKKE_YRKESAKTIV.name
@@ -65,7 +65,7 @@ class VilkårTjeneste(
     }
 
     private fun validerRequestParams(queryParams: Map<String, String>) {
-        val validKeys = listOf(BEHANDLING_ID) + avklartefaktatyperNavn
+        val validKeys = listOf(BEHANDLING_ID, BEHANDLINGSTEMA) + avklartefaktatyperNavn
 
         val unknownKeys = queryParams.keys.filterNot { key ->  validKeys.any { it.equals(key, ignoreCase = true) } }
         if (unknownKeys.isNotEmpty()) {

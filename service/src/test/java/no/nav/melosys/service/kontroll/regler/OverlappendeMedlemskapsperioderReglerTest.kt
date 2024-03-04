@@ -178,9 +178,8 @@ internal class OverlappendeMedlemskapsperioderReglerTest {
     @Test
     fun harOverlappendeMedlemsperiodeMerEnn1DagFraSed_inklusivOverlappendePeriode_medEnDagOver_registrerTreff() {
         val medlemskapDokument = MedlemskapDokument().apply {
-            medlemsperiode = listOf(Medlemsperiode().apply {
+            medlemsperiode = listOf(Medlemsperiode(periode = Periode(LocalDate.EPOCH, LocalDate.EPOCH.plusYears(2).plusDays(1))).apply {
                 status = PeriodestatusMedl.UAVK.kode
-                periode = Periode(LocalDate.EPOCH, LocalDate.EPOCH.plusYears(2).plusDays(1))
             })
         }
         val kontrollperiode = lagLovvalgsPeriode(LocalDate.EPOCH.plusYears(2), LocalDate.EPOCH.plusYears(4))
@@ -193,9 +192,8 @@ internal class OverlappendeMedlemskapsperioderReglerTest {
     @Test
     fun harOverlappendeMedlemsperiodeMerEnn1DagFraSed_tidligerePeriodeOverlapperMedEnDag_under2År_ingenTreff() {
         val medlemskapDokument = MedlemskapDokument().apply {
-            medlemsperiode = listOf(Medlemsperiode().apply {
+            medlemsperiode = listOf(Medlemsperiode(periode = Periode(LocalDate.of(2021, 1, 1), LocalDate.of(2021, 5, 1))).apply {
                 status = PeriodestatusMedl.GYLD.kode
-                periode = Periode(LocalDate.of(2021, 1, 1), LocalDate.of(2021, 5, 1))
             })
         }
         val kontrollperiode = lagLovvalgsPeriode(LocalDate.of(2020, 1, 1), LocalDate.of(2021, 1, 1))
@@ -255,9 +253,8 @@ internal class OverlappendeMedlemskapsperioderReglerTest {
             )
         }
         val medlemskapDokument = MedlemskapDokument().apply {
-            medlemsperiode = listOf(Medlemsperiode().apply {
+            medlemsperiode = listOf(Medlemsperiode(periode = Periode(LocalDate.of(2022, 1, 1), LocalDate.of(2022, 2, 1))).apply {
                 status = PeriodestatusMedl.GYLD.kode
-                periode = Periode(LocalDate.of(2022, 1, 1), LocalDate.of(2022, 2, 1))
                 land = "SWE"
             })
         }
@@ -386,10 +383,9 @@ internal class OverlappendeMedlemskapsperioderReglerTest {
 
     private fun lagMedlemskapsDokument(land: String): MedlemskapDokument {
         return MedlemskapDokument().apply {
-            medlemsperiode = listOf(Medlemsperiode().apply {
+            medlemsperiode = listOf(Medlemsperiode(periode = Periode(LocalDate.EPOCH, LocalDate.EPOCH.plusYears(2))).apply {
                 id = 1L
                 status = PeriodestatusMedl.GYLD.kode
-                periode = Periode(LocalDate.EPOCH, LocalDate.EPOCH.plusYears(2))
                 this.land = land
             })
         }

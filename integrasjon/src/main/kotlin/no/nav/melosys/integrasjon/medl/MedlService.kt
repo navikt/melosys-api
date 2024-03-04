@@ -39,18 +39,17 @@ class MedlService(
             versjon = MEDLEMSKAP_VERSJON
             dokument = MedlemskapDokument().apply {
                 medlemsperiode = periodeListeResponse.map {
-                    Medlemsperiode().apply {
-                        id = it.unntakId
-                        periode = Periode(it.fraOgMed, it.tilOgMed)
-                        type = if (it.medlem!!) "PMMEDSKP" else "PUMEDSKP"
-                        status = it.status
-                        grunnlagstype = it.grunnlag
-                        land = it.lovvalgsland
-                        lovvalg = it.lovvalg
-                        trygdedekning = it.dekning
-                        kildedokumenttype = it.sporingsinformasjon!!.kildedokument
-                        kilde = it.sporingsinformasjon!!.kilde
-                    }
+                    Medlemsperiode(it.unntakId,
+                        Periode(it.fraOgMed, it.tilOgMed),
+                        if (it.medlem!!) "PMMEDSKP" else "PUMEDSKP",
+                        it.status,
+                        it.grunnlag,
+                        it.lovvalgsland,
+                        it.lovvalg,
+                        it.dekning,
+                        it.sporingsinformasjon!!.kildedokument,
+                        it.sporingsinformasjon!!.kilde
+                    )
                 }
             }
             try {

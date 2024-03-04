@@ -20,10 +20,10 @@ public class BrevDataByggerUtpekingAnnetLand implements BrevDataBygger {
     public BrevData lag(BrevDataGrunnlag dataGrunnlag, String saksbehandler) {
         BrevDataUtpekingAnnetLand brevDataUtpekingAnnetLand = new BrevDataUtpekingAnnetLand(brevbestillingDto, saksbehandler);
         long behandlingID = dataGrunnlag.getBehandling().getId();
-        brevDataUtpekingAnnetLand.utpekingsperiode = utpekingService.hentUtpekingsperioder(behandlingID)
+        brevDataUtpekingAnnetLand.setUtpekingsperiode(utpekingService.hentUtpekingsperioder(behandlingID)
             .stream().findFirst()
             .orElseThrow(() -> new FunksjonellException("Brev om utpeking av annet land for behandling " + behandlingID
-                + " kan ikke produseres uten utpekingsperiode."));
+                + " kan ikke produseres uten utpekingsperiode.")));
         return brevDataUtpekingAnnetLand;
     }
 }

@@ -14,17 +14,11 @@ class SedLåsReferanse(val låsReferanse: String) : LåsReferanse {
         }
     }
 
-    override val referanse: String
+    override val gruppePrefiks: String
         get() = rinaSaksnummer
 
     override fun skalSettesPåVent(aktiveLåsReferanser: Collection<String>): Boolean {
-        if (aktiveLåsReferanser.isEmpty()) return false
-
-        // TODO: Det må nå sjekkes at det ikke finnes prosess med nøyaktig samme låsreferanse siden sed mottak
-        // lager nye prosesser med samme låsreferanse som parent prosessen.
-        // Tenker fiksen blir å legge på postfix på subprosesser som lages. Når det er gjort kan denne sjekken fjernes
-        // https://jira.adeo.no/browse/MELOSYS-6365
-        return !aktiveLåsReferanser.contains(låsReferanse)
+        return aktiveLåsReferanser.isNotEmpty()
     }
 
     override fun toString(): String = låsReferanse

@@ -27,6 +27,12 @@ class VilkårForBestemmelseIkkeYrkesaktiv(val mottatteOpplysningerService: Motta
 
             FTRL_KAP2_2_5_ANDRE_LEDD -> ftrlKap2_5VilkårForAvklarteFakta(avklarteFakta)
 
+            FTRL_KAP2_2_7_FØRSTE_LEDD -> listOf(
+                Vilkår(FTRL_2_1A_TRYGDEKOORDINGERING),
+                Vilkår(FTRL_2_7_IKKE_PLIKTIG_MEDLEM),
+                Vilkår(FTRL_2_7_RIMELIGHETSVURDERING)
+            )
+
             FTRL_KAP2_2_7_FJERDE_LEDD -> listOf(
                 Vilkår(FTRL_2_1A_TRYGDEKOORDINGERING),
                 Vilkår(FTRL_2_7_FORSØRGET_FAMILIEMEDLEM),

@@ -1,7 +1,7 @@
 package no.nav.melosys.saksflytapi.domain
 
 interface LåsReferanse {
-    val referanse: String
+    val gruppePrefiks: String
     fun skalSettesPåVent(aktiveLåsReferanser : Collection<String>  ) : Boolean
 
     override fun toString(): String

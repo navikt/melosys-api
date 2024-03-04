@@ -91,11 +91,11 @@ class AvslagYrkesaktivMapperTest {
         vilkaarsresultat16_1.setBegrunnelseFritekst("Fritekst");
 
         BrevDataAvslagYrkesaktiv brevData = new BrevDataAvslagYrkesaktiv(new BrevbestillingDto(), "Z999999");
-        brevData.arbeidsland = Landkoder.AT.getBeskrivelse();
-        brevData.hovedvirksomhet = new AvklartVirksomhet("Test AS", null, null, Yrkesaktivitetstyper.LOENNET_ARBEID);
-        brevData.anmodningsperiodeSvar = Optional.empty();
-        brevData.yrkesaktivitet = Yrkesaktivitetstyper.LOENNET_ARBEID;
-        brevData.art16Vilkaar = vilkaarsresultat16_1;
+        brevData.setArbeidsland(Landkoder.AT.getBeskrivelse());
+        brevData.setHovedvirksomhet(new AvklartVirksomhet("Test AS", null, null, Yrkesaktivitetstyper.LOENNET_ARBEID));
+        brevData.setAnmodningsperiodeSvar(new AnmodningsperiodeSvar());
+        brevData.setYrkesaktivitet(Yrkesaktivitetstyper.LOENNET_ARBEID);
+        brevData.setArt16Vilkaar(vilkaarsresultat16_1);
 
         AvslagYrkesaktivMapper spy = Mockito.spy(new AvslagYrkesaktivMapper());
         String xml = spy.mapTilBrevXML(fellesType, navFelles, behandling, resultat, brevData);
@@ -108,13 +108,13 @@ class AvslagYrkesaktivMapperTest {
         AvslagYrkesaktivMapper spy = Mockito.spy(new AvslagYrkesaktivMapper());
 
         BrevDataAvslagYrkesaktiv brevData = new BrevDataAvslagYrkesaktiv(new BrevbestillingDto(), "Z999999");
-        brevData.arbeidsland = Landkoder.ES.getBeskrivelse();
-        brevData.hovedvirksomhet = new AvklartVirksomhet("Test AS", null, null, Yrkesaktivitetstyper.LOENNET_ARBEID);
-        brevData.anmodningsperiodeSvar = Optional.of(lagAnmodningsperiodeSvarAvslag());
-        brevData.yrkesaktivitet = Yrkesaktivitetstyper.LOENNET_ARBEID;
+        brevData.setArbeidsland(Landkoder.ES.getBeskrivelse());
+        brevData.setHovedvirksomhet(new AvklartVirksomhet("Test AS", null, null, Yrkesaktivitetstyper.LOENNET_ARBEID));
+        brevData.setAnmodningsperiodeSvar(lagAnmodningsperiodeSvarAvslag());
+        brevData.setYrkesaktivitet(Yrkesaktivitetstyper.LOENNET_ARBEID);
 
         Vilkaarsresultat vilkår16_1_oppfylt = lagVilkaarsresultat(Vilkaar.FO_883_2004_ART16_1, true, Art16_1_anmodning.ERSTATTER_EN_ANNEN_UNDER_5_AAR);
-        brevData.art16Vilkaar = vilkår16_1_oppfylt;
+        brevData.setArt16Vilkaar(vilkår16_1_oppfylt);
 
         Behandlingsresultat resultat = lagBehandlingsresultat();
         Vilkaarsresultat vilkår12_1_avslått = lagVilkaarsresultat(Vilkaar.FO_883_2004_ART12_1, false, Art12_1_begrunnelser.IKKE_VESENTLIG_VIRKSOMHET);
@@ -133,7 +133,7 @@ class AvslagYrkesaktivMapperTest {
             Vilkaarsresultat vilkaarsresultat = new Vilkaarsresultat();
             vilkaarsresultat.setBegrunnelser(Collections.singleton(begrunnelse));
             vilkaarsresultat.setBegrunnelseFritekst("Fritekst");
-            brevdata.art16Vilkaar = vilkaarsresultat;
+            brevdata.setArt16Vilkaar(vilkaarsresultat);
             spy.mapArt161Avslag(new Fag(), brevdata);
         }
     }

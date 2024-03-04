@@ -39,11 +39,11 @@ public class InnvilgelseArbeidsgiverMapper implements BrevDataMapper {
     private Fag mapFag(BrevDataInnvilgelse brevDataInnvilgelse) {
         Fag fag = new Fag();
 
-        fag.setArbeidsland(brevDataInnvilgelse.arbeidsland);
-        fag.setNavn(brevDataInnvilgelse.personNavn);
-        fag.setArbeidsgiver(brevDataInnvilgelse.hovedvirksomhet.navn);
+        fag.setArbeidsland(brevDataInnvilgelse.getArbeidsland());
+        fag.setNavn(brevDataInnvilgelse.getPersonNavn());
+        fag.setArbeidsgiver(brevDataInnvilgelse.getHovedvirksomhet().navn);
 
-        Lovvalgsperiode periode = brevDataInnvilgelse.lovvalgsperiode;
+        Lovvalgsperiode periode = brevDataInnvilgelse.getLovvalgsperiode();
         fag.setLovvalgsperiode(LovvalgsperiodeType.builder()
             .withFomDato(lagXmlDato(periode.getFom()))
             .withTomDato(lagXmlDato(periode.getTom()))

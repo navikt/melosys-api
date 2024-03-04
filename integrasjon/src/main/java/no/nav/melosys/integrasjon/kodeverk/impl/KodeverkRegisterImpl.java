@@ -30,7 +30,7 @@ public class KodeverkRegisterImpl implements KodeverkRegister {
             Map<String, List<Kode>> koder = new HashMap<>();
             kodeDto.betydninger.forEach((kode, betydninger) -> {
                 List<Kode> termer = betydninger.stream().map(betydning -> {
-                    String term = betydning.beskrivelser.get(BOKMÅL).term;
+                    String term = betydning.beskrivelser.get(BOKMÅL).getTerm();
                     return new Kode(kode, term, betydning.gyldigFra, betydning.gyldigTil);
                 }).toList();
                 koder.put(kode, termer);

@@ -43,6 +43,11 @@ public class ThreadLocalAccessInfo {
         return threadLocalAccessInfo.saksbehandlerNavn;
     }
 
+    public static UUID getProcessId() {
+        ThreadLocalAccessInfo threadLocalAccessInfo = ThreadLocalAccessInfo.threadLocalStorage.get();
+        return threadLocalAccessInfo.processId;
+    }
+
     private static final ThreadLocal<ThreadLocalAccessInfo> threadLocalStorage =
         ThreadLocal.withInitial(ThreadLocalAccessInfo::new);
 
