@@ -10,6 +10,7 @@ import io.kotest.matchers.string.shouldContain
 import io.mockk.every
 import io.mockk.impl.annotations.MockK
 import io.mockk.junit5.MockKExtension
+import io.mockk.mockk
 import io.mockk.verify
 import no.nav.melosys.domain.*
 import no.nav.melosys.domain.folketrygden.MedlemAvFolketrygden
@@ -22,8 +23,12 @@ import no.nav.melosys.domain.mottatteopplysninger.data.Periode
 import no.nav.melosys.exception.FunksjonellException
 import no.nav.melosys.featuretoggle.ToggleName
 import no.nav.melosys.repository.MedlemAvFolketrygdenRepository
+import no.nav.melosys.service.avklartefakta.AvklartefaktaService
 import no.nav.melosys.service.behandling.BehandlingsresultatService
 import no.nav.melosys.service.behandling.UtledMottaksdato
+import no.nav.melosys.service.ftrl.bestemmelse.vilkaar.VilkårForBestemmelse
+import no.nav.melosys.service.ftrl.bestemmelse.vilkaar.VilkårForBestemmelseIkkeYrkesaktiv
+import no.nav.melosys.service.ftrl.bestemmelse.vilkaar.VilkårForBestemmelseYrkesaktiv
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.extension.ExtendWith
@@ -41,9 +46,14 @@ class OpprettForslagMedlemskapsperiodeServiceTest {
     @MockK
     private lateinit var utledMottaksdato: UtledMottaksdato
 
+    @MockK
+    private lateinit var avklartefaktaService: AvklartefaktaService
+
     private val fakeUnleash = FakeUnleash()
 
     private val utledBestemmelserOgVilkår = UtledBestemmelserOgVilkår(fakeUnleash)
+
+    private val vilkårForBestemmelse = VilkårForBestemmelse(VilkårForBestemmelseYrkesaktiv(mockk()), VilkårForBestemmelseIkkeYrkesaktiv(mockk()))
 
     private lateinit var opprettForslagMedlemskapsperiodeService: OpprettForslagMedlemskapsperiodeService
 
@@ -60,7 +70,9 @@ class OpprettForslagMedlemskapsperiodeServiceTest {
                 behandlingsresultatService,
                 utledMottaksdato,
                 utledBestemmelserOgVilkår,
-                fakeUnleash
+                fakeUnleash,
+                avklartefaktaService,
+                vilkårForBestemmelse
             )
     }
 
@@ -222,6 +234,7 @@ class OpprettForslagMedlemskapsperiodeServiceTest {
         }.message.shouldContain("Kan ikke opprette medlemskapsperioder for sakstype")
     }
 
+    @Deprecated("MELOSYS_FTRL_IKKE_YRKESAKTIV melosys.ftrl.ikke_yrkesaktiv")
     @Test
     fun opprettForslagPåMedlemskapsperioder_oppfyllerIkkeVilkår_kasterFeil() {
         every { behandlingsresultatService.hentBehandlingsresultat(BEH_RES_ID) } returns lagBehandlingsresultat().apply {
@@ -231,6 +244,23 @@ class OpprettForslagMedlemskapsperiodeServiceTest {
 
         shouldThrow<FunksjonellException> {
             opprettForslagMedlemskapsperiodeService.opprettForslagPåMedlemskapsperioder(BEH_RES_ID, BESTEMMELSE)
+        }.message.shouldContain("er påkrevd for bestemmelse")
+    }
+
+    @Test
+    fun opprettForslagPåMedlemskapsperioder_toggle_oppfyllerIkkeVilkår_kasterFeil() {
+        fakeUnleash.enable(ToggleName.MELOSYS_FTRL_IKKE_YRKESAKTIV)
+        every { behandlingsresultatService.hentBehandlingsresultat(BEH_RES_ID) } returns lagBehandlingsresultat().apply {
+            behandling.apply {
+                tema = Behandlingstema.IKKE_YRKESAKTIV
+            }
+            vilkaarsresultater.add(lagVilkår(false))
+        }
+        every { avklartefaktaService.hentAlleAvklarteFakta(any()) } returns emptySet()
+
+
+        shouldThrow<FunksjonellException> {
+            opprettForslagMedlemskapsperiodeService.opprettForslagPåMedlemskapsperioder(BEH_RES_ID, Folketrygdloven_kap2_bestemmelser.FTRL_KAP2_2_5_FØRSTE_LEDD_H)
         }.message.shouldContain("er påkrevd for bestemmelse")
     }
 
@@ -272,6 +302,7 @@ class OpprettForslagMedlemskapsperiodeServiceTest {
         Behandlingsresultat().apply {
             medlemAvFolketrygden = MedlemAvFolketrygden()
             behandling = Behandling().apply {
+                id = 543
                 fagsak = Fagsak().apply { type = Sakstyper.FTRL }
                 tema = Behandlingstema.YRKESAKTIV
                 mottatteOpplysninger = MottatteOpplysninger().apply {
