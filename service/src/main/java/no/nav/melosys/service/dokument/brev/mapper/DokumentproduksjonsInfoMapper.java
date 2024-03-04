@@ -106,6 +106,10 @@ public class DokumentproduksjonsInfoMapper {
                 new DokumentproduksjonsInfo("ikke_yrkesaktiv_vedtaksbrev",
                     DokumentKategoriKode.VB.getKode(),
                     JournalforingsTittel.IKKE_YRKESAKTIV_VEDTAKSBREV.getTittel()))
+            .put(IKKE_YRKESAKTIV_PLIKTIG_FTRL,
+                new DokumentproduksjonsInfo("ikke_yrkesaktiv_pliktig_ftrl",
+                    DokumentKategoriKode.VB.getKode(),
+                    JournalforingsTittel.IKKE_YRKESAKTIV_PLIKTIG_FTRL.getTittel()))
             .put(IKKE_YRKESAKTIV_FRIVILLIG_FTRL,
                 new DokumentproduksjonsInfo("ikke_yrkesaktiv_frivillig_ftrl",
                     DokumentKategoriKode.VB.getKode(),
@@ -152,6 +156,7 @@ public class DokumentproduksjonsInfoMapper {
         MELDING_HENLAGT_SAK("Henleggelse av søknad"),
         IKKE_YRKESAKTIV_VEDTAKSBREV("Vedtak om medlemskap"),
         IKKE_YRKESAKTIV_FRIVILLIG_FTRL("Vedtak om frivillig medlemskap"),
+        IKKE_YRKESAKTIV_PLIKTIG_FTRL("Vedtak om pliktig medlemskap"),
         VARSELBREV_MANGLENDE_INNBETALING("Varsel om manglende innbetaling av trygdeavgift");
 
         private final String tittel;
