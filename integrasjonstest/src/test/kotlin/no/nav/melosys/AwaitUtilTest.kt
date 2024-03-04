@@ -1,6 +1,5 @@
 package no.nav.melosys
 
-import com.google.common.collect.Range.atMost
 import io.kotest.assertions.AssertionFailedError
 import io.kotest.assertions.throwables.shouldThrow
 import io.kotest.matchers.shouldBe
@@ -67,11 +66,27 @@ class AwaitUtilTest {
     @Test
     fun `untilMatching skal gi assert på forskjellig resultat ved timeout`() {
         shouldThrow<AssertionFailedError> {
-            await.atMost(Duration.ofMillis(101)).untilMatching(
-                waitFor = "waiting for message"
-            ) {
+            await.atMost(Duration.ofMillis(101)).untilMatching("waiting for message") {
                 "last log messge"
             }
-        }.message.shouldBe("expected:<\"waiting for message\"> but was:<\"last log messge\">")
+        }.message.shouldBe(
+            "Condition with no.nav.melosys.AwaitUtil was not fulfilled within 101 milliseconds.\n" +
+                "expected:<\"waiting for message\"> but was:<\"last log messge\">"
+        )
+    }
+
+    @Test
+    fun `untilMatching skal gi assert på forskjellig resultat ved timeout bruk withClue`() {
+        shouldThrow<AssertionFailedError> {
+            await.atMost(Duration.ofMillis(101)).untilMatching(
+                waitFor = "waiting for message",
+                clueMessages = { e -> "Did not match last log message: ${e.message}" }
+            ) {
+                "last log message"
+            }
+        }.message.shouldBe(
+            "Did not match last log message: Condition with no.nav.melosys.AwaitUtil was not fulfilled within 101 milliseconds.\n" +
+                "expected:<\"waiting for message\"> but was:<\"last log message\">"
+        )
     }
 }
