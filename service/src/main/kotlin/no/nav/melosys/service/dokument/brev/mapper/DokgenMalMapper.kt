@@ -26,7 +26,7 @@ class DokgenMalMapper(
         // Henter opplysninger på nytt for å sikre at korrekt adresse benyttes (med mindre myndighet)
         val brevbestillingBuilder = mottattBrevbestilling.toBuilder()
         berikBestillingMedPersondata(brevbestillingBuilder, mottattBrevbestilling.behandling, mottaker)
-        return lagDokgenDtoFraBestilling(brevbestillingBuilder.build()).apply {
+            return lagDokgenDtoFraBestilling(brevbestillingBuilder.build()).apply {
             if (Mottakerroller.UTENLANDSK_TRYGDEMYNDIGHET.kode != this.mottaker.type) {
                 this.mottaker = lagMottakerUtenKoder(this.mottaker)
             }
@@ -110,6 +110,38 @@ class DokgenMalMapper(
                 .medIkkeYrkesaktivRelasjonType(ikkeyrkesaktivrelasjonType)
                 .medMedlemskapsperiode(medlemskapsperiode)
                 .build()
+        )
+    }
+
+    internal fun lagInnvilgelseIkkeYrkesaktivFrivilligFtrl(brevbestilling: IkkeYrkesaktivFrivilligFtrlBrevbestilling): InnvilgelseIkkeYrkesaktivFrivilligFtrl {
+        val behandlingsresultat = dokgenMapperDatahenter.hentBehandlingsresultat(brevbestilling.behandling.id)
+        val mottatteOpplysningerData =
+            behandlingsresultat.behandling.mottatteOpplysninger.mottatteOpplysningerData as SøknadNorgeEllerUtenforEØS
+        val trygdedekning = mottatteOpplysningerData.trygdedekning.kode
+        val ikkeyrkesaktivrelasjonType =
+            behandlingsresultat.avklartefakta.filter { it.type == Avklartefaktatyper.IKKE_YRKESAKTIV_RELASJON }.firstOrNull()?.fakta
+        val avslåttMedlemskapsperiodeFørMottaksdatoHelsedel = innvilgelseFtrlMapper.mapAvslåttMedlemskapsperiodeFørMottaksdatoFullDekning(
+            behandlingsresultat.medlemAvFolketrygden,
+            brevbestilling.forsendelseMottatt
+        )
+        val medAvslåttMedlemskapsperiodeFørMottaksdatoFullDekning = innvilgelseFtrlMapper.mapAvslåttMedlemskapsperiodeFørMottaksdatoFullDekning(
+            behandlingsresultat.medlemAvFolketrygden,
+            brevbestilling.forsendelseMottatt
+        )
+
+        return InnvilgelseIkkeYrkesaktivFrivilligFtrl.av(
+            brevbestilling.toBuilder()
+                .medLand(mottatteOpplysningerData.soeknadsland.landkoder.map { dokgenMapperDatahenter.hentLandnavnFraLandkode(it) })
+                .medTrygdedekning(trygdedekning)
+                .medBestemmelse(behandlingsresultat.medlemAvFolketrygden.medlemskapsperioder.last().bestemmelse.name)
+                .medNyVurderingBakgrunn(behandlingsresultat.nyVurderingBakgrunn)
+                .medInnledningFritekst(behandlingsresultat.innledningFritekst)
+                .medBegrunnelseFritekst(behandlingsresultat.begrunnelseFritekst)
+                .medIkkeYrkesaktivRelasjonType(ikkeyrkesaktivrelasjonType)
+                .medAvslåttMedlemskapsperiodeFørMottaksdatoHelsedel(avslåttMedlemskapsperiodeFørMottaksdatoHelsedel)
+                .medAvslåttMedlemskapsperiodeFørMottaksdatoFullDekning(medAvslåttMedlemskapsperiodeFørMottaksdatoFullDekning)
+                .build(),
+            innvilgelseFtrlMapper.mapMedlemskapsPerioder(behandlingsresultat.medlemAvFolketrygden)
         )
     }
 
@@ -221,6 +253,8 @@ class DokgenMalMapper(
             )
 
             Produserbaredokumenter.IKKE_YRKESAKTIV_VEDTAKSBREV -> lagIkkeYrkesaktivVedtaksbrev(brevbestilling as IkkeYrkesaktivBrevbestilling)
+
+            Produserbaredokumenter.IKKE_YRKESAKTIV_FRIVILLIG_FTRL -> lagInnvilgelseIkkeYrkesaktivFrivilligFtrl(brevbestilling as IkkeYrkesaktivFrivilligFtrlBrevbestilling)
 
             Produserbaredokumenter.VARSELBREV_MANGLENDE_INNBETALING -> VarselbrevManglendeInnbetaling(
                 brevbestilling as VarselbrevManglendeInnbetalingBrevbestilling

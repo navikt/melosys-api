@@ -110,6 +110,10 @@ public class DokumentproduksjonsInfoMapper {
                 new DokumentproduksjonsInfo("ikke_yrkesaktiv_pliktig_ftrl",
                     DokumentKategoriKode.VB.getKode(),
                     JournalforingsTittel.IKKE_YRKESAKTIV_PLIKTIG_FTRL.getTittel()))
+            .put(IKKE_YRKESAKTIV_FRIVILLIG_FTRL,
+                new DokumentproduksjonsInfo("ikke_yrkesaktiv_frivillig_ftrl",
+                    DokumentKategoriKode.VB.getKode(),
+                    JournalforingsTittel.IKKE_YRKESAKTIV_FRIVILLIG_FTRL.getTittel()))
             .put(VARSELBREV_MANGLENDE_INNBETALING,
                 new DokumentproduksjonsInfo("varsel_manglende_innbetaling",
                     DokumentKategoriKode.IB.getKode(),
@@ -151,6 +155,7 @@ public class DokumentproduksjonsInfoMapper {
         AVSLAG_MANGLENDE_OPPLYSNINGER("Avslag pga manglende opplysninger"),
         MELDING_HENLAGT_SAK("Henleggelse av søknad"),
         IKKE_YRKESAKTIV_VEDTAKSBREV("Vedtak om medlemskap"),
+        IKKE_YRKESAKTIV_FRIVILLIG_FTRL("Vedtak om frivillig medlemskap"),
         IKKE_YRKESAKTIV_PLIKTIG_FTRL("Vedtak om pliktig medlemskap"),
         VARSELBREV_MANGLENDE_INNBETALING("Varsel om manglende innbetaling av trygdeavgift");
 

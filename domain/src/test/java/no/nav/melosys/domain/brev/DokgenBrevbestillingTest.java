@@ -8,6 +8,7 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.module.SimpleModule;
 import com.fasterxml.jackson.databind.node.ArrayNode;
 import com.fasterxml.jackson.databind.node.ObjectNode;
+import com.fasterxml.jackson.databind.node.ArrayNode;
 import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
 import no.nav.melosys.domain.kodeverk.LovvalgBestemmelse;
 import no.nav.melosys.domain.kodeverk.Mottakerroller;
@@ -41,7 +42,6 @@ class DokgenBrevbestillingTest {
 
     private ObjectNode getJsonNodes(Class type) {
         var node = dataMapper.createObjectNode();
-
         var arrayNode = new ArrayNode(dataMapper.getNodeFactory());
         arrayNode.add("Norge");
         arrayNode.add("Sverige");
@@ -66,6 +66,10 @@ class DokgenBrevbestillingTest {
                 node.put(a.getName(), Betalingsstatus.DELVIS_BETALT.name());
             } else if (a.getType().getSimpleName().equals("List")) {
                 node.put(a.getName(), arrayNode);
+            } else if (a.getType().getSimpleName().equals("List")) {
+                node.put(a.getName(), arrayNode);
+            } else {
+                node.put(a.getName(), a.getType().getSimpleName());
             }
         }
         return node;
