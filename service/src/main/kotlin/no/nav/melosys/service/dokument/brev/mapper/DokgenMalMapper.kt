@@ -90,9 +90,9 @@ class DokgenMalMapper(
         val mottatteOpplysningerData =
             behandlingsresultat.behandling.mottatteOpplysninger.mottatteOpplysningerData as SøknadNorgeEllerUtenforEØS
         val ikkeyrkesaktivrelasjonType =
-            behandlingsresultat.avklartefakta.filter { it.type == Avklartefaktatyper.IKKE_YRKESAKTIV_RELASJON }.first().fakta
+            behandlingsresultat.avklartefakta.filter { it.type == Avklartefaktatyper.IKKE_YRKESAKTIV_RELASJON }.firstOrNull()?.fakta
         val ikkeYrkesaktivOppholdType =
-            behandlingsresultat.avklartefakta.filter { it.type == Avklartefaktatyper.IKKE_YRKESAKTIV_FTRL_2_1_OPPHOLD }.first().fakta
+            behandlingsresultat.avklartefakta.filter { it.type == Avklartefaktatyper.IKKE_YRKESAKTIV_FTRL_2_1_OPPHOLD }.firstOrNull()?.fakta
         val medlemskapsperiode = Periode(
             behandlingsresultat.medlemAvFolketrygden.utledMedlemskapsperiodeFom(),
             behandlingsresultat.medlemAvFolketrygden.utledMedlemskapsperiodeTom()
