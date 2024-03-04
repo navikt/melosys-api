@@ -113,7 +113,6 @@ class SedDataByggerTest {
         behandlingsresultat.getUtpekingsperioder().add(utpekingsperiode);
 
         behandling = DataByggerStubs.hentBehandlingStub();
-        behandling.setTema(Behandlingstema.UTSENDT_ARBEIDSTAKER);
         behandlingsresultat.setBehandling(behandling);
         dataBygger = new SedDataBygger(behandlingsresultatService, landvelgerService, lovvalgsperiodeService, saksbehandlingRegler, unleash);
 
@@ -688,7 +687,6 @@ class SedDataByggerTest {
 
     @Test
     void lag_behandlingMedUnntaksflytTema_henterIkkeArbeidslandUtenMarginaltArbeid() {
-        behandling.setTema(Behandlingstema.A1_ANMODNING_OM_UNNTAK_PAPIR);
         when(saksbehandlingRegler.harRegistreringUnntakFraMedlemskapFlyt(any())).thenReturn(true);
 
         SedDataGrunnlagMedSoknad sedDataGrunnlagMedSoknad = lagGrunnlagMedSøknad();
