@@ -65,7 +65,7 @@ class VilkårForBestemmelseYrkesaktivTest {
 
         vilkår.shouldContainExactly(
             Vilkår(Vilkaar.FTRL_2_1A_TRYGDEKOORDINGERING),
-            Vilkår(Vilkaar.FTRL_2_8_FORUTGÅENDE_TRYGDETID),
+            Vilkår(Vilkaar.FTRL_FORUTGÅENDE_TRYGDETID),
             Vilkår(Vilkaar.FTRL_2_8_FØRSTE_LEDD_NÆR_TILKNYTNING_NORGE),
         )
     }
@@ -80,7 +80,7 @@ class VilkårForBestemmelseYrkesaktivTest {
 
         vilkår.shouldContainExactly(
             Vilkår(Vilkaar.FTRL_2_1A_TRYGDEKOORDINGERING),
-            Vilkår(Vilkaar.FTRL_2_8_FORUTGÅENDE_TRYGDETID),
+            Vilkår(Vilkaar.FTRL_FORUTGÅENDE_TRYGDETID),
             Vilkår(Vilkaar.FTRL_2_8_NÆR_TILKNYTNING_NORGE, muligeBegrunnelser = toStringList(*Ftrl_2_8_naer_tilknytning_norge_begrunnelser.values())),
         )
     }
