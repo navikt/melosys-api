@@ -88,11 +88,10 @@ class FerdigbehandlingKontrollTest {
         val medlemskapsDokument =
             MedlemskapDokument().apply {
                 medlemsperiode = listOf(
-                    Medlemsperiode().apply {
+                    Medlemsperiode(periode = Periode(LocalDate.now(), LocalDate.now().plusDays(4))).apply {
                         id = 1
                         land = "SWE"
                         status = "GYLD"
-                        periode = Periode(LocalDate.now(), LocalDate.now().plusDays(4))
                     })
             }
 
@@ -126,11 +125,10 @@ class FerdigbehandlingKontrollTest {
     fun `medlemskapsperioder uten overlapping skal ikke gi kontrollfeil`() {
         val medlemskapsDokument = MedlemskapDokument().apply {
             medlemsperiode = listOf(
-                Medlemsperiode().apply {
+                Medlemsperiode(periode = Periode(LocalDate.now(), LocalDate.now().plusDays(4))).apply {
                     id = 1
                     land = "SWE"
                     status = "GYLD"
-                    periode = Periode(LocalDate.now(), LocalDate.now().plusDays(4))
                 }
             )
         }
@@ -166,11 +164,10 @@ class FerdigbehandlingKontrollTest {
     fun `medlemskapsperioder med overlapping skal gi kontrollfeil`() {
         val medlemskapsDokument = MedlemskapDokument().apply {
             medlemsperiode = listOf(
-                Medlemsperiode().apply {
+                Medlemsperiode(periode = Periode(LocalDate.now(), LocalDate.now().plusDays(4))).apply {
                     id = 1
                     land = "SWE"
                     status = "GYLD"
-                    periode = Periode(LocalDate.now(), LocalDate.now().plusDays(4))
                 }
             )
         }
@@ -207,11 +204,10 @@ class FerdigbehandlingKontrollTest {
     fun `medlemskapsperioder med overlapping, men som hører til samme fagsak skal ikke gi kontrollfeil`() {
         val medlemskapsDokument = MedlemskapDokument().apply {
             medlemsperiode = listOf(
-                Medlemsperiode().apply {
+                Medlemsperiode(periode = Periode(LocalDate.now(), LocalDate.now().plusDays(4))).apply {
                     id = 12345
                     land = "SWE"
                     status = "GYLD"
-                    periode = Periode(LocalDate.now(), LocalDate.now().plusDays(4))
                 }
             )
         }
@@ -252,11 +248,10 @@ class FerdigbehandlingKontrollTest {
     fun `medlemskapsperioder med overlapping, men som ikke hører til samme fagsak skal gi kontrollfeil`() {
         val medlemskapsDokument = MedlemskapDokument().apply {
             medlemsperiode = listOf(
-                Medlemsperiode().apply {
+                Medlemsperiode(periode = Periode(LocalDate.now(), LocalDate.now().plusDays(4))).apply {
                     id = 12345
                     land = "SWE"
                     status = "GYLD"
-                    periode = Periode(LocalDate.now(), LocalDate.now().plusDays(4))
                 }
             )
         }
@@ -298,11 +293,10 @@ class FerdigbehandlingKontrollTest {
     fun `medlemskapsperioder med overlapping skal gi kontrollfeil med adversel for visse behandlingstema`() {
         val medlemskapsDokument = MedlemskapDokument().apply {
             medlemsperiode = listOf(
-                Medlemsperiode().apply {
+                Medlemsperiode(periode = Periode(LocalDate.now(), LocalDate.now().plusDays(4))).apply {
                     id = 1
                     land = "SWE"
                     status = "GYLD"
-                    periode = Periode(LocalDate.now(), LocalDate.now().plusDays(4))
                 }
             )
         }
@@ -346,11 +340,10 @@ class FerdigbehandlingKontrollTest {
     fun `avslag skal gi kontrollfeil med adversel for visse behandlingstema, dersom overlapper med unntaksperiode`() {
         val medlemskapsDokument = MedlemskapDokument().apply {
             medlemsperiode = listOf(
-                Medlemsperiode().apply {
+                Medlemsperiode(periode = Periode(LocalDate.now(), LocalDate.now().plusDays(4))).apply {
                     id = 1
                     land = "SWE"
                     status = "GYLD"
-                    periode = Periode(LocalDate.now(), LocalDate.now().plusDays(4))
                 }
             )
         }
@@ -388,11 +381,10 @@ class FerdigbehandlingKontrollTest {
         val medlemskapsDokument =
             MedlemskapDokument().apply {
                 medlemsperiode = listOf(
-                    Medlemsperiode().apply {
+                    Medlemsperiode(periode = Periode(LocalDate.now(), LocalDate.now().plusDays(4))).apply {
                         id = 1
                         land = "NOR"
                         status = "GYLD"
-                        periode = Periode(LocalDate.now(), LocalDate.now().plusDays(4))
                     })
             }
 
@@ -427,11 +419,10 @@ class FerdigbehandlingKontrollTest {
         val medlemskapsDokument =
             MedlemskapDokument().apply {
                 medlemsperiode = listOf(
-                    Medlemsperiode().apply {
+                    Medlemsperiode(periode = Periode(LocalDate.now(), LocalDate.now().plusDays(4))).apply {
                         id = 1
                         land = "SWE"
                         status = "GYLD"
-                        periode = Periode(LocalDate.now(), LocalDate.now().plusDays(4))
                     })
             }
 

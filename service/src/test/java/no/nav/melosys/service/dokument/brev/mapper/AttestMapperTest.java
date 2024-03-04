@@ -114,16 +114,16 @@ class AttestMapperTest {
         no.nav.melosys.service.dokument.brev.mapper.arbeidssted.Arbeidssted ikkeFysiskArbeidssted = lagMaritimtArbeidssted();
 
         BrevDataA1 a1Data = new BrevDataA1();
-        a1Data.yrkesgruppe = Yrkesgrupper.ORDINAER;
-        a1Data.bostedsadresse = boAdresse;
-        a1Data.arbeidssteder = Arrays.asList(fysiskArbeidssted, ikkeFysiskArbeidssted);
-        a1Data.arbeidsland = Arrays.asList(Land_iso2.NO, Land_iso2.BG, Land_iso2.AT, Land_iso2.AX);
-        a1Data.person = lagPersonopplysninger();
-        a1Data.hovedvirksomhet = virksomhet;
-        a1Data.bivirksomheter = new ArrayList<>(Collections.singletonList(utenlandskVirksomhet));
+        a1Data.setYrkesgruppe(Yrkesgrupper.ORDINAER);
+        a1Data.setBostedsadresse(boAdresse);
+        a1Data.setArbeidssteder(Arrays.asList(fysiskArbeidssted, ikkeFysiskArbeidssted));
+        a1Data.setArbeidsland(Arrays.asList(Land_iso2.NO, Land_iso2.BG, Land_iso2.AT, Land_iso2.AX));
+        a1Data.setPerson(lagPersonopplysninger());
+        a1Data.setHovedvirksomhet(virksomhet);
+        a1Data.setBivirksomheter(new ArrayList<>(Collections.singletonList(utenlandskVirksomhet)));
 
         brevData = new BrevDataVedlegg("Z1234567");
-        brevData.brevDataA1 = a1Data;
+        brevData.setBrevDataA1(a1Data);
     }
 
     @Test

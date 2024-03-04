@@ -22,12 +22,12 @@ public class VideresendSoknadMapper implements BrevDataMapper {
     public String mapTilBrevXML(FellesType fellesType, MelosysNAVFelles navFelles, Behandling behandling, Behandlingsresultat resultat, BrevData brevData) throws JAXBException, SAXException {
         BrevDataVideresend brevDataVideresend = (BrevDataVideresend) brevData;
         Fag fag = new Fag();
-        fag.setBostedsland(brevDataVideresend.bostedsland);
+        fag.setBostedsland(brevDataVideresend.getBostedsland());
 
-        StrukturertAdresse myndighetensAdresse = brevDataVideresend.trygdemyndighet.getAdresse();
-        String utenlandskMyndighetsNavnOgAdresse = brevDataVideresend.trygdemyndighet.getNavn() + ", " + myndighetensAdresse.toString();
+        StrukturertAdresse myndighetensAdresse = brevDataVideresend.getTrygdemyndighet().getAdresse();
+        String utenlandskMyndighetsNavnOgAdresse = brevDataVideresend.getTrygdemyndighet().getNavn() + ", " + myndighetensAdresse.toString();
         fag.setTrygdemyndighet(utenlandskMyndighetsNavnOgAdresse);
-        fag.setFritekst(brevData.fritekst);
+        fag.setFritekst(brevData.getFritekst());
 
         JAXBElement<BrevdataType> brevdataTypeJAXBElement = lagBrevdataType(fellesType, navFelles, fag);
         return JaxbHelper.marshalAndValidate(brevdataTypeJAXBElement, XSD_LOCATION);

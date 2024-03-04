@@ -37,19 +37,19 @@ public class AvslagArbeidsgiverMapper implements BrevDataMapper {
     Fag mapFag(BrevDataAvslagArbeidsgiver brevData) {
         Fag fag = new Fag();
 
-        fag.setNavn(brevData.person.getSammensattNavn());
+        fag.setNavn(brevData.getPerson().getSammensattNavn());
 
-        fag.setArbeidsland(brevData.arbeidsland);
+        fag.setArbeidsland(brevData.getArbeidsland());
 
-        fag.setArbeidsgiver(brevData.hovedvirksomhet.navn);
-        fag.setJuridiskEnhet(brevData.hovedvirksomhet.navn);    // Skal fjernes når xsd er oppdatert
+        fag.setArbeidsgiver(brevData.getHovedvirksomhet().navn);
+        fag.setJuridiskEnhet(brevData.getHovedvirksomhet().navn);    // Skal fjernes når xsd er oppdatert
 
-        fag.setLovvalgsperiode(lagLovvalgsperiodeType(brevData.lovvalgsperiode));
+        fag.setLovvalgsperiode(lagLovvalgsperiodeType(brevData.getLovvalgsperiode()));
 
-        Set<VilkaarBegrunnelse> art121Begrunnelser = brevData.vilkårbegrunnelser121;
+        Set<VilkaarBegrunnelse> art121Begrunnelser = brevData.getVilkårbegrunnelser121();
         fag.setArt121Begrunnelse(mapArt121BegrunnelseType(art121Begrunnelser));
 
-        Set<VilkaarBegrunnelse> art121VesentligVirksomhetBegrunnelser = brevData.vilkårbegrunnelser121VesentligVirksomhet;
+        Set<VilkaarBegrunnelse> art121VesentligVirksomhetBegrunnelser = brevData.getVilkårbegrunnelser121VesentligVirksomhet();
         fag.setArt121VesentligVirksomhetBegrunnelse(mapArt121VesentligVirksomhetBegrunnelse(art121VesentligVirksomhetBegrunnelser));
 
         return fag;

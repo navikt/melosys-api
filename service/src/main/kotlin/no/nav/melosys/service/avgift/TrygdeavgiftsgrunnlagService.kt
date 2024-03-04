@@ -77,7 +77,6 @@ class TrygdeavgiftsgrunnlagService(private val behandlingsresultatService: Behan
             request.inntektskilder,
             innvilgedeMedlemskapsperioder
         )
-        validerAtIkkeBarePensjonErValgt(request.inntektskilder)
         validerAtSkatteforholdTilNorgeDekkerInnvilgedeMedlemskapsperioderOgOverlapperIkke(
             request.skatteforholdTilNorgeList,
             innvilgedeMedlemskapsperioder
@@ -191,13 +190,6 @@ class TrygdeavgiftsgrunnlagService(private val behandlingsresultatService: Behan
             ) {
                 throw FunksjonellException("Inntektsperioden(e) du har lagt inn dekker ikke hele medlemskapsperioden(e)")
             }
-        }
-
-        fun validerAtIkkeBarePensjonErValgt(
-            inntektsperioder: List<InntektskildeRequest>
-        ) {
-            if (inntektsperioder.all { it.type === Inntektskildetype.PENSJON_UFØRETRYGD || it.type == Inntektskildetype.PENSJON_UFØRETRYGD_KILDESKATT })
-                throw FunksjonellException("Du må oppgi minst en annen inntekt i tillegg til pensjon/uføretrygd")
         }
 
 

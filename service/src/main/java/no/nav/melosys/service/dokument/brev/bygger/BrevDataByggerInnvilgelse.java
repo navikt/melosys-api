@@ -83,28 +83,28 @@ public class BrevDataByggerInnvilgelse implements BrevDataBygger {
         // Bruker skal ha A1 som vedlegg - Arbeidsgiver skal ikke
         var brevDataInnvilgelse = new BrevDataInnvilgelse(brevbestillingDto, saksbehandler);
         if (brevbyggerA1 != null) {
-            brevDataInnvilgelse.vedleggA1 = (BrevDataA1) brevbyggerA1.lag(dataGrunnlag, saksbehandler);
+            brevDataInnvilgelse.setVedleggA1((BrevDataA1) brevbyggerA1.lag(dataGrunnlag, saksbehandler));
         }
 
-        brevDataInnvilgelse.personNavn = dataGrunnlag.getPerson().getSammensattNavn();
-        brevDataInnvilgelse.lovvalgsperiode = lovvalgsperiodeService.hentLovvalgsperiode(behandlingID);
-        brevDataInnvilgelse.arbeidsland = landvelgerService.hentArbeidsland(behandlingID).getBeskrivelse();
-        brevDataInnvilgelse.bostedsland = landvelgerService.hentBostedsland(behandlingID, dataGrunnlag.getMottatteOpplysningerData()).getLandkodeobjekt().getBeskrivelse();
+        brevDataInnvilgelse.setPersonNavn(dataGrunnlag.getPerson().getSammensattNavn());
+        brevDataInnvilgelse.setLovvalgsperiode(lovvalgsperiodeService.hentLovvalgsperiode(behandlingID));
+        brevDataInnvilgelse.setArbeidsland(landvelgerService.hentArbeidsland(behandlingID).getBeskrivelse());
+        brevDataInnvilgelse.setBostedsland(landvelgerService.hentBostedsland(behandlingID, dataGrunnlag.getMottatteOpplysningerData()).getLandkodeobjekt().getBeskrivelse());
 
-        brevDataInnvilgelse.trygdemyndighetsland = landvelgerService.hentUtenlandskTrygdemyndighetsland(behandlingID).stream()
+        brevDataInnvilgelse.setTrygdemyndighetsland(landvelgerService.hentUtenlandskTrygdemyndighetsland(behandlingID).stream()
             .findFirst()
             .map(Land_iso2::getBeskrivelse)
-            .orElse(null);
+            .orElse(null));
 
         if (dataGrunnlag.getAvklarteVirksomheterGrunnlag().antallVirksomheter() != 1) {
             throw new FunksjonellException("Ingen eller flere enn én norsk eller utenlandsk virksomhet forsøkt brukt i innvilgelsesbrev");
         }
 
-        brevDataInnvilgelse.hovedvirksomhet = dataGrunnlag.getAvklarteVirksomheterGrunnlag().hentHovedvirksomhet();
+        brevDataInnvilgelse.setHovedvirksomhet(dataGrunnlag.getAvklarteVirksomheterGrunnlag().hentHovedvirksomhet());
 
         Set<Maritimtyper> maritimTyper = avklartefaktaService.hentMaritimTyper(behandlingID);
         if (!maritimTyper.isEmpty()) {
-            brevDataInnvilgelse.avklartMaritimType = maritimTyper.iterator().next();
+            brevDataInnvilgelse.setAvklartMaritimType(maritimTyper.iterator().next());
         }
 
         brevDataInnvilgelse.setAnmodningsperiodesvar(anmodningsperiodeService.hentAnmodningsperioder(behandlingID)
@@ -114,9 +114,9 @@ public class BrevDataByggerInnvilgelse implements BrevDataBygger {
             .map(Anmodningsperiode::getAnmodningsperiodeSvar)
             .orElse(null));
 
-        brevDataInnvilgelse.erArt16UtenArt12 = vilkaarsresultatService.harVilkaarForArtikkel16(behandlingID) && !vilkaarsresultatService.harVilkaarForArtikkel12(behandlingID);
-        brevDataInnvilgelse.erTuristskip = vilkaarsresultatService.oppfyllerVilkaar(behandlingID, Vilkaar.FTRL_2_12_UNNTAK_TURISTSKIP);
-        brevDataInnvilgelse.avklarteMedfolgendeBarn = hentAvklarteMedfølgendeBarn(behandlingID);
+        brevDataInnvilgelse.setArt16UtenArt12(vilkaarsresultatService.harVilkaarForArtikkel16(behandlingID) && !vilkaarsresultatService.harVilkaarForArtikkel12(behandlingID));
+        brevDataInnvilgelse.setTuristskip(vilkaarsresultatService.oppfyllerVilkaar(behandlingID, Vilkaar.FTRL_2_12_UNNTAK_TURISTSKIP));
+        brevDataInnvilgelse.setAvklarteMedfolgendeBarn(hentAvklarteMedfølgendeBarn(behandlingID));
 
         return brevDataInnvilgelse;
     }

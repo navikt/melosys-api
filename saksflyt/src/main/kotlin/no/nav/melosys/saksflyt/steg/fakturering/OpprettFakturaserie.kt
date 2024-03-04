@@ -46,22 +46,28 @@ class OpprettFakturaserie(
             return
         }
 
-        val behandlingsId = prosessinstans.behandling.id
+        val behandling = prosessinstans.behandling
+        val behandlingsId = behandling.id
         val saksbehandlerIdent = prosessinstans.getData(ProsessDataKey.SAKSBEHANDLER)
         val behandlingsresultat = behandlingsresultatService.hentBehandlingsresultat(behandlingsId)
 
-        if (behandlingsresultat.erOpphørt() || andregangsvurderingHarFjernetTrygdeavgift(prosessinstans.behandling, behandlingsresultat)) {
-            log.info("Kansellerer fakturaserie for behandling: $behandlingsId med fakturaseriereferanse: ${behandlingsresultat.fakturaserieReferanse}")
-            kansellerFakturaserieOgLagreReferanse(behandlingsresultat, saksbehandlerIdent)
+        if (behandlingsresultat.erOpphørt() || andregangsvurderingHarFjernetTrygdeavgift(behandling, behandlingsresultat)) {
+            val opprinneligFakturaserieReferanse =
+                behandlingsresultatService.hentBehandlingsresultat(behandling.opprinneligBehandling.id).fakturaserieReferanse
+            log.info("Kansellerer fakturaserie for behandling: $behandlingsId med fakturaseriereferanse: $opprinneligFakturaserieReferanse")
+            kansellerFakturaserieOgLagreReferanse(behandlingsresultat, opprinneligFakturaserieReferanse, saksbehandlerIdent)
         } else if (skalOppretteFakturaserie(behandlingsresultat)) {
             log.info("Oppretter fakturaserie for behandling: $behandlingsId")
             opprettFakturaserieOgLagreReferanse(behandlingsresultat, mapFakturaserieDto(behandlingsresultat, prosessinstans), saksbehandlerIdent)
         }
     }
 
-    private fun kansellerFakturaserieOgLagreReferanse(behandlingsresultat: Behandlingsresultat, saksbehandlerIdent: String) {
-        val fakturaserieResponse =
-            faktureringskomponentenConsumer.kansellerFakturaserie(behandlingsresultat.fakturaserieReferanse, saksbehandlerIdent)
+    private fun kansellerFakturaserieOgLagreReferanse(
+        behandlingsresultat: Behandlingsresultat,
+        opprinneligFakturaserieReferanse: String,
+        saksbehandlerIdent: String
+    ) {
+        val fakturaserieResponse = faktureringskomponentenConsumer.kansellerFakturaserie(opprinneligFakturaserieReferanse, saksbehandlerIdent)
         behandlingsresultat.fakturaserieReferanse = fakturaserieResponse.fakturaserieReferanse
         behandlingsresultatService.lagre(behandlingsresultat)
     }

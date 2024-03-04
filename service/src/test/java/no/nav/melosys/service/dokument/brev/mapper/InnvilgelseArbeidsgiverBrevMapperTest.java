@@ -50,10 +50,10 @@ class InnvilgelseArbeidsgiverBrevMapperTest {
         FellesType fellesType = lagFellesType();
         MelosysNAVFelles navFelles = lagNAVFelles();
         BrevDataInnvilgelse brevDataInnvilgelse = new BrevDataInnvilgelse(new BrevbestillingDto(), "Z123456");
-        brevDataInnvilgelse.arbeidsland = "Sverige";
-        brevDataInnvilgelse.hovedvirksomhet = new AvklartVirksomhet("Equinor", "987654321", null, Yrkesaktivitetstyper.LOENNET_ARBEID);
-        brevDataInnvilgelse.lovvalgsperiode = lagLovvalgsperiode();
-        brevDataInnvilgelse.personNavn = "For Etter";
+        brevDataInnvilgelse.setArbeidsland("Sverige");
+        brevDataInnvilgelse.setHovedvirksomhet(new AvklartVirksomhet("Equinor", "987654321", null, Yrkesaktivitetstyper.LOENNET_ARBEID));
+        brevDataInnvilgelse.setLovvalgsperiode(lagLovvalgsperiode());
+        brevDataInnvilgelse.setPersonNavn("For Etter");
         String resultat = instans.mapTilBrevXML(fellesType, navFelles, behandling, behandlingsresultat, brevDataInnvilgelse);
         assertThat(resultat).matches("(?s)\\<\\?xml version=\"\\d\\.\\d+\" .*>\n.*");
         assertThat(":navn>For Etter</ns").isSubstringOf(resultat);

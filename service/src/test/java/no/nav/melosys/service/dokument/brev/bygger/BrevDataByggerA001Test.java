@@ -23,7 +23,6 @@ import no.nav.melosys.domain.person.Persondata;
 import no.nav.melosys.exception.FunksjonellException;
 import no.nav.melosys.integrasjon.ereg.EregFasade;
 import no.nav.melosys.service.LovvalgsperiodeService;
-import no.nav.melosys.domain.OrganisasjonDokumentTestFactory;
 import no.nav.melosys.service.aktoer.UtenlandskMyndighetService;
 import no.nav.melosys.service.avklartefakta.AvklarteVirksomheterService;
 import no.nav.melosys.service.avklartefakta.AvklartefaktaService;
@@ -214,7 +213,7 @@ class BrevDataByggerA001Test {
         søknad.selvstendigArbeid.getSelvstendigForetak().add(foretak2);
 
         BrevDataA001 brevDataA001 = (BrevDataA001) brevDataByggerA001.lag(lagBrevDataGrunnlag(), SAKSBEHANDLER_ID);
-        assertThat(brevDataA001.selvstendigeVirksomheter.stream()
+        assertThat(brevDataA001.getSelvstendigeVirksomheter().stream()
             .map(nv -> nv.orgnr)).containsOnly(foretak.getOrgnr());
     }
 
@@ -229,9 +228,9 @@ class BrevDataByggerA001Test {
         søknad.juridiskArbeidsgiverNorge.getEkstraArbeidsgivere().add(orgnr1);
 
         BrevDataA001 brevDataA001 = (BrevDataA001) brevDataByggerA001.lag(lagBrevDataGrunnlag(), SAKSBEHANDLER_ID);
-        assertThat(brevDataA001.selvstendigeVirksomheter.stream()
+        assertThat(brevDataA001.getSelvstendigeVirksomheter().stream()
             .map(nv -> nv.orgnr)).containsOnly(orgnr1);
-        assertThat(brevDataA001.arbeidsgivendeVirksomheter.stream()
+        assertThat(brevDataA001.getArbeidsgivendeVirksomheter().stream()
             .map(nv -> nv.orgnr)).containsOnly(orgnr1);
     }
 
@@ -242,7 +241,7 @@ class BrevDataByggerA001Test {
         søknad.selvstendigArbeid.getSelvstendigForetak().add(foretak);
 
         BrevDataA001 brevDataA001 = (BrevDataA001) brevDataByggerA001.lag(lagBrevDataGrunnlag(), SAKSBEHANDLER_ID);
-        assertThat(brevDataA001.ansettelsesperiode).isEmpty();
+        assertThat(brevDataA001.getAnsettelsesperiode()).isNull();
     }
 
     @Test
@@ -251,10 +250,10 @@ class BrevDataByggerA001Test {
         lagVilkårResultat(Vilkaar.FO_883_2004_ART16_1, true, ERSTATTER_EN_ANNEN_UNDER_5_AAR);
 
         BrevDataA001 brevDataA001 = (BrevDataA001) brevDataByggerA001.lag(lagBrevDataGrunnlag(), SAKSBEHANDLER_ID);
-        assertThat(brevDataA001.anmodningUtenArt12Begrunnelser).isEmpty();
+        assertThat(brevDataA001.getAnmodningUtenArt12Begrunnelser()).isEmpty();
 
-        assertThat(brevDataA001.anmodningBegrunnelser).hasSize(1);
-        assertThat(brevDataA001.anmodningBegrunnelser.stream().map(VilkaarBegrunnelse::getKode))
+        assertThat(brevDataA001.getAnmodningBegrunnelser()).hasSize(1);
+        assertThat(brevDataA001.getAnmodningBegrunnelser().stream().map(VilkaarBegrunnelse::getKode))
             .containsExactly(ERSTATTER_EN_ANNEN_UNDER_5_AAR.getKode());
     }
 
@@ -264,10 +263,10 @@ class BrevDataByggerA001Test {
         lagVilkårResultat(Vilkaar.FO_883_2004_ART16_1, true, ERSTATTER_EN_ANNEN_UNDER_5_AAR);
 
         BrevDataA001 brevDataA001 = (BrevDataA001) brevDataByggerA001.lag(lagBrevDataGrunnlag(), SAKSBEHANDLER_ID);
-        assertThat(brevDataA001.anmodningUtenArt12Begrunnelser).isEmpty();
+        assertThat(brevDataA001.getAnmodningUtenArt12Begrunnelser()).isEmpty();
 
-        assertThat(brevDataA001.anmodningBegrunnelser).hasSize(1);
-        assertThat(brevDataA001.anmodningBegrunnelser.stream().map(VilkaarBegrunnelse::getKode))
+        assertThat(brevDataA001.getAnmodningBegrunnelser()).hasSize(1);
+        assertThat(brevDataA001.getAnmodningBegrunnelser().stream().map(VilkaarBegrunnelse::getKode))
             .containsExactly(ERSTATTER_EN_ANNEN_UNDER_5_AAR.getKode());
     }
 
@@ -276,10 +275,10 @@ class BrevDataByggerA001Test {
         lagVilkårResultat(Vilkaar.FO_883_2004_ART16_1, true, SJOEMANNSKIRKEN);
 
         BrevDataA001 brevDataA001 = (BrevDataA001) brevDataByggerA001.lag(lagBrevDataGrunnlag(), SAKSBEHANDLER_ID);
-        assertThat(brevDataA001.anmodningBegrunnelser).isEmpty();
+        assertThat(brevDataA001.getAnmodningBegrunnelser()).isEmpty();
 
-        assertThat(brevDataA001.anmodningUtenArt12Begrunnelser).hasSize(1);
-        assertThat(brevDataA001.anmodningUtenArt12Begrunnelser.stream().map(VilkaarBegrunnelse::getKode))
+        assertThat(brevDataA001.getAnmodningUtenArt12Begrunnelser()).hasSize(1);
+        assertThat(brevDataA001.getAnmodningUtenArt12Begrunnelser().stream().map(VilkaarBegrunnelse::getKode))
             .containsExactly(SJOEMANNSKIRKEN.getKode());
     }
 
@@ -302,7 +301,7 @@ class BrevDataByggerA001Test {
             LocalDate.of(2017, 10, 23));
 
         BrevDataA001 brevDataA001 = (BrevDataA001) brevDataByggerA001.lag(lagBrevDataGrunnlag(), SAKSBEHANDLER_ID);
-        assertThat((brevDataA001).ansettelsesperiode).contains(forventet.getAnsettelsesPeriode());
+        assertThat((brevDataA001).getAnsettelsesperiode()).isEqualTo(forventet.getAnsettelsesPeriode());
     }
 
     @Test
@@ -310,7 +309,7 @@ class BrevDataByggerA001Test {
         avklarteOrganisasjoner.add(orgnr1);
 
         BrevDataA001 brevDataA001 = (BrevDataA001) brevDataByggerA001.lag(lagBrevDataGrunnlag(), SAKSBEHANDLER_ID);
-        assertThat(brevDataA001.ansettelsesperiode).isNotPresent();
+        assertThat(brevDataA001.getAnsettelsesperiode()).isNull();
     }
 
     @Test
@@ -322,7 +321,7 @@ class BrevDataByggerA001Test {
         BrevDataGrunnlag brevdataGrunnlag = lagBrevDataGrunnlag(brevbestilling);
 
         BrevDataA001 brevDataA001 = (BrevDataA001) brevDataByggerA001.lag(brevdataGrunnlag, SAKSBEHANDLER_ID);
-        assertThat(brevDataA001.ytterligereInformasjon).isEqualTo(forventetInfo);
+        assertThat(brevDataA001.getYtterligereInformasjon()).isEqualTo(forventetInfo);
     }
 
     @Test
@@ -333,7 +332,7 @@ class BrevDataByggerA001Test {
         BrevDataGrunnlag brevdataGrunnlag = lagBrevDataGrunnlag(doksysBrevbestilling, personopplysninger);
 
         BrevDataA001 brevDataA001 = (BrevDataA001) brevDataByggerA001.lag(brevdataGrunnlag, SAKSBEHANDLER_ID);
-        assertThat(brevDataA001.bostedsadresse).isEqualTo(personopplysninger.finnKontaktadresse().get().hentEllerLagStrukturertAdresse());
+        assertThat(brevDataA001.getBostedsadresse()).isEqualTo(personopplysninger.finnKontaktadresse().get().hentEllerLagStrukturertAdresse());
     }
 
     @Test

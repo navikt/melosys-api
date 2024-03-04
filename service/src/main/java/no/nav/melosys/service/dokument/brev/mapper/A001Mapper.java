@@ -43,19 +43,19 @@ class A001Mapper {
 
         seda001.setLandkodeAvsender(hentIso3Landkode(Landkoder.NO.getKode()));
 
-        seda001.setTrygdemyndighet(mapTrygdemyndighet(brevData.utenlandskMyndighet));
+        seda001.setTrygdemyndighet(mapTrygdemyndighet(brevData.getUtenlandskMyndighet()));
 
-        seda001.setPerson(mapPerson(brevData.persondata, brevData.bostedsadresse, brevData.bostedsadresseTypeKode, brevData.utenlandskIdent));
+        seda001.setPerson(mapPerson(brevData.getPersondata(), brevData.getBostedsadresse(), brevData.getBostedsadresseTypeKode(), Optional.ofNullable(brevData.getUtenlandskIdent())));
 
-        seda001.setSelvstendigNæringsvirksomhetListe(mapSelvstendigvirksometliste(brevData.selvstendigeVirksomheter));
-        seda001.setForetakListe(mapForetakliste(brevData.arbeidsgivendeVirksomheter));
+        seda001.setSelvstendigNæringsvirksomhetListe(mapSelvstendigvirksometliste(brevData.getSelvstendigeVirksomheter()));
+        seda001.setForetakListe(mapForetakliste(brevData.getArbeidsgivendeVirksomheter()));
 
-        seda001.setArbeidsstedListe(mapArbeidsstedliste(brevData.arbeidssteder));
+        seda001.setArbeidsstedListe(mapArbeidsstedliste(brevData.getArbeidssteder()));
 
-        seda001.setLovvalgsPeriodeListe(mapAnmodningsperioder(brevData.anmodningsperioder));
+        seda001.setLovvalgsPeriodeListe(mapAnmodningsperioder(brevData.getAnmodningsperioder()));
 
         // Alle lovvalgsperiodene må ha samme landkode
-        Anmodningsperiode lovvalgsperiode = brevData.anmodningsperioder.iterator().next();
+        Anmodningsperiode lovvalgsperiode = brevData.getAnmodningsperioder().iterator().next();
         seda001.setLovvalgsbestemmelse(LovvalgsbestemmelseKode.fromValue(lovvalgsperiode.getUnntakFraBestemmelse().getKode()));
         seda001.setLovvalgsLand(hentIso3Landkode(lovvalgsperiode.getLovvalgsland().getKode()));  // Alltid Norge
 
@@ -66,20 +66,20 @@ class A001Mapper {
         // Mangler implementasjon i oppgavene. Lev1 støtter ikke purring
         seda001.setForespørselType(ForespoerselTypeKode.FOERSTEGANG);
 
-        seda001.setTidligereAnmodningListe(mapTidligereAnmodningListe(brevData.tidligereAnmodninger));
+        seda001.setTidligereAnmodningListe(mapTidligereAnmodningListe(brevData.getTidligereAnmodninger()));
 
-        seda001.setTidligereLovvalgsperiodeListe(mapTidligereLovvalgsperioder(brevData.tidligereLovvalgsperioder));
+        seda001.setTidligereLovvalgsperiodeListe(mapTidligereLovvalgsperioder(brevData.getTidligereLovvalgsperioder()));
 
-        mapAnmodningBegrunnelser(brevData.anmodningBegrunnelser).map(A001Mapper::mapArt16Anmodning)
+        mapAnmodningBegrunnelser(brevData.getAnmodningBegrunnelser()).map(A001Mapper::mapArt16Anmodning)
             .ifPresent(seda001::setVilkårBegrunnelse);
 
-        mapAnmodningUtenArt12Begrunnelser(brevData.anmodningUtenArt12Begrunnelser).map(A001Mapper::mapArt161AnmodningUtenArt12)
+        mapAnmodningUtenArt12Begrunnelser(brevData.getAnmodningUtenArt12Begrunnelser()).map(A001Mapper::mapArt161AnmodningUtenArt12)
             .ifPresent(seda001::setVilkårBegrunnelseUtenArt12);
 
-        seda001.setFritekst(brevData.anmodningFritekstBegrunnelse);
-        seda001.setYtterligereInformasjon(brevData.ytterligereInformasjon);
+        seda001.setFritekst(brevData.getAnmodningFritekstBegrunnelse());
+        seda001.setYtterligereInformasjon(brevData.getYtterligereInformasjon());
 
-        brevData.ansettelsesperiode.ifPresent(periode -> seda001.setAnsettelsesPeriode(mapAnsettelsesperiode(periode)));
+        Optional.ofNullable(brevData.getAnsettelsesperiode()).ifPresent(periode -> seda001.setAnsettelsesPeriode(mapAnsettelsesperiode(periode)));
 
         return seda001;
     }

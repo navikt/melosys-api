@@ -20,8 +20,8 @@ class BrevDataByggerStandardTest {
         String saksbehandler = "Z123456";
         BrevData brevData = brevDataByggerStandard.lag(null, saksbehandler);
         assertThat(brevData).isInstanceOf(BrevData.class);
-        assertThat(brevData.saksbehandler).isEqualTo(saksbehandler);
-        assertThat(brevData.fritekst).isEqualTo(brevbestillingDto.getFritekst());
-        assertThat(brevData.begrunnelseKode).isEqualTo(brevbestillingDto.getBegrunnelseKode());
+        assertThat(brevData.getSaksbehandler()).isEqualTo(saksbehandler);
+        assertThat(brevData.getFritekst()).isEqualTo(brevbestillingDto.getFritekst());
+        assertThat(brevData.getBegrunnelseKode()).isEqualTo(brevbestillingDto.getBegrunnelseKode());
     }
 }

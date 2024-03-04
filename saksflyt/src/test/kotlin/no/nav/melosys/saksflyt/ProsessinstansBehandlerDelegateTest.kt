@@ -41,7 +41,7 @@ internal class ProsessinstansBehandlerDelegateTest {
     }
 
     @Test
-    fun `har SED låsReferanse - oppdaterStatusOmSkalPåVent finnesProsessMedSammeReferanseUnderBehandling settesIkkePåVent`() {
+    fun `har SED låsReferanse - oppdaterStatusOmSkalPåVent finnesProsessMedSammeReferanseUnderBehandling settesPåVent`() {
         prosessinstans.status = ProsessStatus.KLAR
         val låsReferanse = "12_12_1"
         prosessinstans.låsReferanse = låsReferanse
@@ -51,11 +51,14 @@ internal class ProsessinstansBehandlerDelegateTest {
             prosessinstansRepository.findAllByIdNotAndStatusNotInAndLåsReferanseStartingWith(prosessinstans.id, any(), any())
         } returns setOf(eksisterendeProsessinstans.tilProsessinstansInfo())
 
+        every { prosessinstansRepository.save(any()) } returns prosessinstans
+
 
         prosessinstansBehandlerDelegate.oppdaterStatusOmSkalPåVent(prosessinstans)
 
 
-        prosessinstans.status.shouldBe(ProsessStatus.KLAR)
+        verify { prosessinstansRepository.save(prosessinstans) }
+        prosessinstans.status.shouldBe(ProsessStatus.PÅ_VENT)
     }
 
     @Test

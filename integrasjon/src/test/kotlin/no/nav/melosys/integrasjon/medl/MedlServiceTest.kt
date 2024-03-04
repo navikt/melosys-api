@@ -65,18 +65,16 @@ internal class MedlServiceTest {
             .medlemsperiode.shouldHaveSize(1)
             .first()
             .shouldBeEqualToComparingFields(
-                Medlemsperiode().apply {
-                    id = 123456L
-                    type = "PUMEDSKP"
-                    status = PeriodestatusMedl.GYLD.kode
-                    grunnlagstype = "IMEDEOS"
-                    land = "NOR"
-                    lovvalg = LovvalgMedl.ENDL.kode
-                    trygdedekning = "Unntatt"
-                    kildedokumenttype = "Dokument"
-                    kilde = "INFOTR"
-                    periode = Periode(LocalDate.of(2021, 9, 1), LocalDate.of(2021, 10, 1))
-                }, FieldsEqualityCheckConfig(ignorePrivateFields = false)
+                Medlemsperiode(id = 123456L,
+                    type = "PUMEDSKP",
+                    status = PeriodestatusMedl.GYLD.kode,
+                    grunnlagstype = "IMEDEOS",
+                    land = "NOR",
+                    lovvalg = LovvalgMedl.ENDL.kode,
+                    trygdedekning = "Unntatt",
+                    kildedokumenttype = "Dokument",
+                    kilde = "INFOTR",
+                    periode = Periode(LocalDate.of(2021, 9, 1), LocalDate.of(2021, 10, 1))), FieldsEqualityCheckConfig(ignorePrivateFields = false)
             )
     }
 

@@ -1,9 +1,11 @@
 package no.nav.melosys
 
 import ch.qos.logback.classic.Level
+import io.kotest.matchers.collections.shouldContainInOrder
 import io.kotest.matchers.collections.shouldHaveSize
 import io.kotest.matchers.shouldBe
 import mu.KotlinLogging
+import no.nav.melosys.LoggingTestUtils.filterBuilder
 import org.junit.jupiter.api.Test
 import org.slf4j.LoggerFactory
 
@@ -51,5 +53,52 @@ class LoggingTestUtilsTest {
             log.info("skal ikke med 2")
             someOtherLog.info("skal med")
         }.single().formattedMessage.shouldBe("skal med")
+    }
+
+    class SomeClass1
+    class SomeClass2
+
+    @Test
+    fun `filterBuilder skal filtrere`() {
+        val someOtherLog1 = LoggerFactory.getLogger(SomeClass1::class.java)
+        val someOtherLog2 = LoggerFactory.getLogger(SomeClass2::class.java)
+
+        LoggingTestUtils.withLogCapture { logs ->
+            someOtherLog1.info("a-1")
+            someOtherLog1.info("a-2")
+            someOtherLog2.info("b-1")
+            someOtherLog2.info("b-2")
+
+            logs.filterBuilder
+                .match<SomeClass1> { it.message.contains("a-2") }
+                .match<SomeClass2>() { it.message.contains("b-1") }
+                .build()
+                .shouldHaveSize(2).map { it.message }
+                .shouldContainInOrder("a-2", "b-1")
+
+            logs.filterBuilder
+                .match<SomeClass1> { it.message.contains("a-2") }
+                .match<SomeClass2>() { it.message.contains("b-1") }
+                .remove(Regex("-1"))
+                .checkWithThreads { next ->
+                    next("main").shouldBe("a-2")
+                    next("main").shouldBe("b")
+                }
+        }
+    }
+
+    @Test
+    fun `sort skal sorter ting på komma`() {
+        val someOtherLog1 = LoggerFactory.getLogger(SomeClass1::class.java)
+
+        LoggingTestUtils.withLogCapture { logs ->
+            someOtherLog1.info("Prosessinstans(er) på vent med samme gruppe-prefiks: [<x008Prosess>, <a009Prosess>]")
+
+            logs.filterBuilder
+                .match<SomeClass1>()
+                .sort(Regex("gruppe-prefiks: \\[(.*?)]"))
+                .build().first().formattedMessage
+                .shouldBe("Prosessinstans(er) på vent med samme gruppe-prefiks: [<a009Prosess>, <x008Prosess>]")
+        }
     }
 }
