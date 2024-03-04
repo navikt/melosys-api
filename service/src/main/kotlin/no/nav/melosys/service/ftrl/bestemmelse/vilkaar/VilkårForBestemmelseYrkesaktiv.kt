@@ -18,6 +18,19 @@ class VilkårForBestemmelseYrkesaktiv(val mottatteOpplysningerService: MottatteO
         behandlingID: Long?
     ): List<Vilkår> {
         return when (bestemmelse) {
+            // Støtter toggle ToggleName.MELOSYS_FTRL_YRKESAKTIV_PLIKTIGE_BESTEMMELSER, https://jira.adeo.no/browse/MELOSYS-6430
+            FTRL_KAP2_2_1,
+            // Fjern
+            /**
+             * FTRL_KAP2_2_1_FØRSTE_LEDD,
+             * FTRL_KAP2_2_1_FJERDE_LEDD,
+             * FTRL_KAP2_2_3_FØRSTE_LEDD
+             * FTRL_KAP2_2_5_FØRSTE_LEDD_G
+             * FTRL_KAP2_2_6_FØRSTE_LEDD_A
+             * FTRL_KAP2_2_6_FØRSTE_LEDD_B
+             * FTRL_KAP2_2_6_FØRSTE_LEDD_C
+             * */
+            // End støtte
             FTRL_KAP2_2_1_FØRSTE_LEDD,
             FTRL_KAP2_2_1_FJERDE_LEDD,
             FTRL_KAP2_2_2,

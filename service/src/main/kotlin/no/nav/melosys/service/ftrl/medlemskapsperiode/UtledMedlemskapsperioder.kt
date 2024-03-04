@@ -1,5 +1,6 @@
 package no.nav.melosys.service.ftrl.medlemskapsperiode
 
+import io.getunleash.Unleash
 import no.nav.melosys.domain.Behandlingsresultat
 import no.nav.melosys.domain.ErPeriode
 import no.nav.melosys.domain.Medlemskapsperiode
@@ -9,6 +10,7 @@ import no.nav.melosys.domain.kodeverk.InnvilgelsesResultat
 import no.nav.melosys.domain.kodeverk.Trygdedekninger
 import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingstyper
 import no.nav.melosys.exception.FunksjonellException
+import no.nav.melosys.featuretoggle.ToggleName
 import no.nav.melosys.service.ftrl.bestemmelse.LovligeKombinasjonerTrygdedekningBestemmelse
 import org.springframework.data.util.Pair
 import java.time.LocalDate
@@ -37,13 +39,15 @@ object UtledMedlemskapsperioder {
                 }
             }
 
-    fun lagMedlemskapsperioder(dto: UtledMedlemskapsperioderDto): Collection<Medlemskapsperiode> {
+    fun lagMedlemskapsperioder(dto: UtledMedlemskapsperioderDto, unleash: Unleash): Collection<Medlemskapsperiode> {
+        val pliktigeBestemmelserToggleAktiv = unleash.isEnabled(ToggleName.MELOSYS_FTRL_YRKESAKTIV_PLIKTIGE_BESTEMMELSER)
+
         if (bestemmelseErParagraf(dto.bestemmelse, "2_7")) {
             return lagMedlemskapsperioderFor2_7(dto)
         } else if (bestemmelseErParagraf(dto.bestemmelse, "2_8")) {
             return lagMedlemskapsperioderFor2_8(dto)
-        } else if (dto.bestemmelse in PliktigeMedlemskapsbestemmelser.bestemmelser) {
-            return lagMedlemskapsperioderForPliktige(dto)
+        } else if (dto.bestemmelse in if(pliktigeBestemmelserToggleAktiv) PliktigeMedlemskapsbestemmelser.bestemmelserNy else PliktigeMedlemskapsbestemmelser.bestemmelser) {
+            return if(pliktigeBestemmelserToggleAktiv) lagMedlemskapsperioderForPliktigeToggle(dto) else lagMedlemskapsperioderForPliktige(dto)
         }
         throw FunksjonellException("Støtter ikke bestemmelse ${dto.bestemmelse}")
     }
@@ -94,6 +98,18 @@ object UtledMedlemskapsperioder {
     private fun lagMedlemskapsperioderForPliktige(dto: UtledMedlemskapsperioderDto): Collection<Medlemskapsperiode> {
         return setOf(
             lagPeriode(
+                dto.søknadsperiode,
+                Trygdedekninger.FULL_DEKNING_FTRL,
+                InnvilgelsesResultat.INNVILGET,
+                dto.bestemmelse
+            )
+        )
+    }
+
+
+    private fun lagMedlemskapsperioderForPliktigeToggle(dto: UtledMedlemskapsperioderDto): Collection<Medlemskapsperiode> {
+        return setOf(
+            lagPeriodeToggle(
                 dto.søknadsperiode,
                 Trygdedekninger.FULL_DEKNING_FTRL,
                 InnvilgelsesResultat.INNVILGET,
@@ -205,6 +221,21 @@ object UtledMedlemskapsperioder {
             this.bestemmelse = bestemmelse
         }
 
+
+    private fun lagPeriodeToggle(
+        søknadsperiode: ErPeriode,
+        trygdedekning: Trygdedekninger,
+        innvilgelsesResultat: InnvilgelsesResultat,
+        bestemmelse: Folketrygdloven_kap2_bestemmelser
+    ): Medlemskapsperiode =
+        Medlemskapsperiode().apply {
+            this.fom = søknadsperiode.fom
+            this.tom = søknadsperiode.tom
+            this.innvilgelsesresultat = innvilgelsesResultat
+            this.medlemskapstype = UtledMedlemskapstype.avToggle(bestemmelse)
+            this.trygdedekning = trygdedekning
+            this.bestemmelse = bestemmelse
+        }
 
     private fun splitPeriode(periode: ErPeriode, splitFra: LocalDate): Pair<ErPeriode, ErPeriode> =
         Pair.of(

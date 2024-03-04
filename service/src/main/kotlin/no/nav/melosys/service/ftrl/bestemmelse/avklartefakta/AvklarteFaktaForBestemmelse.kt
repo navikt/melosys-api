@@ -1,15 +1,19 @@
 package no.nav.melosys.service.ftrl.bestemmelse.avklartefakta
 
+import io.getunleash.Unleash
 import no.nav.melosys.domain.kodeverk.*
 import no.nav.melosys.domain.kodeverk.Folketrygdloven_kap2_bestemmelser.*
 import no.nav.melosys.domain.mottatteopplysninger.data.Soeknadsland
+import no.nav.melosys.featuretoggle.LocalUnleash
 import no.nav.melosys.service.mottatteopplysninger.MottatteOpplysningerService
 import org.springframework.stereotype.Component
 
 @Component
 class AvklarteFaktaForBestemmelse(val mottatteOpplysningerService: MottatteOpplysningerService) {
+
     fun hentAvklarteFakta(bestemmelse: Folketrygdloven_kap2_bestemmelser, behandlingID: Long): List<AvklarteFaktaType> {
         return when (bestemmelse) {
+            FTRL_KAP2_2_1 -> ftrlKap2_1AvklarteFaktaForBehandling(behandlingID)
             FTRL_KAP2_2_1_FØRSTE_LEDD -> ftrlKap2_1AvklarteFaktaForBehandling(behandlingID)
             FTRL_KAP2_2_5_ANDRE_LEDD -> listOf(
                 AvklarteFaktaType(

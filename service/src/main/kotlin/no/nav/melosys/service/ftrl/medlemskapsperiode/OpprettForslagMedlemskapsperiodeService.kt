@@ -67,8 +67,9 @@ class OpprettForslagMedlemskapsperiodeService(
                         søknad.periode,
                         søknad.trygdedekning,
                         utledMottaksdato.getMottaksdato(behandling),
-                        bestemmelse
-                    )
+                        bestemmelse,
+                    ),
+                    unleash
                 )
             }
             medlemAvFolketrygden.medlemskapsperioder.addAll(medlemskapsperioder)

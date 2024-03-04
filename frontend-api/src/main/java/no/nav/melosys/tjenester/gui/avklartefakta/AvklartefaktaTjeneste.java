@@ -5,6 +5,7 @@ import java.util.Set;
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
 import no.nav.melosys.domain.avklartefakta.Avklartefakta;
+import no.nav.melosys.domain.kodeverk.Arbeidssituasjontype;
 import no.nav.melosys.domain.kodeverk.Ikkeyrkesaktivoppholdtype;
 import no.nav.melosys.domain.kodeverk.Ikkeyrkesaktivrelasjontype;
 import no.nav.melosys.service.avklartefakta.*;
@@ -29,12 +30,14 @@ public class AvklartefaktaTjeneste {
     private final AvklarteFaktaArbeidslandService avklarteFaktaArbeidslandService;
     private final AvklartManglendeInnbetalingService avklartManglendeInnbetalingService;
     private final AvklartFamilieRelasjonTypeService avklartFamilieRelasjonTypeService;
+    private final AvklartArbeidssituasjonTypeService avklartArbeidssituasjonTypeService;
     private final AvklartOppholdTypeService avklartOppholdTypeService;
     private final Aksesskontroll aksesskontroll;
 
     public AvklartefaktaTjeneste(AvklartefaktaService avklartefaktaService,
                                  AvklarteVirksomheterService avklarteVirksomheterService,
                                  AvklarteFaktaArbeidslandService avklarteFaktaArbeidslandService,
+                                 AvklartArbeidssituasjonTypeService avklartArbeidssituasjonTypeService,
                                  Aksesskontroll aksesskontroll,
                                  AvklartManglendeInnbetalingService avklartManglendeInnbetalingService,
                                  AvklartFamilieRelasjonTypeService avklartFamilieRelasjonTypeService,
@@ -42,6 +45,7 @@ public class AvklartefaktaTjeneste {
         this.avklartefaktaService = avklartefaktaService;
         this.avklarteVirksomheterService = avklarteVirksomheterService;
         this.avklarteFaktaArbeidslandService = avklarteFaktaArbeidslandService;
+        this.avklartArbeidssituasjonTypeService = avklartArbeidssituasjonTypeService;
         this.aksesskontroll = aksesskontroll;
         this.avklartManglendeInnbetalingService = avklartManglendeInnbetalingService;
         this.avklartFamilieRelasjonTypeService = avklartFamilieRelasjonTypeService;
@@ -108,6 +112,18 @@ public class AvklartefaktaTjeneste {
 
         return new AvklartefaktaOppsummeringDto(avklartefaktaService.hentAlleAvklarteFakta(behandlingID));
     }
+
+    @PostMapping("{behandlingID}/arbeidssituasjontype")
+    @ApiOperation(value = "Lagre arbeidssituasjontype som avklartefakta", response = AvklartefaktaOppsummeringDto.class)
+    public AvklartefaktaOppsummeringDto lagreArbeidssituasjonTypeSomAvklarteFakta(@PathVariable("behandlingID") long behandlingID,
+                                                                                  @RequestBody Arbeidssituasjontype arbeidssituasjontype) {
+        aksesskontroll.autoriserSkrivTilRessurs(behandlingID, Ressurs.AVKLARTE_FAKTA);
+
+        avklartArbeidssituasjonTypeService.lagreArbeidssituasjonTypeSomAvklarteFakta(behandlingID, arbeidssituasjontype);
+
+        return new AvklartefaktaOppsummeringDto(avklartefaktaService.hentAlleAvklarteFakta(behandlingID));
+    }
+
 
     @PostMapping("{behandlingID}/familierelasjonstype")
     @ApiOperation(value = "Lagre familierelasjonstype for ikke yrkesaktive som avklartefakta", response = AvklartefaktaOppsummeringDto.class)

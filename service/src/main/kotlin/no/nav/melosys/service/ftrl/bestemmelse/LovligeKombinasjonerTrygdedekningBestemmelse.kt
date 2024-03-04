@@ -39,8 +39,45 @@ object LovligeKombinasjonerTrygdedekningBestemmelse {
         )
     )
 
+    val lovligeKombinasjonerDekningBestemmelseToggle = mapOf(
+        listOf(Trygdedekninger.FULL_DEKNING_FTRL) to listOf(
+            Folketrygdloven_kap2_bestemmelser.FTRL_KAP2_2_7_FØRSTE_LEDD,
+            Folketrygdloven_kap2_bestemmelser.FTRL_KAP2_2_7_FJERDE_LEDD,
+            Folketrygdloven_kap2_bestemmelser.FTRL_KAP2_2_7A,
+            *PliktigeMedlemskapsbestemmelser.bestemmelserNy.toTypedArray()
+        ),
+
+        listOf(Trygdedekninger.FTRL_2_7_TREDJE_LEDD_B_HELSE_SYKE_FORELDREPENGER) to listOf(
+            Folketrygdloven_kap2_bestemmelser.FTRL_KAP2_2_7_FØRSTE_LEDD,
+            Folketrygdloven_kap2_bestemmelser.FTRL_KAP2_2_7_FJERDE_LEDD,
+        ),
+
+        listOf(Trygdedekninger.FTRL_2_7A_ANDRE_LEDD_B_HELSE_SYKE_FORELDREPENGER) to listOf(
+            Folketrygdloven_kap2_bestemmelser.FTRL_KAP2_2_7A
+        ),
+
+        listOf(
+            Trygdedekninger.FTRL_2_9_FØRSTE_LEDD_A_HELSE,
+            Trygdedekninger.FTRL_2_9_FØRSTE_LEDD_A_ANDRE_LEDD_HELSE_SYKE_FORELDREPENGER,
+            Trygdedekninger.FTRL_2_9_FØRSTE_LEDD_B_PENSJON,
+            Trygdedekninger.FTRL_2_9_FØRSTE_LEDD_C_HELSE_PENSJON,
+            Trygdedekninger.FTRL_2_9_FØRSTE_LEDD_C_ANDRE_LEDD_HELSE_PENSJON_SYKE_FORELDREPENGER
+        ) to listOf(
+            Folketrygdloven_kap2_bestemmelser.FTRL_KAP2_2_8_FØRSTE_LEDD_A,
+            Folketrygdloven_kap2_bestemmelser.FTRL_KAP2_2_8_FØRSTE_LEDD_B,
+            Folketrygdloven_kap2_bestemmelser.FTRL_KAP2_2_8_FØRSTE_LEDD_C,
+            Folketrygdloven_kap2_bestemmelser.FTRL_KAP2_2_8_FØRSTE_LEDD_D,
+            Folketrygdloven_kap2_bestemmelser.FTRL_KAP2_2_8_ANDRE_LEDD,
+            Folketrygdloven_kap2_bestemmelser.FTRL_KAP2_2_8_FJERDE_LEDD
+        )
+    )
+
     fun hentLovligeBestemmelser(trygdedekning: Trygdedekninger): List<Folketrygdloven_kap2_bestemmelser> {
         return lovligeKombinasjonerDekningBestemmelse[lovligeKombinasjonerDekningBestemmelse.keys.find { it.contains(trygdedekning) }] ?: emptyList()
+    }
+
+    fun hentLovligeBestemmelserToggle(trygdedekning: Trygdedekninger): List<Folketrygdloven_kap2_bestemmelser> {
+        return lovligeKombinasjonerDekningBestemmelseToggle[lovligeKombinasjonerDekningBestemmelseToggle.keys.find { it.contains(trygdedekning) }] ?: emptyList()
     }
 
     fun hentLovligeTrygdedekninger(bestemmelse: Folketrygdloven_kap2_bestemmelser): List<Trygdedekninger> {
@@ -52,7 +89,10 @@ object LovligeKombinasjonerTrygdedekningBestemmelse {
     }
 
     fun erBestemmelseGyldigForTrygdedekning(bestemmelse: Folketrygdloven_kap2_bestemmelser, trygdedekning: Trygdedekninger): Boolean {
+        // Støtter toggle ToggleName.MELOSYS_FTRL_YRKESAKTIV_PLIKTIGE_BESTEMMELSER, https://jira.adeo.no/browse/MELOSYS-6430
         if (bestemmelse in PliktigeMedlemskapsbestemmelser.bestemmelser) {
+            return true
+        } else if (bestemmelse in PliktigeMedlemskapsbestemmelser.bestemmelserNy) {
             return true
         }
         return erGyldigKombinasjon(bestemmelse, trygdedekning)

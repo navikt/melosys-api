@@ -22,6 +22,15 @@ class LovligeKombinasjonerTrygdedekningBestemmelseTest {
             .shouldContainAll(PliktigeMedlemskapsbestemmelser.bestemmelser)
     }
 
+    // Støtter toggle ToggleName.MELOSYS_FTRL_YRKESAKTIV_PLIKTIGE_BESTEMMELSER, https://jira.adeo.no/browse/MELOSYS-6430
+    @Test
+    fun hentLovligeBestemmelser_fullTrygdedekning_returnererAllePliktigeBestemmelseneSamtFlere_TOGGLE() {
+        LovligeKombinasjonerTrygdedekningBestemmelse.hentLovligeBestemmelserToggle(Trygdedekninger.FULL_DEKNING_FTRL)
+            .shouldNotBeNull()
+            .shouldHaveSize(15)
+            .shouldContainAll(PliktigeMedlemskapsbestemmelser.bestemmelserNy)
+    }
+
     @Test
     fun hentLovligeTrygdedekninger_2_7ABestemmelse_returnerer2_7ATrygdedekningOgFullDekning() {
         LovligeKombinasjonerTrygdedekningBestemmelse.hentLovligeTrygdedekninger(Folketrygdloven_kap2_bestemmelser.FTRL_KAP2_2_7A)

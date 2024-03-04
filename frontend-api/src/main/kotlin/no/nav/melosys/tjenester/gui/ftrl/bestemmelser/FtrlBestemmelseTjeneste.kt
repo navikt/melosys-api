@@ -1,9 +1,11 @@
 package no.nav.melosys.tjenester.gui.ftrl.bestemmelser
 
+import io.getunleash.Unleash
 import io.swagger.annotations.Api
 import no.nav.melosys.domain.kodeverk.Folketrygdloven_kap2_bestemmelser
 import no.nav.melosys.domain.kodeverk.Trygdedekninger
 import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingstema
+import no.nav.melosys.featuretoggle.ToggleName
 import no.nav.melosys.service.ftrl.bestemmelse.FtrlBestemmelser
 import no.nav.melosys.service.ftrl.medlemskapsperiode.PliktigeMedlemskapsbestemmelser
 import no.nav.security.token.support.core.api.Protected
@@ -18,7 +20,7 @@ import org.springframework.web.context.WebApplicationContext
 @RestController
 @Api(tags = ["ftrl", "bestemmelser"])
 @Scope(value = WebApplicationContext.SCOPE_REQUEST)
-class FtrlBestemmelseTjeneste(private val ftrlBestemmelser: FtrlBestemmelser) {
+class FtrlBestemmelseTjeneste(private val ftrlBestemmelser: FtrlBestemmelser, private val unleash: Unleash) {
 
     @GetMapping("/ftrl/bestemmelser")
     fun hentBestemmelser(
@@ -30,7 +32,13 @@ class FtrlBestemmelseTjeneste(private val ftrlBestemmelser: FtrlBestemmelser) {
 
     @GetMapping("/ftrl/bestemmelser/pliktige")
     fun hentBestemmelser(): ResponseEntity<FtrlBestemmelserDto> {
-        return ResponseEntity.ok(FtrlBestemmelserDto(PliktigeMedlemskapsbestemmelser.bestemmelser))
+        val pliktigeBestemmelserToggleAktiv = unleash.isEnabled(ToggleName.MELOSYS_FTRL_YRKESAKTIV_PLIKTIGE_BESTEMMELSER)
+        return ResponseEntity.ok(FtrlBestemmelserDto(
+            if(pliktigeBestemmelserToggleAktiv)
+                PliktigeMedlemskapsbestemmelser.bestemmelserNy
+            else
+                PliktigeMedlemskapsbestemmelser.bestemmelser)
+        )
     }
 
     data class FtrlBestemmelserDto(val bestemmelser: List<Folketrygdloven_kap2_bestemmelser>)

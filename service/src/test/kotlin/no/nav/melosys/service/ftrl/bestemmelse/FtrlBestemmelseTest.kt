@@ -1,5 +1,6 @@
 package no.nav.melosys.service.ftrl.bestemmelse
 
+import io.getunleash.FakeUnleash
 import io.kotest.matchers.collections.shouldBeEmpty
 import io.kotest.matchers.collections.shouldContainExactly
 import io.kotest.matchers.collections.shouldHaveSize
@@ -9,11 +10,21 @@ import io.kotest.matchers.nulls.shouldNotBeNull
 import no.nav.melosys.domain.kodeverk.Folketrygdloven_kap2_bestemmelser
 import no.nav.melosys.domain.kodeverk.Trygdedekninger
 import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingstema
+import no.nav.melosys.featuretoggle.ToggleName
+import no.nav.melosys.service.ftrl.GyldigeTrygdedekningerService
+import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
 
 class FtrlBestemmelseTest {
+    private val unleash = FakeUnleash()
 
-    private val ftrlBestemmelser = FtrlBestemmelser()
+    private lateinit var ftrlBestemmelser: FtrlBestemmelser
+
+    @BeforeEach
+    fun setUp() {
+        unleash.resetAll()
+        ftrlBestemmelser = FtrlBestemmelser(unleash)
+    }
 
     @Test
     fun hentBestemmelser_yrkesaktiv_returnererYrkesaktivListe() {
@@ -23,10 +34,18 @@ class FtrlBestemmelseTest {
     }
 
     @Test
-    fun hentBestemmelser_yrkesaktivFullDekning_returnererFiltrertListe() {
+    fun hentBestemmelser_yrkesaktivFullDekning_returnererFiltrertListe_deprecated() {
         ftrlBestemmelser.hentBestemmelser(Behandlingstema.YRKESAKTIV, Trygdedekninger.FULL_DEKNING_FTRL)
             .shouldNotBeNull()
             .shouldHaveSize(13)
+    }
+
+    @Test
+    fun hentBestemmelser_yrkesaktivFullDekning_returnererFiltrertListe() {
+        unleash.enable(ToggleName.MELOSYS_FTRL_YRKESAKTIV_PLIKTIGE_BESTEMMELSER)
+        ftrlBestemmelser.hentBestemmelser(Behandlingstema.YRKESAKTIV, Trygdedekninger.FULL_DEKNING_FTRL)
+            .shouldNotBeNull()
+            .shouldHaveSize(9)
     }
 
     @Test
