@@ -2,7 +2,6 @@ package no.nav.melosys.service.dokument.brev.mapper
 
 import no.nav.melosys.domain.Behandling
 import no.nav.melosys.domain.brev.*
-import no.nav.melosys.domain.dokument.felles.Periode
 import no.nav.melosys.domain.kodeverk.*
 import no.nav.melosys.domain.kodeverk.brev.Produserbaredokumenter
 import no.nav.melosys.domain.mottatteopplysninger.SøknadIkkeYrkesaktiv
