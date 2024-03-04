@@ -689,6 +689,7 @@ class SedDataByggerTest {
     @Test
     void lag_behandlingMedUnntaksflytTema_henterIkkeArbeidslandUtenMarginaltArbeid() {
         behandling.setTema(Behandlingstema.A1_ANMODNING_OM_UNNTAK_PAPIR);
+        when(saksbehandlingRegler.harRegistreringUnntakFraMedlemskapFlyt(any())).thenReturn(true);
 
         SedDataGrunnlagMedSoknad sedDataGrunnlagMedSoknad = lagGrunnlagMedSøknad();
 
