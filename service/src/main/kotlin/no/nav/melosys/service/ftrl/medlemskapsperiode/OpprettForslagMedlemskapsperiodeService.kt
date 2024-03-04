@@ -56,9 +56,8 @@ class OpprettForslagMedlemskapsperiodeService(
             if (behandling.erAndregangsbehandling() && opprinneligBehandling != null) {
                 val opprinneligBehandlingsresultat = behandlingsresultatService.hentBehandlingsresultat(opprinneligBehandling.id)
                 medlemskapsperioder = UtledMedlemskapsperioder.lagMedlemskapsperioderForAndregangsbehandling(
+                    UtledMedlemskapsperioderDto(søknad.periode, søknad.trygdedekning, null, bestemmelse),
                     opprinneligBehandlingsresultat,
-                    bestemmelse,
-                    søknad.trygdedekning,
                     behandling.type
                 )
             } else {
