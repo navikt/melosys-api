@@ -1,7 +1,6 @@
-package no.nav.melosys.itest
+package no.nav.melosys
 
 import io.kotest.matchers.collections.shouldContain
-import no.nav.melosys.AwaitUtil
 import no.nav.melosys.saksflyt.ProsessinstansRepository
 import no.nav.melosys.saksflytapi.domain.ProsessStatus
 import no.nav.melosys.saksflytapi.domain.ProsessType

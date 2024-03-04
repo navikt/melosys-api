@@ -15,6 +15,7 @@ import io.mockk.verify
 import no.nav.melosys.AwaitUtil
 import no.nav.melosys.AwaitUtil.untilMatching
 import no.nav.melosys.LoggingTestUtils.last
+import no.nav.melosys.ProsessUtil
 import no.nav.melosys.domain.Lovvalgsperiode
 import no.nav.melosys.domain.eessi.*
 import no.nav.melosys.domain.eessi.melding.MelosysEessiMelding
