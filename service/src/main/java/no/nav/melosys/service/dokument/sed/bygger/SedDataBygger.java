@@ -13,6 +13,7 @@ import no.nav.melosys.domain.eessi.Periode;
 import no.nav.melosys.domain.eessi.SvarAnmodningUnntak;
 import no.nav.melosys.domain.eessi.sed.*;
 import no.nav.melosys.domain.kodeverk.Land_iso2;
+import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingstema;
 import no.nav.melosys.domain.mottatteopplysninger.data.UtenlandskIdent;
 import no.nav.melosys.domain.person.Persondata;
 import no.nav.melosys.domain.person.familie.Familiemedlem;
@@ -138,14 +139,16 @@ public class SedDataBygger {
         List<Arbeidssted> arbeidssteder = dataGrunnlag.getArbeidsstedGrunnlag().hentArbeidssteder().stream()
             .map(SedDataBygger::mapArbeidssted).collect(Collectors.toList()); //NOSONAR mutable list
 
-        Set<String> arbeidsland = arbeidssteder.stream().map(Arbeidssted::getAdresse).map(Adresse::getLand).collect(Collectors.toSet());
+        if (!saksbehandlingRegler.harRegistreringUnntakFraMedlemskapFlyt(dataGrunnlag.getBehandling())) {
+            Set<String> arbeidsland = arbeidssteder.stream().map(Arbeidssted::getAdresse).map(Adresse::getLand).collect(Collectors.toSet());
 
-        landvelgerService.hentAlleArbeidslandUtenMarginaltArbeid(dataGrunnlag.getBehandling().getId()).stream()
-            .map(Land_iso2::getKode)
-            .distinct()
-            .filter(not(arbeidsland::contains))
-            .map(Arbeidssted::lagIkkeFastArbeidssted)
-            .forEach(arbeidssteder::add);
+            landvelgerService.hentAlleArbeidslandUtenMarginaltArbeid(dataGrunnlag.getBehandling().getId()).stream()
+                .map(Land_iso2::getKode)
+                .distinct()
+                .filter(not(arbeidsland::contains))
+                .map(Arbeidssted::lagIkkeFastArbeidssted)
+                .forEach(arbeidssteder::add);
+        }
 
         return arbeidssteder;
     }
