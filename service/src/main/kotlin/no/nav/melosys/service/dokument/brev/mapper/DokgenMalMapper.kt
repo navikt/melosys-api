@@ -26,7 +26,7 @@ class DokgenMalMapper(
         // Henter opplysninger på nytt for å sikre at korrekt adresse benyttes (med mindre myndighet)
         val brevbestillingBuilder = mottattBrevbestilling.toBuilder()
         berikBestillingMedPersondata(brevbestillingBuilder, mottattBrevbestilling.behandling, mottaker)
-        return lagDokgenDtoFraBestilling(brevbestillingBuilder.build()).apply {
+            return lagDokgenDtoFraBestilling(brevbestillingBuilder.build()).apply {
             if (Mottakerroller.UTENLANDSK_TRYGDEMYNDIGHET.kode != this.mottaker.type) {
                 this.mottaker = lagMottakerUtenKoder(this.mottaker)
             }
@@ -91,7 +91,7 @@ class DokgenMalMapper(
             behandlingsresultat.behandling.mottatteOpplysninger.mottatteOpplysningerData as SøknadNorgeEllerUtenforEØS
         val trygdedekning = mottatteOpplysningerData.trygdedekning.kode
         val ikkeyrkesaktivrelasjonType =
-            behandlingsresultat.avklartefakta.filter { it.type == Avklartefaktatyper.IKKE_YRKESAKTIV_RELASJON }.first().fakta
+            behandlingsresultat.avklartefakta.filter { it.type == Avklartefaktatyper.IKKE_YRKESAKTIV_RELASJON }.firstOrNull()?.fakta
         val avslåttMedlemskapsperiodeFørMottaksdatoHelsedel = innvilgelseFtrlMapper.mapAvslåttMedlemskapsperiodeFørMottaksdatoFullDekning(
             behandlingsresultat.medlemAvFolketrygden,
             brevbestilling.forsendelseMottatt

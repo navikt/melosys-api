@@ -106,7 +106,7 @@ public class DokumentproduksjonsInfoMapper {
                 new DokumentproduksjonsInfo("ikke_yrkesaktiv_vedtaksbrev",
                     DokumentKategoriKode.VB.getKode(),
                     JournalforingsTittel.IKKE_YRKESAKTIV_VEDTAKSBREV.getTittel()))
-            .put(IKKE_YRKESAKTIV_PLIKTIG_FTRL,
+            .put(IKKE_YRKESAKTIV_FRIVILLIG_FTRL,
                 new DokumentproduksjonsInfo("ikke_yrkesaktiv_frivillig_ftrl",
                     DokumentKategoriKode.VB.getKode(),
                     JournalforingsTittel.IKKE_YRKESAKTIV_FRIVILLIG_FTRL.getTittel()))
