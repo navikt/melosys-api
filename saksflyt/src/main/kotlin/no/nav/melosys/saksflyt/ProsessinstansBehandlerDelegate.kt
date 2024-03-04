@@ -35,11 +35,7 @@ class ProsessinstansBehandlerDelegate(
 
     Settes ikke på vent om
         1. Prosessinstansen ikke har en låsreferanse
-        2. Det finnes ingen prosessinstans med samme referanse
-
-        Når det gjelder sed mottak, så settes ikke prosessinstanser med samme låsreferanse på vent
-        siden også subprosesser lages med samme låsreferanse som parent prosessen.
-        Dette må fikses for å løse https://jira.adeo.no/browse/MELOSYS-6365
+        2. Det finnes ingen aktiv prosessinstans med samme gruppe prefiks
      */
     private fun skalSettesPåVent(prosessinstans: Prosessinstans): Boolean {
         if (prosessinstans.låsReferanse == null) {
@@ -47,13 +43,13 @@ class ProsessinstansBehandlerDelegate(
         }
 
         val låsReferanse: LåsReferanse = LåsReferanseFactory.lagLåsReferanse(prosessinstans.låsReferanse)
-        val andreAktiveLåsMedSammeReferanse = finnAndreAktiveLåsMedSammeReferanse(prosessinstans.id, låsReferanse.referanse)
-        return låsReferanse.skalSettesPåVent(andreAktiveLåsMedSammeReferanse)
+        val andreAktiveLåsMedSammeGruppePrefiks = finnAndreAktiveLåsMedSammegruppePrefiks(prosessinstans.id, låsReferanse.gruppePrefiks)
+        log.info { "Låsreferanse: ${prosessinstans.låsReferanse} Andre aktive med samme gruppe prefiks: $andreAktiveLåsMedSammeGruppePrefiks" }
+        return låsReferanse.skalSettesPåVent(andreAktiveLåsMedSammeGruppePrefiks)
     }
 
-    internal fun finnAndreAktiveLåsMedSammeReferanse(id: UUID, låsReferanseStarterMed: String): Collection<String> {
-        return prosessinstansRepository.findAllByIdNotAndStatusNotInAndLåsReferanseStartingWith(
+    internal fun finnAndreAktiveLåsMedSammegruppePrefiks(id: UUID, låsReferanseStarterMed: String): Collection<String> =
+        prosessinstansRepository.findAllByIdNotAndStatusNotInAndLåsReferanseStartingWith(
             id, setOf(ProsessStatus.PÅ_VENT, ProsessStatus.FERDIG), låsReferanseStarterMed
-        ).map { it.låsReferanse }.toSet()
-    }
+        ).map { it.låsReferanse }
 }

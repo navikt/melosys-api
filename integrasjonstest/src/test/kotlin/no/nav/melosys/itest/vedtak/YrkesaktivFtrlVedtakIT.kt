@@ -44,9 +44,9 @@ import no.nav.melosys.service.avgift.dto.SkatteforholdTilNorgeRequest
 import no.nav.melosys.service.avklartefakta.AvklartefaktaDto
 import no.nav.melosys.service.avklartefakta.AvklartefaktaService
 import no.nav.melosys.service.behandling.BehandlingsresultatService
-import no.nav.melosys.service.journalforing.JournalfoeringService
 import no.nav.melosys.service.ftrl.medlemskapsperiode.MedlemskapsperiodeService
 import no.nav.melosys.service.ftrl.medlemskapsperiode.OpprettForslagMedlemskapsperiodeService
+import no.nav.melosys.service.journalforing.JournalfoeringService
 import no.nav.melosys.service.mottatteopplysninger.MottatteOpplysningerService
 import no.nav.melosys.service.oppgave.OppgaveService
 import no.nav.melosys.service.sak.OpprettBehandlingForSak
@@ -100,7 +100,7 @@ class YrkesaktivFtrlVedtakIT(
     fun setup() {
         fakturaserieReferanse = ULID.random().toString()
         oAuthMockServer.start()
-        unleash.enableAllExcept(ToggleName.MELOSYS_FOLKETRYGDEN_2_7)
+        unleash.enableAllExcept(ToggleName.MELOSYS_FOLKETRYGDEN_2_7, ToggleName.MELOSYS_FTRL_YRKESAKTIV_PLIKTIGE_BESTEMMELSER)
         MedlRepo.repo.clear()
         originalSubjectHandler = SubjectHandler.getInstance()
 

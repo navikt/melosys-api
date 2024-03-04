@@ -5,6 +5,7 @@ import no.nav.melosys.saksflytapi.domain.*
 import org.springframework.context.event.EventListener
 import org.springframework.stereotype.Component
 import java.time.LocalDateTime
+import java.util.UUID
 
 private val log = KotlinLogging.logger { }
 
@@ -15,41 +16,50 @@ class ProsessinstansFerdigListener(
 ) {
     @EventListener
     fun prosessinstansFerdig(prosessinstansFerdigEvent: ProsessinstansFerdigEvent) {
-        log.info("Prosessinstans {} ferdig", prosessinstansFerdigEvent.uuid)
-        if (prosessinstansFerdigEvent.låsReferanse != null && finnesIkkeAktivReferanse(prosessinstansFerdigEvent)) {
+        if (prosessinstansFerdigEvent.låsReferanse == null) {
+            log.info("Prosessinstans ${prosessinstansFerdigEvent.uuid} ferdig uten låsreferanse")
+            return
+        }
+
+        log.info("Prosessinstans ${prosessinstansFerdigEvent.uuid} ferdig, sjekker om neste med låsreferanse:${prosessinstansFerdigEvent.låsReferanse} kan startes")
+        if (kanNesteProsessinstansStartes(prosessinstansFerdigEvent)) {
             startNesteProsessinstans(prosessinstansFerdigEvent)
         }
     }
 
-    private fun finnesIkkeAktivReferanse(prosessinstansFerdigEvent: ProsessinstansFerdigEvent): Boolean {
-        if (!prosessinstansRepository.existsByStatusNotInAndLåsReferanse(setOf(ProsessStatus.FERDIG), prosessinstansFerdigEvent.låsReferanse)) {
-            log.info("Det finnes ingen aktiv prosessinstans med låsreferanse {}", prosessinstansFerdigEvent.låsReferanse)
-            return true
-        }
-        log.info("Det finnes en aktiv prosessinstans med låsreferanse {}", prosessinstansFerdigEvent.låsReferanse)
-        return finnesProssesserMedSammeLåsReferanseOgForskjelligIdpåVent(prosessinstansFerdigEvent)
-    }
-
-    private fun finnesProssesserMedSammeLåsReferanseOgForskjelligIdpåVent(prosessinstansFerdigEvent: ProsessinstansFerdigEvent): Boolean =
-        // Dette bør ryddes mer i og det er egen oppgave for å fikse sed synkronisering med samme
-        // låsreferanse: https://jira.adeo.no/browse/MELOSYS-6365
-        prosessinstansRepository.findAllByIdNotAndStatusNotInAndLåsReferanseStartingWith(
-            prosessinstansFerdigEvent.uuid,
-            setOf(ProsessStatus.FERDIG),
-            prosessinstansFerdigEvent.låsReferanse
-        ).filter { it.prosessStatus == ProsessStatus.PÅ_VENT && it.låsReferanse == prosessinstansFerdigEvent.låsReferanse }.apply {
-            log.info("$size prosessinstanser med nøyaktig samme låsreferanse ${prosessinstansFerdigEvent.låsReferanse} er på vent")
+    private fun kanNesteProsessinstansStartes(prosessinstansFerdigEvent: ProsessinstansFerdigEvent): Boolean =
+        prosessinstansRepository.findAllByStatus(ProsessStatus.PÅ_VENT).filter {
+            LåsReferanseFactory.harSammeGruppePrefiks(it.låsReferanse, prosessinstansFerdigEvent.låsReferanse)
+        }.apply {
+            log.info("Prosessinstans(er) på vent med samme gruppe-prefiks: ${this.map { it.id }}")
         }.isNotEmpty()
 
-    private fun startNesteProsessinstans(prosessinstansFerdigEvent: ProsessinstansFerdigEvent) {
-        log.info("Forsøker å starte neste prosessinstans, låsreferanse {}", prosessinstansFerdigEvent.låsReferanse)
-        val ferdigReferanse = LåsReferanseFactory.lagLåsReferanse(prosessinstansFerdigEvent.låsReferanse)
+    private val Prosessinstans.parentId: UUID?
+        get() = getData(ProsessDataKey.PROCESS_PARENT_ID, UUID::class.java)
 
+    private fun ProsessinstansFerdigEvent.finnSibling(): Prosessinstans? =
         prosessinstansRepository.findAllByStatus(ProsessStatus.PÅ_VENT)
-            .filter { harSammeReferanse(it, ferdigReferanse) }
-            .sortedBy { it.registrertDato }
-            .firstOrNull()
-            ?.let { oppdaterStatusOgBehandleProsessinstans(it) }
+            .filter { it.parentId == parentId }
+            .filter { it.låsReferanse == låsReferanse }
+            .sortedBy { it.registrertDato } // Ta den eldste først
+            .firstOrNull().apply {
+                this?.let { log.debug { "Fant sibling ${it.id} til $uuid med parent:$parentId og lås:$låsReferanse" } }
+            }
+
+    private fun startNesteProsessinstans(prosessinstansFerdigEvent: ProsessinstansFerdigEvent) {
+        val alleISammeGruppePåVent = prosessinstansRepository.findAllByStatus(ProsessStatus.PÅ_VENT)
+            .filter { LåsReferanseFactory.harSammeGruppePrefiks(it.låsReferanse, prosessinstansFerdigEvent.låsReferanse) }
+            .sortedBy { it.registrertDato } // Ta den eldste først
+
+        val nesteSomSkalStartes =
+            alleISammeGruppePåVent
+                .firstOrNull { it.parentId == prosessinstansFerdigEvent.uuid } // ta sub-prosesser først
+                ?: prosessinstansFerdigEvent.finnSibling() // ta så sibling-prosesser
+                ?: alleISammeGruppePåVent.firstOrNull() // ta hovedprosesser når vi ikke har flere sub/sibling-prosesser på vent
+
+        if (nesteSomSkalStartes != null) {
+            oppdaterStatusOgBehandleProsessinstans(nesteSomSkalStartes)
+        }
     }
 
     private fun oppdaterStatusOgBehandleProsessinstans(prosessinstans: Prosessinstans) {
@@ -59,9 +69,5 @@ class ProsessinstansFerdigListener(
         prosessinstansRepository.save(prosessinstans)
         prosessinstansBehandler.behandleProsessinstans(prosessinstans)
     }
-
-    private fun harSammeReferanse(prosessinstans: Prosessinstans, ferdigLåsreferanse: LåsReferanse): Boolean {
-        val låsReferanse = LåsReferanseFactory.lagLåsReferanse(prosessinstans.låsReferanse)
-        return låsReferanse.referanse == ferdigLåsreferanse.referanse
-    }
 }
+

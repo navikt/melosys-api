@@ -12,14 +12,14 @@ class ManglendeInnbetalingBehandlingLåsReferanse(val låsReferanse: String) : L
         }
     }
 
-    override val referanse: String
+    override val gruppePrefiks: String
         get() = "${LåsReferanseType.UBETALT}_${fakturaserieReferanse}"
 
     override fun skalSettesPåVent(aktiveLåsReferanser: Collection<String>): Boolean {
         return aktiveLåsReferanser.isNotEmpty()
     }
 
-    override fun toString(): String = referanse
+    override fun toString(): String = gruppePrefiks
 
     private fun erGyldigReferanse(referanse: String): Boolean =
         LåsReferanseType.UBETALT.erGyldigReferanse(referanse)

@@ -170,6 +170,28 @@ class VilkårForBestemmelseIkkeYrkesaktivTest {
     }
 
     @Test
+    fun `vilkår for FTRL_KAP2_2_7_FØRSTE_LEDD`() {
+        val vilkår = vilkårForBestemmelse.hentVilkår(
+            Folketrygdloven_kap2_bestemmelser.FTRL_KAP2_2_7_FØRSTE_LEDD,
+            emptyMap(),
+            1L
+        )
+
+
+        vilkår.shouldContainExactly(
+            Vilkår(
+                FTRL_2_1A_TRYGDEKOORDINGERING
+            ),
+            Vilkår(
+                FTRL_2_7_IKKE_PLIKTIG_MEDLEM
+            ),
+            Vilkår(
+                FTRL_2_7_RIMELIGHETSVURDERING
+            ),
+        )
+    }
+
+    @Test
     fun `vilkår for FTRL_KAP2_2_7_FJERDE_LEDD`() {
         val vilkår = vilkårForBestemmelse.hentVilkår(
             Folketrygdloven_kap2_bestemmelser.FTRL_KAP2_2_7_FJERDE_LEDD,
