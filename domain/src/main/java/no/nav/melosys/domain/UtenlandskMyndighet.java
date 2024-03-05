@@ -33,8 +33,8 @@ public class UtenlandskMyndighet {
     @ManyToMany(cascade = CascadeType.ALL, fetch = FetchType.EAGER)
     @JoinTable(
         name = "utenlandsk_myndighet_pref",
-        joinColumns = @JoinColumn(name = "utenlandsk_myndighet_id", updatable = false),
-        inverseJoinColumns = @JoinColumn(name = "preferanse_id", updatable = false)
+        joinColumns = @JoinColumn(name = "utenlandsk_myndighet_id",insertable = false, updatable = false),
+        inverseJoinColumns = @JoinColumn(name = "preferanse_id", insertable = false, updatable = false)
     )
     private Set<Preferanse> preferanser = new HashSet<>();
 

@@ -31,6 +31,10 @@ public class Inntektsperiode {
     private Inntektskildetype type;
 
     @Embedded
+    @AttributeOverrides({
+        @AttributeOverride(name = "verdi", column = @Column(name = "avgiftspliktig_inntekt_mnd_verdi")),
+        @AttributeOverride(name = "valuta", column = @Column(name = "avgiftspliktig_inntekt_mnd_valuta"))
+    })
     private Penger avgiftspliktigInntektMnd;
 
     @Column(name = "aga_betales_til_skatt")
