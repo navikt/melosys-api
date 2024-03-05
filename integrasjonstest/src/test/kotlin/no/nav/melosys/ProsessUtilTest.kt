@@ -45,21 +45,20 @@ class ProsessUtilTest {
             ) {
             }
         }.message shouldBe "wait for prosees type:JFR_KNYTT to start\n" +
-            "Condition with no.nav.melosys.AwaitUtil was not fulfilled within 2 milliseconds.\n" +
-            "Expected JFR_KNYTT but actual was null"
+            "Condition with no.nav.melosys.AwaitUtil\$AwaitBuilder was not fulfilled within 2 milliseconds.\n" +
+            "Collection should contain element JFR_KNYTT based on object equality; but the collection is []"
     }
 
     @Test
-    fun `assert med beskrivelse om prosess med ønsket type ikke blir funnet i databasen - fiks koden slik at det kommer med om andre typer har blit laget`() {
+    fun `assert med beskrivelse om prosess med ønsket type ikke blir funnet i databasen`() {
         val prosessinstansRepository = mockk<ProsessinstansRepository>()
-        every { prosessinstansRepository.findAllAfterDate(any()) } answers {
+        every { prosessinstansRepository.findAllAfterDate(any()) } returns
             listOf(
                 Prosessinstans().apply {
                     type = ProsessType.IVERKSETT_VEDTAK_EOS
                     status = ProsessStatus.KLAR
                 }
             )
-        }
 
         shouldThrow<AssertionError> {
             ProsessUtil(prosessinstansRepository).executeAndWait(
@@ -67,8 +66,8 @@ class ProsessUtilTest {
             ) {
             }
         }.message shouldBe "wait for prosees type:JFR_KNYTT to start\n" +
-            "Condition with no.nav.melosys.AwaitUtil was not fulfilled within 2 milliseconds.\n" +
-            "Expected JFR_KNYTT but actual was null"
+            "Condition with no.nav.melosys.AwaitUtil\$AwaitBuilder was not fulfilled within 2 milliseconds.\n" +
+            "Collection should contain element JFR_KNYTT based on object equality; but the collection is [IVERKSETT_VEDTAK_EOS]"
     }
 
     @Test
@@ -90,8 +89,8 @@ class ProsessUtilTest {
             }
         }.message shouldBe "also wait for prosessTypes: [IVERKSETT_VEDTAK_EOS]\n" +
             "wait for prosees type:IVERKSETT_VEDTAK_EOS to start\n" +
-            "Condition with no.nav.melosys.AwaitUtil was not fulfilled within 2 milliseconds.\n" +
-            "Expected IVERKSETT_VEDTAK_EOS but actual was null"
+            "Condition with no.nav.melosys.AwaitUtil\$AwaitBuilder was not fulfilled within 2 milliseconds.\n" +
+            "Collection should contain element IVERKSETT_VEDTAK_EOS based on object equality; but the collection is [JFR_KNYTT]"
     }
 
     @Test

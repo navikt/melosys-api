@@ -19,18 +19,12 @@ object AwaitUtil {
         waitFor: T,
         clueMessages: (e: Exception) -> String? = { e -> e.message },
         getCurrent: () -> T?
-    ) = untilMatching({ waitFor }, clueMessages, getCurrent)
-
-    fun <T> ConditionFactory.untilMatching(
-        waitFor: () -> T,
-        clueMessages: (e: Exception) -> String? = { e -> e.message },
-        getCurrent: () -> T?
     ) {
         try {
-            until { getCurrent() == waitFor() }
+            until { getCurrent() == waitFor }
         } catch (e: ConditionTimeoutException) {
             withClue(clueMessages(e)) {
-                getCurrent() shouldBe waitFor()
+                getCurrent() shouldBe waitFor
             }
         }
     }
@@ -38,6 +32,30 @@ object AwaitUtil {
     fun ConditionFactory.throwOnLogError(logEvents: List<ILoggingEvent>): ConditionFactory = this.conditionEvaluationListener {
         logEvents.firstOrNull { it.level == Level.ERROR }?.let {
             throw TekniskException("Fant log entry med level error: ${it.formattedMessage}")
+        }
+    }
+
+    fun <T> ConditionFactory.builder() = AwaitBuilder<T>(this)
+
+    class AwaitBuilder<T>(private val conditionFactory: ConditionFactory) {
+        private lateinit var waitFor: () -> Boolean
+        private lateinit var assertIfTimeout: (e: ConditionTimeoutException) -> Unit
+        fun waitFor(block: () -> Boolean) = apply {
+            waitFor = block
+        }
+
+        fun assertIfTimeout(block: (e: ConditionTimeoutException) -> Unit) = apply {
+            assertIfTimeout = block
+        }
+
+        fun execute() {
+            try {
+                conditionFactory.until {
+                    waitFor()
+                }
+            } catch (e: ConditionTimeoutException) {
+                assertIfTimeout(e)
+            }
         }
     }
 }

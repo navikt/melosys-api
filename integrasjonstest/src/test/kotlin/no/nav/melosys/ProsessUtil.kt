@@ -1,7 +1,10 @@
 package no.nav.melosys
 
 import io.kotest.assertions.withClue
+import io.kotest.matchers.collections.shouldContain
+import io.kotest.matchers.collections.shouldContainInOrder
 import io.kotest.matchers.nulls.shouldNotBeNull
+import no.nav.melosys.AwaitUtil.builder
 import no.nav.melosys.AwaitUtil.untilMatching
 import no.nav.melosys.saksflyt.ProsessinstansRepository
 import no.nav.melosys.saksflytapi.domain.ProsessStatus
@@ -35,9 +38,15 @@ class ProsessUtil(
             AwaitUtil.awaitWithFailOnLogErrors {
                 pollDelay(pollDelay)
                     .timeout(timeOutFindingProsess)
-                    .untilMatching(waitFor = prosessType) {
-                        prosessinstansRepository.findAllAfterDate(startTid).firstOrNull { it.type == prosessType }?.type
+                    .builder<Unit>()
+                    .waitFor { prosessinstansRepository.findAllAfterDate(startTid).any { it.type == prosessType } }
+                    .assertIfTimeout { e ->
+                        val types = prosessinstansRepository.findAllAfterDate(startTid).map { it.type }
+                        withClue(e.message) {
+                            types shouldContain prosessType
+                        }
                     }
+                    .execute()
             }
         }
 

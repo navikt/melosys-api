@@ -2,9 +2,11 @@ package no.nav.melosys
 
 import io.kotest.assertions.AssertionFailedError
 import io.kotest.assertions.throwables.shouldThrow
+import io.kotest.assertions.withClue
 import io.kotest.matchers.shouldBe
 import mu.KotlinLogging
 import no.nav.melosys.AwaitUtil.awaitWithFailOnLogErrors
+import no.nav.melosys.AwaitUtil.builder
 import no.nav.melosys.AwaitUtil.throwOnLogError
 import no.nav.melosys.AwaitUtil.untilMatching
 import no.nav.melosys.LoggingTestUtils.withLogCapture
@@ -62,15 +64,41 @@ class AwaitUtilTest {
         }
     }
 
+
     @Test
-    fun `untilMatching skal sammenlikne waitFor med lambda`() {
-        await.untilMatching(
-            waitFor = { "last log messge" }
-        ) {
-            "last log messge"
-        }
+    fun `await builder skal returnere verdi`() {
+        var i = 0
+            await.atMost(Duration.ofMillis(100))
+                .pollInterval(Duration.ofMillis(1))
+                .pollDelay(Duration.ofMillis(1))
+                .builder<Int>()
+                .waitFor { i++ >= 10 }
+                .assertIfTimeout {
+                    withClue("i > 10") {
+                        i shouldBe 10
+                    }
+                }.execute()
     }
 
+    @Test
+    fun `await builder skal kjøre assert ved timeout`() {
+        shouldThrow<AssertionFailedError> {
+            var i = 0
+            await.atMost(Duration.ofMillis(2))
+                .pollInterval(Duration.ofMillis(1))
+                .pollDelay(Duration.ofMillis(1))
+                .builder<String>()
+                .waitFor { i++.toString() == "hei" }
+                .assertIfTimeout {
+                    withClue("$i.toString() == \"hei\"") {
+                        i.toString() shouldBe "hei"
+                    }
+                }.execute()
+        }.message.shouldBe(
+            "1.toString() == \"hei\"\n" +
+                "expected:<\"hei\"> but was:<\"1\">"
+        )
+    }
 
     @Test
     fun `untilMatching skal gi assert på forskjellig resultat ved timeout`() {
