@@ -19,12 +19,18 @@ object AwaitUtil {
         waitFor: T,
         clueMessages: (e: Exception) -> String? = { e -> e.message },
         getCurrent: () -> T?
+    ) = untilMatching({ waitFor }, clueMessages, getCurrent)
+
+    fun <T> ConditionFactory.untilMatching(
+        waitFor: () -> T,
+        clueMessages: (e: Exception) -> String? = { e -> e.message },
+        getCurrent: () -> T?
     ) {
         try {
-            until { getCurrent() == waitFor }
+            until { getCurrent() == waitFor() }
         } catch (e: ConditionTimeoutException) {
             withClue(clueMessages(e)) {
-                getCurrent() shouldBe waitFor
+                getCurrent() shouldBe waitFor()
             }
         }
     }

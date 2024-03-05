@@ -22,7 +22,7 @@ class AwaitUtilTest {
     fun `awaitWithFailOnLogErrors skal avbryte await å kaste exception ved feil i log`() {
         shouldThrow<TekniskException> {
             awaitWithFailOnLogErrors {
-                atMost(Duration.ofSeconds(1)).until {
+                until {
                     log.error("error")
                     true
                 }
@@ -33,7 +33,7 @@ class AwaitUtilTest {
     @Test
     fun `awaitWithFailOnLogErrors skal retunere verdi som lages av await`() {
         awaitWithFailOnLogErrors {
-            atMost(Duration.ofSeconds(1)).untilNotNull {
+            untilNotNull {
                 "not null"
             }
         }.shouldBe("not null")
@@ -45,7 +45,7 @@ class AwaitUtilTest {
         shouldThrow<TekniskException> {
             withLogCapture { logEvents ->
                 await.throwOnLogError(logEvents)
-                    .atMost(Duration.ofSeconds(1)).until {
+                    .until {
                         log.error("error")
                         true
                     }
@@ -54,9 +54,18 @@ class AwaitUtilTest {
     }
 
     @Test
-    fun `untilMatching skal sammenlikne waitFor med lambda`() {
-        await.atMost(Duration.ofMillis(101)).untilMatching(
+    fun `untilMatching skal sammenlikne waitFor med string`() {
+        await.untilMatching(
             waitFor = "last log messge"
+        ) {
+            "last log messge"
+        }
+    }
+
+    @Test
+    fun `untilMatching skal sammenlikne waitFor med lambda`() {
+        await.untilMatching(
+            waitFor = { "last log messge" }
         ) {
             "last log messge"
         }
