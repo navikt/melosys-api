@@ -15,12 +15,12 @@ import java.time.LocalDate
 object UtledMedlemskapsperioder {
 
     fun lagMedlemskapsperioderForAndregangsbehandling(
-        opprinneligeMedlemskapsperioder: Collection<Medlemskapsperiode>?,
+        opprinneligeMedlemskapsperioder: Collection<Medlemskapsperiode>,
         nyBestemmelse: Folketrygdloven_kap2_bestemmelser,
         nyTrygdedekning: Trygdedekninger,
         type: Behandlingstyper
     ): Collection<Medlemskapsperiode> =
-        (opprinneligeMedlemskapsperioder ?: emptyList())
+        opprinneligeMedlemskapsperioder
             .filter { if (type === Behandlingstyper.MANGLENDE_INNBETALING_TRYGDEAVGIFT) it.erInnvilget() || it.erOpphørt() else it.erInnvilget() }
             .map {
                 Medlemskapsperiode().apply {
