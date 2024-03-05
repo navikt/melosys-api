@@ -21,10 +21,10 @@ class ProsessUtilTest {
 
     @BeforeAll
     fun setUp() {
-        ProsessUtil.timeOut = Duration.ofMillis(210)
-        ProsessUtil.timeOutFindingProsess = Duration.ofMillis(200)
-        ProsessUtil.pollDelay = Duration.ofMillis(199)
-        ProsessUtil.pollInterval = Duration.ofMillis(200)
+        ProsessUtil.timeOut = Duration.ofMillis(2)
+        ProsessUtil.timeOutFindingProsess = Duration.ofMillis(2)
+        ProsessUtil.pollDelay = Duration.ofMillis(1)
+        ProsessUtil.pollInterval = Duration.ofMillis(1)
     }
 
     @AfterAll
@@ -45,7 +45,7 @@ class ProsessUtilTest {
             ) {
             }
         }.message shouldBe "wait for prosees type:JFR_KNYTT to start\n" +
-            "Condition with no.nav.melosys.AwaitUtil was not fulfilled within 200 milliseconds.\n" +
+            "Condition with no.nav.melosys.AwaitUtil was not fulfilled within 2 milliseconds.\n" +
             "Expected JFR_KNYTT but actual was null"
     }
 
@@ -53,7 +53,12 @@ class ProsessUtilTest {
     fun `assert med beskrivelse om prosess med ønsket type ikke blir funnet i databasen - fiks koden slik at det kommer med om andre typer har blit laget`() {
         val prosessinstansRepository = mockk<ProsessinstansRepository>()
         every { prosessinstansRepository.findAllAfterDate(any()) } answers {
-            listOf(ProsessType.IVERKSETT_VEDTAK_EOS).map { Prosessinstans().apply { type = it } }
+            listOf(
+                Prosessinstans().apply {
+                    type = ProsessType.IVERKSETT_VEDTAK_EOS
+                    status = ProsessStatus.KLAR
+                }
+            )
         }
 
         shouldThrow<AssertionError> {
@@ -62,7 +67,7 @@ class ProsessUtilTest {
             ) {
             }
         }.message shouldBe "wait for prosees type:JFR_KNYTT to start\n" +
-            "Condition with no.nav.melosys.AwaitUtil was not fulfilled within 200 milliseconds.\n" +
+            "Condition with no.nav.melosys.AwaitUtil was not fulfilled within 2 milliseconds.\n" +
             "Expected JFR_KNYTT but actual was null"
     }
 
@@ -85,7 +90,7 @@ class ProsessUtilTest {
             }
         }.message shouldBe "also wait for prosessTypes: [IVERKSETT_VEDTAK_EOS]\n" +
             "wait for prosees type:IVERKSETT_VEDTAK_EOS to start\n" +
-            "Condition with no.nav.melosys.AwaitUtil was not fulfilled within 200 milliseconds.\n" +
+            "Condition with no.nav.melosys.AwaitUtil was not fulfilled within 2 milliseconds.\n" +
             "Expected IVERKSETT_VEDTAK_EOS but actual was null"
     }
 
@@ -115,7 +120,7 @@ class ProsessUtilTest {
             }
         }.message shouldBe "also wait for prosessTypes: [IVERKSETT_VEDTAK_EOS]\n" +
             "wait for prosees type:IVERKSETT_VEDTAK_EOS to have status FERDIG\n" +
-            "Condition with no.nav.melosys.AwaitUtil was not fulfilled within 210 milliseconds.\n" +
+            "Condition with no.nav.melosys.AwaitUtil was not fulfilled within 2 milliseconds.\n" +
             "Expected IVERKSETT_VEDTAK_EOS but actual was null"
     }
 
