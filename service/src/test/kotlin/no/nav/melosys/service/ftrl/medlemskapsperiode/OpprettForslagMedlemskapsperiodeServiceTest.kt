@@ -2,8 +2,10 @@ package no.nav.melosys.service.ftrl.medlemskapsperiode
 
 import io.getunleash.FakeUnleash
 import io.kotest.assertions.throwables.shouldThrow
+import io.kotest.matchers.collections.shouldBeEmpty
 import io.kotest.matchers.collections.shouldHaveSize
 import io.kotest.matchers.collections.shouldNotBeEmpty
+import io.kotest.matchers.nulls.shouldNotBeNull
 import io.kotest.matchers.shouldBe
 import io.kotest.matchers.shouldNotBe
 import io.kotest.matchers.string.shouldContain
@@ -220,6 +222,29 @@ class OpprettForslagMedlemskapsperiodeServiceTest {
             }
         verify(exactly = 1) { medlemAvFolketrygdenRepository.save(any()) }
         verify(exactly = 0) { utledMottaksdato.getMottaksdato(any()) }
+    }
+
+    @Test
+    fun opprettForslagPåMedlemskapsperioder_andregangsvurderingIngenOpprinneligeMedlemskapsperioder_returnererTomListe() {
+        val opprinneligBehandlingId = 2L
+        val behandlingsresultat = lagBehandlingsresultat().apply {
+            vilkaarsresultater.addAll(lagAlleKrevdeVilkår())
+            medlemAvFolketrygden = MedlemAvFolketrygden()
+            behandling.type = Behandlingstyper.NY_VURDERING
+            behandling.opprinneligBehandling = Behandling().apply { id = opprinneligBehandlingId }
+        }
+        val opprinneligBehandlingsresultat = lagBehandlingsresultat().apply { medlemAvFolketrygden = MedlemAvFolketrygden() }
+        every { behandlingsresultatService.hentBehandlingsresultat(BEH_RES_ID) } returns behandlingsresultat
+        every { behandlingsresultatService.hentBehandlingsresultat(opprinneligBehandlingId) } returns opprinneligBehandlingsresultat
+        every { medlemAvFolketrygdenRepository.save(behandlingsresultat.medlemAvFolketrygden) } returns behandlingsresultat.medlemAvFolketrygden
+        every { utledMottaksdato.getMottaksdato(any()) } returns LocalDate.now()
+
+
+        val perioder = opprettForslagMedlemskapsperiodeService.opprettForslagPåMedlemskapsperioder(BEH_RES_ID, BESTEMMELSE)
+
+
+        perioder.shouldNotBeNull().shouldBeEmpty()
+        verify(exactly = 1) { medlemAvFolketrygdenRepository.save(any()) }
     }
 
     @Test

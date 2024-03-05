@@ -6,9 +6,7 @@ import io.kotest.matchers.collections.shouldHaveSize
 import io.kotest.matchers.nulls.shouldNotBeNull
 import io.kotest.matchers.shouldBe
 import io.kotest.matchers.string.shouldContain
-import no.nav.melosys.domain.Behandlingsresultat
 import no.nav.melosys.domain.Medlemskapsperiode
-import no.nav.melosys.domain.folketrygden.MedlemAvFolketrygden
 import no.nav.melosys.domain.kodeverk.Folketrygdloven_kap2_bestemmelser
 import no.nav.melosys.domain.kodeverk.InnvilgelsesResultat
 import no.nav.melosys.domain.kodeverk.Medlemskapstyper
@@ -440,46 +438,37 @@ internal class UtledMedlemskapsperioderTest {
     // Ny vurdering / Manglende innbetaling / Andregangsbehandling
     @Test
     fun lagMedlemskapsperioderForAndregangsbehandling_nyVurdering_finnesMedlemskapsperioder_filtrererBortAvslåtte() {
-        val opprinneligBehandlingsresultat = Behandlingsresultat().apply {
-            medlemAvFolketrygden = MedlemAvFolketrygden().apply {
-                medlemskapsperioder = listOf(
-                    Medlemskapsperiode().apply {
-                        innvilgelsesresultat = InnvilgelsesResultat.INNVILGET
-                        trygdedekning = TRYGDEDEKNING_2_8
-                    },
-                    Medlemskapsperiode().apply {
-                        innvilgelsesresultat = InnvilgelsesResultat.AVSLAATT
-                        trygdedekning = TRYGDEDEKNING_2_8
-                    },
-                    Medlemskapsperiode().apply {
-                        innvilgelsesresultat = InnvilgelsesResultat.OPPHØRT
-                        trygdedekning = TRYGDEDEKNING_2_8
-                    })
-            }
-        }
+        val opprinneligeMedlemskapsperioder = listOf(
+            Medlemskapsperiode().apply {
+                innvilgelsesresultat = InnvilgelsesResultat.INNVILGET
+                trygdedekning = TRYGDEDEKNING_2_8
+            },
+            Medlemskapsperiode().apply {
+                innvilgelsesresultat = InnvilgelsesResultat.AVSLAATT
+                trygdedekning = TRYGDEDEKNING_2_8
+            },
+            Medlemskapsperiode().apply {
+                innvilgelsesresultat = InnvilgelsesResultat.OPPHØRT
+                trygdedekning = TRYGDEDEKNING_2_8
+            })
 
 
         val response = UtledMedlemskapsperioder.lagMedlemskapsperioderForAndregangsbehandling(
             UtledMedlemskapsperioderDto(Periode(), TRYGDEDEKNING_2_8, null, BESTEMMELSE_2_8),
-            opprinneligBehandlingsresultat,
+            opprinneligeMedlemskapsperioder,
             Behandlingstyper.NY_VURDERING
         )
 
 
-        opprinneligBehandlingsresultat.medlemAvFolketrygden.medlemskapsperioder.shouldHaveSize(3)
+        opprinneligeMedlemskapsperioder.shouldHaveSize(3)
         response.shouldHaveSize(1).single().innvilgelsesresultat.shouldBe(InnvilgelsesResultat.INNVILGET)
     }
 
     @Test
     fun lagMedlemskapsperioderForAndregangsbehandling_ingenMedlemskapsperioder_returnererTomListe() {
-        val opprinneligBehandlingsresultat = Behandlingsresultat().apply {
-            medlemAvFolketrygden = MedlemAvFolketrygden().apply { medlemskapsperioder = emptyList() }
-        }
-
-
         val response = UtledMedlemskapsperioder.lagMedlemskapsperioderForAndregangsbehandling(
             UtledMedlemskapsperioderDto(Periode(), TRYGDEDEKNING_2_8, null, BESTEMMELSE_2_8),
-            opprinneligBehandlingsresultat,
+            emptyList(),
             Behandlingstyper.NY_VURDERING
         )
 
@@ -489,21 +478,17 @@ internal class UtledMedlemskapsperioderTest {
 
     @Test
     fun lagMedlemskapsperioderForAndregangsbehandling_ulovligKombinasjon_oppdatererTrygdedekning() {
-        val opprinneligBehandlingsresultat = Behandlingsresultat().apply {
-            medlemAvFolketrygden = MedlemAvFolketrygden().apply {
-                medlemskapsperioder = listOf(
-                    Medlemskapsperiode().apply {
-                        innvilgelsesresultat = InnvilgelsesResultat.INNVILGET
-                        bestemmelse = BESTEMMELSE_2_8
-                        trygdedekning = TRYGDEDEKNING_2_8
-                    })
-            }
-        }
+        val opprinneligeMedlemskapsperioder = listOf(
+            Medlemskapsperiode().apply {
+                innvilgelsesresultat = InnvilgelsesResultat.INNVILGET
+                bestemmelse = BESTEMMELSE_2_8
+                trygdedekning = TRYGDEDEKNING_2_8
+            })
 
 
         val response = UtledMedlemskapsperioder.lagMedlemskapsperioderForAndregangsbehandling(
             UtledMedlemskapsperioderDto(Periode(), TRYGDEDEKNING_2_7, null, BESTEMMELSE_2_7),
-            opprinneligBehandlingsresultat,
+            opprinneligeMedlemskapsperioder,
             Behandlingstyper.NY_VURDERING
         )
 
@@ -517,24 +502,20 @@ internal class UtledMedlemskapsperioderTest {
         val søknadsperiode = Periode(MOTTAKSDATO.minusMonths(12), MOTTAKSDATO.minusMonths(6))
         val nySøknadsperiode = Periode(MOTTAKSDATO.minusMonths(8), MOTTAKSDATO.minusMonths(2))
 
-        val opprinneligBehandlingsresultat = Behandlingsresultat().apply {
-            medlemAvFolketrygden = MedlemAvFolketrygden().apply {
-                medlemskapsperioder = listOf(
-                    Medlemskapsperiode().apply {
-                        fom = søknadsperiode.fom
-                        tom = søknadsperiode.tom
-                        innvilgelsesresultat = InnvilgelsesResultat.INNVILGET
-                        bestemmelse = BESTEMMELSE_2_8
-                        trygdedekning = TRYGDEDEKNING_2_8
-                        medlemskapstype = Medlemskapstyper.FRIVILLIG
-                    })
-            }
-        }
+        val opprinneligeMedlemskapsperioder = listOf(
+            Medlemskapsperiode().apply {
+                fom = søknadsperiode.fom
+                tom = søknadsperiode.tom
+                innvilgelsesresultat = InnvilgelsesResultat.INNVILGET
+                bestemmelse = BESTEMMELSE_2_8
+                trygdedekning = TRYGDEDEKNING_2_8
+                medlemskapstype = Medlemskapstyper.FRIVILLIG
+            })
 
 
         val response = UtledMedlemskapsperioder.lagMedlemskapsperioderForAndregangsbehandling(
             UtledMedlemskapsperioderDto(nySøknadsperiode, TRYGDEDEKNING_2_8, null, BESTEMMELSE_PLIKTIG),
-            opprinneligBehandlingsresultat,
+            opprinneligeMedlemskapsperioder,
             Behandlingstyper.NY_VURDERING
         )
 
@@ -551,22 +532,18 @@ internal class UtledMedlemskapsperioderTest {
 
     @Test
     fun lagMedlemskapsperioderForAndregangsbehandling_fraPliktigTilFrivillig_oppdatererFelt() {
-        val opprinneligBehandlingsresultat = Behandlingsresultat().apply {
-            medlemAvFolketrygden = MedlemAvFolketrygden().apply {
-                medlemskapsperioder = listOf(
-                    Medlemskapsperiode().apply {
-                        innvilgelsesresultat = InnvilgelsesResultat.INNVILGET
-                        bestemmelse = BESTEMMELSE_PLIKTIG
-                        trygdedekning = Trygdedekninger.FULL_DEKNING_FTRL
-                        medlemskapstype = Medlemskapstyper.PLIKTIG
-                    })
-            }
-        }
+        val opprinneligeMedlemskapsperioder = listOf(
+            Medlemskapsperiode().apply {
+                innvilgelsesresultat = InnvilgelsesResultat.INNVILGET
+                bestemmelse = BESTEMMELSE_PLIKTIG
+                trygdedekning = Trygdedekninger.FULL_DEKNING_FTRL
+                medlemskapstype = Medlemskapstyper.PLIKTIG
+            })
 
 
         val response = UtledMedlemskapsperioder.lagMedlemskapsperioderForAndregangsbehandling(
             UtledMedlemskapsperioderDto(Periode(), TRYGDEDEKNING_2_8, null, BESTEMMELSE_2_8),
-            opprinneligBehandlingsresultat,
+            opprinneligeMedlemskapsperioder,
             Behandlingstyper.NY_VURDERING
         )
 
@@ -581,33 +558,29 @@ internal class UtledMedlemskapsperioderTest {
 
     @Test
     fun lagMedlemskapsperioderForAndregangsbehandling_manglendeInnbetaling_filtrererBortAvslåtteMenTarVarePåOpphørte() {
-        val opprinneligBehandlingsresultat = Behandlingsresultat().apply {
-            medlemAvFolketrygden = MedlemAvFolketrygden().apply {
-                medlemskapsperioder = listOf(
-                    Medlemskapsperiode().apply {
-                        innvilgelsesresultat = InnvilgelsesResultat.INNVILGET
-                        trygdedekning = TRYGDEDEKNING_2_8
-                    },
-                    Medlemskapsperiode().apply {
-                        innvilgelsesresultat = InnvilgelsesResultat.AVSLAATT
-                        trygdedekning = TRYGDEDEKNING_2_8
-                    },
-                    Medlemskapsperiode().apply {
-                        innvilgelsesresultat = InnvilgelsesResultat.OPPHØRT
-                        trygdedekning = TRYGDEDEKNING_2_8
-                    })
-            }
-        }
+        val opprinneligeMedlemskapsperioder = listOf(
+            Medlemskapsperiode().apply {
+                innvilgelsesresultat = InnvilgelsesResultat.INNVILGET
+                trygdedekning = TRYGDEDEKNING_2_8
+            },
+            Medlemskapsperiode().apply {
+                innvilgelsesresultat = InnvilgelsesResultat.AVSLAATT
+                trygdedekning = TRYGDEDEKNING_2_8
+            },
+            Medlemskapsperiode().apply {
+                innvilgelsesresultat = InnvilgelsesResultat.OPPHØRT
+                trygdedekning = TRYGDEDEKNING_2_8
+            })
 
 
         val response = UtledMedlemskapsperioder.lagMedlemskapsperioderForAndregangsbehandling(
             UtledMedlemskapsperioderDto(Periode(), TRYGDEDEKNING_2_8, null, BESTEMMELSE_2_8),
-            opprinneligBehandlingsresultat,
+            opprinneligeMedlemskapsperioder,
             Behandlingstyper.MANGLENDE_INNBETALING_TRYGDEAVGIFT
         )
 
 
-        opprinneligBehandlingsresultat.medlemAvFolketrygden.medlemskapsperioder.shouldHaveSize(3)
+        opprinneligeMedlemskapsperioder.shouldHaveSize(3)
         response.shouldHaveSize(2)
             .run {
                 first().innvilgelsesresultat.shouldBe(InnvilgelsesResultat.INNVILGET)
@@ -620,26 +593,22 @@ internal class UtledMedlemskapsperioderTest {
         val nyBestemmelse2_8 = Folketrygdloven_kap2_bestemmelser.FTRL_KAP2_2_8_ANDRE_LEDD
         val opphørtBestemmelse = Folketrygdloven_kap2_bestemmelser.FTRL_KAP2_2_15_ANDRE_LEDD
 
-        val opprinneligBehandlingsresultat = Behandlingsresultat().apply {
-            medlemAvFolketrygden = MedlemAvFolketrygden().apply {
-                medlemskapsperioder = listOf(
-                    Medlemskapsperiode().apply {
-                        innvilgelsesresultat = InnvilgelsesResultat.INNVILGET
-                        bestemmelse = BESTEMMELSE_2_8
-                        trygdedekning = TRYGDEDEKNING_2_8
-                    },
-                    Medlemskapsperiode().apply {
-                        innvilgelsesresultat = InnvilgelsesResultat.OPPHØRT
-                        bestemmelse = opphørtBestemmelse
-                        trygdedekning = TRYGDEDEKNING_2_8
-                    })
-            }
-        }
+        val opprinneligeMedlemskapsperioder = listOf(
+            Medlemskapsperiode().apply {
+                innvilgelsesresultat = InnvilgelsesResultat.INNVILGET
+                bestemmelse = BESTEMMELSE_2_8
+                trygdedekning = TRYGDEDEKNING_2_8
+            },
+            Medlemskapsperiode().apply {
+                innvilgelsesresultat = InnvilgelsesResultat.OPPHØRT
+                bestemmelse = opphørtBestemmelse
+                trygdedekning = TRYGDEDEKNING_2_8
+            })
 
 
         val response = UtledMedlemskapsperioder.lagMedlemskapsperioderForAndregangsbehandling(
             UtledMedlemskapsperioderDto(Periode(), TRYGDEDEKNING_2_8, null, nyBestemmelse2_8),
-            opprinneligBehandlingsresultat,
+            opprinneligeMedlemskapsperioder,
             Behandlingstyper.MANGLENDE_INNBETALING_TRYGDEAVGIFT
         )
 
