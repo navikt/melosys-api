@@ -308,7 +308,8 @@ class OpprettForslagMedlemskapsperiodeServiceTest {
     fun opprettForslagPåMedlemskapsperioder_støtterIkkeBestemmelseForDekning_kasterFeil() {
         fakeUnleash.enable(ToggleName.MELOSYS_FTRL_IKKE_YRKESAKTIV)
         val ustøttetBestemmelse = Folketrygdloven_kap2_bestemmelser.FTRL_KAP2_2_7A
-        every { behandlingsresultatService.hentBehandlingsresultat(BEH_RES_ID) } returns lagBehandlingsresultat()
+        every { behandlingsresultatService.hentBehandlingsresultat(BEH_RES_ID) } returns
+            lagBehandlingsresultat().apply { behandling.tema = Behandlingstema.IKKE_YRKESAKTIV }
 
 
         shouldThrow<FunksjonellException> {

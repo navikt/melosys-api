@@ -454,9 +454,8 @@ internal class UtledMedlemskapsperioderTest {
 
 
         val response = UtledMedlemskapsperioder.lagMedlemskapsperioderForAndregangsbehandling(
+            UtledMedlemskapsperioderDto(Periode(), TRYGDEDEKNING_2_8, null, BESTEMMELSE_2_8),
             opprinneligeMedlemskapsperioder,
-            BESTEMMELSE_2_8,
-            TRYGDEDEKNING_2_8,
             Behandlingstyper.NY_VURDERING
         )
 
@@ -468,9 +467,8 @@ internal class UtledMedlemskapsperioderTest {
     @Test
     fun lagMedlemskapsperioderForAndregangsbehandling_ingenMedlemskapsperioder_returnererTomListe() {
         val response = UtledMedlemskapsperioder.lagMedlemskapsperioderForAndregangsbehandling(
+            UtledMedlemskapsperioderDto(Periode(), TRYGDEDEKNING_2_8, null, BESTEMMELSE_2_8),
             emptyList(),
-            BESTEMMELSE_2_8,
-            TRYGDEDEKNING_2_8,
             Behandlingstyper.NY_VURDERING
         )
 
@@ -489,9 +487,8 @@ internal class UtledMedlemskapsperioderTest {
 
 
         val response = UtledMedlemskapsperioder.lagMedlemskapsperioderForAndregangsbehandling(
+            UtledMedlemskapsperioderDto(Periode(), TRYGDEDEKNING_2_7, null, BESTEMMELSE_2_7),
             opprinneligeMedlemskapsperioder,
-            BESTEMMELSE_2_7,
-            TRYGDEDEKNING_2_7,
             Behandlingstyper.NY_VURDERING
         )
 
@@ -501,9 +498,14 @@ internal class UtledMedlemskapsperioderTest {
     }
 
     @Test
-    fun lagMedlemskapsperioderForAndregangsbehandling_fraFrivilligTilPliktig_oppdatererFelt() {
+    fun lagMedlemskapsperioderForAndregangsbehandling_fraFrivilligTilPliktig_lagerForslagPåPerioderPåNytt() {
+        val søknadsperiode = Periode(MOTTAKSDATO.minusMonths(12), MOTTAKSDATO.minusMonths(6))
+        val nySøknadsperiode = Periode(MOTTAKSDATO.minusMonths(8), MOTTAKSDATO.minusMonths(2))
+
         val opprinneligeMedlemskapsperioder = listOf(
             Medlemskapsperiode().apply {
+                fom = søknadsperiode.fom
+                tom = søknadsperiode.tom
                 innvilgelsesresultat = InnvilgelsesResultat.INNVILGET
                 bestemmelse = BESTEMMELSE_2_8
                 trygdedekning = TRYGDEDEKNING_2_8
@@ -512,15 +514,16 @@ internal class UtledMedlemskapsperioderTest {
 
 
         val response = UtledMedlemskapsperioder.lagMedlemskapsperioderForAndregangsbehandling(
+            UtledMedlemskapsperioderDto(nySøknadsperiode, TRYGDEDEKNING_2_8, null, BESTEMMELSE_PLIKTIG),
             opprinneligeMedlemskapsperioder,
-            BESTEMMELSE_PLIKTIG,
-            Trygdedekninger.FULL_DEKNING_FTRL,
             Behandlingstyper.NY_VURDERING
         )
 
 
         response.shouldHaveSize(1)
             .single().run {
+                fom.shouldBe(nySøknadsperiode.fom)
+                tom.shouldBe(nySøknadsperiode.tom)
                 bestemmelse.shouldBe(BESTEMMELSE_PLIKTIG)
                 trygdedekning.shouldBe(Trygdedekninger.FULL_DEKNING_FTRL)
                 medlemskapstype.shouldBe(Medlemskapstyper.PLIKTIG)
@@ -539,9 +542,8 @@ internal class UtledMedlemskapsperioderTest {
 
 
         val response = UtledMedlemskapsperioder.lagMedlemskapsperioderForAndregangsbehandling(
+            UtledMedlemskapsperioderDto(Periode(), TRYGDEDEKNING_2_8, null, BESTEMMELSE_2_8),
             opprinneligeMedlemskapsperioder,
-            BESTEMMELSE_2_8,
-            TRYGDEDEKNING_2_8,
             Behandlingstyper.NY_VURDERING
         )
 
@@ -572,9 +574,8 @@ internal class UtledMedlemskapsperioderTest {
 
 
         val response = UtledMedlemskapsperioder.lagMedlemskapsperioderForAndregangsbehandling(
+            UtledMedlemskapsperioderDto(Periode(), TRYGDEDEKNING_2_8, null, BESTEMMELSE_2_8),
             opprinneligeMedlemskapsperioder,
-            BESTEMMELSE_2_8,
-            TRYGDEDEKNING_2_8,
             Behandlingstyper.MANGLENDE_INNBETALING_TRYGDEAVGIFT
         )
 
@@ -606,9 +607,8 @@ internal class UtledMedlemskapsperioderTest {
 
 
         val response = UtledMedlemskapsperioder.lagMedlemskapsperioderForAndregangsbehandling(
+            UtledMedlemskapsperioderDto(Periode(), TRYGDEDEKNING_2_8, null, nyBestemmelse2_8),
             opprinneligeMedlemskapsperioder,
-            nyBestemmelse2_8,
-            TRYGDEDEKNING_2_8,
             Behandlingstyper.MANGLENDE_INNBETALING_TRYGDEAVGIFT
         )
 

@@ -130,8 +130,11 @@ class MedlemskapsperiodeService(
                 Folketrygdloven_kap2_bestemmelser.FTRL_KAP2_2_1_FØRSTE_LEDD,
                 Folketrygdloven_kap2_bestemmelser.FTRL_KAP2_2_1_FJERDE_LEDD
             )
+        val toggleEnabled =
+            if (behandlingstema == Behandlingstema.YRKESAKTIV) unleash.isEnabled(ToggleName.MELOSYS_FTRL_YRKESAKTIV_PLIKTIGE_BESTEMMELSER)
+            else unleash.isEnabled(ToggleName.MELOSYS_FTRL_IKKE_YRKESAKTIV)
 
-        if (unleash.isEnabled(ToggleName.MELOSYS_FTRL_IKKE_YRKESAKTIV) && tom == null && !nullTilOgMedDatoErTillatt) {
+        if (toggleEnabled && tom == null && !nullTilOgMedDatoErTillatt) {
             throw FunksjonellException("Tom-dato er påkrevd")
         } else if (fom == null || innvilgelsesResultat == null || bestemmelse == null || trygdedekning == null) {
             throw FunksjonellException("Fom-dato, innvilgelsesresultat, bestemmelse og trygdedekning er påkrevd")
