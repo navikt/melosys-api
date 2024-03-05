@@ -11,18 +11,24 @@ data class AvklartefaktaOppsummeringDto internal constructor(
     val fullstendigManglendeInnbetaling: Boolean?,
     val ikkeYrkesaktivFamilieRelasjonstype: String?,
     val ikkeYrkesaktivOppholdstype: String?,
+    val arbeidssituasjonType: String?
 ) {
     constructor(avklartefakta: Set<AvklartefaktaDto>) : this(
         virksomheter = VirksomheterDto.av(avklartefakta),
         arbeidsland = ArbeidslandDto.av(avklartefakta),
         fullstendigManglendeInnbetaling = hentFullstendigManglendeInnbetaling(avklartefakta),
         ikkeYrkesaktivFamilieRelasjonstype = hentFamileRelasjonType(avklartefakta),
-        ikkeYrkesaktivOppholdstype = hentOppholdType(avklartefakta)
+        ikkeYrkesaktivOppholdstype = hentOppholdType(avklartefakta),
+        arbeidssituasjonType = hentArbeidssituasjonType(avklartefakta)
     )
 
     companion object {
         private fun hentFamileRelasjonType(avklartefakta: Set<AvklartefaktaDto>): String? = avklartefakta.firstOrNull {
             it.avklartefaktaType == Avklartefaktatyper.IKKE_YRKESAKTIV_RELASJON
+        }?.fakta?.firstOrNull()
+
+        private fun hentArbeidssituasjonType(avklartefakta: Set<AvklartefaktaDto>): String? = avklartefakta.firstOrNull {
+            it.avklartefaktaType == Avklartefaktatyper.ARBEIDSSITUASJON
         }?.fakta?.firstOrNull()
 
         private fun hentFullstendigManglendeInnbetaling(avklartefakta: Set<AvklartefaktaDto>): Boolean = avklartefakta.firstOrNull {

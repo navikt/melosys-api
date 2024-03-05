@@ -47,6 +47,8 @@ class AvklartefaktaTjenesteTest {
     @MockBean
     private AvklartFamilieRelasjonTypeService avklartFamilieRelasjonTypeService;
     @MockBean
+    private AvklartArbeidssituasjonTypeService avklartArbeidssituasjonTypeService;
+    @MockBean
     private AvklartOppholdTypeService avklartOppholdTypeService;
 
     @Autowired

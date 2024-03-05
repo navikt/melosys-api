@@ -84,6 +84,10 @@ object LovligeKombinasjonerTrygdedekningBestemmelse {
         return lovligeKombinasjonerDekningBestemmelse.filterValues { it.contains(bestemmelse) }.keys.flatten()
     }
 
+    fun hentLovligeTrygdedekningerToggle(bestemmelse: Folketrygdloven_kap2_bestemmelser): List<Trygdedekninger> {
+        return lovligeKombinasjonerDekningBestemmelseToggle.filterValues { it.contains(bestemmelse) }.keys.flatten()
+    }
+
     fun erGyldigKombinasjon(bestemmelse: Folketrygdloven_kap2_bestemmelser, trygdedekning: Trygdedekninger): Boolean {
         return bestemmelse in hentLovligeBestemmelser(trygdedekning)
     }

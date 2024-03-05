@@ -46,8 +46,11 @@ class GyldigeTrygdedekningerService(private val unleash: Unleash) {
 
         val trygdedekningerFraBehandlingstema = trygdedekningerFraBehandlingstema(behandlingstema)
 
+        val pliktigeBestemmelserToggleAktiv = unleash.isEnabled(ToggleName.MELOSYS_FTRL_YRKESAKTIV_PLIKTIGE_BESTEMMELSER)
         if (bestemmelse != null) {
-            val trygdedekningerFraBestemmelse = LovligeKombinasjonerTrygdedekningBestemmelse.hentLovligeTrygdedekninger(bestemmelse).toSet()
+            val trygdedekningerFraBestemmelse = if (pliktigeBestemmelserToggleAktiv)
+                LovligeKombinasjonerTrygdedekningBestemmelse.hentLovligeTrygdedekningerToggle(bestemmelse).toSet() else
+                LovligeKombinasjonerTrygdedekningBestemmelse.hentLovligeTrygdedekninger(bestemmelse).toSet()
             return trygdedekningerFraBehandlingstema.intersect(trygdedekningerFraBestemmelse).toList()
         }
 
@@ -58,6 +61,7 @@ class GyldigeTrygdedekningerService(private val unleash: Unleash) {
         return when {
             behandlingstema == Behandlingstema.IKKE_YRKESAKTIV -> GYLDIGE_TRYGDEDEKNINGER_IKKE_YRKESAKTIV
             unleash.isEnabled(ToggleName.MELOSYS_FOLKETRYGDEN_2_7) -> GYLDIGE_TRYGDEDEKNINGER_YRKESAKTIV
+            unleash.isEnabled(ToggleName.MELOSYS_FTRL_YRKESAKTIV_PLIKTIGE_BESTEMMELSER) -> GYLDIGE_TRYGDEDEKNINGER_YRKESAKTIV
             else -> GYLDIGE_TRYGDEDEKNINGER_YRKESAKTIV_GAMMMEL
         }
     }

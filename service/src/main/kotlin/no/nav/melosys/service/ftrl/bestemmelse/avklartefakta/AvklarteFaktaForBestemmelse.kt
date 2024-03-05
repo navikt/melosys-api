@@ -13,8 +13,26 @@ class AvklarteFaktaForBestemmelse(val mottatteOpplysningerService: MottatteOpply
 
     fun hentAvklarteFakta(bestemmelse: Folketrygdloven_kap2_bestemmelser, behandlingID: Long): List<AvklarteFaktaType> {
         return when (bestemmelse) {
-            FTRL_KAP2_2_1 -> ftrlKap2_1AvklarteFaktaForBehandling(behandlingID)
+            FTRL_KAP2_2_1 -> listOf(
+                AvklarteFaktaType(
+                    Avklartefaktatyper.ARBEIDSSITUASJON, listOf(
+                        Arbeidssituasjontype.MIDLERTIDIG_ARBEID_2_1_FJERDE_LEDD,
+                        Arbeidssituasjontype.VEKSELVIS_ARBEID_2_1_FJERDE_LEDD
+                    ).map(Arbeidssituasjontype::name)
+                )
+            )
+
+            FTRL_KAP2_2_2 -> listOf(
+                AvklarteFaktaType(
+                    Avklartefaktatyper.ARBEIDSSITUASJON, listOf(
+                        Arbeidssituasjontype.ARBIED_I_NORGE_2_2,
+                        Arbeidssituasjontype.ARBEID_PÅ_NORSK_SOKKEL_2_2
+                    ).map(Arbeidssituasjontype::name)
+                )
+            )
+
             FTRL_KAP2_2_1_FØRSTE_LEDD -> ftrlKap2_1AvklarteFaktaForBehandling(behandlingID)
+
             FTRL_KAP2_2_5_ANDRE_LEDD -> listOf(
                 AvklarteFaktaType(
                     Avklartefaktatyper.IKKE_YRKESAKTIV_RELASJON, listOf(

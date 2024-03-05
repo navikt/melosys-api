@@ -93,7 +93,7 @@ class VilkårForBestemmelseYrkesaktivNy(val mottatteOpplysningerService: Mottatt
     private fun ftrlKap2_2VilkårForBehandling(avklarteFakta: Map<Avklartefaktatyper, String>): List<Vilkår> {
         val arbeidssituasjonType = hentArbeidssituasjonFraFakta(avklarteFakta)
 
-        val vilkårForArbeidssituasjon = ftrlKap2_2VilkårForArbeidssituasjon(arbeidssituasjonType) + Vilkår(FTRL_2_14_ARBEIDSGIVERAVGIFT)
+        val vilkårForArbeidssituasjon = ftrlKap2_2VilkårForArbeidssituasjon(arbeidssituasjonType)
 
         return vilkårForArbeidssituasjon + Vilkår(FTRL_ARBEIDSTAKER) + Vilkår(FTRL_2_2_LOVLIG_ADGANG_ARBEID)
     }
@@ -103,14 +103,17 @@ class VilkårForBestemmelseYrkesaktivNy(val mottatteOpplysningerService: Mottatt
             throw FunksjonellException("BehandlingID trengs for å avgjøre land for ftrlKap2_1")
         }
 
-        val arbeidssituasjonType = hentArbeidssituasjonFraFakta(avklarteFakta)
-
-
         val mottatteOpplysninger = mottatteOpplysningerService.hentMottatteOpplysninger(behandlingID)
-        val vilkårForLand = ftrlKap2_1VilkårForLand(mottatteOpplysninger.mottatteOpplysningerData?.soeknadsland) + Vilkår(FTRL_2_1_LOVLIG_OPPHOLD)
-        val vilkårForArbeidssituasjon = ftrlKap2_1VilkårForArbeidssituasjon(arbeidssituasjonType) + Vilkår(FTRL_2_14_ARBEIDSGIVERAVGIFT)
+        val vilkårForLand = ftrlKap2_1VilkårForLand(mottatteOpplysninger.mottatteOpplysningerData?.soeknadsland)
 
-        return vilkårForLand + vilkårForArbeidssituasjon
+        if(vilkårForLand.isNotEmpty()){
+            return vilkårForLand + Vilkår(FTRL_2_1_LOVLIG_OPPHOLD)
+        }
+
+        val arbeidssituasjonType = hentArbeidssituasjonFraFakta(avklarteFakta)
+        val vilkårForArbeidssituasjon = ftrlKap2_1VilkårForArbeidssituasjon(arbeidssituasjonType)
+
+        return vilkårForArbeidssituasjon + Vilkår(FTRL_2_14_ARBEIDSGIVERAVGIFT)
     }
 
 
@@ -136,7 +139,7 @@ class VilkårForBestemmelseYrkesaktivNy(val mottatteOpplysningerService: Mottatt
         return when(arbeidssituasjontype) {
             Arbeidssituasjontype.MIDLERTIDIG_ARBEID_2_1_FJERDE_LEDD -> listOf(
                 Vilkår(FTRL_2_1_BOSATT_NORGE_FORUT),
-                Vilkår(FTRL_2_1_OPPHOLD_UNDER_12MND)
+                Vilkår(FTRL_2_1_ARBEID_OPPHOLD_UNDER_12MND)
             )
             Arbeidssituasjontype.VEKSELVIS_ARBEID_2_1_FJERDE_LEDD -> listOf(
                 Vilkår(FTRL_2_1_VEKSELSVIS_ARBEIDSPERIODE_UNDER_12MND),
@@ -152,7 +155,7 @@ class VilkårForBestemmelseYrkesaktivNy(val mottatteOpplysningerService: Mottatt
             return emptyList()
         }
 
-        val kunNorge = søknadsland.landkoder.first() == Land_iso2.NO.toString()
+        val kunNorge = søknadsland.landkoder.first() == Land_iso2.NO.toString() && søknadsland.landkoder.size == 1
 
         return if(kunNorge) {
             listOf(Vilkår(FTRL_2_1_BOSATT_NORGE), Vilkår(FTRL_2_11_UNNTAK_AMBASSADEPERSONELL_MELLOMFOLKELIG_ORG))
