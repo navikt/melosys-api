@@ -38,7 +38,6 @@ object UtledMedlemskapsperioder {
                 }
             }
     }
-    }
 
     fun lagMedlemskapsperioder(dto: UtledMedlemskapsperioderDto): Collection<Medlemskapsperiode> {
         return when {
