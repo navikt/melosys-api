@@ -13,9 +13,12 @@ import no.nav.melosys.domain.mottatteopplysninger.SøknadNorgeEllerUtenforEØS
 import no.nav.melosys.exception.FunksjonellException
 import no.nav.melosys.featuretoggle.ToggleName
 import no.nav.melosys.repository.MedlemAvFolketrygdenRepository
+import no.nav.melosys.service.avklartefakta.AvklartefaktaService
 import no.nav.melosys.service.behandling.BehandlingsresultatService
 import no.nav.melosys.service.behandling.UtledMottaksdato
 import no.nav.melosys.service.ftrl.bestemmelse.LovligeKombinasjonerTrygdedekningBestemmelse
+import no.nav.melosys.service.ftrl.bestemmelse.vilkaar.Vilkår
+import no.nav.melosys.service.ftrl.bestemmelse.vilkaar.VilkårForBestemmelse
 import org.springframework.stereotype.Service
 import org.springframework.transaction.annotation.Transactional
 
@@ -27,6 +30,8 @@ class OpprettForslagMedlemskapsperiodeService(
     private val utledMottaksdato: UtledMottaksdato,
     private val utledBestemmelserOgVilkår: UtledBestemmelserOgVilkår,
     private val unleash: Unleash,
+    private val avklartefaktaService: AvklartefaktaService,
+    private val vilkårForBestemmlese: VilkårForBestemmelse,
 ) {
 
     @Transactional
@@ -49,9 +54,10 @@ class OpprettForslagMedlemskapsperiodeService(
             val opprinneligBehandling = behandling.opprinneligBehandling
 
             if (behandling.erAndregangsbehandling() && opprinneligBehandling != null) {
-                val opprinneligBehandlingsresultat = behandlingsresultatService.hentBehandlingsresultat(opprinneligBehandling.id)
+                val opprinneligeMedlemskapsperioder = behandlingsresultatService.hentBehandlingsresultat(opprinneligBehandling.id)
+                    ?.medlemAvFolketrygden?.medlemskapsperioder ?: emptyList()
                 medlemskapsperioder = UtledMedlemskapsperioder.lagMedlemskapsperioderForAndregangsbehandling(
-                    opprinneligBehandlingsresultat,
+                    opprinneligeMedlemskapsperioder,
                     bestemmelse,
                     søknad.trygdedekning,
                     behandling.type
@@ -110,11 +116,7 @@ class OpprettForslagMedlemskapsperiodeService(
     }
 
     private fun validerVilkår(behandlingsresultat: Behandlingsresultat, bestemmelse: Folketrygdloven_kap2_bestemmelser) {
-        if (unleash.isEnabled(ToggleName.MELOSYS_FTRL_IKKE_YRKESAKTIV)) {
-            // TODO validering med ny mapping mellom bestemmelser og vilkår kommer
-            return
-        }
-        val vilkårForBestemmelse = hentVilkårForBestemmelse(bestemmelse, behandlingsresultat.behandling.tema)
+        val vilkårForBestemmelse = hentVilkårForBestemmelse(bestemmelse, behandlingsresultat.behandling.tema, behandlingsresultat.behandling.id)
         if (!behandlingsresultat.oppfyllerVilkår(vilkårForBestemmelse)) {
             throw FunksjonellException("Vilkår $vilkårForBestemmelse er påkrevd for bestemmelse $bestemmelse")
         }
@@ -124,8 +126,20 @@ class OpprettForslagMedlemskapsperiodeService(
         utledBestemmelserOgVilkår.hentStøttedeBestemmelserOgVilkår(behandlingstema)
 
 
-    private fun hentVilkårForBestemmelse(bestemmelse: Folketrygdloven_kap2_bestemmelser, behandlingstema: Behandlingstema): Collection<Vilkaar> =
-        hentStøttedeBestemmelserMedVilkår(behandlingstema).get(bestemmelse)
+    private fun hentVilkårForBestemmelse(
+        bestemmelse: Folketrygdloven_kap2_bestemmelser,
+        behandlingstema: Behandlingstema,
+        behandlingID: Long
+    ): Collection<Vilkaar> {
+        if (unleash.isEnabled(ToggleName.MELOSYS_FTRL_IKKE_YRKESAKTIV) && behandlingstema == Behandlingstema.IKKE_YRKESAKTIV
+            || unleash.isEnabled(ToggleName.MELOSYS_FTRL_YRKESAKTIV_PLIKTIGE_BESTEMMELSER)
+        ) {
+            val avklarteFaktaMap = avklartefaktaService.hentAlleAvklarteFakta(behandlingID).filter { it.avklartefaktaType != null }
+                .associate { it.avklartefaktaType to it.fakta.joinToString() }
+            return vilkårForBestemmlese.hentVilkår(bestemmelse, behandlingstema, avklarteFaktaMap, behandlingID).map(Vilkår::vilkår)
+        }
+        return hentStøttedeBestemmelserMedVilkår(behandlingstema).get(bestemmelse)
             ?: throw FunksjonellException("Finner ikke vilkår for bestemmelse $bestemmelse")
+    }
 }
 

@@ -132,7 +132,7 @@ class BrevDataByggerAvslagArbeidsgiverTest {
         BrevDataGrunnlag dataGrunnlag = new BrevDataGrunnlag(brevbestilling, kodeverkService, avklarteVirksomheterService, avklartefaktaService, persondata);
         String saksbehandler = "saksbehandler";
         BrevDataAvslagArbeidsgiver brevData = (BrevDataAvslagArbeidsgiver) brevDataByggerAvslagArbeidsgiver.lag(dataGrunnlag, saksbehandler);
-        assertThat(brevData.hovedvirksomhet.orgnr).isEqualTo("987654321");
+        assertThat(brevData.getHovedvirksomhet().orgnr).isEqualTo("987654321");
     }
 
     private Vilkaarsresultat lagVilkårresultat(Vilkaar vilkaarType, String vilkårbegrunnelseKode) {

@@ -46,11 +46,17 @@ class VilkårForBestemmelseYrkesaktiv(val mottatteOpplysningerService: MottatteO
                 Vilkår(FTRL_2_7A_SKIP_UTENFOR_EØS)
             )
 
-            FTRL_KAP2_2_8_FØRSTE_LEDD_A, FTRL_KAP2_2_8_ANDRE_LEDD -> listOf(
+            FTRL_KAP2_2_8_FØRSTE_LEDD_A-> listOf(
                 Vilkår(FTRL_2_1A_TRYGDEKOORDINGERING),
-                Vilkår(FTRL_2_8_FORUTGÅENDE_TRYGDETID),
+                Vilkår(FTRL_FORUTGÅENDE_TRYGDETID),
+                Vilkår(FTRL_2_8_FØRSTE_LEDD_NÆR_TILKNYTNING_NORGE)
+            )
+
+            FTRL_KAP2_2_8_ANDRE_LEDD -> listOf(
+                Vilkår(FTRL_2_1A_TRYGDEKOORDINGERING),
+                Vilkår(FTRL_FORUTGÅENDE_TRYGDETID),
                 Vilkår(
-                    FTRL_2_8_FØRSTE_LEDD_NÆR_TILKNYTNING_NORGE,
+                    FTRL_2_8_NÆR_TILKNYTNING_NORGE,
                     muligeBegrunnelser = toStringList(*Ftrl_2_8_naer_tilknytning_norge_begrunnelser.values())
                 )
             )

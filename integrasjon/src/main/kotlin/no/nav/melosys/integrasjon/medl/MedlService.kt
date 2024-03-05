@@ -39,18 +39,17 @@ class MedlService(
             versjon = MEDLEMSKAP_VERSJON
             dokument = MedlemskapDokument().apply {
                 medlemsperiode = periodeListeResponse.map {
-                    Medlemsperiode().apply {
-                        id = it.unntakId
-                        periode = Periode(it.fraOgMed, it.tilOgMed)
-                        type = if (it.medlem!!) "PMMEDSKP" else "PUMEDSKP"
-                        status = it.status
-                        grunnlagstype = it.grunnlag
-                        land = it.lovvalgsland
-                        lovvalg = it.lovvalg
-                        trygdedekning = it.dekning
-                        kildedokumenttype = it.sporingsinformasjon!!.kildedokument
-                        kilde = it.sporingsinformasjon!!.kilde
-                    }
+                    Medlemsperiode(it.unntakId,
+                        Periode(it.fraOgMed, it.tilOgMed),
+                        if (it.medlem!!) "PMMEDSKP" else "PUMEDSKP",
+                        it.status,
+                        it.grunnlag,
+                        it.lovvalgsland,
+                        it.lovvalg,
+                        it.dekning,
+                        it.sporingsinformasjon!!.kildedokument,
+                        it.sporingsinformasjon!!.kilde
+                    )
                 }
             }
             try {
@@ -206,9 +205,8 @@ class MedlService(
         MedlemskapsunntakForPost(
             fraOgMed = medlemskapsperiode.fom,
             tilOgMed = medlemskapsperiode.tom,
-            dekning = MedlPeriodeKonverter.tilMedlTrygdeDekning(
-                medlemskapsperiode.trygdedekning,
-                medlemskapsperiode.bestemmelse
+            dekning = MedlPeriodeKonverter.tilMedlTrygdedekningForFtrl(
+                medlemskapsperiode.trygdedekning
             ).kode,
             lovvalgsland = IsoLandkodeKonverterer.tilIso3(Land_iso2.NO.kode),
             grunnlag = MedlPeriodeKonverter.tilGrunnlagMedltype(
@@ -274,10 +272,7 @@ class MedlService(
             unntakId = medlPeriodeID,
             fraOgMed = medlemskapsperiode.fom,
             tilOgMed = medlemskapsperiode.tom,
-            dekning = MedlPeriodeKonverter.tilMedlTrygdeDekning(
-                medlemskapsperiode.trygdedekning,
-                medlemskapsperiode.bestemmelse
-            ).kode,
+            dekning = MedlPeriodeKonverter.tilMedlTrygdedekningForFtrl(medlemskapsperiode.trygdedekning).kode,
             lovvalgsland = IsoLandkodeKonverterer.tilIso3(Land_iso2.NO.kode),
             grunnlag = MedlPeriodeKonverter.tilGrunnlagMedltype(
                 medlemskapsperiode.bestemmelse,

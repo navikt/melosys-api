@@ -171,34 +171,34 @@ final class DokumentServiceTest {
     private static BrevData lagBrevDataInnvilgelse() {
         BrevDataA1 brevDataA1 = new BrevDataA1();
         AvklartVirksomhet arbeidsgiver = new AvklartVirksomhet("Virker av og til", "987654321", lagStrukturertAdresse(), Yrkesaktivitetstyper.LOENNET_ARBEID);
-        brevDataA1.hovedvirksomhet = arbeidsgiver;
-        brevDataA1.bostedsadresse = lagStrukturertAdresse();
-        brevDataA1.yrkesgruppe = Yrkesgrupper.FLYENDE_PERSONELL;
-        brevDataA1.bivirksomheter = Collections.emptyList();
-        brevDataA1.person = lagPersonopplysninger();
-        brevDataA1.arbeidssteder = new ArrayList<>();
-        brevDataA1.arbeidsland = new ArrayList<>();
+        brevDataA1.setHovedvirksomhet(arbeidsgiver);
+        brevDataA1.setBostedsadresse(lagStrukturertAdresse());
+        brevDataA1.setYrkesgruppe(Yrkesgrupper.FLYENDE_PERSONELL);
+        brevDataA1.setBivirksomheter(Collections.emptyList());
+        brevDataA1.setPerson(lagPersonopplysninger());
+        brevDataA1.setArbeidssteder(new ArrayList<>());
+        brevDataA1.setArbeidsland(new ArrayList<>());
         BrevDataInnvilgelse brevdataInnvilgelse = new BrevDataInnvilgelse(new BrevbestillingDto(), "SAKSBEHANDLER");
-        brevdataInnvilgelse.vedleggA1 = brevDataA1;
-        brevdataInnvilgelse.hovedvirksomhet = arbeidsgiver;
-        brevdataInnvilgelse.lovvalgsperiode = lagLovvalgsperiode();
-        brevdataInnvilgelse.avklartMaritimType = Maritimtyper.SKIP;
-        brevdataInnvilgelse.arbeidsland = "Norway";
+        brevdataInnvilgelse.setVedleggA1(brevDataA1);
+        brevdataInnvilgelse.setHovedvirksomhet(arbeidsgiver);
+        brevdataInnvilgelse.setLovvalgsperiode(lagLovvalgsperiode());
+        brevdataInnvilgelse.setAvklartMaritimType(Maritimtyper.SKIP);
+        brevdataInnvilgelse.setArbeidsland("Norway");
         brevdataInnvilgelse.setAnmodningsperiodesvar(lagAnmodningsperiodeSvarInnvilgelse());
-        brevdataInnvilgelse.trygdemyndighetsland = "Denmark";
-        brevdataInnvilgelse.avklarteMedfolgendeBarn = lagAvklarteMedfølgendeBarn();
+        brevdataInnvilgelse.setTrygdemyndighetsland("Denmark");
+        brevdataInnvilgelse.setAvklarteMedfolgendeBarn(lagAvklarteMedfølgendeBarn());
 
         return brevdataInnvilgelse;
     }
 
     private static BrevData lagBrevDataAvslagArbeidsgiver() {
         BrevDataAvslagArbeidsgiver brevDataAvslagArbeidsgiver = new BrevDataAvslagArbeidsgiver("Z007");
-        brevDataAvslagArbeidsgiver.person = lagPersonDokument();
-        brevDataAvslagArbeidsgiver.hovedvirksomhet = new AvklartVirksomhet("Virker 100%", "987654321", lagStrukturertAdresse(), Yrkesaktivitetstyper.LOENNET_ARBEID);
-        brevDataAvslagArbeidsgiver.lovvalgsperiode = lagLovvalgsperiode();
-        brevDataAvslagArbeidsgiver.arbeidsland = "Test";
-        brevDataAvslagArbeidsgiver.vilkårbegrunnelser121 = new HashSet<>();
-        brevDataAvslagArbeidsgiver.vilkårbegrunnelser121VesentligVirksomhet = new HashSet<>();
+        brevDataAvslagArbeidsgiver.setPerson(lagPersonDokument());
+        brevDataAvslagArbeidsgiver.setHovedvirksomhet(new AvklartVirksomhet("Virker 100%", "987654321", lagStrukturertAdresse(), Yrkesaktivitetstyper.LOENNET_ARBEID));
+        brevDataAvslagArbeidsgiver.setLovvalgsperiode(lagLovvalgsperiode());
+        brevDataAvslagArbeidsgiver.setArbeidsland("Test");
+        brevDataAvslagArbeidsgiver.setVilkårbegrunnelser121(new HashSet<>());
+        brevDataAvslagArbeidsgiver.setVilkårbegrunnelser121VesentligVirksomhet(new HashSet<>());
         return brevDataAvslagArbeidsgiver;
     }
 

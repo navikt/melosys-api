@@ -42,10 +42,10 @@ public class AttestMapper implements BrevDataMapper {
 
     public Fag mapFag(BrevDataVedlegg vedlegg) {
         Fag fag = new Fag();
-        if (vedlegg.brevDataA1 != null) {
+        if (vedlegg.getBrevDataA1() != null) {
             fag.setVedleggA1("true");
         }
-        if (vedlegg.brevDataA001 != null) {
+        if (vedlegg.getBrevDataA001() != null) {
             fag.setVedleggSEDA001("true");
         }
         return fag;

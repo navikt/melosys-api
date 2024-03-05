@@ -65,18 +65,16 @@ class MedlServiceMvcTest(
             medlemskapDokument.medlemsperiode
                 .shouldHaveSize(1)
                 .first()
-                .shouldBeEqualToComparingFields(Medlemsperiode().apply {
-                    id = 0
-                    type = "PMMEDSKP"
-                    status = "status"
-                    grunnlagstype = "dekning"
-                    land = "lovvalgsland"
-                    lovvalg = "lovvalg"
-                    trygdedekning = "dekning"
-                    kildedokumenttype = "kildedokument"
-                    kilde = "kilde"
-                    periode = Periode(FOM, TOM)
-                })
+                .shouldBeEqualToComparingFields(Medlemsperiode(id = 0,
+                    type = "PMMEDSKP",
+                    status = "status",
+                    grunnlagstype = "dekning",
+                    land = "lovvalgsland",
+                    lovvalg = "lovvalg",
+                    trygdedekning = "dekning",
+                    kildedokumenttype = "kildedokument",
+                    kilde = "kilde",
+                    periode = Periode(FOM, TOM)))
         }
     }
 
