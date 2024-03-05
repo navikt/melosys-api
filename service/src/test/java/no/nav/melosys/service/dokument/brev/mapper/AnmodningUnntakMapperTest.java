@@ -64,7 +64,7 @@ class AnmodningUnntakMapperTest {
         String xml = mapper.mapTilBrevXML(fellesType, navFelles, behandling, resultat, brevData);
 
         assertThat(xml).matches("(?s)<\\?xml version=\"\\d\\.\\d+\" .*>\n.*")
-            .contains(":yrkesaktivitet>SELVSTENDIG</ns");
+            .contains("yrkesaktivitet>SELVSTENDIG");
         assertThat(Landkoder.AT.getBeskrivelse()).isSubstringOf(xml);
         assertThat(xml).doesNotContain(Landkoder.DK.getKode());
     }

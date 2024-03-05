@@ -42,7 +42,7 @@
 
         <!-- Melosys -->
         <melosys.internt.kodeverk.version>5.15.246</melosys.internt.kodeverk.version>
-        <melosys.brev.version>1.2.124</melosys.brev.version>
+        <melosys.brev.version>1.2.148-SNAPSHOT</melosys.brev.version>
 
         <!-- NAV -->
         <nav.tjenestespesifikasjoner.version>1.2021.02.22-10.45-4201aaea72fb</nav.tjenestespesifikasjoner.version>
@@ -380,6 +380,11 @@
             </dependency>
 
             <!-- Transitive avhengigheter med konflikter -->
+            <dependency>
+                <groupId>com.google.code.javaparser</groupId>
+                <artifactId>javaparser</artifactId>
+                <version>1.0.11</version>
+            </dependency>
             <dependency>
                 <groupId>com.fasterxml.woodstox</groupId>
                 <artifactId>woodstox-core</artifactId>

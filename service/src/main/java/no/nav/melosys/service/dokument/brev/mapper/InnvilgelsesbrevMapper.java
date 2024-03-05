@@ -6,7 +6,8 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import java.util.stream.Collectors;
-import javax.xml.bind.JAXBElement;
+
+import jakarta.xml.bind.JAXBElement;
 import jakarta.xml.bind.JAXBException;
 
 import no.nav.dok.melosysbrev._000108.LovvalgsperiodeType;
@@ -112,10 +113,10 @@ public final class InnvilgelsesbrevMapper implements BrevDataMapper {
 
         Lovvalgsperiode periode = brevdata.getLovvalgsperiode();
         fag.setLovvalgsbestemmelse(LovvalgsbestemmelseKode.fromValue(periode.getBestemmelse().getKode()));
-        fag.setLovvalgsperiode(LovvalgsperiodeType.builder()
+        fag.setLovvalgsperiode(new LovvalgsperiodeType()
             .withFomDato(lagXmlDato(periode.getFom()))
             .withTomDato(lagXmlDato(periode.getTom()))
-            .build());
+        );
 
         if (periode.getTilleggsbestemmelse() != null) {
             fag.setTilleggsbestemmelse(TilleggsbestemmelseKode.fromValue(periode.getTilleggsbestemmelse().getKode()));
@@ -177,8 +178,8 @@ public final class InnvilgelsesbrevMapper implements BrevDataMapper {
         List<BarnInnvilgelseType> barnInnvilgelse = avklarteMedfolgendeBarn.getFamilieOmfattetAvNorskTrygd().stream()
             .map(this::lagBarnInnvilgelseType)
             .collect(Collectors.toList());
-        return BarnOmfattetAvNorskTrygdListeType.builder()
-            .withBarnInnvilgelse(barnInnvilgelse).build();
+        return new BarnOmfattetAvNorskTrygdListeType()
+            .withBarnInnvilgelse(barnInnvilgelse);
     }
 
     private BarnIkkeOmfattetAvNorskTrygdListeType hentBarnIkkeOmfattetAvNorskTrygd(AvklarteMedfolgendeFamilie avklarteMedfolgendeBarn) {
@@ -186,22 +187,21 @@ public final class InnvilgelsesbrevMapper implements BrevDataMapper {
         for (IkkeOmfattetFamilie medfolgendeBarn : avklarteMedfolgendeBarn.getFamilieIkkeOmfattetAvNorskTrygd()) {
             barnAvslag.add(lagBarnAvslagType(medfolgendeBarn));
         }
-        return BarnIkkeOmfattetAvNorskTrygdListeType.builder()
-            .withBarnAvslag(barnAvslag).build();
+        return new BarnIkkeOmfattetAvNorskTrygdListeType()
+            .withBarnAvslag(barnAvslag);
     }
 
     private BarnInnvilgelseType lagBarnInnvilgelseType(OmfattetFamilie omfattetBarn) {
-        return BarnInnvilgelseType.builder()
+        return new BarnInnvilgelseType()
             .withBarnOmfattetAvNorskTrygd(omfattetBarn.getSammensattNavn())
-            .withBarnFodselsnummer(omfattetBarn.getIdent())
-            .build();
+            .withBarnFodselsnummer(omfattetBarn.getIdent());
     }
 
     private BarnAvslagType lagBarnAvslagType(IkkeOmfattetFamilie ikkeOmfattetBarn) {
-        return BarnAvslagType.builder()
+        return new BarnAvslagType()
             .withBarnAvslagBegrunnelse(tilBarnAvslagBegrunnelseKode(ikkeOmfattetBarn.getBegrunnelse()))
             .withBarnFodselsnummer(ikkeOmfattetBarn.getIdent())
-            .withBarnIkkeOmfattetAvNorskTrygd(ikkeOmfattetBarn.getSammensattNavn()).build();
+            .withBarnIkkeOmfattetAvNorskTrygd(ikkeOmfattetBarn.getSammensattNavn());
     }
 
     private BarnAvslagBegrunnelseKode tilBarnAvslagBegrunnelseKode(String begrunnelse) {
@@ -215,12 +215,11 @@ public final class InnvilgelsesbrevMapper implements BrevDataMapper {
 
     private static JAXBElement<BrevdataType> lagBrevdataType(FellesType fellesType, MelosysNAVFelles navFelles, Fag fag, VedleggType vedlegg) {
         ObjectFactory factory = new ObjectFactory();
-        BrevdataType brevdataType = BrevdataType.builder()
+        BrevdataType brevdataType = new BrevdataType()
             .withFelles(fellesType)
             .withNAVFelles(navFelles)
             .withFag(fag)
-            .withVedlegg(vedlegg)
-            .build();
+            .withVedlegg(vedlegg);
         return factory.createBrevdata(brevdataType);
     }
 }

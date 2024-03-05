@@ -1,6 +1,6 @@
 package no.nav.melosys.service.dokument.brev.mapper;
 
-import javax.xml.bind.JAXBElement;
+import jakarta.xml.bind.JAXBElement;
 import jakarta.xml.bind.JAXBException;
 
 import no.nav.dok.melosysbrev._000127.BrevdataType;
@@ -44,10 +44,10 @@ public class InnvilgelseArbeidsgiverMapper implements BrevDataMapper {
         fag.setArbeidsgiver(brevDataInnvilgelse.getHovedvirksomhet().navn);
 
         Lovvalgsperiode periode = brevDataInnvilgelse.getLovvalgsperiode();
-        fag.setLovvalgsperiode(LovvalgsperiodeType.builder()
+        fag.setLovvalgsperiode(new LovvalgsperiodeType()
             .withFomDato(lagXmlDato(periode.getFom()))
             .withTomDato(lagXmlDato(periode.getTom()))
-            .build());
+            );
 
         return fag;
     }
@@ -56,11 +56,10 @@ public class InnvilgelseArbeidsgiverMapper implements BrevDataMapper {
                                                              MelosysNAVFelles navFelles,
                                                              Fag fag) {
         ObjectFactory factory = new ObjectFactory();
-        BrevdataType brevdataType = BrevdataType.builder()
+        BrevdataType brevdataType = new BrevdataType()
             .withFelles(fellesType)
             .withNAVFelles(navFelles)
-            .withFag(fag)
-            .build();
+            .withFag(fag);
         return factory.createBrevdata(brevdataType);
     }
 }

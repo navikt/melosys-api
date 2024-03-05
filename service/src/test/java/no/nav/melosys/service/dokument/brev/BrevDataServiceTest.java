@@ -334,12 +334,11 @@ class BrevDataServiceTest {
         expectedBrevMottaker.setNavn(myndighet.getNavn());
         expectedBrevMottaker.setKortNavn(myndighet.getNavn());
         expectedBrevMottaker.setSpraakkode(Spraakkode.NB);
-        expectedBrevMottaker.setMottakeradresse(UtenlandskPostadresse.builder()
+        expectedBrevMottaker.setMottakeradresse(new UtenlandskPostadresse()
             .withAdresselinje1(myndighet.getGateadresse1())
             .withAdresselinje2(myndighet.getGateadresse2())
             .withAdresselinje3(myndighet.getPostnummer() + " " + myndighet.getPoststed())
-            .withLand(myndighet.getLand())
-            .build());
+            .withLand(myndighet.getLand()));
 
         assertThat(brevMottaker).isEqualTo(expectedBrevMottaker);
     }
@@ -484,12 +483,11 @@ class BrevDataServiceTest {
     }
 
     private NorskPostadresse lagPlassholderAdresse() {
-        return NorskPostadresse.builder()
+        return new NorskPostadresse()
             .withAdresselinje1(BrevDataService.PLASSHOLDER_TEKST)
             .withPostnummer(BrevDataService.PLASSHOLDER_POSTNUMMER)
             .withPoststed(BrevDataService.PLASSHOLDER_TEKST)
-            .withLand(BrevDataService.PLASSHOLDER_TEKST)
-            .build();
+            .withLand(BrevDataService.PLASSHOLDER_TEKST);
     }
 
 }

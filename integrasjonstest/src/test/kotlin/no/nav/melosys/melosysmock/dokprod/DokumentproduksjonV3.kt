@@ -32,8 +32,8 @@ class DokumentproduksjonV3(
     fun produserDokumentutkast(
         @RequestPayload produserDokumentutkast: ProduserDokumentutkast
     ): ProduserDokumentutkastResponseWrapper =
-        ProduserDokumentutkastResponseWrapper().withResponse(
-            ProduserDokumentutkastResponse().withDokumentutkast(
+        ProduserDokumentutkastResponseWrapper().useResponse(
+            ProduserDokumentutkastResponse().useDokumentutkast(
                 genererPDF(
                     objectMapper.writerWithDefaultPrettyPrinter().writeValueAsString(produserDokumentutkast)
                 )
@@ -48,10 +48,10 @@ class DokumentproduksjonV3(
     fun produserIkkeredigerbartDokument(
         @RequestPayload produserIkkeredigerbartDokument: ProduserIkkeredigerbartDokument
     ): ProduserIkkeredigerbartDokumentResponseWrapper =
-        ProduserIkkeredigerbartDokumentResponseWrapper().withResponse(
+        ProduserIkkeredigerbartDokumentResponseWrapper().useResponse(
             ProduserIkkeredigerbartDokumentResponse()
-                .withDokumentId(lagRandomId())
-                .withJournalpostId(lagRandomId())
+                .useDokumentId(lagRandomId())
+                .useJournalpostId(lagRandomId())
         )
 }
 

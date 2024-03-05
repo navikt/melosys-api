@@ -3,7 +3,7 @@ package no.nav.melosys.service.dokument.brev.mapper;
 import java.time.Instant;
 import java.time.LocalDate;
 import java.util.*;
-import javax.xml.bind.JAXBElement;
+import jakarta.xml.bind.JAXBElement;
 import jakarta.xml.bind.JAXBException;
 
 import no.nav.dok.melosysbrev._000115.BostedsadresseTypeKode;
