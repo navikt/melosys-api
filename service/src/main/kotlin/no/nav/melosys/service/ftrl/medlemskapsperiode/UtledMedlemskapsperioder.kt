@@ -1,6 +1,5 @@
 package no.nav.melosys.service.ftrl.medlemskapsperiode
 
-import no.nav.melosys.domain.Behandlingsresultat
 import no.nav.melosys.domain.ErPeriode
 import no.nav.melosys.domain.Medlemskapsperiode
 import no.nav.melosys.domain.dokument.felles.Periode
@@ -16,12 +15,12 @@ import java.time.LocalDate
 object UtledMedlemskapsperioder {
 
     fun lagMedlemskapsperioderForAndregangsbehandling(
-        opprinneligBehandlingsresultat: Behandlingsresultat,
+        opprinneligeMedlemskapsperioder: Collection<Medlemskapsperiode>,
         nyBestemmelse: Folketrygdloven_kap2_bestemmelser,
         nyTrygdedekning: Trygdedekninger,
         type: Behandlingstyper
     ): Collection<Medlemskapsperiode> =
-        opprinneligBehandlingsresultat.medlemAvFolketrygden.medlemskapsperioder
+        opprinneligeMedlemskapsperioder
             .filter { if (type === Behandlingstyper.MANGLENDE_INNBETALING_TRYGDEAVGIFT) it.erInnvilget() || it.erOpphørt() else it.erInnvilget() }
             .map {
                 Medlemskapsperiode().apply {

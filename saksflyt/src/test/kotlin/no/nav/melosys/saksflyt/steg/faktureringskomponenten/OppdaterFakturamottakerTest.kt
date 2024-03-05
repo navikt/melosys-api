@@ -1,6 +1,5 @@
 package no.nav.melosys.saksflyt.steg.faktureringskomponenten
 
-import io.getunleash.FakeUnleash
 import io.mockk.Called
 import io.mockk.every
 import io.mockk.impl.annotations.RelaxedMockK
@@ -38,7 +37,6 @@ class OppdaterFakturamottakerTest {
     @RelaxedMockK
     lateinit var faktureringskomponentenConsumer: FaktureringskomponentenConsumer
 
-    private val unleash = FakeUnleash()
     private val SAKSBEHANDLER_IDENT = "S123456"
     private val SAKSNUMMER = "MEL-1"
     private val BEHANDLING_ID = 1L
@@ -47,21 +45,7 @@ class OppdaterFakturamottakerTest {
 
     @BeforeEach
     fun setup() {
-        unleash.enableAll()
-        oppdaterFakturamottaker = OppdaterFakturamottaker(fagsakService, behandlingsresultatService, faktureringskomponentenConsumer, unleash)
-    }
-
-    @Test
-    fun utfør_toggleAv_ingentingSkjer() {
-        unleash.disableAll()
-
-
-        oppdaterFakturamottaker.utfør(Prosessinstans())
-
-
-        verify { fagsakService wasNot Called }
-        verify { behandlingsresultatService wasNot Called }
-        verify { faktureringskomponentenConsumer wasNot Called }
+        oppdaterFakturamottaker = OppdaterFakturamottaker(fagsakService, behandlingsresultatService, faktureringskomponentenConsumer)
     }
 
     @Test
