@@ -54,11 +54,11 @@ class OpprettForslagMedlemskapsperiodeService(
             val opprinneligBehandling = behandling.opprinneligBehandling
 
             if (behandling.erAndregangsbehandling() && opprinneligBehandling != null) {
-                val opprinneligBehandlingsresultat = behandlingsresultatService.hentBehandlingsresultat(opprinneligBehandling.id)
+                val opprinneligeMedlemskapsperioder = behandlingsresultatService.hentBehandlingsresultat(opprinneligBehandling.id)
+                    ?.medlemAvFolketrygden?.medlemskapsperioder ?: emptyList()
                 medlemskapsperioder = UtledMedlemskapsperioder.lagMedlemskapsperioderForAndregangsbehandling(
-                    opprinneligBehandlingsresultat,
-                    bestemmelse,
-                    søknad.trygdedekning,
+                    UtledMedlemskapsperioderDto(søknad.periode, søknad.trygdedekning, null, bestemmelse),
+                    opprinneligeMedlemskapsperioder,
                     behandling.type
                 )
             } else {
@@ -98,7 +98,7 @@ class OpprettForslagMedlemskapsperiodeService(
             throw FunksjonellException("Bestemmelse er ikke satt. Krever bestemmelse ved opprettelse av forslag for medlemskapsperioder.")
         }
 
-        if (unleash.isEnabled(ToggleName.MELOSYS_FTRL_IKKE_YRKESAKTIV)) {
+        if (toggleIsEnabled(behandlingstema)) {
             if (!LovligeKombinasjonerTrygdedekningBestemmelse.erBestemmelseGyldigForTrygdedekning(bestemmelse, trygdedekning)) {
                 throw FunksjonellException("Ulovlig kombinasjon av bestemmelse $bestemmelse og trygdedekning $trygdedekning")
             }
@@ -130,9 +130,7 @@ class OpprettForslagMedlemskapsperiodeService(
         behandlingstema: Behandlingstema,
         behandlingID: Long
     ): Collection<Vilkaar> {
-        if (unleash.isEnabled(ToggleName.MELOSYS_FTRL_IKKE_YRKESAKTIV) && behandlingstema == Behandlingstema.IKKE_YRKESAKTIV
-            || unleash.isEnabled(ToggleName.MELOSYS_FTRL_YRKESAKTIV_PLIKTIGE_BESTEMMELSER)
-        ) {
+        if (toggleIsEnabled(behandlingstema)) {
             val avklarteFaktaMap = avklartefaktaService.hentAlleAvklarteFakta(behandlingID).filter { it.avklartefaktaType != null }
                 .associate { it.avklartefaktaType to it.fakta.joinToString() }
             return vilkårForBestemmlese.hentVilkår(bestemmelse, behandlingstema, avklarteFaktaMap, behandlingID).map(Vilkår::vilkår)
@@ -140,5 +138,10 @@ class OpprettForslagMedlemskapsperiodeService(
         return hentStøttedeBestemmelserMedVilkår(behandlingstema).get(bestemmelse)
             ?: throw FunksjonellException("Finner ikke vilkår for bestemmelse $bestemmelse")
     }
+
+    private fun toggleIsEnabled(behandlingstema: Behandlingstema) =
+        if (behandlingstema == Behandlingstema.YRKESAKTIV) unleash.isEnabled(ToggleName.MELOSYS_FTRL_YRKESAKTIV_PLIKTIGE_BESTEMMELSER)
+        else unleash.isEnabled(ToggleName.MELOSYS_FTRL_IKKE_YRKESAKTIV)
+
 }
 

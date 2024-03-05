@@ -22,6 +22,7 @@ import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingsstatus;
 import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingstema;
 import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingstyper;
 import no.nav.melosys.domain.kodeverk.lovvalgsbestemmelser.Lovvalgbestemmelser_883_2004;
+import no.nav.melosys.domain.mottatteopplysninger.MottatteOpplysningerData;
 import no.nav.melosys.domain.mottatteopplysninger.data.ForetakUtland;
 import no.nav.melosys.domain.mottatteopplysninger.data.arbeidssteder.LuftfartBase;
 import no.nav.melosys.domain.person.Persondata;
@@ -682,6 +683,18 @@ class SedDataByggerTest {
             .anyMatch("NOR"::equals)
             .anyMatch("SWE"::equals)
             .anyMatch("DNK"::equals);
+    }
+
+    @Test
+    void lag_behandlingMedUnntaksflytTema_henterIkkeArbeidslandUtenMarginaltArbeid() {
+        when(saksbehandlingRegler.harRegistreringUnntakFraMedlemskapFlyt(any())).thenReturn(true);
+
+        SedDataGrunnlagMedSoknad sedDataGrunnlagMedSoknad = lagGrunnlagMedSøknad();
+
+        dataBygger.lag(sedDataGrunnlagMedSoknad, behandlingsresultat, PeriodeType.LOVVALGSPERIODE);
+
+        verify(landvelgerService, times(1)).hentBostedsland(anyLong(), any(MottatteOpplysningerData.class));
+        verify(landvelgerService, times(0)).hentAlleArbeidslandUtenMarginaltArbeid(anyLong());
     }
 
     private void lagUtkastAssertions(SedDataDto sedData, boolean forventAdresse) {

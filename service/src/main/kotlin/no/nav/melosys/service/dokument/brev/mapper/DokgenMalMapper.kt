@@ -2,12 +2,11 @@ package no.nav.melosys.service.dokument.brev.mapper
 
 import no.nav.melosys.domain.Behandling
 import no.nav.melosys.domain.brev.*
-import no.nav.melosys.domain.kodeverk.Fullmaktstype
-import no.nav.melosys.domain.kodeverk.Land_iso2
-import no.nav.melosys.domain.kodeverk.Landkoder
-import no.nav.melosys.domain.kodeverk.Mottakerroller
+import no.nav.melosys.domain.dokument.felles.Periode
+import no.nav.melosys.domain.kodeverk.*
 import no.nav.melosys.domain.kodeverk.brev.Produserbaredokumenter
 import no.nav.melosys.domain.mottatteopplysninger.SøknadIkkeYrkesaktiv
+import no.nav.melosys.domain.mottatteopplysninger.SøknadNorgeEllerUtenforEØS
 import no.nav.melosys.exception.FunksjonellException
 import no.nav.melosys.integrasjon.dokgen.dto.*
 import no.nav.melosys.integrasjon.dokgen.dto.felles.Mottaker
@@ -27,7 +26,7 @@ class DokgenMalMapper(
         // Henter opplysninger på nytt for å sikre at korrekt adresse benyttes (med mindre myndighet)
         val brevbestillingBuilder = mottattBrevbestilling.toBuilder()
         berikBestillingMedPersondata(brevbestillingBuilder, mottattBrevbestilling.behandling, mottaker)
-        return lagDokgenDtoFraBestilling(brevbestillingBuilder.build()).apply {
+            return lagDokgenDtoFraBestilling(brevbestillingBuilder.build()).apply {
             if (Mottakerroller.UTENLANDSK_TRYGDEMYNDIGHET.kode != this.mottaker.type) {
                 this.mottaker = lagMottakerUtenKoder(this.mottaker)
             }
@@ -83,6 +82,66 @@ class DokgenMalMapper(
                 .medIkkeyrkesaktivSituasjontype(mottatteOpplysningerData.ikkeYrkesaktivSituasjontype)
                 .medArtikkel(artikkel)
                 .build()
+        )
+    }
+
+    internal fun lagInnvilgelseIkkeYrkesaktivPliktigFtrl(brevbestilling: IkkeYrkesaktivPliktigFtrlBrevbestilling): InnvilgelseIkkeYrkesaktivPliktigFtrl {
+        val behandlingsresultat = dokgenMapperDatahenter.hentBehandlingsresultat(brevbestilling.behandling.id)
+        val mottatteOpplysningerData =
+            behandlingsresultat.behandling.mottatteOpplysninger.mottatteOpplysningerData as SøknadNorgeEllerUtenforEØS
+        val ikkeyrkesaktivrelasjonType =
+            behandlingsresultat.avklartefakta.filter { it.type == Avklartefaktatyper.IKKE_YRKESAKTIV_RELASJON }.firstOrNull()?.fakta
+        val ikkeYrkesaktivOppholdType =
+            behandlingsresultat.avklartefakta.filter { it.type == Avklartefaktatyper.IKKE_YRKESAKTIV_FTRL_2_1_OPPHOLD }.firstOrNull()?.fakta
+        val medlemskapsperiode = Periode(
+            behandlingsresultat.medlemAvFolketrygden.utledMedlemskapsperiodeFom(),
+            behandlingsresultat.medlemAvFolketrygden.utledMedlemskapsperiodeTom()
+        )
+
+        return InnvilgelseIkkeYrkesaktivPliktigFtrl.av(
+            brevbestilling.toBuilder()
+                .medFlereLandUkjentHvilke(mottatteOpplysningerData.soeknadsland.isFlereLandUkjentHvilke)
+                .medLand(mottatteOpplysningerData.soeknadsland.landkoder.map { dokgenMapperDatahenter.hentLandnavnFraLandkode(it) })
+                .medBestemmelse(behandlingsresultat.medlemAvFolketrygden.medlemskapsperioder.last().bestemmelse.name)
+                .medNyVurderingBakgrunn(behandlingsresultat.nyVurderingBakgrunn)
+                .medInnledningFritekst(behandlingsresultat.innledningFritekst)
+                .medBegrunnelseFritekst(behandlingsresultat.begrunnelseFritekst)
+                .medIkkeYrkesaktivOppholdType(ikkeYrkesaktivOppholdType)
+                .medIkkeYrkesaktivRelasjonType(ikkeyrkesaktivrelasjonType)
+                .medMedlemskapsperiode(medlemskapsperiode)
+                .build()
+        )
+    }
+
+    internal fun lagInnvilgelseIkkeYrkesaktivFrivilligFtrl(brevbestilling: IkkeYrkesaktivFrivilligFtrlBrevbestilling): InnvilgelseIkkeYrkesaktivFrivilligFtrl {
+        val behandlingsresultat = dokgenMapperDatahenter.hentBehandlingsresultat(brevbestilling.behandling.id)
+        val mottatteOpplysningerData =
+            behandlingsresultat.behandling.mottatteOpplysninger.mottatteOpplysningerData as SøknadNorgeEllerUtenforEØS
+        val trygdedekning = mottatteOpplysningerData.trygdedekning.kode
+        val ikkeyrkesaktivrelasjonType =
+            behandlingsresultat.avklartefakta.filter { it.type == Avklartefaktatyper.IKKE_YRKESAKTIV_RELASJON }.firstOrNull()?.fakta
+        val avslåttMedlemskapsperiodeFørMottaksdatoHelsedel = innvilgelseFtrlMapper.mapAvslåttMedlemskapsperiodeFørMottaksdatoFullDekning(
+            behandlingsresultat.medlemAvFolketrygden,
+            brevbestilling.forsendelseMottatt
+        )
+        val medAvslåttMedlemskapsperiodeFørMottaksdatoFullDekning = innvilgelseFtrlMapper.mapAvslåttMedlemskapsperiodeFørMottaksdatoFullDekning(
+            behandlingsresultat.medlemAvFolketrygden,
+            brevbestilling.forsendelseMottatt
+        )
+
+        return InnvilgelseIkkeYrkesaktivFrivilligFtrl.av(
+            brevbestilling.toBuilder()
+                .medLand(mottatteOpplysningerData.soeknadsland.landkoder.map { dokgenMapperDatahenter.hentLandnavnFraLandkode(it) })
+                .medTrygdedekning(trygdedekning)
+                .medBestemmelse(behandlingsresultat.medlemAvFolketrygden.medlemskapsperioder.last().bestemmelse.name)
+                .medNyVurderingBakgrunn(behandlingsresultat.nyVurderingBakgrunn)
+                .medInnledningFritekst(behandlingsresultat.innledningFritekst)
+                .medBegrunnelseFritekst(behandlingsresultat.begrunnelseFritekst)
+                .medIkkeYrkesaktivRelasjonType(ikkeyrkesaktivrelasjonType)
+                .medAvslåttMedlemskapsperiodeFørMottaksdatoHelsedel(avslåttMedlemskapsperiodeFørMottaksdatoHelsedel)
+                .medAvslåttMedlemskapsperiodeFørMottaksdatoFullDekning(medAvslåttMedlemskapsperiodeFørMottaksdatoFullDekning)
+                .build(),
+            innvilgelseFtrlMapper.mapMedlemskapsPerioder(behandlingsresultat.medlemAvFolketrygden)
         )
     }
 
@@ -195,11 +254,15 @@ class DokgenMalMapper(
 
             Produserbaredokumenter.IKKE_YRKESAKTIV_VEDTAKSBREV -> lagIkkeYrkesaktivVedtaksbrev(brevbestilling as IkkeYrkesaktivBrevbestilling)
 
+            Produserbaredokumenter.IKKE_YRKESAKTIV_FRIVILLIG_FTRL -> lagInnvilgelseIkkeYrkesaktivFrivilligFtrl(brevbestilling as IkkeYrkesaktivFrivilligFtrlBrevbestilling)
+
             Produserbaredokumenter.VARSELBREV_MANGLENDE_INNBETALING -> VarselbrevManglendeInnbetaling(
                 brevbestilling as VarselbrevManglendeInnbetalingBrevbestilling
             )
 
             Produserbaredokumenter.VEDTAK_OPPHOERT_MEDLEMSKAP -> VedtakOpphoertMedlemskap(brevbestilling as VedtakOpphoertMedlemskapBrevbestilling)
+
+            Produserbaredokumenter.IKKE_YRKESAKTIV_PLIKTIG_FTRL -> lagInnvilgelseIkkeYrkesaktivPliktigFtrl(brevbestilling as IkkeYrkesaktivPliktigFtrlBrevbestilling)
 
             else -> throw FunksjonellException("ProduserbartDokument ${brevbestilling.produserbartdokument} er ikke støttet av melosys-dokgen")
         }
