@@ -4,6 +4,7 @@ import java.time.LocalDate;
 import java.util.List;
 
 import com.fasterxml.jackson.annotation.JsonFormat;
+import com.fasterxml.jackson.annotation.JsonInclude;
 import no.nav.melosys.domain.brev.IkkeYrkesaktivPliktigFtrlBrevbestilling;
 import no.nav.melosys.domain.dokument.felles.Periode;
 import no.nav.melosys.domain.kodeverk.Mottakerroller;
@@ -18,6 +19,7 @@ public class InnvilgelseIkkeYrkesaktivPliktigFtrl extends DokgenDto {
     private final String sakstype;
     private final String behandlingstype;
     private final boolean flereLandUkjentHvilke;
+    @JsonInclude(JsonInclude.Include.NON_NULL)
     private final List<String> land;
     private final String bestemmelse;
     private final String nyVurderingBakgrunn;
