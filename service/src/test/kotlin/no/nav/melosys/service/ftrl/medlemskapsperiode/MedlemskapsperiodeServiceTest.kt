@@ -244,7 +244,9 @@ class MedlemskapsperiodeServiceTest {
     @Test
     fun `opprettMedlemskapsperiode kaster exception når tomDato er null og bestemmelse ikke er 2_1`() {
         unleash.enable(ToggleName.MELOSYS_FTRL_IKKE_YRKESAKTIV)
-        val medlemAvFolketrygden = MedlemAvFolketrygden().apply { behandlingsresultat = lagBehandlingsresultat(Land_iso2.AU) }
+        val medlemAvFolketrygden = MedlemAvFolketrygden().apply {
+            behandlingsresultat = lagBehandlingsresultat(Land_iso2.AU).apply { behandling.tema = Behandlingstema.IKKE_YRKESAKTIV }
+        }
         every { medlemAvFolketrygdenService.hentMedlemAvFolketrygden(BEHANDLING_ID_1) } returns medlemAvFolketrygden
 
 
@@ -264,7 +266,9 @@ class MedlemskapsperiodeServiceTest {
     fun `opprettMedlemskapsperiode kaster ikke exception når tomDato er null mens toggle er disabled`() {
         every { gyldigeTrygdedekningerService.hentTrygdedekninger(any(), any()) } returns listOf(*Trygdedekninger.values())
         unleash.disable(ToggleName.MELOSYS_FTRL_IKKE_YRKESAKTIV)
-        val medlemAvFolketrygden = MedlemAvFolketrygden().apply { behandlingsresultat = lagBehandlingsresultat() }
+        val medlemAvFolketrygden = MedlemAvFolketrygden().apply {
+            behandlingsresultat = lagBehandlingsresultat().apply { behandling.tema = Behandlingstema.IKKE_YRKESAKTIV }
+        }
         every { medlemAvFolketrygdenService.hentMedlemAvFolketrygden(BEHANDLING_ID_1) } returns medlemAvFolketrygden
         every { medlemskapsperiodeRepository.save(any()) } returnsArgument 0
 

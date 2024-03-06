@@ -1,13 +1,9 @@
 package no.nav.melosys.service.dokument;
 
-import java.util.*;
-
-import io.getunleash.Unleash;
 import no.nav.melosys.domain.*;
 import no.nav.melosys.domain.brev.BrevkopiRegel;
 import no.nav.melosys.domain.brev.Mottaker;
 import no.nav.melosys.domain.brev.Mottakerliste;
-import no.nav.melosys.domain.brev.NorskMyndighet;
 import no.nav.melosys.domain.dokument.arbeidsforhold.ArbeidsforholdDokument;
 import no.nav.melosys.domain.kodeverk.Fullmaktstype;
 import no.nav.melosys.domain.kodeverk.Mottakerroller;
@@ -27,11 +23,12 @@ import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.util.*;
+
 import static java.util.Optional.ofNullable;
 import static no.nav.melosys.domain.Preferanse.PreferanseEnum.RESERVERT_FRA_A1;
 import static no.nav.melosys.domain.brev.BrevkopiRegel.*;
 import static no.nav.melosys.domain.kodeverk.brev.Produserbaredokumenter.*;
-import static no.nav.melosys.featuretoggle.ToggleName.FOLKETRYGDEN_MVP;
 
 @Service
 public class BrevmottakerService {
@@ -41,18 +38,15 @@ public class BrevmottakerService {
     private final UtenlandskMyndighetService utenlandskMyndighetService;
     private final BehandlingsresultatService behandlingsresultatService;
     private final LovvalgsperiodeService lovvalgsperiodeService;
-    private final Unleash unleash;
 
     public BrevmottakerService(AvklarteVirksomheterService avklarteVirksomheterService,
                                UtenlandskMyndighetService utenlandskMyndighetService,
                                BehandlingsresultatService behandlingsresultatService,
-                               LovvalgsperiodeService lovvalgsperiodeService,
-                               Unleash unleash) {
+                               LovvalgsperiodeService lovvalgsperiodeService) {
         this.avklarteVirksomheterService = avklarteVirksomheterService;
         this.utenlandskMyndighetService = utenlandskMyndighetService;
         this.behandlingsresultatService = behandlingsresultatService;
         this.lovvalgsperiodeService = lovvalgsperiodeService;
-        this.unleash = unleash;
     }
 
     /**
@@ -92,9 +86,6 @@ public class BrevmottakerService {
         if (brevkopiRegler.contains(ARBEIDSGIVER_FÅR_KOPI) &&
             !lovvalgsperiodeService.harSelvstendigNæringsdrivendeLovvalgsbestemmelse(behandlingID)) {
             mottakerliste.getKopiMottakere().add(Mottakerroller.ARBEIDSGIVER);
-        }
-        if (!unleash.isEnabled(FOLKETRYGDEN_MVP) && brevkopiRegler.contains(SKATT_FÅR_KOPI)) {
-            mottakerliste.getFasteMottakere().add(NorskMyndighet.SKATTEETATEN);
         }
         if (brevkopiRegler.contains(UTENLANDSK_TRYGDEMYNDIGHET_FÅR_KOPI)) {
             mottakerliste.getKopiMottakere().add(Mottakerroller.UTENLANDSK_TRYGDEMYNDIGHET);
@@ -244,23 +235,23 @@ public class BrevmottakerService {
     }
 
     private List<Mottaker> avklarMottakereForUtenlandskTrygdemyndighet(Behandling behandling, Produserbaredokumenter produserbartDokument) {
-            // Utenlandsk myndighet
-            Map<UtenlandskMyndighet, Mottaker> utenlandskMyndighetMottakerMap
-                = utenlandskMyndighetService.lagUtenlandskeMyndigheterFraBehandling(behandling);
+        // Utenlandsk myndighet
+        Map<UtenlandskMyndighet, Mottaker> utenlandskMyndighetMottakerMap
+            = utenlandskMyndighetService.lagUtenlandskeMyndigheterFraBehandling(behandling);
 
-            if (produserbartDokument == UTENLANDSK_TRYGDEMYNDIGHET_FRITEKSTBREV && utenlandskMyndighetMottakerMap.isEmpty()) {
-                throw new FunksjonellException("Du kan ikke sende brev til trygdemyndigheten i landet du har valgt, fordi korrekt adresse er ukjent.");
-            }
+        if (produserbartDokument == UTENLANDSK_TRYGDEMYNDIGHET_FRITEKSTBREV && utenlandskMyndighetMottakerMap.isEmpty()) {
+            throw new FunksjonellException("Du kan ikke sende brev til trygdemyndigheten i landet du har valgt, fordi korrekt adresse er ukjent.");
+        }
 
-            if (produserbartDokument == ATTEST_A1 && kanReservereMotA1(behandling)) {
-                return utenlandskMyndighetMottakerMap.entrySet()
-                    .stream()
-                    .filter(e -> myndighetØnskerA1(e.getKey()))
-                    .map(Map.Entry::getValue)
-                    .toList();
-            } else {
-                return new ArrayList<>(utenlandskMyndighetMottakerMap.values());
-            }
+        if (produserbartDokument == ATTEST_A1 && kanReservereMotA1(behandling)) {
+            return utenlandskMyndighetMottakerMap.entrySet()
+                .stream()
+                .filter(e -> myndighetØnskerA1(e.getKey()))
+                .map(Map.Entry::getValue)
+                .toList();
+        } else {
+            return new ArrayList<>(utenlandskMyndighetMottakerMap.values());
+        }
     }
 
     private boolean kanReservereMotA1(Behandling behandling) {

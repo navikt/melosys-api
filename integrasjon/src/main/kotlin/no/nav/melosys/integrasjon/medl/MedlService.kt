@@ -205,9 +205,8 @@ class MedlService(
         MedlemskapsunntakForPost(
             fraOgMed = medlemskapsperiode.fom,
             tilOgMed = medlemskapsperiode.tom,
-            dekning = MedlPeriodeKonverter.tilMedlTrygdeDekning(
-                medlemskapsperiode.trygdedekning,
-                medlemskapsperiode.bestemmelse
+            dekning = MedlPeriodeKonverter.tilMedlTrygdedekningForFtrl(
+                medlemskapsperiode.trygdedekning
             ).kode,
             lovvalgsland = IsoLandkodeKonverterer.tilIso3(Land_iso2.NO.kode),
             grunnlag = MedlPeriodeKonverter.tilGrunnlagMedltype(
@@ -273,10 +272,7 @@ class MedlService(
             unntakId = medlPeriodeID,
             fraOgMed = medlemskapsperiode.fom,
             tilOgMed = medlemskapsperiode.tom,
-            dekning = MedlPeriodeKonverter.tilMedlTrygdeDekning(
-                medlemskapsperiode.trygdedekning,
-                medlemskapsperiode.bestemmelse
-            ).kode,
+            dekning = MedlPeriodeKonverter.tilMedlTrygdedekningForFtrl(medlemskapsperiode.trygdedekning).kode,
             lovvalgsland = IsoLandkodeKonverterer.tilIso3(Land_iso2.NO.kode),
             grunnlag = MedlPeriodeKonverter.tilGrunnlagMedltype(
                 medlemskapsperiode.bestemmelse,

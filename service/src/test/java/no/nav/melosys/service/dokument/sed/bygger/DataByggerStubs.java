@@ -29,7 +29,6 @@ import no.nav.melosys.domain.mottatteopplysninger.data.SelvstendigForetak;
 import no.nav.melosys.domain.mottatteopplysninger.data.UtenlandskIdent;
 import no.nav.melosys.domain.mottatteopplysninger.data.arbeidssteder.FysiskArbeidssted;
 import no.nav.melosys.domain.mottatteopplysninger.data.arbeidssteder.MaritimtArbeid;
-import no.nav.melosys.domain.OrganisasjonDokumentTestFactory;
 
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
