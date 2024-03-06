@@ -12,8 +12,6 @@ import no.nav.melosys.domain.Lovvalgsperiode;
 import no.nav.melosys.domain.avklartefakta.AvklartVirksomhet;
 import no.nav.melosys.domain.brev.DokgenBrevbestilling;
 import no.nav.melosys.domain.brev.InnvilgelseBrevbestilling;
-import no.nav.melosys.domain.brev.NorskMyndighet;
-import no.nav.melosys.domain.dokument.organisasjon.OrganisasjonDokument;
 import no.nav.melosys.domain.kodeverk.Land_iso2;
 import no.nav.melosys.domain.kodeverk.LovvalgBestemmelse;
 import no.nav.melosys.domain.kodeverk.begrunnelser.Kontroll_begrunnelser;
@@ -65,7 +63,7 @@ public class TrygdeavtaleMapper {
         return new InnvilgelseOgAttestTrygdeavtale.Builder(brevbestilling)
             .innvilgelse(innvilgelse)
             .attest(mapAttest(brevbestilling, soknadsland))
-            .skalHaInfoOmRettigheter(skalHaInfoOmRettigheter(innvilgelse, brevbestilling))
+            .skalHaInfoOmRettigheter(skalHaInfoOmRettigheter(innvilgelse))
             .nyVurderingBakgrunn(brevbestilling.getNyVurderingBakgrunn())
             .build();
     }
@@ -287,11 +285,6 @@ public class TrygdeavtaleMapper {
         return new FunksjonellException("Avklart medfølgende familie " + uuid + " finnes ikke i mottatteOpplysningeret");
     }
 
-    private boolean erSkatteetaten(OrganisasjonDokument org) {
-        // Skatteetaten skal ikke ha attest
-        return org != null && NorskMyndighet.SKATTEETATEN.getOrgnr().equals(org.getOrgnummer());
-    }
-
     private boolean skalIkkeHaInnvilgelse(InnvilgelseBrevbestilling brevbestilling) {
         // Utenlandkse trygdemyndigheter skal ikke ha innvilgelse
         return brevbestilling.getUtenlandskMyndighet() != null;
@@ -301,10 +294,10 @@ public class TrygdeavtaleMapper {
         LovvalgBestemmelse bestemmelse = lovvalgsperiodeService.hentLovvalgsperiode(brevbestilling.getBehandlingId()).getBestemmelse();
         boolean ukBestemmelseSkalIkkeHaAttest = bestemmelse == UK_ART8_2;
         boolean usaBestemmelseSkalIkkeHaAttest = bestemmelse == USA_ART5_1 || bestemmelse == USA_ART5_9;
-        return erSkatteetaten(brevbestilling.getOrg()) || ukBestemmelseSkalIkkeHaAttest || usaBestemmelseSkalIkkeHaAttest;
+        return ukBestemmelseSkalIkkeHaAttest || usaBestemmelseSkalIkkeHaAttest;
     }
 
-    private boolean skalHaInfoOmRettigheter(InnvilgelseTrygdeavtale innvilgelse, DokgenBrevbestilling brevbestilling) {
-        return !(isEmpty(innvilgelse) || erSkatteetaten(brevbestilling.getOrg()));
+    private boolean skalHaInfoOmRettigheter(InnvilgelseTrygdeavtale innvilgelse) {
+        return !(isEmpty(innvilgelse));
     }
 }
