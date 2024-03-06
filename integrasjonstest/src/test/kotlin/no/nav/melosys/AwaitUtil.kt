@@ -29,14 +29,21 @@ object AwaitUtil {
         }
     }
 
+    private var threadLocalOnTimeoutLambda: ThreadLocal<(ConditionTimeoutException) -> Unit> =
+        ThreadLocal.withInitial { { e: ConditionTimeoutException -> throw e } }
+
+    fun ConditionFactory.onTimeout(onTimeout: (e: ConditionTimeoutException) -> Unit) = apply {
+        threadLocalOnTimeoutLambda.set(onTimeout)
+    }
+
     fun ConditionFactory.waitFor(
-        onTimeout: (e: ConditionTimeoutException) -> Unit = { e -> throw e },
         waitFor: () -> Boolean,
     ) {
         try {
             until { waitFor() }
+            threadLocalOnTimeoutLambda.remove()
         } catch (e: ConditionTimeoutException) {
-            onTimeout(e)
+            threadLocalOnTimeoutLambda.get().invoke(e)
         }
     }
 
