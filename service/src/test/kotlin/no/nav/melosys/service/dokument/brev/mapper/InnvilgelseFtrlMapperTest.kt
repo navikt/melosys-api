@@ -2,9 +2,7 @@ package no.nav.melosys.service.dokument.brev.mapper
 
 import io.kotest.matchers.booleans.shouldBeFalse
 import io.kotest.matchers.booleans.shouldBeTrue
-import io.kotest.matchers.collections.shouldContainExactlyInAnyOrder
-import io.kotest.matchers.collections.shouldHaveSize
-import io.kotest.matchers.collections.shouldNotBeEmpty
+import io.kotest.matchers.collections.*
 import io.kotest.matchers.nulls.shouldBeNull
 import io.kotest.matchers.nulls.shouldNotBeNull
 import io.kotest.matchers.shouldBe
@@ -104,26 +102,42 @@ internal class InnvilgelseFtrlMapperTest {
                 begrunnelse.shouldBe(Ftrl_2_8_naer_tilknytning_norge_begrunnelser.ANNEN_GRUNN)
                 begrunnelseAnnenGrunnFritekst.shouldBe("<p>Vilkårresultat begrunnelse fritekst</p>")
                 arbeidsgivere.shouldHaveSize(1).first().shouldBe(ARBEIDSGIVER_NAVN)
-                arbeidsland.shouldBe(Landkoder.AT.beskrivelse)
-                trygdeavtaleMedArbeidsland.shouldBeFalse()
+                flereLandUkjentHvilke.shouldBeFalse()
+                land.shouldContainOnly(Landkoder.AT.beskrivelse)
+                trygdeavtaleLand.shouldBeEmpty()
                 betalerArbeidsgiveravgift.shouldBeTrue()
             }
     }
 
     @Test
-    fun map_InnvilgetMedUtenlandskInntekt_harTrygdeavtaleMedLand_populererFelter() {
+    fun map_harTrygdeavtaleLand_populererFelter() {
         mockHappyCase(Case.paragraf_2_8)
         every { mockDokgenMapperDatahenter.hentLandnavnFraLandkode(Landkoder.GB.kode) } returns Landkoder.GB.beskrivelse
         every { mockDokgenMapperDatahenter.hentBehandlingsresultat(ofType()) } returns lagBehandlingsResultat(Case.paragraf_2_8).apply {
-            behandling.mottatteOpplysninger.mottatteOpplysningerData.soeknadsland =
-                Soeknadsland(listOf(Landkoder.GB.kode), false)
+            behandling.mottatteOpplysninger.mottatteOpplysningerData.soeknadsland = Soeknadsland(listOf(Landkoder.GB.kode), false)
         }
 
         innvilgelseFtrlMapper.map(lagInnvilgelseFtrlBrevbestilling()).apply {
-            arbeidsland.shouldBe(Landkoder.GB.beskrivelse)
-            trygdeavtaleMedArbeidsland.shouldBeTrue()
+            flereLandUkjentHvilke.shouldBeFalse()
+            land.shouldContainOnly(Landkoder.GB.beskrivelse)
+            trygdeavtaleLand.shouldContainOnly(Landkoder.GB.beskrivelse)
         }
     }
+
+    @Test
+    fun map_harFlereLandUkjentHvilke_populererFelter() {
+        mockHappyCase(Case.paragraf_2_8)
+        every { mockDokgenMapperDatahenter.hentBehandlingsresultat(ofType()) } returns lagBehandlingsResultat(Case.paragraf_2_8).apply {
+            behandling.mottatteOpplysninger.mottatteOpplysningerData.soeknadsland = Soeknadsland(emptyList(), true)
+        }
+
+        innvilgelseFtrlMapper.map(lagInnvilgelseFtrlBrevbestilling()).apply {
+            flereLandUkjentHvilke.shouldBeTrue()
+            land.shouldBeEmpty()
+            trygdeavtaleLand.shouldBeEmpty()
+        }
+    }
+
 
     @Test
     fun map_innvilgetOgAvslaatt_populererFelter() {
@@ -179,8 +193,9 @@ internal class InnvilgelseFtrlMapperTest {
                     begrunnelse.shouldBe(Ftrl_2_8_naer_tilknytning_norge_begrunnelser.ANNEN_GRUNN)
                     begrunnelseAnnenGrunnFritekst.shouldBe("<p>Vilkårresultat begrunnelse fritekst</p>")
                     arbeidsgivere.shouldHaveSize(1).first().shouldBe(ARBEIDSGIVER_NAVN)
-                    arbeidsland.shouldBe(Landkoder.AT.beskrivelse)
-                    trygdeavtaleMedArbeidsland.shouldBeFalse()
+                    flereLandUkjentHvilke.shouldBeFalse()
+                    land.shouldContainOnly(Landkoder.AT.beskrivelse)
+                    trygdeavtaleLand.shouldBeEmpty()
                     betalerArbeidsgiveravgift.shouldBeTrue()
                 }
         }
@@ -248,8 +263,9 @@ internal class InnvilgelseFtrlMapperTest {
                 begrunnelse.shouldBe(Ftrl_2_7_begrunnelser.ANNEN_GRUNN)
                 begrunnelseAnnenGrunnFritekst.shouldBe("<p>Vilkårresultat begrunnelse fritekst</p>")
                 arbeidsgivere.shouldHaveSize(1).first().shouldBe(ARBEIDSGIVER_NAVN)
-                arbeidsland.shouldBe(Landkoder.AT.beskrivelse)
-                trygdeavtaleMedArbeidsland.shouldBeFalse()
+                flereLandUkjentHvilke.shouldBeFalse()
+                land.shouldContainOnly(Landkoder.AT.beskrivelse)
+                trygdeavtaleLand.shouldBeEmpty()
                 betalerArbeidsgiveravgift.shouldBeTrue()
             }
     }

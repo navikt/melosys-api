@@ -551,8 +551,9 @@ internal class DokgenMalMapperTest {
             .begrunnelse(Ftrl_2_8_naer_tilknytning_norge_begrunnelser.ANSATT_I_MULTINASJONALT_SELSKAP)
             .begrunnelseAnnenGrunnFritekst(null)
             .arbeidsgivere(listOf("Egon Olsen AS"))
-            .arbeidsland(Land_iso2.US.kode)
-            .trygdeavtaleMedArbeidsland(false)
+            .flereLandUkjentHvilke(false)
+            .land(listOf(Land_iso2.US.kode))
+            .trygdeavtaleLand(emptyList())
             .betalerArbeidsgiveravgift(true)
             .build()
     }

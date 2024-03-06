@@ -5,11 +5,7 @@ import no.nav.melosys.domain.Medlemskapsperiode
 import no.nav.melosys.domain.Vilkaarsresultat
 import no.nav.melosys.domain.brev.InnvilgelseFtrlBrevbestilling
 import no.nav.melosys.domain.folketrygden.MedlemAvFolketrygden
-import no.nav.melosys.domain.kodeverk.Fullmaktstype
-import no.nav.melosys.domain.kodeverk.Kodeverk
-import no.nav.melosys.domain.kodeverk.Trygdeavtale_myndighetsland
-import no.nav.melosys.domain.kodeverk.Trygdedekninger
-import no.nav.melosys.domain.kodeverk.Vilkaar
+import no.nav.melosys.domain.kodeverk.*
 import no.nav.melosys.domain.kodeverk.begrunnelser.folketrygdloven.Ftrl_2_7_begrunnelser
 import no.nav.melosys.domain.kodeverk.begrunnelser.folketrygdloven.Ftrl_2_8_naer_tilknytning_norge_begrunnelser
 import no.nav.melosys.integrasjon.dokgen.dto.InnvilgelseFtrl
@@ -35,16 +31,25 @@ class InnvilgelseFtrlMapper(
     fun map(brevbestilling: InnvilgelseFtrlBrevbestilling): InnvilgelseFtrl {
         val behandlingsresultat = dokgenMapperDatahenter.hentBehandlingsresultat(brevbestilling.behandlingId)
         val medlemAvFolketrygden = behandlingsresultat.medlemAvFolketrygden
-        val arbeidsland =
-            behandlingsresultat.behandling.mottatteOpplysninger.mottatteOpplysningerData.soeknadsland.landkoder[0]
+        val søknadsland = behandlingsresultat.behandling.mottatteOpplysninger.mottatteOpplysningerData.soeknadsland
 
         return InnvilgelseFtrl.Builder(brevbestilling)
             .behandlingstype(behandlingsresultat.behandling.type)
             .avgiftsperioder(mapAvgiftsPerioder(medlemAvFolketrygden))
             .medlemskapsperioder(mapMedlemskapsPerioder(medlemAvFolketrygden))
             .bestemmelse(medlemAvFolketrygden.medlemskapsperioder.filter { it.erInnvilget() }.sortedBy { it.fom }.first().bestemmelse)
-            .avslåttMedlemskapsperiodeFørMottaksdatoHelsedel(mapAvslåttMedlemskapsperiodeFørMottaksdatoHelsedel(medlemAvFolketrygden, brevbestilling.forsendelseMottatt))
-            .avslåttMedlemskapsperiodeFørMottaksdatoFullDekning(mapAvslåttMedlemskapsperiodeFørMottaksdatoFullDekning(medlemAvFolketrygden, brevbestilling.forsendelseMottatt))
+            .avslåttMedlemskapsperiodeFørMottaksdatoHelsedel(
+                mapAvslåttMedlemskapsperiodeFørMottaksdatoHelsedel(
+                    medlemAvFolketrygden,
+                    brevbestilling.forsendelseMottatt
+                )
+            )
+            .avslåttMedlemskapsperiodeFørMottaksdatoFullDekning(
+                mapAvslåttMedlemskapsperiodeFørMottaksdatoFullDekning(
+                    medlemAvFolketrygden,
+                    brevbestilling.forsendelseMottatt
+                )
+            )
             .trygdeavgiftMottaker(trygdeavgiftMottakerService.getTrygdeavgiftMottaker(medlemAvFolketrygden.fastsattTrygdeavgift.trygdeavgiftsgrunnlag))
             .fullmektigTrygdeavgift(finnFullmektigTrygdeavgift(behandlingsresultat.behandling))
             .skatteplikttype(medlemAvFolketrygden.utledSkatteplikttype())
@@ -55,8 +60,9 @@ class InnvilgelseFtrlMapper(
             .begrunnelseFritekst(brevbestilling.begrunnelseFritekst)
             .trygdeavgiftFritekst(brevbestilling.trygdeavgiftFritekst)
             .arbeidsgivere(hentArbeidsgivere(brevbestilling.behandling))
-            .arbeidsland(dokgenMapperDatahenter.hentLandnavnFraLandkode(arbeidsland))
-            .trygdeavtaleMedArbeidsland(harTrygdeavtaleMedArbeidsland(arbeidsland))
+            .flereLandUkjentHvilke(søknadsland.isFlereLandUkjentHvilke)
+            .land(søknadsland.landkoder.map { dokgenMapperDatahenter.hentLandnavnFraLandkode(it) })
+            .trygdeavtaleLand(mapTrygdeavtaleLand(søknadsland.landkoder))
             .betalerArbeidsgiveravgift(erBetalerArbeidsgiveravgift(medlemAvFolketrygden.medlemskapsperioder))
             .build()
     }
@@ -92,6 +98,9 @@ class InnvilgelseFtrlMapper(
                 it.grunnlagInntekstperiode.avgiftspliktigInntektMnd?.verdi ?: BigDecimal.ZERO,
             )
         }.sortedByDescending { it.fom }
+
+    private fun mapTrygdeavtaleLand(landkoder: List<String>): List<String> =
+        Trygdeavtale_myndighetsland.values().filter { landkoder.contains(it.kode) }.map { dokgenMapperDatahenter.hentLandnavnFraLandkode(it.kode) }
 
     private fun erBetalerArbeidsgiveravgift(medlemskapsperioder: Collection<Medlemskapsperiode>) =
         medlemskapsperioder.any { it.trygdeavgiftsperioder.any { it.grunnlagInntekstperiode.isArbeidsgiversavgiftBetalesTilSkatt } }
@@ -130,9 +139,6 @@ class InnvilgelseFtrlMapper(
             avklarteVirksomheterService.hentUtenlandskeVirksomheter(behandling) +
             avklarteVirksomheterService.hentNorskeSelvstendigeForetak(behandling)
         ).map { it.navn }
-
-    private fun harTrygdeavtaleMedArbeidsland(arbeidsland: String): Boolean =
-        Trygdeavtale_myndighetsland.values().any() { it.name == arbeidsland }
 
     private fun Medlemskapsperiode.harFullDekning(): Boolean = listOf(
         Trygdedekninger.FULL_DEKNING,

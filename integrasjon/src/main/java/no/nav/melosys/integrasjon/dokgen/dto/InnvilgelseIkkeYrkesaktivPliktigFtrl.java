@@ -58,6 +58,7 @@ public class InnvilgelseIkkeYrkesaktivPliktigFtrl extends DokgenDto {
     public String getBehandlingstype() {
         return behandlingstype;
     }
+
     public boolean getFlereLandUkjentHvilke() {
         return flereLandUkjentHvilke;
     }

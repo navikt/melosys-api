@@ -34,8 +34,11 @@ class InnvilgelseFtrl(
     val begrunnelseFritekst: String?,
     val trygdeavgiftFritekst: String?,
     val arbeidsgivere: List<String>,
-    val arbeidsland: String?,
-    val trygdeavtaleMedArbeidsland: Boolean,
+    val flereLandUkjentHvilke: Boolean,
+    @JsonInclude(JsonInclude.Include.NON_NULL)
+    val land: List<String>,
+    @JsonInclude(JsonInclude.Include.NON_NULL)
+    val trygdeavtaleLand: List<String>,
     val betalerArbeidsgiveravgift: Boolean
 ) : DokgenDto(brevbestilling, Mottakerroller.BRUKER) {
 
@@ -57,8 +60,9 @@ class InnvilgelseFtrl(
         private var begrunnelseFritekst: String? = null
         private var trygdeavgiftFritekst: String? = null
         private var arbeidsgivere: List<String> = emptyList()
-        private var arbeidsland: String? = null
-        private var trygdeavtaleMedArbeidsland = false
+        private var flereLandUkjentHvilke = false
+        private var land: List<String> = emptyList()
+        private var trygdeavtaleLand: List<String> = emptyList()
         private var betalerArbeidsgiveravgift = false
 
         fun behandlingstype(behandlingstype: Behandlingstyper): Builder {
@@ -71,7 +75,7 @@ class InnvilgelseFtrl(
             return this
         }
 
-        fun medlemskapsperioder(medlemskapsperioder: List<MedlemskapsperiodeDto> ): Builder {
+        fun medlemskapsperioder(medlemskapsperioder: List<MedlemskapsperiodeDto>): Builder {
             this.medlemskapsperioder = medlemskapsperioder
             return this
         }
@@ -118,7 +122,7 @@ class InnvilgelseFtrl(
 
         fun nyVurderingBakgrunn(nyVurderingBakgrunn: String?): Builder {
             this.nyVurderingBakgrunn = nyVurderingBakgrunn
-            return this;
+            return this
         }
 
         fun innledningFritekst(innledningFritekst: String?): Builder {
@@ -141,13 +145,18 @@ class InnvilgelseFtrl(
             return this
         }
 
-        fun arbeidsland(arbeidsland: String?): Builder {
-            this.arbeidsland = arbeidsland
+        fun flereLandUkjentHvilke(flereLandUkjentHvilke: Boolean): Builder {
+            this.flereLandUkjentHvilke = flereLandUkjentHvilke
             return this
         }
 
-        fun trygdeavtaleMedArbeidsland(trygdeavtaleMedArbeidsland: Boolean): Builder {
-            this.trygdeavtaleMedArbeidsland = trygdeavtaleMedArbeidsland
+        fun land(land: List<String>): Builder {
+            this.land = land
+            return this
+        }
+
+        fun trygdeavtaleLand(trygdeavtaleLand: List<String>): Builder {
+            this.trygdeavtaleLand = trygdeavtaleLand
             return this
         }
 
@@ -176,8 +185,9 @@ class InnvilgelseFtrl(
                 begrunnelseFritekst,
                 trygdeavgiftFritekst,
                 arbeidsgivere,
-                arbeidsland,
-                trygdeavtaleMedArbeidsland,
+                flereLandUkjentHvilke,
+                land,
+                trygdeavtaleLand,
                 betalerArbeidsgiveravgift,
             )
         }
