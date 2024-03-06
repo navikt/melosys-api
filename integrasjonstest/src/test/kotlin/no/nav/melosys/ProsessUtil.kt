@@ -67,13 +67,13 @@ class ProsessUtil(
     companion object {
         private val defaultTimeOut: Duration = Duration.ofSeconds(30)
         private val defaultTimeOutFindingProsess: Duration = Duration.ofSeconds(5)
-        private val defaultPollInterval: Duration = Duration.ofSeconds(1)
-        private val defaultPollDelay: Duration = Duration.ofSeconds(1)
+        private val defaultPollInterval: Duration = Duration.ofMillis(200)
+        private val defaultPollDelay: Duration = Duration.ofMillis(100)
 
-        internal var timeOut: Duration = Duration.ofSeconds(30)
-        internal var timeOutFindingProsess: Duration = Duration.ofSeconds(5)
-        internal var pollInterval: Duration = Duration.ofSeconds(1)
-        internal var pollDelay: Duration = Duration.ofSeconds(1)
+        internal var timeOut: Duration = defaultTimeOut
+        internal var timeOutFindingProsess: Duration = defaultTimeOutFindingProsess
+        internal var pollInterval: Duration = defaultPollInterval
+        internal var pollDelay: Duration = defaultPollDelay
 
         fun reset() {
             timeOut = defaultTimeOut
