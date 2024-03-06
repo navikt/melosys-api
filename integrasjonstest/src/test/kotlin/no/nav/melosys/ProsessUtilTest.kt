@@ -45,7 +45,7 @@ class ProsessUtilTest {
             ) {
             }
         }.message shouldBe "wait for prosees type:JFR_KNYTT to start\n" +
-            "Condition with no.nav.melosys.AwaitUtil\$AwaitUntilBuilder was not fulfilled within 2 milliseconds.\n" +
+            "Condition with no.nav.melosys.AwaitUtil was not fulfilled within 2 milliseconds.\n" +
             "Collection should contain element JFR_KNYTT based on object equality; but the collection is []"
     }
 
@@ -66,7 +66,7 @@ class ProsessUtilTest {
             ) {
             }
         }.message shouldBe "wait for prosees type:JFR_KNYTT to start\n" +
-            "Condition with no.nav.melosys.AwaitUtil\$AwaitUntilBuilder was not fulfilled within 2 milliseconds.\n" +
+            "Condition with no.nav.melosys.AwaitUtil was not fulfilled within 2 milliseconds.\n" +
             "Collection should contain element JFR_KNYTT based on object equality; but the collection is [IVERKSETT_VEDTAK_EOS]"
     }
 
@@ -89,7 +89,7 @@ class ProsessUtilTest {
             }
         }.message shouldBe "also wait for prosessTypes: [IVERKSETT_VEDTAK_EOS]\n" +
             "wait for prosees type:IVERKSETT_VEDTAK_EOS to start\n" +
-            "Condition with no.nav.melosys.AwaitUtil\$AwaitUntilBuilder was not fulfilled within 2 milliseconds.\n" +
+            "Condition with no.nav.melosys.AwaitUtil was not fulfilled within 2 milliseconds.\n" +
             "Collection should contain element IVERKSETT_VEDTAK_EOS based on object equality; but the collection is [JFR_KNYTT]"
     }
 
@@ -119,7 +119,7 @@ class ProsessUtilTest {
             }
         }.message shouldBe "also wait for prosessTypes: [IVERKSETT_VEDTAK_EOS]\n" +
             "wait for prosees type:IVERKSETT_VEDTAK_EOS to have status FERDIG\n" +
-            "Condition with no.nav.melosys.AwaitUtil\$AwaitUntilBuilder was not fulfilled within 2 milliseconds.\n" +
+            "Condition with no.nav.melosys.AwaitUtil was not fulfilled within 2 milliseconds.\n" +
             "prosess med type: IVERKSETT_VEDTAK_EOS har status KLAR\n" +
             "expected:<FERDIG> but was:<KLAR>"
     }

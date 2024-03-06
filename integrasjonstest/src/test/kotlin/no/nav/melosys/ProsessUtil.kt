@@ -4,7 +4,7 @@ import io.kotest.assertions.withClue
 import io.kotest.matchers.collections.shouldContain
 import io.kotest.matchers.nulls.shouldNotBeNull
 import io.kotest.matchers.shouldBe
-import no.nav.melosys.AwaitUtil.untilBuilder
+import no.nav.melosys.AwaitUtil.waitFor
 import no.nav.melosys.saksflyt.ProsessinstansRepository
 import no.nav.melosys.saksflytapi.domain.ProsessStatus
 import no.nav.melosys.saksflytapi.domain.ProsessType
@@ -37,12 +37,15 @@ class ProsessUtil(
             AwaitUtil.awaitWithFailOnLogErrors {
                 pollDelay(pollDelay)
                     .timeout(timeOutFindingProsess)
-                    .untilBuilder()
-                    .until { prosessinstansRepository.findAllAfterDate(startTid).any { it.type == prosessType } }
-                    .onTimeoutWithExceptionClue {
-                        val types = prosessinstansRepository.findAllAfterDate(startTid).map { it.type }
-                        types shouldContain prosessType
-                    }.execute()
+                    .waitFor(
+                        waitFor = { prosessinstansRepository.findAllAfterDate(startTid).any { it.type == prosessType } },
+                        onTimeout = { e ->
+                            withClue(e.message) {
+                                val types = prosessinstansRepository.findAllAfterDate(startTid).map { it.type }
+                                types shouldContain prosessType
+                            }
+                        }
+                    )
             }
         }
 
@@ -51,18 +54,21 @@ class ProsessUtil(
                 var current: Prosessinstans? = null
                 timeout(timeOut)
                     .pollInterval(pollInterval)
-                    .untilBuilder()
-                    .until {
-                        current = prosessinstansRepository.findAllAfterDate(startTid)
-                            .firstOrNull { it.type == prosessType && it.status == ProsessStatus.FERDIG }
-                        current != null
-                    }
-                    .onTimeoutWithExceptionClue {
-                        val prosesserStartet = prosessinstansRepository.findAllAfterDate(startTid).firstOrNull { it.type == prosessType }?.status
-                        withClue("prosess med type: $prosessType har status $prosesserStartet") {
-                            prosesserStartet shouldBe ProsessStatus.FERDIG
+                    .waitFor(
+                        waitFor = {
+                            current = prosessinstansRepository.findAllAfterDate(startTid)
+                                .firstOrNull { it.type == prosessType && it.status == ProsessStatus.FERDIG }
+                            current != null
+                        },
+                        onTimeout = { e ->
+                            val prosesserStartet = prosessinstansRepository.findAllAfterDate(startTid).firstOrNull { it.type == prosessType }?.status
+                            withClue(e.message) {
+                                withClue("prosess med type: $prosessType har status $prosesserStartet") {
+                                    prosesserStartet shouldBe ProsessStatus.FERDIG
+                                }
+                            }
                         }
-                    }.execute()
+                    )
                 current.shouldNotBeNull().id
             }
         }

@@ -29,6 +29,17 @@ object AwaitUtil {
         }
     }
 
+    fun ConditionFactory.waitFor(
+        onTimeout: (e: ConditionTimeoutException) -> Unit = { e -> throw e },
+        waitFor: () -> Boolean,
+    ) {
+        try {
+            until { waitFor() }
+        } catch (e: ConditionTimeoutException) {
+            onTimeout(e)
+        }
+    }
+
     fun ConditionFactory.throwOnLogError(logEvents: List<ILoggingEvent>): ConditionFactory = this.conditionEvaluationListener {
         logEvents.firstOrNull { it.level == Level.ERROR }?.let {
             throw TekniskException("Fant log entry med level error: ${it.formattedMessage}")
