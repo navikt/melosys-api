@@ -6,7 +6,7 @@ import io.kotest.assertions.withClue
 import io.kotest.matchers.shouldBe
 import mu.KotlinLogging
 import no.nav.melosys.AwaitUtil.awaitWithFailOnLogErrors
-import no.nav.melosys.AwaitUtil.builder
+import no.nav.melosys.AwaitUtil.untilBuilder
 import no.nav.melosys.AwaitUtil.throwOnLogError
 import no.nav.melosys.AwaitUtil.untilMatching
 import no.nav.melosys.LoggingTestUtils.withLogCapture
@@ -71,9 +71,9 @@ class AwaitUtilTest {
             await.atMost(Duration.ofMillis(100))
                 .pollInterval(Duration.ofMillis(1))
                 .pollDelay(Duration.ofMillis(1))
-                .builder()
-                .waitFor { i++ >= 10 }
-                .assertIfTimeout {
+                .untilBuilder()
+                .until { i++ >= 10 }
+                .onTimeout {
                     withClue("i > 10") {
                         i shouldBe 10
                     }
@@ -87,9 +87,9 @@ class AwaitUtilTest {
             await.atMost(Duration.ofMillis(2))
                 .pollInterval(Duration.ofMillis(1))
                 .pollDelay(Duration.ofMillis(1))
-                .builder()
-                .waitFor { i++.toString() == "hei" }
-                .assertIfTimeout {
+                .untilBuilder()
+                .until { i++.toString() == "hei" }
+                .onTimeout {
                     withClue("$i.toString() == \"hei\"") {
                         i.toString() shouldBe "hei"
                     }
