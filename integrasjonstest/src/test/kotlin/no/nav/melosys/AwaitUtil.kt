@@ -38,7 +38,7 @@ object AwaitUtil {
     fun ConditionFactory.untilBuilder() = AwaitUntilBuilder(this)
 
     class AwaitUntilBuilder(private val conditionFactory: ConditionFactory) {
-        private var waitFor: () -> Boolean = { throw IllegalStateException("waitFor not set")}
+        private var waitFor: () -> Boolean = { throw IllegalStateException("waitFor not set") }
         private var assertIfTimeout: (e: ConditionTimeoutException) -> Unit = { e -> throw e }
         fun until(block: () -> Boolean) = apply {
             waitFor = block
@@ -46,6 +46,14 @@ object AwaitUtil {
 
         fun onTimeout(block: (e: ConditionTimeoutException) -> Unit) = apply {
             assertIfTimeout = block
+        }
+
+        fun onTimeoutWithExceptionClue(block: () -> Unit) = apply {
+            assertIfTimeout = { e ->
+                withClue(e.message) {
+                    block()
+                }
+            }
         }
 
         fun execute() {

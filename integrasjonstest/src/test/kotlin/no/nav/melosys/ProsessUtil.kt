@@ -3,8 +3,8 @@ package no.nav.melosys
 import io.kotest.assertions.withClue
 import io.kotest.matchers.collections.shouldContain
 import io.kotest.matchers.nulls.shouldNotBeNull
+import io.kotest.matchers.shouldBe
 import no.nav.melosys.AwaitUtil.untilBuilder
-import no.nav.melosys.AwaitUtil.untilMatching
 import no.nav.melosys.saksflyt.ProsessinstansRepository
 import no.nav.melosys.saksflytapi.domain.ProsessStatus
 import no.nav.melosys.saksflytapi.domain.ProsessType
@@ -39,13 +39,10 @@ class ProsessUtil(
                     .timeout(timeOutFindingProsess)
                     .untilBuilder()
                     .until { prosessinstansRepository.findAllAfterDate(startTid).any { it.type == prosessType } }
-                    .onTimeout { e ->
+                    .onTimeoutWithExceptionClue {
                         val types = prosessinstansRepository.findAllAfterDate(startTid).map { it.type }
-                        withClue(e.message) {
-                            types shouldContain prosessType
-                        }
-                    }
-                    .execute()
+                        types shouldContain prosessType
+                    }.execute()
             }
         }
 
@@ -54,11 +51,18 @@ class ProsessUtil(
                 var current: Prosessinstans? = null
                 timeout(timeOut)
                     .pollInterval(pollInterval)
-                    .untilMatching(waitFor = prosessType) {
+                    .untilBuilder()
+                    .until {
                         current = prosessinstansRepository.findAllAfterDate(startTid)
                             .firstOrNull { it.type == prosessType && it.status == ProsessStatus.FERDIG }
-                        current?.type
+                        current != null
                     }
+                    .onTimeoutWithExceptionClue {
+                        val prosesserStartet = prosessinstansRepository.findAllAfterDate(startTid).firstOrNull { it.type == prosessType }?.status
+                        withClue("prosess med type: $prosessType har status $prosesserStartet") {
+                            prosesserStartet shouldBe ProsessStatus.FERDIG
+                        }
+                    }.execute()
                 current.shouldNotBeNull().id
             }
         }
