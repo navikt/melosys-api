@@ -71,7 +71,7 @@ class AwaitUtilTest {
             await.atMost(Duration.ofMillis(100))
                 .pollInterval(Duration.ofMillis(1))
                 .pollDelay(Duration.ofMillis(1))
-                .builder<Int>()
+                .builder()
                 .waitFor { i++ >= 10 }
                 .assertIfTimeout {
                     withClue("i > 10") {
@@ -87,7 +87,7 @@ class AwaitUtilTest {
             await.atMost(Duration.ofMillis(2))
                 .pollInterval(Duration.ofMillis(1))
                 .pollDelay(Duration.ofMillis(1))
-                .builder<String>()
+                .builder()
                 .waitFor { i++.toString() == "hei" }
                 .assertIfTimeout {
                     withClue("$i.toString() == \"hei\"") {

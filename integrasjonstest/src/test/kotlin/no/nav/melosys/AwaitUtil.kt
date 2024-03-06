@@ -35,11 +35,11 @@ object AwaitUtil {
         }
     }
 
-    fun <T> ConditionFactory.builder() = AwaitBuilder<T>(this)
+    fun ConditionFactory.builder() = AwaitBuilder(this)
 
-    class AwaitBuilder<T>(private val conditionFactory: ConditionFactory) {
-        private lateinit var waitFor: () -> Boolean
-        private lateinit var assertIfTimeout: (e: ConditionTimeoutException) -> Unit
+    class AwaitBuilder(private val conditionFactory: ConditionFactory) {
+        private var waitFor: () -> Boolean = { throw IllegalStateException("waitFor not set")}
+        private var assertIfTimeout: (e: ConditionTimeoutException) -> Unit = { e -> throw e }
         fun waitFor(block: () -> Boolean) = apply {
             waitFor = block
         }

@@ -2,7 +2,6 @@ package no.nav.melosys
 
 import io.kotest.assertions.withClue
 import io.kotest.matchers.collections.shouldContain
-import io.kotest.matchers.collections.shouldContainInOrder
 import io.kotest.matchers.nulls.shouldNotBeNull
 import no.nav.melosys.AwaitUtil.builder
 import no.nav.melosys.AwaitUtil.untilMatching
@@ -38,7 +37,7 @@ class ProsessUtil(
             AwaitUtil.awaitWithFailOnLogErrors {
                 pollDelay(pollDelay)
                     .timeout(timeOutFindingProsess)
-                    .builder<Unit>()
+                    .builder()
                     .waitFor { prosessinstansRepository.findAllAfterDate(startTid).any { it.type == prosessType } }
                     .assertIfTimeout { e ->
                         val types = prosessinstansRepository.findAllAfterDate(startTid).map { it.type }
