@@ -42,154 +42,50 @@ class InnvilgelseFtrl(
     val betalerArbeidsgiveravgift: Boolean
 ) : DokgenDto(brevbestilling, Mottakerroller.BRUKER) {
 
-    class Builder(val brevbestilling: InnvilgelseFtrlBrevbestilling) {
-        private val datoMottatt = instantTilLocalDate(brevbestilling.forsendelseMottatt)
-        private lateinit var behandlingstype: Behandlingstyper
-        private var avgiftsperioder: List<AvgiftsperiodeDto> = emptyList()
-        private var medlemskapsperioder: List<MedlemskapsperiodeDto> = emptyList()
-        private var bestemmelse: Folketrygdloven_kap2_bestemmelser? = null
-        private var fullmektigTrygdeavgift: String? = null
-        private var avslåttMedlemskapsperiodeFørMottaksdatoHelsedel = false
-        private var avslåttMedlemskapsperiodeFørMottaksdatoFullDekning = false
-        private var trygdeavgiftMottaker: Trygdeavgiftmottaker? = null
-        private var skatteplikttype: Skatteplikttype? = null
-        private var begrunnelse: Kodeverk? = null
-        private var begrunnelseAnnenGrunnFritekst: String? = null
-        private var nyVurderingBakgrunn: String? = null
-        private var innledningFritekst: String? = null
-        private var begrunnelseFritekst: String? = null
-        private var trygdeavgiftFritekst: String? = null
-        private var arbeidsgivere: List<String> = emptyList()
-        private var flereLandUkjentHvilke = false
-        private var land: List<String> = emptyList()
-        private var trygdeavtaleLand: List<String> = emptyList()
-        private var betalerArbeidsgiveravgift = false
-
-        fun behandlingstype(behandlingstype: Behandlingstyper): Builder {
-            this.behandlingstype = behandlingstype
-            return this
-        }
-
-        fun avgiftsperioder(avgiftsperioder: List<AvgiftsperiodeDto>): Builder {
-            this.avgiftsperioder = avgiftsperioder
-            return this
-        }
-
-        fun medlemskapsperioder(medlemskapsperioder: List<MedlemskapsperiodeDto>): Builder {
-            this.medlemskapsperioder = medlemskapsperioder
-            return this
-        }
-
-        fun bestemmelse(bestemmelse: Folketrygdloven_kap2_bestemmelser?): Builder {
-            this.bestemmelse = bestemmelse
-            return this
-        }
-
-        fun fullmektigTrygdeavgift(fullmektigTrygdeavgift: String?): Builder {
-            this.fullmektigTrygdeavgift = fullmektigTrygdeavgift
-            return this
-        }
-
-        fun avslåttMedlemskapsperiodeFørMottaksdatoHelsedel(avslåttMedlemskapsperiodeFørMottaksdatoHelsedel: Boolean): Builder {
-            this.avslåttMedlemskapsperiodeFørMottaksdatoHelsedel = avslåttMedlemskapsperiodeFørMottaksdatoHelsedel
-            return this
-        }
-
-        fun avslåttMedlemskapsperiodeFørMottaksdatoFullDekning(avslåttMedlemskapsperiodeFørMottaksdatoFullDekning: Boolean): Builder {
-            this.avslåttMedlemskapsperiodeFørMottaksdatoFullDekning = avslåttMedlemskapsperiodeFørMottaksdatoFullDekning
-            return this
-        }
-
-        fun trygdeavgiftMottaker(trygdeavgiftMottaker: Trygdeavgiftmottaker?): Builder {
-            this.trygdeavgiftMottaker = trygdeavgiftMottaker
-            return this
-        }
-
-        fun skatteplikttype(skatteplikttype: Skatteplikttype?): Builder {
-            this.skatteplikttype = skatteplikttype
-            return this
-        }
-
-        fun begrunnelse(begrunnelse: Kodeverk?): Builder {
-            this.begrunnelse = begrunnelse
-            return this
-        }
-
-        fun begrunnelseAnnenGrunnFritekst(begrunnelseAnnenGrunnFritekst: String?): Builder {
-            this.begrunnelseAnnenGrunnFritekst = begrunnelseAnnenGrunnFritekst
-            return this
-        }
-
-        fun nyVurderingBakgrunn(nyVurderingBakgrunn: String?): Builder {
-            this.nyVurderingBakgrunn = nyVurderingBakgrunn
-            return this
-        }
-
-        fun innledningFritekst(innledningFritekst: String?): Builder {
-            this.innledningFritekst = innledningFritekst
-            return this
-        }
-
-        fun begrunnelseFritekst(begrunnelseFritekst: String?): Builder {
-            this.begrunnelseFritekst = begrunnelseFritekst
-            return this
-        }
-
-        fun trygdeavgiftFritekst(trygdeavgiftFritekst: String?): Builder {
-            this.trygdeavgiftFritekst = trygdeavgiftFritekst
-            return this
-        }
-
-        fun arbeidsgivere(arbeidsgivere: List<String>): Builder {
-            this.arbeidsgivere = arbeidsgivere
-            return this
-        }
-
-        fun flereLandUkjentHvilke(flereLandUkjentHvilke: Boolean): Builder {
-            this.flereLandUkjentHvilke = flereLandUkjentHvilke
-            return this
-        }
-
-        fun land(land: List<String>): Builder {
-            this.land = land
-            return this
-        }
-
-        fun trygdeavtaleLand(trygdeavtaleLand: List<String>): Builder {
-            this.trygdeavtaleLand = trygdeavtaleLand
-            return this
-        }
-
-        fun betalerArbeidsgiveravgift(betalerArbeidsgiveravgift: Boolean): Builder {
-            this.betalerArbeidsgiveravgift = betalerArbeidsgiveravgift
-            return this
-        }
-
-        fun build(): InnvilgelseFtrl {
-            return InnvilgelseFtrl(
-                brevbestilling,
-                behandlingstype,
-                datoMottatt,
-                avgiftsperioder,
-                medlemskapsperioder,
-                bestemmelse,
-                avslåttMedlemskapsperiodeFørMottaksdatoHelsedel,
-                avslåttMedlemskapsperiodeFørMottaksdatoFullDekning,
-                trygdeavgiftMottaker,
-                fullmektigTrygdeavgift,
-                skatteplikttype,
-                begrunnelse,
-                begrunnelseAnnenGrunnFritekst,
-                nyVurderingBakgrunn,
-                innledningFritekst,
-                begrunnelseFritekst,
-                trygdeavgiftFritekst,
-                arbeidsgivere,
-                flereLandUkjentHvilke,
-                land,
-                trygdeavtaleLand,
-                betalerArbeidsgiveravgift,
-            )
-        }
-    }
+    constructor(
+        brevbestilling: InnvilgelseFtrlBrevbestilling,
+        behandlingstype: Behandlingstyper,
+        avgiftsperioder: List<AvgiftsperiodeDto>,
+        medlemskapsperioder: List<MedlemskapsperiodeDto>,
+        bestemmelse: Folketrygdloven_kap2_bestemmelser?,
+        avslåttMedlemskapsperiodeFørMottaksdatoHelsedel: Boolean,
+        avslåttMedlemskapsperiodeFørMottaksdatoFullDekning: Boolean,
+        trygdeavgiftMottaker: Trygdeavgiftmottaker?,
+        fullmektigTrygdeavgift: String?,
+        skatteplikttype: Skatteplikttype?,
+        begrunnelse: Kodeverk?,
+        begrunnelseAnnenGrunnFritekst: String?,
+        nyVurderingBakgrunn: String?,
+        innledningFritekst: String?,
+        begrunnelseFritekst: String?,
+        trygdeavgiftFritekst: String?,
+        arbeidsgivere: List<String>,
+        flereLandUkjentHvilke: Boolean,
+        land: List<String>,
+        trygdeavtaleLand: List<String>,
+        betalerArbeidsgiveravgift: Boolean
+    ) : this(
+        brevbestilling,
+        behandlingstype,
+        datoMottatt = instantTilLocalDate(brevbestilling.forsendelseMottatt),
+        avgiftsperioder,
+        medlemskapsperioder,
+        bestemmelse,
+        avslåttMedlemskapsperiodeFørMottaksdatoHelsedel,
+        avslåttMedlemskapsperiodeFørMottaksdatoFullDekning,
+        trygdeavgiftMottaker,
+        fullmektigTrygdeavgift,
+        skatteplikttype,
+        begrunnelse,
+        begrunnelseAnnenGrunnFritekst,
+        nyVurderingBakgrunn,
+        innledningFritekst,
+        begrunnelseFritekst,
+        trygdeavgiftFritekst,
+        arbeidsgivere,
+        flereLandUkjentHvilke,
+        land,
+        trygdeavtaleLand,
+        betalerArbeidsgiveravgift
+    )
 }

@@ -43,28 +43,29 @@ class InnvilgelseFtrlMapper(
         val avslåttMedlemskapsperiodeFørMottaksdatoFullDekning =
             mapAvslåttMedlemskapsperiodeFørMottaksdatoFullDekning(medlemAvFolketrygden, brevbestilling.forsendelseMottatt)
 
-        return InnvilgelseFtrl.Builder(brevbestilling)
-            .behandlingstype(behandlingsresultat.behandling.type)
-            .avgiftsperioder(mapAvgiftsPerioder(medlemAvFolketrygden))
-            .medlemskapsperioder(mapMedlemskapsPerioder(medlemAvFolketrygden))
-            .bestemmelse(medlemAvFolketrygden.medlemskapsperioder.filter { it.erInnvilget() }.sortedBy { it.fom }.first().bestemmelse)
-            .avslåttMedlemskapsperiodeFørMottaksdatoHelsedel(avslåttMedlemskapsperiodeFørMottaksdatoHelsedel)
-            .avslåttMedlemskapsperiodeFørMottaksdatoFullDekning(avslåttMedlemskapsperiodeFørMottaksdatoFullDekning)
-            .trygdeavgiftMottaker(trygdeavgiftMottakerService.getTrygdeavgiftMottaker(medlemAvFolketrygden.fastsattTrygdeavgift.trygdeavgiftsgrunnlag))
-            .fullmektigTrygdeavgift(finnFullmektigTrygdeavgift(behandlingsresultat.behandling))
-            .skatteplikttype(medlemAvFolketrygden.utledSkatteplikttype())
-            .begrunnelse(hentBegrunnelse(behandlingsresultat.vilkaarsresultater))
-            .begrunnelseAnnenGrunnFritekst(hentSaerligBegrunnelseFritekst(behandlingsresultat.vilkaarsresultater))
-            .nyVurderingBakgrunn(brevbestilling.nyVurderingBakgrunn)
-            .innledningFritekst(brevbestilling.innledningFritekst)
-            .begrunnelseFritekst(brevbestilling.begrunnelseFritekst)
-            .trygdeavgiftFritekst(brevbestilling.trygdeavgiftFritekst)
-            .arbeidsgivere(hentArbeidsgivere(brevbestilling.behandling))
-            .flereLandUkjentHvilke(søknadsland.isFlereLandUkjentHvilke)
-            .land(søknadsland.landkoder.map { dokgenMapperDatahenter.hentLandnavnFraLandkode(it) })
-            .trygdeavtaleLand(mapTrygdeavtaleLand(søknadsland.landkoder))
-            .betalerArbeidsgiveravgift(erBetalerArbeidsgiveravgift(medlemAvFolketrygden.medlemskapsperioder))
-            .build()
+        return InnvilgelseFtrl(
+            brevbestilling = brevbestilling,
+            behandlingstype = behandlingsresultat.behandling.type,
+            avgiftsperioder = mapAvgiftsPerioder(medlemAvFolketrygden),
+            medlemskapsperioder = mapMedlemskapsPerioder(medlemAvFolketrygden),
+            bestemmelse = medlemAvFolketrygden.medlemskapsperioder.filter { it.erInnvilget() }.sortedBy { it.fom }.first().bestemmelse,
+            avslåttMedlemskapsperiodeFørMottaksdatoHelsedel = avslåttMedlemskapsperiodeFørMottaksdatoHelsedel,
+            avslåttMedlemskapsperiodeFørMottaksdatoFullDekning = avslåttMedlemskapsperiodeFørMottaksdatoFullDekning,
+            trygdeavgiftMottaker = trygdeavgiftMottakerService.getTrygdeavgiftMottaker(medlemAvFolketrygden.fastsattTrygdeavgift.trygdeavgiftsgrunnlag),
+            fullmektigTrygdeavgift = finnFullmektigTrygdeavgift(behandlingsresultat.behandling),
+            skatteplikttype = medlemAvFolketrygden.utledSkatteplikttype(),
+            begrunnelse = hentBegrunnelse(behandlingsresultat.vilkaarsresultater),
+            begrunnelseAnnenGrunnFritekst = hentSaerligBegrunnelseFritekst(behandlingsresultat.vilkaarsresultater),
+            nyVurderingBakgrunn = brevbestilling.nyVurderingBakgrunn,
+            innledningFritekst = brevbestilling.innledningFritekst,
+            begrunnelseFritekst = brevbestilling.begrunnelseFritekst,
+            trygdeavgiftFritekst = brevbestilling.trygdeavgiftFritekst,
+            arbeidsgivere = hentArbeidsgivere(brevbestilling.behandling),
+            flereLandUkjentHvilke = søknadsland.isFlereLandUkjentHvilke,
+            land = søknadsland.landkoder.map { dokgenMapperDatahenter.hentLandnavnFraLandkode(it) },
+            trygdeavtaleLand = mapTrygdeavtaleLand(søknadsland.landkoder),
+            betalerArbeidsgiveravgift = erBetalerArbeidsgiveravgift(medlemAvFolketrygden.medlemskapsperioder)
+        )
     }
 
     internal fun mapIkkeYrkesaktivFrivillig(brevbestilling: IkkeYrkesaktivFrivilligFtrlBrevbestilling): InnvilgelseIkkeYrkesaktivFrivilligFtrl {
