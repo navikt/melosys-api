@@ -29,7 +29,5 @@ object PliktigeMedlemskapsbestemmelser {
         Folketrygdloven_kap2_bestemmelser.FTRL_KAP2_2_5_FØRSTE_LEDD_E,
         Folketrygdloven_kap2_bestemmelser.FTRL_KAP2_2_5_FØRSTE_LEDD_F,
         Folketrygdloven_kap2_bestemmelser.FTRL_KAP2_2_5_FØRSTE_LEDD_G,
-        Folketrygdloven_kap2_bestemmelser.FTRL_KAP2_2_5_FØRSTE_LEDD_H,
-        Folketrygdloven_kap2_bestemmelser.FTRL_KAP2_2_5_ANDRE_LEDD
     )
 }

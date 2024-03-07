@@ -27,7 +27,7 @@ class LovligeKombinasjonerTrygdedekningBestemmelseTest {
     fun hentLovligeBestemmelser_fullTrygdedekning_returnererAllePliktigeBestemmelseneSamtFlere_TOGGLE() {
         LovligeKombinasjonerTrygdedekningBestemmelse.hentLovligeBestemmelserToggle(Trygdedekninger.FULL_DEKNING_FTRL)
             .shouldNotBeNull()
-            .shouldHaveSize(15)
+            .shouldHaveSize(13)
             .shouldContainAll(PliktigeMedlemskapsbestemmelser.bestemmelserNy)
     }
 

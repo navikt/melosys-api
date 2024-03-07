@@ -45,7 +45,7 @@ class FtrlBestemmelseTest {
         unleash.enable(ToggleName.MELOSYS_FTRL_YRKESAKTIV_PLIKTIGE_BESTEMMELSER)
         ftrlBestemmelser.hentBestemmelser(Behandlingstema.YRKESAKTIV, Trygdedekninger.FULL_DEKNING_FTRL)
             .shouldNotBeNull()
-            .shouldHaveSize(10)
+            .shouldHaveSize(12)
     }
 
     @Test

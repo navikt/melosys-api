@@ -1,37 +1,27 @@
 package no.nav.melosys.service.ftrl.bestemmelse.avklartefakta
 
-import io.getunleash.Unleash
 import no.nav.melosys.domain.kodeverk.*
 import no.nav.melosys.domain.kodeverk.Folketrygdloven_kap2_bestemmelser.*
+import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingstema
 import no.nav.melosys.domain.mottatteopplysninger.data.Soeknadsland
-import no.nav.melosys.featuretoggle.LocalUnleash
+import no.nav.melosys.service.behandling.BehandlingService
 import no.nav.melosys.service.mottatteopplysninger.MottatteOpplysningerService
 import org.springframework.stereotype.Component
 
 @Component
-class AvklarteFaktaForBestemmelse(val mottatteOpplysningerService: MottatteOpplysningerService) {
+class AvklarteFaktaForBestemmelse(val mottatteOpplysningerService: MottatteOpplysningerService, val behandlingService: BehandlingService) {
 
     fun hentAvklarteFakta(bestemmelse: Folketrygdloven_kap2_bestemmelser, behandlingID: Long): List<AvklarteFaktaType> {
+        val erIkkeYrkesaktiv = behandlingService.hentBehandling(behandlingID).tema == Behandlingstema.IKKE_YRKESAKTIV
+
+        return if (erIkkeYrkesaktiv) hentAvklarteFaktaIkkeYrkesaktiv(bestemmelse, behandlingID) else hentAvklarteFaktaYrkesaktiv(bestemmelse, behandlingID)
+    }
+
+    fun hentAvklarteFaktaIkkeYrkesaktiv(bestemmelse: Folketrygdloven_kap2_bestemmelser, behandlingID: Long): List<AvklarteFaktaType> {
         return when (bestemmelse) {
-            FTRL_KAP2_2_1 -> listOf(
-                AvklarteFaktaType(
-                    Avklartefaktatyper.ARBEIDSSITUASJON, listOf(
-                        Arbeidssituasjontype.MIDLERTIDIG_ARBEID_2_1_FJERDE_LEDD,
-                        Arbeidssituasjontype.VEKSELVIS_ARBEID_2_1_FJERDE_LEDD
-                    ).map(Arbeidssituasjontype::name)
-                )
-            )
+            FTRL_KAP2_2_1 -> ftrlKap2_1AvklarteFaktaForBehandling_ikkeYrkesaktiv(behandlingID)
 
-            FTRL_KAP2_2_2 -> listOf(
-                AvklarteFaktaType(
-                    Avklartefaktatyper.ARBEIDSSITUASJON, listOf(
-                        Arbeidssituasjontype.ARBIED_I_NORGE_2_2,
-                        Arbeidssituasjontype.ARBEID_PÅ_NORSK_SOKKEL_2_2
-                    ).map(Arbeidssituasjontype::name)
-                )
-            )
-
-            FTRL_KAP2_2_1_FØRSTE_LEDD -> ftrlKap2_1AvklarteFaktaForBehandling(behandlingID)
+            FTRL_KAP2_2_1_FØRSTE_LEDD -> ftrlKap2_1AvklarteFaktaForBehandling_ikkeYrkesaktiv(behandlingID)
 
             FTRL_KAP2_2_5_ANDRE_LEDD -> listOf(
                 AvklarteFaktaType(
@@ -54,13 +44,57 @@ class AvklarteFaktaForBestemmelse(val mottatteOpplysningerService: MottatteOpply
         }
     }
 
-    private fun ftrlKap2_1AvklarteFaktaForBehandling(behandlingID: Long): List<AvklarteFaktaType> {
-        val mottatteOpplysninger = mottatteOpplysningerService.hentMottatteOpplysninger(behandlingID)
-
-        return ftrlKap2_1AvklarteFaktaForLand(mottatteOpplysninger.mottatteOpplysningerData?.soeknadsland)
+    fun hentAvklarteFaktaYrkesaktiv(bestemmelse: Folketrygdloven_kap2_bestemmelser, behandlingID: Long): List<AvklarteFaktaType> {
+        return when (bestemmelse) {
+            FTRL_KAP2_2_1 -> ftrlKap2_1AvklarteFaktaForBehandling_Yrkesaktiv(behandlingID)
+            FTRL_KAP2_2_2 -> listOf(
+                AvklarteFaktaType(
+                    Avklartefaktatyper.ARBEIDSSITUASJON, listOf(
+                        Arbeidssituasjontype.ARBIED_I_NORGE_2_2,
+                        Arbeidssituasjontype.ARBEID_PÅ_NORSK_SOKKEL_2_2
+                    ).map(Arbeidssituasjontype::name)
+                )
+            )
+            else -> emptyList()
+        }
     }
 
-    private fun ftrlKap2_1AvklarteFaktaForLand(søknadsland: Soeknadsland?): List<AvklarteFaktaType> {
+    private fun ftrlKap2_1AvklarteFaktaForBehandling_ikkeYrkesaktiv(behandlingID: Long): List<AvklarteFaktaType> {
+        val mottatteOpplysninger = mottatteOpplysningerService.hentMottatteOpplysninger(behandlingID)
+        return ftrlKap2_1AvklarteFaktaForLand_ikkeYrkesaktiv(mottatteOpplysninger.mottatteOpplysningerData?.soeknadsland)
+    }
+
+    private fun ftrlKap2_1AvklarteFaktaForBehandling_Yrkesaktiv(behandlingID: Long): List<AvklarteFaktaType> {
+        val mottatteOpplysninger = mottatteOpplysningerService.hentMottatteOpplysninger(behandlingID)
+        return ftrlKap2_1AvklarteFaktaForLand_Yrkesaktiv(mottatteOpplysninger.mottatteOpplysningerData?.soeknadsland)
+    }
+
+    private fun ftrlKap2_1AvklarteFaktaForLand_Yrkesaktiv(søknadsland: Soeknadsland?): List<AvklarteFaktaType> {
+        if (søknadsland == null) {
+            return emptyList()
+        }
+        val kunNorge = søknadsland.landkoder.first() == Land_iso2.NO.toString() && søknadsland.landkoder.size == 1
+        val ettEllerFlereLandUtenforNorge = søknadsland.landkoder.any { it != Land_iso2.NO.toString() } || søknadsland.isFlereLandUkjentHvilke
+
+        if(kunNorge) {
+            return emptyList()
+        }
+        // Ett eller flere land utenfor Norge. Vi legger alltid til grunn at det gjelder opphold i utlandet ved flere land.
+        if (ettEllerFlereLandUtenforNorge) {
+            return listOf(
+                AvklarteFaktaType(
+                    Avklartefaktatyper.ARBEIDSSITUASJON,
+                    listOf(
+                        Arbeidssituasjontype.MIDLERTIDIG_ARBEID_2_1_FJERDE_LEDD,
+                        Arbeidssituasjontype.VEKSELVIS_ARBEID_2_1_FJERDE_LEDD
+                    ).map(Arbeidssituasjontype::name)
+                )
+            )
+        }
+        return emptyList()
+    }
+
+    private fun ftrlKap2_1AvklarteFaktaForLand_ikkeYrkesaktiv(søknadsland: Soeknadsland?): List<AvklarteFaktaType> {
         if (søknadsland == null) {
             return emptyList()
         }
