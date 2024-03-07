@@ -4,9 +4,8 @@ import com.github.tomakehurst.wiremock.WireMockServer
 import com.github.tomakehurst.wiremock.client.WireMock
 import com.github.tomakehurst.wiremock.client.WireMock.equalTo
 import com.github.tomakehurst.wiremock.core.WireMockConfiguration
-import io.kotest.matchers.collections.shouldContain
 import io.kotest.matchers.nulls.shouldNotBeNull
-import no.nav.melosys.AwaitUtil.awaitWithFailOnLogErrors
+import no.nav.melosys.ProsessUtil
 import no.nav.melosys.domain.arkiv.ArkivDokument
 import no.nav.melosys.domain.kodeverk.Avsendertyper
 import no.nav.melosys.domain.kodeverk.ForvaltningsmeldingMottaker
@@ -15,7 +14,6 @@ import no.nav.melosys.melosysmock.oppgave.Oppgave
 import no.nav.melosys.melosysmock.sak.SakRepo
 import no.nav.melosys.melosysmock.testdata.TestDataGenerator
 import no.nav.melosys.saksflyt.ProsessinstansRepository
-import no.nav.melosys.saksflytapi.domain.ProsessStatus
 import no.nav.melosys.saksflytapi.domain.ProsessType
 import no.nav.melosys.saksflytapi.domain.Prosessinstans
 import no.nav.melosys.service.felles.dto.SoeknadslandDto
@@ -23,13 +21,10 @@ import no.nav.melosys.service.journalforing.JournalfoeringService
 import no.nav.melosys.service.journalforing.dto.*
 import no.nav.melosys.service.oppgave.OppgaveService
 import no.nav.melosys.sikkerhet.context.ThreadLocalAccessInfo
-import org.awaitility.kotlin.untilNotNull
 import org.junit.jupiter.api.AfterEach
 import org.junit.jupiter.api.BeforeEach
 import java.time.LocalDate
-import java.time.LocalDateTime
 import java.util.*
-import java.util.concurrent.TimeUnit
 
 class JournalfoeringBase(
     protected val testDataGenerator: TestDataGenerator,
@@ -42,6 +37,7 @@ class JournalfoeringBase(
         WireMockServer(WireMockConfiguration.wireMockConfig().port(8094))
 
     private val processUUID = UUID.randomUUID()
+    private val prosessUtil by lazy { ProsessUtil(prosessinstansRepository) }
 
     @BeforeEach
     fun before() {
@@ -94,32 +90,7 @@ class JournalfoeringBase(
         waitForprosessType: ProsessType,
         alsoWaitForprosessType: List<ProsessType> = listOf(),
         process: () -> Unit
-    ): Prosessinstans {
-        val startTime = LocalDateTime.now()
-        process()
-        val journalføringProsessID = finnProsess(waitForprosessType, startTime)
-        alsoWaitForprosessType.forEach { finnProsess(it, startTime) }
-        return prosessinstansRepository.findById(journalføringProsessID).get()
-    }
-
-    protected fun finnProsess(prosessType: ProsessType, startTid: LocalDateTime): UUID {
-        awaitWithFailOnLogErrors {
-            pollDelay(1, TimeUnit.SECONDS)
-                .timeout(30, TimeUnit.SECONDS)
-                .untilNotNull {
-                    prosessinstansRepository.findAllAfterDate(startTid)
-                }.map { it.type }.shouldContain(prosessType)
-        }
-
-        return awaitWithFailOnLogErrors {
-            timeout(30, TimeUnit.SECONDS)
-                .pollInterval(1, TimeUnit.SECONDS)
-                .untilNotNull {
-                    prosessinstansRepository.findAllAfterDate(startTid)
-                        .find { it.type == prosessType && it.status == ProsessStatus.FERDIG }?.id
-                }
-        }
-    }
+    ): Prosessinstans = prosessUtil.executeAndWait(waitForprosessType, alsoWaitForprosessType, process)
 
     protected fun lagJfrOppgave(): Oppgave =
         testDataGenerator.opprettJfrOppgave(tilordnetRessurs = "Z123456", forVirksomhet = false)
