@@ -120,7 +120,7 @@ class DokgenMalMapper(
                 DokumentasjonSvarfrist.beregnFristPaaMangelbrevFraDagensDato()
             )
 
-            Produserbaredokumenter.INNVILGELSE_FOLKETRYGDLOVEN -> innvilgelseFtrlMapper.mapYrkesaktivFrivillig((brevbestilling as InnvilgelseFtrlBrevbestilling))
+            Produserbaredokumenter.INNVILGELSE_FOLKETRYGDLOVEN -> innvilgelseFtrlMapper.mapYrkesaktivFrivillig((brevbestilling as InnvilgelseFtrlYrkesaktivFrivilligBrevbestilling))
 
             Produserbaredokumenter.TRYGDEAVTALE_GB -> trygdeavtaleMapper.map(
                 brevbestilling.toBuilder()

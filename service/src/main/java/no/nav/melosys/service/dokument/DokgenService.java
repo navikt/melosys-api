@@ -308,7 +308,7 @@ public class DokgenService {
                 .medBarnFritekst(brevbestillingDto.getBarnFritekst())
                 .medVirksomhetArbeidsgiverSkalHaKopi(inneholderArbeidsgiverSomKopimottaker(brevbestillingDto.getKopiMottakere()))
                 .medNyVurderingBakgrunn(brevbestillingDto.getNyVurderingBakgrunn());
-            case INNVILGELSE_FOLKETRYGDLOVEN -> new InnvilgelseFtrlBrevbestilling.Builder()
+            case INNVILGELSE_FOLKETRYGDLOVEN -> new InnvilgelseFtrlYrkesaktivFrivilligBrevbestilling.Builder()
                 .medDistribusjonstype(Distribusjonstype.VEDTAK)
                 .medNyVurderingBakgrunn(brevbestillingDto.getNyVurderingBakgrunn())
                 .medInnledningFritekst(brevbestillingDto.getInnledningFritekst())

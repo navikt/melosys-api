@@ -16,7 +16,7 @@ import no.nav.melosys.domain.VilkaarBegrunnelse
 import no.nav.melosys.domain.Vilkaarsresultat
 import no.nav.melosys.domain.avgift.*
 import no.nav.melosys.domain.avklartefakta.AvklartVirksomhet
-import no.nav.melosys.domain.brev.InnvilgelseFtrlBrevbestilling
+import no.nav.melosys.domain.brev.InnvilgelseFtrlYrkesaktivFrivilligBrevbestilling
 import no.nav.melosys.domain.folketrygden.FastsattTrygdeavgift
 import no.nav.melosys.domain.folketrygden.MedlemAvFolketrygden
 import no.nav.melosys.domain.kodeverk.*
@@ -40,7 +40,7 @@ import java.time.LocalDate
 import java.time.temporal.ChronoUnit
 
 @ExtendWith(MockKExtension::class)
-internal class InnvilgelseFtrlMapperTest {
+internal class InnvilgelseFtrlYrkesaktivFrivilligMapperTest {
 
     @MockK
     private lateinit var mockAvklarteVirksomheterService: AvklarteVirksomheterService
@@ -70,7 +70,7 @@ internal class InnvilgelseFtrlMapperTest {
     fun mapYrkesaktivFrivillig_InnvilgetKunNorskInntektInnvilget_populererFelter() {
         mockHappyCase(Case.paragraf_2_8)
 
-        innvilgelseFtrlMapper.mapYrkesaktivFrivillig(lagInnvilgelseFtrlBrevbestilling()).shouldNotBeNull()
+        innvilgelseFtrlMapper.mapYrkesaktivFrivillig(lagBrevbestilling()).shouldNotBeNull()
             .apply {
                 behandlingstype.shouldBe(Behandlingstyper.FØRSTEGANG)
                 nyVurderingBakgrunn.shouldBe("NYE_OPPLYSNINGER")
@@ -117,7 +117,7 @@ internal class InnvilgelseFtrlMapperTest {
             behandling.mottatteOpplysninger.mottatteOpplysningerData.soeknadsland = Soeknadsland(listOf(Landkoder.GB.kode), false)
         }
 
-        innvilgelseFtrlMapper.mapYrkesaktivFrivillig(lagInnvilgelseFtrlBrevbestilling()).apply {
+        innvilgelseFtrlMapper.mapYrkesaktivFrivillig(lagBrevbestilling()).apply {
             flereLandUkjentHvilke.shouldBeFalse()
             land.shouldContainOnly(Landkoder.GB.beskrivelse)
             trygdeavtaleLand.shouldContainOnly(Landkoder.GB.beskrivelse)
@@ -131,7 +131,7 @@ internal class InnvilgelseFtrlMapperTest {
             behandling.mottatteOpplysninger.mottatteOpplysningerData.soeknadsland = Soeknadsland(emptyList(), true)
         }
 
-        innvilgelseFtrlMapper.mapYrkesaktivFrivillig(lagInnvilgelseFtrlBrevbestilling()).apply {
+        innvilgelseFtrlMapper.mapYrkesaktivFrivillig(lagBrevbestilling()).apply {
             flereLandUkjentHvilke.shouldBeTrue()
             land.shouldBeEmpty()
             trygdeavtaleLand.shouldBeEmpty()
@@ -157,8 +157,8 @@ internal class InnvilgelseFtrlMapperTest {
             )
         }
 
-        innvilgelseFtrlMapper.mapYrkesaktivFrivillig(lagInnvilgelseFtrlBrevbestilling()).apply {
-            innvilgelseFtrlMapper.mapYrkesaktivFrivillig(lagInnvilgelseFtrlBrevbestilling()).shouldNotBeNull()
+        innvilgelseFtrlMapper.mapYrkesaktivFrivillig(lagBrevbestilling()).apply {
+            innvilgelseFtrlMapper.mapYrkesaktivFrivillig(lagBrevbestilling()).shouldNotBeNull()
                 .apply {
                     behandlingstype.shouldBe(Behandlingstyper.FØRSTEGANG)
                     nyVurderingBakgrunn.shouldBe("NYE_OPPLYSNINGER")
@@ -219,7 +219,7 @@ internal class InnvilgelseFtrlMapperTest {
             )
         }
 
-        innvilgelseFtrlMapper.mapYrkesaktivFrivillig(lagInnvilgelseFtrlBrevbestilling()).apply {
+        innvilgelseFtrlMapper.mapYrkesaktivFrivillig(lagBrevbestilling()).apply {
             avgiftsperioder.shouldHaveSize(0)
             medlemskapsperioder.shouldHaveSize(1)
                 .map { it.innvilgelsesResultat }
@@ -231,7 +231,7 @@ internal class InnvilgelseFtrlMapperTest {
     fun `mapYrkesaktivFrivillig Innvilget 2_7 populerer felter`() {
         mockHappyCase(Case.paragraf_2_7)
 
-        innvilgelseFtrlMapper.mapYrkesaktivFrivillig(lagInnvilgelseFtrlBrevbestilling()).shouldNotBeNull()
+        innvilgelseFtrlMapper.mapYrkesaktivFrivillig(lagBrevbestilling()).shouldNotBeNull()
             .apply {
                 behandlingstype.shouldBe(Behandlingstyper.FØRSTEGANG)
                 nyVurderingBakgrunn.shouldBe("NYE_OPPLYSNINGER")
@@ -270,8 +270,8 @@ internal class InnvilgelseFtrlMapperTest {
             }
     }
 
-    private fun lagInnvilgelseFtrlBrevbestilling(): InnvilgelseFtrlBrevbestilling {
-        return InnvilgelseFtrlBrevbestilling.Builder()
+    private fun lagBrevbestilling(): InnvilgelseFtrlYrkesaktivFrivilligBrevbestilling {
+        return InnvilgelseFtrlYrkesaktivFrivilligBrevbestilling.Builder()
             .medBehandling(DokgenTestData.lagBehandling())
             .medPersonDokument(DokgenTestData.lagPersondata())
             .medPersonMottaker(DokgenTestData.lagPersondata())

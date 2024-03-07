@@ -1,17 +1,17 @@
 package no.nav.melosys.domain.brev;
 
-public class InnvilgelseFtrlBrevbestilling extends DokgenBrevbestilling {
+public class InnvilgelseFtrlYrkesaktivFrivilligBrevbestilling extends DokgenBrevbestilling {
     private String nyVurderingBakgrunn;
     private String innledningFritekst;
     private String begrunnelseFritekst;
     private String trygdeavgiftFritekst;
 
-    public InnvilgelseFtrlBrevbestilling() {
+    public InnvilgelseFtrlYrkesaktivFrivilligBrevbestilling() {
         super();
         //Tom constructor på grunn av deserialsering i prosessinstans
     }
 
-    private InnvilgelseFtrlBrevbestilling(Builder builder) {
+    private InnvilgelseFtrlYrkesaktivFrivilligBrevbestilling(Builder builder) {
         super(builder);
         this.nyVurderingBakgrunn = builder.nyVurderingBakgrunn;
         this.innledningFritekst = builder.innledningFritekst;
@@ -48,12 +48,12 @@ public class InnvilgelseFtrlBrevbestilling extends DokgenBrevbestilling {
         public Builder() {
         }
 
-        public Builder(InnvilgelseFtrlBrevbestilling innvilgelseBrevbestilling) {
-            super(innvilgelseBrevbestilling);
-            this.nyVurderingBakgrunn = innvilgelseBrevbestilling.nyVurderingBakgrunn;
-            this.innledningFritekst = innvilgelseBrevbestilling.innledningFritekst;
-            this.begrunnelseFritekst = innvilgelseBrevbestilling.begrunnelseFritekst;
-            this.trygdeavgiftFritekst = innvilgelseBrevbestilling.trygdeavgiftFritekst;
+        public Builder(InnvilgelseFtrlYrkesaktivFrivilligBrevbestilling brevbestilling) {
+            super(brevbestilling);
+            this.nyVurderingBakgrunn = brevbestilling.nyVurderingBakgrunn;
+            this.innledningFritekst = brevbestilling.innledningFritekst;
+            this.begrunnelseFritekst = brevbestilling.begrunnelseFritekst;
+            this.trygdeavgiftFritekst = brevbestilling.trygdeavgiftFritekst;
         }
 
         public Builder medInnledningFritekst(String innledningFritekst) {
@@ -76,8 +76,8 @@ public class InnvilgelseFtrlBrevbestilling extends DokgenBrevbestilling {
             return this;
         }
 
-        public InnvilgelseFtrlBrevbestilling build() {
-            return new InnvilgelseFtrlBrevbestilling(this);
+        public InnvilgelseFtrlYrkesaktivFrivilligBrevbestilling build() {
+            return new InnvilgelseFtrlYrkesaktivFrivilligBrevbestilling(this);
         }
     }
 }

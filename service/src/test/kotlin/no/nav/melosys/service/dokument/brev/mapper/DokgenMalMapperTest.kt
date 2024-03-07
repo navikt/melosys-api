@@ -335,10 +335,10 @@ internal class DokgenMalMapperTest {
         every { mockDokgenMapperDatahenter.hentPersonMottaker(any()) } returns DokgenTestData.lagPersondata()
         every { mockDokgenMapperDatahenter.hentNorskPoststed(any()) } returns "Andeby"
         every { mockDokgenMapperDatahenter.hentLandnavnFraLandkode(Landkoder.NO.kode) } returns Landkoder.NO.beskrivelse
-        every { mockInnvilgelseFtrlMapper.mapYrkesaktivFrivillig(any()) } returns lagInnvilgelseFtrl()
+        every { mockInnvilgelseFtrlMapper.mapYrkesaktivFrivillig(any()) } returns lagInnvilgelseFtrlYrkesaktivFrivillig()
 
         val behandling = DokgenTestData.lagBehandling(DokgenTestData.lagFagsak(true))
-        val brevbestilling: DokgenBrevbestilling = InnvilgelseFtrlBrevbestilling.Builder()
+        val brevbestilling: DokgenBrevbestilling = InnvilgelseFtrlYrkesaktivFrivilligBrevbestilling.Builder()
             .medProduserbartdokument(Produserbaredokumenter.INNVILGELSE_FOLKETRYGDLOVEN)
             .medBehandling(behandling)
             .medOrg(DokgenTestData.lagOrg())
@@ -350,7 +350,7 @@ internal class DokgenMalMapperTest {
         dokgenMalMapper.mapBehandling(
             brevbestilling,
             DokgenTestData.lagMottaker(Mottakerroller.BRUKER)
-        ).shouldBeInstanceOf<InnvilgelseFtrl>()
+        ).shouldBeInstanceOf<InnvilgelseFtrlYrkesaktivFrivillig>()
     }
 
     @Test
@@ -538,9 +538,9 @@ internal class DokgenMalMapperTest {
             .medPersonMottaker(DokgenTestData.lagPersondata())
             .build()
 
-    private fun lagInnvilgelseFtrl(): InnvilgelseFtrl {
-        return InnvilgelseFtrl(
-            brevbestilling = lagInnvilgelseFtrlBrevbestilling(),
+    private fun lagInnvilgelseFtrlYrkesaktivFrivillig(): InnvilgelseFtrlYrkesaktivFrivillig {
+        return InnvilgelseFtrlYrkesaktivFrivillig(
+            brevbestilling = lagInnvilgelseFtrlYrkesaktivFrivilligBrevbestilling(),
             behandlingstype = Behandlingstyper.FØRSTEGANG,
             avgiftsperioder = emptyList(),
             medlemskapsperioder = emptyList(),
@@ -564,8 +564,8 @@ internal class DokgenMalMapperTest {
         )
     }
 
-    private fun lagInnvilgelseFtrlBrevbestilling(): InnvilgelseFtrlBrevbestilling {
-        return InnvilgelseFtrlBrevbestilling.Builder()
+    private fun lagInnvilgelseFtrlYrkesaktivFrivilligBrevbestilling(): InnvilgelseFtrlYrkesaktivFrivilligBrevbestilling {
+        return InnvilgelseFtrlYrkesaktivFrivilligBrevbestilling.Builder()
             .medInnledningFritekst("Innledning")
             .medBegrunnelseFritekst("Begrunnelse")
             .medTrygdeavgiftFritekst("Trygdeavgift fritekst")

@@ -5,14 +5,14 @@ import no.nav.melosys.domain.Medlemskapsperiode
 import no.nav.melosys.domain.Vilkaarsresultat
 import no.nav.melosys.domain.brev.IkkeYrkesaktivFrivilligFtrlBrevbestilling
 import no.nav.melosys.domain.brev.IkkeYrkesaktivPliktigFtrlBrevbestilling
-import no.nav.melosys.domain.brev.InnvilgelseFtrlBrevbestilling
+import no.nav.melosys.domain.brev.InnvilgelseFtrlYrkesaktivFrivilligBrevbestilling
 import no.nav.melosys.domain.dokument.felles.Periode
 import no.nav.melosys.domain.folketrygden.MedlemAvFolketrygden
 import no.nav.melosys.domain.kodeverk.*
 import no.nav.melosys.domain.kodeverk.begrunnelser.folketrygdloven.Ftrl_2_7_begrunnelser
 import no.nav.melosys.domain.kodeverk.begrunnelser.folketrygdloven.Ftrl_2_8_naer_tilknytning_norge_begrunnelser
 import no.nav.melosys.domain.mottatteopplysninger.SøknadNorgeEllerUtenforEØS
-import no.nav.melosys.integrasjon.dokgen.dto.InnvilgelseFtrl
+import no.nav.melosys.integrasjon.dokgen.dto.InnvilgelseFtrlYrkesaktivFrivillig
 import no.nav.melosys.integrasjon.dokgen.dto.InnvilgelseIkkeYrkesaktivFrivilligFtrl
 import no.nav.melosys.integrasjon.dokgen.dto.InnvilgelseIkkeYrkesaktivPliktigFtrl
 import no.nav.melosys.integrasjon.dokgen.dto.innvilgelseftrl.AvgiftsperiodeDto
@@ -34,7 +34,7 @@ class InnvilgelseFtrlMapper(
     private val trygdeavgiftsberegningService: TrygdeavgiftsberegningService
 ) {
     @Transactional
-    internal fun mapYrkesaktivFrivillig(brevbestilling: InnvilgelseFtrlBrevbestilling): InnvilgelseFtrl {
+    internal fun mapYrkesaktivFrivillig(brevbestilling: InnvilgelseFtrlYrkesaktivFrivilligBrevbestilling): InnvilgelseFtrlYrkesaktivFrivillig {
         val behandlingsresultat = dokgenMapperDatahenter.hentBehandlingsresultat(brevbestilling.behandlingId)
         val medlemAvFolketrygden = behandlingsresultat.medlemAvFolketrygden
         val søknadsland = behandlingsresultat.behandling.mottatteOpplysninger.mottatteOpplysningerData.soeknadsland
@@ -43,7 +43,7 @@ class InnvilgelseFtrlMapper(
         val avslåttMedlemskapsperiodeFørMottaksdatoFullDekning =
             mapAvslåttMedlemskapsperiodeFørMottaksdatoFullDekning(medlemAvFolketrygden, brevbestilling.forsendelseMottatt)
 
-        return InnvilgelseFtrl(
+        return InnvilgelseFtrlYrkesaktivFrivillig(
             brevbestilling = brevbestilling,
             behandlingstype = behandlingsresultat.behandling.type,
             avgiftsperioder = mapAvgiftsPerioder(medlemAvFolketrygden),
