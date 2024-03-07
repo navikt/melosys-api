@@ -8,7 +8,7 @@ import mu.KotlinLogging
 import no.nav.melosys.AwaitUtil.awaitWithFailOnLogErrors
 import no.nav.melosys.AwaitUtil.onTimeout
 import no.nav.melosys.AwaitUtil.throwOnLogError
-import no.nav.melosys.AwaitUtil.waitFor
+import no.nav.melosys.AwaitUtil.waitUntil
 import no.nav.melosys.LoggingTestUtils.withLogCapture
 import no.nav.melosys.exception.TekniskException
 import org.awaitility.kotlin.await
@@ -67,7 +67,7 @@ class AwaitUtilTest {
                         i.toString() shouldBe "hei"
                     }
                 }
-                .waitFor { i++.toString() == "hei" }
+                .waitUntil { i++.toString() == "hei" }
         }.message.shouldBe(
             "tall kan ikke være 1 - Condition with no.nav.melosys.AwaitUtil was not fulfilled within 2 milliseconds.\n" +
                 "expected:<\"hei\"> but was:<\"1\">"

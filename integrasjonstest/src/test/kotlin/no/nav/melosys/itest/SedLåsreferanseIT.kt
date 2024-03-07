@@ -8,7 +8,7 @@ import io.mockk.mockk
 import no.nav.melosys.Application
 import no.nav.melosys.AwaitUtil.onTimeout
 import no.nav.melosys.AwaitUtil.throwOnLogError
-import no.nav.melosys.AwaitUtil.waitFor
+import no.nav.melosys.AwaitUtil.waitUntil
 import no.nav.melosys.LoggingTestUtils
 import no.nav.melosys.LoggingTestUtils.filterBuilder
 import no.nav.melosys.LoggingTestUtils.last
@@ -82,7 +82,7 @@ internal class SedLåsreferanseIT(
                     withClue("last log line was not as expected - ${e.message}") {
                         logItems.last<ProsessinstansFerdigListener>() shouldBe testFinishedLogline
                     }
-                }.waitFor { logItems.last<ProsessinstansFerdigListener>() == testFinishedLogline }
+                }.waitUntil { logItems.last<ProsessinstansFerdigListener>() == testFinishedLogline }
 
             logItems.filterBuilder
                 .match<ProsessinstansBehandler>()
@@ -119,7 +119,7 @@ internal class SedLåsreferanseIT(
                     withClue("last log line was not as expected - ${e.message}") {
                         logItems.last<ProsessinstansFerdigListener>() shouldBe testFinishedLogline
                     }
-                }.waitFor { logItems.last<ProsessinstansFerdigListener>() == testFinishedLogline }
+                }.waitUntil { logItems.last<ProsessinstansFerdigListener>() == testFinishedLogline }
 
             logItems.filterBuilder
                 .match<ProsessinstansBehandler>()

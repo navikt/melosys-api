@@ -19,12 +19,11 @@ object AwaitUtil {
     fun ConditionFactory.onTimeout(onTimeout: (e: ConditionTimeoutException) -> Unit) = apply {
         threadLocalOnTimeoutLambda.set(onTimeout)
     }
-
-    fun ConditionFactory.waitFor(
-        waitFor: () -> Boolean,
+    fun ConditionFactory.waitUntil(
+        waitUntil: () -> Boolean,
     ) {
         try {
-            until { waitFor() }
+            until { waitUntil() }
             threadLocalOnTimeoutLambda.remove()
         } catch (e: ConditionTimeoutException) {
             threadLocalOnTimeoutLambda.get().invoke(e)

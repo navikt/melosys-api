@@ -15,7 +15,7 @@ import io.mockk.slot
 import io.mockk.verify
 import no.nav.melosys.AwaitUtil
 import no.nav.melosys.AwaitUtil.onTimeout
-import no.nav.melosys.AwaitUtil.waitFor
+import no.nav.melosys.AwaitUtil.waitUntil
 import no.nav.melosys.LoggingTestUtils.last
 import no.nav.melosys.ProsessUtil
 import no.nav.melosys.domain.Lovvalgsperiode
@@ -126,7 +126,7 @@ class SedMottakTestIT(
                     withClue("last log line was not as expected - ${e.message}") {
                         logItems.last<ProsessinstansFerdigListener>() shouldBe testFinishedLogline
                     }
-                }.waitFor { logItems.last<ProsessinstansFerdigListener>() == testFinishedLogline }
+                }.waitUntil { logItems.last<ProsessinstansFerdigListener>() == testFinishedLogline }
         }
 
         val prosessinstanserSortert = prosessinstansRepository.findAllByLåsReferanseStartingWith(ref)
@@ -184,7 +184,7 @@ class SedMottakTestIT(
                     withClue("last log line was not as expected - ${e.message}") {
                         logItems.last<ProsessinstansFerdigListener>() shouldBe testFinishedLogline
                     }
-                }.waitFor { logItems.last<ProsessinstansFerdigListener>() == testFinishedLogline }
+                }.waitUntil { logItems.last<ProsessinstansFerdigListener>() == testFinishedLogline }
         }
 
         val prosessinstanserSortert = prosessinstansRepository.findAllByLåsReferanseStartingWith(ref)
@@ -238,7 +238,7 @@ class SedMottakTestIT(
                     withClue("last log line was not as expected - ${e.message}") {
                         logItems.last<ProsessinstansFerdigListener>() shouldBe testFinishedLogline
                     }
-                }.waitFor { logItems.last<ProsessinstansFerdigListener>() == testFinishedLogline }
+                }.waitUntil { logItems.last<ProsessinstansFerdigListener>() == testFinishedLogline }
         }
 
         val prosessinstanserSortert = prosessinstansRepository.findAllByLåsReferanseStartingWith(ref)
@@ -295,7 +295,7 @@ class SedMottakTestIT(
                     withClue("last log line was not as expected - ${e.message}") {
                         logItems.last<ProsessinstansFerdigListener>() shouldBe testFinishedLogline
                     }
-                }.waitFor { logItems.last<ProsessinstansFerdigListener>() == testFinishedLogline }
+                }.waitUntil { logItems.last<ProsessinstansFerdigListener>() == testFinishedLogline }
         }
 
         val prosessinstanserSortert = prosessinstansRepository.findAllByLåsReferanseStartingWith(ref)
@@ -352,7 +352,7 @@ class SedMottakTestIT(
                     withClue("last log line was not as expected - ${e.message}") {
                         logItems.last<ProsessinstansFerdigListener>() shouldBe testFinishedLogline
                     }
-                }.waitFor { logItems.last<ProsessinstansFerdigListener>() == testFinishedLogline }
+                }.waitUntil { logItems.last<ProsessinstansFerdigListener>() == testFinishedLogline }
         }
 
         val prosessinstanserSortert = prosessinstansRepository.findAllByLåsReferanseStartingWith(rinaSaksnummer)
@@ -405,7 +405,7 @@ class SedMottakTestIT(
                     withClue("last log line was not as expected - ${e.message}") {
                         logItems.last<ProsessinstansFerdigListener>() shouldBe testFinishedLogline
                     }
-                }.waitFor { logItems.last<ProsessinstansFerdigListener>() == testFinishedLogline }
+                }.waitUntil { logItems.last<ProsessinstansFerdigListener>() == testFinishedLogline }
         }
 
         val prosessinstanserSortert = prosessinstansRepository.findAllByLåsReferanseStartingWith(rinaSaksnummer)
@@ -514,7 +514,7 @@ class SedMottakTestIT(
                     withClue("last log line was not as expected - ${e.message}") {
                         logItems.last<ProsessinstansFerdigListener>() shouldBe testFinishedLogline
                     }
-                }.waitFor { logItems.last<ProsessinstansFerdigListener>() == testFinishedLogline }
+                }.waitUntil { logItems.last<ProsessinstansFerdigListener>() == testFinishedLogline }
         }
 
         val prosessinstanserSortert = prosessinstansRepository.findAllByLåsReferanseStartingWith(rinaSaksnummer)

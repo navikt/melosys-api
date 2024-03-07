@@ -5,7 +5,7 @@ import io.kotest.matchers.collections.shouldContain
 import io.kotest.matchers.nulls.shouldNotBeNull
 import io.kotest.matchers.shouldBe
 import no.nav.melosys.AwaitUtil.onTimeout
-import no.nav.melosys.AwaitUtil.waitFor
+import no.nav.melosys.AwaitUtil.waitUntil
 import no.nav.melosys.saksflyt.ProsessinstansRepository
 import no.nav.melosys.saksflytapi.domain.ProsessStatus
 import no.nav.melosys.saksflytapi.domain.ProsessType
@@ -44,7 +44,7 @@ class ProsessUtil(
                             types shouldContain prosessType
                         }
                     }
-                    .waitFor { prosessinstansRepository.findAllAfterDate(startTid).any { it.type == prosessType } }
+                    .waitUntil { prosessinstansRepository.findAllAfterDate(startTid).any { it.type == prosessType } }
             }
         }
 
@@ -61,7 +61,7 @@ class ProsessUtil(
                             }
                         }
                     }
-                    .waitFor {
+                    .waitUntil {
                         current = prosessinstansRepository.findAllAfterDate(startTid)
                             .firstOrNull { it.type == prosessType && it.status == ProsessStatus.FERDIG }
                         current != null
