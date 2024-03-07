@@ -229,6 +229,15 @@ public final class MedlPeriodeKonverter {
         BiMap<Folketrygdloven_kap2_bestemmelser, GrunnlagMedl> mapFtrlKap2 = HashBiMap.create();
         //TODO: FTRL_KAP2_2_1_FØRSTE_LEDD gjøres om til FTRL_KAP2_2_1 i https://jira.adeo.no/browse/MELOSYS-6430
         mapFtrlKap2.put(Folketrygdloven_kap2_bestemmelser.FTRL_KAP2_2_1_FØRSTE_LEDD, GrunnlagMedl.FTL_2_1);
+        mapFtrlKap2.put(Folketrygdloven_kap2_bestemmelser.FTRL_KAP2_2_2, GrunnlagMedl.FTL_2_2);
+        mapFtrlKap2.put(Folketrygdloven_kap2_bestemmelser.FTRL_KAP2_2_3_ANDRE_LEDD, GrunnlagMedl.FTL_2_3_2_LEDD);
+        mapFtrlKap2.put(Folketrygdloven_kap2_bestemmelser.FTRL_KAP2_2_5_FØRSTE_LEDD_A, GrunnlagMedl.FTL_2_5_1_LEDD_A);
+        mapFtrlKap2.put(Folketrygdloven_kap2_bestemmelser.FTRL_KAP2_2_5_FØRSTE_LEDD_B, GrunnlagMedl.FTL_2_5_1_LEDD_B);
+        mapFtrlKap2.put(Folketrygdloven_kap2_bestemmelser.FTRL_KAP2_2_5_FØRSTE_LEDD_C, GrunnlagMedl.FTL_2_5_1_LEDD_C);
+        mapFtrlKap2.put(Folketrygdloven_kap2_bestemmelser.FTRL_KAP2_2_5_FØRSTE_LEDD_D, GrunnlagMedl.FTL_2_5_1_LEDD_D);
+        mapFtrlKap2.put(Folketrygdloven_kap2_bestemmelser.FTRL_KAP2_2_5_FØRSTE_LEDD_E, GrunnlagMedl.FTL_2_5_1_LEDD_E);
+        mapFtrlKap2.put(Folketrygdloven_kap2_bestemmelser.FTRL_KAP2_2_5_FØRSTE_LEDD_F, GrunnlagMedl.FTL_2_5_1_LEDD_F);
+        mapFtrlKap2.put(Folketrygdloven_kap2_bestemmelser.FTRL_KAP2_2_5_FØRSTE_LEDD_G, GrunnlagMedl.FTL_2_5_1_LEDD_G);
         mapFtrlKap2.put(Folketrygdloven_kap2_bestemmelser.FTRL_KAP2_2_5_FØRSTE_LEDD_H, GrunnlagMedl.FTL_2_5_1_LEDD_H);
         mapFtrlKap2.put(Folketrygdloven_kap2_bestemmelser.FTRL_KAP2_2_5_ANDRE_LEDD, GrunnlagMedl.FTL_2_5_2_LEDD);
         mapFtrlKap2.put(Folketrygdloven_kap2_bestemmelser.FTRL_KAP2_2_7A, GrunnlagMedl.FTL_2_7A);
@@ -244,7 +253,6 @@ public final class MedlPeriodeKonverter {
         ftrlKap2BestemmelserTilGrunnLagMedlTabell = mapFtrlKap2;
     }
 
-
     public static DekningMedl tilMedlTrygdeDekning(Trygdedekninger dekning) {
         return switch (dekning) {
             case FULL_DEKNING_EOSFO, FULL_DEKNING_FTRL, FULL_DEKNING -> DekningMedl.FULL;
@@ -254,15 +262,7 @@ public final class MedlPeriodeKonverter {
         };
     }
 
-    public static DekningMedl tilMedlTrygdeDekning(Trygdedekninger dekning, Folketrygdloven_kap2_bestemmelser bestemmelse) {
-        return switch (bestemmelse) {
-            case FTRL_KAP2_2_8_FØRSTE_LEDD_A, FTRL_KAP2_2_8_ANDRE_LEDD, FTRL_KAP2_2_15_ANDRE_LEDD, FTRL_KAP2_2_7_FØRSTE_LEDD, FTRL_KAP2_2_7A ->
-                mapForFtrl(dekning);
-            default -> throw new TekniskException("Bestemmelse støttes ikke for FTRL: " + bestemmelse.getKode());
-        };
-    }
-
-    private static DekningMedl mapForFtrl(Trygdedekninger dekning) {
+    public static DekningMedl tilMedlTrygdedekningForFtrl(Trygdedekninger dekning) {
         return switch (dekning) {
             case FTRL_2_9_FØRSTE_LEDD_A_HELSE -> DekningMedl.FTRL_2_9_1_LEDD_A;
             case FTRL_2_9_FØRSTE_LEDD_A_ANDRE_LEDD_HELSE_SYKE_FORELDREPENGER -> DekningMedl.FTRL_2_9_2_LEDD_1A;

@@ -1,9 +1,7 @@
 package no.nav.melosys.saksflyt.steg.fakturering
 
-import io.getunleash.Unleash
 import mu.KotlinLogging
 import no.nav.melosys.domain.kodeverk.Fullmaktstype
-import no.nav.melosys.featuretoggle.ToggleName
 import no.nav.melosys.integrasjon.faktureringskomponenten.FaktureringskomponentenConsumer
 import no.nav.melosys.integrasjon.faktureringskomponenten.dto.FakturaMottakerDto
 import no.nav.melosys.integrasjon.faktureringskomponenten.dto.FullmektigDto
@@ -22,7 +20,6 @@ class OppdaterFakturamottaker(
     private val fagsakService: FagsakService,
     private val behandlingsresultatService: BehandlingsresultatService,
     private val faktureringskomponentenConsumer: FaktureringskomponentenConsumer,
-    private val unleash: Unleash
 ) : StegBehandler {
 
     override fun inngangsSteg(): ProsessSteg {
@@ -30,9 +27,6 @@ class OppdaterFakturamottaker(
     }
 
     override fun utfør(prosessinstans: Prosessinstans) {
-        if (!unleash.isEnabled(ToggleName.MELOSYS_OPPDATER_FAKTURAMOTTAKER)) {
-            return
-        }
         val saksnummer = prosessinstans.getData(ProsessDataKey.SAKSNUMMER)
         val fagsak = fagsakService.hentFagsak(saksnummer)
         val fakturaserieReferanserPåSak = fagsak.hentBehandlingerSortertSynkendePåRegistrertDato()

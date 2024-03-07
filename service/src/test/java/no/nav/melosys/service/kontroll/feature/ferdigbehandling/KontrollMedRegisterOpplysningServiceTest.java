@@ -4,7 +4,6 @@ import java.time.LocalDate;
 import java.util.Collection;
 import java.util.Set;
 
-import io.getunleash.FakeUnleash;
 import no.nav.melosys.domain.Behandling;
 import no.nav.melosys.domain.Lovvalgsperiode;
 import no.nav.melosys.domain.Saksopplysning;
@@ -65,7 +64,6 @@ class KontrollMedRegisterOpplysningServiceTest {
 
     private final MottatteOpplysningerData mottatteOpplysningerData = new MottatteOpplysningerData();
     private final Behandling behandling = lagBehandling(mottatteOpplysningerData);
-    private final FakeUnleash unleash = new FakeUnleash();
 
     @BeforeEach
     void setup() {
@@ -78,10 +76,8 @@ class KontrollMedRegisterOpplysningServiceTest {
         behandling.getSaksopplysninger().add(medlSaksopplysning);
         when(behandlingService.hentBehandlingMedSaksopplysninger(behandlingID)).thenReturn(behandling);
 
-        Kontroll kontroll = new Kontroll(behandlingService, lovvalgsperiodeService, avklarteVirksomheterService, persondataFasade, organisasjonOppslagService, saksbehandlingRegler, medlemskapsperiodeService, unleash);
+        Kontroll kontroll = new Kontroll(behandlingService, lovvalgsperiodeService, avklarteVirksomheterService, persondataFasade, organisasjonOppslagService, saksbehandlingRegler, medlemskapsperiodeService);
         kontrollMedRegisterOpplysning = new KontrollMedRegisteropplysning(behandlingService, persondataFasade, registeropplysningerService, kontroll);
-
-        unleash.enableAll();
     }
 
     @Test

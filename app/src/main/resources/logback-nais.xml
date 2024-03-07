@@ -16,6 +16,12 @@
 
     <appender name="stdout_json" class="ch.qos.logback.core.ConsoleAppender">
         <encoder class="net.logstash.logback.encoder.LogstashEncoder">
+            <jsonGeneratorDecorator class="net.logstash.logback.mask.MaskingJsonGeneratorDecorator">
+                <valueMask>
+                    <value>(^|\W)\d{11}(?=$|\W)</value>
+                    <mask>$1***********</mask>
+                </valueMask>
+            </jsonGeneratorDecorator>
             <fieldNames><version>[ignore]</version></fieldNames>
             <throwableConverter class="net.logstash.logback.stacktrace.ShortenedThrowableConverter">
                 <maxDepthPerThrowable>30</maxDepthPerThrowable>

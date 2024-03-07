@@ -4,6 +4,7 @@ import java.time.LocalDate;
 import java.util.List;
 
 import com.fasterxml.jackson.annotation.JsonFormat;
+import com.fasterxml.jackson.annotation.JsonInclude;
 import no.nav.melosys.domain.brev.IkkeYrkesaktivFrivilligFtrlBrevbestilling;
 import no.nav.melosys.domain.dokument.felles.Periode;
 import no.nav.melosys.domain.kodeverk.Mottakerroller;
@@ -18,6 +19,7 @@ public class InnvilgelseIkkeYrkesaktivFrivilligFtrl extends DokgenDto {
     private final LocalDate datoMottatt;
     private final String sakstype;
     private final String behandlingstype;
+    @JsonInclude(JsonInclude.Include.NON_NULL)
     private final List<String> land;
     private final String trygdedekning;
     private final String bestemmelse;
@@ -26,6 +28,7 @@ public class InnvilgelseIkkeYrkesaktivFrivilligFtrl extends DokgenDto {
     private final String begrunnelseFritekst;
     private final boolean avslåttMedlemskapsperiodeFørMottaksdatoHelsedel;
     private final boolean avslåttMedlemskapsperiodeFørMottaksdatoFullDekning;
+    @JsonInclude(JsonInclude.Include.NON_NULL)
     private final List<MedlemskapsperiodeDto> medlemskapsperioder;
     private final String ikkeYrkesaktivRelasjonType;
 

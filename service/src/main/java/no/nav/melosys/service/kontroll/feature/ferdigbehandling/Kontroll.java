@@ -5,7 +5,6 @@ import java.util.List;
 import java.util.Objects;
 import java.util.Set;
 
-import io.getunleash.Unleash;
 import no.nav.melosys.domain.Aktoer;
 import no.nav.melosys.domain.Behandling;
 import no.nav.melosys.domain.Lovvalgsperiode;
@@ -18,15 +17,14 @@ import no.nav.melosys.domain.kodeverk.begrunnelser.Kontroll_begrunnelser;
 import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingsresultattyper;
 import no.nav.melosys.domain.mottatteopplysninger.MottatteOpplysningerData;
 import no.nav.melosys.domain.person.Persondata;
-import no.nav.melosys.featuretoggle.ToggleName;
 import no.nav.melosys.service.LovvalgsperiodeService;
 import no.nav.melosys.service.avklartefakta.AvklarteVirksomheterService;
 import no.nav.melosys.service.behandling.BehandlingService;
+import no.nav.melosys.service.ftrl.medlemskapsperiode.MedlemskapsperiodeService;
 import no.nav.melosys.service.kontroll.feature.ferdigbehandling.data.FerdigbehandlingKontrollData;
 import no.nav.melosys.service.kontroll.feature.ferdigbehandling.data.MedlemskapsperiodeData;
 import no.nav.melosys.service.kontroll.feature.ferdigbehandling.data.SaksopplysningerData;
 import no.nav.melosys.service.kontroll.feature.ferdigbehandling.kontroll.FerdigbehandlingKontrollsett;
-import no.nav.melosys.service.ftrl.medlemskapsperiode.MedlemskapsperiodeService;
 import no.nav.melosys.service.persondata.PersondataFasade;
 import no.nav.melosys.service.registeropplysninger.OrganisasjonOppslagService;
 import no.nav.melosys.service.saksbehandling.SaksbehandlingRegler;
@@ -49,7 +47,6 @@ class Kontroll {
     private final OrganisasjonOppslagService organisasjonOppslagService;
     private final SaksbehandlingRegler saksbehandlingRegler;
     private final MedlemskapsperiodeService medlemskapsperiodeService;
-    private final Unleash unleash;
 
     public Kontroll(BehandlingService behandlingService,
                     LovvalgsperiodeService lovvalgsperiodeService,
@@ -57,8 +54,7 @@ class Kontroll {
                     PersondataFasade persondataFasade,
                     OrganisasjonOppslagService organisasjonOppslagService,
                     SaksbehandlingRegler saksbehandlingRegler,
-                    MedlemskapsperiodeService medlemskapsperiodeService,
-                    Unleash unleash) {
+                    MedlemskapsperiodeService medlemskapsperiodeService) {
         this.behandlingService = behandlingService;
         this.lovvalgsperiodeService = lovvalgsperiodeService;
         this.avklarteVirksomheterService = avklarteVirksomheterService;
@@ -66,7 +62,6 @@ class Kontroll {
         this.organisasjonOppslagService = organisasjonOppslagService;
         this.saksbehandlingRegler = saksbehandlingRegler;
         this.medlemskapsperiodeService = medlemskapsperiodeService;
-        this.unleash = unleash;
     }
 
     public Collection<Kontrollfeil> kontroller(long behandlingId, Behandlingsresultattyper behandlingsresultattype, Set<Kontroll_begrunnelser> kontrollerSomSkalIgnoreres) {
@@ -115,7 +110,7 @@ class Kontroll {
         var regelsettForVedtak = FerdigbehandlingKontrollsett.hentRegelsettForVedtak(sakstype, harRegistreringUnntakFraMedlemskapFlyt, harIkkeYrkesaktivFlyt);
 
         FerdigbehandlingKontrollData ferdigbehandlingKontrollData;
-        if (sakstype.equals(Sakstyper.FTRL) && unleash.isEnabled(ToggleName.FOLKETRYGDEN_MVP)) {
+        if (sakstype.equals(Sakstyper.FTRL)) {
             ferdigbehandlingKontrollData = hentVedtakKontrollDataFTRL(behandling);
         } else {
             ferdigbehandlingKontrollData = hentVedtakKontrollData(behandling);

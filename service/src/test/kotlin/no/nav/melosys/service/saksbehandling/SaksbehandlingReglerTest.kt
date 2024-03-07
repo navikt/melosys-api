@@ -59,7 +59,6 @@ class SaksbehandlingReglerTest {
                 Behandlingstyper.HENVENDELSE,
                 Behandlingstema.IKKE_YRKESAKTIV,
                 false,
-                false,
                 true,
                 true
             ),
@@ -68,7 +67,6 @@ class SaksbehandlingReglerTest {
                 Sakstemaer.MEDLEMSKAP_LOVVALG,
                 Behandlingstyper.HENVENDELSE,
                 Behandlingstema.IKKE_YRKESAKTIV,
-                false,
                 false,
                 true,
                 true
@@ -79,7 +77,6 @@ class SaksbehandlingReglerTest {
                 Behandlingstyper.KLAGE,
                 Behandlingstema.IKKE_YRKESAKTIV,
                 false,
-                false,
                 true,
                 true
             ),
@@ -88,7 +85,6 @@ class SaksbehandlingReglerTest {
                 Sakstemaer.MEDLEMSKAP_LOVVALG,
                 Behandlingstyper.MANGLENDE_INNBETALING_TRYGDEAVGIFT,
                 Behandlingstema.IKKE_YRKESAKTIV,
-                false,
                 false,
                 true,
                 true
@@ -99,7 +95,6 @@ class SaksbehandlingReglerTest {
                 Behandlingstyper.FØRSTEGANG,
                 Behandlingstema.FORESPØRSEL_TRYGDEMYNDIGHET,
                 false,
-                false,
                 true,
                 true
             ),
@@ -109,7 +104,6 @@ class SaksbehandlingReglerTest {
                 Behandlingstyper.FØRSTEGANG,
                 Behandlingstema.IKKE_YRKESAKTIV,
                 false,
-                false,
                 true,
                 false
             ),
@@ -118,7 +112,6 @@ class SaksbehandlingReglerTest {
                 Sakstemaer.MEDLEMSKAP_LOVVALG,
                 Behandlingstyper.FØRSTEGANG,
                 Behandlingstema.YRKESAKTIV,
-                true,
                 false,
                 true,
                 false
@@ -128,7 +121,6 @@ class SaksbehandlingReglerTest {
                 Sakstemaer.MEDLEMSKAP_LOVVALG,
                 Behandlingstyper.FØRSTEGANG,
                 Behandlingstema.IKKE_YRKESAKTIV,
-                false,
                 false,
                 false,
                 true
@@ -139,7 +131,6 @@ class SaksbehandlingReglerTest {
                 Behandlingstyper.FØRSTEGANG,
                 Behandlingstema.IKKE_YRKESAKTIV,
                 false,
-                false,
                 true,
                 false
             ),
@@ -150,7 +141,6 @@ class SaksbehandlingReglerTest {
                 Behandlingstema.YRKESAKTIV,
                 true,
                 true,
-                true,
                 false,
             ),
             Arguments.of(
@@ -158,7 +148,6 @@ class SaksbehandlingReglerTest {
                 Sakstemaer.MEDLEMSKAP_LOVVALG,
                 Behandlingstyper.MANGLENDE_INNBETALING_TRYGDEAVGIFT,
                 Behandlingstema.YRKESAKTIV,
-                true,
                 false,
                 true,
                 true,
@@ -168,7 +157,6 @@ class SaksbehandlingReglerTest {
                 Sakstemaer.MEDLEMSKAP_LOVVALG,
                 Behandlingstyper.FØRSTEGANG,
                 Behandlingstema.IKKE_YRKESAKTIV,
-                false,
                 false,
                 true,
                 false
@@ -183,14 +171,10 @@ class SaksbehandlingReglerTest {
         sakstema: Sakstemaer,
         behandlingstype: Behandlingstyper,
         behandlingstema: Behandlingstema,
-        ftrlToggleEnabled: Boolean,
         manglendeInnbetalingToggleEnabled: Boolean,
         ikkeYrkesaktivFtrlToggleEnabled: Boolean,
         expected: Boolean
     ) {
-        if (ftrlToggleEnabled) {
-            unleash.enable(ToggleName.FOLKETRYGDEN_MVP)
-        }
         if (manglendeInnbetalingToggleEnabled) {
             unleash.enable(ToggleName.SAKSBEHANDLING_MANGLENDE_INNBETALING)
         }

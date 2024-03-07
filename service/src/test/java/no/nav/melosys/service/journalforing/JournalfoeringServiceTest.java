@@ -102,7 +102,6 @@ class JournalfoeringServiceTest {
         saksbehandlingRegler = new SaksbehandlingRegler(behandlingsresultatRepository, unleash);
         SpringSubjectHandler.set(new TestSubjectHandler());
 
-        unleash.enable("melosys.folketrygden.mvp");
         journalpost = new Journalpost("123");
         journalpost.setHoveddokument(new ArkivDokument());
         journalpost.setForsendelseMottatt(Instant.EPOCH);
@@ -569,7 +568,7 @@ class JournalfoeringServiceTest {
 
         journalfoeringService.journalførOgKnyttTilEksisterendeSak(tilordneDto);
 
-        prosessinstansService.opprettProsessinstansJournalføringKnyttTilEksisterende(tilordneDto.tilJournalfoeringTilordneRequest(), MELOSYS_SAKSNUMMER, fagsak, null);
+        verify(prosessinstansService).opprettProsessinstansJournalføringKnyttTilEksisterende(tilordneDto.tilJournalfoeringTilordneRequest(), MELOSYS_SAKSNUMMER, fagsak, null);
     }
 
     @Test
@@ -688,7 +687,7 @@ class JournalfoeringServiceTest {
         journalfoeringService.journalførOgOpprettAndregangsBehandling(tilordneDto);
 
 
-        prosessinstansService.journalførOgOpprettAndregangsBehandling(JFR_ANDREGANG_REPLIKER_BEHANDLING, UTSENDT_ARBEIDSTAKER, NY_VURDERING, tilordneDto.tilJournalfoeringTilordneRequest(), SØKNAD, LocalDate.EPOCH, null);
+        verify(prosessinstansService).journalførOgOpprettAndregangsBehandling(JFR_ANDREGANG_REPLIKER_BEHANDLING, UTSENDT_ARBEIDSTAKER, NY_VURDERING, tilordneDto.tilJournalfoeringTilordneRequest(), SØKNAD, LocalDate.EPOCH, null);
     }
 
     @Test

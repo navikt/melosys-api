@@ -9,7 +9,8 @@ import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingsresultattyper
 import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingstema
 import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingstema.*
 import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingstyper
-import no.nav.melosys.featuretoggle.ToggleName.*
+import no.nav.melosys.featuretoggle.ToggleName.MELOSYS_FTRL_IKKE_YRKESAKTIV
+import no.nav.melosys.featuretoggle.ToggleName.SAKSBEHANDLING_MANGLENDE_INNBETALING
 import no.nav.melosys.repository.BehandlingsresultatRepository
 import org.springframework.stereotype.Component
 
@@ -89,7 +90,6 @@ class SaksbehandlingRegler(
             -> true
 
             ANMODNING_OM_UNNTAK_HOVEDREGEL -> sakstype == Sakstyper.TRYGDEAVTALE
-            YRKESAKTIV -> (sakstype == Sakstyper.FTRL && !unleash.isEnabled(FOLKETRYGDEN_MVP))
             IKKE_YRKESAKTIV -> (sakstype === Sakstyper.FTRL && !unleash.isEnabled(MELOSYS_FTRL_IKKE_YRKESAKTIV))
 
             else -> return false

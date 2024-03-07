@@ -2,8 +2,10 @@ package no.nav.melosys.service.ftrl.medlemskapsperiode
 
 import io.getunleash.FakeUnleash
 import io.kotest.assertions.throwables.shouldThrow
+import io.kotest.matchers.collections.shouldBeEmpty
 import io.kotest.matchers.collections.shouldHaveSize
 import io.kotest.matchers.collections.shouldNotBeEmpty
+import io.kotest.matchers.nulls.shouldNotBeNull
 import io.kotest.matchers.shouldBe
 import io.kotest.matchers.shouldNotBe
 import io.kotest.matchers.string.shouldContain
@@ -221,6 +223,29 @@ class OpprettForslagMedlemskapsperiodeServiceTest {
     }
 
     @Test
+    fun opprettForslagPåMedlemskapsperioder_andregangsvurderingIngenOpprinneligeMedlemskapsperioder_returnererTomListe() {
+        val opprinneligBehandlingId = 2L
+        val behandlingsresultat = lagBehandlingsresultat().apply {
+            vilkaarsresultater.addAll(lagAlleKrevdeVilkår())
+            medlemAvFolketrygden = MedlemAvFolketrygden()
+            behandling.type = Behandlingstyper.NY_VURDERING
+            behandling.opprinneligBehandling = Behandling().apply { id = opprinneligBehandlingId }
+        }
+        val opprinneligBehandlingsresultat = lagBehandlingsresultat().apply { medlemAvFolketrygden = MedlemAvFolketrygden() }
+        every { behandlingsresultatService.hentBehandlingsresultat(BEH_RES_ID) } returns behandlingsresultat
+        every { behandlingsresultatService.hentBehandlingsresultat(opprinneligBehandlingId) } returns opprinneligBehandlingsresultat
+        every { medlemAvFolketrygdenRepository.save(behandlingsresultat.medlemAvFolketrygden) } returns behandlingsresultat.medlemAvFolketrygden
+        every { utledMottaksdato.getMottaksdato(any()) } returns LocalDate.now()
+
+
+        val perioder = opprettForslagMedlemskapsperiodeService.opprettForslagPåMedlemskapsperioder(BEH_RES_ID, BESTEMMELSE)
+
+
+        perioder.shouldNotBeNull().shouldBeEmpty()
+        verify(exactly = 1) { medlemAvFolketrygdenRepository.save(any()) }
+    }
+
+    @Test
     fun opprettForslagPåMedlemskapsperioder_sakstypeEØS_kasterFeil() {
         every { behandlingsresultatService.hentBehandlingsresultat(BEH_RES_ID) } returns lagBehandlingsresultat().apply {
             behandling.fagsak.type = Sakstyper.EU_EOS
@@ -258,7 +283,10 @@ class OpprettForslagMedlemskapsperiodeServiceTest {
 
 
         shouldThrow<FunksjonellException> {
-            opprettForslagMedlemskapsperiodeService.opprettForslagPåMedlemskapsperioder(BEH_RES_ID, Folketrygdloven_kap2_bestemmelser.FTRL_KAP2_2_5_FØRSTE_LEDD_H)
+            opprettForslagMedlemskapsperiodeService.opprettForslagPåMedlemskapsperioder(
+                BEH_RES_ID,
+                Folketrygdloven_kap2_bestemmelser.FTRL_KAP2_2_5_FØRSTE_LEDD_H
+            )
         }.message.shouldContain("er påkrevd for bestemmelse")
     }
 
@@ -278,7 +306,8 @@ class OpprettForslagMedlemskapsperiodeServiceTest {
     fun opprettForslagPåMedlemskapsperioder_støtterIkkeBestemmelseForDekning_kasterFeil() {
         fakeUnleash.enable(ToggleName.MELOSYS_FTRL_IKKE_YRKESAKTIV)
         val ustøttetBestemmelse = Folketrygdloven_kap2_bestemmelser.FTRL_KAP2_2_7A
-        every { behandlingsresultatService.hentBehandlingsresultat(BEH_RES_ID) } returns lagBehandlingsresultat()
+        every { behandlingsresultatService.hentBehandlingsresultat(BEH_RES_ID) } returns
+            lagBehandlingsresultat().apply { behandling.tema = Behandlingstema.IKKE_YRKESAKTIV }
 
 
         shouldThrow<FunksjonellException> {

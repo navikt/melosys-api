@@ -18,38 +18,45 @@ import java.time.LocalDate
 object UtledMedlemskapsperioder {
 
     fun lagMedlemskapsperioderForAndregangsbehandling(
-        opprinneligBehandlingsresultat: Behandlingsresultat,
-        nyBestemmelse: Folketrygdloven_kap2_bestemmelser,
-        nyTrygdedekning: Trygdedekninger,
+        dto: UtledMedlemskapsperioderDto,
+        opprinneligeMedlemskapsperioder: Collection<Medlemskapsperiode>,
         type: Behandlingstyper
-    ): Collection<Medlemskapsperiode> =
-        opprinneligBehandlingsresultat.medlemAvFolketrygden.medlemskapsperioder
+    ): Collection<Medlemskapsperiode> {
+        if (dto.bestemmelse in PliktigeMedlemskapsbestemmelser.bestemmelser) {
+            return lagMedlemskapsperioderForPliktige(dto)
+        }
+        return opprinneligeMedlemskapsperioder
             .filter { if (type === Behandlingstyper.MANGLENDE_INNBETALING_TRYGDEAVGIFT) it.erInnvilget() || it.erOpphørt() else it.erInnvilget() }
             .map {
                 Medlemskapsperiode().apply {
                     fom = it.fom
                     tom = it.tom
                     innvilgelsesresultat = it.innvilgelsesresultat
-                    medlemskapstype = UtledMedlemskapstype.av(nyBestemmelse)
+                    medlemskapstype = UtledMedlemskapstype.av(dto.bestemmelse)
                     trygdedekning =
-                        if (LovligeKombinasjonerTrygdedekningBestemmelse.erGyldigKombinasjon(nyBestemmelse, it.trygdedekning)) it.trygdedekning
-                        else nyTrygdedekning
+                        if (LovligeKombinasjonerTrygdedekningBestemmelse.erGyldigKombinasjon(dto.bestemmelse, it.trygdedekning)) it.trygdedekning
+                        else dto.trygdedekning
                     medlPeriodeID = it.medlPeriodeID
-                    bestemmelse = if (it.erOpphørt()) it.bestemmelse else nyBestemmelse
+                    bestemmelse = if (it.erOpphørt()) it.bestemmelse else dto.bestemmelse
                 }
             }
+    }
 
     fun lagMedlemskapsperioder(dto: UtledMedlemskapsperioderDto, unleash: Unleash): Collection<Medlemskapsperiode> {
         val pliktigeBestemmelserToggleAktiv = unleash.isEnabled(ToggleName.MELOSYS_FTRL_YRKESAKTIV_PLIKTIGE_BESTEMMELSER)
 
-        if (bestemmelseErParagraf(dto.bestemmelse, "2_7")) {
-            return lagMedlemskapsperioderFor2_7(dto)
-        } else if (bestemmelseErParagraf(dto.bestemmelse, "2_8")) {
-            return lagMedlemskapsperioderFor2_8(dto)
-        } else if (dto.bestemmelse in if(pliktigeBestemmelserToggleAktiv) PliktigeMedlemskapsbestemmelser.bestemmelserNy else PliktigeMedlemskapsbestemmelser.bestemmelser) {
-            return if(pliktigeBestemmelserToggleAktiv) lagMedlemskapsperioderForPliktigeToggle(dto) else lagMedlemskapsperioderForPliktige(dto)
+        return when {
+            bestemmelseErParagraf(dto.bestemmelse, "2_7") ->
+                lagMedlemskapsperioderFor2_7(dto)
+
+            bestemmelseErParagraf(dto.bestemmelse, "2_8") ->
+                lagMedlemskapsperioderFor2_8(dto)
+
+            dto.bestemmelse in if(pliktigeBestemmelserToggleAktiv) PliktigeMedlemskapsbestemmelser.bestemmelserNy else PliktigeMedlemskapsbestemmelser.bestemmelser ->
+                if(pliktigeBestemmelserToggleAktiv) lagMedlemskapsperioderForPliktigeToggle(dto) else lagMedlemskapsperioderForPliktige(dto)
+
+            else -> throw FunksjonellException("Støtter ikke bestemmelse ${dto.bestemmelse}")
         }
-        throw FunksjonellException("Støtter ikke bestemmelse ${dto.bestemmelse}")
     }
 
     private fun lagMedlemskapsperioderFor2_7(dto: UtledMedlemskapsperioderDto): Collection<Medlemskapsperiode> {

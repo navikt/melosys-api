@@ -1,6 +1,5 @@
 package no.nav.melosys.saksflyt.steg.faktureringskomponenten
 
-import io.getunleash.FakeUnleash
 import io.kotest.matchers.nulls.shouldBeNull
 import io.kotest.matchers.nulls.shouldNotBeNull
 import io.kotest.matchers.shouldBe
@@ -61,7 +60,6 @@ class OpprettFakturaserieTest {
 
     lateinit var trygdeavgiftMottakerService: TrygdeavgiftMottakerService
 
-    private val unleash = FakeUnleash()
     private val slotFakturaserieDto = slot<FakturaserieDto>()
 
     lateinit var opprettFakturaserie: OpprettFakturaserie
@@ -74,7 +72,6 @@ class OpprettFakturaserieTest {
 
     @BeforeEach
     internal fun setUp() {
-        unleash.enableAll()
         slotFakturaserieDto.clear()
         trygdeavgiftMottakerService = TrygdeavgiftMottakerService()
 
@@ -84,8 +81,7 @@ class OpprettFakturaserieTest {
             faktureringskomponentenConsumer,
             pdlService,
             trygdeavgiftMottakerService,
-            trygdeavgiftOppsummeringService,
-            unleash
+            trygdeavgiftOppsummeringService
         )
     }
 
