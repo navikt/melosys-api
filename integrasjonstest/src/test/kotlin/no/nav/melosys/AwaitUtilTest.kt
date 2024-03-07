@@ -6,9 +6,11 @@ import io.kotest.assertions.withClue
 import io.kotest.matchers.shouldBe
 import mu.KotlinLogging
 import no.nav.melosys.AwaitUtil.awaitWithFailOnLogErrors
+import no.nav.melosys.AwaitUtil.onTimeout
 import no.nav.melosys.AwaitUtil.untilBuilder
 import no.nav.melosys.AwaitUtil.throwOnLogError
 import no.nav.melosys.AwaitUtil.untilMatching
+import no.nav.melosys.AwaitUtil.waitFor
 import no.nav.melosys.LoggingTestUtils.withLogCapture
 import no.nav.melosys.exception.TekniskException
 import org.awaitility.kotlin.await
@@ -96,6 +98,25 @@ class AwaitUtilTest {
                 }.execute()
         }.message.shouldBe(
             "1.toString() == \"hei\"\n" +
+                "expected:<\"hei\"> but was:<\"1\">"
+        )
+    }
+
+    @Test
+    fun `await builder skal kjøre assert ved timeout - uten builder`() {
+        shouldThrow<AssertionFailedError> {
+            var i = 0
+            await.atMost(Duration.ofMillis(2))
+                .pollInterval(Duration.ofMillis(1))
+                .pollDelay(Duration.ofMillis(1))
+                .onTimeout { e ->
+                    withClue("tall kan ikke være 1 - ${e.message}") {
+                        i.toString() shouldBe "hei"
+                    }
+                }
+                .waitFor { i++.toString() == "hei" }
+        }.message.shouldBe(
+            "tall kan ikke være 1 - Condition with no.nav.melosys.AwaitUtil was not fulfilled within 2 milliseconds.\n" +
                 "expected:<\"hei\"> but was:<\"1\">"
         )
     }

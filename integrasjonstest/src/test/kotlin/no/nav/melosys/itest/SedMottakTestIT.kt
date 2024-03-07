@@ -3,6 +3,7 @@ package no.nav.melosys.itest
 import com.ninjasquad.springmockk.MockkBean
 import io.getunleash.FakeUnleash
 import io.kotest.assertions.extracting
+import io.kotest.assertions.withClue
 import io.kotest.matchers.collections.shouldContainExactly
 import io.kotest.matchers.collections.shouldContainInOrder
 import io.kotest.matchers.collections.shouldHaveSize
@@ -13,7 +14,8 @@ import io.mockk.mockk
 import io.mockk.slot
 import io.mockk.verify
 import no.nav.melosys.AwaitUtil
-import no.nav.melosys.AwaitUtil.untilMatching
+import no.nav.melosys.AwaitUtil.onTimeout
+import no.nav.melosys.AwaitUtil.waitFor
 import no.nav.melosys.LoggingTestUtils.last
 import no.nav.melosys.ProsessUtil
 import no.nav.melosys.domain.Lovvalgsperiode
@@ -118,11 +120,13 @@ class SedMottakTestIT(
         melosysEessiMeldingKafkaTemplate.send(kafkaTopic, eessiMeldingX008)
 
         AwaitUtil.awaitWithFailOnLogErrors { logItems ->
-            atMost(Duration.ofSeconds(20)).untilMatching(
-                waitFor = "Prosessinstans(er) på vent med samme gruppe-prefiks: []"
-            ) {
-                logItems.last<ProsessinstansFerdigListener>()
-            }
+            val testFinishedLogline = "Prosessinstans(er) på vent med samme gruppe-prefiks: []"
+            atMost(Duration.ofSeconds(20))
+                .onTimeout { e ->
+                    withClue("last log line was not as expected - ${e.message}") {
+                        logItems.last<ProsessinstansFerdigListener>() shouldBe testFinishedLogline
+                    }
+                }.waitFor { logItems.last<ProsessinstansFerdigListener>() == testFinishedLogline }
         }
 
         val prosessinstanserSortert = prosessinstansRepository.findAllByLåsReferanseStartingWith(ref)
@@ -174,11 +178,13 @@ class SedMottakTestIT(
         melosysEessiMeldingKafkaTemplate.send(kafkaTopic, eessiMeldingX006)
 
         AwaitUtil.awaitWithFailOnLogErrors { logItems ->
-            atMost(Duration.ofSeconds(20)).untilMatching(
-                waitFor = "Prosessinstans(er) på vent med samme gruppe-prefiks: []"
-            ) {
-                logItems.last<ProsessinstansFerdigListener>()
-            }
+            val testFinishedLogline = "Prosessinstans(er) på vent med samme gruppe-prefiks: []"
+            atMost(Duration.ofSeconds(20))
+                .onTimeout { e ->
+                    withClue("last log line was not as expected - ${e.message}") {
+                        logItems.last<ProsessinstansFerdigListener>() shouldBe testFinishedLogline
+                    }
+                }.waitFor { logItems.last<ProsessinstansFerdigListener>() == testFinishedLogline }
         }
 
         val prosessinstanserSortert = prosessinstansRepository.findAllByLåsReferanseStartingWith(ref)
@@ -226,11 +232,13 @@ class SedMottakTestIT(
         melosysEessiMeldingKafkaTemplate.send(kafkaTopic, eessiMeldingX006)
 
         AwaitUtil.awaitWithFailOnLogErrors { logItems ->
-            atMost(Duration.ofSeconds(20)).untilMatching(
-                waitFor = "Prosessinstans(er) på vent med samme gruppe-prefiks: []"
-            ) {
-                logItems.last<ProsessinstansFerdigListener>()
-            }
+            val testFinishedLogline = "Prosessinstans(er) på vent med samme gruppe-prefiks: []"
+            atMost(Duration.ofSeconds(20))
+                .onTimeout { e ->
+                    withClue("last log line was not as expected - ${e.message}") {
+                        logItems.last<ProsessinstansFerdigListener>() shouldBe testFinishedLogline
+                    }
+                }.waitFor { logItems.last<ProsessinstansFerdigListener>() == testFinishedLogline }
         }
 
         val prosessinstanserSortert = prosessinstansRepository.findAllByLåsReferanseStartingWith(ref)
@@ -281,11 +289,13 @@ class SedMottakTestIT(
         melosysEessiMeldingKafkaTemplate.send(kafkaTopic, eessiMeldingX008)
 
         AwaitUtil.awaitWithFailOnLogErrors { logItems ->
-            atMost(Duration.ofSeconds(20)).untilMatching(
-                waitFor = "Prosessinstans(er) på vent med samme gruppe-prefiks: []"
-            ) {
-                logItems.last<ProsessinstansFerdigListener>()
-            }
+            val testFinishedLogline = "Prosessinstans(er) på vent med samme gruppe-prefiks: []"
+            atMost(Duration.ofSeconds(20))
+                .onTimeout { e ->
+                    withClue("last log line was not as expected - ${e.message}") {
+                        logItems.last<ProsessinstansFerdigListener>() shouldBe testFinishedLogline
+                    }
+                }.waitFor { logItems.last<ProsessinstansFerdigListener>() == testFinishedLogline }
         }
 
         val prosessinstanserSortert = prosessinstansRepository.findAllByLåsReferanseStartingWith(ref)
@@ -336,11 +346,13 @@ class SedMottakTestIT(
         melosysEessiMeldingKafkaTemplate.send(kafkaTopic, eessiMeldingX007)
 
         AwaitUtil.awaitWithFailOnLogErrors { logItems ->
-            atMost(Duration.ofSeconds(20)).untilMatching(
-                waitFor = "Prosessinstans(er) på vent med samme gruppe-prefiks: []"
-            ) {
-                logItems.last<ProsessinstansFerdigListener>()
-            }
+            val testFinishedLogline = "Prosessinstans(er) på vent med samme gruppe-prefiks: []"
+            atMost(Duration.ofSeconds(20))
+                .onTimeout { e ->
+                    withClue("last log line was not as expected - ${e.message}") {
+                        logItems.last<ProsessinstansFerdigListener>() shouldBe testFinishedLogline
+                    }
+                }.waitFor { logItems.last<ProsessinstansFerdigListener>() == testFinishedLogline }
         }
 
         val prosessinstanserSortert = prosessinstansRepository.findAllByLåsReferanseStartingWith(rinaSaksnummer)
@@ -387,11 +399,13 @@ class SedMottakTestIT(
         melosysEessiMeldingKafkaTemplate.send(kafkaTopic, eessiMeldingA003)
 
         AwaitUtil.awaitWithFailOnLogErrors { logItems ->
-            atMost(Duration.ofSeconds(20)).untilMatching(
-                waitFor = "Prosessinstans(er) på vent med samme gruppe-prefiks: []"
-            ) {
-                logItems.last<ProsessinstansFerdigListener>()
-            }
+            val testFinishedLogline = "Prosessinstans(er) på vent med samme gruppe-prefiks: []"
+            atMost(Duration.ofSeconds(20))
+                .onTimeout { e ->
+                    withClue("last log line was not as expected - ${e.message}") {
+                        logItems.last<ProsessinstansFerdigListener>() shouldBe testFinishedLogline
+                    }
+                }.waitFor { logItems.last<ProsessinstansFerdigListener>() == testFinishedLogline }
         }
 
         val prosessinstanserSortert = prosessinstansRepository.findAllByLåsReferanseStartingWith(rinaSaksnummer)
@@ -494,11 +508,13 @@ class SedMottakTestIT(
         melosysEessiMeldingKafkaTemplate.send(kafkaTopic, eessiMeldingA003)
 
         AwaitUtil.awaitWithFailOnLogErrors { logItems ->
-            atMost(Duration.ofSeconds(20)).untilMatching(
-                waitFor = "Prosessinstans(er) på vent med samme gruppe-prefiks: []"
-            ) {
-                logItems.last<ProsessinstansFerdigListener>()
-            }
+            val testFinishedLogline = "Prosessinstans(er) på vent med samme gruppe-prefiks: []"
+            atMost(Duration.ofSeconds(20))
+                .onTimeout { e ->
+                    withClue("last log line was not as expected - ${e.message}") {
+                        logItems.last<ProsessinstansFerdigListener>() shouldBe testFinishedLogline
+                    }
+                }.waitFor { logItems.last<ProsessinstansFerdigListener>() == testFinishedLogline }
         }
 
         val prosessinstanserSortert = prosessinstansRepository.findAllByLåsReferanseStartingWith(rinaSaksnummer)

@@ -10,12 +10,15 @@ import org.awaitility.core.ConditionTimeoutException
 import org.awaitility.kotlin.await
 
 object AwaitUtil {
+    private var threadLocalOnTimeoutLambda: ThreadLocal<(ConditionTimeoutException) -> Unit> =
+        ThreadLocal.withInitial { { e: ConditionTimeoutException -> throw e } }
+
     fun <T> awaitWithFailOnLogErrors(block: ConditionFactory.(log: List<ILoggingEvent>) -> T): T =
         LoggingTestUtils.withLogCapture { logEvents ->
             await.throwOnLogError(logEvents).block(logEvents)
         }
 
-    fun <T> ConditionFactory.untilMatching(
+    internal fun <T> ConditionFactory.untilMatching(
         waitFor: T,
         clueMessages: (e: Exception) -> String? = { e -> e.message },
         getCurrent: () -> T?
@@ -28,9 +31,6 @@ object AwaitUtil {
             }
         }
     }
-
-    private var threadLocalOnTimeoutLambda: ThreadLocal<(ConditionTimeoutException) -> Unit> =
-        ThreadLocal.withInitial { { e: ConditionTimeoutException -> throw e } }
 
     fun ConditionFactory.onTimeout(onTimeout: (e: ConditionTimeoutException) -> Unit) = apply {
         threadLocalOnTimeoutLambda.set(onTimeout)
