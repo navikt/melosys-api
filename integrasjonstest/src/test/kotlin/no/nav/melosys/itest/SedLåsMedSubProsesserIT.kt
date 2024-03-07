@@ -1,14 +1,18 @@
 package no.nav.melosys.itest
 
+import io.kotest.assertions.withClue
 import io.kotest.matchers.collections.shouldHaveSize
 import io.kotest.matchers.shouldBe
 import io.mockk.CapturingSlot
 import io.mockk.every
 import io.mockk.mockk
 import no.nav.melosys.Application
+import no.nav.melosys.AwaitUtil.onTimeout
 import no.nav.melosys.AwaitUtil.throwOnLogError
+import no.nav.melosys.AwaitUtil.waitFor
 import no.nav.melosys.LoggingTestUtils
 import no.nav.melosys.LoggingTestUtils.filterBuilder
+import no.nav.melosys.LoggingTestUtils.last
 import no.nav.melosys.ProsessRegister
 import no.nav.melosys.domain.eessi.SedType
 import no.nav.melosys.domain.eessi.melding.MelosysEessiMelding
@@ -84,13 +88,13 @@ internal class SedLåsMedSubProsesserIT(
             prosessRegister.registrer("a009Prosess") { prosessinstansService.opprettProsessinstansSedMottak(a009) }
             prosessRegister.registrer("x008Prosess") { prosessinstansService.opprettProsessinstansSedMottak(x008) }
 
-            await.throwOnLogError(logItems)
-                .timeout(Duration.ofSeconds(30)).pollInterval(Duration.ofSeconds(1))
-                .until {
-                    logItems.filterBuilder.match<ProsessinstansFerdigListener>()
-                        .build().last().formattedMessage.contains("Prosessinstans(er) på vent med samme gruppe-prefiks: []")
-                }
-
+            val testFinishedLogline = "Prosessinstans(er) på vent med samme gruppe-prefiks: []"
+            await.throwOnLogError(logItems).atMost(Duration.ofSeconds(20))
+                .onTimeout { e ->
+                    withClue("last log line was not as expected - ${e.message}") {
+                        logItems.last<ProsessinstansFerdigListener>() shouldBe testFinishedLogline
+                    }
+                }.waitFor { logItems.last<ProsessinstansFerdigListener>() == testFinishedLogline }
 
             val a009Lås = a009.lagUnikIdentifikator()
             val x0008Lås = x008.lagUnikIdentifikator()
@@ -154,12 +158,13 @@ internal class SedLåsMedSubProsesserIT(
             prosessRegister.registrer("førsteProsess") { prosessinstansService.opprettProsessinstansSedMottak(a009) }
             prosessRegister.registrer("duplikatProsess") { prosessinstansService.opprettProsessinstansSedMottak(a009) }
 
-            await.throwOnLogError(logItems)
-                .timeout(Duration.ofSeconds(30)).pollInterval(Duration.ofSeconds(1))
-                .until {
-                    logItems.filterBuilder.match<ProsessinstansFerdigListener>()
-                        .build().last().formattedMessage.contains("Prosessinstans(er) på vent med samme gruppe-prefiks: []")
-                }
+            val testFinishedLogline = "Prosessinstans(er) på vent med samme gruppe-prefiks: []"
+            await.throwOnLogError(logItems).atMost(Duration.ofSeconds(20))
+                .onTimeout { e ->
+                    withClue("last log line was not as expected - ${e.message}") {
+                        logItems.last<ProsessinstansFerdigListener>() shouldBe testFinishedLogline
+                    }
+                }.waitFor { logItems.last<ProsessinstansFerdigListener>() == testFinishedLogline }
 
             logItems.filterBuilder
                 .match<ProsessinstansService> { it.formattedMessage.contains("Melosys har opprettet prosessinstans") }
