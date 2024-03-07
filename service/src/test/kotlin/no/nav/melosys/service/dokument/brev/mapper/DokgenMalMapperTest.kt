@@ -336,7 +336,7 @@ internal class DokgenMalMapperTest {
         every { mockDokgenMapperDatahenter.hentPersonMottaker(any()) } returns DokgenTestData.lagPersondata()
         every { mockDokgenMapperDatahenter.hentNorskPoststed(any()) } returns "Andeby"
         every { mockDokgenMapperDatahenter.hentLandnavnFraLandkode(Landkoder.NO.kode) } returns Landkoder.NO.beskrivelse
-        every { mockInnvilgelseFtrlMapper.map(any()) } returns lagInnvilgelseFtrl()
+        every { mockInnvilgelseFtrlMapper.mapYrkesaktivFrivillig(any()) } returns lagInnvilgelseFtrl()
 
         val behandling = DokgenTestData.lagBehandling(DokgenTestData.lagFagsak(true))
         val brevbestilling: DokgenBrevbestilling = InnvilgelseFtrlBrevbestilling.Builder()

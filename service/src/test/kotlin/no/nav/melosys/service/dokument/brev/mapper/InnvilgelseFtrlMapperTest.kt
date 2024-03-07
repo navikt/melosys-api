@@ -67,10 +67,10 @@ internal class InnvilgelseFtrlMapperTest {
     }
 
     @Test
-    fun map_InnvilgetKunNorskInntektInnvilget_populererFelter() {
+    fun mapYrkesaktivFrivillig_InnvilgetKunNorskInntektInnvilget_populererFelter() {
         mockHappyCase(Case.paragraf_2_8)
 
-        innvilgelseFtrlMapper.map(lagInnvilgelseFtrlBrevbestilling()).shouldNotBeNull()
+        innvilgelseFtrlMapper.mapYrkesaktivFrivillig(lagInnvilgelseFtrlBrevbestilling()).shouldNotBeNull()
             .apply {
                 behandlingstype.shouldBe(Behandlingstyper.FØRSTEGANG)
                 nyVurderingBakgrunn.shouldBe("NYE_OPPLYSNINGER")
@@ -110,14 +110,14 @@ internal class InnvilgelseFtrlMapperTest {
     }
 
     @Test
-    fun map_harTrygdeavtaleLand_populererFelter() {
+    fun mapYrkesaktivFrivillig_harTrygdeavtaleLand_populererFelter() {
         mockHappyCase(Case.paragraf_2_8)
         every { mockDokgenMapperDatahenter.hentLandnavnFraLandkode(Landkoder.GB.kode) } returns Landkoder.GB.beskrivelse
         every { mockDokgenMapperDatahenter.hentBehandlingsresultat(ofType()) } returns lagBehandlingsResultat(Case.paragraf_2_8).apply {
             behandling.mottatteOpplysninger.mottatteOpplysningerData.soeknadsland = Soeknadsland(listOf(Landkoder.GB.kode), false)
         }
 
-        innvilgelseFtrlMapper.map(lagInnvilgelseFtrlBrevbestilling()).apply {
+        innvilgelseFtrlMapper.mapYrkesaktivFrivillig(lagInnvilgelseFtrlBrevbestilling()).apply {
             flereLandUkjentHvilke.shouldBeFalse()
             land.shouldContainOnly(Landkoder.GB.beskrivelse)
             trygdeavtaleLand.shouldContainOnly(Landkoder.GB.beskrivelse)
@@ -125,13 +125,13 @@ internal class InnvilgelseFtrlMapperTest {
     }
 
     @Test
-    fun map_harFlereLandUkjentHvilke_populererFelter() {
+    fun mapYrkesaktivFrivillig_harFlereLandUkjentHvilke_populererFelter() {
         mockHappyCase(Case.paragraf_2_8)
         every { mockDokgenMapperDatahenter.hentBehandlingsresultat(ofType()) } returns lagBehandlingsResultat(Case.paragraf_2_8).apply {
             behandling.mottatteOpplysninger.mottatteOpplysningerData.soeknadsland = Soeknadsland(emptyList(), true)
         }
 
-        innvilgelseFtrlMapper.map(lagInnvilgelseFtrlBrevbestilling()).apply {
+        innvilgelseFtrlMapper.mapYrkesaktivFrivillig(lagInnvilgelseFtrlBrevbestilling()).apply {
             flereLandUkjentHvilke.shouldBeTrue()
             land.shouldBeEmpty()
             trygdeavtaleLand.shouldBeEmpty()
@@ -140,7 +140,7 @@ internal class InnvilgelseFtrlMapperTest {
 
 
     @Test
-    fun map_innvilgetOgAvslaatt_populererFelter() {
+    fun mapYrkesaktivFrivillig_innvilgetOgAvslaatt_populererFelter() {
         mockHappyCase(Case.paragraf_2_8)
         val behandlingsresultat = lagBehandlingsResultat(Case.paragraf_2_8)
         every { mockDokgenMapperDatahenter.hentBehandlingsresultat(ofType()) } returns behandlingsresultat.apply {
@@ -157,8 +157,8 @@ internal class InnvilgelseFtrlMapperTest {
             )
         }
 
-        innvilgelseFtrlMapper.map(lagInnvilgelseFtrlBrevbestilling()).apply {
-            innvilgelseFtrlMapper.map(lagInnvilgelseFtrlBrevbestilling()).shouldNotBeNull()
+        innvilgelseFtrlMapper.mapYrkesaktivFrivillig(lagInnvilgelseFtrlBrevbestilling()).apply {
+            innvilgelseFtrlMapper.mapYrkesaktivFrivillig(lagInnvilgelseFtrlBrevbestilling()).shouldNotBeNull()
                 .apply {
                     behandlingstype.shouldBe(Behandlingstyper.FØRSTEGANG)
                     nyVurderingBakgrunn.shouldBe("NYE_OPPLYSNINGER")
@@ -202,7 +202,7 @@ internal class InnvilgelseFtrlMapperTest {
     }
 
     @Test
-    fun map_innvilgetOgAvslaatt_populererFelter_ingen_avgiftsperioder() {
+    fun mapYrkesaktivFrivillig_innvilgetOgAvslaatt_populererFelter_ingen_avgiftsperioder() {
         mockHappyCase(Case.paragraf_2_8)
         val behandlingsresultat = lagBehandlingsResultat(Case.paragraf_2_8)
         every { mockDokgenMapperDatahenter.hentBehandlingsresultat(ofType()) } returns behandlingsresultat.apply {
@@ -219,7 +219,7 @@ internal class InnvilgelseFtrlMapperTest {
             )
         }
 
-        innvilgelseFtrlMapper.map(lagInnvilgelseFtrlBrevbestilling()).apply {
+        innvilgelseFtrlMapper.mapYrkesaktivFrivillig(lagInnvilgelseFtrlBrevbestilling()).apply {
             avgiftsperioder.shouldHaveSize(0)
             medlemskapsperioder.shouldHaveSize(1)
                 .map { it.innvilgelsesResultat }
@@ -228,10 +228,10 @@ internal class InnvilgelseFtrlMapperTest {
     }
 
     @Test
-    fun `map Innvilget 2_7 populerer felter`() {
+    fun `mapYrkesaktivFrivillig Innvilget 2_7 populerer felter`() {
         mockHappyCase(Case.paragraf_2_7)
 
-        innvilgelseFtrlMapper.map(lagInnvilgelseFtrlBrevbestilling()).shouldNotBeNull()
+        innvilgelseFtrlMapper.mapYrkesaktivFrivillig(lagInnvilgelseFtrlBrevbestilling()).shouldNotBeNull()
             .apply {
                 behandlingstype.shouldBe(Behandlingstyper.FØRSTEGANG)
                 nyVurderingBakgrunn.shouldBe("NYE_OPPLYSNINGER")
