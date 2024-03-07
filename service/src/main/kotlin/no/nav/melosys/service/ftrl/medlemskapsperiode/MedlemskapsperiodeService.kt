@@ -128,7 +128,7 @@ class MedlemskapsperiodeService(
         val pliktigeBestemmelserToggleAktiv = unleash.isEnabled(ToggleName.MELOSYS_FTRL_YRKESAKTIV_PLIKTIGE_BESTEMMELSER)
 
         val nullTilOgMedDatoErTillatt =
-            Land_iso2.NO.kode in land && land.size == 1 && bestemmelse in if(pliktigeBestemmelserToggleAktiv) listOf(
+            Land_iso2.NO.kode in land && land.size == 1 && bestemmelse in if(!pliktigeBestemmelserToggleAktiv) listOf(
                 Folketrygdloven_kap2_bestemmelser.FTRL_KAP2_2_1_FØRSTE_LEDD,
                 Folketrygdloven_kap2_bestemmelser.FTRL_KAP2_2_1_FJERDE_LEDD
             ) else listOf(
