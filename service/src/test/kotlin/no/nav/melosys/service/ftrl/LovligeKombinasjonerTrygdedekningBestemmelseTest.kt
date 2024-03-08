@@ -18,7 +18,7 @@ class LovligeKombinasjonerTrygdedekningBestemmelseTest {
     fun hentLovligeBestemmelser_fullTrygdedekning_returnererAllePliktigeBestemmelseneSamtFlere() {
         LovligeKombinasjonerTrygdedekningBestemmelse.hentLovligeBestemmelser(Trygdedekninger.FULL_DEKNING_FTRL)
             .shouldNotBeNull()
-            .shouldHaveSize(14)
+            .shouldHaveSize(15)
             .shouldContainAll(PliktigeMedlemskapsbestemmelser.bestemmelser)
     }
 
