@@ -58,37 +58,6 @@ class VilkårForBestemmelseIkkeYrkesaktivTest {
     }
 
     @Test
-    fun `vilkår for FTRL_KAP2_2_1_FØRSTE_LEDD, ett eller flere land utenfor Norge`() {
-        val mottatteOpplysninger =
-            MottatteOpplysninger().apply {
-                mottatteOpplysningerData =
-                    SøknadNorgeEllerUtenforEØS().apply { soeknadsland = Soeknadsland().apply { landkoder = listOf(
-                        Land_iso2.NO.toString(), "AB", "PR") } }
-            }
-        every {mottatteOpplysningerService.hentMottatteOpplysninger(1L)} returns mottatteOpplysninger
-
-
-        val vilkår = vilkårForBestemmelse.hentVilkår(
-            Folketrygdloven_kap2_bestemmelser.FTRL_KAP2_2_1_FØRSTE_LEDD,
-            mapOf(Avklartefaktatyper.IKKE_YRKESAKTIV_FTRL_2_1_OPPHOLD to Ikkeyrkesaktivoppholdtype.MIDLERTIDIG_2_1_FJERDE_LEDD.name),
-            1L
-        )
-
-
-        vilkår.shouldContainExactly(
-            Vilkår(
-                FTRL_2_1_BOSATT_NORGE_FORUT
-            ),
-            Vilkår(
-                FTRL_2_1_OPPHOLD_UNDER_12MND
-            ),
-            Vilkår(
-                FTRL_2_1_LOVLIG_OPPHOLD
-            ),
-        )
-    }
-
-    @Test
     fun `vilkår for FTRL_KAP2_2_1, kun Norge`() {
         val mottatteOpplysninger =
             MottatteOpplysninger().apply {

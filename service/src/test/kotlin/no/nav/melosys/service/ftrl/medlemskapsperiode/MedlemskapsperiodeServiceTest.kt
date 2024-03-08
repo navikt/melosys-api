@@ -161,7 +161,6 @@ class MedlemskapsperiodeServiceTest {
 
     @Test
     fun oppdaterMedlemskapsperiode_medlemskapsperiodeFinnes_oppdateres() {
-        unleash.enable(ToggleName.MELOSYS_FTRL_YRKESAKTIV_PLIKTIGE_BESTEMMELSER)
         every { gyldigeTrygdedekningerService.hentTrygdedekninger(any(), any()) } returns listOf(*Trygdedekninger.values())
         val medlemAvFolketrygden = MedlemAvFolketrygden().apply {
             medlemskapsperioder = listOf(Medlemskapsperiode().apply { id = MEDLEMSKAPSPERIODE_ID_1 })
@@ -195,7 +194,6 @@ class MedlemskapsperiodeServiceTest {
 
     @Test
     fun oppdaterMedlemskapsperiode_medlemskapsperiodeOgFastsattTrygdeavgiftFinnes_oppdateres() {
-        unleash.enable(ToggleName.MELOSYS_FTRL_YRKESAKTIV_PLIKTIGE_BESTEMMELSER)
         every { gyldigeTrygdedekningerService.hentTrygdedekninger(any(), any()) } returns listOf(*Trygdedekninger.values())
         val medlemAvFolketrygden = MedlemAvFolketrygden().apply {
             medlemskapsperioder = listOf(Medlemskapsperiode().apply { id = MEDLEMSKAPSPERIODE_ID_1 })
@@ -225,7 +223,6 @@ class MedlemskapsperiodeServiceTest {
     fun `opprettMedlemskapsperiode kaster ikke exception når tomDato er null, land er Norge og bestemmelse er 2_1`() {
         every { gyldigeTrygdedekningerService.hentTrygdedekninger(any(), any()) } returns listOf(*Trygdedekninger.values())
         unleash.enable(ToggleName.MELOSYS_FOLKETRYGDEN_2_7)
-        unleash.enable(ToggleName.MELOSYS_FTRL_YRKESAKTIV_PLIKTIGE_BESTEMMELSER)
         val medlemAvFolketrygden = MedlemAvFolketrygden().apply { behandlingsresultat = lagBehandlingsresultat(Land_iso2.NO) }
         every { medlemAvFolketrygdenService.hentMedlemAvFolketrygden(BEHANDLING_ID_1) } returns medlemAvFolketrygden
         every { medlemskapsperiodeRepository.save(any()) } returnsArgument 0

@@ -43,8 +43,6 @@ object UtledMedlemskapsperioder {
     }
 
     fun lagMedlemskapsperioder(dto: UtledMedlemskapsperioderDto, unleash: Unleash): Collection<Medlemskapsperiode> {
-        val pliktigeBestemmelserToggleAktiv = unleash.isEnabled(ToggleName.MELOSYS_FTRL_YRKESAKTIV_PLIKTIGE_BESTEMMELSER)
-
         return when {
             bestemmelseErParagraf(dto.bestemmelse, "2_7") ->
                 lagMedlemskapsperioderFor2_7(dto)
@@ -52,8 +50,7 @@ object UtledMedlemskapsperioder {
             bestemmelseErParagraf(dto.bestemmelse, "2_8") ->
                 lagMedlemskapsperioderFor2_8(dto)
 
-            dto.bestemmelse in (if(pliktigeBestemmelserToggleAktiv) PliktigeMedlemskapsbestemmelser.bestemmelserNy else PliktigeMedlemskapsbestemmelser.bestemmelser) ->
-                if(pliktigeBestemmelserToggleAktiv) lagMedlemskapsperioderForPliktigeToggle(dto) else lagMedlemskapsperioderForPliktige(dto)
+            dto.bestemmelse in PliktigeMedlemskapsbestemmelser.bestemmelser -> lagMedlemskapsperioderForPliktige(dto)
 
             else -> throw FunksjonellException("Støtter ikke bestemmelse ${dto.bestemmelse}")
         }
@@ -113,17 +110,6 @@ object UtledMedlemskapsperioder {
         )
     }
 
-
-    private fun lagMedlemskapsperioderForPliktigeToggle(dto: UtledMedlemskapsperioderDto): Collection<Medlemskapsperiode> {
-        return setOf(
-            lagPeriodeToggle(
-                dto.søknadsperiode,
-                Trygdedekninger.FULL_DEKNING_FTRL,
-                InnvilgelsesResultat.INNVILGET,
-                dto.bestemmelse
-            )
-        )
-    }
 
     private fun lagMedlemskapsperioderFor2_8(dto: UtledMedlemskapsperioderDto): Collection<Medlemskapsperiode> {
         val søknadsperiode = dto.søknadsperiode
@@ -224,22 +210,6 @@ object UtledMedlemskapsperioder {
             this.tom = søknadsperiode.tom
             this.innvilgelsesresultat = innvilgelsesResultat
             this.medlemskapstype = UtledMedlemskapstype.av(bestemmelse)
-            this.trygdedekning = trygdedekning
-            this.bestemmelse = bestemmelse
-        }
-
-
-    private fun lagPeriodeToggle(
-        søknadsperiode: ErPeriode,
-        trygdedekning: Trygdedekninger,
-        innvilgelsesResultat: InnvilgelsesResultat,
-        bestemmelse: Folketrygdloven_kap2_bestemmelser
-    ): Medlemskapsperiode =
-        Medlemskapsperiode().apply {
-            this.fom = søknadsperiode.fom
-            this.tom = søknadsperiode.tom
-            this.innvilgelsesresultat = innvilgelsesResultat
-            this.medlemskapstype = UtledMedlemskapstype.avToggle(bestemmelse)
             this.trygdedekning = trygdedekning
             this.bestemmelse = bestemmelse
         }

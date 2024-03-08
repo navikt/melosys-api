@@ -21,8 +21,6 @@ class AvklarteFaktaForBestemmelse(val mottatteOpplysningerService: MottatteOpply
         return when (bestemmelse) {
             FTRL_KAP2_2_1 -> ftrlKap2_1AvklarteFaktaForBehandling_ikkeYrkesaktiv(behandlingID)
 
-            FTRL_KAP2_2_1_FØRSTE_LEDD -> ftrlKap2_1AvklarteFaktaForBehandling_ikkeYrkesaktiv(behandlingID)
-
             FTRL_KAP2_2_5_ANDRE_LEDD -> listOf(
                 AvklarteFaktaType(
                     Avklartefaktatyper.IKKE_YRKESAKTIV_RELASJON, listOf(

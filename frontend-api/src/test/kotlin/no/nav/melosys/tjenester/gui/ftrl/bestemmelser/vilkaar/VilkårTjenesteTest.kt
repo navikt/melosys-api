@@ -32,7 +32,7 @@ class VilkårTjenesteTest(@Autowired private val mockMvc: MockMvc) {
 
     @Test
     fun `hent vilkår for ftrl bestemmelse`() {
-        val bestemmelse = Folketrygdloven_kap2_bestemmelser.FTRL_KAP2_2_1_FØRSTE_LEDD
+        val bestemmelse = Folketrygdloven_kap2_bestemmelser.FTRL_KAP2_2_1
 
         justRun { aksesskontroll.autoriser(any()) }
         every { unleash.isEnabled(any()) } returns false

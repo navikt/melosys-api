@@ -53,7 +53,7 @@ class OpprettForslagMedlemskapsperiodeServiceTest {
 
     private val utledBestemmelserOgVilkår = UtledBestemmelserOgVilkår(fakeUnleash)
 
-    private val vilkårForBestemmelse = VilkårForBestemmelse(VilkårForBestemmelseYrkesaktiv(mockk()), VilkårForBestemmelseIkkeYrkesaktiv(mockk()), VilkårForBestemmelseYrkesaktivNy(mockk()), VilkårForBestemmelseIkkeYrkesaktivNy(mockk()), fakeUnleash)
+    private val vilkårForBestemmelse = VilkårForBestemmelse(VilkårForBestemmelseYrkesaktiv(mockk()), VilkårForBestemmelseIkkeYrkesaktiv(mockk()), fakeUnleash)
 
     private lateinit var opprettForslagMedlemskapsperiodeService: OpprettForslagMedlemskapsperiodeService
 
@@ -285,7 +285,7 @@ class OpprettForslagMedlemskapsperiodeServiceTest {
         shouldThrow<FunksjonellException> {
             opprettForslagMedlemskapsperiodeService.opprettForslagPåMedlemskapsperioder(
                 BEH_RES_ID,
-                Folketrygdloven_kap2_bestemmelser.FTRL_KAP2_2_5_FØRSTE_LEDD_H
+                Folketrygdloven_kap2_bestemmelser.FTRL_KAP2_2_8_ANDRE_LEDD
             )
         }.message.shouldContain("er påkrevd for bestemmelse")
     }

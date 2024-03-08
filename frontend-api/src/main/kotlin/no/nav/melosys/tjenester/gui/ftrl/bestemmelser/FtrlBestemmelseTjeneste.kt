@@ -32,13 +32,7 @@ class FtrlBestemmelseTjeneste(private val ftrlBestemmelser: FtrlBestemmelser, pr
 
     @GetMapping("/ftrl/bestemmelser/pliktige")
     fun hentBestemmelser(): ResponseEntity<FtrlBestemmelserDto> {
-        val pliktigeBestemmelserToggleAktiv = unleash.isEnabled(ToggleName.MELOSYS_FTRL_YRKESAKTIV_PLIKTIGE_BESTEMMELSER)
-        return ResponseEntity.ok(FtrlBestemmelserDto(
-            if(pliktigeBestemmelserToggleAktiv)
-                PliktigeMedlemskapsbestemmelser.bestemmelserNy
-            else
-                PliktigeMedlemskapsbestemmelser.bestemmelser)
-        )
+        return ResponseEntity.ok(FtrlBestemmelserDto(PliktigeMedlemskapsbestemmelser.bestemmelser))
     }
 
     data class FtrlBestemmelserDto(val bestemmelser: List<Folketrygdloven_kap2_bestemmelser>)

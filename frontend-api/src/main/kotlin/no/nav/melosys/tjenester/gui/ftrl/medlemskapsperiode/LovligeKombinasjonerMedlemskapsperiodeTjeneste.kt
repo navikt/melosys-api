@@ -21,7 +21,7 @@ import org.springframework.web.context.WebApplicationContext
 @RequestMapping("/medlemskapsperioder")
 @Api(tags = ["lovlige-kombinasjoner", "medlemskapsperiode"])
 @Scope(value = WebApplicationContext.SCOPE_REQUEST)
-class LovligeKombinasjonerMedlemskapsperiodeTjeneste(private var unleash: Unleash) {
+class LovligeKombinasjonerMedlemskapsperiodeTjeneste() {
 
     @GetMapping("/bestemmelse/lovlige-kombinasjoner")
     @ApiOperation(value = "Henter lovlige bestemmelser basert på trygdedekning")
@@ -31,9 +31,7 @@ class LovligeKombinasjonerMedlemskapsperiodeTjeneste(private var unleash: Unleas
             required = true
         ) trygdedekning: Trygdedekninger
     ): ResponseEntity<List<Folketrygdloven_kap2_bestemmelser>> {
-        val pliktigeBestemmelserToggleAktiv = unleash.isEnabled(ToggleName.MELOSYS_FTRL_YRKESAKTIV_PLIKTIGE_BESTEMMELSER)
-
-        val bestemmelser = if(pliktigeBestemmelserToggleAktiv) LovligeKombinasjonerTrygdedekningBestemmelse.hentLovligeBestemmelserToggle(trygdedekning) else LovligeKombinasjonerTrygdedekningBestemmelse.hentLovligeBestemmelser(trygdedekning)
+        val bestemmelser = LovligeKombinasjonerTrygdedekningBestemmelse.hentLovligeBestemmelser(trygdedekning)
 
         return ResponseEntity.ok(bestemmelser)
     }

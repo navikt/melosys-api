@@ -18,18 +18,10 @@ class LovligeKombinasjonerTrygdedekningBestemmelseTest {
     fun hentLovligeBestemmelser_fullTrygdedekning_returnererAllePliktigeBestemmelseneSamtFlere() {
         LovligeKombinasjonerTrygdedekningBestemmelse.hentLovligeBestemmelser(Trygdedekninger.FULL_DEKNING_FTRL)
             .shouldNotBeNull()
-            .shouldHaveSize(16)
+            .shouldHaveSize(13)
             .shouldContainAll(PliktigeMedlemskapsbestemmelser.bestemmelser)
     }
 
-    // Støtter toggle ToggleName.MELOSYS_FTRL_YRKESAKTIV_PLIKTIGE_BESTEMMELSER, https://jira.adeo.no/browse/MELOSYS-6430
-    @Test
-    fun hentLovligeBestemmelser_fullTrygdedekning_returnererAllePliktigeBestemmelseneSamtFlere_TOGGLE() {
-        LovligeKombinasjonerTrygdedekningBestemmelse.hentLovligeBestemmelserToggle(Trygdedekninger.FULL_DEKNING_FTRL)
-            .shouldNotBeNull()
-            .shouldHaveSize(13)
-            .shouldContainAll(PliktigeMedlemskapsbestemmelser.bestemmelserNy)
-    }
 
     @Test
     fun hentLovligeTrygdedekninger_2_7ABestemmelse_returnerer2_7ATrygdedekningOgFullDekning() {
@@ -61,7 +53,7 @@ class LovligeKombinasjonerTrygdedekningBestemmelseTest {
     @Test
     fun erGyldigKombinasjon_uGyldigKombinasjonPliktigBestemmelse_returnererFalse() {
         LovligeKombinasjonerTrygdedekningBestemmelse.erGyldigKombinasjon(
-            Folketrygdloven_kap2_bestemmelser.FTRL_KAP2_2_1_FØRSTE_LEDD,
+            Folketrygdloven_kap2_bestemmelser.FTRL_KAP2_2_1,
             Trygdedekninger.FTRL_2_7A_ANDRE_LEDD_B_HELSE_SYKE_FORELDREPENGER
         ).shouldBeFalse()
     }
@@ -85,7 +77,7 @@ class LovligeKombinasjonerTrygdedekningBestemmelseTest {
     @Test
     fun erBestemmelseGyldigForTrygdedekning_uGyldigKombinasjonMenBestemmelseErPliktig_returnererTrue() {
         LovligeKombinasjonerTrygdedekningBestemmelse.erBestemmelseGyldigForTrygdedekning(
-            Folketrygdloven_kap2_bestemmelser.FTRL_KAP2_2_1_FØRSTE_LEDD,
+            Folketrygdloven_kap2_bestemmelser.FTRL_KAP2_2_1,
             Trygdedekninger.FTRL_2_7A_ANDRE_LEDD_B_HELSE_SYKE_FORELDREPENGER
         ).shouldBeTrue()
     }

@@ -46,11 +46,8 @@ class GyldigeTrygdedekningerService(private val unleash: Unleash) {
 
         val trygdedekningerFraBehandlingstema = trygdedekningerFraBehandlingstema(behandlingstema)
 
-        val pliktigeBestemmelserToggleAktiv = unleash.isEnabled(ToggleName.MELOSYS_FTRL_YRKESAKTIV_PLIKTIGE_BESTEMMELSER)
         if (bestemmelse != null) {
-            val trygdedekningerFraBestemmelse = if (pliktigeBestemmelserToggleAktiv)
-                LovligeKombinasjonerTrygdedekningBestemmelse.hentLovligeTrygdedekningerToggle(bestemmelse).toSet() else
-                LovligeKombinasjonerTrygdedekningBestemmelse.hentLovligeTrygdedekninger(bestemmelse).toSet()
+            val trygdedekningerFraBestemmelse = LovligeKombinasjonerTrygdedekningBestemmelse.hentLovligeTrygdedekninger(bestemmelse).toSet()
             return trygdedekningerFraBehandlingstema.intersect(trygdedekningerFraBestemmelse).toList()
         }
 

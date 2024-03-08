@@ -99,7 +99,7 @@ class OpprettForslagMedlemskapsperiodeService(
             throw FunksjonellException("Bestemmelse er ikke satt. Krever bestemmelse ved opprettelse av forslag for medlemskapsperioder.")
         }
 
-        if (toggleIsEnabled(behandlingstema)) {
+        if (toggleIsEnabled()) {
             if (!LovligeKombinasjonerTrygdedekningBestemmelse.erBestemmelseGyldigForTrygdedekning(bestemmelse, trygdedekning)) {
                 throw FunksjonellException("Ulovlig kombinasjon av bestemmelse $bestemmelse og trygdedekning $trygdedekning")
             }
@@ -131,7 +131,7 @@ class OpprettForslagMedlemskapsperiodeService(
         behandlingstema: Behandlingstema,
         behandlingID: Long
     ): Collection<Vilkaar> {
-        if (toggleIsEnabled(behandlingstema)) {
+        if (toggleIsEnabled()) {
             val avklarteFaktaMap = avklartefaktaService.hentAlleAvklarteFakta(behandlingID).filter { it.avklartefaktaType != null }
                 .associate { it.avklartefaktaType to it.fakta.joinToString() }
             return vilkårForBestemmlese.hentVilkår(bestemmelse, behandlingstema, avklarteFaktaMap, behandlingID).map(Vilkår::vilkår)
@@ -140,9 +140,6 @@ class OpprettForslagMedlemskapsperiodeService(
             ?: throw FunksjonellException("Finner ikke vilkår for bestemmelse $bestemmelse")
     }
 
-    private fun toggleIsEnabled(behandlingstema: Behandlingstema) =
-        if (behandlingstema == Behandlingstema.YRKESAKTIV) unleash.isEnabled(ToggleName.MELOSYS_FTRL_YRKESAKTIV_PLIKTIGE_BESTEMMELSER)
-        else unleash.isEnabled(ToggleName.MELOSYS_FTRL_IKKE_YRKESAKTIV)
-
+    private fun toggleIsEnabled() = unleash.isEnabled(ToggleName.MELOSYS_FTRL_IKKE_YRKESAKTIV)
 }
 

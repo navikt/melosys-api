@@ -23,12 +23,10 @@ class VilkårForBestemmelseYrkesaktivTest {
 
     private lateinit var vilkårForBestemmelse: VilkårForBestemmelseYrkesaktiv
 
-    private lateinit var vilkårForBestemmelseYrkesaktivPliktig: VilkårForBestemmelseYrkesaktivNy
 
     @BeforeEach
     fun setUp() {
         vilkårForBestemmelse = VilkårForBestemmelseYrkesaktiv(mottatteOpplysningerService)
-        vilkårForBestemmelseYrkesaktivPliktig = VilkårForBestemmelseYrkesaktivNy(mottatteOpplysningerService)
     }
 
     @Test
@@ -42,7 +40,7 @@ class VilkårForBestemmelseYrkesaktivTest {
 
         every {mottatteOpplysningerService.hentMottatteOpplysninger(1L)} returns mottatteOpplysninger
 
-        val vilkår = vilkårForBestemmelseYrkesaktivPliktig.hentVilkår(
+        val vilkår = vilkårForBestemmelse.hentVilkår(
             Folketrygdloven_kap2_bestemmelser.FTRL_KAP2_2_1,
             emptyMap(),
             1L
@@ -66,7 +64,7 @@ class VilkårForBestemmelseYrkesaktivTest {
 
         every {mottatteOpplysningerService.hentMottatteOpplysninger(1L)} returns mottatteOpplysninger
 
-        val vilkår = vilkårForBestemmelseYrkesaktivPliktig.hentVilkår(
+        val vilkår = vilkårForBestemmelse.hentVilkår(
             Folketrygdloven_kap2_bestemmelser.FTRL_KAP2_2_1,
             mapOf(Avklartefaktatyper.ARBEIDSSITUASJON to Arbeidssituasjontype.MIDLERTIDIG_ARBEID_2_1_FJERDE_LEDD.name),
             1L
@@ -90,7 +88,7 @@ class VilkårForBestemmelseYrkesaktivTest {
 
         every {mottatteOpplysningerService.hentMottatteOpplysninger(1L)} returns mottatteOpplysninger
 
-        val vilkår = vilkårForBestemmelseYrkesaktivPliktig.hentVilkår(
+        val vilkår = vilkårForBestemmelse.hentVilkår(
             Folketrygdloven_kap2_bestemmelser.FTRL_KAP2_2_1,
             mapOf(Avklartefaktatyper.ARBEIDSSITUASJON to Arbeidssituasjontype.VEKSELVIS_ARBEID_2_1_FJERDE_LEDD.name),
             1L
@@ -105,7 +103,7 @@ class VilkårForBestemmelseYrkesaktivTest {
 
     @Test
     fun `vilkår for FTRL_KAP2_2_2, ARBIED_I_NORGE_2_2`() {
-        val vilkår = vilkårForBestemmelseYrkesaktivPliktig.hentVilkår(
+        val vilkår = vilkårForBestemmelse.hentVilkår(
             Folketrygdloven_kap2_bestemmelser.FTRL_KAP2_2_2,
             mapOf(Avklartefaktatyper.ARBEIDSSITUASJON to Arbeidssituasjontype.ARBIED_I_NORGE_2_2.name),
             1L
@@ -121,7 +119,7 @@ class VilkårForBestemmelseYrkesaktivTest {
 
     @Test
     fun `vilkår for FTRL_KAP2_2_2, ARBEID_PÅ_NORSK_SOKKEL_2_2`() {
-        val vilkår = vilkårForBestemmelseYrkesaktivPliktig.hentVilkår(
+        val vilkår = vilkårForBestemmelse.hentVilkår(
             Folketrygdloven_kap2_bestemmelser.FTRL_KAP2_2_2,
             mapOf(Avklartefaktatyper.ARBEIDSSITUASJON to Arbeidssituasjontype.ARBEID_PÅ_NORSK_SOKKEL_2_2.name),
             1L
@@ -137,7 +135,7 @@ class VilkårForBestemmelseYrkesaktivTest {
 
     @Test
     fun `vilkår for FTRL_KAP2_2_3_ANDRE_LEDD`() {
-        val vilkår = vilkårForBestemmelseYrkesaktivPliktig.hentVilkår(
+        val vilkår = vilkårForBestemmelse.hentVilkår(
             Folketrygdloven_kap2_bestemmelser.FTRL_KAP2_2_3_ANDRE_LEDD,
             emptyMap(),
             1L
@@ -151,7 +149,7 @@ class VilkårForBestemmelseYrkesaktivTest {
 
     @Test
     fun `vilkår for FTRL_KAP2_2_5_FØRSTE_LEDD_A`() {
-        val vilkår = vilkårForBestemmelseYrkesaktivPliktig.hentVilkår(
+        val vilkår = vilkårForBestemmelse.hentVilkår(
             Folketrygdloven_kap2_bestemmelser.FTRL_KAP2_2_5_FØRSTE_LEDD_A,
             emptyMap(),
             1L
@@ -166,7 +164,7 @@ class VilkårForBestemmelseYrkesaktivTest {
 
     @Test
     fun `vilkår for FTRL_KAP2_2_5_FØRSTE_LEDD_B`() {
-        val vilkår = vilkårForBestemmelseYrkesaktivPliktig.hentVilkår(
+        val vilkår = vilkårForBestemmelse.hentVilkår(
             Folketrygdloven_kap2_bestemmelser.FTRL_KAP2_2_5_FØRSTE_LEDD_B,
             emptyMap(),
             1L
@@ -181,7 +179,7 @@ class VilkårForBestemmelseYrkesaktivTest {
 
     @Test
     fun `vilkår for FTRL_KAP2_2_5_FØRSTE_LEDD_C`() {
-        val vilkår = vilkårForBestemmelseYrkesaktivPliktig.hentVilkår(
+        val vilkår = vilkårForBestemmelse.hentVilkår(
             Folketrygdloven_kap2_bestemmelser.FTRL_KAP2_2_5_FØRSTE_LEDD_C,
             emptyMap(),
             1L
@@ -194,7 +192,7 @@ class VilkårForBestemmelseYrkesaktivTest {
 
     @Test
     fun `vilkår for FTRL_KAP2_2_5_FØRSTE_LEDD_D`() {
-        val vilkår = vilkårForBestemmelseYrkesaktivPliktig.hentVilkår(
+        val vilkår = vilkårForBestemmelse.hentVilkår(
             Folketrygdloven_kap2_bestemmelser.FTRL_KAP2_2_5_FØRSTE_LEDD_D,
             emptyMap(),
             1L
@@ -207,7 +205,7 @@ class VilkårForBestemmelseYrkesaktivTest {
 
     @Test
     fun `vilkår for FTRL_KAP2_2_5_FØRSTE_LEDD_E`() {
-        val vilkår = vilkårForBestemmelseYrkesaktivPliktig.hentVilkår(
+        val vilkår = vilkårForBestemmelse.hentVilkår(
             Folketrygdloven_kap2_bestemmelser.FTRL_KAP2_2_5_FØRSTE_LEDD_E,
             emptyMap(),
             1L
@@ -220,7 +218,7 @@ class VilkårForBestemmelseYrkesaktivTest {
 
     @Test
     fun `vilkår for FTRL_KAP2_2_5_FØRSTE_LEDD_F`() {
-        val vilkår = vilkårForBestemmelseYrkesaktivPliktig.hentVilkår(
+        val vilkår = vilkårForBestemmelse.hentVilkår(
             Folketrygdloven_kap2_bestemmelser.FTRL_KAP2_2_5_FØRSTE_LEDD_F,
             emptyMap(),
             1L
@@ -236,7 +234,7 @@ class VilkårForBestemmelseYrkesaktivTest {
 
     @Test
     fun `vilkår for FTRL_KAP2_2_5_FØRSTE_LEDD_G`() {
-        val vilkår = vilkårForBestemmelseYrkesaktivPliktig.hentVilkår(
+        val vilkår = vilkårForBestemmelse.hentVilkår(
             Folketrygdloven_kap2_bestemmelser.FTRL_KAP2_2_5_FØRSTE_LEDD_G,
             emptyMap(),
             1L

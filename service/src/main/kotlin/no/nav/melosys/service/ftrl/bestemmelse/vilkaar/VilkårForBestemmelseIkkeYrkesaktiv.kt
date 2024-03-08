@@ -19,10 +19,7 @@ class VilkårForBestemmelseIkkeYrkesaktiv(val mottatteOpplysningerService: Motta
         behandlingID: Long?
     ): List<Vilkår> {
         return when (bestemmelse) {
-            // Støtter toggle ToggleName.MELOSYS_FTRL_YRKESAKTIV_PLIKTIGE_BESTEMMELSER, https://jira.adeo.no/browse/MELOSYS-6430
             FTRL_KAP2_2_1 -> ftrlKap2_1VilkårForBehandling(behandlingID)
-            // End støtte
-            FTRL_KAP2_2_1_FØRSTE_LEDD -> ftrlKap2_1VilkårForBehandling(behandlingID)
 
             FTRL_KAP2_2_5_FØRSTE_LEDD_H -> listOf(
                 Vilkår(FTRL_2_5_NORSK_STATSBORGER_EØS_BORGER), Vilkår(FTRL_2_5_LÅN_STIPEND_LÅNEKASSEN)

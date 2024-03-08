@@ -23,7 +23,7 @@ class FtrlBestemmelseTest {
     @BeforeEach
     fun setUp() {
         unleash.resetAll()
-        ftrlBestemmelser = FtrlBestemmelser(unleash)
+        ftrlBestemmelser = FtrlBestemmelser()
     }
 
     @Test
@@ -34,15 +34,7 @@ class FtrlBestemmelseTest {
     }
 
     @Test
-    fun hentBestemmelser_yrkesaktivFullDekning_returnererFiltrertListe_deprecated() {
-        ftrlBestemmelser.hentBestemmelser(Behandlingstema.YRKESAKTIV, Trygdedekninger.FULL_DEKNING_FTRL)
-            .shouldNotBeNull()
-            .shouldHaveSize(13)
-    }
-
-    @Test
     fun hentBestemmelser_yrkesaktivFullDekning_returnererFiltrertListe() {
-        unleash.enable(ToggleName.MELOSYS_FTRL_YRKESAKTIV_PLIKTIGE_BESTEMMELSER)
         ftrlBestemmelser.hentBestemmelser(Behandlingstema.YRKESAKTIV, Trygdedekninger.FULL_DEKNING_FTRL)
             .shouldNotBeNull()
             .shouldHaveSize(12)
@@ -52,7 +44,7 @@ class FtrlBestemmelseTest {
     fun hentBestemmelser_ikkeYrkesaktivFullDekning_returnererFiltrertListe() {
         ftrlBestemmelser.hentBestemmelser(Behandlingstema.IKKE_YRKESAKTIV, Trygdedekninger.FULL_DEKNING_FTRL)
             .shouldNotBeNull()
-            .shouldHaveSize(5)
+            .shouldHaveSize(3)
     }
 
     @Test
