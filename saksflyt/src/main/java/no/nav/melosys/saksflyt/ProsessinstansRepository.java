@@ -2,7 +2,6 @@ package no.nav.melosys.saksflyt;
 
 import java.time.LocalDateTime;
 import java.util.Collection;
-import java.util.Optional;
 import java.util.Set;
 import java.util.UUID;
 
@@ -25,13 +24,6 @@ public interface ProsessinstansRepository extends JpaRepository<Prosessinstans, 
         + "GROUP BY p.type, p.status, p.sistFullførtSteg")
     Collection<ProsessinstansStegAntall> antallAktiveOgFeiletPerStegOgStatus(Collection<ProsessSteg> prosessSteg,
                                                                              boolean taMedForsteStegIProsessFlyt);
-
-    Optional<Prosessinstans> findByBehandling_IdAndStatusIs(long id, ProsessStatus prosessStatus);
-
-    Optional<Prosessinstans> findByBehandling_IdAndTypeIn(long id, ProsessType... prosessTypes);
-
-    Collection<Prosessinstans> findAllByBehandling_IdAndTypeIn(long id, ProsessType... prosessTypes);
-
     Collection<Prosessinstans> findAllByStatus(ProsessStatus status);
 
     Collection<Prosessinstans> findAllByStatusIn(Set<ProsessStatus> statuses);
@@ -42,17 +34,7 @@ public interface ProsessinstansRepository extends JpaRepository<Prosessinstans, 
         """)
     Collection<ProsessinstansInfo> findAllByIdNotAndStatusNotInAndLåsReferanseStartingWith(UUID id, Collection<ProsessStatus> prosessStatus, String låsReferanse);
 
-    Collection<Prosessinstans> findAllByStatusNotInAndLåsReferanseStartingWith(Collection<ProsessStatus> prosessStatus, String låsReferanse);
-
     Collection<Prosessinstans> findAllByLåsReferanseStartingWith(String låsReferanse);
-
-    Collection<Prosessinstans> findAllByBehandling_Id(long id);
-
-    @Query(value = "SELECT * FROM PROSESSINSTANS p WHERE p.PROSESS_TYPE = 'MOTTAK_SED' AND p.\"DATA\" LIKE '%X100%'",
-        nativeQuery = true)
-    Set<Prosessinstans> findAllWithSedX100();
-
-    boolean existsByStatusNotInAndLåsReferanse(Collection<ProsessStatus> prosessStatus, String låsreferanse);
 
     @Query(value = "SELECT * FROM PROSESSINSTANS p WHERE p.REGISTRERT_DATO > ?1", nativeQuery = true)
     Collection<Prosessinstans> findAllAfterDate(LocalDateTime localDateTime);
