@@ -34,17 +34,20 @@ class TrygdeavgiftsberegningService
 
         valider(medlemAvFolketrygden)
         fastsattTrygdeavgift.trygdeavgiftsperioder.clear()
-
         if (!trygdeavgiftMottakerService.skalBetalesTilNav(fastsattTrygdeavgift.trygdeavgiftsgrunnlag)) { return emptySet() }
 
         val innvilgedeMedlemskapsperioder =
-            medlemAvFolketrygden.medlemskapsperioder.filter { it.erInnvilget() }
+            medlemAvFolketrygden.medlemskapsperioder.filter { it.erInnvilget()}
+
+        val behandling = behandlingService.hentBehandling(behandlingsresultatID).fagsak
+        val persondata = persondataService.hentPerson(behandling.hentBruker().aktørId)
 
         val (trygdeavgiftsberegningRequest, UUID_DBID_MAPS) =
             TrygdeavgiftsberegningsRequestMapper().map(
                 innvilgedeMedlemskapsperioder,
                 fastsattTrygdeavgift.trygdeavgiftsgrunnlag.skatteforholdTilNorge,
-                fastsattTrygdeavgift.trygdeavgiftsgrunnlag.inntektsperioder
+                fastsattTrygdeavgift.trygdeavgiftsgrunnlag.inntektsperioder,
+                persondata.fødselsdato
             )
         val beregnetTrygdeavgift = trygdeavgiftConsumer.beregnTrygdeavgift(trygdeavgiftsberegningRequest)
         oppdaterTrygdeavgift(beregnetTrygdeavgift, fastsattTrygdeavgift, UUID_DBID_MAPS)

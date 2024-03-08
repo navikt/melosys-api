@@ -7,6 +7,7 @@ import no.nav.melosys.domain.kodeverk.Avgiftsdekning
 import no.nav.melosys.domain.kodeverk.Trygdedekninger
 import no.nav.melosys.exception.FunksjonellException
 import no.nav.melosys.integrasjon.trygdeavgift.dto.*
+import java.time.LocalDate
 import java.util.*
 
 class TrygdeavgiftsberegningsRequestMapper {
@@ -15,6 +16,7 @@ class TrygdeavgiftsberegningsRequestMapper {
         medlemskapsperioder: Collection<Medlemskapsperiode>,
         skatteforholdTilNorge: Collection<SkatteforholdTilNorge>,
         inntektsperioder: Collection<Inntektsperiode>,
+        foedselsDato: LocalDate
     ): Pair<TrygdeavgiftsberegningRequest, List<Map<UUID, Long>>> {
         val (medlemskapsperioderDto, medlemskapsperiodeMap) = mapMedlemskapsperioder(medlemskapsperioder)
         val (skatteforholdsperioderDto, skatteforholdsperiodeMap) = mapSkatteforholdsperioder(skatteforholdTilNorge)
@@ -23,7 +25,8 @@ class TrygdeavgiftsberegningsRequestMapper {
             TrygdeavgiftsberegningRequest(
                 medlemskapsperioderDto,
                 skatteforholdsperioderDto,
-                inntektsperioderDto
+                inntektsperioderDto,
+                foedselsDato
             ),
             listOf(medlemskapsperiodeMap, skatteforholdsperiodeMap, inntektsperiodeMap)
         )
@@ -35,7 +38,8 @@ class TrygdeavgiftsberegningsRequestMapper {
             val dto = MedlemskapsperiodeDto(
                 UUID.randomUUID(),
                 DatoPeriodeDto(it.fom, it.tom),
-                avgiftsdekningerFraTrygdedekning(it.trygdedekning)
+                avgiftsdekningerFraTrygdedekning(it.trygdedekning),
+                it.medlemskapstype
             )
             map[dto.id] = it.id
             dto
