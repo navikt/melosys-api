@@ -44,7 +44,7 @@ class FtrlBestemmelseTest {
     fun hentBestemmelser_ikkeYrkesaktivFullDekning_returnererFiltrertListe() {
         ftrlBestemmelser.hentBestemmelser(Behandlingstema.IKKE_YRKESAKTIV, Trygdedekninger.FULL_DEKNING_FTRL)
             .shouldNotBeNull()
-            .shouldHaveSize(3)
+            .shouldHaveSize(4)
     }
 
     @Test

@@ -285,7 +285,7 @@ class OpprettForslagMedlemskapsperiodeServiceTest {
         shouldThrow<FunksjonellException> {
             opprettForslagMedlemskapsperiodeService.opprettForslagPåMedlemskapsperioder(
                 BEH_RES_ID,
-                Folketrygdloven_kap2_bestemmelser.FTRL_KAP2_2_8_ANDRE_LEDD
+                Folketrygdloven_kap2_bestemmelser.FTRL_KAP2_2_5_FØRSTE_LEDD_H
             )
         }.message.shouldContain("er påkrevd for bestemmelse")
     }
