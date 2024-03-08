@@ -4,7 +4,7 @@ import java.util.List;
 
 import no.nav.melosys.domain.dokument.felles.Periode;
 
-public class IkkeYrkesaktivPliktigFtrlBrevbestilling extends DokgenBrevbestilling {
+public class InnvilgelseFtrlIkkeYrkesaktivPliktigBrevbestilling extends DokgenBrevbestilling {
 
     private boolean flereLandUkjentHvilke;
     private List<String> land;
@@ -16,12 +16,12 @@ public class IkkeYrkesaktivPliktigFtrlBrevbestilling extends DokgenBrevbestillin
     private String ikkeYrkesaktivRelasjonType;
     private Periode medlemskapsperiode;
 
-    public IkkeYrkesaktivPliktigFtrlBrevbestilling() {
+    public InnvilgelseFtrlIkkeYrkesaktivPliktigBrevbestilling() {
         super();
         //Tom constructor på grunn av deserialsering i prosessinstans
     }
 
-    private IkkeYrkesaktivPliktigFtrlBrevbestilling(Builder builder) {
+    private InnvilgelseFtrlIkkeYrkesaktivPliktigBrevbestilling(Builder builder) {
         super(builder);
         this.flereLandUkjentHvilke = builder.flereLandUkjentHvilke;
         this.bestemmelse = builder.bestemmelse;
@@ -88,17 +88,17 @@ public class IkkeYrkesaktivPliktigFtrlBrevbestilling extends DokgenBrevbestillin
         public Builder() {
         }
 
-        public Builder(IkkeYrkesaktivPliktigFtrlBrevbestilling innvilgelseBrevbestilling) {
-            super(innvilgelseBrevbestilling);
-            this.flereLandUkjentHvilke = innvilgelseBrevbestilling.flereLandUkjentHvilke;
-            this.bestemmelse = innvilgelseBrevbestilling.bestemmelse;
-            this.nyVurderingBakgrunn = innvilgelseBrevbestilling.nyVurderingBakgrunn;
-            this.innledningFritekst = innvilgelseBrevbestilling.innledningFritekst;
-            this.begrunnelseFritekst = innvilgelseBrevbestilling.begrunnelseFritekst;
-            this.ikkeYrkesaktivOppholdType = innvilgelseBrevbestilling.ikkeYrkesaktivOppholdType;
-            this.ikkeYrkesaktivRelasjonType = innvilgelseBrevbestilling.ikkeYrkesaktivRelasjonType;
-            this.medlemskapsperiode = innvilgelseBrevbestilling.medlemskapsperiode;
-            this.land = innvilgelseBrevbestilling.land;
+        public Builder(InnvilgelseFtrlIkkeYrkesaktivPliktigBrevbestilling brevbestilling) {
+            super(brevbestilling);
+            this.flereLandUkjentHvilke = brevbestilling.flereLandUkjentHvilke;
+            this.bestemmelse = brevbestilling.bestemmelse;
+            this.nyVurderingBakgrunn = brevbestilling.nyVurderingBakgrunn;
+            this.innledningFritekst = brevbestilling.innledningFritekst;
+            this.begrunnelseFritekst = brevbestilling.begrunnelseFritekst;
+            this.ikkeYrkesaktivOppholdType = brevbestilling.ikkeYrkesaktivOppholdType;
+            this.ikkeYrkesaktivRelasjonType = brevbestilling.ikkeYrkesaktivRelasjonType;
+            this.medlemskapsperiode = brevbestilling.medlemskapsperiode;
+            this.land = brevbestilling.land;
         }
 
         public Builder medBestemmelse(String bestemmelse) {
@@ -146,8 +146,8 @@ public class IkkeYrkesaktivPliktigFtrlBrevbestilling extends DokgenBrevbestillin
             return this;
         }
 
-        public IkkeYrkesaktivPliktigFtrlBrevbestilling build() {
-            return new IkkeYrkesaktivPliktigFtrlBrevbestilling(this);
+        public InnvilgelseFtrlIkkeYrkesaktivPliktigBrevbestilling build() {
+            return new InnvilgelseFtrlIkkeYrkesaktivPliktigBrevbestilling(this);
         }
     }
 }

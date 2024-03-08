@@ -3,8 +3,8 @@ package no.nav.melosys.service.dokument.brev.mapper
 import no.nav.melosys.domain.Behandling
 import no.nav.melosys.domain.Medlemskapsperiode
 import no.nav.melosys.domain.Vilkaarsresultat
-import no.nav.melosys.domain.brev.IkkeYrkesaktivFrivilligFtrlBrevbestilling
-import no.nav.melosys.domain.brev.IkkeYrkesaktivPliktigFtrlBrevbestilling
+import no.nav.melosys.domain.brev.InnvilgelseFtrlIkkeYrkesaktivFrivilligBrevbestilling
+import no.nav.melosys.domain.brev.InnvilgelseFtrlIkkeYrkesaktivPliktigBrevbestilling
 import no.nav.melosys.domain.brev.InnvilgelseFtrlYrkesaktivFrivilligBrevbestilling
 import no.nav.melosys.domain.dokument.felles.Periode
 import no.nav.melosys.domain.folketrygden.MedlemAvFolketrygden
@@ -13,8 +13,8 @@ import no.nav.melosys.domain.kodeverk.begrunnelser.folketrygdloven.Ftrl_2_7_begr
 import no.nav.melosys.domain.kodeverk.begrunnelser.folketrygdloven.Ftrl_2_8_naer_tilknytning_norge_begrunnelser
 import no.nav.melosys.domain.mottatteopplysninger.SøknadNorgeEllerUtenforEØS
 import no.nav.melosys.integrasjon.dokgen.dto.InnvilgelseFtrlYrkesaktivFrivillig
-import no.nav.melosys.integrasjon.dokgen.dto.InnvilgelseIkkeYrkesaktivFrivilligFtrl
-import no.nav.melosys.integrasjon.dokgen.dto.InnvilgelseIkkeYrkesaktivPliktigFtrl
+import no.nav.melosys.integrasjon.dokgen.dto.InnvilgelseFtrlIkkeYrkesaktivFrivillig
+import no.nav.melosys.integrasjon.dokgen.dto.InnvilgelseFtrlIkkeYrkesaktivPliktig
 import no.nav.melosys.integrasjon.dokgen.dto.innvilgelseftrl.AvgiftsperiodeDto
 import no.nav.melosys.service.avgift.TrygdeavgiftMottakerService
 import no.nav.melosys.service.avgift.TrygdeavgiftsberegningService
@@ -68,7 +68,7 @@ class InnvilgelseFtrlMapper(
         )
     }
 
-    internal fun mapIkkeYrkesaktivFrivillig(brevbestilling: IkkeYrkesaktivFrivilligFtrlBrevbestilling): InnvilgelseIkkeYrkesaktivFrivilligFtrl {
+    internal fun mapIkkeYrkesaktivFrivillig(brevbestilling: InnvilgelseFtrlIkkeYrkesaktivFrivilligBrevbestilling): InnvilgelseFtrlIkkeYrkesaktivFrivillig {
         val behandlingsresultat = dokgenMapperDatahenter.hentBehandlingsresultat(brevbestilling.behandling.id)
         val mottatteOpplysningerData = behandlingsresultat.behandling.mottatteOpplysninger.mottatteOpplysningerData as SøknadNorgeEllerUtenforEØS
         val ikkeyrkesaktivrelasjonType =
@@ -78,7 +78,7 @@ class InnvilgelseFtrlMapper(
         val avslåttMedlemskapsperiodeFørMottaksdatoFullDekning =
             mapAvslåttMedlemskapsperiodeFørMottaksdatoFullDekning(behandlingsresultat.medlemAvFolketrygden, brevbestilling.forsendelseMottatt)
 
-        return InnvilgelseIkkeYrkesaktivFrivilligFtrl.av(
+        return InnvilgelseFtrlIkkeYrkesaktivFrivillig.av(
             brevbestilling.toBuilder()
                 .medLand(mottatteOpplysningerData.soeknadsland.landkoder.map { dokgenMapperDatahenter.hentLandnavnFraLandkode(it) })
                 .medTrygdedekning(mottatteOpplysningerData.trygdedekning.kode)
@@ -94,7 +94,7 @@ class InnvilgelseFtrlMapper(
         )
     }
 
-    internal fun mapIkkeYrkesaktivPliktig(brevbestilling: IkkeYrkesaktivPliktigFtrlBrevbestilling): InnvilgelseIkkeYrkesaktivPliktigFtrl {
+    internal fun mapIkkeYrkesaktivPliktig(brevbestilling: InnvilgelseFtrlIkkeYrkesaktivPliktigBrevbestilling): InnvilgelseFtrlIkkeYrkesaktivPliktig {
         val behandlingsresultat = dokgenMapperDatahenter.hentBehandlingsresultat(brevbestilling.behandling.id)
         val avklartefakta = behandlingsresultat.avklartefakta
         val søknadsland = behandlingsresultat.behandling.mottatteOpplysninger.mottatteOpplysningerData.soeknadsland
@@ -103,7 +103,7 @@ class InnvilgelseFtrlMapper(
             behandlingsresultat.medlemAvFolketrygden.utledMedlemskapsperiodeTom()
         )
 
-        return InnvilgelseIkkeYrkesaktivPliktigFtrl.av(
+        return InnvilgelseFtrlIkkeYrkesaktivPliktig.av(
             brevbestilling.toBuilder()
                 .medFlereLandUkjentHvilke(søknadsland.isFlereLandUkjentHvilke)
                 .medLand(søknadsland.landkoder.map { dokgenMapperDatahenter.hentLandnavnFraLandkode(it) })

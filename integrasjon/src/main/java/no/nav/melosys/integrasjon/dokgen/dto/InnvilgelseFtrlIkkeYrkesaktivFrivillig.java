@@ -5,46 +5,49 @@ import java.util.List;
 
 import com.fasterxml.jackson.annotation.JsonFormat;
 import com.fasterxml.jackson.annotation.JsonInclude;
-import no.nav.melosys.domain.brev.IkkeYrkesaktivPliktigFtrlBrevbestilling;
-import no.nav.melosys.domain.dokument.felles.Periode;
+import no.nav.melosys.domain.brev.InnvilgelseFtrlIkkeYrkesaktivFrivilligBrevbestilling;
 import no.nav.melosys.domain.kodeverk.Mottakerroller;
 import no.nav.melosys.integrasjon.dokgen.dto.felles.SaksinfoBruker;
+import no.nav.melosys.integrasjon.dokgen.dto.innvilgelseftrl.MedlemskapsperiodeDto;
 
 import static com.fasterxml.jackson.annotation.JsonFormat.Shape.STRING;
 
-public class InnvilgelseIkkeYrkesaktivPliktigFtrl extends DokgenDto {
+public class InnvilgelseFtrlIkkeYrkesaktivFrivillig extends DokgenDto {
 
     @JsonFormat(shape = STRING)
     private final LocalDate datoMottatt;
     private final String sakstype;
     private final String behandlingstype;
-    private final boolean flereLandUkjentHvilke;
     @JsonInclude(JsonInclude.Include.NON_NULL)
     private final List<String> land;
+    private final String trygdedekning;
     private final String bestemmelse;
     private final String nyVurderingBakgrunn;
     private final String innledningFritekst;
     private final String begrunnelseFritekst;
-    private final String ikkeYrkesaktivOppholdType;
+    private final boolean avslåttMedlemskapsperiodeFørMottaksdatoHelsedel;
+    private final boolean avslåttMedlemskapsperiodeFørMottaksdatoFullDekning;
+    @JsonInclude(JsonInclude.Include.NON_NULL)
+    private final List<MedlemskapsperiodeDto> medlemskapsperioder;
     private final String ikkeYrkesaktivRelasjonType;
-    private final Periode medlemskapsperiode;
 
-    protected InnvilgelseIkkeYrkesaktivPliktigFtrl(IkkeYrkesaktivPliktigFtrlBrevbestilling brevbestilling) {
+    protected InnvilgelseFtrlIkkeYrkesaktivFrivillig(InnvilgelseFtrlIkkeYrkesaktivFrivilligBrevbestilling brevbestilling, List<MedlemskapsperiodeDto> medlemskapsperioder) {
         super(brevbestilling, Mottakerroller.BRUKER);
         var fagsak = brevbestilling.getBehandling().getFagsak();
 
         this.datoMottatt = instantTilLocalDate(brevbestilling.getForsendelseMottatt());
         this.sakstype = fagsak.getType().getKode();
         this.behandlingstype = fagsak.hentSistOppdatertBehandling().getType().getKode();
-        this.flereLandUkjentHvilke = brevbestilling.getFlereLandUkjentHvilke();
         this.land = brevbestilling.getLand();
-        this.medlemskapsperiode = brevbestilling.getMedlemskapsperiode();
+        this.trygdedekning = brevbestilling.getTrygdedekning();
         this.bestemmelse = brevbestilling.getBestemmelse();
         this.nyVurderingBakgrunn = brevbestilling.getNyVurderingBakgrunn();
         this.innledningFritekst = brevbestilling.getInnledningFritekst();
         this.begrunnelseFritekst = brevbestilling.getBegrunnelseFritekst();
-        this.ikkeYrkesaktivOppholdType = brevbestilling.getIkkeYrkesaktivOppholdType();
         this.ikkeYrkesaktivRelasjonType = brevbestilling.getIkkeYrkesaktivRelasjonType();
+        this.avslåttMedlemskapsperiodeFørMottaksdatoHelsedel = brevbestilling.isAvslåttMedlemskapsperiodeFørMottaksdatoHelsedel();
+        this.avslåttMedlemskapsperiodeFørMottaksdatoFullDekning = brevbestilling.isAvslåttMedlemskapsperiodeFørMottaksdatoFullDekning();
+        this.medlemskapsperioder = medlemskapsperioder;
     }
 
     public LocalDate getDatoMottatt() {
@@ -59,16 +62,16 @@ public class InnvilgelseIkkeYrkesaktivPliktigFtrl extends DokgenDto {
         return behandlingstype;
     }
 
-    public boolean getFlereLandUkjentHvilke() {
-        return flereLandUkjentHvilke;
-    }
-
-    public List<String> getLand() {
-        return land;
+    public String getTrygdedekning() {
+        return trygdedekning;
     }
 
     public String getBestemmelse() {
         return bestemmelse;
+    }
+
+    public List<String> getLand() {
+        return land;
     }
 
     public String getNyVurderingBakgrunn() {
@@ -83,16 +86,20 @@ public class InnvilgelseIkkeYrkesaktivPliktigFtrl extends DokgenDto {
         return begrunnelseFritekst;
     }
 
-    public String getIkkeYrkesaktivOppholdType() {
-        return ikkeYrkesaktivOppholdType;
-    }
-
     public String getIkkeYrkesaktivRelasjonType() {
         return ikkeYrkesaktivRelasjonType;
     }
 
-    public Periode getMedlemskapsperiode() {
-        return medlemskapsperiode;
+    public boolean isAvslåttMedlemskapsperiodeFørMottaksdatoHelsedel() {
+        return avslåttMedlemskapsperiodeFørMottaksdatoHelsedel;
+    }
+
+    public boolean isAvslåttMedlemskapsperiodeFørMottaksdatoFullDekning() {
+        return avslåttMedlemskapsperiodeFørMottaksdatoFullDekning;
+    }
+
+    public List<MedlemskapsperiodeDto> getMedlemskapsperioder() {
+        return medlemskapsperioder;
     }
 
     @Override
@@ -101,7 +108,7 @@ public class InnvilgelseIkkeYrkesaktivPliktigFtrl extends DokgenDto {
     }
 
 
-    public static InnvilgelseIkkeYrkesaktivPliktigFtrl av(IkkeYrkesaktivPliktigFtrlBrevbestilling brevbestilling) {
-        return new InnvilgelseIkkeYrkesaktivPliktigFtrl(brevbestilling);
+    public static InnvilgelseFtrlIkkeYrkesaktivFrivillig av(InnvilgelseFtrlIkkeYrkesaktivFrivilligBrevbestilling brevbestilling, List<MedlemskapsperiodeDto> medlemskapsperioder) {
+        return new InnvilgelseFtrlIkkeYrkesaktivFrivillig(brevbestilling, medlemskapsperioder);
     }
 }

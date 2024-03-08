@@ -2,9 +2,7 @@ package no.nav.melosys.domain.brev;
 
 import java.util.List;
 
-import no.nav.melosys.domain.dokument.felles.Periode;
-
-public class IkkeYrkesaktivFrivilligFtrlBrevbestilling extends DokgenBrevbestilling {
+public class InnvilgelseFtrlIkkeYrkesaktivFrivilligBrevbestilling extends DokgenBrevbestilling {
 
     private List<String> land;
     private String trygdedekning;
@@ -16,12 +14,12 @@ public class IkkeYrkesaktivFrivilligFtrlBrevbestilling extends DokgenBrevbestill
     private boolean avslåttMedlemskapsperiodeFørMottaksdatoHelsedel;
     private boolean avslåttMedlemskapsperiodeFørMottaksdatoFullDekning;
 
-    public IkkeYrkesaktivFrivilligFtrlBrevbestilling() {
+    public InnvilgelseFtrlIkkeYrkesaktivFrivilligBrevbestilling() {
         super();
         //Tom constructor på grunn av deserialsering i prosessinstans
     }
 
-    private IkkeYrkesaktivFrivilligFtrlBrevbestilling(Builder builder) {
+    private InnvilgelseFtrlIkkeYrkesaktivFrivilligBrevbestilling(Builder builder) {
         super(builder);
         this.bestemmelse = builder.bestemmelse;
         this.nyVurderingBakgrunn = builder.nyVurderingBakgrunn;
@@ -90,17 +88,17 @@ public String getTrygdedekning() {
         public Builder() {
         }
 
-        public Builder(IkkeYrkesaktivFrivilligFtrlBrevbestilling innvilgelseBrevbestilling) {
-            super(innvilgelseBrevbestilling);
-            this.trygdedekning = innvilgelseBrevbestilling.trygdedekning;
-            this.bestemmelse = innvilgelseBrevbestilling.bestemmelse;
-            this.nyVurderingBakgrunn = innvilgelseBrevbestilling.nyVurderingBakgrunn;
-            this.innledningFritekst = innvilgelseBrevbestilling.innledningFritekst;
-            this.begrunnelseFritekst = innvilgelseBrevbestilling.begrunnelseFritekst;
-            this.ikkeYrkesaktivRelasjonType = innvilgelseBrevbestilling.ikkeYrkesaktivRelasjonType;
-            this.land = innvilgelseBrevbestilling.land;
-            this.avslåttMedlemskapsperiodeFørMottaksdatoHelsedel = innvilgelseBrevbestilling.avslåttMedlemskapsperiodeFørMottaksdatoHelsedel;
-            this.avslåttMedlemskapsperiodeFørMottaksdatoFullDekning = innvilgelseBrevbestilling.avslåttMedlemskapsperiodeFørMottaksdatoFullDekning;
+        public Builder(InnvilgelseFtrlIkkeYrkesaktivFrivilligBrevbestilling brevbestilling) {
+            super(brevbestilling);
+            this.trygdedekning = brevbestilling.trygdedekning;
+            this.bestemmelse = brevbestilling.bestemmelse;
+            this.nyVurderingBakgrunn = brevbestilling.nyVurderingBakgrunn;
+            this.innledningFritekst = brevbestilling.innledningFritekst;
+            this.begrunnelseFritekst = brevbestilling.begrunnelseFritekst;
+            this.ikkeYrkesaktivRelasjonType = brevbestilling.ikkeYrkesaktivRelasjonType;
+            this.land = brevbestilling.land;
+            this.avslåttMedlemskapsperiodeFørMottaksdatoHelsedel = brevbestilling.avslåttMedlemskapsperiodeFørMottaksdatoHelsedel;
+            this.avslåttMedlemskapsperiodeFørMottaksdatoFullDekning = brevbestilling.avslåttMedlemskapsperiodeFørMottaksdatoFullDekning;
         }
 
         public Builder medBestemmelse(String bestemmelse) {
@@ -148,8 +146,8 @@ public String getTrygdedekning() {
             return this;
         }
 
-        public IkkeYrkesaktivFrivilligFtrlBrevbestilling build() {
-            return new IkkeYrkesaktivFrivilligFtrlBrevbestilling(this);
+        public InnvilgelseFtrlIkkeYrkesaktivFrivilligBrevbestilling build() {
+            return new InnvilgelseFtrlIkkeYrkesaktivFrivilligBrevbestilling(this);
         }
     }
 }
