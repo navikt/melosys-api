@@ -4,7 +4,6 @@ import java.time.ZoneId;
 import java.util.*;
 import java.util.stream.Collectors;
 
-import io.getunleash.Unleash;
 import no.nav.melosys.domain.*;
 import no.nav.melosys.domain.adresse.StrukturertAdresse;
 import no.nav.melosys.domain.avklartefakta.AvklartVirksomhet;
@@ -13,13 +12,11 @@ import no.nav.melosys.domain.eessi.Periode;
 import no.nav.melosys.domain.eessi.SvarAnmodningUnntak;
 import no.nav.melosys.domain.eessi.sed.*;
 import no.nav.melosys.domain.kodeverk.Land_iso2;
-import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingstema;
 import no.nav.melosys.domain.mottatteopplysninger.data.UtenlandskIdent;
 import no.nav.melosys.domain.person.Persondata;
 import no.nav.melosys.domain.person.familie.Familiemedlem;
 import no.nav.melosys.domain.person.familie.Familierelasjon;
 import no.nav.melosys.exception.FunksjonellException;
-import no.nav.melosys.featuretoggle.ToggleName;
 import no.nav.melosys.service.LandvelgerService;
 import no.nav.melosys.service.LovvalgsperiodeService;
 import no.nav.melosys.service.behandling.BehandlingsresultatService;
@@ -45,15 +42,13 @@ public class SedDataBygger {
     private final LandvelgerService landvelgerService;
     private final LovvalgsperiodeService lovvalgsperiodeService;
     private final SaksbehandlingRegler saksbehandlingRegler;
-    private final Unleash unleash;
 
     public SedDataBygger(BehandlingsresultatService behandlingsresultatService, LandvelgerService landvelgerService,
-                         LovvalgsperiodeService lovvalgsperiodeService, SaksbehandlingRegler saksbehandlingRegler, Unleash unleash) {
+                         LovvalgsperiodeService lovvalgsperiodeService, SaksbehandlingRegler saksbehandlingRegler) {
         this.behandlingsresultatService = behandlingsresultatService;
         this.landvelgerService = landvelgerService;
         this.lovvalgsperiodeService = lovvalgsperiodeService;
         this.saksbehandlingRegler = saksbehandlingRegler;
-        this.unleash = unleash;
     }
 
     public SedDataDto lag(SedDataGrunnlag dataGrunnlag,
@@ -295,8 +290,7 @@ public class SedDataBygger {
     private VedtakDto lagVedtakDto(Behandlingsresultat behandlingsresultat) {
         return behandlingsresultat.getBehandling().getFagsak().getBehandlinger()
             .stream()
-            .filter(behandling -> !behandling.getId().equals(behandlingsresultat.getId()))
-            .filter(behandling -> unleash.isEnabled(ToggleName.MELOSYS_A003_MIDLERTIDIG_LOVVALGSBESLUTNING) ? behandling.erInaktiv() : behandling.erAvsluttet())
+            .filter(behandling -> !behandling.getId().equals(behandlingsresultat.getId()) && behandling.erInaktiv())
             .map(behandling -> behandlingsresultatService.hentBehandlingsresultat(behandling.getId()))
             .filter(Behandlingsresultat::harVedtak)
             .max(Comparator.comparing(b -> b.getVedtakMetadata().getVedtaksdato()))

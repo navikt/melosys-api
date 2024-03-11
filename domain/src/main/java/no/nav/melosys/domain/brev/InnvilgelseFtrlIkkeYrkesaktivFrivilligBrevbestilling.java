@@ -4,8 +4,8 @@ import java.util.List;
 
 public class InnvilgelseFtrlIkkeYrkesaktivFrivilligBrevbestilling extends DokgenBrevbestilling {
 
+    private boolean flereLandUkjentHvilke;
     private List<String> land;
-    private String trygdedekning;
     private String bestemmelse;
     private String nyVurderingBakgrunn;
     private String innledningFritekst;
@@ -21,20 +21,19 @@ public class InnvilgelseFtrlIkkeYrkesaktivFrivilligBrevbestilling extends Dokgen
 
     private InnvilgelseFtrlIkkeYrkesaktivFrivilligBrevbestilling(Builder builder) {
         super(builder);
+        this.flereLandUkjentHvilke = builder.flereLandUkjentHvilke;
         this.bestemmelse = builder.bestemmelse;
         this.nyVurderingBakgrunn = builder.nyVurderingBakgrunn;
         this.innledningFritekst = builder.innledningFritekst;
         this.begrunnelseFritekst = builder.begrunnelseFritekst;
         this.ikkeYrkesaktivRelasjonType = builder.ikkeYrkesaktivRelasjonType;
         this.land = builder.land;
-        this.trygdedekning = builder.trygdedekning;
         this.avslåttMedlemskapsperiodeFørMottaksdatoHelsedel = builder.avslåttMedlemskapsperiodeFørMottaksdatoHelsedel;
         this.avslåttMedlemskapsperiodeFørMottaksdatoFullDekning = builder.avslåttMedlemskapsperiodeFørMottaksdatoFullDekning;
     }
 
-
-public String getTrygdedekning() {
-        return trygdedekning;
+    public boolean getFlereLandUkjentHvilke() {
+        return flereLandUkjentHvilke;
     }
 
     public String getBestemmelse() {
@@ -75,8 +74,8 @@ public String getTrygdedekning() {
     }
 
     public static final class Builder extends DokgenBrevbestilling.Builder<Builder> {
+        private boolean flereLandUkjentHvilke;
         private List<String> land;
-        private String trygdedekning;
         private String bestemmelse;
         private String nyVurderingBakgrunn;
         private String innledningFritekst;
@@ -90,7 +89,7 @@ public String getTrygdedekning() {
 
         public Builder(InnvilgelseFtrlIkkeYrkesaktivFrivilligBrevbestilling brevbestilling) {
             super(brevbestilling);
-            this.trygdedekning = brevbestilling.trygdedekning;
+            this.flereLandUkjentHvilke = brevbestilling.flereLandUkjentHvilke;
             this.bestemmelse = brevbestilling.bestemmelse;
             this.nyVurderingBakgrunn = brevbestilling.nyVurderingBakgrunn;
             this.innledningFritekst = brevbestilling.innledningFritekst;
@@ -126,11 +125,6 @@ public String getTrygdedekning() {
             return this;
         }
 
-        public Builder medTrygdedekning(String trygdedekning) {
-            this.trygdedekning = trygdedekning;
-            return this;
-        }
-
         public Builder medAvslåttMedlemskapsperiodeFørMottaksdatoHelsedel(boolean avslåttMedlemskapsperiodeFørMottaksdatoHelsedel) {
             this.avslåttMedlemskapsperiodeFørMottaksdatoHelsedel = avslåttMedlemskapsperiodeFørMottaksdatoHelsedel;
             return this;
@@ -138,6 +132,11 @@ public String getTrygdedekning() {
 
         public Builder medAvslåttMedlemskapsperiodeFørMottaksdatoFullDekning(boolean avslåttMedlemskapsperiodeFørMottaksdatoFullDekning) {
             this.avslåttMedlemskapsperiodeFørMottaksdatoFullDekning = avslåttMedlemskapsperiodeFørMottaksdatoFullDekning;
+            return this;
+        }
+
+        public IkkeYrkesaktivFrivilligFtrlBrevbestilling.Builder medFlereLandUkjentHvilke(boolean flereLandUkjentHvilke) {
+            this.flereLandUkjentHvilke = flereLandUkjentHvilke;
             return this;
         }
 
