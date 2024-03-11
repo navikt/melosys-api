@@ -19,7 +19,7 @@ class VilkårForBestemmelseIkkeYrkesaktiv(val mottatteOpplysningerService: Motta
         behandlingID: Long?
     ): List<Vilkår> {
         return when (bestemmelse) {
-            FTRL_KAP2_2_1_FØRSTE_LEDD -> ftrlKap2_1VilkårForBehandling(behandlingID)
+            FTRL_KAP2_2_1 -> ftrlKap2_1VilkårForBehandling(behandlingID)
 
             FTRL_KAP2_2_5_FØRSTE_LEDD_H -> listOf(
                 Vilkår(FTRL_2_5_NORSK_STATSBORGER_EØS_BORGER), Vilkår(FTRL_2_5_LÅN_STIPEND_LÅNEKASSEN)

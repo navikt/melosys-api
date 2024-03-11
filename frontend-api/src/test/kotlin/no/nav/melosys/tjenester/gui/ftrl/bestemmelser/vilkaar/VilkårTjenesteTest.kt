@@ -30,10 +30,9 @@ class VilkårTjenesteTest(@Autowired private val mockMvc: MockMvc) {
     @MockkBean
     lateinit var unleash: Unleash
 
-
     @Test
     fun `hent vilkår for ftrl bestemmelse`() {
-        val bestemmelse = Folketrygdloven_kap2_bestemmelser.FTRL_KAP2_2_1_FØRSTE_LEDD
+        val bestemmelse = Folketrygdloven_kap2_bestemmelser.FTRL_KAP2_2_1
 
         justRun { aksesskontroll.autoriser(any()) }
         every { unleash.isEnabled(any()) } returns false
@@ -56,7 +55,7 @@ class VilkårTjenesteTest(@Autowired private val mockMvc: MockMvc) {
 
     @Test
     fun `hent vilkår for ftrl bestemmelse med toggle MELOSYS_FTRL_BESTEMMELSER_2`() {
-        val bestemmelse = Folketrygdloven_kap2_bestemmelser.FTRL_KAP2_2_1_FØRSTE_LEDD
+        val bestemmelse = Folketrygdloven_kap2_bestemmelser.FTRL_KAP2_2_1
 
         justRun { aksesskontroll.autoriser(any()) }
         every { unleash.isEnabled(MELOSYS_FTRL_YRKESAKTIV_PLIKTIGE_BESTEMMELSER) } returns true
