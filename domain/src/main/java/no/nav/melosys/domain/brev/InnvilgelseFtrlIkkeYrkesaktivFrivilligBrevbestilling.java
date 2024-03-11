@@ -135,7 +135,7 @@ public class InnvilgelseFtrlIkkeYrkesaktivFrivilligBrevbestilling extends Dokgen
             return this;
         }
 
-        public IkkeYrkesaktivFrivilligFtrlBrevbestilling.Builder medFlereLandUkjentHvilke(boolean flereLandUkjentHvilke) {
+        public Builder medFlereLandUkjentHvilke(boolean flereLandUkjentHvilke) {
             this.flereLandUkjentHvilke = flereLandUkjentHvilke;
             return this;
         }

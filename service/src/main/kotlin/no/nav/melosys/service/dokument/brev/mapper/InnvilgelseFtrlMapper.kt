@@ -70,7 +70,7 @@ class InnvilgelseFtrlMapper(
 
     internal fun mapIkkeYrkesaktivFrivillig(brevbestilling: InnvilgelseFtrlIkkeYrkesaktivFrivilligBrevbestilling): InnvilgelseFtrlIkkeYrkesaktivFrivillig {
         val behandlingsresultat = dokgenMapperDatahenter.hentBehandlingsresultat(brevbestilling.behandling.id)
-        val mottatteOpplysningerData = behandlingsresultat.behandling.mottatteOpplysninger.mottatteOpplysningerData as SøknadNorgeEllerUtenforEØS
+        val søknadsland = behandlingsresultat.behandling.mottatteOpplysninger.mottatteOpplysningerData.soeknadsland
         val ikkeyrkesaktivrelasjonType =
             behandlingsresultat.avklartefakta.firstOrNull { it.type == Avklartefaktatyper.IKKE_YRKESAKTIV_RELASJON }?.fakta
         val avslåttMedlemskapsperiodeFørMottaksdatoHelsedel =
@@ -80,8 +80,8 @@ class InnvilgelseFtrlMapper(
 
         return InnvilgelseFtrlIkkeYrkesaktivFrivillig.av(
             brevbestilling.toBuilder()
-                .medLand(mottatteOpplysningerData.soeknadsland.landkoder.map { dokgenMapperDatahenter.hentLandnavnFraLandkode(it) })
-                .medTrygdedekning(mottatteOpplysningerData.trygdedekning.kode)
+                .medFlereLandUkjentHvilke(søknadsland.isFlereLandUkjentHvilke)
+                .medLand(søknadsland.landkoder.map { dokgenMapperDatahenter.hentLandnavnFraLandkode(it) })
                 .medBestemmelse(behandlingsresultat.medlemAvFolketrygden.medlemskapsperioder.last().bestemmelse.name)
                 .medNyVurderingBakgrunn(behandlingsresultat.nyVurderingBakgrunn)
                 .medInnledningFritekst(behandlingsresultat.innledningFritekst)
