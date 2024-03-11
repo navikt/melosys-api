@@ -8,7 +8,6 @@ public class IkkeYrkesaktivFrivilligFtrlBrevbestilling extends DokgenBrevbestill
 
     private boolean flereLandUkjentHvilke;
     private List<String> land;
-    private String trygdedekning;
     private String bestemmelse;
     private String nyVurderingBakgrunn;
     private String innledningFritekst;
@@ -31,17 +30,12 @@ public class IkkeYrkesaktivFrivilligFtrlBrevbestilling extends DokgenBrevbestill
         this.begrunnelseFritekst = builder.begrunnelseFritekst;
         this.ikkeYrkesaktivRelasjonType = builder.ikkeYrkesaktivRelasjonType;
         this.land = builder.land;
-        this.trygdedekning = builder.trygdedekning;
         this.avslåttMedlemskapsperiodeFørMottaksdatoHelsedel = builder.avslåttMedlemskapsperiodeFørMottaksdatoHelsedel;
         this.avslåttMedlemskapsperiodeFørMottaksdatoFullDekning = builder.avslåttMedlemskapsperiodeFørMottaksdatoFullDekning;
     }
 
     public boolean getFlereLandUkjentHvilke() {
         return flereLandUkjentHvilke;
-    }
-
-    public String getTrygdedekning() {
-        return trygdedekning;
     }
 
     public String getBestemmelse() {
@@ -84,7 +78,6 @@ public class IkkeYrkesaktivFrivilligFtrlBrevbestilling extends DokgenBrevbestill
     public static final class Builder extends DokgenBrevbestilling.Builder<Builder> {
         private boolean flereLandUkjentHvilke;
         private List<String> land;
-        private String trygdedekning;
         private String bestemmelse;
         private String nyVurderingBakgrunn;
         private String innledningFritekst;
@@ -99,7 +92,6 @@ public class IkkeYrkesaktivFrivilligFtrlBrevbestilling extends DokgenBrevbestill
         public Builder(IkkeYrkesaktivFrivilligFtrlBrevbestilling innvilgelseBrevbestilling) {
             super(innvilgelseBrevbestilling);
             this.flereLandUkjentHvilke = innvilgelseBrevbestilling.flereLandUkjentHvilke;
-            this.trygdedekning = innvilgelseBrevbestilling.trygdedekning;
             this.bestemmelse = innvilgelseBrevbestilling.bestemmelse;
             this.nyVurderingBakgrunn = innvilgelseBrevbestilling.nyVurderingBakgrunn;
             this.innledningFritekst = innvilgelseBrevbestilling.innledningFritekst;
@@ -132,11 +124,6 @@ public class IkkeYrkesaktivFrivilligFtrlBrevbestilling extends DokgenBrevbestill
 
         public Builder medIkkeYrkesaktivRelasjonType(String ikkeYrkesaktivRelasjonType) {
             this.ikkeYrkesaktivRelasjonType = ikkeYrkesaktivRelasjonType;
-            return this;
-        }
-
-        public Builder medTrygdedekning(String trygdedekning) {
-            this.trygdedekning = trygdedekning;
             return this;
         }
 

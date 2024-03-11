@@ -22,7 +22,6 @@ public class InnvilgelseIkkeYrkesaktivFrivilligFtrl extends DokgenDto {
     private final boolean flereLandUkjentHvilke;
     @JsonInclude(JsonInclude.Include.NON_NULL)
     private final List<String> land;
-    private final String trygdedekning;
     private final String bestemmelse;
     private final String nyVurderingBakgrunn;
     private final String innledningFritekst;
@@ -42,7 +41,6 @@ public class InnvilgelseIkkeYrkesaktivFrivilligFtrl extends DokgenDto {
         this.behandlingstype = fagsak.hentSistOppdatertBehandling().getType().getKode();
         this.flereLandUkjentHvilke = brevbestilling.getFlereLandUkjentHvilke();
         this.land = brevbestilling.getLand();
-        this.trygdedekning = brevbestilling.getTrygdedekning();
         this.bestemmelse = brevbestilling.getBestemmelse();
         this.nyVurderingBakgrunn = brevbestilling.getNyVurderingBakgrunn();
         this.innledningFritekst = brevbestilling.getInnledningFritekst();
@@ -67,10 +65,6 @@ public class InnvilgelseIkkeYrkesaktivFrivilligFtrl extends DokgenDto {
 
     public boolean getFlereLandUkjentHvilke() {
         return flereLandUkjentHvilke;
-    }
-
-    public String getTrygdedekning() {
-        return trygdedekning;
     }
 
     public String getBestemmelse() {

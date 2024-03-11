@@ -133,7 +133,6 @@ class DokgenMalMapper(
             brevbestilling.toBuilder()
                 .medFlereLandUkjentHvilke(mottatteOpplysningerData.soeknadsland.isFlereLandUkjentHvilke)
                 .medLand(mottatteOpplysningerData.soeknadsland.landkoder.map { dokgenMapperDatahenter.hentLandnavnFraLandkode(it) })
-                .medTrygdedekning(trygdedekning)
                 .medBestemmelse(behandlingsresultat.medlemAvFolketrygden.medlemskapsperioder.last().bestemmelse.name)
                 .medNyVurderingBakgrunn(behandlingsresultat.nyVurderingBakgrunn)
                 .medInnledningFritekst(behandlingsresultat.innledningFritekst)
