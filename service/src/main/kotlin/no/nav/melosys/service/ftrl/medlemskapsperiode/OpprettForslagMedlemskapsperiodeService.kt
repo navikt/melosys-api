@@ -67,9 +67,8 @@ class OpprettForslagMedlemskapsperiodeService(
                         søknad.periode,
                         søknad.trygdedekning,
                         utledMottaksdato.getMottaksdato(behandling),
-                        bestemmelse,
-                    ),
-                    unleash
+                        bestemmelse
+                    )
                 )
             }
             medlemAvFolketrygden.medlemskapsperioder.addAll(medlemskapsperioder)
@@ -143,5 +142,6 @@ class OpprettForslagMedlemskapsperiodeService(
     private fun toggleIsEnabled(behandlingstema: Behandlingstema) =
         if (behandlingstema == Behandlingstema.YRKESAKTIV) unleash.isEnabled(ToggleName.MELOSYS_FTRL_YRKESAKTIV_PLIKTIGE_BESTEMMELSER)
         else unleash.isEnabled(ToggleName.MELOSYS_FTRL_IKKE_YRKESAKTIV)
+
 }
 

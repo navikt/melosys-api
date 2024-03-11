@@ -110,17 +110,11 @@ class VilkårForBestemmelseYrkesaktiv(val mottatteOpplysningerService: MottatteO
             return vilkårForLand + Vilkår(FTRL_2_1_LOVLIG_OPPHOLD)
         }
 
-        val arbeidssituasjonType = hentArbeidssituasjonFraFakta(avklarteFakta)
-        val vilkårForArbeidssituasjon = ftrlKap2_1VilkårForArbeidssituasjon(arbeidssituasjonType)
-
-        return vilkårForArbeidssituasjon + Vilkår(FTRL_2_14_ARBEIDSGIVERAVGIFT)
+        return ftrlKap2_1VilkårForArbeidssituasjon(avklarteFakta)
     }
 
 
     private fun ftrlKap2_2VilkårForArbeidssituasjon(arbeidssituasjontype: Arbeidssituasjontype?) : List<Vilkår> {
-        if (arbeidssituasjontype == null) {
-            return emptyList()
-        }
         return when(arbeidssituasjontype) {
             Arbeidssituasjontype.ARBIED_I_NORGE_2_2 -> listOf(
                 Vilkår(FTRL_2_11_UNNTAK_AMBASSADEPERSONELL_MELLOMFOLKELIG_ORG)
@@ -132,11 +126,10 @@ class VilkårForBestemmelseYrkesaktiv(val mottatteOpplysningerService: MottatteO
         }
     }
 
-    private fun ftrlKap2_1VilkårForArbeidssituasjon(arbeidssituasjontype: Arbeidssituasjontype?) : List<Vilkår> {
-        if (arbeidssituasjontype == null) {
-            return emptyList()
-        }
-        return when(arbeidssituasjontype) {
+    private fun ftrlKap2_1VilkårForArbeidssituasjon(avklarteFakta: Map<Avklartefaktatyper, String>) : List<Vilkår> {
+        val arbeidssituasjontype = hentArbeidssituasjonFraFakta(avklarteFakta)
+
+        val vilkårForArbeidssituasjon = when(arbeidssituasjontype) {
             Arbeidssituasjontype.MIDLERTIDIG_ARBEID_2_1_FJERDE_LEDD -> listOf(
                 Vilkår(FTRL_2_1_BOSATT_NORGE_FORUT),
                 Vilkår(FTRL_2_1_ARBEID_OPPHOLD_UNDER_12MND)
@@ -147,6 +140,7 @@ class VilkårForBestemmelseYrkesaktiv(val mottatteOpplysningerService: MottatteO
             )
             else -> emptyList()
         }
+        return vilkårForArbeidssituasjon + Vilkår(FTRL_2_14_ARBEIDSGIVERAVGIFT)
     }
 
 
@@ -164,12 +158,10 @@ class VilkårForBestemmelseYrkesaktiv(val mottatteOpplysningerService: MottatteO
         }
     }
 
-    private fun hentArbeidssituasjonFraFakta(avklarteFakta: Map<Avklartefaktatyper, String>): Arbeidssituasjontype {
+    private fun hentArbeidssituasjonFraFakta(avklarteFakta: Map<Avklartefaktatyper, String>): Arbeidssituasjontype? {
         val avklarteArbeidssituasjon = avklarteFakta[Avklartefaktatyper.ARBEIDSSITUASJON]
-        if (avklarteArbeidssituasjon == null || !Arbeidssituasjontype.values().any { it.name == avklarteArbeidssituasjon }) {
-            throw FunksjonellException("Arbeidssituasjon $avklarteArbeidssituasjon er ugyldig")
-        }
-        return Arbeidssituasjontype.valueOf(avklarteArbeidssituasjon)
+
+        return avklarteArbeidssituasjon?.let { Arbeidssituasjontype.valueOf(it) }
     }
 
     companion object {

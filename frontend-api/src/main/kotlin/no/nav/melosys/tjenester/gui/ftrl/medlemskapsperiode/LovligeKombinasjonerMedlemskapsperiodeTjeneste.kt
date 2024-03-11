@@ -1,11 +1,9 @@
 package no.nav.melosys.tjenester.gui.ftrl.medlemskapsperiode
 
-import io.getunleash.Unleash
 import io.swagger.annotations.Api
 import io.swagger.annotations.ApiOperation
 import no.nav.melosys.domain.kodeverk.Folketrygdloven_kap2_bestemmelser
 import no.nav.melosys.domain.kodeverk.Trygdedekninger
-import no.nav.melosys.featuretoggle.ToggleName
 import no.nav.melosys.service.ftrl.bestemmelse.LovligeKombinasjonerTrygdedekningBestemmelse
 import no.nav.security.token.support.core.api.Protected
 import org.springframework.context.annotation.Scope
@@ -21,7 +19,7 @@ import org.springframework.web.context.WebApplicationContext
 @RequestMapping("/medlemskapsperioder")
 @Api(tags = ["lovlige-kombinasjoner", "medlemskapsperiode"])
 @Scope(value = WebApplicationContext.SCOPE_REQUEST)
-class LovligeKombinasjonerMedlemskapsperiodeTjeneste() {
+class LovligeKombinasjonerMedlemskapsperiodeTjeneste {
 
     @GetMapping("/bestemmelse/lovlige-kombinasjoner")
     @ApiOperation(value = "Henter lovlige bestemmelser basert på trygdedekning")

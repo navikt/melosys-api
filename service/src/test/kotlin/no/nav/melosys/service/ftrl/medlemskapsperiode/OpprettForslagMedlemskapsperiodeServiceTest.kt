@@ -53,7 +53,7 @@ class OpprettForslagMedlemskapsperiodeServiceTest {
 
     private val utledBestemmelserOgVilkår = UtledBestemmelserOgVilkår(fakeUnleash)
 
-    private val vilkårForBestemmelse = VilkårForBestemmelse(VilkårForBestemmelseYrkesaktiv(mockk()), VilkårForBestemmelseIkkeYrkesaktiv(mockk()), fakeUnleash)
+    private val vilkårForBestemmelse = VilkårForBestemmelse(VilkårForBestemmelseYrkesaktiv(mockk()), VilkårForBestemmelseIkkeYrkesaktiv(mockk()))
 
     private lateinit var opprettForslagMedlemskapsperiodeService: OpprettForslagMedlemskapsperiodeService
 

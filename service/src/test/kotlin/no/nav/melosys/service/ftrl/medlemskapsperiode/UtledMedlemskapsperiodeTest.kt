@@ -1,6 +1,5 @@
 package no.nav.melosys.service.ftrl.medlemskapsperiode
 
-import io.getunleash.FakeUnleash
 import io.kotest.assertions.throwables.shouldThrow
 import io.kotest.matchers.collections.shouldBeEmpty
 import io.kotest.matchers.collections.shouldHaveSize
@@ -15,7 +14,6 @@ import no.nav.melosys.domain.kodeverk.Trygdedekninger
 import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingstyper
 import no.nav.melosys.domain.mottatteopplysninger.data.Periode
 import no.nav.melosys.exception.FunksjonellException
-import no.nav.melosys.featuretoggle.ToggleName
 import org.junit.jupiter.api.Test
 import java.time.LocalDate
 
@@ -29,12 +27,11 @@ internal class UtledMedlemskapsperioderTest {
     private val TRYGDEDEKNING_2_7 = Trygdedekninger.FULL_DEKNING_FTRL
     private val TRYGDEDEKNING_2_8 = Trygdedekninger.FTRL_2_9_FØRSTE_LEDD_A_HELSE
     private val MOTTAKSDATO = LocalDate.now()
-    private val unleash = FakeUnleash()
     @Test
     fun lagMedlemskapsperioder_ukjentBestemmelse_kasterFeil() {
         shouldThrow<FunksjonellException> {
             UtledMedlemskapsperioder.lagMedlemskapsperioder(
-                UtledMedlemskapsperioderDto(null, null, null, Folketrygdloven_kap2_bestemmelser.FTRL_KAP2_2_15_ANDRE_LEDD), unleash
+                UtledMedlemskapsperioderDto(null, null, null, Folketrygdloven_kap2_bestemmelser.FTRL_KAP2_2_15_ANDRE_LEDD)
             )
         }.message.shouldContain("Støtter ikke bestemmelse")
     }
@@ -47,7 +44,7 @@ internal class UtledMedlemskapsperioderTest {
         val request = UtledMedlemskapsperioderDto(søknadsperiode, dekning, MOTTAKSDATO, BESTEMMELSE_PLIKTIG)
 
 
-        UtledMedlemskapsperioder.lagMedlemskapsperioder(request, unleash)
+        UtledMedlemskapsperioder.lagMedlemskapsperioder(request)
             .shouldHaveSize(1)
             .single().run {
                 fom.shouldBe(søknadsperiode.fom)
@@ -67,7 +64,7 @@ internal class UtledMedlemskapsperioderTest {
         val request = UtledMedlemskapsperioderDto(søknadsperiode, dekning, MOTTAKSDATO, BESTEMMELSE_2_8)
 
 
-        UtledMedlemskapsperioder.lagMedlemskapsperioder(request, unleash)
+        UtledMedlemskapsperioder.lagMedlemskapsperioder(request)
             .shouldHaveSize(1)
             .single().run {
                 fom.shouldBe(søknadsperiode.fom)
@@ -85,7 +82,7 @@ internal class UtledMedlemskapsperioderTest {
         val request = UtledMedlemskapsperioderDto(søknadsperiode, dekning, MOTTAKSDATO, BESTEMMELSE_2_8)
 
 
-        UtledMedlemskapsperioder.lagMedlemskapsperioder(request, unleash)
+        UtledMedlemskapsperioder.lagMedlemskapsperioder(request)
             .shouldHaveSize(1)
             .single().run {
                 fom.shouldBe(søknadsperiode.fom)
@@ -105,7 +102,7 @@ internal class UtledMedlemskapsperioderTest {
         val request = UtledMedlemskapsperioderDto(søknadsperiode, dekning, MOTTAKSDATO, BESTEMMELSE_2_8)
 
 
-        UtledMedlemskapsperioder.lagMedlemskapsperioder(request, unleash)
+        UtledMedlemskapsperioder.lagMedlemskapsperioder(request)
             .shouldHaveSize(1)
             .single().run {
                 fom.shouldBe(søknadsperiode.fom)
@@ -125,7 +122,7 @@ internal class UtledMedlemskapsperioderTest {
         val request = UtledMedlemskapsperioderDto(søknadsperiode, dekning, MOTTAKSDATO, BESTEMMELSE_2_8)
 
 
-        UtledMedlemskapsperioder.lagMedlemskapsperioder(request, unleash)
+        UtledMedlemskapsperioder.lagMedlemskapsperioder(request)
             .shouldHaveSize(1)
             .single().run {
                 fom.shouldBe(søknadsperiode.fom)
@@ -143,7 +140,7 @@ internal class UtledMedlemskapsperioderTest {
         val request = UtledMedlemskapsperioderDto(søknadsperiode, dekning, MOTTAKSDATO, BESTEMMELSE_2_8)
 
 
-        UtledMedlemskapsperioder.lagMedlemskapsperioder(request, unleash)
+        UtledMedlemskapsperioder.lagMedlemskapsperioder(request)
             .shouldHaveSize(1)
             .single().run {
                 fom.shouldBe(søknadsperiode.fom)
@@ -160,7 +157,7 @@ internal class UtledMedlemskapsperioderTest {
         val request = UtledMedlemskapsperioderDto(søknadsperiode, dekning, MOTTAKSDATO, BESTEMMELSE_2_8)
 
 
-        UtledMedlemskapsperioder.lagMedlemskapsperioder(request, unleash)
+        UtledMedlemskapsperioder.lagMedlemskapsperioder(request)
             .shouldHaveSize(1)
             .single().run {
                 fom.shouldBe(søknadsperiode.fom)
@@ -180,7 +177,7 @@ internal class UtledMedlemskapsperioderTest {
         val request = UtledMedlemskapsperioderDto(søknadsperiode, dekning, MOTTAKSDATO, BESTEMMELSE_2_8)
 
 
-        UtledMedlemskapsperioder.lagMedlemskapsperioder(request, unleash)
+        UtledMedlemskapsperioder.lagMedlemskapsperioder(request)
             .shouldHaveSize(3)
             .toList().run {
                 get(0).run {
@@ -214,7 +211,7 @@ internal class UtledMedlemskapsperioderTest {
         val request = UtledMedlemskapsperioderDto(søknadsperiode, dekning, MOTTAKSDATO, BESTEMMELSE_2_8)
 
 
-        UtledMedlemskapsperioder.lagMedlemskapsperioder(request, unleash)
+        UtledMedlemskapsperioder.lagMedlemskapsperioder(request)
             .shouldHaveSize(3)
             .toList().run {
                 get(0).run {
@@ -248,7 +245,7 @@ internal class UtledMedlemskapsperioderTest {
         val request = UtledMedlemskapsperioderDto(søknadsperiode, dekning, MOTTAKSDATO, BESTEMMELSE_2_8)
 
 
-        UtledMedlemskapsperioder.lagMedlemskapsperioder(request, unleash)
+        UtledMedlemskapsperioder.lagMedlemskapsperioder(request)
             .shouldHaveSize(3)
             .toList().run {
                 get(0).run {
@@ -282,7 +279,7 @@ internal class UtledMedlemskapsperioderTest {
         val request = UtledMedlemskapsperioderDto(søknadsperiode, dekning, MOTTAKSDATO, BESTEMMELSE_2_8)
 
 
-        UtledMedlemskapsperioder.lagMedlemskapsperioder(request, unleash)
+        UtledMedlemskapsperioder.lagMedlemskapsperioder(request)
             .shouldHaveSize(3)
             .toList().run {
                 get(0).run {
@@ -320,7 +317,7 @@ internal class UtledMedlemskapsperioderTest {
         )
 
 
-        UtledMedlemskapsperioder.lagMedlemskapsperioder(request, unleash)
+        UtledMedlemskapsperioder.lagMedlemskapsperioder(request)
             .shouldHaveSize(2)
             .run {
                 first().run {
@@ -351,7 +348,7 @@ internal class UtledMedlemskapsperioderTest {
         )
 
 
-        UtledMedlemskapsperioder.lagMedlemskapsperioder(request, unleash)
+        UtledMedlemskapsperioder.lagMedlemskapsperioder(request)
             .shouldHaveSize(2)
             .run {
                 first().run {
@@ -380,7 +377,7 @@ internal class UtledMedlemskapsperioderTest {
         val request = UtledMedlemskapsperioderDto(søknadsperiode, dekning, MOTTAKSDATO, BESTEMMELSE_2_8)
 
 
-        UtledMedlemskapsperioder.lagMedlemskapsperioder(request, unleash)
+        UtledMedlemskapsperioder.lagMedlemskapsperioder(request)
             .shouldHaveSize(2)
             .run {
                 first().run {
@@ -407,7 +404,7 @@ internal class UtledMedlemskapsperioderTest {
         val request = UtledMedlemskapsperioderDto(søknadsperiode, dekning, MOTTAKSDATO, BESTEMMELSE_2_8)
 
 
-        UtledMedlemskapsperioder.lagMedlemskapsperioder(request, unleash)
+        UtledMedlemskapsperioder.lagMedlemskapsperioder(request)
             .shouldHaveSize(1)
             .single().run {
                 fom.shouldBe(søknadsperiode.fom)
@@ -425,7 +422,7 @@ internal class UtledMedlemskapsperioderTest {
         val request = UtledMedlemskapsperioderDto(søknadsperiode, dekning, MOTTAKSDATO, BESTEMMELSE_2_8)
 
 
-        UtledMedlemskapsperioder.lagMedlemskapsperioder(request, unleash)
+        UtledMedlemskapsperioder.lagMedlemskapsperioder(request)
             .shouldHaveSize(1)
             .single().run {
                 fom.shouldBe(søknadsperiode.fom)
@@ -636,7 +633,7 @@ internal class UtledMedlemskapsperioderTest {
         val request = UtledMedlemskapsperioderDto(søknadsperiode, TRYGDEDEKNING_2_7, MOTTAKSDATO, BESTEMMELSE_2_7)
 
 
-        UtledMedlemskapsperioder.lagMedlemskapsperioder(request, unleash)
+        UtledMedlemskapsperioder.lagMedlemskapsperioder(request)
             .shouldHaveSize(1)
             .single().run {
                 fom.shouldBe(søknadsperiode.fom)
@@ -654,7 +651,7 @@ internal class UtledMedlemskapsperioderTest {
         val request = UtledMedlemskapsperioderDto(søknadsperiode, TRYGDEDEKNING_2_7, MOTTAKSDATO, BESTEMMELSE_2_7)
 
 
-        UtledMedlemskapsperioder.lagMedlemskapsperioder(request, unleash)
+        UtledMedlemskapsperioder.lagMedlemskapsperioder(request)
             .shouldHaveSize(1)
             .single().run {
                 fom.shouldBe(søknadsperiode.fom)
@@ -674,7 +671,7 @@ internal class UtledMedlemskapsperioderTest {
         val request = UtledMedlemskapsperioderDto(søknadsperiode, TRYGDEDEKNING_2_7, MOTTAKSDATO, BESTEMMELSE_2_7)
 
 
-        UtledMedlemskapsperioder.lagMedlemskapsperioder(request, unleash)
+        UtledMedlemskapsperioder.lagMedlemskapsperioder(request)
             .shouldHaveSize(2)
             .run {
                 first().run {
@@ -706,7 +703,7 @@ internal class UtledMedlemskapsperioderTest {
         )
 
 
-        UtledMedlemskapsperioder.lagMedlemskapsperioder(request, unleash)
+        UtledMedlemskapsperioder.lagMedlemskapsperioder(request)
             .shouldHaveSize(1)
             .single().run {
                 innvilgelsesresultat.shouldBe(InnvilgelsesResultat.AVSLAATT)

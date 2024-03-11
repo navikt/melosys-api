@@ -1,7 +1,5 @@
 package no.nav.melosys.service.ftrl.medlemskapsperiode
 
-import io.getunleash.Unleash
-import no.nav.melosys.domain.Behandlingsresultat
 import no.nav.melosys.domain.ErPeriode
 import no.nav.melosys.domain.Medlemskapsperiode
 import no.nav.melosys.domain.dokument.felles.Periode
@@ -10,7 +8,6 @@ import no.nav.melosys.domain.kodeverk.InnvilgelsesResultat
 import no.nav.melosys.domain.kodeverk.Trygdedekninger
 import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingstyper
 import no.nav.melosys.exception.FunksjonellException
-import no.nav.melosys.featuretoggle.ToggleName
 import no.nav.melosys.service.ftrl.bestemmelse.LovligeKombinasjonerTrygdedekningBestemmelse
 import org.springframework.data.util.Pair
 import java.time.LocalDate
@@ -42,7 +39,7 @@ object UtledMedlemskapsperioder {
             }
     }
 
-    fun lagMedlemskapsperioder(dto: UtledMedlemskapsperioderDto, unleash: Unleash): Collection<Medlemskapsperiode> {
+    fun lagMedlemskapsperioder(dto: UtledMedlemskapsperioderDto): Collection<Medlemskapsperiode> {
         return when {
             bestemmelseErParagraf(dto.bestemmelse, "2_7") ->
                 lagMedlemskapsperioderFor2_7(dto)
@@ -50,7 +47,8 @@ object UtledMedlemskapsperioder {
             bestemmelseErParagraf(dto.bestemmelse, "2_8") ->
                 lagMedlemskapsperioderFor2_8(dto)
 
-            dto.bestemmelse in PliktigeMedlemskapsbestemmelser.bestemmelser -> lagMedlemskapsperioderForPliktige(dto)
+            dto.bestemmelse in PliktigeMedlemskapsbestemmelser.bestemmelser ->
+                lagMedlemskapsperioderForPliktige(dto)
 
             else -> throw FunksjonellException("Støtter ikke bestemmelse ${dto.bestemmelse}")
         }
@@ -109,7 +107,6 @@ object UtledMedlemskapsperioder {
             )
         )
     }
-
 
     private fun lagMedlemskapsperioderFor2_8(dto: UtledMedlemskapsperioderDto): Collection<Medlemskapsperiode> {
         val søknadsperiode = dto.søknadsperiode
@@ -213,6 +210,7 @@ object UtledMedlemskapsperioder {
             this.trygdedekning = trygdedekning
             this.bestemmelse = bestemmelse
         }
+
 
     private fun splitPeriode(periode: ErPeriode, splitFra: LocalDate): Pair<ErPeriode, ErPeriode> =
         Pair.of(

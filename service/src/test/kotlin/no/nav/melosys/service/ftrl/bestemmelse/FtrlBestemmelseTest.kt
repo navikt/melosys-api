@@ -1,6 +1,5 @@
 package no.nav.melosys.service.ftrl.bestemmelse
 
-import io.getunleash.FakeUnleash
 import io.kotest.matchers.collections.shouldBeEmpty
 import io.kotest.matchers.collections.shouldContainExactly
 import io.kotest.matchers.collections.shouldHaveSize
@@ -10,19 +9,14 @@ import io.kotest.matchers.nulls.shouldNotBeNull
 import no.nav.melosys.domain.kodeverk.Folketrygdloven_kap2_bestemmelser
 import no.nav.melosys.domain.kodeverk.Trygdedekninger
 import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingstema
-import no.nav.melosys.featuretoggle.ToggleName
-import no.nav.melosys.service.ftrl.GyldigeTrygdedekningerService
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
 
 class FtrlBestemmelseTest {
-    private val unleash = FakeUnleash()
-
     private lateinit var ftrlBestemmelser: FtrlBestemmelser
 
     @BeforeEach
     fun setUp() {
-        unleash.resetAll()
         ftrlBestemmelser = FtrlBestemmelser()
     }
 
