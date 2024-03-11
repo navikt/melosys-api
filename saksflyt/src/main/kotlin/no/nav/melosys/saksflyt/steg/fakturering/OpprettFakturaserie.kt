@@ -1,6 +1,5 @@
 package no.nav.melosys.saksflyt.steg.fakturering
 
-import io.getunleash.Unleash
 import mu.KotlinLogging
 import no.nav.melosys.domain.Behandling
 import no.nav.melosys.domain.Behandlingsresultat
@@ -8,7 +7,6 @@ import no.nav.melosys.domain.avgift.Trygdeavgiftsperiode
 import no.nav.melosys.domain.kodeverk.Fullmaktstype
 import no.nav.melosys.domain.kodeverk.Inntektskildetype
 import no.nav.melosys.exception.FunksjonellException
-import no.nav.melosys.featuretoggle.ToggleName
 import no.nav.melosys.integrasjon.faktureringskomponenten.FaktureringskomponentenConsumer
 import no.nav.melosys.integrasjon.faktureringskomponenten.dto.*
 import no.nav.melosys.saksflyt.steg.StegBehandler
@@ -34,7 +32,6 @@ class OpprettFakturaserie(
     private val pdlService: PersondataService,
     private val trygdeavgiftMottakerService: TrygdeavgiftMottakerService,
     private val trygdeavgiftOppsummeringService: TrygdeavgiftOppsummeringService,
-    private val unleash: Unleash
 ) : StegBehandler {
 
     override fun inngangsSteg(): ProsessSteg {
@@ -42,10 +39,6 @@ class OpprettFakturaserie(
     }
 
     override fun utfør(prosessinstans: Prosessinstans) {
-        if (!unleash.isEnabled(ToggleName.FOLKETRYGDEN_MVP)) {
-            return
-        }
-
         val behandling = prosessinstans.behandling
         val behandlingsId = behandling.id
         val saksbehandlerIdent = prosessinstans.getData(ProsessDataKey.SAKSBEHANDLER)

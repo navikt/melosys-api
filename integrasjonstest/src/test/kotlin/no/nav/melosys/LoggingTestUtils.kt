@@ -5,9 +5,11 @@ import ch.qos.logback.classic.spi.ILoggingEvent
 import ch.qos.logback.core.read.ListAppender
 import io.kotest.assertions.withClue
 import io.kotest.matchers.collections.shouldHaveAtLeastSize
+import mu.KotlinLogging
 import org.slf4j.LoggerFactory
 
 object LoggingTestUtils {
+    val log = KotlinLogging.logger { } // på være public siden brukes av inline funksjon
     inline fun <reified T> captureLog(block: () -> Unit): List<ILoggingEvent> {
         val logger = LoggerFactory.getLogger(T::class.java) as Logger
         val listAppender = ListAppender<ILoggingEvent>().apply { start() }
@@ -18,17 +20,6 @@ object LoggingTestUtils {
             logger.detachAppender(listAppender)
         }
         return listAppender.list
-    }
-
-    fun <T> Collection<T>.check(block: (next: () -> T) -> Unit) {
-        var i = 0
-        val list = toList()
-        block { list[i++] }
-    }
-
-
-    inline fun <reified T : Any> Collection<ILoggingEvent>.match(): Collection<ILoggingEvent> {
-        return filter { it.loggerName == T::class.java.name }
     }
 
     fun <T> withLogCapture(block: (logEvents: List<ILoggingEvent>) -> T): T {
@@ -123,4 +114,18 @@ object LoggingTestUtils {
 
     val Collection<ILoggingEvent>.filterBuilder: LogFilterBuilder
         get() = LogFilterBuilder(this)
+
+
+    inline fun <reified T : Any> Collection<ILoggingEvent>.last(): String? {
+        val findLast = { filterBuilder.match<T>().build().lastOrNull()?.formattedMessage }
+        for (i in 1..3) {
+            try {
+                return findLast()
+            } catch (e: ConcurrentModificationException) {
+                // Siden dette gjelder test er det raskere og prøve på nytt, en å synkronisere
+                log.warn("ConcurrentModification during find last log message, retrying $i", e)
+            }
+        }
+        return findLast()
+    }
 }

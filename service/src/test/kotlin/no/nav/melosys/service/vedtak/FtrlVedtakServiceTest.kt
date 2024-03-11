@@ -21,6 +21,7 @@ import no.nav.melosys.domain.folketrygden.MedlemAvFolketrygden
 import no.nav.melosys.domain.kodeverk.*
 import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingsresultattyper
 import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingsstatus
+import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingstema
 import no.nav.melosys.domain.kodeverk.brev.Produserbaredokumenter
 import no.nav.melosys.exception.FunksjonellException
 import no.nav.melosys.saksflytapi.ProsessinstansService
@@ -123,6 +124,86 @@ class FtrlVedtakServiceTest {
             begrunnelseFritekst.shouldBe(request.begrunnelseFritekst)
             ektefelleFritekst.shouldBe(request.ektefelleFritekst)
             barnFritekst.shouldBe(request.barnFritekst)
+            kopiMottakere.shouldHaveSize(2).toList().run {
+                get(0).rolle.shouldBe(Mottakerroller.ARBEIDSGIVER)
+                get(1).rolle.shouldBe(Mottakerroller.UTENLANDSK_TRYGDEMYNDIGHET)
+            }
+        }
+    }
+
+    @Test
+    fun fattVedtak_ikkeYrkesAktivFrivllig_senderRiktigBrevType() {
+        val behandling = lagBehandling()
+        behandling.tema = Behandlingstema.IKKE_YRKESAKTIV
+        val behandlingsresultat = Behandlingsresultat()
+            .apply {
+                medlemAvFolketrygden = MedlemAvFolketrygden().apply {
+                    medlemskapsperioder = mutableListOf(Medlemskapsperiode().apply {
+                        medlemskapstype = Medlemskapstyper.FRIVILLIG
+                    })
+                }
+            }
+        every { behandlingsresultatService.hentBehandlingsresultat(BEH_ID) } returns behandlingsresultat
+        every { behandlingsresultatService.lagre(behandlingsresultat) } returns behandlingsresultat
+
+        val request = lagFattVedtakRequest(
+            type = Behandlingsresultattyper.MEDLEM_I_FOLKETRYGDEN,
+            kopiMottakere = listOf(
+                KopiMottakerDto(Mottakerroller.ARBEIDSGIVER, "987654321", null, null),
+                KopiMottakerDto(Mottakerroller.UTENLANDSK_TRYGDEMYNDIGHET, null, null, "GB:UK010")
+            )
+        )
+
+
+        ftrlVedtakService.fattVedtak(behandling, request)
+
+
+        verify { dokgenService.produserOgDistribuerBrev(BEH_ID, capture(brevbestillingRequestSlot)) }
+
+        brevbestillingRequestSlot.captured.shouldNotBeNull().run {
+            produserbardokument.shouldBe(Produserbaredokumenter.IKKE_YRKESAKTIV_FRIVILLIG_FTRL)
+            bestillersId.shouldBe("Z990007")
+            mottaker.shouldBe(Mottakerroller.BRUKER)
+            kopiMottakere.shouldHaveSize(2).toList().run {
+                get(0).rolle.shouldBe(Mottakerroller.ARBEIDSGIVER)
+                get(1).rolle.shouldBe(Mottakerroller.UTENLANDSK_TRYGDEMYNDIGHET)
+            }
+        }
+    }
+
+    @Test
+    fun fattVedtak_ikkeYrkesaktivPliktig_senderRiktigBrevType() {
+        val behandling = lagBehandling()
+        behandling.tema = Behandlingstema.IKKE_YRKESAKTIV
+        val behandlingsresultat = Behandlingsresultat()
+            .apply {
+                medlemAvFolketrygden = MedlemAvFolketrygden().apply {
+                    medlemskapsperioder = mutableListOf(Medlemskapsperiode().apply {
+                        medlemskapstype = Medlemskapstyper.PLIKTIG
+                    })
+                }
+            }
+        every { behandlingsresultatService.hentBehandlingsresultat(BEH_ID) } returns behandlingsresultat
+        every { behandlingsresultatService.lagre(behandlingsresultat) } returns behandlingsresultat
+
+        val request = lagFattVedtakRequest(
+            type = Behandlingsresultattyper.MEDLEM_I_FOLKETRYGDEN,
+            kopiMottakere = listOf(
+                KopiMottakerDto(Mottakerroller.ARBEIDSGIVER, "987654321", null, null),
+                KopiMottakerDto(Mottakerroller.UTENLANDSK_TRYGDEMYNDIGHET, null, null, "GB:UK010")
+            )
+        )
+
+
+        ftrlVedtakService.fattVedtak(behandling, request)
+
+
+        verify { dokgenService.produserOgDistribuerBrev(BEH_ID, capture(brevbestillingRequestSlot)) }
+
+        brevbestillingRequestSlot.captured.shouldNotBeNull().run {
+            produserbardokument.shouldBe(Produserbaredokumenter.IKKE_YRKESAKTIV_PLIKTIG_FTRL)
+            bestillersId.shouldBe("Z990007")
+            mottaker.shouldBe(Mottakerroller.BRUKER)
             kopiMottakere.shouldHaveSize(2).toList().run {
                 get(0).rolle.shouldBe(Mottakerroller.ARBEIDSGIVER)
                 get(1).rolle.shouldBe(Mottakerroller.UTENLANDSK_TRYGDEMYNDIGHET)

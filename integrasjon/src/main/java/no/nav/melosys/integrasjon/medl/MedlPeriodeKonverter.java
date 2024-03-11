@@ -229,6 +229,15 @@ public final class MedlPeriodeKonverter {
         BiMap<Folketrygdloven_kap2_bestemmelser, GrunnlagMedl> mapFtrlKap2 = HashBiMap.create();
         //TODO: FTRL_KAP2_2_1_FØRSTE_LEDD gjøres om til FTRL_KAP2_2_1 i https://jira.adeo.no/browse/MELOSYS-6430
         mapFtrlKap2.put(Folketrygdloven_kap2_bestemmelser.FTRL_KAP2_2_1_FØRSTE_LEDD, GrunnlagMedl.FTL_2_1);
+        mapFtrlKap2.put(Folketrygdloven_kap2_bestemmelser.FTRL_KAP2_2_2, GrunnlagMedl.FTL_2_2);
+        mapFtrlKap2.put(Folketrygdloven_kap2_bestemmelser.FTRL_KAP2_2_3_ANDRE_LEDD, GrunnlagMedl.FTL_2_3_2_LEDD);
+        mapFtrlKap2.put(Folketrygdloven_kap2_bestemmelser.FTRL_KAP2_2_5_FØRSTE_LEDD_A, GrunnlagMedl.FTL_2_5_1_LEDD_A);
+        mapFtrlKap2.put(Folketrygdloven_kap2_bestemmelser.FTRL_KAP2_2_5_FØRSTE_LEDD_B, GrunnlagMedl.FTL_2_5_1_LEDD_B);
+        mapFtrlKap2.put(Folketrygdloven_kap2_bestemmelser.FTRL_KAP2_2_5_FØRSTE_LEDD_C, GrunnlagMedl.FTL_2_5_1_LEDD_C);
+        mapFtrlKap2.put(Folketrygdloven_kap2_bestemmelser.FTRL_KAP2_2_5_FØRSTE_LEDD_D, GrunnlagMedl.FTL_2_5_1_LEDD_D);
+        mapFtrlKap2.put(Folketrygdloven_kap2_bestemmelser.FTRL_KAP2_2_5_FØRSTE_LEDD_E, GrunnlagMedl.FTL_2_5_1_LEDD_E);
+        mapFtrlKap2.put(Folketrygdloven_kap2_bestemmelser.FTRL_KAP2_2_5_FØRSTE_LEDD_F, GrunnlagMedl.FTL_2_5_1_LEDD_F);
+        mapFtrlKap2.put(Folketrygdloven_kap2_bestemmelser.FTRL_KAP2_2_5_FØRSTE_LEDD_G, GrunnlagMedl.FTL_2_5_1_LEDD_G);
         mapFtrlKap2.put(Folketrygdloven_kap2_bestemmelser.FTRL_KAP2_2_5_FØRSTE_LEDD_H, GrunnlagMedl.FTL_2_5_1_LEDD_H);
         mapFtrlKap2.put(Folketrygdloven_kap2_bestemmelser.FTRL_KAP2_2_5_ANDRE_LEDD, GrunnlagMedl.FTL_2_5_2_LEDD);
         mapFtrlKap2.put(Folketrygdloven_kap2_bestemmelser.FTRL_KAP2_2_7A, GrunnlagMedl.FTL_2_7A);

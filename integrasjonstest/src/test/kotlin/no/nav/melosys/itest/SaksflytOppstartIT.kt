@@ -1,12 +1,16 @@
 package no.nav.melosys.itest
 
 import com.ninjasquad.springmockk.MockkBean
+import io.kotest.assertions.withClue
+import io.kotest.matchers.collections.shouldHaveSize
 import io.kotest.matchers.optional.shouldBePresent
 import io.kotest.matchers.shouldBe
 import io.mockk.every
 import io.mockk.mockk
 import no.nav.melosys.Application
 import no.nav.melosys.AwaitUtil.awaitWithFailOnLogErrors
+import no.nav.melosys.AwaitUtil.onTimeout
+import no.nav.melosys.AwaitUtil.waitUntil
 import no.nav.melosys.domain.Behandling
 import no.nav.melosys.domain.Fagsak
 import no.nav.melosys.domain.RegistreringsInfo
@@ -127,11 +131,16 @@ internal class SaksflytOppstartIT(
 
         awaitWithFailOnLogErrors {
             applicationEventPublisher.publishEvent(applicationReadyEvent())
-            timeout(Duration.ofMinutes(1)).pollInterval(Duration.ofSeconds(2)).until {
-                prosessinstansRepository.findAllByStatusIn(
-                    ProsessStatus.hentAktiveStatuser(),
-                ).size == 1
-            }
+            val aktiveStatuser = ProsessStatus.hentAktiveStatuser()
+            timeout(Duration.ofSeconds(30))
+                .onTimeout { e ->
+                    withClue("det skal finnes 1 prosesses med status $aktiveStatuser - ${e.message}") {
+                        prosessinstansRepository.findAllByStatusIn(aktiveStatuser).shouldHaveSize(1)
+                    }
+                }
+                .waitUntil {
+                    prosessinstansRepository.findAllByStatusIn(aktiveStatuser).size == 1
+                }
         }
 
         prosessinstansRepository.findById(prosessinstansSomTrengerRekjøring.id).shouldBePresent {
