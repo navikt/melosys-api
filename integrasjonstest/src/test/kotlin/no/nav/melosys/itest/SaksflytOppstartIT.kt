@@ -190,7 +190,7 @@ internal class SaksflytOppstartIT(
     }
 
     fun applicationReadyEvent(): ApplicationReadyEvent {
-        return ApplicationReadyEvent(mockk(), emptyArray(), mockk(), Duration.ofSeconds(2))
+        return ApplicationReadyEvent(mockk(relaxed = true), emptyArray(), mockk(), Duration.ofSeconds(2))
     }
 
     private fun lagFagsak(): Fagsak = Fagsak().apply {
