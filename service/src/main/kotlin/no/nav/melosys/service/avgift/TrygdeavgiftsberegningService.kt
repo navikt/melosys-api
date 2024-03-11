@@ -40,14 +40,14 @@ class TrygdeavgiftsberegningService
             medlemAvFolketrygden.medlemskapsperioder.filter { it.erInnvilget()}
 
         val behandling = behandlingService.hentBehandling(behandlingsresultatID).fagsak
-        val persondata = persondataService.hentPerson(behandling.hentBruker().aktørId)
+        val fødselsdato = persondataService.hentPerson(behandling.hentBruker().aktørId).fødselsdato
 
         val (trygdeavgiftsberegningRequest, UUID_DBID_MAPS) =
             TrygdeavgiftsberegningsRequestMapper().map(
                 innvilgedeMedlemskapsperioder,
                 fastsattTrygdeavgift.trygdeavgiftsgrunnlag.skatteforholdTilNorge,
                 fastsattTrygdeavgift.trygdeavgiftsgrunnlag.inntektsperioder,
-                persondata.fødselsdato
+                fødselsdato
             )
         val beregnetTrygdeavgift = trygdeavgiftConsumer.beregnTrygdeavgift(trygdeavgiftsberegningRequest)
         oppdaterTrygdeavgift(beregnetTrygdeavgift, fastsattTrygdeavgift, UUID_DBID_MAPS)
