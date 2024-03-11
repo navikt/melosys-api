@@ -93,9 +93,7 @@ class VilkårForBestemmelseYrkesaktiv(val mottatteOpplysningerService: MottatteO
     private fun ftrlKap2_2VilkårForBehandling(avklarteFakta: Map<Avklartefaktatyper, String>): List<Vilkår> {
         val arbeidssituasjonType = hentArbeidssituasjonFraFakta(avklarteFakta)
 
-        val vilkårForArbeidssituasjon = ftrlKap2_2VilkårForArbeidssituasjon(arbeidssituasjonType)
-
-        return vilkårForArbeidssituasjon + Vilkår(FTRL_ARBEIDSTAKER) + Vilkår(FTRL_2_2_LOVLIG_ADGANG_ARBEID)
+        return ftrlKap2_2VilkårForArbeidssituasjon(arbeidssituasjonType)
     }
 
     private fun ftrlKap2_1VilkårForBehandling(behandlingID: Long?, avklarteFakta: Map<Avklartefaktatyper, String>): List<Vilkår> {
@@ -108,10 +106,9 @@ class VilkårForBestemmelseYrkesaktiv(val mottatteOpplysningerService: MottatteO
 
         val kunNorge = søknadsland?.landkoder?.first() == Land_iso2.NO.toString() && søknadsland.landkoder.size == 1
 
-        val vilkårForLand = if (kunNorge) ftrlKap2_1VilkårForLand(søknadsland) else emptyList()
-
-        if(vilkårForLand.isNotEmpty()){
-            return vilkårForLand + Vilkår(FTRL_2_1_LOVLIG_OPPHOLD)
+        if(kunNorge){
+            return listOf(
+                Vilkår(FTRL_2_1_BOSATT_NORGE), Vilkår(FTRL_2_11_UNNTAK_AMBASSADEPERSONELL_MELLOMFOLKELIG_ORG), Vilkår(FTRL_2_1_LOVLIG_OPPHOLD))
         }
 
         return ftrlKap2_1VilkårForArbeidssituasjon(avklarteFakta)
@@ -121,12 +118,16 @@ class VilkårForBestemmelseYrkesaktiv(val mottatteOpplysningerService: MottatteO
     private fun ftrlKap2_2VilkårForArbeidssituasjon(arbeidssituasjontype: Arbeidssituasjontype?) : List<Vilkår> {
         return when(arbeidssituasjontype) {
             Arbeidssituasjontype.ARBIED_I_NORGE_2_2 -> listOf(
-                Vilkår(FTRL_2_11_UNNTAK_AMBASSADEPERSONELL_MELLOMFOLKELIG_ORG)
+                Vilkår(FTRL_2_11_UNNTAK_AMBASSADEPERSONELL_MELLOMFOLKELIG_ORG),
+                Vilkår(FTRL_ARBEIDSTAKER),
+                Vilkår(FTRL_2_2_LOVLIG_ADGANG_ARBEID)
             )
             Arbeidssituasjontype.ARBEID_PÅ_NORSK_SOKKEL_2_2 -> listOf(
-                Vilkår(FTRL_2_2_INNRETNING_NATURRESSURSER)
+                Vilkår(FTRL_2_2_INNRETNING_NATURRESSURSER),
+                Vilkår(FTRL_ARBEIDSTAKER),
+                Vilkår(FTRL_2_2_LOVLIG_ADGANG_ARBEID)
             )
-            else -> emptyList()
+            else -> throw FunksjonellException("Arbeidssituasjon $arbeidssituasjontype er ugyldig")
         }
     }
 
@@ -136,24 +137,20 @@ class VilkårForBestemmelseYrkesaktiv(val mottatteOpplysningerService: MottatteO
         val vilkårForArbeidssituasjon = when(arbeidssituasjontype) {
             Arbeidssituasjontype.MIDLERTIDIG_ARBEID_2_1_FJERDE_LEDD -> listOf(
                 Vilkår(FTRL_2_1_BOSATT_NORGE_FORUT),
-                Vilkår(FTRL_2_1_ARBEID_OPPHOLD_UNDER_12MND)
+                Vilkår(FTRL_2_1_ARBEID_OPPHOLD_UNDER_12MND),
+                Vilkår(FTRL_2_14_ARBEIDSGIVERAVGIFT),
+                Vilkår(FTRL_2_1_LOVLIG_OPPHOLD),
             )
             Arbeidssituasjontype.VEKSELVIS_ARBEID_2_1_FJERDE_LEDD -> listOf(
                 Vilkår(FTRL_2_1_VEKSELSVIS_ARBEIDSPERIODE_UNDER_12MND),
-                Vilkår(FTRL_2_14_FRITID_I_NORGE)
+                Vilkår(FTRL_2_14_FRITID_I_NORGE),
+                Vilkår(FTRL_2_14_ARBEIDSGIVERAVGIFT),
+                Vilkår(FTRL_2_1_LOVLIG_OPPHOLD),
             )
-            else -> emptyList()
+            else -> throw FunksjonellException("Arbeidssituasjon $arbeidssituasjontype er ugyldig")
+
         }
-        return vilkårForArbeidssituasjon + Vilkår(FTRL_2_14_ARBEIDSGIVERAVGIFT)
-    }
-
-
-    private fun ftrlKap2_1VilkårForLand(søknadsland: Soeknadsland?): List<Vilkår> {
-        if (søknadsland == null) {
-            return emptyList()
-        }
-
-        return listOf(Vilkår(FTRL_2_1_BOSATT_NORGE), Vilkår(FTRL_2_11_UNNTAK_AMBASSADEPERSONELL_MELLOMFOLKELIG_ORG))
+        return vilkårForArbeidssituasjon
     }
 
     private fun hentArbeidssituasjonFraFakta(avklarteFakta: Map<Avklartefaktatyper, String>): Arbeidssituasjontype? {

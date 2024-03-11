@@ -74,6 +74,7 @@ class VilkårForBestemmelseYrkesaktivTest {
             Vilkår(Vilkaar.FTRL_2_1_BOSATT_NORGE_FORUT),
             Vilkår(Vilkaar.FTRL_2_1_ARBEID_OPPHOLD_UNDER_12MND),
             Vilkår(Vilkaar.FTRL_2_14_ARBEIDSGIVERAVGIFT),
+            Vilkår(Vilkaar.FTRL_2_1_LOVLIG_OPPHOLD)
         )
     }
 
@@ -98,6 +99,7 @@ class VilkårForBestemmelseYrkesaktivTest {
             Vilkår(Vilkaar.FTRL_2_1_VEKSELSVIS_ARBEIDSPERIODE_UNDER_12MND),
             Vilkår(Vilkaar.FTRL_2_14_FRITID_I_NORGE),
             Vilkår(Vilkaar.FTRL_2_14_ARBEIDSGIVERAVGIFT),
+            Vilkår(Vilkaar.FTRL_2_1_LOVLIG_OPPHOLD)
         )
     }
 
