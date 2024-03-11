@@ -62,6 +62,7 @@ internal class TrygdeavgiftsberegningServiceTest {
     private val FULLMEKTIG_ORG_NAVN: String = "Aksjeselskap AS"
     private val BRUKER_AKTØR_ID: String = "987654321"
     private val BRUKER_NAVN: String = "Bruker Etternavn"
+    private val FØDSELSDATO: LocalDate = LocalDate.of(2020, 1, 1)
 
 
     @BeforeEach
@@ -82,6 +83,7 @@ internal class TrygdeavgiftsberegningServiceTest {
         every { mockBehandlingService.hentBehandling(BEHANDLING_ID) }.returns(behandling)
         every { mockPersondataService.hentSammensattNavn(FULLMEKTIG_AKTØR_ID) }.returns(FULLMEKTIG_NAVN)
         every { mockPersondataService.hentSammensattNavn(BRUKER_AKTØR_ID) }.returns(BRUKER_NAVN)
+        every { mockPersondataService.hentPerson(BRUKER_AKTØR_ID).fødselsdato }.returns(FØDSELSDATO)
     }
 
     @Test
@@ -119,12 +121,24 @@ internal class TrygdeavgiftsberegningServiceTest {
 
     @Test
     fun beregnTrygdeavgift_skalBetaleTrygeavgift_beregnerOgLagrerTrygdeavgift() {
+        behandling.apply {
+            fagsak = Fagsak().apply {
+                aktører = setOf(
+                    Aktoer().apply {
+                        aktørId = BRUKER_AKTØR_ID
+                        rolle = Aktoersroller.BRUKER
+                    }
+                )
+            }
+        }
+
         medlemAvFolketrygden.medlemskapsperioder.add(Medlemskapsperiode().apply {
             id = 1L
             fom = FOM
             tom = TOM
             trygdedekning = Trygdedekninger.FTRL_2_9_FØRSTE_LEDD_C_ANDRE_LEDD_HELSE_PENSJON_SYKE_FORELDREPENGER
             innvilgelsesresultat = InnvilgelsesResultat.INNVILGET
+            medlemskapstype = Medlemskapstyper.FRIVILLIG
         })
         medlemAvFolketrygden.fastsattTrygdeavgift = FastsattTrygdeavgift().apply {
             trygdeavgiftsgrunnlag = Trygdeavgiftsgrunnlag().apply {
