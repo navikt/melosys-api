@@ -104,7 +104,11 @@ class VilkårForBestemmelseYrkesaktiv(val mottatteOpplysningerService: MottatteO
         }
 
         val mottatteOpplysninger = mottatteOpplysningerService.hentMottatteOpplysninger(behandlingID)
-        val vilkårForLand = ftrlKap2_1VilkårForLand(mottatteOpplysninger.mottatteOpplysningerData?.soeknadsland)
+        val søknadsland = mottatteOpplysninger.mottatteOpplysningerData?.soeknadsland
+
+        val kunNorge = søknadsland?.landkoder?.first() == Land_iso2.NO.toString() && søknadsland.landkoder.size == 1
+
+        val vilkårForLand = if (kunNorge) ftrlKap2_1VilkårForLand(søknadsland) else emptyList()
 
         if(vilkårForLand.isNotEmpty()){
             return vilkårForLand + Vilkår(FTRL_2_1_LOVLIG_OPPHOLD)
@@ -149,13 +153,7 @@ class VilkårForBestemmelseYrkesaktiv(val mottatteOpplysningerService: MottatteO
             return emptyList()
         }
 
-        val kunNorge = søknadsland.landkoder.first() == Land_iso2.NO.toString() && søknadsland.landkoder.size == 1
-
-        return if(kunNorge) {
-            listOf(Vilkår(FTRL_2_1_BOSATT_NORGE), Vilkår(FTRL_2_11_UNNTAK_AMBASSADEPERSONELL_MELLOMFOLKELIG_ORG))
-        } else {
-            listOf()
-        }
+        return listOf(Vilkår(FTRL_2_1_BOSATT_NORGE), Vilkår(FTRL_2_11_UNNTAK_AMBASSADEPERSONELL_MELLOMFOLKELIG_ORG))
     }
 
     private fun hentArbeidssituasjonFraFakta(avklarteFakta: Map<Avklartefaktatyper, String>): Arbeidssituasjontype? {
