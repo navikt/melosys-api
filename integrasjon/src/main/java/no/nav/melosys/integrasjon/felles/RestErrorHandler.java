@@ -33,9 +33,9 @@ public abstract class RestErrorHandler {
     }
 
     public RuntimeException tilException(HttpStatusCodeException e) {
-        HttpStatus status = HttpStatus.valueOf(e.getStatusCode().value());
+        HttpStatusCode statusCode = e.getStatusCode();
         String feilmelding = hentFeilmelding(e);
-        return tilException(feilmelding, status);
+        return tilException(feilmelding, statusCode);
     }
 
     private String hentFeilmelding(HttpStatusCodeException e) {

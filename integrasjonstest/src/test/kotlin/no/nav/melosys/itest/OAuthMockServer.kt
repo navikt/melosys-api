@@ -24,12 +24,12 @@ class OAuthMockServer(
     private val azureMockServer: WireMockServer =
         WireMockServer(WireMockConfiguration.wireMockConfig().port(mockSecurityPort))
 
-    @MockkBean
-    private lateinit var tokenValidationContextHolder: TokenValidationContextHolder
+//    @MockkBean
+//    private lateinit var tokenValidationContextHolder: TokenValidationContextHolder
 
     fun start() {
-        every { tokenValidationContextHolder.tokenValidationContext } returns tokenValidationContext("sub1")
-        every { tokenValidationContextHolder.tokenValidationContext = any() } returns Unit
+//        every { tokenValidationContextHolder.tokenValidationContext } returns tokenValidationContext("sub1")
+//        every { tokenValidationContextHolder.tokenValidationContext = any() } returns Unit
         azureMockServer.start()
 
         azureMockServer.stubFor(

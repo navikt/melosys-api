@@ -17,7 +17,7 @@ public class MottatteOpplysninger {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
-    @MapsId
+    @JoinColumn(name = "behandling_id", nullable = false, updatable = false)
     @OneToOne(fetch = FetchType.LAZY, optional = false)
     private Behandling behandling;
 
