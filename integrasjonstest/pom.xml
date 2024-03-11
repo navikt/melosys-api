@@ -13,7 +13,7 @@
 
     <properties>
         <commons-cli.version>1.5.0</commons-cli.version>
-        <graphql-spring-boot-starter.version>12.0.0</graphql-spring-boot-starter.version>
+        <graphql-spring-boot-starter.version>15.1.0</graphql-spring-boot-starter.version>
         <scala.version>2.13.9</scala.version>
         <testcontainers.version>1.17.1</testcontainers.version>
     </properties>
@@ -54,6 +54,11 @@
                 <groupId>org.scala-lang</groupId>
                 <artifactId>scala-reflect</artifactId>
                 <version>${scala.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>com.graphql-java</groupId>
+                <artifactId>graphql-java-extended-scalars</artifactId>
+                <version>21.0</version>
             </dependency>
         </dependencies>
     </dependencyManagement>
@@ -131,11 +136,11 @@
             <version>${testcontainers.version}</version>
             <scope>test</scope>
         </dependency>
-        <dependency>
-            <groupId>no.nav.security</groupId>
-            <artifactId>token-validation-test-support</artifactId>
-            <scope>test</scope>
-        </dependency>
+<!--        <dependency>-->
+<!--            <groupId>no.nav.security</groupId>-->
+<!--            <artifactId>token-validation-test-support</artifactId>-->
+<!--            <scope>test</scope>-->
+<!--        </dependency>-->
         <dependency>
             <groupId>no.nav.security</groupId>
             <artifactId>token-validation-spring-test</artifactId>

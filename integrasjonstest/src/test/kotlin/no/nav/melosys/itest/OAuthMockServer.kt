@@ -8,6 +8,7 @@ import com.nimbusds.jwt.JWTClaimsSet
 import com.nimbusds.jwt.PlainJWT
 import com.ninjasquad.springmockk.MockkBean
 import io.mockk.every
+import io.mockk.justRun
 import no.nav.security.token.support.client.spring.oauth2.EnableOAuth2Client
 import no.nav.security.token.support.core.context.TokenValidationContext
 import no.nav.security.token.support.core.context.TokenValidationContextHolder
@@ -24,12 +25,12 @@ class OAuthMockServer(
     private val azureMockServer: WireMockServer =
         WireMockServer(WireMockConfiguration.wireMockConfig().port(mockSecurityPort))
 
-//    @MockkBean
-//    private lateinit var tokenValidationContextHolder: TokenValidationContextHolder
+    @MockkBean()
+    private lateinit var tokenValidationContextHolder: TokenValidationContextHolder
 
     fun start() {
-//        every { tokenValidationContextHolder.tokenValidationContext } returns tokenValidationContext("sub1")
-//        every { tokenValidationContextHolder.tokenValidationContext = any() } returns Unit
+        every { tokenValidationContextHolder.tokenValidationContext } returns tokenValidationContext("sub1")
+        justRun { tokenValidationContextHolder.setTokenValidationContext(any())}
         azureMockServer.start()
 
         azureMockServer.stubFor(
