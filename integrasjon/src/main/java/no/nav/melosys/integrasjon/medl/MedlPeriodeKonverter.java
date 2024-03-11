@@ -227,8 +227,7 @@ public final class MedlPeriodeKonverter {
         lovvalgsbestemmelseTilGrunnlagMedlTabell = map;
 
         BiMap<Folketrygdloven_kap2_bestemmelser, GrunnlagMedl> mapFtrlKap2 = HashBiMap.create();
-        //TODO: FTRL_KAP2_2_1_FØRSTE_LEDD gjøres om til FTRL_KAP2_2_1 i https://jira.adeo.no/browse/MELOSYS-6430
-        mapFtrlKap2.put(Folketrygdloven_kap2_bestemmelser.FTRL_KAP2_2_1_FØRSTE_LEDD, GrunnlagMedl.FTL_2_1);
+        mapFtrlKap2.put(Folketrygdloven_kap2_bestemmelser.FTRL_KAP2_2_1, GrunnlagMedl.FTL_2_1);
         mapFtrlKap2.put(Folketrygdloven_kap2_bestemmelser.FTRL_KAP2_2_2, GrunnlagMedl.FTL_2_2);
         mapFtrlKap2.put(Folketrygdloven_kap2_bestemmelser.FTRL_KAP2_2_3_ANDRE_LEDD, GrunnlagMedl.FTL_2_3_2_LEDD);
         mapFtrlKap2.put(Folketrygdloven_kap2_bestemmelser.FTRL_KAP2_2_5_FØRSTE_LEDD_A, GrunnlagMedl.FTL_2_5_1_LEDD_A);

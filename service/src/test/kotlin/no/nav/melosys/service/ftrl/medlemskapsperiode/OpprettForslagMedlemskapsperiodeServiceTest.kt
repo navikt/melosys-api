@@ -28,9 +28,7 @@ import no.nav.melosys.repository.MedlemAvFolketrygdenRepository
 import no.nav.melosys.service.avklartefakta.AvklartefaktaService
 import no.nav.melosys.service.behandling.BehandlingsresultatService
 import no.nav.melosys.service.behandling.UtledMottaksdato
-import no.nav.melosys.service.ftrl.bestemmelse.vilkaar.VilkårForBestemmelse
-import no.nav.melosys.service.ftrl.bestemmelse.vilkaar.VilkårForBestemmelseIkkeYrkesaktiv
-import no.nav.melosys.service.ftrl.bestemmelse.vilkaar.VilkårForBestemmelseYrkesaktiv
+import no.nav.melosys.service.ftrl.bestemmelse.vilkaar.*
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.extension.ExtendWith

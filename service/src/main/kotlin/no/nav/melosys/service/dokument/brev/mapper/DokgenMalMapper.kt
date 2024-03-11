@@ -26,7 +26,7 @@ class DokgenMalMapper(
         // Henter opplysninger på nytt for å sikre at korrekt adresse benyttes (med mindre myndighet)
         val brevbestillingBuilder = mottattBrevbestilling.toBuilder()
         berikBestillingMedPersondata(brevbestillingBuilder, mottattBrevbestilling.behandling, mottaker)
-            return lagDokgenDtoFraBestilling(brevbestillingBuilder.build()).apply {
+        return lagDokgenDtoFraBestilling(brevbestillingBuilder.build()).apply {
             if (Mottakerroller.UTENLANDSK_TRYGDEMYNDIGHET.kode != this.mottaker.type) {
                 this.mottaker = lagMottakerUtenKoder(this.mottaker)
             }
@@ -115,9 +115,7 @@ class DokgenMalMapper(
 
     internal fun lagInnvilgelseIkkeYrkesaktivFrivilligFtrl(brevbestilling: IkkeYrkesaktivFrivilligFtrlBrevbestilling): InnvilgelseIkkeYrkesaktivFrivilligFtrl {
         val behandlingsresultat = dokgenMapperDatahenter.hentBehandlingsresultat(brevbestilling.behandling.id)
-        val mottatteOpplysningerData =
-            behandlingsresultat.behandling.mottatteOpplysninger.mottatteOpplysningerData as SøknadNorgeEllerUtenforEØS
-        val trygdedekning = mottatteOpplysningerData.trygdedekning.kode
+        val soeknadsland = behandlingsresultat.behandling.mottatteOpplysninger.mottatteOpplysningerData.soeknadsland
         val ikkeyrkesaktivrelasjonType =
             behandlingsresultat.avklartefakta.filter { it.type == Avklartefaktatyper.IKKE_YRKESAKTIV_RELASJON }.firstOrNull()?.fakta
         val avslåttMedlemskapsperiodeFørMottaksdatoHelsedel = innvilgelseFtrlMapper.mapAvslåttMedlemskapsperiodeFørMottaksdatoFullDekning(
@@ -131,9 +129,8 @@ class DokgenMalMapper(
 
         return InnvilgelseIkkeYrkesaktivFrivilligFtrl.av(
             brevbestilling.toBuilder()
-                .medFlereLandUkjentHvilke(mottatteOpplysningerData.soeknadsland.isFlereLandUkjentHvilke)
-                .medLand(mottatteOpplysningerData.soeknadsland.landkoder.map { dokgenMapperDatahenter.hentLandnavnFraLandkode(it) })
-                .medTrygdedekning(trygdedekning)
+                .medFlereLandUkjentHvilke(soeknadsland.isFlereLandUkjentHvilke)
+                .medLand(soeknadsland.landkoder.map { dokgenMapperDatahenter.hentLandnavnFraLandkode(it) })
                 .medBestemmelse(behandlingsresultat.medlemAvFolketrygden.medlemskapsperioder.last().bestemmelse.name)
                 .medNyVurderingBakgrunn(behandlingsresultat.nyVurderingBakgrunn)
                 .medInnledningFritekst(behandlingsresultat.innledningFritekst)

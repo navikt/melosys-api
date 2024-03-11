@@ -4,8 +4,7 @@ import no.nav.melosys.domain.kodeverk.Folketrygdloven_kap2_bestemmelser
 
 object PliktigeMedlemskapsbestemmelser {
     val bestemmelser = listOf(
-        Folketrygdloven_kap2_bestemmelser.FTRL_KAP2_2_1_FØRSTE_LEDD,
-        Folketrygdloven_kap2_bestemmelser.FTRL_KAP2_2_1_FJERDE_LEDD,
+        Folketrygdloven_kap2_bestemmelser.FTRL_KAP2_2_1,
         Folketrygdloven_kap2_bestemmelser.FTRL_KAP2_2_2,
         Folketrygdloven_kap2_bestemmelser.FTRL_KAP2_2_3_ANDRE_LEDD,
         Folketrygdloven_kap2_bestemmelser.FTRL_KAP2_2_5_FØRSTE_LEDD_A,

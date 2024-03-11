@@ -9,11 +9,16 @@ import io.kotest.matchers.nulls.shouldNotBeNull
 import no.nav.melosys.domain.kodeverk.Folketrygdloven_kap2_bestemmelser
 import no.nav.melosys.domain.kodeverk.Trygdedekninger
 import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingstema
+import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
 
 class FtrlBestemmelseTest {
+    private lateinit var ftrlBestemmelser: FtrlBestemmelser
 
-    private val ftrlBestemmelser = FtrlBestemmelser()
+    @BeforeEach
+    fun setUp() {
+        ftrlBestemmelser = FtrlBestemmelser()
+    }
 
     @Test
     fun hentBestemmelser_yrkesaktiv_returnererYrkesaktivListe() {
@@ -26,7 +31,7 @@ class FtrlBestemmelseTest {
     fun hentBestemmelser_yrkesaktivFullDekning_returnererFiltrertListe() {
         ftrlBestemmelser.hentBestemmelser(Behandlingstema.YRKESAKTIV, Trygdedekninger.FULL_DEKNING_FTRL)
             .shouldNotBeNull()
-            .shouldHaveSize(13)
+            .shouldHaveSize(12)
     }
 
     @Test
