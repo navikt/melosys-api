@@ -25,7 +25,6 @@ import no.nav.melosys.domain.mottatteopplysninger.SøknadIkkeYrkesaktiv
 import no.nav.melosys.domain.mottatteopplysninger.data.Periode
 import no.nav.melosys.domain.mottatteopplysninger.data.Soeknadsland
 import no.nav.melosys.itest.JournalfoeringBase
-import no.nav.melosys.itest.OAuthMockServer
 import no.nav.melosys.melosysmock.medl.MedlRepo
 import no.nav.melosys.melosysmock.testdata.TestDataGenerator
 import no.nav.melosys.repository.BehandlingRepository
@@ -40,14 +39,11 @@ import no.nav.melosys.service.oppgave.OppgaveService
 import no.nav.melosys.service.saksopplysninger.OppfriskSaksopplysningerService
 import no.nav.melosys.service.vedtak.FattVedtakRequest
 import no.nav.melosys.service.vedtak.VedtaksfattingFasade
-import org.junit.jupiter.api.AfterEach
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
 import org.springframework.beans.factory.annotation.Autowired
-import org.springframework.context.annotation.Import
 import java.time.LocalDate
 
-@Import(OAuthMockServer::class)
 class IkkeYrkesaktivVedtakIT(
     @Autowired testDataGenerator: TestDataGenerator,
     @Autowired journalføringService: JournalfoeringService,
@@ -55,7 +51,6 @@ class IkkeYrkesaktivVedtakIT(
     @Autowired prosessinstansRepository: ProsessinstansRepository,
     @Autowired private val behandlingsresultatService: BehandlingsresultatService,
     @Autowired private val behandlingRepository: BehandlingRepository,
-    @Autowired private val oAuthMockServer: OAuthMockServer,
     @Autowired private val mottatteOpplysningerService: MottatteOpplysningerService,
     @Autowired private val lovvalgsperiodeService: LovvalgsperiodeService,
     @Autowired private val ferdigbehandlingKontrollFacade: FerdigbehandlingKontrollFacade,
@@ -66,8 +61,6 @@ class IkkeYrkesaktivVedtakIT(
 
     @BeforeEach
     fun setup() {
-        oAuthMockServer.start()
-
         mockServer.stubFor(
             WireMock.post("/api/v1/mal/ikke_yrkesaktiv_vedtaksbrev/lag-pdf?somKopi=false&utkast=false").willReturn(
                 WireMock.aResponse()
@@ -78,11 +71,6 @@ class IkkeYrkesaktivVedtakIT(
         )
         MedlRepo.repo.clear()
         unleash.enableAll()
-    }
-
-    @AfterEach
-    fun afterEach() {
-        oAuthMockServer.stop()
     }
 
     @Test

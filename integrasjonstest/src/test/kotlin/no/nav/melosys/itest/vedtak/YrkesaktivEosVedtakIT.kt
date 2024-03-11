@@ -26,7 +26,6 @@ import no.nav.melosys.domain.kodeverk.lovvalgsbestemmelser.Lovvalgbestemmelser_8
 import no.nav.melosys.domain.mottatteopplysninger.data.Periode
 import no.nav.melosys.domain.mottatteopplysninger.data.Soeknadsland
 import no.nav.melosys.itest.JournalfoeringBase
-import no.nav.melosys.itest.OAuthMockServer
 import no.nav.melosys.melosysmock.medl.MedlRepo
 import no.nav.melosys.melosysmock.testdata.TestDataGenerator
 import no.nav.melosys.repository.BehandlingRepository
@@ -52,11 +51,9 @@ import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Disabled
 import org.junit.jupiter.api.Test
 import org.springframework.beans.factory.annotation.Autowired
-import org.springframework.context.annotation.Import
 import java.time.LocalDate
 
 
-@Import(OAuthMockServer::class)
 class YrkesaktivEosVedtakIT(
     @Autowired testDataGenerator: TestDataGenerator,
     @Autowired journalføringService: JournalfoeringService,
@@ -65,7 +62,6 @@ class YrkesaktivEosVedtakIT(
     @Autowired private val avklartefaktaService: AvklartefaktaService,
     @Autowired private val behandlingsresultatService: BehandlingsresultatService,
     @Autowired private val behandlingRepository: BehandlingRepository,
-    @Autowired private val oAuthMockServer: OAuthMockServer,
     @Autowired private val mottatteOpplysningerService: MottatteOpplysningerService,
     @Autowired private val vilkaarsresultatService: VilkaarsresultatService,
     @Autowired private val lovvalgsperiodeService: LovvalgsperiodeService,
@@ -81,14 +77,12 @@ class YrkesaktivEosVedtakIT(
 
     @BeforeEach
     fun setup() {
-        oAuthMockServer.start()
         unleash.enableAll()
         MedlRepo.repo.clear()
     }
 
     @AfterEach
     fun afterEach() {
-        oAuthMockServer.stop()
         MedlRepo.repo.clear()
     }
 
