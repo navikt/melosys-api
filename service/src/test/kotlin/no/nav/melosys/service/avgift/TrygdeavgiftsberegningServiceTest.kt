@@ -201,7 +201,7 @@ internal class TrygdeavgiftsberegningServiceTest {
             id = 1L
             fom = FOM
             tom = TOM
-            trygdedekning = Trygdedekninger.FTRL_2_9_FØRSTE_LEDD_C_ANDRE_LEDD_HELSE_PENSJON_SYKE_FORELDREPENGER
+            trygdedekning = Trygdedekninger.FULL_DEKNING_EOSFO
             innvilgelsesresultat = InnvilgelsesResultat.INNVILGET
             medlemskapstype = Medlemskapstyper.PLIKTIG
         })
@@ -211,7 +211,7 @@ internal class TrygdeavgiftsberegningServiceTest {
                     id = 1L
                     fomDato = FOM
                     tomDato = TOM
-                    skatteplikttype = Skatteplikttype.SKATTEPLIKTIG
+                    skatteplikttype = Skatteplikttype.IKKE_SKATTEPLIKTIG
                 })
                 inntektsperioder = listOf(Inntektsperiode().apply {
                     id = 1L
