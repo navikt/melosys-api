@@ -16,7 +16,7 @@ class TrygdeavgiftsberegningsRequestMapper {
         medlemskapsperioder: Collection<Medlemskapsperiode>,
         skatteforholdTilNorge: Collection<SkatteforholdTilNorge>,
         inntektsperioder: Collection<Inntektsperiode>,
-        foedselsDato: LocalDate
+        foedselsDato: LocalDate?
     ): Pair<TrygdeavgiftsberegningRequest, List<Map<UUID, Long>>> {
         val (medlemskapsperioderDto, medlemskapsperiodeMap) = mapMedlemskapsperioder(medlemskapsperioder)
         val (skatteforholdsperioderDto, skatteforholdsperiodeMap) = mapSkatteforholdsperioder(skatteforholdTilNorge)
