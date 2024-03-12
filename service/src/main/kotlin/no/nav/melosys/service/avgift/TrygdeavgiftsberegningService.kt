@@ -47,7 +47,7 @@ class TrygdeavgiftsberegningService
                 innvilgedeMedlemskapsperioder,
                 fastsattTrygdeavgift.trygdeavgiftsgrunnlag.skatteforholdTilNorge,
                 fastsattTrygdeavgift.trygdeavgiftsgrunnlag.inntektsperioder,
-                hentFødselsdatoOmViHarBehov(behandlingsresultatID, innvilgedeMedlemskapsperioder)
+                hentFødselsdatoOmViHarTjenstligBehov(behandlingsresultatID, innvilgedeMedlemskapsperioder)
             )
         val beregnetTrygdeavgift = trygdeavgiftConsumer.beregnTrygdeavgift(trygdeavgiftsberegningRequest)
         oppdaterTrygdeavgift(beregnetTrygdeavgift, fastsattTrygdeavgift, UUID_DBID_MAPS)
@@ -55,7 +55,7 @@ class TrygdeavgiftsberegningService
         return medlemAvFolketrygdenService.lagre(medlemAvFolketrygden).fastsattTrygdeavgift.trygdeavgiftsperioder
     }
 
-    private fun hentFødselsdatoOmViHarBehov(behandlingsresultatID: Long, medlemskapsperioder: List<Medlemskapsperiode>): LocalDate? {
+    private fun hentFødselsdatoOmViHarTjenstligBehov(behandlingsresultatID: Long, medlemskapsperioder: List<Medlemskapsperiode>): LocalDate? {
         if (medlemskapsperioder.any { it.medlemskapstype == Medlemskapstyper.PLIKTIG }) {
             val fagsak = behandlingService.hentBehandling(behandlingsresultatID).fagsak
             return persondataService.hentPerson(fagsak.hentBruker().aktørId).fødselsdato
