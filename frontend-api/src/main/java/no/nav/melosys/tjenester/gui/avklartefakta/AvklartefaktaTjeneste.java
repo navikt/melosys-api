@@ -117,14 +117,14 @@ public class AvklartefaktaTjeneste {
     }
 
     @DeleteMapping("{behandlingID}/{avklartefaktatype}")
-    @ApiOperation(value = "Slett avklartefakta")
-    public ResponseEntity<Object> slettAvklarteFakta(@PathVariable("behandlingID") long behandlingID,
+    @ApiOperation(value = "Slett avklartefakta", response = AvklartefaktaOppsummeringDto.class)
+    public AvklartefaktaOppsummeringDto slettAvklarteFakta(@PathVariable("behandlingID") long behandlingID,
                                                                                   @PathVariable Avklartefaktatyper avklartefaktatype) {
         aksesskontroll.autoriserSkrivTilRessurs(behandlingID, Ressurs.AVKLARTE_FAKTA);
 
         avklartefaktaService.slettAvklarteFakta(behandlingID, avklartefaktatype);
 
-        return ResponseEntity.noContent().build();
+        return new AvklartefaktaOppsummeringDto(avklartefaktaService.hentAlleAvklarteFakta(behandlingID));
     }
 
     @PostMapping("{behandlingID}/arbeidssituasjontype")
