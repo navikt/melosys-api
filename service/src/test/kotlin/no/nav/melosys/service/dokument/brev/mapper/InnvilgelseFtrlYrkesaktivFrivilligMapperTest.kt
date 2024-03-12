@@ -2,9 +2,7 @@ package no.nav.melosys.service.dokument.brev.mapper
 
 import io.kotest.matchers.booleans.shouldBeFalse
 import io.kotest.matchers.booleans.shouldBeTrue
-import io.kotest.matchers.collections.shouldContainExactlyInAnyOrder
-import io.kotest.matchers.collections.shouldHaveSize
-import io.kotest.matchers.collections.shouldNotBeEmpty
+import io.kotest.matchers.collections.*
 import io.kotest.matchers.nulls.shouldBeNull
 import io.kotest.matchers.nulls.shouldNotBeNull
 import io.kotest.matchers.shouldBe
@@ -18,7 +16,7 @@ import no.nav.melosys.domain.VilkaarBegrunnelse
 import no.nav.melosys.domain.Vilkaarsresultat
 import no.nav.melosys.domain.avgift.*
 import no.nav.melosys.domain.avklartefakta.AvklartVirksomhet
-import no.nav.melosys.domain.brev.InnvilgelseFtrlBrevbestilling
+import no.nav.melosys.domain.brev.InnvilgelseFtrlYrkesaktivFrivilligBrevbestilling
 import no.nav.melosys.domain.folketrygden.FastsattTrygdeavgift
 import no.nav.melosys.domain.folketrygden.MedlemAvFolketrygden
 import no.nav.melosys.domain.kodeverk.*
@@ -42,7 +40,7 @@ import java.time.LocalDate
 import java.time.temporal.ChronoUnit
 
 @ExtendWith(MockKExtension::class)
-internal class InnvilgelseFtrlMapperTest {
+internal class InnvilgelseFtrlYrkesaktivFrivilligMapperTest {
 
     @MockK
     private lateinit var mockAvklarteVirksomheterService: AvklarteVirksomheterService
@@ -69,10 +67,10 @@ internal class InnvilgelseFtrlMapperTest {
     }
 
     @Test
-    fun map_InnvilgetKunNorskInntektInnvilget_populererFelter() {
+    fun mapYrkesaktivFrivillig_InnvilgetKunNorskInntektInnvilget_populererFelter() {
         mockHappyCase(Case.paragraf_2_8)
 
-        innvilgelseFtrlMapper.map(lagInnvilgelseFtrlBrevbestilling()).shouldNotBeNull()
+        innvilgelseFtrlMapper.mapYrkesaktivFrivillig(lagBrevbestilling()).shouldNotBeNull()
             .apply {
                 behandlingstype.shouldBe(Behandlingstyper.FØRSTEGANG)
                 nyVurderingBakgrunn.shouldBe("NYE_OPPLYSNINGER")
@@ -104,29 +102,45 @@ internal class InnvilgelseFtrlMapperTest {
                 begrunnelse.shouldBe(Ftrl_2_8_naer_tilknytning_norge_begrunnelser.ANNEN_GRUNN)
                 begrunnelseAnnenGrunnFritekst.shouldBe("<p>Vilkårresultat begrunnelse fritekst</p>")
                 arbeidsgivere.shouldHaveSize(1).first().shouldBe(ARBEIDSGIVER_NAVN)
-                arbeidsland.shouldBe(Landkoder.AT.beskrivelse)
-                trygdeavtaleMedArbeidsland.shouldBeFalse()
+                flereLandUkjentHvilke.shouldBeFalse()
+                land.shouldContainOnly(Landkoder.AT.beskrivelse)
+                trygdeavtaleLand.shouldBeEmpty()
                 betalerArbeidsgiveravgift.shouldBeTrue()
             }
     }
 
     @Test
-    fun map_InnvilgetMedUtenlandskInntekt_harTrygdeavtaleMedLand_populererFelter() {
+    fun mapYrkesaktivFrivillig_harTrygdeavtaleLand_populererFelter() {
         mockHappyCase(Case.paragraf_2_8)
         every { mockDokgenMapperDatahenter.hentLandnavnFraLandkode(Landkoder.GB.kode) } returns Landkoder.GB.beskrivelse
         every { mockDokgenMapperDatahenter.hentBehandlingsresultat(ofType()) } returns lagBehandlingsResultat(Case.paragraf_2_8).apply {
-            behandling.mottatteOpplysninger.mottatteOpplysningerData.soeknadsland =
-                Soeknadsland(listOf(Landkoder.GB.kode), false)
+            behandling.mottatteOpplysninger.mottatteOpplysningerData.soeknadsland = Soeknadsland(listOf(Landkoder.GB.kode), false)
         }
 
-        innvilgelseFtrlMapper.map(lagInnvilgelseFtrlBrevbestilling()).apply {
-            arbeidsland.shouldBe(Landkoder.GB.beskrivelse)
-            trygdeavtaleMedArbeidsland.shouldBeTrue()
+        innvilgelseFtrlMapper.mapYrkesaktivFrivillig(lagBrevbestilling()).apply {
+            flereLandUkjentHvilke.shouldBeFalse()
+            land.shouldContainOnly(Landkoder.GB.beskrivelse)
+            trygdeavtaleLand.shouldContainOnly(Landkoder.GB.beskrivelse)
         }
     }
 
     @Test
-    fun map_innvilgetOgAvslaatt_populererFelter() {
+    fun mapYrkesaktivFrivillig_harFlereLandUkjentHvilke_populererFelter() {
+        mockHappyCase(Case.paragraf_2_8)
+        every { mockDokgenMapperDatahenter.hentBehandlingsresultat(ofType()) } returns lagBehandlingsResultat(Case.paragraf_2_8).apply {
+            behandling.mottatteOpplysninger.mottatteOpplysningerData.soeknadsland = Soeknadsland(emptyList(), true)
+        }
+
+        innvilgelseFtrlMapper.mapYrkesaktivFrivillig(lagBrevbestilling()).apply {
+            flereLandUkjentHvilke.shouldBeTrue()
+            land.shouldBeEmpty()
+            trygdeavtaleLand.shouldBeEmpty()
+        }
+    }
+
+
+    @Test
+    fun mapYrkesaktivFrivillig_innvilgetOgAvslaatt_populererFelter() {
         mockHappyCase(Case.paragraf_2_8)
         val behandlingsresultat = lagBehandlingsResultat(Case.paragraf_2_8)
         every { mockDokgenMapperDatahenter.hentBehandlingsresultat(ofType()) } returns behandlingsresultat.apply {
@@ -143,8 +157,8 @@ internal class InnvilgelseFtrlMapperTest {
             )
         }
 
-        innvilgelseFtrlMapper.map(lagInnvilgelseFtrlBrevbestilling()).apply {
-            innvilgelseFtrlMapper.map(lagInnvilgelseFtrlBrevbestilling()).shouldNotBeNull()
+        innvilgelseFtrlMapper.mapYrkesaktivFrivillig(lagBrevbestilling()).apply {
+            innvilgelseFtrlMapper.mapYrkesaktivFrivillig(lagBrevbestilling()).shouldNotBeNull()
                 .apply {
                     behandlingstype.shouldBe(Behandlingstyper.FØRSTEGANG)
                     nyVurderingBakgrunn.shouldBe("NYE_OPPLYSNINGER")
@@ -179,15 +193,16 @@ internal class InnvilgelseFtrlMapperTest {
                     begrunnelse.shouldBe(Ftrl_2_8_naer_tilknytning_norge_begrunnelser.ANNEN_GRUNN)
                     begrunnelseAnnenGrunnFritekst.shouldBe("<p>Vilkårresultat begrunnelse fritekst</p>")
                     arbeidsgivere.shouldHaveSize(1).first().shouldBe(ARBEIDSGIVER_NAVN)
-                    arbeidsland.shouldBe(Landkoder.AT.beskrivelse)
-                    trygdeavtaleMedArbeidsland.shouldBeFalse()
+                    flereLandUkjentHvilke.shouldBeFalse()
+                    land.shouldContainOnly(Landkoder.AT.beskrivelse)
+                    trygdeavtaleLand.shouldBeEmpty()
                     betalerArbeidsgiveravgift.shouldBeTrue()
                 }
         }
     }
 
     @Test
-    fun map_innvilgetOgAvslaatt_populererFelter_ingen_avgiftsperioder() {
+    fun mapYrkesaktivFrivillig_innvilgetOgAvslaatt_populererFelter_ingen_avgiftsperioder() {
         mockHappyCase(Case.paragraf_2_8)
         val behandlingsresultat = lagBehandlingsResultat(Case.paragraf_2_8)
         every { mockDokgenMapperDatahenter.hentBehandlingsresultat(ofType()) } returns behandlingsresultat.apply {
@@ -204,7 +219,7 @@ internal class InnvilgelseFtrlMapperTest {
             )
         }
 
-        innvilgelseFtrlMapper.map(lagInnvilgelseFtrlBrevbestilling()).apply {
+        innvilgelseFtrlMapper.mapYrkesaktivFrivillig(lagBrevbestilling()).apply {
             avgiftsperioder.shouldHaveSize(0)
             medlemskapsperioder.shouldHaveSize(1)
                 .map { it.innvilgelsesResultat }
@@ -213,10 +228,10 @@ internal class InnvilgelseFtrlMapperTest {
     }
 
     @Test
-    fun `map Innvilget 2_7 populerer felter`() {
+    fun `mapYrkesaktivFrivillig Innvilget 2_7 populerer felter`() {
         mockHappyCase(Case.paragraf_2_7)
 
-        innvilgelseFtrlMapper.map(lagInnvilgelseFtrlBrevbestilling()).shouldNotBeNull()
+        innvilgelseFtrlMapper.mapYrkesaktivFrivillig(lagBrevbestilling()).shouldNotBeNull()
             .apply {
                 behandlingstype.shouldBe(Behandlingstyper.FØRSTEGANG)
                 nyVurderingBakgrunn.shouldBe("NYE_OPPLYSNINGER")
@@ -248,14 +263,15 @@ internal class InnvilgelseFtrlMapperTest {
                 begrunnelse.shouldBe(Ftrl_2_7_begrunnelser.ANNEN_GRUNN)
                 begrunnelseAnnenGrunnFritekst.shouldBe("<p>Vilkårresultat begrunnelse fritekst</p>")
                 arbeidsgivere.shouldHaveSize(1).first().shouldBe(ARBEIDSGIVER_NAVN)
-                arbeidsland.shouldBe(Landkoder.AT.beskrivelse)
-                trygdeavtaleMedArbeidsland.shouldBeFalse()
+                flereLandUkjentHvilke.shouldBeFalse()
+                land.shouldContainOnly(Landkoder.AT.beskrivelse)
+                trygdeavtaleLand.shouldBeEmpty()
                 betalerArbeidsgiveravgift.shouldBeTrue()
             }
     }
 
-    private fun lagInnvilgelseFtrlBrevbestilling(): InnvilgelseFtrlBrevbestilling {
-        return InnvilgelseFtrlBrevbestilling.Builder()
+    private fun lagBrevbestilling(): InnvilgelseFtrlYrkesaktivFrivilligBrevbestilling {
+        return InnvilgelseFtrlYrkesaktivFrivilligBrevbestilling.Builder()
             .medBehandling(DokgenTestData.lagBehandling())
             .medPersonDokument(DokgenTestData.lagPersondata())
             .medPersonMottaker(DokgenTestData.lagPersondata())

@@ -6,15 +6,18 @@ import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
 import no.nav.melosys.domain.avklartefakta.Avklartefakta;
 import no.nav.melosys.domain.kodeverk.Arbeidssituasjontype;
+import no.nav.melosys.domain.kodeverk.Avklartefaktatyper;
 import no.nav.melosys.domain.kodeverk.Ikkeyrkesaktivoppholdtype;
 import no.nav.melosys.domain.kodeverk.Ikkeyrkesaktivrelasjontype;
 import no.nav.melosys.service.avklartefakta.*;
+import no.nav.melosys.service.ftrl.bestemmelse.avklartefakta.AvklarteFaktaForBestemmelse;
 import no.nav.melosys.service.tilgang.Aksesskontroll;
 import no.nav.melosys.service.tilgang.Ressurs;
 import no.nav.melosys.tjenester.gui.dto.oppsummertefakta.ArbeidslandDto;
 import no.nav.melosys.tjenester.gui.dto.oppsummertefakta.VirksomheterDto;
 import no.nav.security.token.support.core.api.Protected;
 import org.springframework.context.annotation.Scope;
+import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.context.WebApplicationContext;
 
@@ -109,6 +112,17 @@ public class AvklartefaktaTjeneste {
         aksesskontroll.autoriserSkrivTilRessurs(behandlingID, Ressurs.AVKLARTE_FAKTA);
 
         avklarteFaktaArbeidslandService.lagreArbeidslandSomAvklartefakta(behandlingID, arbeidsland.getArbeidsland());
+
+        return new AvklartefaktaOppsummeringDto(avklartefaktaService.hentAlleAvklarteFakta(behandlingID));
+    }
+
+    @DeleteMapping("{behandlingID}/{avklartefaktatype}")
+    @ApiOperation(value = "Slett avklartefakta", response = AvklartefaktaOppsummeringDto.class)
+    public AvklartefaktaOppsummeringDto slettAvklarteFakta(@PathVariable("behandlingID") long behandlingID,
+                                                                                  @PathVariable Avklartefaktatyper avklartefaktatype) {
+        aksesskontroll.autoriserSkrivTilRessurs(behandlingID, Ressurs.AVKLARTE_FAKTA);
+
+        avklartefaktaService.slettAvklarteFakta(behandlingID, avklartefaktatype);
 
         return new AvklartefaktaOppsummeringDto(avklartefaktaService.hentAlleAvklarteFakta(behandlingID));
     }

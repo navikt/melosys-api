@@ -129,7 +129,6 @@ internal class DokgenMalMapperTest {
                 mottaker.navn.shouldContain(DokgenTestData.SAMMENSATT_NAVN_BRUKER)
                 mottaker.postnr.shouldContain(DokgenTestData.POSTNR_BRUKER)
                 mottaker.adresselinjer.shouldContain(DokgenTestData.ADRESSELINJE_1_BRUKER)
-
             }
     }
 
@@ -336,10 +335,10 @@ internal class DokgenMalMapperTest {
         every { mockDokgenMapperDatahenter.hentPersonMottaker(any()) } returns DokgenTestData.lagPersondata()
         every { mockDokgenMapperDatahenter.hentNorskPoststed(any()) } returns "Andeby"
         every { mockDokgenMapperDatahenter.hentLandnavnFraLandkode(Landkoder.NO.kode) } returns Landkoder.NO.beskrivelse
-        every { mockInnvilgelseFtrlMapper.map(any()) } returns lagInnvilgelseFtrl()
+        every { mockInnvilgelseFtrlMapper.mapYrkesaktivFrivillig(any()) } returns lagInnvilgelseFtrlYrkesaktivFrivillig()
 
         val behandling = DokgenTestData.lagBehandling(DokgenTestData.lagFagsak(true))
-        val brevbestilling: DokgenBrevbestilling = InnvilgelseFtrlBrevbestilling.Builder()
+        val brevbestilling: DokgenBrevbestilling = InnvilgelseFtrlYrkesaktivFrivilligBrevbestilling.Builder()
             .medProduserbartdokument(Produserbaredokumenter.INNVILGELSE_FOLKETRYGDLOVEN)
             .medBehandling(behandling)
             .medOrg(DokgenTestData.lagOrg())
@@ -351,7 +350,7 @@ internal class DokgenMalMapperTest {
         dokgenMalMapper.mapBehandling(
             brevbestilling,
             DokgenTestData.lagMottaker(Mottakerroller.BRUKER)
-        ).shouldBeInstanceOf<InnvilgelseFtrl>()
+        ).shouldBeInstanceOf<InnvilgelseFtrlYrkesaktivFrivillig>()
     }
 
     @Test
@@ -539,26 +538,34 @@ internal class DokgenMalMapperTest {
             .medPersonMottaker(DokgenTestData.lagPersondata())
             .build()
 
-    private fun lagInnvilgelseFtrl(): InnvilgelseFtrl {
-        return InnvilgelseFtrl.Builder(lagInnvilgelseFtrlBrevbestilling())
-            .behandlingstype(Behandlingstyper.FØRSTEGANG)
-            .avgiftsperioder(emptyList())
-            .medlemskapsperioder(emptyList())
-            .bestemmelse(Folketrygdloven_kap2_bestemmelser.FTRL_KAP2_2_8)
-            .avslåttMedlemskapsperiodeFørMottaksdatoHelsedel(false)
-            .trygdeavgiftMottaker(Trygdeavgiftmottaker.TRYGDEAVGIFT_BETALES_TIL_NAV)
-            .skatteplikttype(Skatteplikttype.SKATTEPLIKTIG)
-            .begrunnelse(Ftrl_2_8_naer_tilknytning_norge_begrunnelser.ANSATT_I_MULTINASJONALT_SELSKAP)
-            .begrunnelseAnnenGrunnFritekst(null)
-            .arbeidsgivere(listOf("Egon Olsen AS"))
-            .arbeidsland(Land_iso2.US.kode)
-            .trygdeavtaleMedArbeidsland(false)
-            .betalerArbeidsgiveravgift(true)
-            .build()
+    private fun lagInnvilgelseFtrlYrkesaktivFrivillig(): InnvilgelseFtrlYrkesaktivFrivillig {
+        return InnvilgelseFtrlYrkesaktivFrivillig(
+            brevbestilling = lagInnvilgelseFtrlYrkesaktivFrivilligBrevbestilling(),
+            behandlingstype = Behandlingstyper.FØRSTEGANG,
+            avgiftsperioder = emptyList(),
+            medlemskapsperioder = emptyList(),
+            bestemmelse = Folketrygdloven_kap2_bestemmelser.FTRL_KAP2_2_8,
+            avslåttMedlemskapsperiodeFørMottaksdatoHelsedel = false,
+            avslåttMedlemskapsperiodeFørMottaksdatoFullDekning = false,
+            trygdeavgiftMottaker = Trygdeavgiftmottaker.TRYGDEAVGIFT_BETALES_TIL_NAV,
+            fullmektigTrygdeavgift = null,
+            skatteplikttype = Skatteplikttype.SKATTEPLIKTIG,
+            begrunnelse = Ftrl_2_8_naer_tilknytning_norge_begrunnelser.ANSATT_I_MULTINASJONALT_SELSKAP,
+            nyVurderingBakgrunn = null,
+            begrunnelseFritekst = null,
+            innledningFritekst = null,
+            trygdeavgiftFritekst = null,
+            begrunnelseAnnenGrunnFritekst = null,
+            arbeidsgivere = listOf("Egon Olsen AS"),
+            flereLandUkjentHvilke = false,
+            land = listOf(Land_iso2.US.kode),
+            trygdeavtaleLand = emptyList(),
+            betalerArbeidsgiveravgift = true
+        )
     }
 
-    private fun lagInnvilgelseFtrlBrevbestilling(): InnvilgelseFtrlBrevbestilling {
-        return InnvilgelseFtrlBrevbestilling.Builder()
+    private fun lagInnvilgelseFtrlYrkesaktivFrivilligBrevbestilling(): InnvilgelseFtrlYrkesaktivFrivilligBrevbestilling {
+        return InnvilgelseFtrlYrkesaktivFrivilligBrevbestilling.Builder()
             .medInnledningFritekst("Innledning")
             .medBegrunnelseFritekst("Begrunnelse")
             .medTrygdeavgiftFritekst("Trygdeavgift fritekst")
