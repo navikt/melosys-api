@@ -201,7 +201,7 @@ internal class TrygdeavgiftsberegningServiceTest {
             id = 1L
             fom = FOM
             tom = TOM
-            trygdedekning = Trygdedekninger.FULL_DEKNING_EOSFO
+            trygdedekning = Trygdedekninger.FULL_DEKNING_FTRL
             innvilgelsesresultat = InnvilgelsesResultat.INNVILGET
             medlemskapstype = Medlemskapstyper.PLIKTIG
         })
