@@ -69,14 +69,14 @@ class SedMottakBehandlngsTypeIT(
 
     @Test
     fun `A003 skal føre til riktig oppgave i gosys`() {
-        val eessiMeldingA003 = eessiMeldingTestDataFactory.melosysEessiMelding(
-            bucType = BucType.LA_BUC_02,
-            rinaSaksnummer = Random().nextInt(100000).toString(),
-            sedType = SedType.A003,
-            periode = Periode(LocalDate.now(), LocalDate.now().plusYears(1)),
-            artikkel = "13_1_a",
+        val eessiMeldingA003 = eessiMeldingTestDataFactory.melosysEessiMelding {
+            bucType = BucType.LA_BUC_02.name
+            rinaSaksnummer = Random().nextInt(100000).toString()
+            sedType = SedType.A003.name
+            periode = Periode(LocalDate.now(), LocalDate.now().plusYears(1))
+            artikkel = "13_1_a"
             lovvalgsland = "NO"
-        )
+        }
 
 
         executeAndWait(
@@ -104,14 +104,14 @@ class SedMottakBehandlngsTypeIT(
 
     @Test
     fun `A003 andre gangsbehandling`() {
-        val eessiMeldingA003 = eessiMeldingTestDataFactory.melosysEessiMelding(
-            bucType = BucType.LA_BUC_02,
-            rinaSaksnummer = Random().nextInt(100000).toString(),
-            sedType = SedType.A003,
-            periode = Periode(LocalDate.now(), LocalDate.now().plusYears(1)),
-            artikkel = "13_1_a",
+        val eessiMeldingA003 = eessiMeldingTestDataFactory.melosysEessiMelding {
+            bucType = BucType.LA_BUC_02.name
+            rinaSaksnummer = Random().nextInt(100000).toString()
+            sedType = SedType.A003.name
+            periode = Periode(LocalDate.now(), LocalDate.now().plusYears(1))
+            artikkel = "13_1_a"
             lovvalgsland = "NO"
-        )
+        }
         val prosessinstansArbeidFlereLand =
             executeAndWait(ProsessType.ARBEID_FLERE_LAND_NY_SAK) {
                 melosysEessiMeldingKafkaTemplate.send(kafkaTopic, eessiMeldingA003)

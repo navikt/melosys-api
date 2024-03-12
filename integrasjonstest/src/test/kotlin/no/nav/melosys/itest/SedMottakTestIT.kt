@@ -1,39 +1,49 @@
 package no.nav.melosys.itest
 
+import com.ninjasquad.springmockk.MockkBean
 import io.getunleash.FakeUnleash
 import io.kotest.assertions.extracting
-import io.kotest.matchers.collections.shouldContain
+import io.kotest.assertions.withClue
 import io.kotest.matchers.collections.shouldContainExactly
 import io.kotest.matchers.collections.shouldContainInOrder
 import io.kotest.matchers.collections.shouldHaveSize
+import io.kotest.matchers.optional.shouldBePresent
 import io.kotest.matchers.shouldBe
+import io.mockk.every
+import io.mockk.mockk
+import io.mockk.slot
+import io.mockk.verify
+import no.nav.melosys.AwaitUtil
+import no.nav.melosys.AwaitUtil.onTimeout
+import no.nav.melosys.AwaitUtil.waitUntil
+import no.nav.melosys.LoggingTestUtils.last
+import no.nav.melosys.ProsessUtil
 import no.nav.melosys.domain.Lovvalgsperiode
-import no.nav.melosys.domain.arkiv.*
 import no.nav.melosys.domain.eessi.*
-import no.nav.melosys.domain.eessi.melding.Avsender
 import no.nav.melosys.domain.eessi.melding.MelosysEessiMelding
 import no.nav.melosys.domain.eessi.melding.UtpekingAvvis
 import no.nav.melosys.domain.kodeverk.*
 import no.nav.melosys.domain.kodeverk.behandlinger.*
 import no.nav.melosys.domain.kodeverk.lovvalgsbestemmelser.Lovvalgbestemmelser_883_2004
-import no.nav.melosys.integrasjon.joark.JoarkFasade
 import no.nav.melosys.melosysmock.medl.MedlRepo
 import no.nav.melosys.melosysmock.melosyseessi.MelosysEessiRepo
 import no.nav.melosys.melosysmock.sak.SakRepo
 import no.nav.melosys.repository.BehandlingsresultatRepository
+import no.nav.melosys.saksflyt.ProsessinstansFerdigListener
 import no.nav.melosys.saksflyt.ProsessinstansRepository
-import no.nav.melosys.saksflytapi.domain.ProsessStatus
 import no.nav.melosys.saksflytapi.domain.ProsessType
-import no.nav.melosys.saksflytapi.domain.Prosessinstans
 import no.nav.melosys.service.LovvalgsperiodeService
+import no.nav.melosys.service.avklartefakta.AvklartefaktaDto
+import no.nav.melosys.service.avklartefakta.AvklartefaktaService
 import no.nav.melosys.service.sak.OpprettBehandlingForSak
 import no.nav.melosys.service.sak.OpprettSakDto
 import no.nav.melosys.service.utpeking.UtpekingService
 import no.nav.melosys.service.vedtak.FattVedtakRequest
 import no.nav.melosys.service.vedtak.VedtaksfattingFasade
 import no.nav.melosys.sikkerhet.context.ThreadLocalAccessInfo
-import org.awaitility.kotlin.await
-import org.awaitility.kotlin.untilNotNull
+import no.nav.melosys.statistikk.utstedt_a1.integrasjon.UtstedtA1AivenProducer
+import no.nav.melosys.statistikk.utstedt_a1.integrasjon.dto.Lovvalgsbestemmelse
+import no.nav.melosys.statistikk.utstedt_a1.integrasjon.dto.UtstedtA1Melding
 import org.junit.jupiter.api.AfterEach
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
@@ -43,14 +53,10 @@ import org.springframework.context.annotation.Import
 import org.springframework.kafka.core.KafkaTemplate
 import java.time.Duration
 import java.time.LocalDate
-import java.time.LocalDateTime
 import java.util.*
-import java.util.concurrent.TimeUnit
-import java.util.stream.Collectors
 
 @Import(OAuthMockServer::class)
 class SedMottakTestIT(
-    @Autowired private val joarkFasade: JoarkFasade,
     @Autowired private val eessiMeldingTestDataFactory: EessiMeldingTestDataFactory,
     @Autowired @Qualifier("melosysEessiMelding") private val melosysEessiMeldingKafkaTemplate: KafkaTemplate<String, MelosysEessiMelding>,
     @Autowired private val prosessinstansRepository: ProsessinstansRepository,
@@ -60,13 +66,22 @@ class SedMottakTestIT(
     @Autowired private val lovvalgsperiodeService: LovvalgsperiodeService,
     @Autowired private val behandlingsresultatRepository: BehandlingsresultatRepository,
     @Autowired private val unleash: FakeUnleash,
-    @Autowired private val oAuthMockServer: OAuthMockServer
+    @Autowired private val avklartefaktaService: AvklartefaktaService,
+    @Autowired private val oAuthMockServer: OAuthMockServer,
+    @Autowired private val prosessUtil: ProsessUtil
+
 ) : ComponentTestBase() {
 
     private val kafkaTopic = "teammelosys.eessi.v1-local"
 
+    private val randomUUID = UUID.randomUUID()
+
+    @MockkBean
+    private lateinit var utstedtA1AivenProducer: UtstedtA1AivenProducer
+
     @BeforeEach
     fun setup() {
+        ThreadLocalAccessInfo.beforeExecuteProcess(randomUUID, "steg")
         oAuthMockServer.start()
         SakRepo.clear()
         MedlRepo.repo.clear()
@@ -76,6 +91,7 @@ class SedMottakTestIT(
 
     @AfterEach
     fun after() {
+        ThreadLocalAccessInfo.afterExecuteProcess(randomUUID)
         oAuthMockServer.stop()
     }
 
@@ -87,24 +103,31 @@ class SedMottakTestIT(
         val bucInformasjon = BucInformasjon(ref, true, null, LocalDate.now(), null, listOf(sedInfo))
         MelosysEessiRepo.opprettBucinformasjon(bucInformasjon)
 
-        val eessiMeldingA009 = eessiMeldingTestDataFactory.melosysEessiMelding(
-            BucType.LA_BUC_04, ref, SedType.A009, Periode(LocalDate.now(), LocalDate.now().plusYears(1)),
-            "12_1"
-        )
-        val eessiMeldingX008 = eessiMeldingTestDataFactory.melosysEessiMelding(
-            BucType.LA_BUC_04, ref, SedType.X008, null, null
-        )
+        val eessiMeldingA009 = eessiMeldingTestDataFactory.melosysEessiMelding {
+            bucType = BucType.LA_BUC_04.name
+            rinaSaksnummer = ref
+            sedType = SedType.A009.name
+            periode = Periode(LocalDate.now(), LocalDate.now().plusYears(1))
+            artikkel = "12_1"
+        }
+        val eessiMeldingX008 = eessiMeldingTestDataFactory.melosysEessiMelding {
+            bucType = BucType.LA_BUC_04.name
+            rinaSaksnummer = ref
+            sedType = SedType.X008.name
+        }
 
         melosysEessiMeldingKafkaTemplate.send(kafkaTopic, eessiMeldingA009)
         melosysEessiMeldingKafkaTemplate.send(kafkaTopic, eessiMeldingX008)
 
-        await.timeout(Duration.ofSeconds(30)).pollInterval(Duration.ofSeconds(3))
-            .until {
-                prosessinstansRepository.findAllByStatusNotInAndLåsReferanseStartingWith(
-                    listOf(ProsessStatus.FERDIG),
-                    ref
-                ).isEmpty()
-            }
+        AwaitUtil.awaitWithFailOnLogErrors { logItems ->
+            val testFinishedLogline = "Prosessinstans(er) på vent med samme gruppe-prefiks: []"
+            atMost(Duration.ofSeconds(20))
+                .onTimeout { e ->
+                    withClue("last log line was not as expected - ${e.message}") {
+                        logItems.last<ProsessinstansFerdigListener>() shouldBe testFinishedLogline
+                    }
+                }.waitUntil { logItems.last<ProsessinstansFerdigListener>() == testFinishedLogline }
+        }
 
         val prosessinstanserSortert = prosessinstansRepository.findAllByLåsReferanseStartingWith(ref)
             .sortedBy { it.endretDato }
@@ -119,15 +142,13 @@ class SedMottakTestIT(
                 eessiMeldingX008.lagUnikIdentifikator(),
             )
 
-        prosessinstanserSortert.filter { it.behandling != null }[0]
-            .apply { behandling.status.shouldBe(Behandlingsstatus.AVSLUTTET) }
-            .apply { behandling.fagsak.status.shouldBe(Saksstatuser.ANNULLERT) }
-            .apply {
-                behandlingsresultatRepository.findWithLovvalgsperioderById(behandling.id).get().type.shouldBe(
-                    Behandlingsresultattyper.HENLEGGELSE
-                )
-            }
-
+        prosessinstanserSortert.first { it.behandling != null }.behandling.run {
+            status.shouldBe(Behandlingsstatus.AVSLUTTET)
+            fagsak.status.shouldBe(Saksstatuser.ANNULLERT)
+            behandlingsresultatRepository.findWithLovvalgsperioderById(id)
+                .shouldBePresent()
+                .type.shouldBe(Behandlingsresultattyper.HENLEGGELSE)
+        }
 
     }
 
@@ -139,29 +160,32 @@ class SedMottakTestIT(
         val bucInformasjon = BucInformasjon(ref, true, null, LocalDate.now(), null, listOf(sedInfo))
         MelosysEessiRepo.opprettBucinformasjon(bucInformasjon)
 
-        val eessiMeldingA009 = eessiMeldingTestDataFactory.melosysEessiMelding(
-            BucType.LA_BUC_04, ref, SedType.A009, Periode(LocalDate.now(), LocalDate.now().plusYears(1)),
-            "12_1"
-        )
-        val eessiMeldingX006 = eessiMeldingTestDataFactory.melosysEessiMelding(
-            BucType.LA_BUC_04,
-            ref,
-            SedType.X006,
-            null,
-            null,
+        val eessiMeldingA009 = eessiMeldingTestDataFactory.melosysEessiMelding {
+            bucType = BucType.LA_BUC_04.name
+            rinaSaksnummer = ref
+            sedType = SedType.A009.name
+            periode = Periode(LocalDate.now(), LocalDate.now().plusYears(1))
+            artikkel = "12_1"
+        }
+        val eessiMeldingX006 = eessiMeldingTestDataFactory.melosysEessiMelding {
+            bucType = BucType.LA_BUC_04.name
+            rinaSaksnummer = ref
+            sedType = SedType.X006.name
             isX006NavErFjernet = true
-        )
+        }
 
         melosysEessiMeldingKafkaTemplate.send(kafkaTopic, eessiMeldingA009)
         melosysEessiMeldingKafkaTemplate.send(kafkaTopic, eessiMeldingX006)
 
-        await.timeout(Duration.ofSeconds(30)).pollInterval(Duration.ofSeconds(3))
-            .until {
-                prosessinstansRepository.findAllByStatusNotInAndLåsReferanseStartingWith(
-                    listOf(ProsessStatus.FERDIG),
-                    ref
-                ).isEmpty()
-            }
+        AwaitUtil.awaitWithFailOnLogErrors { logItems ->
+            val testFinishedLogline = "Prosessinstans(er) på vent med samme gruppe-prefiks: []"
+            atMost(Duration.ofSeconds(20))
+                .onTimeout { e ->
+                    withClue("last log line was not as expected - ${e.message}") {
+                        logItems.last<ProsessinstansFerdigListener>() shouldBe testFinishedLogline
+                    }
+                }.waitUntil { logItems.last<ProsessinstansFerdigListener>() == testFinishedLogline }
+        }
 
         val prosessinstanserSortert = prosessinstansRepository.findAllByLåsReferanseStartingWith(ref)
             .sortedBy { it.endretDato }
@@ -176,43 +200,46 @@ class SedMottakTestIT(
                 eessiMeldingX006.lagUnikIdentifikator(),
             )
 
-        prosessinstanserSortert.filter { it.behandling != null }[0]
-            .apply { behandling.status.shouldBe(Behandlingsstatus.AVSLUTTET) }
-            .apply { behandling.fagsak.status.shouldBe(Saksstatuser.ANNULLERT) }
-            .apply {
-                behandlingsresultatRepository.findWithLovvalgsperioderById(behandling.id).get().type.shouldBe(
-                    Behandlingsresultattyper.HENLEGGELSE
-                )
-            }
+        prosessinstanserSortert.first { it.behandling != null }.behandling.run {
+            status.shouldBe(Behandlingsstatus.AVSLUTTET)
+            fagsak.status.shouldBe(Saksstatuser.ANNULLERT)
+            behandlingsresultatRepository.findWithLovvalgsperioderById(id)
+                .shouldBePresent()
+                .type.shouldBe(Behandlingsresultattyper.HENLEGGELSE)
+        }
     }
 
     @Test
     fun `A003 med etterfølgende X006 og lovvalgsland er NO skal gi manuelt behandling`() {
         val ref = Random().nextInt(100000).toString()
 
-        val eessiMeldingA003 = eessiMeldingTestDataFactory.melosysEessiMelding(
-            BucType.LA_BUC_02, ref, SedType.A003, Periode(LocalDate.now(), LocalDate.now().plusYears(1)),
-            "13_1_a", "NO"
-        )
-        val eessiMeldingX006 = eessiMeldingTestDataFactory.melosysEessiMelding(
-            BucType.LA_BUC_02,
-            ref,
-            SedType.X006,
-            null,
-            null,
+        val eessiMeldingA003 = eessiMeldingTestDataFactory.melosysEessiMelding {
+            bucType = BucType.LA_BUC_02.name
+            rinaSaksnummer = ref
+            sedType = SedType.A003.name
+            periode = Periode(LocalDate.now(), LocalDate.now().plusYears(1))
+            artikkel = "13_1_a"
+            lovvalgsland = "NO"
+        }
+        val eessiMeldingX006 = eessiMeldingTestDataFactory.melosysEessiMelding {
+            bucType = BucType.LA_BUC_02.name
+            rinaSaksnummer = ref
+            sedType = SedType.X006.name
             isX006NavErFjernet = true
-        )
+        }
 
         melosysEessiMeldingKafkaTemplate.send(kafkaTopic, eessiMeldingA003)
         melosysEessiMeldingKafkaTemplate.send(kafkaTopic, eessiMeldingX006)
 
-        await.timeout(Duration.ofSeconds(30)).pollInterval(Duration.ofSeconds(3))
-            .until {
-                prosessinstansRepository.findAllByStatusNotInAndLåsReferanseStartingWith(
-                    listOf(ProsessStatus.FERDIG),
-                    ref
-                ).isEmpty()
-            }
+        AwaitUtil.awaitWithFailOnLogErrors { logItems ->
+            val testFinishedLogline = "Prosessinstans(er) på vent med samme gruppe-prefiks: []"
+            atMost(Duration.ofSeconds(20))
+                .onTimeout { e ->
+                    withClue("last log line was not as expected - ${e.message}") {
+                        logItems.last<ProsessinstansFerdigListener>() shouldBe testFinishedLogline
+                    }
+                }.waitUntil { logItems.last<ProsessinstansFerdigListener>() == testFinishedLogline }
+        }
 
         val prosessinstanserSortert = prosessinstansRepository.findAllByLåsReferanseStartingWith(ref)
             .sortedBy { it.endretDato }
@@ -226,12 +253,11 @@ class SedMottakTestIT(
                 eessiMeldingX006.lagUnikIdentifikator(),
             )
 
-        prosessinstanserSortert.filter { it.behandling != null }[0].behandling.apply {
+        prosessinstanserSortert.first { it.behandling != null }.behandling.run {
             status.shouldBe(Behandlingsstatus.VURDER_DOKUMENT)
             fagsak.status.shouldBe(Saksstatuser.OPPRETTET)
-            behandlingsresultatRepository.findWithLovvalgsperioderById(id).get().type.shouldBe(
-                Behandlingsresultattyper.IKKE_FASTSATT
-            )
+            behandlingsresultatRepository.findWithLovvalgsperioderById(id)
+                .shouldBePresent().type.shouldBe(Behandlingsresultattyper.IKKE_FASTSATT)
         }
     }
 
@@ -243,24 +269,34 @@ class SedMottakTestIT(
         val bucInformasjon = BucInformasjon(ref, true, null, LocalDate.now(), null, listOf(sedInfo))
         MelosysEessiRepo.opprettBucinformasjon(bucInformasjon)
 
-        val eessiMeldingA003 = eessiMeldingTestDataFactory.melosysEessiMelding(
-            BucType.LA_BUC_02, ref, SedType.A003, Periode(LocalDate.now(), LocalDate.now().plusYears(1)),
-            "13_1_a", "NO"
-        )
-        val eessiMeldingX008 = eessiMeldingTestDataFactory.melosysEessiMelding(
-            BucType.LA_BUC_02, ref, SedType.X008, null, null
-        )
+        val eessiMeldingA003 = eessiMeldingTestDataFactory.melosysEessiMelding {
+            bucType = BucType.LA_BUC_02.name
+            rinaSaksnummer = ref
+            sedType = SedType.A003.name
+            periode = Periode(LocalDate.now(), LocalDate.now().plusYears(1))
+            artikkel = "13_1_a"
+            lovvalgsland = "NO"
+        }
+        val eessiMeldingX008 = eessiMeldingTestDataFactory.melosysEessiMelding {
+            bucType = BucType.LA_BUC_02.name
+            rinaSaksnummer = ref
+            sedType = SedType.X008.name
+            periode = null
+            artikkel = null
+        }
 
         melosysEessiMeldingKafkaTemplate.send(kafkaTopic, eessiMeldingA003)
         melosysEessiMeldingKafkaTemplate.send(kafkaTopic, eessiMeldingX008)
 
-        await.timeout(Duration.ofSeconds(30)).pollInterval(Duration.ofSeconds(3))
-            .until {
-                prosessinstansRepository.findAllByStatusNotInAndLåsReferanseStartingWith(
-                    listOf(ProsessStatus.FERDIG),
-                    ref
-                ).isEmpty()
-            }
+        AwaitUtil.awaitWithFailOnLogErrors { logItems ->
+            val testFinishedLogline = "Prosessinstans(er) på vent med samme gruppe-prefiks: []"
+            atMost(Duration.ofSeconds(20))
+                .onTimeout { e ->
+                    withClue("last log line was not as expected - ${e.message}") {
+                        logItems.last<ProsessinstansFerdigListener>() shouldBe testFinishedLogline
+                    }
+                }.waitUntil { logItems.last<ProsessinstansFerdigListener>() == testFinishedLogline }
+        }
 
         val prosessinstanserSortert = prosessinstansRepository.findAllByLåsReferanseStartingWith(ref)
             .sortedBy { it.endretDato }
@@ -274,12 +310,11 @@ class SedMottakTestIT(
                 eessiMeldingX008.lagUnikIdentifikator(),
             )
 
-        prosessinstanserSortert.filter { it.behandling != null }[0].behandling.apply {
+        prosessinstanserSortert.first { it.behandling != null }.behandling.run {
             status.shouldBe(Behandlingsstatus.VURDER_DOKUMENT)
             fagsak.status.shouldBe(Saksstatuser.OPPRETTET)
-            behandlingsresultatRepository.findWithLovvalgsperioderById(id).get().type.shouldBe(
-                Behandlingsresultattyper.IKKE_FASTSATT
-            )
+            behandlingsresultatRepository.findWithLovvalgsperioderById(id).shouldBePresent().type
+                .shouldBe(Behandlingsresultattyper.IKKE_FASTSATT)
         }
     }
 
@@ -288,30 +323,37 @@ class SedMottakTestIT(
         val rinaSaksnummer = Random().nextInt(100000).toString()
 
         //Periode på 6 år - fører til et kontrolltreff
-        val eessiMeldingA009 = eessiMeldingTestDataFactory.melosysEessiMelding(
-            BucType.LA_BUC_04, rinaSaksnummer, SedType.A009, Periode(LocalDate.now(), LocalDate.now().plusYears(6)),
-            "12_1"
-        )
-        val eessiMeldingX001 = eessiMeldingTestDataFactory.melosysEessiMelding(
-            BucType.LA_BUC_04, rinaSaksnummer, SedType.X001, null, null
-        )
-        val eessiMeldingX007 = eessiMeldingTestDataFactory.melosysEessiMelding(
-            BucType.LA_BUC_04, rinaSaksnummer, SedType.X007, null, null
-        )
-
+        val eessiMeldingA009 = eessiMeldingTestDataFactory.melosysEessiMelding {
+            bucType = BucType.LA_BUC_04.name
+            this.rinaSaksnummer = rinaSaksnummer
+            sedType = SedType.A009.name
+            periode = Periode(LocalDate.now(), LocalDate.now().plusYears(6))
+            artikkel = "12_1"
+        }
+        val eessiMeldingX001 = eessiMeldingTestDataFactory.melosysEessiMelding {
+            bucType = BucType.LA_BUC_04.name
+            this.rinaSaksnummer = rinaSaksnummer
+            sedType = SedType.X001.name
+        }
+        val eessiMeldingX007 = eessiMeldingTestDataFactory.melosysEessiMelding {
+            bucType = BucType.LA_BUC_04.name
+            this.rinaSaksnummer = rinaSaksnummer
+            sedType = SedType.X007.name
+        }
 
         melosysEessiMeldingKafkaTemplate.send(kafkaTopic, eessiMeldingA009)
         melosysEessiMeldingKafkaTemplate.send(kafkaTopic, eessiMeldingX001)
         melosysEessiMeldingKafkaTemplate.send(kafkaTopic, eessiMeldingX007)
 
-        await.timeout(Duration.ofSeconds(30)).pollInterval(Duration.ofSeconds(3))
-            .until {
-                prosessinstansRepository.findAllByStatusNotInAndLåsReferanseStartingWith(
-                    listOf(ProsessStatus.FERDIG),
-                    rinaSaksnummer
-                ).isEmpty()
-            }
-
+        AwaitUtil.awaitWithFailOnLogErrors { logItems ->
+            val testFinishedLogline = "Prosessinstans(er) på vent med samme gruppe-prefiks: []"
+            atMost(Duration.ofSeconds(20))
+                .onTimeout { e ->
+                    withClue("last log line was not as expected - ${e.message}") {
+                        logItems.last<ProsessinstansFerdigListener>() shouldBe testFinishedLogline
+                    }
+                }.waitUntil { logItems.last<ProsessinstansFerdigListener>() == testFinishedLogline }
+        }
 
         val prosessinstanserSortert = prosessinstansRepository.findAllByLåsReferanseStartingWith(rinaSaksnummer)
             .sortedBy { it.endretDato }
@@ -331,8 +373,8 @@ class SedMottakTestIT(
 
     @Test
     fun `Motta A003, godkjenne med A012, ugyldiggjøre godkjenning A012 med X008 for så å sende en A004`() {
-        val randomUUID = UUID.randomUUID()
-        ThreadLocalAccessInfo.beforeExecuteProcess(randomUUID, "steg")
+        val utstedtA1MeldingCapturingSlot = slot<UtstedtA1Melding>()
+        every { utstedtA1AivenProducer.produserMelding(capture(utstedtA1MeldingCapturingSlot)) } returns mockk<UtstedtA1Melding>()
 
         val rinaSaksnummer = Random().nextInt(100000).toString()
 
@@ -344,26 +386,30 @@ class SedMottakTestIT(
         val bucInformasjon =
             BucInformasjon(rinaSaksnummer, true, "LA_BUC_02", LocalDate.now(), null, listOf(sedInfoA003, sedInfoA012))
         MelosysEessiRepo.opprettBucinformasjon(bucInformasjon)
-        val eessiMeldingA003 = melosysEessiMelding(
-            BucType.LA_BUC_02, rinaSaksnummer, SedType.A003, Periode(LocalDate.now(), LocalDate.now().plusYears(1)),
-            "13_1_a", opprettEessiJournalpost(SedType.A003)
-        )
-        eessiMeldingA003.apply { lovvalgsland = "NO" }
+
+        val eessiMeldingA003 = eessiMeldingTestDataFactory.melosysEessiMelding {
+            bucType = BucType.LA_BUC_02.name
+            this.rinaSaksnummer = rinaSaksnummer
+            sedType = SedType.A003.name
+            periode = Periode(LocalDate.now(), LocalDate.now().plusYears(6))
+            artikkel = "13_1_a"
+            lovvalgsland = "NO"
+        }
 
         melosysEessiMeldingKafkaTemplate.send(kafkaTopic, eessiMeldingA003)
 
-        await.timeout(Duration.ofSeconds(30)).pollInterval(Duration.ofSeconds(3))
-            .until {
-                prosessinstansRepository.findAllByStatusNotInAndLåsReferanseStartingWith(
-                    listOf(ProsessStatus.FERDIG),
-                    rinaSaksnummer
-                ).isEmpty()
-            }
+        AwaitUtil.awaitWithFailOnLogErrors { logItems ->
+            val testFinishedLogline = "Prosessinstans(er) på vent med samme gruppe-prefiks: []"
+            atMost(Duration.ofSeconds(20))
+                .onTimeout { e ->
+                    withClue("last log line was not as expected - ${e.message}") {
+                        logItems.last<ProsessinstansFerdigListener>() shouldBe testFinishedLogline
+                    }
+                }.waitUntil { logItems.last<ProsessinstansFerdigListener>() == testFinishedLogline }
+        }
 
         val prosessinstanserSortert = prosessinstansRepository.findAllByLåsReferanseStartingWith(rinaSaksnummer)
-            .stream()
-            .sorted(Comparator.comparing { obj: Prosessinstans -> obj.endretDato })
-            .collect(Collectors.toList())
+            .sortedBy { it.endretDato }
 
         lovvalgsperiodeService.lagreLovvalgsperioder(
             prosessinstanserSortert.get(1).behandling.id,
@@ -377,7 +423,17 @@ class SedMottakTestIT(
             })
         )
 
-        val vedtaksProsessInstans = executeAndWait(ProsessType.IVERKSETT_VEDTAK_EOS) {
+        avklartefaktaService.lagreAvklarteFakta(
+            prosessinstanserSortert.get(1).behandling.id, setOf(AvklartefaktaDto(
+                listOf("TRUE"), "VIRKSOMHET"
+            ).apply {
+                avklartefaktaType = Avklartefaktatyper.VIRKSOMHET
+                subjektID = "999999999"
+                begrunnelseKoder = emptyList()
+            })
+        )
+
+        val vedtaksProsessInstans = prosessUtil.executeAndWait(ProsessType.IVERKSETT_VEDTAK_EOS) {
             vedtaksfattingFasade.fattVedtak(
                 prosessinstanserSortert.get(1).behandling.id, FattVedtakRequest.Builder()
                     .medBehandlingsresultatType(Behandlingsresultattyper.FORELOEPIG_FASTSATT_LOVVALGSLAND)
@@ -386,7 +442,12 @@ class SedMottakTestIT(
             )
         }
 
-        val opprettNyVurderingProsessinstans = executeAndWait(ProsessType.OPPRETT_REPLIKERT_BEHANDLING_FOR_SAK) {
+        verify(exactly = 1) { utstedtA1AivenProducer.produserMelding(any()) }
+        utstedtA1MeldingCapturingSlot.captured.apply {
+            artikkel.shouldBe(Lovvalgsbestemmelse.ART_11_3_a)
+        }
+
+        val opprettNyVurderingProsessinstans = prosessUtil.executeAndWait(ProsessType.OPPRETT_REPLIKERT_BEHANDLING_FOR_SAK) {
             opprettBehandlingForSak.opprettBehandling(
                 prosessinstanserSortert.get(1).behandling.fagsak.saksnummer,
                 OpprettSakDto().apply {
@@ -398,7 +459,7 @@ class SedMottakTestIT(
                 })
         }
 
-        executeAndWait(ProsessType.UTPEKING_AVVIS) {
+        prosessUtil.executeAndWait(ProsessType.UTPEKING_AVVIS) {
             utpekingService.avvisUtpeking(opprettNyVurderingProsessinstans.behandling.id, UtpekingAvvis().apply {
                 begrunnelse = "lol"
                 etterspørInformasjon = false
@@ -410,21 +471,18 @@ class SedMottakTestIT(
             SedType.X008,
             SedType.A004,
         )
-        vedtaksProsessInstans.behandling.apply {
+        vedtaksProsessInstans.behandling.run {
             status.shouldBe(Behandlingsstatus.AVSLUTTET)
             fagsak.status.shouldBe(Saksstatuser.LOVVALG_AVKLART)
-            behandlingsresultatRepository.findWithLovvalgsperioderById(id).get().type.shouldBe(
-                Behandlingsresultattyper.FORELOEPIG_FASTSATT_LOVVALGSLAND
-            )
+            behandlingsresultatRepository.findWithLovvalgsperioderById(id).shouldBePresent()
+                .type.shouldBe(Behandlingsresultattyper.FORELOEPIG_FASTSATT_LOVVALGSLAND)
         }
-
-        ThreadLocalAccessInfo.afterExecuteProcess(randomUUID)
     }
 
     @Test
     fun `Motta A003, avvise med A004, ugyldiggjøre avvisning A004 med X008 for så å sende en A012`() {
-        val randomUUID = UUID.randomUUID()
-        ThreadLocalAccessInfo.beforeExecuteProcess(randomUUID, "steg")
+        val utstedtA1MeldingCapturingSlot = slot<UtstedtA1Melding>()
+        every { utstedtA1AivenProducer.produserMelding(capture(utstedtA1MeldingCapturingSlot)) } returns mockk<UtstedtA1Melding>()
 
         val rinaSaksnummer = Random().nextInt(100000).toString()
 
@@ -436,36 +494,41 @@ class SedMottakTestIT(
         val bucInformasjon =
             BucInformasjon(rinaSaksnummer, true, "LA_BUC_02", LocalDate.now(), null, listOf(sedInfoA003, sedInfoA004))
         MelosysEessiRepo.opprettBucinformasjon(bucInformasjon)
-        val eessiMeldingA003 = melosysEessiMelding(
-            BucType.LA_BUC_02, rinaSaksnummer, SedType.A003, Periode(LocalDate.now(), LocalDate.now().plusYears(1)),
-            "13_1_a", opprettEessiJournalpost(SedType.A003)
-        )
-        eessiMeldingA003.apply { lovvalgsland = "NO" }
+
+
+        val eessiMeldingA003 = eessiMeldingTestDataFactory.melosysEessiMelding {
+            bucType = BucType.LA_BUC_02.name
+            this.rinaSaksnummer = rinaSaksnummer
+            sedType = SedType.A003.name
+            periode = Periode(LocalDate.now(), LocalDate.now().plusYears(1))
+            artikkel = "13_1_a"
+            lovvalgsland = "NO"
+        }
 
         melosysEessiMeldingKafkaTemplate.send(kafkaTopic, eessiMeldingA003)
 
-        await.timeout(Duration.ofSeconds(30)).pollInterval(Duration.ofSeconds(3))
-            .until {
-                prosessinstansRepository.findAllByStatusNotInAndLåsReferanseStartingWith(
-                    listOf(ProsessStatus.FERDIG),
-                    rinaSaksnummer
-                ).isEmpty()
-            }
+        AwaitUtil.awaitWithFailOnLogErrors { logItems ->
+            val testFinishedLogline = "Prosessinstans(er) på vent med samme gruppe-prefiks: []"
+            atMost(Duration.ofSeconds(20))
+                .onTimeout { e ->
+                    withClue("last log line was not as expected - ${e.message}") {
+                        logItems.last<ProsessinstansFerdigListener>() shouldBe testFinishedLogline
+                    }
+                }.waitUntil { logItems.last<ProsessinstansFerdigListener>() == testFinishedLogline }
+        }
 
         val prosessinstanserSortert = prosessinstansRepository.findAllByLåsReferanseStartingWith(rinaSaksnummer)
-            .stream()
-            .sorted(Comparator.comparing { obj: Prosessinstans -> obj.endretDato })
-            .collect(Collectors.toList())
+            .sortedBy { it.endretDato }
 
 
-        executeAndWait(ProsessType.UTPEKING_AVVIS) {
+        prosessUtil.executeAndWait(ProsessType.UTPEKING_AVVIS) {
             utpekingService.avvisUtpeking(prosessinstanserSortert.get(1).behandling.id, UtpekingAvvis().apply {
                 begrunnelse = "lol"
                 etterspørInformasjon = false
             })
         }
 
-        val opprettNyVurderingProsessinstans = executeAndWait(ProsessType.OPPRETT_REPLIKERT_BEHANDLING_FOR_SAK) {
+        val opprettNyVurderingProsessinstans = prosessUtil.executeAndWait(ProsessType.OPPRETT_REPLIKERT_BEHANDLING_FOR_SAK) {
             opprettBehandlingForSak.opprettBehandling(
                 prosessinstanserSortert.get(1).behandling.fagsak.saksnummer,
                 OpprettSakDto().apply {
@@ -489,13 +552,28 @@ class SedMottakTestIT(
             })
         )
 
-        val vedtaksProsessInstans = executeAndWait(ProsessType.IVERKSETT_VEDTAK_EOS) {
+        avklartefaktaService.lagreAvklarteFakta(
+            opprettNyVurderingProsessinstans.behandling.id, setOf(AvklartefaktaDto(
+                listOf("TRUE"), "VIRKSOMHET"
+            ).apply {
+                avklartefaktaType = Avklartefaktatyper.VIRKSOMHET
+                subjektID = "999999999"
+                begrunnelseKoder = emptyList()
+            })
+        )
+
+        val vedtaksProsessInstans = prosessUtil.executeAndWait(ProsessType.IVERKSETT_VEDTAK_EOS) {
             vedtaksfattingFasade.fattVedtak(
                 opprettNyVurderingProsessinstans.behandling.id, FattVedtakRequest.Builder()
                     .medBehandlingsresultatType(Behandlingsresultattyper.FORELOEPIG_FASTSATT_LOVVALGSLAND)
                     .medVedtakstype(Vedtakstyper.KORRIGERT_VEDTAK)
                     .build()
             )
+        }
+
+        verify(exactly = 1) { utstedtA1AivenProducer.produserMelding(any()) }
+        utstedtA1MeldingCapturingSlot.captured.apply {
+            artikkel.shouldBe(Lovvalgsbestemmelse.ART_11_3_a)
         }
 
         MelosysEessiRepo.sedRepo.get(rinaSaksnummer)!!.shouldContainInOrder(
@@ -510,93 +588,5 @@ class SedMottakTestIT(
                 Behandlingsresultattyper.FORELOEPIG_FASTSATT_LOVVALGSLAND
             )
         }
-
-        ThreadLocalAccessInfo.afterExecuteProcess(randomUUID)
-    }
-
-    protected fun executeAndWait(
-        waitForprosessType: ProsessType,
-        alsoWaitForprosessType: List<ProsessType> = listOf(),
-        process: () -> Unit
-    ): Prosessinstans {
-        val startTime = LocalDateTime.now()
-        process()
-        val journalføringProsessID = finnProsess(waitForprosessType, startTime)
-        alsoWaitForprosessType.forEach { finnProsess(it, startTime) }
-        return prosessinstansRepository.findById(journalføringProsessID).get()
-    }
-
-    protected fun finnProsess(prosessType: ProsessType, startTid: LocalDateTime): UUID {
-        await.pollDelay(1, TimeUnit.SECONDS)
-            .timeout(20, TimeUnit.SECONDS)
-            .untilNotNull {
-                prosessinstansRepository.findAllAfterDate(startTid)
-            }.map { it.type }.shouldContain(prosessType)
-
-        return await
-            .timeout(30, TimeUnit.SECONDS)
-            .pollInterval(1, TimeUnit.SECONDS)
-            .untilNotNull {
-                prosessinstansRepository.findAllAfterDate(startTid)
-                    .find { it.type == prosessType && it.status == ProsessStatus.FERDIG }?.id
-            }
-    }
-
-    private fun melosysEessiMelding(
-        bucType: BucType,
-        rinaSaksnummer: String?,
-        sedType: SedType,
-        periode: Periode?,
-        artikkel: String?,
-        journalpostID: String,
-        lovvalgsland: String = "SE",
-        isX006NavErFjernet: Boolean = false,
-    ): MelosysEessiMelding {
-        val eessiMelding = MelosysEessiMelding()
-        eessiMelding.aktoerId = "1111111111111"
-        eessiMelding.anmodningUnntak = null
-        eessiMelding.arbeidssteder = emptyList()
-        eessiMelding.bucType = bucType.name
-        eessiMelding.gsakSaksnummer = null
-        eessiMelding.artikkel = artikkel
-        eessiMelding.avsender = Avsender("SE:123", "SE")
-        eessiMelding.dokumentId = null
-        eessiMelding.journalpostId = journalpostID
-        eessiMelding.lovvalgsland = lovvalgsland
-        eessiMelding.periode = periode
-        eessiMelding.sedType = sedType.name
-        eessiMelding.sedId = sedType.name
-        eessiMelding.rinaSaksnummer = rinaSaksnummer
-        eessiMelding.statsborgerskap = emptyList()
-        eessiMelding.sedVersjon = "1"
-        eessiMelding.isX006NavErFjernet = isX006NavErFjernet
-        return eessiMelding
-    }
-
-    private fun opprettEessiJournalpost(sedType: SedType): String {
-        val request = OpprettJournalpost()
-        val hovedDokument = FysiskDokument()
-        hovedDokument.dokumentKategori = "SED"
-        hovedDokument.tittel = "$sedType-tittel"
-        hovedDokument.brevkode = sedType.name
-        hovedDokument.dokumentVarianter = listOf(
-            DokumentVariant.lagDokumentVariant(
-                ByteArray(0)
-            )
-        )
-        request.setHoveddokument(hovedDokument)
-        request.brukerId = "123123123"
-        request.brukerIdType = BrukerIdType.FOLKEREGISTERIDENT
-        request.journalposttype = Journalposttype.INN
-        request.journalførendeEnhet = "4530"
-        request.tema = "UFM"
-        request.korrespondansepartId = "SE:123"
-        request.korrespondansepartNavn = "Sverige"
-        request.korrespondansepartLand = "SE"
-        request.setKorrespondansepartIdType(OpprettJournalpost.KorrespondansepartIdType.UTENLANDSK_ORGANISASJON)
-        request.mottaksKanal = "EESSI"
-        request.journalposttype = Journalposttype.INN
-        request.innhold = "$sedType-tittel"
-        return joarkFasade.opprettJournalpost(request, false)
     }
 }

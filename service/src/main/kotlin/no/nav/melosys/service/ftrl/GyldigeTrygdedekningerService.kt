@@ -58,6 +58,7 @@ class GyldigeTrygdedekningerService(private val unleash: Unleash) {
         return when {
             behandlingstema == Behandlingstema.IKKE_YRKESAKTIV -> GYLDIGE_TRYGDEDEKNINGER_IKKE_YRKESAKTIV
             unleash.isEnabled(ToggleName.MELOSYS_FOLKETRYGDEN_2_7) -> GYLDIGE_TRYGDEDEKNINGER_YRKESAKTIV
+            unleash.isEnabled(ToggleName.MELOSYS_FTRL_YRKESAKTIV_PLIKTIGE_BESTEMMELSER) -> GYLDIGE_TRYGDEDEKNINGER_YRKESAKTIV
             else -> GYLDIGE_TRYGDEDEKNINGER_YRKESAKTIV_GAMMMEL
         }
     }

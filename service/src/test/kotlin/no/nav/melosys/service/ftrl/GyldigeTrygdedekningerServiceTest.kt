@@ -142,10 +142,9 @@ class GyldigeTrygdedekningerServiceTest {
     fun hentTrygdedekninger_ikkeYrkesaktivPliktigBestemmelse_returnererBareFullDekning() {
         unleash.enableAll()
 
-
         gyldigeTrygdedekningerService.hentTrygdedekninger(
             Behandlingstema.IKKE_YRKESAKTIV,
-            Folketrygdloven_kap2_bestemmelser.FTRL_KAP2_2_1_FØRSTE_LEDD,
+            Folketrygdloven_kap2_bestemmelser.FTRL_KAP2_2_1,
         )
             .shouldNotBeNull()
             .shouldHaveSize(1)

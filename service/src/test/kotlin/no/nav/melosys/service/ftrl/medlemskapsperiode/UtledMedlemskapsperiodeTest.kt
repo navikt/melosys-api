@@ -23,11 +23,10 @@ import java.time.LocalDate
 internal class UtledMedlemskapsperioderTest {
     private val BESTEMMELSE_2_7 = Folketrygdloven_kap2_bestemmelser.FTRL_KAP2_2_7_FØRSTE_LEDD
     private val BESTEMMELSE_2_8 = Folketrygdloven_kap2_bestemmelser.FTRL_KAP2_2_8_FØRSTE_LEDD_A
-    private val BESTEMMELSE_PLIKTIG = Folketrygdloven_kap2_bestemmelser.FTRL_KAP2_2_1_FØRSTE_LEDD
+    private val BESTEMMELSE_PLIKTIG = Folketrygdloven_kap2_bestemmelser.FTRL_KAP2_2_1
     private val TRYGDEDEKNING_2_7 = Trygdedekninger.FULL_DEKNING_FTRL
     private val TRYGDEDEKNING_2_8 = Trygdedekninger.FTRL_2_9_FØRSTE_LEDD_A_HELSE
     private val MOTTAKSDATO = LocalDate.now()
-
     @Test
     fun lagMedlemskapsperioder_ukjentBestemmelse_kasterFeil() {
         shouldThrow<FunksjonellException> {

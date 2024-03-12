@@ -4,7 +4,6 @@ import java.time.LocalDate;
 import java.time.ZoneId;
 import java.util.*;
 
-import io.getunleash.FakeUnleash;
 import no.nav.melosys.domain.*;
 import no.nav.melosys.domain.adresse.StrukturertAdresse;
 import no.nav.melosys.domain.avklartefakta.Avklartefakta;
@@ -27,7 +26,6 @@ import no.nav.melosys.domain.mottatteopplysninger.data.ForetakUtland;
 import no.nav.melosys.domain.mottatteopplysninger.data.arbeidssteder.LuftfartBase;
 import no.nav.melosys.domain.person.Persondata;
 import no.nav.melosys.exception.FunksjonellException;
-import no.nav.melosys.featuretoggle.ToggleName;
 import no.nav.melosys.service.LandvelgerService;
 import no.nav.melosys.service.LovvalgsperiodeService;
 import no.nav.melosys.service.avklartefakta.AvklartMaritimtArbeid;
@@ -73,8 +71,6 @@ class SedDataByggerTest {
     @Mock
     private SaksbehandlingRegler saksbehandlingRegler;
 
-    private final FakeUnleash unleash = new FakeUnleash();
-
     private SedDataBygger dataBygger;
     private Behandling behandling;
     private Behandlingsresultat behandlingsresultat;
@@ -84,7 +80,6 @@ class SedDataByggerTest {
 
     @BeforeEach
     void setup() {
-        unleash.resetAll();
         doReturn(DataByggerStubs.hentOrganisasjonDokumentSetStub()).when(organisasjonOppslagService).hentOrganisasjoner(anySet());
 
         when(landvelgerService.hentBostedsland(anyLong(), any())).thenReturn(new Bostedsland(Landkoder.IT));
@@ -114,7 +109,7 @@ class SedDataByggerTest {
 
         behandling = DataByggerStubs.hentBehandlingStub();
         behandlingsresultat.setBehandling(behandling);
-        dataBygger = new SedDataBygger(behandlingsresultatService, landvelgerService, lovvalgsperiodeService, saksbehandlingRegler, unleash);
+        dataBygger = new SedDataBygger(behandlingsresultatService, landvelgerService, lovvalgsperiodeService, saksbehandlingRegler);
 
         Lovvalgsperiode lovvalgsperiode = new Lovvalgsperiode();
         lovvalgsperiode.setFom(LocalDate.now());
@@ -499,7 +494,6 @@ class SedDataByggerTest {
 
     @Test
     void lagVedtakDto_midlertidigLovvalgsbestemt_settesSomIkkeFørstegangsvedtak() {
-        unleash.enable(ToggleName.MELOSYS_A003_MIDLERTIDIG_LOVVALGSBESLUTNING);
         Behandlingsresultat behandlingsresultatMedVedtak = new Behandlingsresultat();
         VedtakMetadata vedtakMetadata = new VedtakMetadata();
         vedtakMetadata.setVedtaksdato(LocalDate.now().atStartOfDay(ZoneId.systemDefault()).toInstant());
@@ -524,35 +518,6 @@ class SedDataByggerTest {
         assertThat(sedDataDto).isNotNull();
         assertThat(sedDataDto.getVedtakDto().erFørstegangsvedtak()).isFalse();
         assertThat(sedDataDto.getVedtakDto().datoForrigeVedtak()).isEqualTo(LocalDate.now().toString());
-    }
-
-    @Test
-    void lagVedtakDto_midlertidigLovvalgsbestemtToggleDisabled_settesSomFørstegangsvedtak() {
-        unleash.disable(ToggleName.MELOSYS_A003_MIDLERTIDIG_LOVVALGSBESLUTNING);
-        Behandlingsresultat behandlingsresultatMedVedtak = new Behandlingsresultat();
-        VedtakMetadata vedtakMetadata = new VedtakMetadata();
-        vedtakMetadata.setVedtaksdato(LocalDate.now().atStartOfDay(ZoneId.systemDefault()).toInstant());
-        behandlingsresultatMedVedtak.setVedtakMetadata(vedtakMetadata);
-
-        Behandling avsluttetBehandling = DataByggerStubs.hentBehandlingStub();
-        avsluttetBehandling.setStatus(Behandlingsstatus.MIDLERTIDIG_LOVVALGSBESLUTNING);
-        avsluttetBehandling.setId(2L);
-        behandlingsresultatMedVedtak.setBehandling(avsluttetBehandling);
-
-        ArrayList<Behandling> list = new ArrayList<>();
-        list.add(behandling);
-        list.add(avsluttetBehandling);
-        behandling.getFagsak().setBehandlinger(list);
-        behandlingsresultat.setBehandling(behandling);
-
-        when(behandlingsresultatService.hentBehandlingsresultat(anyLong())).thenReturn(behandlingsresultatMedVedtak);
-
-        SedDataGrunnlagMedSoknad dataGrunnlag = lagGrunnlagMedSøknad();
-
-        SedDataDto sedDataDto = dataBygger.lag(dataGrunnlag, behandlingsresultat, PeriodeType.LOVVALGSPERIODE);
-        assertThat(sedDataDto).isNotNull();
-        assertThat(sedDataDto.getVedtakDto().erFørstegangsvedtak()).isTrue();
-        assertThat(sedDataDto.getVedtakDto().datoForrigeVedtak()).isNull();
     }
 
     @Test

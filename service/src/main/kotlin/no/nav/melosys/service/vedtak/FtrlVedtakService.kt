@@ -5,6 +5,7 @@ import no.nav.melosys.domain.Behandlingsresultat
 import no.nav.melosys.domain.kodeverk.*
 import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingsresultattyper
 import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingsstatus
+import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingstema
 import no.nav.melosys.domain.kodeverk.brev.Produserbaredokumenter
 import no.nav.melosys.exception.FunksjonellException
 import no.nav.melosys.saksflytapi.ProsessinstansService
@@ -45,7 +46,7 @@ class FtrlVedtakService(
             if (request.behandlingsresultatTypeKode == Behandlingsresultattyper.OPPHØRT) Saksstatuser.OPPHØRT else Saksstatuser.LOVVALG_AVKLART
         behandlingService.endreStatus(behandling, Behandlingsstatus.IVERKSETTER_VEDTAK)
         prosessinstansService.opprettProsessinstansIverksettVedtakFTRL(behandling, request.tilVedtakRequest(), nyStatus)
-        dokgenService.produserOgDistribuerBrev(behandlingID, lagBrevbestilling(request))
+        dokgenService.produserOgDistribuerBrev(behandlingID, lagBrevbestilling(request, behandling, behandlingsresultat))
         oppgaveService.ferdigstillOppgaveMedSaksnummer(behandling.fagsak.saksnummer)
     }
 
@@ -58,12 +59,21 @@ class FtrlVedtakService(
         }
     }
 
-    private fun lagBrevbestilling(request: FattVedtakRequest): BrevbestillingDto {
+    private fun lagBrevbestilling(request: FattVedtakRequest, behandling: Behandling, behandlingsresultat: Behandlingsresultat): BrevbestillingDto {
         if (request.behandlingsresultatTypeKode == Behandlingsresultattyper.AVSLAG_MANGLENDE_OPPL) {
             return lagAvslagMangledeOpplysningerBrevbestilling(request)
         }
         if (request.behandlingsresultatTypeKode in listOf(Behandlingsresultattyper.OPPHØRT, Behandlingsresultattyper.DELVIS_OPPHØRT)) {
             return lagVedtakOpphørtMedlemskapBrevbestilling(request)
+        }
+
+        val behandlingstema = behandling.tema
+        val medlemskapstype = behandlingsresultat.medlemAvFolketrygden?.medlemskapsperioder?.firstOrNull()?.medlemskapstype
+        if (behandlingstema === Behandlingstema.IKKE_YRKESAKTIV && medlemskapstype === Medlemskapstyper.PLIKTIG) {
+            return lagInnvilgelseIkkeYrkesaktivFtrl(request, Produserbaredokumenter.IKKE_YRKESAKTIV_PLIKTIG_FTRL)
+        }
+        if (behandlingstema === Behandlingstema.IKKE_YRKESAKTIV && medlemskapstype === Medlemskapstyper.FRIVILLIG) {
+            return lagInnvilgelseIkkeYrkesaktivFtrl(request, Produserbaredokumenter.IKKE_YRKESAKTIV_FRIVILLIG_FTRL)
         }
         return lagInnvilgelseFolketrygdloven(request)
     }
@@ -100,6 +110,14 @@ class FtrlVedtakService(
             nyVurderingBakgrunn = request.nyVurderingBakgrunn
             ektefelleFritekst = request.ektefelleFritekst
             barnFritekst = request.barnFritekst
+            bestillersId = request.bestillersId
+        }
+
+    private fun lagInnvilgelseIkkeYrkesaktivFtrl(request: FattVedtakRequest, produserbaredokument: Produserbaredokumenter): BrevbestillingDto =
+        BrevbestillingDto().apply {
+            produserbardokument = produserbaredokument
+            mottaker = Mottakerroller.BRUKER
+            kopiMottakere = request.kopiMottakere
             bestillersId = request.bestillersId
         }
 

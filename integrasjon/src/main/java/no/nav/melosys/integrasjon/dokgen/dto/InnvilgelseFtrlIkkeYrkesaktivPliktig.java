@@ -5,14 +5,14 @@ import java.util.List;
 
 import com.fasterxml.jackson.annotation.JsonFormat;
 import com.fasterxml.jackson.annotation.JsonInclude;
-import no.nav.melosys.domain.brev.IkkeYrkesaktivPliktigFtrlBrevbestilling;
+import no.nav.melosys.domain.brev.InnvilgelseFtrlIkkeYrkesaktivPliktigBrevbestilling;
 import no.nav.melosys.domain.dokument.felles.Periode;
 import no.nav.melosys.domain.kodeverk.Mottakerroller;
 import no.nav.melosys.integrasjon.dokgen.dto.felles.SaksinfoBruker;
 
 import static com.fasterxml.jackson.annotation.JsonFormat.Shape.STRING;
 
-public class InnvilgelseIkkeYrkesaktivPliktigFtrl extends DokgenDto {
+public class InnvilgelseFtrlIkkeYrkesaktivPliktig extends DokgenDto {
 
     @JsonFormat(shape = STRING)
     private final LocalDate datoMottatt;
@@ -29,7 +29,7 @@ public class InnvilgelseIkkeYrkesaktivPliktigFtrl extends DokgenDto {
     private final String ikkeYrkesaktivRelasjonType;
     private final Periode medlemskapsperiode;
 
-    protected InnvilgelseIkkeYrkesaktivPliktigFtrl(IkkeYrkesaktivPliktigFtrlBrevbestilling brevbestilling) {
+    protected InnvilgelseFtrlIkkeYrkesaktivPliktig(InnvilgelseFtrlIkkeYrkesaktivPliktigBrevbestilling brevbestilling) {
         super(brevbestilling, Mottakerroller.BRUKER);
         var fagsak = brevbestilling.getBehandling().getFagsak();
 
@@ -58,6 +58,7 @@ public class InnvilgelseIkkeYrkesaktivPliktigFtrl extends DokgenDto {
     public String getBehandlingstype() {
         return behandlingstype;
     }
+
     public boolean getFlereLandUkjentHvilke() {
         return flereLandUkjentHvilke;
     }
@@ -100,7 +101,7 @@ public class InnvilgelseIkkeYrkesaktivPliktigFtrl extends DokgenDto {
     }
 
 
-    public static InnvilgelseIkkeYrkesaktivPliktigFtrl av(IkkeYrkesaktivPliktigFtrlBrevbestilling brevbestilling) {
-        return new InnvilgelseIkkeYrkesaktivPliktigFtrl(brevbestilling);
+    public static InnvilgelseFtrlIkkeYrkesaktivPliktig av(InnvilgelseFtrlIkkeYrkesaktivPliktigBrevbestilling brevbestilling) {
+        return new InnvilgelseFtrlIkkeYrkesaktivPliktig(brevbestilling);
     }
 }
