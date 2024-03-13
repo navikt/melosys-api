@@ -22,8 +22,9 @@ class TrygdeavgiftsberegningsRequestMapperTest {
         val medlemskapsperioder = lagMedlemskapsperioder()
         val skatteforholdTilNorge = lagSkatteforholdTilNorge()
         val inntektsperioder = lagInntektsperioder()
+        val fødselsDato = LocalDate.now().minusYears(20)
 
-        val (request, mapsList) = mapper.map(medlemskapsperioder, skatteforholdTilNorge, inntektsperioder)
+        val (request, mapsList) = mapper.map(medlemskapsperioder, skatteforholdTilNorge, inntektsperioder, fødselsDato)
         request.medlemskapsperioder.first().run {
             avgiftsdekninger.shouldContainAll(listOf(Avgiftsdekning.HELSEDEL_MED_SYKEPENGER, Avgiftsdekning.PENSJONSDEL_MED_YRKESSKADETRYGD))
             periode.fom shouldBe medlemskapsperioder[0].fom
