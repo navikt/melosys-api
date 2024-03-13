@@ -16,6 +16,7 @@ public class AnmodningsperiodeSvar {
 
     @MapsId
     @OneToOne(optional = false)
+    @JoinColumn(name = "ANMODNINGSPERIODE_ID")
     private Anmodningsperiode anmodningsperiode;
 
     @Enumerated(EnumType.STRING)

@@ -14,6 +14,7 @@ public class Behandlingsaarsak {
 
     @OneToOne(fetch = FetchType.LAZY, optional = false)
     @MapsId
+    @JoinColumn(name = "behandling_id")
     private Behandling behandling;
 
     @Enumerated(EnumType.STRING)
