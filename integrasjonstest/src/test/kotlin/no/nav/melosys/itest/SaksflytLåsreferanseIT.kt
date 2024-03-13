@@ -7,6 +7,7 @@ import no.nav.melosys.Application
 import no.nav.melosys.AwaitUtil.throwOnLogError
 import no.nav.melosys.LoggingTestUtils
 import no.nav.melosys.LoggingTestUtils.filterBuilder
+import no.nav.melosys.LoggingTestUtils.last
 import no.nav.melosys.ProsessRegister
 import no.nav.melosys.domain.manglendebetaling.Betalingsstatus
 import no.nav.melosys.domain.manglendebetaling.ManglendeFakturabetalingMelding
@@ -90,8 +91,7 @@ internal class SaksflytLåsreferanseIT(
             await.throwOnLogError(logItems)
                 .timeout(Duration.ofSeconds(30)).pollInterval(Duration.ofSeconds(1))
                 .until {
-                    logItems.filterBuilder.match<ProsessinstansFerdigListener>()
-                        .build().last().formattedMessage.contains("Prosessinstans(er) på vent med samme gruppe-prefiks: []")
+                    logItems.last<ProsessinstansFerdigListener>() == "Prosessinstans(er) på vent med samme gruppe-prefiks: []"
                 }
 
             logItems.filterBuilder
@@ -140,8 +140,7 @@ internal class SaksflytLåsreferanseIT(
             await.throwOnLogError(logItems)
                 .timeout(Duration.ofSeconds(30)).pollInterval(Duration.ofSeconds(1))
                 .until {
-                    logItems.filterBuilder.match<ProsessinstansFerdigListener>()
-                        .build().last().formattedMessage.contains("Prosessinstans(er) på vent med samme gruppe-prefiks: []")
+                    logItems.last<ProsessinstansFerdigListener>() == "Prosessinstans(er) på vent med samme gruppe-prefiks: []"
                 }
 
             logItems.filterBuilder
