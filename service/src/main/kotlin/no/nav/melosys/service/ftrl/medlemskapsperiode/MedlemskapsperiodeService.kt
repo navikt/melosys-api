@@ -164,20 +164,20 @@ class MedlemskapsperiodeService(
 
     private fun opphørOpprinneligeInnvilgedePerioderSomIkkeVidereføres(
         opprinneligeGjeldendeMedlemskapsperioder: List<Medlemskapsperiode>,
-        nyeMedlemskapsperioder: List<Medlemskapsperiode>
+        perioderSomVidereføres: List<Medlemskapsperiode>
     ) =
         opprinneligeGjeldendeMedlemskapsperioder
             .filter { it.erInnvilget() }
-            .filter { !eksistererMedlemskapsperiodeMedID(nyeMedlemskapsperioder, it.medlPeriodeID) }
+            .filterNot { eksistererMedlemskapsperiodeMedID(perioderSomVidereføres, it.medlPeriodeID) }
             .forEach { medlPeriodeService.avvisPeriodeOpphørt(it.medlPeriodeID) }
 
     private fun feilregistrerOpprinneligeOpphørtePerioderSomIkkeVidereføres(
         opprinneligeGjeldendeMedlemskapsperioder: List<Medlemskapsperiode>,
-        nyeMedlemskapsperioder: List<Medlemskapsperiode>
+        perioderSomVidereføres: List<Medlemskapsperiode>
     ) =
         opprinneligeGjeldendeMedlemskapsperioder
             .filter { it.erOpphørt() }
-            .filter { !eksistererMedlemskapsperiodeMedID(nyeMedlemskapsperioder, it.medlPeriodeID) }
+            .filterNot { eksistererMedlemskapsperiodeMedID(perioderSomVidereføres, it.medlPeriodeID) }
             .forEach { medlPeriodeService.avvisPeriodeFeilregistrert(it.medlPeriodeID) }
 
     private fun opprettEllerOppdaterInnvilgedePerioder(behandlingID: Long, nyeMedlemskapsperioder: List<Medlemskapsperiode>) =
