@@ -152,11 +152,13 @@ class MedlemskapsperiodeService(
     fun erstattMedlemskapsperioder(behandlingID: Long, opprinneligBehandlingID: Long, nyeMedlemskapsperioder: List<Medlemskapsperiode>) {
         val opprinneligeMedlemskapsperioder = hentMedlemskapsperioder(opprinneligBehandlingID)
             .filter { it.erInnvilget() || it.erOpphørt() }
+        val perioderSomVidereføres = nyeMedlemskapsperioder
+            .filter { it.erInnvilget() || it.erOpphørt() }
 
-        opphørOpprinneligeInnvilgedePerioderSomIkkeVidereføres(opprinneligeMedlemskapsperioder, nyeMedlemskapsperioder)
+        opphørOpprinneligeInnvilgedePerioderSomIkkeVidereføres(opprinneligeMedlemskapsperioder, perioderSomVidereføres)
         opprettEllerOppdaterInnvilgedePerioder(behandlingID, nyeMedlemskapsperioder)
 
-        feilregistrerOpprinneligeOpphørtePerioderSomIkkeVidereføres(opprinneligeMedlemskapsperioder, nyeMedlemskapsperioder)
+        feilregistrerOpprinneligeOpphørtePerioderSomIkkeVidereføres(opprinneligeMedlemskapsperioder, perioderSomVidereføres)
         opprettEllerOppdaterOpphørtePerioder(behandlingID, nyeMedlemskapsperioder)
     }
 
