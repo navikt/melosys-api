@@ -5,15 +5,19 @@ import java.util.Set;
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
 import no.nav.melosys.domain.avklartefakta.Avklartefakta;
+import no.nav.melosys.domain.kodeverk.Arbeidssituasjontype;
+import no.nav.melosys.domain.kodeverk.Avklartefaktatyper;
 import no.nav.melosys.domain.kodeverk.Ikkeyrkesaktivoppholdtype;
 import no.nav.melosys.domain.kodeverk.Ikkeyrkesaktivrelasjontype;
 import no.nav.melosys.service.avklartefakta.*;
+import no.nav.melosys.service.ftrl.bestemmelse.avklartefakta.AvklarteFaktaForBestemmelse;
 import no.nav.melosys.service.tilgang.Aksesskontroll;
 import no.nav.melosys.service.tilgang.Ressurs;
 import no.nav.melosys.tjenester.gui.dto.oppsummertefakta.ArbeidslandDto;
 import no.nav.melosys.tjenester.gui.dto.oppsummertefakta.VirksomheterDto;
 import no.nav.security.token.support.core.api.Protected;
 import org.springframework.context.annotation.Scope;
+import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.context.WebApplicationContext;
 
@@ -29,12 +33,14 @@ public class AvklartefaktaTjeneste {
     private final AvklarteFaktaArbeidslandService avklarteFaktaArbeidslandService;
     private final AvklartManglendeInnbetalingService avklartManglendeInnbetalingService;
     private final AvklartFamilieRelasjonTypeService avklartFamilieRelasjonTypeService;
+    private final AvklartArbeidssituasjonTypeService avklartArbeidssituasjonTypeService;
     private final AvklartOppholdTypeService avklartOppholdTypeService;
     private final Aksesskontroll aksesskontroll;
 
     public AvklartefaktaTjeneste(AvklartefaktaService avklartefaktaService,
                                  AvklarteVirksomheterService avklarteVirksomheterService,
                                  AvklarteFaktaArbeidslandService avklarteFaktaArbeidslandService,
+                                 AvklartArbeidssituasjonTypeService avklartArbeidssituasjonTypeService,
                                  Aksesskontroll aksesskontroll,
                                  AvklartManglendeInnbetalingService avklartManglendeInnbetalingService,
                                  AvklartFamilieRelasjonTypeService avklartFamilieRelasjonTypeService,
@@ -42,6 +48,7 @@ public class AvklartefaktaTjeneste {
         this.avklartefaktaService = avklartefaktaService;
         this.avklarteVirksomheterService = avklarteVirksomheterService;
         this.avklarteFaktaArbeidslandService = avklarteFaktaArbeidslandService;
+        this.avklartArbeidssituasjonTypeService = avklartArbeidssituasjonTypeService;
         this.aksesskontroll = aksesskontroll;
         this.avklartManglendeInnbetalingService = avklartManglendeInnbetalingService;
         this.avklartFamilieRelasjonTypeService = avklartFamilieRelasjonTypeService;
@@ -108,6 +115,29 @@ public class AvklartefaktaTjeneste {
 
         return new AvklartefaktaOppsummeringDto(avklartefaktaService.hentAlleAvklarteFakta(behandlingID));
     }
+
+    @DeleteMapping("{behandlingID}/{avklartefaktatype}")
+    @ApiOperation(value = "Slett avklartefakta", response = AvklartefaktaOppsummeringDto.class)
+    public AvklartefaktaOppsummeringDto slettAvklarteFakta(@PathVariable("behandlingID") long behandlingID,
+                                                                                  @PathVariable Avklartefaktatyper avklartefaktatype) {
+        aksesskontroll.autoriserSkrivTilRessurs(behandlingID, Ressurs.AVKLARTE_FAKTA);
+
+        avklartefaktaService.slettAvklarteFakta(behandlingID, avklartefaktatype);
+
+        return new AvklartefaktaOppsummeringDto(avklartefaktaService.hentAlleAvklarteFakta(behandlingID));
+    }
+
+    @PostMapping("{behandlingID}/arbeidssituasjontype")
+    @ApiOperation(value = "Lagre arbeidssituasjontype som avklartefakta", response = AvklartefaktaOppsummeringDto.class)
+    public AvklartefaktaOppsummeringDto lagreArbeidssituasjonTypeSomAvklarteFakta(@PathVariable("behandlingID") long behandlingID,
+                                                                                  @RequestBody Arbeidssituasjontype arbeidssituasjontype) {
+        aksesskontroll.autoriserSkrivTilRessurs(behandlingID, Ressurs.AVKLARTE_FAKTA);
+
+        avklartArbeidssituasjonTypeService.lagreArbeidssituasjonTypeSomAvklarteFakta(behandlingID, arbeidssituasjontype);
+
+        return new AvklartefaktaOppsummeringDto(avklartefaktaService.hentAlleAvklarteFakta(behandlingID));
+    }
+
 
     @PostMapping("{behandlingID}/familierelasjonstype")
     @ApiOperation(value = "Lagre familierelasjonstype for ikke yrkesaktive som avklartefakta", response = AvklartefaktaOppsummeringDto.class)

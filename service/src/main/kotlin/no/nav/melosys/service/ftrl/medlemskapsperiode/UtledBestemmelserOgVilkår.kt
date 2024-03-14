@@ -26,10 +26,7 @@ class UtledBestemmelserOgVilkår(val unleash: Unleash) {
     )
 
     val yrkesaktivBestemmelserOgVilkårGammel = mapOf<Folketrygdloven_kap2_bestemmelser, Collection<Vilkaar>>(
-        Pair(FTRL_KAP2_2_1_FØRSTE_LEDD, emptySet()),
-        Pair(FTRL_KAP2_2_1_FJERDE_LEDD, emptySet()),
         Pair(FTRL_KAP2_2_2, emptySet()),
-        Pair(FTRL_KAP2_2_3_FØRSTE_LEDD, emptySet()),
         Pair(FTRL_KAP2_2_3_ANDRE_LEDD, emptySet()),
         Pair(FTRL_KAP2_2_5_FØRSTE_LEDD_A, emptySet()),
         Pair(FTRL_KAP2_2_5_FØRSTE_LEDD_B, emptySet()),
@@ -38,9 +35,6 @@ class UtledBestemmelserOgVilkår(val unleash: Unleash) {
         Pair(FTRL_KAP2_2_5_FØRSTE_LEDD_E, emptySet()),
         Pair(FTRL_KAP2_2_5_FØRSTE_LEDD_F, emptySet()),
         Pair(FTRL_KAP2_2_5_FØRSTE_LEDD_G, emptySet()),
-        Pair(FTRL_KAP2_2_6_FØRSTE_LEDD_A, emptySet()),
-        Pair(FTRL_KAP2_2_6_FØRSTE_LEDD_B, emptySet()),
-        Pair(FTRL_KAP2_2_6_FØRSTE_LEDD_C, emptySet()),
         Pair(FTRL_KAP2_2_7_FØRSTE_LEDD, emptySet()),
         Pair(FTRL_KAP2_2_7A, emptySet()),
         Pair(
@@ -54,10 +48,7 @@ class UtledBestemmelserOgVilkår(val unleash: Unleash) {
     )
 
     val yrkesaktivBestemmelserOgVilkårToggle = mapOf<Folketrygdloven_kap2_bestemmelser, Collection<Vilkaar>>(
-        Pair(FTRL_KAP2_2_1_FØRSTE_LEDD, emptySet()),
-        Pair(FTRL_KAP2_2_1_FJERDE_LEDD, emptySet()),
         Pair(FTRL_KAP2_2_2, emptySet()),
-        Pair(FTRL_KAP2_2_3_FØRSTE_LEDD, emptySet()),
         Pair(FTRL_KAP2_2_3_ANDRE_LEDD, emptySet()),
         Pair(FTRL_KAP2_2_5_FØRSTE_LEDD_A, emptySet()),
         Pair(FTRL_KAP2_2_5_FØRSTE_LEDD_B, emptySet()),
@@ -66,9 +57,6 @@ class UtledBestemmelserOgVilkår(val unleash: Unleash) {
         Pair(FTRL_KAP2_2_5_FØRSTE_LEDD_E, emptySet()),
         Pair(FTRL_KAP2_2_5_FØRSTE_LEDD_F, emptySet()),
         Pair(FTRL_KAP2_2_5_FØRSTE_LEDD_G, emptySet()),
-        Pair(FTRL_KAP2_2_6_FØRSTE_LEDD_A, emptySet()),
-        Pair(FTRL_KAP2_2_6_FØRSTE_LEDD_B, emptySet()),
-        Pair(FTRL_KAP2_2_6_FØRSTE_LEDD_C, emptySet()),
         Pair(
             FTRL_KAP2_2_7_FØRSTE_LEDD,
             LinkedHashSet(
@@ -115,9 +103,7 @@ class UtledBestemmelserOgVilkår(val unleash: Unleash) {
         IkkeYrkesaktivBestemmelser.bestemmelser.associateWith { emptySet() }
 
     val pensjonistBestemmelserOgVilkår = mapOf<Folketrygdloven_kap2_bestemmelser, Collection<Vilkaar>>(
-        Pair(FTRL_KAP2_2_1_FØRSTE_LEDD, emptySet()),
-        Pair(FTRL_KAP2_2_1_FJERDE_LEDD, emptySet()),
-        Pair(FTRL_KAP2_2_3_FØRSTE_LEDD, emptySet()),
+        Pair(FTRL_KAP2_2_1, emptySet()),
         Pair(FTRL_KAP2_2_5_ANDRE_LEDD, emptySet()),
         Pair(FTRL_KAP2_2_7_FØRSTE_LEDD, emptySet()),
         Pair(FTRL_KAP2_2_7_FJERDE_LEDD, emptySet()),

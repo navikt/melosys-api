@@ -1,5 +1,14 @@
 package no.nav.melosys.integrasjon.trygdeavgift;
 
+import java.io.IOException;
+import java.math.BigDecimal;
+import java.net.URISyntaxException;
+import java.nio.file.Files;
+import java.nio.file.Paths;
+import java.time.LocalDate;
+import java.util.Collections;
+import java.util.List;
+
 import no.nav.melosys.integrasjon.trygdeavgift.dto.PengerDto;
 import no.nav.melosys.integrasjon.trygdeavgift.dto.TrygdeavgiftsberegningRequest;
 import no.nav.melosys.integrasjon.trygdeavgift.dto.TrygdeavgiftsberegningResponse;
@@ -11,14 +20,6 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.MediaType;
-
-import java.io.IOException;
-import java.math.BigDecimal;
-import java.net.URISyntaxException;
-import java.nio.file.Files;
-import java.nio.file.Paths;
-import java.util.Collections;
-import java.util.List;
 
 import static java.lang.String.format;
 import static org.assertj.core.api.Assertions.assertThat;
@@ -57,7 +58,7 @@ class TrygdeavgiftConsumerTest {
     }
 
     private TrygdeavgiftsberegningRequest lagTrygdeavgiftsberegningRequest() {
-        return new TrygdeavgiftsberegningRequest(Collections.emptySet(), Collections.emptySet(), Collections.emptyList());
+        return new TrygdeavgiftsberegningRequest(Collections.emptySet(), Collections.emptySet(), Collections.emptyList(), LocalDate.now().minusYears(20));
     }
 
     private String hentMockRespons() throws URISyntaxException, IOException {
