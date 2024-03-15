@@ -8,6 +8,7 @@ import io.kotest.matchers.collections.shouldHaveSize
 import io.kotest.matchers.nulls.shouldNotBeNull
 import io.kotest.matchers.shouldBe
 import io.kotest.matchers.string.shouldContain
+import io.mockk.confirmVerified
 import io.mockk.every
 import io.mockk.impl.annotations.MockK
 import io.mockk.impl.annotations.RelaxedMockK
@@ -496,6 +497,27 @@ class MedlemskapsperiodeServiceTest {
         verify(exactly = 1) { medlPeriodeService.oppdaterPeriodeEndelig(BEHANDLING_ID_2, fellesMedlemskapsperiode) }
         verify(exactly = 1) { medlPeriodeService.avvisPeriodeOpphørt(MEDL_ID_2) }
         verify(exactly = 1) { medlPeriodeService.opprettPeriodeEndelig(BEHANDLING_ID_2, nyMedlemskapsperiode) }
+    }
+
+    @Test
+    fun `erstattMedlemskapsperioder skal fjerne innvilgede perioder som blir avslått`() {
+        val gammelPeriode = Medlemskapsperiode().apply {
+            medlPeriodeID = MEDL_ID_1
+            innvilgelsesresultat = InnvilgelsesResultat.INNVILGET
+        }
+        val nyPeriode = Medlemskapsperiode().apply {
+            medlPeriodeID = MEDL_ID_1
+            innvilgelsesresultat = InnvilgelsesResultat.AVSLAATT
+        }
+        every { medlemAvFolketrygdenService.finnMedlemAvFolketrygden(BEHANDLING_ID_1) } returns
+            Optional.of(MedlemAvFolketrygden().apply { medlemskapsperioder = listOf(gammelPeriode) })
+
+
+        medlemskapsperiodeService.erstattMedlemskapsperioder(BEHANDLING_ID_2, BEHANDLING_ID_1, listOf(nyPeriode))
+
+
+        verify(exactly = 1) { medlPeriodeService.avvisPeriodeOpphørt(MEDL_ID_1) }
+        confirmVerified(medlPeriodeService)
     }
 
     @Test
