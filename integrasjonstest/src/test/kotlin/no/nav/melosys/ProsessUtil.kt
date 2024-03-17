@@ -15,6 +15,7 @@ import no.nav.melosys.saksflytapi.domain.Prosessinstans
 import org.springframework.context.event.EventListener
 import org.springframework.stereotype.Component
 import java.time.Duration
+import java.time.LocalDateTime
 import java.util.concurrent.CopyOnWriteArrayList
 
 @Component
@@ -45,11 +46,12 @@ class ProsessUtil(
         waitForProcessCount: Int = 0,
         process: () -> Unit
     ): Prosessinstans {
+        val startTime = LocalDateTime.now()
         process()
         if (waitForProcessCount > 0) waitForProcessesToStart(waitForProcessCount)
-        val journalføringProsess = waitForAndReturnProcess(waitForprosessType)
+        val journalføringProsess = waitForAndReturnProcess(waitForprosessType, startTime)
         withClue("also wait for prosessTypes: $alsoWaitForprosessType") {
-            alsoWaitForprosessType.forEach { waitForAndReturnProcess(it) }
+            alsoWaitForprosessType.forEach { waitForAndReturnProcess(it, startTime) }
         }
         if (waitForProcessCount > 0) waitForProcessesToFinnish(waitForProcessCount)
         return journalføringProsess
@@ -84,18 +86,18 @@ class ProsessUtil(
     }
 
 
-    protected fun waitForAndReturnProcess(prosessType: ProsessType): Prosessinstans {
+    protected fun waitForAndReturnProcess(prosessType: ProsessType, startTime: LocalDateTime): Prosessinstans {
         withClue("wait for process type:$prosessType to start") {
             AwaitUtil.awaitWithFailOnLogErrors {
                 pollDelay(pollDelay)
                     .timeout(timeOutFindingProsess)
                     .onTimeout { e ->
                         withClue(e.message) {
-                            val types = prosessinstanserOpprettet.map { it.type }
+                            val types = prosessinstanserOpprettet.filter { it.registrertDato > startTime }.map { it.type }
                             types shouldContain prosessType
                         }
                     }
-                    .waitUntil { prosessinstanserOpprettet.any { it.type == prosessType } }
+                    .waitUntil { prosessinstanserOpprettet.filter { it.registrertDato > startTime }.any { it.type == prosessType } }
             }
         }
 
@@ -105,7 +107,8 @@ class ProsessUtil(
                 pollDelay(pollDelay)
                     .timeout(timeOut)
                     .onTimeout { e ->
-                        val prosesserStartet = prosessinstanserFerdig.firstOrNull { it.type == prosessType }?.status
+                        val prosesserStartet = prosessinstanserFerdig.filter { it.registrertDato > startTime }
+                            .firstOrNull { it.type == prosessType }?.status
                         withClue(e.message) {
                             withClue("prosess med type: $prosessType har status $prosesserStartet") {
                                 prosesserStartet shouldBe ProsessStatus.FERDIG
@@ -113,7 +116,7 @@ class ProsessUtil(
                         }
                     }
                     .waitUntil {
-                        current = prosessinstanserFerdig
+                        current = prosessinstanserFerdig.filter { it.registrertDato > startTime }
                             .firstOrNull { it.type == prosessType && it.status == ProsessStatus.FERDIG }
                         current != null
                     }
