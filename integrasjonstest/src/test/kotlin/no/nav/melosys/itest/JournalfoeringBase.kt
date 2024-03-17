@@ -13,7 +13,6 @@ import no.nav.melosys.domain.kodeverk.Landkoder
 import no.nav.melosys.melosysmock.oppgave.Oppgave
 import no.nav.melosys.melosysmock.sak.SakRepo
 import no.nav.melosys.melosysmock.testdata.TestDataGenerator
-import no.nav.melosys.saksflyt.ProsessinstansRepository
 import no.nav.melosys.saksflytapi.domain.ProsessType
 import no.nav.melosys.saksflytapi.domain.Prosessinstans
 import no.nav.melosys.service.felles.dto.SoeknadslandDto
@@ -23,21 +22,23 @@ import no.nav.melosys.service.oppgave.OppgaveService
 import no.nav.melosys.sikkerhet.context.ThreadLocalAccessInfo
 import org.junit.jupiter.api.AfterEach
 import org.junit.jupiter.api.BeforeEach
+import org.springframework.beans.factory.annotation.Autowired
 import java.time.LocalDate
 import java.util.*
 
 class JournalfoeringBase(
     protected val testDataGenerator: TestDataGenerator,
     protected val journalføringService: JournalfoeringService,
-    protected val oppgaveService: OppgaveService,
-    protected val prosessinstansRepository: ProsessinstansRepository,
+    protected val oppgaveService: OppgaveService
 ) : ComponentTestBase() {
 
     protected val mockServer: WireMockServer =
         WireMockServer(WireMockConfiguration.wireMockConfig().port(8094))
 
     private val processUUID = UUID.randomUUID()
-    private val prosessUtil by lazy { ProsessUtil(prosessinstansRepository) }
+
+    @Autowired
+    private lateinit var prosessUtil: ProsessUtil
 
     @BeforeEach
     fun before() {
@@ -70,6 +71,7 @@ class JournalfoeringBase(
     fun after() {
         ThreadLocalAccessInfo.afterExecuteProcess(processUUID)
         mockServer.stop()
+        prosessUtil.clear()
     }
 
     protected fun journalførOgVentTilProsesserErFerdige(
@@ -89,8 +91,9 @@ class JournalfoeringBase(
     protected fun executeAndWait(
         waitForprosessType: ProsessType,
         alsoWaitForprosessType: List<ProsessType> = listOf(),
+        count: Int = 0,
         process: () -> Unit
-    ): Prosessinstans = prosessUtil.executeAndWait(waitForprosessType, alsoWaitForprosessType, process)
+    ): Prosessinstans = prosessUtil.executeAndWait(waitForprosessType, alsoWaitForprosessType, count, process)
 
     protected fun lagJfrOppgave(): Oppgave =
         testDataGenerator.opprettJfrOppgave(tilordnetRessurs = "Z123456", forVirksomhet = false)

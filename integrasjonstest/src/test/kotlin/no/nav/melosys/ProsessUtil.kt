@@ -2,59 +2,110 @@ package no.nav.melosys
 
 import io.kotest.assertions.withClue
 import io.kotest.matchers.collections.shouldContain
+import io.kotest.matchers.collections.shouldHaveSize
 import io.kotest.matchers.nulls.shouldNotBeNull
 import io.kotest.matchers.shouldBe
 import no.nav.melosys.AwaitUtil.onTimeout
 import no.nav.melosys.AwaitUtil.waitUntil
-import no.nav.melosys.saksflyt.ProsessinstansRepository
+import no.nav.melosys.saksflyt.ProsessinstansFerdigEvent
+import no.nav.melosys.saksflytapi.ProsessinstansOpprettetEvent
 import no.nav.melosys.saksflytapi.domain.ProsessStatus
 import no.nav.melosys.saksflytapi.domain.ProsessType
 import no.nav.melosys.saksflytapi.domain.Prosessinstans
+import org.springframework.context.event.EventListener
 import org.springframework.stereotype.Component
 import java.time.Duration
-import java.time.LocalDateTime
-import java.util.*
+import java.util.concurrent.CopyOnWriteArrayList
 
 @Component
 class ProsessUtil(
-    private val prosessinstansRepository: ProsessinstansRepository
+    private val prosessinstanserOpprettet: MutableList<Prosessinstans> = CopyOnWriteArrayList(),
+    private val prosessinstanserFerdig: MutableList<Prosessinstans> = CopyOnWriteArrayList()
 ) {
+    @EventListener
+    fun prosessinstansOpprettet(prosessinstansOpprettetEvent: ProsessinstansOpprettetEvent) {
+        println("################# Opprettet- ${prosessinstansOpprettetEvent.hentProsessinstans().type}")
+        prosessinstanserOpprettet.add(prosessinstansOpprettetEvent.hentProsessinstans())
+    }
+
+    @EventListener
+    fun prosessinstansFerdig(prosessinstansFerdigEvent: ProsessinstansFerdigEvent) {
+        println("################# Ferdig- ${prosessinstansFerdigEvent.hentProsessinstans().type}")
+        prosessinstanserFerdig.add(prosessinstansFerdigEvent.hentProsessinstans())
+    }
+
+    fun clear() {
+        prosessinstanserOpprettet.clear()
+        prosessinstanserFerdig.clear()
+    }
+
     fun executeAndWait(
         waitForprosessType: ProsessType,
         alsoWaitForprosessType: List<ProsessType> = listOf(),
+        waitForProcessCount: Int = 0,
         process: () -> Unit
     ): Prosessinstans {
-        val startTime = LocalDateTime.now()
         process()
-        val journalføringProsessID = finnProsess(waitForprosessType, startTime)
+        if (waitForProcessCount > 0) waitForProcessesToStart(waitForProcessCount)
+        val journalføringProsess = waitForAndReturnProcess(waitForprosessType)
         withClue("also wait for prosessTypes: $alsoWaitForprosessType") {
-            alsoWaitForprosessType.forEach { finnProsess(it, startTime) }
+            alsoWaitForprosessType.forEach { waitForAndReturnProcess(it) }
         }
-        return prosessinstansRepository.findById(journalføringProsessID).get()
+        if (waitForProcessCount > 0) waitForProcessesToFinnish(waitForProcessCount)
+        return journalføringProsess
     }
 
-    protected fun finnProsess(prosessType: ProsessType, startTid: LocalDateTime): UUID {
-        withClue("wait for prosees type:$prosessType to start") {
+    protected fun waitForProcessesToStart(count: Int) {
+        withClue("wait for $count processes to start") {
+            AwaitUtil.awaitWithFailOnLogErrors {
+                pollDelay(pollDelay)
+                    .timeout(timeOutFindingProsess)
+                    .onTimeout { e ->
+                        withClue("wait for $count processes to start - ${e.message}") {
+                            prosessinstanserOpprettet.shouldHaveSize(count)
+                        }
+                    }.waitUntil { prosessinstanserOpprettet.size == count }
+            }
+        }
+    }
+
+    protected fun waitForProcessesToFinnish(count: Int) {
+        withClue("wait for $count processes to finnish") {
+            AwaitUtil.awaitWithFailOnLogErrors {
+                pollDelay(pollDelay)
+                    .timeout(timeOutFindingProsess)
+                    .onTimeout { e ->
+                        withClue("wait for $count processes to finnish - ${e.message}") {
+                            prosessinstanserFerdig.shouldHaveSize(count)
+                        }
+                    }.waitUntil { prosessinstanserFerdig.size == count }
+            }
+        }
+    }
+
+
+    protected fun waitForAndReturnProcess(prosessType: ProsessType): Prosessinstans {
+        withClue("wait for process type:$prosessType to start") {
             AwaitUtil.awaitWithFailOnLogErrors {
                 pollDelay(pollDelay)
                     .timeout(timeOutFindingProsess)
                     .onTimeout { e ->
                         withClue(e.message) {
-                            val types = prosessinstansRepository.findAllAfterDate(startTid).map { it.type }
+                            val types = prosessinstanserOpprettet.map { it.type }
                             types shouldContain prosessType
                         }
                     }
-                    .waitUntil { prosessinstansRepository.findAllAfterDate(startTid).any { it.type == prosessType } }
+                    .waitUntil { prosessinstanserOpprettet.any { it.type == prosessType } }
             }
         }
 
         withClue("wait for prosees type:$prosessType to have status FERDIG") {
             return AwaitUtil.awaitWithFailOnLogErrors {
                 var current: Prosessinstans? = null
-                timeout(timeOut)
-                    .pollInterval(pollInterval)
+                pollDelay(pollDelay)
+                    .timeout(timeOut)
                     .onTimeout { e ->
-                        val prosesserStartet = prosessinstansRepository.findAllAfterDate(startTid).firstOrNull { it.type == prosessType }?.status
+                        val prosesserStartet = prosessinstanserFerdig.firstOrNull { it.type == prosessType }?.status
                         withClue(e.message) {
                             withClue("prosess med type: $prosessType har status $prosesserStartet") {
                                 prosesserStartet shouldBe ProsessStatus.FERDIG
@@ -62,11 +113,11 @@ class ProsessUtil(
                         }
                     }
                     .waitUntil {
-                        current = prosessinstansRepository.findAllAfterDate(startTid)
+                        current = prosessinstanserFerdig
                             .firstOrNull { it.type == prosessType && it.status == ProsessStatus.FERDIG }
                         current != null
                     }
-                current.shouldNotBeNull().id
+                current.shouldNotBeNull()
             }
         }
     }
