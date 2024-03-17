@@ -9,6 +9,7 @@ import org.junit.jupiter.api.AfterAll
 import org.junit.jupiter.api.BeforeAll
 import org.junit.jupiter.api.TestInstance
 import java.time.Duration
+import java.time.LocalDateTime
 import java.util.*
 import kotlin.test.Test
 
@@ -47,6 +48,7 @@ class ProsessUtilTest {
             Prosessinstans().apply {
                 type = ProsessType.IVERKSETT_VEDTAK_EOS
                 status = ProsessStatus.KLAR
+                registrertDato = LocalDateTime.now().plusMinutes(1)
             }
         )
 
@@ -66,6 +68,7 @@ class ProsessUtilTest {
             id = UUID.randomUUID()
             type = ProsessType.JFR_KNYTT
             status = ProsessStatus.FERDIG
+            registrertDato = LocalDateTime.now().plusMinutes(1)
         })
 
         shouldThrow<AssertionError> {
@@ -87,11 +90,13 @@ class ProsessUtilTest {
                 id = UUID.randomUUID()
                 type = ProsessType.JFR_KNYTT
                 status = ProsessStatus.FERDIG
+                registrertDato = LocalDateTime.now().plusMinutes(1)
             },
             Prosessinstans().apply {
                 id = UUID.randomUUID()
                 type = ProsessType.IVERKSETT_VEDTAK_EOS
                 status = ProsessStatus.KLAR
+                registrertDato = LocalDateTime.now().plusMinutes(1)
             },
         )
 
@@ -115,6 +120,7 @@ class ProsessUtilTest {
             Prosessinstans().apply {
                 type = ProsessType.JFR_KNYTT
                 status = ProsessStatus.FERDIG
+                registrertDato = LocalDateTime.now().plusMinutes(1)
             }
         )
 
@@ -131,6 +137,7 @@ class ProsessUtilTest {
             id = randomUUID
             type = ProsessType.JFR_KNYTT
             status = ProsessStatus.FERDIG
+            registrertDato = LocalDateTime.now().plusMinutes(1)
         })
 
         ProsessUtil(prosessinstanser, prosessinstanser).executeAndWait(
