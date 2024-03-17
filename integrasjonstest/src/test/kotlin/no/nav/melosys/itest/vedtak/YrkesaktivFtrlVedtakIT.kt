@@ -258,7 +258,7 @@ class YrkesaktivFtrlVedtakIT(
 
         executeAndWait(
             waitForprosessType = ProsessType.IVERKSETT_VEDTAK_FTRL,
-            alsoWaitForprosessType = listOf(ProsessType.OPPRETT_OG_DISTRIBUER_BREV, ProsessType.OPPRETT_REPLIKERT_BEHANDLING_FOR_SAK)
+            alsoWaitForprosessType = listOf(ProsessType.OPPRETT_OG_DISTRIBUER_BREV)
         ) {
             vedtaksfattingFasade.fattVedtak(behandlingsId, vedtakRequest)
         }
