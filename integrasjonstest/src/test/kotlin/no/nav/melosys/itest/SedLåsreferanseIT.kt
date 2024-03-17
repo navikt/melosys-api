@@ -1,27 +1,22 @@
 package no.nav.melosys.itest
 
-import io.kotest.assertions.withClue
 import io.kotest.matchers.shouldBe
 import io.mockk.CapturingSlot
 import io.mockk.every
 import io.mockk.mockk
 import no.nav.melosys.Application
-import no.nav.melosys.AwaitUtil.onTimeout
-import no.nav.melosys.AwaitUtil.throwOnLogError
-import no.nav.melosys.AwaitUtil.waitUntil
 import no.nav.melosys.LoggingTestUtils
 import no.nav.melosys.LoggingTestUtils.filterBuilder
-import no.nav.melosys.LoggingTestUtils.last
 import no.nav.melosys.ProsessRegister
+import no.nav.melosys.ProsessUtil
 import no.nav.melosys.domain.eessi.melding.MelosysEessiMelding
 import no.nav.melosys.saksflyt.ProsessinstansBehandler
-import no.nav.melosys.saksflyt.ProsessinstansFerdigListener
 import no.nav.melosys.saksflyt.steg.sed.mottak.SedMottakRuting
 import no.nav.melosys.saksflytapi.ProsessinstansService
 import no.nav.melosys.saksflytapi.domain.ProsessSteg
+import no.nav.melosys.saksflytapi.domain.ProsessType
 import no.nav.melosys.saksflytapi.domain.Prosessinstans
 import no.nav.security.token.support.spring.test.EnableMockOAuth2Server
-import org.awaitility.kotlin.await
 import org.junit.jupiter.api.AfterEach
 import org.junit.jupiter.api.Test
 import org.springframework.beans.factory.annotation.Autowired
@@ -34,7 +29,6 @@ import org.springframework.context.annotation.Primary
 import org.springframework.kafka.test.context.EmbeddedKafka
 import org.springframework.test.annotation.DirtiesContext
 import org.springframework.test.context.ActiveProfiles
-import java.time.Duration
 
 @ActiveProfiles("test")
 @SpringBootTest(
@@ -52,10 +46,14 @@ import java.time.Duration
 @Import(SedLåsreferanseIT.TestConfig::class)
 internal class SedLåsreferanseIT(
     @Autowired private val prosessinstansService: ProsessinstansService,
-    @Autowired private val prosessRegister: ProsessRegister
+    @Autowired private val prosessRegister: ProsessRegister,
+    @Autowired private val prosessUtil: ProsessUtil
 ) : OracleTestContainerBase() {
     @AfterEach
-    fun setUp() = prosessRegister.clear()
+    fun afterEach() {
+        prosessRegister.clear()
+        prosessUtil.clear()
+    }
 
     @Test
     fun `ikke kjør samtidig når sed har samme rinaSaksnummer men forsjellig sedId, sedVersjon`() {
@@ -73,16 +71,13 @@ internal class SedLåsreferanseIT(
             val sed1ås = sed1.lagUnikIdentifikator()
             val sed2ås = sed2.lagUnikIdentifikator()
 
-            prosessRegister.registrer("sed1Prosess") { prosessinstansService.opprettProsessinstansSedMottak(sed1) }
-            prosessRegister.registrer("sed2Prosess") { prosessinstansService.opprettProsessinstansSedMottak(sed2) }
-
-            val testFinishedLogline = "Prosessinstans(er) på vent med samme gruppe-prefiks: []"
-            await.throwOnLogError(logItems).atMost(Duration.ofSeconds(20))
-                .onTimeout { e ->
-                    withClue("last log line was not as expected - ${e.message}") {
-                        logItems.last<ProsessinstansFerdigListener>() shouldBe testFinishedLogline
-                    }
-                }.waitUntil { logItems.last<ProsessinstansFerdigListener>() == testFinishedLogline }
+            prosessUtil.executeAndWait(
+                waitForprosessType = ProsessType.MOTTAK_SED,
+                waitForProcessCount = 2
+            ) {
+                prosessRegister.registrer("sed1Prosess") { prosessinstansService.opprettProsessinstansSedMottak(sed1) }
+                prosessRegister.registrer("sed2Prosess") { prosessinstansService.opprettProsessinstansSedMottak(sed2) }
+            }
 
             logItems.filterBuilder
                 .match<ProsessinstansBehandler>()
@@ -110,16 +105,13 @@ internal class SedLåsreferanseIT(
             }
             val sed1ås = sed1.lagUnikIdentifikator()
 
-            prosessRegister.registrer("førsteProsess") { prosessinstansService.opprettProsessinstansSedMottak(sed1) }
-            prosessRegister.registrer("duplikatProsess") { prosessinstansService.opprettProsessinstansSedMottak(sed1) }
-
-            val testFinishedLogline = "Prosessinstans(er) på vent med samme gruppe-prefiks: []"
-            await.throwOnLogError(logItems).atMost(Duration.ofSeconds(20))
-                .onTimeout { e ->
-                    withClue("last log line was not as expected - ${e.message}") {
-                        logItems.last<ProsessinstansFerdigListener>() shouldBe testFinishedLogline
-                    }
-                }.waitUntil { logItems.last<ProsessinstansFerdigListener>() == testFinishedLogline }
+            prosessUtil.executeAndWait(
+                waitForprosessType = ProsessType.MOTTAK_SED,
+                waitForProcessCount = 2
+            ) {
+                prosessRegister.registrer("førsteProsess") { prosessinstansService.opprettProsessinstansSedMottak(sed1) }
+                prosessRegister.registrer("duplikatProsess") { prosessinstansService.opprettProsessinstansSedMottak(sed1) }
+            }
 
             logItems.filterBuilder
                 .match<ProsessinstansBehandler>()
