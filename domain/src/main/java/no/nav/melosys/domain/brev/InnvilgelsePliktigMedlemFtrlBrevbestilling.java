@@ -15,7 +15,8 @@ public class InnvilgelsePliktigMedlemFtrlBrevbestilling extends DokgenBrevbestil
     private String ikkeYrkesaktivOppholdType;
     private String ikkeYrkesaktivRelasjonType;
     private Periode medlemskapsperiode;
-    private String trygdeavgiftFritekst; //TODO
+    private String trygdeavgiftFritekst;
+    private boolean harLavSatsPgaAlder;
 
     public InnvilgelsePliktigMedlemFtrlBrevbestilling() {
         super();
@@ -33,6 +34,16 @@ public class InnvilgelsePliktigMedlemFtrlBrevbestilling extends DokgenBrevbestil
         this.ikkeYrkesaktivRelasjonType = builder.ikkeYrkesaktivRelasjonType;
         this.medlemskapsperiode = builder.medlemskapsperiode;
         this.land = builder.land;
+        this.trygdeavgiftFritekst = builder.trygdeavgiftFritekst;
+        this.harLavSatsPgaAlder = builder.harLavSatsPgaAlder;
+    }
+
+    public boolean harLavSatsPgaAlder() {
+        return harLavSatsPgaAlder;
+    }
+
+    public void harLavSatsPgaAlder(boolean harLavSatsPgaAlder) {
+        this.harLavSatsPgaAlder = harLavSatsPgaAlder;
     }
 
     public String getTrygdeavgiftFritekst() {
@@ -93,6 +104,8 @@ public class InnvilgelsePliktigMedlemFtrlBrevbestilling extends DokgenBrevbestil
         private String ikkeYrkesaktivOppholdType;
         private String ikkeYrkesaktivRelasjonType;
         private Periode medlemskapsperiode;
+        private boolean harLavSatsPgaAlder;
+        private String trygdeavgiftFritekst;
 
         public Builder() {
         }
@@ -108,6 +121,8 @@ public class InnvilgelsePliktigMedlemFtrlBrevbestilling extends DokgenBrevbestil
             this.ikkeYrkesaktivRelasjonType = brevbestilling.ikkeYrkesaktivRelasjonType;
             this.medlemskapsperiode = brevbestilling.medlemskapsperiode;
             this.land = brevbestilling.land;
+            this.harLavSatsPgaAlder = brevbestilling.harLavSatsPgaAlder();
+            this.trygdeavgiftFritekst = brevbestilling.trygdeavgiftFritekst;
         }
 
         public Builder medBestemmelse(String bestemmelse) {
