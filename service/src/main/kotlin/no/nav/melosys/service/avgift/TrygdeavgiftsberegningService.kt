@@ -14,6 +14,7 @@ import no.nav.melosys.integrasjon.trygdeavgift.TrygdeavgiftsberegningsRequestMap
 import no.nav.melosys.integrasjon.trygdeavgift.dto.TrygdeavgiftsberegningResponse
 import no.nav.melosys.service.MedlemAvFolketrygdenService
 import no.nav.melosys.service.avgift.dto.InntektskildeRequest
+import no.nav.melosys.service.avgift.dto.SkatteforholdTilNorgeRequest
 import no.nav.melosys.service.behandling.BehandlingService
 import no.nav.melosys.service.persondata.PersondataService
 import org.springframework.stereotype.Service
@@ -126,8 +127,10 @@ class TrygdeavgiftsberegningService
         }
 
         val inntektskilderRequest = medlemAvFolketrygden.fastsattTrygdeavgift.trygdeavgiftsgrunnlag.inntektsperioder.map { InntektskildeRequest(it) }
+        val skatteforholdTilNorgeRequest = medlemAvFolketrygden.fastsattTrygdeavgift.trygdeavgiftsgrunnlag.skatteforholdTilNorge.map { SkatteforholdTilNorgeRequest(it) }
 
         TrygdeavgiftsgrunnlagService.validerAtInntekstperioderDekkerInnvilgedeMedlemskapsperioder(inntektskilderRequest, medlemAvFolketrygden.medlemskapsperioder.toList())
+        TrygdeavgiftsgrunnlagService.validerAtSkatteforholdTilNorgeDekkerInnvilgedeMedlemskapsperioderOgOverlapperIkke(skatteforholdTilNorgeRequest, medlemAvFolketrygden.medlemskapsperioder.toList())
     }
 
     @Transactional(readOnly = true)
