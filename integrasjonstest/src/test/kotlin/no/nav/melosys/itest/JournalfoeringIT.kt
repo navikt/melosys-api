@@ -183,7 +183,7 @@ class JournalfoeringIT(
 
 
         executeAndWait(
-            waitForprosessType =  ProsessType.JFR_KNYTT,
+            waitForprosessType = ProsessType.JFR_KNYTT,
             alsoWaitForprosessType = listOf(ProsessType.OPPRETT_OG_DISTRIBUER_BREV)
         ) {
             journalføringService.journalførOgKnyttTilEksisterendeSak(journalfoeringTilordneDto)
@@ -225,6 +225,7 @@ class JournalfoeringIT(
         val prosessinstans = journalførOgVentTilProsesserErFerdige(
             journalfoeringOpprettDto,
             waitFor = ProsessType.JFR_NY_SAK_BRUKER,
+            alsoWaitForprosessType = listOf(ProsessType.OPPRETT_OG_DISTRIBUER_BREV)
         )
         val behandling = prosessinstans.behandling
 
@@ -244,7 +245,10 @@ class JournalfoeringIT(
         )
 
 
-        executeAndWait(ProsessType.JFR_ANDREGANG_NY_BEHANDLING) {
+        executeAndWait(
+            waitForprosessType = ProsessType.JFR_ANDREGANG_NY_BEHANDLING,
+            alsoWaitForprosessType = listOf(ProsessType.OPPRETT_OG_DISTRIBUER_BREV)
+        ) {
             journalføringService.journalførOgOpprettAndregangsBehandling(journalfoeringTilordneDto)
         }
 
