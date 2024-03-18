@@ -354,6 +354,30 @@ internal class DokgenMalMapperTest {
     }
 
     @Test
+    fun skalMappePliktigFtrlInnvilgelsesbrevTilBruker() {
+        every { mockDokgenMapperDatahenter.hentPersondata(any()) } returns DokgenTestData.lagPersondata()
+        every { mockDokgenMapperDatahenter.hentPersonMottaker(any()) } returns DokgenTestData.lagPersondata()
+        every { mockDokgenMapperDatahenter.hentNorskPoststed(any()) } returns "Andeby"
+        every { mockDokgenMapperDatahenter.hentLandnavnFraLandkode(Landkoder.NO.kode) } returns Landkoder.NO.beskrivelse
+        every { mockInnvilgelseFtrlMapper.mapPliktig(any()) } returns lagInnvilgelseFtrlPliktig()
+
+        val behandling = DokgenTestData.lagBehandling(DokgenTestData.lagFagsak(true))
+        val brevbestilling: DokgenBrevbestilling = InnvilgelsePliktigMedlemFtrlBrevbestilling.Builder()
+            .medProduserbartdokument(Produserbaredokumenter.PLIKTIG_MEDLEM_FTRL)
+            .medBehandling(behandling)
+            .medOrg(DokgenTestData.lagOrg())
+            .medKontaktopplysning(DokgenTestData.lagKontaktOpplysning())
+            .medForsendelseMottatt(Instant.now())
+            .medInnledningFritekst("Dummy")
+            .build()
+
+        dokgenMalMapper.mapBehandling(
+            brevbestilling,
+            DokgenTestData.lagMottaker(Mottakerroller.BRUKER)
+        ).shouldBeInstanceOf<InnvilgelseFtrlPliktig>()
+    }
+
+    @Test
     fun skalMappeVedtakOpphørtMedlemskapTilBrukerMedRiktigOpphørsdato() {
         every { mockDokgenMapperDatahenter.hentPersondata(any()) } returns DokgenTestData.lagPersondata()
         every { mockDokgenMapperDatahenter.hentPersonMottaker(any()) } returns DokgenTestData.lagPersondata()
@@ -564,11 +588,47 @@ internal class DokgenMalMapperTest {
         )
     }
 
+    private fun lagInnvilgelseFtrlPliktig(): InnvilgelseFtrlPliktig {
+        return InnvilgelseFtrlPliktig(
+            brevbestilling = lagInnvilgelsePliktigMedlemFtrlBrevbestilling(),
+            behandlingstype = Behandlingstyper.FØRSTEGANG,
+            avgiftsperioder = emptyList(),
+            medlemskapsperioder = emptyList(),
+            bestemmelse = Folketrygdloven_kap2_bestemmelser.FTRL_KAP2_2_8,
+            avslåttMedlemskapsperiodeFørMottaksdatoHelsedel = false,
+            avslåttMedlemskapsperiodeFørMottaksdatoFullDekning = false,
+            trygdeavgiftMottaker = Trygdeavgiftmottaker.TRYGDEAVGIFT_BETALES_TIL_NAV,
+            fullmektigTrygdeavgift = null,
+            skatteplikttype = Skatteplikttype.SKATTEPLIKTIG,
+            begrunnelse = Ftrl_2_8_naer_tilknytning_norge_begrunnelser.ANSATT_I_MULTINASJONALT_SELSKAP,
+            nyVurderingBakgrunn = null,
+            begrunnelseFritekst = null,
+            innledningFritekst = null,
+            trygdeavgiftFritekst = null,
+            begrunnelseAnnenGrunnFritekst = null,
+            arbeidsgivere = listOf("Egon Olsen AS"),
+            flereLandUkjentHvilke = false,
+            land = listOf(Land_iso2.US.kode),
+            trygdeavtaleLand = emptyList(),
+            betalerArbeidsgiveravgift = true
+        )
+    }
+
     private fun lagInnvilgelseFtrlYrkesaktivFrivilligBrevbestilling(): InnvilgelseFtrlYrkesaktivFrivilligBrevbestilling {
         return InnvilgelseFtrlYrkesaktivFrivilligBrevbestilling.Builder()
             .medInnledningFritekst("Innledning")
             .medBegrunnelseFritekst("Begrunnelse")
             .medTrygdeavgiftFritekst("Trygdeavgift fritekst")
+            .medBehandling(DokgenTestData.lagBehandling())
+            .medPersonDokument(DokgenTestData.lagPersondata())
+            .medPersonMottaker(DokgenTestData.lagPersondata())
+            .build()
+    }
+
+    private fun lagInnvilgelsePliktigMedlemFtrlBrevbestilling(): InnvilgelsePliktigMedlemFtrlBrevbestilling {
+        return InnvilgelsePliktigMedlemFtrlBrevbestilling.Builder()
+            .medInnledningFritekst("Innledning")
+            .medBegrunnelseFritekst("Begrunnelse")
             .medBehandling(DokgenTestData.lagBehandling())
             .medPersonDokument(DokgenTestData.lagPersondata())
             .medPersonMottaker(DokgenTestData.lagPersondata())
