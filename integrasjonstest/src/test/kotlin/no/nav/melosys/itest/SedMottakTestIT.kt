@@ -3,7 +3,6 @@ package no.nav.melosys.itest
 import com.ninjasquad.springmockk.MockkBean
 import io.getunleash.FakeUnleash
 import io.kotest.assertions.extracting
-import io.kotest.assertions.withClue
 import io.kotest.matchers.collections.shouldContainExactly
 import io.kotest.matchers.collections.shouldContainInOrder
 import io.kotest.matchers.collections.shouldHaveSize
@@ -13,10 +12,6 @@ import io.mockk.every
 import io.mockk.mockk
 import io.mockk.slot
 import io.mockk.verify
-import no.nav.melosys.AwaitUtil
-import no.nav.melosys.AwaitUtil.onTimeout
-import no.nav.melosys.AwaitUtil.waitUntil
-import no.nav.melosys.LoggingTestUtils.last
 import no.nav.melosys.ProsessUtil
 import no.nav.melosys.domain.Lovvalgsperiode
 import no.nav.melosys.domain.eessi.*
@@ -29,7 +24,6 @@ import no.nav.melosys.melosysmock.medl.MedlRepo
 import no.nav.melosys.melosysmock.melosyseessi.MelosysEessiRepo
 import no.nav.melosys.melosysmock.sak.SakRepo
 import no.nav.melosys.repository.BehandlingsresultatRepository
-import no.nav.melosys.saksflyt.ProsessinstansFerdigListener
 import no.nav.melosys.saksflyt.ProsessinstansRepository
 import no.nav.melosys.saksflytapi.domain.ProsessType
 import no.nav.melosys.service.LovvalgsperiodeService
@@ -51,7 +45,6 @@ import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.beans.factory.annotation.Qualifier
 import org.springframework.context.annotation.Import
 import org.springframework.kafka.core.KafkaTemplate
-import java.time.Duration
 import java.time.LocalDate
 import java.util.*
 
@@ -176,17 +169,18 @@ class SedMottakTestIT(
             isX006NavErFjernet = true
         }
 
-        melosysEessiMeldingKafkaTemplate.send(kafkaTopic, eessiMeldingA009)
-        melosysEessiMeldingKafkaTemplate.send(kafkaTopic, eessiMeldingX006)
 
-        AwaitUtil.awaitWithFailOnLogErrors { logItems ->
-            val testFinishedLogline = "Prosessinstans(er) på vent med samme gruppe-prefiks: []"
-            atMost(Duration.ofSeconds(20))
-                .onTimeout { e ->
-                    withClue("last log line was not as expected - ${e.message}") {
-                        logItems.last<ProsessinstansFerdigListener>() shouldBe testFinishedLogline
-                    }
-                }.waitUntil { logItems.last<ProsessinstansFerdigListener>() == testFinishedLogline }
+        prosessUtil.executeAndWait(
+            waitForprosessType = ProsessType.MOTTAK_SED,
+            alsoWaitForprosessType = listOf(
+                ProsessType.REGISTRERING_UNNTAK_NY_SAK,
+                ProsessType.REGISTRERING_UNNTAK_GODKJENN,
+                ProsessType.MOTTAK_SED_JOURNALFØRING
+            ),
+            waitForProcessCount = 5
+        ) {
+            melosysEessiMeldingKafkaTemplate.send(kafkaTopic, eessiMeldingA009)
+            melosysEessiMeldingKafkaTemplate.send(kafkaTopic, eessiMeldingX006)
         }
 
         val prosessinstanserSortert = prosessinstansRepository.findAllByLåsReferanseStartingWith(ref)
@@ -230,17 +224,13 @@ class SedMottakTestIT(
             isX006NavErFjernet = true
         }
 
-        melosysEessiMeldingKafkaTemplate.send(kafkaTopic, eessiMeldingA003)
-        melosysEessiMeldingKafkaTemplate.send(kafkaTopic, eessiMeldingX006)
-
-        AwaitUtil.awaitWithFailOnLogErrors { logItems ->
-            val testFinishedLogline = "Prosessinstans(er) på vent med samme gruppe-prefiks: []"
-            atMost(Duration.ofSeconds(20))
-                .onTimeout { e ->
-                    withClue("last log line was not as expected - ${e.message}") {
-                        logItems.last<ProsessinstansFerdigListener>() shouldBe testFinishedLogline
-                    }
-                }.waitUntil { logItems.last<ProsessinstansFerdigListener>() == testFinishedLogline }
+        prosessUtil.executeAndWait(
+            waitForprosessType = ProsessType.MOTTAK_SED,
+            alsoWaitForprosessType = listOf(ProsessType.ARBEID_FLERE_LAND_NY_SAK, ProsessType.MOTTAK_SED_JOURNALFØRING),
+            waitForProcessCount = 4
+        ) {
+            melosysEessiMeldingKafkaTemplate.send(kafkaTopic, eessiMeldingA003)
+            melosysEessiMeldingKafkaTemplate.send(kafkaTopic, eessiMeldingX006)
         }
 
         val prosessinstanserSortert = prosessinstansRepository.findAllByLåsReferanseStartingWith(ref)
@@ -287,18 +277,15 @@ class SedMottakTestIT(
             artikkel = null
         }
 
-        melosysEessiMeldingKafkaTemplate.send(kafkaTopic, eessiMeldingA003)
-        melosysEessiMeldingKafkaTemplate.send(kafkaTopic, eessiMeldingX008)
-
-        AwaitUtil.awaitWithFailOnLogErrors { logItems ->
-            val testFinishedLogline = "Prosessinstans(er) på vent med samme gruppe-prefiks: []"
-            atMost(Duration.ofSeconds(20))
-                .onTimeout { e ->
-                    withClue("last log line was not as expected - ${e.message}") {
-                        logItems.last<ProsessinstansFerdigListener>() shouldBe testFinishedLogline
-                    }
-                }.waitUntil { logItems.last<ProsessinstansFerdigListener>() == testFinishedLogline }
+        prosessUtil.executeAndWait(
+            waitForprosessType = ProsessType.MOTTAK_SED,
+            alsoWaitForprosessType = listOf(ProsessType.ARBEID_FLERE_LAND_NY_SAK, ProsessType.MOTTAK_SED_JOURNALFØRING),
+            waitForProcessCount = 4
+        ) {
+            melosysEessiMeldingKafkaTemplate.send(kafkaTopic, eessiMeldingA003)
+            melosysEessiMeldingKafkaTemplate.send(kafkaTopic, eessiMeldingX008)
         }
+
 
         val prosessinstanserSortert = prosessinstansRepository.findAllByLåsReferanseStartingWith(ref)
             .sortedBy { it.endretDato }
@@ -343,20 +330,18 @@ class SedMottakTestIT(
             sedType = SedType.X007.name
         }
 
-        melosysEessiMeldingKafkaTemplate.send(kafkaTopic, eessiMeldingA009)
-        melosysEessiMeldingKafkaTemplate.send(kafkaTopic, eessiMeldingX001)
-        melosysEessiMeldingKafkaTemplate.send(kafkaTopic, eessiMeldingX007)
-
-        AwaitUtil.awaitWithFailOnLogErrors { logItems ->
-            val testFinishedLogline = "Prosessinstans(er) på vent med samme gruppe-prefiks: []"
-            atMost(Duration.ofSeconds(20))
-                .onTimeout { e ->
-                    withClue("last log line was not as expected - ${e.message}") {
-                        logItems.last<ProsessinstansFerdigListener>() shouldBe testFinishedLogline
-                    }
-                }.waitUntil { logItems.last<ProsessinstansFerdigListener>() == testFinishedLogline }
+        prosessUtil.executeAndWait(
+            waitForprosessType = ProsessType.MOTTAK_SED,
+            alsoWaitForprosessType = listOf(
+                ProsessType.REGISTRERING_UNNTAK_NY_SAK,
+                ProsessType.MOTTAK_SED_JOURNALFØRING
+            ),
+            waitForProcessCount = 6
+        ) {
+            melosysEessiMeldingKafkaTemplate.send(kafkaTopic, eessiMeldingA009)
+            melosysEessiMeldingKafkaTemplate.send(kafkaTopic, eessiMeldingX001)
+            melosysEessiMeldingKafkaTemplate.send(kafkaTopic, eessiMeldingX007)
         }
-
         val prosessinstanserSortert = prosessinstansRepository.findAllByLåsReferanseStartingWith(rinaSaksnummer)
             .sortedBy { it.endretDato }
 
@@ -398,16 +383,12 @@ class SedMottakTestIT(
             lovvalgsland = "NO"
         }
 
-        melosysEessiMeldingKafkaTemplate.send(kafkaTopic, eessiMeldingA003)
-
-        AwaitUtil.awaitWithFailOnLogErrors { logItems ->
-            val testFinishedLogline = "Prosessinstans(er) på vent med samme gruppe-prefiks: []"
-            atMost(Duration.ofSeconds(20))
-                .onTimeout { e ->
-                    withClue("last log line was not as expected - ${e.message}") {
-                        logItems.last<ProsessinstansFerdigListener>() shouldBe testFinishedLogline
-                    }
-                }.waitUntil { logItems.last<ProsessinstansFerdigListener>() == testFinishedLogline }
+        prosessUtil.executeAndWait(
+            waitForprosessType = ProsessType.MOTTAK_SED,
+            alsoWaitForprosessType = listOf(ProsessType.ARBEID_FLERE_LAND_NY_SAK),
+            waitForProcessCount = 2
+        ) {
+            melosysEessiMeldingKafkaTemplate.send(kafkaTopic, eessiMeldingA003)
         }
 
         val prosessinstanserSortert = prosessinstansRepository.findAllByLåsReferanseStartingWith(rinaSaksnummer)
@@ -510,17 +491,17 @@ class SedMottakTestIT(
             lovvalgsland = "NO"
         }
 
-        melosysEessiMeldingKafkaTemplate.send(kafkaTopic, eessiMeldingA003)
 
-        AwaitUtil.awaitWithFailOnLogErrors { logItems ->
-            val testFinishedLogline = "Prosessinstans(er) på vent med samme gruppe-prefiks: []"
-            atMost(Duration.ofSeconds(20))
-                .onTimeout { e ->
-                    withClue("last log line was not as expected - ${e.message}") {
-                        logItems.last<ProsessinstansFerdigListener>() shouldBe testFinishedLogline
-                    }
-                }.waitUntil { logItems.last<ProsessinstansFerdigListener>() == testFinishedLogline }
+        prosessUtil.executeAndWait(
+            waitForprosessType = ProsessType.MOTTAK_SED,
+            alsoWaitForprosessType = listOf(
+                ProsessType.ARBEID_FLERE_LAND_NY_SAK
+            ),
+            waitForProcessCount = 2
+        ) {
+            melosysEessiMeldingKafkaTemplate.send(kafkaTopic, eessiMeldingA003)
         }
+
 
         val prosessinstanserSortert = prosessinstansRepository.findAllByLåsReferanseStartingWith(rinaSaksnummer)
             .sortedBy { it.endretDato }
