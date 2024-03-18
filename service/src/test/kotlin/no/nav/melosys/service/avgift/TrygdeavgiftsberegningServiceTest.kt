@@ -206,7 +206,7 @@ internal class TrygdeavgiftsberegningServiceTest {
                 inntektsperioder = listOf(Inntektsperiode().apply {
                     id = 1L
                     fomDato = FOM
-                    tomDato = TOM.plusMonths(1)
+                    tomDato = TOM.minusMonths(1)
                     type = Inntektskildetype.INNTEKT_FRA_UTLANDET
                     isArbeidsgiversavgiftBetalesTilSkatt = false
                     avgiftspliktigInntektMnd = Penger(10000.0)
