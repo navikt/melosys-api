@@ -185,6 +185,42 @@ internal class TrygdeavgiftsberegningServiceTest {
     }
 
     @Test
+    fun beregnTrygdeavgift_inntekstperioderDekkerIkkeInnvilgedeMedlemskapsperioder_kasterFeil() {
+        medlemAvFolketrygden.medlemskapsperioder.add(Medlemskapsperiode().apply {
+            id = 1L
+            fom = FOM
+            tom = TOM
+            trygdedekning = Trygdedekninger.FTRL_2_9_FØRSTE_LEDD_C_ANDRE_LEDD_HELSE_PENSJON_SYKE_FORELDREPENGER
+            innvilgelsesresultat = InnvilgelsesResultat.INNVILGET
+            medlemskapstype = Medlemskapstyper.FRIVILLIG
+        })
+
+        medlemAvFolketrygden.fastsattTrygdeavgift = FastsattTrygdeavgift().apply {
+            trygdeavgiftsgrunnlag = Trygdeavgiftsgrunnlag().apply {
+                skatteforholdTilNorge = listOf(SkatteforholdTilNorge().apply {
+                    id = 1L
+                    fomDato = FOM
+                    tomDato = TOM
+                    skatteplikttype = Skatteplikttype.SKATTEPLIKTIG
+                })
+                inntektsperioder = listOf(Inntektsperiode().apply {
+                    id = 1L
+                    fomDato = FOM
+                    tomDato = TOM.plusMonths(1)
+                    type = Inntektskildetype.INNTEKT_FRA_UTLANDET
+                    isArbeidsgiversavgiftBetalesTilSkatt = false
+                    avgiftspliktigInntektMnd = Penger(10000.0)
+                })
+            }
+        }
+
+        shouldThrow<FunksjonellException> {
+            trygdeavgiftsberegningService.beregnOgLagreTrygdeavgift(BEHANDLING_ID)
+        }.message.shouldContain("Inntektsperioden(e) du har lagt inn dekker ikke hele medlemskapsperioden(e)")
+    }
+
+
+    @Test
     fun beregnTrygdeavgift_skalBetaleTrygeavgiftPliktigMedlem_beregnerOgLagrerTrygdeavgift() {
         behandling.apply {
             fagsak = Fagsak().apply {
