@@ -6,15 +6,16 @@ import no.nav.melosys.domain.Vilkaarsresultat
 import no.nav.melosys.domain.brev.InnvilgelseFtrlIkkeYrkesaktivFrivilligBrevbestilling
 import no.nav.melosys.domain.brev.InnvilgelseFtrlIkkeYrkesaktivPliktigBrevbestilling
 import no.nav.melosys.domain.brev.InnvilgelseFtrlYrkesaktivFrivilligBrevbestilling
+import no.nav.melosys.domain.brev.InnvilgelsePliktigMedlemFtrlBrevbestilling
 import no.nav.melosys.domain.dokument.felles.Periode
 import no.nav.melosys.domain.folketrygden.MedlemAvFolketrygden
 import no.nav.melosys.domain.kodeverk.*
 import no.nav.melosys.domain.kodeverk.begrunnelser.folketrygdloven.Ftrl_2_7_begrunnelser
 import no.nav.melosys.domain.kodeverk.begrunnelser.folketrygdloven.Ftrl_2_8_naer_tilknytning_norge_begrunnelser
-import no.nav.melosys.domain.mottatteopplysninger.SøknadNorgeEllerUtenforEØS
-import no.nav.melosys.integrasjon.dokgen.dto.InnvilgelseFtrlYrkesaktivFrivillig
 import no.nav.melosys.integrasjon.dokgen.dto.InnvilgelseFtrlIkkeYrkesaktivFrivillig
 import no.nav.melosys.integrasjon.dokgen.dto.InnvilgelseFtrlIkkeYrkesaktivPliktig
+import no.nav.melosys.integrasjon.dokgen.dto.InnvilgelseFtrlPliktig
+import no.nav.melosys.integrasjon.dokgen.dto.InnvilgelseFtrlYrkesaktivFrivillig
 import no.nav.melosys.integrasjon.dokgen.dto.innvilgelseftrl.AvgiftsperiodeDto
 import no.nav.melosys.service.avgift.TrygdeavgiftMottakerService
 import no.nav.melosys.service.avgift.TrygdeavgiftsberegningService
@@ -116,6 +117,39 @@ class InnvilgelseFtrlMapper(
                 .medMedlemskapsperiode(medlemskapsperiode)
                 .build()
         )
+    }
+
+    internal fun mapPliktig(brevbestilling: InnvilgelsePliktigMedlemFtrlBrevbestilling): InnvilgelseFtrlPliktig {
+        val behandlingsresultat = dokgenMapperDatahenter.hentBehandlingsresultat(brevbestilling.behandlingId)
+        val medlemAvFolketrygden = behandlingsresultat.medlemAvFolketrygden
+        val søknadsland = behandlingsresultat.behandling.mottatteOpplysninger.mottatteOpplysningerData.soeknadsland
+        val avslåttMedlemskapsperiodeFørMottaksdatoHelsedel =
+            mapAvslåttMedlemskapsperiodeFørMottaksdatoHelsedel(medlemAvFolketrygden, brevbestilling.forsendelseMottatt)
+        val avslåttMedlemskapsperiodeFørMottaksdatoFullDekning =
+            mapAvslåttMedlemskapsperiodeFørMottaksdatoFullDekning(medlemAvFolketrygden, brevbestilling.forsendelseMottatt)
+
+        return InnvilgelseFtrlPliktig(
+            brevbestilling = brevbestilling,
+            behandlingstype = behandlingsresultat.behandling.type,
+            avgiftsperioder = mapAvgiftsPerioder(medlemAvFolketrygden),
+            medlemskapsperioder = mapMedlemskapsPerioder(medlemAvFolketrygden),
+            bestemmelse = medlemAvFolketrygden.medlemskapsperioder.filter { it.erInnvilget() }.sortedBy { it.fom }.first().bestemmelse,
+            avslåttMedlemskapsperiodeFørMottaksdatoHelsedel = avslåttMedlemskapsperiodeFørMottaksdatoHelsedel,
+            avslåttMedlemskapsperiodeFørMottaksdatoFullDekning = avslåttMedlemskapsperiodeFørMottaksdatoFullDekning,
+            trygdeavgiftMottaker = trygdeavgiftMottakerService.getTrygdeavgiftMottaker(medlemAvFolketrygden.fastsattTrygdeavgift.trygdeavgiftsgrunnlag),
+            fullmektigTrygdeavgift = finnFullmektigTrygdeavgift(behandlingsresultat.behandling),
+            skatteplikttype = medlemAvFolketrygden.utledSkatteplikttype(),
+            begrunnelse = hentBegrunnelse(behandlingsresultat.vilkaarsresultater),
+            begrunnelseAnnenGrunnFritekst = hentSaerligBegrunnelseFritekst(behandlingsresultat.vilkaarsresultater),
+            nyVurderingBakgrunn = brevbestilling.nyVurderingBakgrunn,
+            innledningFritekst = brevbestilling.innledningFritekst,
+            begrunnelseFritekst = brevbestilling.begrunnelseFritekst,
+            trygdeavgiftFritekst = brevbestilling.trygdeavgiftFritekst,
+            arbeidsgivere = hentArbeidsgivere(brevbestilling.behandling),
+            flereLandUkjentHvilke = søknadsland.isFlereLandUkjentHvilke,
+            land = søknadsland.landkoder.map { dokgenMapperDatahenter.hentLandnavnFraLandkode(it) },
+            trygdeavtaleLand = mapTrygdeavtaleLand(søknadsland.landkoder),
+            betalerArbeidsgiveravgift = erBetalerArbeidsgiveravgift(medlemAvFolketrygden.medlemskapsperioder)
     }
 
     private fun mapMedlemskapsPerioder(medlemAvFolketrygden: MedlemAvFolketrygden): List<no.nav.melosys.integrasjon.dokgen.dto.innvilgelseftrl.MedlemskapsperiodeDto> =
