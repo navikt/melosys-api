@@ -182,10 +182,12 @@ class JournalfoeringIT(
         )
 
 
-        executeAndWait(ProsessType.JFR_KNYTT) {
+        executeAndWait(
+            waitForprosessType =  ProsessType.JFR_KNYTT,
+            alsoWaitForprosessType = listOf(ProsessType.OPPRETT_OG_DISTRIBUER_BREV)
+        ) {
             journalføringService.journalførOgKnyttTilEksisterendeSak(journalfoeringTilordneDto)
         }
-
 
         val fagsak = fagsakRepository.findBySaksnummer(behandling.fagsak.saksnummer).get()
         fagsak.behandlinger
