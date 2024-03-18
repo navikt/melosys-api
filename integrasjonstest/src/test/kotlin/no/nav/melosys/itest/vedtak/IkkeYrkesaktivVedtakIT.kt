@@ -135,7 +135,7 @@ class IkkeYrkesaktivVedtakIT(
 
         executeAndWait(
             waitForprosessType = ProsessType.IVERKSETT_VEDTAK_IKKE_YRKESAKTIV,
-            alsoWaitForprosessType = listOf(ProsessType.OPPRETT_OG_DISTRIBUER_BREV)
+            alsoWaitForprosessType = listOf(ProsessType.OPPRETT_OG_DISTRIBUER_BREV, ProsessType.SEND_BREV)
         ) {
             vedtaksfattingFasade.fattVedtak(behandling.id, vedtakRequest)
         }
@@ -239,7 +239,7 @@ class IkkeYrkesaktivVedtakIT(
 
         executeAndWait(
             waitForprosessType = ProsessType.IVERKSETT_VEDTAK_IKKE_YRKESAKTIV,
-            alsoWaitForprosessType = listOf(ProsessType.OPPRETT_OG_DISTRIBUER_BREV)
+            alsoWaitForprosessType = listOf(ProsessType.OPPRETT_OG_DISTRIBUER_BREV, ProsessType.SEND_BREV)
         ) {
             vedtaksfattingFasade.fattVedtak(behandling.id, vedtakRequest)
         }
@@ -341,7 +341,7 @@ class IkkeYrkesaktivVedtakIT(
 
         executeAndWait(
             waitForprosessType = ProsessType.IVERKSETT_VEDTAK_IKKE_YRKESAKTIV,
-            alsoWaitForprosessType = listOf(ProsessType.OPPRETT_OG_DISTRIBUER_BREV)
+            alsoWaitForprosessType = listOf(ProsessType.OPPRETT_OG_DISTRIBUER_BREV, ProsessType.SEND_BREV)
         ) {
             vedtaksfattingFasade.fattVedtak(behandling.id, vedtakRequest)
         }
