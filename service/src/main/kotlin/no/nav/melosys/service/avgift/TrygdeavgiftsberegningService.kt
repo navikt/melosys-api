@@ -109,10 +109,6 @@ class TrygdeavgiftsberegningService
     }
 
     private fun valider(medlemAvFolketrygden: MedlemAvFolketrygden) {
-        val inntektskilderRequest = medlemAvFolketrygden.fastsattTrygdeavgift.trygdeavgiftsgrunnlag.inntektsperioder.map { InntektskildeRequest(it) }
-
-        TrygdeavgiftsgrunnlagService.validerAtInntekstperioderDekkerInnvilgedeMedlemskapsperioder(inntektskilderRequest, medlemAvFolketrygden.medlemskapsperioder.toList())
-
         if (medlemAvFolketrygden.medlemskapsperioder.isEmpty()) {
             throw FunksjonellException("Kan ikke beregne trygdeavgift uten medlemskapsperioder")
         }
@@ -128,6 +124,10 @@ class TrygdeavgiftsberegningService
         if (medlemAvFolketrygden.fastsattTrygdeavgift.trygdeavgiftsgrunnlag.inntektsperioder.isEmpty()) {
             throw FunksjonellException("Kan ikke beregne trygdeavgift uten inntektsperioder")
         }
+
+        val inntektskilderRequest = medlemAvFolketrygden.fastsattTrygdeavgift.trygdeavgiftsgrunnlag.inntektsperioder.map { InntektskildeRequest(it) }
+
+        TrygdeavgiftsgrunnlagService.validerAtInntekstperioderDekkerInnvilgedeMedlemskapsperioder(inntektskilderRequest, medlemAvFolketrygden.medlemskapsperioder.toList())
     }
 
     @Transactional(readOnly = true)
