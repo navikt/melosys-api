@@ -5,6 +5,7 @@ import io.kotest.matchers.collections.shouldContain
 import io.kotest.matchers.collections.shouldHaveSize
 import io.kotest.matchers.nulls.shouldNotBeNull
 import io.kotest.matchers.shouldBe
+import mu.KotlinLogging
 import no.nav.melosys.AwaitUtil.onTimeout
 import no.nav.melosys.AwaitUtil.waitUntil
 import no.nav.melosys.saksflyt.ProsessinstansFerdigEvent
@@ -18,6 +19,7 @@ import java.time.Duration
 import java.time.LocalDateTime
 import java.util.concurrent.CopyOnWriteArrayList
 
+private val log = KotlinLogging.logger { }
 @Component
 class ProsessUtil(
     private val prosessinstanserOpprettet: MutableList<Prosessinstans> = CopyOnWriteArrayList(),
@@ -25,13 +27,13 @@ class ProsessUtil(
 ) {
     @EventListener
     fun prosessinstansOpprettet(prosessinstansOpprettetEvent: ProsessinstansOpprettetEvent) {
-        println("################# Opprettet- ${prosessinstansOpprettetEvent.hentProsessinstans().type}")
+        log.info ("Prosessinstans Opprettet - ${prosessinstansOpprettetEvent.hentProsessinstans().type}")
         prosessinstanserOpprettet.add(prosessinstansOpprettetEvent.hentProsessinstans())
     }
 
     @EventListener
     fun prosessinstansFerdig(prosessinstansFerdigEvent: ProsessinstansFerdigEvent) {
-        println("################# Ferdig- ${prosessinstansFerdigEvent.hentProsessinstans().type}")
+        log.info ("Prosessinstans Ferdig - ${prosessinstansFerdigEvent.hentProsessinstans().type}")
         prosessinstanserFerdig.add(prosessinstansFerdigEvent.hentProsessinstans())
     }
 
@@ -52,6 +54,12 @@ class ProsessUtil(
         val journalføringProsess = waitForAndReturnProcess(waitForprosessType, startTime)
         withClue("also wait for prosessTypes: $alsoWaitForprosessType") {
             alsoWaitForprosessType.forEach { waitForAndReturnProcess(it, startTime) }
+        }
+        withClue("started prosess types should be in waitForprosessType or alsoWaitForprosessType") {
+            val waitFor = alsoWaitForprosessType + waitForprosessType
+            prosessinstanserOpprettet.filter { it.registrertDato > startTime }.forEach {
+                waitFor shouldContain it.type
+            }
         }
         if (waitForProcessCount > 0) waitForProcessesToFinnish(waitForProcessCount)
         return journalføringProsess

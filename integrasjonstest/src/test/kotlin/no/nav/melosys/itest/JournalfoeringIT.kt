@@ -127,7 +127,10 @@ class JournalfoeringIT(
         )
 
 
-        executeAndWait(ProsessType.JFR_ANDREGANG_REPLIKER_BEHANDLING) {
+        executeAndWait(
+            waitForprosessType =  ProsessType.JFR_ANDREGANG_REPLIKER_BEHANDLING,
+            alsoWaitForprosessType = listOf(ProsessType.OPPRETT_OG_DISTRIBUER_BREV)
+        ) {
             journalføringService.journalførOgOpprettAndregangsBehandling(journalfoeringTilordneDto)
         }
 
@@ -304,7 +307,10 @@ class JournalfoeringIT(
         )
 
 
-        executeAndWait(ProsessType.JFR_ANDREGANG_NY_BEHANDLING) {
+        executeAndWait(
+            waitForprosessType =  ProsessType.JFR_ANDREGANG_NY_BEHANDLING,
+            alsoWaitForprosessType = listOf(ProsessType.OPPRETT_OG_DISTRIBUER_BREV)
+        ) {
             journalføringService.journalførOgOpprettAndregangsBehandling(journalfoeringTilordneDto)
         }
 

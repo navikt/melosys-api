@@ -174,7 +174,10 @@ class YrkesaktivFtrlVedtakIT(
             )
         }.behandling.id
 
-        executeAndWait(ProsessType.OPPRETT_NY_BEHANDLING_MANGLENDE_INNBETALING) {
+        executeAndWait(
+            waitForprosessType = ProsessType.OPPRETT_NY_BEHANDLING_MANGLENDE_INNBETALING,
+            alsoWaitForprosessType = listOf(ProsessType.OPPRETT_OG_DISTRIBUER_BREV)
+        ) {
             val kafkaMelding = ManglendeFakturabetalingMelding(
                 fakturaserieReferanse = fakturaserieReferanse,
                 betalingsstatus = Betalingsstatus.IKKE_BETALT,

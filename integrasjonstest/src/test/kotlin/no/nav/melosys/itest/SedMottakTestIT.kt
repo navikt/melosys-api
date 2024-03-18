@@ -93,6 +93,7 @@ class SedMottakTestIT(
     fun after() {
         ThreadLocalAccessInfo.afterExecuteProcess(randomUUID)
         oAuthMockServer.stop()
+        prosessUtil.clear()
     }
 
     @Test
@@ -116,17 +117,18 @@ class SedMottakTestIT(
             sedType = SedType.X008.name
         }
 
-        melosysEessiMeldingKafkaTemplate.send(kafkaTopic, eessiMeldingA009)
-        melosysEessiMeldingKafkaTemplate.send(kafkaTopic, eessiMeldingX008)
 
-        AwaitUtil.awaitWithFailOnLogErrors { logItems ->
-            val testFinishedLogline = "Prosessinstans(er) på vent med samme gruppe-prefiks: []"
-            atMost(Duration.ofSeconds(20))
-                .onTimeout { e ->
-                    withClue("last log line was not as expected - ${e.message}") {
-                        logItems.last<ProsessinstansFerdigListener>() shouldBe testFinishedLogline
-                    }
-                }.waitUntil { logItems.last<ProsessinstansFerdigListener>() == testFinishedLogline }
+        prosessUtil.executeAndWait(
+            waitForprosessType = ProsessType.MOTTAK_SED,
+            alsoWaitForprosessType = listOf(
+                ProsessType.REGISTRERING_UNNTAK_NY_SAK,
+                ProsessType.REGISTRERING_UNNTAK_GODKJENN,
+                ProsessType.MOTTAK_SED_JOURNALFØRING
+            ),
+            waitForProcessCount = 5
+        ) {
+            melosysEessiMeldingKafkaTemplate.send(kafkaTopic, eessiMeldingA009)
+            melosysEessiMeldingKafkaTemplate.send(kafkaTopic, eessiMeldingX008)
         }
 
         val prosessinstanserSortert = prosessinstansRepository.findAllByLåsReferanseStartingWith(ref)
@@ -433,7 +435,10 @@ class SedMottakTestIT(
             })
         )
 
-        val vedtaksProsessInstans = prosessUtil.executeAndWait(ProsessType.IVERKSETT_VEDTAK_EOS) {
+        val vedtaksProsessInstans = prosessUtil.executeAndWait(
+            waitForprosessType = ProsessType.IVERKSETT_VEDTAK_EOS,
+            alsoWaitForprosessType = listOf(ProsessType.SEND_BREV)
+        ) {
             vedtaksfattingFasade.fattVedtak(
                 prosessinstanserSortert.get(1).behandling.id, FattVedtakRequest.Builder()
                     .medBehandlingsresultatType(Behandlingsresultattyper.FORELOEPIG_FASTSATT_LOVVALGSLAND)
@@ -562,7 +567,10 @@ class SedMottakTestIT(
             })
         )
 
-        val vedtaksProsessInstans = prosessUtil.executeAndWait(ProsessType.IVERKSETT_VEDTAK_EOS) {
+        val vedtaksProsessInstans = prosessUtil.executeAndWait(
+            waitForprosessType = ProsessType.IVERKSETT_VEDTAK_EOS,
+            alsoWaitForprosessType = listOf(ProsessType.SEND_BREV)
+        ) {
             vedtaksfattingFasade.fattVedtak(
                 opprettNyVurderingProsessinstans.behandling.id, FattVedtakRequest.Builder()
                     .medBehandlingsresultatType(Behandlingsresultattyper.FORELOEPIG_FASTSATT_LOVVALGSLAND)

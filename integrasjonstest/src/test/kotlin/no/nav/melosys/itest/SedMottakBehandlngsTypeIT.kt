@@ -112,7 +112,10 @@ class SedMottakBehandlngsTypeIT(
             lovvalgsland = "NO"
         }
         val prosessinstansArbeidFlereLand =
-            executeAndWait(ProsessType.ARBEID_FLERE_LAND_NY_SAK) {
+            executeAndWait(
+                waitForprosessType = ProsessType.ARBEID_FLERE_LAND_NY_SAK,
+                alsoWaitForprosessType = listOf(ProsessType.MOTTAK_SED)
+            ) {
                 melosysEessiMeldingKafkaTemplate.send(kafkaTopic, eessiMeldingA003)
             }
 
