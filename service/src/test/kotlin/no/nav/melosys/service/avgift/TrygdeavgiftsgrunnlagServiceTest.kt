@@ -24,6 +24,7 @@ import no.nav.melosys.domain.folketrygden.FastsattTrygdeavgift
 import no.nav.melosys.domain.folketrygden.MedlemAvFolketrygden
 import no.nav.melosys.domain.kodeverk.Inntektskildetype
 import no.nav.melosys.domain.kodeverk.InnvilgelsesResultat
+import no.nav.melosys.domain.kodeverk.Medlemskapstyper
 import no.nav.melosys.domain.kodeverk.Skatteplikttype
 import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingstyper
 import no.nav.melosys.exception.FunksjonellException
@@ -260,6 +261,7 @@ class TrygdeavgiftsgrunnlagServiceTest {
                 this.fom = fom
                 this.tom = tom
                 innvilgelsesresultat = InnvilgelsesResultat.INNVILGET
+                medlemskapstype = Medlemskapstyper.FRIVILLIG
             })
             fastsattTrygdeavgift = FastsattTrygdeavgift().apply {
                 trygdeavgiftsperioder = mutableSetOf(Trygdeavgiftsperiode())
@@ -288,6 +290,7 @@ class TrygdeavgiftsgrunnlagServiceTest {
                 this.fom = fom
                 this.tom = tom
                 innvilgelsesresultat = InnvilgelsesResultat.INNVILGET
+                medlemskapstype = Medlemskapstyper.FRIVILLIG
             })
             fastsattTrygdeavgift = FastsattTrygdeavgift().apply {
                 trygdeavgiftsperioder = mutableSetOf(Trygdeavgiftsperiode())
@@ -369,18 +372,19 @@ class TrygdeavgiftsgrunnlagServiceTest {
                 this.fom = fom
                 this.tom = tom
                 this.innvilgelsesresultat = InnvilgelsesResultat.INNVILGET
+                this.medlemskapstype = Medlemskapstyper.FRIVILLIG
             })
         }
 
 
         trygdeavgiftsgrunnlagService.oppdaterTrygdeavgiftsgrunnlag(
             BEHANDLING_ID, OppdaterTrygdeavgiftsgrunnlagRequest(
-                listOf(SkatteforholdTilNorgeRequest(fom, tom, Skatteplikttype.SKATTEPLIKTIG)), listOf(
-                    InntektskildeRequest(Inntektskildetype.INNTEKT_FRA_UTLANDET, false, BigDecimal.valueOf(30000), fom, tom),
-                    InntektskildeRequest(Inntektskildetype.NÆRINGSINNTEKT_FRA_NORGE, false, BigDecimal.valueOf(10000), fom, tom),
-                    InntektskildeRequest(Inntektskildetype.ARBEIDSINNTEKT_FRA_NORGE, true, null, fom, tom)
-                )
-            )
+            listOf(SkatteforholdTilNorgeRequest(fom, tom, Skatteplikttype.SKATTEPLIKTIG)), listOf(
+            InntektskildeRequest(Inntektskildetype.INNTEKT_FRA_UTLANDET, false, BigDecimal.valueOf(30000), fom, tom),
+            InntektskildeRequest(Inntektskildetype.NÆRINGSINNTEKT_FRA_NORGE, false, BigDecimal.valueOf(10000), fom, tom),
+            InntektskildeRequest(Inntektskildetype.ARBEIDSINNTEKT_FRA_NORGE, true, null, fom, tom)
+        )
+        )
         )
 
 
@@ -422,7 +426,36 @@ class TrygdeavgiftsgrunnlagServiceTest {
             )
     }
 
+    @Test
+    fun oppdaterTrygdeavgiftsgrunnlag_requestMedSkattepliktigPliktigMedlemskapOgTomInntektskilder_lagrerAltKorrekt() {
+        val fom = LocalDate.now().minusMonths(1)
+        val tom = LocalDate.now().plusMonths(3)
+        every { mockBehandlingsresultatService.lagre(any()) } returnsArgument 0
+        behandlingsresultat.medlemAvFolketrygden = MedlemAvFolketrygden().apply {
+            medlemskapsperioder = listOf(Medlemskapsperiode().apply {
+                this.fom = fom
+                this.tom = tom
+                this.innvilgelsesresultat = InnvilgelsesResultat.INNVILGET
+                this.medlemskapstype = Medlemskapstyper.PLIKTIG
+            })
+        }
 
+        trygdeavgiftsgrunnlagService.oppdaterTrygdeavgiftsgrunnlag(
+            BEHANDLING_ID, OppdaterTrygdeavgiftsgrunnlagRequest(
+            listOf(SkatteforholdTilNorgeRequest(fom, tom, Skatteplikttype.SKATTEPLIKTIG)),
+            emptyList()
+        )
+        )
+
+        verify(exactly = 1) { mockBehandlingsresultatService.lagre(capture(slotBehandlingsresultat)) }
+        val lagretBehandlingsresultat = slotBehandlingsresultat.captured
+        lagretBehandlingsresultat.shouldNotBeNull().medlemAvFolketrygden.shouldNotBeNull().fastsattTrygdeavgift.shouldNotBeNull().trygdeavgiftsgrunnlag.shouldNotBeNull()
+        lagretBehandlingsresultat.medlemAvFolketrygden.fastsattTrygdeavgift.trygdeavgiftsperioder.shouldBeEmpty()
+        lagretBehandlingsresultat.medlemAvFolketrygden.fastsattTrygdeavgift.trygdeavgiftsgrunnlag
+            .skatteforholdTilNorge.shouldHaveSize(1).first().skatteplikttype.shouldBe(Skatteplikttype.SKATTEPLIKTIG)
+        lagretBehandlingsresultat.medlemAvFolketrygden.fastsattTrygdeavgift.trygdeavgiftsgrunnlag
+            .inntektsperioder.shouldHaveSize(0)
+    }
     // Tester valideringen:
 
     @Test
