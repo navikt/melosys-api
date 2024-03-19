@@ -152,30 +152,32 @@ class MedlemskapsperiodeService(
     fun erstattMedlemskapsperioder(behandlingID: Long, opprinneligBehandlingID: Long, nyeMedlemskapsperioder: List<Medlemskapsperiode>) {
         val opprinneligeMedlemskapsperioder = hentMedlemskapsperioder(opprinneligBehandlingID)
             .filter { it.erInnvilget() || it.erOpphørt() }
+        val perioderSomVidereføres = nyeMedlemskapsperioder
+            .filter { it.erInnvilget() || it.erOpphørt() }
 
-        opphørOpprinneligeInnvilgedePerioderSomIkkeVidereføres(opprinneligeMedlemskapsperioder, nyeMedlemskapsperioder)
+        opphørOpprinneligeInnvilgedePerioderSomIkkeVidereføres(opprinneligeMedlemskapsperioder, perioderSomVidereføres)
         opprettEllerOppdaterInnvilgedePerioder(behandlingID, nyeMedlemskapsperioder)
 
-        feilregistrerOpprinneligeOpphørtePerioderSomIkkeVidereføres(opprinneligeMedlemskapsperioder, nyeMedlemskapsperioder)
+        feilregistrerOpprinneligeOpphørtePerioderSomIkkeVidereføres(opprinneligeMedlemskapsperioder, perioderSomVidereføres)
         opprettEllerOppdaterOpphørtePerioder(behandlingID, nyeMedlemskapsperioder)
     }
 
     private fun opphørOpprinneligeInnvilgedePerioderSomIkkeVidereføres(
         opprinneligeGjeldendeMedlemskapsperioder: List<Medlemskapsperiode>,
-        nyeMedlemskapsperioder: List<Medlemskapsperiode>
+        perioderSomVidereføres: List<Medlemskapsperiode>
     ) =
         opprinneligeGjeldendeMedlemskapsperioder
             .filter { it.erInnvilget() }
-            .filter { !eksistererMedlemskapsperiodeMedID(nyeMedlemskapsperioder, it.medlPeriodeID) }
+            .filterNot { eksistererMedlemskapsperiodeMedID(perioderSomVidereføres, it.medlPeriodeID) }
             .forEach { medlPeriodeService.avvisPeriodeOpphørt(it.medlPeriodeID) }
 
     private fun feilregistrerOpprinneligeOpphørtePerioderSomIkkeVidereføres(
         opprinneligeGjeldendeMedlemskapsperioder: List<Medlemskapsperiode>,
-        nyeMedlemskapsperioder: List<Medlemskapsperiode>
+        perioderSomVidereføres: List<Medlemskapsperiode>
     ) =
         opprinneligeGjeldendeMedlemskapsperioder
             .filter { it.erOpphørt() }
-            .filter { !eksistererMedlemskapsperiodeMedID(nyeMedlemskapsperioder, it.medlPeriodeID) }
+            .filterNot { eksistererMedlemskapsperiodeMedID(perioderSomVidereføres, it.medlPeriodeID) }
             .forEach { medlPeriodeService.avvisPeriodeFeilregistrert(it.medlPeriodeID) }
 
     private fun opprettEllerOppdaterInnvilgedePerioder(behandlingID: Long, nyeMedlemskapsperioder: List<Medlemskapsperiode>) =

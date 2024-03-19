@@ -1,19 +1,25 @@
 package no.nav.melosys.service.avgift
 
+import no.nav.melosys.domain.Medlemskapsperiode
 import no.nav.melosys.domain.avgift.Trygdeavgiftsperiode
 import no.nav.melosys.domain.folketrygden.FastsattTrygdeavgift
 import no.nav.melosys.domain.folketrygden.MedlemAvFolketrygden
 import no.nav.melosys.domain.kodeverk.Fullmaktstype
+import no.nav.melosys.domain.kodeverk.Medlemskapstyper
 import no.nav.melosys.exception.FunksjonellException
 import no.nav.melosys.integrasjon.ereg.EregFasade
+import no.nav.melosys.integrasjon.inntekt.InntektRequest
 import no.nav.melosys.integrasjon.trygdeavgift.TrygdeavgiftConsumer
 import no.nav.melosys.integrasjon.trygdeavgift.TrygdeavgiftsberegningsRequestMapper
 import no.nav.melosys.integrasjon.trygdeavgift.dto.TrygdeavgiftsberegningResponse
 import no.nav.melosys.service.MedlemAvFolketrygdenService
+import no.nav.melosys.service.avgift.dto.InntektskildeRequest
+import no.nav.melosys.service.avgift.dto.SkatteforholdTilNorgeRequest
 import no.nav.melosys.service.behandling.BehandlingService
 import no.nav.melosys.service.persondata.PersondataService
 import org.springframework.stereotype.Service
 import org.springframework.transaction.annotation.Transactional
+import java.time.LocalDate
 import java.util.*
 
 @Service
@@ -31,25 +37,32 @@ class TrygdeavgiftsberegningService
     fun beregnOgLagreTrygdeavgift(behandlingsresultatID: Long): Set<Trygdeavgiftsperiode> {
         val medlemAvFolketrygden = medlemAvFolketrygdenService.hentMedlemAvFolketrygden(behandlingsresultatID)
         val fastsattTrygdeavgift = medlemAvFolketrygden.fastsattTrygdeavgift
-
         valider(medlemAvFolketrygden)
         fastsattTrygdeavgift.trygdeavgiftsperioder.clear()
-
         if (!trygdeavgiftMottakerService.skalBetalesTilNav(fastsattTrygdeavgift.trygdeavgiftsgrunnlag)) { return emptySet() }
 
         val innvilgedeMedlemskapsperioder =
-            medlemAvFolketrygden.medlemskapsperioder.filter { it.erInnvilget() }
+            medlemAvFolketrygden.medlemskapsperioder.filter { it.erInnvilget()}
 
         val (trygdeavgiftsberegningRequest, UUID_DBID_MAPS) =
             TrygdeavgiftsberegningsRequestMapper().map(
                 innvilgedeMedlemskapsperioder,
                 fastsattTrygdeavgift.trygdeavgiftsgrunnlag.skatteforholdTilNorge,
-                fastsattTrygdeavgift.trygdeavgiftsgrunnlag.inntektsperioder
+                fastsattTrygdeavgift.trygdeavgiftsgrunnlag.inntektsperioder,
+                hentFødselsdatoOmViHarTjenstligBehov(behandlingsresultatID, innvilgedeMedlemskapsperioder)
             )
         val beregnetTrygdeavgift = trygdeavgiftConsumer.beregnTrygdeavgift(trygdeavgiftsberegningRequest)
         oppdaterTrygdeavgift(beregnetTrygdeavgift, fastsattTrygdeavgift, UUID_DBID_MAPS)
 
         return medlemAvFolketrygdenService.lagre(medlemAvFolketrygden).fastsattTrygdeavgift.trygdeavgiftsperioder
+    }
+
+    private fun hentFødselsdatoOmViHarTjenstligBehov(behandlingsresultatID: Long, medlemskapsperioder: List<Medlemskapsperiode>): LocalDate? {
+        if (medlemskapsperioder.any { it.medlemskapstype == Medlemskapstyper.PLIKTIG }) {
+            val fagsak = behandlingService.hentBehandling(behandlingsresultatID).fagsak
+            return persondataService.hentPerson(fagsak.hentBruker().aktørId).fødselsdato
+        }
+        return null
     }
 
     private fun oppdaterTrygdeavgift(
@@ -112,6 +125,13 @@ class TrygdeavgiftsberegningService
         if (medlemAvFolketrygden.fastsattTrygdeavgift.trygdeavgiftsgrunnlag.inntektsperioder.isEmpty()) {
             throw FunksjonellException("Kan ikke beregne trygdeavgift uten inntektsperioder")
         }
+
+        val inntektskilderRequest = medlemAvFolketrygden.fastsattTrygdeavgift.trygdeavgiftsgrunnlag.inntektsperioder.map { InntektskildeRequest(it) }
+        val skatteforholdTilNorgeRequest = medlemAvFolketrygden.fastsattTrygdeavgift.trygdeavgiftsgrunnlag.skatteforholdTilNorge.map { SkatteforholdTilNorgeRequest(it) }
+        val medlemskapsperioder = medlemAvFolketrygden.medlemskapsperioder.toList()
+        
+        TrygdeavgiftsgrunnlagService.validerAtInntekstperioderDekkerInnvilgedeMedlemskapsperioder(inntektskilderRequest, medlemskapsperioder)
+        TrygdeavgiftsgrunnlagService.validerAtSkatteforholdTilNorgeDekkerInnvilgedeMedlemskapsperioderOgOverlapperIkke(skatteforholdTilNorgeRequest, medlemskapsperioder)
     }
 
     @Transactional(readOnly = true)
