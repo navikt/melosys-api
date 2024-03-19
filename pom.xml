@@ -41,9 +41,9 @@
         <kotlin.compiler.jvmTarget>${java.version}</kotlin.compiler.jvmTarget>
 
         <!-- Melosys -->
-        <melosys.internt.kodeverk.version>5.15.257</melosys.internt.kodeverk.version>  
+        <melosys.internt.kodeverk.version>5.15.257</melosys.internt.kodeverk.version>
         <melosys.brev.version>1.2.148</melosys.brev.version>
-        
+
 
         <!-- NAV -->
         <nav.tjenestespesifikasjoner.version>1.2021.02.22-10.45-4201aaea72fb</nav.tjenestespesifikasjoner.version>
@@ -57,7 +57,7 @@
         <archunit.version>1.1.0</archunit.version>
         <apache-httpclients.version>4.5.13</apache-httpclients.version>
         <caffeine.version>3.0.6</caffeine.version>
-        <cxf.version>4.0.0</cxf.version>
+        <cxf.version>4.0.4</cxf.version>
         <commons-collections4.version>4.4</commons-collections4.version>
         <commons-lang.version>3.12.0</commons-lang.version>
         <commons-text.version>1.10.0</commons-text.version>
@@ -106,7 +106,7 @@
         <objenesis.version>3.2</objenesis.version>
         <osgi.version>6.0.0</osgi.version>
         <woodstox.version>6.2.8</woodstox.version>
-        <xmlsec.version>2.3.0</xmlsec.version>
+        <xmlsec.version>3.0.4</xmlsec.version>
         <wiremock-standalone.version>3.0.1</wiremock-standalone.version>
         <nav-foedselsnummer.core.version>1.0-SNAPSHOT.6</nav-foedselsnummer.core.version>
         <xmlunit.version>2.9.0</xmlunit.version>
@@ -197,6 +197,18 @@
             </dependency>
 
             <!-- Eksterne biblioteker -->
+            <dependency>
+                <groupId>jakarta.xml.bind</groupId>
+                <artifactId>jakarta.xml.bind-api</artifactId>
+                <version>3.0.1</version>
+            </dependency>
+
+            <dependency>
+                <groupId>com.sun.xml.bind</groupId>
+                <artifactId>jaxb-impl</artifactId>
+                <version>3.0.1</version>
+                <scope>runtime</scope>
+            </dependency>
             <dependency>
                 <groupId>ch.qos.logback</groupId>
                 <artifactId>logback-classic</artifactId>
