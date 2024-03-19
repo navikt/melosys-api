@@ -1,6 +1,8 @@
 package no.nav.melosys.service.brev
 
 import no.nav.melosys.domain.Behandling
+import no.nav.melosys.domain.brev.Brevbestilling
+import no.nav.melosys.domain.brev.FritekstbrevBrevbestilling
 import no.nav.melosys.domain.brev.Mottaker
 import no.nav.melosys.domain.kodeverk.Mottakerroller
 import no.nav.melosys.domain.kodeverk.brev.Produserbaredokumenter
@@ -10,47 +12,103 @@ import no.nav.melosys.service.LovvalgsperiodeService
 import no.nav.melosys.service.dokument.BrevmottakerService
 import no.nav.melosys.service.dokument.DokgenService
 import no.nav.melosys.service.dokument.DokumentproduksjonsInfo
+import no.nav.melosys.service.ftrl.medlemskapsperiode.MedlemskapsperiodeService
 import org.springframework.stereotype.Service
 import org.springframework.util.StringUtils
+import org.springframework.util.StringUtils.hasText
 
 
 @Service
 class DokumentNavnService(
     private val brevmottakerService: BrevmottakerService,
     private val dokgenService: DokgenService,
-    private val lovvalgsperiodeService: LovvalgsperiodeService
+    private val lovvalgsperiodeService: LovvalgsperiodeService,
+    private val medlemskapsperiodeService: MedlemskapsperiodeService
 ) {
-    fun utledDokumentNavnForProduserbaredokumenterOgMottakerrolle(
+    fun utledDokumentNavnForProduserbartdokumentOgMottakerrolle(
         behandling: Behandling,
-        produserbaredokumenter: Produserbaredokumenter,
+        produserbartdokument: Produserbaredokumenter,
         mottakerRolle: Mottakerroller
-    ): String {
-        if (erTrygdeavtaleVedtaksbrev(produserbaredokumenter)) {
-            val mottaker = brevmottakerService.avklarMottaker(produserbaredokumenter, Mottaker.medRolle(mottakerRolle), behandling)
-            return utledDokumentNavnForProduserbaredokumenterOgMottaker(behandling, produserbaredokumenter, mottaker, null)
-        }
-        return produserbaredokumenter.beskrivelse
-    }
+    ): String =
+        utledTittel(
+            behandling = behandling,
+            produserbartdokument = produserbartdokument,
+            dokumentproduksjonsInfo = dokgenService.hentDokumentInfo(produserbartdokument),
+            mottakerRolle = mottakerRolle
+        )
 
-    fun utledDokumentNavnForProduserbaredokumenterOgMottaker(
+
+    fun utledDokumentNavnForProduserbartdokumentOgMottaker(
         behandling: Behandling,
-        produserbaredokumenter: Produserbaredokumenter,
+        produserbardokument: Produserbaredokumenter,
         mottaker: Mottaker,
-        standardTekst: String?
-    ): String {
-        if (erTrygdeavtaleVedtaksbrev(produserbaredokumenter)) {
-            val dokumentproduksjonsInfo = dokgenService.hentDokumentInfo(produserbaredokumenter)
-            return utledTittelTrygdeavtale(behandling, dokumentproduksjonsInfo, mottaker)
+        standardTekst: String
+    ): String =
+        utledTittel(
+            behandling = behandling,
+            produserbartdokument = produserbardokument,
+            dokumentproduksjonsInfo = dokgenService.hentDokumentInfo(produserbardokument),
+            mottaker = mottaker,
+            standardTekst = standardTekst
+        )
+
+    fun utledTittel(
+        behandling: Behandling,
+        produserbartdokument: Produserbaredokumenter,
+        dokumentproduksjonsInfo: DokumentproduksjonsInfo,
+        mottaker: Mottaker? = null,
+        mottakerRolle: Mottakerroller? = null,
+        brevbestilling: Brevbestilling? = null,
+        standardTekst: String? = null
+    ): String =
+        when {
+            produserbartdokument.erTrygdeavtaleVedtak() ->
+                utledTittelTrygdeavtale(behandling, produserbartdokument, dokumentproduksjonsInfo, mottaker, mottakerRolle)
+
+            standardTekst != null ->
+                standardTekst
+
+            produserbartdokument.erFritekstbrev() ->
+                utledTittelFritekstbrev(dokumentproduksjonsInfo, brevbestilling as FritekstbrevBrevbestilling?)
+
+            produserbartdokument == Produserbaredokumenter.VARSELBREV_MANGLENDE_INNBETALING ->
+                utledTittelManglendeInnbetaling(behandling.id, dokumentproduksjonsInfo)
+
+            else -> dokumentproduksjonsInfo.journalføringsTittel
         }
-        return standardTekst ?: produserbaredokumenter.beskrivelse
+
+    private fun utledTittelManglendeInnbetaling(behandlingID: Long, dokumentproduksjonsInfo: DokumentproduksjonsInfo): String {
+        val erFrivilligMedlemskap = medlemskapsperiodeService.hentMedlemskapsperioder(behandlingID).any { it.erFrivillig() }
+        return if (erFrivilligMedlemskap) dokumentproduksjonsInfo.alternativTittel else dokumentproduksjonsInfo.journalføringsTittel
     }
 
-    private fun erTrygdeavtaleVedtaksbrev(produserbaredokumenter: Produserbaredokumenter): Boolean {
-        return produserbaredokumenter.kode.contains("TRYGDEAVTALE") && produserbaredokumenter.beskrivelse.contains("Vedtaksbrev")
+    private fun utledTittelFritekstbrev(dokumentproduksjonsInfo: DokumentproduksjonsInfo, brevbestilling: FritekstbrevBrevbestilling?): String {
+        if (brevbestilling == null) {
+            return dokumentproduksjonsInfo.journalføringsTittel
+        }
+
+        val tittel = brevbestilling.dokumentTittel ?: brevbestilling.fritekstTittel
+
+        if (!hasText(tittel)) {
+            throw FunksjonellException("Tittel til fritekstbrev mangler, behandlingId:" + brevbestilling.behandlingId)
+        }
+
+        if ("Request to remain subject to Norwegian legislation" == tittel) {
+            return "Søknad om unntak"
+        }
+
+        return tittel
     }
 
-    fun utledTittelTrygdeavtale(behandling: Behandling, dokumentproduksjonsInfo: DokumentproduksjonsInfo, mottaker: Mottaker): String {
-        val tittel = utledTittelTrygdeavtale(behandling.id, dokumentproduksjonsInfo, mottaker)
+    private fun utledTittelTrygdeavtale(
+        behandling: Behandling,
+        produserbartdokument: Produserbaredokumenter,
+        dokumentproduksjonsInfo: DokumentproduksjonsInfo,
+        mottaker: Mottaker?,
+        mottakerRolle: Mottakerroller?
+    ): String {
+        val mottakerAvBrev = mottaker ?: brevmottakerService.avklarMottaker(produserbartdokument, Mottaker.medRolle(mottakerRolle), behandling)
+        val tittel = utledTittelTrygdeavtale(behandling.id, dokumentproduksjonsInfo, mottakerAvBrev)
         return if (behandling.erNyVurdering()) lagEndringTittel(tittel) else tittel
     }
 
@@ -70,5 +128,24 @@ class DokumentNavnService(
     }
 
     private fun lagKopiTittel(tittel: String): String = "Kopi av " + StringUtils.uncapitalize(tittel)
+
     private fun lagEndringTittel(tittel: String): String = "$tittel - endring"
+
+    private fun Produserbaredokumenter.erFritekstbrev(): Boolean =
+        listOf(
+            Produserbaredokumenter.FRITEKSTBREV,
+            Produserbaredokumenter.GENERELT_FRITEKSTBREV_BRUKER,
+            Produserbaredokumenter.GENERELT_FRITEKSTBREV_VIRKSOMHET,
+            Produserbaredokumenter.GENERELT_FRITEKSTBREV_ARBEIDSGIVER,
+            Produserbaredokumenter.GENERELT_FRITEKSTVEDLEGG,
+            Produserbaredokumenter.UTENLANDSK_TRYGDEMYNDIGHET_FRITEKSTBREV
+        ).contains(this)
+
+    private fun Produserbaredokumenter.erTrygdeavtaleVedtak(): Boolean =
+        listOf(
+            Produserbaredokumenter.TRYGDEAVTALE_AU,
+            Produserbaredokumenter.TRYGDEAVTALE_GB,
+            Produserbaredokumenter.TRYGDEAVTALE_US,
+            Produserbaredokumenter.TRYGDEAVTALE_CAN
+        ).contains(this)
 }

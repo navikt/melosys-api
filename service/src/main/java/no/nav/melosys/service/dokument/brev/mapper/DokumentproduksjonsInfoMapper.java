@@ -78,22 +78,28 @@ public class DokumentproduksjonsInfoMapper {
                     Map.of(VedleggTyper.ATTEST, JournalforingsTittel.TRYGDEAVTALE_ATTEST.getTittel())))
             .put(GENERELT_FRITEKSTBREV_BRUKER,
                 new DokumentproduksjonsInfo("fritekstbrev",
-                    DokumentKategoriKode.IB.getKode()))
+                    DokumentKategoriKode.IB.getKode(),
+                    GENERELT_FRITEKSTBREV_BRUKER.getBeskrivelse()))
             .put(GENERELT_FRITEKSTBREV_VIRKSOMHET,
                 new DokumentproduksjonsInfo("fritekstbrev",
-                    DokumentKategoriKode.IB.getKode()))
+                    DokumentKategoriKode.IB.getKode(),
+                    GENERELT_FRITEKSTBREV_VIRKSOMHET.getBeskrivelse()))
             .put(GENERELT_FRITEKSTBREV_ARBEIDSGIVER,
                 new DokumentproduksjonsInfo("fritekstbrev",
-                    DokumentKategoriKode.IB.getKode()))
+                    DokumentKategoriKode.IB.getKode(),
+                    GENERELT_FRITEKSTBREV_ARBEIDSGIVER.getBeskrivelse()))
             .put(FRITEKSTBREV,
                 new DokumentproduksjonsInfo("fritekstbrev",
-                    DokumentKategoriKode.IB.getKode()))
+                    DokumentKategoriKode.IB.getKode(),
+                    FRITEKSTBREV.getBeskrivelse()))
             .put(GENERELT_FRITEKSTVEDLEGG,
                 new DokumentproduksjonsInfo("fritekstvedlegg",
-                    DokumentKategoriKode.IB.getKode()))
+                    DokumentKategoriKode.IB.getKode(),
+                    GENERELT_FRITEKSTVEDLEGG.getBeskrivelse()))
             .put(UTENLANDSK_TRYGDEMYNDIGHET_FRITEKSTBREV,
                 new DokumentproduksjonsInfo("trygdeavtale_fritekstbrev",
-                    DokumentKategoriKode.IB.getKode()))
+                    DokumentKategoriKode.IB.getKode(),
+                    UTENLANDSK_TRYGDEMYNDIGHET_FRITEKSTBREV.getBeskrivelse()))
             .put(AVSLAG_MANGLENDE_OPPLYSNINGER,
                 new DokumentproduksjonsInfo("avslag_manglende_opplysninger",
                     DokumentKategoriKode.VB.getKode(),
@@ -117,7 +123,8 @@ public class DokumentproduksjonsInfoMapper {
             .put(VARSELBREV_MANGLENDE_INNBETALING,
                 new DokumentproduksjonsInfo("varsel_manglende_innbetaling",
                     DokumentKategoriKode.IB.getKode(),
-                    JournalforingsTittel.VARSELBREV_MANGLENDE_INNBETALING.getTittel()))
+                    JournalforingsTittel.MELDING_MANGLENDE_INNBETALING.getTittel(),
+                    JournalforingsTittel.VARSEL_OPPHØRT_MEDLEMSKAP.getTittel()))
             .build());
     }
 
@@ -157,7 +164,8 @@ public class DokumentproduksjonsInfoMapper {
         IKKE_YRKESAKTIV_VEDTAKSBREV("Vedtak om medlemskap"),
         IKKE_YRKESAKTIV_FRIVILLIG_FTRL("Vedtak om frivillig medlemskap"),
         IKKE_YRKESAKTIV_PLIKTIG_FTRL("Vedtak om pliktig medlemskap"),
-        VARSELBREV_MANGLENDE_INNBETALING("Varsel om manglende innbetaling av trygdeavgift");
+        MELDING_MANGLENDE_INNBETALING("Melding om manglende innbetaling av trygdeavgift"),
+        VARSEL_OPPHØRT_MEDLEMSKAP("Varsel om opphør av frivillig medlemskap");
 
         private final String tittel;
 
