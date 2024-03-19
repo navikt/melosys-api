@@ -1,9 +1,10 @@
 package no.nav.melosys.service.brev;
 
+import java.util.stream.Stream;
+
 import no.nav.melosys.domain.Behandling;
 import no.nav.melosys.domain.Lovvalgsperiode;
 import no.nav.melosys.domain.brev.Mottaker;
-import no.nav.melosys.domain.brev.NorskMyndighet;
 import no.nav.melosys.domain.kodeverk.LovvalgBestemmelse;
 import no.nav.melosys.domain.kodeverk.Mottakerroller;
 import no.nav.melosys.service.LovvalgsperiodeService;
@@ -18,8 +19,6 @@ import org.junit.jupiter.params.provider.Arguments;
 import org.junit.jupiter.params.provider.MethodSource;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
-
-import java.util.stream.Stream;
 
 import static no.nav.melosys.domain.kodeverk.Mottakerroller.*;
 import static no.nav.melosys.domain.kodeverk.behandlinger.Behandlingstyper.FØRSTEGANG;
@@ -79,7 +78,7 @@ class DokumentNavnServiceTest {
         behandling.setId(1L);
         behandling.setType(erNyVurdering ? NY_VURDERING : FØRSTEGANG);
 
-        if (!mottaker.erUtenlandskMyndighet() && !NorskMyndighet.SKATTEETATEN.getOrgnr().equals(mottaker.getOrgnr())) {
+        if (!mottaker.erUtenlandskMyndighet()) {
             when(lovvalgsperiodeService.hentLovvalgsperiode(anyLong())).thenReturn(lagLovvalsperiode(skalHaAttest ? UK_ART6_1 : UK_ART8_2));
         }
 
@@ -102,7 +101,7 @@ class DokumentNavnServiceTest {
         behandling.setId(1L);
         behandling.setType(erNyVurdering ? NY_VURDERING : FØRSTEGANG);
 
-        if (!mottaker.erUtenlandskMyndighet() && !NorskMyndighet.SKATTEETATEN.getOrgnr().equals(mottaker.getOrgnr())) {
+        if (!mottaker.erUtenlandskMyndighet()) {
             when(lovvalgsperiodeService.hentLovvalgsperiode(anyLong())).thenReturn(lagLovvalsperiode(skalHaAttest ? UK_ART6_1 : UK_ART8_2));
         }
 
@@ -123,7 +122,7 @@ class DokumentNavnServiceTest {
         behandling.setId(123L);
         behandling.setType(erNyVurdering ? NY_VURDERING : FØRSTEGANG);
 
-        if (!mottaker.erUtenlandskMyndighet() && !NorskMyndighet.SKATTEETATEN.getOrgnr().equals(mottaker.getOrgnr())) {
+        if (!mottaker.erUtenlandskMyndighet()) {
             when(lovvalgsperiodeService.hentLovvalgsperiode(anyLong())).thenReturn(lagLovvalsperiode(skalHaAttest ? UK_ART6_1 : UK_ART8_2));
         }
 
@@ -142,14 +141,12 @@ class DokumentNavnServiceTest {
             Arguments.of(false, false, lagMottaker(BRUKER, "1234", null, null), "Vedtak om medlemskap"),
             Arguments.of(true, false, lagMottaker(ARBEIDSGIVER, null, "1234", null), "Kopi av vedtak om medlemskap, Attest for medlemskap i folketrygden"),
             Arguments.of(false, false, lagMottaker(ARBEIDSGIVER, null, "1234", null), "Kopi av vedtak om medlemskap"),
-            Arguments.of(false, false, lagMottaker(UTENLANDSK_TRYGDEMYNDIGHET, null, NorskMyndighet.SKATTEETATEN.getOrgnr(), null), "Kopi av vedtak om medlemskap"),
             Arguments.of(true, false, lagMottaker(UTENLANDSK_TRYGDEMYNDIGHET, null, null, "1234"), "Attest for medlemskap i folketrygden"),
 
             Arguments.of(true, true, lagMottaker(BRUKER, "1234", null, null), "Vedtak om medlemskap, Attest for medlemskap i folketrygden - endring"),
             Arguments.of(false, true, lagMottaker(BRUKER, "1234", null, null), "Vedtak om medlemskap - endring"),
             Arguments.of(true, true, lagMottaker(ARBEIDSGIVER, null, "1234", null), "Kopi av vedtak om medlemskap, Attest for medlemskap i folketrygden - endring"),
             Arguments.of(false, true, lagMottaker(ARBEIDSGIVER, null, "1234", null), "Kopi av vedtak om medlemskap - endring"),
-            Arguments.of(false, true, lagMottaker(UTENLANDSK_TRYGDEMYNDIGHET, null, NorskMyndighet.SKATTEETATEN.getOrgnr(), null), "Kopi av vedtak om medlemskap - endring"),
             Arguments.of(true, true, lagMottaker(UTENLANDSK_TRYGDEMYNDIGHET, null, null, "1234"), "Attest for medlemskap i folketrygden - endring")
         );
     }
