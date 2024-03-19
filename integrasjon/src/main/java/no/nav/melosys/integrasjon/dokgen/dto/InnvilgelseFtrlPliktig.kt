@@ -20,7 +20,7 @@ class InnvilgelseFtrlPliktig(
     @JsonInclude(JsonInclude.Include.NON_NULL)
     val avgiftsperioder: List<AvgiftsperiodeDto>,
     @JsonInclude(JsonInclude.Include.NON_NULL)
-    val medlemskapsperioder: List<MedlemskapsperiodeDto>,
+    val medlemskapsperiode: MedlemskapsperiodeDto,
     val bestemmelse: Folketrygdloven_kap2_bestemmelser?,
     val avslåttMedlemskapsperiodeFørMottaksdatoHelsedel: Boolean,
     val avslåttMedlemskapsperiodeFørMottaksdatoFullDekning: Boolean,
@@ -39,14 +39,16 @@ class InnvilgelseFtrlPliktig(
     val land: List<String>,
     @JsonInclude(JsonInclude.Include.NON_NULL)
     val trygdeavtaleLand: List<String>,
-    val betalerArbeidsgiveravgift: Boolean
+    val betalerArbeidsgiveravgift: Boolean,
+    val harLavSatsPgaAlder: Boolean,
+    val arbeidssituasjontype: Arbeidssituasjontype
 ) : DokgenDto(brevbestilling, Mottakerroller.BRUKER) {
 
     constructor(
         brevbestilling: InnvilgelsePliktigMedlemFtrlBrevbestilling,
         behandlingstype: Behandlingstyper,
         avgiftsperioder: List<AvgiftsperiodeDto>,
-        medlemskapsperioder: List<MedlemskapsperiodeDto>,
+        medlemskapsperiode: MedlemskapsperiodeDto,
         bestemmelse: Folketrygdloven_kap2_bestemmelser?,
         avslåttMedlemskapsperiodeFørMottaksdatoHelsedel: Boolean,
         avslåttMedlemskapsperiodeFørMottaksdatoFullDekning: Boolean,
@@ -63,13 +65,15 @@ class InnvilgelseFtrlPliktig(
         flereLandUkjentHvilke: Boolean,
         land: List<String>,
         trygdeavtaleLand: List<String>,
-        betalerArbeidsgiveravgift: Boolean
+        betalerArbeidsgiveravgift: Boolean,
+        harLavSatsPgaAlder: Boolean,
+        arbeidssituasjontype: Arbeidssituasjontype
     ) : this(
         brevbestilling,
         behandlingstype,
         datoMottatt = instantTilLocalDate(brevbestilling.forsendelseMottatt),
         avgiftsperioder,
-        medlemskapsperioder,
+        medlemskapsperiode,
         bestemmelse,
         avslåttMedlemskapsperiodeFørMottaksdatoHelsedel,
         avslåttMedlemskapsperiodeFørMottaksdatoFullDekning,
@@ -86,6 +90,8 @@ class InnvilgelseFtrlPliktig(
         flereLandUkjentHvilke,
         land,
         trygdeavtaleLand,
-        betalerArbeidsgiveravgift
+        betalerArbeidsgiveravgift,
+        harLavSatsPgaAlder,
+        arbeidssituasjontype
     )
 }

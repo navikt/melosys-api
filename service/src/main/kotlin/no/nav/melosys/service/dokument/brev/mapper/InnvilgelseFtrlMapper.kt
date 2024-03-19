@@ -17,9 +17,11 @@ import no.nav.melosys.integrasjon.dokgen.dto.InnvilgelseFtrlIkkeYrkesaktivPlikti
 import no.nav.melosys.integrasjon.dokgen.dto.InnvilgelseFtrlPliktig
 import no.nav.melosys.integrasjon.dokgen.dto.InnvilgelseFtrlYrkesaktivFrivillig
 import no.nav.melosys.integrasjon.dokgen.dto.innvilgelseftrl.AvgiftsperiodeDto
+import no.nav.melosys.integrasjon.dokgen.dto.innvilgelseftrl.MedlemskapsperiodeDto
 import no.nav.melosys.service.avgift.TrygdeavgiftMottakerService
 import no.nav.melosys.service.avgift.TrygdeavgiftsberegningService
 import no.nav.melosys.service.avklartefakta.AvklarteVirksomheterService
+import no.nav.melosys.service.persondata.PersondataService
 import org.springframework.stereotype.Component
 import java.math.BigDecimal
 import java.time.Instant
@@ -32,7 +34,8 @@ class InnvilgelseFtrlMapper(
     private val avklarteVirksomheterService: AvklarteVirksomheterService,
     private val dokgenMapperDatahenter: DokgenMapperDatahenter,
     private val trygdeavgiftMottakerService: TrygdeavgiftMottakerService,
-    private val trygdeavgiftsberegningService: TrygdeavgiftsberegningService
+    private val trygdeavgiftsberegningService: TrygdeavgiftsberegningService,
+    private val persondataService: PersondataService
 ) {
     @Transactional
     internal fun mapYrkesaktivFrivillig(brevbestilling: InnvilgelseFtrlYrkesaktivFrivilligBrevbestilling): InnvilgelseFtrlYrkesaktivFrivillig {
@@ -119,7 +122,7 @@ class InnvilgelseFtrlMapper(
         )
     }
 
-    internal fun mapPliktig(brevbestilling: InnvilgelsePliktigMedlemFtrlBrevbestilling): InnvilgelseFtrlPliktig {
+    internal fun mapPliktigMedlem(brevbestilling: InnvilgelsePliktigMedlemFtrlBrevbestilling): InnvilgelseFtrlPliktig {
         val behandlingsresultat = dokgenMapperDatahenter.hentBehandlingsresultat(brevbestilling.behandlingId)
         val medlemAvFolketrygden = behandlingsresultat.medlemAvFolketrygden
         val søknadsland = behandlingsresultat.behandling.mottatteOpplysninger.mottatteOpplysningerData.soeknadsland
@@ -127,13 +130,18 @@ class InnvilgelseFtrlMapper(
             mapAvslåttMedlemskapsperiodeFørMottaksdatoHelsedel(medlemAvFolketrygden, brevbestilling.forsendelseMottatt)
         val avslåttMedlemskapsperiodeFørMottaksdatoFullDekning =
             mapAvslåttMedlemskapsperiodeFørMottaksdatoFullDekning(medlemAvFolketrygden, brevbestilling.forsendelseMottatt)
+        val medlemskapsperiode = medlemAvFolketrygden.medlemskapsperioder.first()
+        val harLavSatsPgaAlder = harLavSatsPgaAlderIMinstEnPeriode(
+            persondataService.hentPerson(behandlingsresultat.behandling.fagsak.hentBruker().aktørId).fødselsdato, medlemskapsperiode)
 
         return InnvilgelseFtrlPliktig(
+            harLavSatsPgaAlder = harLavSatsPgaAlder,
+            arbeidssituasjontype = brevbestilling.arbeidssituasjontype,
             brevbestilling = brevbestilling,
             behandlingstype = behandlingsresultat.behandling.type,
             avgiftsperioder = mapAvgiftsPerioder(medlemAvFolketrygden),
-            medlemskapsperioder = mapMedlemskapsPerioder(medlemAvFolketrygden),
-            bestemmelse = medlemAvFolketrygden.medlemskapsperioder.filter { it.erInnvilget() }.sortedBy { it.fom }.first().bestemmelse,
+            medlemskapsperiode = mapMedlemskapsPeriode(medlemskapsperiode),
+            bestemmelse = medlemskapsperiode.bestemmelse,
             avslåttMedlemskapsperiodeFørMottaksdatoHelsedel = avslåttMedlemskapsperiodeFørMottaksdatoHelsedel,
             avslåttMedlemskapsperiodeFørMottaksdatoFullDekning = avslåttMedlemskapsperiodeFørMottaksdatoFullDekning,
             trygdeavgiftMottaker = trygdeavgiftMottakerService.getTrygdeavgiftMottaker(medlemAvFolketrygden.fastsattTrygdeavgift.trygdeavgiftsgrunnlag),
@@ -151,6 +159,20 @@ class InnvilgelseFtrlMapper(
             trygdeavtaleLand = mapTrygdeavtaleLand(søknadsland.landkoder),
             betalerArbeidsgiveravgift = erBetalerArbeidsgiveravgift(medlemAvFolketrygden.medlemskapsperioder))
     }
+
+    fun harLavSatsPgaAlderIMinstEnPeriode(birthDate: LocalDate, medlemskapsperiode: Medlemskapsperiode): Boolean {
+        val alderForInneværendeÅrForMedlemskapsperiodeFom = medlemskapsperiode.fom.year - birthDate.year
+        val alderForInneværendeÅrForMedlemskapsperiodeTom = medlemskapsperiode.tom.year - birthDate.year
+        return alderForInneværendeÅrForMedlemskapsperiodeFom !in 18..68 || alderForInneværendeÅrForMedlemskapsperiodeTom !in 18..68
+    }
+
+    private fun mapMedlemskapsPeriode(medlemskapsperiode: Medlemskapsperiode): MedlemskapsperiodeDto =
+        MedlemskapsperiodeDto(
+            medlemskapsperiode.fom,
+            medlemskapsperiode.tom,
+            medlemskapsperiode.trygdedekning,
+            medlemskapsperiode.innvilgelsesresultat
+        )
 
     private fun mapMedlemskapsPerioder(medlemAvFolketrygden: MedlemAvFolketrygden): List<no.nav.melosys.integrasjon.dokgen.dto.innvilgelseftrl.MedlemskapsperiodeDto> =
         medlemAvFolketrygden.medlemskapsperioder.map {

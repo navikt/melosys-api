@@ -3,6 +3,7 @@ package no.nav.melosys.domain.brev;
 import java.util.List;
 
 import no.nav.melosys.domain.dokument.felles.Periode;
+import no.nav.melosys.domain.kodeverk.Arbeidssituasjontype;
 
 public class InnvilgelsePliktigMedlemFtrlBrevbestilling extends DokgenBrevbestilling {
 
@@ -17,6 +18,7 @@ public class InnvilgelsePliktigMedlemFtrlBrevbestilling extends DokgenBrevbestil
     private Periode medlemskapsperiode;
     private String trygdeavgiftFritekst;
     private boolean harLavSatsPgaAlder;
+    private Arbeidssituasjontype arbeidssituasjontype;
 
     public InnvilgelsePliktigMedlemFtrlBrevbestilling() {
         super();
@@ -36,6 +38,11 @@ public class InnvilgelsePliktigMedlemFtrlBrevbestilling extends DokgenBrevbestil
         this.land = builder.land;
         this.trygdeavgiftFritekst = builder.trygdeavgiftFritekst;
         this.harLavSatsPgaAlder = builder.harLavSatsPgaAlder;
+        this.arbeidssituasjontype = builder.arbeidssituasjontype;
+    }
+
+    public Arbeidssituasjontype getArbeidssituasjontype() {
+        return arbeidssituasjontype;
     }
 
     public boolean harLavSatsPgaAlder() {
@@ -106,6 +113,7 @@ public class InnvilgelsePliktigMedlemFtrlBrevbestilling extends DokgenBrevbestil
         private Periode medlemskapsperiode;
         private boolean harLavSatsPgaAlder;
         private String trygdeavgiftFritekst;
+        private Arbeidssituasjontype arbeidssituasjontype;
 
         public Builder() {
         }
@@ -123,6 +131,12 @@ public class InnvilgelsePliktigMedlemFtrlBrevbestilling extends DokgenBrevbestil
             this.land = brevbestilling.land;
             this.harLavSatsPgaAlder = brevbestilling.harLavSatsPgaAlder();
             this.trygdeavgiftFritekst = brevbestilling.trygdeavgiftFritekst;
+            this.arbeidssituasjontype = brevbestilling.arbeidssituasjontype;
+        }
+
+        public Builder medArbeidssituasjontype(Arbeidssituasjontype arbeidssituasjontype) {
+            this.arbeidssituasjontype = arbeidssituasjontype;
+            return this;
         }
 
         public Builder medBestemmelse(String bestemmelse) {
