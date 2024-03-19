@@ -67,7 +67,6 @@
         <logback.version>1.4.14</logback.version>
         <logstash.version>7.3</logstash.version>
         <hikaricp.version>5.0.1</hikaricp.version>
-<!--        <jackson.version>2.13.2.20220328</jackson.version>-->
         <javax.ws.rs-api.version>2.1.1</javax.ws.rs-api.version>
         <json-smart.version>2.4.9</json-smart.version>
         <jms-api.version>2.0.1</jms-api.version>
@@ -214,13 +213,6 @@
                 <artifactId>logback-classic</artifactId>
                 <version>${logback.version}</version>
             </dependency>
-<!--            <dependency>-->
-<!--                <groupId>com.fasterxml.jackson</groupId>-->
-<!--                <artifactId>jackson-bom</artifactId>-->
-<!--                <version>${jackson.version}</version>-->
-<!--                <scope>import</scope>-->
-<!--                <type>pom</type>-->
-<!--            </dependency>-->
             <dependency>
                 <groupId>com.github.ben-manes.caffeine</groupId>
                 <artifactId>caffeine</artifactId>
@@ -276,11 +268,6 @@
                 <artifactId>springfox-boot-starter</artifactId>
                 <version>${springfox.version}</version>
             </dependency>
-<!--            <dependency>-->
-<!--                <groupId>javax.servlet</groupId>-->
-<!--                <artifactId>javax.servlet-api</artifactId>-->
-<!--                <version>${servlet-api.version}</version>-->
-<!--            </dependency>-->
             <dependency>
                 <groupId>javax.ws.rs</groupId>
                 <artifactId>javax.ws.rs-api</artifactId>
@@ -498,11 +485,6 @@
                 <artifactId>annotations</artifactId>
                 <version>21.0.1</version>
             </dependency>
-<!--            <dependency>-->
-<!--                <groupId>com.nimbusds</groupId>-->
-<!--                <artifactId>oauth2-oidc-sdk</artifactId>-->
-<!--                <version>9.35</version>-->
-<!--            </dependency>-->
             <dependency>
                 <groupId>org.xerial.snappy</groupId>
                 <artifactId>snappy-java</artifactId>
@@ -520,12 +502,6 @@
                 <artifactId>token-client-spring</artifactId>
                 <version>${token-support.version}</version>
             </dependency>
-<!--            <dependency>-->
-<!--                <groupId>no.nav.tjenester</groupId>-->
-<!--                <artifactId>nav-dokumentproduksjon-v3-tjenestespesifikasjon</artifactId>-->
-<!--                <version>${doksys.dokumentproduksjon.version}</version>-->
-<!--                <classifier>jaxws</classifier>-->
-<!--            </dependency>-->
             <dependency>
                 <groupId>no.nav.tjenester</groupId>
                 <artifactId>dok-nav-dokumentproduksjon-v3-tjenestespesifikasjon</artifactId>
@@ -640,11 +616,6 @@
                 <artifactId>token-validation-core</artifactId>
                 <version>${token-support.version}</version>
             </dependency>
-<!--            <dependency>-->
-<!--                <groupId>no.nav.security</groupId>-->
-<!--                <artifactId>token-validation-test-support</artifactId>-->
-<!--                <version>${token-validation-test-support.version}</version>-->
-<!--            </dependency>-->
             <dependency>
                 <groupId>org.awaitility</groupId>
                 <artifactId>awaitility</artifactId>
