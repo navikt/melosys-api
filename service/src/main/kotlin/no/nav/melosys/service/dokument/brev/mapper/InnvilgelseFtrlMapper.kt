@@ -75,7 +75,7 @@ class InnvilgelseFtrlMapper(
         val ikkeyrkesaktivrelasjonType =
             behandlingsresultat.avklartefakta.firstOrNull { it.type == Avklartefaktatyper.IKKE_YRKESAKTIV_RELASJON }?.fakta
         val avslåttMedlemskapsperiodeFørMottaksdatoHelsedel =
-            mapAvslåttMedlemskapsperiodeFørMottaksdatoFullDekning(behandlingsresultat.medlemAvFolketrygden, brevbestilling.forsendelseMottatt)
+            mapAvslåttMedlemskapsperiodeFørMottaksdatoHelsedel(behandlingsresultat.medlemAvFolketrygden, brevbestilling.forsendelseMottatt)
         val avslåttMedlemskapsperiodeFørMottaksdatoFullDekning =
             mapAvslåttMedlemskapsperiodeFørMottaksdatoFullDekning(behandlingsresultat.medlemAvFolketrygden, brevbestilling.forsendelseMottatt)
 
