@@ -10,7 +10,6 @@ import no.nav.melosys.service.LovvalgsperiodeService
 import no.nav.melosys.service.dokument.BrevmottakerService
 import no.nav.melosys.service.dokument.DokgenService
 import no.nav.melosys.service.dokument.DokumentproduksjonsInfo
-import no.nav.melosys.service.dokument.VedleggTyper
 import org.springframework.stereotype.Service
 import org.springframework.util.StringUtils
 
@@ -41,7 +40,7 @@ class DokumentNavnService(
     ): String {
         if (erTrygdeavtaleVedtaksbrev(produserbaredokumenter)) {
             val dokumentproduksjonsInfo = dokgenService.hentDokumentInfo(produserbaredokumenter)
-            return utledDokumentNavn(behandling, dokumentproduksjonsInfo, mottaker)
+            return utledTittelTrygdeavtale(behandling, dokumentproduksjonsInfo, mottaker)
         }
         return standardTekst ?: produserbaredokumenter.beskrivelse
     }
@@ -50,21 +49,18 @@ class DokumentNavnService(
         return produserbaredokumenter.kode.contains("TRYGDEAVTALE") && produserbaredokumenter.beskrivelse.contains("Vedtaksbrev")
     }
 
-    fun utledDokumentNavn(behandling: Behandling, dokumentproduksjonsInfo: DokumentproduksjonsInfo, mottaker: Mottaker): String {
+    fun utledTittelTrygdeavtale(behandling: Behandling, dokumentproduksjonsInfo: DokumentproduksjonsInfo, mottaker: Mottaker): String {
         val tittel = utledTittelTrygdeavtale(behandling.id, dokumentproduksjonsInfo, mottaker)
         return if (behandling.erNyVurdering()) lagEndringTittel(tittel) else tittel
     }
 
     private fun utledTittelTrygdeavtale(behandlingID: Long, dokumentproduksjonsInfo: DokumentproduksjonsInfo, mottaker: Mottaker): String {
         if (mottaker.erUtenlandskMyndighet()) {
-            return dokumentproduksjonsInfo.vedleggsTitler[VedleggTyper.ATTEST]
-                ?: throw FunksjonellException("Forventer at trygdeavtale-brev gar attest-tittel")
+            return dokumentproduksjonsInfo.attestTittel ?: throw FunksjonellException("Forventer at trygdeavtale-brev har attest-tittel")
         }
 
-        val vedtaksbrevTittel = dokumentproduksjonsInfo.vedleggsTitler[VedleggTyper.VEDTAKSBREV]
-            ?: throw FunksjonellException("Forventer at trygdeavtale-brev har vedtaksbrev-tittel")
-        val erArtikkel8_2 = lovvalgsperiodeService.hentLovvalgsperiode(behandlingID).bestemmelse === Lovvalgsbestemmelser_trygdeavtale_gb.UK_ART8_2
-        val tittel = if (erArtikkel8_2) vedtaksbrevTittel else dokumentproduksjonsInfo.journalføringsTittel
+        val erArtikkel8_2 = lovvalgsperiodeService.hentLovvalgsperiode(behandlingID).bestemmelse == Lovvalgsbestemmelser_trygdeavtale_gb.UK_ART8_2
+        val tittel = if (erArtikkel8_2) dokumentproduksjonsInfo.alternativTittel else dokumentproduksjonsInfo.journalføringsTittel
 
         if (mottaker.rolle == Mottakerroller.BRUKER) {
             return tittel

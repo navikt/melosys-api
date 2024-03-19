@@ -129,7 +129,7 @@ class DokumentNavnServiceTest {
         DokumentproduksjonsInfoMapper dokumentproduksjonsInfoMapper = new DokumentproduksjonsInfoMapper();
 
 
-        String dokumentNavn = dokumentNavnService.utledDokumentNavn(behandling, dokumentproduksjonsInfoMapper.hentDokumentproduksjonsInfo(TRYGDEAVTALE_GB), mottaker);
+        String dokumentNavn = dokumentNavnService.utledTittelTrygdeavtale(behandling, dokumentproduksjonsInfoMapper.hentDokumentproduksjonsInfo(TRYGDEAVTALE_GB), mottaker);
 
 
         assertThat(dokumentNavn).isEqualTo(forventetTittel);

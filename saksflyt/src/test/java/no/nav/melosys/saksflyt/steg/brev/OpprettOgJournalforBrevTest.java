@@ -213,7 +213,7 @@ class OpprettOgJournalforBrevTest {
             .build();
         Prosessinstans prosessinstans = lagProsessinstansMedMottaker(behandling, mottaker, brevbestilling);
 
-        when(mockDokumentNavnService.utledDokumentNavn(behandling, dokumentproduksjonsInfoMapper.hentDokumentproduksjonsInfo(TRYGDEAVTALE_GB), mottaker)).thenReturn("Vedtak om medlemskap, Attest for medlemskap i folketrygden");
+        when(mockDokumentNavnService.utledTittelTrygdeavtale(behandling, dokumentproduksjonsInfoMapper.hentDokumentproduksjonsInfo(TRYGDEAVTALE_GB), mottaker)).thenReturn("Vedtak om medlemskap, Attest for medlemskap i folketrygden");
 
         opprettJournalforBrev.utfør(prosessinstans);
 
