@@ -26,13 +26,13 @@ class ProsessUtil(
     private val prosessinstanserFerdig: MutableList<Prosessinstans> = CopyOnWriteArrayList()
 ) {
     @EventListener
-    fun prosessinstansOpprettet(prosessinstansOpprettetEvent: ProsessinstansOpprettetEvent) {
+    private fun prosessinstansOpprettet(prosessinstansOpprettetEvent: ProsessinstansOpprettetEvent) {
         log.info ("Prosessinstans Opprettet - ${prosessinstansOpprettetEvent.hentProsessinstans().type}")
         prosessinstanserOpprettet.add(prosessinstansOpprettetEvent.hentProsessinstans())
     }
 
     @EventListener
-    fun prosessinstansFerdig(prosessinstansFerdigEvent: ProsessinstansFerdigEvent) {
+    private fun prosessinstansFerdig(prosessinstansFerdigEvent: ProsessinstansFerdigEvent) {
         log.info ("Prosessinstans Ferdig - ${prosessinstansFerdigEvent.hentProsessinstans().type}")
         prosessinstanserFerdig.add(prosessinstansFerdigEvent.hentProsessinstans())
     }
@@ -65,7 +65,7 @@ class ProsessUtil(
         return journalføringProsess
     }
 
-    protected fun waitForProcessesToStart(count: Int) {
+    private fun waitForProcessesToStart(count: Int) {
         withClue("wait for $count processes to start") {
             AwaitUtil.awaitWithFailOnLogErrors {
                 pollDelay(pollDelay)
@@ -79,7 +79,7 @@ class ProsessUtil(
         }
     }
 
-    protected fun waitForProcessesToFinnish(count: Int) {
+    private fun waitForProcessesToFinnish(count: Int) {
         withClue("wait for $count processes to finnish") {
             AwaitUtil.awaitWithFailOnLogErrors {
                 pollDelay(pollDelay)
@@ -94,7 +94,7 @@ class ProsessUtil(
     }
 
 
-    protected fun waitForAndReturnProcess(prosessType: ProsessType, startTime: LocalDateTime): Prosessinstans {
+    private fun waitForAndReturnProcess(prosessType: ProsessType, startTime: LocalDateTime): Prosessinstans {
         withClue("wait for process type:$prosessType to start") {
             AwaitUtil.awaitWithFailOnLogErrors {
                 pollDelay(pollDelay)
