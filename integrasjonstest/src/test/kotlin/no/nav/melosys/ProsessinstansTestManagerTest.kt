@@ -15,7 +15,7 @@ import kotlin.test.Test
 
 
 @TestInstance(TestInstance.Lifecycle.PER_CLASS)
-class ProsessUtilTest {
+class ProsessinstansTestManagerTest {
 
     @BeforeAll
     fun setUp() {
