@@ -17,7 +17,7 @@ import no.nav.melosys.service.LovvalgsperiodeService;
 import no.nav.melosys.service.aktoer.UtenlandskMyndighetService;
 import no.nav.melosys.service.avklartefakta.AvklarteVirksomheterService;
 import no.nav.melosys.service.behandling.BehandlingsresultatService;
-import no.nav.melosys.service.dokument.brev.mapper.BrevmottakerMapper;
+import no.nav.melosys.service.brev.bestilling.BrevMottakerMap;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
@@ -65,12 +65,10 @@ public class BrevmottakerService {
 
     @Transactional
     public Mottakerliste hentMottakerliste(Produserbaredokumenter produserbartdokument, long behandlingId) {
-        Mottakerliste mottakerliste = ofNullable(BrevmottakerMapper.BREV_MOTTAKER_MAP.get(produserbartdokument))
+        Mottakerliste mottakerliste = ofNullable(BrevMottakerMap.INSTANCE.getMap().get(produserbartdokument))
             .orElseThrow(() -> new IkkeFunnetException("Mangler mapping av mottakere for " + produserbartdokument));
 
-        Mottakerliste mottakerListeKopi = new Mottakerliste.Builder()
-            .medHovedMottaker(mottakerliste.getHovedMottaker())
-            .build();
+        Mottakerliste mottakerListeKopi = new Mottakerliste(mottakerliste.getHovedMottaker());
 
         if (mottakerliste.kanHaKopier()) {
             leggTilKopier(behandlingId, mottakerListeKopi, mottakerliste.getBrevkopiRegler());
