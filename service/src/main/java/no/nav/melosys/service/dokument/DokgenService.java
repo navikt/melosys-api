@@ -343,8 +343,7 @@ public class DokgenService {
             case IKKE_YRKESAKTIV_FRIVILLIG_FTRL -> new InnvilgelseFtrlIkkeYrkesaktivFrivilligBrevbestilling.Builder()
                 .medDistribusjonstype(Distribusjonstype.VEDTAK);
             case PLIKTIG_MEDLEM_FTRL -> new InnvilgelsePliktigMedlemFtrlBrevbestilling.Builder()
-                .medDistribusjonstype(Distribusjonstype.VEDTAK)
-                .medArbeidssituasjontype();
+                .medDistribusjonstype(Distribusjonstype.VEDTAK);
             case VARSELBREV_MANGLENDE_INNBETALING -> new VarselbrevManglendeInnbetalingBrevbestilling.Builder()
                 .medDistribusjonstype(Distribusjonstype.VIKTIG)
                 .medFakturanummer(brevbestillingDto.getFakturanummer())

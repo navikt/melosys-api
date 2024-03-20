@@ -3,6 +3,7 @@ package no.nav.melosys.service.dokument.brev.mapper
 import no.nav.melosys.domain.Behandling
 import no.nav.melosys.domain.Medlemskapsperiode
 import no.nav.melosys.domain.Vilkaarsresultat
+import no.nav.melosys.domain.avklartefakta.Avklartefakta
 import no.nav.melosys.domain.brev.InnvilgelseFtrlIkkeYrkesaktivFrivilligBrevbestilling
 import no.nav.melosys.domain.brev.InnvilgelseFtrlIkkeYrkesaktivPliktigBrevbestilling
 import no.nav.melosys.domain.brev.InnvilgelseFtrlYrkesaktivFrivilligBrevbestilling
@@ -21,7 +22,6 @@ import no.nav.melosys.integrasjon.dokgen.dto.innvilgelseftrl.MedlemskapsperiodeD
 import no.nav.melosys.service.avgift.TrygdeavgiftMottakerService
 import no.nav.melosys.service.avgift.TrygdeavgiftsberegningService
 import no.nav.melosys.service.avklartefakta.AvklarteVirksomheterService
-import no.nav.melosys.service.persondata.PersondataService
 import org.springframework.stereotype.Component
 import java.math.BigDecimal
 import java.time.Instant
@@ -35,7 +35,6 @@ class InnvilgelseFtrlMapper(
     private val dokgenMapperDatahenter: DokgenMapperDatahenter,
     private val trygdeavgiftMottakerService: TrygdeavgiftMottakerService,
     private val trygdeavgiftsberegningService: TrygdeavgiftsberegningService,
-    private val persondataService: PersondataService
 ) {
     @Transactional
     internal fun mapYrkesaktivFrivillig(brevbestilling: InnvilgelseFtrlYrkesaktivFrivilligBrevbestilling): InnvilgelseFtrlYrkesaktivFrivillig {
@@ -132,11 +131,12 @@ class InnvilgelseFtrlMapper(
             mapAvslåttMedlemskapsperiodeFørMottaksdatoFullDekning(medlemAvFolketrygden, brevbestilling.forsendelseMottatt)
         val medlemskapsperiode = medlemAvFolketrygden.medlemskapsperioder.first()
         val harLavSatsPgaAlder = harLavSatsPgaAlderIMinstEnPeriode(
-            persondataService.hentPerson(behandlingsresultat.behandling.fagsak.hentBruker().aktørId).fødselsdato, medlemskapsperiode)
+            dokgenMapperDatahenter.hentPersondata(behandlingsresultat.behandling).fødselsdato, medlemskapsperiode)
+
 
         return InnvilgelseFtrlPliktig(
             harLavSatsPgaAlder = harLavSatsPgaAlder,
-            arbeidssituasjontype = brevbestilling.arbeidssituasjontype,
+            arbeidssituasjontype = hentArbeidsSituasjonsType(behandlingsresultat.avklartefakta),
             brevbestilling = brevbestilling,
             behandlingstype = behandlingsresultat.behandling.type,
             avgiftsperioder = mapAvgiftsPerioder(medlemAvFolketrygden),
@@ -158,6 +158,11 @@ class InnvilgelseFtrlMapper(
             land = søknadsland.landkoder.map { dokgenMapperDatahenter.hentLandnavnFraLandkode(it) },
             trygdeavtaleLand = mapTrygdeavtaleLand(søknadsland.landkoder),
             betalerArbeidsgiveravgift = erBetalerArbeidsgiveravgift(medlemAvFolketrygden.medlemskapsperioder))
+    }
+
+    fun hentArbeidsSituasjonsType(avklartefakta: Set<Avklartefakta>): Arbeidssituasjontype? {
+        val arbeidssituasjon = avklartefakta.firstOrNull { it.type == Avklartefaktatyper.ARBEIDSSITUASJON }?.fakta
+        return arbeidssituasjon?.let { Arbeidssituasjontype.valueOf(it) }
     }
 
     fun harLavSatsPgaAlderIMinstEnPeriode(birthDate: LocalDate, medlemskapsperiode: Medlemskapsperiode): Boolean {
