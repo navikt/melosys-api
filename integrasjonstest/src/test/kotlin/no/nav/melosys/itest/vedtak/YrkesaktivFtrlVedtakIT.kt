@@ -34,7 +34,6 @@ import no.nav.melosys.melosysmock.medl.MedlRepo
 import no.nav.melosys.melosysmock.testdata.TestDataGenerator
 import no.nav.melosys.repository.BehandlingRepository
 import no.nav.melosys.repository.FagsakRepository
-import no.nav.melosys.saksflyt.ProsessinstansRepository
 import no.nav.melosys.saksflytapi.domain.ProsessType
 import no.nav.melosys.service.MedlemAvFolketrygdenService
 import no.nav.melosys.service.avgift.TrygdeavgiftsgrunnlagService
@@ -73,7 +72,6 @@ class YrkesaktivFtrlVedtakIT(
     @Autowired testDataGenerator: TestDataGenerator,
     @Autowired journalføringService: JournalfoeringService,
     @Autowired oppgaveService: OppgaveService,
-    @Autowired prosessinstansRepository: ProsessinstansRepository,
     @Autowired private val avklartefaktaService: AvklartefaktaService,
     @Autowired private val fagsakRepository: FagsakRepository,
     @Autowired private val behandlingsresultatService: BehandlingsresultatService,
@@ -90,7 +88,7 @@ class YrkesaktivFtrlVedtakIT(
     @Autowired private val opprettBehandlingForSak: OpprettBehandlingForSak,
     @Autowired private val trygdeavgiftsgrunnlagService: TrygdeavgiftsgrunnlagService,
     @Autowired @Qualifier("manglendeFakturabetalingMelding") private val manglendeFakturabetalingMeldingTemplate: KafkaTemplate<String, ManglendeFakturabetalingMelding>,
-) : JournalfoeringBase(testDataGenerator, journalføringService, oppgaveService, prosessinstansRepository) {
+) : JournalfoeringBase(testDataGenerator, journalføringService, oppgaveService) {
 
     private var originalSubjectHandler: SubjectHandler? = null
     private val kafkaTopic = "teammelosys.manglende-fakturabetaling-local"
@@ -176,7 +174,10 @@ class YrkesaktivFtrlVedtakIT(
             )
         }.behandling.id
 
-        executeAndWait(ProsessType.OPPRETT_NY_BEHANDLING_MANGLENDE_INNBETALING) {
+        executeAndWait(
+            waitForprosessType = ProsessType.OPPRETT_NY_BEHANDLING_MANGLENDE_INNBETALING,
+            alsoWaitForprosessType = listOf(ProsessType.OPPRETT_OG_DISTRIBUER_BREV)
+        ) {
             val kafkaMelding = ManglendeFakturabetalingMelding(
                 fakturaserieReferanse = fakturaserieReferanse,
                 betalingsstatus = Betalingsstatus.IKKE_BETALT,
@@ -259,7 +260,8 @@ class YrkesaktivFtrlVedtakIT(
             .build()
 
         executeAndWait(
-            waitForprosessType = ProsessType.IVERKSETT_VEDTAK_FTRL
+            waitForprosessType = ProsessType.IVERKSETT_VEDTAK_FTRL,
+            alsoWaitForprosessType = listOf(ProsessType.OPPRETT_OG_DISTRIBUER_BREV)
         ) {
             vedtaksfattingFasade.fattVedtak(behandlingsId, vedtakRequest)
         }
