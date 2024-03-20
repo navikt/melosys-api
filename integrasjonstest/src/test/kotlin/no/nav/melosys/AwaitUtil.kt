@@ -32,12 +32,12 @@ object AwaitUtil {
     }
 
     fun ConditionFactory.throwOnLogError(logEvents: List<ILoggingEvent>): ConditionFactory = this.conditionEvaluationListener {
-        findFirstOrNull(logEvents)?.let {
+        findWithErrors(logEvents)?.let {
             throw TekniskException("Fant log entry med level error: ${it.formattedMessage}")
         }
     }
 
-    private fun findFirstOrNull(logEvents: List<ILoggingEvent>): ILoggingEvent? {
+    private fun findWithErrors(logEvents: List<ILoggingEvent>): ILoggingEvent? {
         for (i in 1..3) {
             try {
                 return logEvents.firstOrNull { it.level == Level.ERROR }
