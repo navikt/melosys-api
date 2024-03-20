@@ -12,7 +12,7 @@ import io.mockk.every
 import io.mockk.mockk
 import io.mockk.slot
 import io.mockk.verify
-import no.nav.melosys.ProsessUtil
+import no.nav.melosys.ProsessinstansTestManager
 import no.nav.melosys.domain.Lovvalgsperiode
 import no.nav.melosys.domain.eessi.*
 import no.nav.melosys.domain.eessi.melding.MelosysEessiMelding
@@ -61,7 +61,7 @@ class SedMottakTestIT(
     @Autowired private val unleash: FakeUnleash,
     @Autowired private val avklartefaktaService: AvklartefaktaService,
     @Autowired private val oAuthMockServer: OAuthMockServer,
-    @Autowired private val prosessUtil: ProsessUtil
+    @Autowired private val prosessinstansTestManager: ProsessinstansTestManager
 
 ) : ComponentTestBase() {
 
@@ -86,7 +86,7 @@ class SedMottakTestIT(
     fun after() {
         ThreadLocalAccessInfo.afterExecuteProcess(randomUUID)
         oAuthMockServer.stop()
-        prosessUtil.clear()
+        prosessinstansTestManager.clear()
     }
 
     @Test
@@ -111,7 +111,7 @@ class SedMottakTestIT(
         }
 
 
-        prosessUtil.executeAndWait(
+        prosessinstansTestManager.executeAndWait(
             waitForprosessType = ProsessType.MOTTAK_SED,
             alsoWaitForprosessType = listOf(
                 ProsessType.REGISTRERING_UNNTAK_NY_SAK,
@@ -170,7 +170,7 @@ class SedMottakTestIT(
         }
 
 
-        prosessUtil.executeAndWait(
+        prosessinstansTestManager.executeAndWait(
             waitForprosessType = ProsessType.MOTTAK_SED,
             alsoWaitForprosessType = listOf(
                 ProsessType.REGISTRERING_UNNTAK_NY_SAK,
@@ -224,7 +224,7 @@ class SedMottakTestIT(
             isX006NavErFjernet = true
         }
 
-        prosessUtil.executeAndWait(
+        prosessinstansTestManager.executeAndWait(
             waitForprosessType = ProsessType.MOTTAK_SED,
             alsoWaitForprosessType = listOf(ProsessType.ARBEID_FLERE_LAND_NY_SAK, ProsessType.MOTTAK_SED_JOURNALFØRING),
             waitForProcessCount = 4
@@ -277,7 +277,7 @@ class SedMottakTestIT(
             artikkel = null
         }
 
-        prosessUtil.executeAndWait(
+        prosessinstansTestManager.executeAndWait(
             waitForprosessType = ProsessType.MOTTAK_SED,
             alsoWaitForprosessType = listOf(ProsessType.ARBEID_FLERE_LAND_NY_SAK, ProsessType.MOTTAK_SED_JOURNALFØRING),
             waitForProcessCount = 4
@@ -330,7 +330,7 @@ class SedMottakTestIT(
             sedType = SedType.X007.name
         }
 
-        prosessUtil.executeAndWait(
+        prosessinstansTestManager.executeAndWait(
             waitForprosessType = ProsessType.MOTTAK_SED,
             alsoWaitForprosessType = listOf(
                 ProsessType.REGISTRERING_UNNTAK_NY_SAK,
@@ -383,7 +383,7 @@ class SedMottakTestIT(
             lovvalgsland = "NO"
         }
 
-        prosessUtil.executeAndWait(
+        prosessinstansTestManager.executeAndWait(
             waitForprosessType = ProsessType.MOTTAK_SED,
             alsoWaitForprosessType = listOf(ProsessType.ARBEID_FLERE_LAND_NY_SAK),
             waitForProcessCount = 2
@@ -416,7 +416,7 @@ class SedMottakTestIT(
             })
         )
 
-        val vedtaksProsessInstans = prosessUtil.executeAndWait(
+        val vedtaksProsessInstans = prosessinstansTestManager.executeAndWait(
             waitForprosessType = ProsessType.IVERKSETT_VEDTAK_EOS,
             alsoWaitForprosessType = listOf(ProsessType.SEND_BREV)
         ) {
@@ -433,7 +433,7 @@ class SedMottakTestIT(
             artikkel.shouldBe(Lovvalgsbestemmelse.ART_11_3_a)
         }
 
-        val opprettNyVurderingProsessinstans = prosessUtil.executeAndWait(ProsessType.OPPRETT_REPLIKERT_BEHANDLING_FOR_SAK) {
+        val opprettNyVurderingProsessinstans = prosessinstansTestManager.executeAndWait(ProsessType.OPPRETT_REPLIKERT_BEHANDLING_FOR_SAK) {
             opprettBehandlingForSak.opprettBehandling(
                 prosessinstanserSortert.get(1).behandling.fagsak.saksnummer,
                 OpprettSakDto().apply {
@@ -445,7 +445,7 @@ class SedMottakTestIT(
                 })
         }
 
-        prosessUtil.executeAndWait(ProsessType.UTPEKING_AVVIS) {
+        prosessinstansTestManager.executeAndWait(ProsessType.UTPEKING_AVVIS) {
             utpekingService.avvisUtpeking(opprettNyVurderingProsessinstans.behandling.id, UtpekingAvvis().apply {
                 begrunnelse = "lol"
                 etterspørInformasjon = false
@@ -492,7 +492,7 @@ class SedMottakTestIT(
         }
 
 
-        prosessUtil.executeAndWait(
+        prosessinstansTestManager.executeAndWait(
             waitForprosessType = ProsessType.MOTTAK_SED,
             alsoWaitForprosessType = listOf(
                 ProsessType.ARBEID_FLERE_LAND_NY_SAK
@@ -507,14 +507,14 @@ class SedMottakTestIT(
             .sortedBy { it.endretDato }
 
 
-        prosessUtil.executeAndWait(ProsessType.UTPEKING_AVVIS) {
+        prosessinstansTestManager.executeAndWait(ProsessType.UTPEKING_AVVIS) {
             utpekingService.avvisUtpeking(prosessinstanserSortert.get(1).behandling.id, UtpekingAvvis().apply {
                 begrunnelse = "lol"
                 etterspørInformasjon = false
             })
         }
 
-        val opprettNyVurderingProsessinstans = prosessUtil.executeAndWait(ProsessType.OPPRETT_REPLIKERT_BEHANDLING_FOR_SAK) {
+        val opprettNyVurderingProsessinstans = prosessinstansTestManager.executeAndWait(ProsessType.OPPRETT_REPLIKERT_BEHANDLING_FOR_SAK) {
             opprettBehandlingForSak.opprettBehandling(
                 prosessinstanserSortert.get(1).behandling.fagsak.saksnummer,
                 OpprettSakDto().apply {
@@ -548,7 +548,7 @@ class SedMottakTestIT(
             })
         )
 
-        val vedtaksProsessInstans = prosessUtil.executeAndWait(
+        val vedtaksProsessInstans = prosessinstansTestManager.executeAndWait(
             waitForprosessType = ProsessType.IVERKSETT_VEDTAK_EOS,
             alsoWaitForprosessType = listOf(ProsessType.SEND_BREV)
         ) {

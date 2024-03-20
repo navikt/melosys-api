@@ -8,7 +8,7 @@ import no.nav.melosys.Application
 import no.nav.melosys.LoggingTestUtils
 import no.nav.melosys.LoggingTestUtils.filterBuilder
 import no.nav.melosys.ProsessRegister
-import no.nav.melosys.ProsessUtil
+import no.nav.melosys.ProsessinstansTestManager
 import no.nav.melosys.domain.eessi.melding.MelosysEessiMelding
 import no.nav.melosys.saksflyt.ProsessinstansBehandler
 import no.nav.melosys.saksflyt.steg.sed.mottak.SedMottakRuting
@@ -47,12 +47,12 @@ import org.springframework.test.context.ActiveProfiles
 internal class SedLåsreferanseIT(
     @Autowired private val prosessinstansService: ProsessinstansService,
     @Autowired private val prosessRegister: ProsessRegister,
-    @Autowired private val prosessUtil: ProsessUtil
+    @Autowired private val prosessinstansTestManager: ProsessinstansTestManager
 ) : OracleTestContainerBase() {
     @AfterEach
     fun afterEach() {
         prosessRegister.clear()
-        prosessUtil.clear()
+        prosessinstansTestManager.clear()
     }
 
     @Test
@@ -71,7 +71,7 @@ internal class SedLåsreferanseIT(
             val sed1ås = sed1.lagUnikIdentifikator()
             val sed2ås = sed2.lagUnikIdentifikator()
 
-            prosessUtil.executeAndWait(
+            prosessinstansTestManager.executeAndWait(
                 waitForprosessType = ProsessType.MOTTAK_SED,
                 waitForProcessCount = 2
             ) {
@@ -105,7 +105,7 @@ internal class SedLåsreferanseIT(
             }
             val sed1ås = sed1.lagUnikIdentifikator()
 
-            prosessUtil.executeAndWait(
+            prosessinstansTestManager.executeAndWait(
                 waitForprosessType = ProsessType.MOTTAK_SED,
                 waitForProcessCount = 2
             ) {

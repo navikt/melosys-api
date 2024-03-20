@@ -21,7 +21,7 @@ import java.util.concurrent.CopyOnWriteArrayList
 
 private val log = KotlinLogging.logger { }
 @Component
-class ProsessUtil(
+class ProsessinstansTestManager(
     private val prosessinstanserOpprettet: MutableList<Prosessinstans> = CopyOnWriteArrayList(),
     private val prosessinstanserFerdig: MutableList<Prosessinstans> = CopyOnWriteArrayList()
 ) {

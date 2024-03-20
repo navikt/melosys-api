@@ -9,7 +9,7 @@ import no.nav.melosys.Application
 import no.nav.melosys.LoggingTestUtils
 import no.nav.melosys.LoggingTestUtils.filterBuilder
 import no.nav.melosys.ProsessRegister
-import no.nav.melosys.ProsessUtil
+import no.nav.melosys.ProsessinstansTestManager
 import no.nav.melosys.domain.eessi.SedType
 import no.nav.melosys.domain.eessi.melding.MelosysEessiMelding
 import no.nav.melosys.saksflyt.ProsessinstansBehandler
@@ -58,13 +58,13 @@ import java.util.*
 internal class SedLåsMedSubProsesserIT(
     @Autowired private val prosessinstansService: ProsessinstansService,
     @Autowired private val prosessRegister: ProsessRegister,
-    @Autowired private val prosessUtil: ProsessUtil
+    @Autowired private val prosessinstansTestManager: ProsessinstansTestManager
 ) : OracleTestContainerBase() {
 
     @AfterEach
     fun setUp() {
         prosessRegister.clear()
-        prosessUtil.clear()
+        prosessinstansTestManager.clear()
     }
 
     @Test
@@ -84,7 +84,7 @@ internal class SedLåsMedSubProsesserIT(
 
         LoggingTestUtils.withLogCapture { logItems ->
 
-            prosessUtil.executeAndWait(
+            prosessinstansTestManager.executeAndWait(
                 waitForprosessType = ProsessType.MOTTAK_SED,
                 alsoWaitForprosessType = listOf(ProsessType.MOTTAK_SED_JOURNALFØRING, ProsessType.REGISTRERING_UNNTAK_NY_SAK),
                 waitForProcessCount = 5
@@ -153,7 +153,7 @@ internal class SedLåsMedSubProsesserIT(
 
         LoggingTestUtils.withLogCapture { logItems ->
 
-            prosessUtil.executeAndWait(
+            prosessinstansTestManager.executeAndWait(
                 waitForprosessType = ProsessType.MOTTAK_SED,
                 alsoWaitForprosessType = listOf(ProsessType.MOTTAK_SED_JOURNALFØRING),
                 waitForProcessCount = 6

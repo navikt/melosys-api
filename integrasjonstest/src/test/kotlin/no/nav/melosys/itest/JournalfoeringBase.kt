@@ -5,7 +5,7 @@ import com.github.tomakehurst.wiremock.client.WireMock
 import com.github.tomakehurst.wiremock.client.WireMock.equalTo
 import com.github.tomakehurst.wiremock.core.WireMockConfiguration
 import io.kotest.matchers.nulls.shouldNotBeNull
-import no.nav.melosys.ProsessUtil
+import no.nav.melosys.ProsessinstansTestManager
 import no.nav.melosys.domain.arkiv.ArkivDokument
 import no.nav.melosys.domain.kodeverk.Avsendertyper
 import no.nav.melosys.domain.kodeverk.ForvaltningsmeldingMottaker
@@ -38,7 +38,7 @@ class JournalfoeringBase(
     private val processUUID = UUID.randomUUID()
 
     @Autowired
-    private lateinit var prosessUtil: ProsessUtil
+    private lateinit var prosessinstansTestManager: ProsessinstansTestManager
 
     @BeforeEach
     fun before() {
@@ -71,7 +71,7 @@ class JournalfoeringBase(
     fun after() {
         ThreadLocalAccessInfo.afterExecuteProcess(processUUID)
         mockServer.stop()
-        prosessUtil.clear()
+        prosessinstansTestManager.clear()
     }
 
     protected fun journalførOgVentTilProsesserErFerdige(
@@ -93,7 +93,7 @@ class JournalfoeringBase(
         alsoWaitForprosessType: List<ProsessType> = listOf(),
         count: Int = 0,
         process: () -> Unit
-    ): Prosessinstans = prosessUtil.executeAndWait(waitForprosessType, alsoWaitForprosessType, count, process)
+    ): Prosessinstans = prosessinstansTestManager.executeAndWait(waitForprosessType, alsoWaitForprosessType, count, process)
 
     protected fun lagJfrOppgave(): Oppgave =
         testDataGenerator.opprettJfrOppgave(tilordnetRessurs = "Z123456", forVirksomhet = false)

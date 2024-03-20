@@ -7,7 +7,7 @@ import no.nav.melosys.Application
 import no.nav.melosys.LoggingTestUtils
 import no.nav.melosys.LoggingTestUtils.filterBuilder
 import no.nav.melosys.ProsessRegister
-import no.nav.melosys.ProsessUtil
+import no.nav.melosys.ProsessinstansTestManager
 import no.nav.melosys.domain.manglendebetaling.Betalingsstatus
 import no.nav.melosys.domain.manglendebetaling.ManglendeFakturabetalingMelding
 import no.nav.melosys.saksflyt.ProsessinstansBehandler
@@ -50,12 +50,12 @@ import java.time.LocalDate
 internal class SaksflytLåsreferanseIT(
     @Autowired private val prosessinstansService: ProsessinstansService,
     @Autowired private val prosessRegister: ProsessRegister,
-    @Autowired private val prosessUtil: ProsessUtil
+    @Autowired private val prosessinstansTestManager: ProsessinstansTestManager
 ) : OracleTestContainerBase() {
     @AfterEach
     fun setUp() {
         prosessRegister.clear()
-        prosessUtil.clear()
+        prosessinstansTestManager.clear()
     }
 
     @Test
@@ -79,7 +79,7 @@ internal class SaksflytLåsreferanseIT(
             val manglendeInnbetalingLås2 = LåsReferanseFactory.lagString(manglendeFakturabetalingMelding2)
 
 
-            prosessUtil.executeAndWait(
+            prosessinstansTestManager.executeAndWait(
                 waitForprosessType = ProsessType.OPPRETT_NY_BEHANDLING_MANGLENDE_INNBETALING,
                 waitForProcessCount = 2
             ) {
@@ -124,7 +124,7 @@ internal class SaksflytLåsreferanseIT(
             )
             val manglendeInnbetalingLås1 = LåsReferanseFactory.lagString(manglendeFakturabetalingMelding1)
 
-            prosessUtil.executeAndWait(
+            prosessinstansTestManager.executeAndWait(
                 waitForprosessType = ProsessType.OPPRETT_NY_BEHANDLING_MANGLENDE_INNBETALING,
                 waitForProcessCount = 2
             ) {

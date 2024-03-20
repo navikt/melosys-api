@@ -19,21 +19,21 @@ class ProsessUtilTest {
 
     @BeforeAll
     fun setUp() {
-        ProsessUtil.timeOut = Duration.ofMillis(2)
-        ProsessUtil.timeOutFindingProsess = Duration.ofMillis(2)
-        ProsessUtil.pollDelay = Duration.ofMillis(1)
-        ProsessUtil.pollInterval = Duration.ofMillis(1)
+        ProsessinstansTestManager.timeOut = Duration.ofMillis(2)
+        ProsessinstansTestManager.timeOutFindingProsess = Duration.ofMillis(2)
+        ProsessinstansTestManager.pollDelay = Duration.ofMillis(1)
+        ProsessinstansTestManager.pollInterval = Duration.ofMillis(1)
     }
 
     @AfterAll
     fun tearDown() {
-        ProsessUtil.reset()
+        ProsessinstansTestManager.reset()
     }
 
     @Test
     fun `assert med beskrivelse om prosess ikke finnes i databasen`() {
         shouldThrow<AssertionError> {
-            ProsessUtil().executeAndWait(
+            ProsessinstansTestManager().executeAndWait(
                 waitForprosessType = ProsessType.JFR_KNYTT
             ) {
             }
@@ -53,7 +53,7 @@ class ProsessUtilTest {
         )
 
         shouldThrow<AssertionError> {
-            ProsessUtil(prosessinstanser, prosessinstanser).executeAndWait(
+            ProsessinstansTestManager(prosessinstanser, prosessinstanser).executeAndWait(
                 waitForprosessType = ProsessType.JFR_KNYTT
             ) {
             }
@@ -72,7 +72,7 @@ class ProsessUtilTest {
         })
 
         shouldThrow<AssertionError> {
-            ProsessUtil(prosessinstanser, prosessinstanser).executeAndWait(
+            ProsessinstansTestManager(prosessinstanser, prosessinstanser).executeAndWait(
                 waitForprosessType = ProsessType.JFR_KNYTT,
                 alsoWaitForprosessType = listOf(ProsessType.IVERKSETT_VEDTAK_EOS)
             ) {
@@ -101,7 +101,7 @@ class ProsessUtilTest {
         )
 
         shouldThrow<AssertionError> {
-            ProsessUtil(prosessinstanser, prosessinstanser).executeAndWait(
+            ProsessinstansTestManager(prosessinstanser, prosessinstanser).executeAndWait(
                 waitForprosessType = ProsessType.JFR_KNYTT,
                 alsoWaitForprosessType = listOf(ProsessType.IVERKSETT_VEDTAK_EOS)
             ) {
@@ -124,7 +124,7 @@ class ProsessUtilTest {
             }
         )
 
-        ProsessUtil(prosessinstanser, prosessinstanser).executeAndWait(
+        ProsessinstansTestManager(prosessinstanser, prosessinstanser).executeAndWait(
             waitForprosessType = ProsessType.JFR_KNYTT
         ) {
         }
@@ -140,7 +140,7 @@ class ProsessUtilTest {
             registrertDato = LocalDateTime.now().plusMinutes(1)
         })
 
-        ProsessUtil(prosessinstanser, prosessinstanser).executeAndWait(
+        ProsessinstansTestManager(prosessinstanser, prosessinstanser).executeAndWait(
             waitForprosessType = ProsessType.JFR_KNYTT
         ) {
         }.id shouldBe randomUUID
