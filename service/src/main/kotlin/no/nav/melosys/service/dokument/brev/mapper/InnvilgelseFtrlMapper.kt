@@ -129,9 +129,9 @@ class InnvilgelseFtrlMapper(
             mapAvslåttMedlemskapsperiodeFørMottaksdatoHelsedel(medlemAvFolketrygden, brevbestilling.forsendelseMottatt)
         val avslåttMedlemskapsperiodeFørMottaksdatoFullDekning =
             mapAvslåttMedlemskapsperiodeFørMottaksdatoFullDekning(medlemAvFolketrygden, brevbestilling.forsendelseMottatt)
-        val medlemskapsperiode = medlemAvFolketrygden.medlemskapsperioder.single()
+        val medlemskapsPeriode = medlemAvFolketrygden.medlemskapsperioder.single()
         val harLavSatsPgaAlder = harLavSatsPgaAlderIMinstEnPeriode(
-            dokgenMapperDatahenter.hentPersondata(behandlingsresultat.behandling).fødselsdato, medlemskapsperiode)
+            dokgenMapperDatahenter.hentPersondata(behandlingsresultat.behandling).fødselsdato, medlemskapsPeriode)
 
 
         return InnvilgelseFtrlPliktig(
@@ -140,8 +140,8 @@ class InnvilgelseFtrlMapper(
             brevbestilling = brevbestilling,
             behandlingstype = behandlingsresultat.behandling.type,
             avgiftsperioder = mapAvgiftsPerioder(medlemAvFolketrygden),
-            medlemskapsperiode = mapMedlemskapsPeriodePliktigMedlem(medlemskapsperiode),
-            bestemmelse = medlemskapsperiode.bestemmelse,
+            medlemskapsperiode = mapMedlemskapsPeriodePliktigMedlem(medlemskapsPeriode),
+            bestemmelse = medlemskapsPeriode.bestemmelse,
             avslåttMedlemskapsperiodeFørMottaksdatoHelsedel = avslåttMedlemskapsperiodeFørMottaksdatoHelsedel,
             avslåttMedlemskapsperiodeFørMottaksdatoFullDekning = avslåttMedlemskapsperiodeFørMottaksdatoFullDekning,
             trygdeavgiftMottaker = trygdeavgiftMottakerService.getTrygdeavgiftMottaker(medlemAvFolketrygden.fastsattTrygdeavgift.trygdeavgiftsgrunnlag),
@@ -166,8 +166,10 @@ class InnvilgelseFtrlMapper(
 
     fun harLavSatsPgaAlderIMinstEnPeriode(birthDate: LocalDate, medlemskapsperiode: Medlemskapsperiode): Boolean {
         val alderForInneværendeÅrForMedlemskapsperiodeFom = medlemskapsperiode.fom.year - birthDate.year
-        val alderForInneværendeÅrForMedlemskapsperiodeTom = medlemskapsperiode.tom.year - birthDate.year
-        return alderForInneværendeÅrForMedlemskapsperiodeFom !in 18..68 || alderForInneværendeÅrForMedlemskapsperiodeTom !in 18..68
+        val alderForInneværendeÅrForMedlemskapsperiodeTom = medlemskapsperiode.tom?.year?.minus(birthDate.year)
+
+        return alderForInneværendeÅrForMedlemskapsperiodeFom !in 18..68
+            || (alderForInneværendeÅrForMedlemskapsperiodeTom?.let { it !in 18..68 } ?: false)
     }
 
     private fun mapMedlemskapsPeriodePliktigMedlem(medlemskapsperiode: Medlemskapsperiode): MedlemskapsperiodeDto =
