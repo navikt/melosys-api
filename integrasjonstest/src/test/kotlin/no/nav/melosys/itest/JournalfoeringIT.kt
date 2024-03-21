@@ -21,7 +21,6 @@ import no.nav.melosys.melosysmock.testdata.TestDataGenerator
 import no.nav.melosys.repository.BehandlingRepository
 import no.nav.melosys.repository.BehandlingsresultatRepository
 import no.nav.melosys.repository.FagsakRepository
-import no.nav.melosys.saksflyt.ProsessinstansRepository
 import no.nav.melosys.saksflytapi.domain.ProsessType
 import no.nav.melosys.service.journalforing.JournalfoeringService
 import no.nav.melosys.service.oppgave.OppgaveService
@@ -38,14 +37,13 @@ class JournalfoeringIT(
     @Autowired testDataGenerator: TestDataGenerator,
     @Autowired journalføringService: JournalfoeringService,
     @Autowired oppgaveService: OppgaveService,
-    @Autowired prosessinstansRepository: ProsessinstansRepository,
     @Autowired private val behandlingRepository: BehandlingRepository,
     @Autowired private val behandlingsresultatRepository: BehandlingsresultatRepository,
     @Autowired private val fagsakRepository: FagsakRepository,
     @Autowired private val unleash: FakeUnleash,
     @Autowired private val oAuthMockServer: OAuthMockServer,
     @Autowired private val journalpostRepo: JournalpostRepo
-) : JournalfoeringBase(testDataGenerator, journalføringService, oppgaveService, prosessinstansRepository) {
+) : JournalfoeringBase(testDataGenerator, journalføringService, oppgaveService) {
 
     @BeforeEach
     fun setup() {
@@ -129,7 +127,10 @@ class JournalfoeringIT(
         )
 
 
-        executeAndWait(ProsessType.JFR_ANDREGANG_REPLIKER_BEHANDLING) {
+        executeAndWait(
+            waitForprosessType =  ProsessType.JFR_ANDREGANG_REPLIKER_BEHANDLING,
+            alsoWaitForprosessType = listOf(ProsessType.OPPRETT_OG_DISTRIBUER_BREV)
+        ) {
             journalføringService.journalførOgOpprettAndregangsBehandling(journalfoeringTilordneDto)
         }
 
@@ -184,10 +185,12 @@ class JournalfoeringIT(
         )
 
 
-        executeAndWait(ProsessType.JFR_KNYTT) {
+        executeAndWait(
+            waitForprosessType = ProsessType.JFR_KNYTT,
+            alsoWaitForprosessType = listOf(ProsessType.OPPRETT_OG_DISTRIBUER_BREV)
+        ) {
             journalføringService.journalførOgKnyttTilEksisterendeSak(journalfoeringTilordneDto)
         }
-
 
         val fagsak = fagsakRepository.findBySaksnummer(behandling.fagsak.saksnummer).get()
         fagsak.behandlinger
@@ -225,6 +228,7 @@ class JournalfoeringIT(
         val prosessinstans = journalførOgVentTilProsesserErFerdige(
             journalfoeringOpprettDto,
             waitFor = ProsessType.JFR_NY_SAK_BRUKER,
+            alsoWaitForprosessType = listOf(ProsessType.OPPRETT_OG_DISTRIBUER_BREV)
         )
         val behandling = prosessinstans.behandling
 
@@ -244,7 +248,10 @@ class JournalfoeringIT(
         )
 
 
-        executeAndWait(ProsessType.JFR_ANDREGANG_NY_BEHANDLING) {
+        executeAndWait(
+            waitForprosessType = ProsessType.JFR_ANDREGANG_NY_BEHANDLING,
+            alsoWaitForprosessType = listOf(ProsessType.OPPRETT_OG_DISTRIBUER_BREV)
+        ) {
             journalføringService.journalførOgOpprettAndregangsBehandling(journalfoeringTilordneDto)
         }
 
@@ -300,7 +307,10 @@ class JournalfoeringIT(
         )
 
 
-        executeAndWait(ProsessType.JFR_ANDREGANG_NY_BEHANDLING) {
+        executeAndWait(
+            waitForprosessType =  ProsessType.JFR_ANDREGANG_NY_BEHANDLING,
+            alsoWaitForprosessType = listOf(ProsessType.OPPRETT_OG_DISTRIBUER_BREV)
+        ) {
             journalføringService.journalførOgOpprettAndregangsBehandling(journalfoeringTilordneDto)
         }
 

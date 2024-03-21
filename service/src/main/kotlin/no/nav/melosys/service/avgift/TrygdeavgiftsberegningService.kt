@@ -8,10 +8,13 @@ import no.nav.melosys.domain.kodeverk.Fullmaktstype
 import no.nav.melosys.domain.kodeverk.Medlemskapstyper
 import no.nav.melosys.exception.FunksjonellException
 import no.nav.melosys.integrasjon.ereg.EregFasade
+import no.nav.melosys.integrasjon.inntekt.InntektRequest
 import no.nav.melosys.integrasjon.trygdeavgift.TrygdeavgiftConsumer
 import no.nav.melosys.integrasjon.trygdeavgift.TrygdeavgiftsberegningsRequestMapper
 import no.nav.melosys.integrasjon.trygdeavgift.dto.TrygdeavgiftsberegningResponse
 import no.nav.melosys.service.MedlemAvFolketrygdenService
+import no.nav.melosys.service.avgift.dto.InntektskildeRequest
+import no.nav.melosys.service.avgift.dto.SkatteforholdTilNorgeRequest
 import no.nav.melosys.service.behandling.BehandlingService
 import no.nav.melosys.service.persondata.PersondataService
 import org.springframework.stereotype.Service
@@ -34,7 +37,6 @@ class TrygdeavgiftsberegningService
     fun beregnOgLagreTrygdeavgift(behandlingsresultatID: Long): Set<Trygdeavgiftsperiode> {
         val medlemAvFolketrygden = medlemAvFolketrygdenService.hentMedlemAvFolketrygden(behandlingsresultatID)
         val fastsattTrygdeavgift = medlemAvFolketrygden.fastsattTrygdeavgift
-
         valider(medlemAvFolketrygden)
         fastsattTrygdeavgift.trygdeavgiftsperioder.clear()
         if (!trygdeavgiftMottakerService.skalBetalesTilNav(fastsattTrygdeavgift.trygdeavgiftsgrunnlag)) { return emptySet() }
@@ -123,6 +125,13 @@ class TrygdeavgiftsberegningService
         if (medlemAvFolketrygden.fastsattTrygdeavgift.trygdeavgiftsgrunnlag.inntektsperioder.isEmpty()) {
             throw FunksjonellException("Kan ikke beregne trygdeavgift uten inntektsperioder")
         }
+
+        val inntektskilderRequest = medlemAvFolketrygden.fastsattTrygdeavgift.trygdeavgiftsgrunnlag.inntektsperioder.map { InntektskildeRequest(it) }
+        val skatteforholdTilNorgeRequest = medlemAvFolketrygden.fastsattTrygdeavgift.trygdeavgiftsgrunnlag.skatteforholdTilNorge.map { SkatteforholdTilNorgeRequest(it) }
+        val medlemskapsperioder = medlemAvFolketrygden.medlemskapsperioder.toList()
+        
+        TrygdeavgiftsgrunnlagService.validerAtInntekstperioderDekkerInnvilgedeMedlemskapsperioder(inntektskilderRequest, medlemskapsperioder)
+        TrygdeavgiftsgrunnlagService.validerAtSkatteforholdTilNorgeDekkerInnvilgedeMedlemskapsperioderOgOverlapperIkke(skatteforholdTilNorgeRequest, medlemskapsperioder)
     }
 
     @Transactional(readOnly = true)

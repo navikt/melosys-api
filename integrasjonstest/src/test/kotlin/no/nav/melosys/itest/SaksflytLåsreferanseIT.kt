@@ -4,22 +4,21 @@ import io.kotest.matchers.shouldBe
 import io.mockk.every
 import io.mockk.mockk
 import no.nav.melosys.Application
-import no.nav.melosys.AwaitUtil.throwOnLogError
 import no.nav.melosys.LoggingTestUtils
 import no.nav.melosys.LoggingTestUtils.filterBuilder
 import no.nav.melosys.ProsessRegister
+import no.nav.melosys.ProsessinstansTestManager
 import no.nav.melosys.domain.manglendebetaling.Betalingsstatus
 import no.nav.melosys.domain.manglendebetaling.ManglendeFakturabetalingMelding
 import no.nav.melosys.saksflyt.ProsessinstansBehandler
-import no.nav.melosys.saksflyt.ProsessinstansFerdigListener
 import no.nav.melosys.saksflyt.steg.behandling.OpprettManglendeInnbetalingBehandling
 import no.nav.melosys.saksflyt.steg.brev.SendManglendeInnbetalingVarselBrev
 import no.nav.melosys.saksflyt.steg.oppgave.OpprettOppgave
 import no.nav.melosys.saksflytapi.ProsessinstansService
 import no.nav.melosys.saksflytapi.domain.LåsReferanseFactory
 import no.nav.melosys.saksflytapi.domain.ProsessSteg
+import no.nav.melosys.saksflytapi.domain.ProsessType
 import no.nav.security.token.support.spring.test.EnableMockOAuth2Server
-import org.awaitility.kotlin.await
 import org.junit.jupiter.api.AfterEach
 import org.junit.jupiter.api.Test
 import org.springframework.beans.factory.annotation.Autowired
@@ -32,7 +31,6 @@ import org.springframework.context.annotation.Primary
 import org.springframework.kafka.test.context.EmbeddedKafka
 import org.springframework.test.annotation.DirtiesContext
 import org.springframework.test.context.ActiveProfiles
-import java.time.Duration
 import java.time.LocalDate
 
 @ActiveProfiles("test")
@@ -51,10 +49,14 @@ import java.time.LocalDate
 @Import(SaksflytLåsreferanseIT.TestConfig::class)
 internal class SaksflytLåsreferanseIT(
     @Autowired private val prosessinstansService: ProsessinstansService,
-    @Autowired private val prosessRegister: ProsessRegister
+    @Autowired private val prosessRegister: ProsessRegister,
+    @Autowired private val prosessinstansTestManager: ProsessinstansTestManager
 ) : OracleTestContainerBase() {
     @AfterEach
-    fun setUp() = prosessRegister.clear()
+    fun setUp() {
+        prosessRegister.clear()
+        prosessinstansTestManager.clear()
+    }
 
     @Test
     fun `ikke kjør OpprettManglendeInnbetalingBehandling samtidig`() {
@@ -76,23 +78,18 @@ internal class SaksflytLåsreferanseIT(
             val manglendeInnbetalingLås1 = LåsReferanseFactory.lagString(manglendeFakturabetalingMelding1)
             val manglendeInnbetalingLås2 = LåsReferanseFactory.lagString(manglendeFakturabetalingMelding2)
 
-            prosessRegister.registrer("manglendeInnbetaling-1-Prosess") {
-                prosessinstansService.opprettManglendeInnbetalingProsessflyt(
-                    manglendeFakturabetalingMelding1
-                )
-            }
-            prosessRegister.registrer("manglendeInnbetaling-2-Prosess") {
-                prosessinstansService.opprettManglendeInnbetalingProsessflyt(
-                    manglendeFakturabetalingMelding2
-                )
-            }
 
-            await.throwOnLogError(logItems)
-                .timeout(Duration.ofSeconds(30)).pollInterval(Duration.ofSeconds(1))
-                .until {
-                    logItems.filterBuilder.match<ProsessinstansFerdigListener>()
-                        .build().last().formattedMessage.contains("Prosessinstans(er) på vent med samme gruppe-prefiks: []")
+            prosessinstansTestManager.executeAndWait(
+                waitForprosessType = ProsessType.OPPRETT_NY_BEHANDLING_MANGLENDE_INNBETALING,
+                waitForProcessCount = 2
+            ) {
+                prosessRegister.registrer("manglendeInnbetaling-1-Prosess") {
+                    prosessinstansService.opprettManglendeInnbetalingProsessflyt(manglendeFakturabetalingMelding1)
                 }
+                prosessRegister.registrer("manglendeInnbetaling-2-Prosess") {
+                    prosessinstansService.opprettManglendeInnbetalingProsessflyt(manglendeFakturabetalingMelding2)
+                }
+            }
 
             logItems.filterBuilder
                 .match<ProsessinstansBehandler>()
@@ -127,22 +124,17 @@ internal class SaksflytLåsreferanseIT(
             )
             val manglendeInnbetalingLås1 = LåsReferanseFactory.lagString(manglendeFakturabetalingMelding1)
 
-            prosessRegister.registrer("manglendeInnbetaling-1-Prosess") {
-                prosessinstansService.opprettManglendeInnbetalingProsessflyt(
-                    manglendeFakturabetalingMelding1
-                )
-            }
-            prosessRegister.registrer("manglendeInnbetaling-1-Duplikat") {
-                prosessinstansService.opprettManglendeInnbetalingProsessflyt(
-                    manglendeFakturabetalingMelding1
-                )
-            }
-            await.throwOnLogError(logItems)
-                .timeout(Duration.ofSeconds(30)).pollInterval(Duration.ofSeconds(1))
-                .until {
-                    logItems.filterBuilder.match<ProsessinstansFerdigListener>()
-                        .build().last().formattedMessage.contains("Prosessinstans(er) på vent med samme gruppe-prefiks: []")
+            prosessinstansTestManager.executeAndWait(
+                waitForprosessType = ProsessType.OPPRETT_NY_BEHANDLING_MANGLENDE_INNBETALING,
+                waitForProcessCount = 2
+            ) {
+                prosessRegister.registrer("manglendeInnbetaling-1-Prosess") {
+                    prosessinstansService.opprettManglendeInnbetalingProsessflyt(manglendeFakturabetalingMelding1)
                 }
+                prosessRegister.registrer("manglendeInnbetaling-1-Duplikat") {
+                    prosessinstansService.opprettManglendeInnbetalingProsessflyt(manglendeFakturabetalingMelding1)
+                }
+            }
 
             logItems.filterBuilder
                 .match<ProsessinstansBehandler>()
