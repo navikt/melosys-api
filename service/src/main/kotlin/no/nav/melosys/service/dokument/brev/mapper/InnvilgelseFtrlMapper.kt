@@ -129,7 +129,7 @@ class InnvilgelseFtrlMapper(
             mapAvslåttMedlemskapsperiodeFørMottaksdatoHelsedel(medlemAvFolketrygden, brevbestilling.forsendelseMottatt)
         val avslåttMedlemskapsperiodeFørMottaksdatoFullDekning =
             mapAvslåttMedlemskapsperiodeFørMottaksdatoFullDekning(medlemAvFolketrygden, brevbestilling.forsendelseMottatt)
-        val medlemskapsperiode = medlemAvFolketrygden.medlemskapsperioder.first()
+        val medlemskapsperiode = medlemAvFolketrygden.medlemskapsperioder.single()
         val harLavSatsPgaAlder = harLavSatsPgaAlderIMinstEnPeriode(
             dokgenMapperDatahenter.hentPersondata(behandlingsresultat.behandling).fødselsdato, medlemskapsperiode)
 
@@ -140,7 +140,7 @@ class InnvilgelseFtrlMapper(
             brevbestilling = brevbestilling,
             behandlingstype = behandlingsresultat.behandling.type,
             avgiftsperioder = mapAvgiftsPerioder(medlemAvFolketrygden),
-            medlemskapsperiode = mapMedlemskapsPeriode(medlemskapsperiode),
+            medlemskapsperiode = mapMedlemskapsPeriodePliktigMedlem(medlemskapsperiode),
             bestemmelse = medlemskapsperiode.bestemmelse,
             avslåttMedlemskapsperiodeFørMottaksdatoHelsedel = avslåttMedlemskapsperiodeFørMottaksdatoHelsedel,
             avslåttMedlemskapsperiodeFørMottaksdatoFullDekning = avslåttMedlemskapsperiodeFørMottaksdatoFullDekning,
@@ -170,7 +170,7 @@ class InnvilgelseFtrlMapper(
         return alderForInneværendeÅrForMedlemskapsperiodeFom !in 18..68 || alderForInneværendeÅrForMedlemskapsperiodeTom !in 18..68
     }
 
-    private fun mapMedlemskapsPeriode(medlemskapsperiode: Medlemskapsperiode): MedlemskapsperiodeDto =
+    private fun mapMedlemskapsPeriodePliktigMedlem(medlemskapsperiode: Medlemskapsperiode): MedlemskapsperiodeDto =
         MedlemskapsperiodeDto(
             medlemskapsperiode.fom,
             medlemskapsperiode.tom,
