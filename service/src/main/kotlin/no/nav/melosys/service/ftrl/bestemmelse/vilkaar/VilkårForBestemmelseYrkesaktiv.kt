@@ -104,7 +104,7 @@ class VilkårForBestemmelseYrkesaktiv(val mottatteOpplysningerService: MottatteO
         val mottatteOpplysninger = mottatteOpplysningerService.hentMottatteOpplysninger(behandlingID)
         val søknadsland = mottatteOpplysninger.mottatteOpplysningerData?.soeknadsland
 
-        val kunNorge = søknadsland?.landkoder?.first() == Land_iso2.NO.toString() && søknadsland.landkoder.size == 1
+        val kunNorge = søknadsland?.landkoder?.size == 1 && søknadsland.landkoder?.first() == Land_iso2.NO.toString()
 
         if(kunNorge){
             return listOf(
