@@ -58,7 +58,7 @@ class TrygdeavgiftsberegningService
     }
 
     private fun hentFødselsdatoOmViHarTjenstligBehov(behandlingsresultatID: Long, medlemskapsperioder: List<Medlemskapsperiode>): LocalDate? {
-        if (medlemskapsperioder.any { it.medlemskapstype == Medlemskapstyper.PLIKTIG }) {
+        if (medlemskapsperioder.any { it.erPliktig()}) {
             val fagsak = behandlingService.hentBehandling(behandlingsresultatID).fagsak
             return persondataService.hentPerson(fagsak.hentBruker().aktørId).fødselsdato
         }
@@ -129,7 +129,7 @@ class TrygdeavgiftsberegningService
         val inntektskilderRequest = medlemAvFolketrygden.fastsattTrygdeavgift.trygdeavgiftsgrunnlag.inntektsperioder.map { InntektskildeRequest(it) }
         val skatteforholdTilNorgeRequest = medlemAvFolketrygden.fastsattTrygdeavgift.trygdeavgiftsgrunnlag.skatteforholdTilNorge.map { SkatteforholdTilNorgeRequest(it) }
         val medlemskapsperioder = medlemAvFolketrygden.medlemskapsperioder.toList()
-        
+
         TrygdeavgiftsgrunnlagService.validerAtInntekstperioderDekkerInnvilgedeMedlemskapsperioder(inntektskilderRequest, medlemskapsperioder)
         TrygdeavgiftsgrunnlagService.validerAtSkatteforholdTilNorgeDekkerInnvilgedeMedlemskapsperioderOgOverlapperIkke(skatteforholdTilNorgeRequest, medlemskapsperioder)
     }

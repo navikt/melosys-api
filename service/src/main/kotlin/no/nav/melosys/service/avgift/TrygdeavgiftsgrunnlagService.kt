@@ -9,7 +9,6 @@ import no.nav.melosys.domain.avgift.SkatteforholdTilNorge
 import no.nav.melosys.domain.avgift.Trygdeavgiftsgrunnlag
 import no.nav.melosys.domain.folketrygden.FastsattTrygdeavgift
 import no.nav.melosys.domain.folketrygden.MedlemAvFolketrygden
-import no.nav.melosys.domain.kodeverk.Medlemskapstyper
 import no.nav.melosys.domain.kodeverk.Skatteplikttype
 import no.nav.melosys.domain.kodeverk.Trygdeavgift_typer
 import no.nav.melosys.exception.FunksjonellException
@@ -79,8 +78,8 @@ class TrygdeavgiftsgrunnlagService(private val behandlingsresultatService: Behan
             innvilgedeMedlemskapsperioder
         )
 
-        val erPliktigMedlem = innvilgedeMedlemskapsperioder.all { it.medlemskapstype.equals(Medlemskapstyper.PLIKTIG) }
-        val erSkattepliktigIHelePerioden = request.skatteforholdTilNorgeList.all { it.skatteplikttype.equals(Skatteplikttype.SKATTEPLIKTIG) }
+        val erPliktigMedlem = innvilgedeMedlemskapsperioder.all { it.erPliktig() }
+        val erSkattepliktigIHelePerioden = request.skatteforholdTilNorgeList.all { it.skatteplikttype == Skatteplikttype.SKATTEPLIKTIG }
 
         if (!(erPliktigMedlem && erSkattepliktigIHelePerioden)) {
             validerAtInntekstperioderDekkerInnvilgedeMedlemskapsperioder(
