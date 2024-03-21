@@ -145,16 +145,6 @@ public class InnvilgelsePliktigMedlemFtrlBrevbestilling extends DokgenBrevbestil
             this.arbeidssituasjontype = brevbestilling.arbeidssituasjontype;
         }
 
-        public Builder medArbeidssituasjontype(String arbeidssituasjontype) {
-            this.arbeidssituasjontype = arbeidssituasjontype;
-            return this;
-        }
-
-        public Builder medBestemmelse(String bestemmelse) {
-            this.bestemmelse = bestemmelse;
-            return this;
-        }
-
         public Builder medNyVurderingBakgrunn(String nyVurderingBakgrunn) {
             this.nyVurderingBakgrunn = nyVurderingBakgrunn;
             return this;
@@ -167,31 +157,6 @@ public class InnvilgelsePliktigMedlemFtrlBrevbestilling extends DokgenBrevbestil
 
         public Builder medBegrunnelseFritekst(String begrunnelseFritekst) {
             this.begrunnelseFritekst = begrunnelseFritekst;
-            return this;
-        }
-
-        public Builder medIkkeYrkesaktivOppholdType(String ikkeYrkesaktivOppholdType) {
-            this.ikkeYrkesaktivOppholdType = ikkeYrkesaktivOppholdType;
-            return this;
-        }
-
-        public Builder medIkkeYrkesaktivRelasjonType(String ikkeYrkesaktivRelasjonType) {
-            this.ikkeYrkesaktivRelasjonType = ikkeYrkesaktivRelasjonType;
-            return this;
-        }
-
-        public Builder medMedlemskapsperiode(Periode medlemskapsperiode) {
-            this.medlemskapsperiode = medlemskapsperiode;
-            return this;
-        }
-
-        public Builder medLand(List<String> land) {
-            this.land = land;
-            return this;
-        }
-
-        public Builder medFlereLandUkjentHvilke(boolean flereLandUkjentHvilke) {
-            this.flereLandUkjentHvilke = flereLandUkjentHvilke;
             return this;
         }
 
