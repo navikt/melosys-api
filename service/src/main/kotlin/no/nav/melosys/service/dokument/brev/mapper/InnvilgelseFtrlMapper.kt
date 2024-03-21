@@ -18,7 +18,6 @@ import no.nav.melosys.integrasjon.dokgen.dto.InnvilgelseFtrlIkkeYrkesaktivPlikti
 import no.nav.melosys.integrasjon.dokgen.dto.InnvilgelseFtrlPliktig
 import no.nav.melosys.integrasjon.dokgen.dto.InnvilgelseFtrlYrkesaktivFrivillig
 import no.nav.melosys.integrasjon.dokgen.dto.innvilgelseftrl.AvgiftsperiodeDto
-import no.nav.melosys.integrasjon.dokgen.dto.innvilgelseftrl.MedlemskapsperiodeDto
 import no.nav.melosys.service.avgift.TrygdeavgiftMottakerService
 import no.nav.melosys.service.avgift.TrygdeavgiftsberegningService
 import no.nav.melosys.service.avklartefakta.AvklarteVirksomheterService
@@ -140,7 +139,7 @@ class InnvilgelseFtrlMapper(
             brevbestilling = brevbestilling,
             behandlingstype = behandlingsresultat.behandling.type,
             avgiftsperioder = mapAvgiftsPerioder(medlemAvFolketrygden),
-            medlemskapsperiode = mapMedlemskapsPeriodePliktigMedlem(medlemskapsPeriode),
+            medlemskapsperiode = mapMedlemskapsPerioder(medlemAvFolketrygden).single(),
             bestemmelse = medlemskapsPeriode.bestemmelse,
             avslåttMedlemskapsperiodeFørMottaksdatoHelsedel = avslåttMedlemskapsperiodeFørMottaksdatoHelsedel,
             avslåttMedlemskapsperiodeFørMottaksdatoFullDekning = avslåttMedlemskapsperiodeFørMottaksdatoFullDekning,
@@ -171,14 +170,6 @@ class InnvilgelseFtrlMapper(
         return alderForInneværendeÅrForMedlemskapsperiodeFom !in 18..68
             || (alderForInneværendeÅrForMedlemskapsperiodeTom?.let { it !in 18..68 } ?: false)
     }
-
-    private fun mapMedlemskapsPeriodePliktigMedlem(medlemskapsperiode: Medlemskapsperiode): MedlemskapsperiodeDto =
-        MedlemskapsperiodeDto(
-            medlemskapsperiode.fom,
-            medlemskapsperiode.tom,
-            medlemskapsperiode.trygdedekning,
-            medlemskapsperiode.innvilgelsesresultat
-        )
 
     private fun mapMedlemskapsPerioder(medlemAvFolketrygden: MedlemAvFolketrygden): List<no.nav.melosys.integrasjon.dokgen.dto.innvilgelseftrl.MedlemskapsperiodeDto> =
         medlemAvFolketrygden.medlemskapsperioder.map {
