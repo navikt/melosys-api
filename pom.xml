@@ -59,7 +59,8 @@
         <caffeine.version>3.0.6</caffeine.version>
         <cxf.version>4.0.4</cxf.version>
         <commons-collections4.version>4.4</commons-collections4.version>
-        <commons-lang.version>3.12.0</commons-lang.version>
+        <commons-lang3.version>3.12.0</commons-lang3.version>
+        <commons-lang.version>2.2</commons-lang.version>
         <commons-text.version>1.10.0</commons-text.version>
         <findbugs.jsr305.version>3.0.2</findbugs.jsr305.version>
         <guava.version>31.1-jre</guava.version>
@@ -91,6 +92,17 @@
         <bcpkix-jdk15on.version>1.70</bcpkix-jdk15on.version>
         <nimbus-jose-jwt.version>9.37.1</nimbus-jose-jwt.version>
         <neethi.version>3.1.1</neethi.version>
+        <jakarta.jaxb.version>3.0.1</jakarta.jaxb.version>
+        <javaparser.version>1.0.11</javaparser.version>
+        <google.errorprone.version>2.13.1</google.errorprone.version>
+        <checkerframework.version>3.22.0</checkerframework.version>
+        <threeten.version>1.7.2</threeten.version>
+        <jetbrains.annotations.version>21.0.1</jetbrains.annotations.version>
+        <snappy.java.version>1.1.8.4</snappy.java.version>
+        <mockito.inline.version>5.2.0</mockito.inline.version>
+        <springmockk.version>3.1.1</springmockk.version>
+        <httpclient5.version>5.2</httpclient5.version>
+        <commons.beanutils.version>1.7.0</commons.beanutils.version>
 
         <!-- Transitive avhengigheter -->
         <asm.version>9.3</asm.version>
@@ -197,15 +209,25 @@
 
             <!-- Eksterne biblioteker -->
             <dependency>
+                <groupId>commons-beanutils</groupId>
+                <artifactId>commons-beanutils</artifactId>
+                <version>${commons.beanutils.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>org.apache.httpcomponents.client5</groupId>
+                <artifactId>httpclient5</artifactId>
+                <version>${httpclient5.version}</version>
+            </dependency>
+            <dependency>
                 <groupId>jakarta.xml.bind</groupId>
                 <artifactId>jakarta.xml.bind-api</artifactId>
-                <version>3.0.1</version>
+                <version>${jakarta.jaxb.version}</version>
             </dependency>
 
             <dependency>
                 <groupId>com.sun.xml.bind</groupId>
                 <artifactId>jaxb-impl</artifactId>
-                <version>3.0.1</version>
+                <version>${jakarta.jaxb.version}</version>
                 <scope>runtime</scope>
             </dependency>
             <dependency>
@@ -301,6 +323,11 @@
             <dependency>
                 <groupId>org.apache.commons</groupId>
                 <artifactId>commons-lang3</artifactId>
+                <version>${commons-lang3.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>commons-lang</groupId>
+                <artifactId>commons-lang</artifactId>
                 <version>${commons-lang.version}</version>
             </dependency>
             <dependency>
@@ -383,7 +410,7 @@
             <dependency>
                 <groupId>com.google.code.javaparser</groupId>
                 <artifactId>javaparser</artifactId>
-                <version>1.0.11</version>
+                <version>${javaparser.version}</version>
             </dependency>
             <dependency>
                 <groupId>com.fasterxml.woodstox</groupId>
@@ -393,7 +420,7 @@
             <dependency>
                 <groupId>com.google.errorprone</groupId>
                 <artifactId>error_prone_annotations</artifactId>
-                <version>2.13.1</version>
+                <version>${google.errorprone.version}</version>
             </dependency>
             <dependency>
                 <groupId>commons-logging</groupId>
@@ -418,7 +445,7 @@
             <dependency>
                 <groupId>org.checkerframework</groupId>
                 <artifactId>checker-qual</artifactId>
-                <version>3.22.0</version>
+                <version>${checkerframework.version}</version>
             </dependency>
             <dependency>
                 <groupId>org.javassist</groupId>
@@ -478,17 +505,17 @@
             <dependency>
                 <groupId>org.threeten</groupId>
                 <artifactId>threeten-extra</artifactId>
-                <version>1.7.2</version>
+                <version>${threeten.version}</version>
             </dependency>
             <dependency>
                 <groupId>org.jetbrains</groupId>
                 <artifactId>annotations</artifactId>
-                <version>21.0.1</version>
+                <version>${jetbrains.annotations.version}</version>
             </dependency>
             <dependency>
                 <groupId>org.xerial.snappy</groupId>
                 <artifactId>snappy-java</artifactId>
-                <version>1.1.8.4</version>
+                <version>${snappy.java.version}</version>
             </dependency>
 
             <!-- NAV felleskomponenter -->
@@ -660,6 +687,17 @@
                 <groupId>io.github.jaspeen</groupId>
                 <artifactId>ulid-java</artifactId>
                 <version>${ulid-java}</version>
+                <scope>test</scope>
+            </dependency>
+            <dependency>
+                <groupId>org.mockito</groupId>
+                <artifactId>mockito-inline</artifactId>
+                <version>${mockito.inline.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>com.ninja-squad</groupId>
+                <artifactId>springmockk</artifactId>
+                <version>${springmockk.version}</version>
                 <scope>test</scope>
             </dependency>
 

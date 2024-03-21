@@ -40,7 +40,6 @@
         <dependency>
             <groupId>io.getunleash</groupId>
             <artifactId>unleash-client-java</artifactId>
-            <version>${unleash.version}</version>
         </dependency>
 
         <dependency>
@@ -56,7 +55,6 @@
         <dependency>
             <groupId>org.apache.httpcomponents.client5</groupId>
             <artifactId>httpclient5</artifactId>
-            <version>5.2</version>
         </dependency>
         <dependency>
             <groupId>org.apache.commons</groupId>
@@ -107,13 +105,11 @@
         <dependency>
             <groupId>org.jetbrains.kotlin</groupId>
             <artifactId>kotlin-stdlib</artifactId>
-            <version>${kotlin.version}</version>
         </dependency>
 
         <dependency>
             <groupId>org.jetbrains.kotlin</groupId>
             <artifactId>kotlin-reflect</artifactId>
-            <version>${kotlin.version}</version>
         </dependency>
 
 
@@ -169,7 +165,6 @@
         <dependency>
             <groupId>com.ninja-squad</groupId>
             <artifactId>springmockk</artifactId>
-            <version>3.1.1</version>
             <scope>test</scope>
         </dependency>
         <dependency>

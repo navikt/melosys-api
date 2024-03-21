@@ -99,7 +99,6 @@
         <dependency>
             <groupId>com.ninja-squad</groupId>
             <artifactId>springmockk</artifactId>
-            <version>3.1.1</version>
             <scope>test</scope>
         </dependency>
 
@@ -163,12 +162,10 @@
         <dependency>
             <groupId>org.jetbrains.kotlin</groupId>
             <artifactId>kotlin-stdlib</artifactId>
-            <version>${kotlin.version}</version>
         </dependency>
         <dependency>
             <groupId>org.jetbrains.kotlin</groupId>
             <artifactId>kotlin-test-junit5</artifactId>
-            <version>${kotlin.version}</version>
         </dependency>
         <!-- graphql -->
         <dependency>
