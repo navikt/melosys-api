@@ -1,17 +1,15 @@
 package no.nav.melosys.service.dokument.brev.mapper;
 
+import java.util.HashSet;
+import java.util.Set;
+
 import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.Maps;
 import no.nav.melosys.domain.kodeverk.brev.Produserbaredokumenter;
 import no.nav.melosys.exception.FunksjonellException;
 import no.nav.melosys.integrasjon.joark.DokumentKategoriKode;
 import no.nav.melosys.service.dokument.DokumentproduksjonsInfo;
-import no.nav.melosys.service.dokument.VedleggTyper;
 import org.springframework.stereotype.Component;
-
-import java.util.HashSet;
-import java.util.Map;
-import java.util.Set;
 
 import static java.lang.String.format;
 import static no.nav.melosys.domain.kodeverk.brev.Produserbaredokumenter.*;
@@ -57,25 +55,25 @@ public class DokumentproduksjonsInfoMapper {
                     DokumentKategoriKode.VB.getKode(),
                     JournalforingsTittel.TRYGDEAVTALE.getTittel(),
                     JournalforingsTittel.TRYGDEAVTALE_VEDTAKSBREV.getTittel(),
-                    Map.of(VedleggTyper.ATTEST, JournalforingsTittel.TRYGDEAVTALE_ATTEST.getTittel())))
+                    JournalforingsTittel.TRYGDEAVTALE_ATTEST.getTittel()))
             .put(TRYGDEAVTALE_US,
                 new DokumentproduksjonsInfo("trygdeavtale_us",
                     DokumentKategoriKode.VB.getKode(),
                     JournalforingsTittel.TRYGDEAVTALE.getTittel(),
                     JournalforingsTittel.TRYGDEAVTALE_VEDTAKSBREV.getTittel(),
-                    Map.of(VedleggTyper.ATTEST, JournalforingsTittel.TRYGDEAVTALE_ATTEST.getTittel())))
+                    JournalforingsTittel.TRYGDEAVTALE_ATTEST.getTittel()))
             .put(TRYGDEAVTALE_CAN,
                 new DokumentproduksjonsInfo("trygdeavtale_ca",
                     DokumentKategoriKode.VB.getKode(),
                     JournalforingsTittel.TRYGDEAVTALE.getTittel(),
                     JournalforingsTittel.TRYGDEAVTALE_VEDTAKSBREV.getTittel(),
-                    Map.of(VedleggTyper.ATTEST, JournalforingsTittel.TRYGDEAVTALE_ATTEST.getTittel())))
+                    JournalforingsTittel.TRYGDEAVTALE_ATTEST.getTittel()))
             .put(TRYGDEAVTALE_AU,
                 new DokumentproduksjonsInfo("trygdeavtale_au",
                     DokumentKategoriKode.VB.getKode(),
                     JournalforingsTittel.TRYGDEAVTALE.getTittel(),
                     JournalforingsTittel.TRYGDEAVTALE_VEDTAKSBREV.getTittel(),
-                    Map.of(VedleggTyper.ATTEST, JournalforingsTittel.TRYGDEAVTALE_ATTEST.getTittel())))
+                    JournalforingsTittel.TRYGDEAVTALE_ATTEST.getTittel()))
             .put(GENERELT_FRITEKSTBREV_BRUKER,
                 new DokumentproduksjonsInfo("fritekstbrev",
                     DokumentKategoriKode.IB.getKode(),
