@@ -149,7 +149,7 @@ class InnvilgelseFtrlMapper(
             skatteplikttype = medlemAvFolketrygden.utledSkatteplikttype(),
             begrunnelse = hentBegrunnelse(behandlingsresultat.vilkaarsresultater),
             begrunnelseAnnenGrunnFritekst = hentSaerligBegrunnelseFritekst(behandlingsresultat.vilkaarsresultater),
-            nyVurderingBakgrunn = brevbestilling.nyVurderingBakgrunn,
+            nyVurderingBakgrunn = brevbestilling.innvilgelseNyVurderingBakgrunn,
             innledningFritekst = brevbestilling.innledningFritekst,
             begrunnelseFritekst = brevbestilling.begrunnelseFritekst,
             trygdeavgiftFritekst = brevbestilling.trygdeavgiftFritekst,
@@ -160,9 +160,8 @@ class InnvilgelseFtrlMapper(
             betalerArbeidsgiveravgift = erBetalerArbeidsgiveravgift(medlemAvFolketrygden.medlemskapsperioder))
     }
 
-    fun hentArbeidsSituasjonsType(avklartefakta: Set<Avklartefakta>): Arbeidssituasjontype? {
-        val arbeidssituasjon = avklartefakta.firstOrNull { it.type == Avklartefaktatyper.ARBEIDSSITUASJON }?.fakta
-        return arbeidssituasjon?.let { Arbeidssituasjontype.valueOf(it) }
+    fun hentArbeidsSituasjonsType(avklartefakta: Set<Avklartefakta>): String? {
+        return avklartefakta.firstOrNull { it.type == Avklartefaktatyper.ARBEIDSSITUASJON }?.fakta
     }
 
     fun harLavSatsPgaAlderIMinstEnPeriode(birthDate: LocalDate, medlemskapsperiode: Medlemskapsperiode): Boolean {

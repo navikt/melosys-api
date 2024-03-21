@@ -26,6 +26,7 @@ import no.nav.melosys.integrasjon.dokgen.dto.*
 import no.nav.melosys.integrasjon.dokgen.dto.felles.Innvilgelse
 import no.nav.melosys.integrasjon.dokgen.dto.felles.Person
 import no.nav.melosys.integrasjon.dokgen.dto.felles.SaksinfoVirksomhet
+import no.nav.melosys.integrasjon.dokgen.dto.innvilgelseftrl.MedlemskapsperiodeDto
 import no.nav.melosys.integrasjon.dokgen.dto.trygdeavtale.attest.*
 import no.nav.melosys.integrasjon.dokgen.dto.trygdeavtale.innvilgelse.InnvilgelseTrygdeavtale
 import no.nav.melosys.integrasjon.dokgen.dto.trygdeavtale.innvilgelse.Soknad
@@ -593,7 +594,8 @@ internal class DokgenMalMapperTest {
             brevbestilling = lagInnvilgelsePliktigMedlemFtrlBrevbestilling(),
             behandlingstype = Behandlingstyper.FØRSTEGANG,
             avgiftsperioder = emptyList(),
-            medlemskapsperioder = emptyList(),
+            datoMottatt = LocalDate.now(),
+            medlemskapsperiode = MedlemskapsperiodeDto(LocalDate.now(), LocalDate.now(), Trygdedekninger.FULL_DEKNING_FTRL, InnvilgelsesResultat.INNVILGET),
             bestemmelse = Folketrygdloven_kap2_bestemmelser.FTRL_KAP2_2_8,
             avslåttMedlemskapsperiodeFørMottaksdatoHelsedel = false,
             avslåttMedlemskapsperiodeFørMottaksdatoFullDekning = false,
@@ -610,7 +612,9 @@ internal class DokgenMalMapperTest {
             flereLandUkjentHvilke = false,
             land = listOf(Land_iso2.US.kode),
             trygdeavtaleLand = emptyList(),
-            betalerArbeidsgiveravgift = true
+            betalerArbeidsgiveravgift = true,
+            harLavSatsPgaAlder = false,
+            arbeidssituasjontype = null
         )
     }
 

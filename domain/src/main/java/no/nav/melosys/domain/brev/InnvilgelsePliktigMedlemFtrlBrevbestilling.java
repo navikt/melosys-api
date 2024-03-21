@@ -3,14 +3,13 @@ package no.nav.melosys.domain.brev;
 import java.util.List;
 
 import no.nav.melosys.domain.dokument.felles.Periode;
-import no.nav.melosys.domain.kodeverk.Arbeidssituasjontype;
 
 public class InnvilgelsePliktigMedlemFtrlBrevbestilling extends DokgenBrevbestilling {
 
     private boolean flereLandUkjentHvilke;
     private List<String> land;
     private String bestemmelse;
-    private String nyVurderingBakgrunn;
+    private String innvilgelseNyVurderingBakgrunn;
     private String innledningFritekst;
     private String begrunnelseFritekst;
     private String ikkeYrkesaktivOppholdType;
@@ -18,7 +17,7 @@ public class InnvilgelsePliktigMedlemFtrlBrevbestilling extends DokgenBrevbestil
     private Periode medlemskapsperiode;
     private String trygdeavgiftFritekst;
     private boolean harLavSatsPgaAlder;
-    private Arbeidssituasjontype arbeidssituasjontype;
+    private String arbeidssituasjontype;
 
     public InnvilgelsePliktigMedlemFtrlBrevbestilling() {
         super();
@@ -29,7 +28,7 @@ public class InnvilgelsePliktigMedlemFtrlBrevbestilling extends DokgenBrevbestil
         super(builder);
         this.flereLandUkjentHvilke = builder.flereLandUkjentHvilke;
         this.bestemmelse = builder.bestemmelse;
-        this.nyVurderingBakgrunn = builder.nyVurderingBakgrunn;
+        this.innvilgelseNyVurderingBakgrunn = builder.nyVurderingBakgrunn;
         this.ikkeYrkesaktivOppholdType = builder.ikkeYrkesaktivOppholdType;
         this.innledningFritekst = builder.innledningFritekst;
         this.begrunnelseFritekst = builder.begrunnelseFritekst;
@@ -41,7 +40,19 @@ public class InnvilgelsePliktigMedlemFtrlBrevbestilling extends DokgenBrevbestil
         this.arbeidssituasjontype = builder.arbeidssituasjontype;
     }
 
-    public Arbeidssituasjontype getArbeidssituasjontype() {
+    public void setArbeidssituasjontype(String arbeidssituasjontype) {
+        this.arbeidssituasjontype = arbeidssituasjontype;
+    }
+
+    public boolean getHarLavSatsPgaAlder() {
+        return harLavSatsPgaAlder;
+    }
+
+    public void setHarLavSatsPgaAlder(boolean harLavSatsPgaAlder) {
+        this.harLavSatsPgaAlder = harLavSatsPgaAlder;
+    }
+
+    public String getArbeidssituasjontype() {
         return arbeidssituasjontype;
     }
 
@@ -69,8 +80,8 @@ public class InnvilgelsePliktigMedlemFtrlBrevbestilling extends DokgenBrevbestil
         return bestemmelse;
     }
 
-    public String getNyVurderingBakgrunn() {
-        return nyVurderingBakgrunn;
+    public String getInnvilgelseNyVurderingBakgrunn() {
+        return innvilgelseNyVurderingBakgrunn;
     }
 
     public String getInnledningFritekst() {
@@ -113,7 +124,7 @@ public class InnvilgelsePliktigMedlemFtrlBrevbestilling extends DokgenBrevbestil
         private Periode medlemskapsperiode;
         private boolean harLavSatsPgaAlder;
         private String trygdeavgiftFritekst;
-        private Arbeidssituasjontype arbeidssituasjontype;
+        private String arbeidssituasjontype;
 
         public Builder() {
         }
@@ -122,7 +133,7 @@ public class InnvilgelsePliktigMedlemFtrlBrevbestilling extends DokgenBrevbestil
             super(brevbestilling);
             this.flereLandUkjentHvilke = brevbestilling.flereLandUkjentHvilke;
             this.bestemmelse = brevbestilling.bestemmelse;
-            this.nyVurderingBakgrunn = brevbestilling.nyVurderingBakgrunn;
+            this.nyVurderingBakgrunn = brevbestilling.innvilgelseNyVurderingBakgrunn;
             this.innledningFritekst = brevbestilling.innledningFritekst;
             this.begrunnelseFritekst = brevbestilling.begrunnelseFritekst;
             this.ikkeYrkesaktivOppholdType = brevbestilling.ikkeYrkesaktivOppholdType;
@@ -134,7 +145,7 @@ public class InnvilgelsePliktigMedlemFtrlBrevbestilling extends DokgenBrevbestil
             this.arbeidssituasjontype = brevbestilling.arbeidssituasjontype;
         }
 
-        public Builder medArbeidssituasjontype(Arbeidssituasjontype arbeidssituasjontype) {
+        public Builder medArbeidssituasjontype(String arbeidssituasjontype) {
             this.arbeidssituasjontype = arbeidssituasjontype;
             return this;
         }
@@ -184,6 +195,7 @@ public class InnvilgelsePliktigMedlemFtrlBrevbestilling extends DokgenBrevbestil
             return this;
         }
 
+        @Override
         public InnvilgelsePliktigMedlemFtrlBrevbestilling build() {
             return new InnvilgelsePliktigMedlemFtrlBrevbestilling(this);
         }
