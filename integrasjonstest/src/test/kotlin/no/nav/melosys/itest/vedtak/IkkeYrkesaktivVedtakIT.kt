@@ -28,7 +28,6 @@ import no.nav.melosys.itest.JournalfoeringBase
 import no.nav.melosys.melosysmock.medl.MedlRepo
 import no.nav.melosys.melosysmock.testdata.TestDataGenerator
 import no.nav.melosys.repository.BehandlingRepository
-import no.nav.melosys.saksflyt.ProsessinstansRepository
 import no.nav.melosys.saksflytapi.domain.ProsessType
 import no.nav.melosys.service.LovvalgsperiodeService
 import no.nav.melosys.service.behandling.BehandlingsresultatService
@@ -48,7 +47,6 @@ class IkkeYrkesaktivVedtakIT(
     @Autowired testDataGenerator: TestDataGenerator,
     @Autowired journalføringService: JournalfoeringService,
     @Autowired oppgaveService: OppgaveService,
-    @Autowired prosessinstansRepository: ProsessinstansRepository,
     @Autowired private val behandlingsresultatService: BehandlingsresultatService,
     @Autowired private val behandlingRepository: BehandlingRepository,
     @Autowired private val mottatteOpplysningerService: MottatteOpplysningerService,
@@ -57,7 +55,7 @@ class IkkeYrkesaktivVedtakIT(
     @Autowired private val oppfriskSaksopplysningerService: OppfriskSaksopplysningerService,
     @Autowired private val vedtaksfattingFasade: VedtaksfattingFasade,
     @Autowired private val unleash: FakeUnleash,
-) : JournalfoeringBase(testDataGenerator, journalføringService, oppgaveService, prosessinstansRepository) {
+) : JournalfoeringBase(testDataGenerator, journalføringService, oppgaveService) {
 
     @BeforeEach
     fun setup() {
@@ -125,7 +123,7 @@ class IkkeYrkesaktivVedtakIT(
 
         executeAndWait(
             waitForprosessType = ProsessType.IVERKSETT_VEDTAK_IKKE_YRKESAKTIV,
-            alsoWaitForprosessType = listOf(ProsessType.OPPRETT_OG_DISTRIBUER_BREV)
+            alsoWaitForprosessType = listOf(ProsessType.OPPRETT_OG_DISTRIBUER_BREV, ProsessType.SEND_BREV)
         ) {
             vedtaksfattingFasade.fattVedtak(behandling.id, vedtakRequest)
         }
@@ -229,7 +227,7 @@ class IkkeYrkesaktivVedtakIT(
 
         executeAndWait(
             waitForprosessType = ProsessType.IVERKSETT_VEDTAK_IKKE_YRKESAKTIV,
-            alsoWaitForprosessType = listOf(ProsessType.OPPRETT_OG_DISTRIBUER_BREV)
+            alsoWaitForprosessType = listOf(ProsessType.OPPRETT_OG_DISTRIBUER_BREV, ProsessType.SEND_BREV)
         ) {
             vedtaksfattingFasade.fattVedtak(behandling.id, vedtakRequest)
         }
@@ -331,7 +329,7 @@ class IkkeYrkesaktivVedtakIT(
 
         executeAndWait(
             waitForprosessType = ProsessType.IVERKSETT_VEDTAK_IKKE_YRKESAKTIV,
-            alsoWaitForprosessType = listOf(ProsessType.OPPRETT_OG_DISTRIBUER_BREV)
+            alsoWaitForprosessType = listOf(ProsessType.OPPRETT_OG_DISTRIBUER_BREV, ProsessType.SEND_BREV)
         ) {
             vedtaksfattingFasade.fattVedtak(behandling.id, vedtakRequest)
         }

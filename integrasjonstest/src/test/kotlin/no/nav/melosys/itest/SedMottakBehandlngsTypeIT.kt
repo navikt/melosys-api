@@ -8,10 +8,15 @@ import io.getunleash.FakeUnleash
 import io.kotest.matchers.collections.shouldHaveSize
 import io.kotest.matchers.shouldBe
 import io.kotest.matchers.string.shouldContain
-import no.nav.melosys.domain.eessi.*
+import no.nav.melosys.domain.eessi.BucType
+import no.nav.melosys.domain.eessi.Periode
+import no.nav.melosys.domain.eessi.SedType
 import no.nav.melosys.domain.eessi.melding.MelosysEessiMelding
-import no.nav.melosys.domain.kodeverk.*
-import no.nav.melosys.domain.kodeverk.behandlinger.*
+import no.nav.melosys.domain.kodeverk.Oppgavetyper
+import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingsaarsaktyper
+import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingsstatus
+import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingstema
+import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingstyper
 import no.nav.melosys.melosysmock.journalpost.JournalpostRepo
 import no.nav.melosys.melosysmock.oppgave.OppgaveRepo
 import no.nav.melosys.melosysmock.testdata.TestDataGenerator
@@ -46,8 +51,7 @@ class SedMottakBehandlngsTypeIT(
     @Autowired testDataGenerator: TestDataGenerator,
     @Autowired journalføringService: JournalfoeringService,
     @Autowired oppgaveService: OppgaveService,
-    @Autowired prosessinstansRepository: ProsessinstansRepository
-) : JournalfoeringBase(testDataGenerator, journalføringService, oppgaveService, prosessinstansRepository) {
+) : JournalfoeringBase(testDataGenerator, journalføringService, oppgaveService) {
 
     private val kafkaTopic = "teammelosys.eessi.v1-local"
 
@@ -103,7 +107,10 @@ class SedMottakBehandlngsTypeIT(
             lovvalgsland = "NO"
         }
         val prosessinstansArbeidFlereLand =
-            executeAndWait(ProsessType.ARBEID_FLERE_LAND_NY_SAK) {
+            executeAndWait(
+                waitForprosessType = ProsessType.ARBEID_FLERE_LAND_NY_SAK,
+                alsoWaitForprosessType = listOf(ProsessType.MOTTAK_SED)
+            ) {
                 melosysEessiMeldingKafkaTemplate.send(kafkaTopic, eessiMeldingA003)
             }
 
