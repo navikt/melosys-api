@@ -243,7 +243,7 @@ class TrygdeavgiftsgrunnlagServiceTest {
     }
 
     @Test
-    fun oppdaterTrygdeavgiftsgrunnlag_FTRL_2_2_1_åpenSluttdatoMedlemskapsperiodeOgLukketInntektsperiode_kasterFeil() {
+    fun oppdaterTrygdeavgiftsgrunnlag_FTRL_2_2_1_åpenSluttdatoSkatteforholdOgLukketInntektsperiode_kasterFeil() {
         val fomDato = LocalDate.now().minusMonths(1);
         val tomDato = LocalDate.now().plusMonths(1);
 
@@ -265,8 +265,36 @@ class TrygdeavgiftsgrunnlagServiceTest {
         }.message.shouldContain("Skatteforholdsperiode må ha åpen sluttdato når medlemskapsperiode har åpen sluttdato")
     }
 
+
     @Test
-    fun oppdaterTrygdeavgiftsgrunnlag_FTRL_2_2_1_lukketSluttdatoMedlemskapsperiodeOgLukketInntektsperiode_kasterFeil() {
+    fun oppdaterTrygdeavgiftsgrunnlag_FTRL_2_2_1_åpenOgLukketSluttdatoSkatteforholdAlleMåVæreÅpen_kasterFeil() {
+        val fomDato = LocalDate.now().minusMonths(1);
+        val tomDato = LocalDate.now().plusMonths(1);
+
+        behandlingsresultat.medlemAvFolketrygden = MedlemAvFolketrygden().apply {
+            medlemskapsperioder = listOf(Medlemskapsperiode()
+                .apply {
+                    innvilgelsesresultat = InnvilgelsesResultat.INNVILGET
+                    fom = fomDato
+                    bestemmelse = Folketrygdloven_kap2_bestemmelser.FTRL_KAP2_2_1
+                })
+        }
+        every { mockBehandlingsresultatService.lagre(any()) } returnsArgument 0
+        every { mockTrygdeavgiftMottakerService.getTrygdeavgiftMottaker(any()) } returns Trygdeavgiftmottaker.TRYGDEAVGIFT_BETALES_TIL_SKATT
+
+        shouldThrow<FunksjonellException> {
+            trygdeavgiftsgrunnlagService.oppdaterTrygdeavgiftsgrunnlag(
+                BEHANDLING_ID, OppdaterTrygdeavgiftsgrunnlagRequest(listOf(
+                    lagSkatteforholdTilNorge(fomDato, tomDato),
+                    lagSkatteforholdTilNorge(fomDato, null),
+                    lagSkatteforholdTilNorge(fomDato, tomDato.plusDays(1))
+                ), listOf(lagInntektsperiode(fomDato, null)))
+            )
+        }.message.shouldContain("Skatteforholdsperiode må ha åpen sluttdato når medlemskapsperiode har åpen sluttdato")
+    }
+
+    @Test
+    fun oppdaterTrygdeavgiftsgrunnlag_FTRL_2_2_1_lukketSluttdatoSkatteforholdOgLukketInntektsperiode_kasterFeil() {
         val fomDato = LocalDate.now().minusMonths(1);
         val tomDato = LocalDate.now().plusMonths(1);
 
@@ -289,7 +317,7 @@ class TrygdeavgiftsgrunnlagServiceTest {
     }
 
     @Test
-    fun oppdaterTrygdeavgiftsgrunnlag_FTRL_2_2_1_lukketSluttdatoMedlemskapsperiodeOgÅpenInntektsperiode_kasterFeil() {
+    fun oppdaterTrygdeavgiftsgrunnlag_FTRL_2_2_1_lukketSluttdatoSkatteforholdOgÅpenInntektsperiode_kasterFeil() {
         val fomDato = LocalDate.now().minusMonths(1);
         val tomDato = LocalDate.now().plusMonths(1);
 
