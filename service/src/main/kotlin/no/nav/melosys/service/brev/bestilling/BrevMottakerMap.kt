@@ -4,6 +4,7 @@ import no.nav.melosys.domain.brev.BrevkopiRegel
 import no.nav.melosys.domain.brev.Mottakerliste
 import no.nav.melosys.domain.kodeverk.Mottakerroller
 import no.nav.melosys.domain.kodeverk.brev.Produserbaredokumenter
+import no.nav.melosys.exception.IkkeFunnetException
 
 object BrevMottakerMap {
     private val map = mapOf(
@@ -38,5 +39,8 @@ object BrevMottakerMap {
         Produserbaredokumenter.UTENLANDSK_TRYGDEMYNDIGHET_FRITEKSTBREV to Mottakerliste(Mottakerroller.UTENLANDSK_TRYGDEMYNDIGHET)
     )
 
-    fun getMap() = map
+    @JvmStatic
+    fun hentMottakerListeForProduserbartdokument(produserbartdokument: Produserbaredokumenter): Mottakerliste {
+        return map.get(produserbartdokument) ?: throw IkkeFunnetException("Mangler mapping av mottakere for " + produserbartdokument)
+    }
 }
