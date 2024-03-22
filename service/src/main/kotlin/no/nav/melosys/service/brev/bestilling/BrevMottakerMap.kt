@@ -6,7 +6,7 @@ import no.nav.melosys.domain.kodeverk.Mottakerroller
 import no.nav.melosys.domain.kodeverk.brev.Produserbaredokumenter
 
 object BrevMottakerMap {
-    val map = mapOf(
+    private val map = mapOf(
         Produserbaredokumenter.MELDING_FORVENTET_SAKSBEHANDLINGSTID_SOKNAD to Mottakerliste(Mottakerroller.BRUKER),
         Produserbaredokumenter.MELDING_FORVENTET_SAKSBEHANDLINGSTID_KLAGE to Mottakerliste(Mottakerroller.BRUKER),
 
@@ -37,4 +37,6 @@ object BrevMottakerMap {
         Produserbaredokumenter.FRITEKSTBREV to Mottakerliste(Mottakerroller.NORSK_MYNDIGHET),
         Produserbaredokumenter.UTENLANDSK_TRYGDEMYNDIGHET_FRITEKSTBREV to Mottakerliste(Mottakerroller.UTENLANDSK_TRYGDEMYNDIGHET)
     )
+
+    fun getMap() = map
 }
