@@ -614,7 +614,8 @@ internal class DokgenMalMapperTest {
             trygdeavtaleLand = emptyList(),
             betalerArbeidsgiveravgift = true,
             harLavSatsPgaAlder = false,
-            arbeidssituasjontype = null
+            arbeidssituasjontype = null,
+            medlemskapstype = Medlemskapstyper.PLIKTIG
         )
     }
 
