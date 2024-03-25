@@ -597,8 +597,6 @@ internal class DokgenMalMapperTest {
             datoMottatt = LocalDate.now(),
             medlemskapsperiode = MedlemskapsperiodeDto(LocalDate.now(), LocalDate.now(), Trygdedekninger.FULL_DEKNING_FTRL, InnvilgelsesResultat.INNVILGET),
             bestemmelse = Folketrygdloven_kap2_bestemmelser.FTRL_KAP2_2_8,
-            avslåttMedlemskapsperiodeFørMottaksdatoHelsedel = false,
-            avslåttMedlemskapsperiodeFørMottaksdatoFullDekning = false,
             trygdeavgiftMottaker = Trygdeavgiftmottaker.TRYGDEAVGIFT_BETALES_TIL_NAV,
             fullmektigTrygdeavgift = null,
             skatteplikttype = Skatteplikttype.SKATTEPLIKTIG,
