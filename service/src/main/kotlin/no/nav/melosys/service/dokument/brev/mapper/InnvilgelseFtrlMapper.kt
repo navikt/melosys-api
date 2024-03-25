@@ -156,7 +156,9 @@ class InnvilgelseFtrlMapper(
             flereLandUkjentHvilke = søknadsland.isFlereLandUkjentHvilke,
             land = søknadsland.landkoder.map { dokgenMapperDatahenter.hentLandnavnFraLandkode(it) },
             trygdeavtaleLand = mapTrygdeavtaleLand(søknadsland.landkoder),
-            betalerArbeidsgiveravgift = erBetalerArbeidsgiveravgift(medlemAvFolketrygden.medlemskapsperioder))
+            betalerArbeidsgiveravgift = erBetalerArbeidsgiveravgift(medlemAvFolketrygden.medlemskapsperioder),
+            medlemskapstype = Medlemskapstyper.PLIKTIG,
+        )
     }
 
     fun hentArbeidsSituasjonsType(avklartefakta: Set<Avklartefakta>): String? {

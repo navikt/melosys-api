@@ -42,7 +42,8 @@ class InnvilgelseFtrlPliktig(
     val betalerArbeidsgiveravgift: Boolean,
     val harLavSatsPgaAlder: Boolean,
     val arbeidssituasjontype: String?,
-) : DokgenDto(brevbestilling, Mottakerroller.BRUKER) {
+    val medlemskapstype: Medlemskapstyper,
+    ) : DokgenDto(brevbestilling, Mottakerroller.BRUKER) {
 
     constructor(
         brevbestilling: InnvilgelsePliktigMedlemFtrlBrevbestilling,
@@ -67,7 +68,8 @@ class InnvilgelseFtrlPliktig(
         trygdeavtaleLand: List<String>,
         betalerArbeidsgiveravgift: Boolean,
         harLavSatsPgaAlder: Boolean,
-        arbeidssituasjontype: String?
+        arbeidssituasjontype: String?,
+        medlemskapstype: Medlemskapstyper
     ) : this(
         brevbestilling,
         behandlingstype,
@@ -92,6 +94,7 @@ class InnvilgelseFtrlPliktig(
         trygdeavtaleLand,
         betalerArbeidsgiveravgift,
         harLavSatsPgaAlder,
-        arbeidssituasjontype
+        arbeidssituasjontype,
+        medlemskapstype
     )
 }
