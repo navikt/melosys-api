@@ -4,15 +4,15 @@ import com.fasterxml.jackson.annotation.JsonFormat
 import com.fasterxml.jackson.annotation.JsonInclude
 import com.fasterxml.jackson.databind.annotation.JsonSerialize
 import com.fasterxml.jackson.datatype.jsr310.ser.LocalDateSerializer
-import no.nav.melosys.domain.brev.InnvilgelsePliktigMedlemFtrlBrevbestilling
+import no.nav.melosys.domain.brev.InnvilgelseFtrlYrkresaktivPliktig
 import no.nav.melosys.domain.kodeverk.*
 import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingstyper
 import no.nav.melosys.integrasjon.dokgen.dto.innvilgelseftrl.AvgiftsperiodeDto
 import no.nav.melosys.integrasjon.dokgen.dto.innvilgelseftrl.MedlemskapsperiodeDto
 import java.time.LocalDate
 
-class InnvilgelseFtrlPliktig(
-    brevbestilling: InnvilgelsePliktigMedlemFtrlBrevbestilling,
+class InnvilgelseYrkesaktivPliktigFtrl(
+    brevbestilling: InnvilgelseFtrlYrkresaktivPliktig,
     val behandlingstype: Behandlingstyper,
     @JsonSerialize(using = LocalDateSerializer::class)
     @JsonFormat(shape = JsonFormat.Shape.STRING)
@@ -22,8 +22,6 @@ class InnvilgelseFtrlPliktig(
     @JsonInclude(JsonInclude.Include.NON_NULL)
     val medlemskapsperiode: MedlemskapsperiodeDto,
     val bestemmelse: Folketrygdloven_kap2_bestemmelser?,
-    val avslåttMedlemskapsperiodeFørMottaksdatoHelsedel: Boolean,
-    val avslåttMedlemskapsperiodeFørMottaksdatoFullDekning: Boolean,
     val trygdeavgiftMottaker: Trygdeavgiftmottaker?,
     val fullmektigTrygdeavgift: String?,
     val skatteplikttype: Skatteplikttype?,
@@ -46,13 +44,11 @@ class InnvilgelseFtrlPliktig(
     ) : DokgenDto(brevbestilling, Mottakerroller.BRUKER) {
 
     constructor(
-        brevbestilling: InnvilgelsePliktigMedlemFtrlBrevbestilling,
+        brevbestilling: InnvilgelseFtrlYrkresaktivPliktig,
         behandlingstype: Behandlingstyper,
         avgiftsperioder: List<AvgiftsperiodeDto>,
         medlemskapsperiode: MedlemskapsperiodeDto,
         bestemmelse: Folketrygdloven_kap2_bestemmelser?,
-        avslåttMedlemskapsperiodeFørMottaksdatoHelsedel: Boolean,
-        avslåttMedlemskapsperiodeFørMottaksdatoFullDekning: Boolean,
         trygdeavgiftMottaker: Trygdeavgiftmottaker?,
         fullmektigTrygdeavgift: String?,
         skatteplikttype: Skatteplikttype?,
@@ -77,8 +73,6 @@ class InnvilgelseFtrlPliktig(
         avgiftsperioder,
         medlemskapsperiode,
         bestemmelse,
-        avslåttMedlemskapsperiodeFørMottaksdatoHelsedel,
-        avslåttMedlemskapsperiodeFørMottaksdatoFullDekning,
         trygdeavgiftMottaker,
         fullmektigTrygdeavgift,
         skatteplikttype,

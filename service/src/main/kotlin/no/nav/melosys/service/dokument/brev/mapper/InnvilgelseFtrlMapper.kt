@@ -7,7 +7,7 @@ import no.nav.melosys.domain.avklartefakta.Avklartefakta
 import no.nav.melosys.domain.brev.InnvilgelseFtrlIkkeYrkesaktivFrivilligBrevbestilling
 import no.nav.melosys.domain.brev.InnvilgelseFtrlIkkeYrkesaktivPliktigBrevbestilling
 import no.nav.melosys.domain.brev.InnvilgelseFtrlYrkesaktivFrivilligBrevbestilling
-import no.nav.melosys.domain.brev.InnvilgelsePliktigMedlemFtrlBrevbestilling
+import no.nav.melosys.domain.brev.InnvilgelseFtrlYrkresaktivPliktig
 import no.nav.melosys.domain.dokument.felles.Periode
 import no.nav.melosys.domain.folketrygden.MedlemAvFolketrygden
 import no.nav.melosys.domain.kodeverk.*
@@ -15,8 +15,8 @@ import no.nav.melosys.domain.kodeverk.begrunnelser.folketrygdloven.Ftrl_2_7_begr
 import no.nav.melosys.domain.kodeverk.begrunnelser.folketrygdloven.Ftrl_2_8_naer_tilknytning_norge_begrunnelser
 import no.nav.melosys.integrasjon.dokgen.dto.InnvilgelseFtrlIkkeYrkesaktivFrivillig
 import no.nav.melosys.integrasjon.dokgen.dto.InnvilgelseFtrlIkkeYrkesaktivPliktig
-import no.nav.melosys.integrasjon.dokgen.dto.InnvilgelseFtrlPliktig
 import no.nav.melosys.integrasjon.dokgen.dto.InnvilgelseFtrlYrkesaktivFrivillig
+import no.nav.melosys.integrasjon.dokgen.dto.InnvilgelseYrkesaktivPliktigFtrl
 import no.nav.melosys.integrasjon.dokgen.dto.innvilgelseftrl.AvgiftsperiodeDto
 import no.nav.melosys.service.avgift.TrygdeavgiftMottakerService
 import no.nav.melosys.service.avgift.TrygdeavgiftsberegningService
@@ -120,29 +120,23 @@ class InnvilgelseFtrlMapper(
         )
     }
 
-    internal fun mapPliktigMedlem(brevbestilling: InnvilgelsePliktigMedlemFtrlBrevbestilling): InnvilgelseFtrlPliktig {
+    internal fun mapYrkesaktivPliktig(brevbestilling: InnvilgelseFtrlYrkresaktivPliktig): InnvilgelseYrkesaktivPliktigFtrl {
         val behandlingsresultat = dokgenMapperDatahenter.hentBehandlingsresultat(brevbestilling.behandlingId)
         val medlemAvFolketrygden = behandlingsresultat.medlemAvFolketrygden
         val søknadsland = behandlingsresultat.behandling.mottatteOpplysninger.mottatteOpplysningerData.soeknadsland
-        val avslåttMedlemskapsperiodeFørMottaksdatoHelsedel =
-            mapAvslåttMedlemskapsperiodeFørMottaksdatoHelsedel(medlemAvFolketrygden, brevbestilling.forsendelseMottatt)
-        val avslåttMedlemskapsperiodeFørMottaksdatoFullDekning =
-            mapAvslåttMedlemskapsperiodeFørMottaksdatoFullDekning(medlemAvFolketrygden, brevbestilling.forsendelseMottatt)
-        val medlemskapsPeriode = medlemAvFolketrygden.medlemskapsperioder.single()
+        val medlemskapsperiode = medlemAvFolketrygden.medlemskapsperioder.single()
         val harLavSatsPgaAlder = harLavSatsPgaAlderIMinstEnPeriode(
-            dokgenMapperDatahenter.hentPersondata(behandlingsresultat.behandling).fødselsdato, medlemskapsPeriode)
+            dokgenMapperDatahenter.hentPersondata(behandlingsresultat.behandling).fødselsdato, medlemskapsperiode)
 
 
-        return InnvilgelseFtrlPliktig(
+        return InnvilgelseYrkesaktivPliktigFtrl(
             harLavSatsPgaAlder = harLavSatsPgaAlder,
             arbeidssituasjontype = hentArbeidsSituasjonsType(behandlingsresultat.avklartefakta),
             brevbestilling = brevbestilling,
             behandlingstype = behandlingsresultat.behandling.type,
             avgiftsperioder = mapAvgiftsPerioder(medlemAvFolketrygden),
             medlemskapsperiode = mapMedlemskapsPerioder(medlemAvFolketrygden).single(),
-            bestemmelse = medlemskapsPeriode.bestemmelse,
-            avslåttMedlemskapsperiodeFørMottaksdatoHelsedel = avslåttMedlemskapsperiodeFørMottaksdatoHelsedel,
-            avslåttMedlemskapsperiodeFørMottaksdatoFullDekning = avslåttMedlemskapsperiodeFørMottaksdatoFullDekning,
+            bestemmelse = medlemskapsperiode.bestemmelse,
             trygdeavgiftMottaker = trygdeavgiftMottakerService.getTrygdeavgiftMottaker(medlemAvFolketrygden.fastsattTrygdeavgift.trygdeavgiftsgrunnlag),
             fullmektigTrygdeavgift = finnFullmektigTrygdeavgift(behandlingsresultat.behandling),
             skatteplikttype = medlemAvFolketrygden.utledSkatteplikttype(),
@@ -165,9 +159,9 @@ class InnvilgelseFtrlMapper(
         return avklartefakta.firstOrNull { it.type == Avklartefaktatyper.ARBEIDSSITUASJON }?.fakta
     }
 
-    fun harLavSatsPgaAlderIMinstEnPeriode(birthDate: LocalDate, medlemskapsperiode: Medlemskapsperiode): Boolean {
-        val alderForInneværendeÅrForMedlemskapsperiodeFom = medlemskapsperiode.fom.year - birthDate.year
-        val alderForInneværendeÅrForMedlemskapsperiodeTom = medlemskapsperiode.tom?.year?.minus(birthDate.year)
+    private fun harLavSatsPgaAlderIMinstEnPeriode(foedselsdato: LocalDate, medlemskapsperiode: Medlemskapsperiode): Boolean {
+        val alderForInneværendeÅrForMedlemskapsperiodeFom = medlemskapsperiode.fom.year.minus(foedselsdato.year)
+        val alderForInneværendeÅrForMedlemskapsperiodeTom = medlemskapsperiode.tom?.year?.minus(foedselsdato.year)
 
         return alderForInneværendeÅrForMedlemskapsperiodeFom !in 18..68
             || (alderForInneværendeÅrForMedlemskapsperiodeTom?.let { it !in 18..68 } ?: false)

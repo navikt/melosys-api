@@ -360,10 +360,10 @@ internal class DokgenMalMapperTest {
         every { mockDokgenMapperDatahenter.hentPersonMottaker(any()) } returns DokgenTestData.lagPersondata()
         every { mockDokgenMapperDatahenter.hentNorskPoststed(any()) } returns "Andeby"
         every { mockDokgenMapperDatahenter.hentLandnavnFraLandkode(Landkoder.NO.kode) } returns Landkoder.NO.beskrivelse
-        every { mockInnvilgelseFtrlMapper.mapPliktigMedlem(any()) } returns lagInnvilgelseFtrlPliktig()
+        every { mockInnvilgelseFtrlMapper.mapYrkesaktivPliktig(any()) } returns lagInnvilgelseFtrlPliktig()
 
         val behandling = DokgenTestData.lagBehandling(DokgenTestData.lagFagsak(true))
-        val brevbestilling: DokgenBrevbestilling = InnvilgelsePliktigMedlemFtrlBrevbestilling.Builder()
+        val brevbestilling: DokgenBrevbestilling = InnvilgelseFtrlYrkresaktivPliktig.Builder()
             .medProduserbartdokument(Produserbaredokumenter.PLIKTIG_MEDLEM_FTRL)
             .medBehandling(behandling)
             .medOrg(DokgenTestData.lagOrg())
@@ -375,7 +375,7 @@ internal class DokgenMalMapperTest {
         dokgenMalMapper.mapBehandling(
             brevbestilling,
             DokgenTestData.lagMottaker(Mottakerroller.BRUKER)
-        ).shouldBeInstanceOf<InnvilgelseFtrlPliktig>()
+        ).shouldBeInstanceOf<InnvilgelseYrkesaktivPliktigFtrl>()
     }
 
     @Test
@@ -589,9 +589,9 @@ internal class DokgenMalMapperTest {
         )
     }
 
-    private fun lagInnvilgelseFtrlPliktig(): InnvilgelseFtrlPliktig {
-        return InnvilgelseFtrlPliktig(
-            brevbestilling = lagInnvilgelsePliktigMedlemFtrlBrevbestilling(),
+    private fun lagInnvilgelseFtrlPliktig(): InnvilgelseYrkesaktivPliktigFtrl {
+        return InnvilgelseYrkesaktivPliktigFtrl(
+            brevbestilling = lagInnvilgelseFtrlYrkresaktivPliktig(),
             behandlingstype = Behandlingstyper.FØRSTEGANG,
             avgiftsperioder = emptyList(),
             datoMottatt = LocalDate.now(),
@@ -630,8 +630,8 @@ internal class DokgenMalMapperTest {
             .build()
     }
 
-    private fun lagInnvilgelsePliktigMedlemFtrlBrevbestilling(): InnvilgelsePliktigMedlemFtrlBrevbestilling {
-        return InnvilgelsePliktigMedlemFtrlBrevbestilling.Builder()
+    private fun lagInnvilgelseFtrlYrkresaktivPliktig(): InnvilgelseFtrlYrkresaktivPliktig {
+        return InnvilgelseFtrlYrkresaktivPliktig.Builder()
             .medInnledningFritekst("Innledning")
             .medBegrunnelseFritekst("Begrunnelse")
             .medBehandling(DokgenTestData.lagBehandling())
