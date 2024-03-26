@@ -62,7 +62,6 @@ import java.util.*
 @TestInstance(TestInstance.Lifecycle.PER_CLASS)
 class EessiConsumerTest(
     @Autowired private val eessiConsumer: EessiConsumer,
-    @Autowired private val stsMockServer: StsMockServer,
     @Autowired private val oAuthMockServer: OAuthMockServer,
     @Value("\${mockserver.port}") mockServiceUnderTestPort: Int
 ) {
@@ -73,14 +72,13 @@ class EessiConsumerTest(
     @BeforeAll
     fun beforeAll() {
         serviceUnderTestMockServer.start()
-        stsMockServer.start()
         oAuthMockServer.start()
+        oAuthMockServer.reset()
     }
 
     @AfterAll
     fun afterAll() {
         serviceUnderTestMockServer.stop()
-        stsMockServer.stop()
         oAuthMockServer.stop()
     }
 
@@ -438,12 +436,12 @@ class EessiConsumerTest(
 
     fun get(url: String): MappingBuilder =
         WireMock.get(url)
-            .withHeader("Authorization", WireMock.equalTo("Bearer --token-from-system--"))
+            .withHeader("Authorization", WireMock.equalTo("Bearer --azure-token-from-system--"))
             .withHeader(HttpHeaders.ACCEPT, WireMock.equalTo(MediaType.APPLICATION_JSON_VALUE))
 
     fun post(url: String): MappingBuilder =
         WireMock.post(url)
-            .withHeader("Authorization", WireMock.equalTo("Bearer --token-from-system--"))
+            .withHeader("Authorization", WireMock.equalTo("Bearer --azure-token-from-system--"))
             .withHeader(HttpHeaders.ACCEPT, WireMock.equalTo(MediaType.APPLICATION_JSON_VALUE))
             .withHeader(HttpHeaders.CONTENT_TYPE, WireMock.equalTo(MediaType.APPLICATION_JSON_VALUE))
 
