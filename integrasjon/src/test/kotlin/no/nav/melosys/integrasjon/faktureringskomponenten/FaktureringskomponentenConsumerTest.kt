@@ -100,12 +100,12 @@ class FaktureringskomponentenConsumerTest(
 
     fun get(url: String): MappingBuilder =
         WireMock.get(url)
-            .withHeader("Authorization", WireMock.equalTo("Bearer --token-from-system--"))
+            .withHeader("Authorization", WireMock.equalTo("Bearer --azure-token-from-system--"))
             .withHeader(HttpHeaders.ACCEPT, WireMock.equalTo(MediaType.APPLICATION_JSON_VALUE))
 
     fun post(url: String): MappingBuilder =
         WireMock.post(url)
-            .withHeader("Authorization", WireMock.equalTo("Bearer --token-from-system--"))
+            .withHeader("Authorization", WireMock.equalTo("Bearer --azure-token-from-system--"))
             .withHeader(HttpHeaders.ACCEPT, WireMock.equalTo(MediaType.APPLICATION_JSON_VALUE))
             .withHeader(HttpHeaders.CONTENT_TYPE, WireMock.equalTo(MediaType.APPLICATION_JSON_VALUE))
 
