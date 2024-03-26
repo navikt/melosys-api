@@ -195,7 +195,7 @@ class DokgenMalMapper(
 
             Produserbaredokumenter.IKKE_YRKESAKTIV_VEDTAKSBREV -> lagIkkeYrkesaktivVedtaksbrev(brevbestilling as IkkeYrkesaktivBrevbestilling)
 
-            Produserbaredokumenter.IKKE_YRKESAKTIV_FRIVILLIG_FTRL -> innvilgelseFtrlMapper.mapIkkeYrkesaktivFrivillig(brevbestilling as InnvilgelseFtrlIkkeYrkesaktivFrivilligBrevbestilling)
+            Produserbaredokumenter.IKKE_YRKESAKTIV_FRIVILLIG_FTRL -> innvilgelseFtrlMapper.mapIkkeYrkesaktivFrivillig(brevbestilling)
 
             Produserbaredokumenter.VARSELBREV_MANGLENDE_INNBETALING -> VarselbrevManglendeInnbetaling(
                 brevbestilling as VarselbrevManglendeInnbetalingBrevbestilling
@@ -203,7 +203,7 @@ class DokgenMalMapper(
 
             Produserbaredokumenter.VEDTAK_OPPHOERT_MEDLEMSKAP -> VedtakOpphoertMedlemskap(brevbestilling as VedtakOpphoertMedlemskapBrevbestilling)
 
-            Produserbaredokumenter.IKKE_YRKESAKTIV_PLIKTIG_FTRL -> innvilgelseFtrlMapper.mapIkkeYrkesaktivPliktig(brevbestilling as InnvilgelseFtrlIkkeYrkesaktivPliktigBrevbestilling)
+            Produserbaredokumenter.IKKE_YRKESAKTIV_PLIKTIG_FTRL -> innvilgelseFtrlMapper.mapIkkeYrkesaktivPliktig(brevbestilling)
 
             else -> throw FunksjonellException("ProduserbartDokument ${brevbestilling.produserbartdokument} er ikke støttet av melosys-dokgen")
         }

@@ -338,9 +338,7 @@ public class DokgenService {
                 .medMottakerType(brevbestillingDto.getMottaker());
             case IKKE_YRKESAKTIV_VEDTAKSBREV -> new IkkeYrkesaktivBrevbestilling.Builder()
                 .medDistribusjonstype(Distribusjonstype.VEDTAK);
-            case IKKE_YRKESAKTIV_PLIKTIG_FTRL -> new InnvilgelseFtrlIkkeYrkesaktivPliktigBrevbestilling.Builder()
-                .medDistribusjonstype(Distribusjonstype.VEDTAK);
-            case IKKE_YRKESAKTIV_FRIVILLIG_FTRL -> new InnvilgelseFtrlIkkeYrkesaktivFrivilligBrevbestilling.Builder()
+            case IKKE_YRKESAKTIV_PLIKTIG_FTRL, IKKE_YRKESAKTIV_FRIVILLIG_FTRL -> new DokgenBrevbestilling.Builder()
                 .medDistribusjonstype(Distribusjonstype.VEDTAK);
             case VARSELBREV_MANGLENDE_INNBETALING -> new VarselbrevManglendeInnbetalingBrevbestilling.Builder()
                 .medDistribusjonstype(Distribusjonstype.VIKTIG)
