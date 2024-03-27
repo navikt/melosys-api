@@ -1,6 +1,5 @@
 package no.nav.melosys.service.sak
 
-import io.getunleash.Unleash
 import mu.KotlinLogging
 import no.nav.melosys.domain.Behandling
 import no.nav.melosys.domain.BehandlingEndretAvSaksbehandlerEvent
@@ -17,7 +16,6 @@ import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingstyper
 import no.nav.melosys.domain.mottatteopplysninger.data.Periode
 import no.nav.melosys.domain.mottatteopplysninger.data.Soeknadsland
 import no.nav.melosys.exception.FunksjonellException
-import no.nav.melosys.featuretoggle.ToggleName
 import no.nav.melosys.service.behandling.BehandlingsresultatService
 import no.nav.melosys.service.lovligekombinasjoner.LovligeKombinasjonerSaksbehandlingService
 import no.nav.melosys.service.mottatteopplysninger.MottatteOpplysningerService
@@ -38,8 +36,7 @@ class EndreSakService(
     private val mottatteOpplysningerService: MottatteOpplysningerService,
     private val oppfriskSaksopplysningerService: OppfriskSaksopplysningerService,
     private val applicationEventPublisher: ApplicationEventPublisher,
-    private val saksbehandlingRegler: SaksbehandlingRegler,
-    private val unleash: Unleash,
+    private val saksbehandlingRegler: SaksbehandlingRegler
 ) {
     @Transactional
     fun endre(
@@ -99,7 +96,7 @@ class EndreSakService(
             }
         }
 
-        if (unleash.isEnabled(ToggleName.MELOSYS_SETT_OPPRINNELIG_BEHANDLING) && nyBehandlingstypeErNyVurdering && behandling.opprinneligBehandling == null) {
+        if (nyBehandlingstypeErNyVurdering && behandling.opprinneligBehandling == null) {
             val opprinneligBehandling = saksbehandlingRegler.finnBehandlingSomKanReplikeres(fagsak)
             log.info { "Setter opprinnelig behandling til ${opprinneligBehandling?.id} på behandling ${behandling.id}" }
             behandling.opprinneligBehandling = opprinneligBehandling
