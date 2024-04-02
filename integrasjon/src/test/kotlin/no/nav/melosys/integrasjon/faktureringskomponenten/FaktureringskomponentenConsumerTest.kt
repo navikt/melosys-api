@@ -9,17 +9,12 @@ import com.github.tomakehurst.wiremock.core.WireMockConfiguration
 import io.getunleash.FakeUnleash
 import no.nav.melosys.integrasjon.MetricsTestConfig
 import no.nav.melosys.integrasjon.OAuthMockServer
-import no.nav.melosys.integrasjon.StsMockServer
 import no.nav.melosys.integrasjon.faktureringskomponenten.dto.*
 import no.nav.melosys.integrasjon.felles.GenericAuthFilterFactory
 import no.nav.melosys.integrasjon.felles.mdc.CorrelationIdOutgoingFilter
-import no.nav.melosys.integrasjon.reststs.RestSTSService
-import no.nav.melosys.integrasjon.reststs.SecurityTokenServiceConsumer
-import no.nav.melosys.integrasjon.reststs.StsWebClientProducer
 import no.nav.melosys.sikkerhet.context.ThreadLocalAccessInfo
 import no.nav.security.token.support.client.spring.oauth2.EnableOAuth2Client
 import org.junit.jupiter.api.*
-import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.beans.factory.annotation.Value
 import org.springframework.boot.test.autoconfigure.web.client.AutoConfigureWebClient
 import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest
@@ -32,13 +27,10 @@ import java.time.LocalDate
 import java.util.*
 
 @Import(
-    StsWebClientProducer::class,
-    SecurityTokenServiceConsumer::class,
-    RestSTSService::class,
     OAuthMockServer::class,
-    CorrelationIdOutgoingFilter::class,
-    StsMockServer::class,
     GenericAuthFilterFactory::class,
+
+    CorrelationIdOutgoingFilter::class,
     FaktureringskomponentenConsumerProducer::class,
     FakeUnleash::class
 )
@@ -48,7 +40,6 @@ import java.util.*
 @ActiveProfiles("wiremock-test")
 @TestInstance(TestInstance.Lifecycle.PER_CLASS)
 class FaktureringskomponentenConsumerTest(
-    @Autowired private val stsMockServer: StsMockServer,
     @Value("\${mockserver.port}") mockServiceUnderTestPort: Int
 ) {
 
@@ -59,13 +50,11 @@ class FaktureringskomponentenConsumerTest(
     @BeforeAll
     fun beforeAll() {
         serviceUnderTestMockServer.start()
-        stsMockServer.start()
     }
 
     @AfterAll
     fun afterAll() {
         serviceUnderTestMockServer.stop()
-        stsMockServer.stop()
     }
 
     @BeforeEach
@@ -100,12 +89,12 @@ class FaktureringskomponentenConsumerTest(
 
     fun get(url: String): MappingBuilder =
         WireMock.get(url)
-            .withHeader("Authorization", WireMock.equalTo("Bearer --token-from-system--"))
+            .withHeader("Authorization", WireMock.equalTo("Bearer --azure-token-from-system--"))
             .withHeader(HttpHeaders.ACCEPT, WireMock.equalTo(MediaType.APPLICATION_JSON_VALUE))
 
     fun post(url: String): MappingBuilder =
         WireMock.post(url)
-            .withHeader("Authorization", WireMock.equalTo("Bearer --token-from-system--"))
+            .withHeader("Authorization", WireMock.equalTo("Bearer --azure-token-from-system--"))
             .withHeader(HttpHeaders.ACCEPT, WireMock.equalTo(MediaType.APPLICATION_JSON_VALUE))
             .withHeader(HttpHeaders.CONTENT_TYPE, WireMock.equalTo(MediaType.APPLICATION_JSON_VALUE))
 
