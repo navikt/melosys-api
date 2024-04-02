@@ -31,7 +31,7 @@ class TrygdeavgiftsgrunnlagService(private val behandlingsresultatService: Behan
     ): Trygdeavgiftsgrunnlag {
         val behandlingsresultat = behandlingsresultatService.hentBehandlingsresultat(behandlingID)
         val medlemAvFolketrygden = behandlingsresultat.medlemAvFolketrygden
-        val erFTRL_KAP_2_2_1 = medlemAvFolketrygden.utledMedlemskapsperiodeBestemmelse() == Folketrygdloven_kap2_bestemmelser.FTRL_KAP2_2_1
+        val erFTRL_KAP_2_2_1 = medlemAvFolketrygden.erBestemmelse(Folketrygdloven_kap2_bestemmelser.FTRL_KAP2_2_1)
 
         validerMedlemskapsperioder(medlemAvFolketrygden, erFTRL_KAP_2_2_1)
         if(erFTRL_KAP_2_2_1) {
