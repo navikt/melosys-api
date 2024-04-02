@@ -85,7 +85,7 @@ class SedMottakTestIT(
     }
 
     @Test
-    fun `A009 med etterfølgende X008 skal gi fagsak annulert`() {
+    fun `A009 med etterfølgende X008 skal gi fagsak annullert`() {
         val ref = Random().nextInt(100000).toString()
 
         val sedInfo = SedInformasjon(ref, SedType.A009.name, LocalDate.now(), LocalDate.now(), null, "AVBRUTT", null)
@@ -143,7 +143,7 @@ class SedMottakTestIT(
     }
 
     @Test
-    fun `A009 med etterfølgende X006 skal gi fagsak annulert`() {
+    fun `A009 med etterfølgende X006 skal gi fagsak annullert`() {
         val ref = Random().nextInt(100000).toString()
 
         val sedInfo = SedInformasjon(ref, SedType.A009.name, LocalDate.now(), LocalDate.now(), null, "AVBRUTT", null)

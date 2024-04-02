@@ -24,12 +24,9 @@ import no.nav.melosys.domain.eessi.sed.SedGrunnlagDto
 import no.nav.melosys.exception.TekniskException
 //import no.nav.melosys.integrasjon.MetricsTestConfig
 import no.nav.melosys.integrasjon.OAuthMockServer
-import no.nav.melosys.integrasjon.StsMockServer
 import no.nav.melosys.integrasjon.eessi.dto.SaksrelasjonDto
 import no.nav.melosys.integrasjon.felles.GenericAuthFilterFactory
 import no.nav.melosys.integrasjon.felles.mdc.CorrelationIdOutgoingFilter
-import no.nav.melosys.integrasjon.reststs.RestSTSService
-import no.nav.melosys.integrasjon.reststs.StsWebClientProducer
 import no.nav.melosys.sikkerhet.context.ThreadLocalAccessInfo
 import org.junit.Ignore
 import org.junit.jupiter.api.*
@@ -45,15 +42,11 @@ import java.time.LocalDate
 import java.util.*
 
 @Import(
-    StsWebClientProducer::class,
-    StsMockServer::class,
     OAuthMockServer::class,
     CorrelationIdOutgoingFilter::class,
-    RestSTSService::class,
 
     GenericAuthFilterFactory::class,
     EessiConsumerProducerConfig::class,
-    StsMockServer::class,
 //    MetricsTestConfig::class,
     FakeUnleash::class
 )
@@ -63,7 +56,6 @@ import java.util.*
 @TestInstance(TestInstance.Lifecycle.PER_CLASS)
 class EessiConsumerTest(
     @Autowired private val eessiConsumer: EessiConsumer,
-    @Autowired private val stsMockServer: StsMockServer,
     @Autowired private val oAuthMockServer: OAuthMockServer,
     @Value("\${mockserver.port}") mockServiceUnderTestPort: Int,
     @Autowired private val objectMapper: ObjectMapper
@@ -75,14 +67,13 @@ class EessiConsumerTest(
     @BeforeAll
     fun beforeAll() {
         serviceUnderTestMockServer.start()
-        stsMockServer.start()
         oAuthMockServer.start()
+        oAuthMockServer.reset()
     }
 
     @AfterAll
     fun afterAll() {
         serviceUnderTestMockServer.stop()
-        stsMockServer.stop()
         oAuthMockServer.stop()
     }
 
@@ -440,12 +431,12 @@ class EessiConsumerTest(
 
     fun get(url: String): MappingBuilder =
         WireMock.get(url)
-            .withHeader("Authorization", WireMock.equalTo("Bearer --token-from-system--"))
+            .withHeader("Authorization", WireMock.equalTo("Bearer --azure-token-from-system--"))
             .withHeader(HttpHeaders.ACCEPT, WireMock.equalTo(MediaType.APPLICATION_JSON_VALUE))
 
     fun post(url: String): MappingBuilder =
         WireMock.post(url)
-            .withHeader("Authorization", WireMock.equalTo("Bearer --token-from-system--"))
+            .withHeader("Authorization", WireMock.equalTo("Bearer --azure-token-from-system--"))
             .withHeader(HttpHeaders.ACCEPT, WireMock.equalTo(MediaType.APPLICATION_JSON_VALUE))
             .withHeader(HttpHeaders.CONTENT_TYPE, WireMock.equalTo(MediaType.APPLICATION_JSON_VALUE))
 
