@@ -1,18 +1,18 @@
 package no.nav.melosys.domain.brev;
 
-public class InnvilgelseFtrlYrkeesaktivPliktigBrevbestilling extends DokgenBrevbestilling {
+public class InnvilgelseFtrlYrkesaktivPliktigBrevbestilling extends DokgenBrevbestilling {
 
     private String innvilgelseNyVurderingBakgrunn;
     private String innledningFritekst;
     private String begrunnelseFritekst;
     private String trygdeavgiftFritekst;
 
-    public InnvilgelseFtrlYrkeesaktivPliktigBrevbestilling() {
+    public InnvilgelseFtrlYrkesaktivPliktigBrevbestilling() {
         super();
         //Tom constructor på grunn av deserialsering i prosessinstans
     }
 
-    private InnvilgelseFtrlYrkeesaktivPliktigBrevbestilling(Builder builder) {
+    private InnvilgelseFtrlYrkesaktivPliktigBrevbestilling(Builder builder) {
         super(builder);
         this.innvilgelseNyVurderingBakgrunn = builder.nyVurderingBakgrunn;
         this.innledningFritekst = builder.innledningFritekst;
@@ -53,7 +53,7 @@ public class InnvilgelseFtrlYrkeesaktivPliktigBrevbestilling extends DokgenBrevb
         public Builder() {
         }
 
-        public Builder(InnvilgelseFtrlYrkeesaktivPliktigBrevbestilling brevbestilling) {
+        public Builder(InnvilgelseFtrlYrkesaktivPliktigBrevbestilling brevbestilling) {
             super(brevbestilling);
             this.nyVurderingBakgrunn = brevbestilling.innvilgelseNyVurderingBakgrunn;
             this.innledningFritekst = brevbestilling.innledningFritekst;
@@ -77,8 +77,8 @@ public class InnvilgelseFtrlYrkeesaktivPliktigBrevbestilling extends DokgenBrevb
         }
 
         @Override
-        public InnvilgelseFtrlYrkeesaktivPliktigBrevbestilling build() {
-            return new InnvilgelseFtrlYrkeesaktivPliktigBrevbestilling(this);
+        public InnvilgelseFtrlYrkesaktivPliktigBrevbestilling build() {
+            return new InnvilgelseFtrlYrkesaktivPliktigBrevbestilling(this);
         }
     }
 }

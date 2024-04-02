@@ -363,7 +363,7 @@ internal class DokgenMalMapperTest {
         every { mockInnvilgelseFtrlMapper.mapYrkesaktivPliktig(any()) } returns lagInnvilgelseFtrlPliktig()
 
         val behandling = DokgenTestData.lagBehandling(DokgenTestData.lagFagsak(true))
-        val brevbestilling: DokgenBrevbestilling = InnvilgelseFtrlYrkeesaktivPliktigBrevbestilling.Builder()
+        val brevbestilling: DokgenBrevbestilling = InnvilgelseFtrlYrkesaktivPliktigBrevbestilling.Builder()
             .medProduserbartdokument(Produserbaredokumenter.PLIKTIG_MEDLEM_FTRL)
             .medBehandling(behandling)
             .medOrg(DokgenTestData.lagOrg())
@@ -628,8 +628,8 @@ internal class DokgenMalMapperTest {
             .build()
     }
 
-    private fun lagInnvilgelseFtrlYrkresaktivPliktig(): InnvilgelseFtrlYrkeesaktivPliktigBrevbestilling {
-        return InnvilgelseFtrlYrkeesaktivPliktigBrevbestilling.Builder()
+    private fun lagInnvilgelseFtrlYrkresaktivPliktig(): InnvilgelseFtrlYrkesaktivPliktigBrevbestilling {
+        return InnvilgelseFtrlYrkesaktivPliktigBrevbestilling.Builder()
             .medInnledningFritekst("Innledning")
             .medBegrunnelseFritekst("Begrunnelse")
             .medBehandling(DokgenTestData.lagBehandling())

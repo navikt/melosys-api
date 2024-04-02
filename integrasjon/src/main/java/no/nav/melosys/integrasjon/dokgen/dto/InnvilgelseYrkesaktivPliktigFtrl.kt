@@ -4,7 +4,7 @@ import com.fasterxml.jackson.annotation.JsonFormat
 import com.fasterxml.jackson.annotation.JsonInclude
 import com.fasterxml.jackson.databind.annotation.JsonSerialize
 import com.fasterxml.jackson.datatype.jsr310.ser.LocalDateSerializer
-import no.nav.melosys.domain.brev.InnvilgelseFtrlYrkeesaktivPliktigBrevbestilling
+import no.nav.melosys.domain.brev.InnvilgelseFtrlYrkesaktivPliktigBrevbestilling
 import no.nav.melosys.domain.kodeverk.*
 import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingstyper
 import no.nav.melosys.integrasjon.dokgen.dto.innvilgelseftrl.AvgiftsperiodeDto
@@ -12,7 +12,7 @@ import no.nav.melosys.integrasjon.dokgen.dto.innvilgelseftrl.MedlemskapsperiodeD
 import java.time.LocalDate
 
 class InnvilgelseYrkesaktivPliktigFtrl(
-    brevbestilling: InnvilgelseFtrlYrkeesaktivPliktigBrevbestilling,
+    brevbestilling: InnvilgelseFtrlYrkesaktivPliktigBrevbestilling,
     val behandlingstype: Behandlingstyper,
     @JsonSerialize(using = LocalDateSerializer::class)
     @JsonFormat(shape = JsonFormat.Shape.STRING)
@@ -44,7 +44,7 @@ class InnvilgelseYrkesaktivPliktigFtrl(
     ) : DokgenDto(brevbestilling, Mottakerroller.BRUKER) {
 
     constructor(
-        brevbestilling: InnvilgelseFtrlYrkeesaktivPliktigBrevbestilling,
+        brevbestilling: InnvilgelseFtrlYrkesaktivPliktigBrevbestilling,
         behandlingstype: Behandlingstyper,
         avgiftsperioder: List<AvgiftsperiodeDto>,
         medlemskapsperiode: MedlemskapsperiodeDto,
