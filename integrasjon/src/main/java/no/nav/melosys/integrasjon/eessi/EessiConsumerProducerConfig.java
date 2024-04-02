@@ -29,7 +29,7 @@ public class EessiConsumerProducerConfig implements WebClientConfig {
     ) {
         return new EessiConsumerImpl(webClientBuilder
             .baseUrl(url)
-            .filter(genericAuthFilterFactory.getAzureFilter(CLIENT_NAME))
+            .filter(genericAuthFilterFactory.getStsAzureFilter(CLIENT_NAME))
             .filter(correlationIdOutgoingFilter)
             .filter(errorFilter("Kall mot eessi feilet"))
             .defaultHeaders(this::defaultHeaders)
