@@ -206,7 +206,7 @@ class DokgenMalMapper(
             Produserbaredokumenter.IKKE_YRKESAKTIV_PLIKTIG_FTRL -> innvilgelseFtrlMapper.mapIkkeYrkesaktivPliktig(brevbestilling as InnvilgelseFtrlIkkeYrkesaktivPliktigBrevbestilling)
 
             Produserbaredokumenter.PLIKTIG_MEDLEM_FTRL -> innvilgelseFtrlMapper.mapYrkesaktivPliktig(
-                brevbestilling as InnvilgelseFtrlYrkresaktivPliktig
+                brevbestilling as InnvilgelseFtrlYrkeesaktivPliktigBrevbestilling
             )
 
             else -> throw FunksjonellException("ProduserbartDokument ${brevbestilling.produserbartdokument} er ikke støttet av melosys-dokgen")

@@ -342,7 +342,7 @@ public class DokgenService {
                 .medDistribusjonstype(Distribusjonstype.VEDTAK);
             case IKKE_YRKESAKTIV_FRIVILLIG_FTRL -> new InnvilgelseFtrlIkkeYrkesaktivFrivilligBrevbestilling.Builder()
                 .medDistribusjonstype(Distribusjonstype.VEDTAK);
-            case PLIKTIG_MEDLEM_FTRL -> new InnvilgelseFtrlYrkresaktivPliktig.Builder()
+            case PLIKTIG_MEDLEM_FTRL -> new InnvilgelseFtrlYrkeesaktivPliktigBrevbestilling.Builder()
                 .medDistribusjonstype(Distribusjonstype.VEDTAK);
             case VARSELBREV_MANGLENDE_INNBETALING -> new VarselbrevManglendeInnbetalingBrevbestilling.Builder()
                 .medDistribusjonstype(Distribusjonstype.VIKTIG)

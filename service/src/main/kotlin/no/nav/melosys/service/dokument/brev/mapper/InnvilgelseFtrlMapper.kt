@@ -6,8 +6,8 @@ import no.nav.melosys.domain.Vilkaarsresultat
 import no.nav.melosys.domain.avklartefakta.Avklartefakta
 import no.nav.melosys.domain.brev.InnvilgelseFtrlIkkeYrkesaktivFrivilligBrevbestilling
 import no.nav.melosys.domain.brev.InnvilgelseFtrlIkkeYrkesaktivPliktigBrevbestilling
+import no.nav.melosys.domain.brev.InnvilgelseFtrlYrkeesaktivPliktigBrevbestilling
 import no.nav.melosys.domain.brev.InnvilgelseFtrlYrkesaktivFrivilligBrevbestilling
-import no.nav.melosys.domain.brev.InnvilgelseFtrlYrkresaktivPliktig
 import no.nav.melosys.domain.dokument.felles.Periode
 import no.nav.melosys.domain.folketrygden.MedlemAvFolketrygden
 import no.nav.melosys.domain.kodeverk.*
@@ -120,7 +120,7 @@ class InnvilgelseFtrlMapper(
         )
     }
 
-    internal fun mapYrkesaktivPliktig(brevbestilling: InnvilgelseFtrlYrkresaktivPliktig): InnvilgelseYrkesaktivPliktigFtrl {
+    internal fun mapYrkesaktivPliktig(brevbestilling: InnvilgelseFtrlYrkeesaktivPliktigBrevbestilling): InnvilgelseYrkesaktivPliktigFtrl {
         val behandlingsresultat = dokgenMapperDatahenter.hentBehandlingsresultat(brevbestilling.behandlingId)
         val medlemAvFolketrygden = behandlingsresultat.medlemAvFolketrygden
         val søknadsland = behandlingsresultat.behandling.mottatteOpplysninger.mottatteOpplysningerData.soeknadsland
