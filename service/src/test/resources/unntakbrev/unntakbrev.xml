@@ -88,8 +88,8 @@
         <inngangsvilkårBegrunnelse>EOS_BORGER</inngangsvilkårBegrunnelse>
         <arbeidsland>Østerrike</arbeidsland>
         <lovvalgsperiode>
-            <fomDato>2024-04-03</fomDato>
-            <tomDato>2024-04-03</tomDato>
+            <fomDato>2000-01-01</fomDato>
+            <tomDato>2001-01-01</tomDato>
         </lovvalgsperiode>
         <art121Begrunnelse>
             <ns2:utsendelseOver24Mn></ns2:utsendelseOver24Mn>

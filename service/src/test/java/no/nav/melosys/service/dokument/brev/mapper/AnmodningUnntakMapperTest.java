@@ -153,8 +153,12 @@ class AnmodningUnntakMapperTest {
     private BrevDataAnmodningUnntak lagBrevData(Behandlingsresultat resultat, LovvalgBestemmelse unntakFraBestemmelse) {
         BrevDataAnmodningUnntak brevData = new BrevDataAnmodningUnntak("Z999999", Landkoder.AT.getBeskrivelse(), new AvklartVirksomhet("Test AS", null, null, Yrkesaktivitetstyper.SELVSTENDIG),
             Yrkesaktivitetstyper.SELVSTENDIG, Collections.emptySet(), Collections.emptySet(), null);
+        LocalDate fom = LocalDate.of(2000, 1, 1);
+        LocalDate tom = LocalDate.of(2001, 1, 1);
         Anmodningsperiode anmodningsperiode =
-            new Anmodningsperiode(LocalDate.now(), LocalDate.now(),
+            new Anmodningsperiode(
+                fom,
+                tom,
                 Land_iso2.NO, null, null, Land_iso2.DK,
                 unntakFraBestemmelse, null);
         resultat.setAnmodningsperioder(Sets.newHashSet(anmodningsperiode));
