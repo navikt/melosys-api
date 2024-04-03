@@ -31,7 +31,7 @@ class TrygdeavgiftsgrunnlagService(private val behandlingsresultatService: Behan
     ): Trygdeavgiftsgrunnlag {
         val behandlingsresultat = behandlingsresultatService.hentBehandlingsresultat(behandlingID)
         val medlemAvFolketrygden = behandlingsresultat.medlemAvFolketrygden
-        val erFTRL_KAP_2_2_1 = medlemAvFolketrygden.erBestemmelse(Folketrygdloven_kap2_bestemmelser.FTRL_KAP2_2_1)
+        val erFTRL_KAP_2_2_1 = medlemAvFolketrygden.harBestemmelse(Folketrygdloven_kap2_bestemmelser.FTRL_KAP2_2_1)
 
         validerMedlemskapsperioder(medlemAvFolketrygden, erFTRL_KAP_2_2_1)
         if(erFTRL_KAP_2_2_1) {
@@ -47,12 +47,9 @@ class TrygdeavgiftsgrunnlagService(private val behandlingsresultatService: Behan
     }
 
     private fun validerÅpenSluttdato(behandlingsresultat: Behandlingsresultat, request: OppdaterTrygdeavgiftsgrunnlagRequest) {
-        val midlertidigBehandlingsresultat = lagTrygdeavgiftsgrunnlag(behandlingsresultat, request)
-        val trygdeavgiftsGrunnlag = midlertidigBehandlingsresultat.medlemAvFolketrygden.fastsattTrygdeavgift.trygdeavgiftsgrunnlag
         val medlemAvFolketrygden = behandlingsresultat.medlemAvFolketrygden
-        val skatteforholdsperiodeHarÅpenSluttdato =
-            request.skatteforholdTilNorgeList.all { it.tomDato == null } || request.skatteforholdTilNorgeList.isEmpty()
-        val inntektPeriodeHarÅpenSluttdato = request.inntektskilder.all { it.tomDato == null } || request.inntektskilder.isEmpty()
+        val skatteforholdsperiodeHarÅpenSluttdato = request.skatteforholdTilNorgeList.last().tomDato == null
+        val inntektPeriodeHarÅpenSluttdato = request.inntektskilder.last().tomDato == null
         val medlemskapsperiodeHarÅpenSluttdato = medlemAvFolketrygden.utledMedlemskapsperiodeTom() == null
         val erSkattepliktigIHelePerioden = request.skatteforholdTilNorgeList.all { it.skatteplikttype.equals(Skatteplikttype.SKATTEPLIKTIG) }
 
@@ -69,6 +66,8 @@ class TrygdeavgiftsgrunnlagService(private val behandlingsresultatService: Behan
         }
 
         if ((skatteforholdsperiodeHarÅpenSluttdato || inntektPeriodeHarÅpenSluttdato)) {
+            val midlertidigBehandlingsresultat = lagTrygdeavgiftsgrunnlag(behandlingsresultat, request)
+            val trygdeavgiftsGrunnlag = midlertidigBehandlingsresultat.medlemAvFolketrygden.fastsattTrygdeavgift.trygdeavgiftsgrunnlag
             validerFakturaMottaker(trygdeavgiftsGrunnlag)
         }
     }

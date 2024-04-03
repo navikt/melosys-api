@@ -93,10 +93,10 @@ public class MedlemAvFolketrygden {
     }
 
 
-    public Boolean erBestemmelse(Folketrygdloven_kap2_bestemmelser bestemmelse) {
+    public Boolean harBestemmelse(Folketrygdloven_kap2_bestemmelser bestemmelse) {
         return medlemskapsperioder.stream()
             .filter(Medlemskapsperiode::erInnvilget)
-            .max(Comparator.comparing(Medlemskapsperiode::getTom))
+            .min(Comparator.comparing(Medlemskapsperiode::getFom))
             .map(Medlemskapsperiode::getBestemmelse).orElse(null) == bestemmelse;
     }
 
