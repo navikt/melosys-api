@@ -49,7 +49,7 @@ class TrygdeavgiftsgrunnlagService(private val behandlingsresultatService: Behan
     private fun validerÅpenSluttdato(behandlingsresultat: Behandlingsresultat, request: OppdaterTrygdeavgiftsgrunnlagRequest) {
         val medlemAvFolketrygden = behandlingsresultat.medlemAvFolketrygden
         val skatteforholdsperiodeHarÅpenSluttdato = request.skatteforholdTilNorgeList.last().tomDato == null
-        val inntektPeriodeHarÅpenSluttdato = request.inntektskilder.last().tomDato == null
+        val inntektPeriodeHarÅpenSluttdato = request.inntektskilder.isEmpty() || request.inntektskilder.last().tomDato == null
         val medlemskapsperiodeHarÅpenSluttdato = medlemAvFolketrygden.utledMedlemskapsperiodeTom() == null
         val erSkattepliktigIHelePerioden = request.skatteforholdTilNorgeList.all { it.skatteplikttype.equals(Skatteplikttype.SKATTEPLIKTIG) }
 
