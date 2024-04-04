@@ -31,7 +31,7 @@ public class SafConsumerProducer implements WebClientConfig {
                                    CorrelationIdOutgoingFilter correlationIdOutgoingFilter) {
         return new SafConsumer(
             webClientBuilder
-                .filter(genericAuthFilterFactory.getStsAzureFilter(CLIENT_NAME))
+                .filter(genericAuthFilterFactory.getAzureFilter(CLIENT_NAME))
                 .filter(correlationIdOutgoingFilter)
                 .filter(errorFilter("Kall mot SAF feilet."))
                 .defaultHeaders(this::defaultHeaders)

@@ -11,6 +11,7 @@ class GenericAuthFilterFactory(
     private val clientConfigurationProperties: ClientConfigurationProperties,
     private val oAuth2AccessTokenService: OAuth2AccessTokenService
 ) {
+
     fun getStsAzureFilter(clientName: String): GenericContextExchangeFilter {
         return StsAzureContextExchangeFilter(
             restSTSService,

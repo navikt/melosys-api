@@ -1,5 +1,6 @@
 package no.nav.melosys.service.dokument.brev.mapper
 
+import io.kotest.assertions.throwables.shouldThrow
 import io.kotest.matchers.booleans.shouldBeFalse
 import io.kotest.matchers.booleans.shouldBeTrue
 import io.kotest.matchers.collections.shouldContain
@@ -10,22 +11,28 @@ import io.kotest.matchers.types.shouldBeInstanceOf
 import io.mockk.every
 import io.mockk.impl.annotations.MockK
 import io.mockk.junit5.MockKExtension
+import no.nav.melosys.domain.Behandling
+import no.nav.melosys.domain.Behandlingsresultat
+import no.nav.melosys.domain.Medlemskapsperiode
 import no.nav.melosys.domain.brev.*
 import no.nav.melosys.domain.dokument.arbeidsforhold.Aktoertype
 import no.nav.melosys.domain.dokument.felles.Periode
 import no.nav.melosys.domain.dokument.organisasjon.adresse.GeografiskAdresse
 import no.nav.melosys.domain.dokument.organisasjon.adresse.SemistrukturertAdresse
+import no.nav.melosys.domain.folketrygden.MedlemAvFolketrygden
 import no.nav.melosys.domain.kodeverk.*
 import no.nav.melosys.domain.kodeverk.begrunnelser.Nyvurderingbakgrunner
 import no.nav.melosys.domain.kodeverk.begrunnelser.folketrygdloven.Ftrl_2_8_naer_tilknytning_norge_begrunnelser
 import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingstyper
 import no.nav.melosys.domain.kodeverk.brev.Produserbaredokumenter
 import no.nav.melosys.domain.kodeverk.lovvalgsbestemmelser.trygdeavtale.Lovvalgsbestemmelser_trygdeavtale_gb
+import no.nav.melosys.domain.manglendebetaling.Betalingsstatus
 import no.nav.melosys.exception.FunksjonellException
 import no.nav.melosys.integrasjon.dokgen.dto.*
 import no.nav.melosys.integrasjon.dokgen.dto.felles.Innvilgelse
 import no.nav.melosys.integrasjon.dokgen.dto.felles.Person
 import no.nav.melosys.integrasjon.dokgen.dto.felles.SaksinfoVirksomhet
+import no.nav.melosys.integrasjon.dokgen.dto.innvilgelseftrl.MedlemskapsperiodeDto
 import no.nav.melosys.integrasjon.dokgen.dto.trygdeavtale.attest.*
 import no.nav.melosys.integrasjon.dokgen.dto.trygdeavtale.innvilgelse.InnvilgelseTrygdeavtale
 import no.nav.melosys.integrasjon.dokgen.dto.trygdeavtale.innvilgelse.Soknad
@@ -99,7 +106,7 @@ internal class DokgenMalMapperTest {
 
         dokgenMalMapper.mapBehandling(brevbestilling, DokgenTestData.lagMottaker(Mottakerroller.BRUKER))
             .shouldBeInstanceOf<SaksbehandlingstidSoknad>()
-            .apply {
+            .run {
                 saksinfo.navnBruker.shouldContain("Duck Donald")
                 mottaker.navn.shouldContain("Duck Donald")
                 mottaker.postnr.shouldContain(DokgenTestData.POSTNR_BRUKER)
@@ -124,7 +131,7 @@ internal class DokgenMalMapperTest {
             .build()
         dokgenMalMapper.mapBehandling(brevbestilling, DokgenTestData.lagMottaker(Mottakerroller.BRUKER))
             .shouldBeInstanceOf<SaksbehandlingstidSoknad>()
-            .apply {
+            .run {
                 saksinfo.navnBruker.shouldContain(DokgenTestData.SAMMENSATT_NAVN_BRUKER)
                 mottaker.navn.shouldContain(DokgenTestData.SAMMENSATT_NAVN_BRUKER)
                 mottaker.postnr.shouldContain(DokgenTestData.POSTNR_BRUKER)
@@ -148,7 +155,7 @@ internal class DokgenMalMapperTest {
             .build()
         dokgenMalMapper.mapBehandling(brevbestilling, DokgenTestData.lagMottaker(Mottakerroller.BRUKER))
             .shouldBeInstanceOf<SaksbehandlingstidSoknad>()
-            .apply {
+            .run {
                 saksinfo.navnBruker.shouldContain(DokgenTestData.SAMMENSATT_NAVN_BRUKER)
                 mottaker.navn.shouldContain(DokgenTestData.SAMMENSATT_NAVN_BRUKER)
                 mottaker.postnr.shouldContain(DokgenTestData.POSTNR_BRUKER)
@@ -176,7 +183,7 @@ internal class DokgenMalMapperTest {
 
         dokgenMalMapper.mapBehandling(brevbestilling, DokgenTestData.lagMottaker(Mottakerroller.BRUKER))
             .shouldBeInstanceOf<SaksbehandlingstidSoknad>()
-            .apply {
+            .run {
                 avsenderTypeSoknad.shouldBe(Mottakerroller.UTENLANDSK_TRYGDEMYNDIGHET)
                 avsenderLand.shouldBe("Finland")
                 datoBehandlingstid.shouldBe(
@@ -203,7 +210,7 @@ internal class DokgenMalMapperTest {
 
         dokgenMalMapper.mapBehandling(brevbestilling, DokgenTestData.lagMottaker(Mottakerroller.ARBEIDSGIVER))
             .shouldBeInstanceOf<SaksbehandlingstidSoknad>()
-            .apply {
+            .run {
                 saksinfo.navnBruker.shouldContain(DokgenTestData.SAMMENSATT_NAVN_BRUKER)
                 mottaker.navn.shouldContain(DokgenTestData.NAVN_ORG)
                 mottaker.postnr.shouldContain(DokgenTestData.POSTNR_ORG)
@@ -234,7 +241,7 @@ internal class DokgenMalMapperTest {
             brevbestilling,
             DokgenTestData.lagMottakerFullmektig(Aktoertype.ORGANISASJON)
         ).shouldBeInstanceOf<SaksbehandlingstidSoknad>()
-            .apply {
+            .run {
                 saksinfo.navnBruker.shouldContain(DokgenTestData.SAMMENSATT_NAVN_BRUKER)
                 mottaker.navn.shouldContain(DokgenTestData.NAVN_ORG)
                 mottaker.postnr.shouldContain(DokgenTestData.POSTNR_ORG)
@@ -263,7 +270,7 @@ internal class DokgenMalMapperTest {
             brevbestilling,
             DokgenTestData.lagMottakerFullmektig(Aktoertype.ORGANISASJON)
         ).shouldBeInstanceOf<SaksbehandlingstidSoknad>()
-            .apply {
+            .run {
                 saksinfo.navnBruker.shouldContain(DokgenTestData.SAMMENSATT_NAVN_BRUKER)
                 mottaker.navn.shouldContain(DokgenTestData.NAVN_ORG)
                 mottaker.postnr.shouldContain(DokgenTestData.POSTNR_ORG)
@@ -292,7 +299,7 @@ internal class DokgenMalMapperTest {
 
         dokgenMalMapper.mapBehandling(brevbestilling, DokgenTestData.lagMottaker(Mottakerroller.BRUKER))
             .shouldBeInstanceOf<MangelbrevBruker>()
-            .apply {
+            .run {
                 innledningFritekst.shouldContain("Dummy")
                 manglerInfoFritekst.shouldContain("Dummy")
                 datoInnsendingsfrist.truncatedTo(ChronoUnit.DAYS).shouldBe(Instant.now().plus(Period.ofWeeks(4)).truncatedTo(ChronoUnit.DAYS))
@@ -321,7 +328,7 @@ internal class DokgenMalMapperTest {
 
         dokgenMalMapper.mapBehandling(brevbestilling, DokgenTestData.lagMottaker(Mottakerroller.ARBEIDSGIVER))
             .shouldBeInstanceOf<MangelbrevArbeidsgiver>()
-            .apply {
+            .run {
                 innledningFritekst.shouldContain("Dummy")
                 manglerInfoFritekst.shouldContain("Dummy")
                 navnFullmektig.shouldContain("Fullmektig AS")
@@ -354,6 +361,30 @@ internal class DokgenMalMapperTest {
     }
 
     @Test
+    fun skalMappePliktigFtrlInnvilgelsesbrevTilBruker() {
+        every { mockDokgenMapperDatahenter.hentPersondata(any()) } returns DokgenTestData.lagPersondata()
+        every { mockDokgenMapperDatahenter.hentPersonMottaker(any()) } returns DokgenTestData.lagPersondata()
+        every { mockDokgenMapperDatahenter.hentNorskPoststed(any()) } returns "Andeby"
+        every { mockDokgenMapperDatahenter.hentLandnavnFraLandkode(Landkoder.NO.kode) } returns Landkoder.NO.beskrivelse
+        every { mockInnvilgelseFtrlMapper.mapYrkesaktivPliktig(any()) } returns lagInnvilgelseFtrlPliktig()
+
+        val behandling = DokgenTestData.lagBehandling(DokgenTestData.lagFagsak(true))
+        val brevbestilling: DokgenBrevbestilling = InnvilgelseFtrlYrkesaktivPliktigBrevbestilling.Builder()
+            .medProduserbartdokument(Produserbaredokumenter.PLIKTIG_MEDLEM_FTRL)
+            .medBehandling(behandling)
+            .medOrg(DokgenTestData.lagOrg())
+            .medKontaktopplysning(DokgenTestData.lagKontaktOpplysning())
+            .medForsendelseMottatt(Instant.now())
+            .medInnledningFritekst("Dummy")
+            .build()
+
+        dokgenMalMapper.mapBehandling(
+            brevbestilling,
+            DokgenTestData.lagMottaker(Mottakerroller.BRUKER)
+        ).shouldBeInstanceOf<InnvilgelseYrkesaktivPliktigFtrl>()
+    }
+
+    @Test
     fun skalMappeVedtakOpphørtMedlemskapTilBrukerMedRiktigOpphørsdato() {
         every { mockDokgenMapperDatahenter.hentPersondata(any()) } returns DokgenTestData.lagPersondata()
         every { mockDokgenMapperDatahenter.hentPersonMottaker(any()) } returns DokgenTestData.lagPersondata()
@@ -375,6 +406,58 @@ internal class DokgenMalMapperTest {
             brevbestilling,
             DokgenTestData.lagMottaker(Mottakerroller.BRUKER)
         ).shouldBeInstanceOf<VedtakOpphoertMedlemskap>()
+            .opphoertDato.shouldBe(LocalDate.now())
+    }
+
+    @Test
+    fun skalMappeVarselManglendeOpplysningerTilBrukerMedRiktigMedlemskapstype() {
+        every { mockDokgenMapperDatahenter.hentPersondata(any()) } returns DokgenTestData.lagPersondata()
+        every { mockDokgenMapperDatahenter.hentPersonMottaker(any()) } returns DokgenTestData.lagPersondata()
+        every { mockDokgenMapperDatahenter.hentNorskPoststed(any()) } returns "Andeby"
+        every { mockDokgenMapperDatahenter.hentLandnavnFraLandkode(Landkoder.NO.kode) } returns Landkoder.NO.beskrivelse
+        every { mockDokgenMapperDatahenter.hentBehandlingsresultat(any()) } returns Behandlingsresultat().apply {
+            medlemAvFolketrygden = MedlemAvFolketrygden().apply {
+                medlemskapsperioder.add(Medlemskapsperiode().apply { medlemskapstype = Medlemskapstyper.FRIVILLIG })
+            }
+        }
+        val behandling = DokgenTestData.lagBehandling(DokgenTestData.lagFagsak(true)).apply {
+            opprinneligBehandling = Behandling().apply { id = 1L }
+        }
+        val brevbestilling: DokgenBrevbestilling = VarselbrevManglendeInnbetalingBrevbestilling.Builder()
+            .medProduserbartdokument(Produserbaredokumenter.VARSELBREV_MANGLENDE_INNBETALING)
+            .medBehandling(behandling)
+            .medBetalingsstatus(Betalingsstatus.DELVIS_BETALT)
+            .medForsendelseMottatt(Instant.now())
+            .build()
+
+
+
+        dokgenMalMapper.mapBehandling(
+            brevbestilling,
+            DokgenTestData.lagMottaker(Mottakerroller.BRUKER)
+        ).shouldBeInstanceOf<VarselbrevManglendeInnbetaling>()
+            .medlemskapstype.shouldBe(Medlemskapstyper.FRIVILLIG.kode)
+    }
+
+    @Test
+    fun skalMappeVarselManglendeOpplysningerTilBrukerKasterFeilDersomOpprinneligBehandlingIkkeHarMedlemskapstype() {
+        every { mockDokgenMapperDatahenter.hentPersondata(any()) } returns DokgenTestData.lagPersondata()
+        every { mockDokgenMapperDatahenter.hentPersonMottaker(any()) } returns DokgenTestData.lagPersondata()
+        every { mockDokgenMapperDatahenter.hentNorskPoststed(any()) } returns "Andeby"
+        every { mockDokgenMapperDatahenter.hentBehandlingsresultat(any()) } returns Behandlingsresultat()
+        val behandling = DokgenTestData.lagBehandling(DokgenTestData.lagFagsak(true)).apply {
+            opprinneligBehandling = Behandling().apply { id = 1L }
+        }
+        val brevbestilling: DokgenBrevbestilling = VarselbrevManglendeInnbetalingBrevbestilling.Builder()
+            .medProduserbartdokument(Produserbaredokumenter.VARSELBREV_MANGLENDE_INNBETALING)
+            .medBehandling(behandling)
+            .medForsendelseMottatt(Instant.now())
+            .build()
+
+
+        shouldThrow<FunksjonellException> {
+            dokgenMalMapper.mapBehandling(brevbestilling, DokgenTestData.lagMottaker(Mottakerroller.BRUKER))
+        }.message.shouldBe("Forventer at behandling som tilhører varselbrevet har en opprinnelig behandling med medlemskapsperioder")
     }
 
     @Test
@@ -398,14 +481,14 @@ internal class DokgenMalMapperTest {
 
         dokgenMalMapper.mapBehandling(brevbestilling, DokgenTestData.lagMottaker(Mottakerroller.BRUKER))
             .shouldBeInstanceOf<InnvilgelseOgAttestTrygdeavtale>()
-            .apply {
-                innvilgelse.apply {
+            .run {
+                innvilgelse.run {
                     innvilgelse.innledningFritekst.shouldBe("Innledning")
                     artikkel.shouldBe(Lovvalgsbestemmelser_trygdeavtale_gb.UK_ART6_1)
                     soknad.virksomhetsnavn.shouldBe("Virksomhetsnavn")
                     isVirksomhetArbeidsgiverSkalHaKopi.shouldBeTrue()
                 }
-                attest.apply {
+                attest.run {
                     arbeidstaker.navn.shouldBe("Nordmann, Ola")
                     arbeidstaker.fnr.shouldBe("01010119901")
                     arbeidsgiverNorge.virksomhetsnavn.shouldBe("Virksomhetsnavn")
@@ -439,7 +522,7 @@ internal class DokgenMalMapperTest {
 
         dokgenMalMapper.mapBehandling(brevbestilling, DokgenTestData.lagMottaker(Mottakerroller.BRUKER))
             .shouldBeInstanceOf<Fritekstbrev>()
-            .apply {
+            .run {
                 fritekstTittel.shouldContain("Min tittel")
                 fritekst.shouldContain("Innhold")
                 isMedKontaktopplysninger.shouldBeTrue()
@@ -468,13 +551,13 @@ internal class DokgenMalMapperTest {
 
         dokgenMalMapper.mapBehandling(brevbestilling, DokgenTestData.lagMottaker(Mottakerroller.VIRKSOMHET))
             .shouldBeInstanceOf<Fritekstbrev>()
-            .apply {
+            .run {
                 fritekstTittel.shouldBe("Min tittel")
                 fritekst.shouldBe("Innhold")
                 navnFullmektig.shouldBeNull()
                 saksbehandlerNavn.shouldBe("Fetter Anton")
                 saksinfo.shouldBeInstanceOf<SaksinfoVirksomhet>()
-                    .apply {
+                    .run {
                         saksnummer.shouldBe(DokgenTestData.SAKSNUMMER)
                         navnVirksomhet.shouldBe(DokgenTestData.NAVN_ORG)
                         orgnr.shouldBe(DokgenTestData.ORGNR)
@@ -504,7 +587,7 @@ internal class DokgenMalMapperTest {
 
         dokgenMalMapper.mapBehandling(brevbestilling, DokgenTestData.lagMottaker(Mottakerroller.ARBEIDSGIVER))
             .shouldBeInstanceOf<Fritekstbrev>()
-            .apply {
+            .run {
                 fritekstTittel.shouldBe("Min tittel")
                 fritekst.shouldBe("Innhold")
                 isMedKontaktopplysninger.shouldBeTrue()
@@ -564,11 +647,49 @@ internal class DokgenMalMapperTest {
         )
     }
 
+    private fun lagInnvilgelseFtrlPliktig(): InnvilgelseYrkesaktivPliktigFtrl {
+        return InnvilgelseYrkesaktivPliktigFtrl(
+            brevbestilling = lagInnvilgelseFtrlYrkresaktivPliktig(),
+            behandlingstype = Behandlingstyper.FØRSTEGANG,
+            avgiftsperioder = emptyList(),
+            datoMottatt = LocalDate.now(),
+            medlemskapsperiode = MedlemskapsperiodeDto(LocalDate.now(), LocalDate.now(), Trygdedekninger.FULL_DEKNING_FTRL, InnvilgelsesResultat.INNVILGET),
+            bestemmelse = Folketrygdloven_kap2_bestemmelser.FTRL_KAP2_2_8,
+            trygdeavgiftMottaker = Trygdeavgiftmottaker.TRYGDEAVGIFT_BETALES_TIL_NAV,
+            fullmektigTrygdeavgift = null,
+            skatteplikttype = Skatteplikttype.SKATTEPLIKTIG,
+            begrunnelse = Ftrl_2_8_naer_tilknytning_norge_begrunnelser.ANSATT_I_MULTINASJONALT_SELSKAP,
+            nyVurderingBakgrunn = null,
+            begrunnelseFritekst = null,
+            innledningFritekst = null,
+            trygdeavgiftFritekst = null,
+            begrunnelseAnnenGrunnFritekst = null,
+            arbeidsgivere = listOf("Egon Olsen AS"),
+            flereLandUkjentHvilke = false,
+            land = listOf(Land_iso2.US.kode),
+            trygdeavtaleLand = emptyList(),
+            betalerArbeidsgiveravgift = true,
+            harLavSatsPgaAlder = false,
+            arbeidssituasjontype = null,
+            medlemskapstype = Medlemskapstyper.PLIKTIG
+        )
+    }
+
     private fun lagInnvilgelseFtrlYrkesaktivFrivilligBrevbestilling(): InnvilgelseFtrlYrkesaktivFrivilligBrevbestilling {
         return InnvilgelseFtrlYrkesaktivFrivilligBrevbestilling.Builder()
             .medInnledningFritekst("Innledning")
             .medBegrunnelseFritekst("Begrunnelse")
             .medTrygdeavgiftFritekst("Trygdeavgift fritekst")
+            .medBehandling(DokgenTestData.lagBehandling())
+            .medPersonDokument(DokgenTestData.lagPersondata())
+            .medPersonMottaker(DokgenTestData.lagPersondata())
+            .build()
+    }
+
+    private fun lagInnvilgelseFtrlYrkresaktivPliktig(): InnvilgelseFtrlYrkesaktivPliktigBrevbestilling {
+        return InnvilgelseFtrlYrkesaktivPliktigBrevbestilling.Builder()
+            .medInnledningFritekst("Innledning")
+            .medBegrunnelseFritekst("Begrunnelse")
             .medBehandling(DokgenTestData.lagBehandling())
             .medPersonDokument(DokgenTestData.lagPersondata())
             .medPersonMottaker(DokgenTestData.lagPersondata())
