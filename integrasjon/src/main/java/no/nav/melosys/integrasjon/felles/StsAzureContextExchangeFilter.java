@@ -4,6 +4,7 @@ import no.nav.melosys.integrasjon.reststs.RestSTSService;
 import no.nav.security.token.support.client.core.oauth2.OAuth2AccessTokenService;
 import no.nav.security.token.support.client.spring.ClientConfigurationProperties;
 
+@Deprecated
 public class StsAzureContextExchangeFilter extends GenericContextExchangeFilter {
 
     private final RestSTSService restSTSService;

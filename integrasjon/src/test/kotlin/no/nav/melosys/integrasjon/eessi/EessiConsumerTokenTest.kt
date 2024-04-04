@@ -107,7 +107,7 @@ class EessiConsumerTokenTest(
         )
         shouldThrow<TekniskException> {
             executeFromSystem()
-        }.message.shouldContain("Authorization: Bearer --token-from-system--         <<<<< Header does not match")
+        }.message.shouldContain("Authorization: Bearer --feil token--")
     }
 
     override fun getMockData(): String = "[]"

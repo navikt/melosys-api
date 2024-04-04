@@ -32,7 +32,7 @@ public class OppgaveConsumerProducer implements WebClientConfig {
         return new OppgaveConsumer(
             webClientBuilder
                 .defaultHeaders(this::defaultHeaders)
-                .filter(genericAuthFilterFactory.getStsAzureFilter(CLIENT_NAME))
+                .filter(genericAuthFilterFactory.getAzureFilter(CLIENT_NAME))
                 .filter(correlationIdOutgoingFilter)
                 .filter(errorFilter("Kall mot Oppgave feilet."))
                 .baseUrl(url)

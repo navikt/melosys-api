@@ -44,15 +44,14 @@ import java.time.LocalDate
 import java.util.*
 
 @Import(
-    StsWebClientProducer::class,
-    StsMockServer::class,
     OAuthMockServer::class,
     CorrelationIdOutgoingFilter::class,
+    StsWebClientProducer::class,
+    StsMockServer::class,
     RestSTSService::class,
 
     GenericAuthFilterFactory::class,
     EessiConsumerProducerConfig::class,
-    StsMockServer::class,
     MetricsTestConfig::class,
     FakeUnleash::class
 )
@@ -62,8 +61,8 @@ import java.util.*
 @TestInstance(TestInstance.Lifecycle.PER_CLASS)
 class EessiConsumerTest(
     @Autowired private val eessiConsumer: EessiConsumer,
-    @Autowired private val stsMockServer: StsMockServer,
     @Autowired private val oAuthMockServer: OAuthMockServer,
+    @Autowired private val stsMockServer: StsMockServer,
     @Value("\${mockserver.port}") mockServiceUnderTestPort: Int
 ) {
     private val processUUID = UUID.randomUUID()
@@ -75,6 +74,7 @@ class EessiConsumerTest(
         serviceUnderTestMockServer.start()
         stsMockServer.start()
         oAuthMockServer.start()
+        oAuthMockServer.reset()
     }
 
     @AfterAll

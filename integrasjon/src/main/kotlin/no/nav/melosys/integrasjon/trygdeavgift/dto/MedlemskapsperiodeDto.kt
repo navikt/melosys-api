@@ -9,5 +9,5 @@ data class MedlemskapsperiodeDto(
     val id: UUID,
     val periode: DatoPeriodeDto,
     val avgiftsdekninger: Set<Avgiftsdekning>,
-    val medlemskapsType: Medlemskapstyper,
+    val medlemskapstype: Medlemskapstyper,
 )
