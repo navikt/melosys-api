@@ -23,7 +23,7 @@ import java.time.DateTimeException
 import no.nav.melosys.domain.kodeverk.Trygdeavgiftmottaker.*
 
 @Service
-class TrygdeavgiftsgrunnlagService(private val behandlingsresultatService: BehandlingsresultatService, private val trygdeavgiftMottakerService: TrygdeavgiftMottakerService) {
+class TrygdeavgiftsgrunnlagService(private val behandlingsresultatService: BehandlingsresultatService) {
 
     @Transactional
     fun oppdaterTrygdeavgiftsgrunnlag(
@@ -58,7 +58,7 @@ class TrygdeavgiftsgrunnlagService(private val behandlingsresultatService: Behan
         }
 
         if (erSkattepliktigIHelePerioden && !inntektPeriodeHarÅpenSluttdato && medlemskapsperiodeHarÅpenSluttdato) {
-            throw FunksjonellException("Skatteforholdsperiode må ha åpen sluttdato når medlemskapsperiode har åpen sluttdato")
+            throw FunksjonellException("Inntektskildeperiode må ha åpen sluttdato når medlemskapsperiode har åpen sluttdato")
         }
 
         if (!erSkattepliktigIHelePerioden && !(skatteforholdsperiodeHarÅpenSluttdato && inntektPeriodeHarÅpenSluttdato) && medlemskapsperiodeHarÅpenSluttdato) {

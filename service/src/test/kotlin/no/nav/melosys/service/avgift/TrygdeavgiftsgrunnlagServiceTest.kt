@@ -41,8 +41,6 @@ class TrygdeavgiftsgrunnlagServiceTest {
 
     @MockK
     private lateinit var mockBehandlingsresultatService: BehandlingsresultatService
-    @MockK
-    private lateinit var mockTrygdeavgiftMottakerService: TrygdeavgiftMottakerService
 
     private lateinit var trygdeavgiftsgrunnlagService: TrygdeavgiftsgrunnlagService
 
@@ -55,7 +53,7 @@ class TrygdeavgiftsgrunnlagServiceTest {
 
     @BeforeEach
     fun setup() {
-        trygdeavgiftsgrunnlagService = TrygdeavgiftsgrunnlagService(mockBehandlingsresultatService, mockTrygdeavgiftMottakerService)
+        trygdeavgiftsgrunnlagService = TrygdeavgiftsgrunnlagService(mockBehandlingsresultatService)
         behandlingsresultat = Behandlingsresultat()
         opprinneligBehandlingsresultat = Behandlingsresultat()
         every { mockBehandlingsresultatService.hentBehandlingsresultat(BEHANDLING_ID) }.returns(behandlingsresultat)
@@ -255,13 +253,12 @@ class TrygdeavgiftsgrunnlagServiceTest {
                 })
         }
         every { mockBehandlingsresultatService.lagre(any()) } returnsArgument 0
-        every { mockTrygdeavgiftMottakerService.getTrygdeavgiftMottaker(any()) } returns Trygdeavgiftmottaker.TRYGDEAVGIFT_BETALES_TIL_SKATT
 
         shouldThrow<FunksjonellException> {
             trygdeavgiftsgrunnlagService.oppdaterTrygdeavgiftsgrunnlag(
-                BEHANDLING_ID, OppdaterTrygdeavgiftsgrunnlagRequest(listOf(lagSkatteforholdTilNorge(fomDato, null)), listOf(lagInntektsperiode(fomDato, tomDato)))
+                BEHANDLING_ID, OppdaterTrygdeavgiftsgrunnlagRequest(listOf(lagSkatteforholdTilNorge(fomDato, null)), listOf(lagInntektsperiode(fomDato, tomDato, true)))
             )
-        }.message.shouldContain("Skatteforholdsperiode må ha åpen sluttdato når medlemskapsperiode har åpen sluttdato")
+        }.message.shouldContain("Inntektskildeperiode må ha åpen sluttdato når medlemskapsperiode har åpen sluttdato")
     }
 
 
@@ -279,7 +276,6 @@ class TrygdeavgiftsgrunnlagServiceTest {
                 })
         }
         every { mockBehandlingsresultatService.lagre(any()) } returnsArgument 0
-        every { mockTrygdeavgiftMottakerService.getTrygdeavgiftMottaker(any()) } returns Trygdeavgiftmottaker.TRYGDEAVGIFT_BETALES_TIL_SKATT
 
         shouldThrow<FunksjonellException> {
             trygdeavgiftsgrunnlagService.oppdaterTrygdeavgiftsgrunnlag(
@@ -306,7 +302,6 @@ class TrygdeavgiftsgrunnlagServiceTest {
                 })
         }
         every { mockBehandlingsresultatService.lagre(any()) } returnsArgument 0
-        every { mockTrygdeavgiftMottakerService.getTrygdeavgiftMottaker(any()) } returns Trygdeavgiftmottaker.TRYGDEAVGIFT_BETALES_TIL_SKATT
 
         shouldThrow<FunksjonellException> {
             trygdeavgiftsgrunnlagService.oppdaterTrygdeavgiftsgrunnlag(
@@ -329,7 +324,6 @@ class TrygdeavgiftsgrunnlagServiceTest {
                 })
         }
         every { mockBehandlingsresultatService.lagre(any()) } returnsArgument 0
-        every { mockTrygdeavgiftMottakerService.getTrygdeavgiftMottaker(any()) } returns Trygdeavgiftmottaker.TRYGDEAVGIFT_BETALES_TIL_SKATT
 
         shouldThrow<FunksjonellException> {
             trygdeavgiftsgrunnlagService.oppdaterTrygdeavgiftsgrunnlag(
@@ -351,7 +345,6 @@ class TrygdeavgiftsgrunnlagServiceTest {
                 })
         }
         every { mockBehandlingsresultatService.lagre(any()) } returnsArgument 0
-        every { mockTrygdeavgiftMottakerService.getTrygdeavgiftMottaker(any()) } returns Trygdeavgiftmottaker.TRYGDEAVGIFT_BETALES_TIL_NAV
 
 
         shouldThrow<FunksjonellException> {
@@ -374,8 +367,6 @@ class TrygdeavgiftsgrunnlagServiceTest {
                 })
         }
         every { mockBehandlingsresultatService.lagre(any()) } returnsArgument 0
-        every { mockTrygdeavgiftMottakerService.getTrygdeavgiftMottaker(any()) } returns Trygdeavgiftmottaker.TRYGDEAVGIFT_BETALES_TIL_NAV_OG_SKATT
-
 
         shouldThrow<FunksjonellException> {
             trygdeavgiftsgrunnlagService.oppdaterTrygdeavgiftsgrunnlag(
