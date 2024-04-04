@@ -10,7 +10,7 @@ class InntektskildeRequest(
     val arbeidsgiversavgiftBetales: Boolean,
     val avgiftspliktigInntektMnd: BigDecimal?,
     val fomDato: LocalDate,
-    val tomDato: LocalDate,
+    val tomDato: LocalDate?,
 ) {
     constructor(inntektsperioder: Inntektsperiode) : this(
         inntektsperioder.type,

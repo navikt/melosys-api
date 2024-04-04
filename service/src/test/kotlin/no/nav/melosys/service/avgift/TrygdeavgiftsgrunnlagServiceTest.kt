@@ -22,10 +22,7 @@ import no.nav.melosys.domain.Medlemskapsperiode
 import no.nav.melosys.domain.avgift.*
 import no.nav.melosys.domain.folketrygden.FastsattTrygdeavgift
 import no.nav.melosys.domain.folketrygden.MedlemAvFolketrygden
-import no.nav.melosys.domain.kodeverk.Inntektskildetype
-import no.nav.melosys.domain.kodeverk.InnvilgelsesResultat
-import no.nav.melosys.domain.kodeverk.Medlemskapstyper
-import no.nav.melosys.domain.kodeverk.Skatteplikttype
+import no.nav.melosys.domain.kodeverk.*
 import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingstyper
 import no.nav.melosys.exception.FunksjonellException
 import no.nav.melosys.service.avgift.dto.InntektskildeRequest
@@ -218,6 +215,166 @@ class TrygdeavgiftsgrunnlagServiceTest {
         }.message.shouldContain("Kan ikke oppdatere trygdeavgiftsgrunnlaget før medlemskapsperioder finnes")
     }
 
+
+    @Test
+    fun oppdaterTrygdeavgiftsgrunnlag_FTRL_2_2_1_åpenSluttdato_erGyldig() {
+        val fomDato = LocalDate.now().minusMonths(1);
+
+        behandlingsresultat.medlemAvFolketrygden = MedlemAvFolketrygden().apply {
+            medlemskapsperioder = listOf(Medlemskapsperiode()
+                .apply {
+                    innvilgelsesresultat = InnvilgelsesResultat.INNVILGET
+                    fom = fomDato
+                    bestemmelse = Folketrygdloven_kap2_bestemmelser.FTRL_KAP2_2_1
+                })
+        }
+        every { mockBehandlingsresultatService.lagre(any()) } returnsArgument 0
+
+        trygdeavgiftsgrunnlagService.oppdaterTrygdeavgiftsgrunnlag(
+            BEHANDLING_ID, OppdaterTrygdeavgiftsgrunnlagRequest(listOf(lagSkatteforholdTilNorge(fomDato, null)), listOf(lagInntektsperiode(fomDato, null, true)))
+        )
+
+        verify { mockBehandlingsresultatService.lagre(capture(slotBehandlingsresultat)) }
+        slotBehandlingsresultat.captured.shouldNotBeNull()
+        slotBehandlingsresultat.captured.medlemAvFolketrygden.fastsattTrygdeavgift.trygdeavgiftsperioder.shouldBeEmpty()
+    }
+
+    @Test
+    fun oppdaterTrygdeavgiftsgrunnlag_FTRL_2_2_1_åpenSluttdatoSkatteforholdOgLukketInntektsperiode_kasterFeil() {
+        val fomDato = LocalDate.now().minusMonths(1);
+        val tomDato = LocalDate.now().plusMonths(1);
+
+        behandlingsresultat.medlemAvFolketrygden = MedlemAvFolketrygden().apply {
+            medlemskapsperioder = listOf(Medlemskapsperiode()
+                .apply {
+                    innvilgelsesresultat = InnvilgelsesResultat.INNVILGET
+                    fom = fomDato
+                    bestemmelse = Folketrygdloven_kap2_bestemmelser.FTRL_KAP2_2_1
+                })
+        }
+        every { mockBehandlingsresultatService.lagre(any()) } returnsArgument 0
+
+        shouldThrow<FunksjonellException> {
+            trygdeavgiftsgrunnlagService.oppdaterTrygdeavgiftsgrunnlag(
+                BEHANDLING_ID, OppdaterTrygdeavgiftsgrunnlagRequest(listOf(lagSkatteforholdTilNorge(fomDato, null, Skatteplikttype.IKKE_SKATTEPLIKTIG)), listOf(lagInntektsperiode(fomDato, tomDato, true)))
+            )
+        }.message.shouldContain("Faktura kan ikke opprettes for medlemskapsperiode uten sluttdato. Angi sluttdato på medlemskapsperiode")
+    }
+
+
+    @Test
+    fun oppdaterTrygdeavgiftsgrunnlag_FTRL_2_2_1_åpenOgLukketSluttdatoSkatteforholdAlleMåVæreÅpen_kasterFeil() {
+        val fomDato = LocalDate.now().minusMonths(1);
+        val tomDato = LocalDate.now().plusMonths(1);
+
+        behandlingsresultat.medlemAvFolketrygden = MedlemAvFolketrygden().apply {
+            medlemskapsperioder = listOf(Medlemskapsperiode()
+                .apply {
+                    innvilgelsesresultat = InnvilgelsesResultat.INNVILGET
+                    fom = fomDato
+                    bestemmelse = Folketrygdloven_kap2_bestemmelser.FTRL_KAP2_2_1
+                })
+        }
+        every { mockBehandlingsresultatService.lagre(any()) } returnsArgument 0
+
+        shouldThrow<FunksjonellException> {
+            trygdeavgiftsgrunnlagService.oppdaterTrygdeavgiftsgrunnlag(
+                BEHANDLING_ID, OppdaterTrygdeavgiftsgrunnlagRequest(listOf(
+                    lagSkatteforholdTilNorge(fomDato, tomDato),
+                    lagSkatteforholdTilNorge(fomDato, null),
+                    lagSkatteforholdTilNorge(fomDato, tomDato.plusDays(1))
+                ), listOf(lagInntektsperiode(fomDato, null)))
+            )
+        }.message.shouldContain("Skatteforholdsperiode/inntektsperiode kan ikke ha sluttdato når medlemskapsperiode ikke har sluttdato")
+    }
+
+    @Test
+    fun oppdaterTrygdeavgiftsgrunnlag_FTRL_2_2_1_lukketSluttdatoSkatteforholdOgLukketInntektsperiode_kasterFeil() {
+        val fomDato = LocalDate.now().minusMonths(1);
+        val tomDato = LocalDate.now().plusMonths(1);
+
+        behandlingsresultat.medlemAvFolketrygden = MedlemAvFolketrygden().apply {
+            medlemskapsperioder = listOf(Medlemskapsperiode()
+                .apply {
+                    innvilgelsesresultat = InnvilgelsesResultat.INNVILGET
+                    fom = fomDato
+                    bestemmelse = Folketrygdloven_kap2_bestemmelser.FTRL_KAP2_2_1
+                })
+        }
+        every { mockBehandlingsresultatService.lagre(any()) } returnsArgument 0
+
+        shouldThrow<FunksjonellException> {
+            trygdeavgiftsgrunnlagService.oppdaterTrygdeavgiftsgrunnlag(
+                BEHANDLING_ID, OppdaterTrygdeavgiftsgrunnlagRequest(listOf(lagSkatteforholdTilNorge(fomDato, tomDato)), listOf(lagInntektsperiode(fomDato, tomDato)))
+            )
+        }.message.shouldContain("Skatteforholdsperiode/inntektsperiode kan ikke ha sluttdato når medlemskapsperiode ikke har sluttdato")
+    }
+
+    @Test
+    fun oppdaterTrygdeavgiftsgrunnlag_FTRL_2_2_1_lukketSluttdatoSkatteforholdOgÅpenInntektsperiode_kasterFeil() {
+        val fomDato = LocalDate.now().minusMonths(1);
+        val tomDato = LocalDate.now().plusMonths(1);
+
+        behandlingsresultat.medlemAvFolketrygden = MedlemAvFolketrygden().apply {
+            medlemskapsperioder = listOf(Medlemskapsperiode()
+                .apply {
+                    innvilgelsesresultat = InnvilgelsesResultat.INNVILGET
+                    fom = fomDato
+                    bestemmelse = Folketrygdloven_kap2_bestemmelser.FTRL_KAP2_2_1
+                })
+        }
+        every { mockBehandlingsresultatService.lagre(any()) } returnsArgument 0
+
+        shouldThrow<FunksjonellException> {
+            trygdeavgiftsgrunnlagService.oppdaterTrygdeavgiftsgrunnlag(
+                BEHANDLING_ID, OppdaterTrygdeavgiftsgrunnlagRequest(listOf(lagSkatteforholdTilNorge(fomDato, tomDato)), listOf(lagInntektsperiode(fomDato, null)))
+            )
+        }.message.shouldContain("Skatteforholdsperiode/inntektsperiode kan ikke ha sluttdato når medlemskapsperiode ikke har sluttdato")
+    }
+
+    @Test
+    fun oppdaterTrygdeavgiftsgrunnlag_FTRL_2_2_1_åpenSluttdatoMedTRYGDEAVGIFT_BETALES_TIL_NAV_kasterFeil() {
+        val fomDato = LocalDate.now().minusMonths(1);
+
+        behandlingsresultat.medlemAvFolketrygden = MedlemAvFolketrygden().apply {
+            medlemskapsperioder = listOf(Medlemskapsperiode()
+                .apply {
+                    innvilgelsesresultat = InnvilgelsesResultat.INNVILGET
+                    fom = fomDato
+                    bestemmelse = Folketrygdloven_kap2_bestemmelser.FTRL_KAP2_2_1
+                })
+        }
+        every { mockBehandlingsresultatService.lagre(any()) } returnsArgument 0
+
+
+        shouldThrow<FunksjonellException> {
+            trygdeavgiftsgrunnlagService.oppdaterTrygdeavgiftsgrunnlag(
+                BEHANDLING_ID, OppdaterTrygdeavgiftsgrunnlagRequest(listOf(lagSkatteforholdTilNorge(fomDato, null, Skatteplikttype.IKKE_SKATTEPLIKTIG)), listOf(lagInntektsperiode(fomDato, null)))
+            )
+        }.message.shouldContain("Faktura kan ikke opprettes for medlemskapsperiode uten sluttdato. Angi sluttdato på medlemskapsperiode")
+    }
+
+    @Test
+    fun oppdaterTrygdeavgiftsgrunnlag_FTRL_2_2_1_åpenSluttdatoMedTRYGDEAVGIFT_BETALES_TIL_NAV_OG_SKATT_kasterFeil() {
+        val fomDato = LocalDate.now().minusMonths(1);
+
+        behandlingsresultat.medlemAvFolketrygden = MedlemAvFolketrygden().apply {
+            medlemskapsperioder = listOf(Medlemskapsperiode()
+                .apply {
+                    innvilgelsesresultat = InnvilgelsesResultat.INNVILGET
+                    fom = fomDato
+                    bestemmelse = Folketrygdloven_kap2_bestemmelser.FTRL_KAP2_2_1
+                })
+        }
+        every { mockBehandlingsresultatService.lagre(any()) } returnsArgument 0
+
+        shouldThrow<FunksjonellException> {
+            trygdeavgiftsgrunnlagService.oppdaterTrygdeavgiftsgrunnlag(
+                BEHANDLING_ID, OppdaterTrygdeavgiftsgrunnlagRequest(listOf(lagSkatteforholdTilNorge(fomDato, null, Skatteplikttype.IKKE_SKATTEPLIKTIG)), listOf(lagInntektsperiode(fomDato, null)))
+            )
+        }.message.shouldContain("Faktura kan ikke opprettes for medlemskapsperiode uten sluttdato. Angi sluttdato på medlemskapsperiode")
+    }
+
     @Test
     fun oppdaterTrygdeavgiftsgrunnlag_ingenMedlemskapsperioderInnvilget_kasterFeil() {
         behandlingsresultat.medlemAvFolketrygden = MedlemAvFolketrygden().apply {
@@ -231,24 +388,6 @@ class TrygdeavgiftsgrunnlagServiceTest {
                 BEHANDLING_ID, OppdaterTrygdeavgiftsgrunnlagRequest(emptyList(), emptyList())
             )
         }.message.shouldContain("Klarte ikke finne startdatoen på medlemskapet")
-    }
-
-    @Test
-    fun oppdaterTrygdeavgiftsgrunnlag_medlemskapsperiodeÅpenSluttdato_kasterFeil() {
-        behandlingsresultat.medlemAvFolketrygden = MedlemAvFolketrygden().apply {
-            medlemskapsperioder = listOf(Medlemskapsperiode()
-                .apply {
-                    innvilgelsesresultat = InnvilgelsesResultat.INNVILGET
-                    fom = LocalDate.now()
-                })
-        }
-
-
-        shouldThrow<FunksjonellException> {
-            trygdeavgiftsgrunnlagService.oppdaterTrygdeavgiftsgrunnlag(
-                BEHANDLING_ID, OppdaterTrygdeavgiftsgrunnlagRequest(emptyList(), emptyList())
-            )
-        }.message.shouldContain("Klarte ikke finne sluttdatoen på medlemskapet")
     }
 
     @Test
@@ -317,6 +456,33 @@ class TrygdeavgiftsgrunnlagServiceTest {
                 this.fom = fom
                 this.tom = tom
                 innvilgelsesresultat = InnvilgelsesResultat.INNVILGET
+            })
+            fastsattTrygdeavgift = FastsattTrygdeavgift().apply {
+                trygdeavgiftsperioder = mutableSetOf(Trygdeavgiftsperiode())
+            }
+        }
+        behandlingsresultat.medlemAvFolketrygden.fastsattTrygdeavgift.trygdeavgiftsperioder.shouldNotBeEmpty()
+
+
+        shouldThrow<FunksjonellException> {
+            trygdeavgiftsgrunnlagService.oppdaterTrygdeavgiftsgrunnlag(
+                BEHANDLING_ID,
+                OppdaterTrygdeavgiftsgrunnlagRequest(listOf(lagSkatteforholdTilNorge(fom, tom.minusDays(1))), listOf(lagInntektsperiode(fom, tom)))
+            )
+        }.message.shouldContain("Skatteforholdsperioden(e) du har lagt inn dekker ikke hele medlemskapsperioden(e)")
+    }
+
+    @Test
+    fun oppdaterTrygdeavgiftsgrunnlag_skatteforholdDekkerIkkeHelePerioden_FTRL_2_2_1_kasterFeil() {
+        val fom = LocalDate.now().minusMonths(1);
+        val tom = LocalDate.now().plusMonths(3);
+        every { mockBehandlingsresultatService.lagre(any()) } returnsArgument 0
+        behandlingsresultat.medlemAvFolketrygden = MedlemAvFolketrygden().apply {
+            medlemskapsperioder = listOf(Medlemskapsperiode().apply {
+                this.fom = fom
+                this.tom = tom
+                innvilgelsesresultat = InnvilgelsesResultat.INNVILGET
+                bestemmelse = Folketrygdloven_kap2_bestemmelser.FTRL_KAP2_2_1
             })
             fastsattTrygdeavgift = FastsattTrygdeavgift().apply {
                 trygdeavgiftsperioder = mutableSetOf(Trygdeavgiftsperiode())
@@ -682,11 +848,11 @@ class TrygdeavgiftsgrunnlagServiceTest {
         }
     }
 
-    private fun lagInntektsperiode(fom: LocalDate, tom: LocalDate): InntektskildeRequest {
-        return InntektskildeRequest(Inntektskildetype.ARBEIDSINNTEKT_FRA_NORGE, false, null, fom, tom)
+    private fun lagInntektsperiode(fom: LocalDate, tom: LocalDate?, arbeidsgiveravgiftBetales: Boolean = false): InntektskildeRequest {
+        return InntektskildeRequest(Inntektskildetype.ARBEIDSINNTEKT_FRA_NORGE, arbeidsgiveravgiftBetales, null, fom, tom)
     }
 
-    private fun lagSkatteforholdTilNorge(fom: LocalDate, tom: LocalDate): SkatteforholdTilNorgeRequest {
-        return SkatteforholdTilNorgeRequest(fom, tom, Skatteplikttype.SKATTEPLIKTIG)
+    private fun lagSkatteforholdTilNorge(fom: LocalDate, tom: LocalDate?, skatteplikttype: Skatteplikttype = Skatteplikttype.SKATTEPLIKTIG): SkatteforholdTilNorgeRequest {
+        return SkatteforholdTilNorgeRequest(fom, tom, skatteplikttype)
     }
 }
