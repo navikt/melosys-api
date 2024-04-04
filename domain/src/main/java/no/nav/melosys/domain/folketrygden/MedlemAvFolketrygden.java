@@ -92,16 +92,6 @@ public class MedlemAvFolketrygden {
             .map(Medlemskapsperiode::getTom).orElse(null);
     }
 
-
-    public Boolean harBestemmelse(Folketrygdloven_kap2_bestemmelser bestemmelse) {
-        return medlemskapsperioder.stream()
-            .filter(Medlemskapsperiode::erInnvilget)
-            .min(Comparator.comparing(Medlemskapsperiode::getFom))
-            .map(Medlemskapsperiode::getBestemmelse).orElse(null) == bestemmelse;
-    }
-
-
-
     public LocalDate utledOpphørtDato() {
         return medlemskapsperioder.stream()
             .filter(Medlemskapsperiode::erOpphørt)

@@ -258,7 +258,7 @@ class TrygdeavgiftsgrunnlagServiceTest {
             trygdeavgiftsgrunnlagService.oppdaterTrygdeavgiftsgrunnlag(
                 BEHANDLING_ID, OppdaterTrygdeavgiftsgrunnlagRequest(listOf(lagSkatteforholdTilNorge(fomDato, null, Skatteplikttype.IKKE_SKATTEPLIKTIG)), listOf(lagInntektsperiode(fomDato, tomDato, true)))
             )
-        }.message.shouldContain("Skatteforholdsperiode må ha åpen sluttdato når medlemskapsperiode har åpen sluttdato")
+        }.message.shouldContain("Faktura kan ikke opprettes for medlemskapsperiode uten sluttdato. Angi sluttdato på medlemskapsperiode")
     }
 
 
@@ -285,7 +285,7 @@ class TrygdeavgiftsgrunnlagServiceTest {
                     lagSkatteforholdTilNorge(fomDato, tomDato.plusDays(1))
                 ), listOf(lagInntektsperiode(fomDato, null)))
             )
-        }.message.shouldContain("Skatteforholdsperiode må ha åpen sluttdato når medlemskapsperiode har åpen sluttdato")
+        }.message.shouldContain("Skatteforholdsperiode/inntektsperiode kan ikke ha sluttdato når medlemskapsperiode ikke har sluttdato")
     }
 
     @Test
@@ -307,7 +307,7 @@ class TrygdeavgiftsgrunnlagServiceTest {
             trygdeavgiftsgrunnlagService.oppdaterTrygdeavgiftsgrunnlag(
                 BEHANDLING_ID, OppdaterTrygdeavgiftsgrunnlagRequest(listOf(lagSkatteforholdTilNorge(fomDato, tomDato)), listOf(lagInntektsperiode(fomDato, tomDato)))
             )
-        }.message.shouldContain("Skatteforholdsperiode må ha åpen sluttdato når medlemskapsperiode har åpen sluttdato")
+        }.message.shouldContain("Skatteforholdsperiode/inntektsperiode kan ikke ha sluttdato når medlemskapsperiode ikke har sluttdato")
     }
 
     @Test
@@ -329,7 +329,7 @@ class TrygdeavgiftsgrunnlagServiceTest {
             trygdeavgiftsgrunnlagService.oppdaterTrygdeavgiftsgrunnlag(
                 BEHANDLING_ID, OppdaterTrygdeavgiftsgrunnlagRequest(listOf(lagSkatteforholdTilNorge(fomDato, tomDato)), listOf(lagInntektsperiode(fomDato, null)))
             )
-        }.message.shouldContain("Skatteforholdsperiode må ha åpen sluttdato når medlemskapsperiode har åpen sluttdato")
+        }.message.shouldContain("Skatteforholdsperiode/inntektsperiode kan ikke ha sluttdato når medlemskapsperiode ikke har sluttdato")
     }
 
     @Test
@@ -349,9 +349,9 @@ class TrygdeavgiftsgrunnlagServiceTest {
 
         shouldThrow<FunksjonellException> {
             trygdeavgiftsgrunnlagService.oppdaterTrygdeavgiftsgrunnlag(
-                BEHANDLING_ID, OppdaterTrygdeavgiftsgrunnlagRequest(listOf(lagSkatteforholdTilNorge(fomDato, null)), listOf(lagInntektsperiode(fomDato, null)))
+                BEHANDLING_ID, OppdaterTrygdeavgiftsgrunnlagRequest(listOf(lagSkatteforholdTilNorge(fomDato, null, Skatteplikttype.IKKE_SKATTEPLIKTIG)), listOf(lagInntektsperiode(fomDato, null)))
             )
-        }.message.shouldContain("Faktura kan ikke opprettes for medlemskapsperiode med åpen sluttdato. Angi sluttdato på medlemskapsperiode")
+        }.message.shouldContain("Faktura kan ikke opprettes for medlemskapsperiode uten sluttdato. Angi sluttdato på medlemskapsperiode")
     }
 
     @Test
@@ -370,9 +370,9 @@ class TrygdeavgiftsgrunnlagServiceTest {
 
         shouldThrow<FunksjonellException> {
             trygdeavgiftsgrunnlagService.oppdaterTrygdeavgiftsgrunnlag(
-                BEHANDLING_ID, OppdaterTrygdeavgiftsgrunnlagRequest(listOf(lagSkatteforholdTilNorge(fomDato, null)), listOf(lagInntektsperiode(fomDato, null)))
+                BEHANDLING_ID, OppdaterTrygdeavgiftsgrunnlagRequest(listOf(lagSkatteforholdTilNorge(fomDato, null, Skatteplikttype.IKKE_SKATTEPLIKTIG)), listOf(lagInntektsperiode(fomDato, null)))
             )
-        }.message.shouldContain("Faktura kan ikke opprettes for medlemskapsperiode med åpen sluttdato. Angi sluttdato på medlemskapsperiode")
+        }.message.shouldContain("Faktura kan ikke opprettes for medlemskapsperiode uten sluttdato. Angi sluttdato på medlemskapsperiode")
     }
 
     @Test
@@ -388,24 +388,6 @@ class TrygdeavgiftsgrunnlagServiceTest {
                 BEHANDLING_ID, OppdaterTrygdeavgiftsgrunnlagRequest(emptyList(), emptyList())
             )
         }.message.shouldContain("Klarte ikke finne startdatoen på medlemskapet")
-    }
-
-    @Test
-    fun oppdaterTrygdeavgiftsgrunnlag_medlemskapsperiodeÅpenSluttdato_kasterFeil() {
-        behandlingsresultat.medlemAvFolketrygden = MedlemAvFolketrygden().apply {
-            medlemskapsperioder = listOf(Medlemskapsperiode()
-                .apply {
-                    innvilgelsesresultat = InnvilgelsesResultat.INNVILGET
-                    fom = LocalDate.now()
-                })
-        }
-
-
-        shouldThrow<FunksjonellException> {
-            trygdeavgiftsgrunnlagService.oppdaterTrygdeavgiftsgrunnlag(
-                BEHANDLING_ID, OppdaterTrygdeavgiftsgrunnlagRequest(emptyList(), emptyList())
-            )
-        }.message.shouldContain("Klarte ikke finne sluttdatoen på medlemskapet")
     }
 
     @Test

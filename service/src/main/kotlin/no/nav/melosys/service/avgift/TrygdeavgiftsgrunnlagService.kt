@@ -20,7 +20,6 @@ import org.springframework.stereotype.Service
 import org.springframework.transaction.annotation.Transactional
 import org.threeten.extra.LocalDateRange
 import java.time.DateTimeException
-import no.nav.melosys.domain.kodeverk.Trygdeavgiftmottaker.*
 
 @Service
 class TrygdeavgiftsgrunnlagService(private val behandlingsresultatService: BehandlingsresultatService) {
@@ -31,47 +30,14 @@ class TrygdeavgiftsgrunnlagService(private val behandlingsresultatService: Behan
     ): Trygdeavgiftsgrunnlag {
         val behandlingsresultat = behandlingsresultatService.hentBehandlingsresultat(behandlingID)
         val medlemAvFolketrygden = behandlingsresultat.medlemAvFolketrygden
-        val erFTRL_KAP_2_2_1 = medlemAvFolketrygden.harBestemmelse(Folketrygdloven_kap2_bestemmelser.FTRL_KAP2_2_1)
 
-        validerMedlemskapsperioder(medlemAvFolketrygden, erFTRL_KAP_2_2_1)
-        if(erFTRL_KAP_2_2_1) {
-            validerÅpenSluttdato(behandlingsresultat, request)
-        } else {
-            validerTrygdeavgiftsgrunnlag(request, medlemAvFolketrygden.medlemskapsperioder)
-        }
+        validerMedlemskapsperioder(medlemAvFolketrygden)
+        validerTrygdeavgiftsgrunnlag(request, medlemAvFolketrygden)
 
         fjernTrygdeavgiftsperioderOmDeFinnes(medlemAvFolketrygden.fastsattTrygdeavgift)
 
         return lagreTrygdeavgiftsgrunnlag(behandlingsresultat, request).medlemAvFolketrygden.fastsattTrygdeavgift?.trygdeavgiftsgrunnlag
             ?: throw TekniskException("Noe skjedde ved lagring av trygdeavgiftsgrunnlaget")
-    }
-
-    private fun validerÅpenSluttdato(behandlingsresultat: Behandlingsresultat, request: OppdaterTrygdeavgiftsgrunnlagRequest) {
-        val medlemAvFolketrygden = behandlingsresultat.medlemAvFolketrygden
-        val skatteforholdsperiodeHarÅpenSluttdato = request.skatteforholdTilNorgeList.sortedBy { it.fomDato }.last().tomDato == null
-        val inntektPeriodeHarÅpenSluttdato = request.inntektskilder.isEmpty() || request.inntektskilder.sortedBy { it.fomDato }.last().tomDato == null
-        val medlemskapsperiodeHarÅpenSluttdato = medlemAvFolketrygden.utledMedlemskapsperiodeTom() == null
-        val erSkattepliktigIHelePerioden = request.skatteforholdTilNorgeList.all { it.skatteplikttype.equals(Skatteplikttype.SKATTEPLIKTIG) }
-
-        if (erSkattepliktigIHelePerioden && !skatteforholdsperiodeHarÅpenSluttdato && medlemskapsperiodeHarÅpenSluttdato) {
-            throw FunksjonellException("Skatteforholdsperiode må ha åpen sluttdato når medlemskapsperiode har åpen sluttdato")
-        }
-
-        if (!erSkattepliktigIHelePerioden && !(skatteforholdsperiodeHarÅpenSluttdato && inntektPeriodeHarÅpenSluttdato) && medlemskapsperiodeHarÅpenSluttdato) {
-            throw FunksjonellException("Skatteforholdsperiode må ha åpen sluttdato når medlemskapsperiode har åpen sluttdato")
-        }
-
-        if ((skatteforholdsperiodeHarÅpenSluttdato || inntektPeriodeHarÅpenSluttdato)) {
-            val betalerKunTrygdeavgiftTilSkatt = request.skatteforholdTilNorgeList.all { it.skatteplikttype == Skatteplikttype.SKATTEPLIKTIG }
-                && request.inntektskilder.all { it.arbeidsgiversavgiftBetales || it.type == Inntektskildetype.MISJONÆR }
-            if (!betalerKunTrygdeavgiftTilSkatt) {
-                throw FunksjonellException("Faktura kan ikke opprettes for medlemskapsperiode med åpen sluttdato. Angi sluttdato på medlemskapsperiode")
-            }
-        }
-
-        if(!skatteforholdsperiodeHarÅpenSluttdato && !inntektPeriodeHarÅpenSluttdato && !medlemskapsperiodeHarÅpenSluttdato) {
-            validerTrygdeavgiftsgrunnlag(request, medlemAvFolketrygden.medlemskapsperioder)
-        }
     }
 
     private fun lagreTrygdeavgiftsgrunnlag(
@@ -93,20 +59,35 @@ class TrygdeavgiftsgrunnlagService(private val behandlingsresultatService: Behan
         fastsattTrygdeavgift?.trygdeavgiftsperioder?.clear()
     }
 
-    private fun validerMedlemskapsperioder(medlemAvFolketrygden: MedlemAvFolketrygden, sluttdatoKanVæreÅpen: Boolean) {
+    private fun validerMedlemskapsperioder(medlemAvFolketrygden: MedlemAvFolketrygden) {
         if (medlemAvFolketrygden.medlemskapsperioder.isEmpty()) {
             throw FunksjonellException("Kan ikke oppdatere trygdeavgiftsgrunnlaget før medlemskapsperioder finnes")
         }
         medlemAvFolketrygden.utledMedlemskapsperiodeFom()
             ?: throw FunksjonellException("Klarte ikke finne startdatoen på medlemskapet")
-        if(!sluttdatoKanVæreÅpen) {
-            medlemAvFolketrygden.utledMedlemskapsperiodeTom()
-                ?: throw FunksjonellException("Klarte ikke finne sluttdatoen på medlemskapet")
-        }
     }
 
-    private fun validerTrygdeavgiftsgrunnlag(request: OppdaterTrygdeavgiftsgrunnlagRequest, medlemskapsperioder: Collection<Medlemskapsperiode>) {
-        val innvilgedeMedlemskapsperioder = medlemskapsperioder.filter { it.erInnvilget() }
+    private fun validerTrygdeavgiftsgrunnlag(request: OppdaterTrygdeavgiftsgrunnlagRequest, medlemAvFolketrygden: MedlemAvFolketrygden) {
+        val medlemskapsperioderErÅpen = medlemAvFolketrygden.utledMedlemskapsperiodeTom() == null
+        val erSkattepliktigIHelePerioden = request.skatteforholdTilNorgeList.all { it.skatteplikttype == Skatteplikttype.SKATTEPLIKTIG }
+
+        if (medlemskapsperioderErÅpen) {
+            val skatteforholdsperiodeErÅpen = request.skatteforholdTilNorgeList.sortedBy { it.fomDato }.last().tomDato == null
+
+            if (erSkattepliktigIHelePerioden && !skatteforholdsperiodeErÅpen) {
+                throw FunksjonellException("Skatteforholdsperiode/inntektsperiode kan ikke ha sluttdato når medlemskapsperiode ikke har sluttdato")
+            }
+
+            if (!erSkattepliktigIHelePerioden) {
+                throw FunksjonellException("Faktura kan ikke opprettes for medlemskapsperiode uten sluttdato. Angi sluttdato på medlemskapsperiode")
+            }
+
+            if (erSkattepliktigIHelePerioden && skatteforholdsperiodeErÅpen && request.skatteforholdTilNorgeList.size == 1) {
+                return
+            }
+        }
+
+        val innvilgedeMedlemskapsperioder = medlemAvFolketrygden.medlemskapsperioder.filter { it.erInnvilget() }
 
         validerAtSkatteforholdTilNorgeDekkerInnvilgedeMedlemskapsperioderOgOverlapperIkke(
             request.skatteforholdTilNorgeList,
@@ -114,7 +95,6 @@ class TrygdeavgiftsgrunnlagService(private val behandlingsresultatService: Behan
         )
 
         val erPliktigMedlem = innvilgedeMedlemskapsperioder.all { it.medlemskapstype.equals(Medlemskapstyper.PLIKTIG) }
-        val erSkattepliktigIHelePerioden = request.skatteforholdTilNorgeList.all { it.skatteplikttype.equals(Skatteplikttype.SKATTEPLIKTIG) }
 
         if (!(erPliktigMedlem && erSkattepliktigIHelePerioden)) {
             validerAtInntekstperioderDekkerInnvilgedeMedlemskapsperioder(
