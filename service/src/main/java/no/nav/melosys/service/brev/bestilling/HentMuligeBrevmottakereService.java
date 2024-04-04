@@ -71,7 +71,7 @@ public class HentMuligeBrevmottakereService {
                                                           Mottakerroller hovedmottaker, String orgnrTilValgtArbeidsgiver,
                                                           String institusjonID) {
         return new Brevmottaker.Builder()
-            .medDokumentNavn(dokumentNavnService.utledDokumentNavnForProduserbaredokumenterOgMottakerrolle(behandling, produserbaredokumenter, hovedmottaker))
+            .medDokumentNavn(dokumentNavnService.utledDokumentNavnForProduserbartdokumentOgMottakerrolle(behandling, produserbaredokumenter, hovedmottaker))
             .medMottakerNavn(hentMottakerNavn(produserbaredokumenter, behandling, hovedmottaker, orgnrTilValgtArbeidsgiver, institusjonID))
             .medRolle(hovedmottaker)
             .build();
@@ -86,7 +86,7 @@ public class HentMuligeBrevmottakereService {
 
             String fastTekst = "Kopi til " + orgDokument.getNavn();
             brevmottakere.add(new Brevmottaker.Builder()
-                .medDokumentNavn(dokumentNavnService.utledDokumentNavnForProduserbaredokumenterOgMottaker(behandling, produserbaredokumenter, avklartMottaker, fastTekst))
+                .medDokumentNavn(dokumentNavnService.utledDokumentNavnForProduserbartdokumentOgMottaker(behandling, produserbaredokumenter, avklartMottaker, fastTekst))
                 .medMottakerNavn(orgDokument.getNavn())
                 .medRolle(avklartMottaker.getRolle())
                 .medOrgnr(orgDokument.getOrgnummer())
@@ -195,7 +195,7 @@ public class HentMuligeBrevmottakereService {
             var orgDokument = hentRettOrganisasjonsdokument(behandling, avklartKopi.getOrgnr());
             String fastTekst = avklartKopi.getRolle() == Mottakerroller.ARBEIDSGIVER ? "Kopi til arbeidsgiver" : "Kopi til arbeidsgivers fullmektig";
             brevmottakere.add(new Brevmottaker.Builder()
-                .medDokumentNavn(dokumentNavnService.utledDokumentNavnForProduserbaredokumenterOgMottaker(behandling, produserbaredokumenter, avklartKopi, fastTekst))
+                .medDokumentNavn(dokumentNavnService.utledDokumentNavnForProduserbartdokumentOgMottaker(behandling, produserbaredokumenter, avklartKopi, fastTekst))
                 .medMottakerNavn(orgDokument.getNavn())
                 .medRolle(avklartKopi.getRolle())
                 .medOrgnr(orgDokument.getOrgnummer())
@@ -211,7 +211,7 @@ public class HentMuligeBrevmottakereService {
         for (Mottaker avklartKopi : avklarteKopier) {
             String fastTekst = "Kopi til utenlandsk trygdemyndighet";
             brevmottakere.add(new Brevmottaker.Builder()
-                .medDokumentNavn(dokumentNavnService.utledDokumentNavnForProduserbaredokumenterOgMottaker(behandling, produserbaredokumenter, avklartKopi, fastTekst))
+                .medDokumentNavn(dokumentNavnService.utledDokumentNavnForProduserbartdokumentOgMottaker(behandling, produserbaredokumenter, avklartKopi, fastTekst))
                 .medMottakerNavn("Utenlandsk trygdemyndighet")
                 .medRolle(avklartKopi.getRolle())
                 .medInstitusjonID(avklartKopi.getInstitusjonID())

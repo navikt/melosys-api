@@ -1,18 +1,17 @@
 package no.nav.melosys.domain;
 
+import java.time.LocalDate;
+import java.util.Collection;
+import java.util.HashSet;
+import java.util.Objects;
+import javax.persistence.*;
+
 import no.nav.melosys.domain.avgift.Trygdeavgiftsperiode;
 import no.nav.melosys.domain.folketrygden.MedlemAvFolketrygden;
 import no.nav.melosys.domain.kodeverk.Folketrygdloven_kap2_bestemmelser;
 import no.nav.melosys.domain.kodeverk.InnvilgelsesResultat;
 import no.nav.melosys.domain.kodeverk.Medlemskapstyper;
 import no.nav.melosys.domain.kodeverk.Trygdedekninger;
-
-import javax.persistence.*;
-import java.time.LocalDate;
-import java.util.Collection;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Objects;
 
 @Entity
 @Table(name = "medlemskapsperiode")
@@ -144,6 +143,14 @@ public class Medlemskapsperiode implements ErPeriode, HarBestemmelse<Folketrygdl
 
     public boolean erAvslaatt() {
         return innvilgelsesresultat == InnvilgelsesResultat.AVSLAATT;
+    }
+
+    public boolean erFrivillig() {
+        return medlemskapstype == Medlemskapstyper.FRIVILLIG;
+    }
+
+    public boolean erPliktig() {
+        return medlemskapstype == Medlemskapstyper.PLIKTIG;
     }
 
     @Override

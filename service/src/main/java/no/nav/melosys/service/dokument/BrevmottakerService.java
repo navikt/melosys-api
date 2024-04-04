@@ -1,5 +1,7 @@
 package no.nav.melosys.service.dokument;
 
+import java.util.*;
+
 import no.nav.melosys.domain.*;
 import no.nav.melosys.domain.brev.BrevkopiRegel;
 import no.nav.melosys.domain.brev.Mottaker;
@@ -11,21 +13,17 @@ import no.nav.melosys.domain.kodeverk.brev.Produserbaredokumenter;
 import no.nav.melosys.domain.kodeverk.lovvalgsbestemmelser.Lovvalgbestemmelser_883_2004;
 import no.nav.melosys.domain.kodeverk.lovvalgsbestemmelser.trygdeavtale.Lovvalgsbestemmelser_trygdeavtale_gb;
 import no.nav.melosys.exception.FunksjonellException;
-import no.nav.melosys.exception.IkkeFunnetException;
 import no.nav.melosys.exception.TekniskException;
 import no.nav.melosys.service.LovvalgsperiodeService;
 import no.nav.melosys.service.aktoer.UtenlandskMyndighetService;
 import no.nav.melosys.service.avklartefakta.AvklarteVirksomheterService;
 import no.nav.melosys.service.behandling.BehandlingsresultatService;
-import no.nav.melosys.service.dokument.brev.mapper.BrevmottakerMapper;
+import no.nav.melosys.service.brev.bestilling.BrevMottakerMap;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-import java.util.*;
-
-import static java.util.Optional.ofNullable;
 import static no.nav.melosys.domain.Preferanse.PreferanseEnum.RESERVERT_FRA_A1;
 import static no.nav.melosys.domain.brev.BrevkopiRegel.*;
 import static no.nav.melosys.domain.kodeverk.brev.Produserbaredokumenter.*;
@@ -65,12 +63,9 @@ public class BrevmottakerService {
 
     @Transactional
     public Mottakerliste hentMottakerliste(Produserbaredokumenter produserbartdokument, long behandlingId) {
-        Mottakerliste mottakerliste = ofNullable(BrevmottakerMapper.BREV_MOTTAKER_MAP.get(produserbartdokument))
-            .orElseThrow(() -> new IkkeFunnetException("Mangler mapping av mottakere for " + produserbartdokument));
+        Mottakerliste mottakerliste = BrevMottakerMap.hentMottakerListeForProduserbartdokument(produserbartdokument);
 
-        Mottakerliste mottakerListeKopi = new Mottakerliste.Builder()
-            .medHovedMottaker(mottakerliste.getHovedMottaker())
-            .build();
+        Mottakerliste mottakerListeKopi = new Mottakerliste(mottakerliste.getHovedMottaker());
 
         if (mottakerliste.kanHaKopier()) {
             leggTilKopier(behandlingId, mottakerListeKopi, mottakerliste.getBrevkopiRegler());
