@@ -231,10 +231,9 @@ class TrygdeavgiftsgrunnlagServiceTest {
                 })
         }
         every { mockBehandlingsresultatService.lagre(any()) } returnsArgument 0
-        every { mockTrygdeavgiftMottakerService.getTrygdeavgiftMottaker(any()) } returns Trygdeavgiftmottaker.TRYGDEAVGIFT_BETALES_TIL_SKATT
 
         trygdeavgiftsgrunnlagService.oppdaterTrygdeavgiftsgrunnlag(
-            BEHANDLING_ID, OppdaterTrygdeavgiftsgrunnlagRequest(listOf(lagSkatteforholdTilNorge(fomDato, null)), listOf(lagInntektsperiode(fomDato, null)))
+            BEHANDLING_ID, OppdaterTrygdeavgiftsgrunnlagRequest(listOf(lagSkatteforholdTilNorge(fomDato, null)), listOf(lagInntektsperiode(fomDato, null, true)))
         )
 
         verify { mockBehandlingsresultatService.lagre(capture(slotBehandlingsresultat)) }
@@ -849,8 +848,8 @@ class TrygdeavgiftsgrunnlagServiceTest {
         }
     }
 
-    private fun lagInntektsperiode(fom: LocalDate, tom: LocalDate?): InntektskildeRequest {
-        return InntektskildeRequest(Inntektskildetype.ARBEIDSINNTEKT_FRA_NORGE, false, null, fom, tom)
+    private fun lagInntektsperiode(fom: LocalDate, tom: LocalDate?, arbeidsgiveravgiftBetales: Boolean = false): InntektskildeRequest {
+        return InntektskildeRequest(Inntektskildetype.ARBEIDSINNTEKT_FRA_NORGE, arbeidsgiveravgiftBetales, null, fom, tom)
     }
 
     private fun lagSkatteforholdTilNorge(fom: LocalDate, tom: LocalDate?): SkatteforholdTilNorgeRequest {
