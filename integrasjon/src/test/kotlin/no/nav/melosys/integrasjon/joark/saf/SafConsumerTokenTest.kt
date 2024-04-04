@@ -42,7 +42,7 @@ class SafConsumerTokenTest(
     fun authorizationSkalKommeFraSystem() {
         verifyHeaders(
             mapOf<String, StringValuePattern>(
-                Pair("Authorization", WireMock.equalTo("Bearer --token-from-system--")),
+                Pair("Authorization", WireMock.equalTo("Bearer --azure-token-from-system--")),
                 Pair("Nav-Consumer-Id", WireMock.equalTo("melosys"))
             )
         )
@@ -64,7 +64,7 @@ class SafConsumerTokenTest(
     fun authorizationSkalKommeFraSystemNårHverkenSystemEllerBrukerErKilde() {
         verifyHeaders(
             mapOf<String, StringValuePattern>(
-                Pair("Authorization", WireMock.equalTo("Bearer --token-from-system--")),
+                Pair("Authorization", WireMock.equalTo("Bearer --azure-token-from-system--")),
                 Pair("Nav-Consumer-Id", WireMock.equalTo("melosys"))
             )
         )

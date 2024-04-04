@@ -1,6 +1,5 @@
 package no.nav.melosys.service.sak
 
-import io.getunleash.FakeUnleash
 import io.kotest.assertions.throwables.shouldThrow
 import io.kotest.matchers.nulls.shouldNotBeNull
 import io.kotest.matchers.shouldBe
@@ -78,8 +77,7 @@ internal class EndreSakServiceTest {
             mottatteOpplysningerService,
             oppfriskSaksopplysningerService,
             applicationEventPublisher,
-            saksbehandlingRegler,
-            FakeUnleash().apply { enableAll() }
+            saksbehandlingRegler
         )
     }
 

@@ -3,7 +3,6 @@ package no.nav.melosys.integrasjon
 import com.github.tomakehurst.wiremock.WireMockServer
 import com.github.tomakehurst.wiremock.client.WireMock
 import com.github.tomakehurst.wiremock.core.WireMockConfiguration
-import com.github.tomakehurst.wiremock.matching.ContentPattern
 import io.mockk.spyk
 import no.nav.melosys.integrasjon.felles.EnvironmentHandler
 import no.nav.melosys.integrasjon.reststs.SecurityTokenServiceConsumer
@@ -17,7 +16,6 @@ class StsMockServer(
 ) {
     private val stsMockServer: WireMockServer =
         WireMockServer(WireMockConfiguration.wireMockConfig().port(mockSecurityPort))
-
     fun start() {
         stsMockServer.start()
 

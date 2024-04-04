@@ -118,6 +118,10 @@ public class DokumentproduksjonsInfoMapper {
                 new DokumentproduksjonsInfo("ikke_yrkesaktiv_frivillig_ftrl",
                     DokumentKategoriKode.VB.getKode(),
                     JournalforingsTittel.INNVILGELSE_FTRL_FRIVILLIG.getTittel()))
+            .put(PLIKTIG_MEDLEM_FTRL,
+                new DokumentproduksjonsInfo("pliktig_medlem_ftrl",
+                    DokumentKategoriKode.VB.getKode(),
+                    JournalforingsTittel.INNVILGELSE_FTRL_PLIKTIG.getTittel()))
             .put(VARSELBREV_MANGLENDE_INNBETALING,
                 new DokumentproduksjonsInfo("varsel_manglende_innbetaling",
                     DokumentKategoriKode.IB.getKode(),

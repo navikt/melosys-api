@@ -20,6 +20,7 @@ import org.xml.sax.SAXException;
 /**
  * SOAP-klient som injecter SAML-token fra Security Token Service
  */
+@Deprecated
 public class SecurityTokenServiceSTSClient extends STSClient {
 
     private final RestSTSService restSTSService;
