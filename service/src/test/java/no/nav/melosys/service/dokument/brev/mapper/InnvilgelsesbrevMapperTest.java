@@ -34,14 +34,15 @@ import no.nav.melosys.service.dokument.brev.BrevDataA1;
 import no.nav.melosys.service.dokument.brev.BrevDataInnvilgelse;
 import no.nav.melosys.service.dokument.brev.BrevbestillingDto;
 import org.junit.jupiter.api.Test;
+import org.w3c.dom.Node;
 import org.xmlunit.builder.DiffBuilder;
-import org.xmlunit.diff.Diff;
+import org.xmlunit.builder.Input;
+import org.xmlunit.diff.*;
 
 import static no.nav.melosys.service.dokument.brev.BrevDataTestUtils.*;
 import static no.nav.melosys.service.dokument.brev.mapper.BrevMappingTestUtils.lagFellesType;
 import static no.nav.melosys.service.dokument.brev.mapper.BrevMappingTestUtils.lagNAVFelles;
 import static no.nav.melosys.service.persondata.PersonopplysningerObjectFactory.lagPersonopplysninger;
-import static org.assertj.core.api.Assertions.assertThat;
 import static org.springframework.test.util.AssertionErrors.assertFalse;
 
 class InnvilgelsesbrevMapperTest {
@@ -56,13 +57,50 @@ class InnvilgelsesbrevMapperTest {
     @Test
     void mapArbeidslandFraSøknadsTilBrevXmlGirIkkeTomXmlStreng() throws Exception {
         String xmlFraFil = hentBrevXmlFraFil("innvilgelsesbrev/innvilgelsesbrev.xml");
-        assertThat(xmlFraFil).matches("(?s)<\\?xml version=\"\\d\\.\\d+\" .*>\n.*");
+        String testMapTilBrevXml = testMapTilBrevXml(lagBehandlingsresultat(Collections.singleton(lagLovvalgsperiode()),
+            Collections.singleton(lagAvklarteFakta(Avklartefaktatyper.VIRKSOMHET, "123456789"))), false);
+
+        Diff diff = createDiffIgnoreNameSpace(xmlFraFil, testMapTilBrevXml);
+
+
+        assertFalse(diff.toString(), diff.hasDifferences());
     }
 
     @Test
     void mapTilBrevXML_maritimtArbeidInnenriks_arbeidslandSettesTilTerritorialfarvannLand() throws Exception {
         String xmlFraFil = hentBrevXmlFraFil("innvilgelsesbrev/innvilgelsesbrev_territorialfarvann.xml");
-        assertThat(xmlFraFil).matches("(?s)<\\?xml version=\"\\d\\.\\d+\" .*>\n.*");
+        String testMapTilBrevXml = testMapTilBrevXml(lagBehandlingsresultat(Collections.singleton(lagLovvalgsperiode()),
+            Collections.singleton(lagAvklarteFakta(Avklartefaktatyper.VIRKSOMHET, "123456789"))), true);
+
+
+        Diff diff = createDiffIgnoreNameSpace(xmlFraFil, testMapTilBrevXml);
+
+
+        assertFalse(diff.toString(), diff.hasDifferences());
+    }
+
+    // Created with help from ChatGPT-4
+    private static Diff createDiffIgnoreNameSpace(String expectedXml, String testMapTilBrevXml) {
+        return DiffBuilder.compare(Input.fromString(expectedXml))
+            .withTest(Input.fromString(testMapTilBrevXml))
+            .ignoreWhitespace()
+            .withDifferenceEvaluator(DifferenceEvaluators.chain(
+                DifferenceEvaluators.Default,
+                (comparison, outcome) -> {
+                    if (comparison.getType() == ComparisonType.NAMESPACE_URI) {
+                        Node controlNode = comparison.getControlDetails().getTarget();
+                        Node testNode = comparison.getTestDetails().getTarget();
+                        if (controlNode != null && testNode != null && controlNode.getNodeType() == Node.ELEMENT_NODE && testNode.getNodeType() == Node.ELEMENT_NODE) {
+                            // If both nodes are elements, ignore the namespace URI difference
+                            return ComparisonResult.EQUAL;
+                        }
+                    }
+                    // For all other comparisons, return the original outcome
+                    return outcome;
+                }))
+            .withNodeFilter(node -> !node.getNodeName().endsWith(":opprettelsesDato") && !node.getNodeName().equals("opprettelsesDato"))
+            .checkForSimilar()
+            .build();
     }
 
     private String testMapTilBrevXml(Behandlingsresultat behandlingsresultat, boolean medFartsområde) throws Exception {
