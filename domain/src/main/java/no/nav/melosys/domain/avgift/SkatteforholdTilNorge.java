@@ -19,7 +19,7 @@ public class SkatteforholdTilNorge {
     @Column(name = "fom_dato", nullable = false)
     private LocalDate fomDato;
 
-    @Column(name = "tom_dato", nullable = false)
+    @Column(name = "tom_dato", nullable = true)
     private LocalDate tomDato;
 
     @Column(name = "skatteplikt_type", nullable = false)
