@@ -146,6 +146,14 @@ public class Medlemskapsperiode implements ErPeriode, HarBestemmelse<Folketrygdl
         return innvilgelsesresultat == InnvilgelsesResultat.AVSLAATT;
     }
 
+    public boolean erFrivillig() {
+        return medlemskapstype == Medlemskapstyper.FRIVILLIG;
+    }
+
+    public boolean erPliktig() {
+        return medlemskapstype == Medlemskapstyper.PLIKTIG;
+    }
+
     @Override
     public boolean equals(Object o) {
         if (this == o) return true;

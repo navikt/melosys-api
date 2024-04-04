@@ -198,7 +198,11 @@ class DokgenMalMapper(
             Produserbaredokumenter.IKKE_YRKESAKTIV_FRIVILLIG_FTRL -> innvilgelseFtrlMapper.mapIkkeYrkesaktivFrivillig(brevbestilling as InnvilgelseFtrlIkkeYrkesaktivFrivilligBrevbestilling)
 
             Produserbaredokumenter.VARSELBREV_MANGLENDE_INNBETALING -> VarselbrevManglendeInnbetaling(
-                brevbestilling as VarselbrevManglendeInnbetalingBrevbestilling
+                brevbestilling as VarselbrevManglendeInnbetalingBrevbestilling,
+                brevbestilling.behandling.opprinneligBehandling?.id?.let {
+                    val behandlingsresultat = dokgenMapperDatahenter.hentBehandlingsresultat(it)
+                    behandlingsresultat.medlemAvFolketrygden?.medlemskapsperioder?.firstOrNull()?.medlemskapstype
+                } ?: throw FunksjonellException("Forventer at behandling som tilhører varselbrevet har en opprinnelig behandling med medlemskapsperioder")
             )
 
             Produserbaredokumenter.VEDTAK_OPPHOERT_MEDLEMSKAP -> VedtakOpphoertMedlemskap(brevbestilling as VedtakOpphoertMedlemskapBrevbestilling)
