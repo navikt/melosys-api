@@ -42,7 +42,7 @@ class TrygdeavgiftsgrunnlagService(private val behandlingsresultatService: Behan
 
         fjernTrygdeavgiftsperioderOmDeFinnes(medlemAvFolketrygden.fastsattTrygdeavgift)
 
-        return lagreTrygdeavgiftsgrunnlag(lagTrygdeavgiftsgrunnlag(behandlingsresultat, request)).medlemAvFolketrygden.fastsattTrygdeavgift?.trygdeavgiftsgrunnlag
+        return lagreTrygdeavgiftsgrunnlag(behandlingsresultat, request).medlemAvFolketrygden.fastsattTrygdeavgift?.trygdeavgiftsgrunnlag
             ?: throw TekniskException("Noe skjedde ved lagring av trygdeavgiftsgrunnlaget")
     }
 
@@ -74,24 +74,18 @@ class TrygdeavgiftsgrunnlagService(private val behandlingsresultatService: Behan
         }
     }
 
-    private fun lagTrygdeavgiftsgrunnlag(
+    private fun lagreTrygdeavgiftsgrunnlag(
         behandlingsresultat: Behandlingsresultat,
         request: OppdaterTrygdeavgiftsgrunnlagRequest
     ): Behandlingsresultat {
         val medlemAvFolketrygden = behandlingsresultat.medlemAvFolketrygden
-
         medlemAvFolketrygden.fastsattTrygdeavgift = eksisterendeEllerNyFastsattTrygdeavgift(medlemAvFolketrygden)
         medlemAvFolketrygden.fastsattTrygdeavgift.trygdeavgiftsgrunnlag =
             eksisterendeEllerNyttTrygdeavgiftsgrunnlag(medlemAvFolketrygden).apply {
                 this.skatteforholdTilNorge = lagSkatteforholdTilNorge(request)
                 this.inntektsperioder = lagInntektsperioder(request)
             }
-        return behandlingsresultat
-    }
 
-    private fun lagreTrygdeavgiftsgrunnlag(
-        behandlingsresultat: Behandlingsresultat,
-    ): Behandlingsresultat {
         return behandlingsresultatService.lagre(behandlingsresultat)
     }
 
@@ -201,7 +195,7 @@ class TrygdeavgiftsgrunnlagService(private val behandlingsresultatService: Behan
             val request = OppdaterTrygdeavgiftsgrunnlagRequest(
                 opprinneligTrygdeavgiftsgrunnlag.skatteforholdTilNorge.map { SkatteforholdTilNorgeRequest(it) },
                 opprinneligTrygdeavgiftsgrunnlag.inntektsperioder.map { InntektskildeRequest(it) })
-            return lagreTrygdeavgiftsgrunnlag(lagTrygdeavgiftsgrunnlag(behandlingsresultat, request)).medlemAvFolketrygden.fastsattTrygdeavgift?.trygdeavgiftsgrunnlag
+            return lagreTrygdeavgiftsgrunnlag(behandlingsresultat, request).medlemAvFolketrygden.fastsattTrygdeavgift?.trygdeavgiftsgrunnlag
                 ?: throw TekniskException("Klarte ikke lagre opprinnelig behandlings trygdeavgiftsgrunnlag")
         }
 
