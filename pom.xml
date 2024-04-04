@@ -42,7 +42,7 @@
 
         <!-- Melosys -->
         <melosys.internt.kodeverk.version>5.15.258</melosys.internt.kodeverk.version>
-        <melosys.brev.version>1.2.148</melosys.brev.version>
+        <melosys.brev.version>1.2.154-midlertidig</melosys.brev.version>
 
 
         <!-- NAV -->
@@ -543,7 +543,7 @@
             <!-- Dokumenthåndtering (DOKPROD) -->
             <dependency>
                 <groupId>no.nav.dok.metaforcemal</groupId>
-                <artifactId>melosysbrev</artifactId>
+                <artifactId>melosysbrev-midlertidig</artifactId>
                 <version>${melosys.brev.version}</version>
                 <exclusions>
                     <exclusion>
@@ -554,13 +554,13 @@
             </dependency>
             <dependency>
                 <groupId>no.nav.dok.metaforcemal</groupId>
-                <artifactId>melosysbrev</artifactId>
+                <artifactId>melosysbrev-midlertidig</artifactId>
                 <classifier>jaxb</classifier>
                 <version>${melosys.brev.version}</version>
             </dependency>
             <dependency>
                 <groupId>no.nav.dok.metaforcemal</groupId>
-                <artifactId>melosysbrev</artifactId>
+                <artifactId>melosysbrev-midlertidig</artifactId>
                 <classifier>jaxb-sources</classifier>
                 <version>${melosys.brev.version}</version>
             </dependency>
