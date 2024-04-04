@@ -201,9 +201,7 @@ class TrygdeavgiftsgrunnlagService(private val behandlingsresultatService: Behan
             val request = OppdaterTrygdeavgiftsgrunnlagRequest(
                 opprinneligTrygdeavgiftsgrunnlag.skatteforholdTilNorge.map { SkatteforholdTilNorgeRequest(it) },
                 opprinneligTrygdeavgiftsgrunnlag.inntektsperioder.map { InntektskildeRequest(it) })
-
-            val midlertidigBehandlingsresultat = lagTrygdeavgiftsgrunnlag(behandlingsresultat, request)
-            return lagreTrygdeavgiftsgrunnlag(midlertidigBehandlingsresultat).medlemAvFolketrygden.fastsattTrygdeavgift?.trygdeavgiftsgrunnlag
+            return lagreTrygdeavgiftsgrunnlag(lagTrygdeavgiftsgrunnlag(behandlingsresultat, request)).medlemAvFolketrygden.fastsattTrygdeavgift?.trygdeavgiftsgrunnlag
                 ?: throw TekniskException("Klarte ikke lagre opprinnelig behandlings trygdeavgiftsgrunnlag")
         }
 
