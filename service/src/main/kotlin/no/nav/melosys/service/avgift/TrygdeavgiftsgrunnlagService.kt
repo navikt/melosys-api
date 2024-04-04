@@ -57,10 +57,6 @@ class TrygdeavgiftsgrunnlagService(private val behandlingsresultatService: Behan
             throw FunksjonellException("Skatteforholdsperiode må ha åpen sluttdato når medlemskapsperiode har åpen sluttdato")
         }
 
-        if (erSkattepliktigIHelePerioden && !inntektPeriodeHarÅpenSluttdato && medlemskapsperiodeHarÅpenSluttdato) {
-            throw FunksjonellException("Inntektskildeperiode må ha åpen sluttdato når medlemskapsperiode har åpen sluttdato")
-        }
-
         if (!erSkattepliktigIHelePerioden && !(skatteforholdsperiodeHarÅpenSluttdato && inntektPeriodeHarÅpenSluttdato) && medlemskapsperiodeHarÅpenSluttdato) {
             throw FunksjonellException("Skatteforholdsperiode må ha åpen sluttdato når medlemskapsperiode har åpen sluttdato")
         }
@@ -71,6 +67,10 @@ class TrygdeavgiftsgrunnlagService(private val behandlingsresultatService: Behan
             if (!betalerKunTrygdeavgiftTilSkatt) {
                 throw FunksjonellException("Faktura kan ikke opprettes for medlemskapsperiode med åpen sluttdato. Angi sluttdato på medlemskapsperiode")
             }
+        }
+
+        if(!skatteforholdsperiodeHarÅpenSluttdato && !inntektPeriodeHarÅpenSluttdato && !medlemskapsperiodeHarÅpenSluttdato) {
+            validerTrygdeavgiftsgrunnlag(request, medlemAvFolketrygden.medlemskapsperioder)
         }
     }
 
