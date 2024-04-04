@@ -48,8 +48,8 @@ class TrygdeavgiftsgrunnlagService(private val behandlingsresultatService: Behan
 
     private fun validerÅpenSluttdato(behandlingsresultat: Behandlingsresultat, request: OppdaterTrygdeavgiftsgrunnlagRequest) {
         val medlemAvFolketrygden = behandlingsresultat.medlemAvFolketrygden
-        val skatteforholdsperiodeHarÅpenSluttdato = request.skatteforholdTilNorgeList.last().tomDato == null
-        val inntektPeriodeHarÅpenSluttdato = request.inntektskilder.isEmpty() || request.inntektskilder.last().tomDato == null
+        val skatteforholdsperiodeHarÅpenSluttdato = request.skatteforholdTilNorgeList.sortedBy { it.fomDato }.last().tomDato == null
+        val inntektPeriodeHarÅpenSluttdato = request.inntektskilder.isEmpty() || request.inntektskilder.sortedBy { it.fomDato }.last().tomDato == null
         val medlemskapsperiodeHarÅpenSluttdato = medlemAvFolketrygden.utledMedlemskapsperiodeTom() == null
         val erSkattepliktigIHelePerioden = request.skatteforholdTilNorgeList.all { it.skatteplikttype.equals(Skatteplikttype.SKATTEPLIKTIG) }
 
@@ -66,16 +66,11 @@ class TrygdeavgiftsgrunnlagService(private val behandlingsresultatService: Behan
         }
 
         if ((skatteforholdsperiodeHarÅpenSluttdato || inntektPeriodeHarÅpenSluttdato)) {
-            val midlertidigBehandlingsresultat = lagTrygdeavgiftsgrunnlag(behandlingsresultat, request)
-            val trygdeavgiftsGrunnlag = midlertidigBehandlingsresultat.medlemAvFolketrygden.fastsattTrygdeavgift.trygdeavgiftsgrunnlag
-            validerFakturaMottaker(trygdeavgiftsGrunnlag)
-        }
-    }
-
-    private fun validerFakturaMottaker(trygdeavgiftsGrunnlag: Trygdeavgiftsgrunnlag) {
-        val trygdeavgiftMottaker = trygdeavgiftMottakerService.getTrygdeavgiftMottaker(trygdeavgiftsGrunnlag)
-        if(trygdeavgiftMottaker == TRYGDEAVGIFT_BETALES_TIL_NAV || trygdeavgiftMottaker == TRYGDEAVGIFT_BETALES_TIL_NAV_OG_SKATT){
-            throw FunksjonellException("Faktura kan ikke opprettes for medlemskapsperiode med åpen sluttdato. Angi sluttdato på medlemskapsperiode")
+            val betalerKunTrygdeavgiftTilSkatt = request.skatteforholdTilNorgeList.all { it.skatteplikttype == Skatteplikttype.SKATTEPLIKTIG }
+                && request.inntektskilder.all { it.arbeidsgiversavgiftBetales || it.type == Inntektskildetype.MISJONÆR }
+            if (!betalerKunTrygdeavgiftTilSkatt) {
+                throw FunksjonellException("Faktura kan ikke opprettes for medlemskapsperiode med åpen sluttdato. Angi sluttdato på medlemskapsperiode")
+            }
         }
     }
 
