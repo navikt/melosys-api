@@ -215,6 +215,7 @@ internal class InnvilgelseFtrlYrkesaktivFrivilligMapperTest {
                     medlemskapstype = Medlemskapstyper.FRIVILLIG
                     trygdedekning = Trygdedekninger.FTRL_2_9_FØRSTE_LEDD_A_HELSE
                     medlemAvFolketrygden = behandlingsresultat.medlemAvFolketrygden
+                    bestemmelse = Folketrygdloven_kap2_bestemmelser.FTRL_KAP2_2_8_FØRSTE_LEDD_A
                 }
             )
         }
