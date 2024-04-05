@@ -87,7 +87,12 @@ class FtrlVedtakServiceTest {
 
     @Test
     fun fattVedtak_Førstegangsvedtak_fatterVedtak() {
-        every { behandlingsresultatService.hentBehandlingsresultat(BEH_ID) } returns Behandlingsresultat()
+        every { behandlingsresultatService.hentBehandlingsresultat(BEH_ID) } returns Behandlingsresultat().apply {
+            medlemAvFolketrygden = MedlemAvFolketrygden().apply {
+                addMedlemskapsperiode(Medlemskapsperiode().apply { medlemskapstype = Medlemskapstyper.FRIVILLIG })
+            }
+        }
+        every { behandlingsresultatService.lagre(any()) } returnsArgument 0
         val request = lagFattVedtakRequest(
             type = Behandlingsresultattyper.MEDLEM_I_FOLKETRYGDEN,
             innledningFritekst = "Innledning",
@@ -132,7 +137,7 @@ class FtrlVedtakServiceTest {
     }
 
     @Test
-    fun fattVedtak_ikkeYrkesAktivFrivllig_senderRiktigBrevType() {
+    fun fattVedtak_ikkeYrkesaktivFrivllig_senderRiktigBrevType() {
         val behandling = lagBehandling()
         behandling.tema = Behandlingstema.IKKE_YRKESAKTIV
         val behandlingsresultat = Behandlingsresultat()
@@ -441,5 +446,6 @@ class FtrlVedtakServiceTest {
         Behandling().apply {
             id = BEH_ID
             fagsak = Fagsak().apply { saksnummer = SAKSNUMMER }
+            tema = Behandlingstema.YRKESAKTIV
         }
 }
