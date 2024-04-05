@@ -81,20 +81,24 @@ public class MedlemAvFolketrygden {
         return medlemskapsperioder.stream()
             .filter(Medlemskapsperiode::erInnvilget)
             .min(Comparator.comparing(Medlemskapsperiode::getFom))
-            .map(Medlemskapsperiode::getFom).orElse(null);
+            .map(Medlemskapsperiode::getFom)
+            .orElse(null);
     }
 
     public LocalDate utledMedlemskapsperiodeTom() {
         return medlemskapsperioder.stream()
             .filter(Medlemskapsperiode::erInnvilget)
+            .filter(medlemskapsperiode -> medlemskapsperiode.getTom() != null)
             .max(Comparator.comparing(Medlemskapsperiode::getTom))
-            .map(Medlemskapsperiode::getTom).orElse(null);
+            .map(Medlemskapsperiode::getTom)
+            .orElse(null);
     }
 
     public LocalDate utledOpphørtDato() {
         return medlemskapsperioder.stream()
             .filter(Medlemskapsperiode::erOpphørt)
             .min(Comparator.comparing(Medlemskapsperiode::getFom))
-            .map(Medlemskapsperiode::getFom).orElse(null);
+            .map(Medlemskapsperiode::getFom)
+            .orElse(null);
     }
 }
