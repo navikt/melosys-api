@@ -27,7 +27,6 @@ import no.nav.melosys.domain.person.Persondata;
         @JsonSubTypes.Type(value = FritekstvedleggBrevbestilling.class),
         @JsonSubTypes.Type(value = IkkeYrkesaktivBrevbestilling.class),
         @JsonSubTypes.Type(value = InnvilgelseFtrlYrkesaktivFrivilligBrevbestilling.class),
-        @JsonSubTypes.Type(value = InnvilgelseFtrlYrkesaktivPliktigBrevbestilling.class),
         @JsonSubTypes.Type(value = VarselbrevManglendeInnbetalingBrevbestilling.class),
         @JsonSubTypes.Type(value = VedtakOpphoertMedlemskapBrevbestilling.class)
     }

@@ -11,7 +11,7 @@ data class InntekskildeDto(
     val arbeidsgiversavgiftBetales: Boolean,
     val avgiftspliktigInntektMnd: BigDecimal?,
     val fomDato: LocalDate,
-    val tomDato: LocalDate,
+    val tomDato: LocalDate?,
 ) {
     constructor(inntektsperiode: Inntektsperiode) : this(
         inntektsperiode.type,

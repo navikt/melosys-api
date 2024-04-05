@@ -198,16 +198,18 @@ class DokgenMalMapper(
             Produserbaredokumenter.IKKE_YRKESAKTIV_FRIVILLIG_FTRL -> innvilgelseFtrlMapper.mapIkkeYrkesaktivFrivillig(brevbestilling)
 
             Produserbaredokumenter.VARSELBREV_MANGLENDE_INNBETALING -> VarselbrevManglendeInnbetaling(
-                brevbestilling as VarselbrevManglendeInnbetalingBrevbestilling
+                brevbestilling as VarselbrevManglendeInnbetalingBrevbestilling,
+                brevbestilling.behandling.opprinneligBehandling?.id?.let {
+                    val behandlingsresultat = dokgenMapperDatahenter.hentBehandlingsresultat(it)
+                    behandlingsresultat.medlemAvFolketrygden?.medlemskapsperioder?.firstOrNull()?.medlemskapstype
+                } ?: throw FunksjonellException("Forventer at behandling som tilhører varselbrevet har en opprinnelig behandling med medlemskapsperioder")
             )
 
             Produserbaredokumenter.VEDTAK_OPPHOERT_MEDLEMSKAP -> VedtakOpphoertMedlemskap(brevbestilling as VedtakOpphoertMedlemskapBrevbestilling)
 
             Produserbaredokumenter.IKKE_YRKESAKTIV_PLIKTIG_FTRL -> innvilgelseFtrlMapper.mapIkkeYrkesaktivPliktig(brevbestilling)
 
-            Produserbaredokumenter.PLIKTIG_MEDLEM_FTRL -> innvilgelseFtrlMapper.mapYrkesaktivPliktig(
-                brevbestilling as InnvilgelseFtrlYrkesaktivPliktigBrevbestilling
-            )
+            Produserbaredokumenter.PLIKTIG_MEDLEM_FTRL -> innvilgelseFtrlMapper.mapYrkesaktivPliktig(brevbestilling)
 
             else -> throw FunksjonellException("ProduserbartDokument ${brevbestilling.produserbartdokument} er ikke støttet av melosys-dokgen")
         }

@@ -1,7 +1,6 @@
 package no.nav.melosys.service.dokument.brev.mapper;
 
 import java.util.HashSet;
-import java.util.Map;
 import java.util.Set;
 
 import com.google.common.collect.ImmutableMap;
@@ -10,7 +9,6 @@ import no.nav.melosys.domain.kodeverk.brev.Produserbaredokumenter;
 import no.nav.melosys.exception.FunksjonellException;
 import no.nav.melosys.integrasjon.joark.DokumentKategoriKode;
 import no.nav.melosys.service.dokument.DokumentproduksjonsInfo;
-import no.nav.melosys.service.dokument.VedleggTyper;
 import org.springframework.stereotype.Component;
 
 import static java.lang.String.format;
@@ -45,55 +43,61 @@ public class DokumentproduksjonsInfoMapper {
             .put(INNVILGELSE_FOLKETRYGDLOVEN,
                 new DokumentproduksjonsInfo("innvilgelse_ftrl",
                     DokumentKategoriKode.VB.getKode(),
-                    JournalforingsTittel.INNVILGELSE_FTRL.getTittel())
+                    JournalforingsTittel.INNVILGELSE_FTRL_FRIVILLIG.getTittel())
             )
             .put(VEDTAK_OPPHOERT_MEDLEMSKAP,
                 new DokumentproduksjonsInfo("vedtak_opphoert_medlemskap",
                     DokumentKategoriKode.VB.getKode(),
-                    JournalforingsTittel.VEDTAK_OPPHOERT_MEDLEMSKAP.getTittel())
+                    VEDTAK_OPPHOERT_MEDLEMSKAP.getBeskrivelse())
             )
             .put(TRYGDEAVTALE_GB,
                 new DokumentproduksjonsInfo("trygdeavtale_gb",
                     DokumentKategoriKode.VB.getKode(),
                     JournalforingsTittel.TRYGDEAVTALE.getTittel(),
-                    Map.of(VedleggTyper.VEDTAKSBREV, JournalforingsTittel.TRYGDEAVTALE_VEDTAKSBREV.getTittel(),
-                        VedleggTyper.ATTEST, JournalforingsTittel.TRYGDEAVTALE_ATTEST.getTittel())))
+                    JournalforingsTittel.TRYGDEAVTALE_VEDTAKSBREV.getTittel(),
+                    JournalforingsTittel.TRYGDEAVTALE_ATTEST.getTittel()))
             .put(TRYGDEAVTALE_US,
                 new DokumentproduksjonsInfo("trygdeavtale_us",
                     DokumentKategoriKode.VB.getKode(),
                     JournalforingsTittel.TRYGDEAVTALE.getTittel(),
-                    Map.of(VedleggTyper.VEDTAKSBREV, JournalforingsTittel.TRYGDEAVTALE_VEDTAKSBREV.getTittel(),
-                        VedleggTyper.ATTEST, JournalforingsTittel.TRYGDEAVTALE_ATTEST.getTittel())))
+                    JournalforingsTittel.TRYGDEAVTALE_VEDTAKSBREV.getTittel(),
+                    JournalforingsTittel.TRYGDEAVTALE_ATTEST.getTittel()))
             .put(TRYGDEAVTALE_CAN,
                 new DokumentproduksjonsInfo("trygdeavtale_ca",
                     DokumentKategoriKode.VB.getKode(),
                     JournalforingsTittel.TRYGDEAVTALE.getTittel(),
-                    Map.of(VedleggTyper.VEDTAKSBREV, JournalforingsTittel.TRYGDEAVTALE_VEDTAKSBREV.getTittel(),
-                        VedleggTyper.ATTEST, JournalforingsTittel.TRYGDEAVTALE_ATTEST.getTittel())))
+                    JournalforingsTittel.TRYGDEAVTALE_VEDTAKSBREV.getTittel(),
+                    JournalforingsTittel.TRYGDEAVTALE_ATTEST.getTittel()))
             .put(TRYGDEAVTALE_AU,
                 new DokumentproduksjonsInfo("trygdeavtale_au",
                     DokumentKategoriKode.VB.getKode(),
                     JournalforingsTittel.TRYGDEAVTALE.getTittel(),
-                    Map.of(VedleggTyper.VEDTAKSBREV, JournalforingsTittel.TRYGDEAVTALE_VEDTAKSBREV.getTittel(),
-                        VedleggTyper.ATTEST, JournalforingsTittel.TRYGDEAVTALE_ATTEST.getTittel())))
+                    JournalforingsTittel.TRYGDEAVTALE_VEDTAKSBREV.getTittel(),
+                    JournalforingsTittel.TRYGDEAVTALE_ATTEST.getTittel()))
             .put(GENERELT_FRITEKSTBREV_BRUKER,
                 new DokumentproduksjonsInfo("fritekstbrev",
-                    DokumentKategoriKode.IB.getKode()))
+                    DokumentKategoriKode.IB.getKode(),
+                    GENERELT_FRITEKSTBREV_BRUKER.getBeskrivelse()))
             .put(GENERELT_FRITEKSTBREV_VIRKSOMHET,
                 new DokumentproduksjonsInfo("fritekstbrev",
-                    DokumentKategoriKode.IB.getKode()))
+                    DokumentKategoriKode.IB.getKode(),
+                    GENERELT_FRITEKSTBREV_VIRKSOMHET.getBeskrivelse()))
             .put(GENERELT_FRITEKSTBREV_ARBEIDSGIVER,
                 new DokumentproduksjonsInfo("fritekstbrev",
-                    DokumentKategoriKode.IB.getKode()))
+                    DokumentKategoriKode.IB.getKode(),
+                    GENERELT_FRITEKSTBREV_ARBEIDSGIVER.getBeskrivelse()))
             .put(FRITEKSTBREV,
                 new DokumentproduksjonsInfo("fritekstbrev",
-                    DokumentKategoriKode.IB.getKode()))
+                    DokumentKategoriKode.IB.getKode(),
+                    FRITEKSTBREV.getBeskrivelse()))
             .put(GENERELT_FRITEKSTVEDLEGG,
                 new DokumentproduksjonsInfo("fritekstvedlegg",
-                    DokumentKategoriKode.IB.getKode()))
+                    DokumentKategoriKode.IB.getKode(),
+                    GENERELT_FRITEKSTVEDLEGG.getBeskrivelse()))
             .put(UTENLANDSK_TRYGDEMYNDIGHET_FRITEKSTBREV,
                 new DokumentproduksjonsInfo("trygdeavtale_fritekstbrev",
-                    DokumentKategoriKode.IB.getKode()))
+                    DokumentKategoriKode.IB.getKode(),
+                    UTENLANDSK_TRYGDEMYNDIGHET_FRITEKSTBREV.getBeskrivelse()))
             .put(AVSLAG_MANGLENDE_OPPLYSNINGER,
                 new DokumentproduksjonsInfo("avslag_manglende_opplysninger",
                     DokumentKategoriKode.VB.getKode(),
@@ -109,19 +113,20 @@ public class DokumentproduksjonsInfoMapper {
             .put(IKKE_YRKESAKTIV_PLIKTIG_FTRL,
                 new DokumentproduksjonsInfo("ikke_yrkesaktiv_pliktig_ftrl",
                     DokumentKategoriKode.VB.getKode(),
-                    JournalforingsTittel.IKKE_YRKESAKTIV_PLIKTIG_FTRL.getTittel()))
+                    JournalforingsTittel.INNVILGELSE_FTRL_PLIKTIG.getTittel()))
             .put(IKKE_YRKESAKTIV_FRIVILLIG_FTRL,
                 new DokumentproduksjonsInfo("ikke_yrkesaktiv_frivillig_ftrl",
                     DokumentKategoriKode.VB.getKode(),
-                    JournalforingsTittel.IKKE_YRKESAKTIV_FRIVILLIG_FTRL.getTittel()))
+                    JournalforingsTittel.INNVILGELSE_FTRL_FRIVILLIG.getTittel()))
             .put(PLIKTIG_MEDLEM_FTRL,
                 new DokumentproduksjonsInfo("pliktig_medlem_ftrl",
                     DokumentKategoriKode.VB.getKode(),
-                    JournalforingsTittel.PLIKTIG_MEDLEM_FTRL.getTittel()))
+                    JournalforingsTittel.INNVILGELSE_FTRL_PLIKTIG.getTittel()))
             .put(VARSELBREV_MANGLENDE_INNBETALING,
                 new DokumentproduksjonsInfo("varsel_manglende_innbetaling",
                     DokumentKategoriKode.IB.getKode(),
-                    JournalforingsTittel.VARSELBREV_MANGLENDE_INNBETALING.getTittel()))
+                    JournalforingsTittel.MELDING_MANGLENDE_INNBETALING.getTittel(),
+                    JournalforingsTittel.VARSEL_OPPHØRT_MEDLEMSKAP.getTittel()))
             .build());
     }
 
@@ -151,18 +156,16 @@ public class DokumentproduksjonsInfoMapper {
     private enum JournalforingsTittel {
         FORVALTNINGSMELDING("Melding om forventet saksbehandlingstid"),
         MANGELBREV("Melding om manglende opplysninger"),
-        INNVILGELSE_FTRL("Vedtak om frivillig medlemskap"),
-        VEDTAK_OPPHOERT_MEDLEMSKAP("Vedtak om opphør av frivillig medlemskap"),
+        INNVILGELSE_FTRL_FRIVILLIG("Vedtak om frivillig medlemskap"),
+        INNVILGELSE_FTRL_PLIKTIG("Vedtak om pliktig medlemskap"),
         TRYGDEAVTALE("Vedtak om medlemskap, Attest for medlemskap i folketrygden"),
         TRYGDEAVTALE_VEDTAKSBREV("Vedtak om medlemskap"),
         TRYGDEAVTALE_ATTEST("Attest for medlemskap i folketrygden"),
         AVSLAG_MANGLENDE_OPPLYSNINGER("Avslag pga manglende opplysninger"),
         MELDING_HENLAGT_SAK("Henleggelse av søknad"),
         IKKE_YRKESAKTIV_VEDTAKSBREV("Vedtak om medlemskap"),
-        IKKE_YRKESAKTIV_FRIVILLIG_FTRL("Vedtak om frivillig medlemskap"),
-        IKKE_YRKESAKTIV_PLIKTIG_FTRL("Vedtak om pliktig medlemskap"),
-        PLIKTIG_MEDLEM_FTRL("Vedtak om pliktig medlemskap"),
-        VARSELBREV_MANGLENDE_INNBETALING("Varsel om manglende innbetaling av trygdeavgift");
+        MELDING_MANGLENDE_INNBETALING("Melding om manglende innbetaling av trygdeavgift"),
+        VARSEL_OPPHØRT_MEDLEMSKAP("Varsel om opphør av frivillig medlemskap");
 
         private final String tittel;
 

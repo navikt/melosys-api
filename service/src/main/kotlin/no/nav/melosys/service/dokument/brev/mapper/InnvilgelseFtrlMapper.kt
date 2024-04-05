@@ -5,7 +5,6 @@ import no.nav.melosys.domain.Medlemskapsperiode
 import no.nav.melosys.domain.Vilkaarsresultat
 import no.nav.melosys.domain.brev.DokgenBrevbestilling
 import no.nav.melosys.domain.avklartefakta.Avklartefakta
-import no.nav.melosys.domain.brev.InnvilgelseFtrlYrkesaktivPliktigBrevbestilling
 import no.nav.melosys.domain.brev.InnvilgelseFtrlYrkesaktivFrivilligBrevbestilling
 import no.nav.melosys.domain.dokument.felles.Periode
 import no.nav.melosys.domain.folketrygden.MedlemAvFolketrygden
@@ -117,33 +116,32 @@ class InnvilgelseFtrlMapper(
         )
     }
 
-    internal fun mapYrkesaktivPliktig(brevbestilling: InnvilgelseFtrlYrkesaktivPliktigBrevbestilling): InnvilgelseYrkesaktivPliktigFtrl {
-        val behandlingsresultat = dokgenMapperDatahenter.hentBehandlingsresultat(brevbestilling.behandlingId)
+    internal fun mapYrkesaktivPliktig(brevbestilling: DokgenBrevbestilling): InnvilgelseYrkesaktivPliktigFtrl {
+        val behandling = brevbestilling.behandling
+        val behandlingsresultat = dokgenMapperDatahenter.hentBehandlingsresultat(behandling.id)
         val medlemAvFolketrygden = behandlingsresultat.medlemAvFolketrygden
-        val søknadsland = behandlingsresultat.behandling.mottatteOpplysninger.mottatteOpplysningerData.soeknadsland
+        val søknadsland = behandling.mottatteOpplysninger.mottatteOpplysningerData.soeknadsland
         val medlemskapsperiode = medlemAvFolketrygden.medlemskapsperioder.single()
-        val harLavSatsPgaAlder = harLavSatsPgaAlderIMinstEnPeriode(
-            dokgenMapperDatahenter.hentPersondata(behandlingsresultat.behandling).fødselsdato, medlemskapsperiode)
-
+        val harLavSatsPgaAlder = harLavSatsPgaAlderIMinstEnPeriode(dokgenMapperDatahenter.hentPersondata(behandling).fødselsdato, medlemskapsperiode)
 
         return InnvilgelseYrkesaktivPliktigFtrl(
-            harLavSatsPgaAlder = harLavSatsPgaAlder,
-            arbeidssituasjontype = hentArbeidsSituasjonsType(behandlingsresultat.avklartefakta),
             brevbestilling = brevbestilling,
-            behandlingstype = behandlingsresultat.behandling.type,
+            behandlingstype = behandling.type,
             avgiftsperioder = mapAvgiftsPerioder(medlemAvFolketrygden),
             medlemskapsperiode = mapMedlemskapsPerioder(medlemAvFolketrygden).single(),
             bestemmelse = medlemskapsperiode.bestemmelse,
+            harLavSatsPgaAlder = harLavSatsPgaAlder,
+            arbeidssituasjontype = hentArbeidsSituasjonsType(behandlingsresultat.avklartefakta),
             trygdeavgiftMottaker = trygdeavgiftMottakerService.getTrygdeavgiftMottaker(medlemAvFolketrygden.fastsattTrygdeavgift.trygdeavgiftsgrunnlag),
-            fullmektigTrygdeavgift = finnFullmektigTrygdeavgift(behandlingsresultat.behandling),
+            fullmektigTrygdeavgift = finnFullmektigTrygdeavgift(behandling),
             skatteplikttype = medlemAvFolketrygden.utledSkatteplikttype(),
             begrunnelse = hentBegrunnelse(behandlingsresultat.vilkaarsresultater),
             begrunnelseAnnenGrunnFritekst = hentSaerligBegrunnelseFritekst(behandlingsresultat.vilkaarsresultater),
-            nyVurderingBakgrunn = brevbestilling.innvilgelseNyVurderingBakgrunn,
-            innledningFritekst = brevbestilling.innledningFritekst,
-            begrunnelseFritekst = brevbestilling.begrunnelseFritekst,
-            trygdeavgiftFritekst = brevbestilling.trygdeavgiftFritekst,
-            arbeidsgivere = hentArbeidsgivere(brevbestilling.behandling),
+            nyVurderingBakgrunn = behandlingsresultat.nyVurderingBakgrunn,
+            innledningFritekst = behandlingsresultat.innledningFritekst,
+            begrunnelseFritekst = behandlingsresultat.begrunnelseFritekst,
+            trygdeavgiftFritekst = behandlingsresultat.trygdeavgiftFritekst,
+            arbeidsgivere = hentArbeidsgivere(behandling),
             flereLandUkjentHvilke = søknadsland.isFlereLandUkjentHvilke,
             land = søknadsland.landkoder.map { dokgenMapperDatahenter.hentLandnavnFraLandkode(it) },
             trygdeavtaleLand = mapTrygdeavtaleLand(søknadsland.landkoder),
