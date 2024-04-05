@@ -369,13 +369,12 @@ internal class DokgenMalMapperTest {
         every { mockInnvilgelseFtrlMapper.mapYrkesaktivPliktig(any()) } returns lagInnvilgelseFtrlPliktig()
 
         val behandling = DokgenTestData.lagBehandling(DokgenTestData.lagFagsak(true))
-        val brevbestilling: DokgenBrevbestilling = InnvilgelseFtrlYrkesaktivPliktigBrevbestilling.Builder()
+        val brevbestilling: DokgenBrevbestilling = DokgenBrevbestilling.Builder()
             .medProduserbartdokument(Produserbaredokumenter.PLIKTIG_MEDLEM_FTRL)
             .medBehandling(behandling)
             .medOrg(DokgenTestData.lagOrg())
             .medKontaktopplysning(DokgenTestData.lagKontaktOpplysning())
             .medForsendelseMottatt(Instant.now())
-            .medInnledningFritekst("Dummy")
             .build()
 
         dokgenMalMapper.mapBehandling(
@@ -649,11 +648,16 @@ internal class DokgenMalMapperTest {
 
     private fun lagInnvilgelseFtrlPliktig(): InnvilgelseYrkesaktivPliktigFtrl {
         return InnvilgelseYrkesaktivPliktigFtrl(
-            brevbestilling = lagInnvilgelseFtrlYrkresaktivPliktig(),
+            brevbestilling = lagInnvilgelseFtrlYrkesaktivPliktig(),
             behandlingstype = Behandlingstyper.FØRSTEGANG,
             avgiftsperioder = emptyList(),
             datoMottatt = LocalDate.now(),
-            medlemskapsperiode = MedlemskapsperiodeDto(LocalDate.now(), LocalDate.now(), Trygdedekninger.FULL_DEKNING_FTRL, InnvilgelsesResultat.INNVILGET),
+            medlemskapsperiode = MedlemskapsperiodeDto(
+                LocalDate.now(),
+                LocalDate.now(),
+                Trygdedekninger.FULL_DEKNING_FTRL,
+                InnvilgelsesResultat.INNVILGET
+            ),
             bestemmelse = Folketrygdloven_kap2_bestemmelser.FTRL_KAP2_2_8,
             trygdeavgiftMottaker = Trygdeavgiftmottaker.TRYGDEAVGIFT_BETALES_TIL_NAV,
             fullmektigTrygdeavgift = null,
@@ -686,10 +690,8 @@ internal class DokgenMalMapperTest {
             .build()
     }
 
-    private fun lagInnvilgelseFtrlYrkresaktivPliktig(): InnvilgelseFtrlYrkesaktivPliktigBrevbestilling {
-        return InnvilgelseFtrlYrkesaktivPliktigBrevbestilling.Builder()
-            .medInnledningFritekst("Innledning")
-            .medBegrunnelseFritekst("Begrunnelse")
+    private fun lagInnvilgelseFtrlYrkesaktivPliktig(): DokgenBrevbestilling {
+        return DokgenBrevbestilling.Builder()
             .medBehandling(DokgenTestData.lagBehandling())
             .medPersonDokument(DokgenTestData.lagPersondata())
             .medPersonMottaker(DokgenTestData.lagPersondata())
