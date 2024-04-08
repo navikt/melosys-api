@@ -32,11 +32,13 @@ import org.jeasy.random.EasyRandom;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
+import org.mockito.Answers;
 import org.mockito.ArgumentCaptor;
 import org.mockito.Captor;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.context.ApplicationEventPublisher;
+import org.springframework.scheduling.concurrent.ThreadPoolTaskExecutor;
 
 import static no.nav.melosys.domain.kodeverk.brev.Produserbaredokumenter.*;
 import static org.assertj.core.api.Assertions.assertThat;
@@ -50,6 +52,8 @@ class ProsessinstansServiceTest {
     private ApplicationEventPublisher applicationEventPublisher;
     @Mock
     private ProsessinstansForServiceRepository prosessinstansRepo;
+    @Mock(answer = Answers.RETURNS_MOCKS)
+    private ThreadPoolTaskExecutor threadPoolTaskExecutor;
 
     @Captor
     private ArgumentCaptor<Prosessinstans> piCaptor;
@@ -59,7 +63,7 @@ class ProsessinstansServiceTest {
     @BeforeEach
     public void setUp() {
         prosessinstansService = new ProsessinstansService(applicationEventPublisher,
-            prosessinstansRepo);
+            prosessinstansRepo, threadPoolTaskExecutor);
     }
 
     @Test
