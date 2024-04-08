@@ -69,15 +69,23 @@ class FtrlVedtakService(
 
         val behandlingstema = behandling.tema
         val medlemskapstype = behandlingsresultat.medlemAvFolketrygden?.medlemskapsperioder?.firstOrNull()?.medlemskapstype
-        if (behandlingstema === Behandlingstema.IKKE_YRKESAKTIV && medlemskapstype === Medlemskapstyper.PLIKTIG) {
-            return lagInnvilgelseIkkeYrkesaktivFtrl(request, Produserbaredokumenter.IKKE_YRKESAKTIV_PLIKTIG_FTRL)
-        }
-        if (behandlingstema === Behandlingstema.IKKE_YRKESAKTIV && medlemskapstype === Medlemskapstyper.FRIVILLIG) {
-            return lagInnvilgelseIkkeYrkesaktivFtrl(request, Produserbaredokumenter.IKKE_YRKESAKTIV_FRIVILLIG_FTRL)
-        }
-        return lagInnvilgelseFolketrygdloven(request)
-    }
 
+        return when {
+            behandlingstema.erIkkeYrkesaktiv() && medlemskapstype.erPliktig() ->
+                lagBrevbestillingUtenFritekster(request, Produserbaredokumenter.IKKE_YRKESAKTIV_PLIKTIG_FTRL)
+
+            behandlingstema.erIkkeYrkesaktiv() && medlemskapstype.erFrivillig() ->
+                lagBrevbestillingUtenFritekster(request, Produserbaredokumenter.IKKE_YRKESAKTIV_FRIVILLIG_FTRL)
+
+            behandlingstema.erYrkesaktiv() && medlemskapstype.erPliktig() ->
+                lagBrevbestillingUtenFritekster(request, Produserbaredokumenter.PLIKTIG_MEDLEM_FTRL)
+
+            behandlingstema.erYrkesaktiv() && medlemskapstype.erFrivillig() ->
+                lagInnvilgelseFolketrygdloven(request)
+
+            else -> throw FunksjonellException("Klarer ikke finne brev for kombinasjonen behandlingstema $behandlingstema og medlemskapstype $medlemskapstype")
+        }
+    }
 
     private fun lagVedtakOpphørtMedlemskapBrevbestilling(request: FattVedtakRequest): BrevbestillingDto =
         BrevbestillingDto().apply {
@@ -89,7 +97,6 @@ class FtrlVedtakService(
             opphørtDato = request.opphørtDato
         }
 
-
     private fun lagAvslagMangledeOpplysningerBrevbestilling(request: FattVedtakRequest): BrevbestillingDto =
         BrevbestillingDto().apply {
             produserbardokument = Produserbaredokumenter.AVSLAG_MANGLENDE_OPPLYSNINGER
@@ -97,7 +104,6 @@ class FtrlVedtakService(
             fritekst = request.fritekst
             bestillersId = request.bestillersId
         }
-
 
     private fun lagInnvilgelseFolketrygdloven(request: FattVedtakRequest): BrevbestillingDto =
         BrevbestillingDto().apply {
@@ -113,7 +119,7 @@ class FtrlVedtakService(
             bestillersId = request.bestillersId
         }
 
-    private fun lagInnvilgelseIkkeYrkesaktivFtrl(request: FattVedtakRequest, produserbaredokument: Produserbaredokumenter): BrevbestillingDto =
+    private fun lagBrevbestillingUtenFritekster(request: FattVedtakRequest, produserbaredokument: Produserbaredokumenter): BrevbestillingDto =
         BrevbestillingDto().apply {
             produserbardokument = produserbaredokument
             mottaker = Mottakerroller.BRUKER
@@ -172,4 +178,9 @@ class FtrlVedtakService(
         behandlingsresultat.fastsattAvLand = Land_iso2.NO
         return behandlingsresultatService.lagre(behandlingsresultat)
     }
+
+    private fun Behandlingstema.erYrkesaktiv(): Boolean = this == Behandlingstema.YRKESAKTIV
+    private fun Behandlingstema.erIkkeYrkesaktiv(): Boolean = this == Behandlingstema.IKKE_YRKESAKTIV
+    private fun Medlemskapstyper?.erPliktig(): Boolean = this == Medlemskapstyper.PLIKTIG
+    private fun Medlemskapstyper?.erFrivillig(): Boolean = this == Medlemskapstyper.FRIVILLIG
 }

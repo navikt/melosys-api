@@ -314,6 +314,8 @@ public class DokgenService {
                 .medInnledningFritekst(brevbestillingDto.getInnledningFritekst())
                 .medBegrunnelseFritekst(brevbestillingDto.getBegrunnelseFritekst())
                 .medTrygdeavgiftFritekst(brevbestillingDto.getTrygdeavgiftFritekst());
+            case IKKE_YRKESAKTIV_PLIKTIG_FTRL, IKKE_YRKESAKTIV_FRIVILLIG_FTRL, PLIKTIG_MEDLEM_FTRL -> new DokgenBrevbestilling.Builder<>()
+                .medDistribusjonstype(Distribusjonstype.VEDTAK);
             case GENERELT_FRITEKSTBREV_BRUKER, GENERELT_FRITEKSTBREV_ARBEIDSGIVER, GENERELT_FRITEKSTBREV_VIRKSOMHET,
                 UTENLANDSK_TRYGDEMYNDIGHET_FRITEKSTBREV, FRITEKSTBREV -> new FritekstbrevBrevbestilling.Builder()
                 .medDistribusjonstype(brevbestillingDto.getDistribusjonstype())
@@ -337,12 +339,6 @@ public class DokgenService {
                 .medFritekstvedleggTekst(brevbestillingDto.getFritekst())
                 .medMottakerType(brevbestillingDto.getMottaker());
             case IKKE_YRKESAKTIV_VEDTAKSBREV -> new IkkeYrkesaktivBrevbestilling.Builder()
-                .medDistribusjonstype(Distribusjonstype.VEDTAK);
-            case IKKE_YRKESAKTIV_PLIKTIG_FTRL -> new InnvilgelseFtrlIkkeYrkesaktivPliktigBrevbestilling.Builder()
-                .medDistribusjonstype(Distribusjonstype.VEDTAK);
-            case IKKE_YRKESAKTIV_FRIVILLIG_FTRL -> new InnvilgelseFtrlIkkeYrkesaktivFrivilligBrevbestilling.Builder()
-                .medDistribusjonstype(Distribusjonstype.VEDTAK);
-            case PLIKTIG_MEDLEM_FTRL -> new InnvilgelseFtrlYrkesaktivPliktigBrevbestilling.Builder()
                 .medDistribusjonstype(Distribusjonstype.VEDTAK);
             case VARSELBREV_MANGLENDE_INNBETALING -> new VarselbrevManglendeInnbetalingBrevbestilling.Builder()
                 .medDistribusjonstype(Distribusjonstype.VIKTIG)
