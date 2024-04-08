@@ -8,9 +8,7 @@ import java.time.LocalDate
 
 data class MedlemskapsperiodeDto(
     @JsonSerialize(using = LocalDateSerializer::class) val fom: LocalDate,
-    @JsonSerialize(
-        using = LocalDateSerializer::class
-    ) val tom: LocalDate,
+    @JsonSerialize(using = LocalDateSerializer::class) val tom: LocalDate?,
     val trygdedekning: Trygdedekninger,
     val innvilgelsesResultat: InnvilgelsesResultat
 )
