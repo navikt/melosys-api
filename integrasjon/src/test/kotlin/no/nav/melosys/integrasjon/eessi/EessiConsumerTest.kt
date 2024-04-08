@@ -1,6 +1,6 @@
 package no.nav.melosys.integrasjon.eessi
 
-//import no.nav.melosys.integrasjon.MetricsTestConfig
+import no.nav.melosys.integrasjon.MetricsTestConfig
 import com.fasterxml.jackson.databind.ObjectMapper
 import com.github.tomakehurst.wiremock.WireMockServer
 import com.github.tomakehurst.wiremock.client.MappingBuilder
@@ -23,6 +23,7 @@ import no.nav.melosys.domain.eessi.sed.SedDataDto
 import no.nav.melosys.domain.eessi.sed.SedGrunnlagA003Dto
 import no.nav.melosys.domain.eessi.sed.SedGrunnlagDto
 import no.nav.melosys.exception.TekniskException
+//import no.nav.melosys.integrasjon.MetricsTestConfig
 import no.nav.melosys.integrasjon.OAuthMockServer
 import no.nav.melosys.integrasjon.StsMockServer
 import no.nav.melosys.integrasjon.eessi.dto.SaksrelasjonDto
@@ -52,7 +53,7 @@ import java.util.*
 
     GenericAuthFilterFactory::class,
     EessiConsumerProducerConfig::class,
-//    MetricsTestConfig::class,
+    MetricsTestConfig::class,
     FakeUnleash::class
 )
 @WebMvcTest
@@ -94,7 +95,7 @@ class EessiConsumerTest(
     @AfterEach
     fun after() {
         ThreadLocalAccessInfo.afterExecuteProcess(processUUID)
-//        MetricsTestConfig.clearMeterRegistry()
+        MetricsTestConfig.clearMeterRegistry()
     }
 
 
@@ -128,7 +129,7 @@ class EessiConsumerTest(
             true
         )
 
-//        MetricsTestConfig.checkMetricsUri("/buc/{bucType}?sendAutomatisk={sendAutomatisk}&oppdaterEksisterende={oppdaterEksisterendeOmFinnes}")
+        MetricsTestConfig.checkMetricsUri("/api/buc/{bucType}?sendAutomatisk={sendAutomatisk}&oppdaterEksisterende={oppdaterEksisterendeOmFinnes}")
 
         opprettSedDto.rinaSaksnummer.shouldBe("12345")
     }
@@ -170,7 +171,7 @@ class EessiConsumerTest(
             SedType.A001
         )
 
-//        MetricsTestConfig.checkMetricsUri("/buc/{bucID}/sed/{sedType}")
+        MetricsTestConfig.checkMetricsUri("/api/buc/{bucID}/sed/{sedType}")
     }
 
     @Test
@@ -196,7 +197,7 @@ class EessiConsumerTest(
                 navn.shouldBe("NAVT002")
                 landkode.shouldBe("NO")
             }
-//        MetricsTestConfig.checkMetricsUri("/api/buc/{bucType}/institusjoner?land={landkoder}")
+        MetricsTestConfig.checkMetricsUri("/api/buc/{bucType}/institusjoner?land={landkoder}")
     }
 
     @Test
@@ -243,7 +244,7 @@ class EessiConsumerTest(
             journalpostId.shouldBe(melosysEessiMelding.journalpostId)
         }
 
-//        MetricsTestConfig.checkMetricsUri("/journalpost/{journalpostID}/eessimelding")
+        MetricsTestConfig.checkMetricsUri("/api/journalpost/{journalpostID}/eessimelding")
     }
 
     @Test
@@ -288,7 +289,7 @@ class EessiConsumerTest(
             .first()
             .shouldBeEqualToComparingFields(saksrelasjon, FieldsEqualityCheckConfig(ignorePrivateFields = false))
 
-//        MetricsTestConfig.metricsUriShouldContainBrackets()
+        MetricsTestConfig.metricsUriShouldContainBrackets()
     }
 
     @Test
@@ -310,7 +311,7 @@ class EessiConsumerTest(
 
         resultPDF.shouldBe(pdf)
 
-//        MetricsTestConfig.metricsUriShouldContainBrackets()
+        MetricsTestConfig.metricsUriShouldContainBrackets()
     }
 
     @Test
@@ -363,7 +364,7 @@ class EessiConsumerTest(
                 }
             }
 
-//        MetricsTestConfig.metricsUriShouldContainBrackets()
+        MetricsTestConfig.metricsUriShouldContainBrackets()
     }
 
     @Test
@@ -380,7 +381,7 @@ class EessiConsumerTest(
 
         eessiConsumer.hentTilknyttedeBucer(1L, listOf("UTKAST", "MOTTATT", "SENDT"))
 
-//        MetricsTestConfig.metricsUriShouldContainBrackets()
+        MetricsTestConfig.metricsUriShouldContainBrackets()
     }
 
     @Test
@@ -396,7 +397,7 @@ class EessiConsumerTest(
         )
         eessiConsumer.hentTilknyttedeBucer(1L, listOf("SENDT", "UTKAST"))
 
-//        MetricsTestConfig.metricsUriShouldContainBrackets()
+        MetricsTestConfig.metricsUriShouldContainBrackets()
     }
 
     @Test
@@ -417,7 +418,7 @@ class EessiConsumerTest(
 
         response.shouldBeInstanceOf<SedGrunnlagA003Dto>()
 
-//        MetricsTestConfig.metricsUriShouldContainBrackets()
+        MetricsTestConfig.metricsUriShouldContainBrackets()
     }
 
     @Test
@@ -434,7 +435,7 @@ class EessiConsumerTest(
 
         eessiConsumer.lukkBuc(rinaSaksnummer)
 
-//        MetricsTestConfig.metricsUriShouldContainBrackets()
+        MetricsTestConfig.metricsUriShouldContainBrackets()
     }
 
     fun get(url: String): MappingBuilder =
