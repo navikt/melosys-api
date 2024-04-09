@@ -1,20 +1,20 @@
 package no.nav.melosys.service.dokument.brev.mapper
 
 import no.nav.melosys.domain.Behandling
+import no.nav.melosys.domain.Behandlingsresultat
 import no.nav.melosys.domain.Medlemskapsperiode
 import no.nav.melosys.domain.Vilkaarsresultat
-import no.nav.melosys.domain.brev.InnvilgelseFtrlIkkeYrkesaktivFrivilligBrevbestilling
-import no.nav.melosys.domain.brev.InnvilgelseFtrlIkkeYrkesaktivPliktigBrevbestilling
+import no.nav.melosys.domain.brev.DokgenBrevbestilling
 import no.nav.melosys.domain.brev.InnvilgelseFtrlYrkesaktivFrivilligBrevbestilling
 import no.nav.melosys.domain.dokument.felles.Periode
 import no.nav.melosys.domain.folketrygden.MedlemAvFolketrygden
 import no.nav.melosys.domain.kodeverk.*
 import no.nav.melosys.domain.kodeverk.begrunnelser.folketrygdloven.Ftrl_2_7_begrunnelser
 import no.nav.melosys.domain.kodeverk.begrunnelser.folketrygdloven.Ftrl_2_8_naer_tilknytning_norge_begrunnelser
-import no.nav.melosys.domain.mottatteopplysninger.SøknadNorgeEllerUtenforEØS
-import no.nav.melosys.integrasjon.dokgen.dto.InnvilgelseFtrlYrkesaktivFrivillig
 import no.nav.melosys.integrasjon.dokgen.dto.InnvilgelseFtrlIkkeYrkesaktivFrivillig
 import no.nav.melosys.integrasjon.dokgen.dto.InnvilgelseFtrlIkkeYrkesaktivPliktig
+import no.nav.melosys.integrasjon.dokgen.dto.InnvilgelseFtrlYrkesaktivFrivillig
+import no.nav.melosys.integrasjon.dokgen.dto.InnvilgelseYrkesaktivPliktigFtrl
 import no.nav.melosys.integrasjon.dokgen.dto.innvilgelseftrl.AvgiftsperiodeDto
 import no.nav.melosys.service.avgift.TrygdeavgiftMottakerService
 import no.nav.melosys.service.avgift.TrygdeavgiftsberegningService
@@ -31,7 +31,7 @@ class InnvilgelseFtrlMapper(
     private val avklarteVirksomheterService: AvklarteVirksomheterService,
     private val dokgenMapperDatahenter: DokgenMapperDatahenter,
     private val trygdeavgiftMottakerService: TrygdeavgiftMottakerService,
-    private val trygdeavgiftsberegningService: TrygdeavgiftsberegningService
+    private val trygdeavgiftsberegningService: TrygdeavgiftsberegningService,
 ) {
     @Transactional
     internal fun mapYrkesaktivFrivillig(brevbestilling: InnvilgelseFtrlYrkesaktivFrivilligBrevbestilling): InnvilgelseFtrlYrkesaktivFrivillig {
@@ -68,54 +68,93 @@ class InnvilgelseFtrlMapper(
         )
     }
 
-    internal fun mapIkkeYrkesaktivFrivillig(brevbestilling: InnvilgelseFtrlIkkeYrkesaktivFrivilligBrevbestilling): InnvilgelseFtrlIkkeYrkesaktivFrivillig {
+    internal fun mapIkkeYrkesaktivFrivillig(brevbestilling: DokgenBrevbestilling): InnvilgelseFtrlIkkeYrkesaktivFrivillig {
         val behandlingsresultat = dokgenMapperDatahenter.hentBehandlingsresultat(brevbestilling.behandling.id)
         val søknadsland = behandlingsresultat.behandling.mottatteOpplysninger.mottatteOpplysningerData.soeknadsland
-        val ikkeyrkesaktivrelasjonType =
-            behandlingsresultat.avklartefakta.firstOrNull { it.type == Avklartefaktatyper.IKKE_YRKESAKTIV_RELASJON }?.fakta
         val avslåttMedlemskapsperiodeFørMottaksdatoHelsedel =
             mapAvslåttMedlemskapsperiodeFørMottaksdatoHelsedel(behandlingsresultat.medlemAvFolketrygden, brevbestilling.forsendelseMottatt)
         val avslåttMedlemskapsperiodeFørMottaksdatoFullDekning =
             mapAvslåttMedlemskapsperiodeFørMottaksdatoFullDekning(behandlingsresultat.medlemAvFolketrygden, brevbestilling.forsendelseMottatt)
 
-        return InnvilgelseFtrlIkkeYrkesaktivFrivillig.av(
-            brevbestilling.toBuilder()
-                .medFlereLandUkjentHvilke(søknadsland.isFlereLandUkjentHvilke)
-                .medLand(søknadsland.landkoder.map { dokgenMapperDatahenter.hentLandnavnFraLandkode(it) })
-                .medBestemmelse(behandlingsresultat.medlemAvFolketrygden.medlemskapsperioder.last().bestemmelse.name)
-                .medNyVurderingBakgrunn(behandlingsresultat.nyVurderingBakgrunn)
-                .medInnledningFritekst(behandlingsresultat.innledningFritekst)
-                .medBegrunnelseFritekst(behandlingsresultat.begrunnelseFritekst)
-                .medIkkeYrkesaktivRelasjonType(ikkeyrkesaktivrelasjonType)
-                .medAvslåttMedlemskapsperiodeFørMottaksdatoHelsedel(avslåttMedlemskapsperiodeFørMottaksdatoHelsedel)
-                .medAvslåttMedlemskapsperiodeFørMottaksdatoFullDekning(avslåttMedlemskapsperiodeFørMottaksdatoFullDekning)
-                .build(),
-            mapMedlemskapsPerioder(behandlingsresultat.medlemAvFolketrygden)
+        return InnvilgelseFtrlIkkeYrkesaktivFrivillig(
+            brevbestilling = brevbestilling,
+            flereLandUkjentHvilke = søknadsland.isFlereLandUkjentHvilke,
+            land = søknadsland.landkoder.map { dokgenMapperDatahenter.hentLandnavnFraLandkode(it) },
+            bestemmelse = behandlingsresultat.medlemAvFolketrygden.medlemskapsperioder.last().bestemmelse,
+            nyVurderingBakgrunn = behandlingsresultat.nyVurderingBakgrunn,
+            innledningFritekst = behandlingsresultat.innledningFritekst,
+            begrunnelseFritekst = behandlingsresultat.begrunnelseFritekst,
+            ikkeYrkesaktivRelasjonType = hentAvklartFakta(behandlingsresultat, Avklartefaktatyper.IKKE_YRKESAKTIV_RELASJON),
+            avslåttMedlemskapsperiodeFørMottaksdatoHelsedel = avslåttMedlemskapsperiodeFørMottaksdatoHelsedel,
+            avslåttMedlemskapsperiodeFørMottaksdatoFullDekning = avslåttMedlemskapsperiodeFørMottaksdatoFullDekning,
+            medlemskapsperioder = mapMedlemskapsPerioder(behandlingsresultat.medlemAvFolketrygden)
         )
     }
 
-    internal fun mapIkkeYrkesaktivPliktig(brevbestilling: InnvilgelseFtrlIkkeYrkesaktivPliktigBrevbestilling): InnvilgelseFtrlIkkeYrkesaktivPliktig {
+    internal fun mapIkkeYrkesaktivPliktig(brevbestilling: DokgenBrevbestilling): InnvilgelseFtrlIkkeYrkesaktivPliktig {
         val behandlingsresultat = dokgenMapperDatahenter.hentBehandlingsresultat(brevbestilling.behandling.id)
-        val avklartefakta = behandlingsresultat.avklartefakta
         val søknadsland = behandlingsresultat.behandling.mottatteOpplysninger.mottatteOpplysningerData.soeknadsland
         val medlemskapsperiode = Periode(
             behandlingsresultat.medlemAvFolketrygden.utledMedlemskapsperiodeFom(),
             behandlingsresultat.medlemAvFolketrygden.utledMedlemskapsperiodeTom()
         )
 
-        return InnvilgelseFtrlIkkeYrkesaktivPliktig.av(
-            brevbestilling.toBuilder()
-                .medFlereLandUkjentHvilke(søknadsland.isFlereLandUkjentHvilke)
-                .medLand(søknadsland.landkoder.map { dokgenMapperDatahenter.hentLandnavnFraLandkode(it) })
-                .medBestemmelse(behandlingsresultat.medlemAvFolketrygden.medlemskapsperioder.last().bestemmelse.name)
-                .medNyVurderingBakgrunn(behandlingsresultat.nyVurderingBakgrunn)
-                .medInnledningFritekst(behandlingsresultat.innledningFritekst)
-                .medBegrunnelseFritekst(behandlingsresultat.begrunnelseFritekst)
-                .medIkkeYrkesaktivOppholdType(avklartefakta.firstOrNull { it.type == Avklartefaktatyper.IKKE_YRKESAKTIV_FTRL_2_1_OPPHOLD }?.fakta)
-                .medIkkeYrkesaktivRelasjonType(avklartefakta.firstOrNull { it.type == Avklartefaktatyper.IKKE_YRKESAKTIV_RELASJON }?.fakta)
-                .medMedlemskapsperiode(medlemskapsperiode)
-                .build()
+        return InnvilgelseFtrlIkkeYrkesaktivPliktig(
+            brevbestilling = brevbestilling,
+            flereLandUkjentHvilke = søknadsland.isFlereLandUkjentHvilke,
+            land = søknadsland.landkoder.map { dokgenMapperDatahenter.hentLandnavnFraLandkode(it) },
+            bestemmelse = behandlingsresultat.medlemAvFolketrygden.medlemskapsperioder.last().bestemmelse,
+            nyVurderingBakgrunn = behandlingsresultat.nyVurderingBakgrunn,
+            innledningFritekst = behandlingsresultat.innledningFritekst,
+            begrunnelseFritekst = behandlingsresultat.begrunnelseFritekst,
+            ikkeYrkesaktivOppholdType = hentAvklartFakta(behandlingsresultat, Avklartefaktatyper.IKKE_YRKESAKTIV_FTRL_2_1_OPPHOLD),
+            ikkeYrkesaktivRelasjonType = hentAvklartFakta(behandlingsresultat, Avklartefaktatyper.IKKE_YRKESAKTIV_RELASJON),
+            medlemskapsperiode = medlemskapsperiode
         )
+    }
+
+    internal fun mapYrkesaktivPliktig(brevbestilling: DokgenBrevbestilling): InnvilgelseYrkesaktivPliktigFtrl {
+        val behandling = brevbestilling.behandling
+        val behandlingsresultat = dokgenMapperDatahenter.hentBehandlingsresultat(behandling.id)
+        val medlemAvFolketrygden = behandlingsresultat.medlemAvFolketrygden
+        val søknadsland = behandling.mottatteOpplysninger.mottatteOpplysningerData.soeknadsland
+        val medlemskapsperiode = medlemAvFolketrygden.medlemskapsperioder.single()
+        val harLavSatsPgaAlder = harLavSatsPgaAlderIMinstEnPeriode(dokgenMapperDatahenter.hentPersondata(behandling).fødselsdato, medlemskapsperiode)
+
+        return InnvilgelseYrkesaktivPliktigFtrl(
+            brevbestilling = brevbestilling,
+            behandlingstype = behandling.type,
+            avgiftsperioder = mapAvgiftsPerioder(medlemAvFolketrygden),
+            medlemskapsperiode = mapMedlemskapsPerioder(medlemAvFolketrygden).single(),
+            bestemmelse = medlemskapsperiode.bestemmelse,
+            harLavSatsPgaAlder = harLavSatsPgaAlder,
+            arbeidssituasjontype = hentAvklartFakta(behandlingsresultat, Avklartefaktatyper.ARBEIDSSITUASJON),
+            trygdeavgiftMottaker = trygdeavgiftMottakerService.getTrygdeavgiftMottaker(medlemAvFolketrygden.fastsattTrygdeavgift.trygdeavgiftsgrunnlag),
+            fullmektigTrygdeavgift = finnFullmektigTrygdeavgift(behandling),
+            skatteplikttype = medlemAvFolketrygden.utledSkatteplikttype(),
+            begrunnelse = hentBegrunnelse(behandlingsresultat.vilkaarsresultater),
+            begrunnelseAnnenGrunnFritekst = hentSaerligBegrunnelseFritekst(behandlingsresultat.vilkaarsresultater),
+            nyVurderingBakgrunn = behandlingsresultat.nyVurderingBakgrunn,
+            innledningFritekst = behandlingsresultat.innledningFritekst,
+            begrunnelseFritekst = behandlingsresultat.begrunnelseFritekst,
+            trygdeavgiftFritekst = behandlingsresultat.trygdeavgiftFritekst,
+            arbeidsgivere = hentArbeidsgivere(behandling),
+            flereLandUkjentHvilke = søknadsland.isFlereLandUkjentHvilke,
+            land = søknadsland.landkoder.map { dokgenMapperDatahenter.hentLandnavnFraLandkode(it) },
+            trygdeavtaleLand = mapTrygdeavtaleLand(søknadsland.landkoder),
+            betalerArbeidsgiveravgift = erBetalerArbeidsgiveravgift(medlemAvFolketrygden.medlemskapsperioder),
+        )
+    }
+
+    private fun hentAvklartFakta(behandlingsresultat: Behandlingsresultat, type: Avklartefaktatyper): String? =
+        behandlingsresultat.avklartefakta.firstOrNull { it.type == type }?.fakta
+
+    private fun harLavSatsPgaAlderIMinstEnPeriode(foedselsdato: LocalDate, medlemskapsperiode: Medlemskapsperiode): Boolean {
+        val alderForInneværendeÅrForMedlemskapsperiodeFom = medlemskapsperiode.fom.year.minus(foedselsdato.year)
+        val alderForInneværendeÅrForMedlemskapsperiodeTom = medlemskapsperiode.tom?.year?.minus(foedselsdato.year)
+
+        return alderForInneværendeÅrForMedlemskapsperiodeFom !in 18..68
+            || (alderForInneværendeÅrForMedlemskapsperiodeTom?.let { it !in 18..68 } ?: false)
     }
 
     private fun mapMedlemskapsPerioder(medlemAvFolketrygden: MedlemAvFolketrygden): List<no.nav.melosys.integrasjon.dokgen.dto.innvilgelseftrl.MedlemskapsperiodeDto> =

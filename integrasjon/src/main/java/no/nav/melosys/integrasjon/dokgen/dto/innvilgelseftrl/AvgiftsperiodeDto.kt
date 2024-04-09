@@ -8,9 +8,7 @@ import java.time.LocalDate
 
 data class AvgiftsperiodeDto(
     @JsonSerialize(using = LocalDateSerializer::class) val fom: LocalDate,
-    @JsonSerialize(
-        using = LocalDateSerializer::class
-    ) val tom: LocalDate,
+    @JsonSerialize(using = LocalDateSerializer::class) val tom: LocalDate,
     val avgiftssats: BigDecimal,
     val avgiftPerMd: BigDecimal,
     val inntektskildetype: Inntektskildetype,

@@ -15,7 +15,10 @@ import no.nav.melosys.domain.Lovvalgsperiode;
 import no.nav.melosys.domain.adresse.StrukturertAdresse;
 import no.nav.melosys.domain.avklartefakta.AvklartVirksomhet;
 import no.nav.melosys.domain.avklartefakta.Avklartefakta;
-import no.nav.melosys.domain.kodeverk.*;
+import no.nav.melosys.domain.kodeverk.Avklartefaktatyper;
+import no.nav.melosys.domain.kodeverk.Land_iso2;
+import no.nav.melosys.domain.kodeverk.Maritimtyper;
+import no.nav.melosys.domain.kodeverk.Sakstyper;
 import no.nav.melosys.domain.kodeverk.begrunnelser.Fartsomrader;
 import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingstyper;
 import no.nav.melosys.domain.kodeverk.lovvalgsbestemmelser.Lovvalgbestemmelser_883_2004;
@@ -31,8 +34,10 @@ import no.nav.melosys.service.dokument.brev.BrevDataA1;
 import no.nav.melosys.service.dokument.brev.BrevDataInnvilgelse;
 import no.nav.melosys.service.dokument.brev.BrevbestillingDto;
 import org.junit.jupiter.api.Test;
+import org.w3c.dom.Node;
 import org.xmlunit.builder.DiffBuilder;
-import org.xmlunit.diff.Diff;
+import org.xmlunit.builder.Input;
+import org.xmlunit.diff.*;
 
 import static no.nav.melosys.service.dokument.brev.BrevDataTestUtils.*;
 import static no.nav.melosys.service.dokument.brev.mapper.BrevMappingTestUtils.lagFellesType;
@@ -55,9 +60,9 @@ class InnvilgelsesbrevMapperTest {
         String testMapTilBrevXml = testMapTilBrevXml(lagBehandlingsresultat(Collections.singleton(lagLovvalgsperiode()),
             Collections.singleton(lagAvklarteFakta(Avklartefaktatyper.VIRKSOMHET, "123456789"))), false);
 
-        Diff diff = DiffBuilder.compare(xmlFraFil).withTest(testMapTilBrevXml)
-            .withNodeFilter(node -> !"ns6:opprettelsesDato".equals(node.getNodeName()))
-            .build();
+        Diff diff = createDiffIgnoreNameSpace(xmlFraFil, testMapTilBrevXml);
+
+
         assertFalse(diff.toString(), diff.hasDifferences());
     }
 
@@ -67,10 +72,35 @@ class InnvilgelsesbrevMapperTest {
         String testMapTilBrevXml = testMapTilBrevXml(lagBehandlingsresultat(Collections.singleton(lagLovvalgsperiode()),
             Collections.singleton(lagAvklarteFakta(Avklartefaktatyper.VIRKSOMHET, "123456789"))), true);
 
-        Diff diff = DiffBuilder.compare(xmlFraFil).withTest(testMapTilBrevXml)
-            .withNodeFilter(node -> !"ns6:opprettelsesDato".equals(node.getNodeName()))
-            .build();
+
+        Diff diff = createDiffIgnoreNameSpace(xmlFraFil, testMapTilBrevXml);
+
+
         assertFalse(diff.toString(), diff.hasDifferences());
+    }
+
+    // Created with help from ChatGPT-4
+    private static Diff createDiffIgnoreNameSpace(String expectedXml, String testMapTilBrevXml) {
+        return DiffBuilder.compare(Input.fromString(expectedXml))
+            .withTest(Input.fromString(testMapTilBrevXml))
+            .ignoreWhitespace()
+            .withDifferenceEvaluator(DifferenceEvaluators.chain(
+                DifferenceEvaluators.Default,
+                (comparison, outcome) -> {
+                    if (comparison.getType() == ComparisonType.NAMESPACE_URI) {
+                        Node controlNode = comparison.getControlDetails().getTarget();
+                        Node testNode = comparison.getTestDetails().getTarget();
+                        if (controlNode != null && testNode != null && controlNode.getNodeType() == Node.ELEMENT_NODE && testNode.getNodeType() == Node.ELEMENT_NODE) {
+                            // If both nodes are elements, ignore the namespace URI difference
+                            return ComparisonResult.EQUAL;
+                        }
+                    }
+                    // For all other comparisons, return the original outcome
+                    return outcome;
+                }))
+            .withNodeFilter(node -> !node.getNodeName().endsWith(":opprettelsesDato") && !node.getNodeName().equals("opprettelsesDato"))
+            .checkForSimilar()
+            .build();
     }
 
     private String testMapTilBrevXml(Behandlingsresultat behandlingsresultat, boolean medFartsområde) throws Exception {

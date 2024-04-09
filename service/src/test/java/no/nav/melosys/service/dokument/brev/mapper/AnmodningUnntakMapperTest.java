@@ -1,5 +1,6 @@
 package no.nav.melosys.service.dokument.brev.mapper;
 
+import java.io.IOException;
 import java.time.LocalDate;
 import java.util.*;
 
@@ -25,6 +26,13 @@ import no.nav.melosys.service.SaksbehandlingDataFactory;
 import no.nav.melosys.service.dokument.brev.BrevDataAnmodningUnntak;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
+import org.w3c.dom.Node;
+import org.xmlunit.builder.DiffBuilder;
+import org.xmlunit.builder.Input;
+import org.xmlunit.diff.ComparisonResult;
+import org.xmlunit.diff.ComparisonType;
+import org.xmlunit.diff.Diff;
+import org.xmlunit.diff.DifferenceEvaluators;
 
 import static no.nav.melosys.service.dokument.brev.BrevDataUtils.lagKontaktInformasjon;
 import static no.nav.melosys.service.dokument.brev.BrevDataUtils.lagNorskPostadresse;
@@ -33,6 +41,7 @@ import static no.nav.melosys.service.dokument.brev.mapper.BrevMappingTestUtils.l
 import static no.nav.melosys.service.dokument.brev.mapper.felles.VilkaarbegrunnelseFactoryTest.lagAlleVilkaarBegrunnelser;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatNoException;
+import static org.springframework.test.util.AssertionErrors.assertFalse;
 
 class AnmodningUnntakMapperTest {
 
@@ -62,11 +71,39 @@ class AnmodningUnntakMapperTest {
         BrevDataAnmodningUnntak brevData = lagBrevData(resultat);
 
         String xml = mapper.mapTilBrevXML(fellesType, navFelles, behandling, resultat, brevData);
+        String expectedXml = hentBrevXmlFraFil("unntakbrev/unntakbrev.xml");
 
-        assertThat(xml).matches("(?s)<\\?xml version=\"\\d\\.\\d+\" .*>\n.*")
-            .contains(":yrkesaktivitet>SELVSTENDIG</ns");
-        assertThat(Landkoder.AT.getBeskrivelse()).isSubstringOf(xml);
-        assertThat(xml).doesNotContain(Landkoder.DK.getKode());
+
+        Diff diff = createDiffIgnoreNameSpace(expectedXml, xml);
+
+
+        assertFalse(diff.toString(), diff.hasDifferences());
+    }
+
+    private static Diff createDiffIgnoreNameSpace(String expectedXml, String testMapTilBrevXml) {
+        return DiffBuilder.compare(Input.fromString(expectedXml))
+            .withTest(Input.fromString(testMapTilBrevXml))
+            .ignoreWhitespace()
+            .withDifferenceEvaluator(DifferenceEvaluators.chain(
+                DifferenceEvaluators.Default,
+                (comparison, outcome) -> {
+                    if (comparison.getType() == ComparisonType.NAMESPACE_URI) {
+                        Node controlNode = comparison.getControlDetails().getTarget();
+                        Node testNode = comparison.getTestDetails().getTarget();
+                        if (controlNode != null && testNode != null && controlNode.getNodeType() == Node.ELEMENT_NODE && testNode.getNodeType() == Node.ELEMENT_NODE) {
+                            // If both nodes are elements, ignore the namespace URI difference
+                            return ComparisonResult.EQUAL;
+                        }
+                    }
+                    // For all other comparisons, return the original outcome
+                    return outcome;
+                }))
+            .checkForSimilar()
+            .build();
+    }
+
+    private String hentBrevXmlFraFil(String filnavn) throws IOException {
+        return new String(getClass().getClassLoader().getResourceAsStream(filnavn).readAllBytes());
     }
 
     @Test
@@ -116,8 +153,12 @@ class AnmodningUnntakMapperTest {
     private BrevDataAnmodningUnntak lagBrevData(Behandlingsresultat resultat, LovvalgBestemmelse unntakFraBestemmelse) {
         BrevDataAnmodningUnntak brevData = new BrevDataAnmodningUnntak("Z999999", Landkoder.AT.getBeskrivelse(), new AvklartVirksomhet("Test AS", null, null, Yrkesaktivitetstyper.SELVSTENDIG),
             Yrkesaktivitetstyper.SELVSTENDIG, Collections.emptySet(), Collections.emptySet(), null);
+        LocalDate fom = LocalDate.of(2000, 1, 1);
+        LocalDate tom = LocalDate.of(2001, 1, 1);
         Anmodningsperiode anmodningsperiode =
-            new Anmodningsperiode(LocalDate.now(), LocalDate.now(),
+            new Anmodningsperiode(
+                fom,
+                tom,
                 Land_iso2.NO, null, null, Land_iso2.DK,
                 unntakFraBestemmelse, null);
         resultat.setAnmodningsperioder(Sets.newHashSet(anmodningsperiode));

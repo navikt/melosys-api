@@ -32,13 +32,14 @@ import java.time.LocalDate
 import java.util.*
 
 @Import(
+    OAuthMockServer::class,
+    GenericAuthFilterFactory::class,
     StsWebClientProducer::class,
     SecurityTokenServiceConsumer::class,
     RestSTSService::class,
-    OAuthMockServer::class,
-    CorrelationIdOutgoingFilter::class,
     StsMockServer::class,
-    GenericAuthFilterFactory::class,
+
+    CorrelationIdOutgoingFilter::class,
     FaktureringskomponentenConsumerProducer::class,
     FakeUnleash::class
 )

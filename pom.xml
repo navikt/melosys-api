@@ -41,8 +41,8 @@
         <kotlin.compiler.jvmTarget>${java.version}</kotlin.compiler.jvmTarget>
 
         <!-- Melosys -->
-        <melosys.internt.kodeverk.version>5.15.257</melosys.internt.kodeverk.version>
-        <melosys.brev.version>1.2.124</melosys.brev.version>
+        <melosys.internt.kodeverk.version>5.15.258</melosys.internt.kodeverk.version>
+        <melosys.brev.version>1.2.147-midlertidig</melosys.brev.version>
 
         <!-- NAV -->
         <nav.tjenestespesifikasjoner.version>1.2021.02.22-10.45-4201aaea72fb</nav.tjenestespesifikasjoner.version>
@@ -512,7 +512,7 @@
             <!-- Dokumenthåndtering (DOKPROD) -->
             <dependency>
                 <groupId>no.nav.dok.metaforcemal</groupId>
-                <artifactId>melosysbrev</artifactId>
+                <artifactId>melosysbrev-midlertidig</artifactId>
                 <version>${melosys.brev.version}</version>
                 <exclusions>
                     <exclusion>
@@ -523,13 +523,13 @@
             </dependency>
             <dependency>
                 <groupId>no.nav.dok.metaforcemal</groupId>
-                <artifactId>melosysbrev</artifactId>
+                <artifactId>melosysbrev-midlertidig</artifactId>
                 <classifier>jaxb</classifier>
                 <version>${melosys.brev.version}</version>
             </dependency>
             <dependency>
                 <groupId>no.nav.dok.metaforcemal</groupId>
-                <artifactId>melosysbrev</artifactId>
+                <artifactId>melosysbrev-midlertidig</artifactId>
                 <classifier>jaxb-sources</classifier>
                 <version>${melosys.brev.version}</version>
             </dependency>

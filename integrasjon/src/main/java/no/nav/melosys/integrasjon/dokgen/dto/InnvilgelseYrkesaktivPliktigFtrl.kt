@@ -4,15 +4,15 @@ import com.fasterxml.jackson.annotation.JsonFormat
 import com.fasterxml.jackson.annotation.JsonInclude
 import com.fasterxml.jackson.databind.annotation.JsonSerialize
 import com.fasterxml.jackson.datatype.jsr310.ser.LocalDateSerializer
-import no.nav.melosys.domain.brev.InnvilgelseFtrlYrkesaktivFrivilligBrevbestilling
+import no.nav.melosys.domain.brev.DokgenBrevbestilling
 import no.nav.melosys.domain.kodeverk.*
 import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingstyper
 import no.nav.melosys.integrasjon.dokgen.dto.innvilgelseftrl.AvgiftsperiodeDto
 import no.nav.melosys.integrasjon.dokgen.dto.innvilgelseftrl.MedlemskapsperiodeDto
 import java.time.LocalDate
 
-class InnvilgelseFtrlYrkesaktivFrivillig(
-    brevbestilling: InnvilgelseFtrlYrkesaktivFrivilligBrevbestilling,
+class InnvilgelseYrkesaktivPliktigFtrl(
+    brevbestilling: DokgenBrevbestilling,
     val behandlingstype: Behandlingstyper,
     @JsonSerialize(using = LocalDateSerializer::class)
     @JsonFormat(shape = JsonFormat.Shape.STRING)
@@ -20,10 +20,8 @@ class InnvilgelseFtrlYrkesaktivFrivillig(
     @JsonInclude(JsonInclude.Include.NON_NULL)
     val avgiftsperioder: List<AvgiftsperiodeDto>,
     @JsonInclude(JsonInclude.Include.NON_NULL)
-    val medlemskapsperioder: List<MedlemskapsperiodeDto>,
+    val medlemskapsperiode: MedlemskapsperiodeDto,
     val bestemmelse: Folketrygdloven_kap2_bestemmelser?,
-    val avslåttMedlemskapsperiodeFørMottaksdatoHelsedel: Boolean,
-    val avslåttMedlemskapsperiodeFørMottaksdatoFullDekning: Boolean,
     val trygdeavgiftMottaker: Trygdeavgiftmottaker?,
     val fullmektigTrygdeavgift: String?,
     val skatteplikttype: Skatteplikttype?,
@@ -39,20 +37,20 @@ class InnvilgelseFtrlYrkesaktivFrivillig(
     val land: List<String>,
     @JsonInclude(JsonInclude.Include.NON_NULL)
     val trygdeavtaleLand: List<String>,
-    val betalerArbeidsgiveravgift: Boolean
+    val betalerArbeidsgiveravgift: Boolean,
+    val harLavSatsPgaAlder: Boolean,
+    val arbeidssituasjontype: String?,
 ) : DokgenDto(brevbestilling, Mottakerroller.BRUKER) {
 
     constructor(
-        brevbestilling: InnvilgelseFtrlYrkesaktivFrivilligBrevbestilling,
+        brevbestilling: DokgenBrevbestilling,
         behandlingstype: Behandlingstyper,
         avgiftsperioder: List<AvgiftsperiodeDto>,
-        medlemskapsperioder: List<MedlemskapsperiodeDto>,
-        bestemmelse: Folketrygdloven_kap2_bestemmelser,
-        avslåttMedlemskapsperiodeFørMottaksdatoHelsedel: Boolean,
-        avslåttMedlemskapsperiodeFørMottaksdatoFullDekning: Boolean,
+        medlemskapsperiode: MedlemskapsperiodeDto,
+        bestemmelse: Folketrygdloven_kap2_bestemmelser?,
         trygdeavgiftMottaker: Trygdeavgiftmottaker?,
         fullmektigTrygdeavgift: String?,
-        skatteplikttype: Skatteplikttype,
+        skatteplikttype: Skatteplikttype?,
         begrunnelse: Kodeverk?,
         begrunnelseAnnenGrunnFritekst: String?,
         nyVurderingBakgrunn: String?,
@@ -63,16 +61,16 @@ class InnvilgelseFtrlYrkesaktivFrivillig(
         flereLandUkjentHvilke: Boolean,
         land: List<String>,
         trygdeavtaleLand: List<String>,
-        betalerArbeidsgiveravgift: Boolean
+        betalerArbeidsgiveravgift: Boolean,
+        harLavSatsPgaAlder: Boolean,
+        arbeidssituasjontype: String?,
     ) : this(
         brevbestilling,
         behandlingstype,
         datoMottatt = instantTilLocalDate(brevbestilling.forsendelseMottatt),
         avgiftsperioder,
-        medlemskapsperioder,
+        medlemskapsperiode,
         bestemmelse,
-        avslåttMedlemskapsperiodeFørMottaksdatoHelsedel,
-        avslåttMedlemskapsperiodeFørMottaksdatoFullDekning,
         trygdeavgiftMottaker,
         fullmektigTrygdeavgift,
         skatteplikttype,
@@ -86,6 +84,8 @@ class InnvilgelseFtrlYrkesaktivFrivillig(
         flereLandUkjentHvilke,
         land,
         trygdeavtaleLand,
-        betalerArbeidsgiveravgift
+        betalerArbeidsgiveravgift,
+        harLavSatsPgaAlder,
+        arbeidssituasjontype,
     )
 }

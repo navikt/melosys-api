@@ -120,7 +120,13 @@ class DokgenMalMapper(
                 DokumentasjonSvarfrist.beregnFristPaaMangelbrevFraDagensDato()
             )
 
-            Produserbaredokumenter.INNVILGELSE_FOLKETRYGDLOVEN -> innvilgelseFtrlMapper.mapYrkesaktivFrivillig((brevbestilling as InnvilgelseFtrlYrkesaktivFrivilligBrevbestilling))
+            Produserbaredokumenter.INNVILGELSE_FOLKETRYGDLOVEN -> innvilgelseFtrlMapper.mapYrkesaktivFrivillig(brevbestilling as InnvilgelseFtrlYrkesaktivFrivilligBrevbestilling)
+
+            Produserbaredokumenter.PLIKTIG_MEDLEM_FTRL -> innvilgelseFtrlMapper.mapYrkesaktivPliktig(brevbestilling)
+
+            Produserbaredokumenter.IKKE_YRKESAKTIV_FRIVILLIG_FTRL -> innvilgelseFtrlMapper.mapIkkeYrkesaktivFrivillig(brevbestilling)
+
+            Produserbaredokumenter.IKKE_YRKESAKTIV_PLIKTIG_FTRL -> innvilgelseFtrlMapper.mapIkkeYrkesaktivPliktig(brevbestilling)
 
             Produserbaredokumenter.TRYGDEAVTALE_GB -> trygdeavtaleMapper.map(
                 brevbestilling.toBuilder()
@@ -195,15 +201,15 @@ class DokgenMalMapper(
 
             Produserbaredokumenter.IKKE_YRKESAKTIV_VEDTAKSBREV -> lagIkkeYrkesaktivVedtaksbrev(brevbestilling as IkkeYrkesaktivBrevbestilling)
 
-            Produserbaredokumenter.IKKE_YRKESAKTIV_FRIVILLIG_FTRL -> innvilgelseFtrlMapper.mapIkkeYrkesaktivFrivillig(brevbestilling as InnvilgelseFtrlIkkeYrkesaktivFrivilligBrevbestilling)
-
             Produserbaredokumenter.VARSELBREV_MANGLENDE_INNBETALING -> VarselbrevManglendeInnbetaling(
-                brevbestilling as VarselbrevManglendeInnbetalingBrevbestilling
+                brevbestilling as VarselbrevManglendeInnbetalingBrevbestilling,
+                brevbestilling.behandling.opprinneligBehandling?.id?.let {
+                    val behandlingsresultat = dokgenMapperDatahenter.hentBehandlingsresultat(it)
+                    behandlingsresultat.medlemAvFolketrygden?.medlemskapsperioder?.firstOrNull()?.medlemskapstype
+                } ?: throw FunksjonellException("Forventer at behandling som tilhører varselbrevet har en opprinnelig behandling med medlemskapsperioder")
             )
 
             Produserbaredokumenter.VEDTAK_OPPHOERT_MEDLEMSKAP -> VedtakOpphoertMedlemskap(brevbestilling as VedtakOpphoertMedlemskapBrevbestilling)
-
-            Produserbaredokumenter.IKKE_YRKESAKTIV_PLIKTIG_FTRL -> innvilgelseFtrlMapper.mapIkkeYrkesaktivPliktig(brevbestilling as InnvilgelseFtrlIkkeYrkesaktivPliktigBrevbestilling)
 
             else -> throw FunksjonellException("ProduserbartDokument ${brevbestilling.produserbartdokument} er ikke støttet av melosys-dokgen")
         }
