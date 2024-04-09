@@ -675,7 +675,6 @@ internal class DokgenMalMapperTest {
             betalerArbeidsgiveravgift = true,
             harLavSatsPgaAlder = false,
             arbeidssituasjontype = null,
-            medlemskapstype = Medlemskapstyper.PLIKTIG
         )
     }
 
