@@ -143,7 +143,6 @@ class InnvilgelseFtrlMapper(
             land = søknadsland.landkoder.map { dokgenMapperDatahenter.hentLandnavnFraLandkode(it) },
             trygdeavtaleLand = mapTrygdeavtaleLand(søknadsland.landkoder),
             betalerArbeidsgiveravgift = erBetalerArbeidsgiveravgift(medlemAvFolketrygden.medlemskapsperioder),
-            medlemskapstype = Medlemskapstyper.PLIKTIG,
         )
     }
 

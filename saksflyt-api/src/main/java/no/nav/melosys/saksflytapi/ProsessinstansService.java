@@ -33,7 +33,9 @@ import no.nav.melosys.sikkerhet.context.SubjectHandler;
 import no.nav.melosys.sikkerhet.context.ThreadLocalAccessInfo;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.context.ApplicationEventPublisher;
+import org.springframework.scheduling.concurrent.ThreadPoolTaskExecutor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.util.CollectionUtils;
@@ -47,13 +49,16 @@ public class ProsessinstansService {
 
     private final ApplicationEventPublisher applicationEventPublisher;
     private final ProsessinstansForServiceRepository prosessinstansRepo;
+    private final ThreadPoolTaskExecutor saksflytThreadPoolTaskExecutor;
 
     private final Counter prosessinstanserOpprettet = Metrics.counter(MetrikkerNavn.PROSESSINSTANSER_OPPRETTET);
 
     public ProsessinstansService(ApplicationEventPublisher applicationEventPublisher,
-                                 ProsessinstansForServiceRepository prosessinstansRepo) {
+                                 ProsessinstansForServiceRepository prosessinstansRepo,
+                                 @Qualifier("saksflytThreadPoolTaskExecutor") ThreadPoolTaskExecutor saksflytThreadPoolTaskExecutor) {
         this.applicationEventPublisher = applicationEventPublisher;
         this.prosessinstansRepo = prosessinstansRepo;
+        this.saksflytThreadPoolTaskExecutor = saksflytThreadPoolTaskExecutor;
     }
 
     public void opprettNySakOgBehandling(OpprettSakRequest opprettSakRequest) {
@@ -263,6 +268,10 @@ public class ProsessinstansService {
         }
 
         applicationEventPublisher.publishEvent(new ProsessinstansOpprettetEvent(prosessinstans));
+        int prosessinstanseriKø = saksflytThreadPoolTaskExecutor.getThreadPoolExecutor().getQueue().size();
+        if (prosessinstanseriKø > 0)
+            logger.info("Antall prosessinstanser i saksflytThreadPoolTaskExecutor kø: {}", prosessinstanseriKø);
+
         prosessinstanserOpprettet.increment();
         return prosessinstans.getId();
     }
