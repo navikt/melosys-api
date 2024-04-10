@@ -3,7 +3,9 @@ package no.nav.melosys.service.dokument.brev.mapper;
 import java.util.Set;
 
 import no.nav.melosys.domain.Aktoer;
+import no.nav.melosys.domain.Behandling;
 import no.nav.melosys.domain.Fagsak;
+import no.nav.melosys.domain.brev.DokgenBrevbestilling;
 import no.nav.melosys.domain.dokument.arbeidsforhold.Aktoertype;
 import no.nav.melosys.domain.kodeverk.Aktoersroller;
 import no.nav.melosys.domain.kodeverk.Fullmaktstype;
@@ -50,10 +52,13 @@ class DokgenMapperDatahenterTest {
         fullmektig.setRolle(Aktoersroller.FULLMEKTIG);
         fullmektig.setFullmaktstype(Fullmaktstype.FULLMEKTIG_SØKNAD);
         fagsak.setAktører(Set.of(fullmektig, new Aktoer()));
+        var brevbestilling = new DokgenBrevbestilling();
+        brevbestilling.setBehandling(new Behandling());
+        brevbestilling.getBehandling().setFagsak(fagsak);
 
         when(persondataFasade.hentSammensattNavn(FNR_FULLMEKTIG)).thenReturn("Etternavn, Fornavn");
 
-        dokgenMapperDatahenter.hentFullmektigNavn(fagsak, Fullmaktstype.FULLMEKTIG_SØKNAD);
+        dokgenMapperDatahenter.hentFullmektigNavn(brevbestilling, Fullmaktstype.FULLMEKTIG_SØKNAD);
 
         verify(persondataFasade).hentSammensattNavn(FNR_FULLMEKTIG);
     }
@@ -66,10 +71,13 @@ class DokgenMapperDatahenterTest {
         fullmektig.setRolle(Aktoersroller.FULLMEKTIG);
         fullmektig.setFullmaktstype(Fullmaktstype.FULLMEKTIG_SØKNAD);
         fagsak.setAktører(Set.of(fullmektig, new Aktoer()));
+        var brevbestilling = new DokgenBrevbestilling();
+        brevbestilling.setBehandling(new Behandling());
+        brevbestilling.getBehandling().setFagsak(fagsak);
 
         when(eregFasade.hentOrganisasjonNavn(ORGNR_FULLMEKTIG)).thenReturn("Orgnavn");
 
-        dokgenMapperDatahenter.hentFullmektigNavn(fagsak, Fullmaktstype.FULLMEKTIG_SØKNAD);
+        dokgenMapperDatahenter.hentFullmektigNavn(brevbestilling, Fullmaktstype.FULLMEKTIG_SØKNAD);
 
         verify(eregFasade).hentOrganisasjonNavn(ORGNR_FULLMEKTIG);
     }
