@@ -13,7 +13,10 @@ import org.springframework.transaction.annotation.Transactional
 @Service
 class AktoerService(private val aktørRepository: AktoerRepository) {
 
-    fun hentfagsakAktører(fagsak: Fagsak, aktoersrolle: Aktoersroller): List<Aktoer> {
+    fun hentfagsakAktører(fagsak: Fagsak, aktoersrolle: Aktoersroller?): List<Aktoer> {
+        if (aktoersrolle == null) {
+            return aktørRepository.findByFagsakAndFullmakterIsNotEmpty(fagsak)
+        }
         return aktørRepository.findByFagsakAndRolle(fagsak, aktoersrolle)
     }
 

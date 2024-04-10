@@ -20,6 +20,7 @@ import org.springframework.http.MediaType;
 import org.springframework.test.web.servlet.MockMvc;
 
 import static no.nav.melosys.tjenester.gui.util.ResponseBodyMatchers.responseBody;
+import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.any;
 import static org.mockito.Mockito.when;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
@@ -62,8 +63,9 @@ class AktoerTjenesteTest {
             .andExpect(responseBody(objectMapper).containsObjectAsJson(aktoerDto, AktoerDto.class));
     }
 
+
     @Test
-    void hentAktoer_tilAktoerDto() throws Exception {
+    void hentAktoer_tilAktoerDto_utenÅOppgiRolle() throws Exception {
         Aktoer aktoerMyndighet = new Aktoer();
         aktoerMyndighet.setId(39L);
         aktoerMyndighet.setAktørId("1235");
@@ -73,13 +75,35 @@ class AktoerTjenesteTest {
         aktoerMyndighet.setFagsak(lagFagsak());
         aktoerMyndighet.setUtenlandskPersonId("UTL");
 
-
         when(fagsakService.hentFagsak("MELTEST-1")).thenReturn(lagFagsak());
-        when(aktoerService.hentfagsakAktører(any(), any())).thenReturn(Collections.singletonList(aktoerMyndighet));
-
+        when(aktoerService.hentfagsakAktører(any(), eq(null))).thenReturn(Collections.singletonList(aktoerMyndighet));
 
         mockMvc.perform(get("/api/fagsaker/{saksnummer}/aktoerer", "MELTEST-1")
-                .contentType(MediaType.APPLICATION_JSON))
+                .contentType(MediaType.APPLICATION_JSON)
+            )
+            .andExpect(status().isOk())
+            .andExpect(responseBody(objectMapper).containsObjectAsJson(Collections.singletonList(AktoerDto.tilDto(aktoerMyndighet)), new TypeReference<List<AktoerDto>>() {
+            }));
+    }
+
+    @Test
+    void hentAktoer_tilAktoerDto_OppgiRolle() throws Exception {
+        Aktoer aktoerMyndighet = new Aktoer();
+        aktoerMyndighet.setId(39L);
+        aktoerMyndighet.setAktørId("1235");
+        aktoerMyndighet.setInstitusjonID("INST2");
+        aktoerMyndighet.setRolle(Aktoersroller.BRUKER);
+        aktoerMyndighet.setOrgnr("100");
+        aktoerMyndighet.setFagsak(lagFagsak());
+        aktoerMyndighet.setUtenlandskPersonId("UTL");
+
+        when(fagsakService.hentFagsak("MELTEST-1")).thenReturn(lagFagsak());
+        when(aktoerService.hentfagsakAktører(any(), eq(Aktoersroller.BRUKER))).thenReturn(Collections.singletonList(aktoerMyndighet));
+
+        mockMvc.perform(get("/api/fagsaker/{saksnummer}/aktoerer", "MELTEST-1")
+                .contentType(MediaType.APPLICATION_JSON)
+                .param("rolleKode", "BRUKER")
+            )
             .andExpect(status().isOk())
             .andExpect(responseBody(objectMapper).containsObjectAsJson(Collections.singletonList(AktoerDto.tilDto(aktoerMyndighet)), new TypeReference<List<AktoerDto>>() {
             }));

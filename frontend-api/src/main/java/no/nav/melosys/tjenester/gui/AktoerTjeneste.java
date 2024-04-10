@@ -4,7 +4,6 @@ import java.util.List;
 
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
-import jakarta.transaction.Transactional;
 import no.nav.melosys.domain.Aktoer;
 import no.nav.melosys.domain.Fagsak;
 import no.nav.melosys.domain.kodeverk.Aktoersroller;
@@ -42,7 +41,6 @@ public class AktoerTjeneste {
         value = "Henter aktører knyttet til et gitt saksnummer.",
         response = AktoerDto.class,
         responseContainer = "List")
-    @Transactional
     public List<AktoerDto> hentAktoerer(@PathVariable("saksnummer") String saksnummer,
                                         @RequestParam(value = "rolleKode", required = false) String rolleKode) {
 
@@ -50,9 +48,7 @@ public class AktoerTjeneste {
         aksesskontroll.autoriserSakstilgang(saksnummer);
 
         var rolle = StringUtils.isNotEmpty(rolleKode) ? Aktoersroller.valueOf(rolleKode) : null;
-        if (rolle == null) {
-            throw new IllegalArgumentException("Rollekode må oppgis");
-        }
+
         List<Aktoer> aktører = aktoerService.hentfagsakAktører(fagsak, rolle);
 
         return aktører.stream().map(AktoerDto::tilDto).toList();

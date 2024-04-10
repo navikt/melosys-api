@@ -29,7 +29,7 @@ internal class AktoerServiceTest {
     private lateinit var aktoerRepository: AktoerRepository
 
     private lateinit var aktoerService: AktoerService
-    
+
     private val aktoerSlot = slot<Aktoer>()
 
     @BeforeEach
