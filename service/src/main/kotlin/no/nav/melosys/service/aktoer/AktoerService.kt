@@ -7,18 +7,14 @@ import no.nav.melosys.exception.FunksjonellException
 import no.nav.melosys.exception.IkkeFunnetException
 import no.nav.melosys.exception.TekniskException
 import no.nav.melosys.repository.AktoerRepository
-import org.springframework.data.domain.Example
 import org.springframework.stereotype.Service
 import org.springframework.transaction.annotation.Transactional
 
 @Service
 class AktoerService(private val aktørRepository: AktoerRepository) {
-    fun hentfagsakAktører(fagsak: Fagsak, aktoersrolle: Aktoersroller?): List<Aktoer> {
-        val aktør = Aktoer().apply {
-            this.fagsak = fagsak
-            rolle = aktoersrolle
-        }
-        return aktørRepository.findAll(Example.of(aktør))
+
+    fun hentfagsakAktører(fagsak: Fagsak, aktoersrolle: Aktoersroller): List<Aktoer> {
+        return aktørRepository.findByFagsakAndRolle(fagsak, aktoersrolle)
     }
 
     @Transactional
@@ -56,7 +52,7 @@ class AktoerService(private val aktørRepository: AktoerRepository) {
         val fullmektiger = aktørRepository.findByFagsakAndFullmakterIsNotEmpty(fagsak)
         val fullmektigMedLikFullmakt = fullmektiger.find { it.fullmaktstyper.intersect(aktoerDto.fullmakter).isNotEmpty() }
         if (fullmektigMedLikFullmakt != null && fullmektigMedLikFullmakt.id != aktoerDto.databaseID) {
-            throw FunksjonellException("Det skal kun være en fullmektig per fullmakstype. Saksnummer: " + fagsak.saksnummer)
+            throw FunksjonellException("Det skal kun være en fullmektig per fullmakttype. Saksnummer: " + fagsak.saksnummer)
         }
     }
 
