@@ -10,6 +10,8 @@ import org.springframework.data.jpa.repository.JpaRepository;
 public interface AktoerRepository extends JpaRepository<Aktoer, Long> {
     List<Aktoer> findByFagsakAndFullmakterIsNotEmpty(Fagsak fagsak);
 
+    List<Aktoer> findByFagsak(Fagsak fagsak);
+
     List<Aktoer> findByFagsakAndRolle(Fagsak fagsak, Aktoersroller aktoersroller);
 
     void deleteAllByFagsakAndRolle(Fagsak fagsak, Aktoersroller aktoersroller);

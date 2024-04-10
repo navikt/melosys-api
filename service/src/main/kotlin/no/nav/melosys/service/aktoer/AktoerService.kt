@@ -15,7 +15,7 @@ class AktoerService(private val aktørRepository: AktoerRepository) {
 
     fun hentfagsakAktører(fagsak: Fagsak, aktoersrolle: Aktoersroller?): List<Aktoer> {
         if (aktoersrolle == null) {
-            return aktørRepository.findByFagsakAndFullmakterIsNotEmpty(fagsak)
+            return aktørRepository.findByFagsak(fagsak)
         }
         return aktørRepository.findByFagsakAndRolle(fagsak, aktoersrolle)
     }
@@ -61,7 +61,8 @@ class AktoerService(private val aktørRepository: AktoerRepository) {
 
     @Transactional
     fun slettAktoer(databaseID: Long) {
-        val aktoer = aktørRepository.findById(databaseID).orElseThrow { TekniskException("Klarte ikke slette aktøren. Fant ingen aktør på id: $databaseID") }
+        val aktoer =
+            aktørRepository.findById(databaseID).orElseThrow { TekniskException("Klarte ikke slette aktøren. Fant ingen aktør på id: $databaseID") }
 
         if (aktoer.rolle == Aktoersroller.BRUKER) {
             throw FunksjonellException("Aktøren er en bruker. Det er ikke lov til å slette denne")
