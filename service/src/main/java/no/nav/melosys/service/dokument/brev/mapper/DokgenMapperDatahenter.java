@@ -1,11 +1,9 @@
 package no.nav.melosys.service.dokument.brev.mapper;
 
-import java.time.Instant;
-
 import no.nav.melosys.domain.Behandling;
 import no.nav.melosys.domain.Behandlingsresultat;
-import no.nav.melosys.domain.Fagsak;
 import no.nav.melosys.domain.FellesKodeverk;
+import no.nav.melosys.domain.brev.DokgenBrevbestilling;
 import no.nav.melosys.domain.brev.Mottaker;
 import no.nav.melosys.domain.kodeverk.Aktoersroller;
 import no.nav.melosys.domain.kodeverk.Fullmaktstype;
@@ -17,6 +15,8 @@ import no.nav.melosys.service.kodeverk.KodeverkService;
 import no.nav.melosys.service.persondata.PersondataFasade;
 import org.springframework.stereotype.Component;
 import org.springframework.util.StringUtils;
+
+import java.time.Instant;
 
 import static org.springframework.util.StringUtils.hasText;
 
@@ -53,8 +53,8 @@ public class DokgenMapperDatahenter {
         return landnavn.equals("UKJENT") ? "" : landnavn;
     }
 
-    String hentFullmektigNavn(Fagsak fagsak, Fullmaktstype fullmaktstype) {
-        return fagsak.finnFullmektig(fullmaktstype)
+    String hentFullmektigNavn(DokgenBrevbestilling brevbestilling, Fullmaktstype fullmaktstype) {
+        return brevbestilling.getBehandling().getFagsak().finnFullmektig(fullmaktstype)
             .map(aktoer -> {
                 if (StringUtils.hasText(aktoer.getOrgnr())) {
                     return eregFasade.hentOrganisasjonNavn(aktoer.getOrgnr());

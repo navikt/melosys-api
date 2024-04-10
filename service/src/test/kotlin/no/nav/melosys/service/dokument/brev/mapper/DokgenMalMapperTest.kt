@@ -414,6 +414,7 @@ internal class DokgenMalMapperTest {
         every { mockDokgenMapperDatahenter.hentPersonMottaker(any()) } returns DokgenTestData.lagPersondata()
         every { mockDokgenMapperDatahenter.hentNorskPoststed(any()) } returns "Andeby"
         every { mockDokgenMapperDatahenter.hentLandnavnFraLandkode(Landkoder.NO.kode) } returns Landkoder.NO.beskrivelse
+        every { mockDokgenMapperDatahenter.hentFullmektigNavn(any(), any()) } returns null
         every { mockDokgenMapperDatahenter.hentBehandlingsresultat(any()) } returns Behandlingsresultat().apply {
             medlemAvFolketrygden = MedlemAvFolketrygden().apply {
                 medlemskapsperioder.add(Medlemskapsperiode().apply { medlemskapstype = Medlemskapstyper.FRIVILLIG })
@@ -428,7 +429,6 @@ internal class DokgenMalMapperTest {
             .medBetalingsstatus(Betalingsstatus.DELVIS_BETALT)
             .medForsendelseMottatt(Instant.now())
             .build()
-
 
 
         dokgenMalMapper.mapBehandling(
