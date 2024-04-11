@@ -1,5 +1,7 @@
 package no.nav.melosys.itest
 
+import io.getunleash.FakeUnleash
+import io.getunleash.Unleash
 import no.nav.melosys.domain.*
 import no.nav.melosys.domain.avklartefakta.Avklartefakta
 import no.nav.melosys.domain.avklartefakta.AvklartefaktaRegistrering
@@ -16,6 +18,7 @@ import no.nav.melosys.repository.BehandlingsresultatRepository
 import no.nav.melosys.repository.FagsakRepository
 import no.nav.melosys.service.behandling.BehandlingsresultatService
 import no.nav.melosys.service.behandling.ReplikerBehandlingsresultatService
+import no.nav.melosys.service.saksbehandling.SaksbehandlingRegler
 import org.assertj.core.api.Assertions.assertThat
 import org.junit.jupiter.api.Test
 import org.springframework.beans.factory.annotation.Autowired
@@ -23,7 +26,7 @@ import org.springframework.context.annotation.Import
 import java.time.Instant
 import java.time.LocalDate
 
-@Import(value = [ReplikerBehandlingsresultatService::class, BehandlingsresultatService::class])
+@Import(value = [ReplikerBehandlingsresultatService::class, BehandlingsresultatService::class, SaksbehandlingRegler::class, FakeUnleash::class])
 internal class BehandlingsresultatServiceIT(
     @Autowired
     private val behandlingRepository: BehandlingRepository,
