@@ -272,7 +272,7 @@ class FtrlVedtakServiceTest {
         verify { prosessinstansService.opprettProsessinstansIverksettVedtakFTRL(any(), request.tilVedtakRequest(), Saksstatuser.LOVVALG_AVKLART) }
         verify { oppgaveService.ferdigstillOppgaveMedSaksnummer(SAKSNUMMER) }
         verify { dokgenService.produserOgDistribuerBrev(BEH_ID, capture(brevbestillingRequestSlot)) }
-        verify(exactly = 0) { vilkaarsresultatService.tømVilkårForBehandlingsresultat(any()) }
+        verify(exactly = 0) { behandlingsresultatService.tømVilkårsresultatFraBehandlingsresultat(any()) }
 
         behandlingsresultatSlot.captured.shouldNotBeNull().run {
             type.shouldBe(Behandlingsresultattyper.DELVIS_OPPHØRT)
@@ -337,7 +337,7 @@ class FtrlVedtakServiceTest {
         verify { prosessinstansService.opprettProsessinstansIverksettVedtakFTRL(any(), request.tilVedtakRequest(), Saksstatuser.OPPHØRT) }
         verify { oppgaveService.ferdigstillOppgaveMedSaksnummer(SAKSNUMMER) }
         verify { dokgenService.produserOgDistribuerBrev(BEH_ID, capture(brevbestillingRequestSlot)) }
-        verify { vilkaarsresultatService.tømVilkårForBehandlingsresultat(any()) }
+        verify { behandlingsresultatService.tømVilkårsresultatFraBehandlingsresultat(BEH_ID) }
 
         behandlingsresultatSlot.captured.shouldNotBeNull().run {
             type.shouldBe(Behandlingsresultattyper.OPPHØRT)

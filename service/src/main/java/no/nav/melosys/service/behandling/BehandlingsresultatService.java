@@ -13,12 +13,13 @@ import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingsresultattyper;
 import no.nav.melosys.exception.FunksjonellException;
 import no.nav.melosys.exception.IkkeFunnetException;
 import no.nav.melosys.repository.BehandlingsresultatRepository;
-import no.nav.melosys.service.vilkaar.VilkaarsresultatService;
+import no.nav.melosys.service.saksbehandling.SaksbehandlingRegler;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.context.annotation.Lazy;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+
+import static no.nav.melosys.service.vilkaar.VilkaarsresultatService.IMMUTABLE_VILKAAR;
 
 @Service
 public class BehandlingsresultatService {
@@ -26,19 +27,19 @@ public class BehandlingsresultatService {
     private static final String KAN_IKKE_FINNE_BEHANDLINGSRESULTAT = "Kan ikke finne behandlingsresultat for behandling: ";
 
     private final BehandlingsresultatRepository behandlingsresultatRepository;
-    private final VilkaarsresultatService vilkaarsresultatService;
+    private final SaksbehandlingRegler saksbehandlingRegler;
 
     public BehandlingsresultatService(BehandlingsresultatRepository behandlingsresultatRepository,
-                                      @Lazy VilkaarsresultatService vilkaarsresultatService) {
+                                      SaksbehandlingRegler saksbehandlingRegler) {
         this.behandlingsresultatRepository = behandlingsresultatRepository;
-        this.vilkaarsresultatService = vilkaarsresultatService;
+        this.saksbehandlingRegler = saksbehandlingRegler;
     }
 
     @Transactional
-    public void tømBehandlingsresultat(long behandlingsid) {
-        Behandlingsresultat behandlingsresultat = behandlingsresultatRepository.findById(behandlingsid).orElse(null);
+    public void tømBehandlingsresultat(long behandlingID) {
+        Behandlingsresultat behandlingsresultat = behandlingsresultatRepository.findById(behandlingID).orElse(null);
         if (behandlingsresultat != null) {
-            log.info("Fjerner avklarte fakta, lovvalgsperioder, medlemAvFolketrygden og vilkårsresultater fra behandlingsresultat med behandlingsid: {} ", behandlingsid);
+            log.info("Fjerner avklarte fakta, lovvalgsperioder, medlemAvFolketrygden og vilkårsresultater fra behandlingsresultat med behandlingID: {} ", behandlingID);
             behandlingsresultat.getAvklartefakta().clear();
             behandlingsresultat.getLovvalgsperioder().clear();
             behandlingsresultat.setMedlemAvFolketrygden(null);
@@ -47,9 +48,23 @@ public class BehandlingsresultatService {
             behandlingsresultat.setInnledningFritekst(null);
             behandlingsresultat.setNyVurderingBakgrunn(null);
             behandlingsresultat.setTrygdeavgiftFritekst(null);
-            vilkaarsresultatService.tømVilkårForBehandlingsresultat(behandlingsresultat);
+            tømVilkårsresultatFraBehandlingsresultat(behandlingID);
             behandlingsresultatRepository.save(behandlingsresultat);
         }
+    }
+
+    @Transactional
+    public void tømVilkårsresultatFraBehandlingsresultat(long behandlingID) {
+        Behandlingsresultat behandlingsresultat = behandlingsresultatRepository.findById(behandlingID).orElse(null);
+
+        var behandling = behandlingsresultat.getBehandling();
+        var fagsak = behandling.getFagsak();
+        if (fagsak.erSakstypeEøs() && !saksbehandlingRegler.harIngenFlyt(behandling)) {
+            behandlingsresultat.getVilkaarsresultater().removeIf(vilkaarsresultat -> !IMMUTABLE_VILKAAR.contains(vilkaarsresultat.getVilkaar()));
+        } else {
+            behandlingsresultat.getVilkaarsresultater().clear();
+        }
+        behandlingsresultatRepository.save(behandlingsresultat);
     }
 
     public Behandlingsresultat hentBehandlingsresultat(long behandlingsid) {

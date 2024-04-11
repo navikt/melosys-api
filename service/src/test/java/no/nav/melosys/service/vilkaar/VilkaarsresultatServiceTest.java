@@ -3,16 +3,11 @@ package no.nav.melosys.service.vilkaar;
 import java.util.*;
 
 import no.nav.melosys.domain.*;
-import no.nav.melosys.domain.kodeverk.Sakstemaer;
-import no.nav.melosys.domain.kodeverk.Sakstyper;
 import no.nav.melosys.domain.kodeverk.Vilkaar;
 import no.nav.melosys.domain.kodeverk.begrunnelser.Art12_1_begrunnelser;
-import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingstema;
-import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingstyper;
 import no.nav.melosys.exception.FunksjonellException;
 import no.nav.melosys.repository.VilkaarsresultatRepository;
 import no.nav.melosys.service.behandling.BehandlingsresultatService;
-import no.nav.melosys.service.saksbehandling.SaksbehandlingRegler;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -31,14 +26,12 @@ class VilkaarsresultatServiceTest {
     private BehandlingsresultatService behandlingsresultatService;
     @Mock
     private VilkaarsresultatRepository vilkaarsresultatRepo;
-    @Mock
-    private SaksbehandlingRegler saksbehandlingRegler;
 
     private VilkaarsresultatService vilkaarsresultatService;
 
     @BeforeEach
     public void setUp() {
-        vilkaarsresultatService = new VilkaarsresultatService(behandlingsresultatService, vilkaarsresultatRepo, saksbehandlingRegler);
+        vilkaarsresultatService = new VilkaarsresultatService(behandlingsresultatService, vilkaarsresultatRepo);
     }
 
     @Test
@@ -79,72 +72,11 @@ class VilkaarsresultatServiceTest {
         vilkaarsresultatService.registrerVilkår(behandlingID, Collections.singletonList(vilkaarDto));
 
 
-        verify(vilkaarsresultatRepo).deleteByBehandlingsresultatId(behandlingsresultat.getId());
+        verify(behandlingsresultatService).tømVilkårsresultatFraBehandlingsresultat(behandlingsresultat.getId());
         verify(vilkaarsresultatRepo).flush();
         verify(vilkaarsresultatRepo).save(any(Vilkaarsresultat.class));
     }
 
-    @Test
-    void tømVilkårForBehandlingsresultat_sakstypeIkkeEøs_sletterAlleVilkår() {
-        long behandlingID = 1L;
-        var fagsak = new Fagsak();
-        fagsak.setType(Sakstyper.FTRL);
-        Behandlingsresultat behandlingsresultat = new Behandlingsresultat();
-        behandlingsresultat.setId(behandlingID);
-        behandlingsresultat.setBehandling(new Behandling());
-        behandlingsresultat.getBehandling().setFagsak(fagsak);
-
-
-        vilkaarsresultatService.tømVilkårForBehandlingsresultat(behandlingsresultat);
-
-
-        verify(vilkaarsresultatRepo).deleteByBehandlingsresultatId(behandlingID);
-    }
-
-    @Test
-    void tømVilkårForBehandlingsresultat_sakstypeEøsMenIngenFlyt_sletterAlleVilkår() {
-        long behandlingID = 1L;
-        var fagsak = new Fagsak();
-        fagsak.setType(Sakstyper.EU_EOS);
-        fagsak.setTema(Sakstemaer.MEDLEMSKAP_LOVVALG);
-        var behandling = new Behandling();
-        behandling.setFagsak(fagsak);
-        behandling.setTema(Behandlingstema.UTSENDT_ARBEIDSTAKER);
-        behandling.setType(Behandlingstyper.HENVENDELSE);
-        Behandlingsresultat behandlingsresultat = new Behandlingsresultat();
-        behandlingsresultat.setId(behandlingID);
-        behandlingsresultat.setBehandling(behandling);
-        when(saksbehandlingRegler.harIngenFlyt(any())).thenReturn(true);
-
-
-        vilkaarsresultatService.tømVilkårForBehandlingsresultat(behandlingsresultat);
-
-
-        verify(vilkaarsresultatRepo).deleteByBehandlingsresultatId(behandlingID);
-    }
-
-    @Test
-    void tømVilkårForBehandlingsresultat_sakstypeEøs_sletterIkkeInngangsvilkår() {
-        long behandlingID = 1L;
-        var fagsak = new Fagsak();
-        fagsak.setType(Sakstyper.EU_EOS);
-        fagsak.setTema(Sakstemaer.MEDLEMSKAP_LOVVALG);
-        var behandling = new Behandling();
-        behandling.setFagsak(fagsak);
-        behandling.setTema(Behandlingstema.UTSENDT_ARBEIDSTAKER);
-        behandling.setType(Behandlingstyper.FØRSTEGANG);
-        Behandlingsresultat behandlingsresultat = new Behandlingsresultat();
-        behandlingsresultat.setId(behandlingID);
-        behandlingsresultat.setBehandling(behandling);
-
-
-        vilkaarsresultatService.tømVilkårForBehandlingsresultat(behandlingsresultat);
-
-
-        verify(vilkaarsresultatRepo).deleteByBehandlingsresultatAndVilkaarNotIn(
-            behandlingsresultat,
-            Collections.singleton(Vilkaar.FO_883_2004_INNGANGSVILKAAR));
-    }
 
     @Test
     void registrer_inngangsvilkår_feiler() {

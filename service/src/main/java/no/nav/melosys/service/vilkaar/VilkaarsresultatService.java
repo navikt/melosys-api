@@ -21,16 +21,13 @@ import static no.nav.melosys.domain.kodeverk.Vilkaar.*;
 public class VilkaarsresultatService {
     private final BehandlingsresultatService behandlingsresultatService;
     private final VilkaarsresultatRepository vilkaarsresultatRepo;
-    private final SaksbehandlingRegler saksbehandlingRegler;
 
-    private static final Collection<Vilkaar> IMMUTABLE_VILKAAR = Collections.singleton(FO_883_2004_INNGANGSVILKAAR);
+    public static final Collection<Vilkaar> IMMUTABLE_VILKAAR = Collections.singleton(FO_883_2004_INNGANGSVILKAAR);
 
     public VilkaarsresultatService(BehandlingsresultatService behandlingsresultatService,
-                                   VilkaarsresultatRepository vilkaarsresultatRepo,
-                                   SaksbehandlingRegler saksbehandlingRegler) {
+                                   VilkaarsresultatRepository vilkaarsresultatRepo) {
         this.behandlingsresultatService = behandlingsresultatService;
         this.vilkaarsresultatRepo = vilkaarsresultatRepo;
-        this.saksbehandlingRegler = saksbehandlingRegler;
     }
 
     @Transactional(readOnly = true)
@@ -78,7 +75,7 @@ public class VilkaarsresultatService {
     public void registrerVilkår(long behandlingID, List<VilkaarDto> vilkaarDtoer) {
         validerVilkår(vilkaarDtoer);
         Behandlingsresultat behandlingsresultat = behandlingsresultatService.hentBehandlingsresultat(behandlingID);
-        tømVilkårForBehandlingsresultat(behandlingsresultat);
+        behandlingsresultatService.tømVilkårsresultatFraBehandlingsresultat(behandlingID);
         vilkaarsresultatRepo.flush();
 
         for (VilkaarDto vilkaarDto : vilkaarDtoer) {
@@ -89,17 +86,6 @@ public class VilkaarsresultatService {
                 vilkaarDto.getBegrunnelseFritekst(),
                 vilkaarDto.getBegrunnelseFritekstEngelsk());
             vilkaarsresultatRepo.save(vilkaarsresultat);
-        }
-    }
-
-    @Transactional
-    public void tømVilkårForBehandlingsresultat(Behandlingsresultat behandlingsresultat) {
-        var behandling = behandlingsresultat.getBehandling();
-        var fagsak = behandling.getFagsak();
-        if (fagsak.erSakstypeEøs() && !saksbehandlingRegler.harIngenFlyt(behandling)) {
-            vilkaarsresultatRepo.deleteByBehandlingsresultatAndVilkaarNotIn(behandlingsresultat, IMMUTABLE_VILKAAR);
-        } else {
-            vilkaarsresultatRepo.deleteByBehandlingsresultatId(behandlingsresultat.getId());
         }
     }
 

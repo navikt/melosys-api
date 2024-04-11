@@ -8,13 +8,18 @@ import java.util.Set;
 import no.nav.melosys.domain.*;
 import no.nav.melosys.domain.avklartefakta.Avklartefakta;
 import no.nav.melosys.domain.folketrygden.MedlemAvFolketrygden;
+import no.nav.melosys.domain.kodeverk.Sakstemaer;
+import no.nav.melosys.domain.kodeverk.Sakstyper;
 import no.nav.melosys.domain.kodeverk.Utfallregistreringunntak;
+import no.nav.melosys.domain.kodeverk.Vilkaar;
 import no.nav.melosys.domain.kodeverk.begrunnelser.Henleggelsesgrunner;
 import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingsresultattyper;
+import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingstema;
+import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingstyper;
 import no.nav.melosys.exception.FunksjonellException;
 import no.nav.melosys.exception.IkkeFunnetException;
 import no.nav.melosys.repository.BehandlingsresultatRepository;
-import no.nav.melosys.service.vilkaar.VilkaarsresultatService;
+import no.nav.melosys.service.saksbehandling.SaksbehandlingRegler;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -36,13 +41,13 @@ class BehandlingsresultatServiceTest {
     @Mock
     private BehandlingsresultatRepository behandlingsresultatRepo;
     @Mock
-    private VilkaarsresultatService vilkaarsresultatService;
+    private SaksbehandlingRegler saksbehandlingRegler;
 
     private BehandlingsresultatService behandlingsresultatService;
 
     @BeforeEach
     public void setUp() {
-        behandlingsresultatService = spy(new BehandlingsresultatService(behandlingsresultatRepo, vilkaarsresultatService));
+        behandlingsresultatService = spy(new BehandlingsresultatService(behandlingsresultatRepo, saksbehandlingRegler));
     }
 
     @Test
@@ -72,7 +77,7 @@ class BehandlingsresultatServiceTest {
         assertThat(behandlingsresultat.getBegrunnelseFritekst()).isNull();
         assertThat(behandlingsresultat.getNyVurderingBakgrunn()).isNull();
         assertThat(behandlingsresultat.getTrygdeavgiftFritekst()).isNull();
-        verify(vilkaarsresultatService).tømVilkårForBehandlingsresultat(behandlingsresultat);
+        verify(behandlingsresultatService).tømVilkårsresultatFraBehandlingsresultat(behandlingsresultat.getId());
     }
 
     @Test
@@ -249,5 +254,80 @@ class BehandlingsresultatServiceTest {
         assertThat(capturedBehandlingsresultat.getBegrunnelseFritekst()).isEqualTo("fritekst for begrunnelse");
         assertThat(capturedBehandlingsresultat.getInnledningFritekst()).isEqualTo("fritekst for innledning");
         assertThat(capturedBehandlingsresultat.getTrygdeavgiftFritekst()).isEqualTo("fritekst for trygdeavgift");
+    }
+
+    @Test
+    void tømVilkårsresultatFraBehandlingsresultat_sakstypeIkkeEøs_sletterAlleVilkår() {
+        long behandlingID = 1L;
+        var fagsak = new Fagsak();
+        fagsak.setType(Sakstyper.FTRL);
+        Behandlingsresultat behandlingsresultat = new Behandlingsresultat();
+        behandlingsresultat.setId(behandlingID);
+        behandlingsresultat.setBehandling(new Behandling());
+        behandlingsresultat.getBehandling().setFagsak(fagsak);
+        Vilkaarsresultat vilkaarsresultat = new Vilkaarsresultat();
+        vilkaarsresultat.setId(1L);
+        behandlingsresultat.setVilkaarsresultater(new HashSet<>(Collections.singleton(vilkaarsresultat)));
+        when(behandlingsresultatRepo.findById(behandlingID)).thenReturn(Optional.of(behandlingsresultat));
+
+        behandlingsresultatService.tømVilkårsresultatFraBehandlingsresultat(behandlingID);
+
+        verify(behandlingsresultatRepo).save(behandlingsresultat);
+        assertThat(behandlingsresultat.getVilkaarsresultater()).isEmpty();
+    }
+
+    @Test
+    void tømVilkårsresultatFraBehandlingsresultat_sakstypeEøsMenIngenFlyt_sletterAlleVilkår() {
+        long behandlingID = 1L;
+        var fagsak = new Fagsak();
+        fagsak.setType(Sakstyper.EU_EOS);
+        Behandling behandling = new Behandling();
+        behandling.setId(behandlingID);
+        behandling.setFagsak(fagsak);
+        behandling.setTema(Behandlingstema.UTSENDT_ARBEIDSTAKER);
+        behandling.setType(Behandlingstyper.HENVENDELSE);
+        Behandlingsresultat behandlingsresultat = new Behandlingsresultat();
+        behandlingsresultat.setId(behandlingID);
+        behandlingsresultat.setBehandling(new Behandling());
+        behandlingsresultat.getBehandling().setFagsak(fagsak);
+        when(saksbehandlingRegler.harIngenFlyt(any())).thenReturn(true);
+        when(behandlingsresultatRepo.findById(behandlingID)).thenReturn(Optional.of(behandlingsresultat));
+
+        behandlingsresultatService.tømVilkårsresultatFraBehandlingsresultat(behandlingID);
+
+        verify(behandlingsresultatRepo).save(behandlingsresultat);
+        assertThat(behandlingsresultat.getVilkaarsresultater()).isEmpty();
+    }
+
+    @Test
+    void tømVilkårsresultatFraBehandlingsresultat_sakstypeEøsOgHarFlyt_sletterIkkeInngangsvilkår() {
+        long behandlingID = 1L;
+        var fagsak = new Fagsak();
+        fagsak.setType(Sakstyper.EU_EOS);
+        fagsak.setTema(Sakstemaer.MEDLEMSKAP_LOVVALG);
+        var behandling = new Behandling();
+        behandling.setFagsak(fagsak);
+        behandling.setTema(Behandlingstema.UTSENDT_ARBEIDSTAKER);
+        behandling.setType(Behandlingstyper.FØRSTEGANG);
+        Behandlingsresultat behandlingsresultat = new Behandlingsresultat();
+        behandlingsresultat.setId(behandlingID);
+        behandlingsresultat.setBehandling(behandling);
+
+        Vilkaarsresultat vilkaarsresultat = new Vilkaarsresultat();
+        vilkaarsresultat.setId(1L);
+        vilkaarsresultat.setVilkaar(Vilkaar.FO_883_2004_INNGANGSVILKAAR);
+        Vilkaarsresultat vilkaarsresultatSomSkalSlettes = new Vilkaarsresultat();
+        vilkaarsresultatSomSkalSlettes.setId(2L);
+        vilkaarsresultatSomSkalSlettes.setVilkaar(Vilkaar.FO_883_2004_ART12_1);
+        behandlingsresultat.setVilkaarsresultater(new HashSet<>(Set.of(vilkaarsresultat, vilkaarsresultatSomSkalSlettes)));
+        when(saksbehandlingRegler.harIngenFlyt(behandling)).thenReturn(false);
+        when(behandlingsresultatRepo.findById(behandlingID)).thenReturn(Optional.of(behandlingsresultat));
+
+
+        behandlingsresultatService.tømVilkårsresultatFraBehandlingsresultat(behandlingID);
+
+
+        verify(behandlingsresultatRepo).save(behandlingsresultat);
+        assertThat(behandlingsresultat.getVilkaarsresultater()).containsExactly(vilkaarsresultat);
     }
 }
