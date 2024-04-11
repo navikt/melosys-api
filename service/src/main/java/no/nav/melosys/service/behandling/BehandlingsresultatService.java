@@ -37,25 +37,26 @@ public class BehandlingsresultatService {
 
     @Transactional
     public void tømBehandlingsresultat(long behandlingID) {
-        Behandlingsresultat behandlingsresultat = behandlingsresultatRepository.findById(behandlingID).orElse(null);
-        if (behandlingsresultat != null) {
-            log.info("Fjerner avklarte fakta, lovvalgsperioder, medlemAvFolketrygden og vilkårsresultater fra behandlingsresultat med behandlingID: {} ", behandlingID);
-            behandlingsresultat.getAvklartefakta().clear();
-            behandlingsresultat.getLovvalgsperioder().clear();
-            behandlingsresultat.setMedlemAvFolketrygden(null);
-            behandlingsresultat.setUtfallRegistreringUnntak(null);
-            behandlingsresultat.setBegrunnelseFritekst(null);
-            behandlingsresultat.setInnledningFritekst(null);
-            behandlingsresultat.setNyVurderingBakgrunn(null);
-            behandlingsresultat.setTrygdeavgiftFritekst(null);
-            tømVilkårsresultatFraBehandlingsresultat(behandlingID);
-            behandlingsresultatRepository.save(behandlingsresultat);
-        }
+        Behandlingsresultat behandlingsresultat = behandlingsresultatRepository.findById(behandlingID)
+            .orElseThrow(() -> new IkkeFunnetException(KAN_IKKE_FINNE_BEHANDLINGSRESULTAT + behandlingID));
+
+        log.info("Fjerner avklarte fakta, lovvalgsperioder, medlemAvFolketrygden og vilkårsresultater fra behandlingsresultat med behandlingID: {} ", behandlingID);
+        behandlingsresultat.getAvklartefakta().clear();
+        behandlingsresultat.getLovvalgsperioder().clear();
+        behandlingsresultat.setMedlemAvFolketrygden(null);
+        behandlingsresultat.setUtfallRegistreringUnntak(null);
+        behandlingsresultat.setBegrunnelseFritekst(null);
+        behandlingsresultat.setInnledningFritekst(null);
+        behandlingsresultat.setNyVurderingBakgrunn(null);
+        behandlingsresultat.setTrygdeavgiftFritekst(null);
+        tømVilkårsresultatFraBehandlingsresultat(behandlingID);
+        behandlingsresultatRepository.save(behandlingsresultat);
     }
 
     @Transactional
     public void tømVilkårsresultatFraBehandlingsresultat(long behandlingID) {
-        Behandlingsresultat behandlingsresultat = behandlingsresultatRepository.findById(behandlingID).orElse(null);
+        Behandlingsresultat behandlingsresultat = behandlingsresultatRepository.findById(behandlingID)
+            .orElseThrow(() -> new IkkeFunnetException(KAN_IKKE_FINNE_BEHANDLINGSRESULTAT + behandlingID));
 
         var behandling = behandlingsresultat.getBehandling();
         var fagsak = behandling.getFagsak();
