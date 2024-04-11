@@ -13,7 +13,6 @@ import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingsresultattyper;
 import no.nav.melosys.exception.FunksjonellException;
 import no.nav.melosys.exception.IkkeFunnetException;
 import no.nav.melosys.repository.BehandlingsresultatRepository;
-import no.nav.melosys.service.vilkaar.VilkaarsresultatService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
@@ -26,12 +25,12 @@ public class BehandlingsresultatService {
     public static final String KAN_IKKE_FINNE_BEHANDLINGSRESULTAT = "Kan ikke finne behandlingsresultat for behandling: ";
 
     private final BehandlingsresultatRepository behandlingsresultatRepository;
-    private final VilkaarsresultatService vilkaarsresultatService;
+    private final BehandlingsresultatVilkaarsresultatService behandlingsresultatVilkaarsresultatService;
 
     public BehandlingsresultatService(BehandlingsresultatRepository behandlingsresultatRepository,
-                                      VilkaarsresultatService vilkaarsresultatService) {
+                                      BehandlingsresultatVilkaarsresultatService behandlingsresultatVilkaarsresultatService) {
         this.behandlingsresultatRepository = behandlingsresultatRepository;
-        this.vilkaarsresultatService = vilkaarsresultatService;
+        this.behandlingsresultatVilkaarsresultatService = behandlingsresultatVilkaarsresultatService;
     }
 
     @Transactional
@@ -48,7 +47,7 @@ public class BehandlingsresultatService {
         behandlingsresultat.setInnledningFritekst(null);
         behandlingsresultat.setNyVurderingBakgrunn(null);
         behandlingsresultat.setTrygdeavgiftFritekst(null);
-        vilkaarsresultatService.tømVilkårsresultatFraBehandlingsresultat(behandlingID);
+        behandlingsresultatVilkaarsresultatService.tømVilkårsresultatFraBehandlingsresultat(behandlingID);
         behandlingsresultatRepository.save(behandlingsresultat);
     }
 

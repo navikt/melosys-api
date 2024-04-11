@@ -25,7 +25,7 @@ import no.nav.melosys.service.dokument.brev.datagrunnlag.BrevDataGrunnlag;
 import no.nav.melosys.service.kodeverk.KodeverkService;
 import no.nav.melosys.service.persondata.PersonopplysningerObjectFactory;
 import no.nav.melosys.service.registeropplysninger.OrganisasjonOppslagService;
-import no.nav.melosys.service.vilkaar.VilkaarsresultatService;
+import no.nav.melosys.service.behandling.BehandlingsresultatVilkaarsresultatService;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -53,7 +53,7 @@ class BrevDataByggerAnmodningUnntakTest {
     @Mock
     OrganisasjonOppslagService organisasjonOppslagService;
     @Mock
-    VilkaarsresultatService vilkaarsresultatService;
+    BehandlingsresultatVilkaarsresultatService behandlingsresultatVilkaarsresultatService;
     @Mock
     LandvelgerService landvelgerService;
     @Mock
@@ -65,10 +65,10 @@ class BrevDataByggerAnmodningUnntakTest {
 
     @BeforeEach
     public void setUp() {
-        brevDataByggerAnmodningUnntak = new BrevDataByggerAnmodningUnntak(landvelgerService, vilkaarsresultatService);
+        brevDataByggerAnmodningUnntak = new BrevDataByggerAnmodningUnntak(landvelgerService, behandlingsresultatVilkaarsresultatService);
 
-        when(vilkaarsresultatService.harVilkaarForArtikkel12(anyLong())).thenCallRealMethod();
-        when(vilkaarsresultatService.finnVilkaarsresultat(anyLong(), eq(Vilkaar.FO_883_2004_ART16_1)))
+        when(behandlingsresultatVilkaarsresultatService.harVilkaarForArtikkel12(anyLong())).thenCallRealMethod();
+        when(behandlingsresultatVilkaarsresultatService.finnVilkaarsresultat(anyLong(), eq(Vilkaar.FO_883_2004_ART16_1)))
             .thenReturn(Optional.of(lagVilkaarsresultat(Vilkaar.FO_883_2004_ART16_1, true, KORT_OPPDRAG_RETUR_NORSK_AG)));
     }
 
@@ -132,7 +132,7 @@ class BrevDataByggerAnmodningUnntakTest {
 
     @Test
     void lag_brevDataMedArt121_girAnmodningBegrunnelser() {
-        when(vilkaarsresultatService.finnVilkaarsresultat(anyLong(), eq(Vilkaar.FO_883_2004_ART12_2)))
+        when(behandlingsresultatVilkaarsresultatService.finnVilkaarsresultat(anyLong(), eq(Vilkaar.FO_883_2004_ART12_2)))
             .thenReturn(Optional.of(lagVilkaarsresultat(Vilkaar.FO_883_2004_ART12_2, false, UTSENDELSE_OVER_24_MN)));
 
         Behandling behandling = lagBehandling();
@@ -143,7 +143,7 @@ class BrevDataByggerAnmodningUnntakTest {
 
     @Test
     void lag_brevDataMedArt122_girAnmodningBegrunnelser() {
-        when(vilkaarsresultatService.finnVilkaarsresultat(anyLong(), eq(Vilkaar.FO_883_2004_ART12_2)))
+        when(behandlingsresultatVilkaarsresultatService.finnVilkaarsresultat(anyLong(), eq(Vilkaar.FO_883_2004_ART12_2)))
             .thenReturn(Optional.of(lagVilkaarsresultat(Vilkaar.FO_883_2004_ART12_2, false, UTSENDELSE_OVER_24_MN)));
 
         Behandling behandling = lagBehandling();
@@ -154,7 +154,7 @@ class BrevDataByggerAnmodningUnntakTest {
 
     @Test
     void lag_brevDataMedOppfyltArt121_girAnmodningBegrunnelser() {
-        when(vilkaarsresultatService.finnVilkaarsresultat(anyLong(), eq(Vilkaar.FO_883_2004_ART12_2)))
+        when(behandlingsresultatVilkaarsresultatService.finnVilkaarsresultat(anyLong(), eq(Vilkaar.FO_883_2004_ART12_2)))
             .thenReturn(Optional.of(lagVilkaarsresultat(Vilkaar.FO_883_2004_ART12_2, true)));
 
         Behandling behandling = lagBehandling();
@@ -167,7 +167,7 @@ class BrevDataByggerAnmodningUnntakTest {
     void lag_brevDataMedFritekst() {
         Vilkaarsresultat vilkaar = lagVilkaarsresultat(Vilkaar.FO_883_2004_ART16_1, true, KORT_OPPDRAG_RETUR_NORSK_AG);
         vilkaar.setBegrunnelseFritekst("FRITEKST");
-        when(vilkaarsresultatService.finnVilkaarsresultat(anyLong(), eq(Vilkaar.FO_883_2004_ART16_1))).thenReturn(Optional.of(vilkaar));
+        when(behandlingsresultatVilkaarsresultatService.finnVilkaarsresultat(anyLong(), eq(Vilkaar.FO_883_2004_ART16_1))).thenReturn(Optional.of(vilkaar));
 
         Behandling behandling = lagBehandling();
         BrevDataAnmodningUnntak brevData = (BrevDataAnmodningUnntak) brevDataByggerAnmodningUnntak.lag(lagBrevressurser(behandling), saksbehandler);

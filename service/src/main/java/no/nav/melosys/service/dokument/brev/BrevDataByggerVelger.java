@@ -11,7 +11,7 @@ import no.nav.melosys.service.persondata.PersondataFasade;
 import no.nav.melosys.service.saksopplysninger.SaksopplysningerService;
 import no.nav.melosys.service.unntak.AnmodningsperiodeService;
 import no.nav.melosys.service.utpeking.UtpekingService;
-import no.nav.melosys.service.vilkaar.VilkaarsresultatService;
+import no.nav.melosys.service.behandling.BehandlingsresultatVilkaarsresultatService;
 import org.springframework.stereotype.Component;
 
 @Component
@@ -23,7 +23,7 @@ public class BrevDataByggerVelger {
     private final SaksopplysningerService saksopplysningerService;
     private final UtenlandskMyndighetService utenlandskMyndighetService;
     private final UtpekingService utpekingService;
-    private final VilkaarsresultatService vilkaarsresultatService;
+    private final BehandlingsresultatVilkaarsresultatService behandlingsresultatVilkaarsresultatService;
     private final PersondataFasade persondataFasade;
     private final MottatteOpplysningerService mottatteOpplysningerService;
 
@@ -34,7 +34,7 @@ public class BrevDataByggerVelger {
                                 SaksopplysningerService saksopplysningerService,
                                 UtenlandskMyndighetService utenlandskMyndighetService,
                                 UtpekingService utpekingService,
-                                VilkaarsresultatService vilkaarsresultatService,
+                                BehandlingsresultatVilkaarsresultatService behandlingsresultatVilkaarsresultatService,
                                 PersondataFasade persondataFasade,
                                 MottatteOpplysningerService mottatteOpplysningerService) {
         this.anmodningsperiodeService = anmodningsperiodeService;
@@ -44,7 +44,7 @@ public class BrevDataByggerVelger {
         this.saksopplysningerService = saksopplysningerService;
         this.utenlandskMyndighetService = utenlandskMyndighetService;
         this.utpekingService = utpekingService;
-        this.vilkaarsresultatService = vilkaarsresultatService;
+        this.behandlingsresultatVilkaarsresultatService = behandlingsresultatVilkaarsresultatService;
         this.persondataFasade = persondataFasade;
         this.mottatteOpplysningerService = mottatteOpplysningerService;
     }
@@ -53,16 +53,16 @@ public class BrevDataByggerVelger {
         return switch (produserbartDokument) {
             case ATTEST_A1 -> lagBrevDataByggerA1(brevbestillingDto);
             case AVSLAG_ARBEIDSGIVER -> new BrevDataByggerAvslagArbeidsgiver(landvelgerService, lovvalgsperiodeService,
-                vilkaarsresultatService);
+                behandlingsresultatVilkaarsresultatService);
             case AVSLAG_YRKESAKTIV -> new BrevDataByggerAvslagYrkesaktiv(landvelgerService, anmodningsperiodeService, brevbestillingDto,
-                vilkaarsresultatService);
-            case ORIENTERING_ANMODNING_UNNTAK -> new BrevDataByggerAnmodningUnntak(landvelgerService, vilkaarsresultatService);
+                behandlingsresultatVilkaarsresultatService);
+            case ORIENTERING_ANMODNING_UNNTAK -> new BrevDataByggerAnmodningUnntak(landvelgerService, behandlingsresultatVilkaarsresultatService);
             case ANMODNING_UNNTAK -> lagBrevDataByggerA001(brevbestillingDto);
             case INNVILGELSE_YRKESAKTIV -> lagBrevDataByggerInnvilgelse(brevbestillingDto);
             case INNVILGELSE_YRKESAKTIV_FLERE_LAND -> lagBrevDataByggerInnvilgelseFlereLand(brevbestillingDto);
             case INNVILGELSE_ARBEIDSGIVER -> new BrevDataByggerInnvilgelse(avklartefaktaService, landvelgerService, lovvalgsperiodeService,
                 anmodningsperiodeService, brevbestillingDto,
-                vilkaarsresultatService, persondataFasade,
+                behandlingsresultatVilkaarsresultatService, persondataFasade,
                 mottatteOpplysningerService);
             case ORIENTERING_UTPEKING_UTLAND -> new BrevDataByggerUtpekingAnnetLand(utpekingService, brevbestillingDto);
             case ORIENTERING_VIDERESENDT_SOEKNAD -> new BrevDataByggerVideresend(landvelgerService, utenlandskMyndighetService,
@@ -82,7 +82,7 @@ public class BrevDataByggerVelger {
             new BrevDataByggerA001(lovvalgsperiodeService,
                 anmodningsperiodeService,
                 utenlandskMyndighetService,
-                vilkaarsresultatService);
+                behandlingsresultatVilkaarsresultatService);
         return new BrevDataByggerVedlegg(a001Bygger, brevbestillingDto);
     }
 
@@ -95,7 +95,7 @@ public class BrevDataByggerVelger {
             anmodningsperiodeService,
             brevbestillingDto,
             brevbyggerA1,
-            vilkaarsresultatService,
+            behandlingsresultatVilkaarsresultatService,
             persondataFasade,
             mottatteOpplysningerService);
     }

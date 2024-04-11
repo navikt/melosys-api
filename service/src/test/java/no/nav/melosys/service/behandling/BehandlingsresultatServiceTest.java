@@ -14,7 +14,6 @@ import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingsresultattyper;
 import no.nav.melosys.exception.FunksjonellException;
 import no.nav.melosys.exception.IkkeFunnetException;
 import no.nav.melosys.repository.BehandlingsresultatRepository;
-import no.nav.melosys.service.vilkaar.VilkaarsresultatService;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -40,11 +39,11 @@ class BehandlingsresultatServiceTest {
     private BehandlingsresultatService behandlingsresultatService;
 
     @Mock
-    private VilkaarsresultatService vilkaarsresultatService;
+    private BehandlingsresultatVilkaarsresultatService behandlingsresultatVilkaarsresultatService;
 
     @BeforeEach
     public void setUp() {
-        behandlingsresultatService = spy(new BehandlingsresultatService(behandlingsresultatRepo, vilkaarsresultatService));
+        behandlingsresultatService = spy(new BehandlingsresultatService(behandlingsresultatRepo, behandlingsresultatVilkaarsresultatService));
     }
 
     @Test
@@ -81,7 +80,7 @@ class BehandlingsresultatServiceTest {
         assertThat(behandlingsresultat.getBegrunnelseFritekst()).isNull();
         assertThat(behandlingsresultat.getNyVurderingBakgrunn()).isNull();
         assertThat(behandlingsresultat.getTrygdeavgiftFritekst()).isNull();
-        verify(vilkaarsresultatService).tømVilkårsresultatFraBehandlingsresultat(behandlingsresultat.getId());
+        verify(behandlingsresultatVilkaarsresultatService).tømVilkårsresultatFraBehandlingsresultat(behandlingsresultat.getId());
     }
 
     @Test

@@ -12,7 +12,7 @@ import no.nav.melosys.service.LovvalgsperiodeService;
 import no.nav.melosys.service.dokument.brev.BrevData;
 import no.nav.melosys.service.dokument.brev.BrevDataAvslagArbeidsgiver;
 import no.nav.melosys.service.dokument.brev.datagrunnlag.BrevDataGrunnlag;
-import no.nav.melosys.service.vilkaar.VilkaarsresultatService;
+import no.nav.melosys.service.behandling.BehandlingsresultatVilkaarsresultatService;
 
 import static no.nav.melosys.domain.kodeverk.Vilkaar.ART12_1_VESENTLIG_VIRKSOMHET;
 import static no.nav.melosys.domain.kodeverk.Vilkaar.FO_883_2004_ART12_1;
@@ -20,14 +20,14 @@ import static no.nav.melosys.domain.kodeverk.Vilkaar.FO_883_2004_ART12_1;
 public class BrevDataByggerAvslagArbeidsgiver implements BrevDataBygger {
     private final LandvelgerService landvelgerService;
     private final LovvalgsperiodeService lovvalgsperiodeService;
-    private final VilkaarsresultatService vilkaarsresultatService;
+    private final BehandlingsresultatVilkaarsresultatService behandlingsresultatVilkaarsresultatService;
 
     public BrevDataByggerAvslagArbeidsgiver(LandvelgerService landvelgerService,
                                             LovvalgsperiodeService lovvalgsperiodeService,
-                                            VilkaarsresultatService vilkaarsresultatService) {
+                                            BehandlingsresultatVilkaarsresultatService behandlingsresultatVilkaarsresultatService) {
         this.landvelgerService = landvelgerService;
         this.lovvalgsperiodeService = lovvalgsperiodeService;
-        this.vilkaarsresultatService = vilkaarsresultatService;
+        this.behandlingsresultatVilkaarsresultatService = behandlingsresultatVilkaarsresultatService;
     }
 
     @Override
@@ -48,7 +48,7 @@ public class BrevDataByggerAvslagArbeidsgiver implements BrevDataBygger {
     }
 
     private Set<VilkaarBegrunnelse> hentVilkaarbegrunnelser(long behandlingID, Vilkaar vilkaarType) {
-        Optional<Vilkaarsresultat> vilkårsresultat = vilkaarsresultatService.finnVilkaarsresultat(behandlingID, vilkaarType);
+        Optional<Vilkaarsresultat> vilkårsresultat = behandlingsresultatVilkaarsresultatService.finnVilkaarsresultat(behandlingID, vilkaarType);
 
         return vilkårsresultat.map(Vilkaarsresultat::getBegrunnelser).orElse(Collections.emptySet());
     }

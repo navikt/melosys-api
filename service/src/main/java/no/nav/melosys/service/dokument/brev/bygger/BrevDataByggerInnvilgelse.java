@@ -24,7 +24,7 @@ import no.nav.melosys.service.dokument.brev.datagrunnlag.BrevDataGrunnlag;
 import no.nav.melosys.service.mottatteopplysninger.MottatteOpplysningerService;
 import no.nav.melosys.service.persondata.PersondataFasade;
 import no.nav.melosys.service.unntak.AnmodningsperiodeService;
-import no.nav.melosys.service.vilkaar.VilkaarsresultatService;
+import no.nav.melosys.service.behandling.BehandlingsresultatVilkaarsresultatService;
 
 public class BrevDataByggerInnvilgelse implements BrevDataBygger {
     private final LandvelgerService landvelgerService;
@@ -33,7 +33,7 @@ public class BrevDataByggerInnvilgelse implements BrevDataBygger {
     private final BrevDataByggerA1 brevbyggerA1;
     private final AnmodningsperiodeService anmodningsperiodeService;
     private final LovvalgsperiodeService lovvalgsperiodeService;
-    private final VilkaarsresultatService vilkaarsresultatService;
+    private final BehandlingsresultatVilkaarsresultatService behandlingsresultatVilkaarsresultatService;
     private final PersondataFasade persondataFasade;
     private final MottatteOpplysningerService mottatteOpplysningerService;
 
@@ -42,7 +42,7 @@ public class BrevDataByggerInnvilgelse implements BrevDataBygger {
                                      LovvalgsperiodeService lovvalgsperiodeService,
                                      AnmodningsperiodeService anmodningsperiodeService,
                                      BrevbestillingDto brevbestillingDto,
-                                     VilkaarsresultatService vilkaarsresultatService,
+                                     BehandlingsresultatVilkaarsresultatService behandlingsresultatVilkaarsresultatService,
                                      PersondataFasade persondataFasade,
                                      MottatteOpplysningerService mottatteOpplysningerService) {
         this.landvelgerService = landvelgerService;
@@ -50,7 +50,7 @@ public class BrevDataByggerInnvilgelse implements BrevDataBygger {
         this.anmodningsperiodeService = anmodningsperiodeService;
         this.brevbestillingDto = brevbestillingDto;
         this.lovvalgsperiodeService = lovvalgsperiodeService;
-        this.vilkaarsresultatService = vilkaarsresultatService;
+        this.behandlingsresultatVilkaarsresultatService = behandlingsresultatVilkaarsresultatService;
         this.brevbyggerA1 = null;
         this.persondataFasade = persondataFasade;
         this.mottatteOpplysningerService = mottatteOpplysningerService;
@@ -62,7 +62,7 @@ public class BrevDataByggerInnvilgelse implements BrevDataBygger {
                                      AnmodningsperiodeService anmodningsperiodeService,
                                      BrevbestillingDto brevbestillingDto,
                                      BrevDataByggerA1 brevbyggerA1,
-                                     VilkaarsresultatService vilkaarsresultatService,
+                                     BehandlingsresultatVilkaarsresultatService behandlingsresultatVilkaarsresultatService,
                                      PersondataFasade persondataFasade,
                                      MottatteOpplysningerService mottatteOpplysningerService) {
         this.landvelgerService = landvelgerService;
@@ -71,7 +71,7 @@ public class BrevDataByggerInnvilgelse implements BrevDataBygger {
         this.brevbestillingDto = brevbestillingDto;
         this.brevbyggerA1 = brevbyggerA1;
         this.lovvalgsperiodeService = lovvalgsperiodeService;
-        this.vilkaarsresultatService = vilkaarsresultatService;
+        this.behandlingsresultatVilkaarsresultatService = behandlingsresultatVilkaarsresultatService;
         this.persondataFasade = persondataFasade;
         this.mottatteOpplysningerService = mottatteOpplysningerService;
     }
@@ -114,8 +114,8 @@ public class BrevDataByggerInnvilgelse implements BrevDataBygger {
             .map(Anmodningsperiode::getAnmodningsperiodeSvar)
             .orElse(null));
 
-        brevDataInnvilgelse.setArt16UtenArt12(vilkaarsresultatService.harVilkaarForArtikkel16(behandlingID) && !vilkaarsresultatService.harVilkaarForArtikkel12(behandlingID));
-        brevDataInnvilgelse.setTuristskip(vilkaarsresultatService.oppfyllerVilkaar(behandlingID, Vilkaar.FTRL_2_12_UNNTAK_TURISTSKIP));
+        brevDataInnvilgelse.setArt16UtenArt12(behandlingsresultatVilkaarsresultatService.harVilkaarForArtikkel16(behandlingID) && !behandlingsresultatVilkaarsresultatService.harVilkaarForArtikkel12(behandlingID));
+        brevDataInnvilgelse.setTuristskip(behandlingsresultatVilkaarsresultatService.oppfyllerVilkaar(behandlingID, Vilkaar.FTRL_2_12_UNNTAK_TURISTSKIP));
         brevDataInnvilgelse.setAvklarteMedfolgendeBarn(hentAvklarteMedfølgendeBarn(behandlingID));
 
         return brevDataInnvilgelse;

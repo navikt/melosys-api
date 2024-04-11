@@ -15,7 +15,7 @@ import no.nav.melosys.service.dokument.brev.BrevDataAvslagYrkesaktiv;
 import no.nav.melosys.service.dokument.brev.BrevbestillingDto;
 import no.nav.melosys.service.dokument.brev.datagrunnlag.BrevDataGrunnlag;
 import no.nav.melosys.service.unntak.AnmodningsperiodeService;
-import no.nav.melosys.service.vilkaar.VilkaarsresultatService;
+import no.nav.melosys.service.behandling.BehandlingsresultatVilkaarsresultatService;
 
 import static no.nav.melosys.domain.kodeverk.Vilkaar.FO_883_2004_ART16_1;
 
@@ -23,16 +23,16 @@ public class BrevDataByggerAvslagYrkesaktiv implements BrevDataBygger {
     private final LandvelgerService landvelgerService;
     private final AnmodningsperiodeService anmodningsperiodeService;
     private final BrevbestillingDto brevbestilling;
-    private final VilkaarsresultatService vilkaarsresultatService;
+    private final BehandlingsresultatVilkaarsresultatService behandlingsresultatVilkaarsresultatService;
 
     public BrevDataByggerAvslagYrkesaktiv(LandvelgerService landvelgerService,
                                           AnmodningsperiodeService anmodningsperiodeService,
                                           BrevbestillingDto brebestilling,
-                                          VilkaarsresultatService vilkaarsresultatService) {
+                                          BehandlingsresultatVilkaarsresultatService behandlingsresultatVilkaarsresultatService) {
         this.landvelgerService = landvelgerService;
         this.anmodningsperiodeService = anmodningsperiodeService;
         this.brevbestilling = brebestilling;
-        this.vilkaarsresultatService = vilkaarsresultatService;
+        this.behandlingsresultatVilkaarsresultatService = behandlingsresultatVilkaarsresultatService;
     }
 
     @Override
@@ -54,7 +54,7 @@ public class BrevDataByggerAvslagYrkesaktiv implements BrevDataBygger {
             brevData.setAnmodningsperiodeSvar(hentAnmodningsperiodeSvar(behandlingID).get());
         }
 
-        brevData.setArt16UtenArt12(vilkaarsresultatService.harVilkaarForArtikkel16(behandlingID) && !vilkaarsresultatService.harVilkaarForArtikkel12(behandlingID));
+        brevData.setArt16UtenArt12(behandlingsresultatVilkaarsresultatService.harVilkaarForArtikkel16(behandlingID) && !behandlingsresultatVilkaarsresultatService.harVilkaarForArtikkel12(behandlingID));
 
         return brevData;
     }
@@ -68,7 +68,7 @@ public class BrevDataByggerAvslagYrkesaktiv implements BrevDataBygger {
     }
 
     private Vilkaarsresultat hentFørsteGyldigeVilkaarsresultatForArt16(long behandlingID) {
-        return vilkaarsresultatService.finnVilkaarsresultat(behandlingID, FO_883_2004_ART16_1)
+        return behandlingsresultatVilkaarsresultatService.finnVilkaarsresultat(behandlingID, FO_883_2004_ART16_1)
             .filter(v -> !v.getBegrunnelser().isEmpty()).orElseThrow(() -> new FunksjonellException("Avslag yrkesaktiv må ha vilkår for art16"));
     }
 }

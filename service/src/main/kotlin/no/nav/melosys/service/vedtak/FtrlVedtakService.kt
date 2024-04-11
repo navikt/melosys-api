@@ -14,7 +14,7 @@ import no.nav.melosys.service.behandling.BehandlingsresultatService
 import no.nav.melosys.service.dokument.DokgenService
 import no.nav.melosys.service.dokument.brev.BrevbestillingDto
 import no.nav.melosys.service.oppgave.OppgaveService
-import no.nav.melosys.service.vilkaar.VilkaarsresultatService
+import no.nav.melosys.service.behandling.BehandlingsresultatVilkaarsresultatService
 import org.slf4j.LoggerFactory
 import org.springframework.stereotype.Service
 import java.time.LocalDate
@@ -26,7 +26,7 @@ class FtrlVedtakService(
     val prosessinstansService: ProsessinstansService,
     val oppgaveService: OppgaveService,
     val dokgenService: DokgenService,
-    val vilkaarsresultatService: VilkaarsresultatService
+    val behandlingsresultatVilkaarsresultatService: BehandlingsresultatVilkaarsresultatService
 ) {
     private val log = LoggerFactory.getLogger(FtrlVedtakService::class.java)
 
@@ -165,7 +165,7 @@ class FtrlVedtakService(
         behandlingsresultat.nyVurderingBakgrunn = null
         behandlingsresultat.innledningFritekst = null
         behandlingsresultat.trygdeavgiftFritekst = null
-        vilkaarsresultatService.tømVilkårsresultatFraBehandlingsresultat(behandlingID)
+        behandlingsresultatVilkaarsresultatService.tømVilkårsresultatFraBehandlingsresultat(behandlingID)
 
         behandlingsresultat.avklartefakta.clear()
         behandlingsresultat.avklartefakta.add(fullstendigManglendeInnbetaling)

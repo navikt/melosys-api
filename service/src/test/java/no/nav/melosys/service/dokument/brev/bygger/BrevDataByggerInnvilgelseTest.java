@@ -34,7 +34,7 @@ import no.nav.melosys.service.mottatteopplysninger.MottatteOpplysningerService;
 import no.nav.melosys.service.persondata.PersondataFasade;
 import no.nav.melosys.service.persondata.PersonopplysningerObjectFactory;
 import no.nav.melosys.service.unntak.AnmodningsperiodeService;
-import no.nav.melosys.service.vilkaar.VilkaarsresultatService;
+import no.nav.melosys.service.behandling.BehandlingsresultatVilkaarsresultatService;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -66,7 +66,7 @@ class BrevDataByggerInnvilgelseTest {
     @Mock
     AnmodningsperiodeService anmodningsperiodeService;
     @Mock
-    VilkaarsresultatService vilkaarsresultatService;
+    BehandlingsresultatVilkaarsresultatService behandlingsresultatVilkaarsresultatService;
     @Mock
     PersondataFasade persondataFasade;
     @Mock
@@ -121,7 +121,7 @@ class BrevDataByggerInnvilgelseTest {
             anmodningsperiodeService,
             brevbestillingDto,
             brevDataByggerA1,
-            vilkaarsresultatService,
+            behandlingsresultatVilkaarsresultatService,
             persondataFasade,
             mottatteOpplysningerService);
     }
@@ -152,7 +152,7 @@ class BrevDataByggerInnvilgelseTest {
 
     @Test
     void lag_medFtrl2_12_setterTuristSkipTrue() {
-        when(vilkaarsresultatService.oppfyllerVilkaar(behandling.getId(), Vilkaar.FTRL_2_12_UNNTAK_TURISTSKIP))
+        when(behandlingsresultatVilkaarsresultatService.oppfyllerVilkaar(behandling.getId(), Vilkaar.FTRL_2_12_UNNTAK_TURISTSKIP))
             .thenReturn(true);
 
         BrevDataInnvilgelse brevData = (BrevDataInnvilgelse) brevDataByggerInnvilgelse.lag(lagBrevdataGrunnlag(), saksbehandler);
@@ -188,8 +188,8 @@ class BrevDataByggerInnvilgelseTest {
 
     @Test
     void lag_erArt12_art16UtenArt12False() {
-        when(vilkaarsresultatService.harVilkaarForArtikkel12(anyLong())).thenReturn(true);
-        when(vilkaarsresultatService.harVilkaarForArtikkel16(anyLong())).thenReturn(true);
+        when(behandlingsresultatVilkaarsresultatService.harVilkaarForArtikkel12(anyLong())).thenReturn(true);
+        when(behandlingsresultatVilkaarsresultatService.harVilkaarForArtikkel16(anyLong())).thenReturn(true);
 
         BrevDataInnvilgelse brevData = (BrevDataInnvilgelse) brevDataByggerInnvilgelse.lag(lagBrevdataGrunnlag(), saksbehandler);
         assertThat(brevData.getArt16UtenArt12()).isFalse();
@@ -197,8 +197,8 @@ class BrevDataByggerInnvilgelseTest {
 
     @Test
     void lag_erArt16UtenArt12_art16UtenArt12True() {
-        when(vilkaarsresultatService.harVilkaarForArtikkel12(anyLong())).thenReturn(false);
-        when(vilkaarsresultatService.harVilkaarForArtikkel16(anyLong())).thenReturn(true);
+        when(behandlingsresultatVilkaarsresultatService.harVilkaarForArtikkel12(anyLong())).thenReturn(false);
+        when(behandlingsresultatVilkaarsresultatService.harVilkaarForArtikkel16(anyLong())).thenReturn(true);
 
         BrevDataInnvilgelse brevData = (BrevDataInnvilgelse) brevDataByggerInnvilgelse.lag(lagBrevdataGrunnlag(), saksbehandler);
         assertThat(brevData.getArt16UtenArt12()).isTrue();

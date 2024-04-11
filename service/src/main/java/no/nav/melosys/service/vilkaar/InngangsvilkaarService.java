@@ -13,6 +13,7 @@ import no.nav.melosys.domain.person.Statsborgerskap;
 import no.nav.melosys.exception.FunksjonellException;
 import no.nav.melosys.integrasjon.inngangsvilkar.InngangsvilkaarConsumer;
 import no.nav.melosys.service.behandling.BehandlingService;
+import no.nav.melosys.service.behandling.BehandlingsresultatVilkaarsresultatService;
 import no.nav.melosys.service.persondata.PersondataFasade;
 import no.nav.melosys.service.saksbehandling.SaksbehandlingRegler;
 import org.slf4j.Logger;
@@ -40,23 +41,23 @@ public class InngangsvilkaarService {
     private final BehandlingService behandlingService;
     private final InngangsvilkaarConsumer inngangsvilkaarConsumer;
     private final PersondataFasade persondataFasade;
-    private final VilkaarsresultatService vilkaarsresultatService;
+    private final BehandlingsresultatVilkaarsresultatService behandlingsresultatVilkaarsresultatService;
     private final SaksbehandlingRegler saksbehandlingRegler;
 
     public InngangsvilkaarService(BehandlingService behandlingService,
                                   InngangsvilkaarConsumer inngangsvilkaarConsumer,
                                   PersondataFasade persondataFasade,
-                                  VilkaarsresultatService vilkaarsresultatService,
+                                  BehandlingsresultatVilkaarsresultatService behandlingsresultatVilkaarsresultatService,
                                   SaksbehandlingRegler saksbehandlingRegler) {
         this.behandlingService = behandlingService;
         this.inngangsvilkaarConsumer = inngangsvilkaarConsumer;
         this.persondataFasade = persondataFasade;
-        this.vilkaarsresultatService = vilkaarsresultatService;
+        this.behandlingsresultatVilkaarsresultatService = behandlingsresultatVilkaarsresultatService;
         this.saksbehandlingRegler = saksbehandlingRegler;
     }
 
     public boolean oppfyllervurderingEF_883_2004(long behandlingID) {
-        return vilkaarsresultatService.oppfyllerVilkaar(behandlingID, FO_883_2004_INNGANGSVILKAAR);
+        return behandlingsresultatVilkaarsresultatService.oppfyllerVilkaar(behandlingID, FO_883_2004_INNGANGSVILKAAR);
     }
 
     public boolean skalVurdereInngangsvilkår(Behandling behandling) {
@@ -76,7 +77,7 @@ public class InngangsvilkaarService {
         final InngangsvilkaarVurdering vurderingEF_883_2004 = vurderInngangsvilkår(behandlingID, søknadsland, flereLandUkjentHvilke, søknadsperiode);
         final boolean erEF_883_2004 = vurderingEF_883_2004.isOppfylt();
 
-        vilkaarsresultatService.oppdaterVilkaarsresultat(behandlingID,
+        behandlingsresultatVilkaarsresultatService.oppdaterVilkaarsresultat(behandlingID,
             FO_883_2004_INNGANGSVILKAAR,
             erEF_883_2004,
             vurderingEF_883_2004.getBegrunnelseKode() == null ? Collections.emptySet() : Set.of(vurderingEF_883_2004.getBegrunnelseKode()));
@@ -132,7 +133,7 @@ public class InngangsvilkaarService {
 
     @Transactional
     public void overstyrInngangsvilkårTilOppfylt(long behandlingID) {
-        final var inngangsvilkaar = vilkaarsresultatService.finnVilkaarsresultat(behandlingID, FO_883_2004_INNGANGSVILKAAR);
+        final var inngangsvilkaar = behandlingsresultatVilkaarsresultatService.finnVilkaarsresultat(behandlingID, FO_883_2004_INNGANGSVILKAAR);
         if (inngangsvilkaar.isEmpty()) {
             throw new FunksjonellException("Inngangsvilkår er ikke vurdert for behandling " + behandlingID);
         }
@@ -150,6 +151,6 @@ public class InngangsvilkaarService {
             inngangsvilkaarBegrunnelseKoder.stream()
         ).collect(Collectors.toSet());
 
-        vilkaarsresultatService.oppdaterVilkaarsresultat(behandlingID, FO_883_2004_INNGANGSVILKAAR, true, begrunnelseKoder);
+        behandlingsresultatVilkaarsresultatService.oppdaterVilkaarsresultat(behandlingID, FO_883_2004_INNGANGSVILKAAR, true, begrunnelseKoder);
     }
 }

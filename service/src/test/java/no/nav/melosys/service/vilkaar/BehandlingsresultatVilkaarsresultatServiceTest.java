@@ -11,6 +11,7 @@ import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingstema;
 import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingstyper;
 import no.nav.melosys.exception.FunksjonellException;
 import no.nav.melosys.repository.BehandlingsresultatRepository;
+import no.nav.melosys.service.behandling.BehandlingsresultatVilkaarsresultatService;
 import no.nav.melosys.service.saksbehandling.SaksbehandlingRegler;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -25,17 +26,17 @@ import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
 @ExtendWith(MockitoExtension.class)
-class VilkaarsresultatServiceTest {
+class BehandlingsresultatVilkaarsresultatServiceTest {
     @Mock
     private SaksbehandlingRegler saksbehandlingRegler;
     @Mock
     private BehandlingsresultatRepository behandlingsresultatRepo;
 
-    private VilkaarsresultatService vilkaarsresultatService;
+    private BehandlingsresultatVilkaarsresultatService behandlingsresultatVilkaarsresultatService;
 
     @BeforeEach
     public void setUp() {
-        vilkaarsresultatService = new VilkaarsresultatService(behandlingsresultatRepo, saksbehandlingRegler);
+        behandlingsresultatVilkaarsresultatService = new BehandlingsresultatVilkaarsresultatService(behandlingsresultatRepo, saksbehandlingRegler);
     }
 
     @Test
@@ -54,7 +55,7 @@ class VilkaarsresultatServiceTest {
         when(behandlingsresultatRepo.findById(behandlingID)).thenReturn(Optional.of(behandlingsresultat));
 
 
-        List<VilkaarDto> vilkaarDtoListe = vilkaarsresultatService.hentVilkaar(behandlingID);
+        List<VilkaarDto> vilkaarDtoListe = behandlingsresultatVilkaarsresultatService.hentVilkaar(behandlingID);
 
 
         assertThat(vilkaarDtoListe).hasSize(vilkaarsresultatListe.size());
@@ -74,7 +75,7 @@ class VilkaarsresultatServiceTest {
         vilkaarDto.setBegrunnelseKoder(koder);
 
 
-        vilkaarsresultatService.registrerVilkår(behandlingID, Collections.singletonList(vilkaarDto));
+        behandlingsresultatVilkaarsresultatService.registrerVilkår(behandlingID, Collections.singletonList(vilkaarDto));
 
         verify(behandlingsresultatRepo).save(behandlingsresultat);
         assertThat(behandlingsresultat.getVilkaarsresultater()).hasSize(1);
@@ -92,7 +93,7 @@ class VilkaarsresultatServiceTest {
 
 
         assertThatExceptionOfType(FunksjonellException.class)
-            .isThrownBy(() -> vilkaarsresultatService.registrerVilkår(1L, Collections.singletonList(vilkaarDto)))
+            .isThrownBy(() -> behandlingsresultatVilkaarsresultatService.registrerVilkår(1L, Collections.singletonList(vilkaarDto)))
             .withMessageContaining("Kan ikke endre vilkår " + Vilkaar.FO_883_2004_INNGANGSVILKAAR);
     }
 
@@ -111,7 +112,7 @@ class VilkaarsresultatServiceTest {
         behandlingsresultat.setVilkaarsresultater(new HashSet<>(Collections.singleton(vilkaarsresultat)));
         when(behandlingsresultatRepo.findById(behandlingID)).thenReturn(Optional.of(behandlingsresultat));
 
-        vilkaarsresultatService.tømVilkårsresultatFraBehandlingsresultat(behandlingID);
+        behandlingsresultatVilkaarsresultatService.tømVilkårsresultatFraBehandlingsresultat(behandlingID);
 
         verify(behandlingsresultatRepo).saveAndFlush(behandlingsresultat);
         assertThat(behandlingsresultat.getVilkaarsresultater()).isEmpty();
@@ -134,7 +135,7 @@ class VilkaarsresultatServiceTest {
         when(saksbehandlingRegler.harIngenFlyt(any())).thenReturn(true);
         when(behandlingsresultatRepo.findById(behandlingID)).thenReturn(Optional.of(behandlingsresultat));
 
-        vilkaarsresultatService.tømVilkårsresultatFraBehandlingsresultat(behandlingID);
+        behandlingsresultatVilkaarsresultatService.tømVilkårsresultatFraBehandlingsresultat(behandlingID);
 
         verify(behandlingsresultatRepo).saveAndFlush(behandlingsresultat);
         assertThat(behandlingsresultat.getVilkaarsresultater()).isEmpty();
@@ -165,7 +166,7 @@ class VilkaarsresultatServiceTest {
         when(behandlingsresultatRepo.findById(behandlingID)).thenReturn(Optional.of(behandlingsresultat));
 
 
-        vilkaarsresultatService.tømVilkårsresultatFraBehandlingsresultat(behandlingID);
+        behandlingsresultatVilkaarsresultatService.tømVilkårsresultatFraBehandlingsresultat(behandlingID);
 
 
         verify(behandlingsresultatRepo).saveAndFlush(behandlingsresultat);

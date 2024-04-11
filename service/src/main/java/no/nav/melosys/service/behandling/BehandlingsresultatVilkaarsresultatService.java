@@ -1,4 +1,4 @@
-package no.nav.melosys.service.vilkaar;
+package no.nav.melosys.service.behandling;
 
 import java.util.*;
 import java.util.stream.Collectors;
@@ -12,6 +12,7 @@ import no.nav.melosys.exception.FunksjonellException;
 import no.nav.melosys.exception.IkkeFunnetException;
 import no.nav.melosys.repository.BehandlingsresultatRepository;
 import no.nav.melosys.service.saksbehandling.SaksbehandlingRegler;
+import no.nav.melosys.service.vilkaar.VilkaarDto;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -19,14 +20,14 @@ import static no.nav.melosys.domain.kodeverk.Vilkaar.*;
 import static no.nav.melosys.service.behandling.BehandlingsresultatService.KAN_IKKE_FINNE_BEHANDLINGSRESULTAT;
 
 @Service
-public class VilkaarsresultatService {
+public class BehandlingsresultatVilkaarsresultatService {
 
     private final BehandlingsresultatRepository behandlingsresultatRepository;
     private final SaksbehandlingRegler saksbehandlingRegler;
 
     public static final Collection<Vilkaar> IMMUTABLE_VILKAAR = Collections.singleton(FO_883_2004_INNGANGSVILKAAR);
 
-    public VilkaarsresultatService(
+    public BehandlingsresultatVilkaarsresultatService(
         BehandlingsresultatRepository behandlingsresultatRepository,
         SaksbehandlingRegler saksbehandlingRegler) {
         this.behandlingsresultatRepository = behandlingsresultatRepository;
