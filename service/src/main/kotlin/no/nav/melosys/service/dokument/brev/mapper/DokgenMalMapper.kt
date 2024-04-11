@@ -110,12 +110,7 @@ class DokgenMalMapper(
             Produserbaredokumenter.MANGELBREV_ARBEIDSGIVER -> MangelbrevArbeidsgiver.av(
                 (brevbestilling as MangelbrevBrevbestilling).toBuilder()
                     .medVedtaksdato(dokgenMapperDatahenter.hentVedtaksdato(brevbestilling.getBehandling().id))
-                    .medFullmektigNavn(
-                        dokgenMapperDatahenter.hentFullmektigNavn(
-                            brevbestilling.getBehandling().fagsak,
-                            Fullmaktstype.FULLMEKTIG_SØKNAD
-                        )
-                    )
+                    .medFullmektigNavn(dokgenMapperDatahenter.hentFullmektigNavn(brevbestilling, Fullmaktstype.FULLMEKTIG_SØKNAD))
                     .build(),
                 DokumentasjonSvarfrist.beregnFristPaaMangelbrevFraDagensDato()
             )
@@ -154,12 +149,7 @@ class DokgenMalMapper(
 
             Produserbaredokumenter.GENERELT_FRITEKSTBREV_BRUKER -> FritekstbrevBruker.av(
                 (brevbestilling as FritekstbrevBrevbestilling).toBuilder()
-                    .medNavnFullmektig(
-                        dokgenMapperDatahenter.hentFullmektigNavn(
-                            brevbestilling.getBehandling().fagsak,
-                            Fullmaktstype.FULLMEKTIG_SØKNAD
-                        )
-                    ).build(),
+                    .medNavnFullmektig(dokgenMapperDatahenter.hentFullmektigNavn(brevbestilling, Fullmaktstype.FULLMEKTIG_SØKNAD)).build(),
                 Mottakerroller.BRUKER
             )
 
@@ -169,12 +159,7 @@ class DokgenMalMapper(
 
             Produserbaredokumenter.GENERELT_FRITEKSTBREV_ARBEIDSGIVER -> FritekstbrevBruker.av(
                 (brevbestilling as FritekstbrevBrevbestilling).toBuilder()
-                    .medNavnFullmektig(
-                        dokgenMapperDatahenter.hentFullmektigNavn(
-                            brevbestilling.getBehandling().fagsak,
-                            Fullmaktstype.FULLMEKTIG_ARBEIDSGIVER
-                        )
-                    ).build(),
+                    .medNavnFullmektig(dokgenMapperDatahenter.hentFullmektigNavn(brevbestilling, Fullmaktstype.FULLMEKTIG_ARBEIDSGIVER)).build(),
                 Mottakerroller.ARBEIDSGIVER
             )
 
@@ -206,7 +191,8 @@ class DokgenMalMapper(
                 brevbestilling.behandling.opprinneligBehandling?.id?.let {
                     val behandlingsresultat = dokgenMapperDatahenter.hentBehandlingsresultat(it)
                     behandlingsresultat.medlemAvFolketrygden?.medlemskapsperioder?.firstOrNull()?.medlemskapstype
-                } ?: throw FunksjonellException("Forventer at behandling som tilhører varselbrevet har en opprinnelig behandling med medlemskapsperioder")
+                } ?: throw FunksjonellException("Forventer at behandling som tilhører varselbrevet har en opprinnelig behandling med medlemskapsperioder"),
+                dokgenMapperDatahenter.hentFullmektigNavn(brevbestilling, Fullmaktstype.FULLMEKTIG_SØKNAD)
             )
 
             Produserbaredokumenter.VEDTAK_OPPHOERT_MEDLEMSKAP -> VedtakOpphoertMedlemskap(brevbestilling as VedtakOpphoertMedlemskapBrevbestilling)
