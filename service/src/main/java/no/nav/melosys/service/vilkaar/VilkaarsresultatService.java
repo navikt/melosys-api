@@ -9,33 +9,41 @@ import no.nav.melosys.domain.Vilkaarsresultat;
 import no.nav.melosys.domain.kodeverk.Kodeverk;
 import no.nav.melosys.domain.kodeverk.Vilkaar;
 import no.nav.melosys.exception.FunksjonellException;
-import no.nav.melosys.repository.VilkaarsresultatRepository;
-import no.nav.melosys.service.behandling.BehandlingsresultatService;
+import no.nav.melosys.exception.IkkeFunnetException;
+import no.nav.melosys.repository.BehandlingsresultatRepository;
 import no.nav.melosys.service.saksbehandling.SaksbehandlingRegler;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import static no.nav.melosys.domain.kodeverk.Vilkaar.*;
+import static no.nav.melosys.service.behandling.BehandlingsresultatService.KAN_IKKE_FINNE_BEHANDLINGSRESULTAT;
 
 @Service
 public class VilkaarsresultatService {
-    private final BehandlingsresultatService behandlingsresultatService;
-    private final VilkaarsresultatRepository vilkaarsresultatRepo;
+
+    private final BehandlingsresultatRepository behandlingsresultatRepository;
+    private final SaksbehandlingRegler saksbehandlingRegler;
 
     public static final Collection<Vilkaar> IMMUTABLE_VILKAAR = Collections.singleton(FO_883_2004_INNGANGSVILKAAR);
 
-    public VilkaarsresultatService(BehandlingsresultatService behandlingsresultatService,
-                                   VilkaarsresultatRepository vilkaarsresultatRepo) {
-        this.behandlingsresultatService = behandlingsresultatService;
-        this.vilkaarsresultatRepo = vilkaarsresultatRepo;
+    public VilkaarsresultatService(
+        BehandlingsresultatRepository behandlingsresultatRepository,
+        SaksbehandlingRegler saksbehandlingRegler) {
+        this.behandlingsresultatRepository = behandlingsresultatRepository;
+        this.saksbehandlingRegler = saksbehandlingRegler;
+    }
+
+    public Behandlingsresultat hentBehandlingsresultat(long behandlingsid) {
+        return behandlingsresultatRepository.findById(behandlingsid)
+            .orElseThrow(() -> new IkkeFunnetException(KAN_IKKE_FINNE_BEHANDLINGSRESULTAT + behandlingsid));
     }
 
     @Transactional(readOnly = true)
     public List<VilkaarDto> hentVilkaar(long behandlingID) {
-        List<Vilkaarsresultat> vilkaarsresultatListe = vilkaarsresultatRepo.findByBehandlingsresultatId(behandlingID);
+        Behandlingsresultat behandlingsresultat = hentBehandlingsresultat(behandlingID);
 
         List<VilkaarDto> vilkaarDtoListe = new ArrayList<>();
-        for (Vilkaarsresultat vilkaarsresultat : vilkaarsresultatListe) {
+        for (Vilkaarsresultat vilkaarsresultat : behandlingsresultat.getVilkaarsresultater()) {
             VilkaarDto vilkaarDto = new VilkaarDto();
             vilkaarDto.setVilkaar(vilkaarsresultat.getVilkaar().getKode());
             vilkaarDto.setOppfylt(vilkaarsresultat.isOppfylt());
@@ -50,12 +58,15 @@ public class VilkaarsresultatService {
 
     @Transactional(readOnly = true)
     public Optional<Vilkaarsresultat> finnVilkaarsresultat(long behandlingID, Vilkaar vilkaar) {
-        return vilkaarsresultatRepo.findByBehandlingsresultatIdAndVilkaar(behandlingID, vilkaar);
+        return hentBehandlingsresultat(behandlingID).getVilkaarsresultater().stream()
+            .filter(vilkaarsresultat -> vilkaarsresultat.getVilkaar().equals(vilkaar))
+            .findFirst();
     }
 
     @Transactional(readOnly = true)
     public boolean oppfyllerVilkaar(long behandlingID, Vilkaar vilkaar) {
-        return vilkaarsresultatRepo.existsByBehandlingsresultatIdAndVilkaarAndOppfyltTrue(behandlingID, vilkaar);
+        return hentBehandlingsresultat(behandlingID).getVilkaarsresultater().stream()
+            .anyMatch(vilkaarsresultat -> vilkaar.equals(vilkaarsresultat.getVilkaar()) && vilkaarsresultat.isOppfylt());
     }
 
     @Transactional(readOnly = true)
@@ -74,19 +85,36 @@ public class VilkaarsresultatService {
     @Transactional
     public void registrerVilkår(long behandlingID, List<VilkaarDto> vilkaarDtoer) {
         validerVilkår(vilkaarDtoer);
-        Behandlingsresultat behandlingsresultat = behandlingsresultatService.hentBehandlingsresultat(behandlingID);
-        behandlingsresultatService.tømVilkårsresultatFraBehandlingsresultat(behandlingID);
-        vilkaarsresultatRepo.flush();
+        Behandlingsresultat behandlingsresultat = hentBehandlingsresultat(behandlingID);
+        tømVilkårsresultatFraBehandlingsresultat(behandlingID);
+        // Flush fordi vi potensielt legger til samme vilkåret igjen. INSERT kommer før DELETE i Hibernate, som skaper UNIQUE constraint problemer uten flush.
+        behandlingsresultatRepository.saveAndFlush(behandlingsresultat);
 
         for (VilkaarDto vilkaarDto : vilkaarDtoer) {
-            Vilkaarsresultat vilkaarsresultat = lagVilkaarsresultat(behandlingsresultat,
+            Vilkaarsresultat vilkaarsresultat = lagVilkaarsresultat(
+                behandlingsresultat,
                 Vilkaar.valueOf(vilkaarDto.getVilkaar()),
                 vilkaarDto.isOppfylt(),
                 vilkaarDto.getBegrunnelseKoder(),
                 vilkaarDto.getBegrunnelseFritekst(),
                 vilkaarDto.getBegrunnelseFritekstEngelsk());
-            vilkaarsresultatRepo.save(vilkaarsresultat);
+            behandlingsresultat.getVilkaarsresultater().add(vilkaarsresultat);
         }
+        behandlingsresultatRepository.save(behandlingsresultat);
+    }
+
+    @Transactional
+    public void tømVilkårsresultatFraBehandlingsresultat(long behandlingID) {
+        Behandlingsresultat behandlingsresultat = hentBehandlingsresultat(behandlingID);
+
+        var behandling = behandlingsresultat.getBehandling();
+        var fagsak = behandling.getFagsak();
+        if (fagsak.erSakstypeEøs() && !saksbehandlingRegler.harIngenFlyt(behandling)) {
+            behandlingsresultat.getVilkaarsresultater().removeIf(vilkaarsresultat -> !IMMUTABLE_VILKAAR.contains(vilkaarsresultat.getVilkaar()));
+        } else {
+            behandlingsresultat.getVilkaarsresultater().clear();
+        }
+        behandlingsresultatRepository.saveAndFlush(behandlingsresultat);
     }
 
     private void validerVilkår(List<VilkaarDto> vilkaarDtoer) {
@@ -105,16 +133,18 @@ public class VilkaarsresultatService {
                                          Vilkaar vilkaar,
                                          boolean oppfylt,
                                          Set<Kodeverk> begrunnelseKoder) {
-        vilkaarsresultatRepo.deleteByBehandlingsresultatId(behandlingID);
-        vilkaarsresultatRepo.flush();
-        vilkaarsresultatRepo.save(
-            lagVilkaarsresultat(
-                behandlingsresultatService.hentBehandlingsresultat(behandlingID),
-                vilkaar,
-                oppfylt,
-                begrunnelseKoder.stream().map(Kodeverk::getKode).collect(Collectors.toSet())
-            )
-        );
+        Behandlingsresultat behandlingsresultat = hentBehandlingsresultat(behandlingID);
+        behandlingsresultat.getVilkaarsresultater().clear();
+        // Flush fordi vi potensielt legger til samme vilkåret igjen. INSERT kommer før DELETE i Hibernate, som skaper UNIQUE constraint problemer uten flush.
+        behandlingsresultatRepository.saveAndFlush(behandlingsresultat);
+        Vilkaarsresultat vilkaarsresultat = lagVilkaarsresultat(
+            behandlingsresultat,
+            vilkaar,
+            oppfylt,
+            begrunnelseKoder.stream().map(Kodeverk::getKode).collect(Collectors.toSet()));
+
+        behandlingsresultat.getVilkaarsresultater().add(vilkaarsresultat);
+        behandlingsresultatRepository.save(behandlingsresultat);
     }
 
     private Vilkaarsresultat lagVilkaarsresultat(Behandlingsresultat behandlingsresultat,

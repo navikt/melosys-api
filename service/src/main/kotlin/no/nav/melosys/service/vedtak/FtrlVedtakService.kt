@@ -165,7 +165,7 @@ class FtrlVedtakService(
         behandlingsresultat.nyVurderingBakgrunn = null
         behandlingsresultat.innledningFritekst = null
         behandlingsresultat.trygdeavgiftFritekst = null
-        behandlingsresultatService.tømVilkårsresultatFraBehandlingsresultat(behandlingID)
+        vilkaarsresultatService.tømVilkårsresultatFraBehandlingsresultat(behandlingID)
 
         behandlingsresultat.avklartefakta.clear()
         behandlingsresultat.avklartefakta.add(fullstendigManglendeInnbetaling)

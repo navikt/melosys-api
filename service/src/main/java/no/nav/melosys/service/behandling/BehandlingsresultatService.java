@@ -13,26 +13,25 @@ import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingsresultattyper;
 import no.nav.melosys.exception.FunksjonellException;
 import no.nav.melosys.exception.IkkeFunnetException;
 import no.nav.melosys.repository.BehandlingsresultatRepository;
-import no.nav.melosys.service.saksbehandling.SaksbehandlingRegler;
+import no.nav.melosys.service.vilkaar.VilkaarsresultatService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-import static no.nav.melosys.service.vilkaar.VilkaarsresultatService.IMMUTABLE_VILKAAR;
-
 @Service
 public class BehandlingsresultatService {
     private static final Logger log = LoggerFactory.getLogger(BehandlingsresultatService.class);
-    private static final String KAN_IKKE_FINNE_BEHANDLINGSRESULTAT = "Kan ikke finne behandlingsresultat for behandling: ";
+    //TODO: Ha generisk toppklasse?
+    public static final String KAN_IKKE_FINNE_BEHANDLINGSRESULTAT = "Kan ikke finne behandlingsresultat for behandling: ";
 
     private final BehandlingsresultatRepository behandlingsresultatRepository;
-    private final SaksbehandlingRegler saksbehandlingRegler;
+    private final VilkaarsresultatService vilkaarsresultatService;
 
     public BehandlingsresultatService(BehandlingsresultatRepository behandlingsresultatRepository,
-                                      SaksbehandlingRegler saksbehandlingRegler) {
+                                      VilkaarsresultatService vilkaarsresultatService) {
         this.behandlingsresultatRepository = behandlingsresultatRepository;
-        this.saksbehandlingRegler = saksbehandlingRegler;
+        this.vilkaarsresultatService = vilkaarsresultatService;
     }
 
     @Transactional
@@ -49,22 +48,7 @@ public class BehandlingsresultatService {
         behandlingsresultat.setInnledningFritekst(null);
         behandlingsresultat.setNyVurderingBakgrunn(null);
         behandlingsresultat.setTrygdeavgiftFritekst(null);
-        tømVilkårsresultatFraBehandlingsresultat(behandlingID);
-        behandlingsresultatRepository.save(behandlingsresultat);
-    }
-
-    @Transactional
-    public void tømVilkårsresultatFraBehandlingsresultat(long behandlingID) {
-        Behandlingsresultat behandlingsresultat = behandlingsresultatRepository.findById(behandlingID)
-            .orElseThrow(() -> new IkkeFunnetException(KAN_IKKE_FINNE_BEHANDLINGSRESULTAT + behandlingID));
-
-        var behandling = behandlingsresultat.getBehandling();
-        var fagsak = behandling.getFagsak();
-        if (fagsak.erSakstypeEøs() && !saksbehandlingRegler.harIngenFlyt(behandling)) {
-            behandlingsresultat.getVilkaarsresultater().removeIf(vilkaarsresultat -> !IMMUTABLE_VILKAAR.contains(vilkaarsresultat.getVilkaar()));
-        } else {
-            behandlingsresultat.getVilkaarsresultater().clear();
-        }
+        vilkaarsresultatService.tømVilkårsresultatFraBehandlingsresultat(behandlingID);
         behandlingsresultatRepository.save(behandlingsresultat);
     }
 
