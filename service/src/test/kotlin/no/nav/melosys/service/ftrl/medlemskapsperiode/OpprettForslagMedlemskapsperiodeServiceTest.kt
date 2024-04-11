@@ -246,6 +246,23 @@ class OpprettForslagMedlemskapsperiodeServiceTest {
     }
 
     @Test
+    fun opprettForslagPåMedlemskapsperioder_trygdedekningMedYrkesskade_lagrerAvslåttMedlemskapsperiode() {
+        val behandlingsresultat = lagBehandlingsresultat().apply { vilkaarsresultater.add(lagVilkår()) }
+        (behandlingsresultat.behandling.mottatteOpplysninger.mottatteOpplysningerData as SøknadNorgeEllerUtenforEØS).trygdedekning =
+            Trygdedekninger.FTRL_2_9_FØRSTE_LEDD_B_TREDJE_LEDD_PENSJON_YRKESSKADE
+        every { behandlingsresultatService.hentBehandlingsresultat(BEH_RES_ID) } returns behandlingsresultat
+        every { medlemAvFolketrygdenRepository.save(any()) } returnsArgument 0
+        every { utledMottaksdato.getMottaksdato(any()) } returns LocalDate.now()
+
+
+        val medlemskapsperioder = opprettForslagMedlemskapsperiodeService.opprettForslagPåMedlemskapsperioder(BEH_RES_ID, BESTEMMELSE)
+
+        medlemskapsperioder.shouldNotBeEmpty()
+        medlemskapsperioder.shouldHaveSize(1)
+        medlemskapsperioder.map { it.innvilgelsesresultat }.get(0).shouldBe(InnvilgelsesResultat.AVSLAATT)
+    }
+
+    @Test
     fun opprettForslagPåMedlemskapsperioder_sakstypeEØS_kasterFeil() {
         every { behandlingsresultatService.hentBehandlingsresultat(BEH_RES_ID) } returns lagBehandlingsresultat().apply {
             behandling.fagsak.type = Sakstyper.EU_EOS

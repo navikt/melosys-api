@@ -110,32 +110,38 @@ object UtledMedlemskapsperioder {
 
     private fun lagMedlemskapsperioderFor2_8(dto: UtledMedlemskapsperioderDto): Collection<Medlemskapsperiode> {
         val søknadsperiode = dto.søknadsperiode
-
         val enMånedFørMottaksdato = dto.mottaksdatoSøknad.minusMonths(1)
-        if (søknadsperiode.fom == enMånedFørMottaksdato || søknadsperiode.fom.isAfter(enMånedFørMottaksdato)) {
-            return setOf(
-                lagPeriode(
-                    søknadsperiode,
-                    dto.trygdedekning,
-                    InnvilgelsesResultat.INNVILGET,
-                    dto.bestemmelse
-                )
-            )
+
+        if (dto.trygdedekning.erYrkesskade() || datoErTidligereEnn2ÅrFørMottaksdato(søknadsperiode.fom, dto.mottaksdatoSøknad)) {
+            return lagAvslåttPeriode(dto)
         }
 
-        if (datoErTidligereEnn2ÅrFørMottaksdato(søknadsperiode.fom, dto.mottaksdatoSøknad)) {
-            return setOf(
-                lagPeriode(
-                    søknadsperiode,
-                    dto.trygdedekning,
-                    InnvilgelsesResultat.AVSLAATT,
-                    dto.bestemmelse
-                )
-            )
+        if (søknadsperiode.fom == enMånedFørMottaksdato || søknadsperiode.fom.isAfter(enMånedFørMottaksdato)) {
+            return lagInnvilgetPeriode(dto)
         }
 
         return lagMedlemskapsperioderPeriodeStarterMindreEnn2ÅrFørMottaksdato(dto)
     }
+
+    private fun lagInnvilgetPeriode(dto: UtledMedlemskapsperioderDto): Collection<Medlemskapsperiode> =
+        setOf(
+            lagPeriode(
+                dto.søknadsperiode,
+                dto.trygdedekning,
+                InnvilgelsesResultat.INNVILGET,
+                dto.bestemmelse
+            )
+        )
+
+    private fun lagAvslåttPeriode(dto: UtledMedlemskapsperioderDto): Collection<Medlemskapsperiode> =
+        setOf(
+            lagPeriode(
+                dto.søknadsperiode,
+                dto.trygdedekning,
+                InnvilgelsesResultat.AVSLAATT,
+                dto.bestemmelse
+            )
+        )
 
     private fun lagMedlemskapsperioderPeriodeStarterMindreEnn2ÅrFørMottaksdato(dto: UtledMedlemskapsperioderDto): Collection<Medlemskapsperiode> {
         val søknadsperiode = dto.søknadsperiode
@@ -237,4 +243,13 @@ object UtledMedlemskapsperioder {
 
     private fun bestemmelseErParagraf(bestemmelse: Folketrygdloven_kap2_bestemmelser, paragraf: String): Boolean =
         bestemmelse.kode.startsWith("FTRL_KAP2_$paragraf")
+
+    private fun Trygdedekninger.erYrkesskade(): Boolean {
+        return listOf(
+            Trygdedekninger.FTRL_2_9_FØRSTE_LEDD_B_TREDJE_LEDD_PENSJON_YRKESSKADE,
+            Trygdedekninger.FTRL_2_9_FØRSTE_LEDD_C_TREDJE_LEDD_HELSE_PENSJON_YRKESSKADE,
+            Trygdedekninger.FTRL_2_9_FØRSTE_LEDD_C_ANDRE_LEDD_TREDJE_LEDD_HELSE_PENSJON_SYKE_FORELDREPENGER_YRKESSKADE,
+            Trygdedekninger.FTRL_2_9_TREDJE_LEDD_YRKESSKADE
+        ).contains(this)
+    }
 }
