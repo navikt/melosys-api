@@ -245,6 +245,9 @@ class LovligeKombinasjonerSaksbehandlingService(
         if (!unleash.isEnabled(ToggleName.BEHANDLINGSTYPE_KLAGE)) {
             behandlingstyper.remove(Behandlingstyper.KLAGE)
         }
+        if (!unleash.isEnabled(ToggleName.ÅRSAVREGNING)) {
+            behandlingstyper.remove(Behandlingstyper.ÅRSAVREGNING)
+        }
         if (unleash.isEnabled(ToggleName.SAKSBEHANDLING_MANGLENDE_INNBETALING)) {
             if (aktivBehandling?.erManglendeInnbetalingTrygdeavgift() == true) {
                 behandlingstyper = mutableSetOf(aktivBehandling.type)

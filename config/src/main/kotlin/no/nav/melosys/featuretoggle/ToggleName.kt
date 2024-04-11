@@ -7,4 +7,5 @@ object ToggleName {
     const val MELOSYS_FOLKETRYGDEN_2_7 = "melosys.folketrygden.2_7"
     const val MELOSYS_FTRL_YRKESAKTIV_PLIKTIGE_BESTEMMELSER = "melosys.ftrl.yrkesaktiv.pliktige_bestemmelser"
     const val MELOSYS_FTRL_YRKESSKADEFORDEL = "melosys.ftrl.yrkesskadefordel"
+    const val ÅRSAVREGNING = "aarsavregning"
 }
