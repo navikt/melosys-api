@@ -1,5 +1,8 @@
 package no.nav.melosys.service.lovligekombinasjoner;
 
+import java.util.List;
+import java.util.Set;
+
 import io.getunleash.FakeUnleash;
 import no.nav.melosys.domain.Anmodningsperiode;
 import no.nav.melosys.domain.Behandling;
@@ -19,9 +22,6 @@ import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
-
-import java.util.List;
-import java.util.Set;
 
 import static no.nav.melosys.domain.kodeverk.Sakstemaer.*;
 import static no.nav.melosys.domain.kodeverk.Sakstyper.*;
@@ -156,7 +156,7 @@ class LovligeKombinasjonerSaksbehandlingServiceTest {
             .hentMuligeBehandlingstyper(Aktoersroller.BRUKER, EU_EOS, TRYGDEAVGIFT, YRKESAKTIV, null, null);
 
 
-        assertThat(muligeTyper).containsExactlyInAnyOrder(NY_VURDERING, FØRSTEGANG, HENVENDELSE, KLAGE);
+        assertThat(muligeTyper).containsExactlyInAnyOrder(ÅRSAVREGNING, NY_VURDERING, FØRSTEGANG, HENVENDELSE, KLAGE);
     }
 
     @Test
@@ -256,7 +256,7 @@ class LovligeKombinasjonerSaksbehandlingServiceTest {
             .hentMuligeBehandlingstyper(Aktoersroller.BRUKER, FTRL, TRYGDEAVGIFT, YRKESAKTIV, null, null);
 
 
-        assertThat(muligeTyper).containsExactlyInAnyOrder(NY_VURDERING, FØRSTEGANG, HENVENDELSE, KLAGE);
+        assertThat(muligeTyper).containsExactlyInAnyOrder(ÅRSAVREGNING, NY_VURDERING, FØRSTEGANG, HENVENDELSE, KLAGE);
     }
 
     @Test
@@ -292,7 +292,7 @@ class LovligeKombinasjonerSaksbehandlingServiceTest {
             .hentMuligeBehandlingstyper(Aktoersroller.BRUKER, TRYGDEAVTALE, TRYGDEAVGIFT, YRKESAKTIV, null, null);
 
 
-        assertThat(muligeTyper).containsExactlyInAnyOrder(NY_VURDERING, FØRSTEGANG, HENVENDELSE, KLAGE);
+        assertThat(muligeTyper).containsExactlyInAnyOrder(ÅRSAVREGNING, NY_VURDERING, FØRSTEGANG, HENVENDELSE, KLAGE);
     }
 
     @Test
