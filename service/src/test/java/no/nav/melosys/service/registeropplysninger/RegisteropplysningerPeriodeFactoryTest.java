@@ -167,6 +167,18 @@ class RegisteropplysningerPeriodeFactoryTest {
     }
 
     @Test
+    void hentPeriodeForYtelser_åpenPeriodeMottakSed_forespørTomTilDatoOgDagensDatoFom() {
+        LocalDate now = LocalDate.now();
+        LocalDate fom = LocalDate.now();
+        LocalDate tom = null;
+
+        RegisteropplysningerPeriodeFactory.Periode periode = factory.hentPeriodeForInntekt(fom, tom, mottakAvSed);
+
+        assertThat(periode.fom).isEqualTo(YearMonth.from(fom.minusMonths(2)));
+        assertThat(periode.tom).isEqualTo(YearMonth.from(now));
+    }
+
+    @Test
     void hentPeriodeForYtelser_åpenPeriodeBehandlingSøknad_forespørTomTilDato() {
         LocalDate idag = LocalDate.now();
         LocalDate fom = idag.minusYears(2);
