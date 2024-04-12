@@ -53,7 +53,7 @@ import no.nav.melosys.service.saksopplysninger.OppfriskSaksopplysningerService
 import no.nav.melosys.service.vedtak.FattVedtakRequest
 import no.nav.melosys.service.vedtak.VedtaksfattingFasade
 import no.nav.melosys.service.vilkaar.VilkaarDto
-import no.nav.melosys.service.behandling.BehandlingsresultatVilkaarsresultatService
+import no.nav.melosys.service.behandling.VilkaarsresultatService
 import no.nav.melosys.sikkerhet.context.SpringSubjectHandler
 import no.nav.melosys.sikkerhet.context.SubjectHandler
 import org.junit.jupiter.api.AfterEach
@@ -74,7 +74,7 @@ class YrkesaktivFtrlVedtakIT(
     @Autowired private val behandlingsresultatService: BehandlingsresultatService,
     @Autowired private val behandlingRepository: BehandlingRepository,
     @Autowired private val mottatteOpplysningerService: MottatteOpplysningerService,
-    @Autowired private val behandlingsresultatVilkaarsresultatService: BehandlingsresultatVilkaarsresultatService,
+    @Autowired private val vilkaarsresultatService: VilkaarsresultatService,
     @Autowired private val medlemskapsperiodeService: MedlemskapsperiodeService,
     @Autowired private val opprettForslagMedlemskapsperiodeService: OpprettForslagMedlemskapsperiodeService,
     @Autowired private val medlemAvFolketrygdenService: MedlemAvFolketrygdenService,
@@ -352,7 +352,7 @@ class YrkesaktivFtrlVedtakIT(
             vilkaar = "FTRL_FORUTGÅENDE_TRYGDETID"
             isOppfylt = true
         }
-        behandlingsresultatVilkaarsresultatService.registrerVilkår(behandling.id, listOf(vilkaar))
+        vilkaarsresultatService.registrerVilkår(behandling.id, listOf(vilkaar))
 
         setupTrygdeavgiftBeregning(behandling.id, skatteplikttype, arbeidsgiversavgiftBetales)
 

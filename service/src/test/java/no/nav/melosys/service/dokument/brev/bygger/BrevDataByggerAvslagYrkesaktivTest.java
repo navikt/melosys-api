@@ -21,7 +21,7 @@ import no.nav.melosys.service.kodeverk.KodeverkService;
 import no.nav.melosys.service.persondata.PersonopplysningerObjectFactory;
 import no.nav.melosys.service.registeropplysninger.OrganisasjonOppslagService;
 import no.nav.melosys.service.unntak.AnmodningsperiodeService;
-import no.nav.melosys.service.behandling.BehandlingsresultatVilkaarsresultatService;
+import no.nav.melosys.service.behandling.VilkaarsresultatService;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -50,7 +50,7 @@ class BrevDataByggerAvslagYrkesaktivTest {
     @Mock
     KodeverkService kodeverkService;
     @Mock
-    BehandlingsresultatVilkaarsresultatService behandlingsresultatVilkaarsresultatService;
+    VilkaarsresultatService vilkaarsresultatService;
 
     private BrevDataByggerAvslagYrkesaktiv brevDataByggerAvslagYrkesaktiv;
     private AnmodningsperiodeSvar anmodningsperiodeSvar;
@@ -63,10 +63,10 @@ class BrevDataByggerAvslagYrkesaktivTest {
         anmodningsperiode.setSendtUtland(true);
         when(anmodningsperiodeService.hentAnmodningsperioder(anyLong())).thenReturn(Collections.singletonList(anmodningsperiode));
 
-        when(behandlingsresultatVilkaarsresultatService.finnVilkaarsresultat(anyLong(), eq(Vilkaar.FO_883_2004_ART16_1)))
+        when(vilkaarsresultatService.finnVilkaarsresultat(anyLong(), eq(Vilkaar.FO_883_2004_ART16_1)))
             .thenReturn(Optional.of(lagVilkaarsresultat(Vilkaar.FO_883_2004_ART16_1, true, KORT_OPPDRAG_RETUR_NORSK_AG)));
 
-        brevDataByggerAvslagYrkesaktiv = new BrevDataByggerAvslagYrkesaktiv(landvelgerService, anmodningsperiodeService, new BrevbestillingDto(), behandlingsresultatVilkaarsresultatService);
+        brevDataByggerAvslagYrkesaktiv = new BrevDataByggerAvslagYrkesaktiv(landvelgerService, anmodningsperiodeService, new BrevbestillingDto(), vilkaarsresultatService);
     }
 
     @Test
@@ -103,8 +103,8 @@ class BrevDataByggerAvslagYrkesaktivTest {
 
         lenient().when(
             organisasjonOppslagService.hentOrganisasjoner(orgSet)).thenReturn(new HashSet<>(Collections.singletonList(organisasjonDokument)));
-        when(behandlingsresultatVilkaarsresultatService.harVilkaarForArtikkel12(anyLong())).thenReturn(false);
-        when(behandlingsresultatVilkaarsresultatService.harVilkaarForArtikkel16(anyLong())).thenReturn(true);
+        when(vilkaarsresultatService.harVilkaarForArtikkel12(anyLong())).thenReturn(false);
+        when(vilkaarsresultatService.harVilkaarForArtikkel16(anyLong())).thenReturn(true);
 
         String saksbehandler = "saksbehandler";
         BrevDataAvslagYrkesaktiv brevData = (BrevDataAvslagYrkesaktiv) brevDataByggerAvslagYrkesaktiv.lag(lagBrevressurser(behandling), saksbehandler);

@@ -8,7 +8,7 @@ import no.nav.melosys.service.tilgang.Aksesskontroll;
 import no.nav.melosys.service.tilgang.Ressurs;
 import no.nav.melosys.service.vilkaar.InngangsvilkaarService;
 import no.nav.melosys.service.vilkaar.VilkaarDto;
-import no.nav.melosys.service.behandling.BehandlingsresultatVilkaarsresultatService;
+import no.nav.melosys.service.behandling.VilkaarsresultatService;
 import no.nav.security.token.support.core.api.Protected;
 import org.springframework.context.annotation.Scope;
 import org.springframework.http.ResponseEntity;
@@ -24,14 +24,14 @@ import org.springframework.web.context.WebApplicationContext;
 @Scope(value = WebApplicationContext.SCOPE_REQUEST)
 public class VilkaarTjeneste {
 
-    private final BehandlingsresultatVilkaarsresultatService behandlingsresultatVilkaarsresultatService;
+    private final VilkaarsresultatService vilkaarsresultatService;
     private final InngangsvilkaarService inngangsvilkaarService;
     private final Aksesskontroll aksesskontroll;
 
-    public VilkaarTjeneste(BehandlingsresultatVilkaarsresultatService behandlingsresultatVilkaarsresultatService,
+    public VilkaarTjeneste(VilkaarsresultatService vilkaarsresultatService,
                            InngangsvilkaarService inngangsvilkaarService,
                            Aksesskontroll aksesskontroll) {
-        this.behandlingsresultatVilkaarsresultatService = behandlingsresultatVilkaarsresultatService;
+        this.vilkaarsresultatService = vilkaarsresultatService;
         this.inngangsvilkaarService = inngangsvilkaarService;
         this.aksesskontroll = aksesskontroll;
     }
@@ -39,7 +39,7 @@ public class VilkaarTjeneste {
     @GetMapping("{behandlingID}")
     public List<VilkaarDto> hentVilkår(@PathVariable("behandlingID") long behandlingID) {
         aksesskontroll.autoriser(behandlingID);
-        return behandlingsresultatVilkaarsresultatService.hentVilkaar(behandlingID);
+        return vilkaarsresultatService.hentVilkaar(behandlingID);
     }
 
     @PostMapping("{behandlingID}")
@@ -47,8 +47,8 @@ public class VilkaarTjeneste {
     public List<VilkaarDto> registrerVilkår(@PathVariable("behandlingID") long behandlingID,
                                             @RequestBody List<VilkaarDto> vilkaarDtoer) {
         aksesskontroll.autoriserSkrivTilRessurs(behandlingID, Ressurs.VILKÅR);
-        behandlingsresultatVilkaarsresultatService.registrerVilkår(behandlingID, vilkaarDtoer);
-        return behandlingsresultatVilkaarsresultatService.hentVilkaar(behandlingID);
+        vilkaarsresultatService.registrerVilkår(behandlingID, vilkaarDtoer);
+        return vilkaarsresultatService.hentVilkaar(behandlingID);
     }
 
     @PutMapping("{behandlingID}/inngangsvilkaar/overstyr")

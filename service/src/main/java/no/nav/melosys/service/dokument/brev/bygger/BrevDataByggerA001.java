@@ -21,7 +21,7 @@ import no.nav.melosys.service.dokument.brev.BrevData;
 import no.nav.melosys.service.dokument.brev.BrevDataA001;
 import no.nav.melosys.service.dokument.brev.datagrunnlag.BrevDataGrunnlag;
 import no.nav.melosys.service.unntak.AnmodningsperiodeService;
-import no.nav.melosys.service.behandling.BehandlingsresultatVilkaarsresultatService;
+import no.nav.melosys.service.behandling.VilkaarsresultatService;
 import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.collections4.ListUtils;
 import org.apache.commons.collections4.map.SingletonMap;
@@ -30,7 +30,7 @@ public class BrevDataByggerA001 implements BrevDataBygger {
     private final LovvalgsperiodeService lovvalgsperiodeService;
     private final AnmodningsperiodeService anmodningsperiodeService;
     private final UtenlandskMyndighetService utenlandskMyndighetService;
-    private final BehandlingsresultatVilkaarsresultatService behandlingsresultatVilkaarsresultatService;
+    private final VilkaarsresultatService vilkaarsresultatService;
 
     private BrevDataGrunnlag dataGrunnlag;
     private Behandling behandling;
@@ -38,11 +38,11 @@ public class BrevDataByggerA001 implements BrevDataBygger {
     public BrevDataByggerA001(LovvalgsperiodeService lovvalgsperiodeService,
                               AnmodningsperiodeService anmodningsperiodeService,
                               UtenlandskMyndighetService utenlandskMyndighetRepository,
-                              BehandlingsresultatVilkaarsresultatService behandlingsresultatVilkaarsresultatService) {
+                              VilkaarsresultatService vilkaarsresultatService) {
         this.lovvalgsperiodeService = lovvalgsperiodeService;
         this.anmodningsperiodeService = anmodningsperiodeService;
         this.utenlandskMyndighetService = utenlandskMyndighetRepository;
-        this.behandlingsresultatVilkaarsresultatService = behandlingsresultatVilkaarsresultatService;
+        this.vilkaarsresultatService = vilkaarsresultatService;
     }
 
     @Override
@@ -84,7 +84,7 @@ public class BrevDataByggerA001 implements BrevDataBygger {
 
         Vilkaarsresultat art16Vilkaar = hentVilkårsresultat();
         Set<VilkaarBegrunnelse> art16VilkaarBegrunnelser = art16Vilkaar.getBegrunnelser();
-        if (behandlingsresultatVilkaarsresultatService.harVilkaarForArtikkel12(behandling.getId())) {
+        if (vilkaarsresultatService.harVilkaarForArtikkel12(behandling.getId())) {
             brevData.setAnmodningBegrunnelser(art16VilkaarBegrunnelser);
             brevData.setAnmodningUtenArt12Begrunnelser(Collections.emptySet());
         } else {
@@ -106,7 +106,7 @@ public class BrevDataByggerA001 implements BrevDataBygger {
     }
 
     private Vilkaarsresultat hentVilkårsresultat() {
-        Optional<Vilkaarsresultat> vilkårsresultat = behandlingsresultatVilkaarsresultatService.finnVilkaarsresultat(behandling.getId(), Vilkaar.FO_883_2004_ART16_1);
+        Optional<Vilkaarsresultat> vilkårsresultat = vilkaarsresultatService.finnVilkaarsresultat(behandling.getId(), Vilkaar.FO_883_2004_ART16_1);
         Vilkaarsresultat resultat = vilkårsresultat.orElseThrow(() ->
             new TekniskException("Fant ingen vilkårbegrunnelse for FO_883_2004_ART16_1"));
 

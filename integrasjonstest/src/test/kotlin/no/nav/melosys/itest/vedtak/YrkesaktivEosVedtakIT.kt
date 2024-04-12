@@ -41,7 +41,7 @@ import no.nav.melosys.service.saksopplysninger.OppfriskSaksopplysningerService
 import no.nav.melosys.service.vedtak.FattVedtakRequest
 import no.nav.melosys.service.vedtak.VedtaksfattingFasade
 import no.nav.melosys.service.vilkaar.VilkaarDto
-import no.nav.melosys.service.behandling.BehandlingsresultatVilkaarsresultatService
+import no.nav.melosys.service.behandling.VilkaarsresultatService
 import no.nav.melosys.statistikk.utstedt_a1.integrasjon.UtstedtA1AivenProducer
 import no.nav.melosys.statistikk.utstedt_a1.integrasjon.dto.Lovvalgsbestemmelse
 import no.nav.melosys.statistikk.utstedt_a1.integrasjon.dto.UtstedtA1Melding
@@ -60,7 +60,7 @@ class YrkesaktivEosVedtakIT(
     @Autowired private val behandlingsresultatService: BehandlingsresultatService,
     @Autowired private val behandlingRepository: BehandlingRepository,
     @Autowired private val mottatteOpplysningerService: MottatteOpplysningerService,
-    @Autowired private val behandlingsresultatVilkaarsresultatService: BehandlingsresultatVilkaarsresultatService,
+    @Autowired private val vilkaarsresultatService: VilkaarsresultatService,
     @Autowired private val lovvalgsperiodeService: LovvalgsperiodeService,
     @Autowired private val ferdigbehandlingKontrollFacade: FerdigbehandlingKontrollFacade,
     @Autowired private val oppfriskSaksopplysningerService: OppfriskSaksopplysningerService,
@@ -146,7 +146,7 @@ class YrkesaktivEosVedtakIT(
             vilkaar = "FO_883_2004_ART12_1"
             isOppfylt = true
         }
-        behandlingsresultatVilkaarsresultatService.registrerVilkår(behandling.id, listOf(forutgåendeMedlemskap, vesentlingVirksomhet, art12_1))
+        vilkaarsresultatService.registrerVilkår(behandling.id, listOf(forutgåendeMedlemskap, vesentlingVirksomhet, art12_1))
 
         lovvalgsperiodeService.lagreLovvalgsperioder(behandling.id, listOf(Lovvalgsperiode().apply {
             innvilgelsesresultat = InnvilgelsesResultat.INNVILGET
@@ -288,7 +288,7 @@ class YrkesaktivEosVedtakIT(
             vilkaar = "FO_883_2004_ART12_2"
             isOppfylt = true
         }
-        behandlingsresultatVilkaarsresultatService.registrerVilkår(behandling.id, listOf(normaltDriverVirksomhet, art12_2))
+        vilkaarsresultatService.registrerVilkår(behandling.id, listOf(normaltDriverVirksomhet, art12_2))
 
         lovvalgsperiodeService.lagreLovvalgsperioder(behandling.id, listOf(Lovvalgsperiode().apply {
             innvilgelsesresultat = InnvilgelsesResultat.INNVILGET

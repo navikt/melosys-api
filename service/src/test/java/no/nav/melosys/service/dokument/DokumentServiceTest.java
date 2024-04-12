@@ -64,7 +64,7 @@ import no.nav.melosys.service.registeropplysninger.OrganisasjonOppslagService;
 import no.nav.melosys.service.saksopplysninger.SaksopplysningerService;
 import no.nav.melosys.service.unntak.AnmodningsperiodeService;
 import no.nav.melosys.service.utpeking.UtpekingService;
-import no.nav.melosys.service.behandling.BehandlingsresultatVilkaarsresultatService;
+import no.nav.melosys.service.behandling.VilkaarsresultatService;
 import no.nav.melosys.sikkerhet.context.SpringSubjectHandler;
 import no.nav.melosys.sikkerhet.context.TestSubjectHandler;
 import org.junit.jupiter.api.BeforeEach;
@@ -337,11 +337,11 @@ final class DokumentServiceTest {
         SaksopplysningerService saksopplysningerService = mock(SaksopplysningerService.class);
         UtenlandskMyndighetService utenlandskMyndighetService = mock(UtenlandskMyndighetService.class);
         UtpekingService utpekingService = mock(UtpekingService.class);
-        BehandlingsresultatVilkaarsresultatService behandlingsresultatVilkaarsresultatService = mock(BehandlingsresultatVilkaarsresultatService.class);
+        VilkaarsresultatService vilkaarsresultatService = mock(VilkaarsresultatService.class);
         PersondataFasade persondataFasade = mock(PersondataFasade.class);
         return new BrevDataByggerVelger(anmodningsperiodeService, avklartefaktaService,
             landvelgerService, lovvalgsperiodeService, saksopplysningerService, utenlandskMyndighetService,
-            utpekingService, behandlingsresultatVilkaarsresultatService, persondataFasade, mottatteOpplysningerService);
+            utpekingService, vilkaarsresultatService, persondataFasade, mottatteOpplysningerService);
     }
 
     private BrevDataByggerVelger lagBrevdatabyggerVelgerMock() {

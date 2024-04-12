@@ -26,7 +26,7 @@ import no.nav.melosys.domain.person.Statsborgerskap;
 import no.nav.melosys.exception.FunksjonellException;
 import no.nav.melosys.integrasjon.inngangsvilkar.InngangsvilkaarConsumerImpl;
 import no.nav.melosys.service.behandling.BehandlingService;
-import no.nav.melosys.service.behandling.BehandlingsresultatVilkaarsresultatService;
+import no.nav.melosys.service.behandling.VilkaarsresultatService;
 import no.nav.melosys.service.persondata.PersondataFasade;
 import no.nav.melosys.service.saksbehandling.SaksbehandlingRegler;
 import org.junit.jupiter.api.BeforeEach;
@@ -57,14 +57,14 @@ class InngangsvilkaarServiceTest {
     @Mock
     private SaksbehandlingRegler saksbehandlingRegler;
     @Mock
-    private BehandlingsresultatVilkaarsresultatService behandlingsresultatVilkaarsresultatService;
+    private VilkaarsresultatService vilkaarsresultatService;
 
     private InngangsvilkaarService inngangsvilkaarService;
 
     @BeforeEach
     void setUp() {
         inngangsvilkaarService = new InngangsvilkaarService(behandlingService, inngangsvilkaarConsumer,
-            persondataFasade, behandlingsresultatVilkaarsresultatService, saksbehandlingRegler);
+            persondataFasade, vilkaarsresultatService, saksbehandlingRegler);
     }
 
     @Test
@@ -90,7 +90,7 @@ class InngangsvilkaarServiceTest {
 
         verify(inngangsvilkaarConsumer).vurderInngangsvilkår(Set.of(Land.av(FINLAND), Land.av(SVERIGE)),
             Set.copyOf(tilIso3(søknadsland)), false, periode);
-        verify(behandlingsresultatVilkaarsresultatService).oppdaterVilkaarsresultat(1L, Vilkaar.FO_883_2004_INNGANGSVILKAAR, true,
+        verify(vilkaarsresultatService).oppdaterVilkaarsresultat(1L, Vilkaar.FO_883_2004_INNGANGSVILKAAR, true,
             Collections.emptySet());
     }
 
@@ -103,7 +103,7 @@ class InngangsvilkaarServiceTest {
 
         inngangsvilkaarService.vurderOgLagreInngangsvilkår(1L, landkoder, false, periode);
 
-        verify(behandlingsresultatVilkaarsresultatService).oppdaterVilkaarsresultat(1L, Vilkaar.FO_883_2004_INNGANGSVILKAAR,
+        verify(vilkaarsresultatService).oppdaterVilkaarsresultat(1L, Vilkaar.FO_883_2004_INNGANGSVILKAAR,
             false, Set.of(Inngangsvilkaar.MANGLER_STATSBORGERSKAP));
     }
 
@@ -148,7 +148,7 @@ class InngangsvilkaarServiceTest {
 
         verify(inngangsvilkaarConsumer).vurderInngangsvilkår(Collections.singleton(Land.av(FINLAND)),
             Collections.emptySet(), true, periode);
-        verify(behandlingsresultatVilkaarsresultatService).oppdaterVilkaarsresultat(1L, Vilkaar.FO_883_2004_INNGANGSVILKAAR, true, Collections.emptySet());
+        verify(vilkaarsresultatService).oppdaterVilkaarsresultat(1L, Vilkaar.FO_883_2004_INNGANGSVILKAAR, true, Collections.emptySet());
     }
 
     @Test
@@ -171,7 +171,7 @@ class InngangsvilkaarServiceTest {
 
         inngangsvilkaarService.vurderOgLagreInngangsvilkår(1L, landkoder, false, periode);
 
-        verify(behandlingsresultatVilkaarsresultatService).oppdaterVilkaarsresultat(1L, Vilkaar.FO_883_2004_INNGANGSVILKAAR,
+        verify(vilkaarsresultatService).oppdaterVilkaarsresultat(1L, Vilkaar.FO_883_2004_INNGANGSVILKAAR,
             false, Set.of(Inngangsvilkaar.TEKNISK_FEIL));
     }
 
@@ -204,7 +204,7 @@ class InngangsvilkaarServiceTest {
 
     @Test
     void overstyrInngangsvilkårTilOppfylt_ingenInngangsvilkårFunnet_kasterFunksjonellException() {
-        when(behandlingsresultatVilkaarsresultatService.finnVilkaarsresultat(anyLong(), eq(Vilkaar.FO_883_2004_INNGANGSVILKAAR))).thenReturn(Optional.empty());
+        when(vilkaarsresultatService.finnVilkaarsresultat(anyLong(), eq(Vilkaar.FO_883_2004_INNGANGSVILKAAR))).thenReturn(Optional.empty());
 
         assertThatExceptionOfType(FunksjonellException.class)
             .isThrownBy(() -> inngangsvilkaarService.overstyrInngangsvilkårTilOppfylt(1L))
@@ -214,7 +214,7 @@ class InngangsvilkaarServiceTest {
     @Test
     void overstyrInngangsvilkårTilOppfylt_manglerLandOgPeriode_kasterFunksjonellException() {
         when(behandlingService.hentBehandling(1L)).thenReturn(lagBehandling());
-        when(behandlingsresultatVilkaarsresultatService.finnVilkaarsresultat(anyLong(), eq(Vilkaar.FO_883_2004_INNGANGSVILKAAR))).thenReturn(Optional.of(new Vilkaarsresultat()));
+        when(vilkaarsresultatService.finnVilkaarsresultat(anyLong(), eq(Vilkaar.FO_883_2004_INNGANGSVILKAAR))).thenReturn(Optional.of(new Vilkaarsresultat()));
 
         assertThatExceptionOfType(FunksjonellException.class)
             .isThrownBy(() -> inngangsvilkaarService.overstyrInngangsvilkårTilOppfylt(1L))
@@ -225,13 +225,13 @@ class InngangsvilkaarServiceTest {
     void overstyrInngangsvilkårTilOppfylt_inngangsvilkårFunnet_oppfyllerVilkår() {
         when(behandlingService.hentBehandling(1L)).thenReturn(lagBehandlingMedPeriodeOgLand());
         Vilkaarsresultat vilkaarsresultat = new Vilkaarsresultat();
-        when(behandlingsresultatVilkaarsresultatService.finnVilkaarsresultat(anyLong(), eq(Vilkaar.FO_883_2004_INNGANGSVILKAAR))).thenReturn(Optional.of(vilkaarsresultat));
+        when(vilkaarsresultatService.finnVilkaarsresultat(anyLong(), eq(Vilkaar.FO_883_2004_INNGANGSVILKAAR))).thenReturn(Optional.of(vilkaarsresultat));
 
 
         inngangsvilkaarService.overstyrInngangsvilkårTilOppfylt(1L);
 
 
-        verify(behandlingsresultatVilkaarsresultatService).oppdaterVilkaarsresultat(eq(1L), eq(Vilkaar.FO_883_2004_INNGANGSVILKAAR), eq(true), anySet());
+        verify(vilkaarsresultatService).oppdaterVilkaarsresultat(eq(1L), eq(Vilkaar.FO_883_2004_INNGANGSVILKAAR), eq(true), anySet());
     }
 
     @Test
@@ -241,13 +241,13 @@ class InngangsvilkaarServiceTest {
         vilkaarBegrunnelse.setKode(Inngangsvilkaar.MANGLER_STATSBORGERSKAP.getKode());
         Vilkaarsresultat vilkaarsresultat = new Vilkaarsresultat();
         vilkaarsresultat.setBegrunnelser(Set.of(vilkaarBegrunnelse));
-        when(behandlingsresultatVilkaarsresultatService.finnVilkaarsresultat(anyLong(), eq(Vilkaar.FO_883_2004_INNGANGSVILKAAR))).thenReturn(Optional.of(vilkaarsresultat));
+        when(vilkaarsresultatService.finnVilkaarsresultat(anyLong(), eq(Vilkaar.FO_883_2004_INNGANGSVILKAAR))).thenReturn(Optional.of(vilkaarsresultat));
 
 
         inngangsvilkaarService.overstyrInngangsvilkårTilOppfylt(1L);
 
 
-        verify(behandlingsresultatVilkaarsresultatService).oppdaterVilkaarsresultat(eq(1L), eq(Vilkaar.FO_883_2004_INNGANGSVILKAAR), anyBoolean(), eq(Set.of(
+        verify(vilkaarsresultatService).oppdaterVilkaarsresultat(eq(1L), eq(Vilkaar.FO_883_2004_INNGANGSVILKAAR), anyBoolean(), eq(Set.of(
             Inngangsvilkaar.OVERSTYRT_AV_SAKSBEHANDLER, Inngangsvilkaar.MANGLER_STATSBORGERSKAP
         )));
     }

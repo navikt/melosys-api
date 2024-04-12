@@ -20,14 +20,14 @@ import static no.nav.melosys.domain.kodeverk.Vilkaar.*;
 import static no.nav.melosys.service.behandling.BehandlingsresultatService.KAN_IKKE_FINNE_BEHANDLINGSRESULTAT;
 
 @Service
-public class BehandlingsresultatVilkaarsresultatService {
+public class VilkaarsresultatService {
 
     private final BehandlingsresultatRepository behandlingsresultatRepository;
     private final SaksbehandlingRegler saksbehandlingRegler;
 
     public static final Collection<Vilkaar> IMMUTABLE_VILKAAR = Collections.singleton(FO_883_2004_INNGANGSVILKAAR);
 
-    public BehandlingsresultatVilkaarsresultatService(
+    public VilkaarsresultatService(
         BehandlingsresultatRepository behandlingsresultatRepository,
         SaksbehandlingRegler saksbehandlingRegler) {
         this.behandlingsresultatRepository = behandlingsresultatRepository;

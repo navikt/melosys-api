@@ -18,7 +18,7 @@ import no.nav.melosys.repository.FagsakRepository
 import no.nav.melosys.service.behandling.BehandlingsresultatService
 import no.nav.melosys.service.behandling.ReplikerBehandlingsresultatService
 import no.nav.melosys.service.saksbehandling.SaksbehandlingRegler
-import no.nav.melosys.service.behandling.BehandlingsresultatVilkaarsresultatService
+import no.nav.melosys.service.behandling.VilkaarsresultatService
 import org.assertj.core.api.Assertions.assertThat
 import org.junit.jupiter.api.Test
 import org.springframework.beans.factory.annotation.Autowired
@@ -26,7 +26,7 @@ import org.springframework.context.annotation.Import
 import java.time.Instant
 import java.time.LocalDate
 
-@Import(value = [ReplikerBehandlingsresultatService::class, BehandlingsresultatService::class, SaksbehandlingRegler::class, FakeUnleash::class, BehandlingsresultatVilkaarsresultatService::class])
+@Import(value = [ReplikerBehandlingsresultatService::class, BehandlingsresultatService::class, SaksbehandlingRegler::class, FakeUnleash::class, VilkaarsresultatService::class])
 internal class BehandlingsresultatServiceIT(
     @Autowired
     private val behandlingRepository: BehandlingRepository,

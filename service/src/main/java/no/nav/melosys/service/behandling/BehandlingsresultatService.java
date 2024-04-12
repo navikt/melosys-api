@@ -25,12 +25,12 @@ public class BehandlingsresultatService {
     public static final String KAN_IKKE_FINNE_BEHANDLINGSRESULTAT = "Kan ikke finne behandlingsresultat for behandling: ";
 
     private final BehandlingsresultatRepository behandlingsresultatRepository;
-    private final BehandlingsresultatVilkaarsresultatService behandlingsresultatVilkaarsresultatService;
+    private final VilkaarsresultatService vilkaarsresultatService;
 
     public BehandlingsresultatService(BehandlingsresultatRepository behandlingsresultatRepository,
-                                      BehandlingsresultatVilkaarsresultatService behandlingsresultatVilkaarsresultatService) {
+                                      VilkaarsresultatService vilkaarsresultatService) {
         this.behandlingsresultatRepository = behandlingsresultatRepository;
-        this.behandlingsresultatVilkaarsresultatService = behandlingsresultatVilkaarsresultatService;
+        this.vilkaarsresultatService = vilkaarsresultatService;
     }
 
     @Transactional
@@ -47,7 +47,7 @@ public class BehandlingsresultatService {
         behandlingsresultat.setInnledningFritekst(null);
         behandlingsresultat.setNyVurderingBakgrunn(null);
         behandlingsresultat.setTrygdeavgiftFritekst(null);
-        behandlingsresultatVilkaarsresultatService.tømVilkårsresultatFraBehandlingsresultat(behandlingID);
+        vilkaarsresultatService.tømVilkårsresultatFraBehandlingsresultat(behandlingID);
         behandlingsresultatRepository.save(behandlingsresultat);
     }
 

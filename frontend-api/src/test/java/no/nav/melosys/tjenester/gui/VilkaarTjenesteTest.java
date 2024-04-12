@@ -10,7 +10,7 @@ import no.nav.melosys.domain.kodeverk.begrunnelser.Art12_1_begrunnelser;
 import no.nav.melosys.service.tilgang.Aksesskontroll;
 import no.nav.melosys.service.vilkaar.InngangsvilkaarService;
 import no.nav.melosys.service.vilkaar.VilkaarDto;
-import no.nav.melosys.service.behandling.BehandlingsresultatVilkaarsresultatService;
+import no.nav.melosys.service.behandling.VilkaarsresultatService;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
@@ -29,7 +29,7 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 public class VilkaarTjenesteTest {
 
     @MockBean
-    private BehandlingsresultatVilkaarsresultatService behandlingsresultatVilkaarsresultatService;
+    private VilkaarsresultatService vilkaarsresultatService;
     @MockBean
     private InngangsvilkaarService inngangsvilkaarService;
     @MockBean
@@ -44,7 +44,7 @@ public class VilkaarTjenesteTest {
 
     @Test
     void hentVilkår() throws Exception {
-        when(behandlingsresultatVilkaarsresultatService.hentVilkaar(anyLong())).thenReturn(lagVilkaarDTOList());
+        when(vilkaarsresultatService.hentVilkaar(anyLong())).thenReturn(lagVilkaarDTOList());
 
         mockMvc.perform(get(BASE_URL + "/{behandlingID}", 1L)
                 .contentType(MediaType.APPLICATION_JSON))
@@ -55,7 +55,7 @@ public class VilkaarTjenesteTest {
     @Test
     void registrerVilkår() throws Exception {
         var dto = lagVilkaarDTOList();
-        when(behandlingsresultatVilkaarsresultatService.hentVilkaar(anyLong())).thenReturn(lagVilkaarDTOList());
+        when(vilkaarsresultatService.hentVilkaar(anyLong())).thenReturn(lagVilkaarDTOList());
 
         mockMvc.perform(post(BASE_URL + "/{behandlingID}", 1L)
                 .contentType(MediaType.APPLICATION_JSON)

@@ -39,11 +39,11 @@ class BehandlingsresultatServiceTest {
     private BehandlingsresultatService behandlingsresultatService;
 
     @Mock
-    private BehandlingsresultatVilkaarsresultatService behandlingsresultatVilkaarsresultatService;
+    private VilkaarsresultatService vilkaarsresultatService;
 
     @BeforeEach
     public void setUp() {
-        behandlingsresultatService = spy(new BehandlingsresultatService(behandlingsresultatRepo, behandlingsresultatVilkaarsresultatService));
+        behandlingsresultatService = spy(new BehandlingsresultatService(behandlingsresultatRepo, vilkaarsresultatService));
     }
 
     @Test
@@ -80,7 +80,7 @@ class BehandlingsresultatServiceTest {
         assertThat(behandlingsresultat.getBegrunnelseFritekst()).isNull();
         assertThat(behandlingsresultat.getNyVurderingBakgrunn()).isNull();
         assertThat(behandlingsresultat.getTrygdeavgiftFritekst()).isNull();
-        verify(behandlingsresultatVilkaarsresultatService).tømVilkårsresultatFraBehandlingsresultat(behandlingsresultat.getId());
+        verify(vilkaarsresultatService).tømVilkårsresultatFraBehandlingsresultat(behandlingsresultat.getId());
     }
 
     @Test
