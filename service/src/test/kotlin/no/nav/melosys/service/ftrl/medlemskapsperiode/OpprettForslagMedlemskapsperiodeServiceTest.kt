@@ -28,7 +28,9 @@ import no.nav.melosys.repository.MedlemAvFolketrygdenRepository
 import no.nav.melosys.service.avklartefakta.AvklartefaktaService
 import no.nav.melosys.service.behandling.BehandlingsresultatService
 import no.nav.melosys.service.behandling.UtledMottaksdato
-import no.nav.melosys.service.ftrl.bestemmelse.vilkaar.*
+import no.nav.melosys.service.ftrl.bestemmelse.vilkaar.VilkårForBestemmelse
+import no.nav.melosys.service.ftrl.bestemmelse.vilkaar.VilkårForBestemmelseIkkeYrkesaktiv
+import no.nav.melosys.service.ftrl.bestemmelse.vilkaar.VilkårForBestemmelseYrkesaktiv
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.extension.ExtendWith
@@ -247,9 +249,11 @@ class OpprettForslagMedlemskapsperiodeServiceTest {
 
     @Test
     fun opprettForslagPåMedlemskapsperioder_trygdedekningMedYrkesskade_lagrerAvslåttMedlemskapsperiode() {
-        val behandlingsresultat = lagBehandlingsresultat().apply { vilkaarsresultater.add(lagVilkår()) }
-        (behandlingsresultat.behandling.mottatteOpplysninger.mottatteOpplysningerData as SøknadNorgeEllerUtenforEØS).trygdedekning =
-            Trygdedekninger.FTRL_2_9_FØRSTE_LEDD_B_TREDJE_LEDD_PENSJON_YRKESSKADE
+        val behandlingsresultat = lagBehandlingsresultat().apply {
+            (behandling.mottatteOpplysninger.mottatteOpplysningerData as SøknadNorgeEllerUtenforEØS)
+                .trygdedekning = Trygdedekninger.FTRL_2_9_FØRSTE_LEDD_B_TREDJE_LEDD_PENSJON_YRKESSKADE
+            vilkaarsresultater.add(lagVilkår())
+        }
         every { behandlingsresultatService.hentBehandlingsresultat(BEH_RES_ID) } returns behandlingsresultat
         every { medlemAvFolketrygdenRepository.save(any()) } returnsArgument 0
         every { utledMottaksdato.getMottaksdato(any()) } returns LocalDate.now()
@@ -259,7 +263,7 @@ class OpprettForslagMedlemskapsperiodeServiceTest {
 
         medlemskapsperioder.shouldNotBeEmpty()
         medlemskapsperioder.shouldHaveSize(1)
-        medlemskapsperioder.map { it.innvilgelsesresultat }.get(0).shouldBe(InnvilgelsesResultat.AVSLAATT)
+        medlemskapsperioder.map { it.innvilgelsesresultat }[0].shouldBe(InnvilgelsesResultat.AVSLAATT)
     }
 
     @Test
