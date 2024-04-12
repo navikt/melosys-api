@@ -39,7 +39,6 @@ class GyldigeTrygdedekningerServiceTest {
     fun hentTrygdedekninger_ikkeYrkesaktivMenToggleErAv_kasterFeil() {
         unleash.disableAll()
 
-
         shouldThrow<FunksjonellException> {
             gyldigeTrygdedekningerService.hentTrygdedekninger(Behandlingstema.IKKE_YRKESAKTIV, null)
         }.message.shouldContain("Behandling med behandlingstema Ikke Yrkesaktiv har ikke gyldige trygdedekninger mens toggle er slått av")

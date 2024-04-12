@@ -15,6 +15,7 @@ import no.nav.melosys.domain.dokument.sed.SedDokument
 import no.nav.melosys.domain.dokument.utbetaling.Utbetaling
 import no.nav.melosys.domain.dokument.utbetaling.UtbetalingDokument
 import no.nav.melosys.domain.eessi.melding.Adresse
+import no.nav.melosys.domain.eessi.melding.Arbeidsland
 import no.nav.melosys.domain.eessi.melding.Arbeidssted
 import no.nav.melosys.domain.kodeverk.Landkoder
 import no.nav.melosys.domain.kodeverk.begrunnelser.Kontroll_begrunnelser
@@ -131,6 +132,11 @@ class UfmKontrollTest {
         Assertions.assertThat(UfmKontroll.arbeidssted(kontrollData())).isEqualTo(Kontroll_begrunnelser.ARBEIDSSTED_UTENFOR_EOS)
     }
 
+    @Test
+    fun arbeidsland_erSvalbard_verifiserBegrunnelse() {
+        Assertions.assertThat(UfmKontroll.arbeidsland(kontrollData())).isEqualTo(Kontroll_begrunnelser.ARBEIDSSTED_UTENFOR_EOS)
+    }
+
     private fun kontrollData(localDate: LocalDate): UfmKontrollData {
         return kontrollData(localDate.plusMonths(15), localDate.plusYears(10))
     }
@@ -150,6 +156,12 @@ class UfmKontrollTest {
         val arbeidssted_2 = Arbeidssted("sted2", adresse_2)
         val arbeidssteder = List.of(arbeidssted_1, arbeidssted_2)
         sedDokument.arbeidssteder = arbeidssteder
+
+        val arbeidsland_1 = Arbeidsland("XY", arbeidssteder)
+        val arbeidsland_2 = Arbeidsland("SJ", arbeidssteder)
+        val arbeidsland = List.of(arbeidsland_1, arbeidsland_2)
+
+        sedDokument.arbeidsland = arbeidsland
 
         val personDokument = PersonDokument()
         personDokument.dødsdato = DATE

@@ -19,6 +19,7 @@ public class Adresse {
     private String poststed;
     private String region;
     private String land;
+    private String tilleggsnavn;
 
     private Adresse() {
     }
@@ -38,6 +39,7 @@ public class Adresse {
         Adresse adresse = new Adresse();
         adresse.setGateadresse(IKKE_TILGJENGELIG);
         adresse.setPoststed(IKKE_TILGJENGELIG);
+        adresse.setTilleggsnavn(IKKE_TILGJENGELIG);
         adresse.setLand(landkode);
         return adresse;
     }
@@ -68,6 +70,7 @@ public class Adresse {
         Adresse adresse = new Adresse();
         adresse.setGateadresse(lagGateadresse(strukturertAdresse.getGatenavn(),
             strukturertAdresse.getHusnummerEtasjeLeilighet()));
+        adresse.setTilleggsnavn(strukturertAdresse.getTilleggsnavn());
         adresse.setPostnr(strukturertAdresse.getPostnummer());
         adresse.setPoststed(StringUtils.isBlank(
             strukturertAdresse.getPoststed()) ? UKJENT : strukturertAdresse.getPoststed());
@@ -90,6 +93,7 @@ public class Adresse {
         strukturertAdresse.setRegion(region);
         strukturertAdresse.setPostnummer(postnr);
         strukturertAdresse.setPoststed(poststed);
+        strukturertAdresse.setTilleggsnavn(tilleggsnavn);
         return strukturertAdresse;
     }
 
@@ -104,9 +108,16 @@ public class Adresse {
     public String getGateadresse() {
         return gateadresse;
     }
-
     private void setGateadresse(String gateadresse) {
         this.gateadresse = gateadresse;
+    }
+
+    public String getTilleggsnavn() {
+        return tilleggsnavn;
+    }
+
+    private void setTilleggsnavn(String tilleggsnavn) {
+        this.tilleggsnavn = tilleggsnavn;
     }
 
     public String getPostnr() {
@@ -137,7 +148,7 @@ public class Adresse {
         return land;
     }
 
-    private void setLand(String land) {
+    public void setLand(String land) {
         this.land = land;
     }
 }

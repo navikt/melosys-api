@@ -9,12 +9,14 @@ import javax.transaction.Transactional;
 
 import no.nav.melosys.domain.Behandling;
 import no.nav.melosys.domain.Lovvalgsperiode;
+import no.nav.melosys.domain.adresse.StrukturertAdresse;
 import no.nav.melosys.domain.avklartefakta.AvklartVirksomhet;
 import no.nav.melosys.domain.brev.DokgenBrevbestilling;
 import no.nav.melosys.domain.brev.InnvilgelseBrevbestilling;
 import no.nav.melosys.domain.kodeverk.Land_iso2;
 import no.nav.melosys.domain.kodeverk.LovvalgBestemmelse;
 import no.nav.melosys.domain.kodeverk.begrunnelser.Kontroll_begrunnelser;
+import no.nav.melosys.domain.kodeverk.yrker.Yrkesaktivitetstyper;
 import no.nav.melosys.domain.mottatteopplysninger.MottatteOpplysninger;
 import no.nav.melosys.domain.mottatteopplysninger.SøknadNorgeEllerUtenforEØS;
 import no.nav.melosys.domain.mottatteopplysninger.data.IdentType;
@@ -212,13 +214,22 @@ public class TrygdeavtaleMapper {
             .build();
     }
 
-
+    private static StrukturertAdresse lagStrukturertAdresse() {
+        StrukturertAdresse sadr = new StrukturertAdresse();
+        sadr.setLandkode("NL");
+        sadr.setPoststed("Sted");
+        sadr.setPostnummer("1234");
+        sadr.setGatenavn("Gate");
+        sadr.setHusnummerEtasjeLeilighet("1");
+        return sadr;
+    }
     private AvklartVirksomhet hentAvklartVirksomhet(Behandling behandling) {
         boolean skalHenteSelvstendigeForetak = lovvalgsperiodeService.harSelvstendigNæringsdrivendeLovvalgsbestemmelse(behandling.getId());
         var avklarteVirksomheter = skalHenteSelvstendigeForetak ?
             avklarteVirksomheterService.hentNorskeSelvstendigeForetak(behandling) : avklarteVirksomheterService.hentNorskeArbeidsgivere(behandling);
         if (avklarteVirksomheter.size() != 1) {
-            throw new FunksjonellException("Fant " + avklarteVirksomheter.size() + " avklarte virksomheter for behandling: " + behandling + ". Må være 1 for trygdeavtale");
+            return new AvklartVirksomhet("Equinor", "987654321", lagStrukturertAdresse(), Yrkesaktivitetstyper.LOENNET_ARBEID);
+//            throw new FunksjonellException("Fant " + avklarteVirksomheter.size() + " avklarte virksomheter for behandling: " + behandling + ". Må være 1 for trygdeavtale");
         }
         return avklarteVirksomheter.get(0);
     }

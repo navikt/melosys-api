@@ -10,4 +10,6 @@ public class ToggleName {
     public static final String MELOSYS_FOLKETRYGDEN_2_7 = "melosys.folketrygden.2_7";
 
     public static final String MELOSYS_FTRL_YRKESAKTIV_PLIKTIGE_BESTEMMELSER = "melosys.ftrl.yrkesaktiv.pliktige_bestemmelser";
+
+    public static final String MELOSYS_CDM_4_3 = "melosys.cdm.4_3";
 }

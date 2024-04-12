@@ -58,6 +58,7 @@ class OpprettSedDokumentService(
             rinaDokumentID = melosysEessiMelding.sedId
             statsborgerskapKoder = melosysEessiMelding.statsborgerskap.map { it.landkode }
             arbeidssteder = melosysEessiMelding.arbeidssteder
+            arbeidsland = melosysEessiMelding.arbeidsland
             erEndring = melosysEessiMelding.erEndring
             sedType = SedType.valueOf(melosysEessiMelding.sedType)
             bucType = BucType.valueOf(melosysEessiMelding.bucType)

@@ -3,6 +3,8 @@ package no.nav.melosys.service.kontroll.feature.ufm
 import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule
 import com.fasterxml.jackson.module.kotlin.jacksonObjectMapper
 import com.fasterxml.jackson.module.kotlin.readValue
+import io.getunleash.FakeUnleash
+import io.getunleash.Unleash
 import io.kotest.matchers.collections.shouldHaveSize
 import io.kotest.matchers.equality.shouldBeEqualToComparingFields
 import io.kotest.matchers.shouldBe
@@ -80,15 +82,19 @@ class UfmKontrollServiceTest {
     private var personopplysningerMedHistorikk: PersonMedHistorikk = lagPersonMedHistorikk()
     private var mottatteOpplysningerData: SedGrunnlag = SedGrunnlag()
     private val mapper = jacksonObjectMapper().registerModule(JavaTimeModule())
+    private val unleash = FakeUnleash()
 
     @BeforeEach
     fun setup() {
+        unleash.resetAll()
+
         ufmKontrollService = UfmKontrollService(
             kontrollresultatRepository,
             behandlingsresultatService,
             mottatteOpplysningerService,
             behandlingService,
-            persondataFasade
+            persondataFasade,
+            unleash
         )
     }
 

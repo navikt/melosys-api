@@ -106,6 +106,9 @@ public class SedDataBygger {
         sedDataDto.setArbeidsgivendeVirksomheter(lagArbeidsgivendeVirksomheter(grunnlagMedSøknad));
         sedDataDto.setSelvstendigeVirksomheter(lagSelvstendigeVirksomheter(grunnlagMedSøknad));
         sedDataDto.setArbeidssteder(hentArbeidssteder(grunnlagMedSøknad));
+        sedDataDto.setArbeidsland(hentArbeidsland(grunnlagMedSøknad));
+        var harfastarbeidssted = grunnlagMedSøknad.getMottatteOpplysningerData().arbeidPaaLand.getErFastArbeidssted();
+        sedDataDto.setHarfastarbeidssted(harfastarbeidssted != null ? harfastarbeidssted : false);
         sedDataDto.setAvklartBostedsland(
             landvelgerService.hentBostedsland(grunnlagMedSøknad.getBehandling().getId(), grunnlagMedSøknad.getMottatteOpplysningerData()).landkode()
         );
@@ -146,6 +149,27 @@ public class SedDataBygger {
         }
 
         return arbeidssteder;
+    }
+
+
+    private List<Arbeidsland> hentArbeidsland(SedDataGrunnlagMedSoknad dataGrunnlag) {
+        List<Arbeidssted> arbeidssteder = hentArbeidssteder(dataGrunnlag);
+
+        List<String> alleLand = arbeidssteder.stream()
+            .map(Arbeidssted::getAdresse)
+            .map(Adresse::getLand)
+            .distinct()
+            .toList();
+
+        return alleLand.stream()
+            .map(land -> {
+                List<Arbeidssted> arbeidsstedILandet = arbeidssteder.stream()
+                    .filter(arbeidssted -> arbeidssted.getAdresse().getLand().equals(land))
+                    .toList();
+
+                return new Arbeidsland(land, arbeidsstedILandet);
+            })
+            .toList();
     }
 
     private List<Virksomhet> lagArbeidsgivendeVirksomheter(SedDataGrunnlagMedSoknad dataGrunnlag) {
