@@ -11,6 +11,7 @@ import org.hibernate.annotations.FetchMode;
 @Entity
 @Table(name = "trygdeavgiftsgrunnlag")
 public class Trygdeavgiftsgrunnlag {
+
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;

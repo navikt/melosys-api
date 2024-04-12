@@ -1,24 +1,25 @@
 package no.nav.melosys.domain.avgift;
 
-import no.nav.melosys.domain.kodeverk.Inntektskildetype;
-import org.hibernate.annotations.Columns;
-import org.hibernate.annotations.Parameter;
-import org.hibernate.annotations.Type;
-
-import jakarta.persistence.*;
 import java.time.LocalDate;
 import java.util.Objects;
+
+import jakarta.persistence.*;
+import no.nav.melosys.domain.kodeverk.Inntektskildetype;
 
 @Entity
 @Table(name = "inntektsperiode")
 public class Inntektsperiode {
+
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
-    @ManyToOne(optional = false)
+    @ManyToOne(optional = false, cascade = CascadeType.ALL)
     @JoinColumn(name = "trygdeavgiftsgrunnlag_id", nullable = false, updatable = false)
     private Trygdeavgiftsgrunnlag trygdeavgiftsgrunnlag;
+
+    @OneToOne(mappedBy = "grunnlagInntekstperiode", cascade = CascadeType.ALL)
+    private Trygdeavgiftsperiode trygdeavgiftsperiode;
 
     @Column(name = "fom_dato", nullable = false)
     private LocalDate fomDato;
@@ -119,5 +120,13 @@ public class Inntektsperiode {
         return "Inntektsperiode{" + "id=" + id + ", fomDato=" + fomDato + ", tomDato=" + tomDato + ", type=" + type
             + ", avgiftspliktigInntektMnd=" + avgiftspliktigInntektMnd + ", arbeidsgiversavgiftBetalesTilSkatt="
             + arbeidsgiversavgiftBetalesTilSkatt + '}';
+    }
+
+    public Trygdeavgiftsperiode getTrygdeavgiftsperiode() {
+        return trygdeavgiftsperiode;
+    }
+
+    public void setTrygdeavgiftsperiode(Trygdeavgiftsperiode trygdeavgiftsperiode) {
+        this.trygdeavgiftsperiode = trygdeavgiftsperiode;
     }
 }

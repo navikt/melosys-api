@@ -2,13 +2,12 @@ package no.nav.melosys.domain.avgift;
 
 import java.math.BigDecimal;
 import java.time.LocalDate;
-import jakarta.persistence.*;
 
+import jakarta.persistence.*;
 import no.nav.melosys.domain.Medlemskapsperiode;
 import no.nav.melosys.domain.folketrygden.FastsattTrygdeavgift;
-import org.hibernate.annotations.Columns;
-import org.hibernate.annotations.Parameter;
-import org.hibernate.annotations.Type;
+import org.hibernate.annotations.OnDelete;
+import org.hibernate.annotations.OnDeleteAction;
 
 @Entity
 @Table(name = "trygdeavgiftsperiode")
@@ -34,7 +33,7 @@ public class Trygdeavgiftsperiode {
     @Column(name = "trygdesats", nullable = false)
     private BigDecimal trygdesats;
 
-    @OneToOne
+    @OneToOne(cascade = CascadeType.ALL)
     @JoinColumn(name = "inntektsperiode_id")
     private Inntektsperiode grunnlagInntekstperiode;
 
