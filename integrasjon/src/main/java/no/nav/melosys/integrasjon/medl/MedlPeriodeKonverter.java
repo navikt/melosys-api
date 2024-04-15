@@ -302,7 +302,7 @@ public final class MedlPeriodeKonverter {
     public static LovvalgBestemmelse tilLovvalgBestemmelse(GrunnlagMedl grunnlagKode) {
         LovvalgBestemmelse lovvalgBestemmelse = lovvalgsbestemmelseTilGrunnlagMedlTabell.inverse().get(grunnlagKode);
         if (lovvalgBestemmelse == null) {
-            throw new TekniskException("GrunnlagMedlKode er ukjent. Kode: " + grunnlagKode.getKode());
+            throw new TekniskException("GrunnlagMedlKode er ukjent. Kode: " + grunnlagKode.kode);
         }
         return lovvalgBestemmelse;
     }

@@ -211,7 +211,7 @@ class KontrollTest {
 
         Medlemsperiode medlemsperiode = new Medlemsperiode(
             null, new Periode(LocalDate.now().plusMonths(2), LocalDate.now().plusYears(2)), null,
-            PeriodestatusMedl.GYLD.getKode(), null, null, null, null, null, null);
+                PeriodestatusMedl.GYLD.kode, null, null, null, null, null, null);
         medlemskapDokument.getMedlemsperiode().add(medlemsperiode);
 
 
