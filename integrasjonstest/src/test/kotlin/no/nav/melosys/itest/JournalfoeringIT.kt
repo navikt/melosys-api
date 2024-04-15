@@ -29,9 +29,7 @@ import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.TestInstance
 import org.springframework.beans.factory.annotation.Autowired
-import org.springframework.context.annotation.Import
 
-@Import(OAuthMockServer::class)
 @TestInstance(TestInstance.Lifecycle.PER_CLASS)
 class JournalfoeringIT(
     @Autowired testDataGenerator: TestDataGenerator,
@@ -41,19 +39,16 @@ class JournalfoeringIT(
     @Autowired private val behandlingsresultatRepository: BehandlingsresultatRepository,
     @Autowired private val fagsakRepository: FagsakRepository,
     @Autowired private val unleash: FakeUnleash,
-    @Autowired private val oAuthMockServer: OAuthMockServer,
     @Autowired private val journalpostRepo: JournalpostRepo
 ) : JournalfoeringBase(testDataGenerator, journalføringService, oppgaveService) {
 
     @BeforeEach
     fun setup() {
-        oAuthMockServer.start()
         unleash.enableAll()
     }
 
     @AfterEach
     fun afterEach() {
-        oAuthMockServer.stop()
         journalpostRepo.repo.clear()
     }
 

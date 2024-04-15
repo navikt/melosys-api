@@ -1,13 +1,13 @@
 package no.nav.melosys.repository;
 
-import no.nav.melosys.domain.Behandlingsresultat;
-import org.springframework.data.jpa.repository.EntityGraph;
-import org.springframework.data.repository.CrudRepository;
-
 import java.util.List;
 import java.util.Optional;
 
-public interface BehandlingsresultatRepository extends CrudRepository<Behandlingsresultat, Long> {
+import no.nav.melosys.domain.Behandlingsresultat;
+import org.springframework.data.jpa.repository.EntityGraph;
+import org.springframework.data.jpa.repository.JpaRepository;
+
+public interface BehandlingsresultatRepository extends JpaRepository<Behandlingsresultat, Long> {
     @EntityGraph(attributePaths = {"avklartefakta"}, type = EntityGraph.EntityGraphType.LOAD)
     Optional<Behandlingsresultat> findWithAvklartefaktaById(Long behandlingID);
 

@@ -9,6 +9,7 @@ import no.nav.melosys.integrasjon.oppgave.konsument.dto.OppgaveSearchRequest;
 import no.nav.melosys.integrasjon.oppgave.konsument.dto.OppgaveSvar;
 import no.nav.melosys.integrasjon.oppgave.konsument.dto.OpprettOppgaveDto;
 import org.springframework.http.HttpStatus;
+import org.springframework.http.HttpStatusCode;
 import org.springframework.retry.annotation.Retryable;
 import org.springframework.web.reactive.function.client.ClientResponse;
 import org.springframework.web.reactive.function.client.WebClient;
@@ -32,7 +33,7 @@ public class OppgaveConsumer extends RestErrorHandler {
         return webClient.get()
             .uri(OPPGAVE_URI_MED_ID, oppgaveId)
             .retrieve()
-            .onStatus(HttpStatus::isError, this::håndterFeil)
+            .onStatus(HttpStatusCode::isError, this::håndterFeil)
             .bodyToMono(OppgaveDto.class)
             .block();
     }
@@ -77,7 +78,7 @@ public class OppgaveConsumer extends RestErrorHandler {
                     .build()
             )
             .retrieve()
-            .onStatus(HttpStatus::isError, this::håndterFeil)
+            .onStatus(HttpStatusCode::isError, this::håndterFeil)
             .bodyToMono(OppgaveSvar.class)
             .block();
     }
@@ -91,7 +92,7 @@ public class OppgaveConsumer extends RestErrorHandler {
             .uri(OPPGAVE_URI_MED_ID, request.getId())
             .bodyValue(request)
             .retrieve()
-            .onStatus(HttpStatus::isError, this::håndterFeil)
+            .onStatus(HttpStatusCode::isError, this::håndterFeil)
             .bodyToMono(OppgaveDto.class)
             .block();
     }
@@ -101,14 +102,14 @@ public class OppgaveConsumer extends RestErrorHandler {
             .uri(OPPGAVE_BASE_URI)
             .bodyValue(request)
             .retrieve()
-            .onStatus(HttpStatus::isError, this::håndterFeil)
+            .onStatus(HttpStatusCode::isError, this::håndterFeil)
             .bodyToMono(OppgaveDto.class)
             .map(OppgaveDto::getId)
             .block();
     }
 
     private Mono<Exception> håndterFeil(ClientResponse clientResponse) {
-        final HttpStatus status = clientResponse.statusCode();
+        final HttpStatusCode status = clientResponse.statusCode();
         return clientResponse.bodyToMono(FeilResponseDto.class)
             .map(FeilResponseDto::getFeilmelding)
             .map(feilmelding -> tilException(feilmelding, status));

@@ -3,7 +3,7 @@ package no.nav.melosys.domain.dokument.inntekt
 import com.fasterxml.jackson.annotation.JsonView
 import no.nav.melosys.domain.dokument.DokumentView
 import java.time.YearMonth
-import javax.validation.constraints.NotNull
+import jakarta.validation.constraints.NotNull
 
  data class ArbeidsInntektMaaned(
      @JvmField val aarMaaned: YearMonth? = null,

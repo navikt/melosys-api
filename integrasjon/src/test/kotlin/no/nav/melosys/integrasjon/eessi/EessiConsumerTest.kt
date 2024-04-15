@@ -1,5 +1,6 @@
 package no.nav.melosys.integrasjon.eessi
 
+import no.nav.melosys.integrasjon.MetricsTestConfig
 import com.fasterxml.jackson.databind.ObjectMapper
 import com.github.tomakehurst.wiremock.WireMockServer
 import com.github.tomakehurst.wiremock.client.MappingBuilder
@@ -22,7 +23,7 @@ import no.nav.melosys.domain.eessi.sed.SedDataDto
 import no.nav.melosys.domain.eessi.sed.SedGrunnlagA003Dto
 import no.nav.melosys.domain.eessi.sed.SedGrunnlagDto
 import no.nav.melosys.exception.TekniskException
-import no.nav.melosys.integrasjon.MetricsTestConfig
+//import no.nav.melosys.integrasjon.MetricsTestConfig
 import no.nav.melosys.integrasjon.OAuthMockServer
 import no.nav.melosys.integrasjon.StsMockServer
 import no.nav.melosys.integrasjon.eessi.dto.SaksrelasjonDto
@@ -62,8 +63,9 @@ import java.util.*
 class EessiConsumerTest(
     @Autowired private val eessiConsumer: EessiConsumer,
     @Autowired private val oAuthMockServer: OAuthMockServer,
+    @Value("\${mockserver.port}") mockServiceUnderTestPort: Int,
+    @Autowired private val objectMapper: ObjectMapper,
     @Autowired private val stsMockServer: StsMockServer,
-    @Value("\${mockserver.port}") mockServiceUnderTestPort: Int
 ) {
     private val processUUID = UUID.randomUUID()
     private val serviceUnderTestMockServer: WireMockServer =
@@ -127,7 +129,7 @@ class EessiConsumerTest(
             true
         )
 
-        MetricsTestConfig.checkMetricsUri("/buc/{bucType}?sendAutomatisk={sendAutomatisk}&oppdaterEksisterende={oppdaterEksisterendeOmFinnes}")
+        MetricsTestConfig.checkMetricsUri("/api/buc/{bucType}?sendAutomatisk={sendAutomatisk}&oppdaterEksisterende={oppdaterEksisterendeOmFinnes}")
 
         opprettSedDto.rinaSaksnummer.shouldBe("12345")
     }
@@ -169,7 +171,7 @@ class EessiConsumerTest(
             SedType.A001
         )
 
-        MetricsTestConfig.checkMetricsUri("/buc/{bucID}/sed/{sedType}")
+        MetricsTestConfig.checkMetricsUri("/api/buc/{bucID}/sed/{sedType}")
     }
 
     @Test
@@ -195,7 +197,7 @@ class EessiConsumerTest(
                 navn.shouldBe("NAVT002")
                 landkode.shouldBe("NO")
             }
-        MetricsTestConfig.checkMetricsUri("/buc/{bucType}/institusjoner?land={landkoder}")
+        MetricsTestConfig.checkMetricsUri("/api/buc/{bucType}/institusjoner?land={landkoder}")
     }
 
     @Test
@@ -242,7 +244,7 @@ class EessiConsumerTest(
             journalpostId.shouldBe(melosysEessiMelding.journalpostId)
         }
 
-        MetricsTestConfig.checkMetricsUri("/journalpost/{journalpostID}/eessimelding")
+        MetricsTestConfig.checkMetricsUri("/api/journalpost/{journalpostID}/eessimelding")
     }
 
     @Test

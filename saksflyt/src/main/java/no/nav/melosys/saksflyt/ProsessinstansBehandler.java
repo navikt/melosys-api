@@ -2,7 +2,7 @@ package no.nav.melosys.saksflyt;
 
 import java.time.LocalDateTime;
 import java.util.*;
-import javax.validation.constraints.NotNull;
+import jakarta.validation.constraints.NotNull;
 
 import no.nav.melosys.saksflyt.prosessflyt.ProsessFlyt;
 import no.nav.melosys.saksflyt.prosessflyt.ProsessflytDefinisjon;

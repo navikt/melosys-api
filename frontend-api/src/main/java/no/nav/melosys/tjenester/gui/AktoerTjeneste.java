@@ -48,6 +48,7 @@ public class AktoerTjeneste {
         aksesskontroll.autoriserSakstilgang(saksnummer);
 
         var rolle = StringUtils.isNotEmpty(rolleKode) ? Aktoersroller.valueOf(rolleKode) : null;
+
         List<Aktoer> aktører = aktoerService.hentfagsakAktører(fagsak, rolle);
 
         return aktører.stream().map(AktoerDto::tilDto).toList();

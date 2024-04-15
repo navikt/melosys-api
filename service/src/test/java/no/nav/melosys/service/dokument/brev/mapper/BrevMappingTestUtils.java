@@ -16,21 +16,18 @@ class BrevMappingTestUtils {
         melosysNAVFelles.setMottaker(lagMottaker());
         melosysNAVFelles.setSakspart(lagSakspart());
 
-        NavEnhet navEnhet = NavEnhet.builder()
+        NavEnhet navEnhet = new NavEnhet()
             .withEnhetsId("4567")
-            .withEnhetsNavn("MEL")
-            .build();
+            .withEnhetsNavn("MEL");
         melosysNAVFelles.setBehandlendeEnhet(navEnhet);
 
-        NavAnsatt navAnsatt = NavAnsatt.builder()
+        NavAnsatt navAnsatt = new NavAnsatt()
             .withAnsattId("A94840")
-            .withNavn("Aleksander Z")
-            .build();
+            .withNavn("Aleksander Z");
 
-        Saksbehandler saksbehandler = Saksbehandler.builder()
+        Saksbehandler saksbehandler = new Saksbehandler()
             .withNavEnhet(navEnhet)
-            .withNavAnsatt(navAnsatt)
-            .build();
+            .withNavAnsatt(navAnsatt);
         melosysNAVFelles.setSignerendeSaksbehandler(saksbehandler);
         melosysNAVFelles.setSignerendeBeslutter(saksbehandler);
         melosysNAVFelles.setKontaktinformasjon(lagKontaktInformasjon());
@@ -49,13 +46,12 @@ class BrevMappingTestUtils {
     }
 
     private static Adresse lagAdresse() {
-        return NorskPostadresse.builder()
+        return new NorskPostadresse()
         .withAdresselinje1("Gate")
         .withAdresselinje2("12B")
         .withPoststed("Sted")
         .withPostnummer("4321")
-        .withLand(Landkoder.BG.getKode())
-        .build();
+        .withLand(Landkoder.BG.getKode());
     }
 
     private static Sakspart lagSakspart() {
@@ -67,8 +63,7 @@ class BrevMappingTestUtils {
     }
 
     public static FellesType lagFellesType() {
-        return FellesType.builder()
-            .withFagsaksnummer("MELTEST-1")
-            .build();
+        return new FellesType()
+            .withFagsaksnummer("MELTEST-1");
     }
 }

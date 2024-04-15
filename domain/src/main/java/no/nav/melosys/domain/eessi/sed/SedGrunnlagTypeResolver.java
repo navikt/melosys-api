@@ -32,7 +32,7 @@ public class SedGrunnlagTypeResolver extends TypeIdResolverBase {
 
     @Override
     public String idFromValue(Object o) {
-        return null;
+        return "N/A";
     }
 
     @Override

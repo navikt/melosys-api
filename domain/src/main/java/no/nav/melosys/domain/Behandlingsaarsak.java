@@ -1,8 +1,8 @@
 package no.nav.melosys.domain;
 
 import java.time.LocalDate;
-import javax.annotation.Nonnull;
-import javax.persistence.*;
+import jakarta.annotation.Nonnull;
+import jakarta.persistence.*;
 
 import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingsaarsaktyper;
 
@@ -14,6 +14,7 @@ public class Behandlingsaarsak {
 
     @OneToOne(fetch = FetchType.LAZY, optional = false)
     @MapsId
+    @JoinColumn(name = "behandling_id")
     private Behandling behandling;
 
     @Enumerated(EnumType.STRING)

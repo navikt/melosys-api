@@ -1,6 +1,6 @@
 package no.nav.melosys.domain;
 
-import javax.persistence.*;
+import jakarta.persistence.*;
 
 import org.springframework.data.jpa.domain.support.AuditingEntityListener;
 

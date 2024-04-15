@@ -2,7 +2,7 @@ package no.nav.melosys.service.dokument.brev.mapper;
 
 import java.time.LocalDate;
 import java.util.Collections;
-import javax.xml.bind.JAXBException;
+import jakarta.xml.bind.JAXBException;
 
 import no.nav.dok.brevdata.felles.v1.navfelles.Kontaktinformasjon;
 import no.nav.dok.melosysbrev.felles.melosys_felles.FellesType;

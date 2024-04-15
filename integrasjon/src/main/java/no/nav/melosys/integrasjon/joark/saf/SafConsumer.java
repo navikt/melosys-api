@@ -18,6 +18,7 @@ import no.nav.melosys.integrasjon.joark.saf.dto.journalpost.Journalpost;
 import org.springframework.core.ParameterizedTypeReference;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
+import org.springframework.http.HttpStatusCode;
 import org.springframework.http.MediaType;
 import org.springframework.util.CollectionUtils;
 import org.springframework.web.reactive.function.client.ClientResponse;
@@ -43,7 +44,7 @@ public class SafConsumer extends RestErrorHandler implements CallIdAware {
             .header(CALL_ID, getCallID())
             .header(HttpHeaders.ACCEPT, MediaType.APPLICATION_PDF_VALUE)
             .retrieve()
-            .onStatus(HttpStatus::isError, this::håndterHttpFeil)
+            .onStatus(HttpStatusCode::isError, this::håndterHttpFeil)
             .bodyToMono(byte[].class)
             .block();
     }
@@ -54,7 +55,7 @@ public class SafConsumer extends RestErrorHandler implements CallIdAware {
             .uri(GRAPHQL_ROOT)
             .bodyValue(request)
             .retrieve()
-            .onStatus(HttpStatus::isError, this::håndterHttpFeil)
+            .onStatus(HttpStatusCode::isError, this::håndterHttpFeil)
             .bodyToMono(new ParameterizedTypeReference<GraphQLResponse<HentJournalpostResponse>>() {})
             .map(res -> validerGraphQLResponse("henting av journalpost", res))
             .map(HentJournalpostResponse::journalpost)
@@ -90,7 +91,7 @@ public class SafConsumer extends RestErrorHandler implements CallIdAware {
             .uri(GRAPHQL_ROOT)
             .bodyValue(request)
             .retrieve()
-            .onStatus(HttpStatus::isError, this::håndterHttpFeil)
+            .onStatus(HttpStatusCode::isError, this::håndterHttpFeil)
             .bodyToMono(new ParameterizedTypeReference<GraphQLResponse<HentDokumentoversiktResponseWrapper>>() {})
             .map(res -> validerGraphQLResponse("henting av dokumentoversikt", res))
             .map(HentDokumentoversiktResponseWrapper::hentDokumentoversiktResponse)
@@ -111,7 +112,7 @@ public class SafConsumer extends RestErrorHandler implements CallIdAware {
     }
 
     private Mono<Exception> håndterHttpFeil(ClientResponse clientResponse) {
-        final HttpStatus status = clientResponse.statusCode();
+        final HttpStatusCode status = clientResponse.statusCode();
         return clientResponse.bodyToMono(FeilResponseSafDto.class)
             .map(FeilResponseSafDto::message)
             .map(feilmelding -> tilException(feilmelding, status));

@@ -1,7 +1,6 @@
 package no.nav.melosys.integrasjon.altinn;
 
 import java.util.Arrays;
-import java.util.Collections;
 
 import no.nav.melosys.integrasjon.felles.SystemContextClientRequestInterceptor;
 import no.nav.melosys.integrasjon.felles.mdc.CorrelationIdOutgoingInterceptor;

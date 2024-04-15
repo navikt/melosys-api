@@ -1,8 +1,8 @@
 package no.nav.melosys.domain.jpa;
 
-import javax.persistence.PostLoad;
-import javax.persistence.PostUpdate;
-import javax.persistence.PrePersist;
+import jakarta.persistence.PostLoad;
+import jakarta.persistence.PostUpdate;
+import jakarta.persistence.PrePersist;
 
 import no.nav.melosys.domain.mottatteopplysninger.MottatteOpplysninger;
 import no.nav.melosys.domain.mottatteopplysninger.MottatteOpplysningerKonverterer;

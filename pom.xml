@@ -5,7 +5,7 @@
     <parent>
         <groupId>org.springframework.boot</groupId>
         <artifactId>spring-boot-starter-parent</artifactId>
-        <version>2.5.12</version>
+        <version>3.2.2</version>
     </parent>
 
     <modelVersion>4.0.0</modelVersion>
@@ -37,36 +37,36 @@
     <properties>
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
         <java.version>17</java.version>
-        <kotlin.version>1.7.20</kotlin.version>
+        <kotlin.version>1.8.22</kotlin.version>
         <kotlin.compiler.jvmTarget>${java.version}</kotlin.compiler.jvmTarget>
 
         <!-- Melosys -->
         <melosys.internt.kodeverk.version>5.15.260</melosys.internt.kodeverk.version>
-        <melosys.brev.version>1.2.147-midlertidig</melosys.brev.version>
+        <melosys.brev.version>1.2.154-midlertidig</melosys.brev.version>
 
         <!-- NAV -->
         <nav.tjenestespesifikasjoner.version>1.2021.02.22-10.45-4201aaea72fb</nav.tjenestespesifikasjoner.version>
-        <abac.spring.version>3.0.7</abac.spring.version>
+        <abac.spring.version>4.0.0</abac.spring.version>
         <behandlingstatus.version>1.1.0</behandlingstatus.version>
-        <doksys.dokumentproduksjon.version>3.3.4</doksys.dokumentproduksjon.version>
-        <token-support.version>2.0.20</token-support.version>
+        <doksys.dokumentproduksjon.version>29-af3d66d</doksys.dokumentproduksjon.version>
+        <token-support.version>3.2.0</token-support.version>
         <token-validation-test-support.version>2.0.5</token-validation-test-support.version>
 
         <!-- Versjoner av eksterne biblioteker -->
         <archunit.version>1.1.0</archunit.version>
         <apache-httpclients.version>4.5.13</apache-httpclients.version>
         <caffeine.version>3.0.6</caffeine.version>
-        <cxf.version>3.5.5</cxf.version>
+        <cxf.version>4.0.4</cxf.version>
         <commons-collections4.version>4.4</commons-collections4.version>
-        <commons-lang.version>3.12.0</commons-lang.version>
+        <commons-lang3.version>3.12.0</commons-lang3.version>
+        <commons-lang.version>2.2</commons-lang.version>
         <commons-text.version>1.10.0</commons-text.version>
         <findbugs.jsr305.version>3.0.2</findbugs.jsr305.version>
         <guava.version>31.1-jre</guava.version>
-        <graphql-java.version>17.5</graphql-java.version>
-        <logback.version>1.2.11</logback.version>
+        <graphql-java.version>21.3</graphql-java.version>
+        <logback.version>1.4.14</logback.version>
         <logstash.version>7.3</logstash.version>
         <hikaricp.version>5.0.1</hikaricp.version>
-        <jackson.version>2.13.2.20220328</jackson.version>
         <javax.ws.rs-api.version>2.1.1</javax.ws.rs-api.version>
         <json-smart.version>2.4.9</json-smart.version>
         <jms-api.version>2.0.1</jms-api.version>
@@ -84,33 +84,39 @@
         <easy-random.version>5.0.0</easy-random.version>
         <restFixture.version>4.4</restFixture.version>
         <shedlock.version>4.35.0</shedlock.version>
-        <slf4j.version>1.7.36</slf4j.version>
+        <slf4j.version>2.0.3</slf4j.version>
         <springfox.version>3.0.0</springfox.version>
         <swagger.version>1.5.21</swagger.version>
         <unleash.version>8.3.0</unleash.version>
         <bcpkix-jdk15on.version>1.70</bcpkix-jdk15on.version>
-        <nimbus-jose-jwt.version>9.22</nimbus-jose-jwt.version>
+        <nimbus-jose-jwt.version>9.37.1</nimbus-jose-jwt.version>
         <neethi.version>3.1.1</neethi.version>
+        <jakarta.jaxb.version>3.0.1</jakarta.jaxb.version>
+        <javaparser.version>1.0.11</javaparser.version>
+        <google.errorprone.version>2.13.1</google.errorprone.version>
+        <checkerframework.version>3.22.0</checkerframework.version>
+        <threeten.version>1.7.2</threeten.version>
+        <jetbrains.annotations.version>21.0.1</jetbrains.annotations.version>
+        <snappy.java.version>1.1.8.4</snappy.java.version>
+        <mockito.inline.version>5.2.0</mockito.inline.version>
+        <springmockk.version>3.1.1</springmockk.version>
+        <httpclient5.version>5.2</httpclient5.version>
+        <commons.beanutils.version>1.7.0</commons.beanutils.version>
+        <commons-cli.version>1.5.0</commons-cli.version>
+        <graphql-spring-boot-starter.version>15.1.0</graphql-spring-boot-starter.version>
+        <scala.version>2.13.9</scala.version>
+        <testcontainers.version>1.17.1</testcontainers.version>
+        <jna.version>5.11.0</jna.version>
+        <graphql.java.extended.scalars.version>21.0</graphql.java.extended.scalars.version>
 
         <!-- Transitive avhengigheter -->
-        <asm.version>9.3</asm.version>
-        <bcprov-jdk15on.version>1.68</bcprov-jdk15on.version>
-        <cglib.version>3.3.0</cglib.version>
-        <classgraph.version>4.8.146</classgraph.version>
-        <commons-logging.version>1.2</commons-logging.version>
-        <istack.version>4.1.1</istack.version>
-        <javassist.version>3.28.0-GA</javassist.version>
-        <jaxb2-basics-runtime.version>0.12.0</jaxb2-basics-runtime.version>
+        <asm.version>9.6</asm.version>
         <joda-time.version>2.10.14</joda-time.version>
-        <objenesis.version>3.2</objenesis.version>
-        <osgi.version>6.0.0</osgi.version>
-        <woodstox.version>6.2.8</woodstox.version>
-        <xmlsec.version>2.3.0</xmlsec.version>
-        <wiremock-standalone.version>2.27.2</wiremock-standalone.version>
+        <woodstox.version>6.6.1</woodstox.version>
+        <woodstox.stax2.version>4.2.2</woodstox.stax2.version>
+        <xmlsec.version>3.0.4</xmlsec.version>
+        <wiremock-standalone.version>3.0.1</wiremock-standalone.version>
         <nav-foedselsnummer.core.version>1.0-SNAPSHOT.6</nav-foedselsnummer.core.version>
-        <xmlunit.version>2.9.0</xmlunit.version>
-        <javax.activation.version>1.1.1</javax.activation.version>
-        <org.jboss.logging.annotations.version>2.2.1.Final</org.jboss.logging.annotations.version>
         <ulid-java>0.1.1</ulid-java>
     </properties>
 
@@ -197,16 +203,61 @@
 
             <!-- Eksterne biblioteker -->
             <dependency>
+                <groupId>commons-cli</groupId>
+                <artifactId>commons-cli</artifactId>
+                <version>${commons-cli.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>net.java.dev.jna</groupId>
+                <artifactId>jna</artifactId>
+                <version>${jna.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>net.java.dev.jna</groupId>
+                <artifactId>jna-platform</artifactId>
+                <version>${jna.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>org.scala-lang</groupId>
+                <artifactId>scala-library</artifactId>
+                <version>${scala.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>org.scala-lang</groupId>
+                <artifactId>scala-reflect</artifactId>
+                <version>${scala.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>com.graphql-java</groupId>
+                <artifactId>graphql-java-extended-scalars</artifactId>
+                <version>${graphql.java.extended.scalars.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>commons-beanutils</groupId>
+                <artifactId>commons-beanutils</artifactId>
+                <version>${commons.beanutils.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>org.apache.httpcomponents.client5</groupId>
+                <artifactId>httpclient5</artifactId>
+                <version>${httpclient5.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>jakarta.xml.bind</groupId>
+                <artifactId>jakarta.xml.bind-api</artifactId>
+                <version>${jakarta.jaxb.version}</version>
+            </dependency>
+
+            <dependency>
+                <groupId>com.sun.xml.bind</groupId>
+                <artifactId>jaxb-impl</artifactId>
+                <version>${jakarta.jaxb.version}</version>
+                <scope>runtime</scope>
+            </dependency>
+            <dependency>
                 <groupId>ch.qos.logback</groupId>
                 <artifactId>logback-classic</artifactId>
                 <version>${logback.version}</version>
-            </dependency>
-            <dependency>
-                <groupId>com.fasterxml.jackson</groupId>
-                <artifactId>jackson-bom</artifactId>
-                <version>${jackson.version}</version>
-                <scope>import</scope>
-                <type>pom</type>
             </dependency>
             <dependency>
                 <groupId>com.github.ben-manes.caffeine</groupId>
@@ -264,11 +315,6 @@
                 <version>${springfox.version}</version>
             </dependency>
             <dependency>
-                <groupId>javax.servlet</groupId>
-                <artifactId>javax.servlet-api</artifactId>
-                <version>${servlet-api.version}</version>
-            </dependency>
-            <dependency>
                 <groupId>javax.ws.rs</groupId>
                 <artifactId>javax.ws.rs-api</artifactId>
                 <version>${javax.ws.rs-api.version}</version>
@@ -301,6 +347,11 @@
             <dependency>
                 <groupId>org.apache.commons</groupId>
                 <artifactId>commons-lang3</artifactId>
+                <version>${commons-lang3.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>commons-lang</groupId>
+                <artifactId>commons-lang</artifactId>
                 <version>${commons-lang.version}</version>
             </dependency>
             <dependency>
@@ -344,11 +395,6 @@
                 <version>${hibernate.version}</version>
             </dependency>
             <dependency>
-                <groupId>org.apache.httpcomponents</groupId>
-                <artifactId>httpclient</artifactId>
-                <version>${apache-httpclients.version}</version>
-            </dependency>
-            <dependency>
                 <groupId>org.springframework.kafka</groupId>
                 <artifactId>spring-kafka</artifactId>
                 <version>${spring-kafka.version}</version>
@@ -386,19 +432,24 @@
 
             <!-- Transitive avhengigheter med konflikter -->
             <dependency>
+                <groupId>com.google.code.javaparser</groupId>
+                <artifactId>javaparser</artifactId>
+                <version>${javaparser.version}</version>
+            </dependency>
+            <dependency>
                 <groupId>com.fasterxml.woodstox</groupId>
                 <artifactId>woodstox-core</artifactId>
                 <version>${woodstox.version}</version>
             </dependency>
             <dependency>
-                <groupId>com.google.errorprone</groupId>
-                <artifactId>error_prone_annotations</artifactId>
-                <version>2.13.1</version>
+                <groupId>org.codehaus.woodstox</groupId>
+                <artifactId>stax2-api</artifactId>
+                <version>${woodstox.stax2.version}</version>
             </dependency>
             <dependency>
-                <groupId>commons-logging</groupId>
-                <artifactId>commons-logging</artifactId>
-                <version>${commons-logging.version}</version>
+                <groupId>com.google.errorprone</groupId>
+                <artifactId>error_prone_annotations</artifactId>
+                <version>${google.errorprone.version}</version>
             </dependency>
             <dependency>
                 <groupId>joda-time</groupId>
@@ -411,29 +462,9 @@
                 <version>${xmlsec.version}</version>
             </dependency>
             <dependency>
-                <groupId>org.bouncycastle</groupId>
-                <artifactId>bcprov-jdk15on</artifactId>
-                <version>${bcprov-jdk15on.version}</version>
-            </dependency>
-            <dependency>
                 <groupId>org.checkerframework</groupId>
                 <artifactId>checker-qual</artifactId>
-                <version>3.22.0</version>
-            </dependency>
-            <dependency>
-                <groupId>org.javassist</groupId>
-                <artifactId>javassist</artifactId>
-                <version>${javassist.version}</version>
-            </dependency>
-            <dependency>
-                <groupId>org.jvnet.jaxb2_commons</groupId>
-                <artifactId>jaxb2-basics-runtime</artifactId>
-                <version>${jaxb2-basics-runtime.version}</version>
-            </dependency>
-            <dependency>
-                <groupId>org.objenesis</groupId>
-                <artifactId>objenesis</artifactId>
-                <version>${objenesis.version}</version>
+                <version>${checkerframework.version}</version>
             </dependency>
             <dependency>
                 <groupId>org.ow2.asm</groupId>
@@ -449,16 +480,6 @@
                 <groupId>cglib</groupId>
                 <artifactId>cglib-nodep</artifactId>
                 <version>${cglib.version}</version>
-            </dependency>
-            <dependency>
-                <groupId>com.sun.istack</groupId>
-                <artifactId>istack-commons-runtime</artifactId>
-                <version>${istack.version}</version>
-            </dependency>
-            <dependency>
-                <groupId>io.github.classgraph</groupId>
-                <artifactId>classgraph</artifactId>
-                <version>${classgraph.version}</version>
             </dependency>
             <dependency>
                 <groupId>javax.activation</groupId>
@@ -478,7 +499,17 @@
             <dependency>
                 <groupId>org.threeten</groupId>
                 <artifactId>threeten-extra</artifactId>
-                <version>1.7.2</version>
+                <version>${threeten.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>org.jetbrains</groupId>
+                <artifactId>annotations</artifactId>
+                <version>${jetbrains.annotations.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>org.xerial.snappy</groupId>
+                <artifactId>snappy-java</artifactId>
+                <version>${snappy.java.version}</version>
             </dependency>
 
             <!-- NAV felleskomponenter -->
@@ -494,9 +525,8 @@
             </dependency>
             <dependency>
                 <groupId>no.nav.tjenester</groupId>
-                <artifactId>nav-dokumentproduksjon-v3-tjenestespesifikasjon</artifactId>
+                <artifactId>dok-nav-dokumentproduksjon-v3-tjenestespesifikasjon</artifactId>
                 <version>${doksys.dokumentproduksjon.version}</version>
-                <classifier>jaxws</classifier>
             </dependency>
 
             <dependency>
@@ -570,7 +600,7 @@
                 <scope>test</scope>
             </dependency>
             <dependency>
-                <groupId>com.github.tomakehurst</groupId>
+                <groupId>org.wiremock</groupId>
                 <artifactId>wiremock-standalone</artifactId>
                 <version>${wiremock-standalone.version}</version>
                 <scope>test</scope>
@@ -608,11 +638,6 @@
                 <version>${token-support.version}</version>
             </dependency>
             <dependency>
-                <groupId>no.nav.security</groupId>
-                <artifactId>token-validation-test-support</artifactId>
-                <version>${token-validation-test-support.version}</version>
-            </dependency>
-            <dependency>
                 <groupId>org.awaitility</groupId>
                 <artifactId>awaitility</artifactId>
                 <version>${awaitility.version}</version>
@@ -623,16 +648,6 @@
                 <artifactId>testutils</artifactId>
                 <version>${nav-foedselsnummer.core.version}</version>
                 <scope>test</scope>
-            </dependency>
-            <dependency>
-                <groupId>org.xmlunit</groupId>
-                <artifactId>xmlunit-core</artifactId>
-                <version>${xmlunit.version}</version>
-            </dependency>
-            <dependency>
-                <groupId>org.xmlunit</groupId>
-                <artifactId>xmlunit-matchers</artifactId>
-                <version>${xmlunit.version}</version>
             </dependency>
             <dependency>
                 <groupId>io.kotest</groupId>
@@ -656,6 +671,17 @@
                 <groupId>io.github.jaspeen</groupId>
                 <artifactId>ulid-java</artifactId>
                 <version>${ulid-java}</version>
+                <scope>test</scope>
+            </dependency>
+            <dependency>
+                <groupId>org.mockito</groupId>
+                <artifactId>mockito-inline</artifactId>
+                <version>${mockito.inline.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>com.ninja-squad</groupId>
+                <artifactId>springmockk</artifactId>
+                <version>${springmockk.version}</version>
                 <scope>test</scope>
             </dependency>
 

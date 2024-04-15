@@ -3,7 +3,7 @@ package no.nav.melosys.service.medl;
 import java.time.LocalDate;
 import java.util.Objects;
 import java.util.Optional;
-import javax.transaction.Transactional;
+import jakarta.transaction.Transactional;
 
 import no.nav.melosys.domain.*;
 import no.nav.melosys.domain.kodeverk.Sakstyper;

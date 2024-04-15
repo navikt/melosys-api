@@ -26,6 +26,7 @@ import no.nav.melosys.domain.person.Statsborgerskap;
 import no.nav.melosys.exception.FunksjonellException;
 import no.nav.melosys.integrasjon.inngangsvilkar.InngangsvilkaarConsumerImpl;
 import no.nav.melosys.service.behandling.BehandlingService;
+import no.nav.melosys.service.behandling.VilkaarsresultatService;
 import no.nav.melosys.service.persondata.PersondataFasade;
 import no.nav.melosys.service.saksbehandling.SaksbehandlingRegler;
 import org.junit.jupiter.api.BeforeEach;

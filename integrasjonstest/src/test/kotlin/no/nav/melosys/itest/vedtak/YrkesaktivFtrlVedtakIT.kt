@@ -29,7 +29,6 @@ import no.nav.melosys.featuretoggle.ToggleName
 import no.nav.melosys.integrasjon.faktureringskomponenten.NyFakturaserieResponseDto
 import no.nav.melosys.integrasjon.trygdeavgift.dto.*
 import no.nav.melosys.itest.JournalfoeringBase
-import no.nav.melosys.itest.OAuthMockServer
 import no.nav.melosys.melosysmock.medl.MedlRepo
 import no.nav.melosys.melosysmock.testdata.TestDataGenerator
 import no.nav.melosys.repository.BehandlingRepository
@@ -54,7 +53,7 @@ import no.nav.melosys.service.saksopplysninger.OppfriskSaksopplysningerService
 import no.nav.melosys.service.vedtak.FattVedtakRequest
 import no.nav.melosys.service.vedtak.VedtaksfattingFasade
 import no.nav.melosys.service.vilkaar.VilkaarDto
-import no.nav.melosys.service.vilkaar.VilkaarsresultatService
+import no.nav.melosys.service.behandling.VilkaarsresultatService
 import no.nav.melosys.sikkerhet.context.SpringSubjectHandler
 import no.nav.melosys.sikkerhet.context.SubjectHandler
 import org.junit.jupiter.api.AfterEach
@@ -62,12 +61,10 @@ import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.beans.factory.annotation.Qualifier
-import org.springframework.context.annotation.Import
 import org.springframework.kafka.core.KafkaTemplate
 import java.time.LocalDate
 import java.util.*
 
-@Import(OAuthMockServer::class)
 class YrkesaktivFtrlVedtakIT(
     @Autowired testDataGenerator: TestDataGenerator,
     @Autowired journalføringService: JournalfoeringService,
@@ -76,7 +73,6 @@ class YrkesaktivFtrlVedtakIT(
     @Autowired private val fagsakRepository: FagsakRepository,
     @Autowired private val behandlingsresultatService: BehandlingsresultatService,
     @Autowired private val behandlingRepository: BehandlingRepository,
-    @Autowired private val oAuthMockServer: OAuthMockServer,
     @Autowired private val mottatteOpplysningerService: MottatteOpplysningerService,
     @Autowired private val vilkaarsresultatService: VilkaarsresultatService,
     @Autowired private val medlemskapsperiodeService: MedlemskapsperiodeService,
@@ -97,7 +93,6 @@ class YrkesaktivFtrlVedtakIT(
     @BeforeEach
     fun setup() {
         fakturaserieReferanse = ULID.random().toString()
-        oAuthMockServer.start()
         unleash.enableAllExcept(ToggleName.MELOSYS_FOLKETRYGDEN_2_7, ToggleName.MELOSYS_FTRL_YRKESAKTIV_PLIKTIGE_BESTEMMELSER)
         MedlRepo.repo.clear()
         originalSubjectHandler = SubjectHandler.getInstance()
@@ -151,7 +146,6 @@ class YrkesaktivFtrlVedtakIT(
 
     @AfterEach
     fun afterEach() {
-        oAuthMockServer.stop()
         MedlRepo.repo.clear()
         SubjectHandler.set(originalSubjectHandler)
     }

@@ -1,10 +1,12 @@
 package no.nav.melosys.integrasjon.felles;
 
-import javax.ws.rs.*;
-
+import jakarta.ws.rs.*;
 import no.nav.melosys.exception.*;
+import org.springframework.http.HttpStatus;
 import org.springframework.web.client.HttpStatusCodeException;
 import org.springframework.web.client.RestClientException;
+
+import static org.springframework.http.HttpStatus.*;
 
 public final class ExceptionMapper {
 
@@ -33,7 +35,7 @@ public final class ExceptionMapper {
 
     public static RuntimeException mapException(RestClientException ex, String feilmelding) {
         if (ex instanceof HttpStatusCodeException httpStatusCodeException) {
-            return switch (httpStatusCodeException.getStatusCode()) {
+            return switch (HttpStatus.valueOf(httpStatusCodeException.getStatusCode().value())) {
                 case FORBIDDEN, UNAUTHORIZED -> new SikkerhetsbegrensningException(feilmelding, ex);
                 case NOT_FOUND -> new IkkeFunnetException(feilmelding, ex);
                 case BAD_REQUEST, INTERNAL_SERVER_ERROR, METHOD_NOT_ALLOWED, SERVICE_UNAVAILABLE ->

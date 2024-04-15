@@ -4,7 +4,7 @@ import java.io.IOException;
 import java.io.StringReader;
 import java.io.StringWriter;
 import java.util.Properties;
-import javax.persistence.AttributeConverter;
+import jakarta.persistence.AttributeConverter;
 
 public class PropertiesConverter implements AttributeConverter<Properties, String> {
 
