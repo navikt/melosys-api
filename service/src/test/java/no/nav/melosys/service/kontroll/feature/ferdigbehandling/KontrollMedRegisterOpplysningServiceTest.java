@@ -2,6 +2,7 @@ package no.nav.melosys.service.kontroll.feature.ferdigbehandling;
 
 import java.time.LocalDate;
 import java.util.Collection;
+import java.util.Collections;
 import java.util.Set;
 
 import no.nav.melosys.domain.Behandling;
@@ -88,7 +89,7 @@ class KontrollMedRegisterOpplysningServiceTest {
         when(persondataFasade.hentFolkeregisterident(behandling.getFagsak().hentBrukersAktørID())).thenReturn("fnr");
         when(lovvalgsperiodeService.hentLovvalgsperiode(behandlingID)).thenReturn(lovvalgsperiode);
 
-        Collection<Kontrollfeil> kontrollfeilCollection = kontrollMedRegisterOpplysning.kontrollerVedtak(behandling, Sakstyper.EU_EOS, Behandlingsresultattyper.MEDLEM_I_FOLKETRYGDEN, null);
+        Collection<Kontrollfeil> kontrollfeilCollection = kontrollMedRegisterOpplysning.kontrollerVedtak(behandling, Sakstyper.EU_EOS, Behandlingsresultattyper.MEDLEM_I_FOLKETRYGDEN, Collections.emptySet());
         assertThat(kontrollfeilCollection).hasSize(1);
         assertThat(kontrollfeilCollection.stream().findFirst().get().getKode().getKode()).isEqualTo(Kontroll_begrunnelser.INGEN_SLUTTDATO.getKode());
     }
@@ -99,7 +100,7 @@ class KontrollMedRegisterOpplysningServiceTest {
         when(persondataFasade.hentFolkeregisterident(behandling.getFagsak().hentBrukersAktørID())).thenReturn("fnr");
         when(lovvalgsperiodeService.hentLovvalgsperiode(behandlingID)).thenReturn(lovvalgsperiode);
 
-        kontrollMedRegisterOpplysning.kontroller(behandling.getId(), Behandlingsresultattyper.MEDLEM_I_FOLKETRYGDEN, null);
+        kontrollMedRegisterOpplysning.kontroller(behandling.getId(), Behandlingsresultattyper.MEDLEM_I_FOLKETRYGDEN, Collections.emptySet());
         verify(registeropplysningerService).hentOgLagreOpplysninger(any());
     }
 

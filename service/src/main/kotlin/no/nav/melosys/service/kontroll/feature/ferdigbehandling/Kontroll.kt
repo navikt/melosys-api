@@ -97,58 +97,54 @@ class Kontroll(
     }
 
     private fun hentKontrollDataForAvslagOgHenleggelse(behandling: Behandling): FerdigbehandlingKontrollData {
-        val persondata = hentPersondata(behandling)
-        val saksopplysningerData = hentSaksopplysningerData(behandling)
-        val brevUtkast = utkastBrevService.hentUtkast(behandling.id)
         val fullmektig = behandling.fagsak.finnFullmektig(Fullmaktstype.FULLMEKTIG_SØKNAD).orElse(null)
-        val organisasjonFullmektig = hentOrganisasjonFullmektig(fullmektig)
-        val persondataFullmektig = hentPersondataFullmektig(fullmektig)
         val mottatteOpplysningerData =
             if (!saksbehandlingRegler.harIngenFlyt(behandling)) behandling.mottatteOpplysninger.mottatteOpplysningerData else null
 
-        return FerdigbehandlingKontrollData.lagKontrollDataForAvslag(
-            persondata, mottatteOpplysningerData, saksopplysningerData,
-            fullmektig, organisasjonFullmektig, persondataFullmektig, brevUtkast
+        return FerdigbehandlingKontrollData(
+            persondata = hentPersondata(behandling),
+            mottatteOpplysningerData = mottatteOpplysningerData,
+            saksopplysningerData = hentSaksopplysningerData(behandling),
+            fullmektig = fullmektig,
+            organisasjonDokument = hentOrganisasjonFullmektig(fullmektig),
+            persondataTilFullmektig = hentPersondataFullmektig(fullmektig),
+            brevUtkast = utkastBrevService.hentUtkast(behandling.id)
         )
     }
 
     private fun hentVedtakKontrollData(behandling: Behandling): FerdigbehandlingKontrollData {
-        val persondata = hentPersondata(behandling)
-        val saksopplysningerData = hentSaksopplysningerData(behandling)
-        val brevUtkast = utkastBrevService.hentUtkast(behandling.id)
-        val mottatteOpplysningerData = behandling.mottatteOpplysninger.mottatteOpplysningerData
-        val lovvalgsperiode = lovvalgsperiodeService.hentLovvalgsperiode(behandling.id)
-        val opprinneligLovvalgsperiode = lovvalgsperiodeService.finnOpprinneligLovvalgsperiode(behandling.id).orElse(null)
-        val medlemskapDokument = behandling.hentMedlemskapDokument()
         val fullmektig = behandling.fagsak.finnFullmektig(Fullmaktstype.FULLMEKTIG_SØKNAD).orElse(null)
-        val organisasjonFullmektig = hentOrganisasjonFullmektig(fullmektig)
-        val persondataFullmektig = hentPersondataFullmektig(fullmektig)
 
         return FerdigbehandlingKontrollData(
-            medlemskapDokument, persondata, mottatteOpplysningerData,
-            lovvalgsperiode, opprinneligLovvalgsperiode, saksopplysningerData, behandling.tema,
-            fullmektig, organisasjonFullmektig, persondataFullmektig, null, brevUtkast
+            medlemskapDokument = behandling.hentMedlemskapDokument(),
+            persondata = hentPersondata(behandling),
+            mottatteOpplysningerData = behandling.mottatteOpplysninger.mottatteOpplysningerData,
+            lovvalgsperiode = lovvalgsperiodeService.hentLovvalgsperiode(behandling.id),
+            opprinneligLovvalgsperiode = lovvalgsperiodeService.finnOpprinneligLovvalgsperiode(behandling.id).orElse(null),
+            saksopplysningerData = hentSaksopplysningerData(behandling),
+            behandlingstema = behandling.tema,
+            fullmektig = fullmektig,
+            organisasjonDokument = hentOrganisasjonFullmektig(fullmektig),
+            persondataTilFullmektig = hentPersondataFullmektig(fullmektig),
+            brevUtkast = utkastBrevService.hentUtkast(behandling.id)
         )
     }
 
     private fun hentVedtakKontrollDataFTRL(behandling: Behandling): FerdigbehandlingKontrollData {
-        val persondata = hentPersondata(behandling)
-        val brevUtkast = utkastBrevService.hentUtkast(behandling.id)
-        val mottatteOpplysningerData = behandling.mottatteOpplysninger.mottatteOpplysningerData
-        val medlemskapDokument = behandling.hentMedlemskapDokument()
         val fullmektig = behandling.fagsak.finnFullmektig(Fullmaktstype.FULLMEKTIG_SØKNAD).orElse(null)
-        val organisasjonFullmektig = hentOrganisasjonFullmektig(fullmektig)
-        val persondataFullmektig = hentPersondataFullmektig(fullmektig)
-
         val medlemskapsperioder = medlemskapsperiodeService.hentMedlemskapsperioder(behandling.id)
         val tidligereMedlemskapsperioder = behandling.fagsak.hentInaktiveBehandlinger()
             .map { medlemskapsperiodeService.hentMedlemskapsperioder(it.id) }.flatten()
 
-        val medlemskapsperiodeData = MedlemskapsperiodeData(medlemskapsperioder, tidligereMedlemskapsperioder)
-
-        return FerdigbehandlingKontrollData.lagKontrollDataForFTRL(
-            persondata, mottatteOpplysningerData, medlemskapDokument,
-            fullmektig, organisasjonFullmektig, persondataFullmektig, medlemskapsperiodeData, brevUtkast
+        return FerdigbehandlingKontrollData(
+            medlemskapDokument = behandling.hentMedlemskapDokument(),
+            persondata = hentPersondata(behandling),
+            mottatteOpplysningerData = behandling.mottatteOpplysninger.mottatteOpplysningerData,
+            fullmektig = fullmektig,
+            organisasjonDokument = hentOrganisasjonFullmektig(fullmektig),
+            persondataTilFullmektig = hentPersondataFullmektig(fullmektig),
+            medlemskapsperiodeData = MedlemskapsperiodeData(medlemskapsperioder, tidligereMedlemskapsperioder),
+            brevUtkast = utkastBrevService.hentUtkast(behandling.id)
         )
     }
 

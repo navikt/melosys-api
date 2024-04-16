@@ -1,7 +1,5 @@
 package no.nav.melosys.service.kontroll.feature.ferdigbehandling.kontroll;
 
-import java.util.Arrays;
-
 import no.nav.melosys.domain.Lovvalgsperiode;
 import no.nav.melosys.domain.dokument.medlemskap.MedlemskapDokument;
 import no.nav.melosys.domain.dokument.organisasjon.OrganisasjonDokument;
@@ -20,6 +18,8 @@ import no.nav.melosys.service.kontroll.regler.PeriodeRegler;
 import no.nav.melosys.service.kontroll.regler.PersonRegler;
 import no.nav.melosys.service.validering.Kontrollfeil;
 
+import java.util.Arrays;
+
 import static no.nav.melosys.domain.kodeverk.lovvalgsbestemmelser.trygdeavtale.Lovvalgsbestemmelser_trygdeavtale_au.AUS_ART9_2;
 import static no.nav.melosys.domain.kodeverk.lovvalgsbestemmelser.trygdeavtale.Lovvalgsbestemmelser_trygdeavtale_au.AUS_ART9_3;
 import static no.nav.melosys.domain.kodeverk.lovvalgsbestemmelser.trygdeavtale.Lovvalgsbestemmelser_trygdeavtale_ca.CAN_ART6_2;
@@ -35,16 +35,16 @@ final class FerdigbehandlingKontroll {
     }
 
     static Kontrollfeil overlappendePeriode(FerdigbehandlingKontrollData kontrollData) {
-        MedlemskapDokument medlemskapDokument = kontrollData.medlemskapDokument();
-        MedlemskapsperiodeData medlemskapsperiodeData = kontrollData.medlemskapsperiodeData();
-        Lovvalgsperiode kontrollPeriode = kontrollData.lovvalgsperiode();
-        Lovvalgsperiode opprinneligLovvalgsperiode = kontrollData.opprinneligLovvalgsperiode();
+        MedlemskapDokument medlemskapDokument = kontrollData.getMedlemskapDokument();
+        MedlemskapsperiodeData medlemskapsperiodeData = kontrollData.getMedlemskapsperiodeData();
+        Lovvalgsperiode kontrollPeriode = kontrollData.getLovvalgsperiode();
+        Lovvalgsperiode opprinneligLovvalgsperiode = kontrollData.getOpprinneligLovvalgsperiode();
 
         if (medlemskapsperiodeData != null && medlemskapsperiodeData.harNyeMedlemskapsperioder()) {
             return OverlappendeMedlemskapsperioderRegler.harOverlappendePeriode(medlemskapDokument, medlemskapsperiodeData)
                 ? new Kontrollfeil(Kontroll_begrunnelser.OVERLAPPENDE_MEDL_PERIODER, KontrolldataFeilType.FEIL)
                 : null;
-        } else if (harBehandlingstemaMedUnntakForOverlappendePeriode(kontrollPeriode, kontrollData.behandlingstema())
+        } else if (harBehandlingstemaMedUnntakForOverlappendePeriode(kontrollPeriode, kontrollData.getBehandlingstema())
             && harOverlappendeUnntaksperiode(medlemskapDokument, kontrollPeriode, opprinneligLovvalgsperiode)) {
             return new Kontrollfeil(Kontroll_begrunnelser.OVERLAPPENDE_UNNTAK_PERIODER, KontrolldataFeilType.ADVARSEL);
         }
@@ -55,14 +55,14 @@ final class FerdigbehandlingKontroll {
     }
 
     static boolean harBehandlingstemaMedUnntakForOverlappendePeriode(Lovvalgsperiode lovvalgsperiode, Behandlingstema behandlingstema) {
-            return (behandlingstema == Behandlingstema.UTSENDT_ARBEIDSTAKER || behandlingstema == Behandlingstema.UTSENDT_SELVSTENDIG)
-                && lovvalgsperiode.erAvslått();
+        return (behandlingstema == Behandlingstema.UTSENDT_ARBEIDSTAKER || behandlingstema == Behandlingstema.UTSENDT_SELVSTENDIG)
+            && lovvalgsperiode.erAvslått();
     }
 
     static Kontrollfeil overlappendeUnntaksperiode(FerdigbehandlingKontrollData kontrollData) {
-        MedlemskapDokument medlemskapDokument = kontrollData.medlemskapDokument();
-        Lovvalgsperiode kontrollPeriode = kontrollData.lovvalgsperiode();
-        Lovvalgsperiode opprinneligLovvalgsperiode = kontrollData.opprinneligLovvalgsperiode();
+        MedlemskapDokument medlemskapDokument = kontrollData.getMedlemskapDokument();
+        Lovvalgsperiode kontrollPeriode = kontrollData.getLovvalgsperiode();
+        Lovvalgsperiode opprinneligLovvalgsperiode = kontrollData.getOpprinneligLovvalgsperiode();
 
         if (!harOverlappendeUnntaksperiode(medlemskapDokument, kontrollPeriode, opprinneligLovvalgsperiode)) {
             return null;
@@ -73,9 +73,9 @@ final class FerdigbehandlingKontroll {
 
 
     static Kontrollfeil overlappendeMedlemskapsperiode(FerdigbehandlingKontrollData kontrollData) {
-        MedlemskapDokument medlemskapDokument = kontrollData.medlemskapDokument();
-        Lovvalgsperiode lovvalgsperiode = kontrollData.lovvalgsperiode();
-        Lovvalgsperiode opprinneligLovvalgsperiode = kontrollData.opprinneligLovvalgsperiode();
+        MedlemskapDokument medlemskapDokument = kontrollData.getMedlemskapDokument();
+        Lovvalgsperiode lovvalgsperiode = kontrollData.getLovvalgsperiode();
+        Lovvalgsperiode opprinneligLovvalgsperiode = kontrollData.getOpprinneligLovvalgsperiode();
 
         return OverlappendeMedlemskapsperioderRegler.harOverlappendeMedlemsperiode(medlemskapDokument,
             lovvalgsperiode,
@@ -84,7 +84,7 @@ final class FerdigbehandlingKontroll {
     }
 
     static Kontrollfeil periodeOver24Mnd(FerdigbehandlingKontrollData kontrollData) {
-        Lovvalgsperiode lovvalgsperiode = kontrollData.lovvalgsperiode();
+        Lovvalgsperiode lovvalgsperiode = kontrollData.getLovvalgsperiode();
 
         return lovvalgsperiode.erArtikkel12()
             && PeriodeRegler.periodeOver24Måneder(lovvalgsperiode.getFom(), lovvalgsperiode.getTom())
@@ -92,7 +92,7 @@ final class FerdigbehandlingKontroll {
     }
 
     static Kontrollfeil periodeManglerSluttdato(FerdigbehandlingKontrollData kontrollData) {
-        Lovvalgsperiode lovvalgsperiode = kontrollData.lovvalgsperiode();
+        Lovvalgsperiode lovvalgsperiode = kontrollData.getLovvalgsperiode();
         if (lovvalgsperiode.getTom() != null) {
             return null;
         } else {
@@ -103,7 +103,7 @@ final class FerdigbehandlingKontroll {
     }
 
     static Kontrollfeil periodeOverTreÅr(FerdigbehandlingKontrollData kontrollData) {
-        Lovvalgsperiode lovvalgsperiode = kontrollData.lovvalgsperiode();
+        Lovvalgsperiode lovvalgsperiode = kontrollData.getLovvalgsperiode();
 
         return (lovvalgsperiode.getBestemmelse() == UK_ART6_1 || lovvalgsperiode.getBestemmelse() == AUS_ART9_3)
             && PeriodeRegler.periodeOver3År(lovvalgsperiode.getFom(), lovvalgsperiode.getTom())
@@ -111,7 +111,7 @@ final class FerdigbehandlingKontroll {
     }
 
     static Kontrollfeil periodeOverFemÅr(FerdigbehandlingKontrollData kontrollData) {
-        Lovvalgsperiode lovvalgsperiode = kontrollData.lovvalgsperiode();
+        Lovvalgsperiode lovvalgsperiode = kontrollData.getLovvalgsperiode();
 
         return (lovvalgsperiode.getBestemmelse() == USA_ART5_2 || lovvalgsperiode.getBestemmelse() == CAN_ART7)
             && PeriodeRegler.periodeOver5År(lovvalgsperiode.getFom(), lovvalgsperiode.getTom())
@@ -119,7 +119,7 @@ final class FerdigbehandlingKontroll {
     }
 
     static Kontrollfeil periodeOver12Måneder(FerdigbehandlingKontrollData kontrollData) {
-        Lovvalgsperiode lovvalgsperiode = kontrollData.lovvalgsperiode();
+        Lovvalgsperiode lovvalgsperiode = kontrollData.getLovvalgsperiode();
 
         return (lovvalgsperiode.getBestemmelse() == USA_ART5_4 || lovvalgsperiode.getBestemmelse() == CAN_ART6_2)
             && PeriodeRegler.periodeOver12Måneder(lovvalgsperiode.getFom(), lovvalgsperiode.getTom())
@@ -127,32 +127,32 @@ final class FerdigbehandlingKontroll {
     }
 
     static Kontrollfeil arbeidsstedLandManglerFelter(FerdigbehandlingKontrollData kontrollData) {
-        return ArbeidUtlandKontroll.arbeidsstedLandManglerFelter(kontrollData.mottatteOpplysningerData());
+        return ArbeidUtlandKontroll.arbeidsstedLandManglerFelter(kontrollData.getMottatteOpplysningerData());
     }
 
     static Kontrollfeil arbeidsstedMaritimtManglerFelter(FerdigbehandlingKontrollData kontrollData) {
-        return ArbeidUtlandKontroll.maritimtArbeidsstedManglerFelter(kontrollData.mottatteOpplysningerData());
+        return ArbeidUtlandKontroll.maritimtArbeidsstedManglerFelter(kontrollData.getMottatteOpplysningerData());
     }
 
     static Kontrollfeil arbeidsstedOffshoreManglerFelter(FerdigbehandlingKontrollData kontrollData) {
-        return ArbeidUtlandKontroll.offshoreArbeidsstedManglerFelter(kontrollData.mottatteOpplysningerData());
+        return ArbeidUtlandKontroll.offshoreArbeidsstedManglerFelter(kontrollData.getMottatteOpplysningerData());
     }
 
     static Kontrollfeil arbeidsstedLuftfartManglerFelter(FerdigbehandlingKontrollData kontrollData) {
-        return ArbeidUtlandKontroll.luftfartArbeidsstedManglerFelter(kontrollData.mottatteOpplysningerData());
+        return ArbeidUtlandKontroll.luftfartArbeidsstedManglerFelter(kontrollData.getMottatteOpplysningerData());
     }
 
     static Kontrollfeil foretakUtlandManglerFelter(FerdigbehandlingKontrollData kontrollData) {
-        return ArbeidUtlandKontroll.foretakUtlandManglerFelter(kontrollData.mottatteOpplysningerData());
+        return ArbeidUtlandKontroll.foretakUtlandManglerFelter(kontrollData.getMottatteOpplysningerData());
     }
 
     static Kontrollfeil selvstendigUtlandManglerFelter(FerdigbehandlingKontrollData kontrollData) {
-        return ArbeidUtlandKontroll.selvstendigUtlandManglerFelter(kontrollData.mottatteOpplysningerData());
+        return ArbeidUtlandKontroll.selvstendigUtlandManglerFelter(kontrollData.getMottatteOpplysningerData());
     }
 
     static Kontrollfeil representantIUtlandetMangler(FerdigbehandlingKontrollData kontrollData) {
-        var lovvalgsperiode = kontrollData.lovvalgsperiode();
-        var søknad = (SøknadNorgeEllerUtenforEØS) kontrollData.mottatteOpplysningerData();
+        var lovvalgsperiode = kontrollData.getLovvalgsperiode();
+        var søknad = (SøknadNorgeEllerUtenforEØS) kontrollData.getMottatteOpplysningerData();
 
         return erBestemmelseDerTrygdeavtaleAttestSendes(lovvalgsperiode.getBestemmelse())
             && ArbeidsstedRegler.representantIUtlandetMangler(søknad.getRepresentantIUtlandet())
@@ -160,20 +160,20 @@ final class FerdigbehandlingKontroll {
     }
 
     public static Kontrollfeil orgnrErOpphørt(FerdigbehandlingKontrollData kontrollData) {
-        var behandlingstema = kontrollData.behandlingstema();
+        var behandlingstema = kontrollData.getBehandlingstema();
         return (behandlingstema == Behandlingstema.UTSENDT_ARBEIDSTAKER || behandlingstema == Behandlingstema.ARBEID_TJENESTEPERSON_ELLER_FLY)
-            && kontrollData.saksopplysningerData().harOpphørtAvklartVirksomhet()
+            && kontrollData.getSaksopplysningerData().harOpphørtAvklartVirksomhet()
             ? new Kontrollfeil(Kontroll_begrunnelser.OPPHØRT_ARBEIDSGIVER)
             : null;
     }
 
     static Kontrollfeil åpentUtkastFinnes(FerdigbehandlingKontrollData kontrollData) {
-        var åpneUtkast = kontrollData.brevUtkast();
+        var åpneUtkast = kontrollData.getBrevUtkast();
         return åpneUtkast == null || åpneUtkast.isEmpty() ? null : new Kontrollfeil(Kontroll_begrunnelser.ÅPENT_UTKAST);
     }
 
     static Kontrollfeil adresseRegistrert(FerdigbehandlingKontrollData kontrollData) {
-        var representant = kontrollData.fullmektig();
+        var representant = kontrollData.getFullmektig();
         boolean harRepresentant = representant != null;
 
         var brukerKontrollfeil = new Kontrollfeil(Kontroll_begrunnelser.MANGLENDE_REGISTRERTE_ADRESSE_BRUKER);
@@ -182,7 +182,7 @@ final class FerdigbehandlingKontroll {
             return håndterRepresentantBrukerOgOrganisasjon(kontrollData, representant.erOrganisasjon());
         }
 
-        return PersonRegler.harRegistrertAdresse(kontrollData.persondata(), kontrollData.mottatteOpplysningerData()) ? null : brukerKontrollfeil;
+        return PersonRegler.harRegistrertAdresse(kontrollData.getPersondata(), kontrollData.getMottatteOpplysningerData()) ? null : brukerKontrollfeil;
     }
 
     private static Kontrollfeil håndterRepresentantBrukerOgOrganisasjon(FerdigbehandlingKontrollData kontrollData, boolean representantErOrganisasjon) {
@@ -194,13 +194,13 @@ final class FerdigbehandlingKontroll {
     private static Kontrollfeil erPersonAdresseRegistrert(FerdigbehandlingKontrollData kontrollData) {
         Kontrollfeil representantKontrollfeil = new Kontrollfeil(Kontroll_begrunnelser.MANGLENDE_REGISTRERTE_ADRESSE_REPRESENTANT);
 
-        return PersonRegler.harRegistrertAdresse(kontrollData.persondataTilFullmektig(), kontrollData.mottatteOpplysningerData()) ? null : representantKontrollfeil;
+        return PersonRegler.harRegistrertAdresse(kontrollData.getPersondataTilFullmektig(), kontrollData.getMottatteOpplysningerData()) ? null : representantKontrollfeil;
     }
 
     private static Kontrollfeil erOrganisasjonAdresseRegistrert(FerdigbehandlingKontrollData kontrollData) {
         Kontrollfeil representatKontrollfeil = new Kontrollfeil(Kontroll_begrunnelser.MANGLENDE_REGISTRERTE_ADRESSE_REPRESENTANT);
 
-        OrganisasjonDokument organisasjon = kontrollData.organisasjonDokument();
+        OrganisasjonDokument organisasjon = kontrollData.getOrganisasjonDokument();
         boolean organisasjonHarRegistrertPostadresse = organisasjon.harRegistrertPostadresse();
         boolean organisasjonHarRegistrertForretningsadresse = organisasjon.harRegistrertForretningsadresse();
 
