@@ -168,7 +168,7 @@ class MedlemskapsperiodeServiceTest {
             behandlingsresultat = lagBehandlingsresultat()
         }
         every { medlemAvFolketrygdenService.hentMedlemAvFolketrygden(BEHANDLING_ID_1) } returns medlemAvFolketrygden
-        every { medlemskapsperiodeRepository.save(any()) } returnsArgument 0
+        every { medlemskapsperiodeRepository.saveAndFlush(any()) } returnsArgument 0
 
 
         medlemskapsperiodeService.oppdaterMedlemskapsperiode(
@@ -182,7 +182,7 @@ class MedlemskapsperiodeServiceTest {
         )
 
 
-        verify { medlemskapsperiodeRepository.save(any()) }
+        verify { medlemskapsperiodeRepository.saveAndFlush(any()) }
         verify(exactly = 0) { trygdeavgiftsgrunnlagService.fjernTrygdeavgiftsperioderOmDeFinnes(any()) }
         medlemAvFolketrygden.medlemskapsperioder.single().run {
             fom.shouldBe(NÅ)
@@ -202,7 +202,7 @@ class MedlemskapsperiodeServiceTest {
             behandlingsresultat = lagBehandlingsresultat()
         }
         every { medlemAvFolketrygdenService.hentMedlemAvFolketrygden(BEHANDLING_ID_1) } returns medlemAvFolketrygden
-        every { medlemskapsperiodeRepository.save(any()) } returnsArgument 0
+        every { medlemskapsperiodeRepository.saveAndFlush(any()) } returnsArgument 0
 
 
         medlemskapsperiodeService.oppdaterMedlemskapsperiode(
@@ -216,7 +216,7 @@ class MedlemskapsperiodeServiceTest {
         )
 
 
-        verify { medlemskapsperiodeRepository.save(any()) }
+        verify { medlemskapsperiodeRepository.saveAndFlush(any()) }
         verify { trygdeavgiftsgrunnlagService.fjernTrygdeavgiftsperioderOmDeFinnes(medlemAvFolketrygden.fastsattTrygdeavgift) }
     }
 
@@ -315,7 +315,7 @@ class MedlemskapsperiodeServiceTest {
             behandlingsresultat = lagBehandlingsresultat()
             medlemskapsperioder = listOf(Medlemskapsperiode().apply { id = MEDLEMSKAPSPERIODE_ID_1 })
         }
-        every { medlemskapsperiodeRepository.save(any()) } returnsArgument 0
+        every { medlemskapsperiodeRepository.saveAndFlush(any()) } returnsArgument 0
 
 
         shouldNotThrow<FunksjonellException> {

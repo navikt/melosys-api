@@ -2,6 +2,7 @@ package no.nav.melosys.service;
 
 import java.util.Optional;
 
+import jakarta.transaction.Transactional;
 import no.nav.melosys.domain.folketrygden.MedlemAvFolketrygden;
 import no.nav.melosys.exception.IkkeFunnetException;
 import no.nav.melosys.repository.MedlemAvFolketrygdenRepository;
@@ -29,6 +30,12 @@ public class MedlemAvFolketrygdenService {
         return medlemAvFolketrygdenRepository.findWithMedlemskapsperioderByBehandlingsresultatId(behandlingsresultatID);
     }
 
+    @Transactional
+    public MedlemAvFolketrygden lagreOgFlush(MedlemAvFolketrygden medlemAvFolketrygden) {
+        return medlemAvFolketrygdenRepository.saveAndFlush(medlemAvFolketrygden);
+    }
+
+    @Transactional
     public MedlemAvFolketrygden lagre(MedlemAvFolketrygden medlemAvFolketrygden) {
         return medlemAvFolketrygdenRepository.save(medlemAvFolketrygden);
     }

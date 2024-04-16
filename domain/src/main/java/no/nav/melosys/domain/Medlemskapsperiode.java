@@ -50,9 +50,6 @@ public class Medlemskapsperiode implements ErPeriode, HarBestemmelse<Folketrygdl
     @Column(name = "medlperiode_id")
     private Long medlPeriodeID;
 
-    @OneToMany(mappedBy = "grunnlagMedlemskapsperiode", cascade = CascadeType.ALL, fetch = FetchType.LAZY, orphanRemoval = true)
-    private Collection<Trygdeavgiftsperiode> trygdeavgiftsperioder = new HashSet<>(1);
-
     public Long getId() {
         return id;
     }
@@ -123,15 +120,6 @@ public class Medlemskapsperiode implements ErPeriode, HarBestemmelse<Folketrygdl
 
     public void setMedlPeriodeID(Long medlPeriodeID) {
         this.medlPeriodeID = medlPeriodeID;
-    }
-
-    public Collection<Trygdeavgiftsperiode> getTrygdeavgiftsperioder() {
-        return trygdeavgiftsperioder;
-    }
-
-    @Deprecated(since = "Bare for test...", forRemoval = false)
-    public void setTrygdeavgiftsperioder(Collection<Trygdeavgiftsperiode> trygdeavgiftsperioder) {
-        this.trygdeavgiftsperioder = trygdeavgiftsperioder;
     }
 
     public boolean erInnvilget() {
