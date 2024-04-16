@@ -10,7 +10,7 @@ object FerdigbehandlingKontrollsett {
         sakstype: Sakstyper,
         harRegistreringUnntakFraMedlemskapFlyt: Boolean,
         harIkkeYrkesaktivFlyt: Boolean
-    ): Set<Function<FerdigbehandlingKontrollData, Kontrollfeil>> {
+    ): Set<Function<FerdigbehandlingKontrollData, Kontrollfeil?>> {
         if (harRegistreringUnntakFraMedlemskapFlyt) {
             return REGELSETT_UNNTAKSREGISTRERING
         }
@@ -25,11 +25,11 @@ object FerdigbehandlingKontrollsett {
         }
     }
 
-    fun hentRegelsettForAvslagOgHenleggelse(): Set<Function<FerdigbehandlingKontrollData, Kontrollfeil>> {
+    fun hentRegelsettForAvslagOgHenleggelse(): Set<Function<FerdigbehandlingKontrollData, Kontrollfeil?>> {
         return REGELSETT_AVSLAG_HENLEGGELSE
     }
 
-    private val REGELSETT_EU_EOS: Set<Function<FerdigbehandlingKontrollData, Kontrollfeil>> = setOf(
+    private val REGELSETT_EU_EOS: Set<Function<FerdigbehandlingKontrollData, Kontrollfeil?>> = setOf(
         Function { FerdigbehandlingKontroll.adresseRegistrert(it) },
         Function { FerdigbehandlingKontroll.overlappendePeriode(it) },
         Function { FerdigbehandlingKontroll.periodeOver24Mnd(it) },
@@ -43,12 +43,12 @@ object FerdigbehandlingKontrollsett {
         Function { FerdigbehandlingKontroll.orgnrErOpphørt(it) },
         Function { FerdigbehandlingKontroll.åpentUtkastFinnes(it) })
 
-    private val REGELSETT_FTRL: Set<Function<FerdigbehandlingKontrollData, Kontrollfeil>> = setOf(
+    private val REGELSETT_FTRL: Set<Function<FerdigbehandlingKontrollData, Kontrollfeil?>> = setOf(
         Function { FerdigbehandlingKontroll.adresseRegistrert(it) },
         Function { FerdigbehandlingKontroll.overlappendePeriode(it) },
         Function { FerdigbehandlingKontroll.åpentUtkastFinnes(it) })
 
-    private val REGELSETT_TRYGDEAVTALER: Set<Function<FerdigbehandlingKontrollData, Kontrollfeil>> = setOf(
+    private val REGELSETT_TRYGDEAVTALER: Set<Function<FerdigbehandlingKontrollData, Kontrollfeil?>> = setOf(
         Function { FerdigbehandlingKontroll.adresseRegistrert(it) },
         Function { FerdigbehandlingKontroll.overlappendePeriode(it) },
         Function { FerdigbehandlingKontroll.periodeOver12Måneder(it) },
@@ -59,19 +59,19 @@ object FerdigbehandlingKontrollsett {
         Function { FerdigbehandlingKontroll.representantIUtlandetMangler(it) },
         Function { FerdigbehandlingKontroll.åpentUtkastFinnes(it) })
 
-    private val REGELSETT_UNNTAKSREGISTRERING: Set<Function<FerdigbehandlingKontrollData, Kontrollfeil>> = setOf(
+    private val REGELSETT_UNNTAKSREGISTRERING: Set<Function<FerdigbehandlingKontrollData, Kontrollfeil?>> = setOf(
         Function { FerdigbehandlingKontroll.overlappendeMedlemskapsperiode(it) },
         Function { FerdigbehandlingKontroll.periodeManglerSluttdato(it) },
         Function { FerdigbehandlingKontroll.overlappendeUnntaksperiode(it) },
         Function { FerdigbehandlingKontroll.åpentUtkastFinnes(it) })
 
-    private val REGELSETT_IKKE_YRKESAKTIV: Set<Function<FerdigbehandlingKontrollData, Kontrollfeil>> = setOf(
+    private val REGELSETT_IKKE_YRKESAKTIV: Set<Function<FerdigbehandlingKontrollData, Kontrollfeil?>> = setOf(
         Function { FerdigbehandlingKontroll.adresseRegistrert(it) },
         Function { FerdigbehandlingKontroll.overlappendePeriode(it) },
         Function { FerdigbehandlingKontroll.periodeManglerSluttdato(it) },
         Function { FerdigbehandlingKontroll.åpentUtkastFinnes(it) })
 
-    private val REGELSETT_AVSLAG_HENLEGGELSE: Set<Function<FerdigbehandlingKontrollData, Kontrollfeil>> = setOf(
+    private val REGELSETT_AVSLAG_HENLEGGELSE: Set<Function<FerdigbehandlingKontrollData, Kontrollfeil?>> = setOf(
         Function { FerdigbehandlingKontroll.adresseRegistrert(it) },
         Function { FerdigbehandlingKontroll.åpentUtkastFinnes(it) })
 }
