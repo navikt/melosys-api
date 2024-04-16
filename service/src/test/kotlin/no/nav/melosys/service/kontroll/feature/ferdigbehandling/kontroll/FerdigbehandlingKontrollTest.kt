@@ -45,7 +45,7 @@ class FerdigbehandlingKontrollTest {
         val kontrollfeil = FerdigbehandlingKontroll.periodeOver12Måneder(kontrollData)
 
 
-        kontrollfeil.kode.shouldBe(Kontroll_begrunnelser.MER_ENN_12_MD)
+        kontrollfeil.shouldNotBeNull().kode.shouldBe(Kontroll_begrunnelser.MER_ENN_12_MD)
     }
 
     @Test
@@ -61,7 +61,7 @@ class FerdigbehandlingKontrollTest {
         val kontrollfeil = FerdigbehandlingKontroll.periodeOverFemÅr(kontrollData)
 
 
-        kontrollfeil.kode.shouldBe(Kontroll_begrunnelser.MER_ENN_FEM_ÅR)
+        kontrollfeil.shouldNotBeNull().kode.shouldBe(Kontroll_begrunnelser.MER_ENN_FEM_ÅR)
     }
 
     @Test
@@ -103,7 +103,7 @@ class FerdigbehandlingKontrollTest {
         val kontrollfeil = FerdigbehandlingKontroll.overlappendePeriode(kontrollData)
 
 
-        kontrollfeil.kode.shouldBe(Kontroll_begrunnelser.OVERLAPPENDE_MEDL_PERIODER)
+        kontrollfeil.shouldNotBeNull().kode.shouldBe(Kontroll_begrunnelser.OVERLAPPENDE_MEDL_PERIODER)
     }
 
     @Test
@@ -185,8 +185,10 @@ class FerdigbehandlingKontrollTest {
         val kontrollfeil = FerdigbehandlingKontroll.overlappendePeriode(kontrollData)
 
 
-        kontrollfeil.kode.shouldBe(Kontroll_begrunnelser.OVERLAPPENDE_MEDL_PERIODER)
-        kontrollfeil.type.shouldBe(KontrolldataFeilType.FEIL)
+        kontrollfeil.shouldNotBeNull().run {
+            kode.shouldBe(Kontroll_begrunnelser.OVERLAPPENDE_MEDL_PERIODER)
+            type.shouldBe(KontrolldataFeilType.FEIL)
+        }
     }
 
     @Test
@@ -217,6 +219,7 @@ class FerdigbehandlingKontrollTest {
 
 
         val kontrollfeil = FerdigbehandlingKontroll.overlappendePeriode(kontrollData)
+
 
         kontrollfeil.shouldBeNull()
     }
@@ -250,8 +253,10 @@ class FerdigbehandlingKontrollTest {
 
         val kontrollfeil = FerdigbehandlingKontroll.overlappendePeriode(kontrollData)
 
-        kontrollfeil.kode.shouldBe(Kontroll_begrunnelser.OVERLAPPENDE_MEDL_PERIODER)
-        kontrollfeil.type.shouldBe(KontrolldataFeilType.FEIL)
+        kontrollfeil.shouldNotBeNull().run {
+            kode.shouldBe(Kontroll_begrunnelser.OVERLAPPENDE_MEDL_PERIODER)
+            type.shouldBe(KontrolldataFeilType.FEIL)
+        }
     }
 
     @Test
@@ -287,8 +292,10 @@ class FerdigbehandlingKontrollTest {
         val kontrollfeil = FerdigbehandlingKontroll.overlappendePeriode(kontrollData)
 
 
-        kontrollfeil.kode.shouldBe(Kontroll_begrunnelser.OVERLAPPENDE_MEDL_PERIODER)
-        kontrollfeil.type.shouldBe(KontrolldataFeilType.FEIL)
+        kontrollfeil.shouldNotBeNull().run {
+            kode.shouldBe(Kontroll_begrunnelser.OVERLAPPENDE_MEDL_PERIODER)
+            type.shouldBe(KontrolldataFeilType.FEIL)
+        }
     }
 
     @Test
@@ -316,8 +323,10 @@ class FerdigbehandlingKontrollTest {
 
         val kontrollfeil = FerdigbehandlingKontroll.overlappendePeriode(kontrollData)
 
-        kontrollfeil.kode.shouldBe(Kontroll_begrunnelser.OVERLAPPENDE_UNNTAK_PERIODER)
-        kontrollfeil.type.shouldBe(KontrolldataFeilType.ADVARSEL)
+        kontrollfeil.shouldNotBeNull().run {
+            kode.shouldBe(Kontroll_begrunnelser.OVERLAPPENDE_UNNTAK_PERIODER)
+            type.shouldBe(KontrolldataFeilType.ADVARSEL)
+        }
     }
 
 
@@ -347,7 +356,7 @@ class FerdigbehandlingKontrollTest {
         val kontrollfeil = FerdigbehandlingKontroll.overlappendeMedlemskapsperiode(kontrollData)
 
 
-        kontrollfeil.kode.shouldBe(Kontroll_begrunnelser.OVERLAPPENDE_MEDLEMSKAPSPERIODER)
+        kontrollfeil.shouldNotBeNull().kode.shouldBe(Kontroll_begrunnelser.OVERLAPPENDE_MEDLEMSKAPSPERIODER)
     }
 
     @Test
@@ -376,7 +385,7 @@ class FerdigbehandlingKontrollTest {
         val kontrollfeil = FerdigbehandlingKontroll.overlappendeUnntaksperiode(kontrollData)
 
 
-        kontrollfeil.kode.shouldBe(Kontroll_begrunnelser.OVERLAPPENDE_UNNTAK_PERIODER)
+        kontrollfeil.shouldNotBeNull().kode.shouldBe(Kontroll_begrunnelser.OVERLAPPENDE_UNNTAK_PERIODER)
     }
 
     @Test
@@ -390,7 +399,7 @@ class FerdigbehandlingKontrollTest {
         val kontrollfeil = FerdigbehandlingKontroll.adresseRegistrert(kontrollData)
 
 
-        kontrollfeil.kode.shouldBe(Kontroll_begrunnelser.MANGLENDE_REGISTRERTE_ADRESSE_BRUKER)
+        kontrollfeil.shouldNotBeNull().kode.shouldBe(Kontroll_begrunnelser.MANGLENDE_REGISTRERTE_ADRESSE_BRUKER)
     }
 
     @Test
@@ -453,7 +462,7 @@ class FerdigbehandlingKontrollTest {
         val kontrollfeil = FerdigbehandlingKontroll.adresseRegistrert(kontrollData)
 
 
-        kontrollfeil.kode.shouldBe(Kontroll_begrunnelser.MANGLENDE_REGISTRERTE_ADRESSE_REPRESENTANT)
+        kontrollfeil.shouldNotBeNull().kode.shouldBe(Kontroll_begrunnelser.MANGLENDE_REGISTRERTE_ADRESSE_REPRESENTANT)
     }
 
     private fun lagAktoerFullmektigOrganisasjon(): Aktoer {
