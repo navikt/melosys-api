@@ -15,7 +15,7 @@ import no.nav.melosys.service.dokument.brev.BrevDataAvslagYrkesaktiv;
 import no.nav.melosys.service.dokument.brev.BrevbestillingDto;
 import no.nav.melosys.service.dokument.brev.datagrunnlag.BrevDataGrunnlag;
 import no.nav.melosys.service.unntak.AnmodningsperiodeService;
-import no.nav.melosys.service.vilkaar.VilkaarsresultatService;
+import no.nav.melosys.service.behandling.VilkaarsresultatService;
 
 import static no.nav.melosys.domain.kodeverk.Vilkaar.FO_883_2004_ART16_1;
 

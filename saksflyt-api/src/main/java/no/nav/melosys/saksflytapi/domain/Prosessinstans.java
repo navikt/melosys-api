@@ -3,7 +3,7 @@ package no.nav.melosys.saksflytapi.domain;
 import java.io.IOException;
 import java.time.LocalDateTime;
 import java.util.*;
-import javax.persistence.*;
+import jakarta.persistence.*;
 
 import com.fasterxml.jackson.core.JsonParseException;
 import com.fasterxml.jackson.core.JsonProcessingException;

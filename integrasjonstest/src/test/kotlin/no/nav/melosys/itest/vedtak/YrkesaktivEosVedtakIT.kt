@@ -16,7 +16,6 @@ import io.mockk.slot
 import io.mockk.verify
 import no.nav.melosys.domain.Behandlingsmaate
 import no.nav.melosys.domain.Lovvalgsperiode
-import no.nav.melosys.statistikk.utstedt_a1.integrasjon.dto.Lovvalgsbestemmelse
 import no.nav.melosys.domain.kodeverk.*
 import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingsresultattyper
 import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingsstatus
@@ -26,7 +25,6 @@ import no.nav.melosys.domain.kodeverk.lovvalgsbestemmelser.Lovvalgbestemmelser_8
 import no.nav.melosys.domain.mottatteopplysninger.data.Periode
 import no.nav.melosys.domain.mottatteopplysninger.data.Soeknadsland
 import no.nav.melosys.itest.JournalfoeringBase
-import no.nav.melosys.itest.OAuthMockServer
 import no.nav.melosys.melosysmock.medl.MedlRepo
 import no.nav.melosys.melosysmock.testdata.TestDataGenerator
 import no.nav.melosys.repository.BehandlingRepository
@@ -43,19 +41,17 @@ import no.nav.melosys.service.saksopplysninger.OppfriskSaksopplysningerService
 import no.nav.melosys.service.vedtak.FattVedtakRequest
 import no.nav.melosys.service.vedtak.VedtaksfattingFasade
 import no.nav.melosys.service.vilkaar.VilkaarDto
-import no.nav.melosys.service.vilkaar.VilkaarsresultatService
+import no.nav.melosys.service.behandling.VilkaarsresultatService
 import no.nav.melosys.statistikk.utstedt_a1.integrasjon.UtstedtA1AivenProducer
+import no.nav.melosys.statistikk.utstedt_a1.integrasjon.dto.Lovvalgsbestemmelse
 import no.nav.melosys.statistikk.utstedt_a1.integrasjon.dto.UtstedtA1Melding
 import org.junit.jupiter.api.AfterEach
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Disabled
 import org.junit.jupiter.api.Test
 import org.springframework.beans.factory.annotation.Autowired
-import org.springframework.context.annotation.Import
 import java.time.LocalDate
 
-
-@Import(OAuthMockServer::class)
 class YrkesaktivEosVedtakIT(
     @Autowired testDataGenerator: TestDataGenerator,
     @Autowired journalføringService: JournalfoeringService,
@@ -63,15 +59,13 @@ class YrkesaktivEosVedtakIT(
     @Autowired private val avklartefaktaService: AvklartefaktaService,
     @Autowired private val behandlingsresultatService: BehandlingsresultatService,
     @Autowired private val behandlingRepository: BehandlingRepository,
-    @Autowired private val oAuthMockServer: OAuthMockServer,
     @Autowired private val mottatteOpplysningerService: MottatteOpplysningerService,
     @Autowired private val vilkaarsresultatService: VilkaarsresultatService,
     @Autowired private val lovvalgsperiodeService: LovvalgsperiodeService,
     @Autowired private val ferdigbehandlingKontrollFacade: FerdigbehandlingKontrollFacade,
     @Autowired private val oppfriskSaksopplysningerService: OppfriskSaksopplysningerService,
     @Autowired private val vedtaksfattingFasade: VedtaksfattingFasade,
-    @Autowired private val unleash: FakeUnleash,
-
+    @Autowired private val unleash: FakeUnleash
     ) : JournalfoeringBase(testDataGenerator, journalføringService, oppgaveService) {
 
     @MockkBean
@@ -79,14 +73,12 @@ class YrkesaktivEosVedtakIT(
 
     @BeforeEach
     fun setup() {
-        oAuthMockServer.start()
         unleash.enableAll()
         MedlRepo.repo.clear()
     }
 
     @AfterEach
     fun afterEach() {
-        oAuthMockServer.stop()
         MedlRepo.repo.clear()
     }
 

@@ -8,7 +8,7 @@ import no.nav.melosys.domain.person.adresse.Kontaktadresse;
 import no.nav.melosys.domain.person.adresse.Oppholdsadresse;
 import no.nav.melosys.domain.person.familie.Familiemedlem;
 
-import javax.annotation.Nullable;
+import jakarta.annotation.Nullable;
 import java.time.LocalDate;
 import java.util.Optional;
 import java.util.Set;

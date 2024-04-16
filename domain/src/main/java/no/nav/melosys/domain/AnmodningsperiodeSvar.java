@@ -2,7 +2,7 @@ package no.nav.melosys.domain;
 
 import java.time.LocalDate;
 import java.util.Objects;
-import javax.persistence.*;
+import jakarta.persistence.*;
 
 import no.nav.melosys.domain.kodeverk.Anmodningsperiodesvartyper;
 
@@ -16,6 +16,7 @@ public class AnmodningsperiodeSvar {
 
     @MapsId
     @OneToOne(optional = false)
+    @JoinColumn(name = "ANMODNINGSPERIODE_ID")
     private Anmodningsperiode anmodningsperiode;
 
     @Enumerated(EnumType.STRING)

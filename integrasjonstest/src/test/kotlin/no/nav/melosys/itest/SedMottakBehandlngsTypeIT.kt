@@ -8,10 +8,15 @@ import io.getunleash.FakeUnleash
 import io.kotest.matchers.collections.shouldHaveSize
 import io.kotest.matchers.shouldBe
 import io.kotest.matchers.string.shouldContain
-import no.nav.melosys.domain.eessi.*
+import no.nav.melosys.domain.eessi.BucType
+import no.nav.melosys.domain.eessi.Periode
+import no.nav.melosys.domain.eessi.SedType
 import no.nav.melosys.domain.eessi.melding.MelosysEessiMelding
-import no.nav.melosys.domain.kodeverk.*
-import no.nav.melosys.domain.kodeverk.behandlinger.*
+import no.nav.melosys.domain.kodeverk.Oppgavetyper
+import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingsaarsaktyper
+import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingsstatus
+import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingstema
+import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingstyper
 import no.nav.melosys.melosysmock.journalpost.JournalpostRepo
 import no.nav.melosys.melosysmock.oppgave.OppgaveRepo
 import no.nav.melosys.melosysmock.testdata.TestDataGenerator
@@ -24,18 +29,15 @@ import no.nav.melosys.service.oppgave.OppgaveBehandlingstema
 import no.nav.melosys.service.oppgave.OppgaveService
 import no.nav.melosys.service.sak.OpprettBehandlingForSak
 import no.nav.melosys.service.sak.OpprettSakDto
-import org.junit.jupiter.api.AfterEach
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Disabled
 import org.junit.jupiter.api.Test
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.beans.factory.annotation.Qualifier
-import org.springframework.context.annotation.Import
 import org.springframework.kafka.core.KafkaTemplate
 import java.time.LocalDate
 import java.util.*
 
-@Import(OAuthMockServer::class)
 class SedMottakBehandlngsTypeIT(
     @Autowired @Qualifier("melosysEessiMelding") private val melosysEessiMeldingKafkaTemplate: KafkaTemplate<String, MelosysEessiMelding>,
     @Autowired private val eessiMeldingTestDataFactory: EessiMeldingTestDataFactory,
@@ -49,21 +51,14 @@ class SedMottakBehandlngsTypeIT(
     @Autowired testDataGenerator: TestDataGenerator,
     @Autowired journalføringService: JournalfoeringService,
     @Autowired oppgaveService: OppgaveService,
-    @Autowired private val oAuthMockServer: OAuthMockServer
 ) : JournalfoeringBase(testDataGenerator, journalføringService, oppgaveService) {
 
     private val kafkaTopic = "teammelosys.eessi.v1-local"
 
     @BeforeEach
     fun setup() {
-        oAuthMockServer.start()
         oppgaveRepo.repo.clear()
         unleash.resetAll()
-    }
-
-    @AfterEach
-    fun afterEach() {
-        oAuthMockServer.stop()
     }
 
     @Test

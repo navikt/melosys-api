@@ -42,7 +42,6 @@ import org.springframework.boot.context.event.ApplicationReadyEvent
 import org.springframework.boot.test.autoconfigure.jdbc.AutoConfigureTestDatabase
 import org.springframework.boot.test.context.SpringBootTest
 import org.springframework.context.ApplicationEventPublisher
-import org.springframework.context.annotation.Import
 import org.springframework.kafka.test.context.EmbeddedKafka
 import org.springframework.test.annotation.DirtiesContext
 import org.springframework.test.context.ActiveProfiles
@@ -65,13 +64,11 @@ import java.util.*
 @AutoConfigureTestDatabase(replace = AutoConfigureTestDatabase.Replace.NONE)
 @DirtiesContext
 @EnableMockOAuth2Server
-@Import(OAuthMockServer::class)
 internal class SaksflytOppstartIT(
     @Autowired private val fagsakRepository: FagsakRepository,
     @Autowired private val behandlingRepository: BehandlingRepository,
     @Autowired private val prosessinstansRepository: ProsessinstansRepository,
     @Autowired private val applicationEventPublisher: ApplicationEventPublisher,
-    @Autowired private val oAuthMockServer: OAuthMockServer
 ) : OracleTestContainerBase() {
 
     private val processUUID = UUID.randomUUID()
@@ -84,13 +81,11 @@ internal class SaksflytOppstartIT(
         ThreadLocalAccessInfo.beforeExecuteProcess(processUUID, "test")
 
         SakRepo.clear()
-        oAuthMockServer.start()
     }
 
     @AfterEach
     fun after() {
         ThreadLocalAccessInfo.afterExecuteProcess(processUUID)
-        oAuthMockServer.stop()
         // Skaper trøbbel og ha prosessinstans med status PÅ_VENT liggende
         prosessinstansRepository.findAllByLåsReferanseStartingWith(LÅSREFERANSE_PROSESSINSTANS_SOM_IKKE_SKAL_REKJØRES_ENDA).forEach {
             prosessinstansRepository.delete(it)
@@ -190,7 +185,7 @@ internal class SaksflytOppstartIT(
     }
 
     fun applicationReadyEvent(): ApplicationReadyEvent {
-        return ApplicationReadyEvent(mockk(), emptyArray(), mockk())
+        return ApplicationReadyEvent(mockk(relaxed = true), emptyArray(), mockk(), Duration.ofSeconds(2))
     }
 
     private fun lagFagsak(): Fagsak = Fagsak().apply {

@@ -30,8 +30,6 @@ internal class AktoerServiceTest {
 
     private lateinit var aktoerService: AktoerService
 
-
-    private val exampleSlot = slot<Example<Aktoer>>()
     private val aktoerSlot = slot<Aktoer>()
 
     @BeforeEach
@@ -92,7 +90,7 @@ internal class AktoerServiceTest {
 
 
         val exception = shouldThrow<FunksjonellException> { aktoerService.lagEllerOppdaterAktoer(fagsak, aktoerDto) }
-        exception.message shouldContain "en fullmektig per fullmakstype"
+        exception.message shouldContain "en fullmektig per fullmakttype"
     }
 
     @Test
@@ -103,12 +101,15 @@ internal class AktoerServiceTest {
         aktoerService.hentfagsakAktører(fagsak, Aktoersroller.FULLMEKTIG)
 
 
-        verify { aktoerRepository.findAll(capture((exampleSlot))) }
-        val aktoerExample = exampleSlot.captured
+        val fagsakSlot = slot<Fagsak>()
+        val aktoersrollerSlot = slot<Aktoersroller>()
 
-        val aktoerProbe = aktoerExample.probe
-        aktoerProbe.fagsak shouldBe lagFagsak()
-        aktoerProbe.rolle shouldBe Aktoersroller.FULLMEKTIG
+        verify { aktoerRepository.findByFagsakAndRolle(capture(fagsakSlot), capture(aktoersrollerSlot) ) }
+        val fagsakCaptured = fagsakSlot.captured
+        val aktoersrollerCaptured = aktoersrollerSlot.captured
+        val aktoerProbe = fagsakSlot.captured
+        fagsakCaptured shouldBe lagFagsak()
+        aktoersrollerCaptured shouldBe Aktoersroller.FULLMEKTIG
     }
 
     @Test

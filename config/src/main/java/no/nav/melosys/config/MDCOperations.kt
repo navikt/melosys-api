@@ -3,7 +3,7 @@ package no.nav.melosys.config
 import org.slf4j.MDC
 import java.security.SecureRandom
 import java.util.*
-import javax.servlet.http.HttpServletRequest
+import jakarta.servlet.http.HttpServletRequest
 import javax.xml.namespace.QName
 
 class MDCOperations {

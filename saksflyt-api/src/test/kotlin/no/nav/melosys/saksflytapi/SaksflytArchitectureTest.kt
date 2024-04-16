@@ -56,6 +56,7 @@ class SaksflytapiArchitectureTest {
         private val COMMON_PACKAGES = listOf(
             "java..",
             "javax..",
+            "jakarta..",
             "kotlin..",
             "mu..",
             "com..",

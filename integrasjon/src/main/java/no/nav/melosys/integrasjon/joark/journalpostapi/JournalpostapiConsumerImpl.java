@@ -17,6 +17,9 @@ import org.springframework.web.client.HttpStatusCodeException;
 import org.springframework.web.client.RestClientException;
 import org.springframework.web.client.RestTemplate;
 
+import static org.springframework.http.HttpStatus.FORBIDDEN;
+import static org.springframework.http.HttpStatus.UNAUTHORIZED;
+
 public class JournalpostapiConsumerImpl implements JournalpostapiConsumer, JsonRestIntegrasjon {
     private static final Logger log = LoggerFactory.getLogger(JournalpostapiConsumerImpl.class);
 
@@ -78,12 +81,10 @@ public class JournalpostapiConsumerImpl implements JournalpostapiConsumer, JsonR
             restTemplate.exchange(uri, method, entity, Void.class, variabler).getBody();
         } catch (HttpStatusCodeException ex) {
             String feilmelding = hentFeilmelding(ex);
-            switch (ex.getStatusCode()) {
-                case UNAUTHORIZED:
-                case FORBIDDEN:
-                    throw new SikkerhetsbegrensningException(feilmelding, ex);
-                default:
-                    throw new IntegrasjonException(feilmelding, ex);
+            if (ex.getStatusCode() == UNAUTHORIZED || ex.getStatusCode() == FORBIDDEN) {
+                throw new SikkerhetsbegrensningException(feilmelding, ex);
+            } else {
+                throw new IntegrasjonException(feilmelding, ex);
             }
         } catch (RestClientException ex) {
             throw new IntegrasjonException("Ukjent feil mot journalpostapi", ex);
@@ -92,7 +93,7 @@ public class JournalpostapiConsumerImpl implements JournalpostapiConsumer, JsonR
 
     private String hentFeilmelding(HttpStatusCodeException e) {
         String feilmelding = e.getResponseBodyAsString();
-        if (StringUtils.isEmpty(feilmelding)) return e.getMessage();
+        if (StringUtils.hasText(feilmelding)) return e.getMessage();
         try {
             JsonNode json = objectMapper.readTree(feilmelding).path("message");
             return json.isMissingNode() ? e.getMessage() : json.toString();

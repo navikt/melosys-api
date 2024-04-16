@@ -1,7 +1,7 @@
 package no.nav.melosys.domain.avgift;
 
 import java.time.LocalDate;
-import javax.persistence.*;
+import jakarta.persistence.*;
 
 import no.nav.melosys.domain.kodeverk.Skatteplikttype;
 

@@ -11,8 +11,8 @@ import java.time.Instant
 import java.time.LocalDateTime
 import java.time.ZoneId
 import java.util.*
-import javax.persistence.EntityManager
-import javax.persistence.PersistenceContext
+import jakarta.persistence.EntityManager
+import jakarta.persistence.PersistenceContext
 
 internal const val EUROPE_OSLO = "Europe/Oslo"
 

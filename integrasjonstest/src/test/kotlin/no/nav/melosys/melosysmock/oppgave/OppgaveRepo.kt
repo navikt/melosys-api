@@ -7,7 +7,7 @@ import org.slf4j.LoggerFactory
 import org.springframework.beans.factory.annotation.Value
 import org.springframework.stereotype.Component
 import java.io.File
-import javax.annotation.PreDestroy
+import jakarta.annotation.PreDestroy
 
 @Component
 class OppgaveRepo(@Value("\${persist.repo.oppgave}") private val persist: Boolean) {

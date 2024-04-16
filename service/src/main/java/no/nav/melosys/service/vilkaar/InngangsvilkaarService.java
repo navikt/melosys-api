@@ -13,6 +13,7 @@ import no.nav.melosys.domain.person.Statsborgerskap;
 import no.nav.melosys.exception.FunksjonellException;
 import no.nav.melosys.integrasjon.inngangsvilkar.InngangsvilkaarConsumer;
 import no.nav.melosys.service.behandling.BehandlingService;
+import no.nav.melosys.service.behandling.VilkaarsresultatService;
 import no.nav.melosys.service.persondata.PersondataFasade;
 import no.nav.melosys.service.saksbehandling.SaksbehandlingRegler;
 import org.slf4j.Logger;
@@ -33,6 +34,7 @@ import static no.nav.melosys.domain.util.IsoLandkodeKonverterer.tilIso3;
 
 @Service
 public class InngangsvilkaarService {
+
     private static final Logger log = LoggerFactory.getLogger(InngangsvilkaarService.class);
     private static final long DEFAULT_SLUTTDATO_ANTALL_ÅR = 1;
 
@@ -67,6 +69,7 @@ public class InngangsvilkaarService {
             && behandling.harPeriodeOgSøknadsland();
     }
 
+    @Transactional
     public boolean vurderOgLagreInngangsvilkår(long behandlingID,
                                                Collection<String> søknadsland,
                                                boolean flereLandUkjentHvilke,
@@ -74,7 +77,8 @@ public class InngangsvilkaarService {
         final InngangsvilkaarVurdering vurderingEF_883_2004 = vurderInngangsvilkår(behandlingID, søknadsland, flereLandUkjentHvilke, søknadsperiode);
         final boolean erEF_883_2004 = vurderingEF_883_2004.isOppfylt();
 
-        vilkaarsresultatService.oppdaterVilkaarsresultat(behandlingID, FO_883_2004_INNGANGSVILKAAR,
+        vilkaarsresultatService.oppdaterVilkaarsresultat(behandlingID,
+            FO_883_2004_INNGANGSVILKAAR,
             erEF_883_2004,
             vurderingEF_883_2004.getBegrunnelseKode() == null ? Collections.emptySet() : Set.of(vurderingEF_883_2004.getBegrunnelseKode()));
         return erEF_883_2004;

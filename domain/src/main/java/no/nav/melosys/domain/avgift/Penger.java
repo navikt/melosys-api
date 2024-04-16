@@ -1,13 +1,23 @@
 package no.nav.melosys.domain.avgift;
 
+import jakarta.persistence.Column;
+import jakarta.persistence.Embeddable;
+import org.hibernate.annotations.Struct;
+
 import java.math.BigDecimal;
 import java.util.Objects;
 
+@Embeddable
 public class Penger {
+    @Column(name = "trygdeavgift_beloep_mnd_verdi")
     private BigDecimal verdi;
+    @Column(name = "trygdeavgift_beloep_mnd_valuta")
     private String valuta;
 
     private static final String NOK = "NOK";
+
+    public Penger() {
+    }
 
     public Penger(Double verdi) {
         this(BigDecimal.valueOf(verdi));

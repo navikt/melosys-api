@@ -2,7 +2,7 @@ package no.nav.melosys.domain;
 
 import java.util.*;
 import java.util.stream.Collectors;
-import javax.persistence.*;
+import jakarta.persistence.*;
 
 import no.nav.melosys.domain.kodeverk.Aktoersroller;
 import no.nav.melosys.domain.kodeverk.Fullmaktstype;

@@ -1,7 +1,6 @@
 package no.nav.melosys.service.dokument.brev.bygger;
 
 import no.nav.melosys.domain.kodeverk.brev.Produserbaredokumenter;
-import no.nav.melosys.repository.VilkaarsresultatRepository;
 import no.nav.melosys.service.LandvelgerService;
 import no.nav.melosys.service.LovvalgsperiodeService;
 import no.nav.melosys.service.aktoer.UtenlandskMyndighetService;
@@ -13,7 +12,7 @@ import no.nav.melosys.service.persondata.PersondataFasade;
 import no.nav.melosys.service.saksopplysninger.SaksopplysningerService;
 import no.nav.melosys.service.unntak.AnmodningsperiodeService;
 import no.nav.melosys.service.utpeking.UtpekingService;
-import no.nav.melosys.service.vilkaar.VilkaarsresultatService;
+import no.nav.melosys.service.behandling.VilkaarsresultatService;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -36,14 +35,13 @@ class BrevDataByggerVelgerTest {
         SaksopplysningerService saksopplysningerService = mock(SaksopplysningerService.class);
         UtenlandskMyndighetService utenlandskMyndighetService = mock(UtenlandskMyndighetService.class);
         UtpekingService utpekingService = mock(UtpekingService.class);
-        VilkaarsresultatRepository vilkaarsresultatRepository = mock(VilkaarsresultatRepository.class);
         VilkaarsresultatService vilkaarsresultatService = mock(VilkaarsresultatService.class);
         PersondataFasade persondataFasade = mock(PersondataFasade.class);
         MottatteOpplysningerService mottatteOpplysningerService = mock(MottatteOpplysningerService.class);
 
         brevDataByggerVelger = new BrevDataByggerVelger(anmodningsperiodeService, avklartefaktaService,
             landvelgerService, lovvalgsperiodeService, saksopplysningerService, utenlandskMyndighetService,
-            utpekingService, vilkaarsresultatRepository, vilkaarsresultatService, persondataFasade, mottatteOpplysningerService);
+            utpekingService, vilkaarsresultatService, persondataFasade, mottatteOpplysningerService);
     }
 
     @Test

@@ -24,7 +24,8 @@ import java.math.BigDecimal
 import java.time.Instant
 import java.time.LocalDate
 import java.time.ZoneId
-import javax.transaction.Transactional
+import jakarta.transaction.Transactional
+import no.nav.melosys.domain.folketrygden.FastsattTrygdeavgift
 
 @Component
 class InnvilgelseFtrlMapper(
@@ -64,7 +65,7 @@ class InnvilgelseFtrlMapper(
             flereLandUkjentHvilke = søknadsland.isFlereLandUkjentHvilke,
             land = søknadsland.landkoder.map { dokgenMapperDatahenter.hentLandnavnFraLandkode(it) },
             trygdeavtaleLand = mapTrygdeavtaleLand(søknadsland.landkoder),
-            betalerArbeidsgiveravgift = erBetalerArbeidsgiveravgift(medlemAvFolketrygden.medlemskapsperioder)
+            betalerArbeidsgiveravgift = erBetalerArbeidsgiveravgift(medlemAvFolketrygden.fastsattTrygdeavgift)
         )
     }
 
@@ -142,7 +143,7 @@ class InnvilgelseFtrlMapper(
             flereLandUkjentHvilke = søknadsland.isFlereLandUkjentHvilke,
             land = søknadsland.landkoder.map { dokgenMapperDatahenter.hentLandnavnFraLandkode(it) },
             trygdeavtaleLand = mapTrygdeavtaleLand(søknadsland.landkoder),
-            betalerArbeidsgiveravgift = erBetalerArbeidsgiveravgift(medlemAvFolketrygden.medlemskapsperioder),
+            betalerArbeidsgiveravgift = erBetalerArbeidsgiveravgift(medlemAvFolketrygden.fastsattTrygdeavgift),
         )
     }
 
@@ -188,8 +189,8 @@ class InnvilgelseFtrlMapper(
     private fun mapTrygdeavtaleLand(landkoder: List<String>): List<String> =
         Trygdeavtale_myndighetsland.values().filter { landkoder.contains(it.kode) }.map { dokgenMapperDatahenter.hentLandnavnFraLandkode(it.kode) }
 
-    private fun erBetalerArbeidsgiveravgift(medlemskapsperioder: Collection<Medlemskapsperiode>) =
-        medlemskapsperioder.any { it.trygdeavgiftsperioder.any { it.grunnlagInntekstperiode.isArbeidsgiversavgiftBetalesTilSkatt } }
+    private fun erBetalerArbeidsgiveravgift(fastsattTrygdeavgift: FastsattTrygdeavgift?) =
+        fastsattTrygdeavgift?.trygdeavgiftsperioder?.any { it.grunnlagInntekstperiode.isArbeidsgiversavgiftBetalesTilSkatt } ?: false
 
     private fun finnFullmektigTrygdeavgift(behandling: Behandling): String? {
         if (behandling.fagsak.finnFullmektig(Fullmaktstype.FULLMEKTIG_TRYGDEAVGIFT).isEmpty) return null

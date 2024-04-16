@@ -1,7 +1,7 @@
 package no.nav.melosys.domain.avklartefakta;
 
 import java.util.Objects;
-import javax.persistence.*;
+import jakarta.persistence.*;
 
 import no.nav.melosys.domain.RegistreringsInfo;
 import org.springframework.data.jpa.domain.support.AuditingEntityListener;

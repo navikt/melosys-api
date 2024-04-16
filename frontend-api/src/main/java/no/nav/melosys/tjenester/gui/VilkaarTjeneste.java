@@ -8,7 +8,7 @@ import no.nav.melosys.service.tilgang.Aksesskontroll;
 import no.nav.melosys.service.tilgang.Ressurs;
 import no.nav.melosys.service.vilkaar.InngangsvilkaarService;
 import no.nav.melosys.service.vilkaar.VilkaarDto;
-import no.nav.melosys.service.vilkaar.VilkaarsresultatService;
+import no.nav.melosys.service.behandling.VilkaarsresultatService;
 import no.nav.security.token.support.core.api.Protected;
 import org.springframework.context.annotation.Scope;
 import org.springframework.http.ResponseEntity;

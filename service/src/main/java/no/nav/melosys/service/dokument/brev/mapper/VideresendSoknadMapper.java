@@ -1,7 +1,7 @@
 package no.nav.melosys.service.dokument.brev.mapper;
 
-import javax.xml.bind.JAXBElement;
-import javax.xml.bind.JAXBException;
+import jakarta.xml.bind.JAXBElement;
+import jakarta.xml.bind.JAXBException;
 
 import no.nav.dok.melosysbrev._000146.BrevdataType;
 import no.nav.dok.melosysbrev._000146.Fag;
@@ -34,11 +34,10 @@ public class VideresendSoknadMapper implements BrevDataMapper {
     }
 
     private static JAXBElement<BrevdataType> lagBrevdataType(FellesType fellesType, MelosysNAVFelles navFelles, Fag fag) {
-        BrevdataType brevdataType = BrevdataType.builder()
+        BrevdataType brevdataType = new BrevdataType()
             .withFelles(fellesType)
             .withNAVFelles(navFelles)
-            .withFag(fag)
-            .build();
+            .withFag(fag);
         return new ObjectFactory().createBrevdata(brevdataType);
     }
 }

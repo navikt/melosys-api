@@ -1,6 +1,6 @@
 package no.nav.melosys.domain;
 
-import javax.persistence.*;
+import jakarta.persistence.*;
 
 import no.nav.melosys.domain.kodeverk.Fullmaktstype;
 import org.hibernate.envers.Audited;

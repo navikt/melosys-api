@@ -43,12 +43,10 @@ import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.beans.factory.annotation.Qualifier
-import org.springframework.context.annotation.Import
 import org.springframework.kafka.core.KafkaTemplate
 import java.time.LocalDate
 import java.util.*
 
-@Import(OAuthMockServer::class)
 class SedMottakTestIT(
     @Autowired private val eessiMeldingTestDataFactory: EessiMeldingTestDataFactory,
     @Autowired @Qualifier("melosysEessiMelding") private val melosysEessiMeldingKafkaTemplate: KafkaTemplate<String, MelosysEessiMelding>,
@@ -60,7 +58,6 @@ class SedMottakTestIT(
     @Autowired private val behandlingsresultatRepository: BehandlingsresultatRepository,
     @Autowired private val unleash: FakeUnleash,
     @Autowired private val avklartefaktaService: AvklartefaktaService,
-    @Autowired private val oAuthMockServer: OAuthMockServer,
     @Autowired private val prosessinstansTestManager: ProsessinstansTestManager
 
 ) : ComponentTestBase() {
@@ -75,7 +72,6 @@ class SedMottakTestIT(
     @BeforeEach
     fun setup() {
         ThreadLocalAccessInfo.beforeExecuteProcess(randomUUID, "steg")
-        oAuthMockServer.start()
         SakRepo.clear()
         MedlRepo.repo.clear()
         MelosysEessiRepo.sedRepo.clear()
@@ -85,7 +81,6 @@ class SedMottakTestIT(
     @AfterEach
     fun after() {
         ThreadLocalAccessInfo.afterExecuteProcess(randomUUID)
-        oAuthMockServer.stop()
         prosessinstansTestManager.clear()
     }
 

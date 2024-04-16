@@ -51,7 +51,7 @@ import org.junit.jupiter.api.extension.ExtendWith
 import java.time.Instant
 import java.time.LocalDate
 import java.util.List
-import javax.xml.bind.JAXBElement
+import jakarta.xml.bind.JAXBElement
 
 @ExtendWith(MockKExtension::class)
 @TestInstance(TestInstance.Lifecycle.PER_CLASS)

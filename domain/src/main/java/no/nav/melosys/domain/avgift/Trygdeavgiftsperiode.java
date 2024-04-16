@@ -2,13 +2,11 @@ package no.nav.melosys.domain.avgift;
 
 import java.math.BigDecimal;
 import java.time.LocalDate;
-import javax.persistence.*;
+import java.util.Objects;
 
+import jakarta.persistence.*;
 import no.nav.melosys.domain.Medlemskapsperiode;
 import no.nav.melosys.domain.folketrygden.FastsattTrygdeavgift;
-import org.hibernate.annotations.Columns;
-import org.hibernate.annotations.Parameter;
-import org.hibernate.annotations.Type;
 
 @Entity
 @Table(name = "trygdeavgiftsperiode")
@@ -28,12 +26,7 @@ public class Trygdeavgiftsperiode {
     @Column(name = "periode_til", nullable = false)
     private LocalDate periodeTil;
 
-    @Columns(columns = {
-        @Column(name = "trygdeavgift_beloep_mnd_verdi", nullable = false),
-        @Column(name = "trygdeavgift_beloep_mnd_valuta", nullable = false)})
-    @Type(type = "no.nav.melosys.domain.avgift.PengerType", parameters = {
-        @Parameter(name = "verdiPropertyName", value = "trygdeavgift_beloep_mnd_verdi"),
-        @Parameter(name = "valutaPropertyName", value = "trygdeavgift_beloep_mnd_valuta")})
+    @Embedded
     private Penger trygdeavgiftsbeløpMd;
 
     @Column(name = "trygdesats", nullable = false)
@@ -125,5 +118,18 @@ public class Trygdeavgiftsperiode {
 
     public boolean harAvgift() {
         return BigDecimal.ZERO.compareTo(this.trygdesats) != 0 && BigDecimal.ZERO.compareTo(this.trygdeavgiftsbeløpMd.getVerdi()) != 0;
+    }
+
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (o == null || getClass() != o.getClass()) return false;
+        Trygdeavgiftsperiode that = (Trygdeavgiftsperiode) o;
+        return Objects.equals(id, that.id) && Objects.equals(fastsattTrygdeavgift, that.fastsattTrygdeavgift) && Objects.equals(periodeFra, that.periodeFra) && Objects.equals(periodeTil, that.periodeTil) && Objects.equals(trygdeavgiftsbeløpMd, that.trygdeavgiftsbeløpMd) && Objects.equals(trygdesats, that.trygdesats) && Objects.equals(grunnlagInntekstperiode, that.grunnlagInntekstperiode) && Objects.equals(grunnlagMedlemskapsperiode, that.grunnlagMedlemskapsperiode) && Objects.equals(grunnlagSkatteforholdTilNorge, that.grunnlagSkatteforholdTilNorge);
+    }
+
+    @Override
+    public int hashCode() {
+        return Objects.hash(id, fastsattTrygdeavgift, periodeFra, periodeTil, trygdeavgiftsbeløpMd, trygdesats, grunnlagInntekstperiode, grunnlagMedlemskapsperiode, grunnlagSkatteforholdTilNorge);
     }
 }

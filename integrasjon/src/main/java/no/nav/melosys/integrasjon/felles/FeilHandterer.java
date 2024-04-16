@@ -1,14 +1,14 @@
 package no.nav.melosys.integrasjon.felles;
 
-import javax.ws.rs.core.Response;
+import jakarta.ws.rs.core.Response;
 
 import no.nav.melosys.exception.FunksjonellException;
 import no.nav.melosys.exception.IkkeFunnetException;
 import no.nav.melosys.exception.SikkerhetsbegrensningException;
 import no.nav.melosys.exception.TekniskException;
 
-import static javax.ws.rs.core.Response.Status.Family.CLIENT_ERROR;
-import static javax.ws.rs.core.Response.Status.Family.SERVER_ERROR;
+import static jakarta.ws.rs.core.Response.Status.Family.CLIENT_ERROR;
+import static jakarta.ws.rs.core.Response.Status.Family.SERVER_ERROR;
 
 public interface FeilHandterer {
 

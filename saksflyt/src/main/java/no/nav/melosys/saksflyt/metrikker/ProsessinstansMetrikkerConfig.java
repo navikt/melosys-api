@@ -13,11 +13,10 @@ import org.springframework.context.annotation.Configuration;
 public class ProsessinstansMetrikkerConfig {
 
     @Bean
-    public MeterBinder ProsessinstansMetrikker(MeterRegistry meterRegistry,
-                                               ProsessinstansStatusCache statusCache) {
+    public MeterBinder ProsessinstansMetrikker(ProsessinstansStatusCache statusCache) {
         return registry -> {
-            registrerAntallFeiledeProsessinstanserGruppertPåType(meterRegistry, statusCache);
-            registrerAntallFeiledeProsessinstanserGruppertPåSteg(meterRegistry, statusCache);
+            registrerAntallFeiledeProsessinstanserGruppertPåType(registry, statusCache);
+            registrerAntallFeiledeProsessinstanserGruppertPåSteg(registry, statusCache);
         };
     }
 

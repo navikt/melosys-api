@@ -1,7 +1,6 @@
 package no.nav.melosys.service.dokument.brev;
 
 import no.nav.melosys.domain.kodeverk.brev.Produserbaredokumenter;
-import no.nav.melosys.repository.VilkaarsresultatRepository;
 import no.nav.melosys.service.LandvelgerService;
 import no.nav.melosys.service.LovvalgsperiodeService;
 import no.nav.melosys.service.aktoer.UtenlandskMyndighetService;
@@ -12,7 +11,7 @@ import no.nav.melosys.service.persondata.PersondataFasade;
 import no.nav.melosys.service.saksopplysninger.SaksopplysningerService;
 import no.nav.melosys.service.unntak.AnmodningsperiodeService;
 import no.nav.melosys.service.utpeking.UtpekingService;
-import no.nav.melosys.service.vilkaar.VilkaarsresultatService;
+import no.nav.melosys.service.behandling.VilkaarsresultatService;
 import org.springframework.stereotype.Component;
 
 @Component
@@ -24,7 +23,6 @@ public class BrevDataByggerVelger {
     private final SaksopplysningerService saksopplysningerService;
     private final UtenlandskMyndighetService utenlandskMyndighetService;
     private final UtpekingService utpekingService;
-    private final VilkaarsresultatRepository vilkaarsresultatRepository;
     private final VilkaarsresultatService vilkaarsresultatService;
     private final PersondataFasade persondataFasade;
     private final MottatteOpplysningerService mottatteOpplysningerService;
@@ -36,7 +34,6 @@ public class BrevDataByggerVelger {
                                 SaksopplysningerService saksopplysningerService,
                                 UtenlandskMyndighetService utenlandskMyndighetService,
                                 UtpekingService utpekingService,
-                                VilkaarsresultatRepository vilkaarsresultatRepository,
                                 VilkaarsresultatService vilkaarsresultatService,
                                 PersondataFasade persondataFasade,
                                 MottatteOpplysningerService mottatteOpplysningerService) {
@@ -47,7 +44,6 @@ public class BrevDataByggerVelger {
         this.saksopplysningerService = saksopplysningerService;
         this.utenlandskMyndighetService = utenlandskMyndighetService;
         this.utpekingService = utpekingService;
-        this.vilkaarsresultatRepository = vilkaarsresultatRepository;
         this.vilkaarsresultatService = vilkaarsresultatService;
         this.persondataFasade = persondataFasade;
         this.mottatteOpplysningerService = mottatteOpplysningerService;
@@ -57,7 +53,7 @@ public class BrevDataByggerVelger {
         return switch (produserbartDokument) {
             case ATTEST_A1 -> lagBrevDataByggerA1(brevbestillingDto);
             case AVSLAG_ARBEIDSGIVER -> new BrevDataByggerAvslagArbeidsgiver(landvelgerService, lovvalgsperiodeService,
-                vilkaarsresultatRepository);
+                vilkaarsresultatService);
             case AVSLAG_YRKESAKTIV -> new BrevDataByggerAvslagYrkesaktiv(landvelgerService, anmodningsperiodeService, brevbestillingDto,
                 vilkaarsresultatService);
             case ORIENTERING_ANMODNING_UNNTAK -> new BrevDataByggerAnmodningUnntak(landvelgerService, vilkaarsresultatService);

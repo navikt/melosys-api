@@ -31,6 +31,7 @@ import java.util.*
 
 @ExtendWith(MockKExtension::class)
 internal class TrygdeavgiftsberegningServiceTest {
+
     @MockK
     private lateinit var mockBehandlingService: BehandlingService
 
@@ -78,7 +79,7 @@ internal class TrygdeavgiftsberegningServiceTest {
             )
         medlemAvFolketrygden = MedlemAvFolketrygden()
         behandling = Behandling()
-        every { mockEregFasade.hentOrganisasjonNavn(FULLMEKTIG_ORGNR)}.returns(FULLMEKTIG_ORG_NAVN)
+        every { mockEregFasade.hentOrganisasjonNavn(FULLMEKTIG_ORGNR) }.returns(FULLMEKTIG_ORG_NAVN)
         every { mockMedlemAvFolketrygdenService.hentMedlemAvFolketrygden(BEHANDLING_ID) }.returns(medlemAvFolketrygden)
         every { mockBehandlingService.hentBehandling(BEHANDLING_ID) }.returns(behandling)
         every { mockPersondataService.hentSammensattNavn(FULLMEKTIG_AKTØR_ID) }.returns(FULLMEKTIG_NAVN)
@@ -167,6 +168,7 @@ internal class TrygdeavgiftsberegningServiceTest {
                     )
                 )
             )
+        every { mockMedlemAvFolketrygdenService.lagreOgFlush(medlemAvFolketrygden) }.returns(medlemAvFolketrygden)
 
 
         trygdeavgiftsberegningService.beregnOgLagreTrygdeavgift(BEHANDLING_ID)
@@ -178,8 +180,10 @@ internal class TrygdeavgiftsberegningServiceTest {
                     trygdeavgiftsbeløpMd = Penger(790.0)
                 }
             }
+
+
         verify { mockTrygdeavgiftConsumer.beregnTrygdeavgift(ofType(TrygdeavgiftsberegningRequest::class)) }
-        verify { mockMedlemAvFolketrygdenService.lagre(medlemAvFolketrygden) }
+        verify { mockMedlemAvFolketrygdenService.lagreOgFlush(medlemAvFolketrygden) }
         verify(exactly = 0) { mockPersondataService.hentPerson(BRUKER_AKTØR_ID) }
         medlemAvFolketrygden.fastsattTrygdeavgift.trygdeavgiftsperioder.shouldNotBeEmpty()
     }
@@ -313,6 +317,7 @@ internal class TrygdeavgiftsberegningServiceTest {
                     )
                 )
             )
+        every { mockMedlemAvFolketrygdenService.lagreOgFlush(medlemAvFolketrygden) }.returns(medlemAvFolketrygden)
 
 
         trygdeavgiftsberegningService.beregnOgLagreTrygdeavgift(BEHANDLING_ID)
@@ -324,8 +329,10 @@ internal class TrygdeavgiftsberegningServiceTest {
                     trygdeavgiftsbeløpMd = Penger(790.0)
                 }
             }
+
+
         verify { mockTrygdeavgiftConsumer.beregnTrygdeavgift(ofType(TrygdeavgiftsberegningRequest::class)) }
-        verify { mockMedlemAvFolketrygdenService.lagre(medlemAvFolketrygden) }
+        verify { mockMedlemAvFolketrygdenService.lagreOgFlush(medlemAvFolketrygden) }
         verify(exactly = 1) { mockPersondataService.hentPerson(BRUKER_AKTØR_ID) }
         medlemAvFolketrygden.fastsattTrygdeavgift.trygdeavgiftsperioder.shouldNotBeEmpty()
     }
@@ -358,13 +365,17 @@ internal class TrygdeavgiftsberegningServiceTest {
             }
             trygdeavgiftsperioder.add(Trygdeavgiftsperiode())
         }
-
+        every { mockMedlemAvFolketrygdenService.lagreOgFlush(medlemAvFolketrygden) }.returns(medlemAvFolketrygden)
 
         medlemAvFolketrygden.fastsattTrygdeavgift.medlemAvFolketrygden = medlemAvFolketrygden
         medlemAvFolketrygden.fastsattTrygdeavgift.trygdeavgiftsperioder.shouldNotBeEmpty()
+
+
         trygdeavgiftsberegningService.beregnOgLagreTrygdeavgift(BEHANDLING_ID)
             .shouldNotBeNull()
             .shouldBeEmpty()
+
+
         medlemAvFolketrygden.fastsattTrygdeavgift.trygdeavgiftsperioder.shouldBeEmpty()
     }
 
