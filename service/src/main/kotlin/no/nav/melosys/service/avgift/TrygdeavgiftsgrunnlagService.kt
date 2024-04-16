@@ -50,6 +50,7 @@ class TrygdeavgiftsgrunnlagService(private val behandlingsresultatService: Behan
         medlemAvFolketrygden.fastsattTrygdeavgift.trygdeavgiftsgrunnlag = eksisterendeEllerNyttTrygdeavgiftsgrunnlag(medlemAvFolketrygden)
         medlemAvFolketrygden.fastsattTrygdeavgift.trygdeavgiftsgrunnlag.skatteforholdTilNorge.clear()
         medlemAvFolketrygden.fastsattTrygdeavgift.trygdeavgiftsgrunnlag.inntektsperioder.clear()
+        behandlingsresultatService.lagreOgFlush(behandlingsresultat)
 
         val trygdeavgiftsgrunnlag = medlemAvFolketrygden.fastsattTrygdeavgift.trygdeavgiftsgrunnlag
         trygdeavgiftsgrunnlag.skatteforholdTilNorge.addAll(lagSkatteforholdTilNorge(request, trygdeavgiftsgrunnlag))
