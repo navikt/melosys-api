@@ -99,7 +99,6 @@ class ReplikerBehandlingsresultatService(val behandlingsresultatService: Behandl
         for (medlemskapsperiodeOrig in filtrertMedlemskapsperioderOrig) {
             val medlemskapsperiodeReplika = BeanUtils.cloneBean(medlemskapsperiodeOrig) as Medlemskapsperiode
             medlemskapsperiodeReplika.medlemAvFolketrygden = medlemAvFolketrygdenReplika
-            medlemskapsperiodeReplika.trygdeavgiftsperioder = HashSet()
             medlemAvFolketrygdenReplika.medlemskapsperioder.add(medlemskapsperiodeReplika)
         }
     }

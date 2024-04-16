@@ -5,7 +5,6 @@ import no.nav.melosys.domain.avgift.Trygdeavgiftsperiode
 import no.nav.melosys.domain.folketrygden.FastsattTrygdeavgift
 import no.nav.melosys.domain.folketrygden.MedlemAvFolketrygden
 import no.nav.melosys.domain.kodeverk.Fullmaktstype
-import no.nav.melosys.domain.kodeverk.Medlemskapstyper
 import no.nav.melosys.exception.FunksjonellException
 import no.nav.melosys.integrasjon.ereg.EregFasade
 import no.nav.melosys.integrasjon.trygdeavgift.TrygdeavgiftConsumer
@@ -35,13 +34,17 @@ class TrygdeavgiftsberegningService
     @Transactional
     fun beregnOgLagreTrygdeavgift(behandlingsresultatID: Long): Set<Trygdeavgiftsperiode> {
         val medlemAvFolketrygden = medlemAvFolketrygdenService.hentMedlemAvFolketrygden(behandlingsresultatID)
-        val fastsattTrygdeavgift = medlemAvFolketrygden.fastsattTrygdeavgift
         valider(medlemAvFolketrygden)
+
+        val fastsattTrygdeavgift = medlemAvFolketrygden.fastsattTrygdeavgift
         fastsattTrygdeavgift.trygdeavgiftsperioder.clear()
-        if (!trygdeavgiftMottakerService.skalBetalesTilNav(fastsattTrygdeavgift.trygdeavgiftsgrunnlag)) { return emptySet() }
+        medlemAvFolketrygdenService.lagreOgFlush(medlemAvFolketrygden)
+        if (!trygdeavgiftMottakerService.skalBetalesTilNav(fastsattTrygdeavgift.trygdeavgiftsgrunnlag)) {
+            return emptySet()
+        }
 
         val innvilgedeMedlemskapsperioder =
-            medlemAvFolketrygden.medlemskapsperioder.filter { it.erInnvilget()}
+            medlemAvFolketrygden.medlemskapsperioder.filter { it.erInnvilget() }
 
         val (trygdeavgiftsberegningRequest, UUID_DBID_MAPS) =
             TrygdeavgiftsberegningsRequestMapper().map(
@@ -51,33 +54,34 @@ class TrygdeavgiftsberegningService
                 hentFødselsdatoOmViHarTjenstligBehov(behandlingsresultatID, innvilgedeMedlemskapsperioder)
             )
         val beregnetTrygdeavgift = trygdeavgiftConsumer.beregnTrygdeavgift(trygdeavgiftsberegningRequest)
-        oppdaterTrygdeavgift(beregnetTrygdeavgift, fastsattTrygdeavgift, UUID_DBID_MAPS)
 
-        return medlemAvFolketrygdenService.lagre(medlemAvFolketrygden).fastsattTrygdeavgift.trygdeavgiftsperioder
+        val nyeTrygdeavgiftsPerioder = hentOppdatertTrygdeavgift(beregnetTrygdeavgift, fastsattTrygdeavgift, UUID_DBID_MAPS)
+        medlemAvFolketrygden.fastsattTrygdeavgift.trygdeavgiftsperioder.addAll(nyeTrygdeavgiftsPerioder)
+
+        return medlemAvFolketrygdenService.lagreOgFlush(medlemAvFolketrygden).fastsattTrygdeavgift.trygdeavgiftsperioder
     }
 
     private fun hentFødselsdatoOmViHarTjenstligBehov(behandlingsresultatID: Long, medlemskapsperioder: List<Medlemskapsperiode>): LocalDate? {
-        if (medlemskapsperioder.any { it.erPliktig()}) {
+        if (medlemskapsperioder.any { it.erPliktig() }) {
             val fagsak = behandlingService.hentBehandling(behandlingsresultatID).fagsak
             return persondataService.hentPerson(fagsak.hentBruker().aktørId).fødselsdato
         }
         return null
     }
 
-    private fun oppdaterTrygdeavgift(
+    private fun hentOppdatertTrygdeavgift(
         beregnetTrygdeavgift: List<TrygdeavgiftsberegningResponse>,
         fastsattTrygdeavgift: FastsattTrygdeavgift,
         UUID_DBID_MAPS: List<Map<UUID, Long>>
-    ) =
-        beregnetTrygdeavgift.forEach {
-            fastsattTrygdeavgift.trygdeavgiftsperioder.add(
-                lagTrygdeavgiftsperiode(
-                    fastsattTrygdeavgift,
-                    it,
-                    UUID_DBID_MAPS
-                )
+    ): Set<Trygdeavgiftsperiode> =
+        beregnetTrygdeavgift.map {
+            lagTrygdeavgiftsperiode(
+                fastsattTrygdeavgift,
+                it,
+                UUID_DBID_MAPS
             )
-        }
+        }.toSet()
+
 
     private fun lagTrygdeavgiftsperiode(
         fastsattTrygdeavgift: FastsattTrygdeavgift,
@@ -126,11 +130,18 @@ class TrygdeavgiftsberegningService
         }
 
         val inntektskilderRequest = medlemAvFolketrygden.fastsattTrygdeavgift.trygdeavgiftsgrunnlag.inntektsperioder.map { InntektskildeRequest(it) }
-        val skatteforholdTilNorgeRequest = medlemAvFolketrygden.fastsattTrygdeavgift.trygdeavgiftsgrunnlag.skatteforholdTilNorge.map { SkatteforholdTilNorgeRequest(it) }
+        val skatteforholdTilNorgeRequest =
+            medlemAvFolketrygden.fastsattTrygdeavgift.trygdeavgiftsgrunnlag.skatteforholdTilNorge.map { SkatteforholdTilNorgeRequest(it) }
         val innvilgedeMedlemskapsperioder = medlemAvFolketrygden.medlemskapsperioder.filter { it.erInnvilget() }.toList()
 
-        TrygdeavgiftsgrunnlagService.validerAtInntekstperioderDekkerInnvilgedeMedlemskapsperioder(inntektskilderRequest, innvilgedeMedlemskapsperioder)
-        TrygdeavgiftsgrunnlagService.validerAtSkatteforholdTilNorgeDekkerInnvilgedeMedlemskapsperioderOgOverlapperIkke(skatteforholdTilNorgeRequest, innvilgedeMedlemskapsperioder)
+        TrygdeavgiftsgrunnlagService.validerAtInntekstperioderDekkerInnvilgedeMedlemskapsperioder(
+            inntektskilderRequest,
+            innvilgedeMedlemskapsperioder
+        )
+        TrygdeavgiftsgrunnlagService.validerAtSkatteforholdTilNorgeDekkerInnvilgedeMedlemskapsperioderOgOverlapperIkke(
+            skatteforholdTilNorgeRequest,
+            innvilgedeMedlemskapsperioder
+        )
     }
 
     @Transactional(readOnly = true)

@@ -34,8 +34,8 @@ class TrygdeavgiftsgrunnlagService(private val behandlingsresultatService: Behan
 
         validerMedlemskapsperioder(medlemAvFolketrygden)
         validerTrygdeavgiftsgrunnlag(request, medlemAvFolketrygden)
-
         fjernTrygdeavgiftsperioderOmDeFinnes(medlemAvFolketrygden.fastsattTrygdeavgift)
+        behandlingsresultatService.lagreOgFlush(behandlingsresultat)
 
         return lagreTrygdeavgiftsgrunnlag(behandlingsresultat, request).medlemAvFolketrygden.fastsattTrygdeavgift?.trygdeavgiftsgrunnlag
             ?: throw TekniskException("Noe skjedde ved lagring av trygdeavgiftsgrunnlaget")
@@ -47,13 +47,18 @@ class TrygdeavgiftsgrunnlagService(private val behandlingsresultatService: Behan
     ): Behandlingsresultat {
         val medlemAvFolketrygden = behandlingsresultat.medlemAvFolketrygden
         medlemAvFolketrygden.fastsattTrygdeavgift = eksisterendeEllerNyFastsattTrygdeavgift(medlemAvFolketrygden)
-        medlemAvFolketrygden.fastsattTrygdeavgift.trygdeavgiftsgrunnlag =
-            eksisterendeEllerNyttTrygdeavgiftsgrunnlag(medlemAvFolketrygden).apply {
-                this.skatteforholdTilNorge = lagSkatteforholdTilNorge(request)
-                this.inntektsperioder = lagInntektsperioder(request)
-            }
+        medlemAvFolketrygden.fastsattTrygdeavgift.trygdeavgiftsgrunnlag = eksisterendeEllerNyttTrygdeavgiftsgrunnlag(medlemAvFolketrygden)
+        medlemAvFolketrygden.fastsattTrygdeavgift.trygdeavgiftsgrunnlag.skatteforholdTilNorge.clear()
+        medlemAvFolketrygden.fastsattTrygdeavgift.trygdeavgiftsgrunnlag.inntektsperioder.clear()
+        behandlingsresultatService.lagreOgFlush(behandlingsresultat)
 
-        return behandlingsresultatService.lagre(behandlingsresultat)
+        val trygdeavgiftsgrunnlag = medlemAvFolketrygden.fastsattTrygdeavgift.trygdeavgiftsgrunnlag
+        trygdeavgiftsgrunnlag.skatteforholdTilNorge.addAll(lagSkatteforholdTilNorge(request).onEach {
+            it.trygdeavgiftsgrunnlag = trygdeavgiftsgrunnlag
+        })
+        trygdeavgiftsgrunnlag.inntektsperioder.addAll(lagInntektsperioder(request).onEach { it.trygdeavgiftsgrunnlag = trygdeavgiftsgrunnlag })
+
+        return behandlingsresultatService.lagreOgFlush(behandlingsresultat)
     }
 
     fun fjernTrygdeavgiftsperioderOmDeFinnes(fastsattTrygdeavgift: FastsattTrygdeavgift?) {
