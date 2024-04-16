@@ -40,7 +40,7 @@ class Kontroll(
 ) {
     fun kontroller(
         behandlingId: Long,
-        behandlingsresultattype: Behandlingsresultattyper,
+        behandlingsresultattype: Behandlingsresultattyper?,
         kontrollerSomSkalIgnoreres: Set<Kontroll_begrunnelser>
     ): Collection<Kontrollfeil> {
         val behandling = behandlingService.hentBehandlingMedSaksopplysninger(behandlingId)
@@ -51,7 +51,7 @@ class Kontroll(
     fun kontrollerVedtak(
         behandlingID: Long,
         sakstype: Sakstyper,
-        behandlingsresultattype: Behandlingsresultattyper,
+        behandlingsresultattype: Behandlingsresultattyper?,
         kontrollerSomSkalIgnoreres: Set<Kontroll_begrunnelser>
     ): Collection<Kontrollfeil> =
         utførKontroller(behandlingID, sakstype, behandlingsresultattype).filter { skalViseFeil(it, kontrollerSomSkalIgnoreres, behandlingID) }
@@ -69,7 +69,7 @@ class Kontroll(
         return true
     }
 
-    fun utførKontroller(behandlingID: Long, sakstype: Sakstyper, behandlingsresultattype: Behandlingsresultattyper): Collection<Kontrollfeil> {
+    fun utførKontroller(behandlingID: Long, sakstype: Sakstyper, behandlingsresultattype: Behandlingsresultattyper?): Collection<Kontrollfeil> {
         val behandling = behandlingService.hentBehandlingMedSaksopplysninger(behandlingID)
 
         if (behandlingsresultattype in listOf(Behandlingsresultattyper.AVSLAG_MANGLENDE_OPPL, Behandlingsresultattyper.HENLEGGELSE)) {
