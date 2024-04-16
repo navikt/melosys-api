@@ -50,13 +50,10 @@ class TrygdeavgiftsgrunnlagService(private val behandlingsresultatService: Behan
         medlemAvFolketrygden.fastsattTrygdeavgift.trygdeavgiftsgrunnlag = eksisterendeEllerNyttTrygdeavgiftsgrunnlag(medlemAvFolketrygden)
         medlemAvFolketrygden.fastsattTrygdeavgift.trygdeavgiftsgrunnlag.skatteforholdTilNorge.clear()
         medlemAvFolketrygden.fastsattTrygdeavgift.trygdeavgiftsgrunnlag.inntektsperioder.clear()
-        behandlingsresultatService.lagreOgFlush(behandlingsresultat)
 
         val trygdeavgiftsgrunnlag = medlemAvFolketrygden.fastsattTrygdeavgift.trygdeavgiftsgrunnlag
-        trygdeavgiftsgrunnlag.skatteforholdTilNorge.addAll(lagSkatteforholdTilNorge(request).onEach {
-            it.trygdeavgiftsgrunnlag = trygdeavgiftsgrunnlag
-        })
-        trygdeavgiftsgrunnlag.inntektsperioder.addAll(lagInntektsperioder(request).onEach { it.trygdeavgiftsgrunnlag = trygdeavgiftsgrunnlag })
+        trygdeavgiftsgrunnlag.skatteforholdTilNorge.addAll(lagSkatteforholdTilNorge(request, trygdeavgiftsgrunnlag))
+        trygdeavgiftsgrunnlag.inntektsperioder.addAll(lagInntektsperioder(request, trygdeavgiftsgrunnlag))
 
         return behandlingsresultatService.lagreOgFlush(behandlingsresultat)
     }
@@ -121,18 +118,21 @@ class TrygdeavgiftsgrunnlagService(private val behandlingsresultatService: Behan
 
 
     private fun lagSkatteforholdTilNorge(
-        request: OppdaterTrygdeavgiftsgrunnlagRequest
+        request: OppdaterTrygdeavgiftsgrunnlagRequest,
+        trygdeavgiftsgrunnlag: Trygdeavgiftsgrunnlag
     ): List<SkatteforholdTilNorge> =
         (request.skatteforholdTilNorgeList.map { skatteforholdTilNorgeRequest: SkatteforholdTilNorgeRequest ->
             SkatteforholdTilNorge().apply {
                 this.fomDato = skatteforholdTilNorgeRequest.fomDato
                 this.tomDato = skatteforholdTilNorgeRequest.tomDato
                 this.skatteplikttype = skatteforholdTilNorgeRequest.skatteplikttype
+                this.trygdeavgiftsgrunnlag = trygdeavgiftsgrunnlag
             }
         })
 
     private fun lagInntektsperioder(
         request: OppdaterTrygdeavgiftsgrunnlagRequest,
+        trygdeavgiftsgrunnlag: Trygdeavgiftsgrunnlag,
     ): List<Inntektsperiode> =
         (request.inntektskilder.map { inntektskildeRequest: InntektskildeRequest ->
             Inntektsperiode().apply {
@@ -143,6 +143,7 @@ class TrygdeavgiftsgrunnlagService(private val behandlingsresultatService: Behan
                 this.avgiftspliktigInntektMnd =
                     if (inntektskildeRequest.avgiftspliktigInntektMnd == null) null
                     else Penger(inntektskildeRequest.avgiftspliktigInntektMnd)
+                this.trygdeavgiftsgrunnlag = trygdeavgiftsgrunnlag
             }
         })
 

@@ -55,8 +55,8 @@ class TrygdeavgiftsberegningService
             )
         val beregnetTrygdeavgift = trygdeavgiftConsumer.beregnTrygdeavgift(trygdeavgiftsberegningRequest)
 
-        val nyeTrygdeavgiftsPerioder = hentOppdatertTrygdeavgift(beregnetTrygdeavgift, fastsattTrygdeavgift, UUID_DBID_MAPS)
-        medlemAvFolketrygden.fastsattTrygdeavgift.trygdeavgiftsperioder.addAll(nyeTrygdeavgiftsPerioder)
+        val nyeTrygdeavgiftsperioder = lagOppdaterteTrygdeavgiftsperioder(beregnetTrygdeavgift, fastsattTrygdeavgift, UUID_DBID_MAPS)
+        medlemAvFolketrygden.fastsattTrygdeavgift.trygdeavgiftsperioder.addAll(nyeTrygdeavgiftsperioder)
 
         return medlemAvFolketrygdenService.lagreOgFlush(medlemAvFolketrygden).fastsattTrygdeavgift.trygdeavgiftsperioder
     }
@@ -69,7 +69,7 @@ class TrygdeavgiftsberegningService
         return null
     }
 
-    private fun hentOppdatertTrygdeavgift(
+    private fun lagOppdaterteTrygdeavgiftsperioder(
         beregnetTrygdeavgift: List<TrygdeavgiftsberegningResponse>,
         fastsattTrygdeavgift: FastsattTrygdeavgift,
         UUID_DBID_MAPS: List<Map<UUID, Long>>
