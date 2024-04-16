@@ -13,16 +13,16 @@ public class AnmodningUnntakKontroll {
 
     static Kontrollfeil harRegistrertAdresse(AnmodningUnntakKontrollData kontrollData) {
         return PersonRegler.harRegistrertAdresse(kontrollData.persondata(), kontrollData.mottatteOpplysningerData())
-            ? null : new Kontrollfeil(Kontroll_begrunnelser.MANGLENDE_REGISTRERTE_ADRESSE, KontrolldataFeilType.FEIL);
+            ? null : new Kontrollfeil(Kontroll_begrunnelser.MANGLENDE_REGISTRERTE_ADRESSE);
     }
 
     static Kontrollfeil anmodningsperiodeManglerSluttdato(AnmodningUnntakKontrollData kontrollData) {
         return kontrollData.anmodningsperiode().getTom() == null
-            ? new Kontrollfeil(Kontroll_begrunnelser.INGEN_SLUTTDATO, KontrolldataFeilType.FEIL) : null;
+            ? new Kontrollfeil(Kontroll_begrunnelser.INGEN_SLUTTDATO) : null;
     }
 
     static Kontrollfeil kunEnArbeidsgiver(AnmodningUnntakKontrollData kontrollData) {
         return (kontrollData.antallArbeidsgivere() != 1)
-            ? new Kontrollfeil(Kontroll_begrunnelser.IKKE_KUN_EN_VIRKSOMHET, KontrolldataFeilType.FEIL) : null;
+            ? new Kontrollfeil(Kontroll_begrunnelser.IKKE_KUN_EN_VIRKSOMHET) : null;
     }
 }

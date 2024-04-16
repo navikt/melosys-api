@@ -13,7 +13,7 @@ public final class UnntaksperiodeKontroll {
 
     static Kontrollfeil periodeOver24MånederOgEnDag(UnntaksperiodeKontrollData kontrollData) {
         return PeriodeRegler.periodeOver2ÅrOgEnDag(kontrollData.periodeFom(), kontrollData.periodeTom()) ?
-            new Kontrollfeil(Kontroll_begrunnelser.PERIODEN_OVER_24_MD, KontrolldataFeilType.FEIL) :
+            new Kontrollfeil(Kontroll_begrunnelser.PERIODEN_OVER_24_MD) :
             null;
     }
 }
