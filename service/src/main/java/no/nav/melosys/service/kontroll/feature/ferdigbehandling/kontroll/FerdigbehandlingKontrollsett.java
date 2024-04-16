@@ -1,11 +1,11 @@
 package no.nav.melosys.service.kontroll.feature.ferdigbehandling.kontroll;
 
+import java.util.Set;
+import java.util.function.Function;
+
 import no.nav.melosys.domain.kodeverk.Sakstyper;
 import no.nav.melosys.service.kontroll.feature.ferdigbehandling.data.FerdigbehandlingKontrollData;
 import no.nav.melosys.service.validering.Kontrollfeil;
-
-import java.util.Set;
-import java.util.function.Function;
 
 public class FerdigbehandlingKontrollsett {
 
@@ -40,12 +40,14 @@ public class FerdigbehandlingKontrollsett {
         FerdigbehandlingKontroll::arbeidsstedLuftfartManglerFelter,
         FerdigbehandlingKontroll::foretakUtlandManglerFelter,
         FerdigbehandlingKontroll::selvstendigUtlandManglerFelter,
-        FerdigbehandlingKontroll::orgnrErOpphørt
+        FerdigbehandlingKontroll::orgnrErOpphørt,
+        FerdigbehandlingKontroll::åpentUtkastFinnes
     );
 
     private static final Set<Function<FerdigbehandlingKontrollData, Kontrollfeil>> REGELSETT_FTRL = Set.of(
-            FerdigbehandlingKontroll::adresseRegistrert,
-            FerdigbehandlingKontroll::overlappendePeriode
+        FerdigbehandlingKontroll::adresseRegistrert,
+        FerdigbehandlingKontroll::overlappendePeriode,
+        FerdigbehandlingKontroll::åpentUtkastFinnes
     );
 
     private static final Set<Function<FerdigbehandlingKontrollData, Kontrollfeil>> REGELSETT_TRYGDEAVTALER = Set.of(
@@ -56,22 +58,26 @@ public class FerdigbehandlingKontrollsett {
         FerdigbehandlingKontroll::periodeOverFemÅr,
         FerdigbehandlingKontroll::periodeManglerSluttdato,
         FerdigbehandlingKontroll::arbeidsstedLandManglerFelter,
-        FerdigbehandlingKontroll::representantIUtlandetMangler
+        FerdigbehandlingKontroll::representantIUtlandetMangler,
+        FerdigbehandlingKontroll::åpentUtkastFinnes
     );
 
     private static final Set<Function<FerdigbehandlingKontrollData, Kontrollfeil>> REGELSETT_UNNTAKSREGISTRERING = Set.of(
         FerdigbehandlingKontroll::overlappendeMedlemskapsperiode,
         FerdigbehandlingKontroll::periodeManglerSluttdato,
-        FerdigbehandlingKontroll::overlappendeUnntaksperiode
+        FerdigbehandlingKontroll::overlappendeUnntaksperiode,
+        FerdigbehandlingKontroll::åpentUtkastFinnes
     );
 
     private static final Set<Function<FerdigbehandlingKontrollData, Kontrollfeil>> REGELSETT_IKKE_YRKESAKTIV = Set.of(
         FerdigbehandlingKontroll::adresseRegistrert,
         FerdigbehandlingKontroll::overlappendePeriode,
-        FerdigbehandlingKontroll::periodeManglerSluttdato
+        FerdigbehandlingKontroll::periodeManglerSluttdato,
+        FerdigbehandlingKontroll::åpentUtkastFinnes
     );
 
     private static final Set<Function<FerdigbehandlingKontrollData, Kontrollfeil>> REGELSETT_AVSLAG_HENLEGGELSE = Set.of(
-        FerdigbehandlingKontroll::adresseRegistrert
+        FerdigbehandlingKontroll::adresseRegistrert,
+        FerdigbehandlingKontroll::åpentUtkastFinnes
     );
 }

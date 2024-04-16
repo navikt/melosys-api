@@ -1,7 +1,10 @@
 package no.nav.melosys.service.kontroll.feature.ferdigbehandling.data;
 
+import java.util.List;
+
 import no.nav.melosys.domain.Aktoer;
 import no.nav.melosys.domain.Lovvalgsperiode;
+import no.nav.melosys.domain.brev.utkast.UtkastBrev;
 import no.nav.melosys.domain.dokument.medlemskap.MedlemskapDokument;
 import no.nav.melosys.domain.dokument.organisasjon.OrganisasjonDokument;
 import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingstema;
@@ -19,22 +22,56 @@ public record FerdigbehandlingKontrollData(
     Aktoer fullmektig,
     OrganisasjonDokument organisasjonDokument,
     Persondata persondataTilFullmektig,
-    MedlemskapsperiodeData medlemskapsperiodeData
-    ) {
+    MedlemskapsperiodeData medlemskapsperiodeData,
+    List<UtkastBrev> brevUtkast
+) {
 
-    public static FerdigbehandlingKontrollData lagKontrollDataForAvslag(Persondata persondata,
-                                                                        MottatteOpplysningerData mottatteOpplysningerData,
-                                                                        SaksopplysningerData saksopplysningerData, Aktoer fullmektig, OrganisasjonDokument organisasjonDokument, Persondata persondataTilFullmektig) {
-        return new FerdigbehandlingKontrollData(null, persondata, mottatteOpplysningerData, null, null, saksopplysningerData, null, fullmektig, organisasjonDokument, persondataTilFullmektig, null);
+    public static FerdigbehandlingKontrollData lagKontrollDataForAvslag(
+        Persondata persondata,
+        MottatteOpplysningerData mottatteOpplysningerData,
+        SaksopplysningerData saksopplysningerData,
+        Aktoer fullmektig,
+        OrganisasjonDokument organisasjonDokument,
+        Persondata persondataTilFullmektig,
+        List<UtkastBrev> brevUtkast
+    ) {
+        return new FerdigbehandlingKontrollData(
+            null,
+            persondata,
+            mottatteOpplysningerData,
+            null,
+            null,
+            saksopplysningerData,
+            null,
+            fullmektig,
+            organisasjonDokument,
+            persondataTilFullmektig,
+            null,
+            brevUtkast);
     }
 
-    public static FerdigbehandlingKontrollData lagKontrollDataForFTRL(Persondata persondata,
-                                                                      MottatteOpplysningerData mottatteOpplysningerData,
-                                                                      MedlemskapDokument medlemskapDokument,
-                                                                      Aktoer fullmektig,
-                                                                      OrganisasjonDokument organisasjonDokument,
-                                                                      Persondata persondataTilFullmektig,
-                                                                      MedlemskapsperiodeData medlemskapsperiodeData) {
-        return new FerdigbehandlingKontrollData(medlemskapDokument, persondata, mottatteOpplysningerData, null, null, null, null, fullmektig, organisasjonDokument, persondataTilFullmektig, medlemskapsperiodeData);
+    public static FerdigbehandlingKontrollData lagKontrollDataForFTRL(
+        Persondata persondata,
+        MottatteOpplysningerData mottatteOpplysningerData,
+        MedlemskapDokument medlemskapDokument,
+        Aktoer fullmektig,
+        OrganisasjonDokument organisasjonDokument,
+        Persondata persondataTilFullmektig,
+        MedlemskapsperiodeData medlemskapsperiodeData,
+        List<UtkastBrev> brevUtkast
+    ) {
+        return new FerdigbehandlingKontrollData(
+            medlemskapDokument,
+            persondata,
+            mottatteOpplysningerData,
+            null,
+            null,
+            null,
+            null,
+            fullmektig,
+            organisasjonDokument,
+            persondataTilFullmektig,
+            medlemskapsperiodeData,
+            brevUtkast);
     }
 }

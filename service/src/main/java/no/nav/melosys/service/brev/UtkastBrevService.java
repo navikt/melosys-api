@@ -13,7 +13,6 @@ import org.springframework.stereotype.Service;
 @Service
 public class UtkastBrevService {
 
-
     private final OppdaterUtkastService oppdaterUtkastService;
     private final UtkastBrevRepository utkastBrevRepository;
 

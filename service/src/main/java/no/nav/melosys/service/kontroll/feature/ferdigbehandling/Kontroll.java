@@ -9,6 +9,7 @@ import no.nav.melosys.domain.Aktoer;
 import no.nav.melosys.domain.Behandling;
 import no.nav.melosys.domain.Lovvalgsperiode;
 import no.nav.melosys.domain.Medlemskapsperiode;
+import no.nav.melosys.domain.brev.utkast.UtkastBrev;
 import no.nav.melosys.domain.dokument.medlemskap.MedlemskapDokument;
 import no.nav.melosys.domain.dokument.organisasjon.OrganisasjonDokument;
 import no.nav.melosys.domain.kodeverk.Fullmaktstype;
@@ -20,6 +21,7 @@ import no.nav.melosys.domain.person.Persondata;
 import no.nav.melosys.service.LovvalgsperiodeService;
 import no.nav.melosys.service.avklartefakta.AvklarteVirksomheterService;
 import no.nav.melosys.service.behandling.BehandlingService;
+import no.nav.melosys.service.brev.UtkastBrevService;
 import no.nav.melosys.service.ftrl.medlemskapsperiode.MedlemskapsperiodeService;
 import no.nav.melosys.service.kontroll.feature.ferdigbehandling.data.FerdigbehandlingKontrollData;
 import no.nav.melosys.service.kontroll.feature.ferdigbehandling.data.MedlemskapsperiodeData;
@@ -47,6 +49,7 @@ class Kontroll {
     private final OrganisasjonOppslagService organisasjonOppslagService;
     private final SaksbehandlingRegler saksbehandlingRegler;
     private final MedlemskapsperiodeService medlemskapsperiodeService;
+    private final UtkastBrevService utkastBrevService;
 
     public Kontroll(BehandlingService behandlingService,
                     LovvalgsperiodeService lovvalgsperiodeService,
@@ -54,7 +57,8 @@ class Kontroll {
                     PersondataFasade persondataFasade,
                     OrganisasjonOppslagService organisasjonOppslagService,
                     SaksbehandlingRegler saksbehandlingRegler,
-                    MedlemskapsperiodeService medlemskapsperiodeService) {
+                    MedlemskapsperiodeService medlemskapsperiodeService,
+                    UtkastBrevService utkastBrevService) {
         this.behandlingService = behandlingService;
         this.lovvalgsperiodeService = lovvalgsperiodeService;
         this.avklarteVirksomheterService = avklarteVirksomheterService;
@@ -62,6 +66,7 @@ class Kontroll {
         this.organisasjonOppslagService = organisasjonOppslagService;
         this.saksbehandlingRegler = saksbehandlingRegler;
         this.medlemskapsperiodeService = medlemskapsperiodeService;
+        this.utkastBrevService = utkastBrevService;
     }
 
     public Collection<Kontrollfeil> kontroller(long behandlingId, Behandlingsresultattyper behandlingsresultattype, Set<Kontroll_begrunnelser> kontrollerSomSkalIgnoreres) {
@@ -140,8 +145,10 @@ class Kontroll {
         }
 
         SaksopplysningerData saksopplysningerData = hentSaksopplysningerData(behandling);
+        List<UtkastBrev> brevUtkast = utkastBrevService.hentUtkast(behandling.getId());
 
-        return FerdigbehandlingKontrollData.lagKontrollDataForAvslag(persondata, mottatteOpplysningerData, saksopplysningerData, fullmektig, organisasjon, persondataFullmektig);
+        return FerdigbehandlingKontrollData.lagKontrollDataForAvslag(persondata, mottatteOpplysningerData, saksopplysningerData,
+            fullmektig, organisasjon, persondataFullmektig, brevUtkast);
     }
 
     private FerdigbehandlingKontrollData hentVedtakKontrollData(Behandling behandling) {
@@ -162,9 +169,11 @@ class Kontroll {
         MottatteOpplysningerData mottatteOpplysningerData = behandling.getMottatteOpplysninger().getMottatteOpplysningerData();
         MedlemskapDokument medlemskapDokument = behandling.hentMedlemskapDokument();
         Persondata persondata = hentPersondata(behandling);
+        List<UtkastBrev> brevUtkast = utkastBrevService.hentUtkast(behandling.getId());
 
         return new FerdigbehandlingKontrollData(medlemskapDokument, persondata, mottatteOpplysningerData,
-            lovvalgsperiode, opprinneligLovvalgsperiode, saksopplysningerData, behandling.getTema(), fullmektig, organisasjon, persondataFullmektig, null);
+            lovvalgsperiode, opprinneligLovvalgsperiode, saksopplysningerData, behandling.getTema(),
+            fullmektig, organisasjon, persondataFullmektig, null, brevUtkast);
     }
 
     private FerdigbehandlingKontrollData hentVedtakKontrollDataFTRL(Behandling behandling) {
@@ -189,7 +198,10 @@ class Kontroll {
             persondataFullmektig = hentPersondata(fullmektig.getPersonIdent());
         }
 
-        return FerdigbehandlingKontrollData.lagKontrollDataForFTRL(persondata, mottatteOpplysningerData, medlemskapDokument, fullmektig, organisasjon, persondataFullmektig, medlemskapsperiodeData);
+        List<UtkastBrev> brevUtkast = utkastBrevService.hentUtkast(behandling.getId());
+
+        return FerdigbehandlingKontrollData.lagKontrollDataForFTRL(persondata, mottatteOpplysningerData, medlemskapDokument,
+            fullmektig, organisasjon, persondataFullmektig, medlemskapsperiodeData, brevUtkast);
     }
 
     private Persondata hentPersondata(Behandling behandling) {

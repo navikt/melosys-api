@@ -167,6 +167,11 @@ final class FerdigbehandlingKontroll {
             : null;
     }
 
+    static Kontrollfeil åpentUtkastFinnes(FerdigbehandlingKontrollData kontrollData) {
+        var åpneUtkast = kontrollData.brevUtkast();
+        return åpneUtkast == null || åpneUtkast.isEmpty() ? null : new Kontrollfeil(Kontroll_begrunnelser.ÅPENT_UTKAST);
+    }
+
     static Kontrollfeil adresseRegistrert(FerdigbehandlingKontrollData kontrollData) {
         var representant = kontrollData.fullmektig();
         boolean harRepresentant = representant != null;

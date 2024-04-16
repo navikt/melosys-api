@@ -1,8 +1,11 @@
 package no.nav.melosys.service.kontroll.feature.ferdigbehandling.kontroll
 
+import io.kotest.matchers.collections.shouldBeEmpty
 import io.kotest.matchers.nulls.shouldBeNull
+import io.kotest.matchers.nulls.shouldNotBeNull
 import io.kotest.matchers.shouldBe
 import no.nav.melosys.domain.*
+import no.nav.melosys.domain.brev.utkast.UtkastBrev
 import no.nav.melosys.domain.dokument.medlemskap.MedlemskapDokument
 import no.nav.melosys.domain.dokument.medlemskap.Medlemsperiode
 import no.nav.melosys.domain.dokument.medlemskap.Periode
@@ -26,11 +29,7 @@ import java.time.LocalDate
 
 class FerdigbehandlingKontrollTest {
 
-    companion object {
-        val DATO = LocalDate.parse("2024-01-01")
-        const val BRUKER_AKTØRID = "12345678911"
-        const val FULLMEKTIG_ORGNR = "123456789"
-    }
+    private val DATO: LocalDate = LocalDate.parse("2024-01-01")
 
     @Test
     internal fun utførKontroll_USA_ART5_4PeriodenErMerEnn12Måneder_kontrollfeil() {
@@ -40,7 +39,7 @@ class FerdigbehandlingKontrollTest {
             tom = DATO.plusMonths(12)
         }
         val kontrollData =
-            FerdigbehandlingKontrollData(null, null, null, lovvalgsperiode, null, null, null, null, null, null, null)
+            FerdigbehandlingKontrollData(null, null, null, lovvalgsperiode, null, null, null, null, null, null, null, null)
 
 
         val kontrollfeil = FerdigbehandlingKontroll.periodeOver12Måneder(kontrollData)
@@ -57,7 +56,7 @@ class FerdigbehandlingKontrollTest {
             tom = DATO.plusYears(5)
         }
         val kontrollData =
-            FerdigbehandlingKontrollData(null, null, null, lovvalgsperiode, null, null, null, null, null, null, null)
+            FerdigbehandlingKontrollData(null, null, null, lovvalgsperiode, null, null, null, null, null, null, null, null)
 
 
         val kontrollfeil = FerdigbehandlingKontroll.periodeOverFemÅr(kontrollData)
@@ -74,7 +73,7 @@ class FerdigbehandlingKontrollTest {
             tom = DATO.plusYears(5)
         }
         val kontrollData =
-            FerdigbehandlingKontrollData(null, null, null, lovvalgsperiode, null, null, null, null, null, null, null)
+            FerdigbehandlingKontrollData(null, null, null, lovvalgsperiode, null, null, null, null, null, null, null, null)
 
 
         val kontrollfeil = FerdigbehandlingKontroll.periodeOverFemÅr(kontrollData)
@@ -105,6 +104,7 @@ class FerdigbehandlingKontrollTest {
             null,
             null,
             lovvalgsperiode,
+            null,
             null,
             null,
             null,
@@ -150,7 +150,8 @@ class FerdigbehandlingKontrollTest {
             null,
             null,
             null,
-            MedlemskapsperiodeData(ikkeOverlappendeMedlemskapsperioder, emptyList())
+            MedlemskapsperiodeData(ikkeOverlappendeMedlemskapsperioder, emptyList()),
+            null
         )
 
 
@@ -158,6 +159,82 @@ class FerdigbehandlingKontrollTest {
 
 
         kontrollfeil.shouldBeNull()
+    }
+
+    @Test
+    fun `null brevutkast skal gi kontrollfeil`() {
+        val kontrollData = FerdigbehandlingKontrollData(
+            null,
+            null,
+            null,
+            null,
+            null,
+            null,
+            null,
+            null,
+            null,
+            null,
+            null,
+            null
+        )
+
+
+        val kontrollfeil = FerdigbehandlingKontroll.åpentUtkastFinnes(kontrollData)
+
+
+        kontrollfeil.shouldBeNull()
+    }
+
+    @Test
+    fun `ingen brevutkast skal gi kontrollfeil`() {
+        val kontrollData = FerdigbehandlingKontrollData(
+            null,
+            null,
+            null,
+            null,
+            null,
+            null,
+            null,
+            null,
+            null,
+            null,
+            null,
+            emptyList()
+        )
+
+
+        val kontrollfeil = FerdigbehandlingKontroll.åpentUtkastFinnes(kontrollData)
+
+
+        kontrollfeil.shouldBeNull()
+    }
+
+    @Test
+    fun `ikke-tom brevutkast liste skal gi kontrollfeil`() {
+        val kontrollData = FerdigbehandlingKontrollData(
+            null,
+            null,
+            null,
+            null,
+            null,
+            null,
+            null,
+            null,
+            null,
+            null,
+            null,
+            listOf(UtkastBrev())
+        )
+
+
+        val kontrollfeil = FerdigbehandlingKontroll.åpentUtkastFinnes(kontrollData)
+
+
+        kontrollfeil.shouldNotBeNull().run {
+            kode.shouldBe(Kontroll_begrunnelser.ÅPENT_UTKAST)
+            type.shouldBe(KontrolldataFeilType.FEIL)
+            felter.shouldBeEmpty()
+        }
     }
 
     @Test
@@ -189,7 +266,8 @@ class FerdigbehandlingKontrollTest {
             null,
             null,
             null,
-            MedlemskapsperiodeData(overlappendeMedlemskapsperioder, emptyList())
+            MedlemskapsperiodeData(overlappendeMedlemskapsperioder, emptyList()),
+            null
         )
 
 
@@ -235,7 +313,8 @@ class FerdigbehandlingKontrollTest {
             null,
             null,
             null,
-            MedlemskapsperiodeData(overlappendeMedlemskapsperioder, tidligereMedlemskapsperioder)
+            MedlemskapsperiodeData(overlappendeMedlemskapsperioder, tidligereMedlemskapsperioder),
+            null
         )
 
 
@@ -279,7 +358,8 @@ class FerdigbehandlingKontrollTest {
             null,
             null,
             null,
-            MedlemskapsperiodeData(overlappendeMedlemskapsperioder, tidligereMedlemskapsperioder)
+            MedlemskapsperiodeData(overlappendeMedlemskapsperioder, tidligereMedlemskapsperioder),
+            null
         )
 
 
@@ -325,7 +405,8 @@ class FerdigbehandlingKontrollTest {
             null,
             null,
             null,
-            MedlemskapsperiodeData(overlappendeMedlemskapsperioder, emptyList())
+            MedlemskapsperiodeData(overlappendeMedlemskapsperioder, emptyList()),
+            null
         )
 
 
@@ -366,6 +447,7 @@ class FerdigbehandlingKontrollTest {
             null,
             null,
             null,
+            null,
             null
         )
 
@@ -398,6 +480,7 @@ class FerdigbehandlingKontrollTest {
             null,
             null,
             lovvalgsperiode,
+            null,
             null,
             null,
             null,
@@ -442,6 +525,7 @@ class FerdigbehandlingKontrollTest {
             null,
             null,
             null,
+            null,
             null
         )
 
@@ -458,6 +542,7 @@ class FerdigbehandlingKontrollTest {
             null,
             PersonopplysningerObjectFactory.lagPersonopplysningerUtenAdresser(),
             lagMottatteOpplysningerdata(),
+            null,
             null,
             null,
             null,
@@ -488,6 +573,7 @@ class FerdigbehandlingKontrollTest {
             null,
             null,
             null,
+            null,
             null
         )
 
@@ -511,6 +597,7 @@ class FerdigbehandlingKontrollTest {
             lagAktoerFullmektigPerson(),
             null,
             PersonopplysningerObjectFactory.lagPersonopplysninger(),
+            null,
             null
         )
 
@@ -533,6 +620,7 @@ class FerdigbehandlingKontrollTest {
             null,
             lagAktoerFullmektigOrganisasjon(),
             lagOrganisasjonDokument("1111", "Testegate 4", "2222", "Testegate 5"),
+            null,
             null,
             null
         )
@@ -557,6 +645,7 @@ class FerdigbehandlingKontrollTest {
             lagAktoerFullmektigOrganisasjon(),
             lagOrganisasjonDokument("", "Testegate 4", "", "NO"),
             null,
+            null,
             null
         )
 
@@ -570,7 +659,7 @@ class FerdigbehandlingKontrollTest {
     private fun lagAktoerFullmektigOrganisasjon(): Aktoer {
         val aktoer = Aktoer()
         aktoer.rolle = Aktoersroller.FULLMEKTIG
-        aktoer.orgnr = FULLMEKTIG_ORGNR
+        aktoer.orgnr = "123456789"
         return aktoer
     }
 
@@ -578,7 +667,7 @@ class FerdigbehandlingKontrollTest {
     private fun lagAktoerFullmektigPerson(): Aktoer {
         val aktoer = Aktoer()
         aktoer.rolle = Aktoersroller.FULLMEKTIG
-        aktoer.personIdent = BRUKER_AKTØRID
+        aktoer.personIdent = "12345678911"
         return aktoer
     }
 
