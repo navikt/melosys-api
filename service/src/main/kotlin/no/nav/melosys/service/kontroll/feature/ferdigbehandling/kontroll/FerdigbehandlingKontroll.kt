@@ -33,7 +33,7 @@ object FerdigbehandlingKontroll {
                 Kontrollfeil(Kontroll_begrunnelser.OVERLAPPENDE_MEDL_PERIODER, KontrolldataFeilType.FEIL) else null
         }
 
-        val kontrollPeriode = kontrollData.lovvalgsperiode!!
+        val kontrollPeriode = kontrollData.lovvalgsperiode
         val opprinneligLovvalgsperiode = kontrollData.opprinneligLovvalgsperiode
 
         if (harBehandlingstemaMedUnntakForOverlappendePeriode(kontrollPeriode, kontrollData.behandlingstema)
@@ -49,8 +49,8 @@ object FerdigbehandlingKontroll {
         return null
     }
 
-    private fun harBehandlingstemaMedUnntakForOverlappendePeriode(lovvalgsperiode: Lovvalgsperiode, behandlingstema: Behandlingstema?): Boolean =
-        behandlingstema in listOf(Behandlingstema.UTSENDT_ARBEIDSTAKER, Behandlingstema.UTSENDT_SELVSTENDIG) && lovvalgsperiode.erAvslått()
+    private fun harBehandlingstemaMedUnntakForOverlappendePeriode(lovvalgsperiode: Lovvalgsperiode?, behandlingstema: Behandlingstema?): Boolean =
+        behandlingstema in listOf(Behandlingstema.UTSENDT_ARBEIDSTAKER, Behandlingstema.UTSENDT_SELVSTENDIG) && lovvalgsperiode!!.erAvslått()
 
     fun overlappendeUnntaksperiode(kontrollData: FerdigbehandlingKontrollData): Kontrollfeil? {
         val medlemskapDokument = kontrollData.medlemskapDokument
