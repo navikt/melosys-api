@@ -100,7 +100,7 @@ class Kontroll {
     }
 
     private Collection<Kontrollfeil> utførKontrollerForAvslagOgHenleggelse(Behandling behandling) {
-        var regelsettForAvslagOgHenleggelse = FerdigbehandlingKontrollsett.hentRegelsettForAvslagOgHenleggelse();
+        var regelsettForAvslagOgHenleggelse = FerdigbehandlingKontrollsett.INSTANCE.hentRegelsettForAvslagOgHenleggelse();
         var ferdigbehandlingKontrollData = hentKontrollDataForAvslagOgHenleggelse(behandling);
         return regelsettForAvslagOgHenleggelse.stream()
             .map(f -> f.apply(ferdigbehandlingKontrollData))
@@ -112,7 +112,7 @@ class Kontroll {
         boolean harRegistreringUnntakFraMedlemskapFlyt = saksbehandlingRegler.harRegistreringUnntakFraMedlemskapFlyt(behandling);
         boolean harIkkeYrkesaktivFlyt = saksbehandlingRegler.harIkkeYrkesaktivFlyt(behandling);
 
-        var regelsettForVedtak = FerdigbehandlingKontrollsett.hentRegelsettForVedtak(sakstype, harRegistreringUnntakFraMedlemskapFlyt, harIkkeYrkesaktivFlyt);
+        var regelsettForVedtak = FerdigbehandlingKontrollsett.INSTANCE.hentRegelsettForVedtak(sakstype, harRegistreringUnntakFraMedlemskapFlyt, harIkkeYrkesaktivFlyt);
 
         FerdigbehandlingKontrollData ferdigbehandlingKontrollData;
         if (sakstype.equals(Sakstyper.FTRL)) {
