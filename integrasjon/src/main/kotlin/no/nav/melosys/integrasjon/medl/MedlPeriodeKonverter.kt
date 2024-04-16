@@ -248,14 +248,17 @@ class MedlPeriodeKonverter private constructor() {
 
         fun tilMedlTrygdedekningForFtrl(dekning: Trygdedekninger): DekningMedl =
             when (dekning) {
+                Trygdedekninger.FULL_DEKNING_FTRL -> DekningMedl.FULL
+                Trygdedekninger.FTRL_2_7_TREDJE_LEDD_B_HELSE_SYKE_FORELDREPENGER -> DekningMedl.FTRL_2_7_3_LEDD_B
+                Trygdedekninger.FTRL_2_7A_ANDRE_LEDD_B_HELSE_SYKE_FORELDREPENGER -> DekningMedl.FTRL_2_7A_2_LEDD_B
                 Trygdedekninger.FTRL_2_9_FØRSTE_LEDD_A_HELSE -> DekningMedl.FTRL_2_9_1_LEDD_A
                 Trygdedekninger.FTRL_2_9_FØRSTE_LEDD_A_ANDRE_LEDD_HELSE_SYKE_FORELDREPENGER -> DekningMedl.FTRL_2_9_2_LEDD_1A
                 Trygdedekninger.FTRL_2_9_FØRSTE_LEDD_B_PENSJON -> DekningMedl.FTRL_2_9_1_LEDD_B
+                Trygdedekninger.FTRL_2_9_FØRSTE_LEDD_B_TREDJE_LEDD_PENSJON_YRKESSKADE -> DekningMedl.FTRL_2_9_3_LEDD_1B
+                Trygdedekninger.FTRL_2_9_FØRSTE_LEDD_C_ANDRE_LEDD_TREDJE_LEDD_HELSE_PENSJON_SYKE_FORELDREPENGER_YRKESSKADE -> DekningMedl.FTRL_2_9_2_LEDD_3_LEDD_1C
+                Trygdedekninger.FTRL_2_9_FØRSTE_LEDD_C_TREDJE_LEDD_HELSE_PENSJON_YRKESSKADE -> DekningMedl.FTRL_2_9_3_LEDD_1C
                 Trygdedekninger.FTRL_2_9_FØRSTE_LEDD_C_HELSE_PENSJON -> DekningMedl.FTRL_2_9_1_LEDD_C
                 Trygdedekninger.FTRL_2_9_FØRSTE_LEDD_C_ANDRE_LEDD_HELSE_PENSJON_SYKE_FORELDREPENGER -> DekningMedl.FTRL_2_9_2_LEDD_1C
-                Trygdedekninger.FTRL_2_7_TREDJE_LEDD_B_HELSE_SYKE_FORELDREPENGER -> DekningMedl.FTRL_2_7_3_LEDD_B
-                Trygdedekninger.FTRL_2_7A_ANDRE_LEDD_B_HELSE_SYKE_FORELDREPENGER -> DekningMedl.FTRL_2_7A_2_LEDD_B
-                Trygdedekninger.FULL_DEKNING_FTRL -> DekningMedl.FULL
                 else -> throw TekniskException("Dekningstype støttes ikke for FTRL: ${dekning.kode}")
             }
 
