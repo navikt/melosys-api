@@ -251,11 +251,7 @@ object UtledMedlemskapsperioder {
             ),
             lagPeriode(
                 splittetPeriode.first,
-                when (dto.trygdedekning) {
-                    Trygdedekninger.FTRL_2_9_FØRSTE_LEDD_C_HELSE_PENSJON -> Trygdedekninger.FTRL_2_9_FØRSTE_LEDD_A_HELSE
-                    Trygdedekninger.FTRL_2_9_FØRSTE_LEDD_C_ANDRE_LEDD_HELSE_PENSJON_SYKE_FORELDREPENGER -> Trygdedekninger.FTRL_2_9_FØRSTE_LEDD_A_ANDRE_LEDD_HELSE_SYKE_FORELDREPENGER
-                    else -> throw TekniskException("Forventet ikke trygdedekning ${dto.trygdedekning}")
-                },
+                dto.trygdedekning.utenYrkesskadedel().utenPensjonsdel(),
                 InnvilgelsesResultat.AVSLAATT,
                 dto.bestemmelse
             ),

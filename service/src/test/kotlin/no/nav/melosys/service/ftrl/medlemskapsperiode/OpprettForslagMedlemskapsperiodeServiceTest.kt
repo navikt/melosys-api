@@ -249,7 +249,7 @@ class OpprettForslagMedlemskapsperiodeServiceTest {
     }
 
     @Test
-    fun opprettForslagPåMedlemskapsperioder_trygdedekningMedYrkesskadeOgSenSøknadsdato_lagrerAvslåttOgInnivlgetMedlemskapsperioder() {
+    fun opprettForslagPåMedlemskapsperioder_trygdedekningMedYrkesskadeOgSenSøknadsdato_lagrerAvslåttOgInnvilgetMedlemskapsperioder() {
         val behandlingsresultat = lagBehandlingsresultat().apply {
             (behandling.mottatteOpplysninger.mottatteOpplysningerData as SøknadNorgeEllerUtenforEØS)
                 .trygdedekning = Trygdedekninger.FTRL_2_9_FØRSTE_LEDD_B_TREDJE_LEDD_PENSJON_YRKESSKADE
@@ -270,12 +270,101 @@ class OpprettForslagMedlemskapsperiodeServiceTest {
                 Trygdedekninger.FTRL_2_9_TREDJE_LEDD_YRKESSKADE -> {
                     medlemskapsperiode.innvilgelsesresultat.shouldBe(InnvilgelsesResultat.AVSLAATT)
                     medlemskapsperiode.fom.shouldBe(behandlingsresultat.behandling.mottatteOpplysninger.mottatteOpplysningerData.periode.fom)
+                    medlemskapsperiode.tom.shouldBe(behandlingsresultat.behandling.mottatteOpplysninger.mottatteOpplysningerData.periode.tom)
                 }
 
                 Trygdedekninger.FTRL_2_9_FØRSTE_LEDD_B_PENSJON -> {
                     medlemskapsperiode.innvilgelsesresultat.shouldBe(InnvilgelsesResultat.INNVILGET)
                     medlemskapsperiode.fom.shouldBe(behandlingsresultat.behandling.mottatteOpplysninger.mottatteOpplysningerData.periode.fom)
                     medlemskapsperiode.tom.shouldBe(behandlingsresultat.behandling.mottatteOpplysninger.mottatteOpplysningerData.periode.tom)
+                }
+
+                else -> throw TekniskException("Forventet ikke ${medlemskapsperiode.trygdedekning} i denne testen")
+            }
+        }
+    }
+
+    @Test
+    fun opprettForslagPåMedlemskapsperioder_trygdedekningMedYrkesskadeOgMiddelsTidligSøknadsdato_lagrerAvslåttOgInnvilgetMedlemskapsperioder() {
+        val behandlingsresultat = lagBehandlingsresultat().apply {
+            (behandling.mottatteOpplysninger.mottatteOpplysningerData as SøknadNorgeEllerUtenforEØS).apply {
+                trygdedekning = Trygdedekninger.FTRL_2_9_FØRSTE_LEDD_B_TREDJE_LEDD_PENSJON_YRKESSKADE
+                periode = Periode(LocalDate.now().minusYears(1), null)
+            }
+            vilkaarsresultater.add(lagVilkår())
+        }
+        every { behandlingsresultatService.hentBehandlingsresultat(BEH_RES_ID) } returns behandlingsresultat
+        every { medlemAvFolketrygdenRepository.save(any()) } returnsArgument 0
+        every { utledMottaksdato.getMottaksdato(any()) } returns LocalDate.now()
+
+
+        val medlemskapsperioder = opprettForslagMedlemskapsperiodeService.opprettForslagPåMedlemskapsperioder(BEH_RES_ID, BESTEMMELSE)
+
+
+        medlemskapsperioder.shouldNotBeEmpty()
+        medlemskapsperioder.shouldHaveSize(2)
+        medlemskapsperioder.forEach { medlemskapsperiode ->
+            when (medlemskapsperiode.trygdedekning) {
+                Trygdedekninger.FTRL_2_9_TREDJE_LEDD_YRKESSKADE -> {
+                    medlemskapsperiode.innvilgelsesresultat.shouldBe(InnvilgelsesResultat.AVSLAATT)
+                    medlemskapsperiode.fom.shouldBe(behandlingsresultat.behandling.mottatteOpplysninger.mottatteOpplysningerData.periode.fom)
+                    medlemskapsperiode.tom.shouldBe(behandlingsresultat.behandling.mottatteOpplysninger.mottatteOpplysningerData.periode.tom)
+                }
+
+                Trygdedekninger.FTRL_2_9_FØRSTE_LEDD_B_PENSJON -> {
+                    medlemskapsperiode.innvilgelsesresultat.shouldBe(InnvilgelsesResultat.INNVILGET)
+                    medlemskapsperiode.fom.shouldBe(behandlingsresultat.behandling.mottatteOpplysninger.mottatteOpplysningerData.periode.fom)
+                    medlemskapsperiode.tom.shouldBe(behandlingsresultat.behandling.mottatteOpplysninger.mottatteOpplysningerData.periode.tom)
+                }
+
+                else -> throw TekniskException("Forventet ikke ${medlemskapsperiode.trygdedekning} i denne testen")
+            }
+        }
+    }
+
+    @Test
+    fun opprettForslagPåMedlemskapsperioder_trygdedekningMedYrkesskadeOgTidligSøknadsdato_lagrerAvslåttOgInnvilgetMedlemskapsperioder() {
+        val søknadsdatoFom = LocalDate.now().minusYears(1)
+        val søknadsdatoTom = LocalDate.now().plusMonths(2)
+        val mottaksdato = LocalDate.now()
+        val behandlingsresultat = lagBehandlingsresultat().apply {
+            (behandling.mottatteOpplysninger.mottatteOpplysningerData as SøknadNorgeEllerUtenforEØS).apply {
+                trygdedekning = Trygdedekninger.FTRL_2_9_FØRSTE_LEDD_C_TREDJE_LEDD_HELSE_PENSJON_YRKESSKADE
+                periode = Periode(søknadsdatoFom, søknadsdatoTom)
+            }
+            vilkaarsresultater.add(lagVilkår())
+        }
+        every { behandlingsresultatService.hentBehandlingsresultat(BEH_RES_ID) } returns behandlingsresultat
+        every { medlemAvFolketrygdenRepository.save(any()) } returnsArgument 0
+        every { utledMottaksdato.getMottaksdato(any()) } returns mottaksdato
+
+
+        val medlemskapsperioder = opprettForslagMedlemskapsperiodeService.opprettForslagPåMedlemskapsperioder(BEH_RES_ID, BESTEMMELSE)
+
+
+        medlemskapsperioder.shouldNotBeEmpty()
+        medlemskapsperioder.shouldHaveSize(4)
+        medlemskapsperioder.forEach { medlemskapsperiode ->
+            when (medlemskapsperiode.trygdedekning) {
+                Trygdedekninger.FTRL_2_9_TREDJE_LEDD_YRKESSKADE -> {
+                    medlemskapsperiode.innvilgelsesresultat.shouldBe(InnvilgelsesResultat.AVSLAATT)
+                    medlemskapsperiode.fom.shouldBe(søknadsdatoFom)
+                    medlemskapsperiode.tom.shouldBe(søknadsdatoTom)
+                }
+                Trygdedekninger.FTRL_2_9_FØRSTE_LEDD_A_HELSE  -> {
+                    medlemskapsperiode.innvilgelsesresultat.shouldBe(InnvilgelsesResultat.AVSLAATT)
+                    medlemskapsperiode.fom.shouldBe(søknadsdatoFom)
+                    medlemskapsperiode.tom.shouldBe(mottaksdato.minusDays(1))
+                }
+                Trygdedekninger.FTRL_2_9_FØRSTE_LEDD_B_PENSJON -> {
+                    medlemskapsperiode.innvilgelsesresultat.shouldBe(InnvilgelsesResultat.INNVILGET)
+                    medlemskapsperiode.fom.shouldBe(søknadsdatoFom)
+                    medlemskapsperiode.tom.shouldBe(mottaksdato.minusDays(1))
+                }
+                Trygdedekninger.FTRL_2_9_FØRSTE_LEDD_C_HELSE_PENSJON -> {
+                    medlemskapsperiode.innvilgelsesresultat.shouldBe(InnvilgelsesResultat.INNVILGET)
+                    medlemskapsperiode.fom.shouldBe(mottaksdato)
+                    medlemskapsperiode.tom.shouldBe(søknadsdatoTom)
                 }
 
                 else -> throw TekniskException("Forventet ikke ${medlemskapsperiode.trygdedekning} i denne testen")
