@@ -41,6 +41,7 @@ public class BehandlingsresultatService {
         log.info("Fjerner avklarte fakta, lovvalgsperioder, medlemAvFolketrygden og vilkårsresultater fra behandlingsresultat med behandlingID: {} ", behandlingID);
         behandlingsresultat.getAvklartefakta().clear();
         behandlingsresultat.getLovvalgsperioder().clear();
+        fjernMedlemAvFolketrygdenHvisDenFinnes(behandlingsresultat);
         behandlingsresultat.setMedlemAvFolketrygden(null);
         behandlingsresultat.setUtfallRegistreringUnntak(null);
         behandlingsresultat.setBegrunnelseFritekst(null);
@@ -78,6 +79,10 @@ public class BehandlingsresultatService {
     public Behandlingsresultat hentBehandlingsresultatMedAvklartefakta(long behandlingsid) {
         return behandlingsresultatRepository.findWithAvklartefaktaById(behandlingsid)
             .orElseThrow(() -> new IkkeFunnetException(KAN_IKKE_FINNE_BEHANDLINGSRESULTAT + behandlingsid));
+    }
+
+    public Behandlingsresultat lagreOgFlush(Behandlingsresultat resultat) {
+        return behandlingsresultatRepository.saveAndFlush(resultat);
     }
 
     public Behandlingsresultat lagre(Behandlingsresultat resultat) {
@@ -166,5 +171,12 @@ public class BehandlingsresultatService {
         behandlingsresultat.setNyVurderingBakgrunn(nyVurderingBakgrunn);
 
         return behandlingsresultatRepository.save(behandlingsresultat);
+    }
+
+    private void fjernMedlemAvFolketrygdenHvisDenFinnes(Behandlingsresultat behandlingsresultat) {
+        if (behandlingsresultat.getMedlemAvFolketrygden() != null && behandlingsresultat.getMedlemAvFolketrygden().getFastsattTrygdeavgift() != null) {
+            behandlingsresultat.getMedlemAvFolketrygden().getFastsattTrygdeavgift().getTrygdeavgiftsperioder().clear();
+            behandlingsresultatRepository.saveAndFlush(behandlingsresultat);
+        }
     }
 }
