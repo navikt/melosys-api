@@ -351,16 +351,19 @@ class OpprettForslagMedlemskapsperiodeServiceTest {
                     medlemskapsperiode.fom.shouldBe(søknadsdatoFom)
                     medlemskapsperiode.tom.shouldBe(søknadsdatoTom)
                 }
-                Trygdedekninger.FTRL_2_9_FØRSTE_LEDD_A_HELSE  -> {
+
+                Trygdedekninger.FTRL_2_9_FØRSTE_LEDD_A_HELSE -> {
                     medlemskapsperiode.innvilgelsesresultat.shouldBe(InnvilgelsesResultat.AVSLAATT)
                     medlemskapsperiode.fom.shouldBe(søknadsdatoFom)
                     medlemskapsperiode.tom.shouldBe(mottaksdato.minusDays(1))
                 }
+
                 Trygdedekninger.FTRL_2_9_FØRSTE_LEDD_B_PENSJON -> {
                     medlemskapsperiode.innvilgelsesresultat.shouldBe(InnvilgelsesResultat.INNVILGET)
                     medlemskapsperiode.fom.shouldBe(søknadsdatoFom)
                     medlemskapsperiode.tom.shouldBe(mottaksdato.minusDays(1))
                 }
+
                 Trygdedekninger.FTRL_2_9_FØRSTE_LEDD_C_HELSE_PENSJON -> {
                     medlemskapsperiode.innvilgelsesresultat.shouldBe(InnvilgelsesResultat.INNVILGET)
                     medlemskapsperiode.fom.shouldBe(mottaksdato)
