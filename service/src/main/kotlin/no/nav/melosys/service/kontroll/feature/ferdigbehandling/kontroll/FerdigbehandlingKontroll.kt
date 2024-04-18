@@ -10,6 +10,7 @@ import no.nav.melosys.domain.kodeverk.lovvalgsbestemmelser.trygdeavtale.Lovvalgs
 import no.nav.melosys.domain.kodeverk.lovvalgsbestemmelser.trygdeavtale.Lovvalgsbestemmelser_trygdeavtale_us
 import no.nav.melosys.domain.mottatteopplysninger.SøknadNorgeEllerUtenforEØS
 import no.nav.melosys.exception.KontrolldataFeilType
+import no.nav.melosys.exception.TekniskException
 import no.nav.melosys.service.kontroll.feature.arbeidutland.kontroll.ArbeidUtlandKontroll.Companion.arbeidsstedLandManglerFelter
 import no.nav.melosys.service.kontroll.feature.arbeidutland.kontroll.ArbeidUtlandKontroll.Companion.foretakUtlandManglerFelter
 import no.nav.melosys.service.kontroll.feature.arbeidutland.kontroll.ArbeidUtlandKontroll.Companion.luftfartArbeidsstedManglerFelter
@@ -77,7 +78,7 @@ object FerdigbehandlingKontroll {
     }
 
     fun periodeOver24Mnd(kontrollData: FerdigbehandlingKontrollData): Kontrollfeil? {
-        val lovvalgsperiode = kontrollData.lovvalgsperiode!!
+        val lovvalgsperiode = kontrollData.hentLovvalgsperiode()
 
         if (lovvalgsperiode.erArtikkel12() && PeriodeRegler.periodeOver24Måneder(lovvalgsperiode.fom, lovvalgsperiode.tom)) {
             return Kontrollfeil(Kontroll_begrunnelser.PERIODEN_OVER_24_MD)
@@ -87,7 +88,7 @@ object FerdigbehandlingKontroll {
     }
 
     fun periodeManglerSluttdato(kontrollData: FerdigbehandlingKontrollData): Kontrollfeil? {
-        val lovvalgsperiode = kontrollData.lovvalgsperiode!!
+        val lovvalgsperiode = kontrollData.hentLovvalgsperiode()
 
         if (lovvalgsperiode.tom != null) {
             return null
@@ -97,9 +98,8 @@ object FerdigbehandlingKontroll {
         return Kontrollfeil(Kontroll_begrunnelser.INGEN_SLUTTDATO, type)
     }
 
-
     fun periodeOverTreÅr(kontrollData: FerdigbehandlingKontrollData): Kontrollfeil? {
-        val lovvalgsperiode = kontrollData.lovvalgsperiode!!
+        val lovvalgsperiode = kontrollData.hentLovvalgsperiode()
 
         if (lovvalgsperiode.bestemmelse in listOf(Lovvalgsbestemmelser_trygdeavtale_gb.UK_ART6_1, Lovvalgsbestemmelser_trygdeavtale_au.AUS_ART9_3)
             && PeriodeRegler.periodeOver3År(lovvalgsperiode.fom, lovvalgsperiode.tom)
@@ -111,7 +111,7 @@ object FerdigbehandlingKontroll {
     }
 
     fun periodeOverFemÅr(kontrollData: FerdigbehandlingKontrollData): Kontrollfeil? {
-        val lovvalgsperiode = kontrollData.lovvalgsperiode!!
+        val lovvalgsperiode = kontrollData.hentLovvalgsperiode()
 
         if (lovvalgsperiode.bestemmelse in listOf(Lovvalgsbestemmelser_trygdeavtale_us.USA_ART5_2, Lovvalgsbestemmelser_trygdeavtale_ca.CAN_ART7)
             && PeriodeRegler.periodeOver5År(lovvalgsperiode.fom, lovvalgsperiode.tom)
@@ -123,7 +123,7 @@ object FerdigbehandlingKontroll {
     }
 
     fun periodeOver12Måneder(kontrollData: FerdigbehandlingKontrollData): Kontrollfeil? {
-        val lovvalgsperiode = kontrollData.lovvalgsperiode!!
+        val lovvalgsperiode = kontrollData.hentLovvalgsperiode()
 
         if (lovvalgsperiode.bestemmelse in listOf(Lovvalgsbestemmelser_trygdeavtale_us.USA_ART5_4, Lovvalgsbestemmelser_trygdeavtale_ca.CAN_ART6_2)
             && PeriodeRegler.periodeOver12Måneder(lovvalgsperiode.fom, lovvalgsperiode.tom)
@@ -134,32 +134,26 @@ object FerdigbehandlingKontroll {
         return null
     }
 
-    fun arbeidsstedLandManglerFelter(kontrollData: FerdigbehandlingKontrollData): Kontrollfeil? {
-        return arbeidsstedLandManglerFelter(kontrollData.mottatteOpplysningerData!!)
-    }
+    fun arbeidsstedLandManglerFelter(kontrollData: FerdigbehandlingKontrollData): Kontrollfeil? =
+        arbeidsstedLandManglerFelter(kontrollData.hentMottatteOpplysningerData())
 
-    fun arbeidsstedMaritimtManglerFelter(kontrollData: FerdigbehandlingKontrollData): Kontrollfeil? {
-        return maritimtArbeidsstedManglerFelter(kontrollData.mottatteOpplysningerData!!)
-    }
+    fun arbeidsstedMaritimtManglerFelter(kontrollData: FerdigbehandlingKontrollData): Kontrollfeil? =
+        maritimtArbeidsstedManglerFelter(kontrollData.hentMottatteOpplysningerData())
 
-    fun arbeidsstedOffshoreManglerFelter(kontrollData: FerdigbehandlingKontrollData): Kontrollfeil? {
-        return offshoreArbeidsstedManglerFelter(kontrollData.mottatteOpplysningerData!!)
-    }
+    fun arbeidsstedOffshoreManglerFelter(kontrollData: FerdigbehandlingKontrollData): Kontrollfeil? =
+        offshoreArbeidsstedManglerFelter(kontrollData.hentMottatteOpplysningerData())
 
-    fun arbeidsstedLuftfartManglerFelter(kontrollData: FerdigbehandlingKontrollData): Kontrollfeil? {
-        return luftfartArbeidsstedManglerFelter(kontrollData.mottatteOpplysningerData!!)
-    }
+    fun arbeidsstedLuftfartManglerFelter(kontrollData: FerdigbehandlingKontrollData): Kontrollfeil? =
+        luftfartArbeidsstedManglerFelter(kontrollData.hentMottatteOpplysningerData())
 
-    fun foretakUtlandManglerFelter(kontrollData: FerdigbehandlingKontrollData): Kontrollfeil? {
-        return foretakUtlandManglerFelter(kontrollData.mottatteOpplysningerData!!)
-    }
+    fun foretakUtlandManglerFelter(kontrollData: FerdigbehandlingKontrollData): Kontrollfeil? =
+        foretakUtlandManglerFelter(kontrollData.hentMottatteOpplysningerData())
 
-    fun selvstendigUtlandManglerFelter(kontrollData: FerdigbehandlingKontrollData): Kontrollfeil? {
-        return selvstendigUtlandManglerFelter(kontrollData.mottatteOpplysningerData!!)
-    }
+    fun selvstendigUtlandManglerFelter(kontrollData: FerdigbehandlingKontrollData): Kontrollfeil? =
+        selvstendigUtlandManglerFelter(kontrollData.hentMottatteOpplysningerData())
 
     fun representantIUtlandetMangler(kontrollData: FerdigbehandlingKontrollData): Kontrollfeil? {
-        val lovvalgsperiode = kontrollData.lovvalgsperiode!!
+        val lovvalgsperiode = kontrollData.hentLovvalgsperiode()
         val søknad = kontrollData.mottatteOpplysningerData as SøknadNorgeEllerUtenforEØS
 
         if (erBestemmelseDerTrygdeavtaleAttestSendes(lovvalgsperiode.bestemmelse)
@@ -183,9 +177,8 @@ object FerdigbehandlingKontroll {
         return null
     }
 
-    fun åpentUtkastFinnes(kontrollData: FerdigbehandlingKontrollData): Kontrollfeil? {
-        return if (kontrollData.brevUtkast.isEmpty()) null else Kontrollfeil(Kontroll_begrunnelser.ÅPENT_UTKAST)
-    }
+    fun åpentUtkastFinnes(kontrollData: FerdigbehandlingKontrollData): Kontrollfeil? =
+        if (kontrollData.brevUtkast.isEmpty()) null else Kontrollfeil(Kontroll_begrunnelser.ÅPENT_UTKAST)
 
     fun adresseRegistrert(kontrollData: FerdigbehandlingKontrollData): Kontrollfeil? {
         val fullmektig = kontrollData.fullmektig
@@ -202,7 +195,8 @@ object FerdigbehandlingKontroll {
     }
 
     private fun erPersonAdresseRegistrert(kontrollData: FerdigbehandlingKontrollData): Kontrollfeil? {
-        if (!harRegistrertAdresse(kontrollData.persondataTilFullmektig!!, kontrollData.mottatteOpplysningerData)) {
+        val persondataTilFullmektig = kontrollData.persondataTilFullmektig ?: throw TekniskException("Persondata til fullmektig kan ikke være null")
+        if (!harRegistrertAdresse(persondataTilFullmektig, kontrollData.mottatteOpplysningerData)) {
             return Kontrollfeil(Kontroll_begrunnelser.MANGLENDE_REGISTRERTE_ADRESSE_REPRESENTANT)
         }
 
@@ -210,7 +204,7 @@ object FerdigbehandlingKontroll {
     }
 
     private fun erOrganisasjonAdresseRegistrert(kontrollData: FerdigbehandlingKontrollData): Kontrollfeil? {
-        val organisasjon = kontrollData.organisasjonDokument!!
+        val organisasjon = kontrollData.organisasjonDokument ?: throw TekniskException("OrganisasjonDokument kan ikke være null")
 
         if (!organisasjon.harRegistrertPostadresse() && !organisasjon.harRegistrertForretningsadresse()) {
             return Kontrollfeil(Kontroll_begrunnelser.MANGLENDE_REGISTRERTE_ADRESSE_REPRESENTANT)
@@ -248,4 +242,10 @@ object FerdigbehandlingKontroll {
 
     private fun erBestemmelseDerTrygdeavtaleAttestSendesCanada(bestemmelse: LovvalgBestemmelse): Boolean =
         bestemmelse in Lovvalgsbestemmelser_trygdeavtale_ca.values()
+
+    private fun FerdigbehandlingKontrollData.hentLovvalgsperiode() =
+        this.lovvalgsperiode ?: throw TekniskException("Lovvalgsperiode kan ikke være null")
+
+    private fun FerdigbehandlingKontrollData.hentMottatteOpplysningerData() =
+        this.mottatteOpplysningerData ?: throw TekniskException("MottatteOpplysningerData kan ikke være null")
 }
