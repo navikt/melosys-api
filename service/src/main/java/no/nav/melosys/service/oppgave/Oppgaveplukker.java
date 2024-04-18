@@ -12,7 +12,6 @@ import no.nav.melosys.domain.oppgave.OppgaveTilbakelegging;
 import no.nav.melosys.integrasjon.oppgave.OppgaveFasade;
 import no.nav.melosys.repository.OppgaveTilbakeleggingRepository;
 import no.nav.melosys.service.behandling.BehandlingService;
-import no.nav.melosys.service.lovligekombinasjoner.GyldigeKombinasjoner;
 import no.nav.melosys.service.oppgave.dto.PlukkOppgaveInnDto;
 import no.nav.melosys.service.oppgave.dto.TilbakeleggingDto;
 import no.nav.melosys.service.sak.FagsakService;
@@ -70,7 +69,7 @@ public class Oppgaveplukker {
 
     public List<Oppgave> hentUtildelteOppgaver(PlukkOppgaveInnDto plukkDto) {
         List<Oppgave> utildelteOppgaver = new ArrayList<>();
-        Set<String> oppgaveBehandlingstemaSet = hentAlleOppgaveBehandlingstemaTilSøk(plukkDto.sakstype(), plukkDto.sakstema(), plukkDto.behandlingstema());
+        Set<String> oppgaveBehandlingstemaSet = hentAlleOppgaveBehandlingstemaTilSøk(plukkDto.sakstype, plukkDto.sakstema, plukkDto.behandlingstema);
         for (var oppgaveBehandlingstema : oppgaveBehandlingstemaSet) {
             utildelteOppgaver.addAll(oppgaveFasade.finnUtildelteOppgaverEtterFrist(oppgaveBehandlingstema));
         }
@@ -114,9 +113,9 @@ public class Oppgaveplukker {
     }
 
     private boolean fagsakMatcherSøk(Fagsak fagsak, PlukkOppgaveInnDto plukkDto) {
-        return fagsak != null && fagsak.getType() == plukkDto.sakstype()
-            && fagsak.getTema() == plukkDto.sakstema()
-            && fagsak.getBehandlinger().stream().anyMatch(behandling -> behandling.getTema() == plukkDto.behandlingstema());
+        return fagsak != null && fagsak.getType() == plukkDto.sakstype
+            && fagsak.getTema() == plukkDto.sakstema
+            && fagsak.getBehandlinger().stream().anyMatch(behandling -> behandling.getTema() == plukkDto.behandlingstema);
     }
 
     private boolean venterPåDokumentasjonEllerFagligAvklaring(Fagsak fagsak) {
@@ -153,7 +152,7 @@ public class Oppgaveplukker {
 
     @Transactional
     public synchronized void leggTilbakeOppgave(String saksbehandlerID, TilbakeleggingDto tilbakelegging) {
-        Behandling behandling = behandlingService.hentBehandling(tilbakelegging.getBehandlingID());
+        Behandling behandling = behandlingService.hentBehandling(tilbakelegging.behandlingID);
 
         Fagsak fagsak = behandling.getFagsak();
         Oppgave oppgave = oppgaveService.hentÅpenBehandlingsoppgaveMedFagsaksnummer(fagsak.getSaksnummer());

@@ -172,7 +172,7 @@ class OppgaveplukkerTest {
         when(oppgaveService.hentÅpenBehandlingsoppgaveMedFagsaksnummer(SAKSNUMMER_1)).thenReturn(oppgaveBuilder.build());
 
         TilbakeleggingDto tilbakelegging = new TilbakeleggingDto();
-        tilbakelegging.setBehandlingID(BEHANDLING_ID);
+        tilbakelegging.behandlingID = BEHANDLING_ID;
         tilbakelegging.setVenterPåDokumentasjon(true);
 
 

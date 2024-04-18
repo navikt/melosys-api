@@ -318,7 +318,10 @@ class OppgaveService(
         private val log = LoggerFactory.getLogger(OppgaveService::class.java)
         private const val UKJENT = "UKJENT"
         private fun mapPeriode(mottatteOpplysningerData: MottatteOpplysningerData): PeriodeDto {
-            val periode = MottatteOpplysningerUtils.hentPeriode(mottatteOpplysningerData) ?: return PeriodeDto(null, null)
+            val periode = MottatteOpplysningerUtils.hentPeriode(mottatteOpplysningerData) ?: return PeriodeDto(
+                null,
+                null
+            )
             return PeriodeDto(periode.getFom(), periode.getTom())
         }
     }

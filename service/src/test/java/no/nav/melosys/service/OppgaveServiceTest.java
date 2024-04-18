@@ -136,15 +136,15 @@ class OppgaveServiceTest {
         assertThat(mineSaker).hasSize(2);
 
         Optional<OppgaveDto> behOppgOpt = mineSaker.stream()
-            .filter(o -> o.getOppgaveID().equals(BEH_OPPG_ID))
+            .filter(o -> o.oppgaveID.equals(BEH_OPPG_ID))
             .findFirst();
 
         assertThat(behOppgOpt).isPresent().get().isInstanceOf(BehandlingsoppgaveDto.class);
-        assertThat(((BehandlingsoppgaveDto) behOppgOpt.get()).getBehandling().getBehandlingID()).isEqualTo(behandling.getId());
-        assertThat(((BehandlingsoppgaveDto) behOppgOpt.get()).getLand()).isNotNull();
+        assertThat(((BehandlingsoppgaveDto) behOppgOpt.get()).behandling.behandlingID).isEqualTo(behandling.getId());
+        assertThat(((BehandlingsoppgaveDto) behOppgOpt.get()).land).isNotNull();
 
         Optional<OppgaveDto> jfrOppgOpt = mineSaker.stream()
-            .filter(o -> o.getOppgaveID().equals(JFR_OPPG_ID))
+            .filter(o -> o.oppgaveID.equals(JFR_OPPG_ID))
             .findFirst();
 
         assertThat(jfrOppgOpt).isPresent().get().isInstanceOf(JournalfoeringsoppgaveDto.class);
@@ -167,12 +167,12 @@ class OppgaveServiceTest {
         assertThat(mineSaker).hasSize(1);
 
         Optional<OppgaveDto> behOppgOpt = mineSaker.stream()
-            .filter(o -> o.getOppgaveID().equals(BEH_OPPG_ID))
+            .filter(o -> o.oppgaveID.equals(BEH_OPPG_ID))
             .findFirst();
 
         assertThat(behOppgOpt).isPresent().get().isInstanceOf(BehandlingsoppgaveDto.class);
-        assertThat(((BehandlingsoppgaveDto) behOppgOpt.get()).getBehandling().getBehandlingID()).isEqualTo(behandling.getId());
-        assertThat(((BehandlingsoppgaveDto) behOppgOpt.get()).getLand()).isNull();
+        assertThat(((BehandlingsoppgaveDto) behOppgOpt.get()).behandling.behandlingID).isEqualTo(behandling.getId());
+        assertThat(((BehandlingsoppgaveDto) behOppgOpt.get()).land).isNull();
     }
 
     @Test
@@ -194,11 +194,11 @@ class OppgaveServiceTest {
         assertThat(mineSaker).hasSize(1);
 
         Optional<OppgaveDto> behOppgOpt = mineSaker.stream()
-            .filter(o -> o.getOppgaveID().equals(BEH_OPPG_ID))
+            .filter(o -> o.oppgaveID.equals(BEH_OPPG_ID))
             .findFirst();
 
         assertThat(behOppgOpt).isPresent().get().isInstanceOf(BehandlingsoppgaveDto.class);
-        assertThat(((BehandlingsoppgaveDto) behOppgOpt.get()).getBehandling().getBehandlingID()).isEqualTo(behandling.getId());
+        assertThat(((BehandlingsoppgaveDto) behOppgOpt.get()).behandling.behandlingID).isEqualTo(behandling.getId());
     }
 
     @Test
@@ -222,7 +222,7 @@ class OppgaveServiceTest {
 
 
         BehandlingsoppgaveDto behandlingsOppgave = (BehandlingsoppgaveDto) mineSaker.get(0);
-        assertThat(behandlingsOppgave.getSisteNotat()).isEqualTo(behandlingsnotat2.getTekst());
+        assertThat(behandlingsOppgave.sisteNotat).isEqualTo(behandlingsnotat2.getTekst());
     }
 
     @Test
@@ -246,8 +246,8 @@ class OppgaveServiceTest {
         assertThat(jfrOppgDt).isPresent();
         OppgaveDto oppgaveDto = jfrOppgDt.get();
 
-        assertThat(oppgaveDto.getHovedpartIdent()).isEqualTo("UKJENT");
-        assertThat(oppgaveDto.getNavn()).isEqualTo("UKJENT");
+        assertThat(oppgaveDto.hovedpartIdent).isEqualTo("UKJENT");
+        assertThat(oppgaveDto.navn).isEqualTo("UKJENT");
     }
 
     @Test
@@ -274,8 +274,8 @@ class OppgaveServiceTest {
         assertThat(jfrOppgDt).isPresent();
         OppgaveDto oppgaveDto = jfrOppgDt.get();
 
-        assertThat(oppgaveDto.getHovedpartIdent()).isEqualTo("fnr");
-        assertThat(oppgaveDto.getNavn()).isEqualTo("sammensatt navn");
+        assertThat(oppgaveDto.hovedpartIdent).isEqualTo("fnr");
+        assertThat(oppgaveDto.navn).isEqualTo("sammensatt navn");
     }
 
     @Test
@@ -300,8 +300,8 @@ class OppgaveServiceTest {
         assertThat(jfrOppgDt).isPresent();
         OppgaveDto oppgaveDto = jfrOppgDt.get();
 
-        assertThat(oppgaveDto.getHovedpartIdent()).isEqualTo("2222");
-        assertThat(oppgaveDto.getNavn()).isEqualTo("organisasjonsnavn");
+        assertThat(oppgaveDto.hovedpartIdent).isEqualTo("2222");
+        assertThat(oppgaveDto.navn).isEqualTo("organisasjonsnavn");
     }
 
     @Test
