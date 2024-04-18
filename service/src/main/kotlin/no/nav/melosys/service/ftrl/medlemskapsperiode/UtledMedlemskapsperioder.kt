@@ -8,7 +8,6 @@ import no.nav.melosys.domain.kodeverk.InnvilgelsesResultat
 import no.nav.melosys.domain.kodeverk.Trygdedekninger
 import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingstyper
 import no.nav.melosys.exception.FunksjonellException
-import no.nav.melosys.exception.TekniskException
 import no.nav.melosys.service.ftrl.bestemmelse.LovligeKombinasjonerTrygdedekningBestemmelse
 import org.springframework.data.util.Pair
 import java.time.LocalDate
@@ -196,7 +195,7 @@ object UtledMedlemskapsperioder {
         }
 
         val splittetPeriode = splitPeriode(søknadsperiode, dto.mottaksdatoSøknad)
-        if (dto.trygdedekning == Trygdedekninger.FTRL_2_9_FØRSTE_LEDD_C_TREDJE_LEDD_HELSE_PENSJON_YRKESSKADE || dto.trygdedekning == Trygdedekninger.FTRL_2_9_FØRSTE_LEDD_C_ANDRE_LEDD_TREDJE_LEDD_HELSE_PENSJON_SYKE_FORELDREPENGER_YRKESSKADE) {
+        if (dto.trygdedekning in listOf(Trygdedekninger.FTRL_2_9_FØRSTE_LEDD_C_TREDJE_LEDD_HELSE_PENSJON_YRKESSKADE, Trygdedekninger.FTRL_2_9_FØRSTE_LEDD_C_ANDRE_LEDD_TREDJE_LEDD_HELSE_PENSJON_SYKE_FORELDREPENGER_YRKESSKADE)) {
             return lagSplittetYrkesskadeperioder(dto, splittetPeriode)
         }
         return lagMedlemskapsperioderForPeriodeFørMottaksdato(splittetPeriode.first, dto).plus(
@@ -299,7 +298,7 @@ object UtledMedlemskapsperioder {
 
 
     private fun Trygdedekninger.harPensjonsdel(): Boolean =
-        this == Trygdedekninger.FTRL_2_9_FØRSTE_LEDD_C_HELSE_PENSJON || this == Trygdedekninger.FTRL_2_9_FØRSTE_LEDD_C_ANDRE_LEDD_HELSE_PENSJON_SYKE_FORELDREPENGER
+        this in listOf(Trygdedekninger.FTRL_2_9_FØRSTE_LEDD_C_HELSE_PENSJON, Trygdedekninger.FTRL_2_9_FØRSTE_LEDD_C_ANDRE_LEDD_HELSE_PENSJON_SYKE_FORELDREPENGER)
 
     private fun Trygdedekninger.erKunPensjonsdel(): Boolean =
         this == Trygdedekninger.FTRL_2_9_FØRSTE_LEDD_B_PENSJON
