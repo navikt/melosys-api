@@ -1,8 +1,6 @@
 package no.nav.melosys.service.oppgave
 
-import no.nav.melosys.domain.dokument.felles.KodeverkHjelper
-
-enum class OppgaveBehandlingstema(val kode: String) {
+enum class OppgaveBehandlingstema(@JvmField val kode: String) {
     EU_EOS_LAND("ab0424"),
     AVTALELAND("ab0387"),
     UTENFOR_AVTALELAND("ab0388"),

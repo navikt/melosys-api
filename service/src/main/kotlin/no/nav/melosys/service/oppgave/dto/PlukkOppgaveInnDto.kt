@@ -6,7 +6,7 @@ import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingstema
 
 @JvmRecord
 data class PlukkOppgaveInnDto(
-    @JvmField val sakstype: Sakstyper,
-    @JvmField val sakstema: Sakstemaer,
-    @JvmField val behandlingstema: Behandlingstema
+    @JvmField val sakstype: Sakstyper?,
+    @JvmField val sakstema: Sakstemaer?,
+    @JvmField val behandlingstema: Behandlingstema?
 )

@@ -150,7 +150,7 @@ class OppgaveService(
             )
         }
 
-    fun tildelOppgave(oppgaveID: String, saksbehandler: String) =
+    fun tildelOppgave(oppgaveID: String, saksbehandler: String?) =
         oppgaveFasade.oppdaterOppgave(oppgaveID, OppgaveOppdatering.builder().tilordnetRessurs(saksbehandler).build())
 
     fun opprettOppgaveForSak(saksnummer: String) {
