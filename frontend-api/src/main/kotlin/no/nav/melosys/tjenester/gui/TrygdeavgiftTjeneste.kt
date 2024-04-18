@@ -82,16 +82,8 @@ class TrygdeavgiftTjeneste(
     fun beregnTrygdeavgiftAarsavregning(@PathVariable("behandlingID") behandlingID: Long): ResponseEntity<BeregnetTrygdeavgiftDto> {
         aksesskontroll.autoriserSkrivOgTilordnet(behandlingID)
         return ResponseEntity.ok(
-            BeregnetTrygdeavgiftDto.av(trygdeavgiftsberegningService.beregnOgLagreTrygdeavgift(behandlingID))
-        )
-    }
-
-    //Hent trygdeavgift for spesifikt år
-    @GetMapping("aarsavregning")
-    fun hentDataForAarsavregning(@PathVariable("saksnummer") saksnummer: String, @PathVariable("aar") år: Int): ResponseEntity<BeregnetTrygdeavgiftDto> {
-        aksesskontroll.autoriserSakstilgang(saksnummer)
-        return ResponseEntity.ok(
-            BeregnetTrygdeavgiftDto.av(trygdeavgiftOppsummeringService.hentEksisterendeTrygdeavgiftsperioderForFagsak(saksnummer, år))
+            null
+            //BeregnetTrygdeavgiftDto.av(trygdeavgiftsberegningService.beregnOgLagreAarsavgift(behandlingID)) //TODO lag dette etter att datamodellen er klar
         )
     }
 
