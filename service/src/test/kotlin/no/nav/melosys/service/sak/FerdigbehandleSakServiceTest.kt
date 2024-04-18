@@ -40,7 +40,7 @@ class FerdigbehandleSakServiceTest {
 
     @Test
     fun ferdigbehandleSak_saksstatusOPPRETTET_lagrerKorrekt() {
-        val fagsak = Fagsak().apply { status = Saksstatuser.OPPRETTET }
+        val fagsak = lagFagsak(Saksstatuser.OPPRETTET)
         val behandling = Behandling().apply { this.fagsak = fagsak }
         fagsak.behandlinger.add(behandling)
         every { fagsakService.hentFagsak(SAKSNUMMER) } returns fagsak
@@ -56,7 +56,7 @@ class FerdigbehandleSakServiceTest {
 
     @Test
     fun ferdigbehandleSak_saksstatusAnnetEnnOPPRETTET_lagrerKorrekt() {
-        val fagsak = Fagsak().apply { status = Saksstatuser.LOVVALG_AVKLART }
+        val fagsak = lagFagsak(Saksstatuser.LOVVALG_AVKLART)
         val behandling = Behandling().apply { this.fagsak = fagsak }
         fagsak.behandlinger.add(behandling)
         every { fagsakService.hentFagsak(SAKSNUMMER) } returns fagsak
@@ -69,4 +69,10 @@ class FerdigbehandleSakServiceTest {
         verify { behandlingsresultatService.oppdaterBehandlingsresultattype(behandling.id, Behandlingsresultattyper.FERDIGBEHANDLET) }
         verify { oppgaveService.ferdigstillOppgaveMedSaksnummer(fagsak.saksnummer) }
     }
+
+    private fun lagFagsak(saksstatus: Saksstatuser): Fagsak =
+        Fagsak().apply {
+            saksnummer = SAKSNUMMER
+            status = saksstatus
+        }
 }
