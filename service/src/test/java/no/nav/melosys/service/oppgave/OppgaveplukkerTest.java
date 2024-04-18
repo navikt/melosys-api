@@ -171,9 +171,7 @@ class OppgaveplukkerTest {
         final String saksbehandlerID = "test";
         when(oppgaveService.hentÅpenBehandlingsoppgaveMedFagsaksnummer(SAKSNUMMER_1)).thenReturn(oppgaveBuilder.build());
 
-        TilbakeleggingDto tilbakelegging = new TilbakeleggingDto();
-        tilbakelegging.behandlingID = BEHANDLING_ID;
-        tilbakelegging.setVenterPåDokumentasjon(true);
+        TilbakeleggingDto tilbakelegging = new TilbakeleggingDto(BEHANDLING_ID, true);
 
 
         oppgaveplukker.leggTilbakeOppgave(saksbehandlerID, tilbakelegging);

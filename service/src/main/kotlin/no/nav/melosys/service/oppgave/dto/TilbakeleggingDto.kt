@@ -4,8 +4,8 @@ import com.fasterxml.jackson.annotation.JsonProperty
 
 data class TilbakeleggingDto (
     @JvmField
-    var behandlingID: Long? = null,
+    var behandlingID: Long,
 
     @JsonProperty("venterPaaDokumentasjon")
-    var isVenterPåDokumentasjon: Boolean = false
+    var isVenterPåDokumentasjon: Boolean
 )
