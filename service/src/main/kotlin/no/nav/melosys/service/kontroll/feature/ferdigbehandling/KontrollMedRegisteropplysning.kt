@@ -19,7 +19,7 @@ class KontrollMedRegisteropplysning(
     private val registeropplysningerService: RegisteropplysningerService,
     private val kontroll: Kontroll
 ) {
-    fun kontroller(
+    internal fun kontroller(
         behandlingId: Long,
         behandlingsresultattype: Behandlingsresultattyper?,
         kontrollerSomSkalIgnoreres: Set<Kontroll_begrunnelser>
@@ -30,7 +30,7 @@ class KontrollMedRegisteropplysning(
         return kontrollerVedtak(behandling, sakstype, behandlingsresultattype, kontrollerSomSkalIgnoreres)
     }
 
-    fun kontrollerVedtak(
+    internal fun kontrollerVedtak(
         behandling: Behandling,
         sakstype: Sakstyper,
         behandlingsresultattype: Behandlingsresultattyper?,

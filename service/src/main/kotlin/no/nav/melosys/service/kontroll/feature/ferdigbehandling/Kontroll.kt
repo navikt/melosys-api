@@ -38,7 +38,7 @@ class Kontroll(
     private val medlemskapsperiodeService: MedlemskapsperiodeService,
     private val utkastBrevService: UtkastBrevService
 ) {
-    fun kontroller(
+    internal fun kontroller(
         behandlingId: Long,
         behandlingsresultattype: Behandlingsresultattyper?,
         kontrollerSomSkalIgnoreres: Set<Kontroll_begrunnelser>
@@ -48,7 +48,7 @@ class Kontroll(
         return kontrollerVedtak(behandlingId, sakstype, behandlingsresultattype, kontrollerSomSkalIgnoreres)
     }
 
-    fun kontrollerVedtak(
+    internal fun kontrollerVedtak(
         behandlingID: Long,
         sakstype: Sakstyper,
         behandlingsresultattype: Behandlingsresultattyper?,
@@ -69,7 +69,7 @@ class Kontroll(
         return true
     }
 
-    fun utførKontroller(behandlingID: Long, sakstype: Sakstyper, behandlingsresultattype: Behandlingsresultattyper?): Collection<Kontrollfeil> {
+    private fun utførKontroller(behandlingID: Long, sakstype: Sakstyper, behandlingsresultattype: Behandlingsresultattyper?): Collection<Kontrollfeil> {
         val behandling = behandlingService.hentBehandlingMedSaksopplysninger(behandlingID)
 
         if (behandlingsresultattype in listOf(Behandlingsresultattyper.AVSLAG_MANGLENDE_OPPL, Behandlingsresultattyper.HENLEGGELSE)) {
