@@ -4,6 +4,7 @@ import io.swagger.annotations.Api
 import no.nav.melosys.service.avgift.TrygdeavgiftMottakerService
 import no.nav.melosys.service.avgift.TrygdeavgiftsberegningService
 import no.nav.melosys.service.avgift.TrygdeavgiftsgrunnlagService
+import no.nav.melosys.service.sak.TrygdeavgiftOppsummeringService
 import no.nav.melosys.service.tilgang.Aksesskontroll
 import no.nav.melosys.tjenester.gui.dto.trygdeavgift.BeregnetTrygdeavgiftDto
 import no.nav.melosys.tjenester.gui.dto.trygdeavgift.FakturamottakerDto
@@ -21,6 +22,7 @@ class TrygdeavgiftTjeneste(
     private val trygdeavgiftsgrunnlagService: TrygdeavgiftsgrunnlagService,
     private val trygdeavgiftsberegningService: TrygdeavgiftsberegningService,
     private val trygdeavgiftMottakerService: TrygdeavgiftMottakerService,
+    private val trygdeavgiftOppsummeringService: TrygdeavgiftOppsummeringService,
     private val aksesskontroll: Aksesskontroll
 ) {
 
@@ -72,6 +74,24 @@ class TrygdeavgiftTjeneste(
         aksesskontroll.autoriserSkrivOgTilordnet(behandlingID)
         return ResponseEntity.ok(
             BeregnetTrygdeavgiftDto.av(trygdeavgiftsberegningService.beregnOgLagreTrygdeavgift(behandlingID))
+        )
+    }
+
+    //Post ny verdi til årsavregning, og differansen TODO
+    @PutMapping("/aarsavregning")
+    fun beregnTrygdeavgiftAarsavregning(@PathVariable("behandlingID") behandlingID: Long): ResponseEntity<BeregnetTrygdeavgiftDto> {
+        aksesskontroll.autoriserSkrivOgTilordnet(behandlingID)
+        return ResponseEntity.ok(
+            BeregnetTrygdeavgiftDto.av(trygdeavgiftsberegningService.beregnOgLagreTrygdeavgift(behandlingID))
+        )
+    }
+
+    //Hent trygdeavgift for spesifikt år
+    @GetMapping("aarsavregning")
+    fun hentDataForAarsavregning(@PathVariable("saksnummer") saksnummer: String, @PathVariable("aar") år: Int): ResponseEntity<BeregnetTrygdeavgiftDto> {
+        aksesskontroll.autoriserSakstilgang(saksnummer)
+        return ResponseEntity.ok(
+            BeregnetTrygdeavgiftDto.av(trygdeavgiftOppsummeringService.hentEksisterendeTrygdeavgiftsperioderForFagsak(saksnummer, år))
         )
     }
 
