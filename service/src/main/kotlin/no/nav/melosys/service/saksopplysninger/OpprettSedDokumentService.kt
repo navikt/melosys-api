@@ -2,6 +2,7 @@ package no.nav.melosys.service.saksopplysninger
 
 import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule
 import com.fasterxml.jackson.module.kotlin.jacksonObjectMapper
+import io.getunleash.Unleash
 import mu.KotlinLogging
 import no.nav.melosys.domain.Behandling
 import no.nav.melosys.domain.Saksopplysning
@@ -15,6 +16,7 @@ import no.nav.melosys.domain.eessi.melding.MelosysEessiMelding
 import no.nav.melosys.domain.eessi.sed.Bestemmelse
 import no.nav.melosys.domain.kodeverk.Landkoder
 import no.nav.melosys.domain.kodeverk.LovvalgBestemmelse
+import no.nav.melosys.featuretoggle.ToggleName
 import no.nav.melosys.repository.SaksopplysningRepository
 import org.springframework.stereotype.Component
 import java.time.Instant
@@ -23,14 +25,15 @@ private val log = KotlinLogging.logger { }
 
 @Component
 class OpprettSedDokumentService(
-    private val saksopplysningRepository: SaksopplysningRepository
+    private val saksopplysningRepository: SaksopplysningRepository,
+    private val unleash: Unleash
 ) {
     private val mapper = jacksonObjectMapper().registerModule(JavaTimeModule())
 
     fun opprettSedSaksopplysning(melosysEessiMelding: MelosysEessiMelding, behandling: Behandling): Saksopplysning {
         val now = Instant.now()
         val saksopplysning = Saksopplysning().apply {
-            dokument = opprettSedDokument(melosysEessiMelding)
+            dokument = if(unleash.isEnabled(ToggleName.MELOSYS_CDM_4_3)) opprettSedDokument4_3(melosysEessiMelding) else opprettSedDokument(melosysEessiMelding)
             type = SaksopplysningType.SEDOPPL
             this.behandling = behandling
             versjon = SED_DOKUMENT_VERSJON
@@ -47,6 +50,23 @@ class OpprettSedDokumentService(
     }
 
     private fun opprettSedDokument(melosysEessiMelding: MelosysEessiMelding): SedDokument =
+        SedDokument().apply {
+            avsenderLandkode = Landkoder.valueOf(melosysEessiMelding.avsender.landkode)
+            lovvalgslandKode = Landkoder.valueOf(melosysEessiMelding.lovvalgsland)
+            lovvalgBestemmelse = Bestemmelse.fraBestemmelseString(melosysEessiMelding.artikkel).tilMelosysBestemmelse()
+            unntakFraLovvalgslandKode = hentUnntakFraLovvalgsland(melosysEessiMelding)
+            unntakFraLovvalgBestemmelse = hentUnntakFraLovvalgBestemmelse(melosysEessiMelding)
+            rinaSaksnummer = melosysEessiMelding.rinaSaksnummer
+            lovvalgsperiode = tilMedlemskapPeriode(melosysEessiMelding.periode)
+            rinaDokumentID = melosysEessiMelding.sedId
+            statsborgerskapKoder = melosysEessiMelding.statsborgerskap.map { it.landkode }
+            arbeidssteder = melosysEessiMelding.arbeidssteder
+            erEndring = melosysEessiMelding.erEndring
+            sedType = SedType.valueOf(melosysEessiMelding.sedType)
+            bucType = BucType.valueOf(melosysEessiMelding.bucType)
+        }
+
+    private fun opprettSedDokument4_3(melosysEessiMelding: MelosysEessiMelding): SedDokument =
         SedDokument().apply {
             avsenderLandkode = Landkoder.valueOf(melosysEessiMelding.avsender.landkode)
             lovvalgslandKode = Landkoder.valueOf(melosysEessiMelding.lovvalgsland)

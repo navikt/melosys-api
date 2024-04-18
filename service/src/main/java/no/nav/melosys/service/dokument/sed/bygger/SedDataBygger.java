@@ -4,6 +4,7 @@ import java.time.ZoneId;
 import java.util.*;
 import java.util.stream.Collectors;
 
+import io.getunleash.Unleash;
 import no.nav.melosys.domain.*;
 import no.nav.melosys.domain.adresse.StrukturertAdresse;
 import no.nav.melosys.domain.avklartefakta.AvklartVirksomhet;
@@ -17,6 +18,7 @@ import no.nav.melosys.domain.person.Persondata;
 import no.nav.melosys.domain.person.familie.Familiemedlem;
 import no.nav.melosys.domain.person.familie.Familierelasjon;
 import no.nav.melosys.exception.FunksjonellException;
+import no.nav.melosys.featuretoggle.ToggleName;
 import no.nav.melosys.service.LandvelgerService;
 import no.nav.melosys.service.LovvalgsperiodeService;
 import no.nav.melosys.service.behandling.BehandlingsresultatService;
@@ -43,12 +45,15 @@ public class SedDataBygger {
     private final LovvalgsperiodeService lovvalgsperiodeService;
     private final SaksbehandlingRegler saksbehandlingRegler;
 
+    private final Unleash unleash;
+
     public SedDataBygger(BehandlingsresultatService behandlingsresultatService, LandvelgerService landvelgerService,
-                         LovvalgsperiodeService lovvalgsperiodeService, SaksbehandlingRegler saksbehandlingRegler) {
+                         LovvalgsperiodeService lovvalgsperiodeService, SaksbehandlingRegler saksbehandlingRegler, Unleash unleash) {
         this.behandlingsresultatService = behandlingsresultatService;
         this.landvelgerService = landvelgerService;
         this.lovvalgsperiodeService = lovvalgsperiodeService;
         this.saksbehandlingRegler = saksbehandlingRegler;
+        this.unleash = unleash;
     }
 
     public SedDataDto lag(SedDataGrunnlag dataGrunnlag,
@@ -106,9 +111,13 @@ public class SedDataBygger {
         sedDataDto.setArbeidsgivendeVirksomheter(lagArbeidsgivendeVirksomheter(grunnlagMedSøknad));
         sedDataDto.setSelvstendigeVirksomheter(lagSelvstendigeVirksomheter(grunnlagMedSøknad));
         sedDataDto.setArbeidssteder(hentArbeidssteder(grunnlagMedSøknad));
-        sedDataDto.setArbeidsland(hentArbeidsland(grunnlagMedSøknad));
-        var harfastarbeidssted = grunnlagMedSøknad.getMottatteOpplysningerData().arbeidPaaLand.getErFastArbeidssted();
-        sedDataDto.setHarfastarbeidssted(harfastarbeidssted != null ? harfastarbeidssted : false);
+
+        if(unleash.isEnabled(ToggleName.MELOSYS_CDM_4_3)) {
+            sedDataDto.setArbeidsland(hentArbeidsland(grunnlagMedSøknad));
+            var harfastarbeidssted = grunnlagMedSøknad.getMottatteOpplysningerData().arbeidPaaLand.getErFastArbeidssted();
+            sedDataDto.setHarfastarbeidssted(harfastarbeidssted != null ? harfastarbeidssted : false);
+        }
+
         sedDataDto.setAvklartBostedsland(
             landvelgerService.hentBostedsland(grunnlagMedSøknad.getBehandling().getId(), grunnlagMedSøknad.getMottatteOpplysningerData()).landkode()
         );
