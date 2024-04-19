@@ -2,7 +2,7 @@ package no.nav.melosys.service.oppgave;
 
 
 import java.util.*;
-import javax.annotation.Nullable;
+import jakarta.annotation.Nullable;
 
 import no.nav.melosys.domain.Behandling;
 import no.nav.melosys.domain.Fagsak;

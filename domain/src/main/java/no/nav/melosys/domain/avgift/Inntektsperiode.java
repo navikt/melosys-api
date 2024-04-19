@@ -1,17 +1,15 @@
 package no.nav.melosys.domain.avgift;
 
-import no.nav.melosys.domain.kodeverk.Inntektskildetype;
-import org.hibernate.annotations.Columns;
-import org.hibernate.annotations.Parameter;
-import org.hibernate.annotations.Type;
-
-import javax.persistence.*;
 import java.time.LocalDate;
 import java.util.Objects;
+
+import jakarta.persistence.*;
+import no.nav.melosys.domain.kodeverk.Inntektskildetype;
 
 @Entity
 @Table(name = "inntektsperiode")
 public class Inntektsperiode {
+
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
@@ -30,12 +28,11 @@ public class Inntektsperiode {
     @Enumerated(EnumType.STRING)
     private Inntektskildetype type;
 
-    @Columns(columns = {
-        @Column(name = "avgiftspliktig_inntekt_mnd_verdi"),
-        @Column(name = "avgiftspliktig_inntekt_mnd_valuta")})
-    @Type(type = "no.nav.melosys.domain.avgift.PengerType", parameters = {
-        @Parameter(name = "verdiPropertyName", value = "avgiftspliktig_inntekt_mnd_verdi"),
-        @Parameter(name = "valutaPropertyName", value = "avgiftspliktig_inntekt_mnd_valuta")})
+    @Embedded
+    @AttributeOverrides({
+        @AttributeOverride(name = "verdi", column = @Column(name = "avgiftspliktig_inntekt_mnd_verdi")),
+        @AttributeOverride(name = "valuta", column = @Column(name = "avgiftspliktig_inntekt_mnd_valuta"))
+    })
     private Penger avgiftspliktigInntektMnd;
 
     @Column(name = "aga_betales_til_skatt")

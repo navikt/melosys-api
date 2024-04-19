@@ -40,7 +40,6 @@ import no.nav.melosys.integrasjon.kodeverk.KodeverkRegister;
 import no.nav.melosys.repository.AvklarteFaktaRepository;
 import no.nav.melosys.repository.BehandlingsresultatRepository;
 import no.nav.melosys.repository.UtenlandskMyndighetRepository;
-import no.nav.melosys.repository.VilkaarsresultatRepository;
 import no.nav.melosys.service.LandvelgerService;
 import no.nav.melosys.service.LovvalgsperiodeService;
 import no.nav.melosys.service.aktoer.KontaktopplysningService;
@@ -65,7 +64,7 @@ import no.nav.melosys.service.registeropplysninger.OrganisasjonOppslagService;
 import no.nav.melosys.service.saksopplysninger.SaksopplysningerService;
 import no.nav.melosys.service.unntak.AnmodningsperiodeService;
 import no.nav.melosys.service.utpeking.UtpekingService;
-import no.nav.melosys.service.vilkaar.VilkaarsresultatService;
+import no.nav.melosys.service.behandling.VilkaarsresultatService;
 import no.nav.melosys.sikkerhet.context.SpringSubjectHandler;
 import no.nav.melosys.sikkerhet.context.TestSubjectHandler;
 import org.junit.jupiter.api.BeforeEach;
@@ -332,7 +331,6 @@ final class DokumentServiceTest {
         AnmodningsperiodeService anmodningsperiodeService = mock(AnmodningsperiodeService.class);
         MottatteOpplysningerService mottatteOpplysningerService = mock(MottatteOpplysningerService.class);
         BehandlingsresultatService behandlingsresultatService = mock(BehandlingsresultatService.class);
-        VilkaarsresultatRepository vilkaarsresultatRepository = mock(VilkaarsresultatRepository.class);
         LandvelgerService landvelgerService = new LandvelgerService(avklartefaktaService, behandlingsresultatService,
             mottatteOpplysningerService);
         LovvalgsperiodeService lovvalgsperiodeService = mock(LovvalgsperiodeService.class);
@@ -343,7 +341,7 @@ final class DokumentServiceTest {
         PersondataFasade persondataFasade = mock(PersondataFasade.class);
         return new BrevDataByggerVelger(anmodningsperiodeService, avklartefaktaService,
             landvelgerService, lovvalgsperiodeService, saksopplysningerService, utenlandskMyndighetService,
-            utpekingService, vilkaarsresultatRepository, vilkaarsresultatService, persondataFasade, mottatteOpplysningerService);
+            utpekingService, vilkaarsresultatService, persondataFasade, mottatteOpplysningerService);
     }
 
     private BrevDataByggerVelger lagBrevdatabyggerVelgerMock() {

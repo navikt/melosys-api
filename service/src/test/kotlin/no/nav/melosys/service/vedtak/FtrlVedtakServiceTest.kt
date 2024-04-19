@@ -31,7 +31,7 @@ import no.nav.melosys.service.dokument.DokgenService
 import no.nav.melosys.service.dokument.brev.BrevbestillingDto
 import no.nav.melosys.service.dokument.brev.KopiMottakerDto
 import no.nav.melosys.service.oppgave.OppgaveService
-import no.nav.melosys.service.vilkaar.VilkaarsresultatService
+import no.nav.melosys.service.behandling.VilkaarsresultatService
 import no.nav.melosys.sikkerhet.context.SpringSubjectHandler
 import no.nav.melosys.sikkerhet.context.SubjectHandler
 import no.nav.melosys.sikkerhet.context.TestSubjectHandler
@@ -272,7 +272,7 @@ class FtrlVedtakServiceTest {
         verify { prosessinstansService.opprettProsessinstansIverksettVedtakFTRL(any(), request.tilVedtakRequest(), Saksstatuser.LOVVALG_AVKLART) }
         verify { oppgaveService.ferdigstillOppgaveMedSaksnummer(SAKSNUMMER) }
         verify { dokgenService.produserOgDistribuerBrev(BEH_ID, capture(brevbestillingRequestSlot)) }
-        verify(exactly = 0) { vilkaarsresultatService.tømVilkårForBehandlingsresultat(any()) }
+        verify(exactly = 0) { vilkaarsresultatService.tømVilkårsresultatFraBehandlingsresultat(any()) }
 
         behandlingsresultatSlot.captured.shouldNotBeNull().run {
             type.shouldBe(Behandlingsresultattyper.DELVIS_OPPHØRT)
@@ -337,7 +337,7 @@ class FtrlVedtakServiceTest {
         verify { prosessinstansService.opprettProsessinstansIverksettVedtakFTRL(any(), request.tilVedtakRequest(), Saksstatuser.OPPHØRT) }
         verify { oppgaveService.ferdigstillOppgaveMedSaksnummer(SAKSNUMMER) }
         verify { dokgenService.produserOgDistribuerBrev(BEH_ID, capture(brevbestillingRequestSlot)) }
-        verify { vilkaarsresultatService.tømVilkårForBehandlingsresultat(any()) }
+        verify { vilkaarsresultatService.tømVilkårsresultatFraBehandlingsresultat(BEH_ID) }
 
         behandlingsresultatSlot.captured.shouldNotBeNull().run {
             type.shouldBe(Behandlingsresultattyper.OPPHØRT)

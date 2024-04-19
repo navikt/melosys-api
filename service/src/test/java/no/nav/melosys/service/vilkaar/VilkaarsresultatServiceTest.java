@@ -10,8 +10,8 @@ import no.nav.melosys.domain.kodeverk.begrunnelser.Art12_1_begrunnelser;
 import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingstema;
 import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingstyper;
 import no.nav.melosys.exception.FunksjonellException;
-import no.nav.melosys.repository.VilkaarsresultatRepository;
-import no.nav.melosys.service.behandling.BehandlingsresultatService;
+import no.nav.melosys.repository.BehandlingsresultatRepository;
+import no.nav.melosys.service.behandling.VilkaarsresultatService;
 import no.nav.melosys.service.saksbehandling.SaksbehandlingRegler;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -28,17 +28,15 @@ import static org.mockito.Mockito.when;
 @ExtendWith(MockitoExtension.class)
 class VilkaarsresultatServiceTest {
     @Mock
-    private BehandlingsresultatService behandlingsresultatService;
-    @Mock
-    private VilkaarsresultatRepository vilkaarsresultatRepo;
-    @Mock
     private SaksbehandlingRegler saksbehandlingRegler;
+    @Mock
+    private BehandlingsresultatRepository behandlingsresultatRepo;
 
     private VilkaarsresultatService vilkaarsresultatService;
 
     @BeforeEach
     public void setUp() {
-        vilkaarsresultatService = new VilkaarsresultatService(behandlingsresultatService, vilkaarsresultatRepo, saksbehandlingRegler);
+        vilkaarsresultatService = new VilkaarsresultatService(behandlingsresultatRepo, saksbehandlingRegler);
     }
 
     @Test
@@ -52,8 +50,9 @@ class VilkaarsresultatServiceTest {
         Set<VilkaarBegrunnelse> beggrunnelser = new HashSet<>();
         vilkaarsresultat.setBegrunnelser(beggrunnelser);
         vilkaarsresultatListe.add(vilkaarsresultat);
-
-        when(vilkaarsresultatRepo.findByBehandlingsresultatId(behandlingID)).thenReturn(vilkaarsresultatListe);
+        Behandlingsresultat behandlingsresultat = opprettBehandlingsresultatMedBehandling();
+        behandlingsresultat.setVilkaarsresultater(new HashSet<>(vilkaarsresultatListe));
+        when(behandlingsresultatRepo.findById(behandlingID)).thenReturn(Optional.of(behandlingsresultat));
 
 
         List<VilkaarDto> vilkaarDtoListe = vilkaarsresultatService.hentVilkaar(behandlingID);
@@ -67,7 +66,7 @@ class VilkaarsresultatServiceTest {
     void registrerVilkår() {
         long behandlingID = 1L;
         Behandlingsresultat behandlingsresultat = opprettBehandlingsresultatMedBehandling();
-        when(behandlingsresultatService.hentBehandlingsresultat(behandlingID)).thenReturn(behandlingsresultat);
+        when(behandlingsresultatRepo.findById(behandlingID)).thenReturn(Optional.of(behandlingsresultat));
 
         VilkaarDto vilkaarDto = new VilkaarDto();
         vilkaarDto.setVilkaar(Vilkaar.FO_883_2004_ART12_1.getKode());
@@ -78,14 +77,29 @@ class VilkaarsresultatServiceTest {
 
         vilkaarsresultatService.registrerVilkår(behandlingID, Collections.singletonList(vilkaarDto));
 
-
-        verify(vilkaarsresultatRepo).deleteByBehandlingsresultatId(behandlingsresultat.getId());
-        verify(vilkaarsresultatRepo).flush();
-        verify(vilkaarsresultatRepo).save(any(Vilkaarsresultat.class));
+        verify(behandlingsresultatRepo).save(behandlingsresultat);
+        assertThat(behandlingsresultat.getVilkaarsresultater()).hasSize(1);
+        Vilkaarsresultat vilkaarsresultat = behandlingsresultat.getVilkaarsresultater().iterator().next();
+        assertThat(vilkaarsresultat.getVilkaar()).isEqualTo(Vilkaar.FO_883_2004_ART12_1);
+        assertThat(vilkaarsresultat.getBegrunnelser()).hasSize(1);
+        assertThat(vilkaarsresultat.getBegrunnelser().iterator().next().getKode()).isEqualTo(Art12_1_begrunnelser.ERSTATTER_ANNEN.getKode());
     }
 
+
     @Test
-    void tømVilkårForBehandlingsresultat_sakstypeIkkeEøs_sletterAlleVilkår() {
+    void registrer_inngangsvilkår_feiler() {
+        VilkaarDto vilkaarDto = new VilkaarDto();
+        vilkaarDto.setVilkaar(Vilkaar.FO_883_2004_INNGANGSVILKAAR.getKode());
+
+
+        assertThatExceptionOfType(FunksjonellException.class)
+            .isThrownBy(() -> vilkaarsresultatService.registrerVilkår(1L, Collections.singletonList(vilkaarDto)))
+            .withMessageContaining("Kan ikke endre vilkår " + Vilkaar.FO_883_2004_INNGANGSVILKAAR);
+    }
+
+
+    @Test
+    void tømVilkårsresultatFraBehandlingsresultat_sakstypeIkkeEøs_sletterAlleVilkår() {
         long behandlingID = 1L;
         var fagsak = new Fagsak();
         fagsak.setType(Sakstyper.FTRL);
@@ -93,38 +107,42 @@ class VilkaarsresultatServiceTest {
         behandlingsresultat.setId(behandlingID);
         behandlingsresultat.setBehandling(new Behandling());
         behandlingsresultat.getBehandling().setFagsak(fagsak);
+        Vilkaarsresultat vilkaarsresultat = new Vilkaarsresultat();
+        vilkaarsresultat.setId(1L);
+        behandlingsresultat.setVilkaarsresultater(new HashSet<>(Collections.singleton(vilkaarsresultat)));
+        when(behandlingsresultatRepo.findById(behandlingID)).thenReturn(Optional.of(behandlingsresultat));
 
+        vilkaarsresultatService.tømVilkårsresultatFraBehandlingsresultat(behandlingID);
 
-        vilkaarsresultatService.tømVilkårForBehandlingsresultat(behandlingsresultat);
-
-
-        verify(vilkaarsresultatRepo).deleteByBehandlingsresultatId(behandlingID);
+        verify(behandlingsresultatRepo).saveAndFlush(behandlingsresultat);
+        assertThat(behandlingsresultat.getVilkaarsresultater()).isEmpty();
     }
 
     @Test
-    void tømVilkårForBehandlingsresultat_sakstypeEøsMenIngenFlyt_sletterAlleVilkår() {
+    void tømVilkårsresultatFraBehandlingsresultat_sakstypeEøsMenIngenFlyt_sletterAlleVilkår() {
         long behandlingID = 1L;
         var fagsak = new Fagsak();
         fagsak.setType(Sakstyper.EU_EOS);
-        fagsak.setTema(Sakstemaer.MEDLEMSKAP_LOVVALG);
-        var behandling = new Behandling();
+        Behandling behandling = new Behandling();
+        behandling.setId(behandlingID);
         behandling.setFagsak(fagsak);
         behandling.setTema(Behandlingstema.UTSENDT_ARBEIDSTAKER);
         behandling.setType(Behandlingstyper.HENVENDELSE);
         Behandlingsresultat behandlingsresultat = new Behandlingsresultat();
         behandlingsresultat.setId(behandlingID);
-        behandlingsresultat.setBehandling(behandling);
+        behandlingsresultat.setBehandling(new Behandling());
+        behandlingsresultat.getBehandling().setFagsak(fagsak);
         when(saksbehandlingRegler.harIngenFlyt(any())).thenReturn(true);
+        when(behandlingsresultatRepo.findById(behandlingID)).thenReturn(Optional.of(behandlingsresultat));
 
+        vilkaarsresultatService.tømVilkårsresultatFraBehandlingsresultat(behandlingID);
 
-        vilkaarsresultatService.tømVilkårForBehandlingsresultat(behandlingsresultat);
-
-
-        verify(vilkaarsresultatRepo).deleteByBehandlingsresultatId(behandlingID);
+        verify(behandlingsresultatRepo).saveAndFlush(behandlingsresultat);
+        assertThat(behandlingsresultat.getVilkaarsresultater()).isEmpty();
     }
 
     @Test
-    void tømVilkårForBehandlingsresultat_sakstypeEøs_sletterIkkeInngangsvilkår() {
+    void tømVilkårsresultatFraBehandlingsresultat_sakstypeEøsOgHarFlyt_sletterIkkeInngangsvilkår() {
         long behandlingID = 1L;
         var fagsak = new Fagsak();
         fagsak.setType(Sakstyper.EU_EOS);
@@ -137,24 +155,22 @@ class VilkaarsresultatServiceTest {
         behandlingsresultat.setId(behandlingID);
         behandlingsresultat.setBehandling(behandling);
 
-
-        vilkaarsresultatService.tømVilkårForBehandlingsresultat(behandlingsresultat);
-
-
-        verify(vilkaarsresultatRepo).deleteByBehandlingsresultatAndVilkaarNotIn(
-            behandlingsresultat,
-            Collections.singleton(Vilkaar.FO_883_2004_INNGANGSVILKAAR));
-    }
-
-    @Test
-    void registrer_inngangsvilkår_feiler() {
-        VilkaarDto vilkaarDto = new VilkaarDto();
-        vilkaarDto.setVilkaar(Vilkaar.FO_883_2004_INNGANGSVILKAAR.getKode());
+        Vilkaarsresultat vilkaarsresultat = new Vilkaarsresultat();
+        vilkaarsresultat.setId(1L);
+        vilkaarsresultat.setVilkaar(Vilkaar.FO_883_2004_INNGANGSVILKAAR);
+        Vilkaarsresultat vilkaarsresultatSomSkalSlettes = new Vilkaarsresultat();
+        vilkaarsresultatSomSkalSlettes.setId(2L);
+        vilkaarsresultatSomSkalSlettes.setVilkaar(Vilkaar.FO_883_2004_ART12_1);
+        behandlingsresultat.setVilkaarsresultater(new HashSet<>(Set.of(vilkaarsresultat, vilkaarsresultatSomSkalSlettes)));
+        when(saksbehandlingRegler.harIngenFlyt(behandling)).thenReturn(false);
+        when(behandlingsresultatRepo.findById(behandlingID)).thenReturn(Optional.of(behandlingsresultat));
 
 
-        assertThatExceptionOfType(FunksjonellException.class)
-            .isThrownBy(() -> vilkaarsresultatService.registrerVilkår(1L, Collections.singletonList(vilkaarDto)))
-            .withMessageContaining("Kan ikke endre vilkår " + Vilkaar.FO_883_2004_INNGANGSVILKAAR);
+        vilkaarsresultatService.tømVilkårsresultatFraBehandlingsresultat(behandlingID);
+
+
+        verify(behandlingsresultatRepo).saveAndFlush(behandlingsresultat);
+        assertThat(behandlingsresultat.getVilkaarsresultater()).containsExactly(vilkaarsresultat);
     }
 
     private Behandlingsresultat opprettBehandlingsresultatMedBehandling() {

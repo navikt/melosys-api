@@ -12,7 +12,7 @@ import java.time.Instant;
 import java.util.HashMap;
 import java.util.Map;
 import javax.xml.XMLConstants;
-import javax.xml.bind.helpers.DefaultValidationEventHandler;
+import jakarta.xml.bind.helpers.DefaultValidationEventHandler;
 import javax.xml.transform.*;
 import javax.xml.transform.stream.StreamResult;
 import javax.xml.transform.stream.StreamSource;

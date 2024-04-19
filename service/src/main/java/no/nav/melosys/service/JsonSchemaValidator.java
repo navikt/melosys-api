@@ -2,7 +2,7 @@ package no.nav.melosys.service;
 
 import java.io.InputStream;
 import java.net.URI;
-import javax.validation.ValidationException;
+import jakarta.validation.ValidationException;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.JsonNode;

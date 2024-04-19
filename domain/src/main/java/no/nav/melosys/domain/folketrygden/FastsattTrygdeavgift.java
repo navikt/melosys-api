@@ -2,8 +2,8 @@ package no.nav.melosys.domain.folketrygden;
 
 import java.util.HashSet;
 import java.util.Set;
-import javax.persistence.*;
 
+import jakarta.persistence.*;
 import no.nav.melosys.domain.avgift.Trygdeavgiftsgrunnlag;
 import no.nav.melosys.domain.avgift.Trygdeavgiftsperiode;
 import no.nav.melosys.domain.kodeverk.Trygdeavgift_typer;
@@ -11,6 +11,7 @@ import no.nav.melosys.domain.kodeverk.Trygdeavgift_typer;
 @Entity
 @Table(name = "fastsatt_trygdeavgift")
 public class FastsattTrygdeavgift {
+
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
@@ -26,7 +27,7 @@ public class FastsattTrygdeavgift {
     @OneToOne(mappedBy = "fastsattTrygdeavgift", cascade = CascadeType.ALL, fetch = FetchType.EAGER, orphanRemoval = true)
     private Trygdeavgiftsgrunnlag trygdeavgiftsgrunnlag;
 
-    @OneToMany(mappedBy = "fastsattTrygdeavgift", orphanRemoval = true, fetch = FetchType.EAGER, cascade = CascadeType.ALL)
+    @OneToMany(mappedBy = "fastsattTrygdeavgift", cascade = CascadeType.ALL, fetch = FetchType.EAGER, orphanRemoval = true)
     private Set<Trygdeavgiftsperiode> trygdeavgiftsperioder = new HashSet<>(1);
 
     public Long getId() {

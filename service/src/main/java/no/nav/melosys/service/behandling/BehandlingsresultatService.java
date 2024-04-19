@@ -13,43 +13,43 @@ import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingsresultattyper;
 import no.nav.melosys.exception.FunksjonellException;
 import no.nav.melosys.exception.IkkeFunnetException;
 import no.nav.melosys.repository.BehandlingsresultatRepository;
-import no.nav.melosys.service.vilkaar.VilkaarsresultatService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.context.annotation.Lazy;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 @Service
 public class BehandlingsresultatService {
     private static final Logger log = LoggerFactory.getLogger(BehandlingsresultatService.class);
-    private static final String KAN_IKKE_FINNE_BEHANDLINGSRESULTAT = "Kan ikke finne behandlingsresultat for behandling: ";
+    //TODO: Ha generisk toppklasse?
+    public static final String KAN_IKKE_FINNE_BEHANDLINGSRESULTAT = "Kan ikke finne behandlingsresultat for behandling: ";
 
     private final BehandlingsresultatRepository behandlingsresultatRepository;
     private final VilkaarsresultatService vilkaarsresultatService;
 
     public BehandlingsresultatService(BehandlingsresultatRepository behandlingsresultatRepository,
-                                      @Lazy VilkaarsresultatService vilkaarsresultatService) {
+                                      VilkaarsresultatService vilkaarsresultatService) {
         this.behandlingsresultatRepository = behandlingsresultatRepository;
         this.vilkaarsresultatService = vilkaarsresultatService;
     }
 
     @Transactional
-    public void tømBehandlingsresultat(long behandlingsid) {
-        Behandlingsresultat behandlingsresultat = behandlingsresultatRepository.findById(behandlingsid).orElse(null);
-        if (behandlingsresultat != null) {
-            log.info("Fjerner avklarte fakta, lovvalgsperioder, medlemAvFolketrygden og vilkårsresultater fra behandlingsresultat med behandlingsid: {} ", behandlingsid);
-            behandlingsresultat.getAvklartefakta().clear();
-            behandlingsresultat.getLovvalgsperioder().clear();
-            behandlingsresultat.setMedlemAvFolketrygden(null);
-            behandlingsresultat.setUtfallRegistreringUnntak(null);
-            behandlingsresultat.setBegrunnelseFritekst(null);
-            behandlingsresultat.setInnledningFritekst(null);
-            behandlingsresultat.setNyVurderingBakgrunn(null);
-            behandlingsresultat.setTrygdeavgiftFritekst(null);
-            vilkaarsresultatService.tømVilkårForBehandlingsresultat(behandlingsresultat);
-            behandlingsresultatRepository.save(behandlingsresultat);
-        }
+    public void tømBehandlingsresultat(long behandlingID) {
+        Behandlingsresultat behandlingsresultat = behandlingsresultatRepository.findById(behandlingID)
+            .orElseThrow(() -> new IkkeFunnetException(KAN_IKKE_FINNE_BEHANDLINGSRESULTAT + behandlingID));
+
+        log.info("Fjerner avklarte fakta, lovvalgsperioder, medlemAvFolketrygden og vilkårsresultater fra behandlingsresultat med behandlingID: {} ", behandlingID);
+        behandlingsresultat.getAvklartefakta().clear();
+        behandlingsresultat.getLovvalgsperioder().clear();
+        fjernMedlemAvFolketrygdenHvisDenFinnes(behandlingsresultat);
+        behandlingsresultat.setMedlemAvFolketrygden(null);
+        behandlingsresultat.setUtfallRegistreringUnntak(null);
+        behandlingsresultat.setBegrunnelseFritekst(null);
+        behandlingsresultat.setInnledningFritekst(null);
+        behandlingsresultat.setNyVurderingBakgrunn(null);
+        behandlingsresultat.setTrygdeavgiftFritekst(null);
+        vilkaarsresultatService.tømVilkårsresultatFraBehandlingsresultat(behandlingID);
+        behandlingsresultatRepository.save(behandlingsresultat);
     }
 
     public Behandlingsresultat hentBehandlingsresultat(long behandlingsid) {
@@ -79,6 +79,10 @@ public class BehandlingsresultatService {
     public Behandlingsresultat hentBehandlingsresultatMedAvklartefakta(long behandlingsid) {
         return behandlingsresultatRepository.findWithAvklartefaktaById(behandlingsid)
             .orElseThrow(() -> new IkkeFunnetException(KAN_IKKE_FINNE_BEHANDLINGSRESULTAT + behandlingsid));
+    }
+
+    public Behandlingsresultat lagreOgFlush(Behandlingsresultat resultat) {
+        return behandlingsresultatRepository.saveAndFlush(resultat);
     }
 
     public Behandlingsresultat lagre(Behandlingsresultat resultat) {
@@ -167,5 +171,12 @@ public class BehandlingsresultatService {
         behandlingsresultat.setNyVurderingBakgrunn(nyVurderingBakgrunn);
 
         return behandlingsresultatRepository.save(behandlingsresultat);
+    }
+
+    private void fjernMedlemAvFolketrygdenHvisDenFinnes(Behandlingsresultat behandlingsresultat) {
+        if (behandlingsresultat.getMedlemAvFolketrygden() != null && behandlingsresultat.getMedlemAvFolketrygden().getFastsattTrygdeavgift() != null) {
+            behandlingsresultat.getMedlemAvFolketrygden().getFastsattTrygdeavgift().getTrygdeavgiftsperioder().clear();
+            behandlingsresultatRepository.saveAndFlush(behandlingsresultat);
+        }
     }
 }

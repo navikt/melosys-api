@@ -1,7 +1,7 @@
 package no.nav.melosys.integrasjon.felles;
 
 import java.io.IOException;
-import javax.annotation.Nonnull;
+import jakarta.annotation.Nonnull;
 
 import no.nav.melosys.integrasjon.reststs.RestSTSService;
 import org.springframework.http.HttpHeaders;

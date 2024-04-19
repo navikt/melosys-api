@@ -4,7 +4,7 @@ import java.time.LocalDate;
 import java.util.*;
 import java.util.function.Function;
 import java.util.stream.Collectors;
-import javax.annotation.Nullable;
+import jakarta.annotation.Nullable;
 
 import io.getunleash.Unleash;
 import no.nav.melosys.domain.Behandling;

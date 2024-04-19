@@ -14,7 +14,6 @@ import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingsresultattyper;
 import no.nav.melosys.exception.FunksjonellException;
 import no.nav.melosys.exception.IkkeFunnetException;
 import no.nav.melosys.repository.BehandlingsresultatRepository;
-import no.nav.melosys.service.vilkaar.VilkaarsresultatService;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -35,10 +34,12 @@ class BehandlingsresultatServiceTest {
 
     @Mock
     private BehandlingsresultatRepository behandlingsresultatRepo;
+
+    @Mock
+    private BehandlingsresultatService behandlingsresultatService;
+
     @Mock
     private VilkaarsresultatService vilkaarsresultatService;
-
-    private BehandlingsresultatService behandlingsresultatService;
 
     @BeforeEach
     public void setUp() {
@@ -47,7 +48,9 @@ class BehandlingsresultatServiceTest {
 
     @Test
     void tømBehandlingsresultat() {
+        long behandlingID = 1L;
         Behandlingsresultat behandlingsresultat = new Behandlingsresultat();
+        behandlingsresultat.setId(behandlingID);
         behandlingsresultat.setAvklartefakta(new HashSet<>(Collections.singletonList(new Avklartefakta())));
         behandlingsresultat.setLovvalgsperioder(new HashSet<>(Collections.singletonList(new Lovvalgsperiode())));
         behandlingsresultat.setVilkaarsresultater(new HashSet<>(Collections.singleton(new Vilkaarsresultat())));
@@ -57,6 +60,11 @@ class BehandlingsresultatServiceTest {
         behandlingsresultat.setBegrunnelseFritekst("Begrunnelse fritekst");
         behandlingsresultat.setNyVurderingBakgrunn("ny vurdering bakgrunn");
         behandlingsresultat.setTrygdeavgiftFritekst("trygdeavgift fritekst");
+        Fagsak fagsak = new Fagsak();
+        Behandling behandling = new Behandling();
+        behandling.setFagsak(fagsak);
+        behandling.setId(behandlingID);
+        behandlingsresultat.setBehandling(behandling);
 
         when(behandlingsresultatRepo.findById(anyLong())).thenReturn(Optional.of(behandlingsresultat));
 
@@ -72,7 +80,7 @@ class BehandlingsresultatServiceTest {
         assertThat(behandlingsresultat.getBegrunnelseFritekst()).isNull();
         assertThat(behandlingsresultat.getNyVurderingBakgrunn()).isNull();
         assertThat(behandlingsresultat.getTrygdeavgiftFritekst()).isNull();
-        verify(vilkaarsresultatService).tømVilkårForBehandlingsresultat(behandlingsresultat);
+        verify(vilkaarsresultatService).tømVilkårsresultatFraBehandlingsresultat(behandlingsresultat.getId());
     }
 
     @Test

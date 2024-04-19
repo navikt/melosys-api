@@ -240,7 +240,7 @@ public class DoksysService implements DoksysFasade {
             postadresse.getHusnummerEtasjeLeilighet()));
         utenlandskPostadresse.setAdresselinje3(postadresse.getRegion());
         utenlandskPostadresse.setAdresselinje2(sammenslå(postadresse.getPostnummer(), postadresse.getPoststed()));
-        utenlandskPostadresse.setLand(new Landkoder().withValue(postadresse.getLandkode()));
+        utenlandskPostadresse.setLand(new Landkoder().useValue(postadresse.getLandkode()));
         return utenlandskPostadresse;
     }
 

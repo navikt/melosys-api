@@ -2,7 +2,7 @@ package no.nav.melosys.saksflytapi.domain;
 
 import java.time.LocalDateTime;
 import java.util.Objects;
-import javax.persistence.*;
+import jakarta.persistence.*;
 
 
 @Entity

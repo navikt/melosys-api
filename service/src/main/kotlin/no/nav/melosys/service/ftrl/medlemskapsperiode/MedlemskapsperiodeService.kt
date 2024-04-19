@@ -110,7 +110,7 @@ class MedlemskapsperiodeService(
         }
 
         fjernTrygdeavgiftsperioderOmDeFinnes(medlemAvFolketrygden)
-        return medlemskapsperiodeRepository.save(medlemskapsperiode)
+        return medlemskapsperiodeRepository.saveAndFlush(medlemskapsperiode)
     }
 
     private fun fjernTrygdeavgiftsperioderOmDeFinnes(medlemAvFolketrygden: MedlemAvFolketrygden) =

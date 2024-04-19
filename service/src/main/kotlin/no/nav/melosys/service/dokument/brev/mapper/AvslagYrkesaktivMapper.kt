@@ -17,7 +17,7 @@ import no.nav.melosys.service.dokument.brev.BrevData
 import no.nav.melosys.service.dokument.brev.BrevDataAvslagYrkesaktiv
 import no.nav.melosys.service.dokument.brev.mapper.felles.BrevMapperUtils.convertToXMLGregorianCalendarRemoveTimezone
 import no.nav.melosys.service.dokument.brev.mapper.felles.VilkaarbegrunnelseFactory.*
-import javax.xml.bind.JAXBElement
+import jakarta.xml.bind.JAXBElement
 
 
 open class AvslagYrkesaktivMapper : BrevDataMapper {
@@ -101,10 +101,10 @@ open class AvslagYrkesaktivMapper : BrevDataMapper {
     }
 
     private fun lagTomArt161AvslagBegrunnelse(): Art161AvslagBegrunnelse =
-        Art161AvslagBegrunnelse.builder().withIngenSpesielleForhold("")
+        Art161AvslagBegrunnelse().withIngenSpesielleForhold("")
             .withOver5Aar("")
             .withSaerligAvslagsgrunn("")
-            .withSoektForSent("").build()
+            .withSoektForSent("")
 
     private fun validerFritekstbegrunnelse(begrunnelse: String?): String {
         if (!begrunnelse.isNullOrEmpty()) {

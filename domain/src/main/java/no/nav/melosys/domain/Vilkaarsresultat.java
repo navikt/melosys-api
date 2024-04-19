@@ -3,7 +3,7 @@ package no.nav.melosys.domain;
 import java.util.HashSet;
 import java.util.Objects;
 import java.util.Set;
-import javax.persistence.*;
+import jakarta.persistence.*;
 
 import no.nav.melosys.domain.kodeverk.Vilkaar;
 import org.springframework.data.jpa.domain.support.AuditingEntityListener;

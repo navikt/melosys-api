@@ -4,8 +4,8 @@ import java.math.BigInteger;
 import java.util.Collection;
 import java.util.List;
 import java.util.stream.Collectors;
-import javax.xml.bind.JAXBElement;
-import javax.xml.bind.JAXBException;
+import jakarta.xml.bind.JAXBElement;
+import jakarta.xml.bind.JAXBException;
 
 import no.nav.dok.melosysbrev._000083.LovvalgsperiodeType;
 import no.nav.dok.melosysbrev._000083.ObjectFactory;
@@ -96,10 +96,9 @@ public final class InnvilgelsesbrevFlereLandMapper implements BrevDataMapper {
 
         Lovvalgsperiode periode = brevdata.getLovvalgsperiode();
         fag.setLovvalgsbestemmelse(LovvalgsbestemmelseKode.fromValue(periode.getBestemmelse().getKode()));
-        fag.setLovvalgsperiode(LovvalgsperiodeType.builder()
+        fag.setLovvalgsperiode(new LovvalgsperiodeType()
             .withFomDato(lagXmlDato(periode.getFom()))
-            .withTomDato(lagXmlDato(periode.getTom()))
-            .build());
+            .withTomDato(lagXmlDato(periode.getTom())));
 
         if (periode.getTilleggsbestemmelse() != null) {
             fag.setTilleggsbestemmelse(TilleggsbestemmelseKode.fromValue(periode.getTilleggsbestemmelse().getKode()));
@@ -167,12 +166,11 @@ public final class InnvilgelsesbrevFlereLandMapper implements BrevDataMapper {
 
     private static JAXBElement<BrevdataType> lagBrevdataType(FellesType fellesType, MelosysNAVFelles navFelles, Fag fag, VedleggType vedlegg) {
         ObjectFactory factory = new ObjectFactory();
-        BrevdataType brevdataType = BrevdataType.builder()
+        BrevdataType brevdataType = new BrevdataType()
             .withFelles(fellesType)
             .withNAVFelles(navFelles)
             .withFag(fag)
-            .withVedlegg(vedlegg)
-            .build();
+            .withVedlegg(vedlegg);
         return factory.createBrevdata(brevdataType);
     }
 }
