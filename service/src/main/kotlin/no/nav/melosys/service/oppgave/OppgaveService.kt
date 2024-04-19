@@ -57,13 +57,14 @@ class OppgaveService(
         oppgaveFasade.leggTilbakeOppgave(oppgave.oppgaveId)
     }
 
-    fun finnSisteAvsluttetBehandlingsoppgaveMedFagsaksnummer(saksnummer: String): Optional<Oppgave> =
-        oppgaveFasade.finnAvsluttetBehandlingsoppgaverMedSaksnummer(saksnummer).stream()
-            .filter { oppgave: Oppgave -> filtrerUtAvgiftsoppgaver(oppgave) }.max(Comparator.comparing { obj: Oppgave -> obj.opprettetTidspunkt })
+    fun finnSisteAvsluttetBehandlingsoppgaveMedFagsaksnummer(saksnummer: String): Oppgave? =
+        oppgaveFasade.finnAvsluttetBehandlingsoppgaverMedSaksnummer(saksnummer)
+            .filter { filtrerUtAvgiftsoppgaver(it) }
+            .maxByOrNull { it.opprettetTidspunkt }
 
     fun finnÅpenBehandlingsoppgaveMedFagsaksnummer(saksnummer: String): Optional<Oppgave> {
-        val oppgaver = oppgaveFasade.finnÅpneBehandlingsoppgaverMedSaksnummer(saksnummer).stream()
-            .filter { oppgave: Oppgave -> filtrerUtAvgiftsoppgaver(oppgave) }.toList()
+        val oppgaver = oppgaveFasade.finnÅpneBehandlingsoppgaverMedSaksnummer(saksnummer)
+            .filter { filtrerUtAvgiftsoppgaver(it) }
         return if (oppgaver.isNotEmpty()) {
             if (oppgaver.size > 1) {
                 throw TekniskException("Det finnes flere aktive behandlingsoppgaver for sak $saksnummer")
@@ -96,9 +97,10 @@ class OppgaveService(
             val oppgaveBuilder =
                 lagBehandlingsoppgave(behandling).setTilordnetRessurs(tilordnetRessurs).setJournalpostId(journalpostID).setAktørId(aktørID)
                     .setOrgnr(orgnr).setSaksnummer(behandling.fagsak.saksnummer)
-            val oppgaveID = if (StringUtils.isNotEmpty(aktørID) && harBeskyttelsesbehov(behandling.id)) oppgaveFasade.opprettSensitivOppgave(
-                oppgaveBuilder.build()
-            ) else oppgaveFasade.opprettOppgave(oppgaveBuilder.build())
+            val oppgaveID =
+                if (StringUtils.isNotEmpty(aktørID) && harBeskyttelsesbehov(behandling.id))
+                    oppgaveFasade.opprettSensitivOppgave(oppgaveBuilder.build())
+                else oppgaveFasade.opprettOppgave(oppgaveBuilder.build())
             log.info("Opprettet oppgave $oppgaveID for behandling ${behandling.id}")
         } else if (tilordnetRessurs != null && tilordnetRessurs != eksisterendeOppgave.get().tilordnetRessurs) {
             log.info("Oppgave eksisterer, oppdaterer tilordnetRessurs for oppgave tilknyttet behandling ${behandling.id}")
@@ -158,7 +160,7 @@ class OppgaveService(
         val fagsak = fagsakService.hentFagsak(saksnummer)
         val behandling = fagsak.hentSistAktivBehandling()
         val oppgave = finnSisteAvsluttetBehandlingsoppgaveMedFagsaksnummer(saksnummer)
-        val tilordnetRessurs = oppgave.map { obj: Oppgave -> obj.tilordnetRessurs }.orElse(null)
+        val tilordnetRessurs = oppgave?.tilordnetRessurs
         opprettEllerGjenbrukBehandlingsoppgave(
             behandling, behandling.initierendeJournalpostId, fagsak.hentBrukersAktørID(), tilordnetRessurs, null
         )
