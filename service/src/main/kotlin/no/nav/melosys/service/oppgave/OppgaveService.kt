@@ -2,7 +2,6 @@ package no.nav.melosys.service.oppgave
 
 import jakarta.annotation.Nullable
 import no.nav.melosys.domain.Behandling
-import no.nav.melosys.domain.Behandlingsnotat
 import no.nav.melosys.domain.Tema
 import no.nav.melosys.domain.kodeverk.Oppgavetyper
 import no.nav.melosys.domain.mottatteopplysninger.MottatteOpplysningerData
@@ -172,40 +171,35 @@ class OppgaveService(
             .filter { anObject: String? -> saksbehandler.equals(anObject) }
             .isPresent
 
-    private fun oppgaverTilDtoer(oppgaverFraDomain: Collection<Oppgave>): List<OppgaveDto> =
-        oppgaverFraDomain.map { tilOppgaveDtoHåndterException(it) }.filterNotNull()
-
-    private fun Collection<Oppgave>.tilDtoer(): List<OppgaveDto> = this.map { tilOppgaveDtoHåndterException(it) }.filterNotNull()
+    private fun Collection<Oppgave>.tilDtoer(): List<OppgaveDto> = this.mapNotNull { tilOppgaveDtoHåndterException(it) }
 
     @Nullable
     private fun tilOppgaveDtoHåndterException(oppgave: Oppgave): OppgaveDto? =
         try {
             tilOppgaveDto(oppgave)
         } catch (e: Exception) {
-            log.error("Kan ikke mappe oppgave {}", oppgave.oppgaveId, e)
+            log.error("Kan ikke mappe oppgave ${oppgave.oppgaveId}", e)
             null
         }
 
     private fun tilOppgaveDto(oppgave: Oppgave): OppgaveDto {
-        val resultat: OppgaveDto
-        resultat = if (oppgave.erJournalFøring()) {
+        val oppgaveDto = if (oppgave.erJournalFøring()) {
             lagJournalføringsoppgaveDto(oppgave)
         } else if (oppgave.erBehandling() || oppgave.erVurderDokument() || oppgave.erSedBehandling() || oppgave.erVurderHenvendelse() || oppgave.erManglendeInnbetalingBehandling()) {
             lagBehandlingsoppgaveDto(oppgave)
         } else {
-            throw TekniskException("Oppgavetype " + oppgave.oppgavetype + " støttes ikke")
+            throw TekniskException("Oppgavetype ${oppgave.oppgavetype} støttes ikke")
         }
-        resultat.aktivTil = oppgave.fristFerdigstillelse
-        resultat.ansvarligID = oppgave.tilordnetRessurs
-        resultat.oppgaveID = oppgave.oppgaveId
-        resultat.prioritet = oppgave.prioritet
-        resultat.versjon = oppgave.versjon
-        return resultat
+        oppgaveDto.aktivTil = oppgave.fristFerdigstillelse
+        oppgaveDto.ansvarligID = oppgave.tilordnetRessurs
+        oppgaveDto.oppgaveID = oppgave.oppgaveId
+        oppgaveDto.prioritet = oppgave.prioritet
+        oppgaveDto.versjon = oppgave.versjon
+        return oppgaveDto
     }
 
     private fun lagJournalføringsoppgaveDto(oppgave: Oppgave): OppgaveDto {
-        val journalfoeringsoppgaveDto = JournalfoeringsoppgaveDto()
-        journalfoeringsoppgaveDto.journalpostID = oppgave.journalpostId
+        val journalfoeringsoppgaveDto = JournalfoeringsoppgaveDto(oppgave.journalpostId)
         val aktørId = oppgave.aktørId
         val orgnr = oppgave.orgnr
         oppdaterHovedpartIdentOgNavn(aktørId, orgnr, journalfoeringsoppgaveDto)
@@ -236,47 +230,42 @@ class OppgaveService(
         var behandling = fagsak.hentSistAktivBehandling()
         behandling = behandlingService.hentBehandling(behandling.id)
 
-        val behOppgaveDto = BehandlingsoppgaveDto().apply {
-            oppgaveBeskrivelse = oppgave.beskrivelse
-            saksnummer = fagsak.saksnummer
-            sakstype = fagsak.type
-            sakstema = fagsak.tema
-        }
-        behOppgaveDto.behandling = mapBehandling(behandling)
-        behOppgaveDto.sisteNotat = hentSisteBehandlingsNotat(behandling)
+        val behandlingsoppgaveDtoBuilder = BehandlingsoppgaveDto.builder()
+            .setOppgaveBeskrivelse(oppgave.beskrivelse)
+            .setSaksnummer(fagsak.saksnummer)
+            .setSakstype(fagsak.type)
+            .setSakstema(fagsak.tema)
+            .setBehandling(mapBehandling(behandling))
+            .setSisteNotat(hentSisteBehandlingsNotat(behandling))
 
         val aktørID = fagsak.finnBrukersAktørID().orElse(null)
         val orgnr = fagsak.finnVirksomhetsOrgnr().orElse(null)
-        oppdaterHovedpartIdentOgNavn(aktørID, orgnr, behOppgaveDto)
+        oppdaterHovedpartIdentOgNavn(aktørID, orgnr, behandlingsoppgaveDtoBuilder.build())
         if (orgnr != null) {
-            return behOppgaveDto
+            return behandlingsoppgaveDtoBuilder.build()
         }
 
         val sedopplysninger = saksopplysningerService.finnSedOpplysninger(behandling.id)
         if (sedopplysninger.isPresent) {
             val sedDokument = sedopplysninger.get()
-            behOppgaveDto.land = SoeknadslandDto.av(sedDokument.lovvalgslandKode)
-            behOppgaveDto.periode = PeriodeDto(
-                sedDokument.lovvalgsperiode.fom, sedDokument.lovvalgsperiode.tom
-            )
-            return behOppgaveDto
+            return behandlingsoppgaveDtoBuilder
+                .setLand(SoeknadslandDto.av(sedDokument.lovvalgslandKode))
+                .setPeriode(PeriodeDto(sedDokument.lovvalgsperiode.fom, sedDokument.lovvalgsperiode.tom))
+                .build()
         }
 
         mottatteOpplysningerService.finnMottatteOpplysninger(behandling.id).ifPresent {
             val mottatteOpplysningerData = it.mottatteOpplysningerData
             val søknadsland = MottatteOpplysningerUtils.hentLand(mottatteOpplysningerData)
-            behOppgaveDto.land = SoeknadslandDto.av(søknadsland)
-            behOppgaveDto.periode = mapPeriode(mottatteOpplysningerData)
+            behandlingsoppgaveDtoBuilder
+                .setLand(SoeknadslandDto.av(søknadsland))
+                .setPeriode(mapPeriode(mottatteOpplysningerData))
         }
-        return behOppgaveDto
+        return behandlingsoppgaveDtoBuilder.build()
     }
 
-    private fun hentSisteBehandlingsNotat(behandling: Behandling): String? =
-        if (behandling.behandlingsnotater.isEmpty()) {
-            null
-        } else {
-            Collections.max(behandling.behandlingsnotater, Comparator.comparing { obj: Behandlingsnotat -> obj.registrertDato }).tekst
-        }
+    private fun hentSisteBehandlingsNotat(behandling: Behandling): String? = behandling.behandlingsnotater.maxByOrNull { it.registrertDato }?.tekst
+
 
     private fun mapBehandling(behandling: Behandling): BehandlingDto =
         BehandlingDto().apply {
