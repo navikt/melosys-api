@@ -78,9 +78,11 @@ class TrygdeavgiftTjeneste(
     }
 
     //Post ny verdi til årsavregning, og differansen TODO
-    @PutMapping("/aarsavregning")
-    fun beregnTrygdeavgiftAarsavregning(@PathVariable("behandlingID") behandlingID: Long): ResponseEntity<BeregnetTrygdeavgiftDto> {
+    @PostMapping("/aarsavregning")
+    fun beregnTrygdeavgiftAarsavregning(@PathVariable("behandlingID") behandlingID: Long,
+                                        @RequestBody trygdeavgiftsgrunnlagDto: TrygdeavgiftsgrunnlagDto): ResponseEntity<BeregnetTrygdeavgiftDto> {
         aksesskontroll.autoriserSkrivOgTilordnet(behandlingID)
+        println("Lagrer årsavregning med: " + trygdeavgiftsgrunnlagDto)
         return ResponseEntity.ok(
             null
             //BeregnetTrygdeavgiftDto.av(trygdeavgiftsberegningService.beregnOgLagreAarsavgift(behandlingID)) //TODO lag dette etter att datamodellen er klar

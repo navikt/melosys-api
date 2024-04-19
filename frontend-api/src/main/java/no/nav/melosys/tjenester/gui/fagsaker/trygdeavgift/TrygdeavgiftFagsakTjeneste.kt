@@ -4,7 +4,6 @@ import io.swagger.annotations.Api
 import io.swagger.annotations.ApiOperation
 import no.nav.melosys.service.sak.TrygdeavgiftOppsummeringService
 import no.nav.melosys.service.tilgang.Aksesskontroll
-import no.nav.melosys.tjenester.gui.dto.trygdeavgift.BeregnetTrygdeavgiftDto
 import no.nav.melosys.tjenester.gui.fagsaker.TrygdeavgiftOppsummering
 import no.nav.security.token.support.core.api.Protected
 import org.springframework.context.annotation.Scope
@@ -34,15 +33,6 @@ class TrygdeavgiftFagsakTjeneste(
                     saksnummer
                 )
             )
-        )
-    }
-
-    @GetMapping("/hentTrygdeavgiftForAar/{aar}")
-    fun hentDataForAarsavregning(@PathVariable("saksnummer") saksnummer: String,
-                                 @PathVariable("aar") år: Int): ResponseEntity<BeregnetTrygdeavgiftDto> {
-        aksesskontroll.autoriserSakstilgang(saksnummer)
-        return ResponseEntity.ok(
-            BeregnetTrygdeavgiftDto.av(trygdeavgiftOppsummeringService.hentEksisterendeTrygdeavgiftsperioderForFagsak(saksnummer, år))
         )
     }
 }
