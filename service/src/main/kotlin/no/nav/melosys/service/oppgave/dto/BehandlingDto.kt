@@ -6,13 +6,12 @@ import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingstyper
 import java.time.Instant
 
 data class BehandlingDto (
-    @JvmField
-    var behandlingID: Long? = null,
-    var behandlingstype: Behandlingstyper? = null,
-    var behandlingstema: Behandlingstema? = null,
-    var behandlingsstatus: Behandlingsstatus? = null,
-    var isErUnderOppdatering: Boolean = false,
-    var registrertDato: Instant? = null,
-    var endretDato: Instant? = null,
-    var svarFrist: Instant? = null,
+    val behandlingID: Long,
+    val behandlingstype: Behandlingstyper,
+    val behandlingstema: Behandlingstema,
+    val behandlingsstatus: Behandlingsstatus,
+    val isErUnderOppdatering: Boolean = false,
+    val registrertDato: Instant,
+    val endretDato: Instant,
+    val svarFrist: Instant? = null,
 )

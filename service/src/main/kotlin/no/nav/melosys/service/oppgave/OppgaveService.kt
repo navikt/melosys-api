@@ -267,18 +267,17 @@ class OppgaveService(
     private fun hentSisteBehandlingsNotat(behandling: Behandling): String? = behandling.behandlingsnotater.maxByOrNull { it.registrertDato }?.tekst
 
 
-    private fun mapBehandling(behandling: Behandling): BehandlingDto =
-        BehandlingDto().apply {
-            behandlingID = behandling.id
-            behandlingsstatus = behandling.status
-            behandlingstype = behandling.type
-            behandlingstema = behandling.tema
-            registrertDato = behandling.registrertDato
-            endretDato = behandling.endretDato
-            svarFrist = behandling.dokumentasjonSvarfristDato
-            // FIXME: Feltet og endepunktet fjernes fra JSON-schema
-            isErUnderOppdatering = false
-        }
+    private fun mapBehandling(behandling: Behandling): BehandlingDto = BehandlingDto(
+        behandling.id,
+        behandling.type,
+        behandling.tema,
+        behandling.status,
+        // FIXME: Feltet og endepunktet fjernes fra JSON-schema
+        false,
+        behandling.registrertDato,
+        behandling.endretDato,
+        behandling.dokumentasjonSvarfristDato
+    )
 
     private fun harBeskyttelsesbehov(behandlingID: Long): Boolean {
         val brukersAktørID = getBrukersAktørID(behandlingID)
