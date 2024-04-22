@@ -114,8 +114,8 @@ public class SedDataBygger {
 
         if(unleash.isEnabled(ToggleName.MELOSYS_CDM_4_3)) {
             sedDataDto.setArbeidsland(hentArbeidsland(grunnlagMedSøknad));
-            var harfastarbeidssted = grunnlagMedSøknad.getMottatteOpplysningerData().arbeidPaaLand.getErFastArbeidssted();
-            sedDataDto.setHarfastarbeidssted(harfastarbeidssted != null ? harfastarbeidssted : false);
+            var harFastArbeidssted = grunnlagMedSøknad.getMottatteOpplysningerData().arbeidPaaLand.getErFastArbeidssted();
+            sedDataDto.setHarFastArbeidssted(harFastArbeidssted != null ? harFastArbeidssted : false);
         }
 
         sedDataDto.setAvklartBostedsland(

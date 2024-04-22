@@ -33,7 +33,9 @@ class OpprettSedDokumentService(
     fun opprettSedSaksopplysning(melosysEessiMelding: MelosysEessiMelding, behandling: Behandling): Saksopplysning {
         val now = Instant.now()
         val saksopplysning = Saksopplysning().apply {
-            dokument = if(unleash.isEnabled(ToggleName.MELOSYS_CDM_4_3)) opprettSedDokument4_3(melosysEessiMelding) else opprettSedDokument(melosysEessiMelding)
+            dokument = if (unleash.isEnabled(ToggleName.MELOSYS_CDM_4_3)) opprettSedDokument4_3(melosysEessiMelding) else opprettSedDokument(
+                melosysEessiMelding
+            )
             type = SaksopplysningType.SEDOPPL
             this.behandling = behandling
             versjon = SED_DOKUMENT_VERSJON

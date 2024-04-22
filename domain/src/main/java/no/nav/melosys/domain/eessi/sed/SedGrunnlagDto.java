@@ -17,7 +17,7 @@ public class SedGrunnlagDto {
     private List<Virksomhet> selvstendigeVirksomheter = new ArrayList<>();
     private List<Arbeidssted> arbeidssteder = new ArrayList<>();
     private List<Arbeidsland> arbeidsland = new ArrayList<>();
-    private Boolean harfastarbeidssted;
+    private Boolean harFastArbeidssted;
     private List<Lovvalgsperiode> lovvalgsperioder = new ArrayList<>();
     private String ytterligereInformasjon;
 
@@ -68,8 +68,8 @@ public class SedGrunnlagDto {
     public List<Arbeidsland> getArbeidsland() {
         return arbeidsland;
     }
-    public Boolean getHarfastarbeidssted() {
-        return harfastarbeidssted;
+    public Boolean getHarFastArbeidssted() {
+        return harFastArbeidssted;
     }
 
     public void setArbeidssteder(List<Arbeidssted> arbeidssteder) {
@@ -78,7 +78,7 @@ public class SedGrunnlagDto {
     public void setArbeidsland(List<Arbeidsland> arbeidsland) {
         this.arbeidsland = arbeidsland;
     }
-    public void setHarfastarbeidssted(Boolean harfastarbeidssted) { this.harfastarbeidssted = harfastarbeidssted; }
+    public void setHarFastArbeidssted(Boolean harFastArbeidssted) { this.harFastArbeidssted = harFastArbeidssted; }
 
     public List<Lovvalgsperiode> getLovvalgsperioder() {
         return lovvalgsperioder;

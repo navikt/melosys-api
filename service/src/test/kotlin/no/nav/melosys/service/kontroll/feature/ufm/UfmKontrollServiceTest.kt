@@ -86,8 +86,6 @@ class UfmKontrollServiceTest {
 
     @BeforeEach
     fun setup() {
-        unleash.resetAll()
-
         ufmKontrollService = UfmKontrollService(
             kontrollresultatRepository,
             behandlingsresultatService,
