@@ -182,90 +182,107 @@ class OppgaveService(
             null
         }
 
-    private fun tilOppgaveDto(oppgave: Oppgave): OppgaveDto {
-        val oppgaveDto = if (oppgave.erJournalFøring()) {
+    private fun tilOppgaveDto(oppgave: Oppgave): OppgaveDto =
+        if (oppgave.erJournalFøring()) {
             lagJournalføringsoppgaveDto(oppgave)
         } else if (oppgave.erBehandling() || oppgave.erVurderDokument() || oppgave.erSedBehandling() || oppgave.erVurderHenvendelse() || oppgave.erManglendeInnbetalingBehandling()) {
             lagBehandlingsoppgaveDto(oppgave)
         } else {
             throw TekniskException("Oppgavetype ${oppgave.oppgavetype} støttes ikke")
         }
-        oppgaveDto.aktivTil = oppgave.fristFerdigstillelse
-        oppgaveDto.ansvarligID = oppgave.tilordnetRessurs
-        oppgaveDto.oppgaveID = oppgave.oppgaveId
-        oppgaveDto.prioritet = oppgave.prioritet
-        oppgaveDto.versjon = oppgave.versjon
-        return oppgaveDto
+
+    private fun lagJournalføringsoppgaveDto(oppgave: Oppgave): JournalfoeringsoppgaveDto = JournalfoeringsoppgaveDto(
+        aktivTil = oppgave.fristFerdigstillelse,
+        ansvarligID = oppgave.tilordnetRessurs,
+        oppgaveID = oppgave.oppgaveId,
+        prioritet = oppgave.prioritet,
+        navn = hentNavn(oppgave),
+        hovedpartIdent = hentHovedpartIdent(oppgave),
+        versjon = oppgave.versjon,
+        journalpostID = oppgave.journalpostId
+    )
+
+    private fun lagBehandlingsoppgaveDto(oppgave: Oppgave): BehandlingsoppgaveDto {
+        val fagsak = fagsakService.hentFagsak(oppgave.saksnummer)
+        var sistAktiveBehandling = fagsak.hentSistAktivBehandling()
+        sistAktiveBehandling = behandlingService.hentBehandling(sistAktiveBehandling.id)
+        val orgnr = fagsak.finnVirksomhetsOrgnr().orElse(null)
+
+        return BehandlingsoppgaveDto(
+            aktivTil = oppgave.fristFerdigstillelse,
+            ansvarligID = oppgave.tilordnetRessurs,
+            oppgaveID = oppgave.oppgaveId,
+            prioritet = oppgave.prioritet,
+            navn = hentNavn(oppgave),
+            hovedpartIdent = hentHovedpartIdent(oppgave),
+            versjon = oppgave.versjon,
+            behandling = mapBehandling(sistAktiveBehandling),
+            saksnummer = fagsak.saksnummer,
+            sakstype = fagsak.type,
+            sakstema = fagsak.tema,
+            land = hentLand(orgnr, sistAktiveBehandling.id),
+            periode = hentPeriode(orgnr, sistAktiveBehandling.id),
+            oppgaveBeskrivelse = oppgave.beskrivelse,
+            sisteNotat = hentSisteBehandlingsNotat(sistAktiveBehandling),
+        )
     }
 
-    private fun lagJournalføringsoppgaveDto(oppgave: Oppgave): OppgaveDto {
-        val journalfoeringsoppgaveDto = JournalfoeringsoppgaveDto(oppgave.journalpostId)
-        val aktørId = oppgave.aktørId
-        val orgnr = oppgave.orgnr
-        oppdaterHovedpartIdentOgNavn(aktørId, orgnr, journalfoeringsoppgaveDto)
-        return journalfoeringsoppgaveDto
-    }
+    private fun hentSisteBehandlingsNotat(behandling: Behandling): String? =
+        behandling.behandlingsnotater.maxByOrNull { it.registrertDato }?.tekst
 
-    private fun oppdaterHovedpartIdentOgNavn(aktørID: String?, orgnr: String?, oppgaveDto: OppgaveDto) {
-        if (aktørID != null) {
-            val fnr = persondataFasade.finnFolkeregisterident(aktørID).orElse(null)
+    private fun hentNavn(oppgave: Oppgave): String {
+        if (oppgave.aktørId != null) {
+            val fnr = persondataFasade.finnFolkeregisterident(oppgave.aktørId).orElse(null)
             if (StringUtils.isNotEmpty(fnr)) {
-                oppgaveDto.hovedpartIdent = fnr
-                oppgaveDto.navn = persondataFasade.hentSammensattNavn(fnr)
-                return
+                return persondataFasade.hentSammensattNavn(fnr)
             }
         }
-        if (orgnr != null) {
-            oppgaveDto.hovedpartIdent = orgnr
-            oppgaveDto.navn = eregFasade.hentOrganisasjonNavn(orgnr)
-            return
+        if (oppgave.orgnr != null) {
+            return eregFasade.hentOrganisasjonNavn(oppgave.orgnr)
         }
-        oppgaveDto.hovedpartIdent = UKJENT
-        oppgaveDto.navn = UKJENT
+        return UKJENT
     }
 
-    private fun lagBehandlingsoppgaveDto(oppgave: Oppgave): OppgaveDto {
-        val fagsak = fagsakService.hentFagsak(oppgave.saksnummer)
-
-        var behandling = fagsak.hentSistAktivBehandling()
-        behandling = behandlingService.hentBehandling(behandling.id)
-
-        val behandlingsoppgaveDtoBuilder = BehandlingsoppgaveDto.builder()
-            .setOppgaveBeskrivelse(oppgave.beskrivelse)
-            .setSaksnummer(fagsak.saksnummer)
-            .setSakstype(fagsak.type)
-            .setSakstema(fagsak.tema)
-            .setBehandling(mapBehandling(behandling))
-            .setSisteNotat(hentSisteBehandlingsNotat(behandling))
-
-        val aktørID = fagsak.finnBrukersAktørID().orElse(null)
-        val orgnr = fagsak.finnVirksomhetsOrgnr().orElse(null)
-        oppdaterHovedpartIdentOgNavn(aktørID, orgnr, behandlingsoppgaveDtoBuilder.build())
-        if (orgnr != null) {
-            return behandlingsoppgaveDtoBuilder.build()
+    private fun hentHovedpartIdent(oppgave: Oppgave): String {
+        if (oppgave.aktørId != null) {
+            val fnr = persondataFasade.finnFolkeregisterident(oppgave.aktørId).orElse(null)
+            if (StringUtils.isNotEmpty(fnr)) {
+                return fnr
+            }
         }
-
-        val sedopplysninger = saksopplysningerService.finnSedOpplysninger(behandling.id)
-        if (sedopplysninger.isPresent) {
-            val sedDokument = sedopplysninger.get()
-            return behandlingsoppgaveDtoBuilder
-                .setLand(SoeknadslandDto.av(sedDokument.lovvalgslandKode))
-                .setPeriode(PeriodeDto(sedDokument.lovvalgsperiode.fom, sedDokument.lovvalgsperiode.tom))
-                .build()
+        if (oppgave.orgnr != null) {
+            return oppgave.orgnr
         }
-
-        mottatteOpplysningerService.finnMottatteOpplysninger(behandling.id).ifPresent {
-            val mottatteOpplysningerData = it.mottatteOpplysningerData
-            val søknadsland = MottatteOpplysningerUtils.hentLand(mottatteOpplysningerData)
-            behandlingsoppgaveDtoBuilder
-                .setLand(SoeknadslandDto.av(søknadsland))
-                .setPeriode(mapPeriode(mottatteOpplysningerData))
-        }
-        return behandlingsoppgaveDtoBuilder.build()
+        return UKJENT
     }
 
-    private fun hentSisteBehandlingsNotat(behandling: Behandling): String? = behandling.behandlingsnotater.maxByOrNull { it.registrertDato }?.tekst
+    private fun hentLand(orgnr: String?, sistAktivBehandlingID: Long): SoeknadslandDto? {
+        if (orgnr != null) return null
 
+        val sedopplysninger = saksopplysningerService.finnSedOpplysninger(sistAktivBehandlingID)
+        if (sedopplysninger.isPresent)
+            return SoeknadslandDto.av(sedopplysninger.get().lovvalgslandKode)
+
+        val mottatteOpplysninger = mottatteOpplysningerService.finnMottatteOpplysninger(sistAktivBehandlingID)
+        if (mottatteOpplysninger.isPresent)
+            return SoeknadslandDto.av(MottatteOpplysningerUtils.hentLand(mottatteOpplysninger.get().mottatteOpplysningerData))
+
+        return null
+    }
+
+    private fun hentPeriode(orgnr: String?, sistAktivBehandlingID: Long): PeriodeDto? {
+        if (orgnr != null) return null
+
+        val sedopplysninger = saksopplysningerService.finnSedOpplysninger(sistAktivBehandlingID)
+        if (sedopplysninger.isPresent)
+            return PeriodeDto(sedopplysninger.get().lovvalgsperiode.fom, sedopplysninger.get().lovvalgsperiode.tom)
+
+        val mottatteOpplysninger = mottatteOpplysningerService.finnMottatteOpplysninger(sistAktivBehandlingID)
+        if (mottatteOpplysninger.isPresent)
+            return mapPeriode(mottatteOpplysninger.get().mottatteOpplysningerData)
+
+        return null
+    }
 
     private fun mapBehandling(behandling: Behandling): BehandlingDto = BehandlingDto(
         behandling.id,
