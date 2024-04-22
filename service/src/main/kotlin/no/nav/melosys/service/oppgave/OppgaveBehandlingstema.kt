@@ -1,6 +1,6 @@
 package no.nav.melosys.service.oppgave
 
-enum class OppgaveBehandlingstema(@JvmField val kode: String) {
+enum class OppgaveBehandlingstema(val kode: String) {
     EU_EOS_LAND("ab0424"),
     AVTALELAND("ab0387"),
     UTENFOR_AVTALELAND("ab0388"),

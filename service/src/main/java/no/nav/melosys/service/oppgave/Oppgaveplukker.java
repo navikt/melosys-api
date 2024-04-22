@@ -69,7 +69,7 @@ public class Oppgaveplukker {
 
     public List<Oppgave> hentUtildelteOppgaver(PlukkOppgaveInnDto plukkDto) {
         List<Oppgave> utildelteOppgaver = new ArrayList<>();
-        Set<String> oppgaveBehandlingstemaSet = hentAlleOppgaveBehandlingstemaTilSøk(plukkDto.sakstype, plukkDto.sakstema, plukkDto.behandlingstema);
+        Set<String> oppgaveBehandlingstemaSet = hentAlleOppgaveBehandlingstemaTilSøk(plukkDto.sakstype(), plukkDto.sakstema(), plukkDto.behandlingstema());
         for (var oppgaveBehandlingstema : oppgaveBehandlingstemaSet) {
             utildelteOppgaver.addAll(oppgaveFasade.finnUtildelteOppgaverEtterFrist(oppgaveBehandlingstema));
         }
@@ -113,9 +113,9 @@ public class Oppgaveplukker {
     }
 
     private boolean fagsakMatcherSøk(Fagsak fagsak, PlukkOppgaveInnDto plukkDto) {
-        return fagsak != null && fagsak.getType() == plukkDto.sakstype
-            && fagsak.getTema() == plukkDto.sakstema
-            && fagsak.getBehandlinger().stream().anyMatch(behandling -> behandling.getTema() == plukkDto.behandlingstema);
+        return fagsak != null && fagsak.getType() == plukkDto.sakstype()
+            && fagsak.getTema() == plukkDto.sakstema()
+            && fagsak.getBehandlinger().stream().anyMatch(behandling -> behandling.getTema() == plukkDto.behandlingstema());
     }
 
     private boolean venterPåDokumentasjonEllerFagligAvklaring(Fagsak fagsak) {
@@ -146,13 +146,13 @@ public class Oppgaveplukker {
     private Set<String> hentAlleOppgaveBehandlingstemaTilSøk(Sakstyper sakstype, Sakstemaer sakstema, Behandlingstema behandlingstema) {
         return Arrays.stream(Behandlingstyper.values())
             .filter(behandlingstype -> OppgaveFactory.erGyldigOppgave(sakstype, sakstema, behandlingstema, behandlingstype))
-            .map(behandlingstype -> oppgaveFactory.utledOppgaveBehandlingstema(sakstype, sakstema, behandlingstema, behandlingstype).kode)
+            .map(behandlingstype -> oppgaveFactory.utledOppgaveBehandlingstema(sakstype, sakstema, behandlingstema, behandlingstype).getKode())
             .collect(Collectors.toSet());
     }
 
     @Transactional
     public synchronized void leggTilbakeOppgave(String saksbehandlerID, TilbakeleggingDto tilbakelegging) {
-        Behandling behandling = behandlingService.hentBehandling(tilbakelegging.behandlingID);
+        Behandling behandling = behandlingService.hentBehandling(tilbakelegging.getBehandlingID());
 
         Fagsak fagsak = behandling.getFagsak();
         Oppgave oppgave = oppgaveService.hentÅpenBehandlingsoppgaveMedFagsaksnummer(fagsak.getSaksnummer());

@@ -7,8 +7,8 @@ import java.time.LocalDate
 @JsonPropertyOrder("fom", "tom")
 data class PeriodeDto(
     @JsonProperty("fom")
-    var fom: LocalDate? = null,
+    val fom: LocalDate?,
 
     @JsonProperty("tom")
-    var tom: LocalDate? = null
+    val tom: LocalDate?
 )
