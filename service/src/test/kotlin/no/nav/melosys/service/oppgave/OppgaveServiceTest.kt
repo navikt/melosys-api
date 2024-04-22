@@ -143,14 +143,14 @@ internal class OppgaveServiceTest {
 
 
         mineSaker.shouldHaveSize(2)
-        mineSaker.first { it?.oppgaveID == BEH_OPPG_ID }
+        mineSaker.first { it.oppgaveID == BEH_OPPG_ID }
             .shouldNotBeNull()
             .shouldBeInstanceOf<BehandlingsoppgaveDto>()
             .apply {
                 this.behandling.behandlingID.shouldBe(behandling.id)
                 this.land.shouldNotBeNull()
             }
-        mineSaker.first { it?.oppgaveID == JFR_OPPG_ID }
+        mineSaker.first { it.oppgaveID == JFR_OPPG_ID }
             .shouldNotBeNull()
             .shouldBeInstanceOf<JournalfoeringsoppgaveDto>()
     }
@@ -168,7 +168,7 @@ internal class OppgaveServiceTest {
 
         mineSaker
             .shouldHaveSize(1)
-            .first { it?.oppgaveID == BEH_OPPG_ID }
+            .first { it.oppgaveID == BEH_OPPG_ID }
             .shouldNotBeNull()
             .shouldBeInstanceOf<BehandlingsoppgaveDto>()
             .apply {
@@ -193,7 +193,7 @@ internal class OppgaveServiceTest {
 
         mineSaker
             .shouldHaveSize(1)
-            .first { it?.oppgaveID == BEH_OPPG_ID }
+            .first { it.oppgaveID == BEH_OPPG_ID }
             .shouldNotBeNull()
             .shouldBeInstanceOf<BehandlingsoppgaveDto>()
             .apply {

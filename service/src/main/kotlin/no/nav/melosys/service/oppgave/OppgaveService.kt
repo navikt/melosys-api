@@ -38,7 +38,7 @@ class OppgaveService(
     private val utledMottaksdato: UtledMottaksdato,
     private val oppgaveFactory: OppgaveFactory
 ) {
-    fun hentOppgaverMedAnsvarlig(ansvarligID: String): List<OppgaveDto?> =
+    fun hentOppgaverMedAnsvarlig(ansvarligID: String): List<OppgaveDto> =
         oppgaveFasade.finnOppgaverMedAnsvarlig(ansvarligID).tilDtoer()
 
     fun ferdigstillOppgave(oppgaveID: String) {
