@@ -8,6 +8,7 @@ import java.nio.file.Paths;
 import java.util.Objects;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
+import io.getunleash.FakeUnleash;
 import no.nav.melosys.domain.mottatteopplysninger.SedGrunnlag;
 import no.nav.melosys.domain.eessi.sed.SedGrunnlagDto;
 import no.nav.melosys.domain.mottatteopplysninger.data.ForetakUtland;
@@ -19,10 +20,11 @@ import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.tuple;
 
 class SedGrunnlagMapperTest {
+    private final FakeUnleash fakeUnleash = new FakeUnleash();
 
     @Test
     void mapSedGrunnlag() throws IOException, URISyntaxException {
-        SedGrunnlag sedGrunnlag = SedGrunnlagMapper.tilSedGrunnlag(lagSedGrunnlag("eessi/sedGrunnlag.json"));
+        SedGrunnlag sedGrunnlag = SedGrunnlagMapper.tilSedGrunnlag(lagSedGrunnlag("eessi/sedGrunnlag.json"), fakeUnleash);
 
         assertThat(sedGrunnlag)
             .isNotNull()
@@ -60,7 +62,7 @@ class SedGrunnlagMapperTest {
 
     @Test
     void lagSedGrunnlagA001() throws Exception{
-        SedGrunnlag sedGrunnlag = SedGrunnlagMapper.tilSedGrunnlag(lagSedGrunnlag("eessi/sedGrunnlagA001.json"));
+        SedGrunnlag sedGrunnlag = SedGrunnlagMapper.tilSedGrunnlag(lagSedGrunnlag("eessi/sedGrunnlagA001.json"), fakeUnleash);
 
         assertThat(sedGrunnlag)
             .isNotNull()

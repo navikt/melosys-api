@@ -1,5 +1,6 @@
 package no.nav.melosys.service.saksopplysninger
 
+import io.getunleash.FakeUnleash
 import io.kotest.assertions.json.shouldEqualJson
 import io.kotest.matchers.shouldBe
 import io.kotest.matchers.types.shouldBeInstanceOf
@@ -26,7 +27,8 @@ import java.time.LocalDate
 class OpprettSedDokumentServiceTest {
 
     private val saksopplysningRepository: SaksopplysningRepository = mockk()
-    private val opprettSedDokumentService = OpprettSedDokumentService(saksopplysningRepository)
+    private val fakeUnleash = FakeUnleash()
+    private val opprettSedDokumentService = OpprettSedDokumentService(saksopplysningRepository, fakeUnleash)
 
     @Test
     fun opprettSedSaksopplysning() {
@@ -103,7 +105,8 @@ class OpprettSedDokumentServiceTest {
               "statsborgerskapKoder": [
                 "SE"
               ],
-              "arbeidssteder": null
+              "arbeidssteder": null,
+              "arbeidsland": []
             }
         """
     }

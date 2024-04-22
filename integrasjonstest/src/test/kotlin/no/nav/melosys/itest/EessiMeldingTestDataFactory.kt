@@ -15,6 +15,7 @@ class EessiMeldingTestDataFactory(
         aktoerId = "1111111111111"
         anmodningUnntak = null
         arbeidssteder = emptyList()
+        arbeidsland = emptyList()
         gsakSaksnummer = null
         avsender = Avsender("SE:123", "SE")
         dokumentId = null
