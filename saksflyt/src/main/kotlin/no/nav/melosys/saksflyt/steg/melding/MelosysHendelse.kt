@@ -1,5 +1,6 @@
 package no.nav.melosys.saksflyt.steg.melding
 
+import com.fasterxml.jackson.annotation.JsonAnySetter
 import com.fasterxml.jackson.annotation.JsonSubTypes
 import com.fasterxml.jackson.annotation.JsonTypeInfo
 import no.nav.melosys.domain.kodeverk.Sakstemaer
@@ -9,10 +10,10 @@ data class MelosysHendelse(
     val melding: HendelseMelding
 )
 
-@JsonTypeInfo(use = JsonTypeInfo.Id.NAME, property = "type")
+@JsonTypeInfo(use = JsonTypeInfo.Id.NAME, property = "type", defaultImpl = UkjentMelding::class)
 @JsonSubTypes(
     JsonSubTypes.Type(value = HendelseMelding::class, name = "HendelseMelding"),
-    JsonSubTypes.Type(value = VedtakHendelseMelding::class, name = "VedtakHendelseMelding"),
+    JsonSubTypes.Type(value = VedtakHendelseMelding::class, name = "VedtakHendelseMelding")
 )
 open class HendelseMelding
 
@@ -22,3 +23,11 @@ data class VedtakHendelseMelding(
     val sakstema: Sakstemaer
 ) : HendelseMelding()
 
+class UkjentMelding : HendelseMelding() {
+    val properties: MutableMap<String, Any> = mutableMapOf()
+
+    @JsonAnySetter
+    fun setAdditionalProperty(name: String, value: Any) {
+        properties[name] = value
+    }
+}

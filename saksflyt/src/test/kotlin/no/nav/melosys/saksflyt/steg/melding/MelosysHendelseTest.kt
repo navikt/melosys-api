@@ -1,10 +1,8 @@
 package no.nav.melosys.saksflyt.steg.melding
 
 import com.fasterxml.jackson.databind.JsonNode
-import com.fasterxml.jackson.databind.exc.InvalidTypeIdException
 import com.fasterxml.jackson.module.kotlin.jacksonObjectMapper
 import com.fasterxml.jackson.module.kotlin.readValue
-import io.kotest.assertions.throwables.shouldThrow
 import io.kotest.matchers.shouldBe
 import io.kotest.assertions.json.shouldEqualJson
 import io.kotest.matchers.types.shouldBeInstanceOf
@@ -92,16 +90,18 @@ class MelosysHendelseTest {
     }
 
     @Test
-    fun `throw exception when type is unknown`() {
+    fun `retuner UkjentMelding når vi ikke har type`() {
         val json = """{
                 "melding": {
-                    "type": "UnknownType"
+                    "type": "VedtakHendelseMeldingV2",
+                     "pnr": "12345"
                 }
             }"""
 
-        shouldThrow<InvalidTypeIdException> {
-            objectMapper.readValue<MelosysHendelse>(json)
-        }
+        val result = objectMapper.readValue<MelosysHendelse>(json)
+
+        result.melding.shouldBeInstanceOf<UkjentMelding>()
+            .properties.shouldBe(mapOf("pnr" to "12345"))
     }
 
     private fun Any.toJsonNode(): JsonNode = objectMapper.valueToTree(this)
