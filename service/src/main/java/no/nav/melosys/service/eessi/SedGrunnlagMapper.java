@@ -26,8 +26,8 @@ public class SedGrunnlagMapper {
         SedGrunnlag sedGrunnlag = new SedGrunnlag();
 
         sedGrunnlag.personOpplysninger = tilPersonopplysninger(sedGrunnlagDto.getUtenlandskIdent());
-
-        if(unleash.isEnabled(ToggleName.MELOSYS_CDM_4_3)) {
+        var arbeidsland = sedGrunnlagDto.getArbeidsland();
+        if(unleash.isEnabled(ToggleName.MELOSYS_CDM_4_3) && !arbeidsland.isEmpty()) {
             sedGrunnlag.arbeidPaaLand.setFysiskeArbeidssteder(tilFysiskeArbeidssteder4_3(sedGrunnlagDto.getArbeidsland()));
         } else {
             sedGrunnlag.arbeidPaaLand.setFysiskeArbeidssteder(tilFysiskeArbeidssteder(sedGrunnlagDto.getArbeidssteder()));
