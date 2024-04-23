@@ -34,17 +34,10 @@ class KafkaConfig(
 ) {
 
     @Bean
-    fun jsonDeserializer(objectMapper: ObjectMapper): JsonDeserializer<MelosysEessiMelding> {
-        return JsonDeserializer(MelosysEessiMelding::class.java, objectMapper, false)
-    }
-
-    @Bean
     fun aivenEessiMeldingListenerContainerFactory(
         kafkaProperties: KafkaProperties,
         @Value("\${kafka.aiven.eessi.groupid}") groupId: String
-    ): KafkaConsumerContainerFactory<MelosysEessiMelding> {
-        return kafkaListenerContainerFactory<MelosysEessiMelding>(kafkaProperties, groupId)
-    }
+    ): KafkaConsumerContainerFactory<MelosysEessiMelding> = kafkaListenerContainerFactory<MelosysEessiMelding>(kafkaProperties, groupId)
 
     @Bean
     fun aivenManglendeFakturabetalingMeldingListenerContainerFactory(
@@ -60,22 +53,25 @@ class KafkaConfig(
     ): KafkaListenerContainerFactory<ConcurrentMessageListenerContainer<String, SoknadMottatt>> =
         kafkaListenerContainerFactory<SoknadMottatt>(kafkaProperties, groupId)
 
+    @Bean
+    fun jsonDeserializer(objectMapper: ObjectMapper): JsonDeserializer<MelosysEessiMelding> =
+        JsonDeserializer(MelosysEessiMelding::class.java, objectMapper, false)
+
     private inline fun <reified T> kafkaListenerContainerFactory(
         kafkaProperties: KafkaProperties,
         groupId: String
-    ): ConcurrentKafkaListenerContainerFactory<String, T> =
-        ConcurrentKafkaListenerContainerFactory<String, T>().apply {
-            consumerFactory = DefaultKafkaConsumerFactory(
-                kafkaProperties.buildConsumerProperties(null) + consumerConfig(groupId),
-                StringDeserializer(),
-                valueDeserializer<T>()
-            )
-        }
+    ) = ConcurrentKafkaListenerContainerFactory<String, T>().apply {
+        consumerFactory = DefaultKafkaConsumerFactory(
+            kafkaProperties.buildConsumerProperties(null) + consumerConfig(groupId),
+            StringDeserializer(),
+            valueDeserializer<T>()
+        )
+    }
 
     private inline fun <reified T> valueDeserializer(): ErrorHandlingDeserializer<T> =
         ErrorHandlingDeserializer(JsonDeserializer(T::class.java, false))
 
-    private fun consumerConfig(groupId: String): Map<String, Any> = mapOf<String, Any>(
+    private fun consumerConfig(groupId: String) = mapOf<String, Any>(
         ConsumerConfig.GROUP_ID_CONFIG to groupId,
         ConsumerConfig.BOOTSTRAP_SERVERS_CONFIG to brokersUrl,
         ConsumerConfig.ENABLE_AUTO_COMMIT_CONFIG to false,
