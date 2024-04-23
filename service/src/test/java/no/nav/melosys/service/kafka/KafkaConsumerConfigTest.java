@@ -20,7 +20,7 @@ import static org.assertj.core.api.Assertions.assertThat;
 
 @JsonTest
 @ExtendWith(SpringExtension.class)
-@ContextConfiguration(classes = {KafkaConsumerConfig.class, KafkaProperties.class})
+@ContextConfiguration(classes = {KafkaConfig.class, KafkaProperties.class})
 class KafkaConsumerConfigTest {
 
     @Autowired
