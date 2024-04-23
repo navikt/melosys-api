@@ -1,4 +1,4 @@
-package no.nav.melosys.saksflyt.steg.melding
+package no.nav.melosys.service.hendelser
 
 import com.fasterxml.jackson.annotation.JsonAnySetter
 import com.fasterxml.jackson.annotation.JsonSubTypes
@@ -17,6 +17,7 @@ data class MelosysHendelse(
 )
 open class HendelseMelding
 
+
 data class VedtakHendelseMelding(
     val folkeregisterIdent: String,
     val sakstype: Sakstyper,
@@ -31,3 +32,4 @@ class UkjentMelding : HendelseMelding() {
         properties[name] = value
     }
 }
+

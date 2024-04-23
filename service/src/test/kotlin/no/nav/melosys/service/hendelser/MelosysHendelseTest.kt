@@ -1,4 +1,4 @@
-package no.nav.melosys.saksflyt.steg.melding
+package no.nav.melosys.service.hendelser
 
 import com.fasterxml.jackson.databind.JsonNode
 import com.fasterxml.jackson.module.kotlin.jacksonObjectMapper

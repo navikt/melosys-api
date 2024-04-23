@@ -4,6 +4,8 @@ import mu.KotlinLogging
 import no.nav.melosys.saksflyt.steg.StegBehandler
 import no.nav.melosys.saksflytapi.domain.ProsessSteg
 import no.nav.melosys.saksflytapi.domain.Prosessinstans
+import no.nav.melosys.service.hendelser.MelosysHendelse
+import no.nav.melosys.service.hendelser.VedtakHendelseMelding
 import no.nav.melosys.service.persondata.PersondataService
 import org.springframework.beans.factory.annotation.Qualifier
 import org.springframework.kafka.core.KafkaTemplate
@@ -12,7 +14,7 @@ import kotlin.jvm.optionals.getOrNull
 private val log = KotlinLogging.logger { }
 
 class SendMeldingOmVedtak(
-    @Qualifier("meldingOmVedtak") private val melosysHendelseKafkaTemplate: KafkaTemplate<String, MelosysHendelse>,
+    @Qualifier("melosysHendelse") private val melosysHendelseKafkaTemplate: KafkaTemplate<String, MelosysHendelse>,
     private val persondataService: PersondataService
 ) : StegBehandler {
 
@@ -36,7 +38,7 @@ class SendMeldingOmVedtak(
             "meldingOmVedtak",
             MelosysHendelse(
                 melding = VedtakHendelseMelding(
-                    folkeregisterIdent = folkeregisterIdent, // TODO: må krypteres før sending over kafka
+                    folkeregisterIdent = folkeregisterIdent,
                     sakstype = behandling.fagsak.type,
                     sakstema = behandling.fagsak.tema
                 )
