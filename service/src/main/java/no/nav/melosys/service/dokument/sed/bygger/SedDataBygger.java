@@ -4,6 +4,7 @@ import java.time.ZoneId;
 import java.util.*;
 import java.util.stream.Collectors;
 
+import io.getunleash.Unleash;
 import no.nav.melosys.domain.*;
 import no.nav.melosys.domain.adresse.StrukturertAdresse;
 import no.nav.melosys.domain.avklartefakta.AvklartVirksomhet;
@@ -17,6 +18,7 @@ import no.nav.melosys.domain.person.Persondata;
 import no.nav.melosys.domain.person.familie.Familiemedlem;
 import no.nav.melosys.domain.person.familie.Familierelasjon;
 import no.nav.melosys.exception.FunksjonellException;
+import no.nav.melosys.featuretoggle.ToggleName;
 import no.nav.melosys.service.LandvelgerService;
 import no.nav.melosys.service.LovvalgsperiodeService;
 import no.nav.melosys.service.behandling.BehandlingsresultatService;
@@ -43,12 +45,15 @@ public class SedDataBygger {
     private final LovvalgsperiodeService lovvalgsperiodeService;
     private final SaksbehandlingRegler saksbehandlingRegler;
 
+    private final Unleash unleash;
+
     public SedDataBygger(BehandlingsresultatService behandlingsresultatService, LandvelgerService landvelgerService,
-                         LovvalgsperiodeService lovvalgsperiodeService, SaksbehandlingRegler saksbehandlingRegler) {
+                         LovvalgsperiodeService lovvalgsperiodeService, SaksbehandlingRegler saksbehandlingRegler, Unleash unleash) {
         this.behandlingsresultatService = behandlingsresultatService;
         this.landvelgerService = landvelgerService;
         this.lovvalgsperiodeService = lovvalgsperiodeService;
         this.saksbehandlingRegler = saksbehandlingRegler;
+        this.unleash = unleash;
     }
 
     public SedDataDto lag(SedDataGrunnlag dataGrunnlag,
@@ -106,6 +111,13 @@ public class SedDataBygger {
         sedDataDto.setArbeidsgivendeVirksomheter(lagArbeidsgivendeVirksomheter(grunnlagMedSøknad));
         sedDataDto.setSelvstendigeVirksomheter(lagSelvstendigeVirksomheter(grunnlagMedSøknad));
         sedDataDto.setArbeidssteder(hentArbeidssteder(grunnlagMedSøknad));
+
+        if (unleash.isEnabled(ToggleName.MELOSYS_CDM_4_3)) {
+            sedDataDto.setArbeidsland(hentArbeidsland(grunnlagMedSøknad));
+            var harFastArbeidssted = grunnlagMedSøknad.getMottatteOpplysningerData().arbeidPaaLand.getErFastArbeidssted();
+            sedDataDto.setHarFastArbeidssted(harFastArbeidssted != null ? harFastArbeidssted : false);
+        }
+
         sedDataDto.setAvklartBostedsland(
             landvelgerService.hentBostedsland(grunnlagMedSøknad.getBehandling().getId(), grunnlagMedSøknad.getMottatteOpplysningerData()).landkode()
         );
@@ -146,6 +158,27 @@ public class SedDataBygger {
         }
 
         return arbeidssteder;
+    }
+
+
+    private List<Arbeidsland> hentArbeidsland(SedDataGrunnlagMedSoknad dataGrunnlag) {
+        List<Arbeidssted> arbeidssteder = hentArbeidssteder(dataGrunnlag);
+
+        List<String> alleLand = arbeidssteder.stream()
+            .map(Arbeidssted::getAdresse)
+            .map(Adresse::getLand)
+            .distinct()
+            .toList();
+
+        return alleLand.stream()
+            .map(land -> {
+                List<Arbeidssted> arbeidsstedILandet = arbeidssteder.stream()
+                    .filter(arbeidssted -> arbeidssted.getAdresse().getLand().equals(land))
+                    .toList();
+
+                return new Arbeidsland(land, arbeidsstedILandet);
+            })
+            .toList();
     }
 
     private List<Virksomhet> lagArbeidsgivendeVirksomheter(SedDataGrunnlagMedSoknad dataGrunnlag) {

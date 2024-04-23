@@ -12,6 +12,12 @@ public class Kontrollfeil {
     private final List<String> felter;
     private final KontrolldataFeilType type;
 
+    public Kontrollfeil(Kontroll_begrunnelser kode) {
+        this.kode = kode;
+        this.type = KontrolldataFeilType.FEIL;
+        this.felter = Collections.emptyList();
+    }
+
     public Kontrollfeil(Kontroll_begrunnelser kode, KontrolldataFeilType type) {
         this.kode = kode;
         this.type = type;

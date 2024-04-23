@@ -2,12 +2,11 @@ package no.nav.melosys.domain.avgift;
 
 import java.math.BigDecimal;
 import java.time.LocalDate;
+import java.util.Objects;
 
 import jakarta.persistence.*;
 import no.nav.melosys.domain.Medlemskapsperiode;
 import no.nav.melosys.domain.folketrygden.FastsattTrygdeavgift;
-import org.hibernate.annotations.OnDelete;
-import org.hibernate.annotations.OnDeleteAction;
 
 @Entity
 @Table(name = "trygdeavgiftsperiode")
@@ -33,7 +32,7 @@ public class Trygdeavgiftsperiode {
     @Column(name = "trygdesats", nullable = false)
     private BigDecimal trygdesats;
 
-    @OneToOne(cascade = CascadeType.ALL)
+    @OneToOne
     @JoinColumn(name = "inntektsperiode_id")
     private Inntektsperiode grunnlagInntekstperiode;
 
@@ -119,5 +118,18 @@ public class Trygdeavgiftsperiode {
 
     public boolean harAvgift() {
         return BigDecimal.ZERO.compareTo(this.trygdesats) != 0 && BigDecimal.ZERO.compareTo(this.trygdeavgiftsbeløpMd.getVerdi()) != 0;
+    }
+
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (o == null || getClass() != o.getClass()) return false;
+        Trygdeavgiftsperiode that = (Trygdeavgiftsperiode) o;
+        return Objects.equals(id, that.id) && Objects.equals(fastsattTrygdeavgift, that.fastsattTrygdeavgift) && Objects.equals(periodeFra, that.periodeFra) && Objects.equals(periodeTil, that.periodeTil) && Objects.equals(trygdeavgiftsbeløpMd, that.trygdeavgiftsbeløpMd) && Objects.equals(trygdesats, that.trygdesats) && Objects.equals(grunnlagInntekstperiode, that.grunnlagInntekstperiode) && Objects.equals(grunnlagMedlemskapsperiode, that.grunnlagMedlemskapsperiode) && Objects.equals(grunnlagSkatteforholdTilNorge, that.grunnlagSkatteforholdTilNorge);
+    }
+
+    @Override
+    public int hashCode() {
+        return Objects.hash(id, fastsattTrygdeavgift, periodeFra, periodeTil, trygdeavgiftsbeløpMd, trygdesats, grunnlagInntekstperiode, grunnlagMedlemskapsperiode, grunnlagSkatteforholdTilNorge);
     }
 }

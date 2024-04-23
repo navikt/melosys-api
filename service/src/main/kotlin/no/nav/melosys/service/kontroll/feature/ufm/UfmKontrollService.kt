@@ -1,5 +1,6 @@
 package no.nav.melosys.service.kontroll.feature.ufm
 
+import io.getunleash.Unleash
 import io.micrometer.core.instrument.Metrics
 import no.nav.melosys.domain.Behandling
 import no.nav.melosys.domain.Behandlingsresultat
@@ -9,6 +10,7 @@ import no.nav.melosys.domain.dokument.person.PersonhistorikkDokument
 import no.nav.melosys.domain.dokument.sed.SedDokument
 import no.nav.melosys.domain.eessi.SedType
 import no.nav.melosys.domain.kodeverk.begrunnelser.Kontroll_begrunnelser
+import no.nav.melosys.featuretoggle.ToggleName
 import no.nav.melosys.metrics.MetrikkerNavn
 import no.nav.melosys.repository.KontrollresultatRepository
 import no.nav.melosys.service.behandling.BehandlingService
@@ -34,7 +36,8 @@ class UfmKontrollService(
     private val behandlingsresultatService: BehandlingsresultatService,
     private val mottatteOpplysningerService: MottatteOpplysningerService,
     private val behandlingService: BehandlingService,
-    private val persondataFasade: PersondataFasade
+    private val persondataFasade: PersondataFasade,
+    private val unleash: Unleash
 ) {
 
     companion object {
@@ -103,7 +106,9 @@ class UfmKontrollService(
     }
 
     private fun utførKontroller(kontrollData: UfmKontrollData, sedType: SedType): List<Kontroll_begrunnelser> {
-        return UfmKontrollsett.hentRegelsettForSedType(sedType).stream()
+        val CDM4_3ToggleEnabled = unleash.isEnabled(ToggleName.MELOSYS_CDM_4_3)
+
+        return UfmKontrollsett.hentRegelsettForSedType(sedType, CDM4_3ToggleEnabled).stream()
             .map { f: Function<UfmKontrollData?, Kontroll_begrunnelser> ->
                 f.apply(
                     kontrollData

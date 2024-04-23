@@ -4,6 +4,8 @@ import java.time.LocalDate;
 import java.util.*;
 
 import com.google.common.collect.Sets;
+import io.getunleash.FakeUnleash;
+import io.getunleash.Unleash;
 import no.nav.melosys.domain.*;
 import no.nav.melosys.domain.arkiv.ArkivDokument;
 import no.nav.melosys.domain.arkiv.DokumentReferanse;
@@ -69,7 +71,7 @@ class EessiServiceTest {
     private ArgumentCaptor<SedDataDto> sedDataDtoCaptor;
 
     private final EasyRandom easyRandom = new EasyRandom();
-
+    private final FakeUnleash unleash = new FakeUnleash();
     private final String mottakerBelgia1 = "BE:12222";
     private final String mottakerBelgia2 = "BE:9999";
     private final String mottakerBelgia3 = "BE:123131";
@@ -85,7 +87,7 @@ class EessiServiceTest {
     @BeforeEach
     void setup() {
         eessiService = new EessiService(behandlingService, behandlingsresultatService, eessiConsumer, joarkFasade,
-            sedDataBygger, dokumentdataGrunnlagFactory);
+            sedDataBygger, dokumentdataGrunnlagFactory, unleash);
     }
 
     private static Behandling lagBehandling() {

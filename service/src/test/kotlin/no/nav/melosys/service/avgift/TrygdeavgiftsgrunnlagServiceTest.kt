@@ -16,6 +16,7 @@ import io.mockk.impl.annotations.MockK
 import io.mockk.junit5.MockKExtension
 import io.mockk.slot
 import io.mockk.verify
+import io.mockk.verifyOrder
 import no.nav.melosys.domain.Behandling
 import no.nav.melosys.domain.Behandlingsresultat
 import no.nav.melosys.domain.Medlemskapsperiode
@@ -79,7 +80,7 @@ class TrygdeavgiftsgrunnlagServiceTest {
     @Test
     fun hentTrygdeavgiftsgrunnlagEllerOpprinneligTrygdeavgiftsgrunnlag_ingenGrunnlag_nyVurdering_lagrerOgReturnererGammeltGrunnlag() {
         val nå = LocalDate.now()
-        every { mockBehandlingsresultatService.lagre(any()) } returnsArgument 0
+        every { mockBehandlingsresultatService.lagreOgFlush(any()) } returnsArgument 0
         behandlingsresultat.apply {
             behandling = Behandling().apply {
                 id = BEHANDLING_ID
@@ -112,7 +113,12 @@ class TrygdeavgiftsgrunnlagServiceTest {
         trygdeavgiftsgrunnlagService.hentTrygdeavgiftsgrunnlagEllerOpprinneligTrygdeavgiftsgrunnlag(BEHANDLING_ID)
 
 
-        verify { mockBehandlingsresultatService.lagre(capture(slotBehandlingsresultat)) }
+        verifyOrder {
+            mockBehandlingsresultatService.hentBehandlingsresultat(BEHANDLING_ID)
+            mockBehandlingsresultatService.hentBehandlingsresultat(OPPRINNELIG_BEHANDLING_ID)
+            mockBehandlingsresultatService.lagreOgFlush(behandlingsresultat)
+            mockBehandlingsresultatService.lagreOgFlush(capture(slotBehandlingsresultat))
+        }
         slotBehandlingsresultat.captured.medlemAvFolketrygden.fastsattTrygdeavgift.trygdeavgiftsgrunnlag?.run {
             id.shouldNotBe(10)
             skatteforholdTilNorge.shouldNotBeEmpty().first().run {
@@ -228,13 +234,20 @@ class TrygdeavgiftsgrunnlagServiceTest {
                     bestemmelse = Folketrygdloven_kap2_bestemmelser.FTRL_KAP2_2_1
                 })
         }
-        every { mockBehandlingsresultatService.lagre(any()) } returnsArgument 0
+        every { mockBehandlingsresultatService.lagreOgFlush(any()) } returnsArgument 0
+
 
         trygdeavgiftsgrunnlagService.oppdaterTrygdeavgiftsgrunnlag(
-            BEHANDLING_ID, OppdaterTrygdeavgiftsgrunnlagRequest(listOf(lagSkatteforholdTilNorge(fomDato, null)), listOf(lagInntektsperiode(fomDato, null, true)))
+            BEHANDLING_ID,
+            OppdaterTrygdeavgiftsgrunnlagRequest(listOf(lagSkatteforholdTilNorge(fomDato, null)), listOf(lagInntektsperiode(fomDato, null, true)))
         )
 
-        verify { mockBehandlingsresultatService.lagre(capture(slotBehandlingsresultat)) }
+
+        verifyOrder {
+            mockBehandlingsresultatService.lagreOgFlush(behandlingsresultat)
+            mockBehandlingsresultatService.lagreOgFlush(behandlingsresultat)
+            mockBehandlingsresultatService.lagreOgFlush(capture(slotBehandlingsresultat))
+        }
         slotBehandlingsresultat.captured.shouldNotBeNull()
         slotBehandlingsresultat.captured.medlemAvFolketrygden.fastsattTrygdeavgift.trygdeavgiftsperioder.shouldBeEmpty()
     }
@@ -256,7 +269,11 @@ class TrygdeavgiftsgrunnlagServiceTest {
 
         shouldThrow<FunksjonellException> {
             trygdeavgiftsgrunnlagService.oppdaterTrygdeavgiftsgrunnlag(
-                BEHANDLING_ID, OppdaterTrygdeavgiftsgrunnlagRequest(listOf(lagSkatteforholdTilNorge(fomDato, null, Skatteplikttype.IKKE_SKATTEPLIKTIG)), listOf(lagInntektsperiode(fomDato, tomDato, true)))
+                BEHANDLING_ID,
+                OppdaterTrygdeavgiftsgrunnlagRequest(
+                    listOf(lagSkatteforholdTilNorge(fomDato, null, Skatteplikttype.IKKE_SKATTEPLIKTIG)),
+                    listOf(lagInntektsperiode(fomDato, tomDato, true))
+                )
             )
         }.message.shouldContain("Faktura kan ikke opprettes for medlemskapsperiode uten sluttdato. Angi sluttdato på medlemskapsperiode")
     }
@@ -279,11 +296,13 @@ class TrygdeavgiftsgrunnlagServiceTest {
 
         shouldThrow<FunksjonellException> {
             trygdeavgiftsgrunnlagService.oppdaterTrygdeavgiftsgrunnlag(
-                BEHANDLING_ID, OppdaterTrygdeavgiftsgrunnlagRequest(listOf(
-                    lagSkatteforholdTilNorge(fomDato, tomDato),
-                    lagSkatteforholdTilNorge(fomDato, null),
-                    lagSkatteforholdTilNorge(fomDato, tomDato.plusDays(1))
-                ), listOf(lagInntektsperiode(fomDato, null)))
+                BEHANDLING_ID, OppdaterTrygdeavgiftsgrunnlagRequest(
+                    listOf(
+                        lagSkatteforholdTilNorge(fomDato, tomDato),
+                        lagSkatteforholdTilNorge(fomDato, null),
+                        lagSkatteforholdTilNorge(fomDato, tomDato.plusDays(1))
+                    ), listOf(lagInntektsperiode(fomDato, null))
+                )
             )
         }.message.shouldContain("Skatteforholdsperiode/inntektsperiode kan ikke ha sluttdato når medlemskapsperiode ikke har sluttdato")
     }
@@ -305,7 +324,8 @@ class TrygdeavgiftsgrunnlagServiceTest {
 
         shouldThrow<FunksjonellException> {
             trygdeavgiftsgrunnlagService.oppdaterTrygdeavgiftsgrunnlag(
-                BEHANDLING_ID, OppdaterTrygdeavgiftsgrunnlagRequest(listOf(lagSkatteforholdTilNorge(fomDato, tomDato)), listOf(lagInntektsperiode(fomDato, tomDato)))
+                BEHANDLING_ID,
+                OppdaterTrygdeavgiftsgrunnlagRequest(listOf(lagSkatteforholdTilNorge(fomDato, tomDato)), listOf(lagInntektsperiode(fomDato, tomDato)))
             )
         }.message.shouldContain("Skatteforholdsperiode/inntektsperiode kan ikke ha sluttdato når medlemskapsperiode ikke har sluttdato")
     }
@@ -327,7 +347,8 @@ class TrygdeavgiftsgrunnlagServiceTest {
 
         shouldThrow<FunksjonellException> {
             trygdeavgiftsgrunnlagService.oppdaterTrygdeavgiftsgrunnlag(
-                BEHANDLING_ID, OppdaterTrygdeavgiftsgrunnlagRequest(listOf(lagSkatteforholdTilNorge(fomDato, tomDato)), listOf(lagInntektsperiode(fomDato, null)))
+                BEHANDLING_ID,
+                OppdaterTrygdeavgiftsgrunnlagRequest(listOf(lagSkatteforholdTilNorge(fomDato, tomDato)), listOf(lagInntektsperiode(fomDato, null)))
             )
         }.message.shouldContain("Skatteforholdsperiode/inntektsperiode kan ikke ha sluttdato når medlemskapsperiode ikke har sluttdato")
     }
@@ -349,7 +370,11 @@ class TrygdeavgiftsgrunnlagServiceTest {
 
         shouldThrow<FunksjonellException> {
             trygdeavgiftsgrunnlagService.oppdaterTrygdeavgiftsgrunnlag(
-                BEHANDLING_ID, OppdaterTrygdeavgiftsgrunnlagRequest(listOf(lagSkatteforholdTilNorge(fomDato, null, Skatteplikttype.IKKE_SKATTEPLIKTIG)), listOf(lagInntektsperiode(fomDato, null)))
+                BEHANDLING_ID,
+                OppdaterTrygdeavgiftsgrunnlagRequest(
+                    listOf(lagSkatteforholdTilNorge(fomDato, null, Skatteplikttype.IKKE_SKATTEPLIKTIG)),
+                    listOf(lagInntektsperiode(fomDato, null))
+                )
             )
         }.message.shouldContain("Faktura kan ikke opprettes for medlemskapsperiode uten sluttdato. Angi sluttdato på medlemskapsperiode")
     }
@@ -370,7 +395,11 @@ class TrygdeavgiftsgrunnlagServiceTest {
 
         shouldThrow<FunksjonellException> {
             trygdeavgiftsgrunnlagService.oppdaterTrygdeavgiftsgrunnlag(
-                BEHANDLING_ID, OppdaterTrygdeavgiftsgrunnlagRequest(listOf(lagSkatteforholdTilNorge(fomDato, null, Skatteplikttype.IKKE_SKATTEPLIKTIG)), listOf(lagInntektsperiode(fomDato, null)))
+                BEHANDLING_ID,
+                OppdaterTrygdeavgiftsgrunnlagRequest(
+                    listOf(lagSkatteforholdTilNorge(fomDato, null, Skatteplikttype.IKKE_SKATTEPLIKTIG)),
+                    listOf(lagInntektsperiode(fomDato, null))
+                )
             )
         }.message.shouldContain("Faktura kan ikke opprettes for medlemskapsperiode uten sluttdato. Angi sluttdato på medlemskapsperiode")
     }
@@ -394,7 +423,7 @@ class TrygdeavgiftsgrunnlagServiceTest {
     fun oppdaterTrygdeavgiftsgrunnlag_eksistererBeregnetTrygdeavgift_sletterEksisterendeBeregning() {
         val fom = LocalDate.now().minusMonths(1);
         val tom = LocalDate.now().plusMonths(3);
-        every { mockBehandlingsresultatService.lagre(any()) } returnsArgument 0
+        every { mockBehandlingsresultatService.lagreOgFlush(any()) } returnsArgument 0
         behandlingsresultat.medlemAvFolketrygden = MedlemAvFolketrygden().apply {
             medlemskapsperioder = listOf(Medlemskapsperiode().apply {
                 this.fom = fom
@@ -414,7 +443,11 @@ class TrygdeavgiftsgrunnlagServiceTest {
         )
 
 
-        verify { mockBehandlingsresultatService.lagre(capture(slotBehandlingsresultat)) }
+        verifyOrder {
+            mockBehandlingsresultatService.lagreOgFlush(behandlingsresultat)
+            mockBehandlingsresultatService.lagreOgFlush(behandlingsresultat)
+            mockBehandlingsresultatService.lagreOgFlush(capture(slotBehandlingsresultat))
+        }
         slotBehandlingsresultat.captured.shouldNotBeNull()
         slotBehandlingsresultat.captured.medlemAvFolketrygden.fastsattTrygdeavgift.trygdeavgiftsperioder.shouldBeEmpty()
     }
@@ -532,7 +565,7 @@ class TrygdeavgiftsgrunnlagServiceTest {
     fun oppdaterTrygdeavgiftsgrunnlag_requestMedSkattepliktOgInntektskilder_lagrerAltKorrekt() {
         val fom = LocalDate.now().minusMonths(1)
         val tom = LocalDate.now().plusMonths(3)
-        every { mockBehandlingsresultatService.lagre(any()) } returnsArgument 0
+        every { mockBehandlingsresultatService.lagreOgFlush(any()) } returnsArgument 0
         behandlingsresultat.medlemAvFolketrygden = MedlemAvFolketrygden().apply {
             medlemskapsperioder = listOf(Medlemskapsperiode().apply {
                 this.fom = fom
@@ -545,16 +578,20 @@ class TrygdeavgiftsgrunnlagServiceTest {
 
         trygdeavgiftsgrunnlagService.oppdaterTrygdeavgiftsgrunnlag(
             BEHANDLING_ID, OppdaterTrygdeavgiftsgrunnlagRequest(
-            listOf(SkatteforholdTilNorgeRequest(fom, tom, Skatteplikttype.SKATTEPLIKTIG)), listOf(
-            InntektskildeRequest(Inntektskildetype.INNTEKT_FRA_UTLANDET, false, BigDecimal.valueOf(30000), fom, tom),
-            InntektskildeRequest(Inntektskildetype.NÆRINGSINNTEKT_FRA_NORGE, false, BigDecimal.valueOf(10000), fom, tom),
-            InntektskildeRequest(Inntektskildetype.ARBEIDSINNTEKT_FRA_NORGE, true, null, fom, tom)
-        )
-        )
+                listOf(SkatteforholdTilNorgeRequest(fom, tom, Skatteplikttype.SKATTEPLIKTIG)), listOf(
+                    InntektskildeRequest(Inntektskildetype.INNTEKT_FRA_UTLANDET, false, BigDecimal.valueOf(30000), fom, tom),
+                    InntektskildeRequest(Inntektskildetype.NÆRINGSINNTEKT_FRA_NORGE, false, BigDecimal.valueOf(10000), fom, tom),
+                    InntektskildeRequest(Inntektskildetype.ARBEIDSINNTEKT_FRA_NORGE, true, null, fom, tom)
+                )
+            )
         )
 
 
-        verify(exactly = 1) { mockBehandlingsresultatService.lagre(capture(slotBehandlingsresultat)) }
+        verifyOrder {
+            mockBehandlingsresultatService.lagreOgFlush(behandlingsresultat)
+            mockBehandlingsresultatService.lagreOgFlush(behandlingsresultat)
+            mockBehandlingsresultatService.lagreOgFlush(capture(slotBehandlingsresultat))
+        }
         val lagretBehandlingsresultat = slotBehandlingsresultat.captured
         lagretBehandlingsresultat.shouldNotBeNull().medlemAvFolketrygden.shouldNotBeNull().fastsattTrygdeavgift.shouldNotBeNull().trygdeavgiftsgrunnlag.shouldNotBeNull()
         lagretBehandlingsresultat.medlemAvFolketrygden.fastsattTrygdeavgift.trygdeavgiftsperioder.shouldBeEmpty()
@@ -596,7 +633,7 @@ class TrygdeavgiftsgrunnlagServiceTest {
     fun oppdaterTrygdeavgiftsgrunnlag_requestMedSkattepliktigPliktigMedlemskapOgTomInntektskilder_lagrerAltKorrekt() {
         val fom = LocalDate.now().minusMonths(1)
         val tom = LocalDate.now().plusMonths(3)
-        every { mockBehandlingsresultatService.lagre(any()) } returnsArgument 0
+        every { mockBehandlingsresultatService.lagreOgFlush(any()) } returnsArgument 0
         behandlingsresultat.medlemAvFolketrygden = MedlemAvFolketrygden().apply {
             medlemskapsperioder = listOf(Medlemskapsperiode().apply {
                 this.fom = fom
@@ -608,12 +645,16 @@ class TrygdeavgiftsgrunnlagServiceTest {
 
         trygdeavgiftsgrunnlagService.oppdaterTrygdeavgiftsgrunnlag(
             BEHANDLING_ID, OppdaterTrygdeavgiftsgrunnlagRequest(
-            listOf(SkatteforholdTilNorgeRequest(fom, tom, Skatteplikttype.SKATTEPLIKTIG)),
-            emptyList()
-        )
+                listOf(SkatteforholdTilNorgeRequest(fom, tom, Skatteplikttype.SKATTEPLIKTIG)),
+                emptyList()
+            )
         )
 
-        verify(exactly = 1) { mockBehandlingsresultatService.lagre(capture(slotBehandlingsresultat)) }
+        verifyOrder {
+            mockBehandlingsresultatService.lagreOgFlush(behandlingsresultat)
+            mockBehandlingsresultatService.lagreOgFlush(behandlingsresultat)
+            mockBehandlingsresultatService.lagreOgFlush(capture(slotBehandlingsresultat))
+        }
         val lagretBehandlingsresultat = slotBehandlingsresultat.captured
         lagretBehandlingsresultat.shouldNotBeNull().medlemAvFolketrygden.shouldNotBeNull().fastsattTrygdeavgift.shouldNotBeNull().trygdeavgiftsgrunnlag.shouldNotBeNull()
         lagretBehandlingsresultat.medlemAvFolketrygden.fastsattTrygdeavgift.trygdeavgiftsperioder.shouldBeEmpty()
@@ -852,7 +893,11 @@ class TrygdeavgiftsgrunnlagServiceTest {
         return InntektskildeRequest(Inntektskildetype.ARBEIDSINNTEKT_FRA_NORGE, arbeidsgiveravgiftBetales, null, fom, tom)
     }
 
-    private fun lagSkatteforholdTilNorge(fom: LocalDate, tom: LocalDate?, skatteplikttype: Skatteplikttype = Skatteplikttype.SKATTEPLIKTIG): SkatteforholdTilNorgeRequest {
+    private fun lagSkatteforholdTilNorge(
+        fom: LocalDate,
+        tom: LocalDate?,
+        skatteplikttype: Skatteplikttype = Skatteplikttype.SKATTEPLIKTIG
+    ): SkatteforholdTilNorgeRequest {
         return SkatteforholdTilNorgeRequest(fom, tom, skatteplikttype)
     }
 }

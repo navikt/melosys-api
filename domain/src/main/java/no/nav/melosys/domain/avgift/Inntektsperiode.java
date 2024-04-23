@@ -14,12 +14,9 @@ public class Inntektsperiode {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
-    @ManyToOne(optional = false, cascade = CascadeType.ALL)
+    @ManyToOne(optional = false)
     @JoinColumn(name = "trygdeavgiftsgrunnlag_id", nullable = false, updatable = false)
     private Trygdeavgiftsgrunnlag trygdeavgiftsgrunnlag;
-
-    @OneToOne(mappedBy = "grunnlagInntekstperiode", cascade = CascadeType.ALL)
-    private Trygdeavgiftsperiode trygdeavgiftsperiode;
 
     @Column(name = "fom_dato", nullable = false)
     private LocalDate fomDato;
@@ -120,13 +117,5 @@ public class Inntektsperiode {
         return "Inntektsperiode{" + "id=" + id + ", fomDato=" + fomDato + ", tomDato=" + tomDato + ", type=" + type
             + ", avgiftspliktigInntektMnd=" + avgiftspliktigInntektMnd + ", arbeidsgiversavgiftBetalesTilSkatt="
             + arbeidsgiversavgiftBetalesTilSkatt + '}';
-    }
-
-    public Trygdeavgiftsperiode getTrygdeavgiftsperiode() {
-        return trygdeavgiftsperiode;
-    }
-
-    public void setTrygdeavgiftsperiode(Trygdeavgiftsperiode trygdeavgiftsperiode) {
-        this.trygdeavgiftsperiode = trygdeavgiftsperiode;
     }
 }

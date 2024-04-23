@@ -8,6 +8,7 @@ import no.nav.melosys.domain.dokument.SaksopplysningDokument;
 import no.nav.melosys.domain.dokument.medlemskap.Periode;
 import no.nav.melosys.domain.eessi.BucType;
 import no.nav.melosys.domain.eessi.SedType;
+import no.nav.melosys.domain.eessi.melding.Arbeidsland;
 import no.nav.melosys.domain.eessi.melding.Arbeidssted;
 import no.nav.melosys.domain.kodeverk.*;
 
@@ -26,6 +27,7 @@ public class SedDokument implements SaksopplysningDokument {
     private BucType bucType;
     private List<String> statsborgerskapKoder = new ArrayList<>();
     private List<Arbeidssted> arbeidssteder = new ArrayList<>();
+    private List<Arbeidsland> arbeidsland = new ArrayList<>();
 
     public String getRinaSaksnummer() {
         return rinaSaksnummer;
@@ -119,8 +121,16 @@ public class SedDokument implements SaksopplysningDokument {
         return arbeidssteder;
     }
 
+    public List<Arbeidsland> getArbeidsland() {
+        return arbeidsland;
+    }
+
     public void setArbeidssteder(List<Arbeidssted> arbeidssteder) {
         this.arbeidssteder = arbeidssteder;
+    }
+
+    public void setArbeidsland(List<Arbeidsland> arbeidsland) {
+        this.arbeidsland = arbeidsland;
     }
 
     public SedType getSedType() {
