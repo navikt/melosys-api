@@ -43,17 +43,14 @@ object LovligeKombinasjonerTrygdedekningBestemmelse {
         )
     )
 
-    fun hentLovligeBestemmelser(trygdedekning: Trygdedekninger): List<Folketrygdloven_kap2_bestemmelser> {
-        return lovligeKombinasjonerDekningBestemmelse[lovligeKombinasjonerDekningBestemmelse.keys.find { it.contains(trygdedekning) }] ?: emptyList()
-    }
+    fun hentLovligeBestemmelser(trygdedekning: Trygdedekninger): List<Folketrygdloven_kap2_bestemmelser> =
+        lovligeKombinasjonerDekningBestemmelse[lovligeKombinasjonerDekningBestemmelse.keys.find { it.contains(trygdedekning) }] ?: emptyList()
 
-    fun hentLovligeTrygdedekninger(bestemmelse: Folketrygdloven_kap2_bestemmelser): List<Trygdedekninger> {
-        return lovligeKombinasjonerDekningBestemmelse.filterValues { it.contains(bestemmelse) }.keys.flatten()
-    }
+    fun hentLovligeTrygdedekninger(bestemmelse: Folketrygdloven_kap2_bestemmelser): List<Trygdedekninger> =
+        lovligeKombinasjonerDekningBestemmelse.filterValues { it.contains(bestemmelse) }.keys.flatten()
 
-    fun erGyldigKombinasjon(bestemmelse: Folketrygdloven_kap2_bestemmelser, trygdedekning: Trygdedekninger): Boolean {
-        return bestemmelse in hentLovligeBestemmelser(trygdedekning)
-    }
+    fun erGyldigKombinasjon(bestemmelse: Folketrygdloven_kap2_bestemmelser, trygdedekning: Trygdedekninger): Boolean =
+        bestemmelse in hentLovligeBestemmelser(trygdedekning)
 
     fun erBestemmelseGyldigForTrygdedekning(bestemmelse: Folketrygdloven_kap2_bestemmelser, trygdedekning: Trygdedekninger): Boolean {
         if (bestemmelse in PliktigeMedlemskapsbestemmelser.bestemmelser) {

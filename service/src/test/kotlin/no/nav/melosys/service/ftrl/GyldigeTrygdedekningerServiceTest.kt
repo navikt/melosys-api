@@ -52,7 +52,7 @@ class GyldigeTrygdedekningerServiceTest {
 
         gyldigeTrygdedekningerService.hentTrygdedekninger(Behandlingstema.YRKESAKTIV, null)
             .shouldNotBeNull()
-            .shouldHaveSize(11)
+            .shouldHaveSize(12)
             .shouldContainExactly(
                 Trygdedekninger.FULL_DEKNING_FTRL,
                 Trygdedekninger.FTRL_2_9_FØRSTE_LEDD_A_HELSE,
@@ -65,6 +65,7 @@ class GyldigeTrygdedekningerServiceTest {
                 Trygdedekninger.FTRL_2_9_FØRSTE_LEDD_B_TREDJE_LEDD_PENSJON_YRKESSKADE,
                 Trygdedekninger.FTRL_2_9_FØRSTE_LEDD_C_TREDJE_LEDD_HELSE_PENSJON_YRKESSKADE,
                 Trygdedekninger.FTRL_2_9_FØRSTE_LEDD_C_ANDRE_LEDD_TREDJE_LEDD_HELSE_PENSJON_SYKE_FORELDREPENGER_YRKESSKADE,
+                Trygdedekninger.FTRL_2_9_TREDJE_LEDD_YRKESSKADE
             )
     }
 
@@ -75,7 +76,7 @@ class GyldigeTrygdedekningerServiceTest {
 
         gyldigeTrygdedekningerService.hentTrygdedekninger(Behandlingstema.YRKESAKTIV, Folketrygdloven_kap2_bestemmelser.FTRL_KAP2_2_8_FØRSTE_LEDD_A)
             .shouldNotBeNull()
-            .shouldHaveSize(8)
+            .shouldHaveSize(9)
             .shouldContainExactly(
                 Trygdedekninger.FTRL_2_9_FØRSTE_LEDD_A_HELSE,
                 Trygdedekninger.FTRL_2_9_FØRSTE_LEDD_A_ANDRE_LEDD_HELSE_SYKE_FORELDREPENGER,
@@ -85,6 +86,7 @@ class GyldigeTrygdedekningerServiceTest {
                 Trygdedekninger.FTRL_2_9_FØRSTE_LEDD_B_TREDJE_LEDD_PENSJON_YRKESSKADE,
                 Trygdedekninger.FTRL_2_9_FØRSTE_LEDD_C_TREDJE_LEDD_HELSE_PENSJON_YRKESSKADE,
                 Trygdedekninger.FTRL_2_9_FØRSTE_LEDD_C_ANDRE_LEDD_TREDJE_LEDD_HELSE_PENSJON_SYKE_FORELDREPENGER_YRKESSKADE,
+                Trygdedekninger.FTRL_2_9_TREDJE_LEDD_YRKESSKADE
             )
     }
 
@@ -127,7 +129,7 @@ class GyldigeTrygdedekningerServiceTest {
 
         gyldigeTrygdedekningerService.hentTrygdedekninger(Behandlingstema.IKKE_YRKESAKTIV, null)
             .shouldNotBeNull()
-            .shouldHaveSize(10)
+            .shouldHaveSize(11)
             .run {
                 shouldContainExactly(
                     Trygdedekninger.FULL_DEKNING_FTRL,
@@ -139,11 +141,11 @@ class GyldigeTrygdedekningerServiceTest {
                     Trygdedekninger.FTRL_2_7_TREDJE_LEDD_B_HELSE_SYKE_FORELDREPENGER,
                     Trygdedekninger.FTRL_2_9_FØRSTE_LEDD_B_TREDJE_LEDD_PENSJON_YRKESSKADE,
                     Trygdedekninger.FTRL_2_9_FØRSTE_LEDD_C_TREDJE_LEDD_HELSE_PENSJON_YRKESSKADE,
-                    Trygdedekninger.FTRL_2_9_FØRSTE_LEDD_C_ANDRE_LEDD_TREDJE_LEDD_HELSE_PENSJON_SYKE_FORELDREPENGER_YRKESSKADE
+                    Trygdedekninger.FTRL_2_9_FØRSTE_LEDD_C_ANDRE_LEDD_TREDJE_LEDD_HELSE_PENSJON_SYKE_FORELDREPENGER_YRKESSKADE,
+                    Trygdedekninger.FTRL_2_9_TREDJE_LEDD_YRKESSKADE
                 )
                 shouldNotContainAnyOf(
                     Trygdedekninger.FTRL_2_7A_ANDRE_LEDD_B_HELSE_SYKE_FORELDREPENGER,
-                    Trygdedekninger.FTRL_2_9_TREDJE_LEDD_YRKESSKADE
                 )
             }
     }
