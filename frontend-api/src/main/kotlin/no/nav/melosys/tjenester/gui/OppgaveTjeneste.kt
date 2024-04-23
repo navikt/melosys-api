@@ -19,7 +19,6 @@ import no.nav.melosys.tjenester.gui.dto.oppgave.OppgaveOversiktDto
 import no.nav.melosys.tjenester.gui.dto.oppgave.PlukketOppgaveDto
 import no.nav.security.token.support.core.api.Protected
 import org.apache.commons.lang3.StringUtils
-import org.slf4j.LoggerFactory
 import org.springframework.context.annotation.Scope
 import org.springframework.http.ResponseEntity
 import org.springframework.web.bind.annotation.*
@@ -47,21 +46,22 @@ class OppgaveTjeneste(
         val plukketOppgave = oppgaveplukker.plukkOppgave(ident, plukkDto)
         return if (plukketOppgave != null) {
             val behandling = oppgaveService.hentSistAktiveBehandling(plukketOppgave.saksnummer)
-            ResponseEntity.ok(PlukketOppgaveDto(
-                oppgaveID = plukketOppgave.oppgaveId,
-                behandlingID = behandling.id,
-                behandlingstype = behandling.type.kode,
-                behandlingstema = behandling.tema.kode,
-                journalpostID = plukketOppgave.journalpostId,
-                saksnummer =
-                    if (plukketOppgave.erBehandling() || plukketOppgave.erVurderDokument() || plukketOppgave.erSedBehandling() || plukketOppgave.erVurderHenvendelse() || plukketOppgave.erManglendeInnbetalingBehandling())
-                        plukketOppgave.saksnummer
-                    else null
-            ))
+            ResponseEntity.ok(
+                PlukketOppgaveDto(
+                    oppgaveID = plukketOppgave.oppgaveId,
+                    behandlingID = behandling.id,
+                    behandlingstype = behandling.type.kode,
+                    behandlingstema = behandling.tema.kode,
+                    journalpostID = plukketOppgave.journalpostId,
+                    saksnummer = finnSaksnummer(plukketOppgave)
+                )
+            )
         } else {
-            ResponseEntity.ok(PlukketOppgaveDto(
-                antallUtildelteOppgaver = oppgaveplukker.hentUtildelteOppgaver(plukkDto).size
-            ))
+            ResponseEntity.ok(
+                PlukketOppgaveDto(
+                    antallUtildelteOppgaver = oppgaveplukker.hentUtildelteOppgaver(plukkDto).size
+                )
+            )
         }
     }
 
@@ -123,5 +123,19 @@ class OppgaveTjeneste(
         } catch (e: IkkeFunnetException) {
             ResponseEntity.ok(ArrayList())
         }
+    }
+
+    private fun finnSaksnummer(oppgave: Oppgave): String? {
+        val conditions = listOf(
+            Oppgave::erBehandling,
+            Oppgave::erVurderDokument,
+            Oppgave::erSedBehandling,
+            Oppgave::erVurderHenvendelse,
+            Oppgave::erManglendeInnbetalingBehandling
+        )
+        return if (conditions.any { it(oppgave) })
+            oppgave.saksnummer
+        else
+            null
     }
 }

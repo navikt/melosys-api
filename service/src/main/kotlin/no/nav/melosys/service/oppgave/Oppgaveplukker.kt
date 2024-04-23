@@ -16,14 +16,10 @@ import no.nav.melosys.service.oppgave.OppgaveFactory.Companion.erGyldigOppgave
 import no.nav.melosys.service.oppgave.dto.PlukkOppgaveInnDto
 import no.nav.melosys.service.oppgave.dto.TilbakeleggingDto
 import no.nav.melosys.service.sak.FagsakService
-import org.slf4j.LoggerFactory
 import org.springframework.stereotype.Service
 import org.springframework.transaction.annotation.Transactional
 import java.time.Instant
 import java.time.LocalDateTime
-import java.util.*
-import java.util.function.Function
-import java.util.stream.Collectors
 
 @Service
 class Oppgaveplukker(
@@ -56,23 +52,16 @@ class Oppgaveplukker(
     }
 
     fun hentUtildelteOppgaver(plukkDto: PlukkOppgaveInnDto): List<Oppgave> {
-        val utildelteOppgaver: MutableList<Oppgave> = ArrayList()
         val oppgaveBehandlingstemaSet =
             hentAlleOppgaveBehandlingstemaTilSøk(plukkDto.sakstype, plukkDto.sakstema, plukkDto.behandlingstema)
-        for (oppgaveBehandlingstema in oppgaveBehandlingstemaSet) {
-            utildelteOppgaver.addAll(oppgaveFasade.finnUtildelteOppgaverEtterFrist(oppgaveBehandlingstema))
+        return oppgaveBehandlingstemaSet.flatMap {
+            oppgaveFasade.finnUtildelteOppgaverEtterFrist(it)
         }
-        return utildelteOppgaver
     }
 
     private fun filtrerOppgaver(plukkDto: PlukkOppgaveInnDto, utildelteOppgaver: List<Oppgave>): List<Oppgave> {
         val saksnumre = utildelteOppgaver.map { obj: Oppgave -> obj.saksnummer }
-        val sasksnummerFagsakMap = fagsakService.hentFagsaker(saksnumre).stream()
-            .collect(
-                Collectors.toMap(
-                    { obj: Fagsak -> obj.saksnummer }, Function.identity()
-                )
-            )
+        val sasksnummerFagsakMap = fagsakService.hentFagsaker(saksnumre).associateBy { it.saksnummer }
         var antallSakSomIkkeMatcherSøk = 0
         var antallSakSomVenter = 0
         val filtrerteOppgaver = ArrayList<Oppgave>()

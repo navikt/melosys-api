@@ -52,7 +52,7 @@ internal class OppgaveTjenesteTest {
     }
 
     @Test
-    @Throws(Exception::class)
+    @Throws
     fun plukkOppgave() {
         val oppgave = Oppgave.Builder()
             .setOppgaveId("1")
@@ -92,7 +92,7 @@ internal class OppgaveTjenesteTest {
     }
 
     @Test
-    @Throws(Exception::class)
+    @Throws
     fun søkOppgaverMedPersonIdentEllerOrgnr_fnrSendesInn_kallerRettFunksjon() {
         every { oppgaveSoekFilter.finnBehandlingsoppgaverMedPersonIdent(any<String>()) } returns emptyList()
 
@@ -108,7 +108,7 @@ internal class OppgaveTjenesteTest {
     }
 
     @Test
-    @Throws(Exception::class)
+    @Throws
     fun søkOppgaverMedPersonIdentEllerOrgnr_orgnrSendesInn_kallerRettFunksjon() {
         every { oppgaveSoekFilter.finnBehandlingsoppgaverMedOrgnr(any<String>()) } returns emptyList()
 
@@ -124,7 +124,7 @@ internal class OppgaveTjenesteTest {
     }
 
     @Test
-    @Throws(Exception::class)
+    @Throws
     fun søkOppgaverMedPersonIdentEllerOrgnr_fnrOgOrgnrSendesInn_kasterFeil() {
         mockMvc.perform(
             MockMvcRequestBuilders.get("$BASE_URL/sok")
@@ -140,7 +140,7 @@ internal class OppgaveTjenesteTest {
     }
 
     @Test
-    @Throws(Exception::class)
+    @Throws
     fun søkOppgaverMedPersonIdentEllerOrgnr_ingentingSendesInn_kasterFeil() {
         mockMvc.perform(
             MockMvcRequestBuilders.get("$BASE_URL/sok")

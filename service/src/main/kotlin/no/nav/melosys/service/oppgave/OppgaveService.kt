@@ -1,6 +1,7 @@
 package no.nav.melosys.service.oppgave
 
 import jakarta.annotation.Nullable
+import mu.KotlinLogging
 import no.nav.melosys.domain.Behandling
 import no.nav.melosys.domain.Tema
 import no.nav.melosys.domain.kodeverk.Oppgavetyper
@@ -22,7 +23,6 @@ import no.nav.melosys.service.persondata.PersondataFasade
 import no.nav.melosys.service.sak.FagsakService
 import no.nav.melosys.service.saksopplysninger.SaksopplysningerService
 import org.apache.commons.lang3.StringUtils
-import org.slf4j.LoggerFactory
 import org.springframework.stereotype.Service
 import java.util.*
 
@@ -38,6 +38,8 @@ class OppgaveService(
     private val utledMottaksdato: UtledMottaksdato,
     private val oppgaveFactory: OppgaveFactory
 ) {
+    private val log = KotlinLogging.logger {}
+
     fun hentOppgaverMedAnsvarlig(ansvarligID: String): List<OppgaveDto> =
         oppgaveFasade.finnOppgaverMedAnsvarlig(ansvarligID).tilDtoer()
 
@@ -322,7 +324,6 @@ class OppgaveService(
     }
 
     companion object {
-        private val log = LoggerFactory.getLogger(OppgaveService::class.java)
         private const val UKJENT = "UKJENT"
         private fun mapPeriode(mottatteOpplysningerData: MottatteOpplysningerData): PeriodeDto {
             val periode = MottatteOpplysningerUtils.hentPeriode(mottatteOpplysningerData) ?: return PeriodeDto(
