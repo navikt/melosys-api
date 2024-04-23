@@ -1,6 +1,6 @@
-package no.nav.melosys.integrasjon.medl;
+package no.nav.melosys.integrasjon.medl
 
-public enum GrunnlagMedl {
+enum class GrunnlagMedl(@JvmField val kode: String) {
     FO_11_2("FO_11_2"),
     FO_11_3_A("FO_11_3_a"),
     FO_11_3_B("FO_11_3_b"),
@@ -30,13 +30,10 @@ public enum GrunnlagMedl {
     FO_1408_14_A_2("FO_1408_14a_2"),
     FO_1408_14_C_A("FO_1408_14c_a"),
     FO_1408_14_C_B("FO_1408_14c_b"),
+
     MEDFT("MEDFT"),
     IMEDEOS("IMEDEOS"),
-    FTL_2_8_1_LEDD_A("FTL_2-8_1_ledd_a"),
-    FTL_2_8_2_LEDD("FTL_2-8_2_ledd"),
-    FTL_2_15_2_LEDD("FTL_2-15_2_ledd"),
-    FTL_2_7_1_LEDD("FTL_2-7_1_ledd"),
-    FTL_2_7A("FTL_2-7a"),
+
     FTL_2_1("FTL_2-1"),
     FTL_2_2("FTL_2-2"),
     FTL_2_3_2_LEDD("FTL_2-3_2_ledd"),
@@ -49,10 +46,16 @@ public enum GrunnlagMedl {
     FTL_2_5_1_LEDD_G("FTL_2-5_1_ledd_g"),
     FTL_2_5_1_LEDD_H("FTL_2-5_1_ledd_h"),
     FTL_2_5_2_LEDD("FTL_2-5_2_ledd"),
+    FTL_2_7_1_LEDD("FTL_2-7_1_ledd"),
     FTL_2_7_4_LEDD("FTL_2-7_4_ledd"),
+    FTL_2_7A("FTL_2-7a"),
+    FTL_2_8_1_LEDD_A("FTL_2-8_1_ledd_a"),
     FTL_2_8_1_LEDD_B("FTL_2-8_1_ledd_b"),
     FTL_2_8_1_LEDD_C("FTL_2-8_1_ledd_c"),
+    FTL_2_8_2_LEDD("FTL_2-8_2_ledd"),
     FTL_2_8_4_LEDD("FTL_2-8_4_ledd"),
+    FTL_2_15_2_LEDD("FTL_2-15_2_ledd"),
+
     AUSTRALIA("Australia"),
     AUS_9_2("Australia_9_2"),
     AUS_9_3("Australia_9_3"),
@@ -189,15 +192,5 @@ public enum GrunnlagMedl {
     USA_5_4("USA_5_4"),
     USA_5_5("USA_5_5"),
     USA_5_6("USA_5_6"),
-    USA_5_9("USA_5_9");
-
-    private final String kode;
-
-    GrunnlagMedl(String kode) {
-        this.kode = kode;
-    }
-
-    public String getKode() {
-        return kode;
-    }
+    USA_5_9("USA_5_9")
 }
