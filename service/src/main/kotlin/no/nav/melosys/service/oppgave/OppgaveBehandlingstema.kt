@@ -1,6 +1,6 @@
-package no.nav.melosys.service.oppgave;
+package no.nav.melosys.service.oppgave
 
-public enum OppgaveBehandlingstema {
+enum class OppgaveBehandlingstema(val kode: String) {
     EU_EOS_LAND("ab0424"),
     AVTALELAND("ab0387"),
     UTENFOR_AVTALELAND("ab0388"),
@@ -24,15 +24,5 @@ public enum OppgaveBehandlingstema {
     EU_EOS_SOKNAD_OM_UNNTAK("ab0491"),
     EU_EOS_FORESPORSEL_FRA_TRYGDEMYNDIGHET("ab0492"),
     AVTALAND_MELDING_OM_UNNTAK("ab0488"),
-    AVTALAND_SOKNAD_OM_UNNTAK("ab0489");
-
-    private final String kode;
-
-    OppgaveBehandlingstema(String kode) {
-        this.kode = kode;
-    }
-
-    public String getKode() {
-        return kode;
-    }
+    AVTALAND_SOKNAD_OM_UNNTAK("ab0489")
 }
