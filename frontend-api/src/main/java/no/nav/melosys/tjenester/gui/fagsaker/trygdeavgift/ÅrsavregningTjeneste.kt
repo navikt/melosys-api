@@ -1,10 +1,9 @@
 package no.nav.melosys.tjenester.gui.fagsaker.trygdeavgift
 
 import io.swagger.annotations.Api
-import no.nav.melosys.service.sak.TrygdeavgiftOppsummeringService
+import no.nav.melosys.integrasjon.trygdeavgift.dto.TrygdeavgiftsberegningResponse
 import no.nav.melosys.service.tilgang.Aksesskontroll
 import no.nav.melosys.tjenester.gui.dto.trygdeavgift.BeregnetTrygdeavgiftDto
-import no.nav.melosys.tjenester.gui.dto.trygdeavgift.TrygdeavgiftsgrunnlagDto
 import no.nav.security.token.support.core.api.Protected
 import org.springframework.context.annotation.Scope
 import org.springframework.http.ResponseEntity
@@ -29,10 +28,11 @@ class ÅrsavregningTjeneste(
         )
     }
 
-    @PostMapping("{saksnummer}/lagreAarsavregningForAar/{aar}")
-    fun lagreDataForAarsavregning(@RequestBody årsavgiftDto: ÅrsavgiftDto): ResponseEntity<Double> {
+    @PostMapping("{behandlingID}/lagreAarsavregningForAar/{aar}")
+    fun lagreDataForAarsavregning(@PathVariable("behandlingID") behandlingID: Long,
+                                  @RequestBody årsavgiftDto: ÅrsavgiftDto): ResponseEntity<List<TrygdeavgiftsberegningResponse>> {
         return ResponseEntity.ok(
-                aarsavregningService.beregnOgLagreAarsavgift(årsavgiftDto)) //TODO lag dette etter att datamodellen er klar
+                aarsavregningService.beregnOgLagreAarsavgift(behandlingID, årsavgiftDto) //TODO lag dette etter att datamodellen er klar
         )
     }
 }
