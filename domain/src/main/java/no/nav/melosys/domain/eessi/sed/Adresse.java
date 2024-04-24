@@ -24,6 +24,12 @@ public class Adresse {
     private Adresse() {
     }
 
+    public boolean erGyldigAdresse() {
+        return
+            (gateadresse != null && (!gateadresse.isBlank() || !gateadresse.equals(IKKE_TILGJENGELIG))) &&
+                (poststed != null && (!poststed.isBlank() || !poststed.equals(IKKE_TILGJENGELIG)));
+    }
+
     public static Adresse lagAdresse(Adressetype adressetype, StrukturertAdresse strukturertAdresse) {
         if (strukturertAdresse == null) {
             return null;
@@ -108,6 +114,7 @@ public class Adresse {
     public String getGateadresse() {
         return gateadresse;
     }
+
     private void setGateadresse(String gateadresse) {
         this.gateadresse = gateadresse;
     }
