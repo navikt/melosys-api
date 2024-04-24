@@ -27,19 +27,6 @@ class TrygdeavgiftOppsummeringService(
         return harTrygdeavgift && bestiltFaktura
     }
 
-     fun hentEksisterendeTrygdeavgiftsperioderForFagsak(saksnummer: String, år: Int): Set<Trygdeavgiftsperiode> {
-        return fagsakService.hentFagsak(saksnummer)
-            .behandlinger
-            .flatMap { behandling ->
-                behandlingsresultatService.hentBehandlingsresultat(behandling.id)
-                    .medlemAvFolketrygden
-                    .fastsattTrygdeavgift
-                    .trygdeavgiftsperioder
-                    .filter { periode -> periode.periodeFra.year == år }
-            }
-            .toSet()
-    }
-
     private fun trygdeavgiftsperiodeHarAvgift(trygdeavgiftsperiode: Trygdeavgiftsperiode?): Boolean {
         return (trygdeavgiftsperiode != null) && (trygdeavgiftsperiode.trygdeavgiftsbeløpMd != null) && trygdeavgiftsperiode.harAvgift()
     }
