@@ -1,15 +1,14 @@
-package no.nav.melosys.service.hendelser
+package no.nav.melosys.integrasjon.hendelser
 
 import com.fasterxml.jackson.databind.JsonNode
 import com.fasterxml.jackson.module.kotlin.jacksonObjectMapper
 import com.fasterxml.jackson.module.kotlin.readValue
-import io.kotest.matchers.shouldBe
 import io.kotest.assertions.json.shouldEqualJson
+import io.kotest.matchers.shouldBe
 import io.kotest.matchers.types.shouldBeInstanceOf
 import no.nav.melosys.domain.kodeverk.Sakstemaer
 import no.nav.melosys.domain.kodeverk.Sakstyper
 import org.junit.jupiter.api.Test
-
 
 class MelosysHendelseTest {
     private val objectMapper = jacksonObjectMapper()

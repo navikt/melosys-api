@@ -1,4 +1,4 @@
-package no.nav.melosys.service.hendelser
+package no.nav.melosys.integrasjon.hendelser
 
 import com.fasterxml.jackson.annotation.JsonAnySetter
 import com.fasterxml.jackson.annotation.JsonSubTypes
