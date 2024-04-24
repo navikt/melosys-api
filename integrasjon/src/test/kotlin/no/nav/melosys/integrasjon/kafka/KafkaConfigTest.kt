@@ -1,4 +1,4 @@
-package no.nav.melosys.service.kafka
+package no.nav.melosys.integrasjon.kafka
 
 import io.kotest.matchers.equals.shouldBeEqual
 import no.nav.melosys.domain.eessi.melding.MelosysEessiMelding

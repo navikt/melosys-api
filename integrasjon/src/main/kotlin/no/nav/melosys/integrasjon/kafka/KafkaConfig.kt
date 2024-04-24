@@ -1,9 +1,9 @@
-package no.nav.melosys.service.kafka
+package no.nav.melosys.integrasjon.kafka
 
 import com.fasterxml.jackson.databind.ObjectMapper
 import no.nav.melosys.domain.eessi.melding.MelosysEessiMelding
 import no.nav.melosys.domain.manglendebetaling.ManglendeFakturabetalingMelding
-import no.nav.melosys.service.soknad.SoknadMottatt
+import no.nav.melosys.integrasjon.SoknadMottatt
 import org.apache.kafka.clients.CommonClientConfigs
 import org.apache.kafka.clients.consumer.ConsumerConfig
 import org.apache.kafka.common.config.SslConfigs
@@ -54,8 +54,7 @@ class KafkaConfig(
         kafkaListenerContainerFactory<SoknadMottatt>(kafkaProperties, groupId)
 
     @Bean
-    fun jsonDeserializer(objectMapper: ObjectMapper): JsonDeserializer<MelosysEessiMelding> =
-        JsonDeserializer(MelosysEessiMelding::class.java, objectMapper, false)
+    fun jsonDeserializer(objectMapper: ObjectMapper) = JsonDeserializer(MelosysEessiMelding::class.java, objectMapper, false)
 
     private inline fun <reified T> kafkaListenerContainerFactory(
         kafkaProperties: KafkaProperties,
@@ -69,7 +68,9 @@ class KafkaConfig(
     }
 
     private inline fun <reified T> valueDeserializer(): ErrorHandlingDeserializer<T> =
-        ErrorHandlingDeserializer(JsonDeserializer(T::class.java, false))
+        ErrorHandlingDeserializer(
+            JsonDeserializer(T::class.java, false)
+        )
 
     private fun consumerConfig(groupId: String) = mapOf<String, Any>(
         ConsumerConfig.GROUP_ID_CONFIG to groupId,
