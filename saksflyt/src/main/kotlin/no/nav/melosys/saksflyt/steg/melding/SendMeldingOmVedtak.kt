@@ -9,10 +9,12 @@ import no.nav.melosys.integrasjon.hendelser.VedtakHendelseMelding
 import no.nav.melosys.service.persondata.PersondataService
 import org.springframework.beans.factory.annotation.Qualifier
 import org.springframework.kafka.core.KafkaTemplate
+import org.springframework.stereotype.Component
 import kotlin.jvm.optionals.getOrNull
 
 private val log = KotlinLogging.logger { }
 
+@Component
 class SendMeldingOmVedtak(
     @Qualifier("melosysHendelse") private val melosysHendelseKafkaTemplate: KafkaTemplate<String, MelosysHendelse>,
     private val persondataService: PersondataService
