@@ -26,8 +26,9 @@ public class Adresse {
 
     public boolean erGyldigAdresse() {
         return
-            (gateadresse != null && (!gateadresse.isBlank() || !gateadresse.equals(IKKE_TILGJENGELIG))) &&
-                (poststed != null && (!poststed.isBlank() || !poststed.equals(IKKE_TILGJENGELIG)));
+            gateadresse != null && !gateadresse.isBlank() && !gateadresse.equals(IKKE_TILGJENGELIG) &&
+                poststed != null && !poststed.isBlank() && !poststed.equals(IKKE_TILGJENGELIG) &&
+                land != null && !land.isBlank();
     }
 
     public static Adresse lagAdresse(Adressetype adressetype, StrukturertAdresse strukturertAdresse) {
