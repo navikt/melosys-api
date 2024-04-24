@@ -2,6 +2,7 @@ package no.nav.melosys.service.soknad;
 
 import java.time.ZonedDateTime;
 
+import no.nav.melosys.integrasjon.SoknadMottatt;
 import org.junit.jupiter.api.Test;
 
 import static org.assertj.core.api.Assertions.assertThat;

@@ -1,4 +1,4 @@
-package no.nav.melosys.service.soknad;
+package no.nav.melosys.integrasjon;
 
 import java.time.ZonedDateTime;
 import java.time.temporal.ChronoUnit;

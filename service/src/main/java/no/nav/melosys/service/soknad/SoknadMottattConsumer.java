@@ -1,5 +1,6 @@
 package no.nav.melosys.service.soknad;
 
+import no.nav.melosys.integrasjon.SoknadMottatt;
 import no.nav.melosys.saksflytapi.ProsessinstansService;
 import no.nav.melosys.service.mottatteopplysninger.MottatteOpplysningerService;
 import org.apache.kafka.clients.consumer.ConsumerRecord;
