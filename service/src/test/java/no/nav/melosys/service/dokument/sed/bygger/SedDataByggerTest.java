@@ -4,6 +4,7 @@ import java.time.LocalDate;
 import java.time.ZoneId;
 import java.util.*;
 
+import io.getunleash.FakeUnleash;
 import no.nav.melosys.domain.*;
 import no.nav.melosys.domain.adresse.StrukturertAdresse;
 import no.nav.melosys.domain.avklartefakta.Avklartefakta;
@@ -77,6 +78,7 @@ class SedDataByggerTest {
     private Lovvalgsperiode lovvalgsperiode;
     private Anmodningsperiode anmodningsperiode;
     private Utpekingsperiode utpekingsperiode;
+    private final FakeUnleash fakeUnleash = new FakeUnleash();
 
     @BeforeEach
     void setup() {
@@ -109,7 +111,7 @@ class SedDataByggerTest {
 
         behandling = DataByggerStubs.hentBehandlingStub();
         behandlingsresultat.setBehandling(behandling);
-        dataBygger = new SedDataBygger(behandlingsresultatService, landvelgerService, lovvalgsperiodeService, saksbehandlingRegler);
+        dataBygger = new SedDataBygger(behandlingsresultatService, landvelgerService, lovvalgsperiodeService, saksbehandlingRegler, fakeUnleash);
 
         Lovvalgsperiode lovvalgsperiode = new Lovvalgsperiode();
         lovvalgsperiode.setFom(LocalDate.now());

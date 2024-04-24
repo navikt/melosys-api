@@ -46,7 +46,7 @@ class EessiConsumerTokenTest(
     fun authorizationSkalKommeFraSystem() {
         verifyHeaders(
             mapOf(
-                Pair("Authorization", WireMock.equalTo("Bearer --token-from-system--")),
+                Pair("Authorization", WireMock.equalTo("Bearer --azure-token-from-system--")),
                 Pair(HttpHeaders.ACCEPT, WireMock.equalTo(MediaType.APPLICATION_JSON_VALUE)),
                 Pair(HttpHeaders.CONTENT_TYPE, WireMock.equalTo(MediaType.APPLICATION_JSON_VALUE))
             )
@@ -71,7 +71,7 @@ class EessiConsumerTokenTest(
     fun authorizationSkalKommeFraSystemNårHverkenSystemEllerBrukerErKilde() {
         verifyHeaders(
             mapOf(
-                Pair("Authorization", WireMock.equalTo("Bearer --token-from-system--")),
+                Pair("Authorization", WireMock.equalTo("Bearer --azure-token-from-system--")),
                 Pair(HttpHeaders.ACCEPT, WireMock.equalTo(MediaType.APPLICATION_JSON_VALUE)),
                 Pair(HttpHeaders.CONTENT_TYPE, WireMock.equalTo(MediaType.APPLICATION_JSON_VALUE))
             )

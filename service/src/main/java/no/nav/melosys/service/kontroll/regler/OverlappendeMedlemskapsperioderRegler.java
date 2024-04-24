@@ -16,14 +16,14 @@ public final class OverlappendeMedlemskapsperioderRegler {
     public static boolean harOverlappendeMedlemsperiodeFraSed(MedlemskapDokument medlemskapDokument,
                                                               ErPeriode kontrollperiode) {
         return medlemskapDokument.hentMedlemsperioderHvorKildeIkkeLånekassen().stream().anyMatch(
-            medlemsperiode -> !PeriodestatusMedl.AVST.getKode().equals(medlemsperiode.getStatus())
+            medlemsperiode -> !PeriodestatusMedl.AVST.kode.equals(medlemsperiode.getStatus())
                 && PeriodeRegler.periodeOverlapper(kontrollperiode, medlemsperiode.getPeriode()));
     }
 
     public static boolean harOverlappendeMedlemsperiodeMerEnn1DagFraSed(MedlemskapDokument medlemskapDokument,
                                                                         ErPeriode kontrollperiode) {
         return medlemskapDokument.hentMedlemsperioderHvorKildeIkkeLånekassen().stream().anyMatch(
-            medlemsperiode -> !PeriodestatusMedl.AVST.getKode().equals(medlemsperiode.getStatus())
+            medlemsperiode -> !PeriodestatusMedl.AVST.kode.equals(medlemsperiode.getStatus())
                 && PeriodeRegler.perioderOverlapperMerEnn1Dag(kontrollperiode, medlemsperiode.getPeriode()));
     }
 
@@ -32,7 +32,7 @@ public final class OverlappendeMedlemskapsperioderRegler {
                                                  Lovvalgsperiode opprinneligPeriodeTilKontrollperiode) {
         return medlemskapDokument.hentMedlemsperioderHvorKildeIkkeLånekassen()
             .stream()
-            .filter(medlemsperiode -> !PeriodestatusMedl.AVST.getKode().equals(medlemsperiode.getStatus()))
+            .filter(medlemsperiode -> !PeriodestatusMedl.AVST.kode.equals(medlemsperiode.getStatus()))
             .anyMatch(medlemsperiode ->
                 PeriodeRegler.periodeOverlapper(kontrollperiode, medlemsperiode.getPeriode())
                 && (kontrollperiode.erNyPeriodeForMedl() || kontrollperiode.harForskjelligMedlID(medlemsperiode.getId()))
@@ -44,7 +44,7 @@ public final class OverlappendeMedlemskapsperioderRegler {
                                                  MedlemskapsperiodeData medlemskapsperiodeData) {
         return medlemskapsperiodeData.getNyeMedlemskapsperioder().stream().anyMatch(kontrollperiode ->
             medlemskapDokument.hentMedlemsperioderHvorKildeIkkeLånekassen().stream()
-                .filter(medlemsperiode -> !PeriodestatusMedl.AVST.getKode().equals(medlemsperiode.getStatus()))
+                .filter(medlemsperiode -> !PeriodestatusMedl.AVST.kode.equals(medlemsperiode.getStatus()))
                 .filter(medlemsperiode -> !medlemskapsperiodeData.medlIdEksistererPåTidligereMedlemskapsperiode(medlemsperiode.getId()))
                 .anyMatch(medlemsperiode ->
                     PeriodeRegler.periodeOverlapper(kontrollperiode, medlemsperiode.getPeriode())
@@ -58,7 +58,7 @@ public final class OverlappendeMedlemskapsperioderRegler {
                                                         Lovvalgsperiode opprinneligPeriodeTilKontrollperiode) {
         return medlemskapDokument.hentMedlemsperioderHvorKildeIkkeLånekassen().stream()
             .filter(Medlemsperiode::erUnntaksperiode)
-            .filter(medlemsperiode -> !PeriodestatusMedl.AVST.getKode().equals(medlemsperiode.getStatus()))
+            .filter(medlemsperiode -> !PeriodestatusMedl.AVST.kode.equals(medlemsperiode.getStatus()))
             .anyMatch(medlemsperiode -> PeriodeRegler.periodeOverlapper(kontrollperiode, medlemsperiode.getPeriode())
                 && (kontrollperiode.erNyPeriodeForMedl() || kontrollperiode.harForskjelligMedlID(medlemsperiode.getId()))
                 && (opprinneligPeriodeTilKontrollperiode == null || opprinneligPeriodeTilKontrollperiode.harForskjelligMedlID(medlemsperiode.getId())
@@ -70,7 +70,7 @@ public final class OverlappendeMedlemskapsperioderRegler {
                                                         Lovvalgsperiode opprinneligPeriodeTilKontrollperiode) {
         return medlemskapDokument.hentMedlemsperioderHvorKildeIkkeLånekassen().stream()
             .filter(Medlemsperiode::erMedlemskapsperiode)
-            .filter(medlemsperiode -> !PeriodestatusMedl.AVST.getKode().equals(medlemsperiode.getStatus()))
+            .filter(medlemsperiode -> !PeriodestatusMedl.AVST.kode.equals(medlemsperiode.getStatus()))
             .anyMatch(medlemsperiode -> PeriodeRegler.periodeOverlapper(kontrollperiode, medlemsperiode.getPeriode())
                 && (kontrollperiode.erNyPeriodeForMedl() || kontrollperiode.harForskjelligMedlID(medlemsperiode.getId()))
                 && (opprinneligPeriodeTilKontrollperiode == null || opprinneligPeriodeTilKontrollperiode.harForskjelligMedlID(medlemsperiode.getId())
@@ -84,7 +84,7 @@ public final class OverlappendeMedlemskapsperioderRegler {
         }
         var sedLovvalgsperiode = sedDokument.getLovvalgsperiode();
         return medlemskapDokument.hentMedlemsperioderHvorKildeIkkeLånekassen().stream().anyMatch(
-            medlemsperiode -> !PeriodestatusMedl.AVST.getKode().equals(medlemsperiode.getStatus())
+            medlemsperiode -> !PeriodestatusMedl.AVST.kode.equals(medlemsperiode.getStatus())
                 && PeriodeRegler.perioderOverlapperMerEnn1Dag(sedLovvalgsperiode, medlemsperiode.getPeriode())
                 && !sedDokument.getLovvalgslandKode().getKode().equals(medlemsperiode.hentLandSomIso2()));
     }

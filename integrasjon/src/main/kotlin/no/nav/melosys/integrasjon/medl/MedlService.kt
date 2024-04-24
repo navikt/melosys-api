@@ -162,7 +162,7 @@ class MedlService(
             else -> throw TekniskException("Oppretting av periode i MEDL feilet")
         }.apply {
             sporingsinformasjon = MedlemskapsunntakForPost.SporingsinformasjonForPost(
-                kildedokument = kildedokumenttypeMedl.getKode()
+                kildedokument = kildedokumenttypeMedl.kode
             )
             ident = fnr
             lovvalg = lovvalgMedl.kode
@@ -254,7 +254,7 @@ class MedlService(
                 )
             ).kode,
             sporingsinformasjon = MedlemskapsunntakForPut.SporingsinformasjonForPut(
-                kildedokument = kildedokumenttypeMedl.getKode(),
+                kildedokument = kildedokumenttypeMedl.kode,
                 versjon = eksisterendePeriode.sporingsinformasjon!!.versjon
             )
         )
@@ -278,7 +278,7 @@ class MedlService(
                 medlemskapsperiode.bestemmelse,
             ).kode,
             sporingsinformasjon = MedlemskapsunntakForPut.SporingsinformasjonForPut(
-                kildedokument = kildedokumenttypeMedl.getKode(),
+                kildedokument = kildedokumenttypeMedl.kode,
                 versjon = eksisterendePeriode.sporingsinformasjon!!.versjon
             )
         )

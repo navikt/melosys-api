@@ -39,7 +39,7 @@ class PostadresseKontrollService(
         return if (harRegistrertAdresse) {
             emptyList()
         } else {
-            listOf(Kontrollfeil(kontrollBegrunnelseFra(kontekst), KontrolldataFeilType.FEIL))
+            listOf(Kontrollfeil(kontrollBegrunnelseFra(kontekst)))
         }
     }
 
