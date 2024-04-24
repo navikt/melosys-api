@@ -44,7 +44,7 @@ class GyldigeTrygdedekningerService(private val unleash: Unleash) {
     private val TILLEGG_GYLDIGE_TRYGDEDEKNINGER_YRESSKADEFORDEL = listOf(
         Trygdedekninger.FTRL_2_9_FØRSTE_LEDD_B_TREDJE_LEDD_PENSJON_YRKESSKADE,
         Trygdedekninger.FTRL_2_9_FØRSTE_LEDD_C_TREDJE_LEDD_HELSE_PENSJON_YRKESSKADE,
-        Trygdedekninger.FTRL_2_9_FØRSTE_LEDD_C_ANDRE_LEDD_TREDJE_LEDD_HELSE_PENSJON_SYKE_FORELDREPENGER_YRKESSKADE
+        Trygdedekninger.FTRL_2_9_FØRSTE_LEDD_C_ANDRE_LEDD_TREDJE_LEDD_HELSE_PENSJON_SYKE_FORELDREPENGER_YRKESSKADE,
     )
 
     fun hentTrygdedekninger(behandlingstema: Behandlingstema, bestemmelse: Folketrygdloven_kap2_bestemmelser?): List<Trygdedekninger> {
@@ -54,7 +54,12 @@ class GyldigeTrygdedekningerService(private val unleash: Unleash) {
 
         if (bestemmelse != null) {
             val trygdedekningerFraBestemmelse = LovligeKombinasjonerTrygdedekningBestemmelse.hentLovligeTrygdedekninger(bestemmelse).toSet()
-            return trygdedekningerFraBehandlingstema.intersect(trygdedekningerFraBestemmelse).toList()
+            return trygdedekningerFraBehandlingstema
+                .toMutableList()
+                .apply {
+                    if (unleash.isEnabled(ToggleName.MELOSYS_FTRL_YRKESSKADEFORDEL))
+                        add(Trygdedekninger.FTRL_2_9_TREDJE_LEDD_YRKESSKADE)
+                }.intersect(trygdedekningerFraBestemmelse).toList()
         }
 
         return trygdedekningerFraBehandlingstema
