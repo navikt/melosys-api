@@ -11,7 +11,6 @@ CREATE TABLE aarsavregning
 
 ALTER TABLE aarsavregning
     ADD CONSTRAINT fk_aarsavregning_behandlingsresultat FOREIGN KEY (behandlingsresultat_id) REFERENCES behandlingsresultat;
-CREATE INDEX idx_beh_resultat_id ON aarsavregning (behandlingsresultat_id);
 
 ALTER TABLE aarsavregning
     ADD CONSTRAINT fk_aarsavregning_tidl_beh FOREIGN KEY (tidligere_behandling_id) REFERENCES behandling;
