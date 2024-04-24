@@ -33,7 +33,7 @@ public class HenleggelseTjeneste {
         return ResponseEntity.noContent().build();
     }
 
-    @PutMapping(value = "/fagsaker/{saksnr}/henlegg-som-bortfalt", consumes = MediaType.TEXT_PLAIN_VALUE, produces = MediaType.TEXT_PLAIN_VALUE)
+    @PutMapping(value = "/fagsaker/{saksnr}/henlegg-som-bortfalt")
     @ApiOperation(value = "Henlegger en fagsak i Melosys som bortfalt, fordi den ikke skal behandles i Melosys. " +
         "Henlegger kun den aktive behandlingen uten endring av saksstatus dersom behandlingtype er NY_VURDERING.")
     public ResponseEntity<Void> henleggSakSomBortfalt(@PathVariable("saksnr") String saksnummer) {

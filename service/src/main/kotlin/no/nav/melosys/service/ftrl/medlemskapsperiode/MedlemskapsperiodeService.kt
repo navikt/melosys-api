@@ -139,7 +139,8 @@ class MedlemskapsperiodeService(
             throw FunksjonellException("Fom-dato, innvilgelsesresultat, bestemmelse og trygdedekning er påkrevd")
         }
         val gyldigeTrygdedekninger = gyldigeTrygdedekningerService.hentTrygdedekninger(
-            behandlingstema, if (bestemmelse == Folketrygdloven_kap2_bestemmelser.FTRL_KAP2_2_15_ANDRE_LEDD) null else bestemmelse
+            behandlingstema,
+            if (bestemmelse == Folketrygdloven_kap2_bestemmelser.FTRL_KAP2_2_15_ANDRE_LEDD) null else bestemmelse
         )
         if (trygdedekning !in gyldigeTrygdedekninger) {
             throw FunksjonellException("Trygedekning $trygdedekning støttes ikke for behandlingstema $behandlingstema og bestemmelse $bestemmelse")
