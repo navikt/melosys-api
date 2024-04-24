@@ -4,8 +4,8 @@ import mu.KotlinLogging
 import no.nav.melosys.saksflyt.steg.StegBehandler
 import no.nav.melosys.saksflytapi.domain.ProsessSteg
 import no.nav.melosys.saksflytapi.domain.Prosessinstans
-import no.nav.melosys.service.hendelser.MelosysHendelse
-import no.nav.melosys.service.hendelser.VedtakHendelseMelding
+import no.nav.melosys.integrasjon.hendelser.MelosysHendelse
+import no.nav.melosys.integrasjon.hendelser.VedtakHendelseMelding
 import no.nav.melosys.service.persondata.PersondataService
 import org.springframework.beans.factory.annotation.Qualifier
 import org.springframework.kafka.core.KafkaTemplate

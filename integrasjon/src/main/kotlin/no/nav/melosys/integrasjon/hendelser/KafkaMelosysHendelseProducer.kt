@@ -1,9 +1,8 @@
-package no.nav.melosys.saksflyt.steg.melding
+package no.nav.melosys.integrasjon.hendelser
 
 import mu.KotlinLogging
 import no.nav.melosys.config.MDCOperations
 import no.nav.melosys.exception.TekniskException
-import no.nav.melosys.service.hendelser.MelosysHendelse
 import org.apache.kafka.clients.producer.ProducerRecord
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.beans.factory.annotation.Qualifier
@@ -15,7 +14,7 @@ import java.util.concurrent.TimeUnit
 private val log = KotlinLogging.logger { }
 
 @Component
-class KafkaFakturaBestiltProducer(
+class KafkaMelosysHendelseProducer(
     @Value("\$kafka.aiven.melosys-hendelse.topic") private val topicName: String,
     @Qualifier("melosysHendelse") @Autowired private val kafkaTemplate: KafkaTemplate<String, MelosysHendelse>
 ) {
