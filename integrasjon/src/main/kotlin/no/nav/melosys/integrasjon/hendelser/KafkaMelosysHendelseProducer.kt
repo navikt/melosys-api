@@ -21,23 +21,20 @@ class KafkaMelosysHendelseProducer(
     fun produserBestillingsmelding(melosysHendelse: MelosysHendelse) {
         val hendelseRecord = ProducerRecord<String, MelosysHendelse>(topicName, melosysHendelse)
         hendelseRecord.headers().add(MDCOperations.CORRELATION_ID, MDCOperations.getCorrelationId().encodeToByteArray())
-        log.info("Sender melding om hendelse $melosysHendelse til topic $topicName")
         val future = kafkaTemplate.send(hendelseRecord)
 
         try {
             val sendeResultat = future[15L, TimeUnit.SECONDS]
             log.info(
                 "Melding sendt på topic $topicName " +
-                    "for melosysHendelse ${melosysHendelse.melding}\n" +
+                    "data: ${melosysHendelse.melding}\n" +
                     "Offset: ${sendeResultat.recordMetadata.offset()} "
             )
         } catch (e: InterruptedException) {
             Thread.currentThread().interrupt()
             throw TekniskException("Avbrutt ved sending av melding om faktura bestilt for hendelse ${melosysHendelse.melding}")
         } catch (e: Exception) {
-            throw TekniskException(
-                "Kunne ikke sende melding om faktura bestilt for hendelse ${melosysHendelse.melding}", e
-            )
+            throw TekniskException("Kunne ikke sende melding om faktura bestilt for hendelse ${melosysHendelse.melding}", e)
         }
     }
 }
