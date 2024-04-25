@@ -1,6 +1,8 @@
 package no.nav.melosys.saksflyt.steg.melding
 
+import io.getunleash.Unleash
 import mu.KotlinLogging
+import no.nav.melosys.featuretoggle.ToggleName
 import no.nav.melosys.integrasjon.hendelser.KafkaMelosysHendelseProducer
 import no.nav.melosys.saksflyt.steg.StegBehandler
 import no.nav.melosys.saksflytapi.domain.ProsessSteg
@@ -15,8 +17,9 @@ private val log = KotlinLogging.logger { }
 
 @Component
 class SendMeldingOmVedtak(
-    private val kafkaMelosysHendelseProducer : KafkaMelosysHendelseProducer,
-    private val persondataService: PersondataService
+    private val kafkaMelosysHendelseProducer: KafkaMelosysHendelseProducer,
+    private val persondataService: PersondataService,
+    private val unleash: Unleash
 ) : StegBehandler {
 
     override fun inngangsSteg(): ProsessSteg {
@@ -24,14 +27,17 @@ class SendMeldingOmVedtak(
     }
 
     override fun utfør(prosessinstans: Prosessinstans) {
+        if (!unleash.isEnabled(ToggleName.MELOSYS_SEND_MELDING_OM_VEDTAK)) {
+            return
+        }
         val behandling = prosessinstans.behandling
 
-        val brukersAktørID = behandling.fagsak.hentBrukersAktørID()
-        val folkeregisterIdent = persondataService.finnFolkeregisterident(brukersAktørID)
-            .getOrNull()
+        val fagsak = behandling.fagsak
+        val brukersAktørID = fagsak.hentBrukersAktørID()
+        val folkeregisterIdent = persondataService.finnFolkeregisterident(brukersAktørID).getOrNull()
 
         if (folkeregisterIdent == null) {
-            log.error("Fant ikke folkeregisterident for bruker med aktørID $brukersAktørID")
+            log.warn("Fant ikke folkeregisterident for bruker med aktørID $brukersAktørID")
             return
         }
 
@@ -39,8 +45,8 @@ class SendMeldingOmVedtak(
             MelosysHendelse(
                 melding = VedtakHendelseMelding(
                     folkeregisterIdent = folkeregisterIdent,
-                    sakstype = behandling.fagsak.type,
-                    sakstema = behandling.fagsak.tema
+                    sakstype = fagsak.type,
+                    sakstema = fagsak.tema
                 )
             )
         )
