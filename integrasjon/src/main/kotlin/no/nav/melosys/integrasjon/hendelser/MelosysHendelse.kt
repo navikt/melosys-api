@@ -17,19 +17,18 @@ data class MelosysHendelse(
 )
 open class HendelseMelding
 
-
 data class VedtakHendelseMelding(
     val folkeregisterIdent: String,
     val sakstype: Sakstyper,
     val sakstema: Sakstemaer
 ) : HendelseMelding()
 
-class UkjentMelding : HendelseMelding() {
+data class UkjentMelding(
     val properties: MutableMap<String, Any> = mutableMapOf()
+) : HendelseMelding() {
 
     @JsonAnySetter
     fun setAdditionalProperty(name: String, value: Any) {
         properties[name] = value
     }
 }
-
