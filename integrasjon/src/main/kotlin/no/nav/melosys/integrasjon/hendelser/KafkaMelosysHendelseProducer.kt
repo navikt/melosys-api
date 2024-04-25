@@ -15,12 +15,13 @@ private val log = KotlinLogging.logger { }
 
 @Component
 class KafkaMelosysHendelseProducer(
-    @Value("\$kafka.aiven.melosys-hendelse.topic") private val topicName: String,
+    @Value("\${kafka.aiven.melosys-hendelse.topic}") private val topicName: String,
     @Qualifier("melosysHendelse") @Autowired private val kafkaTemplate: KafkaTemplate<String, MelosysHendelse>
 ) {
     fun produserBestillingsmelding(melosysHendelse: MelosysHendelse) {
         val hendelseRecord = ProducerRecord<String, MelosysHendelse>(topicName, melosysHendelse)
         hendelseRecord.headers().add(MDCOperations.CORRELATION_ID, MDCOperations.getCorrelationId().encodeToByteArray())
+        log.info("Sender melding om hendelse $melosysHendelse til topic $topicName")
         val future = kafkaTemplate.send(hendelseRecord)
 
         try {
