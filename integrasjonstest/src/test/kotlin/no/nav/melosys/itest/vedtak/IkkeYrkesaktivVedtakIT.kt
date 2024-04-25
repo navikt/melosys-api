@@ -24,6 +24,7 @@ import no.nav.melosys.domain.kodeverk.lovvalgsbestemmelser.trygdeavtale.Lovvalgs
 import no.nav.melosys.domain.mottatteopplysninger.SøknadIkkeYrkesaktiv
 import no.nav.melosys.domain.mottatteopplysninger.data.Periode
 import no.nav.melosys.domain.mottatteopplysninger.data.Soeknadsland
+import no.nav.melosys.integrasjon.hendelser.MelosysHendelse
 import no.nav.melosys.itest.JournalfoeringBase
 import no.nav.melosys.melosysmock.medl.MedlRepo
 import no.nav.melosys.melosysmock.testdata.TestDataGenerator
@@ -38,10 +39,15 @@ import no.nav.melosys.service.oppgave.OppgaveService
 import no.nav.melosys.service.saksopplysninger.OppfriskSaksopplysningerService
 import no.nav.melosys.service.vedtak.FattVedtakRequest
 import no.nav.melosys.service.vedtak.VedtaksfattingFasade
+import org.apache.kafka.clients.consumer.ConsumerRecord
+import org.junit.jupiter.api.AfterEach
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
 import org.springframework.beans.factory.annotation.Autowired
+import org.springframework.kafka.annotation.KafkaListener
 import java.time.LocalDate
+import java.util.concurrent.BlockingQueue
+import java.util.concurrent.LinkedBlockingQueue
 
 class IkkeYrkesaktivVedtakIT(
     @Autowired testDataGenerator: TestDataGenerator,
@@ -56,6 +62,19 @@ class IkkeYrkesaktivVedtakIT(
     @Autowired private val vedtaksfattingFasade: VedtaksfattingFasade,
     @Autowired private val unleash: FakeUnleash,
 ) : JournalfoeringBase(testDataGenerator, journalføringService, oppgaveService) {
+
+    private val records: BlockingQueue<ConsumerRecord<String, MelosysHendelse>> = LinkedBlockingQueue()
+
+    @KafkaListener(topics = ["\${kafka.aiven.melosys-hendelse.topic}"], groupId = "\${kafka.aiven.melosys-hendelse.groupid}",
+        containerFactory = "melosysMeldingListenerContainerFactory")
+    fun melosysHendelseListener(record: ConsumerRecord<String, MelosysHendelse>) {
+        records.add(record)
+    }
+
+    @AfterEach
+    fun cleanup() {
+        records.clear()
+    }
 
     @BeforeEach
     fun setup() {
@@ -170,6 +189,16 @@ class IkkeYrkesaktivVedtakIT(
                 lovvalg.shouldBe("ENDL")
                 grunnlag.shouldBe("FO_11_2")
                 sporingsinformasjon?.kildedokument.shouldBe("Henv_Soknad")
+            }
+
+        println(records)
+
+        records.shouldHaveSize(1)
+            .single().value()
+            .apply {
+                println("########")
+                println(this)
+//                folkeregisterIdent shouldBe "30056928150"
             }
     }
 
