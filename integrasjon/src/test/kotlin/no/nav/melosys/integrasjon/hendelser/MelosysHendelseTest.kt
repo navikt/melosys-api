@@ -18,7 +18,7 @@ class MelosysHendelseTest {
         val melosysHendelse = MelosysHendelse(HendelseMelding())
 
 
-        melosysHendelse.toJsonNode().toPrettyString() shouldEqualJson """
+        melosysHendelse.toJson() shouldEqualJson """
             {
                 "melding": {
                     "type": "HendelseMelding"
@@ -38,7 +38,7 @@ class MelosysHendelseTest {
         )
 
 
-        melosysHendelse.toJsonNode().toPrettyString() shouldEqualJson """
+        melosysHendelse.toJson() shouldEqualJson """
             {
                 "melding": {
                     "type": "VedtakHendelseMelding",
@@ -49,8 +49,10 @@ class MelosysHendelseTest {
             }"""
     }
 
+
+
     @Test
-    fun `deserialize HendelseMelding as part of MelosysHendelse`() {
+    fun `deserialize HendelseMelding`() {
         val json = """
             {
                 "melding": {
@@ -66,7 +68,7 @@ class MelosysHendelseTest {
     }
 
     @Test
-    fun `deserialize VedtakHendelseMelding as part of MelosysHendelse`() {
+    fun `deserialize VedtakHendelseMelding`() {
         val json = """
             {
                 "melding": {
@@ -74,6 +76,30 @@ class MelosysHendelseTest {
                     "folkeregisterIdent": "12345",
                     "sakstype": "TRYGDEAVTALE",
                     "sakstema": "TRYGDEAVGIFT"
+                }
+            }"""
+
+
+        val result = objectMapper.readValue<MelosysHendelse>(json)
+
+
+        result.melding.shouldBeInstanceOf<VedtakHendelseMelding>().apply {
+            folkeregisterIdent shouldBe "12345"
+            sakstype shouldBe Sakstyper.TRYGDEAVTALE
+            sakstema shouldBe Sakstemaer.TRYGDEAVGIFT
+        }
+    }
+
+    @Test
+    fun `deserialize og ignorer ekstra felter i VedtakHendelseMelding`() {
+        val json = """
+            {
+                "melding": {
+                    "type": "VedtakHendelseMelding",
+                    "folkeregisterIdent": "12345",
+                    "sakstype": "TRYGDEAVTALE",
+                    "sakstema": "TRYGDEAVGIFT",
+                    "ekstarfelt": "DUMMY"
                 }
             }"""
 
@@ -103,5 +129,5 @@ class MelosysHendelseTest {
             .properties.shouldBe(mapOf("pnr" to "12345"))
     }
 
-    private fun Any.toJsonNode(): JsonNode = objectMapper.valueToTree(this)
+    private fun Any.toJson(): String = objectMapper.valueToTree<JsonNode?>(this).toPrettyString()
 }

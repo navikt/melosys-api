@@ -1,6 +1,7 @@
 package no.nav.melosys.integrasjon.hendelser
 
 import com.fasterxml.jackson.annotation.JsonAnySetter
+import com.fasterxml.jackson.annotation.JsonIgnoreProperties
 import com.fasterxml.jackson.annotation.JsonSubTypes
 import com.fasterxml.jackson.annotation.JsonTypeInfo
 import no.nav.melosys.domain.kodeverk.Sakstemaer
@@ -15,6 +16,7 @@ data class MelosysHendelse(
     JsonSubTypes.Type(value = HendelseMelding::class, name = "HendelseMelding"),
     JsonSubTypes.Type(value = VedtakHendelseMelding::class, name = "VedtakHendelseMelding")
 )
+@JsonIgnoreProperties(ignoreUnknown = true)
 open class HendelseMelding
 
 data class VedtakHendelseMelding(
