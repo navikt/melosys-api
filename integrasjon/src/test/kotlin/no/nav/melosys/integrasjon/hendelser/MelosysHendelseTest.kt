@@ -120,7 +120,7 @@ class MelosysHendelseTest {
     data class DummyMelding(
         val folkeregisterIdent: String,
         val sakstype: Sakstyper,
-        val nyFlelt: String = "default"
+        val nyFelt: String = "default"
     ) : HendelseMelding()
 
     @Test
@@ -139,11 +139,12 @@ class MelosysHendelseTest {
 
         val result = objectMapper.readValue<MelosysHendelse>(json)
 
+
         result.melding.shouldBe(
             DummyMelding(
                 folkeregisterIdent = "12345",
                 sakstype = Sakstyper.TRYGDEAVTALE,
-                nyFlelt = "default"
+                nyFelt = "default"
             )
         )
     }
