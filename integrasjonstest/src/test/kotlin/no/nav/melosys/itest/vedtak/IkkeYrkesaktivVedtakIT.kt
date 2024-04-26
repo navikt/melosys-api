@@ -188,7 +188,7 @@ class IkkeYrkesaktivVedtakIT(
             .single().value()
             .shouldBeInstanceOf<MelosysHendelse>()
             .melding.shouldBeInstanceOf<VedtakHendelseMelding>()
-            .apply {
+            .run {
                 folkeregisterIdent shouldBe "30056928150"
                 sakstype shouldBe Sakstyper.EU_EOS
                 sakstema shouldBe Sakstemaer.MEDLEMSKAP_LOVVALG
