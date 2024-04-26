@@ -22,7 +22,7 @@ open class HendelseMelding
 data class VedtakHendelseMelding(
     val folkeregisterIdent: String,
     val sakstype: Sakstyper,
-    val sakstema: Sakstemaer
+    val sakstema: Sakstemaer = Sakstemaer.TRYGDEAVGIFT
 ) : HendelseMelding()
 
 data class UkjentMelding(

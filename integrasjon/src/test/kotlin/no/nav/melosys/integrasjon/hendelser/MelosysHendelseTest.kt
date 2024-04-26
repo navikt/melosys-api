@@ -50,7 +50,6 @@ class MelosysHendelseTest {
     }
 
 
-
     @Test
     fun `deserialize HendelseMelding`() {
         val json = """
@@ -83,11 +82,13 @@ class MelosysHendelseTest {
         val result = objectMapper.readValue<MelosysHendelse>(json)
 
 
-        result.melding.shouldBeInstanceOf<VedtakHendelseMelding>().apply {
-            folkeregisterIdent shouldBe "12345"
-            sakstype shouldBe Sakstyper.TRYGDEAVTALE
-            sakstema shouldBe Sakstemaer.TRYGDEAVGIFT
-        }
+        result.melding.shouldBe(
+            VedtakHendelseMelding(
+                folkeregisterIdent = "12345",
+                sakstype = Sakstyper.TRYGDEAVTALE,
+                sakstema = Sakstemaer.TRYGDEAVGIFT
+            )
+        )
     }
 
     @Test
@@ -107,12 +108,46 @@ class MelosysHendelseTest {
         val result = objectMapper.readValue<MelosysHendelse>(json)
 
 
-        result.melding.shouldBeInstanceOf<VedtakHendelseMelding>().apply {
-            folkeregisterIdent shouldBe "12345"
-            sakstype shouldBe Sakstyper.TRYGDEAVTALE
-            sakstema shouldBe Sakstemaer.TRYGDEAVGIFT
-        }
+        result.melding.shouldBe(
+            VedtakHendelseMelding(
+                folkeregisterIdent = "12345",
+                sakstype = Sakstyper.TRYGDEAVTALE,
+                sakstema = Sakstemaer.TRYGDEAVGIFT
+            )
+        )
     }
+
+    data class DummyMelding(
+        val folkeregisterIdent: String,
+        val sakstype: Sakstyper,
+        val nyFlelt: String = "default"
+    ) : HendelseMelding()
+
+    @Test
+    fun `deserialize og legg til default ved manglende`() {
+        objectMapper.registerSubtypes(DummyMelding::class.java)
+
+        val json = """
+            {
+                "melding": {
+                    "type": "${"MelosysHendelseTest\$DummyMelding"}",
+                    "folkeregisterIdent": "12345",
+                    "sakstype": "TRYGDEAVTALE"
+                }
+            }"""
+
+
+        val result = objectMapper.readValue<MelosysHendelse>(json)
+
+        result.melding.shouldBe(
+            DummyMelding(
+                folkeregisterIdent = "12345",
+                sakstype = Sakstyper.TRYGDEAVTALE,
+                nyFlelt = "default"
+            )
+        )
+    }
+
 
     @Test
     fun `retuner UkjentMelding når vi ikke har type`() {
