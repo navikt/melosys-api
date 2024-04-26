@@ -37,7 +37,7 @@ class SendMeldingOmVedtak(
         val folkeregisterIdent = persondataService.finnFolkeregisterident(brukersAktørID).getOrNull()
 
         if (folkeregisterIdent == null) {
-            log.warn("Fant ikke folkeregisterident for bruker med aktørID $brukersAktørID")
+            log.warn("Fant ikke folkeregisterident for sak: ${fagsak.saksnummer} med behandling: ${behandling.id}")
             return
         }
 
