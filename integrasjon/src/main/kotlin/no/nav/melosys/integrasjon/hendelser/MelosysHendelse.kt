@@ -1,6 +1,5 @@
 package no.nav.melosys.integrasjon.hendelser
 
-import com.fasterxml.jackson.annotation.JsonAnySetter
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties
 import com.fasterxml.jackson.annotation.JsonSubTypes
 import com.fasterxml.jackson.annotation.JsonTypeInfo
@@ -11,7 +10,7 @@ data class MelosysHendelse(
     val melding: HendelseMelding
 )
 
-@JsonTypeInfo(use = JsonTypeInfo.Id.NAME, property = "type", defaultImpl = UkjentMelding::class)
+@JsonTypeInfo(use = JsonTypeInfo.Id.NAME, property = "type")
 @JsonSubTypes(
     JsonSubTypes.Type(value = HendelseMelding::class, name = "HendelseMelding"),
     JsonSubTypes.Type(value = VedtakHendelseMelding::class, name = "VedtakHendelseMelding")
@@ -25,12 +24,3 @@ data class VedtakHendelseMelding(
     val sakstema: Sakstemaer = Sakstemaer.TRYGDEAVGIFT
 ) : HendelseMelding()
 
-data class UkjentMelding(
-    val properties: MutableMap<String, Any> = mutableMapOf()
-) : HendelseMelding() {
-
-    @JsonAnySetter
-    fun setAdditionalProperty(name: String, value: Any) {
-        properties[name] = value
-    }
-}

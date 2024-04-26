@@ -1,5 +1,8 @@
 package no.nav.melosys.integrasjon.hendelser
 
+import com.fasterxml.jackson.annotation.JsonAnySetter
+import com.fasterxml.jackson.annotation.JsonSubTypes
+import com.fasterxml.jackson.annotation.JsonTypeInfo
 import com.fasterxml.jackson.databind.JsonNode
 import com.fasterxml.jackson.module.kotlin.jacksonObjectMapper
 import com.fasterxml.jackson.module.kotlin.readValue
@@ -10,8 +13,9 @@ import no.nav.melosys.domain.kodeverk.Sakstemaer
 import no.nav.melosys.domain.kodeverk.Sakstyper
 import org.junit.jupiter.api.Test
 
+
 class MelosysHendelseTest {
-    private val objectMapper = jacksonObjectMapper()
+    val objectMapper = jacksonObjectMapper()
 
     @Test
     fun `serialize tom hendelse`() {
@@ -150,18 +154,34 @@ class MelosysHendelseTest {
     }
 
 
+    // Eksempel på hvordan man kan håndtere ukjente meldinger når man leser køen
+    @JsonTypeInfo(use = JsonTypeInfo.Id.NAME, property = "type", defaultImpl = UkjentMelding::class)
+    @JsonSubTypes(
+        JsonSubTypes.Type(value = HendelseMeldingForTest::class, name = "HendelseMeldingForTest"),
+    )
+    open class HendelseMeldingForTest
+
+    data class UkjentMelding(
+        val properties: MutableMap<String, Any> = mutableMapOf()
+    ) : HendelseMeldingForTest() {
+
+        @JsonAnySetter
+        fun setAdditionalProperty(name: String, value: Any) {
+            properties[name] = value
+        }
+    }
+
     @Test
     fun `retuner UkjentMelding når vi ikke har type`() {
+
         val json = """{
-                "melding": {
                     "type": "VedtakHendelseMeldingV2",
                      "pnr": "12345"
-                }
-            }"""
+                }"""
 
-        val result = objectMapper.readValue<MelosysHendelse>(json)
+        val result = objectMapper.readValue<HendelseMeldingForTest>(json)
 
-        result.melding.shouldBeInstanceOf<UkjentMelding>()
+        result.shouldBeInstanceOf<UkjentMelding>()
             .properties.shouldBe(mapOf("pnr" to "12345"))
     }
 
