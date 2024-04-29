@@ -38,7 +38,6 @@ import no.nav.melosys.tjenester.gui.util.SaksbehandlingDataFactory;
 import org.jeasy.random.EasyRandom;
 import org.jeasy.random.EasyRandomParameters;
 import org.junit.jupiter.api.BeforeEach;
-import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
@@ -47,7 +46,6 @@ import org.springframework.http.MediaType;
 import org.springframework.test.web.servlet.MockMvc;
 
 import static no.nav.melosys.domain.FagsakTestFactory.*;
-import static no.nav.melosys.tjenester.gui.util.ResponseBodyMatchers.responseBody;
 import static org.hamcrest.Matchers.*;
 import static org.jeasy.random.FieldPredicates.*;
 import static org.mockito.Mockito.any;
@@ -124,10 +122,18 @@ class FagsakTjenesteTest {
         Fagsak fagsak = FagsakTestFactory.builder().medBruker().build();
         when(fagsakService.hentFagsak(SAKSNUMMER)).thenReturn(fagsak);
 
+        var expectedResponse = lagFagsakDto(fagsak);
         mockMvc.perform(get(BASE_URL + "/{saksnr}", SAKSNUMMER)
                 .contentType(MediaType.APPLICATION_JSON))
             .andExpect(status().isOk())
-            .andExpect(responseBody(objectMapper).containsObjectAsJson(lagFagsakDto(fagsak), FagsakDto.class));
+            .andExpect(jsonPath("saksnummer", equalTo(expectedResponse.getSaksnummer())))
+            .andExpect(jsonPath("gsakSaksnummer", equalTo(expectedResponse.getGsakSaksnummer())))
+            .andExpect(jsonPath("sakstema.kode", equalTo(expectedResponse.getSakstema().getKode())))
+            .andExpect(jsonPath("sakstype.kode", equalTo(expectedResponse.getSakstype().getKode())))
+            .andExpect(jsonPath("saksstatus.kode", equalTo(expectedResponse.getSaksstatus().getKode())))
+            .andExpect(jsonPath("registrertDato", equalTo(expectedResponse.getRegistrertDato().toString())))
+            .andExpect(jsonPath("endretDato", equalTo(expectedResponse.getEndretDato().toString())))
+            .andExpect(jsonPath("hovedpartRolle", equalTo(expectedResponse.getHovedpartRolle().toString())));
     }
 
     @Test
