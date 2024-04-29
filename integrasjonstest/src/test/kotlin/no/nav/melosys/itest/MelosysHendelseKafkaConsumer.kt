@@ -20,7 +20,7 @@ class MelosysHendelseKafkaConsumer {
 
     private val records: BlockingQueue<ConsumerRecord<String, MelosysHendelse>> = LinkedBlockingQueue()
 
-    @KafkaListener(topics = ["\${kafka.aiven.melosys-hendelse.topic}"], groupId = "\${kafka.aiven.melosys-hendelse.groupid}",
+    @KafkaListener(topics = ["\${kafka.aiven.melosys-hendelser.topic}"], groupId = "\${kafka.aiven.melosys-hendelse.groupid}",
         containerFactory = "melosysMeldingListenerContainerFactory")
     private fun melosysHendelseListener(record: ConsumerRecord<String, MelosysHendelse>) {
         records.add(record)

@@ -15,7 +15,7 @@ private val log = KotlinLogging.logger { }
 
 @Component
 class KafkaMelosysHendelseProducer(
-    @Value("\${kafka.aiven.melosys-hendelse.topic}") private val topicName: String,
+    @Value("\${kafka.aiven.melosys-hendelser.topic}") private val topicName: String,
     @Qualifier("melosysHendelse") @Autowired private val kafkaTemplate: KafkaTemplate<String, MelosysHendelse>
 ) {
     fun produserBestillingsmelding(melosysHendelse: MelosysHendelse) {
