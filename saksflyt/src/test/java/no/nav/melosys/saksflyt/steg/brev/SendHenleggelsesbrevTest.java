@@ -2,10 +2,7 @@ package no.nav.melosys.saksflyt.steg.brev;
 
 import java.util.Collections;
 
-import no.nav.melosys.domain.Behandling;
-import no.nav.melosys.domain.Behandlingsresultat;
-import no.nav.melosys.domain.BehandlingsresultatBegrunnelse;
-import no.nav.melosys.domain.Fagsak;
+import no.nav.melosys.domain.*;
 import no.nav.melosys.domain.brev.Mottaker;
 import no.nav.melosys.domain.kodeverk.Mottakerroller;
 import no.nav.melosys.domain.kodeverk.begrunnelser.Henleggelsesgrunner;
@@ -49,7 +46,7 @@ class SendHenleggelsesbrevTest {
     @Test
     void utfør_sendHenleggelsesbrev_produserDokument() {
         String saksbehandler = "Z097";
-        Fagsak fagsak = new Fagsak();
+        Fagsak fagsak = FagsakTestFactory.lagFagsak();
         Prosessinstans prosessinstans = new Prosessinstans();
         prosessinstans.setType(ProsessType.HENLEGG_SAK);
 

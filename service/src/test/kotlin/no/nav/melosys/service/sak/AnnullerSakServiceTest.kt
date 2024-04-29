@@ -8,6 +8,7 @@ import io.mockk.verify
 import no.nav.melosys.domain.Behandling
 import no.nav.melosys.domain.Behandlingsresultat
 import no.nav.melosys.domain.Fagsak
+import no.nav.melosys.domain.FagsakTestFactory
 import no.nav.melosys.domain.folketrygden.MedlemAvFolketrygden
 import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingsresultattyper
 import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingsstatus
@@ -42,15 +43,14 @@ class AnnullerSakServiceTest {
     fun `annuller sak - ferdigstill oppgave, slett medlemskapsperioder, oppdater behandlingsresultatstatus og opprett prosess`() {
         val saksnummer = "78945613"
         val behandlingId = 12L
-        val fagsak = Fagsak().apply {
+        val fagsak = FagsakTestFactory.builder().apply {
             this.saksnummer = saksnummer
-            behandlinger = listOf(
-                Behandling().apply {
-                    id = behandlingId
-                    status = Behandlingsstatus.OPPRETTET
-                }
+            leggTilBehandling(Behandling().apply {
+                id = behandlingId
+                status = Behandlingsstatus.OPPRETTET
+            }
             )
-        }
+        }.build()
         val behandlingsresultat = Behandlingsresultat().apply {
             id = behandlingId
             medlemAvFolketrygden = MedlemAvFolketrygden()
@@ -66,6 +66,6 @@ class AnnullerSakServiceTest {
         verify { oppgaveService.ferdigstillOppgaveMedSaksnummer(saksnummer) }
         verify { medlemskapsperiodeService.slettMedlemskapsperioder(behandlingId) }
         verify { behandlingsresultatService.oppdaterBehandlingsresultattype(behandlingId, Behandlingsresultattyper.ANNULLERT) }
-        verify { prosessinstansService.opprettAnnullerFagsakProsessflyt(fagsak.hentAktivBehandling()) }
+        verify { prosessinstansService.opprettAnnullerFagsakProsessflyt(fagsak.finnAktivBehandling()) }
     }
 }

@@ -12,6 +12,7 @@ import io.mockk.slot
 import io.mockk.verify
 import no.nav.melosys.domain.Aktoer
 import no.nav.melosys.domain.Fagsak
+import no.nav.melosys.domain.FagsakTestFactory
 import no.nav.melosys.domain.Fullmakt
 import no.nav.melosys.domain.kodeverk.Aktoersroller
 import no.nav.melosys.domain.kodeverk.Fullmaktstype
@@ -40,7 +41,7 @@ internal class AktoerServiceTest {
     @Test
     fun lagEllerOppdater_nyAktoer() {
         val aktoerDto = lagAktoerDto()
-        val fagsak = lagFagsak()
+        val fagsak = FagsakTestFactory.lagFagsak()
         val aktoer = lagAktoer()
         every { aktoerRepository.save(any()) } returns aktoer
 
@@ -60,7 +61,7 @@ internal class AktoerServiceTest {
         val aktoerFromDatabase = lagAktoer()
         val aktoerDto = lagAktoerDto()
         aktoerDto.databaseID = aktoerFromDatabase.id
-        val fagsak = lagFagsak()
+        val fagsak = FagsakTestFactory.lagFagsak()
 
         every { aktoerRepository.save(any()) } returns aktoerFromDatabase
         every { aktoerRepository.findById(aktoerDto.databaseID) } returns Optional.of(aktoerFromDatabase)
@@ -81,7 +82,7 @@ internal class AktoerServiceTest {
         val aktoerDto = lagAktoerDto().apply {
             fullmakter = setOf(Fullmaktstype.FULLMEKTIG_TRYGDEAVGIFT)
         }
-        val fagsak = lagFagsak()
+        val fagsak = FagsakTestFactory.lagFagsak()
         val aktoer = lagAktoer().apply {
             fullmakter = setOf(Fullmakt().apply { type = Fullmaktstype.FULLMEKTIG_TRYGDEAVGIFT })
         }
@@ -95,7 +96,7 @@ internal class AktoerServiceTest {
 
     @Test
     fun hentfagsakAktoerer() {
-        val fagsak = lagFagsak()
+        val fagsak = FagsakTestFactory.lagFagsak()
 
 
         aktoerService.hentfagsakAktører(fagsak, Aktoersroller.FULLMEKTIG)
@@ -108,7 +109,7 @@ internal class AktoerServiceTest {
         val fagsakCaptured = fagsakSlot.captured
         val aktoersrollerCaptured = aktoersrollerSlot.captured
         val aktoerProbe = fagsakSlot.captured
-        fagsakCaptured shouldBe lagFagsak()
+        fagsakCaptured shouldBe FagsakTestFactory.lagFagsak()
         aktoersrollerCaptured shouldBe Aktoersroller.FULLMEKTIG
     }
 
@@ -131,7 +132,7 @@ internal class AktoerServiceTest {
         val aktoer = Aktoer()
         aktoer.id = 10L
         aktoer.rolle = Aktoersroller.FULLMEKTIG
-        aktoer.fagsak = Fagsak()
+        aktoer.fagsak = FagsakTestFactory.lagFagsak()
         val optionalAktoer = Optional.of(aktoer)
         every { aktoerRepository.findById(10L) } returns optionalAktoer
 
@@ -145,7 +146,7 @@ internal class AktoerServiceTest {
 
     @Test
     fun erstattEksisterendeArbeidsgiveraktører_medNyttOrgnr() {
-        val fagsak = lagFagsak()
+        val fagsak = FagsakTestFactory.lagFagsak()
         val orgnumre = listOf("123456789")
         every { aktoerRepository.save(any()) } returns mockk()
 
@@ -163,7 +164,7 @@ internal class AktoerServiceTest {
 
     @Test
     fun erstattEksisterendeArbeidsgiveraktører_utenNyeOrgnr() {
-        val fagsak = lagFagsak()
+        val fagsak = FagsakTestFactory.lagFagsak()
 
 
         aktoerService.erstattEksisterendeArbeidsgiveraktører(fagsak, emptyList())
@@ -171,12 +172,6 @@ internal class AktoerServiceTest {
 
         verify { aktoerRepository.deleteAllByFagsakAndRolle(fagsak, Aktoersroller.ARBEIDSGIVER) }
         verify(exactly = 0) { aktoerRepository.save(any()) }
-    }
-
-    private fun lagFagsak(): Fagsak {
-        val fagsak = Fagsak()
-        fagsak.saksnummer = "MELTEST-1"
-        return fagsak
     }
 
     private fun lagAktoer(): Aktoer = Aktoer().apply {

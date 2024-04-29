@@ -478,10 +478,8 @@ class SedDataByggerTest {
         avsluttetBehandling.setId(2L);
         behandlingsresultatMedVedtak.setBehandling(avsluttetBehandling);
 
-        ArrayList<Behandling> list = new ArrayList<>();
-        list.add(behandling);
-        list.add(avsluttetBehandling);
-        behandling.getFagsak().setBehandlinger(list);
+        behandling.getFagsak().leggTilBehandling(behandling);
+        behandling.getFagsak().leggTilBehandling(avsluttetBehandling);
         behandlingsresultat.setBehandling(behandling);
 
         when(behandlingsresultatService.hentBehandlingsresultat(anyLong())).thenReturn(behandlingsresultatMedVedtak);
@@ -506,10 +504,8 @@ class SedDataByggerTest {
         avsluttetBehandling.setId(2L);
         behandlingsresultatMedVedtak.setBehandling(avsluttetBehandling);
 
-        ArrayList<Behandling> list = new ArrayList<>();
-        list.add(behandling);
-        list.add(avsluttetBehandling);
-        behandling.getFagsak().setBehandlinger(list);
+        behandling.getFagsak().leggTilBehandling(behandling);
+        behandling.getFagsak().leggTilBehandling(avsluttetBehandling);
         behandlingsresultat.setBehandling(behandling);
 
         when(behandlingsresultatService.hentBehandlingsresultat(anyLong())).thenReturn(behandlingsresultatMedVedtak);
@@ -583,9 +579,7 @@ class SedDataByggerTest {
 
     @Test
     void lag_harFlytErEøsErIkkeSed_søknadsperiodeBlirSatt() {
-        var fagsak = new Fagsak();
-        fagsak.setType(Sakstyper.EU_EOS);
-        fagsak.setTema(Sakstemaer.MEDLEMSKAP_LOVVALG);
+        var fagsak = FagsakTestFactory.lagFagsak();
         behandling.setTema(Behandlingstema.UTSENDT_ARBEIDSTAKER);
         behandling.setType(Behandlingstyper.FØRSTEGANG);
         behandling.setFagsak(fagsak);
@@ -599,8 +593,7 @@ class SedDataByggerTest {
 
     @Test
     void lag_erIkkeEuEøs_søknadsperiodeBlirIkkeSatt() {
-        var fagsak = new Fagsak();
-        fagsak.setType(Sakstyper.TRYGDEAVTALE);
+        var fagsak = FagsakTestFactory.builder().type(Sakstyper.TRYGDEAVTALE).build();
         behandling.setTema(Behandlingstema.UTSENDT_ARBEIDSTAKER);
         behandling.setType(Behandlingstyper.FØRSTEGANG);
         behandling.setFagsak(fagsak);
@@ -612,8 +605,7 @@ class SedDataByggerTest {
 
     @Test
     void lag_erSed_søknadsperiodeBlirIkkeSatt() {
-        var fagsak = new Fagsak();
-        fagsak.setType(Sakstyper.EU_EOS);
+        var fagsak = FagsakTestFactory.lagFagsak();
         behandling.setTema(Behandlingstema.ANMODNING_OM_UNNTAK_HOVEDREGEL);
         behandling.setType(Behandlingstyper.FØRSTEGANG);
         behandling.setFagsak(fagsak);
@@ -625,9 +617,7 @@ class SedDataByggerTest {
 
     @Test
     void lag_harIkkeFlyt_søknadsperiodeBlirIkkeSatt() {
-        var fagsak = new Fagsak();
-        fagsak.setType(Sakstyper.EU_EOS);
-        fagsak.setTema(Sakstemaer.MEDLEMSKAP_LOVVALG);
+        var fagsak = FagsakTestFactory.lagFagsak();
         behandling.setTema(Behandlingstema.UTSENDT_ARBEIDSTAKER);
         behandling.setType(Behandlingstyper.HENVENDELSE);
         behandling.setFagsak(fagsak);

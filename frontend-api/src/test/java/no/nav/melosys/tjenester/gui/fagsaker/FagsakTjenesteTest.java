@@ -1,10 +1,8 @@
 package no.nav.melosys.tjenester.gui.fagsaker;
 
 import java.time.LocalDate;
-import java.util.Collections;
 import java.util.List;
 import java.util.Optional;
-import java.util.Set;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import no.nav.melosys.domain.*;
@@ -23,7 +21,6 @@ import no.nav.melosys.domain.kodeverk.lovvalgsbestemmelser.Lovvalgbestemmelser_8
 import no.nav.melosys.domain.kodeverk.lovvalgsbestemmelser.Tilleggsbestemmelser_883_2004;
 import no.nav.melosys.domain.mottatteopplysninger.MottatteOpplysninger;
 import no.nav.melosys.domain.mottatteopplysninger.Soeknad;
-import no.nav.melosys.domain.OrganisasjonDokumentTestFactory;
 import no.nav.melosys.service.MedlemAvFolketrygdenService;
 import no.nav.melosys.service.behandling.BehandlingsresultatService;
 import no.nav.melosys.service.mottatteopplysninger.MottatteOpplysningerService;
@@ -41,6 +38,7 @@ import no.nav.melosys.tjenester.gui.util.SaksbehandlingDataFactory;
 import org.jeasy.random.EasyRandom;
 import org.jeasy.random.EasyRandomParameters;
 import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
@@ -48,6 +46,7 @@ import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.http.MediaType;
 import org.springframework.test.web.servlet.MockMvc;
 
+import static no.nav.melosys.domain.FagsakTestFactory.*;
 import static no.nav.melosys.tjenester.gui.util.ResponseBodyMatchers.responseBody;
 import static org.hamcrest.Matchers.*;
 import static org.jeasy.random.FieldPredicates.*;
@@ -60,8 +59,6 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 @WebMvcTest(controllers = {FagsakTjeneste.class})
 class FagsakTjenesteTest {
 
-    private static final String FNR = "12345678901";
-    private static final String ORGNR = "111111111";
     private static final String BASE_URL = "/api/fagsaker";
     private static final LocalDate FOM = LocalDate.now();
     private static final LocalDate TOM = LocalDate.now();
@@ -124,13 +121,10 @@ class FagsakTjenesteTest {
 
     @Test
     void hentFagsak() throws Exception {
-        Fagsak fagsak = lagFagsak();
-        var bruker = new Aktoer();
-        bruker.setRolle(Aktoersroller.BRUKER);
-        fagsak.setAktører(Set.of(bruker));
-        when(fagsakService.hentFagsak("123")).thenReturn(fagsak);
+        Fagsak fagsak = FagsakTestFactory.builder().medBruker().build();
+        when(fagsakService.hentFagsak(SAKSNUMMER)).thenReturn(fagsak);
 
-        mockMvc.perform(get(BASE_URL + "/{saksnr}", "123")
+        mockMvc.perform(get(BASE_URL + "/{saksnr}", SAKSNUMMER)
                 .contentType(MediaType.APPLICATION_JSON))
             .andExpect(status().isOk())
             .andExpect(responseBody(objectMapper).containsObjectAsJson(lagFagsakDto(fagsak), FagsakDto.class));
@@ -139,7 +133,7 @@ class FagsakTjenesteTest {
     @Test
     void opprettFagsak() throws Exception {
         var opprettSakDto = new OpprettSakDto();
-        opprettSakDto.setBrukerID(FNR);
+        opprettSakDto.setBrukerID(BRUKER_AKTØR_ID);
 
         mockMvc.perform(post(BASE_URL)
                 .contentType(MediaType.APPLICATION_JSON)
@@ -162,14 +156,14 @@ class FagsakTjenesteTest {
 
     @Test
     void lagNyBehandling() throws Exception {
-        Fagsak fagsak = SaksbehandlingDataFactory.lagFagsak("MEL-1");
+        Fagsak fagsak = SaksbehandlingDataFactory.lagFagsak();
         var behandling = new Behandling();
         behandling.setFagsak(fagsak);
         behandling.setId(123L);
 
-        fagsak.setBehandlinger(Collections.singletonList(behandling));
+        fagsak.leggTilBehandling(behandling);
         var opprettSakDto = new OpprettSakDto();
-        opprettSakDto.setBrukerID(FNR);
+        opprettSakDto.setBrukerID(BRUKER_AKTØR_ID);
         opprettSakDto.setBehandlingstema(Behandlingstema.ARBEID_TJENESTEPERSON_ELLER_FLY);
         opprettSakDto.setBehandlingstype(Behandlingstyper.NY_VURDERING);
 
@@ -182,37 +176,36 @@ class FagsakTjenesteTest {
 
     @Test
     void hentFagsaker_medFnr_verifiserErMappetKorrekt() throws Exception {
-        Fagsak fagsak = SaksbehandlingDataFactory.lagFagsak("MEL-1");
+        Fagsak fagsak = SaksbehandlingDataFactory.lagFagsak();
         var behandling = new Behandling();
         behandling.setFagsak(fagsak);
         behandling.setId(123L);
-        fagsak.setBehandlinger(Collections.singletonList(behandling));
+        fagsak.leggTilBehandling(behandling);
         mockFagsakTjeneste(fagsak, null);
-        var fagsakSokDto = new FagsakSokDto(FNR, null, null);
+        var fagsakSokDto = new FagsakSokDto(BRUKER_AKTØR_ID, null, null);
 
         mockMvc.perform(post(BASE_URL + "/sok")
                 .contentType(MediaType.APPLICATION_JSON)
                 .content(objectMapper.writeValueAsString(fagsakSokDto)))
             .andExpect(status().isOk())
             .andExpect(jsonPath("$[0].hovedpartRolle", equalTo(Aktoersroller.BRUKER.toString())))
-            .andExpect(jsonPath("$[0].saksnummer", equalTo("MEL-1")));
+            .andExpect(jsonPath("$[0].saksnummer", equalTo(SAKSNUMMER)));
     }
 
     @Test
     void hentFagsaker_medBehandlingsresultatOgLovvalgsperiode_verifiserErMappetKorrekt() throws Exception {
         long behandlingID = 123L;
 
-        String saksnummer = "MEL-1";
-        mockFagsakMedBehandling(behandlingID, saksnummer);
+        mockFagsakMedBehandling(behandlingID);
 
-        var fagsakSokDto = new FagsakSokDto(FNR, null, null);
+        var fagsakSokDto = new FagsakSokDto(BRUKER_AKTØR_ID, null, null);
 
         mockMvc.perform(post(BASE_URL + "/sok")
                 .contentType(MediaType.APPLICATION_JSON)
                 .content(objectMapper.writeValueAsString(fagsakSokDto)))
             .andExpect(status().isOk())
             .andExpect(jsonPath("$[0].hovedpartRolle", equalTo(Aktoersroller.BRUKER.toString())))
-            .andExpect(jsonPath("$[0].saksnummer", equalTo(saksnummer)))
+            .andExpect(jsonPath("$[0].saksnummer", equalTo(SAKSNUMMER)))
             .andExpect(jsonPath("$[0].behandlingOversikter[0].land.landkoder[0]", equalTo(Landkoder.DK.getKode())))
             .andExpect(jsonPath("$[0].behandlingOversikter[0].land.landkoder[0]", is(not(equalTo(FORVENTET_LOVVALGSPERIODE.lovvalgsland)))))
             .andExpect(jsonPath("$[0].behandlingOversikter[0].soknadsperiode.fom", equalTo("2019-01-01")))
@@ -225,13 +218,12 @@ class FagsakTjenesteTest {
     @Test
     void hentFagsaker_medMedlemAvFolketrygdenOgMedlemskapsperioder_verifiserErMappetKorrekt() throws Exception {
         long behandlingID = 123L;
-        String saksnummer = "MEL-1";
 
-        var fagsak = SaksbehandlingDataFactory.lagFagsak(saksnummer);
+        var fagsak = SaksbehandlingDataFactory.lagFagsak();
         var behandling = new Behandling();
         behandling.setFagsak(fagsak);
         behandling.setId(behandlingID);
-        fagsak.setBehandlinger(Collections.singletonList(behandling));
+        fagsak.leggTilBehandling(behandling);
         var behandlingsresultat = new Behandlingsresultat();
         behandlingsresultat.setMedlemAvFolketrygden(new MedlemAvFolketrygden());
         var medlemskapsperiode = new Medlemskapsperiode();
@@ -241,14 +233,14 @@ class FagsakTjenesteTest {
         behandlingsresultat.getMedlemAvFolketrygden().setMedlemskapsperioder(List.of(medlemskapsperiode));
         mockFagsakTjeneste(fagsak, behandlingsresultat);
 
-        var fagsakSokDto = new FagsakSokDto(FNR, null, null);
+        var fagsakSokDto = new FagsakSokDto(BRUKER_AKTØR_ID, null, null);
 
         mockMvc.perform(post(BASE_URL + "/sok")
                 .contentType(MediaType.APPLICATION_JSON)
                 .content(objectMapper.writeValueAsString(fagsakSokDto)))
             .andExpect(status().isOk())
             .andExpect(jsonPath("$[0].hovedpartRolle", equalTo(Aktoersroller.BRUKER.toString())))
-            .andExpect(jsonPath("$[0].saksnummer", equalTo(saksnummer)))
+            .andExpect(jsonPath("$[0].saksnummer", equalTo(SAKSNUMMER)))
             .andExpect(jsonPath("$[0].behandlingOversikter[0].land.landkoder[0]", equalTo(Landkoder.DK.getKode())))
             .andExpect(jsonPath("$[0].behandlingOversikter[0].land.landkoder[0]", is(not(equalTo(FORVENTET_LOVVALGSPERIODE.lovvalgsland)))))
             .andExpect(jsonPath("$[0].behandlingOversikter[0].soknadsperiode.fom", equalTo("2019-01-01")))
@@ -260,16 +252,15 @@ class FagsakTjenesteTest {
 
     @Test
     void hentFagsaker_medTomtFnr_verifiserAtNavnErUkjent() throws Exception {
-        Fagsak fagsak = lagFagsak();
+        Aktoer brukerUtenFnr = new Aktoer();
+        brukerUtenFnr.setRolle(Aktoersroller.BRUKER);
+        Fagsak fagsak = FagsakTestFactory.builder().aktører(brukerUtenFnr).build();
         var behandling = new Behandling();
         behandling.setId(123L);
         behandling.setFagsak(fagsak);
-        fagsak.setBehandlinger(List.of(behandling));
-        Aktoer aktoer = new Aktoer();
-        aktoer.setRolle(Aktoersroller.BRUKER);
-        fagsak.setAktører(Set.of(aktoer));
+        fagsak.leggTilBehandling(behandling);
         mockFagsakTjeneste(fagsak, null);
-        var fagsakSokDto = new FagsakSokDto(FNR, null, null);
+        var fagsakSokDto = new FagsakSokDto(BRUKER_AKTØR_ID, null, null);
 
         mockMvc.perform(post(BASE_URL + "/sok")
                 .contentType(MediaType.APPLICATION_JSON)
@@ -277,20 +268,16 @@ class FagsakTjenesteTest {
             .andExpect(status().isOk())
             .andExpect(jsonPath("$[0].hovedpartRolle", equalTo(Aktoersroller.BRUKER.toString())))
             .andExpect(jsonPath("$[0].navn", equalTo("UKJENT")))
-            .andExpect(jsonPath("$[0].saksnummer", equalTo("MEL-1")));
+            .andExpect(jsonPath("$[0].saksnummer", equalTo(SAKSNUMMER)));
     }
 
     @Test
     void hentFagsaker_medOrgnr_verifiserErMappetKorrekt() throws Exception {
-        Fagsak fagsak = lagFagsak();
+        Fagsak fagsak = FagsakTestFactory.builder().medVirksomhet().build();
         var behandling = new Behandling();
         behandling.setId(123L);
         behandling.setFagsak(fagsak);
-        fagsak.setBehandlinger(List.of(behandling));
-        Aktoer aktoer = new Aktoer();
-        aktoer.setOrgnr(ORGNR);
-        aktoer.setRolle(Aktoersroller.VIRKSOMHET);
-        fagsak.setAktører(Set.of(aktoer));
+        fagsak.leggTilBehandling(behandling);
         mockFagsakTjeneste(fagsak, null);
 
         var organisajonsdokument = OrganisasjonDokumentTestFactory.builder()
@@ -309,14 +296,13 @@ class FagsakTjenesteTest {
 
     @Test
     void hentFagsaker_medTomtOrgnr_verifiserAtNavnErUkjent() throws Exception {
-        Fagsak fagsak = lagFagsak();
+        var aktoer = new Aktoer();
+        aktoer.setRolle(Aktoersroller.VIRKSOMHET);
+        Fagsak fagsak = FagsakTestFactory.builder().aktører(aktoer).build();
         var behandling = new Behandling();
         behandling.setId(123L);
         behandling.setFagsak(fagsak);
-        fagsak.setBehandlinger(List.of(behandling));
-        var aktoer = new Aktoer();
-        aktoer.setRolle(Aktoersroller.VIRKSOMHET);
-        fagsak.setAktører(Set.of(aktoer));
+        fagsak.leggTilBehandling(behandling);
         mockFagsakTjeneste(fagsak, null);
         var fagsakSokDto = new FagsakSokDto(null, null, ORGNR);
 
@@ -344,24 +330,24 @@ class FagsakTjenesteTest {
         EndreSakDto endreSakDto = new EndreSakDto(Sakstyper.TRYGDEAVTALE, Sakstemaer.UNNTAK,
             Behandlingstema.FORESPØRSEL_TRYGDEMYNDIGHET, Behandlingstyper.NY_VURDERING, Behandlingsstatus.OPPRETTET, null);
 
-        mockMvc.perform(post(BASE_URL + "/{saksnr}/endre", "123")
+        mockMvc.perform(post(BASE_URL + "/{saksnr}/endre", SAKSNUMMER)
                 .content(objectMapper.writeValueAsString(endreSakDto))
                 .contentType(MediaType.APPLICATION_JSON))
             .andExpect(status().isNoContent());
 
-        verify(aksesskontroll).autoriserSakstilgang("123");
-        verify(endreSakService).endre("123", Sakstyper.TRYGDEAVTALE, Sakstemaer.UNNTAK,
+        verify(aksesskontroll).autoriserSakstilgang(SAKSNUMMER);
+        verify(endreSakService).endre(SAKSNUMMER, Sakstyper.TRYGDEAVTALE, Sakstemaer.UNNTAK,
             Behandlingstema.FORESPØRSEL_TRYGDEMYNDIGHET, Behandlingstyper.NY_VURDERING, Behandlingsstatus.OPPRETTET, null);
     }
 
     @Test
     void ferdigbehandleSak() throws Exception {
-        mockMvc.perform(put(BASE_URL + "/{saksnr}/ferdigbehandle", "123")
+        mockMvc.perform(put(BASE_URL + "/{saksnr}/ferdigbehandle", SAKSNUMMER)
                 .contentType(MediaType.APPLICATION_JSON))
             .andExpect(status().isNoContent());
 
-        verify(aksesskontroll).autoriserSakstilgang("123");
-        verify(ferdigbehandleSakService).ferdigbehandleSak("123");
+        verify(aksesskontroll).autoriserSakstilgang(SAKSNUMMER);
+        verify(ferdigbehandleSakService).ferdigbehandleSak(SAKSNUMMER);
     }
 
     private void mockFagsakTjeneste(Fagsak fagsak, Behandlingsresultat eksisterendeBehres) {
@@ -377,18 +363,18 @@ class FagsakTjenesteTest {
         when(behandlingsresultatService.hentBehandlingsresultatMedLovvalgsperioder(anyLong())).thenReturn(behandlingsresultat);
         when(mottatteOpplysningerService.finnMottatteOpplysninger(fagsak.getBehandlinger().get(0).getId())).thenReturn(Optional.of(mottatteOpplysninger));
         when(medlemAvFolketrygdenService.finnMedlemAvFolketrygdenMedMedlemskapsperioder(anyLong())).thenReturn(Optional.ofNullable(behandlingsresultat.getMedlemAvFolketrygden()));
-        when(fagsakService.hentFagsak("123")).thenReturn(fagsak);
+        when(fagsakService.hentFagsak(SAKSNUMMER)).thenReturn(fagsak);
         when(persondataFasade.hentSammensattNavn(any())).thenReturn("Joe Moe");
-        doReturn(List.of(fagsak)).when(fagsakService).hentFagsakerMedAktør(Aktoersroller.BRUKER, FNR);
+        doReturn(List.of(fagsak)).when(fagsakService).hentFagsakerMedAktør(Aktoersroller.BRUKER, BRUKER_AKTØR_ID);
         doReturn(List.of(fagsak)).when(fagsakService).hentFagsakerMedOrgnr(Aktoersroller.VIRKSOMHET, ORGNR);
     }
 
-    private void mockFagsakMedBehandling(long behandlingID, String saksnummer) {
-        var fagsak = SaksbehandlingDataFactory.lagFagsak(saksnummer);
+    private void mockFagsakMedBehandling(long behandlingID) {
+        var fagsak = SaksbehandlingDataFactory.lagFagsak();
         var behandling = new Behandling();
         behandling.setFagsak(fagsak);
         behandling.setId(behandlingID);
-        fagsak.setBehandlinger(Collections.singletonList(behandling));
+        fagsak.leggTilBehandling(behandling);
         mockFagsakTjeneste(fagsak, null);
     }
 
@@ -405,13 +391,6 @@ class FagsakTjenesteTest {
         lovvalgsperiode.setMedlPeriodeID(Long.valueOf(FORVENTET_LOVVALGSPERIODE.medlemskapsperiodeID));
 
         return lovvalgsperiode;
-    }
-
-    private Fagsak lagFagsak() {
-        Fagsak fagsak = new Fagsak();
-        fagsak.setSaksnummer("MEL-1");
-        fagsak.setBehandlinger(Collections.emptyList());
-        return fagsak;
     }
 
     private FagsakDto lagFagsakDto(Fagsak fagsak) {

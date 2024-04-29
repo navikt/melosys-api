@@ -71,15 +71,9 @@ class BrevDataByggerAvslagYrkesaktivTest {
 
     @Test
     void lag_annmodningUnntakBrev_avklarVirksomhetSomSelvstendigForetak() {
-        Aktoer aktoer = new Aktoer();
-        aktoer.setRolle(Aktoersroller.BRUKER);
-        aktoer.setAktørId("ident");
-
         Behandling behandling = new Behandling();
         behandling.setId(1L);
-        Fagsak fagsak = new Fagsak();
-        fagsak.setType(Sakstyper.EU_EOS);
-        fagsak.setAktører(Set.of(aktoer));
+        Fagsak fagsak = FagsakTestFactory.builder().medBruker().build();
         behandling.setFagsak(fagsak);
 
         List<String> selvstendigeForetak = Collections.singletonList("987654321");

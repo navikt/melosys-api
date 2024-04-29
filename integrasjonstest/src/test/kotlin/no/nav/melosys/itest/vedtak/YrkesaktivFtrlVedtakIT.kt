@@ -184,7 +184,7 @@ class YrkesaktivFtrlVedtakIT(
         fagsakRepository.findBySaksnummer(saksnummer)
             .shouldBePresent().run {
                 behandlinger.shouldHaveSize(2)
-                hentAktivBehandling().shouldNotBeNull().run {
+                finnAktivBehandling().shouldNotBeNull().run {
                     tema shouldBe Behandlingstema.YRKESAKTIV
                     type shouldBe Behandlingstyper.MANGLENDE_INNBETALING_TRYGDEAVGIFT
                     behandlingsårsak.type shouldBe Behandlingsaarsaktyper.SØKNAD

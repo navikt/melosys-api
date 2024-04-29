@@ -374,7 +374,7 @@ class OpprettFakturaserieTest {
     }
 
     private fun lagTestData(aktører: Set<Aktoer>) {
-        this.fagsak = lagFagsak().apply { this.aktører = aktører }
+        this.fagsak = FagsakTestFactory.builder().aktører(aktører).build()
         this.behandling = lagBehandling(fagsak)
         prosessinstans = Prosessinstans().apply {
             setData(ProsessDataKey.SAKSBEHANDLER, "S123456")
@@ -385,7 +385,7 @@ class OpprettFakturaserieTest {
         fastsattTrygdeavgift = behandlingsresultat.medlemAvFolketrygden.fastsattTrygdeavgift
     }
 
-    private fun lagBehandling(fagsak: Fagsak = lagFagsak()): Behandling {
+    private fun lagBehandling(fagsak: Fagsak): Behandling {
         val behandling = Behandling()
         behandling.id = BEHANDLING_ID
         behandling.tema = Behandlingstema.UTSENDT_ARBEIDSTAKER
@@ -393,13 +393,6 @@ class OpprettFakturaserieTest {
         behandling.status = Behandlingsstatus.AVSLUTTET
         behandling.fagsak = fagsak
         return behandling
-    }
-
-    private fun lagFagsak(): Fagsak = Fagsak().apply {
-        saksnummer = "MEL-100"
-        type = Sakstyper.EU_EOS
-        tema = Sakstemaer.MEDLEMSKAP_LOVVALG
-        status = Saksstatuser.OPPRETTET
     }
 
     fun lagBehandlingsresultat(): Behandlingsresultat {

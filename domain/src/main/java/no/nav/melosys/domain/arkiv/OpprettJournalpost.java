@@ -2,6 +2,7 @@ package no.nav.melosys.domain.arkiv;
 
 import java.util.Collection;
 import java.util.List;
+import java.util.Optional;
 
 import com.google.common.collect.MoreCollectors;
 import no.nav.melosys.domain.Fagsak;
@@ -94,9 +95,9 @@ public class OpprettJournalpost extends Journalpost {
         opprettJournalpost.setBrukerIdType(BrukerIdType.FOLKEREGISTERIDENT);
         opprettJournalpost.setForsendelseMottatt(hovedDokument.getInnsendtTidspunkt());
 
-        fagsak.finnFullmektig(Fullmaktstype.FULLMEKTIG_SØKNAD).ifPresentOrElse(
-            r -> {
-                opprettJournalpost.setKorrespondansepartId(r.getOrgnr());
+        Optional.ofNullable(fagsak.finnFullmektig(Fullmaktstype.FULLMEKTIG_SØKNAD)).ifPresentOrElse(
+            fullmektig -> {
+                opprettJournalpost.setKorrespondansepartId(fullmektig.getOrgnr());
                 opprettJournalpost.setKorrespondansepartNavn(avsenderNavn);
                 opprettJournalpost.setKorrespondansepartIdType(KorrespondansepartIdType.ORGNR);
             },

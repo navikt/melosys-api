@@ -9,10 +9,7 @@ import java.util.HashSet;
 
 import no.nav.dok.melosysbrev.felles.melosys_felles.FellesType;
 import no.nav.dok.melosysbrev.felles.melosys_felles.MelosysNAVFelles;
-import no.nav.melosys.domain.Behandling;
-import no.nav.melosys.domain.Behandlingsresultat;
-import no.nav.melosys.domain.Fagsak;
-import no.nav.melosys.domain.Lovvalgsperiode;
+import no.nav.melosys.domain.*;
 import no.nav.melosys.domain.adresse.StrukturertAdresse;
 import no.nav.melosys.domain.avklartefakta.AvklartVirksomhet;
 import no.nav.melosys.domain.dokument.felles.Land;
@@ -84,7 +81,7 @@ class AttestMapperTest {
 
         behandling = mock(Behandling.class);
         when(behandling.getRegistrertDato()).thenReturn(Instant.now());
-        when(behandling.getFagsak()).thenReturn(new Fagsak());
+        when(behandling.getFagsak()).thenReturn(FagsakTestFactory.lagFagsak());
 
         StrukturertAdresse strukturertAdresse = new StrukturertAdresse();
         strukturertAdresse.setHusnummerEtasjeLeilighet("25");

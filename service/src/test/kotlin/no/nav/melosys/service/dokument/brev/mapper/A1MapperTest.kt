@@ -20,10 +20,6 @@ import no.nav.dok.melosysbrev._000116.ObjectFactory
 import no.nav.dok.melosysbrev.felles.melosys_felles.FellesType
 import no.nav.dok.melosysbrev.felles.melosys_felles.MelosysNAVFelles
 import no.nav.dok.melosysbrev.felles.melosys_vedlegg.VedleggType
-import no.nav.melosys.domain.Behandling
-import no.nav.melosys.domain.Behandlingsresultat
-import no.nav.melosys.domain.Fagsak
-import no.nav.melosys.domain.Lovvalgsperiode
 import no.nav.melosys.domain.adresse.StrukturertAdresse
 import no.nav.melosys.domain.avklartefakta.AvklartVirksomhet
 import no.nav.melosys.domain.kodeverk.Land_iso2
@@ -52,6 +48,7 @@ import java.time.Instant
 import java.time.LocalDate
 import java.util.List
 import jakarta.xml.bind.JAXBElement
+import no.nav.melosys.domain.*
 
 @ExtendWith(MockKExtension::class)
 @TestInstance(TestInstance.Lifecycle.PER_CLASS)
@@ -85,7 +82,7 @@ internal class A1MapperTest {
         every { behandlingsresultat.hentLovvalgsperiode() } returns lovvalgsperiode
 
         every { behandling.registrertDato } returns Instant.now()
-        every { behandling.fagsak } returns Fagsak()
+        every { behandling.fagsak } returns FagsakTestFactory.lagFagsak()
         every { behandling.id } returns 1L
 
         val boAdresse = StrukturertAdresse().apply {

@@ -12,10 +12,9 @@ import io.kotest.matchers.types.shouldNotBeInstanceOf
 import io.mockk.*
 import io.mockk.impl.annotations.MockK
 import io.mockk.junit5.MockKExtension
-import no.nav.melosys.domain.Behandling
-import no.nav.melosys.domain.Behandlingsaarsak
-import no.nav.melosys.domain.Fagsak
+import no.nav.melosys.domain.*
 import no.nav.melosys.domain.arkiv.Journalpost
+import no.nav.melosys.domain.kodeverk.Aktoersroller
 import no.nav.melosys.domain.kodeverk.Mottatteopplysningertyper
 import no.nav.melosys.domain.kodeverk.Sakstemaer
 import no.nav.melosys.domain.kodeverk.Sakstyper
@@ -514,10 +513,10 @@ internal class MottatteOpplysningerServiceTest {
 
     private fun lagBehandling(sakstype: Sakstyper, sakstemaer: Sakstemaer, tema: Behandlingstema) =
         Behandling().apply {
-            fagsak = Fagsak().apply {
-                type = sakstype
-                this.tema = sakstemaer
-            }
+            fagsak = FagsakTestFactory.builder()
+                .type(sakstype)
+                .tema(sakstemaer)
+                .build()
             id = behandlingID
             initierendeJournalpostId = "123321"
             type = Behandlingstyper.FØRSTEGANG

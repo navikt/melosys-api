@@ -85,9 +85,6 @@ public class FagsakService {
 
     @Transactional
     public void lagre(Fagsak sak) {
-        if (sak.getSaksnummer() == null) {
-            sak.setSaksnummer(hentNesteSaksnummer());
-        }
         fagsakRepository.save(sak);
     }
 
@@ -115,7 +112,7 @@ public class FagsakService {
         boolean harIngenTrygdemyndigheter = fagsak.hentMyndigheter().isEmpty();
         if (harIngenTrygdemyndigheter) {
             Aktoer nyTrygdemyndighet = lagMyndighetAktørForTrygdeavtaler(fagsak, landkode);
-            fagsak.getAktører().add(nyTrygdemyndighet);
+            fagsak.leggTilAktør(nyTrygdemyndighet);
         }
         fagsakRepository.save(fagsak);
     }
@@ -138,9 +135,14 @@ public class FagsakService {
 
     @Transactional
     public Fagsak nyFagsakOgBehandling(OpprettSakRequest opprettSakRequest) {
-        Fagsak fagsak = new Fagsak();
-        String saksnummer = hentNesteSaksnummer();
-        fagsak.setSaksnummer(saksnummer);
+        String saksnummer  = hentNesteSaksnummer();
+        Fagsak fagsak = new Fagsak(
+            saksnummer,
+            null,
+            opprettSakRequest.getSakstype(),
+            opprettSakRequest.getSakstema(),
+            Saksstatuser.OPPRETTET
+        );
 
         HashSet<Aktoer> aktører = new HashSet<>();
 
@@ -173,7 +175,6 @@ public class FagsakService {
         }
 
         FullmektigDto fullmektig = opprettSakRequest.getFullmektig();
-
         if (fullmektig != null) {
             Aktoer aktørFullmektig = new Aktoer();
             aktørFullmektig.setOrgnr(fullmektig.getOrgnr());
@@ -185,13 +186,9 @@ public class FagsakService {
         }
 
         Instant nå = Instant.now();
-
-        fagsak.setType(opprettSakRequest.getSakstype());
-        fagsak.setTema(opprettSakRequest.getSakstema());
-        fagsak.setAktører(aktører);
+        fagsak.getAktører().addAll(aktører);
         fagsak.setRegistrertDato(nå);
         fagsak.setEndretDato(nå);
-        fagsak.setStatus(Saksstatuser.OPPRETTET);
 
         lagre(fagsak);
 
@@ -213,7 +210,7 @@ public class FagsakService {
             Behandlingsstatus.OPPRETTET, behandlingstype, behandlingstema,
             initierendeJournalpostId, initierendeDokumentId, mottaksdato,
             behandlingsårsaktype, behandlingsårsakFritekst);
-        fagsak.setBehandlinger(Collections.singletonList(behandling));
+        fagsak.leggTilBehandling(behandling);
 
         sakerOpprettet.increment();
         return fagsak;
@@ -228,7 +225,7 @@ public class FagsakService {
                                            Behandlingstema nyBehandlingstema, Behandlingstyper nyBehandlingstype,
                                            Behandlingsstatus nyBehandlingsstatus, LocalDate nyMottaksdato) {
         Fagsak fagsak = hentFagsak(saksnummer);
-        Behandling behandling = fagsak.hentAktivBehandling();
+        Behandling behandling = fagsak.finnAktivBehandling();
         validerOppdatering(fagsak, behandling, nySakstype, nySakstema, nyBehandlingstema, nyBehandlingstype);
         if (fagsak.getType() != nySakstype || fagsak.getTema() != nySakstema) {
             log.info("Endrer sakstype for fagsak {} fra {} til {}", fagsak.getSaksnummer(), fagsak.getType(), nySakstype);
@@ -253,7 +250,7 @@ public class FagsakService {
 
 
     public void avsluttFagsakOgBehandling(Fagsak fagsak, Saksstatuser saksstatus) {
-        Behandling aktivBehandling = fagsak.hentAktivBehandling();
+        Behandling aktivBehandling = fagsak.finnAktivBehandling();
         if (aktivBehandling == null) {
             log.warn("Forsøker å lukke behandling for fagsak {} som ikke har noen aktiv behandling", fagsak.getSaksnummer());
             oppdaterStatus(fagsak, saksstatus);
@@ -266,8 +263,7 @@ public class FagsakService {
                                           Behandling behandling,
                                           Saksstatuser saksstatus) {
         if (!behandling.getFagsak().getSaksnummer().equals(fagsak.getSaksnummer())) {
-            throw new FunksjonellException("Behandling " + behandling.getId()
-                + " tilhører ikke fagsak " + fagsak.getSaksnummer());
+            throw new FunksjonellException("Behandling " + behandling.getId() + " tilhører ikke fagsak " + fagsak.getSaksnummer());
         }
         oppdaterStatus(fagsak, saksstatus);
         behandlingService.avsluttBehandling(behandling.getId());

@@ -10,6 +10,7 @@ import io.mockk.slot
 import io.mockk.verify
 import no.nav.melosys.domain.Behandling
 import no.nav.melosys.domain.Fagsak
+import no.nav.melosys.domain.FagsakTestFactory
 import no.nav.melosys.domain.kodeverk.Oppgavetyper
 import no.nav.melosys.domain.kodeverk.Sakstemaer
 import no.nav.melosys.domain.kodeverk.Sakstyper
@@ -157,7 +158,7 @@ internal class OppgaveplukkerTest {
             dokumentasjonSvarfristDato = Instant.now().minus(Duration.ofDays(1))
             this.fagsak = fagsak
         }
-        fagsak.behandlinger = listOf(behandling)
+        fagsak.leggTilBehandling(behandling)
         every { oppgaveFasade.finnUtildelteOppgaverEtterFrist(any<String>()) } returns oppgaver
         every { fagsakService.hentFagsaker(any<Collection<String>>()) } returns listOf(fagsak)
         every { fagsakService.hentFagsak(SAKSNUMMER_1) } returns fagsak
@@ -179,7 +180,7 @@ internal class OppgaveplukkerTest {
             status = Behandlingsstatus.AVVENT_FAGLIG_AVKLARING
             this.fagsak = fagsak
         }
-        fagsak.behandlinger = listOf(behandling)
+        fagsak.leggTilBehandling(behandling)
         every { oppgaveFasade.finnUtildelteOppgaverEtterFrist(any<String>()) } returns oppgaver
         every { fagsakService.hentFagsaker(any<Collection<String>>()) } returns listOf(fagsak)
 
@@ -231,7 +232,7 @@ internal class OppgaveplukkerTest {
             dokumentasjonSvarfristDato = Instant.now().plus(Duration.ofDays(1))
             this.fagsak = fagsak
         }
-        fagsak.behandlinger = listOf(behandling)
+        fagsak.leggTilBehandling(behandling)
         every { oppgaveFasade.finnUtildelteOppgaverEtterFrist(any<String>()) } returns oppgaver
         every { fagsakService.hentFagsaker(any<Collection<String>>()) } returns listOf(fagsak)
 
@@ -258,7 +259,7 @@ internal class OppgaveplukkerTest {
             status = Behandlingsstatus.AVVENT_DOK_PART
             this.fagsak = fagsak
         }
-        fagsak.behandlinger = listOf(behandling)
+        fagsak.leggTilBehandling(behandling)
         every { oppgaveFasade.finnUtildelteOppgaverEtterFrist(any<String>()) } returns oppgaver
         every { fagsakService.hentFagsaker(any<Collection<String>>()) } returns listOf(fagsak)
 
@@ -279,12 +280,12 @@ internal class OppgaveplukkerTest {
             this.fagsak = fagsak
 
         }
-        fagsak.behandlinger = listOf(behandling)
+        fagsak.leggTilBehandling(behandling)
         every { oppgaveFasade.finnUtildelteOppgaverEtterFrist(any<String>()) } returns oppgaver
         every { fagsakService.hentFagsaker(any<Collection<String>>()) } returns listOf(fagsak)
         every { fagsakService.hentFagsak(SAKSNUMMER_1) } returns fagsak
         every { behandlingService.lagre(any<Behandling>()) } answers {}
-        every {oppgaveService.tildelOppgave(any<String>(), any<String>())} answers {}
+        every { oppgaveService.tildelOppgave(any<String>(), any<String>()) } answers {}
 
 
         val oppgave = oppgaveplukker.plukkOppgave("Z01234", opprettPlukkOppgaveInnDto())
@@ -305,7 +306,7 @@ internal class OppgaveplukkerTest {
             tema = Behandlingstema.PENSJONIST
             this.fagsak = fagsak
         }
-        fagsak.behandlinger = listOf(behandling)
+        fagsak.leggTilBehandling(behandling)
         every { oppgaveFasade.finnUtildelteOppgaverEtterFrist(any<String>()) } returns oppgaver
         every { fagsakService.hentFagsaker(any<Collection<String>>()) } returns listOf(fagsak)
         every { fagsakService.hentFagsak(SAKSNUMMER_1) } returns fagsak
@@ -375,11 +376,11 @@ internal class OppgaveplukkerTest {
         sakstype: Sakstyper = Sakstyper.EU_EOS,
         sakstema: Sakstemaer = Sakstemaer.MEDLEMSKAP_LOVVALG
     ): Fagsak =
-        Fagsak().apply {
+        FagsakTestFactory.builder().apply {
             this.saksnummer = saksnummer ?: UUID.randomUUID().toString()
             type = sakstype
             tema = sakstema
-        }
+        }.build()
 
     private fun opprettFagsakMedBehandling(saksnummer: String): Fagsak {
         val fagsak = opprettFagsak(saksnummer)
@@ -387,7 +388,16 @@ internal class OppgaveplukkerTest {
             status = Behandlingsstatus.OPPRETTET
             this.fagsak = fagsak
         }
-        fagsak.behandlinger = listOf(behandling)
+        fagsak.leggTilBehandling(behandling)
+
+        FagsakTestFactory.builder()
+            .behandlinger(Behandling())
+            .build()
+
+        FagsakTestFactory.builder().apply {
+            behandlinger = mutableListOf(Behandling())
+        }.build()
+
         return fagsak
     }
 
@@ -404,7 +414,7 @@ internal class OppgaveplukkerTest {
             dokumentasjonSvarfristDato = Instant.now().plus(Duration.ofDays(1))
             this.fagsak = fagsak
         }
-        fagsak.behandlinger = listOf(behandling)
+        fagsak.leggTilBehandling(behandling)
         return fagsak
     }
 

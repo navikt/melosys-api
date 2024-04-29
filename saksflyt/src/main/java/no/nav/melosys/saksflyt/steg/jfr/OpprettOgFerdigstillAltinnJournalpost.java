@@ -56,10 +56,10 @@ public class OpprettOgFerdigstillAltinnJournalpost implements StegBehandler {
         Collection<AltinnDokument> dokumenter = altinnSoeknadService
             .hentDokumenterTilknyttetSoknad(prosessinstans.getData(ProsessDataKey.MOTTATT_SOKNAD_ID));
 
-        Optional<Aktoer> fullmektig = fagsak.finnFullmektig(Fullmaktstype.FULLMEKTIG_SØKNAD);
+        Aktoer fullmektig = fagsak.finnFullmektig(Fullmaktstype.FULLMEKTIG_SØKNAD);
         String avsenderNavn;
-        if (fullmektig.isPresent()) {
-            avsenderNavn = eregFasade.hentOrganisasjonNavn(fullmektig.get().getOrgnr());
+        if (fullmektig != null) {
+            avsenderNavn = eregFasade.hentOrganisasjonNavn(fullmektig.getOrgnr());
         } else {
             avsenderNavn = eregFasade.hentOrganisasjonNavn(fagsak.hentUnikArbeidsgiver().getOrgnr());
         }

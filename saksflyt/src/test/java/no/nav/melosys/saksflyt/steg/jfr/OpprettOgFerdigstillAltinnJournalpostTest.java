@@ -8,6 +8,7 @@ import java.util.Set;
 import no.nav.melosys.domain.Aktoer;
 import no.nav.melosys.domain.Behandling;
 import no.nav.melosys.domain.Fagsak;
+import no.nav.melosys.domain.FagsakTestFactory;
 import no.nav.melosys.domain.arkiv.ArkivDokument;
 import no.nav.melosys.domain.arkiv.BrukerIdType;
 import no.nav.melosys.domain.arkiv.Journalpost;
@@ -56,7 +57,6 @@ class OpprettOgFerdigstillAltinnJournalpostTest {
 
     private final Aktoer bruker = new Aktoer();
     private final String ident = "00000000000";
-    private final String saksnummer = "MEL-1231";
 
     @Captor
     private ArgumentCaptor<OpprettJournalpost> captor;
@@ -77,17 +77,9 @@ class OpprettOgFerdigstillAltinnJournalpostTest {
         bruker.setRolle(Aktoersroller.BRUKER);
         bruker.setAktørId("3321231");
 
-        Aktoer fullmektig = new Aktoer();
-        fullmektig.setRolle(Aktoersroller.FULLMEKTIG);
-        fullmektig.setOrgnr("fullmektigOrgnr");
-        fullmektig.setFullmaktstyper(List.of(Fullmaktstype.FULLMEKTIG_SØKNAD, Fullmaktstype.FULLMEKTIG_ARBEIDSGIVER));
-
-        Fagsak fagsak = new Fagsak();
-        fagsak.setSaksnummer(saksnummer);
-        fagsak.setGsakSaksnummer(123L);
-        fagsak.setAktører(Set.of(bruker, fullmektig));
+        Fagsak fagsak = FagsakTestFactory.builder().medGsakSaksnummer().build();
         behandling.setFagsak(fagsak);
-        fagsak.getBehandlinger().add(behandling);
+        fagsak.leggTilBehandling(behandling);
         prosessinstans.setBehandling(behandling);
 
         var dokumenter = new ArrayList<AltinnDokument>();
@@ -101,6 +93,13 @@ class OpprettOgFerdigstillAltinnJournalpostTest {
 
     @Test
     void utfør_journalpostBlirOpprettet_verifiser() {
+        Aktoer fullmektig = new Aktoer();
+        fullmektig.setRolle(Aktoersroller.FULLMEKTIG);
+        fullmektig.setOrgnr("fullmektigOrgnr");
+        fullmektig.setFullmaktstyper(List.of(Fullmaktstype.FULLMEKTIG_SØKNAD, Fullmaktstype.FULLMEKTIG_ARBEIDSGIVER));
+        behandling.getFagsak().leggTilAktør(bruker);
+        behandling.getFagsak().leggTilAktør(fullmektig);
+
         opprettOgFerdigstillAltinnJournalpost.utfør(prosessinstans);
 
         verify(persondataFasade).hentFolkeregisterident(anyString());
@@ -111,7 +110,7 @@ class OpprettOgFerdigstillAltinnJournalpostTest {
         assertThat(opprettJournalpost)
             .extracting(Journalpost::getTema, Journalpost::getMottaksKanal,
                 Journalpost::getSaksnummer, Journalpost::getBrukerId, Journalpost::getBrukerIdType)
-            .containsExactly("MED", "ALTINN", saksnummer, ident, BrukerIdType.FOLKEREGISTERIDENT);
+            .containsExactly("MED", "ALTINN", FagsakTestFactory.SAKSNUMMER, ident, BrukerIdType.FOLKEREGISTERIDENT);
         assertThat(opprettJournalpost.getInnhold()).isNotEmpty();
         assertThat(opprettJournalpost.getHoveddokument())
             .extracting(ArkivDokument::getDokumentId, ArkivDokument::getTittel)
@@ -128,7 +127,8 @@ class OpprettOgFerdigstillAltinnJournalpostTest {
         Aktoer arbeidsgiver = new Aktoer();
         arbeidsgiver.setRolle(Aktoersroller.ARBEIDSGIVER);
         arbeidsgiver.setOrgnr("arbOrgnr");
-        behandling.getFagsak().setAktører(Set.of(bruker, arbeidsgiver));
+        behandling.getFagsak().leggTilAktør(bruker);
+        behandling.getFagsak().leggTilAktør(arbeidsgiver);
 
         when(eregFasade.hentOrganisasjonNavn(arbeidsgiver.getOrgnr())).thenReturn("Arbeidsgiver");
 

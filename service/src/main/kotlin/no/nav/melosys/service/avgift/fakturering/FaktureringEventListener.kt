@@ -36,7 +36,7 @@ class FaktureringEventListener(
         val behandling = behandlingService.hentBehandling(event.behandling.id)
         val fagsak = behandling.fagsak
 
-        val fullmektigForTrygdeavgift = fagsak.finnFullmektig(Fullmaktstype.FULLMEKTIG_TRYGDEAVGIFT).orElse(null)
+        val fullmektigForTrygdeavgift = fagsak.finnFullmektig(Fullmaktstype.FULLMEKTIG_TRYGDEAVGIFT)
         val gjeldendeFullmektigerNårBehandlingBleOpprettet =
             aktoerHistorikkService.hentHistoriskeAktørerPåTidspunkt(fagsak, Aktoersroller.FULLMEKTIG, behandling.registrertDato)
                 .filter { it.fullmaktstyper.contains(Fullmaktstype.FULLMEKTIG_TRYGDEAVGIFT) }

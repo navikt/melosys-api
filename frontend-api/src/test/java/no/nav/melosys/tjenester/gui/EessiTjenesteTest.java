@@ -2,7 +2,7 @@ package no.nav.melosys.tjenester.gui;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import no.nav.melosys.domain.Behandling;
-import no.nav.melosys.domain.Fagsak;
+import no.nav.melosys.domain.FagsakTestFactory;
 import no.nav.melosys.domain.eessi.BucType;
 import no.nav.melosys.domain.eessi.Institusjon;
 import no.nav.melosys.domain.kodeverk.Landkoder;
@@ -81,9 +81,7 @@ public class EessiTjenesteTest {
     private static Behandling lagBehandling() {
         var behandling = new Behandling();
         behandling.setId(1L);
-        var fagsak = new Fagsak();
-        fagsak.setGsakSaksnummer(2L);
-        behandling.setFagsak(fagsak);
+        behandling.setFagsak(FagsakTestFactory.builder().medGsakSaksnummer().build());
         return behandling;
     }
 }

@@ -301,13 +301,8 @@ class TrygdeavtaleTjenesteTest {
     }
 
     private static Behandling lagBehandling() {
-        var bruker = new Aktoer();
-        bruker.setRolle(Aktoersroller.BRUKER);
-        bruker.setAktørId("AktørId");
-        var fagsak = new Fagsak();
-        fagsak.getAktører().add(bruker);
         var behandling = new Behandling();
-        behandling.setFagsak(fagsak);
+        behandling.setFagsak(FagsakTestFactory.builder().medBruker().build());
         behandling.setTema(Behandlingstema.UTSENDT_ARBEIDSTAKER);
         behandling.setType(Behandlingstyper.FØRSTEGANG);
         behandling.setMottatteOpplysninger(lagMottatteOpplysninger());

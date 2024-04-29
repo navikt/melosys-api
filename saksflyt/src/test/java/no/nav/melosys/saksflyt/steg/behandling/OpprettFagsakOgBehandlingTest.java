@@ -4,6 +4,7 @@ import java.util.Collections;
 
 import no.nav.melosys.domain.Behandling;
 import no.nav.melosys.domain.Fagsak;
+import no.nav.melosys.domain.FagsakTestFactory;
 import no.nav.melosys.domain.kodeverk.Sakstemaer;
 import no.nav.melosys.domain.kodeverk.Sakstyper;
 import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingsaarsaktyper;
@@ -58,9 +59,7 @@ class OpprettFagsakOgBehandlingTest {
         prosessinstans.setData(BEHANDLINGSÅRSAKTYPE, Behandlingsaarsaktyper.FRITEKST);
         prosessinstans.setData(BEHANDLINGSÅRSAK_FRITEKST, "Fritekst");
 
-        Fagsak fagsak = new Fagsak();
-        fagsak.setSaksnummer("MELTEST-333");
-        fagsak.setBehandlinger(Collections.singletonList(new Behandling()));
+        Fagsak fagsak = FagsakTestFactory.builder().behandlinger(new Behandling()).build();
         when(fagsakService.nyFagsakOgBehandling(any(OpprettSakRequest.class))).thenReturn(fagsak);
 
         opprettFagsakOgBehandling.utfør(prosessinstans);

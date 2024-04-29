@@ -60,7 +60,7 @@ public class OppfriskSaksopplysningerService {
                 behandlingID) + "Det er ikke lenger mulig å endre mottatteOpplysninger og saksopplysninger");
         }
 
-        Optional<String> aktørIdOptional = behandling.getFagsak().finnBrukersAktørID();
+        Optional<String> aktørIdOptional = Optional.ofNullable(behandling.getFagsak().finnBrukersAktørID());
         String brukerID = aktørIdOptional.map(persondataFasade::hentFolkeregisterident).orElse(null);
 
         //OK om perioden er tom. Ikke alle behandlingstema krever periode.

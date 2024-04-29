@@ -135,10 +135,10 @@ public class BrevmottakerService {
         }
 
         List<Mottaker> mottakere = new ArrayList<>();
-        Optional<Aktoer> fullmektig = fagsak.finnFullmektig(Fullmaktstype.FULLMEKTIG_SØKNAD);
-        if (fullmektig.isPresent()) {
+        Aktoer fullmektig = fagsak.finnFullmektig(Fullmaktstype.FULLMEKTIG_SØKNAD);
+        if (fullmektig != null) {
             boolean erTilBådeBrukerOgFullmektig = erTilBådeBrukerOgFullmektig(produserbartDokument, forhåndsvisning);
-            mottakere.add(Mottaker.av(fullmektig.get()));
+            mottakere.add(Mottaker.av(fullmektig));
             if (erTilBådeBrukerOgFullmektig) {
                 mottakere.add(Mottaker.av(bruker));
             }
@@ -162,9 +162,9 @@ public class BrevmottakerService {
     }
 
     private List<Mottaker> avklarMottakereForFullmektig(Fagsak fagsak) {
-        Optional<Aktoer> fullmektig = fagsak.finnFullmektig(Fullmaktstype.FULLMEKTIG_SØKNAD);
-        if (fullmektig.isPresent()) {
-            return List.of(Mottaker.av(fullmektig.get()));
+        Aktoer fullmektig = fagsak.finnFullmektig(Fullmaktstype.FULLMEKTIG_SØKNAD);
+        if (fullmektig != null) {
+            return List.of(Mottaker.av(fullmektig));
         } else {
             throw new FunksjonellException("Finner ikke fullmektig for bruker");
         }
@@ -180,9 +180,9 @@ public class BrevmottakerService {
 
     private List<Mottaker> avklarMottakereForArbeidsgiver(Behandling behandling, boolean kunAvklarteVirksomheter) {
         Fagsak fagsak = behandling.getFagsak();
-        Optional<Aktoer> fullmektig = fagsak.finnFullmektig(Fullmaktstype.FULLMEKTIG_ARBEIDSGIVER);
-        if (fullmektig.isPresent()) {
-            return Collections.singletonList(Mottaker.av(fullmektig.get()));
+        Aktoer fullmektig = fagsak.finnFullmektig(Fullmaktstype.FULLMEKTIG_ARBEIDSGIVER);
+        if (fullmektig != null) {
+            return Collections.singletonList(Mottaker.av(fullmektig));
         } else {
             return kunAvklarteVirksomheter ? avklarArbeidsgiverFraAvklarteVirksomheter(behandling) : avklarArbeidsgiverFraAlleVirksomheter(behandling);
         }

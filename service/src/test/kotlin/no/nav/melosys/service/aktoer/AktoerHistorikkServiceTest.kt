@@ -8,6 +8,7 @@ import io.mockk.impl.annotations.MockK
 import io.mockk.junit5.MockKExtension
 import no.nav.melosys.domain.Aktoer
 import no.nav.melosys.domain.Fagsak
+import no.nav.melosys.domain.FagsakTestFactory
 import no.nav.melosys.domain.Fullmakt
 import no.nav.melosys.domain.kodeverk.Aktoersroller
 import no.nav.melosys.domain.kodeverk.Fullmaktstype
@@ -53,7 +54,7 @@ internal class AktoerHistorikkServiceTest {
 
 
         val tidspunkt = LocalDate.of(2023, 12, 2).atStartOfDay(ZoneId.of("Europe/Oslo")).toInstant()
-        val result = aktoerHistorikkService.hentHistoriskeAktørerPåTidspunkt(Fagsak(), Aktoersroller.FULLMEKTIG, tidspunkt)
+        val result = aktoerHistorikkService.hentHistoriskeAktørerPåTidspunkt(FagsakTestFactory.lagFagsak(), Aktoersroller.FULLMEKTIG, tidspunkt)
 
 
         result.shouldHaveSize(2)
@@ -79,7 +80,7 @@ internal class AktoerHistorikkServiceTest {
 
 
         val tidspunkt = LocalDate.of(2023, 12, 4).atStartOfDay(ZoneId.of("Europe/Oslo")).toInstant()
-        val result = aktoerHistorikkService.hentHistoriskeAktørerPåTidspunkt(Fagsak(), Aktoersroller.FULLMEKTIG, tidspunkt)
+        val result = aktoerHistorikkService.hentHistoriskeAktørerPåTidspunkt(FagsakTestFactory.lagFagsak(), Aktoersroller.FULLMEKTIG, tidspunkt)
 
 
         result.shouldHaveSize(3)
@@ -136,7 +137,7 @@ internal class AktoerHistorikkServiceTest {
         every { auditRepository.getRevisions(eq(Aktoer::class.java), any()) } returns revisions
 
 
-        val result = aktoerHistorikkService.hentAktørHistorikk(Fagsak(), Aktoersroller.FULLMEKTIG)
+        val result = aktoerHistorikkService.hentAktørHistorikk(FagsakTestFactory.lagFagsak(), Aktoersroller.FULLMEKTIG)
 
 
         result.shouldContainExactly(

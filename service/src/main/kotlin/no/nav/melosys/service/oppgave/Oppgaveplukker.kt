@@ -107,7 +107,7 @@ class Oppgaveplukker(
 
     private fun oppdaterBehandlingsstatus(saksnummer: String) {
         val fagsak = fagsakService.hentFagsak(saksnummer)
-        val behandling = fagsak.hentAktivBehandling()
+        val behandling = fagsak.finnAktivBehandling()
         if (behandling != null && (behandling.status == Behandlingsstatus.SVAR_ANMODNING_MOTTATT || behandling.status == Behandlingsstatus.OPPRETTET)) {
             behandling.status = Behandlingsstatus.UNDER_BEHANDLING
             behandlingService.lagre(behandling)

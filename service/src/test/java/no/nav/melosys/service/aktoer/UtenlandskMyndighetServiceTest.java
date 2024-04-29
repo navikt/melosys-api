@@ -2,10 +2,7 @@ package no.nav.melosys.service.aktoer;
 
 import java.util.*;
 
-import no.nav.melosys.domain.Behandling;
-import no.nav.melosys.domain.Fagsak;
-import no.nav.melosys.domain.Preferanse;
-import no.nav.melosys.domain.UtenlandskMyndighet;
+import no.nav.melosys.domain.*;
 import no.nav.melosys.domain.brev.Mottaker;
 import no.nav.melosys.domain.kodeverk.Land_iso2;
 import no.nav.melosys.domain.kodeverk.Landkoder;
@@ -44,7 +41,6 @@ class UtenlandskMyndighetServiceTest {
     ArgumentCaptor<List<String>> stringListArgumentCaptor;
 
     private final long BEHANDLING_ID = 1L;
-    private final String SAKSNUMMER = "MEL-1";
 
     Behandling behandling;
 
@@ -63,7 +59,7 @@ class UtenlandskMyndighetServiceTest {
         utenlandskMyndighetService.avklarUtenlandskMyndighetSomAktørOgLagre(behandling);
 
 
-        verify(fagsakServiceMock).oppdaterMyndighetForTrygdeavtale(SAKSNUMMER, Land_iso2.NO);
+        verify(fagsakServiceMock).oppdaterMyndighetForTrygdeavtale(FagsakTestFactory.SAKSNUMMER, Land_iso2.NO);
         verifyNoMoreInteractions(fagsakServiceMock);
     }
 
@@ -82,7 +78,6 @@ class UtenlandskMyndighetServiceTest {
 
     @Test
     void avklarUtenlandskMyndighetSomAktørOgLagre_oppdatererMyndigheterForEuEos() {
-        behandling.getFagsak().setType(Sakstyper.EU_EOS);
         when(landvelgerServiceMock.hentUtenlandskTrygdemyndighetsland(BEHANDLING_ID)).thenReturn(List.of(Land_iso2.SE));
         UtenlandskMyndighet utenlandskMyndighet = new UtenlandskMyndighet();
         utenlandskMyndighet.setLandkode(Land_iso2.SE);
@@ -93,13 +88,12 @@ class UtenlandskMyndighetServiceTest {
         utenlandskMyndighetService.avklarUtenlandskMyndighetSomAktørOgLagre(behandling);
 
 
-        verify(fagsakServiceMock).oppdaterMyndigheterForEuEos(eq(SAKSNUMMER), anyCollection());
+        verify(fagsakServiceMock).oppdaterMyndigheterForEuEos(eq(FagsakTestFactory.SAKSNUMMER), anyCollection());
         verifyNoMoreInteractions(fagsakServiceMock);
     }
 
     @Test
     void avklarUtenlandskMyndighetSomAktørOgLagre_oppdatererMyndigheterMedRiktigId() {
-        behandling.getFagsak().setType(Sakstyper.EU_EOS);
         when(landvelgerServiceMock.hentUtenlandskTrygdemyndighetsland(BEHANDLING_ID))
             .thenReturn(List.of(Land_iso2.SE, Land_iso2.DK));
 
@@ -116,13 +110,12 @@ class UtenlandskMyndighetServiceTest {
         utenlandskMyndighetService.avklarUtenlandskMyndighetSomAktørOgLagre(behandling);
 
 
-        verify(fagsakServiceMock).oppdaterMyndigheterForEuEos(SAKSNUMMER, List.of("SE:INSTITUSJONSKODE", "DK"));
+        verify(fagsakServiceMock).oppdaterMyndigheterForEuEos(FagsakTestFactory.SAKSNUMMER, List.of("SE:INSTITUSJONSKODE", "DK"));
         verifyNoMoreInteractions(fagsakServiceMock);
     }
 
     @Test
     void avklarUtenlandskMyndighetSomAktørOgLagre_kasterIkkeFunnetException_nårUtenlandskmyndighetIkkeErFunnet() {
-        behandling.getFagsak().setType(Sakstyper.EU_EOS);
         when(landvelgerServiceMock.hentUtenlandskTrygdemyndighetsland(BEHANDLING_ID)).thenReturn(List.of(Land_iso2.SE));
         when(utenlandskMyndighetRepositoryMock.findByLandkode(Land_iso2.SE)).thenReturn(Optional.empty());
 
@@ -151,7 +144,6 @@ class UtenlandskMyndighetServiceTest {
     void avklarUtenlandskMyndighetSomAktørOgLagre_forventkorrektInstitusjonsId() {
         var utenlandskMyndighet = lagUtenlandskMyndighet(Land_iso2.IT, "IT123", null);
         var utenlandskMyndighetReservert = lagUtenlandskMyndighet(Land_iso2.CZ, "CZ123", Preferanse.PreferanseEnum.RESERVERT_FRA_A1);
-        behandling.getFagsak().setType(Sakstyper.EU_EOS);
 
         when(utenlandskMyndighetRepositoryMock.findByLandkode(Land_iso2.IT)).thenReturn(Optional.of(utenlandskMyndighet));
         when(utenlandskMyndighetRepositoryMock.findByLandkode(Land_iso2.CZ)).thenReturn(Optional.of(utenlandskMyndighetReservert));
@@ -225,8 +217,7 @@ class UtenlandskMyndighetServiceTest {
 
 
     private Behandling lagBehandling() {
-        Fagsak fagsak = new Fagsak();
-        fagsak.setSaksnummer(SAKSNUMMER);
+        Fagsak fagsak = FagsakTestFactory.lagFagsak();
         Behandling behandling = new Behandling();
         behandling.setId(BEHANDLING_ID);
         behandling.setFagsak(fagsak);

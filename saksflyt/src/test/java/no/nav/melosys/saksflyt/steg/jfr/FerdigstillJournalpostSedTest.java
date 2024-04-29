@@ -3,6 +3,7 @@ package no.nav.melosys.saksflyt.steg.jfr;
 import no.nav.melosys.domain.Aktoer;
 import no.nav.melosys.domain.Behandling;
 import no.nav.melosys.domain.Fagsak;
+import no.nav.melosys.domain.FagsakTestFactory;
 import no.nav.melosys.domain.arkiv.Journalpost;
 import no.nav.melosys.domain.arkiv.Journalposttype;
 import no.nav.melosys.domain.eessi.melding.MelosysEessiMelding;
@@ -23,6 +24,8 @@ import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 
+import static no.nav.melosys.domain.FagsakTestFactory.BRUKER_AKTØR_ID;
+import static no.nav.melosys.domain.FagsakTestFactory.SAKSNUMMER;
 import static org.mockito.Mockito.*;
 
 @ExtendWith(MockitoExtension.class)
@@ -38,8 +41,6 @@ class FerdigstillJournalpostSedTest {
 
     private static final String JOURNALPOST_ID = "jp123";
     private static final String BRUKER_ID = "bruker123";
-    private static final String AKTØR_ID = "aktør123";
-    private static final String SAKSNUMMER = "MEL-1223";
     private static final String TITTEL = "tittel123";
 
     private final OppgaveFactory oppgaveFactory = new OppgaveFactory();
@@ -51,7 +52,7 @@ class FerdigstillJournalpostSedTest {
 
     @Test
     void utfør_oppdatererJournalpost_nårJournalpostIkkeErFerdigstilt() {
-        when(persondataFasade.hentFolkeregisterident(AKTØR_ID)).thenReturn(BRUKER_ID);
+        when(persondataFasade.hentFolkeregisterident(BRUKER_AKTØR_ID)).thenReturn(BRUKER_ID);
         Journalpost journalpost = new Journalpost(JOURNALPOST_ID);
         journalpost.setErFerdigstilt(false);
         journalpost.setJournalposttype(Journalposttype.INN);
@@ -68,7 +69,7 @@ class FerdigstillJournalpostSedTest {
 
     @Test
     void utfør_oppdatererJournalpost_nårJournalpostIkkeErFerdigstilt_brukFagsakTema() {
-        when(persondataFasade.hentFolkeregisterident(AKTØR_ID)).thenReturn(BRUKER_ID);
+        when(persondataFasade.hentFolkeregisterident(BRUKER_AKTØR_ID)).thenReturn(BRUKER_ID);
         Journalpost journalpost = new Journalpost(JOURNALPOST_ID);
         journalpost.setErFerdigstilt(false);
         journalpost.setJournalposttype(Journalposttype.INN);
@@ -114,17 +115,11 @@ class FerdigstillJournalpostSedTest {
     }
 
     private static Prosessinstans hentProsessinstans() {
-
-        Aktoer bruker = new Aktoer();
-        bruker.setRolle(Aktoersroller.BRUKER);
-        bruker.setAktørId(AKTØR_ID);
-
-        Fagsak fagsak = new Fagsak();
-        fagsak.setType(Sakstyper.EU_EOS);
-        fagsak.setGsakSaksnummer(123L);
-        fagsak.setSaksnummer(SAKSNUMMER);
-        fagsak.getAktører().add(bruker);
-        fagsak.setTema(Sakstemaer.TRYGDEAVGIFT);
+        Fagsak fagsak = FagsakTestFactory.builder()
+            .medGsakSaksnummer()
+            .tema(Sakstemaer.TRYGDEAVGIFT)
+            .medBruker()
+            .build();
 
         Behandling behandling = new Behandling();
         behandling.setTema(Behandlingstema.UTSENDT_ARBEIDSTAKER);
