@@ -9,11 +9,11 @@ Under arbeid
 ## Context
 
 Nåværende datastruktur for trygdeavgift oppleves som mer komplisert enn nødvendig av flere utviklere, med tabeller som inneholder lite data
-og avhengigheter som skaper en syklus. Det ble også oppdaget feil i JPA-mappingen i forbindelse med oppgradering av Spring Boot.
+og avhengigheter som skaper nesten en syklus. Det ble også oppdaget feil i JPA-mappingen i forbindelse med oppgradering av Spring Boot.
 
 Fastsatt_trygdeavgift kan betraktes som både starten og slutten av syklusen.
-Trygdeavgiftsperioder er avhengige av inntektsperioder og skatteforhold, som igjen er avhengige av et skattegrunnlag. Men
-Samtidig er skattegrunnlaget avhengig av fastsatt_trygdeavgift og trygdeavgiftsperioder er avhengige av fastsatt_trygdeavgift.
+Trygdeavgiftsperioder er avhengige av inntektsperioder og skatteforhold, som igjen er avhengige av et trygdeavgiftsgrunnlag. Men
+Samtidig er tabellen Trygdeavgiftsgrunnlag avhengig av Fastsatt_trygdeavgift og trygdeavgiftsperioder er avhengige av fastsatt_trygdeavgift.
 
 Avhengighetssykluser mellom tabeller i en database kan føre til uønskede konsekvenser som f.eks. økt kompleksitet, utfordringer med å opprettholde dataintegritet
 og dårligere ytelser. Unødvendige avhengighetssykluser bør derfor unngås.
