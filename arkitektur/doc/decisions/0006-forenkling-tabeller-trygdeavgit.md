@@ -11,7 +11,7 @@ Under arbeid
 Nåværende datastruktur for trygdeavgift oppleves som mer komplisert enn nødvendig av flere utviklere, med tabeller som inneholder lite data
 og avhengigheter som skaper nesten en syklus. Det ble også oppdaget feil i JPA-mappingen i forbindelse med oppgradering av Spring Boot.
 
-Fastsatt_trygdeavgift kan betraktes som både starten og slutten av syklusen.
+Fastsatt_trygdeavgift kan betraktes som både starten og slutten av en løkke.
 Trygdeavgiftsperioder er avhengige av inntektsperioder og skatteforhold, som igjen er avhengige av et trygdeavgiftsgrunnlag. Men
 Samtidig er tabellen Trygdeavgiftsgrunnlag avhengig av Fastsatt_trygdeavgift og trygdeavgiftsperioder er avhengige av fastsatt_trygdeavgift.
 
