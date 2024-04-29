@@ -23,6 +23,10 @@ public class Arbeidsland {
         return arbeidssted;
     }
 
+    public Boolean harFastArbeidssted(){
+        return arbeidssted.stream().anyMatch(arbSted -> arbSted.getAdresse().erGyldigAdresse());
+    }
+
     public void setArbeidssted(List<Arbeidssted> arbeidssted) {
         this.arbeidssted = arbeidssted;
     }
