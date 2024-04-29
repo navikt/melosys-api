@@ -62,9 +62,6 @@ class KafkaConfig(
         kafkaListenerContainerFactory<SoknadMottatt>(kafkaProperties, groupId)
 
     @Bean
-    fun jsonDeserializer(objectMapper: ObjectMapper) = JsonDeserializer(MelosysEessiMelding::class.java, objectMapper, false)
-
-    @Bean
     fun producerFactoryMelosysHendelse(): ProducerFactory<String, MelosysHendelse> =
         DefaultKafkaProducerFactory(
             mutableMapOf<String, Any>(
