@@ -12,6 +12,8 @@ object FagsakTestFactory {
     val SAKSTYPE = Sakstyper.EU_EOS
     val SAKSTEMA = Sakstemaer.MEDLEMSKAP_LOVVALG
     val SAKSSTATUS = Saksstatuser.OPPRETTET
+
+    // Disse burde flyttes til en AktørTestFactory om den kommer
     const val BRUKER_AKTØR_ID = "12345678901"
     const val ORGNR = "123456789"
     const val INSTITUSJON_ID = "SE:id"
