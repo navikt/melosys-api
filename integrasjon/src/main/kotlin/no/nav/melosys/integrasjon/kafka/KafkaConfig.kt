@@ -5,7 +5,6 @@ import no.nav.melosys.domain.eessi.melding.MelosysEessiMelding
 import no.nav.melosys.domain.manglendebetaling.ManglendeFakturabetalingMelding
 import no.nav.melosys.integrasjon.SoknadMottatt
 import no.nav.melosys.integrasjon.hendelser.MelosysHendelse
-import no.nav.melosys.integrasjon.hendelser.MelosysHendelseSerializer
 import org.apache.kafka.clients.CommonClientConfigs
 import org.apache.kafka.clients.consumer.ConsumerConfig
 import org.apache.kafka.clients.producer.ProducerConfig
@@ -28,6 +27,7 @@ import org.springframework.kafka.core.ProducerFactory
 import org.springframework.kafka.listener.ConcurrentMessageListenerContainer
 import org.springframework.kafka.support.serializer.ErrorHandlingDeserializer
 import org.springframework.kafka.support.serializer.JsonDeserializer
+import org.springframework.kafka.support.serializer.JsonSerializer
 
 typealias KafkaConsumerContainerFactory<T> = KafkaListenerContainerFactory<ConcurrentMessageListenerContainer<String, T>>
 
@@ -62,15 +62,15 @@ class KafkaConfig(
         kafkaListenerContainerFactory<SoknadMottatt>(kafkaProperties, groupId)
 
     @Bean
-    fun producerFactoryMelosysHendelse(): ProducerFactory<String, MelosysHendelse> =
+    fun producerFactoryMelosysHendelse(objectMapper: ObjectMapper): ProducerFactory<String, MelosysHendelse> =
         DefaultKafkaProducerFactory(
             mutableMapOf<String, Any>(
                 CommonClientConfigs.CLIENT_ID_CONFIG to "melosys-producer",
                 ProducerConfig.ACKS_CONFIG to "all",
                 ProducerConfig.BOOTSTRAP_SERVERS_CONFIG to brokersUrl,
-                ProducerConfig.KEY_SERIALIZER_CLASS_CONFIG to StringSerializer::class.java,
-                ProducerConfig.VALUE_SERIALIZER_CLASS_CONFIG to MelosysHendelseSerializer::class.java
-            ) + securityConfig()
+            ) + securityConfig(),
+            StringSerializer(),
+            JsonSerializer(objectMapper)
         )
 
     @Bean
