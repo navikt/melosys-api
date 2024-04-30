@@ -36,30 +36,6 @@ class Fagsak(
     @OneToMany(mappedBy = "fagsak", cascade = [CascadeType.ALL], fetch = FetchType.EAGER)
     val behandlinger: MutableList<Behandling> = mutableListOf()
 ) : RegistreringsInfo() {
-    constructor(
-        saksnummer: String,
-        gsakSaksnummer: Long? = null,
-        type: Sakstyper,
-        tema: Sakstemaer,
-        status: Saksstatuser
-    ) : this(
-        saksnummer,
-        gsakSaksnummer,
-        type,
-        tema,
-        status,
-        mutableSetOf(),
-        mutableListOf()
-    )
-
-    @Deprecated("Er nødvendig med tom constructor med default verdier for JPA og kotlin")
-    constructor(): this(
-        "",
-        null,
-        Sakstyper.EU_EOS,
-        Sakstemaer.MEDLEMSKAP_LOVVALG,
-        Saksstatuser.OPPRETTET
-    )
 
     companion object {
         private const val FINNER_IKKE_BEHANDLINGER_FOR_FAGSAK = "Finner ikke behandlinger for fagsak "

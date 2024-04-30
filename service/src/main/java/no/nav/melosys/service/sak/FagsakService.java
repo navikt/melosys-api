@@ -141,10 +141,10 @@ public class FagsakService {
             null,
             opprettSakRequest.getSakstype(),
             opprettSakRequest.getSakstema(),
-            Saksstatuser.OPPRETTET
+            Saksstatuser.OPPRETTET,
+            new HashSet<>(),
+            new ArrayList<>()
         );
-
-        HashSet<Aktoer> aktører = new HashSet<>();
 
         String aktørID = opprettSakRequest.getAktørID();
         if (aktørID != null) {
@@ -153,7 +153,7 @@ public class FagsakService {
             aktør.setUtenlandskPersonId(opprettSakRequest.getUtenlandskPersonId());
             aktør.setFagsak(fagsak);
             aktør.setRolle(Aktoersroller.BRUKER);
-            aktører.add(aktør);
+            fagsak.leggTilAktør(aktør);
         }
 
         String virksomhetOrgnr = opprettSakRequest.getVirksomhetOrgnr();
@@ -162,7 +162,7 @@ public class FagsakService {
             virksomhet.setOrgnr(virksomhetOrgnr);
             virksomhet.setFagsak(fagsak);
             virksomhet.setRolle(Aktoersroller.VIRKSOMHET);
-            aktører.add(virksomhet);
+            fagsak.leggTilAktør(virksomhet);
         }
 
         String arbeidsgiver = opprettSakRequest.getArbeidsgiver();
@@ -171,7 +171,7 @@ public class FagsakService {
             aktørArbeidsgiver.setOrgnr(arbeidsgiver);
             aktørArbeidsgiver.setFagsak(fagsak);
             aktørArbeidsgiver.setRolle(Aktoersroller.ARBEIDSGIVER);
-            aktører.add(aktørArbeidsgiver);
+            fagsak.leggTilAktør(aktørArbeidsgiver);
         }
 
         FullmektigDto fullmektig = opprettSakRequest.getFullmektig();
@@ -182,11 +182,10 @@ public class FagsakService {
             aktørFullmektig.setFullmaktstyper(fullmektig.getFullmakter());
             aktørFullmektig.setRolle(Aktoersroller.FULLMEKTIG);
             aktørFullmektig.setFagsak(fagsak);
-            aktører.add(aktørFullmektig);
+            fagsak.leggTilAktør(aktørFullmektig);
         }
 
         Instant nå = Instant.now();
-        fagsak.getAktører().addAll(aktører);
         fagsak.setRegistrertDato(nå);
         fagsak.setEndretDato(nå);
 
