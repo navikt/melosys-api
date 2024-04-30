@@ -80,17 +80,11 @@ public class AvsenderMottaker {
 
     public static AvsenderMottaker.IdType tilAvsenderMottakerIdType(Avsendertyper avsendertype) {
         if (avsendertype == null) return null;
-        
-        switch (avsendertype) {
-            case PERSON:
-                return AvsenderMottaker.IdType.FNR;
-            case ORGANISASJON:
-                return AvsenderMottaker.IdType.ORGNR;
-            case UTENLANDSK_TRYGDEMYNDIGHET:
-                return AvsenderMottaker.IdType.UTL_ORG;
-            default:
-                throw new TekniskException("AvsenderType " + avsendertype + " støttes ikke.");
-        }
+        return switch (avsendertype) {
+            case PERSON -> IdType.FNR;
+            case ORGANISASJON -> IdType.ORGNR;
+            case UTENLANDSK_TRYGDEMYNDIGHET -> IdType.UTL_ORG;
+        };
     }
 }
 

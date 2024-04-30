@@ -49,12 +49,13 @@ public class OppdaterOgFerdigstillJournalpost implements StegBehandler {
         String avsenderID = prosessinstans.getData(AVSENDER_ID);
         String avsenderNavn = prosessinstans.getData(AVSENDER_NAVN);
         String avsenderLand = prosessinstans.getData(AVSENDER_LAND);
-        Avsendertyper avsenderType = prosessinstans.getData(AVSENDER_TYPE, Avsendertyper.class);
-        if (avsenderNavn == null) {
+        boolean mottakskanalErEessi = prosessinstans.getData(MOTTAKSKANAL_ER_EESSI, Boolean.class, false);
+        Avsendertyper avsenderType = prosessinstans.getData(AVSENDER_TYPE, Avsendertyper.class, null);
+        if (!mottakskanalErEessi && avsenderNavn == null) {
             if (avsenderID == null) {
                 throw new FunksjonellException("Både avsenderID og AvsenderNavn er null. AvsenderNavn er påkrevd for å journalføre.");
             }
-            avsenderNavn = avsenderID; //Avsendernavn er påkrevd
+            avsenderNavn = avsenderID;
         }
         String tittel = prosessinstans.getData(HOVEDDOKUMENT_TITTEL);
         String hovedDokumentID = prosessinstans.getData(DOKUMENT_ID);
@@ -71,7 +72,8 @@ public class OppdaterOgFerdigstillJournalpost implements StegBehandler {
             .medHovedDokumentID(hovedDokumentID)
             .medAvsenderID(avsenderID)
             .medAvsenderNavn(avsenderNavn)
-            .medAvsenderType(avsenderType).medAvsenderLand(avsenderLand)
+            .medAvsenderType(avsenderType)
+            .medAvsenderLand(avsenderLand)
             .medTittel(tittel)
             .medMottattDato(mottattDato)
             .medFysiskeVedlegg(fysiskeVedleggMedTitler)

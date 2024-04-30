@@ -106,7 +106,7 @@ public class JournalfoeringService {
             validerKanOppretteSakFraSed(journalpost);
         }
 
-        fellesValidering(journalfoeringDto);
+        fellesValidering(journalfoeringDto, journalpost.mottaksKanalErEessi());
         validerOpprettelseSak(journalfoeringDto);
 
         ProsessType prosessType;
@@ -129,7 +129,8 @@ public class JournalfoeringService {
         Behandlingsaarsaktyper behandlingsaarsaktyper = utledÅrsaktype(journalpost, sakstema, behandlingstema, behandlingstype);
 
         prosessinstansService.opprettProsessinstansJournalføringNySak(journalfoeringDto.tilJournalfoeringOpprettRequest(), prosessType,
-            skalSetteSøknadslandOgPeriode, mottaksdato, behandlingsaarsaktyper, finnInstitusjonIdEllerNull(journalfoeringDto.getAvsenderID()));
+            skalSetteSøknadslandOgPeriode, mottaksdato, behandlingsaarsaktyper, finnInstitusjonIdEllerNull(journalfoeringDto.getAvsenderID()),
+            journalpost.mottaksKanalErEessi());
 
         log.info("Ny sak bestilt etter journalføring av journalpost {}", journalfoeringDto.getJournalpostID());
     }
@@ -238,11 +239,11 @@ public class JournalfoeringService {
             validerKanSendeForvaltningsmelding(journalfoeringDto, fagsak.getTema());
         }
 
-        fellesValidering(journalfoeringDto);
+        fellesValidering(journalfoeringDto, journalpost.mottaksKanalErEessi());
 
         log.info("{} knytter journalpost {} til eksisterende sak {}", SubjectHandler.getInstance().getUserID(), journalfoeringDto.getJournalpostID(), saksnummer);
 
-        prosessinstansService.opprettProsessinstansJournalføringKnyttTilEksisterende(journalfoeringDto.tilJournalfoeringTilordneRequest(), saksnummer, fagsak, finnInstitusjonIdEllerNull(journalfoeringDto.getAvsenderID()));
+        prosessinstansService.opprettProsessinstansJournalføringKnyttTilEksisterende(journalfoeringDto.tilJournalfoeringTilordneRequest(), saksnummer, fagsak, finnInstitusjonIdEllerNull(journalfoeringDto.getAvsenderID()), journalpost.mottaksKanalErEessi());
     }
 
     private String finnInstitusjonIdEllerNull(String avsenderID) {
@@ -266,11 +267,11 @@ public class JournalfoeringService {
         if (journalpost.mottaksKanalErEessi()) {
             validerKanTilknytteJournalpostForSedTilSak(journalpost, saksnummer);
         }
-        if(journalfoeringDto.skalSendeForvaltningsmelding()) {
+        if (journalfoeringDto.skalSendeForvaltningsmelding()) {
             validerKanSendeForvaltningsmelding(journalfoeringDto, fagsak.getTema());
         }
 
-        fellesValidering(journalfoeringDto);
+        fellesValidering(journalfoeringDto, journalpost.mottaksKanalErEessi());
         lovligeKombinasjonerSaksbehandlingService.validerBehandlingstemaOgBehandlingstypeForAndregangsbehandling(fagsak, sistBehandling, sistBehandlingsresultat, behandlingstema, behandlingstype);
 
         if (sistBehandling.erAktiv()) {
@@ -285,7 +286,7 @@ public class JournalfoeringService {
         LocalDate mottaksdato = utledMottaksdato(journalfoeringDto.getMottattDato(), journalpost);
 
         prosessinstansService.journalførOgOpprettAndregangsBehandling(prosessTypeForAndregangsbehandling, behandlingstema, behandlingstype, journalfoeringDto.tilJournalfoeringTilordneRequest(),
-            behandlingsaarsaktyper, mottaksdato, finnInstitusjonIdEllerNull(journalfoeringDto.getAvsenderID()));
+            behandlingsaarsaktyper, mottaksdato, finnInstitusjonIdEllerNull(journalfoeringDto.getAvsenderID()), journalpost.mottaksKanalErEessi());
     }
 
     private static LocalDate utledMottaksdato(LocalDate datoFraSaksbehandler, Journalpost journalpost) {
@@ -316,7 +317,7 @@ public class JournalfoeringService {
         }
     }
 
-    private void fellesValidering(JournalfoeringDto journalfoeringDto) {
+    private void fellesValidering(JournalfoeringDto journalfoeringDto, boolean mottaksKanalErEessi) {
         if (journalfoeringDto instanceof JournalfoeringOpprettDto journalfoeringOpprettDto
             && journalfoeringOpprettDto.getFagsak() == null) {
             throw new FunksjonellException("Opplysninger for å opprette en søknad mangler");
@@ -328,14 +329,16 @@ public class JournalfoeringService {
         if (StringUtils.isEmpty(journalfoeringDto.getOppgaveID())) {
             throw new FunksjonellException("OppgaveID mangler");
         }
-        if (journalfoeringDto.getAvsenderType() != null && StringUtils.isEmpty(journalfoeringDto.getAvsenderID())) {
-            throw new FunksjonellException("AvsenderID er påkrevd når AvsenderType er satt");
-        }
-        if (!StringUtils.isEmpty(journalfoeringDto.getAvsenderID()) && journalfoeringDto.getAvsenderType() == null) {
-            throw new FunksjonellException("AvsenderType er påkrevd når AvsenderID er satt");
-        }
-        if (StringUtils.isEmpty(journalfoeringDto.getAvsenderNavn())) {
-            throw new FunksjonellException("AvsenderNavn mangler");
+        if (!mottaksKanalErEessi) {
+            if (journalfoeringDto.getAvsenderType() != null && StringUtils.isEmpty(journalfoeringDto.getAvsenderID())) {
+                throw new FunksjonellException("AvsenderID er påkrevd når AvsenderType er satt");
+            }
+            if (!StringUtils.isEmpty(journalfoeringDto.getAvsenderID()) && journalfoeringDto.getAvsenderType() == null) {
+                throw new FunksjonellException("AvsenderType er påkrevd når AvsenderID er satt");
+            }
+            if (StringUtils.isEmpty(journalfoeringDto.getAvsenderNavn())) {
+                throw new FunksjonellException("AvsenderNavn mangler");
+            }
         }
         if (StringUtils.isEmpty(journalfoeringDto.getBrukerID()) && StringUtils.isEmpty(journalfoeringDto.getVirksomhetOrgnr())) {
             throw new FunksjonellException("Både BrukerID og VirksomhetOrgnr mangler. Krever én");
