@@ -9,7 +9,8 @@ Under arbeid
 ## Context
 
 Nåværende datastruktur for trygdeavgift oppleves som mer komplisert enn nødvendig av flere utviklere, med tabeller som inneholder lite data
-og avhengigheter som skaper nesten en syklus. Det ble også oppdaget feil i JPA-mappingen i forbindelse med oppgradering av Spring Boot.
+og avhengigheter som skaper nesten en syklus. På grunn av strengere krav av mange-til-en-forhold i Hibernate 6, fant vi en feil i forbindelse med
+oppgradering av Spring Boot som gjorde at lister ikke ble slettet, men regenerert.
 
 Fastsatt_trygdeavgift kan betraktes som både starten og slutten av en løkke.
 Trygdeavgiftsperioder er avhengige av inntektsperioder og skatteforhold, som igjen er avhengige av et trygdeavgiftsgrunnlag. Men
