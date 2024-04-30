@@ -7,10 +7,7 @@ import java.util.List;
 import java.util.Set;
 
 import com.google.common.collect.Sets;
-import no.nav.melosys.domain.Anmodningsperiode;
-import no.nav.melosys.domain.Behandling;
-import no.nav.melosys.domain.Behandlingsresultat;
-import no.nav.melosys.domain.Fagsak;
+import no.nav.melosys.domain.*;
 import no.nav.melosys.domain.arkiv.DokumentReferanse;
 import no.nav.melosys.domain.arkiv.Vedlegg;
 import no.nav.melosys.domain.brev.DoksysBrevbestilling;
@@ -136,9 +133,7 @@ class SendAnmodningOmUnntakTest {
 
     private static Behandling lagBehandling() {
         Behandling behandling = new Behandling();
-        Fagsak fagsak = new Fagsak();
-        fagsak.setSaksnummer("MEL-1");
-        fagsak.setGsakSaksnummer(123L);
+        Fagsak fagsak = FagsakTestFactory.builder().medGsakSaksnummer().build();
         behandling.setFagsak(fagsak);
         behandling.setId(BEHANDLING_ID);
         behandling.setDokumentasjonSvarfristDato(Instant.now());

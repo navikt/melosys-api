@@ -2,10 +2,7 @@ package no.nav.melosys.service.dokument.brev.bygger;
 
 import java.util.*;
 
-import no.nav.melosys.domain.Behandling;
-import no.nav.melosys.domain.Fagsak;
-import no.nav.melosys.domain.Saksopplysning;
-import no.nav.melosys.domain.Vilkaarsresultat;
+import no.nav.melosys.domain.*;
 import no.nav.melosys.domain.brev.DoksysBrevbestilling;
 import no.nav.melosys.domain.dokument.organisasjon.OrganisasjonDokument;
 import no.nav.melosys.domain.dokument.organisasjon.OrganisasjonsDetaljer;
@@ -16,7 +13,6 @@ import no.nav.melosys.domain.kodeverk.Sakstyper;
 import no.nav.melosys.domain.kodeverk.Vilkaar;
 import no.nav.melosys.domain.person.Persondata;
 import no.nav.melosys.service.LandvelgerService;
-import no.nav.melosys.domain.OrganisasjonDokumentTestFactory;
 import no.nav.melosys.service.avklartefakta.AvklarteVirksomheterService;
 import no.nav.melosys.service.avklartefakta.AvklartefaktaService;
 import no.nav.melosys.service.behandling.BehandlingService;
@@ -85,8 +81,7 @@ class BrevDataByggerAnmodningUnntakTest {
     private Behandling lagBehandling() {
         Behandling behandling = new Behandling();
         behandling.setId(1L);
-        Fagsak fagsak = new Fagsak();
-        fagsak.setType(Sakstyper.EU_EOS);
+        Fagsak fagsak = FagsakTestFactory.lagFagsak();
         behandling.setFagsak(fagsak);
 
         List<String> selvstendigeForetak = Collections.singletonList("987654321");

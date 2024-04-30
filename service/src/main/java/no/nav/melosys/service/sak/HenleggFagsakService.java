@@ -55,7 +55,7 @@ public class HenleggFagsakService {
             throw new TekniskException(begrunnelseKodeString.toUpperCase() + " er ingen gyldig henleggelsesgrunn");
         }
 
-        Behandling aktivBehandling = fagsak.hentAktivBehandling();
+        Behandling aktivBehandling = fagsak.finnAktivBehandling();
         oppdaterBehandlingsresultat(aktivBehandling.getId(), begrunnelseKode, fritekst);
         if (aktivBehandling.erAndregangsbehandling()) {
             behandlingService.avsluttAndregangsbehandling(aktivBehandling.getId(), Behandlingsresultattyper.HENLEGGELSE);
@@ -83,7 +83,7 @@ public class HenleggFagsakService {
     @Transactional
     public void henleggSakEllerBehandlingSomBortfalt(String saksnummer) {
         Fagsak fagsak = fagsakService.hentFagsak(saksnummer);
-        Behandling aktivBehandling = fagsak.hentAktivBehandling();
+        Behandling aktivBehandling = fagsak.finnAktivBehandling();
 
         if (aktivBehandling.erAndregangsbehandling()) {
             henleggBehandlingSomBortfalt(aktivBehandling.getId(), saksnummer);

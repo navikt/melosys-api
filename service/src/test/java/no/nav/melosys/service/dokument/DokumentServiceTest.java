@@ -82,7 +82,6 @@ import static org.mockito.Mockito.*;
 
 final class DokumentServiceTest {
     private static final long BEHANDLINGSID = 13L;
-    private static final long GSAKSNUMMER = 321L;
     private static final String ORGNR = "123456789";
 
     private static long idTeller = 1L;
@@ -274,13 +273,12 @@ final class DokumentServiceTest {
 
     private static Behandling lagBehandling() {
         Behandling behandling = new Behandling();
-        Fagsak fagsak = new Fagsak();
-        fagsak.setGsakSaksnummer(GSAKSNUMMER);
         Set<Aktoer> aktører = new HashSet<>(Arrays.asList(lagAktør(Aktoersroller.BRUKER),
             lagAktør(Aktoersroller.FULLMEKTIG)));
-        fagsak.setAktører(aktører);
-        fagsak.setType(Sakstyper.EU_EOS);
-        fagsak.setSaksnummer("123");
+        Fagsak fagsak = FagsakTestFactory.builder()
+            .medGsakSaksnummer()
+            .aktører(aktører)
+            .build();
         behandling.setFagsak(fagsak);
         behandling.setType(Behandlingstyper.KLAGE);
         behandling.setId(BEHANDLINGSID);

@@ -4,10 +4,7 @@ import java.time.Instant;
 import java.time.LocalDate;
 import java.util.*;
 
-import no.nav.melosys.domain.Anmodningsperiode;
-import no.nav.melosys.domain.Behandling;
-import no.nav.melosys.domain.Behandlingsresultat;
-import no.nav.melosys.domain.Fagsak;
+import no.nav.melosys.domain.*;
 import no.nav.melosys.domain.kodeverk.Land_iso2;
 import no.nav.melosys.domain.kodeverk.Trygdedekninger;
 import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingsresultattyper;
@@ -90,7 +87,7 @@ class LagreAnmodningsperiodeIMedlTest {
 
     @Test
     void utfør_oppdaterAnmodningsperiode_ok() {
-        Fagsak fagsak = new Fagsak();
+        Fagsak fagsak = FagsakTestFactory.lagFagsak();
         Behandling forrigeBehandling = new Behandling();
         forrigeBehandling.setId(2L);
         forrigeBehandling.setFagsak(fagsak);
@@ -109,7 +106,9 @@ class LagreAnmodningsperiodeIMedlTest {
         behandling.setType(Behandlingstyper.NY_VURDERING);
         behandling.setRegistrertDato(Instant.now());
 
-        fagsak.setBehandlinger(Arrays.asList(behandling, forrigeBehandling, førsteBehandling));
+        fagsak.leggTilBehandling(behandling);
+        fagsak.leggTilBehandling(forrigeBehandling);
+        fagsak.leggTilBehandling(førsteBehandling);
 
         Anmodningsperiode anmodningsperiode = new Anmodningsperiode(NOW, NOW.plusMonths(1), null, null, null, null, null, null);
         behandlingsresultat.setAnmodningsperioder(Set.of(anmodningsperiode));

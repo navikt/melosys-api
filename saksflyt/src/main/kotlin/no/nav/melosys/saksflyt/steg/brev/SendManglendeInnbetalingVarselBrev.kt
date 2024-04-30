@@ -48,7 +48,7 @@ class SendManglendeInnbetalingVarselBrev(
     }
 
     private fun finnFullmektigTrygdeavgift(fagsak: Fagsak, behandlingID: Long): String? {
-        if (fagsak.finnFullmektig(Fullmaktstype.FULLMEKTIG_TRYGDEAVGIFT).isEmpty) return null
+        if (fagsak.finnFullmektig(Fullmaktstype.FULLMEKTIG_TRYGDEAVGIFT) == null) return null
 
         return trygdeavgiftsberegningService.finnFakturamottakerNavn(behandlingID)
     }

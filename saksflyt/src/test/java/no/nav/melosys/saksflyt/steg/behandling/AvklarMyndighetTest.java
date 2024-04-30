@@ -1,9 +1,6 @@
 package no.nav.melosys.saksflyt.steg.behandling;
 
-import no.nav.melosys.domain.Behandling;
-import no.nav.melosys.domain.Behandlingsresultat;
-import no.nav.melosys.domain.Fagsak;
-import no.nav.melosys.domain.Lovvalgsperiode;
+import no.nav.melosys.domain.*;
 import no.nav.melosys.domain.kodeverk.InnvilgelsesResultat;
 import no.nav.melosys.domain.kodeverk.Land_iso2;
 import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingsresultattyper;
@@ -43,8 +40,7 @@ class AvklarMyndighetTest {
         avklarMyndighet = new AvklarMyndighet(behandlingService, behandlingsresultatService, utenlandskMyndighetService);
 
         prosessinstans = new Prosessinstans();
-        Fagsak fagsak = new Fagsak();
-        fagsak.setSaksnummer("saksnr");
+        Fagsak fagsak = FagsakTestFactory.lagFagsak();
 
         Behandling behandling = lagBehandling(fagsak);
         when(behandlingService.hentBehandlingMedSaksopplysninger(anyLong())).thenReturn(behandling);

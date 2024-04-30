@@ -2,10 +2,7 @@ package no.nav.melosys.saksflyt.steg.medl;
 
 import java.util.NoSuchElementException;
 
-import no.nav.melosys.domain.Behandling;
-import no.nav.melosys.domain.Behandlingsresultat;
-import no.nav.melosys.domain.Fagsak;
-import no.nav.melosys.domain.Lovvalgsperiode;
+import no.nav.melosys.domain.*;
 import no.nav.melosys.domain.kodeverk.*;
 import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingsresultattyper;
 import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingstema;
@@ -50,9 +47,7 @@ class LagreLovvalgsperiodeMedlTest {
     @BeforeEach
     public void setup() {
         lagreLovvalgsperiodeMedl = new LagreLovvalgsperiodeMedl(behandlingsresultatService, medlPeriodeService, saksbehandlingRegler);
-        Fagsak fagsak = new Fagsak();
-        fagsak.setType(Sakstyper.TRYGDEAVTALE);
-        fagsak.setTema(Sakstemaer.UNNTAK);
+        Fagsak fagsak = FagsakTestFactory.builder().type(Sakstyper.TRYGDEAVTALE).tema(Sakstemaer.UNNTAK).build();
 
         behandling.setId(behandlingID);
         behandling.setTema(Behandlingstema.UTSENDT_ARBEIDSTAKER);
@@ -217,9 +212,7 @@ class LagreLovvalgsperiodeMedlTest {
 
     @Test
     void utfør_ikkeGodkjentRegistreringUnntak_oppretterIkkeLovvalgsperiode() {
-        Fagsak fagsak = new Fagsak();
-        fagsak.setType(Sakstyper.TRYGDEAVTALE);
-        fagsak.setTema(Sakstemaer.UNNTAK);
+        Fagsak fagsak = FagsakTestFactory.builder().type(Sakstyper.TRYGDEAVTALE).tema(Sakstemaer.UNNTAK).build();
 
         Behandling behandling = TestdataFactory.lagBehandling();
         behandling.setFagsak(fagsak);

@@ -172,9 +172,15 @@ class UtstedtA1ServiceTest {
         bruker.setAktørId("1234567891234");
         bruker.setRolle(Aktoersroller.BRUKER);
 
-        Fagsak fagsak = new Fagsak();
-        fagsak.setSaksnummer("MEL-123");
-        fagsak.setAktører(Set.of(bruker));
+        Fagsak fagsak = new Fagsak(
+            "MEL-123",
+            null,
+            Sakstyper.EU_EOS,
+            Sakstemaer.MEDLEMSKAP_LOVVALG,
+            Saksstatuser.OPPRETTET,
+            Set.of(bruker),
+            List.of()
+        );
 
         Behandling behandling = new Behandling();
         behandling.setId(BEHANDLING_ID);

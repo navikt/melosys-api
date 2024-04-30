@@ -69,22 +69,21 @@ public final class DokgenTestData {
     }
 
     public static Fagsak lagFagsak(boolean medFullmektig) {
-        Fagsak fagsak = new Fagsak();
+        Fagsak fagsak = FagsakTestFactory.builder()
+            .saksnummer(SAKSNUMMER)
+            .behandlinger(lagBehandlinger())
+            .type(Sakstyper.FTRL)
+            .tema(Sakstemaer.UNNTAK)
+            .medBruker()
+            .build();
+
         fagsak.setRegistrertDato(Instant.now());
-        fagsak.setBehandlinger(lagBehandlinger());
-        fagsak.setType(Sakstyper.FTRL);
-        fagsak.setTema(Sakstemaer.UNNTAK);
         fagsak.setEndretAv("L12345");
-        fagsak.setSaksnummer(SAKSNUMMER);
-        Aktoer bruker = new Aktoer();
-        bruker.setRolle(Aktoersroller.BRUKER);
-        bruker.setAktørId("aktørId");
-        fagsak.getAktører().add(bruker);
         if (medFullmektig) {
             Aktoer fullmektig = new Aktoer();
             fullmektig.setRolle(Aktoersroller.FULLMEKTIG);
             fullmektig.setFullmaktstype(Fullmaktstype.FULLMEKTIG_SØKNAD);
-            fagsak.getAktører().add(fullmektig);
+            fagsak.leggTilAktør(fullmektig);
         }
         return fagsak;
     }

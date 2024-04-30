@@ -8,10 +8,7 @@ import java.util.Set;
 
 import no.nav.dok.melosysbrev.felles.melosys_felles.FellesType;
 import no.nav.dok.melosysbrev.felles.melosys_felles.MelosysNAVFelles;
-import no.nav.melosys.domain.Behandling;
-import no.nav.melosys.domain.Behandlingsresultat;
-import no.nav.melosys.domain.Fagsak;
-import no.nav.melosys.domain.Lovvalgsperiode;
+import no.nav.melosys.domain.*;
 import no.nav.melosys.domain.adresse.StrukturertAdresse;
 import no.nav.melosys.domain.avklartefakta.AvklartVirksomhet;
 import no.nav.melosys.domain.avklartefakta.Avklartefakta;
@@ -104,7 +101,7 @@ class InnvilgelsesbrevMapperTest {
     }
 
     private String testMapTilBrevXml(Behandlingsresultat behandlingsresultat, boolean medFartsområde) throws Exception {
-        return testMapTilBrevXml(lagBehandling(lagFagsak(), medFartsområde), behandlingsresultat);
+        return testMapTilBrevXml(lagBehandling(medFartsområde), behandlingsresultat);
     }
 
     private String hentBrevXmlFraFil(String filnavn) throws IOException {
@@ -167,14 +164,8 @@ class InnvilgelsesbrevMapperTest {
         return faktum;
     }
 
-    private static Fagsak lagFagsak() {
-        Fagsak fagsak = new Fagsak();
-        fagsak.setType(Sakstyper.EU_EOS);
-        return fagsak;
-    }
-
-    private static Behandling lagBehandling(Fagsak fagsak, boolean medFartsområde) {
-        return lagBehandling(fagsak, lagSoeknadDokument(medFartsområde));
+    private static Behandling lagBehandling(boolean medFartsområde) {
+        return lagBehandling(FagsakTestFactory.lagFagsak(), lagSoeknadDokument(medFartsområde));
     }
 
     private static Soeknad lagSoeknadDokument(boolean medFartsområde) {

@@ -10,6 +10,7 @@ import io.mockk.verify
 import no.nav.melosys.domain.Behandling
 import no.nav.melosys.domain.Behandlingsresultat
 import no.nav.melosys.domain.Fagsak
+import no.nav.melosys.domain.FagsakTestFactory
 import no.nav.melosys.domain.kodeverk.Saksstatuser
 import no.nav.melosys.domain.kodeverk.begrunnelser.Henleggelsesgrunner
 import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingsresultattyper
@@ -44,7 +45,6 @@ internal class HenleggFagsakServiceTest {
 
     private lateinit var henleggFagsakService: HenleggFagsakService
 
-    private val SAKSNUMMER = "MEL-1"
     private val BEHANDLING_ID: Long = 1L
     private val BEGRUNNELSE_FRITEKST = "Dette er grunnen til at jeg henla saken"
 
@@ -64,16 +64,16 @@ internal class HenleggFagsakServiceTest {
     fun henleggFagsak_gyldigHenleggelsesgrunn_behandlingsresultatBlirOppdatert() {
         val behandlingsresultat = Behandlingsresultat()
         val behandling = lagBehandling()
-        every { fagsakService.hentFagsak(SAKSNUMMER) } returns lagFagsak(behandling)
+        every { fagsakService.hentFagsak(FagsakTestFactory.SAKSNUMMER) } returns FagsakTestFactory.builder().behandlinger(behandling).build()
         every { behandlingsresultatService.hentBehandlingsresultat(BEHANDLING_ID) } returns behandlingsresultat
 
 
-        henleggFagsakService.henleggFagsakEllerBehandling(SAKSNUMMER, Henleggelsesgrunner.ANNET.kode, BEGRUNNELSE_FRITEKST)
+        henleggFagsakService.henleggFagsakEllerBehandling(FagsakTestFactory.SAKSNUMMER, Henleggelsesgrunner.ANNET.kode, BEGRUNNELSE_FRITEKST)
 
 
         verify { behandlingsresultatService.lagre(behandlingsresultat) }
         verify { prosessinstansService.opprettProsessinstansFagsakHenlagt(behandling) }
-        verify { oppgaveService.ferdigstillOppgaveMedSaksnummer(SAKSNUMMER) }
+        verify { oppgaveService.ferdigstillOppgaveMedSaksnummer(FagsakTestFactory.SAKSNUMMER) }
         behandlingsresultat.run {
             type.shouldBe(Behandlingsresultattyper.HENLEGGELSE)
             begrunnelseFritekst.shouldBe(BEGRUNNELSE_FRITEKST)
@@ -84,71 +84,80 @@ internal class HenleggFagsakServiceTest {
     @Test
     fun henleggFagsakEllerBehandling_avslutterKunBehandling_nårBehandlingTypeErNyVurdering() {
         val behandling = lagBehandling(type = Behandlingstyper.NY_VURDERING)
-        every { fagsakService.hentFagsak(SAKSNUMMER) } returns lagFagsak(behandling)
+        every { fagsakService.hentFagsak(FagsakTestFactory.SAKSNUMMER) } returns FagsakTestFactory.builder().behandlinger(behandling).build()
 
 
-        henleggFagsakService.henleggFagsakEllerBehandling(SAKSNUMMER, Henleggelsesgrunner.ANNET.kode, BEGRUNNELSE_FRITEKST)
+        henleggFagsakService.henleggFagsakEllerBehandling(FagsakTestFactory.SAKSNUMMER, Henleggelsesgrunner.ANNET.kode, BEGRUNNELSE_FRITEKST)
 
 
         verify { behandlingService.avsluttAndregangsbehandling(BEHANDLING_ID, Behandlingsresultattyper.HENLEGGELSE) }
         verify { prosessinstansService.opprettProsessinstansFagsakHenlagt(behandling) }
-        verify { oppgaveService.ferdigstillOppgaveMedSaksnummer(SAKSNUMMER) }
+        verify { oppgaveService.ferdigstillOppgaveMedSaksnummer(FagsakTestFactory.SAKSNUMMER) }
         verify(exactly = 0) { fagsakService.avsluttFagsakOgBehandling(any(), any()) }
     }
 
     @Test
     fun henleggFagsakEllerBehandling_avslutterKunBehandling_nårBehandlingTypeErManglendeInnbetalingTrygdeavgift() {
         val behandling = lagBehandling(type = Behandlingstyper.MANGLENDE_INNBETALING_TRYGDEAVGIFT)
-        every { fagsakService.hentFagsak(SAKSNUMMER) } returns lagFagsak(behandling)
+        every { fagsakService.hentFagsak(FagsakTestFactory.SAKSNUMMER) } returns FagsakTestFactory.builder().behandlinger(behandling).build()
 
 
-        henleggFagsakService.henleggFagsakEllerBehandling(SAKSNUMMER, Henleggelsesgrunner.ANNET.kode, BEGRUNNELSE_FRITEKST)
+        henleggFagsakService.henleggFagsakEllerBehandling(FagsakTestFactory.SAKSNUMMER, Henleggelsesgrunner.ANNET.kode, BEGRUNNELSE_FRITEKST)
 
 
         verify { behandlingService.avsluttAndregangsbehandling(BEHANDLING_ID, Behandlingsresultattyper.HENLEGGELSE) }
         verify { prosessinstansService.opprettProsessinstansFagsakHenlagt(behandling) }
-        verify { oppgaveService.ferdigstillOppgaveMedSaksnummer(SAKSNUMMER) }
+        verify { oppgaveService.ferdigstillOppgaveMedSaksnummer(FagsakTestFactory.SAKSNUMMER) }
         verify(exactly = 0) { fagsakService.avsluttFagsakOgBehandling(any(), any()) }
     }
 
     @Test
     fun henleggFagsakEllerBehandling_avslutterFagsakOgBehandling_nårBehandlingIkkeErAndregang() {
         val behandling = lagBehandling()
-        val fagsak = lagFagsak(behandling)
-        every { fagsakService.hentFagsak(SAKSNUMMER) } returns fagsak
+        val fagsak = FagsakTestFactory.builder().behandlinger(behandling).build()
+        every { fagsakService.hentFagsak(FagsakTestFactory.SAKSNUMMER) } returns fagsak
 
 
-        henleggFagsakService.henleggFagsakEllerBehandling(SAKSNUMMER, Henleggelsesgrunner.ANNET.kode, BEGRUNNELSE_FRITEKST)
+        henleggFagsakService.henleggFagsakEllerBehandling(FagsakTestFactory.SAKSNUMMER, Henleggelsesgrunner.ANNET.kode, BEGRUNNELSE_FRITEKST)
 
 
         verify { fagsakService.avsluttFagsakOgBehandling(fagsak, Saksstatuser.HENLAGT) }
         verify { prosessinstansService.opprettProsessinstansFagsakHenlagt(behandling) }
-        verify { oppgaveService.ferdigstillOppgaveMedSaksnummer(SAKSNUMMER) }
+        verify { oppgaveService.ferdigstillOppgaveMedSaksnummer(FagsakTestFactory.SAKSNUMMER) }
         verify(exactly = 0) { behandlingService.avsluttAndregangsbehandling(any(), any()) }
     }
 
     @Test
     fun henleggFagsakEllerBehandling_ikkeGyldigHenleggelsesgrunn_kasterException() {
-        shouldThrow<TekniskException> { henleggFagsakService.henleggFagsakEllerBehandling(SAKSNUMMER, "UGYLDIGKODE", BEGRUNNELSE_FRITEKST) }
+        shouldThrow<TekniskException> {
+            henleggFagsakService.henleggFagsakEllerBehandling(
+                FagsakTestFactory.SAKSNUMMER,
+                "UGYLDIGKODE",
+                BEGRUNNELSE_FRITEKST
+            )
+        }
             .message.shouldBe("UGYLDIGKODE er ingen gyldig henleggelsesgrunn")
     }
 
     @Test
     fun henleggSakEllerBehandlingSomBortfalt_fagsakMedFlereBehandlinger_avslutterAktivBehandlingOgStatusBlirHENLAGT_BORTFALT() {
-        val fagsak = lagFagsak(
-            lagBehandling(id = 123L, status = Behandlingsstatus.AVSLUTTET),
-            lagBehandling(id = BEHANDLING_ID, status = Behandlingsstatus.ANMODNING_UNNTAK_SENDT)
-        )
-        every { fagsakService.hentFagsak(SAKSNUMMER) } returns fagsak
+        val fagsak = FagsakTestFactory.builder()
+            .behandlinger(
+                listOf(
+                    lagBehandling(id = 123L, status = Behandlingsstatus.AVSLUTTET),
+                    lagBehandling(id = BEHANDLING_ID, status = Behandlingsstatus.ANMODNING_UNNTAK_SENDT)
+                )
+            ).build()
+        every { fagsakService.hentFagsak(FagsakTestFactory.SAKSNUMMER) } returns fagsak
 
 
-        henleggFagsakService.henleggSakEllerBehandlingSomBortfalt(SAKSNUMMER)
+        henleggFagsakService.henleggSakEllerBehandlingSomBortfalt(FagsakTestFactory.SAKSNUMMER)
 
 
         verify { fagsakService.lagre(fagsak) }
         verify { behandlingsresultatService.oppdaterBehandlingsresultattype(123L, Behandlingsresultattyper.HENLEGGELSE_BORTFALT) }
         verify { behandlingsresultatService.oppdaterBehandlingsresultattype(BEHANDLING_ID, Behandlingsresultattyper.HENLEGGELSE_BORTFALT) }
-        verify { oppgaveService.ferdigstillOppgaveMedSaksnummer(SAKSNUMMER) }
+        verify { oppgaveService.ferdigstillOppgaveMedSaksnummer(FagsakTestFactory.SAKSNUMMER) }
         verify { behandlingService.avsluttBehandling(BEHANDLING_ID) }
         verify(exactly = 0) { behandlingService.avsluttBehandling(123L) }
         verify(exactly = 0) { behandlingService.avsluttAndregangsbehandling(any(), any()) }
@@ -158,17 +167,20 @@ internal class HenleggFagsakServiceTest {
 
     @Test
     fun henleggSakEllerBehandlingSomBortfalt_avslutterKunBehandling_dersomBehandlingTypeErNyVurdering() {
-        every { fagsakService.hentFagsak(SAKSNUMMER) } returns lagFagsak(
-            lagBehandling(id = 123L, status = Behandlingsstatus.AVSLUTTET),
-            lagBehandling(id = BEHANDLING_ID, type = Behandlingstyper.NY_VURDERING)
-        )
+        every { fagsakService.hentFagsak(FagsakTestFactory.SAKSNUMMER) } returns FagsakTestFactory.builder()
+            .behandlinger(
+                listOf(
+                    lagBehandling(id = 123L, status = Behandlingsstatus.AVSLUTTET),
+                    lagBehandling(id = BEHANDLING_ID, type = Behandlingstyper.NY_VURDERING)
+                )
+            ).build()
 
 
-        henleggFagsakService.henleggSakEllerBehandlingSomBortfalt(SAKSNUMMER)
+        henleggFagsakService.henleggSakEllerBehandlingSomBortfalt(FagsakTestFactory.SAKSNUMMER)
 
 
         verify { behandlingService.avsluttAndregangsbehandling(BEHANDLING_ID, Behandlingsresultattyper.HENLEGGELSE_BORTFALT) }
-        verify { oppgaveService.ferdigstillOppgaveMedSaksnummer(SAKSNUMMER) }
+        verify { oppgaveService.ferdigstillOppgaveMedSaksnummer(FagsakTestFactory.SAKSNUMMER) }
         verify(exactly = 0) { behandlingsresultatService.oppdaterBehandlingsresultattype(any(), any()) }
         verify(exactly = 0) { behandlingService.avsluttBehandling(any()) }
         verify(exactly = 0) { fagsakService.avsluttFagsakOgBehandling(any(), any()) }
@@ -176,26 +188,23 @@ internal class HenleggFagsakServiceTest {
 
     @Test
     fun henleggSakEllerBehandlingSomBortfalt_avslutterKunBehandling_dersomBehandlingTypeErManglendeInnbetalingTrygdeavgift() {
-        every { fagsakService.hentFagsak(SAKSNUMMER) } returns lagFagsak(
-            lagBehandling(id = 123L, status = Behandlingsstatus.AVSLUTTET),
-            lagBehandling(id = BEHANDLING_ID, type = Behandlingstyper.MANGLENDE_INNBETALING_TRYGDEAVGIFT)
-        )
+        every { fagsakService.hentFagsak(FagsakTestFactory.SAKSNUMMER) } returns FagsakTestFactory.builder()
+            .behandlinger(
+                listOf(
+                    lagBehandling(id = 123L, status = Behandlingsstatus.AVSLUTTET),
+                    lagBehandling(id = BEHANDLING_ID, type = Behandlingstyper.MANGLENDE_INNBETALING_TRYGDEAVGIFT)
+                )
+            ).build()
 
 
-        henleggFagsakService.henleggSakEllerBehandlingSomBortfalt(SAKSNUMMER)
+        henleggFagsakService.henleggSakEllerBehandlingSomBortfalt(FagsakTestFactory.SAKSNUMMER)
 
 
         verify { behandlingService.avsluttAndregangsbehandling(BEHANDLING_ID, Behandlingsresultattyper.HENLEGGELSE_BORTFALT) }
-        verify { oppgaveService.ferdigstillOppgaveMedSaksnummer(SAKSNUMMER) }
+        verify { oppgaveService.ferdigstillOppgaveMedSaksnummer(FagsakTestFactory.SAKSNUMMER) }
         verify(exactly = 0) { behandlingsresultatService.oppdaterBehandlingsresultattype(any(), any()) }
         verify(exactly = 0) { behandlingService.avsluttBehandling(any()) }
         verify(exactly = 0) { fagsakService.avsluttFagsakOgBehandling(any(), any()) }
-    }
-
-
-    private fun lagFagsak(vararg behandlinger: Behandling) = Fagsak().apply {
-        saksnummer = SAKSNUMMER
-        this.behandlinger.addAll(behandlinger)
     }
 
     private fun lagBehandling(

@@ -42,11 +42,11 @@ class DataByggerStubs {
         behandling.setId(1L);
         behandling.setMottatteOpplysninger(new MottatteOpplysninger());
 
-        Fagsak fagsak = new Fagsak();
+        Fagsak fagsak = FagsakTestFactory.lagFagsak();
         Aktoer myndighet = new Aktoer();
         myndighet.setRolle(Aktoersroller.TRYGDEMYNDIGHET);
         myndighet.setInstitusjonID("SE:123321");
-        fagsak.setAktører(Collections.singleton(myndighet));
+        fagsak.leggTilAktør(myndighet);
         behandling.setFagsak(fagsak);
 
         Set<Saksopplysning> saksopplysninger = new HashSet<>();

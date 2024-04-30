@@ -6,6 +6,7 @@ import java.util.Map;
 
 import no.nav.melosys.domain.Behandling;
 import no.nav.melosys.domain.Fagsak;
+import no.nav.melosys.domain.FagsakTestFactory;
 import no.nav.melosys.domain.kodeverk.Avsendertyper;
 import no.nav.melosys.domain.kodeverk.Sakstemaer;
 import no.nav.melosys.domain.kodeverk.Sakstyper;
@@ -80,10 +81,7 @@ class OppdaterOgFerdigstillJournalpostTest {
         prosessinstans.setType(ProsessType.JFR_NY_SAK_BRUKER);
         prosessinstans.setBehandling(new Behandling());
         prosessinstans.getBehandling().setTema(Behandlingstema.UTSENDT_ARBEIDSTAKER);
-        prosessinstans.getBehandling().setFagsak(new Fagsak());
-        prosessinstans.getBehandling().getFagsak().setType(Sakstyper.EU_EOS);
-        prosessinstans.getBehandling().getFagsak().setSaksnummer("MEL-123");
-        prosessinstans.getBehandling().getFagsak().setTema(Sakstemaer.MEDLEMSKAP_LOVVALG);
+        prosessinstans.getBehandling().setFagsak(FagsakTestFactory.lagFagsak());
 
         if (medAvsenderNavn) {
             prosessinstans.setData(ProsessDataKey.AVSENDER_NAVN, avsenderNavn);

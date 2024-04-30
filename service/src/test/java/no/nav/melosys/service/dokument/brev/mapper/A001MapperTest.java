@@ -86,7 +86,7 @@ class A001MapperTest {
         Behandling behandling = mock(Behandling.class);
         when(behandling.getRegistrertDato()).thenReturn(Instant.now());
         when(behandling.getSaksopplysninger()).thenReturn(new HashSet<>(List.of(saksopplysning)));
-        when(behandling.getFagsak()).thenReturn(new Fagsak());
+        when(behandling.getFagsak()).thenReturn(FagsakTestFactory.lagFagsak());
 
         StrukturertAdresse strukturertAdresse = lagStrukturertAdresse();
 

@@ -88,7 +88,7 @@ class BrevmottakerServiceTest {
 
     @Test
     void avklarMottakere_medBrukerRolleOgIkkeRegistretBruker_feiler() {
-        when(behandling.getFagsak()).thenReturn(new Fagsak());
+        when(behandling.getFagsak()).thenReturn(FagsakTestFactory.lagFagsak());
 
         assertThatThrownBy(() -> brevmottakerService.avklarMottakere(null, Mottaker.medRolle(BRUKER), behandling))
             .isInstanceOf(FunksjonellException.class)
@@ -97,7 +97,7 @@ class BrevmottakerServiceTest {
 
     @Test
     void avklarMottakere_medBrukerRolleUtenFullmektig_girBrukerMottaker() {
-        when(behandling.getFagsak()).thenReturn(lagFagsak());
+        when(behandling.getFagsak()).thenReturn(lagFagsakMedBruker());
 
         List<Mottaker> mottakere = brevmottakerService.avklarMottakere(null, Mottaker.medRolle(BRUKER), behandling);
 
@@ -128,7 +128,7 @@ class BrevmottakerServiceTest {
     @Test
     void avklarMottakere_medVirksomhetRolleOgIngenVirksomhet_feiler() {
         var mottaker = Mottaker.medRolle(VIRKSOMHET);
-        when(behandling.getFagsak()).thenReturn(new Fagsak());
+        when(behandling.getFagsak()).thenReturn(FagsakTestFactory.lagFagsak());
 
         assertThatExceptionOfType(FunksjonellException.class)
             .isThrownBy(() -> brevmottakerService.avklarMottakere(null, mottaker, behandling))
@@ -140,8 +140,7 @@ class BrevmottakerServiceTest {
         Aktoer virksomhet = new Aktoer();
         virksomhet.setRolle(Aktoersroller.VIRKSOMHET);
         virksomhet.setOrgnr("orgnr");
-        var fagsak = new Fagsak();
-        fagsak.setAktører(Set.of(virksomhet));
+        var fagsak = FagsakTestFactory.builder().aktører(virksomhet).build();
         when(behandling.getFagsak()).thenReturn(fagsak);
 
         List<Mottaker> mottakere = brevmottakerService.avklarMottakere(null, Mottaker.medRolle(VIRKSOMHET), behandling);
@@ -153,7 +152,7 @@ class BrevmottakerServiceTest {
 
     @Test
     void avklarMottakere_medArbeidsgiverRolleOgIngenArbeidsgivere_feiler() {
-        when(behandling.getFagsak()).thenReturn(lagFagsak());
+        when(behandling.getFagsak()).thenReturn(lagFagsakMedBruker());
         when(avklarteVirksomheterService.hentNorskeArbeidsgivendeOrgnumre(behandling)).thenReturn(Collections.emptySet());
         when(avklarteVirksomheterService.hentUtenlandskeVirksomheter(behandling)).thenReturn(Collections.emptyList());
 
@@ -165,7 +164,7 @@ class BrevmottakerServiceTest {
     @Test
     void avklarMottakere_medArbeidsgiverRolle_girArbeidsgiverMottakere() {
         when(avklarteVirksomheterService.hentNorskeArbeidsgivendeOrgnumre(behandling)).thenReturn(Sets.newHashSet("123456789", "987654321"));
-        when(behandling.getFagsak()).thenReturn(lagFagsak());
+        when(behandling.getFagsak()).thenReturn(lagFagsakMedBruker());
 
         List<Mottaker> arbeidsgivere = brevmottakerService.avklarMottakere(null, Mottaker.medRolle(ARBEIDSGIVER), behandling);
 
@@ -176,7 +175,7 @@ class BrevmottakerServiceTest {
 
     @Test
     void avklarMottakere_medBareUtenlandskeArbeidsgivere_girIngenMottakere() {
-        when(behandling.getFagsak()).thenReturn(lagFagsak());
+        when(behandling.getFagsak()).thenReturn(lagFagsakMedBruker());
         when(avklarteVirksomheterService.hentNorskeArbeidsgivendeOrgnumre(behandling)).thenReturn(Collections.emptySet());
         when(avklarteVirksomheterService.hentUtenlandskeVirksomheter(behandling))
             .thenReturn(Collections.singletonList(new AvklartVirksomhet(new ForetakUtland())));
@@ -187,7 +186,7 @@ class BrevmottakerServiceTest {
 
     @Test
     void avklarMottakere_medArbeidsgiverRolleIkkeKunAvklarteVirksomheterOgIngenArbeidsgivere_girTomListe() {
-        when(behandling.getFagsak()).thenReturn(lagFagsak());
+        when(behandling.getFagsak()).thenReturn(lagFagsakMedBruker());
         when(behandling.getMottatteOpplysninger()).thenReturn(lagMottatteOpplysninger(null, null));
         when(behandling.finnArbeidsforholdDokument()).thenReturn(Optional.of(lagArbeidsforholdDokument(null)));
 
@@ -198,7 +197,7 @@ class BrevmottakerServiceTest {
 
     @Test
     void avklarMottakere_medArbeidsgiverRolleIkkeKunAvklarteVirksomheter_girArbeidsgiverMottakere() {
-        when(behandling.getFagsak()).thenReturn(lagFagsak());
+        when(behandling.getFagsak()).thenReturn(lagFagsakMedBruker());
         when(behandling.getMottatteOpplysninger()).thenReturn(lagMottatteOpplysninger("987654321", null));
         when(behandling.finnArbeidsforholdDokument()).thenReturn(Optional.of(lagArbeidsforholdDokument("123456789")));
 
@@ -211,7 +210,7 @@ class BrevmottakerServiceTest {
 
     @Test
     void avklarMottakere_medBareUtenlandskeArbeidsgivereIkkeKunAvklarteVirksomheter_girIngenMottakere() {
-        when(behandling.getFagsak()).thenReturn(lagFagsak());
+        when(behandling.getFagsak()).thenReturn(lagFagsakMedBruker());
         when(behandling.getMottatteOpplysninger()).thenReturn(lagMottatteOpplysninger(null, "uuid"));
         when(behandling.finnArbeidsforholdDokument()).thenReturn(Optional.of(lagArbeidsforholdDokument(null)));
 
@@ -422,33 +421,27 @@ class BrevmottakerServiceTest {
             .hasMessage("Valg av mottakerRolle støttes ikke for ORIENTERING_UTPEKING_UTLAND");
     }
 
-    private Aktoer lagAktoer(Aktoersroller rolle) {
-        var aktoer = new Aktoer();
-        aktoer.setRolle(rolle);
-        return aktoer;
-    }
-
-    private Fagsak lagFagsak() {
-        Fagsak fagsak = new Fagsak();
-        fagsak.getAktører().add(lagAktoer(Aktoersroller.BRUKER));
-        return fagsak;
+    private Fagsak lagFagsakMedBruker() {
+        return FagsakTestFactory.builder().medBruker().build();
     }
 
     private Fagsak lagFagsakMedFullmektigOrg(Fullmaktstype fullmaktstype) {
-        Fagsak fagsak = lagFagsak();
-        Aktoer aktoer = lagAktoer(Aktoersroller.FULLMEKTIG);
+        Fagsak fagsak = lagFagsakMedBruker();
+        Aktoer aktoer = new Aktoer();
+        aktoer.setRolle(Aktoersroller.FULLMEKTIG);
         aktoer.setFullmaktstype(fullmaktstype);
         aktoer.setOrgnr("REP-ORGNR");
-        fagsak.getAktører().add(aktoer);
+        fagsak.leggTilAktør(aktoer);
         return fagsak;
     }
 
     private Fagsak lagFagsakMedFullmektigPerson(Fullmaktstype fullmaktstype) {
-        var fagsak = lagFagsak();
-        Aktoer aktoer = lagAktoer(Aktoersroller.FULLMEKTIG);
+        Fagsak fagsak = lagFagsakMedBruker();
+        Aktoer aktoer = new Aktoer();
+        aktoer.setRolle(Aktoersroller.FULLMEKTIG);
         aktoer.setFullmaktstype(fullmaktstype);
         aktoer.setPersonIdent("REP-FNR");
-        fagsak.getAktører().add(aktoer);
+        fagsak.leggTilAktør(aktoer);
         return fagsak;
     }
 

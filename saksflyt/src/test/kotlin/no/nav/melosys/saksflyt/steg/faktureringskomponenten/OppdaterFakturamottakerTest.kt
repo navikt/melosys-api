@@ -8,7 +8,8 @@ import io.mockk.verify
 import no.nav.melosys.domain.Aktoer
 import no.nav.melosys.domain.Behandling
 import no.nav.melosys.domain.Behandlingsresultat
-import no.nav.melosys.domain.Fagsak
+import no.nav.melosys.domain.FagsakTestFactory
+import no.nav.melosys.domain.FagsakTestFactory.SAKSNUMMER
 import no.nav.melosys.domain.kodeverk.Aktoersroller
 import no.nav.melosys.domain.kodeverk.Fullmaktstype
 import no.nav.melosys.integrasjon.faktureringskomponenten.FaktureringskomponentenConsumer
@@ -38,7 +39,6 @@ class OppdaterFakturamottakerTest {
     lateinit var faktureringskomponentenConsumer: FaktureringskomponentenConsumer
 
     private val SAKSBEHANDLER_IDENT = "S123456"
-    private val SAKSNUMMER = "MEL-1"
     private val BEHANDLING_ID = 1L
 
     private lateinit var oppdaterFakturamottaker: OppdaterFakturamottaker
@@ -50,9 +50,9 @@ class OppdaterFakturamottakerTest {
 
     @Test
     fun utfør_ingenBehandlingerMedFakturaserieReferanser_kallerIkkeFaktureringskomponenten() {
-        every { fagsakService.hentFagsak(SAKSNUMMER) } returns Fagsak().apply {
-            behandlinger.add(Behandling().apply { id = BEHANDLING_ID })
-        }
+        every { fagsakService.hentFagsak(SAKSNUMMER) } returns FagsakTestFactory.builder().apply {
+            leggTilBehandling(Behandling().apply { id = BEHANDLING_ID })
+        }.build()
         every { behandlingsresultatService.hentBehandlingsresultat(BEHANDLING_ID) } returns Behandlingsresultat()
 
 
@@ -69,17 +69,17 @@ class OppdaterFakturamottakerTest {
             rolle = Aktoersroller.FULLMEKTIG
             setFullmaktstype(Fullmaktstype.FULLMEKTIG_TRYGDEAVGIFT)
         }
-        val fagsak = Fagsak().apply {
+        val fagsak = FagsakTestFactory.builder().apply {
             aktører.add(fullmektig)
-            behandlinger.add(Behandling().apply {
+            leggTilBehandling(Behandling().apply {
                 id = BEHANDLING_ID
                 registrertDato = Instant.now().minus(31, ChronoUnit.DAYS)
             })
-            behandlinger.add(Behandling().apply {
+            leggTilBehandling(Behandling().apply {
                 id = 2L
                 registrertDato = Instant.now()
             })
-        }
+        }.build()
         val behandlingsresultat1 = Behandlingsresultat().apply { fakturaserieReferanse = "1" }
         val behandlingsresultat2 = Behandlingsresultat().apply { fakturaserieReferanse = "2" }
         every { fagsakService.hentFagsak(SAKSNUMMER) } returns fagsak
@@ -108,7 +108,7 @@ class OppdaterFakturamottakerTest {
 
     @Test
     fun utfør_referanseMenIngenFullmektig_kallerFaktureringskomponentMedTomFullmektig() {
-        val fagsak = Fagsak().apply { behandlinger.add(Behandling().apply { id = BEHANDLING_ID }) }
+        val fagsak = FagsakTestFactory.builder().behandlinger(Behandling().apply { id = BEHANDLING_ID }).build()
         val behandlingsresultat = Behandlingsresultat().apply { fakturaserieReferanse = "1" }
         every { fagsakService.hentFagsak(SAKSNUMMER) } returns fagsak
         every { behandlingsresultatService.hentBehandlingsresultat(BEHANDLING_ID) } returns behandlingsresultat

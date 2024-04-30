@@ -7,6 +7,7 @@ import java.util.List;
 import java.util.Optional;
 
 import no.nav.melosys.domain.Fagsak;
+import no.nav.melosys.domain.FagsakTestFactory;
 import no.nav.melosys.domain.arkiv.Journalpost;
 import no.nav.melosys.domain.arkiv.Journalposttype;
 import no.nav.melosys.domain.kodeverk.*;
@@ -252,7 +253,7 @@ class OpprettSakTest {
         when(oppgaveService.hentOppgaveMedOppgaveID(opprettSakDto.getOppgaveID())).thenReturn(oppgave);
         final Journalpost journalpost = lagJournalpost(Journalposttype.INN, "EESSI");
         when(journalfoeringService.hentJournalpost(JP_ID)).thenReturn(journalpost);
-        when(journalfoeringService.finnSakTilknyttetSedJournalpost(journalpost)).thenReturn(Optional.of(new Fagsak()));
+        when(journalfoeringService.finnSakTilknyttetSedJournalpost(journalpost)).thenReturn(Optional.of(FagsakTestFactory.lagFagsak()));
         when(saksbehandlingRegler.harIngenFlyt(any(), any(), any(), any())).thenReturn(true);
 
         assertThatExceptionOfType(FunksjonellException.class)

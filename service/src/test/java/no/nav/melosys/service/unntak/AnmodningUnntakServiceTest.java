@@ -72,7 +72,6 @@ class AnmodningUnntakServiceTest {
 
     private static final long BEHANDLING_ID = 1L;
     private static final String FRITEKST_SED = "Ytterligere info som fritekst";
-    private static final String SAKSNUMMER = "MEL-111";
     private static final String MOTTAKER_INSTITUSJON = "SE:432";
 
     @Captor
@@ -91,8 +90,7 @@ class AnmodningUnntakServiceTest {
     void anmodningOmUnntak_erEessiKlarMedMottakerInstitusjon_prosessOpprettet() throws Exception {
         final DokumentReferanse dokumentReferanse = new DokumentReferanse("jpID", "dokID");
         Behandling behandling = new Behandling();
-        Fagsak fagsak = new Fagsak();
-        fagsak.setSaksnummer(SAKSNUMMER);
+        Fagsak fagsak = FagsakTestFactory.lagFagsak();
         behandling.setFagsak(fagsak);
         behandling.getSaksopplysninger().add(lagPersonSaksopplysning());
         behandling.setMottatteOpplysninger(new MottatteOpplysninger());
@@ -113,8 +111,7 @@ class AnmodningUnntakServiceTest {
     void anmodningOmUnntak_ikkeEessiReadyMottakerInstitusjonNull_prosessOpprettet() throws Exception {
         Behandling behandling = new Behandling();
         behandling.setMottatteOpplysninger(new MottatteOpplysninger());
-        Fagsak fagsak = new Fagsak();
-        fagsak.setSaksnummer(SAKSNUMMER);
+        Fagsak fagsak = FagsakTestFactory.lagFagsak();
         behandling.setFagsak(fagsak);
         behandling.getSaksopplysninger().add(lagPersonSaksopplysning());
         when(behandlingService.hentBehandlingMedSaksopplysninger(BEHANDLING_ID)).thenReturn(behandling);
@@ -156,7 +153,7 @@ class AnmodningUnntakServiceTest {
         assertThat(lovvalgsperioder.getValue()).containsExactly(
             Lovvalgsperiode.av(lagAnmodningsperiodeSvar(), Medlemskapstyper.PLIKTIG));
         verify(prosessinstansService).opprettProsessinstansAnmodningOmUnntakMottakSvar(behandling, FRITEKST_SED);
-        verify(oppgaveService).ferdigstillOppgaveMedSaksnummer(SAKSNUMMER);
+        verify(oppgaveService).ferdigstillOppgaveMedSaksnummer(FagsakTestFactory.SAKSNUMMER);
         verify(behandlingsresultatService).oppdaterBehandlingsresultattype(BEHANDLING_ID, Behandlingsresultattyper.REGISTRERT_UNNTAK);
     }
 
@@ -248,9 +245,7 @@ class AnmodningUnntakServiceTest {
 
     private static Behandling lagBehandling() {
         Behandling behandling = new Behandling();
-        Fagsak fagsak = new Fagsak();
-        fagsak.setSaksnummer(SAKSNUMMER);
-        behandling.setFagsak(fagsak);
+        behandling.setFagsak(FagsakTestFactory.lagFagsak());
         behandling.setId(BEHANDLING_ID);
 
         return behandling;

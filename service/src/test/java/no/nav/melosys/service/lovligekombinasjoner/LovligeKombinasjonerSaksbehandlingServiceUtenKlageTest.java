@@ -1,12 +1,10 @@
 package no.nav.melosys.service.lovligekombinasjoner;
 
+import java.util.List;
 import java.util.Set;
 
 import io.getunleash.FakeUnleash;
-import no.nav.melosys.domain.Anmodningsperiode;
-import no.nav.melosys.domain.Behandling;
-import no.nav.melosys.domain.Behandlingsresultat;
-import no.nav.melosys.domain.Fagsak;
+import no.nav.melosys.domain.*;
 import no.nav.melosys.domain.kodeverk.Aktoersroller;
 import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingsstatus;
 import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingstema;
@@ -60,12 +58,11 @@ class LovligeKombinasjonerSaksbehandlingServiceUtenKlageTest {
 
     @Test
     void hentMuligeSakstyper_saksnummerIkkeNullSakKanEndres_returnererAlleSakstyper() {
-        var fagsak = new Fagsak();
-        fagsak.getBehandlinger().add(new Behandling());
-        when(fagsakService.hentFagsak("saksnummer")).thenReturn(fagsak);
+        var fagsak = FagsakTestFactory.builder().behandlinger(new Behandling()).build();
+        when(fagsakService.hentFagsak(FagsakTestFactory.SAKSNUMMER)).thenReturn(fagsak);
 
 
-        var muligeSakstyper = lovligeKombinasjonerSaksbehandlingService.hentMuligeSakstyper("saksnummer");
+        var muligeSakstyper = lovligeKombinasjonerSaksbehandlingService.hentMuligeSakstyper(FagsakTestFactory.SAKSNUMMER);
 
 
         assertThat(muligeSakstyper).hasSize(3).contains(EU_EOS, FTRL, TRYGDEAVTALE);
@@ -73,14 +70,14 @@ class LovligeKombinasjonerSaksbehandlingServiceUtenKlageTest {
 
     @Test
     void hentMuligeSakstyper_saksnummerIkkeNullSakKanIkkeEndres_returnererTomListe() {
-        var fagsak = new Fagsak();
-        fagsak.getBehandlinger().add(new Behandling());
-        fagsak.getBehandlinger().add(new Behandling());
-        fagsak.getBehandlinger().get(0).setStatus(AVSLUTTET);
-        when(fagsakService.hentFagsak("saksnummer")).thenReturn(fagsak);
+        var behandling1 = new Behandling();
+        behandling1.setStatus(AVSLUTTET);
+        var behandling2 = new Behandling();
+        var fagsak = FagsakTestFactory.builder().behandlinger(List.of(behandling1, behandling2)).build();
+        when(fagsakService.hentFagsak(FagsakTestFactory.SAKSNUMMER)).thenReturn(fagsak);
 
 
-        var muligeSakstyper = lovligeKombinasjonerSaksbehandlingService.hentMuligeSakstyper("saksnummer");
+        var muligeSakstyper = lovligeKombinasjonerSaksbehandlingService.hentMuligeSakstyper(FagsakTestFactory.SAKSNUMMER);
 
 
         assertThat(muligeSakstyper).isEmpty();
@@ -97,12 +94,11 @@ class LovligeKombinasjonerSaksbehandlingServiceUtenKlageTest {
 
     @Test
     void hentMuligeSakstemaer_saksnummerErIkkeNullSakKanEndres_returnererLovligeSakstemaer() {
-        var fagsak = new Fagsak();
-        fagsak.getBehandlinger().add(new Behandling());
-        when(fagsakService.hentFagsak("saksnummer")).thenReturn(fagsak);
+        var fagsak = FagsakTestFactory.builder().behandlinger(new Behandling()).build();
+        when(fagsakService.hentFagsak(FagsakTestFactory.SAKSNUMMER)).thenReturn(fagsak);
 
 
-        var muligeSakstemaer = lovligeKombinasjonerSaksbehandlingService.hentMuligeSakstemaer(Aktoersroller.VIRKSOMHET, TRYGDEAVTALE, "saksnummer");
+        var muligeSakstemaer = lovligeKombinasjonerSaksbehandlingService.hentMuligeSakstemaer(Aktoersroller.VIRKSOMHET, TRYGDEAVTALE, FagsakTestFactory.SAKSNUMMER);
 
 
         assertThat(muligeSakstemaer).isNotEmpty();
@@ -110,14 +106,14 @@ class LovligeKombinasjonerSaksbehandlingServiceUtenKlageTest {
 
     @Test
     void hentMuligeSakstemaer_saksnummerErIkkeNullSakKanIkkeEndres_returnererTomListe() {
-        var fagsak = new Fagsak();
-        fagsak.getBehandlinger().add(new Behandling());
-        fagsak.getBehandlinger().add(new Behandling());
-        fagsak.getBehandlinger().get(0).setStatus(AVSLUTTET);
-        when(fagsakService.hentFagsak("saksnummer")).thenReturn(fagsak);
+        var behandling1 = new Behandling();
+        behandling1.setStatus(AVSLUTTET);
+        var behandling2 = new Behandling();
+        var fagsak = FagsakTestFactory.builder().behandlinger(List.of(behandling1, behandling2)).build();
+        when(fagsakService.hentFagsak(FagsakTestFactory.SAKSNUMMER)).thenReturn(fagsak);
 
 
-        var muligeSakstemaer = lovligeKombinasjonerSaksbehandlingService.hentMuligeSakstemaer(Aktoersroller.VIRKSOMHET, TRYGDEAVTALE, "saksnummer");
+        var muligeSakstemaer = lovligeKombinasjonerSaksbehandlingService.hentMuligeSakstemaer(Aktoersroller.VIRKSOMHET, TRYGDEAVTALE, FagsakTestFactory.SAKSNUMMER);
 
 
         assertThat(muligeSakstemaer).isEmpty();
@@ -278,8 +274,7 @@ class LovligeKombinasjonerSaksbehandlingServiceUtenKlageTest {
 
     @Test
     void hentMuligeBehandlingstyper_sisteBehandlingFinnes_skalIkkeReturnereFørstegangsbehandling() {
-        Fagsak fagsak = new Fagsak();
-        fagsak.setType(EU_EOS);
+        Fagsak fagsak = FagsakTestFactory.lagFagsak();
         Behandling sisteBehandling = behandlingMedTemaOgType(UTSENDT_ARBEIDSTAKER, FØRSTEGANG);
         sisteBehandling.setFagsak(fagsak);
         sisteBehandling.setStatus(Behandlingsstatus.AVSLUTTET);
@@ -292,8 +287,7 @@ class LovligeKombinasjonerSaksbehandlingServiceUtenKlageTest {
 
     @Test
     void hentMuligeBehandlingstyper_sisteBehandlingAktiv_skalReturnereTomListe() {
-        Fagsak fagsak = new Fagsak();
-        fagsak.setType(EU_EOS);
+        Fagsak fagsak = FagsakTestFactory.lagFagsak();
         Behandling sisteBehandling = behandlingMedTemaOgType(UTSENDT_ARBEIDSTAKER, FØRSTEGANG);
         sisteBehandling.setFagsak(fagsak);
         sisteBehandling.setStatus(UNDER_BEHANDLING);
@@ -307,8 +301,7 @@ class LovligeKombinasjonerSaksbehandlingServiceUtenKlageTest {
 
     @Test
     void hentMuligeBehandlingstyper_sisteBehandlingAktivOgAnmodningsperiodeSendt_skalReturnereKunNyVurdering() {
-        Fagsak fagsak = new Fagsak();
-        fagsak.setType(EU_EOS);
+        Fagsak fagsak = FagsakTestFactory.lagFagsak();
         Behandling sisteBehandling = behandlingMedTemaOgType(UTSENDT_ARBEIDSTAKER, FØRSTEGANG);
         sisteBehandling.setFagsak(fagsak);
         sisteBehandling.setStatus(UNDER_BEHANDLING);

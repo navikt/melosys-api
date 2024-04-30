@@ -460,7 +460,7 @@ class OpprettForslagMedlemskapsperiodeServiceTest {
             medlemAvFolketrygden = MedlemAvFolketrygden()
             behandling = Behandling().apply {
                 id = 543
-                fagsak = Fagsak().apply { type = Sakstyper.FTRL }
+                fagsak = FagsakTestFactory.builder().type(Sakstyper.FTRL).build()
                 tema = Behandlingstema.YRKESAKTIV
                 mottatteOpplysninger = MottatteOpplysninger().apply {
                     mottatteOpplysningerData = SøknadNorgeEllerUtenforEØS().apply {

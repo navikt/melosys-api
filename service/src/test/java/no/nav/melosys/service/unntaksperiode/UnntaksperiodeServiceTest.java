@@ -59,8 +59,7 @@ class UnntaksperiodeServiceTest {
     public void setUp() {
         unntaksperiodeService = new UnntaksperiodeService(behandlingService, behandlingsresultatService, lovvalgsperiodeService, oppgaveService, prosessinstansService, unntaksperiodeKontrollService);
         behandling.setId(1L);
-        behandling.setFagsak(new Fagsak());
-        behandling.getFagsak().setSaksnummer("MEL-123hei");
+        behandling.setFagsak(FagsakTestFactory.lagFagsak());
         behandling.setTema(Behandlingstema.REGISTRERING_UNNTAK_NORSK_TRYGD_UTSTASJONERING);
         when(behandlingService.hentBehandling(anyLong())).thenReturn(behandling);
     }

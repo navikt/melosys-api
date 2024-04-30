@@ -10,6 +10,7 @@ import java.util.Set;
 import no.nav.melosys.domain.Aktoer;
 import no.nav.melosys.domain.Behandling;
 import no.nav.melosys.domain.Fagsak;
+import no.nav.melosys.domain.FagsakTestFactory;
 import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingsstatus;
 import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingstema;
 import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingstyper;
@@ -26,7 +27,6 @@ import static no.nav.melosys.integrasjon.pdl.dto.Endringstype.OPPRETT;
 
 public class FamiliemedlemObjectFactory {
 
-    public static final String IDENT_HOVEDPERSON = "30056928150";
     public static final String IDENT_PERSON_GIFT = "21075114491";
     public static final String PERSON_GIFT_FORNAVN = "BRÅKETE";
     public static final String IDENT_PERSON_GIFT_HISTORISK = "12028536819";
@@ -43,7 +43,7 @@ public class FamiliemedlemObjectFactory {
             Set.of(lagNorskBostedsadresse()),
             Collections.emptySet(),
             Set.of(lagFødselsdatoForVoksen()),
-            Set.of(new Folkeregisteridentifikator(IDENT_HOVEDPERSON, lagAktivMetadata())),
+            Set.of(new Folkeregisteridentifikator(FagsakTestFactory.BRUKER_AKTØR_ID, lagAktivMetadata())),
             Collections.emptySet(),
             lagForelderBarnRelasjoner(),
             Collections.emptySet(),
@@ -62,7 +62,7 @@ public class FamiliemedlemObjectFactory {
             Set.of(lagNorskBostedsadresse()),
             Collections.emptySet(),
             Set.of(lagFødselsdatoForVoksen()),
-            Set.of(new Folkeregisteridentifikator(IDENT_HOVEDPERSON, lagAktivMetadata())),
+            Set.of(new Folkeregisteridentifikator(FagsakTestFactory.BRUKER_AKTØR_ID, lagAktivMetadata())),
             Collections.emptySet(),
             lagForelderBarnRelasjoner(),
             Collections.emptySet(),
@@ -81,7 +81,7 @@ public class FamiliemedlemObjectFactory {
             Set.of(lagNorskBostedsadresse()),
             Collections.emptySet(),
             Set.of(lagFødselsdatoForVoksen()),
-            Set.of(new Folkeregisteridentifikator(IDENT_HOVEDPERSON, lagAktivMetadata())),
+            Set.of(new Folkeregisteridentifikator(FagsakTestFactory.BRUKER_AKTØR_ID, lagAktivMetadata())),
             Collections.emptySet(),
             Collections.emptySet(),
             Collections.emptySet(),
@@ -163,7 +163,7 @@ public class FamiliemedlemObjectFactory {
             Collections.emptySet(),
             Set.of(
                 new Sivilstand(Sivilstandstype.GIFT,
-                    IDENT_HOVEDPERSON,
+                    FagsakTestFactory.BRUKER_AKTØR_ID,
                     LocalDate.of(2019, 8, 3),
                     null,
                     lagAktivMetadata(toLocalDateTime("2020-12-05T08:32:21")))
@@ -178,21 +178,8 @@ public class FamiliemedlemObjectFactory {
         behandling.setStatus(Behandlingsstatus.UNDER_BEHANDLING);
         behandling.setType(Behandlingstyper.FØRSTEGANG);
         behandling.setTema(Behandlingstema.UTSENDT_ARBEIDSTAKER);
-        behandling.setFagsak(lagFagsak());
+        behandling.setFagsak(FagsakTestFactory.builder().medBruker().build());
         return behandling;
-    }
-
-    public static Fagsak lagFagsak() {
-        Fagsak fagsak = new Fagsak();
-        fagsak.getAktører().add(lagBruker());
-        return fagsak;
-    }
-
-    public static Aktoer lagBruker() {
-        Aktoer aktoer = new Aktoer();
-        aktoer.setRolle(BRUKER);
-        aktoer.setAktørId(IDENT_HOVEDPERSON);
-        return aktoer;
     }
 
     public static Bostedsadresse lagNorskBostedsadresse() {

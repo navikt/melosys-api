@@ -12,10 +12,7 @@ import io.mockk.impl.annotations.RelaxedMockK
 import io.mockk.junit5.MockKExtension
 import io.mockk.slot
 import io.mockk.verify
-import no.nav.melosys.domain.Behandling
-import no.nav.melosys.domain.Behandlingsresultat
-import no.nav.melosys.domain.Fagsak
-import no.nav.melosys.domain.Medlemskapsperiode
+import no.nav.melosys.domain.*
 import no.nav.melosys.domain.avklartefakta.Avklartefakta
 import no.nav.melosys.domain.folketrygden.MedlemAvFolketrygden
 import no.nav.melosys.domain.kodeverk.*
@@ -42,7 +39,6 @@ import java.time.LocalDate
 
 @ExtendWith(MockKExtension::class)
 class FtrlVedtakServiceTest {
-    val SAKSNUMMER = "MEL-123"
     val BEH_ID = 123L
 
     @RelaxedMockK
@@ -112,7 +108,7 @@ class FtrlVedtakServiceTest {
         verify { behandlingsresultatService.lagre(capture(behandlingsresultatSlot)) }
         verify { behandlingService.endreStatus(capture(behandlingSlot), Behandlingsstatus.IVERKSETTER_VEDTAK) }
         verify { prosessinstansService.opprettProsessinstansIverksettVedtakFTRL(any(), request.tilVedtakRequest(), Saksstatuser.LOVVALG_AVKLART) }
-        verify { oppgaveService.ferdigstillOppgaveMedSaksnummer(SAKSNUMMER) }
+        verify { oppgaveService.ferdigstillOppgaveMedSaksnummer(FagsakTestFactory.SAKSNUMMER) }
         verify { dokgenService.produserOgDistribuerBrev(BEH_ID, capture(brevbestillingRequestSlot)) }
 
         behandlingsresultatSlot.captured.shouldNotBeNull().run {
@@ -228,7 +224,7 @@ class FtrlVedtakServiceTest {
         verify { behandlingsresultatService.lagre(capture(behandlingsresultatSlot)) }
         verify { behandlingService.endreStatus(capture(behandlingSlot), Behandlingsstatus.IVERKSETTER_VEDTAK) }
         verify { prosessinstansService.opprettProsessinstansIverksettVedtakFTRL(any(), request.tilVedtakRequest(), Saksstatuser.LOVVALG_AVKLART) }
-        verify { oppgaveService.ferdigstillOppgaveMedSaksnummer(SAKSNUMMER) }
+        verify { oppgaveService.ferdigstillOppgaveMedSaksnummer(FagsakTestFactory.SAKSNUMMER) }
         verify { dokgenService.produserOgDistribuerBrev(BEH_ID, capture(brevbestillingRequestSlot)) }
 
         behandlingsresultatSlot.captured.shouldNotBeNull().run {
@@ -270,7 +266,7 @@ class FtrlVedtakServiceTest {
         verify { behandlingsresultatService.lagre(capture(behandlingsresultatSlot)) }
         verify { behandlingService.endreStatus(capture(behandlingSlot), Behandlingsstatus.IVERKSETTER_VEDTAK) }
         verify { prosessinstansService.opprettProsessinstansIverksettVedtakFTRL(any(), request.tilVedtakRequest(), Saksstatuser.LOVVALG_AVKLART) }
-        verify { oppgaveService.ferdigstillOppgaveMedSaksnummer(SAKSNUMMER) }
+        verify { oppgaveService.ferdigstillOppgaveMedSaksnummer(FagsakTestFactory.SAKSNUMMER) }
         verify { dokgenService.produserOgDistribuerBrev(BEH_ID, capture(brevbestillingRequestSlot)) }
         verify(exactly = 0) { vilkaarsresultatService.tømVilkårsresultatFraBehandlingsresultat(any()) }
 
@@ -335,7 +331,7 @@ class FtrlVedtakServiceTest {
         verify { behandlingsresultatService.lagre(capture(behandlingsresultatSlot)) }
         verify { behandlingService.endreStatus(capture(behandlingSlot), Behandlingsstatus.IVERKSETTER_VEDTAK) }
         verify { prosessinstansService.opprettProsessinstansIverksettVedtakFTRL(any(), request.tilVedtakRequest(), Saksstatuser.OPPHØRT) }
-        verify { oppgaveService.ferdigstillOppgaveMedSaksnummer(SAKSNUMMER) }
+        verify { oppgaveService.ferdigstillOppgaveMedSaksnummer(FagsakTestFactory.SAKSNUMMER) }
         verify { dokgenService.produserOgDistribuerBrev(BEH_ID, capture(brevbestillingRequestSlot)) }
         verify { vilkaarsresultatService.tømVilkårsresultatFraBehandlingsresultat(BEH_ID) }
 
@@ -445,7 +441,7 @@ class FtrlVedtakServiceTest {
     private fun lagBehandling(): Behandling =
         Behandling().apply {
             id = BEH_ID
-            fagsak = Fagsak().apply { saksnummer = SAKSNUMMER }
+            fagsak = FagsakTestFactory.lagFagsak()
             tema = Behandlingstema.YRKESAKTIV
         }
 }

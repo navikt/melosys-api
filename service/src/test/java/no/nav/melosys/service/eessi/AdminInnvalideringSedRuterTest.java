@@ -215,8 +215,9 @@ class AdminInnvalideringSedRuterTest {
     }
 
     private Fagsak lagFagsak(Behandlingstema behandlingstema, Behandlingsstatus behandlingsstatus) {
-        var fagsak = new Fagsak();
-        fagsak.setBehandlinger(List.of(lagBehandling(fagsak, behandlingstema, behandlingsstatus)));
+        var fagsak = FagsakTestFactory.lagFagsak();
+        var behandling = lagBehandling(fagsak, behandlingstema, behandlingsstatus);
+        fagsak.leggTilBehandling(behandling);
         return fagsak;
     }
 }

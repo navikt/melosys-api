@@ -18,7 +18,10 @@ import no.nav.melosys.domain.*
 import no.nav.melosys.domain.dokument.felles.Land
 import no.nav.melosys.domain.dokument.person.Diskresjonskode
 import no.nav.melosys.domain.dokument.person.PersonDokument
-import no.nav.melosys.domain.kodeverk.*
+import no.nav.melosys.domain.kodeverk.Aktoersroller
+import no.nav.melosys.domain.kodeverk.Landkoder
+import no.nav.melosys.domain.kodeverk.Mottatteopplysningertyper
+import no.nav.melosys.domain.kodeverk.Oppgavetyper
 import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingsstatus
 import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingstema
 import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingstyper
@@ -38,7 +41,6 @@ import no.nav.melosys.service.behandling.UtledMottaksdato
 import no.nav.melosys.service.mottatteopplysninger.MottatteOpplysningerService
 import no.nav.melosys.service.oppgave.dto.BehandlingsoppgaveDto
 import no.nav.melosys.service.oppgave.dto.JournalfoeringsoppgaveDto
-import no.nav.melosys.service.oppgave.dto.OppgaveDto
 import no.nav.melosys.service.persondata.PersondataFasade
 import no.nav.melosys.service.sak.FagsakService
 import no.nav.melosys.service.saksopplysninger.SaksopplysningerService
@@ -103,11 +105,11 @@ internal class OppgaveServiceTest {
             .setOppgavetype(Oppgavetyper.BEH_SAK_MK)
             .setTilordnetRessurs(TILORDNET_RESSURS)
             .setOppgaveId(BEH_OPPG_ID)
-            .setSaksnummer(SAKSNUMMER)
+            .setSaksnummer(FagsakTestFactory.SAKSNUMMER)
             .build()
 
         every { saksopplysningerService.finnSedOpplysninger(any()) } returns Optional.empty()
-        every { oppgaveFasade.finnÅpneBehandlingsoppgaverMedSaksnummer(SAKSNUMMER) } returns listOf(oppgave)
+        every { oppgaveFasade.finnÅpneBehandlingsoppgaverMedSaksnummer(FagsakTestFactory.SAKSNUMMER) } returns listOf(oppgave)
         every { oppgaveFasade.oppdaterOppgave(any(), any()) } answers {}
         every { oppgaveFasade.opprettOppgave(any<Oppgave>()) } returns BEH_OPPG_ID
         every { oppgaveFasade.opprettSensitivOppgave(any<Oppgave>()) } returns BEH_OPPG_ID
@@ -119,20 +121,14 @@ internal class OppgaveServiceTest {
         val oppgave1 = Oppgave.Builder()
             .setOppgaveId(BEH_OPPG_ID)
             .setOppgavetype(Oppgavetyper.BEH_SAK_MK)
-            .setSaksnummer(SAKSNUMMER)
+            .setSaksnummer(FagsakTestFactory.SAKSNUMMER)
         val oppgave2 = Oppgave.Builder()
             .setJournalpostId(JFR_OPPG_JPID)
             .setOppgaveId(JFR_OPPG_ID)
             .setOppgavetype(Oppgavetyper.JFR)
         val oppgaver = setOf(oppgave1.build(), oppgave2.build())
         val behandling = lagBehandling()
-        val fagsak = Fagsak().apply {
-            saksnummer = SAKSNUMMER
-            type = Sakstyper.EU_EOS
-            status = Saksstatuser.OPPRETTET
-            tema = Sakstemaer.MEDLEMSKAP_LOVVALG
-            behandlinger = listOf(behandling)
-        }
+        val fagsak = FagsakTestFactory.builder().behandlinger(behandling).build()
         every { oppgaveFasade.finnOppgaverMedAnsvarlig(TILORDNET_RESSURS) } returns oppgaver
         every { behandlingService.hentBehandling(any<Long>()) } returns behandling
         every { fagsakService.hentFagsak(any<String>()) } returns fagsak
@@ -158,7 +154,7 @@ internal class OppgaveServiceTest {
     @Test
     fun hentOppgaverMedAnsvarlig_mottatteopplysningerFinnesIkke_mappesKorrekt() {
         val behandling = lagBehandling()
-        val fagsak = lagFagsak(behandling)
+        val fagsak = FagsakTestFactory.builder().behandlinger(behandling).build()
         every { oppgaveFasade.finnOppgaverMedAnsvarlig(TILORDNET_RESSURS) } returns setOf(oppgave)
         every { behandlingService.hentBehandling(any<Long>()) } returns behandling
         every { fagsakService.hentFagsak(any<String>()) } returns fagsak
@@ -180,7 +176,7 @@ internal class OppgaveServiceTest {
     @Test
     fun hentOppgaverMedAnsvarlig_mottatteopplysningerDataErAnmodningEllerAttest_mappesKorrekt() {
         val behandling = lagBehandling()
-        val fagsak = lagFagsak(behandling)
+        val fagsak = FagsakTestFactory.builder().behandlinger(behandling).build()
         val mottatteOpplysninger = lagMottatteOpplysninger().apply {
             mottatteOpplysningerData = AnmodningEllerAttest()
         }
@@ -214,7 +210,7 @@ internal class OppgaveServiceTest {
         val behandling = lagBehandling().apply {
             behandlingsnotater = setOf(behandlingsnotat1, behandlingsnotat2)
         }
-        val fagsak = lagFagsak(behandling)
+        val fagsak = FagsakTestFactory.builder().behandlinger(behandling).build()
         every { oppgaveFasade.finnOppgaverMedAnsvarlig(TILORDNET_RESSURS) } returns setOf(oppgave)
         every { behandlingService.hentBehandling(any<Long>()) } returns behandling
         every { fagsakService.hentFagsak(any<String>()) } returns fagsak
@@ -305,14 +301,14 @@ internal class OppgaveServiceTest {
 
     @Test
     fun hentOppgaveForFagsaksnummer_oppgaveEksisterer_forventOppgave() {
-        val oppgave = oppgaveService.hentÅpenBehandlingsoppgaveMedFagsaksnummer(SAKSNUMMER)
+        val oppgave = oppgaveService.hentÅpenBehandlingsoppgaveMedFagsaksnummer(FagsakTestFactory.SAKSNUMMER)
 
         oppgave.erBehandling().shouldBeTrue()
     }
 
     @Test
     fun finnÅpenBehandlingsoppgaveMedFagsaksnummer_returnererOppgaveViStøtter_filtrererIkkeUtOppgave() {
-        every { oppgaveFasade.finnÅpneBehandlingsoppgaverMedSaksnummer(SAKSNUMMER) } returns
+        every { oppgaveFasade.finnÅpneBehandlingsoppgaverMedSaksnummer(FagsakTestFactory.SAKSNUMMER) } returns
             listOf(
                 Oppgave.Builder()
                     .setTema(Tema.MED)
@@ -320,14 +316,14 @@ internal class OppgaveServiceTest {
                     .build()
             )
 
-        val oppgave = oppgaveService.finnÅpenBehandlingsoppgaveMedFagsaksnummer(SAKSNUMMER)
+        val oppgave = oppgaveService.finnÅpenBehandlingsoppgaveMedFagsaksnummer(FagsakTestFactory.SAKSNUMMER)
 
         oppgave.shouldNotBeEmpty()
     }
 
     @Test
     fun finnÅpenBehandlingsoppgaveMedFagsaksnummer_returnererTrygdeavgiftOppgave_filtrererUtOppgave() {
-        every { oppgaveFasade.finnÅpneBehandlingsoppgaverMedSaksnummer(SAKSNUMMER) } returns
+        every { oppgaveFasade.finnÅpneBehandlingsoppgaverMedSaksnummer(FagsakTestFactory.SAKSNUMMER) } returns
             listOf(
                 Oppgave.Builder()
                     .setTema(Tema.TRY)
@@ -335,7 +331,7 @@ internal class OppgaveServiceTest {
                     .build()
             )
 
-        val oppgave = oppgaveService.finnÅpenBehandlingsoppgaveMedFagsaksnummer(SAKSNUMMER)
+        val oppgave = oppgaveService.finnÅpenBehandlingsoppgaveMedFagsaksnummer(FagsakTestFactory.SAKSNUMMER)
 
         oppgave.shouldBeEmpty()
     }
@@ -346,7 +342,7 @@ internal class OppgaveServiceTest {
         every { behandlingService.hentBehandlingMedSaksopplysninger(any<Long>()) } returns behandling
         every { behandlingService.hentBehandling(any<Long>()) } returns behandling
         every { utledMottaksdato.getMottaksdato(behandling) } returns LocalDate.now()
-        every { oppgaveFasade.finnÅpneBehandlingsoppgaverMedSaksnummer(SAKSNUMMER) } returns emptyList()
+        every { oppgaveFasade.finnÅpneBehandlingsoppgaverMedSaksnummer(FagsakTestFactory.SAKSNUMMER) } returns emptyList()
 
         oppgaveService.opprettEllerGjenbrukBehandlingsoppgave(behandling, "222", "333", "Z99999")
 
@@ -365,7 +361,7 @@ internal class OppgaveServiceTest {
         every { behandlingService.hentBehandlingMedSaksopplysninger(any<Long>()) } returns behandling
         every { behandlingService.hentBehandling(any<Long>()) } returns behandling
         every { utledMottaksdato.getMottaksdato(behandling) } returns LocalDate.now()
-        every { oppgaveFasade.finnÅpneBehandlingsoppgaverMedSaksnummer(SAKSNUMMER) } returns emptyList()
+        every { oppgaveFasade.finnÅpneBehandlingsoppgaverMedSaksnummer(FagsakTestFactory.SAKSNUMMER) } returns emptyList()
 
         oppgaveService.opprettEllerGjenbrukBehandlingsoppgave(behandling, "222", "333", "Z99999")
 
@@ -381,7 +377,7 @@ internal class OppgaveServiceTest {
         every { behandlingService.hentBehandlingMedSaksopplysninger(any<Long>()) } returns behandling
         every { behandlingService.hentBehandling(any<Long>()) } returns behandling
         every { utledMottaksdato.getMottaksdato(behandling) } returns LocalDate.now()
-        every { oppgaveFasade.finnÅpneBehandlingsoppgaverMedSaksnummer(SAKSNUMMER) } returns emptyList()
+        every { oppgaveFasade.finnÅpneBehandlingsoppgaverMedSaksnummer(FagsakTestFactory.SAKSNUMMER) } returns emptyList()
 
         oppgaveService.opprettEllerGjenbrukBehandlingsoppgave(behandling, "222", "333", "Z99999")
 
@@ -394,9 +390,7 @@ internal class OppgaveServiceTest {
         val behandling = Behandling().apply {
             type = Behandlingstyper.FØRSTEGANG
             tema = Behandlingstema.UTSENDT_ARBEIDSTAKER
-            fagsak = Fagsak().apply {
-                saksnummer = SAKSNUMMER
-            }
+            fagsak = FagsakTestFactory.lagFagsak()
         }
 
         oppgaveService.opprettEllerGjenbrukBehandlingsoppgave(behandling, "222", "333", oppgave.tilordnetRessurs)
@@ -411,9 +405,7 @@ internal class OppgaveServiceTest {
         val behandling = Behandling().apply {
             type = Behandlingstyper.FØRSTEGANG
             tema = Behandlingstema.UTSENDT_ARBEIDSTAKER
-            fagsak = Fagsak().apply {
-                saksnummer = SAKSNUMMER
-            }
+            fagsak = FagsakTestFactory.lagFagsak()
         }
         every { oppgaveFasade.oppdaterOppgave(any(), any()) } answers {}
 
@@ -428,9 +420,9 @@ internal class OppgaveServiceTest {
     fun opprettEllerGjenbrukBehandlingsoppgave_personHarBeskyttelsesbehov_sensitivOppgaveBlirOpprettet() {
         val behandling = lagBehandling()
         every { behandlingService.hentBehandling(any<Long>()) } returns behandling
-        every { persondataFasade.harStrengtFortroligAdresse("aktørID") } returns true
+        every { persondataFasade.harStrengtFortroligAdresse(FagsakTestFactory.BRUKER_AKTØR_ID) } returns true
         every { utledMottaksdato.getMottaksdato(behandling) } returns LocalDate.now()
-        every { oppgaveFasade.finnÅpneBehandlingsoppgaverMedSaksnummer(SAKSNUMMER) } returns emptyList()
+        every { oppgaveFasade.finnÅpneBehandlingsoppgaverMedSaksnummer(FagsakTestFactory.SAKSNUMMER) } returns emptyList()
 
         oppgaveService.opprettEllerGjenbrukBehandlingsoppgave(behandling, "222", "333", "Z99999")
 
@@ -447,12 +439,12 @@ internal class OppgaveServiceTest {
                 }
             }
         }
-        every { persondataFasade.harStrengtFortroligAdresse("aktørID") } returns false
+        every { persondataFasade.harStrengtFortroligAdresse(FagsakTestFactory.BRUKER_AKTØR_ID) } returns false
         every { persondataFasade.harStrengtFortroligAdresse("fnrBarn") } returns true
         every { behandlingService.hentBehandlingMedSaksopplysninger(any<Long>()) } returns behandling
         every { behandlingService.hentBehandling(any<Long>()) } returns behandling
         every { utledMottaksdato.getMottaksdato(behandling) } returns LocalDate.now()
-        every { oppgaveFasade.finnÅpneBehandlingsoppgaverMedSaksnummer(SAKSNUMMER) } returns emptyList()
+        every { oppgaveFasade.finnÅpneBehandlingsoppgaverMedSaksnummer(FagsakTestFactory.SAKSNUMMER) } returns emptyList()
 
         oppgaveService.opprettEllerGjenbrukBehandlingsoppgave(behandling, "222", "333", "Z99999")
 
@@ -463,9 +455,7 @@ internal class OppgaveServiceTest {
     @Test
     fun opprettOppgaveForSak_oppretterNyOppgaveForFagsak() {
         val behandling = lagBehandling()
-        val fagsak = behandling.fagsak.apply {
-            behandlinger = listOf(behandling)
-        }
+        val fagsak = behandling.fagsak.apply { leggTilBehandling(behandling) }
         val oppgave1 = Oppgave.Builder()
             .setTilordnetRessurs("tilordnet ressurs 1")
             .setOpprettetTidspunkt(LocalDate.now().atStartOfDay(ZoneId.systemDefault())).setStatus("FERDIGSTILT")
@@ -474,19 +464,19 @@ internal class OppgaveServiceTest {
             .setTilordnetRessurs("tilordnet ressurs 2")
             .setOpprettetTidspunkt(LocalDate.now().minusDays(2).atStartOfDay(ZoneId.systemDefault()))
             .setStatus("FERDIGSTILT").build()
-        every { persondataFasade.harStrengtFortroligAdresse("aktørID") } returns false
+        every { persondataFasade.harStrengtFortroligAdresse(FagsakTestFactory.BRUKER_AKTØR_ID) } returns false
         every { behandlingService.hentBehandlingMedSaksopplysninger(any<Long>()) } returns behandling
         every { behandlingService.hentBehandling(any<Long>()) } returns behandling
-        every { oppgaveFasade.finnAvsluttetBehandlingsoppgaverMedSaksnummer(SAKSNUMMER) } returns listOf(oppgave1, oppgave2)
-        every { oppgaveFasade.finnÅpneBehandlingsoppgaverMedSaksnummer(SAKSNUMMER) } returns emptyList()
-        every { fagsakService.hentFagsak(SAKSNUMMER) } returns fagsak
+        every { oppgaveFasade.finnAvsluttetBehandlingsoppgaverMedSaksnummer(FagsakTestFactory.SAKSNUMMER) } returns listOf(oppgave1, oppgave2)
+        every { oppgaveFasade.finnÅpneBehandlingsoppgaverMedSaksnummer(FagsakTestFactory.SAKSNUMMER) } returns emptyList()
+        every { fagsakService.hentFagsak(FagsakTestFactory.SAKSNUMMER) } returns fagsak
         every { utledMottaksdato.getMottaksdato(behandling) } returns LocalDate.now()
 
-        oppgaveService.opprettOppgaveForSak(SAKSNUMMER)
+        oppgaveService.opprettOppgaveForSak(FagsakTestFactory.SAKSNUMMER)
 
         verify { oppgaveFasade.opprettOppgave(capture(oppgaveSlot)) }
         oppgaveSlot.captured.apply {
-            saksnummer.shouldBe(SAKSNUMMER)
+            saksnummer.shouldBe(FagsakTestFactory.SAKSNUMMER)
             tilordnetRessurs.shouldBe(oppgave1.tilordnetRessurs)
         }
     }
@@ -522,16 +512,7 @@ internal class OppgaveServiceTest {
             .shouldBeFalse()
     }
 
-    private fun lagFagsak(behandling: Behandling): Fagsak = Fagsak().apply {
-        saksnummer = SAKSNUMMER
-        type = Sakstyper.EU_EOS
-        status = Saksstatuser.OPPRETTET
-        tema = Sakstemaer.MEDLEMSKAP_LOVVALG
-        behandlinger = listOf(behandling)
-    }
-
     companion object {
-        private const val SAKSNUMMER = "MEL-12345"
         private const val BEH_OPPG_ID = "1"
         private const val JFR_OPPG_ID = "2"
         private const val JFR_OPPG_JPID = "02"
@@ -544,19 +525,9 @@ internal class OppgaveServiceTest {
             val saksopplysninger: MutableSet<Saksopplysning> = HashSet()
             saksopplysninger.add(personOpplysning)
 
-            val bruker = Aktoer().apply {
-                rolle = Aktoersroller.BRUKER
-                aktørId = "aktørID"
-            }
-            val fagsak = Fagsak().apply {
-                saksnummer = SAKSNUMMER
-                type = Sakstyper.EU_EOS
-                tema = Sakstemaer.MEDLEMSKAP_LOVVALG
-                aktører.add(bruker)
-            }
             val behandling = Behandling().apply {
                 id = 1L
-                this.fagsak = fagsak
+                fagsak = FagsakTestFactory.builder().medBruker().build()
                 type = Behandlingstyper.FØRSTEGANG
                 tema = Behandlingstema.UTSENDT_ARBEIDSTAKER
                 registrertDato = Instant.ofEpochMilli(111L)

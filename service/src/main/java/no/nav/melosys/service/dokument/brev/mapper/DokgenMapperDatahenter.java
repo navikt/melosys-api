@@ -17,6 +17,7 @@ import org.springframework.stereotype.Component;
 import org.springframework.util.StringUtils;
 
 import java.time.Instant;
+import java.util.Optional;
 
 import static org.springframework.util.StringUtils.hasText;
 
@@ -54,8 +55,9 @@ public class DokgenMapperDatahenter {
     }
 
     String hentFullmektigNavn(DokgenBrevbestilling brevbestilling, Fullmaktstype fullmaktstype) {
-        return brevbestilling.getBehandling().getFagsak().finnFullmektig(fullmaktstype)
-            .map(aktoer -> {
+        return Optional.ofNullable(
+                brevbestilling.getBehandling().getFagsak().finnFullmektig(fullmaktstype)
+            ).map(aktoer -> {
                 if (StringUtils.hasText(aktoer.getOrgnr())) {
                     return eregFasade.hentOrganisasjonNavn(aktoer.getOrgnr());
                 } else if (StringUtils.hasText(aktoer.getPersonIdent())) {

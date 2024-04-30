@@ -5,6 +5,7 @@ import java.time.YearMonth;
 
 import no.nav.melosys.domain.Behandling;
 import no.nav.melosys.domain.Fagsak;
+import no.nav.melosys.domain.FagsakTestFactory;
 import no.nav.melosys.domain.kodeverk.Sakstyper;
 import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingstema;
 import org.junit.jupiter.api.BeforeEach;
@@ -195,9 +196,7 @@ class RegisteropplysningerPeriodeFactoryTest {
         behandling.setTema(erBehandlingAvSøknad
             ? Behandlingstema.UTSENDT_ARBEIDSTAKER
             : Behandlingstema.ANMODNING_OM_UNNTAK_HOVEDREGEL);
-        Fagsak fagsak = new Fagsak();
-        fagsak.setType(Sakstyper.EU_EOS);
-        behandling.setFagsak(fagsak);
+        behandling.setFagsak(FagsakTestFactory.lagFagsak());
         return behandling;
     }
 }

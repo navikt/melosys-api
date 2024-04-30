@@ -208,7 +208,7 @@ class OppgaveService(
         val fagsak = fagsakService.hentFagsak(oppgave.saksnummer)
         var sistAktiveBehandling = fagsak.hentSistAktivBehandling()
         sistAktiveBehandling = behandlingService.hentBehandling(sistAktiveBehandling.id)
-        val orgnr = fagsak.finnVirksomhetsOrgnr().orElse(null)
+        val orgnr = fagsak.finnVirksomhetsOrgnr()
 
         return BehandlingsoppgaveDto(
             aktivTil = oppgave.fristFerdigstillelse,

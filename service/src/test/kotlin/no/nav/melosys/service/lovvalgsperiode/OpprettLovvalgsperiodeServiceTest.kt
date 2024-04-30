@@ -9,10 +9,7 @@ import io.mockk.impl.annotations.MockK
 import io.mockk.junit5.MockKExtension
 import io.mockk.slot
 import io.mockk.verify
-import no.nav.melosys.domain.Behandling
-import no.nav.melosys.domain.Behandlingsresultat
-import no.nav.melosys.domain.Fagsak
-import no.nav.melosys.domain.Lovvalgsperiode
+import no.nav.melosys.domain.*
 import no.nav.melosys.domain.kodeverk.*
 import no.nav.melosys.domain.kodeverk.lovvalgsbestemmelser.trygdeavtale.*
 import no.nav.melosys.domain.mottatteopplysninger.AnmodningEllerAttest
@@ -343,7 +340,7 @@ class OpprettLovvalgsperiodeServiceTest {
     private fun lagBehandling(land: Land_iso2): Behandling =
         Behandling().apply {
             id = 1L
-            fagsak = Fagsak().apply { type = Sakstyper.TRYGDEAVTALE }
+            fagsak = FagsakTestFactory.builder().type(Sakstyper.TRYGDEAVTALE).build()
             mottatteOpplysninger = MottatteOpplysninger().apply {
                 mottatteOpplysningerData = AnmodningEllerAttest().apply {
                     lovvalgsland = land

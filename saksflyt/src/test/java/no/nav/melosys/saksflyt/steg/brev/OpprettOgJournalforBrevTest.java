@@ -130,10 +130,7 @@ class OpprettOgJournalforBrevTest {
         Aktoer virksomhet = new Aktoer();
         virksomhet.setOrgnr("orgnr");
         virksomhet.setRolle(Aktoersroller.VIRKSOMHET);
-        var fagsak = new Fagsak();
-        fagsak.setTema(Sakstemaer.MEDLEMSKAP_LOVVALG);
-        fagsak.setAktører(Set.of(virksomhet));
-        fagsak.setType(Sakstyper.EU_EOS);
+        var fagsak = FagsakTestFactory.builder().aktører(virksomhet).build();
         Behandling behandling = new Behandling();
         behandling.setFagsak(fagsak);
         behandling.setTema(Behandlingstema.YRKESAKTIV);
