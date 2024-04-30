@@ -37,11 +37,6 @@ class Fagsak(
     val behandlinger: MutableList<Behandling> = mutableListOf()
 ) : RegistreringsInfo() {
 
-    companion object {
-        private const val FINNER_IKKE_BEHANDLINGER_FOR_FAGSAK = "Finner ikke behandlinger for fagsak "
-
-    }
-
     fun leggTilAktør(aktør: Aktoer) = aktører.add(aktør)
 
     fun leggTilBehandling(behandling: Behandling) = behandlinger.add(behandling)
@@ -160,4 +155,9 @@ class Fagsak(
     }
 
     override fun hashCode(): Int = 31
+
+    companion object {
+        private const val FINNER_IKKE_BEHANDLINGER_FOR_FAGSAK = "Finner ikke behandlinger for fagsak "
+
+    }
 }
