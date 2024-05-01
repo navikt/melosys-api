@@ -202,13 +202,13 @@ public class ProsessinstansService {
 
     public void opprettProsessinstansJournalføringNySak(JournalfoeringOpprettRequest journalfoeringRequest, ProsessType prosessType,
                                                         boolean skalSetteSøknadslandOgPeriode, LocalDate mottaksdato,
-                                                        Behandlingsaarsaktyper behandlingsaarsaktyper, String institusjonID,
+                                                        Behandlingsaarsaktyper behandlingsaarsaktype, String institusjonID,
                                                         boolean mottaksKanalErEessi) {
         Prosessinstans prosessinstans = lagJournalføringProsessinstans(prosessType, journalfoeringRequest, institusjonID, mottaksKanalErEessi);
         prosessinstans.setData(ProsessDataKey.SAKSTYPE, Sakstyper.valueOf(journalfoeringRequest.getFagsak().getSakstype()));
         prosessinstans.setData(ProsessDataKey.SAKSTEMA, Sakstemaer.valueOf(journalfoeringRequest.getFagsak().getSakstema()));
         prosessinstans.setData(ProsessDataKey.BEHANDLINGSTYPE, Behandlingstyper.valueOf(journalfoeringRequest.getBehandlingstypeKode()));
-        prosessinstans.setData(ProsessDataKey.BEHANDLINGSÅRSAKTYPE, behandlingsaarsaktyper);
+        prosessinstans.setData(ProsessDataKey.BEHANDLINGSÅRSAKTYPE, behandlingsaarsaktype);
         prosessinstans.setData(ProsessDataKey.MOTTATT_DATO, mottaksdato);
         prosessinstans.setData(ProsessDataKey.BEHANDLINGSTEMA, Behandlingstema.valueOf(journalfoeringRequest.getBehandlingstemaKode()));
 

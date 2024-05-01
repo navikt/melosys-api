@@ -66,24 +66,32 @@ class OppdaterOgFerdigstillJournalpostTest {
     }
 
     @Test
-    void utfør_avsenderNavnErSatt_brukerAvsenderNavn_brukFagsakTema() {
-        var prosessinstans = prosessinstans(true);
+    void utfør_mottakerKanalErEessi_setterIkkeAvsender() {
+        var prosessinstans = new Prosessinstans();
+        leggTilBehandling(prosessinstans);
+        prosessinstans.setData(ProsessDataKey.AVSENDER_ID, null);
+        prosessinstans.setData(ProsessDataKey.AVSENDER_ID, null);
+        prosessinstans.setData(ProsessDataKey.AVSENDER_LAND, null);
+        prosessinstans.setData(ProsessDataKey.AVSENDER_TYPE, null);
+        prosessinstans.setData(ProsessDataKey.MOTTAKSKANAL_ER_EESSI, true);
+
+
         oppdaterOgFerdigstillJournalpost.utfør(prosessinstans);
 
-        verify(joarkFasade).oppdaterOgFerdigstillJournalpost(any(), oppdateringArgumentCaptor.capture());
 
-        assertOppdatering(oppdateringArgumentCaptor.getValue(), true);
+        verify(joarkFasade).oppdaterOgFerdigstillJournalpost(any(), oppdateringArgumentCaptor.capture());
+        var oppdatering = oppdateringArgumentCaptor.getValue();
+        assertThat(oppdatering.getAvsenderID()).isNull();
+        assertThat(oppdatering.getAvsenderNavn()).isNull();
+        assertThat(oppdatering.getAvsenderLand()).isNull();
+        assertThat(oppdatering.getAvsenderType()).isNull();
     }
+
 
     private Prosessinstans prosessinstans(boolean medAvsenderNavn) {
         var prosessinstans = new Prosessinstans();
         prosessinstans.setType(ProsessType.JFR_NY_SAK_BRUKER);
-        prosessinstans.setBehandling(new Behandling());
-        prosessinstans.getBehandling().setTema(Behandlingstema.UTSENDT_ARBEIDSTAKER);
-        prosessinstans.getBehandling().setFagsak(new Fagsak());
-        prosessinstans.getBehandling().getFagsak().setType(Sakstyper.EU_EOS);
-        prosessinstans.getBehandling().getFagsak().setSaksnummer("MEL-123");
-        prosessinstans.getBehandling().getFagsak().setTema(Sakstemaer.MEDLEMSKAP_LOVVALG);
+        leggTilBehandling(prosessinstans);
 
         if (medAvsenderNavn) {
             prosessinstans.setData(ProsessDataKey.AVSENDER_NAVN, avsenderNavn);
@@ -122,15 +130,24 @@ class OppdaterOgFerdigstillJournalpostTest {
                 JournalpostOppdatering::getFysiskeVedlegg
             ).containsExactly(
                 avsenderLand,
-            brukerID,
-            avsenderID,
-            avsendertype,
-            tittel,
-            hovedDokId,
-            mottattDato,
-            logiskVedleggTitler,
-            fysiskVedleggTitler
-        );
+                brukerID,
+                avsenderID,
+                avsendertype,
+                tittel,
+                hovedDokId,
+                mottattDato,
+                logiskVedleggTitler,
+                fysiskVedleggTitler
+            );
+    }
+
+    private void leggTilBehandling(Prosessinstans prosessinstans) {
+        prosessinstans.setBehandling(new Behandling());
+        prosessinstans.getBehandling().setTema(Behandlingstema.UTSENDT_ARBEIDSTAKER);
+        prosessinstans.getBehandling().setFagsak(new Fagsak());
+        prosessinstans.getBehandling().getFagsak().setType(Sakstyper.EU_EOS);
+        prosessinstans.getBehandling().getFagsak().setSaksnummer("MEL-123");
+        prosessinstans.getBehandling().getFagsak().setTema(Sakstemaer.MEDLEMSKAP_LOVVALG);
     }
 
     private final String brukerID = "231";

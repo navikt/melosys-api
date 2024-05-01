@@ -405,7 +405,6 @@ public class JournalfoeringService {
     }
 
     private void validerJournalfoerSed(JournalfoeringSedDto journalfoeringSedDto) {
-
         if (StringUtils.isEmpty(journalfoeringSedDto.getJournalpostID())) {
             throw new FunksjonellException("JournalpostID er påkrevd!");
         } else if (StringUtils.isEmpty(journalfoeringSedDto.getBrukerID())) {

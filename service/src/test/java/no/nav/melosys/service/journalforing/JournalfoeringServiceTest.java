@@ -49,8 +49,7 @@ import static no.nav.melosys.domain.kodeverk.behandlinger.Behandlingstema.*;
 import static no.nav.melosys.domain.kodeverk.behandlinger.Behandlingstyper.FØRSTEGANG;
 import static no.nav.melosys.domain.kodeverk.behandlinger.Behandlingstyper.NY_VURDERING;
 import static no.nav.melosys.saksflytapi.domain.ProsessType.*;
-import static org.assertj.core.api.Assertions.assertThat;
-import static org.assertj.core.api.Assertions.assertThatExceptionOfType;
+import static org.assertj.core.api.Assertions.*;
 import static org.mockito.ArgumentMatchers.*;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
@@ -198,7 +197,7 @@ class JournalfoeringServiceTest {
 
 
         verify(prosessinstansService).opprettProsessinstansJournalføringNySak(any(JournalfoeringOpprettRequest.class), any(ProsessType.class),
-            eq(false), any(LocalDate.class), any(Behandlingsaarsaktyper.class), eq("AB:123"), journalpost.mottaksKanalErEessi());
+            eq(false), any(LocalDate.class), any(Behandlingsaarsaktyper.class), eq("AB:123"), eq(journalpost.mottaksKanalErEessi()));
     }
 
 
@@ -285,8 +284,8 @@ class JournalfoeringServiceTest {
         journalfoeringService.journalførOgOpprettSak(opprettDto);
 
 
-        verify(prosessinstansService).opprettProsessinstansJournalføringNySak(journalfoeringOpprettRequestCaptor.capture(), eq(JFR_NY_SAK_BRUKER), // TODO: JournalfoeringOpprettRequest()
-            eq(true), eq(LocalDate.EPOCH), eq(SØKNAD), eq(null), journalpost.mottaksKanalErEessi());
+        verify(prosessinstansService).opprettProsessinstansJournalføringNySak(journalfoeringOpprettRequestCaptor.capture(), eq(JFR_NY_SAK_BRUKER),
+            eq(true), eq(LocalDate.EPOCH), eq(SØKNAD), eq(null), eq(journalpost.mottaksKanalErEessi()));
 
         JournalfoeringOpprettRequest value = journalfoeringOpprettRequestCaptor.getValue();
         assertThat(value).isEqualTo(opprettDto.tilJournalfoeringOpprettRequest());
@@ -308,7 +307,7 @@ class JournalfoeringServiceTest {
 
 
         verify(prosessinstansService).opprettProsessinstansJournalføringNySak(journalfoeringOpprettRequestCaptor.capture(), eq(JFR_NY_SAK_BRUKER),
-            eq(true), eq(LocalDate.EPOCH), eq(SØKNAD), eq(null), journalpost.mottaksKanalErEessi());
+            eq(true), eq(LocalDate.EPOCH), eq(SØKNAD), eq(null), eq(journalpost.mottaksKanalErEessi()));
 
         JournalfoeringOpprettRequest value = journalfoeringOpprettRequestCaptor.getValue();
         assertThat(value).isEqualTo(opprettDto.tilJournalfoeringOpprettRequest());
@@ -328,7 +327,7 @@ class JournalfoeringServiceTest {
         journalfoeringService.journalførOgOpprettSak(opprettDto);
 
         verify(prosessinstansService).opprettProsessinstansJournalføringNySak(any(JournalfoeringOpprettRequest.class), any(ProsessType.class),
-            eq(false), any(LocalDate.class), any(Behandlingsaarsaktyper.class), eq("AB:123"), journalpost.mottaksKanalErEessi());
+            eq(false), any(LocalDate.class), any(Behandlingsaarsaktyper.class), eq("AB:123"), eq(journalpost.mottaksKanalErEessi()));
     }
 
     @Test
@@ -342,7 +341,7 @@ class JournalfoeringServiceTest {
         journalfoeringService.journalførOgOpprettSak(opprettDto);
 
         verify(prosessinstansService).opprettProsessinstansJournalføringNySak(any(JournalfoeringOpprettRequest.class), any(ProsessType.class),
-            eq(false), any(LocalDate.class), any(Behandlingsaarsaktyper.class), eq("AB:123"), journalpost.mottaksKanalErEessi());
+            eq(false), any(LocalDate.class), any(Behandlingsaarsaktyper.class), eq("AB:123"), eq(journalpost.mottaksKanalErEessi()));
     }
 
     @Test
@@ -356,7 +355,7 @@ class JournalfoeringServiceTest {
         journalfoeringService.journalførOgOpprettSak(opprettDto);
 
         verify(prosessinstansService).opprettProsessinstansJournalføringNySak(any(JournalfoeringOpprettRequest.class), any(ProsessType.class),
-            eq(false), any(LocalDate.class), any(Behandlingsaarsaktyper.class), eq("AB:123"), journalpost.mottaksKanalErEessi());
+            eq(false), any(LocalDate.class), any(Behandlingsaarsaktyper.class), eq("AB:123"), eq(journalpost.mottaksKanalErEessi()));
     }
 
     @Test
@@ -408,7 +407,7 @@ class JournalfoeringServiceTest {
 
 
         verify(prosessinstansService).opprettProsessinstansJournalføringNySak(any(JournalfoeringOpprettRequest.class), any(ProsessType.class),
-            eq(false), any(LocalDate.class), any(Behandlingsaarsaktyper.class), eq("AB:123"), journalpost.mottaksKanalErEessi());
+            eq(false), any(LocalDate.class), any(Behandlingsaarsaktyper.class), eq("AB:123"), eq(journalpost.mottaksKanalErEessi()));
     }
 
     @Test
@@ -422,7 +421,7 @@ class JournalfoeringServiceTest {
     }
 
     @Test
-    void journalførOgOpprettSak_avsenderId_mangler() {
+    void journalførOgOpprettSak_avsenderIdMangler_kasterFeil() {
         opprettDto.setAvsenderID(null);
         when(joarkFasade.hentJournalpost(anyString())).thenReturn(journalpost);
 
@@ -432,13 +431,31 @@ class JournalfoeringServiceTest {
     }
 
     @Test
-    void journalførOgOpprettSak_avsenderType_mangler() {
+    void journalførOgOpprettSak_avsenderTypeMangler_kasterFeil() {
         opprettDto.setAvsenderType(null);
         when(joarkFasade.hentJournalpost(anyString())).thenReturn(journalpost);
 
         assertThatExceptionOfType(FunksjonellException.class)
             .isThrownBy(() -> journalfoeringService.journalførOgOpprettSak(opprettDto))
             .withMessageContaining("AvsenderType er påkrevd når AvsenderID er satt");
+    }
+
+    @Test
+    void journalførOgOpprettSak_avsenderManglerMottakskanalErEessi_kasterIkkeFeil() {
+        opprettDto.setAvsenderID(null);
+        opprettDto.setAvsenderNavn(null);
+        opprettDto.setAvsenderType(null);
+
+        opprettDto.setBehandlingstemaKode(UTSENDT_ARBEIDSTAKER.getKode());
+        opprettDto.setFagsak(lagFagsakDto(LocalDate.MIN, LocalDate.MAX, "DK", Sakstyper.EU_EOS));
+        journalpost.setMottaksKanal("EESSI");
+        MelosysEessiMelding melosysEessiMelding = new MelosysEessiMelding();
+        melosysEessiMelding.setRinaSaksnummer(RINA_SAKSNUMMER);
+        when(joarkFasade.hentJournalpost(anyString())).thenReturn(journalpost);
+        when(eessiService.hentSedTilknyttetJournalpost(journalpost.getJournalpostId())).thenReturn(melosysEessiMelding);
+
+
+        assertThatNoException().isThrownBy(() -> journalfoeringService.journalførOgOpprettSak(opprettDto));
     }
 
     @Test
