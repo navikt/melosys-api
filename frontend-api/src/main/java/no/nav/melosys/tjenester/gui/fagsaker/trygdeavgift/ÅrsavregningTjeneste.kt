@@ -25,8 +25,8 @@ class ÅrsavregningTjeneste(
     private val faktureringskomponentenConsumer: FaktureringskomponentenConsumer
 ) {
     @GetMapping("/hentTrygdeavgiftForAar/{aar}")
-    fun hentDataForAarsavregning(@PathVariable("saksnummer") saksnummer: String,
-                                 @PathVariable("aar") år: Int): ResponseEntity<BeregnetTrygdeavgiftDto> {
+    fun hentDataForÅrsavregning(@PathVariable("saksnummer") saksnummer: String,
+                                @PathVariable("aar") år: Int): ResponseEntity<BeregnetTrygdeavgiftDto> {
         aksesskontroll.autoriserSakstilgang(saksnummer)
         return ResponseEntity.ok(
             BeregnetTrygdeavgiftDto.av(aarsavregningService.hentEksisterendeTrygdeavgiftsperioderForFagsak(saksnummer, år))
@@ -35,7 +35,7 @@ class ÅrsavregningTjeneste(
 
     @Unprotected
     @PostMapping("/hentTotalBeloepForPeriode")
-    fun lagreDataForAarsavregning(@RequestBody årsavgiftDto: BeregnTotalBeløpDto): ResponseEntity<BigDecimal> {
+    fun lagreDataForÅrsavregning(@RequestBody årsavgiftDto: BeregnTotalBeløpDto): ResponseEntity<BigDecimal> {
         return ResponseEntity.ok(
             faktureringskomponentenConsumer.hentTotalTrygdeavgiftForPeriode(årsavgiftDto)
         )
