@@ -3,7 +3,7 @@ package no.nav.melosys.tjenester.gui.fagsaker.trygdeavgift
 import io.swagger.annotations.Api
 import no.nav.melosys.integrasjon.faktureringskomponenten.FaktureringskomponentenConsumer
 import no.nav.melosys.integrasjon.faktureringskomponenten.dto.BeregnTotalBeløpDto
-import no.nav.melosys.integrasjon.trygdeavgift.dto.TrygdeavgiftsberegningResponse
+import no.nav.melosys.service.sak.AarsavregningService
 import no.nav.melosys.service.tilgang.Aksesskontroll
 import no.nav.melosys.tjenester.gui.dto.trygdeavgift.BeregnetTrygdeavgiftDto
 import no.nav.security.token.support.core.api.Protected
@@ -33,19 +33,9 @@ class ÅrsavregningTjeneste(
         )
     }
 
-    //TODO heller ikke en del av 6570, men kan brukes når vi skal lagre den ferdige årsberegingen.
-    @PostMapping("/{behandlingID}/lagreAarsavregningForAar/{aar}")
-    fun lagreDataForAarsavregning(@PathVariable("behandlingID") behandlingID: Long,
-                                  @RequestBody årsavgiftDto: ÅrsavgiftDto): ResponseEntity<List<TrygdeavgiftsberegningResponse>> {
-        return ResponseEntity.ok(
-                aarsavregningService.beregnOgLagreAarsavgift(behandlingID, årsavgiftDto) //TODO lag dette etter att datamodellen er klar
-        )
-    }
-
     @Unprotected
     @PostMapping("/hentTotalBeloepForPeriode")
-    fun lagreDataForAarsavregning(@PathVariable("behandlingID") behandlingID: Long,
-                                  @RequestBody årsavgiftDto: BeregnTotalBeløpDto): ResponseEntity<BigDecimal> {
+    fun lagreDataForAarsavregning(@RequestBody årsavgiftDto: BeregnTotalBeløpDto): ResponseEntity<BigDecimal> {
         return ResponseEntity.ok(
             faktureringskomponentenConsumer.hentTotalTrygdeavgiftForPeriode(årsavgiftDto)
         )

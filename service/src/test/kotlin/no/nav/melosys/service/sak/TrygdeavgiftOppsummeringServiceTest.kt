@@ -2,7 +2,6 @@ package no.nav.melosys.service.sak
 
 import io.kotest.matchers.booleans.shouldBeFalse
 import io.kotest.matchers.booleans.shouldBeTrue
-import io.kotest.matchers.shouldBe
 import io.mockk.every
 import io.mockk.impl.annotations.MockK
 import io.mockk.junit5.MockKExtension
@@ -18,7 +17,6 @@ import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.extension.ExtendWith
 import java.math.BigDecimal
-import java.time.LocalDate
 
 @ExtendWith(MockKExtension::class)
 class TrygdeavgiftOppsummeringServiceTest {
@@ -121,38 +119,5 @@ class TrygdeavgiftOppsummeringServiceTest {
 
 
         trygdeavgiftOppsummeringService.harFagsakBehandlingerMedTrygdeavgift(SAKSNUMMER).shouldBeTrue()
-    }
-
-    @Test
-    fun `test hentEksisterendeTrygdeavgiftsperioderForFagsak filters out non-matching years`() {
-        val saksnummer = "12345"
-        val year = 2023
-
-        val trygdeavgiftsperiode1 = Trygdeavgiftsperiode().apply {
-            trygdeavgiftsbeløpMd = Penger(1000.0)
-            trygdesats = BigDecimal.ZERO
-            periodeFra = LocalDate.of(2021, 1, 11)
-            periodeTil = LocalDate.of(2021, 10, 11)
-        }
-        val trygdeavgiftsperiode2 = Trygdeavgiftsperiode().apply {
-            trygdeavgiftsbeløpMd = Penger(2345.56)
-            trygdesats = BigDecimal(3.56)
-            periodeFra = LocalDate.of(2023, 1, 11)
-            periodeTil = LocalDate.of(2023, 10, 11)
-        }
-        behandlingsresultat.apply {
-            medlemAvFolketrygden = MedlemAvFolketrygden().apply {
-                fastsattTrygdeavgift = FastsattTrygdeavgift().apply {
-                    trygdeavgiftsperioder.add(trygdeavgiftsperiode1)
-                    trygdeavgiftsperioder.add(trygdeavgiftsperiode2)
-                }
-                fakturaserieReferanse = "FakturaserieReferanse"
-            }
-        }
-
-        every { fagsakService.hentFagsak(saksnummer) } returns fagsak
-        every { behandlingsresultatService.hentBehandlingsresultat(any()) } returns behandlingsresultat
-
-        trygdeavgiftOppsummeringService.hentEksisterendeTrygdeavgiftsperioderForFagsak(saksnummer, year).shouldBe(setOf(trygdeavgiftsperiode2))
     }
 }
