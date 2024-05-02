@@ -26,20 +26,19 @@ internal class AarsavregningServiceTest {
     @RelaxedMockK
     private lateinit var behandlingsresultatService: BehandlingsresultatService
 
-    private lateinit var fagsak: Fagsak
-    private lateinit var behandlingsresultat: Behandlingsresultat
+    private var fagsak = Fagsak()
+    private var behandlingsresultat = Behandlingsresultat()
 
     private lateinit var aarsavregningService: AarsavregningService
 
     @BeforeEach
     fun setup() {
-        behandlingsresultat = Behandlingsresultat()
-        fagsak = Fagsak().apply { behandlinger.add(Behandling().apply { id = 12345 }) }
+        fagsak.apply { behandlinger.add(Behandling().apply { id = 12345 }) }
         aarsavregningService = AarsavregningService(fagsakService, behandlingsresultatService)
     }
 
     @Test
-    fun `test hentEksisterendeTrygdeavgiftsperioderForFagsak filters out non-matching years`() {
+    fun `sjekk hentEksisterendeTrygdeavgiftsperioderForFagsak kun returnerer trygdeavgiftsperioder for forespurt år`() {
         val saksnummer = "12345"
         val year = 2023
 
