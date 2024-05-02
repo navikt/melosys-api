@@ -2,8 +2,9 @@ package no.nav.melosys.service.sak
 
 import io.kotest.matchers.shouldBe
 import io.mockk.every
-import io.mockk.impl.annotations.MockK
+import io.mockk.impl.annotations.RelaxedMockK
 import io.mockk.junit5.MockKExtension
+import no.nav.melosys.domain.Behandling
 import no.nav.melosys.domain.Behandlingsresultat
 import no.nav.melosys.domain.Fagsak
 import no.nav.melosys.domain.avgift.Penger
@@ -19,10 +20,10 @@ import java.time.LocalDate
 
 @ExtendWith(MockKExtension::class)
 internal class AarsavregningServiceTest {
-    @MockK
+    @RelaxedMockK
     private lateinit var fagsakService: FagsakService
 
-    @MockK
+    @RelaxedMockK
     private lateinit var behandlingsresultatService: BehandlingsresultatService
 
     private lateinit var fagsak: Fagsak
@@ -32,7 +33,8 @@ internal class AarsavregningServiceTest {
 
     @BeforeEach
     fun setup() {
-        // Initialize your service here with mocked dependencies
+        behandlingsresultat = Behandlingsresultat()
+        fagsak = Fagsak().apply { behandlinger.add(Behandling().apply { id = 12345 }) }
         aarsavregningService = AarsavregningService(fagsakService, behandlingsresultatService)
     }
 
