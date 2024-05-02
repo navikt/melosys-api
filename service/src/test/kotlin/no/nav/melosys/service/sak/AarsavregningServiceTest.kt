@@ -33,7 +33,8 @@ internal class AarsavregningServiceTest {
 
     @BeforeEach
     fun setup() {
-        fagsak.apply { behandlinger.add(Behandling().apply { id = 12345 }) }
+        fagsak.apply { behandlinger.add(Behandling().apply { id = 12345 })  }
+        fagsak.apply { saksnummer = "12345" }
         aarsavregningService = AarsavregningService(fagsakService, behandlingsresultatService)
     }
 
