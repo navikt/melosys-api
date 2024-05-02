@@ -9,10 +9,8 @@ import io.mockk.junit5.MockKExtension
 import io.mockk.slot
 import io.mockk.verify
 import no.nav.melosys.domain.Behandling
-import no.nav.melosys.domain.Fagsak
+import no.nav.melosys.domain.FagsakTestFactory
 import no.nav.melosys.domain.kodeverk.Avsendertyper
-import no.nav.melosys.domain.kodeverk.Sakstemaer
-import no.nav.melosys.domain.kodeverk.Sakstyper
 import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingstema
 import no.nav.melosys.exception.FunksjonellException
 import no.nav.melosys.integrasjon.joark.JoarkFasade
@@ -64,7 +62,7 @@ internal class OppdaterOgFerdigstillJournalpostTest {
 
         verify { joarkFasade.oppdaterOgFerdigstillJournalpost(JOURNALPOST_ID, capture(journalpostOppdateringSlot)) }
         journalpostOppdateringSlot.captured.shouldNotBeNull().run {
-            saksnummer.shouldBe(SAKSNUMMER)
+            saksnummer.shouldBe(FagsakTestFactory.SAKSNUMMER)
             brukerID.shouldBe(BRUKER_ID)
             virksomhetOrgnr.shouldBe(VIRKSOMHET_ORGNR)
             hovedDokumentID.shouldBe(DOKUMENT_ID)
@@ -99,6 +97,7 @@ internal class OppdaterOgFerdigstillJournalpostTest {
         val prosessinstans = lagProsessinstans().apply {
             setData(ProsessDataKey.AVSENDER_NAVN, AVSENDER_NAVN)
         }
+
 
         oppdaterOgFerdigstillJournalpost.utfør(prosessinstans)
 
@@ -141,17 +140,12 @@ internal class OppdaterOgFerdigstillJournalpostTest {
         setData(ProsessDataKey.JOURNALPOST_ID, JOURNALPOST_ID)
         behandling = Behandling().apply {
             tema = Behandlingstema.UTSENDT_ARBEIDSTAKER
-            fagsak = Fagsak().apply {
-                saksnummer = SAKSNUMMER
-                type = Sakstyper.EU_EOS
-                tema = Sakstemaer.MEDLEMSKAP_LOVVALG
-            }
+            fagsak = FagsakTestFactory.lagFagsak()
         }
     }
 
 
     private val JOURNALPOST_ID = "123"
-    private val SAKSNUMMER = "MEL-123"
     private val BRUKER_ID = "231"
     private val VIRKSOMHET_ORGNR = "456"
     private val DOKUMENT_ID = "4424224"
