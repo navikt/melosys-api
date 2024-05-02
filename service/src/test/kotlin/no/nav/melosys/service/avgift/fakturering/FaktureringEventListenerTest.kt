@@ -63,10 +63,7 @@ internal class FaktureringEventListenerTest {
             type = Fullmaktstype.FULLMEKTIG_TRYGDEAVGIFT
         }
         nåværendeFullmektigAvgift.fullmakter = setOf(fullmakt)
-        val fagsak = Fagsak().apply {
-            saksnummer = "MEL-test"
-            aktører = setOf(nåværendeFullmektigAvgift)
-        }
+        val fagsak = FagsakTestFactory.builder().aktører(nåværendeFullmektigAvgift).build()
         val avsluttetBehandling = Behandling().apply {
             id = 1
             status = AVSLUTTET
@@ -147,10 +144,7 @@ internal class FaktureringEventListenerTest {
             type = Fullmaktstype.FULLMEKTIG_TRYGDEAVGIFT
         }
         nåværendeFullmektigAvgift.fullmakter = setOf(fullmakt)
-        val fagsak = Fagsak().apply {
-            saksnummer = "MEL-test"
-            aktører = setOf(nåværendeFullmektigAvgift)
-        }
+        val fagsak = FagsakTestFactory.builder().aktører(nåværendeFullmektigAvgift).build()
         val avsluttetBehandling = Behandling().apply {
             id = 1
             status = AVSLUTTET
@@ -195,10 +189,7 @@ internal class FaktureringEventListenerTest {
 
     @Test
     fun `Hvis tidligere fullmektig ble fjernet, skal bruker få fakturaer`() {
-        val fagsak = Fagsak().apply {
-            saksnummer = "MEL-test"
-            aktører = setOf()
-        }
+        val fagsak = FagsakTestFactory.lagFagsak()
         val avsluttetBehandling = Behandling().apply {
             id = 1
             status = AVSLUTTET

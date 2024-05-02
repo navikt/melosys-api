@@ -212,13 +212,7 @@ class MedlPeriodeServiceTest {
     fun `oppdaterPeriodeForeløpig bruker KildedokumenttypeMedl DOKUMENT når TRYGDEAVTALE og REGISTRERING_UNNTAK`() {
         every { behandlingService.hentBehandling(any()) } returns Behandling().apply {
             tema = Behandlingstema.REGISTRERING_UNNTAK
-            fagsak = Fagsak().apply {
-                type = Sakstyper.TRYGDEAVTALE
-                aktører.add(Aktoer().apply {
-                    rolle = Aktoersroller.BRUKER
-                    aktørId = "456"
-                })
-            }
+            fagsak = FagsakTestFactory.builder().type(Sakstyper.TRYGDEAVTALE).medBruker().build()
         }
         val lovvalgsperiode = Lovvalgsperiode().apply {
             medlPeriodeID = MEDL_PERIODE_ID
@@ -236,14 +230,9 @@ class MedlPeriodeServiceTest {
     fun `oppdaterPeriodeForeløpig bruker KildedokumenttypeMedl HENV_SOKNAD når TRYGDEAVTALE og ANMODNING_OM_UNNTAK`() {
         every { behandlingService.hentBehandling(any()) } returns Behandling().apply {
             tema = Behandlingstema.ANMODNING_OM_UNNTAK_HOVEDREGEL
-            fagsak = Fagsak().apply {
-                type = Sakstyper.TRYGDEAVTALE
-                aktører.add(Aktoer().apply {
-                    rolle = Aktoersroller.BRUKER
-                    aktørId = "456"
-                })
-            }
+            fagsak = FagsakTestFactory.builder().type(Sakstyper.TRYGDEAVTALE).medBruker().build()
         }
+
         val lovvalgsperiode = Lovvalgsperiode().apply {
             medlPeriodeID = MEDL_PERIODE_ID
             behandlingsresultat = lagBehandlingsResultat()
@@ -260,13 +249,7 @@ class MedlPeriodeServiceTest {
     fun `oppdaterPeriodeForeløpig bruker KildedokumenttypeMedl A1 når EU_EOS og A1_ANMODNING_OM_UNNTAK_PAPIR`() {
         every { behandlingService.hentBehandling(any()) } returns Behandling().apply {
             tema = Behandlingstema.A1_ANMODNING_OM_UNNTAK_PAPIR
-            fagsak = Fagsak().apply {
-                type = Sakstyper.EU_EOS
-                aktører.add(Aktoer().apply {
-                    rolle = Aktoersroller.BRUKER
-                    aktørId = "456"
-                })
-            }
+            fagsak = FagsakTestFactory.builder().medBruker().build()
         }
         val lovvalgsperiode = Lovvalgsperiode().apply {
             medlPeriodeID = MEDL_PERIODE_ID
@@ -303,12 +286,13 @@ class MedlPeriodeServiceTest {
 
     @Test
     fun avsluttTidligereMedlPeriode_behandlingOgPeriodeFinnes_avviserPeriode() {
-        val fagsak = Fagsak().apply {
-            behandlinger = listOf(Behandling().apply {
-                status = Behandlingsstatus.AVSLUTTET
-                id = 1L
-            })
-        }
+        val fagsak = FagsakTestFactory.builder()
+            .behandlinger(
+                Behandling().apply {
+                    status = Behandlingsstatus.AVSLUTTET
+                    id = 1L
+                }
+            ).build()
         val behandlingsresultat = Behandlingsresultat().apply {
             lovvalgsperioder =
                 setOf(Lovvalgsperiode().apply { medlPeriodeID = MEDL_PERIODE_ID })
@@ -324,12 +308,13 @@ class MedlPeriodeServiceTest {
 
     @Test
     fun avsluttTidligereMedlPeriode_ingenEksisterendePeriode_ingenPeriodeBlirAvvist() {
-        val fagsak = Fagsak().apply {
-            behandlinger = listOf(Behandling().apply {
-                status = Behandlingsstatus.AVSLUTTET
-                id = 1L
-            })
-        }
+        val fagsak = FagsakTestFactory.builder()
+            .behandlinger(
+                Behandling().apply {
+                    status = Behandlingsstatus.AVSLUTTET
+                    id = 1L
+                }
+            ).build()
         val behandlingsresultat = Behandlingsresultat().apply { lovvalgsperioder = setOf() }
         every { behandlingsresultatService.hentBehandlingsresultat(1L) } returns behandlingsresultat
         every { fagsakService.hentFagsak("MEL-1") } returns fagsak
@@ -358,13 +343,7 @@ class MedlPeriodeServiceTest {
         id = 1L
         behandling = Behandling().apply {
             tema = behandlingstema
-            fagsak = Fagsak().apply {
-                aktører.add(Aktoer().apply {
-                    rolle = Aktoersroller.BRUKER
-                    aktørId = "456"
-                    type = sakstype
-                })
-            }
+            fagsak = FagsakTestFactory.builder().type(sakstype).medBruker().build()
         }
     }
 

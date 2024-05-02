@@ -2,6 +2,7 @@ package no.nav.melosys.tjenester.gui.fagsaker;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import no.nav.melosys.domain.Fagsak;
+import no.nav.melosys.domain.FagsakTestFactory;
 import no.nav.melosys.domain.kodeverk.begrunnelser.Henleggelsesgrunner;
 import no.nav.melosys.service.sak.FagsakService;
 import no.nav.melosys.service.sak.HenleggFagsakService;
@@ -53,15 +54,14 @@ class HenleggelseTjenesteTest {
 
     @Test
     void henleggSakSomBortfalt() throws Exception {
-        String saksnummer = "123";
-        Fagsak fagsak = lagFagsak(saksnummer);
-        when(fagsakService.hentFagsak(saksnummer)).thenReturn(fagsak);
+        Fagsak fagsak = lagFagsak();
+        when(fagsakService.hentFagsak(FagsakTestFactory.SAKSNUMMER)).thenReturn(fagsak);
 
-        mockMvc.perform(put(BASE_URL + "/{saksnr}/henlegg-som-bortfalt", saksnummer)
+        mockMvc.perform(put(BASE_URL + "/{saksnr}/henlegg-som-bortfalt", FagsakTestFactory.SAKSNUMMER)
                             .contentType(MediaType.TEXT_PLAIN)
                             .accept(MediaType.TEXT_PLAIN))
             .andExpect(status().isNoContent());
 
-        verify(henleggFagsakService).henleggSakEllerBehandlingSomBortfalt(saksnummer);
+        verify(henleggFagsakService).henleggSakEllerBehandlingSomBortfalt(FagsakTestFactory.SAKSNUMMER);
     }
 }

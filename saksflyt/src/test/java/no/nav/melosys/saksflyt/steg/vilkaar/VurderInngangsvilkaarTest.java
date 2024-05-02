@@ -5,6 +5,7 @@ import java.util.List;
 
 import no.nav.melosys.domain.Behandling;
 import no.nav.melosys.domain.Fagsak;
+import no.nav.melosys.domain.FagsakTestFactory;
 import no.nav.melosys.domain.kodeverk.Landkoder;
 import no.nav.melosys.domain.mottatteopplysninger.MottatteOpplysninger;
 import no.nav.melosys.domain.mottatteopplysninger.MottatteOpplysningerData;
@@ -48,7 +49,7 @@ class VurderInngangsvilkaarTest {
 
         behandling.setMottatteOpplysninger(new MottatteOpplysninger());
         behandling.getMottatteOpplysninger().setMottatteOpplysningerData(mottatteOpplysningerData);
-        behandling.setFagsak(new Fagsak());
+        behandling.setFagsak(FagsakTestFactory.lagFagsak());
 
         Prosessinstans prosessinstans = new Prosessinstans();
         prosessinstans.setBehandling(behandling);
@@ -73,7 +74,7 @@ class VurderInngangsvilkaarTest {
         when(inngangsvilkaarService.skalVurdereInngangsvilkår(any())).thenReturn(false);
         Prosessinstans prosessinstans = new Prosessinstans();
         prosessinstans.setBehandling(behandling);
-        behandling.setFagsak(new Fagsak());
+        behandling.setFagsak(FagsakTestFactory.lagFagsak());
 
 
         vurderInngangsvilkaar.utfør(prosessinstans);

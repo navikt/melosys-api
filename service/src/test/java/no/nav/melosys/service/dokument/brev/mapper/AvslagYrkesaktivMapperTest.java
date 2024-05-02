@@ -50,8 +50,7 @@ class AvslagYrkesaktivMapperTest {
         navFelles.setKontaktinformasjon(kontaktinformasjon);
 
         behandling = new Behandling();
-        Fagsak fagsak = new Fagsak();
-        fagsak.setType(Sakstyper.EU_EOS);
+        Fagsak fagsak = FagsakTestFactory.lagFagsak();
         behandling.setFagsak(fagsak);
     }
 

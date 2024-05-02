@@ -5,10 +5,7 @@ import io.mockk.every
 import io.mockk.mockk
 import io.mockk.slot
 import io.mockk.verify
-import no.nav.melosys.domain.Aktoer
-import no.nav.melosys.domain.Behandling
-import no.nav.melosys.domain.Fagsak
-import no.nav.melosys.domain.Fullmakt
+import no.nav.melosys.domain.*
 import no.nav.melosys.domain.brev.TrygdeavgiftBetalingsfrist
 import no.nav.melosys.domain.kodeverk.Aktoersroller
 import no.nav.melosys.domain.kodeverk.Fullmaktstype
@@ -50,7 +47,7 @@ class SendManglendeInnbetalingVarselBrevTest {
         val prosessinstans = Prosessinstans()
         val behandling = Behandling().apply {
             id = 123
-            fagsak = Fagsak()
+            fagsak = FagsakTestFactory.lagFagsak()
         }
         prosessinstans.behandling = behandling
         prosessinstans.setData(ProsessDataKey.BETALINGSSTATUS, Betalingsstatus.DELVIS_BETALT)
@@ -80,13 +77,13 @@ class SendManglendeInnbetalingVarselBrevTest {
         val prosessinstans = Prosessinstans()
         val behandling = Behandling().apply {
             id = 123
-            fagsak = Fagsak().apply {
-                aktører = mutableSetOf(Aktoer().apply {
+            fagsak = FagsakTestFactory.builder().apply {
+                leggTilAktør(Aktoer().apply {
                     aktørId = "123"
                     rolle = Aktoersroller.FULLMEKTIG
                     fullmakter = mutableSetOf(Fullmakt().apply { type = Fullmaktstype.FULLMEKTIG_TRYGDEAVGIFT })
                 })
-            }
+            }.build()
         }
         prosessinstans.behandling = behandling
         prosessinstans.setData(ProsessDataKey.BETALINGSSTATUS, Betalingsstatus.DELVIS_BETALT)

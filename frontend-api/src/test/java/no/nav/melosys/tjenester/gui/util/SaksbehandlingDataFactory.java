@@ -5,6 +5,7 @@ import java.util.ArrayList;
 
 import no.nav.melosys.domain.Aktoer;
 import no.nav.melosys.domain.Fagsak;
+import no.nav.melosys.domain.FagsakTestFactory;
 import no.nav.melosys.domain.mottatteopplysninger.Soeknad;
 import no.nav.melosys.domain.mottatteopplysninger.data.arbeidssteder.FysiskArbeidssted;
 import no.nav.melosys.domain.kodeverk.Landkoder;
@@ -17,25 +18,10 @@ import static no.nav.melosys.domain.kodeverk.Aktoersroller.BRUKER;
 public final class SaksbehandlingDataFactory {
 
     public static Fagsak lagFagsak() {
-        return lagFagsak("MEL-1");
-    }
-
-    public static Fagsak lagFagsak(String saksnummer) {
-        var fagsak = new Fagsak();
-        fagsak.setSaksnummer(saksnummer);
-        fagsak.setTema(Sakstemaer.MEDLEMSKAP_LOVVALG);
-        fagsak.setStatus(Saksstatuser.OPPRETTET);
-        fagsak.setType(Sakstyper.EU_EOS);
-        fagsak.getAktører().add(lagBruker());
-        fagsak.setGsakSaksnummer(123L);
-        return fagsak;
-    }
-
-    public static Aktoer lagBruker() {
-        var aktoer = new Aktoer();
-        aktoer.setRolle(BRUKER);
-        aktoer.setAktørId("aktørID");
-        return aktoer;
+        return FagsakTestFactory.builder()
+            .medBruker()
+            .medGsakSaksnummer()
+            .build();
     }
 
     public static Soeknad lagSøknadDokument() {

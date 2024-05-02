@@ -12,9 +12,7 @@ import no.nav.melosys.domain.Behandlingsresultat;
 import no.nav.melosys.domain.Fagsak;
 import no.nav.melosys.domain.Lovvalgsperiode;
 import no.nav.melosys.domain.avklartefakta.AvklartVirksomhet;
-import no.nav.melosys.domain.kodeverk.Land_iso2;
-import no.nav.melosys.domain.kodeverk.Landkoder;
-import no.nav.melosys.domain.kodeverk.Sakstyper;
+import no.nav.melosys.domain.kodeverk.*;
 import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingstyper;
 import no.nav.melosys.domain.kodeverk.lovvalgsbestemmelser.Lovvalgbestemmelser_883_2004;
 import no.nav.melosys.domain.kodeverk.lovvalgsbestemmelser.Tilleggsbestemmelser_883_2004;
@@ -25,6 +23,8 @@ import no.nav.melosys.service.dokument.brev.BrevDataInnvilgelseFlereLand;
 import no.nav.melosys.service.dokument.brev.BrevbestillingDto;
 import org.junit.jupiter.api.Test;
 
+import static java.util.Collections.emptyList;
+import static java.util.Collections.emptySet;
 import static no.nav.melosys.service.dokument.brev.BrevDataTestUtils.lagStrukturertAdresse;
 import static no.nav.melosys.service.dokument.brev.mapper.BrevMappingTestUtils.lagFellesType;
 import static no.nav.melosys.service.dokument.brev.mapper.BrevMappingTestUtils.lagNAVFelles;
@@ -115,9 +115,15 @@ class InnvilgelsesbrevFlereLandMapperTest {
     }
 
     private static Fagsak lagFagsak() {
-        Fagsak fagsak = new Fagsak();
-        fagsak.setType(Sakstyper.EU_EOS);
-        return fagsak;
+        return new Fagsak(
+            "MEL-test",
+            123L,
+            Sakstyper.EU_EOS,
+            Sakstemaer.MEDLEMSKAP_LOVVALG,
+            Saksstatuser.OPPRETTET,
+            emptySet(),
+            emptyList()
+        );
     }
 
     private static Behandling lagBehandling(Fagsak fagsak) {

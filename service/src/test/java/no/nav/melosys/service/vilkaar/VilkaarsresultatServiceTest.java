@@ -101,8 +101,7 @@ class VilkaarsresultatServiceTest {
     @Test
     void tømVilkårsresultatFraBehandlingsresultat_sakstypeIkkeEøs_sletterAlleVilkår() {
         long behandlingID = 1L;
-        var fagsak = new Fagsak();
-        fagsak.setType(Sakstyper.FTRL);
+        var fagsak = FagsakTestFactory.builder().type(Sakstyper.FTRL).build();
         Behandlingsresultat behandlingsresultat = new Behandlingsresultat();
         behandlingsresultat.setId(behandlingID);
         behandlingsresultat.setBehandling(new Behandling());
@@ -121,8 +120,7 @@ class VilkaarsresultatServiceTest {
     @Test
     void tømVilkårsresultatFraBehandlingsresultat_sakstypeEøsMenIngenFlyt_sletterAlleVilkår() {
         long behandlingID = 1L;
-        var fagsak = new Fagsak();
-        fagsak.setType(Sakstyper.EU_EOS);
+        var fagsak = FagsakTestFactory.lagFagsak();
         Behandling behandling = new Behandling();
         behandling.setId(behandlingID);
         behandling.setFagsak(fagsak);
@@ -144,9 +142,7 @@ class VilkaarsresultatServiceTest {
     @Test
     void tømVilkårsresultatFraBehandlingsresultat_sakstypeEøsOgHarFlyt_sletterIkkeInngangsvilkår() {
         long behandlingID = 1L;
-        var fagsak = new Fagsak();
-        fagsak.setType(Sakstyper.EU_EOS);
-        fagsak.setTema(Sakstemaer.MEDLEMSKAP_LOVVALG);
+        var fagsak = FagsakTestFactory.lagFagsak();
         var behandling = new Behandling();
         behandling.setFagsak(fagsak);
         behandling.setTema(Behandlingstema.UTSENDT_ARBEIDSTAKER);
@@ -176,7 +172,7 @@ class VilkaarsresultatServiceTest {
     private Behandlingsresultat opprettBehandlingsresultatMedBehandling() {
         var behandlingsresultat = new Behandlingsresultat();
         var behandling = new Behandling();
-        var fagsak = new Fagsak();
+        var fagsak = FagsakTestFactory.lagFagsak();
         behandling.setFagsak(fagsak);
         behandlingsresultat.setBehandling(behandling);
         behandlingsresultat.setId(1L);

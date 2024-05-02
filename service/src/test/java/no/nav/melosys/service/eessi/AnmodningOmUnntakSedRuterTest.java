@@ -5,10 +5,7 @@ import java.time.LocalDate;
 import java.util.Collections;
 import java.util.Optional;
 
-import no.nav.melosys.domain.Behandling;
-import no.nav.melosys.domain.Behandlingsresultat;
-import no.nav.melosys.domain.Fagsak;
-import no.nav.melosys.domain.Lovvalgsperiode;
+import no.nav.melosys.domain.*;
 import no.nav.melosys.domain.eessi.Periode;
 import no.nav.melosys.domain.eessi.melding.MelosysEessiMelding;
 import no.nav.melosys.domain.eessi.melding.Statsborgerskap;
@@ -122,10 +119,9 @@ class AnmodningOmUnntakSedRuterTest {
         behandling.setStatus(Behandlingsstatus.OPPRETTET);
         behandling.setRegistrertDato(Instant.now());
 
-        Fagsak fagsak = new Fagsak();
-        fagsak.setSaksnummer("123");
+        Fagsak fagsak = FagsakTestFactory.lagFagsak();
         behandling.setFagsak(fagsak);
-        fagsak.setBehandlinger(Collections.singletonList(behandling));
+        fagsak.leggTilBehandling(behandling);
         return fagsak;
     }
 

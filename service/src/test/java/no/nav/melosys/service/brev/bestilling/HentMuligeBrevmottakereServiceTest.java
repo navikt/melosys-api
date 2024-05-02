@@ -235,7 +235,7 @@ class HentMuligeBrevmottakereServiceTest {
                 Brevmottaker::getRolle,
                 Brevmottaker::getAktørId,
                 Brevmottaker::getOrgnr)
-            .containsExactly("Kopi til bruker", "Ola Nordmann", BRUKER, "aktørId", null);
+            .containsExactly("Kopi til bruker", "Ola Nordmann", BRUKER, FagsakTestFactory.BRUKER_AKTØR_ID, null);
     }
 
     @Test
@@ -296,7 +296,7 @@ class HentMuligeBrevmottakereServiceTest {
                 Brevmottaker::getRolle,
                 Brevmottaker::getAktørId,
                 Brevmottaker::getOrgnr)
-            .containsExactly("Kopi til bruker", "Ola Nordmann", BRUKER, "aktørId", null);
+            .containsExactly("Kopi til bruker", "Ola Nordmann", BRUKER, FagsakTestFactory.BRUKER_AKTØR_ID, null);
     }
 
     @Test
@@ -507,12 +507,7 @@ class HentMuligeBrevmottakereServiceTest {
     }
 
     private Fagsak lagFagsak() {
-        Fagsak fagsak = new Fagsak();
-        Aktoer bruker = new Aktoer();
-        bruker.setRolle(Aktoersroller.BRUKER);
-        bruker.setAktørId("aktørId");
-        fagsak.getAktører().add(bruker);
-        return fagsak;
+        return FagsakTestFactory.builder().medBruker().build();
     }
 
     private void mockHentOrganisasjon(String orgnr, String navn) {

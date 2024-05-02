@@ -62,10 +62,7 @@ class AvklarArbeidsgiverTest {
         prosessinstans.setBehandling(behandling);
         prosessinstans.setType(ProsessType.IVERKSETT_VEDTAK_EOS);
 
-        fagsak = new Fagsak();
-        fagsak.setSaksnummer("saksnr");
-        fagsak.setType(Sakstyper.EU_EOS);
-        fagsak.setTema(Sakstemaer.MEDLEMSKAP_LOVVALG);
+        fagsak = FagsakTestFactory.lagFagsak();
         behandling.setFagsak(fagsak);
         behandling.setId(1L);
         behandling.setTema(Behandlingstema.UTSENDT_ARBEIDSTAKER);

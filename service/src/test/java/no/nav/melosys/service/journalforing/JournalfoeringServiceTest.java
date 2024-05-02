@@ -481,9 +481,7 @@ class JournalfoeringServiceTest {
         when(eessiService.hentSedTilknyttetJournalpost(journalpost.getJournalpostId())).thenReturn(melosysEessiMelding);
 
         final Long arkivsakID = 22244L;
-        final Fagsak fagsak = new Fagsak();
-        fagsak.setSaksnummer("MEL-22");
-        fagsak.setSaksnummer(arkivsakID.toString());
+        final Fagsak fagsak = FagsakTestFactory.builder().saksnummer(arkivsakID.toString()).build();
         opprettDto.setBehandlingstemaKode(UTSENDT_ARBEIDSTAKER.getKode());
         journalpost.setMottaksKanal("EESSI");
         when(eessiService.støtterAutomatiskBehandling(any(MelosysEessiMelding.class))).thenReturn(Boolean.FALSE);
@@ -558,8 +556,7 @@ class JournalfoeringServiceTest {
 
         var behandling = new Behandling();
         behandling.setStatus(Behandlingsstatus.UNDER_BEHANDLING);
-        var fagsak = new Fagsak();
-        fagsak.getBehandlinger().add(behandling);
+        var fagsak = FagsakTestFactory.builder().behandlinger(behandling).build();
 
         when(joarkFasade.hentJournalpost(tilordneDto.getJournalpostID())).thenReturn(journalpost);
         when(fagsakService.hentFagsak(MELOSYS_SAKSNUMMER)).thenReturn(fagsak);
@@ -577,8 +574,7 @@ class JournalfoeringServiceTest {
 
         var behandling = new Behandling();
         behandling.setStatus(Behandlingsstatus.UNDER_BEHANDLING);
-        var fagsak = new Fagsak();
-        fagsak.getBehandlinger().add(behandling);
+        var fagsak = FagsakTestFactory.builder().behandlinger(behandling).build();
 
         when(joarkFasade.hentJournalpost(tilordneDto.getJournalpostID())).thenReturn(journalpost);
         when(fagsakService.hentFagsak(MELOSYS_SAKSNUMMER)).thenReturn(fagsak);
@@ -609,9 +605,10 @@ class JournalfoeringServiceTest {
 
         var behandling = new Behandling();
         behandling.setStatus(Behandlingsstatus.UNDER_BEHANDLING);
-        var fagsak = new Fagsak();
-        fagsak.getBehandlinger().add(behandling);
-        fagsak.setSaksnummer("FAGSAK KOBLET TIL SED FRA FØR");
+        var fagsak = FagsakTestFactory.builder()
+            .saksnummer("FAGSAK KOBLET TIL SED FRA FØR")
+            .behandlinger(behandling)
+            .build();
 
         tilordneDto.setSaksnummer("FAGSAK SOM PRØVER Å KNYTTE JOURNALPOST FOR SED TIL SEG");
 
@@ -620,7 +617,7 @@ class JournalfoeringServiceTest {
         when(eessiService.hentSedTilknyttetJournalpost(journalpost.getJournalpostId())).thenReturn(melosysEessiMelding);
         when(eessiService.finnSakForRinasaksnummer(RINA_SAKSNUMMER)).thenReturn(Optional.of(arkivsakID));
         when(fagsakService.finnFagsakFraArkivsakID(arkivsakID)).thenReturn(Optional.of(fagsak));
-        when(fagsakService.hentFagsak("FAGSAK SOM PRØVER Å KNYTTE JOURNALPOST FOR SED TIL SEG")).thenReturn(new Fagsak());
+        when(fagsakService.hentFagsak("FAGSAK SOM PRØVER Å KNYTTE JOURNALPOST FOR SED TIL SEG")).thenReturn(FagsakTestFactory.lagFagsak());
         when(joarkFasade.hentJournalpost(anyString())).thenReturn(journalpost);
 
 
@@ -639,10 +636,10 @@ class JournalfoeringServiceTest {
         behandling.setStatus(Behandlingsstatus.MIDLERTIDIG_LOVVALGSBESLUTNING);
         behandling.setType(Behandlingstyper.NY_VURDERING);
         behandling.setTema(Behandlingstema.BESLUTNING_LOVVALG_NORGE);
-        var fagsak = lagFagsak(behandling);
         Aktoer aktoer = new Aktoer();
         aktoer.setRolle(Aktoersroller.BRUKER);
-        fagsak.setAktører(Set.of(aktoer));
+        var fagsak = lagFagsak(behandling);
+        fagsak.leggTilAktør(aktoer);
         fagsak.setType(Sakstyper.FTRL);
         fagsak.setTema(UNNTAK);
 
@@ -667,7 +664,7 @@ class JournalfoeringServiceTest {
         fagsak.setTema(Sakstemaer.MEDLEMSKAP_LOVVALG);
         Aktoer aktoer = new Aktoer();
         aktoer.setRolle(Aktoersroller.BRUKER);
-        fagsak.setAktører(Set.of(aktoer));
+        fagsak.leggTilAktør(aktoer);
 
         when(joarkFasade.hentJournalpost(tilordneDto.getJournalpostID())).thenReturn(journalpost);
         when(fagsakService.hentFagsak(MELOSYS_SAKSNUMMER)).thenReturn(fagsak);
@@ -692,7 +689,7 @@ class JournalfoeringServiceTest {
         fagsak.setTema(Sakstemaer.MEDLEMSKAP_LOVVALG);
         Aktoer aktoer = new Aktoer();
         aktoer.setRolle(Aktoersroller.BRUKER);
-        fagsak.setAktører(Set.of(aktoer));
+        fagsak.leggTilAktør(aktoer);
         Behandlingsresultat behandlingsresultat = new Behandlingsresultat();
         behandlingsresultat.setType(Behandlingsresultattyper.AVSLAG_SØKNAD);
 
@@ -713,8 +710,7 @@ class JournalfoeringServiceTest {
 
         var aktivBehandling = lagBehandling();
         aktivBehandling.setStatus(Behandlingsstatus.UNDER_BEHANDLING);
-        var fagsak = new Fagsak();
-        fagsak.getBehandlinger().add(aktivBehandling);
+        var fagsak = FagsakTestFactory.builder().behandlinger(aktivBehandling).build();
 
         when(joarkFasade.hentJournalpost(tilordneDto.getJournalpostID())).thenReturn(journalpost);
         when(fagsakService.hentFagsak(MELOSYS_SAKSNUMMER)).thenReturn(fagsak);
@@ -732,7 +728,6 @@ class JournalfoeringServiceTest {
         var aktivBehandling = lagBehandling();
         aktivBehandling.setStatus(Behandlingsstatus.UNDER_BEHANDLING);
         var fagsak = lagFagsak(aktivBehandling);
-        fagsak.setType(Sakstyper.EU_EOS);
         var anmodningsperiode = new Anmodningsperiode();
         anmodningsperiode.setSendtUtland(true);
         var behandlingsresultat = new Behandlingsresultat();
@@ -755,11 +750,9 @@ class JournalfoeringServiceTest {
 
         var behandling = lagBehandling();
         behandling.setStatus(Behandlingsstatus.UNDER_BEHANDLING);
-        var fagsak1 = lagFagsak(behandling);
-        fagsak1.setSaksnummer("FAGSAK KOBLET TIL SED FRA FØR");
+        var fagsak1 = lagFagsak("FAGSAK KOBLET TIL SED FRA FØR", behandling);
 
-        var fagsak2 = lagFagsak(lagBehandling());
-        fagsak2.setSaksnummer("FAGSAK SOM PRØVER Å KNYTTE JOURNALPOST FOR SED TIL SEG");
+        var fagsak2 = lagFagsak("FAGSAK SOM PRØVER Å KNYTTE JOURNALPOST FOR SED TIL SEG", lagBehandling());
 
         tilordneDto.setSaksnummer(fagsak2.getSaksnummer());
 
@@ -852,11 +845,14 @@ class JournalfoeringServiceTest {
         return fagsakDto;
     }
 
-    private Fagsak lagFagsak(Behandling behandling) {
-        var fagsak = new Fagsak();
-        fagsak.getBehandlinger().add(behandling);
+    private Fagsak lagFagsak(String saksnummer, Behandling behandling) {
+        var fagsak = FagsakTestFactory.builder().saksnummer(saksnummer).behandlinger(behandling).build();
         behandling.setFagsak(fagsak);
         return fagsak;
+    }
+
+    private Fagsak lagFagsak(Behandling behandling) {
+        return lagFagsak(FagsakTestFactory.SAKSNUMMER, behandling);
     }
 
     private Behandling lagBehandling() {

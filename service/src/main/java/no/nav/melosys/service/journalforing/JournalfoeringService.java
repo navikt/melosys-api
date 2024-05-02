@@ -33,7 +33,6 @@ import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-import static no.nav.melosys.domain.Fagsak.erSakstypeEøs;
 import static no.nav.melosys.domain.kodeverk.Sakstemaer.MEDLEMSKAP_LOVVALG;
 import static no.nav.melosys.domain.kodeverk.behandlinger.Behandlingstyper.FØRSTEGANG;
 import static no.nav.melosys.domain.kodeverk.behandlinger.Behandlingstyper.NY_VURDERING;
@@ -261,7 +260,7 @@ public class JournalfoeringService {
         final var sistBehandling = fagsak.hentSistRegistrertBehandling();
         final var sistBehandlingsresultat = behandlingsresultatService.hentBehandlingsresultatMedAnmodningsperioder(sistBehandling.getId());
 
-        if (fagsak.hentAktivBehandling() != null && (sistBehandlingsresultat.erIkkeArtikkel16MedSendtAnmodningOmUnntak())) {
+        if (fagsak.finnAktivBehandling() != null && (sistBehandlingsresultat.erIkkeArtikkel16MedSendtAnmodningOmUnntak())) {
             throw new FunksjonellException("Det finnes allerede en aktiv behandling på fagsak " + saksnummer);
         }
         if (journalpost.mottaksKanalErEessi()) {
@@ -294,7 +293,7 @@ public class JournalfoeringService {
     }
 
     private boolean skalSetteSøknadslandOgPeriode(Sakstyper sakstype, Sakstemaer sakstema, Behandlingstema behandlingstema, Behandlingstyper behandlingstype) {
-        return erSakstypeEøs(sakstype)
+        return sakstype == Sakstyper.EU_EOS
             && !saksbehandlingRegler.harIngenFlyt(sakstype, sakstema, behandlingstype, behandlingstema)
             && !saksbehandlingRegler.harRegistreringUnntakFraMedlemskapFlyt(sakstype, sakstema, behandlingstema)
             && !saksbehandlingRegler.harIkkeYrkesaktivFlyt(sakstype, behandlingstema);

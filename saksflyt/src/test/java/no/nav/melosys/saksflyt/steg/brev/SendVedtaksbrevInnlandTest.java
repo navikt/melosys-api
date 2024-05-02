@@ -283,7 +283,7 @@ class SendVedtaksbrevInnlandTest {
         Aktoer arbeidsgiver = new Aktoer();
         arbeidsgiver.setRolle(Aktoersroller.ARBEIDSGIVER);
         arbeidsgiver.setOrgnr("123456789");
-        behandling.getFagsak().getAktører().add(arbeidsgiver);
+        behandling.getFagsak().leggTilAktør(arbeidsgiver);
 
 
         sendVedtaksbrevInnland.utfør(lagProsessinstans());
@@ -363,9 +363,6 @@ class SendVedtaksbrevInnlandTest {
     }
 
     private static Fagsak lagFagsak() {
-        Fagsak fagsak = new Fagsak();
-        fagsak.setGsakSaksnummer(1234L);
-        fagsak.setType(Sakstyper.EU_EOS);
         Aktoer aktør = new Aktoer();
         aktør.setAktørId("1");
         aktør.setRolle(Aktoersroller.BRUKER);
@@ -379,8 +376,10 @@ class SendVedtaksbrevInnlandTest {
         arbeidsgiver.setRolle(Aktoersroller.ARBEIDSGIVER);
         arbeidsgiver.setOrgnr("123456789");
 
-        fagsak.setAktører(new HashSet<>(Set.of(aktør, arbeidsgiver, myndighet)));
-        return fagsak;
+        return FagsakTestFactory.builder()
+            .medGsakSaksnummer()
+            .aktører(Set.of(aktør, arbeidsgiver, myndighet))
+            .build();
     }
 
     private static Anmodningsperiode lagAnmodningsperiodeMedSvar() {

@@ -3,13 +3,15 @@ package no.nav.melosys.tjenester.gui;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
-import java.util.Set;
 
 import no.nav.melosys.domain.Aktoer;
 import no.nav.melosys.domain.Behandling;
-import no.nav.melosys.domain.Fagsak;
+import no.nav.melosys.domain.FagsakTestFactory;
 import no.nav.melosys.domain.UtenlandskMyndighet;
-import no.nav.melosys.domain.kodeverk.*;
+import no.nav.melosys.domain.kodeverk.Aktoersroller;
+import no.nav.melosys.domain.kodeverk.Land_iso2;
+import no.nav.melosys.domain.kodeverk.Mottakerroller;
+import no.nav.melosys.domain.kodeverk.Sakstyper;
 import no.nav.melosys.domain.kodeverk.begrunnelser.Kontroll_begrunnelser;
 import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingstema;
 import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingstyper;
@@ -126,8 +128,7 @@ class BrevmalListeByggerTest {
     void byggBrevmalDtoListe_virksomhetErHovedpart_returnererTilgjengeligeMaler() {
         Aktoer virksomhet = new Aktoer();
         virksomhet.setRolle(Aktoersroller.VIRKSOMHET);
-        var behandling = lagBehandling(Behandlingstyper.FØRSTEGANG);
-        behandling.getFagsak().setAktører(Set.of(virksomhet));
+        var behandling = lagBehandling(Behandlingstyper.FØRSTEGANG, virksomhet);
         when(behandlingService.hentBehandlingMedSaksopplysninger(anyLong())).thenReturn(behandling);
         when(behandlingService.hentBehandling(anyLong())).thenReturn(behandling);
 
@@ -389,7 +390,6 @@ class BrevmalListeByggerTest {
     @Test
     void byggBrevmalDtoListe_EUEØS_lagerRiktigeTittelValgForFritekstbrev() {
         Behandling behandlingEUEOS = lagBehandling(Behandlingstyper.FØRSTEGANG);
-        behandlingEUEOS.getFagsak().setType(Sakstyper.EU_EOS);
         when(behandlingService.hentBehandlingMedSaksopplysninger(anyLong())).thenReturn(behandlingEUEOS);
         when(behandlingService.hentBehandling(anyLong())).thenReturn(behandlingEUEOS);
         mockUtenlandskTrygdemyndighetServiceMottakerValgKall();
@@ -414,7 +414,6 @@ class BrevmalListeByggerTest {
     @Test
     void byggBrevmalDtoListe_EUEØS_lagerRiktigeDistribusjonstyperForFritekstbrev() {
         Behandling behandlingEUEOS = lagBehandling(Behandlingstyper.FØRSTEGANG);
-        behandlingEUEOS.getFagsak().setType(Sakstyper.EU_EOS);
         when(behandlingService.hentBehandlingMedSaksopplysninger(anyLong())).thenReturn(behandlingEUEOS);
         when(behandlingService.hentBehandling(anyLong())).thenReturn(behandlingEUEOS);
         mockUtenlandskTrygdemyndighetServiceMottakerValgKall();
@@ -440,8 +439,7 @@ class BrevmalListeByggerTest {
 
     @Test
     void byggBrevmalDtoListe_FTRL_lagerRiktigeTittelValgForFritekstbrev() {
-        Behandling behandlingFTRL = lagBehandling(Behandlingstyper.FØRSTEGANG);
-        behandlingFTRL.getFagsak().setType(Sakstyper.FTRL);
+        Behandling behandlingFTRL = lagBehandling(Behandlingstyper.FØRSTEGANG, Sakstyper.FTRL);
         when(behandlingService.hentBehandlingMedSaksopplysninger(anyLong())).thenReturn(behandlingFTRL);
         when(behandlingService.hentBehandling(anyLong())).thenReturn(behandlingFTRL);
 
@@ -468,8 +466,7 @@ class BrevmalListeByggerTest {
 
     @Test
     void byggBrevmalDtoListe_FTRL_lagerRiktigeDistribusjonstyperForFritekstbrev() {
-        Behandling behandlingFTRL = lagBehandling(Behandlingstyper.FØRSTEGANG);
-        behandlingFTRL.getFagsak().setType(Sakstyper.FTRL);
+        Behandling behandlingFTRL = lagBehandling(Behandlingstyper.FØRSTEGANG, Sakstyper.FTRL);
         when(behandlingService.hentBehandlingMedSaksopplysninger(anyLong())).thenReturn(behandlingFTRL);
         when(behandlingService.hentBehandling(anyLong())).thenReturn(behandlingFTRL);
 
@@ -494,8 +491,7 @@ class BrevmalListeByggerTest {
 
     @Test
     void byggBrevmalDtoListe_trygdeavtale_lagerRiktigeTittelValgForFritekstbrev() {
-        Behandling behandlingTrygdeavtale = lagBehandling(Behandlingstyper.FØRSTEGANG);
-        behandlingTrygdeavtale.getFagsak().setType(Sakstyper.TRYGDEAVTALE);
+        Behandling behandlingTrygdeavtale = lagBehandling(Behandlingstyper.FØRSTEGANG, Sakstyper.TRYGDEAVTALE);
         MottatteOpplysninger mottatteOpplysninger = new MottatteOpplysninger();
         MottatteOpplysningerData mottatteOpplysningerData = new MottatteOpplysningerData();
         mottatteOpplysningerData.soeknadsland = new Soeknadsland(Collections.singletonList("GB"), false);
@@ -523,8 +519,7 @@ class BrevmalListeByggerTest {
 
     @Test
     void byggBrevmalDtoListe_trygdeavtale_lagerRiktigeDistribusjonstyperForFritekstbrev() {
-        Behandling behandlingTrygdeavtale = lagBehandling(Behandlingstyper.FØRSTEGANG);
-        behandlingTrygdeavtale.getFagsak().setType(Sakstyper.TRYGDEAVTALE);
+        Behandling behandlingTrygdeavtale = lagBehandling(Behandlingstyper.FØRSTEGANG, Sakstyper.TRYGDEAVTALE);
         MottatteOpplysninger mottatteOpplysninger = new MottatteOpplysninger();
         AnmodningEllerAttest anmodningEllerAttest = new AnmodningEllerAttest();
         anmodningEllerAttest.setLovvalgsland(Land_iso2.GB);
@@ -554,8 +549,7 @@ class BrevmalListeByggerTest {
 
     @Test
     void byggBrevmalDtoListe_trygdeavtale_behandlingUtenFlyt_lagerRiktigeFeltForUtenlandskTrygdeMyndighetFritekstbrev() {
-        Behandling behandlingTrygdeavtale = lagBehandling(Behandlingstyper.HENVENDELSE);
-        behandlingTrygdeavtale.getFagsak().setType(Sakstyper.TRYGDEAVTALE);
+        Behandling behandlingTrygdeavtale = lagBehandling(Behandlingstyper.HENVENDELSE, Sakstyper.TRYGDEAVTALE);
         MottatteOpplysninger mottatteOpplysninger = new MottatteOpplysninger();
         AnmodningEllerAttest anmodningEllerAttest = new AnmodningEllerAttest();
         mottatteOpplysninger.setMottatteOpplysningerData(anmodningEllerAttest);
@@ -623,8 +617,7 @@ class BrevmalListeByggerTest {
 
     @Test
     void byggBrevmalDtoListe_trygdeavtale_behandlingMedFlyt_lagerRiktigeFeltForUtenlandskTrygdeMyndighetFritekstbrev() {
-        Behandling behandlingTrygdeavtale = lagBehandling(Behandlingstyper.FØRSTEGANG);
-        behandlingTrygdeavtale.getFagsak().setType(Sakstyper.TRYGDEAVTALE);
+        Behandling behandlingTrygdeavtale = lagBehandling(Behandlingstyper.FØRSTEGANG, Sakstyper.TRYGDEAVTALE);
         MottatteOpplysninger mottatteOpplysninger = new MottatteOpplysninger();
         AnmodningEllerAttest anmodningEllerAttest = new AnmodningEllerAttest();
         anmodningEllerAttest.setLovvalgsland(Land_iso2.AU);
@@ -650,8 +643,7 @@ class BrevmalListeByggerTest {
 
     @Test
     void byggBrevmalDtoListe_trygdeavtale_behandlingUtenLand_lagerFeilmeldingForUtenlandskTrygdeMyndighetMottaker() {
-        Behandling behandlingTrygdeavtale = lagBehandling(Behandlingstyper.FØRSTEGANG);
-        behandlingTrygdeavtale.getFagsak().setType(Sakstyper.TRYGDEAVTALE);
+        Behandling behandlingTrygdeavtale = lagBehandling(Behandlingstyper.FØRSTEGANG, Sakstyper.TRYGDEAVTALE);
         MottatteOpplysninger mottatteOpplysninger = new MottatteOpplysninger();
         AnmodningEllerAttest anmodningEllerAttest = new AnmodningEllerAttest();
         mottatteOpplysninger.setMottatteOpplysningerData(anmodningEllerAttest);
@@ -716,19 +708,31 @@ class BrevmalListeByggerTest {
                 Kontroll_begrunnelser.MANGLENDE_REGISTRERTE_ADRESSE.getBeskrivelse());
     }
 
-    private Behandling lagBehandling(Behandlingstyper type) {
-        Aktoer bruker = new Aktoer();
-        bruker.setRolle(Aktoersroller.BRUKER);
-        var fagsak = new Fagsak();
-        fagsak.setType(Sakstyper.EU_EOS);
-        fagsak.setTema(Sakstemaer.MEDLEMSKAP_LOVVALG);
-        fagsak.setAktører(Set.of(bruker));
+    private Behandling lagBehandling(Behandlingstyper type, Sakstyper sakstype, Aktoer aktoer) {
+        var fagsak = FagsakTestFactory.builder()
+            .type(sakstype)
+            .aktører(aktoer)
+            .build();
         var behandling = new Behandling();
         behandling.setId(1L);
         behandling.setFagsak(fagsak);
         behandling.setTema(Behandlingstema.UTSENDT_ARBEIDSTAKER);
         behandling.setType(type);
         return behandling;
+    }
+
+    private Behandling lagBehandling(Behandlingstyper behandlingstype, Sakstyper sakstype) {
+        Aktoer bruker = new Aktoer();
+        bruker.setRolle(Aktoersroller.BRUKER);
+        return lagBehandling(behandlingstype, sakstype, bruker);
+    }
+
+    private Behandling lagBehandling(Behandlingstyper behandlingstype, Aktoer aktoer) {
+        return lagBehandling(behandlingstype, Sakstyper.EU_EOS, aktoer);
+    }
+
+    private Behandling lagBehandling(Behandlingstyper behandlingstype) {
+        return lagBehandling(behandlingstype, Sakstyper.EU_EOS);
     }
 
     private void mockUtenlandskTrygdemyndighetServiceMottakerValgKall() {

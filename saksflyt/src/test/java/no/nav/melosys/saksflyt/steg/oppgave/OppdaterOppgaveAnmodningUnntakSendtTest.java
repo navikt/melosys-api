@@ -4,6 +4,7 @@ import java.time.*;
 
 import no.nav.melosys.domain.Behandling;
 import no.nav.melosys.domain.Fagsak;
+import no.nav.melosys.domain.FagsakTestFactory;
 import no.nav.melosys.domain.oppgave.Oppgave;
 import no.nav.melosys.integrasjon.oppgave.OppgaveOppdatering;
 import no.nav.melosys.saksflytapi.domain.ProsessDataKey;
@@ -25,7 +26,6 @@ class OppdaterOppgaveAnmodningUnntakSendtTest {
 
     private static final String OPPGAVE_ID = "123";
     private static final String ANMODNING_UNNTAK_BESKRIVELSE = "Anmodning om unntak er sendt utenlandsk trygdemyndighet.";
-    private static final String SAKSNUMMER = "234";
 
     @Mock
     private OppgaveService oppgaveService;
@@ -43,9 +43,7 @@ class OppdaterOppgaveAnmodningUnntakSendtTest {
         Behandling behandling = new Behandling();
         LocalDate toMånederFremITid = LocalDate.now().plusMonths(2L);
         behandling.setDokumentasjonSvarfristDato(Instant.from(ZonedDateTime.of(toMånederFremITid, LocalTime.MAX, ZoneId.systemDefault())));
-        Fagsak fagsak = new Fagsak();
-        fagsak.setSaksnummer(SAKSNUMMER);
-        behandling.setFagsak(fagsak);
+        behandling.setFagsak(FagsakTestFactory.lagFagsak());
         prosessinstans.setBehandling(behandling);
         prosessinstans.setData(ProsessDataKey.OPPGAVE_ID, OPPGAVE_ID);
 
@@ -61,7 +59,7 @@ class OppdaterOppgaveAnmodningUnntakSendtTest {
         LocalDate toMånederFremITid = LocalDate.now().plusMonths(2L);
 
         oppdaterOppgaveAnmodningUnntakSendt.utfør(prosessinstans);
-        verify(oppgaveService).hentÅpenBehandlingsoppgaveMedFagsaksnummer(SAKSNUMMER);
+        verify(oppgaveService).hentÅpenBehandlingsoppgaveMedFagsaksnummer(FagsakTestFactory.SAKSNUMMER);
         verify(oppgaveService).oppdaterOppgave(eq(oppgave.getOppgaveId()), oppgaveCaptor.capture());
         assertThat(oppgaveCaptor.getValue().getFristFerdigstillelse()).isEqualTo(toMånederFremITid);
         assertThat(oppgaveCaptor.getValue().getBeskrivelse()).isEqualTo(ANMODNING_UNNTAK_BESKRIVELSE);
@@ -76,7 +74,7 @@ class OppdaterOppgaveAnmodningUnntakSendtTest {
         when(oppgaveService.hentÅpenBehandlingsoppgaveMedFagsaksnummer(anyString())).thenReturn(oppgave);
 
         oppdaterOppgaveAnmodningUnntakSendt.utfør(prosessinstans);
-        verify(oppgaveService).hentÅpenBehandlingsoppgaveMedFagsaksnummer(SAKSNUMMER);
+        verify(oppgaveService).hentÅpenBehandlingsoppgaveMedFagsaksnummer(FagsakTestFactory.SAKSNUMMER);
         verify(oppgaveService).oppdaterOppgave(eq(oppgave.getOppgaveId()), oppgaveCaptor.capture());
         assertThat(oppgaveCaptor.getValue().getFristFerdigstillelse()).isNull();
         assertThat(oppgaveCaptor.getValue().getBeskrivelse()).isEqualTo(ANMODNING_UNNTAK_BESKRIVELSE);

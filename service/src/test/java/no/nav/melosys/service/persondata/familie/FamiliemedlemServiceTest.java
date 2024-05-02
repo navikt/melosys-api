@@ -5,6 +5,7 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Set;
 
+import no.nav.melosys.domain.FagsakTestFactory;
 import no.nav.melosys.domain.dokument.person.PersonDokument;
 import no.nav.melosys.domain.dokument.person.Sivilstand;
 import no.nav.melosys.domain.person.Navn;
@@ -69,7 +70,7 @@ class FamiliemedlemServiceTest {
     void hentFamiliemedlemmerFraBehandlingID_aktivBehandling() {
         long behandlingID = 1L;
         when(behandlingService.hentBehandling(behandlingID)).thenReturn(lagBehandling());
-        when(pdlConsumer.hentFamilierelasjoner(IDENT_HOVEDPERSON)).thenReturn(lagHovedpersonMedBarn());
+        when(pdlConsumer.hentFamilierelasjoner(FagsakTestFactory.BRUKER_AKTØR_ID)).thenReturn(lagHovedpersonMedBarn());
         when(pdlConsumer.hentBarn(IDENT_BARN)).thenReturn(lagPerson());
         when(pdlConsumer.hentEktefelleEllerPartner(IDENT_PERSON_GIFT)).thenReturn(lagPersonGift());
 
@@ -84,7 +85,7 @@ class FamiliemedlemServiceTest {
     void hentFamiliemedlemmerFraBehandlingID_aktivBehandling_korrigertPåSammeDato() {
         long behandlingID = 1L;
         when(behandlingService.hentBehandling(behandlingID)).thenReturn(lagBehandling());
-        when(pdlConsumer.hentFamilierelasjoner(IDENT_HOVEDPERSON))
+        when(pdlConsumer.hentFamilierelasjoner(FagsakTestFactory.BRUKER_AKTØR_ID))
             .thenReturn(lagHovedpersonMedBarn_medKorrigertGiftSeparertSkiltPåSammeDato());
         when(pdlConsumer.hentBarn(IDENT_BARN)).thenReturn(lagPerson());
         when(pdlConsumer.hentEktefelleEllerPartner(IDENT_PERSON_GIFT)).thenReturn(lagPersonGift());

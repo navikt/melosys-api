@@ -7,6 +7,7 @@ import java.util.Optional;
 import no.nav.melosys.domain.Behandling;
 import no.nav.melosys.domain.BehandlingEndretAvSaksbehandlerEvent;
 import no.nav.melosys.domain.Fagsak;
+import no.nav.melosys.domain.FagsakTestFactory;
 import no.nav.melosys.domain.dokument.DokumentBestiltEvent;
 import no.nav.melosys.domain.kodeverk.Sakstemaer;
 import no.nav.melosys.domain.kodeverk.Sakstyper;
@@ -45,7 +46,6 @@ class BehandlingEventListenerTest {
     private final OppgaveFactory oppgaveFactory = new OppgaveFactory();
 
     private final long BEHANDLING_ID = 123321L;
-    private final String FAGSAKSNUMMER = "222";
     private final String OPPGAVE_ID = "333";
 
     private final Behandling behandling = new Behandling();
@@ -89,10 +89,7 @@ class BehandlingEventListenerTest {
 
     @Test
     void behandlingEndret_oppdatererOppgave_medRiktigData() {
-        Fagsak fagsak = new Fagsak();
-        fagsak.setSaksnummer(FAGSAKSNUMMER);
-        fagsak.setType(Sakstyper.EU_EOS);
-        fagsak.setTema(Sakstemaer.MEDLEMSKAP_LOVVALG);
+        Fagsak fagsak = FagsakTestFactory.lagFagsak();
         behandling.setType(Behandlingstyper.NY_VURDERING);
         behandling.setTema(Behandlingstema.IKKE_YRKESAKTIV);
         behandling.setBehandlingsfrist(LocalDate.of(2022, 3, 7));
@@ -103,7 +100,7 @@ class BehandlingEventListenerTest {
             behandling
         );
         Oppgave oppgave = new Oppgave.Builder().setOppgaveId(OPPGAVE_ID).build();
-        when(oppgaveService.finnÅpenBehandlingsoppgaveMedFagsaksnummer(FAGSAKSNUMMER)).thenReturn(Optional.of(oppgave));
+        when(oppgaveService.finnÅpenBehandlingsoppgaveMedFagsaksnummer(FagsakTestFactory.SAKSNUMMER)).thenReturn(Optional.of(oppgave));
         when(oppgaveService.lagBehandlingsoppgave(behandling)).thenReturn(oppgaveFactory.lagBehandlingsoppgave(behandling, LocalDate.now(), behandling::hentSedDokument));
 
         behandlingEventListener.behandlingEndret(behandlingEndretAvSaksbehandlerEvent);

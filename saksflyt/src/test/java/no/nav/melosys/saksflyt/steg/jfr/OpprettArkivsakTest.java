@@ -1,11 +1,8 @@
 package no.nav.melosys.saksflyt.steg.jfr;
 
-import no.nav.melosys.domain.Aktoer;
 import no.nav.melosys.domain.Behandling;
 import no.nav.melosys.domain.Fagsak;
-import no.nav.melosys.domain.kodeverk.Aktoersroller;
-import no.nav.melosys.domain.kodeverk.Sakstemaer;
-import no.nav.melosys.domain.kodeverk.Sakstyper;
+import no.nav.melosys.domain.FagsakTestFactory;
 import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingstema;
 import no.nav.melosys.exception.FunksjonellException;
 import no.nav.melosys.saksflytapi.domain.Prosessinstans;
@@ -43,16 +40,7 @@ class OpprettArkivsakTest {
     void utfør_arkivsakIDEksistererIkkeFraFør_arkivsakBlirOpprettet() {
         final long forventetArkivsakID = 1234432;
 
-        String aktørID = "4214323324";
-        Fagsak fagsak = new Fagsak();
-        fagsak.setSaksnummer("MEL-4321");
-        fagsak.setType(Sakstyper.EU_EOS);
-        fagsak.setTema(Sakstemaer.MEDLEMSKAP_LOVVALG);
-
-        Aktoer bruker = new Aktoer();
-        bruker.setAktørId(aktørID);
-        bruker.setRolle(Aktoersroller.BRUKER);
-        fagsak.getAktører().add(bruker);
+        Fagsak fagsak = FagsakTestFactory.builder().medBruker().build();
 
         Behandling behandling = new Behandling();
         behandling.setTema(Behandlingstema.UTSENDT_ARBEIDSTAKER);
@@ -61,7 +49,7 @@ class OpprettArkivsakTest {
         Prosessinstans prosessinstans = new Prosessinstans();
         prosessinstans.setBehandling(behandling);
 
-        when(arkivsakService.opprettSakForBruker(fagsak.getSaksnummer(), oppgaveFactory.utledTema(fagsak.getType(), fagsak.getTema(), behandling.getTema()), aktørID)).thenReturn(forventetArkivsakID);
+        when(arkivsakService.opprettSakForBruker(fagsak.getSaksnummer(), oppgaveFactory.utledTema(fagsak.getType(), fagsak.getTema(), behandling.getTema()), FagsakTestFactory.BRUKER_AKTØR_ID)).thenReturn(forventetArkivsakID);
         opprettArkivsak.utfør(prosessinstans);
 
         assertThat(fagsak.getGsakSaksnummer()).isEqualTo(forventetArkivsakID);
@@ -71,16 +59,7 @@ class OpprettArkivsakTest {
     void utfør_arkivsakIDEksistererIkkeFraFør_arkivsakBlirOpprettet_brukFagsakTema() {
         final long forventetArkivsakID = 1234432;
 
-        String aktørID = "4214323324";
-        Fagsak fagsak = new Fagsak();
-        fagsak.setType(Sakstyper.EU_EOS);
-        fagsak.setSaksnummer("MEL-4321");
-        fagsak.setTema(Sakstemaer.MEDLEMSKAP_LOVVALG);
-
-        Aktoer bruker = new Aktoer();
-        bruker.setAktørId(aktørID);
-        bruker.setRolle(Aktoersroller.BRUKER);
-        fagsak.getAktører().add(bruker);
+        Fagsak fagsak = FagsakTestFactory.builder().medBruker().build();
 
         Behandling behandling = new Behandling();
         behandling.setTema(Behandlingstema.YRKESAKTIV);
@@ -90,7 +69,7 @@ class OpprettArkivsakTest {
         prosessinstans.setBehandling(behandling);
 
         when(arkivsakService.opprettSakForBruker(fagsak.getSaksnummer(), oppgaveFactory.utledTema(fagsak.getType(), fagsak.getTema(), behandling.getTema()),
-            aktørID)).thenReturn(forventetArkivsakID);
+            FagsakTestFactory.BRUKER_AKTØR_ID)).thenReturn(forventetArkivsakID);
         opprettArkivsak.utfør(prosessinstans);
 
         assertThat(fagsak.getGsakSaksnummer()).isEqualTo(forventetArkivsakID);
@@ -100,16 +79,7 @@ class OpprettArkivsakTest {
     void utfør_virksomhetErHovedpart_oppretterSakForVirksomhet() {
         final long forventetArkivsakID = 1234432;
 
-        String orgnr = "999999999";
-        Fagsak fagsak = new Fagsak();
-        fagsak.setType(Sakstyper.EU_EOS);
-        fagsak.setSaksnummer("MEL-4321");
-        fagsak.setTema(Sakstemaer.MEDLEMSKAP_LOVVALG);
-
-        Aktoer virksomhet = new Aktoer();
-        virksomhet.setOrgnr(orgnr);
-        virksomhet.setRolle(Aktoersroller.VIRKSOMHET);
-        fagsak.getAktører().add(virksomhet);
+        Fagsak fagsak = FagsakTestFactory.builder().medVirksomhet().build();
 
         Behandling behandling = new Behandling();
         behandling.setTema(Behandlingstema.YRKESAKTIV);
@@ -119,7 +89,7 @@ class OpprettArkivsakTest {
         prosessinstans.setBehandling(behandling);
 
         when(arkivsakService
-            .opprettSakForVirksomhet(fagsak.getSaksnummer(), oppgaveFactory.utledTema(fagsak.getType(), fagsak.getTema(), behandling.getTema()), orgnr))
+            .opprettSakForVirksomhet(fagsak.getSaksnummer(), oppgaveFactory.utledTema(fagsak.getType(), fagsak.getTema(), behandling.getTema()), FagsakTestFactory.ORGNR))
             .thenReturn(forventetArkivsakID);
 
 
@@ -131,9 +101,7 @@ class OpprettArkivsakTest {
 
     @Test
     void utfør_arkivsakIDEksisterer_kasterException() {
-        Fagsak fagsak = new Fagsak();
-        fagsak.setSaksnummer("MEL-4321");
-        fagsak.setGsakSaksnummer(11111L);
+        Fagsak fagsak = FagsakTestFactory.builder().medGsakSaksnummer().build();
 
         Behandling behandling = new Behandling();
         behandling.setFagsak(fagsak);
@@ -149,10 +117,7 @@ class OpprettArkivsakTest {
 
     @Test
     void utfør_harVerkenBrukerIDEllerVirksomhetOrgnr_kasterException() {
-        Fagsak fagsak = new Fagsak();
-        fagsak.setTema(Sakstemaer.MEDLEMSKAP_LOVVALG);
-        fagsak.setSaksnummer("MEL-4321");
-        fagsak.setType(Sakstyper.EU_EOS);
+        Fagsak fagsak = FagsakTestFactory.lagFagsak();
 
         Behandling behandling = new Behandling();
         behandling.setTema(Behandlingstema.YRKESAKTIV);
@@ -163,7 +128,7 @@ class OpprettArkivsakTest {
 
         assertThatExceptionOfType(FunksjonellException.class)
             .isThrownBy(() -> opprettArkivsak.utfør(prosessinstans))
-            .withMessageContaining("Finner verken bruker eller virksomhet tilknyttet fagsak MEL-4321");
+            .withMessageContaining("Finner verken bruker eller virksomhet tilknyttet fagsak MEL-test");
 
     }
 }

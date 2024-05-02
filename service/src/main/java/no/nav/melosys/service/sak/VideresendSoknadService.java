@@ -62,7 +62,7 @@ public class VideresendSoknadService {
                            String fritekst,
                            Set<DokumentReferanse> vedleggReferanser) {
         final Fagsak fagsak = fagsakService.hentFagsak(saksnummer);
-        final Behandling behandling = fagsak.hentAktivBehandling();
+        final Behandling behandling = fagsak.finnAktivBehandling();
         log.info("Videresender søknad for sak: {} behandling: {}", behandling.getFagsak().getSaksnummer(), behandling.getId());
 
         final Bostedsland bostedsland = landvelgerService.hentBostedsland(behandling);
@@ -93,12 +93,13 @@ public class VideresendSoknadService {
     }
 
     private void validerDokumenterTilhørerSakOgTilgang(Set<DokumentReferanse> vedleggReferanser, Fagsak fagsak) {
-        joarkFasade.validerDokumenterTilhørerSakOgHarTilgang(new HentJournalposterTilknyttetSakRequest(fagsak.getGsakSaksnummer(),
-            fagsak.getSaksnummer()), vedleggReferanser);
+        joarkFasade.validerDokumenterTilhørerSakOgHarTilgang(
+            new HentJournalposterTilknyttetSakRequest(fagsak.getGsakSaksnummer(), fagsak.getSaksnummer()), vedleggReferanser
+        );
     }
 
     private void validerBehandlingstemaErArbeidFlereLand(Behandling behandling) {
-        if(!Behandlingstema.ARBEID_FLERE_LAND.equals(behandling.getTema())){
+        if (!Behandlingstema.ARBEID_FLERE_LAND.equals(behandling.getTema())) {
             throw new FunksjonellException("Behandling " + behandling.getId() + " har ikke behandlingstema 'ARBEID_FLERE_LAND' og kan ikke videresendes");
         }
     }

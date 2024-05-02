@@ -17,8 +17,8 @@ import no.nav.melosys.repository.BehandlingsresultatRepository
 import no.nav.melosys.repository.FagsakRepository
 import no.nav.melosys.service.behandling.BehandlingsresultatService
 import no.nav.melosys.service.behandling.ReplikerBehandlingsresultatService
-import no.nav.melosys.service.saksbehandling.SaksbehandlingRegler
 import no.nav.melosys.service.behandling.VilkaarsresultatService
+import no.nav.melosys.service.saksbehandling.SaksbehandlingRegler
 import org.assertj.core.api.Assertions.assertThat
 import org.junit.jupiter.api.Test
 import org.springframework.beans.factory.annotation.Autowired
@@ -72,36 +72,32 @@ internal class BehandlingsresultatServiceIT(
     }
 
     private fun lagFagsakMedBehandlinger(): Behandlinger {
-        Fagsak().apply {
-            saksnummer = "MEL-1001"
-            type = Sakstyper.TRYGDEAVTALE
-            status = Saksstatuser.LOVVALG_AVKLART
-            tema = Sakstemaer.MEDLEMSKAP_LOVVALG
-            leggTilRegisteringInfo()
-        }.also { fsak ->
-            fagsakRepository.save(fsak)
+        Fagsak("MEL-test", null, Sakstyper.TRYGDEAVTALE, Sakstemaer.MEDLEMSKAP_LOVVALG, Saksstatuser.LOVVALG_AVKLART)
+            .apply { leggTilRegisteringInfo() }
+            .also { fsak ->
+                fagsakRepository.save(fsak)
 
-            val tidligsteInaktiveBehandling = Behandling().apply {
-                fagsak = fsak
-                leggTilRegisteringInfo()
-                behandlingsfrist = LocalDate.now().plusYears(1)
-                status = Behandlingsstatus.AVSLUTTET
-                type = Behandlingstyper.FØRSTEGANG
-                tema = Behandlingstema.YRKESAKTIV
-            }.also { behandlingRepository.save(it) }
+                val tidligsteInaktiveBehandling = Behandling().apply {
+                    fagsak = fsak
+                    leggTilRegisteringInfo()
+                    behandlingsfrist = LocalDate.now().plusYears(1)
+                    status = Behandlingsstatus.AVSLUTTET
+                    type = Behandlingstyper.FØRSTEGANG
+                    tema = Behandlingstema.YRKESAKTIV
+                }.also { behandlingRepository.save(it) }
 
-            val behandlingsreplika = Behandling().apply {
-                fagsak = fsak
-                leggTilRegisteringInfo()
-                behandlingsfrist = LocalDate.now().plusYears(1)
-                status = Behandlingsstatus.OPPRETTET
-                type = Behandlingstyper.FØRSTEGANG
-                tema = Behandlingstema.YRKESAKTIV
-            }.also {
-                behandlingRepository.save(it)
+                val behandlingsreplika = Behandling().apply {
+                    fagsak = fsak
+                    leggTilRegisteringInfo()
+                    behandlingsfrist = LocalDate.now().plusYears(1)
+                    status = Behandlingsstatus.OPPRETTET
+                    type = Behandlingstyper.FØRSTEGANG
+                    tema = Behandlingstema.YRKESAKTIV
+                }.also {
+                    behandlingRepository.save(it)
+                }
+                return Behandlinger(tidligsteInaktiveBehandling, behandlingsreplika)
             }
-            return Behandlinger(tidligsteInaktiveBehandling, behandlingsreplika)
-        }
     }
 
     fun lagBehandlingsresultat(tidligsteInaktiveBehandling: Behandling): Behandlingsresultat =
