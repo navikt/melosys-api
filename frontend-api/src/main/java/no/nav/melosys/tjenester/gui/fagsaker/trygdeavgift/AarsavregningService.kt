@@ -21,6 +21,7 @@ class AarsavregningService (
     private val persondataService: PersondataService,
     private val trygdeavgiftConsumer: TrygdeavgiftConsumer
 ) {
+    //TODO Ikke egentlig en del av 6570, men er en forutsetning for å lage datagrunnlaget for 6570
     fun hentEksisterendeTrygdeavgiftsperioderForFagsak(saksnummer: String, år: Int): Set<Trygdeavgiftsperiode> {
         return fagsakService.hentFagsak(saksnummer)
             .behandlinger

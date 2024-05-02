@@ -4,7 +4,6 @@ import io.swagger.annotations.Api
 import no.nav.melosys.service.avgift.TrygdeavgiftMottakerService
 import no.nav.melosys.service.avgift.TrygdeavgiftsberegningService
 import no.nav.melosys.service.avgift.TrygdeavgiftsgrunnlagService
-import no.nav.melosys.service.sak.TrygdeavgiftOppsummeringService
 import no.nav.melosys.service.tilgang.Aksesskontroll
 import no.nav.melosys.tjenester.gui.dto.trygdeavgift.BeregnetTrygdeavgiftDto
 import no.nav.melosys.tjenester.gui.dto.trygdeavgift.FakturamottakerDto
@@ -22,7 +21,6 @@ class TrygdeavgiftTjeneste(
     private val trygdeavgiftsgrunnlagService: TrygdeavgiftsgrunnlagService,
     private val trygdeavgiftsberegningService: TrygdeavgiftsberegningService,
     private val trygdeavgiftMottakerService: TrygdeavgiftMottakerService,
-    private val trygdeavgiftOppsummeringService: TrygdeavgiftOppsummeringService,
     private val aksesskontroll: Aksesskontroll
 ) {
 
