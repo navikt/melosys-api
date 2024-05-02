@@ -1,4 +1,4 @@
-package no.nav.melosys.tjenester.gui.fagsaker
+package no.nav.melosys.service.sak
 
 import io.kotest.matchers.shouldBe
 import io.mockk.every
@@ -11,8 +11,6 @@ import no.nav.melosys.domain.avgift.Trygdeavgiftsperiode
 import no.nav.melosys.domain.folketrygden.FastsattTrygdeavgift
 import no.nav.melosys.domain.folketrygden.MedlemAvFolketrygden
 import no.nav.melosys.service.behandling.BehandlingsresultatService
-import no.nav.melosys.service.sak.AarsavregningService
-import no.nav.melosys.service.sak.FagsakService
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.extension.ExtendWith
