@@ -59,7 +59,7 @@ public class AdminFjernmottakerSedRuter extends AdminSedRuter implements SedRute
             return;
         }
 
-        var sistAktiveBehandling = fagsak.get().hentSistAktivBehandling();
+        var sistAktiveBehandling = fagsak.get().hentSistAktivBehandlingIkkeÅrsavregning();
 
         if (sistAktiveBehandling.erNorgeUtpekt()) {
             if (sistAktiveBehandling.erAktiv()) {

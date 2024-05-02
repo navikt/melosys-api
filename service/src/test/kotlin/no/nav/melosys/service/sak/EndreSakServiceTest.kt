@@ -137,8 +137,8 @@ internal class EndreSakServiceTest {
         endreSakService.endre(FagsakTestFactory.SAKSNUMMER, FTRL, TRYGDEAVGIFT, YRKESAKTIV, FØRSTEGANG, AVVENT_FAGLIG_AVKLARING, null)
 
 
-        verify { mottatteOpplysningerService.slettOpplysninger(fagsak.hentAktivBehandling().id) }
-        verify(exactly = 0) { mottatteOpplysningerService.opprettSøknadEllerAnmodningEllerAttest(fagsak.hentAktivBehandling(), any(), any()) }
+        verify { mottatteOpplysningerService.slettOpplysninger(fagsak.hentAktivBehandlingIkkeÅrsavregning().id) }
+        verify(exactly = 0) { mottatteOpplysningerService.opprettSøknadEllerAnmodningEllerAttest(fagsak.hentAktivBehandlingIkkeÅrsavregning(), any(), any()) }
     }
 
     @Test
@@ -167,10 +167,10 @@ internal class EndreSakServiceTest {
 
 
         val soeknadslandSlot = slot<Soeknadsland>()
-        verify { mottatteOpplysningerService.slettOpplysninger(fagsak.hentAktivBehandling().id) }
+        verify { mottatteOpplysningerService.slettOpplysninger(fagsak.hentAktivBehandlingIkkeÅrsavregning().id) }
         verify {
             mottatteOpplysningerService.opprettSøknadEllerAnmodningEllerAttest(
-                fagsak.hentAktivBehandling(),
+                fagsak.hentAktivBehandlingIkkeÅrsavregning(),
                 any(),
                 capture(soeknadslandSlot)
             )
@@ -204,10 +204,10 @@ internal class EndreSakServiceTest {
 
 
         val soeknadslandSlot = slot<Soeknadsland>()
-        verify { mottatteOpplysningerService.slettOpplysninger(fagsak.hentAktivBehandling().id) }
+        verify { mottatteOpplysningerService.slettOpplysninger(fagsak.hentAktivBehandlingIkkeÅrsavregning().id) }
         verify {
             mottatteOpplysningerService.opprettSøknadEllerAnmodningEllerAttest(
-                fagsak.hentAktivBehandling(),
+                fagsak.hentAktivBehandlingIkkeÅrsavregning(),
                 any(),
                 capture(soeknadslandSlot)
             )

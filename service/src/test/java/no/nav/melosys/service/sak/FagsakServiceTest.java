@@ -154,7 +154,7 @@ class FagsakServiceTest {
 
         verify(fagsakRepo).save(fagsak);
         verify(lovligeKombinasjonerSaksbehandlingService).validerOpprettelseOgEndring(fagsak.getHovedpartRolle(), Sakstyper.TRYGDEAVTALE, MEDLEMSKAP_LOVVALG, Behandlingstema.ARBEID_FLERE_LAND, NY_VURDERING);
-        verify(behandlingService).endreBehandling(fagsak.finnAktivBehandling().getId(), NY_VURDERING, ARBEID_FLERE_LAND, null, null);
+        verify(behandlingService).endreBehandling(fagsak.finnAktivBehandlingIkkeÅrsavregning().getId(), NY_VURDERING, ARBEID_FLERE_LAND, null, null);
     }
 
     @Test

@@ -1,7 +1,6 @@
 package no.nav.melosys.service.sak
 
 import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingsresultattyper
-import no.nav.melosys.exception.FunksjonellException
 import no.nav.melosys.saksflytapi.ProsessinstansService
 import no.nav.melosys.service.behandling.BehandlingsresultatService
 import no.nav.melosys.service.ftrl.medlemskapsperiode.MedlemskapsperiodeService
@@ -18,7 +17,7 @@ class AnnullerSakService(
 ) {
     fun annullerSak(saksnummer: String) {
         val fagsak = fagsakService.hentFagsak(saksnummer)
-        val behandling = fagsak.hentAktivBehandling()
+        val behandling = fagsak.hentAktivBehandlingIkkeÅrsavregning()
         val behandlingsresultat = behandlingsresultatService.hentBehandlingsresultat(behandling.id)
 
         oppgaveService.ferdigstillOppgaveMedSaksnummer(saksnummer)

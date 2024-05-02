@@ -419,6 +419,10 @@ public class Behandling extends RegistreringsInfo {
                 BESLUTNING_LOVVALG_NORGE.equals(tema));
     }
 
+    public boolean erÅrsavregning() {
+        return type == Behandlingstyper.ÅRSAVREGNING;
+    }
+
     public static boolean erBehandlingAvSøknadUtsendtArbeidstaker(String behandlingstemaKode) {
         return UTSENDT_ARBEIDSTAKER.getKode().equalsIgnoreCase(behandlingstemaKode)
             || UTSENDT_SELVSTENDIG.getKode().equalsIgnoreCase(behandlingstemaKode);

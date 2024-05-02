@@ -42,8 +42,8 @@ class OpprettManglendeInnbetalingBehandling(
 
         val fagsak = behandlingService.hentBehandling(behandlingsresultater.first().id).fagsak
 
-        if (fagsak.harAktivBehandling()) {
-            val aktivBehandling = fagsak.hentAktivBehandling()
+        if (fagsak.harAktivBehandlingIkkeÅrsavregning()) {
+            val aktivBehandling = fagsak.hentAktivBehandlingIkkeÅrsavregning()
             if (aktivBehandling.erManglendeInnbetalingTrygdeavgift()) {
                 prosessinstans.behandling = aktivBehandling
                 return

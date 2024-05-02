@@ -50,7 +50,7 @@ public class DefaultSedRuter implements SedRuter {
             log.info("Oppretter oppgave sed {} i rinasak {}", eessiMelding.getSedId(), eessiMelding.getRinaSaksnummer());
             oppgaveService.opprettJournalføringsoppgave(eessiMelding.getJournalpostId(), prosessinstans.hentAktørIDFraDataEllerSED());
         } else {
-            Behandling sistAktivBehandling = fagsak.get().hentSistAktivBehandling();
+            Behandling sistAktivBehandling = fagsak.get().hentSistAktivBehandlingIkkeÅrsavregning();
 
             if (sistAktivBehandling.erAktiv()) {
                 behandlingService.endreStatus(sistAktivBehandling.getId(), Behandlingsstatus.VURDER_DOKUMENT);

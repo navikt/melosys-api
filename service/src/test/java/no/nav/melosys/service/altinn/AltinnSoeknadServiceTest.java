@@ -35,7 +35,6 @@ import java.net.URL;
 import java.time.Instant;
 import java.time.LocalDate;
 import java.time.ZoneId;
-import java.util.List;
 import java.util.Set;
 
 import static org.assertj.core.api.Assertions.assertThat;
@@ -84,7 +83,7 @@ class AltinnSoeknadServiceTest {
         when(persondataFasade.hentAktørIdForIdent(anyString())).thenReturn(aktørID);
 
 
-        assertThat(altinnSoeknadService.opprettFagsakOgBehandlingFraAltinnSøknad(søknadID)).isEqualTo(fagsak.finnAktivBehandling());
+        assertThat(altinnSoeknadService.opprettFagsakOgBehandlingFraAltinnSøknad(søknadID)).isEqualTo(fagsak.finnAktivBehandlingIkkeÅrsavregning());
 
 
         OpprettSakRequest req = captor.getValue();
@@ -114,7 +113,7 @@ class AltinnSoeknadServiceTest {
         when(persondataFasade.hentAktørIdForIdent(anyString())).thenReturn(aktørID);
 
 
-        assertThat(altinnSoeknadService.opprettFagsakOgBehandlingFraAltinnSøknad(søknadID)).isEqualTo(fagsak.finnAktivBehandling());
+        assertThat(altinnSoeknadService.opprettFagsakOgBehandlingFraAltinnSøknad(søknadID)).isEqualTo(fagsak.finnAktivBehandlingIkkeÅrsavregning());
 
 
         OpprettSakRequest req = captor.getValue();
@@ -221,7 +220,7 @@ class AltinnSoeknadServiceTest {
 
 
         verify(avklarteVirksomheterService).lagreVirksomhetSomAvklartfakta(
-            søknad.getInnhold().getArbeidsgiver().getVirksomhetsnummer(), fagsak.finnAktivBehandling().getId());
+            søknad.getInnhold().getArbeidsgiver().getVirksomhetsnummer(), fagsak.finnAktivBehandlingIkkeÅrsavregning().getId());
     }
 
     private MedlemskapArbeidEOSM lagMedlemskapArbeidEOSM() {

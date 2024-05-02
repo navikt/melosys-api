@@ -224,7 +224,7 @@ public class FagsakService {
                                            Behandlingstema nyBehandlingstema, Behandlingstyper nyBehandlingstype,
                                            Behandlingsstatus nyBehandlingsstatus, LocalDate nyMottaksdato) {
         Fagsak fagsak = hentFagsak(saksnummer);
-        Behandling behandling = fagsak.finnAktivBehandling();
+        Behandling behandling = fagsak.finnAktivBehandlingIkkeÅrsavregning();
         validerOppdatering(fagsak, behandling, nySakstype, nySakstema, nyBehandlingstema, nyBehandlingstype);
         if (fagsak.getType() != nySakstype || fagsak.getTema() != nySakstema) {
             log.info("Endrer sakstype for fagsak {} fra {} til {}", fagsak.getSaksnummer(), fagsak.getType(), nySakstype);
@@ -249,7 +249,7 @@ public class FagsakService {
 
 
     public void avsluttFagsakOgBehandling(Fagsak fagsak, Saksstatuser saksstatus) {
-        Behandling aktivBehandling = fagsak.finnAktivBehandling();
+        Behandling aktivBehandling = fagsak.finnAktivBehandlingIkkeÅrsavregning();
         if (aktivBehandling == null) {
             log.warn("Forsøker å lukke behandling for fagsak {} som ikke har noen aktiv behandling", fagsak.getSaksnummer());
             oppdaterStatus(fagsak, saksstatus);
@@ -286,7 +286,7 @@ public class FagsakService {
     private List<Fagsak> sorterFagsaker(List<Fagsak> fagsaker) {
         return fagsaker.stream()
             .sorted((a, b) -> {
-                int compareAktivBehandling = Boolean.compare(b.harAktivBehandling(), a.harAktivBehandling());
+                int compareAktivBehandling = Boolean.compare(b.harAktivBehandlingIkkeÅrsavregning(), a.harAktivBehandlingIkkeÅrsavregning());
                 if (compareAktivBehandling != 0) {
                     return compareAktivBehandling;
                 }

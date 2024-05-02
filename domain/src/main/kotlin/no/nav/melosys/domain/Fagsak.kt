@@ -41,18 +41,20 @@ class Fagsak(
 
     fun leggTilBehandling(behandling: Behandling) = behandlinger.add(behandling)
 
-    fun harAktivBehandling(): Boolean = finnAktivBehandling() != null
+    fun harAktivBehandlingIkkeÅrsavregning(): Boolean = finnAktivBehandlingIkkeÅrsavregning() != null
 
-    fun finnAktivBehandling(): Behandling? {
-        val aktiveBehandlinger = behandlinger.filter { it.erAktiv() }
+    fun finnAktivBehandlingIkkeÅrsavregning(): Behandling? {
+        val aktiveBehandlinger = behandlinger.filter { it.erAktiv() && !it.erÅrsavregning() }
         if (aktiveBehandlinger.size > 1)
             throw TekniskException("Det finnes mer enn en aktiv behandling for sak $saksnummer")
 
         return aktiveBehandlinger.firstOrNull()
     }
 
-    fun hentAktivBehandling(): Behandling = finnAktivBehandling()
+    fun hentAktivBehandlingIkkeÅrsavregning(): Behandling = finnAktivBehandlingIkkeÅrsavregning()
         ?: throw FunksjonellException("Finner ingen aktiv behandling på fagsak $saksnummer")
+
+    fun hentAktiveÅrsavregninger(): List<Behandling> = behandlinger.filter { it.erAktiv() && it.erÅrsavregning() }
 
     fun hentInaktiveBehandlinger(): List<Behandling> = behandlinger.filter { it.erInaktiv() }
 
@@ -60,10 +62,13 @@ class Fagsak(
     fun hentSistRegistrertBehandling(): Behandling = hentBehandlingerSortertSynkendePåRegistrertDato().firstOrNull()
         ?: throw IkkeFunnetException(FINNER_IKKE_BEHANDLINGER_FOR_FAGSAK + saksnummer)
 
-    fun hentSistOppdatertBehandling(): Behandling = behandlinger.maxByOrNull { it.endretDato }
+    fun hentSistOppdatertBehandlingIkkeÅrsavregning(): Behandling = behandlinger
+        .filter { !it.erÅrsavregning() }
+        .maxByOrNull { it.endretDato }
         ?: throw IkkeFunnetException(FINNER_IKKE_BEHANDLINGER_FOR_FAGSAK + saksnummer)
 
-    fun hentSistAktivBehandling(): Behandling = finnAktivBehandling() ?: hentSistOppdatertBehandling()
+    fun hentSistAktivBehandlingIkkeÅrsavregning(): Behandling =
+        finnAktivBehandlingIkkeÅrsavregning() ?: hentSistOppdatertBehandlingIkkeÅrsavregning()
 
     fun finnTidligstInaktivBehandling(): Behandling? = behandlinger.filter { it.erInaktiv() }.minByOrNull { it.getRegistrertDato() }
 
@@ -125,7 +130,7 @@ class Fagsak(
             .filter { Aktoersroller.FULLMEKTIG == it.rolle }
             .firstOrNull { it.fullmaktstyper.contains(fullmaktstype) }
 
-    fun kanEndreTypeOgTema(): Boolean = harAktivBehandling() && behandlinger.size == 1
+    fun kanEndreTypeOgTema(): Boolean = harAktivBehandlingIkkeÅrsavregning() && behandlinger.size == 1
 
     val hovedpartRolle: Aktoersroller
         get() =

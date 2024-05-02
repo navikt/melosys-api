@@ -259,7 +259,7 @@ public class JournalfoeringService {
         final var sistBehandling = fagsak.hentSistRegistrertBehandling();
         final var sistBehandlingsresultat = behandlingsresultatService.hentBehandlingsresultatMedAnmodningsperioder(sistBehandling.getId());
 
-        if (fagsak.finnAktivBehandling() != null && (sistBehandlingsresultat.erIkkeArtikkel16MedSendtAnmodningOmUnntak())) {
+        if (fagsak.finnAktivBehandlingIkkeÅrsavregning() != null && (sistBehandlingsresultat.erIkkeArtikkel16MedSendtAnmodningOmUnntak())) {
             throw new FunksjonellException("Det finnes allerede en aktiv behandling på fagsak " + saksnummer);
         }
         if (journalpost.mottaksKanalErEessi()) {

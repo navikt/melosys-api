@@ -31,7 +31,7 @@ public class IkkeYrkesaktivVedtaksbrev extends DokgenDto {
 
         this.datoMottatt = instantTilLocalDate(brevbestilling.getForsendelseMottatt());
         this.sakstype = fagsak.getType().getKode();
-        this.behandlingstype = fagsak.hentSistOppdatertBehandling().getType().getKode();
+        this.behandlingstype = fagsak.hentSistOppdatertBehandlingIkkeÅrsavregning().getType().getKode();
         this.innvilgelse = new IkkeYrkesaktivInnvilgelse(brevbestilling.getInnledningFritekst(), brevbestilling.getBegrunnelseFritekst(), brevbestilling.getNyVurderingBakgrunn());
         this.oppholdsland = brevbestilling.getOppholdsLand();
         this.periode = new IkkeYrkesaktivPeriode(brevbestilling.getPeriodeFom(), brevbestilling.getPeriodeTom());
