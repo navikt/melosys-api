@@ -11,6 +11,7 @@ import no.nav.melosys.domain.avgift.Penger
 import no.nav.melosys.domain.avgift.Trygdeavgiftsperiode
 import no.nav.melosys.domain.folketrygden.FastsattTrygdeavgift
 import no.nav.melosys.domain.folketrygden.MedlemAvFolketrygden
+import no.nav.melosys.domain.kodeverk.Sakstyper
 import no.nav.melosys.service.behandling.BehandlingsresultatService
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
@@ -26,7 +27,11 @@ internal class AarsavregningServiceTest {
     @RelaxedMockK
     private lateinit var behandlingsresultatService: BehandlingsresultatService
 
-    private var fagsak = Fagsak()
+    private val fagsak = Fagsak().apply { saksnummer = "12345"
+        behandlinger.add(Behandling().apply { id = 12345 })
+        type = Sakstyper.FTRL
+
+    }
     private var behandlingsresultat = Behandlingsresultat()
 
     private lateinit var aarsavregningService: AarsavregningService
