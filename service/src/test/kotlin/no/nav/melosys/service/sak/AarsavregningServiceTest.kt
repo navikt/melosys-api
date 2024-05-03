@@ -27,7 +27,7 @@ internal class AarsavregningServiceTest {
     @RelaxedMockK
     private lateinit var behandlingsresultatService: BehandlingsresultatService
 
-    private val fagsak = Fagsak().apply { saksnummer = "12345"
+    private var fagsak = Fagsak().apply { saksnummer = "12345"
         behandlinger.add(Behandling().apply { id = 12345 })
         type = Sakstyper.FTRL
     }
