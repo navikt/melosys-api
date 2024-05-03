@@ -34,7 +34,7 @@ class ÅrsavregningTjeneste(
     }
 
     @Unprotected
-    @PostMapping("/hentTotalBeloepForPeriode")
+    @PostMapping("/hentTotalTrygdeavgiftForPeriode")
     fun lagreDataForÅrsavregning(@RequestBody årsavgiftDto: BeregnTotalBeløpDto): ResponseEntity<BigDecimal> {
         return ResponseEntity.ok(
             faktureringskomponentenConsumer.hentTotalTrygdeavgiftForPeriode(årsavgiftDto)
