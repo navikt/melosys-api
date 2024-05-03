@@ -10,7 +10,7 @@ class AarsavregningService (
     private val behandlingsresultatService: BehandlingsresultatService
 ) {
     //TODO Ikke egentlig en del av 6570, men er en forutsetning for å lage datagrunnlaget for 6570
-    fun hentEksisterendeTrygdeavgiftsperioderForFagsak(saksnummer: String, år: Int): Set<Trygdeavgiftsperiode> {
+    fun hentEksisterendeTrygdeavgiftsperioderForFagsak(saksnummer: String, år: Int): List<Trygdeavgiftsperiode> {
         return fagsakService.hentFagsak(saksnummer)
             .behandlinger
             .flatMap { behandling ->
@@ -20,6 +20,5 @@ class AarsavregningService (
                     .trygdeavgiftsperioder
                     .filter { periode -> periode.periodeFra.year == år }
             }
-            .toSet()
     }
 }

@@ -77,6 +77,9 @@ internal class AarsavregningServiceTest {
         every { fagsakService.hentFagsak(saksnummer) } returns fagsak
         every { behandlingsresultatService.hentBehandlingsresultat(any()) } returns behandlingsresultat
 
-        aarsavregningService.hentEksisterendeTrygdeavgiftsperioderForFagsak(saksnummer, year).shouldBe(setOf(trygdeavgiftsperiode2))
+        val test = aarsavregningService.hentEksisterendeTrygdeavgiftsperioderForFagsak(saksnummer, year)
+        println(test)
+
+        aarsavregningService.hentEksisterendeTrygdeavgiftsperioderForFagsak(saksnummer, year).shouldBe(listOf(trygdeavgiftsperiode2))
     }
 }
