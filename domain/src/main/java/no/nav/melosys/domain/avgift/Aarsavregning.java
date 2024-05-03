@@ -4,7 +4,6 @@ import java.math.BigDecimal;
 import java.util.Objects;
 
 import jakarta.persistence.*;
-import no.nav.melosys.domain.Behandling;
 import no.nav.melosys.domain.Behandlingsresultat;
 
 @Entity
@@ -13,23 +12,23 @@ public class Aarsavregning {
     @Id
     private Long id;
 
-    @OneToOne(fetch = FetchType.LAZY,optional = false)
+    @OneToOne(fetch = FetchType.LAZY, optional = false)
     @MapsId
     @JoinColumn(name = "behandlingsresultat_id")
     private Behandlingsresultat behandlingsresultat;
 
-    @ManyToOne()
-    @JoinColumn(name = "tidligere_behandling_id")
-    private Behandling tidligereBehandling;
-
-    @Column(name = "aar")
+    @Column(name = "aar", nullable = false, updatable = false)
     private Integer aar;
+
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "tidligere_resultat_id")
+    private Behandlingsresultat tidligereBehandlingsresultat;
 
     @Column(name = "tidligere_fakturert_beloep")
     private BigDecimal tidligereFakturertBeloep;
 
-    @Column(name = "fastsatt_totalbeloep")
-    private BigDecimal fastsattTotalbeloep;
+    @Column(name = "nytt_totalbeloep")
+    private BigDecimal nyttTotalbeloep;
 
     @Column(name = "til_fakturering_beloep")
     private BigDecimal tilFaktureringBeloep;
@@ -50,20 +49,20 @@ public class Aarsavregning {
         this.behandlingsresultat = behandlingsresultat;
     }
 
-    public Behandling getTidligereBehandling() {
-        return tidligereBehandling;
-    }
-
-    public void setTidligereBehandling(Behandling tidligereBehandling) {
-        this.tidligereBehandling = tidligereBehandling;
-    }
-
     public Integer getAar() {
         return aar;
     }
 
     public void setAar(Integer aar) {
         this.aar = aar;
+    }
+
+    public Behandlingsresultat getTidligereBehandlingsresultat() {
+        return tidligereBehandlingsresultat;
+    }
+
+    public void setTidligereBehandlingsresultat(Behandlingsresultat tidligereBehandlingsresultat) {
+        this.tidligereBehandlingsresultat = tidligereBehandlingsresultat;
     }
 
     public BigDecimal getTidligereFakturertBeloep() {
@@ -74,12 +73,12 @@ public class Aarsavregning {
         this.tidligereFakturertBeloep = tidligereFakturertBeloep;
     }
 
-    public BigDecimal getFastsattTotalbeloep() {
-        return fastsattTotalbeloep;
+    public BigDecimal getNyttTotalbeloep() {
+        return nyttTotalbeloep;
     }
 
-    public void setFastsattTotalbeloep(BigDecimal fastsattTotalbeloep) {
-        this.fastsattTotalbeloep = fastsattTotalbeloep;
+    public void setNyttTotalbeloep(BigDecimal fastsattTotalbeloep) {
+        this.nyttTotalbeloep = fastsattTotalbeloep;
     }
 
     public BigDecimal getTilFaktureringBeloep() {
@@ -94,11 +93,11 @@ public class Aarsavregning {
     public boolean equals(Object o) {
         if (this == o) return true;
         if (!(o instanceof Aarsavregning that)) return false;
-        return Objects.equals(id, that.id) && Objects.equals(aar, that.aar) && Objects.equals(tidligereFakturertBeloep, that.tidligereFakturertBeloep) && Objects.equals(fastsattTotalbeloep, that.fastsattTotalbeloep) && Objects.equals(tilFaktureringBeloep, that.tilFaktureringBeloep);
+        return Objects.equals(id, that.id) && Objects.equals(aar, that.aar) && Objects.equals(tidligereFakturertBeloep, that.tidligereFakturertBeloep) && Objects.equals(nyttTotalbeloep, that.nyttTotalbeloep) && Objects.equals(tilFaktureringBeloep, that.tilFaktureringBeloep);
     }
 
     @Override
     public int hashCode() {
-        return Objects.hash(id, aar, tidligereFakturertBeloep, fastsattTotalbeloep, tilFaktureringBeloep);
+        return Objects.hash(id, aar, tidligereFakturertBeloep, nyttTotalbeloep, tilFaktureringBeloep);
     }
 }
