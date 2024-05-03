@@ -29,11 +29,10 @@ internal class AarsavregningServiceTest {
     @RelaxedMockK
     private lateinit var behandlingsresultatService: BehandlingsresultatService
 
-    private var fagsak = Fagsak().apply {
-        saksnummer = "12345"
-        type = Sakstyper.FTRL
-        tema = Sakstemaer.TRYGDEAVGIFT
-        status = Saksstatuser.OPPRETTET
+    private var fagsak = Fagsak(saksnummer = "12345", type = Sakstyper.FTRL,
+        tema = Sakstemaer.TRYGDEAVGIFT,
+        status = Saksstatuser.OPPRETTET,
+        ).apply {
         behandlinger.add(Behandling().apply {
             id = 12345
         })
