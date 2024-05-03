@@ -53,7 +53,6 @@ class BehandlingServiceTest {
     private static final Behandlingstema BEHANDLING_TEMA = Behandlingstema.ARBEID_FLERE_LAND;
     private static final Behandlingsstatus BEHANDLING_STATUS = UNDER_BEHANDLING;
     private static final LocalDate MOTTAKSDATO = LocalDate.now().plusMonths(1);
-    private static final String SAKSNUMMER = "12";
     private static final List<Long> PERIODE_IDS = Arrays.asList(2L, 3L);
 
     @Mock
@@ -103,12 +102,7 @@ class BehandlingServiceTest {
 
     @Test
     void endreBehandling() {
-        Fagsak fagsak = new Fagsak();
-        fagsak.setType(Sakstyper.EU_EOS);
-        fagsak.setTema(Sakstemaer.MEDLEMSKAP_LOVVALG);
-        Aktoer a1 = new Aktoer();
-        a1.setRolle(Aktoersroller.BRUKER);
-        fagsak.setAktører(Sets.newLinkedHashSet(a1));
+        Fagsak fagsak = FagsakTestFactory.builder().medBruker().build();
 
         behandling.setTema(ARBEID_TJENESTEPERSON_ELLER_FLY);
         behandling.setType(HENVENDELSE);
@@ -148,8 +142,7 @@ class BehandlingServiceTest {
         behandling.setStatus(BEHANDLING_STATUS);
         behandling.setBehandlingsfrist(MOTTAKSDATO);
         behandling.setMottatteOpplysninger(opprettMottatteOpplysninger());
-        behandling.setFagsak(new Fagsak());
-        behandling.getFagsak().setTema(Sakstemaer.MEDLEMSKAP_LOVVALG);
+        behandling.setFagsak(FagsakTestFactory.lagFagsak());
         when(behandlingRepository.findById(BEHANDLING_ID)).thenReturn(Optional.of(behandling));
         when(utledMottaksdato.getMottaksdato(any())).thenReturn(MOTTAKSDATO);
 
@@ -191,8 +184,7 @@ class BehandlingServiceTest {
 
     @Test
     void oppdaterStatus_statusAvventDok_dokumentasjonSvarfristOppdatert() {
-        var fagsak = new Fagsak();
-        fagsak.setSaksnummer(SAKSNUMMER);
+        var fagsak = FagsakTestFactory.lagFagsak();
         var behandling = new Behandling();
         behandling.setStatus(Behandlingsstatus.VURDER_DOKUMENT);
         behandling.setFagsak(fagsak);
@@ -203,7 +195,7 @@ class BehandlingServiceTest {
 
         verify(applicationEventPublisher).publishEvent(behandlingEndretStatusEventCaptor.capture());
         assertThat(behandling.getDokumentasjonSvarfristDato()).isNotNull();
-        verify(oppgaveService).oppdaterOppgaveMedSaksnummer(eq(SAKSNUMMER), any());
+        verify(oppgaveService).oppdaterOppgaveMedSaksnummer(eq(FagsakTestFactory.SAKSNUMMER), any());
         BehandlingEndretStatusEvent behandlingEndretStatusEvent = behandlingEndretStatusEventCaptor.getValue();
         assertThat(behandlingEndretStatusEvent.getBehandlingID()).isEqualTo(BEHANDLING_ID);
         assertThat(behandlingEndretStatusEvent.getBehandlingsstatus()).isEqualTo(AVVENT_DOK_PART);
@@ -212,8 +204,7 @@ class BehandlingServiceTest {
 
     @Test
     void oppdaterStatus_statusAnmodningUnntakSendt_behandlingLagret() {
-        Fagsak fagsak = new Fagsak();
-        fagsak.setSaksnummer("23132");
+        Fagsak fagsak = FagsakTestFactory.lagFagsak();
         Behandling behandling = new Behandling();
         behandling.setId(BEHANDLING_ID);
         behandling.setFagsak(fagsak);
@@ -254,8 +245,7 @@ class BehandlingServiceTest {
 
     @Test
     void oppdaterStatus_statusAvsluttet_ferdigstillOppgave() {
-        Fagsak fagsak = new Fagsak();
-        fagsak.setSaksnummer("23132");
+        Fagsak fagsak = FagsakTestFactory.lagFagsak();
         Behandling behandling = new Behandling();
         behandling.setStatus(Behandlingsstatus.UNDER_BEHANDLING);
         behandling.setFagsak(fagsak);
@@ -334,7 +324,7 @@ class BehandlingServiceTest {
 
 
         Behandling behandling = behandlingService.nyBehandling(
-            opprettFagsak(), Behandlingsstatus.OPPRETTET, FØRSTEGANG, Behandlingstema.UTSENDT_ARBEIDSTAKER,
+            FagsakTestFactory.lagFagsak(), Behandlingsstatus.OPPRETTET, FØRSTEGANG, Behandlingstema.UTSENDT_ARBEIDSTAKER,
             initierendeJournalpostId, initierendeDokumentId, MOTTAKSDATO, Behandlingsaarsaktyper.SØKNAD, null);
 
 
@@ -348,7 +338,7 @@ class BehandlingServiceTest {
 
     @Test
     void nyBehandling_manglerMottaksdatoOgÅrsak_kasterFeil() {
-        var fagsak = new Fagsak();
+        var fagsak = FagsakTestFactory.lagFagsak();
 
         assertThatExceptionOfType(FunksjonellException.class)
             .isThrownBy(() -> behandlingService.nyBehandling(
@@ -361,8 +351,7 @@ class BehandlingServiceTest {
     void nyBehandling_behandlingsfristKriterier_får8UkerBehandlingsfrist() {
         String initierendeJournalpostId = "234";
         String initierendeDokumentId = "221234";
-        Fagsak fagsak = new Fagsak();
-        fagsak.setTema(Sakstemaer.MEDLEMSKAP_LOVVALG);
+        Fagsak fagsak = FagsakTestFactory.lagFagsak();
         when(utledMottaksdato.getMottaksdato(any())).thenReturn(LocalDate.now());
         LocalDate frist8Uker = LocalDate.now().plusWeeks(8);
 
@@ -385,8 +374,7 @@ class BehandlingServiceTest {
     void nyBehandling_behandlingsfristKriterier_får70DagerBehandlingsfrist() {
         String initierendeJournalpostId = "234";
         String initierendeDokumentId = "221234";
-        Fagsak fagsak = new Fagsak();
-        fagsak.setTema(Sakstemaer.MEDLEMSKAP_LOVVALG);
+        Fagsak fagsak = FagsakTestFactory.lagFagsak();
         when(utledMottaksdato.getMottaksdato(any())).thenReturn(LocalDate.now());
         LocalDate frist70Dager = LocalDate.now().plusDays(70);
 
@@ -410,8 +398,7 @@ class BehandlingServiceTest {
         LocalDate frist90Dager = LocalDate.now().plusDays(90);
         String initierendeJournalpostId = "234";
         String initierendeDokumentId = "221234";
-        Fagsak fagsak = new Fagsak();
-        fagsak.setTema(Sakstemaer.TRYGDEAVGIFT);
+        Fagsak fagsak = FagsakTestFactory.builder().tema(Sakstemaer.TRYGDEAVGIFT).build();
         when(utledMottaksdato.getMottaksdato(any())).thenReturn(LocalDate.now());
 
 
@@ -434,8 +421,7 @@ class BehandlingServiceTest {
         LocalDate frist180Dager = LocalDate.now().plusDays(180);
         String initierendeJournalpostId = "234";
         String initierendeDokumentId = "221234";
-        Fagsak fagsak = new Fagsak();
-        fagsak.setTema(Sakstemaer.UNNTAK);
+        Fagsak fagsak = FagsakTestFactory.builder().tema(Sakstemaer.UNNTAK).build();
         when(utledMottaksdato.getMottaksdato(any())).thenReturn(LocalDate.now());
 
 
@@ -644,7 +630,7 @@ class BehandlingServiceTest {
     @Test
     void endreStatus_setterSvarFristTilNull_nårNyStatusErUnderBehandling() {
         Behandling behandling = new Behandling();
-        behandling.setFagsak(new Fagsak());
+        behandling.setFagsak(FagsakTestFactory.lagFagsak());
         behandling.setId(BEHANDLING_ID);
         behandling.setStatus(AVVENT_DOK_UTL);
 
@@ -741,7 +727,7 @@ class BehandlingServiceTest {
         behandling.setMottatteOpplysninger(new MottatteOpplysninger());
         behandling.getMottatteOpplysninger().setMottatteOpplysningerData(new MottatteOpplysningerData());
         behandling.getSaksopplysninger().add(opprettSaksopplysning());
-        behandling.setFagsak(opprettFagsak());
+        behandling.setFagsak(FagsakTestFactory.lagFagsak());
         return behandling;
     }
 
@@ -775,12 +761,6 @@ class BehandlingServiceTest {
         return behandling;
     }
 
-    private Fagsak opprettFagsak() {
-        var fagsak = new Fagsak();
-        fagsak.setTema(Sakstemaer.MEDLEMSKAP_LOVVALG);
-        return fagsak;
-    }
-
     private MottatteOpplysninger opprettMottatteOpplysninger() {
         var mottatteOpplysninger = new MottatteOpplysninger();
         var mottatteOpplysningerData = new MottatteOpplysningerData();
@@ -792,7 +772,7 @@ class BehandlingServiceTest {
 
     private Behandling opprettBehandlingUnderBehandling() {
         Behandling behandling = new Behandling();
-        behandling.setFagsak(new Fagsak());
+        behandling.setFagsak(FagsakTestFactory.lagFagsak());
         behandling.setId(BEHANDLING_ID);
         behandling.setStatus(UNDER_BEHANDLING);
         return behandling;

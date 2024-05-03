@@ -96,7 +96,7 @@ internal class MedlServiceTest {
                     lovvalg = LovvalgMedl.ENDL.kode,
                     grunnlag = GrunnlagMedl.FO_11_4_1.kode,
                     sporingsinformasjon = MedlemskapsunntakForPost.SporingsinformasjonForPost(
-                        kildedokument = KildedokumenttypeMedl.HENV_SOKNAD.getKode()
+                        kildedokument = KildedokumenttypeMedl.HENV_SOKNAD.kode
                     )
                 )
             )
@@ -124,7 +124,7 @@ internal class MedlServiceTest {
                     lovvalg = LovvalgMedl.UAVK.kode,
                     grunnlag = GrunnlagMedl.FO_11_4_1.kode,
                     sporingsinformasjon = MedlemskapsunntakForPost.SporingsinformasjonForPost(
-                        kildedokument = KildedokumenttypeMedl.HENV_SOKNAD.getKode()
+                        kildedokument = KildedokumenttypeMedl.HENV_SOKNAD.kode
                     )
                 )
             )
@@ -157,7 +157,7 @@ internal class MedlServiceTest {
                     lovvalg = LovvalgMedl.UAVK.kode,
                     grunnlag = GrunnlagMedl.FO_1408_14_2_A.kode,
                     sporingsinformasjon = MedlemskapsunntakForPost.SporingsinformasjonForPost(
-                        kildedokument = KildedokumenttypeMedl.HENV_SOKNAD.getKode()
+                        kildedokument = KildedokumenttypeMedl.HENV_SOKNAD.kode
                     )
                 )
             )
@@ -185,7 +185,7 @@ internal class MedlServiceTest {
                     lovvalg = LovvalgMedl.FORL.kode,
                     grunnlag = GrunnlagMedl.FO_11_4_1.kode,
                     sporingsinformasjon = MedlemskapsunntakForPost.SporingsinformasjonForPost(
-                        kildedokument = KildedokumenttypeMedl.HENV_SOKNAD.getKode()
+                        kildedokument = KildedokumenttypeMedl.HENV_SOKNAD.kode
                     )
                 )
             )
@@ -215,7 +215,7 @@ internal class MedlServiceTest {
                     grunnlag = GrunnlagMedl.FO_11_4_1.kode,
                     sporingsinformasjon = MedlemskapsunntakForPut.SporingsinformasjonForPut(
                         versjon = 1,
-                        kildedokument = KildedokumenttypeMedl.HENV_SOKNAD.getKode()
+                        kildedokument = KildedokumenttypeMedl.HENV_SOKNAD.kode
                     )
                 )
             )
@@ -243,7 +243,7 @@ internal class MedlServiceTest {
                     lovvalg = LovvalgMedl.FORL.kode,
                     grunnlag = GrunnlagMedl.FO_11_5.kode,
                     sporingsinformasjon = MedlemskapsunntakForPost.SporingsinformasjonForPost(
-                        kildedokument = KildedokumenttypeMedl.HENV_SOKNAD.getKode()
+                        kildedokument = KildedokumenttypeMedl.HENV_SOKNAD.kode
                     )
                 )
             )
@@ -271,7 +271,7 @@ internal class MedlServiceTest {
                     lovvalg = LovvalgMedl.ENDL.kode,
                     grunnlag = GrunnlagMedl.FTL_2_8_1_LEDD_A.kode,
                     sporingsinformasjon = MedlemskapsunntakForPost.SporingsinformasjonForPost(
-                        kildedokument = KildedokumenttypeMedl.HENV_SOKNAD.getKode()
+                        kildedokument = KildedokumenttypeMedl.HENV_SOKNAD.kode
                     )
                 )
             )
@@ -302,7 +302,7 @@ internal class MedlServiceTest {
                     lovvalg = LovvalgMedl.ENDL.kode,
                     grunnlag = GrunnlagMedl.FTL_2_15_2_LEDD.kode,
                     sporingsinformasjon = MedlemskapsunntakForPost.SporingsinformasjonForPost(
-                        kildedokument = KildedokumenttypeMedl.HENV_SOKNAD.getKode()
+                        kildedokument = KildedokumenttypeMedl.HENV_SOKNAD.kode
                     )
                 )
             )
@@ -336,7 +336,7 @@ internal class MedlServiceTest {
                     grunnlag = GrunnlagMedl.FTL_2_15_2_LEDD.kode,
                     sporingsinformasjon = MedlemskapsunntakForPut.SporingsinformasjonForPut(
                         versjon = 1,
-                        kildedokument = KildedokumenttypeMedl.HENV_SOKNAD.getKode()
+                        kildedokument = KildedokumenttypeMedl.HENV_SOKNAD.kode
                     )
                 )
             )
@@ -365,7 +365,7 @@ internal class MedlServiceTest {
                     grunnlag = GrunnlagMedl.FO_11_4_1.kode,
                     sporingsinformasjon = MedlemskapsunntakForPut.SporingsinformasjonForPut(
                         versjon = 1,
-                        kildedokument = KildedokumenttypeMedl.HENV_SOKNAD.getKode()
+                        kildedokument = KildedokumenttypeMedl.HENV_SOKNAD.kode
                     )
                 )
             )

@@ -3,6 +3,7 @@ package no.nav.melosys.service.dokument.brev;
 import java.time.Instant;
 import java.util.HashSet;
 import java.util.Optional;
+import java.util.Set;
 
 import no.nav.dok.brevdata.felles.v1.navfelles.*;
 import no.nav.dok.brevdata.felles.v1.simpletypes.AktoerType;
@@ -86,7 +87,7 @@ class BrevDataServiceTest {
     void lagA1_tilUtenlandskMyndighet() {
         Behandling behandling = lagBehandling(lagSøknadDokument());
         Aktoer aktoerMyndighet = lagAktoerMyndighet();
-        behandling.getFagsak().getAktører().add(aktoerMyndighet);
+        behandling.getFagsak().leggTilAktør(aktoerMyndighet);
         BrevDataVedlegg brevData = new BrevDataVedlegg("Z123456");
         UtenlandskMyndighet myndighet = lagUtenlandskMyndighet();
         no.nav.melosys.domain.brev.Mottaker mottakerMyndighet = lagMottakerMyndighet();
@@ -182,7 +183,7 @@ class BrevDataServiceTest {
     @Test
     void avklarMottakerId_fullmektigOgKontaktOpplysningFinnes_kontaktOpplysningForFullmektigBrukes() {
         Behandling behandling = lagBehandling(lagSøknadDokument());
-        behandling.getFagsak().getAktører().add(hentFullmektigOrgAktør());
+        behandling.getFagsak().leggTilAktør(hentFullmektigOrgAktør());
 
         Kontaktopplysning kontaktopplysning = new Kontaktopplysning();
         kontaktopplysning.setKontaktopplysningID(new KontaktopplysningID("MELTEST-1", "999"));
@@ -427,7 +428,7 @@ class BrevDataServiceTest {
 
         forventet.setDokumenttypeID(DokumenttypeIdMapper.hentID(doktype));
         forventet.setFagområde("MED");
-        forventet.setJournalsakID("123");
+        forventet.setJournalsakID(String.valueOf(FagsakTestFactory.GSAK_SAKSNUMMER));
         forventet.setSaksbehandler("TEST");
         forventet.setBerik(true);
 
@@ -442,10 +443,6 @@ class BrevDataServiceTest {
     }
 
     private static Behandling lagBehandling(MottatteOpplysningerData mottatteOpplysningerData) {
-        Fagsak fagsak = new Fagsak();
-        fagsak.setSaksnummer("MOCK-1");
-        fagsak.setGsakSaksnummer(123L);
-
         Aktoer bruker = new Aktoer();
         bruker.setAktørId(AKTØRID);
         bruker.setRolle(Aktoersroller.BRUKER);
@@ -454,7 +451,7 @@ class BrevDataServiceTest {
         arbeidsgiver.setOrgnr(ORGNR);
         arbeidsgiver.setRolle(Aktoersroller.ARBEIDSGIVER);
 
-        fagsak.setAktører(new HashSet<>(asList(bruker, arbeidsgiver)));
+        Fagsak fagsak = FagsakTestFactory.builder().medGsakSaksnummer().aktører(Set.of(bruker, arbeidsgiver)).build();
 
         Behandling behandling = new Behandling();
         behandling.setId(1L);

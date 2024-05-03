@@ -60,7 +60,7 @@ public class OpprettBehandlingForSak {
     }
 
     private void valider(Fagsak fagsak, Behandlingsresultat sistBehandlingsresultat, OpprettSakDto opprettSakDto) {
-        if (fagsak.hentAktivBehandling() != null && sistBehandlingsresultat.erIkkeArtikkel16MedSendtAnmodningOmUnntak()) {
+        if (fagsak.finnAktivBehandling() != null && sistBehandlingsresultat.erIkkeArtikkel16MedSendtAnmodningOmUnntak()) {
             throw new FunksjonellException(String.format("Det finnes allerede en aktiv behandling på fagsak %s", fagsak.getSaksnummer()));
         }
         if (opprettSakDto.getBehandlingstema() == null) {

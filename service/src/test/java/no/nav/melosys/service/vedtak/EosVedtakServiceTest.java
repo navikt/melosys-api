@@ -356,22 +356,14 @@ class EosVedtakServiceTest {
     }
 
     private Fagsak lagFagsak() {
-        Fagsak fagsak = new Fagsak();
-        fagsak.setSaksnummer("MEL-111");
-        fagsak.setType(Sakstyper.EU_EOS);
-        fagsak.setTema(Sakstemaer.MEDLEMSKAP_LOVVALG);
-        Aktoer aktoer = new Aktoer();
-        aktoer.setAktørId("1234567890123");
-        aktoer.setRolle(Aktoersroller.BRUKER);
-        fagsak.setAktører(Collections.singleton(aktoer));
-        return fagsak;
+        return FagsakTestFactory.builder().medBruker().build();
     }
 
     private void leggTilMyndighetAktoer() {
         Aktoer myndighet = new Aktoer();
         myndighet.setRolle(Aktoersroller.TRYGDEMYNDIGHET);
         myndighet.setInstitusjonID("SE:SE001");
-        behandling.getFagsak().setAktører(Set.of(myndighet));
+        behandling.getFagsak().leggTilAktør(myndighet);
     }
 
     private FattVedtakRequest lagRequest(Behandlingsresultattyper behandlingsresultattype, Vedtakstyper vedtakstype,

@@ -187,8 +187,14 @@ class ProsessinstansServiceTest {
     }
 
     private Behandling lagBehandling() {
-        Fagsak fagsak = new Fagsak();
-        fagsak.setSaksnummer("12354");
+        Fagsak fagsak = new Fagsak("MEL-test",
+            null,
+            Sakstyper.EU_EOS,
+            Sakstemaer.MEDLEMSKAP_LOVVALG,
+            Saksstatuser.OPPRETTET,
+            Collections.emptySet(),
+            Collections.emptyList()
+        );
         Behandling behandling = new Behandling();
         behandling.setFagsak(fagsak);
         behandling.setMottatteOpplysninger(new MottatteOpplysninger());

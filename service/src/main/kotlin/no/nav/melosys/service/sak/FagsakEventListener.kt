@@ -24,7 +24,7 @@ class FagsakEventListener(
         oppgave.ifPresentOrElse({
             val behandling = fagsak.hentAktivBehandling()
             log.info(
-                "Oppdaterer oppgave {} med sakstype {} og sakstema {}", it.oppgaveId, fagsak.type, fagsak.tema
+                "Oppdaterer oppgave ${it.oppgaveId} med sakstype ${fagsak.type} og sakstema ${fagsak.tema}"
             )
             oppgaveService.oppdaterOppgave(
                 it.oppgaveId, behandling

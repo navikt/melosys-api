@@ -40,7 +40,6 @@ class GyldigeTrygdedekningerServiceTest {
     fun hentTrygdedekninger_ikkeYrkesaktivMenToggleErAv_kasterFeil() {
         unleash.disableAll()
 
-
         shouldThrow<FunksjonellException> {
             gyldigeTrygdedekningerService.hentTrygdedekninger(Behandlingstema.IKKE_YRKESAKTIV, null)
         }.message.shouldContain("Behandling med behandlingstema Ikke Yrkesaktiv har ikke gyldige trygdedekninger mens toggle er slått av")
@@ -76,7 +75,7 @@ class GyldigeTrygdedekningerServiceTest {
 
         gyldigeTrygdedekningerService.hentTrygdedekninger(Behandlingstema.YRKESAKTIV, Folketrygdloven_kap2_bestemmelser.FTRL_KAP2_2_8_FØRSTE_LEDD_A)
             .shouldNotBeNull()
-            .shouldHaveSize(8)
+            .shouldHaveSize(9)
             .shouldContainExactly(
                 Trygdedekninger.FTRL_2_9_FØRSTE_LEDD_A_HELSE,
                 Trygdedekninger.FTRL_2_9_FØRSTE_LEDD_A_ANDRE_LEDD_HELSE_SYKE_FORELDREPENGER,
@@ -86,6 +85,7 @@ class GyldigeTrygdedekningerServiceTest {
                 Trygdedekninger.FTRL_2_9_FØRSTE_LEDD_B_TREDJE_LEDD_PENSJON_YRKESSKADE,
                 Trygdedekninger.FTRL_2_9_FØRSTE_LEDD_C_TREDJE_LEDD_HELSE_PENSJON_YRKESSKADE,
                 Trygdedekninger.FTRL_2_9_FØRSTE_LEDD_C_ANDRE_LEDD_TREDJE_LEDD_HELSE_PENSJON_SYKE_FORELDREPENGER_YRKESSKADE,
+                Trygdedekninger.FTRL_2_9_TREDJE_LEDD_YRKESSKADE
             )
     }
 

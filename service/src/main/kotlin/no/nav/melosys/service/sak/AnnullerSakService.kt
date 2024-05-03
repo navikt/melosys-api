@@ -1,6 +1,7 @@
 package no.nav.melosys.service.sak
 
 import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingsresultattyper
+import no.nav.melosys.exception.FunksjonellException
 import no.nav.melosys.saksflytapi.ProsessinstansService
 import no.nav.melosys.service.behandling.BehandlingsresultatService
 import no.nav.melosys.service.ftrl.medlemskapsperiode.MedlemskapsperiodeService

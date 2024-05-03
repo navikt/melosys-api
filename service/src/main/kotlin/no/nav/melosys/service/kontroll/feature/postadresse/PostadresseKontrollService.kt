@@ -39,14 +39,14 @@ class PostadresseKontrollService(
         return if (harRegistrertAdresse) {
             emptyList()
         } else {
-            listOf(Kontrollfeil(kontrollBegrunnelseFra(kontekst), KontrolldataFeilType.FEIL))
+            listOf(Kontrollfeil(kontrollBegrunnelseFra(kontekst)))
         }
     }
 
     private fun oppdaterKontekstForBehandling(kontekst: PostadressesjekkKontekst, behandling: Behandling) {
         val fullmektigForBruker = behandling.fagsak.finnFullmektig(Fullmaktstype.FULLMEKTIG_SØKNAD)
-        if (fullmektigForBruker.isPresent) {
-            kontekst.oppdaterForFullmektigTilBruker(fullmektigForBruker.get())
+        if (fullmektigForBruker != null) {
+            kontekst.oppdaterForFullmektigTilBruker(fullmektigForBruker)
         } else {
             kontekst.oppdaterForBruker(behandling.fagsak.hentBrukersAktørID())
         }

@@ -101,11 +101,11 @@ public class UtpekingService {
                                   Set<String> mottakerinstitusjoner,
                                   String ytterligereInformasjonSed,
                                   String fritekstBrev) {
-        Behandling behandling = fagsak.hentAktivBehandling();
+        Behandling behandling = fagsak.finnAktivBehandling();
         if (behandling.getTema() != Behandlingstema.ARBEID_FLERE_LAND) {
             throw new FunksjonellException("Utpeking kan ikke skje for en behandling med tema " + behandling.getTema());
         }
-        long behandlingID = fagsak.hentAktivBehandling().getId();
+        long behandlingID = fagsak.finnAktivBehandling().getId();
 
         if (log.isInfoEnabled()) {
             log.info("Utpeking av annet land for sak: {}, behandling: {}, mottakerinstitusjoner: {}",

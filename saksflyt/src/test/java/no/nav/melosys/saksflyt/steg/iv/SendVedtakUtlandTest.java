@@ -58,19 +58,18 @@ class SendVedtakUtlandTest {
     private Lovvalgsperiode lovvalgsperiode;
     private Behandlingsresultat behandlingsresultat;
     private final Behandling behandling = new Behandling();
-    private final Fagsak fagsak = new Fagsak();
+    private Fagsak fagsak;
 
     private final FakeUnleash fakeUnleash = new FakeUnleash();
     @Captor
     private ArgumentCaptor<DoksysBrevbestilling> brevbestillingArgumentCaptor;
 
     private static final long BEHANDLING_ID = 1L;
-    private static final long SAKSNUMMER = 123L;
     private static final String MOTTAKER_INSTITUSJON = "SE:123";
 
     @BeforeEach
     public void setUp() {
-        fagsak.setGsakSaksnummer(SAKSNUMMER);
+        fagsak = FagsakTestFactory.builder().medGsakSaksnummer().build();
         behandling.setFagsak(fagsak);
         behandling.setId(BEHANDLING_ID);
 

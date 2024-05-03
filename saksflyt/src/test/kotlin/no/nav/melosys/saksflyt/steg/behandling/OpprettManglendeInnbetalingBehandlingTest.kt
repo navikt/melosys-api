@@ -13,6 +13,7 @@ import io.mockk.verify
 import no.nav.melosys.domain.Behandling
 import no.nav.melosys.domain.Behandlingsresultat
 import no.nav.melosys.domain.Fagsak
+import no.nav.melosys.domain.FagsakTestFactory
 import no.nav.melosys.domain.kodeverk.Sakstemaer
 import no.nav.melosys.domain.kodeverk.Sakstyper
 import no.nav.melosys.domain.kodeverk.behandlinger.*
@@ -72,7 +73,7 @@ class OpprettManglendeInnbetalingBehandlingTest {
     @Test
     fun `utfør skal kaste feil dersom man ikke har behandling som kan brukes til replikering`() {
         val behandlingsresultat = lagBehandlingsresultat()
-        val behandling = Behandling().apply { fagsak = Fagsak() }
+        val behandling = Behandling().apply { fagsak = FagsakTestFactory.lagFagsak() }
         val prosessinstans = Prosessinstans().apply {
             setData(ProsessDataKey.FAKTURASERIE_REFERANSE, behandlingsresultat.fakturaserieReferanse)
         }
@@ -315,11 +316,10 @@ class OpprettManglendeInnbetalingBehandlingTest {
 
     private fun lagBehandling(block: Behandling.() -> Unit = {}): Behandling = Behandling().apply behandling@{
         id = 1L
-        fagsak = Fagsak().apply {
-            tema = Sakstemaer.MEDLEMSKAP_LOVVALG
+        fagsak = FagsakTestFactory.builder().apply {
             type = Sakstyper.FTRL
-            behandlinger.add(this@behandling)
-        }
+            leggTilBehandling(this@behandling)
+        }.build()
         tema = Behandlingstema.YRKESAKTIV
         block()
     }

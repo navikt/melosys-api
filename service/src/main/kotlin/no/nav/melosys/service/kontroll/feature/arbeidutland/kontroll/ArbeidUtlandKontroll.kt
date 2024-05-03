@@ -24,7 +24,7 @@ open class ArbeidUtlandKontroll {
                     erUfullstendigUtfyllt = true
                 }
             }
-            return if (erUfullstendigUtfyllt) Kontrollfeil(Kontroll_begrunnelser.MANGLENDE_OPPL_ARBEIDSSTED_LAND, KontrolldataFeilType.FEIL)
+            return if (erUfullstendigUtfyllt) Kontrollfeil(Kontroll_begrunnelser.MANGLENDE_OPPL_ARBEIDSSTED_LAND)
             else null
         }
 
@@ -61,7 +61,7 @@ open class ArbeidUtlandKontroll {
                 }
             }
 
-            return if (erUfullstendigUtfyllt) Kontrollfeil(Kontroll_begrunnelser.MANGLENDE_OPPL_ARBEIDSSTED_MARITIM, KontrolldataFeilType.FEIL)
+            return if (erUfullstendigUtfyllt) Kontrollfeil(Kontroll_begrunnelser.MANGLENDE_OPPL_ARBEIDSSTED_MARITIM)
             else null
         }
 
@@ -90,7 +90,7 @@ open class ArbeidUtlandKontroll {
                 }
             }
 
-            return if (erUfullstendigUtfyllt) Kontrollfeil(Kontroll_begrunnelser.MANGLENDE_OPPL_ARBEIDSSTED_OFFSHORE, KontrolldataFeilType.FEIL)
+            return if (erUfullstendigUtfyllt) Kontrollfeil(Kontroll_begrunnelser.MANGLENDE_OPPL_ARBEIDSSTED_OFFSHORE)
             else null
         }
 
@@ -116,7 +116,7 @@ open class ArbeidUtlandKontroll {
                     erUfullstendigUtfyllt = true
                 }
             }
-            return if (erUfullstendigUtfyllt) Kontrollfeil(Kontroll_begrunnelser.MANGLENDE_OPPL_ARBEIDSSTED_LUFTFART, KontrolldataFeilType.FEIL)
+            return if (erUfullstendigUtfyllt) Kontrollfeil(Kontroll_begrunnelser.MANGLENDE_OPPL_ARBEIDSSTED_LUFTFART)
             else null
         }
 
@@ -141,7 +141,7 @@ open class ArbeidUtlandKontroll {
                 }
             }
 
-            return if (erUfullstendigUtfyllt) Kontrollfeil(Kontroll_begrunnelser.MANGLENDE_OPPL_ARBEIDSFORHOLD_UTL, KontrolldataFeilType.FEIL)
+            return if (erUfullstendigUtfyllt) Kontrollfeil(Kontroll_begrunnelser.MANGLENDE_OPPL_ARBEIDSFORHOLD_UTL)
             else null
         }
 
@@ -166,7 +166,7 @@ open class ArbeidUtlandKontroll {
                 }
             }
 
-            return if (erUfullstendigUtfyllt) Kontrollfeil(Kontroll_begrunnelser.MANGLENDE_OPPL_SELVSTENDIG_ARBEIDSFORHOLD_UTL, KontrolldataFeilType.FEIL)
+            return if (erUfullstendigUtfyllt) Kontrollfeil(Kontroll_begrunnelser.MANGLENDE_OPPL_SELVSTENDIG_ARBEIDSFORHOLD_UTL)
             else null
         }
     }

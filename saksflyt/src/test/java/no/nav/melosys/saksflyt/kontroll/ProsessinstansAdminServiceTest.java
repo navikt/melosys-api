@@ -5,6 +5,7 @@ import java.util.*;
 
 import no.nav.melosys.domain.Behandling;
 import no.nav.melosys.domain.Fagsak;
+import no.nav.melosys.domain.FagsakTestFactory;
 import no.nav.melosys.exception.FunksjonellException;
 import no.nav.melosys.saksflyt.ProsessinstansBehandlerDelegate;
 import no.nav.melosys.saksflyt.ProsessinstansRepository;
@@ -192,13 +193,7 @@ class ProsessinstansAdminServiceTest {
     private Behandling lagBehandling() {
         var behandling = new Behandling();
         behandling.setId(1L);
-        behandling.setFagsak(lagFagsak());
+        behandling.setFagsak(FagsakTestFactory.lagFagsak());
         return behandling;
-    }
-
-    private Fagsak lagFagsak() {
-        var fagsak = new Fagsak();
-        fagsak.setSaksnummer("MEL-2");
-        return fagsak;
     }
 }

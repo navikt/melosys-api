@@ -69,8 +69,7 @@ class ArbeidFlereLandSedRuterTest {
 
         behandling = new Behandling();
         behandling.setId(behandlingID);
-        fagsak = new Fagsak();
-        fagsak.setBehandlinger(List.of(behandling));
+        fagsak = FagsakTestFactory.builder().behandlinger(behandling).build();
         behandling.setFagsak(fagsak);
 
         melosysEessiMelding = new MelosysEessiMelding();
@@ -230,9 +229,7 @@ class ArbeidFlereLandSedRuterTest {
 
     @Test
     void finnSakOgBestemRuting_SakstemaUnntakMedNorskLovvalg_endresTilMedlemskapLovvalg() {
-        fagsak = new Fagsak();
-        fagsak.setBehandlinger(List.of(behandling));
-        fagsak.setTema(Sakstemaer.MEDLEMSKAP_LOVVALG);
+        fagsak = FagsakTestFactory.builder().behandlinger(behandling).build();
         behandling.setTema(Behandlingstema.BESLUTNING_LOVVALG_NORGE);
         behandling.setFagsak(fagsak);
         behandlingsresultat = new Behandlingsresultat();
@@ -250,9 +247,7 @@ class ArbeidFlereLandSedRuterTest {
 
     @Test
     void finnSakOgBestemRuting_SakstemaMedlemskapLovvalgMedUtenlandskLovvalg_endresTilUnntak() {
-        fagsak = new Fagsak();
-        fagsak.setBehandlinger(List.of(behandling));
-        fagsak.setTema(Sakstemaer.UNNTAK);
+        fagsak = FagsakTestFactory.builder().tema(Sakstemaer.UNNTAK).behandlinger(behandling).build();
         behandling.setTema(Behandlingstema.BESLUTNING_LOVVALG_ANNET_LAND);
         behandling.setFagsak(fagsak);
         behandlingsresultat = new Behandlingsresultat();

@@ -6,10 +6,7 @@ import java.util.List;
 import java.util.Optional;
 import java.util.Set;
 
-import no.nav.melosys.domain.Behandling;
-import no.nav.melosys.domain.Fagsak;
-import no.nav.melosys.domain.VilkaarBegrunnelse;
-import no.nav.melosys.domain.Vilkaarsresultat;
+import no.nav.melosys.domain.*;
 import no.nav.melosys.domain.dokument.felles.Land;
 import no.nav.melosys.domain.inngangsvilkar.Feilmelding;
 import no.nav.melosys.domain.inngangsvilkar.InngangsvilkarResponse;
@@ -71,7 +68,6 @@ class InngangsvilkaarServiceTest {
     void vurderOgLagreInngangsvilkår_medFlereGyldigeStatsborgerskap_oppdaterVilkårsresultat() {
         final List<String> søknadsland = List.of("FR", "DK", "NO");
         final var periode = new no.nav.melosys.domain.mottatteopplysninger.data.Periode(LocalDate.now().plusYears(1), LocalDate.MAX);
-        final String ident = "aktørID";
         when(behandlingService.hentBehandling(anyLong())).thenReturn(lagBehandling());
         final Set<Statsborgerskap> statsborgerskap = Set.of(
             new no.nav.melosys.domain.person.Statsborgerskap("FIN", null, LocalDate.parse("1989-11-18"), null, "FREG",
@@ -79,7 +75,7 @@ class InngangsvilkaarServiceTest {
             new no.nav.melosys.domain.person.Statsborgerskap("SWE", LocalDate.parse("2009-11-18"), null, null, "PDL",
                 "Dolly", false)
         );
-        when(persondataFasade.hentStatsborgerskap(ident)).thenReturn(statsborgerskap);
+        when(persondataFasade.hentStatsborgerskap(FagsakTestFactory.BRUKER_AKTØR_ID)).thenReturn(statsborgerskap);
 
         InngangsvilkarResponse res = new InngangsvilkarResponse();
         res.setFeilmeldinger(Collections.emptyList());
@@ -254,8 +250,7 @@ class InngangsvilkaarServiceTest {
 
     @Test
     void skalVurdereInngangsvilkår_altStemmer_returnererTrue() {
-        var fagsak = new Fagsak();
-        fagsak.setType(Sakstyper.EU_EOS);
+        var fagsak = FagsakTestFactory.lagFagsak();
         var behandling = lagBehandlingMedPeriodeOgLand();
         behandling.setFagsak(fagsak);
 
@@ -265,8 +260,7 @@ class InngangsvilkaarServiceTest {
 
     @Test
     void skalVurdereInngangsvilkår_sakstypeIkkeEøs_returnererFalse() {
-        var fagsak = new Fagsak();
-        fagsak.setType(Sakstyper.FTRL);
+        var fagsak = FagsakTestFactory.builder().type(Sakstyper.FTRL).build();
         var behandling = new Behandling();
         behandling.setFagsak(fagsak);
 
@@ -278,8 +272,7 @@ class InngangsvilkaarServiceTest {
     @Test
     void skalVurdereInngangsvilkår_harIngenFlyt_returnererFalse() {
         when(saksbehandlingRegler.harIngenFlyt(any())).thenReturn(true);
-        var fagsak = new Fagsak();
-        fagsak.setType(Sakstyper.EU_EOS);
+        var fagsak = FagsakTestFactory.lagFagsak();
         var behandling = new Behandling();
         behandling.setFagsak(fagsak);
 
@@ -293,8 +286,7 @@ class InngangsvilkaarServiceTest {
     @Test
     void skalVurdereInngangsvilkår_harUnntaktsregistreringFlyt_returnererFalse() {
         when(saksbehandlingRegler.harRegistreringUnntakFraMedlemskapFlyt(any())).thenReturn(true);
-        var fagsak = new Fagsak();
-        fagsak.setType(Sakstyper.EU_EOS);
+        var fagsak = FagsakTestFactory.lagFagsak();
         var behandling = new Behandling();
         behandling.setFagsak(fagsak);
 
@@ -308,8 +300,7 @@ class InngangsvilkaarServiceTest {
     @Test
     void skalVurdereInngangsvilkår_harIkkeYrkeskaktivFlyt_returnererFalse() {
         when(saksbehandlingRegler.harIkkeYrkesaktivFlyt(any())).thenReturn(true);
-        var fagsak = new Fagsak();
-        fagsak.setType(Sakstyper.EU_EOS);
+        var fagsak = FagsakTestFactory.lagFagsak();
         var behandling = new Behandling();
         behandling.setFagsak(fagsak);
 
@@ -322,8 +313,7 @@ class InngangsvilkaarServiceTest {
 
     @Test
     void skalVurdereInngangsvilkår_erSed_returnererFalse() {
-        var fagsak = new Fagsak();
-        fagsak.setType(Sakstyper.EU_EOS);
+        var fagsak = FagsakTestFactory.lagFagsak();
         var behandling = new Behandling();
         behandling.setFagsak(fagsak);
         behandling.setTema(REGISTRERING_UNNTAK_NORSK_TRYGD_ØVRIGE);
@@ -337,8 +327,7 @@ class InngangsvilkaarServiceTest {
 
     @Test
     void skalVurdereInngangsvilkår_harIkkePeriode_returnererFalse() {
-        var fagsak = new Fagsak();
-        fagsak.setType(Sakstyper.EU_EOS);
+        var fagsak = FagsakTestFactory.lagFagsak();
         var behandling = lagBehandlingMedPeriodeOgLand();
         behandling.setFagsak(fagsak);
         behandling.getMottatteOpplysninger().getMottatteOpplysningerData().periode = new Periode(null, null);
@@ -353,8 +342,7 @@ class InngangsvilkaarServiceTest {
 
     @Test
     void skalVurdereInngangsvilkår_harIkkeLand_returnererFalse() {
-        var fagsak = new Fagsak();
-        fagsak.setType(Sakstyper.EU_EOS);
+        var fagsak = FagsakTestFactory.lagFagsak();
         var behandling = lagBehandlingMedPeriodeOgLand();
         behandling.setFagsak(fagsak);
         behandling.getMottatteOpplysninger().getMottatteOpplysningerData().soeknadsland.setLandkoder(Collections.emptyList());

@@ -3,10 +3,7 @@ package no.nav.melosys.saksflyt.steg.behandling;
 import java.util.Collections;
 import java.util.Set;
 
-import no.nav.melosys.domain.Behandling;
-import no.nav.melosys.domain.Behandlingsresultat;
-import no.nav.melosys.domain.Fagsak;
-import no.nav.melosys.domain.Lovvalgsperiode;
+import no.nav.melosys.domain.*;
 import no.nav.melosys.domain.kodeverk.*;
 import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingsresultattyper;
 import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingsstatus;
@@ -49,7 +46,6 @@ class AvsluttFagsakOgBehandlingTest {
     private Lovvalgsperiode lovvalgsperiode;
     private Prosessinstans prosessinstans;
 
-    private final String saksnummer = "MEL-123";
 
     @BeforeEach
     public void setUp() {
@@ -63,11 +59,7 @@ class AvsluttFagsakOgBehandlingTest {
         behandling.setId(123L);
         behandling.setTema(Behandlingstema.YRKESAKTIV);
 
-        fagsak = new Fagsak();
-        fagsak.setSaksnummer(saksnummer);
-        fagsak.setBehandlinger(Collections.singletonList(behandling));
-        fagsak.setType(Sakstyper.EU_EOS);
-        fagsak.setTema(Sakstemaer.MEDLEMSKAP_LOVVALG);
+        fagsak = FagsakTestFactory.builder().behandlinger(behandling).build();
 
         behandling.setFagsak(fagsak);
         prosessinstans.setBehandling(behandling);
@@ -87,7 +79,7 @@ class AvsluttFagsakOgBehandlingTest {
 
     @Test
     void utfør_erArtikkel12_behandlingOgFagsakAvsluttet() {
-        when(fagsakService.hentFagsak(saksnummer)).thenReturn(fagsak);
+        when(fagsakService.hentFagsak(FagsakTestFactory.SAKSNUMMER)).thenReturn(fagsak);
         lovvalgsperiode.setBestemmelse(Lovvalgbestemmelser_883_2004.FO_883_2004_ART12_1);
 
         avsluttFagsakOgBehandling.utfør(prosessinstans);
@@ -109,7 +101,7 @@ class AvsluttFagsakOgBehandlingTest {
         lovvalgsperiode.setBestemmelse(Lovvalgbestemmelser_883_2004.FO_883_2004_ART13_1A);
         behandling.setTema(Behandlingstema.A1_ANMODNING_OM_UNNTAK_PAPIR);
         fagsak.setTema(Sakstemaer.UNNTAK);
-        when(fagsakService.hentFagsak(saksnummer)).thenReturn(fagsak);
+        when(fagsakService.hentFagsak(FagsakTestFactory.SAKSNUMMER)).thenReturn(fagsak);
         when(saksbehandlingRegler.harRegistreringUnntakFraMedlemskapFlyt(any())).thenReturn(true);
 
         avsluttFagsakOgBehandling.utfør(prosessinstans);
@@ -119,7 +111,7 @@ class AvsluttFagsakOgBehandlingTest {
 
     @Test
     void utfør_saksstatusIProsessData_behandlingsstatusSatt() {
-        when(fagsakService.hentFagsak(saksnummer)).thenReturn(fagsak);
+        when(fagsakService.hentFagsak(FagsakTestFactory.SAKSNUMMER)).thenReturn(fagsak);
         prosessinstans.setData(ProsessDataKey.SAKSSTATUS, Saksstatuser.AVSLUTTET);
 
         avsluttFagsakOgBehandling.utfør(prosessinstans);

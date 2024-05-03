@@ -110,41 +110,80 @@ object UtledMedlemskapsperioder {
 
     private fun lagMedlemskapsperioderFor2_8(dto: UtledMedlemskapsperioderDto): Collection<Medlemskapsperiode> {
         val søknadsperiode = dto.søknadsperiode
-
         val enMånedFørMottaksdato = dto.mottaksdatoSøknad.minusMonths(1)
-        if (søknadsperiode.fom == enMånedFørMottaksdato || søknadsperiode.fom.isAfter(enMånedFørMottaksdato)) {
+
+        if (datoErTidligereEnn2ÅrFørMottaksdato(søknadsperiode.fom, dto.mottaksdatoSøknad)) {
+            return lagAvslåttPeriode(dto)
+        }
+
+        if (søknadsperiode.fom.isEqualOrAfter(enMånedFørMottaksdato)) {
+            return lagMedlemskapsperioderPeriodeStarterMindreEnnEnMånedFørMottaksdato(dto)
+        }
+
+        return lagMedlemskapsperioderPeriodeStarterMindreEnn2ÅrFørMottaksdato(dto)
+    }
+
+    private fun lagInnvilgetPeriode(dto: UtledMedlemskapsperioderDto): Collection<Medlemskapsperiode> =
+        setOf(
+            lagPeriode(
+                dto.søknadsperiode,
+                dto.trygdedekning,
+                InnvilgelsesResultat.INNVILGET,
+                dto.bestemmelse
+            )
+        )
+
+    private fun lagAvslåttPeriode(dto: UtledMedlemskapsperioderDto): Collection<Medlemskapsperiode> =
+        setOf(
+            lagPeriode(
+                dto.søknadsperiode,
+                dto.trygdedekning,
+                InnvilgelsesResultat.AVSLAATT,
+                dto.bestemmelse
+            )
+        )
+
+
+    private fun lagMedlemskapsperioderPeriodeStarterMindreEnnEnMånedFørMottaksdato(dto: UtledMedlemskapsperioderDto): Collection<Medlemskapsperiode> {
+        if (dto.trygdedekning.er2_9FørsteLeddMedYrkesskade()) {
             return setOf(
                 lagPeriode(
-                    søknadsperiode,
-                    dto.trygdedekning,
+                    dto.søknadsperiode,
+                    Trygdedekninger.FTRL_2_9_TREDJE_LEDD_YRKESSKADE,
+                    InnvilgelsesResultat.AVSLAATT,
+                    dto.bestemmelse
+                )
+            ).plus(
+                lagPeriode(
+                    dto.søknadsperiode,
+                    dto.trygdedekning.utenYrkesskadedel(),
                     InnvilgelsesResultat.INNVILGET,
                     dto.bestemmelse
                 )
             )
         }
 
-        if (datoErTidligereEnn2ÅrFørMottaksdato(søknadsperiode.fom, dto.mottaksdatoSøknad)) {
-            return setOf(
-                lagPeriode(
-                    søknadsperiode,
-                    dto.trygdedekning,
-                    InnvilgelsesResultat.AVSLAATT,
-                    dto.bestemmelse
-                )
-            )
-        }
-
-        return lagMedlemskapsperioderPeriodeStarterMindreEnn2ÅrFørMottaksdato(dto)
+        return lagInnvilgetPeriode(dto)
     }
 
     private fun lagMedlemskapsperioderPeriodeStarterMindreEnn2ÅrFørMottaksdato(dto: UtledMedlemskapsperioderDto): Collection<Medlemskapsperiode> {
         val søknadsperiode = dto.søknadsperiode
 
-        if (erKunPensjonsdel(dto.trygdedekning)) {
+        if (dto.trygdedekning.erKunPensjonsdel()) {
+            return lagInnvilgetPeriode(dto)
+        }
+
+        if (dto.trygdedekning == Trygdedekninger.FTRL_2_9_FØRSTE_LEDD_B_TREDJE_LEDD_PENSJON_YRKESSKADE) {
             return setOf(
                 lagPeriode(
-                    søknadsperiode,
-                    dto.trygdedekning,
+                    dto.søknadsperiode,
+                    Trygdedekninger.FTRL_2_9_TREDJE_LEDD_YRKESSKADE,
+                    InnvilgelsesResultat.AVSLAATT,
+                    dto.bestemmelse
+                ),
+                lagPeriode(
+                    dto.søknadsperiode,
+                    Trygdedekninger.FTRL_2_9_FØRSTE_LEDD_B_PENSJON,
                     InnvilgelsesResultat.INNVILGET,
                     dto.bestemmelse
                 )
@@ -156,6 +195,9 @@ object UtledMedlemskapsperioder {
         }
 
         val splittetPeriode = splitPeriode(søknadsperiode, dto.mottaksdatoSøknad)
+        if (dto.trygdedekning in listOf(Trygdedekninger.FTRL_2_9_FØRSTE_LEDD_C_TREDJE_LEDD_HELSE_PENSJON_YRKESSKADE, Trygdedekninger.FTRL_2_9_FØRSTE_LEDD_C_ANDRE_LEDD_TREDJE_LEDD_HELSE_PENSJON_SYKE_FORELDREPENGER_YRKESSKADE)) {
+            return lagSplittetYrkesskadeperioder(dto, splittetPeriode)
+        }
         return lagMedlemskapsperioderForPeriodeFørMottaksdato(splittetPeriode.first, dto).plus(
             lagPeriode(
                 splittetPeriode.second,
@@ -170,12 +212,12 @@ object UtledMedlemskapsperioder {
     private fun lagMedlemskapsperioderForPeriodeFørMottaksdato(
         periode: ErPeriode,
         dto: UtledMedlemskapsperioderDto
-    ): Collection<Medlemskapsperiode> {
-        return if (harPensjonsdel(dto.trygdedekning)) {
-            mutableSetOf(
+    ): Collection<Medlemskapsperiode> =
+        if (dto.trygdedekning.harPensjonsdel()) {
+            setOf(
                 lagPeriode(
                     periode,
-                    fjernPensjonsdel(dto.trygdedekning),
+                    dto.trygdedekning.utenPensjonsdel(),
                     InnvilgelsesResultat.AVSLAATT,
                     dto.bestemmelse
                 ),
@@ -186,7 +228,7 @@ object UtledMedlemskapsperioder {
                     dto.bestemmelse
                 )
             )
-        } else mutableSetOf(
+        } else setOf(
             lagPeriode(
                 periode,
                 dto.trygdedekning,
@@ -194,7 +236,37 @@ object UtledMedlemskapsperioder {
                 dto.bestemmelse
             )
         )
-    }
+
+    private fun lagSplittetYrkesskadeperioder(
+        dto: UtledMedlemskapsperioderDto,
+        splittetPeriode: Pair<ErPeriode, ErPeriode>
+    ): Collection<Medlemskapsperiode> =
+        setOf(
+            lagPeriode(
+                dto.søknadsperiode,
+                Trygdedekninger.FTRL_2_9_TREDJE_LEDD_YRKESSKADE,
+                InnvilgelsesResultat.AVSLAATT,
+                dto.bestemmelse
+            ),
+            lagPeriode(
+                splittetPeriode.first,
+                dto.trygdedekning.utenYrkesskadedel().utenPensjonsdel(),
+                InnvilgelsesResultat.AVSLAATT,
+                dto.bestemmelse
+            ),
+            lagPeriode(
+                splittetPeriode.first,
+                Trygdedekninger.FTRL_2_9_FØRSTE_LEDD_B_PENSJON,
+                InnvilgelsesResultat.INNVILGET,
+                dto.bestemmelse
+            ),
+            lagPeriode(
+                splittetPeriode.second,
+                dto.trygdedekning.utenYrkesskadedel(),
+                InnvilgelsesResultat.INNVILGET,
+                dto.bestemmelse
+            )
+        )
 
     private fun lagPeriode(
         søknadsperiode: ErPeriode,
@@ -218,23 +290,40 @@ object UtledMedlemskapsperioder {
             Periode(splitFra, periode.tom)
         )
 
-    private fun fjernPensjonsdel(trygdedekning: Trygdedekninger): Trygdedekninger =
-        when (trygdedekning) {
-            Trygdedekninger.FTRL_2_9_FØRSTE_LEDD_C_HELSE_PENSJON -> Trygdedekninger.FTRL_2_9_FØRSTE_LEDD_A_HELSE
-            Trygdedekninger.FTRL_2_9_FØRSTE_LEDD_C_ANDRE_LEDD_HELSE_PENSJON_SYKE_FORELDREPENGER -> Trygdedekninger.FTRL_2_9_FØRSTE_LEDD_A_ANDRE_LEDD_HELSE_SYKE_FORELDREPENGER
-            else -> throw FunksjonellException("Trygdedekning $trygdedekning har ikke pensjonsdel")
-        }
-
-    private fun harPensjonsdel(trygdedekninger: Trygdedekninger): Boolean =
-        trygdedekninger == Trygdedekninger.FTRL_2_9_FØRSTE_LEDD_C_HELSE_PENSJON || trygdedekninger == Trygdedekninger.FTRL_2_9_FØRSTE_LEDD_C_ANDRE_LEDD_HELSE_PENSJON_SYKE_FORELDREPENGER
-
-
-    private fun erKunPensjonsdel(trygdedekning: Trygdedekninger): Boolean =
-        trygdedekning == Trygdedekninger.FTRL_2_9_FØRSTE_LEDD_B_PENSJON
-
     private fun datoErTidligereEnn2ÅrFørMottaksdato(dato: LocalDate, mottaksdato: LocalDate) =
         dato.isBefore(mottaksdato.minusYears(2))
 
     private fun bestemmelseErParagraf(bestemmelse: Folketrygdloven_kap2_bestemmelser, paragraf: String): Boolean =
         bestemmelse.kode.startsWith("FTRL_KAP2_$paragraf")
+
+
+    private fun Trygdedekninger.harPensjonsdel(): Boolean =
+        this in listOf(Trygdedekninger.FTRL_2_9_FØRSTE_LEDD_C_HELSE_PENSJON, Trygdedekninger.FTRL_2_9_FØRSTE_LEDD_C_ANDRE_LEDD_HELSE_PENSJON_SYKE_FORELDREPENGER)
+
+    private fun Trygdedekninger.erKunPensjonsdel(): Boolean =
+        this == Trygdedekninger.FTRL_2_9_FØRSTE_LEDD_B_PENSJON
+
+    private fun Trygdedekninger.er2_9FørsteLeddMedYrkesskade(): Boolean =
+        listOf(
+            Trygdedekninger.FTRL_2_9_FØRSTE_LEDD_B_TREDJE_LEDD_PENSJON_YRKESSKADE,
+            Trygdedekninger.FTRL_2_9_FØRSTE_LEDD_C_TREDJE_LEDD_HELSE_PENSJON_YRKESSKADE,
+            Trygdedekninger.FTRL_2_9_FØRSTE_LEDD_C_ANDRE_LEDD_TREDJE_LEDD_HELSE_PENSJON_SYKE_FORELDREPENGER_YRKESSKADE,
+        ).contains(this)
+
+    private fun Trygdedekninger.utenPensjonsdel(): Trygdedekninger =
+        when (this) {
+            Trygdedekninger.FTRL_2_9_FØRSTE_LEDD_C_HELSE_PENSJON -> Trygdedekninger.FTRL_2_9_FØRSTE_LEDD_A_HELSE
+            Trygdedekninger.FTRL_2_9_FØRSTE_LEDD_C_ANDRE_LEDD_HELSE_PENSJON_SYKE_FORELDREPENGER -> Trygdedekninger.FTRL_2_9_FØRSTE_LEDD_A_ANDRE_LEDD_HELSE_SYKE_FORELDREPENGER
+            else -> throw FunksjonellException("Trygdedekning $this har ikke pensjonsdel")
+        }
+
+    private fun Trygdedekninger.utenYrkesskadedel(): Trygdedekninger =
+        when (this) {
+            Trygdedekninger.FTRL_2_9_FØRSTE_LEDD_B_TREDJE_LEDD_PENSJON_YRKESSKADE -> Trygdedekninger.FTRL_2_9_FØRSTE_LEDD_B_PENSJON
+            Trygdedekninger.FTRL_2_9_FØRSTE_LEDD_C_TREDJE_LEDD_HELSE_PENSJON_YRKESSKADE -> Trygdedekninger.FTRL_2_9_FØRSTE_LEDD_C_HELSE_PENSJON
+            Trygdedekninger.FTRL_2_9_FØRSTE_LEDD_C_ANDRE_LEDD_TREDJE_LEDD_HELSE_PENSJON_SYKE_FORELDREPENGER_YRKESSKADE -> Trygdedekninger.FTRL_2_9_FØRSTE_LEDD_C_ANDRE_LEDD_HELSE_PENSJON_SYKE_FORELDREPENGER
+            else -> throw FunksjonellException("Trygdedekning $this har ikke yrkesskadedel")
+        }
+
+    private fun LocalDate.isEqualOrAfter(localDate: LocalDate): Boolean = this.isEqual(localDate) || this.isAfter(localDate)
 }

@@ -5,6 +5,7 @@ import java.util.Collections;
 
 import no.nav.melosys.domain.Behandling;
 import no.nav.melosys.domain.Fagsak;
+import no.nav.melosys.domain.FagsakTestFactory;
 import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingsstatus;
 import no.nav.melosys.saksflytapi.domain.ProsessDataKey;
 import no.nav.melosys.saksflytapi.domain.Prosessinstans;
@@ -53,19 +54,15 @@ public class AvsluttTidligereMedlPeriodeTest {
 
         Prosessinstans prosessinstans = hentProsessinstans(behandling, true);
         avsluttTidligereMedlPeriode.utfør(prosessinstans);
-        verify(medlPeriodeService).avsluttTidligerMedlPeriode("MEL-123");
+        verify(medlPeriodeService).avsluttTidligerMedlPeriode(FagsakTestFactory.SAKSNUMMER);
     }
 
     private Fagsak hentFagsak() {
-        Fagsak fagsak = new Fagsak();
-
         Behandling behandling = new Behandling();
         behandling.setRegistrertDato(Instant.now());
         behandling.setStatus(Behandlingsstatus.AVSLUTTET);
-        fagsak.setBehandlinger(Collections.singletonList(behandling));
-        fagsak.setSaksnummer("MEL-123");
 
-        return fagsak;
+        return FagsakTestFactory.builder().behandlinger(behandling).build();
     }
 
     private Prosessinstans hentProsessinstans(Behandling behandling, boolean erEndring) {

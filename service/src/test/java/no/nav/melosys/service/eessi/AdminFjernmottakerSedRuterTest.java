@@ -5,10 +5,7 @@ import java.util.List;
 import java.util.Optional;
 import java.util.Set;
 
-import no.nav.melosys.domain.Anmodningsperiode;
-import no.nav.melosys.domain.Behandling;
-import no.nav.melosys.domain.Behandlingsresultat;
-import no.nav.melosys.domain.Fagsak;
+import no.nav.melosys.domain.*;
 import no.nav.melosys.domain.eessi.melding.MelosysEessiMelding;
 import no.nav.melosys.domain.kodeverk.Saksstatuser;
 import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingsstatus;
@@ -187,8 +184,9 @@ class AdminFjernmottakerSedRuterTest {
     }
 
     private Fagsak lagFagsak(Behandlingstema behandlingstema, Behandlingsstatus behandlingsstatus) {
-        var fagsak = new Fagsak();
-        fagsak.setBehandlinger(List.of(lagBehandling(fagsak, behandlingstema, behandlingsstatus)));
+        var fagsak = FagsakTestFactory.lagFagsak();
+        var behandling = lagBehandling(fagsak, behandlingstema, behandlingsstatus);
+        fagsak.leggTilBehandling(behandling);
         return fagsak;
     }
 }

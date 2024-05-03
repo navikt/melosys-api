@@ -6,6 +6,7 @@ import java.util.Set;
 import no.nav.melosys.domain.Aktoer;
 import no.nav.melosys.domain.Behandling;
 import no.nav.melosys.domain.BehandlingEndretStatusEvent;
+import no.nav.melosys.domain.FagsakTestFactory;
 import no.nav.melosys.domain.kodeverk.Aktoersroller;
 import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingsstatus;
 import no.nav.melosys.domain.person.Informasjonsbehov;
@@ -24,6 +25,7 @@ import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 
+import static no.nav.melosys.domain.FagsakTestFactory.BRUKER_AKTØR_ID;
 import static org.mockito.Mockito.*;
 
 @ExtendWith(MockitoExtension.class)
@@ -55,9 +57,9 @@ class SaksopplysningEventListenerTest {
         when(avklartefaktaService.hentAvklarteMedfølgendeBarn(anyLong())).thenReturn(ingenMedfolgendeFamilie());
         when(avklartefaktaService.hentAvklarteMedfølgendeEktefelle(anyLong())).thenReturn(lagMedfolgendeFamilie());
         Personopplysninger personopplysninger = PersonopplysningerObjectFactory.lagPersonopplysninger();
-        when(persondataFasade.hentPerson("aktørID", Informasjonsbehov.MED_FAMILIERELASJONER)).thenReturn(personopplysninger);
+        when(persondataFasade.hentPerson(BRUKER_AKTØR_ID, Informasjonsbehov.MED_FAMILIERELASJONER)).thenReturn(personopplysninger);
         PersonMedHistorikk personMedHistorikk = PersonopplysningerObjectFactory.lagPersonMedHistorikk();
-        when(persondataFasade.hentPersonMedHistorikk("aktørID")).thenReturn(personMedHistorikk);
+        when(persondataFasade.hentPersonMedHistorikk(BRUKER_AKTØR_ID)).thenReturn(personMedHistorikk);
 
         BehandlingEndretStatusEvent event = new BehandlingEndretStatusEvent(Behandlingsstatus.IVERKSETTER_VEDTAK, behandling);
         saksoppplysningEventListener.lagrePersonopplysninger(event);
@@ -76,9 +78,9 @@ class SaksopplysningEventListenerTest {
         when(avklartefaktaService.hentAvklarteMedfølgendeBarn(anyLong())).thenReturn(ingenMedfolgendeFamilie());
         when(avklartefaktaService.hentAvklarteMedfølgendeEktefelle(anyLong())).thenReturn(ingenMedfolgendeFamilie());
         Personopplysninger personopplysninger = PersonopplysningerObjectFactory.lagPersonopplysninger();
-        when(persondataFasade.hentPerson("aktørID")).thenReturn(personopplysninger);
+        when(persondataFasade.hentPerson(BRUKER_AKTØR_ID)).thenReturn(personopplysninger);
         PersonMedHistorikk personMedHistorikk = PersonopplysningerObjectFactory.lagPersonMedHistorikk();
-        when(persondataFasade.hentPersonMedHistorikk("aktørID")).thenReturn(personMedHistorikk);
+        when(persondataFasade.hentPersonMedHistorikk(BRUKER_AKTØR_ID)).thenReturn(personMedHistorikk);
 
         BehandlingEndretStatusEvent event = new BehandlingEndretStatusEvent(Behandlingsstatus.IVERKSETTER_VEDTAK, behandling);
         saksoppplysningEventListener.lagrePersonopplysninger(event);
@@ -103,9 +105,7 @@ class SaksopplysningEventListenerTest {
     void lagrePersonopplysning_hovedpartErVirksomhet_opplysningerBlirIkkeLagret() {
         Behandling behandling = SaksbehandlingDataFactory.lagBehandling();
         behandling.setStatus(Behandlingsstatus.IVERKSETTER_VEDTAK);
-        Aktoer virksomhet = new Aktoer();
-        virksomhet.setRolle(Aktoersroller.VIRKSOMHET);
-        behandling.getFagsak().setAktører(Set.of(virksomhet));
+        behandling.setFagsak(FagsakTestFactory.builder().medVirksomhet().build());
         BehandlingEndretStatusEvent event = new BehandlingEndretStatusEvent(Behandlingsstatus.IVERKSETTER_VEDTAK, behandling);
         when(behandlingService.hentBehandlingMedSaksopplysninger(anyLong())).thenReturn(behandling);
 

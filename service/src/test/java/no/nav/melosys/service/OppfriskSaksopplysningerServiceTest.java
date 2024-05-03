@@ -97,7 +97,7 @@ class OppfriskSaksopplysningerServiceTest {
         Behandling behandling = lagBehandling();
         Aktoer virksomhet = new Aktoer();
         virksomhet.setRolle(Aktoersroller.VIRKSOMHET);
-        behandling.getFagsak().setAktører(Set.of(virksomhet));
+        behandling.getFagsak().leggTilAktør(virksomhet);
         behandling.setType(Behandlingstyper.HENVENDELSE);
         when(behandlingService.hentBehandling(anyLong())).thenReturn(behandling);
         when(saksbehandlingRegler.harIngenFlyt(any(), any(), any(), any())).thenReturn(true);
@@ -189,18 +189,9 @@ class OppfriskSaksopplysningerServiceTest {
     }
 
     private static Behandling lagBehandling() {
-        final String aktørID = "123";
         Behandling behandling = new Behandling();
         behandling.setId(BEHANDLING_ID);
-        Fagsak fagsak = new Fagsak();
-        fagsak.setType(Sakstyper.EU_EOS);
-        fagsak.setTema(Sakstemaer.MEDLEMSKAP_LOVVALG);
-        Aktoer aktør = new Aktoer();
-        aktør.setAktørId(aktørID);
-        aktør.setRolle(Aktoersroller.BRUKER);
-        HashSet<Aktoer> aktører = new HashSet<>();
-        aktører.add(aktør);
-        fagsak.setAktører(aktører);
+        Fagsak fagsak = FagsakTestFactory.builder().medBruker().build();
         behandling.setFagsak(fagsak);
         behandling.setTema(Behandlingstema.UTSENDT_ARBEIDSTAKER);
         behandling.setType(Behandlingstyper.FØRSTEGANG);

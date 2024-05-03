@@ -2,6 +2,7 @@ package no.nav.melosys.saksflyt.steg.sed;
 
 import no.nav.melosys.domain.Behandling;
 import no.nav.melosys.domain.Fagsak;
+import no.nav.melosys.domain.FagsakTestFactory;
 import no.nav.melosys.domain.arkiv.Journalpost;
 import no.nav.melosys.domain.eessi.melding.MelosysEessiMelding;
 import no.nav.melosys.integrasjon.joark.JoarkFasade;
@@ -40,8 +41,7 @@ class OppdaterSaksrelasjonTest {
         Prosessinstans prosessinstans = new Prosessinstans();
         prosessinstans.setData(ProsessDataKey.JOURNALPOST_ID, JOURNALPOST_ID);
 
-        Fagsak fagsak = new Fagsak();
-        fagsak.setGsakSaksnummer(123L);
+        Fagsak fagsak = FagsakTestFactory.builder().medGsakSaksnummer().build();
         Behandling behandling = new Behandling();
         behandling.setFagsak(fagsak);
         prosessinstans.setBehandling(behandling);
@@ -86,8 +86,7 @@ class OppdaterSaksrelasjonTest {
         Prosessinstans prosessinstans = new Prosessinstans();
         prosessinstans.setData(ProsessDataKey.EESSI_MELDING, eessiMelding);
 
-        Fagsak fagsak = new Fagsak();
-        fagsak.setGsakSaksnummer(123L);
+        Fagsak fagsak = FagsakTestFactory.builder().medGsakSaksnummer().build();
 
         Behandling behandling = new Behandling();
         behandling.setFagsak(fagsak);
@@ -101,9 +100,7 @@ class OppdaterSaksrelasjonTest {
 
     @Test
     void utfør_ingenBehandlingIngenArkivsakIDIProsessinstnas_henterArkivsakIDFraSaksnummerIFagsakServiceOppdatererSaksrelasjon() {
-        final Fagsak fagsak = new Fagsak();
-        fagsak.setSaksnummer("MEL-0");
-        fagsak.setGsakSaksnummer(123L);
+        final Fagsak fagsak = FagsakTestFactory.builder().medGsakSaksnummer().build();
 
         MelosysEessiMelding eessiMelding = new MelosysEessiMelding();
         eessiMelding.setRinaSaksnummer("12312");

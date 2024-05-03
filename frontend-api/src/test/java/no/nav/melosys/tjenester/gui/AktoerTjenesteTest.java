@@ -7,6 +7,7 @@ import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import no.nav.melosys.domain.Aktoer;
 import no.nav.melosys.domain.Fagsak;
+import no.nav.melosys.domain.FagsakTestFactory;
 import no.nav.melosys.domain.kodeverk.Aktoersroller;
 import no.nav.melosys.service.aktoer.AktoerDto;
 import no.nav.melosys.service.aktoer.AktoerService;
@@ -49,14 +50,14 @@ class AktoerTjenesteTest {
         aktoerDto.setOrgnr("123456789");
         aktoerDto.setDatabaseID(1L);
 
-        Fagsak fagsak = lagFagsak();
+        Fagsak fagsak = FagsakTestFactory.lagFagsak();
 
 
-        when(fagsakService.hentFagsak("MELTEST-1")).thenReturn(fagsak);
+        when(fagsakService.hentFagsak(FagsakTestFactory.SAKSNUMMER)).thenReturn(fagsak);
         when(aktoerService.lagEllerOppdaterAktoer(any(Fagsak.class), any(AktoerDto.class))).thenReturn(1L);
 
 
-        mockMvc.perform(post("/api/fagsaker/{saksnummer}/aktoerer", "MELTEST-1")
+        mockMvc.perform(post("/api/fagsaker/{saksnummer}/aktoerer", FagsakTestFactory.SAKSNUMMER)
                 .contentType(MediaType.APPLICATION_JSON)
                 .content(objectMapper.writeValueAsString(aktoerDto)))
             .andExpect(status().isOk())
@@ -72,13 +73,13 @@ class AktoerTjenesteTest {
         aktoerMyndighet.setInstitusjonID("INST2");
         aktoerMyndighet.setRolle(Aktoersroller.TRYGDEMYNDIGHET);
         aktoerMyndighet.setOrgnr("100");
-        aktoerMyndighet.setFagsak(lagFagsak());
+        aktoerMyndighet.setFagsak(FagsakTestFactory.lagFagsak());
         aktoerMyndighet.setUtenlandskPersonId("UTL");
 
-        when(fagsakService.hentFagsak("MELTEST-1")).thenReturn(lagFagsak());
+        when(fagsakService.hentFagsak(FagsakTestFactory.SAKSNUMMER)).thenReturn(FagsakTestFactory.lagFagsak());
         when(aktoerService.hentfagsakAktører(any(), eq(null))).thenReturn(Collections.singletonList(aktoerMyndighet));
 
-        mockMvc.perform(get("/api/fagsaker/{saksnummer}/aktoerer", "MELTEST-1")
+        mockMvc.perform(get("/api/fagsaker/{saksnummer}/aktoerer", FagsakTestFactory.SAKSNUMMER)
                 .contentType(MediaType.APPLICATION_JSON)
             )
             .andExpect(status().isOk())
@@ -94,13 +95,13 @@ class AktoerTjenesteTest {
         aktoerMyndighet.setInstitusjonID("INST2");
         aktoerMyndighet.setRolle(Aktoersroller.BRUKER);
         aktoerMyndighet.setOrgnr("100");
-        aktoerMyndighet.setFagsak(lagFagsak());
+        aktoerMyndighet.setFagsak(FagsakTestFactory.lagFagsak());
         aktoerMyndighet.setUtenlandskPersonId("UTL");
 
-        when(fagsakService.hentFagsak("MELTEST-1")).thenReturn(lagFagsak());
+        when(fagsakService.hentFagsak(FagsakTestFactory.SAKSNUMMER)).thenReturn(FagsakTestFactory.lagFagsak());
         when(aktoerService.hentfagsakAktører(any(), eq(Aktoersroller.BRUKER))).thenReturn(Collections.singletonList(aktoerMyndighet));
 
-        mockMvc.perform(get("/api/fagsaker/{saksnummer}/aktoerer", "MELTEST-1")
+        mockMvc.perform(get("/api/fagsaker/{saksnummer}/aktoerer", FagsakTestFactory.SAKSNUMMER)
                 .contentType(MediaType.APPLICATION_JSON)
                 .param("rolleKode", "BRUKER")
             )
@@ -113,11 +114,5 @@ class AktoerTjenesteTest {
     void slettAktoer_ok() throws Exception {
         mockMvc.perform(delete("/api/fagsaker/aktoerer/{databaseID}", 123L))
             .andExpect(status().isNoContent());
-    }
-
-    private Fagsak lagFagsak() {
-        Fagsak fagsak = new Fagsak();
-        fagsak.setSaksnummer("MELTEST-1");
-        return fagsak;
     }
 }

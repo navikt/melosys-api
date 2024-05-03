@@ -43,7 +43,7 @@ class InnvilgelseArbeidsgiverBrevMapperTest {
     }
 
     private void testMapTilBrevXml(Behandlingsresultat behandlingsresultat) throws Exception {
-        testMapTilBrevXml(lagBehandling(lagFagsak()), behandlingsresultat);
+        testMapTilBrevXml(lagBehandling(FagsakTestFactory.lagFagsak()), behandlingsresultat);
     }
 
     private void testMapTilBrevXml(Behandling behandling, Behandlingsresultat behandlingsresultat) throws Exception {
@@ -86,12 +86,6 @@ class InnvilgelseArbeidsgiverBrevMapperTest {
         faktum.setFakta("TRUE");
         faktum.setSubjekt("123456789");
         return faktum;
-    }
-
-    private static Fagsak lagFagsak() {
-        Fagsak fagsak = new Fagsak();
-        fagsak.setType(Sakstyper.EU_EOS);
-        return fagsak;
     }
 
     private static Behandling lagBehandling(Fagsak fagsak) {

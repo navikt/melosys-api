@@ -3,6 +3,7 @@ package no.nav.melosys.service.kontroll.regler;
 import java.util.function.Predicate;
 import java.util.regex.Pattern;
 
+import no.nav.melosys.domain.eessi.melding.Arbeidsland;
 import no.nav.melosys.domain.mottatteopplysninger.data.arbeidssteder.RepresentantIUtlandet;
 import no.nav.melosys.domain.dokument.sed.SedDokument;
 import no.nav.melosys.domain.eessi.melding.Arbeidssted;
@@ -25,6 +26,10 @@ public final class ArbeidsstedRegler {
         arbeidssted -> StringUtils.equals(arbeidssted.getAdresse().getLand(), Landkoder.SJ.getKode())
             || StringUtils.equals(arbeidssted.getAdresse().getLand(), Landkoder.NO.getKode()) && BYER_FRA_SVALBARD_PATTERN.matcher(arbeidssted.getAdresse().getBy()).find();
 
+    private static final Predicate<Arbeidsland> ARBEIDSLAND_ARBEIDSSTED_SVALBARD_JAN_MAIEN =
+        arbeidsland -> StringUtils.equals(arbeidsland.getLand(), Landkoder.SJ.getKode())
+            || StringUtils.equals(arbeidsland.getLand(), Landkoder.NO.getKode()) && arbeidsland.getArbeidssted().stream().anyMatch(arbeidssted ->
+            BYER_FRA_SVALBARD_PATTERN.matcher(arbeidssted.getAdresse().getBy()).find());
 
     public static boolean representantIUtlandetMangler(RepresentantIUtlandet representantIUtlandet) {
         return representantIUtlandet == null || representantIUtlandet.getRepresentantNavn() == null;
@@ -32,5 +37,10 @@ public final class ArbeidsstedRegler {
 
     public static boolean erArbeidsstedFraSvalbardOgJanMayen(SedDokument sedDokument) {
         return sedDokument.getArbeidssteder().stream().anyMatch(ARBEIDSSTED_SVALBARD_JAN_MAIEN);
+    }
+
+
+    public static boolean erArbeidsstedFraSvalbardOgJanMayen4_3(SedDokument sedDokument) {
+        return sedDokument.getArbeidsland().stream().anyMatch(ARBEIDSLAND_ARBEIDSSTED_SVALBARD_JAN_MAIEN);
     }
 }

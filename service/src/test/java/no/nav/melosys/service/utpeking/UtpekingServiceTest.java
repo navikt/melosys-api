@@ -79,15 +79,14 @@ class UtpekingServiceTest {
     private final long behandlingID = 431;
     private final Behandling behandling = new Behandling();
     private final Behandlingsresultat behandlingsresultat = new Behandlingsresultat();
-    private final Fagsak fagsak = new Fagsak();
+    private Fagsak fagsak;
 
     @BeforeEach
     public void setup() {
         utpekingService = new UtpekingService(behandlingService, behandlingsresultatService, eessiService, landvelgerService,
             lovvalgsperiodeService, oppgaveService, prosessinstansService, utpekingsperiodeRepository, ferdigbehandlingKontrollFacade, melosysEventMulticaster);
 
-        fagsak.setBehandlinger(List.of(behandling));
-        fagsak.setType(Sakstyper.EU_EOS);
+        fagsak = FagsakTestFactory.builder().behandlinger(behandling).build();
         behandling.setId(behandlingID);
         behandling.setStatus(Behandlingsstatus.UNDER_BEHANDLING);
         behandling.setFagsak(fagsak);

@@ -381,12 +381,7 @@ class TilBrevAdresseServiceTest {
     }
 
     private Fagsak lagFagsak() {
-        Fagsak fagsak = new Fagsak();
-        Aktoer bruker = new Aktoer();
-        bruker.setRolle(Aktoersroller.BRUKER);
-        bruker.setAktørId("aktørId");
-        fagsak.getAktører().add(bruker);
-        return fagsak;
+        return FagsakTestFactory.builder().medBruker().build();
     }
 
     private Saksopplysning lagPERSOPLSaksopplysning() {

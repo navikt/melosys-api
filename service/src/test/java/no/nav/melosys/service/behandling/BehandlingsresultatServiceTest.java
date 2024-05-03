@@ -60,7 +60,7 @@ class BehandlingsresultatServiceTest {
         behandlingsresultat.setBegrunnelseFritekst("Begrunnelse fritekst");
         behandlingsresultat.setNyVurderingBakgrunn("ny vurdering bakgrunn");
         behandlingsresultat.setTrygdeavgiftFritekst("trygdeavgift fritekst");
-        Fagsak fagsak = new Fagsak();
+        Fagsak fagsak = FagsakTestFactory.lagFagsak();
         Behandling behandling = new Behandling();
         behandling.setFagsak(fagsak);
         behandling.setId(behandlingID);

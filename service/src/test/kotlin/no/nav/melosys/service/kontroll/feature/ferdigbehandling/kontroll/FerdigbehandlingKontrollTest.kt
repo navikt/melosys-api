@@ -1,8 +1,11 @@
 package no.nav.melosys.service.kontroll.feature.ferdigbehandling.kontroll
 
+import io.kotest.matchers.collections.shouldBeEmpty
 import io.kotest.matchers.nulls.shouldBeNull
+import io.kotest.matchers.nulls.shouldNotBeNull
 import io.kotest.matchers.shouldBe
 import no.nav.melosys.domain.*
+import no.nav.melosys.domain.brev.utkast.UtkastBrev
 import no.nav.melosys.domain.dokument.medlemskap.MedlemskapDokument
 import no.nav.melosys.domain.dokument.medlemskap.Medlemsperiode
 import no.nav.melosys.domain.dokument.medlemskap.Periode
@@ -17,20 +20,18 @@ import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingstema
 import no.nav.melosys.domain.kodeverk.lovvalgsbestemmelser.trygdeavtale.Lovvalgsbestemmelser_trygdeavtale_us
 import no.nav.melosys.domain.mottatteopplysninger.MottatteOpplysningerData
 import no.nav.melosys.domain.mottatteopplysninger.data.Soeknadsland
+import no.nav.melosys.domain.person.Persondata
 import no.nav.melosys.exception.KontrolldataFeilType
 import no.nav.melosys.service.kontroll.feature.ferdigbehandling.data.FerdigbehandlingKontrollData
 import no.nav.melosys.service.kontroll.feature.ferdigbehandling.data.MedlemskapsperiodeData
+import no.nav.melosys.service.kontroll.feature.ferdigbehandling.data.SaksopplysningerData
 import no.nav.melosys.service.persondata.PersonopplysningerObjectFactory
 import org.junit.jupiter.api.Test
 import java.time.LocalDate
 
 class FerdigbehandlingKontrollTest {
 
-    companion object {
-        val DATO = LocalDate.parse("2024-01-01")
-        const val BRUKER_AKTØRID = "12345678911"
-        const val FULLMEKTIG_ORGNR = "123456789"
-    }
+    private val DATO: LocalDate = LocalDate.parse("2024-01-01")
 
     @Test
     internal fun utførKontroll_USA_ART5_4PeriodenErMerEnn12Måneder_kontrollfeil() {
@@ -39,14 +40,12 @@ class FerdigbehandlingKontrollTest {
             fom = DATO
             tom = DATO.plusMonths(12)
         }
-        val kontrollData =
-            FerdigbehandlingKontrollData(null, null, null, lovvalgsperiode, null, null, null, null, null, null, null)
-
+        val kontrollData = lagFerdigbehandlingKontrollData(lovvalgsperiode = lovvalgsperiode)
 
         val kontrollfeil = FerdigbehandlingKontroll.periodeOver12Måneder(kontrollData)
 
 
-        kontrollfeil.kode.shouldBe(Kontroll_begrunnelser.MER_ENN_12_MD)
+        kontrollfeil.shouldNotBeNull().kode.shouldBe(Kontroll_begrunnelser.MER_ENN_12_MD)
     }
 
     @Test
@@ -56,14 +55,13 @@ class FerdigbehandlingKontrollTest {
             fom = DATO
             tom = DATO.plusYears(5)
         }
-        val kontrollData =
-            FerdigbehandlingKontrollData(null, null, null, lovvalgsperiode, null, null, null, null, null, null, null)
+        val kontrollData = lagFerdigbehandlingKontrollData(lovvalgsperiode = lovvalgsperiode)
 
 
         val kontrollfeil = FerdigbehandlingKontroll.periodeOverFemÅr(kontrollData)
 
 
-        kontrollfeil.kode.shouldBe(Kontroll_begrunnelser.MER_ENN_FEM_ÅR)
+        kontrollfeil.shouldNotBeNull().kode.shouldBe(Kontroll_begrunnelser.MER_ENN_FEM_ÅR)
     }
 
     @Test
@@ -73,8 +71,7 @@ class FerdigbehandlingKontrollTest {
             fom = DATO
             tom = DATO.plusYears(5)
         }
-        val kontrollData =
-            FerdigbehandlingKontrollData(null, null, null, lovvalgsperiode, null, null, null, null, null, null, null)
+        val kontrollData = lagFerdigbehandlingKontrollData(lovvalgsperiode = lovvalgsperiode)
 
 
         val kontrollfeil = FerdigbehandlingKontroll.periodeOverFemÅr(kontrollData)
@@ -100,25 +97,13 @@ class FerdigbehandlingKontrollTest {
             fom = LocalDate.now()
             tom = LocalDate.now().plusDays(4)
         }
-        val kontrollData = FerdigbehandlingKontrollData(
-            medlemskapsDokument,
-            null,
-            null,
-            lovvalgsperiode,
-            null,
-            null,
-            null,
-            null,
-            null,
-            null,
-            null
-        )
+        val kontrollData = lagFerdigbehandlingKontrollData(medlemskapDokument = medlemskapsDokument, lovvalgsperiode = lovvalgsperiode)
 
 
         val kontrollfeil = FerdigbehandlingKontroll.overlappendePeriode(kontrollData)
 
 
-        kontrollfeil.kode.shouldBe(Kontroll_begrunnelser.OVERLAPPENDE_MEDL_PERIODER)
+        kontrollfeil.shouldNotBeNull().kode.shouldBe(Kontroll_begrunnelser.OVERLAPPENDE_MEDL_PERIODER)
     }
 
     @Test
@@ -132,25 +117,14 @@ class FerdigbehandlingKontrollTest {
                 }
             )
         }
-
         val ikkeOverlappendeMedlemskapsperioder = listOf(
             lagMedlemskapsperiode(
                 LocalDate.now().plusDays(5), LocalDate.now().plusDays(10)
             )
         )
-
-        val kontrollData = FerdigbehandlingKontrollData(
-            medlemskapsDokument,
-            null,
-            null,
-            null,
-            null,
-            null,
-            null,
-            null,
-            null,
-            null,
-            MedlemskapsperiodeData(ikkeOverlappendeMedlemskapsperioder, emptyList())
+        val kontrollData = lagFerdigbehandlingKontrollData(
+            medlemskapDokument = medlemskapsDokument,
+            medlemskapsperiodeData = MedlemskapsperiodeData(ikkeOverlappendeMedlemskapsperioder, emptyList()),
         )
 
 
@@ -158,6 +132,32 @@ class FerdigbehandlingKontrollTest {
 
 
         kontrollfeil.shouldBeNull()
+    }
+
+    @Test
+    fun `ingen brevutkast skal gi kontrollfeil`() {
+        val kontrollData = lagFerdigbehandlingKontrollData(brevUtkast = emptyList())
+
+
+        val kontrollfeil = FerdigbehandlingKontroll.åpentUtkastFinnes(kontrollData)
+
+
+        kontrollfeil.shouldBeNull()
+    }
+
+    @Test
+    fun `ikke-tom brevutkast liste skal gi kontrollfeil`() {
+        val kontrollData = lagFerdigbehandlingKontrollData(brevUtkast = listOf(UtkastBrev()))
+
+
+        val kontrollfeil = FerdigbehandlingKontroll.åpentUtkastFinnes(kontrollData)
+
+
+        kontrollfeil.shouldNotBeNull().run {
+            kode.shouldBe(Kontroll_begrunnelser.ÅPENT_UTKAST)
+            type.shouldBe(KontrolldataFeilType.FEIL)
+            felter.shouldBeEmpty()
+        }
     }
 
     @Test
@@ -171,33 +171,24 @@ class FerdigbehandlingKontrollTest {
                 }
             )
         }
-
         val overlappendeMedlemskapsperioder = listOf(
             lagMedlemskapsperiode(
                 LocalDate.now().plusDays(1), LocalDate.now().plusDays(10)
             )
         )
-
-        val kontrollData = FerdigbehandlingKontrollData(
-            medlemskapsDokument,
-            null,
-            null,
-            null,
-            null,
-            null,
-            null,
-            null,
-            null,
-            null,
-            MedlemskapsperiodeData(overlappendeMedlemskapsperioder, emptyList())
+        val kontrollData = lagFerdigbehandlingKontrollData(
+            medlemskapDokument = medlemskapsDokument,
+            medlemskapsperiodeData = MedlemskapsperiodeData(overlappendeMedlemskapsperioder, emptyList()),
         )
 
 
         val kontrollfeil = FerdigbehandlingKontroll.overlappendePeriode(kontrollData)
 
 
-        kontrollfeil.kode.shouldBe(Kontroll_begrunnelser.OVERLAPPENDE_MEDL_PERIODER)
-        kontrollfeil.type.shouldBe(KontrolldataFeilType.FEIL)
+        kontrollfeil.shouldNotBeNull().run {
+            kode.shouldBe(Kontroll_begrunnelser.OVERLAPPENDE_MEDL_PERIODER)
+            type.shouldBe(KontrolldataFeilType.FEIL)
+        }
     }
 
     @Test
@@ -211,7 +202,6 @@ class FerdigbehandlingKontrollTest {
                 }
             )
         }
-
         val overlappendeMedlemskapsperioder = listOf(
             lagMedlemskapsperiode(
                 LocalDate.now().plusDays(1), LocalDate.now().plusDays(10)
@@ -222,24 +212,14 @@ class FerdigbehandlingKontrollTest {
                 LocalDate.now().plusDays(1), LocalDate.now().plusDays(10)
             ).apply { medlPeriodeID = 12345 }
         )
-
-
-        val kontrollData = FerdigbehandlingKontrollData(
-            medlemskapsDokument,
-            null,
-            null,
-            null,
-            null,
-            null,
-            null,
-            null,
-            null,
-            null,
-            MedlemskapsperiodeData(overlappendeMedlemskapsperioder, tidligereMedlemskapsperioder)
+        val kontrollData = lagFerdigbehandlingKontrollData(
+            medlemskapDokument = medlemskapsDokument,
+            medlemskapsperiodeData = MedlemskapsperiodeData(overlappendeMedlemskapsperioder, tidligereMedlemskapsperioder),
         )
 
 
         val kontrollfeil = FerdigbehandlingKontroll.overlappendePeriode(kontrollData)
+
 
         kontrollfeil.shouldBeNull()
     }
@@ -255,7 +235,6 @@ class FerdigbehandlingKontrollTest {
                 }
             )
         }
-
         val overlappendeMedlemskapsperioder = listOf(
             lagMedlemskapsperiode(
                 LocalDate.now().plusDays(1), LocalDate.now().plusDays(10)
@@ -266,27 +245,18 @@ class FerdigbehandlingKontrollTest {
                 LocalDate.now().plusDays(1), LocalDate.now().plusDays(10)
             ).apply { medlPeriodeID = 666 }
         )
-
-
-        val kontrollData = FerdigbehandlingKontrollData(
-            medlemskapsDokument,
-            null,
-            null,
-            null,
-            null,
-            null,
-            null,
-            null,
-            null,
-            null,
-            MedlemskapsperiodeData(overlappendeMedlemskapsperioder, tidligereMedlemskapsperioder)
+        val kontrollData = lagFerdigbehandlingKontrollData(
+            medlemskapDokument = medlemskapsDokument,
+            medlemskapsperiodeData = MedlemskapsperiodeData(overlappendeMedlemskapsperioder, tidligereMedlemskapsperioder),
         )
 
 
         val kontrollfeil = FerdigbehandlingKontroll.overlappendePeriode(kontrollData)
 
-        kontrollfeil.kode.shouldBe(Kontroll_begrunnelser.OVERLAPPENDE_MEDL_PERIODER)
-        kontrollfeil.type.shouldBe(KontrolldataFeilType.FEIL)
+        kontrollfeil.shouldNotBeNull().run {
+            kode.shouldBe(Kontroll_begrunnelser.OVERLAPPENDE_MEDL_PERIODER)
+            type.shouldBe(KontrolldataFeilType.FEIL)
+        }
     }
 
     @Test
@@ -300,40 +270,32 @@ class FerdigbehandlingKontrollTest {
                 }
             )
         }
-
         val overlappendeMedlemskapsperioder = listOf(
             lagMedlemskapsperiode(
                 LocalDate.now().plusDays(1), LocalDate.now().plusDays(10)
             )
         )
-
         val lovvalgsperiode = Lovvalgsperiode().apply {
             id = 1
             fom = LocalDate.now()
             tom = LocalDate.now().plusDays(4)
             innvilgelsesresultat = InnvilgelsesResultat.AVSLAATT
         }
-
-        val kontrollData = FerdigbehandlingKontrollData(
-            medlemskapsDokument,
-            null,
-            null,
-            lovvalgsperiode,
-            null,
-            null,
-            Behandlingstema.UTSENDT_ARBEIDSTAKER,
-            null,
-            null,
-            null,
-            MedlemskapsperiodeData(overlappendeMedlemskapsperioder, emptyList())
+        val kontrollData = lagFerdigbehandlingKontrollData(
+            medlemskapDokument = medlemskapsDokument,
+            lovvalgsperiode = lovvalgsperiode,
+            behandlingstema = Behandlingstema.UTSENDT_ARBEIDSTAKER,
+            medlemskapsperiodeData = MedlemskapsperiodeData(overlappendeMedlemskapsperioder, emptyList()),
         )
 
 
         val kontrollfeil = FerdigbehandlingKontroll.overlappendePeriode(kontrollData)
 
 
-        kontrollfeil.kode.shouldBe(Kontroll_begrunnelser.OVERLAPPENDE_MEDL_PERIODER)
-        kontrollfeil.type.shouldBe(KontrolldataFeilType.FEIL)
+        kontrollfeil.shouldNotBeNull().run {
+            kode.shouldBe(Kontroll_begrunnelser.OVERLAPPENDE_MEDL_PERIODER)
+            type.shouldBe(KontrolldataFeilType.FEIL)
+        }
     }
 
     @Test
@@ -347,32 +309,24 @@ class FerdigbehandlingKontrollTest {
                 }
             )
         }
-
         val lovvalgsperiode = Lovvalgsperiode().apply {
             id = 1
             fom = LocalDate.now()
             tom = LocalDate.now().plusDays(4)
             innvilgelsesresultat = InnvilgelsesResultat.AVSLAATT
         }
-
-        val kontrollData = FerdigbehandlingKontrollData(
-            medlemskapsDokument,
-            null,
-            null,
-            lovvalgsperiode,
-            null,
-            null,
-            Behandlingstema.UTSENDT_ARBEIDSTAKER,
-            null,
-            null,
-            null,
-            null
+        val kontrollData = lagFerdigbehandlingKontrollData(
+            medlemskapDokument = medlemskapsDokument,
+            lovvalgsperiode = lovvalgsperiode,
+            behandlingstema = Behandlingstema.UTSENDT_ARBEIDSTAKER,
         )
 
         val kontrollfeil = FerdigbehandlingKontroll.overlappendePeriode(kontrollData)
 
-        kontrollfeil.kode.shouldBe(Kontroll_begrunnelser.OVERLAPPENDE_UNNTAK_PERIODER)
-        kontrollfeil.type.shouldBe(KontrolldataFeilType.ADVARSEL)
+        kontrollfeil.shouldNotBeNull().run {
+            kode.shouldBe(Kontroll_begrunnelser.OVERLAPPENDE_UNNTAK_PERIODER)
+            type.shouldBe(KontrolldataFeilType.ADVARSEL)
+        }
     }
 
 
@@ -393,25 +347,16 @@ class FerdigbehandlingKontrollTest {
             fom = LocalDate.now()
             tom = LocalDate.now().plusDays(4)
         }
-        val kontrollData = FerdigbehandlingKontrollData(
-            medlemskapsDokument,
-            null,
-            null,
-            lovvalgsperiode,
-            null,
-            null,
-            null,
-            null,
-            null,
-            null,
-            null
+        val kontrollData = lagFerdigbehandlingKontrollData(
+            medlemskapDokument = medlemskapsDokument,
+            lovvalgsperiode = lovvalgsperiode,
         )
 
 
         val kontrollfeil = FerdigbehandlingKontroll.overlappendeMedlemskapsperiode(kontrollData)
 
 
-        kontrollfeil.kode.shouldBe(Kontroll_begrunnelser.OVERLAPPENDE_MEDLEMSKAPSPERIODER)
+        kontrollfeil.shouldNotBeNull().kode.shouldBe(Kontroll_begrunnelser.OVERLAPPENDE_MEDLEMSKAPSPERIODER)
     }
 
     @Test
@@ -431,64 +376,37 @@ class FerdigbehandlingKontrollTest {
             fom = LocalDate.now()
             tom = LocalDate.now().plusDays(4)
         }
-        val kontrollData = FerdigbehandlingKontrollData(
-            medlemskapsDokument,
-            null,
-            null,
-            lovvalgsperiode,
-            null,
-            null,
-            null,
-            null,
-            null,
-            null,
-            null
+        val kontrollData = lagFerdigbehandlingKontrollData(
+            medlemskapDokument = medlemskapsDokument,
+            lovvalgsperiode = lovvalgsperiode,
         )
 
 
         val kontrollfeil = FerdigbehandlingKontroll.overlappendeUnntaksperiode(kontrollData)
 
 
-        kontrollfeil.kode.shouldBe(Kontroll_begrunnelser.OVERLAPPENDE_UNNTAK_PERIODER)
+        kontrollfeil.shouldNotBeNull().kode.shouldBe(Kontroll_begrunnelser.OVERLAPPENDE_UNNTAK_PERIODER)
     }
 
     @Test
     fun `person uten registrert adresse skal gi kontrollfeil`() {
-        val kontrollData = FerdigbehandlingKontrollData(
-            null,
-            PersonopplysningerObjectFactory.lagPersonopplysningerUtenAdresser(),
-            lagMottatteOpplysningerdata(),
-            null,
-            null,
-            null,
-            null,
-            null,
-            null,
-            null,
-            null
+        val kontrollData = lagFerdigbehandlingKontrollData(
+            persondata = PersonopplysningerObjectFactory.lagPersonopplysningerUtenAdresser(),
+            mottatteOpplysningerData = lagMottatteOpplysningerdata(),
         )
 
 
         val kontrollfeil = FerdigbehandlingKontroll.adresseRegistrert(kontrollData)
 
 
-        kontrollfeil.kode.shouldBe(Kontroll_begrunnelser.MANGLENDE_REGISTRERTE_ADRESSE_BRUKER)
+        kontrollfeil.shouldNotBeNull().kode.shouldBe(Kontroll_begrunnelser.MANGLENDE_REGISTRERTE_ADRESSE_BRUKER)
     }
 
     @Test
     fun `person med registrert adresse skal ikke gi kontrollfeil`() {
-        val kontrollData = FerdigbehandlingKontrollData(
-            null,
-            PersonopplysningerObjectFactory.lagPersonopplysninger(),
-            lagMottatteOpplysningerdata(),
-            null,
-            null,
-            null,
-            null,
-            null,
-            null,
-            null,
-            null
+        val kontrollData = lagFerdigbehandlingKontrollData(
+            persondata = PersonopplysningerObjectFactory.lagPersonopplysninger(),
+            mottatteOpplysningerData = lagMottatteOpplysningerdata(),
         )
 
 
@@ -496,22 +414,16 @@ class FerdigbehandlingKontrollTest {
 
 
         kontrollfeil.shouldBeNull()
+
     }
 
     @Test
     fun `person uten registrert adresse med fullmakt med gyldig adresse skal ikke gi kontrollfeil`() {
-        val kontrollData = FerdigbehandlingKontrollData(
-            null,
-            PersonopplysningerObjectFactory.lagPersonopplysningerUtenAdresser(),
-            lagMottatteOpplysningerdata(),
-            null,
-            null,
-            null,
-            null,
-            lagAktoerFullmektigPerson(),
-            null,
-            PersonopplysningerObjectFactory.lagPersonopplysninger(),
-            null
+        val kontrollData = lagFerdigbehandlingKontrollData(
+            persondata = PersonopplysningerObjectFactory.lagPersonopplysningerUtenAdresser(),
+            mottatteOpplysningerData = lagMottatteOpplysningerdata(),
+            fullmektig = lagAktoerFullmektigPerson(),
+            persondataTilFullmektig = PersonopplysningerObjectFactory.lagPersonopplysninger(),
         )
 
 
@@ -523,18 +435,11 @@ class FerdigbehandlingKontrollTest {
 
     @Test
     fun `person uten registrert adresse med fullmektig organisasjon med adresse skal ikke gi kontrollfeil`() {
-        val kontrollData = FerdigbehandlingKontrollData(
-            null,
-            PersonopplysningerObjectFactory.lagPersonopplysningerUtenAdresser(),
-            lagMottatteOpplysningerdata(),
-            null,
-            null,
-            null,
-            null,
-            lagAktoerFullmektigOrganisasjon(),
-            lagOrganisasjonDokument("1111", "Testegate 4", "2222", "Testegate 5"),
-            null,
-            null
+        val kontrollData = lagFerdigbehandlingKontrollData(
+            persondata = PersonopplysningerObjectFactory.lagPersonopplysningerUtenAdresser(),
+            mottatteOpplysningerData = lagMottatteOpplysningerdata(),
+            fullmektig = lagAktoerFullmektigOrganisasjon(),
+            organisasjonDokument = lagOrganisasjonDokument("1111", "Testegate 4", "2222", "Testegate 5"),
         )
 
 
@@ -546,39 +451,31 @@ class FerdigbehandlingKontrollTest {
 
     @Test
     fun `person uten registrert adresse med fullmektig organisasjon uten adresse skal gi kontrollfeil`() {
-        val kontrollData = FerdigbehandlingKontrollData(
-            null,
-            PersonopplysningerObjectFactory.lagPersonopplysningerUtenAdresser(),
-            lagMottatteOpplysningerdata(),
-            null,
-            null,
-            null,
-            null,
-            lagAktoerFullmektigOrganisasjon(),
-            lagOrganisasjonDokument("", "Testegate 4", "", "NO"),
-            null,
-            null
+        val kontrollData = lagFerdigbehandlingKontrollData(
+            persondata = PersonopplysningerObjectFactory.lagPersonopplysningerUtenAdresser(),
+            mottatteOpplysningerData = lagMottatteOpplysningerdata(),
+            fullmektig = lagAktoerFullmektigOrganisasjon(),
+            organisasjonDokument = lagOrganisasjonDokument("", "Testegate 4", "", "NO"),
         )
 
 
         val kontrollfeil = FerdigbehandlingKontroll.adresseRegistrert(kontrollData)
 
 
-        kontrollfeil.kode.shouldBe(Kontroll_begrunnelser.MANGLENDE_REGISTRERTE_ADRESSE_REPRESENTANT)
+        kontrollfeil.shouldNotBeNull().kode.shouldBe(Kontroll_begrunnelser.MANGLENDE_REGISTRERTE_ADRESSE_REPRESENTANT)
     }
 
     private fun lagAktoerFullmektigOrganisasjon(): Aktoer {
         val aktoer = Aktoer()
         aktoer.rolle = Aktoersroller.FULLMEKTIG
-        aktoer.orgnr = FULLMEKTIG_ORGNR
+        aktoer.orgnr = "123456789"
         return aktoer
     }
-
 
     private fun lagAktoerFullmektigPerson(): Aktoer {
         val aktoer = Aktoer()
         aktoer.rolle = Aktoersroller.FULLMEKTIG
-        aktoer.personIdent = BRUKER_AKTØRID
+        aktoer.personIdent = "12345678911"
         return aktoer
     }
 
@@ -635,4 +532,31 @@ class FerdigbehandlingKontrollTest {
         return medlemskapsperiode
     }
 
+    private fun lagFerdigbehandlingKontrollData(
+        medlemskapDokument: MedlemskapDokument? = null,
+        persondata: Persondata = PersonopplysningerObjectFactory.lagPersonopplysninger(),
+        mottatteOpplysningerData: MottatteOpplysningerData? = null,
+        lovvalgsperiode: Lovvalgsperiode? = null,
+        opprinneligLovvalgsperiode: Lovvalgsperiode? = null,
+        saksopplysningerData: SaksopplysningerData? = null,
+        behandlingstema: Behandlingstema? = null,
+        fullmektig: Aktoer? = null,
+        organisasjonDokument: OrganisasjonDokument? = null,
+        persondataTilFullmektig: Persondata? = null,
+        medlemskapsperiodeData: MedlemskapsperiodeData? = null,
+        brevUtkast: List<UtkastBrev> = emptyList()
+    ) = FerdigbehandlingKontrollData(
+        medlemskapDokument,
+        persondata,
+        mottatteOpplysningerData,
+        lovvalgsperiode,
+        opprinneligLovvalgsperiode,
+        saksopplysningerData,
+        behandlingstema,
+        fullmektig,
+        organisasjonDokument,
+        persondataTilFullmektig,
+        medlemskapsperiodeData,
+        brevUtkast
+    )
 }

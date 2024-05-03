@@ -6,6 +6,7 @@ import io.mockk.junit5.MockKExtension
 import io.mockk.verify
 import no.nav.melosys.domain.Behandling
 import no.nav.melosys.domain.Fagsak
+import no.nav.melosys.domain.FagsakTestFactory
 import no.nav.melosys.domain.kodeverk.Saksstatuser
 import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingsresultattyper
 import no.nav.melosys.saksflytapi.ProsessinstansService
@@ -31,7 +32,6 @@ class FerdigbehandleSakServiceTest {
     lateinit var prosessinstansService: ProsessinstansService
 
     private lateinit var ferdigbehandleSakService: FerdigbehandleSakService
-    private val SAKSNUMMER = "MEL-1"
 
     @BeforeEach
     fun setup() {
@@ -40,13 +40,13 @@ class FerdigbehandleSakServiceTest {
 
     @Test
     fun ferdigbehandleSak_saksstatusOPPRETTET_lagrerKorrekt() {
-        val fagsak = Fagsak().apply { status = Saksstatuser.OPPRETTET }
+        val fagsak = FagsakTestFactory.lagFagsak()
         val behandling = Behandling().apply { this.fagsak = fagsak }
         fagsak.behandlinger.add(behandling)
-        every { fagsakService.hentFagsak(SAKSNUMMER) } returns fagsak
+        every { fagsakService.hentFagsak(FagsakTestFactory.SAKSNUMMER) } returns fagsak
 
 
-        ferdigbehandleSakService.ferdigbehandleSak(SAKSNUMMER)
+        ferdigbehandleSakService.ferdigbehandleSak(FagsakTestFactory.SAKSNUMMER)
 
 
         verify { fagsakService.avsluttFagsakOgBehandling(fagsak, behandling, Saksstatuser.AVSLUTTET) }
@@ -56,13 +56,15 @@ class FerdigbehandleSakServiceTest {
 
     @Test
     fun ferdigbehandleSak_saksstatusAnnetEnnOPPRETTET_lagrerKorrekt() {
-        val fagsak = Fagsak().apply { status = Saksstatuser.LOVVALG_AVKLART }
+        val fagsak = FagsakTestFactory.builder().apply {
+            status = Saksstatuser.LOVVALG_AVKLART
+        }.build()
         val behandling = Behandling().apply { this.fagsak = fagsak }
         fagsak.behandlinger.add(behandling)
-        every { fagsakService.hentFagsak(SAKSNUMMER) } returns fagsak
+        every { fagsakService.hentFagsak(FagsakTestFactory.SAKSNUMMER) } returns fagsak
 
 
-        ferdigbehandleSakService.ferdigbehandleSak(SAKSNUMMER)
+        ferdigbehandleSakService.ferdigbehandleSak(FagsakTestFactory.SAKSNUMMER)
 
 
         verify { fagsakService.avsluttFagsakOgBehandling(fagsak, behandling, Saksstatuser.LOVVALG_AVKLART) }

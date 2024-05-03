@@ -188,11 +188,13 @@ internal class SaksflytOppstartIT(
         return ApplicationReadyEvent(mockk(relaxed = true), emptyArray(), mockk(), Duration.ofSeconds(2))
     }
 
-    private fun lagFagsak(): Fagsak = Fagsak().apply {
-        saksnummer = "MEL-1007"
-        type = Sakstyper.EU_EOS
-        tema = Sakstemaer.MEDLEMSKAP_LOVVALG
-        status = Saksstatuser.OPPRETTET
+    private fun lagFagsak(): Fagsak = Fagsak(
+        "MEL-1007",
+        null,
+        Sakstyper.EU_EOS,
+        Sakstemaer.MEDLEMSKAP_LOVVALG,
+        Saksstatuser.OPPRETTET,
+    ).apply {
         leggTilRegisteringInfo()
     }
 

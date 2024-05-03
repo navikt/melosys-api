@@ -58,7 +58,7 @@ public class AltinnSoeknadService {
         final LocalDate mottaksdato = hentMottaksdato(søknadReferanse);
 
         final Fagsak fagsak = fagsakService.nyFagsakOgBehandling(lagOpprettSakRequest(søknad, mottaksdato));
-        final Behandling behandling = fagsak.hentAktivBehandling();
+        final Behandling behandling = fagsak.finnAktivBehandling();
 
         mottatteOpplysningerService.opprettSøknadUtsendteArbeidstakereEøs(
             behandling.getId(),

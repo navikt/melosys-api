@@ -27,8 +27,6 @@ import org.springframework.context.annotation.Lazy;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-import static no.nav.melosys.domain.Fagsak.erSakstypeEøs;
-
 @Service
 public class OpprettSak {
     private final JournalfoeringService journalfoeringService;
@@ -114,7 +112,7 @@ public class OpprettSak {
         lovligeKombinasjonerSaksbehandlingService.validerOpprettelseOgEndring(
             hovedpart, sakstype, sakstema, behandlingstema, behandlingstype);
 
-        if (erSakstypeEøs(sakstype)
+        if ((sakstype == Sakstyper.EU_EOS)
             && !saksbehandlingRegler.harIngenFlyt(sakstype, sakstema, behandlingstype, behandlingstema)
             && !saksbehandlingRegler.harIkkeYrkesaktivFlyt(sakstype, behandlingstema)
             && !saksbehandlingRegler.harRegistreringUnntakFraMedlemskapFlyt(sakstype, sakstema, behandlingstema)) {

@@ -5,6 +5,7 @@ import java.time.LocalDate;
 import com.google.common.collect.Lists;
 import no.nav.melosys.domain.Behandling;
 import no.nav.melosys.domain.Fagsak;
+import no.nav.melosys.domain.FagsakTestFactory;
 import no.nav.melosys.domain.eessi.melding.MelosysEessiMelding;
 import no.nav.melosys.domain.kodeverk.Sakstemaer;
 import no.nav.melosys.domain.kodeverk.Sakstyper;
@@ -83,15 +84,14 @@ class OpprettFagsakOgBehandlingFraSedTest {
     }
 
     private Fagsak lagFagsak() {
-        Fagsak fagsak = new Fagsak();
-        fagsak.setSaksnummer("MEL-123");
+        Fagsak fagsak = FagsakTestFactory.lagFagsak();
 
         Behandling behandling = new Behandling();
         behandling.setId(1L);
         behandling.setStatus(Behandlingsstatus.UNDER_BEHANDLING);
         behandling.setFagsak(fagsak);
 
-        fagsak.setBehandlinger(Lists.newArrayList(behandling));
+        fagsak.leggTilBehandling(behandling);
         return fagsak;
     }
 }

@@ -74,7 +74,6 @@ class EessiConsumerTest(
     @BeforeAll
     fun beforeAll() {
         serviceUnderTestMockServer.start()
-        stsMockServer.start()
         oAuthMockServer.start()
         oAuthMockServer.reset()
     }
@@ -82,7 +81,6 @@ class EessiConsumerTest(
     @AfterAll
     fun afterAll() {
         serviceUnderTestMockServer.stop()
-        stsMockServer.stop()
         oAuthMockServer.stop()
     }
 
@@ -440,12 +438,12 @@ class EessiConsumerTest(
 
     fun get(url: String): MappingBuilder =
         WireMock.get(url)
-            .withHeader("Authorization", WireMock.equalTo("Bearer --token-from-system--"))
+            .withHeader("Authorization", WireMock.equalTo("Bearer --azure-token-from-system--"))
             .withHeader(HttpHeaders.ACCEPT, WireMock.equalTo(MediaType.APPLICATION_JSON_VALUE))
 
     fun post(url: String): MappingBuilder =
         WireMock.post(url)
-            .withHeader("Authorization", WireMock.equalTo("Bearer --token-from-system--"))
+            .withHeader("Authorization", WireMock.equalTo("Bearer --azure-token-from-system--"))
             .withHeader(HttpHeaders.ACCEPT, WireMock.equalTo(MediaType.APPLICATION_JSON_VALUE))
             .withHeader(HttpHeaders.CONTENT_TYPE, WireMock.equalTo(MediaType.APPLICATION_JSON_VALUE))
 

@@ -145,8 +145,8 @@ class LovvalgsperiodeServiceTest {
 
     @Test
     void hentTidligereLovvalgsperioder_enValgtMedlemsperiode_returnererEnTidligerLovvalgsperiode() {
-        Medlemsperiode medlemsperiode = lagMedlemsperiode(23L, GrunnlagMedl.FO_12_2.getKode());
-        Medlemsperiode medlemsperiodeFeilId = lagMedlemsperiode(46L, GrunnlagMedl.FO_12_2.getKode());
+        Medlemsperiode medlemsperiode = lagMedlemsperiode(23L, GrunnlagMedl.FO_12_2.kode);
+        Medlemsperiode medlemsperiodeFeilId = lagMedlemsperiode(46L, GrunnlagMedl.FO_12_2.kode);
 
         MedlemskapDokument medlDokument = new MedlemskapDokument();
         medlDokument.getMedlemsperiode().add(medlemsperiode);
@@ -322,6 +322,6 @@ class LovvalgsperiodeServiceTest {
         Periode periode = new Periode(LocalDate.now(), LocalDate.now());
         return new Medlemsperiode(
             id, periode, null,
-            PeriodestatusMedl.GYLD.getKode(), grunnlagMedlKode, null, null, null, null, null);
+            PeriodestatusMedl.GYLD.kode, grunnlagMedlKode, null, null, null, null, null);
     }
 }

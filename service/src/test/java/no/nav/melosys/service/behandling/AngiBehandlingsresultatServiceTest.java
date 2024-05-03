@@ -3,6 +3,7 @@ package no.nav.melosys.service.behandling;
 import no.nav.melosys.domain.Behandling;
 import no.nav.melosys.domain.Behandlingsresultat;
 import no.nav.melosys.domain.Fagsak;
+import no.nav.melosys.domain.FagsakTestFactory;
 import no.nav.melosys.domain.kodeverk.Saksstatuser;
 import no.nav.melosys.domain.kodeverk.Sakstemaer;
 import no.nav.melosys.domain.kodeverk.Sakstyper;
@@ -157,7 +158,7 @@ class AngiBehandlingsresultatServiceTest {
 
     @Test
     void oppdaterBehandlingsresultattypeOgAvsluttFagsakOgBehandling_gyldigScenarioAVSLAG_SØKNAD_kallerKorrekt() {
-        var behandlingsresultat = lagBehandlingsresultat(Sakstemaer.MEDLEMSKAP_LOVVALG, null, Behandlingstyper.FØRSTEGANG, Behandlingstema.ARBEID_TJENESTEPERSON_ELLER_FLY);
+        var behandlingsresultat = lagBehandlingsresultat(Sakstemaer.MEDLEMSKAP_LOVVALG, Sakstyper.EU_EOS, Behandlingstyper.FØRSTEGANG, Behandlingstema.ARBEID_TJENESTEPERSON_ELLER_FLY);
         when(behandlingsresultatService.hentBehandlingsresultat(BEHANDLING_ID)).thenReturn(behandlingsresultat);
 
 
@@ -173,7 +174,7 @@ class AngiBehandlingsresultatServiceTest {
 
     @Test
     void oppdaterBehandlingsresultattypeOgAvsluttFagsakOgBehandling_gyldigScenarioKLAGE_kallerKorrekt() {
-        var behandlingsresultat = lagBehandlingsresultat(null, null, Behandlingstyper.KLAGE, null);
+        var behandlingsresultat = lagBehandlingsresultat(Sakstemaer.MEDLEMSKAP_LOVVALG, Sakstyper.EU_EOS, Behandlingstyper.KLAGE, null);
         when(behandlingsresultatService.hentBehandlingsresultat(BEHANDLING_ID)).thenReturn(behandlingsresultat);
 
 
@@ -189,7 +190,7 @@ class AngiBehandlingsresultatServiceTest {
 
     @Test
     void oppdaterBehandlingsresultattypeOgAvsluttFagsakOgBehandling_gyldigScenarioNY_VURDERING_kallerKorrekt() {
-        var behandlingsresultat = lagBehandlingsresultat(null, null, Behandlingstyper.NY_VURDERING, null);
+        var behandlingsresultat = lagBehandlingsresultat(Sakstemaer.MEDLEMSKAP_LOVVALG, Sakstyper.EU_EOS, Behandlingstyper.NY_VURDERING, null);
         when(behandlingsresultatService.hentBehandlingsresultat(BEHANDLING_ID)).thenReturn(behandlingsresultat);
 
 
@@ -231,10 +232,10 @@ class AngiBehandlingsresultatServiceTest {
     }
 
     private Behandlingsresultat lagBehandlingsresultat(Sakstemaer sakstema, Sakstyper sakstype, Behandlingstyper behandlingstype, Behandlingstema behandlingstema) {
-        var fagsak = new Fagsak();
-        fagsak.setSaksnummer("MEL-1234");
-        fagsak.setTema(sakstema);
-        fagsak.setType(sakstype);
+        var fagsak = FagsakTestFactory.builder()
+            .tema(sakstema)
+            .type(sakstype)
+            .build();
         var behandling = new Behandling();
         behandling.setFagsak(fagsak);
         behandling.setType(behandlingstype);

@@ -11,6 +11,7 @@ import io.mockk.impl.annotations.MockK
 import io.mockk.junit5.MockKExtension
 import io.mockk.verify
 import no.nav.melosys.domain.*
+import no.nav.melosys.domain.FagsakTestFactory.BRUKER_AKTØR_ID
 import no.nav.melosys.domain.avgift.*
 import no.nav.melosys.domain.folketrygden.FastsattTrygdeavgift
 import no.nav.melosys.domain.folketrygden.MedlemAvFolketrygden
@@ -61,7 +62,6 @@ internal class TrygdeavgiftsberegningServiceTest {
     private val FULLMEKTIG_NAVN: String = "Herr Fullmektig"
     private val FULLMEKTIG_ORGNR: String = "888888888"
     private val FULLMEKTIG_ORG_NAVN: String = "Aksjeselskap AS"
-    private val BRUKER_AKTØR_ID: String = "987654321"
     private val BRUKER_NAVN: String = "Bruker Etternavn"
     private val FØDSELSDATO: LocalDate = LocalDate.of(2020, 1, 1)
 
@@ -262,14 +262,7 @@ internal class TrygdeavgiftsberegningServiceTest {
     @Test
     fun beregnTrygdeavgift_skalBetaleTrygeavgiftPliktigMedlem_beregnerOgLagrerTrygdeavgift() {
         behandling.apply {
-            fagsak = Fagsak().apply {
-                aktører = setOf(
-                    Aktoer().apply {
-                        aktørId = BRUKER_AKTØR_ID
-                        rolle = Aktoersroller.BRUKER
-                    }
-                )
-            }
+            fagsak = FagsakTestFactory.builder().medBruker().build()
         }
 
         medlemAvFolketrygden.medlemskapsperioder.add(Medlemskapsperiode().apply {
@@ -434,14 +427,7 @@ internal class TrygdeavgiftsberegningServiceTest {
     @Test
     fun finnFakturamottaker_harIkkeFullmektig_mottakerErBruker() {
         behandling.apply {
-            fagsak = Fagsak().apply {
-                aktører = setOf(
-                    Aktoer().apply {
-                        aktørId = BRUKER_AKTØR_ID
-                        rolle = Aktoersroller.BRUKER
-                    }
-                )
-            }
+            fagsak = FagsakTestFactory.builder().medBruker().build()
         }
         trygdeavgiftsberegningService.finnFakturamottakerNavn(BEHANDLING_ID).shouldBe(BRUKER_NAVN)
     }
@@ -449,18 +435,19 @@ internal class TrygdeavgiftsberegningServiceTest {
     @Test
     fun finnFakturamottaker_harFullmektigPersonForTrygdeavgift_mottakerErFullmektigPerson() {
         behandling.apply {
-            fagsak = Fagsak().apply {
-                aktører = setOf(
-                    Aktoer().apply {
-                        aktørId = BRUKER_AKTØR_ID
-                        rolle = Aktoersroller.BRUKER
-                    },
-                    Aktoer().apply {
-                        rolle = Aktoersroller.FULLMEKTIG
-                        personIdent = FULLMEKTIG_AKTØR_ID
-                        fullmakter = setOf(Fullmakt().apply { type = Fullmaktstype.FULLMEKTIG_TRYGDEAVGIFT })
-                    })
-            }
+            fagsak = FagsakTestFactory.builder()
+                .aktører(
+                    setOf(
+                        Aktoer().apply {
+                            aktørId = BRUKER_AKTØR_ID
+                            rolle = Aktoersroller.BRUKER
+                        },
+                        Aktoer().apply {
+                            rolle = Aktoersroller.FULLMEKTIG
+                            personIdent = FULLMEKTIG_AKTØR_ID
+                            fullmakter = setOf(Fullmakt().apply { type = Fullmaktstype.FULLMEKTIG_TRYGDEAVGIFT })
+                        })
+                ).build()
         }
         trygdeavgiftsberegningService.finnFakturamottakerNavn(BEHANDLING_ID).shouldBe(FULLMEKTIG_NAVN)
     }
@@ -468,8 +455,8 @@ internal class TrygdeavgiftsberegningServiceTest {
     @Test
     fun finnFakturamottaker_harFullmektigOrgForTrygdeavgift_mottakerErFullmektigOrg() {
         behandling.apply {
-            fagsak = Fagsak().apply {
-                aktører = setOf(
+            fagsak = FagsakTestFactory.builder().aktører(
+                setOf(
                     Aktoer().apply {
                         aktørId = BRUKER_AKTØR_ID
                         rolle = Aktoersroller.BRUKER
@@ -479,7 +466,7 @@ internal class TrygdeavgiftsberegningServiceTest {
                         rolle = Aktoersroller.FULLMEKTIG
                         fullmakter = setOf(Fullmakt().apply { type = Fullmaktstype.FULLMEKTIG_TRYGDEAVGIFT })
                     })
-            }
+            ).build()
         }
         trygdeavgiftsberegningService.finnFakturamottakerNavn(BEHANDLING_ID).shouldBe(FULLMEKTIG_ORG_NAVN)
     }
@@ -487,8 +474,8 @@ internal class TrygdeavgiftsberegningServiceTest {
     @Test
     fun finnFakturamottaker_harFullmektigMenIkkeForTrygdeavgift_brukerErFullmektig() {
         behandling.apply {
-            fagsak = Fagsak().apply {
-                aktører = setOf(
+            fagsak = FagsakTestFactory.builder().aktører(
+                setOf(
                     Aktoer().apply {
                         aktørId = BRUKER_AKTØR_ID
                         rolle = Aktoersroller.BRUKER
@@ -499,7 +486,7 @@ internal class TrygdeavgiftsberegningServiceTest {
                         fullmakter = setOf(Fullmakt().apply { type = Fullmaktstype.FULLMEKTIG_SØKNAD },
                             Fullmakt().apply { type = Fullmaktstype.FULLMEKTIG_ARBEIDSGIVER })
                     })
-            }
+            ).build()
         }
         trygdeavgiftsberegningService.finnFakturamottakerNavn(BEHANDLING_ID).shouldBe(BRUKER_NAVN)
     }

@@ -193,7 +193,7 @@ class InnvilgelseFtrlMapper(
         fastsattTrygdeavgift?.trygdeavgiftsperioder?.any { it.grunnlagInntekstperiode.isArbeidsgiversavgiftBetalesTilSkatt } ?: false
 
     private fun finnFullmektigTrygdeavgift(behandling: Behandling): String? {
-        if (behandling.fagsak.finnFullmektig(Fullmaktstype.FULLMEKTIG_TRYGDEAVGIFT).isEmpty) return null
+        if (behandling.fagsak.finnFullmektig(Fullmaktstype.FULLMEKTIG_TRYGDEAVGIFT) == null) return null
 
         return trygdeavgiftsberegningService.finnFakturamottakerNavn(behandling.id)
     }

@@ -5,23 +5,24 @@ import no.nav.melosys.domain.oppgave.Oppgave
 import java.time.LocalDate
 import java.time.ZonedDateTime
 
-class OppgaveDto private constructor(val oppgaveID: String) {
-    var tema: Tema? = null
-    var oppgavetype: String? = null
-    var registrertDato: ZonedDateTime? = null
-    var frist: LocalDate? = null
-    var sakID: String? = null
-    var journalpostID: String? = null
-
+data class OppgaveDto(
+    val oppgaveID: String,
+    val tema: Tema?,
+    val oppgavetype: String?,
+    val registrertDato: ZonedDateTime?,
+    val frist: LocalDate?,
+    val sakID: String?,
+    val journalpostID: String?
+) {
     companion object {
-        @JvmStatic
-        fun av(oppgave: Oppgave): OppgaveDto = OppgaveDto(oppgave.oppgaveId).apply {
-            tema = oppgave.tema
-            oppgavetype = oppgave.oppgavetype?.beskrivelse ?: ""
-            registrertDato = oppgave.opprettetTidspunkt
-            frist = oppgave.fristFerdigstillelse
-            sakID = oppgave.saksnummer
-            journalpostID = oppgave.journalpostId
-        }
+        fun av(oppgave: Oppgave): OppgaveDto = OppgaveDto(
+            oppgaveID =  oppgave.oppgaveId,
+            tema = oppgave.tema,
+            oppgavetype = oppgave.oppgavetype?.beskrivelse ?: "",
+            registrertDato = oppgave.opprettetTidspunkt,
+            frist = oppgave.fristFerdigstillelse,
+            sakID = oppgave.saksnummer,
+            journalpostID = oppgave.journalpostId,
+        )
     }
 }

@@ -37,7 +37,7 @@ class OppdaterFakturamottaker(
             return
         }
 
-        val fullmektig = fagsak.finnFullmektig(Fullmaktstype.FULLMEKTIG_TRYGDEAVGIFT).orElse(null)
+        val fullmektig = fagsak.finnFullmektig(Fullmaktstype.FULLMEKTIG_TRYGDEAVGIFT)
         val sisteFakturaserieReferanse = fakturaserieReferanserPåSak.first()
 
         log.info("Oppdaterer fakturamottaker for fakturaserie : $sisteFakturaserieReferanse")
