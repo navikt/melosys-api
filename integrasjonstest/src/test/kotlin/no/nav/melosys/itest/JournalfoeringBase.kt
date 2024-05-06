@@ -102,8 +102,8 @@ class JournalfoeringBase(
         jfrOppgave: Oppgave,
         journalfoeringOpprettDto: JournalfoeringOpprettDto
     ): JournalfoeringOpprettDto {
-        val hentJournalpost = journalføringService.hentJournalpost(jfrOppgave.journalpostId)
-        return lagJournalføringDto(jfrOppgave, hentJournalpost!!.hoveddokument, journalfoeringOpprettDto)
+        val hentJournalpost = journalføringService.hentJournalpost(jfrOppgave.journalpostId!!)
+        return lagJournalføringDto(jfrOppgave, hentJournalpost.hoveddokument, journalfoeringOpprettDto)
     }
 
     private fun lagJournalføringDto(
@@ -151,13 +151,13 @@ class JournalfoeringBase(
         journalfoeringTilordneDto: JournalfoeringTilordneDto = defaultJournalfoeringTilordneDto()
     ): JournalfoeringTilordneDto {
         val jfrOppgave: Oppgave = lagJfrOppgave()
-        val hentJournalpost = journalføringService.hentJournalpost(jfrOppgave.journalpostId)
+        val hentJournalpost = journalføringService.hentJournalpost(jfrOppgave.journalpostId!!)
         return journalfoeringTilordneDto
             .apply {
                 this.saksnummer = saksnummer
                 journalpostID = jfrOppgave.journalpostId
                 oppgaveID = jfrOppgave.id.toString()
-                hoveddokument = DokumentDto(hentJournalpost!!.hoveddokument.dokumentId, hentJournalpost.hoveddokument.tittel).apply {
+                hoveddokument = DokumentDto(hentJournalpost.hoveddokument.dokumentId, hentJournalpost.hoveddokument.tittel).apply {
                     logiskeVedlegg = emptyList()
                 }
             }.apply {
