@@ -524,7 +524,7 @@ internal class JournalfoeringServiceTest {
 
 
         shouldThrow<FunksjonellException> { journalfoeringService.journalførOgOpprettSak(opprettDto) }
-            .message.shouldBe("RINA-sak 22222 er allerede tilknyttet 22244")
+            .message.shouldBe("RINA-sak 22222 er allerede tilknyttet 111")
     }
 
     @Test
