@@ -341,10 +341,29 @@ class ProsessinstansServiceTest {
         final String institusjonsIdForDk = "ID_FOR_DK";
 
 
-        Prosessinstans prosessinstans = prosessinstansService.lagJournalføringProsessinstans(ProsessType.JFR_NY_SAK_BRUKER, journalfoeringOpprettRequest, institusjonsIdForDk);
+        Prosessinstans prosessinstans = prosessinstansService.lagJournalføringProsessinstans(ProsessType.JFR_NY_SAK_BRUKER, journalfoeringOpprettRequest, institusjonsIdForDk, false);
 
 
         assertThat(prosessinstans.getData(ProsessDataKey.AVSENDER_ID)).isEqualTo(institusjonsIdForDk);
+    }
+
+    @Test
+    void opprettProsessinstansJournalføring_mottakskanalErEessi_setterIkkeAvsenderIProsessinstans() {
+        JournalfoeringOpprettRequest journalfoeringOpprettRequest = lagJournalfoeringOpprettRequest();
+        journalfoeringOpprettRequest.setAvsenderType(Avsendertyper.UTENLANDSK_TRYGDEMYNDIGHET);
+        journalfoeringOpprettRequest.setAvsenderID("DK");
+        journalfoeringOpprettRequest.setAvsenderNavn("Trygdemyndighet i Danmark");
+        final String institusjonsIdForDk = "ID_FOR_DK";
+
+
+        Prosessinstans prosessinstans = prosessinstansService.lagJournalføringProsessinstans(ProsessType.JFR_NY_SAK_BRUKER, journalfoeringOpprettRequest, institusjonsIdForDk, true);
+
+
+        assertThat(prosessinstans.getData(ProsessDataKey.MOTTAKSKANAL_ER_EESSI, Boolean.class)).isTrue();
+        assertThat(prosessinstans.getData(ProsessDataKey.AVSENDER_ID)).isNull();
+        assertThat(prosessinstans.getData(ProsessDataKey.AVSENDER_LAND)).isNull();
+        assertThat(prosessinstans.getData(ProsessDataKey.AVSENDER_NAVN)).isNull();
+        assertThat(prosessinstans.getData(ProsessDataKey.AVSENDER_TYPE)).isNull();
     }
 
     @Test
@@ -353,7 +372,7 @@ class ProsessinstansServiceTest {
 
         journalfoeringOpprettRequest.setForvaltningsmeldingMottaker(ForvaltningsmeldingMottaker.BRUKER);
 
-        Prosessinstans prosessinstans = prosessinstansService.lagJournalføringProsessinstans(ProsessType.ANMODNING_OM_UNNTAK, journalfoeringOpprettRequest, null);
+        Prosessinstans prosessinstans = prosessinstansService.lagJournalføringProsessinstans(ProsessType.ANMODNING_OM_UNNTAK, journalfoeringOpprettRequest, null, false);
 
         assertThat(prosessinstans.getData(ProsessDataKey.FORVALTNINGSMELDING_MOTTAKER, ForvaltningsmeldingMottaker.class)).isEqualTo(ForvaltningsmeldingMottaker.BRUKER);
     }
@@ -365,7 +384,7 @@ class ProsessinstansServiceTest {
         journalfoeringOpprettRequest.setForvaltningsmeldingMottaker(ForvaltningsmeldingMottaker.INGEN);
 
 
-        Prosessinstans prosessinstans = prosessinstansService.lagJournalføringProsessinstans(ProsessType.ANMODNING_OM_UNNTAK, journalfoeringOpprettRequest, null);
+        Prosessinstans prosessinstans = prosessinstansService.lagJournalføringProsessinstans(ProsessType.ANMODNING_OM_UNNTAK, journalfoeringOpprettRequest, null, false);
 
 
         assertThat(prosessinstans.getData(ProsessDataKey.FORVALTNINGSMELDING_MOTTAKER, ForvaltningsmeldingMottaker.class)).isEqualTo(ForvaltningsmeldingMottaker.INGEN);
@@ -378,7 +397,7 @@ class ProsessinstansServiceTest {
         journalfoeringOpprettRequest.setBrukerID(null);
         journalfoeringOpprettRequest.setVirksomhetOrgnr("orgnr");
 
-        Prosessinstans prosessinstans = prosessinstansService.lagJournalføringProsessinstans(ProsessType.ANMODNING_OM_UNNTAK, journalfoeringOpprettRequest, null);
+        Prosessinstans prosessinstans = prosessinstansService.lagJournalføringProsessinstans(ProsessType.ANMODNING_OM_UNNTAK, journalfoeringOpprettRequest, null, false);
 
         assertThat(prosessinstans.getData(ProsessDataKey.VIRKSOMHET_ORGNR)).isEqualTo("orgnr");
     }
@@ -391,7 +410,7 @@ class ProsessinstansServiceTest {
         journalfoeringOpprettRequest.setSkalTilordnes(true);
 
 
-        Prosessinstans prosessinstans = prosessinstansService.lagJournalføringProsessinstans(ProsessType.ANMODNING_OM_UNNTAK, journalfoeringOpprettRequest, null);
+        Prosessinstans prosessinstans = prosessinstansService.lagJournalføringProsessinstans(ProsessType.ANMODNING_OM_UNNTAK, journalfoeringOpprettRequest, null, false);
 
 
         assertThat(prosessinstans.getData(ProsessDataKey.SKAL_TILORDNES, Boolean.class)).isTrue();
@@ -403,7 +422,7 @@ class ProsessinstansServiceTest {
         journalfoeringOpprettRequest.setSkalTilordnes(false);
 
 
-        Prosessinstans prosessinstans = prosessinstansService.lagJournalføringProsessinstans(ProsessType.ANMODNING_OM_UNNTAK, journalfoeringOpprettRequest, null);
+        Prosessinstans prosessinstans = prosessinstansService.lagJournalføringProsessinstans(ProsessType.ANMODNING_OM_UNNTAK, journalfoeringOpprettRequest, null, false);
 
 
         assertThat(prosessinstans.getData(ProsessDataKey.SKAL_TILORDNES, Boolean.class)).isFalse();
@@ -423,7 +442,7 @@ class ProsessinstansServiceTest {
         logiskeVedlegg1.add("tittel");
 
 
-        Prosessinstans prosessinstans = prosessinstansService.lagJournalføringProsessinstans(ProsessType.JFR_NY_SAK_BRUKER, journalfoeringOpprettRequest, null);
+        Prosessinstans prosessinstans = prosessinstansService.lagJournalføringProsessinstans(ProsessType.JFR_NY_SAK_BRUKER, journalfoeringOpprettRequest, null, false);
 
 
         var fysiskeVedleggTypeReference = new TypeReference<Map<String, String>>() {
@@ -449,7 +468,7 @@ class ProsessinstansServiceTest {
         journalfoeringOpprettRequest.setVedlegg(vedlegg);
 
 
-        Prosessinstans prosessinstans = prosessinstansService.lagJournalføringProsessinstans(ProsessType.JFR_NY_SAK_BRUKER, journalfoeringOpprettRequest, null);
+        Prosessinstans prosessinstans = prosessinstansService.lagJournalføringProsessinstans(ProsessType.JFR_NY_SAK_BRUKER, journalfoeringOpprettRequest, null, false);
 
 
         var fysiskeVedleggTypeReference = new TypeReference<Map<String, String>>() {

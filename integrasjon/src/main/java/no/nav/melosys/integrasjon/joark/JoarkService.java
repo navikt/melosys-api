@@ -113,8 +113,7 @@ public class JoarkService implements JoarkFasade {
 
     @Override
     public void oppdaterOgFerdigstillJournalpost(String journalpostID, JournalpostOppdatering journalpostOppdatering) {
-
-        fjernEksisterendeLogiskeVedleggPåHovddokument(journalpostID);
+        fjernEksisterendeLogiskeVedleggPåHoveddokument(journalpostID);
 
         OppdaterJournalpostRequest.Builder request = new OppdaterJournalpostRequest.Builder()
             .medDatoMottatt(journalpostOppdatering.getMottattDato())
@@ -144,20 +143,28 @@ public class JoarkService implements JoarkFasade {
             }
         }
 
-        AvsenderMottaker avsender = AvsenderMottaker.builder()
-            .id(journalpostOppdatering.getAvsenderID())
-            .land(journalpostOppdatering.getAvsenderLand())
-            .navn(journalpostOppdatering.getAvsenderNavn())
-            .idType(AvsenderMottaker.tilAvsenderMottakerIdType(journalpostOppdatering.getAvsenderType()))
-            .build();
-
-        request.medAvsender(avsender);
+        if (harAvsenderMottakerFelt(journalpostOppdatering)) {
+            AvsenderMottaker avsender = AvsenderMottaker.builder()
+                .id(journalpostOppdatering.getAvsenderID())
+                .land(journalpostOppdatering.getAvsenderLand())
+                .navn(journalpostOppdatering.getAvsenderNavn())
+                .idType(AvsenderMottaker.tilAvsenderMottakerIdType(journalpostOppdatering.getAvsenderType()))
+                .build();
+            request.medAvsender(avsender);
+        }
 
         journalpostapiConsumer.oppdaterJournalpost(request.build(), journalpostID);
         journalpostapiConsumer.ferdigstillJournalpost(new FerdigstillJournalpostRequest(), journalpostID);
     }
 
-    private void fjernEksisterendeLogiskeVedleggPåHovddokument(String journalpostID) {
+    private boolean harAvsenderMottakerFelt(JournalpostOppdatering journalpostOppdatering) {
+        return journalpostOppdatering.getAvsenderID() != null
+            || journalpostOppdatering.getAvsenderNavn() != null
+            || journalpostOppdatering.getAvsenderLand() != null
+            || journalpostOppdatering.getAvsenderType() != null;
+    }
+
+    private void fjernEksisterendeLogiskeVedleggPåHoveddokument(String journalpostID) {
         var journalpost = hentJournalpost(journalpostID);
         if (journalpost.getHoveddokument() != null) {
             var hoveddokument = journalpost.getHoveddokument();
