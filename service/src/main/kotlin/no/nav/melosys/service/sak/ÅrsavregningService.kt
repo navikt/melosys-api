@@ -8,6 +8,6 @@ import org.springframework.stereotype.Service
 class ÅrsavregningService (
     private val faktureringskomponentenConsumer: FaktureringskomponentenConsumer
 ) {
-    fun hentTotalTrygdeavgiftForPeriode(beregnTotalBeløpDto: BeregnTotalBeløpDto) =
+    fun beregnTotalTrygdeavgiftForPeriode(beregnTotalBeløpDto: BeregnTotalBeløpDto) =
         faktureringskomponentenConsumer.hentTotalTrygdeavgiftForPeriode(beregnTotalBeløpDto)
 }

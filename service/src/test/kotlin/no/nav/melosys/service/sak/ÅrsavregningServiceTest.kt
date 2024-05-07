@@ -34,7 +34,7 @@ internal class ÅrsavregningServiceTest {
         val totalTrygdeavgiftMockResult = BigDecimal.valueOf(1234.55)
         every { faktureringskomponentenConsumer.hentTotalTrygdeavgiftForPeriode(dto) } returns totalTrygdeavgiftMockResult
 
-        val result = årsavregningService.hentTotalTrygdeavgiftForPeriode(dto)
+        val result = årsavregningService.beregnTotalTrygdeavgiftForPeriode(dto)
 
         verify { faktureringskomponentenConsumer.hentTotalTrygdeavgiftForPeriode(dto) }
         assert(result == totalTrygdeavgiftMockResult)

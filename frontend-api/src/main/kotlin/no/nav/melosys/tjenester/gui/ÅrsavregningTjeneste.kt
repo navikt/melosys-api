@@ -21,10 +21,10 @@ import java.math.BigDecimal
 class ÅrsavregningTjeneste(
     private val årsavregningService: ÅrsavregningService,
 ) {
-    @PostMapping("/henttotaltrygdeavgiftforperiode")
+    @PostMapping("/beregntotaltrygdeavgiftforperiode")
     fun hentTotalTrygdeavgiftForPeriode(@RequestBody beregnTotalBeløpDto: BeregnTotalBeløpDto): ResponseEntity<BigDecimal> {
         return ResponseEntity.ok(
-            årsavregningService.hentTotalTrygdeavgiftForPeriode(beregnTotalBeløpDto)
+            årsavregningService.beregnTotalTrygdeavgiftForPeriode(beregnTotalBeløpDto)
         )
     }
 }
