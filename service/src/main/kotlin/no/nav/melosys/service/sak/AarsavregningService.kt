@@ -6,19 +6,12 @@ import org.springframework.stereotype.Service
 
 @Service
 class AarsavregningService (
-    private val fagsakService: FagsakService,
     private val behandlingsresultatService: BehandlingsresultatService
 ) {
-    //TODO Ikke egentlig en del av 6570, men er en forutsetning for å lage datagrunnlaget for 6570
-    fun hentEksisterendeTrygdeavgiftsperioderForFagsak(saksnummer: String, år: Int): List<Trygdeavgiftsperiode> {
-        return fagsakService.hentFagsak(saksnummer)
-            .behandlinger
-            .flatMap { behandling ->
-                behandlingsresultatService.hentBehandlingsresultat(behandling.id)
-                    .medlemAvFolketrygden
-                    .fastsattTrygdeavgift
-                    .trygdeavgiftsperioder
-                    .filter { periode -> periode.periodeFra.year == år }
-            }
-    }
+    fun hentEksisterendeTrygdeavgiftsperioderForFagsak(behandlingsId: Long, år: Int): List<Trygdeavgiftsperiode> =
+        behandlingsresultatService.hentBehandlingsresultat(behandlingsId)
+            .medlemAvFolketrygden
+            .fastsattTrygdeavgift
+            .trygdeavgiftsperioder
+            .filter { periode -> periode.periodeFra.year == år }
 }

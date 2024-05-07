@@ -28,11 +28,11 @@ class ÅrsavregningTjeneste(
     private val faktureringskomponentenConsumer: FaktureringskomponentenConsumer
 ) {
     @GetMapping("/henttrygdeavgiftforaar/{aar}")
-    fun hentDataForÅrsavregning(@PathVariable("saksnummer") saksnummer: String,
+    fun hentDataForÅrsavregning(@PathVariable("saksnummer") behandlingsId: Long,
                                 @PathVariable("aar") år: Int): ResponseEntity<ÅrsavregningDto> {
-        aksesskontroll.autoriserSakstilgang(saksnummer)
+        aksesskontroll.autoriser(behandlingsId)
         return ResponseEntity.ok(
-            lagDataForÅrsavregning(aarsavregningService.hentEksisterendeTrygdeavgiftsperioderForFagsak(saksnummer, år))
+            lagDataForÅrsavregning(aarsavregningService.hentEksisterendeTrygdeavgiftsperioderForFagsak(behandlingsId, år))
         )
     }
 
