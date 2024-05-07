@@ -26,7 +26,7 @@ internal class ÅrsavregningServiceTest {
     }
 
     @Test
-    fun `test hentTotalTrygdeavgiftForPeriode`() {
+    fun `test hentTotalTrygdeavgiftForPeriode henter totalbeløp`() {
         val fakturaseriePeriodeDto = FakturaseriePeriodeDto(
             enhetsprisPerManed = BigDecimal(100), startDato = LocalDate.now().minusYears(1), sluttDato = LocalDate.now(), beskrivelse = "test")
 
