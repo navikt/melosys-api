@@ -151,8 +151,7 @@ class JournalfoeringService(
         } else ProsessType.JFR_ANDREGANG_NY_BEHANDLING
 
     companion object {
-        private fun utledMottaksdato(datoFraSaksbehandler: LocalDate?, journalpost: Journalpost): LocalDate {
-            return datoFraSaksbehandler ?: LocalDate.ofInstant(journalpost.forsendelseMottatt, ZoneId.systemDefault())
-        }
+        private fun utledMottaksdato(datoFraSaksbehandler: LocalDate?, journalpost: Journalpost): LocalDate =
+            datoFraSaksbehandler ?: LocalDate.ofInstant(journalpost.forsendelseMottatt, ZoneId.systemDefault())
     }
 }

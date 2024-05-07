@@ -257,7 +257,7 @@ class JournalfoeringValidering(
         }
     }
 
-    private fun journalføringGjelder(journalfoeringDto: JournalfoeringDto): Aktoersroller {
-        return if (journalfoeringDto.brukerID.isNullOrEmpty()) Aktoersroller.VIRKSOMHET else Aktoersroller.BRUKER
-    }
+    private fun journalføringGjelder(journalfoeringDto: JournalfoeringDto): Aktoersroller =
+        if (journalfoeringDto.brukerID.isNullOrEmpty()) Aktoersroller.VIRKSOMHET else Aktoersroller.BRUKER
+
 }
