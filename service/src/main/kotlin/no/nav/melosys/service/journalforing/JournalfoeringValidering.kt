@@ -1,5 +1,6 @@
 package no.nav.melosys.service.journalforing
 
+import io.getunleash.Unleash
 import no.nav.melosys.domain.Fagsak
 import no.nav.melosys.domain.arkiv.Journalpost
 import no.nav.melosys.domain.eessi.melding.MelosysEessiMelding
@@ -7,6 +8,7 @@ import no.nav.melosys.domain.kodeverk.*
 import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingstema
 import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingstyper
 import no.nav.melosys.exception.FunksjonellException
+import no.nav.melosys.featuretoggle.ToggleName.MELOSYS_HINDRE_JOURNALFOERING_AV_FERDIGSTILTE_JOURNALPOSTER
 import no.nav.melosys.service.behandling.BehandlingsresultatService
 import no.nav.melosys.service.dokument.sed.EessiService
 import no.nav.melosys.service.journalforing.dto.JournalfoeringDto
@@ -24,13 +26,12 @@ class JournalfoeringValidering(
     private val eessiService: EessiService,
     private val saksbehandlingRegler: SaksbehandlingRegler,
     private val behandlingsresultatService: BehandlingsresultatService,
-    private val fagsakService: FagsakService
+    private val fagsakService: FagsakService,
+    private val unleash: Unleash,
 ) {
 
     internal fun validerJournalførOgOpprettSak(journalfoeringDto: JournalfoeringOpprettDto, journalpost: Journalpost) {
-        if (journalpost.isErFerdigstilt) {
-            throw FunksjonellException("Journalposten er allerede ferdigstilt!")
-        }
+        validerJournalpostIkkeAlleredeFerdigstilt(journalpost)
 
         val sakstype = Sakstyper.valueOf(journalfoeringDto.fagsak.sakstype)
         val sakstema = Sakstemaer.valueOf(journalfoeringDto.fagsak.sakstema)
@@ -68,6 +69,10 @@ class JournalfoeringValidering(
     }
 
     internal fun validerJournalførOgKnyttTilEksisterendeSak(journalfoeringDto: JournalfoeringTilordneDto, journalpost: Journalpost, fagsak: Fagsak) {
+        if (unleash.isEnabled(MELOSYS_HINDRE_JOURNALFOERING_AV_FERDIGSTILTE_JOURNALPOSTER)) {
+            validerJournalpostIkkeAlleredeFerdigstilt(journalpost)
+        }
+
         if (journalpost.mottaksKanalErEessi()) {
             val melosysEessiMelding = eessiService.hentSedTilknyttetJournalpost(journalpost.journalpostId)
             validerSkalIkkeBehandlesAutomatisk(melosysEessiMelding)
@@ -90,6 +95,10 @@ class JournalfoeringValidering(
         journalpost: Journalpost,
         fagsak: Fagsak
     ) {
+        if (unleash.isEnabled(MELOSYS_HINDRE_JOURNALFOERING_AV_FERDIGSTILTE_JOURNALPOSTER)) {
+            validerJournalpostIkkeAlleredeFerdigstilt(journalpost)
+        }
+
         val sistBehandling = fagsak.hentSistRegistrertBehandling()
         val sistBehandlingsresultat = behandlingsresultatService.hentBehandlingsresultatMedAnmodningsperioder(sistBehandling.id)
 
@@ -134,6 +143,12 @@ class JournalfoeringValidering(
 
             !eessiService.støtterAutomatiskBehandling(journalfoeringSedDto.journalpostID) ->
                 throw FunksjonellException("Sed tilknyttet journalpost ${journalfoeringSedDto.journalpostID} støtter ikke automatisk behandling!")
+        }
+    }
+
+    private fun validerJournalpostIkkeAlleredeFerdigstilt(journalpost: Journalpost) {
+        if (journalpost.isErFerdigstilt) {
+            throw FunksjonellException("Journalposten er allerede ferdigstilt!")
         }
     }
 
