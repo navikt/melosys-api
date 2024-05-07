@@ -46,7 +46,7 @@ public class UnntaksperiodeSedRuter implements SedRuterForSedTyper {
 
         Optional<Fagsak> fagsak = fagsakService.finnFagsakFraArkivsakID(arkivsakID);
         if (fagsak.isPresent()) {
-            Behandling behandling = fagsak.get().hentSistAktivBehandling();
+            Behandling behandling = fagsak.get().hentSistAktivBehandlingIkkeÅrsavregning();
             Behandlingsresultat behandlingsresultat = behandlingsresultatService.hentBehandlingsresultat(behandling.getId());
             if (periodeErEndret(melosysEessiMelding, behandlingsresultat)) {
                 log.info("Mottatt ny {} i {} hvor periode er endret. Oppretter ny behandling",

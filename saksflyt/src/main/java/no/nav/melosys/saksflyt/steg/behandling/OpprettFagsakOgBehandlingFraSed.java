@@ -60,7 +60,7 @@ public class OpprettFagsakOgBehandlingFraSed implements StegBehandler {
         Fagsak fagsak = fagsakService.nyFagsakOgBehandling(opprettSakRequest);
         prosessinstans.setData(SAKSNUMMER, fagsak.getSaksnummer());
 
-        Behandling behandling = fagsak.finnAktivBehandling();
+        Behandling behandling = fagsak.finnAktivBehandlingIkkeÅrsavregning();
         prosessinstans.setBehandling(behandling);
 
         log.info("Fagsak {} opprettet med behandling {} for RINA-sak {}",

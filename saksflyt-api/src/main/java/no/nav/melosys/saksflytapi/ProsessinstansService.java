@@ -179,7 +179,7 @@ public class ProsessinstansService {
     public void opprettProsessinstansJournalføringKnyttTilEksisterende(JournalfoeringTilordneRequest journalfoeringRequest, String saksnummer,
                                                                        Fagsak fagsak, String institusjonID, boolean mottaksKanalErEessi) {
         Prosessinstans prosessinstans = lagJournalføringProsessinstans(ProsessType.JFR_KNYTT, journalfoeringRequest, institusjonID, mottaksKanalErEessi);
-        prosessinstans.setBehandling(fagsak.hentSistAktivBehandling());
+        prosessinstans.setBehandling(fagsak.hentSistAktivBehandlingIkkeÅrsavregning());
         prosessinstans.setData(ProsessDataKey.SAKSNUMMER, saksnummer);
         prosessinstans.setData(ProsessDataKey.JFR_INGEN_VURDERING, journalfoeringRequest.getIngenVurdering());
 

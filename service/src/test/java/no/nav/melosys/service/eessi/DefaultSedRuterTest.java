@@ -7,8 +7,6 @@ import no.nav.melosys.domain.*;
 import no.nav.melosys.domain.dokument.sed.SedDokument;
 import no.nav.melosys.domain.eessi.SedType;
 import no.nav.melosys.domain.eessi.melding.MelosysEessiMelding;
-import no.nav.melosys.domain.kodeverk.Sakstemaer;
-import no.nav.melosys.domain.kodeverk.Sakstyper;
 import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingsstatus;
 import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingstema;
 import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingstyper;
@@ -87,7 +85,7 @@ class DefaultSedRuterTest {
         defaultSedRuter.rutSedTilBehandling(prosessinstans, GSAK_SAKSNUMMER);
 
         assertThat(prosessinstans.getBehandling()).isNotNull();
-        verify(prosessinstansService).opprettProsessinstansSedJournalføring(fagsak.finnAktivBehandling(), melosysEessiMelding);
+        verify(prosessinstansService).opprettProsessinstansSedJournalføring(fagsak.finnAktivBehandlingIkkeÅrsavregning(), melosysEessiMelding);
         verify(behandlingService).endreStatus(anyLong(), eq(Behandlingsstatus.VURDER_DOKUMENT));
         verify(oppgaveService).finnÅpenBehandlingsoppgaveMedFagsaksnummer(SAKSNUMMER);
         verify(oppgaveService).oppdaterOppgave(eq(oppgaveId), any(OppgaveOppdatering.class));
@@ -102,7 +100,7 @@ class DefaultSedRuterTest {
         prosessinstans.setData(ProsessDataKey.EESSI_MELDING, melosysEessiMelding);
 
         Fagsak fagsak = hentFagsak();
-        fagsak.hentSistOppdatertBehandling().setStatus(Behandlingsstatus.MIDLERTIDIG_LOVVALGSBESLUTNING);
+        fagsak.hentSistOppdatertBehandlingIkkeÅrsavregning().setStatus(Behandlingsstatus.MIDLERTIDIG_LOVVALGSBESLUTNING);
 
         when(fagsakService.finnFagsakFraArkivsakID(GSAK_SAKSNUMMER)).thenReturn(Optional.of(fagsak));
 
@@ -111,7 +109,7 @@ class DefaultSedRuterTest {
 
 
         assertThat(prosessinstans.getBehandling()).isNotNull();
-        verify(prosessinstansService).opprettProsessinstansSedJournalføring(fagsak.hentSistAktivBehandling(), melosysEessiMelding);
+        verify(prosessinstansService).opprettProsessinstansSedJournalføring(fagsak.hentSistAktivBehandlingIkkeÅrsavregning(), melosysEessiMelding);
         verify(behandlingService, never()).endreStatus(anyLong(), any());
         verify(oppgaveService, never()).finnÅpenBehandlingsoppgaveMedFagsaksnummer(any());
         verifyNoInteractions(oppgaveService);
@@ -125,7 +123,7 @@ class DefaultSedRuterTest {
         prosessinstans.setData(ProsessDataKey.EESSI_MELDING, melosysEessiMelding);
 
         Fagsak fagsak = hentFagsak();
-        Behandling behandling = fagsak.finnAktivBehandling();
+        Behandling behandling = fagsak.finnAktivBehandlingIkkeÅrsavregning();
         behandling.setType(Behandlingstyper.HENVENDELSE);
         behandling.setStatus(Behandlingsstatus.OPPRETTET);
         when(fagsakService.finnFagsakFraArkivsakID(GSAK_SAKSNUMMER)).thenReturn(Optional.of(fagsak));
@@ -138,7 +136,7 @@ class DefaultSedRuterTest {
         verify(behandlingService).endreStatus(anyLong(), eq(Behandlingsstatus.VURDER_DOKUMENT));
         verify(oppgaveService).opprettOppgave(oppgaveCaptor.capture());
         verify(oppgaveService).oppdaterOppgave(any(), oppgaveOppdateringArgumentCaptor.capture());
-        verify(prosessinstansService).opprettProsessinstansSedJournalføring(fagsak.hentSistAktivBehandling(), melosysEessiMelding);
+        verify(prosessinstansService).opprettProsessinstansSedJournalføring(fagsak.hentSistAktivBehandlingIkkeÅrsavregning(), melosysEessiMelding);
         assertThat(oppgaveCaptor.getValue())
             .extracting(Oppgave::getSaksnummer)
             .isEqualTo(SAKSNUMMER);
@@ -155,7 +153,7 @@ class DefaultSedRuterTest {
         prosessinstans.setData(ProsessDataKey.EESSI_MELDING, melosysEessiMelding);
 
         Fagsak fagsak = hentFagsak();
-        Behandling behandling = fagsak.finnAktivBehandling();
+        Behandling behandling = fagsak.finnAktivBehandlingIkkeÅrsavregning();
         behandling.setStatus(Behandlingsstatus.AVSLUTTET);
         when(fagsakService.finnFagsakFraArkivsakID(GSAK_SAKSNUMMER)).thenReturn(Optional.of(fagsak));
 

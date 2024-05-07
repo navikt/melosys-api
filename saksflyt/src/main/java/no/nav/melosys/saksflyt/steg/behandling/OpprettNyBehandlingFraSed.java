@@ -79,7 +79,7 @@ public class OpprettNyBehandlingFraSed implements StegBehandler {
     }
 
     private void avsluttTidligereBehandling(Fagsak fagsak) {
-        var aktivBehandling = fagsak.finnAktivBehandling();
+        var aktivBehandling = fagsak.finnAktivBehandlingIkkeÅrsavregning();
         if (aktivBehandling != null) {
             behandlingsresultatService.oppdaterBehandlingsresultattype(aktivBehandling.getId(), Behandlingsresultattyper.FERDIGBEHANDLET);
             behandlingService.avsluttBehandling(aktivBehandling.getId());

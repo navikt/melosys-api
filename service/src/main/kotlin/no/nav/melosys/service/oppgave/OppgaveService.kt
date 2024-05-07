@@ -83,7 +83,7 @@ class OppgaveService(
 
     fun hentOppgaveMedOppgaveID(oppgaveID: String): Oppgave = oppgaveFasade.hentOppgave(oppgaveID)
 
-    fun hentSistAktiveBehandling(saksnummer: String): Behandling = fagsakService.hentFagsak(saksnummer).hentSistAktivBehandling()
+    fun hentSistAktiveBehandling(saksnummer: String): Behandling = fagsakService.hentFagsak(saksnummer).hentSistAktivBehandlingIkkeÅrsavregning()
 
     @JvmOverloads
     fun opprettEllerGjenbrukBehandlingsoppgave(
@@ -159,7 +159,7 @@ class OppgaveService(
     fun opprettOppgaveForSak(saksnummer: String) {
         log.info("Oppretter ny oppgave for saksnummer {}", saksnummer)
         val fagsak = fagsakService.hentFagsak(saksnummer)
-        val behandling = fagsak.hentSistAktivBehandling()
+        val behandling = fagsak.hentSistAktivBehandlingIkkeÅrsavregning()
         val oppgave = finnSisteAvsluttetBehandlingsoppgaveMedFagsaksnummer(saksnummer)
         val tilordnetRessurs = oppgave?.tilordnetRessurs
         opprettEllerGjenbrukBehandlingsoppgave(
@@ -206,7 +206,7 @@ class OppgaveService(
 
     private fun lagBehandlingsoppgaveDto(oppgave: Oppgave): BehandlingsoppgaveDto {
         val fagsak = fagsakService.hentFagsak(oppgave.saksnummer)
-        var sistAktiveBehandling = fagsak.hentSistAktivBehandling()
+        var sistAktiveBehandling = fagsak.hentSistAktivBehandlingIkkeÅrsavregning()
         sistAktiveBehandling = behandlingService.hentBehandling(sistAktiveBehandling.id)
         val orgnr = fagsak.finnVirksomhetsOrgnr()
 

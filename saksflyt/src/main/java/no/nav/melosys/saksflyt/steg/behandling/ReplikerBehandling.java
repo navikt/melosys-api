@@ -60,7 +60,7 @@ public class ReplikerBehandling implements StegBehandler {
 
         Behandling nyBehandling = behandlingService.replikerBehandlingOgBehandlingsresultat(behandlingBruktForReplikering, behandlingstype);
 
-        if (behandlingBruktForReplikering.erAktiv()) {
+        if (behandlingBruktForReplikering.erAktiv() && !behandlingBruktForReplikering.erÅrsavregning()) {
             throw new FunksjonellException("Støtter ikke opprettelse av ny behandling når behandling som er utgangspunkt for revurdering er aktiv");
         }
         if (behandlingstema != null) {

@@ -102,7 +102,7 @@ class JournalfoeringValidering(
         val sistBehandling = fagsak.hentSistRegistrertBehandling()
         val sistBehandlingsresultat = behandlingsresultatService.hentBehandlingsresultatMedAnmodningsperioder(sistBehandling.id)
 
-        if (fagsak.finnAktivBehandling() != null && sistBehandlingsresultat.erIkkeArtikkel16MedSendtAnmodningOmUnntak()) {
+        if (fagsak.finnAktivBehandlingIkkeÅrsavregning() != null && sistBehandlingsresultat.erIkkeArtikkel16MedSendtAnmodningOmUnntak()) {
             throw FunksjonellException("Det finnes allerede en aktiv behandling på fagsak ${fagsak.saksnummer}")
         }
 
