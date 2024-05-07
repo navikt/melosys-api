@@ -5,7 +5,7 @@ import no.nav.melosys.integrasjon.faktureringskomponenten.dto.BeregnTotalBeløpD
 import org.springframework.stereotype.Service
 
 @Service
-class AarsavregningService (
+class ÅrsavregningService (
     private val faktureringskomponentenConsumer: FaktureringskomponentenConsumer
 ) {
     fun hentTotalTrygdeavgiftForPeriode(beregnTotalBeløpDto: BeregnTotalBeløpDto) =

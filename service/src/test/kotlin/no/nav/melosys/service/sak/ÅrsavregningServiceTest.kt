@@ -14,15 +14,15 @@ import java.math.BigDecimal
 import java.time.LocalDate
 
 @ExtendWith(MockKExtension::class)
-internal class AarsavregningServiceTest {
+internal class ÅrsavregningServiceTest {
     @RelaxedMockK
     private lateinit var faktureringskomponentenConsumer: FaktureringskomponentenConsumer
 
-    private lateinit var aarsavregningService: AarsavregningService
+    private lateinit var årsavregningService: ÅrsavregningService
 
     @BeforeEach
     fun setup() {
-        aarsavregningService = AarsavregningService(faktureringskomponentenConsumer)
+        årsavregningService = ÅrsavregningService(faktureringskomponentenConsumer)
     }
 
     @Test
@@ -34,7 +34,7 @@ internal class AarsavregningServiceTest {
         val totalTrygdeavgiftMockResult = BigDecimal.valueOf(1234.55)
         every { faktureringskomponentenConsumer.hentTotalTrygdeavgiftForPeriode(dto) } returns totalTrygdeavgiftMockResult
 
-        val result = aarsavregningService.hentTotalTrygdeavgiftForPeriode(dto)
+        val result = årsavregningService.hentTotalTrygdeavgiftForPeriode(dto)
 
         verify { faktureringskomponentenConsumer.hentTotalTrygdeavgiftForPeriode(dto) }
         assert(result == totalTrygdeavgiftMockResult)

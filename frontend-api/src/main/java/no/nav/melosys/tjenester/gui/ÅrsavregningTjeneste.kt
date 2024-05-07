@@ -2,9 +2,8 @@ package no.nav.melosys.tjenester.gui
 
 import io.swagger.annotations.Api
 import no.nav.melosys.integrasjon.faktureringskomponenten.dto.BeregnTotalBeløpDto
-import no.nav.melosys.service.sak.AarsavregningService
+import no.nav.melosys.service.sak.ÅrsavregningService
 import no.nav.security.token.support.core.api.Protected
-import no.nav.security.token.support.core.api.Unprotected
 import org.springframework.context.annotation.Scope
 import org.springframework.http.ResponseEntity
 import org.springframework.web.bind.annotation.PostMapping
@@ -20,14 +19,12 @@ import java.math.BigDecimal
 @Api(tags = ["Årsavregning", "Trygdeavgift"])
 @RequestMapping("/aarsavregning")
 class ÅrsavregningTjeneste(
-    private val aarsavregningService: AarsavregningService,
+    private val årsavregningService: ÅrsavregningService,
 ) {
-
-    @Unprotected
     @PostMapping("/henttotaltrygdeavgiftforperiode")
-    fun hentTotalTrygdeavgiftForPeriode(@RequestBody årsavgiftDto: BeregnTotalBeløpDto): ResponseEntity<BigDecimal> {
+    fun hentTotalTrygdeavgiftForPeriode(@RequestBody beregnTotalBeløpDto: BeregnTotalBeløpDto): ResponseEntity<BigDecimal> {
         return ResponseEntity.ok(
-            aarsavregningService.hentTotalTrygdeavgiftForPeriode(årsavgiftDto)
+            årsavregningService.hentTotalTrygdeavgiftForPeriode(beregnTotalBeløpDto)
         )
     }
 }
