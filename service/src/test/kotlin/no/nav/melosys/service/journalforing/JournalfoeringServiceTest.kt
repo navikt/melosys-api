@@ -1,6 +1,7 @@
 package no.nav.melosys.service.journalforing
 
 import io.getunleash.FakeUnleash
+import io.kotest.assertions.throwables.shouldNotThrow
 import io.kotest.assertions.throwables.shouldNotThrowAny
 import io.kotest.assertions.throwables.shouldThrow
 import io.kotest.matchers.nulls.shouldNotBeNull
@@ -25,6 +26,7 @@ import no.nav.melosys.domain.kodeverk.*
 import no.nav.melosys.domain.kodeverk.behandlinger.*
 import no.nav.melosys.exception.FunksjonellException
 import no.nav.melosys.exception.IkkeFunnetException
+import no.nav.melosys.featuretoggle.ToggleName
 import no.nav.melosys.integrasjon.joark.JoarkFasade
 import no.nav.melosys.repository.BehandlingsresultatRepository
 import no.nav.melosys.saksflytapi.ProsessinstansService
@@ -58,7 +60,6 @@ internal class JournalfoeringServiceTest {
     private val ARKIVSAK_ID = 111L
     private val INSTITUSJON_ID = "AB:123"
 
-
     @MockK
     private lateinit var joarkFasade: JoarkFasade
     @RelaxedMockK
@@ -86,6 +87,7 @@ internal class JournalfoeringServiceTest {
     private lateinit var journalfoeringSedDto: JournalfoeringSedDto
 
     private var journalfoeringOpprettRequestSlot = slot<JournalfoeringOpprettRequest>()
+    private val unleash = FakeUnleash()
 
     @BeforeEach
     fun setup() {
@@ -126,14 +128,13 @@ internal class JournalfoeringServiceTest {
         }
 
         SpringSubjectHandler.set(TestSubjectHandler())
-
-        val unleash = FakeUnleash()
+        unleash.resetAll()
         val saksbehandlingRegler = SaksbehandlingRegler(behandlingsresultatRepository, unleash)
         val lovligeKombinasjonerSaksbehandlingService = LovligeKombinasjonerSaksbehandlingService(
             fagsakService, behandlingService, behandlingsresultatService, unleash
         )
         val journalfoeringValidering = JournalfoeringValidering(
-            lovligeKombinasjonerSaksbehandlingService, eessiService, saksbehandlingRegler, behandlingsresultatService, fagsakService
+            lovligeKombinasjonerSaksbehandlingService, eessiService, saksbehandlingRegler, behandlingsresultatService, fagsakService, unleash
         )
         journalfoeringService = JournalfoeringService(
             journalfoeringValidering, joarkFasade, prosessinstansService, eessiService, fagsakService,
@@ -557,6 +558,30 @@ internal class JournalfoeringServiceTest {
 
         shouldThrow<FunksjonellException> { journalfoeringService.journalførOgOpprettSak(opprettDto) }
             .message.shouldBe("Journalposten er allerede ferdigstilt!")
+    }
+
+    @Test
+    fun journalførOgKnyttTilEksisterendeSak_journalpostErFerdigstilt_kasterExceptionNårToggleErPå() {
+        unleash.enable(ToggleName.MELOSYS_HINDRE_JOURNALFOERING_AV_FERDIGSTILTE_JOURNALPOSTER)
+        journalpost.isErFerdigstilt = true
+        every { fagsakService.hentFagsak(any()) } returns lagFagsak()
+        every { joarkFasade.hentJournalpost(journalpost.journalpostId) } returns journalpost
+
+
+        shouldThrow<FunksjonellException> { journalfoeringService.journalførOgKnyttTilEksisterendeSak(tilordneDto) }
+            .message.shouldBe("Journalposten er allerede ferdigstilt!")
+    }
+
+    @Test
+    fun journalførOgKnyttTilEksisterendeSak_journalpostErFerdigstilt_kasterIkkeExceptionNårToggleErAv() {
+        unleash.disable(ToggleName.MELOSYS_HINDRE_JOURNALFOERING_AV_FERDIGSTILTE_JOURNALPOSTER)
+        journalpost.isErFerdigstilt = true
+        every { fagsakService.hentFagsak(any()) } returns lagFagsak()
+        every { utenlandskMyndighetService.finnInstitusjonID(any()) } returns Optional.of(INSTITUSJON_ID)
+        every { joarkFasade.hentJournalpost(journalpost.journalpostId) } returns journalpost
+
+
+        shouldNotThrow<FunksjonellException> { journalfoeringService.journalførOgKnyttTilEksisterendeSak(tilordneDto) }
     }
 
     @Test
