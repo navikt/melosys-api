@@ -1,5 +1,9 @@
 package no.nav.melosys.saksflyt.steg.oppgave
 
+import io.mockk.every
+import io.mockk.impl.annotations.MockK
+import io.mockk.junit5.MockKExtension
+import io.mockk.verify
 import no.nav.melosys.domain.oppgave.Oppgave
 import no.nav.melosys.saksflytapi.domain.ProsessDataKey
 import no.nav.melosys.saksflytapi.domain.Prosessinstans
@@ -7,35 +11,34 @@ import no.nav.melosys.service.oppgave.OppgaveService
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.extension.ExtendWith
-import org.mockito.Mock
-import org.mockito.Mockito
-import org.mockito.junit.jupiter.MockitoExtension
 import java.util.*
 
-@ExtendWith(MockitoExtension::class)
+@ExtendWith(MockKExtension::class)
 internal class TildelBehandlingsoppgaveTest {
-    @Mock
-    private val oppgaveService: OppgaveService? = null
-    private var tildelBehandlingsoppgave: TildelBehandlingsoppgave? = null
-    private var prosessinstans: Prosessinstans? = null
+    @MockK
+    private lateinit var oppgaveService: OppgaveService
+
+    private lateinit var tildelBehandlingsoppgave: TildelBehandlingsoppgave
+    private lateinit var prosessinstans: Prosessinstans
     @BeforeEach
     fun setUp() {
-        tildelBehandlingsoppgave = TildelBehandlingsoppgave(oppgaveService!!)
-        prosessinstans = Prosessinstans()
-        prosessinstans!!.setData(ProsessDataKey.SAKSBEHANDLER, SAKSBEHANDLER)
-        prosessinstans!!.setData(ProsessDataKey.SAKSNUMMER, SAKSNUMMER)
-        val oppgaveBuilder = Oppgave.Builder()
-        oppgaveBuilder.setOppgaveId(OPPGAVE_ID)
-        val oppgave = oppgaveBuilder.build()
-        Mockito.`when`(oppgaveService.finnÅpenBehandlingsoppgaveMedFagsaksnummer(SAKSNUMMER))
-            .thenReturn(Optional.of(oppgave))
+        tildelBehandlingsoppgave = TildelBehandlingsoppgave(oppgaveService)
+        prosessinstans = Prosessinstans().apply {
+            setData(ProsessDataKey.SAKSBEHANDLER, SAKSBEHANDLER)
+            setData(ProsessDataKey.SAKSNUMMER, SAKSNUMMER)
+        }
+        every {oppgaveService.finnÅpenBehandlingsoppgaveMedFagsaksnummer(SAKSNUMMER)} returns
+            Optional.of(Oppgave.Builder().setOppgaveId(OPPGAVE_ID).build())
+        every {oppgaveService.tildelOppgave(any(), any())} answers {}
     }
 
     @Test
     fun utfør_finnerOppgave_forventTildelingAvOppgave() {
-        prosessinstans!!.setData(ProsessDataKey.SKAL_TILORDNES, true)
-        tildelBehandlingsoppgave!!.utfør(prosessinstans!!)
-        Mockito.verify(oppgaveService).tildelOppgave(OPPGAVE_ID, SAKSBEHANDLER)
+        prosessinstans.setData(ProsessDataKey.SKAL_TILORDNES, true)
+
+        tildelBehandlingsoppgave.utfør(prosessinstans)
+
+        verify {oppgaveService.tildelOppgave(OPPGAVE_ID, SAKSBEHANDLER)}
     }
 
     companion object {

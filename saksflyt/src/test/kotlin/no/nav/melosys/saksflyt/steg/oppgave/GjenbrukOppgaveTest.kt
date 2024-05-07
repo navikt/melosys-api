@@ -1,5 +1,12 @@
 package no.nav.melosys.saksflyt.steg.oppgave
 
+import io.kotest.matchers.nulls.shouldBeNull
+import io.kotest.matchers.shouldBe
+import io.mockk.every
+import io.mockk.impl.annotations.MockK
+import io.mockk.junit5.MockKExtension
+import io.mockk.slot
+import io.mockk.verify
 import no.nav.melosys.domain.Aktoer
 import no.nav.melosys.domain.Behandling
 import no.nav.melosys.domain.FagsakTestFactory
@@ -15,26 +22,24 @@ import no.nav.melosys.saksflytapi.domain.Prosessinstans
 import no.nav.melosys.service.oppgave.OppgaveBehandlingstema
 import no.nav.melosys.service.oppgave.OppgaveFactory
 import no.nav.melosys.service.oppgave.OppgaveService
-import org.assertj.core.api.Assertions
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.extension.ExtendWith
-import org.mockito.*
-import org.mockito.junit.jupiter.MockitoExtension
 import java.time.LocalDate
 
-@ExtendWith(MockitoExtension::class)
+@ExtendWith(MockKExtension::class)
 internal class GjenbrukOppgaveTest {
-    @Mock
-    private val oppgaveService: OppgaveService? = null
+    @MockK
+    private lateinit var oppgaveService: OppgaveService
 
-    @Captor
-    private val oppgaveCaptor: ArgumentCaptor<Oppgave>? = null
-    private var gjenbrukOppgave: GjenbrukOppgave? = null
+    private val oppgaveSlot = slot<Oppgave>()
+    private lateinit var gjenbrukOppgave: GjenbrukOppgave
     private val oppgaveFactory = OppgaveFactory()
+
     @BeforeEach
     fun setUp() {
-        gjenbrukOppgave = GjenbrukOppgave(oppgaveService!!)
+        gjenbrukOppgave = GjenbrukOppgave(oppgaveService)
+        every { oppgaveService.opprettOppgave(any<Oppgave>()) } returns ""
     }
 
     @Test
@@ -42,20 +47,25 @@ internal class GjenbrukOppgaveTest {
         val oppgaveID = "1234"
         val oppgaveBeskrivelse = "jeg beskriver oppgave"
         val eksisterendeOppgave = Oppgave.Builder().setBeskrivelse(oppgaveBeskrivelse).build()
-        Mockito.`when`(oppgaveService!!.hentOppgaveMedOppgaveID(oppgaveID)).thenReturn(eksisterendeOppgave)
+        every { oppgaveService.hentOppgaveMedOppgaveID(oppgaveID) } returns eksisterendeOppgave
         val prosessinstans = lagProsessinstans(oppgaveID, false)
-        Mockito.`when`(oppgaveService.lagBehandlingsoppgave(ArgumentMatchers.any()))
-            .thenReturn(oppgaveFactory.lagBehandlingsoppgave(prosessinstans.behandling, LocalDate.now()) { null })
-        gjenbrukOppgave!!.utfør(prosessinstans)
-        Mockito.verify(oppgaveService).opprettOppgave(oppgaveCaptor!!.capture())
-        Assertions.assertThat(oppgaveCaptor.value)
-            .hasFieldOrPropertyWithValue("saksnummer", FagsakTestFactory.SAKSNUMMER)
-            .hasFieldOrPropertyWithValue("behandlesAvApplikasjon", Fagsystem.MELOSYS)
-            .hasFieldOrPropertyWithValue("oppgavetype", Oppgavetyper.BEH_SAK_MK)
-            .hasFieldOrPropertyWithValue("behandlingstema", OppgaveBehandlingstema.EU_EOS_YRKESAKTIV.kode)
-            .hasFieldOrPropertyWithValue("behandlingstype", null)
-            .hasFieldOrPropertyWithValue("tilordnetRessurs", "Deg321")
-            .hasFieldOrPropertyWithValue("aktørId", "123321")
+        every { oppgaveService.lagBehandlingsoppgave(any()) } returns oppgaveFactory.lagBehandlingsoppgave(
+            prosessinstans.behandling,
+            LocalDate.now()
+        ) { null }
+
+        gjenbrukOppgave.utfør(prosessinstans)
+
+        verify { oppgaveService.opprettOppgave(capture(oppgaveSlot)) }
+        oppgaveSlot.captured.run {
+            saksnummer.shouldBe(FagsakTestFactory.SAKSNUMMER)
+            behandlesAvApplikasjon.shouldBe(Fagsystem.MELOSYS)
+            oppgavetype.shouldBe(Oppgavetyper.BEH_SAK_MK)
+            behandlingstema.shouldBe(OppgaveBehandlingstema.EU_EOS_YRKESAKTIV.kode)
+            behandlingstype.shouldBeNull()
+            tilordnetRessurs.shouldBe("Deg321")
+            aktørId.shouldBe("123321")
+        }
     }
 
     @Test
@@ -63,46 +73,49 @@ internal class GjenbrukOppgaveTest {
         val oppgaveID = "1234"
         val oppgaveBeskrivelse = "jeg beskriver oppgave"
         val eksisterendeOppgave = Oppgave.Builder().setBeskrivelse(oppgaveBeskrivelse).build()
-        Mockito.`when`(oppgaveService!!.hentOppgaveMedOppgaveID(oppgaveID)).thenReturn(eksisterendeOppgave)
+        every { oppgaveService.hentOppgaveMedOppgaveID(oppgaveID) } returns eksisterendeOppgave
         val prosessinstans = lagProsessinstans(oppgaveID, true)
-        Mockito.`when`(oppgaveService.lagBehandlingsoppgave(ArgumentMatchers.any()))
-            .thenReturn(oppgaveFactory.lagBehandlingsoppgave(prosessinstans.behandling, LocalDate.now()) { null })
-        gjenbrukOppgave!!.utfør(prosessinstans)
-        Mockito.verify(oppgaveService).opprettOppgave(oppgaveCaptor!!.capture())
-        Assertions.assertThat(oppgaveCaptor.value)
-            .hasFieldOrPropertyWithValue("saksnummer", FagsakTestFactory.SAKSNUMMER)
-            .hasFieldOrPropertyWithValue("behandlesAvApplikasjon", Fagsystem.MELOSYS)
-            .hasFieldOrPropertyWithValue("oppgavetype", Oppgavetyper.BEH_SAK_MK)
-            .hasFieldOrPropertyWithValue("behandlingstema", OppgaveBehandlingstema.EU_EOS_YRKESAKTIV.kode)
-            .hasFieldOrPropertyWithValue("behandlingstype", null)
-            .hasFieldOrPropertyWithValue("tilordnetRessurs", "Deg321")
-            .hasFieldOrPropertyWithValue("orgnr", "999999999")
+        every { oppgaveService.lagBehandlingsoppgave(any()) } returns oppgaveFactory.lagBehandlingsoppgave(
+            prosessinstans.behandling,
+            LocalDate.now()
+        ) { null }
+
+        gjenbrukOppgave.utfør(prosessinstans)
+
+        verify { oppgaveService.opprettOppgave(capture(oppgaveSlot)) }
+        oppgaveSlot.captured.run {
+            saksnummer.shouldBe(FagsakTestFactory.SAKSNUMMER)
+            behandlesAvApplikasjon.shouldBe(Fagsystem.MELOSYS)
+            oppgavetype.shouldBe(Oppgavetyper.BEH_SAK_MK)
+            behandlingstema.shouldBe(OppgaveBehandlingstema.EU_EOS_YRKESAKTIV.kode)
+            behandlingstype.shouldBeNull()
+            tilordnetRessurs.shouldBe("Deg321")
+            orgnr.shouldBe("999999999")
+        }
     }
 
-    companion object {
-        private fun lagProsessinstans(oppgaveID: String, erForVirksomhet: Boolean): Prosessinstans {
-            val fagsak = lagFagsak()
-            val prosessinstans = Prosessinstans()
-            if (erForVirksomhet) {
-                val virksomhet = Aktoer()
-                virksomhet.orgnr = "999999999"
-                virksomhet.rolle = Aktoersroller.VIRKSOMHET
-                fagsak.leggTilAktør(virksomhet)
-            } else {
-                val bruker = Aktoer()
-                bruker.aktørId = "123321"
-                bruker.rolle = Aktoersroller.BRUKER
-                fagsak.leggTilAktør(bruker)
-            }
-            val behandling = Behandling()
-            behandling.tema = Behandlingstema.UTSENDT_ARBEIDSTAKER
-            behandling.type = Behandlingstyper.FØRSTEGANG
-            behandling.fagsak = fagsak
-            prosessinstans.behandling = behandling
-            prosessinstans.setData(ProsessDataKey.OPPGAVE_ID, oppgaveID)
-            prosessinstans.setData(ProsessDataKey.SKAL_TILORDNES, true)
-            prosessinstans.setData(ProsessDataKey.SAKSBEHANDLER, "Deg321")
-            return prosessinstans
+    private fun lagProsessinstans(oppgaveID: String, erForVirksomhet: Boolean): Prosessinstans {
+        val fagsak = lagFagsak()
+        val prosessinstans = Prosessinstans()
+        if (erForVirksomhet) {
+            fagsak.leggTilAktør(Aktoer().apply {
+                orgnr = "999999999"
+                rolle = Aktoersroller.VIRKSOMHET
+            })
+        } else {
+            fagsak.leggTilAktør(Aktoer().apply {
+                aktørId = "123321"
+                rolle = Aktoersroller.BRUKER
+            })
         }
+        prosessinstans.behandling = Behandling().apply {
+            tema = Behandlingstema.UTSENDT_ARBEIDSTAKER
+            type = Behandlingstyper.FØRSTEGANG
+            this.fagsak = fagsak
+        }
+        prosessinstans.setData(ProsessDataKey.OPPGAVE_ID, oppgaveID)
+        prosessinstans.setData(ProsessDataKey.SKAL_TILORDNES, true)
+        prosessinstans.setData(ProsessDataKey.SAKSBEHANDLER, "Deg321")
+        return prosessinstans
     }
 }

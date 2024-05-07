@@ -1,5 +1,9 @@
 package no.nav.melosys.saksflyt.steg.oppgave
 
+import io.mockk.every
+import io.mockk.impl.annotations.MockK
+import io.mockk.junit5.MockKExtension
+import io.mockk.verify
 import no.nav.melosys.domain.Behandling
 import no.nav.melosys.domain.FagsakTestFactory
 import no.nav.melosys.domain.FagsakTestFactory.builder
@@ -9,18 +13,18 @@ import no.nav.melosys.service.oppgave.OppgaveService
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.extension.ExtendWith
-import org.mockito.Mock
-import org.mockito.Mockito
-import org.mockito.junit.jupiter.MockitoExtension
 
-@ExtendWith(MockitoExtension::class)
+@ExtendWith(MockKExtension::class)
 internal class OpprettOppgaveTest {
-    @Mock
-    private val oppgaveService: OppgaveService? = null
-    private var opprettOppgave: OpprettOppgave? = null
+    @MockK
+    private lateinit var oppgaveService: OppgaveService
+
+    private lateinit var opprettOppgave: OpprettOppgave
+
     @BeforeEach
     fun setUp() {
-        opprettOppgave = OpprettOppgave(oppgaveService!!)
+        opprettOppgave = OpprettOppgave(oppgaveService)
+        every {oppgaveService.opprettEllerGjenbrukBehandlingsoppgave(any<Behandling>(), any<String>(), any<String>(), any<String>(), any<String>())} answers {}
     }
 
     @Test
@@ -28,22 +32,28 @@ internal class OpprettOppgaveTest {
         val journalpostID = "142342343"
         val saksbehandler = "meg!"
         val fagsak = builder().medBruker().build()
-        val behandling = Behandling()
-        behandling.id = 243L
-        behandling.initierendeJournalpostId = journalpostID
-        behandling.fagsak = fagsak
-        val prosessinstans = Prosessinstans()
-        prosessinstans.behandling = behandling
-        prosessinstans.setData(ProsessDataKey.SKAL_TILORDNES, true)
-        prosessinstans.setData(ProsessDataKey.SAKSBEHANDLER, saksbehandler)
-        opprettOppgave!!.utfør(prosessinstans)
-        Mockito.verify(oppgaveService).opprettEllerGjenbrukBehandlingsoppgave(
-            behandling,
-            journalpostID,
-            FagsakTestFactory.BRUKER_AKTØR_ID,
-            saksbehandler,
-            null
-        )
+        val behandling = Behandling().apply {
+            id = 243L
+            initierendeJournalpostId = journalpostID
+            this.fagsak = fagsak
+        }
+        val prosessinstans = Prosessinstans().apply {
+            this.behandling = behandling
+            setData(ProsessDataKey.SKAL_TILORDNES, true)
+            setData(ProsessDataKey.SAKSBEHANDLER, saksbehandler)
+        }
+
+        opprettOppgave.utfør(prosessinstans)
+
+        verify {
+            oppgaveService.opprettEllerGjenbrukBehandlingsoppgave(
+                behandling,
+                journalpostID,
+                FagsakTestFactory.BRUKER_AKTØR_ID,
+                saksbehandler,
+                null
+            )
+        }
     }
 
     @Test
@@ -51,21 +61,27 @@ internal class OpprettOppgaveTest {
         val journalpostID = "142342343"
         val saksbehandler = "meg!"
         val fagsak = builder().medVirksomhet().build()
-        val behandling = Behandling()
-        behandling.id = 243L
-        behandling.initierendeJournalpostId = journalpostID
-        behandling.fagsak = fagsak
-        val prosessinstans = Prosessinstans()
-        prosessinstans.behandling = behandling
-        prosessinstans.setData(ProsessDataKey.SKAL_TILORDNES, true)
-        prosessinstans.setData(ProsessDataKey.SAKSBEHANDLER, saksbehandler)
-        opprettOppgave!!.utfør(prosessinstans)
-        Mockito.verify(oppgaveService).opprettEllerGjenbrukBehandlingsoppgave(
-            behandling,
-            journalpostID,
-            null,
-            saksbehandler,
-            FagsakTestFactory.ORGNR
-        )
+        val behandling = Behandling().apply {
+            id = 243L
+            initierendeJournalpostId = journalpostID
+            this.fagsak = fagsak
+        }
+        val prosessinstans = Prosessinstans().apply {
+            this.behandling = behandling
+            setData(ProsessDataKey.SKAL_TILORDNES, true)
+            setData(ProsessDataKey.SAKSBEHANDLER, saksbehandler)
+        }
+
+        opprettOppgave.utfør(prosessinstans)
+
+        verify {
+            oppgaveService.opprettEllerGjenbrukBehandlingsoppgave(
+                behandling,
+                journalpostID,
+                null,
+                saksbehandler,
+                FagsakTestFactory.ORGNR
+            )
+        }
     }
 }
