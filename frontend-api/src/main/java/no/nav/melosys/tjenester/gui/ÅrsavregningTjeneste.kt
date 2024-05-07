@@ -18,7 +18,7 @@ import java.math.BigDecimal
 @RestController
 @Scope(value = WebApplicationContext.SCOPE_REQUEST)
 @Api(tags = ["Årsavregning", "Trygdeavgift"])
-@RequestMapping("/aarsavregning/{saksnummer}")
+@RequestMapping("/aarsavregning")
 class ÅrsavregningTjeneste(
     private val aarsavregningService: AarsavregningService,
 ) {
