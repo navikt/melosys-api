@@ -18,9 +18,7 @@ class OpprettAvgiftsoppgave(
     private val behandlingsresultatService: BehandlingsresultatService,
     private val oppgaveService: OppgaveService
 ) : StegBehandler {
-    override fun inngangsSteg(): ProsessSteg {
-        return ProsessSteg.OPPRETT_AVGIFTSOPPGAVE
-    }
+    override fun inngangsSteg(): ProsessSteg = ProsessSteg.OPPRETT_AVGIFTSOPPGAVE
 
     override fun utfør(prosessinstans: Prosessinstans) {
         val behandling = prosessinstans.behandling

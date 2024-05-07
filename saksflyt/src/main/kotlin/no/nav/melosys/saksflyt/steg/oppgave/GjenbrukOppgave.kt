@@ -1,19 +1,18 @@
 package no.nav.melosys.saksflyt.steg.oppgave
 
+import mu.KotlinLogging
 import no.nav.melosys.domain.kodeverk.Aktoersroller
 import no.nav.melosys.saksflyt.steg.StegBehandler
 import no.nav.melosys.saksflytapi.domain.ProsessDataKey
 import no.nav.melosys.saksflytapi.domain.ProsessSteg
 import no.nav.melosys.saksflytapi.domain.Prosessinstans
 import no.nav.melosys.service.oppgave.OppgaveService
-import org.slf4j.LoggerFactory
 import org.springframework.stereotype.Component
 
 @Component
 class GjenbrukOppgave(private val oppgaveService: OppgaveService) : StegBehandler {
-    override fun inngangsSteg(): ProsessSteg {
-        return ProsessSteg.GJENBRUK_OPPGAVE
-    }
+    private val log = KotlinLogging.logger {}
+    override fun inngangsSteg(): ProsessSteg = ProsessSteg.GJENBRUK_OPPGAVE
 
     override fun utfør(prosessinstans: Prosessinstans) {
         val behandling = prosessinstans.behandling
@@ -34,14 +33,7 @@ class GjenbrukOppgave(private val oppgaveService: OppgaveService) : StegBehandle
             .build()
         val opprettetOppgaveID = oppgaveService.opprettOppgave(nyOppgave)
         log.info(
-            "Opprettet ny oppgave med ID {} til sak {}, med beskrivelse fra oppgave {}",
-            opprettetOppgaveID,
-            saksnummer,
-            oppgaveID
+            "Opprettet ny oppgave med ID $opprettetOppgaveID til sak $saksnummer, med beskrivelse fra oppgave $oppgaveID"
         )
-    }
-
-    companion object {
-        private val log = LoggerFactory.getLogger(GjenbrukOppgave::class.java)
     }
 }

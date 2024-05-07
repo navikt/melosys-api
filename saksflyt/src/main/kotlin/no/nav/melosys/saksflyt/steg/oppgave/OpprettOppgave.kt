@@ -8,9 +8,7 @@ import org.springframework.stereotype.Component
 
 @Component
 class OpprettOppgave(private val oppgaveService: OppgaveService) : StegBehandler {
-    override fun inngangsSteg(): ProsessSteg {
-        return ProsessSteg.OPPRETT_OPPGAVE
-    }
+    override fun inngangsSteg(): ProsessSteg = ProsessSteg.OPPRETT_OPPGAVE
 
     override fun utfør(prosessinstans: Prosessinstans) {
         oppgaveService.opprettEllerGjenbrukBehandlingsoppgave(
