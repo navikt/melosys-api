@@ -84,4 +84,17 @@ internal class OpprettOppgaveTest {
             )
         }
     }
+
+    @Test
+    fun utfoerSteg_ingenBehandling_ingenOppgave() {
+        val prosessinstans = Prosessinstans().apply {
+            behandling = null
+        }
+
+        opprettOppgave.utfør(prosessinstans)
+
+        verify (exactly = 0) {
+            oppgaveService.opprettEllerGjenbrukBehandlingsoppgave(any(), any(), any(), any())
+        }
+    }
 }

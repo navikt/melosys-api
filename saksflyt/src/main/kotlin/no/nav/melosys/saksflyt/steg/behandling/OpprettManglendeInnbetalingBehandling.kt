@@ -10,6 +10,7 @@ import no.nav.melosys.saksflyt.steg.StegBehandler
 import no.nav.melosys.saksflytapi.domain.ProsessDataKey
 import no.nav.melosys.saksflytapi.domain.ProsessSteg
 import no.nav.melosys.saksflytapi.domain.Prosessinstans
+import no.nav.melosys.service.MedlemAvFolketrygdenService
 import no.nav.melosys.service.behandling.BehandlingService
 import no.nav.melosys.service.behandling.BehandlingsresultatService
 import no.nav.melosys.service.oppgave.OppgaveService
@@ -21,6 +22,7 @@ import java.time.LocalDate
 class OpprettManglendeInnbetalingBehandling(
     private val behandlingService: BehandlingService,
     private val behandlingsresultatService: BehandlingsresultatService,
+    private val medlemAvFolketrygdenService: MedlemAvFolketrygdenService,
     private val saksbehandlingRegler: SaksbehandlingRegler,
     private val oppgaveService: OppgaveService
 ) : StegBehandler {
@@ -38,6 +40,13 @@ class OpprettManglendeInnbetalingBehandling(
 
         if (behandlingsresultater.isEmpty()) {
             throw FunksjonellException("Finner ikke behandlingsresultat med fakturaserie-referanse: $fakturaserieReferanse")
+        }
+
+        val medlemskapsperiode = medlemAvFolketrygdenService.finnMedlemAvFolketrygden(behandlingsresultater.first().id)
+
+        if (medlemskapsperiode.isPresent && medlemskapsperiode.get().medlemskapsperioder.any { it.erPliktig() }) {
+            // TODO: Finn riktig behandling å sette
+            return
         }
 
         val fagsak = behandlingService.hentBehandling(behandlingsresultater.first().id).fagsak
@@ -59,7 +68,11 @@ class OpprettManglendeInnbetalingBehandling(
                 return
             }
 
-            if (aktivBehandling.type in listOf(Behandlingstyper.HENVENDELSE, Behandlingstyper.NY_VURDERING) && aktivBehandling.opprinneligBehandling == null) {
+            if (aktivBehandling.type in listOf(
+                    Behandlingstyper.HENVENDELSE,
+                    Behandlingstyper.NY_VURDERING
+                ) && aktivBehandling.opprinneligBehandling == null
+            ) {
                 behandlingService.avsluttBehandling(aktivBehandling.id)
                 behandlingsresultatService.oppdaterBehandlingsresultattype(aktivBehandling.id, Behandlingsresultattyper.AVBRUTT)
                 oppgaveService.ferdigstillOppgaveMedSaksnummer(aktivBehandling.fagsak.saksnummer)
