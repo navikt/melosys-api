@@ -3,7 +3,7 @@ package no.nav.melosys.tjenester.gui
 import io.swagger.annotations.Api
 import no.nav.melosys.integrasjon.faktureringskomponenten.dto.BeregnTotalBeløpDto
 import no.nav.melosys.service.sak.ÅrsavregningService
-import no.nav.melosys.tjenester.gui.dto.ÅrsavregningDto
+import no.nav.melosys.service.sak.ÅrsavregningDto
 import no.nav.security.token.support.core.api.Protected
 import org.springframework.http.ResponseEntity
 import org.springframework.web.bind.annotation.*

@@ -2,13 +2,15 @@ package no.nav.melosys.service.sak
 
 import no.nav.melosys.integrasjon.faktureringskomponenten.FaktureringskomponentenConsumer
 import no.nav.melosys.integrasjon.faktureringskomponenten.dto.BeregnTotalBeløpDto
+import no.nav.melosys.service.behandling.BehandlingsresultatService
 import no.nav.melosys.sikkerhet.context.SubjectHandler
 import org.springframework.stereotype.Service
 import java.math.BigDecimal
 
 @Service
 class ÅrsavregningService (
-    private val faktureringskomponentenConsumer: FaktureringskomponentenConsumer
+    private val faktureringskomponentenConsumer: FaktureringskomponentenConsumer,
+    private val behandlingsresultatService: BehandlingsresultatService
 ) {
     fun beregnTotalTrygdeavgiftForPeriode(beregnTotalBeløpDto: BeregnTotalBeløpDto): BigDecimal {
         val saksbehandlerIdent = SubjectHandler.getInstance().getUserID()

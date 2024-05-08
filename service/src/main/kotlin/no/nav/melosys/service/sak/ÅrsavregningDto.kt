@@ -1,13 +1,12 @@
-package no.nav.melosys.tjenester.gui.dto
+package no.nav.melosys.service.sak
 
 import no.nav.melosys.domain.Medlemskapsperiode
 import no.nav.melosys.domain.avgift.Inntektsperiode
 import no.nav.melosys.domain.avgift.SkatteforholdTilNorge
 import no.nav.melosys.domain.avgift.Trygdeavgiftsperiode
 import no.nav.melosys.integrasjon.dokgen.dto.innvilgelseftrl.MedlemskapsperiodeDto
-import no.nav.melosys.tjenester.gui.dto.trygdeavgift.InntekskildeDto
-import no.nav.melosys.tjenester.gui.dto.trygdeavgift.SkatteforholdTilNorgeDto
-import no.nav.melosys.tjenester.gui.dto.trygdeavgift.TrygdeavgiftsperiodeDto
+import no.nav.melosys.integrasjon.trygdeavgift.dto.TrygdeavgiftsperiodeDto
+
 
 data class ÅrsavregningDto(
     val trygdeavgiftsPerioder: List<TrygdeavgiftsperiodeDto>,
