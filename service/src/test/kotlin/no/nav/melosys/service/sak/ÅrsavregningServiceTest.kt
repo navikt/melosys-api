@@ -30,7 +30,7 @@ internal class ÅrsavregningServiceTest {
         val fakturaseriePeriodeDto = FakturaseriePeriodeDto(
             enhetsprisPerManed = BigDecimal(100), startDato = LocalDate.now().minusYears(1), sluttDato = LocalDate.now(), beskrivelse = "test")
 
-        val dto = BeregnTotalBeløpDto(listOf(fakturaseriePeriodeDto, fakturaseriePeriodeDto, fakturaseriePeriodeDto))
+        val dto = BeregnTotalBeløpDto("Z123456", listOf(fakturaseriePeriodeDto, fakturaseriePeriodeDto, fakturaseriePeriodeDto))
         val totalTrygdeavgiftMockResult = BigDecimal.valueOf(1234.55)
         every { faktureringskomponentenConsumer.hentTotalTrygdeavgiftForPeriode(dto) } returns totalTrygdeavgiftMockResult
 
