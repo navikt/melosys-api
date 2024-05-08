@@ -40,9 +40,10 @@ open class FaktureringskomponentenConsumer(private val webClient: WebClient) : J
             .bodyToMono<Void>()
             .block()
 
-    fun hentTotalTrygdeavgiftForPeriode(beregnTotalBeløpDto: BeregnTotalBeløpDto) =
+    fun hentTotalTrygdeavgiftForPeriode(beregnTotalBeløpDto: BeregnTotalBeløpDto, saksbehandlerIdent: String) =
         webClient.post()
-            .uri("/totalbeloep")
+            .uri("/totalbeloep/beregn")
+            .header("Nav-User-Id", saksbehandlerIdent)
             .bodyValue(beregnTotalBeløpDto)
             .retrieve()
             .bodyToMono<BigDecimal>()
