@@ -15,6 +15,7 @@ import no.nav.melosys.domain.kodeverk.Saksstatuser
 import no.nav.melosys.domain.kodeverk.Sakstemaer
 import no.nav.melosys.domain.kodeverk.Sakstyper
 import no.nav.melosys.service.behandling.BehandlingsresultatService
+import no.nav.melosys.tjenester.gui.AarsavregningService
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.extension.ExtendWith
@@ -77,9 +78,9 @@ internal class AarsavregningServiceTest {
         every { fagsakService.hentFagsak(saksnummer) } returns fagsak
         every { behandlingsresultatService.hentBehandlingsresultat(any()) } returns behandlingsresultat
 
-        val test = aarsavregningService.hentEksisterendeTrygdeavgiftsperioderForFagsak(saksnummer, year)
+        val test = aarsavregningService.hentEksisterendeTrygdeavgiftsperioderForBehandling(saksnummer, year)
         println(test)
 
-        aarsavregningService.hentEksisterendeTrygdeavgiftsperioderForFagsak(saksnummer, year).shouldBe(listOf(trygdeavgiftsperiode2))
+        aarsavregningService.hentEksisterendeTrygdeavgiftsperioderForBehandling(saksnummer, year).shouldBe(listOf(trygdeavgiftsperiode2))
     }
 }

@@ -6,8 +6,6 @@ import no.nav.melosys.integrasjon.faktureringskomponenten.Faktureringskomponente
 import no.nav.melosys.integrasjon.faktureringskomponenten.dto.BeregnTotalBeløpDto
 import no.nav.melosys.service.sak.AarsavregningService
 import no.nav.melosys.service.tilgang.Aksesskontroll
-import no.nav.melosys.tjenester.gui.dto.trygdeavgift.BeregnetTrygdeavgiftDto
-import no.nav.melosys.tjenester.gui.dto.trygdeavgift.TrygdeavgiftsperiodeDto
 import no.nav.melosys.tjenester.gui.dto.ÅrsavregningDto
 import no.nav.security.token.support.core.api.Protected
 import no.nav.security.token.support.core.api.Unprotected
@@ -32,7 +30,7 @@ class ÅrsavregningTjeneste(
                                 @PathVariable("aar") år: Int): ResponseEntity<ÅrsavregningDto> {
         aksesskontroll.autoriser(behandlingsId)
         return ResponseEntity.ok(
-            lagDataForÅrsavregning(aarsavregningService.hentEksisterendeTrygdeavgiftsperioderForFagsak(behandlingsId, år))
+            lagDataForÅrsavregning(aarsavregningService.hentEksisterendeTrygdeavgiftsperioderForBehandling(behandlingsId, år))
         )
     }
 
