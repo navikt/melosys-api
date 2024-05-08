@@ -47,10 +47,11 @@ class AarsavregningService (
         val fastsattTrygdeavgift = medlem.fastsattTrygdeavgift
 
         return ÅrsavregningDto(
-            trygdeavgiftsPerioder = fastsattTrygdeavgift.trygdeavgiftsperioder.filter { it.periodeFra.year == år },
+
+        )
+        return ÅrsavregningDto.av(trygdeavgiftsPerioder = fastsattTrygdeavgift.trygdeavgiftsperioder.filter { it.periodeFra.year == år },
             skatteforholdsperioder = fastsattTrygdeavgift.trygdeavgiftsgrunnlag.skatteforholdTilNorge.filter { it.fomDato.year == år },
             inntektskilder = fastsattTrygdeavgift.trygdeavgiftsgrunnlag.inntektsperioder.filter { it.fomDato.year == år },
-            medlemskapsperioder = medlem.medlemskapsperioder.filter { it.fom.year == år }
-        )
+            medlemskapsperioder = medlem.medlemskapsperioder.filter { it.fom.year == år })
     }
 }
