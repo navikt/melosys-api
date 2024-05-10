@@ -1,9 +1,6 @@
 package no.nav.melosys.service.vedtak;
 
-import no.nav.melosys.domain.Behandling;
-import no.nav.melosys.domain.Behandlingsresultat;
-import no.nav.melosys.domain.Fagsak;
-import no.nav.melosys.domain.Lovvalgsperiode;
+import no.nav.melosys.domain.*;
 import no.nav.melosys.domain.kodeverk.InnvilgelsesResultat;
 import no.nav.melosys.domain.kodeverk.Land_iso2;
 import no.nav.melosys.domain.kodeverk.Sakstyper;
@@ -159,8 +156,7 @@ class VedtaksfattingFasadeTest {
         behandlingsresultat.setId(behandlingID);
         behandlingsresultat.setBehandling(behandling);
 
-        Fagsak fagsak = new Fagsak();
-        fagsak.setType(Sakstyper.EU_EOS);
+        Fagsak fagsak = FagsakTestFactory.lagFagsak();
         behandling.setFagsak(fagsak);
 
         Lovvalgsperiode lovvalgsperiode = new Lovvalgsperiode();
@@ -174,9 +170,7 @@ class VedtaksfattingFasadeTest {
     }
 
     private void setFagsakPåBehandling(Sakstyper sakstype) {
-        Fagsak fagsak = new Fagsak();
-        fagsak.setType(sakstype);
-        behandling.setFagsak(fagsak);
+        behandling.setFagsak(FagsakTestFactory.builder().type(sakstype).build());
     }
 
     private FattVedtakRequest lagFattEosVedtakRequest() {

@@ -79,9 +79,7 @@ internal class BehandlingTest {
     @Test
     fun utledBehandlingsfrist_4Uker() {
         val behandling = Behandling().apply {
-            fagsak = Fagsak().apply {
-                tema = Sakstemaer.MEDLEMSKAP_LOVVALG
-            }
+            fagsak = FagsakTestFactory.lagFagsak()
             tema = Behandlingstema.YRKESAKTIV
             type = Behandlingstyper.MANGLENDE_INNBETALING_TRYGDEAVGIFT
         }
@@ -95,9 +93,7 @@ internal class BehandlingTest {
     @Test
     fun utledBehandlingsfrist_8Uker() {
         val behandling = Behandling().apply {
-            fagsak = Fagsak().apply {
-                tema = Sakstemaer.MEDLEMSKAP_LOVVALG
-            }
+            fagsak = FagsakTestFactory.lagFagsak()
             tema = Behandlingstema.BESLUTNING_LOVVALG_ANNET_LAND
             type = Behandlingstyper.FØRSTEGANG
         }
@@ -111,9 +107,7 @@ internal class BehandlingTest {
     @Test
     fun utledBehandlingsfrist_70dager() {
         val behandling = Behandling().apply {
-            fagsak = Fagsak().apply {
-                tema = Sakstemaer.MEDLEMSKAP_LOVVALG
-            }
+            fagsak = FagsakTestFactory.lagFagsak()
             tema = Behandlingstema.BESLUTNING_LOVVALG_ANNET_LAND
             type = Behandlingstyper.KLAGE
         }
@@ -127,33 +121,25 @@ internal class BehandlingTest {
     @Test
     fun utledBehandlingsfrist_90dager() {
         val behandling_soknadsbehandlinger = Behandling().apply {
-            fagsak = Fagsak().apply {
-                tema = Sakstemaer.MEDLEMSKAP_LOVVALG
-            }
+            fagsak = FagsakTestFactory.lagFagsak()
             tema = Behandlingstema.UTSENDT_ARBEIDSTAKER
             type = Behandlingstyper.FØRSTEGANG
         }
 
         val behandling_anmodning_unntak = Behandling().apply {
-            fagsak = Fagsak().apply {
-                tema = Sakstemaer.MEDLEMSKAP_LOVVALG
-            }
+            fagsak = FagsakTestFactory.lagFagsak()
             tema = Behandlingstema.ANMODNING_OM_UNNTAK_HOVEDREGEL
             type = Behandlingstyper.FØRSTEGANG
         }
 
         val behandling_attester_fra_andre_trygdeavtaleland = Behandling().apply {
-            fagsak = Fagsak().apply {
-                tema = Sakstemaer.MEDLEMSKAP_LOVVALG
-            }
+            fagsak = FagsakTestFactory.lagFagsak()
             tema = Behandlingstema.REGISTRERING_UNNTAK
             type = Behandlingstyper.FØRSTEGANG
         }
 
         val behandling_henvendelser = Behandling().apply {
-            fagsak = Fagsak().apply {
-                tema = Sakstemaer.MEDLEMSKAP_LOVVALG
-            }
+            fagsak = FagsakTestFactory.lagFagsak()
             tema = Behandlingstema.UTSENDT_ARBEIDSTAKER
             type = Behandlingstyper.HENVENDELSE
         }
@@ -180,16 +166,12 @@ internal class BehandlingTest {
     @Test
     fun utledBehandlingsfrist_180dager() {
         val behandling_utstasjonering = Behandling().apply {
-            fagsak = Fagsak().apply {
-                tema = Sakstemaer.UNNTAK
-            }
+            fagsak = FagsakTestFactory.builder().tema(Sakstemaer.UNNTAK).build()
             tema = Behandlingstema.REGISTRERING_UNNTAK_NORSK_TRYGD_UTSTASJONERING
             type = Behandlingstyper.NY_VURDERING
         }
         val behandling_ovrige = Behandling().apply {
-            fagsak = Fagsak().apply {
-                tema = Sakstemaer.UNNTAK
-            }
+            fagsak = FagsakTestFactory.builder().tema(Sakstemaer.UNNTAK).build()
             tema = Behandlingstema.REGISTRERING_UNNTAK_NORSK_TRYGD_ØVRIGE
             type = Behandlingstyper.NY_VURDERING
         }

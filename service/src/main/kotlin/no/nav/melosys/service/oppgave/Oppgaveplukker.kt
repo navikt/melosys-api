@@ -92,7 +92,7 @@ class Oppgaveplukker(
             && fagsak.behandlinger.any { it.tema == plukkDto.behandlingstema }
 
     private fun venterPåDokumentasjonEllerFagligAvklaring(fagsak: Fagsak): Boolean {
-        val behandling = fagsak.hentSistAktivBehandling()
+        val behandling = fagsak.hentSistAktivBehandlingIkkeÅrsavregning()
         if (behandling.erVenterForDokumentasjon()) {
             if (behandling.dokumentasjonSvarfristDato == null) {
                 log.warn(
@@ -107,7 +107,7 @@ class Oppgaveplukker(
 
     private fun oppdaterBehandlingsstatus(saksnummer: String) {
         val fagsak = fagsakService.hentFagsak(saksnummer)
-        val behandling = fagsak.hentAktivBehandling()
+        val behandling = fagsak.finnAktivBehandlingIkkeÅrsavregning()
         if (behandling != null && (behandling.status == Behandlingsstatus.SVAR_ANMODNING_MOTTATT || behandling.status == Behandlingsstatus.OPPRETTET)) {
             behandling.status = Behandlingsstatus.UNDER_BEHANDLING
             behandlingService.lagre(behandling)

@@ -64,7 +64,7 @@ class TrygdeavgiftsberegningService
     private fun hentFødselsdatoOmViHarTjenstligBehov(behandlingsresultatID: Long, medlemskapsperioder: List<Medlemskapsperiode>): LocalDate? {
         if (medlemskapsperioder.any { it.erPliktig() }) {
             val fagsak = behandlingService.hentBehandling(behandlingsresultatID).fagsak
-            return persondataService.hentPerson(fagsak.hentBruker().aktørId).fødselsdato
+            return persondataService.hentPerson(fagsak.hentBrukersAktørID()).fødselsdato
         }
         return null
     }
@@ -155,13 +155,13 @@ class TrygdeavgiftsberegningService
     @Transactional(readOnly = true)
     fun finnFakturamottakerNavn(behandlingID: Long): String {
         val fagsak = behandlingService.hentBehandling(behandlingID).fagsak
-        return fagsak.finnFullmektig(Fullmaktstype.FULLMEKTIG_TRYGDEAVGIFT)
-            .map {
+        fagsak.finnFullmektig(Fullmaktstype.FULLMEKTIG_TRYGDEAVGIFT)
+            .let {
+                if (it == null)
+                    return persondataService.hentSammensattNavn(fagsak.hentBrukersAktørID())
                 if (it.erPerson())
-                    persondataService.hentSammensattNavn(it.personIdent)
-                else
-                    eregFasade.hentOrganisasjonNavn(it.orgnr)
+                    return persondataService.hentSammensattNavn(it.personIdent)
+                return eregFasade.hentOrganisasjonNavn(it.orgnr)
             }
-            .orElse(persondataService.hentSammensattNavn(fagsak.hentBruker().aktørId))
     }
 }

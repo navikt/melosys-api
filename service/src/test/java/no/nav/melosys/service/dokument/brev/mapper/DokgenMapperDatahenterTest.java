@@ -5,6 +5,7 @@ import java.util.Set;
 import no.nav.melosys.domain.Aktoer;
 import no.nav.melosys.domain.Behandling;
 import no.nav.melosys.domain.Fagsak;
+import no.nav.melosys.domain.FagsakTestFactory;
 import no.nav.melosys.domain.brev.DokgenBrevbestilling;
 import no.nav.melosys.domain.dokument.arbeidsforhold.Aktoertype;
 import no.nav.melosys.domain.kodeverk.Aktoersroller;
@@ -46,12 +47,11 @@ class DokgenMapperDatahenterTest {
 
     @Test
     void hentFullmektigNavn_fullmektigPerson_henterSammensattNavnPerson() {
-        Fagsak fagsak = new Fagsak();
         Aktoer fullmektig = new Aktoer();
         fullmektig.setPersonIdent(FNR_FULLMEKTIG);
         fullmektig.setRolle(Aktoersroller.FULLMEKTIG);
         fullmektig.setFullmaktstype(Fullmaktstype.FULLMEKTIG_SØKNAD);
-        fagsak.setAktører(Set.of(fullmektig, new Aktoer()));
+        Fagsak fagsak = FagsakTestFactory.builder().aktører(Set.of(fullmektig, new Aktoer())).build();
         var brevbestilling = new DokgenBrevbestilling();
         brevbestilling.setBehandling(new Behandling());
         brevbestilling.getBehandling().setFagsak(fagsak);
@@ -65,12 +65,11 @@ class DokgenMapperDatahenterTest {
 
     @Test
     void hentFullmektigNavn_fullmektigOrg_henterNavnOrganisasjon() {
-        Fagsak fagsak = new Fagsak();
         Aktoer fullmektig = new Aktoer();
         fullmektig.setOrgnr(ORGNR_FULLMEKTIG);
         fullmektig.setRolle(Aktoersroller.FULLMEKTIG);
         fullmektig.setFullmaktstype(Fullmaktstype.FULLMEKTIG_SØKNAD);
-        fagsak.setAktører(Set.of(fullmektig, new Aktoer()));
+        Fagsak fagsak = FagsakTestFactory.builder().aktører(Set.of(fullmektig, new Aktoer())).build();
         var brevbestilling = new DokgenBrevbestilling();
         brevbestilling.setBehandling(new Behandling());
         brevbestilling.getBehandling().setFagsak(fagsak);

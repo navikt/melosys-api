@@ -4,6 +4,7 @@ import java.util.Collections;
 
 import no.nav.melosys.domain.Behandling;
 import no.nav.melosys.domain.Fagsak;
+import no.nav.melosys.domain.FagsakTestFactory;
 import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingsstatus;
 import no.nav.melosys.saksflytapi.domain.ProsessDataKey;
 import no.nav.melosys.saksflytapi.domain.Prosessinstans;
@@ -27,19 +28,18 @@ class SettVurderDokumentTest {
 
     private SettVurderDokument settVurderDokument;
 
-    private final String saksnummer = "MEL-12345678";
     private final long behandlingID = 21321L;
     private final Prosessinstans prosessinstans = new Prosessinstans();
 
     @BeforeEach
     public void setUp() {
         settVurderDokument = new SettVurderDokument(fagsakService, behandlingService);
-        prosessinstans.setData(ProsessDataKey.SAKSNUMMER, saksnummer);
+        prosessinstans.setData(ProsessDataKey.SAKSNUMMER, FagsakTestFactory.SAKSNUMMER);
     }
 
     @Test
     void utfør_sakMedBehandling_oppdatererStatus() {
-        when(fagsakService.hentFagsak(eq(saksnummer))).thenReturn(fagsakMedBehandling());
+        when(fagsakService.hentFagsak(eq(FagsakTestFactory.SAKSNUMMER))).thenReturn(fagsakMedBehandling());
         prosessinstans.setData(ProsessDataKey.JFR_INGEN_VURDERING, false);
         settVurderDokument.utfør(prosessinstans);
         verify(behandlingService).endreStatus(behandlingID, Behandlingsstatus.VURDER_DOKUMENT);
@@ -47,7 +47,7 @@ class SettVurderDokumentTest {
 
     @Test
     void utfør_sakUtenBehandling_ingenStatusEndring() {
-        when(fagsakService.hentFagsak(eq(saksnummer))).thenReturn(new Fagsak());
+        when(fagsakService.hentFagsak(eq(FagsakTestFactory.SAKSNUMMER))).thenReturn(FagsakTestFactory.lagFagsak());
         prosessinstans.setData(ProsessDataKey.JFR_INGEN_VURDERING, false);
         settVurderDokument.utfør(prosessinstans);
         verify(behandlingService, never()).endreStatus(anyLong(), any());
@@ -55,18 +55,16 @@ class SettVurderDokumentTest {
 
     @Test
     void utfør_ingenVurdering_ingenStatusEndring() {
-        when(fagsakService.hentFagsak(eq(saksnummer))).thenReturn(fagsakMedBehandling());
+        when(fagsakService.hentFagsak(eq(FagsakTestFactory.SAKSNUMMER))).thenReturn(fagsakMedBehandling());
         prosessinstans.setData(ProsessDataKey.JFR_INGEN_VURDERING, true);
         settVurderDokument.utfør(prosessinstans);
         verify(behandlingService, never()).endreStatus(anyLong(), any());
     }
 
     private Fagsak fagsakMedBehandling() {
-        Fagsak fagsak = new Fagsak();
         Behandling behandling = new Behandling();
         behandling.setId(behandlingID);
         behandling.setStatus(Behandlingsstatus.UNDER_BEHANDLING);
-        fagsak.setBehandlinger(Collections.singletonList(behandling));
-        return fagsak;
+        return FagsakTestFactory.builder().behandlinger(behandling).build();
     }
 }

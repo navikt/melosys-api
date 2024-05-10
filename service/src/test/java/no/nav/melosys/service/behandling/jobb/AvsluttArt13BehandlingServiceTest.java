@@ -44,7 +44,7 @@ class AvsluttArt13BehandlingServiceTest {
 
     private final Behandlingsresultat behandlingsresultat = new Behandlingsresultat();
     private final Behandling behandling = new Behandling();
-    private final Fagsak fagsak = new Fagsak();
+    private Fagsak fagsak;
     private final Lovvalgsperiode lovvalgsperiode = new Lovvalgsperiode();
     private final VedtakMetadata vedtakMetadata = new VedtakMetadata();
 
@@ -55,12 +55,12 @@ class AvsluttArt13BehandlingServiceTest {
         avsluttArt13BehandlingService = new AvsluttArt13BehandlingService(behandlingService, fagsakService,
             behandlingsresultatService, medlPeriodeService, lovvalgsperiodeService);
 
+        fagsak = FagsakTestFactory.lagFagsak();
         behandling.setId(behandlingID);
         behandlingsresultat.setId(behandlingID);
         behandling.setStatus(Behandlingsstatus.MIDLERTIDIG_LOVVALGSBESLUTNING);
         behandling.setTema(Behandlingstema.ARBEID_FLERE_LAND);
         behandling.setFagsak(fagsak);
-        fagsak.setSaksnummer("MEL-11");
         behandlingsresultat.setBehandling(behandling);
         behandlingsresultat.getLovvalgsperioder().add(lovvalgsperiode);
         behandlingsresultat.setVedtakMetadata(vedtakMetadata);

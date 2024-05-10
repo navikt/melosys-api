@@ -70,7 +70,7 @@ public class OpprettNyBehandlingFraSed implements StegBehandler {
             joarkFasade.hentMottaksDatoForJournalpost(eessiMelding.getJournalpostId()),
             Behandlingsaarsaktyper.SED, null);
 
-        fagsak.getBehandlinger().add(behandling);
+        fagsak.leggTilBehandling(behandling);
         fagsakService.lagre(fagsak);
 
         ferdigstillOppgave(fagsak.getSaksnummer());
@@ -79,7 +79,7 @@ public class OpprettNyBehandlingFraSed implements StegBehandler {
     }
 
     private void avsluttTidligereBehandling(Fagsak fagsak) {
-        var aktivBehandling = fagsak.hentAktivBehandling();
+        var aktivBehandling = fagsak.finnAktivBehandlingIkkeÅrsavregning();
         if (aktivBehandling != null) {
             behandlingsresultatService.oppdaterBehandlingsresultattype(aktivBehandling.getId(), Behandlingsresultattyper.FERDIGBEHANDLET);
             behandlingService.avsluttBehandling(aktivBehandling.getId());

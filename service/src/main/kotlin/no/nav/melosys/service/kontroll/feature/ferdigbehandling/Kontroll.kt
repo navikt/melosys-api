@@ -97,7 +97,7 @@ class Kontroll(
     }
 
     private fun hentKontrollDataForAvslagOgHenleggelse(behandling: Behandling): FerdigbehandlingKontrollData {
-        val fullmektig = behandling.fagsak.finnFullmektig(Fullmaktstype.FULLMEKTIG_SØKNAD).orElse(null)
+        val fullmektig = behandling.fagsak.finnFullmektig(Fullmaktstype.FULLMEKTIG_SØKNAD)
         val mottatteOpplysningerData =
             if (!saksbehandlingRegler.harIngenFlyt(behandling)) behandling.mottatteOpplysninger.mottatteOpplysningerData else null
 
@@ -113,7 +113,7 @@ class Kontroll(
     }
 
     private fun hentVedtakKontrollData(behandling: Behandling): FerdigbehandlingKontrollData {
-        val fullmektig = behandling.fagsak.finnFullmektig(Fullmaktstype.FULLMEKTIG_SØKNAD).orElse(null)
+        val fullmektig = behandling.fagsak.finnFullmektig(Fullmaktstype.FULLMEKTIG_SØKNAD)
 
         return FerdigbehandlingKontrollData(
             medlemskapDokument = behandling.hentMedlemskapDokument(),
@@ -131,7 +131,7 @@ class Kontroll(
     }
 
     private fun hentVedtakKontrollDataFTRL(behandling: Behandling): FerdigbehandlingKontrollData {
-        val fullmektig = behandling.fagsak.finnFullmektig(Fullmaktstype.FULLMEKTIG_SØKNAD).orElse(null)
+        val fullmektig = behandling.fagsak.finnFullmektig(Fullmaktstype.FULLMEKTIG_SØKNAD)
         val medlemskapsperioder = medlemskapsperiodeService.hentMedlemskapsperioder(behandling.id)
         val tidligereMedlemskapsperioder = behandling.fagsak.hentInaktiveBehandlinger()
             .map { medlemskapsperiodeService.hentMedlemskapsperioder(it.id) }.flatten()

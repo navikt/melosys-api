@@ -2,6 +2,7 @@ package no.nav.melosys.domain.arkiv;
 
 import java.util.Collection;
 import java.util.List;
+import java.util.Optional;
 
 import com.google.common.collect.MoreCollectors;
 import no.nav.melosys.domain.Fagsak;
@@ -80,7 +81,7 @@ public class OpprettJournalpost extends Journalpost {
         dokumenter.remove(hovedDokument);
 
         OpprettJournalpost opprettJournalpost = new OpprettJournalpost();
-        final var mottatteOpplysninger = fagsak.hentSistAktivBehandling().getMottatteOpplysninger();
+        final var mottatteOpplysninger = fagsak.hentSistAktivBehandlingIkkeÅrsavregning().getMottatteOpplysninger();
         opprettJournalpost.setHoveddokument(lagFysiskHovedDokumentAltinn(hovedDokument, mottatteOpplysninger));
         opprettJournalpost.setInnhold(opprettJournalpost.getHoveddokument().getTittel());
         opprettJournalpost.setVedlegg(dokumenter.stream().map(FysiskDokument::lagFysiskDokumentAltinn).toList());
@@ -94,9 +95,9 @@ public class OpprettJournalpost extends Journalpost {
         opprettJournalpost.setBrukerIdType(BrukerIdType.FOLKEREGISTERIDENT);
         opprettJournalpost.setForsendelseMottatt(hovedDokument.getInnsendtTidspunkt());
 
-        fagsak.finnFullmektig(Fullmaktstype.FULLMEKTIG_SØKNAD).ifPresentOrElse(
-            r -> {
-                opprettJournalpost.setKorrespondansepartId(r.getOrgnr());
+        Optional.ofNullable(fagsak.finnFullmektig(Fullmaktstype.FULLMEKTIG_SØKNAD)).ifPresentOrElse(
+            fullmektig -> {
+                opprettJournalpost.setKorrespondansepartId(fullmektig.getOrgnr());
                 opprettJournalpost.setKorrespondansepartNavn(avsenderNavn);
                 opprettJournalpost.setKorrespondansepartIdType(KorrespondansepartIdType.ORGNR);
             },

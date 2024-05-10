@@ -65,7 +65,7 @@ public class ArbeidFlereLandSedRuter implements SedRuterForSedTyper {
             throw new FunksjonellException("Finner ingen sak tilknyttet arkivsak " + arkivsakID);
         }
 
-        final Behandling eksisterendeBehandling = fagsak.get().hentSistAktivBehandling();
+        final Behandling eksisterendeBehandling = fagsak.get().hentSistAktivBehandlingIkkeÅrsavregning();
         final Behandlingsresultat behandlingsresultat = behandlingsresultatService.hentBehandlingsresultat(eksisterendeBehandling.getId());
         final Behandlingstema nyttBehandlingstema = hentBehandlingstema(melosysEessiMelding);
 
@@ -144,18 +144,16 @@ public class ArbeidFlereLandSedRuter implements SedRuterForSedTyper {
     private void validerNorgeIkkeUtpektOgVedtakIkkeFattet(Behandling behandling, Behandlingsresultat behandlingsresultat) {
         if (behandling.erNorgeUtpekt() && behandlingsresultat.harVedtak()) {
             throw new FunksjonellException(String.format(
-                    "Det er allerede fattet vedtak på behandling %s med tema %s. Støtte for omgjøring ikke implementert",
-                    behandling.getId(), behandling.getTema()));
+                "Det er allerede fattet vedtak på behandling %s med tema %s. Støtte for omgjøring ikke implementert",
+                behandling.getId(), behandling.getTema()));
         }
     }
 
     private void validerLovligeKombinasjoner(Behandlingstema nyttBehandlingsTema, Fagsak fagsak) {
-        if (fagsak.getTema() != null) {
-            if (nyttBehandlingsTema.equals(Behandlingstema.BESLUTNING_LOVVALG_NORGE) && fagsak.getTema().equals(Sakstemaer.UNNTAK)) {
-                fagsakService.oppdaterSakstema(fagsak, Sakstemaer.MEDLEMSKAP_LOVVALG);
-            } else if (nyttBehandlingsTema.equals(Behandlingstema.BESLUTNING_LOVVALG_ANNET_LAND) && fagsak.getTema().equals(Sakstemaer.MEDLEMSKAP_LOVVALG)) {
-                fagsakService.oppdaterSakstema(fagsak, Sakstemaer.UNNTAK);
-            }
+        if (nyttBehandlingsTema.equals(Behandlingstema.BESLUTNING_LOVVALG_NORGE) && fagsak.getTema().equals(Sakstemaer.UNNTAK)) {
+            fagsakService.oppdaterSakstema(fagsak, Sakstemaer.MEDLEMSKAP_LOVVALG);
+        } else if (nyttBehandlingsTema.equals(Behandlingstema.BESLUTNING_LOVVALG_ANNET_LAND) && fagsak.getTema().equals(Sakstemaer.MEDLEMSKAP_LOVVALG)) {
+            fagsakService.oppdaterSakstema(fagsak, Sakstemaer.UNNTAK);
         }
     }
 }

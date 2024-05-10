@@ -45,8 +45,8 @@ class PostadresseKontrollService(
 
     private fun oppdaterKontekstForBehandling(kontekst: PostadressesjekkKontekst, behandling: Behandling) {
         val fullmektigForBruker = behandling.fagsak.finnFullmektig(Fullmaktstype.FULLMEKTIG_SØKNAD)
-        if (fullmektigForBruker.isPresent) {
-            kontekst.oppdaterForFullmektigTilBruker(fullmektigForBruker.get())
+        if (fullmektigForBruker != null) {
+            kontekst.oppdaterForFullmektigTilBruker(fullmektigForBruker)
         } else {
             kontekst.oppdaterForBruker(behandling.fagsak.hentBrukersAktørID())
         }

@@ -182,9 +182,7 @@ class AnmodningUnntakMapperTest {
 
     private Behandling lagBehandling() {
         Behandling behandling = new Behandling();
-        Fagsak fagsak = new Fagsak();
-        fagsak.setType(Sakstyper.EU_EOS);
-        behandling.setFagsak(fagsak);
+        behandling.setFagsak(FagsakTestFactory.lagFagsak());
 
         StrukturertAdresse strukturertAdresse = new StrukturertAdresse();
         strukturertAdresse.setLandkode("NO");

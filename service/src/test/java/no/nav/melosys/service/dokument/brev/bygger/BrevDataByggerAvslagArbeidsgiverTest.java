@@ -75,12 +75,7 @@ class BrevDataByggerAvslagArbeidsgiverTest {
 
     @Test
     void lag_avslagArbeidsgiverBrev_harVilkaarBegrunnelser() {
-        Aktoer aktoer = new Aktoer();
-        aktoer.setRolle(Aktoersroller.BRUKER);
-        aktoer.setAktørId("ident");
-
-        Fagsak fagsak = new Fagsak();
-        fagsak.setAktører(Set.of(aktoer));
+        Fagsak fagsak = FagsakTestFactory.builder().medBruker().build();
 
         Behandling behandling = new Behandling();
         behandling.setFagsak(fagsak);

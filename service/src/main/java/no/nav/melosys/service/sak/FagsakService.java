@@ -85,9 +85,6 @@ public class FagsakService {
 
     @Transactional
     public void lagre(Fagsak sak) {
-        if (sak.getSaksnummer() == null) {
-            sak.setSaksnummer(hentNesteSaksnummer());
-        }
         fagsakRepository.save(sak);
     }
 
@@ -115,7 +112,7 @@ public class FagsakService {
         boolean harIngenTrygdemyndigheter = fagsak.hentMyndigheter().isEmpty();
         if (harIngenTrygdemyndigheter) {
             Aktoer nyTrygdemyndighet = lagMyndighetAktørForTrygdeavtaler(fagsak, landkode);
-            fagsak.getAktører().add(nyTrygdemyndighet);
+            fagsak.leggTilAktør(nyTrygdemyndighet);
         }
         fagsakRepository.save(fagsak);
     }
@@ -138,11 +135,16 @@ public class FagsakService {
 
     @Transactional
     public Fagsak nyFagsakOgBehandling(OpprettSakRequest opprettSakRequest) {
-        Fagsak fagsak = new Fagsak();
-        String saksnummer = hentNesteSaksnummer();
-        fagsak.setSaksnummer(saksnummer);
-
-        HashSet<Aktoer> aktører = new HashSet<>();
+        String saksnummer  = hentNesteSaksnummer();
+        Fagsak fagsak = new Fagsak(
+            saksnummer,
+            null,
+            opprettSakRequest.getSakstype(),
+            opprettSakRequest.getSakstema(),
+            Saksstatuser.OPPRETTET,
+            new HashSet<>(),
+            new ArrayList<>()
+        );
 
         String aktørID = opprettSakRequest.getAktørID();
         if (aktørID != null) {
@@ -151,7 +153,7 @@ public class FagsakService {
             aktør.setUtenlandskPersonId(opprettSakRequest.getUtenlandskPersonId());
             aktør.setFagsak(fagsak);
             aktør.setRolle(Aktoersroller.BRUKER);
-            aktører.add(aktør);
+            fagsak.leggTilAktør(aktør);
         }
 
         String virksomhetOrgnr = opprettSakRequest.getVirksomhetOrgnr();
@@ -160,7 +162,7 @@ public class FagsakService {
             virksomhet.setOrgnr(virksomhetOrgnr);
             virksomhet.setFagsak(fagsak);
             virksomhet.setRolle(Aktoersroller.VIRKSOMHET);
-            aktører.add(virksomhet);
+            fagsak.leggTilAktør(virksomhet);
         }
 
         String arbeidsgiver = opprettSakRequest.getArbeidsgiver();
@@ -169,11 +171,10 @@ public class FagsakService {
             aktørArbeidsgiver.setOrgnr(arbeidsgiver);
             aktørArbeidsgiver.setFagsak(fagsak);
             aktørArbeidsgiver.setRolle(Aktoersroller.ARBEIDSGIVER);
-            aktører.add(aktørArbeidsgiver);
+            fagsak.leggTilAktør(aktørArbeidsgiver);
         }
 
         FullmektigDto fullmektig = opprettSakRequest.getFullmektig();
-
         if (fullmektig != null) {
             Aktoer aktørFullmektig = new Aktoer();
             aktørFullmektig.setOrgnr(fullmektig.getOrgnr());
@@ -181,17 +182,12 @@ public class FagsakService {
             aktørFullmektig.setFullmaktstyper(fullmektig.getFullmakter());
             aktørFullmektig.setRolle(Aktoersroller.FULLMEKTIG);
             aktørFullmektig.setFagsak(fagsak);
-            aktører.add(aktørFullmektig);
+            fagsak.leggTilAktør(aktørFullmektig);
         }
 
         Instant nå = Instant.now();
-
-        fagsak.setType(opprettSakRequest.getSakstype());
-        fagsak.setTema(opprettSakRequest.getSakstema());
-        fagsak.setAktører(aktører);
         fagsak.setRegistrertDato(nå);
         fagsak.setEndretDato(nå);
-        fagsak.setStatus(Saksstatuser.OPPRETTET);
 
         lagre(fagsak);
 
@@ -213,7 +209,7 @@ public class FagsakService {
             Behandlingsstatus.OPPRETTET, behandlingstype, behandlingstema,
             initierendeJournalpostId, initierendeDokumentId, mottaksdato,
             behandlingsårsaktype, behandlingsårsakFritekst);
-        fagsak.setBehandlinger(Collections.singletonList(behandling));
+        fagsak.leggTilBehandling(behandling);
 
         sakerOpprettet.increment();
         return fagsak;
@@ -228,7 +224,7 @@ public class FagsakService {
                                            Behandlingstema nyBehandlingstema, Behandlingstyper nyBehandlingstype,
                                            Behandlingsstatus nyBehandlingsstatus, LocalDate nyMottaksdato) {
         Fagsak fagsak = hentFagsak(saksnummer);
-        Behandling behandling = fagsak.hentAktivBehandling();
+        Behandling behandling = fagsak.finnAktivBehandlingIkkeÅrsavregning();
         validerOppdatering(fagsak, behandling, nySakstype, nySakstema, nyBehandlingstema, nyBehandlingstype);
         if (fagsak.getType() != nySakstype || fagsak.getTema() != nySakstema) {
             log.info("Endrer sakstype for fagsak {} fra {} til {}", fagsak.getSaksnummer(), fagsak.getType(), nySakstype);
@@ -253,7 +249,7 @@ public class FagsakService {
 
 
     public void avsluttFagsakOgBehandling(Fagsak fagsak, Saksstatuser saksstatus) {
-        Behandling aktivBehandling = fagsak.hentAktivBehandling();
+        Behandling aktivBehandling = fagsak.finnAktivBehandlingIkkeÅrsavregning();
         if (aktivBehandling == null) {
             log.warn("Forsøker å lukke behandling for fagsak {} som ikke har noen aktiv behandling", fagsak.getSaksnummer());
             oppdaterStatus(fagsak, saksstatus);
@@ -266,8 +262,7 @@ public class FagsakService {
                                           Behandling behandling,
                                           Saksstatuser saksstatus) {
         if (!behandling.getFagsak().getSaksnummer().equals(fagsak.getSaksnummer())) {
-            throw new FunksjonellException("Behandling " + behandling.getId()
-                + " tilhører ikke fagsak " + fagsak.getSaksnummer());
+            throw new FunksjonellException("Behandling " + behandling.getId() + " tilhører ikke fagsak " + fagsak.getSaksnummer());
         }
         oppdaterStatus(fagsak, saksstatus);
         behandlingService.avsluttBehandling(behandling.getId());
@@ -291,7 +286,7 @@ public class FagsakService {
     private List<Fagsak> sorterFagsaker(List<Fagsak> fagsaker) {
         return fagsaker.stream()
             .sorted((a, b) -> {
-                int compareAktivBehandling = Boolean.compare(b.harAktivBehandling(), a.harAktivBehandling());
+                int compareAktivBehandling = Boolean.compare(b.harAktivBehandlingIkkeÅrsavregning(), a.harAktivBehandlingIkkeÅrsavregning());
                 if (compareAktivBehandling != 0) {
                     return compareAktivBehandling;
                 }

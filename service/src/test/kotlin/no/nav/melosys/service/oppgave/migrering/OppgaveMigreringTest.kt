@@ -160,11 +160,10 @@ class OppgaveMigreringTest {
 
         return Behandling().apply {
             id = 1
-            fagsak = Fagsak().apply {
-                saksnummer = "MEL-1"
-                type = sakstype
-                tema = sakstema
-            }
+            fagsak = FagsakTestFactory.builder()
+                .type(sakstype)
+                .tema(sakstema)
+                .build()
             type = behandlingstype
             tema = behandlingstema
             if (sedName != null) {

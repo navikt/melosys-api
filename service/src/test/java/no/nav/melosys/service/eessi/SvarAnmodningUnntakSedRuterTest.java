@@ -22,7 +22,6 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.Mock;
-import org.mockito.internal.util.collections.Sets;
 import org.mockito.junit.jupiter.MockitoExtension;
 
 import static org.assertj.core.api.Assertions.assertThatExceptionOfType;
@@ -60,7 +59,7 @@ class SvarAnmodningUnntakSedRuterTest {
         prosessinstans.setData(ProsessDataKey.EESSI_MELDING, eessiMelding);
         svarAnmodningUnntakSedRuter.rutSedTilBehandling(prosessinstans, 1L);
 
-        verify(prosessinstansService).opprettProsessinstansMottattSvarAnmodningUnntak(fagsak.hentAktivBehandling(), eessiMelding);
+        verify(prosessinstansService).opprettProsessinstansMottattSvarAnmodningUnntak(fagsak.finnAktivBehandlingIkkeÅrsavregning(), eessiMelding);
     }
 
     @Test
@@ -80,7 +79,7 @@ class SvarAnmodningUnntakSedRuterTest {
         svarAnmodningUnntakSedRuter.rutSedTilBehandling(prosessinstans, 1L);
 
         verify(prosessinstansService).opprettProsessinstansSedJournalføring(
-            fagsak.hentAktivBehandling(), eessiMelding
+            fagsak.finnAktivBehandlingIkkeÅrsavregning(), eessiMelding
         );
     }
 
@@ -99,7 +98,7 @@ class SvarAnmodningUnntakSedRuterTest {
 
         verify(oppgaveService).oppdaterOppgave(any(), any(OppgaveOppdatering.class));
         verify(prosessinstansService).opprettProsessinstansSedJournalføring(
-            fagsak.hentAktivBehandling(), eessiMelding
+            fagsak.finnAktivBehandlingIkkeÅrsavregning(), eessiMelding
         );
     }
 
@@ -129,18 +128,18 @@ class SvarAnmodningUnntakSedRuterTest {
     }
 
     private Fagsak hentFagsak(Behandlingstema behandlingstema, Behandlingsstatus behandlingsstatus) {
-        Fagsak fagsak = new Fagsak();
+        Fagsak fagsak = FagsakTestFactory.lagFagsak();
         Behandling behandling = new Behandling();
         behandling.setTema(behandlingstema);
         behandling.setStatus(behandlingsstatus);
         behandling.setId(123L);
         behandling.setFagsak(fagsak);
-        fagsak.setBehandlinger(Collections.singletonList(behandling));
+        fagsak.leggTilBehandling(behandling);
 
         Aktoer aktoer = new Aktoer();
         aktoer.setRolle(Aktoersroller.BRUKER);
         aktoer.setAktørId("223345325342");
-        fagsak.setAktører(Sets.newSet(aktoer));
+        fagsak.leggTilAktør(aktoer);
         return fagsak;
     }
 

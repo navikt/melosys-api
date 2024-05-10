@@ -2,6 +2,7 @@ package no.nav.melosys.service.altinn;
 
 import no.nav.melosys.domain.Behandling;
 import no.nav.melosys.domain.Fagsak;
+import no.nav.melosys.domain.FagsakTestFactory;
 import no.nav.melosys.domain.Kontaktopplysning;
 import no.nav.melosys.domain.kodeverk.Fullmaktstype;
 import no.nav.melosys.domain.kodeverk.Sakstemaer;
@@ -34,7 +35,6 @@ import java.net.URL;
 import java.time.Instant;
 import java.time.LocalDate;
 import java.time.ZoneId;
-import java.util.List;
 import java.util.Set;
 
 import static org.assertj.core.api.Assertions.assertThat;
@@ -83,7 +83,7 @@ class AltinnSoeknadServiceTest {
         when(persondataFasade.hentAktørIdForIdent(anyString())).thenReturn(aktørID);
 
 
-        assertThat(altinnSoeknadService.opprettFagsakOgBehandlingFraAltinnSøknad(søknadID)).isEqualTo(fagsak.hentAktivBehandling());
+        assertThat(altinnSoeknadService.opprettFagsakOgBehandlingFraAltinnSøknad(søknadID)).isEqualTo(fagsak.finnAktivBehandlingIkkeÅrsavregning());
 
 
         OpprettSakRequest req = captor.getValue();
@@ -113,7 +113,7 @@ class AltinnSoeknadServiceTest {
         when(persondataFasade.hentAktørIdForIdent(anyString())).thenReturn(aktørID);
 
 
-        assertThat(altinnSoeknadService.opprettFagsakOgBehandlingFraAltinnSøknad(søknadID)).isEqualTo(fagsak.hentAktivBehandling());
+        assertThat(altinnSoeknadService.opprettFagsakOgBehandlingFraAltinnSøknad(søknadID)).isEqualTo(fagsak.finnAktivBehandlingIkkeÅrsavregning());
 
 
         OpprettSakRequest req = captor.getValue();
@@ -220,7 +220,7 @@ class AltinnSoeknadServiceTest {
 
 
         verify(avklarteVirksomheterService).lagreVirksomhetSomAvklartfakta(
-            søknad.getInnhold().getArbeidsgiver().getVirksomhetsnummer(), fagsak.hentAktivBehandling().getId());
+            søknad.getInnhold().getArbeidsgiver().getVirksomhetsnummer(), fagsak.finnAktivBehandlingIkkeÅrsavregning().getId());
     }
 
     private MedlemskapArbeidEOSM lagMedlemskapArbeidEOSM() {
@@ -238,12 +238,12 @@ class AltinnSoeknadServiceTest {
     }
 
     private Fagsak lagFagsak() {
-        Fagsak fagsak = new Fagsak();
         Behandling behandling = new Behandling();
         behandling.setId(1L);
         behandling.setStatus(Behandlingsstatus.OPPRETTET);
-        fagsak.setBehandlinger(List.of(behandling));
 
-        return fagsak;
+        return FagsakTestFactory.builder()
+            .behandlinger(behandling)
+            .build();
     }
 }

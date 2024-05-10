@@ -157,9 +157,9 @@ public class MedlPeriodeService {
     public void avsluttTidligerMedlPeriode(String saksnummer) {
         var fagsak = fagsakService.hentFagsak(saksnummer);
 
-        Optional<Behandling> optionalBehandling = fagsak.finnTidligstInaktivBehandling();
-        if (optionalBehandling.isPresent()) {
-            Optional<Lovvalgsperiode> lovvalgsperiode = finnLovvalgsperiode(optionalBehandling.get());
+        Behandling behandling = fagsak.finnTidligstInaktivBehandling();
+        if (behandling != null) {
+            Optional<Lovvalgsperiode> lovvalgsperiode = finnLovvalgsperiode(behandling);
             if (lovvalgsperiode.isPresent() && lovvalgsperiode.get().getMedlPeriodeID() != null) {
                 log.info("Avslutter tidligere periode for fagsak {}", fagsak.getSaksnummer());
                 avvisPeriode(lovvalgsperiode.get().getMedlPeriodeID());

@@ -87,12 +87,7 @@ class BrevDataByggerA001Test {
 
     @BeforeEach
     public void setUp() {
-        Aktoer aktoer = new Aktoer();
-        aktoer.setRolle(Aktoersroller.BRUKER);
-        aktoer.setAktørId("ident");
-
-        Fagsak fagsak = new Fagsak();
-        fagsak.setAktører(Set.of(aktoer));
+        Fagsak fagsak = FagsakTestFactory.builder().medBruker().build();
 
         behandling = new Behandling();
         behandling.setId(123L);

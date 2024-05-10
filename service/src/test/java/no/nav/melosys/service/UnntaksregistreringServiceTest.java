@@ -3,6 +3,7 @@ package no.nav.melosys.service;
 import no.nav.melosys.domain.Behandling;
 import no.nav.melosys.domain.Behandlingsresultat;
 import no.nav.melosys.domain.Fagsak;
+import no.nav.melosys.domain.FagsakTestFactory;
 import no.nav.melosys.domain.kodeverk.Land_iso2;
 import no.nav.melosys.domain.kodeverk.Saksstatuser;
 import no.nav.melosys.domain.kodeverk.Sakstyper;
@@ -32,7 +33,6 @@ import static org.mockito.Mockito.when;
 @ExtendWith(MockitoExtension.class)
 class UnntaksregistreringServiceTest {
     private final Long BEHANDLING_ID = 111L;
-    private final String SAKSNUMMER = "MEL-111";
 
     @Mock
     private BehandlingService behandlingService;
@@ -67,7 +67,7 @@ class UnntaksregistreringServiceTest {
 
 
         verify(prosessinstansService).opprettProsessinstansRegistrerUnntakFraMedlemskap(behandling, Saksstatuser.LOVVALG_AVKLART);
-        verify(oppgaveService).ferdigstillOppgaveMedSaksnummer(SAKSNUMMER);
+        verify(oppgaveService).ferdigstillOppgaveMedSaksnummer(FagsakTestFactory.SAKSNUMMER);
         verify(behandlingsresultatService).lagre(captor.capture());
 
         var capturedBehandlingsresultat = captor.getValue();
@@ -90,7 +90,7 @@ class UnntaksregistreringServiceTest {
 
 
         verify(prosessinstansService).opprettProsessinstansRegistrerUnntakFraMedlemskap(behandling, Saksstatuser.LOVVALG_AVKLART);
-        verify(oppgaveService).ferdigstillOppgaveMedSaksnummer(SAKSNUMMER);
+        verify(oppgaveService).ferdigstillOppgaveMedSaksnummer(FagsakTestFactory.SAKSNUMMER);
         verify(behandlingsresultatService).lagre(captor.capture());
 
         var capturedBehandlingsresultat = captor.getValue();
@@ -101,7 +101,7 @@ class UnntaksregistreringServiceTest {
 
     @Test
     void registrerUnntakFraMedlemskap_utfallRegistreringUnntakIkkeGodkjent_lagrerAltKorrekt() {
-        var behandling = lagBehandling(null, null, null);
+        var behandling = lagBehandling(Sakstyper.EU_EOS, null, null);
         var behandlingsresultat = new Behandlingsresultat();
         behandlingsresultat.setUtfallRegistreringUnntak(Utfallregistreringunntak.IKKE_GODKJENT);
 
@@ -113,7 +113,7 @@ class UnntaksregistreringServiceTest {
 
 
         verify(prosessinstansService).opprettProsessinstansRegistrerUnntakFraMedlemskap(behandling, Saksstatuser.AVSLUTTET);
-        verify(oppgaveService).ferdigstillOppgaveMedSaksnummer(SAKSNUMMER);
+        verify(oppgaveService).ferdigstillOppgaveMedSaksnummer(FagsakTestFactory.SAKSNUMMER);
         verify(behandlingsresultatService).lagre(captor.capture());
 
         var capturedBehandlingsresultat = captor.getValue();
@@ -123,7 +123,7 @@ class UnntaksregistreringServiceTest {
 
     @Test
     void registrerUnntakFraMedlemskap_mottatteOpplysningerDataIkkeAnmodningEllerAttest_kasterFeil() {
-        var behandling = lagBehandling(null, null, null);
+        var behandling = lagBehandling(Sakstyper.EU_EOS, null, null);
         behandling.getMottatteOpplysninger().setMottatteOpplysningerData(new SøknadNorgeEllerUtenforEØS());
         var behandlingsresultat = new Behandlingsresultat();
 
@@ -137,9 +137,7 @@ class UnntaksregistreringServiceTest {
     }
 
     private Behandling lagBehandling(Sakstyper sakstype, Land_iso2 avsenderland, Land_iso2 lovvalgsland) {
-        var fagsak = new Fagsak();
-        fagsak.setSaksnummer(SAKSNUMMER);
-        fagsak.setType(sakstype);
+        var fagsak = FagsakTestFactory.builder().type(sakstype).build();
 
         var anmodningEllerAttest = new AnmodningEllerAttest();
         anmodningEllerAttest.setAvsenderland(avsenderland);

@@ -1,10 +1,9 @@
 package no.nav.melosys.service.tilgang;
 
-import java.util.Set;
-
 import no.nav.melosys.domain.Aktoer;
 import no.nav.melosys.domain.Behandling;
 import no.nav.melosys.domain.Fagsak;
+import no.nav.melosys.domain.FagsakTestFactory;
 import no.nav.melosys.domain.kodeverk.Aktoersroller;
 import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingsstatus;
 import no.nav.melosys.service.behandling.BehandlingService;
@@ -23,6 +22,8 @@ import org.mockito.Mock;
 import org.mockito.Spy;
 import org.mockito.junit.jupiter.MockitoExtension;
 
+import static no.nav.melosys.domain.FagsakTestFactory.BRUKER_AKTØR_ID;
+import static no.nav.melosys.domain.FagsakTestFactory.SAKSNUMMER;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.Mockito.*;
 
@@ -48,21 +49,17 @@ class AksesskontrollImplTest {
 
     private Aksesskontroll aksesskontroll;
 
-    private final Fagsak fagsak = new Fagsak();
+    private Fagsak fagsak;
     private final Behandling behandling = new Behandling();
-    private final String aktørID = "412423";
-    private final String saksnummer = "MEL-0";
     private final long behandlingID = 1111;
 
     @BeforeEach
     void setup() {
+        fagsak = FagsakTestFactory.builder()
+            .medBruker()
+            .build();
         behandling.setId(behandlingID);
         behandling.setFagsak(fagsak);
-        Aktoer aktoer = new Aktoer();
-        aktoer.setRolle(Aktoersroller.BRUKER);
-        aktoer.setAktørId(aktørID);
-        fagsak.getAktører().add(aktoer);
-        fagsak.setSaksnummer(saksnummer);
 
         SubjectHandler.set(new TestSubjectHandler());
 
@@ -86,18 +83,18 @@ class AksesskontrollImplTest {
 
         verify(auditLogger).log(auditCaptor.capture());
         assertThat(auditCaptor.getValue().getSourceUserId()).isNotNull();
-        assertThat(auditCaptor.getValue().getDestinationUserId()).isEqualTo(fagsak.finnBrukersAktørID().get());
+        assertThat(auditCaptor.getValue().getDestinationUserId()).isEqualTo(fagsak.finnBrukersAktørID());
         assertThat(auditCaptor.getValue().getMessage()).isEqualTo("melding");
-        verify(brukertilgangKontroll).validerTilgangTilAktørID(fagsak.finnBrukersAktørID().get());
+        verify(brukertilgangKontroll).validerTilgangTilAktørID(fagsak.finnBrukersAktørID());
     }
 
     @Test
     void autoriserSakstilgang_sjekkerBruker() {
-        when(fagsakService.hentFagsak(saksnummer)).thenReturn(fagsak);
+        when(fagsakService.hentFagsak(SAKSNUMMER)).thenReturn(fagsak);
 
-        aksesskontroll.autoriserSakstilgang(saksnummer);
+        aksesskontroll.autoriserSakstilgang(SAKSNUMMER);
 
-        verify(brukertilgangKontroll).validerTilgangTilAktørID(aktørID);
+        verify(brukertilgangKontroll).validerTilgangTilAktørID(BRUKER_AKTØR_ID);
     }
 
     @Test
@@ -106,7 +103,7 @@ class AksesskontrollImplTest {
 
         aksesskontroll.autoriser(behandlingID);
 
-        verify(brukertilgangKontroll).validerTilgangTilAktørID(aktørID);
+        verify(brukertilgangKontroll).validerTilgangTilAktørID(BRUKER_AKTØR_ID);
         verify(redigerbarKontroll, never()).sjekkRessursRedigerbar(behandling, Ressurs.UKJENT);
     }
 
@@ -116,15 +113,13 @@ class AksesskontrollImplTest {
 
         aksesskontroll.autoriser(behandlingID, Aksesstype.SKRIV);
 
-        verify(brukertilgangKontroll).validerTilgangTilAktørID(aktørID);
+        verify(brukertilgangKontroll).validerTilgangTilAktørID(BRUKER_AKTØR_ID);
         verify(redigerbarKontroll).sjekkRessursRedigerbar(behandling, Ressurs.UKJENT);
     }
 
     @Test
     void autoriser_harIkkeBruker_verifiserIkkeSjekkAktørID() {
-        Aktoer virksomhet = new Aktoer();
-        virksomhet.setRolle(Aktoersroller.VIRKSOMHET);
-        behandling.getFagsak().setAktører(Set.of(virksomhet));
+        behandling.setFagsak(FagsakTestFactory.builder().medVirksomhet().build());
         when(behandlingService.hentBehandling(behandlingID)).thenReturn(behandling);
 
         aksesskontroll.autoriser(behandlingID, Aksesstype.SKRIV);
@@ -140,7 +135,7 @@ class AksesskontrollImplTest {
 
         aksesskontroll.autoriserSkrivTilRessurs(behandlingID, skrivTilRessurs);
 
-        verify(brukertilgangKontroll).validerTilgangTilAktørID(aktørID);
+        verify(brukertilgangKontroll).validerTilgangTilAktørID(BRUKER_AKTØR_ID);
         verify(redigerbarKontroll).sjekkRessursRedigerbar(behandling, skrivTilRessurs);
     }
 
@@ -157,7 +152,7 @@ class AksesskontrollImplTest {
     void behandlingKanRedigeresAvSaksbehandler_behandlingRedigerbarOppgaveIkkeTilordnet_ikkeSann() {
         final var saksbehandler = "Z111111";
         when(redigerbarKontroll.behandlingErRedigerbar(behandling)).thenReturn(true);
-        when(oppgaveService.saksbehandlerErTilordnetOppgaveForSaksnummer(saksbehandler, saksnummer)).thenReturn(false);
+        when(oppgaveService.saksbehandlerErTilordnetOppgaveForSaksnummer(saksbehandler, SAKSNUMMER)).thenReturn(false);
 
         var saksbehandlerHarTilgang = aksesskontroll.behandlingKanRedigeresAvSaksbehandler(behandling, saksbehandler);
 
@@ -168,7 +163,7 @@ class AksesskontrollImplTest {
     void behandlingKanRedigeresAvSaksbehandler_behandlingRedigerbarOppgaveTilordnet_sann() {
         final var saksbehandler = "Z111111";
         when(redigerbarKontroll.behandlingErRedigerbar(behandling)).thenReturn(true);
-        when(oppgaveService.saksbehandlerErTilordnetOppgaveForSaksnummer(saksbehandler, saksnummer)).thenReturn(true);
+        when(oppgaveService.saksbehandlerErTilordnetOppgaveForSaksnummer(saksbehandler, SAKSNUMMER)).thenReturn(true);
 
         var saksbehandlerHarTilgang = aksesskontroll.behandlingKanRedigeresAvSaksbehandler(behandling, saksbehandler);
 

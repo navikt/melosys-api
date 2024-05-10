@@ -9,6 +9,7 @@ import io.mockk.junit5.MockKExtension
 import no.nav.melosys.domain.Behandling
 import no.nav.melosys.domain.Behandlingsresultat
 import no.nav.melosys.domain.Fagsak
+import no.nav.melosys.domain.FagsakTestFactory
 import no.nav.melosys.domain.kodeverk.Sakstemaer
 import no.nav.melosys.domain.kodeverk.Sakstyper
 import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingsresultattyper
@@ -423,10 +424,7 @@ class SaksbehandlingReglerTest {
             type = Behandlingstyper.FØRSTEGANG
             tema = Behandlingstema.UTSENDT_ARBEIDSTAKER
             status = Behandlingsstatus.AVSLUTTET
-            fagsak = Fagsak().apply {
-                type = Sakstyper.EU_EOS
-                tema = Sakstemaer.MEDLEMSKAP_LOVVALG
-            }
+            fagsak = FagsakTestFactory.lagFagsak()
         }
 
         return listOf(
@@ -448,10 +446,7 @@ class SaksbehandlingReglerTest {
                         type = Behandlingstyper.KLAGE
                         tema = Behandlingstema.UTSENDT_ARBEIDSTAKER
                         status = Behandlingsstatus.AVSLUTTET
-                        fagsak = Fagsak().apply {
-                            type = Sakstyper.EU_EOS
-                            tema = Sakstemaer.MEDLEMSKAP_LOVVALG
-                        }
+                        fagsak = FagsakTestFactory.lagFagsak()
                     }
                 ),
                 null
@@ -469,20 +464,14 @@ class SaksbehandlingReglerTest {
                         type = Behandlingstyper.KLAGE
                         tema = Behandlingstema.UTSENDT_ARBEIDSTAKER
                         status = Behandlingsstatus.AVSLUTTET
-                        fagsak = Fagsak().apply {
-                            type = Sakstyper.EU_EOS
-                            tema = Sakstemaer.MEDLEMSKAP_LOVVALG
-                        }
+                        fagsak = FagsakTestFactory.lagFagsak()
                     },
                     Behandling().apply {
                         id = 1
                         type = Behandlingstyper.FØRSTEGANG
                         tema = Behandlingstema.UTSENDT_ARBEIDSTAKER
                         status = Behandlingsstatus.AVSLUTTET
-                        fagsak = Fagsak().apply {
-                            type = Sakstyper.EU_EOS
-                            tema = Sakstemaer.MEDLEMSKAP_LOVVALG
-                        }
+                        fagsak = FagsakTestFactory.lagFagsak()
                     }
                 ),
                 1L
@@ -495,30 +484,21 @@ class SaksbehandlingReglerTest {
                         type = Behandlingstyper.FØRSTEGANG
                         tema = Behandlingstema.UTSENDT_ARBEIDSTAKER
                         status = Behandlingsstatus.UNDER_BEHANDLING
-                        fagsak = Fagsak().apply {
-                            type = Sakstyper.EU_EOS
-                            tema = Sakstemaer.MEDLEMSKAP_LOVVALG
-                        }
+                        fagsak = FagsakTestFactory.lagFagsak()
                     },
                     Behandling().apply {
                         id = 1
                         type = Behandlingstyper.KLAGE
                         tema = Behandlingstema.UTSENDT_ARBEIDSTAKER
                         status = Behandlingsstatus.AVSLUTTET
-                        fagsak = Fagsak().apply {
-                            type = Sakstyper.EU_EOS
-                            tema = Sakstemaer.MEDLEMSKAP_LOVVALG
-                        }
+                        fagsak = FagsakTestFactory.lagFagsak()
                     },
                     Behandling().apply {
                         id = 2
                         type = Behandlingstyper.NY_VURDERING
                         tema = Behandlingstema.UTSENDT_ARBEIDSTAKER
                         status = Behandlingsstatus.AVSLUTTET
-                        fagsak = Fagsak().apply {
-                            type = Sakstyper.EU_EOS
-                            tema = Sakstemaer.MEDLEMSKAP_LOVVALG
-                        }
+                        fagsak = FagsakTestFactory.lagFagsak()
                     }
                 ),
                 2L
@@ -530,10 +510,7 @@ class SaksbehandlingReglerTest {
                     type = Behandlingstyper.HENVENDELSE
                     tema = Behandlingstema.UTSENDT_ARBEIDSTAKER
                     status = Behandlingsstatus.AVSLUTTET
-                    fagsak = Fagsak().apply {
-                        type = Sakstyper.EU_EOS
-                        tema = Sakstemaer.MEDLEMSKAP_LOVVALG
-                    }
+                    fagsak = FagsakTestFactory.lagFagsak()
                 }),
                 null
             ),
@@ -546,10 +523,9 @@ class SaksbehandlingReglerTest {
                         tema = Behandlingstema.YRKESAKTIV
                         status = Behandlingsstatus.AVSLUTTET
                         registrertDato = Instant.now().minus(90, ChronoUnit.DAYS)
-                        fagsak = Fagsak().apply {
+                        fagsak = FagsakTestFactory.builder().apply {
                             type = Sakstyper.FTRL
-                            tema = Sakstemaer.MEDLEMSKAP_LOVVALG
-                        }
+                        }.build()
                     },
                     Behandling().apply {
                         id = 1
@@ -557,10 +533,9 @@ class SaksbehandlingReglerTest {
                         tema = Behandlingstema.YRKESAKTIV
                         status = Behandlingsstatus.AVSLUTTET
                         registrertDato = Instant.now().minus(60, ChronoUnit.DAYS)
-                        fagsak = Fagsak().apply {
+                        fagsak = FagsakTestFactory.builder().apply {
                             type = Sakstyper.FTRL
-                            tema = Sakstemaer.MEDLEMSKAP_LOVVALG
-                        }
+                        }.build()
                     },
                     Behandling().apply {
                         id = 2
@@ -568,10 +543,9 @@ class SaksbehandlingReglerTest {
                         tema = Behandlingstema.YRKESAKTIV
                         status = Behandlingsstatus.AVSLUTTET
                         registrertDato = Instant.now().minus(30, ChronoUnit.DAYS)
-                        fagsak = Fagsak().apply {
+                        fagsak = FagsakTestFactory.builder().apply {
                             type = Sakstyper.FTRL
-                            tema = Sakstemaer.MEDLEMSKAP_LOVVALG
-                        }
+                        }.build()
                     }
                 ).sortedByDescending { it.registrertDato },
                 2L
@@ -636,12 +610,16 @@ class SaksbehandlingReglerTest {
             }, behandlingsresultattype))
         }
 
-        fun lagFagsak(type: Sakstyper, tema: Sakstemaer) =
-            Fagsak().apply {
-                this.type = type
-                this.tema = tema
-                this.behandlinger = behandlinger(this).map { it.first }
+        fun lagFagsak(sakstype: Sakstyper, sakstema: Sakstemaer): Fagsak {
+            val fagsak = FagsakTestFactory.builder().apply {
+                type = sakstype
+                tema = sakstema
+            }.build()
+            behandlinger(fagsak).map { it.first }.forEach {
+                fagsak.leggTilBehandling(it)
             }
+            return fagsak
+        }
 
         override fun toString(): String {
             return behandlingerMedType.map { (behandling, behandlingsresultattyper) ->

@@ -36,7 +36,7 @@ public class SettVurderDokument implements StegBehandler {
         String saksnummer = prosessinstans.getData(ProsessDataKey.SAKSNUMMER);
 
         Fagsak fagsak = fagsakService.hentFagsak(saksnummer);
-        Behandling behandling = fagsak.hentAktivBehandling();
+        Behandling behandling = fagsak.finnAktivBehandlingIkkeÅrsavregning();
         boolean ingenVurdering = prosessinstans.getData(ProsessDataKey.JFR_INGEN_VURDERING, Boolean.class);
         if (behandling != null && !ingenVurdering) {
             behandlingService.endreStatus(behandling.getId(), Behandlingsstatus.VURDER_DOKUMENT);

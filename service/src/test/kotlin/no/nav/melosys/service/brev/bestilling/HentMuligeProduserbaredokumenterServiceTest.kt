@@ -10,6 +10,7 @@ import io.mockk.junit5.MockKExtension
 import no.nav.melosys.domain.Aktoer
 import no.nav.melosys.domain.Behandling
 import no.nav.melosys.domain.Fagsak
+import no.nav.melosys.domain.FagsakTestFactory
 import no.nav.melosys.domain.kodeverk.Aktoersroller
 import no.nav.melosys.domain.kodeverk.Mottakerroller
 import no.nav.melosys.domain.kodeverk.Sakstemaer
@@ -161,5 +162,5 @@ class HentMuligeProduserbaredokumenterServiceTest {
             .shouldContainInOrder(Produserbaredokumenter.MANGELBREV_BRUKER, Produserbaredokumenter.GENERELT_FRITEKSTBREV_BRUKER)
     }
 
-    private fun lagBehandling(): Behandling = Behandling().apply { fagsak = Fagsak() }
+    private fun lagBehandling(): Behandling = Behandling().apply { fagsak = FagsakTestFactory.lagFagsak() }
 }

@@ -1,6 +1,7 @@
 package no.nav.melosys.saksflyt;
 
 import java.time.LocalDate;
+import java.util.Set;
 
 import no.nav.melosys.domain.*;
 import no.nav.melosys.domain.dokument.felles.Periode;
@@ -17,6 +18,7 @@ import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingstyper;
 import no.nav.melosys.integrasjon.joark.DokumentKategoriKode;
 import no.nav.melosys.service.dokument.DokumentproduksjonsInfo;
 
+import static java.util.Collections.emptyList;
 import static java.util.Collections.singleton;
 import static no.nav.melosys.domain.kodeverk.Aktoersroller.BRUKER;
 
@@ -74,14 +76,15 @@ public final class TestdataFactory {
     }
 
     public static Fagsak lagFagsak(String saksnummer) {
-        var fagsak = new Fagsak();
-        fagsak.setSaksnummer(saksnummer);
-        fagsak.setStatus(Saksstatuser.OPPRETTET);
-        fagsak.setType(Sakstyper.EU_EOS);
-        fagsak.setTema(Sakstemaer.MEDLEMSKAP_LOVVALG);
-        fagsak.getAktører().add(lagBruker());
-        fagsak.setGsakSaksnummer(123L);
-        return fagsak;
+        return new Fagsak(
+            saksnummer,
+            123L,
+            Sakstyper.EU_EOS,
+            Sakstemaer.MEDLEMSKAP_LOVVALG,
+            Saksstatuser.OPPRETTET,
+            Set.of(lagBruker()),
+            emptyList()
+        );
     }
 
     public static Aktoer lagBruker() {

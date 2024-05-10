@@ -40,7 +40,7 @@ public class Mangelbrev extends DokgenDto {
         this.datoInnsendingsfrist = datoInnsendingsfrist;
         this.sakstype = fagsak.getType().getKode();
         this.sakstema = fagsak.getTema().getKode();
-        this.behandlingstype = fagsak.hentSistOppdatertBehandling().getType().getKode();
+        this.behandlingstype = fagsak.hentSistOppdatertBehandlingIkkeÅrsavregning().getType().getKode();
         this.manglerInfoFritekst = brevbestilling.getManglerInfoFritekst();
         this.innledningFritekst = brevbestilling.getInnledningFritekst();
     }

@@ -12,8 +12,7 @@ import io.mockk.verify
 import no.nav.melosys.domain.Anmodningsperiode
 import no.nav.melosys.domain.Behandling
 import no.nav.melosys.domain.Behandlingsresultat
-import no.nav.melosys.domain.Fagsak
-import no.nav.melosys.domain.kodeverk.Saksstatuser
+import no.nav.melosys.domain.FagsakTestFactory
 import no.nav.melosys.domain.kodeverk.Sakstemaer
 import no.nav.melosys.domain.kodeverk.Sakstemaer.*
 import no.nav.melosys.domain.kodeverk.Sakstyper
@@ -66,8 +65,6 @@ internal class EndreSakServiceTest {
 
     private lateinit var endreSakService: EndreSakService
 
-    private val SAKSNUMMER = "MEL-123"
-
     @BeforeEach
     fun setUp() {
         endreSakService = EndreSakService(
@@ -90,14 +87,14 @@ internal class EndreSakServiceTest {
         }
         val aktivBehandling = SaksbehandlingDataFactory.lagBehandling(opprinneligFagsak, mottatteOpplysningerData)
         aktivBehandling.sisteOpplysningerHentetDato = Instant.now()
-        opprinneligFagsak.behandlinger.add(aktivBehandling)
+        opprinneligFagsak.leggTilBehandling(aktivBehandling)
 
-        every { fagsakService.hentFagsak(SAKSNUMMER) } returns opprinneligFagsak
+        every { fagsakService.hentFagsak(FagsakTestFactory.SAKSNUMMER) } returns opprinneligFagsak
         every { mottatteOpplysningerService.finnMottatteOpplysninger(any()) } returns Optional.of(MottatteOpplysninger())
 
 
         endreSakService.endre(
-            SAKSNUMMER,
+            FagsakTestFactory.SAKSNUMMER,
             EU_EOS,
             MEDLEMSKAP_LOVVALG,
             UTSENDT_ARBEIDSTAKER,
@@ -109,7 +106,7 @@ internal class EndreSakServiceTest {
 
         verify {
             fagsakService.oppdaterFagsakOgBehandling(
-                SAKSNUMMER,
+                FagsakTestFactory.SAKSNUMMER,
                 EU_EOS,
                 MEDLEMSKAP_LOVVALG,
                 UTSENDT_ARBEIDSTAKER,
@@ -131,17 +128,17 @@ internal class EndreSakServiceTest {
             periode = Periode()
             soeknadsland = Soeknadsland()
         }
-        fagsak.behandlinger.add(SaksbehandlingDataFactory.lagBehandling(fagsak, mottatteOpplysningerData))
-        every { fagsakService.hentFagsak(SAKSNUMMER) } returns fagsak
+        fagsak.leggTilBehandling(SaksbehandlingDataFactory.lagBehandling(fagsak, mottatteOpplysningerData))
+        every { fagsakService.hentFagsak(FagsakTestFactory.SAKSNUMMER) } returns fagsak
         every { mottatteOpplysningerService.finnMottatteOpplysninger(any()) } returns Optional.of(MottatteOpplysninger())
         every { saksbehandlingRegler.harIngenFlyt(any(), any(), any(), any()) } returns true
 
 
-        endreSakService.endre(SAKSNUMMER, FTRL, TRYGDEAVGIFT, YRKESAKTIV, FØRSTEGANG, AVVENT_FAGLIG_AVKLARING, null)
+        endreSakService.endre(FagsakTestFactory.SAKSNUMMER, FTRL, TRYGDEAVGIFT, YRKESAKTIV, FØRSTEGANG, AVVENT_FAGLIG_AVKLARING, null)
 
 
-        verify { mottatteOpplysningerService.slettOpplysninger(fagsak.hentAktivBehandling().id) }
-        verify(exactly = 0) { mottatteOpplysningerService.opprettSøknadEllerAnmodningEllerAttest(fagsak.hentAktivBehandling(), any(), any()) }
+        verify { mottatteOpplysningerService.slettOpplysninger(fagsak.hentAktivBehandlingIkkeÅrsavregning().id) }
+        verify(exactly = 0) { mottatteOpplysningerService.opprettSøknadEllerAnmodningEllerAttest(fagsak.hentAktivBehandlingIkkeÅrsavregning(), any(), any()) }
     }
 
     @Test
@@ -153,13 +150,13 @@ internal class EndreSakServiceTest {
         }
         fagsak.type = TRYGDEAVTALE
         val behandling = SaksbehandlingDataFactory.lagBehandling(fagsak, mottatteOpplysningerData)
-        fagsak.behandlinger.add(behandling)
-        every { fagsakService.hentFagsak(SAKSNUMMER) } returns fagsak
+        fagsak.leggTilBehandling(behandling)
+        every { fagsakService.hentFagsak(FagsakTestFactory.SAKSNUMMER) } returns fagsak
         every { mottatteOpplysningerService.finnMottatteOpplysninger(any()) } returns Optional.of(behandling.mottatteOpplysninger)
 
 
         endreSakService.endre(
-            SAKSNUMMER,
+            FagsakTestFactory.SAKSNUMMER,
             EU_EOS,
             MEDLEMSKAP_LOVVALG,
             UTSENDT_ARBEIDSTAKER,
@@ -170,10 +167,10 @@ internal class EndreSakServiceTest {
 
 
         val soeknadslandSlot = slot<Soeknadsland>()
-        verify { mottatteOpplysningerService.slettOpplysninger(fagsak.hentAktivBehandling().id) }
+        verify { mottatteOpplysningerService.slettOpplysninger(fagsak.hentAktivBehandlingIkkeÅrsavregning().id) }
         verify {
             mottatteOpplysningerService.opprettSøknadEllerAnmodningEllerAttest(
-                fagsak.hentAktivBehandling(),
+                fagsak.hentAktivBehandlingIkkeÅrsavregning(),
                 any(),
                 capture(soeknadslandSlot)
             )
@@ -190,13 +187,13 @@ internal class EndreSakServiceTest {
         }
         fagsak.type = TRYGDEAVTALE
         val behandling = SaksbehandlingDataFactory.lagBehandling(fagsak, mottatteOpplysningerData)
-        fagsak.behandlinger.add(behandling)
-        every { fagsakService.hentFagsak(SAKSNUMMER) } returns fagsak
+        fagsak.leggTilBehandling(behandling)
+        every { fagsakService.hentFagsak(FagsakTestFactory.SAKSNUMMER) } returns fagsak
         every { mottatteOpplysningerService.finnMottatteOpplysninger(any()) } returns Optional.of(behandling.mottatteOpplysninger)
 
 
         endreSakService.endre(
-            SAKSNUMMER,
+            FagsakTestFactory.SAKSNUMMER,
             EU_EOS,
             MEDLEMSKAP_LOVVALG,
             UTSENDT_ARBEIDSTAKER,
@@ -207,10 +204,10 @@ internal class EndreSakServiceTest {
 
 
         val soeknadslandSlot = slot<Soeknadsland>()
-        verify { mottatteOpplysningerService.slettOpplysninger(fagsak.hentAktivBehandling().id) }
+        verify { mottatteOpplysningerService.slettOpplysninger(fagsak.hentAktivBehandlingIkkeÅrsavregning().id) }
         verify {
             mottatteOpplysningerService.opprettSøknadEllerAnmodningEllerAttest(
-                fagsak.hentAktivBehandling(),
+                fagsak.hentAktivBehandlingIkkeÅrsavregning(),
                 any(),
                 capture(soeknadslandSlot)
             )
@@ -224,15 +221,15 @@ internal class EndreSakServiceTest {
         val behandling = SaksbehandlingDataFactory.lagInaktivBehandling(opprinneligFagsak).apply {
             status = IVERKSETTER_VEDTAK
         }
-        opprinneligFagsak.behandlinger.add(behandling)
-        every { fagsakService.hentFagsak(SAKSNUMMER) } returns opprinneligFagsak
+        opprinneligFagsak.leggTilBehandling(behandling)
+        every { fagsakService.hentFagsak(FagsakTestFactory.SAKSNUMMER) } returns opprinneligFagsak
         every { mottatteOpplysningerService.finnMottatteOpplysninger(any()) } returns Optional.of(MottatteOpplysninger())
 
 
         shouldThrow<FunksjonellException>
         {
             endreSakService.endre(
-                SAKSNUMMER,
+                FagsakTestFactory.SAKSNUMMER,
                 EU_EOS,
                 MEDLEMSKAP_LOVVALG,
                 ANMODNING_OM_UNNTAK_HOVEDREGEL,
@@ -247,8 +244,8 @@ internal class EndreSakServiceTest {
     fun `ikke lov å endre fagsak eller behandlinger med sendt anmodning om unntak`() {
         val opprinneligFagsak = lagFagsak(FTRL, UNNTAK)
         val behandling = SaksbehandlingDataFactory.lagBehandling(opprinneligFagsak)
-        opprinneligFagsak.behandlinger.add(behandling)
-        every { fagsakService.hentFagsak(SAKSNUMMER) } returns opprinneligFagsak
+        opprinneligFagsak.leggTilBehandling(behandling)
+        every { fagsakService.hentFagsak(FagsakTestFactory.SAKSNUMMER) } returns opprinneligFagsak
         val anmodningsperiode = Anmodningsperiode().apply {
             setSendtUtland(true)
         }
@@ -261,7 +258,7 @@ internal class EndreSakServiceTest {
         shouldThrow<FunksjonellException>
         {
             endreSakService.endre(
-                SAKSNUMMER,
+                FagsakTestFactory.SAKSNUMMER,
                 EU_EOS,
                 MEDLEMSKAP_LOVVALG,
                 UTSENDT_ARBEIDSTAKER,
@@ -276,8 +273,8 @@ internal class EndreSakServiceTest {
     fun `greit å endre behandlingsstatus med sendt anmodning om unntak`() {
         val sak = lagFagsak(FTRL, UNNTAK)
         val behandling = SaksbehandlingDataFactory.lagBehandling(sak)
-        sak.behandlinger.add(behandling)
-        every { fagsakService.hentFagsak(SAKSNUMMER) } returns sak
+        sak.leggTilBehandling(behandling)
+        every { fagsakService.hentFagsak(FagsakTestFactory.SAKSNUMMER) } returns sak
         val anmodningsperiode = Anmodningsperiode().apply {
             setSendtUtland(true)
         }
@@ -315,8 +312,8 @@ internal class EndreSakServiceTest {
     fun `endring av kun mottaksdato eller behandlingsstatus skal ikke endre mottatte opplysninger eller registeropplysninger`() {
         val sak = lagFagsak(EU_EOS, UNNTAK)
         val behandling = SaksbehandlingDataFactory.lagBehandling(sak)
-        sak.behandlinger.add(behandling)
-        every { fagsakService.hentFagsak(SAKSNUMMER) } returns sak
+        sak.leggTilBehandling(behandling)
+        every { fagsakService.hentFagsak(FagsakTestFactory.SAKSNUMMER) } returns sak
 
 
         endreSakService.endre(
@@ -342,14 +339,14 @@ internal class EndreSakServiceTest {
             soeknadsland = Soeknadsland()
         }
         val aktivBehandling = SaksbehandlingDataFactory.lagBehandling(opprinneligFagsak, mottatteOpplysningerData)
-        opprinneligFagsak.behandlinger.add(aktivBehandling)
-        every { fagsakService.hentFagsak(SAKSNUMMER) } returns opprinneligFagsak
+        opprinneligFagsak.leggTilBehandling(aktivBehandling)
+        every { fagsakService.hentFagsak(FagsakTestFactory.SAKSNUMMER) } returns opprinneligFagsak
         every { mottatteOpplysningerService.finnMottatteOpplysninger(any()) } returns Optional.of(MottatteOpplysninger())
         every { saksbehandlingRegler.harRegistreringUnntakFraMedlemskapFlyt(EU_EOS, UNNTAK, A1_ANMODNING_OM_UNNTAK_PAPIR) } returns true
 
 
         endreSakService.endre(
-            SAKSNUMMER,
+            FagsakTestFactory.SAKSNUMMER,
             EU_EOS,
             UNNTAK,
             A1_ANMODNING_OM_UNNTAK_PAPIR,
@@ -361,7 +358,7 @@ internal class EndreSakServiceTest {
 
         verify {
             fagsakService.oppdaterFagsakOgBehandling(
-                SAKSNUMMER,
+                FagsakTestFactory.SAKSNUMMER,
                 EU_EOS,
                 UNNTAK,
                 A1_ANMODNING_OM_UNNTAK_PAPIR,
@@ -391,14 +388,17 @@ internal class EndreSakServiceTest {
             type = HENVENDELSE
             status = UNDER_BEHANDLING
         }
-        val sak = lagFagsak(FTRL, MEDLEMSKAP_LOVVALG).apply { behandlinger.addAll(listOf(gammelBehandling, aktivBehandling)) }
-        every { fagsakService.hentFagsak(SAKSNUMMER) } returns sak
+        val sak = lagFagsak(FTRL, MEDLEMSKAP_LOVVALG).apply {
+            leggTilBehandling(gammelBehandling)
+            leggTilBehandling(aktivBehandling)
+        }
+        every { fagsakService.hentFagsak(FagsakTestFactory.SAKSNUMMER) } returns sak
         every { mottatteOpplysningerService.finnMottatteOpplysninger(2L) } returns Optional.empty()
         every { saksbehandlingRegler.finnBehandlingSomKanReplikeres(sak) } returns gammelBehandling
 
 
         endreSakService.endre(
-            SAKSNUMMER,
+            FagsakTestFactory.SAKSNUMMER,
             FTRL,
             MEDLEMSKAP_LOVVALG,
             YRKESAKTIV,
@@ -410,7 +410,7 @@ internal class EndreSakServiceTest {
 
         verify {
             fagsakService.oppdaterFagsakOgBehandling(
-                SAKSNUMMER,
+                FagsakTestFactory.SAKSNUMMER,
                 FTRL,
                 MEDLEMSKAP_LOVVALG,
                 YRKESAKTIV,
@@ -426,11 +426,9 @@ internal class EndreSakServiceTest {
     }
 
     private fun lagFagsak(sakstype: Sakstyper, sakstema: Sakstemaer) =
-        Fagsak().apply {
-            this.saksnummer = SAKSNUMMER
-            this.type = sakstype
-            this.tema = sakstema
-            this.status = Saksstatuser.OPPRETTET
-            this.aktører.add(SaksbehandlingDataFactory.lagBruker())
-        }
+        FagsakTestFactory.builder().apply {
+            type = sakstype
+            tema = sakstema
+            medBruker()
+        }.build()
 }

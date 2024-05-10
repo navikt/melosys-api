@@ -10,7 +10,7 @@ data class BehandlingDto (
     val behandlingstype: Behandlingstyper,
     val behandlingstema: Behandlingstema,
     val behandlingsstatus: Behandlingsstatus,
-    val isErUnderOppdatering: Boolean,
+    val erUnderOppdatering: Boolean,
     val registrertDato: Instant,
     val endretDato: Instant,
     val svarFrist: Instant? = null,

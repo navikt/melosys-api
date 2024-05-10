@@ -59,9 +59,7 @@ public class HentRegisteropplysninger implements StegBehandler {
             return;
         }
 
-        var aktørId = behandling.getFagsak().finnBrukersAktørID().orElseThrow(
-            () -> new FunksjonellException("Kan ikke hente registreopplysninger når bruker ikke har aktørID")
-        );
+        var aktørId = behandling.getFagsak().hentBrukersAktørID();
 
         var registeropplysningerRequestBuilder = RegisteropplysningerRequest.builder()
             .behandlingID(prosessinstans.getBehandling().getId())

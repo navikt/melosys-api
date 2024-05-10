@@ -6,9 +6,10 @@ import java.util.Collections;
 import java.util.List;
 import java.util.Optional;
 
-import no.nav.melosys.domain.Fagsak;
+import no.nav.melosys.domain.FagsakTestFactory;
 import no.nav.melosys.domain.arkiv.Journalpost;
 import no.nav.melosys.domain.arkiv.Journalposttype;
+import no.nav.melosys.domain.eessi.melding.MelosysEessiMelding;
 import no.nav.melosys.domain.kodeverk.*;
 import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingsaarsaktyper;
 import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingstema;
@@ -16,6 +17,7 @@ import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingstyper;
 import no.nav.melosys.domain.oppgave.Oppgave;
 import no.nav.melosys.exception.FunksjonellException;
 import no.nav.melosys.saksflytapi.ProsessinstansService;
+import no.nav.melosys.service.dokument.sed.EessiService;
 import no.nav.melosys.service.felles.dto.SoeknadslandDto;
 import no.nav.melosys.service.journalforing.JournalfoeringService;
 import no.nav.melosys.service.journalforing.dto.PeriodeDto;
@@ -52,6 +54,10 @@ class OpprettSakTest {
     private LovligeKombinasjonerSaksbehandlingService lovligeKombinasjonerSaksbehandlingService;
     @Mock
     private SaksbehandlingRegler saksbehandlingRegler;
+    @Mock
+    private FagsakService fagsakService;
+    @Mock
+    private EessiService eessiService;
 
     private static final EasyRandom random = new EasyRandom(getRandomConfig());
 
@@ -70,7 +76,7 @@ class OpprettSakTest {
 
     @BeforeEach
     public void setUp() {
-        opprettSak = new OpprettSak(journalfoeringService, oppgaveService, prosessinstansService, saksbehandlingRegler, lovligeKombinasjonerSaksbehandlingService);
+        opprettSak = new OpprettSak(journalfoeringService, oppgaveService, prosessinstansService, saksbehandlingRegler, fagsakService, eessiService, lovligeKombinasjonerSaksbehandlingService);
     }
 
     @Test
@@ -252,7 +258,10 @@ class OpprettSakTest {
         when(oppgaveService.hentOppgaveMedOppgaveID(opprettSakDto.getOppgaveID())).thenReturn(oppgave);
         final Journalpost journalpost = lagJournalpost(Journalposttype.INN, "EESSI");
         when(journalfoeringService.hentJournalpost(JP_ID)).thenReturn(journalpost);
-        when(journalfoeringService.finnSakTilknyttetSedJournalpost(journalpost)).thenReturn(Optional.of(new Fagsak()));
+        when(eessiService.hentSedTilknyttetJournalpost(JP_ID)).thenReturn(new MelosysEessiMelding());
+        when(eessiService.finnSakForRinasaksnummer(any())).thenReturn(Optional.of(1L));
+        when(fagsakService.finnFagsakFraArkivsakID(1L)).thenReturn(Optional.of(FagsakTestFactory.lagFagsak()));
+//        when(journalfoeringService.finnSakTilknyttetSedJournalpost(journalpost)).thenReturn(Optional.of(FagsakTestFactory.lagFagsak()));
         when(saksbehandlingRegler.harIngenFlyt(any(), any(), any(), any())).thenReturn(true);
 
         assertThatExceptionOfType(FunksjonellException.class)
@@ -270,8 +279,8 @@ class OpprettSakTest {
         when(oppgaveService.hentOppgaveMedOppgaveID(opprettSakDto.getOppgaveID())).thenReturn(oppgave);
         final Journalpost journalpost = lagJournalpost(Journalposttype.INN, "EESSI");
         when(journalfoeringService.hentJournalpost(JP_ID)).thenReturn(journalpost);
-        when(journalfoeringService.finnSakTilknyttetSedJournalpost(journalpost)).thenReturn(Optional.empty());
-
+        when(eessiService.hentSedTilknyttetJournalpost(JP_ID)).thenReturn(new MelosysEessiMelding());
+        when(eessiService.finnSakForRinasaksnummer(any())).thenReturn(Optional.empty());
         opprettSak.opprettNySakOgBehandlingFraOppgave(opprettSakDto);
 
 
@@ -291,7 +300,8 @@ class OpprettSakTest {
         when(oppgaveService.hentOppgaveMedOppgaveID(opprettSakDto.getOppgaveID())).thenReturn(oppgave);
         final Journalpost journalpost = lagJournalpost(Journalposttype.INN, "EESSI");
         when(journalfoeringService.hentJournalpost(JP_ID)).thenReturn(journalpost);
-        when(journalfoeringService.finnSakTilknyttetSedJournalpost(journalpost)).thenReturn(Optional.empty());
+        when(eessiService.hentSedTilknyttetJournalpost(JP_ID)).thenReturn(new MelosysEessiMelding());
+        when(eessiService.finnSakForRinasaksnummer(any())).thenReturn(Optional.empty());
         when(saksbehandlingRegler.harIngenFlyt(any(), any(), any(), any())).thenReturn(true);
 
 

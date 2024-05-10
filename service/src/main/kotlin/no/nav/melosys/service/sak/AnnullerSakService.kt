@@ -17,7 +17,7 @@ class AnnullerSakService(
 ) {
     fun annullerSak(saksnummer: String) {
         val fagsak = fagsakService.hentFagsak(saksnummer)
-        val behandling = fagsak.hentAktivBehandling()
+        val behandling = fagsak.hentAktivBehandlingIkkeÅrsavregning()
         val behandlingsresultat = behandlingsresultatService.hentBehandlingsresultat(behandling.id)
 
         oppgaveService.ferdigstillOppgaveMedSaksnummer(saksnummer)
