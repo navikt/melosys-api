@@ -2,11 +2,13 @@ package no.nav.melosys.saksflyt.steg.sed;
 
 import java.util.Set;
 
-import no.nav.melosys.domain.*;
-import no.nav.melosys.domain.kodeverk.Aktoersroller;
+import no.nav.melosys.domain.Behandling;
+import no.nav.melosys.domain.Behandlingsresultat;
+import no.nav.melosys.domain.FagsakTestFactory;
+import no.nav.melosys.domain.Kontrollresultat;
 import no.nav.melosys.domain.kodeverk.begrunnelser.Kontroll_begrunnelser;
 import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingstema;
-import no.nav.melosys.domain.saksflyt.Prosessinstans;
+import no.nav.melosys.saksflytapi.domain.Prosessinstans;
 import no.nav.melosys.service.behandling.BehandlingService;
 import no.nav.melosys.service.behandling.BehandlingsresultatService;
 import no.nav.melosys.service.oppgave.OppgaveService;
@@ -46,18 +48,14 @@ class BestemBehandlingsmåteSedTest {
         prosessinstans.setBehandling(behandling);
         behandling.setId(234L);
 
-        Aktoer bruker = new Aktoer();
-        bruker.setRolle(Aktoersroller.BRUKER);
-        bruker.setAktørId("123");
-        behandling.setFagsak(new Fagsak());
-        behandling.getFagsak().getAktører().add(bruker);
+        behandling.setFagsak(FagsakTestFactory.builder().medBruker().build());
 
         when(behandlingService.hentBehandlingMedSaksopplysninger(eq(behandling.getId()))).thenReturn(behandling);
         when(behandlingsresultatService.hentBehandlingsresultat(anyLong())).thenReturn(behandlingsresultat);
     }
 
     @Test
-    void utfør_temaRegistreringUnntakIngenTreffIRegister_prosessOpprettes() throws Exception {
+    void utfør_temaRegistreringUnntakIngenTreffIRegister_prosessOpprettes() {
         behandling.setTema(Behandlingstema.REGISTRERING_UNNTAK_NORSK_TRYGD_UTSTASJONERING);
         bestemBehandlingsmåteSed.utfør(prosessinstans);
 
@@ -69,7 +67,7 @@ class BestemBehandlingsmåteSedTest {
     }
 
     @Test
-    void utfør_temaRegistreringUnntakMedTreffIRegister_oppgaveOpprettes() throws Exception {
+    void utfør_temaRegistreringUnntakMedTreffIRegister_oppgaveOpprettes() {
         behandling.setTema(Behandlingstema.REGISTRERING_UNNTAK_NORSK_TRYGD_UTSTASJONERING);
         Kontrollresultat kontrollresultat = new Kontrollresultat();
         kontrollresultat.setBegrunnelse(Kontroll_begrunnelser.FEIL_I_PERIODEN);

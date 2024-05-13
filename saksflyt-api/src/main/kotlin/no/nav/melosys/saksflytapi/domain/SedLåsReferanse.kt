@@ -1,0 +1,28 @@
+package no.nav.melosys.saksflytapi.domain
+
+class SedLåsReferanse(val låsReferanse: String) : LåsReferanse {
+    val rinaSaksnummer: String
+    val sedID: String
+    val sedVersjon: String
+
+    init {
+        require(erGyldigReferanse(låsReferanse)) { "$låsReferanse er ikke gyldig SED-referanse" }
+        låsReferanse.split("_").let {
+            rinaSaksnummer = it[0]
+            sedID = it[1]
+            sedVersjon = it[2]
+        }
+    }
+
+    override val gruppePrefiks: String
+        get() = rinaSaksnummer
+
+    override fun skalSettesPåVent(aktiveLåsReferanser: Collection<String>): Boolean {
+        return aktiveLåsReferanser.isNotEmpty()
+    }
+
+    override fun toString(): String = låsReferanse
+
+    private fun erGyldigReferanse(referanse: String): Boolean =
+        LåsReferanseType.SED.erGyldigReferanse(referanse)
+}

@@ -47,8 +47,8 @@ public final class DokgenTestData {
     public static final String REGION = "NEVERLAND";
     public static final LocalDate LOVVALGSPERIODE_FOM = LocalDate.of(2020, 1, 1);
     public static final LocalDate LOVVALGSPERIODE_TOM = LocalDate.of(2021, 1, 1);
-    public static final String FNR_REPRESENTANT = "30098000492";
-    public static final String ORGNR_REPRESENTANT = "810072512";
+    public static final String FNR_FULLMEKTIG = "30098000492";
+    public static final String ORGNR_FULLMEKTIG = "810072512";
 
     public static Behandling lagBehandling() {
         return lagBehandling(lagFagsak());
@@ -68,23 +68,22 @@ public final class DokgenTestData {
         return lagFagsak(false);
     }
 
-    public static Fagsak lagFagsak(boolean medRepresentant) {
-        Fagsak fagsak = new Fagsak();
+    public static Fagsak lagFagsak(boolean medFullmektig) {
+        Fagsak fagsak = FagsakTestFactory.builder()
+            .saksnummer(SAKSNUMMER)
+            .behandlinger(lagBehandlinger())
+            .type(Sakstyper.FTRL)
+            .tema(Sakstemaer.UNNTAK)
+            .medBruker()
+            .build();
+
         fagsak.setRegistrertDato(Instant.now());
-        fagsak.setBehandlinger(lagBehandlinger());
-        fagsak.setType(Sakstyper.FTRL);
-        fagsak.setTema(Sakstemaer.UNNTAK);
         fagsak.setEndretAv("L12345");
-        fagsak.setSaksnummer(SAKSNUMMER);
-        Aktoer bruker = new Aktoer();
-        bruker.setRolle(Aktoersroller.BRUKER);
-        bruker.setAktørId("aktørId");
-        fagsak.getAktører().add(bruker);
-        if (medRepresentant) {
-            Aktoer representant = new Aktoer();
-            representant.setRolle(Aktoersroller.REPRESENTANT);
-            representant.setRepresenterer(Representerer.BRUKER);
-            fagsak.getAktører().add(representant);
+        if (medFullmektig) {
+            Aktoer fullmektig = new Aktoer();
+            fullmektig.setRolle(Aktoersroller.FULLMEKTIG);
+            fullmektig.setFullmaktstype(Fullmaktstype.FULLMEKTIG_SØKNAD);
+            fagsak.leggTilAktør(fullmektig);
         }
         return fagsak;
     }
@@ -95,7 +94,7 @@ public final class DokgenTestData {
             null, null, null, "PDL", null, false);
 
         final var kontaktadresse = new Kontaktadresse(
-            new StrukturertAdresse(ADRESSELINJE_1_BRUKER, null, POSTNR_BRUKER, POSTSTED_BRUKER, null, null),
+            new StrukturertAdresse(ADRESSELINJE_1_BRUKER, null, POSTNR_BRUKER, POSTSTED_BRUKER, null, "NO"),
             null, null, null, null, "PDL", null, null,
             false);
 
@@ -110,10 +109,10 @@ public final class DokgenTestData {
 
     public static UstrukturertAdresse lagAdresse() {
         UstrukturertAdresse ustrukturertAdresse = new UstrukturertAdresse();
-        ustrukturertAdresse.adresselinje1 = ADRESSELINJE_1_BRUKER;
-        ustrukturertAdresse.postnr = POSTNR_BRUKER;
-        ustrukturertAdresse.poststed = POSTSTED_BRUKER;
-        ustrukturertAdresse.land = new Land(Land.NORGE);
+        ustrukturertAdresse.setAdresselinje1(ADRESSELINJE_1_BRUKER);
+        ustrukturertAdresse.setPostnr(POSTNR_BRUKER);
+        ustrukturertAdresse.setPoststed(POSTSTED_BRUKER);
+        ustrukturertAdresse.setLand(new Land(Land.NORGE));
         return ustrukturertAdresse;
     }
 
@@ -124,23 +123,26 @@ public final class DokgenTestData {
     }
 
     public static OrganisasjonDokument lagOrg() {
-        OrganisasjonDokument organisasjonDokument = new OrganisasjonDokument();
-        organisasjonDokument.setNavn(NAVN_ORG);
-        organisasjonDokument.setOrgnummer(ORGNR);
-        organisasjonDokument.setOrganisasjonDetaljer(lagOrgDetaljer());
-        return organisasjonDokument;
+        return OrganisasjonDokumentTestFactory.builder()
+            .orgnummer(ORGNR)
+            .navn(NAVN_ORG)
+            .organisasjonsDetaljer(lagOrgDetaljer())
+            .build();
     }
 
     public static OrganisasjonDokument lagOrg(Landkoder landkoder) {
-        OrganisasjonDokument organisasjonDokument = lagOrg();
-        OrganisasjonsDetaljer organisasjonsDetaljer = new OrganisasjonsDetaljer();
         SemistrukturertAdresse semistrukturertAdresse = new SemistrukturertAdresse();
         semistrukturertAdresse.setLandkode(landkoder.getKode());
         semistrukturertAdresse.setGyldighetsperiode(new Periode(LocalDate.now(), LocalDate.now()));
         semistrukturertAdresse.setPostnr(POSTNR_ORG);
-        organisasjonsDetaljer.forretningsadresse.add(semistrukturertAdresse);
-        organisasjonDokument.setOrganisasjonDetaljer(organisasjonsDetaljer);
-        return organisasjonDokument;
+        OrganisasjonsDetaljer organisasjonsDetaljer = OrganisasjonsDetaljerTestFactory.builder()
+            .forretningsadresse(semistrukturertAdresse)
+            .build();
+        return OrganisasjonDokumentTestFactory.builder()
+            .orgnummer(ORGNR)
+            .navn(NAVN_ORG)
+            .organisasjonsDetaljer(organisasjonsDetaljer)
+            .build();
     }
 
     private static List<Behandling> lagBehandlinger() {
@@ -153,7 +155,7 @@ public final class DokgenTestData {
 
     private static MottatteOpplysninger lagMottatteOpplysninger() {
         MottatteOpplysninger mottatteOpplysninger = new MottatteOpplysninger();
-        mottatteOpplysninger.setMottatteOpplysningerdata(lagMottatteOpplysningerdata());
+        mottatteOpplysninger.setMottatteOpplysningerData(lagMottatteOpplysningerdata());
         return mottatteOpplysninger;
     }
 
@@ -164,9 +166,9 @@ public final class DokgenTestData {
     }
 
     private static OrganisasjonsDetaljer lagOrgDetaljer() {
-        OrganisasjonsDetaljer organisasjonsDetaljer = new OrganisasjonsDetaljer();
-        organisasjonsDetaljer.postadresse = singletonList(lagOrgAdresse());
-        return organisasjonsDetaljer;
+        return OrganisasjonsDetaljerTestFactory.builder()
+            .postadresse(lagOrgAdresse())
+            .build();
     }
 
     private static GeografiskAdresse lagOrgAdresse() {
@@ -174,6 +176,7 @@ public final class DokgenTestData {
         semistrukturertAdresse.setAdresselinje1(POSTBOKS_ORG);
         semistrukturertAdresse.setPostnr(POSTNR_ORG);
         semistrukturertAdresse.setGyldighetsperiode(new Periode(LocalDate.now().minusDays(2), LocalDate.now().plusDays(2)));
+        semistrukturertAdresse.setLandkode("NO");
         return semistrukturertAdresse;
     }
 
@@ -186,7 +189,7 @@ public final class DokgenTestData {
         Behandling behandling = lagBehandling(lagFagsak());
         var mottatteOpplysningerData = new SøknadNorgeEllerUtenforEØS();
         mottatteOpplysningerData.setRepresentantIUtlandet(representantIUtlandet);
-        behandling.getMottatteOpplysninger().setMottatteOpplysningerdata(mottatteOpplysningerData);
+        behandling.getMottatteOpplysninger().setMottatteOpplysningerData(mottatteOpplysningerData);
         return behandling;
     }
 
@@ -212,21 +215,21 @@ public final class DokgenTestData {
             }
             case ARBEIDSGIVER -> {
                 mottaker.setRolle(ARBEIDSGIVER);
-                mottaker.setOrgnr(ORGNR_REPRESENTANT);
+                mottaker.setOrgnr(ORGNR_FULLMEKTIG);
             }
             default -> throw new IllegalArgumentException("Støtter ikke mottakerrolle " + rolle.getKode());
         }
         return mottaker;
     }
 
-    public static Mottaker lagMottakerRepresentant(Aktoertype aktoertype) {
-        Mottaker representant = new Mottaker();
+    public static Mottaker lagMottakerFullmektig(Aktoertype aktoertype) {
+        Mottaker fullmektig = new Mottaker();
         switch (aktoertype) {
-            case PERSON -> representant.setPersonIdent(FNR_REPRESENTANT);
-            case ORGANISASJON -> representant.setOrgnr(ORGNR_REPRESENTANT);
-            default -> throw new IllegalArgumentException("Representant må være person eller organisasjon");
+            case PERSON -> fullmektig.setPersonIdent(FNR_FULLMEKTIG);
+            case ORGANISASJON -> fullmektig.setOrgnr(ORGNR_FULLMEKTIG);
+            default -> throw new IllegalArgumentException("Fullmektig må være person eller organisasjon");
         }
-        representant.setRolle(FULLMEKTIG);
-        return representant;
+        fullmektig.setRolle(FULLMEKTIG);
+        return fullmektig;
     }
 }

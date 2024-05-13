@@ -12,17 +12,17 @@ public class SoeknadTest {
     @Test
     public void hentAlleOrganisasjonsnumre() {
         SelvstendigForetak selvstendigForetak = new SelvstendigForetak();
-        selvstendigForetak.orgnr = "12345678910";
+        selvstendigForetak.setOrgnr("12345678910");
 
         Soeknad soeknad = new Soeknad();
-        soeknad.selvstendigArbeid.selvstendigForetak = Collections.singletonList(selvstendigForetak);
+        soeknad.selvstendigArbeid.setSelvstendigForetak(Collections.singletonList(selvstendigForetak));
 
         String orgNr2 = "10987654321";
-        soeknad.juridiskArbeidsgiverNorge.ekstraArbeidsgivere.add("10987654321");
+        soeknad.juridiskArbeidsgiverNorge.getEkstraArbeidsgivere().add("10987654321");
 
         Set<String> organisasjonsnumre = soeknad.hentAlleOrganisasjonsnumre();
         assertThat(organisasjonsnumre.size()).isEqualTo(2);
-        assertThat(organisasjonsnumre).contains(selvstendigForetak.orgnr)
+        assertThat(organisasjonsnumre).contains(selvstendigForetak.getOrgnr())
             .contains(orgNr2);
     }
 }

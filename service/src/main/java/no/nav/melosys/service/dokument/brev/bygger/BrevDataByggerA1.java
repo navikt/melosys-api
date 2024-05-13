@@ -28,21 +28,21 @@ public class BrevDataByggerA1 implements BrevDataBygger {
         }
 
         BrevDataA1 brevData = new BrevDataA1();
-        brevData.person = dataGrunnlag.getPerson();
-        brevData.yrkesgruppe = avklartefaktaService.finnYrkesGruppe(dataGrunnlag.getBehandling().getId()).orElse(null);
-        brevData.bostedsadresse = dataGrunnlag.getBostedGrunnlag().finnBostedsadresse().orElse(null);
+        brevData.setPerson(dataGrunnlag.getPerson());
+        brevData.setYrkesgruppe(avklartefaktaService.finnYrkesGruppe(dataGrunnlag.getBehandling().getId()).orElse(null));
+        brevData.setBostedsadresse(dataGrunnlag.getBostedGrunnlag().finnBostedsadresse().orElse(null));
 
         List<Arbeidssted> arbeidssteder = dataGrunnlag.getArbeidsstedGrunnlag().hentArbeidssteder();
-        brevData.arbeidssteder = arbeidssteder;
-        brevData.arbeidsland = landvelgerService.hentAlleArbeidsland(dataGrunnlag.getBehandling().getId());
-        brevData.erUkjenteEllerAlleEosLand = dataGrunnlag.getMottatteOpplysningerData().soeknadsland.erUkjenteEllerAlleEosLand;
+        brevData.setArbeidssteder(arbeidssteder);
+        brevData.setArbeidsland(landvelgerService.hentAlleArbeidsland(dataGrunnlag.getBehandling().getId()));
+        brevData.setUkjenteEllerAlleEosLand(dataGrunnlag.getMottatteOpplysningerData().soeknadsland.isFlereLandUkjentHvilke());
 
-        brevData.hovedvirksomhet = dataGrunnlag.getAvklarteVirksomheterGrunnlag().hentHovedvirksomhet();
-        brevData.bivirksomheter = dataGrunnlag.getAvklarteVirksomheterGrunnlag().hentBivirksomheter();
+        brevData.setHovedvirksomhet(dataGrunnlag.getAvklarteVirksomheterGrunnlag().hentHovedvirksomhet());
+        brevData.setBivirksomheter(dataGrunnlag.getAvklarteVirksomheterGrunnlag().hentBivirksomheter());
 
         // Feltet 5.1 i A1 fletter arbeidsgivere og oppdragsgivere.
         // Oppdragsgiver defineres for arbeidsstedet og må utledes derfra
-        brevData.bivirksomheter.addAll(hentForetakFraArbeidssteder(arbeidssteder));
+        brevData.getBivirksomheter().addAll(hentForetakFraArbeidssteder(arbeidssteder));
         return brevData;
     }
 

@@ -7,7 +7,8 @@ import no.nav.melosys.exception.TekniskException
 import no.nav.melosys.integrasjon.ConsumerWireMockTestBase
 import no.nav.melosys.integrasjon.OAuthMockServer
 import no.nav.melosys.integrasjon.felles.GenericAuthFilterFactory
-import no.nav.melosys.integrasjon.reststs.RestTokenServiceClient
+import no.nav.melosys.integrasjon.reststs.RestSTSService
+import no.nav.melosys.integrasjon.reststs.SecurityTokenServiceConsumer
 import no.nav.melosys.integrasjon.reststs.StsWebClientProducer
 import no.nav.security.token.support.client.spring.oauth2.EnableOAuth2Client
 import org.assertj.core.api.Assertions
@@ -23,7 +24,8 @@ import org.springframework.test.context.ActiveProfiles
 
 @Import(
     StsWebClientProducer::class,
-    RestTokenServiceClient::class,
+    SecurityTokenServiceConsumer::class,
+    RestSTSService::class,
     OAuthMockServer::class,
 
     GenericAuthFilterFactory::class,
@@ -44,7 +46,7 @@ class EessiConsumerTokenTest(
     fun authorizationSkalKommeFraSystem() {
         verifyHeaders(
             mapOf(
-                Pair("Authorization", WireMock.equalTo("Bearer --token-from-system--")),
+                Pair("Authorization", WireMock.equalTo("Bearer --azure-token-from-system--")),
                 Pair(HttpHeaders.ACCEPT, WireMock.equalTo(MediaType.APPLICATION_JSON_VALUE)),
                 Pair(HttpHeaders.CONTENT_TYPE, WireMock.equalTo(MediaType.APPLICATION_JSON_VALUE))
             )
@@ -69,7 +71,7 @@ class EessiConsumerTokenTest(
     fun authorizationSkalKommeFraSystemNårHverkenSystemEllerBrukerErKilde() {
         verifyHeaders(
             mapOf(
-                Pair("Authorization", WireMock.equalTo("Bearer --token-from-system--")),
+                Pair("Authorization", WireMock.equalTo("Bearer --azure-token-from-system--")),
                 Pair(HttpHeaders.ACCEPT, WireMock.equalTo(MediaType.APPLICATION_JSON_VALUE)),
                 Pair(HttpHeaders.CONTENT_TYPE, WireMock.equalTo(MediaType.APPLICATION_JSON_VALUE))
             )
@@ -105,7 +107,7 @@ class EessiConsumerTokenTest(
         )
         shouldThrow<TekniskException> {
             executeFromSystem()
-        }.message.shouldContain("Authorization: Bearer --token-from-system--         <<<<< Header does not match")
+        }.message.shouldContain("Authorization: Bearer --feil token--")
     }
 
     override fun getMockData(): String = "[]"

@@ -1,10 +1,5 @@
 package no.nav.melosys.service.behandling;
 
-import java.lang.reflect.InvocationTargetException;
-import java.time.Instant;
-import java.time.LocalDate;
-import java.util.*;
-
 import io.micrometer.core.instrument.Counter;
 import io.micrometer.core.instrument.Metrics;
 import no.nav.melosys.domain.*;
@@ -19,7 +14,7 @@ import no.nav.melosys.integrasjon.oppgave.OppgaveOppdatering;
 import no.nav.melosys.repository.BehandlingRepository;
 import no.nav.melosys.repository.TidligereMedlemsperiodeRepository;
 import no.nav.melosys.service.brev.UtkastBrevService;
-import no.nav.melosys.service.lovligekombinasjoner.LovligeKombinasjonerService;
+import no.nav.melosys.service.lovligekombinasjoner.LovligeKombinasjonerSaksbehandlingService;
 import no.nav.melosys.service.oppgave.OppgaveService;
 import org.apache.commons.beanutils.BeanUtils;
 import org.slf4j.Logger;
@@ -28,6 +23,11 @@ import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.context.annotation.Lazy;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+
+import java.lang.reflect.InvocationTargetException;
+import java.time.Instant;
+import java.time.LocalDate;
+import java.util.*;
 
 import static no.nav.melosys.domain.kodeverk.behandlinger.Behandlingsstatus.*;
 import static no.nav.melosys.metrics.MetrikkerNavn.*;
@@ -50,7 +50,7 @@ public class BehandlingService {
     private final TidligereMedlemsperiodeRepository tidligereMedlemsperiodeRepository;
     private final BehandlingsresultatService behandlingsresultatService;
     private final OppgaveService oppgaveService;
-    private final LovligeKombinasjonerService lovligeKombinasjonerService;
+    private final LovligeKombinasjonerSaksbehandlingService lovligeKombinasjonerSaksbehandlingService;
     private final UtkastBrevService utkastBrevService;
     private final ApplicationEventPublisher applicationEventPublisher;
     private final UtledMottaksdato utledMottaksdato;
@@ -61,7 +61,7 @@ public class BehandlingService {
                              TidligereMedlemsperiodeRepository tidligereMedlemsperiodeRepository,
                              BehandlingsresultatService behandlingsresultatService,
                              @Lazy OppgaveService oppgaveService,
-                             @Lazy LovligeKombinasjonerService lovligeKombinasjonerService,
+                             @Lazy LovligeKombinasjonerSaksbehandlingService lovligeKombinasjonerSaksbehandlingService,
                              UtkastBrevService utkastBrevService,
                              ApplicationEventPublisher applicationEventPublisher,
                              UtledMottaksdato utledMottaksdato,
@@ -70,7 +70,7 @@ public class BehandlingService {
         this.tidligereMedlemsperiodeRepository = tidligereMedlemsperiodeRepository;
         this.behandlingsresultatService = behandlingsresultatService;
         this.oppgaveService = oppgaveService;
-        this.lovligeKombinasjonerService = lovligeKombinasjonerService;
+        this.lovligeKombinasjonerSaksbehandlingService = lovligeKombinasjonerSaksbehandlingService;
         this.utkastBrevService = utkastBrevService;
         this.applicationEventPublisher = applicationEventPublisher;
         this.utledMottaksdato = utledMottaksdato;
@@ -109,7 +109,7 @@ public class BehandlingService {
         behandling.setStatus(behandlingsstatus);
         behandling.setType(behandlingstype);
         behandling.setTema(behandlingstema);
-        behandling.setBehandlingsårsak(new Behandlingsaarsak(årsaktype, årsakFritekst, mottaksdato));
+        behandling.settBehandlingsårsak(new Behandlingsaarsak(årsaktype, årsakFritekst, mottaksdato));
         behandling.setInitierendeJournalpostId(initierendeJournalpostId);
         behandling.setInitierendeDokumentId(initierendeDokumentId);
         behandling.setBehandlingsfrist(Behandling.utledBehandlingsfrist(behandling, utledMottaksdato.getMottaksdato(behandling)));
@@ -131,7 +131,7 @@ public class BehandlingService {
             throw new FunksjonellException("Behandlingen må være aktiv for å kunne endres");
         }
         if (nyStatus != null && nyStatus != behandling.getStatus()) {
-            lovligeKombinasjonerService.validerNyStatusMulig(behandling, nyStatus);
+            lovligeKombinasjonerSaksbehandlingService.validerNyStatusMulig(behandling, nyStatus);
             endreStatus(behandling, nyStatus);
         }
         if (nyType != null && nyType != behandling.getType()) {
@@ -301,8 +301,8 @@ public class BehandlingService {
         behandlingsreplika.setStatus(OPPRETTET);
         behandlingsreplika.setOpprinneligBehandling(tidligsteInaktiveBehandling);
         behandlingsreplika.setMottatteOpplysninger(replikerMottatteOpplysninger(behandlingsreplika, tidligsteInaktiveBehandling.getMottatteOpplysninger()));
+        behandlingsreplika.setBehandlingsårsak(null);
         behandlingsreplika.setBehandlingsnotater(Collections.emptySet());
-        behandlingsreplika.setBehandlingsfrist(Behandling.utledBehandlingsfrist(behandlingsreplika, utledMottaksdato.getMottaksdato(behandlingsreplika)));
 
         behandlingsreplika.setSaksopplysninger(new HashSet<>());
         for (Saksopplysning saksopplysning : tidligsteInaktiveBehandling.getSaksopplysninger()) {
@@ -336,7 +336,7 @@ public class BehandlingService {
         }
 
         MottatteOpplysninger replikertMottatteOpplysninger = (MottatteOpplysninger) BeanUtils.cloneBean(opprinneligMottatteOpplysninger);
-        replikertMottatteOpplysninger.setMottatteOpplysningerdata(opprinneligMottatteOpplysninger.getMottatteOpplysningerData());
+        replikertMottatteOpplysninger.setMottatteOpplysningerData(opprinneligMottatteOpplysninger.getMottatteOpplysningerData());
         replikertMottatteOpplysninger.setId(null);
         replikertMottatteOpplysninger.setBehandling(behandlingsreplika);
         return replikertMottatteOpplysninger;
@@ -357,9 +357,9 @@ public class BehandlingService {
         applicationEventPublisher.publishEvent(new BehandlingEndretStatusEvent(AVSLUTTET, behandling));
     }
 
-    public void avsluttNyVurdering(long behandlingId, Behandlingsresultattyper nyBehandlingsResultatType) {
+    public void avsluttAndregangsbehandling(long behandlingId, Behandlingsresultattyper nyBehandlingsResultatType) {
         Behandling behandling = hentBehandling(behandlingId);
-        avsluttNyVurdering(behandling, nyBehandlingsResultatType);
+        avsluttAndregangsbehandling(behandling, nyBehandlingsResultatType);
     }
 
     @Transactional(readOnly = true)
@@ -398,12 +398,12 @@ public class BehandlingService {
     public Set<Behandlingsstatus> hentMuligeStatuser(long behandlingID) {
         return hentBehandling(behandlingID).erInaktiv()
             ? Collections.emptySet()
-            : lovligeKombinasjonerService.hentMuligeBehandlingStatuser();
+            : lovligeKombinasjonerSaksbehandlingService.hentMuligeBehandlingStatuser();
     }
 
-    private void avsluttNyVurdering(Behandling behandling, Behandlingsresultattyper nyBehandlingsResultatType) {
-        if (!behandling.erNyVurdering()) {
-            throw new FunksjonellException("Behandling " + behandling.getId() + " er ikke typen NY_VURDERING!");
+    private void avsluttAndregangsbehandling(Behandling behandling, Behandlingsresultattyper nyBehandlingsResultatType) {
+        if (!behandling.erAndregangsbehandling()) {
+            throw new FunksjonellException("Behandling " + behandling.getId() + " er ikke typen NY_VURDERING eller MANGLENDE_INNBETALING_TRYGDEAVGIFT!");
         }
         avsluttBehandling(behandling);
 

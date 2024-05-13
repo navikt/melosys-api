@@ -2,7 +2,7 @@ package no.nav.melosys.domain.mottatteopplysninger;
 
 import java.time.Instant;
 import java.time.LocalDate;
-import javax.persistence.*;
+import jakarta.persistence.*;
 
 import no.nav.melosys.domain.Behandling;
 import no.nav.melosys.domain.jpa.MottatteOpplysningerListener;
@@ -17,7 +17,7 @@ public class MottatteOpplysninger {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
-    @MapsId
+    @JoinColumn(name = "behandling_id", nullable = false, updatable = false)
     @OneToOne(fetch = FetchType.LAZY, optional = false)
     private Behandling behandling;
 
@@ -147,7 +147,7 @@ public class MottatteOpplysninger {
         return mottatteOpplysningerData;
     }
 
-    public void setMottatteOpplysningerdata(MottatteOpplysningerData mottatteOpplysningerData) {
+    public void setMottatteOpplysningerData(MottatteOpplysningerData mottatteOpplysningerData) {
         this.mottatteOpplysningerData = mottatteOpplysningerData;
     }
 }

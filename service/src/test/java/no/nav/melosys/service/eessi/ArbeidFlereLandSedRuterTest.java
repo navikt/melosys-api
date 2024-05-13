@@ -1,7 +1,6 @@
 package no.nav.melosys.service.eessi;
 
 import java.time.LocalDate;
-import java.util.Collections;
 import java.util.List;
 import java.util.Optional;
 
@@ -16,16 +15,16 @@ import no.nav.melosys.domain.kodeverk.Sakstemaer;
 import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingsstatus;
 import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingstema;
 import no.nav.melosys.domain.oppgave.Oppgave;
-import no.nav.melosys.domain.saksflyt.ProsessDataKey;
-import no.nav.melosys.domain.saksflyt.Prosessinstans;
 import no.nav.melosys.exception.FunksjonellException;
 import no.nav.melosys.integrasjon.oppgave.OppgaveOppdatering;
+import no.nav.melosys.saksflytapi.ProsessinstansService;
+import no.nav.melosys.saksflytapi.domain.ProsessDataKey;
+import no.nav.melosys.saksflytapi.domain.Prosessinstans;
 import no.nav.melosys.service.behandling.BehandlingService;
 import no.nav.melosys.service.behandling.BehandlingsresultatService;
 import no.nav.melosys.service.eessi.ruting.ArbeidFlereLandSedRuter;
 import no.nav.melosys.service.oppgave.OppgaveService;
 import no.nav.melosys.service.sak.FagsakService;
-import no.nav.melosys.service.saksflyt.ProsessinstansService;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -35,8 +34,10 @@ import org.mockito.junit.jupiter.MockitoExtension;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatExceptionOfType;
-import static org.mockito.ArgumentMatchers.*;
-import static org.mockito.Mockito.*;
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.eq;
+import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.when;
 
 @ExtendWith(MockitoExtension.class)
 class ArbeidFlereLandSedRuterTest {
@@ -68,8 +69,7 @@ class ArbeidFlereLandSedRuterTest {
 
         behandling = new Behandling();
         behandling.setId(behandlingID);
-        fagsak = new Fagsak();
-        fagsak.setBehandlinger(List.of(behandling));
+        fagsak = FagsakTestFactory.builder().behandlinger(behandling).build();
         behandling.setFagsak(fagsak);
 
         melosysEessiMelding = new MelosysEessiMelding();
@@ -229,9 +229,7 @@ class ArbeidFlereLandSedRuterTest {
 
     @Test
     void finnSakOgBestemRuting_SakstemaUnntakMedNorskLovvalg_endresTilMedlemskapLovvalg() {
-        fagsak = new Fagsak();
-        fagsak.setBehandlinger(List.of(behandling));
-        fagsak.setTema(Sakstemaer.MEDLEMSKAP_LOVVALG);
+        fagsak = FagsakTestFactory.builder().behandlinger(behandling).build();
         behandling.setTema(Behandlingstema.BESLUTNING_LOVVALG_NORGE);
         behandling.setFagsak(fagsak);
         behandlingsresultat = new Behandlingsresultat();
@@ -249,9 +247,7 @@ class ArbeidFlereLandSedRuterTest {
 
     @Test
     void finnSakOgBestemRuting_SakstemaMedlemskapLovvalgMedUtenlandskLovvalg_endresTilUnntak() {
-        fagsak = new Fagsak();
-        fagsak.setBehandlinger(List.of(behandling));
-        fagsak.setTema(Sakstemaer.UNNTAK);
+        fagsak = FagsakTestFactory.builder().tema(Sakstemaer.UNNTAK).behandlinger(behandling).build();
         behandling.setTema(Behandlingstema.BESLUTNING_LOVVALG_ANNET_LAND);
         behandling.setFagsak(fagsak);
         behandlingsresultat = new Behandlingsresultat();

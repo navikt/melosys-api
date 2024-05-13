@@ -5,7 +5,6 @@ import java.util.Optional;
 import no.nav.melosys.domain.Behandling;
 import no.nav.melosys.domain.ErPeriode;
 import no.nav.melosys.domain.dokument.felles.Periode;
-import no.nav.melosys.domain.person.Informasjonsbehov;
 import no.nav.melosys.exception.FunksjonellException;
 import no.nav.melosys.service.behandling.BehandlingService;
 import no.nav.melosys.service.behandling.BehandlingsresultatService;
@@ -14,7 +13,6 @@ import no.nav.melosys.service.persondata.PersondataFasade;
 import no.nav.melosys.service.registeropplysninger.RegisteropplysningerFactory;
 import no.nav.melosys.service.registeropplysninger.RegisteropplysningerRequest;
 import no.nav.melosys.service.registeropplysninger.RegisteropplysningerService;
-import no.nav.melosys.service.saksbehandling.SaksbehandlingRegler;
 import no.nav.melosys.service.unntak.AnmodningsperiodeService;
 import no.nav.melosys.service.vilkaar.InngangsvilkaarService;
 import org.slf4j.Logger;
@@ -34,7 +32,6 @@ public class OppfriskSaksopplysningerService {
     private final RegisteropplysningerService registeropplysningerService;
     private final PersondataFasade persondataFasade;
     private final RegisteropplysningerFactory registeropplysningerFactory;
-    private final SaksbehandlingRegler saksbehandlingRegler;
 
     public OppfriskSaksopplysningerService(AnmodningsperiodeService anmodningsperiodeService,
                                            BehandlingService behandlingService,
@@ -43,8 +40,7 @@ public class OppfriskSaksopplysningerService {
                                            InngangsvilkaarService inngangsvilkaarService,
                                            RegisteropplysningerService registeropplysningerService,
                                            PersondataFasade persondataFasade,
-                                           RegisteropplysningerFactory registeropplysningerFactory,
-                                           SaksbehandlingRegler saksbehandlingRegler) {
+                                           RegisteropplysningerFactory registeropplysningerFactory) {
         this.anmodningsperiodeService = anmodningsperiodeService;
         this.behandlingService = behandlingService;
         this.behandlingsresultatService = behandlingsresultatService;
@@ -53,11 +49,10 @@ public class OppfriskSaksopplysningerService {
         this.registeropplysningerService = registeropplysningerService;
         this.persondataFasade = persondataFasade;
         this.registeropplysningerFactory = registeropplysningerFactory;
-        this.saksbehandlingRegler = saksbehandlingRegler;
     }
 
     @Transactional
-    public void oppfriskSaksopplysning(long behandlingID, boolean medFamilierelasjoner) {
+    public void oppfriskSaksopplysning(long behandlingID, boolean periodeOver5aar) {
         Behandling behandling = behandlingService.hentBehandling(behandlingID);
 
         if (behandling.erUtsending() && anmodningsperiodeService.harSendtAnmodningsperiode(behandlingID)) {
@@ -65,7 +60,7 @@ public class OppfriskSaksopplysningerService {
                 behandlingID) + "Det er ikke lenger mulig å endre mottatteOpplysninger og saksopplysninger");
         }
 
-        Optional<String> aktørIdOptional = behandling.getFagsak().finnBrukersAktørID();
+        Optional<String> aktørIdOptional = Optional.ofNullable(behandling.getFagsak().finnBrukersAktørID());
         String brukerID = aktørIdOptional.map(persondataFasade::hentFolkeregisterident).orElse(null);
 
         //OK om perioden er tom. Ikke alle behandlingstema krever periode.
@@ -82,9 +77,7 @@ public class OppfriskSaksopplysningerService {
             .fnr(brukerID)
             .fom(periode.getFom())
             .tom(periode.getTom())
-            .informasjonsbehov(medFamilierelasjoner
-                ? Informasjonsbehov.MED_FAMILIERELASJONER
-                : Informasjonsbehov.STANDARD)
+            .hentOpplysningerFor5aar(periodeOver5aar)
             .build();
 
         log.info("Starter oppfrisking av behandlingID: {} ", behandlingID);
@@ -96,15 +89,11 @@ public class OppfriskSaksopplysningerService {
             ufmKontrollService.utførKontrollerOgRegistrerFeil(behandlingID);
         }
 
-        if (behandling.getFagsak().erSakstypeEøs()
-            && behandling.harPeriodeOgLand()
-            && !saksbehandlingRegler.harTomFlyt(behandling)
-            && behandling.kanResultereIVedtak()
-            && !inngangsvilkaarService.oppfyllervurderingEF_883_2004(behandlingID)) {
+        if (inngangsvilkaarService.skalVurdereInngangsvilkår(behandling) && !inngangsvilkaarService.oppfyllervurderingEF_883_2004(behandlingID)) {
             inngangsvilkaarService.vurderOgLagreInngangsvilkår(
                 behandlingID,
                 behandling.hentSøknadsLand(),
-                behandling.getMottatteOpplysninger().getMottatteOpplysningerData().soeknadsland.erUkjenteEllerAlleEosLand,
+                behandling.getMottatteOpplysninger().getMottatteOpplysningerData().soeknadsland.isFlereLandUkjentHvilke(),
                 periode
             );
         }

@@ -9,11 +9,11 @@ import no.nav.melosys.domain.Behandlingsresultat;
 import no.nav.melosys.domain.Fagsak;
 import no.nav.melosys.domain.eessi.SedType;
 import no.nav.melosys.domain.eessi.melding.MelosysEessiMelding;
-import no.nav.melosys.domain.saksflyt.ProsessDataKey;
-import no.nav.melosys.domain.saksflyt.Prosessinstans;
+import no.nav.melosys.saksflytapi.ProsessinstansService;
+import no.nav.melosys.saksflytapi.domain.ProsessDataKey;
+import no.nav.melosys.saksflytapi.domain.Prosessinstans;
 import no.nav.melosys.service.behandling.BehandlingsresultatService;
 import no.nav.melosys.service.sak.FagsakService;
-import no.nav.melosys.service.saksflyt.ProsessinstansService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
@@ -43,7 +43,7 @@ public class AnmodningOmUnntakSedRuter implements SedRuterForSedTyper {
 
         Optional<Fagsak> fagsak = fagsakService.finnFagsakFraArkivsakID(arkivsakID);
         if (fagsak.isPresent()) {
-            Behandling behandling = fagsak.get().hentSistOppdatertBehandling();
+            Behandling behandling = fagsak.get().hentSistOppdatertBehandlingIkkeÅrsavregning();
             prosessinstans.setBehandling(behandling);
             Behandlingsresultat behandlingsresultat = behandlingsresultatService.hentBehandlingsresultat(behandling.getId());
             if (periodeErEndret(melosysEessiMelding, behandlingsresultat)) {

@@ -11,19 +11,17 @@ import no.nav.dok.brevdata.felles.v1.simpletypes.Spraakkode;
 public enum EasyRandomConfigurer {
     ;
 
-    private static final Mottaker MOTTAKER = Person.builder()
+    private static final Mottaker MOTTAKER = new Person()
         .withId("foobar")
         .withTypeKode(AktoerType.PERSON)
         .withNavn("Foobar Zot")
         .withKortNavn("fbz")
         .withSpraakkode(Spraakkode.NN)
-        .withMottakeradresse(NorskPostadresse.builder()
+        .withMottakeradresse(new NorskPostadresse()
             .withAdresselinje1("Gate 1")
             .withPostnummer("1234")
             .withPoststed("Sted")
-            .withLand("NO")
-            .build())
-        .build();
+            .withLand("NO"));
 
     static EasyRandomParameters paramForDokProd() {
         return new EasyRandomParameters()

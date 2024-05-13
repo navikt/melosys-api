@@ -7,8 +7,6 @@ import no.nav.melosys.domain.oppgave.Oppgave;
 
 public interface OppgaveFasade {
 
-    void feilregistrerOppgaver(Set<Oppgave> oppgaveSet);
-
     void ferdigstillOppgave(String oppgaveId);
 
     List<Oppgave> finnUtildelteOppgaverEtterFrist(String behandlingstema);
@@ -20,8 +18,6 @@ public interface OppgaveFasade {
     List<Oppgave> finnOppgaverMedAktørId(String aktørID, String[] oppgavetyper);
 
     List<Oppgave> finnOppgaverMedOrgnr(String orgnr, String[] oppgavetyper);
-
-    List<Oppgave> finnÅpneBehandlingsoppgaverMedJournalpostID(String journalpostID);
 
     List<Oppgave> finnÅpneBehandlingsoppgaverMedSaksnummer(String saksnummer);
 

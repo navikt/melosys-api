@@ -8,17 +8,17 @@ import no.nav.melosys.domain.kodeverk.Sakstyper;
 import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingsaarsaktyper;
 import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingstema;
 import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingstyper;
-import no.nav.melosys.domain.saksflyt.ProsessSteg;
-import no.nav.melosys.domain.saksflyt.Prosessinstans;
 import no.nav.melosys.integrasjon.joark.JoarkFasade;
 import no.nav.melosys.saksflyt.steg.StegBehandler;
+import no.nav.melosys.saksflytapi.domain.ProsessSteg;
+import no.nav.melosys.saksflytapi.domain.Prosessinstans;
 import no.nav.melosys.service.sak.FagsakService;
 import no.nav.melosys.service.sak.OpprettSakRequest;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Component;
 
-import static no.nav.melosys.domain.saksflyt.ProsessDataKey.*;
+import static no.nav.melosys.saksflytapi.domain.ProsessDataKey.*;
 
 @Component
 public class OpprettFagsakOgBehandlingFraSed implements StegBehandler {
@@ -60,7 +60,7 @@ public class OpprettFagsakOgBehandlingFraSed implements StegBehandler {
         Fagsak fagsak = fagsakService.nyFagsakOgBehandling(opprettSakRequest);
         prosessinstans.setData(SAKSNUMMER, fagsak.getSaksnummer());
 
-        Behandling behandling = fagsak.hentAktivBehandling();
+        Behandling behandling = fagsak.finnAktivBehandlingIkkeÅrsavregning();
         prosessinstans.setBehandling(behandling);
 
         log.info("Fagsak {} opprettet med behandling {} for RINA-sak {}",

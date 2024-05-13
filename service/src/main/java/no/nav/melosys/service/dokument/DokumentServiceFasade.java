@@ -11,6 +11,8 @@ import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import static no.nav.melosys.domain.kodeverk.brev.Produserbaredokumenter.MELDING_FORVENTET_SAKSBEHANDLINGSTID_SOKNAD;
+
 @Service
 public class DokumentServiceFasade {
 
@@ -54,29 +56,27 @@ public class DokumentServiceFasade {
         brevbestillingDto.setFritekst(fritekst);
         brevbestillingDto.setBegrunnelseKode(begrunnelseKode);
         brevbestillingDto.setBestillersId(avsenderId);
+        // Metoden kalles kun gjennom PIene for forvaltningsmelding og henleggelsesmelding. Overstyringen av mottaker legges inn under en if blokk
+        // for å unngå uønsket funksjonalitet dersom man tar i bruk denne metoden i fremtiden.
+        if (produserbartDokument.equals(MELDING_FORVENTET_SAKSBEHANDLINGSTID_SOKNAD)) {
+            brevbestillingDto.setOrgnr(mottaker.getOrgnr());
+            brevbestillingDto.setAnnenPersonMottakerIdent(mottaker.getPersonIdent());
+        }
 
         dokgenService.produserOgDistribuerBrev(behandlingId, brevbestillingDto);
     }
+
 
     @Transactional
     public void produserDokument(Produserbaredokumenter dokumentType, Mottaker mottaker, long behandlingId, DoksysBrevbestilling brevbestilling) {
         var brevbestillingDto = new BrevbestillingDto();
         brevbestillingDto.setProduserbardokument(dokumentType);
         brevbestillingDto.setMottaker(mottaker.getRolle());
-        brevbestillingDto.setFritekst(hentFritekst(brevbestilling));
+        brevbestillingDto.setFritekst(brevbestilling.getFritekst());
         brevbestillingDto.setBegrunnelseKode(brevbestilling.getBegrunnelseKode());
         brevbestillingDto.setBestillersId(brevbestilling.getAvsenderID());
 
         produserDokument(behandlingId, brevbestilling, brevbestillingDto, mottaker);
-    }
-
-    private String hentFritekst(DoksysBrevbestilling brevbestilling) {
-        if (brevbestilling.getProduserbartdokument() == null) return null;
-
-        return switch (brevbestilling.getProduserbartdokument()) {
-            case AVSLAG_MANGLENDE_OPPLYSNINGER, MELDING_HENLAGT_SAK -> brevbestilling.getFritekst();
-            default -> null;
-        };
     }
 
     private void produserDokument(long behandlingID, DoksysBrevbestilling brevbestilling, BrevbestillingDto brevbestillingDto, Mottaker mottaker) {

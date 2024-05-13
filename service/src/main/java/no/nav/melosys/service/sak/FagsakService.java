@@ -6,17 +6,21 @@ import java.util.*;
 
 import io.micrometer.core.instrument.Counter;
 import io.micrometer.core.instrument.Metrics;
-import no.nav.melosys.domain.*;
+import no.nav.melosys.domain.Aktoer;
+import no.nav.melosys.domain.Behandling;
+import no.nav.melosys.domain.Fagsak;
+import no.nav.melosys.domain.Kontaktopplysning;
 import no.nav.melosys.domain.kodeverk.*;
-import no.nav.melosys.domain.kodeverk.behandlinger.*;
+import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingsaarsaktyper;
+import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingsstatus;
+import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingstema;
+import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingstyper;
 import no.nav.melosys.exception.FunksjonellException;
 import no.nav.melosys.exception.IkkeFunnetException;
 import no.nav.melosys.repository.FagsakRepository;
 import no.nav.melosys.service.aktoer.KontaktopplysningService;
 import no.nav.melosys.service.behandling.BehandlingService;
-import no.nav.melosys.service.behandling.BehandlingsresultatService;
-import no.nav.melosys.service.lovligekombinasjoner.LovligeKombinasjonerService;
-import no.nav.melosys.service.oppgave.OppgaveService;
+import no.nav.melosys.service.lovligekombinasjoner.LovligeKombinasjonerSaksbehandlingService;
 import no.nav.melosys.service.persondata.PersondataFasade;
 import org.apache.commons.collections4.CollectionUtils;
 import org.slf4j.Logger;
@@ -35,24 +39,21 @@ public class FagsakService {
     private final FagsakRepository fagsakRepository;
     private final BehandlingService behandlingService;
     private final KontaktopplysningService kontaktopplysningService;
-    private final OppgaveService oppgaveService;
     private final PersondataFasade persondataFasade;
-    private final BehandlingsresultatService behandlingsresultatService;
-    private final LovligeKombinasjonerService lovligeKombinasjonerService;
+    private final LovligeKombinasjonerSaksbehandlingService lovligeKombinasjonerSaksbehandlingService;
 
     private final Counter sakerOpprettet = Metrics.counter(SAKER_OPPRETTET);
 
-    public FagsakService(FagsakRepository fagsakRepository, BehandlingService behandlingService,
-                         KontaktopplysningService kontaktopplysningService, @Lazy OppgaveService oppgaveService,
-                         PersondataFasade persondataFasade, BehandlingsresultatService behandlingsresultatService,
-                         @Lazy LovligeKombinasjonerService lovligeKombinasjonerService) {
+    public FagsakService(FagsakRepository fagsakRepository,
+                         BehandlingService behandlingService,
+                         KontaktopplysningService kontaktopplysningService,
+                         PersondataFasade persondataFasade,
+                         @Lazy LovligeKombinasjonerSaksbehandlingService lovligeKombinasjonerSaksbehandlingService) {
         this.fagsakRepository = fagsakRepository;
         this.behandlingService = behandlingService;
         this.kontaktopplysningService = kontaktopplysningService;
-        this.oppgaveService = oppgaveService;
         this.persondataFasade = persondataFasade;
-        this.behandlingsresultatService = behandlingsresultatService;
-        this.lovligeKombinasjonerService = lovligeKombinasjonerService;
+        this.lovligeKombinasjonerSaksbehandlingService = lovligeKombinasjonerSaksbehandlingService;
     }
 
     public Fagsak hentFagsak(String saksnummer) {
@@ -75,25 +76,22 @@ public class FagsakService {
 
     public List<Fagsak> hentFagsakerMedAktør(Aktoersroller rolleType, String ident) {
         String aktørID = persondataFasade.hentAktørIdForIdent(ident);
-        return fagsakRepository.findByRolleAndAktør(rolleType, aktørID);
+        return sorterFagsaker(fagsakRepository.findByRolleAndAktør(rolleType, aktørID));
     }
 
     public List<Fagsak> hentFagsakerMedOrgnr(Aktoersroller rolleType, String orgnr) {
-        return fagsakRepository.findByRolleAndOrgnr(rolleType, orgnr);
+        return sorterFagsaker(fagsakRepository.findByRolleAndOrgnr(rolleType, orgnr));
     }
 
     @Transactional
     public void lagre(Fagsak sak) {
-        if (sak.getSaksnummer() == null) {
-            sak.setSaksnummer(hentNesteSaksnummer());
-        }
         fagsakRepository.save(sak);
     }
 
     @Transactional
     public void oppdaterMyndigheterForEuEos(String saksnummer, Collection<String> ider) {
         Fagsak fagsak = hentFagsak(saksnummer);
-        fagsak.getAktører().removeIf(aktoer -> !ider.contains(aktoer.getInstitusjonId())
+        fagsak.getAktører().removeIf(aktoer -> !ider.contains(aktoer.getInstitusjonID())
             && aktoer.getRolle() == Aktoersroller.TRYGDEMYNDIGHET);
 
         Collection<Aktoer> nyeMyndigheter = ider.stream()
@@ -114,7 +112,7 @@ public class FagsakService {
         boolean harIngenTrygdemyndigheter = fagsak.hentMyndigheter().isEmpty();
         if (harIngenTrygdemyndigheter) {
             Aktoer nyTrygdemyndighet = lagMyndighetAktørForTrygdeavtaler(fagsak, landkode);
-            fagsak.getAktører().add(nyTrygdemyndighet);
+            fagsak.leggTilAktør(nyTrygdemyndighet);
         }
         fagsakRepository.save(fagsak);
     }
@@ -123,7 +121,7 @@ public class FagsakService {
         Aktoer aktør = new Aktoer();
         aktør.setFagsak(fagsak);
         aktør.setRolle(Aktoersroller.TRYGDEMYNDIGHET);
-        aktør.setInstitusjonId(ID);
+        aktør.setInstitusjonID(ID);
         return aktør;
     }
 
@@ -136,23 +134,17 @@ public class FagsakService {
     }
 
     @Transactional
-    public void ferdigbehandleSak(String saksnummer) {
-        var fagsak = hentFagsak(saksnummer);
-        var behandling = fagsak.hentAktivBehandling();
-        var nyStatus = fagsak.getStatus() == Saksstatuser.OPPRETTET ? Saksstatuser.AVSLUTTET : fagsak.getStatus();
-
-        avsluttFagsakOgBehandling(fagsak, behandling, nyStatus);
-        behandlingsresultatService.oppdaterBehandlingsresultattype(behandling.getId(), Behandlingsresultattyper.FERDIGBEHANDLET);
-        oppgaveService.ferdigstillOppgaveMedSaksnummer(fagsak.getSaksnummer());
-    }
-
-    @Transactional
     public Fagsak nyFagsakOgBehandling(OpprettSakRequest opprettSakRequest) {
-        Fagsak fagsak = new Fagsak();
-        String saksnummer = hentNesteSaksnummer();
-        fagsak.setSaksnummer(saksnummer);
-
-        HashSet<Aktoer> aktører = new HashSet<>();
+        String saksnummer  = hentNesteSaksnummer();
+        Fagsak fagsak = new Fagsak(
+            saksnummer,
+            null,
+            opprettSakRequest.getSakstype(),
+            opprettSakRequest.getSakstema(),
+            Saksstatuser.OPPRETTET,
+            new HashSet<>(),
+            new ArrayList<>()
+        );
 
         String aktørID = opprettSakRequest.getAktørID();
         if (aktørID != null) {
@@ -161,7 +153,7 @@ public class FagsakService {
             aktør.setUtenlandskPersonId(opprettSakRequest.getUtenlandskPersonId());
             aktør.setFagsak(fagsak);
             aktør.setRolle(Aktoersroller.BRUKER);
-            aktører.add(aktør);
+            fagsak.leggTilAktør(aktør);
         }
 
         String virksomhetOrgnr = opprettSakRequest.getVirksomhetOrgnr();
@@ -170,7 +162,7 @@ public class FagsakService {
             virksomhet.setOrgnr(virksomhetOrgnr);
             virksomhet.setFagsak(fagsak);
             virksomhet.setRolle(Aktoersroller.VIRKSOMHET);
-            aktører.add(virksomhet);
+            fagsak.leggTilAktør(virksomhet);
         }
 
         String arbeidsgiver = opprettSakRequest.getArbeidsgiver();
@@ -179,26 +171,23 @@ public class FagsakService {
             aktørArbeidsgiver.setOrgnr(arbeidsgiver);
             aktørArbeidsgiver.setFagsak(fagsak);
             aktørArbeidsgiver.setRolle(Aktoersroller.ARBEIDSGIVER);
-            aktører.add(aktørArbeidsgiver);
+            fagsak.leggTilAktør(aktørArbeidsgiver);
         }
 
-        Fullmektig fullmektig = opprettSakRequest.getFullmektig();
+        FullmektigDto fullmektig = opprettSakRequest.getFullmektig();
         if (fullmektig != null) {
-            Aktoer aktørFullmektig = lagAktørFullmektigMedID(fullmektig.getRepresentantID());
+            Aktoer aktørFullmektig = new Aktoer();
+            aktørFullmektig.setOrgnr(fullmektig.getOrgnr());
+            aktørFullmektig.setPersonIdent(fullmektig.getPersonident());
+            aktørFullmektig.setFullmaktstyper(fullmektig.getFullmakter());
+            aktørFullmektig.setRolle(Aktoersroller.FULLMEKTIG);
             aktørFullmektig.setFagsak(fagsak);
-            aktørFullmektig.setRolle(Aktoersroller.REPRESENTANT);
-            aktørFullmektig.setRepresenterer(fullmektig.getRepresenterer());
-            aktører.add(aktørFullmektig);
+            fagsak.leggTilAktør(aktørFullmektig);
         }
 
         Instant nå = Instant.now();
-
-        fagsak.setType(opprettSakRequest.getSakstype());
-        fagsak.setTema(opprettSakRequest.getSakstema());
-        fagsak.setAktører(aktører);
         fagsak.setRegistrertDato(nå);
         fagsak.setEndretDato(nå);
-        fagsak.setStatus(Saksstatuser.OPPRETTET);
 
         lagre(fagsak);
 
@@ -220,20 +209,10 @@ public class FagsakService {
             Behandlingsstatus.OPPRETTET, behandlingstype, behandlingstema,
             initierendeJournalpostId, initierendeDokumentId, mottaksdato,
             behandlingsårsaktype, behandlingsårsakFritekst);
-        fagsak.setBehandlinger(Collections.singletonList(behandling));
+        fagsak.leggTilBehandling(behandling);
 
         sakerOpprettet.increment();
         return fagsak;
-    }
-
-    private Aktoer lagAktørFullmektigMedID(String representantID) {
-        Aktoer aktørFullmektig = new Aktoer();
-        if (representantID.length() == 11) {
-            aktørFullmektig.setPersonIdent(representantID);
-        } else {
-            aktørFullmektig.setOrgnr(representantID);
-        }
-        return aktørFullmektig;
     }
 
     private String hentNesteSaksnummer() {
@@ -245,7 +224,7 @@ public class FagsakService {
                                            Behandlingstema nyBehandlingstema, Behandlingstyper nyBehandlingstype,
                                            Behandlingsstatus nyBehandlingsstatus, LocalDate nyMottaksdato) {
         Fagsak fagsak = hentFagsak(saksnummer);
-        Behandling behandling = fagsak.hentAktivBehandling();
+        Behandling behandling = fagsak.finnAktivBehandlingIkkeÅrsavregning();
         validerOppdatering(fagsak, behandling, nySakstype, nySakstema, nyBehandlingstema, nyBehandlingstype);
         if (fagsak.getType() != nySakstype || fagsak.getTema() != nySakstema) {
             log.info("Endrer sakstype for fagsak {} fra {} til {}", fagsak.getSaksnummer(), fagsak.getType(), nySakstype);
@@ -264,13 +243,13 @@ public class FagsakService {
         }
         var behandlingHarEndring = behandling.getTema() != nyBehandlingstema || behandling.getType() != nyBehandlingstype;
         if (fagsakHarEndring || behandlingHarEndring) {
-            lovligeKombinasjonerService.validerOpprettelseOgEndring(sak.getHovedpartRolle(), nySakstype, nySakstema, nyBehandlingstema, nyBehandlingstype);
+            lovligeKombinasjonerSaksbehandlingService.validerOpprettelseOgEndring(sak.getHovedpartRolle(), nySakstype, nySakstema, nyBehandlingstema, nyBehandlingstype);
         }
     }
 
 
     public void avsluttFagsakOgBehandling(Fagsak fagsak, Saksstatuser saksstatus) {
-        Behandling aktivBehandling = fagsak.hentAktivBehandling();
+        Behandling aktivBehandling = fagsak.finnAktivBehandlingIkkeÅrsavregning();
         if (aktivBehandling == null) {
             log.warn("Forsøker å lukke behandling for fagsak {} som ikke har noen aktiv behandling", fagsak.getSaksnummer());
             oppdaterStatus(fagsak, saksstatus);
@@ -283,8 +262,7 @@ public class FagsakService {
                                           Behandling behandling,
                                           Saksstatuser saksstatus) {
         if (!behandling.getFagsak().getSaksnummer().equals(fagsak.getSaksnummer())) {
-            throw new FunksjonellException("Behandling " + behandling.getId()
-                + " tilhører ikke fagsak " + fagsak.getSaksnummer());
+            throw new FunksjonellException("Behandling " + behandling.getId() + " tilhører ikke fagsak " + fagsak.getSaksnummer());
         }
         oppdaterStatus(fagsak, saksstatus);
         behandlingService.avsluttBehandling(behandling.getId());
@@ -303,5 +281,20 @@ public class FagsakService {
 
     public List<Fagsak> hentFagsaker(Collection<String> saksnumre) {
         return fagsakRepository.findAllBySaksnummerIn(saksnumre);
+    }
+
+    private List<Fagsak> sorterFagsaker(List<Fagsak> fagsaker) {
+        return fagsaker.stream()
+            .sorted((a, b) -> {
+                int compareAktivBehandling = Boolean.compare(b.harAktivBehandlingIkkeÅrsavregning(), a.harAktivBehandlingIkkeÅrsavregning());
+                if (compareAktivBehandling != 0) {
+                    return compareAktivBehandling;
+                }
+
+                Instant registrertDatoA = a.hentSistRegistrertBehandling().getRegistrertDato();
+                Instant registrertDatoB = b.hentSistRegistrertBehandling().getRegistrertDato();
+                return registrertDatoB.compareTo(registrertDatoA);
+            })
+            .toList();
     }
 }

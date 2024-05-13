@@ -4,7 +4,7 @@ import java.io.StringReader;
 import java.sql.Clob;
 import java.sql.SQLException;
 import java.sql.Statement;
-import javax.xml.bind.helpers.DefaultValidationEventHandler;
+import jakarta.xml.bind.helpers.DefaultValidationEventHandler;
 import javax.xml.transform.TransformerException;
 import javax.xml.transform.stream.StreamSource;
 

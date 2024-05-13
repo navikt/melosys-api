@@ -10,6 +10,7 @@ import no.nav.melosys.domain.dokument.person.PersonDokument;
 import no.nav.melosys.domain.kodeverk.*;
 import no.nav.melosys.domain.person.Persondata;
 import no.nav.melosys.service.LandvelgerService;
+import no.nav.melosys.domain.OrganisasjonDokumentTestFactory;
 import no.nav.melosys.service.avklartefakta.AvklarteVirksomheterService;
 import no.nav.melosys.service.avklartefakta.AvklartefaktaService;
 import no.nav.melosys.service.behandling.BehandlingService;
@@ -20,7 +21,7 @@ import no.nav.melosys.service.kodeverk.KodeverkService;
 import no.nav.melosys.service.persondata.PersonopplysningerObjectFactory;
 import no.nav.melosys.service.registeropplysninger.OrganisasjonOppslagService;
 import no.nav.melosys.service.unntak.AnmodningsperiodeService;
-import no.nav.melosys.service.vilkaar.VilkaarsresultatService;
+import no.nav.melosys.service.behandling.VilkaarsresultatService;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -70,15 +71,9 @@ class BrevDataByggerAvslagYrkesaktivTest {
 
     @Test
     void lag_annmodningUnntakBrev_avklarVirksomhetSomSelvstendigForetak() {
-        Aktoer aktoer = new Aktoer();
-        aktoer.setRolle(Aktoersroller.BRUKER);
-        aktoer.setAktørId("ident");
-
         Behandling behandling = new Behandling();
         behandling.setId(1L);
-        Fagsak fagsak = new Fagsak();
-        fagsak.setType(Sakstyper.EU_EOS);
-        fagsak.setAktører(Set.of(aktoer));
+        Fagsak fagsak = FagsakTestFactory.builder().medBruker().build();
         behandling.setFagsak(fagsak);
 
         List<String> selvstendigeForetak = Collections.singletonList("987654321");
@@ -93,11 +88,12 @@ class BrevDataByggerAvslagYrkesaktivTest {
         when(avklartefaktaService.hentAvklarteOrgnrOgUuid(behandling.getId())).thenReturn(orgSet);
 
         when(landvelgerService.hentArbeidsland(anyLong())).thenReturn(Land_iso2.DE);
-        OrganisasjonDokument organisasjonDokument = new OrganisasjonDokument();
-        organisasjonDokument.setOrgnummer("999");
         OrganisasjonsDetaljer organisasjonsDetaljer = mock(OrganisasjonsDetaljer.class);
         when(organisasjonsDetaljer.hentStrukturertForretningsadresse()).thenReturn(lagStrukturertAdresse());
-        organisasjonDokument.organisasjonDetaljer = organisasjonsDetaljer;
+        OrganisasjonDokument organisasjonDokument = OrganisasjonDokumentTestFactory.builder()
+            .orgnummer("999")
+            .organisasjonsDetaljer(organisasjonsDetaljer)
+            .build();
 
         lenient().when(
             organisasjonOppslagService.hentOrganisasjoner(orgSet)).thenReturn(new HashSet<>(Collections.singletonList(organisasjonDokument)));
@@ -107,11 +103,11 @@ class BrevDataByggerAvslagYrkesaktivTest {
         String saksbehandler = "saksbehandler";
         BrevDataAvslagYrkesaktiv brevData = (BrevDataAvslagYrkesaktiv) brevDataByggerAvslagYrkesaktiv.lag(lagBrevressurser(behandling), saksbehandler);
 
-        assertThat(brevData.hovedvirksomhet.orgnr).isEqualTo("999");
-        assertThat(brevData.hovedvirksomhet.erSelvstendigForetak()).isTrue();
-        assertThat(brevData.arbeidsland).isEqualTo(Landkoder.DE.getBeskrivelse());
-        assertThat(brevData.anmodningsperiodeSvar).isPresent().get().usingRecursiveComparison().isEqualTo(anmodningsperiodeSvar);
-        assertThat(brevData.erArt16UtenArt12).isTrue();
+        assertThat(brevData.getHovedvirksomhet().orgnr).isEqualTo("999");
+        assertThat(brevData.getHovedvirksomhet().erSelvstendigForetak()).isTrue();
+        assertThat(brevData.getArbeidsland()).isEqualTo(Landkoder.DE.getBeskrivelse());
+        assertThat(brevData.getAnmodningsperiodeSvar()).usingRecursiveComparison().isEqualTo(anmodningsperiodeSvar);
+        assertThat(brevData.getArt16UtenArt12()).isTrue();
     }
 
     private AnmodningsperiodeSvar lagAnmodningsperiodeSvarAvslag() {

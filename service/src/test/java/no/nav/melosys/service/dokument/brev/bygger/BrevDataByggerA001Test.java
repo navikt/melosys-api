@@ -33,7 +33,7 @@ import no.nav.melosys.service.kodeverk.KodeverkService;
 import no.nav.melosys.service.persondata.PersonopplysningerObjectFactory;
 import no.nav.melosys.service.registeropplysninger.OrganisasjonOppslagService;
 import no.nav.melosys.service.unntak.AnmodningsperiodeService;
-import no.nav.melosys.service.vilkaar.VilkaarsresultatService;
+import no.nav.melosys.service.behandling.VilkaarsresultatService;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -87,12 +87,7 @@ class BrevDataByggerA001Test {
 
     @BeforeEach
     public void setUp() {
-        Aktoer aktoer = new Aktoer();
-        aktoer.setRolle(Aktoersroller.BRUKER);
-        aktoer.setAktørId("ident");
-
-        Fagsak fagsak = new Fagsak();
-        fagsak.setAktører(Set.of(aktoer));
+        Fagsak fagsak = FagsakTestFactory.builder().medBruker().build();
 
         behandling = new Behandling();
         behandling.setId(123L);
@@ -120,10 +115,10 @@ class BrevDataByggerA001Test {
         oppgittAdresse.setLandkode(Landkoder.NO.getKode());
 
         søknad = new Soeknad();
-        søknad.bosted.oppgittAdresse = oppgittAdresse;
+        søknad.bosted.setOppgittAdresse(oppgittAdresse);
 
         ForetakUtland foretakUtland = new ForetakUtland();
-        foretakUtland.orgnr = orgnr1;
+        foretakUtland.setOrgnr(orgnr1);
         søknad.foretakUtland.add(foretakUtland);
 
         MedlemskapDokument medlDokument = new MedlemskapDokument();
@@ -143,7 +138,7 @@ class BrevDataByggerA001Test {
         behandling.setSaksopplysninger(new HashSet<>(List.of(medl, aareg)));
 
         MottatteOpplysninger mottatteOpplysninger = new MottatteOpplysninger();
-        mottatteOpplysninger.setMottatteOpplysningerdata(søknad);
+        mottatteOpplysninger.setMottatteOpplysningerData(søknad);
         behandling.setMottatteOpplysninger(mottatteOpplysninger);
 
         OrganisasjonsDetaljer detaljer = mock(OrganisasjonsDetaljer.class);
@@ -180,10 +175,11 @@ class BrevDataByggerA001Test {
     }
 
     private void leggTilTestorganisasjon(String navn, String orgnummer, OrganisasjonsDetaljer detaljer) {
-        OrganisasjonDokument orgDok = new OrganisasjonDokument();
-        orgDok.setNavn(Collections.singletonList(navn));
-        orgDok.setOrgnummer(orgnummer);
-        orgDok.setOrganisasjonDetaljer(detaljer);
+        OrganisasjonDokument orgDok = OrganisasjonDokumentTestFactory.builder()
+            .orgnummer(orgnummer)
+            .navn(navn)
+            .organisasjonsDetaljer(detaljer)
+            .build();
         Saksopplysning saksopplysning = new Saksopplysning();
         saksopplysning.setType(SaksopplysningType.ORG);
         saksopplysning.setDokument(orgDok);
@@ -192,8 +188,8 @@ class BrevDataByggerA001Test {
 
     private Arbeidsforhold lagArbeidsforhold(String orgnr, LocalDate fom, LocalDate tom) {
         Arbeidsforhold arbeidsforhold = new Arbeidsforhold();
-        arbeidsforhold.arbeidsgiverID = orgnr;
-        arbeidsforhold.ansettelsesPeriode = new Periode(fom, tom);
+        arbeidsforhold.setArbeidsgiverID(orgnr);
+        arbeidsforhold.setAnsettelsesPeriode(new Periode(fom, tom));
         arbDokument.arbeidsforhold.add(arbeidsforhold);
 
         return arbeidsforhold;
@@ -204,16 +200,16 @@ class BrevDataByggerA001Test {
         avklarteOrganisasjoner.add(orgnr1);
 
         SelvstendigForetak foretak = new SelvstendigForetak();
-        foretak.orgnr = orgnr1;
-        søknad.selvstendigArbeid.selvstendigForetak.add(foretak);
+        foretak.setOrgnr(orgnr1);
+        søknad.selvstendigArbeid.getSelvstendigForetak().add(foretak);
 
         SelvstendigForetak foretak2 = new SelvstendigForetak();
-        foretak2.orgnr = orgnr2;
-        søknad.selvstendigArbeid.selvstendigForetak.add(foretak2);
+        foretak2.setOrgnr(orgnr2);
+        søknad.selvstendigArbeid.getSelvstendigForetak().add(foretak2);
 
         BrevDataA001 brevDataA001 = (BrevDataA001) brevDataByggerA001.lag(lagBrevDataGrunnlag(), SAKSBEHANDLER_ID);
-        assertThat(brevDataA001.selvstendigeVirksomheter.stream()
-            .map(nv -> nv.orgnr)).containsOnly(foretak.orgnr);
+        assertThat(brevDataA001.getSelvstendigeVirksomheter().stream()
+            .map(nv -> nv.orgnr)).containsOnly(foretak.getOrgnr());
     }
 
     @Test
@@ -221,26 +217,26 @@ class BrevDataByggerA001Test {
         avklarteOrganisasjoner.add(orgnr1);
 
         SelvstendigForetak foretak = new SelvstendigForetak();
-        foretak.orgnr = orgnr1;
-        søknad.selvstendigArbeid.selvstendigForetak.add(foretak);
+        foretak.setOrgnr(orgnr1);
+        søknad.selvstendigArbeid.getSelvstendigForetak().add(foretak);
 
-        søknad.juridiskArbeidsgiverNorge.ekstraArbeidsgivere.add(orgnr1);
+        søknad.juridiskArbeidsgiverNorge.getEkstraArbeidsgivere().add(orgnr1);
 
         BrevDataA001 brevDataA001 = (BrevDataA001) brevDataByggerA001.lag(lagBrevDataGrunnlag(), SAKSBEHANDLER_ID);
-        assertThat(brevDataA001.selvstendigeVirksomheter.stream()
+        assertThat(brevDataA001.getSelvstendigeVirksomheter().stream()
             .map(nv -> nv.orgnr)).containsOnly(orgnr1);
-        assertThat(brevDataA001.arbeidsgivendeVirksomheter.stream()
+        assertThat(brevDataA001.getArbeidsgivendeVirksomheter().stream()
             .map(nv -> nv.orgnr)).containsOnly(orgnr1);
     }
 
     @Test
     void testIngenAvklarteforetak() {
         SelvstendigForetak foretak = new SelvstendigForetak();
-        foretak.orgnr = orgnr1;
-        søknad.selvstendigArbeid.selvstendigForetak.add(foretak);
+        foretak.setOrgnr(orgnr1);
+        søknad.selvstendigArbeid.getSelvstendigForetak().add(foretak);
 
         BrevDataA001 brevDataA001 = (BrevDataA001) brevDataByggerA001.lag(lagBrevDataGrunnlag(), SAKSBEHANDLER_ID);
-        assertThat(brevDataA001.ansettelsesperiode).isEmpty();
+        assertThat(brevDataA001.getAnsettelsesperiode()).isNull();
     }
 
     @Test
@@ -249,10 +245,10 @@ class BrevDataByggerA001Test {
         lagVilkårResultat(Vilkaar.FO_883_2004_ART16_1, true, ERSTATTER_EN_ANNEN_UNDER_5_AAR);
 
         BrevDataA001 brevDataA001 = (BrevDataA001) brevDataByggerA001.lag(lagBrevDataGrunnlag(), SAKSBEHANDLER_ID);
-        assertThat(brevDataA001.anmodningUtenArt12Begrunnelser).isEmpty();
+        assertThat(brevDataA001.getAnmodningUtenArt12Begrunnelser()).isEmpty();
 
-        assertThat(brevDataA001.anmodningBegrunnelser).hasSize(1);
-        assertThat(brevDataA001.anmodningBegrunnelser.stream().map(VilkaarBegrunnelse::getKode))
+        assertThat(brevDataA001.getAnmodningBegrunnelser()).hasSize(1);
+        assertThat(brevDataA001.getAnmodningBegrunnelser().stream().map(VilkaarBegrunnelse::getKode))
             .containsExactly(ERSTATTER_EN_ANNEN_UNDER_5_AAR.getKode());
     }
 
@@ -262,10 +258,10 @@ class BrevDataByggerA001Test {
         lagVilkårResultat(Vilkaar.FO_883_2004_ART16_1, true, ERSTATTER_EN_ANNEN_UNDER_5_AAR);
 
         BrevDataA001 brevDataA001 = (BrevDataA001) brevDataByggerA001.lag(lagBrevDataGrunnlag(), SAKSBEHANDLER_ID);
-        assertThat(brevDataA001.anmodningUtenArt12Begrunnelser).isEmpty();
+        assertThat(brevDataA001.getAnmodningUtenArt12Begrunnelser()).isEmpty();
 
-        assertThat(brevDataA001.anmodningBegrunnelser).hasSize(1);
-        assertThat(brevDataA001.anmodningBegrunnelser.stream().map(VilkaarBegrunnelse::getKode))
+        assertThat(brevDataA001.getAnmodningBegrunnelser()).hasSize(1);
+        assertThat(brevDataA001.getAnmodningBegrunnelser().stream().map(VilkaarBegrunnelse::getKode))
             .containsExactly(ERSTATTER_EN_ANNEN_UNDER_5_AAR.getKode());
     }
 
@@ -274,10 +270,10 @@ class BrevDataByggerA001Test {
         lagVilkårResultat(Vilkaar.FO_883_2004_ART16_1, true, SJOEMANNSKIRKEN);
 
         BrevDataA001 brevDataA001 = (BrevDataA001) brevDataByggerA001.lag(lagBrevDataGrunnlag(), SAKSBEHANDLER_ID);
-        assertThat(brevDataA001.anmodningBegrunnelser).isEmpty();
+        assertThat(brevDataA001.getAnmodningBegrunnelser()).isEmpty();
 
-        assertThat(brevDataA001.anmodningUtenArt12Begrunnelser).hasSize(1);
-        assertThat(brevDataA001.anmodningUtenArt12Begrunnelser.stream().map(VilkaarBegrunnelse::getKode))
+        assertThat(brevDataA001.getAnmodningUtenArt12Begrunnelser()).hasSize(1);
+        assertThat(brevDataA001.getAnmodningUtenArt12Begrunnelser().stream().map(VilkaarBegrunnelse::getKode))
             .containsExactly(SJOEMANNSKIRKEN.getKode());
     }
 
@@ -300,7 +296,7 @@ class BrevDataByggerA001Test {
             LocalDate.of(2017, 10, 23));
 
         BrevDataA001 brevDataA001 = (BrevDataA001) brevDataByggerA001.lag(lagBrevDataGrunnlag(), SAKSBEHANDLER_ID);
-        assertThat((brevDataA001).ansettelsesperiode).contains(forventet.ansettelsesPeriode);
+        assertThat((brevDataA001).getAnsettelsesperiode()).isEqualTo(forventet.getAnsettelsesPeriode());
     }
 
     @Test
@@ -308,7 +304,7 @@ class BrevDataByggerA001Test {
         avklarteOrganisasjoner.add(orgnr1);
 
         BrevDataA001 brevDataA001 = (BrevDataA001) brevDataByggerA001.lag(lagBrevDataGrunnlag(), SAKSBEHANDLER_ID);
-        assertThat(brevDataA001.ansettelsesperiode).isNotPresent();
+        assertThat(brevDataA001.getAnsettelsesperiode()).isNull();
     }
 
     @Test
@@ -320,7 +316,7 @@ class BrevDataByggerA001Test {
         BrevDataGrunnlag brevdataGrunnlag = lagBrevDataGrunnlag(brevbestilling);
 
         BrevDataA001 brevDataA001 = (BrevDataA001) brevDataByggerA001.lag(brevdataGrunnlag, SAKSBEHANDLER_ID);
-        assertThat(brevDataA001.ytterligereInformasjon).isEqualTo(forventetInfo);
+        assertThat(brevDataA001.getYtterligereInformasjon()).isEqualTo(forventetInfo);
     }
 
     @Test
@@ -331,7 +327,7 @@ class BrevDataByggerA001Test {
         BrevDataGrunnlag brevdataGrunnlag = lagBrevDataGrunnlag(doksysBrevbestilling, personopplysninger);
 
         BrevDataA001 brevDataA001 = (BrevDataA001) brevDataByggerA001.lag(brevdataGrunnlag, SAKSBEHANDLER_ID);
-        assertThat(brevDataA001.bostedsadresse).isEqualTo(personopplysninger.finnKontaktadresse().get().hentEllerLagStrukturertAdresse());
+        assertThat(brevDataA001.getBostedsadresse()).isEqualTo(personopplysninger.finnKontaktadresse().get().hentEllerLagStrukturertAdresse());
     }
 
     @Test

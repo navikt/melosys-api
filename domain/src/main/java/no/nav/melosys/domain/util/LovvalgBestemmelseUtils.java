@@ -6,10 +6,7 @@ import java.util.Map;
 import java.util.Optional;
 
 import no.nav.melosys.domain.kodeverk.LovvalgBestemmelse;
-import no.nav.melosys.domain.kodeverk.lovvalgsbestemmelser.Lovvalgbestemmelser_883_2004;
-import no.nav.melosys.domain.kodeverk.lovvalgsbestemmelser.Lovvalgbestemmelser_987_2009;
-import no.nav.melosys.domain.kodeverk.lovvalgsbestemmelser.Overgangsregelbestemmelser;
-import no.nav.melosys.domain.kodeverk.lovvalgsbestemmelser.Tilleggsbestemmelser_883_2004;
+import no.nav.melosys.domain.kodeverk.lovvalgsbestemmelser.*;
 import no.nav.melosys.domain.kodeverk.lovvalgsbestemmelser.trygdeavtale.*;
 
 public final class LovvalgBestemmelseUtils {
@@ -25,6 +22,8 @@ public final class LovvalgBestemmelseUtils {
             Lovvalgbestemmelser_883_2004.values(),
             Lovvalgbestemmelser_987_2009.values(),
             Tilleggsbestemmelser_883_2004.values(),
+            Lovvalgbestemmelser_konv_efta_storbritannia.values(),
+            Tilleggsbestemmelser_konv_efta_storbritannia.values(),
 
             Lovvalgsbestemmelser_trygdeavtale_au.values(),
             Lovvalgsbestemmelser_trygdeavtale_ba.values(),

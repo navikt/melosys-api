@@ -6,6 +6,7 @@ import java.util.Optional;
 import no.nav.melosys.domain.Behandling;
 import no.nav.melosys.domain.Behandlingsnotat;
 import no.nav.melosys.domain.Fagsak;
+import no.nav.melosys.domain.FagsakTestFactory;
 import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingsstatus;
 import no.nav.melosys.exception.FunksjonellException;
 import no.nav.melosys.repository.BehandlingsnotatRepository;
@@ -46,7 +47,7 @@ class BehandlingsnotatServiceTest {
     @BeforeEach
     public void setup() {
         behandlingsnotatService = new BehandlingsnotatService(behandlingsnotatRepository, fagsakService);
-        fagsak = new Fagsak();
+        fagsak = FagsakTestFactory.lagFagsak();
         SpringSubjectHandler.set(new TestSubjectHandler());
     }
 
@@ -130,7 +131,7 @@ class BehandlingsnotatServiceTest {
         Behandling behandling = new Behandling();
         behandling.setFagsak(fagsak);
         behandling.setStatus(behandlingsstatus);
-        fagsak.getBehandlinger().add(behandling);
+        fagsak.leggTilBehandling(behandling);
         return behandling;
     }
 

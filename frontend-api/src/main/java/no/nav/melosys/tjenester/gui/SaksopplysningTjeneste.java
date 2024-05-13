@@ -34,9 +34,9 @@ public class SaksopplysningTjeneste {
         @ApiResponse(code = 404, message = "Behandling ikke funnet"),
         @ApiResponse(code = 500, message = "Uventet teknisk Feil")
     })
-    public ResponseEntity<Void> oppfriskSaksopplysning(@PathVariable("behandlingID") long behandlingID, @RequestParam(required = false) boolean medFamilierelasjoner) {
+    public ResponseEntity<Void> oppfriskSaksopplysning(@PathVariable("behandlingID") long behandlingID, @RequestParam(required = false) boolean inkluderSiste5Aar) {
         aksesskontroll.autoriserSkriv(behandlingID);
-        oppfriskSaksopplysningerService.oppfriskSaksopplysning(behandlingID, medFamilierelasjoner);
+        oppfriskSaksopplysningerService.oppfriskSaksopplysning(behandlingID, inkluderSiste5Aar);
         return ResponseEntity.noContent().build();
     }
 }

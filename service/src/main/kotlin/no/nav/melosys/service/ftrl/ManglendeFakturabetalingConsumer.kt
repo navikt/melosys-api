@@ -1,8 +1,8 @@
 package no.nav.melosys.service.ftrl
 
 import mu.KotlinLogging
-import no.nav.melosys.domain.ftrl.ManglendeFakturabetalingMelding
-import no.nav.melosys.service.sak.OpprettBehandlingForSak
+import no.nav.melosys.domain.manglendebetaling.ManglendeFakturabetalingMelding
+import no.nav.melosys.saksflytapi.ProsessinstansService
 import org.apache.kafka.clients.consumer.ConsumerRecord
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.context.annotation.Profile
@@ -12,7 +12,7 @@ import org.springframework.stereotype.Service
 @Service
 @Profile("!local-q1 & !local-q2")
 class ManglendeFakturabetalingConsumer(
-    @Autowired private val opprettBehandlingForSak: OpprettBehandlingForSak
+    @Autowired private val prosessinstansService: ProsessinstansService
 ) {
     private val log = KotlinLogging.logger { }
 
@@ -26,10 +26,7 @@ class ManglendeFakturabetalingConsumer(
     ) {
         val manglendeFakturebetalingMelding = consumerRecord.value()
         try {
-            opprettBehandlingForSak.opprettBehandlingManglendeInnbetaling(
-                FaktureringsKomponentenHjelper.hentBehandingsId(manglendeFakturebetalingMelding.vedtaksId),
-                manglendeFakturebetalingMelding.mottaksDato
-            )
+            prosessinstansService.opprettManglendeInnbetalingProsessflyt(manglendeFakturebetalingMelding)
         } catch (e: Exception) {
             log.error("Feil ved mottak av ManglendeFakturabetaling med consumer record key ${consumerRecord.key()}", e)
         }

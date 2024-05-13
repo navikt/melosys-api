@@ -37,7 +37,7 @@ public final class Mottaker {
     }
 
     public static Mottaker av(Aktoer aktoer) {
-        return new Mottaker(mottakerrolleAv(aktoer.getRolle()), aktoer.getAktørId(), aktoer.getPersonIdent(), aktoer.getOrgnr(), aktoer.getInstitusjonId(), aktoer.getTrygdemyndighetLand());
+        return new Mottaker(mottakerrolleAv(aktoer.getRolle()), aktoer.getAktørId(), aktoer.getPersonIdent(), aktoer.getOrgnr(), aktoer.getInstitusjonID(), aktoer.getTrygdemyndighetLand());
     }
 
     private static Mottakerroller mottakerrolleAv(Aktoersroller aktoersrolle) {
@@ -45,7 +45,7 @@ public final class Mottaker {
             case BRUKER -> Mottakerroller.BRUKER;
             case VIRKSOMHET -> Mottakerroller.VIRKSOMHET;
             case ARBEIDSGIVER -> Mottakerroller.ARBEIDSGIVER;
-            case REPRESENTANT -> Mottakerroller.FULLMEKTIG;
+            case FULLMEKTIG -> Mottakerroller.FULLMEKTIG;
             case TRYGDEMYNDIGHET -> Mottakerroller.UTENLANDSK_TRYGDEMYNDIGHET;
             default -> throw new FunksjonellException("Støtter ikke mapping av aktoersrolle" + aktoersrolle);
         };
@@ -67,7 +67,7 @@ public final class Mottaker {
 
     public boolean erOrganisasjon() {
         return switch (rolle) {
-            case BRUKER -> false;
+            case BRUKER, ANNEN_PERSON -> false;
             case FULLMEKTIG -> orgnr != null;
             default -> true;
         };

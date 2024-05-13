@@ -4,8 +4,8 @@ import java.math.BigInteger;
 import java.util.Collection;
 import java.util.List;
 import java.util.stream.Collectors;
-import javax.xml.bind.JAXBElement;
-import javax.xml.bind.JAXBException;
+import jakarta.xml.bind.JAXBElement;
+import jakarta.xml.bind.JAXBException;
 
 import no.nav.dok.melosysbrev._000083.LovvalgsperiodeType;
 import no.nav.dok.melosysbrev._000083.ObjectFactory;
@@ -35,7 +35,7 @@ public final class InnvilgelsesbrevFlereLandMapper implements BrevDataMapper {
         BrevDataInnvilgelseFlereLand brevDataInnvilgelse = (BrevDataInnvilgelseFlereLand) brevdata;
 
         VedleggMapper vedleggMapper = new VedleggMapper(behandling, resultat);
-        vedleggMapper.map(brevDataInnvilgelse.vedleggA1);
+        vedleggMapper.map(brevDataInnvilgelse.getVedleggA1());
 
         Fag fag = mapFag(behandling, resultat, brevDataInnvilgelse);
 
@@ -49,57 +49,56 @@ public final class InnvilgelsesbrevFlereLandMapper implements BrevDataMapper {
         fag.setBehandlingstype(BehandlingstypeKodeMapper.hentBehandlingstypeKode(behandling));
 
         // Logikk i brev benytter antallArbeidsgivere for å aktivere tekst med arbeidsgiver eller arbeidsgiverListe
-        int antallArbeidsgivere = brevdata.arbeidsgivere.size();
+        int antallArbeidsgivere = brevdata.getArbeidsgivere().size();
         fag.setAntallArbeidsgivere(BigInteger.valueOf(antallArbeidsgivere));
         if (antallArbeidsgivere == 1) {
-            AvklartVirksomhet avklartVirksomhet = brevdata.arbeidsgivere.iterator().next();
+            AvklartVirksomhet avklartVirksomhet = brevdata.getArbeidsgivere().iterator().next();
             fag.setArbeidsgiver(avklartVirksomhet.navn);
         }
-        fag.setArbeidsgiverListe(mapArbeidsgiverListe(brevdata.arbeidsgivere));
+        fag.setArbeidsgiverListe(mapArbeidsgiverListe(brevdata.getArbeidsgivere()));
 
         // AntallArbeidsland avgjør om brevet bruker arbeidsland eller arbeidslandListe
-        int antallArbeidsland = brevdata.alleArbeidsland.size();
+        int antallArbeidsland = brevdata.getAlleArbeidsland().size();
         fag.setAntallArbeidsland(BigInteger.valueOf(antallArbeidsland));
         if (antallArbeidsland == 1) {
-            String arbeidsland = brevdata.alleArbeidsland.iterator().next();
+            String arbeidsland = brevdata.getAlleArbeidsland().iterator().next();
             fag.setArbeidsland(arbeidsland);
         }
-        fag.setArbeidslandListe(mapArbeidslandListe(brevdata.alleArbeidsland));
-        fag.setErUkjenteEllerAlleEosLand(Boolean.toString(brevdata.erUkjenteEllerAlleEosLand));
+        fag.setArbeidslandListe(mapArbeidslandListe(brevdata.getAlleArbeidsland()));
+        fag.setErUkjenteEllerAlleEosLand(Boolean.toString(brevdata.getUkjenteEllerAlleEosLand()));
 
-        fag.setBostedsland(brevdata.bostedsland);
-        if (brevdata.trydemyndighetsland != null) {
-            fag.setTrygdemyndighetsland(brevdata.trydemyndighetsland.getBeskrivelse());
+        fag.setBostedsland(brevdata.getBostedsland());
+        if (brevdata.getTrydemyndighetsland() != null) {
+            fag.setTrygdemyndighetsland(brevdata.getTrydemyndighetsland().getBeskrivelse());
         } else {
             fag.setTrygdemyndighetsland(" ");
         }
 
         // Virksomhetsland er arbeidsland for selvstendig næringsdrivende
-        int antallVirksomhetsland = brevdata.alleArbeidsland.size();
+        int antallVirksomhetsland = brevdata.getAlleArbeidsland().size();
         fag.setAntallVirksomhetsland(BigInteger.valueOf(antallVirksomhetsland));
         if (antallVirksomhetsland == 1) {
-            String virksomhetsland = brevdata.alleArbeidsland.iterator().next();
+            String virksomhetsland = brevdata.getAlleArbeidsland().iterator().next();
             fag.setVirksomhetsland(virksomhetsland);
         }
-        fag.setVirksomhetslandListe(mapVirksomhetsListe(brevdata.alleArbeidsland));
+        fag.setVirksomhetslandListe(mapVirksomhetsListe(brevdata.getAlleArbeidsland()));
 
-        if (brevdata.harAvklartMaritimTypeSkip) {
+        if (brevdata.getAvklartMaritimTypeSkip()) {
             fag.setArbeidPåSkip(JA);
         }
-        if (brevdata.harAvklartMaritimTypeSokkel) {
+        if (brevdata.getAvklartMaritimTypeSokkel()) {
             fag.setArbeidPåSokkel(JA);
         }
 
-        if (brevdata.erBegrensetPeriode) {
+        if (brevdata.getBegrensetPeriode()) {
             fag.setBegrensetPeriode(JA);
         }
 
-        Lovvalgsperiode periode = brevdata.lovvalgsperiode;
+        Lovvalgsperiode periode = brevdata.getLovvalgsperiode();
         fag.setLovvalgsbestemmelse(LovvalgsbestemmelseKode.fromValue(periode.getBestemmelse().getKode()));
-        fag.setLovvalgsperiode(LovvalgsperiodeType.builder()
+        fag.setLovvalgsperiode(new LovvalgsperiodeType()
             .withFomDato(lagXmlDato(periode.getFom()))
-            .withTomDato(lagXmlDato(periode.getTom()))
-            .build());
+            .withTomDato(lagXmlDato(periode.getTom())));
 
         if (periode.getTilleggsbestemmelse() != null) {
             fag.setTilleggsbestemmelse(TilleggsbestemmelseKode.fromValue(periode.getTilleggsbestemmelse().getKode()));
@@ -109,7 +108,7 @@ public final class InnvilgelsesbrevFlereLandMapper implements BrevDataMapper {
             fag.setVedtaksType(tilVedtaksTypeKode(resultat.getVedtakMetadata().getVedtakstype()));
         }
 
-        fag.setFritekst(brevdata.fritekst);
+        fag.setFritekst(brevdata.getFritekst());
 
         return fag;
     }
@@ -167,12 +166,11 @@ public final class InnvilgelsesbrevFlereLandMapper implements BrevDataMapper {
 
     private static JAXBElement<BrevdataType> lagBrevdataType(FellesType fellesType, MelosysNAVFelles navFelles, Fag fag, VedleggType vedlegg) {
         ObjectFactory factory = new ObjectFactory();
-        BrevdataType brevdataType = BrevdataType.builder()
+        BrevdataType brevdataType = new BrevdataType()
             .withFelles(fellesType)
             .withNAVFelles(navFelles)
             .withFag(fag)
-            .withVedlegg(vedlegg)
-            .build();
+            .withVedlegg(vedlegg);
         return factory.createBrevdata(brevdataType);
     }
 }

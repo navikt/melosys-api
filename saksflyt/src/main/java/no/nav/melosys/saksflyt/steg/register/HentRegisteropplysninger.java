@@ -2,10 +2,10 @@ package no.nav.melosys.saksflyt.steg.register;
 
 import no.nav.melosys.domain.Behandling;
 import no.nav.melosys.domain.kodeverk.Aktoersroller;
-import no.nav.melosys.domain.saksflyt.ProsessSteg;
-import no.nav.melosys.domain.saksflyt.Prosessinstans;
 import no.nav.melosys.exception.FunksjonellException;
 import no.nav.melosys.saksflyt.steg.StegBehandler;
+import no.nav.melosys.saksflytapi.domain.ProsessSteg;
+import no.nav.melosys.saksflytapi.domain.Prosessinstans;
 import no.nav.melosys.service.behandling.BehandlingService;
 import no.nav.melosys.service.persondata.PersondataFasade;
 import no.nav.melosys.service.registeropplysninger.RegisteropplysningerFactory;
@@ -16,7 +16,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Component;
 
-import static no.nav.melosys.domain.saksflyt.ProsessSteg.HENT_REGISTEROPPLYSNINGER;
+import static no.nav.melosys.saksflytapi.domain.ProsessSteg.HENT_REGISTEROPPLYSNINGER;
 
 @Component
 public class HentRegisteropplysninger implements StegBehandler {
@@ -59,9 +59,7 @@ public class HentRegisteropplysninger implements StegBehandler {
             return;
         }
 
-        var aktørId = behandling.getFagsak().finnBrukersAktørID().orElseThrow(
-            () -> new FunksjonellException("Kan ikke hente registreopplysninger når bruker ikke har aktørID")
-        );
+        var aktørId = behandling.getFagsak().hentBrukersAktørID();
 
         var registeropplysningerRequestBuilder = RegisteropplysningerRequest.builder()
             .behandlingID(prosessinstans.getBehandling().getId())

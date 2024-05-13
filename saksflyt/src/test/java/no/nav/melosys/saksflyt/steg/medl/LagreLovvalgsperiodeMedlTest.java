@@ -2,19 +2,14 @@ package no.nav.melosys.saksflyt.steg.medl;
 
 import java.util.NoSuchElementException;
 
-import no.finn.unleash.FakeUnleash;
-import no.nav.melosys.domain.Behandling;
-import no.nav.melosys.domain.Behandlingsresultat;
-import no.nav.melosys.domain.Fagsak;
-import no.nav.melosys.domain.Lovvalgsperiode;
+import no.nav.melosys.domain.*;
 import no.nav.melosys.domain.kodeverk.*;
 import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingsresultattyper;
 import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingstema;
 import no.nav.melosys.domain.kodeverk.lovvalgsbestemmelser.Lovvalgbestemmelser_883_2004;
-import no.nav.melosys.domain.saksflyt.Prosessinstans;
 import no.nav.melosys.exception.FunksjonellException;
-import no.nav.melosys.featuretoggle.ToggleName;
 import no.nav.melosys.saksflyt.TestdataFactory;
+import no.nav.melosys.saksflytapi.domain.Prosessinstans;
 import no.nav.melosys.service.behandling.BehandlingsresultatService;
 import no.nav.melosys.service.medl.MedlPeriodeService;
 import no.nav.melosys.service.saksbehandling.SaksbehandlingRegler;
@@ -52,9 +47,7 @@ class LagreLovvalgsperiodeMedlTest {
     @BeforeEach
     public void setup() {
         lagreLovvalgsperiodeMedl = new LagreLovvalgsperiodeMedl(behandlingsresultatService, medlPeriodeService, saksbehandlingRegler);
-        Fagsak fagsak = new Fagsak();
-        fagsak.setType(Sakstyper.TRYGDEAVTALE);
-        fagsak.setTema(Sakstemaer.UNNTAK);
+        Fagsak fagsak = FagsakTestFactory.builder().type(Sakstyper.TRYGDEAVTALE).tema(Sakstemaer.UNNTAK).build();
 
         behandling.setId(behandlingID);
         behandling.setTema(Behandlingstema.UTSENDT_ARBEIDSTAKER);
@@ -218,22 +211,8 @@ class LagreLovvalgsperiodeMedlTest {
     }
 
     @Test
-    void utfør_avslagManglendeOpplysningerIngenLovvalgsperiode_oppretterIkkeLovvalgsperiode() {
-        behandlingsresultat.setType(Behandlingsresultattyper.AVSLAG_MANGLENDE_OPPL);
-        when(behandlingsresultatService.hentBehandlingsresultat(behandlingID)).thenReturn(behandlingsresultat);
-
-
-        lagreLovvalgsperiodeMedl.utfør(prosessinstans);
-
-
-        verifyNoInteractions(medlPeriodeService);
-    }
-
-    @Test
     void utfør_ikkeGodkjentRegistreringUnntak_oppretterIkkeLovvalgsperiode() {
-        Fagsak fagsak = new Fagsak();
-        fagsak.setType(Sakstyper.TRYGDEAVTALE);
-        fagsak.setTema(Sakstemaer.UNNTAK);
+        Fagsak fagsak = FagsakTestFactory.builder().type(Sakstyper.TRYGDEAVTALE).tema(Sakstemaer.UNNTAK).build();
 
         Behandling behandling = TestdataFactory.lagBehandling();
         behandling.setFagsak(fagsak);

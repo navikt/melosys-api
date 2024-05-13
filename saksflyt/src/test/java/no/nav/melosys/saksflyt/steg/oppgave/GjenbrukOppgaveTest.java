@@ -2,19 +2,14 @@ package no.nav.melosys.saksflyt.steg.oppgave;
 
 import java.time.LocalDate;
 
-import no.nav.melosys.domain.Aktoer;
-import no.nav.melosys.domain.Behandling;
-import no.nav.melosys.domain.Fagsak;
-import no.nav.melosys.domain.Fagsystem;
+import no.nav.melosys.domain.*;
 import no.nav.melosys.domain.kodeverk.Aktoersroller;
 import no.nav.melosys.domain.kodeverk.Oppgavetyper;
-import no.nav.melosys.domain.kodeverk.Sakstemaer;
-import no.nav.melosys.domain.kodeverk.Sakstyper;
 import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingstema;
 import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingstyper;
 import no.nav.melosys.domain.oppgave.Oppgave;
-import no.nav.melosys.domain.saksflyt.ProsessDataKey;
-import no.nav.melosys.domain.saksflyt.Prosessinstans;
+import no.nav.melosys.saksflytapi.domain.ProsessDataKey;
+import no.nav.melosys.saksflytapi.domain.Prosessinstans;
 import no.nav.melosys.service.oppgave.OppgaveBehandlingstema;
 import no.nav.melosys.service.oppgave.OppgaveFactory;
 import no.nav.melosys.service.oppgave.OppgaveService;
@@ -51,12 +46,11 @@ class GjenbrukOppgaveTest {
     @Test
     void gjenbrukOppgave_utfør_oppdatererOppgave() {
         final String oppgaveID = "1234";
-        final String saksnummer = "MEL-123";
         final String oppgaveBeskrivelse = "jeg beskriver oppgave";
 
         Oppgave eksisterendeOppgave = new Oppgave.Builder().setBeskrivelse(oppgaveBeskrivelse).build();
         when(oppgaveService.hentOppgaveMedOppgaveID(oppgaveID)).thenReturn(eksisterendeOppgave);
-        var prosessinstans = lagProsessinstans(oppgaveID, saksnummer, false);
+        var prosessinstans = lagProsessinstans(oppgaveID, false);
         when(oppgaveService.lagBehandlingsoppgave(any())).thenReturn(oppgaveFactory.lagBehandlingsoppgave(prosessinstans.getBehandling(), LocalDate.now(), () -> null));
 
 
@@ -65,7 +59,7 @@ class GjenbrukOppgaveTest {
 
         verify(oppgaveService).opprettOppgave(oppgaveCaptor.capture());
         assertThat(oppgaveCaptor.getValue())
-            .hasFieldOrPropertyWithValue("saksnummer", saksnummer)
+            .hasFieldOrPropertyWithValue("saksnummer", FagsakTestFactory.SAKSNUMMER)
             .hasFieldOrPropertyWithValue("behandlesAvApplikasjon", Fagsystem.MELOSYS)
             .hasFieldOrPropertyWithValue("oppgavetype", Oppgavetyper.BEH_SAK_MK)
             .hasFieldOrPropertyWithValue("behandlingstema", OppgaveBehandlingstema.EU_EOS_YRKESAKTIV.getKode())
@@ -77,13 +71,12 @@ class GjenbrukOppgaveTest {
     @Test
     void gjenbrukOppgave_utfør_oppdatererOppgave_virksomhet() {
         final String oppgaveID = "1234";
-        final String saksnummer = "MEL-123";
         final String oppgaveBeskrivelse = "jeg beskriver oppgave";
 
         Oppgave eksisterendeOppgave = new Oppgave.Builder().setBeskrivelse(oppgaveBeskrivelse).build();
         when(oppgaveService.hentOppgaveMedOppgaveID(oppgaveID)).thenReturn(eksisterendeOppgave);
-        var prosessinstans = lagProsessinstans(oppgaveID, saksnummer, true);
-        when(oppgaveService.lagBehandlingsoppgave(any())).thenReturn(oppgaveFactory.lagBehandlingsoppgave(prosessinstans.getBehandling(), LocalDate.now(),  () -> null));
+        var prosessinstans = lagProsessinstans(oppgaveID, true);
+        when(oppgaveService.lagBehandlingsoppgave(any())).thenReturn(oppgaveFactory.lagBehandlingsoppgave(prosessinstans.getBehandling(), LocalDate.now(), () -> null));
 
 
         gjenbrukOppgave.utfør(prosessinstans);
@@ -91,7 +84,7 @@ class GjenbrukOppgaveTest {
 
         verify(oppgaveService).opprettOppgave(oppgaveCaptor.capture());
         assertThat(oppgaveCaptor.getValue())
-            .hasFieldOrPropertyWithValue("saksnummer", saksnummer)
+            .hasFieldOrPropertyWithValue("saksnummer", FagsakTestFactory.SAKSNUMMER)
             .hasFieldOrPropertyWithValue("behandlesAvApplikasjon", Fagsystem.MELOSYS)
             .hasFieldOrPropertyWithValue("oppgavetype", Oppgavetyper.BEH_SAK_MK)
             .hasFieldOrPropertyWithValue("behandlingstema", OppgaveBehandlingstema.EU_EOS_YRKESAKTIV.getKode())
@@ -100,23 +93,20 @@ class GjenbrukOppgaveTest {
             .hasFieldOrPropertyWithValue("orgnr", "999999999");
     }
 
-    private static Prosessinstans lagProsessinstans(String oppgaveID, String saksnummer, Boolean erForVirksomhet) {
-        Fagsak fagsak = new Fagsak();
-        fagsak.setSaksnummer(saksnummer);
-        fagsak.setType(Sakstyper.EU_EOS);
-        fagsak.setTema(Sakstemaer.MEDLEMSKAP_LOVVALG);
+    private static Prosessinstans lagProsessinstans(String oppgaveID, Boolean erForVirksomhet) {
+        Fagsak fagsak = FagsakTestFactory.lagFagsak();
         Prosessinstans prosessinstans = new Prosessinstans();
 
         if (erForVirksomhet) {
             Aktoer virksomhet = new Aktoer();
             virksomhet.setOrgnr("999999999");
             virksomhet.setRolle(Aktoersroller.VIRKSOMHET);
-            fagsak.getAktører().add(virksomhet);
+            fagsak.leggTilAktør(virksomhet);
         } else {
             Aktoer bruker = new Aktoer();
             bruker.setAktørId("123321");
             bruker.setRolle(Aktoersroller.BRUKER);
-            fagsak.getAktører().add(bruker);
+            fagsak.leggTilAktør(bruker);
         }
 
         Behandling behandling = new Behandling();

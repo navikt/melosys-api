@@ -4,10 +4,10 @@ import java.time.LocalDate;
 import java.time.ZoneId;
 
 import no.nav.melosys.domain.oppgave.Oppgave;
-import no.nav.melosys.domain.saksflyt.ProsessSteg;
-import no.nav.melosys.domain.saksflyt.Prosessinstans;
 import no.nav.melosys.integrasjon.oppgave.OppgaveOppdatering;
 import no.nav.melosys.saksflyt.steg.StegBehandler;
+import no.nav.melosys.saksflytapi.domain.ProsessSteg;
+import no.nav.melosys.saksflytapi.domain.Prosessinstans;
 import no.nav.melosys.service.oppgave.OppgaveService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;

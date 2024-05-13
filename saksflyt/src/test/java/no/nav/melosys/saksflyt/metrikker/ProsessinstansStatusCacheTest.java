@@ -5,9 +5,8 @@ import java.util.Arrays;
 import java.util.Collection;
 import java.util.Collections;
 
-import no.nav.melosys.domain.metrikker.ProsessinstansAntall;
-import no.nav.melosys.domain.saksflyt.ProsessType;
-import no.nav.melosys.repository.ProsessinstansRepository;
+import no.nav.melosys.saksflyt.ProsessinstansRepository;
+import no.nav.melosys.saksflytapi.domain.ProsessType;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.mock.mockito.MockBean;
@@ -15,10 +14,10 @@ import org.springframework.scheduling.annotation.EnableScheduling;
 import org.springframework.test.context.TestPropertySource;
 import org.springframework.test.context.junit.jupiter.SpringJUnitConfig;
 
-import static no.nav.melosys.domain.saksflyt.ProsessStatus.FEILET;
-import static no.nav.melosys.domain.saksflyt.ProsessStatus.FERDIG;
-import static no.nav.melosys.domain.saksflyt.ProsessType.ANMODNING_OM_UNNTAK;
-import static no.nav.melosys.domain.saksflyt.ProsessType.IVERKSETT_VEDTAK_EOS;
+import static no.nav.melosys.saksflytapi.domain.ProsessStatus.FEILET;
+import static no.nav.melosys.saksflytapi.domain.ProsessStatus.FERDIG;
+import static no.nav.melosys.saksflytapi.domain.ProsessType.ANMODNING_OM_UNNTAK;
+import static no.nav.melosys.saksflytapi.domain.ProsessType.IVERKSETT_VEDTAK_EOS;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.awaitility.Awaitility.await;
 import static org.mockito.ArgumentMatchers.*;

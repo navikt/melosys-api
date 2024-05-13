@@ -7,6 +7,7 @@ import java.util.Optional;
 import no.nav.melosys.domain.Fagsak;
 import no.nav.melosys.domain.arkiv.Journalpost;
 import no.nav.melosys.domain.arkiv.Journalposttype;
+import no.nav.melosys.domain.eessi.melding.MelosysEessiMelding;
 import no.nav.melosys.domain.kodeverk.Oppgavetyper;
 import no.nav.melosys.domain.kodeverk.Sakstemaer;
 import no.nav.melosys.domain.kodeverk.Sakstyper;
@@ -15,19 +16,18 @@ import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingstema;
 import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingstyper;
 import no.nav.melosys.domain.oppgave.Oppgave;
 import no.nav.melosys.exception.FunksjonellException;
+import no.nav.melosys.saksflytapi.ProsessinstansService;
+import no.nav.melosys.service.dokument.sed.EessiService;
 import no.nav.melosys.service.journalforing.JournalfoeringService;
 import no.nav.melosys.service.journalforing.UtledBehandlingsaarsak;
 import no.nav.melosys.service.journalforing.dto.PeriodeDto;
-import no.nav.melosys.service.lovligekombinasjoner.LovligeKombinasjonerService;
+import no.nav.melosys.service.lovligekombinasjoner.LovligeKombinasjonerSaksbehandlingService;
 import no.nav.melosys.service.oppgave.OppgaveService;
 import no.nav.melosys.service.saksbehandling.SaksbehandlingRegler;
-import no.nav.melosys.service.saksflyt.ProsessinstansService;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.context.annotation.Lazy;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
-
-import static no.nav.melosys.domain.Fagsak.erSakstypeEøs;
 
 @Service
 public class OpprettSak {
@@ -35,18 +35,22 @@ public class OpprettSak {
     private final OppgaveService oppgaveService;
     private final ProsessinstansService prosessinstansService;
     private final SaksbehandlingRegler saksbehandlingRegler;
+    private final FagsakService fagsakService;
+    private final EessiService eessiService;
 
-    private final LovligeKombinasjonerService lovligeKombinasjonerService;
+    private final LovligeKombinasjonerSaksbehandlingService lovligeKombinasjonerSaksbehandlingService;
 
     public OpprettSak(JournalfoeringService journalfoeringService, OppgaveService oppgaveService,
                       @Lazy ProsessinstansService prosessinstansService,
                       SaksbehandlingRegler saksbehandlingRegler,
-                      LovligeKombinasjonerService lovligeKombinasjonerService) {
+                      FagsakService fagsakService, EessiService eessiService, LovligeKombinasjonerSaksbehandlingService lovligeKombinasjonerSaksbehandlingService) {
         this.journalfoeringService = journalfoeringService;
         this.oppgaveService = oppgaveService;
         this.prosessinstansService = prosessinstansService;
         this.saksbehandlingRegler = saksbehandlingRegler;
-        this.lovligeKombinasjonerService = lovligeKombinasjonerService;
+        this.fagsakService = fagsakService;
+        this.eessiService = eessiService;
+        this.lovligeKombinasjonerSaksbehandlingService = lovligeKombinasjonerSaksbehandlingService;
     }
 
     @Transactional
@@ -69,12 +73,12 @@ public class OpprettSak {
         if (sakstype == Sakstyper.EU_EOS) {
             prosessinstansService.opprettProsessinstansNySakEØS(
                 oppgave.getJournalpostId(),
-                opprettSakDto
+                opprettSakDto.tilOpprettSakRequest()
             );
         } else if (sakstype == Sakstyper.FTRL || sakstype == Sakstyper.TRYGDEAVTALE) {
             prosessinstansService.opprettProsessinstansNySakFTRLTrygdeavtale(
                 oppgave.getJournalpostId(),
-                opprettSakDto
+                opprettSakDto.tilOpprettSakRequest()
             );
         } else {
             throw new FunksjonellException("Sakstype %s støttes ikke".formatted(sakstype));
@@ -101,7 +105,7 @@ public class OpprettSak {
         }
 
         validerOpprettSakDto(opprettSakDto);
-        prosessinstansService.opprettNySakOgBehandling(opprettSakDto);
+        prosessinstansService.opprettNySakOgBehandling(opprettSakDto.tilOpprettSakRequest());
     }
 
     void validerOpprettSakDto(OpprettSakDto opprettSakDto) {
@@ -111,11 +115,11 @@ public class OpprettSak {
         var behandlingstema = opprettSakDto.getBehandlingstema();
         var behandlingstype = opprettSakDto.getBehandlingstype();
 
-        lovligeKombinasjonerService.validerOpprettelseOgEndring(
+        lovligeKombinasjonerSaksbehandlingService.validerOpprettelseOgEndring(
             hovedpart, sakstype, sakstema, behandlingstema, behandlingstype);
 
-        if (erSakstypeEøs(sakstype)
-            && !saksbehandlingRegler.harTomFlyt(sakstype, sakstema, behandlingstype, behandlingstema)
+        if ((sakstype == Sakstyper.EU_EOS)
+            && !saksbehandlingRegler.harIngenFlyt(sakstype, sakstema, behandlingstype, behandlingstema)
             && !saksbehandlingRegler.harIkkeYrkesaktivFlyt(sakstype, behandlingstema)
             && !saksbehandlingRegler.harRegistreringUnntakFraMedlemskapFlyt(sakstype, sakstema, behandlingstema)) {
             validerSøknadData(opprettSakDto.getSoknadDto());
@@ -128,12 +132,12 @@ public class OpprettSak {
         if (soknadDto == null) {
             throw new FunksjonellException("SoknadDto må ikke være null for å opprette en søknadbehandling.");
         }
-        PeriodeDto periodeDto = soknadDto.getPeriode();
+        PeriodeDto periodeDto = soknadDto.periode;
         if (periodeDto.getFom() == null) {
             feilet = true;
             feilmeldingBuilder.append("søknadsperiodes fra og med dato, ");
         }
-        if (!soknadDto.getLand().erGyldig()) {
+        if (!soknadDto.land.erGyldig()) {
             feilet = true;
             feilmeldingBuilder.append("land, ");
         }
@@ -160,7 +164,8 @@ public class OpprettSak {
             || oppgavetype == Oppgavetyper.BEH_SAK
             || oppgavetype == Oppgavetyper.BEH_SED
             || oppgavetype == Oppgavetyper.VUR
-            || oppgavetype == Oppgavetyper.VURD_HENV;
+            || oppgavetype == Oppgavetyper.VURD_HENV
+            || oppgavetype == Oppgavetyper.VURD_MAN_INNB;
     }
 
     private void validerJournalpost(Journalpost journalpost) {
@@ -171,11 +176,20 @@ public class OpprettSak {
     }
 
     private void validerSedTilknytning(Journalpost journalpost) {
-        Optional<Fagsak> optionalFagsak = journalfoeringService.finnSakTilknyttetSedJournalpost(journalpost);
+        Optional<Fagsak> optionalFagsak = finnSakTilknyttetSedJournalpost(journalpost);
         if (optionalFagsak.isPresent()) {
             throw new FunksjonellException(
                 "SED-en som er tilknyttet Gosys-oppgaven du har valgt er allerede koblet til %s".formatted(
                     optionalFagsak.get().getSaksnummer()));
         }
+    }
+
+    private Optional<Fagsak> finnSakTilknyttetSedJournalpost(Journalpost journalpost) {
+        if (!journalpost.mottaksKanalErEessi()) {
+            return Optional.empty();
+        }
+        MelosysEessiMelding melosysEessiMelding = eessiService.hentSedTilknyttetJournalpost(journalpost.getJournalpostId());
+        Optional<Long> tilknyttetArkivsak = eessiService.finnSakForRinasaksnummer(melosysEessiMelding.getRinaSaksnummer());
+        return tilknyttetArkivsak.flatMap(fagsakService::finnFagsakFraArkivsakID);
     }
 }

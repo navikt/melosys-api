@@ -7,20 +7,20 @@ import java.util.Set;
 
 import com.fasterxml.jackson.core.type.TypeReference;
 import no.nav.melosys.domain.Behandlingsresultat;
+import no.nav.melosys.domain.arkiv.Vedlegg;
 import no.nav.melosys.domain.avklartefakta.Avklartefakta;
 import no.nav.melosys.domain.eessi.BucType;
-import no.nav.melosys.domain.arkiv.Vedlegg;
 import no.nav.melosys.domain.kodeverk.Avklartefaktatyper;
 import no.nav.melosys.domain.kodeverk.begrunnelser.Endretperiode;
-import no.nav.melosys.domain.saksflyt.ProsessDataKey;
-import no.nav.melosys.domain.saksflyt.Prosessinstans;
 import no.nav.melosys.saksflyt.steg.StegBehandler;
+import no.nav.melosys.saksflytapi.domain.ProsessDataKey;
+import no.nav.melosys.saksflytapi.domain.Prosessinstans;
 import no.nav.melosys.service.behandling.BehandlingsresultatService;
 import no.nav.melosys.service.dokument.sed.EessiService;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.util.CollectionUtils;
 
-import static no.nav.melosys.domain.saksflyt.ProsessDataKey.SAKSBEHANDLER;
+import static no.nav.melosys.saksflytapi.domain.ProsessDataKey.SAKSBEHANDLER;
 
 public abstract class AbstraktSendUtland implements StegBehandler {
     protected final EessiService eessiService;

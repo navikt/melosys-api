@@ -17,9 +17,9 @@ import no.nav.melosys.domain.kodeverk.Vilkaar;
 import no.nav.melosys.domain.kodeverk.begrunnelser.Art12_1_begrunnelser;
 import no.nav.melosys.domain.kodeverk.begrunnelser.Art12_1_vesentlig_virksomhet;
 import no.nav.melosys.domain.person.Persondata;
-import no.nav.melosys.repository.VilkaarsresultatRepository;
 import no.nav.melosys.service.LandvelgerService;
 import no.nav.melosys.service.LovvalgsperiodeService;
+import no.nav.melosys.domain.OrganisasjonDokumentTestFactory;
 import no.nav.melosys.service.avklartefakta.AvklarteVirksomheterService;
 import no.nav.melosys.service.avklartefakta.AvklartefaktaService;
 import no.nav.melosys.service.behandling.BehandlingService;
@@ -28,6 +28,7 @@ import no.nav.melosys.service.dokument.brev.datagrunnlag.BrevDataGrunnlag;
 import no.nav.melosys.service.kodeverk.KodeverkService;
 import no.nav.melosys.service.persondata.PersonopplysningerObjectFactory;
 import no.nav.melosys.service.registeropplysninger.OrganisasjonOppslagService;
+import no.nav.melosys.service.behandling.VilkaarsresultatService;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -57,7 +58,7 @@ class BrevDataByggerAvslagArbeidsgiverTest {
     @Mock
     KodeverkService kodeverkService;
     @Mock
-    VilkaarsresultatRepository vilkaarsresultatRepository;
+    VilkaarsresultatService vilkaarsresultatService;
     @Mock
     LovvalgsperiodeService lovvalgsperiodeService;
 
@@ -69,17 +70,12 @@ class BrevDataByggerAvslagArbeidsgiverTest {
 
         brevDataByggerAvslagArbeidsgiver = new BrevDataByggerAvslagArbeidsgiver(landvelgerService,
             lovvalgsperiodeService,
-            vilkaarsresultatRepository);
+            vilkaarsresultatService);
     }
 
     @Test
     void lag_avslagArbeidsgiverBrev_harVilkaarBegrunnelser() {
-        Aktoer aktoer = new Aktoer();
-        aktoer.setRolle(Aktoersroller.BRUKER);
-        aktoer.setAktørId("ident");
-
-        Fagsak fagsak = new Fagsak();
-        fagsak.setAktører(Set.of(aktoer));
+        Fagsak fagsak = FagsakTestFactory.builder().medBruker().build();
 
         Behandling behandling = new Behandling();
         behandling.setFagsak(fagsak);
@@ -109,28 +105,29 @@ class BrevDataByggerAvslagArbeidsgiverTest {
         Set<String> orgSet = new HashSet<>(Collections.singletonList("987654321"));
         when(avklartefaktaService.hentAvklarteOrgnrOgUuid(behandling.getId())).thenReturn(orgSet);
 
-        OrganisasjonDokument organisasjonDokument = new OrganisasjonDokument();
-        organisasjonDokument.setOrgnummer("987654321");
         OrganisasjonsDetaljer organisasjonsDetaljer = mock(OrganisasjonsDetaljer.class);
         when(organisasjonsDetaljer.hentStrukturertForretningsadresse()).thenReturn(lagStrukturertAdresse());
-        organisasjonDokument.organisasjonDetaljer = organisasjonsDetaljer;
+        OrganisasjonDokument organisasjonDokument = OrganisasjonDokumentTestFactory.builder()
+            .orgnummer("987654321")
+            .organisasjonsDetaljer(organisasjonsDetaljer)
+            .build();
 
         when(organisasjonOppslagService.hentOrganisasjoner(orgSet)).thenReturn(new HashSet<>(Collections.singletonList(organisasjonDokument)));
 
         Vilkaarsresultat vilkaarsresultatArt121 = lagVilkårresultat(Vilkaar.FO_883_2004_ART12_1, Art12_1_begrunnelser.IKKE_OMFATTET_LENGE_NOK_I_NORGE_FOER.getKode());
         Vilkaarsresultat vesentligVirksomhet = lagVilkårresultat(Vilkaar.ART12_1_VESENTLIG_VIRKSOMHET, Art12_1_vesentlig_virksomhet.FOR_LITE_KONTRAKTER_NORGE.getKode());
 
-        when(vilkaarsresultatRepository.findByBehandlingsresultatIdAndVilkaar(anyLong(), eq(FO_883_2004_ART12_1))).thenReturn(Optional.of(vilkaarsresultatArt121));
-        when(vilkaarsresultatRepository.findByBehandlingsresultatIdAndVilkaar(anyLong(), eq(ART12_1_VESENTLIG_VIRKSOMHET))).thenReturn(Optional.of(vesentligVirksomhet));
+        when(vilkaarsresultatService.finnVilkaarsresultat(anyLong(), eq(FO_883_2004_ART12_1))).thenReturn(Optional.of(vilkaarsresultatArt121));
+        when(vilkaarsresultatService.finnVilkaarsresultat(anyLong(), eq(ART12_1_VESENTLIG_VIRKSOMHET))).thenReturn(Optional.of(vesentligVirksomhet));
 
         AvklarteVirksomheterService avklarteVirksomheterService = new AvklarteVirksomheterService(avklartefaktaService,
-                                                                                                  organisasjonOppslagService, mock(BehandlingService.class), kodeverkService);
+            organisasjonOppslagService, mock(BehandlingService.class), kodeverkService);
         DoksysBrevbestilling brevbestilling = new DoksysBrevbestilling.Builder().medBehandling(behandling).build();
         Persondata persondata = PersonopplysningerObjectFactory.lagPersonopplysninger();
         BrevDataGrunnlag dataGrunnlag = new BrevDataGrunnlag(brevbestilling, kodeverkService, avklarteVirksomheterService, avklartefaktaService, persondata);
         String saksbehandler = "saksbehandler";
         BrevDataAvslagArbeidsgiver brevData = (BrevDataAvslagArbeidsgiver) brevDataByggerAvslagArbeidsgiver.lag(dataGrunnlag, saksbehandler);
-        assertThat(brevData.hovedvirksomhet.orgnr).isEqualTo("987654321");
+        assertThat(brevData.getHovedvirksomhet().orgnr).isEqualTo("987654321");
     }
 
     private Vilkaarsresultat lagVilkårresultat(Vilkaar vilkaarType, String vilkårbegrunnelseKode) {

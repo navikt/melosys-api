@@ -10,6 +10,8 @@ import no.nav.melosys.domain.Lovvalgsperiode;
 import no.nav.melosys.domain.dokument.medlemskap.MedlemskapDokument;
 import no.nav.melosys.domain.dokument.medlemskap.Medlemsperiode;
 import no.nav.melosys.domain.kodeverk.lovvalgsbestemmelser.Lovvalgbestemmelser_883_2004;
+import no.nav.melosys.domain.kodeverk.lovvalgsbestemmelser.trygdeavtale.Lovvalgsbestemmelser_trygdeavtale_ca;
+import no.nav.melosys.domain.kodeverk.lovvalgsbestemmelser.trygdeavtale.Lovvalgsbestemmelser_trygdeavtale_us;
 import no.nav.melosys.exception.FunksjonellException;
 import no.nav.melosys.exception.IkkeFunnetException;
 import no.nav.melosys.integrasjon.medl.GrunnlagMedl;
@@ -120,15 +122,15 @@ public class LovvalgsperiodeService {
 
         MedlemskapDokument medlemskapdokument = behandling.hentMedlemskapDokument();
         Set<Medlemsperiode> perioder = medlemskapdokument.getMedlemsperiode().stream()
-            .filter(periode -> utvalgtePeriodeIDer.contains(periode.id))
+            .filter(periode -> utvalgtePeriodeIDer.contains(periode.getId()))
             .collect(Collectors.toSet());
 
         List<Lovvalgsperiode> tidligereLovvalgsperioder = new ArrayList<>();
         for (Medlemsperiode periode : perioder) {
             Lovvalgsperiode lovvalgsperiode = new Lovvalgsperiode();
-            lovvalgsperiode.setFom(periode.periode.getFom());
-            lovvalgsperiode.setTom(periode.periode.getTom());
-            lovvalgsperiode.setMedlPeriodeID(periode.id);
+            lovvalgsperiode.setFom(periode.getPeriode().getFom());
+            lovvalgsperiode.setTom(periode.getPeriode().getTom());
+            lovvalgsperiode.setMedlPeriodeID(periode.getId());
             if (periode.getGrunnlagstype() != null
                 && EnumUtils.isValidEnum(GrunnlagMedl.class, periode.getGrunnlagstype().toUpperCase())) {
                 GrunnlagMedl grunnlagMedlKode = GrunnlagMedl.valueOf(periode.getGrunnlagstype().toUpperCase());
@@ -157,5 +159,11 @@ public class LovvalgsperiodeService {
     public Optional<Lovvalgsperiode> finnOpprinneligLovvalgsperiode(long behandlingId) {
         return behandlingRepository.findById(behandlingId).map(Behandling::getOpprinneligBehandling)
             .flatMap(behandling -> lovvalgsperiodeRepo.findByBehandlingsresultatId(behandling.getId()).stream().findFirst());
+    }
+
+    public boolean harSelvstendigNæringsdrivendeLovvalgsbestemmelse(long behandlingId) {
+        var lovvalgBestemmelse = hentLovvalgsperiode(behandlingId).getBestemmelse();
+        return lovvalgBestemmelse.equals(Lovvalgsbestemmelser_trygdeavtale_ca.CAN_ART6_2) ||
+            lovvalgBestemmelse.equals(Lovvalgsbestemmelser_trygdeavtale_us.USA_ART5_4);
     }
 }

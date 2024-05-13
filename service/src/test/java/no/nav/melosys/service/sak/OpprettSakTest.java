@@ -6,32 +6,36 @@ import java.util.Collections;
 import java.util.List;
 import java.util.Optional;
 
-import no.finn.unleash.FakeUnleash;
-import no.nav.melosys.domain.Fagsak;
+import no.nav.melosys.domain.FagsakTestFactory;
 import no.nav.melosys.domain.arkiv.Journalpost;
 import no.nav.melosys.domain.arkiv.Journalposttype;
+import no.nav.melosys.domain.eessi.melding.MelosysEessiMelding;
 import no.nav.melosys.domain.kodeverk.*;
 import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingsaarsaktyper;
 import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingstema;
 import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingstyper;
 import no.nav.melosys.domain.oppgave.Oppgave;
 import no.nav.melosys.exception.FunksjonellException;
+import no.nav.melosys.saksflytapi.ProsessinstansService;
+import no.nav.melosys.service.dokument.sed.EessiService;
 import no.nav.melosys.service.felles.dto.SoeknadslandDto;
 import no.nav.melosys.service.journalforing.JournalfoeringService;
 import no.nav.melosys.service.journalforing.dto.PeriodeDto;
-import no.nav.melosys.service.lovligekombinasjoner.LovligeKombinasjonerService;
+import no.nav.melosys.service.lovligekombinasjoner.LovligeKombinasjonerSaksbehandlingService;
 import no.nav.melosys.service.oppgave.OppgaveService;
 import no.nav.melosys.service.saksbehandling.SaksbehandlingRegler;
-import no.nav.melosys.service.saksflyt.ProsessinstansService;
 import org.jeasy.random.EasyRandom;
 import org.jeasy.random.EasyRandomParameters;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
+import org.mockito.ArgumentCaptor;
+import org.mockito.Captor;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 
 import static org.assertj.core.api.Assertions.assertThatExceptionOfType;
+import static org.assertj.core.api.AssertionsForClassTypes.assertThat;
 import static org.jeasy.random.FieldPredicates.named;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.*;
@@ -47,11 +51,19 @@ class OpprettSakTest {
     @Mock
     private ProsessinstansService prosessinstansService;
     @Mock
-    private LovligeKombinasjonerService lovligeKombinasjonerService;
+    private LovligeKombinasjonerSaksbehandlingService lovligeKombinasjonerSaksbehandlingService;
     @Mock
     private SaksbehandlingRegler saksbehandlingRegler;
+    @Mock
+    private FagsakService fagsakService;
+    @Mock
+    private EessiService eessiService;
 
     private static final EasyRandom random = new EasyRandom(getRandomConfig());
+
+    @Captor
+    private ArgumentCaptor<no.nav.melosys.saksflytapi.journalfoering.OpprettSakRequest> opprettSakRequestArgumentCaptor;
+
 
     private static EasyRandomParameters getRandomConfig() {
         return new EasyRandomParameters().collectionSizeRange(1, 4)
@@ -64,7 +76,7 @@ class OpprettSakTest {
 
     @BeforeEach
     public void setUp() {
-        opprettSak = new OpprettSak(journalfoeringService, oppgaveService, prosessinstansService, saksbehandlingRegler, lovligeKombinasjonerService);
+        opprettSak = new OpprettSak(journalfoeringService, oppgaveService, prosessinstansService, saksbehandlingRegler, fagsakService, eessiService, lovligeKombinasjonerSaksbehandlingService);
     }
 
     @Test
@@ -72,6 +84,8 @@ class OpprettSakTest {
         OpprettSakDto opprettSakDto = random.nextObject(OpprettSakDto.class);
         opprettSakDto.setSakstype(Sakstyper.EU_EOS);
         opprettSakDto.setBehandlingstema(Behandlingstema.FORESPØRSEL_TRYGDEMYNDIGHET);
+        opprettSakDto.getSoknadDto().land.setFlereLandUkjentHvilke(false);
+
         Oppgave oppgave = new Oppgave.Builder().setOppgavetype(Oppgavetyper.BEH_SAK_MK).setJournalpostId("1234").build();
         when(oppgaveService.hentOppgaveMedOppgaveID(opprettSakDto.getOppgaveID())).thenReturn(oppgave);
         when(journalfoeringService.hentJournalpost("1234")).thenReturn(lagJournalpost(Journalposttype.INN, "skanning"));
@@ -80,7 +94,7 @@ class OpprettSakTest {
         opprettSak.opprettNySakOgBehandlingFraOppgave(opprettSakDto);
 
 
-        verify(prosessinstansService).opprettProsessinstansNySakEØS(oppgave.getJournalpostId(), opprettSakDto);
+        verify(prosessinstansService).opprettProsessinstansNySakEØS(oppgave.getJournalpostId(), opprettSakDto.tilOpprettSakRequest());
     }
 
     @Test
@@ -97,7 +111,8 @@ class OpprettSakTest {
         opprettSak.opprettNySakOgBehandling(opprettSakDto);
 
 
-        verify(prosessinstansService).opprettNySakOgBehandling(opprettSakDto);
+        verify(prosessinstansService).opprettNySakOgBehandling(opprettSakRequestArgumentCaptor.capture());
+        assertThat(opprettSakRequestArgumentCaptor.getValue()).isEqualTo(opprettSakDto.tilOpprettSakRequest());
     }
 
     @Test
@@ -113,7 +128,7 @@ class OpprettSakTest {
         opprettSak.opprettNySakOgBehandling(opprettSakDto);
 
 
-        verify(prosessinstansService).opprettNySakOgBehandling(opprettSakDto);
+        verify(prosessinstansService).opprettNySakOgBehandling(opprettSakDto.tilOpprettSakRequest());
     }
 
     @Test
@@ -129,7 +144,8 @@ class OpprettSakTest {
         opprettSak.opprettNySakOgBehandling(opprettSakDto);
 
 
-        verify(prosessinstansService).opprettNySakOgBehandling(opprettSakDto);
+        verify(prosessinstansService).opprettNySakOgBehandling(opprettSakRequestArgumentCaptor.capture());
+        assertThat(opprettSakRequestArgumentCaptor.getValue()).isEqualTo(opprettSakDto.tilOpprettSakRequest());
     }
 
     @Test
@@ -174,7 +190,7 @@ class OpprettSakTest {
         opprettSak.opprettNySakOgBehandlingFraOppgave(opprettSakDto);
 
 
-        verify(prosessinstansService).opprettProsessinstansNySakFTRLTrygdeavtale(oppgave.getJournalpostId(), opprettSakDto);
+        verify(prosessinstansService).opprettProsessinstansNySakFTRLTrygdeavtale(oppgave.getJournalpostId(), opprettSakDto.tilOpprettSakRequest());
     }
 
     @Test
@@ -190,7 +206,7 @@ class OpprettSakTest {
         opprettSak.opprettNySakOgBehandlingFraOppgave(opprettSakDto);
 
 
-        verify(prosessinstansService).opprettProsessinstansNySakFTRLTrygdeavtale(oppgave.getJournalpostId(), opprettSakDto);
+        verify(prosessinstansService).opprettProsessinstansNySakFTRLTrygdeavtale(oppgave.getJournalpostId(), opprettSakDto.tilOpprettSakRequest());
     }
 
     @Test
@@ -198,7 +214,7 @@ class OpprettSakTest {
         OpprettSakDto opprettSakDto = random.nextObject(OpprettSakDto.class);
         opprettSakDto.setSakstype(Sakstyper.EU_EOS);
         opprettSakDto.setBehandlingstema(Behandlingstema.UTSENDT_ARBEIDSTAKER);
-        opprettSakDto.getSoknadDto().setLand(lagSoeknadslandDto(true));
+        opprettSakDto.getSoknadDto().land = lagSoeknadslandDto(true);
         opprettSakDto.setOppgaveID("");
 
         assertThatExceptionOfType(FunksjonellException.class)
@@ -242,7 +258,11 @@ class OpprettSakTest {
         when(oppgaveService.hentOppgaveMedOppgaveID(opprettSakDto.getOppgaveID())).thenReturn(oppgave);
         final Journalpost journalpost = lagJournalpost(Journalposttype.INN, "EESSI");
         when(journalfoeringService.hentJournalpost(JP_ID)).thenReturn(journalpost);
-        when(journalfoeringService.finnSakTilknyttetSedJournalpost(journalpost)).thenReturn(Optional.of(new Fagsak()));
+        when(eessiService.hentSedTilknyttetJournalpost(JP_ID)).thenReturn(new MelosysEessiMelding());
+        when(eessiService.finnSakForRinasaksnummer(any())).thenReturn(Optional.of(1L));
+        when(fagsakService.finnFagsakFraArkivsakID(1L)).thenReturn(Optional.of(FagsakTestFactory.lagFagsak()));
+//        when(journalfoeringService.finnSakTilknyttetSedJournalpost(journalpost)).thenReturn(Optional.of(FagsakTestFactory.lagFagsak()));
+        when(saksbehandlingRegler.harIngenFlyt(any(), any(), any(), any())).thenReturn(true);
 
         assertThatExceptionOfType(FunksjonellException.class)
             .isThrownBy(() -> opprettSak.opprettNySakOgBehandlingFraOppgave(opprettSakDto))
@@ -259,35 +279,36 @@ class OpprettSakTest {
         when(oppgaveService.hentOppgaveMedOppgaveID(opprettSakDto.getOppgaveID())).thenReturn(oppgave);
         final Journalpost journalpost = lagJournalpost(Journalposttype.INN, "EESSI");
         when(journalfoeringService.hentJournalpost(JP_ID)).thenReturn(journalpost);
-        when(journalfoeringService.finnSakTilknyttetSedJournalpost(journalpost)).thenReturn(Optional.empty());
-
+        when(eessiService.hentSedTilknyttetJournalpost(JP_ID)).thenReturn(new MelosysEessiMelding());
+        when(eessiService.finnSakForRinasaksnummer(any())).thenReturn(Optional.empty());
         opprettSak.opprettNySakOgBehandlingFraOppgave(opprettSakDto);
 
 
-        verify(prosessinstansService).opprettProsessinstansNySakEØS(oppgave.getJournalpostId(), opprettSakDto);
+        verify(prosessinstansService).opprettProsessinstansNySakEØS(oppgave.getJournalpostId(), opprettSakDto.tilOpprettSakRequest());
     }
 
     @Test
-    void validerOpprettSakDto_søknadUtenLandOgPeriodeTomFlyt_oppretterProsess() {
+    void validerOpprettSakDto_søknadUtenLandOgPeriodeIngenFlyt_oppretterProsess() {
         OpprettSakDto opprettSakDto = random.nextObject(OpprettSakDto.class);
         opprettSakDto.setSakstype(Sakstyper.EU_EOS);
         opprettSakDto.setBehandlingstema(Behandlingstema.UTSENDT_ARBEIDSTAKER);
         opprettSakDto.setBehandlingstype(Behandlingstyper.HENVENDELSE);
-        opprettSakDto.getSoknadDto().getLand().setErUkjenteEllerAlleEosLand(false);
-        opprettSakDto.getSoknadDto().getLand().getLandkoder().clear();
-        opprettSakDto.getSoknadDto().setPeriode(null);
+        opprettSakDto.getSoknadDto().land.setFlereLandUkjentHvilke(false);
+        opprettSakDto.getSoknadDto().land.getLandkoder().clear();
+        opprettSakDto.getSoknadDto().periode = null;
         Oppgave oppgave = new Oppgave.Builder().setOppgavetype(Oppgavetyper.BEH_SAK_MK).setJournalpostId(JP_ID).build();
         when(oppgaveService.hentOppgaveMedOppgaveID(opprettSakDto.getOppgaveID())).thenReturn(oppgave);
         final Journalpost journalpost = lagJournalpost(Journalposttype.INN, "EESSI");
         when(journalfoeringService.hentJournalpost(JP_ID)).thenReturn(journalpost);
-        when(journalfoeringService.finnSakTilknyttetSedJournalpost(journalpost)).thenReturn(Optional.empty());
-        when(saksbehandlingRegler.harTomFlyt(any(), any(), any(), any())).thenReturn(true);
+        when(eessiService.hentSedTilknyttetJournalpost(JP_ID)).thenReturn(new MelosysEessiMelding());
+        when(eessiService.finnSakForRinasaksnummer(any())).thenReturn(Optional.empty());
+        when(saksbehandlingRegler.harIngenFlyt(any(), any(), any(), any())).thenReturn(true);
 
 
         opprettSak.opprettNySakOgBehandlingFraOppgave(opprettSakDto);
 
 
-        verify(prosessinstansService).opprettProsessinstansNySakEØS(oppgave.getJournalpostId(), opprettSakDto);
+        verify(prosessinstansService).opprettProsessinstansNySakEØS(oppgave.getJournalpostId(), opprettSakDto.tilOpprettSakRequest());
     }
 
     private Journalpost lagJournalpost(Journalposttype journalposttype, String mottakskanal) {
@@ -303,7 +324,7 @@ class OpprettSakTest {
         OpprettSakDto opprettSakDto = random.nextObject(OpprettSakDto.class);
         opprettSakDto.setSakstype(Sakstyper.EU_EOS);
         opprettSakDto.setBehandlingstema(Behandlingstema.UTSENDT_ARBEIDSTAKER);
-        opprettSakDto.getSoknadDto().setLand(lagSoeknadslandDto(false));
+        opprettSakDto.getSoknadDto().land = lagSoeknadslandDto(false);
         Oppgave oppgave = new Oppgave.Builder().setOppgavetype(Oppgavetyper.JFR).setJournalpostId("33").build();
         when(oppgaveService.hentOppgaveMedOppgaveID(opprettSakDto.getOppgaveID())).thenReturn(oppgave);
 
@@ -312,9 +333,9 @@ class OpprettSakTest {
             .withMessageContaining("kan ikke opprettes på bakgrunn av oppgave med type");
     }
 
-    private SoeknadslandDto lagSoeknadslandDto(boolean erUkjenteEllerAlleEosLand) {
-        List<String> landkoder = erUkjenteEllerAlleEosLand ? Collections.emptyList() : Collections.singletonList("DK");
-        return new SoeknadslandDto(landkoder, erUkjenteEllerAlleEosLand);
+    private SoeknadslandDto lagSoeknadslandDto(boolean flereLandUkjentHvilke) {
+        List<String> landkoder = flereLandUkjentHvilke ? Collections.emptyList() : Collections.singletonList("DK");
+        return new SoeknadslandDto(landkoder, flereLandUkjentHvilke);
     }
 
     @Test
@@ -323,7 +344,7 @@ class OpprettSakTest {
         opprettSakDto.setSakstype(Sakstyper.EU_EOS);
         opprettSakDto.setBehandlingstema(null);
 
-        doThrow(new FunksjonellException("Behandlingstema")).when(lovligeKombinasjonerService).validerOpprettelseOgEndring(any(), any(), any(), any(), any());
+        doThrow(new FunksjonellException("Behandlingstema")).when(lovligeKombinasjonerSaksbehandlingService).validerOpprettelseOgEndring(any(), any(), any(), any(), any());
 
         assertThatExceptionOfType(FunksjonellException.class)
             .isThrownBy(() -> opprettSak.opprettNySakOgBehandlingFraOppgave(opprettSakDto))
@@ -359,7 +380,7 @@ class OpprettSakTest {
         opprettSak.opprettNySakOgBehandlingFraOppgave(opprettSakDto);
 
 
-        verify(prosessinstansService).opprettProsessinstansNySakFTRLTrygdeavtale(oppgave.getJournalpostId(), opprettSakDto);
+        verify(prosessinstansService).opprettProsessinstansNySakFTRLTrygdeavtale(oppgave.getJournalpostId(), opprettSakDto.tilOpprettSakRequest());
     }
 
     @Test
@@ -376,7 +397,7 @@ class OpprettSakTest {
         opprettSak.opprettNySakOgBehandlingFraOppgave(opprettSakDto);
 
 
-        verify(prosessinstansService).opprettProsessinstansNySakFTRLTrygdeavtale(oppgave.getJournalpostId(), opprettSakDto);
+        verify(prosessinstansService).opprettProsessinstansNySakFTRLTrygdeavtale(oppgave.getJournalpostId(), opprettSakDto.tilOpprettSakRequest());
     }
 
     @Test
@@ -386,7 +407,7 @@ class OpprettSakTest {
         opprettSakDto.setSakstema(Sakstemaer.MEDLEMSKAP_LOVVALG);
         opprettSakDto.setBehandlingstema(Behandlingstema.UTSENDT_ARBEIDSTAKER);
         opprettSakDto.setBehandlingstype(Behandlingstyper.FØRSTEGANG);
-        opprettSakDto.getSoknadDto().getPeriode().setFom(null);
+        opprettSakDto.getSoknadDto().periode.setFom(null);
 
         assertThatExceptionOfType(FunksjonellException.class)
             .isThrownBy(() -> opprettSak.opprettNySakOgBehandlingFraOppgave(opprettSakDto))
@@ -400,8 +421,8 @@ class OpprettSakTest {
         opprettSakDto.setSakstema(Sakstemaer.MEDLEMSKAP_LOVVALG);
         opprettSakDto.setBehandlingstema(Behandlingstema.UTSENDT_ARBEIDSTAKER);
         opprettSakDto.setBehandlingstype(Behandlingstyper.FØRSTEGANG);
-        opprettSakDto.getSoknadDto().getLand().setErUkjenteEllerAlleEosLand(false);
-        opprettSakDto.getSoknadDto().getLand().getLandkoder().clear();
+        opprettSakDto.getSoknadDto().land.setFlereLandUkjentHvilke(false);
+        opprettSakDto.getSoknadDto().land.getLandkoder().clear();
 
         assertThatExceptionOfType(FunksjonellException.class)
             .isThrownBy(() -> opprettSak.opprettNySakOgBehandlingFraOppgave(opprettSakDto))
@@ -415,8 +436,8 @@ class OpprettSakTest {
         opprettSakDto.setSakstema(Sakstemaer.MEDLEMSKAP_LOVVALG);
         opprettSakDto.setBehandlingstema(Behandlingstema.UTSENDT_ARBEIDSTAKER);
         opprettSakDto.setBehandlingstype(Behandlingstyper.FØRSTEGANG);
-        opprettSakDto.getSoknadDto().getLand().setErUkjenteEllerAlleEosLand(true);
-        opprettSakDto.getSoknadDto().getLand().setLandkoder(Collections.singletonList("DK"));
+        opprettSakDto.getSoknadDto().land.setFlereLandUkjentHvilke(true);
+        opprettSakDto.getSoknadDto().land.setLandkoder(Collections.singletonList("DK"));
 
         assertThatExceptionOfType(FunksjonellException.class)
             .isThrownBy(() -> opprettSak.opprettNySakOgBehandlingFraOppgave(opprettSakDto))
@@ -425,8 +446,8 @@ class OpprettSakTest {
 
     private SøknadDto opprettSoknadDto() {
         var søknadDto = new SøknadDto();
-        søknadDto.setPeriode(new PeriodeDto(LocalDate.now().minusMonths(4), LocalDate.now().minusMonths(3)));
-        søknadDto.setLand(SoeknadslandDto.av(Landkoder.DE));
+        søknadDto.periode = new PeriodeDto(LocalDate.now().minusMonths(4), LocalDate.now().minusMonths(3));
+        søknadDto.land = SoeknadslandDto.av(Landkoder.DE);
         return søknadDto;
     }
 }

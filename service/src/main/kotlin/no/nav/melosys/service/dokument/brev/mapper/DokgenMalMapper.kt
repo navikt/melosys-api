@@ -2,10 +2,10 @@ package no.nav.melosys.service.dokument.brev.mapper
 
 import no.nav.melosys.domain.Behandling
 import no.nav.melosys.domain.brev.*
+import no.nav.melosys.domain.kodeverk.Fullmaktstype
 import no.nav.melosys.domain.kodeverk.Land_iso2
 import no.nav.melosys.domain.kodeverk.Landkoder
 import no.nav.melosys.domain.kodeverk.Mottakerroller
-import no.nav.melosys.domain.kodeverk.Representerer
 import no.nav.melosys.domain.kodeverk.brev.Produserbaredokumenter
 import no.nav.melosys.domain.mottatteopplysninger.SøknadIkkeYrkesaktiv
 import no.nav.melosys.exception.FunksjonellException
@@ -110,17 +110,19 @@ class DokgenMalMapper(
             Produserbaredokumenter.MANGELBREV_ARBEIDSGIVER -> MangelbrevArbeidsgiver.av(
                 (brevbestilling as MangelbrevBrevbestilling).toBuilder()
                     .medVedtaksdato(dokgenMapperDatahenter.hentVedtaksdato(brevbestilling.getBehandling().id))
-                    .medFullmektigNavn(
-                        dokgenMapperDatahenter.hentFullmektigNavn(
-                            brevbestilling.getBehandling().fagsak,
-                            Representerer.BRUKER
-                        )
-                    )
+                    .medFullmektigNavn(dokgenMapperDatahenter.hentFullmektigNavn(brevbestilling, Fullmaktstype.FULLMEKTIG_SØKNAD))
                     .build(),
                 DokumentasjonSvarfrist.beregnFristPaaMangelbrevFraDagensDato()
             )
 
-            Produserbaredokumenter.INNVILGELSE_FOLKETRYGDLOVEN -> innvilgelseFtrlMapper.map((brevbestilling as InnvilgelseFtrlBrevbestilling))
+            Produserbaredokumenter.INNVILGELSE_FOLKETRYGDLOVEN -> innvilgelseFtrlMapper.mapYrkesaktivFrivillig(brevbestilling as InnvilgelseFtrlYrkesaktivFrivilligBrevbestilling)
+
+            Produserbaredokumenter.PLIKTIG_MEDLEM_FTRL -> innvilgelseFtrlMapper.mapYrkesaktivPliktig(brevbestilling)
+
+            Produserbaredokumenter.IKKE_YRKESAKTIV_FRIVILLIG_FTRL -> innvilgelseFtrlMapper.mapIkkeYrkesaktivFrivillig(brevbestilling)
+
+            Produserbaredokumenter.IKKE_YRKESAKTIV_PLIKTIG_FTRL -> innvilgelseFtrlMapper.mapIkkeYrkesaktivPliktig(brevbestilling)
+
             Produserbaredokumenter.TRYGDEAVTALE_GB -> trygdeavtaleMapper.map(
                 brevbestilling.toBuilder()
                     .medVedtaksdato(dokgenMapperDatahenter.hentVedtaksdato(brevbestilling.behandling.id))
@@ -147,12 +149,7 @@ class DokgenMalMapper(
 
             Produserbaredokumenter.GENERELT_FRITEKSTBREV_BRUKER -> FritekstbrevBruker.av(
                 (brevbestilling as FritekstbrevBrevbestilling).toBuilder()
-                    .medNavnFullmektig(
-                        dokgenMapperDatahenter.hentFullmektigNavn(
-                            brevbestilling.getBehandling().fagsak,
-                            Representerer.BRUKER
-                        )
-                    ).build(),
+                    .medNavnFullmektig(dokgenMapperDatahenter.hentFullmektigNavn(brevbestilling, Fullmaktstype.FULLMEKTIG_SØKNAD)).build(),
                 Mottakerroller.BRUKER
             )
 
@@ -162,12 +159,7 @@ class DokgenMalMapper(
 
             Produserbaredokumenter.GENERELT_FRITEKSTBREV_ARBEIDSGIVER -> FritekstbrevBruker.av(
                 (brevbestilling as FritekstbrevBrevbestilling).toBuilder()
-                    .medNavnFullmektig(
-                        dokgenMapperDatahenter.hentFullmektigNavn(
-                            brevbestilling.getBehandling().fagsak,
-                            Representerer.ARBEIDSGIVER
-                        )
-                    ).build(),
+                    .medNavnFullmektig(dokgenMapperDatahenter.hentFullmektigNavn(brevbestilling, Fullmaktstype.FULLMEKTIG_ARBEIDSGIVER)).build(),
                 Mottakerroller.ARBEIDSGIVER
             )
 
@@ -178,6 +170,7 @@ class DokgenMalMapper(
             Produserbaredokumenter.AVSLAG_MANGLENDE_OPPLYSNINGER -> Avslagbrev.av(
                 (brevbestilling as AvslagBrevbestilling).toBuilder().build()
             )
+
             Produserbaredokumenter.MELDING_HENLAGT_SAK -> Henleggelsesbrev.av(
                 (brevbestilling as HenleggelseBrevbestilling).toBuilder().build()
             )
@@ -192,6 +185,17 @@ class DokgenMalMapper(
             )
 
             Produserbaredokumenter.IKKE_YRKESAKTIV_VEDTAKSBREV -> lagIkkeYrkesaktivVedtaksbrev(brevbestilling as IkkeYrkesaktivBrevbestilling)
+
+            Produserbaredokumenter.VARSELBREV_MANGLENDE_INNBETALING -> VarselbrevManglendeInnbetaling(
+                brevbestilling as VarselbrevManglendeInnbetalingBrevbestilling,
+                brevbestilling.behandling.opprinneligBehandling?.id?.let {
+                    val behandlingsresultat = dokgenMapperDatahenter.hentBehandlingsresultat(it)
+                    behandlingsresultat.medlemAvFolketrygden?.medlemskapsperioder?.firstOrNull()?.medlemskapstype
+                } ?: throw FunksjonellException("Forventer at behandling som tilhører varselbrevet har en opprinnelig behandling med medlemskapsperioder"),
+                dokgenMapperDatahenter.hentFullmektigNavn(brevbestilling, Fullmaktstype.FULLMEKTIG_SØKNAD)
+            )
+
+            Produserbaredokumenter.VEDTAK_OPPHOERT_MEDLEMSKAP -> VedtakOpphoertMedlemskap(brevbestilling as VedtakOpphoertMedlemskapBrevbestilling)
 
             else -> throw FunksjonellException("ProduserbartDokument ${brevbestilling.produserbartdokument} er ikke støttet av melosys-dokgen")
         }

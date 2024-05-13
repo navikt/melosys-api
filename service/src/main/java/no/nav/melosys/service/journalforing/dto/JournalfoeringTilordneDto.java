@@ -1,5 +1,7 @@
 package no.nav.melosys.service.journalforing.dto;
 
+import no.nav.melosys.saksflytapi.journalfoering.JournalfoeringTilordneRequest;
+
 public class JournalfoeringTilordneDto extends JournalfoeringDto {
     private String saksnummer; // Melosys saksnummer
     private boolean ingenVurdering;
@@ -19,4 +21,27 @@ public class JournalfoeringTilordneDto extends JournalfoeringDto {
     public void setIngenVurdering(boolean ingenVurdering) {
         this.ingenVurdering = ingenVurdering;
     }
+
+    public JournalfoeringTilordneRequest tilJournalfoeringTilordneRequest() {
+        return new JournalfoeringTilordneRequest(
+            journalpostID,
+            oppgaveID,
+            brukerID,
+            virksomhetOrgnr,
+            avsenderID,
+            avsenderNavn,
+            avsenderType,
+            hoveddokument.tilDokumentRequest(),
+            vedlegg.stream().map(DokumentDto::tilDokumentRequest).toList(),
+            mottattDato,
+            skalTilordnes,
+            forvaltningsmeldingMottaker,
+            behandlingstemaKode,
+            behandlingstypeKode,
+            saksnummer,
+            ingenVurdering
+        );
+    }
+
+
 }

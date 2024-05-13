@@ -7,16 +7,13 @@ import java.util.List;
 import java.util.Set;
 
 import com.fasterxml.jackson.core.type.TypeReference;
-import no.nav.melosys.domain.Behandling;
-import no.nav.melosys.domain.Behandlingsresultat;
-import no.nav.melosys.domain.Fagsak;
-import no.nav.melosys.domain.Lovvalgsperiode;
+import no.nav.melosys.domain.*;
 import no.nav.melosys.domain.eessi.BucInformasjon;
 import no.nav.melosys.domain.eessi.BucType;
 import no.nav.melosys.domain.kodeverk.lovvalgsbestemmelser.Lovvalgbestemmelser_883_2004;
-import no.nav.melosys.domain.saksflyt.ProsessDataKey;
-import no.nav.melosys.domain.saksflyt.Prosessinstans;
 import no.nav.melosys.exception.TekniskException;
+import no.nav.melosys.saksflytapi.domain.ProsessDataKey;
+import no.nav.melosys.saksflytapi.domain.Prosessinstans;
 import no.nav.melosys.service.LandvelgerService;
 import no.nav.melosys.service.behandling.BehandlingsresultatService;
 import no.nav.melosys.service.dokument.sed.EessiService;
@@ -106,8 +103,7 @@ class HentMottakerinstitusjonerForkortetPeriodeTest {
         Behandling behandling = new Behandling();
         behandling.setId(behandlingId);
 
-        Fagsak fagsak = new Fagsak();
-        fagsak.setGsakSaksnummer(123L);
+        Fagsak fagsak = FagsakTestFactory.builder().medGsakSaksnummer().build();
         behandling.setFagsak(fagsak);
         return behandling;
     }

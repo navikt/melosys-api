@@ -8,29 +8,31 @@ import java.util.Set;
 import no.nav.melosys.domain.Behandling;
 import no.nav.melosys.domain.Bostedsland;
 import no.nav.melosys.domain.Fagsak;
+import no.nav.melosys.domain.FagsakTestFactory;
 import no.nav.melosys.domain.arkiv.DokumentReferanse;
-import no.nav.melosys.domain.mottatteopplysninger.MottatteOpplysningerData;
 import no.nav.melosys.domain.eessi.BucType;
 import no.nav.melosys.domain.kodeverk.Land_iso2;
 import no.nav.melosys.domain.kodeverk.Landkoder;
 import no.nav.melosys.domain.kodeverk.Saksstatuser;
 import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingsresultattyper;
 import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingstema;
+import no.nav.melosys.domain.mottatteopplysninger.MottatteOpplysningerData;
 import no.nav.melosys.exception.FunksjonellException;
 import no.nav.melosys.integrasjon.joark.JoarkFasade;
+import no.nav.melosys.saksflytapi.ProsessinstansService;
 import no.nav.melosys.service.LandvelgerService;
 import no.nav.melosys.service.behandling.BehandlingsresultatService;
 import no.nav.melosys.service.dokument.sed.EessiService;
 import no.nav.melosys.service.oppgave.OppgaveService;
 import no.nav.melosys.service.persondata.PersondataFasade;
 import no.nav.melosys.service.persondata.PersonopplysningerObjectFactory;
-import no.nav.melosys.service.saksflyt.ProsessinstansService;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 
+import static no.nav.melosys.domain.FagsakTestFactory.SAKSNUMMER;
 import static no.nav.melosys.service.SaksbehandlingDataFactory.lagBehandling;
 import static no.nav.melosys.service.SaksbehandlingDataFactory.lagFagsak;
 import static org.assertj.core.api.Assertions.assertThatExceptionOfType;
@@ -60,8 +62,7 @@ class VideresendSoknadServiceTest {
     private VideresendSoknadService videresendSoknadService;
 
     private final Bostedsland BOSTEDSLAND = new Bostedsland(Landkoder.ES);
-    private static final String SAKSNUMMER = "MEL-2222";
-    private final Fagsak fagsak = lagFagsak(SAKSNUMMER);
+    private final Fagsak fagsak = lagFagsak();
     private final MottatteOpplysningerData mottatteOpplysningerData = new MottatteOpplysningerData();
     private final Behandling behandling = lagBehandling(mottatteOpplysningerData);
 
@@ -70,7 +71,7 @@ class VideresendSoknadServiceTest {
         videresendSoknadService = new VideresendSoknadService(eessiService, fagsakService, behandlingsresultatService, joarkFasade, landvelgerService, oppgaveService, persondataFasade, prosessinstansService);
 
         behandling.setFagsak(fagsak);
-        fagsak.getBehandlinger().add(behandling);
+        fagsak.leggTilBehandling(behandling);
 
         when(fagsakService.hentFagsak(SAKSNUMMER)).thenReturn(fagsak);
     }

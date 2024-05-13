@@ -71,7 +71,7 @@ class DokSysServiceTest {
         ArgumentCaptor<ProduserDokumentutkastRequest> captor = ArgumentCaptor.forClass(ProduserDokumentutkastRequest.class);
         verify(dokumentproduksjonConsumer).produserDokumentutkast(captor.capture());
         ProduserDokumentutkastRequest dokumentutkastRequest = captor.getValue();
-        assertThat(dokumentutkastRequest.getDokumenttypeId()).isEqualTo(metadata.dokumenttypeID);
+        assertThat(dokumentutkastRequest.getDokumenttypeId()).isEqualTo(metadata.getDokumenttypeID());
     }
 
     @Test
@@ -85,7 +85,7 @@ class DokSysServiceTest {
         verify(dokumentproduksjonConsumer).produserIkkeredigerbartDokument(captor.capture());
 
         Dokumentbestillingsinformasjon dokInfo = hentDokumentBestillingInfoFraCaptor(captor);
-        assertThat(dokInfo.getDokumenttypeId()).isEqualTo(metadata.dokumenttypeID);
+        assertThat(dokInfo.getDokumenttypeId()).isEqualTo(metadata.getDokumenttypeID());
         assertThat(dokInfo.getAdresse()).isNull();
         assertThat(dokInfo.getMottaker().isBerik()).isTrue();
         assertThat(dokInfo.getMottaker()).isInstanceOf(Person.class);
@@ -137,8 +137,8 @@ class DokSysServiceTest {
     }
 
     @Test
-    void produserIkkeredigerbartDokument_tilRepresentantPerson() throws Exception {
-        DokumentbestillingMetadata metadata = lagMetadataMedRepresentant(Aktoertype.PERSON);
+    void produserIkkeredigerbartDokument_tilFullmektigPerson() throws Exception {
+        DokumentbestillingMetadata metadata = lagMetadataMedFullmektig(Aktoertype.PERSON);
         when(dokumentproduksjonConsumer.produserIkkeredigerbartDokument(any())).thenReturn(new ProduserIkkeredigerbartDokumentResponse());
 
         dokSysService.produserIkkeredigerbartDokument(new Dokumentbestilling(metadata, lagBrevData()));
@@ -153,8 +153,8 @@ class DokSysServiceTest {
     }
 
     @Test
-    void produserIkkeredigerbartDokument_tilRepresentantOrganisasjon() throws Exception {
-        DokumentbestillingMetadata metadata = lagMetadataMedRepresentant(Aktoertype.ORGANISASJON);
+    void produserIkkeredigerbartDokument_tilFullmektigOrganisasjon() throws Exception {
+        DokumentbestillingMetadata metadata = lagMetadataMedFullmektig(Aktoertype.ORGANISASJON);
         when(dokumentproduksjonConsumer.produserIkkeredigerbartDokument(any())).thenReturn(new ProduserIkkeredigerbartDokumentResponse());
 
         dokSysService.produserIkkeredigerbartDokument(new Dokumentbestilling(metadata, lagBrevData()));
@@ -180,12 +180,12 @@ class DokSysServiceTest {
         Dokumentbestillingsinformasjon dokInfo = hentDokumentBestillingInfoFraCaptor(captor);
         assertThat(dokInfo.getMottaker().isBerik()).isFalse();
         assertThat(dokInfo.getMottaker()).isInstanceOf(Person.class);
-        assertThat(((Person) dokInfo.getMottaker()).getNavn()).isEqualTo(metadata.utenlandskMyndighet.navn);
+        assertThat(((Person) dokInfo.getMottaker()).getNavn()).isEqualTo(metadata.getUtenlandskMyndighet().getNavn());
 
 
         UtenlandskPostadresse utenlandskPostadresse = (UtenlandskPostadresse) dokInfo.getAdresse();
-        assertThat(utenlandskPostadresse.getAdresselinje1()).isEqualTo(metadata.utenlandskMyndighet.gateadresse1);
-        assertThat(utenlandskPostadresse.getLand().getValue()).isEqualTo(metadata.utenlandskMyndighet.landkode.getKode());
+        assertThat(utenlandskPostadresse.getAdresselinje1()).isEqualTo(metadata.getUtenlandskMyndighet().getGateadresse1());
+        assertThat(utenlandskPostadresse.getLand().getValue()).isEqualTo(metadata.getUtenlandskMyndighet().getLandkode().getKode());
     }
 
     @Test
@@ -202,7 +202,7 @@ class DokSysServiceTest {
 
         Dokumentbestillingsinformasjon dokInfo = hentDokumentBestillingInfoFraCaptor(captor);
         assertThat(dokInfo.getMottaker()).isInstanceOf(Organisasjon.class);
-        assertThat(((Organisasjon) dokInfo.getMottaker()).getOrgnummer()).isEqualTo(metadata.mottakerID);
+        assertThat(((Organisasjon) dokInfo.getMottaker()).getOrgnummer()).isEqualTo(metadata.getMottakerID());
     }
 
     @Test
@@ -378,13 +378,13 @@ class DokSysServiceTest {
 
     private DokumentbestillingMetadata lagMetadataForBruker(StrukturertAdresse postadresse) {
         DokumentbestillingMetadata metadata = new DokumentbestillingMetadata();
-        metadata.dokumenttypeID = "dok_1234";
-        metadata.brukerNavn = "Kim Se";
-        metadata.brukerID = FNR;
-        metadata.mottaker = lagMottaker(Mottakerroller.BRUKER);
-        metadata.postadresse = postadresse;
+        metadata.setDokumenttypeID("dok_1234");
+        metadata.setBrukerNavn("Kim Se");
+        metadata.setBrukerID(FNR);
+        metadata.setMottaker(lagMottaker(Mottakerroller.BRUKER));
+        metadata.setPostadresse(postadresse);
         if (postadresse == null) {
-            metadata.berik = true;
+            metadata.setBerik(true);
         }
         return metadata;
     }
@@ -412,48 +412,48 @@ class DokSysServiceTest {
 
     private DokumentbestillingMetadata lagMetadataMedArbeidsgiver() {
         DokumentbestillingMetadata metadata = new DokumentbestillingMetadata();
-        metadata.mottaker = lagMottaker(Mottakerroller.ARBEIDSGIVER);
-        metadata.mottakerID = ORGNR;
-        metadata.dokumenttypeID = "dok_1234";
+        metadata.setMottaker(lagMottaker(Mottakerroller.ARBEIDSGIVER));
+        metadata.setMottakerID(ORGNR);
+        metadata.setDokumenttypeID("dok_1234");
         return metadata;
     }
 
-    private DokumentbestillingMetadata lagMetadataMedRepresentant(Aktoertype representantType) {
+    private DokumentbestillingMetadata lagMetadataMedFullmektig(Aktoertype fullmektigType) {
         DokumentbestillingMetadata metadata = new DokumentbestillingMetadata();
-        metadata.mottaker = lagMottakerFullmektig(representantType);
-        metadata.mottakerID = switch (representantType) {
+        metadata.setMottaker(lagMottakerFullmektig(fullmektigType));
+        metadata.setMottakerID(switch (fullmektigType) {
             case PERSON -> REP_FNR;
             case ORGANISASJON -> REP_ORGNR;
             default -> throw new IllegalArgumentException("Mottakertype må være person eller organisasjon");
-        };
-        metadata.dokumenttypeID = "dok_1234";
+        });
+        metadata.setDokumenttypeID("dok_1234");
         return metadata;
     }
 
     private DokumentbestillingMetadata lagMetadataMedUtenlandskMyndighet() {
         DokumentbestillingMetadata metadata = new DokumentbestillingMetadata();
-        metadata.mottaker = lagMottaker(Mottakerroller.UTENLANDSK_TRYGDEMYNDIGHET);
-        metadata.mottakerID = ORGNR;
-        metadata.utenlandskMyndighet = lagUtenlandskMyndighet();
-        metadata.dokumenttypeID = "dok_1234";
+        metadata.setMottaker(lagMottaker(Mottakerroller.UTENLANDSK_TRYGDEMYNDIGHET));
+        metadata.setMottakerID(ORGNR);
+        metadata.setUtenlandskMyndighet(lagUtenlandskMyndighet());
+        metadata.setDokumenttypeID("dok_1234");
         return metadata;
     }
 
     private UtenlandskMyndighet lagUtenlandskMyndighet() {
         UtenlandskMyndighet utenlandskMyndighet = new UtenlandskMyndighet();
-        utenlandskMyndighet.gateadresse1 = "Stubenstrasse 77";
-        utenlandskMyndighet.postnummer = "0101";
-        utenlandskMyndighet.poststed = "Berlin";
-        utenlandskMyndighet.landkode = Land_iso2.GL;
-        utenlandskMyndighet.institusjonskode = "INST-023%zdf";
+        utenlandskMyndighet.setGateadresse1("Stubenstrasse 77");
+        utenlandskMyndighet.setPostnummer("0101");
+        utenlandskMyndighet.setPoststed("Berlin");
+        utenlandskMyndighet.setLandkode(Land_iso2.GL);
+        utenlandskMyndighet.setInstitusjonskode("INST-023%zdf");
         return utenlandskMyndighet;
     }
 
     private DokumentbestillingMetadata lagMetadataMedNorskMyndighet() {
         DokumentbestillingMetadata metadata = new DokumentbestillingMetadata();
-        metadata.mottaker = lagMottaker(Mottakerroller.NORSK_MYNDIGHET);
-        metadata.mottakerID = ORGNR;
-        metadata.dokumenttypeID = "dok_1234";
+        metadata.setMottaker(lagMottaker(Mottakerroller.NORSK_MYNDIGHET));
+        metadata.setMottakerID(ORGNR);
+        metadata.setDokumenttypeID("dok_1234");
         return metadata;
     }
 

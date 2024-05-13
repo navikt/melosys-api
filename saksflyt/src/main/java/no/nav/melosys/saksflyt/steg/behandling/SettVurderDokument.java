@@ -3,10 +3,10 @@ package no.nav.melosys.saksflyt.steg.behandling;
 import no.nav.melosys.domain.Behandling;
 import no.nav.melosys.domain.Fagsak;
 import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingsstatus;
-import no.nav.melosys.domain.saksflyt.ProsessDataKey;
-import no.nav.melosys.domain.saksflyt.ProsessSteg;
-import no.nav.melosys.domain.saksflyt.Prosessinstans;
 import no.nav.melosys.saksflyt.steg.StegBehandler;
+import no.nav.melosys.saksflytapi.domain.ProsessDataKey;
+import no.nav.melosys.saksflytapi.domain.ProsessSteg;
+import no.nav.melosys.saksflytapi.domain.Prosessinstans;
 import no.nav.melosys.service.behandling.BehandlingService;
 import no.nav.melosys.service.sak.FagsakService;
 import org.slf4j.Logger;
@@ -36,7 +36,7 @@ public class SettVurderDokument implements StegBehandler {
         String saksnummer = prosessinstans.getData(ProsessDataKey.SAKSNUMMER);
 
         Fagsak fagsak = fagsakService.hentFagsak(saksnummer);
-        Behandling behandling = fagsak.hentAktivBehandling();
+        Behandling behandling = fagsak.finnAktivBehandlingIkkeÅrsavregning();
         boolean ingenVurdering = prosessinstans.getData(ProsessDataKey.JFR_INGEN_VURDERING, Boolean.class);
         if (behandling != null && !ingenVurdering) {
             behandlingService.endreStatus(behandling.getId(), Behandlingsstatus.VURDER_DOKUMENT);

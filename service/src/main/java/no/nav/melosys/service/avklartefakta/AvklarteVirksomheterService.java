@@ -59,7 +59,7 @@ public class AvklarteVirksomheterService {
         Set<String> avklarteOrgnumreOgUuider = avklartefaktaService.hentAvklarteOrgnrOgUuid(behandling.getId());
 
         return mottatteOpplysningerData.foretakUtland.stream()
-            .filter(uf -> avklarteOrgnumreOgUuider.contains(uf.uuid))
+            .filter(uf -> avklarteOrgnumreOgUuider.contains(uf.getUuid()))
             .map(AvklartVirksomhet::new)
             .toList();
     }
@@ -71,8 +71,7 @@ public class AvklarteVirksomheterService {
         }
 
         MottatteOpplysningerData mottatteOpplysningerData = mottatteOpplysninger.getMottatteOpplysningerData();
-        Set<String> organisasjonsnumre = mottatteOpplysningerData.selvstendigArbeid.hentAlleOrganisasjonsnumre()
-            .collect(Collectors.toSet());
+        Set<String> organisasjonsnumre = new HashSet<>(mottatteOpplysningerData.selvstendigArbeid.hentAlleOrganisasjonsnumre());
 
         Set<String> avklarteOrgnumreOgUuider = avklartefaktaService.hentAvklarteOrgnrOgUuid(behandling.getId());
         organisasjonsnumre.retainAll(avklarteOrgnumreOgUuider);
@@ -87,7 +86,7 @@ public class AvklarteVirksomheterService {
 
         Set<String> arbeidsgivendeOrgnumre = finnOrgNummerFraArbeidsforhold(behandling);
         MottatteOpplysningerData mottatteOpplysningerData = mottatteOpplysninger.getMottatteOpplysningerData();
-        arbeidsgivendeOrgnumre.addAll(mottatteOpplysningerData.juridiskArbeidsgiverNorge.ekstraArbeidsgivere);
+        arbeidsgivendeOrgnumre.addAll(mottatteOpplysningerData.juridiskArbeidsgiverNorge.getEkstraArbeidsgivere());
 
         Set<String> avklarteOrgnumreOgUuider = avklartefaktaService.hentAvklarteOrgnrOgUuid(behandling.getId());
         arbeidsgivendeOrgnumre.retainAll(avklarteOrgnumreOgUuider);
@@ -105,7 +104,7 @@ public class AvklarteVirksomheterService {
     public List<AvklartVirksomhet> hentNorskeSelvstendigeForetak(Behandling behandling, Function<OrganisasjonDokument, Adresse> adressekonverterer) {
         Set<String> selvstendigeForetakOrgnumre = hentNorskeSelvstendigeForetakOrgnumre(behandling);
         return organisasjonOppslagService.hentOrganisasjoner(selvstendigeForetakOrgnumre).stream()
-            .map(org -> new AvklartVirksomhet(org.lagSammenslåttNavn(), org.getOrgnummer(), adressekonverterer.apply(org), Yrkesaktivitetstyper.SELVSTENDIG))
+            .map(org -> new AvklartVirksomhet(org.getNavn(), org.getOrgnummer(), adressekonverterer.apply(org), Yrkesaktivitetstyper.SELVSTENDIG))
             .toList();
     }
 
@@ -116,7 +115,7 @@ public class AvklarteVirksomheterService {
     public List<AvklartVirksomhet> hentNorskeArbeidsgivere(Behandling behandling, Function<OrganisasjonDokument, Adresse> adressekonverterer) {
         Set<String> arbeidsgivendeOrgnumre = hentNorskeArbeidsgivendeOrgnumre(behandling);
         return organisasjonOppslagService.hentOrganisasjoner(arbeidsgivendeOrgnumre).stream()
-            .map(org -> new AvklartVirksomhet(org.lagSammenslåttNavn(), org.getOrgnummer(), adressekonverterer.apply(org), Yrkesaktivitetstyper.LOENNET_ARBEID, org.getOrganisasjonDetaljer().getOpphoersdato()))
+            .map(org -> new AvklartVirksomhet(org.getNavn(), org.getOrgnummer(), adressekonverterer.apply(org), Yrkesaktivitetstyper.LOENNET_ARBEID, org.getOrganisasjonDetaljer().getOpphoersdato()))
             .toList();
     }
 

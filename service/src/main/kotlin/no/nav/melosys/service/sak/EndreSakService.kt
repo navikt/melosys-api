@@ -17,20 +17,20 @@ import no.nav.melosys.domain.mottatteopplysninger.data.Periode
 import no.nav.melosys.domain.mottatteopplysninger.data.Soeknadsland
 import no.nav.melosys.exception.FunksjonellException
 import no.nav.melosys.service.behandling.BehandlingsresultatService
-import no.nav.melosys.service.lovligekombinasjoner.LovligeKombinasjonerService
+import no.nav.melosys.service.lovligekombinasjoner.LovligeKombinasjonerSaksbehandlingService
 import no.nav.melosys.service.mottatteopplysninger.MottatteOpplysningerService
 import no.nav.melosys.service.saksbehandling.SaksbehandlingRegler
 import no.nav.melosys.service.saksopplysninger.OppfriskSaksopplysningerService
 import org.springframework.context.ApplicationEventPublisher
 import org.springframework.stereotype.Service
 import java.time.LocalDate
-import javax.transaction.Transactional
+import jakarta.transaction.Transactional
 
 private val log = KotlinLogging.logger { }
 
 @Service
 class EndreSakService(
-    private val lovligeKombinasjonerService: LovligeKombinasjonerService,
+    private val lovligeKombinasjonerSaksbehandlingService: LovligeKombinasjonerSaksbehandlingService,
     private val fagsakService: FagsakService,
     private val behandlingsresultatService: BehandlingsresultatService,
     private val mottatteOpplysningerService: MottatteOpplysningerService,
@@ -50,11 +50,12 @@ class EndreSakService(
     ) {
         val fagsak = fagsakService.hentFagsak(saksnummer)
         validerSak(fagsak, nySakstype, nySakstema)
-        val behandling = fagsak.hentAktivBehandling()
+        val behandling = fagsak.hentAktivBehandlingIkkeÅrsavregning()
         validerBehandling(behandling)
 
         val sakEndres = sakEndres(fagsak, nySakstype, nySakstema)
         val behandlingTemaEllerTypeEndres = behandlingTemaTypeEndres(behandling, nyBehandlingstema, nyBehandlingstype)
+        val nyBehandlingstypeErNyVurdering = !behandling.erNyVurdering() && nyBehandlingstype == Behandlingstyper.NY_VURDERING
         if (sakEndres || behandlingTemaEllerTypeEndres) {
             validerEndring(
                 fagsak,
@@ -77,7 +78,7 @@ class EndreSakService(
         )
 
         if (sakEndres || behandlingTemaEllerTypeEndres) {
-            if (saksbehandlingRegler.harTomFlyt(
+            if (saksbehandlingRegler.harIngenFlyt(
                     nySakstype,
                     nySakstema,
                     nyBehandlingstype,
@@ -93,6 +94,12 @@ class EndreSakService(
             if (behandling.sisteOpplysningerHentetDato != null) {
                 oppfriskSaksopplysningerService.oppfriskSaksopplysning(behandling.id, false)
             }
+        }
+
+        if (nyBehandlingstypeErNyVurdering && behandling.opprinneligBehandling == null) {
+            val opprinneligBehandling = saksbehandlingRegler.finnBehandlingSomKanReplikeres(fagsak)
+            log.info { "Setter opprinnelig behandling til ${opprinneligBehandling?.id} på behandling ${behandling.id}" }
+            behandling.opprinneligBehandling = opprinneligBehandling
         }
 
         if (sakEndres) {
@@ -135,7 +142,7 @@ class EndreSakService(
             throw FunksjonellException("Behandling ${behandling.id} har sendt anmodning om unntak og kan ikke lenger endres")
         }
 
-        lovligeKombinasjonerService.validerOpprettelseOgEndring(
+        lovligeKombinasjonerSaksbehandlingService.validerOpprettelseOgEndring(
             behandling,
             fagsak.hovedpartRolle,
             nySakstype,
@@ -175,7 +182,7 @@ class EndreSakService(
         if (soeknadsland == null || soeknadsland.landkoder.isEmpty()) {
             return tomSøknadsland
         }
-        if ((nySakstype != EU_EOS) && (soeknadsland.erUkjenteEllerAlleEosLand || (soeknadsland.landkoder.size != 1))) {
+        if ((nySakstype != EU_EOS) && (soeknadsland.isFlereLandUkjentHvilke || (soeknadsland.landkoder.size != 1))) {
             return tomSøknadsland
         }
 

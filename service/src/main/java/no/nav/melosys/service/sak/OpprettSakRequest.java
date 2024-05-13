@@ -4,7 +4,6 @@ import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.List;
 
-import no.nav.melosys.domain.Fullmektig;
 import no.nav.melosys.domain.Kontaktopplysning;
 import no.nav.melosys.domain.kodeverk.Sakstemaer;
 import no.nav.melosys.domain.kodeverk.Sakstyper;
@@ -17,8 +16,9 @@ public class OpprettSakRequest {
     private final String aktørID;
     private final String virksomhetOrgnr;
     private final String utenlandskPersonId;
+    @Deprecated(since = "melosys.fullmektig.trygdeavgift")
     private final String arbeidsgiver;
-    private final Fullmektig fullmektig;
+    private final FullmektigDto fullmektig;
     private final List<Kontaktopplysning> kontaktopplysninger;
     private final Behandlingstyper behandlingstype;
     private final Behandlingstema behandlingstema;
@@ -30,12 +30,11 @@ public class OpprettSakRequest {
     private final Sakstyper sakstype;
     private final Sakstemaer sakstema;
 
-    private OpprettSakRequest(OpprettSakRequest.Builder builder) {
+    private OpprettSakRequest(Builder builder) {
         this.aktørID = builder.aktørID;
         this.virksomhetOrgnr = builder.virksomhetOrgnr;
         this.utenlandskPersonId = builder.utenlandskPersonId;
         this.arbeidsgiver = builder.arbeidsgiver;
-        this.fullmektig = builder.fullmektig;
         this.kontaktopplysninger = builder.kontaktopplysninger;
         this.behandlingstype = builder.behandlingstype;
         this.behandlingstema = builder.behandlingstema;
@@ -46,6 +45,7 @@ public class OpprettSakRequest {
         this.initierendeDokumentId = builder.initierendeDokumentId;
         this.sakstype = builder.sakstype;
         this.sakstema = builder.sakstema;
+        this.fullmektig = builder.fullmektig;
     }
 
     public String getAktørID() {
@@ -64,7 +64,7 @@ public class OpprettSakRequest {
         return arbeidsgiver;
     }
 
-    public Fullmektig getFullmektig() {
+    public FullmektigDto getFullmektig() {
         return fullmektig;
     }
 
@@ -113,7 +113,7 @@ public class OpprettSakRequest {
         private String virksomhetOrgnr;
         private String utenlandskPersonId;
         private String arbeidsgiver;
-        private Fullmektig fullmektig;
+        private FullmektigDto fullmektig;
         private List<Kontaktopplysning> kontaktopplysninger = new ArrayList<>();
         private Behandlingstyper behandlingstype;
         private Behandlingstema behandlingstema;
@@ -145,7 +145,7 @@ public class OpprettSakRequest {
             return this;
         }
 
-        public Builder medFullmektig(Fullmektig fullmektig) {
+        public Builder medFullmektig(FullmektigDto fullmektig) {
             this.fullmektig = fullmektig;
             return this;
         }

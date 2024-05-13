@@ -53,7 +53,7 @@
             <artifactId>shedlock-provider-jdbc-template</artifactId>
         </dependency>
         <dependency>
-            <groupId>no.finn.unleash</groupId>
+            <groupId>io.getunleash</groupId>
             <artifactId>unleash-client-java</artifactId>
         </dependency>
         <dependency>
@@ -88,7 +88,7 @@
             <scope>test</scope>
         </dependency>
         <dependency>
-            <groupId>com.github.tomakehurst</groupId>
+            <groupId>org.wiremock</groupId>
             <artifactId>wiremock-standalone</artifactId>
             <scope>test</scope>
         </dependency>

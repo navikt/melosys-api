@@ -12,9 +12,7 @@ import no.nav.melosys.domain.Behandlingsresultat;
 import no.nav.melosys.domain.Fagsak;
 import no.nav.melosys.domain.Lovvalgsperiode;
 import no.nav.melosys.domain.avklartefakta.AvklartVirksomhet;
-import no.nav.melosys.domain.kodeverk.Land_iso2;
-import no.nav.melosys.domain.kodeverk.Landkoder;
-import no.nav.melosys.domain.kodeverk.Sakstyper;
+import no.nav.melosys.domain.kodeverk.*;
 import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingstyper;
 import no.nav.melosys.domain.kodeverk.lovvalgsbestemmelser.Lovvalgbestemmelser_883_2004;
 import no.nav.melosys.domain.kodeverk.lovvalgsbestemmelser.Tilleggsbestemmelser_883_2004;
@@ -25,6 +23,8 @@ import no.nav.melosys.service.dokument.brev.BrevDataInnvilgelseFlereLand;
 import no.nav.melosys.service.dokument.brev.BrevbestillingDto;
 import org.junit.jupiter.api.Test;
 
+import static java.util.Collections.emptyList;
+import static java.util.Collections.emptySet;
 import static no.nav.melosys.service.dokument.brev.BrevDataTestUtils.lagStrukturertAdresse;
 import static no.nav.melosys.service.dokument.brev.mapper.BrevMappingTestUtils.lagFellesType;
 import static no.nav.melosys.service.dokument.brev.mapper.BrevMappingTestUtils.lagNAVFelles;
@@ -66,31 +66,31 @@ class InnvilgelsesbrevFlereLandMapperTest {
         List<AvklartVirksomhet> norskeVirksomheter = Collections.singletonList(new AvklartVirksomhet("Telenor", "1234", lagStrukturertAdresse(), Yrkesaktivitetstyper.LOENNET_ARBEID));
 
         BrevDataInnvilgelseFlereLand brevdataInnvilgelse = new BrevDataInnvilgelseFlereLand(new BrevbestillingDto(), "SAKSBEHANDLER");
-        brevdataInnvilgelse.lovvalgsperiode = lagLovvalgsperiode();
-        brevdataInnvilgelse.harAvklartMaritimTypeSkip = true;
-        brevdataInnvilgelse.harAvklartMaritimTypeSokkel = false;
-        brevdataInnvilgelse.arbeidsgivere = norskeVirksomheter;
-        brevdataInnvilgelse.bostedsland = "Norge";
-        brevdataInnvilgelse.trydemyndighetsland = Landkoder.DE;
-        brevdataInnvilgelse.alleArbeidsland = List.of("Sverige", "Danmark", "Finland", "Spania");
-        brevdataInnvilgelse.erMarginaltArbeid = true;
-        brevdataInnvilgelse.erBegrensetPeriode = true;
-        brevdataInnvilgelse.vedleggA1 = lagBrevdataA1(norskeVirksomheter);
+        brevdataInnvilgelse.setLovvalgsperiode(lagLovvalgsperiode());
+        brevdataInnvilgelse.setAvklartMaritimTypeSkip(true);
+        brevdataInnvilgelse.setAvklartMaritimTypeSokkel(false);
+        brevdataInnvilgelse.setArbeidsgivere(norskeVirksomheter);
+        brevdataInnvilgelse.setBostedsland("Norge");
+        brevdataInnvilgelse.setTrydemyndighetsland(Landkoder.DE);
+        brevdataInnvilgelse.setAlleArbeidsland(List.of("Sverige", "Danmark", "Finland", "Spania"));
+        brevdataInnvilgelse.setMarginaltArbeid(true);
+        brevdataInnvilgelse.setBegrensetPeriode(true);
+        brevdataInnvilgelse.setVedleggA1(lagBrevdataA1(norskeVirksomheter));
         return brevdataInnvilgelse;
     }
 
     private static BrevDataA1 lagBrevdataA1(List<AvklartVirksomhet> virksomheter) {
         BrevDataA1 brevdataA1 = new BrevDataA1();
-        brevdataA1.person = lagPersonopplysninger();
-        brevdataA1.bostedsadresse = lagStrukturertAdresse();
-        brevdataA1.yrkesgruppe = Yrkesgrupper.ORDINAER;
-        brevdataA1.hovedvirksomhet = virksomheter.get(0);
+        brevdataA1.setPerson(lagPersonopplysninger());
+        brevdataA1.setBostedsadresse(lagStrukturertAdresse());
+        brevdataA1.setYrkesgruppe(Yrkesgrupper.ORDINAER);
+        brevdataA1.setHovedvirksomhet(virksomheter.get(0));
         ArrayList<AvklartVirksomhet> bivirksomheter = new ArrayList<>(virksomheter);
         bivirksomheter.remove(0);
-        brevdataA1.bivirksomheter = bivirksomheter;
+        brevdataA1.setBivirksomheter(bivirksomheter);
 
-        brevdataA1.arbeidssteder = new ArrayList<>();
-        brevdataA1.arbeidsland = new ArrayList<>();
+        brevdataA1.setArbeidssteder(new ArrayList<>());
+        brevdataA1.setArbeidsland(new ArrayList<>());
         return brevdataA1;
     }
 
@@ -115,9 +115,15 @@ class InnvilgelsesbrevFlereLandMapperTest {
     }
 
     private static Fagsak lagFagsak() {
-        Fagsak fagsak = new Fagsak();
-        fagsak.setType(Sakstyper.EU_EOS);
-        return fagsak;
+        return new Fagsak(
+            "MEL-test",
+            123L,
+            Sakstyper.EU_EOS,
+            Sakstemaer.MEDLEMSKAP_LOVVALG,
+            Saksstatuser.OPPRETTET,
+            emptySet(),
+            emptyList()
+        );
     }
 
     private static Behandling lagBehandling(Fagsak fagsak) {

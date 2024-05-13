@@ -1,9 +1,6 @@
 package no.nav.melosys.service.tilgang;
 
-import no.nav.melosys.domain.Anmodningsperiode;
-import no.nav.melosys.domain.Behandling;
-import no.nav.melosys.domain.Behandlingsresultat;
-import no.nav.melosys.domain.Fagsak;
+import no.nav.melosys.domain.*;
 import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingsstatus;
 import no.nav.melosys.exception.FunksjonellException;
 import no.nav.melosys.service.behandling.BehandlingsresultatService;
@@ -28,13 +25,10 @@ class RedigerbarKontrollTest {
 
     private RedigerbarKontroll redigerbarKontroll;
 
-    private final String saksnummer = "MEL-00";
-
     @BeforeEach
     void setup() {
         behandling.setId(11111L);
-        behandling.setFagsak(new Fagsak());
-        behandling.getFagsak().setSaksnummer(saksnummer);
+        behandling.setFagsak(FagsakTestFactory.lagFagsak());
         redigerbarKontroll = new RedigerbarKontroll(behandlingsresultatService);
     }
 

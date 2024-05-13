@@ -7,10 +7,7 @@ import java.util.List;
 import java.util.Set;
 
 import com.google.common.collect.Sets;
-import no.nav.melosys.domain.Anmodningsperiode;
-import no.nav.melosys.domain.Behandling;
-import no.nav.melosys.domain.Behandlingsresultat;
-import no.nav.melosys.domain.Fagsak;
+import no.nav.melosys.domain.*;
 import no.nav.melosys.domain.arkiv.DokumentReferanse;
 import no.nav.melosys.domain.arkiv.Vedlegg;
 import no.nav.melosys.domain.brev.DoksysBrevbestilling;
@@ -23,9 +20,9 @@ import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingsresultattyper;
 import no.nav.melosys.domain.kodeverk.brev.Produserbaredokumenter;
 import no.nav.melosys.domain.kodeverk.lovvalgsbestemmelser.Lovvalgbestemmelser_883_2004;
 import no.nav.melosys.domain.kodeverk.lovvalgsbestemmelser.Tilleggsbestemmelser_883_2004;
-import no.nav.melosys.domain.saksflyt.ProsessDataKey;
-import no.nav.melosys.domain.saksflyt.Prosessinstans;
 import no.nav.melosys.saksflyt.brev.BrevBestiller;
+import no.nav.melosys.saksflytapi.domain.ProsessDataKey;
+import no.nav.melosys.saksflytapi.domain.Prosessinstans;
 import no.nav.melosys.service.behandling.BehandlingService;
 import no.nav.melosys.service.behandling.BehandlingsresultatService;
 import no.nav.melosys.service.dokument.sed.EessiService;
@@ -38,7 +35,7 @@ import org.mockito.Captor;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 
-import static no.nav.melosys.domain.saksflyt.ProsessDataKey.YTTERLIGERE_INFO_SED;
+import static no.nav.melosys.saksflytapi.domain.ProsessDataKey.YTTERLIGERE_INFO_SED;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.Mockito.*;
 
@@ -136,9 +133,7 @@ class SendAnmodningOmUnntakTest {
 
     private static Behandling lagBehandling() {
         Behandling behandling = new Behandling();
-        Fagsak fagsak = new Fagsak();
-        fagsak.setSaksnummer("MEL-1");
-        fagsak.setGsakSaksnummer(123L);
+        Fagsak fagsak = FagsakTestFactory.builder().medGsakSaksnummer().build();
         behandling.setFagsak(fagsak);
         behandling.setId(BEHANDLING_ID);
         behandling.setDokumentasjonSvarfristDato(Instant.now());

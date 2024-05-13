@@ -1,7 +1,7 @@
 package no.nav.melosys.service.dokument.brev.mapper;
 
-import javax.xml.bind.JAXBElement;
-import javax.xml.bind.JAXBException;
+import jakarta.xml.bind.JAXBElement;
+import jakarta.xml.bind.JAXBException;
 import javax.xml.datatype.DatatypeConfigurationException;
 
 import no.nav.dok.melosysbrev._000168.BrevdataType;
@@ -38,7 +38,7 @@ public final class UtpekingAnnetLandMapper implements BrevDataMapper {
 
     Fag mapFag(BrevDataUtpekingAnnetLand brevDataUtpekingAnnetLand) {
         Fag fag = new Fag();
-        Utpekingsperiode utpekingsperiode = brevDataUtpekingAnnetLand.utpekingsperiode;
+        Utpekingsperiode utpekingsperiode = brevDataUtpekingAnnetLand.getUtpekingsperiode();
 
         fag.setLovvalgsland(utpekingsperiode.getLovvalgsland().getBeskrivelse());
         fag.setLovvalgsperiode(lagLovvalgsperiodeType(utpekingsperiode));
@@ -46,7 +46,7 @@ public final class UtpekingAnnetLandMapper implements BrevDataMapper {
         if (utpekingsperiode.getTilleggsbestemmelse() != null) {
             fag.setTilleggsbestemmelse(TilleggsbestemmelseKode.fromValue(utpekingsperiode.getTilleggsbestemmelse().getKode()));
         }
-        fag.setFritekst(brevDataUtpekingAnnetLand.fritekst);
+        fag.setFritekst(brevDataUtpekingAnnetLand.getFritekst());
 
         return fag;
     }

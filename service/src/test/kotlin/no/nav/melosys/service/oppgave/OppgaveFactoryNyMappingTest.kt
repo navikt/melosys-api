@@ -157,7 +157,7 @@ internal class OppgaveFactoryNyMappingTest {
                             .shouldHaveSize(1)
                             .first().run {
                                 level.shouldBe(Level.WARN)
-                                message.shouldBe("Sed dokument mangler for:MEL-1 behandlingID:1")
+                                message.shouldBe("Sed dokument mangler for:${FagsakTestFactory.SAKSNUMMER} behandlingID:1")
                             }
                     }
                 }
@@ -255,7 +255,7 @@ internal class OppgaveFactoryNyMappingTest {
                 .shouldHaveSize(1)
                 .first().run {
                     level.shouldBe(Level.WARN)
-                    message.shouldBe("Sed dokument mangler for:MEL-1 behandlingID:1")
+                    message.shouldBe("Sed dokument mangler for:${behandling.fagsak.saksnummer} behandlingID:${behandling.id}")
                 }
             oppgave.beskrivelse.shouldBe("")
         }
@@ -447,11 +447,10 @@ internal class OppgaveFactoryNyMappingTest {
         ): Behandling {
             return Behandling().apply {
                 id = 1
-                fagsak = Fagsak().apply {
-                    saksnummer = "MEL-1"
+                fagsak = FagsakTestFactory.builder().apply {
                     type = sakstype
                     tema = sakstema
-                }
+                }.build()
                 type = behandlingstype
                 tema = behandlingstema
                 if (sedType != null) {

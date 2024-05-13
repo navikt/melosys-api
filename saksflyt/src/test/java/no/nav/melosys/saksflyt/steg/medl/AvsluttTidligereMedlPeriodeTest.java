@@ -5,9 +5,10 @@ import java.util.Collections;
 
 import no.nav.melosys.domain.Behandling;
 import no.nav.melosys.domain.Fagsak;
+import no.nav.melosys.domain.FagsakTestFactory;
 import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingsstatus;
-import no.nav.melosys.domain.saksflyt.ProsessDataKey;
-import no.nav.melosys.domain.saksflyt.Prosessinstans;
+import no.nav.melosys.saksflytapi.domain.ProsessDataKey;
+import no.nav.melosys.saksflytapi.domain.Prosessinstans;
 import no.nav.melosys.service.medl.MedlPeriodeService;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -15,7 +16,6 @@ import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 
-import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.verify;
 
 @ExtendWith(MockitoExtension.class)
@@ -46,7 +46,7 @@ public class AvsluttTidligereMedlPeriodeTest {
     }
 
     @Test
-    public void utfør_erEndring_verifiserAvsluttTidligereMedlPeriode() throws Exception {
+    public void utfør_erEndring_verifiserAvsluttTidligereMedlPeriode() {
 
         Behandling behandling = new Behandling();
         behandling.setId(1L);
@@ -54,18 +54,15 @@ public class AvsluttTidligereMedlPeriodeTest {
 
         Prosessinstans prosessinstans = hentProsessinstans(behandling, true);
         avsluttTidligereMedlPeriode.utfør(prosessinstans);
-        verify(medlPeriodeService).avsluttTidligerMedlPeriode(any(Fagsak.class));
+        verify(medlPeriodeService).avsluttTidligerMedlPeriode(FagsakTestFactory.SAKSNUMMER);
     }
 
     private Fagsak hentFagsak() {
-        Fagsak fagsak = new Fagsak();
-
         Behandling behandling = new Behandling();
         behandling.setRegistrertDato(Instant.now());
         behandling.setStatus(Behandlingsstatus.AVSLUTTET);
-        fagsak.setBehandlinger(Collections.singletonList(behandling));
 
-        return fagsak;
+        return FagsakTestFactory.builder().behandlinger(behandling).build();
     }
 
     private Prosessinstans hentProsessinstans(Behandling behandling, boolean erEndring) {

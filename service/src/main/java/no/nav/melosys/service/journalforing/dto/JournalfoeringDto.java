@@ -1,28 +1,30 @@
 package no.nav.melosys.service.journalforing.dto;
 
-import no.nav.melosys.domain.kodeverk.Avsendertyper;
-
 import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.List;
 
-import static java.lang.Boolean.FALSE;
+import no.nav.melosys.domain.kodeverk.Avsendertyper;
+import no.nav.melosys.domain.kodeverk.ForvaltningsmeldingMottaker;
+
+import static no.nav.melosys.domain.kodeverk.ForvaltningsmeldingMottaker.AVSENDER;
+import static no.nav.melosys.domain.kodeverk.ForvaltningsmeldingMottaker.BRUKER;
 
 public abstract class JournalfoeringDto {
-    private String journalpostID;
-    private String oppgaveID;
-    private String brukerID;
-    private String virksomhetOrgnr;
-    private String avsenderID;
-    private String avsenderNavn;
-    private Avsendertyper avsenderType;
-    private DokumentDto hoveddokument;
-    private List<DokumentDto> vedlegg = new ArrayList<>();
-    private boolean skalTilordnes;
-    private Boolean ikkeSendForvaltingsmelding;
-    private LocalDate mottattDato;
-    private String behandlingstemaKode;
-    private String behandlingstypeKode;
+    protected String journalpostID;
+    protected String oppgaveID;
+    protected String brukerID;
+    protected String virksomhetOrgnr;
+    protected String avsenderID;
+    protected String avsenderNavn;
+    protected Avsendertyper avsenderType;
+    protected DokumentDto hoveddokument;
+    protected List<DokumentDto> vedlegg = new ArrayList<>();
+    protected boolean skalTilordnes;
+    protected LocalDate mottattDato;
+    protected String behandlingstemaKode;
+    protected String behandlingstypeKode;
+    protected ForvaltningsmeldingMottaker forvaltningsmeldingMottaker;
 
     public String getJournalpostID() {
         return journalpostID;
@@ -104,14 +106,6 @@ public abstract class JournalfoeringDto {
         this.skalTilordnes = skalTilordnes;
     }
 
-    public Boolean isIkkeSendForvaltingsmelding() {
-        return ikkeSendForvaltingsmelding;
-    }
-
-    public void setIkkeSendForvaltingsmelding(Boolean ikkeSendForvaltingsmelding) {
-        this.ikkeSendForvaltingsmelding = ikkeSendForvaltingsmelding;
-    }
-
     public LocalDate getMottattDato() {
         return mottattDato;
     }
@@ -137,6 +131,14 @@ public abstract class JournalfoeringDto {
     }
 
     public boolean skalSendeForvaltningsmelding() {
-        return FALSE.equals(ikkeSendForvaltingsmelding);
+        return BRUKER.equals(forvaltningsmeldingMottaker) || AVSENDER.equals(forvaltningsmeldingMottaker);
+    }
+
+    public ForvaltningsmeldingMottaker getForvaltningsmeldingMottaker() {
+        return forvaltningsmeldingMottaker;
+    }
+
+    public void setForvaltningsmeldingMottaker(ForvaltningsmeldingMottaker forvaltningsmeldingMottaker) {
+        this.forvaltningsmeldingMottaker = forvaltningsmeldingMottaker;
     }
 }

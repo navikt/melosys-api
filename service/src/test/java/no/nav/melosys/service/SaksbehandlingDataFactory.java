@@ -6,9 +6,6 @@ import java.time.temporal.ChronoUnit;
 import no.nav.melosys.domain.*;
 import no.nav.melosys.domain.mottatteopplysninger.MottatteOpplysninger;
 import no.nav.melosys.domain.mottatteopplysninger.MottatteOpplysningerData;
-import no.nav.melosys.domain.kodeverk.Saksstatuser;
-import no.nav.melosys.domain.kodeverk.Sakstemaer;
-import no.nav.melosys.domain.kodeverk.Sakstyper;
 import no.nav.melosys.domain.kodeverk.Vedtakstyper;
 import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingsresultattyper;
 import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingsstatus;
@@ -38,7 +35,7 @@ public final class SaksbehandlingDataFactory {
         behandling.setTema(Behandlingstema.UTSENDT_ARBEIDSTAKER);
         behandling.setFagsak(fagsak);
         behandling.setMottatteOpplysninger(new MottatteOpplysninger());
-        behandling.getMottatteOpplysninger().setMottatteOpplysningerdata(mottatteOpplysningerData);
+        behandling.getMottatteOpplysninger().setMottatteOpplysningerData(mottatteOpplysningerData);
         final Instant nå = Instant.now();
         behandling.setRegistrertDato(nå.minus(30, ChronoUnit.DAYS));
         behandling.setEndretDato(nå);
@@ -83,24 +80,6 @@ public final class SaksbehandlingDataFactory {
     }
 
     public static Fagsak lagFagsak() {
-        return lagFagsak("MEL-test");
-    }
-
-    public static Fagsak lagFagsak(String saksnummer) {
-        var fagsak = new Fagsak();
-        fagsak.setSaksnummer(saksnummer);
-        fagsak.setStatus(Saksstatuser.OPPRETTET);
-        fagsak.setType(Sakstyper.EU_EOS);
-        fagsak.setTema(Sakstemaer.MEDLEMSKAP_LOVVALG);
-        fagsak.getAktører().add(lagBruker());
-        fagsak.setGsakSaksnummer(123L);
-        return fagsak;
-    }
-
-    public static Aktoer lagBruker() {
-        var aktoer = new Aktoer();
-        aktoer.setRolle(BRUKER);
-        aktoer.setAktørId("aktørID");
-        return aktoer;
+        return FagsakTestFactory.builder().medBruker().medGsakSaksnummer().build();
     }
 }

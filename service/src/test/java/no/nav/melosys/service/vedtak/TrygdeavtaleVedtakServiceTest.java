@@ -3,10 +3,7 @@ package no.nav.melosys.service.vedtak;
 import java.util.List;
 import java.util.Set;
 
-import no.nav.melosys.domain.Behandling;
-import no.nav.melosys.domain.Behandlingsresultat;
-import no.nav.melosys.domain.Fagsak;
-import no.nav.melosys.domain.Lovvalgsperiode;
+import no.nav.melosys.domain.*;
 import no.nav.melosys.domain.kodeverk.InnvilgelsesResultat;
 import no.nav.melosys.domain.kodeverk.Land_iso2;
 import no.nav.melosys.domain.kodeverk.Sakstyper;
@@ -16,6 +13,7 @@ import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingsresultattyper;
 import no.nav.melosys.domain.mottatteopplysninger.MottatteOpplysninger;
 import no.nav.melosys.domain.mottatteopplysninger.MottatteOpplysningerData;
 import no.nav.melosys.exception.ValideringException;
+import no.nav.melosys.saksflytapi.ProsessinstansService;
 import no.nav.melosys.service.behandling.BehandlingService;
 import no.nav.melosys.service.behandling.BehandlingsresultatService;
 import no.nav.melosys.service.dokument.DokgenService;
@@ -24,7 +22,6 @@ import no.nav.melosys.service.dokument.brev.KopiMottakerDto;
 import no.nav.melosys.service.kontroll.feature.ferdigbehandling.FerdigbehandlingKontrollFacade;
 import no.nav.melosys.service.oppgave.OppgaveService;
 import no.nav.melosys.service.saksbehandling.SaksbehandlingRegler;
-import no.nav.melosys.service.saksflyt.ProsessinstansService;
 import no.nav.melosys.sikkerhet.context.SpringSubjectHandler;
 import no.nav.melosys.sikkerhet.context.SubjectHandler;
 import no.nav.melosys.sikkerhet.context.TestSubjectHandler;
@@ -53,7 +50,6 @@ import static org.mockito.Mockito.when;
 class TrygdeavtaleVedtakServiceTest {
 
     public static final long BEHANDLING_ID = 123L;
-    public static final String SAKSNUMMER = "MEL-123";
 
     @Mock
     private BehandlingsresultatService behandlingsresultatService;
@@ -80,7 +76,8 @@ class TrygdeavtaleVedtakServiceTest {
 
     @BeforeEach
     void setup() {
-        trygdeavtaleVedtakService = new TrygdeavtaleVedtakService(behandlingsresultatService, behandlingService, prosessinstansService, oppgaveService, dokgenService, ferdigbehandlingKontrollFacade, saksbehandlingRegler);
+        trygdeavtaleVedtakService = new TrygdeavtaleVedtakService(behandlingsresultatService, behandlingService, prosessinstansService,
+            oppgaveService, dokgenService, ferdigbehandlingKontrollFacade, saksbehandlingRegler);
 
         SpringSubjectHandler.set(new TestSubjectHandler());
     }
@@ -95,8 +92,8 @@ class TrygdeavtaleVedtakServiceTest {
 
         verify(behandlingsresultatService).lagre(behandlingsresultatCaptor.capture());
         verify(behandlingService).endreStatus(behandlingCaptor.capture(), eq(IVERKSETTER_VEDTAK));
-        verify(prosessinstansService).opprettProsessinstansIverksettVedtakTrygdeavtale(any(Behandling.class), eq(request));
-        verify(oppgaveService).ferdigstillOppgaveMedSaksnummer(SAKSNUMMER);
+        verify(prosessinstansService).opprettProsessinstansIverksettVedtakTrygdeavtale(any(Behandling.class));
+        verify(oppgaveService).ferdigstillOppgaveMedSaksnummer(FagsakTestFactory.SAKSNUMMER);
         verify(dokgenService).produserOgDistribuerBrev(anyLong(), brevbestillingRequestCaptor.capture());
         verify(ferdigbehandlingKontrollFacade).kontrollerVedtakMedRegisteropplysninger(any(Behandling.class), eq(Sakstyper.TRYGDEAVTALE), any(Behandlingsresultattyper.class), eq(null));
 
@@ -141,8 +138,8 @@ class TrygdeavtaleVedtakServiceTest {
 
         verify(behandlingsresultatService).lagre(behandlingsresultatCaptor.capture());
         verify(behandlingService).endreStatus(behandlingCaptor.capture(), eq(IVERKSETTER_VEDTAK));
-        verify(prosessinstansService).opprettProsessinstansIverksettVedtakTrygdeavtale(any(Behandling.class), eq(request));
-        verify(oppgaveService).ferdigstillOppgaveMedSaksnummer(SAKSNUMMER);
+        verify(prosessinstansService).opprettProsessinstansIverksettVedtakTrygdeavtale(any(Behandling.class));
+        verify(oppgaveService).ferdigstillOppgaveMedSaksnummer(FagsakTestFactory.SAKSNUMMER);
         verify(dokgenService).produserOgDistribuerBrev(anyLong(), brevbestillingRequestCaptor.capture());
         verify(ferdigbehandlingKontrollFacade).kontrollerVedtakMedRegisteropplysninger(any(Behandling.class), eq(Sakstyper.TRYGDEAVTALE), any(Behandlingsresultattyper.class), eq(null));
 
@@ -187,8 +184,8 @@ class TrygdeavtaleVedtakServiceTest {
 
         verify(behandlingsresultatService).lagre(behandlingsresultatCaptor.capture());
         verify(behandlingService).endreStatus(behandlingCaptor.capture(), eq(IVERKSETTER_VEDTAK));
-        verify(prosessinstansService).opprettProsessinstansIverksettVedtakTrygdeavtale(any(Behandling.class), eq(request));
-        verify(oppgaveService).ferdigstillOppgaveMedSaksnummer(SAKSNUMMER);
+        verify(prosessinstansService).opprettProsessinstansIverksettVedtakTrygdeavtale(any(Behandling.class));
+        verify(oppgaveService).ferdigstillOppgaveMedSaksnummer(FagsakTestFactory.SAKSNUMMER);
         verify(dokgenService).produserOgDistribuerBrev(anyLong(), brevbestillingRequestCaptor.capture());
         verify(ferdigbehandlingKontrollFacade).kontrollerVedtakMedRegisteropplysninger(any(Behandling.class), eq(Sakstyper.TRYGDEAVTALE), any(Behandlingsresultattyper.class), eq(null));
 
@@ -229,7 +226,7 @@ class TrygdeavtaleVedtakServiceTest {
         when(behandlingsresultatService.hentBehandlingsresultat(BEHANDLING_ID)).thenReturn(behandlingsresultat);
 
         FattVedtakRequest request = new FattVedtakRequest.Builder()
-            .medBehandlingsresultat(AVSLAG_MANGLENDE_OPPL)
+            .medBehandlingsresultatType(AVSLAG_MANGLENDE_OPPL)
             .medVedtakstype(FØRSTEGANGSVEDTAK)
             .medFritekst("fritekst for beskrivelse avslag")
             .medBestillersId(SubjectHandler.getInstance().getUserID())
@@ -239,8 +236,8 @@ class TrygdeavtaleVedtakServiceTest {
 
         verify(behandlingsresultatService).lagre(behandlingsresultatCaptor.capture());
         verify(behandlingService).endreStatus(behandlingCaptor.capture(), eq(IVERKSETTER_VEDTAK));
-        verify(prosessinstansService).opprettProsessinstansIverksettVedtakTrygdeavtale(any(Behandling.class), eq(request));
-        verify(oppgaveService).ferdigstillOppgaveMedSaksnummer(SAKSNUMMER);
+        verify(prosessinstansService).opprettProsessinstansIverksettVedtakTrygdeavtale(any(Behandling.class));
+        verify(oppgaveService).ferdigstillOppgaveMedSaksnummer(FagsakTestFactory.SAKSNUMMER);
         verify(dokgenService).produserOgDistribuerBrev(anyLong(), brevbestillingRequestCaptor.capture());
 
         Behandlingsresultat lagretBehandlingsresultat = behandlingsresultatCaptor.getValue();
@@ -263,7 +260,7 @@ class TrygdeavtaleVedtakServiceTest {
 
     private FattVedtakRequest lagFattVedtakRequest(Vedtakstyper vedtakstype, String nyVurderingBakgrunn) {
         return new FattVedtakRequest.Builder()
-            .medBehandlingsresultat(FASTSATT_LOVVALGSLAND)
+            .medBehandlingsresultatType(FASTSATT_LOVVALGSLAND)
             .medVedtakstype(vedtakstype)
             .medInnledningFritekst("Innledning")
             .medBegrunnelseFritekst("Begrunnelse")
@@ -281,23 +278,17 @@ class TrygdeavtaleVedtakServiceTest {
     private Behandling lagBehandling() {
         var behandling = new Behandling();
         behandling.setId(BEHANDLING_ID);
-        behandling.setFagsak(lagFagsak());
+        behandling.setFagsak(FagsakTestFactory.lagFagsak());
         behandling.setMottatteOpplysninger(lagMottatteOpplysninger());
         return behandling;
     }
 
     private MottatteOpplysninger lagMottatteOpplysninger() {
         MottatteOpplysningerData mottatteOpplysningerData = new MottatteOpplysningerData();
-        mottatteOpplysningerData.soeknadsland.landkoder = List.of(Land_iso2.GB.getKode());
+        mottatteOpplysningerData.soeknadsland.setLandkoder(List.of(Land_iso2.GB.getKode()));
         MottatteOpplysninger mottatteOpplysninger = new MottatteOpplysninger();
-        mottatteOpplysninger.setMottatteOpplysningerdata(mottatteOpplysningerData);
+        mottatteOpplysninger.setMottatteOpplysningerData(mottatteOpplysningerData);
         return mottatteOpplysninger;
-    }
-
-    private Fagsak lagFagsak() {
-        var fagsak = new Fagsak();
-        fagsak.setSaksnummer(SAKSNUMMER);
-        return fagsak;
     }
 
     private Behandlingsresultat lagBehandlingsresultat() {

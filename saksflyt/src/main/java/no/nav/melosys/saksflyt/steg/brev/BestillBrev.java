@@ -1,17 +1,17 @@
 package no.nav.melosys.saksflyt.steg.brev;
 
 import no.nav.melosys.domain.brev.DoksysBrevbestilling;
-import no.nav.melosys.domain.saksflyt.ProsessSteg;
-import no.nav.melosys.domain.saksflyt.Prosessinstans;
 import no.nav.melosys.exception.FunksjonellException;
 import no.nav.melosys.saksflyt.brev.BrevBestiller;
 import no.nav.melosys.saksflyt.steg.StegBehandler;
+import no.nav.melosys.saksflytapi.domain.ProsessSteg;
+import no.nav.melosys.saksflytapi.domain.Prosessinstans;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Component;
 
-import static no.nav.melosys.domain.saksflyt.ProsessDataKey.BREVBESTILLING;
-import static no.nav.melosys.domain.saksflyt.ProsessSteg.BESTILL_BREV;
+import static no.nav.melosys.saksflytapi.domain.ProsessDataKey.BREVBESTILLING;
+import static no.nav.melosys.saksflytapi.domain.ProsessSteg.BESTILL_BREV;
 
 @Component
 public class BestillBrev implements StegBehandler {

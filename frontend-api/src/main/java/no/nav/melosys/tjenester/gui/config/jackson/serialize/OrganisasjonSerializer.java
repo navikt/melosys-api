@@ -5,9 +5,9 @@ import java.io.IOException;
 import com.fasterxml.jackson.core.JsonGenerator;
 import com.fasterxml.jackson.databind.SerializerProvider;
 import com.fasterxml.jackson.databind.ser.std.StdSerializer;
-import no.nav.melosys.domain.AbstraktOrganisasjon;
 import no.nav.melosys.domain.FellesKodeverk;
 import no.nav.melosys.domain.adresse.StrukturertAdresse;
+import no.nav.melosys.domain.dokument.organisasjon.OrganisasjonDokument;
 import no.nav.melosys.service.kodeverk.KodeverkService;
 import no.nav.melosys.tjenester.gui.dto.AdresseDto;
 import no.nav.melosys.tjenester.gui.dto.GateadresseDto;
@@ -17,17 +17,17 @@ import org.apache.commons.lang3.StringUtils;
 import static no.nav.melosys.service.kodeverk.KodeverkService.UKJENT;
 
 
-public class OrganisasjonSerializer extends StdSerializer<AbstraktOrganisasjon> {
+public class OrganisasjonSerializer extends StdSerializer<OrganisasjonDokument> {
 
     private final transient KodeverkService kodeverkService;
 
     public OrganisasjonSerializer(KodeverkService kodeverkService) {
-        super(AbstraktOrganisasjon.class);
+        super(OrganisasjonDokument.class);
         this.kodeverkService = kodeverkService;
     }
 
     @Override
-    public void serialize(AbstraktOrganisasjon organisasjon, JsonGenerator generator, SerializerProvider provider) throws IOException {
+    public void serialize(OrganisasjonDokument organisasjon, JsonGenerator generator, SerializerProvider provider) throws IOException {
         OrganisasjonDto organisasjonDto = new OrganisasjonDto();
 
         organisasjonDto.setOrgnr(organisasjon.getOrgnummer());

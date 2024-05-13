@@ -4,6 +4,8 @@ import java.time.LocalDate;
 import java.util.*;
 
 import com.google.common.collect.Sets;
+import io.getunleash.FakeUnleash;
+import io.getunleash.Unleash;
 import no.nav.melosys.domain.*;
 import no.nav.melosys.domain.arkiv.ArkivDokument;
 import no.nav.melosys.domain.arkiv.DokumentReferanse;
@@ -69,7 +71,7 @@ class EessiServiceTest {
     private ArgumentCaptor<SedDataDto> sedDataDtoCaptor;
 
     private final EasyRandom easyRandom = new EasyRandom();
-
+    private final FakeUnleash unleash = new FakeUnleash();
     private final String mottakerBelgia1 = "BE:12222";
     private final String mottakerBelgia2 = "BE:9999";
     private final String mottakerBelgia3 = "BE:123131";
@@ -85,15 +87,13 @@ class EessiServiceTest {
     @BeforeEach
     void setup() {
         eessiService = new EessiService(behandlingService, behandlingsresultatService, eessiConsumer, joarkFasade,
-            sedDataBygger, dokumentdataGrunnlagFactory);
+            sedDataBygger, dokumentdataGrunnlagFactory, unleash);
     }
 
     private static Behandling lagBehandling() {
         Behandling behandling = new Behandling();
         behandling.setId(BEHANDLING_ID);
-        behandling.setFagsak(new Fagsak());
-        behandling.getFagsak().setSaksnummer("123");
-        behandling.getFagsak().setGsakSaksnummer(123L);
+        behandling.setFagsak(FagsakTestFactory.builder().medGsakSaksnummer().build());
         return behandling;
     }
 
@@ -127,9 +127,7 @@ class EessiServiceTest {
         DokumentReferanse dokumentReferanse = new DokumentReferanse(journalpostID, "2");
         when(joarkFasade.hentJournalposterTilknyttetSak(any())).thenReturn(List.of(journalpost));
         when(joarkFasade.hentDokument(anyString(), anyString())).thenReturn(new byte[8]);
-        Fagsak fagsak = new Fagsak();
-        fagsak.setGsakSaksnummer(1233321L);
-        fagsak.setSaksnummer("MEL-0");
+        Fagsak fagsak = FagsakTestFactory.builder().medGsakSaksnummer().build();
 
         Collection<Vedlegg> vedlegg = eessiService.lagEessiVedlegg(fagsak, Set.of(dokumentReferanse));
 
@@ -400,8 +398,7 @@ class EessiServiceTest {
         Behandling behandling = new Behandling();
         behandling.setId(BEHANDLING_ID);
         behandling.setType(Behandlingstyper.NY_VURDERING);
-        Fagsak fagsak = new Fagsak();
-        fagsak.setGsakSaksnummer(1337L);
+        Fagsak fagsak = FagsakTestFactory.builder().medGsakSaksnummer().build();
         behandling.setFagsak(fagsak);
 
         Saksopplysning saksopplysning = new Saksopplysning();
@@ -413,7 +410,7 @@ class EessiServiceTest {
         BucInformasjon bucInformasjon = new BucInformasjon("1", true, "LA_BUC_02", LocalDate.now(), null, List.of(sedInformasjon));
         List<BucInformasjon> bucInformasjonListe = List.of(bucInformasjon);
 
-        when(eessiConsumer.hentTilknyttedeBucer(eq(1337L), any())).thenReturn(bucInformasjonListe);
+        when(eessiConsumer.hentTilknyttedeBucer(eq(FagsakTestFactory.GSAK_SAKSNUMMER), any())).thenReturn(bucInformasjonListe);
         when(behandlingService.hentBehandlingMedSaksopplysninger(anyLong())).thenReturn(behandling);
         when(behandlingService.hentBehandling(anyLong())).thenReturn(behandling);
         when(dokumentdataGrunnlagFactory.av(any(), any())).thenReturn(Mockito.mock(SedDataGrunnlagMedSoknad.class));
@@ -437,8 +434,7 @@ class EessiServiceTest {
         behandling.setId(BEHANDLING_ID);
         behandling.setType(Behandlingstyper.NY_VURDERING);
         behandling.setType(Behandlingstyper.NY_VURDERING);
-        Fagsak fagsak = new Fagsak();
-        fagsak.setGsakSaksnummer(1337L);
+        Fagsak fagsak = FagsakTestFactory.builder().medGsakSaksnummer().build();
         behandling.setFagsak(fagsak);
 
         Saksopplysning saksopplysning = new Saksopplysning();
@@ -450,7 +446,7 @@ class EessiServiceTest {
         BucInformasjon bucInformasjon = new BucInformasjon("1", true, "LA_BUC_02", LocalDate.now(), null, List.of(sedInformasjon));
         List<BucInformasjon> bucInformasjonListe = List.of(bucInformasjon);
 
-        when(eessiConsumer.hentTilknyttedeBucer(eq(1337L), any())).thenReturn(bucInformasjonListe);
+        when(eessiConsumer.hentTilknyttedeBucer(eq(FagsakTestFactory.GSAK_SAKSNUMMER), any())).thenReturn(bucInformasjonListe);
         when(behandlingService.hentBehandlingMedSaksopplysninger(anyLong())).thenReturn(behandling);
         when(dokumentdataGrunnlagFactory.av(any())).thenReturn(Mockito.mock(SedDataGrunnlagMedSoknad.class));
         when(sedDataBygger.lagUtkast(any(), any(), any())).thenReturn(new SedDataDto());

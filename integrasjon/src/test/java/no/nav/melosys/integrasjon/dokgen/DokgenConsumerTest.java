@@ -12,6 +12,7 @@ import no.nav.melosys.domain.Saksopplysning;
 import no.nav.melosys.domain.SaksopplysningType;
 import no.nav.melosys.domain.brev.MangelbrevBrevbestilling;
 import no.nav.melosys.domain.dokument.person.PersonDokument;
+import no.nav.melosys.domain.kodeverk.Saksstatuser;
 import no.nav.melosys.domain.kodeverk.Sakstemaer;
 import no.nav.melosys.domain.kodeverk.Sakstyper;
 import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingstyper;
@@ -108,12 +109,15 @@ class DokgenConsumerTest {
     }
 
     private Fagsak lagFagsak(Behandling behandling) {
-        Fagsak fagsak = new Fagsak();
-        fagsak.setType(Sakstyper.EU_EOS);
-        fagsak.setTema(Sakstemaer.MEDLEMSKAP_LOVVALG);
         behandling.setType(Behandlingstyper.FØRSTEGANG);
-        fagsak.setBehandlinger(List.of(behandling));
-        return fagsak;
+        return new Fagsak("MEL-test",
+            null,
+            Sakstyper.EU_EOS,
+            Sakstemaer.MEDLEMSKAP_LOVVALG,
+            Saksstatuser.OPPRETTET,
+            Collections.emptySet(),
+            List.of(behandling)
+        );
     }
 
     private Saksopplysning lagPersondokument() {

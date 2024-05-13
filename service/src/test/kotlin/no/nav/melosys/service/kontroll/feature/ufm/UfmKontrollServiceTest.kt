@@ -1,5 +1,10 @@
 package no.nav.melosys.service.kontroll.feature.ufm
 
+import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule
+import com.fasterxml.jackson.module.kotlin.jacksonObjectMapper
+import com.fasterxml.jackson.module.kotlin.readValue
+import io.getunleash.FakeUnleash
+import io.getunleash.Unleash
 import io.kotest.matchers.collections.shouldHaveSize
 import io.kotest.matchers.equality.shouldBeEqualToComparingFields
 import io.kotest.matchers.shouldBe
@@ -17,6 +22,7 @@ import no.nav.melosys.domain.dokument.medlemskap.MedlemskapDokument
 import no.nav.melosys.domain.dokument.medlemskap.Medlemsperiode
 import no.nav.melosys.domain.dokument.medlemskap.Periode
 import no.nav.melosys.domain.dokument.medlemskap.PeriodeType
+import no.nav.melosys.domain.dokument.person.PersonhistorikkDokument
 import no.nav.melosys.domain.dokument.sed.SedDokument
 import no.nav.melosys.domain.dokument.utbetaling.UtbetalingDokument
 import no.nav.melosys.domain.eessi.SedType
@@ -26,24 +32,29 @@ import no.nav.melosys.domain.kodeverk.lovvalgsbestemmelser.Lovvalgbestemmelser_8
 import no.nav.melosys.domain.kodeverk.lovvalgsbestemmelser.Overgangsregelbestemmelser
 import no.nav.melosys.domain.kodeverk.lovvalgsbestemmelser.Tilleggsbestemmelser_883_2004
 import no.nav.melosys.domain.mottatteopplysninger.SedGrunnlag
+import no.nav.melosys.domain.person.PersonMedHistorikk
 import no.nav.melosys.domain.person.Personopplysninger
 import no.nav.melosys.domain.person.adresse.Bostedsadresse
+import no.nav.melosys.exception.IkkeFunnetException
 import no.nav.melosys.repository.KontrollresultatRepository
 import no.nav.melosys.service.SaksbehandlingDataFactory
 import no.nav.melosys.service.behandling.BehandlingService
 import no.nav.melosys.service.behandling.BehandlingsresultatService
 import no.nav.melosys.service.mottatteopplysninger.MottatteOpplysningerService
 import no.nav.melosys.service.persondata.PersondataFasade
+import no.nav.melosys.service.persondata.PersonopplysningerObjectFactory.lagPersonMedHistorikk
 import no.nav.melosys.service.persondata.PersonopplysningerObjectFactory.lagPersonopplysninger
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.extension.ExtendWith
+import java.nio.charset.StandardCharsets
 import java.time.LocalDate
 import java.util.*
 
 
 @ExtendWith(MockKExtension::class)
 class UfmKontrollServiceTest {
+
     @RelaxedMockK
     lateinit var kontrollresultatRepository: KontrollresultatRepository
 
@@ -68,7 +79,10 @@ class UfmKontrollServiceTest {
     private var sedDokument: SedDokument = SedDokument()
     private var medlemskapDokument = MedlemskapDokument()
     private var personopplysninger: Personopplysninger = lagPersonopplysninger()
+    private var personopplysningerMedHistorikk: PersonMedHistorikk = lagPersonMedHistorikk()
     private var mottatteOpplysningerData: SedGrunnlag = SedGrunnlag()
+    private val mapper = jacksonObjectMapper().registerModule(JavaTimeModule())
+    private val unleash = FakeUnleash()
 
     @BeforeEach
     fun setup() {
@@ -77,7 +91,8 @@ class UfmKontrollServiceTest {
             behandlingsresultatService,
             mottatteOpplysningerService,
             behandlingService,
-            persondataFasade
+            persondataFasade,
+            unleash
         )
     }
 
@@ -93,8 +108,7 @@ class UfmKontrollServiceTest {
         }
         medlemskapDokument.apply {
             medlemsperiode.add(
-                Medlemsperiode().apply {
-                    periode = Periode(LocalDate.now(), LocalDate.now().plusMonths(1))
+                Medlemsperiode(periode = Periode(LocalDate.now(), LocalDate.now().plusMonths(1))).apply {
                     land = "SWE"
                     type = PeriodeType.PERIODE_UTEN_MEDLEMSKAP
                 }
@@ -129,15 +143,13 @@ class UfmKontrollServiceTest {
         }
         medlemskapDokument.apply {
             medlemsperiode.add(
-                Medlemsperiode().apply {
-                    periode = Periode(LocalDate.now(), LocalDate.now().plusMonths(1))
+                Medlemsperiode(periode = Periode(LocalDate.now(), LocalDate.now().plusMonths(1))).apply {
                     land = "SWE"
                     type = PeriodeType.PERIODE_UTEN_MEDLEMSKAP
                 }
             )
             medlemsperiode.add(
-                Medlemsperiode().apply {
-                    periode = Periode(LocalDate.now().plusDays(15), LocalDate.now().plusMonths(2))
+                Medlemsperiode(periode = Periode(LocalDate.now().plusDays(15), LocalDate.now().plusMonths(2))).apply {
                     land = "SWE"
                     type = PeriodeType.PERIODE_UTEN_MEDLEMSKAP
                 }
@@ -162,6 +174,80 @@ class UfmKontrollServiceTest {
 
     @Test
     fun
+        utførKontrollerOgRegistrerFeil_A003_lovvalgslandUtenforNorge_boddINorgeIPerioden_feilKontroll() {
+        sedDokument.apply {
+            sedType = SedType.A003
+            lovvalgslandKode = Landkoder.SE
+            avsenderLandkode = Landkoder.SE
+            lovvalgsperiode = Periode(LocalDate.of(2023, 3,23), LocalDate.of(2023,3,25))
+            setErEndring(false)
+        }
+
+        personopplysninger.apply {
+            bostedsadresse = Bostedsadresse(
+                StrukturertAdresse().apply { landkode = "NO" }, null, LocalDate.of(2023, 1,2), LocalDate.of(2023,12,20), null,
+                null,
+                false
+            )
+        }
+        every { kontrollresultatRepository.saveAll(capture(kontrollresultatSlot)) }
+            .answers {
+                kontrollresultatSlot.captured.shouldHaveSize(1)
+                    .sortedBy { it.begrunnelse }
+                    .apply {
+                        first().apply {
+                            begrunnelse.shouldBe(Kontroll_begrunnelser.BOSATT_I_NORGE_I_PERIODEN)
+                            behandlingsresultat.id.shouldBe(BEHANDLINGSRESULTAT_ID)
+                        }
+                    }
+            }
+        setupMockedTestData()
+
+
+        ufmKontrollService.utførKontrollerOgRegistrerFeil(BEHANDLING_ID)
+    }
+
+    @Test
+    fun
+        utførKontrollerOgRegistrerFeil_A003_lovvalgslandUtenforNorge_boddINorgeIPerioden_sedÅpenPeriodeTil_feilKontrollManuellBehandling() {
+        sedDokument.apply {
+            sedType = SedType.A003
+            lovvalgslandKode = Landkoder.SE
+            avsenderLandkode = Landkoder.SE
+            lovvalgsperiode = Periode(LocalDate.of(2023, 3,23), null)
+            setErEndring(false)
+        }
+
+        personopplysninger.apply {
+            bostedsadresse = Bostedsadresse(
+                StrukturertAdresse().apply { landkode = "NO" }, null, LocalDate.of(2023, 1,2), LocalDate.of(2023,12,20), null,
+                null,
+                false
+            )
+        }
+        every { kontrollresultatRepository.saveAll(capture(kontrollresultatSlot)) }
+            .answers {
+                kontrollresultatSlot.captured.shouldHaveSize(2)
+                    .sortedBy { it.begrunnelse }
+                    .apply {
+                        first().apply {
+                            begrunnelse.shouldBe(Kontroll_begrunnelser.BOSATT_I_NORGE_I_PERIODEN)
+                            behandlingsresultat.id.shouldBe(BEHANDLINGSRESULTAT_ID)
+                        }
+                        last().apply {
+                            begrunnelse.shouldBe(Kontroll_begrunnelser.INGEN_SLUTTDATO)
+                            behandlingsresultat.id.shouldBe(BEHANDLINGSRESULTAT_ID)
+                        }
+                    }
+            }
+        setupMockedTestData()
+
+
+        ufmKontrollService.utførKontrollerOgRegistrerFeil(BEHANDLING_ID)
+    }
+
+    @Test
+    fun
         utførKontrollerOgRegistrerFeil_A003_lovvalgslandUtenforNorge_medOverlappendePeriodeUtenMedlemskap_erOpprinnelig_harUliktLand_ingenYtterligeOpplysninger_feilKontroll() {
         sedDokument.apply {
             sedType = SedType.A003
@@ -172,11 +258,9 @@ class UfmKontrollServiceTest {
         }
         medlemskapDokument.apply {
             medlemsperiode.add(
-                Medlemsperiode().apply {
-                    periode = Periode(LocalDate.now(), LocalDate.now().plusMonths(1))
-                    land = "DNK"
-                    type = PeriodeType.PERIODE_UTEN_MEDLEMSKAP
-                }
+                Medlemsperiode(periode = Periode(LocalDate.now(), LocalDate.now().plusMonths(1)),
+                    land = "DNK",
+                    type = PeriodeType.PERIODE_UTEN_MEDLEMSKAP)
             )
         }
         personopplysninger.apply {
@@ -215,11 +299,9 @@ class UfmKontrollServiceTest {
         }
         medlemskapDokument.apply {
             medlemsperiode.add(
-                Medlemsperiode().apply {
-                    periode = Periode(LocalDate.now(), LocalDate.now().plusMonths(1))
-                    land = "NOR"
-                    type = PeriodeType.PERIODE_MED_MEDLEMSKAP
-                }
+                Medlemsperiode(periode = Periode(LocalDate.now(), LocalDate.now().plusMonths(1)),
+                    land = "NOR",
+                    type = PeriodeType.PERIODE_MED_MEDLEMSKAP)
             )
         }
         personopplysninger.apply {
@@ -257,16 +339,10 @@ class UfmKontrollServiceTest {
         }
         medlemskapDokument.apply {
             medlemsperiode.add(
-                Medlemsperiode().apply {
-                    periode = Periode(LocalDate.now(), LocalDate.now().plusMonths(1))
-                    land = "SWE"
-                },
+                Medlemsperiode(periode = Periode(LocalDate.now(), LocalDate.now().plusMonths(1)), land = "SWE"),
             )
             medlemsperiode.add(
-                Medlemsperiode().apply {
-                    periode = Periode(LocalDate.now().plusMonths(1), LocalDate.now().plusMonths(2))
-                    land = "SWE"
-                },
+                Medlemsperiode(periode = Periode(LocalDate.now().plusMonths(1), LocalDate.now().plusMonths(2)), land = "SWE"),
             )
             personopplysninger
         }
@@ -300,14 +376,12 @@ class UfmKontrollServiceTest {
         }
         medlemskapDokument.apply {
             medlemsperiode.add(
-                Medlemsperiode().apply {
-                    periode = Periode(LocalDate.now(), LocalDate.now().plusMonths(1))
+                Medlemsperiode(periode = Periode(LocalDate.now(), LocalDate.now().plusMonths(1))).apply {
                     land = "SWE"
                 },
             )
             medlemsperiode.add(
-                Medlemsperiode().apply {
-                    periode = Periode(LocalDate.now().plusMonths(1), LocalDate.now().plusMonths(2))
+                Medlemsperiode(periode = Periode(LocalDate.now().plusMonths(1), LocalDate.now().plusMonths(2))).apply {
                     land = "SWE"
                 },
             )
@@ -354,16 +428,12 @@ class UfmKontrollServiceTest {
         }
         medlemskapDokument.apply {
             medlemsperiode.add(
-                Medlemsperiode().apply {
-                    periode = Periode(LocalDate.now(), LocalDate.now().plusMonths(1))
+                Medlemsperiode(periode = Periode(LocalDate.now(), LocalDate.now().plusMonths(1))).apply {
                     land = "SWE"
                 },
             )
             medlemsperiode.add(
-                Medlemsperiode().apply {
-                    periode = Periode(LocalDate.now().plusMonths(1), LocalDate.now().plusMonths(2))
-                    land = "SWE"
-                },
+                Medlemsperiode(periode = Periode(LocalDate.now().plusMonths(1), LocalDate.now().plusMonths(2)), land = "SWE"),
             )
             personopplysninger
         }
@@ -406,16 +476,12 @@ class UfmKontrollServiceTest {
         }
         medlemskapDokument.apply {
             medlemsperiode.add(
-                Medlemsperiode().apply {
-                    periode = Periode(LocalDate.now(), LocalDate.now().plusMonths(1))
-                    land = "SWE"
-                },
+                Medlemsperiode(periode = Periode(LocalDate.now(), LocalDate.now().plusMonths(1)),
+                    land = "SWE"),
             )
             medlemsperiode.add(
-                Medlemsperiode().apply {
-                    periode = Periode(LocalDate.now().plusMonths(1), LocalDate.now().plusMonths(2))
-                    land = "DNK"
-                },
+                Medlemsperiode(periode = Periode(LocalDate.now().plusMonths(1), LocalDate.now().plusMonths(2)),
+                    land = "DNK"),
             )
             personopplysninger
         }
@@ -438,7 +504,7 @@ class UfmKontrollServiceTest {
 
 
     @Test
-    fun utførKontrollerOgRegistrerFeil_A003_forventKontroll_bosattINorge() {
+    fun utførKontrollerOgRegistrerFeil_A003_forventKontroll_bosattINorgeIPeriode() {
         sedDokument.apply {
             sedType = SedType.A003
             lovvalgslandKode = Landkoder.NO
@@ -454,12 +520,12 @@ class UfmKontrollServiceTest {
                             behandlingsresultat.id.shouldBe(BEHANDLINGSRESULTAT_ID)
                         }
                         last().apply {
-                            begrunnelse.shouldBe(Kontroll_begrunnelser.BOSATT_I_NORGE)
+                            begrunnelse.shouldBe(Kontroll_begrunnelser.BOSATT_I_NORGE_I_PERIODEN)
                             behandlingsresultat.id.shouldBe(BEHANDLINGSRESULTAT_ID)
                         }
                     }
             }
-        setupMockedTestData()
+        setupMockedTestData(medHistorikk = true)
 
 
         ufmKontrollService.utførKontrollerOgRegistrerFeil(BEHANDLING_ID)
@@ -519,8 +585,9 @@ class UfmKontrollServiceTest {
             )
         }
         mottatteOpplysningerData.apply {
-            overgangsregelbestemmelser.add(Overgangsregelbestemmelser.FO_1408_1971_ART14A_2)
-            overgangsregelbestemmelser.add(Overgangsregelbestemmelser.FO_1408_1971_ART14_2_B)
+            overgangsregelbestemmelser = arrayListOf(
+                Overgangsregelbestemmelser.FO_1408_1971_ART14A_2, Overgangsregelbestemmelser.FO_1408_1971_ART14_2_B
+            )
         }
         every { kontrollresultatRepository.saveAll(capture(kontrollresultatSlot)) }
             .answers {
@@ -578,13 +645,20 @@ class UfmKontrollServiceTest {
             .first().shouldBeEqualToComparingFields(Kontroll_begrunnelser.FEIL_I_PERIODEN)
     }
 
-    private fun setupMockedTestData() {
+    private fun setupMockedTestData(medHistorikk: Boolean = false) {
+        val personhistorikkDokument = mapper.readValue<PersonhistorikkDokument>(hentRessurs("mock/personHistorikkDokument.json"))
+
         behandling.saksopplysninger.add(lagSaksopplysning(sedDokument, SaksopplysningType.SEDOPPL))
         behandling.saksopplysninger.add(lagSaksopplysning(medlemskapDokument, SaksopplysningType.MEDL))
         behandling.saksopplysninger.add(lagSaksopplysning(InntektDokument(), SaksopplysningType.INNTK))
         behandling.saksopplysninger.add(lagSaksopplysning(UtbetalingDokument(), SaksopplysningType.UTBETAL))
+        if (medHistorikk) {
+            behandling.saksopplysninger.add(lagSaksopplysning(personhistorikkDokument, SaksopplysningType.PERSHIST))
+        }
 
         every { persondataFasade.hentPerson(any()) } returns personopplysninger
+        every { persondataFasade.hentPersonMedHistorikk(any<String>()) } returns personopplysningerMedHistorikk
+        every { persondataFasade.hentPersonMedHistorikk(any<Long>()) } returns personopplysningerMedHistorikk
         every { behandlingService.hentBehandlingMedSaksopplysninger(BEHANDLING_ID) } returns behandling
         every { behandlingsresultatService.hentBehandlingsresultat(BEHANDLING_ID) } returns Behandlingsresultat()
             .apply {
@@ -593,6 +667,9 @@ class UfmKontrollServiceTest {
         every { mottatteOpplysningerService.finnMottatteOpplysningerData(BEHANDLING_ID) } returns
             Optional.of(mottatteOpplysningerData)
     }
+
+    private fun hentRessurs(fil: String): String = this::class.java.classLoader.getResource(fil)
+        ?.readText(StandardCharsets.UTF_8) ?: throw IkkeFunnetException("Fant ikke $fil")
 
     private fun lagSaksopplysning(
         saksopplysningDokument: SaksopplysningDokument,

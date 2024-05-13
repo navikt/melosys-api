@@ -1,9 +1,6 @@
 package no.nav.melosys.saksflyt.steg.behandling;
 
-import no.nav.melosys.domain.Behandling;
-import no.nav.melosys.domain.Behandlingsresultat;
-import no.nav.melosys.domain.Fagsak;
-import no.nav.melosys.domain.Lovvalgsperiode;
+import no.nav.melosys.domain.*;
 import no.nav.melosys.domain.kodeverk.InnvilgelsesResultat;
 import no.nav.melosys.domain.kodeverk.Land_iso2;
 import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingsresultattyper;
@@ -12,8 +9,8 @@ import no.nav.melosys.domain.kodeverk.lovvalgsbestemmelser.Lovvalgbestemmelser_8
 import no.nav.melosys.domain.mottatteopplysninger.MottatteOpplysninger;
 import no.nav.melosys.domain.mottatteopplysninger.Soeknad;
 import no.nav.melosys.domain.mottatteopplysninger.data.arbeidssteder.FysiskArbeidssted;
-import no.nav.melosys.domain.saksflyt.ProsessType;
-import no.nav.melosys.domain.saksflyt.Prosessinstans;
+import no.nav.melosys.saksflytapi.domain.ProsessType;
+import no.nav.melosys.saksflytapi.domain.Prosessinstans;
 import no.nav.melosys.service.aktoer.UtenlandskMyndighetService;
 import no.nav.melosys.service.behandling.BehandlingService;
 import no.nav.melosys.service.behandling.BehandlingsresultatService;
@@ -43,8 +40,7 @@ class AvklarMyndighetTest {
         avklarMyndighet = new AvklarMyndighet(behandlingService, behandlingsresultatService, utenlandskMyndighetService);
 
         prosessinstans = new Prosessinstans();
-        Fagsak fagsak = new Fagsak();
-        fagsak.setSaksnummer("saksnr");
+        Fagsak fagsak = FagsakTestFactory.lagFagsak();
 
         Behandling behandling = lagBehandling(fagsak);
         when(behandlingService.hentBehandlingMedSaksopplysninger(anyLong())).thenReturn(behandling);
@@ -56,7 +52,7 @@ class AvklarMyndighetTest {
     void utfør_utenMyndighet_myndighetOpprettes() {
 
         Behandlingsresultat behandlingsresultat = lagBehandlingResultat();
-        when(behandlingsresultatService.hentBehandlingsresultat(eq(1L))).thenReturn(behandlingsresultat);
+        when(behandlingsresultatService.hentBehandlingsresultat(1L)).thenReturn(behandlingsresultat);
 
         avklarMyndighet.utfør(prosessinstans);
 
@@ -69,13 +65,13 @@ class AvklarMyndighetTest {
         behandling.setFagsak(fagsak);
         behandling.setType(Behandlingstyper.FØRSTEGANG);
         Soeknad søknadDokument = new Soeknad();
-        søknadDokument.soeknadsland.landkoder.add("BE");
+        søknadDokument.soeknadsland.getLandkoder().add("BE");
         FysiskArbeidssted fysiskArbeidssted = new FysiskArbeidssted();
-        fysiskArbeidssted.adresse.setLandkode("HR");
-        søknadDokument.arbeidPaaLand.fysiskeArbeidssteder.add(fysiskArbeidssted);
-        søknadDokument.bosted.oppgittAdresse.setLandkode("IT");
+        fysiskArbeidssted.getAdresse().setLandkode("HR");
+        søknadDokument.arbeidPaaLand.getFysiskeArbeidssteder().add(fysiskArbeidssted);
+        søknadDokument.bosted.getOppgittAdresse().setLandkode("IT");
         MottatteOpplysninger mottatteOpplysninger = new MottatteOpplysninger();
-        mottatteOpplysninger.setMottatteOpplysningerdata(søknadDokument);
+        mottatteOpplysninger.setMottatteOpplysningerData(søknadDokument);
         behandling.setMottatteOpplysninger(mottatteOpplysninger);
         return behandling;
     }

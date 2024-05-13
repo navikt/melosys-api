@@ -2,6 +2,7 @@ package no.nav.melosys.integrasjon.dokgen;
 
 import java.util.ArrayList;
 import java.util.List;
+import javax.annotation.Nullable;
 
 import no.nav.melosys.domain.Kontaktopplysning;
 import no.nav.melosys.domain.adresse.StrukturertAdresse;
@@ -23,6 +24,7 @@ public final class DokgenAdresseMapper {
         return org == null ? persondata.getSammensattNavn() : org.getNavn();
     }
 
+    @Nullable
     public static List<String> mapAdresselinjer(OrganisasjonDokument org, String kontaktperson,
                                                 Kontaktopplysning kontaktopplysning, Persondata persondata) {
         List<String> adresselinjer;
@@ -72,6 +74,7 @@ public final class DokgenAdresseMapper {
         return poststed;
     }
 
+    @Nullable
     public static String mapLandForAdresse(OrganisasjonDokument org, Persondata persondata) {
         String landkode;
         if (org == null) {
@@ -100,11 +103,11 @@ public final class DokgenAdresseMapper {
         if (mottakerType == Mottakerroller.UTENLANDSK_TRYGDEMYNDIGHET && brevbestilling.getUtenlandskMyndighet() != null) {
             var utenlandskMyndighet = brevbestilling.getUtenlandskMyndighet();
             return new Mottaker(
-                utenlandskMyndighet.navn,
+                utenlandskMyndighet.getNavn(),
                 utenlandskMyndighet.getGateadresseAsList(),
-                utenlandskMyndighet.postnummer,
-                utenlandskMyndighet.poststed,
-                utenlandskMyndighet.land,
+                utenlandskMyndighet.getPostnummer(),
+                utenlandskMyndighet.getPoststed(),
+                utenlandskMyndighet.getLand(),
                 mottakerType.getKode(),
                 null
             );

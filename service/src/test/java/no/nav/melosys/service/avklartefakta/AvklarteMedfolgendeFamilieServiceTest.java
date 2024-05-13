@@ -91,7 +91,7 @@ class AvklarteMedfolgendeFamilieServiceTest {
 
         List<Avklartefakta> capturedAvklarteFakta = captor.getAllValues();
         capturedAvklarteFakta.sort(Comparator.comparing(Avklartefakta::getSubjekt));
-        assertThat(capturedAvklarteFakta.size()).isEqualTo(2);
+        assertThat(capturedAvklarteFakta).hasSize(2);
         Avklartefakta avklartBarn = capturedAvklarteFakta.get(0);
         Avklartefakta avklartEktefelleSamboer = capturedAvklarteFakta.get(1);
 
@@ -101,7 +101,7 @@ class AvklarteMedfolgendeFamilieServiceTest {
         assertThat(avklartBarn.getFakta()).isEqualTo(Avklartefakta.IKKE_VALGT_FAKTA);
         assertThat(avklartBarn.getBegrunnelseFritekst()).isEqualTo(fritekstBarn);
         assertThat(avklartBarn.getBehandlingsresultat()).isEqualTo(behandlingsresultat);
-        assertThat(avklartBarn.getRegistreringer().size()).isEqualTo(1);
+        assertThat(avklartBarn.getRegistreringer()).hasSize(1);
 
         AvklartefaktaRegistrering registreringBarn = avklartBarn.getRegistreringer().iterator().next();
         assertThat(registreringBarn.getBegrunnelseKode()).isEqualTo(OVER_18_AR.getKode());
@@ -112,7 +112,7 @@ class AvklarteMedfolgendeFamilieServiceTest {
         assertThat(avklartEktefelleSamboer.getFakta()).isEqualTo(Avklartefakta.IKKE_VALGT_FAKTA);
         assertThat(avklartEktefelleSamboer.getBegrunnelseFritekst()).isEqualTo(fritekstEktefelleSamboer);
         assertThat(avklartEktefelleSamboer.getBehandlingsresultat()).isEqualTo(behandlingsresultat);
-        assertThat(avklartEktefelleSamboer.getRegistreringer().size()).isEqualTo(1);
+        assertThat(avklartEktefelleSamboer.getRegistreringer()).hasSize(1);
 
         AvklartefaktaRegistrering registreringEktefelleSamboer = avklartEktefelleSamboer.getRegistreringer().iterator().next();
         assertThat(registreringEktefelleSamboer.getBegrunnelseKode()).isEqualTo(SAMBOER_UTEN_FELLES_BARN.getKode());
@@ -137,7 +137,7 @@ class AvklarteMedfolgendeFamilieServiceTest {
 
         List<Avklartefakta> capturedAvklarteFakta = captor.getAllValues();
         capturedAvklarteFakta.sort(Comparator.comparing(Avklartefakta::getSubjekt));
-        assertThat(capturedAvklarteFakta.size()).isEqualTo(2);
+        assertThat(capturedAvklarteFakta).hasSize(2);
         Avklartefakta avklartBarn = capturedAvklarteFakta.get(0);
         Avklartefakta avklartEktefelleSamboer = capturedAvklarteFakta.get(1);
 
@@ -147,7 +147,7 @@ class AvklarteMedfolgendeFamilieServiceTest {
         assertThat(avklartBarn.getFakta()).isEqualTo(VALGT_FAKTA);
         assertThat(avklartBarn.getBegrunnelseFritekst()).isNull();
         assertThat(avklartBarn.getBehandlingsresultat()).isEqualTo(behandlingsresultat);
-        assertThat(avklartBarn.getRegistreringer().isEmpty()).isTrue();
+        assertThat(avklartBarn.getRegistreringer()).isEmpty();
 
         assertThat(avklartEktefelleSamboer.getSubjekt()).isEqualTo(uuidEktefelleSamboer);
         assertThat(avklartEktefelleSamboer.getType()).isEqualTo(Avklartefaktatyper.VURDERING_MEDLEMSKAP_EKTEFELLE_SAMBOER);
@@ -155,7 +155,7 @@ class AvklarteMedfolgendeFamilieServiceTest {
         assertThat(avklartEktefelleSamboer.getFakta()).isEqualTo(VALGT_FAKTA);
         assertThat(avklartEktefelleSamboer.getBegrunnelseFritekst()).isNull();
         assertThat(avklartEktefelleSamboer.getBehandlingsresultat()).isEqualTo(behandlingsresultat);
-        assertThat(avklartEktefelleSamboer.getRegistreringer().isEmpty()).isTrue();
+        assertThat(avklartEktefelleSamboer.getRegistreringer()).isEmpty();
     }
 
     @Test
@@ -322,16 +322,16 @@ class AvklarteMedfolgendeFamilieServiceTest {
     private MottatteOpplysninger lagMottatteOpplysninger(boolean medFolgendeFamilie) {
         MottatteOpplysningerData mottatteOpplysningerData = new MottatteOpplysningerData();
         if (medFolgendeFamilie) {
-            mottatteOpplysningerData.personOpplysninger.medfolgendeFamilie = List.of(
+            mottatteOpplysningerData.personOpplysninger.setMedfolgendeFamilie(List.of(
                 MedfolgendeFamilie.tilMedfolgendeFamilie(uuidBarn, "09080723451", "Bjartmar", MedfolgendeFamilie.Relasjonsrolle.BARN),
                 MedfolgendeFamilie.tilMedfolgendeFamilie(uuidBarn2, "09080723452", "Arnhild", MedfolgendeFamilie.Relasjonsrolle.BARN),
                 MedfolgendeFamilie.tilMedfolgendeFamilie(uuidEktefelleSamboer, "09080656743", "Kari", MedfolgendeFamilie.Relasjonsrolle.EKTEFELLE_SAMBOER)
-            );
+            ));
         } else {
-            mottatteOpplysningerData.personOpplysninger.medfolgendeFamilie = Collections.emptyList();
+            mottatteOpplysningerData.personOpplysninger.setMedfolgendeFamilie(Collections.emptyList());
         }
         MottatteOpplysninger mottatteOpplysninger = new MottatteOpplysninger();
-        mottatteOpplysninger.setMottatteOpplysningerdata(mottatteOpplysningerData);
+        mottatteOpplysninger.setMottatteOpplysningerData(mottatteOpplysningerData);
         return mottatteOpplysninger;
     }
 
@@ -369,9 +369,9 @@ class AvklarteMedfolgendeFamilieServiceTest {
         MedfolgendeFamilie medfolgendeFamilieUuid1 = MedfolgendeFamilie.tilMedfolgendeFamilie(uuidBarn, "fnr1", null, MedfolgendeFamilie.Relasjonsrolle.BARN);
         MedfolgendeFamilie medfolgendeFamilieUuid2 = MedfolgendeFamilie.tilMedfolgendeFamilie(uuidEktefelleSamboer, "fnr2", null, MedfolgendeFamilie.Relasjonsrolle.EKTEFELLE_SAMBOER);
         MottatteOpplysningerData mottatteOpplysningerData = new MottatteOpplysningerData();
-        mottatteOpplysningerData.personOpplysninger.medfolgendeFamilie.addAll(List.of(medfolgendeFamilieUuid1, medfolgendeFamilieUuid2));
+        mottatteOpplysningerData.personOpplysninger.getMedfolgendeFamilie().addAll(List.of(medfolgendeFamilieUuid1, medfolgendeFamilieUuid2));
         MottatteOpplysninger mottatteOpplysninger = new MottatteOpplysninger();
-        mottatteOpplysninger.setMottatteOpplysningerdata(mottatteOpplysningerData);
+        mottatteOpplysninger.setMottatteOpplysningerData(mottatteOpplysningerData);
         Behandling behandling = new Behandling();
         behandling.setMottatteOpplysninger(mottatteOpplysninger);
         return behandling;

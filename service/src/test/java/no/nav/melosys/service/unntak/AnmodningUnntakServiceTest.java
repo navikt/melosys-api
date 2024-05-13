@@ -21,6 +21,7 @@ import no.nav.melosys.domain.kodeverk.lovvalgsbestemmelser.Lovvalgbestemmelser_8
 import no.nav.melosys.domain.mottatteopplysninger.MottatteOpplysninger;
 import no.nav.melosys.exception.FunksjonellException;
 import no.nav.melosys.integrasjon.joark.JoarkFasade;
+import no.nav.melosys.saksflytapi.ProsessinstansService;
 import no.nav.melosys.service.LandvelgerService;
 import no.nav.melosys.service.LovvalgsperiodeService;
 import no.nav.melosys.service.behandling.BehandlingService;
@@ -28,7 +29,6 @@ import no.nav.melosys.service.behandling.BehandlingsresultatService;
 import no.nav.melosys.service.dokument.sed.EessiService;
 import no.nav.melosys.service.kontroll.feature.unntak.AnmodningUnntakKontrollService;
 import no.nav.melosys.service.oppgave.OppgaveService;
-import no.nav.melosys.service.saksflyt.ProsessinstansService;
 import no.nav.melosys.sikkerhet.context.TestSubjectHandler;
 import org.apache.commons.lang3.RandomStringUtils;
 import org.junit.jupiter.api.BeforeEach;
@@ -72,7 +72,6 @@ class AnmodningUnntakServiceTest {
 
     private static final long BEHANDLING_ID = 1L;
     private static final String FRITEKST_SED = "Ytterligere info som fritekst";
-    private static final String SAKSNUMMER = "MEL-111";
     private static final String MOTTAKER_INSTITUSJON = "SE:432";
 
     @Captor
@@ -91,8 +90,7 @@ class AnmodningUnntakServiceTest {
     void anmodningOmUnntak_erEessiKlarMedMottakerInstitusjon_prosessOpprettet() throws Exception {
         final DokumentReferanse dokumentReferanse = new DokumentReferanse("jpID", "dokID");
         Behandling behandling = new Behandling();
-        Fagsak fagsak = new Fagsak();
-        fagsak.setSaksnummer(SAKSNUMMER);
+        Fagsak fagsak = FagsakTestFactory.lagFagsak();
         behandling.setFagsak(fagsak);
         behandling.getSaksopplysninger().add(lagPersonSaksopplysning());
         behandling.setMottatteOpplysninger(new MottatteOpplysninger());
@@ -113,8 +111,7 @@ class AnmodningUnntakServiceTest {
     void anmodningOmUnntak_ikkeEessiReadyMottakerInstitusjonNull_prosessOpprettet() throws Exception {
         Behandling behandling = new Behandling();
         behandling.setMottatteOpplysninger(new MottatteOpplysninger());
-        Fagsak fagsak = new Fagsak();
-        fagsak.setSaksnummer(SAKSNUMMER);
+        Fagsak fagsak = FagsakTestFactory.lagFagsak();
         behandling.setFagsak(fagsak);
         behandling.getSaksopplysninger().add(lagPersonSaksopplysning());
         when(behandlingService.hentBehandlingMedSaksopplysninger(BEHANDLING_ID)).thenReturn(behandling);
@@ -156,7 +153,7 @@ class AnmodningUnntakServiceTest {
         assertThat(lovvalgsperioder.getValue()).containsExactly(
             Lovvalgsperiode.av(lagAnmodningsperiodeSvar(), Medlemskapstyper.PLIKTIG));
         verify(prosessinstansService).opprettProsessinstansAnmodningOmUnntakMottakSvar(behandling, FRITEKST_SED);
-        verify(oppgaveService).ferdigstillOppgaveMedSaksnummer(SAKSNUMMER);
+        verify(oppgaveService).ferdigstillOppgaveMedSaksnummer(FagsakTestFactory.SAKSNUMMER);
         verify(behandlingsresultatService).oppdaterBehandlingsresultattype(BEHANDLING_ID, Behandlingsresultattyper.REGISTRERT_UNNTAK);
     }
 
@@ -248,9 +245,7 @@ class AnmodningUnntakServiceTest {
 
     private static Behandling lagBehandling() {
         Behandling behandling = new Behandling();
-        Fagsak fagsak = new Fagsak();
-        fagsak.setSaksnummer(SAKSNUMMER);
-        behandling.setFagsak(fagsak);
+        behandling.setFagsak(FagsakTestFactory.lagFagsak());
         behandling.setId(BEHANDLING_ID);
 
         return behandling;

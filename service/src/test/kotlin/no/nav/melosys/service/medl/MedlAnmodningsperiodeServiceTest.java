@@ -4,10 +4,7 @@ import java.time.Instant;
 import java.util.List;
 import java.util.Set;
 
-import no.nav.melosys.domain.Anmodningsperiode;
-import no.nav.melosys.domain.Behandling;
-import no.nav.melosys.domain.Behandlingsresultat;
-import no.nav.melosys.domain.Fagsak;
+import no.nav.melosys.domain.*;
 import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingstema;
 import no.nav.melosys.integrasjon.medl.MedlService;
 import no.nav.melosys.integrasjon.medl.StatusaarsakMedl;
@@ -48,16 +45,14 @@ class MedlAnmodningsperiodeServiceTest {
         nyBehandling = new Behandling();
         nyBehandling.setTema(Behandlingstema.ANMODNING_OM_UNNTAK_HOVEDREGEL);
         nyBehandling.setRegistrertDato(Instant.now());
-        fagsak = new Fagsak();
+        fagsak = FagsakTestFactory.lagFagsak();
         behandlingsresultat = lagBehandlingsresultatMedAnmodningsperiode();
     }
 
     @Test
     void avsluttTidligereAnmodningsperiode_avslutterTidligereAnmodningsperiode() {
-        fagsak.setBehandlinger(List.of(
-            lagA001Behandling(1L, Instant.now().minusSeconds(5)),
-            nyBehandling
-        ));
+        fagsak.leggTilBehandling(lagA001Behandling(1L, Instant.now().minusSeconds(5)));
+        fagsak.leggTilBehandling(nyBehandling);
         nyBehandling.setId(2L);
         nyBehandling.setFagsak(fagsak);
         when(behandlingsresultatService.hentBehandlingsresultat(1L)).thenReturn(behandlingsresultat);
@@ -71,12 +66,10 @@ class MedlAnmodningsperiodeServiceTest {
 
     @Test
     void avsluttTidligereAnmodningsperiode_avslutterTidligereAnmodningsperiode_medFlereTidligereBehandlinger() {
-        fagsak.setBehandlinger(List.of(
-            lagA001Behandling(1L, Instant.now().minusSeconds(15)),
-            lagA001Behandling(2L, Instant.now().minusSeconds(10)),
-            lagA001Behandling(3L, Instant.now().minusSeconds(5)),
-            nyBehandling
-        ));
+        fagsak.leggTilBehandling(lagA001Behandling(1L, Instant.now().minusSeconds(15)));
+        fagsak.leggTilBehandling(lagA001Behandling(2L, Instant.now().minusSeconds(10)));
+        fagsak.leggTilBehandling(lagA001Behandling(3L, Instant.now().minusSeconds(5)));
+        fagsak.leggTilBehandling(nyBehandling);
         nyBehandling.setId(4L);
         nyBehandling.setFagsak(fagsak);
         when(behandlingsresultatService.hentBehandlingsresultat(3L)).thenReturn(behandlingsresultat);

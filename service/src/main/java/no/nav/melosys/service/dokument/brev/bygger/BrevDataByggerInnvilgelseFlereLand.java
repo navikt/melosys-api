@@ -48,29 +48,28 @@ public class BrevDataByggerInnvilgelseFlereLand implements BrevDataBygger {
 
         BrevDataInnvilgelseFlereLand brevdata = lagInnvilgelseBrevdataMedA1(dataGrunnlag, saksbehandler);
 
-        brevdata.arbeidsgivere =
-            ListUtils.union(dataGrunnlag.getAvklarteVirksomheterGrunnlag().hentNorskeArbeidsgivere(),
-                dataGrunnlag.getAvklarteVirksomheterGrunnlag().hentUtenlandskeArbeidsgivere());
+        brevdata.setArbeidsgivere(ListUtils.union(dataGrunnlag.getAvklarteVirksomheterGrunnlag().hentNorskeArbeidsgivere(),
+            dataGrunnlag.getAvklarteVirksomheterGrunnlag().hentUtenlandskeArbeidsgivere()));
 
-        brevdata.lovvalgsperiode = lovvalgsperiodeService.hentLovvalgsperiode(behandlingID);
-        brevdata.erUkjenteEllerAlleEosLand = landvelgerService.erUkjenteEllerAlleEosLand(behandlingID);
-        brevdata.alleArbeidsland = landvelgerService.hentAlleArbeidsland(behandlingID).stream()
+        brevdata.setLovvalgsperiode(lovvalgsperiodeService.hentLovvalgsperiode(behandlingID));
+        brevdata.setUkjenteEllerAlleEosLand(landvelgerService.isFlereLandUkjentHvilke(behandlingID));
+        brevdata.setAlleArbeidsland(landvelgerService.hentAlleArbeidsland(behandlingID).stream()
             .map(Land_iso2::getBeskrivelse)
-            .collect(Collectors.toList());
+            .collect(Collectors.toList()));
 
-        brevdata.bostedsland = landvelgerService.hentBostedsland(behandlingID, grunnlagData).getLandkodeobjekt().getBeskrivelse();
+        brevdata.setBostedsland(landvelgerService.hentBostedsland(behandlingID, grunnlagData).getLandkodeobjekt().getBeskrivelse());
 
         Set<Maritimtyper> maritimType = avklartefaktaService.hentMaritimTyper(behandlingID);
-        brevdata.harAvklartMaritimTypeSokkel = maritimType.stream().anyMatch(mt -> mt == Maritimtyper.SOKKEL);
-        brevdata.harAvklartMaritimTypeSkip = maritimType.stream().anyMatch(mt -> mt == Maritimtyper.SKIP);
+        brevdata.setAvklartMaritimTypeSokkel(maritimType.stream().anyMatch(mt -> mt == Maritimtyper.SOKKEL));
+        brevdata.setAvklartMaritimTypeSkip(maritimType.stream().anyMatch(mt -> mt == Maritimtyper.SKIP));
 
-        brevdata.erMarginaltArbeid = avklartefaktaService.harMarginaltArbeid(behandlingID);
-        brevdata.erBegrensetPeriode = !PeriodeRegler.periodeErLik(
-            grunnlagData.periode.getFom(), grunnlagData.periode.getTom(), brevdata.lovvalgsperiode.getFom(), brevdata.lovvalgsperiode.getTom()
-        );
+        brevdata.setMarginaltArbeid(avklartefaktaService.harMarginaltArbeid(behandlingID));
+        brevdata.setBegrensetPeriode(!PeriodeRegler.periodeErLik(
+            grunnlagData.periode.getFom(), grunnlagData.periode.getTom(), brevdata.getLovvalgsperiode().getFom(), brevdata.getLovvalgsperiode().getTom()
+        ));
 
         if (dataGrunnlag.getBehandling().erNorgeUtpekt()) {
-            brevdata.trydemyndighetsland = saksopplysningerService.hentSedOpplysninger(behandlingID).getAvsenderLandkode();
+            brevdata.setTrydemyndighetsland(saksopplysningerService.hentSedOpplysninger(behandlingID).getAvsenderLandkode());
         }
 
         return brevdata;
@@ -78,7 +77,7 @@ public class BrevDataByggerInnvilgelseFlereLand implements BrevDataBygger {
 
     private BrevDataInnvilgelseFlereLand lagInnvilgelseBrevdataMedA1(BrevDataGrunnlag dataGrunnlag, String saksbehandler) {
         BrevDataInnvilgelseFlereLand brevdata = new BrevDataInnvilgelseFlereLand(brevbestillingDto, saksbehandler);
-        brevdata.vedleggA1 = (BrevDataA1) brevbyggerA1.lag(dataGrunnlag, saksbehandler);
+        brevdata.setVedleggA1((BrevDataA1) brevbyggerA1.lag(dataGrunnlag, saksbehandler));
         return brevdata;
     }
 }

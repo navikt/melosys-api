@@ -21,6 +21,7 @@ import no.nav.melosys.exception.FunksjonellException;
 import no.nav.melosys.exception.TekniskException;
 import no.nav.melosys.exception.ValideringException;
 import no.nav.melosys.repository.UtpekingsperiodeRepository;
+import no.nav.melosys.saksflytapi.ProsessinstansService;
 import no.nav.melosys.service.LandvelgerService;
 import no.nav.melosys.service.LovvalgsperiodeService;
 import no.nav.melosys.service.behandling.BehandlingService;
@@ -28,7 +29,6 @@ import no.nav.melosys.service.behandling.BehandlingsresultatService;
 import no.nav.melosys.service.dokument.sed.EessiService;
 import no.nav.melosys.service.kontroll.feature.ferdigbehandling.FerdigbehandlingKontrollFacade;
 import no.nav.melosys.service.oppgave.OppgaveService;
-import no.nav.melosys.service.saksflyt.ProsessinstansService;
 import no.nav.melosys.service.validering.Kontrollfeil;
 import no.nav.melosys.service.vedtak.VedtaksfattingFasade;
 import org.apache.commons.lang3.StringUtils;
@@ -101,11 +101,11 @@ public class UtpekingService {
                                   Set<String> mottakerinstitusjoner,
                                   String ytterligereInformasjonSed,
                                   String fritekstBrev) {
-        Behandling behandling = fagsak.hentAktivBehandling();
+        Behandling behandling = fagsak.finnAktivBehandlingIkkeÅrsavregning();
         if (behandling.getTema() != Behandlingstema.ARBEID_FLERE_LAND) {
             throw new FunksjonellException("Utpeking kan ikke skje for en behandling med tema " + behandling.getTema());
         }
-        long behandlingID = fagsak.hentAktivBehandling().getId();
+        long behandlingID = fagsak.finnAktivBehandlingIkkeÅrsavregning().getId();
 
         if (log.isInfoEnabled()) {
             log.info("Utpeking av annet land for sak: {}, behandling: {}, mottakerinstitusjoner: {}",
@@ -159,7 +159,7 @@ public class UtpekingService {
         validerAvslagUtpeking(utpekingAvvis);
         Behandling behandling = behandlingService.hentBehandling(behandlingID);
 
-        if (!behandling.erAktiv()) {
+        if (behandling.erInaktiv()) {
             throw new FunksjonellException("Behandling " + behandlingID + " er ikke aktiv!");
         }
 
@@ -191,7 +191,7 @@ public class UtpekingService {
         if (StringUtils.isEmpty(utpekingAvvis.getBegrunnelse())) {
             throw new FunksjonellException("Du må oppgi en begrunnelse for å kunne avslå en utpeking");
         }
-        if (utpekingAvvis.isEtterspørInformasjon() == null) {
+        if (utpekingAvvis.getEtterspørInformasjon() == null) {
             throw new FunksjonellException("Du må oppgi om forespørsel om mer informasjon vil bli sendt");
         }
     }

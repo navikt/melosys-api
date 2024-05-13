@@ -41,6 +41,7 @@ public class Land extends AbstraktKodeverkHjelper {
     public static final String UNGARN = "HUN";
     public static final String ØSTERRIKE = "AUT";
     public static final String ÅLAND = "ALA";
+    public static final String UNKNOWN = "XUK";
 
     // Brukes av JAXB
     public Land() {}
@@ -56,10 +57,6 @@ public class Land extends AbstraktKodeverkHjelper {
     @Override
     public FellesKodeverk hentKodeverkNavn() {
         return FellesKodeverk.LANDKODER;
-    }
-
-    public boolean erUkjent() {
-        return UKJENT.equals(kode);
     }
 
     @Override

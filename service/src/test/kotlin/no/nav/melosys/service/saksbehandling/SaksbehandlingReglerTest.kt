@@ -1,14 +1,15 @@
 package no.nav.melosys.service.saksbehandling
 
+import io.getunleash.FakeUnleash
 import io.kotest.matchers.shouldBe
 import io.mockk.MockKAdditionalAnswerScope
 import io.mockk.every
 import io.mockk.impl.annotations.MockK
 import io.mockk.junit5.MockKExtension
-import no.finn.unleash.FakeUnleash
 import no.nav.melosys.domain.Behandling
 import no.nav.melosys.domain.Behandlingsresultat
 import no.nav.melosys.domain.Fagsak
+import no.nav.melosys.domain.FagsakTestFactory
 import no.nav.melosys.domain.kodeverk.Sakstemaer
 import no.nav.melosys.domain.kodeverk.Sakstyper
 import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingsresultattyper
@@ -25,8 +26,10 @@ import org.junit.jupiter.params.ParameterizedTest
 import org.junit.jupiter.params.provider.Arguments
 import org.junit.jupiter.params.provider.Arguments.arguments
 import org.junit.jupiter.params.provider.MethodSource
+import java.time.Instant
 import java.time.LocalDate
 import java.time.ZoneOffset
+import java.time.temporal.ChronoUnit
 import java.util.*
 
 @ExtendWith(MockKExtension::class)
@@ -49,7 +52,7 @@ class SaksbehandlingReglerTest {
         unleash.resetAll()
     }
 
-    fun testHarTomFlytParametere() =
+    fun testHarIngenFlytParametere() =
         listOf(
             Arguments.of(
                 Sakstyper.TRYGDEAVTALE,
@@ -57,6 +60,7 @@ class SaksbehandlingReglerTest {
                 Behandlingstyper.HENVENDELSE,
                 Behandlingstema.IKKE_YRKESAKTIV,
                 false,
+                true,
                 true
             ),
             Arguments.of(
@@ -65,6 +69,7 @@ class SaksbehandlingReglerTest {
                 Behandlingstyper.HENVENDELSE,
                 Behandlingstema.IKKE_YRKESAKTIV,
                 false,
+                true,
                 true
             ),
             Arguments.of(
@@ -73,6 +78,7 @@ class SaksbehandlingReglerTest {
                 Behandlingstyper.KLAGE,
                 Behandlingstema.IKKE_YRKESAKTIV,
                 false,
+                true,
                 true
             ),
             Arguments.of(
@@ -81,6 +87,7 @@ class SaksbehandlingReglerTest {
                 Behandlingstyper.MANGLENDE_INNBETALING_TRYGDEAVGIFT,
                 Behandlingstema.IKKE_YRKESAKTIV,
                 false,
+                true,
                 true
             ),
             Arguments.of(
@@ -89,6 +96,7 @@ class SaksbehandlingReglerTest {
                 Behandlingstyper.FØRSTEGANG,
                 Behandlingstema.FORESPØRSEL_TRYGDEMYNDIGHET,
                 false,
+                true,
                 true
             ),
             Arguments.of(
@@ -97,6 +105,7 @@ class SaksbehandlingReglerTest {
                 Behandlingstyper.FØRSTEGANG,
                 Behandlingstema.IKKE_YRKESAKTIV,
                 false,
+                true,
                 false
             ),
             Arguments.of(
@@ -104,6 +113,7 @@ class SaksbehandlingReglerTest {
                 Sakstemaer.MEDLEMSKAP_LOVVALG,
                 Behandlingstyper.FØRSTEGANG,
                 Behandlingstema.YRKESAKTIV,
+                false,
                 true,
                 false
             ),
@@ -113,7 +123,35 @@ class SaksbehandlingReglerTest {
                 Behandlingstyper.FØRSTEGANG,
                 Behandlingstema.IKKE_YRKESAKTIV,
                 false,
+                false,
                 true
+            ),
+            Arguments.of(
+                Sakstyper.FTRL,
+                Sakstemaer.MEDLEMSKAP_LOVVALG,
+                Behandlingstyper.FØRSTEGANG,
+                Behandlingstema.IKKE_YRKESAKTIV,
+                false,
+                true,
+                false
+            ),
+            Arguments.of(
+                Sakstyper.FTRL,
+                Sakstemaer.MEDLEMSKAP_LOVVALG,
+                Behandlingstyper.MANGLENDE_INNBETALING_TRYGDEAVGIFT,
+                Behandlingstema.YRKESAKTIV,
+                true,
+                true,
+                false,
+            ),
+            Arguments.of(
+                Sakstyper.FTRL,
+                Sakstemaer.MEDLEMSKAP_LOVVALG,
+                Behandlingstyper.MANGLENDE_INNBETALING_TRYGDEAVGIFT,
+                Behandlingstema.YRKESAKTIV,
+                false,
+                true,
+                true,
             ),
             Arguments.of(
                 Sakstyper.TRYGDEAVTALE,
@@ -121,25 +159,31 @@ class SaksbehandlingReglerTest {
                 Behandlingstyper.FØRSTEGANG,
                 Behandlingstema.IKKE_YRKESAKTIV,
                 false,
+                true,
                 false
             ),
         )
 
 
     @ParameterizedTest
-    @MethodSource("testHarTomFlytParametere")
-    fun testHarTomFlyt(
+    @MethodSource("testHarIngenFlytParametere")
+    fun testHarIngenFlyt(
         sakstype: Sakstyper,
         sakstema: Sakstemaer,
         behandlingstype: Behandlingstyper,
         behandlingstema: Behandlingstema,
-        ftrlToggleEnabled: Boolean = false,
+        manglendeInnbetalingToggleEnabled: Boolean,
+        ikkeYrkesaktivFtrlToggleEnabled: Boolean,
         expected: Boolean
     ) {
-        if (ftrlToggleEnabled) {
-            unleash.enable(ToggleName.FOLKETRYGDEN_MVP);
+        if (manglendeInnbetalingToggleEnabled) {
+            unleash.enable(ToggleName.SAKSBEHANDLING_MANGLENDE_INNBETALING)
         }
-        val result = saksbehandlingRegler.harTomFlyt(sakstype, sakstema, behandlingstype, behandlingstema)
+        if (ikkeYrkesaktivFtrlToggleEnabled) {
+            unleash.enable(ToggleName.MELOSYS_FTRL_IKKE_YRKESAKTIV)
+        }
+        val result = saksbehandlingRegler.harIngenFlyt(sakstype, sakstema, behandlingstype, behandlingstema)
+
 
         result.shouldBe(expected)
     }
@@ -249,6 +293,19 @@ class SaksbehandlingReglerTest {
                 add(Behandlingstyper.FØRSTEGANG, Behandlingstema.YRKESAKTIV)
             }
         ),
+        arguments(
+            Sakstyper.FTRL,
+            Sakstemaer.MEDLEMSKAP_LOVVALG,
+            Behandlingstyper.MANGLENDE_INNBETALING_TRYGDEAVGIFT,
+            Behandlingstema.YRKESAKTIV,
+            BehandlingHolder().apply {
+                add(
+                    Behandlingstyper.MANGLENDE_INNBETALING_TRYGDEAVGIFT,
+                    Behandlingstema.YRKESAKTIV,
+                    Behandlingsresultattyper.OPPHØRT
+                )
+            }
+        ),
     )
 
     @ParameterizedTest(name = "{0} - {1} - {2} - {3}")
@@ -329,6 +386,19 @@ class SaksbehandlingReglerTest {
                 )
             }
         ),
+        arguments(
+            Sakstyper.FTRL,
+            Sakstemaer.MEDLEMSKAP_LOVVALG,
+            Behandlingstyper.MANGLENDE_INNBETALING_TRYGDEAVGIFT,
+            Behandlingstema.YRKESAKTIV,
+            BehandlingHolder().apply {
+                add(
+                    Behandlingstyper.MANGLENDE_INNBETALING_TRYGDEAVGIFT,
+                    Behandlingstema.YRKESAKTIV,
+                    Behandlingsresultattyper.DELVIS_OPPHØRT
+                )
+            }
+        ),
     )
 
     @ParameterizedTest(name = "behandlingsresultatType:{0} - FunnetBehandlingID:{2}")
@@ -338,6 +408,7 @@ class SaksbehandlingReglerTest {
         behandlinger: List<Behandling>,
         expectedBehandlingID: Long?
     ) {
+        unleash.enableAll()
         every { behandlingsresultatRepository.findById(any()) } returns lagBehandlingsresultat(resultatTypeFraRepo)
         val saksbehandlingRegler = SaksbehandlingRegler(behandlingsresultatRepository, unleash)
 
@@ -353,10 +424,7 @@ class SaksbehandlingReglerTest {
             type = Behandlingstyper.FØRSTEGANG
             tema = Behandlingstema.UTSENDT_ARBEIDSTAKER
             status = Behandlingsstatus.AVSLUTTET
-            fagsak = Fagsak().apply {
-                type = Sakstyper.EU_EOS
-                tema = Sakstemaer.MEDLEMSKAP_LOVVALG
-            }
+            fagsak = FagsakTestFactory.lagFagsak()
         }
 
         return listOf(
@@ -378,10 +446,7 @@ class SaksbehandlingReglerTest {
                         type = Behandlingstyper.KLAGE
                         tema = Behandlingstema.UTSENDT_ARBEIDSTAKER
                         status = Behandlingsstatus.AVSLUTTET
-                        fagsak = Fagsak().apply {
-                            type = Sakstyper.EU_EOS
-                            tema = Sakstemaer.MEDLEMSKAP_LOVVALG
-                        }
+                        fagsak = FagsakTestFactory.lagFagsak()
                     }
                 ),
                 null
@@ -399,20 +464,14 @@ class SaksbehandlingReglerTest {
                         type = Behandlingstyper.KLAGE
                         tema = Behandlingstema.UTSENDT_ARBEIDSTAKER
                         status = Behandlingsstatus.AVSLUTTET
-                        fagsak = Fagsak().apply {
-                            type = Sakstyper.EU_EOS
-                            tema = Sakstemaer.MEDLEMSKAP_LOVVALG
-                        }
+                        fagsak = FagsakTestFactory.lagFagsak()
                     },
                     Behandling().apply {
                         id = 1
                         type = Behandlingstyper.FØRSTEGANG
                         tema = Behandlingstema.UTSENDT_ARBEIDSTAKER
                         status = Behandlingsstatus.AVSLUTTET
-                        fagsak = Fagsak().apply {
-                            type = Sakstyper.EU_EOS
-                            tema = Sakstemaer.MEDLEMSKAP_LOVVALG
-                        }
+                        fagsak = FagsakTestFactory.lagFagsak()
                     }
                 ),
                 1L
@@ -425,30 +484,21 @@ class SaksbehandlingReglerTest {
                         type = Behandlingstyper.FØRSTEGANG
                         tema = Behandlingstema.UTSENDT_ARBEIDSTAKER
                         status = Behandlingsstatus.UNDER_BEHANDLING
-                        fagsak = Fagsak().apply {
-                            type = Sakstyper.EU_EOS
-                            tema = Sakstemaer.MEDLEMSKAP_LOVVALG
-                        }
+                        fagsak = FagsakTestFactory.lagFagsak()
                     },
                     Behandling().apply {
                         id = 1
                         type = Behandlingstyper.KLAGE
                         tema = Behandlingstema.UTSENDT_ARBEIDSTAKER
                         status = Behandlingsstatus.AVSLUTTET
-                        fagsak = Fagsak().apply {
-                            type = Sakstyper.EU_EOS
-                            tema = Sakstemaer.MEDLEMSKAP_LOVVALG
-                        }
+                        fagsak = FagsakTestFactory.lagFagsak()
                     },
                     Behandling().apply {
                         id = 2
                         type = Behandlingstyper.NY_VURDERING
                         tema = Behandlingstema.UTSENDT_ARBEIDSTAKER
                         status = Behandlingsstatus.AVSLUTTET
-                        fagsak = Fagsak().apply {
-                            type = Sakstyper.EU_EOS
-                            tema = Sakstemaer.MEDLEMSKAP_LOVVALG
-                        }
+                        fagsak = FagsakTestFactory.lagFagsak()
                     }
                 ),
                 2L
@@ -460,12 +510,45 @@ class SaksbehandlingReglerTest {
                     type = Behandlingstyper.HENVENDELSE
                     tema = Behandlingstema.UTSENDT_ARBEIDSTAKER
                     status = Behandlingsstatus.AVSLUTTET
-                    fagsak = Fagsak().apply {
-                        type = Sakstyper.EU_EOS
-                        tema = Sakstemaer.MEDLEMSKAP_LOVVALG
-                    }
+                    fagsak = FagsakTestFactory.lagFagsak()
                 }),
                 null
+            ),
+            arguments(
+                Behandlingsresultattyper.IKKE_FASTSATT,
+                listOf(
+                    Behandling().apply {
+                        id = 0
+                        type = Behandlingstyper.FØRSTEGANG
+                        tema = Behandlingstema.YRKESAKTIV
+                        status = Behandlingsstatus.AVSLUTTET
+                        registrertDato = Instant.now().minus(90, ChronoUnit.DAYS)
+                        fagsak = FagsakTestFactory.builder().apply {
+                            type = Sakstyper.FTRL
+                        }.build()
+                    },
+                    Behandling().apply {
+                        id = 1
+                        type = Behandlingstyper.NY_VURDERING
+                        tema = Behandlingstema.YRKESAKTIV
+                        status = Behandlingsstatus.AVSLUTTET
+                        registrertDato = Instant.now().minus(60, ChronoUnit.DAYS)
+                        fagsak = FagsakTestFactory.builder().apply {
+                            type = Sakstyper.FTRL
+                        }.build()
+                    },
+                    Behandling().apply {
+                        id = 2
+                        type = Behandlingstyper.MANGLENDE_INNBETALING_TRYGDEAVGIFT
+                        tema = Behandlingstema.YRKESAKTIV
+                        status = Behandlingsstatus.AVSLUTTET
+                        registrertDato = Instant.now().minus(30, ChronoUnit.DAYS)
+                        fagsak = FagsakTestFactory.builder().apply {
+                            type = Sakstyper.FTRL
+                        }.build()
+                    }
+                ).sortedByDescending { it.registrertDato },
+                2L
             ),
         )
     }
@@ -527,12 +610,16 @@ class SaksbehandlingReglerTest {
             }, behandlingsresultattype))
         }
 
-        fun lagFagsak(type: Sakstyper, tema: Sakstemaer) =
-            Fagsak().apply {
-                this.type = type
-                this.tema = tema
-                this.behandlinger = behandlinger(this).map { it.first }
+        fun lagFagsak(sakstype: Sakstyper, sakstema: Sakstemaer): Fagsak {
+            val fagsak = FagsakTestFactory.builder().apply {
+                type = sakstype
+                tema = sakstema
+            }.build()
+            behandlinger(fagsak).map { it.first }.forEach {
+                fagsak.leggTilBehandling(it)
             }
+            return fagsak
+        }
 
         override fun toString(): String {
             return behandlingerMedType.map { (behandling, behandlingsresultattyper) ->

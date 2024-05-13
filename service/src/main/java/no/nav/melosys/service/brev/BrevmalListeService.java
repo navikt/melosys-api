@@ -4,7 +4,6 @@ import no.nav.melosys.domain.kodeverk.Mottakerroller;
 import no.nav.melosys.domain.kodeverk.brev.Produserbaredokumenter;
 import no.nav.melosys.service.brev.bestilling.HentBrevAdresseTilMottakereService;
 import no.nav.melosys.service.brev.bestilling.HentMuligeProduserbaredokumenterService;
-import no.nav.melosys.service.brev.brevmalliste.BrevAdresse;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 

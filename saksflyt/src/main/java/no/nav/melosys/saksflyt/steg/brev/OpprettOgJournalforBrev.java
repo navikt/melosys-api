@@ -11,29 +11,27 @@ import no.nav.melosys.domain.brev.*;
 import no.nav.melosys.domain.kodeverk.Aktoersroller;
 import no.nav.melosys.domain.kodeverk.Mottakerroller;
 import no.nav.melosys.domain.kodeverk.brev.Produserbaredokumenter;
-import no.nav.melosys.domain.saksflyt.ProsessSteg;
-import no.nav.melosys.domain.saksflyt.Prosessinstans;
 import no.nav.melosys.exception.FunksjonellException;
 import no.nav.melosys.exception.IkkeFunnetException;
 import no.nav.melosys.integrasjon.ereg.EregFasade;
 import no.nav.melosys.integrasjon.joark.JoarkFasade;
 import no.nav.melosys.saksflyt.steg.StegBehandler;
+import no.nav.melosys.saksflytapi.domain.ProsessSteg;
+import no.nav.melosys.saksflytapi.domain.Prosessinstans;
 import no.nav.melosys.service.aktoer.UtenlandskMyndighetService;
 import no.nav.melosys.service.behandling.BehandlingService;
 import no.nav.melosys.service.brev.DokumentNavnService;
 import no.nav.melosys.service.dokument.DokgenService;
 import no.nav.melosys.service.dokument.DokumentHentingService;
-import no.nav.melosys.service.dokument.DokumentproduksjonsInfo;
 import no.nav.melosys.service.oppgave.OppgaveFactory;
 import no.nav.melosys.service.persondata.PersondataFasade;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Component;
 
-import static no.nav.melosys.domain.kodeverk.brev.Produserbaredokumenter.*;
-import static no.nav.melosys.domain.saksflyt.ProsessDataKey.*;
-import static no.nav.melosys.domain.saksflyt.ProsessSteg.OPPRETT_OG_JOURNALFØR_BREV;
-import static org.springframework.util.ObjectUtils.isEmpty;
+import static no.nav.melosys.domain.kodeverk.brev.Produserbaredokumenter.GENERELT_FRITEKSTVEDLEGG;
+import static no.nav.melosys.saksflytapi.domain.ProsessDataKey.*;
+import static no.nav.melosys.saksflytapi.domain.ProsessSteg.OPPRETT_OG_JOURNALFØR_BREV;
 
 @Component
 public class OpprettOgJournalforBrev implements StegBehandler {
@@ -93,16 +91,18 @@ public class OpprettOgJournalforBrev implements StegBehandler {
         List<Vedlegg> vedlegg = hentVedlegg(brevbestilling, fagsak.getSaksnummer(), mottaker);
         log.info("Produserbartdokument {} for behandling {} produsert", produserbartDokument, behandling.getId());
 
-        DokumentproduksjonsInfo dokumentproduksjonsInfo = dokgenService.hentDokumentInfo(produserbartDokument);
+        var dokumentproduksjonsInfo = dokgenService.hentDokumentInfo(produserbartDokument);
+        var journalføringTittel = dokumentNavnService.utledTittel(behandling, produserbartDokument, dokumentproduksjonsInfo, mottaker, null, brevbestilling, null);
 
         JournalpostBestilling.Builder bestilling = new JournalpostBestilling.Builder()
-            .medTittel(utledJournalføringsTittel(behandling, dokumentproduksjonsInfo, brevbestilling, mottaker))
+            .medTittel(journalføringTittel)
             .medBrevkode(dokumentproduksjonsInfo.dokgenMalnavn())
             .medDokumentKategori(dokumentproduksjonsInfo.dokumentKategoriKode())
             .medMottakerNavn(utledNavn(mottakerID, mottakerType))
             .medMottakerId(mottakerType == MottakerType.PERSON_MED_AKTØR_ID ? persondataFasade.hentFolkeregisterident(mottakerID) : mottakerID)
             .medMottakerIdType(utledMottakerIdType(mottakerType))
             .medSaksnummer(fagsak.getSaksnummer())
+            .medEksternReferanseId(prosessinstans.getId().toString())
             .medPdf(pdf)
             .medVedlegg(vedlegg);
 
@@ -151,7 +151,7 @@ public class OpprettOgJournalforBrev implements StegBehandler {
         return switch (mottakerType) {
             case PERSON_MED_AKTØR_ID, PERSON_MED_FNR -> persondataFasade.hentSammensattNavn(mottakerID);
             case ORGANISASJON -> eregFasade.hentOrganisasjonNavn(mottakerID);
-            case INSTITUSJON -> utenlandskMyndighetService.hentUtenlandskMyndighetForInstitusjonID(mottakerID).navn;
+            case INSTITUSJON -> utenlandskMyndighetService.hentUtenlandskMyndighetForInstitusjonID(mottakerID).getNavn();
         };
     }
 
@@ -218,23 +218,6 @@ public class OpprettOgJournalforBrev implements StegBehandler {
             }).toList();
     }
 
-    private String utledJournalføringsTittel(Behandling behandling, DokumentproduksjonsInfo dokumentproduksjonsInfo, DokgenBrevbestilling brevbestilling, Mottaker mottaker) {
-        if (brevbestilling instanceof FritekstbrevBrevbestilling fritekstbrevBrevbestilling) {
-            String fritekstTittel = fritekstbrevBrevbestilling.getDokumentTittel() != null ? fritekstbrevBrevbestilling.getDokumentTittel() : fritekstbrevBrevbestilling.getFritekstTittel();
-            if (isEmpty(fritekstTittel)) {
-                throw new FunksjonellException("Tittel til fritekstbrev mangler, behandlingId:" + brevbestilling.getBehandlingId());
-            }
-            if ("Request to remain subject to Norwegian legislation".equals(fritekstTittel)) {
-                return "Søknad om unntak";
-            }
-            return fritekstTittel;
-        }
-        if (List.of(TRYGDEAVTALE_GB, TRYGDEAVTALE_US, TRYGDEAVTALE_CAN, TRYGDEAVTALE_AU).contains(brevbestilling.getProduserbartdokument())) {
-            return dokumentNavnService.utledDokumentNavn(behandling, dokumentproduksjonsInfo, mottaker);
-        }
-        return dokumentproduksjonsInfo.journalføringsTittel();
-    }
-
     private ArkivDokument hentArkivDokumentFraJournalpost(SaksvedleggBestilling saksvedlegg, List<Journalpost> journalposter) {
         return journalposter.stream()
             .filter(journalpost -> saksvedlegg.journalpostID().equals(journalpost.getJournalpostId()))
@@ -242,5 +225,4 @@ public class OpprettOgJournalforBrev implements StegBehandler {
             .orElseThrow(() -> new IkkeFunnetException(String.format("Finner ikke journalpost %s for saken %s", saksvedlegg.journalpostID(), "saksnummer")))
             .hentArkivDokument(saksvedlegg.dokumentID());
     }
-
 }

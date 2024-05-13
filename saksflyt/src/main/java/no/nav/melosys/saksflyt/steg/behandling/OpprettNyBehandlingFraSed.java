@@ -1,16 +1,15 @@
 package no.nav.melosys.saksflyt.steg.behandling;
 
-import no.finn.unleash.Unleash;
 import no.nav.melosys.domain.Fagsak;
 import no.nav.melosys.domain.eessi.melding.MelosysEessiMelding;
 import no.nav.melosys.domain.kodeverk.behandlinger.*;
 import no.nav.melosys.domain.oppgave.Oppgave;
-import no.nav.melosys.domain.saksflyt.ProsessDataKey;
-import no.nav.melosys.domain.saksflyt.ProsessSteg;
-import no.nav.melosys.domain.saksflyt.Prosessinstans;
 import no.nav.melosys.exception.TekniskException;
 import no.nav.melosys.integrasjon.joark.JoarkFasade;
 import no.nav.melosys.saksflyt.steg.StegBehandler;
+import no.nav.melosys.saksflytapi.domain.ProsessDataKey;
+import no.nav.melosys.saksflytapi.domain.ProsessSteg;
+import no.nav.melosys.saksflytapi.domain.Prosessinstans;
 import no.nav.melosys.service.behandling.BehandlingService;
 import no.nav.melosys.service.behandling.BehandlingsresultatService;
 import no.nav.melosys.service.oppgave.OppgaveService;
@@ -71,7 +70,7 @@ public class OpprettNyBehandlingFraSed implements StegBehandler {
             joarkFasade.hentMottaksDatoForJournalpost(eessiMelding.getJournalpostId()),
             Behandlingsaarsaktyper.SED, null);
 
-        fagsak.getBehandlinger().add(behandling);
+        fagsak.leggTilBehandling(behandling);
         fagsakService.lagre(fagsak);
 
         ferdigstillOppgave(fagsak.getSaksnummer());
@@ -80,7 +79,7 @@ public class OpprettNyBehandlingFraSed implements StegBehandler {
     }
 
     private void avsluttTidligereBehandling(Fagsak fagsak) {
-        var aktivBehandling = fagsak.hentAktivBehandling();
+        var aktivBehandling = fagsak.finnAktivBehandlingIkkeÅrsavregning();
         if (aktivBehandling != null) {
             behandlingsresultatService.oppdaterBehandlingsresultattype(aktivBehandling.getId(), Behandlingsresultattyper.FERDIGBEHANDLET);
             behandlingService.avsluttBehandling(aktivBehandling.getId());

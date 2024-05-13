@@ -4,6 +4,7 @@ import java.time.ZoneId;
 import java.util.*;
 import java.util.stream.Collectors;
 
+import io.getunleash.Unleash;
 import no.nav.melosys.domain.*;
 import no.nav.melosys.domain.adresse.StrukturertAdresse;
 import no.nav.melosys.domain.avklartefakta.AvklartVirksomhet;
@@ -12,12 +13,12 @@ import no.nav.melosys.domain.eessi.Periode;
 import no.nav.melosys.domain.eessi.SvarAnmodningUnntak;
 import no.nav.melosys.domain.eessi.sed.*;
 import no.nav.melosys.domain.kodeverk.Land_iso2;
-import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingsstatus;
 import no.nav.melosys.domain.mottatteopplysninger.data.UtenlandskIdent;
 import no.nav.melosys.domain.person.Persondata;
 import no.nav.melosys.domain.person.familie.Familiemedlem;
 import no.nav.melosys.domain.person.familie.Familierelasjon;
 import no.nav.melosys.exception.FunksjonellException;
+import no.nav.melosys.featuretoggle.ToggleName;
 import no.nav.melosys.service.LandvelgerService;
 import no.nav.melosys.service.LovvalgsperiodeService;
 import no.nav.melosys.service.behandling.BehandlingsresultatService;
@@ -44,12 +45,15 @@ public class SedDataBygger {
     private final LovvalgsperiodeService lovvalgsperiodeService;
     private final SaksbehandlingRegler saksbehandlingRegler;
 
+    private final Unleash unleash;
+
     public SedDataBygger(BehandlingsresultatService behandlingsresultatService, LandvelgerService landvelgerService,
-                         LovvalgsperiodeService lovvalgsperiodeService, SaksbehandlingRegler saksbehandlingRegler) {
+                         LovvalgsperiodeService lovvalgsperiodeService, SaksbehandlingRegler saksbehandlingRegler, Unleash unleash) {
         this.behandlingsresultatService = behandlingsresultatService;
         this.landvelgerService = landvelgerService;
         this.lovvalgsperiodeService = lovvalgsperiodeService;
         this.saksbehandlingRegler = saksbehandlingRegler;
+        this.unleash = unleash;
     }
 
     public SedDataDto lag(SedDataGrunnlag dataGrunnlag,
@@ -107,6 +111,15 @@ public class SedDataBygger {
         sedDataDto.setArbeidsgivendeVirksomheter(lagArbeidsgivendeVirksomheter(grunnlagMedSøknad));
         sedDataDto.setSelvstendigeVirksomheter(lagSelvstendigeVirksomheter(grunnlagMedSøknad));
         sedDataDto.setArbeidssteder(hentArbeidssteder(grunnlagMedSøknad));
+
+        if (unleash.isEnabled(ToggleName.MELOSYS_CDM_4_3)) {
+            var arbeidsland = hentArbeidsland(grunnlagMedSøknad);
+            sedDataDto.setArbeidsland(arbeidsland);
+            sedDataDto.setHarFastArbeidssted(
+                arbeidsland.stream().anyMatch(Arbeidsland::harFastArbeidssted)
+            );
+        }
+
         sedDataDto.setAvklartBostedsland(
             landvelgerService.hentBostedsland(grunnlagMedSøknad.getBehandling().getId(), grunnlagMedSøknad.getMottatteOpplysningerData()).landkode()
         );
@@ -114,13 +127,13 @@ public class SedDataBygger {
         sedDataDto.setFamilieMedlem(grunnlagMedSøknad.getPersondata().hentFamiliemedlemmer().stream()
             .filter(Familiemedlem::erForelder)
             .map(SedDataBygger::lagForelder).toList());
-        sedDataDto.setUtenlandskIdent(grunnlagMedSøknad.getMottatteOpplysningerData().personOpplysninger.utenlandskIdent.stream()
+        sedDataDto.setUtenlandskIdent(grunnlagMedSøknad.getMottatteOpplysningerData().personOpplysninger.getUtenlandskIdent().stream()
             .map(SedDataBygger::tilUtenlandskIdentDto).toList());
 
         var behandling = grunnlagMedSøknad.getBehandling();
         if (behandling.getFagsak().erSakstypeEøs() &&
             !behandling.erBehandlingAvSed() &&
-            !saksbehandlingRegler.harTomFlyt(behandling)
+            !saksbehandlingRegler.harIngenFlyt(behandling)
         ) {
             sedDataDto.setSøknadsperiode(new Periode(
                 grunnlagMedSøknad.getMottatteOpplysningerData().periode.getFom(),
@@ -135,16 +148,39 @@ public class SedDataBygger {
         List<Arbeidssted> arbeidssteder = dataGrunnlag.getArbeidsstedGrunnlag().hentArbeidssteder().stream()
             .map(SedDataBygger::mapArbeidssted).collect(Collectors.toList()); //NOSONAR mutable list
 
-        Set<String> arbeidsland = arbeidssteder.stream().map(Arbeidssted::getAdresse).map(Adresse::getLand).collect(Collectors.toSet());
+        if (!saksbehandlingRegler.harRegistreringUnntakFraMedlemskapFlyt(dataGrunnlag.getBehandling())) {
+            Set<String> arbeidsland = arbeidssteder.stream().map(Arbeidssted::getAdresse).map(Adresse::getLand).collect(Collectors.toSet());
 
-        landvelgerService.hentAlleArbeidslandUtenMarginaltArbeid(dataGrunnlag.getBehandling().getId()).stream()
-            .map(Land_iso2::getKode)
-            .distinct()
-            .filter(not(arbeidsland::contains))
-            .map(Arbeidssted::lagIkkeFastArbeidssted)
-            .forEach(arbeidssteder::add);
+            landvelgerService.hentAlleArbeidslandUtenMarginaltArbeid(dataGrunnlag.getBehandling().getId()).stream()
+                .map(Land_iso2::getKode)
+                .distinct()
+                .filter(not(arbeidsland::contains))
+                .map(Arbeidssted::lagIkkeFastArbeidssted)
+                .forEach(arbeidssteder::add);
+        }
 
         return arbeidssteder;
+    }
+
+
+    private List<Arbeidsland> hentArbeidsland(SedDataGrunnlagMedSoknad dataGrunnlag) {
+        List<Arbeidssted> arbeidssteder = hentArbeidssteder(dataGrunnlag);
+
+        List<String> alleLand = arbeidssteder.stream()
+            .map(Arbeidssted::getAdresse)
+            .map(Adresse::getLand)
+            .distinct()
+            .toList();
+
+        return alleLand.stream()
+            .map(land -> {
+                List<Arbeidssted> arbeidsstedILandet = arbeidssteder.stream()
+                    .filter(arbeidssted -> arbeidssted.getAdresse().getLand().equals(land))
+                    .toList();
+
+                return new Arbeidsland(land, arbeidsstedILandet);
+            })
+            .toList();
     }
 
     private List<Virksomhet> lagArbeidsgivendeVirksomheter(SedDataGrunnlagMedSoknad dataGrunnlag) {
@@ -189,8 +225,8 @@ public class SedDataBygger {
 
     private static Ident tilUtenlandskIdentDto(UtenlandskIdent ui) {
         Ident ident = new Ident();
-        ident.setIdent(ui.ident);
-        ident.setLandkode(ui.landkode);
+        ident.setIdent(ui.getIdent());
+        ident.setLandkode(ui.getLandkode());
         return ident;
     }
 
@@ -289,7 +325,7 @@ public class SedDataBygger {
     private VedtakDto lagVedtakDto(Behandlingsresultat behandlingsresultat) {
         return behandlingsresultat.getBehandling().getFagsak().getBehandlinger()
             .stream()
-            .filter(behandling -> behandling.harStatus(Behandlingsstatus.AVSLUTTET) && !behandling.getId().equals(behandlingsresultat.getId()))
+            .filter(behandling -> !behandling.getId().equals(behandlingsresultat.getId()) && behandling.erInaktiv())
             .map(behandling -> behandlingsresultatService.hentBehandlingsresultat(behandling.getId()))
             .filter(Behandlingsresultat::harVedtak)
             .max(Comparator.comparing(b -> b.getVedtakMetadata().getVedtaksdato()))

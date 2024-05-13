@@ -1,10 +1,12 @@
 package no.nav.melosys.integrasjon.eessi
 
+import no.nav.melosys.integrasjon.MetricsTestConfig
 import com.fasterxml.jackson.databind.ObjectMapper
 import com.github.tomakehurst.wiremock.WireMockServer
 import com.github.tomakehurst.wiremock.client.MappingBuilder
 import com.github.tomakehurst.wiremock.client.WireMock
 import com.github.tomakehurst.wiremock.core.WireMockConfiguration
+import io.getunleash.FakeUnleash
 import io.kotest.assertions.throwables.shouldThrow
 import io.kotest.matchers.collections.shouldBeSingleton
 import io.kotest.matchers.collections.shouldHaveSize
@@ -21,12 +23,13 @@ import no.nav.melosys.domain.eessi.sed.SedDataDto
 import no.nav.melosys.domain.eessi.sed.SedGrunnlagA003Dto
 import no.nav.melosys.domain.eessi.sed.SedGrunnlagDto
 import no.nav.melosys.exception.TekniskException
-import no.nav.melosys.integrasjon.MetricsTestConfig
+//import no.nav.melosys.integrasjon.MetricsTestConfig
 import no.nav.melosys.integrasjon.OAuthMockServer
 import no.nav.melosys.integrasjon.StsMockServer
 import no.nav.melosys.integrasjon.eessi.dto.SaksrelasjonDto
 import no.nav.melosys.integrasjon.felles.GenericAuthFilterFactory
 import no.nav.melosys.integrasjon.felles.mdc.CorrelationIdOutgoingFilter
+import no.nav.melosys.integrasjon.reststs.RestSTSService
 import no.nav.melosys.integrasjon.reststs.StsWebClientProducer
 import no.nav.melosys.sikkerhet.context.ThreadLocalAccessInfo
 import org.junit.jupiter.api.*
@@ -42,15 +45,16 @@ import java.time.LocalDate
 import java.util.*
 
 @Import(
-    StsWebClientProducer::class,
-    StsMockServer::class,
     OAuthMockServer::class,
     CorrelationIdOutgoingFilter::class,
+    StsWebClientProducer::class,
+    StsMockServer::class,
+    RestSTSService::class,
 
     GenericAuthFilterFactory::class,
     EessiConsumerProducerConfig::class,
-    StsMockServer::class,
-    MetricsTestConfig::class
+    MetricsTestConfig::class,
+    FakeUnleash::class
 )
 @WebMvcTest
 @AutoConfigureWebClient
@@ -58,9 +62,10 @@ import java.util.*
 @TestInstance(TestInstance.Lifecycle.PER_CLASS)
 class EessiConsumerTest(
     @Autowired private val eessiConsumer: EessiConsumer,
-    @Autowired private val stsMockServer: StsMockServer,
     @Autowired private val oAuthMockServer: OAuthMockServer,
-    @Value("\${mockserver.port}") mockServiceUnderTestPort: Int
+    @Value("\${mockserver.port}") mockServiceUnderTestPort: Int,
+    @Autowired private val objectMapper: ObjectMapper,
+    @Autowired private val stsMockServer: StsMockServer,
 ) {
     private val processUUID = UUID.randomUUID()
     private val serviceUnderTestMockServer: WireMockServer =
@@ -69,14 +74,13 @@ class EessiConsumerTest(
     @BeforeAll
     fun beforeAll() {
         serviceUnderTestMockServer.start()
-        stsMockServer.start()
         oAuthMockServer.start()
+        oAuthMockServer.reset()
     }
 
     @AfterAll
     fun afterAll() {
         serviceUnderTestMockServer.stop()
-        stsMockServer.stop()
         oAuthMockServer.stop()
     }
 
@@ -123,7 +127,7 @@ class EessiConsumerTest(
             true
         )
 
-        MetricsTestConfig.checkMetricsUri("/buc/{bucType}?sendAutomatisk={sendAutomatisk}&oppdaterEksisterende={oppdaterEksisterendeOmFinnes}")
+        MetricsTestConfig.checkMetricsUri("/api/buc/{bucType}?sendAutomatisk={sendAutomatisk}&oppdaterEksisterende={oppdaterEksisterendeOmFinnes}")
 
         opprettSedDto.rinaSaksnummer.shouldBe("12345")
     }
@@ -165,7 +169,7 @@ class EessiConsumerTest(
             SedType.A001
         )
 
-        MetricsTestConfig.checkMetricsUri("/buc/{bucID}/sed/{sedType}")
+        MetricsTestConfig.checkMetricsUri("/api/buc/{bucID}/sed/{sedType}")
     }
 
     @Test
@@ -191,7 +195,7 @@ class EessiConsumerTest(
                 navn.shouldBe("NAVT002")
                 landkode.shouldBe("NO")
             }
-        MetricsTestConfig.checkMetricsUri("/buc/{bucType}/institusjoner?land={landkoder}")
+        MetricsTestConfig.checkMetricsUri("/api/buc/{bucType}/institusjoner?land={landkoder}")
     }
 
     @Test
@@ -238,7 +242,7 @@ class EessiConsumerTest(
             journalpostId.shouldBe(melosysEessiMelding.journalpostId)
         }
 
-        MetricsTestConfig.checkMetricsUri("/journalpost/{journalpostID}/eessimelding")
+        MetricsTestConfig.checkMetricsUri("/api/journalpost/{journalpostID}/eessimelding")
     }
 
     @Test
@@ -434,12 +438,12 @@ class EessiConsumerTest(
 
     fun get(url: String): MappingBuilder =
         WireMock.get(url)
-            .withHeader("Authorization", WireMock.equalTo("Bearer --token-from-system--"))
+            .withHeader("Authorization", WireMock.equalTo("Bearer --azure-token-from-system--"))
             .withHeader(HttpHeaders.ACCEPT, WireMock.equalTo(MediaType.APPLICATION_JSON_VALUE))
 
     fun post(url: String): MappingBuilder =
         WireMock.post(url)
-            .withHeader("Authorization", WireMock.equalTo("Bearer --token-from-system--"))
+            .withHeader("Authorization", WireMock.equalTo("Bearer --azure-token-from-system--"))
             .withHeader(HttpHeaders.ACCEPT, WireMock.equalTo(MediaType.APPLICATION_JSON_VALUE))
             .withHeader(HttpHeaders.CONTENT_TYPE, WireMock.equalTo(MediaType.APPLICATION_JSON_VALUE))
 

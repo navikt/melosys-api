@@ -1,5 +1,11 @@
 package no.nav.melosys.domain;
 
+import java.time.Instant;
+import java.time.LocalDate;
+import java.util.*;
+import java.util.stream.Collectors;
+import jakarta.persistence.*;
+
 import no.nav.melosys.domain.avklartefakta.Avklartefakta;
 import no.nav.melosys.domain.folketrygden.MedlemAvFolketrygden;
 import no.nav.melosys.domain.kodeverk.*;
@@ -8,12 +14,6 @@ import no.nav.melosys.domain.kodeverk.lovvalgsbestemmelser.Lovvalgbestemmelser_8
 import no.nav.melosys.domain.kodeverk.lovvalgsbestemmelser.Tilleggsbestemmelser_883_2004;
 import no.nav.melosys.exception.FunksjonellException;
 import org.springframework.data.jpa.domain.support.AuditingEntityListener;
-
-import javax.persistence.*;
-import java.time.Instant;
-import java.time.LocalDate;
-import java.util.*;
-import java.util.stream.Collectors;
 
 import static java.util.Optional.ofNullable;
 
@@ -53,6 +53,9 @@ public class Behandlingsresultat extends RegistreringsInfo {
 
     @Column(name = "ny_vurdering_bakgrunn")
     private String nyVurderingBakgrunn;
+
+    @Column(name = "fakturaserie_referanse")
+    private String fakturaserieReferanse;
 
     @OneToOne(mappedBy = "behandlingsresultat", cascade = CascadeType.ALL, orphanRemoval = true, fetch = FetchType.EAGER)
     private VedtakMetadata vedtakMetadata;
@@ -263,17 +266,16 @@ public class Behandlingsresultat extends RegistreringsInfo {
     }
 
     public boolean erAvslag() {
-        return erAvslagManglendeOpplysninger() || (type == Behandlingsresultattyper.AVSLAG_SØKNAD)
-            || (type == Behandlingsresultattyper.FASTSATT_LOVVALGSLAND && hentLovvalgsperiode().erAvslått())
-            || (type == Behandlingsresultattyper.MEDLEM_I_FOLKETRYGDEN && finnMedlemskapsperioder().stream().noneMatch(Medlemskapsperiode::erInnvilget));
-    }
-
-    public boolean erAvslagManglendeOpplysninger() {
-        return type == Behandlingsresultattyper.AVSLAG_MANGLENDE_OPPL;
+        return (type == Behandlingsresultattyper.AVSLAG_SØKNAD)
+            || (type == Behandlingsresultattyper.FASTSATT_LOVVALGSLAND && hentLovvalgsperiode().erAvslått());
     }
 
     public boolean erAnmodningOmUnntak() {
         return type == Behandlingsresultattyper.ANMODNING_OM_UNNTAK;
+    }
+
+    public boolean erOpphørt() {
+        return type == Behandlingsresultattyper.OPPHØRT;
     }
 
     public boolean erInnvilgelse() {
@@ -437,9 +439,11 @@ public class Behandlingsresultat extends RegistreringsInfo {
             || erInnvilgelseFlereLand()
             || erUtpeking());
     }
+
     public void settVedtakMetadata(LocalDate klagefrist) {
         settVedtakMetadata(null, klagefrist);
     }
+
     public void settVedtakMetadata(Vedtakstyper vedtakstype,
                                    LocalDate klagefrist) {
         if (vedtakMetadata == null) {
@@ -473,5 +477,13 @@ public class Behandlingsresultat extends RegistreringsInfo {
 
     public void setNyVurderingBakgrunn(String nyVurderingBakgrunn) {
         this.nyVurderingBakgrunn = nyVurderingBakgrunn;
+    }
+
+    public String getFakturaserieReferanse() {
+        return fakturaserieReferanse;
+    }
+
+    public void setFakturaserieReferanse(String fakturaserieReferanse) {
+        this.fakturaserieReferanse = fakturaserieReferanse;
     }
 }

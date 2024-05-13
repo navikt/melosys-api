@@ -12,10 +12,9 @@ import io.kotest.matchers.types.shouldNotBeInstanceOf
 import io.mockk.*
 import io.mockk.impl.annotations.MockK
 import io.mockk.junit5.MockKExtension
-import no.nav.melosys.domain.Behandling
-import no.nav.melosys.domain.Behandlingsaarsak
-import no.nav.melosys.domain.Fagsak
+import no.nav.melosys.domain.*
 import no.nav.melosys.domain.arkiv.Journalpost
+import no.nav.melosys.domain.kodeverk.Aktoersroller
 import no.nav.melosys.domain.kodeverk.Mottatteopplysningertyper
 import no.nav.melosys.domain.kodeverk.Sakstemaer
 import no.nav.melosys.domain.kodeverk.Sakstyper
@@ -25,10 +24,10 @@ import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingstyper
 import no.nav.melosys.domain.mottatteopplysninger.*
 import no.nav.melosys.domain.mottatteopplysninger.data.Periode
 import no.nav.melosys.domain.mottatteopplysninger.data.Soeknadsland
-import no.nav.melosys.domain.saksflyt.Prosessinstans
 import no.nav.melosys.exception.IkkeFunnetException
 import no.nav.melosys.integrasjon.joark.JoarkFasade
 import no.nav.melosys.repository.MottatteOpplysningerRepository
+import no.nav.melosys.saksflytapi.domain.Prosessinstans
 import no.nav.melosys.service.behandling.BehandlingService
 import no.nav.melosys.service.behandling.UtledMottaksdato
 import no.nav.melosys.service.saksbehandling.SaksbehandlingRegler
@@ -67,7 +66,7 @@ internal class MottatteOpplysningerServiceTest {
                 saksbehandlingRegler
             )
         )
-        every { saksbehandlingRegler.harTomFlyt(any()) } returns false
+        every { saksbehandlingRegler.harIngenFlyt(any()) } returns false
         every { saksbehandlingRegler.harIkkeYrkesaktivFlyt(any()) } returns false
         every { saksbehandlingRegler.harRegistreringUnntakFraMedlemskapFlyt(any()) } returns false
     }
@@ -96,8 +95,8 @@ internal class MottatteOpplysningerServiceTest {
     }
 
     @Test
-    fun hentEllerOpprettMottatteOpplysninger_finnesIkkeTomFlyt_kastException() {
-        every { saksbehandlingRegler.harTomFlyt(any()) } returns true
+    fun hentEllerOpprettMottatteOpplysninger_finnesIkkeIngenFlyt_kastException() {
+        every { saksbehandlingRegler.harIngenFlyt(any()) } returns true
         every { mottatteOpplysningerRepositoryMock.findByBehandling_Id(behandlingID) } returns Optional.empty()
         every { behandlingServiceMock.hentBehandling(behandlingID) } returns lagBehandling(
             Sakstyper.EU_EOS,
@@ -114,7 +113,7 @@ internal class MottatteOpplysningerServiceTest {
 
     @Test
     fun hentEllerOpprettMottatteOpplysninger_saksbehandlerKanIkkeRedigereBehandling_kastException() {
-        every { saksbehandlingRegler.harTomFlyt(any()) } returns false
+        every { saksbehandlingRegler.harIngenFlyt(any()) } returns false
         every { mottatteOpplysningerRepositoryMock.findByBehandling_Id(behandlingID) } returns Optional.empty()
         every { behandlingServiceMock.hentBehandling(behandlingID) } returns lagBehandling(
             Sakstyper.EU_EOS,
@@ -130,8 +129,8 @@ internal class MottatteOpplysningerServiceTest {
     }
 
     @Test
-    fun opprettSøknadEllerAnmodningEllerAttest_tomFlyt_lagerIkkeAnmodningEllerAttest() {
-        every { saksbehandlingRegler.harTomFlyt(any()) } returns true
+    fun opprettSøknadEllerAnmodningEllerAttest_ingenFlyt_lagerIkkeAnmodningEllerAttest() {
+        every { saksbehandlingRegler.harIngenFlyt(any()) } returns true
         val prosessinstans = Prosessinstans().apply {
             behandling = lagBehandling(
                 Sakstyper.EU_EOS,
@@ -251,12 +250,12 @@ internal class MottatteOpplysningerServiceTest {
     @Test
     fun oppdaterMottatteOpplysninger_mottatteopplysningerJsonDataIkkeSatt_setterJsonDataOgLagrerMottatteOpplysninger() {
         val mottatteOpplysninger = MottatteOpplysninger().apply {
-            setMottatteOpplysningerdata(MottatteOpplysningerData().apply {
+            mottatteOpplysningerData = MottatteOpplysningerData().apply {
                 periode = Periode(
                     LocalDate.of(2000, 1, 1),
                     LocalDate.of(2010, 1, 1)
                 )
-            })
+            }
         }
         every { mottatteOpplysningerRepositoryMock.saveAndFlush(any()) } returns mockk()
 
@@ -279,7 +278,7 @@ internal class MottatteOpplysningerServiceTest {
     @Test
     fun oppdaterMottatteOpplysningerPeriodeOgLand_eksisterer_oppdatererPeriodeOgLand() {
         val mottatteOpplysninger = MottatteOpplysninger().apply {
-            setMottatteOpplysningerdata(MottatteOpplysningerData())
+            mottatteOpplysningerData = MottatteOpplysningerData()
         }
         val periode = Periode(
             LocalDate.of(2021, 1, 1),
@@ -399,8 +398,8 @@ internal class MottatteOpplysningerServiceTest {
     }
 
     @Test
-    fun opprettSøknad_tomFlyt_mottatteOpplysningerBlirIkkeOpprettet() {
-        every { saksbehandlingRegler.harTomFlyt(any()) } returns true
+    fun opprettSøknad_ingenFlyt_mottatteOpplysningerBlirIkkeOpprettet() {
+        every { saksbehandlingRegler.harIngenFlyt(any()) } returns true
         val behandling = lagBehandling(
             Sakstyper.TRYGDEAVTALE,
             Sakstemaer.MEDLEMSKAP_LOVVALG,
@@ -480,9 +479,10 @@ internal class MottatteOpplysningerServiceTest {
         )
 
 
-        mottatteOpplysningerServiceSpy.opprettSøknadEllerAnmodningEllerAttest(Prosessinstans().apply {
-            this.behandling = behandling
-        })
+        mottatteOpplysningerServiceSpy.opprettSøknadEllerAnmodningEllerAttest(
+            Prosessinstans().apply {
+                this.behandling = behandling
+            })
 
 
         verify {
@@ -513,10 +513,10 @@ internal class MottatteOpplysningerServiceTest {
 
     private fun lagBehandling(sakstype: Sakstyper, sakstemaer: Sakstemaer, tema: Behandlingstema) =
         Behandling().apply {
-            fagsak = Fagsak().apply {
-                type = sakstype
-                this.tema = sakstemaer
-            }
+            fagsak = FagsakTestFactory.builder()
+                .type(sakstype)
+                .tema(sakstemaer)
+                .build()
             id = behandlingID
             initierendeJournalpostId = "123321"
             type = Behandlingstyper.FØRSTEGANG

@@ -3,7 +3,7 @@ package no.nav.melosys.integrasjon.kodeverk.impl;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import javax.ws.rs.NotFoundException;
+import jakarta.ws.rs.NotFoundException;
 
 import no.nav.melosys.integrasjon.kodeverk.Kode;
 import no.nav.melosys.integrasjon.kodeverk.Kodeverk;
@@ -30,7 +30,7 @@ public class KodeverkRegisterImpl implements KodeverkRegister {
             Map<String, List<Kode>> koder = new HashMap<>();
             kodeDto.betydninger.forEach((kode, betydninger) -> {
                 List<Kode> termer = betydninger.stream().map(betydning -> {
-                    String term = betydning.beskrivelser.get(BOKMÅL).term;
+                    String term = betydning.beskrivelser.get(BOKMÅL).getTerm();
                     return new Kode(kode, term, betydning.gyldigFra, betydning.gyldigTil);
                 }).toList();
                 koder.put(kode, termer);

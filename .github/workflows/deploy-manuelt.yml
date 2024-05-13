@@ -43,16 +43,16 @@ jobs:
 
     steps:
       - name: Checkout
-        uses: actions/checkout@v3
+        uses: actions/checkout@v4
       - name: Setup Maven
-        uses: actions/cache@v3
+        uses: actions/cache@v4
         with:
           path: ~/.m2/repository
           key: ${{ runner.os }}-maven-${{ hashFiles('**/pom.xml') }}
           restore-keys: |
             ${{ runner.os }}-maven-
       - name: Set up JDK 17
-        uses: actions/setup-java@v3
+        uses: actions/setup-java@v4
         with:
           java-version: '17'
           distribution: 'temurin'
@@ -76,7 +76,14 @@ jobs:
     runs-on: ubuntu-latest-8-cores
     needs: build
     steps:
-      - uses: actions/checkout@v3
+      - uses: actions/checkout@v4
+      - name: deploy new Unleash Apikey to ${{github.event.inputs.environment}}
+        uses: nais/deploy/actions/deploy@v1
+        env:
+          APIKEY: ${{ secrets.NAIS_DEPLOY_APIKEY }}
+          CLUSTER: ${{github.event.inputs.environment == 'prod' && 'prod-fss' || 'dev-fss' }}
+          RESOURCE: nais/unleash-apitoken.yml
+          VARS: nais/vars-${{github.event.inputs.environment}}.json
       - name: deploy to ${{github.event.inputs.environment}}
         uses: nais/deploy/actions/deploy@v1
         env:

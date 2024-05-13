@@ -3,27 +3,25 @@ package no.nav.melosys.service.eessi;
 import java.util.Collections;
 import java.util.Optional;
 
-import no.finn.unleash.FakeUnleash;
 import no.nav.melosys.domain.*;
 import no.nav.melosys.domain.eessi.melding.MelosysEessiMelding;
 import no.nav.melosys.domain.kodeverk.Aktoersroller;
 import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingsstatus;
 import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingstema;
 import no.nav.melosys.domain.oppgave.Oppgave;
-import no.nav.melosys.domain.saksflyt.ProsessDataKey;
-import no.nav.melosys.domain.saksflyt.Prosessinstans;
 import no.nav.melosys.exception.FunksjonellException;
 import no.nav.melosys.integrasjon.oppgave.OppgaveOppdatering;
+import no.nav.melosys.saksflytapi.ProsessinstansService;
+import no.nav.melosys.saksflytapi.domain.ProsessDataKey;
+import no.nav.melosys.saksflytapi.domain.Prosessinstans;
 import no.nav.melosys.service.eessi.ruting.SvarAnmodningUnntakSedRuter;
 import no.nav.melosys.service.oppgave.OppgaveService;
 import no.nav.melosys.service.sak.FagsakService;
-import no.nav.melosys.service.saksflyt.ProsessinstansService;
 import no.nav.melosys.service.unntak.AnmodningsperiodeService;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.Mock;
-import org.mockito.internal.util.collections.Sets;
 import org.mockito.junit.jupiter.MockitoExtension;
 
 import static org.assertj.core.api.Assertions.assertThatExceptionOfType;
@@ -61,7 +59,7 @@ class SvarAnmodningUnntakSedRuterTest {
         prosessinstans.setData(ProsessDataKey.EESSI_MELDING, eessiMelding);
         svarAnmodningUnntakSedRuter.rutSedTilBehandling(prosessinstans, 1L);
 
-        verify(prosessinstansService).opprettProsessinstansMottattSvarAnmodningUnntak(fagsak.hentAktivBehandling(), eessiMelding);
+        verify(prosessinstansService).opprettProsessinstansMottattSvarAnmodningUnntak(fagsak.finnAktivBehandlingIkkeÅrsavregning(), eessiMelding);
     }
 
     @Test
@@ -81,7 +79,7 @@ class SvarAnmodningUnntakSedRuterTest {
         svarAnmodningUnntakSedRuter.rutSedTilBehandling(prosessinstans, 1L);
 
         verify(prosessinstansService).opprettProsessinstansSedJournalføring(
-            fagsak.hentAktivBehandling(), eessiMelding
+            fagsak.finnAktivBehandlingIkkeÅrsavregning(), eessiMelding
         );
     }
 
@@ -100,7 +98,7 @@ class SvarAnmodningUnntakSedRuterTest {
 
         verify(oppgaveService).oppdaterOppgave(any(), any(OppgaveOppdatering.class));
         verify(prosessinstansService).opprettProsessinstansSedJournalføring(
-            fagsak.hentAktivBehandling(), eessiMelding
+            fagsak.finnAktivBehandlingIkkeÅrsavregning(), eessiMelding
         );
     }
 
@@ -130,18 +128,18 @@ class SvarAnmodningUnntakSedRuterTest {
     }
 
     private Fagsak hentFagsak(Behandlingstema behandlingstema, Behandlingsstatus behandlingsstatus) {
-        Fagsak fagsak = new Fagsak();
+        Fagsak fagsak = FagsakTestFactory.lagFagsak();
         Behandling behandling = new Behandling();
         behandling.setTema(behandlingstema);
         behandling.setStatus(behandlingsstatus);
         behandling.setId(123L);
         behandling.setFagsak(fagsak);
-        fagsak.setBehandlinger(Collections.singletonList(behandling));
+        fagsak.leggTilBehandling(behandling);
 
         Aktoer aktoer = new Aktoer();
         aktoer.setRolle(Aktoersroller.BRUKER);
         aktoer.setAktørId("223345325342");
-        fagsak.setAktører(Sets.newSet(aktoer));
+        fagsak.leggTilAktør(aktoer);
         return fagsak;
     }
 

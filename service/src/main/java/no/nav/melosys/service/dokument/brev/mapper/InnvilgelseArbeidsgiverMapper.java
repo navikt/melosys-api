@@ -1,7 +1,7 @@
 package no.nav.melosys.service.dokument.brev.mapper;
 
-import javax.xml.bind.JAXBElement;
-import javax.xml.bind.JAXBException;
+import jakarta.xml.bind.JAXBElement;
+import jakarta.xml.bind.JAXBException;
 
 import no.nav.dok.melosysbrev._000127.BrevdataType;
 import no.nav.dok.melosysbrev._000127.Fag;
@@ -39,15 +39,15 @@ public class InnvilgelseArbeidsgiverMapper implements BrevDataMapper {
     private Fag mapFag(BrevDataInnvilgelse brevDataInnvilgelse) {
         Fag fag = new Fag();
 
-        fag.setArbeidsland(brevDataInnvilgelse.arbeidsland);
-        fag.setNavn(brevDataInnvilgelse.personNavn);
-        fag.setArbeidsgiver(brevDataInnvilgelse.hovedvirksomhet.navn);
+        fag.setArbeidsland(brevDataInnvilgelse.getArbeidsland());
+        fag.setNavn(brevDataInnvilgelse.getPersonNavn());
+        fag.setArbeidsgiver(brevDataInnvilgelse.getHovedvirksomhet().navn);
 
-        Lovvalgsperiode periode = brevDataInnvilgelse.lovvalgsperiode;
-        fag.setLovvalgsperiode(LovvalgsperiodeType.builder()
+        Lovvalgsperiode periode = brevDataInnvilgelse.getLovvalgsperiode();
+        fag.setLovvalgsperiode(new LovvalgsperiodeType()
             .withFomDato(lagXmlDato(periode.getFom()))
             .withTomDato(lagXmlDato(periode.getTom()))
-            .build());
+            );
 
         return fag;
     }
@@ -56,11 +56,10 @@ public class InnvilgelseArbeidsgiverMapper implements BrevDataMapper {
                                                              MelosysNAVFelles navFelles,
                                                              Fag fag) {
         ObjectFactory factory = new ObjectFactory();
-        BrevdataType brevdataType = BrevdataType.builder()
+        BrevdataType brevdataType = new BrevdataType()
             .withFelles(fellesType)
             .withNAVFelles(navFelles)
-            .withFag(fag)
-            .build();
+            .withFag(fag);
         return factory.createBrevdata(brevdataType);
     }
 }

@@ -58,7 +58,7 @@ public class DoksysService implements DoksysFasade {
         ProduserDokumentutkastRequest wsRequest = new ProduserDokumentutkastRequest();
         DokumentbestillingMetadata metadata = dokumentbestilling.getMetadata();
 
-        wsRequest.setDokumenttypeId(metadata.dokumenttypeID);
+        wsRequest.setDokumenttypeId(metadata.getDokumenttypeID());
         wsRequest.setBrevdata(dokumentbestilling.getBrevData());
 
         try {
@@ -79,7 +79,7 @@ public class DoksysService implements DoksysFasade {
         Dokumentbestillingsinformasjon info = new Dokumentbestillingsinformasjon();
 
         DokumentbestillingMetadata metadata = dokumentbestilling.getMetadata();
-        info.setDokumenttypeId(metadata.dokumenttypeID);
+        info.setDokumenttypeId(metadata.getDokumenttypeID());
         info.setFerdigstillForsendelse(true);
 
         Fagsystemer bestillendeFagsystem = objectFactory.createFagsystemer();
@@ -93,26 +93,26 @@ public class DoksysService implements DoksysFasade {
         info.setSakstilhoerendeFagsystem(sakstilhørendeFagsystem);
 
         Person bruker = objectFactory.createPerson();
-        bruker.setNavn(metadata.brukerNavn);
-        bruker.setIdent(metadata.brukerID);
+        bruker.setNavn(metadata.getBrukerNavn());
+        bruker.setIdent(metadata.getBrukerID());
         info.setBruker(bruker);
 
         info.setMottaker(lagMottaker(metadata));
 
-        info.setJournalsakId(metadata.journalsakID);
+        info.setJournalsakId(metadata.getJournalsakID());
 
         Fagomraader fagområde = objectFactory.createFagomraader();
-        fagområde.setKodeRef(metadata.fagområde);
-        fagområde.setValue(metadata.fagområde);
+        fagområde.setKodeRef(metadata.getFagområde());
+        fagområde.setValue(metadata.getFagområde());
         info.setDokumenttilhoerendeFagomraade(fagområde);
 
         info.setJournalfoerendeEnhet(Integer.toString(MELOSYS_ENHET_ID));
-        info.setSaksbehandlernavn(metadata.saksbehandler != null ? metadata.saksbehandler : SYS_AVSENDER);
+        info.setSaksbehandlernavn(metadata.getSaksbehandler() != null ? metadata.getSaksbehandler() : SYS_AVSENDER);
 
-        if (metadata.mottaker.erUtenlandskMyndighet()) {
-            info.setAdresse(lagUtenlandskAdresse(metadata.utenlandskMyndighet.getAdresse()));
-        } else if (metadata.postadresse != null) {
-            info.setAdresse(lagUtenlandskAdresse(metadata.postadresse));
+        if (metadata.getMottaker().erUtenlandskMyndighet()) {
+            info.setAdresse(lagUtenlandskAdresse(metadata.getUtenlandskMyndighet().getAdresse()));
+        } else if (metadata.getPostadresse() != null) {
+            info.setAdresse(lagUtenlandskAdresse(metadata.getPostadresse()));
         }
 
         wsRequest.setDokumentbestillingsinformasjon(info);
@@ -126,8 +126,8 @@ public class DoksysService implements DoksysFasade {
             ProduserIkkeredigerbartDokumentResponse wsResponse = dokumentproduksjonConsumer.produserIkkeredigerbartDokument(wsRequest);
 
             DokumentbestillingResponse response = new DokumentbestillingResponse();
-            response.dokumentId = wsResponse.getDokumentId();
-            response.journalpostId = wsResponse.getJournalpostId();
+            response.setDokumentId(wsResponse.getDokumentId());
+            response.setJournalpostId(wsResponse.getJournalpostId());
 
             return response;
         } catch (ProduserIkkeredigerbartDokumentSikkerhetsbegrensning e) {
@@ -240,19 +240,19 @@ public class DoksysService implements DoksysFasade {
             postadresse.getHusnummerEtasjeLeilighet()));
         utenlandskPostadresse.setAdresselinje3(postadresse.getRegion());
         utenlandskPostadresse.setAdresselinje2(sammenslå(postadresse.getPostnummer(), postadresse.getPoststed()));
-        utenlandskPostadresse.setLand(new Landkoder().withValue(postadresse.getLandkode()));
+        utenlandskPostadresse.setLand(new Landkoder().useValue(postadresse.getLandkode()));
         return utenlandskPostadresse;
     }
 
     private Aktoer lagMottaker(DokumentbestillingMetadata metadata) {
-        if (metadata.mottaker == null) {
+        if (metadata.getMottaker() == null) {
             throw new FunksjonellException("Brev kan ikke sendes, mottaker er ikke satt.");
         }
 
-        Mottakerroller mottakerRolle = metadata.mottaker.getRolle();
-        String mottakerID = metadata.mottakerID;
-        String brukerNavn = metadata.brukerNavn;
-        boolean berik = metadata.berik;
+        Mottakerroller mottakerRolle = metadata.getMottaker().getRolle();
+        String mottakerID = metadata.getMottakerID();
+        String brukerNavn = metadata.getBrukerNavn();
+        boolean berik = Boolean.TRUE.equals(metadata.getBerik());
 
         switch (mottakerRolle) {
             case BRUKER:
@@ -260,7 +260,7 @@ public class DoksysService implements DoksysFasade {
             case ARBEIDSGIVER, NORSK_MYNDIGHET:
                 return lagOrganisasjon(mottakerID);
             case FULLMEKTIG:
-                if (metadata.mottaker.erOrganisasjon()) {
+                if (metadata.getMottaker().erOrganisasjon()) {
                     return lagOrganisasjon(mottakerID);
                 } else {
                     Person person = objectFactory.createPerson();
@@ -268,10 +268,10 @@ public class DoksysService implements DoksysFasade {
                     return person;
                 }
             case UTENLANDSK_TRYGDEMYNDIGHET:
-                if (metadata.mottaker.erUtenlandskMyndighet()) {
+                if (metadata.getMottaker().erUtenlandskMyndighet()) {
                     // Dokprod støtter ikke utenlandske myndigheter så vi lager en falsk person
                     // med mottakerId="11111111111" og dermed blir AvsendMottakId i Joark tom.
-                    return lagPerson(FALSK_MOTTAKER_ID, metadata.utenlandskMyndighet.navn, false);
+                    return lagPerson(FALSK_MOTTAKER_ID, metadata.getUtenlandskMyndighet().getNavn(), false);
                 } else {
                     return lagOrganisasjon(mottakerID);
                 }

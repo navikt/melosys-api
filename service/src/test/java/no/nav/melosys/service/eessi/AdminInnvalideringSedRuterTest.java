@@ -15,8 +15,9 @@ import no.nav.melosys.domain.eessi.melding.MelosysEessiMelding;
 import no.nav.melosys.domain.kodeverk.Saksstatuser;
 import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingsstatus;
 import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingstema;
-import no.nav.melosys.domain.saksflyt.ProsessDataKey;
-import no.nav.melosys.domain.saksflyt.Prosessinstans;
+import no.nav.melosys.saksflytapi.ProsessinstansService;
+import no.nav.melosys.saksflytapi.domain.ProsessDataKey;
+import no.nav.melosys.saksflytapi.domain.Prosessinstans;
 import no.nav.melosys.service.behandling.BehandlingService;
 import no.nav.melosys.service.behandling.BehandlingsresultatService;
 import no.nav.melosys.service.dokument.sed.EessiService;
@@ -24,7 +25,6 @@ import no.nav.melosys.service.eessi.ruting.AdminInnvalideringSedRuter;
 import no.nav.melosys.service.medl.MedlPeriodeService;
 import no.nav.melosys.service.oppgave.OppgaveService;
 import no.nav.melosys.service.sak.FagsakService;
-import no.nav.melosys.service.saksflyt.ProsessinstansService;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -94,7 +94,7 @@ class AdminInnvalideringSedRuterTest {
     void rutSedTilBehandling_tilhørendeFagsakFinnesOgBehandlingErNorgeUtpektAktiv_behandlingsstausVURDER_DOKUMENT() {
         var fagsak = lagFagsak(Behandlingstema.BESLUTNING_LOVVALG_NORGE, Behandlingsstatus.UNDER_BEHANDLING);
         when(fagsakService.finnFagsakFraArkivsakID(arkivsakID)).thenReturn(Optional.of(fagsak));
-        Behandling sistAktiveBehandling = fagsak.hentSistAktivBehandling();
+        Behandling sistAktiveBehandling = fagsak.hentSistAktivBehandlingIkkeÅrsavregning();
 
 
         adminInnvalideringSedRuter.rutSedTilBehandling(prosessinstans, arkivsakID);
@@ -118,8 +118,8 @@ class AdminInnvalideringSedRuterTest {
     @Test
     void rutSedTilBehandling_behandlingErUtlandUtpektOgAvsluttetHarMedlPeriode_oppdaterSaksstatusAnnullertOgOpphørMEDLPeriode() {
         var fagsak = lagFagsak(Behandlingstema.BESLUTNING_LOVVALG_ANNET_LAND, Behandlingsstatus.AVSLUTTET);
-        fagsak.hentSistAktivBehandling().getSaksopplysninger().add(lagSedDokument());
-        Behandling sistAktiveBehandling = fagsak.hentSistAktivBehandling();
+        fagsak.hentSistAktivBehandlingIkkeÅrsavregning().getSaksopplysninger().add(lagSedDokument());
+        Behandling sistAktiveBehandling = fagsak.hentSistAktivBehandlingIkkeÅrsavregning();
 
         Behandlingsresultat behandlingsresultat = lagBehandlingsresultat(true);
         behandlingsresultat.setBehandling(sistAktiveBehandling);
@@ -137,8 +137,8 @@ class AdminInnvalideringSedRuterTest {
     @Test
     void rutSedTilBehandling_behandlingErUtstasjoneringOgAktiv_oppdaterSaksstatusAnnullert() {
         var fagsak = lagFagsak(Behandlingstema.REGISTRERING_UNNTAK_NORSK_TRYGD_UTSTASJONERING, Behandlingsstatus.UNDER_BEHANDLING);
-        fagsak.hentSistAktivBehandling().getSaksopplysninger().add(lagSedDokument());
-        Behandling sistAktiveBehandling = fagsak.hentSistAktivBehandling();
+        fagsak.hentSistAktivBehandlingIkkeÅrsavregning().getSaksopplysninger().add(lagSedDokument());
+        Behandling sistAktiveBehandling = fagsak.hentSistAktivBehandlingIkkeÅrsavregning();
 
         Behandlingsresultat behandlingsresultat = new Behandlingsresultat();
         behandlingsresultat.setBehandling(sistAktiveBehandling);
@@ -159,7 +159,7 @@ class AdminInnvalideringSedRuterTest {
     @Test
     void rutSedTilBehandling_behandlingErUnntakNorskTrygvØvrigAktivSedIkkeAnnullert_oppretterBehandlingsoppgave() {
         var fagsak = lagFagsak(Behandlingstema.REGISTRERING_UNNTAK_NORSK_TRYGD_ØVRIGE, Behandlingsstatus.UNDER_BEHANDLING);
-        fagsak.hentSistAktivBehandling().getSaksopplysninger().add(lagSedDokument());
+        fagsak.hentSistAktivBehandlingIkkeÅrsavregning().getSaksopplysninger().add(lagSedDokument());
 
         when(eessiService.hentTilknyttedeBucer(arkivsakID, List.of())).thenReturn(lagBucInformasjon("ÅPEN"));
         when(fagsakService.finnFagsakFraArkivsakID(arkivsakID)).thenReturn(Optional.of(fagsak));
@@ -215,8 +215,9 @@ class AdminInnvalideringSedRuterTest {
     }
 
     private Fagsak lagFagsak(Behandlingstema behandlingstema, Behandlingsstatus behandlingsstatus) {
-        var fagsak = new Fagsak();
-        fagsak.setBehandlinger(List.of(lagBehandling(fagsak, behandlingstema, behandlingsstatus)));
+        var fagsak = FagsakTestFactory.lagFagsak();
+        var behandling = lagBehandling(fagsak, behandlingstema, behandlingsstatus);
+        fagsak.leggTilBehandling(behandling);
         return fagsak;
     }
 }

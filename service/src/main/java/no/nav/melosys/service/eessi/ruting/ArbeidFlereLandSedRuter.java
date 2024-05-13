@@ -4,7 +4,6 @@ import java.util.Collection;
 import java.util.Collections;
 import java.util.Optional;
 
-import no.finn.unleash.Unleash;
 import no.nav.melosys.domain.Behandling;
 import no.nav.melosys.domain.Behandlingsresultat;
 import no.nav.melosys.domain.Fagsak;
@@ -14,15 +13,15 @@ import no.nav.melosys.domain.kodeverk.Landkoder;
 import no.nav.melosys.domain.kodeverk.Sakstemaer;
 import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingsstatus;
 import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingstema;
-import no.nav.melosys.domain.saksflyt.ProsessDataKey;
-import no.nav.melosys.domain.saksflyt.Prosessinstans;
 import no.nav.melosys.exception.FunksjonellException;
 import no.nav.melosys.integrasjon.oppgave.OppgaveOppdatering;
+import no.nav.melosys.saksflytapi.ProsessinstansService;
+import no.nav.melosys.saksflytapi.domain.ProsessDataKey;
+import no.nav.melosys.saksflytapi.domain.Prosessinstans;
 import no.nav.melosys.service.behandling.BehandlingService;
 import no.nav.melosys.service.behandling.BehandlingsresultatService;
 import no.nav.melosys.service.oppgave.OppgaveService;
 import no.nav.melosys.service.sak.FagsakService;
-import no.nav.melosys.service.saksflyt.ProsessinstansService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
@@ -66,7 +65,7 @@ public class ArbeidFlereLandSedRuter implements SedRuterForSedTyper {
             throw new FunksjonellException("Finner ingen sak tilknyttet arkivsak " + arkivsakID);
         }
 
-        final Behandling eksisterendeBehandling = fagsak.get().hentSistAktivBehandling();
+        final Behandling eksisterendeBehandling = fagsak.get().hentSistAktivBehandlingIkkeÅrsavregning();
         final Behandlingsresultat behandlingsresultat = behandlingsresultatService.hentBehandlingsresultat(eksisterendeBehandling.getId());
         final Behandlingstema nyttBehandlingstema = hentBehandlingstema(melosysEessiMelding);
 
@@ -145,18 +144,16 @@ public class ArbeidFlereLandSedRuter implements SedRuterForSedTyper {
     private void validerNorgeIkkeUtpektOgVedtakIkkeFattet(Behandling behandling, Behandlingsresultat behandlingsresultat) {
         if (behandling.erNorgeUtpekt() && behandlingsresultat.harVedtak()) {
             throw new FunksjonellException(String.format(
-                    "Det er allerede fattet vedtak på behandling %s med tema %s. Støtte for omgjøring ikke implementert",
-                    behandling.getId(), behandling.getTema()));
+                "Det er allerede fattet vedtak på behandling %s med tema %s. Støtte for omgjøring ikke implementert",
+                behandling.getId(), behandling.getTema()));
         }
     }
 
     private void validerLovligeKombinasjoner(Behandlingstema nyttBehandlingsTema, Fagsak fagsak) {
-        if (fagsak.getTema() != null) {
-            if (nyttBehandlingsTema.equals(Behandlingstema.BESLUTNING_LOVVALG_NORGE) && fagsak.getTema().equals(Sakstemaer.UNNTAK)) {
-                fagsakService.oppdaterSakstema(fagsak, Sakstemaer.MEDLEMSKAP_LOVVALG);
-            } else if (nyttBehandlingsTema.equals(Behandlingstema.BESLUTNING_LOVVALG_ANNET_LAND) && fagsak.getTema().equals(Sakstemaer.MEDLEMSKAP_LOVVALG)) {
-                fagsakService.oppdaterSakstema(fagsak, Sakstemaer.UNNTAK);
-            }
+        if (nyttBehandlingsTema.equals(Behandlingstema.BESLUTNING_LOVVALG_NORGE) && fagsak.getTema().equals(Sakstemaer.UNNTAK)) {
+            fagsakService.oppdaterSakstema(fagsak, Sakstemaer.MEDLEMSKAP_LOVVALG);
+        } else if (nyttBehandlingsTema.equals(Behandlingstema.BESLUTNING_LOVVALG_ANNET_LAND) && fagsak.getTema().equals(Sakstemaer.MEDLEMSKAP_LOVVALG)) {
+            fagsakService.oppdaterSakstema(fagsak, Sakstemaer.UNNTAK);
         }
     }
 }

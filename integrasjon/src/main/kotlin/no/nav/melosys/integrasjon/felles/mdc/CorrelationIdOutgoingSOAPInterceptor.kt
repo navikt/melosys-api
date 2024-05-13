@@ -1,5 +1,6 @@
 package no.nav.melosys.integrasjon.felles.mdc
 
+import no.nav.melosys.config.MDCOperations
 import org.apache.cxf.binding.soap.SoapHeader
 import org.apache.cxf.binding.soap.SoapMessage
 import org.apache.cxf.interceptor.Fault
@@ -7,7 +8,7 @@ import org.apache.cxf.jaxb.JAXBDataBinding
 import org.apache.cxf.message.Message
 import org.apache.cxf.phase.AbstractPhaseInterceptor
 import org.apache.cxf.phase.Phase
-import javax.xml.bind.JAXBException
+import jakarta.xml.bind.JAXBException
 
 class CorrelationIdOutgoingSOAPInterceptor() : AbstractPhaseInterceptor<Message>(Phase.PRE_STREAM) {
 

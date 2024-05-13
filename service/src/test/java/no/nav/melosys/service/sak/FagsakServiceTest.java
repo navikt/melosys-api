@@ -1,24 +1,24 @@
 package no.nav.melosys.service.sak;
 
 import java.time.Instant;
-import java.time.temporal.ChronoUnit;
 import java.util.*;
 import java.util.stream.Collectors;
 
 import no.nav.melosys.domain.*;
 import no.nav.melosys.domain.kodeverk.Aktoersroller;
-import no.nav.melosys.domain.kodeverk.Representerer;
+import no.nav.melosys.domain.kodeverk.Fullmaktstype;
 import no.nav.melosys.domain.kodeverk.Saksstatuser;
 import no.nav.melosys.domain.kodeverk.Sakstyper;
-import no.nav.melosys.domain.kodeverk.behandlinger.*;
+import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingsaarsaktyper;
+import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingsstatus;
+import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingstema;
+import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingstyper;
 import no.nav.melosys.exception.FunksjonellException;
 import no.nav.melosys.repository.FagsakRepository;
 import no.nav.melosys.service.SaksbehandlingDataFactory;
 import no.nav.melosys.service.aktoer.KontaktopplysningService;
 import no.nav.melosys.service.behandling.BehandlingService;
-import no.nav.melosys.service.behandling.BehandlingsresultatService;
-import no.nav.melosys.service.lovligekombinasjoner.LovligeKombinasjonerService;
-import no.nav.melosys.service.oppgave.OppgaveService;
+import no.nav.melosys.service.lovligekombinasjoner.LovligeKombinasjonerSaksbehandlingService;
 import no.nav.melosys.service.persondata.PersondataFasade;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -27,13 +27,13 @@ import org.mockito.ArgumentCaptor;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 
+import static no.nav.melosys.domain.FagsakTestFactory.SAKSNUMMER;
 import static no.nav.melosys.domain.kodeverk.Sakstemaer.MEDLEMSKAP_LOVVALG;
 import static no.nav.melosys.domain.kodeverk.Sakstyper.EU_EOS;
-import static no.nav.melosys.domain.kodeverk.behandlinger.Behandlingsresultattyper.*;
-import static no.nav.melosys.domain.kodeverk.behandlinger.Behandlingsstatus.*;
 import static no.nav.melosys.domain.kodeverk.behandlinger.Behandlingstema.ARBEID_FLERE_LAND;
 import static no.nav.melosys.domain.kodeverk.behandlinger.Behandlingstema.UTSENDT_ARBEIDSTAKER;
-import static no.nav.melosys.domain.kodeverk.behandlinger.Behandlingstyper.*;
+import static no.nav.melosys.domain.kodeverk.behandlinger.Behandlingstyper.FØRSTEGANG;
+import static no.nav.melosys.domain.kodeverk.behandlinger.Behandlingstyper.NY_VURDERING;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatExceptionOfType;
 import static org.assertj.core.groups.Tuple.tuple;
@@ -41,8 +41,6 @@ import static org.mockito.Mockito.*;
 
 @ExtendWith(MockitoExtension.class)
 class FagsakServiceTest {
-    private final static String SAKSNUMMER = "MEL-123";
-
     @Mock
     private FagsakRepository fagsakRepo;
     @Mock
@@ -50,14 +48,9 @@ class FagsakServiceTest {
     @Mock
     private KontaktopplysningService kontaktopplysningService;
     @Mock
-    private OppgaveService oppgaveService;
-    @Mock
     private PersondataFasade persondataFasade;
     @Mock
-    private BehandlingsresultatService behandlingsresultatService;
-    @Mock
-    private LovligeKombinasjonerService lovligeKombinasjonerService;
-
+    private LovligeKombinasjonerSaksbehandlingService lovligeKombinasjonerSaksbehandlingService;
     private FagsakService fagsakService;
 
     @BeforeEach
@@ -66,15 +59,13 @@ class FagsakServiceTest {
             fagsakRepo,
             behandlingService,
             kontaktopplysningService,
-            oppgaveService,
             persondataFasade,
-            behandlingsresultatService,
-            lovligeKombinasjonerService);
+                lovligeKombinasjonerSaksbehandlingService);
     }
 
     @Test
     void hentFagsak() {
-        when(fagsakRepo.findBySaksnummer(anyString())).thenReturn(Optional.of(new Fagsak()));
+        when(fagsakRepo.findBySaksnummer(anyString())).thenReturn(Optional.of(FagsakTestFactory.lagFagsak()));
         fagsakService.hentFagsak(SAKSNUMMER);
         verify(fagsakRepo).findBySaksnummer(SAKSNUMMER);
     }
@@ -88,7 +79,7 @@ class FagsakServiceTest {
 
     @Test
     void lagre() {
-        Fagsak fagsak = lagFagsak();
+        Fagsak fagsak = FagsakTestFactory.lagFagsak();
         fagsakService.lagre(fagsak);
         verify(fagsakRepo).save(fagsak);
         assertThat(fagsak).isNotNull();
@@ -111,12 +102,15 @@ class FagsakServiceTest {
             .medInitierendeJournalpostId(initierendeJournalpostId)
             .medInitierendeDokumentId(initierendeDokumentId)
             .medArbeidsgiver("arbeidsgiver")
-            .medFullmektig(new Fullmektig("orgnr", Representerer.ARBEIDSGIVER))
+            .medFullmektig(new FullmektigDto("orgnr", null, List.of(Fullmaktstype.FULLMEKTIG_ARBEIDSGIVER)))
             .medBehandlingsårsaktype(Behandlingsaarsaktyper.FRITEKST)
             .medBehandlingsårsakFritekst("Fritekst")
             .build();
 
+
         Fagsak fagsak = fagsakService.nyFagsakOgBehandling(opprettSakRequest);
+
+
         verify(fagsakRepo).save(any(Fagsak.class));
         verify(behandlingService).nyBehandling(any(), eq(Behandlingsstatus.OPPRETTET), eq(FØRSTEGANG),
             eq(UTSENDT_ARBEIDSTAKER), eq(initierendeJournalpostId), eq(initierendeDokumentId), any(),
@@ -124,52 +118,55 @@ class FagsakServiceTest {
         assertThat(fagsak.getBehandlinger()).isNotEmpty();
         assertThat(fagsak.getType()).isEqualTo(EU_EOS);
         assertThat(fagsak.getTema()).isEqualTo(MEDLEMSKAP_LOVVALG);
-        Aktoer forventetFullmektig = new Aktoer();
-        forventetFullmektig.setFagsak(fagsak);
-        forventetFullmektig.setRolle(Aktoersroller.REPRESENTANT);
-        forventetFullmektig.setOrgnr("orgnr");
-        forventetFullmektig.setRepresenterer(Representerer.ARBEIDSGIVER);
-        assertThat(fagsak.finnRepresentant(Representerer.ARBEIDSGIVER)).isPresent().get()
-            .usingRecursiveComparison().isEqualTo(forventetFullmektig);
+        var lagretFullmektig = fagsak.finnFullmektig(Fullmaktstype.FULLMEKTIG_ARBEIDSGIVER);
+        assertThat(lagretFullmektig).isNotNull()
+            .extracting(Aktoer::getFagsak, Aktoer::getRolle, Aktoer::getOrgnr)
+            .containsExactly(fagsak, Aktoersroller.FULLMEKTIG, "orgnr");
+        assertThat(lagretFullmektig.getFullmakter()).flatExtracting(Fullmakt::getType).containsExactly(Fullmaktstype.FULLMEKTIG_ARBEIDSGIVER);
     }
 
     @Test
     void nyFagsakOgBehandling_kontaktPersonFinnes_KontaktOpplysningOpprettes() {
-        Kontaktopplysning kontaktopplysning = Kontaktopplysning.av("RepresentantOrgnr", "Kontaktperson", "Telefon");
-        OpprettSakRequest opprettSakRequest = new OpprettSakRequest.Builder().medAktørID("123456789")
+        when(behandlingService.nyBehandling(any(), any(), any(), any(), any(), any(), any(), any(), any())).thenReturn(new Behandling());
+        Kontaktopplysning kontaktopplysning = Kontaktopplysning.av("FullmektigOrgnr", "Kontaktperson", "Telefon", "Orgnr");
+        OpprettSakRequest opprettSakRequest = new OpprettSakRequest.Builder()
+            .medAktørID("123456789")
+            .medSakstype(EU_EOS)
+            .medSakstema(MEDLEMSKAP_LOVVALG)
             .medBehandlingstype(FØRSTEGANG)
-            .medKontaktopplysninger(List.of(kontaktopplysning)).build();
+            .medKontaktopplysninger(List.of(kontaktopplysning))
+            .build();
 
         fagsakService.nyFagsakOgBehandling(opprettSakRequest);
 
         verify(kontaktopplysningService).lagEllerOppdaterKontaktopplysning(
-            any(), eq("RepresentantOrgnr"), eq(null), eq("Kontaktperson"), eq("Telefon")
+            any(), eq("FullmektigOrgnr"), eq("Orgnr"), eq("Kontaktperson"), eq("Telefon")
         );
     }
 
     @Test
     void oppdaterFagsakOgBehandling() {
         Fagsak fagsak = lagFagsakMedBruker();
-        fagsak.getBehandlinger().add(SaksbehandlingDataFactory.lagBehandling());
+        fagsak.leggTilBehandling(SaksbehandlingDataFactory.lagBehandling());
         when(fagsakRepo.findBySaksnummer(SAKSNUMMER)).thenReturn(Optional.of(fagsak));
 
         fagsakService.oppdaterFagsakOgBehandling(fagsak.getSaksnummer(), Sakstyper.TRYGDEAVTALE, MEDLEMSKAP_LOVVALG, Behandlingstema.ARBEID_FLERE_LAND, NY_VURDERING, null, null);
 
         verify(fagsakRepo).save(fagsak);
-        verify(lovligeKombinasjonerService).validerOpprettelseOgEndring(fagsak.getHovedpartRolle(), Sakstyper.TRYGDEAVTALE, MEDLEMSKAP_LOVVALG, Behandlingstema.ARBEID_FLERE_LAND, NY_VURDERING);
-        verify(behandlingService).endreBehandling(fagsak.hentAktivBehandling().getId(), NY_VURDERING, ARBEID_FLERE_LAND, null, null);
+        verify(lovligeKombinasjonerSaksbehandlingService).validerOpprettelseOgEndring(fagsak.getHovedpartRolle(), Sakstyper.TRYGDEAVTALE, MEDLEMSKAP_LOVVALG, Behandlingstema.ARBEID_FLERE_LAND, NY_VURDERING);
+        verify(behandlingService).endreBehandling(fagsak.finnAktivBehandlingIkkeÅrsavregning().getId(), NY_VURDERING, ARBEID_FLERE_LAND, null, null);
     }
 
     @Test
     void oppdaterFagsakOgBehandling_ingenEndringPåTypeTema_validererIkke() {
         Fagsak fagsak = lagFagsakMedBruker();
         Behandling behandling = SaksbehandlingDataFactory.lagBehandling();
-        fagsak.getBehandlinger().add(behandling);
+        fagsak.leggTilBehandling(behandling);
         when(fagsakRepo.findBySaksnummer(SAKSNUMMER)).thenReturn(Optional.of(fagsak));
 
         fagsakService.oppdaterFagsakOgBehandling(fagsak.getSaksnummer(), fagsak.getType(), fagsak.getTema(), behandling.getTema(), behandling.getType(), null, null);
 
-        verifyNoInteractions(lovligeKombinasjonerService);
+        verifyNoInteractions(lovligeKombinasjonerSaksbehandlingService);
     }
 
     @Test
@@ -184,7 +181,7 @@ class FagsakServiceTest {
         verify(fagsakRepo).save(captor.capture());
         Fagsak oppdaterFagsak = captor.getValue();
         assertThat(oppdaterFagsak.getAktører().stream()
-            .map(Aktoer::getInstitusjonId)
+            .map(Aktoer::getInstitusjonID)
             .collect(Collectors.toList())).isSubsetOf(nyeInstitusjonsIder);
     }
 
@@ -197,7 +194,7 @@ class FagsakServiceTest {
         bruker.setFagsak(eksisterendeFagsak);
         bruker.setRolle(Aktoersroller.BRUKER);
         bruker.setAktørId("1234");
-        eksisterendeFagsak.getAktører().add(bruker);
+        eksisterendeFagsak.leggTilAktør(bruker);
 
         List<String> nyeInstitusjonsIder = Collections.singletonList("Ny institusjonsid");
         fagsakService.oppdaterMyndigheterForEuEos(SAKSNUMMER, nyeInstitusjonsIder);
@@ -207,7 +204,7 @@ class FagsakServiceTest {
         Fagsak oppdaterFagsak = captor.getValue();
 
         assertThat(oppdaterFagsak.getAktører())
-            .extracting(Aktoer::getRolle, Aktoer::getAktørId, Aktoer::getInstitusjonId)
+            .extracting(Aktoer::getRolle, Aktoer::getAktørId, Aktoer::getInstitusjonID)
             .containsExactlyInAnyOrder(
                 tuple(Aktoersroller.BRUKER, "1234", null),
                 tuple(Aktoersroller.TRYGDEMYNDIGHET, null, "Ny institusjonsid")
@@ -216,13 +213,12 @@ class FagsakServiceTest {
 
     @Test
     void avsluttFagsakOgBehandling_erAktiv_blirAvsluttet() {
-        Fagsak fagsak = new Fagsak();
-        fagsak.setSaksnummer(SAKSNUMMER);
+        Fagsak fagsak = FagsakTestFactory.lagFagsak();
         Behandling behandling = new Behandling();
         behandling.setId(1L);
         behandling.setStatus(Behandlingsstatus.UNDER_BEHANDLING);
         behandling.setFagsak(fagsak);
-        fagsak.setBehandlinger(List.of(behandling));
+        fagsak.leggTilBehandling(behandling);
 
         fagsakService.avsluttFagsakOgBehandling(fagsak, Saksstatuser.LOVVALG_AVKLART);
         assertThat(fagsak.getStatus()).isEqualTo(Saksstatuser.LOVVALG_AVKLART);
@@ -232,14 +228,12 @@ class FagsakServiceTest {
 
     @Test
     void avsluttFagsakOgBehandling_behandlingTilhørerAnnenFagsak_kasterException() {
-        Fagsak fagsak = new Fagsak();
-        fagsak.setSaksnummer("MEL-99");
+        Fagsak fagsak = FagsakTestFactory.lagFagsak();
 
         Behandling behandling = new Behandling();
         behandling.setId(1L);
         behandling.setStatus(Behandlingsstatus.UNDER_BEHANDLING);
-        behandling.setFagsak(new Fagsak());
-        behandling.getFagsak().setSaksnummer("MEL-0");
+        behandling.setFagsak(FagsakTestFactory.builder().saksnummer("MEL-annenId").build());
 
         assertThatExceptionOfType(FunksjonellException.class)
             .isThrownBy(() -> fagsakService.avsluttFagsakOgBehandling(fagsak, behandling, Saksstatuser.LOVVALG_AVKLART))
@@ -248,8 +242,7 @@ class FagsakServiceTest {
 
     @Test
     void avsluttFagsakOgBehandling_manglerBehandling_avslutterFagsak() {
-        var fagsak = new Fagsak();
-        fagsak.setSaksnummer(SAKSNUMMER);
+        var fagsak = FagsakTestFactory.lagFagsak();
 
         fagsakService.avsluttFagsakOgBehandling(fagsak, Saksstatuser.AVSLUTTET);
 
@@ -259,79 +252,60 @@ class FagsakServiceTest {
     }
 
     @Test
-    void ferdigbehandleSak_saksstatusOPPRETTET_lagrerKorrekt() {
-        var fagsak = lagFagsak();
-        var behandling = lagBehandling(1L, null, null, null);
-        behandling.setFagsak(fagsak);
-        fagsak.getBehandlinger().add(behandling);
-        assertThat(fagsak.getStatus()).isEqualTo(Saksstatuser.OPPRETTET);
+    void hentFagsakerMedOrgNr_riktigSortering() {
+        Behandling behandlingAktivRegistrertNaa = lagBehandling(1L, FØRSTEGANG, Behandlingsstatus.UNDER_BEHANDLING, Instant.now());
+        Behandling behandlingInaktivRegistretNaa = lagBehandling(2L, FØRSTEGANG, Behandlingsstatus.AVSLUTTET, Instant.now());
+        Behandling behandlingAktivRegistrertFoer = lagBehandling(3L, FØRSTEGANG, Behandlingsstatus.UNDER_BEHANDLING,
+            Instant.now().minusSeconds(3600));
+        Behandling behandlingInaktivRegistrertFoer = lagBehandling(4L, FØRSTEGANG, Behandlingsstatus.AVSLUTTET, Instant.now().minusSeconds(3600));
+        Fagsak fagsak1 = lagFagsakMedAktørForVirksomhet();
+        Fagsak fagsak2 = lagFagsakMedAktørForVirksomhet();
+        Fagsak fagsak3 = lagFagsakMedAktørForVirksomhet();
+        Fagsak fagsak4 = lagFagsakMedAktørForVirksomhet();
+        fagsak1.leggTilBehandling(behandlingAktivRegistrertNaa);
+        fagsak2.leggTilBehandling(behandlingAktivRegistrertFoer);
+        fagsak3.leggTilBehandling(behandlingInaktivRegistretNaa);
+        fagsak4.leggTilBehandling(behandlingInaktivRegistrertFoer);
 
-        when(fagsakRepo.findBySaksnummer(SAKSNUMMER)).thenReturn(Optional.of(fagsak));
-        ArgumentCaptor<Fagsak> fagsakArgumentCaptor = ArgumentCaptor.forClass(Fagsak.class);
+        when(fagsakRepo.findByRolleAndOrgnr(Aktoersroller.VIRKSOMHET, "12345")).thenReturn(List.of(fagsak2, fagsak4, fagsak1, fagsak3));
 
+        List<Fagsak> fagsakList = fagsakService.hentFagsakerMedOrgnr(Aktoersroller.VIRKSOMHET, "12345");
 
-        fagsakService.ferdigbehandleSak(SAKSNUMMER);
-
-
-        verify(behandlingService).avsluttBehandling(behandling.getId());
-        verify(behandlingsresultatService).oppdaterBehandlingsresultattype(behandling.getId(), FERDIGBEHANDLET);
-        verify(oppgaveService).ferdigstillOppgaveMedSaksnummer(fagsak.getSaksnummer());
-        verify(fagsakRepo).save(fagsakArgumentCaptor.capture());
-        assertThat(fagsakArgumentCaptor.getValue().getStatus()).isEqualTo(Saksstatuser.AVSLUTTET);
-    }
-
-    @Test
-    void ferdigbehandleSak_saksstatusAnnetEnnOPPRETTET_lagrerKorrekt() {
-        var fagsak = lagFagsak();
-        fagsak.setStatus(Saksstatuser.LOVVALG_AVKLART);
-        var behandling = lagBehandling(1L, null, null, null);
-        behandling.setFagsak(fagsak);
-        fagsak.getBehandlinger().add(behandling);
-        assertThat(fagsak.getStatus()).isNotEqualTo(Saksstatuser.OPPRETTET);
-
-        when(fagsakRepo.findBySaksnummer(SAKSNUMMER)).thenReturn(Optional.of(fagsak));
-        ArgumentCaptor<Fagsak> fagsakArgumentCaptor = ArgumentCaptor.forClass(Fagsak.class);
-
-
-        fagsakService.ferdigbehandleSak(SAKSNUMMER);
-
-
-        verify(behandlingService).avsluttBehandling(behandling.getId());
-        verify(behandlingsresultatService).oppdaterBehandlingsresultattype(behandling.getId(), FERDIGBEHANDLET);
-        verify(oppgaveService).ferdigstillOppgaveMedSaksnummer(fagsak.getSaksnummer());
-        verify(fagsakRepo).save(fagsakArgumentCaptor.capture());
-        assertThat(fagsakArgumentCaptor.getValue().getStatus()).isEqualTo(fagsak.getStatus());
+        assertThat(fagsakList).hasSize(4);
+        assertThat(fagsakList.get(0).hentSistRegistrertBehandling()).isEqualTo(behandlingAktivRegistrertNaa);
+        assertThat(fagsakList.get(1).hentSistRegistrertBehandling()).isEqualTo(behandlingAktivRegistrertFoer);
+        assertThat(fagsakList.get(2).hentSistRegistrertBehandling()).isEqualTo(behandlingInaktivRegistretNaa);
+        assertThat(fagsakList.get(3).hentSistRegistrertBehandling()).isEqualTo(behandlingInaktivRegistrertFoer);
     }
 
     private Fagsak lagFagsakMedAktørforMyndighet() {
-        Fagsak fagsak = lagFagsak();
+        Fagsak fagsak = FagsakTestFactory.lagFagsak();
 
         Aktoer aktoer = new Aktoer();
-        aktoer.setInstitusjonId("Gammel institusjonsid");
+        aktoer.setInstitusjonID("Gammel institusjonsid");
         aktoer.setFagsak(fagsak);
         aktoer.setRolle(Aktoersroller.TRYGDEMYNDIGHET);
-        fagsak.setAktører(new HashSet<>(Collections.singleton(aktoer)));
+        fagsak.leggTilAktør(aktoer);
+        return fagsak;
+    }
+
+    private Fagsak lagFagsakMedAktørForVirksomhet() {
+        Fagsak fagsak = FagsakTestFactory.lagFagsak();
+
+        Aktoer aktoer = new Aktoer();
+        aktoer.setOrgnr("12345");
+        aktoer.setRolle(Aktoersroller.VIRKSOMHET);
+        fagsak.leggTilAktør(aktoer);
         return fagsak;
     }
 
     private Fagsak lagFagsakMedBruker() {
-        Fagsak fagsak = lagFagsak();
+        Fagsak fagsak = FagsakTestFactory.lagFagsak();
 
         Aktoer aktoer = new Aktoer();
         aktoer.setAktørId("12312");
         aktoer.setRolle(Aktoersroller.BRUKER);
-        fagsak.setAktører(Set.of(aktoer));
-        return fagsak;
-    }
-
-    private Fagsak lagFagsak() {
-        Fagsak fagsak = new Fagsak();
-        fagsak.setGsakSaksnummer(123L);
-        fagsak.setSaksnummer(SAKSNUMMER);
-        fagsak.setStatus(Saksstatuser.OPPRETTET);
-        fagsak.setType(EU_EOS);
-        fagsak.setRegistrertDato(Instant.now());
-        fagsak.setEndretDato(Instant.now());
+        fagsak.leggTilAktør(aktoer);
         return fagsak;
     }
 
@@ -343,30 +317,5 @@ class FagsakServiceTest {
         behandling.setEndretDato(registrertDato);
         behandling.setRegistrertDato(registrertDato);
         return behandling;
-    }
-
-    private Behandlingsresultat lagBehandlingsresultat(Behandling behandling, Instant registrertDato, VedtakMetadata vedtakMetadata, Behandlingsresultattyper type) {
-        var behandlingsresultat = new Behandlingsresultat();
-        behandlingsresultat.setId(behandling.getId());
-        behandlingsresultat.setBehandling(behandling);
-        behandlingsresultat.setRegistrertDato(registrertDato);
-        behandlingsresultat.setVedtakMetadata(vedtakMetadata);
-        behandlingsresultat.setType(type);
-        return behandlingsresultat;
-    }
-
-    private Behandlingsresultat lagBehandlingsresultatMedAnmodningsperiode(Behandling behandling, boolean sendtTilUtlandet) {
-        var anmodningsperiode = new Anmodningsperiode();
-        anmodningsperiode.setSendtUtland(sendtTilUtlandet);
-        var behandlingsresultat = new Behandlingsresultat();
-        behandlingsresultat.setAnmodningsperioder(Set.of(anmodningsperiode));
-        behandlingsresultat.setBehandling(behandling);
-        return behandlingsresultat;
-    }
-
-    private VedtakMetadata lagVedtakMetadata(Instant registrertDato) {
-        var vedtakMetadata = new VedtakMetadata();
-        vedtakMetadata.setRegistrertDato(registrertDato);
-        return vedtakMetadata;
     }
 }

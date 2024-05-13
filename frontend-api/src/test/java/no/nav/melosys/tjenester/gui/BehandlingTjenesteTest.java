@@ -6,10 +6,10 @@ import java.util.List;
 import java.util.Set;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
-import no.finn.unleash.FakeUnleash;
+import io.getunleash.FakeUnleash;
 import no.nav.melosys.domain.Behandling;
 import no.nav.melosys.domain.Behandlingsresultat;
-import no.nav.melosys.domain.Fagsak;
+import no.nav.melosys.domain.FagsakTestFactory;
 import no.nav.melosys.domain.dokument.inntekt.tillegsinfo.Tilleggsinformasjon;
 import no.nav.melosys.domain.dokument.inntekt.tillegsinfo.TilleggsinformasjonDetaljer;
 import no.nav.melosys.domain.dokument.organisasjon.adresse.GeografiskAdresse;
@@ -143,9 +143,7 @@ class BehandlingTjenesteTest {
     private Behandling opprettTomBehandlingMedId() {
         Behandling behandling = new Behandling();
         behandling.setId(BEHANDLING_ID);
-        Fagsak fagsak = new Fagsak();
-        fagsak.setSaksnummer("SNR");
-        behandling.setFagsak(fagsak);
+        behandling.setFagsak(FagsakTestFactory.lagFagsak());
 
         return behandling;
     }

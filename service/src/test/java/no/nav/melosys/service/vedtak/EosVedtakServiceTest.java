@@ -16,6 +16,7 @@ import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingstema;
 import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingstyper;
 import no.nav.melosys.domain.kodeverk.lovvalgsbestemmelser.Lovvalgbestemmelser_883_2004;
 import no.nav.melosys.exception.FunksjonellException;
+import no.nav.melosys.saksflytapi.ProsessinstansService;
 import no.nav.melosys.service.LandvelgerService;
 import no.nav.melosys.service.avklartefakta.AvklartefaktaService;
 import no.nav.melosys.service.behandling.BehandlingService;
@@ -24,7 +25,6 @@ import no.nav.melosys.service.dokument.sed.EessiService;
 import no.nav.melosys.service.kontroll.feature.ferdigbehandling.FerdigbehandlingKontrollFacade;
 import no.nav.melosys.service.oppgave.OppgaveService;
 import no.nav.melosys.service.saksbehandling.SaksbehandlingRegler;
-import no.nav.melosys.service.saksflyt.ProsessinstansService;
 import no.nav.melosys.sikkerhet.context.SpringSubjectHandler;
 import no.nav.melosys.sikkerhet.context.TestSubjectHandler;
 import org.junit.jupiter.api.BeforeEach;
@@ -356,28 +356,20 @@ class EosVedtakServiceTest {
     }
 
     private Fagsak lagFagsak() {
-        Fagsak fagsak = new Fagsak();
-        fagsak.setSaksnummer("MEL-111");
-        fagsak.setType(Sakstyper.EU_EOS);
-        fagsak.setTema(Sakstemaer.MEDLEMSKAP_LOVVALG);
-        Aktoer aktoer = new Aktoer();
-        aktoer.setAktørId("1234567890123");
-        aktoer.setRolle(Aktoersroller.BRUKER);
-        fagsak.setAktører(Collections.singleton(aktoer));
-        return fagsak;
+        return FagsakTestFactory.builder().medBruker().build();
     }
 
     private void leggTilMyndighetAktoer() {
         Aktoer myndighet = new Aktoer();
         myndighet.setRolle(Aktoersroller.TRYGDEMYNDIGHET);
-        myndighet.setInstitusjonId("SE:SE001");
-        behandling.getFagsak().setAktører(Set.of(myndighet));
+        myndighet.setInstitusjonID("SE:SE001");
+        behandling.getFagsak().leggTilAktør(myndighet);
     }
 
     private FattVedtakRequest lagRequest(Behandlingsresultattyper behandlingsresultattype, Vedtakstyper vedtakstype,
                                          String behandlingsresultatFritekst, String fritekstSed, Set<String> mottakerinstitusjoner) {
         return new FattVedtakRequest.Builder()
-            .medBehandlingsresultat(behandlingsresultattype)
+            .medBehandlingsresultatType(behandlingsresultattype)
             .medVedtakstype(vedtakstype)
             .medFritekst(behandlingsresultatFritekst)
             .medFritekstSed(fritekstSed)

@@ -1,7 +1,7 @@
 package no.nav.melosys.saksflyt;
 
-import no.nav.melosys.domain.saksflyt.Prosessinstans;
-import no.nav.melosys.service.saksflyt.ProsessinstansOpprettetEvent;
+import no.nav.melosys.saksflytapi.ProsessinstansOpprettetEvent;
+import no.nav.melosys.saksflytapi.domain.Prosessinstans;
 import org.springframework.stereotype.Component;
 import org.springframework.transaction.event.TransactionPhase;
 import org.springframework.transaction.event.TransactionalEventListener;

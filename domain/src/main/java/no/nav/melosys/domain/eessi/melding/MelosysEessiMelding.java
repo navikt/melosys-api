@@ -18,6 +18,7 @@ public class MelosysEessiMelding {
     private String aktoerId;
     private List<Statsborgerskap> statsborgerskap;
     private List<Arbeidssted> arbeidssteder;
+    private List<Arbeidsland> arbeidsland;
     private Periode periode;
     private String lovvalgsland;
     private String artikkel;
@@ -108,8 +109,16 @@ public class MelosysEessiMelding {
         return arbeidssteder;
     }
 
+    public List<Arbeidsland> getArbeidsland() {
+        return arbeidsland;
+    }
+
     public void setArbeidssteder(List<Arbeidssted> arbeidssteder) {
         this.arbeidssteder = arbeidssteder;
+    }
+
+    public void setArbeidsland(List<Arbeidsland> arbeidsland) {
+        this.arbeidsland = arbeidsland;
     }
 
     public Periode getPeriode() {
@@ -247,6 +256,7 @@ public class MelosysEessiMelding {
             Objects.equals(aktoerId, that.aktoerId) &&
             Objects.equals(statsborgerskap, that.statsborgerskap) &&
             Objects.equals(arbeidssteder, that.arbeidssteder) &&
+            Objects.equals(arbeidsland, that.arbeidsland) &&
             Objects.equals(periode, that.periode) &&
             Objects.equals(lovvalgsland, that.lovvalgsland) &&
             Objects.equals(artikkel, that.artikkel) &&
@@ -260,7 +270,7 @@ public class MelosysEessiMelding {
 
     @Override
     public int hashCode() {
-        return Objects.hash(sedId, sequenceId, rinaSaksnummer, avsender, journalpostId, dokumentId, gsakSaksnummer, aktoerId, statsborgerskap, arbeidssteder, periode, lovvalgsland, artikkel, erEndring, midlertidigBestemmelse, ytterligereInformasjon, bucType, sedType, svarAnmodningUnntak, anmodningUnntak, x006NavErFjernet);
+        return Objects.hash(sedId, sequenceId, rinaSaksnummer, avsender, journalpostId, dokumentId, gsakSaksnummer, aktoerId, statsborgerskap, arbeidssteder, arbeidsland, periode, lovvalgsland, artikkel, erEndring, midlertidigBestemmelse, ytterligereInformasjon, bucType, sedType, svarAnmodningUnntak, anmodningUnntak, x006NavErFjernet);
     }
 
     public boolean inneholderYtterligereInformasjon() {

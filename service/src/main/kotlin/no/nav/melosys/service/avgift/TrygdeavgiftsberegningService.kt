@@ -1,76 +1,87 @@
 package no.nav.melosys.service.avgift
 
 import no.nav.melosys.domain.Medlemskapsperiode
-import no.nav.melosys.domain.avgift.Inntektsperiode
 import no.nav.melosys.domain.avgift.Trygdeavgiftsperiode
 import no.nav.melosys.domain.folketrygden.FastsattTrygdeavgift
 import no.nav.melosys.domain.folketrygden.MedlemAvFolketrygden
+import no.nav.melosys.domain.kodeverk.Fullmaktstype
 import no.nav.melosys.exception.FunksjonellException
+import no.nav.melosys.integrasjon.ereg.EregFasade
 import no.nav.melosys.integrasjon.trygdeavgift.TrygdeavgiftConsumer
 import no.nav.melosys.integrasjon.trygdeavgift.TrygdeavgiftsberegningsRequestMapper
 import no.nav.melosys.integrasjon.trygdeavgift.dto.TrygdeavgiftsberegningResponse
 import no.nav.melosys.service.MedlemAvFolketrygdenService
+import no.nav.melosys.service.avgift.dto.InntektskildeRequest
+import no.nav.melosys.service.avgift.dto.SkatteforholdTilNorgeRequest
+import no.nav.melosys.service.behandling.BehandlingService
+import no.nav.melosys.service.persondata.PersondataService
 import org.springframework.stereotype.Service
 import org.springframework.transaction.annotation.Transactional
-import org.threeten.extra.LocalDateRange
-import java.time.DateTimeException
+import java.time.LocalDate
 import java.util.*
 
 @Service
 class TrygdeavgiftsberegningService
     (
+    private val behandlingService: BehandlingService,
+    private val eregFasade: EregFasade,
     private val medlemAvFolketrygdenService: MedlemAvFolketrygdenService,
+    private val trygdeavgiftMottakerService: TrygdeavgiftMottakerService,
+    private val persondataService: PersondataService,
     private val trygdeavgiftConsumer: TrygdeavgiftConsumer
 ) {
 
     @Transactional
     fun beregnOgLagreTrygdeavgift(behandlingsresultatID: Long): Set<Trygdeavgiftsperiode> {
         val medlemAvFolketrygden = medlemAvFolketrygdenService.hentMedlemAvFolketrygden(behandlingsresultatID)
-        val fastsattTrygdeavgift = medlemAvFolketrygden.fastsattTrygdeavgift
-
-        val innvilgedeMedlemskapsperioder =
-            medlemAvFolketrygden.medlemskapsperioder.filter { it.erInnvilget() }
-
         valider(medlemAvFolketrygden)
-        validerInntekstperioderDekkerMedlemskapsperioder(
-            fastsattTrygdeavgift.trygdeavgiftsgrunnlag.inntektsperioder,
-            innvilgedeMedlemskapsperioder
-        )
 
-
+        val fastsattTrygdeavgift = medlemAvFolketrygden.fastsattTrygdeavgift
         fastsattTrygdeavgift.trygdeavgiftsperioder.clear()
-
-        if (!fastsattTrygdeavgift.skalBetalesTilNav()) {
+        medlemAvFolketrygdenService.lagreOgFlush(medlemAvFolketrygden)
+        if (!trygdeavgiftMottakerService.skalBetalesTilNav(fastsattTrygdeavgift.trygdeavgiftsgrunnlag)) {
             return emptySet()
         }
 
+        val innvilgedeMedlemskapsperioder =
+            medlemAvFolketrygden.medlemskapsperioder.filter { it.erInnvilget() }
 
         val (trygdeavgiftsberegningRequest, UUID_DBID_MAPS) =
             TrygdeavgiftsberegningsRequestMapper().map(
                 innvilgedeMedlemskapsperioder,
                 fastsattTrygdeavgift.trygdeavgiftsgrunnlag.skatteforholdTilNorge,
-                fastsattTrygdeavgift.trygdeavgiftsgrunnlag.inntektsperioder
+                fastsattTrygdeavgift.trygdeavgiftsgrunnlag.inntektsperioder,
+                hentFødselsdatoOmViHarTjenstligBehov(behandlingsresultatID, innvilgedeMedlemskapsperioder)
             )
         val beregnetTrygdeavgift = trygdeavgiftConsumer.beregnTrygdeavgift(trygdeavgiftsberegningRequest)
-        oppdaterTrygdeavgift(beregnetTrygdeavgift, fastsattTrygdeavgift, UUID_DBID_MAPS)
 
-        return medlemAvFolketrygdenService.lagre(medlemAvFolketrygden).fastsattTrygdeavgift.trygdeavgiftsperioder
+        val nyeTrygdeavgiftsperioder = lagOppdaterteTrygdeavgiftsperioder(beregnetTrygdeavgift, fastsattTrygdeavgift, UUID_DBID_MAPS)
+        medlemAvFolketrygden.fastsattTrygdeavgift.trygdeavgiftsperioder.addAll(nyeTrygdeavgiftsperioder)
+
+        return medlemAvFolketrygdenService.lagreOgFlush(medlemAvFolketrygden).fastsattTrygdeavgift.trygdeavgiftsperioder
     }
 
-    private fun oppdaterTrygdeavgift(
+    private fun hentFødselsdatoOmViHarTjenstligBehov(behandlingsresultatID: Long, medlemskapsperioder: List<Medlemskapsperiode>): LocalDate? {
+        if (medlemskapsperioder.any { it.erPliktig() }) {
+            val fagsak = behandlingService.hentBehandling(behandlingsresultatID).fagsak
+            return persondataService.hentPerson(fagsak.hentBrukersAktørID()).fødselsdato
+        }
+        return null
+    }
+
+    private fun lagOppdaterteTrygdeavgiftsperioder(
         beregnetTrygdeavgift: List<TrygdeavgiftsberegningResponse>,
         fastsattTrygdeavgift: FastsattTrygdeavgift,
         UUID_DBID_MAPS: List<Map<UUID, Long>>
-    ) =
-        beregnetTrygdeavgift.forEach {
-            fastsattTrygdeavgift.trygdeavgiftsperioder.add(
-                lagTrygdeavgiftsperiode(
-                    fastsattTrygdeavgift,
-                    it,
-                    UUID_DBID_MAPS
-                )
+    ): Set<Trygdeavgiftsperiode> =
+        beregnetTrygdeavgift.map {
+            lagTrygdeavgiftsperiode(
+                fastsattTrygdeavgift,
+                it,
+                UUID_DBID_MAPS
             )
-        }
+        }.toSet()
+
 
     private fun lagTrygdeavgiftsperiode(
         fastsattTrygdeavgift: FastsattTrygdeavgift,
@@ -117,45 +128,40 @@ class TrygdeavgiftsberegningService
         if (medlemAvFolketrygden.fastsattTrygdeavgift.trygdeavgiftsgrunnlag.inntektsperioder.isEmpty()) {
             throw FunksjonellException("Kan ikke beregne trygdeavgift uten inntektsperioder")
         }
+
+        val inntektskilderRequest = medlemAvFolketrygden.fastsattTrygdeavgift.trygdeavgiftsgrunnlag.inntektsperioder.map { InntektskildeRequest(it) }
+        val skatteforholdTilNorgeRequest =
+            medlemAvFolketrygden.fastsattTrygdeavgift.trygdeavgiftsgrunnlag.skatteforholdTilNorge.map { SkatteforholdTilNorgeRequest(it) }
+        val innvilgedeMedlemskapsperioder = medlemAvFolketrygden.medlemskapsperioder.filter { it.erInnvilget() }.toList()
+
+        TrygdeavgiftsgrunnlagService.validerAtInntekstperioderDekkerInnvilgedeMedlemskapsperioder(
+            inntektskilderRequest,
+            innvilgedeMedlemskapsperioder
+        )
+        TrygdeavgiftsgrunnlagService.validerAtSkatteforholdTilNorgeDekkerInnvilgedeMedlemskapsperioderOgOverlapperIkke(
+            skatteforholdTilNorgeRequest,
+            innvilgedeMedlemskapsperioder
+        )
     }
 
     @Transactional(readOnly = true)
     fun hentTrygdeavgiftsberegning(behandlingsresultatID: Long): Set<Trygdeavgiftsperiode> {
-        return medlemAvFolketrygdenService.hentMedlemAvFolketrygden(behandlingsresultatID)?.fastsattTrygdeavgift?.trygdeavgiftsperioder
+        return medlemAvFolketrygdenService.finnMedlemAvFolketrygden(behandlingsresultatID)
+            .map { it.fastsattTrygdeavgift?.trygdeavgiftsperioder }
+            .orElse(null)
             ?: emptySet()
     }
 
-    companion object {
-        fun validerInntekstperioderDekkerMedlemskapsperioder(
-            inntektsperioder: List<Inntektsperiode>,
-            medlemskapsperioder: List<Medlemskapsperiode>
-        ) {
-            val inntektperiodeRange = inntektsperioder.sortedBy { it.fomDato }
-                .map { inntektsperiode -> LocalDateRange.ofClosed(inntektsperiode.fomDato, inntektsperiode.tomDato) }
-
-            var totaltRange: LocalDateRange? = null
-            try {
-                for (range in inntektperiodeRange) {
-                    totaltRange = if (totaltRange == null) {
-                        range
-                    } else {
-                        totaltRange.union(range)
-                    }
-                }
-            } catch (ex: DateTimeException) {
-                throw FunksjonellException("Inntektsperioden(e) du har lagt inn dekker ikke hele medlemskapsperioden(e)")
+    @Transactional(readOnly = true)
+    fun finnFakturamottakerNavn(behandlingID: Long): String {
+        val fagsak = behandlingService.hentBehandling(behandlingID).fagsak
+        fagsak.finnFullmektig(Fullmaktstype.FULLMEKTIG_TRYGDEAVGIFT)
+            .let {
+                if (it == null)
+                    return persondataService.hentSammensattNavn(fagsak.hentBrukersAktørID())
+                if (it.erPerson())
+                    return persondataService.hentSammensattNavn(it.personIdent)
+                return eregFasade.hentOrganisasjonNavn(it.orgnr)
             }
-
-
-            val sortertMedlemskapsperiode = medlemskapsperioder.sortedBy { it.fom }
-            if (LocalDateRange.ofClosed(
-                    sortertMedlemskapsperiode.first().fom,
-                    sortertMedlemskapsperiode.last().tom
-                ) != totaltRange
-            ) {
-                throw FunksjonellException("Inntektsperioden(e) du har lagt inn dekker ikke hele medlemskapsperioden(e)")
-            }
-        }
     }
-
 }

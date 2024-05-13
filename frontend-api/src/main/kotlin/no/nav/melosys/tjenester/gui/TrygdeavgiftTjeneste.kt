@@ -1,11 +1,12 @@
 package no.nav.melosys.tjenester.gui
 
 import io.swagger.annotations.Api
-import no.nav.melosys.domain.kodeverk.Trygdeavgiftmottaker
+import no.nav.melosys.service.avgift.TrygdeavgiftMottakerService
 import no.nav.melosys.service.avgift.TrygdeavgiftsberegningService
 import no.nav.melosys.service.avgift.TrygdeavgiftsgrunnlagService
 import no.nav.melosys.service.tilgang.Aksesskontroll
 import no.nav.melosys.tjenester.gui.dto.trygdeavgift.BeregnetTrygdeavgiftDto
+import no.nav.melosys.tjenester.gui.dto.trygdeavgift.FakturamottakerDto
 import no.nav.melosys.tjenester.gui.dto.trygdeavgift.TrygdeavgiftMottakerDto
 import no.nav.melosys.tjenester.gui.dto.trygdeavgift.TrygdeavgiftsgrunnlagDto
 import no.nav.security.token.support.core.api.Protected
@@ -19,6 +20,7 @@ import org.springframework.web.bind.annotation.*
 class TrygdeavgiftTjeneste(
     private val trygdeavgiftsgrunnlagService: TrygdeavgiftsgrunnlagService,
     private val trygdeavgiftsberegningService: TrygdeavgiftsberegningService,
+    private val trygdeavgiftMottakerService: TrygdeavgiftMottakerService,
     private val aksesskontroll: Aksesskontroll
 ) {
 
@@ -26,7 +28,7 @@ class TrygdeavgiftTjeneste(
     fun hentTrygdeavgiftsgrunnlag(@PathVariable("behandlingID") behandlingID: Long): ResponseEntity<TrygdeavgiftsgrunnlagDto> {
         aksesskontroll.autoriser(behandlingID)
 
-        return trygdeavgiftsgrunnlagService.hentTrygdeavgiftsgrunnlag(behandlingID)
+        return trygdeavgiftsgrunnlagService.hentTrygdeavgiftsgrunnlagEllerOpprinneligTrygdeavgiftsgrunnlag(behandlingID)
             ?.let { ResponseEntity.ok(TrygdeavgiftsgrunnlagDto(it)) } ?: ResponseEntity.noContent().build()
     }
 
@@ -35,7 +37,9 @@ class TrygdeavgiftTjeneste(
         aksesskontroll.autoriser(behandlingID)
 
         return trygdeavgiftsgrunnlagService.hentTrygdeavgiftsgrunnlag(behandlingID)
-            ?.let { ResponseEntity.ok(TrygdeavgiftMottakerDto(it.fastsattTrygdeavgift.trygdeavgiftMottaker)) } ?: ResponseEntity.noContent().build()
+            ?.let { ResponseEntity.ok(TrygdeavgiftMottakerDto(
+                trygdeavgiftMottakerService.getTrygdeavgiftMottaker(it)))
+            } ?: ResponseEntity.noContent().build()
     }
 
     @PutMapping("/grunnlag")
@@ -69,5 +73,11 @@ class TrygdeavgiftTjeneste(
         return ResponseEntity.ok(
             BeregnetTrygdeavgiftDto.av(trygdeavgiftsberegningService.beregnOgLagreTrygdeavgift(behandlingID))
         )
+    }
+
+    @GetMapping("/fakturamottaker")
+    fun hentFakturamottaker(@PathVariable("behandlingID") behandlingID: Long): ResponseEntity<FakturamottakerDto> {
+        aksesskontroll.autoriser(behandlingID)
+        return ResponseEntity.ok(FakturamottakerDto(trygdeavgiftsberegningService.finnFakturamottakerNavn(behandlingID)))
     }
 }

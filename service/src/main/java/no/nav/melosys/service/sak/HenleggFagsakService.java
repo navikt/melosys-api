@@ -9,10 +9,10 @@ import no.nav.melosys.domain.kodeverk.begrunnelser.Henleggelsesgrunner;
 import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingsresultattyper;
 import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingsstatus;
 import no.nav.melosys.exception.TekniskException;
+import no.nav.melosys.saksflytapi.ProsessinstansService;
 import no.nav.melosys.service.behandling.BehandlingService;
 import no.nav.melosys.service.behandling.BehandlingsresultatService;
 import no.nav.melosys.service.oppgave.OppgaveService;
-import no.nav.melosys.service.saksflyt.ProsessinstansService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
@@ -55,10 +55,10 @@ public class HenleggFagsakService {
             throw new TekniskException(begrunnelseKodeString.toUpperCase() + " er ingen gyldig henleggelsesgrunn");
         }
 
-        Behandling aktivBehandling = fagsak.hentAktivBehandling();
+        Behandling aktivBehandling = fagsak.finnAktivBehandlingIkkeÅrsavregning();
         oppdaterBehandlingsresultat(aktivBehandling.getId(), begrunnelseKode, fritekst);
-        if (aktivBehandling.erNyVurdering()) {
-            behandlingService.avsluttNyVurdering(aktivBehandling.getId(), Behandlingsresultattyper.HENLEGGELSE);
+        if (aktivBehandling.erAndregangsbehandling()) {
+            behandlingService.avsluttAndregangsbehandling(aktivBehandling.getId(), Behandlingsresultattyper.HENLEGGELSE);
         } else {
             fagsakService.avsluttFagsakOgBehandling(fagsak, Saksstatuser.HENLAGT);
         }
@@ -83,9 +83,9 @@ public class HenleggFagsakService {
     @Transactional
     public void henleggSakEllerBehandlingSomBortfalt(String saksnummer) {
         Fagsak fagsak = fagsakService.hentFagsak(saksnummer);
-        Behandling aktivBehandling = fagsak.hentAktivBehandling();
+        Behandling aktivBehandling = fagsak.finnAktivBehandlingIkkeÅrsavregning();
 
-        if (aktivBehandling.erNyVurdering()) {
+        if (aktivBehandling.erAndregangsbehandling()) {
             henleggBehandlingSomBortfalt(aktivBehandling.getId(), saksnummer);
         } else {
             henleggSakSomBortfalt(fagsak);
@@ -93,14 +93,16 @@ public class HenleggFagsakService {
     }
 
     private void henleggBehandlingSomBortfalt(long behandlingId, String saksnummer) {
-        behandlingService.avsluttNyVurdering(behandlingId, Behandlingsresultattyper.HENLEGGELSE_BORTFALT);
+        behandlingService.avsluttAndregangsbehandling(behandlingId, Behandlingsresultattyper.HENLEGGELSE_BORTFALT);
         oppgaveService.ferdigstillOppgaveMedSaksnummer(saksnummer);
     }
 
     private void henleggSakSomBortfalt(Fagsak fagsak) {
         log.info("Fagsak {}: {}", fagsak.getSaksnummer(), Saksstatuser.HENLAGT_BORTFALT.getBeskrivelse());
-        fagsak.getBehandlinger().forEach(behandling -> behandlingsresultatService.oppdaterBehandlingsresultattype(behandling.getId(), Behandlingsresultattyper.HENLEGGELSE_BORTFALT));
-        fagsak.getBehandlinger().forEach(behandling -> behandling.setStatus(Behandlingsstatus.AVSLUTTET));
+        fagsak.getBehandlinger().forEach(behandling -> {
+            behandlingsresultatService.oppdaterBehandlingsresultattype(behandling.getId(), Behandlingsresultattyper.HENLEGGELSE_BORTFALT);
+            if (behandling.getStatus() != Behandlingsstatus.AVSLUTTET) behandlingService.avsluttBehandling(behandling.getId());
+        });
         fagsak.setStatus(Saksstatuser.HENLAGT_BORTFALT);
         fagsakService.lagre(fagsak);
         oppgaveService.ferdigstillOppgaveMedSaksnummer(fagsak.getSaksnummer());

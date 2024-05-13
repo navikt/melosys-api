@@ -1,16 +1,15 @@
 package no.nav.melosys.domain.folketrygden;
 
+import no.nav.melosys.domain.Behandlingsresultat;
+import no.nav.melosys.domain.Medlemskapsperiode;
+import no.nav.melosys.domain.avgift.SkatteforholdTilNorge;
+import no.nav.melosys.domain.kodeverk.Skatteplikttype;
+
+import jakarta.persistence.*;
 import java.time.LocalDate;
 import java.util.Collection;
 import java.util.Comparator;
 import java.util.HashSet;
-import javax.persistence.*;
-
-import no.nav.melosys.domain.Behandlingsresultat;
-import no.nav.melosys.domain.Medlemskapsperiode;
-import no.nav.melosys.domain.avgift.SkatteforholdTilNorge;
-import no.nav.melosys.domain.kodeverk.Folketrygdloven_kap2_bestemmelser;
-import no.nav.melosys.domain.kodeverk.Skatteplikttype;
 
 @Entity
 @Table(name = "medlem_av_folketrygden")
@@ -22,10 +21,6 @@ public class MedlemAvFolketrygden {
     @OneToOne(optional = false)
     @JoinColumn(name = "beh_resultat_id", nullable = false, updatable = false)
     private Behandlingsresultat behandlingsresultat;
-
-    @Column(name = "bestemmelse", nullable = false)
-    @Enumerated(EnumType.STRING)
-    private Folketrygdloven_kap2_bestemmelser bestemmelse;
 
     @OneToMany(mappedBy = "medlemAvFolketrygden", cascade = CascadeType.ALL, fetch = FetchType.LAZY, orphanRemoval = true)
     private Collection<Medlemskapsperiode> medlemskapsperioder = new HashSet<>(1);
@@ -47,14 +42,6 @@ public class MedlemAvFolketrygden {
 
     public void setBehandlingsresultat(Behandlingsresultat behandlingsresultat) {
         this.behandlingsresultat = behandlingsresultat;
-    }
-
-    public Folketrygdloven_kap2_bestemmelser getBestemmelse() {
-        return bestemmelse;
-    }
-
-    public void setBestemmelse(Folketrygdloven_kap2_bestemmelser bestemmelse) {
-        this.bestemmelse = bestemmelse;
     }
 
     public Collection<Medlemskapsperiode> getMedlemskapsperioder() {
@@ -94,14 +81,24 @@ public class MedlemAvFolketrygden {
         return medlemskapsperioder.stream()
             .filter(Medlemskapsperiode::erInnvilget)
             .min(Comparator.comparing(Medlemskapsperiode::getFom))
-            .map(Medlemskapsperiode::getFom).orElse(null);
+            .map(Medlemskapsperiode::getFom)
+            .orElse(null);
     }
 
     public LocalDate utledMedlemskapsperiodeTom() {
         return medlemskapsperioder.stream()
             .filter(Medlemskapsperiode::erInnvilget)
+            .filter(medlemskapsperiode -> medlemskapsperiode.getTom() != null)
             .max(Comparator.comparing(Medlemskapsperiode::getTom))
-            .map(Medlemskapsperiode::getTom).orElse(null);
+            .map(Medlemskapsperiode::getTom)
+            .orElse(null);
     }
 
+    public LocalDate utledOpphørtDato() {
+        return medlemskapsperioder.stream()
+            .filter(Medlemskapsperiode::erOpphørt)
+            .min(Comparator.comparing(Medlemskapsperiode::getFom))
+            .map(Medlemskapsperiode::getFom)
+            .orElse(null);
+    }
 }

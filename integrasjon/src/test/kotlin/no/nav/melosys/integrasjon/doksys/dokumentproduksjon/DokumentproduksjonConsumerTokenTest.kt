@@ -2,17 +2,19 @@ package no.nav.melosys.integrasjon.doksys.dokumentproduksjon
 
 import com.github.tomakehurst.wiremock.client.MappingBuilder
 import com.github.tomakehurst.wiremock.client.WireMock.*
+import com.github.tomakehurst.wiremock.matching.EqualToPattern
 import com.github.tomakehurst.wiremock.matching.StringValuePattern
 import no.nav.melosys.integrasjon.ConsumerWireMockTestBase
 import no.nav.melosys.integrasjon.OAuthMockServer
+import no.nav.melosys.integrasjon.reststs.RestSTSService
+import no.nav.melosys.integrasjon.reststs.SecurityTokenServiceConsumer
+import no.nav.melosys.integrasjon.reststs.StsWebClientProducer
 import no.nav.melosys.sikkerhet.context.SpringSubjectHandler
 import no.nav.melosys.sikkerhet.context.SubjectHandler
-import no.nav.melosys.sikkerhet.sts.*
 import no.nav.security.token.support.spring.SpringTokenValidationContextHolder
 import no.nav.tjeneste.virksomhet.dokumentproduksjon.v3.meldinger.ProduserIkkeredigerbartDokumentRequest
 import no.nav.tjeneste.virksomhet.dokumentproduksjon.v3.meldinger.ProduserIkkeredigerbartDokumentResponse
 import org.junit.jupiter.api.AfterAll
-import org.junit.jupiter.api.Disabled
 import org.junit.jupiter.api.Test
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.beans.factory.annotation.Value
@@ -22,10 +24,11 @@ import org.springframework.context.annotation.Import
 import org.springframework.test.context.ActiveProfiles
 
 @Import(
-    StsLoginConfig::class,
-    StsProdWrapper::class,
-    StsTestWrapper::class,
     OAuthMockServer::class,
+
+    StsWebClientProducer::class,
+    SecurityTokenServiceConsumer::class,
+    RestSTSService::class,
 
     DokumentproduksjonConsumerConfig::class,
     DokumentproduksjonConsumerProducer::class
@@ -54,7 +57,7 @@ class DokumentproduksjonConsumerTokenTest(
     @Test
     fun authorizationSkalKommeFraSystem() {
         stsMockServer.stubFor(
-            defaultSecurityServiceWireMockMappings()
+            defaultSecurityServiceWireMockMappingForSystem()
                 .withRequestBody(
                     notMatching(".*BinarySecurityToken.*")
 
@@ -67,7 +70,6 @@ class DokumentproduksjonConsumerTokenTest(
     }
 
     @Test
-    @Disabled("Docsys støtter ikke azure ennå, så bruker kun system token")
     fun authorizationSkalKommeFraBruker() {
         SubjectHandler.set(object : SubjectHandler() {
             override fun getOidcTokenString() = "--token-from-user--"
@@ -75,23 +77,15 @@ class DokumentproduksjonConsumerTokenTest(
             override fun getUserName() = ""
             override fun getGroups() = mutableListOf<String>()
         })
-
-        val binarySecurityToken = """
-                <wsse:BinarySecurityToken
-                        xmlns:wsse="http://docs.oasis-open.org/wss/2004/01/oasis-200401-wss-wssecurity-secext-1.0.xsd"
-                        EncodingType="http://docs.oasis-open.org/wss/2004/01/oasis-200401-wss-soap-message-security-1.0#Base64Binary"
-                        ValueType="urn:ietf:params:oauth:token-type:jwt">LS10b2tlbi1mcm9tLXVzZXItLQ==
-                </wsse:BinarySecurityToken>
-        """.trimIndent()
-
         stsMockServer.stubFor(
-            defaultSecurityServiceWireMockMappings()
+            defaultSecurityServiceWireMockMappingForBruker()
                 .withRequestBody(
-                    matchingXPath(
-                        "/Envelope/Body/RequestSecurityToken/OnBehalfOf/BinarySecurityToken",
-                        equalToXml(binarySecurityToken)
-                    )
+                    notMatching(".*BinarySecurityToken.*")
+
                 )
+        )
+        verifyHeaders(
+            soapActionHeader()
         )
         verifyHeaders(
             soapActionHeader()
@@ -102,7 +96,7 @@ class DokumentproduksjonConsumerTokenTest(
     @Test
     fun authorizationSkalKommeFraSystemNårHverkenSystemEllerBrukerErKilde() {
         stsMockServer.stubFor(
-            defaultSecurityServiceWireMockMappings()
+            defaultSecurityServiceWireMockMappingForSystem()
                 .withRequestBody(
                     notMatching(".*BinarySecurityToken.*")
                 )
@@ -138,54 +132,31 @@ class DokumentproduksjonConsumerTokenTest(
     override fun executeRequest() =
         dokumentproduksjonConsumer.produserIkkeredigerbartDokument(ProduserIkkeredigerbartDokumentRequest())
 
-    private fun defaultSecurityServiceWireMockMappings(): MappingBuilder =
-        post("/SecurityTokenServiceProvider/")
-            .withRequestBody(
-                matchingXPath(
-                    "/Envelope/Header/Security/UsernameToken/Username",
-                    equalToXml("<wsse:Username>srvmelosys</wsse:Username>")
-                )
-            )
-            .withRequestBody(
-                matchingXPath(
-                    "/Envelope/Header/Security/UsernameToken/Password",
-                    equalToXml(
-                        """
-                        <wsse:Password Type="http://docs.oasis-open.org/wss/2004/01/oasis-200401-wss-username-token-profile-1.0#PasswordText">
-                            dummy
-                        </wsse:Password>
-                    """.trimIndent()
-                    )
-                )
-            )
+    private fun defaultSecurityServiceWireMockMappingForSystem(): MappingBuilder =
+        get("/samltoken")
+            .withHeader("Authorization", EqualToPattern("Basic dGVzdDp0ZXN0"))
             .willReturn(
                 aResponse()
                     .withStatus(200)
-                    .withHeader("Content-Type", "text/xml")
+                    .withHeader("Content-Type", "application/json")
                     .withBody(sts_response)
             )
 
-    private val sts_response = """
-        <?xml version="1.0" encoding="UTF-8"?>
-        <soapenv:Envelope xmlns:wsa="http://www.w3.org/2005/08/addressing" xmlns:soapenv="http://schemas.xmlsoap.org/soap/envelope/">
-            <soapenv:Header>
-                <wsa:MessageID>urn:uuid:5e22dd04-7a8e-494a-a05e-2fff16ecf883</wsa:MessageID>
-                <wsa:Action>http://docs.oasis-open.org/ws-sx/ws-trust/200512/RSTRC/IssueFinal</wsa:Action>
-                <wsa:To>http://www.w3.org/2005/08/addressing/anonymous</wsa:To>
-            </soapenv:Header>
-            <soapenv:Body>
-                <wst:RequestSecurityTokenResponseCollection xmlns:wst="http://docs.oasis-open.org/ws-sx/ws-trust/200512">
-                    <wst:RequestSecurityTokenResponse Context="supportLater">
-                     <wst:TokenType>http://docs.oasis-open.org/wss/oasis-wss-saml-token-profile-1.1#SAMLV2.0</wst:TokenType>
-                        <wst:RequestedSecurityToken>
-                            <saml2:Assertion Version="2.0" ID="SAML-8d11de08-b17f-45ba-bd18-68098a4d28ce" IssueInstant="2018-09-06T10:28:45Z"
-                                             xmlns:saml2="urn:oasis:names:tc:SAML:2.0:assertion">
-                                <saml2:Issuer>SomeOne</saml2:Issuer>
-                            </saml2:Assertion>
-                        </wst:RequestedSecurityToken>
-                    </wst:RequestSecurityTokenResponse>
-                </wst:RequestSecurityTokenResponseCollection>
-            </soapenv:Body>
-        </soapenv:Envelope>
+    private fun defaultSecurityServiceWireMockMappingForBruker(): MappingBuilder =
+        post("/token/exchange?grant_type=urn:ietf:params:oauth:grant-type:token-exchange&requested_token_type=urn:ietf:params:oauth:token-type:saml2&subject_token_type=urn:ietf:params:oauth:token-type:access_token&subject_token=--token-from-user--")
+            .withHeader("Authorization", EqualToPattern("Basic dGVzdDp0ZXN0"))
+            .willReturn(
+                aResponse()
+                    .withStatus(200)
+                    .withHeader("Content-Type", "application/json")
+                    .withBody(sts_response)
+            )
+
+    private val sts_response = """{
+          "access_token": "PHNhbWxwOlJlc3BvbnNlIHhtbG5zOnNhbWxwPSJ1cm46b2FzaXM6bmFtZXM6dGM6U0FNTDoyLjA6cHJvdG9jb2wiIHhtbG5zOnNhbWw9InVybjpvYXNpczpuYW1lczp0YzpTQU1MOjIuMDphc3NlcnRpb24iIElEPSJfOGU4ZGM1ZjY5YTk4Y2M0YzFmZjM0MjdlNWNlMzQ2MDZmZDY3MmY5MWU2IiBWZXJzaW9uPSIyLjAiIElzc3VlSW5zdGFudD0iMjAxNC0wNy0xN1QwMTowMTo0OFoiIERlc3RpbmF0aW9uPSJodHRwOi8vc3AuZXhhbXBsZS5jb20vZGVtbzEvaW5kZXgucGhwP2FjcyIgSW5SZXNwb25zZVRvPSJPTkVMT0dJTl80ZmVlM2IwNDYzOTVjNGU3NTEwMTFlOTdmODkwMGI1MjczZDU2Njg1Ij4KICA8c2FtbDpJc3N1ZXI+aHR0cDovL2lkcC5leGFtcGxlLmNvbS9tZXRhZGF0YS5waHA8L3NhbWw6SXNzdWVyPgogIDxzYW1scDpTdGF0dXM+CiAgICA8c2FtbHA6U3RhdHVzQ29kZSBWYWx1ZT0idXJuOm9hc2lzOm5hbWVzOnRjOlNBTUw6Mi4wOnN0YXR1czpTdWNjZXNzIi8+CiAgPC9zYW1scDpTdGF0dXM+CiAgPHNhbWw6QXNzZXJ0aW9uIHhtbG5zOnhzaT0iaHR0cDovL3d3dy53My5vcmcvMjAwMS9YTUxTY2hlbWEtaW5zdGFuY2UiIHhtbG5zOnhzPSJodHRwOi8vd3d3LnczLm9yZy8yMDAxL1hNTFNjaGVtYSIgSUQ9Il9kNzFhM2E4ZTlmY2M0NWM5ZTlkMjQ4ZWY3MDQ5MzkzZmM4ZjA0ZTVmNzUiIFZlcnNpb249IjIuMCIgSXNzdWVJbnN0YW50PSIyMDE0LTA3LTE3VDAxOjAxOjQ4WiI+CiAgICA8c2FtbDpJc3N1ZXI+aHR0cDovL2lkcC5leGFtcGxlLmNvbS9tZXRhZGF0YS5waHA8L3NhbWw6SXNzdWVyPgogICAgPHNhbWw6U3ViamVjdD4KICAgICAgPHNhbWw6TmFtZUlEIFNQTmFtZVF1YWxpZmllcj0iaHR0cDovL3NwLmV4YW1wbGUuY29tL2RlbW8xL21ldGFkYXRhLnBocCIgRm9ybWF0PSJ1cm46b2FzaXM6bmFtZXM6dGM6U0FNTDoyLjA6bmFtZWlkLWZvcm1hdDp0cmFuc2llbnQiPl9jZTNkMjk0OGI0Y2YyMDE0NmRlZTBhMGIzZGQ2ZjY5YjZjZjg2ZjYyZDc8L3NhbWw6TmFtZUlEPgogICAgICA8c2FtbDpTdWJqZWN0Q29uZmlybWF0aW9uIE1ldGhvZD0idXJuOm9hc2lzOm5hbWVzOnRjOlNBTUw6Mi4wOmNtOmJlYXJlciI+CiAgICAgICAgPHNhbWw6U3ViamVjdENvbmZpcm1hdGlvbkRhdGEgTm90T25PckFmdGVyPSIyMDI0LTAxLTE4VDA2OjIxOjQ4WiIgUmVjaXBpZW50PSJodHRwOi8vc3AuZXhhbXBsZS5jb20vZGVtbzEvaW5kZXgucGhwP2FjcyIgSW5SZXNwb25zZVRvPSJPTkVMT0dJTl80ZmVlM2IwNDYzOTVjNGU3NTEwMTFlOTdmODkwMGI1MjczZDU2Njg1Ii8+CiAgICAgIDwvc2FtbDpTdWJqZWN0Q29uZmlybWF0aW9uPgogICAgPC9zYW1sOlN1YmplY3Q+CiAgICA8c2FtbDpDb25kaXRpb25zIE5vdEJlZm9yZT0iMjAxNC0wNy0xN1QwMTowMToxOFoiIE5vdE9uT3JBZnRlcj0iMjAyNC0wMS0xOFQwNjoyMTo0OFoiPgogICAgICA8c2FtbDpBdWRpZW5jZVJlc3RyaWN0aW9uPgogICAgICAgIDxzYW1sOkF1ZGllbmNlPmh0dHA6Ly9zcC5leGFtcGxlLmNvbS9kZW1vMS9tZXRhZGF0YS5waHA8L3NhbWw6QXVkaWVuY2U+CiAgICAgIDwvc2FtbDpBdWRpZW5jZVJlc3RyaWN0aW9uPgogICAgPC9zYW1sOkNvbmRpdGlvbnM+CiAgICA8c2FtbDpBdXRoblN0YXRlbWVudCBBdXRobkluc3RhbnQ9IjIwMTQtMDctMTdUMDE6MDE6NDhaIiBTZXNzaW9uTm90T25PckFmdGVyPSIyMDI0LTA3LTE3VDA5OjAxOjQ4WiIgU2Vzc2lvbkluZGV4PSJfYmU5OTY3YWJkOTA0ZGRjYWUzYzBlYjQxODlhZGJlM2Y3MWUzMjdjZjkzIj4KICAgICAgPHNhbWw6QXV0aG5Db250ZXh0PgogICAgICAgIDxzYW1sOkF1dGhuQ29udGV4dENsYXNzUmVmPnVybjpvYXNpczpuYW1lczp0YzpTQU1MOjIuMDphYzpjbGFzc2VzOlBhc3N3b3JkPC9zYW1sOkF1dGhuQ29udGV4dENsYXNzUmVmPgogICAgICA8L3NhbWw6QXV0aG5Db250ZXh0PgogICAgPC9zYW1sOkF1dGhuU3RhdGVtZW50PgogICAgPHNhbWw6QXR0cmlidXRlU3RhdGVtZW50PgogICAgICA8c2FtbDpBdHRyaWJ1dGUgTmFtZT0idWlkIiBOYW1lRm9ybWF0PSJ1cm46b2FzaXM6bmFtZXM6dGM6U0FNTDoyLjA6YXR0cm5hbWUtZm9ybWF0OmJhc2ljIj4KICAgICAgICA8c2FtbDpBdHRyaWJ1dGVWYWx1ZSB4c2k6dHlwZT0ieHM6c3RyaW5nIj50ZXN0PC9zYW1sOkF0dHJpYnV0ZVZhbHVlPgogICAgICA8L3NhbWw6QXR0cmlidXRlPgogICAgICA8c2FtbDpBdHRyaWJ1dGUgTmFtZT0ibWFpbCIgTmFtZUZvcm1hdD0idXJuOm9hc2lzOm5hbWVzOnRjOlNBTUw6Mi4wOmF0dHJuYW1lLWZvcm1hdDpiYXNpYyI+CiAgICAgICAgPHNhbWw6QXR0cmlidXRlVmFsdWUgeHNpOnR5cGU9InhzOnN0cmluZyI+dGVzdEBleGFtcGxlLmNvbTwvc2FtbDpBdHRyaWJ1dGVWYWx1ZT4KICAgICAgPC9zYW1sOkF0dHJpYnV0ZT4KICAgICAgPHNhbWw6QXR0cmlidXRlIE5hbWU9ImVkdVBlcnNvbkFmZmlsaWF0aW9uIiBOYW1lRm9ybWF0PSJ1cm46b2FzaXM6bmFtZXM6dGM6U0FNTDoyLjA6YXR0cm5hbWUtZm9ybWF0OmJhc2ljIj4KICAgICAgICA8c2FtbDpBdHRyaWJ1dGVWYWx1ZSB4c2k6dHlwZT0ieHM6c3RyaW5nIj51c2Vyczwvc2FtbDpBdHRyaWJ1dGVWYWx1ZT4KICAgICAgICA8c2FtbDpBdHRyaWJ1dGVWYWx1ZSB4c2k6dHlwZT0ieHM6c3RyaW5nIj5leGFtcGxlcm9sZTE8L3NhbWw6QXR0cmlidXRlVmFsdWU+CiAgICAgIDwvc2FtbDpBdHRyaWJ1dGU+CiAgICA8L3NhbWw6QXR0cmlidXRlU3RhdGVtZW50PgogIDwvc2FtbDpBc3NlcnRpb24+Cjwvc2FtbHA6UmVzcG9uc2U+",
+          "issued_token_type": "urn:ietf:params:oauth:token-type:saml2",
+          "token_type": "Bearer",
+          "expires_in": 3162
+        }
         """.trimIndent()
 }

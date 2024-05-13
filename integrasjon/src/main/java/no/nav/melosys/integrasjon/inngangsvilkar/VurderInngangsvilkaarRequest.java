@@ -8,7 +8,7 @@ import no.nav.melosys.domain.ErPeriode;
 record VurderInngangsvilkaarRequest(
     Set<String> statsborgerskap,
     Set<String> arbeidsland,
-    boolean erUkjenteEllerAlleEosLand,
+    boolean flereLandUkjentHvilke,
     ErPeriode periode
 ) {
 }

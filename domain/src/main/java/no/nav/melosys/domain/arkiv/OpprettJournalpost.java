@@ -1,14 +1,15 @@
 package no.nav.melosys.domain.arkiv;
 
+import java.util.Collection;
+import java.util.List;
+import java.util.Optional;
+
 import com.google.common.collect.MoreCollectors;
 import no.nav.melosys.domain.Fagsak;
 import no.nav.melosys.domain.Tema;
 import no.nav.melosys.domain.eessi.SedType;
-import no.nav.melosys.domain.kodeverk.Representerer;
+import no.nav.melosys.domain.kodeverk.Fullmaktstype;
 import no.nav.melosys.domain.msm.AltinnDokument;
-
-import java.util.Collection;
-import java.util.List;
 
 import static no.nav.melosys.domain.arkiv.FysiskDokument.*;
 
@@ -47,7 +48,7 @@ public class OpprettJournalpost extends Journalpost {
 
     public static OpprettJournalpost lagJournalpostForSendingAvSedSomBrev(
         String saksnummer, String brukerFnr, SedType sedType, byte[] sedPdf, String institusjonID,
-        String institusjonNavn, String institusjonLand, List<FysiskDokument> vedlegg, Tema tema) {
+        String institusjonNavn, String institusjonLand, List<FysiskDokument> vedlegg, Tema tema, String eksternReferanseIdForJournalpost) {
 
         var opprettJournalpost = new OpprettJournalpost();
         opprettJournalpost.setHoveddokument(lagFysiskDokumentSed(sedType, sedPdf));
@@ -64,6 +65,7 @@ public class OpprettJournalpost extends Journalpost {
         opprettJournalpost.setKorrespondansepartIdType(KorrespondansepartIdType.UTENLANDSK_ORGANISASJON);
         opprettJournalpost.setBrukerId(brukerFnr);
         opprettJournalpost.setBrukerIdType(BrukerIdType.FOLKEREGISTERIDENT);
+        opprettJournalpost.setEksternReferanseId(eksternReferanseIdForJournalpost);
 
         opprettJournalpost.setInnhold(opprettJournalpost.getHoveddokument().getTittel());
 
@@ -79,7 +81,7 @@ public class OpprettJournalpost extends Journalpost {
         dokumenter.remove(hovedDokument);
 
         OpprettJournalpost opprettJournalpost = new OpprettJournalpost();
-        final var mottatteOpplysninger = fagsak.hentSistAktivBehandling().getMottatteOpplysninger();
+        final var mottatteOpplysninger = fagsak.hentSistAktivBehandlingIkkeÅrsavregning().getMottatteOpplysninger();
         opprettJournalpost.setHoveddokument(lagFysiskHovedDokumentAltinn(hovedDokument, mottatteOpplysninger));
         opprettJournalpost.setInnhold(opprettJournalpost.getHoveddokument().getTittel());
         opprettJournalpost.setVedlegg(dokumenter.stream().map(FysiskDokument::lagFysiskDokumentAltinn).toList());
@@ -93,9 +95,9 @@ public class OpprettJournalpost extends Journalpost {
         opprettJournalpost.setBrukerIdType(BrukerIdType.FOLKEREGISTERIDENT);
         opprettJournalpost.setForsendelseMottatt(hovedDokument.getInnsendtTidspunkt());
 
-        fagsak.finnRepresentant(Representerer.BRUKER).ifPresentOrElse(
-            r -> {
-                opprettJournalpost.setKorrespondansepartId(r.getOrgnr());
+        Optional.ofNullable(fagsak.finnFullmektig(Fullmaktstype.FULLMEKTIG_SØKNAD)).ifPresentOrElse(
+            fullmektig -> {
+                opprettJournalpost.setKorrespondansepartId(fullmektig.getOrgnr());
                 opprettJournalpost.setKorrespondansepartNavn(avsenderNavn);
                 opprettJournalpost.setKorrespondansepartIdType(KorrespondansepartIdType.ORGNR);
             },
@@ -117,6 +119,7 @@ public class OpprettJournalpost extends Journalpost {
         opprettJournalpost.setTema(tema.getKode());
         opprettJournalpost.setSaksnummer(bestilling.getSaksnummer());
         opprettJournalpost.setBrukerId(bestilling.getHovedpartId());
+        opprettJournalpost.setEksternReferanseId(bestilling.getEksternReferanseId());
         opprettJournalpost.setBrukerIdType(bestilling.getHovedpartIdType());
         opprettJournalpost.setKorrespondansepartId(bestilling.getMottakerId());
         opprettJournalpost.setKorrespondansepartNavn(bestilling.getMottakerNavn());

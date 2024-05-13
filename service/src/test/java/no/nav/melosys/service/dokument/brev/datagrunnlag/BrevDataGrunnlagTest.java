@@ -8,6 +8,7 @@ import java.util.Set;
 import no.nav.melosys.domain.Aktoer;
 import no.nav.melosys.domain.Behandling;
 import no.nav.melosys.domain.Fagsak;
+import no.nav.melosys.domain.FagsakTestFactory;
 import no.nav.melosys.domain.mottatteopplysninger.MottatteOpplysninger;
 import no.nav.melosys.domain.mottatteopplysninger.Soeknad;
 import no.nav.melosys.domain.mottatteopplysninger.data.arbeidssteder.MaritimtArbeid;
@@ -55,19 +56,14 @@ class BrevDataGrunnlagTest {
     }
 
     private Behandling lagBehandling(Soeknad søknad) {
-        Aktoer aktoer = new Aktoer();
-        aktoer.setRolle(Aktoersroller.BRUKER);
-        aktoer.setAktørId("ident");
-
-        Fagsak fagsak = new Fagsak();
-        fagsak.setAktører(Set.of(aktoer));
+        Fagsak fagsak = FagsakTestFactory.builder().medBruker().build();
 
         Behandling behandling = new Behandling();
         behandling.setId(1L);
         behandling.setFagsak(fagsak);
 
         MottatteOpplysninger mottatteOpplysninger = new MottatteOpplysninger();
-        mottatteOpplysninger.setMottatteOpplysningerdata(søknad);
+        mottatteOpplysninger.setMottatteOpplysningerData(søknad);
         behandling.setMottatteOpplysninger(mottatteOpplysninger);
         return behandling;
     }
@@ -84,10 +80,10 @@ class BrevDataGrunnlagTest {
         this.søknad.maritimtArbeid.add(maritimtArbeidISøknad);
 
         List<Arbeidssted> arbeidssteder = dataGrunnlag.getArbeidsstedGrunnlag().hentArbeidssteder();
-        assertThat(arbeidssteder.size()).isEqualTo(1);
+        assertThat(arbeidssteder).hasSize(1);
 
         MaritimtArbeidssted arbeidssted = (MaritimtArbeidssted) arbeidssteder.get(0);
-        assertThat(arbeidssted.getEnhetNavn()).isEqualTo(maritimtArbeidISøknad.enhetNavn);
+        assertThat(arbeidssted.getEnhetNavn()).isEqualTo(maritimtArbeidISøknad.getEnhetNavn());
         assertThat(arbeidssted.getForetakNavn()).isNullOrEmpty();
         assertThat(arbeidssted.getIdnummer()).isNullOrEmpty();
         assertThat(arbeidssted.getYrkesgruppe().getKode()).isEqualTo(Yrkesgrupper.SOKKEL_ELLER_SKIP.getKode());

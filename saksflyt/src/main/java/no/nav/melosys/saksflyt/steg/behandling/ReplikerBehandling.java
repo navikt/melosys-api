@@ -9,11 +9,11 @@ import no.nav.melosys.domain.Fagsak;
 import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingsaarsaktyper;
 import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingstema;
 import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingstyper;
-import no.nav.melosys.domain.saksflyt.ProsessDataKey;
-import no.nav.melosys.domain.saksflyt.ProsessSteg;
-import no.nav.melosys.domain.saksflyt.Prosessinstans;
 import no.nav.melosys.exception.FunksjonellException;
 import no.nav.melosys.saksflyt.steg.StegBehandler;
+import no.nav.melosys.saksflytapi.domain.ProsessDataKey;
+import no.nav.melosys.saksflytapi.domain.ProsessSteg;
+import no.nav.melosys.saksflytapi.domain.Prosessinstans;
 import no.nav.melosys.service.behandling.BehandlingService;
 import no.nav.melosys.service.sak.FagsakService;
 import no.nav.melosys.service.saksbehandling.SaksbehandlingRegler;
@@ -21,8 +21,8 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Component;
 
-import static no.nav.melosys.domain.saksflyt.ProsessDataKey.*;
-import static no.nav.melosys.domain.saksflyt.ProsessSteg.REPLIKER_BEHANDLING;
+import static no.nav.melosys.saksflytapi.domain.ProsessDataKey.*;
+import static no.nav.melosys.saksflytapi.domain.ProsessSteg.REPLIKER_BEHANDLING;
 
 
 @Component
@@ -32,12 +32,12 @@ public class ReplikerBehandling implements StegBehandler {
 
     private final FagsakService fagsakService;
     private final BehandlingService behandlingService;
-    private final SaksbehandlingRegler behandlingReplikeringsRegler;
+    private final SaksbehandlingRegler saksbehandlingRegler;
 
-    public ReplikerBehandling(FagsakService fagsakService, BehandlingService behandlingService, SaksbehandlingRegler behandlingReplikeringsRegler) {
+    public ReplikerBehandling(FagsakService fagsakService, BehandlingService behandlingService, SaksbehandlingRegler saksbehandlingRegler) {
         this.fagsakService = fagsakService;
         this.behandlingService = behandlingService;
-        this.behandlingReplikeringsRegler = behandlingReplikeringsRegler;
+        this.saksbehandlingRegler = saksbehandlingRegler;
     }
 
     @Override
@@ -53,21 +53,21 @@ public class ReplikerBehandling implements StegBehandler {
         var behandlingstema = prosessinstans.getData(ProsessDataKey.BEHANDLINGSTEMA, Behandlingstema.class);
 
         Behandling behandlingBruktForReplikering = Optional.ofNullable(
-            behandlingReplikeringsRegler.finnBehandlingSomKanReplikeres(fagsak)
+            saksbehandlingRegler.finnBehandlingSomKanReplikeres(fagsak)
         ).orElseThrow(() ->
             new FunksjonellException("Finner ikke behandling som kan replikeres. Denne fantes ved opprettelse av prosessen")
         );
 
         Behandling nyBehandling = behandlingService.replikerBehandlingOgBehandlingsresultat(behandlingBruktForReplikering, behandlingstype);
 
-        if (behandlingBruktForReplikering.erAktiv()) {
+        if (behandlingBruktForReplikering.erAktiv() && !behandlingBruktForReplikering.erÅrsavregning()) {
             throw new FunksjonellException("Støtter ikke opprettelse av ny behandling når behandling som er utgangspunkt for revurdering er aktiv");
         }
         if (behandlingstema != null) {
             nyBehandling.setTema(behandlingstema);
         }
 
-        settBehandlingsårsak(nyBehandling, prosessinstans);
+        settBehandlingsårsakOgFrist(nyBehandling, prosessinstans);
 
         prosessinstans.setBehandling(nyBehandling);
 
@@ -77,7 +77,7 @@ public class ReplikerBehandling implements StegBehandler {
             behandlingBruktForReplikering.getId(), nyBehandling.getId(), saksnummer);
     }
 
-    private void settBehandlingsårsak(Behandling nyBehandling, Prosessinstans prosessinstans) {
+    private void settBehandlingsårsakOgFrist(Behandling nyBehandling, Prosessinstans prosessinstans) {
         var behandlingsårsaktype = prosessinstans.getData(BEHANDLINGSÅRSAKTYPE, Behandlingsaarsaktyper.class);
         var behandlingsårsakFritekst = prosessinstans.getData(BEHANDLINGSÅRSAK_FRITEKST);
         LocalDate mottaksdato = prosessinstans.getData(MOTTATT_DATO, LocalDate.class);
@@ -87,6 +87,7 @@ public class ReplikerBehandling implements StegBehandler {
         }
 
         var behandlingsårsak = new Behandlingsaarsak(behandlingsårsaktype, behandlingsårsakFritekst, mottaksdato);
-        nyBehandling.setBehandlingsårsak(behandlingsårsak);
+        nyBehandling.settBehandlingsårsak(behandlingsårsak);
+        nyBehandling.setBehandlingsfrist(Behandling.utledBehandlingsfrist(nyBehandling, mottaksdato));
     }
 }

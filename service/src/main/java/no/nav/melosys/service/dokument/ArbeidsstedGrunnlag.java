@@ -37,8 +37,8 @@ public class ArbeidsstedGrunnlag {
     }
 
     private List<Arbeidssted> hentFysiskearbeidssteder() {
-        List<Arbeidssted> fysiskeArbeidssteder = grunnlagData.arbeidPaaLand.fysiskeArbeidssteder.stream()
-            .map(fa -> new FysiskArbeidssted(fa.virksomhetNavn, null, fa.adresse))
+        List<Arbeidssted> fysiskeArbeidssteder = grunnlagData.arbeidPaaLand.getFysiskeArbeidssteder().stream()
+            .map(fa -> new FysiskArbeidssted(fa.getVirksomhetNavn(), null, fa.getAdresse()))
             .collect(Collectors.toList());
 
         if (fysiskeArbeidssteder.isEmpty()) {
@@ -64,7 +64,7 @@ public class ArbeidsstedGrunnlag {
 
     private MaritimtArbeidssted lagMaritimtArbeidssted(MaritimtArbeid maritimtArbeid) {
         // Arbeidssted for maritimt arbeid benytter arbeidsland fra avklartfakta
-        AvklartMaritimtArbeid avklartMaritimtArbeid = avklarteMaritimeArbeidEtterSubjekt.get(maritimtArbeid.enhetNavn);
+        AvklartMaritimtArbeid avklartMaritimtArbeid = avklarteMaritimeArbeidEtterSubjekt.get(maritimtArbeid.getEnhetNavn());
         if (avklartMaritimtArbeid != null) {
             return new MaritimtArbeidssted(maritimtArbeid, avklartMaritimtArbeid);
         }

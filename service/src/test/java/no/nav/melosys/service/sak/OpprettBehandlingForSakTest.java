@@ -1,9 +1,6 @@
 package no.nav.melosys.service.sak;
 
-import java.time.LocalDate;
-import java.util.Optional;
-
-import no.finn.unleash.FakeUnleash;
+import io.getunleash.FakeUnleash;
 import no.nav.melosys.domain.*;
 import no.nav.melosys.domain.kodeverk.Aktoersroller;
 import no.nav.melosys.domain.kodeverk.Sakstemaer;
@@ -11,16 +8,19 @@ import no.nav.melosys.domain.kodeverk.Sakstyper;
 import no.nav.melosys.domain.kodeverk.behandlinger.*;
 import no.nav.melosys.exception.FunksjonellException;
 import no.nav.melosys.repository.BehandlingsresultatRepository;
+import no.nav.melosys.saksflytapi.ProsessinstansService;
 import no.nav.melosys.service.behandling.BehandlingService;
 import no.nav.melosys.service.behandling.BehandlingsresultatService;
-import no.nav.melosys.service.lovligekombinasjoner.LovligeKombinasjonerService;
+import no.nav.melosys.service.lovligekombinasjoner.LovligeKombinasjonerSaksbehandlingService;
 import no.nav.melosys.service.saksbehandling.SaksbehandlingRegler;
-import no.nav.melosys.service.saksflyt.ProsessinstansService;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
+
+import java.time.LocalDate;
+import java.util.Optional;
 
 import static org.assertj.core.api.Assertions.assertThatExceptionOfType;
 import static org.assertj.core.api.Assertions.assertThatNoException;
@@ -30,7 +30,6 @@ import static org.mockito.Mockito.when;
 @ExtendWith(MockitoExtension.class)
 class OpprettBehandlingForSakTest {
 
-    public static final String SAKSNUMMER = "MEL-1";
     @Mock
     private ProsessinstansService prosessinstansService;
     @Mock
@@ -43,14 +42,14 @@ class OpprettBehandlingForSakTest {
     private BehandlingsresultatService behandlingsresultatService;
 
     private final FakeUnleash unleash = new FakeUnleash();
-    private final LovligeKombinasjonerService lovligeKombinasjonerService = new LovligeKombinasjonerService(fagsakService, behandlingService, behandlingsresultatService, unleash);
 
     private OpprettBehandlingForSak opprettBehandlingForSak;
 
     @BeforeEach
     public void setUp() {
+        LovligeKombinasjonerSaksbehandlingService lovligeKombinasjonerSaksbehandlingService = new LovligeKombinasjonerSaksbehandlingService(fagsakService, behandlingService, behandlingsresultatService, unleash);
         SaksbehandlingRegler saksbehandlingRegler = new SaksbehandlingRegler(behandlingsresultatRepository, unleash);
-        opprettBehandlingForSak = new OpprettBehandlingForSak(fagsakService, prosessinstansService, saksbehandlingRegler, lovligeKombinasjonerService, behandlingService, behandlingsresultatService);
+        opprettBehandlingForSak = new OpprettBehandlingForSak(fagsakService, prosessinstansService, saksbehandlingRegler, lovligeKombinasjonerSaksbehandlingService, behandlingService, behandlingsresultatService);
     }
 
     @Test
@@ -58,14 +57,14 @@ class OpprettBehandlingForSakTest {
         Behandling aktivBehandling = lagBehandling();
         aktivBehandling.setStatus(Behandlingsstatus.UNDER_BEHANDLING);
         OpprettSakDto opprettSakDto = lagOpprettSakDto();
-        when(fagsakService.hentFagsak(SAKSNUMMER)).thenReturn(lagFagsak(aktivBehandling));
+        when(fagsakService.hentFagsak(FagsakTestFactory.SAKSNUMMER)).thenReturn(lagFagsak(aktivBehandling));
 
         when(behandlingsresultatService.hentBehandlingsresultat(aktivBehandling.getId())).thenReturn(new Behandlingsresultat());
 
 
         assertThatExceptionOfType(FunksjonellException.class)
-            .isThrownBy(() -> opprettBehandlingForSak.opprettBehandling(SAKSNUMMER, opprettSakDto))
-            .withMessageContaining(String.format("Det finnes allerede en aktiv behandling på fagsak %s", SAKSNUMMER));
+            .isThrownBy(() -> opprettBehandlingForSak.opprettBehandling(FagsakTestFactory.SAKSNUMMER, opprettSakDto))
+            .withMessageContaining(String.format("Det finnes allerede en aktiv behandling på fagsak %s", FagsakTestFactory.SAKSNUMMER));
     }
 
     @Test
@@ -73,7 +72,7 @@ class OpprettBehandlingForSakTest {
         Behandling aktivBehandling = lagBehandling();
         aktivBehandling.setStatus(Behandlingsstatus.UNDER_BEHANDLING);
         OpprettSakDto opprettSakDto = lagOpprettSakDto();
-        when(fagsakService.hentFagsak(SAKSNUMMER)).thenReturn(lagFagsak(aktivBehandling));
+        when(fagsakService.hentFagsak(FagsakTestFactory.SAKSNUMMER)).thenReturn(lagFagsak(aktivBehandling));
 
         Anmodningsperiode anmodningsperiode = new Anmodningsperiode();
         anmodningsperiode.setSendtUtland(true);
@@ -82,7 +81,7 @@ class OpprettBehandlingForSakTest {
         when(behandlingsresultatService.hentBehandlingsresultat(aktivBehandling.getId())).thenReturn(behandlingsresultat);
 
 
-        assertThatNoException().isThrownBy(() -> opprettBehandlingForSak.opprettBehandling(SAKSNUMMER, opprettSakDto));
+        assertThatNoException().isThrownBy(() -> opprettBehandlingForSak.opprettBehandling(FagsakTestFactory.SAKSNUMMER, opprettSakDto));
     }
 
 
@@ -91,11 +90,11 @@ class OpprettBehandlingForSakTest {
         OpprettSakDto opprettSakDto = lagOpprettSakDto();
         opprettSakDto.setBehandlingstema(null);
 
-        when(fagsakService.hentFagsak(SAKSNUMMER)).thenReturn(lagFagsak(lagBehandling()));
+        when(fagsakService.hentFagsak(FagsakTestFactory.SAKSNUMMER)).thenReturn(lagFagsak(lagBehandling()));
 
 
         assertThatExceptionOfType(FunksjonellException.class)
-            .isThrownBy(() -> opprettBehandlingForSak.opprettBehandling(SAKSNUMMER, opprettSakDto))
+            .isThrownBy(() -> opprettBehandlingForSak.opprettBehandling(FagsakTestFactory.SAKSNUMMER, opprettSakDto))
             .withMessageContaining("Behandlingstema mangler");
     }
 
@@ -104,11 +103,11 @@ class OpprettBehandlingForSakTest {
         OpprettSakDto opprettSakDto = lagOpprettSakDto();
         opprettSakDto.setBehandlingstype(null);
 
-        when(fagsakService.hentFagsak(SAKSNUMMER)).thenReturn(lagFagsak(lagBehandling()));
+        when(fagsakService.hentFagsak(FagsakTestFactory.SAKSNUMMER)).thenReturn(lagFagsak(lagBehandling()));
 
 
         assertThatExceptionOfType(FunksjonellException.class)
-            .isThrownBy(() -> opprettBehandlingForSak.opprettBehandling(SAKSNUMMER, opprettSakDto))
+            .isThrownBy(() -> opprettBehandlingForSak.opprettBehandling(FagsakTestFactory.SAKSNUMMER, opprettSakDto))
             .withMessageContaining("Behandlingstype mangler");
     }
 
@@ -117,11 +116,11 @@ class OpprettBehandlingForSakTest {
         OpprettSakDto opprettSakDto = lagOpprettSakDto();
         opprettSakDto.setMottaksdato(null);
 
-        when(fagsakService.hentFagsak(SAKSNUMMER)).thenReturn(lagFagsak(lagBehandling()));
+        when(fagsakService.hentFagsak(FagsakTestFactory.SAKSNUMMER)).thenReturn(lagFagsak(lagBehandling()));
 
 
         assertThatExceptionOfType(FunksjonellException.class)
-            .isThrownBy(() -> opprettBehandlingForSak.opprettBehandling(SAKSNUMMER, opprettSakDto))
+            .isThrownBy(() -> opprettBehandlingForSak.opprettBehandling(FagsakTestFactory.SAKSNUMMER, opprettSakDto))
             .withMessageContaining("Mottaksdato");
     }
 
@@ -130,11 +129,11 @@ class OpprettBehandlingForSakTest {
         OpprettSakDto opprettSakDto = lagOpprettSakDto();
         opprettSakDto.setBehandlingstype(Behandlingstyper.FØRSTEGANG);
 
-        when(fagsakService.hentFagsak(SAKSNUMMER)).thenReturn(lagFagsak(lagBehandling()));
+        when(fagsakService.hentFagsak(FagsakTestFactory.SAKSNUMMER)).thenReturn(lagFagsak(lagBehandling()));
 
 
         assertThatExceptionOfType(FunksjonellException.class)
-            .isThrownBy(() -> opprettBehandlingForSak.opprettBehandling(SAKSNUMMER, opprettSakDto))
+            .isThrownBy(() -> opprettBehandlingForSak.opprettBehandling(FagsakTestFactory.SAKSNUMMER, opprettSakDto))
             .withMessageContaining("er ikke en lovlig behandlingstype med de andre valgte verdiene");
     }
 
@@ -143,11 +142,11 @@ class OpprettBehandlingForSakTest {
         OpprettSakDto opprettSakDto = lagOpprettSakDto();
         opprettSakDto.setBehandlingstema(Behandlingstema.REGISTRERING_UNNTAK);
 
-        when(fagsakService.hentFagsak(SAKSNUMMER)).thenReturn(lagFagsak(lagBehandling()));
+        when(fagsakService.hentFagsak(FagsakTestFactory.SAKSNUMMER)).thenReturn(lagFagsak(lagBehandling()));
 
 
         assertThatExceptionOfType(FunksjonellException.class)
-            .isThrownBy(() -> opprettBehandlingForSak.opprettBehandling(SAKSNUMMER, opprettSakDto))
+            .isThrownBy(() -> opprettBehandlingForSak.opprettBehandling(FagsakTestFactory.SAKSNUMMER, opprettSakDto))
             .withMessageContaining("er ikke et lovlig behandlingstema med de andre valgte verdiene");
     }
 
@@ -157,27 +156,27 @@ class OpprettBehandlingForSakTest {
         opprettSakDto.setBehandlingsaarsakFritekst("Fritekst");
         opprettSakDto.setBehandlingsaarsakType(Behandlingsaarsaktyper.SØKNAD);
 
-        when(fagsakService.hentFagsak(SAKSNUMMER)).thenReturn(lagFagsak(lagBehandling()));
+        when(fagsakService.hentFagsak(FagsakTestFactory.SAKSNUMMER)).thenReturn(lagFagsak(lagBehandling()));
 
 
         assertThatExceptionOfType(FunksjonellException.class)
-            .isThrownBy(() -> opprettBehandlingForSak.opprettBehandling(SAKSNUMMER, opprettSakDto))
+            .isThrownBy(() -> opprettBehandlingForSak.opprettBehandling(FagsakTestFactory.SAKSNUMMER, opprettSakDto))
             .withMessageContaining("Kan ikke lagre fritekst som årsak når årsakstype");
     }
 
     @Test
-    void opprettBehandling_opprettetBehandlingFårTomFlyt_oppretterProsessSomIkkeReplikerer() {
+    void opprettBehandling_opprettetBehandlingFårIngenFlyt_oppretterProsessSomIkkeReplikerer() {
         OpprettSakDto opprettSakDto = lagOpprettSakDto();
         opprettSakDto.setBehandlingstema(Behandlingstema.PENSJONIST);
         opprettSakDto.setBehandlingstype(Behandlingstyper.HENVENDELSE);
 
-        when(fagsakService.hentFagsak(SAKSNUMMER)).thenReturn(lagFagsak(lagBehandling()));
+        when(fagsakService.hentFagsak(FagsakTestFactory.SAKSNUMMER)).thenReturn(lagFagsak(lagBehandling()));
 
 
-        opprettBehandlingForSak.opprettBehandling(SAKSNUMMER, opprettSakDto);
+        opprettBehandlingForSak.opprettBehandling(FagsakTestFactory.SAKSNUMMER, opprettSakDto);
 
 
-        verify(prosessinstansService).opprettNyBehandlingForSak(SAKSNUMMER, opprettSakDto);
+        verify(prosessinstansService).opprettNyBehandlingForSak(FagsakTestFactory.SAKSNUMMER, opprettSakDto.tilOpprettSakRequest());
     }
 
     @Test
@@ -191,17 +190,17 @@ class OpprettBehandlingForSakTest {
 
         Fagsak fagsak = lagFagsak(eksisterendeBehandling);
         eksisterendeBehandling.setFagsak(fagsak);
-        when(fagsakService.hentFagsak(SAKSNUMMER)).thenReturn(fagsak);
+        when(fagsakService.hentFagsak(FagsakTestFactory.SAKSNUMMER)).thenReturn(fagsak);
 
         Behandlingsresultat eksisterendeResultat = new Behandlingsresultat();
         eksisterendeResultat.setType(Behandlingsresultattyper.FASTSATT_LOVVALGSLAND);
         when(behandlingsresultatRepository.findById(eksisterendeBehandling.getId())).thenReturn(Optional.of(eksisterendeResultat));
 
 
-        opprettBehandlingForSak.opprettBehandling(SAKSNUMMER, opprettSakDto);
+        opprettBehandlingForSak.opprettBehandling(FagsakTestFactory.SAKSNUMMER, opprettSakDto);
 
 
-        verify(prosessinstansService).opprettOgReplikerBehandlingForSak(SAKSNUMMER, opprettSakDto);
+        verify(prosessinstansService).opprettOgReplikerBehandlingForSak(FagsakTestFactory.SAKSNUMMER, opprettSakDto.tilOpprettSakRequest());
     }
 
     private OpprettSakDto lagOpprettSakDto() {
@@ -223,14 +222,10 @@ class OpprettBehandlingForSakTest {
     }
 
     private Fagsak lagFagsak(Behandling behandling) {
-        Fagsak fagsak = new Fagsak();
-        fagsak.setSaksnummer(SAKSNUMMER);
-        fagsak.setType(Sakstyper.EU_EOS);
-        fagsak.setTema(Sakstemaer.MEDLEMSKAP_LOVVALG);
-        Aktoer bruker = new Aktoer();
-        bruker.setRolle(Aktoersroller.BRUKER);
-        fagsak.getAktører().add(bruker);
-        fagsak.getBehandlinger().add(behandling);
+        Fagsak fagsak = FagsakTestFactory.builder()
+            .medBruker()
+            .behandlinger(behandling)
+            .build();
         behandling.setFagsak(fagsak);
         return fagsak;
     }

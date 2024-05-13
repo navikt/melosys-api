@@ -5,18 +5,18 @@ import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 import java.util.stream.Stream;
-import javax.transaction.Transactional;
+import jakarta.transaction.Transactional;
 
 import no.nav.melosys.domain.Behandling;
 import no.nav.melosys.domain.Lovvalgsperiode;
+import no.nav.melosys.domain.adresse.StrukturertAdresse;
 import no.nav.melosys.domain.avklartefakta.AvklartVirksomhet;
 import no.nav.melosys.domain.brev.DokgenBrevbestilling;
 import no.nav.melosys.domain.brev.InnvilgelseBrevbestilling;
-import no.nav.melosys.domain.brev.NorskMyndighet;
-import no.nav.melosys.domain.dokument.organisasjon.OrganisasjonDokument;
 import no.nav.melosys.domain.kodeverk.Land_iso2;
 import no.nav.melosys.domain.kodeverk.LovvalgBestemmelse;
 import no.nav.melosys.domain.kodeverk.begrunnelser.Kontroll_begrunnelser;
+import no.nav.melosys.domain.kodeverk.yrker.Yrkesaktivitetstyper;
 import no.nav.melosys.domain.mottatteopplysninger.MottatteOpplysninger;
 import no.nav.melosys.domain.mottatteopplysninger.SøknadNorgeEllerUtenforEØS;
 import no.nav.melosys.domain.mottatteopplysninger.data.IdentType;
@@ -65,7 +65,7 @@ public class TrygdeavtaleMapper {
         return new InnvilgelseOgAttestTrygdeavtale.Builder(brevbestilling)
             .innvilgelse(innvilgelse)
             .attest(mapAttest(brevbestilling, soknadsland))
-            .skalHaInfoOmRettigheter(skalHaInfoOmRettigheter(innvilgelse, brevbestilling))
+            .skalHaInfoOmRettigheter(skalHaInfoOmRettigheter(innvilgelse))
             .nyVurderingBakgrunn(brevbestilling.getNyVurderingBakgrunn())
             .build();
     }
@@ -104,7 +104,7 @@ public class TrygdeavtaleMapper {
                 persondokument.getFødselsdato(),
                 persondokument.hentFolkeregisterident(),
                 adresseSjekker.finnGyldigNorskAdresse(soknadsland)))
-            .representant(lagRepresentant(behandling.getMottatteOpplysninger()))
+            .representant(lagRepresentantIUtlandet(behandling.getMottatteOpplysninger()))
             .utsendelse(lagUtsendelse(lovvalgsperioder, persondokument, soknadsland))
             .build();
     }
@@ -214,9 +214,19 @@ public class TrygdeavtaleMapper {
             .build();
     }
 
-
+    private static StrukturertAdresse lagStrukturertAdresse() {
+        StrukturertAdresse sadr = new StrukturertAdresse();
+        sadr.setLandkode("NL");
+        sadr.setPoststed("Sted");
+        sadr.setPostnummer("1234");
+        sadr.setGatenavn("Gate");
+        sadr.setHusnummerEtasjeLeilighet("1");
+        return sadr;
+    }
     private AvklartVirksomhet hentAvklartVirksomhet(Behandling behandling) {
-        var avklarteVirksomheter = avklarteVirksomheterService.hentNorskeArbeidsgivere(behandling);
+        boolean skalHenteSelvstendigeForetak = lovvalgsperiodeService.harSelvstendigNæringsdrivendeLovvalgsbestemmelse(behandling.getId());
+        var avklarteVirksomheter = skalHenteSelvstendigeForetak ?
+            avklarteVirksomheterService.hentNorskeSelvstendigeForetak(behandling) : avklarteVirksomheterService.hentNorskeArbeidsgivere(behandling);
         if (avklarteVirksomheter.size() != 1) {
             throw new FunksjonellException("Fant " + avklarteVirksomheter.size() + " avklarte virksomheter for behandling: " + behandling + ". Må være 1 for trygdeavtale");
         }
@@ -228,7 +238,7 @@ public class TrygdeavtaleMapper {
         return new ArbeidsgiverNorge(norskArbeidsgiver.navn, norskArbeidsgiver.adresse.toList());
     }
 
-    private RepresentantTrygdeavtale lagRepresentant(MottatteOpplysninger mottatteOpplysninger) {
+    private RepresentantTrygdeavtale lagRepresentantIUtlandet(MottatteOpplysninger mottatteOpplysninger) {
         var søknad = (SøknadNorgeEllerUtenforEØS) mottatteOpplysninger.getMottatteOpplysningerData();
         var representantIUtlandet = søknad.getRepresentantIUtlandet();
         if (representantIUtlandet == null) {
@@ -236,8 +246,8 @@ public class TrygdeavtaleMapper {
         }
 
         return new RepresentantTrygdeavtale(
-            representantIUtlandet.representantNavn,
-            representantIUtlandet.adresselinjer
+            representantIUtlandet.getRepresentantNavn(),
+            representantIUtlandet.getAdresselinjer()
         );
     }
 
@@ -285,11 +295,6 @@ public class TrygdeavtaleMapper {
         return new FunksjonellException("Avklart medfølgende familie " + uuid + " finnes ikke i mottatteOpplysningeret");
     }
 
-    private boolean erSkatteetaten(OrganisasjonDokument org) {
-        // Skatteetaten skal ikke ha attest
-        return org != null && NorskMyndighet.SKATTEETATEN.getOrgnr().equals(org.getOrgnummer());
-    }
-
     private boolean skalIkkeHaInnvilgelse(InnvilgelseBrevbestilling brevbestilling) {
         // Utenlandkse trygdemyndigheter skal ikke ha innvilgelse
         return brevbestilling.getUtenlandskMyndighet() != null;
@@ -299,10 +304,10 @@ public class TrygdeavtaleMapper {
         LovvalgBestemmelse bestemmelse = lovvalgsperiodeService.hentLovvalgsperiode(brevbestilling.getBehandlingId()).getBestemmelse();
         boolean ukBestemmelseSkalIkkeHaAttest = bestemmelse == UK_ART8_2;
         boolean usaBestemmelseSkalIkkeHaAttest = bestemmelse == USA_ART5_1 || bestemmelse == USA_ART5_9;
-        return erSkatteetaten(brevbestilling.getOrg()) || ukBestemmelseSkalIkkeHaAttest || usaBestemmelseSkalIkkeHaAttest;
+        return ukBestemmelseSkalIkkeHaAttest || usaBestemmelseSkalIkkeHaAttest;
     }
 
-    private boolean skalHaInfoOmRettigheter(InnvilgelseTrygdeavtale innvilgelse, DokgenBrevbestilling brevbestilling) {
-        return !(isEmpty(innvilgelse) || erSkatteetaten(brevbestilling.getOrg()));
+    private boolean skalHaInfoOmRettigheter(InnvilgelseTrygdeavtale innvilgelse) {
+        return !(isEmpty(innvilgelse));
     }
 }

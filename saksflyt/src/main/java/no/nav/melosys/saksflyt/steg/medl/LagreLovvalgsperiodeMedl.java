@@ -5,10 +5,10 @@ import java.util.Optional;
 import no.nav.melosys.domain.Behandling;
 import no.nav.melosys.domain.Lovvalgsperiode;
 import no.nav.melosys.domain.kodeverk.Utfallregistreringunntak;
-import no.nav.melosys.domain.saksflyt.ProsessSteg;
-import no.nav.melosys.domain.saksflyt.Prosessinstans;
 import no.nav.melosys.exception.FunksjonellException;
 import no.nav.melosys.saksflyt.steg.StegBehandler;
+import no.nav.melosys.saksflytapi.domain.ProsessSteg;
+import no.nav.melosys.saksflytapi.domain.Prosessinstans;
 import no.nav.melosys.service.behandling.BehandlingsresultatService;
 import no.nav.melosys.service.medl.MedlPeriodeService;
 import no.nav.melosys.service.saksbehandling.SaksbehandlingRegler;
@@ -43,7 +43,7 @@ public class LagreLovvalgsperiodeMedl implements StegBehandler {
     public void utfør(Prosessinstans prosessinstans) {
         final long behandlingID = prosessinstans.getBehandling().getId();
         final var behandlingsresultat = behandlingsresultatService.hentBehandlingsresultat(behandlingID);
-        if (behandlingsresultat.erAvslagManglendeOpplysninger() || erIkkeGodkjentRegistreringUnntakFraMedlemskap(prosessinstans.getBehandling(), behandlingsresultat.getUtfallRegistreringUnntak())) {
+        if (erIkkeGodkjentRegistreringUnntakFraMedlemskap(prosessinstans.getBehandling(), behandlingsresultat.getUtfallRegistreringUnntak())) {
             return;
         }
 

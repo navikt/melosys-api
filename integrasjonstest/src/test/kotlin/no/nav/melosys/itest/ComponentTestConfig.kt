@@ -1,7 +1,7 @@
 package no.nav.melosys.itest
 
-import no.finn.unleash.FakeUnleash
-import no.finn.unleash.Unleash
+import io.getunleash.FakeUnleash
+import io.getunleash.Unleash
 import no.nav.melosys.melosysmock.config.GraphqlConfig
 import no.nav.melosys.melosysmock.config.SoapConfig
 import org.springframework.boot.test.context.TestConfiguration

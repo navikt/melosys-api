@@ -19,7 +19,6 @@ import no.nav.melosys.domain.mottatteopplysninger.Soeknad;
 import no.nav.melosys.domain.mottatteopplysninger.data.Periode;
 import no.nav.melosys.domain.mottatteopplysninger.data.Soeknadsland;
 import no.nav.melosys.domain.mottatteopplysninger.data.arbeidssteder.FysiskArbeidssted;
-import no.nav.melosys.domain.person.Informasjonsbehov;
 import no.nav.melosys.exception.FunksjonellException;
 import no.nav.melosys.service.behandling.BehandlingService;
 import no.nav.melosys.service.behandling.BehandlingsresultatService;
@@ -35,12 +34,10 @@ import no.nav.melosys.service.vilkaar.InngangsvilkaarService;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
-import org.mockito.ArgumentCaptor;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 
 import static org.assertj.core.api.Assertions.assertThatExceptionOfType;
-import static org.assertj.core.api.AssertionsForClassTypes.assertThat;
 import static org.mockito.ArgumentMatchers.*;
 import static org.mockito.Mockito.*;
 
@@ -63,15 +60,13 @@ class OppfriskSaksopplysningerServiceTest {
     @Mock
     private SaksbehandlingRegler saksbehandlingRegler;
 
-    private RegisteropplysningerFactory registeropplysningerFactory;
-
     private OppfriskSaksopplysningerService oppfriskSaksopplysningerService;
 
     private static final long BEHANDLING_ID = 11L;
 
     @BeforeEach
     public void setUp() {
-        registeropplysningerFactory = new RegisteropplysningerFactory(saksbehandlingRegler);
+        RegisteropplysningerFactory registeropplysningerFactory = new RegisteropplysningerFactory(saksbehandlingRegler);
         oppfriskSaksopplysningerService = new OppfriskSaksopplysningerService(
             anmodningsperiodeService,
             behandlingService,
@@ -80,8 +75,7 @@ class OppfriskSaksopplysningerServiceTest {
             inngangsvilkaarService,
             registeropplysningerService,
             persondataFasade,
-            registeropplysningerFactory,
-            saksbehandlingRegler);
+            registeropplysningerFactory);
     }
 
     @Test
@@ -99,15 +93,15 @@ class OppfriskSaksopplysningerServiceTest {
     }
 
     @Test
-    void oppfriskSaksopplysning_virksomhetTomFlyt() {
+    void oppfriskSaksopplysning_virksomhetIngenFlyt() {
         Behandling behandling = lagBehandling();
         Aktoer virksomhet = new Aktoer();
         virksomhet.setRolle(Aktoersroller.VIRKSOMHET);
-        behandling.getFagsak().setAktører(Set.of(virksomhet));
+        behandling.getFagsak().leggTilAktør(virksomhet);
         behandling.setType(Behandlingstyper.HENVENDELSE);
         when(behandlingService.hentBehandling(anyLong())).thenReturn(behandling);
-        when(saksbehandlingRegler.harTomFlyt(any(), any(), any(), any())).thenReturn(true);
-        when(saksbehandlingRegler.harTomFlyt(any())).thenReturn(true);
+        when(saksbehandlingRegler.harIngenFlyt(any(), any(), any(), any())).thenReturn(true);
+        when(inngangsvilkaarService.skalVurdereInngangsvilkår(any())).thenReturn(false);
 
 
         oppfriskSaksopplysningerService.oppfriskSaksopplysning(BEHANDLING_ID, false);
@@ -115,7 +109,7 @@ class OppfriskSaksopplysningerServiceTest {
 
         verify(behandlingsresultatService).tømBehandlingsresultat(anyLong());
         verify(registeropplysningerService).slettRegisterOpplysninger(BEHANDLING_ID);
-        verifyNoInteractions(inngangsvilkaarService);
+        verify(inngangsvilkaarService, never()).vurderOgLagreInngangsvilkår(anyLong(), any(), anyBoolean(), any(Periode.class));
     }
 
     @Test
@@ -123,6 +117,7 @@ class OppfriskSaksopplysningerServiceTest {
         when(behandlingService.hentBehandling(anyLong())).thenReturn(lagBehandling());
         lagBehandling().setTema(Behandlingstema.ANMODNING_OM_UNNTAK_HOVEDREGEL);
         when(anmodningsperiodeService.harSendtAnmodningsperiode(BEHANDLING_ID)).thenReturn(true);
+
 
         assertThatExceptionOfType(FunksjonellException.class)
             .isThrownBy(() -> oppfriskSaksopplysningerService.oppfriskSaksopplysning(BEHANDLING_ID, false))
@@ -138,7 +133,9 @@ class OppfriskSaksopplysningerServiceTest {
         when(behandlingService.hentBehandling(BEHANDLING_ID)).thenReturn(behandling);
         when(persondataFasade.hentFolkeregisterident(anyString())).thenReturn("322211");
 
+
         oppfriskSaksopplysningerService.oppfriskSaksopplysning(BEHANDLING_ID, false);
+
 
         verify(ufmKontrollService).utførKontrollerOgRegistrerFeil(BEHANDLING_ID);
     }
@@ -157,117 +154,28 @@ class OppfriskSaksopplysningerServiceTest {
 
         when(behandlingService.hentBehandling(anyLong())).thenReturn(behandling);
         when(persondataFasade.hentFolkeregisterident(anyString())).thenReturn("322211");
+        when(inngangsvilkaarService.skalVurdereInngangsvilkår(any())).thenReturn(true);
         when(inngangsvilkaarService.vurderOgLagreInngangsvilkår(anyLong(), anyList(), anyBoolean(), any(Periode.class))).thenReturn(true);
 
+
         oppfriskSaksopplysningerService.oppfriskSaksopplysning(BEHANDLING_ID, false);
+
 
         verify(inngangsvilkaarService).vurderOgLagreInngangsvilkår(eq(behandling.getId()), eq(List.of("SE")), eq(false), any(Periode.class));
     }
 
     @Test
-    void oppfriskSaksopplysning_erIkkeSakstypeEuEøs_henterIkkeInngangsvilkår() {
+    void oppfriskSaksopplysning_skalIkkeHenteInngangsvilkår_henterIkkeInngangsvilkår() {
         Behandling behandling = lagBehandling();
-        behandling.getFagsak().setType(Sakstyper.TRYGDEAVTALE);
-
         when(behandlingService.hentBehandling(anyLong())).thenReturn(behandling);
         when(persondataFasade.hentFolkeregisterident(anyString())).thenReturn("322211");
+        when(inngangsvilkaarService.skalVurdereInngangsvilkår(any())).thenReturn(false);
 
 
         oppfriskSaksopplysningerService.oppfriskSaksopplysning(BEHANDLING_ID, false);
 
 
         verify(inngangsvilkaarService, never()).vurderOgLagreInngangsvilkår(anyLong(), any(), anyBoolean(), any(Periode.class));
-    }
-
-    @Test
-    void oppfriskSaksopplysning_harTomFlyt_henterIkkeInngangsvilkår() {
-        Behandling behandling = lagBehandling();
-        behandling.getFagsak().setType(Sakstyper.EU_EOS);
-        behandling.setType(Behandlingstyper.HENVENDELSE);
-
-        when(behandlingService.hentBehandling(anyLong())).thenReturn(behandling);
-        when(persondataFasade.hentFolkeregisterident(anyString())).thenReturn("322211");
-        when(saksbehandlingRegler.harTomFlyt(any())).thenReturn(true);
-        when(saksbehandlingRegler.harTomFlyt(any(), any(), any(), any())).thenReturn(true);
-
-        oppfriskSaksopplysningerService.oppfriskSaksopplysning(BEHANDLING_ID, false);
-
-
-        verify(inngangsvilkaarService, never()).vurderOgLagreInngangsvilkår(anyLong(), any(), anyBoolean(), any(Periode.class));
-    }
-
-    @Test
-    void oppfriskSaksopplysning_kanIkkeResultereIVedtak_henterIkkeInngangsvilkår() {
-        Behandling behandling = lagBehandling();
-        behandling.getFagsak().setType(Sakstyper.EU_EOS);
-        behandling.setTema(Behandlingstema.REGISTRERING_UNNTAK_NORSK_TRYGD_UTSTASJONERING);
-
-        when(behandlingService.hentBehandling(anyLong())).thenReturn(behandling);
-        when(persondataFasade.hentFolkeregisterident(anyString())).thenReturn("322211");
-
-
-        oppfriskSaksopplysningerService.oppfriskSaksopplysning(BEHANDLING_ID, false);
-
-
-        verify(inngangsvilkaarService, never()).vurderOgLagreInngangsvilkår(anyLong(), any(), anyBoolean(), any(Periode.class));
-    }
-
-    @Test
-    void oppfriskSaksopplysning_utenPeriode_henterIkkeInngangsvilkår() {
-        Behandling behandling = lagBehandling();
-        behandling.getMottatteOpplysninger().getMottatteOpplysningerData().periode = new Periode();
-        behandling.getFagsak().setType(Sakstyper.EU_EOS);
-
-        when(behandlingService.hentBehandling(anyLong())).thenReturn(behandling);
-        when(persondataFasade.hentFolkeregisterident(anyString())).thenReturn("322211");
-
-
-        oppfriskSaksopplysningerService.oppfriskSaksopplysning(BEHANDLING_ID, false);
-
-
-        verify(inngangsvilkaarService, never()).vurderOgLagreInngangsvilkår(anyLong(), any(), anyBoolean(), any(Periode.class));
-    }
-
-    @Test
-    void oppfriskSaksopplysning_utenLand_henterIkkeInngangsvilkår() {
-        Behandling behandling = lagBehandling();
-        behandling.getMottatteOpplysninger().getMottatteOpplysningerData().soeknadsland = new Soeknadsland();
-        behandling.getFagsak().setType(Sakstyper.EU_EOS);
-
-        when(behandlingService.hentBehandling(anyLong())).thenReturn(behandling);
-        when(persondataFasade.hentFolkeregisterident(anyString())).thenReturn("322211");
-
-
-        oppfriskSaksopplysningerService.oppfriskSaksopplysning(BEHANDLING_ID, false);
-
-
-        verify(inngangsvilkaarService, never()).vurderOgLagreInngangsvilkår(anyLong(), any(), anyBoolean(), any(Periode.class));
-    }
-
-    @Test
-    void oppfriskSaksopplysning_utenFamilierelasjoner_girForventetInformasjonsbehov() {
-        Behandling behandling = lagBehandling();
-        when(behandlingService.hentBehandling(anyLong())).thenReturn(behandling);
-        when(persondataFasade.hentFolkeregisterident(anyString())).thenReturn("322211");
-        ArgumentCaptor<RegisteropplysningerRequest> requestCaptor = ArgumentCaptor.forClass(RegisteropplysningerRequest.class);
-
-        oppfriskSaksopplysningerService.oppfriskSaksopplysning(BEHANDLING_ID, false);
-
-        verify(registeropplysningerService).hentOgLagreOpplysninger(requestCaptor.capture());
-        assertThat(requestCaptor.getValue().getInformasjonsbehov()).isEqualTo(Informasjonsbehov.STANDARD);
-    }
-
-    @Test
-    void oppfriskSaksopplysning_medFamilierelasjoner_girForventetInformasjonsbehov() {
-        Behandling behandling = lagBehandling();
-        when(behandlingService.hentBehandling(anyLong())).thenReturn(behandling);
-        when(persondataFasade.hentFolkeregisterident(anyString())).thenReturn("322211");
-        ArgumentCaptor<RegisteropplysningerRequest> requestCaptor = ArgumentCaptor.forClass(RegisteropplysningerRequest.class);
-
-        oppfriskSaksopplysningerService.oppfriskSaksopplysning(BEHANDLING_ID, true);
-
-        verify(registeropplysningerService).hentOgLagreOpplysninger(requestCaptor.capture());
-        assertThat(requestCaptor.getValue().getInformasjonsbehov()).isEqualTo(Informasjonsbehov.MED_FAMILIERELASJONER);
     }
 
     private Saksopplysning lagSED() {
@@ -281,18 +189,9 @@ class OppfriskSaksopplysningerServiceTest {
     }
 
     private static Behandling lagBehandling() {
-        final String aktørID = "123";
         Behandling behandling = new Behandling();
         behandling.setId(BEHANDLING_ID);
-        Fagsak fagsak = new Fagsak();
-        fagsak.setType(Sakstyper.EU_EOS);
-        fagsak.setTema(Sakstemaer.MEDLEMSKAP_LOVVALG);
-        Aktoer aktør = new Aktoer();
-        aktør.setAktørId(aktørID);
-        aktør.setRolle(Aktoersroller.BRUKER);
-        HashSet<Aktoer> aktører = new HashSet<>();
-        aktører.add(aktør);
-        fagsak.setAktører(aktører);
+        Fagsak fagsak = FagsakTestFactory.builder().medBruker().build();
         behandling.setFagsak(fagsak);
         behandling.setTema(Behandlingstema.UTSENDT_ARBEIDSTAKER);
         behandling.setType(Behandlingstyper.FØRSTEGANG);
@@ -306,14 +205,14 @@ class OppfriskSaksopplysningerServiceTest {
         Soeknad soeknad = new Soeknad();
 
         FysiskArbeidssted fysiskArbeidssted = new FysiskArbeidssted();
-        soeknad.arbeidPaaLand.fysiskeArbeidssteder = new ArrayList<>();
-        soeknad.arbeidPaaLand.fysiskeArbeidssteder.add(fysiskArbeidssted);
+        soeknad.arbeidPaaLand.setFysiskeArbeidssteder(new ArrayList<>());
+        soeknad.arbeidPaaLand.getFysiskeArbeidssteder().add(fysiskArbeidssted);
 
         soeknad.periode = new Periode(LocalDate.now(), LocalDate.now().plusYears(2));
         soeknad.soeknadsland = new Soeknadsland(List.of("SE"), false);
 
         MottatteOpplysninger mottatteOpplysninger = new MottatteOpplysninger();
-        mottatteOpplysninger.setMottatteOpplysningerdata(soeknad);
+        mottatteOpplysninger.setMottatteOpplysningerData(soeknad);
         behandling.setMottatteOpplysninger(mottatteOpplysninger);
 
         behandling.setSaksopplysninger(saksopplysninger);

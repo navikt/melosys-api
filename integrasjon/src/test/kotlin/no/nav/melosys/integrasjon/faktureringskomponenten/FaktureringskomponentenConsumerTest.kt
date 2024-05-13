@@ -6,13 +6,15 @@ import com.github.tomakehurst.wiremock.WireMockServer
 import com.github.tomakehurst.wiremock.client.MappingBuilder
 import com.github.tomakehurst.wiremock.client.WireMock
 import com.github.tomakehurst.wiremock.core.WireMockConfiguration
-import no.nav.melosys.integrasjon.MetricsTestConfig
+import io.getunleash.FakeUnleash
+//import no.nav.melosys.integrasjon.MetricsTestConfig
 import no.nav.melosys.integrasjon.OAuthMockServer
 import no.nav.melosys.integrasjon.StsMockServer
 import no.nav.melosys.integrasjon.faktureringskomponenten.dto.*
 import no.nav.melosys.integrasjon.felles.GenericAuthFilterFactory
 import no.nav.melosys.integrasjon.felles.mdc.CorrelationIdOutgoingFilter
-import no.nav.melosys.integrasjon.reststs.RestTokenServiceClient
+import no.nav.melosys.integrasjon.reststs.RestSTSService
+import no.nav.melosys.integrasjon.reststs.SecurityTokenServiceConsumer
 import no.nav.melosys.integrasjon.reststs.StsWebClientProducer
 import no.nav.melosys.sikkerhet.context.ThreadLocalAccessInfo
 import no.nav.security.token.support.client.spring.oauth2.EnableOAuth2Client
@@ -30,13 +32,16 @@ import java.time.LocalDate
 import java.util.*
 
 @Import(
-    StsWebClientProducer::class,
-    RestTokenServiceClient::class,
     OAuthMockServer::class,
-    CorrelationIdOutgoingFilter::class,
-    StsMockServer::class,
     GenericAuthFilterFactory::class,
+    StsWebClientProducer::class,
+    SecurityTokenServiceConsumer::class,
+    RestSTSService::class,
+    StsMockServer::class,
+
+    CorrelationIdOutgoingFilter::class,
     FaktureringskomponentenConsumerProducer::class,
+    FakeUnleash::class
 )
 @WebMvcTest
 @AutoConfigureWebClient
@@ -73,7 +78,7 @@ class FaktureringskomponentenConsumerTest(
     @AfterEach
     fun after() {
         ThreadLocalAccessInfo.afterExecuteProcess(processUUID)
-        MetricsTestConfig.clearMeterRegistry()
+//        MetricsTestConfig.clearMeterRegistry()
     }
 
     @Test
@@ -96,20 +101,20 @@ class FaktureringskomponentenConsumerTest(
 
     fun get(url: String): MappingBuilder =
         WireMock.get(url)
-            .withHeader("Authorization", WireMock.equalTo("Bearer --token-from-system--"))
+            .withHeader("Authorization", WireMock.equalTo("Bearer --azure-token-from-system--"))
             .withHeader(HttpHeaders.ACCEPT, WireMock.equalTo(MediaType.APPLICATION_JSON_VALUE))
 
     fun post(url: String): MappingBuilder =
         WireMock.post(url)
-            .withHeader("Authorization", WireMock.equalTo("Bearer --token-from-system--"))
+            .withHeader("Authorization", WireMock.equalTo("Bearer --azure-token-from-system--"))
             .withHeader(HttpHeaders.ACCEPT, WireMock.equalTo(MediaType.APPLICATION_JSON_VALUE))
             .withHeader(HttpHeaders.CONTENT_TYPE, WireMock.equalTo(MediaType.APPLICATION_JSON_VALUE))
 
 
     private fun lagFakturaserieDto(
-        vedtaksnummer: String = "MEL-123",
+        fakturaserieReferanse: String? = null,
         fodselsnummer: String = "12345678911",
-        fullmektig: FullmektigDto = FullmektigDto("11987654321", "123456789", "Ole Brum"),
+        fullmektig: FullmektigDto = FullmektigDto("11987654321", "123456789"),
         referanseBruker: String = "Nasse Nøff",
         referanseNav: String = "NAV Medlemskap og avgift",
         fakturaGjelder: Innbetalingstype = Innbetalingstype.TRYGDEAVGIFT,
@@ -124,8 +129,8 @@ class FaktureringskomponentenConsumerTest(
         ),
     ): FakturaserieDto {
         return FakturaserieDto(
-            vedtaksnummer,
             fodselsnummer,
+            fakturaserieReferanse,
             fullmektig,
             referanseBruker,
             referanseNav,

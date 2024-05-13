@@ -2,24 +2,24 @@ package no.nav.melosys.saksflyt.steg.sed;
 
 import java.util.List;
 import java.util.Set;
+import java.util.UUID;
 
-import no.nav.melosys.domain.Aktoer;
 import no.nav.melosys.domain.Behandling;
 import no.nav.melosys.domain.Behandlingsresultat;
 import no.nav.melosys.domain.Fagsak;
+import no.nav.melosys.domain.FagsakTestFactory;
 import no.nav.melosys.domain.arkiv.ArkivDokument;
 import no.nav.melosys.domain.arkiv.DokumentReferanse;
 import no.nav.melosys.domain.arkiv.Journalpost;
 import no.nav.melosys.domain.arkiv.Vedlegg;
 import no.nav.melosys.domain.eessi.BucType;
 import no.nav.melosys.domain.eessi.SedType;
-import no.nav.melosys.domain.kodeverk.Aktoersroller;
 import no.nav.melosys.domain.kodeverk.Land_iso2;
 import no.nav.melosys.domain.kodeverk.Landkoder;
-import no.nav.melosys.domain.saksflyt.ProsessDataKey;
-import no.nav.melosys.domain.saksflyt.Prosessinstans;
 import no.nav.melosys.exception.FunksjonellException;
 import no.nav.melosys.integrasjon.joark.JoarkFasade;
+import no.nav.melosys.saksflytapi.domain.ProsessDataKey;
+import no.nav.melosys.saksflytapi.domain.Prosessinstans;
 import no.nav.melosys.service.behandling.BehandlingsresultatService;
 import no.nav.melosys.service.dokument.brev.SedSomBrevService;
 import no.nav.melosys.service.dokument.sed.EessiService;
@@ -107,6 +107,8 @@ class VideresendSoknadTest {
     @Test
     void utfør_skalSendesUtlandErIkkeEessiKlar_senderA008SomBrev() {
         Prosessinstans prosessinstans = opprettProsessinstans();
+        UUID prosessinstansUuid = UUID.randomUUID();
+        prosessinstans.setId(prosessinstansUuid);
         Behandling behandling = prosessinstans.getBehandling();
         String opprettetJournalpostID = "532523";
 
@@ -117,7 +119,7 @@ class VideresendSoknadTest {
         when(joarkFasade.hentJournalpost(behandling.getInitierendeJournalpostId())).thenReturn(journalpost);
         when(joarkFasade.hentDokument(behandling.getInitierendeJournalpostId(), journalpost.getHoveddokument().getDokumentId()))
             .thenReturn(vedlegg);
-        when(sedSomBrevService.lagJournalpostForSendingAvSedSomBrev(any(SedType.class), any(Land_iso2.class), any(), any()))
+        when(sedSomBrevService.lagJournalpostForSendingAvSedSomBrev(any(SedType.class), any(Land_iso2.class), any(), any(), eq(prosessinstansUuid.toString())))
             .thenReturn(opprettetJournalpostID);
 
         Behandlingsresultat behandlingsresultat = new Behandlingsresultat();
@@ -130,7 +132,7 @@ class VideresendSoknadTest {
         videresendSoknad.utfør(prosessinstans);
 
         verify(sedSomBrevService)
-            .lagJournalpostForSendingAvSedSomBrev(eq(SedType.A008), any(Land_iso2.class), eq(behandling), anyList());
+            .lagJournalpostForSendingAvSedSomBrev(eq(SedType.A008), any(Land_iso2.class), eq(behandling), anyList(), eq(prosessinstansUuid.toString()));
         assertThat(prosessinstans.getData(ProsessDataKey.DISTRIBUERBAR_JOURNALPOST_ID)).isEqualTo(opprettetJournalpostID);
         assertThat(prosessinstans.getData(ProsessDataKey.DISTRIBUER_MOTTAKER_LAND, Landkoder.class)).isEqualTo(Landkoder.SE);
     }
@@ -145,20 +147,10 @@ class VideresendSoknadTest {
     }
 
     private static Fagsak lagFagsak() {
-        Aktoer myndighet = new Aktoer();
-        myndighet.setRolle(Aktoersroller.TRYGDEMYNDIGHET);
-        myndighet.setAktørId("123");
-        myndighet.setInstitusjonId("SE:id");
-
-        Aktoer bruker = new Aktoer();
-        bruker.setRolle(Aktoersroller.BRUKER);
-        bruker.setAktørId("321");
-
-        Fagsak fagsak = new Fagsak();
-        fagsak.setSaksnummer("MEL-123");
-        fagsak.setGsakSaksnummer(1111L);
-        fagsak.setAktører(Set.of(myndighet, bruker));
-
-        return fagsak;
+        return FagsakTestFactory.builder()
+            .medGsakSaksnummer()
+            .medTrygdemyndighet()
+            .medBruker()
+            .build();
     }
 }

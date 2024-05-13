@@ -43,20 +43,18 @@ class InnvilgelseArbeidsgiverBrevMapperTest {
     }
 
     private void testMapTilBrevXml(Behandlingsresultat behandlingsresultat) throws Exception {
-        testMapTilBrevXml(lagBehandling(lagFagsak()), behandlingsresultat);
+        testMapTilBrevXml(lagBehandling(FagsakTestFactory.lagFagsak()), behandlingsresultat);
     }
 
     private void testMapTilBrevXml(Behandling behandling, Behandlingsresultat behandlingsresultat) throws Exception {
         FellesType fellesType = lagFellesType();
         MelosysNAVFelles navFelles = lagNAVFelles();
         BrevDataInnvilgelse brevDataInnvilgelse = new BrevDataInnvilgelse(new BrevbestillingDto(), "Z123456");
-        brevDataInnvilgelse.arbeidsland = "Sverige";
-        brevDataInnvilgelse.hovedvirksomhet = new AvklartVirksomhet("Equinor", "987654321", null, Yrkesaktivitetstyper.LOENNET_ARBEID);
-        brevDataInnvilgelse.lovvalgsperiode = lagLovvalgsperiode();
-        brevDataInnvilgelse.personNavn = "For Etter";
+        brevDataInnvilgelse.setArbeidsland("Sverige");
+        brevDataInnvilgelse.setHovedvirksomhet(new AvklartVirksomhet("Equinor", "987654321", null, Yrkesaktivitetstyper.LOENNET_ARBEID));
+        brevDataInnvilgelse.setLovvalgsperiode(lagLovvalgsperiode());
+        brevDataInnvilgelse.setPersonNavn("For Etter");
         String resultat = instans.mapTilBrevXML(fellesType, navFelles, behandling, behandlingsresultat, brevDataInnvilgelse);
-        // TODO: Vurder å bruke XMLUnit e.l. til å sammenlikne XML-strengen
-        // grundig mot forventninger.
         assertThat(resultat).matches("(?s)\\<\\?xml version=\"\\d\\.\\d+\" .*>\n.*");
         assertThat(":navn>For Etter</ns").isSubstringOf(resultat);
     }
@@ -88,12 +86,6 @@ class InnvilgelseArbeidsgiverBrevMapperTest {
         faktum.setFakta("TRUE");
         faktum.setSubjekt("123456789");
         return faktum;
-    }
-
-    private static Fagsak lagFagsak() {
-        Fagsak fagsak = new Fagsak();
-        fagsak.setType(Sakstyper.EU_EOS);
-        return fagsak;
     }
 
     private static Behandling lagBehandling(Fagsak fagsak) {

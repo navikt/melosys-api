@@ -25,9 +25,9 @@ public class ArbeidsforholdDokumentTest {
 
     public Arbeidsforhold leggTilArbeidsforhold(String arbeidsgiverID, String opplysningspliktigID, Periode periode) {
         Arbeidsforhold arbeidsforhold = new Arbeidsforhold();
-        arbeidsforhold.arbeidsgiverID = arbeidsgiverID;
-        arbeidsforhold.opplysningspliktigID = opplysningspliktigID;
-        arbeidsforhold.ansettelsesPeriode = periode;
+        arbeidsforhold.setArbeidsgiverID(arbeidsgiverID);
+        arbeidsforhold.setOpplysningspliktigID(opplysningspliktigID);
+        arbeidsforhold.setAnsettelsesPeriode(periode);
         arbeidsforholdDokument.arbeidsforhold.add(arbeidsforhold);
         return arbeidsforhold;
     }

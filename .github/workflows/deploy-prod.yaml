@@ -8,13 +8,20 @@ jobs:
   deploy-prod:
     runs-on: ubuntu-latest-8-cores
     steps:
-      - uses: actions/checkout@v3
+      - uses: actions/checkout@v4
       - name: get release tag
         run: |
           APPLICATION=$(echo $GITHUB_REPOSITORY | cut -d "/" -f 2)
           IMAGE=ghcr.io/$GITHUB_REPOSITORY/$APPLICATION:$GITHUB_SHA
           echo "IMAGE=${IMAGE}" >> $GITHUB_ENV
           echo $IMAGE
+      - name: deploy new Unleash Apikey to ${{github.event.inputs.environment}}
+        uses: nais/deploy/actions/deploy@v1
+        env:
+          APIKEY: ${{ secrets.NAIS_DEPLOY_APIKEY }}
+          CLUSTER: prod-fss
+          RESOURCE: nais/unleash-apitoken.yml
+          VARS: nais/vars-prod.json
       - name: Deploy
         uses: nais/deploy/actions/deploy@v1
         env:

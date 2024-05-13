@@ -5,22 +5,19 @@ import java.time.LocalDate;
 import java.util.Collections;
 import java.util.Optional;
 
-import no.nav.melosys.domain.Behandling;
-import no.nav.melosys.domain.Behandlingsresultat;
-import no.nav.melosys.domain.Fagsak;
-import no.nav.melosys.domain.Lovvalgsperiode;
+import no.nav.melosys.domain.*;
 import no.nav.melosys.domain.eessi.Periode;
 import no.nav.melosys.domain.eessi.melding.MelosysEessiMelding;
 import no.nav.melosys.domain.eessi.melding.Statsborgerskap;
 import no.nav.melosys.domain.kodeverk.Land_iso2;
 import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingsstatus;
 import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingstema;
-import no.nav.melosys.domain.saksflyt.ProsessDataKey;
-import no.nav.melosys.domain.saksflyt.Prosessinstans;
+import no.nav.melosys.saksflytapi.ProsessinstansService;
+import no.nav.melosys.saksflytapi.domain.ProsessDataKey;
+import no.nav.melosys.saksflytapi.domain.Prosessinstans;
 import no.nav.melosys.service.behandling.BehandlingsresultatService;
 import no.nav.melosys.service.eessi.ruting.UnntaksperiodeSedRuter;
 import no.nav.melosys.service.sak.FagsakService;
-import no.nav.melosys.service.saksflyt.ProsessinstansService;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -82,7 +79,7 @@ class UnntaksperiodeSedRuterTest {
 
         unntaksperiodeSedRuter.rutSedTilBehandling(prosessinstans, 1L);
 
-        verify(prosessinstansService).opprettProsessinstansSedJournalføring(eq(fagsak.hentSistAktivBehandling()), any(MelosysEessiMelding.class));
+        verify(prosessinstansService).opprettProsessinstansSedJournalføring(eq(fagsak.hentSistAktivBehandlingIkkeÅrsavregning()), any(MelosysEessiMelding.class));
     }
 
     @Test
@@ -116,10 +113,9 @@ class UnntaksperiodeSedRuterTest {
         behandling.setStatus(Behandlingsstatus.AVSLUTTET);
         behandling.setRegistrertDato(Instant.now());
 
-        Fagsak fagsak = new Fagsak();
-        fagsak.setSaksnummer("123");
+        Fagsak fagsak = FagsakTestFactory.lagFagsak();
         behandling.setFagsak(fagsak);
-        fagsak.setBehandlinger(Collections.singletonList(behandling));
+        fagsak.leggTilBehandling(behandling);
         return fagsak;
     }
 
@@ -142,8 +138,7 @@ class UnntaksperiodeSedRuterTest {
         periode.setTom(tom);
         melding.setPeriode(periode);
 
-        Statsborgerskap statsborgerskap = new Statsborgerskap();
-        statsborgerskap.setLandkode("SE");
+        Statsborgerskap statsborgerskap = new Statsborgerskap("SE");
 
         melding.setRinaSaksnummer("r123");
         melding.setSedId("s123");

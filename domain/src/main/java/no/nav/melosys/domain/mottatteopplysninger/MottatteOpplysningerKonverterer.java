@@ -5,6 +5,7 @@ import java.util.EnumMap;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
+import com.fasterxml.jackson.module.kotlin.KotlinModule;
 import no.nav.melosys.domain.kodeverk.Mottatteopplysningertyper;
 
 public final class MottatteOpplysningerKonverterer {
@@ -20,7 +21,7 @@ public final class MottatteOpplysningerKonverterer {
         mapper.put(Mottatteopplysningertyper.SØKNAD_A1_UTSENDTE_ARBEIDSTAKERE_EØS, Soeknad.class);
         mapper.put(Mottatteopplysningertyper.SED, SedGrunnlag.class);
         mapper.put(Mottatteopplysningertyper.ANMODNING_ELLER_ATTEST, AnmodningEllerAttest.class);
-        objectMapper.registerModule(new JavaTimeModule());
+        objectMapper.registerModules(new JavaTimeModule(), new KotlinModule.Builder().build());
     }
 
     private MottatteOpplysningerKonverterer() {
@@ -38,7 +39,7 @@ public final class MottatteOpplysningerKonverterer {
 
     public static void lastMottatteOpplysninger(MottatteOpplysninger mottatteOpplysninger) {
         try {
-            mottatteOpplysninger.setMottatteOpplysningerdata(
+            mottatteOpplysninger.setMottatteOpplysningerData(
                 lagDatagrunnlagFraType(mottatteOpplysninger.getJsonData(), klasseForType(mottatteOpplysninger.getType()))
             );
         } catch (JsonProcessingException e) {

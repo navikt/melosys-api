@@ -1,0 +1,146 @@
+{
+    "arbeidsInntektMaaned": [
+        {
+            "aarMaaned": "2022-01",
+            "arbeidsInntektInformasjon": {
+                "inntektListe": [
+                    {
+                        "inntektType": "LOENNSINNTEKT",
+                        "beloep": 50000,
+                        "fordel": "kontantytelse",
+                        "inntektskilde": "A-ordningen",
+                        "inntektsperiodetype": "Maaned",
+                        "inntektsstatus": "LoependeInnrapportert",
+                        "leveringstidspunkt": "2023-07",
+                        "opptjeningsperiodeFom": "2022-01-01",
+                        "opptjeningsperiodeTom": "2022-01-10",
+                        "utbetaltIMaaned": "2022-01",
+                        "opplysningspliktig": {
+                            "identifikator": "928497704",
+                            "aktoerType": "ORGANISASJON"
+                        },
+                        "virksomhet": {
+                            "identifikator": "907670201",
+                            "aktoerType": "ORGANISASJON"
+                        },
+                        "inntektsmottaker": {
+                            "identifikator": "2395801903843",
+                            "aktoerType": "AKTOER_ID"
+                        },
+                        "inngaarIGrunnlagForTrekk": true,
+                        "utloeserArbeidsgiveravgift": true,
+                        "informasjonsstatus": "InngaarAlltid",
+                        "beskrivelse": "fastloenn",
+                        "antall" : 1,
+                        "tilleggsinformasjon": {
+                            "kategori": "bla"
+                        }
+                    }
+                ]
+            }
+        },
+        {
+            "aarMaaned": "2022-02",
+            "arbeidsInntektInformasjon": {
+                "inntektListe": [
+                    {
+                        "inntektType": "YTELSE_FRA_OFFENTLIGE",
+                        "beloep": 50000,
+                        "fordel": "kontantytelse",
+                        "inntektskilde": "A-ordningen",
+                        "inntektsperiodetype": "Maaned",
+                        "inntektsstatus": "LoependeInnrapportert",
+                        "leveringstidspunkt": "2023-07",
+                        "utbetaltIMaaned": "2022-02",
+                        "opplysningspliktig": {
+                            "identifikator": "928497704",
+                            "aktoerType": "ORGANISASJON"
+                        },
+                        "virksomhet": {
+                            "identifikator": "907670201",
+                            "aktoerType": "ORGANISASJON"
+                        },
+                        "inntektsmottaker": {
+                            "identifikator": "2395801903843",
+                            "aktoerType": "AKTOER_ID"
+                        },
+                        "inngaarIGrunnlagForTrekk": true,
+                        "utloeserArbeidsgiveravgift": true,
+                        "informasjonsstatus": "InngaarAlltid",
+                        "beskrivelse": "fastloenn",
+                        "tilleggsinformasjon": {
+                            "kategori": "bla",
+                            "tilleggsinformasjonDetaljer": {
+                                "detaljerType": "REISEKOSTOGLOSJI",
+                                "persontype": "norskPendler"
+                            }
+                        }
+                    }
+                ]
+            }
+        },
+        {
+            "aarMaaned": "2022-03",
+            "arbeidsInntektInformasjon": {
+                "inntektListe": [
+                    {
+                        "inntektType": "NAERINGSINNTEKT",
+                        "beloep": 50000,
+                        "fordel": "kontantytelse",
+                        "inntektskilde": "A-ordningen",
+                        "inntektsperiodetype": "Maaned",
+                        "inntektsstatus": "LoependeInnrapportert",
+                        "leveringstidspunkt": "2023-07",
+                        "utbetaltIMaaned": "2022-03",
+                        "opplysningspliktig": {
+                            "identifikator": "928497704",
+                            "aktoerType": "ORGANISASJON"
+                        },
+                        "virksomhet": {
+                            "identifikator": "907670201",
+                            "aktoerType": "ORGANISASJON"
+                        },
+                        "inntektsmottaker": {
+                            "identifikator": "2395801903843",
+                            "aktoerType": "AKTOER_ID"
+                        },
+                        "inngaarIGrunnlagForTrekk": true,
+                        "utloeserArbeidsgiveravgift": true,
+                        "informasjonsstatus": "InngaarAlltid",
+                        "beskrivelse": "fastloenn",
+                        "tilleggsinformasjon": {
+                            "kategori": "bla",
+                            "tilleggsinformasjonDetaljer": {
+                                "detaljerType": "SVALBARDINNTEKT",
+                                "antallDager": 40,
+                                "betaltTrygdeavgift": "50000"
+                            }
+                        }
+                    }
+                ]
+            }
+        },
+        {
+            "aarMaaned": "2022-04",
+            "arbeidsInntektInformasjon": {
+                "inntektListe": [
+                    {
+                        "inntektType": "NAERINGSINNTEKT",
+                        "beloep": 50000,
+                        "fordel": "kontantytelse",
+                        "inntektskilde": "A-ordningen",
+                        "inntektsperiodetype": "Maaned",
+                        "inntektsstatus": "LoependeInnrapportert",
+                        "leveringstidspunkt": "2023-07",
+                        "utbetaltIMaaned": "2022-01",
+                        "beskrivelse": "fastloenn"
+                    }
+                ]
+            }
+        }
+    ],
+    "ident": {
+        "identifikator": "2395801903843",
+        "aktoerType": "AKTOER_ID"
+    }
+}

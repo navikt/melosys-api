@@ -4,6 +4,7 @@ import java.time.LocalDate;
 import java.time.ZoneId;
 import java.util.*;
 
+import io.getunleash.FakeUnleash;
 import no.nav.melosys.domain.*;
 import no.nav.melosys.domain.adresse.StrukturertAdresse;
 import no.nav.melosys.domain.avklartefakta.Avklartefakta;
@@ -21,6 +22,7 @@ import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingsstatus;
 import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingstema;
 import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingstyper;
 import no.nav.melosys.domain.kodeverk.lovvalgsbestemmelser.Lovvalgbestemmelser_883_2004;
+import no.nav.melosys.domain.mottatteopplysninger.MottatteOpplysningerData;
 import no.nav.melosys.domain.mottatteopplysninger.data.ForetakUtland;
 import no.nav.melosys.domain.mottatteopplysninger.data.arbeidssteder.LuftfartBase;
 import no.nav.melosys.domain.person.Persondata;
@@ -76,10 +78,10 @@ class SedDataByggerTest {
     private Lovvalgsperiode lovvalgsperiode;
     private Anmodningsperiode anmodningsperiode;
     private Utpekingsperiode utpekingsperiode;
+    private final FakeUnleash fakeUnleash = new FakeUnleash();
 
     @BeforeEach
     void setup() {
-
         doReturn(DataByggerStubs.hentOrganisasjonDokumentSetStub()).when(organisasjonOppslagService).hentOrganisasjoner(anySet());
 
         when(landvelgerService.hentBostedsland(anyLong(), any())).thenReturn(new Bostedsland(Landkoder.IT));
@@ -109,7 +111,7 @@ class SedDataByggerTest {
 
         behandling = DataByggerStubs.hentBehandlingStub();
         behandlingsresultat.setBehandling(behandling);
-        dataBygger = new SedDataBygger(behandlingsresultatService, landvelgerService, lovvalgsperiodeService, saksbehandlingRegler);
+        dataBygger = new SedDataBygger(behandlingsresultatService, landvelgerService, lovvalgsperiodeService, saksbehandlingRegler, fakeUnleash);
 
         Lovvalgsperiode lovvalgsperiode = new Lovvalgsperiode();
         lovvalgsperiode.setFom(LocalDate.now());
@@ -209,7 +211,6 @@ class SedDataByggerTest {
     @Test
     void lag_bostedsadresseUtenGateadresse_gatenavnBlirNA() {
         Bostedsadresse bostedsadresse = new Bostedsadresse();
-        bostedsadresse.setGateadresse(null);
         bostedsadresse.setLand(new Land(Land.SVERIGE));
         behandling.hentPersonDokument().setBostedsadresse(bostedsadresse);
 
@@ -338,7 +339,9 @@ class SedDataByggerTest {
     @Test
     void lag_brukerErKode6_forventHarSensitiveOpplysninger() {
         SedDataGrunnlagMedSoknad sedDataGrunnlagMedSoknad = lagGrunnlagMedSøknad();
-        sedDataGrunnlagMedSoknad.getBehandling().hentPersonDokument().setDiskresjonskode(new Diskresjonskode("SPSF"));
+        Diskresjonskode diskresjonskode = new Diskresjonskode();
+        diskresjonskode.setKode("SPSF");
+        sedDataGrunnlagMedSoknad.getBehandling().hentPersonDokument().setDiskresjonskode(diskresjonskode);
         SedDataDto sedData = dataBygger.lagUtkast(sedDataGrunnlagMedSoknad, behandlingsresultat, PeriodeType.LOVVALGSPERIODE);
 
         assertThat(sedData).isNotNull();
@@ -349,7 +352,9 @@ class SedDataByggerTest {
     @Test
     void lag_brukerHarKode7_forventHarIkkeSensitiveOpplysninger() {
         SedDataGrunnlagMedSoknad sedDataGrunnlagMedSoknad = lagGrunnlagMedSøknad();
-        sedDataGrunnlagMedSoknad.getBehandling().hentPersonDokument().setDiskresjonskode(new Diskresjonskode("SPSO"));
+        Diskresjonskode diskresjonskode = new Diskresjonskode();
+        diskresjonskode.setKode("SPSO");
+        sedDataGrunnlagMedSoknad.getBehandling().hentPersonDokument().setDiskresjonskode(diskresjonskode);
         SedDataDto sedData = dataBygger.lagUtkast(sedDataGrunnlagMedSoknad, behandlingsresultat, PeriodeType.LOVVALGSPERIODE);
 
         assertThat(sedData).isNotNull();
@@ -420,8 +425,8 @@ class SedDataByggerTest {
     @Test
     void lagUtkast_medLuftfartBase_arbeidsstedBlirSatt() {
         LuftfartBase luftfartBase = new LuftfartBase();
-        luftfartBase.hjemmebaseNavn = "hjemmebaseNavn";
-        luftfartBase.hjemmebaseLand = "GB";
+        luftfartBase.setHjemmebaseNavn("hjemmebaseNavn");
+        luftfartBase.setHjemmebaseLand("GB");
 
         SedDataGrunnlagMedSoknad dataGrunnlag = lagGrunnlagMedSøknad();
         dataGrunnlag.getMottatteOpplysningerData().luftfartBaser = List.of(luftfartBase);
@@ -431,19 +436,19 @@ class SedDataByggerTest {
 
         Arbeidssted arbeidssted = sedData.getArbeidssteder().get(1);
 
-        assertThat(arbeidssted.getNavn()).isEqualTo(luftfartBase.hjemmebaseNavn);
+        assertThat(arbeidssted.getNavn()).isEqualTo(luftfartBase.getHjemmebaseNavn());
         assertThat(arbeidssted.getAdresse().getGateadresse()).isEqualTo("N/A");
-        assertThat(arbeidssted.getAdresse().getLand()).isEqualTo(luftfartBase.hjemmebaseLand);
+        assertThat(arbeidssted.getAdresse().getLand()).isEqualTo(luftfartBase.getHjemmebaseLand());
     }
 
     @Test
     void lagUtkast_medUtenlandskSelvstendigForetak_forventAtUtenlandskSelvstendigForetakIkkeSendesSomArbeidsgivendeVirksomhet() {
         ForetakUtland utenlandskSelvstendigForetak = new ForetakUtland();
-        utenlandskSelvstendigForetak.adresse = new StrukturertAdresse();
-        utenlandskSelvstendigForetak.adresse.setLandkode(Landkoder.DE.getKode());
-        utenlandskSelvstendigForetak.selvstendigNæringsvirksomhet = true;
-        utenlandskSelvstendigForetak.navn = "selvstendig";
-        utenlandskSelvstendigForetak.uuid = "123";
+        utenlandskSelvstendigForetak.setAdresse(new StrukturertAdresse());
+        utenlandskSelvstendigForetak.getAdresse().setLandkode(Landkoder.DE.getKode());
+        utenlandskSelvstendigForetak.setSelvstendigNæringsvirksomhet(true);
+        utenlandskSelvstendigForetak.setNavn("selvstendig");
+        utenlandskSelvstendigForetak.setUuid("123");
 
         SedDataGrunnlagMedSoknad dataGrunnlag = lagGrunnlagMedSøknad();
         dataGrunnlag.getMottatteOpplysningerData().foretakUtland = List.of(utenlandskSelvstendigForetak);
@@ -473,10 +478,34 @@ class SedDataByggerTest {
         avsluttetBehandling.setId(2L);
         behandlingsresultatMedVedtak.setBehandling(avsluttetBehandling);
 
-        ArrayList<Behandling> list = new ArrayList<>();
-        list.add(behandling);
-        list.add(avsluttetBehandling);
-        behandling.getFagsak().setBehandlinger(list);
+        behandling.getFagsak().leggTilBehandling(behandling);
+        behandling.getFagsak().leggTilBehandling(avsluttetBehandling);
+        behandlingsresultat.setBehandling(behandling);
+
+        when(behandlingsresultatService.hentBehandlingsresultat(anyLong())).thenReturn(behandlingsresultatMedVedtak);
+
+        SedDataGrunnlagMedSoknad dataGrunnlag = lagGrunnlagMedSøknad();
+
+        SedDataDto sedDataDto = dataBygger.lag(dataGrunnlag, behandlingsresultat, PeriodeType.LOVVALGSPERIODE);
+        assertThat(sedDataDto).isNotNull();
+        assertThat(sedDataDto.getVedtakDto().erFørstegangsvedtak()).isFalse();
+        assertThat(sedDataDto.getVedtakDto().datoForrigeVedtak()).isEqualTo(LocalDate.now().toString());
+    }
+
+    @Test
+    void lagVedtakDto_midlertidigLovvalgsbestemt_settesSomIkkeFørstegangsvedtak() {
+        Behandlingsresultat behandlingsresultatMedVedtak = new Behandlingsresultat();
+        VedtakMetadata vedtakMetadata = new VedtakMetadata();
+        vedtakMetadata.setVedtaksdato(LocalDate.now().atStartOfDay(ZoneId.systemDefault()).toInstant());
+        behandlingsresultatMedVedtak.setVedtakMetadata(vedtakMetadata);
+
+        Behandling avsluttetBehandling = DataByggerStubs.hentBehandlingStub();
+        avsluttetBehandling.setStatus(Behandlingsstatus.MIDLERTIDIG_LOVVALGSBESLUTNING);
+        avsluttetBehandling.setId(2L);
+        behandlingsresultatMedVedtak.setBehandling(avsluttetBehandling);
+
+        behandling.getFagsak().leggTilBehandling(behandling);
+        behandling.getFagsak().leggTilBehandling(avsluttetBehandling);
         behandlingsresultat.setBehandling(behandling);
 
         when(behandlingsresultatService.hentBehandlingsresultat(anyLong())).thenReturn(behandlingsresultatMedVedtak);
@@ -550,9 +579,7 @@ class SedDataByggerTest {
 
     @Test
     void lag_harFlytErEøsErIkkeSed_søknadsperiodeBlirSatt() {
-        var fagsak = new Fagsak();
-        fagsak.setType(Sakstyper.EU_EOS);
-        fagsak.setTema(Sakstemaer.MEDLEMSKAP_LOVVALG);
+        var fagsak = FagsakTestFactory.lagFagsak();
         behandling.setTema(Behandlingstema.UTSENDT_ARBEIDSTAKER);
         behandling.setType(Behandlingstyper.FØRSTEGANG);
         behandling.setFagsak(fagsak);
@@ -566,8 +593,7 @@ class SedDataByggerTest {
 
     @Test
     void lag_erIkkeEuEøs_søknadsperiodeBlirIkkeSatt() {
-        var fagsak = new Fagsak();
-        fagsak.setType(Sakstyper.TRYGDEAVTALE);
+        var fagsak = FagsakTestFactory.builder().type(Sakstyper.TRYGDEAVTALE).build();
         behandling.setTema(Behandlingstema.UTSENDT_ARBEIDSTAKER);
         behandling.setType(Behandlingstyper.FØRSTEGANG);
         behandling.setFagsak(fagsak);
@@ -579,8 +605,7 @@ class SedDataByggerTest {
 
     @Test
     void lag_erSed_søknadsperiodeBlirIkkeSatt() {
-        var fagsak = new Fagsak();
-        fagsak.setType(Sakstyper.EU_EOS);
+        var fagsak = FagsakTestFactory.lagFagsak();
         behandling.setTema(Behandlingstema.ANMODNING_OM_UNNTAK_HOVEDREGEL);
         behandling.setType(Behandlingstyper.FØRSTEGANG);
         behandling.setFagsak(fagsak);
@@ -592,14 +617,12 @@ class SedDataByggerTest {
 
     @Test
     void lag_harIkkeFlyt_søknadsperiodeBlirIkkeSatt() {
-        var fagsak = new Fagsak();
-        fagsak.setType(Sakstyper.EU_EOS);
-        fagsak.setTema(Sakstemaer.MEDLEMSKAP_LOVVALG);
+        var fagsak = FagsakTestFactory.lagFagsak();
         behandling.setTema(Behandlingstema.UTSENDT_ARBEIDSTAKER);
         behandling.setType(Behandlingstyper.HENVENDELSE);
         behandling.setFagsak(fagsak);
         var søknad = behandling.getMottatteOpplysninger().getMottatteOpplysningerData();
-        when(saksbehandlingRegler.harTomFlyt(any())).thenReturn(true);
+        when(saksbehandlingRegler.harIngenFlyt(any())).thenReturn(true);
 
         var sedData = dataBygger.lag(lagGrunnlagMedSøknad(), behandlingsresultat, PeriodeType.LOVVALGSPERIODE);
 
@@ -617,6 +640,18 @@ class SedDataByggerTest {
             .anyMatch("NOR"::equals)
             .anyMatch("SWE"::equals)
             .anyMatch("DNK"::equals);
+    }
+
+    @Test
+    void lag_behandlingMedUnntaksflytTema_henterIkkeArbeidslandUtenMarginaltArbeid() {
+        when(saksbehandlingRegler.harRegistreringUnntakFraMedlemskapFlyt(any())).thenReturn(true);
+
+        SedDataGrunnlagMedSoknad sedDataGrunnlagMedSoknad = lagGrunnlagMedSøknad();
+
+        dataBygger.lag(sedDataGrunnlagMedSoknad, behandlingsresultat, PeriodeType.LOVVALGSPERIODE);
+
+        verify(landvelgerService, times(1)).hentBostedsland(anyLong(), any(MottatteOpplysningerData.class));
+        verify(landvelgerService, times(0)).hentAlleArbeidslandUtenMarginaltArbeid(anyLong());
     }
 
     private void lagUtkastAssertions(SedDataDto sedData, boolean forventAdresse) {

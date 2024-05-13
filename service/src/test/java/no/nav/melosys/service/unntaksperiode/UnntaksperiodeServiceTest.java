@@ -17,12 +17,12 @@ import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingsstatus;
 import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingstema;
 import no.nav.melosys.domain.kodeverk.lovvalgsbestemmelser.Lovvalgbestemmelser_883_2004;
 import no.nav.melosys.exception.FunksjonellException;
+import no.nav.melosys.saksflytapi.ProsessinstansService;
 import no.nav.melosys.service.LovvalgsperiodeService;
 import no.nav.melosys.service.behandling.BehandlingService;
 import no.nav.melosys.service.behandling.BehandlingsresultatService;
 import no.nav.melosys.service.kontroll.feature.unntaksperiode.UnntaksperiodeKontrollService;
 import no.nav.melosys.service.oppgave.OppgaveService;
-import no.nav.melosys.service.saksflyt.ProsessinstansService;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -59,8 +59,7 @@ class UnntaksperiodeServiceTest {
     public void setUp() {
         unntaksperiodeService = new UnntaksperiodeService(behandlingService, behandlingsresultatService, lovvalgsperiodeService, oppgaveService, prosessinstansService, unntaksperiodeKontrollService);
         behandling.setId(1L);
-        behandling.setFagsak(new Fagsak());
-        behandling.getFagsak().setSaksnummer("MEL-123hei");
+        behandling.setFagsak(FagsakTestFactory.lagFagsak());
         behandling.setTema(Behandlingstema.REGISTRERING_UNNTAK_NORSK_TRYGD_UTSTASJONERING);
         when(behandlingService.hentBehandling(anyLong())).thenReturn(behandling);
     }
@@ -176,7 +175,7 @@ class UnntaksperiodeServiceTest {
         Set<String> begrunnelser = new HashSet<>();
         begrunnelser.add(Ikke_godkjent_begrunnelser.TREDJELANDSBORGER_IKKE_AVTALELAND.getKode());
         unntaksperiodeService.ikkeGodkjennPeriode(1L, begrunnelser, null);
-        verify(prosessinstansService).opprettProsessinstansUnntaksperiodeAvvist(any(), anySet(), any());
+        verify(prosessinstansService).opprettProsessinstansUnntaksperiodeAvvist(any(), any());
     }
 
     @Test

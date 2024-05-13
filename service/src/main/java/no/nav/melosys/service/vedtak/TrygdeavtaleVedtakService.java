@@ -17,6 +17,7 @@ import no.nav.melosys.exception.FunksjonellException;
 import no.nav.melosys.exception.IkkeFunnetException;
 import no.nav.melosys.exception.TekniskException;
 import no.nav.melosys.exception.ValideringException;
+import no.nav.melosys.saksflytapi.ProsessinstansService;
 import no.nav.melosys.service.behandling.BehandlingService;
 import no.nav.melosys.service.behandling.BehandlingsresultatService;
 import no.nav.melosys.service.dokument.DokgenService;
@@ -24,7 +25,6 @@ import no.nav.melosys.service.dokument.brev.BrevbestillingDto;
 import no.nav.melosys.service.kontroll.feature.ferdigbehandling.FerdigbehandlingKontrollFacade;
 import no.nav.melosys.service.oppgave.OppgaveService;
 import no.nav.melosys.service.saksbehandling.SaksbehandlingRegler;
-import no.nav.melosys.service.saksflyt.ProsessinstansService;
 import no.nav.melosys.service.validering.Kontrollfeil;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -92,11 +92,11 @@ public class TrygdeavtaleVedtakService {
 
         if(saksbehandlingRegler.harIkkeYrkesaktivFlyt(behandling)) {
             behandlingsresultat.setFastsattAvLand(Land_iso2.NO);
-            prosessinstansService.opprettProsessinstansIverksettIkkeYrkesaktiv(behandling, request.getFritekst());
+            prosessinstansService.opprettProsessinstansIverksettIkkeYrkesaktiv(behandling);
         } else {
             behandling.getFagsak().setStatus(Saksstatuser.MEDLEMSKAP_AVKLART); // TODO: Egen oppgave for fjerne denne som ikke brukes
             oppdaterBehandlingsresultat(behandlingsresultat, request);
-            prosessinstansService.opprettProsessinstansIverksettVedtakTrygdeavtale(behandling, request);
+            prosessinstansService.opprettProsessinstansIverksettVedtakTrygdeavtale(behandling);
             BrevbestillingDto brevbestillingDto = lagBrevbestilling(behandling, request);
             dokgenService.produserOgDistribuerBrev(behandlingID, brevbestillingDto);
         }
@@ -108,7 +108,7 @@ public class TrygdeavtaleVedtakService {
         if (request.getBehandlingsresultatTypeKode() == Behandlingsresultattyper.AVSLAG_MANGLENDE_OPPL) {
             return lagAvslagMangledeOpplysningerBrevbestilling(request);
         }
-        Optional<Produserbaredokumenter> produserbaredokumenter = behandling.getMottatteOpplysninger().getMottatteOpplysningerData().soeknadsland.landkoder.stream()
+        Optional<Produserbaredokumenter> produserbaredokumenter = behandling.getMottatteOpplysninger().getMottatteOpplysningerData().soeknadsland.getLandkoder().stream()
             .map(Land_iso2::valueOf)
             .findFirst()
             .map(this::utledProduserbartTrygdeavtaleDokument);

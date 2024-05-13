@@ -1,6 +1,9 @@
 package no.nav.melosys.service.aktoer;
 
+import java.util.Set;
+
 import no.nav.melosys.domain.Aktoer;
+import no.nav.melosys.domain.kodeverk.Fullmaktstype;
 
 public class AktoerDto {
 
@@ -10,7 +13,7 @@ public class AktoerDto {
     private String orgnr;
     private String rolleKode;
     private String utenlandskPersonID;
-    private String representererKode;
+    private Set<Fullmaktstype> fullmakter;
     private Long databaseID;
 
     public String getAktoerID() {
@@ -61,12 +64,12 @@ public class AktoerDto {
         this.utenlandskPersonID = utenlandskPersonID;
     }
 
-    public String getRepresentererKode() {
-        return representererKode;
+    public Set<Fullmaktstype> getFullmakter() {
+        return fullmakter;
     }
 
-    public void setRepresentererKode(String representererKode) {
-        this.representererKode = representererKode;
+    public void setFullmakter(Set<Fullmaktstype> fullmakter) {
+        this.fullmakter = fullmakter;
     }
 
     public Long getDatabaseID() {
@@ -80,16 +83,13 @@ public class AktoerDto {
     public static AktoerDto tilDto(Aktoer aktoer) {
         AktoerDto aktoerDto = new AktoerDto();
         aktoerDto.setAktoerID(aktoer.getAktørId());
-        aktoerDto.setInstitusjonsID(aktoer.getInstitusjonId());
+        aktoerDto.setInstitusjonsID(aktoer.getInstitusjonID());
         aktoerDto.setOrgnr(aktoer.getOrgnr());
         aktoerDto.setRolleKode(aktoer.getRolle().getKode());
         aktoerDto.setUtenlandskPersonID(aktoer.getUtenlandskPersonId());
-        if (aktoer.getRepresenterer() != null) {
-            aktoerDto.setRepresentererKode(aktoer.getRepresenterer().getKode());
-        }
+        aktoerDto.setFullmakter(aktoer.getFullmaktstyper());
         aktoerDto.setDatabaseID(aktoer.getId());
         aktoerDto.setPersonIdent(aktoer.getPersonIdent());
         return aktoerDto;
     }
-
 }

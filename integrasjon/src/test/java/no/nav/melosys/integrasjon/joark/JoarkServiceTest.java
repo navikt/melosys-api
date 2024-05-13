@@ -124,7 +124,6 @@ class JoarkServiceTest {
 
     @Test
     void oppdaterJournalpost_utenVedlegg_fungerer() {
-
         String tittel = "tittel";
         String hovedDokumentID = "1234";
         JournalpostOppdatering journalpostOppdatering = new JournalpostOppdatering.Builder()
@@ -165,8 +164,47 @@ class JoarkServiceTest {
     }
 
     @Test
-    void oppdaterJournalpost_skalFerdigstilles_ferdigstillJournalpostBlirKalt() {
+    void oppdaterJournalpost_utenAvsender_fungerer() {
+        String tittel = "tittel";
+        String hovedDokumentID = "1234";
+        JournalpostOppdatering journalpostOppdatering = new JournalpostOppdatering.Builder()
+            .medSaksnummer("MEL-8")
+            .medBrukerID("12345").medHovedDokumentID(hovedDokumentID)
+            .medTittel(tittel).medFysiskeVedlegg(null)
+            .medLogiskeVedleggTitler(null).build();
 
+        var safJournalpost = safJournalpost("123", false);
+
+        when(safConsumer.hentJournalpost(anyString())).thenReturn(safJournalpost);
+        joarkService.oppdaterOgFerdigstillJournalpost("123", journalpostOppdatering);
+
+        verify(journalpostapiConsumer, never()).fjernLogiskeVedlegg(any(), any());
+        verify(journalpostapiConsumer).oppdaterJournalpost(oppdaterJournalpostRequestCaptor.capture(), anyString());
+        OppdaterJournalpostRequest request = oppdaterJournalpostRequestCaptor.getValue();
+
+        assertThat(request).isNotNull();
+        assertThat(request.tittel).isEqualTo(tittel);
+        assertThat(request.avsenderMottaker).isNull();
+
+        assertThat(request.bruker).isNotNull();
+        assertThat(request.bruker.getId()).isNotNull();
+        assertThat(request.bruker.getIdType()).isNotNull();
+
+        assertThat(request.sak).isNotNull();
+        assertThat(request.sak.getFagsakId()).isEqualTo(journalpostOppdatering.getSaksnummer());
+        assertThat(request.sak.getSakstype()).isEqualTo("FAGSAK");
+        assertThat(request.sak.getFagsaksystem()).isNotNull();
+
+        assertThat(request.dokumenter).hasSize(1);
+        Dokumentoppdatering hovedDokument = request.dokumenter.iterator().next();
+        assertThat(hovedDokument.tittel).isEqualTo(tittel);
+        assertThat(hovedDokument.dokumentInfoId).isEqualTo(hovedDokumentID);
+
+        verify(journalpostapiConsumer, never()).leggTilLogiskVedlegg(anyString(), anyString());
+    }
+
+    @Test
+    void oppdaterJournalpost_skalFerdigstilles_ferdigstillJournalpostBlirKalt() {
         final var journalpostID = "123321";
         JournalpostOppdatering journalpostOppdatering = new JournalpostOppdatering.Builder()
             .medSaksnummer("MEL-1111")

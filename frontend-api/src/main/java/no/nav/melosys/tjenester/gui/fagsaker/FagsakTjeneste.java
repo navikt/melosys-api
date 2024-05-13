@@ -1,10 +1,5 @@
 package no.nav.melosys.tjenester.gui.fagsaker;
 
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.List;
-import java.util.Optional;
-
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
 import no.nav.melosys.domain.Behandling;
@@ -32,6 +27,11 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.context.WebApplicationContext;
 
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.List;
+import java.util.Optional;
+
 import static no.nav.melosys.domain.util.MottatteOpplysningerUtils.hentLand;
 import static no.nav.melosys.domain.util.MottatteOpplysningerUtils.hentPeriode;
 
@@ -54,7 +54,7 @@ public class FagsakTjeneste {
     private final SaksopplysningerService saksopplysningerService;
     private final OrganisasjonOppslagService organisasjonOppslagService;
     private final OpprettBehandlingForSak opprettBehandlingForSak;
-
+    private final FerdigbehandleSakService ferdigbehandleSakService;
     private final MedlemAvFolketrygdenService medlemAvFolketrygdenService;
 
     public FagsakTjeneste(FagsakService fagsakService,
@@ -67,6 +67,7 @@ public class FagsakTjeneste {
                           SaksopplysningerService saksopplysningerService,
                           OrganisasjonOppslagService organisasjonOppslagService,
                           OpprettBehandlingForSak opprettBehandlingForSak,
+                          FerdigbehandleSakService ferdigbehandleSakService,
                           MedlemAvFolketrygdenService medlemAvFolketrygdenService) {
         this.fagsakService = fagsakService;
         this.aksesskontroll = aksesskontroll;
@@ -78,6 +79,7 @@ public class FagsakTjeneste {
         this.saksopplysningerService = saksopplysningerService;
         this.organisasjonOppslagService = organisasjonOppslagService;
         this.opprettBehandlingForSak = opprettBehandlingForSak;
+        this.ferdigbehandleSakService = ferdigbehandleSakService;
         this.medlemAvFolketrygdenService = medlemAvFolketrygdenService;
     }
 
@@ -163,7 +165,7 @@ public class FagsakTjeneste {
         log.info("Saksbehandler {} ber om å avslutte aktiv behandling og oppdatere saksstatus på {}", SubjectHandler.getInstance().getUserID(), saksnummer);
         aksesskontroll.autoriserSakstilgang(saksnummer);
 
-        fagsakService.ferdigbehandleSak(saksnummer);
+        ferdigbehandleSakService.ferdigbehandleSak(saksnummer);
 
         return ResponseEntity.noContent().build();
     }
@@ -270,12 +272,12 @@ public class FagsakTjeneste {
         }
         var fagsak = behandlinger.get(0).getFagsak();
         var aktørId = fagsak.finnBrukersAktørID();
-        if (aktørId.isPresent()) {
-            return persondataFasade.hentSammensattNavn(persondataFasade.hentFolkeregisterident(aktørId.get()));
+        if (aktørId != null) {
+            return persondataFasade.hentSammensattNavn(persondataFasade.hentFolkeregisterident(aktørId));
         }
         var orgnr = fagsak.finnVirksomhetsOrgnr();
-        if (orgnr.isPresent()) {
-            return organisasjonOppslagService.hentOrganisasjon(orgnr.get()).getNavn();
+        if (orgnr != null) {
+            return organisasjonOppslagService.hentOrganisasjon(orgnr).getNavn();
         }
         return UKJENT_NAVN;
     }

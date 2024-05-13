@@ -1,6 +1,5 @@
 package no.nav.melosys.tjenester.gui.saksflyt;
 
-import no.finn.unleash.Unleash;
 import no.nav.melosys.service.UnntaksregistreringService;
 import no.nav.melosys.service.tilgang.Aksesskontroll;
 import org.junit.jupiter.api.Test;

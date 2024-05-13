@@ -20,11 +20,11 @@ public class VedleggMapper {
     }
 
     public void map(BrevDataVedlegg vedleggData) {
-        if (vedleggData.brevDataA1 != null) {
-            map(vedleggData.brevDataA1);
+        if (vedleggData.getBrevDataA1() != null) {
+            map(vedleggData.getBrevDataA1());
         }
-        if (vedleggData.brevDataA001 != null) {
-            map(vedleggData.brevDataA001);
+        if (vedleggData.getBrevDataA001() != null) {
+            map(vedleggData.getBrevDataA001());
         }
     }
 

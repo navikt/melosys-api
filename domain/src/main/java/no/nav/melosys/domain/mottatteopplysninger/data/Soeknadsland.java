@@ -1,25 +1,25 @@
 package no.nav.melosys.domain.mottatteopplysninger.data;
 
-import no.nav.melosys.domain.kodeverk.Land_iso2;
-import no.nav.melosys.domain.kodeverk.Trygdeavtale_myndighetsland;
-import no.nav.melosys.exception.TekniskException;
-
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 import java.util.Objects;
 
-public class Soeknadsland {
-    public List<String> landkoder = new ArrayList<>();
+import no.nav.melosys.domain.kodeverk.Land_iso2;
+import no.nav.melosys.domain.kodeverk.Trygdeavtale_myndighetsland;
+import no.nav.melosys.exception.TekniskException;
 
-    public boolean erUkjenteEllerAlleEosLand;
+public class Soeknadsland {
+    private List<String> landkoder = new ArrayList<>();
+
+    private boolean flereLandUkjentHvilke;
 
     public Soeknadsland() {
     }
 
-    public Soeknadsland(List<String> landkoder, boolean erUkjenteEllerAlleEosLand) {
+    public Soeknadsland(List<String> landkoder, boolean flereLandUkjentHvilke) {
         this.landkoder = landkoder;
-        this.erUkjenteEllerAlleEosLand = erUkjenteEllerAlleEosLand;
+        this.flereLandUkjentHvilke = flereLandUkjentHvilke;
     }
 
     public static Soeknadsland av(Land_iso2... lovvalgsland) {
@@ -27,7 +27,7 @@ public class Soeknadsland {
     }
 
     public boolean erGyldig() {
-        return !landkoder.isEmpty() || erUkjenteEllerAlleEosLand;
+        return !landkoder.isEmpty() || flereLandUkjentHvilke;
     }
 
     public Trygdeavtale_myndighetsland hentSoeknadslandForTrygdeavtale() {
@@ -35,5 +35,21 @@ public class Soeknadsland {
             throw new TekniskException("Trygdeavtale kan kun ha et søknadsland, denne har: " + landkoder.size());
         }
         return landkoder.isEmpty() ? null : Trygdeavtale_myndighetsland.valueOf(landkoder.get(0));
+    }
+
+    public List<String> getLandkoder() {
+        return landkoder;
+    }
+
+    public void setLandkoder(List<String> landkoder) {
+        this.landkoder = landkoder;
+    }
+
+    public boolean isFlereLandUkjentHvilke() {
+        return flereLandUkjentHvilke;
+    }
+
+    public void setFlereLandUkjentHvilke(boolean flereLandUkjentHvilke) {
+        this.flereLandUkjentHvilke = flereLandUkjentHvilke;
     }
 }

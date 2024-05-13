@@ -24,8 +24,7 @@ import org.springframework.transaction.annotation.Transactional;
 
 import static no.nav.melosys.domain.avklartefakta.Avklartefakta.IKKE_VALGT_FAKTA;
 import static no.nav.melosys.domain.avklartefakta.Avklartefakta.VALGT_FAKTA;
-import static no.nav.melosys.domain.kodeverk.Avklartefaktatyper.VURDERING_LOVVALG_BARN;
-import static no.nav.melosys.domain.kodeverk.Avklartefaktatyper.VURDERING_MEDLEMSKAP_EKTEFELLE_SAMBOER;
+import static no.nav.melosys.domain.kodeverk.Avklartefaktatyper.*;
 
 @Service
 public class AvklartefaktaService {
@@ -189,7 +188,7 @@ public class AvklartefaktaService {
         Behandlingsresultat resultat = behandlingsresultatRepository.findById(behandlingID)
             .orElseThrow(() -> new IkkeFunnetException(FANT_IKKE_RESULTAT + behandlingID));
 
-        Avklartefakta avklartefakta = new Avklartefakta();
+        Avklartefakta avklartefakta = new  Avklartefakta();
         avklartefakta.setType(type);
         avklartefakta.setReferanse(referanse);
         avklartefakta.setSubjekt(subjekt);

@@ -1,28 +1,23 @@
 package no.nav.melosys.service.eessi;
 
 import java.time.Instant;
-import java.util.List;
 import java.util.Optional;
 import java.util.Set;
 
-import no.finn.unleash.FakeUnleash;
-import no.nav.melosys.domain.Anmodningsperiode;
-import no.nav.melosys.domain.Behandling;
-import no.nav.melosys.domain.Behandlingsresultat;
-import no.nav.melosys.domain.Fagsak;
+import no.nav.melosys.domain.*;
 import no.nav.melosys.domain.eessi.melding.MelosysEessiMelding;
 import no.nav.melosys.domain.kodeverk.Saksstatuser;
 import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingsstatus;
 import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingstema;
-import no.nav.melosys.domain.saksflyt.ProsessDataKey;
-import no.nav.melosys.domain.saksflyt.Prosessinstans;
+import no.nav.melosys.saksflytapi.ProsessinstansService;
+import no.nav.melosys.saksflytapi.domain.ProsessDataKey;
+import no.nav.melosys.saksflytapi.domain.Prosessinstans;
 import no.nav.melosys.service.behandling.BehandlingService;
 import no.nav.melosys.service.behandling.BehandlingsresultatService;
 import no.nav.melosys.service.eessi.ruting.AdminFjernmottakerSedRuter;
 import no.nav.melosys.service.medl.MedlPeriodeService;
 import no.nav.melosys.service.oppgave.OppgaveService;
 import no.nav.melosys.service.sak.FagsakService;
-import no.nav.melosys.service.saksflyt.ProsessinstansService;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -83,7 +78,7 @@ class AdminFjernmottakerSedRuterTest {
         melosysEessiMelding.setX006NavErFjernet(false);
         prosessinstans.setData(ProsessDataKey.EESSI_MELDING, melosysEessiMelding);
 
-        Behandling sistAktiveBehandling = fagsak.hentSistAktivBehandling();
+        Behandling sistAktiveBehandling = fagsak.hentSistAktivBehandlingIkkeÅrsavregning();
 
         when(fagsakService.finnFagsakFraArkivsakID(arkivsakID)).thenReturn(Optional.of(fagsak));
         adminFjernmottakerSedRuter.rutSedTilBehandling(prosessinstans, arkivsakID);
@@ -95,7 +90,7 @@ class AdminFjernmottakerSedRuterTest {
         var fagsak = lagFagsak(Behandlingstema.BESLUTNING_LOVVALG_ANNET_LAND, Behandlingsstatus.UNDER_BEHANDLING);
 
         prosessinstans.setData(ProsessDataKey.EESSI_MELDING, melosysEessiMelding);
-        Behandling sistAktiveBehandling = fagsak.hentSistAktivBehandling();
+        Behandling sistAktiveBehandling = fagsak.hentSistAktivBehandlingIkkeÅrsavregning();
 
         when(fagsakService.finnFagsakFraArkivsakID(arkivsakID)).thenReturn(Optional.of(fagsak));
 
@@ -110,7 +105,7 @@ class AdminFjernmottakerSedRuterTest {
         melosysEessiMelding.setX006NavErFjernet(true);
 
         prosessinstans.setData(ProsessDataKey.EESSI_MELDING, melosysEessiMelding);
-        Behandling sistAktiveBehandling = fagsak.hentSistAktivBehandling();
+        Behandling sistAktiveBehandling = fagsak.hentSistAktivBehandlingIkkeÅrsavregning();
 
         Behandlingsresultat behandlingsresultat = new Behandlingsresultat();
         behandlingsresultat.setBehandling(sistAktiveBehandling);
@@ -134,7 +129,7 @@ class AdminFjernmottakerSedRuterTest {
         melosysEessiMelding.setX006NavErFjernet(true);
 
         prosessinstans.setData(ProsessDataKey.EESSI_MELDING, melosysEessiMelding);
-        Behandling sistAktiveBehandling = fagsak.hentSistAktivBehandling();
+        Behandling sistAktiveBehandling = fagsak.hentSistAktivBehandlingIkkeÅrsavregning();
 
         Behandlingsresultat behandlingsresultat = new Behandlingsresultat();
         behandlingsresultat.setBehandling(sistAktiveBehandling);
@@ -156,7 +151,7 @@ class AdminFjernmottakerSedRuterTest {
     void rutSedTilBehandling_tilhørendeFagsakFinnesOgBehandlingErNorgeUtpektAktiv_behandlingsstausVURDER_DOKUMENT() {
         var fagsak = lagFagsak(Behandlingstema.BESLUTNING_LOVVALG_NORGE, Behandlingsstatus.UNDER_BEHANDLING);
         when(fagsakService.finnFagsakFraArkivsakID(arkivsakID)).thenReturn(Optional.of(fagsak));
-        Behandling sistAktiveBehandling = fagsak.hentSistAktivBehandling();
+        Behandling sistAktiveBehandling = fagsak.hentSistAktivBehandlingIkkeÅrsavregning();
 
 
         adminFjernmottakerSedRuter.rutSedTilBehandling(prosessinstans, arkivsakID);
@@ -188,8 +183,9 @@ class AdminFjernmottakerSedRuterTest {
     }
 
     private Fagsak lagFagsak(Behandlingstema behandlingstema, Behandlingsstatus behandlingsstatus) {
-        var fagsak = new Fagsak();
-        fagsak.setBehandlinger(List.of(lagBehandling(fagsak, behandlingstema, behandlingsstatus)));
+        var fagsak = FagsakTestFactory.lagFagsak();
+        var behandling = lagBehandling(fagsak, behandlingstema, behandlingsstatus);
+        fagsak.leggTilBehandling(behandling);
         return fagsak;
     }
 }

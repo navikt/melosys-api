@@ -1,8 +1,8 @@
 package no.nav.melosys.service.dokument.brev.mapper;
 
 import java.util.Objects;
-import javax.xml.bind.JAXBElement;
-import javax.xml.bind.JAXBException;
+import jakarta.xml.bind.JAXBElement;
+import jakarta.xml.bind.JAXBException;
 
 import no.nav.dok.melosysbrev._000116.BrevdataType;
 import no.nav.dok.melosysbrev._000116.Fag;
@@ -42,10 +42,10 @@ public class AttestMapper implements BrevDataMapper {
 
     public Fag mapFag(BrevDataVedlegg vedlegg) {
         Fag fag = new Fag();
-        if (vedlegg.brevDataA1 != null) {
+        if (vedlegg.getBrevDataA1() != null) {
             fag.setVedleggA1("true");
         }
-        if (vedlegg.brevDataA001 != null) {
+        if (vedlegg.getBrevDataA001() != null) {
             fag.setVedleggSEDA001("true");
         }
         return fag;

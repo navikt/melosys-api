@@ -1,6 +1,5 @@
 package no.nav.melosys.service.sak;
 
-import no.finn.unleash.FakeUnleash;
 import no.nav.melosys.domain.Tema;
 import no.nav.melosys.domain.kodeverk.Sakstemaer;
 import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingstema;

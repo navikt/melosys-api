@@ -1,9 +1,9 @@
 package no.nav.melosys.service.tilgang;
 
+import no.nav.melosys.config.MDCOperations;
 import no.nav.melosys.domain.Behandling;
 import no.nav.melosys.domain.Fagsak;
 import no.nav.melosys.exception.FunksjonellException;
-import no.nav.melosys.integrasjon.felles.mdc.MDCOperations;
 import no.nav.melosys.service.behandling.BehandlingService;
 import no.nav.melosys.service.oppgave.OppgaveService;
 import no.nav.melosys.service.sak.FagsakService;
@@ -13,6 +13,8 @@ import no.nav.melosys.sikkerhet.logging.AuditEventType;
 import no.nav.melosys.sikkerhet.logging.AuditLogger;
 import org.springframework.stereotype.Component;
 import org.springframework.transaction.annotation.Transactional;
+
+import java.util.Optional;
 
 import static no.nav.melosys.service.tilgang.Aksesstype.LES;
 import static no.nav.melosys.service.tilgang.Aksesstype.SKRIV;
@@ -50,7 +52,7 @@ public class AksesskontrollImpl implements Aksesskontroll {
     @Override
     public void auditAutoriser(long behandlingID, String kontekst) {
         var behandling = behandlingService.hentBehandling(behandlingID);
-        String aktørID = behandling.getFagsak().finnBrukersAktørID().orElse(null);
+        String aktørID = behandling.getFagsak().finnBrukersAktørID();
         if (aktørID != null) {
             logAudit(AuditEventType.READ, aktørID, kontekst);
             brukertilgangKontroll.validerTilgangTilAktørID(aktørID);
@@ -60,7 +62,7 @@ public class AksesskontrollImpl implements Aksesskontroll {
     @Override
     public void auditAutoriserSkriv(long behandlingID, String kontekst) {
         var behandling = behandlingService.hentBehandling(behandlingID);
-        String aktørID = behandling.getFagsak().finnBrukersAktørID().orElse(null);
+        String aktørID = behandling.getFagsak().finnBrukersAktørID();
         if (aktørID != null) {
             logAudit(AuditEventType.UPDATE, aktørID, kontekst);
             autoriser(behandling, SKRIV, Ressurs.UKJENT, false);
@@ -75,7 +77,7 @@ public class AksesskontrollImpl implements Aksesskontroll {
 
     @Override
     public void auditAutoriserSakstilgang(Fagsak fagsak, String kontekst) {
-        fagsak.finnBrukersAktørID().ifPresent(aktørID -> auditAutoriserAktørID(aktørID, kontekst));
+        Optional.ofNullable(fagsak.finnBrukersAktørID()).ifPresent(aktørID -> auditAutoriserAktørID(aktørID, kontekst));
     }
 
     private void logAudit(AuditEventType eventType, String personIdent, String message) {
@@ -90,7 +92,7 @@ public class AksesskontrollImpl implements Aksesskontroll {
 
     @Override
     public void autoriserSakstilgang(Fagsak fagsak) {
-        fagsak.finnBrukersAktørID().ifPresent(brukertilgangKontroll::validerTilgangTilAktørID);
+        Optional.ofNullable(fagsak.finnBrukersAktørID()).ifPresent(brukertilgangKontroll::validerTilgangTilAktørID);
     }
 
     @Override
@@ -136,7 +138,7 @@ public class AksesskontrollImpl implements Aksesskontroll {
     }
 
     private void autoriser(Behandling behandling, Aksesstype aksesstype, Ressurs ressurs, boolean validerTilordnet) {
-        behandling.getFagsak().finnBrukersAktørID().ifPresent(brukertilgangKontroll::validerTilgangTilAktørID);
+        Optional.ofNullable(behandling.getFagsak().finnBrukersAktørID()).ifPresent(brukertilgangKontroll::validerTilgangTilAktørID);
 
         if (aksesstype == SKRIV) {
             if (validerTilordnet) {

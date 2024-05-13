@@ -3,28 +3,23 @@ package no.nav.melosys.service.eessi;
 import java.time.LocalDate;
 import java.util.Optional;
 
-import no.nav.melosys.domain.Behandling;
-import no.nav.melosys.domain.Fagsak;
-import no.nav.melosys.domain.Saksopplysning;
-import no.nav.melosys.domain.SaksopplysningType;
+import no.nav.melosys.domain.*;
 import no.nav.melosys.domain.dokument.sed.SedDokument;
 import no.nav.melosys.domain.eessi.SedType;
 import no.nav.melosys.domain.eessi.melding.MelosysEessiMelding;
-import no.nav.melosys.domain.kodeverk.Sakstemaer;
-import no.nav.melosys.domain.kodeverk.Sakstyper;
 import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingsstatus;
 import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingstema;
 import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingstyper;
 import no.nav.melosys.domain.oppgave.Oppgave;
-import no.nav.melosys.domain.saksflyt.ProsessDataKey;
-import no.nav.melosys.domain.saksflyt.Prosessinstans;
 import no.nav.melosys.integrasjon.oppgave.OppgaveOppdatering;
+import no.nav.melosys.saksflytapi.ProsessinstansService;
+import no.nav.melosys.saksflytapi.domain.ProsessDataKey;
+import no.nav.melosys.saksflytapi.domain.Prosessinstans;
 import no.nav.melosys.service.behandling.BehandlingService;
 import no.nav.melosys.service.eessi.ruting.DefaultSedRuter;
 import no.nav.melosys.service.oppgave.OppgaveFactory;
 import no.nav.melosys.service.oppgave.OppgaveService;
 import no.nav.melosys.service.sak.FagsakService;
-import no.nav.melosys.service.saksflyt.ProsessinstansService;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -34,6 +29,7 @@ import org.mockito.ArgumentCaptor;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 
+import static no.nav.melosys.domain.FagsakTestFactory.SAKSNUMMER;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.ArgumentMatchers.anyLong;
 import static org.mockito.ArgumentMatchers.eq;
@@ -55,7 +51,6 @@ class DefaultSedRuterTest {
 
     private final OppgaveFactory oppgaveFactory = new OppgaveFactory();
 
-    private static final String SAKSNUMMER = "MEL-!!!";
     private static final Long GSAK_SAKSNUMMER = 123L;
 
     @BeforeEach
@@ -90,14 +85,14 @@ class DefaultSedRuterTest {
         defaultSedRuter.rutSedTilBehandling(prosessinstans, GSAK_SAKSNUMMER);
 
         assertThat(prosessinstans.getBehandling()).isNotNull();
-        verify(prosessinstansService).opprettProsessinstansSedJournalføring(fagsak.hentAktivBehandling(), melosysEessiMelding);
+        verify(prosessinstansService).opprettProsessinstansSedJournalføring(fagsak.finnAktivBehandlingIkkeÅrsavregning(), melosysEessiMelding);
         verify(behandlingService).endreStatus(anyLong(), eq(Behandlingsstatus.VURDER_DOKUMENT));
         verify(oppgaveService).finnÅpenBehandlingsoppgaveMedFagsaksnummer(SAKSNUMMER);
         verify(oppgaveService).oppdaterOppgave(eq(oppgaveId), any(OppgaveOppdatering.class));
     }
 
     @ParameterizedTest
-    @EnumSource(value = SedType.class, names = {"A012", "X001", "X007"})
+    @EnumSource(value = SedType.class, names = {"A012", "X001", "X007", "X005"})
     void rutSedTilBehandling_SedTyperSaksnummerOgFagsakEksistererStatusMidlertidigLovvalgsbeslutning_ikkeOppdaterStatusEllerOppgave(SedType sedType) {
         Prosessinstans prosessinstans = new Prosessinstans();
         prosessinstans.setData(ProsessDataKey.GSAK_SAK_ID, GSAK_SAKSNUMMER);
@@ -105,7 +100,7 @@ class DefaultSedRuterTest {
         prosessinstans.setData(ProsessDataKey.EESSI_MELDING, melosysEessiMelding);
 
         Fagsak fagsak = hentFagsak();
-        fagsak.hentSistOppdatertBehandling().setStatus(Behandlingsstatus.MIDLERTIDIG_LOVVALGSBESLUTNING);
+        fagsak.hentSistOppdatertBehandlingIkkeÅrsavregning().setStatus(Behandlingsstatus.MIDLERTIDIG_LOVVALGSBESLUTNING);
 
         when(fagsakService.finnFagsakFraArkivsakID(GSAK_SAKSNUMMER)).thenReturn(Optional.of(fagsak));
 
@@ -114,7 +109,7 @@ class DefaultSedRuterTest {
 
 
         assertThat(prosessinstans.getBehandling()).isNotNull();
-        verify(prosessinstansService).opprettProsessinstansSedJournalføring(fagsak.hentSistAktivBehandling(), melosysEessiMelding);
+        verify(prosessinstansService).opprettProsessinstansSedJournalføring(fagsak.hentSistAktivBehandlingIkkeÅrsavregning(), melosysEessiMelding);
         verify(behandlingService, never()).endreStatus(anyLong(), any());
         verify(oppgaveService, never()).finnÅpenBehandlingsoppgaveMedFagsaksnummer(any());
         verifyNoInteractions(oppgaveService);
@@ -128,9 +123,7 @@ class DefaultSedRuterTest {
         prosessinstans.setData(ProsessDataKey.EESSI_MELDING, melosysEessiMelding);
 
         Fagsak fagsak = hentFagsak();
-        fagsak.setType(Sakstyper.EU_EOS);
-        fagsak.setTema(Sakstemaer.MEDLEMSKAP_LOVVALG);
-        Behandling behandling = fagsak.hentAktivBehandling();
+        Behandling behandling = fagsak.finnAktivBehandlingIkkeÅrsavregning();
         behandling.setType(Behandlingstyper.HENVENDELSE);
         behandling.setStatus(Behandlingsstatus.OPPRETTET);
         when(fagsakService.finnFagsakFraArkivsakID(GSAK_SAKSNUMMER)).thenReturn(Optional.of(fagsak));
@@ -143,7 +136,7 @@ class DefaultSedRuterTest {
         verify(behandlingService).endreStatus(anyLong(), eq(Behandlingsstatus.VURDER_DOKUMENT));
         verify(oppgaveService).opprettOppgave(oppgaveCaptor.capture());
         verify(oppgaveService).oppdaterOppgave(any(), oppgaveOppdateringArgumentCaptor.capture());
-        verify(prosessinstansService).opprettProsessinstansSedJournalføring(fagsak.hentSistAktivBehandling(), melosysEessiMelding);
+        verify(prosessinstansService).opprettProsessinstansSedJournalføring(fagsak.hentSistAktivBehandlingIkkeÅrsavregning(), melosysEessiMelding);
         assertThat(oppgaveCaptor.getValue())
             .extracting(Oppgave::getSaksnummer)
             .isEqualTo(SAKSNUMMER);
@@ -160,9 +153,7 @@ class DefaultSedRuterTest {
         prosessinstans.setData(ProsessDataKey.EESSI_MELDING, melosysEessiMelding);
 
         Fagsak fagsak = hentFagsak();
-        fagsak.setType(Sakstyper.EU_EOS);
-        fagsak.setTema(Sakstemaer.MEDLEMSKAP_LOVVALG);
-        Behandling behandling = fagsak.hentAktivBehandling();
+        Behandling behandling = fagsak.finnAktivBehandlingIkkeÅrsavregning();
         behandling.setStatus(Behandlingsstatus.AVSLUTTET);
         when(fagsakService.finnFagsakFraArkivsakID(GSAK_SAKSNUMMER)).thenReturn(Optional.of(fagsak));
 
@@ -190,10 +181,9 @@ class DefaultSedRuterTest {
         behandling.setTema(Behandlingstema.FORESPØRSEL_TRYGDEMYNDIGHET);
         behandling.setType(Behandlingstyper.FØRSTEGANG);
 
-        Fagsak fagsak = new Fagsak();
-        fagsak.setSaksnummer(SAKSNUMMER);
-        fagsak.getBehandlinger().add(behandling);
+        var fagsak = FagsakTestFactory.builder().behandlinger(behandling).build();
         behandling.setFagsak(fagsak);
+
         Saksopplysning saksopplysning = new Saksopplysning();
         saksopplysning.setType(SaksopplysningType.SEDOPPL);
         SedDokument dokument = new SedDokument();

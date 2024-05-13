@@ -8,7 +8,7 @@ import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingsresultattyper;
 import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingstyper;
 import no.nav.melosys.domain.kodeverk.lovvalgsbestemmelser.Lovvalgbestemmelser_883_2004;
 import no.nav.melosys.domain.oppgave.Oppgave;
-import no.nav.melosys.domain.saksflyt.Prosessinstans;
+import no.nav.melosys.saksflytapi.domain.Prosessinstans;
 import no.nav.melosys.service.behandling.BehandlingsresultatService;
 import no.nav.melosys.service.oppgave.OppgaveService;
 import org.junit.jupiter.api.BeforeEach;
@@ -35,7 +35,6 @@ class OpprettAvgiftsoppgaveTest {
 
     private OpprettAvgiftsoppgave opprettAvgiftsoppgave;
 
-    private static final String DUMM_ID = "DUMM_ID";
     private Behandlingsresultat behandlingsresultat;
 
     @BeforeEach
@@ -56,7 +55,7 @@ class OpprettAvgiftsoppgaveTest {
         assertThat(oppgave.getValue().getOppgavetype()).isEqualTo(Oppgavetyper.VUR);
         assertThat(oppgave.getValue().getJournalpostId()).isNotBlank();
         assertThat(oppgave.getValue().getBehandlesAvApplikasjon()).isEqualTo(Fagsystem.INTET);
-        assertThat(oppgave.getValue().getAktørId()).isEqualTo(DUMM_ID);
+        assertThat(oppgave.getValue().getAktørId()).isEqualTo(FagsakTestFactory.BRUKER_AKTØR_ID);
         assertThat(oppgave.getValue().getBeskrivelse()).isEqualTo(OpprettAvgiftsoppgave.AVGIFTSVURDERING_BESKRIVELSE);
     }
 
@@ -79,8 +78,7 @@ class OpprettAvgiftsoppgaveTest {
         when(behandlingsresultatService.hentBehandlingsresultat(anyLong())).thenReturn(behandlingsresultat);
 
         Prosessinstans prosessinstans = new Prosessinstans();
-        Fagsak fagsak = lagFagsak();
-        fagsak.setType(Sakstyper.FTRL);
+        Fagsak fagsak = lagFagsak(Sakstyper.FTRL);
         prosessinstans.setBehandling(lagBehandling(fagsak));
 
         opprettAvgiftsoppgave.utfør(prosessinstans);
@@ -98,24 +96,12 @@ class OpprettAvgiftsoppgaveTest {
 
     private static Prosessinstans lagProsessinstans() {
         Prosessinstans prosessinstans = new Prosessinstans();
-        prosessinstans.setBehandling(lagBehandling(lagFagsak()));
+        prosessinstans.setBehandling(lagBehandling(lagFagsak(Sakstyper.EU_EOS)));
         return prosessinstans;
     }
 
-    private static Fagsak lagFagsak() {
-        Fagsak fagsak = new Fagsak();
-        String saksnummer = "MEL-TESTx";
-        fagsak.setSaksnummer(saksnummer);
-        fagsak.setType(Sakstyper.EU_EOS);
-        fagsak.getAktører().add(lagBruker());
-        return fagsak;
-    }
-
-    private static Aktoer lagBruker() {
-        Aktoer aktoer = new Aktoer();
-        aktoer.setRolle(Aktoersroller.BRUKER);
-        aktoer.setAktørId(DUMM_ID);
-        return aktoer;
+    private static Fagsak lagFagsak(Sakstyper sakstype) {
+        return FagsakTestFactory.builder().type(sakstype).medBruker().build();
     }
 
     private static Behandling lagBehandling(Fagsak fagsak) {

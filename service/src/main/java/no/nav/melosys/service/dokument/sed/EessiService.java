@@ -4,8 +4,9 @@ import java.time.LocalDate;
 import java.util.*;
 import java.util.function.Function;
 import java.util.stream.Collectors;
-import javax.annotation.Nullable;
+import jakarta.annotation.Nullable;
 
+import io.getunleash.Unleash;
 import no.nav.melosys.domain.Behandling;
 import no.nav.melosys.domain.Behandlingsresultat;
 import no.nav.melosys.domain.Fagsak;
@@ -56,16 +57,18 @@ public class EessiService {
     private final EessiConsumer eessiConsumer;
     private final SedDataBygger sedDataBygger;
     private final SedDataGrunnlagFactory dataGrunnlagFactory;
+    private final Unleash unleash;
 
     public EessiService(BehandlingService behandlingService, BehandlingsresultatService behandlingsresultatService,
                         EessiConsumer eessiConsumer, JoarkFasade joarkFasade,
-                        SedDataBygger sedDataBygger, SedDataGrunnlagFactory dataGrunnlagFactory) {
+                        SedDataBygger sedDataBygger, SedDataGrunnlagFactory dataGrunnlagFactory, Unleash unleash) {
         this.behandlingService = behandlingService;
         this.behandlingsresultatService = behandlingsresultatService;
         this.joarkFasade = joarkFasade;
         this.eessiConsumer = eessiConsumer;
         this.sedDataBygger = sedDataBygger;
         this.dataGrunnlagFactory = dataGrunnlagFactory;
+        this.unleash = unleash;
     }
 
     public Collection<Vedlegg> lagEessiVedlegg(Fagsak fagsak, Collection<DokumentReferanse> vedleggReferanser) {
@@ -236,7 +239,7 @@ public class EessiService {
         sedDataDto.setUtpekingAvvis(new UtpekingAvvisDto(
             utpekingAvvis.getNyttLovvalgsland(),
             utpekingAvvis.getBegrunnelse(),
-            utpekingAvvis.isEtterspørInformasjon()
+            utpekingAvvis.getEtterspørInformasjon()
         ));
 
         if (behandling.erNyVurdering()) {
@@ -364,13 +367,12 @@ public class EessiService {
     }
 
     public SedGrunnlag hentSedGrunnlag(String rinaSaksnummer, String rinaDokumentID) {
-        return SedGrunnlagMapper.tilSedGrunnlag(eessiConsumer.hentSedGrunnlag(rinaSaksnummer, rinaDokumentID));
+        return SedGrunnlagMapper.tilSedGrunnlag(eessiConsumer.hentSedGrunnlag(rinaSaksnummer, rinaDokumentID), unleash);
     }
 
     public void lukkBuc(String rinaSaksnummer) {
         eessiConsumer.lukkBuc(rinaSaksnummer);
     }
-
     private void sendInvalideringSed(long behandlingID, String sedTypeSomSkalInvalideres, LocalDate opprettetDato) {
         var behandling = behandlingService.hentBehandlingMedSaksopplysninger(behandlingID);
         var behandlingsresultat = behandlingsresultatService.hentBehandlingsresultat(behandling.getId());

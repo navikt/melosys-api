@@ -6,13 +6,14 @@ import java.util.Optional;
 import com.google.common.collect.Lists;
 import no.nav.melosys.domain.Behandling;
 import no.nav.melosys.domain.Fagsak;
+import no.nav.melosys.domain.FagsakTestFactory;
 import no.nav.melosys.domain.eessi.melding.MelosysEessiMelding;
 import no.nav.melosys.domain.kodeverk.behandlinger.*;
 import no.nav.melosys.domain.oppgave.Oppgave;
-import no.nav.melosys.domain.saksflyt.ProsessDataKey;
-import no.nav.melosys.domain.saksflyt.Prosessinstans;
 import no.nav.melosys.exception.TekniskException;
 import no.nav.melosys.integrasjon.joark.JoarkFasade;
+import no.nav.melosys.saksflytapi.domain.ProsessDataKey;
+import no.nav.melosys.saksflytapi.domain.Prosessinstans;
 import no.nav.melosys.service.behandling.BehandlingService;
 import no.nav.melosys.service.behandling.BehandlingsresultatService;
 import no.nav.melosys.service.oppgave.OppgaveService;
@@ -90,9 +91,7 @@ class OpprettNyBehandlingFraSedTest {
         Behandling behandling = new Behandling();
         behandling.setId(123L);
         behandling.setStatus(Behandlingsstatus.UNDER_BEHANDLING);
-        Fagsak fagsak = new Fagsak();
-        fagsak.setSaksnummer("MEL-199001");
-        fagsak.setBehandlinger(Lists.newArrayList(behandling));
+        Fagsak fagsak = FagsakTestFactory.builder().behandlinger(behandling).build();
 
         Oppgave oppgave = new Oppgave.Builder()
             .setOppgaveId("123oppg")
@@ -101,7 +100,7 @@ class OpprettNyBehandlingFraSedTest {
         when(fagsakService.hentFagsakFraArkivsakID(gsakSaksnummer)).thenReturn(fagsak);
         when(behandlingService.nyBehandling(any(), any(), any(), any(), any(), any(), any(), any(), any())).thenReturn(new Behandling());
         when(joarkFasade.hentMottaksDatoForJournalpost(journalpostID)).thenReturn(mottaksdato);
-        when(oppgaveFasade.finnÅpenBehandlingsoppgaveMedFagsaksnummer(fagsak.getSaksnummer()))
+        when(oppgaveFasade.finnÅpenBehandlingsoppgaveMedFagsaksnummer(FagsakTestFactory.SAKSNUMMER))
             .thenReturn(Optional.of(oppgave));
 
         opprettNyBehandlingFraSed.utfør(prosessinstans);

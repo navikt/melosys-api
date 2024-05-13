@@ -1,19 +1,17 @@
 package no.nav.melosys.domain.folketrygden;
 
 import java.util.HashSet;
-import java.util.List;
 import java.util.Set;
-import javax.persistence.*;
 
-import no.nav.melosys.domain.avgift.Inntektsperiode;
+import jakarta.persistence.*;
 import no.nav.melosys.domain.avgift.Trygdeavgiftsgrunnlag;
 import no.nav.melosys.domain.avgift.Trygdeavgiftsperiode;
 import no.nav.melosys.domain.kodeverk.Trygdeavgift_typer;
-import no.nav.melosys.domain.kodeverk.Trygdeavgiftmottaker;
 
 @Entity
 @Table(name = "fastsatt_trygdeavgift")
 public class FastsattTrygdeavgift {
+
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
@@ -29,7 +27,7 @@ public class FastsattTrygdeavgift {
     @OneToOne(mappedBy = "fastsattTrygdeavgift", cascade = CascadeType.ALL, fetch = FetchType.EAGER, orphanRemoval = true)
     private Trygdeavgiftsgrunnlag trygdeavgiftsgrunnlag;
 
-    @OneToMany(mappedBy = "fastsattTrygdeavgift", orphanRemoval = true, fetch = FetchType.EAGER, cascade = CascadeType.ALL)
+    @OneToMany(mappedBy = "fastsattTrygdeavgift", cascade = CascadeType.ALL, fetch = FetchType.EAGER, orphanRemoval = true)
     private Set<Trygdeavgiftsperiode> trygdeavgiftsperioder = new HashSet<>(1);
 
     public Long getId() {
@@ -71,28 +69,5 @@ public class FastsattTrygdeavgift {
 
     public void setTrygdeavgiftsperioder(Set<Trygdeavgiftsperiode> trygdeavgiftsperioder) {
         this.trygdeavgiftsperioder = trygdeavgiftsperioder;
-    }
-
-    public boolean skalBetalesTilNav() {
-        var trygdeavgiftMottaker = getTrygdeavgiftMottaker();
-        return trygdeavgiftMottaker == Trygdeavgiftmottaker.TRYGDEAVGIFT_BETALES_TIL_NAV
-            || trygdeavgiftMottaker == Trygdeavgiftmottaker.TRYGDEAVGIFT_BETALES_TIL_NAV_OG_SKATT;
-    }
-
-    public Trygdeavgiftmottaker getTrygdeavgiftMottaker() {
-        var inntektsperioder = trygdeavgiftsgrunnlag.getInntektsperioder();
-
-        if (trygdeavgiftBetalesTilNavOgSkatt(inntektsperioder)) {
-            return Trygdeavgiftmottaker.TRYGDEAVGIFT_BETALES_TIL_NAV_OG_SKATT;
-        }
-        return inntektsperioder.stream().allMatch(Inntektsperiode::isTrygdeavgiftBetalesKunTilSkatt)
-            ? Trygdeavgiftmottaker.TRYGDEAVGIFT_BETALES_TIL_SKATT
-            : Trygdeavgiftmottaker.TRYGDEAVGIFT_BETALES_TIL_NAV;
-    }
-
-    private static boolean trygdeavgiftBetalesTilNavOgSkatt(List<Inntektsperiode> inntektsperioder) {
-        boolean ordinærTrygdeavgiftTilSkatt = inntektsperioder.stream().anyMatch(Inntektsperiode::isOrdinærTrygdeavgiftBetalesTilSkatt);
-        boolean ordinærTrygdeavgiftTilNav = inntektsperioder.stream().anyMatch(inntektsperiode -> !inntektsperiode.isOrdinærTrygdeavgiftBetalesTilSkatt());
-        return (ordinærTrygdeavgiftTilSkatt && ordinærTrygdeavgiftTilNav) || inntektsperioder.stream().anyMatch(Inntektsperiode::isTrygdeavgiftBetalesBådeTilNavOgSkatt);
     }
 }

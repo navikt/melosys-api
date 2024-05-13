@@ -1,16 +1,23 @@
 package no.nav.melosys.domain;
 
-import java.util.Objects;
-import javax.persistence.*;
+import java.util.*;
+import java.util.stream.Collectors;
+import jakarta.persistence.*;
 
 import no.nav.melosys.domain.kodeverk.Aktoersroller;
+import no.nav.melosys.domain.kodeverk.Fullmaktstype;
 import no.nav.melosys.domain.kodeverk.Land_iso2;
-import no.nav.melosys.domain.kodeverk.Representerer;
 import no.nav.melosys.exception.TekniskException;
+import org.hibernate.envers.AuditOverride;
+import org.hibernate.envers.Audited;
 import org.springframework.data.jpa.domain.support.AuditingEntityListener;
+
+import static org.hibernate.envers.RelationTargetAuditMode.NOT_AUDITED;
 
 @Entity
 @Table(name = "aktoer")
+@Audited
+@AuditOverride(forClass = RegistreringsInfo.class)
 @EntityListeners(AuditingEntityListener.class)
 public class Aktoer extends RegistreringsInfo {
 
@@ -20,6 +27,7 @@ public class Aktoer extends RegistreringsInfo {
 
     @ManyToOne(optional = false)
     @JoinColumn(name = "saksnummer", updatable = false)
+    @Audited(targetAuditMode = NOT_AUDITED)
     private Fagsak fagsak;
 
     @Column(name = "person_ident")
@@ -29,7 +37,7 @@ public class Aktoer extends RegistreringsInfo {
     private String aktørId;
 
     @Column(name = "eu_eos_institusjon_id", updatable = false)
-    private String institusjonId;
+    private String institusjonID;
 
     @Enumerated(EnumType.STRING)
     @Column(name = "trygdemyndighet_land", updatable = false)
@@ -45,9 +53,8 @@ public class Aktoer extends RegistreringsInfo {
     @Column(name = "utenlandsk_person_id")
     private String utenlandskPersonId;
 
-    @Enumerated(EnumType.STRING)
-    @Column(name = "representerer")
-    private Representerer representerer;
+    @OneToMany(mappedBy = "aktoer", cascade = CascadeType.ALL, fetch = FetchType.EAGER, orphanRemoval = true)
+    private Set<Fullmakt> fullmakter = new HashSet<>(1);
 
     public Long getId() {
         return id;
@@ -97,12 +104,12 @@ public class Aktoer extends RegistreringsInfo {
         this.rolle = rolle;
     }
 
-    public String getInstitusjonId() {
-        return institusjonId;
+    public String getInstitusjonID() {
+        return institusjonID;
     }
 
-    public void setInstitusjonId(String institusjonId) {
-        this.institusjonId = institusjonId;
+    public void setInstitusjonID(String institusjonID) {
+        this.institusjonID = institusjonID;
     }
 
     public String getUtenlandskPersonId() {
@@ -113,18 +120,36 @@ public class Aktoer extends RegistreringsInfo {
         this.utenlandskPersonId = utenlandskPersonId;
     }
 
-    public Representerer getRepresenterer() {
-        return representerer;
+    public Set<Fullmakt> getFullmakter() {
+        return fullmakter;
     }
 
-    public void setRepresenterer(Representerer representerer) {
-        this.representerer = representerer;
+    public Set<Fullmaktstype> getFullmaktstyper() {
+        return fullmakter != null ? fullmakter.stream().map(Fullmakt::getType).collect(Collectors.toSet()) : Collections.emptySet();
+    }
+
+    public void setFullmakter(Set<Fullmakt> fullmakter) {
+        this.fullmakter.clear();
+        this.fullmakter.addAll(fullmakter);
+    }
+
+    public void setFullmaktstyper(Collection<Fullmaktstype> fullmaktstyper) {
+        setFullmakter(fullmaktstyper.stream().map((fullmaktstype -> {
+            var fullmakt = new Fullmakt();
+            fullmakt.setType(fullmaktstype);
+            fullmakt.setAktoer(this);
+            return fullmakt;
+        })).collect(Collectors.toSet()));
+    }
+
+    public void setFullmaktstype(Fullmaktstype fullmaktstype) {
+        setFullmaktstyper(Set.of(fullmaktstype));
     }
 
     public boolean erPerson() {
         return switch (rolle) {
             case BRUKER -> true;
-            case REPRESENTANT -> personIdent != null;
+            case REPRESENTANT, FULLMEKTIG -> personIdent != null;
             default -> false;
         };
     }
@@ -132,21 +157,13 @@ public class Aktoer extends RegistreringsInfo {
     public boolean erOrganisasjon() {
         return switch (rolle) {
             case BRUKER -> false;
-            case REPRESENTANT -> orgnr != null;
+            case REPRESENTANT, FULLMEKTIG -> orgnr != null;
             default -> true;
         };
     }
 
     public boolean erUtenlandskMyndighet() {
-        return rolle == Aktoersroller.TRYGDEMYNDIGHET && (institusjonId != null || trygdemyndighetLand != null);
-    }
-
-    public boolean erBruker() {
-        return Aktoersroller.BRUKER.equals(rolle);
-    }
-
-    public boolean erVirksomhet() {
-        return Aktoersroller.VIRKSOMHET.equals(rolle);
+        return rolle == Aktoersroller.TRYGDEMYNDIGHET && (institusjonID != null || trygdemyndighetLand != null);
     }
 
     public Land_iso2 getTrygdemyndighetLand() {
@@ -159,7 +176,7 @@ public class Aktoer extends RegistreringsInfo {
 
     public Land_iso2 hentMyndighetLandkode() {
         if (erUtenlandskMyndighet()) {
-            return institusjonId != null ? UtenlandskMyndighet.konverterInstitusjonIdTilLandkode(institusjonId) : trygdemyndighetLand;
+            return institusjonID != null ? UtenlandskMyndighet.konverterInstitusjonIdTilLandkode(institusjonID) : trygdemyndighetLand;
         }
         throw new TekniskException("Aktør " + id + " er ikke en utenlandsk myndighet");
     }
@@ -175,7 +192,8 @@ public class Aktoer extends RegistreringsInfo {
         return Objects.equals(this.fagsak, that.fagsak)
             && Objects.equals(this.aktørId, that.aktørId)
             && Objects.equals(this.orgnr, that.orgnr)
-            && Objects.equals(this.institusjonId, that.institusjonId)
+            && Objects.equals(this.personIdent, that.personIdent)
+            && Objects.equals(this.institusjonID, that.institusjonID)
             && Objects.equals(this.trygdemyndighetLand, that.trygdemyndighetLand)
             && Objects.equals(this.utenlandskPersonId, that.utenlandskPersonId)
             && Objects.equals(this.rolle, that.rolle);
@@ -183,6 +201,6 @@ public class Aktoer extends RegistreringsInfo {
 
     @Override
     public int hashCode() {
-        return Objects.hash(fagsak, aktørId, orgnr, utenlandskPersonId, rolle, institusjonId);
+        return Objects.hash(fagsak, personIdent, aktørId, institusjonID, trygdemyndighetLand, orgnr, rolle, utenlandskPersonId);
     }
 }

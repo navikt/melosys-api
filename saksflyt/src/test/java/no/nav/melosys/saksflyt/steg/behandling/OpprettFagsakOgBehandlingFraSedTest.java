@@ -5,6 +5,7 @@ import java.time.LocalDate;
 import com.google.common.collect.Lists;
 import no.nav.melosys.domain.Behandling;
 import no.nav.melosys.domain.Fagsak;
+import no.nav.melosys.domain.FagsakTestFactory;
 import no.nav.melosys.domain.eessi.melding.MelosysEessiMelding;
 import no.nav.melosys.domain.kodeverk.Sakstemaer;
 import no.nav.melosys.domain.kodeverk.Sakstyper;
@@ -12,10 +13,10 @@ import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingsaarsaktyper;
 import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingsstatus;
 import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingstema;
 import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingstyper;
-import no.nav.melosys.domain.saksflyt.ProsessDataKey;
-import no.nav.melosys.domain.saksflyt.ProsessType;
-import no.nav.melosys.domain.saksflyt.Prosessinstans;
 import no.nav.melosys.integrasjon.joark.JoarkFasade;
+import no.nav.melosys.saksflytapi.domain.ProsessDataKey;
+import no.nav.melosys.saksflytapi.domain.ProsessType;
+import no.nav.melosys.saksflytapi.domain.Prosessinstans;
 import no.nav.melosys.service.sak.FagsakService;
 import no.nav.melosys.service.sak.OpprettSakRequest;
 import org.junit.jupiter.api.BeforeEach;
@@ -83,15 +84,14 @@ class OpprettFagsakOgBehandlingFraSedTest {
     }
 
     private Fagsak lagFagsak() {
-        Fagsak fagsak = new Fagsak();
-        fagsak.setSaksnummer("MEL-123");
+        Fagsak fagsak = FagsakTestFactory.lagFagsak();
 
         Behandling behandling = new Behandling();
         behandling.setId(1L);
         behandling.setStatus(Behandlingsstatus.UNDER_BEHANDLING);
         behandling.setFagsak(fagsak);
 
-        fagsak.setBehandlinger(Lists.newArrayList(behandling));
+        fagsak.leggTilBehandling(behandling);
         return fagsak;
     }
 }

@@ -4,6 +4,7 @@ import no.nav.melosys.domain.Saksopplysning;
 import no.nav.melosys.domain.dokument.organisasjon.OrganisasjonDokument;
 import no.nav.melosys.exception.FunksjonellException;
 import no.nav.melosys.integrasjon.ereg.EregFasade;
+import no.nav.melosys.domain.OrganisasjonDokumentTestFactory;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -32,7 +33,7 @@ class OrganisasjonOppslagServiceTest {
         final var orgnrMedWhitespace = " 123456789 ";
 
         var saksopplysning = new Saksopplysning();
-        saksopplysning.setDokument(new OrganisasjonDokument());
+        saksopplysning.setDokument(OrganisasjonDokumentTestFactory.builder().build());
         when(eregFasade.hentOrganisasjon(orgnrMedWhitespace.trim())).thenReturn(saksopplysning);
 
         assertThat(organisasjonOppslagService.hentOrganisasjon(orgnrMedWhitespace)).isInstanceOf(OrganisasjonDokument.class);

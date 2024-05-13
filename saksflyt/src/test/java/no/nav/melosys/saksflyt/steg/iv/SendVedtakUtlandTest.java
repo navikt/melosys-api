@@ -4,10 +4,10 @@ import java.time.LocalDate;
 import java.util.Collections;
 import java.util.List;
 import java.util.Set;
+import java.util.UUID;
 
 import com.google.common.collect.Sets;
-import no.finn.unleash.FakeUnleash;
-import no.finn.unleash.Unleash;
+import io.getunleash.FakeUnleash;
 import no.nav.melosys.domain.*;
 import no.nav.melosys.domain.avklartefakta.Avklartefakta;
 import no.nav.melosys.domain.brev.DoksysBrevbestilling;
@@ -20,13 +20,13 @@ import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingsresultattyper;
 import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingstema;
 import no.nav.melosys.domain.kodeverk.brev.Produserbaredokumenter;
 import no.nav.melosys.domain.kodeverk.lovvalgsbestemmelser.Lovvalgbestemmelser_883_2004;
-import no.nav.melosys.domain.saksflyt.ProsessDataKey;
-import no.nav.melosys.domain.saksflyt.Prosessinstans;
 import no.nav.melosys.saksflyt.steg.sed.SendVedtakUtland;
+import no.nav.melosys.saksflytapi.ProsessinstansService;
+import no.nav.melosys.saksflytapi.domain.ProsessDataKey;
+import no.nav.melosys.saksflytapi.domain.Prosessinstans;
 import no.nav.melosys.service.behandling.BehandlingsresultatService;
 import no.nav.melosys.service.dokument.brev.SedSomBrevService;
 import no.nav.melosys.service.dokument.sed.EessiService;
-import no.nav.melosys.service.saksflyt.ProsessinstansService;
 import no.nav.melosys.service.utpeking.UtpekingService;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -58,19 +58,18 @@ class SendVedtakUtlandTest {
     private Lovvalgsperiode lovvalgsperiode;
     private Behandlingsresultat behandlingsresultat;
     private final Behandling behandling = new Behandling();
-    private final Fagsak fagsak = new Fagsak();
+    private Fagsak fagsak;
 
     private final FakeUnleash fakeUnleash = new FakeUnleash();
     @Captor
     private ArgumentCaptor<DoksysBrevbestilling> brevbestillingArgumentCaptor;
 
     private static final long BEHANDLING_ID = 1L;
-    private static final long SAKSNUMMER = 123L;
     private static final String MOTTAKER_INSTITUSJON = "SE:123";
 
     @BeforeEach
     public void setUp() {
-        fagsak.setGsakSaksnummer(SAKSNUMMER);
+        fagsak = FagsakTestFactory.builder().medGsakSaksnummer().build();
         behandling.setFagsak(fagsak);
         behandling.setId(BEHANDLING_ID);
 
@@ -144,13 +143,15 @@ class SendVedtakUtlandTest {
         behandlingsresultat.setId(BEHANDLING_ID);
         lovvalgsperiode.setBestemmelse(Lovvalgbestemmelser_883_2004.FO_883_2004_ART13_1B2);
         lovvalgsperiode.setLovvalgsland(Land_iso2.AT);
+        UUID prosessinstansUuid = UUID.randomUUID();
+        prosessinstans.setId(prosessinstansUuid);
 
         prosessinstans.setData(ProsessDataKey.UTPEKT_LAND, Landkoder.AT);
-        when(sedSomBrevService.lagJournalpostForSendingAvSedSomBrev(eq(SedType.A003), any(), any()))
+        when(sedSomBrevService.lagJournalpostForSendingAvSedSomBrev(eq(SedType.A003), any(), any(), eq(prosessinstansUuid.toString())))
             .thenReturn("journalpostID");
         sendVedtakUtland.utfør(prosessinstans);
         verify(sedSomBrevService)
-            .lagJournalpostForSendingAvSedSomBrev(SedType.A003, Land_iso2.AT, behandling);
+            .lagJournalpostForSendingAvSedSomBrev(SedType.A003, Land_iso2.AT, behandling, prosessinstansUuid.toString());
     }
 
     @Test

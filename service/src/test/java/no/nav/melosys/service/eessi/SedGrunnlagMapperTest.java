@@ -8,37 +8,42 @@ import java.nio.file.Paths;
 import java.util.Objects;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
+import io.getunleash.FakeUnleash;
 import no.nav.melosys.domain.mottatteopplysninger.SedGrunnlag;
 import no.nav.melosys.domain.eessi.sed.SedGrunnlagDto;
+import no.nav.melosys.domain.mottatteopplysninger.data.ForetakUtland;
+import no.nav.melosys.domain.mottatteopplysninger.data.UtenlandskIdent;
+import no.nav.melosys.domain.mottatteopplysninger.data.arbeidssteder.FysiskArbeidssted;
 import org.junit.jupiter.api.Test;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.tuple;
 
 class SedGrunnlagMapperTest {
+    private final FakeUnleash fakeUnleash = new FakeUnleash();
 
     @Test
     void mapSedGrunnlag() throws IOException, URISyntaxException {
-        SedGrunnlag sedGrunnlag = SedGrunnlagMapper.tilSedGrunnlag(lagSedGrunnlag("eessi/sedGrunnlag.json"));
+        SedGrunnlag sedGrunnlag = SedGrunnlagMapper.tilSedGrunnlag(lagSedGrunnlag("eessi/sedGrunnlag.json"), fakeUnleash);
 
         assertThat(sedGrunnlag)
             .isNotNull()
             .isInstanceOf(SedGrunnlag.class);
 
-        assertThat(sedGrunnlag.personOpplysninger.utenlandskIdent)
+        assertThat(sedGrunnlag.personOpplysninger.getUtenlandskIdent())
             .extracting(
-                utenlandskIdent -> utenlandskIdent.ident,
-                utenlandskIdent -> utenlandskIdent.landkode)
+                UtenlandskIdent::getIdent,
+                UtenlandskIdent::getLandkode)
             .containsExactly(tuple("15225345345", "BG"));
 
-        assertThat(sedGrunnlag.arbeidPaaLand.fysiskeArbeidssteder)
-            .extracting(arbeidssted -> arbeidssted.virksomhetNavn)
+        assertThat(sedGrunnlag.arbeidPaaLand.getFysiskeArbeidssteder())
+            .extracting(FysiskArbeidssted::getVirksomhetNavn)
             .containsExactlyInAnyOrder(
                 "Testarbeidsstednavn",
                 "Testarbeidsstednavn2"
             );
 
-        assertThat(sedGrunnlag.juridiskArbeidsgiverNorge.ekstraArbeidsgivere)
+        assertThat(sedGrunnlag.juridiskArbeidsgiverNorge.getEkstraArbeidsgivere())
             .containsExactlyInAnyOrder(
                 "115511",
                 "226622",
@@ -46,7 +51,7 @@ class SedGrunnlagMapperTest {
             );
 
         assertThat(sedGrunnlag.foretakUtland)
-            .extracting(foretakUtland -> foretakUtland.orgnr)
+            .extracting(foretakUtland -> foretakUtland.getOrgnr())
             .containsExactly(
                 "923609016",
                 "123321",
@@ -57,27 +62,27 @@ class SedGrunnlagMapperTest {
 
     @Test
     void lagSedGrunnlagA001() throws Exception{
-        SedGrunnlag sedGrunnlag = SedGrunnlagMapper.tilSedGrunnlag(lagSedGrunnlag("eessi/sedGrunnlagA001.json"));
+        SedGrunnlag sedGrunnlag = SedGrunnlagMapper.tilSedGrunnlag(lagSedGrunnlag("eessi/sedGrunnlagA001.json"), fakeUnleash);
 
         assertThat(sedGrunnlag)
             .isNotNull()
             .isInstanceOf(SedGrunnlag.class);
 
-        assertThat(sedGrunnlag.personOpplysninger.utenlandskIdent)
+        assertThat(sedGrunnlag.personOpplysninger.getUtenlandskIdent())
             .extracting(
-                utenlandskIdent -> utenlandskIdent.ident,
-                utenlandskIdent -> utenlandskIdent.landkode)
+                UtenlandskIdent::getIdent,
+                UtenlandskIdent::getLandkode)
             .containsExactly(tuple("15225345345", "BG"));
 
-        assertThat(sedGrunnlag.arbeidPaaLand.fysiskeArbeidssteder)
-            .extracting(arbeidssted -> arbeidssted.virksomhetNavn)
+        assertThat(sedGrunnlag.arbeidPaaLand.getFysiskeArbeidssteder())
+            .extracting(FysiskArbeidssted::getVirksomhetNavn)
             .containsExactlyInAnyOrder(
                 "Testarbeidsstednavn",
                 "Testarbeidsstednavn2"
             );
 
         assertThat(sedGrunnlag.foretakUtland)
-            .extracting(foretakUtland -> foretakUtland.orgnr)
+            .extracting(ForetakUtland::getOrgnr)
             .containsExactly(
                 "TestOrgnummer",
                 "Testselvstendignummer"

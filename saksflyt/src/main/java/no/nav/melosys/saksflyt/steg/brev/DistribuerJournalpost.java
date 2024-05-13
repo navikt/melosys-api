@@ -9,12 +9,12 @@ import no.nav.melosys.domain.brev.DokgenBrevbestilling;
 import no.nav.melosys.domain.dokument.organisasjon.OrganisasjonDokument;
 import no.nav.melosys.domain.kodeverk.Land_iso2;
 import no.nav.melosys.domain.kodeverk.Mottakerroller;
-import no.nav.melosys.domain.saksflyt.ProsessSteg;
-import no.nav.melosys.domain.saksflyt.Prosessinstans;
 import no.nav.melosys.exception.FunksjonellException;
 import no.nav.melosys.integrasjon.doksys.DoksysFasade;
 import no.nav.melosys.integrasjon.ereg.EregFasade;
 import no.nav.melosys.saksflyt.steg.StegBehandler;
+import no.nav.melosys.saksflytapi.domain.ProsessSteg;
+import no.nav.melosys.saksflytapi.domain.Prosessinstans;
 import no.nav.melosys.service.aktoer.KontaktopplysningService;
 import no.nav.melosys.service.aktoer.UtenlandskMyndighetService;
 import no.nav.melosys.service.behandling.BehandlingService;
@@ -23,7 +23,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Component;
 
-import static no.nav.melosys.domain.saksflyt.ProsessDataKey.*;
+import static no.nav.melosys.saksflytapi.domain.ProsessDataKey.*;
 import static org.apache.commons.lang3.ObjectUtils.isEmpty;
 import static org.springframework.util.StringUtils.hasText;
 
@@ -67,7 +67,7 @@ public class DistribuerJournalpost implements StegBehandler {
         var brevbestilling = prosessinstans.getData(BREVBESTILLING, DokgenBrevbestilling.class);
         Mottakerroller mottaker = prosessinstans.getData(MOTTAKER, Mottakerroller.class);
         String orgnr = prosessinstans.getData(ORGNR);
-        String institusjonId = prosessinstans.getData(INSTITUSJON_ID);
+        String institusjonID = prosessinstans.getData(INSTITUSJON_ID);
 
         if (isEmpty(journalpostId)) {
             throw new FunksjonellException("JournalpostId mangler, kan ikke distribuere");
@@ -94,8 +94,8 @@ public class DistribuerJournalpost implements StegBehandler {
                     kodeverkService.dekod(FellesKodeverk.POSTNUMMER, orgAdresse.getPostnummer()));
             }
             bestillingsId = doksysFasade.distribuerJournalpost(journalpostId, orgAdresse, kontaktopplysning, brevbestilling.getKontaktpersonNavn(), brevbestilling.getDistribusjonstype());
-        } else if (hasText(institusjonId)) {
-            Land_iso2 landkode = UtenlandskMyndighet.konverterInstitusjonIdTilLandkode(institusjonId);
+        } else if (hasText(institusjonID)) {
+            Land_iso2 landkode = UtenlandskMyndighet.konverterInstitusjonIdTilLandkode(institusjonID);
             var utenlandskMyndighet =
                 utenlandskMyndighetService.hentUtenlandskMyndighet(landkode, brevbestilling.getProduserbartdokument());
             bestillingsId = doksysFasade.distribuerJournalpost(journalpostId, utenlandskMyndighet.getAdresse(), brevbestilling.getDistribusjonstype());

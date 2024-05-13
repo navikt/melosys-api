@@ -4,12 +4,14 @@ import com.github.tomakehurst.wiremock.WireMockServer
 import com.github.tomakehurst.wiremock.client.MappingBuilder
 import com.github.tomakehurst.wiremock.client.WireMock
 import com.github.tomakehurst.wiremock.core.WireMockConfiguration
+import io.getunleash.FakeUnleash
 import io.kotest.matchers.shouldBe
-import no.nav.melosys.integrasjon.MetricsTestConfig
+//import no.nav.melosys.integrasjon.MetricsTestConfig
 import no.nav.melosys.integrasjon.OAuthMockServer
 import no.nav.melosys.integrasjon.StsMockServer
 import no.nav.melosys.integrasjon.felles.GenericAuthFilterFactory
 import no.nav.melosys.integrasjon.felles.mdc.CorrelationIdOutgoingFilter
+import no.nav.melosys.integrasjon.reststs.RestSTSService
 import no.nav.melosys.integrasjon.reststs.StsWebClientProducer
 import no.nav.melosys.sikkerhet.context.ThreadLocalAccessInfo
 import org.junit.jupiter.api.*
@@ -28,10 +30,12 @@ import java.util.*
     OAuthMockServer::class,
     CorrelationIdOutgoingFilter::class,
 
+    RestSTSService::class,
     AzureAdConsumerProducer::class,
     AzureAdConsumer::class,
     GenericAuthFilterFactory::class,
     StsMockServer::class,
+    FakeUnleash::class
 )
 @WebMvcTest
 @AutoConfigureWebClient
@@ -70,7 +74,7 @@ class AzureAdConsumerTest(
     @AfterEach
     fun after() {
         ThreadLocalAccessInfo.afterExecuteProcess(processUUID)
-        MetricsTestConfig.clearMeterRegistry()
+//        MetricsTestConfig.clearMeterRegistry()
     }
 
 

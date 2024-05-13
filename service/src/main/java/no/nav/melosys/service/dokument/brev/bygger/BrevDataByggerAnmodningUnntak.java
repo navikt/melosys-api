@@ -12,7 +12,7 @@ import no.nav.melosys.service.LandvelgerService;
 import no.nav.melosys.service.dokument.brev.BrevData;
 import no.nav.melosys.service.dokument.brev.BrevDataAnmodningUnntak;
 import no.nav.melosys.service.dokument.brev.datagrunnlag.BrevDataGrunnlag;
-import no.nav.melosys.service.vilkaar.VilkaarsresultatService;
+import no.nav.melosys.service.behandling.VilkaarsresultatService;
 
 import static no.nav.melosys.domain.kodeverk.Vilkaar.FO_883_2004_ART16_1;
 
@@ -28,29 +28,21 @@ public class BrevDataByggerAnmodningUnntak implements BrevDataBygger {
 
     @Override
     public BrevData lag(BrevDataGrunnlag dataGrunnlag, String saksbehandler) {
-        BrevDataAnmodningUnntak brevData = new BrevDataAnmodningUnntak(saksbehandler);
         long behandlingID = dataGrunnlag.getBehandling().getId();
         if (dataGrunnlag.getAvklarteVirksomheterGrunnlag().antallVirksomheter() != 1) {
             throw new FunksjonellException(Kontroll_begrunnelser.IKKE_KUN_EN_VIRKSOMHET.getBeskrivelse());
         }
 
-        brevData.hovedvirksomhet = dataGrunnlag.getAvklarteVirksomheterGrunnlag().hentHovedvirksomhet();
-        brevData.yrkesaktivitet = brevData.hovedvirksomhet.yrkesaktivitet;
-        brevData.arbeidsland = landvelgerService.hentArbeidsland(behandlingID).getBeskrivelse();
-
         Vilkaarsresultat art16Vilkaar = hentFørsteGyldigeVilkaarsresultatArt16(behandlingID);
         Set<VilkaarBegrunnelse> art16Begrunnelser = art16Vilkaar.getBegrunnelser();
-        if (vilkaarsresultatService.harVilkaarForArtikkel12(behandlingID)) {
-            brevData.anmodningBegrunnelser = art16Begrunnelser;
-            brevData.anmodningUtenArt12Begrunnelser = Collections.emptySet();
-        } else {
-            brevData.anmodningBegrunnelser = Collections.emptySet();
-            brevData.anmodningUtenArt12Begrunnelser = art16Begrunnelser;
-        }
 
-        brevData.anmodningFritekst = art16Vilkaar.getBegrunnelseFritekst();
+        boolean harVilkaarForArtikkel12 = vilkaarsresultatService.harVilkaarForArtikkel12(behandlingID);
+        Set<VilkaarBegrunnelse> anmodningBegrunnelser = harVilkaarForArtikkel12 ? art16Begrunnelser : Collections.emptySet();
+        Set<VilkaarBegrunnelse> anmodningUtenArt12Begrunnelser = harVilkaarForArtikkel12 ? Collections.emptySet() : art16Begrunnelser;
 
-        return brevData;
+        var hovedvirksomhet = dataGrunnlag.getAvklarteVirksomheterGrunnlag().hentHovedvirksomhet();
+        return new BrevDataAnmodningUnntak(saksbehandler, landvelgerService.hentArbeidsland(behandlingID).getBeskrivelse(),
+            hovedvirksomhet, hovedvirksomhet.yrkesaktivitet, anmodningBegrunnelser, anmodningUtenArt12Begrunnelser, art16Vilkaar.getBegrunnelseFritekst());
     }
 
     // Vilkåret for art16 er både oppfylt og har begrunnelser ved anmodning om unntak

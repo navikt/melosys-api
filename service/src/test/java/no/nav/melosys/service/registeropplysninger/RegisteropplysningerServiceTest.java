@@ -15,7 +15,7 @@ import no.nav.melosys.domain.dokument.sed.SedDokument;
 import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingstema;
 import no.nav.melosys.integrasjon.aareg.AaregFasade;
 import no.nav.melosys.integrasjon.ereg.EregFasade;
-import no.nav.melosys.integrasjon.inntk.InntektFasade;
+import no.nav.melosys.integrasjon.inntekt.InntektService;
 import no.nav.melosys.integrasjon.utbetaling.UtbetaldataRestService;
 import no.nav.melosys.service.behandling.BehandlingService;
 import no.nav.melosys.service.medl.MedlPeriodeService;
@@ -47,7 +47,7 @@ class RegisteropplysningerServiceTest {
     @Mock
     private BehandlingService behandlingService;
     @Mock
-    private InntektFasade inntektService;
+    private InntektService inntektService;
     @Mock
     private SaksopplysningerService saksopplysningerService;
     @Mock
@@ -104,7 +104,7 @@ class RegisteropplysningerServiceTest {
     @Test
     void hentOgLagreOpplysninger_medAlleOpplysningerIVilkårligRekkefølge_alleBlirHentetOgLagretIRettRekkefølge() {
         Arbeidsforhold arbeidsforhold = new Arbeidsforhold();
-        arbeidsforhold.arbeidsgiverID = "123456789";
+        arbeidsforhold.setArbeidsgiverID("123456789");
 
         ArbeidsforholdDokument arbeidsforholdDokument = new ArbeidsforholdDokument(List.of(arbeidsforhold));
         Saksopplysning saksopplysning = new Saksopplysning();
@@ -183,6 +183,24 @@ class RegisteropplysningerServiceTest {
         verify(behandlingService).lagre(any(Behandling.class));
     }
 
+    @Test
+    void hentOgLagreOpplysninger_medAlleOpplysninger_skalHente5AarFoerFom() {
+        LocalDate fom = LocalDate.now().minusYears(1);
+        LocalDate tom = LocalDate.now().plusYears(1);
+
+        registeropplysningerService.hentOgLagreOpplysninger(
+            RegisteropplysningerRequest.builder()
+                .behandlingID(2L)
+                .saksopplysningTyper(RegisteropplysningerRequest.hentSaksopplysningTyperSomLagres())
+                .fom(fom)
+                .tom(tom)
+                .fnr(FNR)
+                .hentOpplysningerFor5aar(true)
+                .build());
+
+        verify(registeropplysningerPeriodeFactory).hentPeriodeForArbeidsforhold(fom.minusYears(5), tom);
+    }
+
 
     @Test
     void hentOgLagreOpplysninger_feilIPeriode_kanIkkeHenteOpplysningerSomBrukerPeriode() {
@@ -243,7 +261,7 @@ class RegisteropplysningerServiceTest {
 
     private ArbeidsforholdDokument lagArbeidsforholdDokument() {
         Arbeidsforhold arbeidsforhold = new Arbeidsforhold();
-        arbeidsforhold.arbeidsgiverID = "123456789";
+        arbeidsforhold.setArbeidsgiverID("123456789");
 
         ArbeidsforholdDokument arbeidsforholdDokument = new ArbeidsforholdDokument(List.of(arbeidsforhold));
         Saksopplysning saksopplysning = new Saksopplysning();

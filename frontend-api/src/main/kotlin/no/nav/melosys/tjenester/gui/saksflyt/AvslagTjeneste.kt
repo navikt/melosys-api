@@ -2,7 +2,7 @@ package no.nav.melosys.tjenester.gui.saksflyt
 
 import io.swagger.annotations.Api
 import io.swagger.annotations.ApiOperation
-import no.nav.melosys.service.saksflyt.AvslagService
+import no.nav.melosys.service.sak.AvslagService
 import no.nav.melosys.service.tilgang.Aksesskontroll
 import no.nav.melosys.sikkerhet.context.SubjectHandler
 import no.nav.melosys.tjenester.gui.dto.AvslagDto

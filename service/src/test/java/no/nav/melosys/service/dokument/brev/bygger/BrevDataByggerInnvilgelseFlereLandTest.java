@@ -57,19 +57,14 @@ class BrevDataByggerInnvilgelseFlereLandTest {
 
     @BeforeEach
     void setUp() {
-        Aktoer aktoer = new Aktoer();
-        aktoer.setRolle(Aktoersroller.BRUKER);
-        aktoer.setAktørId("ident");
-
-        Fagsak fagsak = new Fagsak();
-        fagsak.setAktører(Set.of(aktoer));
+        Fagsak fagsak = FagsakTestFactory.builder().medBruker().build();
 
         behandling = new Behandling();
         behandling.setId(1L);
         behandling.setFagsak(fagsak);
         behandling.getSaksopplysninger().add(lagPersonsopplysning());
         behandling.setMottatteOpplysninger(new MottatteOpplysninger());
-        behandling.getMottatteOpplysninger().setMottatteOpplysningerdata(new Soeknad());
+        behandling.getMottatteOpplysninger().setMottatteOpplysningerData(new Soeknad());
 
         brevbestillingDto = new BrevbestillingDto();
         brevbestillingDto.setMottaker(Mottakerroller.BRUKER);
@@ -110,9 +105,9 @@ class BrevDataByggerInnvilgelseFlereLandTest {
 
         BrevDataGrunnlag brevdataressurser = lagBrevressurser();
         BrevDataInnvilgelseFlereLand brevData = (BrevDataInnvilgelseFlereLand) brevDataByggerInnvilgelse.lag(brevdataressurser, saksbehandler);
-        assertThat(brevData.saksbehandler).isEqualTo(saksbehandler);
-        assertThat(brevData.harAvklartMaritimTypeSokkel).isTrue();
-        assertThat(brevData.harAvklartMaritimTypeSkip).isFalse();
+        assertThat(brevData.getSaksbehandler()).isEqualTo(saksbehandler);
+        assertThat(brevData.getAvklartMaritimTypeSokkel()).isTrue();
+        assertThat(brevData.getAvklartMaritimTypeSkip()).isFalse();
     }
 
     @Test
@@ -121,9 +116,9 @@ class BrevDataByggerInnvilgelseFlereLandTest {
 
         BrevDataGrunnlag brevdataressurser = lagBrevressurser();
         BrevDataInnvilgelseFlereLand brevData = (BrevDataInnvilgelseFlereLand) brevDataByggerInnvilgelse.lag(brevdataressurser, saksbehandler);
-        assertThat(brevData.harAvklartMaritimTypeSokkel).isFalse();
-        assertThat(brevData.harAvklartMaritimTypeSkip).isFalse();
-        assertThat(brevData.trydemyndighetsland).isNull();
+        assertThat(brevData.getAvklartMaritimTypeSokkel()).isFalse();
+        assertThat(brevData.getAvklartMaritimTypeSkip()).isFalse();
+        assertThat(brevData.getTrydemyndighetsland()).isNull();
     }
 
     @Test
@@ -135,15 +130,15 @@ class BrevDataByggerInnvilgelseFlereLandTest {
 
         BrevDataGrunnlag brevdataressurser = lagBrevressurser();
         BrevDataInnvilgelseFlereLand brevData = (BrevDataInnvilgelseFlereLand) brevDataByggerInnvilgelse.lag(brevdataressurser, saksbehandler);
-        assertThat(brevData.trydemyndighetsland).isEqualTo(Landkoder.DE);
+        assertThat(brevData.getTrydemyndighetsland()).isEqualTo(Landkoder.DE);
     }
 
     @Test
     void lag_innvilgelsesBrev_harBestillingsinformasjon() {
         BrevData brevData = brevDataByggerInnvilgelse.lag(lagBrevressurser(), saksbehandler);
 
-        assertThat(brevData.begrunnelseKode).isEqualTo(brevbestillingDto.getBegrunnelseKode());
-        assertThat(brevData.fritekst).isEqualTo(brevbestillingDto.getFritekst());
-        assertThat(brevData.saksbehandler).isEqualTo(saksbehandler);
+        assertThat(brevData.getBegrunnelseKode()).isEqualTo(brevbestillingDto.getBegrunnelseKode());
+        assertThat(brevData.getFritekst()).isEqualTo(brevbestillingDto.getFritekst());
+        assertThat(brevData.getSaksbehandler()).isEqualTo(saksbehandler);
     }
 }

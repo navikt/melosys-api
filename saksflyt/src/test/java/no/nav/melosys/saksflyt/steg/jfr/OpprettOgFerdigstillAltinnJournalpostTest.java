@@ -2,23 +2,25 @@ package no.nav.melosys.saksflyt.steg.jfr;
 
 import java.time.Instant;
 import java.util.ArrayList;
+import java.util.List;
 import java.util.Set;
 
 import no.nav.melosys.domain.Aktoer;
 import no.nav.melosys.domain.Behandling;
 import no.nav.melosys.domain.Fagsak;
+import no.nav.melosys.domain.FagsakTestFactory;
 import no.nav.melosys.domain.arkiv.ArkivDokument;
 import no.nav.melosys.domain.arkiv.BrukerIdType;
 import no.nav.melosys.domain.arkiv.Journalpost;
 import no.nav.melosys.domain.arkiv.OpprettJournalpost;
-import no.nav.melosys.domain.mottatteopplysninger.MottatteOpplysninger;
 import no.nav.melosys.domain.kodeverk.Aktoersroller;
-import no.nav.melosys.domain.kodeverk.Representerer;
+import no.nav.melosys.domain.kodeverk.Fullmaktstype;
+import no.nav.melosys.domain.mottatteopplysninger.MottatteOpplysninger;
 import no.nav.melosys.domain.msm.AltinnDokument;
-import no.nav.melosys.domain.saksflyt.ProsessDataKey;
-import no.nav.melosys.domain.saksflyt.Prosessinstans;
 import no.nav.melosys.integrasjon.ereg.EregFasade;
 import no.nav.melosys.integrasjon.joark.JoarkFasade;
+import no.nav.melosys.saksflytapi.domain.ProsessDataKey;
+import no.nav.melosys.saksflytapi.domain.Prosessinstans;
 import no.nav.melosys.service.altinn.AltinnSoeknadService;
 import no.nav.melosys.service.behandling.BehandlingService;
 import no.nav.melosys.service.persondata.PersondataFasade;
@@ -36,7 +38,7 @@ import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
 @ExtendWith(MockitoExtension.class)
-public class OpprettOgFerdigstillAltinnJournalpostTest {
+class OpprettOgFerdigstillAltinnJournalpostTest {
     @Mock
     private AltinnSoeknadService altinnSoeknadService;
     @Mock
@@ -55,7 +57,6 @@ public class OpprettOgFerdigstillAltinnJournalpostTest {
 
     private final Aktoer bruker = new Aktoer();
     private final String ident = "00000000000";
-    private final String saksnummer = "MEL-1231";
 
     @Captor
     private ArgumentCaptor<OpprettJournalpost> captor;
@@ -76,17 +77,9 @@ public class OpprettOgFerdigstillAltinnJournalpostTest {
         bruker.setRolle(Aktoersroller.BRUKER);
         bruker.setAktørId("3321231");
 
-        Aktoer representant = new Aktoer();
-        representant.setRolle(Aktoersroller.REPRESENTANT);
-        representant.setOrgnr("repOrgnr");
-        representant.setRepresenterer(Representerer.BEGGE);
-
-        Fagsak fagsak = new Fagsak();
-        fagsak.setSaksnummer(saksnummer);
-        fagsak.setGsakSaksnummer(123L);
-        fagsak.setAktører(Set.of(bruker, representant));
+        Fagsak fagsak = FagsakTestFactory.builder().medGsakSaksnummer().build();
         behandling.setFagsak(fagsak);
-        fagsak.getBehandlinger().add(behandling);
+        fagsak.leggTilBehandling(behandling);
         prosessinstans.setBehandling(behandling);
 
         var dokumenter = new ArrayList<AltinnDokument>();
@@ -99,7 +92,14 @@ public class OpprettOgFerdigstillAltinnJournalpostTest {
     }
 
     @Test
-    public void utfør_journalpostBlirOpprettet_verifiser() {
+    void utfør_journalpostBlirOpprettet_verifiser() {
+        Aktoer fullmektig = new Aktoer();
+        fullmektig.setRolle(Aktoersroller.FULLMEKTIG);
+        fullmektig.setOrgnr("fullmektigOrgnr");
+        fullmektig.setFullmaktstyper(List.of(Fullmaktstype.FULLMEKTIG_SØKNAD, Fullmaktstype.FULLMEKTIG_ARBEIDSGIVER));
+        behandling.getFagsak().leggTilAktør(bruker);
+        behandling.getFagsak().leggTilAktør(fullmektig);
+
         opprettOgFerdigstillAltinnJournalpost.utfør(prosessinstans);
 
         verify(persondataFasade).hentFolkeregisterident(anyString());
@@ -110,7 +110,7 @@ public class OpprettOgFerdigstillAltinnJournalpostTest {
         assertThat(opprettJournalpost)
             .extracting(Journalpost::getTema, Journalpost::getMottaksKanal,
                 Journalpost::getSaksnummer, Journalpost::getBrukerId, Journalpost::getBrukerIdType)
-            .containsExactly("MED", "ALTINN", saksnummer, ident, BrukerIdType.FOLKEREGISTERIDENT);
+            .containsExactly("MED", "ALTINN", FagsakTestFactory.SAKSNUMMER, ident, BrukerIdType.FOLKEREGISTERIDENT);
         assertThat(opprettJournalpost.getInnhold()).isNotEmpty();
         assertThat(opprettJournalpost.getHoveddokument())
             .extracting(ArkivDokument::getDokumentId, ArkivDokument::getTittel)
@@ -123,11 +123,12 @@ public class OpprettOgFerdigstillAltinnJournalpostTest {
     }
 
     @Test
-    public void utfør_ingenRepresentantForBruker_avsenderNavnErArbeidsgiverOrganisasjonNavn() {
+    void utfør_ingenFullmektigForBruker_avsenderNavnErArbeidsgiverOrganisasjonNavn() {
         Aktoer arbeidsgiver = new Aktoer();
         arbeidsgiver.setRolle(Aktoersroller.ARBEIDSGIVER);
         arbeidsgiver.setOrgnr("arbOrgnr");
-        behandling.getFagsak().setAktører(Set.of(bruker, arbeidsgiver));
+        behandling.getFagsak().leggTilAktør(bruker);
+        behandling.getFagsak().leggTilAktør(arbeidsgiver);
 
         when(eregFasade.hentOrganisasjonNavn(arbeidsgiver.getOrgnr())).thenReturn("Arbeidsgiver");
 

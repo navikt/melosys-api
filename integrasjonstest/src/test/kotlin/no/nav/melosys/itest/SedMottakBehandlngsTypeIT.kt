@@ -4,39 +4,39 @@ import com.fasterxml.jackson.databind.JsonNode
 import com.fasterxml.jackson.databind.SerializationFeature
 import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule
 import com.fasterxml.jackson.module.kotlin.jacksonObjectMapper
+import io.getunleash.FakeUnleash
 import io.kotest.matchers.collections.shouldHaveSize
 import io.kotest.matchers.shouldBe
 import io.kotest.matchers.string.shouldContain
-import no.finn.unleash.FakeUnleash
-import no.nav.melosys.domain.arkiv.*
-import no.nav.melosys.domain.eessi.*
+import no.nav.melosys.domain.eessi.BucType
+import no.nav.melosys.domain.eessi.Periode
+import no.nav.melosys.domain.eessi.SedType
 import no.nav.melosys.domain.eessi.melding.MelosysEessiMelding
-import no.nav.melosys.domain.kodeverk.*
-import no.nav.melosys.domain.kodeverk.behandlinger.*
-import no.nav.melosys.domain.saksflyt.ProsessType
+import no.nav.melosys.domain.kodeverk.Oppgavetyper
+import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingsaarsaktyper
+import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingsstatus
+import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingstema
+import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingstyper
 import no.nav.melosys.melosysmock.journalpost.JournalpostRepo
 import no.nav.melosys.melosysmock.oppgave.OppgaveRepo
 import no.nav.melosys.melosysmock.testdata.TestDataGenerator
 import no.nav.melosys.repository.BehandlingRepository
 import no.nav.melosys.repository.FagsakRepository
-import no.nav.melosys.repository.ProsessinstansRepository
+import no.nav.melosys.saksflytapi.domain.ProsessType
 import no.nav.melosys.service.journalforing.JournalfoeringService
 import no.nav.melosys.service.oppgave.OppgaveBehandlingstema
 import no.nav.melosys.service.oppgave.OppgaveService
 import no.nav.melosys.service.sak.OpprettBehandlingForSak
 import no.nav.melosys.service.sak.OpprettSakDto
-import org.junit.jupiter.api.AfterEach
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Disabled
 import org.junit.jupiter.api.Test
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.beans.factory.annotation.Qualifier
-import org.springframework.context.annotation.Import
 import org.springframework.kafka.core.KafkaTemplate
 import java.time.LocalDate
 import java.util.*
 
-@Import(KodeverkStub::class, OAuthMockServer::class)
 class SedMottakBehandlngsTypeIT(
     @Autowired @Qualifier("melosysEessiMelding") private val melosysEessiMeldingKafkaTemplate: KafkaTemplate<String, MelosysEessiMelding>,
     @Autowired private val eessiMeldingTestDataFactory: EessiMeldingTestDataFactory,
@@ -50,37 +50,33 @@ class SedMottakBehandlngsTypeIT(
     @Autowired testDataGenerator: TestDataGenerator,
     @Autowired journalføringService: JournalfoeringService,
     @Autowired oppgaveService: OppgaveService,
-    @Autowired prosessinstansRepository: ProsessinstansRepository,
-    @Autowired private val oAuthMockServer: OAuthMockServer
-) : JournalfoeringBase(testDataGenerator, journalføringService, oppgaveService, prosessinstansRepository) {
+) : JournalfoeringBase(testDataGenerator, journalføringService, oppgaveService) {
 
     private val kafkaTopic = "teammelosys.eessi.v1-local"
 
     @BeforeEach
     fun setup() {
-        oAuthMockServer.start()
         oppgaveRepo.repo.clear()
         unleash.resetAll()
     }
 
-    @AfterEach
-    fun afterEach() {
-        oAuthMockServer.stop()
-    }
-
     @Test
     fun `A003 skal føre til riktig oppgave i gosys`() {
-        val eessiMeldingA003 = eessiMeldingTestDataFactory.melosysEessiMelding(
-            bucType = BucType.LA_BUC_02,
-            rinaSaksnummer = Random().nextInt(100000).toString(),
-            sedType = SedType.A003,
-            periode = Periode(LocalDate.now(), LocalDate.now().plusYears(1)),
-            artikkel = "13_1_a",
+        val eessiMeldingA003 = eessiMeldingTestDataFactory.melosysEessiMelding {
+            bucType = BucType.LA_BUC_02.name
+            rinaSaksnummer = Random().nextInt(100000).toString()
+            sedType = SedType.A003.name
+            periode = Periode(LocalDate.now(), LocalDate.now().plusYears(1))
+            artikkel = "13_1_a"
             lovvalgsland = "NO"
-        )
+        }
 
 
-        executeAndWait(ProsessType.MOTTAK_SED, listOf(ProsessType.ARBEID_FLERE_LAND_NY_SAK)) {
+        executeAndWait(
+            ProsessType.MOTTAK_SED, listOf(
+                ProsessType.ARBEID_FLERE_LAND_NY_SAK
+            )
+        ) {
             melosysEessiMeldingKafkaTemplate.send(kafkaTopic, eessiMeldingA003)
         }
 
@@ -101,16 +97,19 @@ class SedMottakBehandlngsTypeIT(
 
     @Test
     fun `A003 andre gangsbehandling`() {
-        val eessiMeldingA003 = eessiMeldingTestDataFactory.melosysEessiMelding(
-            bucType = BucType.LA_BUC_02,
-            rinaSaksnummer = Random().nextInt(100000).toString(),
-            sedType = SedType.A003,
-            periode = Periode(LocalDate.now(), LocalDate.now().plusYears(1)),
-            artikkel = "13_1_a",
+        val eessiMeldingA003 = eessiMeldingTestDataFactory.melosysEessiMelding {
+            bucType = BucType.LA_BUC_02.name
+            rinaSaksnummer = Random().nextInt(100000).toString()
+            sedType = SedType.A003.name
+            periode = Periode(LocalDate.now(), LocalDate.now().plusYears(1))
+            artikkel = "13_1_a"
             lovvalgsland = "NO"
-        )
+        }
         val prosessinstansArbeidFlereLand =
-            executeAndWait(ProsessType.ARBEID_FLERE_LAND_NY_SAK) {
+            executeAndWait(
+                waitForprosessType = ProsessType.ARBEID_FLERE_LAND_NY_SAK,
+                alsoWaitForprosessType = listOf(ProsessType.MOTTAK_SED)
+            ) {
                 melosysEessiMeldingKafkaTemplate.send(kafkaTopic, eessiMeldingA003)
             }
 

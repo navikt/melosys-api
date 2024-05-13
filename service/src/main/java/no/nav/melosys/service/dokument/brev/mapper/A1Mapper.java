@@ -36,6 +36,7 @@ class A1Mapper {
     private static final int ANTALL_PÅKREVDE_FELTER_I_LISTE_5_2 = 13;
     static final int MAKS_ANTALL_TEGN_PER_LINJE_5_2 = 70;
     static final String STATSLØS_TEKST = "Stateless";
+    static final String UNKNOWN_TEKST = "UNKNOWN";
     static final String FLERE_UKJENTE_ELLER_IKKE_OPPGITT_LAND = "Various EEA-countries/Switzerland";
 
     private BrevDataA1 brevData;
@@ -52,24 +53,24 @@ class A1Mapper {
 
         a1.setLovvalgsperiode(mapLovvalgsperiode(resultat.hentLovvalgsperiode()));
 
-        if (brevData.yrkesgruppe != null) {
-            a1.setYrkesgruppe(YrkesgruppeKode.valueOf(brevData.yrkesgruppe.name()));
+        if (brevData.getYrkesgruppe() != null) {
+            a1.setYrkesgruppe(YrkesgruppeKode.valueOf(brevData.getYrkesgruppe().name()));
         }
 
-        a1.setHovedvirksomhet(mapHovedvirksomhet(brevData.hovedvirksomhet));
+        a1.setHovedvirksomhet(mapHovedvirksomhet(brevData.getHovedvirksomhet()));
 
-        a1.setBivirksomhetListe(mapBivirksomheter(brevData.bivirksomheter, brevData.arbeidssteder));
+        a1.setBivirksomhetListe(mapBivirksomheter(brevData.getBivirksomheter(), brevData.getArbeidssteder()));
 
-        a1.setFysiskArbeidsstedAdresseListe(mapFysiskeAdresser(brevData.arbeidssteder, brevData.arbeidsland));
+        a1.setFysiskArbeidsstedAdresseListe(mapFysiskeAdresser(brevData.getArbeidssteder(), brevData.getArbeidsland()));
 
-        String ikkeFysiskArbeidssted = harIkkeFastArbeidssted(brevData.arbeidssteder) ? "true" : "false";
+        String ikkeFysiskArbeidssted = harIkkeFastArbeidssted(brevData.getArbeidssteder()) ? "true" : "false";
         a1.setIkkeFysiskArbeidssted(ikkeFysiskArbeidssted);
 
         return a1;
     }
 
     private PersonType mapPerson(BrevDataA1 brevDataA1) {
-        final var persondata = brevDataA1.person;
+        final var persondata = brevDataA1.getPerson();
         PersonType person = new PersonType();
         person.setKjoenn(KjoennKode.fromValue(persondata.hentKjønnType().getKode()));
         person.setStatsborgerskap(mapStatsborgerskap(persondata.hentAlleStatsborgerskap()));
@@ -82,7 +83,7 @@ class A1Mapper {
             throw new TekniskException("Konverteringsfeil ved konvertering av fødselsdato", e);
         }
 
-        person.setBostedsadresse(mapBostedAdresse(brevDataA1.bostedsadresse));
+        person.setBostedsadresse(mapBostedAdresse(brevDataA1.getBostedsadresse()));
         person.setMidlertidigOppholdsadresse(mapMidlertidigOppholdsadresse(persondata));
 
         return person;
@@ -114,6 +115,11 @@ class A1Mapper {
         if (statsborgerskap.contains(Land.av(Land.STATSLØS))) {
             return STATSLØS_TEKST;
         }
+
+        if (statsborgerskap.contains(Land.av(Land.UNKNOWN))) {
+            return UNKNOWN_TEKST;
+        }
+
         return statsborgerskap.stream()
             .sorted(Comparator.comparing(Land::getKode))
             .map(s -> IsoLandkodeKonverterer.tilIso2(s.getKode())).collect(Collectors.joining(","));
@@ -188,7 +194,7 @@ class A1Mapper {
 
     private Stream<AdresseType> lagAdresserForArbeidsstederOgLandUtenArbeidssted(List<Arbeidssted> arbeidssteder,
                                                                                  Collection<Land_iso2> arbeidsland) {
-        if (brevData.erUkjenteEllerAlleEosLand) {
+        if (brevData.getUkjenteEllerAlleEosLand()) {
             return lagAdresselinjeForUkjentEllerIkkeOppgittArbeidssted().stream().map(this::tilAdresseType);
         }
 
@@ -254,25 +260,29 @@ class A1Mapper {
     }
 
     private MidlertidigOppholdsadresseType lagMidlertidigOppholdsadresse(StrukturertAdresse strukturertAdresse) {
-        return MidlertidigOppholdsadresseType.builder()
+        return new MidlertidigOppholdsadresseType()
             .withGatenavn(strukturertAdresse.getGatenavn())
             .withHusnummer(strukturertAdresse.getHusnummerEtasjeLeilighet())
             .withPostnr(strukturertAdresse.getPostnummer())
             .withPoststed(strukturertAdresse.getPoststed())
             .withRegion(strukturertAdresse.getRegion())
-            .withLandkode(strukturertAdresse.getLandkode())
-            .build();
+            .withLandkode(strukturertAdresse.getLandkode());
     }
 
+    // Noen felter settes til " " for at de skal gå gjennom XSD validering. Melosys er mindre streng enn
+    // XSD'en tilsier.
     private BostedsadresseType lagBostedsadresse(StrukturertAdresse strukturertAdresse) {
-        return BostedsadresseType.builder()
+        return new BostedsadresseType()
             .withGatenavn(StringUtils.isEmpty(strukturertAdresse.getGatenavn()) ? " " : strukturertAdresse.getGatenavn())
             .withHusnummer(strukturertAdresse.getHusnummerEtasjeLeilighet())
-            .withPostnr(strukturertAdresse.getPostnummer())
-            .withPoststed(strukturertAdresse.getPoststed())
+            .withPostnr(strukturertAdresse.erNorsk() ? strukturertAdresse.getPostnummer() : lagXsdGyldigPostnrForUtenlandskAdresse(strukturertAdresse))
+            .withPoststed(StringUtils.isEmpty(strukturertAdresse.getPoststed()) ? " " : strukturertAdresse.getPoststed())
             .withRegion(strukturertAdresse.getRegion())
-            .withLandkode(strukturertAdresse.getLandkode())
-            .build();
+            .withLandkode(strukturertAdresse.getLandkode());
+    }
+
+    private String lagXsdGyldigPostnrForUtenlandskAdresse(StrukturertAdresse strukturertAdresse) {
+        return StringUtils.isEmpty(strukturertAdresse.getPostnummer()) ? " " : strukturertAdresse.getPostnummer();
     }
 
 

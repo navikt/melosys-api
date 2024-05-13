@@ -20,6 +20,7 @@ import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingsstatus;
 import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingstyper;
 import no.nav.melosys.exception.FunksjonellException;
 import no.nav.melosys.exception.ValideringException;
+import no.nav.melosys.saksflytapi.ProsessinstansService;
 import no.nav.melosys.service.LandvelgerService;
 import no.nav.melosys.service.avklartefakta.AvklartefaktaService;
 import no.nav.melosys.service.behandling.BehandlingService;
@@ -28,7 +29,6 @@ import no.nav.melosys.service.dokument.sed.EessiService;
 import no.nav.melosys.service.kontroll.feature.ferdigbehandling.FerdigbehandlingKontrollFacade;
 import no.nav.melosys.service.oppgave.OppgaveService;
 import no.nav.melosys.service.saksbehandling.SaksbehandlingRegler;
-import no.nav.melosys.service.saksflyt.ProsessinstansService;
 import no.nav.melosys.service.validering.Kontrollfeil;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -72,7 +72,7 @@ public class EosVedtakService {
 
     public void fattVedtak(Behandling behandling, Behandlingsresultattyper behandlingsresultattype, Vedtakstyper vedtakstype) throws ValideringException {
         FattVedtakRequest request = new FattVedtakRequest.Builder()
-            .medBehandlingsresultat(behandlingsresultattype)
+            .medBehandlingsresultatType(behandlingsresultattype)
             .medVedtakstype(vedtakstype)
             .build();
         fattVedtak(behandling, request);
@@ -111,7 +111,7 @@ public class EosVedtakService {
 
         if (saksbehandlingRegler.harIkkeYrkesaktivFlyt(behandling)) {
             behandlingsresultat.setFastsattAvLand(Land_iso2.NO);
-            prosessinstansService.opprettProsessinstansIverksettIkkeYrkesaktiv(behandling, request.getFritekst());
+            prosessinstansService.opprettProsessinstansIverksettIkkeYrkesaktiv(behandling);
         } else {
             oppdaterBehandlingsresultat(behandlingsresultat, request.getVedtakstype(), request.getFritekst(), request.getNyVurderingBakgrunn());
             Set<String> mottakerinstitusjoner = avklarMottakerInstitusjoner(behandling, request.getMottakerinstitusjoner(), behandlingsresultat);
@@ -166,7 +166,7 @@ public class EosVedtakService {
     private Set<String> avklarMottakerInstitusjoner(Behandling behandling,
                                                     Set<String> mottakerinstitusjoner,
                                                     Behandlingsresultat behandlingsresultat) {
-        if (saksbehandlingRegler.harTomFlyt(behandling)) {
+        if (saksbehandlingRegler.harIngenFlyt(behandling)) {
             return Collections.emptySet();
         }
 

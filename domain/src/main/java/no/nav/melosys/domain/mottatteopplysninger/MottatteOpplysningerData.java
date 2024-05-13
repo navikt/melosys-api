@@ -42,7 +42,7 @@ public class MottatteOpplysningerData {
     public Set<String> hentAlleOrganisasjonsnumre() {
         return Stream
             .of(
-                selvstendigArbeid.hentAlleOrganisasjonsnumre(),
+                selvstendigArbeid.hentAlleOrganisasjonsnumre().stream(),
                 juridiskArbeidsgiverNorge.hentManueltRegistrerteArbeidsgiverOrgnumre()
             )
             .flatMap(i -> i)
@@ -51,8 +51,11 @@ public class MottatteOpplysningerData {
     }
 
     public List<String> hentUtenlandskeArbeidsstederLandkode() {
-        return arbeidPaaLand.fysiskeArbeidssteder.stream()
-            .map(a -> a.adresse != null ? a.adresse.getLandkode() : null)
+        return arbeidPaaLand.getFysiskeArbeidssteder().stream()
+            .map(a -> {
+                a.getAdresse();
+                return a.getAdresse().getLandkode();
+            })
             .filter(Objects::nonNull)
             .distinct()
             .collect(Collectors.toList());
@@ -60,7 +63,7 @@ public class MottatteOpplysningerData {
 
     public List<String> hentUtenlandskeArbeidsgivereUuid() {
         return foretakUtland.stream()
-            .map(f -> f.uuid)
+            .map(ForetakUtland::getUuid)
             .filter(Objects::nonNull)
             .distinct()
             .collect(Collectors.toList());
@@ -68,7 +71,7 @@ public class MottatteOpplysningerData {
 
     public List<String> hentUtenlandskeArbeidsgivereLandkode() {
         return foretakUtland.stream()
-            .map(f -> f.adresse != null ? f.adresse.getLandkode() : null)
+            .map(f -> f.getAdresse().getLandkode())
             .filter(Objects::nonNull)
             .distinct()
             .collect(Collectors.toList());
@@ -76,30 +79,30 @@ public class MottatteOpplysningerData {
 
     public Map<String, String> hentUtenlandskeArbeidsgivereUuidOgNavn() {
         return foretakUtland.stream()
-            .filter(f -> Objects.nonNull(f.uuid) && Objects.nonNull(f.navn))
-            .collect(Collectors.toMap(f -> f.uuid, f -> f.navn));
+            .filter(f -> Objects.nonNull(f.getUuid()) && Objects.nonNull(f.getNavn()))
+            .collect(Collectors.toMap(ForetakUtland::getUuid, ForetakUtland::getNavn));
     }
 
     public Set<String> hentFnrMedfølgendeBarn() {
-        return personOpplysninger.medfolgendeFamilie.stream()
+        return personOpplysninger.getMedfolgendeFamilie().stream()
             .filter(MedfolgendeFamilie::erBarn)
             .map(MedfolgendeFamilie::getFnr)
             .collect(Collectors.toSet());
     }
 
     public Map<String, MedfolgendeFamilie.Relasjonsrolle> hentUuidOgRolleMedfølgendeFamilie() {
-        return personOpplysninger.medfolgendeFamilie.stream()
+        return personOpplysninger.getMedfolgendeFamilie().stream()
             .collect(Collectors.toMap(MedfolgendeFamilie::getUuid, MedfolgendeFamilie::getRelasjonsrolle));
     }
 
     public Map<String, MedfolgendeFamilie> hentMedfølgendeBarn() {
-        return personOpplysninger.medfolgendeFamilie.stream()
+        return personOpplysninger.getMedfolgendeFamilie().stream()
             .filter(MedfolgendeFamilie::erBarn)
             .collect(Collectors.toMap(MedfolgendeFamilie::getUuid, mf -> mf));
     }
 
     public Map<String, MedfolgendeFamilie> hentMedfølgendeEktefelle() {
-        return personOpplysninger.medfolgendeFamilie.stream()
+        return personOpplysninger.getMedfolgendeFamilie().stream()
             .filter(MedfolgendeFamilie::erEktefelleSamboer)
             .collect(Collectors.toMap(MedfolgendeFamilie::getUuid, mf -> mf));
     }

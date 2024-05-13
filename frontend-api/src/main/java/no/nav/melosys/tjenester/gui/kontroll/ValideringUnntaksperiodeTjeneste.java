@@ -1,7 +1,7 @@
 package no.nav.melosys.tjenester.gui.kontroll;
 
 import java.time.LocalDate;
-import javax.validation.Valid;
+import jakarta.validation.Valid;
 
 import io.swagger.annotations.Api;
 import no.nav.melosys.domain.ErPeriode;

@@ -1,13 +1,16 @@
 package no.nav.melosys.service.kontroll.feature.ufm.kontroll;
 
 import java.time.LocalDate;
+import java.util.Collections;
 import java.util.Optional;
+import java.util.stream.Collectors;
 
 import no.nav.melosys.domain.dokument.sed.SedDokument;
 import no.nav.melosys.domain.kodeverk.begrunnelser.Kontroll_begrunnelser;
 import no.nav.melosys.domain.kodeverk.lovvalgsbestemmelser.Tilleggsbestemmelser_883_2004;
 import no.nav.melosys.domain.mottatteopplysninger.MottatteOpplysningerData;
 import no.nav.melosys.domain.mottatteopplysninger.SedGrunnlag;
+import no.nav.melosys.domain.person.adresse.Bostedsadresse;
 import no.nav.melosys.service.kontroll.feature.ufm.data.UfmKontrollData;
 import no.nav.melosys.service.kontroll.regler.*;
 import org.slf4j.Logger;
@@ -16,7 +19,7 @@ import org.slf4j.LoggerFactory;
 import static no.nav.melosys.service.kontroll.regler.OverlappendeMedlemskapsperioderRegler.*;
 import static org.apache.cxf.common.util.StringUtils.isEmpty;
 
-final class UfmKontroll {
+class UfmKontroll {
 
     private static final Logger log = LoggerFactory.getLogger(UfmKontroll.class);
 
@@ -128,8 +131,32 @@ final class UfmKontroll {
             Kontroll_begrunnelser.BOSATT_I_NORGE : null;
     }
 
+    static Kontroll_begrunnelser personBosattINorgeIPerioden(UfmKontrollData kontrollData) {
+        LocalDate sedFra = kontrollData.sedDokument().getLovvalgsperiode().getFom();
+        LocalDate sedTil = kontrollData.sedDokument().getLovvalgsperiode().getTom();
+
+        var historiskeBostedAdresser = kontrollData.persondataMedHistorikk().isPresent() ? kontrollData.persondataMedHistorikk().get().bostedsadresser() : Collections.EMPTY_LIST;
+        var historiskeOppholdsAdresser = kontrollData.persondataMedHistorikk().isPresent() ? kontrollData.persondataMedHistorikk().get().oppholdsadresser() : Collections.EMPTY_LIST;
+
+
+        var bostedAdressePeriode = kontrollData.personhistorikkDokumenter()
+            .stream()
+            .flatMap(a -> a.getBostedsadressePeriodeListe().stream())
+            .collect(Collectors.toList());
+
+        Optional<Bostedsadresse> personBostedsadresse = kontrollData.persondata().finnBostedsadresse();
+
+        return PersonRegler.personBosattINorgeIPeriode(bostedAdressePeriode, personBostedsadresse, historiskeBostedAdresser, historiskeOppholdsAdresser, sedFra, sedTil == null ? LocalDate.now() : sedTil) ?
+            Kontroll_begrunnelser.BOSATT_I_NORGE_I_PERIODEN : null;
+    }
+
     static Kontroll_begrunnelser arbeidssted(UfmKontrollData kontrollData) {
         return ArbeidsstedRegler.erArbeidsstedFraSvalbardOgJanMayen(kontrollData.sedDokument()) ?
+            Kontroll_begrunnelser.ARBEIDSSTED_UTENFOR_EOS : null;
+    }
+
+    static Kontroll_begrunnelser arbeidsland(UfmKontrollData kontrollData) {
+        return ArbeidsstedRegler.erArbeidsstedFraSvalbardOgJanMayen4_3(kontrollData.sedDokument()) ?
             Kontroll_begrunnelser.ARBEIDSSTED_UTENFOR_EOS : null;
     }
 
@@ -141,7 +168,7 @@ final class UfmKontroll {
 
     private static boolean harTransitiveRegler(Optional<MottatteOpplysningerData> optionalMottatteOpplysningerData) {
         return optionalMottatteOpplysningerData.isPresent()
-            && !((SedGrunnlag) optionalMottatteOpplysningerData.get()).overgangsregelbestemmelser.isEmpty();
+            && !((SedGrunnlag) optionalMottatteOpplysningerData.get()).getOvergangsregelbestemmelser().isEmpty();
     }
 
     private static boolean harOvergangsregler(SedDokument sedDokument) {
@@ -151,6 +178,6 @@ final class UfmKontroll {
     }
 
     private static boolean harMottatteOpplysningerMedYtterligereInformasjon(Optional<MottatteOpplysningerData> optionalMottatteOpplysningerData) {
-        return optionalMottatteOpplysningerData.isPresent() && !isEmpty(((SedGrunnlag) optionalMottatteOpplysningerData.get()).ytterligereInformasjon);
+        return optionalMottatteOpplysningerData.isPresent() && !isEmpty(((SedGrunnlag) optionalMottatteOpplysningerData.get()).getYtterligereInformasjon());
     }
 }

@@ -21,17 +21,15 @@ public final class BrevDataUtils {
     }
 
     static NavAnsatt lagNavAnsatt(String ansattId, String navn) {
-        return NavAnsatt.builder()
+        return new NavAnsatt()
             .withAnsattId(ansattId != null ? ansattId : "N/A")
-            .withNavn(navn)
-            .build();
+            .withNavn(navn);
     }
 
     static NavEnhet lagNavEnhet() {
-        return NavEnhet.builder()
+        return new NavEnhet()
             .withEnhetsId(MELOSYS_ENHET_ID)
-            .withEnhetsNavn(PLASSHOLDER_TEKST)
-            .build();
+            .withEnhetsNavn(PLASSHOLDER_TEKST);
     }
 
     public static LovvalgsperiodeType lagLovvalgsperiodeType(Lovvalgsperiode lovvalgsperiode) {
@@ -47,30 +45,27 @@ public final class BrevDataUtils {
 
     // Adresse-stubs
     public static Kontaktinformasjon lagKontaktInformasjon() {
-        return Kontaktinformasjon.builder()
+        return new Kontaktinformasjon()
             .withBesoksadresse(lagAdresse(new Besoksadresse(), lagNorskPostadresse()))
             .withPostadresse(lagAdresse(new Postadresse(), lagNorskPostadresse()))
             //Adressen skal benyttes dersom bruker/mottakerRolle har behov for å kontakte NAV per post.
-            .withReturadresse(lagAdresse(new Returadresse(), lagNorskPostadresse()))
-            .build();
+            .withReturadresse(lagAdresse(new Returadresse(), lagNorskPostadresse()));
     }
 
     public static NorskPostadresse lagNorskPostadresse() {
-        return NorskPostadresse.builder()
+        return new NorskPostadresse()
             .withAdresselinje1(PLASSHOLDER_TEKST)
             .withPostnummer(PLASSHOLDER_POSTNUMMER)
             .withPoststed(PLASSHOLDER_TEKST)
-            .withLand(PLASSHOLDER_TEKST)
-            .build();
+            .withLand(PLASSHOLDER_TEKST);
     }
 
     public static UtenlandskPostadresse lagUtendlanskAdresse(UtenlandskMyndighet utenlandskMyndighet) {
-        return UtenlandskPostadresse.builder()
-            .withAdresselinje1(utenlandskMyndighet.gateadresse1)
-            .withAdresselinje2(utenlandskMyndighet.gateadresse2)
-            .withAdresselinje3(utenlandskMyndighet.postnummer + " " + utenlandskMyndighet.poststed)
-            .withLand(utenlandskMyndighet.land)
-            .build();
+        return new UtenlandskPostadresse()
+            .withAdresselinje1(utenlandskMyndighet.getGateadresse1())
+            .withAdresselinje2(utenlandskMyndighet.getGateadresse2())
+            .withAdresselinje3(utenlandskMyndighet.getPostnummer() + " " + utenlandskMyndighet.getPoststed())
+            .withLand(utenlandskMyndighet.getLand());
     }
 
     private static <T extends AdresseEnhet> T lagAdresse(T adresse, NorskPostadresse postadresse) {
@@ -82,22 +77,20 @@ public final class BrevDataUtils {
     }
 
     public static UtenlandskPostadresse lagAdresse(StrukturertAdresse adresse) {
-        return UtenlandskPostadresse.builder()
+        return new UtenlandskPostadresse()
             .withAdresselinje1(sammenslå(
                 adresse.getGatenavn(),
                 adresse.getHusnummerEtasjeLeilighet(),
                 adresse.getPostboks()))
             .withAdresselinje2(sammenslå(adresse.getPostnummer(), adresse.getPoststed()))
             .withAdresselinje3(adresse.getRegion())
-            .withLand(Landkoder.valueOf(adresse.getLandkode()).getBeskrivelse())
-            .build();
+            .withLand(Landkoder.valueOf(adresse.getLandkode()).getBeskrivelse());
     }
 
     public static PersonnavnType lagPersonnavn(Persondata persondata) {
-        return PersonnavnType.builder()
+        return new PersonnavnType()
             .withFornavn(persondata.getFornavn())
             .withMellomnavn(persondata.getMellomnavn())
-            .withEtternavn(persondata.getEtternavn())
-            .build();
+            .withEtternavn(persondata.getEtternavn());
     }
 }

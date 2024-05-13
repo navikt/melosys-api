@@ -7,6 +7,7 @@ import no.nav.melosys.domain.kodeverk.Avgiftsdekning
 import no.nav.melosys.domain.kodeverk.Trygdedekninger
 import no.nav.melosys.exception.FunksjonellException
 import no.nav.melosys.integrasjon.trygdeavgift.dto.*
+import java.time.LocalDate
 import java.util.*
 
 class TrygdeavgiftsberegningsRequestMapper {
@@ -15,6 +16,7 @@ class TrygdeavgiftsberegningsRequestMapper {
         medlemskapsperioder: Collection<Medlemskapsperiode>,
         skatteforholdTilNorge: Collection<SkatteforholdTilNorge>,
         inntektsperioder: Collection<Inntektsperiode>,
+        foedselsDato: LocalDate?
     ): Pair<TrygdeavgiftsberegningRequest, List<Map<UUID, Long>>> {
         val (medlemskapsperioderDto, medlemskapsperiodeMap) = mapMedlemskapsperioder(medlemskapsperioder)
         val (skatteforholdsperioderDto, skatteforholdsperiodeMap) = mapSkatteforholdsperioder(skatteforholdTilNorge)
@@ -23,7 +25,8 @@ class TrygdeavgiftsberegningsRequestMapper {
             TrygdeavgiftsberegningRequest(
                 medlemskapsperioderDto,
                 skatteforholdsperioderDto,
-                inntektsperioderDto
+                inntektsperioderDto,
+                foedselsDato
             ),
             listOf(medlemskapsperiodeMap, skatteforholdsperiodeMap, inntektsperiodeMap)
         )
@@ -35,7 +38,8 @@ class TrygdeavgiftsberegningsRequestMapper {
             val dto = MedlemskapsperiodeDto(
                 UUID.randomUUID(),
                 DatoPeriodeDto(it.fom, it.tom),
-                avgiftsdekningerFraTrygdedekning(it.trygdedekning)
+                avgiftsdekningerFraTrygdedekning(it.trygdedekning),
+                it.medlemskapstype
             )
             map[dto.id] = it.id
             dto
@@ -66,7 +70,6 @@ class TrygdeavgiftsberegningsRequestMapper {
                 DatoPeriodeDto(it.fomDato, it.tomDato),
                 it.type,
                 it.isArbeidsgiversavgiftBetalesTilSkatt,
-                it.isOrdinærTrygdeavgiftBetalesTilSkatt,
                 if (it.avgiftspliktigInntektMnd == null) null else PengerDto(it.avgiftspliktigInntektMnd)
             )
             map[dto.id] = it.id
@@ -91,6 +94,24 @@ class TrygdeavgiftsberegningsRequestMapper {
 
             Trygdedekninger.FTRL_2_9_FØRSTE_LEDD_C_ANDRE_LEDD_HELSE_PENSJON_SYKE_FORELDREPENGER ->
                 setOf(Avgiftsdekning.HELSEDEL_MED_SYKEPENGER, Avgiftsdekning.PENSJONSDEL_UTEN_YRKESSKADETRYGD)
+
+            Trygdedekninger.FULL_DEKNING_FTRL ->
+                setOf(Avgiftsdekning.HELSEDEL_MED_SYKEPENGER, Avgiftsdekning.PENSJONSDEL_MED_YRKESSKADETRYGD)
+
+            Trygdedekninger.FTRL_2_7A_ANDRE_LEDD_B_HELSE_SYKE_FORELDREPENGER ->
+                setOf(Avgiftsdekning.HELSEDEL_MED_SYKEPENGER)
+
+            Trygdedekninger.FTRL_2_7_TREDJE_LEDD_B_HELSE_SYKE_FORELDREPENGER ->
+                setOf(Avgiftsdekning.HELSEDEL_MED_SYKEPENGER)
+
+            Trygdedekninger.FTRL_2_9_FØRSTE_LEDD_B_TREDJE_LEDD_PENSJON_YRKESSKADE ->
+                setOf(Avgiftsdekning.PENSJONSDEL_MED_YRKESSKADETRYGD)
+
+            Trygdedekninger.FTRL_2_9_FØRSTE_LEDD_C_TREDJE_LEDD_HELSE_PENSJON_YRKESSKADE ->
+                setOf(Avgiftsdekning.HELSEDEL_UTEN_SYKEPENGER, Avgiftsdekning.PENSJONSDEL_MED_YRKESSKADETRYGD)
+
+            Trygdedekninger.FTRL_2_9_FØRSTE_LEDD_C_ANDRE_LEDD_TREDJE_LEDD_HELSE_PENSJON_SYKE_FORELDREPENGER_YRKESSKADE ->
+                setOf(Avgiftsdekning.HELSEDEL_MED_SYKEPENGER, Avgiftsdekning.PENSJONSDEL_MED_YRKESSKADETRYGD)
 
             else -> throw FunksjonellException("Kan ikke finne avgiftsdekninger fra trygdedekning " + trygdedekning)
         }

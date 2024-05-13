@@ -3,7 +3,7 @@ package no.nav.melosys.sikkerhet.context;
 import java.util.ArrayList;
 import java.util.List;
 
-import com.nimbusds.jose.shaded.json.JSONArray;
+import net.minidev.json.JSONArray;
 import no.nav.security.token.support.core.context.TokenValidationContext;
 import no.nav.security.token.support.core.jwt.JwtToken;
 import no.nav.security.token.support.spring.SpringTokenValidationContextHolder;

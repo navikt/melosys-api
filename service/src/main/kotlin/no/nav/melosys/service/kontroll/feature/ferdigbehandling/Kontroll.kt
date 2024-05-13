@@ -1,0 +1,162 @@
+package no.nav.melosys.service.kontroll.feature.ferdigbehandling
+
+import mu.KotlinLogging
+import no.nav.melosys.domain.Aktoer
+import no.nav.melosys.domain.Behandling
+import no.nav.melosys.domain.dokument.organisasjon.OrganisasjonDokument
+import no.nav.melosys.domain.kodeverk.Fullmaktstype
+import no.nav.melosys.domain.kodeverk.Sakstyper
+import no.nav.melosys.domain.kodeverk.begrunnelser.Kontroll_begrunnelser
+import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingsresultattyper
+import no.nav.melosys.domain.person.Persondata
+import no.nav.melosys.service.LovvalgsperiodeService
+import no.nav.melosys.service.avklartefakta.AvklarteVirksomheterService
+import no.nav.melosys.service.behandling.BehandlingService
+import no.nav.melosys.service.brev.UtkastBrevService
+import no.nav.melosys.service.ftrl.medlemskapsperiode.MedlemskapsperiodeService
+import no.nav.melosys.service.kontroll.feature.ferdigbehandling.data.FerdigbehandlingKontrollData
+import no.nav.melosys.service.kontroll.feature.ferdigbehandling.data.MedlemskapsperiodeData
+import no.nav.melosys.service.kontroll.feature.ferdigbehandling.data.SaksopplysningerData
+import no.nav.melosys.service.kontroll.feature.ferdigbehandling.kontroll.FerdigbehandlingKontrollsett.hentRegelsettForAvslagOgHenleggelse
+import no.nav.melosys.service.kontroll.feature.ferdigbehandling.kontroll.FerdigbehandlingKontrollsett.hentRegelsettForVedtak
+import no.nav.melosys.service.persondata.PersondataFasade
+import no.nav.melosys.service.registeropplysninger.OrganisasjonOppslagService
+import no.nav.melosys.service.saksbehandling.SaksbehandlingRegler
+import no.nav.melosys.service.validering.Kontrollfeil
+import org.springframework.stereotype.Component
+
+private val log = KotlinLogging.logger { }
+
+@Component
+class Kontroll(
+    private val behandlingService: BehandlingService,
+    private val lovvalgsperiodeService: LovvalgsperiodeService,
+    private val avklarteVirksomheterService: AvklarteVirksomheterService,
+    private val persondataFasade: PersondataFasade,
+    private val organisasjonOppslagService: OrganisasjonOppslagService,
+    private val saksbehandlingRegler: SaksbehandlingRegler,
+    private val medlemskapsperiodeService: MedlemskapsperiodeService,
+    private val utkastBrevService: UtkastBrevService
+) {
+    internal fun kontroller(
+        behandlingId: Long,
+        behandlingsresultattype: Behandlingsresultattyper?,
+        kontrollerSomSkalIgnoreres: Set<Kontroll_begrunnelser>
+    ): Collection<Kontrollfeil> {
+        val behandling = behandlingService.hentBehandlingMedSaksopplysninger(behandlingId)
+        val sakstype = behandling.fagsak.type
+        return kontrollerVedtak(behandlingId, sakstype, behandlingsresultattype, kontrollerSomSkalIgnoreres)
+    }
+
+    internal fun kontrollerVedtak(
+        behandlingID: Long,
+        sakstype: Sakstyper,
+        behandlingsresultattype: Behandlingsresultattyper?,
+        kontrollerSomSkalIgnoreres: Set<Kontroll_begrunnelser>
+    ): Collection<Kontrollfeil> =
+        utførKontroller(behandlingID, sakstype, behandlingsresultattype).filter { skalViseFeil(it, kontrollerSomSkalIgnoreres, behandlingID) }
+
+
+    private fun skalViseFeil(
+        kontrollfeil: Kontrollfeil,
+        kontrollerSomSkalIgnoreres: Set<Kontroll_begrunnelser> = emptySet(),
+        behandlingID: Long
+    ): Boolean {
+        if (kontrollfeil.kode in kontrollerSomSkalIgnoreres) {
+            log.info("Ignorerer kontroll ${kontrollfeil.kode.kode} for behandling $behandlingID")
+            return false
+        }
+        return true
+    }
+
+    private fun utførKontroller(behandlingID: Long, sakstype: Sakstyper, behandlingsresultattype: Behandlingsresultattyper?): Collection<Kontrollfeil> {
+        val behandling = behandlingService.hentBehandlingMedSaksopplysninger(behandlingID)
+
+        if (behandlingsresultattype in listOf(Behandlingsresultattyper.AVSLAG_MANGLENDE_OPPL, Behandlingsresultattyper.HENLEGGELSE)) {
+            return utførKontrollerForAvslagOgHenleggelse(behandling)
+        }
+
+        return utførKontroller(behandling, sakstype)
+    }
+
+    private fun utførKontrollerForAvslagOgHenleggelse(behandling: Behandling): Collection<Kontrollfeil> {
+        val ferdigbehandlingKontrollData = hentKontrollDataForAvslagOgHenleggelse(behandling)
+        return hentRegelsettForAvslagOgHenleggelse().mapNotNull { it.apply(ferdigbehandlingKontrollData) }
+    }
+
+    private fun utførKontroller(behandling: Behandling, sakstype: Sakstyper): Collection<Kontrollfeil> {
+        val regelsettForVedtak = hentRegelsettForVedtak(
+            sakstype = sakstype,
+            harRegistreringUnntakFraMedlemskapFlyt = saksbehandlingRegler.harRegistreringUnntakFraMedlemskapFlyt(behandling),
+            harIkkeYrkesaktivFlyt = saksbehandlingRegler.harIkkeYrkesaktivFlyt(behandling)
+        )
+        val ferdigbehandlingKontrollData =
+            if (sakstype == Sakstyper.FTRL) hentVedtakKontrollDataFTRL(behandling) else hentVedtakKontrollData(behandling)
+
+        return regelsettForVedtak.mapNotNull { it.apply(ferdigbehandlingKontrollData) }
+    }
+
+    private fun hentKontrollDataForAvslagOgHenleggelse(behandling: Behandling): FerdigbehandlingKontrollData {
+        val fullmektig = behandling.fagsak.finnFullmektig(Fullmaktstype.FULLMEKTIG_SØKNAD)
+        val mottatteOpplysningerData =
+            if (!saksbehandlingRegler.harIngenFlyt(behandling)) behandling.mottatteOpplysninger.mottatteOpplysningerData else null
+
+        return FerdigbehandlingKontrollData(
+            persondata = hentPersondata(behandling),
+            mottatteOpplysningerData = mottatteOpplysningerData,
+            saksopplysningerData = hentSaksopplysningerData(behandling),
+            fullmektig = fullmektig,
+            organisasjonDokument = hentOrganisasjonFullmektig(fullmektig),
+            persondataTilFullmektig = hentPersondataFullmektig(fullmektig),
+            brevUtkast = utkastBrevService.hentUtkast(behandling.id)
+        )
+    }
+
+    private fun hentVedtakKontrollData(behandling: Behandling): FerdigbehandlingKontrollData {
+        val fullmektig = behandling.fagsak.finnFullmektig(Fullmaktstype.FULLMEKTIG_SØKNAD)
+
+        return FerdigbehandlingKontrollData(
+            medlemskapDokument = behandling.hentMedlemskapDokument(),
+            persondata = hentPersondata(behandling),
+            mottatteOpplysningerData = behandling.mottatteOpplysninger.mottatteOpplysningerData,
+            lovvalgsperiode = lovvalgsperiodeService.hentLovvalgsperiode(behandling.id),
+            opprinneligLovvalgsperiode = lovvalgsperiodeService.finnOpprinneligLovvalgsperiode(behandling.id).orElse(null),
+            saksopplysningerData = hentSaksopplysningerData(behandling),
+            behandlingstema = behandling.tema,
+            fullmektig = fullmektig,
+            organisasjonDokument = hentOrganisasjonFullmektig(fullmektig),
+            persondataTilFullmektig = hentPersondataFullmektig(fullmektig),
+            brevUtkast = utkastBrevService.hentUtkast(behandling.id)
+        )
+    }
+
+    private fun hentVedtakKontrollDataFTRL(behandling: Behandling): FerdigbehandlingKontrollData {
+        val fullmektig = behandling.fagsak.finnFullmektig(Fullmaktstype.FULLMEKTIG_SØKNAD)
+        val medlemskapsperioder = medlemskapsperiodeService.hentMedlemskapsperioder(behandling.id)
+        val tidligereMedlemskapsperioder = behandling.fagsak.hentInaktiveBehandlinger()
+            .map { medlemskapsperiodeService.hentMedlemskapsperioder(it.id) }.flatten()
+
+        return FerdigbehandlingKontrollData(
+            medlemskapDokument = behandling.hentMedlemskapDokument(),
+            persondata = hentPersondata(behandling),
+            mottatteOpplysningerData = behandling.mottatteOpplysninger.mottatteOpplysningerData,
+            fullmektig = fullmektig,
+            organisasjonDokument = hentOrganisasjonFullmektig(fullmektig),
+            persondataTilFullmektig = hentPersondataFullmektig(fullmektig),
+            medlemskapsperiodeData = MedlemskapsperiodeData(medlemskapsperioder, tidligereMedlemskapsperioder),
+            brevUtkast = utkastBrevService.hentUtkast(behandling.id)
+        )
+    }
+
+    private fun hentPersondata(behandling: Behandling): Persondata = persondataFasade.hentPerson(behandling.fagsak.hentBrukersAktørID())
+
+    private fun hentPersondataFullmektig(fullmektig: Aktoer?): Persondata? =
+        if (fullmektig != null && fullmektig.erPerson()) persondataFasade.hentPerson(fullmektig.personIdent) else null
+
+    private fun hentOrganisasjonFullmektig(fullmektig: Aktoer?): OrganisasjonDokument? =
+        if (fullmektig != null && fullmektig.erOrganisasjon()) organisasjonOppslagService.hentOrganisasjon(fullmektig.orgnr) else null
+
+    private fun hentSaksopplysningerData(behandling: Behandling): SaksopplysningerData =
+        SaksopplysningerData(avklarteVirksomheterService.harOpphørtAvklartVirksomhet(behandling))
+
+}

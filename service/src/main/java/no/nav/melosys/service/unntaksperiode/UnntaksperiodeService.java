@@ -15,13 +15,13 @@ import no.nav.melosys.domain.kodeverk.LovvalgBestemmelse;
 import no.nav.melosys.domain.kodeverk.Utfallregistreringunntak;
 import no.nav.melosys.domain.kodeverk.begrunnelser.Ikke_godkjent_begrunnelser;
 import no.nav.melosys.exception.FunksjonellException;
+import no.nav.melosys.saksflytapi.ProsessinstansService;
 import no.nav.melosys.service.LovvalgsperiodeService;
 import no.nav.melosys.service.behandling.BehandlingService;
 import no.nav.melosys.service.behandling.BehandlingsresultatService;
 import no.nav.melosys.service.kontroll.feature.unntaksperiode.UnntaksperiodeKontrollService;
 import no.nav.melosys.service.kontroll.regler.PeriodeRegler;
 import no.nav.melosys.service.oppgave.OppgaveService;
-import no.nav.melosys.service.saksflyt.ProsessinstansService;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.context.annotation.Primary;
 import org.springframework.stereotype.Service;
@@ -107,23 +107,14 @@ public class UnntaksperiodeService {
     @Transactional
     public void ikkeGodkjennPeriode(long behandlingID, Set<String> begrunnelser, String fritekst) {
         Behandling behandling = hentOgValiderBehandling(behandlingID);
-        Set<Ikke_godkjent_begrunnelser> ikkeGodkjentBegrunnelser = tilIkkeGodkjentBegrunnelser(begrunnelser);
-        validerBegrunnelser(ikkeGodkjentBegrunnelser, fritekst);
+        validerBegrunnelser(begrunnelser, fritekst);
         behandlingsresultatService.settUtfallRegistreringUnntakOgType(behandlingID, Utfallregistreringunntak.IKKE_GODKJENT);
         behandlingsresultatService.oppdaterBegrunnelser(
             behandlingID, begrunnelser.stream().map(BehandlingsresultatBegrunnelse::lag).collect(Collectors.toSet()), fritekst
         );
 
-        prosessinstansService.opprettProsessinstansUnntaksperiodeAvvist(behandling, ikkeGodkjentBegrunnelser, fritekst);
+        prosessinstansService.opprettProsessinstansUnntaksperiodeAvvist(behandling, fritekst);
         oppgaveService.ferdigstillOppgaveMedSaksnummer(behandling.getFagsak().getSaksnummer());
-    }
-
-    private Set<Ikke_godkjent_begrunnelser> tilIkkeGodkjentBegrunnelser(Set<String> begrunnelser) {
-        Set<Ikke_godkjent_begrunnelser> ikkeGodkjentBegrunnelser = new HashSet<>();
-        for (String b : begrunnelser) {
-            ikkeGodkjentBegrunnelser.add(Ikke_godkjent_begrunnelser.valueOf(b));
-        }
-        return ikkeGodkjentBegrunnelser;
     }
 
     private Behandling hentOgValiderBehandling(long behandlingID) {
@@ -141,10 +132,15 @@ public class UnntaksperiodeService {
         }
     }
 
-    private void validerBegrunnelser(Set<Ikke_godkjent_begrunnelser> begrunnelser, String fritekst) {
-        if (begrunnelser.isEmpty()) {
+    private void validerBegrunnelser(Set<String> begrunnelser, String fritekst) {
+        Set<Ikke_godkjent_begrunnelser> ikkeGodkjentBegrunnelser = new HashSet<>();
+        for (String b : begrunnelser) {
+            ikkeGodkjentBegrunnelser.add(Ikke_godkjent_begrunnelser.valueOf(b));
+        }
+
+        if (ikkeGodkjentBegrunnelser.isEmpty()) {
             throw new FunksjonellException("Ingen begrunnelser for avlag av periode");
-        } else if (begrunnelser.contains(Ikke_godkjent_begrunnelser.ANNET) && StringUtils.isEmpty(fritekst)) {
+        } else if (ikkeGodkjentBegrunnelser.contains(Ikke_godkjent_begrunnelser.ANNET) && StringUtils.isEmpty(fritekst)) {
             throw new FunksjonellException("Begrunnelse " + Ikke_godkjent_begrunnelser.ANNET + " krever fritekst!");
         }
     }

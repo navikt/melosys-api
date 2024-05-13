@@ -3,8 +3,7 @@ package no.nav.melosys.saksflyt.steg.sed;
 import java.time.LocalDate;
 import java.util.Set;
 
-import no.finn.unleash.FakeUnleash;
-import no.finn.unleash.Unleash;
+import io.getunleash.FakeUnleash;
 import no.nav.melosys.domain.Behandling;
 import no.nav.melosys.domain.Saksopplysning;
 import no.nav.melosys.domain.SaksopplysningType;
@@ -12,10 +11,10 @@ import no.nav.melosys.domain.dokument.medlemskap.Periode;
 import no.nav.melosys.domain.dokument.sed.SedDokument;
 import no.nav.melosys.domain.eessi.melding.UtpekingAvvis;
 import no.nav.melosys.domain.eessi.sed.SedDataDto;
-import no.nav.melosys.domain.saksflyt.ProsessDataKey;
-import no.nav.melosys.domain.saksflyt.Prosessinstans;
 import no.nav.melosys.integrasjon.eessi.EessiConsumer;
 import no.nav.melosys.integrasjon.joark.JoarkFasade;
+import no.nav.melosys.saksflytapi.domain.ProsessDataKey;
+import no.nav.melosys.saksflytapi.domain.Prosessinstans;
 import no.nav.melosys.service.behandling.BehandlingService;
 import no.nav.melosys.service.behandling.BehandlingsresultatService;
 import no.nav.melosys.service.dokument.sed.EessiService;
@@ -50,10 +49,12 @@ class SendAvslagUtpekingTest {
     private EessiService eessiService;
     private Behandling behandling;
 
+    private final FakeUnleash fakeUnleash = new FakeUnleash();
+
     @BeforeEach
     public void settOpp() {
         eessiService = new EessiService(behandlingService, behandlingsresultatService, eessiConsumer, joarkFasade,
-            sedDataBygger, sedDataGrunnlagFactory);
+            sedDataBygger, sedDataGrunnlagFactory, fakeUnleash);
         sendAvslagUtpeking = new SendAvslagUtpeking(eessiService);
 
         SedDokument sedDokument = new SedDokument();

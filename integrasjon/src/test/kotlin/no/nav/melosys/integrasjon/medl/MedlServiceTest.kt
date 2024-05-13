@@ -65,18 +65,16 @@ internal class MedlServiceTest {
             .medlemsperiode.shouldHaveSize(1)
             .first()
             .shouldBeEqualToComparingFields(
-                Medlemsperiode().apply {
-                    id = 123456L
-                    type = "PUMEDSKP"
-                    status = PeriodestatusMedl.GYLD.kode
-                    grunnlagstype = "IMEDEOS"
-                    land = "NOR"
-                    lovvalg = LovvalgMedl.ENDL.kode
-                    trygdedekning = "Unntatt"
-                    kildedokumenttype = "Dokument"
-                    kilde = "INFOTR"
-                    periode = Periode(LocalDate.of(2021, 9, 1), LocalDate.of(2021, 10, 1))
-                }, FieldsEqualityCheckConfig(ignorePrivateFields = false)
+                Medlemsperiode(id = 123456L,
+                    type = "PUMEDSKP",
+                    status = PeriodestatusMedl.GYLD.kode,
+                    grunnlagstype = "IMEDEOS",
+                    land = "NOR",
+                    lovvalg = LovvalgMedl.ENDL.kode,
+                    trygdedekning = "Unntatt",
+                    kildedokumenttype = "Dokument",
+                    kilde = "INFOTR",
+                    periode = Periode(LocalDate.of(2021, 9, 1), LocalDate.of(2021, 10, 1))), FieldsEqualityCheckConfig(ignorePrivateFields = false)
             )
     }
 
@@ -98,7 +96,7 @@ internal class MedlServiceTest {
                     lovvalg = LovvalgMedl.ENDL.kode,
                     grunnlag = GrunnlagMedl.FO_11_4_1.kode,
                     sporingsinformasjon = MedlemskapsunntakForPost.SporingsinformasjonForPost(
-                        kildedokument = KildedokumenttypeMedl.HENV_SOKNAD.getKode()
+                        kildedokument = KildedokumenttypeMedl.HENV_SOKNAD.kode
                     )
                 )
             )
@@ -126,7 +124,7 @@ internal class MedlServiceTest {
                     lovvalg = LovvalgMedl.UAVK.kode,
                     grunnlag = GrunnlagMedl.FO_11_4_1.kode,
                     sporingsinformasjon = MedlemskapsunntakForPost.SporingsinformasjonForPost(
-                        kildedokument = KildedokumenttypeMedl.HENV_SOKNAD.getKode()
+                        kildedokument = KildedokumenttypeMedl.HENV_SOKNAD.kode
                     )
                 )
             )
@@ -159,7 +157,7 @@ internal class MedlServiceTest {
                     lovvalg = LovvalgMedl.UAVK.kode,
                     grunnlag = GrunnlagMedl.FO_1408_14_2_A.kode,
                     sporingsinformasjon = MedlemskapsunntakForPost.SporingsinformasjonForPost(
-                        kildedokument = KildedokumenttypeMedl.HENV_SOKNAD.getKode()
+                        kildedokument = KildedokumenttypeMedl.HENV_SOKNAD.kode
                     )
                 )
             )
@@ -187,7 +185,7 @@ internal class MedlServiceTest {
                     lovvalg = LovvalgMedl.FORL.kode,
                     grunnlag = GrunnlagMedl.FO_11_4_1.kode,
                     sporingsinformasjon = MedlemskapsunntakForPost.SporingsinformasjonForPost(
-                        kildedokument = KildedokumenttypeMedl.HENV_SOKNAD.getKode()
+                        kildedokument = KildedokumenttypeMedl.HENV_SOKNAD.kode
                     )
                 )
             )
@@ -217,7 +215,7 @@ internal class MedlServiceTest {
                     grunnlag = GrunnlagMedl.FO_11_4_1.kode,
                     sporingsinformasjon = MedlemskapsunntakForPut.SporingsinformasjonForPut(
                         versjon = 1,
-                        kildedokument = KildedokumenttypeMedl.HENV_SOKNAD.getKode()
+                        kildedokument = KildedokumenttypeMedl.HENV_SOKNAD.kode
                     )
                 )
             )
@@ -245,7 +243,7 @@ internal class MedlServiceTest {
                     lovvalg = LovvalgMedl.FORL.kode,
                     grunnlag = GrunnlagMedl.FO_11_5.kode,
                     sporingsinformasjon = MedlemskapsunntakForPost.SporingsinformasjonForPost(
-                        kildedokument = KildedokumenttypeMedl.HENV_SOKNAD.getKode()
+                        kildedokument = KildedokumenttypeMedl.HENV_SOKNAD.kode
                     )
                 )
             )
@@ -271,15 +269,80 @@ internal class MedlServiceTest {
                     dekning = DekningMedl.FTRL_2_9_1_LEDD_A.kode,
                     lovvalgsland = "NOR",
                     lovvalg = LovvalgMedl.ENDL.kode,
-                    grunnlag = GrunnlagMedl.FTL_2_8_1_ledd_a.kode,
+                    grunnlag = GrunnlagMedl.FTL_2_8_1_LEDD_A.kode,
                     sporingsinformasjon = MedlemskapsunntakForPost.SporingsinformasjonForPost(
-                        kildedokument = KildedokumenttypeMedl.HENV_SOKNAD.getKode()
+                        kildedokument = KildedokumenttypeMedl.HENV_SOKNAD.kode
                     )
                 )
             )
             hentMedlemskapsunntak()
         }
         medlService.opprettPeriodeEndelig(FNR, medlemskapsperiode, KildedokumenttypeMedl.HENV_SOKNAD)
+    }
+
+    @Test
+    fun skalOppretteOpphørtPeriodeEndelig() {
+        val medlemskapsperiode = lagMedlemskapsPeriode().apply {
+            medlemAvFolketrygden =
+                MedlemAvFolketrygden().apply { bestemmelse = Folketrygdloven_kap2_bestemmelser.FTRL_KAP2_2_15_ANDRE_LEDD }
+        }
+        val medlemskapsunntakForPostCapturingSlot = slot<MedlemskapsunntakForPost>()
+        every {
+            mockRestConsumer.opprettPeriode(capture(medlemskapsunntakForPostCapturingSlot))
+        }.answers {
+            medlemskapsunntakForPostCapturingSlot.captured.shouldBeEqualToComparingFields(
+                MedlemskapsunntakForPost(
+                    ident = FNR,
+                    fraOgMed = medlemskapsperiode.fom,
+                    tilOgMed = medlemskapsperiode.tom,
+                    status = PeriodestatusMedl.AVST.kode,
+                    statusaarsak = StatusaarsakMedl.OPPHORT.kode,
+                    dekning = DekningMedl.FTRL_2_9_1_LEDD_A.kode,
+                    lovvalgsland = "NOR",
+                    lovvalg = LovvalgMedl.ENDL.kode,
+                    grunnlag = GrunnlagMedl.FTL_2_15_2_LEDD.kode,
+                    sporingsinformasjon = MedlemskapsunntakForPost.SporingsinformasjonForPost(
+                        kildedokument = KildedokumenttypeMedl.HENV_SOKNAD.kode
+                    )
+                )
+            )
+            hentMedlemskapsunntak()
+        }
+        medlService.opprettOpphørtPeriode(FNR, medlemskapsperiode, KildedokumenttypeMedl.HENV_SOKNAD)
+    }
+
+    @Test
+    fun skalOppdatereOpphørtPeriode() {
+        every { mockRestConsumer.hentPeriode(any()) } returns hentMedlemskapsunntak()
+        val medlemskapsperiode = lagMedlemskapsPeriode().apply {
+            medlPeriodeID = 123456L
+            medlemAvFolketrygden =
+                MedlemAvFolketrygden().apply { bestemmelse = Folketrygdloven_kap2_bestemmelser.FTRL_KAP2_2_15_ANDRE_LEDD }
+        }
+        val medlemskapsunntakForPutCapturingSlot = slot<MedlemskapsunntakForPut>()
+        every {
+            mockRestConsumer.oppdaterPeriode(capture(medlemskapsunntakForPutCapturingSlot))
+        }.answers {
+            medlemskapsunntakForPutCapturingSlot.captured.shouldBeEqualToComparingFields(
+                MedlemskapsunntakForPut(
+                    unntakId = 123456,
+                    fraOgMed = medlemskapsperiode.fom,
+                    tilOgMed = medlemskapsperiode.tom,
+                    status = PeriodestatusMedl.AVST.kode,
+                    statusaarsak = StatusaarsakMedl.OPPHORT.kode,
+                    dekning = DekningMedl.FTRL_2_9_1_LEDD_A.kode,
+                    lovvalgsland = "NOR",
+                    lovvalg = LovvalgMedl.ENDL.kode,
+                    grunnlag = GrunnlagMedl.FTL_2_15_2_LEDD.kode,
+                    sporingsinformasjon = MedlemskapsunntakForPut.SporingsinformasjonForPut(
+                        versjon = 1,
+                        kildedokument = KildedokumenttypeMedl.HENV_SOKNAD.kode
+                    )
+                )
+            )
+            hentMedlemskapsunntak()
+        }
+        medlService.oppdaterOpphørtPeriode(medlemskapsperiode, KildedokumenttypeMedl.HENV_SOKNAD)
     }
 
     @Test
@@ -302,7 +365,7 @@ internal class MedlServiceTest {
                     grunnlag = GrunnlagMedl.FO_11_4_1.kode,
                     sporingsinformasjon = MedlemskapsunntakForPut.SporingsinformasjonForPut(
                         versjon = 1,
-                        kildedokument = KildedokumenttypeMedl.HENV_SOKNAD.getKode()
+                        kildedokument = KildedokumenttypeMedl.HENV_SOKNAD.kode
                     )
                 )
             )
@@ -357,7 +420,6 @@ internal class MedlServiceTest {
 
     private fun lagMedlemskapsPeriode() = Medlemskapsperiode().apply {
         medlemskapstype = Medlemskapstyper.FRIVILLIG
-        arbeidsland = Landkoder.BE.kode
         trygdedekning = Trygdedekninger.FTRL_2_9_FØRSTE_LEDD_A_HELSE
         fom = LocalDate.now()
         tom = LocalDate.now().plusYears(1)
@@ -365,7 +427,7 @@ internal class MedlServiceTest {
             MedlemAvFolketrygden().apply { bestemmelse = Folketrygdloven_kap2_bestemmelser.FTRL_KAP2_2_8_FØRSTE_LEDD_A }
     }
 
-    fun lagBehandlingsresultatMedOvergangsregelbestemmelser(): Behandlingsresultat {
+    private fun lagBehandlingsresultatMedOvergangsregelbestemmelser(): Behandlingsresultat {
         val behandlingsresultat = Behandlingsresultat()
 
         behandlingsresultat.apply {
@@ -377,9 +439,9 @@ internal class MedlServiceTest {
                 type = Behandlingstyper.FØRSTEGANG
                 status = Behandlingsstatus.VURDER_DOKUMENT
                 mottatteOpplysninger = MottatteOpplysninger().apply {
-                    setMottatteOpplysningerdata(SedGrunnlag().apply {
+                    mottatteOpplysningerData = SedGrunnlag().apply {
                         overgangsregelbestemmelser = listOf(Overgangsregelbestemmelser.FO_1408_1971_ART14_2_A)
-                    })
+                    }
                 }
             }
         }

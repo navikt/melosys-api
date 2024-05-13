@@ -6,7 +6,7 @@ public enum MottakerType {
     ARBEIDSGIVER_ELLER_ARBEIDSGIVERS_FULLMEKTIG("Arbeidsgiver eller arbeidsgivers fullmektig"),
     ANNEN_ORGANISASJON("Annen organisasjon"),
     NORSK_MYNDIGHET("Norske myndigheter"),
-    UTENLANDSK_TRYGDEMYNDIGHET("Utenlandsk trygdemyndighet i avtaleland");
+    UTENLANDSK_TRYGDEMYNDIGHET("Utenlandsk trygdemyndighet");
 
     MottakerType(String beskrivelse) {
         this.beskrivelse = beskrivelse;

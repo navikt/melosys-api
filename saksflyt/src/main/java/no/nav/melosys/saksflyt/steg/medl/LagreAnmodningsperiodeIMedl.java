@@ -6,9 +6,9 @@ import no.nav.melosys.domain.Anmodningsperiode;
 import no.nav.melosys.domain.Behandling;
 import no.nav.melosys.domain.Behandlingsresultat;
 import no.nav.melosys.domain.Fagsak;
-import no.nav.melosys.domain.saksflyt.ProsessSteg;
-import no.nav.melosys.domain.saksflyt.Prosessinstans;
 import no.nav.melosys.saksflyt.steg.StegBehandler;
+import no.nav.melosys.saksflytapi.domain.ProsessSteg;
+import no.nav.melosys.saksflytapi.domain.Prosessinstans;
 import no.nav.melosys.service.behandling.BehandlingsresultatService;
 import no.nav.melosys.service.kontroll.regler.PeriodeRegler;
 import no.nav.melosys.service.medl.MedlPeriodeService;
@@ -16,7 +16,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Component;
 
-import static no.nav.melosys.domain.saksflyt.ProsessSteg.LAGRE_ANMODNINGSPERIODE_MEDL;
+import static no.nav.melosys.saksflytapi.domain.ProsessSteg.LAGRE_ANMODNINGSPERIODE_MEDL;
 
 @Component
 public class LagreAnmodningsperiodeIMedl implements StegBehandler {

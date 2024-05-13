@@ -4,23 +4,54 @@ import io.kotest.matchers.collections.shouldContain
 import io.kotest.matchers.collections.shouldHaveSize
 import io.kotest.matchers.shouldBe
 import io.kotest.matchers.string.shouldContain
+import io.micrometer.common.KeyValue
+import io.micrometer.common.KeyValues
+import io.micrometer.core.instrument.observation.DefaultMeterObservationHandler
 import io.micrometer.core.instrument.simple.SimpleMeterRegistry
-import org.springframework.boot.actuate.metrics.AutoTimer
-import org.springframework.boot.actuate.metrics.web.reactive.client.DefaultWebClientExchangeTagsProvider
-import org.springframework.boot.actuate.metrics.web.reactive.client.MetricsWebClientFilterFunction
+import io.micrometer.observation.GlobalObservationConvention
+import io.micrometer.observation.ObservationRegistry
 import org.springframework.boot.test.context.TestConfiguration
 import org.springframework.context.annotation.Bean
+import org.springframework.http.server.reactive.observation.ServerHttpObservationDocumentation
+import org.springframework.web.reactive.function.client.ClientHttpObservationDocumentation
+import org.springframework.web.reactive.function.client.ClientRequestObservationContext
+import org.springframework.web.reactive.function.client.DefaultClientRequestObservationConvention
 import org.springframework.web.reactive.function.client.WebClient
+
 
 @TestConfiguration
 class MetricsTestConfig() {
 
+//https://github.com/spring-projects/spring-boot/issues/34009
+//    @Bean
+//    fun myBuilder(): WebClient.Builder {
+//        val metricsWebClientFilterFunction = MetricsWebClientFilterFunction(
+//            meterRegistry, DefaultWebClientExchangeTagsProvider(), "test", AutoTimer.ENABLED
+//        )
+//        return WebClient.builder().filters { it.add((metricsWebClientFilterFunction)) }
+//    }
+
     @Bean
     fun myBuilder(): WebClient.Builder {
-        val metricsWebClientFilterFunction = MetricsWebClientFilterFunction(
-            meterRegistry, DefaultWebClientExchangeTagsProvider(), "test", AutoTimer.ENABLED
-        )
-        return WebClient.builder().filters { it.add((metricsWebClientFilterFunction)) }
+        return WebClient.builder()
+            .observationRegistry(observationRegistry())
+            .observationConvention(CustomWebClientObservationConvention())
+    }
+
+    @Bean
+    fun observationRegistry(): ObservationRegistry {
+        val observationRegistry = ObservationRegistry.create()
+        observationRegistry.observationConfig()
+            .observationHandler(DefaultMeterObservationHandler(meterRegistry))
+        return observationRegistry
+    }
+
+
+    class CustomWebClientObservationConvention : DefaultClientRequestObservationConvention() {
+        override fun getName(): String {
+            return "test"
+        }
+
     }
 
     companion object {
@@ -36,10 +67,7 @@ class MetricsTestConfig() {
         }
 
         fun metricsUriShouldContainBrackets() {
-            meterRegistry.meters
-                .shouldHaveSize(1)
-                .first().id.apply {
-                    name.shouldBe("test")
+            meterRegistry.meters.first { it.id.name == "test" }.id.apply {
                     this.getTag("uri")
                         .shouldContain("{")
                 }

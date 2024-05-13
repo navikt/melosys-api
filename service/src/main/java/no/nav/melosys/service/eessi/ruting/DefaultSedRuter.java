@@ -3,7 +3,6 @@ package no.nav.melosys.service.eessi.ruting;
 import java.util.Optional;
 import java.util.Set;
 
-import no.finn.unleash.Unleash;
 import no.nav.melosys.domain.Behandling;
 import no.nav.melosys.domain.Fagsak;
 import no.nav.melosys.domain.eessi.SedType;
@@ -11,14 +10,13 @@ import no.nav.melosys.domain.eessi.melding.MelosysEessiMelding;
 import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingsstatus;
 import no.nav.melosys.domain.oppgave.Oppgave;
 import no.nav.melosys.domain.oppgave.PrioritetType;
-import no.nav.melosys.domain.saksflyt.ProsessDataKey;
-import no.nav.melosys.domain.saksflyt.Prosessinstans;
 import no.nav.melosys.integrasjon.oppgave.OppgaveOppdatering;
+import no.nav.melosys.saksflytapi.ProsessinstansService;
+import no.nav.melosys.saksflytapi.domain.ProsessDataKey;
+import no.nav.melosys.saksflytapi.domain.Prosessinstans;
 import no.nav.melosys.service.behandling.BehandlingService;
-import no.nav.melosys.service.oppgave.OppgaveFactory;
 import no.nav.melosys.service.oppgave.OppgaveService;
 import no.nav.melosys.service.sak.FagsakService;
-import no.nav.melosys.service.saksflyt.ProsessinstansService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
@@ -52,7 +50,7 @@ public class DefaultSedRuter implements SedRuter {
             log.info("Oppretter oppgave sed {} i rinasak {}", eessiMelding.getSedId(), eessiMelding.getRinaSaksnummer());
             oppgaveService.opprettJournalføringsoppgave(eessiMelding.getJournalpostId(), prosessinstans.hentAktørIDFraDataEllerSED());
         } else {
-            Behandling sistAktivBehandling = fagsak.get().hentSistAktivBehandling();
+            Behandling sistAktivBehandling = fagsak.get().hentSistAktivBehandlingIkkeÅrsavregning();
 
             if (sistAktivBehandling.erAktiv()) {
                 behandlingService.endreStatus(sistAktivBehandling.getId(), Behandlingsstatus.VURDER_DOKUMENT);
@@ -78,7 +76,7 @@ public class DefaultSedRuter implements SedRuter {
     }
 
     private boolean sedTypeSkalHaOppgave(SedType sedType) {
-        return !Set.of(SedType.X001, SedType.X007, SedType.A012).contains(sedType);
+        return !Set.of(SedType.X001, SedType.X007, SedType.A012, SedType.X005).contains(sedType);
     }
 
     private void oppdaterEllerOpprettOppgave(Behandling behandling, Prosessinstans prosessinstans, SedType sedType) {

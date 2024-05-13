@@ -8,11 +8,11 @@ import no.nav.melosys.domain.kodeverk.Sakstyper
 import no.nav.melosys.domain.mottatteopplysninger.*
 import no.nav.melosys.domain.mottatteopplysninger.data.Periode
 import no.nav.melosys.domain.mottatteopplysninger.data.Soeknadsland
-import no.nav.melosys.domain.saksflyt.ProsessDataKey
-import no.nav.melosys.domain.saksflyt.Prosessinstans
 import no.nav.melosys.exception.FunksjonellException
 import no.nav.melosys.exception.IkkeFunnetException
 import no.nav.melosys.repository.MottatteOpplysningerRepository
+import no.nav.melosys.saksflytapi.domain.ProsessDataKey
+import no.nav.melosys.saksflytapi.domain.Prosessinstans
 import no.nav.melosys.service.behandling.BehandlingService
 import no.nav.melosys.service.behandling.UtledMottaksdato
 import no.nav.melosys.service.saksbehandling.SaksbehandlingRegler
@@ -41,7 +41,7 @@ class MottatteOpplysningerService(
     ): MottatteOpplysninger? =
         finnMottatteOpplysninger(behandlingID).orElseGet {
             val behandling = behandlingService.hentBehandling(behandlingID)
-            if (saksbehandlingRegler.harTomFlyt(behandling) || !behandlingKanRedigeresAvSaksbehandler) {
+            if (saksbehandlingRegler.harIngenFlyt(behandling) || !behandlingKanRedigeresAvSaksbehandler) {
                 throw IkkeFunnetException("Finner ikke mottatteOpplysninger for behandling $behandlingID")
             } else {
                 opprettSøknadEllerAnmodningEllerAttest(behandling, Periode(), Soeknadsland())
@@ -114,7 +114,7 @@ class MottatteOpplysningerService(
         behandling: Behandling, periode: Periode?, soeknadsland: Soeknadsland?
     ): MottatteOpplysninger? {
         val behandlingID = behandling.id
-        if (saksbehandlingRegler.harTomFlyt(behandling)) {
+        if (saksbehandlingRegler.harIngenFlyt(behandling)) {
             log.info { "Søknad trengs ikke og opprettes ikke for behandling $behandlingID med tema ${behandling.tema}" }
             return null
         }
@@ -185,7 +185,7 @@ class MottatteOpplysningerService(
             this.mottaksdato = utledMottaksdato.getMottaksdato(behandling)
             this.originalData = originalData
             this.eksternReferanseID = eksternReferanseID
-            this.setMottatteOpplysningerdata(mottatteOpplysningerData)
+            this.mottatteOpplysningerData = mottatteOpplysningerData
         }
 
         behandling.mottatteOpplysninger = mottatteOpplysninger

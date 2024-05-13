@@ -3,9 +3,10 @@ package no.nav.melosys.saksflyt.steg.oppgave;
 import no.nav.melosys.domain.Aktoer;
 import no.nav.melosys.domain.Behandling;
 import no.nav.melosys.domain.Fagsak;
+import no.nav.melosys.domain.FagsakTestFactory;
 import no.nav.melosys.domain.kodeverk.Aktoersroller;
-import no.nav.melosys.domain.saksflyt.ProsessDataKey;
-import no.nav.melosys.domain.saksflyt.Prosessinstans;
+import no.nav.melosys.saksflytapi.domain.ProsessDataKey;
+import no.nav.melosys.saksflytapi.domain.Prosessinstans;
 import no.nav.melosys.service.oppgave.OppgaveService;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -30,15 +31,9 @@ class OpprettOppgaveTest {
     @Test
     void utfoerSteg_nySak_sendForvaltningsmelding() {
         final String journalpostID = "142342343";
-        final String aktørID = "1242142";
         final String saksbehandler = "meg!";
 
-        Aktoer bruker = new Aktoer();
-        bruker.setRolle(Aktoersroller.BRUKER);
-        bruker.setAktørId(aktørID);
-
-        Fagsak fagsak = new Fagsak();
-        fagsak.getAktører().add(bruker);
+        Fagsak fagsak = FagsakTestFactory.builder().medBruker().build();
 
         Behandling behandling = new Behandling();
         behandling.setId(243L);
@@ -52,22 +47,15 @@ class OpprettOppgaveTest {
 
         opprettOppgave.utfør(prosessinstans);
 
-        verify(oppgaveService).opprettEllerGjenbrukBehandlingsoppgave(behandling, journalpostID, aktørID, saksbehandler, null);
+        verify(oppgaveService).opprettEllerGjenbrukBehandlingsoppgave(behandling, journalpostID, FagsakTestFactory.BRUKER_AKTØR_ID, saksbehandler, null);
     }
 
     @Test
     void utfoerSteg_nyOppgave_virksomhet() {
         final String journalpostID = "142342343";
-        final String orgnr = "999999999";
         final String saksbehandler = "meg!";
 
-        Aktoer virksomhet = new Aktoer();
-        virksomhet.setOrgnr(orgnr);
-        virksomhet.setRolle(Aktoersroller.VIRKSOMHET);
-        virksomhet.setAktørId(orgnr);
-
-        Fagsak fagsak = new Fagsak();
-        fagsak.getAktører().add(virksomhet);
+        Fagsak fagsak = FagsakTestFactory.builder().medVirksomhet().build();
 
         Behandling behandling = new Behandling();
         behandling.setId(243L);
@@ -81,6 +69,6 @@ class OpprettOppgaveTest {
 
         opprettOppgave.utfør(prosessinstans);
 
-        verify(oppgaveService).opprettEllerGjenbrukBehandlingsoppgave(behandling, journalpostID, null, saksbehandler, orgnr);
+        verify(oppgaveService).opprettEllerGjenbrukBehandlingsoppgave(behandling, journalpostID, null, saksbehandler, FagsakTestFactory.ORGNR);
     }
 }

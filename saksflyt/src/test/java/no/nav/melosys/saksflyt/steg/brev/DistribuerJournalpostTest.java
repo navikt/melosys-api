@@ -11,12 +11,12 @@ import no.nav.melosys.domain.brev.DokgenBrevbestilling;
 import no.nav.melosys.domain.brev.MangelbrevBrevbestilling;
 import no.nav.melosys.domain.kodeverk.Land_iso2;
 import no.nav.melosys.domain.kodeverk.Mottakerroller;
-import no.nav.melosys.domain.saksflyt.ProsessDataKey;
-import no.nav.melosys.domain.saksflyt.Prosessinstans;
 import no.nav.melosys.exception.FunksjonellException;
 import no.nav.melosys.integrasjon.doksys.DoksysFasade;
 import no.nav.melosys.integrasjon.ereg.EregFasade;
 import no.nav.melosys.saksflyt.TestdataFactory;
+import no.nav.melosys.saksflytapi.domain.ProsessDataKey;
+import no.nav.melosys.saksflytapi.domain.Prosessinstans;
 import no.nav.melosys.service.aktoer.KontaktopplysningService;
 import no.nav.melosys.service.aktoer.UtenlandskMyndighetService;
 import no.nav.melosys.service.behandling.BehandlingService;
@@ -143,12 +143,12 @@ class DistribuerJournalpostTest {
     @Test
     void utførDistribuerJournalpostMedUtenlandskMyndighet() {
         final String journalpostId = "12345";
-        final String institusjonId = "GB:A100";
+        final String institusjonID = "GB:A100";
         Prosessinstans prosessinstans = setupHappypath(journalpostId, Mottakerroller.UTENLANDSK_TRYGDEMYNDIGHET, Distribusjonstype.VIKTIG);
-        prosessinstans.setData(ProsessDataKey.INSTITUSJON_ID, institusjonId);
+        prosessinstans.setData(ProsessDataKey.INSTITUSJON_ID, institusjonID);
 
         var utenlandskMyndighet = new UtenlandskMyndighet();
-        utenlandskMyndighet.landkode = Land_iso2.GB;
+        utenlandskMyndighet.setLandkode(Land_iso2.GB);
 
         when(mockUtenlandskMyndighetService.hentUtenlandskMyndighet(eq(Land_iso2.GB), any())).thenReturn(utenlandskMyndighet);
 

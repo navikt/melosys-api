@@ -7,6 +7,7 @@ import java.util.stream.Collectors;
 
 import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.Maps;
+import com.google.common.collect.Sets;
 import no.nav.melosys.domain.Behandling;
 import no.nav.melosys.domain.Saksopplysning;
 import no.nav.melosys.domain.SaksopplysningType;
@@ -15,7 +16,7 @@ import no.nav.melosys.domain.dokument.inntekt.InntektDokument;
 import no.nav.melosys.exception.TekniskException;
 import no.nav.melosys.integrasjon.aareg.AaregFasade;
 import no.nav.melosys.integrasjon.ereg.EregFasade;
-import no.nav.melosys.integrasjon.inntk.InntektFasade;
+import no.nav.melosys.integrasjon.inntekt.InntektService;
 import no.nav.melosys.integrasjon.utbetaling.UtbetaldataRestService;
 import no.nav.melosys.service.behandling.BehandlingService;
 import no.nav.melosys.service.kontroll.regler.PeriodeRegler;
@@ -49,7 +50,7 @@ public class RegisteropplysningerService {
     private final EregFasade eregFasade;
     private final AaregFasade aaregFasade;
     private final BehandlingService behandlingService;
-    private final InntektFasade inntektService;
+    private final InntektService inntektService;
     private final SaksopplysningerService saksopplysningerService;
     private final RegisteropplysningerPeriodeFactory registeropplysningerPeriodeFactory;
     private final UtbetaldataRestService utbetaldataRestService;
@@ -58,7 +59,7 @@ public class RegisteropplysningerService {
                                        EregFasade eregFasade,
                                        AaregFasade aaregFasade,
                                        BehandlingService behandlingService,
-                                       InntektFasade inntektService,
+                                       InntektService inntektService,
                                        SaksopplysningerService saksopplysningerService,
                                        RegisteropplysningerPeriodeFactory registeropplysningerPeriodeFactory,
                                        UtbetaldataRestService utbetaldataRestService) {
@@ -82,6 +83,9 @@ public class RegisteropplysningerService {
         if (registeropplysningerRequest.getOpplysningstyper().isEmpty()) {
             log.info("Var ingen registeropplysninger å hente for behandling {}", registeropplysningerRequest.getBehandlingID());
             return;
+        }
+        if (registeropplysningerRequest.hentOpplysningerFor5aar()) {
+            registeropplysningerRequest.setFom(registeropplysningerRequest.getFom().minusYears(5));
         }
 
         Behandling behandling = behandlingService.hentBehandlingMedSaksopplysninger(registeropplysningerRequest.getBehandlingID());
@@ -180,20 +184,22 @@ public class RegisteropplysningerService {
     }
 
     private List<Saksopplysning> hentOrganisasjonsopplysninger(RegisteropplysningerRequest registeropplysningerRequest, Behandling behandling) {
-        Set<String> orgnumre = new HashSet<>();
+        Set<String> orgnumreFraArbeidsforhold = saksopplysningerService.finnArbeidsforholdsopplysninger(behandling.getId())
+            .map(ArbeidsforholdDokument::hentOrgnumre)
+            .orElseGet(Collections::emptySet);
+        Set<String> orgnumreFraInntekt = saksopplysningerService.finnInntektsopplysninger(behandling.getId())
+            .map(InntektDokument::hentOrgnumre)
+            .orElseGet(Collections::emptySet);
 
-        Optional<ArbeidsforholdDokument> arbeidsforholdDokument = saksopplysningerService.finnArbeidsforholdsopplysninger(behandling.getId());
-        Optional<InntektDokument> inntektDokument = saksopplysningerService.finnInntektsopplysninger(behandling.getId());
+        return Sets.union(orgnumreFraArbeidsforhold, orgnumreFraInntekt).stream()
+            .filter(RegisteropplysningerService::erGyldigOrgnr)
+            .map(eregFasade::hentOrganisasjon)
+            .toList();
+    }
 
-        arbeidsforholdDokument.ifPresent(dokument -> orgnumre.addAll(dokument.hentOrgnumre()));
-        inntektDokument.ifPresent(dokument -> orgnumre.addAll(dokument.hentOrgnumre()));
-
-        List<Saksopplysning> saksopplysninger = new ArrayList<>();
-        for (String orgnr : orgnumre) {
-            saksopplysninger.add(eregFasade.hentOrganisasjon(orgnr));
-        }
-
-        return saksopplysninger;
+    // Ereg har ikke data om personer, men arbeidsforhold og inntekt kan innneholde fnr registrert som orgnr
+    private static boolean erGyldigOrgnr(String orgnr) {
+        return orgnr != null && orgnr.length() != 11;
     }
 
     @Transactional

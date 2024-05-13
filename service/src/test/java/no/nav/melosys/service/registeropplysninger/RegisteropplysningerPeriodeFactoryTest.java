@@ -5,6 +5,7 @@ import java.time.YearMonth;
 
 import no.nav.melosys.domain.Behandling;
 import no.nav.melosys.domain.Fagsak;
+import no.nav.melosys.domain.FagsakTestFactory;
 import no.nav.melosys.domain.kodeverk.Sakstyper;
 import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingstema;
 import org.junit.jupiter.api.BeforeEach;
@@ -167,6 +168,18 @@ class RegisteropplysningerPeriodeFactoryTest {
     }
 
     @Test
+    void hentPeriodeForYtelser_åpenPeriodeMottakSed_forespørTomTilDatoOgDagensDatoFom() {
+        LocalDate now = LocalDate.now();
+        LocalDate fom = LocalDate.now();
+        LocalDate tom = null;
+
+        RegisteropplysningerPeriodeFactory.Periode periode = factory.hentPeriodeForInntekt(fom, tom, mottakAvSed);
+
+        assertThat(periode.fom).isEqualTo(YearMonth.from(fom.minusMonths(2)));
+        assertThat(periode.tom).isEqualTo(YearMonth.from(now));
+    }
+
+    @Test
     void hentPeriodeForYtelser_åpenPeriodeBehandlingSøknad_forespørTomTilDato() {
         LocalDate idag = LocalDate.now();
         LocalDate fom = idag.minusYears(2);
@@ -183,9 +196,7 @@ class RegisteropplysningerPeriodeFactoryTest {
         behandling.setTema(erBehandlingAvSøknad
             ? Behandlingstema.UTSENDT_ARBEIDSTAKER
             : Behandlingstema.ANMODNING_OM_UNNTAK_HOVEDREGEL);
-        Fagsak fagsak = new Fagsak();
-        fagsak.setType(Sakstyper.EU_EOS);
-        behandling.setFagsak(fagsak);
+        behandling.setFagsak(FagsakTestFactory.lagFagsak());
         return behandling;
     }
 }

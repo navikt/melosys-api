@@ -16,6 +16,7 @@ public interface Adresse {
 
     static String sammenslå(String... strings) {
         return Arrays.stream(strings)
+            .filter(Objects::nonNull)
             .reduce("", (res, s) -> res + " " + Objects.toString(s, "")).trim();
     }
 

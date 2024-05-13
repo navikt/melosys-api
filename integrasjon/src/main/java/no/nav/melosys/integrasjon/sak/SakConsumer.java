@@ -4,15 +4,15 @@ import java.security.NoSuchAlgorithmException;
 import java.util.Collections;
 import java.util.List;
 import javax.net.ssl.SSLContext;
-import javax.ws.rs.client.Client;
-import javax.ws.rs.client.ClientBuilder;
-import javax.ws.rs.client.Entity;
-import javax.ws.rs.client.WebTarget;
-import javax.ws.rs.core.GenericType;
-import javax.ws.rs.core.HttpHeaders;
-import javax.ws.rs.core.MediaType;
-import javax.ws.rs.core.Response;
-import javax.ws.rs.core.Response.Status.Family;
+import jakarta.ws.rs.client.Client;
+import jakarta.ws.rs.client.ClientBuilder;
+import jakarta.ws.rs.client.Entity;
+import jakarta.ws.rs.client.WebTarget;
+import jakarta.ws.rs.core.GenericType;
+import jakarta.ws.rs.core.HttpHeaders;
+import jakarta.ws.rs.core.MediaType;
+import jakarta.ws.rs.core.Response;
+import jakarta.ws.rs.core.Response.Status.Family;
 
 import no.nav.melosys.exception.IntegrasjonException;
 import no.nav.melosys.exception.TekniskException;
@@ -25,8 +25,8 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.retry.annotation.Retryable;
 
-import static no.nav.melosys.integrasjon.felles.mdc.MDCOperations.X_CORRELATION_ID;
-import static no.nav.melosys.integrasjon.felles.mdc.MDCOperations.getCorrelationId;
+import static no.nav.melosys.config.MDCOperations.X_CORRELATION_ID;
+import static no.nav.melosys.config.MDCOperations.getCorrelationId;
 
 @Retryable
 public class SakConsumer implements FeilHandterer, BasicAuthAware {

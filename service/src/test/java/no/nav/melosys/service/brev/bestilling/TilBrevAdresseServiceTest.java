@@ -8,8 +8,6 @@ import no.nav.melosys.domain.adresse.StrukturertAdresse;
 import no.nav.melosys.domain.brev.Mottaker;
 import no.nav.melosys.domain.dokument.felles.Land;
 import no.nav.melosys.domain.dokument.felles.Periode;
-import no.nav.melosys.domain.dokument.organisasjon.OrganisasjonDokument;
-import no.nav.melosys.domain.dokument.organisasjon.OrganisasjonsDetaljer;
 import no.nav.melosys.domain.dokument.organisasjon.adresse.SemistrukturertAdresse;
 import no.nav.melosys.domain.dokument.person.PersonDokument;
 import no.nav.melosys.domain.kodeverk.Aktoersroller;
@@ -22,7 +20,8 @@ import no.nav.melosys.exception.FunksjonellException;
 import no.nav.melosys.integrasjon.ereg.EregFasade;
 import no.nav.melosys.service.aktoer.KontaktopplysningService;
 import no.nav.melosys.service.aktoer.UtenlandskMyndighetService;
-import no.nav.melosys.service.brev.brevmalliste.BrevAdresse;
+import no.nav.melosys.service.brev.BrevAdresse;
+import no.nav.melosys.service.brev.TilBrevAdresseService;
 import no.nav.melosys.service.persondata.PersondataFasade;
 import no.nav.melosys.service.persondata.PersonopplysningerObjectFactory;
 import org.junit.jupiter.api.Test;
@@ -33,10 +32,12 @@ import org.mockito.junit.jupiter.MockitoExtension;
 
 import static java.util.Collections.emptyList;
 import static java.util.Collections.emptySet;
+import static no.nav.melosys.service.persondata.PersonopplysningerObjectFactory.lagPersonopplysninger;
 import static no.nav.melosys.service.persondata.PersonopplysningerObjectFactory.lagPersonopplysningerUtenOppholdsadresseOgKontaktadresse;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatExceptionOfType;
 import static org.mockito.ArgumentMatchers.anyString;
+import static org.mockito.Mockito.verifyNoInteractions;
 import static org.mockito.Mockito.when;
 
 @ExtendWith(MockitoExtension.class)
@@ -77,7 +78,8 @@ class TilBrevAdresseServiceTest {
                 BrevAdresse::getPostnr,
                 BrevAdresse::getPoststed,
                 BrevAdresse::getRegion,
-                BrevAdresse::getLand)
+                BrevAdresse::getLand,
+                BrevAdresse::getUgyldig)
             .containsExactly(
                 "Nordmann Ola",
                 null,
@@ -85,7 +87,8 @@ class TilBrevAdresseServiceTest {
                 "1234",
                 "Oslo",
                 "Norge",
-                "NO");
+                "NO",
+                false);
     }
 
     @Test
@@ -108,7 +111,8 @@ class TilBrevAdresseServiceTest {
                 BrevAdresse::getPostnr,
                 BrevAdresse::getPoststed,
                 BrevAdresse::getRegion,
-                BrevAdresse::getLand)
+                BrevAdresse::getLand,
+                BrevAdresse::getUgyldig)
             .containsExactly(
                 "Ola Nordmann Fullmektig",
                 "orgnr",
@@ -116,7 +120,8 @@ class TilBrevAdresseServiceTest {
                 "0123",
                 "Oslo",
                 null,
-                Land.NORGE);
+                Land.NORGE,
+                false);
     }
 
 
@@ -140,7 +145,8 @@ class TilBrevAdresseServiceTest {
                 BrevAdresse::getPostnr,
                 BrevAdresse::getPoststed,
                 BrevAdresse::getRegion,
-                BrevAdresse::getLand)
+                BrevAdresse::getLand,
+                BrevAdresse::getUgyldig)
             .containsExactly(
                 "Nordmann Ola",
                 null,
@@ -148,7 +154,8 @@ class TilBrevAdresseServiceTest {
                 "1234",
                 "Oslo",
                 "Norge",
-                "NO");
+                "NO",
+                false);
     }
 
 
@@ -172,7 +179,8 @@ class TilBrevAdresseServiceTest {
                 BrevAdresse::getPostnr,
                 BrevAdresse::getPoststed,
                 BrevAdresse::getRegion,
-                BrevAdresse::getLand)
+                BrevAdresse::getLand,
+                BrevAdresse::getUgyldig)
             .containsExactly(
                 "Ola Nordmann Rørleggerfirma",
                 "orgnr",
@@ -180,7 +188,8 @@ class TilBrevAdresseServiceTest {
                 "0123",
                 "Oslo",
                 null,
-                Land.NORGE);
+                Land.NORGE,
+                false);
     }
 
     @Test
@@ -203,7 +212,8 @@ class TilBrevAdresseServiceTest {
                 BrevAdresse::getPostnr,
                 BrevAdresse::getPoststed,
                 BrevAdresse::getRegion,
-                BrevAdresse::getLand)
+                BrevAdresse::getLand,
+                BrevAdresse::getUgyldig)
             .containsExactly(
                 "Ola Nordmann Rørleggerfirma",
                 "orgnr",
@@ -211,7 +221,8 @@ class TilBrevAdresseServiceTest {
                 "0123",
                 "Oslo",
                 null,
-                Land.NORGE);
+                Land.NORGE,
+                false);
     }
 
 
@@ -256,8 +267,17 @@ class TilBrevAdresseServiceTest {
                 BrevAdresse::getPostnr,
                 BrevAdresse::getPoststed,
                 BrevAdresse::getRegion,
-                BrevAdresse::getLand)
-            .containsExactly("Nordmann Ola", null, null, null, null, null, null);
+                BrevAdresse::getLand,
+                BrevAdresse::getUgyldig)
+            .containsExactly(
+                "Nordmann Ola",
+                null,
+                null,
+                null,
+                null,
+                null,
+                null,
+                true);
     }
 
     @Test
@@ -277,6 +297,82 @@ class TilBrevAdresseServiceTest {
             .isEqualTo(List.of("gatenavnFraBostedsadresse 3"));
     }
 
+    @Test
+    void tilBrevAdresse_verkenPersonIdentEllerOrgnr_kasterFeil() {
+        assertThatExceptionOfType(FunksjonellException.class)
+            .isThrownBy(() -> tilBrevAdresseService.tilBrevAdresse((String) null, null))
+            .withMessageContaining("Kan ikke finne adresse uten personIdent og organisasjonsnummer");
+    }
+
+    @Test
+    void tilBrevAdresse_finnerIkkePersonDataFraPersonIdent_kasterFeil() {
+        assertThatExceptionOfType(FunksjonellException.class)
+            .isThrownBy(() -> tilBrevAdresseService.tilBrevAdresse("123", null))
+            .withMessageContaining("Finner ikke persondata for personIdent");
+    }
+
+    @Test
+    void tilBrevAdresse_personIdentSendesInn_returnererPersonAdresse() {
+        when(persondataFasade.hentPerson("123")).thenReturn(lagPersonopplysninger());
+
+
+        var brevAdresse = tilBrevAdresseService.tilBrevAdresse("123", null);
+
+
+        verifyNoInteractions(eregFasade);
+        assertThat(brevAdresse)
+            .isNotNull()
+            .extracting(
+                BrevAdresse::getMottakerNavn,
+                BrevAdresse::getOrgnr,
+                BrevAdresse::getAdresselinjer,
+                BrevAdresse::getPostnr,
+                BrevAdresse::getPoststed,
+                BrevAdresse::getRegion,
+                BrevAdresse::getLand,
+                BrevAdresse::getUgyldig)
+            .containsExactly(
+                "Nordmann Ola",
+                null,
+                List.of("gatenavnKontaktadressePDL"),
+                "0123",
+                "Poststed",
+                null,
+                "NO",
+                false);
+    }
+
+    @Test
+    void tilBrevAdresse_orgnrSendesInn_returnererOrganisasjonsAdresse() {
+        when(eregFasade.hentOrganisasjon("orgnr")).thenReturn(lagOrgSaksopplysning("orgnr", "Ola Nordmann Rørleggerfirma"));
+
+
+        var brevAdresse = tilBrevAdresseService.tilBrevAdresse(null, "orgnr");
+
+
+        verifyNoInteractions(persondataFasade);
+        assertThat(brevAdresse)
+            .isNotNull()
+            .extracting(
+                BrevAdresse::getMottakerNavn,
+                BrevAdresse::getOrgnr,
+                BrevAdresse::getAdresselinjer,
+                BrevAdresse::getPostnr,
+                BrevAdresse::getPoststed,
+                BrevAdresse::getRegion,
+                BrevAdresse::getLand,
+                BrevAdresse::getUgyldig)
+            .containsExactly(
+                "Ola Nordmann Rørleggerfirma",
+                "orgnr",
+                List.of("Gateadresse 43A"),
+                "0123",
+                "Oslo",
+                null,
+                Land.NORGE,
+                false);
+    }
+
     private Behandling lagBehandling() {
         Behandling behandling = new Behandling();
         behandling.setFagsak(lagFagsak());
@@ -285,21 +381,16 @@ class TilBrevAdresseServiceTest {
     }
 
     private Fagsak lagFagsak() {
-        Fagsak fagsak = new Fagsak();
-        Aktoer bruker = new Aktoer();
-        bruker.setRolle(Aktoersroller.BRUKER);
-        bruker.setAktørId("aktørId");
-        fagsak.getAktører().add(bruker);
-        return fagsak;
+        return FagsakTestFactory.builder().medBruker().build();
     }
 
     private Saksopplysning lagPERSOPLSaksopplysning() {
         var dokument = new PersonDokument();
         dokument.setFnr("12345678910");
         dokument.setSammensattNavn("Ola Nordmann");
-        dokument.getGjeldendePostadresse().adresselinje1 = "Gateadresse 43A";
-        dokument.getGjeldendePostadresse().postnr = "0123";
-        dokument.getGjeldendePostadresse().land = Land.av(Land.NORGE);
+        dokument.getGjeldendePostadresse().setAdresselinje1("Gateadresse 43A");
+        dokument.getGjeldendePostadresse().setPostnr("0123");
+        dokument.getGjeldendePostadresse().setLand(Land.av(Land.NORGE));
         var saksopplysning = new Saksopplysning();
         saksopplysning.setDokument(dokument);
         saksopplysning.setType(SaksopplysningType.PERSOPL);
@@ -313,12 +404,15 @@ class TilBrevAdresseServiceTest {
         geogragiskAdresse.setPoststed("Oslo");
         geogragiskAdresse.setLandkode(Land.NORGE);
         geogragiskAdresse.setGyldighetsperiode(new Periode(LocalDate.MIN, LocalDate.MAX));
-        var organisasjonsDetaljer = new OrganisasjonsDetaljer();
-        organisasjonsDetaljer.postadresse.add(geogragiskAdresse);
-        var dokument = new OrganisasjonDokument();
-        dokument.setOrganisasjonDetaljer(organisasjonsDetaljer);
-        dokument.setNavn(List.of(navn));
-        dokument.setOrgnummer(orgNummer);
+        var organisasjonsDetaljer = OrganisasjonsDetaljerTestFactory.builder()
+            .postadresse(geogragiskAdresse)
+            .build();
+        organisasjonsDetaljer.setPostadresse(List.of(geogragiskAdresse));
+        var dokument = OrganisasjonDokumentTestFactory.builder()
+            .orgnummer(orgNummer)
+            .navn(navn)
+            .organisasjonsDetaljer(organisasjonsDetaljer)
+            .build();
         var saksopplysning = new Saksopplysning();
         saksopplysning.setDokument(dokument);
         saksopplysning.setType(SaksopplysningType.ORG);

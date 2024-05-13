@@ -1,6 +1,6 @@
 package no.nav.melosys.domain.jpa;
 
-import javax.persistence.AttributeConverter;
+import jakarta.persistence.AttributeConverter;
 
 import no.nav.melosys.domain.kodeverk.LovvalgBestemmelse;
 import no.nav.melosys.domain.util.LovvalgBestemmelseUtils;

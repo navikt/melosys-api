@@ -7,6 +7,7 @@ import java.util.HashSet;
 import no.nav.melosys.domain.Aktoer;
 import no.nav.melosys.domain.Behandling;
 import no.nav.melosys.domain.Fagsak;
+import no.nav.melosys.domain.FagsakTestFactory;
 import no.nav.melosys.domain.kodeverk.Aktoersroller;
 import no.nav.melosys.domain.kodeverk.Sakstemaer;
 import no.nav.melosys.domain.kodeverk.Sakstyper;
@@ -16,7 +17,7 @@ import no.nav.melosys.domain.mottatteopplysninger.MottatteOpplysninger;
 import no.nav.melosys.domain.mottatteopplysninger.Soeknad;
 import no.nav.melosys.domain.mottatteopplysninger.SøknadNorgeEllerUtenforEØS;
 import no.nav.melosys.domain.mottatteopplysninger.data.Periode;
-import no.nav.melosys.domain.saksflyt.Prosessinstans;
+import no.nav.melosys.saksflytapi.domain.Prosessinstans;
 import no.nav.melosys.service.behandling.BehandlingService;
 import no.nav.melosys.service.persondata.PersondataFasade;
 import no.nav.melosys.service.registeropplysninger.RegisteropplysningerFactory;
@@ -52,7 +53,6 @@ class HentRegisteropplysningerTest {
     private ArgumentCaptor<RegisteropplysningerRequest> requestCaptor;
 
     private final Behandling behandling = new Behandling();
-    private final String aktørID = "54321";
 
     @BeforeEach
     public void setUp() {
@@ -61,13 +61,7 @@ class HentRegisteropplysningerTest {
 
         behandling.setId(222L);
 
-        Aktoer bruker = new Aktoer();
-        bruker.setRolle(Aktoersroller.BRUKER);
-        bruker.setAktørId(aktørID);
-
-        Fagsak fagsak = new Fagsak();
-        fagsak.setTema(Sakstemaer.MEDLEMSKAP_LOVVALG);
-        fagsak.getAktører().add(bruker);
+        Fagsak fagsak = FagsakTestFactory.builder().medBruker().build();
         behandling.setFagsak(fagsak);
         behandling.setType(Behandlingstyper.FØRSTEGANG);
 
@@ -78,11 +72,7 @@ class HentRegisteropplysningerTest {
     void utfør_hoppOverSteg() {
         Prosessinstans prosessinstans = new Prosessinstans();
         prosessinstans.setBehandling(behandling);
-        Fagsak fagsak = new Fagsak();
-        fagsak.setType(Sakstyper.FTRL);
-        Aktoer bruker = new Aktoer();
-        bruker.setRolle(Aktoersroller.BRUKER);
-        fagsak.setAktører(Collections.singleton(bruker));
+        Fagsak fagsak = FagsakTestFactory.builder().type(Sakstyper.FTRL).medBruker().build();
         behandling.setFagsak(fagsak);
         behandling.setTema(Behandlingstema.ARBEID_KUN_NORGE);
 
@@ -95,15 +85,8 @@ class HentRegisteropplysningerTest {
     void utfør_hoppOverSteg_virksomhet() {
         Prosessinstans prosessinstans = new Prosessinstans();
         prosessinstans.setBehandling(behandling);
-        Fagsak fagsak = new Fagsak();
 
-        fagsak.setAktører(new HashSet<>());
-        Aktoer a1 = new Aktoer();
-        a1.setRolle(Aktoersroller.VIRKSOMHET);
-        a1.setAktørId("123");
-        fagsak.getAktører().add(a1);
-
-        fagsak.setType(Sakstyper.FTRL);
+        Fagsak fagsak = FagsakTestFactory.builder().type(Sakstyper.FTRL).medVirksomhet().build();
         behandling.setFagsak(fagsak);
         behandling.setTema(Behandlingstema.ARBEID_KUN_NORGE);
 
@@ -115,14 +98,14 @@ class HentRegisteropplysningerTest {
     @Test
     void utfør_behandlingstemaUtsendtArbeidstaker_henterPeriodeFraSøknad() {
         String ident = "143545";
-        when(persondataFasade.hentFolkeregisterident(aktørID)).thenReturn(ident);
+        when(persondataFasade.hentFolkeregisterident(FagsakTestFactory.BRUKER_AKTØR_ID)).thenReturn(ident);
 
         behandling.getFagsak().setType(Sakstyper.EU_EOS);
         behandling.setTema(Behandlingstema.UTSENDT_ARBEIDSTAKER);
 
         Periode periode = new Periode(LocalDate.now(), LocalDate.now().plusYears(2));
         MottatteOpplysninger mottatteOpplysninger = new MottatteOpplysninger();
-        mottatteOpplysninger.setMottatteOpplysningerdata(new Soeknad());
+        mottatteOpplysninger.setMottatteOpplysningerData(new Soeknad());
         mottatteOpplysninger.getMottatteOpplysningerData().periode = periode;
         behandling.setMottatteOpplysninger(mottatteOpplysninger);
 
@@ -146,7 +129,7 @@ class HentRegisteropplysningerTest {
         behandling.getFagsak().setType(Sakstyper.FTRL);
 
         MottatteOpplysninger mottatteOpplysninger = new MottatteOpplysninger();
-        mottatteOpplysninger.setMottatteOpplysningerdata(new SøknadNorgeEllerUtenforEØS());
+        mottatteOpplysninger.setMottatteOpplysningerData(new SøknadNorgeEllerUtenforEØS());
         behandling.setMottatteOpplysninger(mottatteOpplysninger);
 
         Prosessinstans prosessinstans = new Prosessinstans();
@@ -163,7 +146,7 @@ class HentRegisteropplysningerTest {
         behandling.getFagsak().setType(Sakstyper.TRYGDEAVTALE);
 
         MottatteOpplysninger mottatteOpplysninger = new MottatteOpplysninger();
-        mottatteOpplysninger.setMottatteOpplysningerdata(new SøknadNorgeEllerUtenforEØS());
+        mottatteOpplysninger.setMottatteOpplysningerData(new SøknadNorgeEllerUtenforEØS());
         behandling.setMottatteOpplysninger(mottatteOpplysninger);
 
         Prosessinstans prosessinstans = new Prosessinstans();
@@ -182,7 +165,7 @@ class HentRegisteropplysningerTest {
         when(saksbehandlingRegler.harRegistreringUnntakFraMedlemskapFlyt(behandling)).thenReturn(true);
 
         MottatteOpplysninger mottatteOpplysninger = new MottatteOpplysninger();
-        mottatteOpplysninger.setMottatteOpplysningerdata(new SøknadNorgeEllerUtenforEØS());
+        mottatteOpplysninger.setMottatteOpplysningerData(new SøknadNorgeEllerUtenforEØS());
         behandling.setMottatteOpplysninger(mottatteOpplysninger);
 
         Prosessinstans prosessinstans = new Prosessinstans();
@@ -201,7 +184,7 @@ class HentRegisteropplysningerTest {
         when(saksbehandlingRegler.harRegistreringUnntakFraMedlemskapFlyt(behandling)).thenReturn(true);
 
         MottatteOpplysninger mottatteOpplysninger = new MottatteOpplysninger();
-        mottatteOpplysninger.setMottatteOpplysningerdata(new SøknadNorgeEllerUtenforEØS());
+        mottatteOpplysninger.setMottatteOpplysningerData(new SøknadNorgeEllerUtenforEØS());
         behandling.setMottatteOpplysninger(mottatteOpplysninger);
 
         Prosessinstans prosessinstans = new Prosessinstans();
@@ -213,12 +196,12 @@ class HentRegisteropplysningerTest {
     }
 
     @Test
-    void utfør_harTomFlyt_henterIngenting() {
+    void utfør_harIngenFlyt_henterIngenting() {
         behandling.setTema(Behandlingstema.TRYGDETID);
         behandling.getFagsak().setType(Sakstyper.EU_EOS);
         var prosessinstans = new Prosessinstans();
         prosessinstans.setBehandling(behandling);
-        when(saksbehandlingRegler.harTomFlyt(any(), any(), any(), any())).thenReturn(true);
+        when(saksbehandlingRegler.harIngenFlyt(any(), any(), any(), any())).thenReturn(true);
 
         hentRegisteropplysninger.utfør(prosessinstans);
 

@@ -4,18 +4,19 @@ import java.util.*;
 
 import no.nav.melosys.domain.*;
 import no.nav.melosys.domain.adresse.StrukturertAdresse;
-import no.nav.melosys.domain.mottatteopplysninger.MottatteOpplysninger;
-import no.nav.melosys.domain.mottatteopplysninger.Soeknad;
-import no.nav.melosys.domain.mottatteopplysninger.data.ForetakUtland;
-import no.nav.melosys.domain.mottatteopplysninger.data.SelvstendigForetak;
-import no.nav.melosys.domain.mottatteopplysninger.data.arbeidssteder.FysiskArbeidssted;
 import no.nav.melosys.domain.brev.DoksysBrevbestilling;
 import no.nav.melosys.domain.dokument.organisasjon.OrganisasjonDokument;
 import no.nav.melosys.domain.dokument.organisasjon.OrganisasjonsDetaljer;
 import no.nav.melosys.domain.dokument.person.PersonDokument;
 import no.nav.melosys.domain.kodeverk.Aktoersroller;
 import no.nav.melosys.domain.kodeverk.Landkoder;
+import no.nav.melosys.domain.mottatteopplysninger.MottatteOpplysninger;
+import no.nav.melosys.domain.mottatteopplysninger.Soeknad;
+import no.nav.melosys.domain.mottatteopplysninger.data.ForetakUtland;
+import no.nav.melosys.domain.mottatteopplysninger.data.SelvstendigForetak;
+import no.nav.melosys.domain.mottatteopplysninger.data.arbeidssteder.FysiskArbeidssted;
 import no.nav.melosys.service.LandvelgerService;
+import no.nav.melosys.domain.OrganisasjonDokumentTestFactory;
 import no.nav.melosys.service.avklartefakta.AvklarteVirksomheterService;
 import no.nav.melosys.service.avklartefakta.AvklartefaktaService;
 import no.nav.melosys.service.behandling.BehandlingService;
@@ -54,13 +55,7 @@ class BrevDataByggerA1Test {
 
     @BeforeEach
     void setUp() {
-
-        Aktoer aktoer = new Aktoer();
-        aktoer.setRolle(Aktoersroller.BRUKER);
-        aktoer.setAktørId("ident");
-
-        Fagsak fagsak = new Fagsak();
-        fagsak.setAktører(Set.of(aktoer));
+        Fagsak fagsak = FagsakTestFactory.builder().medBruker().build();
 
         Behandling behandling = new Behandling();
         behandling.setId(123L);
@@ -73,15 +68,15 @@ class BrevDataByggerA1Test {
 
         StrukturertAdresse oppgittAdresse = lagStrukturertAdresse();
         søknad = new Soeknad();
-        søknad.bosted.oppgittAdresse = oppgittAdresse;
+        søknad.bosted.setOppgittAdresse(oppgittAdresse);
 
         ForetakUtland foretakUtland = new ForetakUtland();
-        foretakUtland.orgnr = "12345678910";
-        foretakUtland.navn = "Utenlandsk arbeidsgiver AS";
+        foretakUtland.setOrgnr("12345678910");
+        foretakUtland.setNavn("Utenlandsk arbeidsgiver AS");
         søknad.foretakUtland.add(foretakUtland);
 
         behandling.setMottatteOpplysninger(new MottatteOpplysninger());
-        behandling.getMottatteOpplysninger().setMottatteOpplysningerdata(søknad);
+        behandling.getMottatteOpplysninger().setMottatteOpplysningerData(søknad);
 
         Saksopplysning person = new Saksopplysning();
         PersonDokument personDok = new PersonDokument();
@@ -118,10 +113,11 @@ class BrevDataByggerA1Test {
     }
 
     private OrganisasjonDokument leggTilTestorganisasjon(String navn, String orgnummer, OrganisasjonsDetaljer detaljer) {
-        OrganisasjonDokument org = new OrganisasjonDokument();
-        org.setOrgnummer(orgnummer);
-        org.setOrganisasjonDetaljer(detaljer);
-        org.setNavn(Collections.singletonList(navn));
+        OrganisasjonDokument org = OrganisasjonDokumentTestFactory.builder()
+            .orgnummer(orgnummer)
+            .navn(navn)
+            .organisasjonsDetaljer(detaljer)
+            .build();
         Saksopplysning saksopplysning = new Saksopplysning();
         saksopplysning.setType(SaksopplysningType.ORG);
         saksopplysning.setDokument(org);
@@ -140,20 +136,20 @@ class BrevDataByggerA1Test {
     void lag_sjekkAvklarteSelvstendigeForetak() {
         mockAvklarteOrganisasjoner(Collections.singletonList("999"));
         SelvstendigForetak foretak = new SelvstendigForetak();
-        foretak.orgnr = "999";
-        søknad.selvstendigArbeid.selvstendigForetak.add(foretak);
+        foretak.setOrgnr("999");
+        søknad.selvstendigArbeid.getSelvstendigForetak().add(foretak);
 
         BrevDataA1 brevDataDto = (BrevDataA1) brevDataByggerA1.lag(dataGrunnlag, saksbehandler);
-        assertThat(brevDataDto.hovedvirksomhet.orgnr).isEqualTo(foretak.orgnr);
+        assertThat(brevDataDto.getHovedvirksomhet().orgnr).isEqualTo(foretak.getOrgnr());
     }
 
     @Test
     void lag_hentAvklarteArbeidsgivere() {
         mockAvklarteOrganisasjoner(Collections.singletonList("7777"));
-        søknad.juridiskArbeidsgiverNorge.ekstraArbeidsgivere.add("7777");
+        søknad.juridiskArbeidsgiverNorge.getEkstraArbeidsgivere().add("7777");
 
         BrevDataA1 brevDataDto = (BrevDataA1) brevDataByggerA1.lag(dataGrunnlag, saksbehandler);
-        assertThat(brevDataDto.hovedvirksomhet.orgnr).isEqualTo("7777");
+        assertThat(brevDataDto.getHovedvirksomhet().orgnr).isEqualTo("7777");
     }
 
     private StrukturertAdresse lagStrukturertAdresse() {
@@ -170,16 +166,14 @@ class BrevDataByggerA1Test {
     void lag_ArbeidsstedHosOppdragsgiver_girUtenlandskvirksomhet() {
         mockAvklarteOrganisasjoner(Collections.singletonList(orgnr2));
 
-        FysiskArbeidssted fysiskArbeidssted = new FysiskArbeidssted();
-        fysiskArbeidssted.virksomhetNavn = "Utenlandsk Oppdragsgiver LTD";
-        fysiskArbeidssted.adresse = lagStrukturertAdresse();
-        søknad.arbeidPaaLand.fysiskeArbeidssteder.add(fysiskArbeidssted);
+        FysiskArbeidssted fysiskArbeidssted = new FysiskArbeidssted("Utenlandsk Oppdragsgiver LTD", lagStrukturertAdresse());
+        søknad.arbeidPaaLand.getFysiskeArbeidssteder().add(fysiskArbeidssted);
 
         BrevDataA1 brevDataDto = (BrevDataA1) brevDataByggerA1.lag(dataGrunnlag, saksbehandler);
-        assertThat(brevDataDto.bivirksomheter.stream().map(uv -> uv.navn)).contains(fysiskArbeidssted.virksomhetNavn);
-        assertThat(brevDataDto.arbeidssteder.stream()
+        assertThat(brevDataDto.getBivirksomheter().stream().map(uv -> uv.navn)).contains(fysiskArbeidssted.getVirksomhetNavn());
+        assertThat(brevDataDto.getArbeidssteder().stream()
             .filter(no.nav.melosys.service.dokument.brev.mapper.arbeidssted.Arbeidssted::erFysisk)
             .map(no.nav.melosys.service.dokument.brev.mapper.arbeidssted.FysiskArbeidssted.class::cast)
-            .map(no.nav.melosys.service.dokument.brev.mapper.arbeidssted.FysiskArbeidssted::getAdresse)).contains(fysiskArbeidssted.adresse);
+            .map(no.nav.melosys.service.dokument.brev.mapper.arbeidssted.FysiskArbeidssted::getAdresse)).contains(fysiskArbeidssted.getAdresse());
     }
 }

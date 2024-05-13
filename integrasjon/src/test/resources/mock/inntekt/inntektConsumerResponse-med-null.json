@@ -1,0 +1,18 @@
+{
+    "arbeidsInntektMaaned": [
+        {
+            "aarMaaned": "2022-01",
+            "arbeidsInntektInformasjon": {
+                "inntektListe": [
+                    {
+                        "inntektType": "YTELSE_FRA_OFFENTLIGE",
+                        "beloep": 50000,
+                        "inntektskilde": "A-ordningen",
+                        "inntektsstatus": "LoependeInnrapportert",
+                        "leveringstidspunkt": "2023-07"
+                    }
+                ]
+            }
+        }
+      ]
+}

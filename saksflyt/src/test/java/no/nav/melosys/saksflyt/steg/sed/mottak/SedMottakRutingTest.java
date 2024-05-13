@@ -3,13 +3,12 @@ package no.nav.melosys.saksflyt.steg.sed.mottak;
 import java.util.Collections;
 import java.util.Optional;
 
-import no.finn.unleash.FakeUnleash;
 import no.nav.melosys.domain.arkiv.Journalpost;
 import no.nav.melosys.domain.eessi.SedType;
 import no.nav.melosys.domain.eessi.melding.MelosysEessiMelding;
-import no.nav.melosys.domain.saksflyt.ProsessDataKey;
-import no.nav.melosys.domain.saksflyt.Prosessinstans;
 import no.nav.melosys.integrasjon.joark.JoarkFasade;
+import no.nav.melosys.saksflytapi.domain.ProsessDataKey;
+import no.nav.melosys.saksflytapi.domain.Prosessinstans;
 import no.nav.melosys.service.dokument.sed.EessiService;
 import no.nav.melosys.service.eessi.ruting.DefaultSedRuter;
 import no.nav.melosys.service.eessi.ruting.SedRuterForSedTyper;

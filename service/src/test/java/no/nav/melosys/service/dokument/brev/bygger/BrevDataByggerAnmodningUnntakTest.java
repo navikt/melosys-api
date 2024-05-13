@@ -2,10 +2,7 @@ package no.nav.melosys.service.dokument.brev.bygger;
 
 import java.util.*;
 
-import no.nav.melosys.domain.Behandling;
-import no.nav.melosys.domain.Fagsak;
-import no.nav.melosys.domain.Saksopplysning;
-import no.nav.melosys.domain.Vilkaarsresultat;
+import no.nav.melosys.domain.*;
 import no.nav.melosys.domain.brev.DoksysBrevbestilling;
 import no.nav.melosys.domain.dokument.organisasjon.OrganisasjonDokument;
 import no.nav.melosys.domain.dokument.organisasjon.OrganisasjonsDetaljer;
@@ -24,7 +21,7 @@ import no.nav.melosys.service.dokument.brev.datagrunnlag.BrevDataGrunnlag;
 import no.nav.melosys.service.kodeverk.KodeverkService;
 import no.nav.melosys.service.persondata.PersonopplysningerObjectFactory;
 import no.nav.melosys.service.registeropplysninger.OrganisasjonOppslagService;
-import no.nav.melosys.service.vilkaar.VilkaarsresultatService;
+import no.nav.melosys.service.behandling.VilkaarsresultatService;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -76,16 +73,15 @@ class BrevDataByggerAnmodningUnntakTest {
         Behandling behandling = lagBehandling();
 
         BrevDataAnmodningUnntak brevData = (BrevDataAnmodningUnntak) brevDataByggerAnmodningUnntak.lag(lagBrevressurser(behandling), saksbehandler);
-        assertThat(brevData.hovedvirksomhet.orgnr).isEqualTo("999");
-        assertThat(brevData.hovedvirksomhet.erSelvstendigForetak()).isTrue();
-        assertThat(brevData.arbeidsland).isEqualTo(Landkoder.DE.getBeskrivelse());
+        assertThat(brevData.getHovedvirksomhet().orgnr).isEqualTo("999");
+        assertThat(brevData.getHovedvirksomhet().erSelvstendigForetak()).isTrue();
+        assertThat(brevData.getArbeidsland()).isEqualTo(Landkoder.DE.getBeskrivelse());
     }
 
     private Behandling lagBehandling() {
         Behandling behandling = new Behandling();
         behandling.setId(1L);
-        Fagsak fagsak = new Fagsak();
-        fagsak.setType(Sakstyper.EU_EOS);
+        Fagsak fagsak = FagsakTestFactory.lagFagsak();
         behandling.setFagsak(fagsak);
 
         List<String> selvstendigeForetak = Collections.singletonList("987654321");
@@ -102,17 +98,18 @@ class BrevDataByggerAnmodningUnntakTest {
 
     public BrevDataGrunnlag lagBrevressurser(Behandling behandling) {
         AvklarteVirksomheterService avklarteVirksomheterService = new AvklarteVirksomheterService(avklartefaktaService,
-                                                                                                  organisasjonOppslagService, mock(BehandlingService.class), kodeverkService);
+            organisasjonOppslagService, mock(BehandlingService.class), kodeverkService);
 
         Set<String> orgSet = new HashSet<>(Collections.singletonList("987654321"));
         when(avklartefaktaService.hentAvklarteOrgnrOgUuid(behandling.getId())).thenReturn(orgSet);
 
         when(landvelgerService.hentArbeidsland(anyLong())).thenReturn(Land_iso2.DE);
-        OrganisasjonDokument organisasjonDokument = new OrganisasjonDokument();
-        organisasjonDokument.setOrgnummer("999");
         OrganisasjonsDetaljer organisasjonsDetaljer = mock(OrganisasjonsDetaljer.class);
         when(organisasjonsDetaljer.hentStrukturertForretningsadresse()).thenReturn(lagStrukturertAdresse());
-        organisasjonDokument.organisasjonDetaljer = organisasjonsDetaljer;
+        OrganisasjonDokument organisasjonDokument = OrganisasjonDokumentTestFactory.builder()
+            .orgnummer("999")
+            .organisasjonsDetaljer(organisasjonsDetaljer)
+            .build();
 
         when(organisasjonOppslagService.hentOrganisasjoner(orgSet)).thenReturn(new HashSet<>(Collections.singletonList(organisasjonDokument)));
         DoksysBrevbestilling brevbestilling = new DoksysBrevbestilling.Builder().medBehandling(behandling).build();
@@ -124,8 +121,8 @@ class BrevDataByggerAnmodningUnntakTest {
     void lag_brevDataUtenArt12_girAnmodningUtenArt12Begrunnelser() {
         Behandling behandling = lagBehandling();
         BrevDataAnmodningUnntak brevData = (BrevDataAnmodningUnntak) brevDataByggerAnmodningUnntak.lag(lagBrevressurser(behandling), saksbehandler);
-        assertThat(brevData.anmodningBegrunnelser).isEmpty();
-        assertThat(brevData.anmodningUtenArt12Begrunnelser).isNotEmpty();
+        assertThat(brevData.getAnmodningBegrunnelser()).isEmpty();
+        assertThat(brevData.getAnmodningUtenArt12Begrunnelser()).isNotEmpty();
     }
 
     @Test
@@ -135,8 +132,8 @@ class BrevDataByggerAnmodningUnntakTest {
 
         Behandling behandling = lagBehandling();
         BrevDataAnmodningUnntak brevData = (BrevDataAnmodningUnntak) brevDataByggerAnmodningUnntak.lag(lagBrevressurser(behandling), saksbehandler);
-        assertThat(brevData.anmodningBegrunnelser).isNotEmpty();
-        assertThat(brevData.anmodningUtenArt12Begrunnelser).isEmpty();
+        assertThat(brevData.getAnmodningBegrunnelser()).isNotEmpty();
+        assertThat(brevData.getAnmodningUtenArt12Begrunnelser()).isEmpty();
     }
 
     @Test
@@ -146,8 +143,8 @@ class BrevDataByggerAnmodningUnntakTest {
 
         Behandling behandling = lagBehandling();
         BrevDataAnmodningUnntak brevData = (BrevDataAnmodningUnntak) brevDataByggerAnmodningUnntak.lag(lagBrevressurser(behandling), saksbehandler);
-        assertThat(brevData.anmodningBegrunnelser).isNotEmpty();
-        assertThat(brevData.anmodningUtenArt12Begrunnelser).isEmpty();
+        assertThat(brevData.getAnmodningBegrunnelser()).isNotEmpty();
+        assertThat(brevData.getAnmodningUtenArt12Begrunnelser()).isEmpty();
     }
 
     @Test
@@ -157,8 +154,8 @@ class BrevDataByggerAnmodningUnntakTest {
 
         Behandling behandling = lagBehandling();
         BrevDataAnmodningUnntak brevData = (BrevDataAnmodningUnntak) brevDataByggerAnmodningUnntak.lag(lagBrevressurser(behandling), saksbehandler);
-        assertThat(brevData.anmodningBegrunnelser).isNotEmpty();
-        assertThat(brevData.anmodningUtenArt12Begrunnelser).isEmpty();
+        assertThat(brevData.getAnmodningBegrunnelser()).isNotEmpty();
+        assertThat(brevData.getAnmodningUtenArt12Begrunnelser()).isEmpty();
     }
 
     @Test
@@ -169,6 +166,6 @@ class BrevDataByggerAnmodningUnntakTest {
 
         Behandling behandling = lagBehandling();
         BrevDataAnmodningUnntak brevData = (BrevDataAnmodningUnntak) brevDataByggerAnmodningUnntak.lag(lagBrevressurser(behandling), saksbehandler);
-        assertThat(brevData.anmodningFritekst).isEqualTo("FRITEKST");
+        assertThat(brevData.getAnmodningFritekst()).isEqualTo("FRITEKST");
     }
 }

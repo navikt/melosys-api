@@ -1,6 +1,6 @@
 package no.nav.melosys.integrasjon.aareg.arbeidsforhold
 
-import no.nav.melosys.integrasjon.reststs.RestStsClient
+import no.nav.melosys.integrasjon.reststs.RestSTSService
 import org.springframework.http.HttpHeaders
 import org.springframework.stereotype.Component
 import org.springframework.web.reactive.function.client.ClientRequest
@@ -11,23 +11,23 @@ import reactor.core.publisher.Mono
 import java.util.function.Supplier
 
 @Component
-class ArbeidsforholdContextExchangeFilter(private val restStsClient: RestStsClient) : ExchangeFilterFunction {
+class ArbeidsforholdContextExchangeFilter(private val restSTSService: RestSTSService) : ExchangeFilterFunction {
     override fun filter(
         clientRequest: ClientRequest,
         exchangeFunction: ExchangeFunction,
     ): Mono<ClientResponse> {
         return exchangeFunction.exchange(
             ClientRequest.from(clientRequest)
-                .header(HttpHeaders.AUTHORIZATION, getTokenSupplier(restStsClient).get())
-                .header(NAV_CONSUMER_TOKEN, restStsClient.bearerToken())
+                .header(HttpHeaders.AUTHORIZATION, getTokenSupplier(restSTSService).get())
+                .header(NAV_CONSUMER_TOKEN, restSTSService.bearerToken())
                 .build()
         )
     }
 
-    private fun getTokenSupplier(restStsClient: RestStsClient): Supplier<String> {
+    private fun getTokenSupplier(restSTSService: RestSTSService): Supplier<String> {
         // Om vi får lagt inn "0000-ga-aa-register-konsument" i sakbehandler token kan vi benytte dette når tilgjengelig
         // https://nav-it.slack.com/archives/C01BSCJM127/p1649411252534409
-        return Supplier { restStsClient.bearerToken() }
+        return Supplier { restSTSService.bearerToken() }
     }
 
     companion object {

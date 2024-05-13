@@ -3,7 +3,7 @@ package no.nav.melosys.domain.avklartefakta;
 import java.util.HashSet;
 import java.util.Objects;
 import java.util.Set;
-import javax.persistence.*;
+import jakarta.persistence.*;
 
 import no.nav.melosys.domain.Behandlingsresultat;
 import no.nav.melosys.domain.kodeverk.Avklartefaktatyper;
@@ -155,9 +155,5 @@ public class Avklartefakta {
             ", begrunnelseFritekst='" + begrunnelseFritekst + '\'' +
             ", registreringer=" + registreringer +
             '}';
-    }
-
-    public static boolean erValgtFakta(Avklartefakta avklartefakta) {
-        return VALGT_FAKTA.equalsIgnoreCase(avklartefakta.getFakta());
     }
 }

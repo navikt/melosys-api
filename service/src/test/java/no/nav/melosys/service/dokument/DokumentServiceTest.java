@@ -40,7 +40,6 @@ import no.nav.melosys.integrasjon.kodeverk.KodeverkRegister;
 import no.nav.melosys.repository.AvklarteFaktaRepository;
 import no.nav.melosys.repository.BehandlingsresultatRepository;
 import no.nav.melosys.repository.UtenlandskMyndighetRepository;
-import no.nav.melosys.repository.VilkaarsresultatRepository;
 import no.nav.melosys.service.LandvelgerService;
 import no.nav.melosys.service.LovvalgsperiodeService;
 import no.nav.melosys.service.aktoer.KontaktopplysningService;
@@ -65,7 +64,7 @@ import no.nav.melosys.service.registeropplysninger.OrganisasjonOppslagService;
 import no.nav.melosys.service.saksopplysninger.SaksopplysningerService;
 import no.nav.melosys.service.unntak.AnmodningsperiodeService;
 import no.nav.melosys.service.utpeking.UtpekingService;
-import no.nav.melosys.service.vilkaar.VilkaarsresultatService;
+import no.nav.melosys.service.behandling.VilkaarsresultatService;
 import no.nav.melosys.sikkerhet.context.SpringSubjectHandler;
 import no.nav.melosys.sikkerhet.context.TestSubjectHandler;
 import org.junit.jupiter.api.BeforeEach;
@@ -83,7 +82,6 @@ import static org.mockito.Mockito.*;
 
 final class DokumentServiceTest {
     private static final long BEHANDLINGSID = 13L;
-    private static final long GSAKSNUMMER = 321L;
     private static final String ORGNR = "123456789";
 
     private static long idTeller = 1L;
@@ -171,34 +169,34 @@ final class DokumentServiceTest {
     private static BrevData lagBrevDataInnvilgelse() {
         BrevDataA1 brevDataA1 = new BrevDataA1();
         AvklartVirksomhet arbeidsgiver = new AvklartVirksomhet("Virker av og til", "987654321", lagStrukturertAdresse(), Yrkesaktivitetstyper.LOENNET_ARBEID);
-        brevDataA1.hovedvirksomhet = arbeidsgiver;
-        brevDataA1.bostedsadresse = lagStrukturertAdresse();
-        brevDataA1.yrkesgruppe = Yrkesgrupper.FLYENDE_PERSONELL;
-        brevDataA1.bivirksomheter = Collections.emptyList();
-        brevDataA1.person = lagPersonopplysninger();
-        brevDataA1.arbeidssteder = new ArrayList<>();
-        brevDataA1.arbeidsland = new ArrayList<>();
+        brevDataA1.setHovedvirksomhet(arbeidsgiver);
+        brevDataA1.setBostedsadresse(lagStrukturertAdresse());
+        brevDataA1.setYrkesgruppe(Yrkesgrupper.FLYENDE_PERSONELL);
+        brevDataA1.setBivirksomheter(Collections.emptyList());
+        brevDataA1.setPerson(lagPersonopplysninger());
+        brevDataA1.setArbeidssteder(new ArrayList<>());
+        brevDataA1.setArbeidsland(new ArrayList<>());
         BrevDataInnvilgelse brevdataInnvilgelse = new BrevDataInnvilgelse(new BrevbestillingDto(), "SAKSBEHANDLER");
-        brevdataInnvilgelse.vedleggA1 = brevDataA1;
-        brevdataInnvilgelse.hovedvirksomhet = arbeidsgiver;
-        brevdataInnvilgelse.lovvalgsperiode = lagLovvalgsperiode();
-        brevdataInnvilgelse.avklartMaritimType = Maritimtyper.SKIP;
-        brevdataInnvilgelse.arbeidsland = "Norway";
+        brevdataInnvilgelse.setVedleggA1(brevDataA1);
+        brevdataInnvilgelse.setHovedvirksomhet(arbeidsgiver);
+        brevdataInnvilgelse.setLovvalgsperiode(lagLovvalgsperiode());
+        brevdataInnvilgelse.setAvklartMaritimType(Maritimtyper.SKIP);
+        brevdataInnvilgelse.setArbeidsland("Norway");
         brevdataInnvilgelse.setAnmodningsperiodesvar(lagAnmodningsperiodeSvarInnvilgelse());
-        brevdataInnvilgelse.trygdemyndighetsland = "Denmark";
-        brevdataInnvilgelse.avklarteMedfolgendeBarn = lagAvklarteMedfølgendeBarn();
+        brevdataInnvilgelse.setTrygdemyndighetsland("Denmark");
+        brevdataInnvilgelse.setAvklarteMedfolgendeBarn(lagAvklarteMedfølgendeBarn());
 
         return brevdataInnvilgelse;
     }
 
     private static BrevData lagBrevDataAvslagArbeidsgiver() {
         BrevDataAvslagArbeidsgiver brevDataAvslagArbeidsgiver = new BrevDataAvslagArbeidsgiver("Z007");
-        brevDataAvslagArbeidsgiver.person = lagPersonDokument();
-        brevDataAvslagArbeidsgiver.hovedvirksomhet = new AvklartVirksomhet("Virker 100%", "987654321", lagStrukturertAdresse(), Yrkesaktivitetstyper.LOENNET_ARBEID);
-        brevDataAvslagArbeidsgiver.lovvalgsperiode = lagLovvalgsperiode();
-        brevDataAvslagArbeidsgiver.arbeidsland = "Test";
-        brevDataAvslagArbeidsgiver.vilkårbegrunnelser121 = new HashSet<>();
-        brevDataAvslagArbeidsgiver.vilkårbegrunnelser121VesentligVirksomhet = new HashSet<>();
+        brevDataAvslagArbeidsgiver.setPerson(lagPersonDokument());
+        brevDataAvslagArbeidsgiver.setHovedvirksomhet(new AvklartVirksomhet("Virker 100%", "987654321", lagStrukturertAdresse(), Yrkesaktivitetstyper.LOENNET_ARBEID));
+        brevDataAvslagArbeidsgiver.setLovvalgsperiode(lagLovvalgsperiode());
+        brevDataAvslagArbeidsgiver.setArbeidsland("Test");
+        brevDataAvslagArbeidsgiver.setVilkårbegrunnelser121(new HashSet<>());
+        brevDataAvslagArbeidsgiver.setVilkårbegrunnelser121VesentligVirksomhet(new HashSet<>());
         return brevDataAvslagArbeidsgiver;
     }
 
@@ -247,8 +245,7 @@ final class DokumentServiceTest {
             avklarteVirksomheterService,
             mock(UtenlandskMyndighetService.class),
             behandlingsresultatService,
-            mock(LovvalgsperiodeService.class),
-            behandlingService);
+            mock(LovvalgsperiodeService.class));
         return new DokumentService(
             behandlingService,
             brevDataService,
@@ -276,27 +273,26 @@ final class DokumentServiceTest {
 
     private static Behandling lagBehandling() {
         Behandling behandling = new Behandling();
-        Fagsak fagsak = new Fagsak();
-        fagsak.setGsakSaksnummer(GSAKSNUMMER);
         Set<Aktoer> aktører = new HashSet<>(Arrays.asList(lagAktør(Aktoersroller.BRUKER),
-            lagAktør(Aktoersroller.REPRESENTANT)));
-        fagsak.setAktører(aktører);
-        fagsak.setType(Sakstyper.EU_EOS);
-        fagsak.setSaksnummer("123");
+            lagAktør(Aktoersroller.FULLMEKTIG)));
+        Fagsak fagsak = FagsakTestFactory.builder()
+            .medGsakSaksnummer()
+            .aktører(aktører)
+            .build();
         behandling.setFagsak(fagsak);
         behandling.setType(Behandlingstyper.KLAGE);
         behandling.setId(BEHANDLINGSID);
 
         Soeknad søknad = new Soeknad();
         ForetakUtland foretakUtland = new ForetakUtland();
-        foretakUtland.orgnr = "12345678910";
+        foretakUtland.setOrgnr("12345678910");
         søknad.foretakUtland.add(foretakUtland);
         søknad.juridiskArbeidsgiverNorge = new JuridiskArbeidsgiverNorge();
-        søknad.juridiskArbeidsgiverNorge.ekstraArbeidsgivere = Collections.singletonList(ORGNR);
-        søknad.oppholdUtland.oppholdslandkoder.add("DK");
+        søknad.juridiskArbeidsgiverNorge.setEkstraArbeidsgivere(Collections.singletonList(ORGNR));
+        søknad.oppholdUtland.getOppholdslandkoder().add("DK");
 
         MottatteOpplysninger mottatteOpplysninger = new MottatteOpplysninger();
-        mottatteOpplysninger.setMottatteOpplysningerdata(søknad);
+        mottatteOpplysninger.setMottatteOpplysningerData(søknad);
         behandling.setMottatteOpplysninger(mottatteOpplysninger);
 
         Saksopplysning personopplysninger = lagSaksopplysning(SaksopplysningType.PERSOPL, lagPersonDokument());
@@ -333,7 +329,6 @@ final class DokumentServiceTest {
         AnmodningsperiodeService anmodningsperiodeService = mock(AnmodningsperiodeService.class);
         MottatteOpplysningerService mottatteOpplysningerService = mock(MottatteOpplysningerService.class);
         BehandlingsresultatService behandlingsresultatService = mock(BehandlingsresultatService.class);
-        VilkaarsresultatRepository vilkaarsresultatRepository = mock(VilkaarsresultatRepository.class);
         LandvelgerService landvelgerService = new LandvelgerService(avklartefaktaService, behandlingsresultatService,
             mottatteOpplysningerService);
         LovvalgsperiodeService lovvalgsperiodeService = mock(LovvalgsperiodeService.class);
@@ -344,7 +339,7 @@ final class DokumentServiceTest {
         PersondataFasade persondataFasade = mock(PersondataFasade.class);
         return new BrevDataByggerVelger(anmodningsperiodeService, avklartefaktaService,
             landvelgerService, lovvalgsperiodeService, saksopplysningerService, utenlandskMyndighetService,
-            utpekingService, vilkaarsresultatRepository, vilkaarsresultatService, persondataFasade, mottatteOpplysningerService);
+            utpekingService, vilkaarsresultatService, persondataFasade, mottatteOpplysningerService);
     }
 
     private BrevDataByggerVelger lagBrevdatabyggerVelgerMock() {
@@ -378,19 +373,21 @@ final class DokumentServiceTest {
     }
 
     private static EregFasade mockEregFasade() {
-        EregFasade eregFasade = mock(EregFasade.class);
-        OrganisasjonDokument orgDok = new OrganisasjonDokument();
-        orgDok.setNavn(Collections.singletonList("Virker av og til"));
-        OrganisasjonsDetaljer organisasjonDetaljer = new OrganisasjonsDetaljer();
         SemistrukturertAdresse adresse = new SemistrukturertAdresse();
         adresse.setLandkode("NO");
         adresse.setAdresselinje1("Gate 1");
         adresse.setPostnr("1234");
         Periode gyldighetsperiode = new Periode(LocalDate.now().minusYears(10), LocalDate.now().plusYears(10));
         adresse.setGyldighetsperiode(gyldighetsperiode);
-        organisasjonDetaljer.forretningsadresse = Collections.singletonList(adresse);
-        orgDok.setOrganisasjonDetaljer(organisasjonDetaljer);
-        orgDok.setOrgnummer(ORGNR);
+        OrganisasjonsDetaljer organisasjonDetaljer = OrganisasjonsDetaljerTestFactory.builder()
+            .forretningsadresse(adresse)
+            .build();
+        OrganisasjonDokument orgDok = OrganisasjonDokumentTestFactory.builder()
+            .orgnummer(ORGNR)
+            .navn("Virker av og til")
+            .organisasjonsDetaljer(organisasjonDetaljer)
+            .build();
+        EregFasade eregFasade = mock(EregFasade.class);
         when(eregFasade.hentOrganisasjon(ORGNR)).thenReturn(lagSaksopplysning(SaksopplysningType.ORG, orgDok));
         return eregFasade;
     }
@@ -469,8 +466,8 @@ final class DokumentServiceTest {
         aktør.setAktørId("123");
         aktør.setOrgnr("999");
         aktør.setRolle(type);
-        if (type == Aktoersroller.REPRESENTANT) {
-            aktør.setRepresenterer(Representerer.BRUKER);
+        if (type == Aktoersroller.FULLMEKTIG) {
+            aktør.setFullmaktstype(Fullmaktstype.FULLMEKTIG_SØKNAD);
         }
         return aktør;
     }

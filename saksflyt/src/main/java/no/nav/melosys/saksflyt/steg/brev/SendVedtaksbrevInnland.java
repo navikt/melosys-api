@@ -15,18 +15,17 @@ import no.nav.melosys.domain.kodeverk.Aktoersroller;
 import no.nav.melosys.domain.kodeverk.Avklartefaktatyper;
 import no.nav.melosys.domain.kodeverk.Mottakerroller;
 import no.nav.melosys.domain.kodeverk.begrunnelser.Endretperiode;
-import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingsresultattyper;
 import no.nav.melosys.domain.kodeverk.brev.Produserbaredokumenter;
 import no.nav.melosys.domain.mottatteopplysninger.MottatteOpplysninger;
-import no.nav.melosys.domain.saksflyt.ProsessDataKey;
-import no.nav.melosys.domain.saksflyt.ProsessSteg;
-import no.nav.melosys.domain.saksflyt.Prosessinstans;
 import no.nav.melosys.exception.FunksjonellException;
 import no.nav.melosys.saksflyt.steg.StegBehandler;
+import no.nav.melosys.saksflytapi.ProsessinstansService;
+import no.nav.melosys.saksflytapi.domain.ProsessDataKey;
+import no.nav.melosys.saksflytapi.domain.ProsessSteg;
+import no.nav.melosys.saksflytapi.domain.Prosessinstans;
 import no.nav.melosys.service.behandling.BehandlingService;
 import no.nav.melosys.service.behandling.BehandlingsresultatService;
 import no.nav.melosys.service.saksbehandling.SaksbehandlingRegler;
-import no.nav.melosys.service.saksflyt.ProsessinstansService;
 import org.apache.commons.lang3.StringUtils;
 import org.jetbrains.annotations.NotNull;
 import org.slf4j.Logger;
@@ -36,9 +35,8 @@ import org.springframework.stereotype.Component;
 import static no.nav.melosys.domain.kodeverk.brev.Produserbaredokumenter.*;
 import static no.nav.melosys.domain.kodeverk.lovvalgsbestemmelser.Lovvalgbestemmelser_883_2004.FO_883_2004_ART13_4;
 import static no.nav.melosys.domain.kodeverk.lovvalgsbestemmelser.Lovvalgbestemmelser_883_2004.FO_883_2004_ART16_1;
-import static no.nav.melosys.domain.saksflyt.ProsessDataKey.SAKSBEHANDLER;
-import static no.nav.melosys.domain.saksflyt.ProsessSteg.SEND_VEDTAKSBREV_INNLAND;
-
+import static no.nav.melosys.saksflytapi.domain.ProsessDataKey.SAKSBEHANDLER;
+import static no.nav.melosys.saksflytapi.domain.ProsessSteg.SEND_VEDTAKSBREV_INNLAND;
 
 @Component
 public class SendVedtaksbrevInnland implements StegBehandler {
@@ -51,7 +49,8 @@ public class SendVedtaksbrevInnland implements StegBehandler {
 
     public SendVedtaksbrevInnland(BehandlingService behandlingService,
                                   BehandlingsresultatService behandlingsresultatService,
-                                  ProsessinstansService prosessinstansService, SaksbehandlingRegler saksbehandlingRegler) {
+                                  ProsessinstansService prosessinstansService,
+                                  SaksbehandlingRegler saksbehandlingRegler) {
         this.behandlingService = behandlingService;
         this.behandlingsresultatService = behandlingsresultatService;
         this.prosessinstansService = prosessinstansService;
@@ -67,13 +66,12 @@ public class SendVedtaksbrevInnland implements StegBehandler {
     public void utfør(Prosessinstans prosessinstans) {
         Behandling behandling = behandlingService.hentBehandlingMedSaksopplysninger(prosessinstans.getBehandling().getId());
         Behandlingsresultat resultat = behandlingsresultatService.hentBehandlingsresultat(behandling.getId());
-        Behandlingsresultattyper behandlingsresultatType = resultat.getType();
         String saksbehandler = hentSaksbehandler(prosessinstans, resultat);
         String begrunnelseKode = hentBegrunnelsekodeTilForkortetPeriode(resultat);
         String fritekst = hentBegrunnelseFritekst(prosessinstans);
 
         if (resultat.erAvslag()) {
-            sendAvslagsbrev(behandling, behandlingsresultatType, saksbehandler, fritekst);
+            sendAvslagsbrev(behandling, saksbehandler, fritekst);
             log.info("Sendt avslagsbrev for behandling {}", behandling.getId());
         } else if (resultat.erUtpeking()) {
             sendUtpekingsbrev(behandling, saksbehandler, fritekst);
@@ -90,29 +88,17 @@ public class SendVedtaksbrevInnland implements StegBehandler {
         }
     }
 
-    private void sendAvslagsbrev(Behandling behandling,
-                                 Behandlingsresultattyper behandlingsresultatType,
-                                 String saksbehandler,
-                                 String fritekst) {
-        Produserbaredokumenter avslagTypeBruker = (behandlingsresultatType != Behandlingsresultattyper.AVSLAG_MANGLENDE_OPPL)
-            ? AVSLAG_YRKESAKTIV : AVSLAG_MANGLENDE_OPPLYSNINGER;
-
-        List<Mottaker> mottakerListe;
-        if (avslagTypeBruker == AVSLAG_YRKESAKTIV) {
-            mottakerListe = List.of(Mottaker.medRolle(Mottakerroller.BRUKER), Mottaker.av(NorskMyndighet.HELFO), Mottaker.av(NorskMyndighet.SKATTEETATEN));
-        } else {
-            mottakerListe = List.of(Mottaker.medRolle(Mottakerroller.BRUKER));
-        }
+    private void sendAvslagsbrev(Behandling behandling, String saksbehandler, String fritekst) {
+        var mottakerListe = List.of(Mottaker.medRolle(Mottakerroller.BRUKER), Mottaker.av(NorskMyndighet.HELFO), Mottaker.av(NorskMyndighet.SKATTEETATEN));
 
         DoksysBrevbestilling brevbestilling = new DoksysBrevbestilling.Builder()
-            .medProduserbartDokument(avslagTypeBruker)
+            .medProduserbartDokument(AVSLAG_YRKESAKTIV)
             .medAvsenderID(saksbehandler)
             .medFritekst(fritekst)
             .build();
         prosessinstansService.opprettProsessinstanserSendBrev(behandling, brevbestilling, mottakerListe);
 
-        if (behandling.getFagsak().harAktørMedRolleType(Aktoersroller.ARBEIDSGIVER)
-            && behandlingsresultatType != Behandlingsresultattyper.AVSLAG_MANGLENDE_OPPL) {
+        if (behandling.getFagsak().harAktørMedRolleType(Aktoersroller.ARBEIDSGIVER)) {
 
             DoksysBrevbestilling brevbestillingArbeidsgiver = new DoksysBrevbestilling.Builder()
                 .medProduserbartDokument(AVSLAG_ARBEIDSGIVER)
@@ -130,8 +116,7 @@ public class SendVedtaksbrevInnland implements StegBehandler {
                                       String begrunnelseKode,
                                       String fritekst) {
 
-        boolean harIkkeYrkesaktivFlyt = saksbehandlingRegler.harIkkeYrkesaktivFlyt(behandling.getFagsak().getType(), behandling.getTema());
-        Produserbaredokumenter produserbaredokument = hentProduserbarDokumentForInnvilgelse(resultat, harIkkeYrkesaktivFlyt);
+        Produserbaredokumenter produserbaredokument = hentProduserbarDokumentForInnvilgelse(behandling, resultat);
 
         List<Mottaker> mottakerListe = new ArrayList<>(List.of(Mottaker.medRolle(Mottakerroller.BRUKER)));
         if (brevSendesTilStatligSkatteoppkreving(
@@ -139,9 +124,6 @@ public class SendVedtaksbrevInnland implements StegBehandler {
             behandling.getMottatteOpplysninger()
         )) {
             mottakerListe.add(Mottaker.av(NorskMyndighet.SKATTEINNKREVER_UTLAND));
-        }
-        if (!harIkkeYrkesaktivFlyt) {
-            mottakerListe.add(Mottaker.av(NorskMyndighet.SKATTEETATEN));
         }
 
         DoksysBrevbestilling innvilgelseBrukerOgSkatt = new DoksysBrevbestilling.Builder().medProduserbartDokument(produserbaredokument)
@@ -153,8 +135,8 @@ public class SendVedtaksbrevInnland implements StegBehandler {
     }
 
     @NotNull
-    private static Produserbaredokumenter hentProduserbarDokumentForInnvilgelse(Behandlingsresultat resultat, boolean harIkkeYrkesaktivFlyt) {
-        if (harIkkeYrkesaktivFlyt) {
+    private Produserbaredokumenter hentProduserbarDokumentForInnvilgelse(Behandling behandling, Behandlingsresultat resultat) {
+        if (saksbehandlingRegler.harIkkeYrkesaktivFlyt(behandling.getFagsak().getType(), behandling.getTema())) {
             return IKKE_YRKESAKTIV_VEDTAKSBREV;
         }
         if (resultat.erInnvilgelseFlereLand()) {
@@ -201,7 +183,7 @@ public class SendVedtaksbrevInnland implements StegBehandler {
     private static boolean finnesArbeidsgiverUtland(MottatteOpplysninger mottatteOpplysninger) {
         return !mottatteOpplysninger.getMottatteOpplysningerData().foretakUtland.isEmpty()
             && mottatteOpplysninger.getMottatteOpplysningerData().foretakUtland.stream()
-            .anyMatch(foretakUtland -> Boolean.FALSE.equals(foretakUtland.selvstendigNæringsvirksomhet));
+            .anyMatch(foretakUtland -> Boolean.FALSE.equals(foretakUtland.getSelvstendigNæringsvirksomhet()));
     }
 
     private String hentBegrunnelsekodeTilForkortetPeriode(Behandlingsresultat behandlingsresultat) {
@@ -215,7 +197,7 @@ public class SendVedtaksbrevInnland implements StegBehandler {
     }
 
     private String hentBegrunnelseFritekst(Prosessinstans prosessinstans) {
-        return prosessinstans.getData(ProsessDataKey.BEHANDLINGSRESULTAT_BEGRUNNELSE_FRITEKST);
+        return prosessinstans.getData(ProsessDataKey.BEGRUNNELSE_FRITEKST);
     }
 
     private String hentSaksbehandler(Prosessinstans prosessinstans, Behandlingsresultat behandlingsresultat) {

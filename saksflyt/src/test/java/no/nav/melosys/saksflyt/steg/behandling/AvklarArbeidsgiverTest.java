@@ -4,7 +4,6 @@ import java.util.Collections;
 import java.util.HashSet;
 import java.util.List;
 
-import no.finn.unleash.FakeUnleash;
 import no.nav.melosys.domain.*;
 import no.nav.melosys.domain.avklartefakta.AvklartVirksomhet;
 import no.nav.melosys.domain.kodeverk.Aktoersroller;
@@ -16,9 +15,9 @@ import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingstema;
 import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingstyper;
 import no.nav.melosys.domain.kodeverk.lovvalgsbestemmelser.Lovvalgbestemmelser_883_2004;
 import no.nav.melosys.domain.kodeverk.yrker.Yrkesaktivitetstyper;
-import no.nav.melosys.domain.saksflyt.ProsessType;
-import no.nav.melosys.domain.saksflyt.Prosessinstans;
 import no.nav.melosys.repository.AktoerRepository;
+import no.nav.melosys.saksflytapi.domain.ProsessType;
+import no.nav.melosys.saksflytapi.domain.Prosessinstans;
 import no.nav.melosys.service.aktoer.AktoerService;
 import no.nav.melosys.service.avklartefakta.AvklarteVirksomheterService;
 import no.nav.melosys.service.behandling.BehandlingService;
@@ -63,10 +62,7 @@ class AvklarArbeidsgiverTest {
         prosessinstans.setBehandling(behandling);
         prosessinstans.setType(ProsessType.IVERKSETT_VEDTAK_EOS);
 
-        fagsak = new Fagsak();
-        fagsak.setSaksnummer("saksnr");
-        fagsak.setType(Sakstyper.EU_EOS);
-        fagsak.setTema(Sakstemaer.MEDLEMSKAP_LOVVALG);
+        fagsak = FagsakTestFactory.lagFagsak();
         behandling.setFagsak(fagsak);
         behandling.setId(1L);
         behandling.setTema(Behandlingstema.UTSENDT_ARBEIDSTAKER);
@@ -109,8 +105,8 @@ class AvklarArbeidsgiverTest {
     }
 
     @Test
-    void utfør_medTomFlyt_arbeidsgiverAvklaresIkke() {
-        when(saksbehandlingRegler.harTomFlyt(any())).thenReturn(true);
+    void utfør_medIngenFlyt_arbeidsgiverAvklaresIkke() {
+        when(saksbehandlingRegler.harIngenFlyt(any())).thenReturn(true);
         behandling.setType(Behandlingstyper.HENVENDELSE);
 
         avklarArbeidsgiver.utfør(prosessinstans);
@@ -147,18 +143,6 @@ class AvklarArbeidsgiverTest {
     @Test
     void utfør_iverksettVedtakArt13_arbeidsgiverAktoererSkalIkkeOpprettes() {
         lovvalgsperiode.setBestemmelse(Lovvalgbestemmelser_883_2004.FO_883_2004_ART13_1A);
-
-
-        avklarArbeidsgiver.utfør(prosessinstans);
-
-
-        verify(aktoerService, never()).erstattEksisterendeArbeidsgiveraktører(any(), any());
-    }
-
-    @Test
-    void utfør_resultatAvslagManglendeOppl_arbeidsgiverAktoererSkalIkkeOpprettes() {
-        behandlingsresultat.setType(Behandlingsresultattyper.AVSLAG_MANGLENDE_OPPL);
-        behandlingsresultat.setLovvalgsperioder(new HashSet<>());
 
 
         avklarArbeidsgiver.utfør(prosessinstans);

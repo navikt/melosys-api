@@ -6,8 +6,9 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import java.util.stream.Collectors;
-import javax.xml.bind.JAXBElement;
-import javax.xml.bind.JAXBException;
+
+import jakarta.xml.bind.JAXBElement;
+import jakarta.xml.bind.JAXBException;
 
 import no.nav.dok.melosysbrev._000108.LovvalgsperiodeType;
 import no.nav.dok.melosysbrev._000108.ObjectFactory;
@@ -16,15 +17,17 @@ import no.nav.dok.melosysbrev.felles.melosys_felles.*;
 import no.nav.dok.melosysbrev.felles.melosys_vedlegg.VedleggType;
 import no.nav.melosys.domain.*;
 import no.nav.melosys.domain.avklartefakta.AvklartVirksomhet;
-import no.nav.melosys.domain.mottatteopplysninger.MottatteOpplysningerData;
-import no.nav.melosys.domain.mottatteopplysninger.data.arbeidssteder.MaritimtArbeid;
 import no.nav.melosys.domain.kodeverk.Anmodningsperiodesvartyper;
 import no.nav.melosys.domain.kodeverk.Landkoder;
 import no.nav.melosys.domain.kodeverk.Maritimtyper;
 import no.nav.melosys.domain.kodeverk.Vedtakstyper;
 import no.nav.melosys.domain.kodeverk.begrunnelser.Fartsomrader;
 import no.nav.melosys.domain.kodeverk.begrunnelser.Medfolgende_barn_begrunnelser;
-import no.nav.melosys.domain.person.familie.*;
+import no.nav.melosys.domain.mottatteopplysninger.MottatteOpplysningerData;
+import no.nav.melosys.domain.mottatteopplysninger.data.arbeidssteder.MaritimtArbeid;
+import no.nav.melosys.domain.person.familie.AvklarteMedfolgendeFamilie;
+import no.nav.melosys.domain.person.familie.IkkeOmfattetFamilie;
+import no.nav.melosys.domain.person.familie.OmfattetFamilie;
 import no.nav.melosys.exception.TekniskException;
 import no.nav.melosys.service.dokument.brev.BrevData;
 import no.nav.melosys.service.dokument.brev.BrevDataInnvilgelse;
@@ -54,7 +57,7 @@ public final class InnvilgelsesbrevMapper implements BrevDataMapper {
         BrevDataInnvilgelse brevDataInnvilgelse = (BrevDataInnvilgelse) brevdata;
 
         VedleggMapper vedleggMapper = new VedleggMapper(behandling, resultat);
-        vedleggMapper.map(brevDataInnvilgelse.vedleggA1);
+        vedleggMapper.map(brevDataInnvilgelse.getVedleggA1());
 
         Fag fag = mapFag(behandling, resultat, brevDataInnvilgelse);
 
@@ -68,34 +71,34 @@ public final class InnvilgelsesbrevMapper implements BrevDataMapper {
         fag.setBehandlingstype(BehandlingstypeKodeMapper.hentBehandlingstypeKode(behandling));
         fag.setSakstype(SakstypeKode.valueOf(behandling.getFagsak().getType().getKode()));
 
-        AvklartVirksomhet hovedvirksomhet = brevdata.hovedvirksomhet;
+        AvklartVirksomhet hovedvirksomhet = brevdata.getHovedvirksomhet();
         if (hovedvirksomhet.erArbeidsgiver()) {
             fag.setArbeidsgiver(hovedvirksomhet.navn);
         }
         fag.setYrkesaktivitet(YrkesaktivitetsKode.fromValue(hovedvirksomhet.yrkesaktivitet.getKode()));
 
         fag.setInngangsvilkårbegrunnelse(InngangsvilkaarBegrunnelseKode.EOS_BORGER);
-        fag.setBostedsland(brevdata.bostedsland);
-        fag.setTrygdemyndighetsland(brevdata.trygdemyndighetsland);
+        fag.setBostedsland(brevdata.getBostedsland());
+        fag.setTrygdemyndighetsland(brevdata.getTrygdemyndighetsland());
 
         MottatteOpplysningerData grunnlagData = behandling.getMottatteOpplysninger().getMottatteOpplysningerData();
 
-        fag.setArbeidsland(brevdata.arbeidsland);
-        fag.setFlaggland(brevdata.arbeidsland);
+        fag.setArbeidsland(brevdata.getArbeidsland());
+        fag.setFlaggland(brevdata.getArbeidsland());
 
         if (!grunnlagData.maritimtArbeid.isEmpty()) {
             MaritimtArbeid maritimtArbeid = grunnlagData.maritimtArbeid.iterator().next();
-            fag.setFlaggland(maritimtArbeid.flaggLandkode);
-            if (Fartsomrader.INNENRIKS == maritimtArbeid.fartsomradeKode) {
+            fag.setFlaggland(maritimtArbeid.getFlaggLandkode());
+            if (Fartsomrader.INNENRIKS == maritimtArbeid.getFartsomradeKode()) {
                 fag.setArbeidPåTerritorialfarvann(JA);
-                fag.setArbeidsland(Landkoder.valueOf(maritimtArbeid.territorialfarvannLandkode).getBeskrivelse());
+                fag.setArbeidsland(Landkoder.valueOf(maritimtArbeid.getTerritorialfarvannLandkode()).getBeskrivelse());
             }
         }
 
-        if (brevdata.avklartMaritimType == Maritimtyper.SKIP) {
+        if (brevdata.getAvklartMaritimType() == Maritimtyper.SKIP) {
             fag.setArbeidPåSkip(JA);
         }
-        if (brevdata.avklartMaritimType == Maritimtyper.SOKKEL) {
+        if (brevdata.getAvklartMaritimType() == Maritimtyper.SOKKEL) {
             fag.setArbeidPåSokkel(JA);
         }
 
@@ -108,48 +111,48 @@ public final class InnvilgelsesbrevMapper implements BrevDataMapper {
             .map(AnmodningsPeriodeSvarTypeKode::valueOf)
             .ifPresent(fag::setAnmodningsPeriodeSvarType);
 
-        Lovvalgsperiode periode = brevdata.lovvalgsperiode;
+        Lovvalgsperiode periode = brevdata.getLovvalgsperiode();
         fag.setLovvalgsbestemmelse(LovvalgsbestemmelseKode.fromValue(periode.getBestemmelse().getKode()));
-        fag.setLovvalgsperiode(LovvalgsperiodeType.builder()
+        fag.setLovvalgsperiode(new LovvalgsperiodeType()
             .withFomDato(lagXmlDato(periode.getFom()))
             .withTomDato(lagXmlDato(periode.getTom()))
-            .build());
+        );
 
         if (periode.getTilleggsbestemmelse() != null) {
             fag.setTilleggsbestemmelse(TilleggsbestemmelseKode.fromValue(periode.getTilleggsbestemmelse().getKode()));
         }
-        if (brevdata.begrunnelseKode != null) {
-            fag.setEndretPeriodeBegrunnelse(EndretPeriodeBegrunnelseKode.fromValue(brevdata.begrunnelseKode));
+        if (brevdata.getBegrunnelseKode() != null) {
+            fag.setEndretPeriodeBegrunnelse(EndretPeriodeBegrunnelseKode.fromValue(brevdata.getBegrunnelseKode()));
         }
 
         Set<VilkaarBegrunnelse> art121Begrunnelser = resultat.hentVilkaarbegrunnelser(FO_883_2004_ART12_1);
         fag.setArt121Begrunnelse(mapArt121BegrunnelseType(art121Begrunnelser));
 
-        if (brevdata.erTuristskip) {
+        if (brevdata.getTuristskip()) {
             fag.setVilkår(VilkaarKode.FTRL_2_12_UNNTAK_TURISTSKIP);
         }
 
         Set<VilkaarBegrunnelse> art122Begrunnelser = resultat.hentVilkaarbegrunnelser(FO_883_2004_ART12_2);
         fag.setArt122Begrunnelse(mapArt122BegrunnelseType(art122Begrunnelser));
 
-        fag.setFritekst(brevdata.fritekst);
+        fag.setFritekst(brevdata.getFritekst());
 
         if (resultat.getVedtakMetadata() != null) {
             fag.setVedtaksType(tilVedtaksTypeKode(resultat.getVedtakMetadata().getVedtakstype()));
         }
 
-        if (brevdata.erArt16UtenArt12) {
+        if (brevdata.getArt16UtenArt12()) {
             fag.setArt16UtenArt12(JA);
         }
 
-        if (brevdata.avklarteMedfolgendeBarn.finnes()) {
+        if (brevdata.getAvklarteMedfolgendeBarn().finnes()) {
             fag.setErVurderingLovvalgBarn(JA);
             fag.setAntallBarnOmfattetAvNorskTrygd(
-                BigInteger.valueOf(brevdata.avklarteMedfolgendeBarn.getFamilieOmfattetAvNorskTrygd().size())
+                BigInteger.valueOf(brevdata.getAvklarteMedfolgendeBarn().getFamilieOmfattetAvNorskTrygd().size())
             );
-            fag.setBarnIkkeOmfattetAvNorskTrygdListe(hentBarnIkkeOmfattetAvNorskTrygd(brevdata.avklarteMedfolgendeBarn));
-            fag.setBarnOmfattetAvNorskTrygdListe(hentBarnOmfattetAvNorskTrygd(brevdata.avklarteMedfolgendeBarn));
-            brevdata.avklarteMedfolgendeBarn.hentBegrunnelseFritekst().ifPresent(fag::setMedfoelgendeBarnFritekst);
+            fag.setBarnIkkeOmfattetAvNorskTrygdListe(hentBarnIkkeOmfattetAvNorskTrygd(brevdata.getAvklarteMedfolgendeBarn()));
+            fag.setBarnOmfattetAvNorskTrygdListe(hentBarnOmfattetAvNorskTrygd(brevdata.getAvklarteMedfolgendeBarn()));
+            brevdata.getAvklarteMedfolgendeBarn().hentBegrunnelseFritekst().ifPresent(fag::setMedfoelgendeBarnFritekst);
         } else {
             fag.setAntallBarnOmfattetAvNorskTrygd(BigInteger.valueOf(0));
         }
@@ -167,6 +170,7 @@ public final class InnvilgelsesbrevMapper implements BrevDataMapper {
             case KORRIGERT_VEDTAK -> VedtaksTypeKode.KORRIGERT_VEDTAK;
             case OMGJØRINGSVEDTAK -> VedtaksTypeKode.OMGJOERINGSVEDTAK;
             case ENDRINGSVEDTAK -> null; //Brev har ikke koder for ENDRINGSVEDTAK
+            default -> throw new TekniskException("Vedtakstype " + vedtakstype + " kan ikke mappes til VedtaksTypeKode");
         };
     }
 
@@ -174,8 +178,8 @@ public final class InnvilgelsesbrevMapper implements BrevDataMapper {
         List<BarnInnvilgelseType> barnInnvilgelse = avklarteMedfolgendeBarn.getFamilieOmfattetAvNorskTrygd().stream()
             .map(this::lagBarnInnvilgelseType)
             .collect(Collectors.toList());
-        return BarnOmfattetAvNorskTrygdListeType.builder()
-            .withBarnInnvilgelse(barnInnvilgelse).build();
+        return new BarnOmfattetAvNorskTrygdListeType()
+            .withBarnInnvilgelse(barnInnvilgelse);
     }
 
     private BarnIkkeOmfattetAvNorskTrygdListeType hentBarnIkkeOmfattetAvNorskTrygd(AvklarteMedfolgendeFamilie avklarteMedfolgendeBarn) {
@@ -183,22 +187,21 @@ public final class InnvilgelsesbrevMapper implements BrevDataMapper {
         for (IkkeOmfattetFamilie medfolgendeBarn : avklarteMedfolgendeBarn.getFamilieIkkeOmfattetAvNorskTrygd()) {
             barnAvslag.add(lagBarnAvslagType(medfolgendeBarn));
         }
-        return BarnIkkeOmfattetAvNorskTrygdListeType.builder()
-            .withBarnAvslag(barnAvslag).build();
+        return new BarnIkkeOmfattetAvNorskTrygdListeType()
+            .withBarnAvslag(barnAvslag);
     }
 
     private BarnInnvilgelseType lagBarnInnvilgelseType(OmfattetFamilie omfattetBarn) {
-        return BarnInnvilgelseType.builder()
+        return new BarnInnvilgelseType()
             .withBarnOmfattetAvNorskTrygd(omfattetBarn.getSammensattNavn())
-            .withBarnFodselsnummer(omfattetBarn.getIdent())
-            .build();
+            .withBarnFodselsnummer(omfattetBarn.getIdent());
     }
 
     private BarnAvslagType lagBarnAvslagType(IkkeOmfattetFamilie ikkeOmfattetBarn) {
-        return BarnAvslagType.builder()
+        return new BarnAvslagType()
             .withBarnAvslagBegrunnelse(tilBarnAvslagBegrunnelseKode(ikkeOmfattetBarn.getBegrunnelse()))
             .withBarnFodselsnummer(ikkeOmfattetBarn.getIdent())
-            .withBarnIkkeOmfattetAvNorskTrygd(ikkeOmfattetBarn.getSammensattNavn()).build();
+            .withBarnIkkeOmfattetAvNorskTrygd(ikkeOmfattetBarn.getSammensattNavn());
     }
 
     private BarnAvslagBegrunnelseKode tilBarnAvslagBegrunnelseKode(String begrunnelse) {
@@ -212,12 +215,11 @@ public final class InnvilgelsesbrevMapper implements BrevDataMapper {
 
     private static JAXBElement<BrevdataType> lagBrevdataType(FellesType fellesType, MelosysNAVFelles navFelles, Fag fag, VedleggType vedlegg) {
         ObjectFactory factory = new ObjectFactory();
-        BrevdataType brevdataType = BrevdataType.builder()
+        BrevdataType brevdataType = new BrevdataType()
             .withFelles(fellesType)
             .withNAVFelles(navFelles)
             .withFag(fag)
-            .withVedlegg(vedlegg)
-            .build();
+            .withVedlegg(vedlegg);
         return factory.createBrevdata(brevdataType);
     }
 }

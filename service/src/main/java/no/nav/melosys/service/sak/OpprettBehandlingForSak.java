@@ -4,62 +4,37 @@ import no.nav.melosys.domain.Behandling;
 import no.nav.melosys.domain.Behandlingsresultat;
 import no.nav.melosys.domain.Fagsak;
 import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingsaarsaktyper;
-import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingstyper;
 import no.nav.melosys.exception.FunksjonellException;
+import no.nav.melosys.saksflytapi.ProsessinstansService;
 import no.nav.melosys.service.behandling.BehandlingService;
 import no.nav.melosys.service.behandling.BehandlingsresultatService;
-import no.nav.melosys.service.lovligekombinasjoner.LovligeKombinasjonerService;
+import no.nav.melosys.service.lovligekombinasjoner.LovligeKombinasjonerSaksbehandlingService;
 import no.nav.melosys.service.saksbehandling.SaksbehandlingRegler;
-import no.nav.melosys.service.saksflyt.ProsessinstansService;
 import org.apache.commons.lang3.StringUtils;
-import org.jetbrains.annotations.NotNull;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
-
-import java.time.LocalDate;
-import java.time.LocalDateTime;
 
 @Service
 public class OpprettBehandlingForSak {
     private final FagsakService fagsakService;
     private final ProsessinstansService prosessinstansService;
     private final SaksbehandlingRegler saksbehandlingRegler;
-    private final LovligeKombinasjonerService lovligeKombinasjonerService;
+    private final LovligeKombinasjonerSaksbehandlingService lovligeKombinasjonerSaksbehandlingService;
     private final BehandlingService behandlingService;
     private final BehandlingsresultatService behandlingsresultatService;
 
     public OpprettBehandlingForSak(FagsakService fagsakService,
                                    ProsessinstansService prosessinstansService,
                                    SaksbehandlingRegler saksbehandlingRegler,
-                                   LovligeKombinasjonerService lovligeKombinasjonerService,
+                                   LovligeKombinasjonerSaksbehandlingService lovligeKombinasjonerSaksbehandlingService,
                                    BehandlingService behandlingService,
                                    BehandlingsresultatService behandlingsresultatService) {
         this.fagsakService = fagsakService;
         this.prosessinstansService = prosessinstansService;
         this.saksbehandlingRegler = saksbehandlingRegler;
-        this.lovligeKombinasjonerService = lovligeKombinasjonerService;
+        this.lovligeKombinasjonerSaksbehandlingService = lovligeKombinasjonerSaksbehandlingService;
         this.behandlingService = behandlingService;
         this.behandlingsresultatService = behandlingsresultatService;
-    }
-
-    @Transactional
-    public void opprettBehandlingManglendeInnbetaling(long behandlingId, LocalDate mottaksDato) {
-        Behandling behandling = behandlingService.hentBehandling(behandlingId);
-        Fagsak fagsak = behandling.getFagsak();
-        final Behandling sistBehandling = fagsak.hentSistRegistrertBehandling();
-
-        opprettBehandling(fagsak.getSaksnummer(), lagOpprettSakDto(sistBehandling, mottaksDato));
-    }
-
-    @NotNull
-    private static OpprettSakDto lagOpprettSakDto(Behandling sistBehandling, LocalDate mottaksDato) {
-        OpprettSakDto opprettSakDto = new OpprettSakDto();
-        opprettSakDto.setBehandlingstema(sistBehandling.getTema());
-        opprettSakDto.setBehandlingstype(Behandlingstyper.MANGLENDE_INNBETALING_TRYGDEAVGIFT);
-        opprettSakDto.setBehandlingsaarsakType(sistBehandling.getBehandlingsårsak().getType());
-        opprettSakDto.setBehandlingsaarsakFritekst(sistBehandling.getBehandlingsårsak().getFritekst());
-        opprettSakDto.setMottaksdato(mottaksDato);
-        return opprettSakDto;
     }
 
     @Transactional
@@ -71,21 +46,21 @@ public class OpprettBehandlingForSak {
         var behandlingstype = opprettSakDto.getBehandlingstype();
 
         valider(fagsak, sistBehandlingsresultat, opprettSakDto);
-        lovligeKombinasjonerService.validerBehandlingstemaOgBehandlingstypeForAndregangsbehandling(fagsak, sistBehandling, sistBehandlingsresultat, behandlingstema, behandlingstype);
+        lovligeKombinasjonerSaksbehandlingService.validerBehandlingstemaOgBehandlingstypeForAndregangsbehandling(fagsak, sistBehandling, sistBehandlingsresultat, behandlingstema, behandlingstype);
 
         if (sistBehandling.erAktiv()) {
             behandlingService.avsluttBehandling(sistBehandling.getId());
         }
 
         if (saksbehandlingRegler.skalTidligereBehandlingReplikeres(fagsak, behandlingstype, behandlingstema)) {
-            prosessinstansService.opprettOgReplikerBehandlingForSak(saksnummer, opprettSakDto);
+            prosessinstansService.opprettOgReplikerBehandlingForSak(saksnummer, opprettSakDto.tilOpprettSakRequest());
         } else {
-            prosessinstansService.opprettNyBehandlingForSak(saksnummer, opprettSakDto);
+            prosessinstansService.opprettNyBehandlingForSak(saksnummer, opprettSakDto.tilOpprettSakRequest());
         }
     }
 
     private void valider(Fagsak fagsak, Behandlingsresultat sistBehandlingsresultat, OpprettSakDto opprettSakDto) {
-        if (fagsak.hentAktivBehandling() != null && sistBehandlingsresultat.erIkkeArtikkel16MedSendtAnmodningOmUnntak()) {
+        if (fagsak.finnAktivBehandlingIkkeÅrsavregning() != null && sistBehandlingsresultat.erIkkeArtikkel16MedSendtAnmodningOmUnntak()) {
             throw new FunksjonellException(String.format("Det finnes allerede en aktiv behandling på fagsak %s", fagsak.getSaksnummer()));
         }
         if (opprettSakDto.getBehandlingstema() == null) {

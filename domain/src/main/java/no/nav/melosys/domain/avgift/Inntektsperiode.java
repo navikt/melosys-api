@@ -2,16 +2,14 @@ package no.nav.melosys.domain.avgift;
 
 import java.time.LocalDate;
 import java.util.Objects;
-import javax.persistence.*;
 
+import jakarta.persistence.*;
 import no.nav.melosys.domain.kodeverk.Inntektskildetype;
-import org.hibernate.annotations.Columns;
-import org.hibernate.annotations.Parameter;
-import org.hibernate.annotations.Type;
 
 @Entity
 @Table(name = "inntektsperiode")
 public class Inntektsperiode {
+
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
@@ -30,19 +28,15 @@ public class Inntektsperiode {
     @Enumerated(EnumType.STRING)
     private Inntektskildetype type;
 
-    @Columns(columns = {
-        @Column(name = "avgiftspliktig_inntekt_mnd_verdi"),
-        @Column(name = "avgiftspliktig_inntekt_mnd_valuta")})
-    @Type(type = "no.nav.melosys.domain.avgift.PengerType", parameters = {
-        @Parameter(name = "verdiPropertyName", value = "avgiftspliktig_inntekt_mnd_verdi"),
-        @Parameter(name = "valutaPropertyName", value = "avgiftspliktig_inntekt_mnd_valuta")})
+    @Embedded
+    @AttributeOverrides({
+        @AttributeOverride(name = "verdi", column = @Column(name = "avgiftspliktig_inntekt_mnd_verdi")),
+        @AttributeOverride(name = "valuta", column = @Column(name = "avgiftspliktig_inntekt_mnd_valuta"))
+    })
     private Penger avgiftspliktigInntektMnd;
 
     @Column(name = "aga_betales_til_skatt")
     private boolean arbeidsgiversavgiftBetalesTilSkatt;
-
-    @Column(name = "trygdeavgift_betales_til_skatt")
-    private boolean ordinærTrygdeavgiftBetalesTilSkatt;
 
     public Long getId() {
         return id;
@@ -100,14 +94,6 @@ public class Inntektsperiode {
         this.arbeidsgiversavgiftBetalesTilSkatt = arbeidsgiversavgiftBetalesTilSkatt;
     }
 
-    public boolean isOrdinærTrygdeavgiftBetalesTilSkatt() {
-        return ordinærTrygdeavgiftBetalesTilSkatt;
-    }
-
-    public void setOrdinærTrygdeavgiftBetalesTilSkatt(boolean ordinærTrygdeavgiftBetalesTilSkatt) {
-        this.ordinærTrygdeavgiftBetalesTilSkatt = ordinærTrygdeavgiftBetalesTilSkatt;
-    }
-
     @Override
     public boolean equals(Object o) {
         if (this == o) return true;
@@ -117,33 +103,19 @@ public class Inntektsperiode {
             && Objects.equals(fomDato, that.fomDato) && Objects.equals(tomDato, that.tomDato)
             && Objects.equals(type, that.type)
             && Objects.equals(avgiftspliktigInntektMnd, that.avgiftspliktigInntektMnd)
-            && arbeidsgiversavgiftBetalesTilSkatt == that.arbeidsgiversavgiftBetalesTilSkatt
-            && ordinærTrygdeavgiftBetalesTilSkatt == that.ordinærTrygdeavgiftBetalesTilSkatt;
+            && arbeidsgiversavgiftBetalesTilSkatt == that.arbeidsgiversavgiftBetalesTilSkatt;
     }
 
     @Override
     public int hashCode() {
         return Objects.hash(trygdeavgiftsgrunnlag, fomDato, tomDato, type, avgiftspliktigInntektMnd,
-            arbeidsgiversavgiftBetalesTilSkatt, ordinærTrygdeavgiftBetalesTilSkatt);
+            arbeidsgiversavgiftBetalesTilSkatt);
     }
 
     @Override
     public String toString() {
         return "Inntektsperiode{" + "id=" + id + ", fomDato=" + fomDato + ", tomDato=" + tomDato + ", type=" + type
             + ", avgiftspliktigInntektMnd=" + avgiftspliktigInntektMnd + ", arbeidsgiversavgiftBetalesTilSkatt="
-            + arbeidsgiversavgiftBetalesTilSkatt + ", ordinærTrygdeavgiftBetalesTilSkatt=" + ordinærTrygdeavgiftBetalesTilSkatt + '}';
+            + arbeidsgiversavgiftBetalesTilSkatt + '}';
     }
-
-    public boolean isTrygdeavgiftBetalesBådeTilNavOgSkatt() {
-        return !isTrygdeavgiftBetalesKunTilSkatt() && !isTrygdeavgiftBetalesKunTilNav();
-    }
-
-    public boolean isTrygdeavgiftBetalesKunTilSkatt() {
-        return isOrdinærTrygdeavgiftBetalesTilSkatt() && (isArbeidsgiversavgiftBetalesTilSkatt() || Inntektskildetype.MISJONÆR.equals(type));
-    }
-
-    public boolean isTrygdeavgiftBetalesKunTilNav() {
-        return !isOrdinærTrygdeavgiftBetalesTilSkatt() && (!isArbeidsgiversavgiftBetalesTilSkatt() || Inntektskildetype.MISJONÆR.equals(type));
-    }
-
 }

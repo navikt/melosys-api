@@ -1,9 +1,16 @@
 package no.nav.melosys.itest
 
 import com.ninjasquad.springmockk.MockkBean
+import io.kotest.assertions.withClue
+import io.kotest.matchers.collections.shouldHaveSize
+import io.kotest.matchers.optional.shouldBePresent
+import io.kotest.matchers.shouldBe
 import io.mockk.every
 import io.mockk.mockk
 import no.nav.melosys.Application
+import no.nav.melosys.AwaitUtil.awaitWithFailOnLogErrors
+import no.nav.melosys.AwaitUtil.onTimeout
+import no.nav.melosys.AwaitUtil.waitUntil
 import no.nav.melosys.domain.Behandling
 import no.nav.melosys.domain.Fagsak
 import no.nav.melosys.domain.RegistreringsInfo
@@ -15,20 +22,18 @@ import no.nav.melosys.domain.kodeverk.Sakstyper
 import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingsstatus
 import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingstema
 import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingstyper
-import no.nav.melosys.domain.saksflyt.ProsessDataKey
-import no.nav.melosys.domain.saksflyt.ProsessStatus
-import no.nav.melosys.domain.saksflyt.ProsessType
-import no.nav.melosys.domain.saksflyt.Prosessinstans
 import no.nav.melosys.integrasjon.joark.saf.SafConsumer
 import no.nav.melosys.integrasjon.joark.saf.dto.journalpost.*
 import no.nav.melosys.melosysmock.sak.SakRepo
 import no.nav.melosys.repository.BehandlingRepository
 import no.nav.melosys.repository.FagsakRepository
-import no.nav.melosys.repository.ProsessinstansRepository
+import no.nav.melosys.saksflyt.ProsessinstansRepository
+import no.nav.melosys.saksflytapi.domain.ProsessDataKey
+import no.nav.melosys.saksflytapi.domain.ProsessStatus
+import no.nav.melosys.saksflytapi.domain.ProsessType
+import no.nav.melosys.saksflytapi.domain.Prosessinstans
 import no.nav.melosys.sikkerhet.context.ThreadLocalAccessInfo
 import no.nav.security.token.support.spring.test.EnableMockOAuth2Server
-import org.assertj.core.api.Assertions.assertThat
-import org.awaitility.Awaitility
 import org.junit.jupiter.api.AfterEach
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
@@ -37,7 +42,6 @@ import org.springframework.boot.context.event.ApplicationReadyEvent
 import org.springframework.boot.test.autoconfigure.jdbc.AutoConfigureTestDatabase
 import org.springframework.boot.test.context.SpringBootTest
 import org.springframework.context.ApplicationEventPublisher
-import org.springframework.context.annotation.Import
 import org.springframework.kafka.test.context.EmbeddedKafka
 import org.springframework.test.annotation.DirtiesContext
 import org.springframework.test.context.ActiveProfiles
@@ -50,7 +54,7 @@ import java.util.*
 @ActiveProfiles("test")
 @SpringBootTest(
     classes = [Application::class, SaksflytTestConfig::class],
-    webEnvironment = SpringBootTest.WebEnvironment.NONE
+    webEnvironment = SpringBootTest.WebEnvironment.DEFINED_PORT
 )
 @EmbeddedKafka(
     count = 1, controlledShutdown = true, partitions = 1,
@@ -60,13 +64,11 @@ import java.util.*
 @AutoConfigureTestDatabase(replace = AutoConfigureTestDatabase.Replace.NONE)
 @DirtiesContext
 @EnableMockOAuth2Server
-@Import(OAuthMockServer::class)
 internal class SaksflytOppstartIT(
     @Autowired private val fagsakRepository: FagsakRepository,
     @Autowired private val behandlingRepository: BehandlingRepository,
     @Autowired private val prosessinstansRepository: ProsessinstansRepository,
     @Autowired private val applicationEventPublisher: ApplicationEventPublisher,
-    @Autowired private val oAuthMockServer: OAuthMockServer
 ) : OracleTestContainerBase() {
 
     private val processUUID = UUID.randomUUID()
@@ -79,13 +81,15 @@ internal class SaksflytOppstartIT(
         ThreadLocalAccessInfo.beforeExecuteProcess(processUUID, "test")
 
         SakRepo.clear()
-        oAuthMockServer.start()
     }
 
     @AfterEach
     fun after() {
         ThreadLocalAccessInfo.afterExecuteProcess(processUUID)
-        oAuthMockServer.stop()
+        // Skaper trøbbel og ha prosessinstans med status PÅ_VENT liggende
+        prosessinstansRepository.findAllByLåsReferanseStartingWith(LÅSREFERANSE_PROSESSINSTANS_SOM_IKKE_SKAL_REKJØRES_ENDA).forEach {
+            prosessinstansRepository.delete(it)
+        }
     }
 
     @Test
@@ -94,32 +98,52 @@ internal class SaksflytOppstartIT(
         val behandling = lagBehandling(fagsak).also { behandlingRepository.save(it) }
 
         val prosessinstansSomTrengerRekjøring = lagProsessinstans(
-            ProsessType.MOTTAK_SED, ProsessStatus.PÅ_VENT, behandling, LocalDateTime.now().minusDays(2)
+            ProsessType.MOTTAK_SED,
+            ProsessStatus.PÅ_VENT,
+            behandling,
+            LocalDateTime.now().minusDays(2),
+            LÅSREFERANSE_PROSESSINSTANS_SOM_TRENGER_REKJØRING
+        ).apply {
+            this.setData(ProsessDataKey.EESSI_MELDING, eessiMelding())
+        }.also { prosessinstansRepository.save(it) }
+
+        val prosessinstansSomIkkeSkalRekjøresEnda = lagProsessinstans(
+            ProsessType.MOTTAK_SED,
+            ProsessStatus.PÅ_VENT,
+            behandling,
+            LocalDateTime.now().minusHours(3),
+            LÅSREFERANSE_PROSESSINSTANS_SOM_IKKE_SKAL_REKJØRES_ENDA
         ).apply {
             this.setData(ProsessDataKey.EESSI_MELDING, eessiMelding())
         }.also { prosessinstansRepository.save(it) }
 
         lagProsessinstans(
-            ProsessType.MOTTAK_SED, ProsessStatus.PÅ_VENT, behandling, LocalDateTime.now().minusHours(3)
-        ).also { prosessinstansRepository.save(it) }
-
-        lagProsessinstans(
-            ProsessType.UTPEKING_AVVIS, ProsessStatus.FERDIG, behandling, LocalDateTime.now().minusDays(4)
+            ProsessType.UTPEKING_AVVIS, ProsessStatus.FERDIG, behandling, LocalDateTime.now().minusDays(4), null
         ).also { prosessinstansRepository.save(it) }
 
         every { safConsumer.hentJournalpost(eessiMelding().journalpostId) } returns journalpost()
 
 
-        applicationEventPublisher.publishEvent(applicationReadyEvent())
-        Awaitility.await().timeout(Duration.ofMinutes(1)).pollInterval(Duration.ofSeconds(2)).until {
-            prosessinstansRepository.findAllByStatusIn(
-                ProsessStatus.hentAktiveStatuser(),
-            ).size == 1
+        awaitWithFailOnLogErrors {
+            applicationEventPublisher.publishEvent(applicationReadyEvent())
+            val aktiveStatuser = ProsessStatus.hentAktiveStatuser()
+            timeout(Duration.ofSeconds(30))
+                .onTimeout { e ->
+                    withClue("det skal finnes 1 prosesses med status $aktiveStatuser - ${e.message}") {
+                        prosessinstansRepository.findAllByStatusIn(aktiveStatuser).shouldHaveSize(1)
+                    }
+                }
+                .waitUntil {
+                    prosessinstansRepository.findAllByStatusIn(aktiveStatuser).size == 1
+                }
         }
 
-
-        assertThat(prosessinstansRepository.findById(prosessinstansSomTrengerRekjøring.id)).isPresent.get()
-            .matches { it.status == ProsessStatus.FERDIG }
+        prosessinstansRepository.findById(prosessinstansSomTrengerRekjøring.id).shouldBePresent {
+            it.status shouldBe ProsessStatus.FERDIG
+        }
+        prosessinstansRepository.findById(prosessinstansSomIkkeSkalRekjøresEnda.id).shouldBePresent {
+            it.status shouldBe ProsessStatus.PÅ_VENT
+        }
     }
 
     private fun journalpost(): Journalpost = Journalpost(
@@ -137,7 +161,10 @@ internal class SaksflytOppstartIT(
     )
 
     private fun lagProsessinstans(
-        type: ProsessType, status: ProsessStatus, behandling: Behandling? = null, endretDato: LocalDateTime
+        type: ProsessType, status: ProsessStatus,
+        behandling: Behandling? = null,
+        endretDato: LocalDateTime,
+        låsReferanse: String?
     ): Prosessinstans {
         return Prosessinstans().apply {
             this.behandling = behandling
@@ -145,7 +172,7 @@ internal class SaksflytOppstartIT(
             this.status = status
             sistFullførtSteg = null
             registrertDato = endretDato
-            låsReferanse = if (status === ProsessStatus.PÅ_VENT) "123_dummy_1" else null
+            this.låsReferanse = låsReferanse
             this.endretDato = endretDato
         }
     }
@@ -158,14 +185,16 @@ internal class SaksflytOppstartIT(
     }
 
     fun applicationReadyEvent(): ApplicationReadyEvent {
-        return ApplicationReadyEvent(mockk(), emptyArray(), mockk())
+        return ApplicationReadyEvent(mockk(relaxed = true), emptyArray(), mockk(), Duration.ofSeconds(2))
     }
 
-    private fun lagFagsak(): Fagsak = Fagsak().apply {
-        saksnummer = "MEL-1007"
-        type = Sakstyper.EU_EOS
-        tema = Sakstemaer.MEDLEMSKAP_LOVVALG
-        status = Saksstatuser.OPPRETTET
+    private fun lagFagsak(): Fagsak = Fagsak(
+        "MEL-1007",
+        null,
+        Sakstyper.EU_EOS,
+        Sakstemaer.MEDLEMSKAP_LOVVALG,
+        Saksstatuser.OPPRETTET,
+    ).apply {
         leggTilRegisteringInfo()
     }
 
@@ -182,5 +211,11 @@ internal class SaksflytOppstartIT(
         registrertDato = Instant.now()
         endretDato = Instant.now()
         endretAv = "bla"
+    }
+
+    companion object {
+        val LÅSREFERANSE_PROSESSINSTANS_SOM_IKKE_SKAL_REKJØRES_ENDA = "234_dummy_2"
+        val LÅSREFERANSE_PROSESSINSTANS_SOM_TRENGER_REKJØRING = "123_dummy_1"
+
     }
 }

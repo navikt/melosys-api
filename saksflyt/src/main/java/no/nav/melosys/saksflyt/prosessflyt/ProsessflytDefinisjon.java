@@ -4,10 +4,10 @@ import java.util.EnumMap;
 import java.util.Map;
 import java.util.Optional;
 
-import no.nav.melosys.domain.saksflyt.ProsessSteg;
-import no.nav.melosys.domain.saksflyt.ProsessType;
+import no.nav.melosys.saksflytapi.domain.ProsessSteg;
+import no.nav.melosys.saksflytapi.domain.ProsessType;
 
-import static no.nav.melosys.domain.saksflyt.ProsessSteg.*;
+import static no.nav.melosys.saksflytapi.domain.ProsessSteg.*;
 
 public final class ProsessflytDefinisjon {
 
@@ -96,7 +96,8 @@ public final class ProsessflytDefinisjon {
                 REPLIKER_BEHANDLING,
                 OPPDATER_OG_FERDIGSTILL_JOURNALPOST,
                 OPPDATER_SAKSRELASJON,
-                OPPRETT_OPPGAVE
+                OPPRETT_OPPGAVE,
+                SEND_FORVALTNINGSMELDING
             )
         );
 
@@ -108,16 +109,27 @@ public final class ProsessflytDefinisjon {
                 OPPDATER_SAKSRELASJON,
                 HENT_REGISTEROPPLYSNINGER,
                 VURDER_INNGANGSVILKÅR,
-                OPPRETT_OPPGAVE
+                OPPRETT_OPPGAVE,
+                SEND_FORVALTNINGSMELDING
             )
+        );
+
+        PROSESS_FLYT_MAP.put(ProsessType.ANNULLER_SAK,
+            new ProsessFlyt(ProsessType.ANNULLER_SAK,
+                LAGRE_MEDLEMSKAPSPERIODE_MEDL,
+                KANSELLER_FAKTURASERIE,
+                AVSLUTT_SAK_OG_BEHANDLING
+                )
         );
 
         PROSESS_FLYT_MAP.put(ProsessType.JFR_KNYTT,
             new ProsessFlyt(ProsessType.JFR_KNYTT,
                 OPPDATER_OG_FERDIGSTILL_JOURNALPOST,
                 OPPDATER_SAKSRELASJON,
+                OPPRETT_TIDLIGERE_JOURNALPOSTER_FOR_SAK,
                 JFR_SETT_VURDER_DOKUMENT,
-                JFR_TILDEL_BEHANDLINGSOPPGAVE
+                JFR_TILDEL_BEHANDLINGSOPPGAVE,
+                SEND_FORVALTNINGSMELDING
             )
         );
 
@@ -153,6 +165,14 @@ public final class ProsessflytDefinisjon {
             )
         );
 
+        PROSESS_FLYT_MAP.put(ProsessType.OPPRETT_NY_BEHANDLING_MANGLENDE_INNBETALING,
+            new ProsessFlyt(ProsessType.OPPRETT_NY_BEHANDLING_MANGLENDE_INNBETALING,
+                OPPRETT_MANGLENDE_INNBETALING_BEHANDLING,
+                OPPRETT_OPPGAVE,
+                SEND_MANGLENDE_INNBETALING_VARSELBREV
+            )
+        );
+
         PROSESS_FLYT_MAP.put(ProsessType.OPPRETT_REPLIKERT_BEHANDLING_FOR_SAK,
             new ProsessFlyt(ProsessType.OPPRETT_REPLIKERT_BEHANDLING_FOR_SAK,
                 REPLIKER_BEHANDLING,
@@ -179,7 +199,8 @@ public final class ProsessflytDefinisjon {
                 SEND_VEDTAK_UTLAND,
                 DISTRIBUER_JOURNALPOST_UTLAND,
                 OPPRETT_AVGIFTSOPPGAVE,
-                AVSLUTT_SAK_OG_BEHANDLING
+                AVSLUTT_SAK_OG_BEHANDLING,
+                SEND_MELDING_OM_VEDTAK
             )
         );
 
@@ -191,7 +212,8 @@ public final class ProsessflytDefinisjon {
                 SEND_VEDTAK_UTLAND,
                 DISTRIBUER_JOURNALPOST_UTLAND,
                 OPPRETT_AVGIFTSOPPGAVE,
-                AVSLUTT_SAK_OG_BEHANDLING
+                AVSLUTT_SAK_OG_BEHANDLING,
+                SEND_MELDING_OM_VEDTAK
             )
         );
 
@@ -199,8 +221,10 @@ public final class ProsessflytDefinisjon {
             new ProsessFlyt(ProsessType.IVERKSETT_VEDTAK_FTRL,
                 LAGRE_MEDLEMSKAPSPERIODE_MEDL,
                 OPPRETT_AVGIFTSOPPGAVE,
-                OPPRETT_BETALINGSPLAN,
-                AVSLUTT_SAK_OG_BEHANDLING
+                OPPRETT_FAKTURASERIE,
+                AVSLUTT_SAK_OG_BEHANDLING,
+                SEND_MELDING_OM_VEDTAK
+
             )
         );
 
@@ -210,7 +234,8 @@ public final class ProsessflytDefinisjon {
                 AVKLAR_ARBEIDSGIVER,
                 LAGRE_LOVVALGSPERIODE_MEDL,
                 OPPRETT_AVGIFTSOPPGAVE,
-                AVSLUTT_SAK_OG_BEHANDLING
+                AVSLUTT_SAK_OG_BEHANDLING,
+                SEND_MELDING_OM_VEDTAK
             )
         );
 
@@ -219,7 +244,8 @@ public final class ProsessflytDefinisjon {
             new ProsessFlyt(ProsessType.IVERKSETT_VEDTAK_IKKE_YRKESAKTIV,
                 LAGRE_LOVVALGSPERIODE_MEDL,
                 SEND_VEDTAKSBREV_INNLAND,
-                AVSLUTT_SAK_OG_BEHANDLING
+                AVSLUTT_SAK_OG_BEHANDLING,
+                SEND_MELDING_OM_VEDTAK
             )
         );
 
@@ -368,6 +394,13 @@ public final class ProsessflytDefinisjon {
                 VURDER_INNGANGSVILKÅR,
                 OPPRETT_OPPGAVE,
                 SEND_FORVALTNINGSMELDING
+            )
+        );
+
+        PROSESS_FLYT_MAP.put(
+            ProsessType.OPPDATER_FAKTURAMOTTAKER,
+            new ProsessFlyt(ProsessType.OPPDATER_FAKTURAMOTTAKER,
+                OPPDATER_FAKTURAMOTTAKER
             )
         );
     }

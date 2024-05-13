@@ -1,6 +1,7 @@
 package no.nav.melosys.service.sak
 
 import io.kotest.assertions.throwables.shouldThrow
+import io.kotest.matchers.nulls.shouldNotBeNull
 import io.kotest.matchers.shouldBe
 import io.mockk.called
 import io.mockk.every
@@ -8,11 +9,10 @@ import io.mockk.impl.annotations.RelaxedMockK
 import io.mockk.junit5.MockKExtension
 import io.mockk.slot
 import io.mockk.verify
-import no.finn.unleash.FakeUnleash
 import no.nav.melosys.domain.Anmodningsperiode
+import no.nav.melosys.domain.Behandling
 import no.nav.melosys.domain.Behandlingsresultat
-import no.nav.melosys.domain.Fagsak
-import no.nav.melosys.domain.kodeverk.Saksstatuser
+import no.nav.melosys.domain.FagsakTestFactory
 import no.nav.melosys.domain.kodeverk.Sakstemaer
 import no.nav.melosys.domain.kodeverk.Sakstemaer.*
 import no.nav.melosys.domain.kodeverk.Sakstyper
@@ -20,7 +20,7 @@ import no.nav.melosys.domain.kodeverk.Sakstyper.*
 import no.nav.melosys.domain.kodeverk.Trygdeavtale_myndighetsland
 import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingsstatus.*
 import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingstema.*
-import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingstyper.FØRSTEGANG
+import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingstyper.*
 import no.nav.melosys.domain.mottatteopplysninger.MottatteOpplysninger
 import no.nav.melosys.domain.mottatteopplysninger.MottatteOpplysningerData
 import no.nav.melosys.domain.mottatteopplysninger.data.Periode
@@ -28,7 +28,7 @@ import no.nav.melosys.domain.mottatteopplysninger.data.Soeknadsland
 import no.nav.melosys.exception.FunksjonellException
 import no.nav.melosys.service.SaksbehandlingDataFactory
 import no.nav.melosys.service.behandling.BehandlingsresultatService
-import no.nav.melosys.service.lovligekombinasjoner.LovligeKombinasjonerService
+import no.nav.melosys.service.lovligekombinasjoner.LovligeKombinasjonerSaksbehandlingService
 import no.nav.melosys.service.mottatteopplysninger.MottatteOpplysningerService
 import no.nav.melosys.service.saksbehandling.SaksbehandlingRegler
 import no.nav.melosys.service.saksopplysninger.OppfriskSaksopplysningerService
@@ -36,9 +36,6 @@ import org.assertj.core.api.Assertions.assertThat
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.extension.ExtendWith
-import org.mockito.kotlin.any
-import org.mockito.kotlin.verifyNoInteractions
-import org.mockito.kotlin.verifyNoMoreInteractions
 import org.springframework.context.ApplicationEventPublisher
 import java.time.Instant
 import java.util.*
@@ -46,7 +43,7 @@ import java.util.*
 @ExtendWith(MockKExtension::class)
 internal class EndreSakServiceTest {
     @RelaxedMockK
-    lateinit var lovligeKombinasjonerService: LovligeKombinasjonerService
+    lateinit var lovligeKombinasjonerSaksbehandlingService: LovligeKombinasjonerSaksbehandlingService
 
     @RelaxedMockK
     lateinit var fagsakService: FagsakService
@@ -71,33 +68,33 @@ internal class EndreSakServiceTest {
     @BeforeEach
     fun setUp() {
         endreSakService = EndreSakService(
-            lovligeKombinasjonerService,
+            lovligeKombinasjonerSaksbehandlingService,
             fagsakService,
             behandlingsresultatService,
             mottatteOpplysningerService,
             oppfriskSaksopplysningerService,
             applicationEventPublisher,
-            saksbehandlingRegler,
+            saksbehandlingRegler
         )
     }
 
     @Test
-    fun `endring av sak, ikke tom flyt - oppdater, opprett ny søknad og oppfrisk saksopplysninger`() {
-        val saksnummer = "MEL-123"
-        val opprinneligFagsak = lagFagsak(saksnummer, TRYGDEAVTALE, TRYGDEAVGIFT)
+    fun `endring av sak, ikke ingen flyt - oppdater, opprett ny søknad og oppfrisk saksopplysninger`() {
+        val opprinneligFagsak = lagFagsak(TRYGDEAVTALE, TRYGDEAVGIFT)
         val mottatteOpplysningerData = MottatteOpplysningerData().apply {
             periode = Periode()
             soeknadsland = Soeknadsland()
         }
         val aktivBehandling = SaksbehandlingDataFactory.lagBehandling(opprinneligFagsak, mottatteOpplysningerData)
         aktivBehandling.sisteOpplysningerHentetDato = Instant.now()
-        opprinneligFagsak.behandlinger.add(aktivBehandling)
+        opprinneligFagsak.leggTilBehandling(aktivBehandling)
 
-        every { fagsakService.hentFagsak(saksnummer) } returns opprinneligFagsak
+        every { fagsakService.hentFagsak(FagsakTestFactory.SAKSNUMMER) } returns opprinneligFagsak
         every { mottatteOpplysningerService.finnMottatteOpplysninger(any()) } returns Optional.of(MottatteOpplysninger())
 
+
         endreSakService.endre(
-            saksnummer,
+            FagsakTestFactory.SAKSNUMMER,
             EU_EOS,
             MEDLEMSKAP_LOVVALG,
             UTSENDT_ARBEIDSTAKER,
@@ -109,7 +106,7 @@ internal class EndreSakServiceTest {
 
         verify {
             fagsakService.oppdaterFagsakOgBehandling(
-                saksnummer,
+                FagsakTestFactory.SAKSNUMMER,
                 EU_EOS,
                 MEDLEMSKAP_LOVVALG,
                 UTSENDT_ARBEIDSTAKER,
@@ -125,43 +122,41 @@ internal class EndreSakServiceTest {
     }
 
     @Test
-    fun `endring av sak, tom flyt - slett mottate opplysninger hvis finnes, opprett ikke nye`() {
-        val saksnummer = "MEL-123"
-        val fagsak = SaksbehandlingDataFactory.lagFagsak(saksnummer)
+    fun `endring av sak, ingen flyt - slett mottatte opplysninger hvis finnes, opprett ikke nye`() {
+        val fagsak = SaksbehandlingDataFactory.lagFagsak()
         val mottatteOpplysningerData = MottatteOpplysningerData().apply {
             periode = Periode()
             soeknadsland = Soeknadsland()
         }
-        fagsak.behandlinger.add(SaksbehandlingDataFactory.lagBehandling(fagsak, mottatteOpplysningerData))
-        every { fagsakService.hentFagsak(saksnummer) } returns fagsak
+        fagsak.leggTilBehandling(SaksbehandlingDataFactory.lagBehandling(fagsak, mottatteOpplysningerData))
+        every { fagsakService.hentFagsak(FagsakTestFactory.SAKSNUMMER) } returns fagsak
         every { mottatteOpplysningerService.finnMottatteOpplysninger(any()) } returns Optional.of(MottatteOpplysninger())
-        every { saksbehandlingRegler.harTomFlyt(any(), any(), any(), any()) } returns true
+        every { saksbehandlingRegler.harIngenFlyt(any(), any(), any(), any()) } returns true
 
 
-        endreSakService.endre(saksnummer, FTRL, TRYGDEAVGIFT, YRKESAKTIV, FØRSTEGANG, AVVENT_FAGLIG_AVKLARING, null)
+        endreSakService.endre(FagsakTestFactory.SAKSNUMMER, FTRL, TRYGDEAVGIFT, YRKESAKTIV, FØRSTEGANG, AVVENT_FAGLIG_AVKLARING, null)
 
 
-        verify { mottatteOpplysningerService.slettOpplysninger(fagsak.hentAktivBehandling().id) }
-        verify(exactly = 0) { mottatteOpplysningerService.opprettSøknadEllerAnmodningEllerAttest(fagsak.hentAktivBehandling(), any(), any()) }
+        verify { mottatteOpplysningerService.slettOpplysninger(fagsak.hentAktivBehandlingIkkeÅrsavregning().id) }
+        verify(exactly = 0) { mottatteOpplysningerService.opprettSøknadEllerAnmodningEllerAttest(fagsak.hentAktivBehandlingIkkeÅrsavregning(), any(), any()) }
     }
 
     @Test
     fun `endring av sak, land gyldig for både ny og gammel flyt - bruker eksisterende soeknadsland`() {
-        val saksnummer = "MEL-123"
-        val fagsak = SaksbehandlingDataFactory.lagFagsak(saksnummer)
+        val fagsak = SaksbehandlingDataFactory.lagFagsak()
         val mottatteOpplysningerData = MottatteOpplysningerData().apply {
             periode = Periode()
             soeknadsland = Soeknadsland().apply { landkoder.add(Trygdeavtale_myndighetsland.FR.kode) }
         }
         fagsak.type = TRYGDEAVTALE
         val behandling = SaksbehandlingDataFactory.lagBehandling(fagsak, mottatteOpplysningerData)
-        fagsak.behandlinger.add(behandling)
-        every { fagsakService.hentFagsak(saksnummer) } returns fagsak
+        fagsak.leggTilBehandling(behandling)
+        every { fagsakService.hentFagsak(FagsakTestFactory.SAKSNUMMER) } returns fagsak
         every { mottatteOpplysningerService.finnMottatteOpplysninger(any()) } returns Optional.of(behandling.mottatteOpplysninger)
 
 
         endreSakService.endre(
-            saksnummer,
+            FagsakTestFactory.SAKSNUMMER,
             EU_EOS,
             MEDLEMSKAP_LOVVALG,
             UTSENDT_ARBEIDSTAKER,
@@ -172,10 +167,10 @@ internal class EndreSakServiceTest {
 
 
         val soeknadslandSlot = slot<Soeknadsland>()
-        verify { mottatteOpplysningerService.slettOpplysninger(fagsak.hentAktivBehandling().id) }
+        verify { mottatteOpplysningerService.slettOpplysninger(fagsak.hentAktivBehandlingIkkeÅrsavregning().id) }
         verify {
             mottatteOpplysningerService.opprettSøknadEllerAnmodningEllerAttest(
-                fagsak.hentAktivBehandling(),
+                fagsak.hentAktivBehandlingIkkeÅrsavregning(),
                 any(),
                 capture(soeknadslandSlot)
             )
@@ -185,21 +180,20 @@ internal class EndreSakServiceTest {
 
     @Test
     fun `endring av sak, land ikke gyldig for ny flyt - bruker tomt soeknadsland`() {
-        val saksnummer = "MEL-123"
-        val fagsak = SaksbehandlingDataFactory.lagFagsak(saksnummer)
+        val fagsak = SaksbehandlingDataFactory.lagFagsak()
         val mottatteOpplysningerData = MottatteOpplysningerData().apply {
             periode = Periode()
             soeknadsland = Soeknadsland().apply { landkoder.add(Trygdeavtale_myndighetsland.AU.kode) }
         }
         fagsak.type = TRYGDEAVTALE
         val behandling = SaksbehandlingDataFactory.lagBehandling(fagsak, mottatteOpplysningerData)
-        fagsak.behandlinger.add(behandling)
-        every { fagsakService.hentFagsak(saksnummer) } returns fagsak
+        fagsak.leggTilBehandling(behandling)
+        every { fagsakService.hentFagsak(FagsakTestFactory.SAKSNUMMER) } returns fagsak
         every { mottatteOpplysningerService.finnMottatteOpplysninger(any()) } returns Optional.of(behandling.mottatteOpplysninger)
 
 
         endreSakService.endre(
-            saksnummer,
+            FagsakTestFactory.SAKSNUMMER,
             EU_EOS,
             MEDLEMSKAP_LOVVALG,
             UTSENDT_ARBEIDSTAKER,
@@ -210,10 +204,10 @@ internal class EndreSakServiceTest {
 
 
         val soeknadslandSlot = slot<Soeknadsland>()
-        verify { mottatteOpplysningerService.slettOpplysninger(fagsak.hentAktivBehandling().id) }
+        verify { mottatteOpplysningerService.slettOpplysninger(fagsak.hentAktivBehandlingIkkeÅrsavregning().id) }
         verify {
             mottatteOpplysningerService.opprettSøknadEllerAnmodningEllerAttest(
-                fagsak.hentAktivBehandling(),
+                fagsak.hentAktivBehandlingIkkeÅrsavregning(),
                 any(),
                 capture(soeknadslandSlot)
             )
@@ -223,19 +217,19 @@ internal class EndreSakServiceTest {
 
     @Test
     fun `ikke lov å endre behandlinger med status IVERKSETTER_VEDTAK`() {
-        val saksnummer = "MEL-124"
-        val opprinneligFagsak = lagFagsak(saksnummer, FTRL, UNNTAK)
+        val opprinneligFagsak = lagFagsak(FTRL, UNNTAK)
         val behandling = SaksbehandlingDataFactory.lagInaktivBehandling(opprinneligFagsak).apply {
             status = IVERKSETTER_VEDTAK
         }
-        opprinneligFagsak.behandlinger.add(behandling)
-        every { fagsakService.hentFagsak(saksnummer) } returns opprinneligFagsak
+        opprinneligFagsak.leggTilBehandling(behandling)
+        every { fagsakService.hentFagsak(FagsakTestFactory.SAKSNUMMER) } returns opprinneligFagsak
         every { mottatteOpplysningerService.finnMottatteOpplysninger(any()) } returns Optional.of(MottatteOpplysninger())
+
 
         shouldThrow<FunksjonellException>
         {
             endreSakService.endre(
-                saksnummer,
+                FagsakTestFactory.SAKSNUMMER,
                 EU_EOS,
                 MEDLEMSKAP_LOVVALG,
                 ANMODNING_OM_UNNTAK_HOVEDREGEL,
@@ -248,11 +242,10 @@ internal class EndreSakServiceTest {
 
     @Test
     fun `ikke lov å endre fagsak eller behandlinger med sendt anmodning om unntak`() {
-        val saksnummer = "MEL-124"
-        val opprinneligFagsak = lagFagsak(saksnummer, FTRL, UNNTAK)
+        val opprinneligFagsak = lagFagsak(FTRL, UNNTAK)
         val behandling = SaksbehandlingDataFactory.lagBehandling(opprinneligFagsak)
-        opprinneligFagsak.behandlinger.add(behandling)
-        every { fagsakService.hentFagsak(saksnummer) } returns opprinneligFagsak
+        opprinneligFagsak.leggTilBehandling(behandling)
+        every { fagsakService.hentFagsak(FagsakTestFactory.SAKSNUMMER) } returns opprinneligFagsak
         val anmodningsperiode = Anmodningsperiode().apply {
             setSendtUtland(true)
         }
@@ -261,10 +254,11 @@ internal class EndreSakServiceTest {
         }
         every { behandlingsresultatService.hentBehandlingsresultatMedAnmodningsperioder(behandling.id) } returns resultat
 
+
         shouldThrow<FunksjonellException>
         {
             endreSakService.endre(
-                saksnummer,
+                FagsakTestFactory.SAKSNUMMER,
                 EU_EOS,
                 MEDLEMSKAP_LOVVALG,
                 UTSENDT_ARBEIDSTAKER,
@@ -277,11 +271,10 @@ internal class EndreSakServiceTest {
 
     @Test
     fun `greit å endre behandlingsstatus med sendt anmodning om unntak`() {
-        val saksnummer = "MEL-124"
-        val sak = lagFagsak(saksnummer, FTRL, UNNTAK)
+        val sak = lagFagsak(FTRL, UNNTAK)
         val behandling = SaksbehandlingDataFactory.lagBehandling(sak)
-        sak.behandlinger.add(behandling)
-        every { fagsakService.hentFagsak(saksnummer) } returns sak
+        sak.leggTilBehandling(behandling)
+        every { fagsakService.hentFagsak(FagsakTestFactory.SAKSNUMMER) } returns sak
         val anmodningsperiode = Anmodningsperiode().apply {
             setSendtUtland(true)
         }
@@ -317,11 +310,10 @@ internal class EndreSakServiceTest {
 
     @Test
     fun `endring av kun mottaksdato eller behandlingsstatus skal ikke endre mottatte opplysninger eller registeropplysninger`() {
-        val saksnummer = "MEL-124"
-        val sak = lagFagsak(saksnummer, EU_EOS, UNNTAK)
+        val sak = lagFagsak(EU_EOS, UNNTAK)
         val behandling = SaksbehandlingDataFactory.lagBehandling(sak)
-        sak.behandlinger.add(behandling)
-        every { fagsakService.hentFagsak(saksnummer) } returns sak
+        sak.leggTilBehandling(behandling)
+        every { fagsakService.hentFagsak(FagsakTestFactory.SAKSNUMMER) } returns sak
 
 
         endreSakService.endre(
@@ -340,21 +332,21 @@ internal class EndreSakServiceTest {
     }
 
     @Test
-    fun `endring av sak, ikke tom flyt - oppdater, opprett ny søknad, oppfrisker ikke når registeropplysninger ikke har blitt hentet før`() {
-        val saksnummer = "MEL-125"
-        val opprinneligFagsak = lagFagsak(saksnummer, TRYGDEAVTALE, TRYGDEAVGIFT)
+    fun `endring av sak, ikke ingen flyt - oppdater, opprett ny søknad, oppfrisker ikke når registeropplysninger ikke har blitt hentet før`() {
+        val opprinneligFagsak = lagFagsak(TRYGDEAVTALE, TRYGDEAVGIFT)
         val mottatteOpplysningerData = MottatteOpplysningerData().apply {
             periode = Periode()
             soeknadsland = Soeknadsland()
         }
         val aktivBehandling = SaksbehandlingDataFactory.lagBehandling(opprinneligFagsak, mottatteOpplysningerData)
-        opprinneligFagsak.behandlinger.add(aktivBehandling)
-        every { fagsakService.hentFagsak(saksnummer) } returns opprinneligFagsak
+        opprinneligFagsak.leggTilBehandling(aktivBehandling)
+        every { fagsakService.hentFagsak(FagsakTestFactory.SAKSNUMMER) } returns opprinneligFagsak
         every { mottatteOpplysningerService.finnMottatteOpplysninger(any()) } returns Optional.of(MottatteOpplysninger())
-        every {saksbehandlingRegler.harRegistreringUnntakFraMedlemskapFlyt(EU_EOS, UNNTAK, A1_ANMODNING_OM_UNNTAK_PAPIR)} returns true
+        every { saksbehandlingRegler.harRegistreringUnntakFraMedlemskapFlyt(EU_EOS, UNNTAK, A1_ANMODNING_OM_UNNTAK_PAPIR) } returns true
+
 
         endreSakService.endre(
-            saksnummer,
+            FagsakTestFactory.SAKSNUMMER,
             EU_EOS,
             UNNTAK,
             A1_ANMODNING_OM_UNNTAK_PAPIR,
@@ -366,7 +358,7 @@ internal class EndreSakServiceTest {
 
         verify {
             fagsakService.oppdaterFagsakOgBehandling(
-                saksnummer,
+                FagsakTestFactory.SAKSNUMMER,
                 EU_EOS,
                 UNNTAK,
                 A1_ANMODNING_OM_UNNTAK_PAPIR,
@@ -382,12 +374,61 @@ internal class EndreSakServiceTest {
         verify { applicationEventPublisher.publishEvent(any()) }
     }
 
-    private fun lagFagsak(saksnummer: String, sakstype: Sakstyper, sakstema: Sakstemaer) =
-        Fagsak().apply {
-            this.saksnummer = saksnummer
-            this.type = sakstype
-            this.tema = sakstema
-            this.status = Saksstatuser.OPPRETTET
-            this.aktører.add(SaksbehandlingDataFactory.lagBruker())
+    @Test
+    fun `endring av behandlingstype til ny vurdering, opprinneligBehandling er null - oppdater opprinneligBehandling`() {
+        val gammelBehandling = Behandling().apply {
+            id = 1L
+            tema = YRKESAKTIV
+            type = FØRSTEGANG
+            status = AVSLUTTET
         }
+        val aktivBehandling = Behandling().apply {
+            id = 2L
+            tema = YRKESAKTIV
+            type = HENVENDELSE
+            status = UNDER_BEHANDLING
+        }
+        val sak = lagFagsak(FTRL, MEDLEMSKAP_LOVVALG).apply {
+            leggTilBehandling(gammelBehandling)
+            leggTilBehandling(aktivBehandling)
+        }
+        every { fagsakService.hentFagsak(FagsakTestFactory.SAKSNUMMER) } returns sak
+        every { mottatteOpplysningerService.finnMottatteOpplysninger(2L) } returns Optional.empty()
+        every { saksbehandlingRegler.finnBehandlingSomKanReplikeres(sak) } returns gammelBehandling
+
+
+        endreSakService.endre(
+            FagsakTestFactory.SAKSNUMMER,
+            FTRL,
+            MEDLEMSKAP_LOVVALG,
+            YRKESAKTIV,
+            NY_VURDERING,
+            UNDER_BEHANDLING,
+            null
+        )
+
+
+        verify {
+            fagsakService.oppdaterFagsakOgBehandling(
+                FagsakTestFactory.SAKSNUMMER,
+                FTRL,
+                MEDLEMSKAP_LOVVALG,
+                YRKESAKTIV,
+                NY_VURDERING,
+                UNDER_BEHANDLING,
+                null
+            )
+        }
+        verify { mottatteOpplysningerService.slettOpplysninger(aktivBehandling.id) }
+        verify { mottatteOpplysningerService.opprettSøknadEllerAnmodningEllerAttest(aktivBehandling, any(), any()) }
+        verify { applicationEventPublisher.publishEvent(any()) }
+        aktivBehandling.opprinneligBehandling.shouldNotBeNull().shouldBe(gammelBehandling)
+    }
+
+    private fun lagFagsak(sakstype: Sakstyper, sakstema: Sakstemaer) =
+        FagsakTestFactory.builder().apply {
+            type = sakstype
+            tema = sakstema
+            medBruker()
+        }.build()
 }

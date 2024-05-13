@@ -21,7 +21,7 @@ import no.nav.melosys.service.dokument.brev.BrevData;
 import no.nav.melosys.service.dokument.brev.BrevDataA001;
 import no.nav.melosys.service.dokument.brev.datagrunnlag.BrevDataGrunnlag;
 import no.nav.melosys.service.unntak.AnmodningsperiodeService;
-import no.nav.melosys.service.vilkaar.VilkaarsresultatService;
+import no.nav.melosys.service.behandling.VilkaarsresultatService;
 import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.collections4.ListUtils;
 import org.apache.commons.collections4.map.SingletonMap;
@@ -54,42 +54,48 @@ public class BrevDataByggerA001 implements BrevDataBygger {
         Land_iso2 landkode = Land_iso2.valueOf(anmodningsperioder.iterator().next().getUnntakFraLovvalgsland().getKode());
 
         BrevDataA001 brevData = new BrevDataA001();
-        brevData.persondata = dataGrunnlag.getPerson();
-        brevData.utenlandskMyndighet = utenlandskMyndighetService.hentUtenlandskMyndighet(landkode);
+        brevData.setPersondata(dataGrunnlag.getPerson());
+        brevData.setUtenlandskMyndighet(utenlandskMyndighetService.hentUtenlandskMyndighet(landkode));
 
-        brevData.arbeidsgivendeVirksomheter =
-            ListUtils.union(dataGrunnlag.getAvklarteVirksomheterGrunnlag().hentNorskeArbeidsgivere(),
-                dataGrunnlag.getAvklarteVirksomheterGrunnlag().hentUtenlandskeArbeidsgivere());
+        brevData.setArbeidsgivendeVirksomheter(ListUtils.union(dataGrunnlag.getAvklarteVirksomheterGrunnlag().hentNorskeArbeidsgivere(),
+            dataGrunnlag.getAvklarteVirksomheterGrunnlag().hentUtenlandskeArbeidsgivere()));
 
-        brevData.selvstendigeVirksomheter =
-            ListUtils.union(dataGrunnlag.getAvklarteVirksomheterGrunnlag().hentNorskeSelvstendige(),
-                dataGrunnlag.getAvklarteVirksomheterGrunnlag().hentUtenlandskeSelvstendige());
+        brevData.setSelvstendigeVirksomheter(ListUtils.union(dataGrunnlag.getAvklarteVirksomheterGrunnlag().hentNorskeSelvstendige(),
+            dataGrunnlag.getAvklarteVirksomheterGrunnlag().hentUtenlandskeSelvstendige()));
 
         var adresseOgType = hentBostedsadresseOgTypeKode();
-        brevData.bostedsadresse = adresseOgType.getValue();
-        brevData.bostedsadresseTypeKode = adresseOgType.getKey();
+        brevData.setBostedsadresse(adresseOgType.getValue());
+        brevData.setBostedsadresseTypeKode(adresseOgType.getKey());
 
-        brevData.arbeidssteder = dataGrunnlag.getArbeidsstedGrunnlag().hentArbeidssteder();
+        brevData.setArbeidssteder(dataGrunnlag.getArbeidsstedGrunnlag().hentArbeidssteder());
 
-        brevData.utenlandskIdent = hentUtenlandskIdent(landkode);
-        brevData.anmodningsperioder = anmodningsperioder;
-        brevData.tidligereLovvalgsperioder = lovvalgsperiodeService.hentTidligereLovvalgsperioder(behandling);
-        brevData.ansettelsesperiode = hentAnsettelsesperiode();
+        var utenlandskIdent = hentUtenlandskIdent(landkode).isPresent() ?
+            hentUtenlandskIdent(landkode).get() :
+            null;
+
+        brevData.setUtenlandskIdent(utenlandskIdent);
+        brevData.setAnmodningsperioder(anmodningsperioder);
+        brevData.setTidligereLovvalgsperioder(lovvalgsperiodeService.hentTidligereLovvalgsperioder(behandling));
+
+        var ansettelsesPeriode = hentAnsettelsesperiode().isPresent() ?
+            hentAnsettelsesperiode().get() :
+            null;
+        brevData.setAnsettelsesperiode(ansettelsesPeriode);
 
         Vilkaarsresultat art16Vilkaar = hentVilkårsresultat();
         Set<VilkaarBegrunnelse> art16VilkaarBegrunnelser = art16Vilkaar.getBegrunnelser();
         if (vilkaarsresultatService.harVilkaarForArtikkel12(behandling.getId())) {
-            brevData.anmodningBegrunnelser = art16VilkaarBegrunnelser;
-            brevData.anmodningUtenArt12Begrunnelser = Collections.emptySet();
+            brevData.setAnmodningBegrunnelser(art16VilkaarBegrunnelser);
+            brevData.setAnmodningUtenArt12Begrunnelser(Collections.emptySet());
         } else {
-            brevData.anmodningBegrunnelser = Collections.emptySet();
-            brevData.anmodningUtenArt12Begrunnelser = art16VilkaarBegrunnelser;
+            brevData.setAnmodningBegrunnelser(Collections.emptySet());
+            brevData.setAnmodningUtenArt12Begrunnelser(art16VilkaarBegrunnelser);
         }
 
         if (harSærligGrunn(art16VilkaarBegrunnelser)) {
-            brevData.anmodningFritekstBegrunnelse = art16Vilkaar.getBegrunnelseFritekstEessi();
+            brevData.setAnmodningFritekstBegrunnelse(art16Vilkaar.getBegrunnelseFritekstEessi());
         }
-        brevData.ytterligereInformasjon = dataGrunnlag.getBrevbestilling().getYtterligereInformasjon();
+        brevData.setYtterligereInformasjon(dataGrunnlag.getBrevbestilling().getYtterligereInformasjon());
         return brevData;
     }
 
@@ -111,9 +117,9 @@ public class BrevDataByggerA001 implements BrevDataBygger {
     }
 
     private Optional<String> hentUtenlandskIdent(Land_iso2 landkode) {
-        return dataGrunnlag.getMottatteOpplysningerData().personOpplysninger.utenlandskIdent.stream()
-            .filter(utenlandskIdent -> utenlandskIdent.landkode.equals(landkode.getKode()))
-            .map(utenlandskIdent -> utenlandskIdent.ident)
+        return dataGrunnlag.getMottatteOpplysningerData().personOpplysninger.getUtenlandskIdent().stream()
+            .filter(utenlandskIdent -> Objects.equals(utenlandskIdent.getLandkode(), landkode.getKode()))
+            .map(utenlandskIdent -> utenlandskIdent.getIdent())
             .findFirst();
     }
 

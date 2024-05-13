@@ -8,10 +8,7 @@ import java.util.stream.Collectors;
 import ch.qos.logback.classic.Logger;
 import ch.qos.logback.classic.spi.ILoggingEvent;
 import ch.qos.logback.core.read.ListAppender;
-import no.nav.melosys.domain.Behandling;
-import no.nav.melosys.domain.FellesKodeverk;
-import no.nav.melosys.domain.Saksopplysning;
-import no.nav.melosys.domain.SaksopplysningType;
+import no.nav.melosys.domain.*;
 import no.nav.melosys.domain.adresse.Adresse;
 import no.nav.melosys.domain.adresse.StrukturertAdresse;
 import no.nav.melosys.domain.avklartefakta.AvklartVirksomhet;
@@ -127,9 +124,9 @@ class AvklarteVirksomheterServiceTest {
 
     private ForetakUtland lagForetakUtland(String navn, String uuid, String orgnr) {
         ForetakUtland foretakUtland = new ForetakUtland();
-        foretakUtland.navn = navn;
-        foretakUtland.uuid = uuid;
-        foretakUtland.orgnr = orgnr;
+        foretakUtland.setNavn(navn);
+        foretakUtland.setUuid(uuid);
+        foretakUtland.setOrgnr(orgnr);
         return foretakUtland;
     }
 
@@ -247,7 +244,7 @@ class AvklarteVirksomheterServiceTest {
     @Test
     void harOpphørtAvklartVirksomhet_opphoersdatoTilbakeITid_girTrue() {
         OrganisasjonDokument orgDok = lagOrganisasjonDokument("0011", "Gatenavn 1");
-        orgDok.organisasjonDetaljer.opphoersdato = LocalDate.now().minusYears(1);
+        orgDok.getOrganisasjonDetaljer().setOpphoersdato(LocalDate.now().minusYears(1));
         when(organisasjonOppslagService.hentOrganisasjoner(any())).thenReturn(Collections.singleton(orgDok));
 
         behandling.setSaksopplysninger(lagArbeidsforholdOpplysninger(Collections.emptyList()));
@@ -334,8 +331,8 @@ class AvklarteVirksomheterServiceTest {
     @Test
     void utfyllManglendeAdressefelter_utenlandskIngenForretningsadressePostadresseUtenPostnummer_postnummerTomString() {
         var organisasjonDokument = lagOrganisasjonDokument(null, null, null, "DK");
-        organisasjonDokument.organisasjonDetaljer.forretningsadresse = Collections.emptyList();
-        organisasjonDokument.organisasjonDetaljer.postadresse.stream().findFirst().ifPresent(a -> ((SemistrukturertAdresse) a).setPostnr(null));
+        organisasjonDokument.getOrganisasjonDetaljer().setForretningsadresse(Collections.emptyList());
+        organisasjonDokument.getOrganisasjonDetaljer().getPostadresse().stream().findFirst().ifPresent(a -> ((SemistrukturertAdresse) a).setPostnr(null));
         StrukturertAdresse adresse = avklarteVirksomheterService.utfyllManglendeAdressefelter(organisasjonDokument);
 
         assertThat(adresse.getGatenavn()).isEqualTo("Postgatenavn");
@@ -360,11 +357,11 @@ class AvklarteVirksomheterServiceTest {
 
     private void forberedValidering() {
         ForetakUtland foretakUtland = new ForetakUtland();
-        foretakUtland.uuid = uuid1;
+        foretakUtland.setUuid(uuid1);
         SelvstendigForetak selvstendigForetak = new SelvstendigForetak();
-        selvstendigForetak.orgnr = orgnr1;
+        selvstendigForetak.setOrgnr(orgnr1);
         Arbeidsforhold arbeidsforhold = new Arbeidsforhold();
-        arbeidsforhold.arbeidsgiverID = orgnr3;
+        arbeidsforhold.setArbeidsgiverID(orgnr3);
         ArbeidsforholdDokument arbeidsforholdDokument = new ArbeidsforholdDokument();
         arbeidsforholdDokument.arbeidsforhold.add(arbeidsforhold);
         Saksopplysning saksopplysning = new Saksopplysning();
@@ -372,10 +369,10 @@ class AvklarteVirksomheterServiceTest {
         saksopplysning.setDokument(arbeidsforholdDokument);
         MottatteOpplysningerData mottatteOpplysningerData = new MottatteOpplysningerData();
         mottatteOpplysningerData.foretakUtland.add(foretakUtland);
-        mottatteOpplysningerData.selvstendigArbeid.selvstendigForetak.add(selvstendigForetak);
-        mottatteOpplysningerData.juridiskArbeidsgiverNorge.ekstraArbeidsgivere.add(orgnr2);
+        mottatteOpplysningerData.selvstendigArbeid.getSelvstendigForetak().add(selvstendigForetak);
+        mottatteOpplysningerData.juridiskArbeidsgiverNorge.getEkstraArbeidsgivere().add(orgnr2);
         MottatteOpplysninger mottatteOpplysninger = new MottatteOpplysninger();
-        mottatteOpplysninger.setMottatteOpplysningerdata(mottatteOpplysningerData);
+        mottatteOpplysninger.setMottatteOpplysningerData(mottatteOpplysningerData);
         Behandling behandling = new Behandling();
         behandling.setSaksopplysninger(Set.of(saksopplysning));
         behandling.setMottatteOpplysninger(mottatteOpplysninger);
@@ -392,24 +389,27 @@ class AvklarteVirksomheterServiceTest {
     }
 
     private OrganisasjonDokument lagOrganisasjonDokument(String forretningsPostnr, String forretningsGatenavn, String postadressePostnr, String postadresseLand) {
-        OrganisasjonDokument organisasjonDokument = new OrganisasjonDokument();
-        OrganisasjonsDetaljer organisasjonsDetaljer = new OrganisasjonsDetaljer();
-        organisasjonDokument.setOrganisasjonDetaljer(organisasjonsDetaljer);
         SemistrukturertAdresse forretningsadresse = new SemistrukturertAdresse();
-        organisasjonsDetaljer.forretningsadresse.add(forretningsadresse);
         forretningsadresse.setAdresselinje1(forretningsGatenavn);
         forretningsadresse.setPostnr(forretningsPostnr);
         forretningsadresse.setPoststed("Forretningspoststed");
         forretningsadresse.setLandkode("NO");
         forretningsadresse.setGyldighetsperiode(new Periode(LocalDate.now().minusDays(1), LocalDate.now().plusDays(1)));
         SemistrukturertAdresse postadresse = new SemistrukturertAdresse();
-        organisasjonsDetaljer.postadresse.add(postadresse);
         postadresse.setAdresselinje1("Postgatenavn");
         postadresse.setPostnr(postadressePostnr);
         postadresse.setPoststed("Postpoststed");
         postadresse.setLandkode(postadresseLand);
         postadresse.setGyldighetsperiode(new Periode(LocalDate.now().minusDays(1), LocalDate.now().plusDays(1)));
 
-        return organisasjonDokument;
+        OrganisasjonsDetaljer organisasjonsDetaljer = OrganisasjonsDetaljerTestFactory.builder()
+            .forretningsadresse(forretningsadresse)
+            .postadresse(postadresse)
+            .build();
+
+        return OrganisasjonDokumentTestFactory.builder()
+            .organisasjonsDetaljer(organisasjonsDetaljer)
+            .build();
     }
+
 }

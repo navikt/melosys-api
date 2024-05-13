@@ -1,9 +1,6 @@
 package no.nav.melosys.itest
 
 import no.nav.melosys.domain.arkiv.*
-import no.nav.melosys.domain.eessi.BucType
-import no.nav.melosys.domain.eessi.Periode
-import no.nav.melosys.domain.eessi.SedType
 import no.nav.melosys.domain.eessi.melding.Avsender
 import no.nav.melosys.domain.eessi.melding.MelosysEessiMelding
 import no.nav.melosys.integrasjon.joark.JoarkFasade
@@ -14,40 +11,29 @@ import org.springframework.stereotype.Component
 class EessiMeldingTestDataFactory(
     @Autowired private val joarkFasade: JoarkFasade,
 ) {
-    fun melosysEessiMelding(
-        bucType: BucType,
-        rinaSaksnummer: String?,
-        sedType: SedType,
-        periode: Periode?,
-        artikkel: String?,
-        lovvalgsland: String = "SE",
-        isX006NavErFjernet: Boolean = false,
-    ): MelosysEessiMelding = MelosysEessiMelding().apply {
-        this.aktoerId = "1111111111111"
-        this.anmodningUnntak = null
-        this.arbeidssteder = emptyList()
-        this.bucType = bucType.name
-        this.gsakSaksnummer = null
-        this.artikkel = artikkel
-        this.avsender = Avsender("SE:123", "SE")
-        this.dokumentId = null
-        this.journalpostId = opprettEessiJournalpost(sedType)
-        this.lovvalgsland = lovvalgsland
-        this.periode = periode
-        this.sedType = sedType.name
-        this.sedId = sedType.name
-        this.rinaSaksnummer = rinaSaksnummer
-        this.statsborgerskap = emptyList()
-        this.sedVersjon = "1"
-        this.isX006NavErFjernet = isX006NavErFjernet
+    fun melosysEessiMelding(block: MelosysEessiMelding.() -> Unit): MelosysEessiMelding = MelosysEessiMelding().apply {
+        aktoerId = "1111111111111"
+        anmodningUnntak = null
+        arbeidssteder = emptyList()
+        arbeidsland = emptyList()
+        gsakSaksnummer = null
+        avsender = Avsender("SE:123", "SE")
+        dokumentId = null
+        statsborgerskap = emptyList()
+        sedVersjon = "1"
+        lovvalgsland = "SE"
+        isX006NavErFjernet = false
+        block()
+        if (sedId == null) sedId = sedType
+        if (journalpostId == null) journalpostId = opprettEessiJournalpost(sedType)
     }
 
-    fun opprettEessiJournalpost(sedType: SedType): String {
+    fun opprettEessiJournalpost(sedType: String): String {
         val request = OpprettJournalpost().apply {
             setHoveddokument(FysiskDokument().apply {
                 dokumentKategori = "SED"
                 tittel = "$sedType-tittel"
-                brevkode = sedType.name
+                brevkode = sedType
                 dokumentVarianter = listOf(
                     DokumentVariant.lagDokumentVariant(
                         ByteArray(0)

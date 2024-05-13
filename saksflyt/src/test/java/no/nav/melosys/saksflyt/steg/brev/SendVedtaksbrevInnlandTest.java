@@ -17,15 +17,15 @@ import no.nav.melosys.domain.kodeverk.lovvalgsbestemmelser.Tilleggsbestemmelser_
 import no.nav.melosys.domain.mottatteopplysninger.MottatteOpplysninger;
 import no.nav.melosys.domain.mottatteopplysninger.Soeknad;
 import no.nav.melosys.domain.mottatteopplysninger.data.ForetakUtland;
-import no.nav.melosys.domain.saksflyt.ProsessDataKey;
-import no.nav.melosys.domain.saksflyt.ProsessType;
-import no.nav.melosys.domain.saksflyt.Prosessinstans;
 import no.nav.melosys.exception.FunksjonellException;
+import no.nav.melosys.saksflytapi.ProsessinstansService;
+import no.nav.melosys.saksflytapi.domain.ProsessDataKey;
+import no.nav.melosys.saksflytapi.domain.ProsessType;
+import no.nav.melosys.saksflytapi.domain.Prosessinstans;
 import no.nav.melosys.service.behandling.BehandlingService;
 import no.nav.melosys.service.behandling.BehandlingsresultatService;
 import no.nav.melosys.service.dokument.brev.BrevData;
 import no.nav.melosys.service.saksbehandling.SaksbehandlingRegler;
-import no.nav.melosys.service.saksflyt.ProsessinstansService;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -67,7 +67,8 @@ class SendVedtaksbrevInnlandTest {
         behandling = lagBehandling();
         when(behandlingService.hentBehandlingMedSaksopplysninger(BEHANDLINGID)).thenReturn(behandling);
 
-        sendVedtaksbrevInnland = new SendVedtaksbrevInnland(behandlingService, behandlingsresultatService, prosessinstansService, saksbehandlingRegler);
+        sendVedtaksbrevInnland = new SendVedtaksbrevInnland(behandlingService, behandlingsresultatService,
+            prosessinstansService, saksbehandlingRegler);
     }
 
     @Test
@@ -85,20 +86,6 @@ class SendVedtaksbrevInnlandTest {
     }
 
     @Test
-    void utfør_avslagManglendeOppl_bestillerAvslagManglendeOppl() {
-        when(behandlingsresultatService.hentBehandlingsresultat(BEHANDLINGID))
-            .thenReturn(lagBehandlingsresultatUtenPerioder(Behandlingsresultattyper.AVSLAG_MANGLENDE_OPPL));
-
-
-        sendVedtaksbrevInnland.utfør(lagProsessinstans());
-
-
-        verify(prosessinstansService).opprettProsessinstanserSendBrev(eq(behandling), doksysBrevbestillingArgumentCaptor.capture(), eq(List.of(Mottaker.medRolle(BRUKER))));
-        assertThat(doksysBrevbestillingArgumentCaptor.getValue().getProduserbartdokument()).isEqualTo(AVSLAG_MANGLENDE_OPPLYSNINGER);
-        verify(prosessinstansService, never()).opprettProsessinstansSendBrev(eq(behandling), any(DoksysBrevbestilling.class), eq(Mottaker.medRolle(ARBEIDSGIVER)));
-    }
-
-    @Test
     void utfør_utenPeriode_feiler() {
         when(behandlingsresultatService.hentBehandlingsresultat(BEHANDLINGID))
             .thenReturn(lagBehandlingsresultatUtenPerioder(Behandlingsresultattyper.FASTSATT_LOVVALGSLAND));
@@ -111,7 +98,7 @@ class SendVedtaksbrevInnlandTest {
     }
 
     @Test
-    void utfør_innvilgelse12_1_vedtakOgKopiTilSkattSendes() {
+    void utfør_innvilgelse12_1_vedtakOgKopiTilSkattSendesIkke() {
         when(behandlingsresultatService.hentBehandlingsresultat(BEHANDLINGID))
             .thenReturn(lagBehandlingsresultat(lagInnvilgetLovvalgsperiode(FO_883_2004_ART12_1)));
 
@@ -119,7 +106,7 @@ class SendVedtaksbrevInnlandTest {
         sendVedtaksbrevInnland.utfør(lagProsessinstans());
 
 
-        var mottakere = List.of(Mottaker.medRolle(BRUKER), Mottaker.av(NorskMyndighet.SKATTEETATEN));
+        var mottakere = List.of(Mottaker.medRolle(BRUKER));
         verify(prosessinstansService).opprettProsessinstanserSendBrev(eq(behandling), doksysBrevbestillingArgumentCaptor.capture(), eq(mottakere));
         assertThat(doksysBrevbestillingArgumentCaptor.getValue().getProduserbartdokument()).isEqualTo(INNVILGELSE_YRKESAKTIV);
     }
@@ -133,7 +120,7 @@ class SendVedtaksbrevInnlandTest {
         sendVedtaksbrevInnland.utfør(lagProsessinstans());
 
 
-        var mottakere = List.of(Mottaker.medRolle(BRUKER), Mottaker.av(NorskMyndighet.SKATTEETATEN));
+        var mottakere = List.of(Mottaker.medRolle(BRUKER));
         verify(prosessinstansService).opprettProsessinstanserSendBrev(eq(behandling), doksysBrevbestillingArgumentCaptor.capture(), eq(mottakere));
         assertThat(doksysBrevbestillingArgumentCaptor.getValue().getProduserbartdokument()).isEqualTo(INNVILGELSE_YRKESAKTIV);
         verify(prosessinstansService, never()).opprettProsessinstansSendBrev(eq(behandling), any(DoksysBrevbestilling.class), eq(Mottaker.medRolle(ARBEIDSGIVER)));
@@ -148,7 +135,7 @@ class SendVedtaksbrevInnlandTest {
         sendVedtaksbrevInnland.utfør(lagProsessinstans());
 
 
-        var mottakere = List.of(Mottaker.medRolle(BRUKER), Mottaker.av(NorskMyndighet.SKATTEETATEN));
+        var mottakere = List.of(Mottaker.medRolle(BRUKER));
         verify(prosessinstansService).opprettProsessinstanserSendBrev(eq(behandling), doksysBrevbestillingArgumentCaptor.capture(), eq(mottakere));
         assertThat(doksysBrevbestillingArgumentCaptor.getValue().getProduserbartdokument()).isEqualTo(INNVILGELSE_YRKESAKTIV_FLERE_LAND);
     }
@@ -168,22 +155,6 @@ class SendVedtaksbrevInnlandTest {
         verify(prosessinstansService).opprettProsessinstanserSendBrev(eq(behandling), doksysBrevbestillingArgumentCaptor.capture(), eq(mottakere));
         assertThat(doksysBrevbestillingArgumentCaptor.getValue().getProduserbartdokument()).isEqualTo(IKKE_YRKESAKTIV_VEDTAKSBREV);
     }
-
-    @Test
-    void utfør_avslagManglendeOppl_ikke_yrkesaktiv_bestillerAvslagManglendeOppl() {
-        behandling.setTema(Behandlingstema.IKKE_YRKESAKTIV);
-        when(behandlingsresultatService.hentBehandlingsresultat(BEHANDLINGID))
-            .thenReturn(lagBehandlingsresultatUtenPerioder(Behandlingsresultattyper.AVSLAG_MANGLENDE_OPPL));
-
-
-        sendVedtaksbrevInnland.utfør(lagProsessinstans());
-
-
-        verify(prosessinstansService).opprettProsessinstanserSendBrev(eq(behandling), doksysBrevbestillingArgumentCaptor.capture(), eq(List.of(Mottaker.medRolle(BRUKER))));
-        assertThat(doksysBrevbestillingArgumentCaptor.getValue().getProduserbartdokument()).isEqualTo(AVSLAG_MANGLENDE_OPPLYSNINGER);
-        verify(prosessinstansService, never()).opprettProsessinstansSendBrev(eq(behandling), any(DoksysBrevbestilling.class), eq(Mottaker.medRolle(ARBEIDSGIVER)));
-    }
-
 
     @Test
     void utfør_utpeking13_1B1_senderOrienteringsbrev() {
@@ -218,14 +189,14 @@ class SendVedtaksbrevInnlandTest {
         when(behandlingsresultatService.hentBehandlingsresultat(BEHANDLINGID))
             .thenReturn(lagBehandlingsresultat(lagInnvilgetLovvalgsperiode(FO_883_2004_ART13_1A)));
         ForetakUtland arbeidsgiverUtland = new ForetakUtland();
-        arbeidsgiverUtland.selvstendigNæringsvirksomhet = false;
+        arbeidsgiverUtland.setSelvstendigNæringsvirksomhet(false);
         behandling.getMottatteOpplysninger().getMottatteOpplysningerData().foretakUtland.add(arbeidsgiverUtland);
 
 
         sendVedtaksbrevInnland.utfør(lagProsessinstans());
 
 
-        var mottakere = List.of(Mottaker.medRolle(BRUKER), Mottaker.av(NorskMyndighet.SKATTEINNKREVER_UTLAND), Mottaker.av(NorskMyndighet.SKATTEETATEN));
+        var mottakere = List.of(Mottaker.medRolle(BRUKER), Mottaker.av(NorskMyndighet.SKATTEINNKREVER_UTLAND));
         verify(prosessinstansService).opprettProsessinstanserSendBrev(eq(behandling), doksysBrevbestillingArgumentCaptor.capture(), eq(mottakere));
         assertThat(doksysBrevbestillingArgumentCaptor.getValue().getProduserbartdokument()).isEqualTo(INNVILGELSE_YRKESAKTIV_FLERE_LAND);
     }
@@ -236,14 +207,14 @@ class SendVedtaksbrevInnlandTest {
         behandlingsresultat.getAnmodningsperioder().add(lagAnmodningsperiodeMedSvar());
         when(behandlingsresultatService.hentBehandlingsresultat(BEHANDLINGID)).thenReturn(behandlingsresultat);
         ForetakUtland utenlandskSelvstendigVirksomhet = new ForetakUtland();
-        utenlandskSelvstendigVirksomhet.selvstendigNæringsvirksomhet = true;
+        utenlandskSelvstendigVirksomhet.setSelvstendigNæringsvirksomhet(true);
         behandling.getMottatteOpplysninger().getMottatteOpplysningerData().foretakUtland.add(utenlandskSelvstendigVirksomhet);
 
 
         sendVedtaksbrevInnland.utfør(lagProsessinstans());
 
 
-        var mottakere = List.of(Mottaker.medRolle(BRUKER), Mottaker.av(NorskMyndighet.SKATTEETATEN));
+        var mottakere = List.of(Mottaker.medRolle(BRUKER));
         verify(prosessinstansService).opprettProsessinstanserSendBrev(eq(behandling), any(DoksysBrevbestilling.class), eq(mottakere));
     }
 
@@ -259,7 +230,7 @@ class SendVedtaksbrevInnlandTest {
 
 
         assertThat(prosessinstans.getData(ProsessDataKey.SAKSBEHANDLER)).isNull();
-        var mottakere = List.of(Mottaker.medRolle(BRUKER), Mottaker.av(NorskMyndighet.SKATTEETATEN));
+        var mottakere = List.of(Mottaker.medRolle(BRUKER));
         verify(prosessinstansService).opprettProsessinstanserSendBrev(eq(behandling), doksysBrevbestillingArgumentCaptor.capture(), eq(mottakere));
         assertThat(doksysBrevbestillingArgumentCaptor.getValue().getAvsenderID()).isEqualTo("Z111111");
     }
@@ -274,7 +245,7 @@ class SendVedtaksbrevInnlandTest {
         sendVedtaksbrevInnland.utfør(lagProsessinstans());
 
 
-        var mottakere = List.of(Mottaker.medRolle(BRUKER), Mottaker.av(NorskMyndighet.SKATTEETATEN));
+        var mottakere = List.of(Mottaker.medRolle(BRUKER));
         verify(prosessinstansService).opprettProsessinstanserSendBrev(eq(behandling), any(DoksysBrevbestilling.class), eq(mottakere));
     }
 
@@ -312,7 +283,7 @@ class SendVedtaksbrevInnlandTest {
         Aktoer arbeidsgiver = new Aktoer();
         arbeidsgiver.setRolle(Aktoersroller.ARBEIDSGIVER);
         arbeidsgiver.setOrgnr("123456789");
-        behandling.getFagsak().getAktører().add(arbeidsgiver);
+        behandling.getFagsak().leggTilAktør(arbeidsgiver);
 
 
         sendVedtaksbrevInnland.utfør(lagProsessinstans());
@@ -332,7 +303,7 @@ class SendVedtaksbrevInnlandTest {
         sendVedtaksbrevInnland.utfør(lagProsessinstans());
 
 
-        var mottakere = List.of(Mottaker.medRolle(BRUKER), Mottaker.av(NorskMyndighet.SKATTEETATEN));
+        var mottakere = List.of(Mottaker.medRolle(BRUKER));
         verify(prosessinstansService).opprettProsessinstanserSendBrev(eq(behandling), any(DoksysBrevbestilling.class), eq(mottakere));
         verify(prosessinstansService).opprettProsessinstansSendBrev(eq(behandling), doksysBrevbestillingArgumentCaptor.capture(), eq(Mottaker.medRolle(ARBEIDSGIVER)));
         assertThat(doksysBrevbestillingArgumentCaptor.getValue().getProduserbartdokument()).isEqualTo(INNVILGELSE_ARBEIDSGIVER);
@@ -367,7 +338,7 @@ class SendVedtaksbrevInnlandTest {
         sendVedtaksbrevInnland.utfør(lagProsessinstans());
 
 
-        var mottakere = List.of(Mottaker.medRolle(BRUKER), Mottaker.av(NorskMyndighet.SKATTEETATEN));
+        var mottakere = List.of(Mottaker.medRolle(BRUKER));
         verify(prosessinstansService).opprettProsessinstanserSendBrev(eq(behandling), doksysBrevbestillingArgumentCaptor.capture(), eq(mottakere));
         assertThat(doksysBrevbestillingArgumentCaptor.getValue().getBegrunnelseKode()).isEqualTo(Endretperiode.ENDRINGER_ARBEIDSSITUASJON.getKode());
     }
@@ -386,15 +357,12 @@ class SendVedtaksbrevInnlandTest {
         behandling.setId(BEHANDLINGID);
         behandling.setType(Behandlingstyper.FØRSTEGANG);
         behandling.setMottatteOpplysninger(new MottatteOpplysninger());
-        behandling.getMottatteOpplysninger().setMottatteOpplysningerdata(new Soeknad());
+        behandling.getMottatteOpplysninger().setMottatteOpplysningerData(new Soeknad());
         behandling.setFagsak(lagFagsak());
         return behandling;
     }
 
     private static Fagsak lagFagsak() {
-        Fagsak fagsak = new Fagsak();
-        fagsak.setGsakSaksnummer(1234L);
-        fagsak.setType(Sakstyper.EU_EOS);
         Aktoer aktør = new Aktoer();
         aktør.setAktørId("1");
         aktør.setRolle(Aktoersroller.BRUKER);
@@ -402,14 +370,16 @@ class SendVedtaksbrevInnlandTest {
         Aktoer myndighet = new Aktoer();
         myndighet.setAktørId("2");
         myndighet.setRolle(Aktoersroller.TRYGDEMYNDIGHET);
-        myndighet.setInstitusjonId("SE:sesese123");
+        myndighet.setInstitusjonID("SE:sesese123");
 
         Aktoer arbeidsgiver = new Aktoer();
         arbeidsgiver.setRolle(Aktoersroller.ARBEIDSGIVER);
         arbeidsgiver.setOrgnr("123456789");
 
-        fagsak.setAktører(new HashSet<>(Set.of(aktør, arbeidsgiver, myndighet)));
-        return fagsak;
+        return FagsakTestFactory.builder()
+            .medGsakSaksnummer()
+            .aktører(Set.of(aktør, arbeidsgiver, myndighet))
+            .build();
     }
 
     private static Anmodningsperiode lagAnmodningsperiodeMedSvar() {

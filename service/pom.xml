@@ -17,19 +17,19 @@
     <dependencies>
         <dependency>
             <groupId>no.nav.dok.metaforcemal</groupId>
-            <artifactId>melosysbrev</artifactId>
+            <artifactId>melosysbrev-midlertidig</artifactId>
             <scope>runtime</scope>
         </dependency>
         <dependency>
             <groupId>no.nav.dok.metaforcemal</groupId>
-            <artifactId>melosysbrev</artifactId>
+            <artifactId>melosysbrev-midlertidig</artifactId>
             <classifier>jaxb</classifier>
         </dependency>
         <!-- Hack to force Maven to download the source attachment of the
              above dependency. Not a real dependency. -->
         <dependency>
             <groupId>no.nav.dok.metaforcemal</groupId>
-            <artifactId>melosysbrev</artifactId>
+            <artifactId>melosysbrev-midlertidig</artifactId>
             <classifier>jaxb-sources</classifier>
             <scope>provided</scope>
         </dependency>
@@ -54,6 +54,14 @@
         <dependency>
             <groupId>org.apache.commons</groupId>
             <artifactId>commons-text</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>commons-beanutils</groupId>
+            <artifactId>commons-beanutils</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>commons-lang</groupId>
+            <artifactId>commons-lang</artifactId>
         </dependency>
         <dependency>
             <groupId>org.slf4j</groupId>
@@ -92,6 +100,10 @@
             <artifactId>spring-kafka</artifactId>
         </dependency>
         <dependency>
+            <groupId>no.nav.melosys</groupId>
+            <artifactId>saksflyt-api</artifactId>
+        </dependency>
+        <dependency>
             <groupId>net.javacrumbs.shedlock</groupId>
             <artifactId>shedlock-spring</artifactId>
         </dependency>
@@ -111,7 +123,6 @@
         <dependency>
             <groupId>org.jetbrains.kotlin</groupId>
             <artifactId>kotlin-stdlib</artifactId>
-            <version>${kotlin.version}</version>
         </dependency>
         <dependency>
             <groupId>io.github.microutils</groupId>
@@ -136,6 +147,12 @@
         <dependency>
             <groupId>no.nav.melosys</groupId>
             <artifactId>sikkerhet</artifactId>
+            <type>test-jar</type>
+            <scope>test</scope>
+        </dependency>
+        <dependency>
+            <groupId>no.nav.melosys</groupId>
+            <artifactId>melosys-domain</artifactId>
             <type>test-jar</type>
             <scope>test</scope>
         </dependency>
@@ -173,6 +190,10 @@
             <groupId>org.mockito.kotlin</groupId>
             <artifactId>mockito-kotlin</artifactId>
             <scope>test</scope>
+        </dependency>
+        <dependency>
+            <groupId>io.kotest</groupId>
+            <artifactId>kotest-assertions-json-jvm</artifactId>
         </dependency>
     </dependencies>
 

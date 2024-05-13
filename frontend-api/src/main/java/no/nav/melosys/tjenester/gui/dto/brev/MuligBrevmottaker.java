@@ -8,7 +8,7 @@ public record MuligBrevmottaker(String mottakerNavn,
                                 Mottakerroller rolle,
                                 String orgnr,
                                 String aktørId,
-                                String institusjonId) {
+                                String institusjonID) {
     public static MuligBrevmottaker av(Brevmottaker hovedMottaker) {
         return new MuligBrevmottaker(
             hovedMottaker.getMottakerNavn(),
@@ -16,6 +16,6 @@ public record MuligBrevmottaker(String mottakerNavn,
             hovedMottaker.getRolle(),
             hovedMottaker.getOrgnr(),
             hovedMottaker.getAktørId(),
-            hovedMottaker.getInstitusjonId());
+            hovedMottaker.getInstitusjonID());
     }
 }

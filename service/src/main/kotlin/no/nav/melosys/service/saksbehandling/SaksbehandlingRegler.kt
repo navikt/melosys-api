@@ -1,6 +1,6 @@
 package no.nav.melosys.service.saksbehandling
 
-import no.finn.unleash.Unleash
+import io.getunleash.Unleash
 import no.nav.melosys.domain.Behandling
 import no.nav.melosys.domain.Fagsak
 import no.nav.melosys.domain.kodeverk.Sakstemaer
@@ -9,7 +9,8 @@ import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingsresultattyper
 import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingstema
 import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingstema.*
 import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingstyper
-import no.nav.melosys.featuretoggle.ToggleName.FOLKETRYGDEN_MVP
+import no.nav.melosys.featuretoggle.ToggleName.MELOSYS_FTRL_IKKE_YRKESAKTIV
+import no.nav.melosys.featuretoggle.ToggleName.SAKSBEHANDLING_MANGLENDE_INNBETALING
 import no.nav.melosys.repository.BehandlingsresultatRepository
 import org.springframework.stereotype.Component
 
@@ -24,7 +25,7 @@ class SaksbehandlingRegler(
         behandlingstype: Behandlingstyper,
         behandlingstema: Behandlingstema
     ): Boolean {
-        if (harTomFlyt(
+        if (harIngenFlyt(
                 fagsak.type,
                 fagsak.tema,
                 behandlingstype,
@@ -41,7 +42,7 @@ class SaksbehandlingRegler(
     internal fun finnBehandlingSomKanReplikeres(behandlinger: List<Behandling>) =
         behandlinger
             .filter { it.erInaktiv() }
-            .filter { !harTomFlyt(it) }
+            .filter { !harIngenFlyt(it) }
             .firstOrNull {
                 val behandlingsresultat = behandlingsresultatRepository.findById(it.id)
                 behandlingstyperSomKanReplikeres.contains(it.type)
@@ -49,22 +50,27 @@ class SaksbehandlingRegler(
                     && !behandlingsresultattyperSomIkkeKanReplikeres.contains(behandlingsresultat.get().type)
             }
 
-    fun harTomFlyt(behandling: Behandling): Boolean =
-        harTomFlyt(
+    fun harIngenFlyt(behandling: Behandling): Boolean =
+        harIngenFlyt(
             behandling.fagsak.type,
             behandling.fagsak.tema,
             behandling.type,
             behandling.tema
         )
 
-    fun harTomFlyt(
+    fun harIngenFlyt(
         sakstype: Sakstyper,
         sakstema: Sakstemaer,
         behandlingstype: Behandlingstyper,
         behandlingstema: Behandlingstema
     ): Boolean {
         if (sakstema == Sakstemaer.TRYGDEAVGIFT) return true
-        if (behandlingstype == Behandlingstyper.HENVENDELSE || behandlingstype == Behandlingstyper.KLAGE || behandlingstype == Behandlingstyper.MANGLENDE_INNBETALING_TRYGDEAVGIFT) return true
+
+        if (behandlingstype == Behandlingstyper.MANGLENDE_INNBETALING_TRYGDEAVGIFT
+            && !unleash.isEnabled(SAKSBEHANDLING_MANGLENDE_INNBETALING)
+        ) return true
+
+        if (behandlingstype == Behandlingstyper.HENVENDELSE || behandlingstype == Behandlingstyper.KLAGE) return true
 
         if (harRegistreringUnntakFraMedlemskapFlyt(
                 sakstype,
@@ -84,8 +90,7 @@ class SaksbehandlingRegler(
             -> true
 
             ANMODNING_OM_UNNTAK_HOVEDREGEL -> sakstype == Sakstyper.TRYGDEAVTALE
-            YRKESAKTIV -> (sakstype == Sakstyper.FTRL && !unleash.isEnabled(FOLKETRYGDEN_MVP))
-            IKKE_YRKESAKTIV -> (sakstype === Sakstyper.FTRL)
+            IKKE_YRKESAKTIV -> (sakstype === Sakstyper.FTRL && !unleash.isEnabled(MELOSYS_FTRL_IKKE_YRKESAKTIV))
 
             else -> return false
         }
@@ -137,14 +142,17 @@ class SaksbehandlingRegler(
         val behandlingstyperSomKanReplikeres = listOf(
             Behandlingstyper.NY_VURDERING,
             Behandlingstyper.ENDRET_PERIODE,
-            Behandlingstyper.FØRSTEGANG
+            Behandlingstyper.FØRSTEGANG,
+            Behandlingstyper.MANGLENDE_INNBETALING_TRYGDEAVGIFT
         )
         val behandlingsresultattyperSomIkkeKanReplikeres = listOf(
             Behandlingsresultattyper.HENLEGGELSE,
             Behandlingsresultattyper.ANMODNING_OM_UNNTAK,
             Behandlingsresultattyper.AVSLAG_MANGLENDE_OPPL,
             Behandlingsresultattyper.FERDIGBEHANDLET,
-            Behandlingsresultattyper.HENLEGGELSE_BORTFALT
+            Behandlingsresultattyper.HENLEGGELSE_BORTFALT,
+            Behandlingsresultattyper.ANNULLERT,
+            Behandlingsresultattyper.OPPHØRT
         )
     }
 }

@@ -7,7 +7,8 @@ import no.nav.melosys.integrasjon.ConsumerWireMockTestBase
 import no.nav.melosys.integrasjon.OAuthMockServer
 import no.nav.melosys.integrasjon.faktureringskomponenten.dto.*
 import no.nav.melosys.integrasjon.felles.GenericAuthFilterFactory
-import no.nav.melosys.integrasjon.reststs.RestTokenServiceClient
+import no.nav.melosys.integrasjon.reststs.RestSTSService
+import no.nav.melosys.integrasjon.reststs.SecurityTokenServiceConsumer
 import no.nav.melosys.integrasjon.reststs.StsWebClientProducer
 import no.nav.security.token.support.client.spring.oauth2.EnableOAuth2Client
 import org.assertj.core.api.Assertions
@@ -25,7 +26,8 @@ import java.time.LocalDate
 
 @Import(
     StsWebClientProducer::class,
-    RestTokenServiceClient::class,
+    SecurityTokenServiceConsumer::class,
+    RestSTSService::class,
     OAuthMockServer::class,
     GenericAuthFilterFactory::class,
     FaktureringskomponentenConsumerProducer::class,
@@ -39,7 +41,11 @@ class FaktureringskomponentenConsumerTokenTest(
     @Value("\${mockserver.port}") mockServiceUnderTestPort: Int,
     @Value("\${mockserver.security.port}") mockSecurityPort: Int,
     @Autowired oAuthMockServer: OAuthMockServer
-) : ConsumerWireMockTestBase<String, String>(mockServiceUnderTestPort, mockSecurityPort, oAuthMockServer) {
+) : ConsumerWireMockTestBase<String, NyFakturaserieResponseDto>(
+    mockServiceUnderTestPort,
+    mockSecurityPort,
+    oAuthMockServer
+) {
 
     @Test
     fun authorizationSkalKommeFraSystem() {
@@ -86,16 +92,18 @@ class FaktureringskomponentenConsumerTokenTest(
         return WireMock.post(UrlPattern.ANY)
     }
 
-    override fun getMockData(): String = "[]"
+    override fun getMockData(): String = "{\n" +
+        "  \"fakturaserieReferanse\": \"123\"\n" +
+        "}"
 
     override fun executeRequest() =
-        faktureringskomponentenConsumer.lagFakturaSerie(lagFakturaserieDto())
+        faktureringskomponentenConsumer.lagFakturaserie(lagFakturaserieDto(), "N123456")
 
 
     private fun lagFakturaserieDto(
-        vedtaksnummer: String = "MEL-123",
+        fakturaserieReferanse: String? = null,
         fodselsnummer: String = "12345678911",
-        fullmektig: FullmektigDto = FullmektigDto("11987654321", "123456789", "Ole Brum"),
+        fullmektig: FullmektigDto = FullmektigDto("11987654321", "123456789"),
         referanseBruker: String = "Nasse Nøff",
         referanseNav: String = "NAV Medlemskap og avgift",
         fakturaGjelder: Innbetalingstype = Innbetalingstype.TRYGDEAVGIFT,
@@ -110,8 +118,8 @@ class FaktureringskomponentenConsumerTokenTest(
         ),
     ): FakturaserieDto {
         return FakturaserieDto(
-            vedtaksnummer,
             fodselsnummer,
+            fakturaserieReferanse,
             fullmektig,
             referanseBruker,
             referanseNav,

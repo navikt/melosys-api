@@ -3,7 +3,7 @@ package no.nav.melosys.domain;
 import java.time.Instant;
 import java.time.LocalDate;
 import java.util.*;
-import javax.persistence.*;
+import jakarta.persistence.*;
 
 import no.nav.melosys.domain.dokument.SaksopplysningDokument;
 import no.nav.melosys.domain.dokument.arbeidsforhold.ArbeidsforholdDokument;
@@ -191,6 +191,10 @@ public class Behandling extends RegistreringsInfo {
     }
 
     public void setBehandlingsårsak(Behandlingsaarsak behandlingsårsak) {
+        this.behandlingsårsak = behandlingsårsak;
+    }
+
+    public void settBehandlingsårsak(Behandlingsaarsak behandlingsårsak) {
         if (behandlingsårsak == null) {
             if (this.behandlingsårsak != null) {
                 this.behandlingsårsak.setBehandling(null);
@@ -267,8 +271,8 @@ public class Behandling extends RegistreringsInfo {
         return Optional.ofNullable(mottatteOpplysninger).map(MottatteOpplysninger::getMottatteOpplysningerData);
     }
 
-    public boolean harPeriodeOgLand() {
-        return harPeriode() && harLand();
+    public boolean harPeriodeOgSøknadsland() {
+        return harPeriode() && harSøknadsland();
     }
 
     public boolean harPeriode() {
@@ -281,6 +285,13 @@ public class Behandling extends RegistreringsInfo {
             if (mottatteOpplysninger.getMottatteOpplysningerData() instanceof AnmodningEllerAttest anmodningEllerAttest) {
                 return anmodningEllerAttest.getLovvalgsland() != null;
             }
+            return mottatteOpplysninger.getMottatteOpplysningerData().soeknadsland.erGyldig();
+        }
+        return false;
+    }
+
+    public boolean harSøknadsland() {
+        if (mottatteOpplysninger != null && mottatteOpplysninger.getMottatteOpplysningerData() != null) {
             return mottatteOpplysninger.getMottatteOpplysningerData().soeknadsland.erGyldig();
         }
         return false;
@@ -309,7 +320,7 @@ public class Behandling extends RegistreringsInfo {
             var utenlandskeArbeidsstederLandkoder = mottatteOpplysninger.getMottatteOpplysningerData().hentUtenlandskeArbeidsstederLandkode();
             return utenlandskeArbeidsstederLandkoder.isEmpty() ? Collections.singleton(Landkoder.NO.getKode()) : utenlandskeArbeidsstederLandkoder;
         } else {
-            return mottatteOpplysninger.getMottatteOpplysningerData().soeknadsland.landkoder;
+            return mottatteOpplysninger.getMottatteOpplysningerData().soeknadsland.getLandkoder();
         }
     }
 
@@ -365,8 +376,20 @@ public class Behandling extends RegistreringsInfo {
             || status == Behandlingsstatus.ANMODNING_UNNTAK_SENDT;
     }
 
+    public boolean erFørstegangsvurdering() {
+        return type == Behandlingstyper.FØRSTEGANG;
+    }
+
     public boolean erNyVurdering() {
         return type == Behandlingstyper.NY_VURDERING;
+    }
+
+    public boolean erManglendeInnbetalingTrygdeavgift() {
+        return type == Behandlingstyper.MANGLENDE_INNBETALING_TRYGDEAVGIFT;
+    }
+
+    public boolean erAndregangsbehandling() {
+        return erNyVurdering() || erManglendeInnbetalingTrygdeavgift();
     }
 
     public boolean erNorgeUtpekt() {
@@ -396,6 +419,10 @@ public class Behandling extends RegistreringsInfo {
                 BESLUTNING_LOVVALG_NORGE.equals(tema));
     }
 
+    public boolean erÅrsavregning() {
+        return type == Behandlingstyper.ÅRSAVREGNING;
+    }
+
     public static boolean erBehandlingAvSøknadUtsendtArbeidstaker(String behandlingstemaKode) {
         return UTSENDT_ARBEIDSTAKER.getKode().equalsIgnoreCase(behandlingstemaKode)
             || UTSENDT_SELVSTENDIG.getKode().equalsIgnoreCase(behandlingstemaKode);
@@ -403,10 +430,6 @@ public class Behandling extends RegistreringsInfo {
 
     public static boolean erBehandlingAvSøknadArbeidIFlereLand(String behandlingstemaKode) {
         return ARBEID_FLERE_LAND.getKode().equalsIgnoreCase(behandlingstemaKode);
-    }
-
-    public static boolean erAnmodningOmUnntak(Behandlingstema behandlingstema) {
-        return erAnmodningOmUnntak(behandlingstema.getKode());
     }
 
     private static boolean erAnmodningOmUnntak(String behandlingstemaKode) {

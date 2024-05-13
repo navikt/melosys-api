@@ -1,5 +1,6 @@
 package no.nav.melosys.service.dokument.brev;
 
+import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
@@ -8,13 +9,14 @@ import no.nav.melosys.domain.arkiv.Distribusjonstype;
 import no.nav.melosys.domain.brev.utkast.BrevbestillingUtkast;
 import no.nav.melosys.domain.kodeverk.Mottakerroller;
 import no.nav.melosys.domain.kodeverk.brev.Produserbaredokumenter;
+import no.nav.melosys.domain.manglendebetaling.Betalingsstatus;
 
 public final class BrevbestillingDto {
     private Produserbaredokumenter produserbardokument;
     private Mottakerroller mottaker;
     private String orgnr;
     private List<String> orgnrNorskMyndighet;
-    private String institusjonId;
+    private String institusjonID;
     private String innledningFritekst;
     private String manglerFritekst;
     private String begrunnelseFritekst;
@@ -35,6 +37,12 @@ public final class BrevbestillingDto {
     private String saksbehandlerNrToIdent;
     private String begrunnelseKode;
     private String ytterligereInformasjon;
+    private String fakturanummer;
+    private Betalingsstatus betalingsstatus;
+    private String fullmektigForBetaling;
+    private LocalDate betalingsfrist;
+    private String annenPersonMottakerIdent;
+    private LocalDate opphørtDato;
 
     public BrevbestillingDto() {
     }
@@ -44,7 +52,7 @@ public final class BrevbestillingDto {
         Mottakerroller mottaker,
         String orgnr,
         List<String> orgnrNorskMyndighet,
-        String institusjonId,
+        String institusjonID,
         String innledningFritekst,
         String manglerFritekst,
         String begrunnelseFritekst,
@@ -64,13 +72,19 @@ public final class BrevbestillingDto {
         String dokumentTittel,
         String saksbehandlerNrToIdent,
         String begrunnelseKode,
-        String ytterligereInformasjon) {
+        String ytterligereInformasjon,
+        String fakturanummer,
+        Betalingsstatus betalingsstatus,
+        String fullmektigForBetaling,
+        LocalDate betalingsfrist,
+        String annenPersonMottakerIdent,
+        LocalDate opphørtDato) {
 
         this.produserbardokument = produserbardokument;
         this.mottaker = mottaker;
         this.orgnr = orgnr;
         this.orgnrNorskMyndighet = orgnrNorskMyndighet;
-        this.institusjonId = institusjonId;
+        this.institusjonID = institusjonID;
         this.innledningFritekst = innledningFritekst;
         this.manglerFritekst = manglerFritekst;
         this.begrunnelseFritekst = begrunnelseFritekst;
@@ -91,11 +105,17 @@ public final class BrevbestillingDto {
         this.saksbehandlerNrToIdent = saksbehandlerNrToIdent;
         this.begrunnelseKode = begrunnelseKode;
         this.ytterligereInformasjon = ytterligereInformasjon;
+        this.fakturanummer = fakturanummer;
+        this.betalingsstatus = betalingsstatus;
+        this.fullmektigForBetaling = fullmektigForBetaling;
+        this.betalingsfrist = betalingsfrist;
+        this.annenPersonMottakerIdent = annenPersonMottakerIdent;
+        this.opphørtDato = opphørtDato;
     }
 
 
     public static BrevbestillingDto av(BrevbestillingUtkast brevbestillingUtkast) {
-        String institusjonId = null;
+        String institusjonID = null;
         String bestillersId = null;
         String deprecatedBegrunnelseKode = null;
         String deprecatedYtterligereInformasjon = null;
@@ -105,7 +125,7 @@ public final class BrevbestillingDto {
             brevbestillingUtkast.mottaker(),
             brevbestillingUtkast.orgnr(),
             brevbestillingUtkast.orgnrNorskMyndighet(),
-            institusjonId,
+            institusjonID,
             brevbestillingUtkast.innledningFritekst(),
             brevbestillingUtkast.manglerFritekst(),
             brevbestillingUtkast.begrunnelseFritekst(),
@@ -125,7 +145,13 @@ public final class BrevbestillingDto {
             brevbestillingUtkast.dokumentTittel(),
             brevbestillingUtkast.saksbehandlerNrToIdent(),
             deprecatedBegrunnelseKode,
-            deprecatedYtterligereInformasjon
+            deprecatedYtterligereInformasjon,
+            null,
+            null,
+            null,
+            null,
+            null,
+            null
         );
     }
 
@@ -145,8 +171,8 @@ public final class BrevbestillingDto {
         this.orgnrNorskMyndighet = orgnrNorskMyndighet;
     }
 
-    public void setInstitusjonId(String institusjonId) {
-        this.institusjonId = institusjonId;
+    public void setInstitusjonID(String institusjonID) {
+        this.institusjonID = institusjonID;
     }
 
     public void setInnledningFritekst(String innledningFritekst) {
@@ -169,7 +195,7 @@ public final class BrevbestillingDto {
         this.barnFritekst = barnFritekst;
     }
 
-    public void setTrygdeavtaleFritekst(String barnFritekst) {
+    public void setTrygdeavtaleFritekst(String trygdeavgiftFritekst) {
         this.trygdeavgiftFritekst = trygdeavgiftFritekst;
     }
 
@@ -248,8 +274,8 @@ public final class BrevbestillingDto {
         return orgnrNorskMyndighet;
     }
 
-    public String getInstitusjonId() {
-        return institusjonId;
+    public String getInstitusjonID() {
+        return institusjonID;
     }
 
     public String getInnledningFritekst() {
@@ -341,71 +367,124 @@ public final class BrevbestillingDto {
         return ytterligereInformasjon;
     }
 
+    public void setTrygdeavgiftFritekst(String trygdeavgiftFritekst) {
+        this.trygdeavgiftFritekst = trygdeavgiftFritekst;
+    }
+
+    public boolean isKontaktopplysninger() {
+        return kontaktopplysninger;
+    }
+
+    public LocalDate getOpphørtDato() {
+        return opphørtDato;
+    }
+
+    public void setOpphørtDato(LocalDate opphørtDato) {
+        this.opphørtDato = opphørtDato;
+    }
+
     @Override
-    public boolean equals(Object obj) {
-        if (obj == this) return true;
-        if (obj == null || obj.getClass() != this.getClass()) return false;
-        var that = (BrevbestillingDto) obj;
-        return Objects.equals(this.produserbardokument, that.produserbardokument) &&
-            Objects.equals(this.mottaker, that.mottaker) &&
-            Objects.equals(this.orgnr, that.orgnr) &&
-            Objects.equals(this.orgnrNorskMyndighet, that.orgnrNorskMyndighet) &&
-            Objects.equals(this.institusjonId, that.institusjonId) &&
-            Objects.equals(this.innledningFritekst, that.innledningFritekst) &&
-            Objects.equals(this.manglerFritekst, that.manglerFritekst) &&
-            Objects.equals(this.begrunnelseFritekst, that.begrunnelseFritekst) &&
-            Objects.equals(this.ektefelleFritekst, that.ektefelleFritekst) &&
-            Objects.equals(this.barnFritekst, that.barnFritekst) &&
-            Objects.equals(this.trygdeavgiftFritekst, that.trygdeavgiftFritekst) &&
-            Objects.equals(this.kontaktpersonNavn, that.kontaktpersonNavn) &&
-            Objects.equals(this.kopiMottakere, that.kopiMottakere) &&
-            Objects.equals(this.bestillersId, that.bestillersId) &&
-            Objects.equals(this.fritekstTittel, that.fritekstTittel) &&
-            Objects.equals(this.fritekst, that.fritekst) &&
-            Objects.equals(this.distribusjonstype, that.distribusjonstype) &&
-            this.kontaktopplysninger == that.kontaktopplysninger &&
-            Objects.equals(this.nyVurderingBakgrunn, that.nyVurderingBakgrunn) &&
-            Objects.equals(this.saksVedlegg, that.saksVedlegg) &&
-            Objects.equals(this.fritekstvedlegg, that.fritekstvedlegg) &&
-            Objects.equals(this.dokumentTittel, that.dokumentTittel) &&
-            Objects.equals(this.saksbehandlerNrToIdent, that.saksbehandlerNrToIdent) &&
-            Objects.equals(this.begrunnelseKode, that.begrunnelseKode) &&
-            Objects.equals(this.ytterligereInformasjon, that.ytterligereInformasjon);
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (o == null || getClass() != o.getClass()) return false;
+        BrevbestillingDto that = (BrevbestillingDto) o;
+        return kontaktopplysninger == that.kontaktopplysninger && produserbardokument == that.produserbardokument && mottaker == that.mottaker &&
+            Objects.equals(orgnr, that.orgnr) && Objects.equals(orgnrNorskMyndighet, that.orgnrNorskMyndighet) &&
+            Objects.equals(institusjonID, that.institusjonID) && Objects.equals(innledningFritekst, that.innledningFritekst) &&
+            Objects.equals(manglerFritekst, that.manglerFritekst) && Objects.equals(begrunnelseFritekst, that.begrunnelseFritekst) &&
+            Objects.equals(ektefelleFritekst, that.ektefelleFritekst) && Objects.equals(barnFritekst, that.barnFritekst) &&
+            Objects.equals(trygdeavgiftFritekst, that.trygdeavgiftFritekst) && Objects.equals(kontaktpersonNavn, that.kontaktpersonNavn) &&
+            Objects.equals(kopiMottakere, that.kopiMottakere) && Objects.equals(bestillersId, that.bestillersId) &&
+            Objects.equals(fritekstTittel, that.fritekstTittel) && Objects.equals(fritekst, that.fritekst) &&
+            distribusjonstype == that.distribusjonstype && Objects.equals(nyVurderingBakgrunn, that.nyVurderingBakgrunn) &&
+            Objects.equals(saksVedlegg, that.saksVedlegg) && Objects.equals(fritekstvedlegg, that.fritekstvedlegg) &&
+            Objects.equals(dokumentTittel, that.dokumentTittel) && Objects.equals(saksbehandlerNrToIdent, that.saksbehandlerNrToIdent) &&
+            Objects.equals(begrunnelseKode, that.begrunnelseKode) && Objects.equals(ytterligereInformasjon, that.ytterligereInformasjon) &&
+            Objects.equals(fakturanummer, that.fakturanummer) && betalingsstatus == that.betalingsstatus &&
+            Objects.equals(fullmektigForBetaling, that.fullmektigForBetaling) && Objects.equals(betalingsfrist, that.betalingsfrist) &&
+            Objects.equals(annenPersonMottakerIdent, that.annenPersonMottakerIdent) && Objects.equals(opphørtDato, that.opphørtDato);
     }
 
     @Override
     public int hashCode() {
-        return Objects.hash(produserbardokument, mottaker, orgnr, orgnrNorskMyndighet, institusjonId, innledningFritekst, manglerFritekst, begrunnelseFritekst, ektefelleFritekst, barnFritekst, trygdeavgiftFritekst, kontaktpersonNavn, kopiMottakere, bestillersId, fritekstTittel, fritekst, distribusjonstype, kontaktopplysninger, nyVurderingBakgrunn, saksVedlegg, fritekstvedlegg, dokumentTittel, begrunnelseKode, ytterligereInformasjon);
+        return Objects.hash(produserbardokument, mottaker, orgnr, orgnrNorskMyndighet, institusjonID, innledningFritekst, manglerFritekst,
+            begrunnelseFritekst, ektefelleFritekst, barnFritekst, trygdeavgiftFritekst, kontaktpersonNavn, kopiMottakere, bestillersId, fritekstTittel, fritekst, distribusjonstype, kontaktopplysninger, nyVurderingBakgrunn, saksVedlegg, fritekstvedlegg, dokumentTittel, saksbehandlerNrToIdent, begrunnelseKode, ytterligereInformasjon, fakturanummer, betalingsstatus, fullmektigForBetaling, betalingsfrist, annenPersonMottakerIdent, opphørtDato);
     }
 
     @Override
     public String toString() {
-        return "BrevbestillingDto[" +
-            "produserbardokument=" + produserbardokument + ", " +
-            "mottaker=" + mottaker + ", " +
-            "orgnr=" + orgnr + ", " +
-            "orgnrNorskMyndighet=" + orgnrNorskMyndighet + ", " +
-            "institusjonId=" + institusjonId + ", " +
-            "innledningFritekst=" + innledningFritekst + ", " +
-            "manglerFritekst=" + manglerFritekst + ", " +
-            "begrunnelseFritekst=" + begrunnelseFritekst + ", " +
-            "ektefelleFritekst=" + ektefelleFritekst + ", " +
-            "barnFritekst=" + barnFritekst + ", " +
-            "trygdeavtaleFritekst=" + trygdeavgiftFritekst + ", " +
-            "kontaktpersonNavn=" + kontaktpersonNavn + ", " +
-            "kopiMottakere=" + kopiMottakere + ", " +
-            "bestillersId=" + bestillersId + ", " +
-            "fritekstTittel=" + fritekstTittel + ", " +
-            "fritekst=" + fritekst + ", " +
-            "distribusjonstype=" + distribusjonstype + ", " +
-            "kontaktopplysninger=" + kontaktopplysninger + ", " +
-            "nyVurderingBakgrunn=" + nyVurderingBakgrunn + ", " +
-            "saksVedlegg=" + saksVedlegg + ", " +
-            "fritekstvedlegg=" + fritekstvedlegg + ", " +
-            "dokumentTittel=" + dokumentTittel + ", " +
-            "saksbehandlerNrToIdent=" + saksbehandlerNrToIdent + ", " +
-            "begrunnelseKode=" + begrunnelseKode + ", " +
-            "ytterligereInformasjon=" + ytterligereInformasjon + ']';
+        return "BrevbestillingDto{" +
+            "produserbardokument=" + produserbardokument +
+            ", mottaker=" + mottaker +
+            ", orgnr='" + orgnr + '\'' +
+            ", orgnrNorskMyndighet=" + orgnrNorskMyndighet +
+            ", institusjonID='" + institusjonID + '\'' +
+            ", innledningFritekst='" + innledningFritekst + '\'' +
+            ", manglerFritekst='" + manglerFritekst + '\'' +
+            ", begrunnelseFritekst='" + begrunnelseFritekst + '\'' +
+            ", ektefelleFritekst='" + ektefelleFritekst + '\'' +
+            ", barnFritekst='" + barnFritekst + '\'' +
+            ", trygdeavgiftFritekst='" + trygdeavgiftFritekst + '\'' +
+            ", kontaktpersonNavn='" + kontaktpersonNavn + '\'' +
+            ", kopiMottakere=" + kopiMottakere +
+            ", bestillersId='" + bestillersId + '\'' +
+            ", fritekstTittel='" + fritekstTittel + '\'' +
+            ", fritekst='" + fritekst + '\'' +
+            ", distribusjonstype=" + distribusjonstype +
+            ", kontaktopplysninger=" + kontaktopplysninger +
+            ", nyVurderingBakgrunn='" + nyVurderingBakgrunn + '\'' +
+            ", saksVedlegg=" + saksVedlegg +
+            ", fritekstvedlegg=" + fritekstvedlegg +
+            ", dokumentTittel='" + dokumentTittel + '\'' +
+            ", saksbehandlerNrToIdent='" + saksbehandlerNrToIdent + '\'' +
+            ", begrunnelseKode='" + begrunnelseKode + '\'' +
+            ", ytterligereInformasjon='" + ytterligereInformasjon + '\'' +
+            ", fakturanummer='" + fakturanummer + '\'' +
+            ", betalingsstatus=" + betalingsstatus +
+            ", fullmektigForBetaling='" + fullmektigForBetaling + '\'' +
+            ", betalingsfrist=" + betalingsfrist +
+            ", annenPersonMottakerIdent='" + annenPersonMottakerIdent + '\'' +
+            ", opphørtDato='" + opphørtDato + '\'' +
+            '}';
     }
 
+    public String getFakturanummer() {
+        return fakturanummer;
+    }
+
+    public void setFakturanummer(String fakturanummer) {
+        this.fakturanummer = fakturanummer;
+    }
+
+    public Betalingsstatus getBetalingsstatus() {
+        return betalingsstatus;
+    }
+
+    public void setBetalingsstatus(Betalingsstatus betalingsstatus) {
+        this.betalingsstatus = betalingsstatus;
+    }
+
+    public String getFullmektigForBetaling() {
+        return fullmektigForBetaling;
+    }
+
+    public void setFullmektigForBetaling(String fullmektigForBetaling) {
+        this.fullmektigForBetaling = fullmektigForBetaling;
+    }
+
+    public LocalDate getBetalingsfrist() {
+        return betalingsfrist;
+    }
+
+    public void setBetalingsfrist(LocalDate betalingsfrist) {
+        this.betalingsfrist = betalingsfrist;
+    }
+
+    public String getAnnenPersonMottakerIdent() {
+        return annenPersonMottakerIdent;
+    }
+
+    public void setAnnenPersonMottakerIdent(String annenPersonMottakerIdent) {
+        this.annenPersonMottakerIdent = annenPersonMottakerIdent;
+    }
 }

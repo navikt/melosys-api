@@ -7,10 +7,8 @@ import io.swagger.annotations.ApiOperation;
 import no.nav.melosys.domain.Aktoer;
 import no.nav.melosys.domain.Fagsak;
 import no.nav.melosys.domain.kodeverk.Aktoersroller;
-import no.nav.melosys.domain.kodeverk.Representerer;
 import no.nav.melosys.service.aktoer.AktoerDto;
 import no.nav.melosys.service.aktoer.AktoerService;
-import no.nav.melosys.service.persondata.PersondataFasade;
 import no.nav.melosys.service.sak.FagsakService;
 import no.nav.melosys.service.tilgang.Aksesskontroll;
 import no.nav.security.token.support.core.api.Protected;
@@ -44,22 +42,15 @@ public class AktoerTjeneste {
         response = AktoerDto.class,
         responseContainer = "List")
     public List<AktoerDto> hentAktoerer(@PathVariable("saksnummer") String saksnummer,
-                                        @RequestParam(value = "rolleKode", required = false) String rolleKode,
-                                        @RequestParam(value = "representerer", required = false) String representerer) {
+                                        @RequestParam(value = "rolleKode", required = false) String rolleKode) {
 
         Fagsak fagsak = fagsakService.hentFagsak(saksnummer);
         aksesskontroll.autoriserSakstilgang(saksnummer);
 
-        Aktoersroller rolle = null;
-        Representerer representantRepresenterer = null;
-        if (StringUtils.isNotEmpty(rolleKode)) {
-            rolle = Aktoersroller.valueOf(rolleKode);
-        }
-        if (StringUtils.isNotEmpty(representerer)) {
-            representantRepresenterer = Representerer.valueOf(representerer);
-        }
+        var rolle = StringUtils.isNotEmpty(rolleKode) ? Aktoersroller.valueOf(rolleKode) : null;
 
-        List<Aktoer> aktører = aktoerService.hentfagsakAktører(fagsak, rolle, representantRepresenterer);
+        List<Aktoer> aktører = aktoerService.hentfagsakAktører(fagsak, rolle);
+
         return aktører.stream().map(AktoerDto::tilDto).toList();
     }
 

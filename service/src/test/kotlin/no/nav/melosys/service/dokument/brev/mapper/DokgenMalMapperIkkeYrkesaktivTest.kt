@@ -8,10 +8,7 @@ import io.kotest.matchers.shouldBe
 import io.mockk.every
 import io.mockk.impl.annotations.MockK
 import io.mockk.junit5.MockKExtension
-import no.nav.melosys.domain.Behandling
-import no.nav.melosys.domain.Behandlingsresultat
-import no.nav.melosys.domain.Fagsak
-import no.nav.melosys.domain.Lovvalgsperiode
+import no.nav.melosys.domain.*
 import no.nav.melosys.domain.brev.IkkeYrkesaktivBrevbestilling
 import no.nav.melosys.domain.kodeverk.Land_iso2
 import no.nav.melosys.domain.kodeverk.Sakstyper
@@ -62,17 +59,13 @@ class DokgenMalMapperIkkeYrkesaktivTest {
             type = Behandlingstyper.FØRSTEGANG
             status = Behandlingsstatus.UNDER_BEHANDLING
             mottatteOpplysninger = MottatteOpplysninger().apply {
-                setMottatteOpplysningerdata(
+                mottatteOpplysningerData =
                     SøknadIkkeYrkesaktiv().apply {
-                    ikkeYrkesaktivSituasjontype = Ikkeyrkesaktivsituasjontype.STUDENT
-                    soeknadsland = Soeknadsland(listOf(Land_iso2.CA.kode), false)
-                })
+                        ikkeYrkesaktivSituasjontype = Ikkeyrkesaktivsituasjontype.STUDENT
+                        soeknadsland = Soeknadsland(listOf(Land_iso2.CA.kode), false)
+                    }
             }
-            fagsak = Fagsak().apply {
-                saksnummer = "MEL-1"
-                type = Sakstyper.EU_EOS
-                behandlinger = listOf(this@behandling)
-            }
+            fagsak = FagsakTestFactory.builder().behandlinger(this@behandling).build()
         }
         val behandlingsresultat = Behandlingsresultat().apply {
             id = 1L
@@ -128,16 +121,15 @@ class DokgenMalMapperIkkeYrkesaktivTest {
             tema = Behandlingstema.IKKE_YRKESAKTIV
             type = Behandlingstyper.FØRSTEGANG
             mottatteOpplysninger = MottatteOpplysninger().apply {
-                setMottatteOpplysningerdata(
+                mottatteOpplysningerData =
                     SøknadIkkeYrkesaktiv().apply {
-                    soeknadsland = Soeknadsland(listOf(Land_iso2.CA_QC.kode), false)
-                })
+                        soeknadsland = Soeknadsland(listOf(Land_iso2.CA_QC.kode), false)
+                    }
             }
-            fagsak = Fagsak().apply {
-                saksnummer = "MEL-2"
-                type = Sakstyper.TRYGDEAVTALE
-                behandlinger = listOf(this@behandling)
-            }
+            fagsak = FagsakTestFactory.builder()
+                .type(Sakstyper.TRYGDEAVTALE)
+                .behandlinger(this@behandling)
+                .build()
         }
         val behandlingsresultat = Behandlingsresultat().apply {
             id = 2L

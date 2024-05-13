@@ -2,7 +2,7 @@ package no.nav.melosys.domain;
 
 import java.time.LocalDate;
 import java.util.Objects;
-import javax.persistence.*;
+import jakarta.persistence.*;
 
 import no.nav.melosys.domain.jpa.LovvalgBestemmelsekonverterer;
 import no.nav.melosys.domain.kodeverk.Land_iso2;

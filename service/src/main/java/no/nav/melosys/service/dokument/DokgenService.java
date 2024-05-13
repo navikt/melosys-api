@@ -20,6 +20,7 @@ import no.nav.melosys.domain.kodeverk.brev.Produserbaredokumenter;
 import no.nav.melosys.integrasjon.dokgen.DokgenConsumer;
 import no.nav.melosys.integrasjon.ereg.EregFasade;
 import no.nav.melosys.integrasjon.joark.JoarkFasade;
+import no.nav.melosys.saksflytapi.ProsessinstansService;
 import no.nav.melosys.service.aktoer.KontaktopplysningService;
 import no.nav.melosys.service.aktoer.UtenlandskMyndighetService;
 import no.nav.melosys.service.behandling.BehandlingService;
@@ -31,7 +32,6 @@ import no.nav.melosys.service.dokument.brev.KopiMottakerDto;
 import no.nav.melosys.service.dokument.brev.SaksvedleggDto;
 import no.nav.melosys.service.dokument.brev.mapper.DokgenMalMapper;
 import no.nav.melosys.service.dokument.brev.mapper.DokumentproduksjonsInfoMapper;
-import no.nav.melosys.service.saksflyt.ProsessinstansService;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -84,10 +84,10 @@ public class DokgenService {
         Produserbaredokumenter produserbartdokument = brevbestillingDto.getProduserbardokument();
         Behandling behandling = behandlingService.hentBehandlingMedSaksopplysninger(behandlingId);
         Mottaker mottaker;
-        if (hasText(brevbestillingDto.getOrgnr()) || hasText(brevbestillingDto.getInstitusjonId())) {
+        if (hasText(brevbestillingDto.getOrgnr()) || hasText(brevbestillingDto.getInstitusjonID())) {
             mottaker = Mottaker.medRolle(brevbestillingDto.getMottaker());
             mottaker.setOrgnr(brevbestillingDto.getOrgnr());
-            mottaker.setInstitusjonID(brevbestillingDto.getInstitusjonId());
+            mottaker.setInstitusjonID(brevbestillingDto.getInstitusjonID());
         } else {
             mottaker = brevmottakerService.avklarMottakere(produserbartdokument,
                 Mottaker.medRolle(brevbestillingDto.getMottaker()), behandling, true, false).get(0);
@@ -153,7 +153,7 @@ public class DokgenService {
             } else {
                 mottaker.setOrgnr(kopiMottaker.orgnr());
                 mottaker.setAktørId(kopiMottaker.aktørId());
-                mottaker.setInstitusjonID(kopiMottaker.institusjonId());
+                mottaker.setInstitusjonID(kopiMottaker.institusjonID());
             }
             brevbestilling.medBestillKopi(true);
             produserOgDistribuerBrev(behandling, mottaker, brevbestilling.build());
@@ -161,24 +161,51 @@ public class DokgenService {
     }
 
     private List<Mottaker> hentMottakere(BrevbestillingDto brevbestillingDto, Produserbaredokumenter produserbartDokument, Behandling behandling) {
-        List<Mottaker> mottakere = new ArrayList<>();
         boolean erBrevTilOrganisasjon = hasText(brevbestillingDto.getOrgnr());
         boolean erBrevTilNorskMyndighet = Mottakerroller.NORSK_MYNDIGHET.equals(brevbestillingDto.getMottaker())
             && !brevbestillingDto.getOrgnrNorskMyndighet().isEmpty();
+        boolean erBrevTilAnnenPerson = hasText(brevbestillingDto.getAnnenPersonMottakerIdent());
+        boolean erBrevTilUtenlandskTrygdemyndighetFraBehandlingMedIngenFlyt =
+            hasText(brevbestillingDto.getInstitusjonID()) && produserbartDokument.equals(Produserbaredokumenter.UTENLANDSK_TRYGDEMYNDIGHET_FRITEKSTBREV);
 
-        if (erBrevTilOrganisasjon) {
-            Mottaker mottaker = Mottaker.medRolle(brevbestillingDto.getMottaker());
-            mottaker.setOrgnr(brevbestillingDto.getOrgnr());
-            mottakere.add(mottaker);
+        if (erBrevTilUtenlandskTrygdemyndighetFraBehandlingMedIngenFlyt) {
+            return hentMottakerForUtenlandskTrygdemyndighet(brevbestillingDto);
+        } else if (erBrevTilOrganisasjon) {
+            return hentMottakerForOrganisasjon(brevbestillingDto);
+        } else if (erBrevTilAnnenPerson) {
+            return hentMottakerForAnnenPerson(brevbestillingDto);
         } else if (erBrevTilNorskMyndighet) {
-            for (String orgNr : brevbestillingDto.getOrgnrNorskMyndighet()) {
-                Mottaker mottaker = Mottaker.medRolle(brevbestillingDto.getMottaker());
-                mottaker.setOrgnr(orgNr);
-                mottakere.add(mottaker);
-            }
+            return hentMottakereForNorskMyndighet(brevbestillingDto);
         } else {
-            mottakere = brevmottakerService.avklarMottakere(produserbartDokument,
+            return brevmottakerService.avklarMottakere(produserbartDokument,
                 Mottaker.medRolle(brevbestillingDto.getMottaker()), behandling, false, false);
+        }
+    }
+
+    private List<Mottaker> hentMottakerForUtenlandskTrygdemyndighet(BrevbestillingDto brevbestillingDto) {
+        var mottaker = Mottaker.medRolle(brevbestillingDto.getMottaker());
+        mottaker.setInstitusjonID(brevbestillingDto.getInstitusjonID());
+        return List.of(mottaker);
+    }
+
+    private List<Mottaker> hentMottakerForOrganisasjon(BrevbestillingDto brevbestillingDto) {
+        var mottaker = Mottaker.medRolle(brevbestillingDto.getMottaker());
+        mottaker.setOrgnr(brevbestillingDto.getOrgnr());
+        return List.of(mottaker);
+    }
+
+    private List<Mottaker> hentMottakerForAnnenPerson(BrevbestillingDto brevbestillingDto) {
+        var mottaker = Mottaker.medRolle(brevbestillingDto.getMottaker());
+        mottaker.setPersonIdent(brevbestillingDto.getAnnenPersonMottakerIdent());
+        return List.of(mottaker);
+    }
+
+    private List<Mottaker> hentMottakereForNorskMyndighet(BrevbestillingDto brevbestillingDto) {
+        List<Mottaker> mottakere = new ArrayList<>();
+        for (String orgNr : brevbestillingDto.getOrgnrNorskMyndighet()) {
+            var mottaker = Mottaker.medRolle(brevbestillingDto.getMottaker());
+            mottaker.setOrgnr(orgNr);
+            mottakere.add(mottaker);
         }
         return mottakere;
     }
@@ -273,20 +300,22 @@ public class DokgenService {
                 .medManglerInfoFritekst(brevbestillingDto.getManglerFritekst())
                 .medKontaktpersonNavn(brevbestillingDto.getKontaktpersonNavn())
                 .medBrukerSkalHaKopi(inneholderBrukerSomKopimottaker(brevbestillingDto.getKopiMottakere()));
-            case TRYGDEAVTALE_GB, TRYGDEAVTALE_US, TRYGDEAVTALE_CAN, TRYGDEAVTALE_AU ->
-                new InnvilgelseBrevbestilling.Builder()
-                    .medDistribusjonstype(Distribusjonstype.VEDTAK)
-                    .medInnledningFritekst(brevbestillingDto.getInnledningFritekst())
-                    .medBegrunnelseFritekst(brevbestillingDto.getBegrunnelseFritekst())
-                    .medEktefelleFritekst(brevbestillingDto.getEktefelleFritekst())
-                    .medBarnFritekst(brevbestillingDto.getBarnFritekst())
-                    .medVirksomhetArbeidsgiverSkalHaKopi(inneholderArbeidsgiverSomKopimottaker(brevbestillingDto.getKopiMottakere()))
-                    .medNyVurderingBakgrunn(brevbestillingDto.getNyVurderingBakgrunn());
-            case INNVILGELSE_FOLKETRYGDLOVEN -> new InnvilgelseFtrlBrevbestilling.Builder()
+            case TRYGDEAVTALE_GB, TRYGDEAVTALE_US, TRYGDEAVTALE_CAN, TRYGDEAVTALE_AU -> new InnvilgelseBrevbestilling.Builder()
                 .medDistribusjonstype(Distribusjonstype.VEDTAK)
                 .medInnledningFritekst(brevbestillingDto.getInnledningFritekst())
                 .medBegrunnelseFritekst(brevbestillingDto.getBegrunnelseFritekst())
+                .medEktefelleFritekst(brevbestillingDto.getEktefelleFritekst())
+                .medBarnFritekst(brevbestillingDto.getBarnFritekst())
+                .medVirksomhetArbeidsgiverSkalHaKopi(inneholderArbeidsgiverSomKopimottaker(brevbestillingDto.getKopiMottakere()))
+                .medNyVurderingBakgrunn(brevbestillingDto.getNyVurderingBakgrunn());
+            case INNVILGELSE_FOLKETRYGDLOVEN -> new InnvilgelseFtrlYrkesaktivFrivilligBrevbestilling.Builder()
+                .medDistribusjonstype(Distribusjonstype.VEDTAK)
+                .medNyVurderingBakgrunn(brevbestillingDto.getNyVurderingBakgrunn())
+                .medInnledningFritekst(brevbestillingDto.getInnledningFritekst())
+                .medBegrunnelseFritekst(brevbestillingDto.getBegrunnelseFritekst())
                 .medTrygdeavgiftFritekst(brevbestillingDto.getTrygdeavgiftFritekst());
+            case IKKE_YRKESAKTIV_PLIKTIG_FTRL, IKKE_YRKESAKTIV_FRIVILLIG_FTRL, PLIKTIG_MEDLEM_FTRL -> new DokgenBrevbestilling.Builder<>()
+                .medDistribusjonstype(Distribusjonstype.VEDTAK);
             case GENERELT_FRITEKSTBREV_BRUKER, GENERELT_FRITEKSTBREV_ARBEIDSGIVER, GENERELT_FRITEKSTBREV_VIRKSOMHET,
                 UTENLANDSK_TRYGDEMYNDIGHET_FRITEKSTBREV, FRITEKSTBREV -> new FritekstbrevBrevbestilling.Builder()
                 .medDistribusjonstype(brevbestillingDto.getDistribusjonstype())
@@ -309,8 +338,18 @@ public class DokgenService {
                 .medFritekstvedleggTittel(brevbestillingDto.getFritekstTittel())
                 .medFritekstvedleggTekst(brevbestillingDto.getFritekst())
                 .medMottakerType(brevbestillingDto.getMottaker());
-            case IKKE_YRKESAKTIV_VEDTAKSBREV ->
-                new IkkeYrkesaktivBrevbestilling.Builder().medDistribusjonstype(Distribusjonstype.VEDTAK);
+            case IKKE_YRKESAKTIV_VEDTAKSBREV -> new IkkeYrkesaktivBrevbestilling.Builder()
+                .medDistribusjonstype(Distribusjonstype.VEDTAK);
+            case VARSELBREV_MANGLENDE_INNBETALING -> new VarselbrevManglendeInnbetalingBrevbestilling.Builder()
+                .medDistribusjonstype(Distribusjonstype.VIKTIG)
+                .medFakturanummer(brevbestillingDto.getFakturanummer())
+                .medBetalingsstatus(brevbestillingDto.getBetalingsstatus())
+                .medFullmektigForBetaling(brevbestillingDto.getFullmektigForBetaling())
+                .medBetalingsfrist(brevbestillingDto.getBetalingsfrist());
+            case VEDTAK_OPPHOERT_MEDLEMSKAP -> new VedtakOpphoertMedlemskapBrevbestilling.Builder()
+                .medDistribusjonstype(Distribusjonstype.VEDTAK)
+                .medOpphørtDato(brevbestillingDto.getOpphørtDato())
+                .medOpphørtBegrunnelseFritekst(brevbestillingDto.getBegrunnelseFritekst());
 
             default -> new DokgenBrevbestilling.Builder<>().medDistribusjonstype(Distribusjonstype.VIKTIG);
         };

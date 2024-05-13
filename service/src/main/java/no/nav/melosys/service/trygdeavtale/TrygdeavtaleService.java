@@ -74,7 +74,7 @@ public class TrygdeavtaleService {
     }
 
     public List<MedfolgendeFamilie> hentFamiliemedlemmer(Behandling behandling) {
-        return behandling.getMottatteOpplysninger().getMottatteOpplysningerData().personOpplysninger.medfolgendeFamilie;
+        return behandling.getMottatteOpplysninger().getMottatteOpplysningerData().personOpplysninger.getMedfolgendeFamilie();
     }
 
     public void overførResultat(long behandlingId, TrygdeavtaleResultat trygdeavtaleResultat) {

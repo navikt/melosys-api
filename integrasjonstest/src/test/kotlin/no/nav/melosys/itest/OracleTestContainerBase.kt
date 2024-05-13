@@ -11,19 +11,22 @@ open class OracleTestContainerBase {
             DockerImageName.parse("ghcr.io/navikt/melosys-legacy-avhengigheter/oracle-xe:18.4.0-slim")
                 .asCompatibleSubstituteFor("gvenzl/oracle-xe")
         )
+        private const val useContainer = true // easy way to switch to run against local docker
 
         @DynamicPropertySource
         @JvmStatic
         fun oracleProperties(registry: DynamicPropertyRegistry) {
-            // Det finnes ikke Oracle container som støtter ARM arkitektur
-            val m1Mac: String? = System.getenv("M1_MAC")
-            if (m1Mac?.lowercase() == "true") return
+            if (useTestContainer()) {
+                registry.add("spring.datasource.url") { oracleContainer.jdbcUrl }
+                registry.add("spring.datasource.password") { oracleContainer.password }
+                registry.add("spring.datasource.username") { oracleContainer.username }
 
-            registry.add("spring.datasource.url") { oracleContainer.jdbcUrl }
-            registry.add("spring.datasource.password") { oracleContainer.password }
-            registry.add("spring.datasource.username") { oracleContainer.username }
-
-            oracleContainer.start()
+                oracleContainer.start()
+            }
         }
+
+        private fun useLocalDB(): Boolean = listOf("USE-LOCAL-DB", "USE_LOCAL_DB").any { System.getenv(it)?.lowercase() == "true" }
+
+        private fun useTestContainer(): Boolean = !useLocalDB() && useContainer
     }
 }

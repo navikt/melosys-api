@@ -32,12 +32,12 @@ public class UtenlandskMyndighetService {
 
     static {
         var utenlandskMyndighet = new UtenlandskMyndighet();
-        utenlandskMyndighet.navn = "Social Security Administration";
-        utenlandskMyndighet.gateadresse1 = "Division of Training and Program Support";
-        utenlandskMyndighet.gateadresse2 = "International Support Branch, NT 03-A-09 6100 Wabash Avenue";
-        utenlandskMyndighet.poststed = "Baltimore MD 21215";
-        utenlandskMyndighet.land = "USA";
-        utenlandskMyndighet.landkode = Land_iso2.US;
+        utenlandskMyndighet.setNavn("Social Security Administration");
+        utenlandskMyndighet.setGateadresse1("Division of Training and Program Support");
+        utenlandskMyndighet.setGateadresse2("International Support Branch, NT 03-A-09 6100 Wabash Avenue");
+        utenlandskMyndighet.setPoststed("Baltimore MD 21215");
+        utenlandskMyndighet.setLand("USA");
+        utenlandskMyndighet.setLandkode(Land_iso2.US);
         utenlandskMyndighetUnntakUSA = utenlandskMyndighet;
     }
 
@@ -65,12 +65,19 @@ public class UtenlandskMyndighetService {
     }
 
     private Optional<UtenlandskMyndighet> finnUtenlandskMyndighet(String landkode) {
+        if (landkode == null) {
+            return Optional.empty();
+        }
         Optional<Land_iso2> eøsLandkodeOptional = Enums.getIfPresent(Land_iso2.class, landkode).toJavaUtil();
         return eøsLandkodeOptional.flatMap(utenlandskMyndighetRepository::findByLandkode);
     }
 
     public UtenlandskMyndighet hentUtenlandskMyndighet(Land_iso2 landkode) {
         return hentUtenlandskMyndighet(landkode, null);
+    }
+
+    public List<UtenlandskMyndighet> hentAlleUtenlandskeMyndigheter() {
+        return utenlandskMyndighetRepository.findAll();
     }
 
     public UtenlandskMyndighet hentUtenlandskMyndighet(Land_iso2 landkode, Produserbaredokumenter produserbaredokumenter) {
@@ -85,10 +92,6 @@ public class UtenlandskMyndighetService {
         return hentUtenlandskMyndighet(UtenlandskMyndighet.konverterInstitusjonIdTilLandkode(institusjonID));
     }
 
-    public List<UtenlandskMyndighet> hentAlleUtenlandskMyndigheter() {
-        return utenlandskMyndighetRepository.findAll();
-    }
-
     public Map<UtenlandskMyndighet, Mottaker> lagUtenlandskeMyndigheterFraBehandling(Behandling behandling) {
         Collection<Land_iso2> utenlandskeMyndigheterLandkoder = new ArrayList<>();
         try {
@@ -99,6 +102,7 @@ public class UtenlandskMyndighetService {
         List<UtenlandskMyndighet> utenlandskMyndighetList = utenlandskMyndighetRepository.findByLandkodeIsIn(utenlandskeMyndigheterLandkoder);
 
         return utenlandskMyndighetList.stream()
+            .filter(utenlandskMyndighet -> utenlandskMyndighet.getAdresse().erGyldig())
             .collect(Collectors.toMap(utenlandskMyndighet -> utenlandskMyndighet, this::lagMottaker));
     }
 

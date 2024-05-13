@@ -1,7 +1,7 @@
 package no.nav.melosys.domain;
 
 import java.util.Objects;
-import javax.persistence.*;
+import jakarta.persistence.*;
 
 @Entity
 @Table(name = "saksopplysning_kilde")

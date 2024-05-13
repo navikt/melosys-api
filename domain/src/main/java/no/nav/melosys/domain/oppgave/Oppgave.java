@@ -274,6 +274,10 @@ public final class Oppgave {
         return oppgavetype == Oppgavetyper.BEH_SAK_MK;
     }
 
+    public boolean erManglendeInnbetalingBehandling() {
+        return  oppgavetype == Oppgavetyper.VURD_MAN_INNB;
+    }
+
     public boolean erJournalFøring() {
         return oppgavetype == Oppgavetyper.JFR;
     }

@@ -1,7 +1,7 @@
 package no.nav.melosys.service.dokument.brev.mapper;
 
-import javax.xml.bind.JAXBElement;
-import javax.xml.bind.JAXBException;
+import jakarta.xml.bind.JAXBElement;
+import jakarta.xml.bind.JAXBException;
 
 import no.nav.dok.melosysbrev._000146.BrevdataType;
 import no.nav.dok.melosysbrev._000146.Fag;
@@ -22,23 +22,22 @@ public class VideresendSoknadMapper implements BrevDataMapper {
     public String mapTilBrevXML(FellesType fellesType, MelosysNAVFelles navFelles, Behandling behandling, Behandlingsresultat resultat, BrevData brevData) throws JAXBException, SAXException {
         BrevDataVideresend brevDataVideresend = (BrevDataVideresend) brevData;
         Fag fag = new Fag();
-        fag.setBostedsland(brevDataVideresend.bostedsland);
+        fag.setBostedsland(brevDataVideresend.getBostedsland());
 
-        StrukturertAdresse myndighetensAdresse = brevDataVideresend.trygdemyndighet.getAdresse();
-        String utenlandskMyndighetsNavnOgAdresse = brevDataVideresend.trygdemyndighet.navn + ", " + myndighetensAdresse.toString();
+        StrukturertAdresse myndighetensAdresse = brevDataVideresend.getTrygdemyndighet().getAdresse();
+        String utenlandskMyndighetsNavnOgAdresse = brevDataVideresend.getTrygdemyndighet().getNavn() + ", " + myndighetensAdresse.toString();
         fag.setTrygdemyndighet(utenlandskMyndighetsNavnOgAdresse);
-        fag.setFritekst(brevData.fritekst);
+        fag.setFritekst(brevData.getFritekst());
 
         JAXBElement<BrevdataType> brevdataTypeJAXBElement = lagBrevdataType(fellesType, navFelles, fag);
         return JaxbHelper.marshalAndValidate(brevdataTypeJAXBElement, XSD_LOCATION);
     }
 
     private static JAXBElement<BrevdataType> lagBrevdataType(FellesType fellesType, MelosysNAVFelles navFelles, Fag fag) {
-        BrevdataType brevdataType = BrevdataType.builder()
+        BrevdataType brevdataType = new BrevdataType()
             .withFelles(fellesType)
             .withNAVFelles(navFelles)
-            .withFag(fag)
-            .build();
+            .withFag(fag);
         return new ObjectFactory().createBrevdata(brevdataType);
     }
 }

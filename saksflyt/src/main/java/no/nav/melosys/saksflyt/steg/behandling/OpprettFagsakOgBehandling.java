@@ -1,23 +1,18 @@
 package no.nav.melosys.saksflyt.steg.behandling;
 
 import java.time.LocalDate;
-import java.util.Collections;
-import java.util.List;
 import java.util.Optional;
 
 import no.nav.melosys.domain.Behandling;
 import no.nav.melosys.domain.Fagsak;
-import no.nav.melosys.domain.Fullmektig;
-import no.nav.melosys.domain.Kontaktopplysning;
-import no.nav.melosys.domain.kodeverk.Representerer;
 import no.nav.melosys.domain.kodeverk.Sakstemaer;
 import no.nav.melosys.domain.kodeverk.Sakstyper;
 import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingsaarsaktyper;
 import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingstema;
 import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingstyper;
-import no.nav.melosys.domain.saksflyt.ProsessSteg;
-import no.nav.melosys.domain.saksflyt.Prosessinstans;
 import no.nav.melosys.saksflyt.steg.StegBehandler;
+import no.nav.melosys.saksflytapi.domain.ProsessSteg;
+import no.nav.melosys.saksflytapi.domain.Prosessinstans;
 import no.nav.melosys.service.persondata.PersondataFasade;
 import no.nav.melosys.service.sak.FagsakService;
 import no.nav.melosys.service.sak.OpprettSakRequest;
@@ -26,8 +21,8 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Component;
 
-import static no.nav.melosys.domain.saksflyt.ProsessDataKey.*;
-import static no.nav.melosys.domain.saksflyt.ProsessSteg.OPPRETT_SAK_OG_BEH;
+import static no.nav.melosys.saksflytapi.domain.ProsessDataKey.*;
+import static no.nav.melosys.saksflytapi.domain.ProsessSteg.OPPRETT_SAK_OG_BEH;
 
 @Component
 public class OpprettFagsakOgBehandling implements StegBehandler {
@@ -51,10 +46,6 @@ public class OpprettFagsakOgBehandling implements StegBehandler {
     public void utfør(Prosessinstans prosessinstans) {
         String aktørID = finnAktørID(prosessinstans).orElse(null);
         String virksomhetOrgnr = prosessinstans.getData(VIRKSOMHET_ORGNR);
-        String arbeidsgiver = prosessinstans.getData(ARBEIDSGIVER);
-        String representant = prosessinstans.getData(REPRESENTANT);
-        String representantKontakperson = prosessinstans.getData(REPRESENTANT_KONTAKTPERSON);
-        Representerer representantRepresenterer = prosessinstans.getData(REPRESENTANT_REPRESENTERER, Representerer.class);
         String initierendeJournalpostId = prosessinstans.getData(JOURNALPOST_ID);
         String initierendeDokumentId = prosessinstans.getData(DOKUMENT_ID);
         LocalDate mottaksdato = prosessinstans.getData(MOTTATT_DATO, LocalDate.class);
@@ -68,9 +59,6 @@ public class OpprettFagsakOgBehandling implements StegBehandler {
         OpprettSakRequest opprettSakRequest = new OpprettSakRequest.Builder()
             .medAktørID(aktørID)
             .medVirksomhetOrgnr(virksomhetOrgnr)
-            .medArbeidsgiver(arbeidsgiver)
-            .medFullmektig(representant != null ? new Fullmektig(representant, representantRepresenterer) : null)
-            .medKontaktopplysninger(lagKontaktopplysningerForRepresentant(representant, representantKontakperson))
             .medSakstype(sakstype)
             .medSakstema(sakstema)
             .medBehandlingsårsaktype(behandlingsårsaktype)
@@ -82,7 +70,7 @@ public class OpprettFagsakOgBehandling implements StegBehandler {
             .medInitierendeDokumentId(initierendeDokumentId)
             .build();
         Fagsak fagsak = fagsakService.nyFagsakOgBehandling(opprettSakRequest);
-        Behandling behandling = fagsak.hentAktivBehandling();
+        Behandling behandling = fagsak.hentAktivBehandlingIkkeÅrsavregning();
         prosessinstans.setBehandling(behandling);
         log.info("Opprettet fagsak {} med behandling {}", fagsak.getSaksnummer(), behandling.getId());
     }
@@ -99,13 +87,5 @@ public class OpprettFagsakOgBehandling implements StegBehandler {
         }
 
         return Optional.empty();
-    }
-
-    private List<Kontaktopplysning> lagKontaktopplysningerForRepresentant(String representant,
-                                                                          String kontaktperson) {
-        if (representant == null || kontaktperson == null) {
-            return Collections.emptyList();
-        }
-        return Collections.singletonList(Kontaktopplysning.av(representant, kontaktperson, null));
     }
 }

@@ -9,13 +9,13 @@ import no.nav.melosys.domain.eessi.SedType;
 import no.nav.melosys.domain.eessi.melding.MelosysEessiMelding;
 import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingsresultattyper;
 import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingsstatus;
-import no.nav.melosys.domain.saksflyt.Prosessinstans;
+import no.nav.melosys.saksflytapi.ProsessinstansService;
+import no.nav.melosys.saksflytapi.domain.Prosessinstans;
 import no.nav.melosys.service.behandling.BehandlingService;
 import no.nav.melosys.service.behandling.BehandlingsresultatService;
 import no.nav.melosys.service.medl.MedlPeriodeService;
 import no.nav.melosys.service.oppgave.OppgaveService;
 import no.nav.melosys.service.sak.FagsakService;
-import no.nav.melosys.service.saksflyt.ProsessinstansService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Component;
@@ -59,7 +59,7 @@ public class AdminFjernmottakerSedRuter extends AdminSedRuter implements SedRute
             return;
         }
 
-        var sistAktiveBehandling = fagsak.get().hentSistAktivBehandling();
+        var sistAktiveBehandling = fagsak.get().hentSistAktivBehandlingIkkeÅrsavregning();
 
         if (sistAktiveBehandling.erNorgeUtpekt()) {
             if (sistAktiveBehandling.erAktiv()) {

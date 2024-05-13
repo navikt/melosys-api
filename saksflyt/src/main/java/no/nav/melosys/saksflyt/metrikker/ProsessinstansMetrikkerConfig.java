@@ -3,9 +3,9 @@ package no.nav.melosys.saksflyt.metrikker;
 import io.micrometer.core.instrument.Gauge;
 import io.micrometer.core.instrument.MeterRegistry;
 import io.micrometer.core.instrument.binder.MeterBinder;
-import no.nav.melosys.domain.saksflyt.ProsessSteg;
-import no.nav.melosys.domain.saksflyt.ProsessType;
 import no.nav.melosys.metrics.MetrikkerNavn;
+import no.nav.melosys.saksflytapi.domain.ProsessSteg;
+import no.nav.melosys.saksflytapi.domain.ProsessType;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 
@@ -13,11 +13,10 @@ import org.springframework.context.annotation.Configuration;
 public class ProsessinstansMetrikkerConfig {
 
     @Bean
-    public MeterBinder ProsessinstansMetrikker(MeterRegistry meterRegistry,
-                                               ProsessinstansStatusCache statusCache) {
+    public MeterBinder ProsessinstansMetrikker(ProsessinstansStatusCache statusCache) {
         return registry -> {
-            registrerAntallFeiledeProsessinstanserGruppertPåType(meterRegistry, statusCache);
-            registrerAntallFeiledeProsessinstanserGruppertPåSteg(meterRegistry, statusCache);
+            registrerAntallFeiledeProsessinstanserGruppertPåType(registry, statusCache);
+            registrerAntallFeiledeProsessinstanserGruppertPåSteg(registry, statusCache);
         };
     }
 
