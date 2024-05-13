@@ -223,7 +223,6 @@ class MedlemskapsperiodeServiceTest {
     @Test
     fun `opprettMedlemskapsperiode kaster ikke exception når tomDato er null, land er Norge og bestemmelse er 2_1`() {
         every { gyldigeTrygdedekningerService.hentTrygdedekninger(any(), any()) } returns listOf(*Trygdedekninger.values())
-        unleash.enable(ToggleName.MELOSYS_FOLKETRYGDEN_2_7)
         val medlemAvFolketrygden = MedlemAvFolketrygden().apply { behandlingsresultat = lagBehandlingsresultat(Land_iso2.NO) }
         every { medlemAvFolketrygdenService.hentMedlemAvFolketrygden(BEHANDLING_ID_1) } returns medlemAvFolketrygden
         every { medlemskapsperiodeRepository.save(any()) } returnsArgument 0

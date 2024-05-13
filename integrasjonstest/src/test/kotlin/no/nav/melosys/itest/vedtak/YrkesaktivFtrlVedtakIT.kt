@@ -93,7 +93,7 @@ class YrkesaktivFtrlVedtakIT(
     @BeforeEach
     fun setup() {
         fakturaserieReferanse = ULID.random().toString()
-        unleash.enableAllExcept(ToggleName.MELOSYS_FOLKETRYGDEN_2_7, ToggleName.MELOSYS_FTRL_YRKESAKTIV_PLIKTIGE_BESTEMMELSER)
+        unleash.enableAllExcept(ToggleName.MELOSYS_FTRL_YRKESAKTIV_PLIKTIGE_BESTEMMELSER)
         MedlRepo.repo.clear()
         originalSubjectHandler = SubjectHandler.getInstance()
 

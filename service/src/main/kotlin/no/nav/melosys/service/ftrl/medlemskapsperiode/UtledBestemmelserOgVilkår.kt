@@ -8,13 +8,12 @@ import no.nav.melosys.domain.kodeverk.begrunnelser.folketrygdloven.Ftrl_2_7_begr
 import no.nav.melosys.domain.kodeverk.begrunnelser.folketrygdloven.Ftrl_2_8_naer_tilknytning_norge_begrunnelser
 import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingstema
 import no.nav.melosys.domain.util.KodeverkUtils
-import no.nav.melosys.featuretoggle.ToggleName
 import no.nav.melosys.service.ftrl.bestemmelse.IkkeYrkesaktivBestemmelser
 import org.springframework.stereotype.Component
 
 @Deprecated("MELOSYS-6470, se no.nav.melosys.service.ftrl.bestemmelse")
 @Component
-class UtledBestemmelserOgVilkår(val unleash: Unleash) {
+class UtledBestemmelserOgVilkår {
 
     val støttetBestemmelser2_8 = listOf(
         FTRL_KAP2_2_8_FØRSTE_LEDD_A,
@@ -25,29 +24,7 @@ class UtledBestemmelserOgVilkår(val unleash: Unleash) {
         FTRL_KAP2_2_7A
     )
 
-    val yrkesaktivBestemmelserOgVilkårGammel = mapOf<Folketrygdloven_kap2_bestemmelser, Collection<Vilkaar>>(
-        Pair(FTRL_KAP2_2_2, emptySet()),
-        Pair(FTRL_KAP2_2_3_ANDRE_LEDD, emptySet()),
-        Pair(FTRL_KAP2_2_5_FØRSTE_LEDD_A, emptySet()),
-        Pair(FTRL_KAP2_2_5_FØRSTE_LEDD_B, emptySet()),
-        Pair(FTRL_KAP2_2_5_FØRSTE_LEDD_C, emptySet()),
-        Pair(FTRL_KAP2_2_5_FØRSTE_LEDD_D, emptySet()),
-        Pair(FTRL_KAP2_2_5_FØRSTE_LEDD_E, emptySet()),
-        Pair(FTRL_KAP2_2_5_FØRSTE_LEDD_F, emptySet()),
-        Pair(FTRL_KAP2_2_5_FØRSTE_LEDD_G, emptySet()),
-        Pair(FTRL_KAP2_2_7_FØRSTE_LEDD, emptySet()),
-        Pair(FTRL_KAP2_2_7A, emptySet()),
-        Pair(
-            FTRL_KAP2_2_8_FØRSTE_LEDD_A,
-            setOf(Vilkaar.FTRL_FORUTGÅENDE_TRYGDETID)
-        ),
-        Pair(
-            FTRL_KAP2_2_8_ANDRE_LEDD,
-            LinkedHashSet(listOf(Vilkaar.FTRL_FORUTGÅENDE_TRYGDETID, Vilkaar.FTRL_2_8_NÆR_TILKNYTNING_NORGE))
-        )
-    )
-
-    val yrkesaktivBestemmelserOgVilkårToggle = mapOf<Folketrygdloven_kap2_bestemmelser, Collection<Vilkaar>>(
+    val yrkesaktivBestemmelserOgVilkår = mapOf<Folketrygdloven_kap2_bestemmelser, Collection<Vilkaar>>(
         Pair(FTRL_KAP2_2_2, emptySet()),
         Pair(FTRL_KAP2_2_3_ANDRE_LEDD, emptySet()),
         Pair(FTRL_KAP2_2_5_FØRSTE_LEDD_A, emptySet()),
@@ -125,7 +102,7 @@ class UtledBestemmelserOgVilkår(val unleash: Unleash) {
 
     private fun bestemmelseOgVilkårFraBehandlingstema(behandlingstema: Behandlingstema): Map<Folketrygdloven_kap2_bestemmelser, Collection<Vilkaar>> {
         return when (behandlingstema) {
-            Behandlingstema.YRKESAKTIV -> if (unleash.isEnabled(ToggleName.MELOSYS_FOLKETRYGDEN_2_7)) yrkesaktivBestemmelserOgVilkårToggle else yrkesaktivBestemmelserOgVilkårGammel
+            Behandlingstema.YRKESAKTIV -> yrkesaktivBestemmelserOgVilkår
             Behandlingstema.IKKE_YRKESAKTIV -> ikkeYrkesaktivBestemmelserOgVilkår
             Behandlingstema.PENSJONIST -> pensjonistBestemmelserOgVilkår
             else -> defaultBestemmelserOgVilkår
@@ -134,15 +111,12 @@ class UtledBestemmelserOgVilkår(val unleash: Unleash) {
 
     fun hentStøttedeBestemmelserOgVilkår(behandlingstema: Behandlingstema): Map<Folketrygdloven_kap2_bestemmelser, Collection<Vilkaar>> =
         bestemmelseOgVilkårFraBehandlingstema(behandlingstema).filter {
-            (unleash.isEnabled(ToggleName.MELOSYS_FOLKETRYGDEN_2_7) && støttetBestemmelser2_7.contains(it.key))
-                || støttetBestemmelser2_8.contains(it.key)
+            støttetBestemmelser2_7.contains(it.key) || støttetBestemmelser2_8.contains(it.key)
         }
 
     fun hentIkkeStøttedeBestemmelserOgVilkår(behandlingstema: Behandlingstema): Map<Folketrygdloven_kap2_bestemmelser, Collection<Vilkaar>> =
         bestemmelseOgVilkårFraBehandlingstema(behandlingstema).filter {
-            !støttetBestemmelser2_8.contains(it.key) && (!unleash.isEnabled(ToggleName.MELOSYS_FOLKETRYGDEN_2_7) || !støttetBestemmelser2_7.contains(
-                it.key
-            ))
+            !støttetBestemmelser2_8.contains(it.key) && !støttetBestemmelser2_7.contains(it.key)
         }
 
     fun hentBegrunnelserForVilkår(vilkår: Vilkaar): Collection<String> =

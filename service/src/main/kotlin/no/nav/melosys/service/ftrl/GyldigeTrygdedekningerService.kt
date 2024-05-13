@@ -23,14 +23,6 @@ class GyldigeTrygdedekningerService(private val unleash: Unleash) {
         Trygdedekninger.FTRL_2_7A_ANDRE_LEDD_B_HELSE_SYKE_FORELDREPENGER
     )
 
-    private val GYLDIGE_TRYGDEDEKNINGER_YRKESAKTIV_GAMMMEL = listOf(
-        Trygdedekninger.FTRL_2_9_FØRSTE_LEDD_A_HELSE,
-        Trygdedekninger.FTRL_2_9_FØRSTE_LEDD_A_ANDRE_LEDD_HELSE_SYKE_FORELDREPENGER,
-        Trygdedekninger.FTRL_2_9_FØRSTE_LEDD_B_PENSJON,
-        Trygdedekninger.FTRL_2_9_FØRSTE_LEDD_C_HELSE_PENSJON,
-        Trygdedekninger.FTRL_2_9_FØRSTE_LEDD_C_ANDRE_LEDD_HELSE_PENSJON_SYKE_FORELDREPENGER
-    )
-
     private val GYLDIGE_TRYGDEDEKNINGER_IKKE_YRKESAKTIV = listOf(
         Trygdedekninger.FULL_DEKNING_FTRL,
         Trygdedekninger.FTRL_2_9_FØRSTE_LEDD_A_HELSE,
@@ -66,11 +58,10 @@ class GyldigeTrygdedekningerService(private val unleash: Unleash) {
     }
 
     private fun trygdedekningerFraBehandlingstema(behandlingstema: Behandlingstema): List<Trygdedekninger> {
-        val trygdedekninger = when {
-            behandlingstema == Behandlingstema.IKKE_YRKESAKTIV -> GYLDIGE_TRYGDEDEKNINGER_IKKE_YRKESAKTIV
-            unleash.isEnabled(ToggleName.MELOSYS_FOLKETRYGDEN_2_7) -> GYLDIGE_TRYGDEDEKNINGER_YRKESAKTIV
-            unleash.isEnabled(ToggleName.MELOSYS_FTRL_YRKESAKTIV_PLIKTIGE_BESTEMMELSER) -> GYLDIGE_TRYGDEDEKNINGER_YRKESAKTIV
-            else -> GYLDIGE_TRYGDEDEKNINGER_YRKESAKTIV_GAMMMEL
+        val trygdedekninger = when (behandlingstema) {
+            Behandlingstema.IKKE_YRKESAKTIV -> GYLDIGE_TRYGDEDEKNINGER_IKKE_YRKESAKTIV
+            Behandlingstema.YRKESAKTIV -> GYLDIGE_TRYGDEDEKNINGER_YRKESAKTIV
+            else -> throw FunksjonellException("Finnes ikke gyldige trygdedekninger for behandlingstema $behandlingstema")
         }
         if (unleash.isEnabled(ToggleName.MELOSYS_FTRL_YRKESSKADEFORDEL)) {
             return trygdedekninger + TILLEGG_GYLDIGE_TRYGDEDEKNINGER_YRESSKADEFORDEL
