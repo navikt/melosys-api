@@ -1,6 +1,5 @@
 package no.nav.melosys.service.saksbehandling
 
-import io.getunleash.Unleash
 import no.nav.melosys.domain.Behandling
 import no.nav.melosys.domain.Fagsak
 import no.nav.melosys.domain.kodeverk.Sakstemaer
@@ -9,15 +8,11 @@ import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingsresultattyper
 import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingstema
 import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingstema.*
 import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingstyper
-import no.nav.melosys.featuretoggle.ToggleName.MELOSYS_FTRL_IKKE_YRKESAKTIV
 import no.nav.melosys.repository.BehandlingsresultatRepository
 import org.springframework.stereotype.Component
 
 @Component
-class SaksbehandlingRegler(
-    private val behandlingsresultatRepository: BehandlingsresultatRepository,
-    private val unleash: Unleash
-) {
+class SaksbehandlingRegler(private val behandlingsresultatRepository: BehandlingsresultatRepository) {
 
     fun skalTidligereBehandlingReplikeres(
         fagsak: Fagsak,
@@ -85,7 +80,6 @@ class SaksbehandlingRegler(
             -> true
 
             ANMODNING_OM_UNNTAK_HOVEDREGEL -> sakstype == Sakstyper.TRYGDEAVTALE
-            IKKE_YRKESAKTIV -> (sakstype === Sakstyper.FTRL && !unleash.isEnabled(MELOSYS_FTRL_IKKE_YRKESAKTIV))
 
             else -> return false
         }

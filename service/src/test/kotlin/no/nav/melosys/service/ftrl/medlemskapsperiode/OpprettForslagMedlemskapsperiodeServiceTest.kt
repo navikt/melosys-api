@@ -387,22 +387,8 @@ class OpprettForslagMedlemskapsperiodeServiceTest {
         }.message.shouldContain("Kan ikke opprette medlemskapsperioder for sakstype")
     }
 
-    @Deprecated("MELOSYS_FTRL_IKKE_YRKESAKTIV melosys.ftrl.ikke_yrkesaktiv")
-    @Test
-    fun opprettForslagPåMedlemskapsperioder_oppfyllerIkkeVilkår_kasterFeil() {
-        every { behandlingsresultatService.hentBehandlingsresultat(BEH_RES_ID) } returns lagBehandlingsresultat().apply {
-            vilkaarsresultater.add(lagVilkår(false))
-        }
-
-
-        shouldThrow<FunksjonellException> {
-            opprettForslagMedlemskapsperiodeService.opprettForslagPåMedlemskapsperioder(BEH_RES_ID, BESTEMMELSE)
-        }.message.shouldContain("er påkrevd for bestemmelse")
-    }
-
     @Test
     fun opprettForslagPåMedlemskapsperioder_toggle_oppfyllerIkkeVilkår_kasterFeil() {
-        fakeUnleash.enable(ToggleName.MELOSYS_FTRL_IKKE_YRKESAKTIV)
         every { behandlingsresultatService.hentBehandlingsresultat(BEH_RES_ID) } returns lagBehandlingsresultat().apply {
             behandling.apply {
                 tema = Behandlingstema.IKKE_YRKESAKTIV
@@ -420,21 +406,8 @@ class OpprettForslagMedlemskapsperiodeServiceTest {
         }.message.shouldContain("er påkrevd for bestemmelse")
     }
 
-    @Deprecated("MELOSYS_FTRL_IKKE_YRKESAKTIV melosys.ftrl.ikke_yrkesaktiv")
-    @Test
-    fun opprettForslagPåMedlemskapsperioder_støtterIkkeBestemmelse_kasterFeil() {
-        val ustøttetBestemmelse = Folketrygdloven_kap2_bestemmelser.FTRL_KAP2_2_8_FØRSTE_LEDD_D
-        every { behandlingsresultatService.hentBehandlingsresultat(BEH_RES_ID) } returns lagBehandlingsresultat()
-
-
-        shouldThrow<FunksjonellException> {
-            opprettForslagMedlemskapsperiodeService.opprettForslagPåMedlemskapsperioder(BEH_RES_ID, ustøttetBestemmelse)
-        }.message.shouldContain("Støtter ikke")
-    }
-
     @Test
     fun opprettForslagPåMedlemskapsperioder_støtterIkkeBestemmelseForDekning_kasterFeil() {
-        fakeUnleash.enable(ToggleName.MELOSYS_FTRL_IKKE_YRKESAKTIV)
         val ustøttetBestemmelse = Folketrygdloven_kap2_bestemmelser.FTRL_KAP2_2_7A
         every { behandlingsresultatService.hentBehandlingsresultat(BEH_RES_ID) } returns
             lagBehandlingsresultat().apply { behandling.tema = Behandlingstema.IKKE_YRKESAKTIV }

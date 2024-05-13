@@ -82,8 +82,5 @@ class GyldigeTrygdedekningerService(private val unleash: Unleash) {
         if (behandlingstema !in listOf(Behandlingstema.YRKESAKTIV, Behandlingstema.IKKE_YRKESAKTIV)) {
             throw FunksjonellException("Behandling med behandlingstema $behandlingstema har ikke gyldige trygdedekninger")
         }
-        if (behandlingstema == Behandlingstema.IKKE_YRKESAKTIV && !unleash.isEnabled(ToggleName.MELOSYS_FTRL_IKKE_YRKESAKTIV)) {
-            throw FunksjonellException("Behandling med behandlingstema Ikke Yrkesaktiv har ikke gyldige trygdedekninger mens toggle er slått av")
-        }
     }
 }

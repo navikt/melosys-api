@@ -1,6 +1,5 @@
 package no.nav.melosys.service.saksbehandling
 
-import io.getunleash.FakeUnleash
 import io.kotest.matchers.shouldBe
 import io.mockk.MockKAdditionalAnswerScope
 import io.mockk.every
@@ -16,9 +15,7 @@ import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingsresultattyper
 import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingsstatus
 import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingstema
 import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingstyper
-import no.nav.melosys.featuretoggle.ToggleName
 import no.nav.melosys.repository.BehandlingsresultatRepository
-import org.junit.jupiter.api.AfterEach
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.TestInstance
 import org.junit.jupiter.api.extension.ExtendWith
@@ -38,18 +35,11 @@ class SaksbehandlingReglerTest {
     @MockK
     lateinit var behandlingsresultatRepository: BehandlingsresultatRepository
 
-    private val unleash = FakeUnleash()
-
     private lateinit var saksbehandlingRegler: SaksbehandlingRegler
 
     @BeforeEach
     fun setUp() {
-        saksbehandlingRegler = SaksbehandlingRegler(behandlingsresultatRepository, unleash)
-    }
-
-    @AfterEach
-    fun afterEach() {
-        unleash.resetAll()
+        saksbehandlingRegler = SaksbehandlingRegler(behandlingsresultatRepository)
     }
 
     fun testHarIngenFlytParametere() =
@@ -59,7 +49,6 @@ class SaksbehandlingReglerTest {
                 Sakstemaer.TRYGDEAVGIFT,
                 Behandlingstyper.HENVENDELSE,
                 Behandlingstema.IKKE_YRKESAKTIV,
-                true,
                 true
             ),
             Arguments.of(
@@ -67,7 +56,6 @@ class SaksbehandlingReglerTest {
                 Sakstemaer.MEDLEMSKAP_LOVVALG,
                 Behandlingstyper.HENVENDELSE,
                 Behandlingstema.IKKE_YRKESAKTIV,
-                true,
                 true
             ),
             Arguments.of(
@@ -75,7 +63,6 @@ class SaksbehandlingReglerTest {
                 Sakstemaer.MEDLEMSKAP_LOVVALG,
                 Behandlingstyper.KLAGE,
                 Behandlingstema.IKKE_YRKESAKTIV,
-                true,
                 true
             ),
             Arguments.of(
@@ -83,7 +70,6 @@ class SaksbehandlingReglerTest {
                 Sakstemaer.MEDLEMSKAP_LOVVALG,
                 Behandlingstyper.MANGLENDE_INNBETALING_TRYGDEAVGIFT,
                 Behandlingstema.IKKE_YRKESAKTIV,
-                true,
                 false
             ),
             Arguments.of(
@@ -91,7 +77,6 @@ class SaksbehandlingReglerTest {
                 Sakstemaer.MEDLEMSKAP_LOVVALG,
                 Behandlingstyper.FØRSTEGANG,
                 Behandlingstema.FORESPØRSEL_TRYGDEMYNDIGHET,
-                true,
                 true
             ),
             Arguments.of(
@@ -99,7 +84,6 @@ class SaksbehandlingReglerTest {
                 Sakstemaer.MEDLEMSKAP_LOVVALG,
                 Behandlingstyper.FØRSTEGANG,
                 Behandlingstema.IKKE_YRKESAKTIV,
-                true,
                 false
             ),
             Arguments.of(
@@ -107,7 +91,6 @@ class SaksbehandlingReglerTest {
                 Sakstemaer.MEDLEMSKAP_LOVVALG,
                 Behandlingstyper.FØRSTEGANG,
                 Behandlingstema.YRKESAKTIV,
-                true,
                 false
             ),
             Arguments.of(
@@ -115,15 +98,6 @@ class SaksbehandlingReglerTest {
                 Sakstemaer.MEDLEMSKAP_LOVVALG,
                 Behandlingstyper.FØRSTEGANG,
                 Behandlingstema.IKKE_YRKESAKTIV,
-                false,
-                true
-            ),
-            Arguments.of(
-                Sakstyper.FTRL,
-                Sakstemaer.MEDLEMSKAP_LOVVALG,
-                Behandlingstyper.FØRSTEGANG,
-                Behandlingstema.IKKE_YRKESAKTIV,
-                true,
                 false
             ),
             Arguments.of(
@@ -131,7 +105,6 @@ class SaksbehandlingReglerTest {
                 Sakstemaer.MEDLEMSKAP_LOVVALG,
                 Behandlingstyper.MANGLENDE_INNBETALING_TRYGDEAVGIFT,
                 Behandlingstema.YRKESAKTIV,
-                true,
                 false,
             ),
             Arguments.of(
@@ -139,7 +112,6 @@ class SaksbehandlingReglerTest {
                 Sakstemaer.MEDLEMSKAP_LOVVALG,
                 Behandlingstyper.FØRSTEGANG,
                 Behandlingstema.IKKE_YRKESAKTIV,
-                true,
                 false
             ),
         )
@@ -152,12 +124,8 @@ class SaksbehandlingReglerTest {
         sakstema: Sakstemaer,
         behandlingstype: Behandlingstyper,
         behandlingstema: Behandlingstema,
-        ikkeYrkesaktivFtrlToggleEnabled: Boolean,
         expected: Boolean
     ) {
-        if (ikkeYrkesaktivFtrlToggleEnabled) {
-            unleash.enable(ToggleName.MELOSYS_FTRL_IKKE_YRKESAKTIV)
-        }
         val result = saksbehandlingRegler.harIngenFlyt(sakstype, sakstema, behandlingstype, behandlingstema)
 
 
@@ -384,9 +352,8 @@ class SaksbehandlingReglerTest {
         behandlinger: List<Behandling>,
         expectedBehandlingID: Long?
     ) {
-        unleash.enableAll()
         every { behandlingsresultatRepository.findById(any()) } returns lagBehandlingsresultat(resultatTypeFraRepo)
-        val saksbehandlingRegler = SaksbehandlingRegler(behandlingsresultatRepository, unleash)
+        val saksbehandlingRegler = SaksbehandlingRegler(behandlingsresultatRepository)
 
         val behandling = saksbehandlingRegler.finnBehandlingSomKanReplikeres(behandlinger)
 
@@ -562,16 +529,14 @@ class SaksbehandlingReglerTest {
 
     class BehandlingHolder {
         private val behandlingerMedType: ArrayList<Pair<Behandling, Behandlingsresultattyper?>> = ArrayList()
-        private val unleash = FakeUnleash()
 
         fun setup(behandlingsresultatRepository: BehandlingsresultatRepository): SaksbehandlingRegler {
-            unleash.enableAll()
             setupMock { id: Long, behandlingsresultattype: Behandlingsresultattyper? ->
                 every { behandlingsresultatRepository.findById(id) } returns lagBehandlingsresultat(
                     behandlingsresultattype
                 )
             }
-            return SaksbehandlingRegler(behandlingsresultatRepository, unleash)
+            return SaksbehandlingRegler(behandlingsresultatRepository)
         }
 
         fun add(
