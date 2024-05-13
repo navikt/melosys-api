@@ -10,7 +10,6 @@ import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingstema
 import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingstema.*
 import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingstyper
 import no.nav.melosys.featuretoggle.ToggleName.MELOSYS_FTRL_IKKE_YRKESAKTIV
-import no.nav.melosys.featuretoggle.ToggleName.SAKSBEHANDLING_MANGLENDE_INNBETALING
 import no.nav.melosys.repository.BehandlingsresultatRepository
 import org.springframework.stereotype.Component
 
@@ -65,10 +64,6 @@ class SaksbehandlingRegler(
         behandlingstema: Behandlingstema
     ): Boolean {
         if (sakstema == Sakstemaer.TRYGDEAVGIFT) return true
-
-        if (behandlingstype == Behandlingstyper.MANGLENDE_INNBETALING_TRYGDEAVGIFT
-            && !unleash.isEnabled(SAKSBEHANDLING_MANGLENDE_INNBETALING)
-        ) return true
 
         if (behandlingstype == Behandlingstyper.HENVENDELSE || behandlingstype == Behandlingstyper.KLAGE) return true
 
