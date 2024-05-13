@@ -23,6 +23,7 @@ public final class LovvalgBestemmelseUtils {
             Lovvalgbestemmelser_987_2009.values(),
             Tilleggsbestemmelser_883_2004.values(),
             Lovvalgbestemmelser_konv_efta_storbritannia.values(),
+            Tilleggsbestemmelser_konv_efta_storbritannia.values(),
 
             Lovvalgsbestemmelser_trygdeavtale_au.values(),
             Lovvalgsbestemmelser_trygdeavtale_ba.values(),
