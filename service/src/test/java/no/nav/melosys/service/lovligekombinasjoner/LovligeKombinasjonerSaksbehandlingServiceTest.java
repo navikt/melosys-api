@@ -199,8 +199,7 @@ class LovligeKombinasjonerSaksbehandlingServiceTest {
     }
 
     @Test
-    void hentMuligeBehandlingstyper_FTRL_LOVVALG_MEDLEMSKAP_temaYrkesaktiv_toggleAv_returnererLovligKombinasjon() {
-        unleash.enableAllExcept(ToggleName.SAKSBEHANDLING_MANGLENDE_INNBETALING);
+    void hentMuligeBehandlingstyper_FTRL_LOVVALG_MEDLEMSKAP_temaYrkesaktiv_returnererLovligKombinasjon() {
         var muligeTyper = lovligeKombinasjonerSaksbehandlingService.hentMuligeBehandlingstyper(Aktoersroller.BRUKER, FTRL, MEDLEMSKAP_LOVVALG, YRKESAKTIV, null, null);
 
 
@@ -211,26 +210,6 @@ class LovligeKombinasjonerSaksbehandlingServiceTest {
     void hentMuligeBehandlingstyper_FTRL_LOVVALG_MEDLEMSKAP_temaPensjonist_returnererLovligKombinasjon() {
         var muligeTyper = lovligeKombinasjonerSaksbehandlingService
             .hentMuligeBehandlingstyper(Aktoersroller.BRUKER, FTRL, MEDLEMSKAP_LOVVALG, PENSJONIST, null, null);
-
-        assertThat(muligeTyper).containsExactlyInAnyOrder(NY_VURDERING, FØRSTEGANG, HENVENDELSE, KLAGE);
-    }
-
-    @Test
-    void hentMuligeBehandlingstyper_FTRL_LOVVALG_MEDLEMSKAP_temaYrkesaktiv_toggleDisabled_returnererLovligKombinasjon() {
-        unleash.enableAllExcept(ToggleName.SAKSBEHANDLING_MANGLENDE_INNBETALING);
-        var muligeTyper = lovligeKombinasjonerSaksbehandlingService
-            .hentMuligeBehandlingstyper(Aktoersroller.BRUKER, FTRL, MEDLEMSKAP_LOVVALG, YRKESAKTIV, null, null);
-
-
-        assertThat(muligeTyper).containsExactlyInAnyOrder(NY_VURDERING, FØRSTEGANG, HENVENDELSE, KLAGE);
-    }
-
-    @Test
-    void hentMuligeBehandlingstyper_FTRL_LOVVALG_MEDLEMSKAP_temaPensjonist_toggleDisabled_returnererLovligKombinasjon() {
-        unleash.enableAllExcept(ToggleName.SAKSBEHANDLING_MANGLENDE_INNBETALING);
-        var muligeTyper = lovligeKombinasjonerSaksbehandlingService
-            .hentMuligeBehandlingstyper(Aktoersroller.BRUKER, FTRL, MEDLEMSKAP_LOVVALG, PENSJONIST, null, null);
-
 
         assertThat(muligeTyper).containsExactlyInAnyOrder(NY_VURDERING, FØRSTEGANG, HENVENDELSE, KLAGE);
     }

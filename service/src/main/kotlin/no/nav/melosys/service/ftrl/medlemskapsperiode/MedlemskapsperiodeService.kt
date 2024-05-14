@@ -130,8 +130,7 @@ class MedlemskapsperiodeService(
                 Folketrygdloven_kap2_bestemmelser.FTRL_KAP2_2_1
             )
         val toggleEnabled =
-            if (behandlingstema == Behandlingstema.YRKESAKTIV) unleash.isEnabled(ToggleName.MELOSYS_FTRL_YRKESAKTIV_PLIKTIGE_BESTEMMELSER)
-            else unleash.isEnabled(ToggleName.MELOSYS_FTRL_IKKE_YRKESAKTIV)
+            behandlingstema != Behandlingstema.YRKESAKTIV || unleash.isEnabled(ToggleName.MELOSYS_FTRL_YRKESAKTIV_PLIKTIGE_BESTEMMELSER)
 
         if (toggleEnabled && tom == null && !nullTilOgMedDatoErTillatt) {
             throw FunksjonellException("Tom-dato er påkrevd")

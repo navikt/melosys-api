@@ -223,7 +223,6 @@ class MedlemskapsperiodeServiceTest {
     @Test
     fun `opprettMedlemskapsperiode kaster ikke exception når tomDato er null, land er Norge og bestemmelse er 2_1`() {
         every { gyldigeTrygdedekningerService.hentTrygdedekninger(any(), any()) } returns listOf(*Trygdedekninger.values())
-        unleash.enable(ToggleName.MELOSYS_FOLKETRYGDEN_2_7)
         val medlemAvFolketrygden = MedlemAvFolketrygden().apply { behandlingsresultat = lagBehandlingsresultat(Land_iso2.NO) }
         every { medlemAvFolketrygdenService.hentMedlemAvFolketrygden(BEHANDLING_ID_1) } returns medlemAvFolketrygden
         every { medlemskapsperiodeRepository.save(any()) } returnsArgument 0
@@ -244,7 +243,6 @@ class MedlemskapsperiodeServiceTest {
 
     @Test
     fun `opprettMedlemskapsperiode kaster exception når tomDato er null og bestemmelse ikke er 2_1`() {
-        unleash.enable(ToggleName.MELOSYS_FTRL_IKKE_YRKESAKTIV)
         val medlemAvFolketrygden = MedlemAvFolketrygden().apply {
             behandlingsresultat = lagBehandlingsresultat(Land_iso2.AU).apply { behandling.tema = Behandlingstema.IKKE_YRKESAKTIV }
         }
@@ -261,29 +259,6 @@ class MedlemskapsperiodeServiceTest {
                 PliktigeMedlemskapsbestemmelser.bestemmelser[0]
             )
         }.message.shouldContain("Tom-dato er påkrevd")
-    }
-
-    @Test
-    fun `opprettMedlemskapsperiode kaster ikke exception når tomDato er null mens toggle er disabled`() {
-        every { gyldigeTrygdedekningerService.hentTrygdedekninger(any(), any()) } returns listOf(*Trygdedekninger.values())
-        unleash.disable(ToggleName.MELOSYS_FTRL_IKKE_YRKESAKTIV)
-        val medlemAvFolketrygden = MedlemAvFolketrygden().apply {
-            behandlingsresultat = lagBehandlingsresultat().apply { behandling.tema = Behandlingstema.IKKE_YRKESAKTIV }
-        }
-        every { medlemAvFolketrygdenService.hentMedlemAvFolketrygden(BEHANDLING_ID_1) } returns medlemAvFolketrygden
-        every { medlemskapsperiodeRepository.save(any()) } returnsArgument 0
-
-
-        shouldNotThrow<FunksjonellException> {
-            medlemskapsperiodeService.opprettMedlemskapsperiode(
-                BEHANDLING_ID_1,
-                NÅ,
-                null,
-                InnvilgelsesResultat.AVSLAATT,
-                Trygdedekninger.FTRL_2_9_FØRSTE_LEDD_A_HELSE,
-                PliktigeMedlemskapsbestemmelser.bestemmelser[0]
-            )
-        }
     }
 
     @Test

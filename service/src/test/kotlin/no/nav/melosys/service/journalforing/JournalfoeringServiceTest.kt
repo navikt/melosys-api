@@ -128,8 +128,8 @@ internal class JournalfoeringServiceTest {
         }
 
         SpringSubjectHandler.set(TestSubjectHandler())
+        val saksbehandlingRegler = SaksbehandlingRegler(behandlingsresultatRepository)
         unleash.resetAll()
-        val saksbehandlingRegler = SaksbehandlingRegler(behandlingsresultatRepository, unleash)
         val lovligeKombinasjonerSaksbehandlingService = LovligeKombinasjonerSaksbehandlingService(
             fagsakService, behandlingService, behandlingsresultatService, unleash
         )

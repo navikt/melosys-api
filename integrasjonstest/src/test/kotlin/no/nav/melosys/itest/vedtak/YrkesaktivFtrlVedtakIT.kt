@@ -42,6 +42,7 @@ import no.nav.melosys.service.avgift.dto.SkatteforholdTilNorgeRequest
 import no.nav.melosys.service.avklartefakta.AvklartefaktaDto
 import no.nav.melosys.service.avklartefakta.AvklartefaktaService
 import no.nav.melosys.service.behandling.BehandlingsresultatService
+import no.nav.melosys.service.behandling.VilkaarsresultatService
 import no.nav.melosys.service.ftrl.medlemskapsperiode.MedlemskapsperiodeService
 import no.nav.melosys.service.ftrl.medlemskapsperiode.OpprettForslagMedlemskapsperiodeService
 import no.nav.melosys.service.journalforing.JournalfoeringService
@@ -53,7 +54,6 @@ import no.nav.melosys.service.saksopplysninger.OppfriskSaksopplysningerService
 import no.nav.melosys.service.vedtak.FattVedtakRequest
 import no.nav.melosys.service.vedtak.VedtaksfattingFasade
 import no.nav.melosys.service.vilkaar.VilkaarDto
-import no.nav.melosys.service.behandling.VilkaarsresultatService
 import no.nav.melosys.sikkerhet.context.SpringSubjectHandler
 import no.nav.melosys.sikkerhet.context.SubjectHandler
 import org.junit.jupiter.api.AfterEach
@@ -93,7 +93,7 @@ class YrkesaktivFtrlVedtakIT(
     @BeforeEach
     fun setup() {
         fakturaserieReferanse = ULID.random().toString()
-        unleash.enableAllExcept(ToggleName.MELOSYS_FOLKETRYGDEN_2_7, ToggleName.MELOSYS_FTRL_YRKESAKTIV_PLIKTIGE_BESTEMMELSER)
+        unleash.enableAllExcept(ToggleName.MELOSYS_FTRL_YRKESAKTIV_PLIKTIGE_BESTEMMELSER)
         MedlRepo.repo.clear()
         originalSubjectHandler = SubjectHandler.getInstance()
 
@@ -348,11 +348,17 @@ class YrkesaktivFtrlVedtakIT(
         }
         avklartefaktaService.lagreAvklarteFakta(behandling.id, setOf(yrkesgruppe, virksomhet, yrkesaktivitet))
 
-        val vilkaar = VilkaarDto().apply {
-            vilkaar = "FTRL_FORUTGÅENDE_TRYGDETID"
+        val vilkår = listOf(VilkaarDto().apply {
+            vilkaar = Vilkaar.FTRL_2_1A_TRYGDEKOORDINGERING.kode
             isOppfylt = true
-        }
-        vilkaarsresultatService.registrerVilkår(behandling.id, listOf(vilkaar))
+        }, VilkaarDto().apply {
+            vilkaar = Vilkaar.FTRL_FORUTGÅENDE_TRYGDETID.kode
+            isOppfylt = true
+        }, VilkaarDto().apply {
+            vilkaar = Vilkaar.FTRL_2_8_FØRSTE_LEDD_NÆR_TILKNYTNING_NORGE.kode
+            isOppfylt = true
+        })
+        vilkaarsresultatService.registrerVilkår(behandling.id, vilkår)
 
         setupTrygdeavgiftBeregning(behandling.id, skatteplikttype, arbeidsgiversavgiftBetales)
 
