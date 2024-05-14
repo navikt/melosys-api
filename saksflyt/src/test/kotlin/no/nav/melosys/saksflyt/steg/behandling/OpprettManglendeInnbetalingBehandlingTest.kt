@@ -2,7 +2,6 @@ package no.nav.melosys.saksflyt.steg.behandling
 
 import io.kotest.assertions.throwables.shouldThrow
 import io.kotest.assertions.withClue
-import io.kotest.matchers.nulls.shouldBeNull
 import io.kotest.matchers.nulls.shouldNotBeNull
 import io.kotest.matchers.shouldBe
 import io.kotest.matchers.string.shouldContain
@@ -316,10 +315,17 @@ class OpprettManglendeInnbetalingBehandlingTest {
     }
 
     @Test
-    fun `oppretter ikke behandling om medlemskap er pliktig`() {
+    fun `oppretter ikke behandling om siste behandling det ble fattet vedtak i har pliktig medlemskap`() {
         val mottaksdato = LocalDate.now()
-        val behandlingsresultat = lagBehandlingsresultat()
+        val behandlingsresultat = lagBehandlingsresultat().apply {
+            type = Behandlingsresultattyper.FASTSATT_LOVVALGSLAND
+        }
         val prosessinstans = lagProsessinstans(behandlingsresultat.fakturaserieReferanse, mottaksdato)
+        val behandling = lagBehandling()
+        val behandlingAvsluttet = lagBehandling {
+            status = Behandlingsstatus.AVSLUTTET
+            type = Behandlingstyper.NY_VURDERING
+        }
 
         every {
             behandlingsresultatService.finnAlleBehandlingsresultatMedFakturaserieReferanse(behandlingsresultat.fakturaserieReferanse)
@@ -330,6 +336,8 @@ class OpprettManglendeInnbetalingBehandlingTest {
                     medlemskapstype = Medlemskapstyper.PLIKTIG
                 })
             })
+        every { behandlingService.hentBehandling(behandlingsresultat.id) } returns behandling
+        every { saksbehandlingRegler.finnBehandlingSomKanReplikeres(behandling.fagsak)} returns behandlingAvsluttet
 
 
         opprettManglendeInnbetalingBehandling.utfør(prosessinstans)
@@ -337,7 +345,7 @@ class OpprettManglendeInnbetalingBehandlingTest {
 
         verify(exactly = 0) { behandlingService.avsluttBehandling(any()) }
         verify(exactly = 0) { behandlingService.replikerBehandlingOgBehandlingsresultat(any(), any()) }
-        prosessinstans.behandling.shouldBeNull()
+        prosessinstans.behandling.shouldBe(behandlingAvsluttet)
     }
 
     private fun lagBehandlingsresultat() = Behandlingsresultat().apply {

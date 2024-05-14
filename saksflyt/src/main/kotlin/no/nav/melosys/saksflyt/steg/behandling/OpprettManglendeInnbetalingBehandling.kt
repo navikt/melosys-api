@@ -44,12 +44,15 @@ class OpprettManglendeInnbetalingBehandling(
 
         val medlemskapsperiode = medlemAvFolketrygdenService.finnMedlemAvFolketrygden(behandlingsresultater.first().id)
 
-        if (medlemskapsperiode.isPresent && medlemskapsperiode.get().medlemskapsperioder.any { it.erPliktig() }) {
-            // TODO: Finn riktig behandling å sette
-            return
-        }
-
         val fagsak = behandlingService.hentBehandling(behandlingsresultater.first().id).fagsak
+
+        if (medlemskapsperiode.isPresent && medlemskapsperiode.get().medlemskapsperioder.any { it.erPliktig() }) {
+            val behandlingMedFattetVedtak = saksbehandlingRegler.finnBehandlingSomKanReplikeres(fagsak)
+            if (behandlingMedFattetVedtak != null) {
+                prosessinstans.behandling = behandlingMedFattetVedtak
+                return
+            }
+        }
 
         if (fagsak.harAktivBehandling()) {
             val aktivBehandling = fagsak.hentAktivBehandling()
