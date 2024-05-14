@@ -24,7 +24,6 @@ import no.nav.melosys.domain.mottatteopplysninger.SøknadNorgeEllerUtenforEØS
 import no.nav.melosys.domain.mottatteopplysninger.data.Periode
 import no.nav.melosys.exception.FunksjonellException
 import no.nav.melosys.exception.TekniskException
-import no.nav.melosys.featuretoggle.ToggleName
 import no.nav.melosys.repository.MedlemAvFolketrygdenRepository
 import no.nav.melosys.service.avklartefakta.AvklartefaktaService
 import no.nav.melosys.service.behandling.BehandlingsresultatService
@@ -52,9 +51,7 @@ class OpprettForslagMedlemskapsperiodeServiceTest {
     @MockK
     private lateinit var avklartefaktaService: AvklartefaktaService
 
-    private val fakeUnleash = FakeUnleash()
-
-    private val utledBestemmelserOgVilkår = UtledBestemmelserOgVilkår(fakeUnleash)
+    private val utledBestemmelserOgVilkår = UtledBestemmelserOgVilkår()
 
     private val vilkårForBestemmelse = VilkårForBestemmelse(VilkårForBestemmelseYrkesaktiv(mockk()), VilkårForBestemmelseIkkeYrkesaktiv(mockk()))
 
@@ -66,14 +63,13 @@ class OpprettForslagMedlemskapsperiodeServiceTest {
 
     @BeforeEach
     fun setup() {
-        fakeUnleash.resetAll()
         opprettForslagMedlemskapsperiodeService =
             OpprettForslagMedlemskapsperiodeService(
                 medlemAvFolketrygdenRepository,
                 behandlingsresultatService,
                 utledMottaksdato,
                 utledBestemmelserOgVilkår,
-                fakeUnleash,
+                FakeUnleash(),
                 avklartefaktaService,
                 vilkårForBestemmelse
             )
@@ -81,7 +77,7 @@ class OpprettForslagMedlemskapsperiodeServiceTest {
 
     @Test
     fun opprettForslagPåMedlemskapsperioder_dataFraSøknadSatt_lagrerMedlemskapsperioder() {
-        val behandlingsresultat = lagBehandlingsresultat().apply { vilkaarsresultater.add(lagVilkår()) }
+        val behandlingsresultat = lagBehandlingsresultat().apply { vilkaarsresultater.addAll(lagVilkår()) }
         every { behandlingsresultatService.hentBehandlingsresultat(BEH_RES_ID) } returns behandlingsresultat
         every { medlemAvFolketrygdenRepository.save(any()) } returnsArgument 0
         every { utledMottaksdato.getMottaksdato(any()) } returns LocalDate.now()
@@ -96,7 +92,7 @@ class OpprettForslagMedlemskapsperiodeServiceTest {
     @Test
     fun opprettForslagPåMedlemskapsperioder_dataFraSøknadSatt_medlemskapsperioderEksisterer_oppdatererBestemmelse() {
         val behandlingsresultat = lagBehandlingsresultat().apply {
-            vilkaarsresultater.addAll(lagAlleKrevdeVilkår())
+            vilkaarsresultater.addAll(lagVilkår())
             medlemAvFolketrygden = MedlemAvFolketrygden().apply {
                 addMedlemskapsperiode(Medlemskapsperiode().apply {
                     id = 1L
@@ -136,7 +132,7 @@ class OpprettForslagMedlemskapsperiodeServiceTest {
     fun opprettForslagPåMedlemskapsperioder_nyVurdering_kopiererTidligereInnvilgedePerioder_oppdatererBestemmelse() {
         val opprinneligBehandlingId = 2L
         val behandlingsresultat = lagBehandlingsresultat().apply {
-            vilkaarsresultater.addAll(lagAlleKrevdeVilkår())
+            vilkaarsresultater.addAll(lagVilkår())
             medlemAvFolketrygden = MedlemAvFolketrygden()
             behandling.type = Behandlingstyper.NY_VURDERING
             behandling.opprinneligBehandling = Behandling().apply { id = opprinneligBehandlingId }
@@ -175,7 +171,7 @@ class OpprettForslagMedlemskapsperiodeServiceTest {
     fun opprettForslagPåMedlemskapsperioder_manglendeInnbetalingTrygdeavgift_kopiererTidligereInnvilgedeOgOpphørtePerioder_oppdatererBestemmelsePåInnvilgede() {
         val opprinneligBehandlingId = 2L
         val behandlingsresultat = lagBehandlingsresultat().apply {
-            vilkaarsresultater.addAll(lagAlleKrevdeVilkår())
+            vilkaarsresultater.addAll(lagVilkår())
             medlemAvFolketrygden = MedlemAvFolketrygden()
             behandling.type = Behandlingstyper.MANGLENDE_INNBETALING_TRYGDEAVGIFT
             behandling.opprinneligBehandling = Behandling().apply { id = opprinneligBehandlingId }
@@ -229,7 +225,7 @@ class OpprettForslagMedlemskapsperiodeServiceTest {
     fun opprettForslagPåMedlemskapsperioder_andregangsvurderingIngenOpprinneligeMedlemskapsperioder_returnererTomListe() {
         val opprinneligBehandlingId = 2L
         val behandlingsresultat = lagBehandlingsresultat().apply {
-            vilkaarsresultater.addAll(lagAlleKrevdeVilkår())
+            vilkaarsresultater.addAll(lagVilkår())
             medlemAvFolketrygden = MedlemAvFolketrygden()
             behandling.type = Behandlingstyper.NY_VURDERING
             behandling.opprinneligBehandling = Behandling().apply { id = opprinneligBehandlingId }
@@ -253,7 +249,7 @@ class OpprettForslagMedlemskapsperiodeServiceTest {
         val behandlingsresultat = lagBehandlingsresultat().apply {
             (behandling.mottatteOpplysninger.mottatteOpplysningerData as SøknadNorgeEllerUtenforEØS)
                 .trygdedekning = Trygdedekninger.FTRL_2_9_FØRSTE_LEDD_B_TREDJE_LEDD_PENSJON_YRKESSKADE
-            vilkaarsresultater.add(lagVilkår())
+            vilkaarsresultater.addAll(lagVilkår())
         }
         every { behandlingsresultatService.hentBehandlingsresultat(BEH_RES_ID) } returns behandlingsresultat
         every { medlemAvFolketrygdenRepository.save(any()) } returnsArgument 0
@@ -291,7 +287,7 @@ class OpprettForslagMedlemskapsperiodeServiceTest {
                 trygdedekning = Trygdedekninger.FTRL_2_9_FØRSTE_LEDD_B_TREDJE_LEDD_PENSJON_YRKESSKADE
                 periode = Periode(LocalDate.now().minusYears(1), null)
             }
-            vilkaarsresultater.add(lagVilkår())
+            vilkaarsresultater.addAll(lagVilkår())
         }
         every { behandlingsresultatService.hentBehandlingsresultat(BEH_RES_ID) } returns behandlingsresultat
         every { medlemAvFolketrygdenRepository.save(any()) } returnsArgument 0
@@ -332,7 +328,7 @@ class OpprettForslagMedlemskapsperiodeServiceTest {
                 trygdedekning = Trygdedekninger.FTRL_2_9_FØRSTE_LEDD_C_TREDJE_LEDD_HELSE_PENSJON_YRKESSKADE
                 periode = Periode(søknadsdatoFom, søknadsdatoTom)
             }
-            vilkaarsresultater.add(lagVilkår())
+            vilkaarsresultater.addAll(lagVilkår())
         }
         every { behandlingsresultatService.hentBehandlingsresultat(BEH_RES_ID) } returns behandlingsresultat
         every { medlemAvFolketrygdenRepository.save(any()) } returnsArgument 0
@@ -387,27 +383,12 @@ class OpprettForslagMedlemskapsperiodeServiceTest {
         }.message.shouldContain("Kan ikke opprette medlemskapsperioder for sakstype")
     }
 
-    @Deprecated("MELOSYS_FTRL_IKKE_YRKESAKTIV melosys.ftrl.ikke_yrkesaktiv")
     @Test
     fun opprettForslagPåMedlemskapsperioder_oppfyllerIkkeVilkår_kasterFeil() {
-        every { behandlingsresultatService.hentBehandlingsresultat(BEH_RES_ID) } returns lagBehandlingsresultat().apply {
-            vilkaarsresultater.add(lagVilkår(false))
-        }
-
-
-        shouldThrow<FunksjonellException> {
-            opprettForslagMedlemskapsperiodeService.opprettForslagPåMedlemskapsperioder(BEH_RES_ID, BESTEMMELSE)
-        }.message.shouldContain("er påkrevd for bestemmelse")
-    }
-
-    @Test
-    fun opprettForslagPåMedlemskapsperioder_toggle_oppfyllerIkkeVilkår_kasterFeil() {
-        fakeUnleash.enable(ToggleName.MELOSYS_FTRL_IKKE_YRKESAKTIV)
         every { behandlingsresultatService.hentBehandlingsresultat(BEH_RES_ID) } returns lagBehandlingsresultat().apply {
             behandling.apply {
                 tema = Behandlingstema.IKKE_YRKESAKTIV
             }
-            vilkaarsresultater.add(lagVilkår(false))
         }
         every { avklartefaktaService.hentAlleAvklarteFakta(any()) } returns emptySet()
 
@@ -420,21 +401,8 @@ class OpprettForslagMedlemskapsperiodeServiceTest {
         }.message.shouldContain("er påkrevd for bestemmelse")
     }
 
-    @Deprecated("MELOSYS_FTRL_IKKE_YRKESAKTIV melosys.ftrl.ikke_yrkesaktiv")
-    @Test
-    fun opprettForslagPåMedlemskapsperioder_støtterIkkeBestemmelse_kasterFeil() {
-        val ustøttetBestemmelse = Folketrygdloven_kap2_bestemmelser.FTRL_KAP2_2_8_FØRSTE_LEDD_D
-        every { behandlingsresultatService.hentBehandlingsresultat(BEH_RES_ID) } returns lagBehandlingsresultat()
-
-
-        shouldThrow<FunksjonellException> {
-            opprettForslagMedlemskapsperiodeService.opprettForslagPåMedlemskapsperioder(BEH_RES_ID, ustøttetBestemmelse)
-        }.message.shouldContain("Støtter ikke")
-    }
-
     @Test
     fun opprettForslagPåMedlemskapsperioder_støtterIkkeBestemmelseForDekning_kasterFeil() {
-        fakeUnleash.enable(ToggleName.MELOSYS_FTRL_IKKE_YRKESAKTIV)
         val ustøttetBestemmelse = Folketrygdloven_kap2_bestemmelser.FTRL_KAP2_2_7A
         every { behandlingsresultatService.hentBehandlingsresultat(BEH_RES_ID) } returns
             lagBehandlingsresultat().apply { behandling.tema = Behandlingstema.IKKE_YRKESAKTIV }
@@ -472,18 +440,18 @@ class OpprettForslagMedlemskapsperiodeServiceTest {
             }
         }
 
-    private fun lagVilkår(oppfylt: Boolean = true): Vilkaarsresultat =
-        Vilkaarsresultat().apply {
-            vilkaar = Vilkaar.FTRL_FORUTGÅENDE_TRYGDETID
-            isOppfylt = oppfylt
-        }
-
-    private fun lagAlleKrevdeVilkår(): List<Vilkaarsresultat> =
+    private fun lagVilkår(): List<Vilkaarsresultat> =
         listOf(Vilkaarsresultat().apply {
+            vilkaar = Vilkaar.FTRL_2_1A_TRYGDEKOORDINGERING
+            isOppfylt = true
+        }, Vilkaarsresultat().apply {
             vilkaar = Vilkaar.FTRL_FORUTGÅENDE_TRYGDETID
             isOppfylt = true
         }, Vilkaarsresultat().apply {
             vilkaar = Vilkaar.FTRL_2_8_NÆR_TILKNYTNING_NORGE
+            isOppfylt = true
+        }, Vilkaarsresultat().apply {
+            vilkaar = Vilkaar.FTRL_2_8_FØRSTE_LEDD_NÆR_TILKNYTNING_NORGE
             isOppfylt = true
         })
 }

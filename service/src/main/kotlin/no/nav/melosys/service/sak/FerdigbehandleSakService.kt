@@ -16,7 +16,7 @@ class FerdigbehandleSakService(
     @Transactional
     fun ferdigbehandleSak(saksnummer: String) {
         val fagsak = fagsakService.hentFagsak(saksnummer)
-        val behandling = fagsak.hentAktivBehandling()
+        val behandling = fagsak.hentAktivBehandlingIkkeÅrsavregning()
         val nyStatus = if (fagsak.status == Saksstatuser.OPPRETTET) Saksstatuser.AVSLUTTET else fagsak.status
 
         fagsakService.avsluttFagsakOgBehandling(fagsak, behandling, nyStatus)

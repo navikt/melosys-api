@@ -62,7 +62,7 @@ public class VideresendSoknadService {
                            String fritekst,
                            Set<DokumentReferanse> vedleggReferanser) {
         final Fagsak fagsak = fagsakService.hentFagsak(saksnummer);
-        final Behandling behandling = fagsak.finnAktivBehandling();
+        final Behandling behandling = fagsak.finnAktivBehandlingIkkeÅrsavregning();
         log.info("Videresender søknad for sak: {} behandling: {}", behandling.getFagsak().getSaksnummer(), behandling.getId());
 
         final Bostedsland bostedsland = landvelgerService.hentBostedsland(behandling);

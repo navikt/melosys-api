@@ -14,32 +14,10 @@ import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
 
 class UtledBestemmelserOgVilkårTest {
-
-    val fakeUnleash = FakeUnleash()
-
-    lateinit var utledBestemmelserOgVilkår: UtledBestemmelserOgVilkår
-
-    @BeforeEach
-    fun setUp() {
-        utledBestemmelserOgVilkår = UtledBestemmelserOgVilkår(fakeUnleash)
-    }
+    private val utledBestemmelserOgVilkår = UtledBestemmelserOgVilkår()
 
     @Test
     fun hentStøttede_behandlingstemaYRKESAKTIV_returnererStøttede() {
-        utledBestemmelserOgVilkår.hentStøttedeBestemmelserOgVilkår(Behandlingstema.YRKESAKTIV).run {
-            shouldHaveKeys(
-                Folketrygdloven_kap2_bestemmelser.FTRL_KAP2_2_8_FØRSTE_LEDD_A,
-                Folketrygdloven_kap2_bestemmelser.FTRL_KAP2_2_8_ANDRE_LEDD,
-            )
-            shouldHaveSize(2)
-        }
-
-    }
-
-    @Test
-    fun hentStøttede_behandlingstemaYRKESAKTIV_returnererStøttedeMedToggle() {
-        fakeUnleash.enable(ToggleName.MELOSYS_FOLKETRYGDEN_2_7)
-
         utledBestemmelserOgVilkår.hentStøttedeBestemmelserOgVilkår(Behandlingstema.YRKESAKTIV).run {
             shouldHaveKeys(
                 Folketrygdloven_kap2_bestemmelser.FTRL_KAP2_2_8_FØRSTE_LEDD_A,
@@ -49,20 +27,10 @@ class UtledBestemmelserOgVilkårTest {
             )
             shouldHaveSize(4)
         }
-
     }
-
 
     @Test
     fun hentStøttede_behandlingstemaIKKE_YRKESAKTIV_returnererFærre() {
-        utledBestemmelserOgVilkår.hentStøttedeBestemmelserOgVilkår(Behandlingstema.IKKE_YRKESAKTIV)
-            .shouldHaveKeys(Folketrygdloven_kap2_bestemmelser.FTRL_KAP2_2_8_ANDRE_LEDD)
-    }
-
-    @Test
-    fun hentStøttede_behandlingstemaIKKE_YRKESAKTIV_returnererFærreMedToggle() {
-        fakeUnleash.enable(ToggleName.MELOSYS_FOLKETRYGDEN_2_7)
-
         utledBestemmelserOgVilkår.hentStøttedeBestemmelserOgVilkår(Behandlingstema.IKKE_YRKESAKTIV).run {
             shouldHaveKeys(
                 Folketrygdloven_kap2_bestemmelser.FTRL_KAP2_2_8_ANDRE_LEDD,
@@ -91,18 +59,6 @@ class UtledBestemmelserOgVilkårTest {
 
     @Test
     fun hentIkkeStøttede_behandlingstemaYRKESAKTIV_returnererIkkeStøttede() {
-        utledBestemmelserOgVilkår.hentIkkeStøttedeBestemmelserOgVilkår(Behandlingstema.YRKESAKTIV).run {
-            shouldNotBeEmpty()
-            shouldNotHaveKeys(
-                Folketrygdloven_kap2_bestemmelser.FTRL_KAP2_2_8_FØRSTE_LEDD_A,
-                Folketrygdloven_kap2_bestemmelser.FTRL_KAP2_2_8_ANDRE_LEDD
-            )
-        }
-    }
-
-    @Test
-    fun hentIkkeStøttede_behandlingstemaYRKESAKTIV_returnererIkkeStøttedeMedToggle() {
-        fakeUnleash.enableAll()
         utledBestemmelserOgVilkår.hentIkkeStøttedeBestemmelserOgVilkår(Behandlingstema.YRKESAKTIV).run {
             shouldNotBeEmpty()
             shouldNotHaveKeys(

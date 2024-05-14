@@ -199,7 +199,8 @@ public final class ProsessflytDefinisjon {
                 SEND_VEDTAK_UTLAND,
                 DISTRIBUER_JOURNALPOST_UTLAND,
                 OPPRETT_AVGIFTSOPPGAVE,
-                AVSLUTT_SAK_OG_BEHANDLING
+                AVSLUTT_SAK_OG_BEHANDLING,
+                SEND_MELDING_OM_VEDTAK
             )
         );
 
@@ -211,7 +212,8 @@ public final class ProsessflytDefinisjon {
                 SEND_VEDTAK_UTLAND,
                 DISTRIBUER_JOURNALPOST_UTLAND,
                 OPPRETT_AVGIFTSOPPGAVE,
-                AVSLUTT_SAK_OG_BEHANDLING
+                AVSLUTT_SAK_OG_BEHANDLING,
+                SEND_MELDING_OM_VEDTAK
             )
         );
 
@@ -220,7 +222,9 @@ public final class ProsessflytDefinisjon {
                 LAGRE_MEDLEMSKAPSPERIODE_MEDL,
                 OPPRETT_AVGIFTSOPPGAVE,
                 OPPRETT_FAKTURASERIE,
-                AVSLUTT_SAK_OG_BEHANDLING
+                AVSLUTT_SAK_OG_BEHANDLING,
+                SEND_MELDING_OM_VEDTAK
+
             )
         );
 
@@ -230,7 +234,8 @@ public final class ProsessflytDefinisjon {
                 AVKLAR_ARBEIDSGIVER,
                 LAGRE_LOVVALGSPERIODE_MEDL,
                 OPPRETT_AVGIFTSOPPGAVE,
-                AVSLUTT_SAK_OG_BEHANDLING
+                AVSLUTT_SAK_OG_BEHANDLING,
+                SEND_MELDING_OM_VEDTAK
             )
         );
 
@@ -239,7 +244,8 @@ public final class ProsessflytDefinisjon {
             new ProsessFlyt(ProsessType.IVERKSETT_VEDTAK_IKKE_YRKESAKTIV,
                 LAGRE_LOVVALGSPERIODE_MEDL,
                 SEND_VEDTAKSBREV_INNLAND,
-                AVSLUTT_SAK_OG_BEHANDLING
+                AVSLUTT_SAK_OG_BEHANDLING,
+                SEND_MELDING_OM_VEDTAK
             )
         );
 

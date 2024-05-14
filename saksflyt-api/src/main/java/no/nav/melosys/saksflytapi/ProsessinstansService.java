@@ -6,10 +6,10 @@ import java.util.List;
 import java.util.Set;
 import java.util.UUID;
 import java.util.stream.Collectors;
-import jakarta.annotation.Nullable;
 
 import io.micrometer.core.instrument.Counter;
 import io.micrometer.core.instrument.Metrics;
+import jakarta.annotation.Nullable;
 import no.nav.melosys.config.MDCOperations;
 import no.nav.melosys.domain.Behandling;
 import no.nav.melosys.domain.Fagsak;
@@ -111,7 +111,7 @@ public class ProsessinstansService {
         lagre(prosessinstans);
     }
 
-    Prosessinstans lagJournalføringProsessinstans(ProsessType type, JournalfoeringRequest journalfoeringRequest, String institusjonID) {
+    Prosessinstans lagJournalføringProsessinstans(ProsessType type, JournalfoeringRequest journalfoeringRequest, String institusjonID, boolean mottaksKanalErEessi) {
         Prosessinstans prosessinstans = new Prosessinstans();
         prosessinstans.setType(type);
 
@@ -120,15 +120,19 @@ public class ProsessinstansService {
         prosessinstans.setData(ProsessDataKey.OPPGAVE_ID, journalfoeringRequest.getOppgaveID());
         prosessinstans.setData(ProsessDataKey.BRUKER_ID, journalfoeringRequest.getBrukerID());
         prosessinstans.setData(ProsessDataKey.VIRKSOMHET_ORGNR, journalfoeringRequest.getVirksomhetOrgnr());
+        prosessinstans.setData(ProsessDataKey.MOTTAKSKANAL_ER_EESSI, mottaksKanalErEessi);
 
-        prosessinstans.setData(ProsessDataKey.AVSENDER_TYPE, journalfoeringRequest.getAvsenderType());
-        if (journalfoeringRequest.getAvsenderType() == Avsendertyper.UTENLANDSK_TRYGDEMYNDIGHET) {
-            prosessinstans.setData(ProsessDataKey.AVSENDER_ID, institusjonID);
-            prosessinstans.setData(ProsessDataKey.AVSENDER_LAND, journalfoeringRequest.getAvsenderID());
-        } else {
-            prosessinstans.setData(ProsessDataKey.AVSENDER_ID, journalfoeringRequest.getAvsenderID());
+        if (!mottaksKanalErEessi) {
+            prosessinstans.setData(ProsessDataKey.AVSENDER_TYPE, journalfoeringRequest.getAvsenderType());
+            if (journalfoeringRequest.getAvsenderType() == Avsendertyper.UTENLANDSK_TRYGDEMYNDIGHET) {
+                prosessinstans.setData(ProsessDataKey.AVSENDER_ID, institusjonID);
+                prosessinstans.setData(ProsessDataKey.AVSENDER_LAND, journalfoeringRequest.getAvsenderID());
+            } else {
+                prosessinstans.setData(ProsessDataKey.AVSENDER_ID, journalfoeringRequest.getAvsenderID());
+            }
+            prosessinstans.setData(ProsessDataKey.AVSENDER_NAVN, journalfoeringRequest.getAvsenderNavn());
         }
-        prosessinstans.setData(ProsessDataKey.AVSENDER_NAVN, journalfoeringRequest.getAvsenderNavn());
+
         prosessinstans.setData(ProsessDataKey.HOVEDDOKUMENT_TITTEL, journalfoeringRequest.getHoveddokument().getTittel());
         prosessinstans.setData(ProsessDataKey.SKAL_TILORDNES, journalfoeringRequest.getSkalTilordnes());
         prosessinstans.setData(ProsessDataKey.FORVALTNINGSMELDING_MOTTAKER, journalfoeringRequest.getForvaltningsmeldingMottaker());
@@ -172,19 +176,21 @@ public class ProsessinstansService {
         lagre(prosessinstans);
     }
 
-    public void opprettProsessinstansJournalføringKnyttTilEksisterende(JournalfoeringTilordneRequest journalfoeringRequest, String saksnummer, Fagsak fagsak, String institusjonID) {
-        Prosessinstans prosessinstans = lagJournalføringProsessinstans(ProsessType.JFR_KNYTT, journalfoeringRequest, institusjonID);
-        prosessinstans.setBehandling(fagsak.hentSistAktivBehandling());
+    public void opprettProsessinstansJournalføringKnyttTilEksisterende(JournalfoeringTilordneRequest journalfoeringRequest, String saksnummer,
+                                                                       Fagsak fagsak, String institusjonID, boolean mottaksKanalErEessi) {
+        Prosessinstans prosessinstans = lagJournalføringProsessinstans(ProsessType.JFR_KNYTT, journalfoeringRequest, institusjonID, mottaksKanalErEessi);
+        prosessinstans.setBehandling(fagsak.hentSistAktivBehandlingIkkeÅrsavregning());
         prosessinstans.setData(ProsessDataKey.SAKSNUMMER, saksnummer);
         prosessinstans.setData(ProsessDataKey.JFR_INGEN_VURDERING, journalfoeringRequest.getIngenVurdering());
 
         lagre(prosessinstans);
     }
 
-    public void journalførOgOpprettAndregangsBehandling(ProsessType prosessTypeForAndregangsbehandling, Behandlingstema behandlingstema, Behandlingstyper behandlingstype,
-                                                        JournalfoeringTilordneRequest journalfoeringRequest, Behandlingsaarsaktyper behandlingsaarsaktyper, LocalDate mottaksdato, String institusjonID) {
-
-        Prosessinstans prosessinstans = lagJournalføringProsessinstans(prosessTypeForAndregangsbehandling, journalfoeringRequest, institusjonID);
+    public void journalførOgOpprettAndregangsBehandling(ProsessType prosessTypeForAndregangsbehandling, Behandlingstema behandlingstema,
+                                                        Behandlingstyper behandlingstype, JournalfoeringTilordneRequest journalfoeringRequest,
+                                                        Behandlingsaarsaktyper behandlingsaarsaktyper, LocalDate mottaksdato, String institusjonID,
+                                                        boolean mottaksKanalErEessi) {
+        Prosessinstans prosessinstans = lagJournalføringProsessinstans(prosessTypeForAndregangsbehandling, journalfoeringRequest, institusjonID, mottaksKanalErEessi);
         prosessinstans.setData(ProsessDataKey.BEHANDLINGSTEMA, behandlingstema);
         prosessinstans.setData(ProsessDataKey.BEHANDLINGSTYPE, behandlingstype);
         prosessinstans.setData(ProsessDataKey.BEHANDLINGSÅRSAKTYPE, behandlingsaarsaktyper);
@@ -195,13 +201,14 @@ public class ProsessinstansService {
     }
 
     public void opprettProsessinstansJournalføringNySak(JournalfoeringOpprettRequest journalfoeringRequest, ProsessType prosessType,
-                                                        boolean skalSetteSøknadslandOgPeriode, LocalDate mottaksdato, Behandlingsaarsaktyper behandlingsaarsaktyper, String institusjonID) {
-
-        Prosessinstans prosessinstans = lagJournalføringProsessinstans(prosessType, journalfoeringRequest, institusjonID);
+                                                        boolean skalSetteSøknadslandOgPeriode, LocalDate mottaksdato,
+                                                        Behandlingsaarsaktyper behandlingsaarsaktype, String institusjonID,
+                                                        boolean mottaksKanalErEessi) {
+        Prosessinstans prosessinstans = lagJournalføringProsessinstans(prosessType, journalfoeringRequest, institusjonID, mottaksKanalErEessi);
         prosessinstans.setData(ProsessDataKey.SAKSTYPE, Sakstyper.valueOf(journalfoeringRequest.getFagsak().getSakstype()));
         prosessinstans.setData(ProsessDataKey.SAKSTEMA, Sakstemaer.valueOf(journalfoeringRequest.getFagsak().getSakstema()));
         prosessinstans.setData(ProsessDataKey.BEHANDLINGSTYPE, Behandlingstyper.valueOf(journalfoeringRequest.getBehandlingstypeKode()));
-        prosessinstans.setData(ProsessDataKey.BEHANDLINGSÅRSAKTYPE, behandlingsaarsaktyper);
+        prosessinstans.setData(ProsessDataKey.BEHANDLINGSÅRSAKTYPE, behandlingsaarsaktype);
         prosessinstans.setData(ProsessDataKey.MOTTATT_DATO, mottaksdato);
         prosessinstans.setData(ProsessDataKey.BEHANDLINGSTEMA, Behandlingstema.valueOf(journalfoeringRequest.getBehandlingstemaKode()));
 

@@ -22,7 +22,7 @@ class FagsakEventListener(
         val oppgave: Optional<Oppgave> =
             oppgaveService.finnÅpenBehandlingsoppgaveMedFagsaksnummer(fagsak.saksnummer)
         oppgave.ifPresentOrElse({
-            val behandling = fagsak.hentAktivBehandling()
+            val behandling = fagsak.hentAktivBehandlingIkkeÅrsavregning()
             log.info(
                 "Oppdaterer oppgave ${it.oppgaveId} med sakstype ${fagsak.type} og sakstema ${fagsak.tema}"
             )

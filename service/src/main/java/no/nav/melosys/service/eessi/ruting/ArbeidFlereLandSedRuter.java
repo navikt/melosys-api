@@ -65,7 +65,7 @@ public class ArbeidFlereLandSedRuter implements SedRuterForSedTyper {
             throw new FunksjonellException("Finner ingen sak tilknyttet arkivsak " + arkivsakID);
         }
 
-        final Behandling eksisterendeBehandling = fagsak.get().hentSistAktivBehandling();
+        final Behandling eksisterendeBehandling = fagsak.get().hentSistAktivBehandlingIkkeÅrsavregning();
         final Behandlingsresultat behandlingsresultat = behandlingsresultatService.hentBehandlingsresultat(eksisterendeBehandling.getId());
         final Behandlingstema nyttBehandlingstema = hentBehandlingstema(melosysEessiMelding);
 

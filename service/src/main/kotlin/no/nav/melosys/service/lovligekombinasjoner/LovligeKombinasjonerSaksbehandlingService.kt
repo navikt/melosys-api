@@ -245,15 +245,12 @@ class LovligeKombinasjonerSaksbehandlingService(
         if (!unleash.isEnabled(ToggleName.BEHANDLINGSTYPE_KLAGE)) {
             behandlingstyper.remove(Behandlingstyper.KLAGE)
         }
-        if (unleash.isEnabled(ToggleName.SAKSBEHANDLING_MANGLENDE_INNBETALING)) {
-            if (aktivBehandling?.erManglendeInnbetalingTrygdeavgift() == true) {
-                behandlingstyper = mutableSetOf(aktivBehandling.type)
-            } else if (sisteBehandling?.fagsak?.behandlinger?.any { it.erManglendeInnbetalingTrygdeavgift() } != true) {
-                behandlingstyper.remove(Behandlingstyper.MANGLENDE_INNBETALING_TRYGDEAVGIFT)
-            }
-        } else {
+        if (aktivBehandling?.erManglendeInnbetalingTrygdeavgift() == true) {
+            behandlingstyper = mutableSetOf(aktivBehandling.type)
+        } else if (sisteBehandling?.fagsak?.behandlinger?.any { it.erManglendeInnbetalingTrygdeavgift() } != true) {
             behandlingstyper.remove(Behandlingstyper.MANGLENDE_INNBETALING_TRYGDEAVGIFT)
         }
+
 
         return behandlingstyper
     }

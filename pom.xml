@@ -41,7 +41,7 @@
         <kotlin.compiler.jvmTarget>${java.version}</kotlin.compiler.jvmTarget>
 
         <!-- Melosys -->
-        <melosys.internt.kodeverk.version>5.15.264</melosys.internt.kodeverk.version>
+        <melosys.internt.kodeverk.version>5.15.267</melosys.internt.kodeverk.version>
         <melosys.brev.version>1.2.154-midlertidig</melosys.brev.version>
 
         <!-- NAV -->
@@ -89,7 +89,7 @@
         <swagger.version>1.5.21</swagger.version>
         <unleash.version>8.3.0</unleash.version>
         <bcpkix-jdk15on.version>1.70</bcpkix-jdk15on.version>
-        <nimbus-jose-jwt.version>9.37.1</nimbus-jose-jwt.version>
+        <nimbus-jose-jwt.version>9.37.2</nimbus-jose-jwt.version>
         <neethi.version>3.1.1</neethi.version>
         <jakarta.jaxb.version>3.0.1</jakarta.jaxb.version>
         <javaparser.version>1.0.11</javaparser.version>
@@ -97,11 +97,11 @@
         <checkerframework.version>3.22.0</checkerframework.version>
         <threeten.version>1.7.2</threeten.version>
         <jetbrains.annotations.version>21.0.1</jetbrains.annotations.version>
-        <snappy.java.version>1.1.8.4</snappy.java.version>
+        <snappy.java.version>1.1.10.4</snappy.java.version>
         <mockito.inline.version>5.2.0</mockito.inline.version>
         <springmockk.version>3.1.1</springmockk.version>
         <httpclient5.version>5.2</httpclient5.version>
-        <commons.beanutils.version>1.7.0</commons.beanutils.version>
+        <commons.beanutils.version>1.9.4</commons.beanutils.version>
         <commons-cli.version>1.5.0</commons-cli.version>
         <graphql-spring-boot-starter.version>15.1.0</graphql-spring-boot-starter.version>
         <scala.version>2.13.9</scala.version>

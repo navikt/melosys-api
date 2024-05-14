@@ -54,8 +54,8 @@ class OpprettManglendeInnbetalingBehandling(
             }
         }
 
-        if (fagsak.harAktivBehandling()) {
-            val aktivBehandling = fagsak.hentAktivBehandling()
+        if (fagsak.harAktivBehandlingIkkeÅrsavregning()) {
+            val aktivBehandling = fagsak.hentAktivBehandlingIkkeÅrsavregning()
             if (aktivBehandling.erManglendeInnbetalingTrygdeavgift()) {
                 prosessinstans.behandling = aktivBehandling
                 return

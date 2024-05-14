@@ -22,7 +22,6 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.Mock;
-import org.mockito.internal.util.collections.Sets;
 import org.mockito.junit.jupiter.MockitoExtension;
 
 import static org.assertj.core.api.Assertions.assertThatExceptionOfType;
@@ -60,7 +59,7 @@ class SvarAnmodningUnntakSedRuterTest {
         prosessinstans.setData(ProsessDataKey.EESSI_MELDING, eessiMelding);
         svarAnmodningUnntakSedRuter.rutSedTilBehandling(prosessinstans, 1L);
 
-        verify(prosessinstansService).opprettProsessinstansMottattSvarAnmodningUnntak(fagsak.finnAktivBehandling(), eessiMelding);
+        verify(prosessinstansService).opprettProsessinstansMottattSvarAnmodningUnntak(fagsak.finnAktivBehandlingIkkeÅrsavregning(), eessiMelding);
     }
 
     @Test
@@ -80,7 +79,7 @@ class SvarAnmodningUnntakSedRuterTest {
         svarAnmodningUnntakSedRuter.rutSedTilBehandling(prosessinstans, 1L);
 
         verify(prosessinstansService).opprettProsessinstansSedJournalføring(
-            fagsak.finnAktivBehandling(), eessiMelding
+            fagsak.finnAktivBehandlingIkkeÅrsavregning(), eessiMelding
         );
     }
 
@@ -99,7 +98,7 @@ class SvarAnmodningUnntakSedRuterTest {
 
         verify(oppgaveService).oppdaterOppgave(any(), any(OppgaveOppdatering.class));
         verify(prosessinstansService).opprettProsessinstansSedJournalføring(
-            fagsak.finnAktivBehandling(), eessiMelding
+            fagsak.finnAktivBehandlingIkkeÅrsavregning(), eessiMelding
         );
     }
 

@@ -1,10 +1,12 @@
 package no.nav.melosys.integrasjon.faktureringskomponenten
 
+import no.nav.melosys.integrasjon.faktureringskomponenten.dto.BeregnTotalBeløpDto
 import no.nav.melosys.integrasjon.faktureringskomponenten.dto.FakturaMottakerDto
 import no.nav.melosys.integrasjon.faktureringskomponenten.dto.FakturaserieDto
 import no.nav.melosys.integrasjon.felles.JsonRestIntegrasjon
 import org.springframework.web.reactive.function.client.WebClient
 import org.springframework.web.reactive.function.client.bodyToMono
+import java.math.BigDecimal
 
 data class NyFakturaserieResponseDto(
     val fakturaserieReferanse: String,
@@ -37,4 +39,13 @@ open class FaktureringskomponentenConsumer(private val webClient: WebClient) : J
             .retrieve()
             .bodyToMono<Void>()
             .block()
+
+    fun hentTotalTrygdeavgiftForPeriode(beregnTotalBeløpDto: BeregnTotalBeløpDto, saksbehandlerIdent: String) =
+        webClient.post()
+            .uri("/totalbeloep/beregn")
+            .header("Nav-User-Id", saksbehandlerIdent)
+            .bodyValue(beregnTotalBeløpDto)
+            .retrieve()
+            .bodyToMono<BigDecimal>()
+            .block()!!
 }

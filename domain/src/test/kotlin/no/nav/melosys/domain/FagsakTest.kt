@@ -9,6 +9,7 @@ import no.nav.melosys.domain.kodeverk.Aktoersroller
 import no.nav.melosys.domain.kodeverk.Fullmaktstype
 import no.nav.melosys.domain.kodeverk.Land_iso2
 import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingsstatus
+import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingstyper
 import no.nav.melosys.exception.FunksjonellException
 import no.nav.melosys.exception.TekniskException
 import org.junit.jupiter.api.Test
@@ -19,24 +20,27 @@ internal class FagsakTest {
 
     @Test
     fun getAktivBehandling() {
-        val b1 = lagBehandling(Behandlingsstatus.AVSLUTTET)
-        val b2 = lagBehandling(Behandlingsstatus.UNDER_BEHANDLING)
-        val b3 = lagBehandling(Behandlingsstatus.AVSLUTTET)
-        val behandlinger = listOf(b1, b2, b3)
+        val b1 = Behandling().apply { status = Behandlingsstatus.AVSLUTTET }
+        val b2 = Behandling().apply { status = Behandlingsstatus.UNDER_BEHANDLING }
+        val b3 = Behandling().apply { status = Behandlingsstatus.AVSLUTTET }
+        val b4 = Behandling().apply { status = Behandlingsstatus.UNDER_BEHANDLING; type = Behandlingstyper.ÅRSAVREGNING }
+        val behandlinger = listOf(b1, b2, b3, b4)
         val fagsak = FagsakTestFactory.builder().behandlinger(behandlinger).build()
 
-        val aktivBehandling = fagsak.finnAktivBehandling()
+        val aktivBehandling = fagsak.finnAktivBehandlingIkkeÅrsavregning()
 
         aktivBehandling.shouldBe(b2)
     }
 
     @Test
     fun hentTidligsteInaktivBehandling_toInaktive() {
-        val tidligsteInaktiveBehandling = lagBehandling(Behandlingsstatus.AVSLUTTET).apply {
+        val tidligsteInaktiveBehandling = Behandling().apply {
+            status = Behandlingsstatus.AVSLUTTET
             registrertDato = Instant.parse("2019-01-10T10:37:30.00Z")
         }
-        val aktivBehandling = lagBehandling(Behandlingsstatus.UNDER_BEHANDLING)
-        val seinesteInaktiveBehandling = lagBehandling(Behandlingsstatus.AVSLUTTET).apply {
+        val aktivBehandling = Behandling().apply { status = Behandlingsstatus.UNDER_BEHANDLING }
+        val seinesteInaktiveBehandling = Behandling().apply {
+            status = Behandlingsstatus.AVSLUTTET
             registrertDato = Instant.parse("2019-02-10T10:37:30.00Z")
         }
         val behandlinger = listOf(tidligsteInaktiveBehandling, aktivBehandling, seinesteInaktiveBehandling)
@@ -52,7 +56,7 @@ internal class FagsakTest {
         }
         val fagsak = FagsakTestFactory.builder().behandlinger(behandling).build()
 
-        fagsak.hentSistOppdatertBehandling().shouldBe(behandling)
+        fagsak.hentSistOppdatertBehandlingIkkeÅrsavregning().shouldBe(behandling)
     }
 
     @Test
@@ -74,7 +78,7 @@ internal class FagsakTest {
             )
         ).build()
 
-        fagsak.hentSistOppdatertBehandling().shouldBe(sistOppdaterteBehandling)
+        fagsak.hentSistOppdatertBehandlingIkkeÅrsavregning().shouldBe(sistOppdaterteBehandling)
     }
 
     @Test
@@ -112,7 +116,7 @@ internal class FagsakTest {
     fun getSistOppdaterteBehandling_ingenBehandlinger_kasterException() {
         val fagsak = FagsakTestFactory.lagFagsak()
 
-        assertFailsWith<FunksjonellException> { fagsak.hentSistOppdatertBehandling() }
+        assertFailsWith<FunksjonellException> { fagsak.hentSistOppdatertBehandlingIkkeÅrsavregning() }
             .shouldHaveMessage("Finner ikke behandlinger for fagsak ${fagsak.saksnummer}")
     }
 
@@ -123,7 +127,7 @@ internal class FagsakTest {
         val behandlinger = listOf(b1, b2)
         val fagsak = FagsakTestFactory.builder().behandlinger(behandlinger).build()
 
-        val aktivBehandling = fagsak.finnAktivBehandling()
+        val aktivBehandling = fagsak.finnAktivBehandlingIkkeÅrsavregning()
 
         aktivBehandling.shouldBeNull()
     }
@@ -135,7 +139,7 @@ internal class FagsakTest {
         val behandlinger = listOf(b1, b2)
         val fagsak = FagsakTestFactory.builder().behandlinger(behandlinger).build()
 
-        assertFailsWith<TekniskException> { fagsak.hentAktivBehandling() }
+        assertFailsWith<TekniskException> { fagsak.hentAktivBehandlingIkkeÅrsavregning() }
             .shouldHaveMessage("Det finnes mer enn en aktiv behandling for sak ${fagsak.saksnummer}")
     }
 

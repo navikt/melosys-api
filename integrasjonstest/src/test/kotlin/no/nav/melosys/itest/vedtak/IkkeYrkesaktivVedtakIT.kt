@@ -10,6 +10,7 @@ import io.kotest.assertions.withClue
 import io.kotest.matchers.collections.shouldHaveSize
 import io.kotest.matchers.nulls.shouldNotBeNull
 import io.kotest.matchers.shouldBe
+import io.kotest.matchers.types.shouldBeInstanceOf
 import no.nav.melosys.domain.Behandlingsmaate
 import no.nav.melosys.domain.Lovvalgsperiode
 import no.nav.melosys.domain.kodeverk.*
@@ -24,7 +25,10 @@ import no.nav.melosys.domain.kodeverk.lovvalgsbestemmelser.trygdeavtale.Lovvalgs
 import no.nav.melosys.domain.mottatteopplysninger.SøknadIkkeYrkesaktiv
 import no.nav.melosys.domain.mottatteopplysninger.data.Periode
 import no.nav.melosys.domain.mottatteopplysninger.data.Soeknadsland
+import no.nav.melosys.integrasjon.hendelser.MelosysHendelse
+import no.nav.melosys.integrasjon.hendelser.VedtakHendelseMelding
 import no.nav.melosys.itest.JournalfoeringBase
+import no.nav.melosys.itest.MelosysHendelseKafkaConsumer
 import no.nav.melosys.melosysmock.medl.MedlRepo
 import no.nav.melosys.melosysmock.testdata.TestDataGenerator
 import no.nav.melosys.repository.BehandlingRepository
@@ -38,6 +42,7 @@ import no.nav.melosys.service.oppgave.OppgaveService
 import no.nav.melosys.service.saksopplysninger.OppfriskSaksopplysningerService
 import no.nav.melosys.service.vedtak.FattVedtakRequest
 import no.nav.melosys.service.vedtak.VedtaksfattingFasade
+import org.junit.jupiter.api.AfterEach
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
 import org.springframework.beans.factory.annotation.Autowired
@@ -55,7 +60,14 @@ class IkkeYrkesaktivVedtakIT(
     @Autowired private val oppfriskSaksopplysningerService: OppfriskSaksopplysningerService,
     @Autowired private val vedtaksfattingFasade: VedtaksfattingFasade,
     @Autowired private val unleash: FakeUnleash,
+    @Autowired private val melosysHendelseKafkaConsumer: MelosysHendelseKafkaConsumer
 ) : JournalfoeringBase(testDataGenerator, journalføringService, oppgaveService) {
+
+
+    @AfterEach
+    fun cleanup() {
+        melosysHendelseKafkaConsumer.clear()
+    }
 
     @BeforeEach
     fun setup() {
@@ -171,6 +183,17 @@ class IkkeYrkesaktivVedtakIT(
                 grunnlag.shouldBe("FO_11_2")
                 sporingsinformasjon?.kildedokument.shouldBe("Henv_Soknad")
             }
+
+        melosysHendelseKafkaConsumer.melosysHendelser.shouldHaveSize(1)
+            .single().value()
+            .shouldBeInstanceOf<MelosysHendelse>()
+            .melding.shouldBe(
+                VedtakHendelseMelding(
+                    folkeregisterIdent = "30056928150",
+                    sakstype = Sakstyper.EU_EOS,
+                    sakstema = Sakstemaer.MEDLEMSKAP_LOVVALG
+                )
+            )
     }
 
     @Test

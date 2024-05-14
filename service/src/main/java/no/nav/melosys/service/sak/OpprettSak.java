@@ -7,6 +7,7 @@ import java.util.Optional;
 import no.nav.melosys.domain.Fagsak;
 import no.nav.melosys.domain.arkiv.Journalpost;
 import no.nav.melosys.domain.arkiv.Journalposttype;
+import no.nav.melosys.domain.eessi.melding.MelosysEessiMelding;
 import no.nav.melosys.domain.kodeverk.Oppgavetyper;
 import no.nav.melosys.domain.kodeverk.Sakstemaer;
 import no.nav.melosys.domain.kodeverk.Sakstyper;
@@ -16,6 +17,7 @@ import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingstyper;
 import no.nav.melosys.domain.oppgave.Oppgave;
 import no.nav.melosys.exception.FunksjonellException;
 import no.nav.melosys.saksflytapi.ProsessinstansService;
+import no.nav.melosys.service.dokument.sed.EessiService;
 import no.nav.melosys.service.journalforing.JournalfoeringService;
 import no.nav.melosys.service.journalforing.UtledBehandlingsaarsak;
 import no.nav.melosys.service.journalforing.dto.PeriodeDto;
@@ -33,17 +35,21 @@ public class OpprettSak {
     private final OppgaveService oppgaveService;
     private final ProsessinstansService prosessinstansService;
     private final SaksbehandlingRegler saksbehandlingRegler;
+    private final FagsakService fagsakService;
+    private final EessiService eessiService;
 
     private final LovligeKombinasjonerSaksbehandlingService lovligeKombinasjonerSaksbehandlingService;
 
     public OpprettSak(JournalfoeringService journalfoeringService, OppgaveService oppgaveService,
                       @Lazy ProsessinstansService prosessinstansService,
                       SaksbehandlingRegler saksbehandlingRegler,
-                      LovligeKombinasjonerSaksbehandlingService lovligeKombinasjonerSaksbehandlingService) {
+                      FagsakService fagsakService, EessiService eessiService, LovligeKombinasjonerSaksbehandlingService lovligeKombinasjonerSaksbehandlingService) {
         this.journalfoeringService = journalfoeringService;
         this.oppgaveService = oppgaveService;
         this.prosessinstansService = prosessinstansService;
         this.saksbehandlingRegler = saksbehandlingRegler;
+        this.fagsakService = fagsakService;
+        this.eessiService = eessiService;
         this.lovligeKombinasjonerSaksbehandlingService = lovligeKombinasjonerSaksbehandlingService;
     }
 
@@ -170,11 +176,20 @@ public class OpprettSak {
     }
 
     private void validerSedTilknytning(Journalpost journalpost) {
-        Optional<Fagsak> optionalFagsak = journalfoeringService.finnSakTilknyttetSedJournalpost(journalpost);
+        Optional<Fagsak> optionalFagsak = finnSakTilknyttetSedJournalpost(journalpost);
         if (optionalFagsak.isPresent()) {
             throw new FunksjonellException(
                 "SED-en som er tilknyttet Gosys-oppgaven du har valgt er allerede koblet til %s".formatted(
                     optionalFagsak.get().getSaksnummer()));
         }
+    }
+
+    private Optional<Fagsak> finnSakTilknyttetSedJournalpost(Journalpost journalpost) {
+        if (!journalpost.mottaksKanalErEessi()) {
+            return Optional.empty();
+        }
+        MelosysEessiMelding melosysEessiMelding = eessiService.hentSedTilknyttetJournalpost(journalpost.getJournalpostId());
+        Optional<Long> tilknyttetArkivsak = eessiService.finnSakForRinasaksnummer(melosysEessiMelding.getRinaSaksnummer());
+        return tilknyttetArkivsak.flatMap(fagsakService::finnFagsakFraArkivsakID);
     }
 }

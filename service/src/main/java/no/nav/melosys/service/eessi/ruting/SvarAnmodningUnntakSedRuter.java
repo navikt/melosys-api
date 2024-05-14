@@ -83,7 +83,7 @@ public class SvarAnmodningUnntakSedRuter implements SedRuterForSedTyper {
     private Behandling hentBehandling(Long gsakSaksnummer) {
         return fagsakService
             .hentFagsakFraArkivsakID(gsakSaksnummer)
-            .hentSistAktivBehandling();
+            .hentSistAktivBehandlingIkkeÅrsavregning();
     }
 
     private void oppdaterBehandlingOgOppgave(Behandling behandling, String sedType) {

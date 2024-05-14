@@ -43,7 +43,7 @@ public class AnmodningOmUnntakSedRuter implements SedRuterForSedTyper {
 
         Optional<Fagsak> fagsak = fagsakService.finnFagsakFraArkivsakID(arkivsakID);
         if (fagsak.isPresent()) {
-            Behandling behandling = fagsak.get().hentSistOppdatertBehandling();
+            Behandling behandling = fagsak.get().hentSistOppdatertBehandlingIkkeÅrsavregning();
             prosessinstans.setBehandling(behandling);
             Behandlingsresultat behandlingsresultat = behandlingsresultatService.hentBehandlingsresultat(behandling.getId());
             if (periodeErEndret(melosysEessiMelding, behandlingsresultat)) {
