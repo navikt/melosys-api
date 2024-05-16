@@ -4,6 +4,7 @@ import com.github.tomakehurst.wiremock.WireMockServer
 import com.github.tomakehurst.wiremock.client.WireMock
 import com.github.tomakehurst.wiremock.client.WireMock.equalTo
 import com.github.tomakehurst.wiremock.core.WireMockConfiguration
+import com.github.tomakehurst.wiremock.extension.Extension
 import io.kotest.matchers.nulls.shouldNotBeNull
 import no.nav.melosys.ProsessinstansTestManager
 import no.nav.melosys.domain.arkiv.ArkivDokument
@@ -29,11 +30,16 @@ import java.util.*
 class JournalfoeringBase(
     protected val testDataGenerator: TestDataGenerator,
     protected val journalføringService: JournalfoeringService,
-    protected val oppgaveService: OppgaveService
+    protected val oppgaveService: OppgaveService,
+    protected val extensionForWireMock: Extension? = null
 ) : ComponentTestBase() {
 
     protected val mockServer: WireMockServer =
-        WireMockServer(WireMockConfiguration.wireMockConfig().port(8094))
+        WireMockServer(
+            WireMockConfiguration
+                .options().extensions(extensionForWireMock)
+                .port(8094)
+        )
 
     private val processUUID = UUID.randomUUID()
 
@@ -57,11 +63,11 @@ class JournalfoeringBase(
                 .withQueryParam("somKopi", equalTo("false"))
                 .withQueryParam("utkast", equalTo("false"))
                 .willReturn(
-                WireMock.aResponse()
-                    .withStatus(200)
-                    .withHeader("Content-Type", "application/json")
-                    .withBody(ByteArray(0))
-            )
+                    WireMock.aResponse()
+                        .withStatus(200)
+                        .withHeader("Content-Type", "application/json")
+                        .withBody(ByteArray(0))
+                )
         )
 
         ThreadLocalAccessInfo.beforeExecuteProcess(processUUID, "steg")

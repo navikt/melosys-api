@@ -7,7 +7,10 @@ import java.util.Set;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import no.nav.melosys.domain.Medlemskapsperiode;
-import no.nav.melosys.domain.avgift.*;
+import no.nav.melosys.domain.avgift.Inntektsperiode;
+import no.nav.melosys.domain.avgift.Penger;
+import no.nav.melosys.domain.avgift.SkatteforholdTilNorge;
+import no.nav.melosys.domain.avgift.Trygdeavgiftsperiode;
 import no.nav.melosys.domain.folketrygden.FastsattTrygdeavgift;
 import no.nav.melosys.domain.folketrygden.MedlemAvFolketrygden;
 import no.nav.melosys.domain.kodeverk.Inntektskildetype;
@@ -15,13 +18,13 @@ import no.nav.melosys.domain.kodeverk.Skatteplikttype;
 import no.nav.melosys.domain.kodeverk.Trygdedekninger;
 import no.nav.melosys.service.avgift.TrygdeavgiftMottakerService;
 import no.nav.melosys.service.avgift.TrygdeavgiftsberegningService;
-import no.nav.melosys.service.avgift.TrygdeavgiftsgrunnlagService;
 import no.nav.melosys.service.avgift.dto.OppdaterTrygdeavgiftsgrunnlagRequest;
 import no.nav.melosys.service.tilgang.Aksesskontroll;
 import no.nav.melosys.tjenester.gui.dto.trygdeavgift.BeregnetTrygdeavgiftDto;
 import no.nav.melosys.tjenester.gui.dto.trygdeavgift.FakturamottakerDto;
 import no.nav.melosys.tjenester.gui.dto.trygdeavgift.TrygdeavgiftsgrunnlagDto;
 import no.nav.melosys.tjenester.gui.dto.trygdeavgift.TrygdeavgiftsperiodeDto;
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
@@ -45,10 +48,7 @@ class TrygdeavgiftTjenesteTest {
     @MockBean
     private TrygdeavgiftsberegningService trygdeavgiftsberegningService;
     @MockBean
-    private TrygdeavgiftsgrunnlagService trygdeavgiftsgrunnlagService;
-    @MockBean
     private TrygdeavgiftMottakerService trygdeavgiftMottakerService;
-
     @Autowired
     private MockMvc mockMvc;
     @Autowired
@@ -56,30 +56,28 @@ class TrygdeavgiftTjenesteTest {
 
     private static final String BASE_URL = "/api/behandlinger/{behandlingID}/trygdeavgift";
     private static final long BEHANDLINGSRESULTAT_ID = 1;
-    private static final Trygdeavgiftsgrunnlag trygdeavgiftsgrunnlag = lagTrygdeavgiftsgrunnlag();
     private static final Set<Trygdeavgiftsperiode> trygdeavgiftsperioder = lagTrygdeavgiftsperioder();
 
     @Test
     void hentTrygdeavgiftsgrunnlag() throws Exception {
-        when(trygdeavgiftsgrunnlagService.hentTrygdeavgiftsgrunnlagEllerOpprinneligTrygdeavgiftsgrunnlag(BEHANDLINGSRESULTAT_ID)).thenReturn(trygdeavgiftsgrunnlag);
 
         mockMvc.perform(get(BASE_URL + "/grunnlag", 1L)
                 .contentType(MediaType.APPLICATION_JSON))
             .andExpect(status().isOk())
-            .andExpect(responseBody(objectMapper).containsObjectAsJson(new TrygdeavgiftsgrunnlagDto(trygdeavgiftsgrunnlag), TrygdeavgiftsgrunnlagDto.class));
+            .andExpect(responseBody(objectMapper).containsObjectAsJson(new TrygdeavgiftsgrunnlagDto(trygdeavgiftsperioder), TrygdeavgiftsgrunnlagDto.class));
     }
 
     @Test
     void oppdaterTrygdeavgiftsgrunnlag() throws Exception {
-        var dto = new TrygdeavgiftsgrunnlagDto(Collections.emptyList(), Collections.emptyList());
-        when(trygdeavgiftsgrunnlagService.oppdaterTrygdeavgiftsgrunnlag(eq(BEHANDLINGSRESULTAT_ID), any(OppdaterTrygdeavgiftsgrunnlagRequest.class)))
+        var dto = new BeregnetTrygdeavgiftDto(Collections.emptyList(), Collections.emptyList());
+        when(trygdeavgiftsberegningService.beregnOgLagreTrygdeavgift(eq(BEHANDLINGSRESULTAT_ID), any(OppdaterTrygdeavgiftsgrunnlagRequest.class)))
             .thenReturn(trygdeavgiftsgrunnlag);
 
         mockMvc.perform(put(BASE_URL + "/grunnlag", 1L)
                 .contentType(MediaType.APPLICATION_JSON)
                 .content(objectMapper.writeValueAsString(dto)))
             .andExpect(status().isOk())
-            .andExpect(responseBody(objectMapper).containsObjectAsJson(new TrygdeavgiftsgrunnlagDto(trygdeavgiftsgrunnlag), TrygdeavgiftsgrunnlagDto.class));
+            .andExpect(responseBody(objectMapper).containsObjectAsJson(new TrygdeavgiftsgrunnlagDto(trygdeavgiftsperioder), TrygdeavgiftsgrunnlagDto.class));
     }
 
     @Test
@@ -146,6 +144,12 @@ class TrygdeavgiftTjenesteTest {
         var inntektsperiode = new Inntektsperiode();
         inntektsperiode.setType(Inntektskildetype.INNTEKT_FRA_UTLANDET);
         trygdeavgift.setGrunnlagInntekstperiode(inntektsperiode);
+
+        var skatteForholdINorge = new SkatteforholdTilNorge();
+        skatteForholdINorge.setFomDato(LocalDate.now());
+        skatteForholdINorge.setTomDato(LocalDate.now());
+        skatteForholdINorge.setSkatteplikttype(Skatteplikttype.SKATTEPLIKTIG);
+        trygdeavgift.setGrunnlagSkatteforholdTilNorge(skatteForholdINorge);
 
         trygdeavgift.setFastsattTrygdeavgift(new FastsattTrygdeavgift());
         trygdeavgift.getFastsattTrygdeavgift().setMedlemAvFolketrygden(new MedlemAvFolketrygden());

@@ -9,14 +9,14 @@ import java.time.LocalDate
 data class InntekskildeDto(
     val type: Inntektskildetype,
     val arbeidsgiversavgiftBetales: Boolean,
-    val avgiftspliktigInntektMnd: BigDecimal?,
+    val avgiftspliktigInntektMnd: BigDecimal,
     val fomDato: LocalDate,
-    val tomDato: LocalDate?,
+    val tomDato: LocalDate,
 ) {
     constructor(inntektsperiode: Inntektsperiode) : this(
         inntektsperiode.type,
         inntektsperiode.isArbeidsgiversavgiftBetalesTilSkatt,
-        inntektsperiode.avgiftspliktigInntektMnd?.verdi,
+        inntektsperiode.avgiftspliktigInntektMnd.verdi,
         inntektsperiode.fomDato,
         inntektsperiode.tomDato
     )

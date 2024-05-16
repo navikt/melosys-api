@@ -180,15 +180,14 @@ class ReplikerBehandlingsresultatServiceTest {
             .matches { it.id == null }
             .matches { it.trygdeavgiftstype == behandlingsresultatReplika.medlemAvFolketrygden.fastsattTrygdeavgift.trygdeavgiftstype }
 
-        Assertions.assertThat(behandlingsresultatReplika.medlemAvFolketrygden.fastsattTrygdeavgift.trygdeavgiftsgrunnlag)
-            .matches { it.fastsattTrygdeavgift == behandlingsresultatReplika.medlemAvFolketrygden.fastsattTrygdeavgift }
+        Assertions.assertThat(behandlingsresultatReplika.medlemAvFolketrygden.fastsattTrygdeavgift)
+            .matches { it == behandlingsresultatReplika.medlemAvFolketrygden.fastsattTrygdeavgift }
             .matches { it.id == null }
 
         val inntektsperiodeOrig =
-            medlemAvFolketrygdenOrig.fastsattTrygdeavgift.trygdeavgiftsgrunnlag.inntektsperioder.first()
-        Assertions.assertThat(behandlingsresultatReplika.medlemAvFolketrygden.fastsattTrygdeavgift.trygdeavgiftsgrunnlag.inntektsperioder)
+            medlemAvFolketrygdenOrig.fastsattTrygdeavgift.hentInntektsperioder().first()
+        Assertions.assertThat(behandlingsresultatReplika.medlemAvFolketrygden.fastsattTrygdeavgift.hentInntektsperioder())
             .singleElement()
-            .matches { it.trygdeavgiftsgrunnlag == behandlingsresultatReplika.medlemAvFolketrygden.fastsattTrygdeavgift.trygdeavgiftsgrunnlag }
             .matches { it.id == null }
             .matches { it.fomDato == inntektsperiodeOrig.fomDato }
             .matches { it.tomDato == inntektsperiodeOrig.tomDato }
@@ -197,10 +196,9 @@ class ReplikerBehandlingsresultatServiceTest {
             .matches { it.isArbeidsgiversavgiftBetalesTilSkatt == inntektsperiodeOrig.isArbeidsgiversavgiftBetalesTilSkatt }
 
         val skatteforholdTilNorgeOrig =
-            medlemAvFolketrygdenOrig.fastsattTrygdeavgift.trygdeavgiftsgrunnlag.skatteforholdTilNorge.first()
-        Assertions.assertThat(behandlingsresultatReplika.medlemAvFolketrygden.fastsattTrygdeavgift.trygdeavgiftsgrunnlag.skatteforholdTilNorge)
+            medlemAvFolketrygdenOrig.fastsattTrygdeavgift.hentSkatteforholdTilNorge().first()
+        Assertions.assertThat(behandlingsresultatReplika.medlemAvFolketrygden.fastsattTrygdeavgift.hentSkatteforholdTilNorge())
             .singleElement()
-            .matches { it.trygdeavgiftsgrunnlag == behandlingsresultatReplika.medlemAvFolketrygden.fastsattTrygdeavgift.trygdeavgiftsgrunnlag }
             .matches { it.id == null }
             .matches { it.fomDato == skatteforholdTilNorgeOrig.fomDato }
             .matches { it.tomDato == skatteforholdTilNorgeOrig.tomDato }
@@ -310,12 +308,25 @@ class ReplikerBehandlingsresultatServiceTest {
         fastsattTrygdeavgift.medlemAvFolketrygden = medlemAvFolketrygden
         fastsattTrygdeavgift.id = 34L
         fastsattTrygdeavgift.trygdeavgiftstype = Trygdeavgift_typer.FORELØPIG
-        fastsattTrygdeavgift.trygdeavgiftsgrunnlag = opprettTrygdeavgiftsgrunnlag(fastsattTrygdeavgift)
         fastsattTrygdeavgift.trygdeavgiftsperioder = opprettTrygdeavgiftsperioder(fastsattTrygdeavgift)
         return fastsattTrygdeavgift
     }
 
     private fun opprettTrygdeavgiftsperioder(fastsattTrygdeavgift: FastsattTrygdeavgift): Set<Trygdeavgiftsperiode> {
+        val inntektsperiode = Inntektsperiode().apply {
+            id = 1L
+            fomDato = LocalDate.now()
+            tomDato = LocalDate.now()
+            type = Inntektskildetype.INNTEKT_FRA_UTLANDET
+            avgiftspliktigInntektMnd = Penger(1000.0)
+            isArbeidsgiversavgiftBetalesTilSkatt = false
+        }
+        val skatteforholdTilNorge = SkatteforholdTilNorge().apply {
+            id = 1L
+            fomDato = LocalDate.now()
+            tomDato = LocalDate.now()
+            skatteplikttype = Skatteplikttype.SKATTEPLIKTIG
+        }
         return setOf(
             Trygdeavgiftsperiode().apply {
                 id = 1L
@@ -324,34 +335,11 @@ class ReplikerBehandlingsresultatServiceTest {
                 periodeTil = LocalDate.now()
                 trygdeavgiftsbeløpMd = Penger(500.0)
                 trygdesats = BigDecimal(50)
-                grunnlagInntekstperiode = fastsattTrygdeavgift.trygdeavgiftsgrunnlag.inntektsperioder.first()
-                grunnlagSkatteforholdTilNorge = fastsattTrygdeavgift.trygdeavgiftsgrunnlag.skatteforholdTilNorge.first()
+                grunnlagInntekstperiode = inntektsperiode
+                grunnlagSkatteforholdTilNorge = skatteforholdTilNorge
                 grunnlagMedlemskapsperiode = fastsattTrygdeavgift.medlemAvFolketrygden.medlemskapsperioder.first()
             }
         )
-    }
-
-    private fun opprettTrygdeavgiftsgrunnlag(fastsattTrygdeavgift: FastsattTrygdeavgift): Trygdeavgiftsgrunnlag {
-        val trygdeavgiftsgrunnlag = Trygdeavgiftsgrunnlag()
-        trygdeavgiftsgrunnlag.fastsattTrygdeavgift = fastsattTrygdeavgift
-        trygdeavgiftsgrunnlag.id = 35L
-        trygdeavgiftsgrunnlag.inntektsperioder = mutableListOf(
-            Inntektsperiode().apply {
-                id = 1L
-                fomDato = LocalDate.now()
-                tomDato = LocalDate.now()
-                type = Inntektskildetype.INNTEKT_FRA_UTLANDET
-                avgiftspliktigInntektMnd = Penger(1000.0)
-                isArbeidsgiversavgiftBetalesTilSkatt = false
-            })
-        trygdeavgiftsgrunnlag.skatteforholdTilNorge = mutableListOf(
-            SkatteforholdTilNorge().apply {
-                id = 1L
-                fomDato = LocalDate.now()
-                tomDato = LocalDate.now()
-                skatteplikttype = Skatteplikttype.SKATTEPLIKTIG
-            })
-        return trygdeavgiftsgrunnlag
     }
 
     private fun opprettMedlemskapsperiode(innvilgelsesResultat: InnvilgelsesResultat): Medlemskapsperiode {

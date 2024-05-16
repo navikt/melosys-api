@@ -218,7 +218,12 @@ internal class InnvilgelseFtrlYrkesaktivFrivilligMapperTest {
                     bestemmelse = Folketrygdloven_kap2_bestemmelser.FTRL_KAP2_2_8_FØRSTE_LEDD_A
                 }
             )
+            medlemAvFolketrygden.fastsattTrygdeavgift.trygdeavgiftsperioder = lagTrygdeavgiftsperioder()
         }
+
+        /* TODO: Når det er yrkesaktiv, forventes det ingen avgiftsperioder, men man trenger likevel skatteforhold.. What to do? Skal vi lage en tom
+        * TODO: trygdeavgiftsperiode, og dermed utvide denne testen til å forvente 0 i beløp osv? Burde kanskje også ha en e2e test for dette.
+        *  */
 
         innvilgelseFtrlMapper.mapYrkesaktivFrivillig(lagBrevbestilling()).apply {
             avgiftsperioder.shouldHaveSize(0)
@@ -323,17 +328,6 @@ internal class InnvilgelseFtrlYrkesaktivFrivilligMapperTest {
     private fun lagMedlemAvFolketrygden(paragraf: Case): MedlemAvFolketrygden = MedlemAvFolketrygden().apply {
         medlemskapsperioder = lagMedlemskapsperioder(this, paragraf)
         fastsattTrygdeavgift = FastsattTrygdeavgift().apply {
-            trygdeavgiftsgrunnlag = Trygdeavgiftsgrunnlag().apply {
-                inntektsperioder = listOf(Inntektsperiode().apply {
-                    fomDato = LocalDate.EPOCH.plusMonths(1)
-                    tomDato = LocalDate.EPOCH.plusMonths(4)
-                    type = Inntektskildetype.ARBEIDSINNTEKT_FRA_NORGE
-                    isArbeidsgiversavgiftBetalesTilSkatt = true
-                    avgiftspliktigInntektMnd = Penger(0.0)
-                })
-                skatteforholdTilNorge =
-                    listOf(SkatteforholdTilNorge().apply { skatteplikttype = Skatteplikttype.SKATTEPLIKTIG })
-            }
             trygdeavgiftsperioder = lagTrygdeavgiftsperioder()
         }
     }
@@ -352,21 +346,35 @@ internal class InnvilgelseFtrlYrkesaktivFrivilligMapperTest {
             this.medlemAvFolketrygden = medlemAvFolketrygden
         })
 
-    private fun lagTrygdeavgiftsperioder(): Set<Trygdeavgiftsperiode> =
-        setOf(Trygdeavgiftsperiode().apply {
+    private fun lagTrygdeavgiftsperioder(): Set<Trygdeavgiftsperiode> {
+        val inntektsperioder = listOf(Inntektsperiode().apply {
+            fomDato = LocalDate.EPOCH.plusMonths(1)
+            tomDato = LocalDate.EPOCH.plusMonths(4)
+            type = Inntektskildetype.ARBEIDSINNTEKT_FRA_NORGE
+            isArbeidsgiversavgiftBetalesTilSkatt = true
+            avgiftspliktigInntektMnd = Penger(0.0)
+        })
+        val skatteforholdTilNorge =
+            listOf(SkatteforholdTilNorge().apply { skatteplikttype = Skatteplikttype.SKATTEPLIKTIG })
+
+
+        return setOf(Trygdeavgiftsperiode().apply {
             periodeFra = LocalDate.EPOCH.plusMonths(1)
             periodeTil = LocalDate.EPOCH.plusMonths(4)
             trygdesats = BigDecimal.ZERO
             trygdeavgiftsbeløpMd = Penger(0.0)
-            grunnlagInntekstperiode = lagGrunnlagInntektsperiode()
+            grunnlagInntekstperiode = inntektsperioder[0]
+            grunnlagSkatteforholdTilNorge = skatteforholdTilNorge[0]
         },
             Trygdeavgiftsperiode().apply {
                 periodeFra = LocalDate.EPOCH.plusMonths(5)
                 periodeTil = LocalDate.EPOCH.plusMonths(8)
                 trygdesats = BigDecimal(0.05)
                 trygdeavgiftsbeløpMd = Penger(500.0)
-                grunnlagInntekstperiode = lagGrunnlagInntektsperiode()
+                grunnlagInntekstperiode = inntektsperioder[0]
+                grunnlagSkatteforholdTilNorge = skatteforholdTilNorge[0]
             })
+    }
 
     private fun lagGrunnlagInntektsperiode(): Inntektsperiode =
         Inntektsperiode().apply {

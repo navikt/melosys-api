@@ -77,7 +77,7 @@ class OpprettFakturaserie(
 
     private fun skalOppretteFakturaserie(behandlingsresultat: Behandlingsresultat): Boolean {
         return trygdeavgiftsperioderMedAvgift(behandlingsresultat).isNotEmpty()
-            && trygdeavgiftMottakerService.skalBetalesTilNav(behandlingsresultat.medlemAvFolketrygden.fastsattTrygdeavgift.trygdeavgiftsgrunnlag)
+            && trygdeavgiftMottakerService.skalBetalesTilNav(behandlingsresultat.medlemAvFolketrygden.fastsattTrygdeavgift)
     }
 
     private fun andregangsvurderingHarFjernetTrygdeavgift(behandling: Behandling, behandlingsresultat: Behandlingsresultat): Boolean {
@@ -90,8 +90,8 @@ class OpprettFakturaserie(
         } ?: false
 
     private fun betalerNåKunTilSkatt(behandlingsresultat: Behandlingsresultat): Boolean {
-        val trygdeavgiftsGrunnlag = behandlingsresultat.medlemAvFolketrygden?.fastsattTrygdeavgift?.trygdeavgiftsgrunnlag
-        return trygdeavgiftsGrunnlag?.let {
+        val fastsattTrygdeavgift = behandlingsresultat.medlemAvFolketrygden?.fastsattTrygdeavgift
+        return fastsattTrygdeavgift?.let {
             trygdeavgiftMottakerService.betalerKunTrygdeavgiftTilSkatt(it)
         } ?: false
     }

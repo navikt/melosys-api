@@ -1,8 +1,9 @@
 package no.nav.melosys.domain.avgift;
 
 import java.time.LocalDate;
-import jakarta.persistence.*;
+import java.util.Set;
 
+import jakarta.persistence.*;
 import no.nav.melosys.domain.kodeverk.Skatteplikttype;
 
 @Entity
@@ -12,9 +13,8 @@ public class SkatteforholdTilNorge {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
-    @ManyToOne(optional = false)
-    @JoinColumn(name = "trygdeavgiftsgrunnlag_id", nullable = false, updatable = false)
-    private Trygdeavgiftsgrunnlag trygdeavgiftsgrunnlag;
+//    @OneToMany(mappedBy = "grunnlagSkatteforholdTilNorge")
+//    private Set<Trygdeavgiftsperiode> trygdeavgiftsperioder;
 
     @Column(name = "fom_dato", nullable = false)
     private LocalDate fomDato;
@@ -32,14 +32,6 @@ public class SkatteforholdTilNorge {
 
     public void setId(Long id) {
         this.id = id;
-    }
-
-    public Trygdeavgiftsgrunnlag getTrygdeavgiftsgrunnlag() {
-        return trygdeavgiftsgrunnlag;
-    }
-
-    public void setTrygdeavgiftsgrunnlag(Trygdeavgiftsgrunnlag trygdeavgiftsgrunnlag) {
-        this.trygdeavgiftsgrunnlag = trygdeavgiftsgrunnlag;
     }
 
     public LocalDate getFomDato() {

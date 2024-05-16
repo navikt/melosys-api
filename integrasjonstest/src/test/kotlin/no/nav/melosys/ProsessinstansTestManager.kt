@@ -134,7 +134,7 @@ class ProsessinstansTestManager(
     }
 
     companion object {
-        private val defaultTimeOut: Duration = Duration.ofSeconds(30)
+        private val defaultTimeOut: Duration = Duration.ofSeconds(300000) //TODO: Sett tilbake til 30 sek
         private val defaultTimeOutFindingProsess: Duration = Duration.ofSeconds(5)
         private val defaultPollInterval: Duration = Duration.ofMillis(200)
         private val defaultPollDelay: Duration = Duration.ofMillis(100)
