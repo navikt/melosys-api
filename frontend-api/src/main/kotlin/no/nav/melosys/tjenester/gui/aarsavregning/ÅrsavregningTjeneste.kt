@@ -1,4 +1,4 @@
-package no.nav.melosys.tjenester.gui
+package no.nav.melosys.tjenester.gui.aarsavregning
 
 import io.swagger.annotations.Api
 import no.nav.melosys.integrasjon.faktureringskomponenten.dto.BeregnTotalBeløpDto
