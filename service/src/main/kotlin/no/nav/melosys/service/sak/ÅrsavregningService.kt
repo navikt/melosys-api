@@ -1,5 +1,6 @@
 package no.nav.melosys.service.sak
 
+import no.nav.melosys.domain.avgift.Aarsavregning
 import no.nav.melosys.integrasjon.faktureringskomponenten.FaktureringskomponentenConsumer
 import no.nav.melosys.integrasjon.faktureringskomponenten.dto.BeregnTotalBeløpDto
 import no.nav.melosys.sikkerhet.context.SubjectHandler
@@ -13,5 +14,9 @@ class ÅrsavregningService (
     fun beregnTotalTrygdeavgiftForPeriode(beregnTotalBeløpDto: BeregnTotalBeløpDto): BigDecimal {
         val saksbehandlerIdent = SubjectHandler.getInstance().getUserID()
         return faktureringskomponentenConsumer.hentTotalTrygdeavgiftForPeriode(beregnTotalBeløpDto, saksbehandlerIdent)
+    }
+
+    fun hentÅrsavregnig(avregningID: Long): Aarsavregning {
+        TODO("")
     }
 }
