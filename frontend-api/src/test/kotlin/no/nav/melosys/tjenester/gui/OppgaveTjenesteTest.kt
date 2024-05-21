@@ -27,7 +27,6 @@ import org.springframework.http.MediaType
 import org.springframework.test.web.servlet.MockMvc
 import org.springframework.test.web.servlet.request.MockMvcRequestBuilders
 import org.springframework.test.web.servlet.result.MockMvcResultMatchers.status
-import java.util.*
 
 @WebMvcTest(controllers = [OppgaveTjeneste::class])
 internal class OppgaveTjenesteTest {
@@ -52,7 +51,6 @@ internal class OppgaveTjenesteTest {
     }
 
     @Test
-    @Throws
     fun plukkOppgave() {
         val oppgave = Oppgave.Builder()
             .setOppgaveId("1")
@@ -92,7 +90,6 @@ internal class OppgaveTjenesteTest {
     }
 
     @Test
-    @Throws
     fun søkOppgaverMedPersonIdentEllerOrgnr_fnrSendesInn_kallerRettFunksjon() {
         every { oppgaveSoekFilter.finnBehandlingsoppgaverMedPersonIdent(any<String>()) } returns emptyList()
 
@@ -108,7 +105,6 @@ internal class OppgaveTjenesteTest {
     }
 
     @Test
-    @Throws
     fun søkOppgaverMedPersonIdentEllerOrgnr_orgnrSendesInn_kallerRettFunksjon() {
         every { oppgaveSoekFilter.finnBehandlingsoppgaverMedOrgnr(any<String>()) } returns emptyList()
 
@@ -124,7 +120,6 @@ internal class OppgaveTjenesteTest {
     }
 
     @Test
-    @Throws
     fun søkOppgaverMedPersonIdentEllerOrgnr_fnrOgOrgnrSendesInn_kasterFeil() {
         mockMvc.perform(
             MockMvcRequestBuilders.get("$BASE_URL/sok")
@@ -140,7 +135,6 @@ internal class OppgaveTjenesteTest {
     }
 
     @Test
-    @Throws
     fun søkOppgaverMedPersonIdentEllerOrgnr_ingentingSendesInn_kasterFeil() {
         mockMvc.perform(
             MockMvcRequestBuilders.get("$BASE_URL/sok")
