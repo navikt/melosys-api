@@ -15,6 +15,7 @@ import no.nav.melosys.domain.Behandling;
 import no.nav.melosys.domain.Fagsak;
 import no.nav.melosys.domain.arkiv.Distribusjonstype;
 import no.nav.melosys.domain.arkiv.DokumentReferanse;
+import no.nav.melosys.domain.arsavregning.Skattehendelse;
 import no.nav.melosys.domain.brev.DokgenBrevbestilling;
 import no.nav.melosys.domain.brev.DoksysBrevbestilling;
 import no.nav.melosys.domain.brev.Mottaker;
@@ -163,6 +164,17 @@ public class ProsessinstansService {
         prosessinstans.setData(BETALINGSSTATUS, manglendeFakturabetalingMelding.getBetalingsstatus());
         prosessinstans.setData(FAKTURANUMMER, manglendeFakturabetalingMelding.getFakturanummer());
         prosessinstans.setLåsReferanse(LåsReferanseFactory.lagString(manglendeFakturabetalingMelding));
+
+        return lagre(prosessinstans);
+    }
+
+    @Transactional
+    public UUID opprettArsavregningsBehandlingProsessflyt(Skattehendelse skattehendelse) {
+        Prosessinstans prosessinstans = new Prosessinstans();
+        prosessinstans.setType(ProsessType.OPPRETT_NY_BEHANDLING_ARSAVREGNING);
+
+        prosessinstans.setData(GJELDER_PERIODE, skattehendelse.getGjelderPeriode());
+        prosessinstans.setData(IDENTIFIKATOR, skattehendelse.getIdentifikator());
 
         return lagre(prosessinstans);
     }

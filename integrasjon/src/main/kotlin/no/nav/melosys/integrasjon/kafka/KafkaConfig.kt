@@ -1,6 +1,7 @@
 package no.nav.melosys.integrasjon.kafka
 
 import com.fasterxml.jackson.databind.ObjectMapper
+import no.nav.melosys.domain.arsavregning.Skattehendelse
 import no.nav.melosys.domain.eessi.melding.MelosysEessiMelding
 import no.nav.melosys.domain.manglendebetaling.ManglendeFakturabetalingMelding
 import no.nav.melosys.integrasjon.SoknadMottatt
@@ -60,6 +61,13 @@ class KafkaConfig(
         @Value("\${kafka.aiven.soknad-mottak.groupid}") groupId: String
     ): KafkaListenerContainerFactory<ConcurrentMessageListenerContainer<String, SoknadMottatt>> =
         kafkaListenerContainerFactory<SoknadMottatt>(kafkaProperties, groupId)
+
+    @Bean
+    fun aivenSkattehendelserListenerContainerFactory(
+        kafkaProperties: KafkaProperties,
+        @Value("\${kafka.aiven.skattehendelser.groupid}") groupId: String
+    ): KafkaConsumerContainerFactory<Skattehendelse> =
+        kafkaListenerContainerFactory<Skattehendelse>(kafkaProperties, groupId)
 
     @Bean
     fun producerFactoryMelosysHendelse(objectMapper: ObjectMapper): ProducerFactory<String, MelosysHendelse> =

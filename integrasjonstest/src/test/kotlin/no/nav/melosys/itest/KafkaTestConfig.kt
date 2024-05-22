@@ -1,6 +1,7 @@
 package no.nav.melosys.itest
 
 import com.fasterxml.jackson.databind.ObjectMapper
+import no.nav.melosys.domain.arsavregning.Skattehendelse
 import no.nav.melosys.domain.eessi.melding.MelosysEessiMelding
 import no.nav.melosys.domain.manglendebetaling.ManglendeFakturabetalingMelding
 import org.apache.kafka.common.serialization.StringSerializer
@@ -22,7 +23,7 @@ class KafkaTestConfig {
         kafkaProperties: KafkaProperties,
         objectMapper: ObjectMapper?
     ): KafkaTemplate<String, MelosysEessiMelding> {
-        val props = kafkaProperties.buildProducerProperties()
+        val props = kafkaProperties.buildConsumerProperties(null)
         val producerFactory: ProducerFactory<String, MelosysEessiMelding> =
             DefaultKafkaProducerFactory(props, StringSerializer(), JsonSerializer(objectMapper))
         return KafkaTemplate(producerFactory)
@@ -34,8 +35,20 @@ class KafkaTestConfig {
         kafkaProperties: KafkaProperties,
         objectMapper: ObjectMapper?
     ): KafkaTemplate<String, ManglendeFakturabetalingMelding> {
-        val props = kafkaProperties.buildProducerProperties()
+        val props = kafkaProperties.buildProducerProperties(null)
         val producerFactory: ProducerFactory<String, ManglendeFakturabetalingMelding> =
+            DefaultKafkaProducerFactory(props, StringSerializer(), JsonSerializer(objectMapper))
+        return KafkaTemplate(producerFactory)
+    }
+
+    @Bean
+    @Qualifier("skatteHendelseMelding")
+    fun skatteHendelseMeldingKafkaTemplate(
+        kafkaProperties: KafkaProperties,
+        objectMapper: ObjectMapper?
+    ): KafkaTemplate<String, Skattehendelse> {
+        val props = kafkaProperties.buildProducerProperties(null)
+        val producerFactory: ProducerFactory<String, Skattehendelse> =
             DefaultKafkaProducerFactory(props, StringSerializer(), JsonSerializer(objectMapper))
         return KafkaTemplate(producerFactory)
     }
