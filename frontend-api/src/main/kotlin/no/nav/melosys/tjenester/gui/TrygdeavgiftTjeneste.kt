@@ -12,6 +12,7 @@ import no.nav.melosys.tjenester.gui.dto.trygdeavgift.TrygdeavgiftsgrunnlagDto
 import no.nav.security.token.support.core.api.Protected
 import org.springframework.http.ResponseEntity
 import org.springframework.web.bind.annotation.*
+import kotlin.jvm.optionals.getOrNull
 
 @Protected
 @RestController
@@ -28,7 +29,7 @@ class TrygdeavgiftTjeneste(
     fun hentTrygdeavgiftMottaker(@PathVariable("behandlingID") behandlingID: Long): ResponseEntity<TrygdeavgiftMottakerDto> {
         aksesskontroll.autoriser(behandlingID)
 
-        return medlemAvFolketrygdenService.hentMedlemAvFolketrygden(behandlingID).fastsattTrygdeavgift
+        return medlemAvFolketrygdenService.finnMedlemAvFolketrygden(behandlingID).getOrNull()?.fastsattTrygdeavgift
             ?.let {
                 ResponseEntity.ok(
                     TrygdeavgiftMottakerDto(

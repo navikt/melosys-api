@@ -23,12 +23,6 @@ class TrygdeavgiftValideringService() {
             validerTrygdeavgiftsgrunnlag(request, medlemAvFolketrygden)
         }
 
-        private fun validerAtFastsattTrygdeavgiftFinnes(medlemAvFolketrygden: MedlemAvFolketrygden) {
-            if (medlemAvFolketrygden.fastsattTrygdeavgift == null) {
-                throw FunksjonellException("Kan ikke beregne trygdeavgift uten fastsattTrygdeavgift")
-            }
-        }
-
         private fun validerMedlemskapsperioder(medlemAvFolketrygden: MedlemAvFolketrygden) {
             if (medlemAvFolketrygden.medlemskapsperioder.isEmpty()) {
                 throw FunksjonellException("Kan ikke beregne trygdeavgift uten medlemskapsperioder")
@@ -37,10 +31,13 @@ class TrygdeavgiftValideringService() {
                 ?: throw FunksjonellException("Klarte ikke finne startdatoen på medlemskapet")
         }
 
-        private fun validerTrygdeavgiftsgrunnlag(request: OppdaterTrygdeavgiftsgrunnlagRequest, medlemAvFolketrygden: MedlemAvFolketrygden) {
-            val medlemskapsperioderErÅpen = medlemAvFolketrygden.utledMedlemskapsperiodeTom() == null
-            val erSkattepliktigIHelePerioden = request.skatteforholdTilNorgeList.all { it.skatteplikttype == Skatteplikttype.SKATTEPLIKTIG }
+        private fun validerAtFastsattTrygdeavgiftFinnes(medlemAvFolketrygden: MedlemAvFolketrygden) {
+            if (medlemAvFolketrygden.fastsattTrygdeavgift == null) {
+                throw FunksjonellException("Kan ikke beregne trygdeavgift uten fastsattTrygdeavgift")
+            }
+        }
 
+        private fun validerTrygdeavgiftsgrunnlag(request: OppdaterTrygdeavgiftsgrunnlagRequest, medlemAvFolketrygden: MedlemAvFolketrygden) {
             if (request.inntektskilder.isEmpty()) {
                 throw FunksjonellException("Kan ikke beregne trygdeavgift uten inntektsperioder")
             }
@@ -48,6 +45,8 @@ class TrygdeavgiftValideringService() {
                 throw FunksjonellException("Kan ikke beregne trygdeavgift uten skatteforholdTilNorge")
             }
 
+            val erSkattepliktigIHelePerioden = request.skatteforholdTilNorgeList.all { it.skatteplikttype == Skatteplikttype.SKATTEPLIKTIG }
+            val medlemskapsperioderErÅpen = medlemAvFolketrygden.utledMedlemskapsperiodeTom() == null
             if (medlemskapsperioderErÅpen) {
                 val skatteforholdsperiodeErÅpen = request.skatteforholdTilNorgeList.sortedBy { it.fomDato }.last().tomDato == null
 
@@ -59,7 +58,7 @@ class TrygdeavgiftValideringService() {
                     throw FunksjonellException("Faktura kan ikke opprettes for medlemskapsperiode uten sluttdato. Angi sluttdato på medlemskapsperiode")
                 }
 
-                if (erSkattepliktigIHelePerioden && skatteforholdsperiodeErÅpen && request.skatteforholdTilNorgeList.size == 1) {
+                if (request.skatteforholdTilNorgeList.size == 1) {
                     return
                 }
             }

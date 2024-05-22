@@ -187,7 +187,7 @@ class TrygdeavgiftsberegningService
             this.fastsattTrygdeavgift = medlemAvFolketrygden.fastsattTrygdeavgift
             this.grunnlagMedlemskapsperiode = medlemAvFolketrygden.medlemskapsperioder
                 .find {
-                    UUID.nameUUIDFromBytes(it.id.toString().toByteArray()) == beregningsgrunnlag.medlemskapsperiodeId
+                    idToUUid(it.id) == beregningsgrunnlag.medlemskapsperiodeId
                 }
             this.grunnlagSkatteforholdTilNorge = skatteforholdTilNorge.find {
                 it.first == beregningsgrunnlag.skatteforholdsperiodeId
@@ -199,7 +199,7 @@ class TrygdeavgiftsberegningService
     }
 
     private fun erAlleTrygdeavgiftbelopNull(beregnetTrygdeavgift: List<TrygdeavgiftsberegningResponse>): Boolean {
-        return beregnetTrygdeavgift.all { it.beregnetPeriode.månedsavgift.verdi.compareTo(BigDecimal.valueOf(0)) == 0 }
+        return beregnetTrygdeavgift.all { it.beregnetPeriode.månedsavgift.verdi.compareTo(BigDecimal.ZERO) == 0 }
     }
 
     @Transactional(readOnly = true)
@@ -229,7 +229,11 @@ class TrygdeavgiftsberegningService
         }
 
         fun Medlemskapsperiode.idToUUID(): UUID {
-            return UUID.nameUUIDFromBytes(this.id.toString().toByteArray())
+            return idToUUid(this.id)
+        }
+
+        private fun idToUUid(id: Long): UUID {
+            return UUID.nameUUIDFromBytes(id.toString().toByteArray())
         }
     }
 }
