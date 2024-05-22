@@ -100,8 +100,8 @@ internal class OppgaveplukkerTest {
         every { oppgaveFasade.finnUtildelteOppgaverEtterFrist(any<String>()) } returns oppgaver
         every { fagsakService.hentFagsaker(any<Collection<String>>()) } returns fagsaker
         every { fagsakService.hentFagsak(SAKSNUMMER_4) } returns fagsak_4
-        every { behandlingService.lagre(any<Behandling>()) } answers {}
-        every { oppgaveService.tildelOppgave(any<String>(), any<String>()) } answers {}
+        every { behandlingService.lagre(any<Behandling>()) } returns Unit
+        every { oppgaveService.tildelOppgave(any<String>(), any<String>()) } returns Unit
 
 
         val oppgave = oppgaveplukker.plukkOppgave("Z01234", opprettPlukkOppgaveInnDto())
@@ -138,8 +138,8 @@ internal class OppgaveplukkerTest {
         every { oppgaveFasade.finnUtildelteOppgaverEtterFrist(any<String>()) } returns oppgaver
         every { fagsakService.hentFagsaker(any<Collection<String>>()) } returns fagsaker
         every { fagsakService.hentFagsak(SAKSNUMMER_2) } returns fagsak_2
-        every { behandlingService.lagre(any<Behandling>()) } answers {}
-        every { oppgaveService.tildelOppgave(any<String>(), any<String>()) } answers {}
+        every { behandlingService.lagre(any<Behandling>()) } returns Unit
+        every { oppgaveService.tildelOppgave(any<String>(), any<String>()) } returns Unit
 
 
         val oppgave = oppgaveplukker.plukkOppgave("Z01234", opprettPlukkOppgaveInnDto())
@@ -162,7 +162,7 @@ internal class OppgaveplukkerTest {
         every { oppgaveFasade.finnUtildelteOppgaverEtterFrist(any<String>()) } returns oppgaver
         every { fagsakService.hentFagsaker(any<Collection<String>>()) } returns listOf(fagsak)
         every { fagsakService.hentFagsak(SAKSNUMMER_1) } returns fagsak
-        every { oppgaveService.tildelOppgave(any<String>(), any<String>()) } answers {}
+        every { oppgaveService.tildelOppgave(any<String>(), any<String>()) } returns Unit
 
 
         val oppgave = oppgaveplukker.plukkOppgave("Z01234", opprettPlukkOppgaveInnDto())
@@ -205,7 +205,7 @@ internal class OppgaveplukkerTest {
         val saksbehandlerID = "test"
         every { behandlingService.hentBehandling(BEHANDLING_ID) } returns behandling
         every { oppgaveService.hentÅpenBehandlingsoppgaveMedFagsaksnummer(SAKSNUMMER_1) } returns oppgaveBuilder.build()
-        every { oppgaveFasade.leggTilbakeOppgave(any<String>()) } answers {}
+        every { oppgaveFasade.leggTilbakeOppgave(any<String>()) } returns Unit
 
 
         oppgaveplukker.leggTilbakeOppgave(saksbehandlerID, TilbakeleggingDto(BEHANDLING_ID, true))
@@ -284,8 +284,8 @@ internal class OppgaveplukkerTest {
         every { oppgaveFasade.finnUtildelteOppgaverEtterFrist(any<String>()) } returns oppgaver
         every { fagsakService.hentFagsaker(any<Collection<String>>()) } returns listOf(fagsak)
         every { fagsakService.hentFagsak(SAKSNUMMER_1) } returns fagsak
-        every { behandlingService.lagre(any<Behandling>()) } answers {}
-        every { oppgaveService.tildelOppgave(any<String>(), any<String>()) } answers {}
+        every { behandlingService.lagre(any<Behandling>()) } returns Unit
+        every { oppgaveService.tildelOppgave(any<String>(), any<String>()) } returns Unit
 
 
         val oppgave = oppgaveplukker.plukkOppgave("Z01234", opprettPlukkOppgaveInnDto())
@@ -310,8 +310,8 @@ internal class OppgaveplukkerTest {
         every { oppgaveFasade.finnUtildelteOppgaverEtterFrist(any<String>()) } returns oppgaver
         every { fagsakService.hentFagsaker(any<Collection<String>>()) } returns listOf(fagsak)
         every { fagsakService.hentFagsak(SAKSNUMMER_1) } returns fagsak
-        every { behandlingService.lagre(any<Behandling>()) } answers {}
-        every { oppgaveService.tildelOppgave(any<String>(), any<String>()) } answers {}
+        every { behandlingService.lagre(any<Behandling>()) } returns Unit
+        every { oppgaveService.tildelOppgave(any<String>(), any<String>()) } returns Unit
 
 
         val oppgave =

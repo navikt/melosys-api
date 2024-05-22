@@ -29,7 +29,7 @@ internal class TildelBehandlingsoppgaveTest {
         }
         every {oppgaveService.finnÅpenBehandlingsoppgaveMedFagsaksnummer(SAKSNUMMER)} returns
             Optional.of(Oppgave.Builder().setOppgaveId(OPPGAVE_ID).build())
-        every {oppgaveService.tildelOppgave(any(), any())} answers {}
+        every {oppgaveService.tildelOppgave(any(), any())} returns Unit
     }
 
     @Test

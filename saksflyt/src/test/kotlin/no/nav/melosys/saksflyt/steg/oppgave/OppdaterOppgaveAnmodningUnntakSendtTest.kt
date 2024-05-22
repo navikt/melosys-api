@@ -41,7 +41,7 @@ internal class OppdaterOppgaveAnmodningUnntakSendtTest {
             this.behandling = behandling
             setData(ProsessDataKey.OPPGAVE_ID, OPPGAVE_ID)
         }
-        every {oppgaveService.oppdaterOppgave(any(), any<OppgaveOppdatering>())} answers {}
+        every { oppgaveService.oppdaterOppgave(any(), any<OppgaveOppdatering>()) } returns Unit
     }
 
     @Test
@@ -78,13 +78,11 @@ internal class OppdaterOppgaveAnmodningUnntakSendtTest {
         }
     }
 
-    private fun lagOppgave(fristFerdigstillelse: LocalDate, beskrivelse: String?): Oppgave {
-        val oppgaveBuilder = Oppgave.Builder()
-        oppgaveBuilder.setFristFerdigstillelse(fristFerdigstillelse)
-        oppgaveBuilder.setOppgaveId(OPPGAVE_ID)
-        oppgaveBuilder.setBeskrivelse(beskrivelse)
-        return oppgaveBuilder.build()
-    }
+    private fun lagOppgave(fristFerdigstillelse: LocalDate, beskrivelse: String?): Oppgave = Oppgave.Builder().apply {
+        setFristFerdigstillelse(fristFerdigstillelse)
+        setOppgaveId(OPPGAVE_ID)
+        setBeskrivelse(beskrivelse)
+    }.build()
 
     companion object {
         private const val OPPGAVE_ID = "123"

@@ -24,7 +24,7 @@ internal class OpprettOppgaveTest {
     @BeforeEach
     fun setUp() {
         opprettOppgave = OpprettOppgave(oppgaveService)
-        every {oppgaveService.opprettEllerGjenbrukBehandlingsoppgave(any<Behandling>(), any<String>(), any<String>(), any<String>(), any<String>())} answers {}
+        every {oppgaveService.opprettEllerGjenbrukBehandlingsoppgave(any<Behandling>(), any<String>(), any<String>(), any<String>(), any<String>())} returns Unit
     }
 
     @Test

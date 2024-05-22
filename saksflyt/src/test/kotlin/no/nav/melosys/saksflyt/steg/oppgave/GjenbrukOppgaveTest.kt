@@ -51,8 +51,9 @@ internal class GjenbrukOppgaveTest {
         val prosessinstans = lagProsessinstans(oppgaveID, false)
         every { oppgaveService.lagBehandlingsoppgave(any()) } returns oppgaveFactory.lagBehandlingsoppgave(
             prosessinstans.behandling,
-            LocalDate.now()
-        ) { null }
+            LocalDate.now(),
+            hentSedDokument = { null }
+        )
 
         gjenbrukOppgave.utfør(prosessinstans)
 
@@ -77,8 +78,9 @@ internal class GjenbrukOppgaveTest {
         val prosessinstans = lagProsessinstans(oppgaveID, true)
         every { oppgaveService.lagBehandlingsoppgave(any()) } returns oppgaveFactory.lagBehandlingsoppgave(
             prosessinstans.behandling,
-            LocalDate.now()
-        ) { null }
+            LocalDate.now(),
+            hentSedDokument = { null }
+        )
 
         gjenbrukOppgave.utfør(prosessinstans)
 
@@ -94,28 +96,26 @@ internal class GjenbrukOppgaveTest {
         }
     }
 
-    private fun lagProsessinstans(oppgaveID: String, erForVirksomhet: Boolean): Prosessinstans {
-        val fagsak = lagFagsak()
-        val prosessinstans = Prosessinstans()
-        if (erForVirksomhet) {
-            fagsak.leggTilAktør(Aktoer().apply {
-                orgnr = "999999999"
-                rolle = Aktoersroller.VIRKSOMHET
-            })
-        } else {
-            fagsak.leggTilAktør(Aktoer().apply {
-                aktørId = "123321"
-                rolle = Aktoersroller.BRUKER
-            })
-        }
-        prosessinstans.behandling = Behandling().apply {
+    private fun lagProsessinstans(oppgaveID: String, erForVirksomhet: Boolean): Prosessinstans = Prosessinstans().apply {
+        behandling = Behandling().apply {
             tema = Behandlingstema.UTSENDT_ARBEIDSTAKER
             type = Behandlingstyper.FØRSTEGANG
-            this.fagsak = fagsak
+            fagsak = lagFagsak().apply {
+                if (erForVirksomhet) {
+                    leggTilAktør(Aktoer().apply {
+                        orgnr = "999999999"
+                        rolle = Aktoersroller.VIRKSOMHET
+                    })
+                } else {
+                    leggTilAktør(Aktoer().apply {
+                        aktørId = "123321"
+                        rolle = Aktoersroller.BRUKER
+                    })
+                }
+            }
         }
-        prosessinstans.setData(ProsessDataKey.OPPGAVE_ID, oppgaveID)
-        prosessinstans.setData(ProsessDataKey.SKAL_TILORDNES, true)
-        prosessinstans.setData(ProsessDataKey.SAKSBEHANDLER, "Deg321")
-        return prosessinstans
+        setData(ProsessDataKey.OPPGAVE_ID, oppgaveID)
+        setData(ProsessDataKey.SKAL_TILORDNES, true)
+        setData(ProsessDataKey.SAKSBEHANDLER, "Deg321")
     }
 }

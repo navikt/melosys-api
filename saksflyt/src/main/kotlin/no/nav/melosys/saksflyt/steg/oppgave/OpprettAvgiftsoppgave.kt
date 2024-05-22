@@ -24,12 +24,13 @@ class OpprettAvgiftsoppgave(
         val behandling = prosessinstans.behandling
         val behandlingID = behandling.id
         val behandlingsresultat = behandlingsresultatService.hentBehandlingsresultat(behandlingID)
-        if (!behandlingsresultat.erAvslag() && !behandling.fagsak.erSakstypeFtrl()) {
-            val lovvalgsperiode = behandlingsresultat.hentLovvalgsperiode()
-            if (!lovvalgsperiode.erArtikkel11() && !lovvalgsperiode.erArtikkel13()) {
-                oppgaveService.opprettOppgave(lagOppgaveTilTrygdeavgift(behandling))
-            }
-        }
+
+        if (behandlingsresultat.erAvslag() || behandling.fagsak.erSakstypeFtrl())  return
+
+        val lovvalgsperiode = behandlingsresultat.hentLovvalgsperiode()
+        if (lovvalgsperiode.erArtikkel11() || lovvalgsperiode.erArtikkel13()) return
+
+        oppgaveService.opprettOppgave(lagOppgaveTilTrygdeavgift(behandling))
     }
 
     companion object {
