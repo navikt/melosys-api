@@ -27,7 +27,7 @@ class GjenbrukOppgave(private val oppgaveService: OppgaveService) : StegBehandle
                 if (fagsak.hovedpartRolle == Aktoersroller.VIRKSOMHET) null else fagsak.hentBrukersAktørID()
             )
             .setOrgnr(
-                if (fagsak.hovedpartRolle == Aktoersroller.VIRKSOMHET) fagsak.hentVirksomhet()!!.orgnr else null
+                if (fagsak.hovedpartRolle == Aktoersroller.VIRKSOMHET) fagsak.hentVirksomhet().orgnr else null
             )
             .setBeskrivelse(gjenbruktOppgave.beskrivelse)
             .build()

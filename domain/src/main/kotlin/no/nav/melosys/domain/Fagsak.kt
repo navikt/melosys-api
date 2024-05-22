@@ -89,9 +89,11 @@ class Fagsak(
      */
     fun hentUnikArbeidsgiver(): Aktoer? = hentAktørMedRolleType(Aktoersroller.ARBEIDSGIVER)
 
-    fun hentVirksomhet(): Aktoer? = hentAktørMedRolleType(Aktoersroller.VIRKSOMHET)
+    fun finnVirksomhet(): Aktoer? = hentAktørMedRolleType(Aktoersroller.VIRKSOMHET)
 
-    fun finnVirksomhetsOrgnr(): String? = hentVirksomhet()?.orgnr
+    fun hentVirksomhet(): Aktoer = finnVirksomhet() ?: throw FunksjonellException("Fant ikke virksomhet for sak $saksnummer")
+
+    fun finnVirksomhetsOrgnr(): String? = finnVirksomhet()?.orgnr
 
     private fun hentAktørMedRolleType(rolleType: Aktoersroller): Aktoer? {
         val kandidater = hentAktørerMedRolleType(rolleType)
