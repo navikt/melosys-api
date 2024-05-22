@@ -474,11 +474,15 @@ class DynamiskTrygdeavgiftsberegningTransformer : ResponseTransformerV2 {
         val skatteforholdsperioderUuid = requestBody["skatteforholdsperioder"][0]["id"].asText()
         val inntektsperioderUuid = requestBody["inntektsperioder"][0]["id"].asText()
 
+        val skatteforhold = requestBody["skatteforholdsperioder"][0]["skatteforhold"].asText()
+        val sats = if (skatteforhold == "IKKE_SKATTEPLIKTIG") 6.8.toBigDecimal() else 0.toBigDecimal()
+        val månedsavgift = if (skatteforhold == "IKKE_SKATTEPLIKTIG") PengerDto(1000.toBigDecimal(), NOK) else PengerDto(0.toBigDecimal(), NOK)
         val responsBodyFraTrygdeavgiftsberegning = listOf(
             TrygdeavgiftsberegningResponse(
                 TrygdeavgiftsperiodeDto(
                     DatoPeriodeDto(LocalDate.of(2023, 1, 1), LocalDate.of(2023, 2, 1)),
-                    6.8.toBigDecimal(), PengerDto(1000.toBigDecimal(), NOK)
+                    sats,
+                    månedsavgift
                 ),
                 TrygdeavgiftsgrunnlagDto(
                     UUID.fromString(medlemskapsperioderUuid),

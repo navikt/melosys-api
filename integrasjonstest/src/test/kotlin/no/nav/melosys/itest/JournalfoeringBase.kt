@@ -36,6 +36,7 @@ class JournalfoeringBase(
 
     protected val mockServer: WireMockServer =
         WireMockServer(
+            if (extensionForWireMock == null) WireMockConfiguration.options().port(8094) else
             WireMockConfiguration
                 .options().extensions(extensionForWireMock)
                 .port(8094)

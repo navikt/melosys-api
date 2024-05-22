@@ -10,6 +10,8 @@ import io.kotest.matchers.string.shouldContain
 import io.mockk.every
 import io.mockk.impl.annotations.MockK
 import io.mockk.junit5.MockKExtension
+import io.mockk.mockkStatic
+import io.mockk.unmockkStatic
 import io.mockk.verify
 import no.nav.melosys.domain.*
 import no.nav.melosys.domain.FagsakTestFactory.BRUKER_AKTØR_ID
@@ -30,6 +32,7 @@ import no.nav.melosys.service.avgift.dto.OppdaterTrygdeavgiftsgrunnlagRequest
 import no.nav.melosys.service.avgift.dto.SkatteforholdTilNorgeRequest
 import no.nav.melosys.service.behandling.BehandlingService
 import no.nav.melosys.service.persondata.PersondataService
+import org.junit.jupiter.api.AfterEach
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.extension.ExtendWith
@@ -102,6 +105,12 @@ internal class TrygdeavgiftsberegningServiceTest {
         every { mockPersondataService.hentPerson(BRUKER_AKTØR_ID).fødselsdato }.returns(FØDSELSDATO)
     }
 
+
+    @AfterEach
+    fun `Remove RandomNumberGenerator mockks`() {
+        unmockkStatic(UUID::class)
+    }
+
     @Test
     fun hentTrygdeavgiftsberegning_ingenTrygdeavgift_returnerTomListe() {
         medlemAvFolketrygden.fastsattTrygdeavgift = FastsattTrygdeavgift()
@@ -148,34 +157,17 @@ internal class TrygdeavgiftsberegningServiceTest {
             innvilgelsesresultat = InnvilgelsesResultat.INNVILGET
             medlemskapstype = Medlemskapstyper.FRIVILLIG
         })
+        val notSoRandomUuid = UUID.randomUUID()
+        mockkStatic(UUID::class)
+        every { UUID.randomUUID() } returns notSoRandomUuid
+
         medlemAvFolketrygden.fastsattTrygdeavgift = FastsattTrygdeavgift()
-
-        every { mockMedlemAvFolketrygdenService.lagre(any()) }.returns(medlemAvFolketrygden)
-        every { mockTrygdeavgiftConsumer.beregnTrygdeavgift(ofType(TrygdeavgiftsberegningRequest::class)) }
-            .returns(
-                listOf(
-                    TrygdeavgiftsberegningResponse(
-                        TrygdeavgiftsperiodeDto(
-                            DatoPeriodeDto(FOM, TOM),
-                            BigDecimal.valueOf(7.9),
-                            PengerDto(BigDecimal.valueOf(790), NOK)
-                        ),
-                        TrygdeavgiftsgrunnlagDto(
-                            UUID.randomUUID(),
-                            UUID.randomUUID(),
-                            UUID.randomUUID()
-                        )
-                    )
-                )
-            )
-        every { mockMedlemAvFolketrygdenService.lagreOgFlush(medlemAvFolketrygden) }.returns(medlemAvFolketrygden)
-
         val oppdateringRequest = OppdaterTrygdeavgiftsgrunnlagRequest(
             listOf(
                 SkatteforholdTilNorgeRequest(
                     FOM,
                     TOM,
-                    Skatteplikttype.SKATTEPLIKTIG
+                    Skatteplikttype.IKKE_SKATTEPLIKTIG //Endre til SKATTEPLIKTIG
                 )
             ),
             listOf(
@@ -188,6 +180,27 @@ internal class TrygdeavgiftsberegningServiceTest {
                 )
             )
         )
+
+        every { mockMedlemAvFolketrygdenService.lagre(any()) }.returns(medlemAvFolketrygden)
+        every { mockTrygdeavgiftConsumer.beregnTrygdeavgift(ofType(TrygdeavgiftsberegningRequest::class)) }
+            .returns(
+                listOf(
+                    TrygdeavgiftsberegningResponse(
+                        TrygdeavgiftsperiodeDto(
+                            DatoPeriodeDto(FOM, TOM),
+                            BigDecimal.valueOf(7.9),
+                            PengerDto(BigDecimal.valueOf(790), NOK)
+                        ),
+                        TrygdeavgiftsgrunnlagDto(
+                            notSoRandomUuid,
+                            oppdateringRequest.skatteforholdTilNorgeList.first().toUUID(),
+                            notSoRandomUuid
+                        )
+                    )
+                )
+            )
+        every { mockMedlemAvFolketrygdenService.lagreOgFlush(medlemAvFolketrygden) }.returns(medlemAvFolketrygden)
+
 
         trygdeavgiftsberegningService.beregnOgLagreTrygdeavgift(BEHANDLING_ID, oppdateringRequest)
             .shouldNotBeNull()
@@ -303,6 +316,10 @@ internal class TrygdeavgiftsberegningServiceTest {
                 )
             )
         )
+        val notSoRandomUuid = UUID.randomUUID()
+        mockkStatic(UUID::class)
+        every { UUID.randomUUID() } returns notSoRandomUuid
+
         every { mockMedlemAvFolketrygdenService.lagre(any()) }.returns(medlemAvFolketrygden)
         every { mockTrygdeavgiftConsumer.beregnTrygdeavgift(ofType(TrygdeavgiftsberegningRequest::class)) }
             .returns(
@@ -314,10 +331,9 @@ internal class TrygdeavgiftsberegningServiceTest {
                             PengerDto(BigDecimal.valueOf(790), NOK)
                         ),
                         TrygdeavgiftsgrunnlagDto(
-                            UUID.randomUUID(),
-                            UUID.randomUUID(),
-                            UUID.randomUUID()
-                        )
+                            notSoRandomUuid,
+                            oppdateringRequest.skatteforholdTilNorgeList.first().toUUID(),
+                            notSoRandomUuid                        )
                     )
                 )
             )
@@ -389,7 +405,7 @@ internal class TrygdeavgiftsberegningServiceTest {
                         TrygdeavgiftsgrunnlagDto(
                             medlemAvFolketrygden.medlemskapsperioder.first().idToUUID(),
                             oppdateringRequest.skatteforholdTilNorgeList.first().toUUID(),
-                            oppdateringRequest.inntektskilder.first().toUUID()
+                            UUID.randomUUID()
                         )
                     )
                 )
@@ -458,7 +474,7 @@ internal class TrygdeavgiftsberegningServiceTest {
                         TrygdeavgiftsgrunnlagDto(
                             medlemAvFolketrygden.medlemskapsperioder.first().idToUUID(),
                             oppdateringRequest.skatteforholdTilNorgeList.first().toUUID(),
-                            oppdateringRequest.inntektskilder.first().toUUID()
+                            UUID.randomUUID()
                         )
                     )
                 )

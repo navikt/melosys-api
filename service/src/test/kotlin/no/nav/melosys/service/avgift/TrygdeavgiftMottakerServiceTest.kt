@@ -28,295 +28,295 @@ internal class TrygdeavgiftMottakerServiceTest {
         )
 
 
-    val result = trygdeavgiftMottakerService.getTrygdeavgiftMottaker(fastsattTrygdeavgift)
+        val result = trygdeavgiftMottakerService.getTrygdeavgiftMottaker(fastsattTrygdeavgift)
 
-    result.shouldBe(TRYGDEAVGIFT_BETALES_TIL_NAV)
-}
-
-@Test
-fun `trygdeavgiftsmottaker skal være SKATT hvis bruker er skattepliktig og aga er true`() {
-    val fastsattTrygdeavgift = lagFastsattTrygdeavgift(
-        setOf(
-            lagTrygdeavgiftsperiode(
-                lagSkatteforholdsperiode(Skatteplikttype.SKATTEPLIKTIG),
-                lagInntektsperiode(true, ARBEIDSINNTEKT_FRA_NORGE)
-            )
-        )
-    )
-
-    val result = trygdeavgiftMottakerService.getTrygdeavgiftMottaker(fastsattTrygdeavgift)
-    result.shouldBe(TRYGDEAVGIFT_BETALES_TIL_SKATT)
-}
-
-@Test
-fun `trygdeavgiftsmottaker skal være SKATT hvis bruker er skattepliktig og aga er false, men type er MISJONÆR`() {
-    val fastsattTrygdeavgift = lagFastsattTrygdeavgift(
-        setOf(
-            lagTrygdeavgiftsperiode(
-                lagSkatteforholdsperiode(Skatteplikttype.SKATTEPLIKTIG),
-                lagInntektsperiode(false, MISJONÆR)
-            )
-        )
-    )
-
-    val result = trygdeavgiftMottakerService.getTrygdeavgiftMottaker(fastsattTrygdeavgift)
-    result.shouldBe(TRYGDEAVGIFT_BETALES_TIL_SKATT)
-}
-
-@Test
-fun `trygdeavgiftsmottaker skal være SKATT og NAV type er MISJONÆR kun i en periode`() {
-    val fastsattTrygdeavgift = lagFastsattTrygdeavgift(
-        setOf(
-            lagTrygdeavgiftsperiode(
-                lagSkatteforholdsperiode(Skatteplikttype.IKKE_SKATTEPLIKTIG),
-                lagInntektsperiode(false, MISJONÆR)
-            ),
-            lagTrygdeavgiftsperiode(
-                lagSkatteforholdsperiode(Skatteplikttype.IKKE_SKATTEPLIKTIG),
-                lagInntektsperiode(false, ARBEIDSINNTEKT_FRA_NORGE)
-            ),
-            lagTrygdeavgiftsperiode(
-                lagSkatteforholdsperiode(Skatteplikttype.SKATTEPLIKTIG),
-                lagInntektsperiode(false, MISJONÆR)
-            ),
-            lagTrygdeavgiftsperiode(
-                lagSkatteforholdsperiode(Skatteplikttype.SKATTEPLIKTIG),
-                lagInntektsperiode(false, ARBEIDSINNTEKT_FRA_NORGE)
-            )
-        )
-    )
-
-    val result = trygdeavgiftMottakerService.getTrygdeavgiftMottaker(fastsattTrygdeavgift)
-    result.shouldBe(TRYGDEAVGIFT_BETALES_TIL_NAV_OG_SKATT)
-}
-
-@Test
-fun `trygdeavgiftsmottaker skal være NAV hvis bruker er ikke skattepliktig, men type er FN_SKATTEFRITAK`() {
-    val fastsattTrygdeavgift = lagFastsattTrygdeavgift(
-        setOf(
-            lagTrygdeavgiftsperiode(
-                lagSkatteforholdsperiode(Skatteplikttype.IKKE_SKATTEPLIKTIG),
-                lagInntektsperiode(false, FN_SKATTEFRITAK)
-            )
-        )
-    )
-
-    val result = trygdeavgiftMottakerService.getTrygdeavgiftMottaker(fastsattTrygdeavgift)
-    result.shouldBe(TRYGDEAVGIFT_BETALES_TIL_NAV)
-}
-
-@Test
-fun `trygdeavgiftsmottaker skal være NAV hvis bruker er skattepliktig, men type er FN_SKATTEFRITAK`() {
-    val fastsattTrygdeavgift = lagFastsattTrygdeavgift(
-        setOf(
-            lagTrygdeavgiftsperiode(
-                lagSkatteforholdsperiode(Skatteplikttype.SKATTEPLIKTIG),
-                lagInntektsperiode(false, FN_SKATTEFRITAK)
-            )
-        )
-    )
-
-    val result = trygdeavgiftMottakerService.getTrygdeavgiftMottaker(fastsattTrygdeavgift)
-    result.shouldBe(TRYGDEAVGIFT_BETALES_TIL_NAV)
-}
-
-@Test
-fun `trygdeavgiftsmottaker skal være NAV hvis bruker er ikke_skattepliktig og aga er false, men type er FN_SKATTEFRITAK`() {
-    val fastsattTrygdeavgift = lagFastsattTrygdeavgift(
-        setOf(
-            lagTrygdeavgiftsperiode(
-                lagSkatteforholdsperiode(Skatteplikttype.IKKE_SKATTEPLIKTIG),
-                lagInntektsperiode(false, FN_SKATTEFRITAK)
-            )
-        )
-    )
-
-    val result = trygdeavgiftMottakerService.getTrygdeavgiftMottaker(fastsattTrygdeavgift)
-    result.shouldBe(TRYGDEAVGIFT_BETALES_TIL_NAV)
-}
-
-@Test
-fun `trygdeavgiftsmottaker skal være SKATT og NAV hvis bruker har flere inntektsperioder, men en type er FN_SKATTEFRITAK`() {
-    val fastsattTrygdeavgift = lagFastsattTrygdeavgift(
-        setOf(
-            lagTrygdeavgiftsperiode(
-                lagSkatteforholdsperiode(Skatteplikttype.SKATTEPLIKTIG),
-                lagInntektsperiode(false, FN_SKATTEFRITAK)
-            ),
-            lagTrygdeavgiftsperiode(
-                lagSkatteforholdsperiode(Skatteplikttype.SKATTEPLIKTIG),
-                lagInntektsperiode(true, ARBEIDSINNTEKT_FRA_NORGE)
-            ),
-        )
-    )
-
-    val result = trygdeavgiftMottakerService.getTrygdeavgiftMottaker(fastsattTrygdeavgift)
-    result.shouldBe(TRYGDEAVGIFT_BETALES_TIL_NAV_OG_SKATT)
-}
-
-@Test
-fun `trygdeavgiftsmottaker skal være NAV hvis bruker er ikke skattepliktig og aga er false, men type er MISJONÆR`() {
-    val fastsattTrygdeavgift = lagFastsattTrygdeavgift(
-        setOf(
-            lagTrygdeavgiftsperiode(
-                lagSkatteforholdsperiode(Skatteplikttype.IKKE_SKATTEPLIKTIG),
-                lagInntektsperiode(false, MISJONÆR)
-            )
-        )
-    )
-
-    val result = trygdeavgiftMottakerService.getTrygdeavgiftMottaker(fastsattTrygdeavgift)
-    result.shouldBe(TRYGDEAVGIFT_BETALES_TIL_NAV)
-}
-
-@Test
-fun `trygdeavgiftsmottaker skal være NAV og SKATT hvis skatteplikt og aga er en kombinasjon v1`() {
-    val fastsattTrygdeavgift = lagFastsattTrygdeavgift(
-        setOf(
-            lagTrygdeavgiftsperiode(
-                lagSkatteforholdsperiode(Skatteplikttype.SKATTEPLIKTIG),
-                lagInntektsperiode(false, ARBEIDSINNTEKT_FRA_NORGE)
-            )
-        )
-    )
-
-    val result = trygdeavgiftMottakerService.getTrygdeavgiftMottaker(fastsattTrygdeavgift)
-    result.shouldBe(TRYGDEAVGIFT_BETALES_TIL_NAV_OG_SKATT)
-}
-
-@Test
-fun `trygdeavgiftsmottaker skal være NAV og SKATT hvis skatteplikt og aga er en kombinasjon v2`() {
-    val fastsattTrygdeavgift = lagFastsattTrygdeavgift(
-        setOf(
-            lagTrygdeavgiftsperiode(
-                lagSkatteforholdsperiode(Skatteplikttype.IKKE_SKATTEPLIKTIG),
-                lagInntektsperiode(true, ARBEIDSINNTEKT_FRA_NORGE)
-            )
-        )
-    )
-
-    val result = trygdeavgiftMottakerService.getTrygdeavgiftMottaker(fastsattTrygdeavgift)
-    result.shouldBe(TRYGDEAVGIFT_BETALES_TIL_NAV_OG_SKATT)
-}
-
-@Test
-fun `trygdeavgiftsmottaker skal være NAV og SKATT hvis skatteplikt og aga er en kombinasjon v3`() {
-    val fastsattTrygdeavgift = lagFastsattTrygdeavgift(
-        setOf(
-            lagTrygdeavgiftsperiode(
-                lagSkatteforholdsperiode(Skatteplikttype.IKKE_SKATTEPLIKTIG),
-                lagInntektsperiode(true, ARBEIDSINNTEKT_FRA_NORGE)
-            ),
-            lagTrygdeavgiftsperiode(
-                lagSkatteforholdsperiode(Skatteplikttype.SKATTEPLIKTIG),
-                lagInntektsperiode(true, ARBEIDSINNTEKT_FRA_NORGE)
-            ),
-        )
-    )
-
-    val result = trygdeavgiftMottakerService.getTrygdeavgiftMottaker(fastsattTrygdeavgift)
-    result.shouldBe(TRYGDEAVGIFT_BETALES_TIL_NAV_OG_SKATT)
-}
-
-@Test
-fun `trygdeavgiftsmottaker skal være NAV og SKATT hvis skatteplikt og aga er en kombinasjon v4`() {
-    val fastsattTrygdeavgift = lagFastsattTrygdeavgift(
-        setOf(
-            lagTrygdeavgiftsperiode(
-                lagSkatteforholdsperiode(Skatteplikttype.IKKE_SKATTEPLIKTIG),
-                lagInntektsperiode(true, ARBEIDSINNTEKT_FRA_NORGE)
-            ),
-            lagTrygdeavgiftsperiode(
-                lagSkatteforholdsperiode(Skatteplikttype.IKKE_SKATTEPLIKTIG),
-                lagInntektsperiode(false, ARBEIDSINNTEKT_FRA_NORGE)
-            ),
-            lagTrygdeavgiftsperiode(
-                lagSkatteforholdsperiode(Skatteplikttype.SKATTEPLIKTIG),
-                lagInntektsperiode(true, ARBEIDSINNTEKT_FRA_NORGE)
-            ),
-            lagTrygdeavgiftsperiode(
-                lagSkatteforholdsperiode(Skatteplikttype.SKATTEPLIKTIG),
-                lagInntektsperiode(false, ARBEIDSINNTEKT_FRA_NORGE)
-            ),
-        )
-    )
-
-    val result = trygdeavgiftMottakerService.getTrygdeavgiftMottaker(fastsattTrygdeavgift)
-    result.shouldBe(TRYGDEAVGIFT_BETALES_TIL_NAV_OG_SKATT)
-}
-
-@Test
-fun `trygdeavgiftsmottaker skal være NAV og SKATT hvis skatteplikt og aga er en kombinasjon v5`() {
-    val fastsattTrygdeavgift = lagFastsattTrygdeavgift(
-        setOf(
-            lagTrygdeavgiftsperiode(
-                lagSkatteforholdsperiode(Skatteplikttype.IKKE_SKATTEPLIKTIG),
-                lagInntektsperiode(false, ARBEIDSINNTEKT_FRA_NORGE)
-            ),
-            lagTrygdeavgiftsperiode(
-                lagSkatteforholdsperiode(Skatteplikttype.SKATTEPLIKTIG),
-                lagInntektsperiode(false, ARBEIDSINNTEKT_FRA_NORGE)
-            ),
-        )
-    )
-
-    val result = trygdeavgiftMottakerService.getTrygdeavgiftMottaker(fastsattTrygdeavgift)
-    result.shouldBe(TRYGDEAVGIFT_BETALES_TIL_NAV_OG_SKATT)
-}
-
-@Test
-fun `trygdeavgiftsmottaker skal være NAV og SKATT hvis det er flere innteksperioder med forskjellige mottakere`() {
-    val fastsattTrygdeavgift = lagFastsattTrygdeavgift(
-        setOf(
-            lagTrygdeavgiftsperiode(
-                lagSkatteforholdsperiode(Skatteplikttype.SKATTEPLIKTIG),
-                lagInntektsperiode(true, ARBEIDSINNTEKT_FRA_NORGE)
-            ),
-            lagTrygdeavgiftsperiode(
-                lagSkatteforholdsperiode(Skatteplikttype.SKATTEPLIKTIG),
-                lagInntektsperiode(false, ARBEIDSINNTEKT_FRA_NORGE)
-            )
-        )
-    )
-
-    val result = trygdeavgiftMottakerService.getTrygdeavgiftMottaker(fastsattTrygdeavgift)
-    result.shouldBe(TRYGDEAVGIFT_BETALES_TIL_NAV_OG_SKATT)
-}
-
-fun lagFastsattTrygdeavgift(trygdeavgiftsperioder: Set<Trygdeavgiftsperiode>): FastsattTrygdeavgift {
-    return FastsattTrygdeavgift().apply {
-        this.trygdeavgiftsperioder = trygdeavgiftsperioder
+        result.shouldBe(TRYGDEAVGIFT_BETALES_TIL_NAV)
     }
-}
 
-fun lagTrygdeavgiftsperiode(
-    skatteforholdTilNorge: SkatteforholdTilNorge,
-    inntektsperiode: Inntektsperiode
-): Trygdeavgiftsperiode {
-    val trygdeavgiftsperiode = Trygdeavgiftsperiode().apply {
-        grunnlagInntekstperiode = inntektsperiode
-        grunnlagSkatteforholdTilNorge = skatteforholdTilNorge
-    }
-    return trygdeavgiftsperiode
-}
+    @Test
+    fun `trygdeavgiftsmottaker skal være SKATT hvis bruker er skattepliktig og aga er true`() {
+        val fastsattTrygdeavgift = lagFastsattTrygdeavgift(
+            setOf(
+                lagTrygdeavgiftsperiode(
+                    lagSkatteforholdsperiode(Skatteplikttype.SKATTEPLIKTIG),
+                    lagInntektsperiode(true, ARBEIDSINNTEKT_FRA_NORGE)
+                )
+            )
+        )
 
-fun lagInntektsperiode(
-    arbeidsgiversavgiftBetalesTilSkatt: Boolean,
-    inntektskildetype: Inntektskildetype
-): Inntektsperiode {
-    val inntektsperiode = Inntektsperiode().apply {
-        isArbeidsgiversavgiftBetalesTilSkatt = arbeidsgiversavgiftBetalesTilSkatt
-        type = inntektskildetype
+        val result = trygdeavgiftMottakerService.getTrygdeavgiftMottaker(fastsattTrygdeavgift)
+        result.shouldBe(TRYGDEAVGIFT_BETALES_TIL_SKATT)
     }
-    return inntektsperiode
-}
 
-fun lagSkatteforholdsperiode(
-    skatteplikttype: Skatteplikttype
-): SkatteforholdTilNorge {
-    val skatteforholdTilNorge = SkatteforholdTilNorge().apply {
-        setSkatteplikttype(skatteplikttype)
+    @Test
+    fun `trygdeavgiftsmottaker skal være SKATT hvis bruker er skattepliktig og aga er false, men type er MISJONÆR`() {
+        val fastsattTrygdeavgift = lagFastsattTrygdeavgift(
+            setOf(
+                lagTrygdeavgiftsperiode(
+                    lagSkatteforholdsperiode(Skatteplikttype.SKATTEPLIKTIG),
+                    lagInntektsperiode(false, MISJONÆR)
+                )
+            )
+        )
+
+        val result = trygdeavgiftMottakerService.getTrygdeavgiftMottaker(fastsattTrygdeavgift)
+        result.shouldBe(TRYGDEAVGIFT_BETALES_TIL_SKATT)
     }
-    return skatteforholdTilNorge
-}
+
+    @Test
+    fun `trygdeavgiftsmottaker skal være SKATT og NAV type er MISJONÆR kun i en periode`() {
+        val fastsattTrygdeavgift = lagFastsattTrygdeavgift(
+            setOf(
+                lagTrygdeavgiftsperiode(
+                    lagSkatteforholdsperiode(Skatteplikttype.IKKE_SKATTEPLIKTIG),
+                    lagInntektsperiode(false, MISJONÆR)
+                ),
+                lagTrygdeavgiftsperiode(
+                    lagSkatteforholdsperiode(Skatteplikttype.IKKE_SKATTEPLIKTIG),
+                    lagInntektsperiode(false, ARBEIDSINNTEKT_FRA_NORGE)
+                ),
+                lagTrygdeavgiftsperiode(
+                    lagSkatteforholdsperiode(Skatteplikttype.SKATTEPLIKTIG),
+                    lagInntektsperiode(false, MISJONÆR)
+                ),
+                lagTrygdeavgiftsperiode(
+                    lagSkatteforholdsperiode(Skatteplikttype.SKATTEPLIKTIG),
+                    lagInntektsperiode(false, ARBEIDSINNTEKT_FRA_NORGE)
+                )
+            )
+        )
+
+        val result = trygdeavgiftMottakerService.getTrygdeavgiftMottaker(fastsattTrygdeavgift)
+        result.shouldBe(TRYGDEAVGIFT_BETALES_TIL_NAV_OG_SKATT)
+    }
+
+    @Test
+    fun `trygdeavgiftsmottaker skal være NAV hvis bruker er ikke skattepliktig, men type er FN_SKATTEFRITAK`() {
+        val fastsattTrygdeavgift = lagFastsattTrygdeavgift(
+            setOf(
+                lagTrygdeavgiftsperiode(
+                    lagSkatteforholdsperiode(Skatteplikttype.IKKE_SKATTEPLIKTIG),
+                    lagInntektsperiode(false, FN_SKATTEFRITAK)
+                )
+            )
+        )
+
+        val result = trygdeavgiftMottakerService.getTrygdeavgiftMottaker(fastsattTrygdeavgift)
+        result.shouldBe(TRYGDEAVGIFT_BETALES_TIL_NAV)
+    }
+
+    @Test
+    fun `trygdeavgiftsmottaker skal være NAV hvis bruker er skattepliktig, men type er FN_SKATTEFRITAK`() {
+        val fastsattTrygdeavgift = lagFastsattTrygdeavgift(
+            setOf(
+                lagTrygdeavgiftsperiode(
+                    lagSkatteforholdsperiode(Skatteplikttype.SKATTEPLIKTIG),
+                    lagInntektsperiode(false, FN_SKATTEFRITAK)
+                )
+            )
+        )
+
+        val result = trygdeavgiftMottakerService.getTrygdeavgiftMottaker(fastsattTrygdeavgift)
+        result.shouldBe(TRYGDEAVGIFT_BETALES_TIL_NAV)
+    }
+
+    @Test
+    fun `trygdeavgiftsmottaker skal være NAV hvis bruker er ikke_skattepliktig og aga er false, men type er FN_SKATTEFRITAK`() {
+        val fastsattTrygdeavgift = lagFastsattTrygdeavgift(
+            setOf(
+                lagTrygdeavgiftsperiode(
+                    lagSkatteforholdsperiode(Skatteplikttype.IKKE_SKATTEPLIKTIG),
+                    lagInntektsperiode(false, FN_SKATTEFRITAK)
+                )
+            )
+        )
+
+        val result = trygdeavgiftMottakerService.getTrygdeavgiftMottaker(fastsattTrygdeavgift)
+        result.shouldBe(TRYGDEAVGIFT_BETALES_TIL_NAV)
+    }
+
+    @Test
+    fun `trygdeavgiftsmottaker skal være SKATT og NAV hvis bruker har flere inntektsperioder, men en type er FN_SKATTEFRITAK`() {
+        val fastsattTrygdeavgift = lagFastsattTrygdeavgift(
+            setOf(
+                lagTrygdeavgiftsperiode(
+                    lagSkatteforholdsperiode(Skatteplikttype.SKATTEPLIKTIG),
+                    lagInntektsperiode(false, FN_SKATTEFRITAK)
+                ),
+                lagTrygdeavgiftsperiode(
+                    lagSkatteforholdsperiode(Skatteplikttype.SKATTEPLIKTIG),
+                    lagInntektsperiode(true, ARBEIDSINNTEKT_FRA_NORGE)
+                ),
+            )
+        )
+
+        val result = trygdeavgiftMottakerService.getTrygdeavgiftMottaker(fastsattTrygdeavgift)
+        result.shouldBe(TRYGDEAVGIFT_BETALES_TIL_NAV_OG_SKATT)
+    }
+
+    @Test
+    fun `trygdeavgiftsmottaker skal være NAV hvis bruker er ikke skattepliktig og aga er false, men type er MISJONÆR`() {
+        val fastsattTrygdeavgift = lagFastsattTrygdeavgift(
+            setOf(
+                lagTrygdeavgiftsperiode(
+                    lagSkatteforholdsperiode(Skatteplikttype.IKKE_SKATTEPLIKTIG),
+                    lagInntektsperiode(false, MISJONÆR)
+                )
+            )
+        )
+
+        val result = trygdeavgiftMottakerService.getTrygdeavgiftMottaker(fastsattTrygdeavgift)
+        result.shouldBe(TRYGDEAVGIFT_BETALES_TIL_NAV)
+    }
+
+    @Test
+    fun `trygdeavgiftsmottaker skal være NAV og SKATT hvis skatteplikt og aga er en kombinasjon v1`() {
+        val fastsattTrygdeavgift = lagFastsattTrygdeavgift(
+            setOf(
+                lagTrygdeavgiftsperiode(
+                    lagSkatteforholdsperiode(Skatteplikttype.SKATTEPLIKTIG),
+                    lagInntektsperiode(false, ARBEIDSINNTEKT_FRA_NORGE)
+                )
+            )
+        )
+
+        val result = trygdeavgiftMottakerService.getTrygdeavgiftMottaker(fastsattTrygdeavgift)
+        result.shouldBe(TRYGDEAVGIFT_BETALES_TIL_NAV_OG_SKATT)
+    }
+
+    @Test
+    fun `trygdeavgiftsmottaker skal være NAV og SKATT hvis skatteplikt og aga er en kombinasjon v2`() {
+        val fastsattTrygdeavgift = lagFastsattTrygdeavgift(
+            setOf(
+                lagTrygdeavgiftsperiode(
+                    lagSkatteforholdsperiode(Skatteplikttype.IKKE_SKATTEPLIKTIG),
+                    lagInntektsperiode(true, ARBEIDSINNTEKT_FRA_NORGE)
+                )
+            )
+        )
+
+        val result = trygdeavgiftMottakerService.getTrygdeavgiftMottaker(fastsattTrygdeavgift)
+        result.shouldBe(TRYGDEAVGIFT_BETALES_TIL_NAV_OG_SKATT)
+    }
+
+    @Test
+    fun `trygdeavgiftsmottaker skal være NAV og SKATT hvis skatteplikt og aga er en kombinasjon v3`() {
+        val fastsattTrygdeavgift = lagFastsattTrygdeavgift(
+            setOf(
+                lagTrygdeavgiftsperiode(
+                    lagSkatteforholdsperiode(Skatteplikttype.IKKE_SKATTEPLIKTIG),
+                    lagInntektsperiode(true, ARBEIDSINNTEKT_FRA_NORGE)
+                ),
+                lagTrygdeavgiftsperiode(
+                    lagSkatteforholdsperiode(Skatteplikttype.SKATTEPLIKTIG),
+                    lagInntektsperiode(true, ARBEIDSINNTEKT_FRA_NORGE)
+                ),
+            )
+        )
+
+        val result = trygdeavgiftMottakerService.getTrygdeavgiftMottaker(fastsattTrygdeavgift)
+        result.shouldBe(TRYGDEAVGIFT_BETALES_TIL_NAV_OG_SKATT)
+    }
+
+    @Test
+    fun `trygdeavgiftsmottaker skal være NAV og SKATT hvis skatteplikt og aga er en kombinasjon v4`() {
+        val fastsattTrygdeavgift = lagFastsattTrygdeavgift(
+            setOf(
+                lagTrygdeavgiftsperiode(
+                    lagSkatteforholdsperiode(Skatteplikttype.IKKE_SKATTEPLIKTIG),
+                    lagInntektsperiode(true, ARBEIDSINNTEKT_FRA_NORGE)
+                ),
+                lagTrygdeavgiftsperiode(
+                    lagSkatteforholdsperiode(Skatteplikttype.IKKE_SKATTEPLIKTIG),
+                    lagInntektsperiode(false, ARBEIDSINNTEKT_FRA_NORGE)
+                ),
+                lagTrygdeavgiftsperiode(
+                    lagSkatteforholdsperiode(Skatteplikttype.SKATTEPLIKTIG),
+                    lagInntektsperiode(true, ARBEIDSINNTEKT_FRA_NORGE)
+                ),
+                lagTrygdeavgiftsperiode(
+                    lagSkatteforholdsperiode(Skatteplikttype.SKATTEPLIKTIG),
+                    lagInntektsperiode(false, ARBEIDSINNTEKT_FRA_NORGE)
+                ),
+            )
+        )
+
+        val result = trygdeavgiftMottakerService.getTrygdeavgiftMottaker(fastsattTrygdeavgift)
+        result.shouldBe(TRYGDEAVGIFT_BETALES_TIL_NAV_OG_SKATT)
+    }
+
+    @Test
+    fun `trygdeavgiftsmottaker skal være NAV og SKATT hvis skatteplikt og aga er en kombinasjon v5`() {
+        val fastsattTrygdeavgift = lagFastsattTrygdeavgift(
+            setOf(
+                lagTrygdeavgiftsperiode(
+                    lagSkatteforholdsperiode(Skatteplikttype.IKKE_SKATTEPLIKTIG),
+                    lagInntektsperiode(false, ARBEIDSINNTEKT_FRA_NORGE)
+                ),
+                lagTrygdeavgiftsperiode(
+                    lagSkatteforholdsperiode(Skatteplikttype.SKATTEPLIKTIG),
+                    lagInntektsperiode(false, ARBEIDSINNTEKT_FRA_NORGE)
+                ),
+            )
+        )
+
+        val result = trygdeavgiftMottakerService.getTrygdeavgiftMottaker(fastsattTrygdeavgift)
+        result.shouldBe(TRYGDEAVGIFT_BETALES_TIL_NAV_OG_SKATT)
+    }
+
+    @Test
+    fun `trygdeavgiftsmottaker skal være NAV og SKATT hvis det er flere innteksperioder med forskjellige mottakere`() {
+        val fastsattTrygdeavgift = lagFastsattTrygdeavgift(
+            setOf(
+                lagTrygdeavgiftsperiode(
+                    lagSkatteforholdsperiode(Skatteplikttype.SKATTEPLIKTIG),
+                    lagInntektsperiode(true, ARBEIDSINNTEKT_FRA_NORGE)
+                ),
+                lagTrygdeavgiftsperiode(
+                    lagSkatteforholdsperiode(Skatteplikttype.SKATTEPLIKTIG),
+                    lagInntektsperiode(false, ARBEIDSINNTEKT_FRA_NORGE)
+                )
+            )
+        )
+
+        val result = trygdeavgiftMottakerService.getTrygdeavgiftMottaker(fastsattTrygdeavgift)
+        result.shouldBe(TRYGDEAVGIFT_BETALES_TIL_NAV_OG_SKATT)
+    }
+
+    fun lagFastsattTrygdeavgift(trygdeavgiftsperioder: Set<Trygdeavgiftsperiode>): FastsattTrygdeavgift {
+        return FastsattTrygdeavgift().apply {
+            this.trygdeavgiftsperioder = trygdeavgiftsperioder
+        }
+    }
+
+    fun lagTrygdeavgiftsperiode(
+        skatteforholdTilNorge: SkatteforholdTilNorge,
+        inntektsperiode: Inntektsperiode
+    ): Trygdeavgiftsperiode {
+        val trygdeavgiftsperiode = Trygdeavgiftsperiode().apply {
+            grunnlagInntekstperiode = inntektsperiode
+            grunnlagSkatteforholdTilNorge = skatteforholdTilNorge
+        }
+        return trygdeavgiftsperiode
+    }
+
+    fun lagInntektsperiode(
+        arbeidsgiversavgiftBetalesTilSkatt: Boolean,
+        inntektskildetype: Inntektskildetype
+    ): Inntektsperiode {
+        val inntektsperiode = Inntektsperiode().apply {
+            isArbeidsgiversavgiftBetalesTilSkatt = arbeidsgiversavgiftBetalesTilSkatt
+            type = inntektskildetype
+        }
+        return inntektsperiode
+    }
+
+    fun lagSkatteforholdsperiode(
+        skatteplikttype: Skatteplikttype
+    ): SkatteforholdTilNorge {
+        val skatteforholdTilNorge = SkatteforholdTilNorge().apply {
+            setSkatteplikttype(skatteplikttype)
+        }
+        return skatteforholdTilNorge
+    }
 }

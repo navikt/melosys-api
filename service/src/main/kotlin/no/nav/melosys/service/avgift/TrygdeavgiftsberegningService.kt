@@ -8,12 +8,12 @@ import no.nav.melosys.domain.folketrygden.FastsattTrygdeavgift
 import no.nav.melosys.domain.folketrygden.MedlemAvFolketrygden
 import no.nav.melosys.domain.kodeverk.Fullmaktstype
 import no.nav.melosys.domain.kodeverk.Trygdeavgift_typer
+import no.nav.melosys.domain.kodeverk.Trygdeavgiftmottaker
 import no.nav.melosys.integrasjon.ereg.EregFasade
 import no.nav.melosys.integrasjon.trygdeavgift.AvgiftsdekningerFraTrygdedekning
 import no.nav.melosys.integrasjon.trygdeavgift.TrygdeavgiftConsumer
 import no.nav.melosys.integrasjon.trygdeavgift.dto.*
 import no.nav.melosys.service.MedlemAvFolketrygdenService
-import no.nav.melosys.service.avgift.dto.InntektskildeRequest
 import no.nav.melosys.service.avgift.dto.OppdaterTrygdeavgiftsgrunnlagRequest
 import no.nav.melosys.service.avgift.dto.SkatteforholdTilNorgeRequest
 import no.nav.melosys.service.behandling.BehandlingService
@@ -76,9 +76,8 @@ class TrygdeavgiftsberegningService
 
         medlemAvFolketrygden.fastsattTrygdeavgift.trygdeavgiftsperioder.addAll(nyeTrygdeavgiftsperioder)
 
-        val skalBetalesTilNAV =
-            trygdeavgiftMottakerService.skalBetalesTilNav(medlemAvFolketrygden.fastsattTrygdeavgift)
-        if (!skalBetalesTilNAV && !erAlleTrygdeavgiftbelopNull(beregnetTrygdeavgift)) {
+        val skalKunBetalesTilSkatt = trygdeavgiftMottakerService.getTrygdeavgiftMottaker(medlemAvFolketrygden.fastsattTrygdeavgift) == Trygdeavgiftmottaker.TRYGDEAVGIFT_BETALES_TIL_SKATT
+        if (skalKunBetalesTilSkatt && !erAlleTrygdeavgiftbelopNull(beregnetTrygdeavgift)) {
             throw IllegalStateException("Trygdeavgift skal ikke betales til NAV. Beregnet trygdeavgift må derfor være 0.")
         }
 
@@ -110,7 +109,7 @@ class TrygdeavgiftsberegningService
     private fun mapInntektsperiodeDtos(oppdaterTrygdeavgiftsgrunnlagRequest: OppdaterTrygdeavgiftsgrunnlagRequest) =
         oppdaterTrygdeavgiftsgrunnlagRequest.inntektskilder.map {
             InntektsperiodeDto(
-                it.toUUID(),
+                UUID.randomUUID(),
                 DatoPeriodeDto(it.fomDato, it.tomDato ?: LocalDate.MAX), //TODO: Håndter null
                 it.type,
                 it.arbeidsgiversavgiftBetales,
@@ -227,10 +226,6 @@ class TrygdeavgiftsberegningService
     companion object {
         fun SkatteforholdTilNorgeRequest.toUUID(): UUID {
             return UUID.nameUUIDFromBytes("${this.fomDato}${this.tomDato}${this.skatteplikttype}".toByteArray())
-        }
-
-        fun InntektskildeRequest.toUUID(): UUID {
-            return UUID.nameUUIDFromBytes("${this.fomDato}${this.tomDato}${this.type}${this.arbeidsgiversavgiftBetales}${this.avgiftspliktigInntektMnd}".toByteArray())
         }
 
         fun Medlemskapsperiode.idToUUID(): UUID {

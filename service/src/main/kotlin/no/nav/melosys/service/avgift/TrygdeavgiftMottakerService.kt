@@ -31,12 +31,11 @@ class TrygdeavgiftMottakerService {
     fun betalerKunTrygdeavgiftTilSkatt(
         fastsattTrygdeavgift: FastsattTrygdeavgift,
     ): Boolean {
-        //TODO: er .filterNotNull() hack? - sjekk YrkesaktivFtrlVedtakIT uten dette.
-        return fastsattTrygdeavgift.hentSkatteforholdTilNorge().filterNotNull().all { it.skatteplikttype == Skatteplikttype.SKATTEPLIKTIG }
+        return fastsattTrygdeavgift.hentSkatteforholdTilNorge().all { it.skatteplikttype == Skatteplikttype.SKATTEPLIKTIG }
             && fastsattTrygdeavgift.hentInntektsperioder().filterNotNull().all { it.isArbeidsgiversavgiftBetalesTilSkatt || erMisjonær(it.type) }
     }
 
-    private fun betalerKunTrygdeavgiftTilNav(
+    fun betalerKunTrygdeavgiftTilNav(
         fastsattTrygdeavgift: FastsattTrygdeavgift,
     ): Boolean {
 
