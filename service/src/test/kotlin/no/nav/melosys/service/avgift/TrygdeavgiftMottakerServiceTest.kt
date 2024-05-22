@@ -28,7 +28,7 @@ internal class TrygdeavgiftMottakerServiceTest {
         )
 
 
-    val result = trygdeavgiftMottakerService.getTrygdeavgiftMottaker(fastsattTrygdeavgift, null)
+    val result = trygdeavgiftMottakerService.getTrygdeavgiftMottaker(fastsattTrygdeavgift)
 
     result.shouldBe(TRYGDEAVGIFT_BETALES_TIL_NAV)
 }
@@ -44,7 +44,7 @@ fun `trygdeavgiftsmottaker skal være SKATT hvis bruker er skattepliktig og aga 
         )
     )
 
-    val result = trygdeavgiftMottakerService.getTrygdeavgiftMottaker(fastsattTrygdeavgift, null)
+    val result = trygdeavgiftMottakerService.getTrygdeavgiftMottaker(fastsattTrygdeavgift)
     result.shouldBe(TRYGDEAVGIFT_BETALES_TIL_SKATT)
 }
 
@@ -59,7 +59,7 @@ fun `trygdeavgiftsmottaker skal være SKATT hvis bruker er skattepliktig og aga 
         )
     )
 
-    val result = trygdeavgiftMottakerService.getTrygdeavgiftMottaker(fastsattTrygdeavgift, null)
+    val result = trygdeavgiftMottakerService.getTrygdeavgiftMottaker(fastsattTrygdeavgift)
     result.shouldBe(TRYGDEAVGIFT_BETALES_TIL_SKATT)
 }
 
@@ -101,7 +101,7 @@ fun `trygdeavgiftsmottaker skal være NAV hvis bruker er ikke skattepliktig, men
         )
     )
 
-    val result = trygdeavgiftMottakerService.getTrygdeavgiftMottaker(fastsattTrygdeavgift, null)
+    val result = trygdeavgiftMottakerService.getTrygdeavgiftMottaker(fastsattTrygdeavgift)
     result.shouldBe(TRYGDEAVGIFT_BETALES_TIL_NAV)
 }
 
@@ -116,7 +116,7 @@ fun `trygdeavgiftsmottaker skal være NAV hvis bruker er skattepliktig, men type
         )
     )
 
-    val result = trygdeavgiftMottakerService.getTrygdeavgiftMottaker(fastsattTrygdeavgift, null)
+    val result = trygdeavgiftMottakerService.getTrygdeavgiftMottaker(fastsattTrygdeavgift)
     result.shouldBe(TRYGDEAVGIFT_BETALES_TIL_NAV)
 }
 
@@ -131,7 +131,7 @@ fun `trygdeavgiftsmottaker skal være NAV hvis bruker er ikke_skattepliktig og a
         )
     )
 
-    val result = trygdeavgiftMottakerService.getTrygdeavgiftMottaker(fastsattTrygdeavgift, null)
+    val result = trygdeavgiftMottakerService.getTrygdeavgiftMottaker(fastsattTrygdeavgift)
     result.shouldBe(TRYGDEAVGIFT_BETALES_TIL_NAV)
 }
 
@@ -150,7 +150,7 @@ fun `trygdeavgiftsmottaker skal være SKATT og NAV hvis bruker har flere inntekt
         )
     )
 
-    val result = trygdeavgiftMottakerService.getTrygdeavgiftMottaker(fastsattTrygdeavgift, null)
+    val result = trygdeavgiftMottakerService.getTrygdeavgiftMottaker(fastsattTrygdeavgift)
     result.shouldBe(TRYGDEAVGIFT_BETALES_TIL_NAV_OG_SKATT)
 }
 
@@ -165,7 +165,7 @@ fun `trygdeavgiftsmottaker skal være NAV hvis bruker er ikke skattepliktig og a
         )
     )
 
-    val result = trygdeavgiftMottakerService.getTrygdeavgiftMottaker(fastsattTrygdeavgift, null)
+    val result = trygdeavgiftMottakerService.getTrygdeavgiftMottaker(fastsattTrygdeavgift)
     result.shouldBe(TRYGDEAVGIFT_BETALES_TIL_NAV)
 }
 
@@ -180,7 +180,7 @@ fun `trygdeavgiftsmottaker skal være NAV og SKATT hvis skatteplikt og aga er en
         )
     )
 
-    val result = trygdeavgiftMottakerService.getTrygdeavgiftMottaker(fastsattTrygdeavgift, null)
+    val result = trygdeavgiftMottakerService.getTrygdeavgiftMottaker(fastsattTrygdeavgift)
     result.shouldBe(TRYGDEAVGIFT_BETALES_TIL_NAV_OG_SKATT)
 }
 
@@ -195,7 +195,7 @@ fun `trygdeavgiftsmottaker skal være NAV og SKATT hvis skatteplikt og aga er en
         )
     )
 
-    val result = trygdeavgiftMottakerService.getTrygdeavgiftMottaker(fastsattTrygdeavgift, null)
+    val result = trygdeavgiftMottakerService.getTrygdeavgiftMottaker(fastsattTrygdeavgift)
     result.shouldBe(TRYGDEAVGIFT_BETALES_TIL_NAV_OG_SKATT)
 }
 
@@ -214,7 +214,7 @@ fun `trygdeavgiftsmottaker skal være NAV og SKATT hvis skatteplikt og aga er en
         )
     )
 
-    val result = trygdeavgiftMottakerService.getTrygdeavgiftMottaker(fastsattTrygdeavgift, null)
+    val result = trygdeavgiftMottakerService.getTrygdeavgiftMottaker(fastsattTrygdeavgift)
     result.shouldBe(TRYGDEAVGIFT_BETALES_TIL_NAV_OG_SKATT)
 }
 
@@ -241,7 +241,7 @@ fun `trygdeavgiftsmottaker skal være NAV og SKATT hvis skatteplikt og aga er en
         )
     )
 
-    val result = trygdeavgiftMottakerService.getTrygdeavgiftMottaker(fastsattTrygdeavgift, null)
+    val result = trygdeavgiftMottakerService.getTrygdeavgiftMottaker(fastsattTrygdeavgift)
     result.shouldBe(TRYGDEAVGIFT_BETALES_TIL_NAV_OG_SKATT)
 }
 
@@ -260,7 +260,7 @@ fun `trygdeavgiftsmottaker skal være NAV og SKATT hvis skatteplikt og aga er en
         )
     )
 
-    val result = trygdeavgiftMottakerService.getTrygdeavgiftMottaker(fastsattTrygdeavgift, null)
+    val result = trygdeavgiftMottakerService.getTrygdeavgiftMottaker(fastsattTrygdeavgift)
     result.shouldBe(TRYGDEAVGIFT_BETALES_TIL_NAV_OG_SKATT)
 }
 
@@ -279,7 +279,7 @@ fun `trygdeavgiftsmottaker skal være NAV og SKATT hvis det er flere innteksperi
         )
     )
 
-    val result = trygdeavgiftMottakerService.getTrygdeavgiftMottaker(fastsattTrygdeavgift, null)
+    val result = trygdeavgiftMottakerService.getTrygdeavgiftMottaker(fastsattTrygdeavgift)
     result.shouldBe(TRYGDEAVGIFT_BETALES_TIL_NAV_OG_SKATT)
 }
 
