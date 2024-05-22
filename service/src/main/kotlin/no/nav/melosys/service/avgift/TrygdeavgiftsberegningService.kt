@@ -67,12 +67,6 @@ class TrygdeavgiftsberegningService
 
         val beregnetTrygdeavgift = trygdeavgiftConsumer.beregnTrygdeavgift(trygdeavgiftsberegningRequest)
 
-        val skalBetalesTilNAV =
-            trygdeavgiftMottakerService.skalBetalesTilNav(medlemAvFolketrygden.fastsattTrygdeavgift, oppdaterTrygdeavgiftsgrunnlagRequest)
-        if (!skalBetalesTilNAV && !erAlleTrygdeavgiftbelopNull(beregnetTrygdeavgift)) {
-            throw IllegalStateException("Trygdeavgift skal ikke betales til NAV. Beregnet trygdeavgift må derfor være 0.")
-        }
-
         val nyeTrygdeavgiftsperioder = lagNyeTrygdeavgiftsperioder(
             medlemAvFolketrygden,
             skatteforholdsperioderDtos,
@@ -81,6 +75,12 @@ class TrygdeavgiftsberegningService
         )
 
         medlemAvFolketrygden.fastsattTrygdeavgift.trygdeavgiftsperioder.addAll(nyeTrygdeavgiftsperioder)
+
+        val skalBetalesTilNAV =
+            trygdeavgiftMottakerService.skalBetalesTilNav(medlemAvFolketrygden.fastsattTrygdeavgift)
+        if (!skalBetalesTilNAV && !erAlleTrygdeavgiftbelopNull(beregnetTrygdeavgift)) {
+            throw IllegalStateException("Trygdeavgift skal ikke betales til NAV. Beregnet trygdeavgift må derfor være 0.")
+        }
 
         medlemAvFolketrygdenService.lagreOgFlush(medlemAvFolketrygden)
         return nyeTrygdeavgiftsperioder;
@@ -111,7 +111,7 @@ class TrygdeavgiftsberegningService
         oppdaterTrygdeavgiftsgrunnlagRequest.inntektskilder.map {
             InntektsperiodeDto(
                 it.toUUID(),
-                DatoPeriodeDto(it.fomDato, it.tomDato),
+                DatoPeriodeDto(it.fomDato, it.tomDato ?: LocalDate.MAX), //TODO: Håndter null
                 it.type,
                 it.arbeidsgiversavgiftBetales,
                 PengerDto(it.avgiftspliktigInntektMnd ?: 0.toBigDecimal())
