@@ -111,7 +111,7 @@ class TrygdeavgiftsberegningService
         oppdaterTrygdeavgiftsgrunnlagRequest.inntektskilder.map {
             InntektsperiodeDto(
                 it.toUUID(),
-                DatoPeriodeDto(it.fomDato, it.tomDato),
+                DatoPeriodeDto(it.fomDato, it.tomDato ?: LocalDate.MAX), //TODO: Håndter null
                 it.type,
                 it.arbeidsgiversavgiftBetales,
                 PengerDto(it.avgiftspliktigInntektMnd ?: 0.toBigDecimal())
