@@ -50,7 +50,7 @@ class TrygdeavgiftTjeneste(
         )
 
         return ResponseEntity.ok(
-            BeregnetTrygdeavgiftDto.av(trygdeavgiftsperiodeSet, trygdeavgiftsgrunnlagDto)
+            BeregnetTrygdeavgiftDto.av(trygdeavgiftsperiodeSet)
         )
     }
 
@@ -59,10 +59,9 @@ class TrygdeavgiftTjeneste(
         aksesskontroll.autoriser(behandlingID)
 
         val trygdeavgiftsperiodeSet = trygdeavgiftsberegningService.hentTrygdeavgiftsberegning(behandlingID)
-        val trygdeavgiftsgrunnlagDto = TrygdeavgiftsgrunnlagDto(trygdeavgiftsperiodeSet)
 
         return ResponseEntity.ok(
-            BeregnetTrygdeavgiftDto.av(trygdeavgiftsperiodeSet, trygdeavgiftsgrunnlagDto)
+            BeregnetTrygdeavgiftDto.av(trygdeavgiftsperiodeSet)
         )
     }
 

@@ -2,7 +2,6 @@ package no.nav.melosys.service.behandling
 
 import no.nav.melosys.domain.*
 import no.nav.melosys.domain.avgift.Inntektsperiode
-import no.nav.melosys.domain.avgift.Penger
 import no.nav.melosys.domain.avgift.SkatteforholdTilNorge
 import no.nav.melosys.domain.avgift.Trygdeavgiftsperiode
 import no.nav.melosys.domain.avklartefakta.Avklartefakta
@@ -15,7 +14,6 @@ import org.apache.commons.beanutils.BeanUtils
 import org.springframework.stereotype.Service
 import org.springframework.transaction.annotation.Transactional
 import java.lang.reflect.InvocationTargetException
-import java.math.BigDecimal
 
 @Service
 class ReplikerBehandlingsresultatService(val behandlingsresultatService: BehandlingsresultatService) {
@@ -122,12 +120,6 @@ class ReplikerBehandlingsresultatService(val behandlingsresultatService: Behandl
             medlemAvFolketrygdenOriginal,
             medlemAvFolketrygdenReplika
         )
-        fastsattTrygdeavgiftReplika.trygdeavgiftsperioder.onEach {
-            it.id = null
-            it.grunnlagInntekstperiode.id = null
-            it.grunnlagMedlemskapsperiode.id = null
-            it.grunnlagSkatteforholdTilNorge.id = null
-        }
     }
 
     @Throws(
@@ -141,8 +133,12 @@ class ReplikerBehandlingsresultatService(val behandlingsresultatService: Behandl
         medlemAvFolketrygdenReplika: MedlemAvFolketrygden
     ) {
         val fastsattTrygdeavgiftReplika = medlemAvFolketrygdenReplika.fastsattTrygdeavgift
-        val inntektsperioderReplika = hentReplikerteInntektsperioder(medlemAvFolketrygdenOriginal)
-        val skatteforholdTilNorgeReplika = hentReplikerteSkatteforholdsperioder(medlemAvFolketrygdenOriginal)
+        val inntektsperioderReplika = medlemAvFolketrygdenOriginal.fastsattTrygdeavgift.hentInntektsperioder().map {
+            BeanUtils.cloneBean(it) as Inntektsperiode
+        }.toSet()
+        val skatteforholdTilNorgeReplika = medlemAvFolketrygdenOriginal.fastsattTrygdeavgift.hentSkatteforholdTilNorge().map {
+            BeanUtils.cloneBean(it) as SkatteforholdTilNorge
+        }.toSet()
 
         fastsattTrygdeavgiftReplika.trygdeavgiftsperioder = HashSet()
         for (trygdeavgiftsperiodeOriginal in medlemAvFolketrygdenOriginal.fastsattTrygdeavgift.trygdeavgiftsperioder) {
@@ -159,34 +155,14 @@ class ReplikerBehandlingsresultatService(val behandlingsresultatService: Behandl
 
             fastsattTrygdeavgiftReplika.trygdeavgiftsperioder.add(trygdeavgiftsperiodeReplika)
         }
-    }
 
-    @Throws(
-        InvocationTargetException::class,
-        NoSuchMethodException::class,
-        InstantiationException::class,
-        IllegalAccessException::class
-    )
-    private fun hentReplikerteSkatteforholdsperioder(
-        medlemAvFolketrygdenOriginal: MedlemAvFolketrygden,
-    ): Set<SkatteforholdTilNorge> {
-        return medlemAvFolketrygdenOriginal.fastsattTrygdeavgift.hentSkatteforholdTilNorge().map {
-            BeanUtils.cloneBean(it) as SkatteforholdTilNorge
-        }.toSet()
-    }
+        fastsattTrygdeavgiftReplika.trygdeavgiftsperioder.onEach {
+            it.id = null
+            it.grunnlagInntekstperiode.id = null
+            it.grunnlagMedlemskapsperiode.id = null
+            it.grunnlagSkatteforholdTilNorge.id = null
+        }
 
-    @Throws(
-        InvocationTargetException::class,
-        NoSuchMethodException::class,
-        InstantiationException::class,
-        IllegalAccessException::class
-    )
-    private fun hentReplikerteInntektsperioder(
-        medlemAvFolketrygdenOriginal: MedlemAvFolketrygden,
-    ): Set<Inntektsperiode> {
-        return medlemAvFolketrygdenOriginal.fastsattTrygdeavgift.hentInntektsperioder().map {
-            BeanUtils.cloneBean(it) as Inntektsperiode
-        }.toSet()
     }
 
     @Throws(

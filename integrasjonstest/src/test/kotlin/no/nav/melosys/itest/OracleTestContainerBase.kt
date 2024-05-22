@@ -25,7 +25,8 @@ open class OracleTestContainerBase {
             }
         }
 
-        private fun useLocalDB(): Boolean = listOf("USE-LOCAL-DB", "USE_LOCAL_DB").any { System.getenv(it)?.lowercase() == "true" }
+        //TODO: Gjør om
+        private fun useLocalDB(): Boolean = true
 
         private fun useTestContainer(): Boolean = !useLocalDB() && useContainer
     }

@@ -9,15 +9,18 @@ import no.nav.melosys.domain.folketrygden.MedlemAvFolketrygden
 import no.nav.melosys.domain.kodeverk.Fullmaktstype
 import no.nav.melosys.domain.kodeverk.Trygdeavgift_typer
 import no.nav.melosys.integrasjon.ereg.EregFasade
-import no.nav.melosys.integrasjon.trygdeavgift.TrygdeavgiftConsumer
 import no.nav.melosys.integrasjon.trygdeavgift.AvgiftsdekningerFraTrygdedekning
+import no.nav.melosys.integrasjon.trygdeavgift.TrygdeavgiftConsumer
 import no.nav.melosys.integrasjon.trygdeavgift.dto.*
 import no.nav.melosys.service.MedlemAvFolketrygdenService
+import no.nav.melosys.service.avgift.dto.InntektskildeRequest
 import no.nav.melosys.service.avgift.dto.OppdaterTrygdeavgiftsgrunnlagRequest
+import no.nav.melosys.service.avgift.dto.SkatteforholdTilNorgeRequest
 import no.nav.melosys.service.behandling.BehandlingService
 import no.nav.melosys.service.persondata.PersondataService
 import org.springframework.stereotype.Service
 import org.springframework.transaction.annotation.Transactional
+import java.math.BigDecimal
 import java.time.LocalDate
 import java.util.*
 
@@ -45,11 +48,7 @@ class TrygdeavgiftsberegningService
             medlemAvFolketrygden.fastsattTrygdeavgift.trygdeavgiftsperioder.clear()
         }
 
-        medlemAvFolketrygdenService.lagreOgFlush(medlemAvFolketrygden) // Er det nødvendig?
-
-        if (!trygdeavgiftMottakerService.skalBetalesTilNav(medlemAvFolketrygden.fastsattTrygdeavgift, oppdaterTrygdeavgiftsgrunnlagRequest)) {
-            return emptySet()
-        }
+        medlemAvFolketrygdenService.lagreOgFlush(medlemAvFolketrygden)
 
         TrygdeavgiftValideringService.validerTrygdeavgiftberegningRequest(oppdaterTrygdeavgiftsgrunnlagRequest, medlemAvFolketrygden);
 
@@ -68,12 +67,19 @@ class TrygdeavgiftsberegningService
 
         val beregnetTrygdeavgift = trygdeavgiftConsumer.beregnTrygdeavgift(trygdeavgiftsberegningRequest)
 
+        val skalBetalesTilNAV =
+            trygdeavgiftMottakerService.skalBetalesTilNav(medlemAvFolketrygden.fastsattTrygdeavgift, oppdaterTrygdeavgiftsgrunnlagRequest)
+        if (!skalBetalesTilNAV && !erAlleTrygdeavgiftbelopNull(beregnetTrygdeavgift)) {
+            throw IllegalStateException("Trygdeavgift skal ikke betales til NAV. Beregnet trygdeavgift må derfor være 0.")
+        }
+
         val nyeTrygdeavgiftsperioder = lagNyeTrygdeavgiftsperioder(
-            medlemAvFolketrygden.fastsattTrygdeavgift,
+            medlemAvFolketrygden,
             skatteforholdsperioderDtos,
             inntektsperioderDtos,
             beregnetTrygdeavgift
         )
+
         medlemAvFolketrygden.fastsattTrygdeavgift.trygdeavgiftsperioder.addAll(nyeTrygdeavgiftsperioder)
 
         medlemAvFolketrygdenService.lagreOgFlush(medlemAvFolketrygden)
@@ -83,7 +89,7 @@ class TrygdeavgiftsberegningService
     private fun mapTilMedlemskapsperiodeDtos(medlemskapsperioder: List<Medlemskapsperiode>) =
         medlemskapsperioder.map {
             MedlemskapsperiodeDto(
-                UUID.nameUUIDFromBytes(it.id.toString().toByteArray()),
+                it.idToUUID(),
                 DatoPeriodeDto(it.fom, it.tom),
                 AvgiftsdekningerFraTrygdedekning.avgiftsdekningerFraTrygdedekning(it.trygdedekning),
                 it.medlemskapstype
@@ -94,8 +100,8 @@ class TrygdeavgiftsberegningService
     private fun mapTilSkatteforholdsperiodeDtos(oppdaterTrygdeavgiftsgrunnlagRequest: OppdaterTrygdeavgiftsgrunnlagRequest) =
         oppdaterTrygdeavgiftsgrunnlagRequest.skatteforholdTilNorgeList.map {
             SkatteforholdsperiodeDto(
-                UUID.randomUUID(),
-                DatoPeriodeDto(it.fomDato, it.tomDato),
+                it.toUUID(),
+                DatoPeriodeDto(it.fomDato, it.tomDato ?: LocalDate.MAX), //TODO: Håndter null
                 it.skatteplikttype
             )
         }.toSet()
@@ -104,11 +110,11 @@ class TrygdeavgiftsberegningService
     private fun mapInntektsperiodeDtos(oppdaterTrygdeavgiftsgrunnlagRequest: OppdaterTrygdeavgiftsgrunnlagRequest) =
         oppdaterTrygdeavgiftsgrunnlagRequest.inntektskilder.map {
             InntektsperiodeDto(
-                UUID.randomUUID(),
+                it.toUUID(),
                 DatoPeriodeDto(it.fomDato, it.tomDato),
                 it.type,
                 it.arbeidsgiversavgiftBetales,
-                PengerDto(it.avgiftspliktigInntektMnd)
+                PengerDto(it.avgiftspliktigInntektMnd ?: 0.toBigDecimal())
             )
         }
 
@@ -127,7 +133,7 @@ class TrygdeavgiftsberegningService
         }
 
     private fun lagNyeTrygdeavgiftsperioder(
-        fastsattTrygdeavgift: FastsattTrygdeavgift,
+        medlemAvFolketrygden: MedlemAvFolketrygden,
         skatteForholdTilNorgeDtos: Set<SkatteforholdsperiodeDto>,
         inntektsperiodeDtos: List<InntektsperiodeDto>,
         beregnetTrygdeavgift: List<TrygdeavgiftsberegningResponse>,
@@ -157,7 +163,7 @@ class TrygdeavgiftsberegningService
 
         return beregnetTrygdeavgift.map {
             lagTrygdeavgiftsperiode(
-                fastsattTrygdeavgift,
+                medlemAvFolketrygden,
                 skatteforholdTilNorge,
                 inntektsperioder,
                 it
@@ -166,7 +172,7 @@ class TrygdeavgiftsberegningService
     }
 
     private fun lagTrygdeavgiftsperiode(
-        fastsattTrygdeavgift: FastsattTrygdeavgift,
+        medlemAvFolketrygden: MedlemAvFolketrygden,
         skatteforholdTilNorge: List<Pair<UUID, SkatteforholdTilNorge>>,
         inntektsperioder: List<Pair<UUID, Inntektsperiode>>,
         trygdeavgiftsberegningResponse: TrygdeavgiftsberegningResponse,
@@ -179,8 +185,8 @@ class TrygdeavgiftsberegningService
             this.periodeTil = beregnetPeriode.periode.tom
             this.trygdesats = beregnetPeriode.sats
             this.trygdeavgiftsbeløpMd = beregnetPeriode.månedsavgift.tilPenger()
-            this.fastsattTrygdeavgift = fastsattTrygdeavgift
-            this.grunnlagMedlemskapsperiode = fastsattTrygdeavgift.medlemAvFolketrygden.medlemskapsperioder
+            this.fastsattTrygdeavgift = medlemAvFolketrygden.fastsattTrygdeavgift
+            this.grunnlagMedlemskapsperiode = medlemAvFolketrygden.medlemskapsperioder
                 .find {
                     UUID.nameUUIDFromBytes(it.id.toString().toByteArray()) == beregningsgrunnlag.medlemskapsperiodeId
                 }
@@ -191,6 +197,10 @@ class TrygdeavgiftsberegningService
                 it.first == beregningsgrunnlag.inntektsperiodeId
             }?.second
         }
+    }
+
+    private fun erAlleTrygdeavgiftbelopNull(beregnetTrygdeavgift: List<TrygdeavgiftsberegningResponse>): Boolean {
+        return beregnetTrygdeavgift.all { it.beregnetPeriode.månedsavgift.verdi.compareTo(BigDecimal.valueOf(0)) == 0 }
     }
 
     @Transactional(readOnly = true)
@@ -212,5 +222,19 @@ class TrygdeavgiftsberegningService
                     return persondataService.hentSammensattNavn(it.personIdent)
                 return eregFasade.hentOrganisasjonNavn(it.orgnr)
             }
+    }
+
+    companion object {
+        fun SkatteforholdTilNorgeRequest.toUUID(): UUID {
+            return UUID.nameUUIDFromBytes("${this.fomDato}${this.tomDato}${this.skatteplikttype}".toByteArray())
+        }
+
+        fun InntektskildeRequest.toUUID(): UUID {
+            return UUID.nameUUIDFromBytes("${this.fomDato}${this.tomDato}${this.type}${this.arbeidsgiversavgiftBetales}${this.avgiftspliktigInntektMnd}".toByteArray())
+        }
+
+        fun Medlemskapsperiode.idToUUID(): UUID {
+            return UUID.nameUUIDFromBytes(this.id.toString().toByteArray())
+        }
     }
 }

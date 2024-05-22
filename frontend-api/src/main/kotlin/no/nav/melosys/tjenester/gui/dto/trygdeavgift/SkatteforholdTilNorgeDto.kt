@@ -7,7 +7,7 @@ import java.time.LocalDate
 
 data class SkatteforholdTilNorgeDto(
     val fomDato: LocalDate,
-    val tomDato: LocalDate,
+    val tomDato: LocalDate?,
     val skatteplikttype: Skatteplikttype,
 ) {
     constructor(skatteforholdTilNorge: SkatteforholdTilNorge) : this(

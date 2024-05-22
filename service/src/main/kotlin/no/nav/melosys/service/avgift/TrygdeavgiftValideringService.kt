@@ -31,16 +31,22 @@ class TrygdeavgiftValideringService() {
 
         private fun validerMedlemskapsperioder(medlemAvFolketrygden: MedlemAvFolketrygden) {
             if (medlemAvFolketrygden.medlemskapsperioder.isEmpty()) {
-                throw FunksjonellException("Kan ikke oppdatere trygdeavgiftsgrunnlaget før medlemskapsperioder finnes")
+                throw FunksjonellException("Kan ikke beregne trygdeavgift uten medlemskapsperioder")
             }
             medlemAvFolketrygden.utledMedlemskapsperiodeFom()
                 ?: throw FunksjonellException("Klarte ikke finne startdatoen på medlemskapet")
         }
 
-        //TODO: https://nav-it.slack.com/archives/C05AYQKUC0K/p1715794906101809
         private fun validerTrygdeavgiftsgrunnlag(request: OppdaterTrygdeavgiftsgrunnlagRequest, medlemAvFolketrygden: MedlemAvFolketrygden) {
             val medlemskapsperioderErÅpen = medlemAvFolketrygden.utledMedlemskapsperiodeTom() == null
             val erSkattepliktigIHelePerioden = request.skatteforholdTilNorgeList.all { it.skatteplikttype == Skatteplikttype.SKATTEPLIKTIG }
+
+            if (request.inntektskilder.isEmpty()) {
+                throw FunksjonellException("Kan ikke beregne trygdeavgift uten inntektsperioder")
+            }
+            if (request.skatteforholdTilNorgeList.isEmpty()) {
+                throw FunksjonellException("Kan ikke beregne trygdeavgift uten skatteforholdTilNorge")
+            }
 
             if (medlemskapsperioderErÅpen) {
                 val skatteforholdsperiodeErÅpen = request.skatteforholdTilNorgeList.sortedBy { it.fomDato }.last().tomDato == null

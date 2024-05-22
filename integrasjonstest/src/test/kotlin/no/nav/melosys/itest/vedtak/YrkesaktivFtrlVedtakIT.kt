@@ -457,6 +457,10 @@ class YrkesaktivFtrlVedtakIT(
         }
 }
 
+/**
+ * Wiremock transformer for å simulere dynamisk respons fra trygdeavgiftsberegning. I produksjonskoden settes det UUID.randomUUID() for id-ene, som
+ * returneres i responsen til trygdeavgiftsberegning. Derfor må denne transformeren settes opp for å returnere UUID-ene som forventes i responsen.
+ */
 class DynamiskTrygdeavgiftsberegningTransformer : ResponseTransformerV2 {
     override fun transform(response: Response?, serveEvent: ServeEvent?): Response {
         val mapper = jacksonObjectMapper().registerModule(JavaTimeModule())
@@ -464,12 +468,13 @@ class DynamiskTrygdeavgiftsberegningTransformer : ResponseTransformerV2 {
         if (serveEvent?.request?.url != "/api/v2/beregn") {
             throw IllegalArgumentException("Invalid url. Denne transformeren støtter kun /api/v2/beregn")
         }
+
         val requestBody = mapper.readTree(serveEvent.request?.bodyAsString)
         val medlemskapsperioderUuid = requestBody["medlemskapsperioder"][0]["id"].asText()
         val skatteforholdsperioderUuid = requestBody["skatteforholdsperioder"][0]["id"].asText()
         val inntektsperioderUuid = requestBody["inntektsperioder"][0]["id"].asText()
 
-        val expectedResponse = listOf(
+        val responsBodyFraTrygdeavgiftsberegning = listOf(
             TrygdeavgiftsberegningResponse(
                 TrygdeavgiftsperiodeDto(
                     DatoPeriodeDto(LocalDate.of(2023, 1, 1), LocalDate.of(2023, 2, 1)),
@@ -484,7 +489,7 @@ class DynamiskTrygdeavgiftsberegningTransformer : ResponseTransformerV2 {
         )
 
         return Response.Builder.like(response)
-            .body(mapper.writeValueAsString(expectedResponse))
+            .body(mapper.writeValueAsString(responsBodyFraTrygdeavgiftsberegning))
             .build()
     }
 

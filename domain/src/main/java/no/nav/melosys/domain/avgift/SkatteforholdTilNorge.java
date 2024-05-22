@@ -1,7 +1,6 @@
 package no.nav.melosys.domain.avgift;
 
 import java.time.LocalDate;
-import java.util.Set;
 
 import jakarta.persistence.*;
 import no.nav.melosys.domain.kodeverk.Skatteplikttype;
@@ -12,9 +11,6 @@ public class SkatteforholdTilNorge {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
-
-//    @OneToMany(mappedBy = "grunnlagSkatteforholdTilNorge")
-//    private Set<Trygdeavgiftsperiode> trygdeavgiftsperioder;
 
     @Column(name = "fom_dato", nullable = false)
     private LocalDate fomDato;

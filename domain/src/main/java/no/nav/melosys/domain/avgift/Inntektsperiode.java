@@ -2,7 +2,6 @@ package no.nav.melosys.domain.avgift;
 
 import java.time.LocalDate;
 import java.util.Objects;
-import java.util.Set;
 
 import jakarta.persistence.*;
 import no.nav.melosys.domain.kodeverk.Inntektskildetype;
@@ -14,9 +13,6 @@ public class Inntektsperiode {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
-//
-//    @OneToMany(mappedBy = "grunnlagInntekstperiode")
-//    private Set<Trygdeavgiftsperiode> trygdeavgiftsperioder;
 
     @Column(name = "fom_dato", nullable = false)
     private LocalDate fomDato;

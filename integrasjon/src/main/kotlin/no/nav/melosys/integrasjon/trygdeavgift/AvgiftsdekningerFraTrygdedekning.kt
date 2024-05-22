@@ -41,7 +41,7 @@ class AvgiftsdekningerFraTrygdedekning {
                 Trygdedekninger.FTRL_2_9_FØRSTE_LEDD_C_ANDRE_LEDD_TREDJE_LEDD_HELSE_PENSJON_SYKE_FORELDREPENGER_YRKESSKADE ->
                     setOf(Avgiftsdekning.HELSEDEL_MED_SYKEPENGER, Avgiftsdekning.PENSJONSDEL_MED_YRKESSKADETRYGD)
 
-                else -> throw FunksjonellException("Kan ikke finne avgiftsdekninger fra trygdedekning " + trygdedekning)
+                else -> throw FunksjonellException("Kan ikke finne avgiftsdekninger fra trygdedekning $trygdedekning")
             }
         }
     }

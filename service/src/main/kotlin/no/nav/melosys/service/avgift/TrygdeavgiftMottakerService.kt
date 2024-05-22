@@ -38,7 +38,7 @@ class TrygdeavgiftMottakerService {
     ): Boolean {
         if (oppdaterTrygdeavgiftsgrunnlagRequest != null) {
             return oppdaterTrygdeavgiftsgrunnlagRequest.skatteforholdTilNorgeList.all { it.skatteplikttype == Skatteplikttype.SKATTEPLIKTIG }
-                && oppdaterTrygdeavgiftsgrunnlagRequest.inntektskilder.all { it.type == Inntektskildetype.MISJONÆR }
+                && oppdaterTrygdeavgiftsgrunnlagRequest.inntektskilder.all { it.arbeidsgiversavgiftBetales ||  it.type == Inntektskildetype.MISJONÆR }
         }
 
         //TODO: er .filterNotNull() hack? - sjekk YrkesaktivFtrlVedtakIT uten dette.

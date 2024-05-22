@@ -132,7 +132,7 @@ class InnvilgelseFtrlMapper(
             arbeidssituasjontype = hentAvklartFakta(behandlingsresultat, Avklartefaktatyper.ARBEIDSSITUASJON),
             trygdeavgiftMottaker = trygdeavgiftMottakerService.getTrygdeavgiftMottaker(medlemAvFolketrygden.fastsattTrygdeavgift),
             fullmektigTrygdeavgift = finnFullmektigTrygdeavgift(behandling),
-            skatteplikttype = medlemAvFolketrygden.utledSkatteplikttype(), //TODO: Spørsmål: Kan man alltid anta at første periode er den som gjelder? Hva skjer for yrkesaktiv frivillig?
+            skatteplikttype = medlemAvFolketrygden.utledSkatteplikttype(),
             begrunnelse = hentBegrunnelse(behandlingsresultat.vilkaarsresultater),
             begrunnelseAnnenGrunnFritekst = hentSaerligBegrunnelseFritekst(behandlingsresultat.vilkaarsresultater),
             nyVurderingBakgrunn = behandlingsresultat.nyVurderingBakgrunn,

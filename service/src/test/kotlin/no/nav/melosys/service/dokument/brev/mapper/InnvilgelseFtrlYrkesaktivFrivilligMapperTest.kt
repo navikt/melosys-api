@@ -221,10 +221,6 @@ internal class InnvilgelseFtrlYrkesaktivFrivilligMapperTest {
             medlemAvFolketrygden.fastsattTrygdeavgift.trygdeavgiftsperioder = lagTrygdeavgiftsperioder()
         }
 
-        /* TODO: Når det er yrkesaktiv, forventes det ingen avgiftsperioder, men man trenger likevel skatteforhold.. What to do? Skal vi lage en tom
-        * TODO: trygdeavgiftsperiode, og dermed utvide denne testen til å forvente 0 i beløp osv? Burde kanskje også ha en e2e test for dette.
-        *  */
-
         innvilgelseFtrlMapper.mapYrkesaktivFrivillig(lagBrevbestilling()).apply {
             avgiftsperioder.shouldHaveSize(0)
             medlemskapsperioder.shouldHaveSize(1)

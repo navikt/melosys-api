@@ -7,9 +7,9 @@ data class BeregnetTrygdeavgiftDto(
     val trygdeavgiftsgrunnlag: TrygdeavgiftsgrunnlagDto,
 ) {
     companion object {
-        fun av(trygdeavgiftsperiodeSet: Set<Trygdeavgiftsperiode>, trygdeavgiftsgrunnlag: TrygdeavgiftsgrunnlagDto) = BeregnetTrygdeavgiftDto(
+        fun av(trygdeavgiftsperiodeSet: Set<Trygdeavgiftsperiode>) = BeregnetTrygdeavgiftDto(
             trygdeavgiftsperiodeSet.map { TrygdeavgiftsperiodeDto(it) }.sortedWith(compareBy { it.fom }),
-            trygdeavgiftsgrunnlag
+            TrygdeavgiftsgrunnlagDto(trygdeavgiftsperiodeSet)
         )
     }
 }
