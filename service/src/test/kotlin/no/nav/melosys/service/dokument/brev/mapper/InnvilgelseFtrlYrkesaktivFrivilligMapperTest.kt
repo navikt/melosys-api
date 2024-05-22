@@ -14,7 +14,10 @@ import no.nav.melosys.domain.Behandlingsresultat
 import no.nav.melosys.domain.Medlemskapsperiode
 import no.nav.melosys.domain.VilkaarBegrunnelse
 import no.nav.melosys.domain.Vilkaarsresultat
-import no.nav.melosys.domain.avgift.*
+import no.nav.melosys.domain.avgift.Inntektsperiode
+import no.nav.melosys.domain.avgift.Penger
+import no.nav.melosys.domain.avgift.SkatteforholdTilNorge
+import no.nav.melosys.domain.avgift.Trygdeavgiftsperiode
 import no.nav.melosys.domain.avklartefakta.AvklartVirksomhet
 import no.nav.melosys.domain.brev.InnvilgelseFtrlYrkesaktivFrivilligBrevbestilling
 import no.nav.melosys.domain.folketrygden.FastsattTrygdeavgift
@@ -205,8 +208,18 @@ internal class InnvilgelseFtrlYrkesaktivFrivilligMapperTest {
     fun mapYrkesaktivFrivillig_innvilgetOgAvslaatt_populererFelter_ingen_avgiftsperioder() {
         mockHappyCase(Case.paragraf_2_8)
         val behandlingsresultat = lagBehandlingsResultat(Case.paragraf_2_8)
+        val trygdeavgiftsperioder = mutableSetOf(
+            Trygdeavgiftsperiode().apply {
+                grunnlagInntekstperiode = lagGrunnlagInntektsperiode()
+                grunnlagSkatteforholdTilNorge = SkatteforholdTilNorge().apply { skatteplikttype = Skatteplikttype.SKATTEPLIKTIG }
+                trygdesats = BigDecimal.ZERO
+                trygdeavgiftsbeløpMd = Penger(BigDecimal.ZERO)
+                periodeFra = LocalDate.EPOCH.plusMonths(1)
+                periodeTil = LocalDate.EPOCH.plusMonths(4)
+            }
+        )
         every { mockDokgenMapperDatahenter.hentBehandlingsresultat(ofType()) } returns behandlingsresultat.apply {
-            medlemAvFolketrygden.fastsattTrygdeavgift.trygdeavgiftsperioder = emptySet()
+            medlemAvFolketrygden.fastsattTrygdeavgift.trygdeavgiftsperioder = trygdeavgiftsperioder
             medlemAvFolketrygden.medlemskapsperioder = listOf(
                 Medlemskapsperiode().apply {
                     fom = LocalDate.EPOCH.plusMonths(1)
@@ -218,7 +231,6 @@ internal class InnvilgelseFtrlYrkesaktivFrivilligMapperTest {
                     bestemmelse = Folketrygdloven_kap2_bestemmelser.FTRL_KAP2_2_8_FØRSTE_LEDD_A
                 }
             )
-            medlemAvFolketrygden.fastsattTrygdeavgift.trygdeavgiftsperioder = lagTrygdeavgiftsperioder()
         }
 
         innvilgelseFtrlMapper.mapYrkesaktivFrivillig(lagBrevbestilling()).apply {
@@ -343,12 +355,9 @@ internal class InnvilgelseFtrlYrkesaktivFrivilligMapperTest {
         })
 
     private fun lagTrygdeavgiftsperioder(): Set<Trygdeavgiftsperiode> {
-        val inntektsperioder = listOf(Inntektsperiode().apply {
+        val inntektsperioder = listOf(lagGrunnlagInntektsperiode().apply {
             fomDato = LocalDate.EPOCH.plusMonths(1)
             tomDato = LocalDate.EPOCH.plusMonths(4)
-            type = Inntektskildetype.ARBEIDSINNTEKT_FRA_NORGE
-            isArbeidsgiversavgiftBetalesTilSkatt = true
-            avgiftspliktigInntektMnd = Penger(0.0)
         })
         val skatteforholdTilNorge =
             listOf(SkatteforholdTilNorge().apply { skatteplikttype = Skatteplikttype.SKATTEPLIKTIG })

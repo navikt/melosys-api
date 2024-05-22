@@ -50,7 +50,7 @@ class TrygdeavgiftsberegningService
 
         medlemAvFolketrygdenService.lagreOgFlush(medlemAvFolketrygden)
 
-        TrygdeavgiftValideringService.validerTrygdeavgiftberegningRequest(oppdaterTrygdeavgiftsgrunnlagRequest, medlemAvFolketrygden);
+        TrygdeavgiftValideringService.validerTrygdeavgiftberegningRequest(oppdaterTrygdeavgiftsgrunnlagRequest, medlemAvFolketrygden)
 
         val innvilgedeMedlemskapsperioder = medlemAvFolketrygden.medlemskapsperioder.filter { it.erInnvilget() }
 
@@ -83,7 +83,7 @@ class TrygdeavgiftsberegningService
         }
 
         medlemAvFolketrygdenService.lagreOgFlush(medlemAvFolketrygden)
-        return nyeTrygdeavgiftsperioder;
+        return nyeTrygdeavgiftsperioder
     }
 
     private fun mapTilMedlemskapsperiodeDtos(medlemskapsperioder: List<Medlemskapsperiode>) =
