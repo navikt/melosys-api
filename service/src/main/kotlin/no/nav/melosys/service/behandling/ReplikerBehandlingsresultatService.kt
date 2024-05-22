@@ -87,14 +87,14 @@ class ReplikerBehandlingsresultatService(val behandlingsresultatService: Behandl
     ) {
         medlemAvFolketrygdenReplika.medlemskapsperioder = HashSet()
 
-        val filtrertMedlemskapsperioderOrig = if (behandlingstype == Behandlingstyper.MANGLENDE_INNBETALING_TRYGDEAVGIFT) {
+        val filtrertMedlemskapsperioderOriginal = if (behandlingstype == Behandlingstyper.MANGLENDE_INNBETALING_TRYGDEAVGIFT) {
             behandlingsresultatOrig.medlemAvFolketrygden.medlemskapsperioder.filter { it.erInnvilget() || it.erOpphørt() }
         } else {
             behandlingsresultatOrig.medlemAvFolketrygden.medlemskapsperioder.filter { it.erInnvilget() }
         }
 
-        for (medlemskapsperiodeOrig in filtrertMedlemskapsperioderOrig) {
-            val medlemskapsperiodeReplika = BeanUtils.cloneBean(medlemskapsperiodeOrig) as Medlemskapsperiode
+        for (medlemskapsperiodeOriginal in filtrertMedlemskapsperioderOriginal) {
+            val medlemskapsperiodeReplika = BeanUtils.cloneBean(medlemskapsperiodeOriginal) as Medlemskapsperiode
             medlemskapsperiodeReplika.medlemAvFolketrygden = medlemAvFolketrygdenReplika
             medlemAvFolketrygdenReplika.medlemskapsperioder.add(medlemskapsperiodeReplika)
         }
@@ -135,16 +135,15 @@ class ReplikerBehandlingsresultatService(val behandlingsresultatService: Behandl
         val fastsattTrygdeavgiftReplika = medlemAvFolketrygdenReplika.fastsattTrygdeavgift
         val inntektsperioderReplika = medlemAvFolketrygdenOriginal.fastsattTrygdeavgift.hentInntektsperioder().map {
             BeanUtils.cloneBean(it) as Inntektsperiode
-        }.toSet()
+        }
         val skatteforholdTilNorgeReplika = medlemAvFolketrygdenOriginal.fastsattTrygdeavgift.hentSkatteforholdTilNorge().map {
             BeanUtils.cloneBean(it) as SkatteforholdTilNorge
-        }.toSet()
+        }
 
         fastsattTrygdeavgiftReplika.trygdeavgiftsperioder = HashSet()
         for (trygdeavgiftsperiodeOriginal in medlemAvFolketrygdenOriginal.fastsattTrygdeavgift.trygdeavgiftsperioder) {
             val trygdeavgiftsperiodeReplika = BeanUtils.cloneBean(trygdeavgiftsperiodeOriginal) as Trygdeavgiftsperiode
             trygdeavgiftsperiodeReplika.fastsattTrygdeavgift = fastsattTrygdeavgiftReplika
-            trygdeavgiftsperiodeReplika.id = null
 
             trygdeavgiftsperiodeReplika.grunnlagMedlemskapsperiode = medlemAvFolketrygdenReplika.medlemskapsperioder
                 .find { it.id == trygdeavgiftsperiodeOriginal.grunnlagMedlemskapsperiode.id }
@@ -176,8 +175,8 @@ class ReplikerBehandlingsresultatService(val behandlingsresultatService: Behandl
         behandlingsresultatsReplika: Behandlingsresultat
     ) {
         behandlingsresultatsReplika.utpekingsperioder = HashSet()
-        for (utpekingsperiodeOrig in behandlingsresultatOrig.utpekingsperioder) {
-            val utpekingsperiodeReplika = BeanUtils.cloneBean(utpekingsperiodeOrig) as Utpekingsperiode
+        for (utpekingsperiodeOriginal in behandlingsresultatOrig.utpekingsperioder) {
+            val utpekingsperiodeReplika = BeanUtils.cloneBean(utpekingsperiodeOriginal) as Utpekingsperiode
             utpekingsperiodeReplika.behandlingsresultat = behandlingsresultatsReplika
             utpekingsperiodeReplika.id = null
             utpekingsperiodeReplika.medlPeriodeID = null
@@ -197,8 +196,8 @@ class ReplikerBehandlingsresultatService(val behandlingsresultatService: Behandl
         behandlingsresultatReplika: Behandlingsresultat
     ) {
         behandlingsresultatReplika.anmodningsperioder = HashSet()
-        for (anmodningsperiodeOrig in behandlingsresultatOrig.anmodningsperioder) {
-            val anmodningsperiodeReplika = BeanUtils.cloneBean(anmodningsperiodeOrig) as Anmodningsperiode
+        for (anmodningsperiodeOriginal in behandlingsresultatOrig.anmodningsperioder) {
+            val anmodningsperiodeReplika = BeanUtils.cloneBean(anmodningsperiodeOriginal) as Anmodningsperiode
             anmodningsperiodeReplika.behandlingsresultat = behandlingsresultatReplika
             anmodningsperiodeReplika.id = null
             anmodningsperiodeReplika.medlPeriodeID = null
@@ -219,13 +218,13 @@ class ReplikerBehandlingsresultatService(val behandlingsresultatService: Behandl
         behandlingsresultatReplika: Behandlingsresultat
     ) {
         behandlingsresultatReplika.vilkaarsresultater = HashSet()
-        for (vilkaarsresultatOrig in behandlingsresultatOrig.vilkaarsresultater) {
-            val vilkaarsresultatReplika = BeanUtils.cloneBean(vilkaarsresultatOrig) as Vilkaarsresultat
+        for (vilkaarsresultatOriginal in behandlingsresultatOrig.vilkaarsresultater) {
+            val vilkaarsresultatReplika = BeanUtils.cloneBean(vilkaarsresultatOriginal) as Vilkaarsresultat
             vilkaarsresultatReplika.behandlingsresultat = behandlingsresultatReplika
             vilkaarsresultatReplika.id = null
             vilkaarsresultatReplika.begrunnelser = HashSet()
-            for (vilkaarBegrunnelseOrig in vilkaarsresultatOrig.begrunnelser) {
-                val vilkaarBegrunnelsesReplika = BeanUtils.cloneBean(vilkaarBegrunnelseOrig) as VilkaarBegrunnelse
+            for (vilkaarBegrunnelseOriginal in vilkaarsresultatOriginal.begrunnelser) {
+                val vilkaarBegrunnelsesReplika = BeanUtils.cloneBean(vilkaarBegrunnelseOriginal) as VilkaarBegrunnelse
                 vilkaarBegrunnelsesReplika.vilkaarsresultat = vilkaarsresultatReplika
                 vilkaarBegrunnelsesReplika.id = null
                 vilkaarsresultatReplika.begrunnelser.add(vilkaarBegrunnelsesReplika)
@@ -245,8 +244,8 @@ class ReplikerBehandlingsresultatService(val behandlingsresultatService: Behandl
         behandlingsresultatReplika: Behandlingsresultat
     ) {
         behandlingsresultatReplika.lovvalgsperioder = HashSet()
-        for (lovvalgsperiodeOrig in behandlingsresultatOrig.lovvalgsperioder) {
-            val lovvalgsperiodeReplika = BeanUtils.cloneBean(lovvalgsperiodeOrig) as Lovvalgsperiode
+        for (lovvalgsperiodeOriginal in behandlingsresultatOrig.lovvalgsperioder) {
+            val lovvalgsperiodeReplika = BeanUtils.cloneBean(lovvalgsperiodeOriginal) as Lovvalgsperiode
             lovvalgsperiodeReplika.behandlingsresultat = behandlingsresultatReplika
             lovvalgsperiodeReplika.id = null
             behandlingsresultatReplika.lovvalgsperioder.add(lovvalgsperiodeReplika)
@@ -264,9 +263,9 @@ class ReplikerBehandlingsresultatService(val behandlingsresultatService: Behandl
         behandlingsresultatReplika: Behandlingsresultat
     ) {
         behandlingsresultatReplika.behandlingsresultatBegrunnelser = HashSet()
-        for (behandlingsresultatBegrunnelseOrig in behandlingsresultatOrig.behandlingsresultatBegrunnelser) {
+        for (behandlingsresultatBegrunnelseOriginal in behandlingsresultatOrig.behandlingsresultatBegrunnelser) {
             val behandlingsresultatBegrunnelseReplika =
-                BeanUtils.cloneBean(behandlingsresultatBegrunnelseOrig) as BehandlingsresultatBegrunnelse
+                BeanUtils.cloneBean(behandlingsresultatBegrunnelseOriginal) as BehandlingsresultatBegrunnelse
             behandlingsresultatBegrunnelseReplika.behandlingsresultat = behandlingsresultatReplika
             behandlingsresultatBegrunnelseReplika.id = null
             behandlingsresultatReplika.behandlingsresultatBegrunnelser.add(behandlingsresultatBegrunnelseReplika)
@@ -284,14 +283,14 @@ class ReplikerBehandlingsresultatService(val behandlingsresultatService: Behandl
         behandlingsresultatReplika: Behandlingsresultat
     ) {
         behandlingsresultatReplika.avklartefakta = HashSet()
-        for (avklartefaktaOrig in behandlingsresultatOrig.avklartefakta) {
-            val avklartefaktaReplika = BeanUtils.cloneBean(avklartefaktaOrig) as Avklartefakta
+        for (avklartefaktaOriginal in behandlingsresultatOrig.avklartefakta) {
+            val avklartefaktaReplika = BeanUtils.cloneBean(avklartefaktaOriginal) as Avklartefakta
             avklartefaktaReplika.behandlingsresultat = behandlingsresultatReplika
             avklartefaktaReplika.id = null
             avklartefaktaReplika.registreringer = HashSet()
-            for (avklartefaktaRegistreringOrig in avklartefaktaOrig.registreringer) {
+            for (avklartefaktaRegistreringOriginal in avklartefaktaOriginal.registreringer) {
                 val avklartefaktaRegistreringReplika =
-                    BeanUtils.cloneBean(avklartefaktaRegistreringOrig) as AvklartefaktaRegistrering
+                    BeanUtils.cloneBean(avklartefaktaRegistreringOriginal) as AvklartefaktaRegistrering
                 avklartefaktaRegistreringReplika.avklartefakta = avklartefaktaReplika
                 avklartefaktaRegistreringReplika.id = null
                 avklartefaktaReplika.registreringer.add(avklartefaktaRegistreringReplika)
@@ -311,8 +310,8 @@ class ReplikerBehandlingsresultatService(val behandlingsresultatService: Behandl
         behandlingsresultatReplika: Behandlingsresultat
     ) {
         behandlingsresultatReplika.kontrollresultater = HashSet()
-        for (kontrollresultatOrig in behandlingsresultatOrig.kontrollresultater) {
-            val kontrollresultatReplika = BeanUtils.cloneBean(kontrollresultatOrig) as Kontrollresultat
+        for (kontrollresultatOriginal in behandlingsresultatOrig.kontrollresultater) {
+            val kontrollresultatReplika = BeanUtils.cloneBean(kontrollresultatOriginal) as Kontrollresultat
             kontrollresultatReplika.behandlingsresultat = behandlingsresultatReplika
             kontrollresultatReplika.id = null
             behandlingsresultatReplika.kontrollresultater.add(kontrollresultatReplika)
