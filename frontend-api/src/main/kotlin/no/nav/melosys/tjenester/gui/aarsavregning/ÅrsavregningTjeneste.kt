@@ -7,10 +7,7 @@ import no.nav.melosys.domain.kodeverk.Trygdedekninger
 import no.nav.melosys.service.sak.ÅrsavregningService
 import no.nav.security.token.support.core.api.Protected
 import org.springframework.http.ResponseEntity
-import org.springframework.web.bind.annotation.GetMapping
-import org.springframework.web.bind.annotation.PathVariable
-import org.springframework.web.bind.annotation.RequestMapping
-import org.springframework.web.bind.annotation.RestController
+import org.springframework.web.bind.annotation.*
 import java.time.LocalDate
 
 @Protected
@@ -79,12 +76,25 @@ class ÅrsavregningTjeneste(
     }
 }
 
+@PutMapping("/{avregningID}")
+fun hentAvregning(@PathVariable("avregningID") avregningID: Long, @RequestBody årsavregningRequest: ÅrsavregningRequest): ResponseEntity<Unit> {
+    // TODO val årsavregnig = årsavregningService.oppdaterÅrsavregning(avregningID)
+    return ResponseEntity.noContent().build()
+}
+
 data class ÅrsavregningResponse(
     val aar: Int,
     val forskuddsvisFakturertAvgift: FakturertAvgift,
     val avvikFunnet: Boolean?,
     val endeligAvgift: EndeligAvgift?,
     val avregning: Avregning?
+)
+
+data class ÅrsavregningRequest(
+    val aar: Int,
+    val tidligereFakturertBeloep: Int?,
+    val skatteforholdsperioder: List<Skatteforholdsperiode>,
+    val inntektskperioder: List<Inntektsperiode>,
 )
 
 data class FakturertAvgift(
