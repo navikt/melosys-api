@@ -172,9 +172,6 @@ public class BrevmottakerService {
 
     private List<Mottaker> avklarMottakereForVirksomhet(Behandling behandling) {
         Aktoer virksomhet = behandling.getFagsak().hentVirksomhet();
-        if (virksomhet == null) {
-            throw new FunksjonellException("Virksomhet er ikke registrert.");
-        }
         return List.of(Mottaker.av(virksomhet));
     }
 

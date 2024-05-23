@@ -132,7 +132,7 @@ class BrevmottakerServiceTest {
 
         assertThatExceptionOfType(FunksjonellException.class)
             .isThrownBy(() -> brevmottakerService.avklarMottakere(null, mottaker, behandling))
-            .withMessageContaining("Virksomhet er ikke registrert.");
+            .withMessageContaining("Fant ikke virksomhet for sak ");
     }
 
     @Test
