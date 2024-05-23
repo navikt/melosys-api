@@ -2,6 +2,7 @@ package no.nav.melosys.saksflyt.steg.behandling
 
 import no.nav.melosys.domain.Behandling
 import no.nav.melosys.domain.Behandlingsaarsak
+import no.nav.melosys.domain.Fagsak
 import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingsaarsaktyper
 import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingsresultattyper
 import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingstyper
@@ -35,8 +36,8 @@ class OpprettManglendeInnbetalingBehandling(
         val fakturaserieReferanse = prosessinstans.getData(ProsessDataKey.FAKTURASERIE_REFERANSE)
         val mottaksDato = prosessinstans.getData(ProsessDataKey.MOTTATT_DATO, LocalDate::class.java)
 
-        val behandlingsresultater =
-            behandlingsresultatService.finnAlleBehandlingsresultatMedFakturaserieReferanse(fakturaserieReferanse)
+        val behandlingsresultater = behandlingsresultatService
+            .finnAlleBehandlingsresultatMedFakturaserieReferanse(fakturaserieReferanse)
 
         if (behandlingsresultater.isEmpty()) {
             throw FunksjonellException("Finner ikke behandlingsresultat med fakturaserie-referanse: $fakturaserieReferanse")
@@ -44,7 +45,8 @@ class OpprettManglendeInnbetalingBehandling(
 
         val medlemskapsperiode = medlemAvFolketrygdenService.finnMedlemAvFolketrygden(behandlingsresultater.first().id)
 
-        val fagsak = behandlingService.hentBehandling(behandlingsresultater.first().id).fagsak
+        val fagsak = behandlingService.hentBehandling(behandlingsresultater.first().id)?.fagsak
+            ?: throw FunksjonellException("Fagsak er ikke tilstede for behandlingsresultat id: ${behandlingsresultater.first().id}")
 
         if (medlemskapsperiode.isPresent && medlemskapsperiode.get().medlemskapsperioder.any { it.erPliktig() }) {
             val behandlingMedFattetVedtak = saksbehandlingRegler.finnBehandlingSomKanReplikeres(fagsak)
@@ -56,12 +58,25 @@ class OpprettManglendeInnbetalingBehandling(
 
         if (fagsak.harAktivBehandlingIkkeÅrsavregning()) {
             val aktivBehandling = fagsak.hentAktivBehandlingIkkeÅrsavregning()
-            if (aktivBehandling.erManglendeInnbetalingTrygdeavgift()) {
+            håndterAktivBehandling(aktivBehandling, prosessinstans, mottaksDato)
+            return
+        }
+
+        lagNyBehandling(prosessinstans, fagsak, mottaksDato)
+    }
+
+    private fun håndterAktivBehandling(
+        aktivBehandling: Behandling,
+        prosessinstans: Prosessinstans,
+        mottaksDato: LocalDate?
+    ) {
+        when {
+            aktivBehandling.erManglendeInnbetalingTrygdeavgift() -> {
                 prosessinstans.behandling = aktivBehandling
                 return
             }
 
-            if (aktivBehandling.erNyVurdering() && aktivBehandling.opprinneligBehandling != null) {
+            aktivBehandling.erNyVurdering() && aktivBehandling.opprinneligBehandling != null -> {
                 aktivBehandling.type = Behandlingstyper.MANGLENDE_INNBETALING_TRYGDEAVGIFT
                 val manglendeInnbetalingFrist = Behandling.utledBehandlingsfrist(aktivBehandling, mottaksDato)
                 if (manglendeInnbetalingFrist.isBefore(aktivBehandling.behandlingsfrist)) {
@@ -71,19 +86,20 @@ class OpprettManglendeInnbetalingBehandling(
                 return
             }
 
-            if (aktivBehandling.type in listOf(
-                    Behandlingstyper.HENVENDELSE,
-                    Behandlingstyper.NY_VURDERING
-                ) && aktivBehandling.opprinneligBehandling == null
-            ) {
+            aktivBehandling.type in listOf(Behandlingstyper.HENVENDELSE, Behandlingstyper.NY_VURDERING) &&
+                aktivBehandling.opprinneligBehandling == null -> {
                 behandlingService.avsluttBehandling(aktivBehandling.id)
                 behandlingsresultatService.oppdaterBehandlingsresultattype(aktivBehandling.id, Behandlingsresultattyper.AVBRUTT)
                 oppgaveService.ferdigstillOppgaveMedSaksnummer(aktivBehandling.fagsak.saksnummer)
-            } else {
-                throw FunksjonellException("Har ikke støtte for aktiv behandling: ${aktivBehandling.id}")
+                lagNyBehandling(prosessinstans, aktivBehandling.fagsak, mottaksDato)
+                return
             }
-        }
 
+            else -> throw FunksjonellException("Har ikke støtte for aktiv behandling: ${aktivBehandling.id}")
+        }
+    }
+
+    private fun lagNyBehandling(prosessinstans: Prosessinstans, fagsak: Fagsak, mottaksDato: LocalDate?) {
         val behandlingBruktForReplikering = saksbehandlingRegler.finnBehandlingSomKanReplikeres(fagsak)
             ?: throw FunksjonellException(
                 "Finner ikke behandling som skal brukes til replikering. " +
@@ -94,9 +110,10 @@ class OpprettManglendeInnbetalingBehandling(
             behandlingBruktForReplikering,
             Behandlingstyper.MANGLENDE_INNBETALING_TRYGDEAVGIFT
         )
-        nyBehandling.settBehandlingsårsak(Behandlingsaarsak(Behandlingsaarsaktyper.MELDING_OM_MANGLENDE_INNBETALING, null, mottaksDato))
+        nyBehandling.settBehandlingsårsak(
+            Behandlingsaarsak(Behandlingsaarsaktyper.MELDING_OM_MANGLENDE_INNBETALING, null, mottaksDato)
+        )
         nyBehandling.behandlingsfrist = Behandling.utledBehandlingsfrist(nyBehandling, mottaksDato)
-
 
         prosessinstans.behandling = nyBehandling
     }
