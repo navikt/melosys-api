@@ -9,8 +9,8 @@ data class TrygdeavgiftsgrunnlagDto(
 ) {
 
     constructor(trygdeavgiftsperiode: Set<Trygdeavgiftsperiode>) : this(
-        trygdeavgiftsperiode.map { SkatteforholdTilNorgeDto(it.grunnlagSkatteforholdTilNorge) }.toSet(),
-        trygdeavgiftsperiode.map { InntekskildeDto(it.grunnlagInntekstperiode) }.toSet()
+        trygdeavgiftsperiode.map { SkatteforholdTilNorgeDto(it.grunnlagSkatteforholdTilNorge) }.sortedWith(compareBy { it.tomDato }).toSet(),
+        trygdeavgiftsperiode.map { InntekskildeDto(it.grunnlagInntekstperiode) }.sortedWith(compareBy { it.tomDato }).toSet()
     )
 
     fun tilRequest(): OppdaterTrygdeavgiftsgrunnlagRequest =
