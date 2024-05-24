@@ -1,8 +1,6 @@
 package no.nav.melosys.tjenester.gui.aarsavregning
 
 import com.ninjasquad.springmockk.MockkBean
-import io.mockk.every
-import no.nav.melosys.domain.avgift.Aarsavregning
 import no.nav.melosys.service.sak.ÅrsavregningService
 import org.junit.jupiter.api.Test
 import org.springframework.beans.factory.annotation.Autowired
@@ -23,7 +21,7 @@ internal class ÅrsavregningTjenesteTest {
 
     @Test
     fun `hent avregning basert på ID`() {
-        every { årsavregningService.hentÅrsavregnig(any()) } returns Aarsavregning()
+        // TODO every { årsavregningService.hentÅrsavregning(any()) } returns Årsavregning()
 
 
         val expectedJson = """{

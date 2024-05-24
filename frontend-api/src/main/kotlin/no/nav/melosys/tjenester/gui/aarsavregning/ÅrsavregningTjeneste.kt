@@ -19,7 +19,7 @@ class ÅrsavregningTjeneste(
 ) {
     @GetMapping("/{avregningID}")
     fun hentAvregning(@PathVariable("avregningID") avregningID: Long): ResponseEntity<ÅrsavregningResponse> {
-        // TODO val årsavregnig = årsavregningService.hentÅrsavregnig(avregningID)
+        // TODO bruk årsavregningService
         return ResponseEntity.ok(
             ÅrsavregningResponse(
                 aar = 2023,
@@ -78,7 +78,7 @@ class ÅrsavregningTjeneste(
 
 @PutMapping("/{avregningID}")
 fun hentAvregning(@PathVariable("avregningID") avregningID: Long, @RequestBody årsavregningRequest: ÅrsavregningRequest): ResponseEntity<Unit> {
-    // TODO val årsavregnig = årsavregningService.oppdaterÅrsavregning(avregningID)
+    // TODO bruk årsavregningService
     return ResponseEntity.noContent().build()
 }
 
