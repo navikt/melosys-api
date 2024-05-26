@@ -32,9 +32,7 @@ class TrygdeavgiftTjeneste(
         return medlemAvFolketrygdenService.finnMedlemAvFolketrygden(behandlingID).getOrNull()?.fastsattTrygdeavgift
             ?.let {
                 ResponseEntity.ok(
-                    TrygdeavgiftMottakerDto(
-                        trygdeavgiftMottakerService.getTrygdeavgiftMottaker(it)
-                    )
+                    TrygdeavgiftMottakerDto(trygdeavgiftMottakerService.getTrygdeavgiftMottaker(it))
                 )
             } ?: ResponseEntity.noContent().build()
     }
@@ -63,6 +61,17 @@ class TrygdeavgiftTjeneste(
 
         return ResponseEntity.ok(
             BeregnetTrygdeavgiftDto.av(trygdeavgiftsperiodeSet)
+        )
+    }
+
+    @GetMapping("/grunnlag/opprinnelig")
+    fun hentOpprinneligTrygdeavgiftsgrunnlagDersomDetEksisterer(@PathVariable("behandlingID") behandlingID: Long): ResponseEntity<TrygdeavgiftsgrunnlagDto> {
+        aksesskontroll.autoriser(behandlingID)
+
+        val trygdeavgiftsperioder = trygdeavgiftsberegningService.hentOpprinneligTrygdeavgiftsperioder(behandlingID)
+
+        return ResponseEntity.ok(
+            TrygdeavgiftsgrunnlagDto(trygdeavgiftsperioder)
         )
     }
 

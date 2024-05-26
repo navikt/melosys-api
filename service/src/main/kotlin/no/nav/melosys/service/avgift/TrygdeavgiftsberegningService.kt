@@ -17,6 +17,7 @@ import no.nav.melosys.service.MedlemAvFolketrygdenService
 import no.nav.melosys.service.avgift.dto.OppdaterTrygdeavgiftsgrunnlagRequest
 import no.nav.melosys.service.avgift.dto.SkatteforholdTilNorgeRequest
 import no.nav.melosys.service.behandling.BehandlingService
+import no.nav.melosys.service.behandling.BehandlingsresultatService
 import no.nav.melosys.service.persondata.PersondataService
 import org.springframework.stereotype.Service
 import org.springframework.transaction.annotation.Transactional
@@ -29,6 +30,7 @@ class TrygdeavgiftsberegningService
     (
     private val behandlingService: BehandlingService,
     private val eregFasade: EregFasade,
+    private val behandlingsresultatService: BehandlingsresultatService,
     private val medlemAvFolketrygdenService: MedlemAvFolketrygdenService,
     private val trygdeavgiftMottakerService: TrygdeavgiftMottakerService,
     private val persondataService: PersondataService,
@@ -76,7 +78,8 @@ class TrygdeavgiftsberegningService
 
         medlemAvFolketrygden.fastsattTrygdeavgift.trygdeavgiftsperioder.addAll(nyeTrygdeavgiftsperioder)
 
-        val skalKunBetalesTilSkatt = trygdeavgiftMottakerService.getTrygdeavgiftMottaker(medlemAvFolketrygden.fastsattTrygdeavgift) == Trygdeavgiftmottaker.TRYGDEAVGIFT_BETALES_TIL_SKATT
+        val skalKunBetalesTilSkatt =
+            trygdeavgiftMottakerService.getTrygdeavgiftMottaker(medlemAvFolketrygden.fastsattTrygdeavgift) == Trygdeavgiftmottaker.TRYGDEAVGIFT_BETALES_TIL_SKATT
         if (skalKunBetalesTilSkatt && !erAlleTrygdeavgiftbelopNull(beregnetTrygdeavgift)) {
             throw IllegalStateException("Trygdeavgift skal ikke betales til NAV. Beregnet trygdeavgift må derfor være 0.")
         }
@@ -208,6 +211,17 @@ class TrygdeavgiftsberegningService
             .map { it.fastsattTrygdeavgift?.trygdeavgiftsperioder }
             .orElse(null)
             ?: emptySet()
+    }
+
+    @Transactional(readOnly = true)
+    fun hentOpprinneligTrygdeavgiftsperioder(behandlingsresultatID: Long): Set<Trygdeavgiftsperiode> {
+        val behandlingsresultat = behandlingsresultatService.hentBehandlingsresultat(behandlingsresultatID)
+        val behandliong = behandlingsresultat.behandling
+        behandliong.opprinneligBehandling?.let {
+            return behandlingsresultatService.hentBehandlingsresultat(it.id).medlemAvFolketrygden.fastsattTrygdeavgift?.trygdeavgiftsperioder
+                ?: emptySet()
+        }
+        return emptySet()
     }
 
     @Transactional(readOnly = true)
