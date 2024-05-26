@@ -173,9 +173,9 @@ public final class ProsessflytDefinisjon {
             )
         );
 
-        PROSESS_FLYT_MAP.put(ProsessType.OPPRETT_NY_BEHANDLING_ARSAVREGNING,
-            new ProsessFlyt(ProsessType.OPPRETT_NY_BEHANDLING_ARSAVREGNING,
-                OPPRETT_ARSAVREGNING_BEHANDLING
+        PROSESS_FLYT_MAP.put(ProsessType.OPPRETT_NY_BEHANDLING_AARSAVREGNING,
+            new ProsessFlyt(ProsessType.OPPRETT_NY_BEHANDLING_AARSAVREGNING,
+                OPPRETT_AARSAVREGNING_BEHANDLING
             )
         );
 

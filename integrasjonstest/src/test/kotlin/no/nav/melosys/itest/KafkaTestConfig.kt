@@ -1,7 +1,7 @@
 package no.nav.melosys.itest
 
 import com.fasterxml.jackson.databind.ObjectMapper
-import no.nav.melosys.domain.arsavregning.Skattehendelse
+import no.nav.melosys.domain.avgift.aarsavregning.Skattehendelse
 import no.nav.melosys.domain.eessi.melding.MelosysEessiMelding
 import no.nav.melosys.domain.manglendebetaling.ManglendeFakturabetalingMelding
 import org.apache.kafka.common.serialization.StringSerializer

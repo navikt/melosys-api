@@ -8,7 +8,7 @@ import org.springframework.stereotype.Component
 @Component
 class OpprettArsavregning():StegBehandler {
     override fun inngangsSteg(): ProsessSteg {
-        return ProsessSteg.OPPRETT_ARSAVREGNING_BEHANDLING
+        return ProsessSteg.OPPRETT_AARSAVREGNING_BEHANDLING
     }
 
     override fun utfør(prosessinstans: Prosessinstans?) {

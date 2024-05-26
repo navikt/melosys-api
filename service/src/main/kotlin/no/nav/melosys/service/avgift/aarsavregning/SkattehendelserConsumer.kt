@@ -1,7 +1,7 @@
-package no.nav.melosys.service.arsavregning
+package no.nav.melosys.service.avgift.aarsavregning
 
 import mu.KotlinLogging
-import no.nav.melosys.domain.arsavregning.Skattehendelse
+import no.nav.melosys.domain.avgift.aarsavregning.Skattehendelse
 import no.nav.melosys.saksflytapi.ProsessinstansService
 import org.apache.kafka.clients.consumer.ConsumerRecord
 import org.springframework.beans.factory.annotation.Autowired
@@ -22,11 +22,7 @@ class SkattehendelserConsumer(
     )
     fun lesSkattehendelser(consumerRecord: ConsumerRecord<String, Skattehendelse>) {
         val skattehendelseMelding = consumerRecord.value()
-        try {
-            prosessinstansService.opprettArsavregningsBehandlingProsessflyt(skattehendelseMelding)
-        } catch (e: Exception) {
-            log.error("Feil ved mottak av Skattehendelse med consumer record key ${consumerRecord.key()}", e)
-        }
+        prosessinstansService.opprettArsavregningsBehandlingProsessflyt(skattehendelseMelding)
     }
 
 }

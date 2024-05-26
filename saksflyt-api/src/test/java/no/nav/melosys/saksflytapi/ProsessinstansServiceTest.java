@@ -7,7 +7,7 @@ import com.fasterxml.jackson.core.type.TypeReference;
 import no.nav.melosys.domain.Behandling;
 import no.nav.melosys.domain.Fagsak;
 import no.nav.melosys.domain.arkiv.DokumentReferanse;
-import no.nav.melosys.domain.arsavregning.Skattehendelse;
+import no.nav.melosys.domain.avgift.aarsavregning.Skattehendelse;
 import no.nav.melosys.domain.brev.*;
 import no.nav.melosys.domain.eessi.Periode;
 import no.nav.melosys.domain.eessi.melding.MelosysEessiMelding;
@@ -769,7 +769,7 @@ class ProsessinstansServiceTest {
 
     @Test
     void opprettProsessinstanserArsavregning() {
-        Skattehendelse skattehendelse = new Skattehendelse("2023", "456789", 1, true);
+        Skattehendelse skattehendelse = new Skattehendelse("2023", "456789");
 
 
         prosessinstansService.opprettArsavregningsBehandlingProsessflyt(skattehendelse);
