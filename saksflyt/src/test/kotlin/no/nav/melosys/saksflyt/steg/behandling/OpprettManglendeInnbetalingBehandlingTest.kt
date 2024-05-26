@@ -12,15 +12,17 @@ import io.mockk.junit5.MockKExtension
 import io.mockk.verify
 import no.nav.melosys.domain.Behandling
 import no.nav.melosys.domain.Behandlingsresultat
-import no.nav.melosys.domain.Fagsak
 import no.nav.melosys.domain.FagsakTestFactory
-import no.nav.melosys.domain.kodeverk.Sakstemaer
+import no.nav.melosys.domain.Medlemskapsperiode
+import no.nav.melosys.domain.folketrygden.MedlemAvFolketrygden
+import no.nav.melosys.domain.kodeverk.Medlemskapstyper
 import no.nav.melosys.domain.kodeverk.Sakstyper
 import no.nav.melosys.domain.kodeverk.behandlinger.*
 import no.nav.melosys.exception.FunksjonellException
 import no.nav.melosys.saksflytapi.domain.ProsessDataKey
 import no.nav.melosys.saksflytapi.domain.ProsessSteg
 import no.nav.melosys.saksflytapi.domain.Prosessinstans
+import no.nav.melosys.service.MedlemAvFolketrygdenService
 import no.nav.melosys.service.behandling.BehandlingService
 import no.nav.melosys.service.behandling.BehandlingsresultatService
 import no.nav.melosys.service.oppgave.OppgaveService
@@ -29,6 +31,7 @@ import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.extension.ExtendWith
 import java.time.LocalDate
+import java.util.*
 
 @ExtendWith(MockKExtension::class)
 class OpprettManglendeInnbetalingBehandlingTest {
@@ -37,6 +40,9 @@ class OpprettManglendeInnbetalingBehandlingTest {
 
     @MockK
     private lateinit var behandlingsresultatService: BehandlingsresultatService
+
+    @MockK
+    private lateinit var medlemAvFolketrygdenService: MedlemAvFolketrygdenService
 
     @MockK
     private lateinit var saksbehandlingRegler: SaksbehandlingRegler
@@ -49,7 +55,14 @@ class OpprettManglendeInnbetalingBehandlingTest {
     @BeforeEach
     fun setUp() {
         opprettManglendeInnbetalingBehandling =
-            OpprettManglendeInnbetalingBehandling(behandlingService, behandlingsresultatService, saksbehandlingRegler, oppgaveService)
+            OpprettManglendeInnbetalingBehandling(
+                behandlingService,
+                behandlingsresultatService,
+                medlemAvFolketrygdenService,
+                saksbehandlingRegler,
+                oppgaveService
+            )
+        every { medlemAvFolketrygdenService.finnMedlemAvFolketrygden(any<Long>()) } returns Optional.empty()
     }
 
     @Test
@@ -299,6 +312,40 @@ class OpprettManglendeInnbetalingBehandlingTest {
         shouldThrow<FunksjonellException> {
             opprettManglendeInnbetalingBehandling.utfør(prosessinstans)
         }.message.shouldBe("Har ikke støtte for aktiv behandling: 1")
+    }
+
+    @Test
+    fun `oppretter ikke behandling om siste behandling det ble fattet vedtak i har pliktig medlemskap`() {
+        val mottaksdato = LocalDate.now()
+        val behandlingsresultat = lagBehandlingsresultat().apply {
+            type = Behandlingsresultattyper.FASTSATT_LOVVALGSLAND
+        }
+        val prosessinstans = lagProsessinstans(behandlingsresultat.fakturaserieReferanse, mottaksdato)
+        val behandling = lagBehandling()
+        val behandlingAvsluttet = lagBehandling {
+            status = Behandlingsstatus.AVSLUTTET
+            type = Behandlingstyper.NY_VURDERING
+        }
+
+        every {
+            behandlingsresultatService.finnAlleBehandlingsresultatMedFakturaserieReferanse(behandlingsresultat.fakturaserieReferanse)
+        } returns listOf(behandlingsresultat)
+        every { medlemAvFolketrygdenService.finnMedlemAvFolketrygden(any()) } returns
+            Optional.of(MedlemAvFolketrygden().apply {
+                medlemskapsperioder.add(Medlemskapsperiode().apply {
+                    medlemskapstype = Medlemskapstyper.PLIKTIG
+                })
+            })
+        every { behandlingService.hentBehandling(behandlingsresultat.id) } returns behandling
+        every { saksbehandlingRegler.finnBehandlingSomKanReplikeres(behandling.fagsak)} returns behandlingAvsluttet
+
+
+        opprettManglendeInnbetalingBehandling.utfør(prosessinstans)
+
+
+        verify(exactly = 0) { behandlingService.avsluttBehandling(any()) }
+        verify(exactly = 0) { behandlingService.replikerBehandlingOgBehandlingsresultat(any(), any()) }
+        prosessinstans.behandling.shouldBe(behandlingAvsluttet)
     }
 
     private fun lagBehandlingsresultat() = Behandlingsresultat().apply {

@@ -30,7 +30,7 @@ class SaksbehandlingRegler(private val behandlingsresultatRepository: Behandling
         return finnBehandlingSomKanReplikeres(fagsak) != null
     }
 
-    fun finnBehandlingSomKanReplikeres(fagsak: Fagsak) =
+    fun finnBehandlingSomKanReplikeres(fagsak: Fagsak): Behandling? =
         finnBehandlingSomKanReplikeres(fagsak.hentBehandlingerSortertSynkendePåRegistrertDato())
 
     internal fun finnBehandlingSomKanReplikeres(behandlinger: List<Behandling>) =
