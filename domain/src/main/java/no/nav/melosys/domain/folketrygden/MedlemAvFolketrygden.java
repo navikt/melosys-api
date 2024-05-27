@@ -70,10 +70,15 @@ public class MedlemAvFolketrygden {
     }
 
     public Skatteplikttype utledSkatteplikttype() {
-        var trygdeavgiftsperiode = fastsattTrygdeavgift.getTrygdeavgiftsperioder().stream().findFirst()
-            .orElseThrow(() -> new RuntimeException("Trygdeavgiftsperiode ikke funnet, skal ikke skje for medlemAvFolketrygden :" + id));
+        var trygdeavgiftsperiode = fastsattTrygdeavgift.getTrygdeavgiftsperioder().stream().findFirst();
+        var erÅpenSluttdato = fastsattTrygdeavgift.getMedlemAvFolketrygden().utledMedlemskapsperiodeTom() == null;
+        if (trygdeavgiftsperiode.isEmpty() && erÅpenSluttdato) {
+            return Skatteplikttype.SKATTEPLIKTIG;
+        } else if (trygdeavgiftsperiode.isEmpty()) {
+            throw new RuntimeException("Trygdeavgiftsperiode ikke funnet, og det er ikke åpen sluttdato, id = " + id);
+        }
 
-        return trygdeavgiftsperiode.getGrunnlagSkatteforholdTilNorge().getSkatteplikttype();
+        return trygdeavgiftsperiode.get().getGrunnlagSkatteforholdTilNorge().getSkatteplikttype();
     }
 
 

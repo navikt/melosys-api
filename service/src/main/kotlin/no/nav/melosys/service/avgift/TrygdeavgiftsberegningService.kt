@@ -101,11 +101,7 @@ class TrygdeavgiftsberegningService
 
     private fun mapTilSkatteforholdsperiodeDtos(oppdaterTrygdeavgiftsgrunnlagRequest: OppdaterTrygdeavgiftsgrunnlagRequest) =
         oppdaterTrygdeavgiftsgrunnlagRequest.skatteforholdTilNorgeList.map {
-            SkatteforholdsperiodeDto(
-                it.toUUID(),
-                DatoPeriodeDto(it.fomDato, it.tomDato ?: LocalDate.MAX), //TODO: Håndter null
-                it.skatteplikttype
-            )
+            SkatteforholdsperiodeDto(it.toUUID(), DatoPeriodeDto(it.fomDato, it.tomDato), it.skatteplikttype)
         }.toSet()
 
 
@@ -113,7 +109,7 @@ class TrygdeavgiftsberegningService
         oppdaterTrygdeavgiftsgrunnlagRequest.inntektskilder.map {
             InntektsperiodeDto(
                 UUID.randomUUID(),
-                DatoPeriodeDto(it.fomDato, it.tomDato ?: LocalDate.MAX), //TODO: Håndter null
+                DatoPeriodeDto(it.fomDato, it.tomDato),
                 it.type,
                 it.arbeidsgiversavgiftBetales,
                 PengerDto(it.avgiftspliktigInntektMnd ?: 0.toBigDecimal())
