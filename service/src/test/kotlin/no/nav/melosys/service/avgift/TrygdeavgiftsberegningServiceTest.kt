@@ -31,6 +31,7 @@ import no.nav.melosys.service.avgift.dto.InntektskildeRequest
 import no.nav.melosys.service.avgift.dto.OppdaterTrygdeavgiftsgrunnlagRequest
 import no.nav.melosys.service.avgift.dto.SkatteforholdTilNorgeRequest
 import no.nav.melosys.service.behandling.BehandlingService
+import no.nav.melosys.service.behandling.BehandlingsresultatService
 import no.nav.melosys.service.persondata.PersondataService
 import org.junit.jupiter.api.AfterEach
 import org.junit.jupiter.api.BeforeEach
@@ -54,6 +55,8 @@ internal class TrygdeavgiftsberegningServiceTest {
 
     @MockK
     private lateinit var mockTrygdeavgiftConsumer: TrygdeavgiftConsumer
+
+    @MockK lateinit var mockBehandlingsresultatService: BehandlingsresultatService
 
     @MockK
     private lateinit var mockPersondataService: PersondataService
@@ -82,6 +85,7 @@ internal class TrygdeavgiftsberegningServiceTest {
             TrygdeavgiftsberegningService(
                 mockBehandlingService,
                 mockEregFasade,
+                mockBehandlingsresultatService,
                 mockMedlemAvFolketrygdenService,
                 trygdeavgiftMottakerService,
                 mockPersondataService,
