@@ -20,6 +20,7 @@ import no.nav.melosys.service.MedlemAvFolketrygdenService;
 import no.nav.melosys.service.avgift.TrygdeavgiftMottakerService;
 import no.nav.melosys.service.avgift.TrygdeavgiftsberegningService;
 import no.nav.melosys.service.tilgang.Aksesskontroll;
+import no.nav.melosys.tjenester.gui.behandlinger.trygdeavgift.TrygdeavgiftTjeneste;
 import no.nav.melosys.tjenester.gui.dto.trygdeavgift.*;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;

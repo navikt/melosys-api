@@ -4,8 +4,9 @@ import java.time.Instant;
 import java.time.LocalDate;
 import java.util.*;
 import java.util.stream.Collectors;
-import jakarta.persistence.*;
 
+import jakarta.persistence.*;
+import no.nav.melosys.domain.avgift.Aarsavregning;
 import no.nav.melosys.domain.avklartefakta.Avklartefakta;
 import no.nav.melosys.domain.folketrygden.MedlemAvFolketrygden;
 import no.nav.melosys.domain.kodeverk.*;
@@ -91,6 +92,9 @@ public class Behandlingsresultat extends RegistreringsInfo {
 
     @OneToOne(mappedBy = "behandlingsresultat", cascade = CascadeType.ALL, fetch = FetchType.LAZY, orphanRemoval = true)
     private MedlemAvFolketrygden medlemAvFolketrygden;
+
+    @OneToOne(mappedBy = "behandlingsresultat", cascade = CascadeType.ALL, fetch = FetchType.LAZY, orphanRemoval = true)
+    private Aarsavregning aarsavregning;
 
     public Long getId() {
         return id;
@@ -246,6 +250,14 @@ public class Behandlingsresultat extends RegistreringsInfo {
 
     public void setMedlemAvFolketrygden(MedlemAvFolketrygden medlemAvFolketrygden) {
         this.medlemAvFolketrygden = medlemAvFolketrygden;
+    }
+
+    public Aarsavregning getAarsavregning() {
+        return aarsavregning;
+    }
+
+    public void setAarsavregning(Aarsavregning aarsavregning) {
+        this.aarsavregning = aarsavregning;
     }
 
     @Override

@@ -1,4 +1,4 @@
-package no.nav.melosys.tjenester.gui
+package no.nav.melosys.tjenester.gui.behandlinger.trygdeavgift
 
 import io.swagger.annotations.Api
 import no.nav.melosys.service.MedlemAvFolketrygdenService

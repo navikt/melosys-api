@@ -4,7 +4,6 @@ import io.swagger.annotations.Api
 import io.swagger.annotations.ApiOperation
 import no.nav.melosys.service.sak.TrygdeavgiftOppsummeringService
 import no.nav.melosys.service.tilgang.Aksesskontroll
-import no.nav.melosys.tjenester.gui.fagsaker.TrygdeavgiftOppsummering
 import no.nav.security.token.support.core.api.Protected
 import org.springframework.context.annotation.Scope
 import org.springframework.http.ResponseEntity
@@ -36,3 +35,5 @@ class TrygdeavgiftFagsakTjeneste(
         )
     }
 }
+
+data class TrygdeavgiftOppsummering(val harBehandlingMedTrygdeavgift: Boolean)
