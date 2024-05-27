@@ -33,7 +33,8 @@ public record BrevbestillingUtkast(
     List<Utkast.Saksvedlegg> saksVedlegg,
     List<Utkast.FritekstVedlegg> fritekstVedlegg,
     String dokumentTittel,
-    String saksbehandlerNrToIdent
+    String saksbehandlerNrToIdent,
+    boolean skalViseStandardTekstOmOpplysninger
 ) {
     @JsonIgnore
     public String getTittel() {

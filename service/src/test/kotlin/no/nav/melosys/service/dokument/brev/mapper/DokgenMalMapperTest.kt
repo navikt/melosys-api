@@ -60,6 +60,9 @@ internal class DokgenMalMapperTest {
     @MockK
     private lateinit var mockTrygdeavtaleMapper: TrygdeavtaleMapper
 
+    @MockK
+    private lateinit var mockInnhentingAvInntektsopplysningerMapper: InnhentingAvInntektsopplysningerMapper
+
     private lateinit var dokgenMalMapper: DokgenMalMapper
 
     @BeforeEach
@@ -67,6 +70,7 @@ internal class DokgenMalMapperTest {
         dokgenMalMapper = DokgenMalMapper(
             mockDokgenMapperDatahenter,
             mockInnvilgelseFtrlMapper,
+            mockInnhentingAvInntektsopplysningerMapper,
             mockTrygdeavtaleMapper
         )
     }

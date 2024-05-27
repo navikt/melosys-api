@@ -35,6 +35,7 @@ public final class BrevbestillingDto {
     private List<FritekstvedleggDto> fritekstvedlegg;
     private String dokumentTittel;
     private String saksbehandlerNrToIdent;
+    private boolean skalViseStandardTekstOmOpplysninger;
     private String begrunnelseKode;
     private String ytterligereInformasjon;
     private String fakturanummer;
@@ -71,6 +72,7 @@ public final class BrevbestillingDto {
         List<FritekstvedleggDto> fritekstvedlegg,
         String dokumentTittel,
         String saksbehandlerNrToIdent,
+        boolean skalViseStandardTekstOmOpplysninger,
         String begrunnelseKode,
         String ytterligereInformasjon,
         String fakturanummer,
@@ -103,6 +105,7 @@ public final class BrevbestillingDto {
         this.fritekstvedlegg = fritekstvedlegg;
         this.dokumentTittel = dokumentTittel;
         this.saksbehandlerNrToIdent = saksbehandlerNrToIdent;
+        this.skalViseStandardTekstOmOpplysninger = skalViseStandardTekstOmOpplysninger;
         this.begrunnelseKode = begrunnelseKode;
         this.ytterligereInformasjon = ytterligereInformasjon;
         this.fakturanummer = fakturanummer;
@@ -144,6 +147,7 @@ public final class BrevbestillingDto {
             brevbestillingUtkast.fritekstVedlegg().stream().map(FritekstvedleggDto::av).toList(),
             brevbestillingUtkast.dokumentTittel(),
             brevbestillingUtkast.saksbehandlerNrToIdent(),
+            brevbestillingUtkast.skalViseStandardTekstOmOpplysninger(),
             deprecatedBegrunnelseKode,
             deprecatedYtterligereInformasjon,
             null,
@@ -253,6 +257,14 @@ public final class BrevbestillingDto {
 
     public void setYtterligereInformasjon(String ytterligereInformasjon) {
         this.ytterligereInformasjon = ytterligereInformasjon;
+    }
+
+    public boolean isSkalViseStandardTekstOmOpplysninger() {
+        return skalViseStandardTekstOmOpplysninger;
+    }
+
+    public void setSkalViseStandardTekstOmOpplysninger(boolean skalViseStandardTekstOmOpplysninger) {
+        this.skalViseStandardTekstOmOpplysninger = skalViseStandardTekstOmOpplysninger;
     }
 
     public Produserbaredokumenter getProduserbardokument() {

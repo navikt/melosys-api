@@ -38,6 +38,9 @@ class DokgenMalMapperIkkeYrkesaktivTest {
     private lateinit var mockTrygdeavtaleMapper: TrygdeavtaleMapper
 
     @MockK
+    private lateinit var mockInnhentingAvInntektsopplysningerMapper: InnhentingAvInntektsopplysningerMapper
+
+    @MockK
     private lateinit var mockInnvilgelseFtrlMapper: InnvilgelseFtrlMapper
 
     private lateinit var dokgenMalMapper: DokgenMalMapper
@@ -47,6 +50,7 @@ class DokgenMalMapperIkkeYrkesaktivTest {
         dokgenMalMapper = DokgenMalMapper(
             mockDokgenMapperDatahenter,
             mockInnvilgelseFtrlMapper,
+            mockInnhentingAvInntektsopplysningerMapper,
             mockTrygdeavtaleMapper
         )
     }
