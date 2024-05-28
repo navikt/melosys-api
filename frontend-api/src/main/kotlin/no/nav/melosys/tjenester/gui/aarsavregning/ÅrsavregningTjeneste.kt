@@ -23,31 +23,37 @@ class ÅrsavregningTjeneste(
         return ResponseEntity.ok(
             ÅrsavregningResponse(
                 aar = 2023,
-                forskuddsvisFakturertAvgift = FakturertAvgift(
-                    skatteforholdsperioder = listOf(
-                        Skatteforholdsperiode(LocalDate.of(2023, 1, 1), LocalDate.of(2023, 7, 31), Skatteplikttype.SKATTEPLIKTIG),
-                        Skatteforholdsperiode(LocalDate.of(2023, 8, 1), LocalDate.of(2023, 12, 31), Skatteplikttype.IKKE_SKATTEPLIKTIG)
+                tidligereOpplysninger = TidligereOpplysninger(
+                    Trygdeavgiftsgrunnlag(
+                        medlemskapsperioder = listOf(
+                            Medlemskapsperiode(LocalDate.of(2023, 1, 1), LocalDate.of(2023, 7, 31), Trygdedekninger.FTRL_2_9_FØRSTE_LEDD_B_PENSJON),
+                            Medlemskapsperiode(
+                                LocalDate.of(2023, 8, 1),
+                                LocalDate.of(2023, 12, 31),
+                                Trygdedekninger.FTRL_2_9_FØRSTE_LEDD_C_ANDRE_LEDD_HELSE_PENSJON_SYKE_FORELDREPENGER
+                            )
+                        ),
+                        skatteforholdsperioder = listOf(
+                            Skatteforholdsperiode(LocalDate.of(2023, 1, 1), LocalDate.of(2023, 7, 31), Skatteplikttype.SKATTEPLIKTIG),
+                            Skatteforholdsperiode(LocalDate.of(2023, 8, 1), LocalDate.of(2023, 12, 31), Skatteplikttype.IKKE_SKATTEPLIKTIG)
+                        ),
+                        inntektskperioder = listOf()
                     ),
-                    medlemskapsperioder = listOf(
-                        Medlemskapsperiode(LocalDate.of(2023, 1, 1), LocalDate.of(2023, 7, 31), Trygdedekninger.FTRL_2_9_FØRSTE_LEDD_B_PENSJON),
-                        Medlemskapsperiode(
-                            LocalDate.of(2023, 8, 1),
-                            LocalDate.of(2023, 12, 31),
-                            Trygdedekninger.FTRL_2_9_FØRSTE_LEDD_C_ANDRE_LEDD_HELSE_PENSJON_SYKE_FORELDREPENGER
-                        )
-                    ),
-                    trygdeavgiftsperioder = listOf(
-                        Trygdeavgiftsperiode(
-                            LocalDate.of(2023, 1, 1), LocalDate.of(2023, 7, 31), Inntektskildetype.ARBEIDSINNTEKT_FRA_NORGE, true, 40000, 0.0, 0
-                        ), Trygdeavgiftsperiode(
-                            LocalDate.of(2023, 8, 1), LocalDate.of(2023, 12, 31), Inntektskildetype.INNTEKT_FRA_UTLANDET, false, 15000, 42.2, 6330
-                        )
-                    ),
-                    totalInntektPerMd = 690000,
-                    totalAvgiftPerMd = 127020
+                    Avgift(
+                        trygdeavgiftsperioder = listOf(
+                            Trygdeavgiftsperiode(
+                                LocalDate.of(2023, 1, 1), LocalDate.of(2023, 7, 31), Inntektskildetype.ARBEIDSINNTEKT_FRA_NORGE, true, 40000, 0.0, 0
+                            ), Trygdeavgiftsperiode(
+                                LocalDate.of(2023, 8, 1), LocalDate.of(2023, 12, 31), Inntektskildetype.INNTEKT_FRA_UTLANDET, false, 15000, 42.2, 6330
+                            )
+                        ),
+                        totalInntektPerMd = 690000,
+                        totalAvgiftPerMd = 127020
+                    )
                 ),
-                avvikFunnet = false,
-                endeligAvgift = EndeligAvgift(
+                avvikFunnet = true,
+                nyttGrunnlag = Trygdeavgiftsgrunnlag(
+                    medlemskapsperioder = listOf(),
                     skatteforholdsperioder = listOf(
                         Skatteforholdsperiode(LocalDate.of(2023, 1, 1), LocalDate.of(2023, 7, 31), Skatteplikttype.SKATTEPLIKTIG),
                         Skatteforholdsperiode(LocalDate.of(2023, 8, 1), LocalDate.of(2023, 12, 31), Skatteplikttype.IKKE_SKATTEPLIKTIG)
@@ -55,6 +61,9 @@ class ÅrsavregningTjeneste(
                     inntektskperioder = listOf(
                         Inntektsperiode(LocalDate.of(2023, 1, 1), LocalDate.of(2023, 7, 31), Inntektskildetype.ARBEIDSINNTEKT_FRA_NORGE, true, 95000)
                     ),
+
+                ),
+                endeligAvgift = Avgift(
                     trygdeavgiftsperioder = listOf(
                         Trygdeavgiftsperiode(
                             LocalDate.of(2023, 1, 1), LocalDate.of(2023, 7, 31), Inntektskildetype.ARBEIDSINNTEKT_FRA_NORGE, true, 40000, 0.0, 0
@@ -64,7 +73,6 @@ class ÅrsavregningTjeneste(
                     ),
                     totalInntektPerMd = 690000,
                     totalAvgiftPerMd = 127020
-
                 ),
                 avregning = Avregning(
                     nyttTotalbeloep = 24280,
@@ -84,9 +92,10 @@ fun hentAvregning(@PathVariable("avregningID") avregningID: Long, @RequestBody �
 
 data class ÅrsavregningResponse(
     val aar: Int,
-    val forskuddsvisFakturertAvgift: FakturertAvgift,
+    val tidligereOpplysninger: TidligereOpplysninger?,
     val avvikFunnet: Boolean?,
-    val endeligAvgift: EndeligAvgift?,
+    val nyttGrunnlag: Trygdeavgiftsgrunnlag?,
+    val endeligAvgift: Avgift?,
     val avregning: Avregning?
 )
 
@@ -97,9 +106,18 @@ data class ÅrsavregningRequest(
     val inntektskperioder: List<Inntektsperiode>,
 )
 
-data class FakturertAvgift(
-    val skatteforholdsperioder: List<Skatteforholdsperiode>,
+data class TidligereOpplysninger(
+    val trygdeavgiftsgrunnlag: Trygdeavgiftsgrunnlag,
+    val avgift: Avgift
+)
+
+data class Trygdeavgiftsgrunnlag(
     val medlemskapsperioder: List<Medlemskapsperiode>,
+    val skatteforholdsperioder: List<Skatteforholdsperiode>,
+    val inntektskperioder: List<Inntektsperiode>,
+)
+
+data class Avgift(
     val trygdeavgiftsperioder: List<Trygdeavgiftsperiode>,
     val totalInntektPerMd: Int,
     val totalAvgiftPerMd: Int
@@ -121,14 +139,6 @@ data class Trygdeavgiftsperiode(
     val inntektPerMd: Int,
     val avgiftssats: Double,
     val avgiftPerMd: Int
-)
-
-data class EndeligAvgift(
-    val skatteforholdsperioder: List<Skatteforholdsperiode>,
-    val inntektskperioder: List<Inntektsperiode>,
-    val trygdeavgiftsperioder: List<Trygdeavgiftsperiode>,
-    val totalInntektPerMd: Int,
-    val totalAvgiftPerMd: Int
 )
 
 data class Inntektsperiode(
