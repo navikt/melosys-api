@@ -57,8 +57,10 @@ internal class ÅrsavregningServiceTest {
 
         årsavregningService.hentÅrsavregning(1) shouldBe Årsavregning(
             aar = 2023,
-            tidligereAvgift = null,
-            endeligAvgift = null,
+            tidligereGrunnlag = null,
+            tidligereAvgift = emptyList(),
+            nyttGrunnlag = null,
+            endeligAvgift = emptyList(),
             tidligereFakturertBeloep = null,
             nyttTotalbeloep = null,
             tilFaktureringBeloep = null

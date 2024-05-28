@@ -28,8 +28,10 @@ class ÅrsavregningService(
         val aarsavregning = aarsavregningRepository.findById(avregningID).orElseThrow { IkkeFunnetException("Fant ikke årsavregning $avregningID") }
         return Årsavregning(
             aar = aarsavregning.aar,
-            tidligereAvgift = null, // TODO mer mapping kommer
-            endeligAvgift = null,
+            tidligereGrunnlag = null,
+            tidligereAvgift = listOf(),
+            nyttGrunnlag = null, // TODO mer mapping kommer
+            endeligAvgift = listOf(),
             tidligereFakturertBeloep = aarsavregning.tidligereFakturertBeloep,
             nyttTotalbeloep = aarsavregning.nyttTotalbeloep,
             tilFaktureringBeloep = aarsavregning.tilFaktureringBeloep
@@ -39,16 +41,13 @@ class ÅrsavregningService(
 
 data class Årsavregning(
     val aar: Int,
-    val tidligereAvgift: Trygdeavgift?,
-    val endeligAvgift: Trygdeavgift?,
+    val tidligereGrunnlag: Trygdeavgiftsgrunnlag?,
+    val tidligereAvgift: List<Trygdeavgiftsperiode>,
+    val nyttGrunnlag: Trygdeavgiftsgrunnlag?,
+    val endeligAvgift: List<Trygdeavgiftsperiode>,
     val tidligereFakturertBeloep: BigDecimal?,
     val nyttTotalbeloep: BigDecimal?,
     val tilFaktureringBeloep: BigDecimal?,
-)
-
-data class Trygdeavgift(
-    val grunnlag: Trygdeavgiftsgrunnlag,
-    val avgiftsperioder: List<Trygdeavgiftsperiode>
 )
 
 data class Trygdeavgiftsgrunnlag(
