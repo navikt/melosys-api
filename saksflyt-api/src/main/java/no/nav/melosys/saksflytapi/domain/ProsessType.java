@@ -41,7 +41,8 @@ public enum ProsessType {
     UTPEKING_AVVIS("UTPEKING_AVVIS", "Avviser utpeking mottatt i en A003"),
     VIDERESEND_SOKNAD("VIDERESEND_SOKNAD", "Videresend søknad"),
     IVERKSETT_VEDTAK_IKKE_YRKESAKTIV("IVERKSETT_VEDTAK_IKKE_YRKESAKTIV", "Iverksett vedtak Ikke yrkesaktiv"),
-    ANNULLER_SAK("ANNULLER_SAK", "Annullerer en sak, fjerner medl perioder og kansellerer faktura");
+    ANNULLER_SAK("ANNULLER_SAK", "Annullerer en sak, fjerner medl perioder og kansellerer faktura"),
+    OPPRETT_NY_BEHANDLING_AARSAVREGNING("OPPRETT_NY_BEHANDLING_ARSAVREGNING", "Oppretter årsavregningbehandling på aktuell bruker");
 
     private final String kode;
     private final String beskrivelse;

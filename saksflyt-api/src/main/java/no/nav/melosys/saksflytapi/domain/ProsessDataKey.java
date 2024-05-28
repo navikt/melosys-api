@@ -73,7 +73,9 @@ public enum ProsessDataKey {
     VIRKSOMHET_ORGNR("virksomhetOrgnr"),
     YTTERLIGERE_INFO_SED("ytterligereInformasjonSed"),
     PROCESS_PARENT_ID("parentId"),
-    FORVALTNINGSMELDING_MOTTAKER("forvaltningsmeldingMottaker");
+    FORVALTNINGSMELDING_MOTTAKER("forvaltningsmeldingMottaker"),
+    GJELDER_PERIODE("gjelderPeriode"),
+    IDENTIFIKATOR("identifikator");
 
     private final String kode;
 

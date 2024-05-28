@@ -67,7 +67,8 @@ public enum ProsessSteg {
     SEND_MANGLENDE_INNBETALING_VARSELBREV("SEND_MANGLENDE_INNBETALING_VARSELBREV", "Sender varselbrev om manglende innbetaling"),
     OPPRETT_MANGLENDE_INNBETALING_BEHANDLING("OPPRETT_MANGLENDE_INNBETALING_BEHANDLING", "Oppretter ny behandling for manglende innbetaling"),
     KANSELLER_FAKTURASERIE("KANSELLER_FAKTURASERIE", "Kansellerer fakturaserie og tilhørende fakturaer"),
-    SEND_MELDING_OM_VEDTAK("SEND_MELDING_OM_VEDTAK", "Sender melding om vedtak");
+    SEND_MELDING_OM_VEDTAK("SEND_MELDING_OM_VEDTAK", "Sender melding om vedtak"),
+    OPPRETT_AARSAVREGNING_BEHANDLING("OPPRETT_ARSAVREGNING_BEHANDLING", "Oppretter ny behandling for årsavregning");
 
 
     private final String kode;

@@ -119,7 +119,7 @@ public final class ProsessflytDefinisjon {
                 LAGRE_MEDLEMSKAPSPERIODE_MEDL,
                 KANSELLER_FAKTURASERIE,
                 AVSLUTT_SAK_OG_BEHANDLING
-                )
+            )
         );
 
         PROSESS_FLYT_MAP.put(ProsessType.JFR_KNYTT,
@@ -170,6 +170,12 @@ public final class ProsessflytDefinisjon {
                 OPPRETT_MANGLENDE_INNBETALING_BEHANDLING,
                 OPPRETT_OPPGAVE,
                 SEND_MANGLENDE_INNBETALING_VARSELBREV
+            )
+        );
+
+        PROSESS_FLYT_MAP.put(ProsessType.OPPRETT_NY_BEHANDLING_AARSAVREGNING,
+            new ProsessFlyt(ProsessType.OPPRETT_NY_BEHANDLING_AARSAVREGNING,
+                OPPRETT_AARSAVREGNING_BEHANDLING
             )
         );
 
