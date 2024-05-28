@@ -1,5 +1,6 @@
 package no.nav.melosys.service.behandling
 
+import io.getunleash.FakeUnleash
 import io.kotest.assertions.throwables.shouldThrow
 import io.kotest.matchers.collections.shouldBeEmpty
 import io.kotest.matchers.collections.shouldHaveSize
@@ -39,11 +40,13 @@ internal class VilkaarsresultatServiceTest {
     @MockK
     private lateinit var behandlingsresultatRepo: BehandlingsresultatRepository
 
+    private val unleash = FakeUnleash()
+
     private lateinit var vilkaarsresultatService: VilkaarsresultatService
 
     @BeforeEach
     fun setUp() {
-        vilkaarsresultatService = VilkaarsresultatService(behandlingsresultatRepo, saksbehandlingRegler)
+        vilkaarsresultatService = VilkaarsresultatService(behandlingsresultatRepo, saksbehandlingRegler, unleash)
     }
 
     @Test

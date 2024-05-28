@@ -17,8 +17,6 @@ import no.nav.melosys.service.dokument.brev.datagrunnlag.BrevDataGrunnlag;
 import no.nav.melosys.service.unntak.AnmodningsperiodeService;
 import no.nav.melosys.service.behandling.VilkaarsresultatService;
 
-import static no.nav.melosys.domain.kodeverk.Vilkaar.FO_883_2004_ART16_1;
-
 public class BrevDataByggerAvslagYrkesaktiv implements BrevDataBygger {
     private final LandvelgerService landvelgerService;
     private final AnmodningsperiodeService anmodningsperiodeService;
@@ -54,7 +52,7 @@ public class BrevDataByggerAvslagYrkesaktiv implements BrevDataBygger {
             brevData.setAnmodningsperiodeSvar(hentAnmodningsperiodeSvar(behandlingID).get());
         }
 
-        brevData.setArt16UtenArt12(vilkaarsresultatService.harVilkaarForArtikkel16(behandlingID) && !vilkaarsresultatService.harVilkaarForArtikkel12(behandlingID));
+        brevData.setArt16UtenArt12(vilkaarsresultatService.harVilkaarForUnntak(behandlingID) && !vilkaarsresultatService.harVilkaarForUtsending(behandlingID));
 
         return brevData;
     }
@@ -68,7 +66,7 @@ public class BrevDataByggerAvslagYrkesaktiv implements BrevDataBygger {
     }
 
     private Vilkaarsresultat hentFørsteGyldigeVilkaarsresultatForArt16(long behandlingID) {
-        return vilkaarsresultatService.finnVilkaarsresultat(behandlingID, FO_883_2004_ART16_1)
+        return vilkaarsresultatService.finnUnntaksVilkaarsresultat(behandlingID)
             .filter(v -> !v.getBegrunnelser().isEmpty()).orElseThrow(() -> new FunksjonellException("Avslag yrkesaktiv må ha vilkår for art16"));
     }
 }

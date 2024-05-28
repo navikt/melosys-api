@@ -63,7 +63,7 @@ class BrevDataByggerAvslagYrkesaktivTest {
         anmodningsperiode.setSendtUtland(true);
         when(anmodningsperiodeService.hentAnmodningsperioder(anyLong())).thenReturn(Collections.singletonList(anmodningsperiode));
 
-        when(vilkaarsresultatService.finnVilkaarsresultat(anyLong(), eq(Vilkaar.FO_883_2004_ART16_1)))
+        when(vilkaarsresultatService.finnUnntaksVilkaarsresultat(anyLong()))
             .thenReturn(Optional.of(lagVilkaarsresultat(Vilkaar.FO_883_2004_ART16_1, true, KORT_OPPDRAG_RETUR_NORSK_AG)));
 
         brevDataByggerAvslagYrkesaktiv = new BrevDataByggerAvslagYrkesaktiv(landvelgerService, anmodningsperiodeService, new BrevbestillingDto(), vilkaarsresultatService);
@@ -97,8 +97,8 @@ class BrevDataByggerAvslagYrkesaktivTest {
 
         lenient().when(
             organisasjonOppslagService.hentOrganisasjoner(orgSet)).thenReturn(new HashSet<>(Collections.singletonList(organisasjonDokument)));
-        when(vilkaarsresultatService.harVilkaarForArtikkel12(anyLong())).thenReturn(false);
-        when(vilkaarsresultatService.harVilkaarForArtikkel16(anyLong())).thenReturn(true);
+        when(vilkaarsresultatService.harVilkaarForUtsending(anyLong())).thenReturn(false);
+        when(vilkaarsresultatService.harVilkaarForUnntak(anyLong())).thenReturn(true);
 
         String saksbehandler = "saksbehandler";
         BrevDataAvslagYrkesaktiv brevData = (BrevDataAvslagYrkesaktiv) brevDataByggerAvslagYrkesaktiv.lag(lagBrevressurser(behandling), saksbehandler);

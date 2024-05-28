@@ -12,7 +12,7 @@ import no.nav.melosys.domain.adresse.StrukturertAdresse;
 import no.nav.melosys.domain.dokument.arbeidsforhold.ArbeidsforholdDokument;
 import no.nav.melosys.domain.dokument.felles.Periode;
 import no.nav.melosys.domain.kodeverk.Land_iso2;
-import no.nav.melosys.domain.kodeverk.Vilkaar;
+import no.nav.melosys.domain.mottatteopplysninger.data.UtenlandskIdent;
 import no.nav.melosys.exception.FunksjonellException;
 import no.nav.melosys.exception.TekniskException;
 import no.nav.melosys.service.LovvalgsperiodeService;
@@ -84,7 +84,7 @@ public class BrevDataByggerA001 implements BrevDataBygger {
 
         Vilkaarsresultat art16Vilkaar = hentVilkårsresultat();
         Set<VilkaarBegrunnelse> art16VilkaarBegrunnelser = art16Vilkaar.getBegrunnelser();
-        if (vilkaarsresultatService.harVilkaarForArtikkel12(behandling.getId())) {
+        if (vilkaarsresultatService.harVilkaarForUtsending(behandling.getId())) {
             brevData.setAnmodningBegrunnelser(art16VilkaarBegrunnelser);
             brevData.setAnmodningUtenArt12Begrunnelser(Collections.emptySet());
         } else {
@@ -106,7 +106,7 @@ public class BrevDataByggerA001 implements BrevDataBygger {
     }
 
     private Vilkaarsresultat hentVilkårsresultat() {
-        Optional<Vilkaarsresultat> vilkårsresultat = vilkaarsresultatService.finnVilkaarsresultat(behandling.getId(), Vilkaar.FO_883_2004_ART16_1);
+        Optional<Vilkaarsresultat> vilkårsresultat = vilkaarsresultatService.finnUnntaksVilkaarsresultat(behandling.getId());
         Vilkaarsresultat resultat = vilkårsresultat.orElseThrow(() ->
             new TekniskException("Fant ingen vilkårbegrunnelse for FO_883_2004_ART16_1"));
 
@@ -119,7 +119,7 @@ public class BrevDataByggerA001 implements BrevDataBygger {
     private Optional<String> hentUtenlandskIdent(Land_iso2 landkode) {
         return dataGrunnlag.getMottatteOpplysningerData().personOpplysninger.getUtenlandskIdent().stream()
             .filter(utenlandskIdent -> Objects.equals(utenlandskIdent.getLandkode(), landkode.getKode()))
-            .map(utenlandskIdent -> utenlandskIdent.getIdent())
+            .map(UtenlandskIdent::getIdent)
             .findFirst();
     }
 

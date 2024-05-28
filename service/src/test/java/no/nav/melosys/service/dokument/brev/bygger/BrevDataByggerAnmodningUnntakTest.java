@@ -9,7 +9,6 @@ import no.nav.melosys.domain.dokument.organisasjon.OrganisasjonsDetaljer;
 import no.nav.melosys.domain.dokument.person.PersonDokument;
 import no.nav.melosys.domain.kodeverk.Land_iso2;
 import no.nav.melosys.domain.kodeverk.Landkoder;
-import no.nav.melosys.domain.kodeverk.Sakstyper;
 import no.nav.melosys.domain.kodeverk.Vilkaar;
 import no.nav.melosys.domain.person.Persondata;
 import no.nav.melosys.service.LandvelgerService;
@@ -63,8 +62,8 @@ class BrevDataByggerAnmodningUnntakTest {
     public void setUp() {
         brevDataByggerAnmodningUnntak = new BrevDataByggerAnmodningUnntak(landvelgerService, vilkaarsresultatService);
 
-        when(vilkaarsresultatService.harVilkaarForArtikkel12(anyLong())).thenCallRealMethod();
-        when(vilkaarsresultatService.finnVilkaarsresultat(anyLong(), eq(Vilkaar.FO_883_2004_ART16_1)))
+        when(vilkaarsresultatService.harVilkaarForUtsending(anyLong())).thenCallRealMethod();
+        when(vilkaarsresultatService.finnUnntaksVilkaarsresultat(anyLong()))
             .thenReturn(Optional.of(lagVilkaarsresultat(Vilkaar.FO_883_2004_ART16_1, true, KORT_OPPDRAG_RETUR_NORSK_AG)));
     }
 
@@ -127,7 +126,7 @@ class BrevDataByggerAnmodningUnntakTest {
 
     @Test
     void lag_brevDataMedArt121_girAnmodningBegrunnelser() {
-        when(vilkaarsresultatService.finnVilkaarsresultat(anyLong(), eq(Vilkaar.FO_883_2004_ART12_2)))
+        when(vilkaarsresultatService.finnUtsendingsVilkaarsresultat(anyLong()))
             .thenReturn(Optional.of(lagVilkaarsresultat(Vilkaar.FO_883_2004_ART12_2, false, UTSENDELSE_OVER_24_MN)));
 
         Behandling behandling = lagBehandling();
@@ -138,7 +137,7 @@ class BrevDataByggerAnmodningUnntakTest {
 
     @Test
     void lag_brevDataMedArt122_girAnmodningBegrunnelser() {
-        when(vilkaarsresultatService.finnVilkaarsresultat(anyLong(), eq(Vilkaar.FO_883_2004_ART12_2)))
+        when(vilkaarsresultatService.finnUtsendingsVilkaarsresultat(anyLong()))
             .thenReturn(Optional.of(lagVilkaarsresultat(Vilkaar.FO_883_2004_ART12_2, false, UTSENDELSE_OVER_24_MN)));
 
         Behandling behandling = lagBehandling();
@@ -149,7 +148,7 @@ class BrevDataByggerAnmodningUnntakTest {
 
     @Test
     void lag_brevDataMedOppfyltArt121_girAnmodningBegrunnelser() {
-        when(vilkaarsresultatService.finnVilkaarsresultat(anyLong(), eq(Vilkaar.FO_883_2004_ART12_2)))
+        when(vilkaarsresultatService.finnUtsendingsVilkaarsresultat(anyLong()))
             .thenReturn(Optional.of(lagVilkaarsresultat(Vilkaar.FO_883_2004_ART12_2, true)));
 
         Behandling behandling = lagBehandling();
@@ -162,7 +161,7 @@ class BrevDataByggerAnmodningUnntakTest {
     void lag_brevDataMedFritekst() {
         Vilkaarsresultat vilkaar = lagVilkaarsresultat(Vilkaar.FO_883_2004_ART16_1, true, KORT_OPPDRAG_RETUR_NORSK_AG);
         vilkaar.setBegrunnelseFritekst("FRITEKST");
-        when(vilkaarsresultatService.finnVilkaarsresultat(anyLong(), eq(Vilkaar.FO_883_2004_ART16_1))).thenReturn(Optional.of(vilkaar));
+        when(vilkaarsresultatService.finnUnntaksVilkaarsresultat(anyLong())).thenReturn(Optional.of(vilkaar));
 
         Behandling behandling = lagBehandling();
         BrevDataAnmodningUnntak brevData = (BrevDataAnmodningUnntak) brevDataByggerAnmodningUnntak.lag(lagBrevressurser(behandling), saksbehandler);

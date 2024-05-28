@@ -1,5 +1,6 @@
 package no.nav.melosys.service.behandling
 
+import io.getunleash.Unleash
 import no.nav.melosys.domain.Behandlingsresultat
 import no.nav.melosys.domain.VilkaarBegrunnelse
 import no.nav.melosys.domain.Vilkaarsresultat
@@ -7,6 +8,7 @@ import no.nav.melosys.domain.kodeverk.Kodeverk
 import no.nav.melosys.domain.kodeverk.Vilkaar
 import no.nav.melosys.exception.FunksjonellException
 import no.nav.melosys.exception.IkkeFunnetException
+import no.nav.melosys.featuretoggle.ToggleName
 import no.nav.melosys.repository.BehandlingsresultatRepository
 import no.nav.melosys.service.saksbehandling.SaksbehandlingRegler
 import no.nav.melosys.service.vilkaar.VilkaarDto
@@ -18,7 +20,8 @@ import java.util.*
 @Service
 class VilkaarsresultatService(
     private val behandlingsresultatRepository: BehandlingsresultatRepository,
-    private val saksbehandlingRegler: SaksbehandlingRegler
+    private val saksbehandlingRegler: SaksbehandlingRegler,
+    private val unleash: Unleash
 ) {
     fun hentBehandlingsresultat(behandlingsid: Long): Behandlingsresultat =
         behandlingsresultatRepository.findById(behandlingsid)
@@ -41,22 +44,46 @@ class VilkaarsresultatService(
         Optional.ofNullable(hentBehandlingsresultat(behandlingID).vilkaarsresultater.firstOrNull { it.vilkaar == vilkaar })
 
     @Transactional(readOnly = true)
+    fun finnUtsendingsVilkaarsresultat(behandlingID: Long): Optional<Vilkaarsresultat> {
+        val unntaksvilkår =
+            if (unleash.isEnabled(ToggleName.MELOSYS_KONVENSJON_EFTA_LAND_OG_STORBRITANNIA)) listOf(
+                Vilkaar.FO_883_2004_ART12_1,
+                Vilkaar.FO_883_2004_ART12_2,
+                Vilkaar.KONV_EFTA_STORBRITANNIA_ART14_1,
+                Vilkaar.KONV_EFTA_STORBRITANNIA_ART14_2,
+                Vilkaar.KONV_EFTA_STORBRITANNIA_ART16_1,
+                Vilkaar.KONV_EFTA_STORBRITANNIA_ART16_3,
+            ) else listOf(
+                Vilkaar.FO_883_2004_ART12_1,
+                Vilkaar.FO_883_2004_ART12_2,
+            )
+
+        return Optional.ofNullable(hentBehandlingsresultat(behandlingID).vilkaarsresultater.firstOrNull { it.vilkaar in unntaksvilkår })
+    }
+
+    @Transactional(readOnly = true)
+    fun finnUnntaksVilkaarsresultat(behandlingID: Long): Optional<Vilkaarsresultat> {
+        val unntaksvilkår =
+            if (unleash.isEnabled(ToggleName.MELOSYS_KONVENSJON_EFTA_LAND_OG_STORBRITANNIA)) listOf(
+                Vilkaar.FO_883_2004_ART16_1,
+                Vilkaar.KONV_EFTA_STORBRITANNIA_ART18_1
+            ) else listOf(
+                Vilkaar.FO_883_2004_ART16_1
+            )
+
+        return Optional.ofNullable(hentBehandlingsresultat(behandlingID).vilkaarsresultater.firstOrNull { it.vilkaar in unntaksvilkår })
+    }
+
+    @Transactional(readOnly = true)
     fun oppfyllerVilkaar(behandlingID: Long, vilkaar: Vilkaar): Boolean =
         hentBehandlingsresultat(behandlingID).vilkaarsresultater
             .any { vilkaar == it.vilkaar && it.isOppfylt }
 
     @Transactional(readOnly = true)
-    fun harVilkaarForArtikkel12(behandlingID: Long): Boolean {
-        val art121Vilkaar = finnVilkaarsresultat(behandlingID, Vilkaar.FO_883_2004_ART12_1)
-        val art122Vilkaar = finnVilkaarsresultat(behandlingID, Vilkaar.FO_883_2004_ART12_2)
-        return art121Vilkaar.isPresent || art122Vilkaar.isPresent
-    }
+    fun harVilkaarForUtsending(behandlingID: Long): Boolean = finnUtsendingsVilkaarsresultat(behandlingID).isPresent
 
     @Transactional(readOnly = true)
-    fun harVilkaarForArtikkel16(behandlingID: Long): Boolean {
-        val art161Vilkaar = finnVilkaarsresultat(behandlingID, Vilkaar.FO_883_2004_ART16_1)
-        return art161Vilkaar.isPresent
-    }
+    fun harVilkaarForUnntak(behandlingID: Long): Boolean = finnUnntaksVilkaarsresultat(behandlingID).isPresent
 
     @Transactional
     fun registrerVilkår(behandlingID: Long, vilkaarDtoer: List<VilkaarDto>) {
