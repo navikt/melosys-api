@@ -1,4 +1,4 @@
-package no.nav.melosys.service.sak
+package no.nav.melosys.service.avgift.aarsavregning
 
 import no.nav.melosys.domain.Medlemskapsperiode
 import no.nav.melosys.domain.avgift.Inntektsperiode

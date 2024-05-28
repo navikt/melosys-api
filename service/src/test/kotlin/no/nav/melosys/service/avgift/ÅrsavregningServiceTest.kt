@@ -1,4 +1,4 @@
-package no.nav.melosys.service.sak
+package no.nav.melosys.service.avgift
 
 import io.kotest.matchers.shouldBe
 import io.mockk.every
@@ -10,6 +10,8 @@ import no.nav.melosys.integrasjon.faktureringskomponenten.Faktureringskomponente
 import no.nav.melosys.integrasjon.faktureringskomponenten.dto.BeregnTotalBeløpDto
 import no.nav.melosys.integrasjon.faktureringskomponenten.dto.FakturaseriePeriodeDto
 import no.nav.melosys.repository.AarsavregningRepository
+import no.nav.melosys.service.avgift.aarsavregning.Årsavregning
+import no.nav.melosys.service.avgift.aarsavregning.ÅrsavregningService
 import no.nav.melosys.sikkerhet.context.SpringSubjectHandler
 import no.nav.melosys.sikkerhet.context.TestSubjectHandler
 import org.junit.jupiter.api.BeforeEach
