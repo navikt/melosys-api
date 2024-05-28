@@ -11,7 +11,6 @@ import no.nav.melosys.saksflyt.steg.StegBehandler
 import no.nav.melosys.saksflytapi.domain.ProsessDataKey
 import no.nav.melosys.saksflytapi.domain.ProsessSteg
 import no.nav.melosys.saksflytapi.domain.Prosessinstans
-import no.nav.melosys.service.MedlemAvFolketrygdenService
 import no.nav.melosys.service.behandling.BehandlingService
 import no.nav.melosys.service.behandling.BehandlingsresultatService
 import no.nav.melosys.service.oppgave.OppgaveService
@@ -23,7 +22,6 @@ import java.time.LocalDate
 class OpprettManglendeInnbetalingBehandling(
     private val behandlingService: BehandlingService,
     private val behandlingsresultatService: BehandlingsresultatService,
-    private val medlemAvFolketrygdenService: MedlemAvFolketrygdenService,
     private val saksbehandlingRegler: SaksbehandlingRegler,
     private val oppgaveService: OppgaveService
 ) : StegBehandler {
@@ -43,12 +41,12 @@ class OpprettManglendeInnbetalingBehandling(
             throw FunksjonellException("Finner ikke behandlingsresultat med fakturaserie-referanse: $fakturaserieReferanse")
         }
 
-        val medlemskapsperiode = medlemAvFolketrygdenService.finnMedlemAvFolketrygden(behandlingsresultater.first().id)
+        val førsteBehandlingsresultat = behandlingsresultater.first()
 
         val fagsak = behandlingService.hentBehandling(behandlingsresultater.first().id)?.fagsak
             ?: throw FunksjonellException("Fagsak er ikke tilstede for behandlingsresultat id: ${behandlingsresultater.first().id}")
 
-        if (medlemskapsperiode.isPresent && medlemskapsperiode.get().medlemskapsperioder.any { it.erPliktig() }) {
+        if (førsteBehandlingsresultat.medlemskapsperioder.any { it.erPliktig() }) {
             val behandlingMedFattetVedtak = saksbehandlingRegler.finnBehandlingSomKanReplikeres(fagsak)
             if (behandlingMedFattetVedtak != null) {
                 prosessinstans.behandling = behandlingMedFattetVedtak

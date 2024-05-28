@@ -1,18 +1,16 @@
 package no.nav.melosys.domain;
 
+import java.time.LocalDate;
+import java.util.HashSet;
+import java.util.Objects;
+import java.util.Set;
+
+import jakarta.persistence.*;
 import no.nav.melosys.domain.avgift.Trygdeavgiftsperiode;
-import no.nav.melosys.domain.folketrygden.MedlemAvFolketrygden;
 import no.nav.melosys.domain.kodeverk.Folketrygdloven_kap2_bestemmelser;
 import no.nav.melosys.domain.kodeverk.InnvilgelsesResultat;
 import no.nav.melosys.domain.kodeverk.Medlemskapstyper;
 import no.nav.melosys.domain.kodeverk.Trygdedekninger;
-
-import jakarta.persistence.*;
-import java.time.LocalDate;
-import java.util.Collection;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Objects;
 
 @Entity
 @Table(name = "medlemskapsperiode")
@@ -22,8 +20,8 @@ public class Medlemskapsperiode implements ErPeriode, HarBestemmelse<Folketrygdl
     private Long id;
 
     @ManyToOne(optional = false)
-    @JoinColumn(name = "medlem_av_folketrygden_id", nullable = false, updatable = false)
-    private MedlemAvFolketrygden medlemAvFolketrygden;
+    @JoinColumn(name = "behandlingsresultat_id", nullable = false, updatable = false)
+    private Behandlingsresultat behandlingsresultat;
 
     @Column(name = "fom_dato", nullable = false)
     private LocalDate fom;
@@ -47,6 +45,9 @@ public class Medlemskapsperiode implements ErPeriode, HarBestemmelse<Folketrygdl
     @Enumerated(EnumType.STRING)
     private Folketrygdloven_kap2_bestemmelser bestemmelse;
 
+    @OneToMany(mappedBy = "grunnlagMedlemskapsperiode", cascade = CascadeType.ALL, fetch = FetchType.EAGER, orphanRemoval = true)
+    private Set<Trygdeavgiftsperiode> trygdeavgiftsperioder = new HashSet<>(1);
+
     @Column(name = "medlperiode_id")
     private Long medlPeriodeID;
 
@@ -58,12 +59,12 @@ public class Medlemskapsperiode implements ErPeriode, HarBestemmelse<Folketrygdl
         this.id = id;
     }
 
-    public MedlemAvFolketrygden getMedlemAvFolketrygden() {
-        return medlemAvFolketrygden;
+    public Behandlingsresultat getBehandlingsresultat() {
+        return behandlingsresultat;
     }
 
-    public void setMedlemAvFolketrygden(MedlemAvFolketrygden medlemAvFolketrygden) {
-        this.medlemAvFolketrygden = medlemAvFolketrygden;
+    public void setBehandlingsresultat(Behandlingsresultat behandlingsresultat) {
+        this.behandlingsresultat = behandlingsresultat;
     }
 
     public LocalDate getFom() {
@@ -148,7 +149,7 @@ public class Medlemskapsperiode implements ErPeriode, HarBestemmelse<Folketrygdl
         if (o == null || getClass() != o.getClass()) return false;
         Medlemskapsperiode that = (Medlemskapsperiode) o;
         return Objects.equals(id, that.id) &&
-            Objects.equals(medlemAvFolketrygden, that.medlemAvFolketrygden) &&
+            Objects.equals(behandlingsresultat, that.behandlingsresultat) &&
             Objects.equals(fom, that.fom) &&
             Objects.equals(tom, that.tom) &&
             innvilgelsesresultat == that.innvilgelsesresultat &&
@@ -159,14 +160,14 @@ public class Medlemskapsperiode implements ErPeriode, HarBestemmelse<Folketrygdl
 
     @Override
     public int hashCode() {
-        return Objects.hash(id, medlemAvFolketrygden, fom, tom, innvilgelsesresultat, medlemskapstype, trygdedekning, medlPeriodeID);
+        return Objects.hash(id, behandlingsresultat, fom, tom, innvilgelsesresultat, medlemskapstype, trygdedekning, medlPeriodeID);
     }
 
     @Override
     public String toString() {
         return "Medlemskapsperiode{" +
             "id=" + id +
-            ", medlemAvFolketrygden=" + medlemAvFolketrygden +
+            ", behandlingsresultat=" + behandlingsresultat +
             ", fom=" + fom +
             ", tom=" + tom +
             ", innvilgelsesresultat=" + innvilgelsesresultat +
@@ -174,5 +175,13 @@ public class Medlemskapsperiode implements ErPeriode, HarBestemmelse<Folketrygdl
             ", trygdedekning=" + trygdedekning +
             ", medlPeriodeID=" + medlPeriodeID +
             '}';
+    }
+
+    public Set<Trygdeavgiftsperiode> getTrygdeavgiftsperioder() {
+        return trygdeavgiftsperioder;
+    }
+
+    public void setTrygdeavgiftsperioder(Set<Trygdeavgiftsperiode> trygdeavgiftsperioder) {
+        this.trygdeavgiftsperioder = trygdeavgiftsperioder;
     }
 }

@@ -39,7 +39,6 @@ import no.nav.melosys.melosysmock.testdata.TestDataGenerator
 import no.nav.melosys.repository.BehandlingRepository
 import no.nav.melosys.repository.FagsakRepository
 import no.nav.melosys.saksflytapi.domain.ProsessType
-import no.nav.melosys.service.MedlemAvFolketrygdenService
 import no.nav.melosys.service.avgift.TrygdeavgiftsberegningService
 import no.nav.melosys.service.avgift.dto.InntektskildeRequest
 import no.nav.melosys.service.avgift.dto.OppdaterTrygdeavgiftsgrunnlagRequest
@@ -82,7 +81,6 @@ class YrkesaktivFtrlVedtakIT(
     @Autowired private val vilkaarsresultatService: VilkaarsresultatService,
     @Autowired private val medlemskapsperiodeService: MedlemskapsperiodeService,
     @Autowired private val opprettForslagMedlemskapsperiodeService: OpprettForslagMedlemskapsperiodeService,
-    @Autowired private val medlemAvFolketrygdenService: MedlemAvFolketrygdenService,
     @Autowired private val oppfriskSaksopplysningerService: OppfriskSaksopplysningerService,
     @Autowired private val vedtaksfattingFasade: VedtaksfattingFasade,
     @Autowired private val unleash: FakeUnleash,
@@ -414,8 +412,6 @@ class YrkesaktivFtrlVedtakIT(
             )
         )
 
-        val medlemAvFolketrygden = medlemAvFolketrygdenService.hentMedlemAvFolketrygden(behandlingId)
-
         val skatteforholdTilNorge = SkatteforholdTilNorge().apply {
             fomDato = LocalDate.of(2023, 1, 1)
             tomDato = LocalDate.of(2023, 2, 1)
@@ -437,15 +433,13 @@ class YrkesaktivFtrlVedtakIT(
                 periodeTil = LocalDate.of(2023, 2, 1)
                 trygdesats = 6.8.toBigDecimal()
                 trygdeavgiftsbeløpMd = Penger(1000.toBigDecimal(), "nok")
-                fastsattTrygdeavgift = medlemAvFolketrygden.fastsattTrygdeavgift
                 grunnlagMedlemskapsperiode = medlemskapsperiode
                 grunnlagSkatteforholdTilNorge = skatteforholdTilNorge
                 grunnlagInntekstperiode = inntektsperiode
             }
         )
 
-        medlemAvFolketrygden.fastsattTrygdeavgift.trygdeavgiftsperioder = trygdeavgiftsperioder
-        medlemAvFolketrygdenService.lagre(medlemAvFolketrygden)
+        medlemskapsperiode.trygdeavgiftsperioder = trygdeavgiftsperioder
     }
 
     private val Any.toJsonNode: JsonNode

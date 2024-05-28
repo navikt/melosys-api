@@ -11,14 +11,12 @@ import no.nav.melosys.domain.avgift.Inntektsperiode;
 import no.nav.melosys.domain.avgift.Penger;
 import no.nav.melosys.domain.avgift.SkatteforholdTilNorge;
 import no.nav.melosys.domain.avgift.Trygdeavgiftsperiode;
-import no.nav.melosys.domain.folketrygden.FastsattTrygdeavgift;
-import no.nav.melosys.domain.folketrygden.MedlemAvFolketrygden;
 import no.nav.melosys.domain.kodeverk.Inntektskildetype;
 import no.nav.melosys.domain.kodeverk.Skatteplikttype;
 import no.nav.melosys.domain.kodeverk.Trygdedekninger;
-import no.nav.melosys.service.MedlemAvFolketrygdenService;
 import no.nav.melosys.service.avgift.TrygdeavgiftMottakerService;
 import no.nav.melosys.service.avgift.TrygdeavgiftsberegningService;
+import no.nav.melosys.service.behandling.BehandlingsresultatService;
 import no.nav.melosys.service.tilgang.Aksesskontroll;
 import no.nav.melosys.tjenester.gui.behandlinger.trygdeavgift.TrygdeavgiftTjeneste;
 import no.nav.melosys.tjenester.gui.dto.trygdeavgift.*;
@@ -45,9 +43,9 @@ class TrygdeavgiftTjenesteTest {
     @MockBean
     private TrygdeavgiftsberegningService trygdeavgiftsberegningService;
     @MockBean
-    private TrygdeavgiftMottakerService trygdeavgiftMottakerService;
+    private BehandlingsresultatService behandlingsresultatService;
     @MockBean
-    private MedlemAvFolketrygdenService medlemAvFolketrygdenService;
+    private TrygdeavgiftMottakerService trygdeavgiftMottakerService;
     @Autowired
     private MockMvc mockMvc;
     @Autowired
@@ -130,9 +128,7 @@ class TrygdeavgiftTjenesteTest {
         skatteForholdINorge.setSkatteplikttype(Skatteplikttype.SKATTEPLIKTIG);
         trygdeavgift.setGrunnlagSkatteforholdTilNorge(skatteForholdINorge);
 
-        trygdeavgift.setFastsattTrygdeavgift(new FastsattTrygdeavgift());
-        trygdeavgift.getFastsattTrygdeavgift().setMedlemAvFolketrygden(new MedlemAvFolketrygden());
-        trygdeavgift.getFastsattTrygdeavgift().getMedlemAvFolketrygden().setMedlemskapsperioder(Set.of(medlemskapsperiode));
+        trygdeavgift.setGrunnlagMedlemskapsperiode(medlemskapsperiode);
 
         return Set.of(trygdeavgift);
     }
