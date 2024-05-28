@@ -17,7 +17,7 @@ class InnhentingAvInntektsopplysningerMapper(
         val behandlingsresultat = dokgenMapperDatahenter.hentBehandlingsresultat(brevbestilling.behandlingId)
         val medlemAvFolketrygden = behandlingsresultat.medlemAvFolketrygden
 
-        val årsavregningsår = 2024 // TODO: Hent denne fra behandlingsresultat
+        val årsavregningsår = behandlingsresultat.aarsavregning.aar
         val fristdato = LocalDate.now().plusWeeks(4)
         val medlemskapsperiode = mapMedlemskapsPerioder(medlemAvFolketrygden, årsavregningsår)
 

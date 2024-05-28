@@ -1,10 +1,12 @@
 package no.nav.melosys.service.dokument.brev.mapper
 
+import io.kotest.matchers.nulls.shouldBeNull
 import io.kotest.matchers.shouldBe
 import io.mockk.every
 import io.mockk.impl.annotations.MockK
 import io.mockk.junit5.MockKExtension
 import no.nav.melosys.domain.*
+import no.nav.melosys.domain.avgift.Aarsavregning
 import no.nav.melosys.domain.brev.InnhentingAvInntektsopplysningerBrevbestilling
 import no.nav.melosys.domain.dokument.person.PersonDokument
 import no.nav.melosys.domain.folketrygden.MedlemAvFolketrygden
@@ -33,7 +35,7 @@ internal class InnhentingAvInntektsopplysningerMapperTest {
     }
 
     @Test
-    fun `map`() {
+    fun `hent inntektsopplysninger for årsavregning`() {
         every { mockDokgenMapperDatahenter.hentBehandlingsresultat(ofType()) } returns lagBehandlingsResultat()
 
         val brevbestilling =
@@ -48,11 +50,13 @@ internal class InnhentingAvInntektsopplysningerMapperTest {
                 .build()
 
         innhentingAvInntektsopplysningerMapper.map(brevbestilling).run {
+            årsavregningsår.shouldBe(2023)
+            fristdato.shouldBe(LocalDate.now().plusWeeks(4))
+            fritekst.shouldBeNull()
             medlemskapsperiodeFom.shouldBe(LocalDate.of(2023, 1, 1))
             medlemskapsperiodeTom.shouldBe(LocalDate.of(2023, 9, 1))
         }
     }
-
 
     private fun lagBehandling(block: Behandling.() -> Unit = {}): Behandling = Behandling().apply behandling@{
         id = 1L
@@ -68,6 +72,9 @@ internal class InnhentingAvInntektsopplysningerMapperTest {
         return Behandlingsresultat().apply {
             behandling = lagBehandling()
             medlemAvFolketrygden = MedlemAvFolketrygden().apply {
+                aarsavregning = Aarsavregning().apply {
+                    aar = 2023
+                }
                 medlemskapsperioder = listOf(
                     Medlemskapsperiode().apply {
                         fom = LocalDate.of(2022, 5, 17)
