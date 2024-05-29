@@ -26,56 +26,62 @@ internal class ÅrsavregningTjenesteTest {
 
         val expectedJson = """{
   "aar": 2023,
-  "forskuddsvisFakturertAvgift": {
-    "skatteforholdsperioder": [
-      {
-        "fom": "2023-01-01",
-        "tom": "2023-07-31",
-        "skatteplikttype": "SKATTEPLIKTIG"
-      },
-      {
-        "fom": "2023-08-01",
-        "tom": "2023-12-31",
-        "skatteplikttype": "IKKE_SKATTEPLIKTIG"
-      }
-    ],
-    "medlemskapsperioder": [
-      {
-        "fom": "2023-01-01",
-        "tom": "2023-07-31",
-        "trygdedekning": "FTRL_2_9_FØRSTE_LEDD_B_PENSJON"
-      },
-      {
-        "fom": "2023-08-01",
-        "tom": "2023-12-31",
-        "trygdedekning": "FTRL_2_9_FØRSTE_LEDD_C_ANDRE_LEDD_HELSE_PENSJON_SYKE_FORELDREPENGER"
-      }
-    ],
-    "trygdeavgiftsperioder": [
-      {
-        "fom": "2023-01-01",
-        "tom": "2023-07-31",
-        "inntektskildetype": "ARBEIDSINNTEKT_FRA_NORGE",
-        "arbeidsgiversavgiftBetales": true,
-        "inntektPerMd": 40000,
-        "avgiftssats": 0.0,
-        "avgiftPerMd": 0
-      },
-      {
-        "fom": "2023-08-01",
-        "tom": "2023-12-31",
-        "inntektskildetype": "INNTEKT_FRA_UTLANDET",
-        "arbeidsgiversavgiftBetales": false,
-        "inntektPerMd": 15000,
-        "avgiftssats": 42.2,
-        "avgiftPerMd": 6330
-      }
-    ],
-    "totalInntektPerMd": 690000,
-    "totalAvgiftPerMd": 127020
+  "tidligereOpplysninger": {
+    "trygdeavgiftsgrunnlag": {
+      "medlemskapsperioder": [
+        {
+          "fom": "2023-01-01",
+          "tom": "2023-07-31",
+          "trygdedekning": "FTRL_2_9_FØRSTE_LEDD_B_PENSJON"
+        },
+        {
+          "fom": "2023-08-01",
+          "tom": "2023-12-31",
+          "trygdedekning": "FTRL_2_9_FØRSTE_LEDD_C_ANDRE_LEDD_HELSE_PENSJON_SYKE_FORELDREPENGER"
+        }
+      ],
+      "skatteforholdsperioder": [
+        {
+          "fom": "2023-01-01",
+          "tom": "2023-07-31",
+          "skatteplikttype": "SKATTEPLIKTIG"
+        },
+        {
+          "fom": "2023-08-01",
+          "tom": "2023-12-31",
+          "skatteplikttype": "IKKE_SKATTEPLIKTIG"
+        }
+      ],
+      "inntektskperioder": []
+    },
+    "avgift": {
+      "trygdeavgiftsperioder": [
+        {
+          "fom": "2023-01-01",
+          "tom": "2023-07-31",
+          "inntektskildetype": "ARBEIDSINNTEKT_FRA_NORGE",
+          "arbeidsgiversavgiftBetales": true,
+          "inntektPerMd": 40000,
+          "avgiftssats": 0.0,
+          "avgiftPerMd": 0
+        },
+        {
+          "fom": "2023-08-01",
+          "tom": "2023-12-31",
+          "inntektskildetype": "INNTEKT_FRA_UTLANDET",
+          "arbeidsgiversavgiftBetales": false,
+          "inntektPerMd": 15000,
+          "avgiftssats": 42.2,
+          "avgiftPerMd": 6330
+        }
+      ],
+      "totalInntektPerMd": 690000,
+      "totalAvgiftPerMd": 127020
+    }
   },
-  "avvikFunnet": false,
-  "endeligAvgift": {
+  "avvikFunnet": true,
+  "nyttGrunnlag": {
+    "medlemskapsperioder": [],
     "skatteforholdsperioder": [
       {
         "fom": "2023-01-01",
@@ -96,7 +102,9 @@ internal class ÅrsavregningTjenesteTest {
         "arbeidsgiversavgiftBetales": true,
         "inntektPerMd": 95000
       }
-    ],
+    ]
+  },
+  "endeligAvgift": {
     "trygdeavgiftsperioder": [
       {
         "fom": "2023-01-01",
