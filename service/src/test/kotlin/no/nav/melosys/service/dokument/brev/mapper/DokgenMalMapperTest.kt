@@ -449,7 +449,7 @@ internal class DokgenMalMapperTest {
 
         shouldThrow<FunksjonellException> {
             dokgenMalMapper.mapBehandling(brevbestilling, DokgenTestData.lagMottaker(Mottakerroller.BRUKER))
-        }.message.shouldBe("Forventer at behandling som tilhører varselbrevet har medlemskapsperioder")
+        }.message.shouldBe("Forventer at behandling som tilhører varselbrevet har en opprinnelig behandling med medlemskapsperioder")
     }
 
     @Test
