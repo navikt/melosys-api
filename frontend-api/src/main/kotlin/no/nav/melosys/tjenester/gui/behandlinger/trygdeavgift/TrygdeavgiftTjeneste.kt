@@ -1,9 +1,9 @@
 package no.nav.melosys.tjenester.gui.behandlinger.trygdeavgift
 
 import io.swagger.annotations.Api
-import no.nav.melosys.service.MedlemAvFolketrygdenService
 import no.nav.melosys.service.avgift.TrygdeavgiftMottakerService
 import no.nav.melosys.service.avgift.TrygdeavgiftsberegningService
+import no.nav.melosys.service.behandling.BehandlingsresultatService
 import no.nav.melosys.service.tilgang.Aksesskontroll
 import no.nav.melosys.tjenester.gui.dto.trygdeavgift.BeregnetTrygdeavgiftDto
 import no.nav.melosys.tjenester.gui.dto.trygdeavgift.FakturamottakerDto
@@ -12,7 +12,6 @@ import no.nav.melosys.tjenester.gui.dto.trygdeavgift.TrygdeavgiftsgrunnlagDto
 import no.nav.security.token.support.core.api.Protected
 import org.springframework.http.ResponseEntity
 import org.springframework.web.bind.annotation.*
-import kotlin.jvm.optionals.getOrNull
 
 @Protected
 @RestController
@@ -20,7 +19,7 @@ import kotlin.jvm.optionals.getOrNull
 @RequestMapping("/behandlinger/{behandlingID}/trygdeavgift")
 class TrygdeavgiftTjeneste(
     private val trygdeavgiftsberegningService: TrygdeavgiftsberegningService,
-    private val medlemAvFolketrygdenService: MedlemAvFolketrygdenService,
+    private val behandlingsresultatService: BehandlingsresultatService,
     private val trygdeavgiftMottakerService: TrygdeavgiftMottakerService,
     private val aksesskontroll: Aksesskontroll
 ) {
@@ -29,12 +28,11 @@ class TrygdeavgiftTjeneste(
     fun hentTrygdeavgiftMottaker(@PathVariable("behandlingID") behandlingID: Long): ResponseEntity<TrygdeavgiftMottakerDto> {
         aksesskontroll.autoriser(behandlingID)
 
-        return medlemAvFolketrygdenService.finnMedlemAvFolketrygden(behandlingID).getOrNull()?.fastsattTrygdeavgift
-            ?.let {
-                ResponseEntity.ok(
-                    TrygdeavgiftMottakerDto(trygdeavgiftMottakerService.getTrygdeavgiftMottaker(it))
-                )
-            } ?: ResponseEntity.noContent().build()
+        return behandlingsresultatService.hentBehandlingsresultat(behandlingID).let {
+            ResponseEntity.ok(
+                TrygdeavgiftMottakerDto(trygdeavgiftMottakerService.getTrygdeavgiftMottaker(it))
+            )
+        }
     }
 
     @PutMapping("/beregning")

@@ -17,7 +17,6 @@ import no.nav.melosys.domain.*
 import no.nav.melosys.domain.dokument.medlemskap.MedlemskapDokument
 import no.nav.melosys.domain.dokument.medlemskap.Medlemsperiode
 import no.nav.melosys.domain.dokument.medlemskap.Periode
-import no.nav.melosys.domain.folketrygden.MedlemAvFolketrygden
 import no.nav.melosys.domain.kodeverk.*
 import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingsresultattyper
 import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingsstatus
@@ -65,7 +64,8 @@ internal class MedlServiceTest {
             .medlemsperiode.shouldHaveSize(1)
             .first()
             .shouldBeEqualToComparingFields(
-                Medlemsperiode(id = 123456L,
+                Medlemsperiode(
+                    id = 123456L,
                     type = "PUMEDSKP",
                     status = PeriodestatusMedl.GYLD.kode,
                     grunnlagstype = "IMEDEOS",
@@ -74,7 +74,8 @@ internal class MedlServiceTest {
                     trygdedekning = "Unntatt",
                     kildedokumenttype = "Dokument",
                     kilde = "INFOTR",
-                    periode = Periode(LocalDate.of(2021, 9, 1), LocalDate.of(2021, 10, 1))), FieldsEqualityCheckConfig(ignorePrivateFields = false)
+                    periode = Periode(LocalDate.of(2021, 9, 1), LocalDate.of(2021, 10, 1))
+                ), FieldsEqualityCheckConfig(ignorePrivateFields = false)
             )
     }
 
@@ -282,10 +283,8 @@ internal class MedlServiceTest {
 
     @Test
     fun skalOppretteOpphørtPeriodeEndelig() {
-        val medlemskapsperiode = lagMedlemskapsPeriode().apply {
-            medlemAvFolketrygden =
-                MedlemAvFolketrygden().apply { bestemmelse = Folketrygdloven_kap2_bestemmelser.FTRL_KAP2_2_15_ANDRE_LEDD }
-        }
+        val medlemskapsperiode = lagMedlemskapsPeriode().apply { bestemmelse = Folketrygdloven_kap2_bestemmelser.FTRL_KAP2_2_15_ANDRE_LEDD }
+
         val medlemskapsunntakForPostCapturingSlot = slot<MedlemskapsunntakForPost>()
         every {
             mockRestConsumer.opprettPeriode(capture(medlemskapsunntakForPostCapturingSlot))
@@ -316,8 +315,7 @@ internal class MedlServiceTest {
         every { mockRestConsumer.hentPeriode(any()) } returns hentMedlemskapsunntak()
         val medlemskapsperiode = lagMedlemskapsPeriode().apply {
             medlPeriodeID = 123456L
-            medlemAvFolketrygden =
-                MedlemAvFolketrygden().apply { bestemmelse = Folketrygdloven_kap2_bestemmelser.FTRL_KAP2_2_15_ANDRE_LEDD }
+            bestemmelse = Folketrygdloven_kap2_bestemmelser.FTRL_KAP2_2_15_ANDRE_LEDD
         }
         val medlemskapsunntakForPutCapturingSlot = slot<MedlemskapsunntakForPut>()
         every {
@@ -423,8 +421,7 @@ internal class MedlServiceTest {
         trygdedekning = Trygdedekninger.FTRL_2_9_FØRSTE_LEDD_A_HELSE
         fom = LocalDate.now()
         tom = LocalDate.now().plusYears(1)
-        medlemAvFolketrygden =
-            MedlemAvFolketrygden().apply { bestemmelse = Folketrygdloven_kap2_bestemmelser.FTRL_KAP2_2_8_FØRSTE_LEDD_A }
+        bestemmelse = Folketrygdloven_kap2_bestemmelser.FTRL_KAP2_2_8_FØRSTE_LEDD_A
     }
 
     private fun lagBehandlingsresultatMedOvergangsregelbestemmelser(): Behandlingsresultat {

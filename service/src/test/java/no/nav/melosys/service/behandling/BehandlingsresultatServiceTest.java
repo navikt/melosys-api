@@ -7,7 +7,6 @@ import java.util.Set;
 
 import no.nav.melosys.domain.*;
 import no.nav.melosys.domain.avklartefakta.Avklartefakta;
-import no.nav.melosys.domain.folketrygden.MedlemAvFolketrygden;
 import no.nav.melosys.domain.kodeverk.Utfallregistreringunntak;
 import no.nav.melosys.domain.kodeverk.begrunnelser.Henleggelsesgrunner;
 import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingsresultattyper;
@@ -54,7 +53,6 @@ class BehandlingsresultatServiceTest {
         behandlingsresultat.setAvklartefakta(new HashSet<>(Collections.singletonList(new Avklartefakta())));
         behandlingsresultat.setLovvalgsperioder(new HashSet<>(Collections.singletonList(new Lovvalgsperiode())));
         behandlingsresultat.setVilkaarsresultater(new HashSet<>(Collections.singleton(new Vilkaarsresultat())));
-        behandlingsresultat.setMedlemAvFolketrygden(new MedlemAvFolketrygden());
         behandlingsresultat.setUtfallRegistreringUnntak(Utfallregistreringunntak.GODKJENT);
         behandlingsresultat.setInnledningFritekst("Innledning fritekst");
         behandlingsresultat.setBegrunnelseFritekst("Begrunnelse fritekst");
@@ -74,7 +72,6 @@ class BehandlingsresultatServiceTest {
 
         assertThat(behandlingsresultat.getAvklartefakta()).isEmpty();
         assertThat(behandlingsresultat.getLovvalgsperioder()).isEmpty();
-        assertThat(behandlingsresultat.getMedlemAvFolketrygden()).isNull();
         assertThat(behandlingsresultat.getUtfallRegistreringUnntak()).isNull();
         assertThat(behandlingsresultat.getInnledningFritekst()).isNull();
         assertThat(behandlingsresultat.getBegrunnelseFritekst()).isNull();

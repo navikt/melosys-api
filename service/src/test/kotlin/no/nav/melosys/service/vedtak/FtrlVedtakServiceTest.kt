@@ -14,7 +14,6 @@ import io.mockk.slot
 import io.mockk.verify
 import no.nav.melosys.domain.*
 import no.nav.melosys.domain.avklartefakta.Avklartefakta
-import no.nav.melosys.domain.folketrygden.MedlemAvFolketrygden
 import no.nav.melosys.domain.kodeverk.*
 import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingsresultattyper
 import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingsstatus
@@ -24,11 +23,11 @@ import no.nav.melosys.exception.FunksjonellException
 import no.nav.melosys.saksflytapi.ProsessinstansService
 import no.nav.melosys.service.behandling.BehandlingService
 import no.nav.melosys.service.behandling.BehandlingsresultatService
+import no.nav.melosys.service.behandling.VilkaarsresultatService
 import no.nav.melosys.service.dokument.DokgenService
 import no.nav.melosys.service.dokument.brev.BrevbestillingDto
 import no.nav.melosys.service.dokument.brev.KopiMottakerDto
 import no.nav.melosys.service.oppgave.OppgaveService
-import no.nav.melosys.service.behandling.VilkaarsresultatService
 import no.nav.melosys.sikkerhet.context.SpringSubjectHandler
 import no.nav.melosys.sikkerhet.context.SubjectHandler
 import no.nav.melosys.sikkerhet.context.TestSubjectHandler
@@ -84,9 +83,7 @@ class FtrlVedtakServiceTest {
     @Test
     fun fattVedtak_Førstegangsvedtak_fatterVedtak() {
         every { behandlingsresultatService.hentBehandlingsresultat(BEH_ID) } returns Behandlingsresultat().apply {
-            medlemAvFolketrygden = MedlemAvFolketrygden().apply {
-                addMedlemskapsperiode(Medlemskapsperiode().apply { medlemskapstype = Medlemskapstyper.FRIVILLIG })
-            }
+            addMedlemskapsperiode(Medlemskapsperiode().apply { medlemskapstype = Medlemskapstyper.FRIVILLIG })
         }
         every { behandlingsresultatService.lagre(any()) } returnsArgument 0
         val request = lagFattVedtakRequest(
@@ -138,11 +135,9 @@ class FtrlVedtakServiceTest {
         behandling.tema = Behandlingstema.IKKE_YRKESAKTIV
         val behandlingsresultat = Behandlingsresultat()
             .apply {
-                medlemAvFolketrygden = MedlemAvFolketrygden().apply {
-                    medlemskapsperioder = mutableListOf(Medlemskapsperiode().apply {
-                        medlemskapstype = Medlemskapstyper.FRIVILLIG
-                    })
-                }
+                medlemskapsperioder = mutableListOf(Medlemskapsperiode().apply {
+                    medlemskapstype = Medlemskapstyper.FRIVILLIG
+                })
             }
         every { behandlingsresultatService.hentBehandlingsresultat(BEH_ID) } returns behandlingsresultat
         every { behandlingsresultatService.lagre(behandlingsresultat) } returns behandlingsresultat
@@ -178,11 +173,9 @@ class FtrlVedtakServiceTest {
         behandling.tema = Behandlingstema.IKKE_YRKESAKTIV
         val behandlingsresultat = Behandlingsresultat()
             .apply {
-                medlemAvFolketrygden = MedlemAvFolketrygden().apply {
-                    medlemskapsperioder = mutableListOf(Medlemskapsperiode().apply {
-                        medlemskapstype = Medlemskapstyper.PLIKTIG
-                    })
-                }
+                medlemskapsperioder = mutableListOf(Medlemskapsperiode().apply {
+                    medlemskapstype = Medlemskapstyper.PLIKTIG
+                })
             }
         every { behandlingsresultatService.hentBehandlingsresultat(BEH_ID) } returns behandlingsresultat
         every { behandlingsresultatService.lagre(behandlingsresultat) } returns behandlingsresultat
@@ -246,12 +239,10 @@ class FtrlVedtakServiceTest {
     fun fattVedtak_delvis_opphørt_fatterVedtak() {
         every { behandlingsresultatService.lagre(any()) } returnsArgument 0
         every { behandlingsresultatService.hentBehandlingsresultat(BEH_ID) } returns Behandlingsresultat().apply {
-            medlemAvFolketrygden = MedlemAvFolketrygden().apply {
-                medlemskapsperioder = listOf(Medlemskapsperiode().apply {
-                    innvilgelsesresultat = InnvilgelsesResultat.OPPHØRT
-                    fom = LocalDate.now()
-                })
-            }
+            medlemskapsperioder = listOf(Medlemskapsperiode().apply {
+                innvilgelsesresultat = InnvilgelsesResultat.OPPHØRT
+                fom = LocalDate.now()
+            })
         }
         val request = lagFattVedtakRequest(
             type = Behandlingsresultattyper.DELVIS_OPPHØRT,
@@ -294,8 +285,7 @@ class FtrlVedtakServiceTest {
                 type = Avklartefaktatyper.FULLSTENDIG_MANGLENDE_INNBETALING
                 referanse = Avklartefaktatyper.FULLSTENDIG_MANGLENDE_INNBETALING.kode
             })
-            medlemAvFolketrygden = MedlemAvFolketrygden()
-            medlemAvFolketrygden.medlemskapsperioder = mutableListOf(
+            medlemskapsperioder = mutableListOf(
                 Medlemskapsperiode().apply {
                     id = 1
                     innvilgelsesresultat = InnvilgelsesResultat.INNVILGET
@@ -339,7 +329,7 @@ class FtrlVedtakServiceTest {
             type.shouldBe(Behandlingsresultattyper.OPPHØRT)
             begrunnelseFritekst.shouldBe(request.begrunnelseFritekst)
             fastsattAvLand.shouldBe(Land_iso2.NO)
-            medlemAvFolketrygden.medlemskapsperioder.shouldHaveSize(2).run {
+            medlemskapsperioder.shouldHaveSize(2).run {
                 first().run {
                     innvilgelsesresultat.shouldBe(InnvilgelsesResultat.OPPHØRT)
                     bestemmelse.shouldBe(Folketrygdloven_kap2_bestemmelser.FTRL_KAP2_2_15_ANDRE_LEDD)
@@ -392,12 +382,10 @@ class FtrlVedtakServiceTest {
                 type = Avklartefaktatyper.FULLSTENDIG_MANGLENDE_INNBETALING
                 referanse = Avklartefaktatyper.FULLSTENDIG_MANGLENDE_INNBETALING.kode
             })
-            medlemAvFolketrygden = MedlemAvFolketrygden()
-            medlemAvFolketrygden.medlemskapsperioder =
-                mutableSetOf(Medlemskapsperiode().apply {
-                    innvilgelsesresultat = InnvilgelsesResultat.INNVILGET
-                    fom = LocalDate.now()
-                })
+            medlemskapsperioder = mutableSetOf(Medlemskapsperiode().apply {
+                innvilgelsesresultat = InnvilgelsesResultat.INNVILGET
+                fom = LocalDate.now()
+            })
         }
         every { behandlingsresultatService.hentBehandlingsresultat(BEH_ID) } returns behandlingsresultat
         val request = lagFattVedtakRequest(
@@ -410,7 +398,7 @@ class FtrlVedtakServiceTest {
 
         shouldThrow<FunksjonellException> {
             ftrlVedtakService.fattVedtak(behandling, request)
-        }.shouldHaveMessage("Medsendt opphørsdato: ${request.opphørtDato} er ikke lik forventet opphørsdato: ${behandlingsresultat.medlemAvFolketrygden.utledOpphørtDato()}")
+        }.shouldHaveMessage("Medsendt opphørsdato: ${request.opphørtDato} er ikke lik forventet opphørsdato: ${behandlingsresultat.utledOpphørtDato()}")
     }
 
 

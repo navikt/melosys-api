@@ -11,10 +11,10 @@ import no.nav.melosys.exception.FunksjonellException
 import no.nav.melosys.saksflytapi.ProsessinstansService
 import no.nav.melosys.service.behandling.BehandlingService
 import no.nav.melosys.service.behandling.BehandlingsresultatService
+import no.nav.melosys.service.behandling.VilkaarsresultatService
 import no.nav.melosys.service.dokument.DokgenService
 import no.nav.melosys.service.dokument.brev.BrevbestillingDto
 import no.nav.melosys.service.oppgave.OppgaveService
-import no.nav.melosys.service.behandling.VilkaarsresultatService
 import org.slf4j.LoggerFactory
 import org.springframework.stereotype.Service
 import java.time.LocalDate
@@ -52,7 +52,7 @@ class FtrlVedtakService(
 
     private fun validerRequest(behandlingsresultat: Behandlingsresultat, request: FattVedtakRequest) {
         if (request.behandlingsresultatTypeKode in listOf(Behandlingsresultattyper.OPPHØRT, Behandlingsresultattyper.DELVIS_OPPHØRT)) {
-            val forventetOpphørsdato = behandlingsresultat.medlemAvFolketrygden.utledOpphørtDato()
+            val forventetOpphørsdato = behandlingsresultat.utledOpphørtDato()
             if (forventetOpphørsdato != request.opphørtDato) {
                 throw FunksjonellException("Medsendt opphørsdato: ${request.opphørtDato} er ikke lik forventet opphørsdato: $forventetOpphørsdato")
             }
@@ -68,7 +68,7 @@ class FtrlVedtakService(
         }
 
         val behandlingstema = behandling.tema
-        val medlemskapstype = behandlingsresultat.medlemAvFolketrygden?.medlemskapsperioder?.firstOrNull()?.medlemskapstype
+        val medlemskapstype = behandlingsresultat.medlemskapsperioder?.firstOrNull()?.medlemskapstype
 
         return when {
             behandlingstema.erIkkeYrkesaktiv() && medlemskapstype.erPliktig() ->
@@ -153,7 +153,7 @@ class FtrlVedtakService(
             .firstOrNull { Avklartefaktatyper.FULLSTENDIG_MANGLENDE_INNBETALING.kode == it.referanse && Avklartefaktatyper.FULLSTENDIG_MANGLENDE_INNBETALING == it.type }
             ?: throw FunksjonellException("Forventer at fullstendigManglendeInnbetaling er satt ved fatting av vedtak for behandlingstype OPPHØRT")
 
-        val opphørteMedlemskapsperioder = behandlingsresultat.medlemAvFolketrygden.medlemskapsperioder
+        val opphørteMedlemskapsperioder = behandlingsresultat.medlemskapsperioder
             .filter { it.erInnvilget() || it.erOpphørt() }
             .onEach {
                 it.innvilgelsesresultat = InnvilgelsesResultat.OPPHØRT
@@ -169,8 +169,8 @@ class FtrlVedtakService(
 
         behandlingsresultat.avklartefakta.clear()
         behandlingsresultat.avklartefakta.add(fullstendigManglendeInnbetaling)
-        behandlingsresultat.medlemAvFolketrygden.medlemskapsperioder.clear()
-        behandlingsresultat.medlemAvFolketrygden.medlemskapsperioder.addAll(opphørteMedlemskapsperioder)
+        behandlingsresultat.medlemskapsperioder.clear()
+        behandlingsresultat.medlemskapsperioder.addAll(opphørteMedlemskapsperioder)
 
         behandlingsresultat.type = Behandlingsresultattyper.OPPHØRT
         behandlingsresultat.settVedtakMetadata(request.vedtakstype, LocalDate.now().plusWeeks(VedtaksfattingFasade.FRIST_KLAGE_UKER.toLong()))

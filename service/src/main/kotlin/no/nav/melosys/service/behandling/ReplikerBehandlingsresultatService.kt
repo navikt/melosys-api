@@ -6,8 +6,6 @@ import no.nav.melosys.domain.avgift.SkatteforholdTilNorge
 import no.nav.melosys.domain.avgift.Trygdeavgiftsperiode
 import no.nav.melosys.domain.avklartefakta.Avklartefakta
 import no.nav.melosys.domain.avklartefakta.AvklartefaktaRegistrering
-import no.nav.melosys.domain.folketrygden.FastsattTrygdeavgift
-import no.nav.melosys.domain.folketrygden.MedlemAvFolketrygden
 import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingsresultattyper
 import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingstyper
 import org.apache.commons.beanutils.BeanUtils
@@ -26,10 +24,10 @@ class ReplikerBehandlingsresultatService(val behandlingsresultatService: Behandl
         IllegalAccessException::class
     )
     fun replikerBehandlingsresultat(tidligsteInaktiveBehandling: Behandling, behandlingReplika: Behandling) {
-        val behandlingsresultatOrig: Behandlingsresultat =
+        val behandlingsresultatOriginal: Behandlingsresultat =
             behandlingsresultatService.hentBehandlingsresultat(tidligsteInaktiveBehandling.id)
 
-        val behandlingsresultatReplika = BeanUtils.cloneBean(behandlingsresultatOrig) as Behandlingsresultat
+        val behandlingsresultatReplika = BeanUtils.cloneBean(behandlingsresultatOriginal) as Behandlingsresultat
 
         behandlingsresultatReplika.behandling = behandlingReplika
         behandlingsresultatReplika.id = null
@@ -39,14 +37,14 @@ class ReplikerBehandlingsresultatService(val behandlingsresultatService: Behandl
         behandlingsresultatReplika.behandlingsmåte = Behandlingsmaate.MANUELT
         behandlingsresultatReplika.type = Behandlingsresultattyper.IKKE_FASTSATT
 
-        replikerAvklartefakta(behandlingsresultatOrig, behandlingsresultatReplika)
-        replikerLovvalgsperioder(behandlingsresultatOrig, behandlingsresultatReplika)
-        replikerVilkaarsresultat(behandlingsresultatOrig, behandlingsresultatReplika)
-        replikerAnmodningsperioder(behandlingsresultatOrig, behandlingsresultatReplika)
-        replikerBehandlingsresultatBegrunnelser(behandlingsresultatOrig, behandlingsresultatReplika)
-        replikerKontrollResultater(behandlingsresultatOrig, behandlingsresultatReplika)
-        replikerUtpekingsperioder(behandlingsresultatOrig, behandlingsresultatReplika)
-        replikerMedlemAvFolketrygden(behandlingsresultatOrig, behandlingsresultatReplika, behandlingReplika.type)
+        replikerAvklartefakta(behandlingsresultatOriginal, behandlingsresultatReplika)
+        replikerLovvalgsperioder(behandlingsresultatOriginal, behandlingsresultatReplika)
+        replikerVilkaarsresultat(behandlingsresultatOriginal, behandlingsresultatReplika)
+        replikerAnmodningsperioder(behandlingsresultatOriginal, behandlingsresultatReplika)
+        replikerBehandlingsresultatBegrunnelser(behandlingsresultatOriginal, behandlingsresultatReplika)
+        replikerKontrollResultater(behandlingsresultatOriginal, behandlingsresultatReplika)
+        replikerUtpekingsperioder(behandlingsresultatOriginal, behandlingsresultatReplika)
+        replikerMedlemAvFolketrygden(behandlingsresultatOriginal, behandlingsresultatReplika, behandlingReplika.type)
 
         behandlingsresultatService.lagre(behandlingsresultatReplika)
     }
@@ -58,20 +56,14 @@ class ReplikerBehandlingsresultatService(val behandlingsresultatService: Behandl
         IllegalAccessException::class
     )
     private fun replikerMedlemAvFolketrygden(
-        behandlingsresultatOrig: Behandlingsresultat,
+        behandlingsresultatOriginal: Behandlingsresultat,
         behandlingsresultatReplika: Behandlingsresultat,
         behandlingstype: Behandlingstyper
     ) {
-        if (behandlingsresultatOrig.medlemAvFolketrygden == null) return
-        val medlemAvFolketrygdenReplika = BeanUtils.cloneBean(behandlingsresultatOrig.medlemAvFolketrygden) as MedlemAvFolketrygden
-        medlemAvFolketrygdenReplika.behandlingsresultat = behandlingsresultatReplika
-        medlemAvFolketrygdenReplika.id = null
-        behandlingsresultatReplika.medlemAvFolketrygden = medlemAvFolketrygdenReplika
+        replikerMedlemskapsperioderBasertPåBehandlingstype(behandlingsresultatOriginal, behandlingsresultatReplika, behandlingstype)
+        replikerTrygdeavgift(behandlingsresultatOriginal, behandlingsresultatReplika)
 
-        replikerMedlemskapsperioderBasertPåBehandlingstype(behandlingsresultatOrig, medlemAvFolketrygdenReplika, behandlingstype)
-        replikerFastsattTrygdeavgift(behandlingsresultatOrig.medlemAvFolketrygden, medlemAvFolketrygdenReplika)
-
-        medlemAvFolketrygdenReplika.medlemskapsperioder.onEach { it.id = null }
+        behandlingsresultatReplika.medlemskapsperioder.onEach { it.id = null }
     }
 
     @Throws(
@@ -81,22 +73,22 @@ class ReplikerBehandlingsresultatService(val behandlingsresultatService: Behandl
         IllegalAccessException::class
     )
     private fun replikerMedlemskapsperioderBasertPåBehandlingstype(
-        behandlingsresultatOrig: Behandlingsresultat,
-        medlemAvFolketrygdenReplika: MedlemAvFolketrygden,
+        behandlingsresultatOriginal: Behandlingsresultat,
+        behandlingsresultatReplika: Behandlingsresultat,
         behandlingstype: Behandlingstyper
     ) {
-        medlemAvFolketrygdenReplika.medlemskapsperioder = HashSet()
+        behandlingsresultatReplika.medlemskapsperioder = HashSet()
 
         val filtrertMedlemskapsperioderOriginal = if (behandlingstype == Behandlingstyper.MANGLENDE_INNBETALING_TRYGDEAVGIFT) {
-            behandlingsresultatOrig.medlemAvFolketrygden.medlemskapsperioder.filter { it.erInnvilget() || it.erOpphørt() }
+            behandlingsresultatOriginal.medlemskapsperioder.filter { it.erInnvilget() || it.erOpphørt() }
         } else {
-            behandlingsresultatOrig.medlemAvFolketrygden.medlemskapsperioder.filter { it.erInnvilget() }
+            behandlingsresultatOriginal.medlemskapsperioder.filter { it.erInnvilget() }
         }
 
         for (medlemskapsperiodeOriginal in filtrertMedlemskapsperioderOriginal) {
             val medlemskapsperiodeReplika = BeanUtils.cloneBean(medlemskapsperiodeOriginal) as Medlemskapsperiode
-            medlemskapsperiodeReplika.medlemAvFolketrygden = medlemAvFolketrygdenReplika
-            medlemAvFolketrygdenReplika.medlemskapsperioder.add(medlemskapsperiodeReplika)
+            medlemskapsperiodeReplika.behandlingsresultat = behandlingsresultatReplika
+            behandlingsresultatReplika.medlemskapsperioder.add(medlemskapsperiodeReplika)
         }
     }
 
@@ -106,62 +98,39 @@ class ReplikerBehandlingsresultatService(val behandlingsresultatService: Behandl
         InstantiationException::class,
         IllegalAccessException::class
     )
-    private fun replikerFastsattTrygdeavgift(
-        medlemAvFolketrygdenOriginal: MedlemAvFolketrygden,
-        medlemAvFolketrygdenReplika: MedlemAvFolketrygden
+    private fun replikerTrygdeavgift(
+        behandlingsresultatOriginal: Behandlingsresultat,
+        behandlingsresultatReplika: Behandlingsresultat,
     ) {
-        if (medlemAvFolketrygdenOriginal.fastsattTrygdeavgift == null) return
-        val fastsattTrygdeavgiftReplika = BeanUtils.cloneBean(medlemAvFolketrygdenOriginal.fastsattTrygdeavgift) as FastsattTrygdeavgift
-        fastsattTrygdeavgiftReplika.medlemAvFolketrygden = medlemAvFolketrygdenReplika
-        fastsattTrygdeavgiftReplika.id = null
-        medlemAvFolketrygdenReplika.fastsattTrygdeavgift = fastsattTrygdeavgiftReplika
-
-        replikerTrygdeavgiftsperioder(
-            medlemAvFolketrygdenOriginal,
-            medlemAvFolketrygdenReplika
-        )
-    }
-
-    @Throws(
-        InvocationTargetException::class,
-        NoSuchMethodException::class,
-        InstantiationException::class,
-        IllegalAccessException::class
-    )
-    private fun replikerTrygdeavgiftsperioder(
-        medlemAvFolketrygdenOriginal: MedlemAvFolketrygden,
-        medlemAvFolketrygdenReplika: MedlemAvFolketrygden
-    ) {
-        val fastsattTrygdeavgiftReplika = medlemAvFolketrygdenReplika.fastsattTrygdeavgift
-        val inntektsperioderReplika = medlemAvFolketrygdenOriginal.fastsattTrygdeavgift.hentInntektsperioder().map {
+        val inntektsperioderReplika = behandlingsresultatOriginal.hentInntektsperioder().map {
             BeanUtils.cloneBean(it) as Inntektsperiode
         }
-        val skatteforholdTilNorgeReplika = medlemAvFolketrygdenOriginal.fastsattTrygdeavgift.hentSkatteforholdTilNorge().map {
+        val skatteforholdTilNorgeReplika = behandlingsresultatOriginal.hentSkatteforholdTilNorge().map {
             BeanUtils.cloneBean(it) as SkatteforholdTilNorge
         }
 
-        fastsattTrygdeavgiftReplika.trygdeavgiftsperioder = HashSet()
-        for (trygdeavgiftsperiodeOriginal in medlemAvFolketrygdenOriginal.fastsattTrygdeavgift.trygdeavgiftsperioder) {
+        behandlingsresultatReplika.medlemskapsperioder.forEach{
+            it.trygdeavgiftsperioder = HashSet()
+        }
+        for (trygdeavgiftsperiodeOriginal in behandlingsresultatOriginal.trygdeavgiftsperioder) {
             val trygdeavgiftsperiodeReplika = BeanUtils.cloneBean(trygdeavgiftsperiodeOriginal) as Trygdeavgiftsperiode
-            trygdeavgiftsperiodeReplika.fastsattTrygdeavgift = fastsattTrygdeavgiftReplika
 
-            trygdeavgiftsperiodeReplika.grunnlagMedlemskapsperiode = medlemAvFolketrygdenReplika.medlemskapsperioder
+            trygdeavgiftsperiodeReplika.grunnlagMedlemskapsperiode = behandlingsresultatReplika.medlemskapsperioder
                 .find { it.id == trygdeavgiftsperiodeOriginal.grunnlagMedlemskapsperiode.id }
             trygdeavgiftsperiodeReplika.grunnlagInntekstperiode =
                 inntektsperioderReplika.find { it.id == trygdeavgiftsperiodeOriginal.grunnlagInntekstperiode.id }
             trygdeavgiftsperiodeReplika.grunnlagSkatteforholdTilNorge =
                 skatteforholdTilNorgeReplika.find { it.id == trygdeavgiftsperiodeOriginal.grunnlagSkatteforholdTilNorge.id }
 
-            fastsattTrygdeavgiftReplika.trygdeavgiftsperioder.add(trygdeavgiftsperiodeReplika)
+            trygdeavgiftsperiodeReplika.grunnlagMedlemskapsperiode.trygdeavgiftsperioder.add(trygdeavgiftsperiodeReplika)
         }
 
-        fastsattTrygdeavgiftReplika.trygdeavgiftsperioder.onEach {
+        behandlingsresultatReplika.trygdeavgiftsperioder.onEach {
             it.id = null
             it.grunnlagInntekstperiode.id = null
             it.grunnlagMedlemskapsperiode.id = null
             it.grunnlagSkatteforholdTilNorge.id = null
         }
-
     }
 
     @Throws(
