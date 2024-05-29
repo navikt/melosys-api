@@ -2,6 +2,7 @@ package no.nav.melosys.tjenester.gui;
 
 import java.math.BigDecimal;
 import java.time.LocalDate;
+import java.util.List;
 import java.util.Set;
 import java.util.stream.Collectors;
 
@@ -99,10 +100,10 @@ class TrygdeavgiftTjenesteTest {
     }
 
     private TrygdeavgiftsgrunnlagDto lagTrygdeavgiftsgrunnlagDto() {
-        Set<SkatteforholdTilNorgeDto> skatteforholdTilNorgeDtos = trygdeavgiftsperioder.stream().map(Trygdeavgiftsperiode::getGrunnlagSkatteforholdTilNorge)
-            .map(SkatteforholdTilNorgeDto::new).collect(Collectors.toSet());
-        Set<InntekskildeDto> inntekskildeDtos = trygdeavgiftsperioder.stream().map(Trygdeavgiftsperiode::getGrunnlagInntekstperiode)
-            .map(InntekskildeDto::new).collect(Collectors.toSet());
+        List<SkatteforholdTilNorgeDto> skatteforholdTilNorgeDtos = trygdeavgiftsperioder.stream().map(Trygdeavgiftsperiode::getGrunnlagSkatteforholdTilNorge)
+            .map(SkatteforholdTilNorgeDto::new).collect(Collectors.toList());
+        List<InntekskildeDto> inntekskildeDtos = trygdeavgiftsperioder.stream().map(Trygdeavgiftsperiode::getGrunnlagInntekstperiode)
+            .map(InntekskildeDto::new).collect(Collectors.toList());
 
         return new TrygdeavgiftsgrunnlagDto(skatteforholdTilNorgeDtos, inntekskildeDtos);
     }
