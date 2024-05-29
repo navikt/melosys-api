@@ -71,8 +71,7 @@ public class MedlemAvFolketrygden {
 
     public Skatteplikttype utledSkatteplikttype() {
         var trygdeavgiftsperiode = fastsattTrygdeavgift.getTrygdeavgiftsperioder().stream().findFirst();
-        var erÅpenSluttdato = fastsattTrygdeavgift.getMedlemAvFolketrygden().utledMedlemskapsperiodeTom() == null;
-        if (trygdeavgiftsperiode.isEmpty() && erÅpenSluttdato) {
+        if (trygdeavgiftsperiode.isEmpty() && erÅpenSluttdato()) {
             return Skatteplikttype.SKATTEPLIKTIG;
         } else if (trygdeavgiftsperiode.isEmpty()) {
             throw new RuntimeException("Trygdeavgiftsperiode ikke funnet, og det er ikke åpen sluttdato, id = " + id);
@@ -105,5 +104,12 @@ public class MedlemAvFolketrygden {
             .min(Comparator.comparing(Medlemskapsperiode::getFom))
             .map(Medlemskapsperiode::getFom)
             .orElse(null);
+    }
+
+    /*
+    Åpen sluttdato på medlemskapsperiode er tillatt for arbeidsland Norge og bestemmelse 2.1. Skal ikke ha trygdeavgiftsperioder.
+     */
+    private boolean erÅpenSluttdato() {
+        return fastsattTrygdeavgift.getMedlemAvFolketrygden().utledMedlemskapsperiodeTom() == null;
     }
 }
