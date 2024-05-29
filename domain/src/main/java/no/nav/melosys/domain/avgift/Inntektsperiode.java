@@ -2,6 +2,7 @@ package no.nav.melosys.domain.avgift;
 
 import java.time.LocalDate;
 import java.util.Objects;
+import java.util.Set;
 
 import jakarta.persistence.*;
 import no.nav.melosys.domain.kodeverk.Inntektskildetype;
@@ -14,9 +15,8 @@ public class Inntektsperiode {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
-    @ManyToOne(optional = false)
-    @JoinColumn(name = "trygdeavgiftsgrunnlag_id", nullable = false, updatable = false)
-    private Trygdeavgiftsgrunnlag trygdeavgiftsgrunnlag;
+    @OneToMany(mappedBy = "grunnlagInntekstperiode")
+    private Set<Trygdeavgiftsperiode> trygdeavgiftsperioder;
 
     @Column(name = "fom_dato", nullable = false)
     private LocalDate fomDato;
@@ -44,14 +44,6 @@ public class Inntektsperiode {
 
     public void setId(Long id) {
         this.id = id;
-    }
-
-    public Trygdeavgiftsgrunnlag getTrygdeavgiftsgrunnlag() {
-        return trygdeavgiftsgrunnlag;
-    }
-
-    public void setTrygdeavgiftsgrunnlag(Trygdeavgiftsgrunnlag trygdeavgiftsgrunnlag) {
-        this.trygdeavgiftsgrunnlag = trygdeavgiftsgrunnlag;
     }
 
     public LocalDate getFomDato() {
@@ -99,8 +91,7 @@ public class Inntektsperiode {
         if (this == o) return true;
         if (o == null || getClass() != o.getClass()) return false;
         Inntektsperiode that = (Inntektsperiode) o;
-        return Objects.equals(trygdeavgiftsgrunnlag, that.trygdeavgiftsgrunnlag)
-            && Objects.equals(fomDato, that.fomDato) && Objects.equals(tomDato, that.tomDato)
+        return Objects.equals(fomDato, that.fomDato) && Objects.equals(tomDato, that.tomDato)
             && Objects.equals(type, that.type)
             && Objects.equals(avgiftspliktigInntektMnd, that.avgiftspliktigInntektMnd)
             && arbeidsgiversavgiftBetalesTilSkatt == that.arbeidsgiversavgiftBetalesTilSkatt;
@@ -108,7 +99,7 @@ public class Inntektsperiode {
 
     @Override
     public int hashCode() {
-        return Objects.hash(trygdeavgiftsgrunnlag, fomDato, tomDato, type, avgiftspliktigInntektMnd,
+        return Objects.hash(fomDato, tomDato, type, avgiftspliktigInntektMnd,
             arbeidsgiversavgiftBetalesTilSkatt);
     }
 
@@ -117,5 +108,9 @@ public class Inntektsperiode {
         return "Inntektsperiode{" + "id=" + id + ", fomDato=" + fomDato + ", tomDato=" + tomDato + ", type=" + type
             + ", avgiftspliktigInntektMnd=" + avgiftspliktigInntektMnd + ", arbeidsgiversavgiftBetalesTilSkatt="
             + arbeidsgiversavgiftBetalesTilSkatt + '}';
+    }
+
+    public Set<Trygdeavgiftsperiode> getTrygdeavgiftsperioder() {
+        return trygdeavgiftsperioder;
     }
 }

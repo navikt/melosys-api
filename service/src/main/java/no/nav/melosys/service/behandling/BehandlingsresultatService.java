@@ -81,10 +81,6 @@ public class BehandlingsresultatService {
             .orElseThrow(() -> new IkkeFunnetException(KAN_IKKE_FINNE_BEHANDLINGSRESULTAT + behandlingsid));
     }
 
-    public Behandlingsresultat lagreOgFlush(Behandlingsresultat resultat) {
-        return behandlingsresultatRepository.saveAndFlush(resultat);
-    }
-
     public Behandlingsresultat lagre(Behandlingsresultat resultat) {
         return behandlingsresultatRepository.save(resultat);
     }
