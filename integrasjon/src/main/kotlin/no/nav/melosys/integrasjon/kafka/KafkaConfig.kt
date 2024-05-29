@@ -1,6 +1,7 @@
 package no.nav.melosys.integrasjon.kafka
 
 import com.fasterxml.jackson.databind.ObjectMapper
+import no.nav.melosys.domain.avgift.aarsavregning.Skattehendelse
 import no.nav.melosys.domain.eessi.melding.MelosysEessiMelding
 import no.nav.melosys.domain.manglendebetaling.ManglendeFakturabetalingMelding
 import no.nav.melosys.integrasjon.SoknadMottatt
@@ -24,7 +25,9 @@ import org.springframework.kafka.core.DefaultKafkaConsumerFactory
 import org.springframework.kafka.core.DefaultKafkaProducerFactory
 import org.springframework.kafka.core.KafkaTemplate
 import org.springframework.kafka.core.ProducerFactory
+import org.springframework.kafka.listener.CommonContainerStoppingErrorHandler
 import org.springframework.kafka.listener.ConcurrentMessageListenerContainer
+import org.springframework.kafka.listener.ContainerProperties
 import org.springframework.kafka.support.serializer.ErrorHandlingDeserializer
 import org.springframework.kafka.support.serializer.JsonDeserializer
 import org.springframework.kafka.support.serializer.JsonSerializer
@@ -60,6 +63,17 @@ class KafkaConfig(
         @Value("\${kafka.aiven.soknad-mottak.groupid}") groupId: String
     ): KafkaListenerContainerFactory<ConcurrentMessageListenerContainer<String, SoknadMottatt>> =
         kafkaListenerContainerFactory<SoknadMottatt>(kafkaProperties, groupId)
+
+    @Bean
+    fun aivenSkattehendelserListenerContainerFactory(
+        kafkaProperties: KafkaProperties,
+        @Value("\${kafka.aiven.skattehendelser.groupid}") groupId: String
+    ): KafkaConsumerContainerFactory<Skattehendelse> =
+        kafkaListenerContainerFactory<Skattehendelse>(kafkaProperties, groupId).apply {
+            setCommonErrorHandler(CommonContainerStoppingErrorHandler())
+
+            containerProperties.ackMode = ContainerProperties.AckMode.RECORD
+        }
 
     @Bean
     fun producerFactoryMelosysHendelse(objectMapper: ObjectMapper): ProducerFactory<String, MelosysHendelse> =
