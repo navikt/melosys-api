@@ -24,6 +24,7 @@ import no.nav.melosys.domain.kodeverk.Landkoder;
 import no.nav.melosys.domain.kodeverk.Trygdedekninger;
 import no.nav.melosys.domain.kodeverk.Vilkaar;
 import no.nav.melosys.domain.kodeverk.lovvalgsbestemmelser.Lovvalgbestemmelser_883_2004;
+import no.nav.melosys.domain.kodeverk.lovvalgsbestemmelser.Lovvalgbestemmelser_konv_efta_storbritannia;
 import no.nav.melosys.domain.kodeverk.lovvalgsbestemmelser.Tilleggsbestemmelser_883_2004;
 import no.nav.melosys.domain.kodeverk.yrker.Yrkesaktivitetstyper;
 import no.nav.melosys.domain.mottatteopplysninger.Soeknad;
@@ -186,6 +187,20 @@ class A001MapperTest {
         var SEDA001 = mapper.mapSEDA001(brevData);
 
         assertThat(SEDA001.getPerson().getBostedsadresse().getAdresseType()).isEqualTo(BostedsadresseTypeKode.BOSTEDSLAND);
+    }
+
+    @Test
+    void mapSEDA001_storbritannia_blirMappetKorrekt() {
+        brevData.getAnmodningsperioder().forEach(periode -> {
+            periode.setBestemmelse(Lovvalgbestemmelser_konv_efta_storbritannia.KONV_EFTA_STORBRITANNIA_ART18_1);
+            periode.setUnntakFraBestemmelse(Lovvalgbestemmelser_konv_efta_storbritannia.KONV_EFTA_STORBRITANNIA_ART13_3D);
+        });
+        brevData.setYtterligereInformasjon("Fritekst fra saksbehandler.");
+
+        var SEDA001 = mapper.mapSEDA001(brevData);
+
+        assertThat(SEDA001.getLovvalgsbestemmelse().value()).isEqualTo(Lovvalgbestemmelser_883_2004.FO_883_2004_ART11_3E.getKode());
+        assertThat(SEDA001.getYtterligereInformasjon()).isEqualTo("Issued under the EEA EFTA Convention.\nFritekst fra saksbehandler.");
     }
 
 

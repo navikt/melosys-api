@@ -22,6 +22,8 @@ import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingsstatus;
 import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingstema;
 import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingstyper;
 import no.nav.melosys.domain.kodeverk.lovvalgsbestemmelser.Lovvalgbestemmelser_883_2004;
+import no.nav.melosys.domain.kodeverk.lovvalgsbestemmelser.Lovvalgbestemmelser_konv_efta_storbritannia;
+import no.nav.melosys.domain.kodeverk.lovvalgsbestemmelser.Tilleggsbestemmelser_konv_efta_storbritannia;
 import no.nav.melosys.domain.mottatteopplysninger.MottatteOpplysningerData;
 import no.nav.melosys.domain.mottatteopplysninger.data.ForetakUtland;
 import no.nav.melosys.domain.mottatteopplysninger.data.arbeidssteder.LuftfartBase;
@@ -165,6 +167,24 @@ class SedDataByggerTest {
         assertThat(sedLovvalgsperiode.getLovvalgsland()).isEqualTo(lovvalgsperiode.getLovvalgsland().getKode());
 
         assertThat(sedData.getArbeidsgivendeVirksomheter()).isNotEmpty();
+    }
+
+    @Test
+    void lag_storbritanniaAnmodningsperiode_forventKorrektMapping() {
+        anmodningsperiode.setBestemmelse(Lovvalgbestemmelser_konv_efta_storbritannia.KONV_EFTA_STORBRITANNIA_ART18_1);
+        anmodningsperiode.setUnntakFraBestemmelse(Lovvalgbestemmelser_konv_efta_storbritannia.KONV_EFTA_STORBRITANNIA_ART13_4);
+        anmodningsperiode.setTilleggsbestemmelse(Tilleggsbestemmelser_konv_efta_storbritannia.KONV_EFTA_STORBRITANNIA_ART13_4_1);
+
+
+        SedDataDto sedData = dataBygger.lag(lagGrunnlagMedSøknad(), behandlingsresultat, PeriodeType.ANMODNINGSPERIODE);
+
+
+        assertThat(sedData).isNotNull();
+        assertThat(sedData.getLovvalgsperioder()).isNotEmpty();
+        var sedLovvalgsperiode = sedData.getLovvalgsperioder().get(0);
+        assertThat(sedLovvalgsperiode.getBestemmelse()).isEqualTo(no.nav.melosys.domain.eessi.sed.Bestemmelse.ART_16_1);
+        assertThat(sedLovvalgsperiode.getUnntakFraBestemmelse()).isEqualTo(no.nav.melosys.domain.eessi.sed.Bestemmelse.ART_11_4);
+        assertThat(sedLovvalgsperiode.getTilleggsBestemmelse()).isEqualTo(no.nav.melosys.domain.eessi.sed.Bestemmelse.ART_11_4);
     }
 
     @Test
