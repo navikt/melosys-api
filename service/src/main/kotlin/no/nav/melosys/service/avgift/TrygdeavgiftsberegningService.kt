@@ -212,8 +212,8 @@ class TrygdeavgiftsberegningService
     @Transactional(readOnly = true)
     fun hentOpprinneligTrygdeavgiftsperioder(behandlingsresultatID: Long): Set<Trygdeavgiftsperiode> {
         val behandlingsresultat = behandlingsresultatService.hentBehandlingsresultat(behandlingsresultatID)
-        val behandliong = behandlingsresultat.behandling
-        behandliong.opprinneligBehandling?.let {
+        val behandling = behandlingsresultat.behandling
+        behandling.opprinneligBehandling?.let {
             return behandlingsresultatService.hentBehandlingsresultat(it.id).medlemAvFolketrygden.fastsattTrygdeavgift?.trygdeavgiftsperioder
                 ?: emptySet()
         }
