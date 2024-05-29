@@ -4,13 +4,13 @@ import no.nav.melosys.domain.avgift.Trygdeavgiftsperiode
 import no.nav.melosys.service.avgift.dto.OppdaterTrygdeavgiftsgrunnlagRequest
 
 data class TrygdeavgiftsgrunnlagDto(
-    val skatteforholdsperioder: Set<SkatteforholdTilNorgeDto>,
-    val inntektskilder: Set<InntekskildeDto>
+    val skatteforholdsperioder: List<SkatteforholdTilNorgeDto>,
+    val inntektskilder: List<InntekskildeDto>
 ) {
 
     constructor(trygdeavgiftsperiode: Set<Trygdeavgiftsperiode>) : this(
-        trygdeavgiftsperiode.map { SkatteforholdTilNorgeDto(it.grunnlagSkatteforholdTilNorge) }.sortedWith(compareBy { it.tomDato }).toSet(),
-        trygdeavgiftsperiode.map { InntekskildeDto(it.grunnlagInntekstperiode) }.sortedWith(compareBy { it.tomDato }).toSet()
+        trygdeavgiftsperiode.map { SkatteforholdTilNorgeDto(it.grunnlagSkatteforholdTilNorge) }.sortedWith(compareBy { it.tomDato }).toList(),
+        trygdeavgiftsperiode.map { InntekskildeDto(it.grunnlagInntekstperiode) }.sortedWith(compareBy { it.tomDato }).toList()
     )
 
     fun tilRequest(): OppdaterTrygdeavgiftsgrunnlagRequest =
