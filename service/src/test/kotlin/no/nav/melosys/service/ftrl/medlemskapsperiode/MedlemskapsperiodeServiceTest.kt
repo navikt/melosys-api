@@ -25,10 +25,9 @@ import no.nav.melosys.domain.mottatteopplysninger.MottatteOpplysninger
 import no.nav.melosys.domain.mottatteopplysninger.SøknadNorgeEllerUtenforEØS
 import no.nav.melosys.domain.mottatteopplysninger.data.Soeknadsland
 import no.nav.melosys.exception.FunksjonellException
-import no.nav.melosys.featuretoggle.ToggleName
 import no.nav.melosys.repository.MedlemskapsperiodeRepository
 import no.nav.melosys.service.MedlemAvFolketrygdenService
-import no.nav.melosys.service.avgift.TrygdeavgiftsgrunnlagService
+import no.nav.melosys.service.avgift.TrygdeavgiftValideringService
 import no.nav.melosys.service.behandling.BehandlingsresultatService
 import no.nav.melosys.service.ftrl.GyldigeTrygdedekningerService
 import no.nav.melosys.service.medl.MedlPeriodeService
@@ -46,9 +45,6 @@ class MedlemskapsperiodeServiceTest {
 
     @MockK
     lateinit var medlemAvFolketrygdenService: MedlemAvFolketrygdenService
-
-    @RelaxedMockK
-    lateinit var trygdeavgiftsgrunnlagService: TrygdeavgiftsgrunnlagService
 
     @MockK
     lateinit var medlemskapsperiodeRepository: MedlemskapsperiodeRepository
@@ -77,7 +73,6 @@ class MedlemskapsperiodeServiceTest {
         medlemskapsperiodeService = MedlemskapsperiodeService(
             medlemskapsperiodeRepository,
             medlemAvFolketrygdenService,
-            trygdeavgiftsgrunnlagService,
             medlPeriodeService,
             gyldigeTrygdedekningerService,
             unleash
@@ -122,7 +117,6 @@ class MedlemskapsperiodeServiceTest {
 
 
         verify { medlemskapsperiodeRepository.save(any()) }
-        verify(exactly = 0) { trygdeavgiftsgrunnlagService.fjernTrygdeavgiftsperioderOmDeFinnes(any()) }
         medlemAvFolketrygden.medlemskapsperioder.shouldHaveSize(1).single().run {
             fom.shouldBe(NÅ)
             tom.shouldBe(NÅ)
@@ -144,7 +138,6 @@ class MedlemskapsperiodeServiceTest {
         every { medlemAvFolketrygdenService.hentMedlemAvFolketrygden(BEHANDLING_ID_1) } returns medlemAvFolketrygden
         every { medlemskapsperiodeRepository.save(any()) } returnsArgument 0
 
-
         medlemskapsperiodeService.opprettMedlemskapsperiode(
             BEHANDLING_ID_1,
             NÅ,
@@ -156,8 +149,8 @@ class MedlemskapsperiodeServiceTest {
 
 
         verify { medlemskapsperiodeRepository.save(any()) }
-        verify { trygdeavgiftsgrunnlagService.fjernTrygdeavgiftsperioderOmDeFinnes(medlemAvFolketrygden.fastsattTrygdeavgift) }
         medlemAvFolketrygden.medlemskapsperioder.shouldHaveSize(1)
+        medlemAvFolketrygden.fastsattTrygdeavgift?.trygdeavgiftsperioder?.shouldBeEmpty()
     }
 
     @Test
@@ -183,7 +176,6 @@ class MedlemskapsperiodeServiceTest {
 
 
         verify { medlemskapsperiodeRepository.saveAndFlush(any()) }
-        verify(exactly = 0) { trygdeavgiftsgrunnlagService.fjernTrygdeavgiftsperioderOmDeFinnes(any()) }
         medlemAvFolketrygden.medlemskapsperioder.single().run {
             fom.shouldBe(NÅ)
             tom.shouldBe(NÅ)
@@ -217,7 +209,7 @@ class MedlemskapsperiodeServiceTest {
 
 
         verify { medlemskapsperiodeRepository.saveAndFlush(any()) }
-        verify { trygdeavgiftsgrunnlagService.fjernTrygdeavgiftsperioderOmDeFinnes(medlemAvFolketrygden.fastsattTrygdeavgift) }
+        medlemAvFolketrygden.fastsattTrygdeavgift?.trygdeavgiftsperioder?.shouldBeEmpty()
     }
 
     @Test
@@ -619,8 +611,6 @@ class MedlemskapsperiodeServiceTest {
 
         medlemskapsperiodeService.slettMedlemskapsperiode(BEHANDLING_ID_1, MEDLEMSKAPSPERIODE_ID_1)
 
-
-        verify(exactly = 0) { trygdeavgiftsgrunnlagService.fjernTrygdeavgiftsperioderOmDeFinnes(any()) }
         medlemAvFolketrygden.medlemskapsperioder.shouldHaveSize(1)
     }
 
@@ -636,7 +626,7 @@ class MedlemskapsperiodeServiceTest {
         medlemskapsperiodeService.slettMedlemskapsperiode(BEHANDLING_ID_1, MEDLEMSKAPSPERIODE_ID_1)
 
 
-        verify { trygdeavgiftsgrunnlagService.fjernTrygdeavgiftsperioderOmDeFinnes(medlemAvFolketrygden.fastsattTrygdeavgift) }
+        medlemAvFolketrygden.fastsattTrygdeavgift?.trygdeavgiftsperioder?.shouldBeEmpty()
         medlemAvFolketrygden.medlemskapsperioder.shouldBeEmpty()
     }
 
@@ -653,7 +643,6 @@ class MedlemskapsperiodeServiceTest {
         medlemskapsperiodeService.slettMedlemskapsperioder(BEHANDLING_ID_1)
 
 
-        verify(exactly = 0) { trygdeavgiftsgrunnlagService.fjernTrygdeavgiftsperioderOmDeFinnes(any()) }
         medlemAvFolketrygden.medlemskapsperioder.shouldBeEmpty()
     }
 
@@ -671,7 +660,7 @@ class MedlemskapsperiodeServiceTest {
         medlemskapsperiodeService.slettMedlemskapsperioder(BEHANDLING_ID_1)
 
 
-        verify { trygdeavgiftsgrunnlagService.fjernTrygdeavgiftsperioderOmDeFinnes(medlemAvFolketrygden.fastsattTrygdeavgift) }
+        medlemAvFolketrygden.fastsattTrygdeavgift?.trygdeavgiftsperioder?.shouldBeEmpty()
         medlemAvFolketrygden.medlemskapsperioder.shouldBeEmpty()
     }
 

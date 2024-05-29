@@ -32,7 +32,7 @@ public class Trygdeavgiftsperiode {
     @Column(name = "trygdesats", nullable = false)
     private BigDecimal trygdesats;
 
-    @OneToOne
+    @ManyToOne(cascade = CascadeType.ALL)
     @JoinColumn(name = "inntektsperiode_id")
     private Inntektsperiode grunnlagInntekstperiode;
 
@@ -40,7 +40,7 @@ public class Trygdeavgiftsperiode {
     @JoinColumn(name = "medlemskapsperiode_id")
     private Medlemskapsperiode grunnlagMedlemskapsperiode;
 
-    @OneToOne
+    @ManyToOne(cascade = CascadeType.ALL)
     @JoinColumn(name = "skatteforhold_id")
     private SkatteforholdTilNorge grunnlagSkatteforholdTilNorge;
 

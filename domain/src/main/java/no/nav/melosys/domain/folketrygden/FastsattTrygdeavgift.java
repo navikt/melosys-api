@@ -2,9 +2,11 @@ package no.nav.melosys.domain.folketrygden;
 
 import java.util.HashSet;
 import java.util.Set;
+import java.util.stream.Collectors;
 
 import jakarta.persistence.*;
-import no.nav.melosys.domain.avgift.Trygdeavgiftsgrunnlag;
+import no.nav.melosys.domain.avgift.Inntektsperiode;
+import no.nav.melosys.domain.avgift.SkatteforholdTilNorge;
 import no.nav.melosys.domain.avgift.Trygdeavgiftsperiode;
 import no.nav.melosys.domain.kodeverk.Trygdeavgift_typer;
 
@@ -23,9 +25,6 @@ public class FastsattTrygdeavgift {
     @Column(name = "type")
     @Enumerated(EnumType.STRING)
     private Trygdeavgift_typer trygdeavgiftstype;
-
-    @OneToOne(mappedBy = "fastsattTrygdeavgift", cascade = CascadeType.ALL, fetch = FetchType.EAGER, orphanRemoval = true)
-    private Trygdeavgiftsgrunnlag trygdeavgiftsgrunnlag;
 
     @OneToMany(mappedBy = "fastsattTrygdeavgift", cascade = CascadeType.ALL, fetch = FetchType.EAGER, orphanRemoval = true)
     private Set<Trygdeavgiftsperiode> trygdeavgiftsperioder = new HashSet<>(1);
@@ -54,15 +53,6 @@ public class FastsattTrygdeavgift {
         this.trygdeavgiftstype = trygdeavgiftstype;
     }
 
-    public Trygdeavgiftsgrunnlag getTrygdeavgiftsgrunnlag() {
-        return trygdeavgiftsgrunnlag;
-    }
-
-    public void setTrygdeavgiftsgrunnlag(Trygdeavgiftsgrunnlag trygdeavgiftsgrunnlag) {
-        trygdeavgiftsgrunnlag.setFastsattTrygdeavgift(this);
-        this.trygdeavgiftsgrunnlag = trygdeavgiftsgrunnlag;
-    }
-
     public Set<Trygdeavgiftsperiode> getTrygdeavgiftsperioder() {
         return trygdeavgiftsperioder;
     }
@@ -70,4 +60,17 @@ public class FastsattTrygdeavgift {
     public void setTrygdeavgiftsperioder(Set<Trygdeavgiftsperiode> trygdeavgiftsperioder) {
         this.trygdeavgiftsperioder = trygdeavgiftsperioder;
     }
+
+    public Set<SkatteforholdTilNorge> hentSkatteforholdTilNorge() {
+        return getTrygdeavgiftsperioder().stream()
+            .map(Trygdeavgiftsperiode::getGrunnlagSkatteforholdTilNorge)
+            .collect(Collectors.toSet());
+    }
+
+    public Set<Inntektsperiode> hentInntektsperioder() {
+        return getTrygdeavgiftsperioder().stream()
+            .map(Trygdeavgiftsperiode::getGrunnlagInntekstperiode)
+            .collect(Collectors.toSet());
+    }
+
 }

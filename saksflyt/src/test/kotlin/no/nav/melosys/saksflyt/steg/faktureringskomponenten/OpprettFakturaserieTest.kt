@@ -321,11 +321,11 @@ class OpprettFakturaserieTest {
     @Test
     fun `Ikke opprett betalingsplan når trygdeavgift betales til skatt`() {
         lagTestData(emptySet())
-        behandlingsresultat.medlemAvFolketrygden.fastsattTrygdeavgift.trygdeavgiftsgrunnlag.inntektsperioder.first()
+        behandlingsresultat.medlemAvFolketrygden.fastsattTrygdeavgift.hentInntektsperioder().first()
             .apply {
                 isArbeidsgiversavgiftBetalesTilSkatt = true
             }
-        behandlingsresultat.medlemAvFolketrygden.fastsattTrygdeavgift.trygdeavgiftsgrunnlag.skatteforholdTilNorge.first()
+        behandlingsresultat.medlemAvFolketrygden.fastsattTrygdeavgift.hentSkatteforholdTilNorge().first()
             .apply {
                 skatteplikttype = Skatteplikttype.SKATTEPLIKTIG
             }
@@ -413,8 +413,8 @@ class OpprettFakturaserieTest {
             fastsattTrygdeavgift = lagFastsattTrygdeavgift()
             fastsattTrygdeavgift.trygdeavgiftsperioder.first().apply {
                 grunnlagMedlemskapsperiode = medlemskapsperioder.first()
-                grunnlagInntekstperiode = fastsattTrygdeavgift.trygdeavgiftsgrunnlag.inntektsperioder.first()
-                grunnlagSkatteforholdTilNorge = fastsattTrygdeavgift.trygdeavgiftsgrunnlag.skatteforholdTilNorge.first()
+                grunnlagInntekstperiode = fastsattTrygdeavgift.hentInntektsperioder().first()
+                grunnlagSkatteforholdTilNorge = fastsattTrygdeavgift.hentSkatteforholdTilNorge().first()
             }
         }
     }
@@ -433,10 +433,6 @@ class OpprettFakturaserieTest {
     private fun lagFastsattTrygdeavgift(): FastsattTrygdeavgift {
         return FastsattTrygdeavgift().apply {
             trygdeavgiftsperioder = mutableSetOf(lagTrygdeavgift(this))
-            trygdeavgiftsgrunnlag = Trygdeavgiftsgrunnlag().apply {
-                inntektsperioder = listOf(lagInntektsperiode())
-                skatteforholdTilNorge = listOf(lagSkatteforholdTilNorge())
-            }
         }
     }
 
@@ -447,6 +443,8 @@ class OpprettFakturaserieTest {
             trygdeavgiftsbeløpMd = Penger(5000.0)
             trygdesats = BigDecimal(3.5)
             this.fastsattTrygdeavgift = fastsattTrygdeavgift
+            grunnlagInntekstperiode = lagInntektsperiode()
+            grunnlagSkatteforholdTilNorge = lagSkatteforholdTilNorge()
         }
     }
 

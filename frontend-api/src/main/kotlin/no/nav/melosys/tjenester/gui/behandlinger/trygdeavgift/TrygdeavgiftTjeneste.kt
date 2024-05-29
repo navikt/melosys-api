@@ -1,9 +1,9 @@
 package no.nav.melosys.tjenester.gui.behandlinger.trygdeavgift
 
 import io.swagger.annotations.Api
+import no.nav.melosys.service.MedlemAvFolketrygdenService
 import no.nav.melosys.service.avgift.TrygdeavgiftMottakerService
 import no.nav.melosys.service.avgift.TrygdeavgiftsberegningService
-import no.nav.melosys.service.avgift.TrygdeavgiftsgrunnlagService
 import no.nav.melosys.service.tilgang.Aksesskontroll
 import no.nav.melosys.tjenester.gui.dto.trygdeavgift.BeregnetTrygdeavgiftDto
 import no.nav.melosys.tjenester.gui.dto.trygdeavgift.FakturamottakerDto
@@ -12,66 +12,66 @@ import no.nav.melosys.tjenester.gui.dto.trygdeavgift.TrygdeavgiftsgrunnlagDto
 import no.nav.security.token.support.core.api.Protected
 import org.springframework.http.ResponseEntity
 import org.springframework.web.bind.annotation.*
+import kotlin.jvm.optionals.getOrNull
 
 @Protected
 @RestController
 @Api(tags = ["trygdeavgift"])
 @RequestMapping("/behandlinger/{behandlingID}/trygdeavgift")
 class TrygdeavgiftTjeneste(
-    private val trygdeavgiftsgrunnlagService: TrygdeavgiftsgrunnlagService,
     private val trygdeavgiftsberegningService: TrygdeavgiftsberegningService,
+    private val medlemAvFolketrygdenService: MedlemAvFolketrygdenService,
     private val trygdeavgiftMottakerService: TrygdeavgiftMottakerService,
     private val aksesskontroll: Aksesskontroll
 ) {
-
-    @GetMapping("/grunnlag")
-    fun hentTrygdeavgiftsgrunnlag(@PathVariable("behandlingID") behandlingID: Long): ResponseEntity<TrygdeavgiftsgrunnlagDto> {
-        aksesskontroll.autoriser(behandlingID)
-
-        return trygdeavgiftsgrunnlagService.hentTrygdeavgiftsgrunnlagEllerOpprinneligTrygdeavgiftsgrunnlag(behandlingID)
-            ?.let { ResponseEntity.ok(TrygdeavgiftsgrunnlagDto(it)) } ?: ResponseEntity.noContent().build()
-    }
 
     @GetMapping("/mottaker")
     fun hentTrygdeavgiftMottaker(@PathVariable("behandlingID") behandlingID: Long): ResponseEntity<TrygdeavgiftMottakerDto> {
         aksesskontroll.autoriser(behandlingID)
 
-        return trygdeavgiftsgrunnlagService.hentTrygdeavgiftsgrunnlag(behandlingID)
-            ?.let { ResponseEntity.ok(TrygdeavgiftMottakerDto(
-                trygdeavgiftMottakerService.getTrygdeavgiftMottaker(it)))
+        return medlemAvFolketrygdenService.finnMedlemAvFolketrygden(behandlingID).getOrNull()?.fastsattTrygdeavgift
+            ?.let {
+                ResponseEntity.ok(
+                    TrygdeavgiftMottakerDto(trygdeavgiftMottakerService.getTrygdeavgiftMottaker(it))
+                )
             } ?: ResponseEntity.noContent().build()
     }
 
-    @PutMapping("/grunnlag")
-    fun oppdaterTrygdeavgiftsgrunnlag(
+    @PutMapping("/beregning")
+    fun beregnTrygdeavgiftsperioder(
         @PathVariable("behandlingID") behandlingID: Long,
         @RequestBody trygdeavgiftsgrunnlagDto: TrygdeavgiftsgrunnlagDto
-    ): ResponseEntity<TrygdeavgiftsgrunnlagDto> {
+    ): ResponseEntity<BeregnetTrygdeavgiftDto> {
         aksesskontroll.autoriserSkrivOgTilordnet(behandlingID)
+        val trygdeavgiftsperiodeSet = trygdeavgiftsberegningService.beregnOgLagreTrygdeavgift(
+            behandlingID,
+            trygdeavgiftsgrunnlagDto.tilRequest()
+        )
 
         return ResponseEntity.ok(
-            TrygdeavgiftsgrunnlagDto(
-                trygdeavgiftsgrunnlagService.oppdaterTrygdeavgiftsgrunnlag(
-                    behandlingID,
-                    trygdeavgiftsgrunnlagDto.tilRequest()
-                )
-            )
+            BeregnetTrygdeavgiftDto.av(trygdeavgiftsperiodeSet)
         )
     }
 
     @GetMapping("/beregning")
-    fun hentTrygdeavgift(@PathVariable("behandlingID") behandlingID: Long): ResponseEntity<BeregnetTrygdeavgiftDto> {
+    fun hentBeregnetTrygdeavgift(@PathVariable("behandlingID") behandlingID: Long): ResponseEntity<BeregnetTrygdeavgiftDto> {
         aksesskontroll.autoriser(behandlingID)
+
+        val trygdeavgiftsperiodeSet = trygdeavgiftsberegningService.hentTrygdeavgiftsberegning(behandlingID)
+
         return ResponseEntity.ok(
-            BeregnetTrygdeavgiftDto.av(trygdeavgiftsberegningService.hentTrygdeavgiftsberegning(behandlingID))
+            BeregnetTrygdeavgiftDto.av(trygdeavgiftsperiodeSet)
         )
     }
 
-    @PutMapping("/beregning")
-    fun beregnTrygdeavgift(@PathVariable("behandlingID") behandlingID: Long): ResponseEntity<BeregnetTrygdeavgiftDto> {
-        aksesskontroll.autoriserSkrivOgTilordnet(behandlingID)
+    @GetMapping("/grunnlag/opprinnelig")
+    fun hentOpprinneligTrygdeavgiftsgrunnlagDersomDetEksisterer(@PathVariable("behandlingID") behandlingID: Long): ResponseEntity<TrygdeavgiftsgrunnlagDto> {
+        aksesskontroll.autoriser(behandlingID)
+
+        val trygdeavgiftsperioder = trygdeavgiftsberegningService.hentOpprinneligTrygdeavgiftsperioder(behandlingID)
+
         return ResponseEntity.ok(
-            BeregnetTrygdeavgiftDto.av(trygdeavgiftsberegningService.beregnOgLagreTrygdeavgift(behandlingID))
+            TrygdeavgiftsgrunnlagDto(trygdeavgiftsperioder)
         )
     }
 
