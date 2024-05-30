@@ -5,22 +5,23 @@ import io.kotest.assertions.throwables.shouldThrow
 import io.kotest.matchers.collections.shouldBeEmpty
 import io.kotest.matchers.collections.shouldHaveSize
 import io.kotest.matchers.nulls.shouldNotBeNull
+import io.kotest.matchers.optional.shouldBePresent
+import io.kotest.matchers.optional.shouldNotBePresent
 import io.kotest.matchers.shouldBe
 import io.mockk.every
 import io.mockk.impl.annotations.MockK
 import io.mockk.impl.annotations.RelaxedMockK
 import io.mockk.junit5.MockKExtension
 import io.mockk.verify
-import no.nav.melosys.domain.Behandling
-import no.nav.melosys.domain.Behandlingsresultat
-import no.nav.melosys.domain.FagsakTestFactory
-import no.nav.melosys.domain.Vilkaarsresultat
+import no.nav.melosys.domain.*
 import no.nav.melosys.domain.kodeverk.Sakstyper
 import no.nav.melosys.domain.kodeverk.Vilkaar
 import no.nav.melosys.domain.kodeverk.begrunnelser.Art12_1_begrunnelser
+import no.nav.melosys.domain.kodeverk.begrunnelser.Art12_1_forutgaaende_medl
 import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingstema
 import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingstyper
 import no.nav.melosys.exception.FunksjonellException
+import no.nav.melosys.featuretoggle.ToggleName
 import no.nav.melosys.repository.BehandlingsresultatRepository
 import no.nav.melosys.service.saksbehandling.SaksbehandlingRegler
 import no.nav.melosys.service.vilkaar.VilkaarDto
@@ -56,8 +57,10 @@ internal class VilkaarsresultatServiceTest {
                 Vilkaarsresultat().apply {
                     vilkaar = Vilkaar.ART12_1_FORUTGAAENDE_MEDLEMSKAP
                     isOppfylt = true
-                    begrunnelser = setOf()
+                    begrunnelser =
+                        setOf(VilkaarBegrunnelse().apply { kode = Art12_1_forutgaaende_medl.IKKE_FOLKEREGISTRERT_ELLER_ARBEIDET_I_NORGE.kode })
                     begrunnelseFritekst = "begrunnelse"
+                    begrunnelseFritekstEessi = "kommer ikke på hva begrunnelse er på engelsk"
                 }
             )
         }
@@ -70,7 +73,100 @@ internal class VilkaarsresultatServiceTest {
         response
             .shouldNotBeNull()
             .shouldHaveSize(1)
-            .single().vilkaar.shouldBe(Vilkaar.ART12_1_FORUTGAAENDE_MEDLEMSKAP.kode)
+            .single().run {
+                vilkaar.shouldBe(Vilkaar.ART12_1_FORUTGAAENDE_MEDLEMSKAP.kode)
+                begrunnelseKoder.shouldHaveSize(1).single().shouldBe(Art12_1_forutgaaende_medl.IKKE_FOLKEREGISTRERT_ELLER_ARBEIDET_I_NORGE.kode)
+                begrunnelseFritekstEngelsk.shouldBe("kommer ikke på hva begrunnelse er på engelsk")
+            }
+    }
+
+    @Test
+    fun finnVilkaarsresultat_artikkel16_1_finnerVilkaarsresultat() {
+        val behandlingsresultat = lagBehandlingsresultat().apply {
+            vilkaarsresultater = setOf(Vilkaarsresultat().apply { vilkaar = Vilkaar.FO_883_2004_ART16_1 })
+        }
+        every { behandlingsresultatRepo.findById(BEHANDLING_ID) } returns Optional.of(behandlingsresultat)
+
+
+        val response = vilkaarsresultatService.finnVilkaarsresultat(BEHANDLING_ID, Vilkaar.FO_883_2004_ART16_1)
+
+
+        response
+            .shouldNotBeNull()
+            .shouldBePresent()
+            .vilkaar.shouldBe(Vilkaar.FO_883_2004_ART16_1)
+    }
+
+    @Test
+    fun finnUnntaksVilkaarsresultat_artikkel16_1_finnerVilkaarsresultat() {
+        val behandlingsresultat = lagBehandlingsresultat().apply {
+            vilkaarsresultater = setOf(Vilkaarsresultat().apply { vilkaar = Vilkaar.FO_883_2004_ART16_1 })
+        }
+        every { behandlingsresultatRepo.findById(BEHANDLING_ID) } returns Optional.of(behandlingsresultat)
+
+
+        val response = vilkaarsresultatService.finnUnntaksVilkaarsresultat(BEHANDLING_ID)
+
+
+        response.shouldBePresent().vilkaar.shouldBe(Vilkaar.FO_883_2004_ART16_1)
+    }
+
+    @Test
+    fun finnUnntaksVilkaarsresultat_artikkel18_1ToggleIkkePå_finnerIkkeVilkaarsresultat() {
+        unleash.disable(ToggleName.MELOSYS_KONVENSJON_EFTA_LAND_OG_STORBRITANNIA)
+        val behandlingsresultat = lagBehandlingsresultat().apply {
+            vilkaarsresultater = setOf(Vilkaarsresultat().apply { vilkaar = Vilkaar.KONV_EFTA_STORBRITANNIA_ART18_1 })
+        }
+        every { behandlingsresultatRepo.findById(BEHANDLING_ID) } returns Optional.of(behandlingsresultat)
+
+
+        val response = vilkaarsresultatService.finnUnntaksVilkaarsresultat(BEHANDLING_ID)
+
+
+        response.shouldNotBePresent()
+    }
+
+    @Test
+    fun finnUnntaksVilkaarsresultat_artikkel18_1TogglePå_finnerVilkaarsresultat() {
+        unleash.enable(ToggleName.MELOSYS_KONVENSJON_EFTA_LAND_OG_STORBRITANNIA)
+        val behandlingsresultat = lagBehandlingsresultat().apply {
+            vilkaarsresultater = setOf(Vilkaarsresultat().apply { vilkaar = Vilkaar.KONV_EFTA_STORBRITANNIA_ART18_1 })
+        }
+        every { behandlingsresultatRepo.findById(BEHANDLING_ID) } returns Optional.of(behandlingsresultat)
+
+
+        val response = vilkaarsresultatService.finnUnntaksVilkaarsresultat(BEHANDLING_ID)
+
+
+        response.shouldBePresent().vilkaar.shouldBe(Vilkaar.KONV_EFTA_STORBRITANNIA_ART18_1)
+    }
+
+    @Test
+    fun finnUtsendingsVilkaarsresultat_artikkel12_1_finnerVilkaarsresultat() {
+        val behandlingsresultat = lagBehandlingsresultat().apply {
+            vilkaarsresultater = setOf(Vilkaarsresultat().apply { vilkaar = Vilkaar.FO_883_2004_ART12_1 })
+        }
+        every { behandlingsresultatRepo.findById(BEHANDLING_ID) } returns Optional.of(behandlingsresultat)
+
+
+        val response = vilkaarsresultatService.finnUtsendingsVilkaarsresultat(BEHANDLING_ID)
+
+
+        response.shouldBePresent().vilkaar.shouldBe(Vilkaar.FO_883_2004_ART12_1)
+    }
+
+    @Test
+    fun finnUtsendingsVilkaarsresultat_artikkel12_2_finnerVilkaarsresultat() {
+        val behandlingsresultat = lagBehandlingsresultat().apply {
+            vilkaarsresultater = setOf(Vilkaarsresultat().apply { vilkaar = Vilkaar.FO_883_2004_ART12_2 })
+        }
+        every { behandlingsresultatRepo.findById(BEHANDLING_ID) } returns Optional.of(behandlingsresultat)
+
+
+        val response = vilkaarsresultatService.finnUtsendingsVilkaarsresultat(BEHANDLING_ID)
+
+
+        response.shouldBePresent().vilkaar.shouldBe(Vilkaar.FO_883_2004_ART12_2)
     }
 
     @Test

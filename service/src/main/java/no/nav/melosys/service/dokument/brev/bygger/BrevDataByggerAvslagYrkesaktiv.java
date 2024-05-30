@@ -25,11 +25,11 @@ public class BrevDataByggerAvslagYrkesaktiv implements BrevDataBygger {
 
     public BrevDataByggerAvslagYrkesaktiv(LandvelgerService landvelgerService,
                                           AnmodningsperiodeService anmodningsperiodeService,
-                                          BrevbestillingDto brebestilling,
+                                          BrevbestillingDto brevbestillingDto,
                                           VilkaarsresultatService vilkaarsresultatService) {
         this.landvelgerService = landvelgerService;
         this.anmodningsperiodeService = anmodningsperiodeService;
-        this.brevbestilling = brebestilling;
+        this.brevbestilling = brevbestillingDto;
         this.vilkaarsresultatService = vilkaarsresultatService;
     }
 
