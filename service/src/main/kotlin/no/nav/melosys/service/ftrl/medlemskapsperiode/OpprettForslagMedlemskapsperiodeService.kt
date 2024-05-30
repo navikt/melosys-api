@@ -4,7 +4,6 @@ import io.getunleash.Unleash
 import no.nav.melosys.domain.Behandlingsresultat
 import no.nav.melosys.domain.Fagsak
 import no.nav.melosys.domain.Medlemskapsperiode
-import no.nav.melosys.domain.folketrygden.MedlemAvFolketrygden
 import no.nav.melosys.domain.kodeverk.Folketrygdloven_kap2_bestemmelser
 import no.nav.melosys.domain.kodeverk.Trygdedekninger
 import no.nav.melosys.domain.kodeverk.Vilkaar
@@ -12,7 +11,6 @@ import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingstema
 import no.nav.melosys.domain.mottatteopplysninger.SøknadNorgeEllerUtenforEØS
 import no.nav.melosys.exception.FunksjonellException
 import no.nav.melosys.featuretoggle.ToggleName
-import no.nav.melosys.repository.MedlemAvFolketrygdenRepository
 import no.nav.melosys.service.avklartefakta.AvklartefaktaService
 import no.nav.melosys.service.behandling.BehandlingsresultatService
 import no.nav.melosys.service.behandling.UtledMottaksdato
@@ -25,7 +23,6 @@ import org.springframework.transaction.annotation.Transactional
 
 @Service
 class OpprettForslagMedlemskapsperiodeService(
-    private val medlemAvFolketrygdenRepository: MedlemAvFolketrygdenRepository,
     private val behandlingsresultatService: BehandlingsresultatService,
     private val utledMottaksdato: UtledMottaksdato,
     private val utledBestemmelserOgVilkår: UtledBestemmelserOgVilkår,
@@ -46,16 +43,13 @@ class OpprettForslagMedlemskapsperiodeService(
         validerBestemmelse(bestemmelse, behandling.tema, søknad.trygdedekning)
         validerVilkår(behandlingsresultat, bestemmelse!!)
 
-        val medlemAvFolketrygden = behandlingsresultat.medlemAvFolketrygden
-            ?: MedlemAvFolketrygden().apply { this.behandlingsresultat = behandlingsresultat }
-
-        if (medlemAvFolketrygden.medlemskapsperioder.isEmpty()) {
+        if (behandlingsresultat.medlemskapsperioder.isEmpty()) {
             val medlemskapsperioder: Collection<Medlemskapsperiode>
             val opprinneligBehandling = behandling.opprinneligBehandling
 
             if (behandling.erAndregangsbehandling() && opprinneligBehandling != null) {
                 val opprinneligeMedlemskapsperioder = behandlingsresultatService.hentBehandlingsresultat(opprinneligBehandling.id)
-                    ?.medlemAvFolketrygden?.medlemskapsperioder ?: emptyList()
+                    ?.medlemskapsperioder ?: emptyList()
                 medlemskapsperioder = UtledMedlemskapsperioder.lagMedlemskapsperioderForAndregangsbehandling(
                     UtledMedlemskapsperioderDto(søknad.periode, søknad.trygdedekning, null, bestemmelse),
                     opprinneligeMedlemskapsperioder,
@@ -71,16 +65,16 @@ class OpprettForslagMedlemskapsperiodeService(
                     )
                 )
             }
-            medlemAvFolketrygden.medlemskapsperioder.addAll(medlemskapsperioder)
-            medlemskapsperioder.forEach { it.medlemAvFolketrygden = medlemAvFolketrygden }
+            behandlingsresultat.medlemskapsperioder.addAll(medlemskapsperioder)
+            medlemskapsperioder.forEach { it.behandlingsresultat = behandlingsresultat }
         } else {
-            medlemAvFolketrygden.medlemskapsperioder.forEach {
+            behandlingsresultat.medlemskapsperioder.forEach {
                 if (!it.erOpphørt()) it.bestemmelse = bestemmelse
                 it.medlemskapstype = UtledMedlemskapstype.av(bestemmelse)
             }
         }
 
-        return medlemAvFolketrygdenRepository.save(medlemAvFolketrygden).medlemskapsperioder
+        return behandlingsresultatService.lagre(behandlingsresultat).medlemskapsperioder
     }
 
     private fun validerSakstype(fagsak: Fagsak) {

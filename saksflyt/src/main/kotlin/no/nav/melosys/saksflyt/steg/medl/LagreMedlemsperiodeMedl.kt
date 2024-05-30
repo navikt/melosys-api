@@ -26,10 +26,10 @@ class LagreMedlemsperiodeMedl(
             medlemskapsperiodeService.erstattMedlemskapsperioder(
                 behandlingID,
                 behandling.opprinneligBehandling.id,
-                behandlingsresultat.finnMedlemskapsperioder().toList()
+                behandlingsresultat.medlemskapsperioder.toList()
             )
         } else {
-            behandlingsresultat.finnMedlemskapsperioder().filter(Medlemskapsperiode::erInnvilget).forEach {
+            behandlingsresultat.medlemskapsperioder.filter(Medlemskapsperiode::erInnvilget).forEach {
                 medlemskapsperiodeService.opprettEllerOppdaterMedlPeriode(behandlingID, it)
             }
         }

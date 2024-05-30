@@ -1,6 +1,6 @@
 package no.nav.melosys.service.avgift
 
-import no.nav.melosys.domain.folketrygden.FastsattTrygdeavgift
+import no.nav.melosys.domain.Behandlingsresultat
 import no.nav.melosys.domain.kodeverk.Inntektskildetype
 import no.nav.melosys.domain.kodeverk.Skatteplikttype
 import no.nav.melosys.domain.kodeverk.Trygdeavgiftmottaker
@@ -10,38 +10,38 @@ import org.springframework.stereotype.Service
 class TrygdeavgiftMottakerService {
 
     fun skalBetalesTilNav(
-        fastsattTrygdeavgift: FastsattTrygdeavgift,
+        behandlingsresultat: Behandlingsresultat,
     ): Boolean {
-        val trygdeavgiftMottaker = getTrygdeavgiftMottaker(fastsattTrygdeavgift)
+        val trygdeavgiftMottaker = getTrygdeavgiftMottaker(behandlingsresultat)
         return trygdeavgiftMottaker == Trygdeavgiftmottaker.TRYGDEAVGIFT_BETALES_TIL_NAV
             || trygdeavgiftMottaker == Trygdeavgiftmottaker.TRYGDEAVGIFT_BETALES_TIL_NAV_OG_SKATT
     }
 
     fun getTrygdeavgiftMottaker(
-        fastsattTrygdeavgift: FastsattTrygdeavgift,
+        behandlingsresultat: Behandlingsresultat,
     ) = when {
         betalerKunTrygdeavgiftTilSkatt(
-            fastsattTrygdeavgift,
+            behandlingsresultat,
         ) -> Trygdeavgiftmottaker.TRYGDEAVGIFT_BETALES_TIL_SKATT
 
-        betalerKunTrygdeavgiftTilNav(fastsattTrygdeavgift) -> Trygdeavgiftmottaker.TRYGDEAVGIFT_BETALES_TIL_NAV
+        betalerKunTrygdeavgiftTilNav(behandlingsresultat) -> Trygdeavgiftmottaker.TRYGDEAVGIFT_BETALES_TIL_NAV
         else -> Trygdeavgiftmottaker.TRYGDEAVGIFT_BETALES_TIL_NAV_OG_SKATT
     }
 
     fun betalerKunTrygdeavgiftTilSkatt(
-        fastsattTrygdeavgift: FastsattTrygdeavgift,
+        behandlingsresultat: Behandlingsresultat,
     ): Boolean {
-        return fastsattTrygdeavgift.hentSkatteforholdTilNorge().all { it.skatteplikttype == Skatteplikttype.SKATTEPLIKTIG }
-            && fastsattTrygdeavgift.hentInntektsperioder().filterNotNull().all { it.isArbeidsgiversavgiftBetalesTilSkatt || erMisjonær(it.type) }
+        return behandlingsresultat.hentSkatteforholdTilNorge().all { it.skatteplikttype == Skatteplikttype.SKATTEPLIKTIG }
+            && behandlingsresultat.hentInntektsperioder().filterNotNull().all { it.isArbeidsgiversavgiftBetalesTilSkatt || erMisjonær(it.type) }
     }
 
     fun betalerKunTrygdeavgiftTilNav(
-        fastsattTrygdeavgift: FastsattTrygdeavgift,
+        behandlingsresultat: Behandlingsresultat,
     ): Boolean {
 
-        return (fastsattTrygdeavgift.hentSkatteforholdTilNorge().all { it.skatteplikttype == Skatteplikttype.IKKE_SKATTEPLIKTIG }
-            && fastsattTrygdeavgift.hentInntektsperioder().all { !it.isArbeidsgiversavgiftBetalesTilSkatt || erMisjonær(it.type) })
-            || fastsattTrygdeavgift.hentInntektsperioder().all { erFnAnsatt(it.type) }
+        return (behandlingsresultat.hentSkatteforholdTilNorge().all { it.skatteplikttype == Skatteplikttype.IKKE_SKATTEPLIKTIG }
+            && behandlingsresultat.hentInntektsperioder().all { !it.isArbeidsgiversavgiftBetalesTilSkatt || erMisjonær(it.type) })
+            || behandlingsresultat.hentInntektsperioder().all { erFnAnsatt(it.type) }
     }
 
     private fun erFnAnsatt(inntektskildetype: Inntektskildetype): Boolean {

@@ -20,8 +20,6 @@ import no.nav.melosys.domain.avgift.SkatteforholdTilNorge
 import no.nav.melosys.domain.avgift.Trygdeavgiftsperiode
 import no.nav.melosys.domain.avklartefakta.AvklartVirksomhet
 import no.nav.melosys.domain.brev.InnvilgelseFtrlYrkesaktivFrivilligBrevbestilling
-import no.nav.melosys.domain.folketrygden.FastsattTrygdeavgift
-import no.nav.melosys.domain.folketrygden.MedlemAvFolketrygden
 import no.nav.melosys.domain.kodeverk.*
 import no.nav.melosys.domain.kodeverk.begrunnelser.folketrygdloven.Ftrl_2_7_begrunnelser
 import no.nav.melosys.domain.kodeverk.begrunnelser.folketrygdloven.Ftrl_2_8_naer_tilknytning_norge_begrunnelser
@@ -147,15 +145,15 @@ internal class InnvilgelseFtrlYrkesaktivFrivilligMapperTest {
         mockHappyCase(Case.paragraf_2_8)
         val behandlingsresultat = lagBehandlingsResultat(Case.paragraf_2_8)
         every { mockDokgenMapperDatahenter.hentBehandlingsresultat(ofType()) } returns behandlingsresultat.apply {
-            medlemAvFolketrygden.medlemskapsperioder = listOf(
-                medlemAvFolketrygden.medlemskapsperioder.iterator().next(),
+            behandlingsresultat.medlemskapsperioder = listOf(
+                behandlingsresultat.medlemskapsperioder.iterator().next(),
                 Medlemskapsperiode().apply {
                     fom = LocalDate.EPOCH.minusMonths(1)
                     tom = LocalDate.EPOCH.minusMonths(4)
                     innvilgelsesresultat = InnvilgelsesResultat.AVSLAATT
                     medlemskapstype = Medlemskapstyper.FRIVILLIG
                     trygdedekning = Trygdedekninger.FTRL_2_9_FØRSTE_LEDD_A_HELSE
-                    medlemAvFolketrygden = behandlingsresultat.medlemAvFolketrygden
+                    this.behandlingsresultat = behandlingsresultat
                 }
             )
         }
@@ -219,16 +217,16 @@ internal class InnvilgelseFtrlYrkesaktivFrivilligMapperTest {
             }
         )
         every { mockDokgenMapperDatahenter.hentBehandlingsresultat(ofType()) } returns behandlingsresultat.apply {
-            medlemAvFolketrygden.fastsattTrygdeavgift.trygdeavgiftsperioder = trygdeavgiftsperioder
-            medlemAvFolketrygden.medlemskapsperioder = listOf(
+            behandlingsresultat.medlemskapsperioder = listOf(
                 Medlemskapsperiode().apply {
                     fom = LocalDate.EPOCH.plusMonths(1)
                     tom = LocalDate.EPOCH.plusMonths(4)
                     innvilgelsesresultat = InnvilgelsesResultat.INNVILGET
                     medlemskapstype = Medlemskapstyper.FRIVILLIG
                     trygdedekning = Trygdedekninger.FTRL_2_9_FØRSTE_LEDD_A_HELSE
-                    medlemAvFolketrygden = behandlingsresultat.medlemAvFolketrygden
+                    this.behandlingsresultat = behandlingsresultat
                     bestemmelse = Folketrygdloven_kap2_bestemmelser.FTRL_KAP2_2_8_FØRSTE_LEDD_A
+                    this.trygdeavgiftsperioder= trygdeavgiftsperioder
                 }
             )
         }
@@ -300,7 +298,7 @@ internal class InnvilgelseFtrlYrkesaktivFrivilligMapperTest {
 
     private fun lagBehandlingsResultat(paragraf: Case): Behandlingsresultat {
         return Behandlingsresultat().apply {
-            medlemAvFolketrygden = lagMedlemAvFolketrygden(paragraf).apply { fastsattTrygdeavgift.medlemAvFolketrygden = this }
+            medlemskapsperioder = lagMedlemskapsperioder(this, paragraf)
             vilkaarsresultater = setOf(Vilkaarsresultat().apply {
                 vilkaar = when (paragraf) {
                     Case.paragraf_2_7 -> Vilkaar.FTRL_2_7_RIMELIGHETSVURDERING
@@ -333,14 +331,7 @@ internal class InnvilgelseFtrlYrkesaktivFrivilligMapperTest {
         )
     )
 
-    private fun lagMedlemAvFolketrygden(paragraf: Case): MedlemAvFolketrygden = MedlemAvFolketrygden().apply {
-        medlemskapsperioder = lagMedlemskapsperioder(this, paragraf)
-        fastsattTrygdeavgift = FastsattTrygdeavgift().apply {
-            trygdeavgiftsperioder = lagTrygdeavgiftsperioder()
-        }
-    }
-
-    private fun lagMedlemskapsperioder(medlemAvFolketrygden: MedlemAvFolketrygden, paragraf: Case): List<Medlemskapsperiode> =
+    private fun lagMedlemskapsperioder(behandlingsresultat: Behandlingsresultat, paragraf: Case): List<Medlemskapsperiode> =
         listOf(Medlemskapsperiode().apply {
             fom = LocalDate.EPOCH.plusMonths(1)
             tom = LocalDate.EPOCH.plusMonths(4)
@@ -351,7 +342,8 @@ internal class InnvilgelseFtrlYrkesaktivFrivilligMapperTest {
                 Case.paragraf_2_7 -> Folketrygdloven_kap2_bestemmelser.FTRL_KAP2_2_7_FØRSTE_LEDD
                 Case.paragraf_2_8 -> Folketrygdloven_kap2_bestemmelser.FTRL_KAP2_2_8
             }
-            this.medlemAvFolketrygden = medlemAvFolketrygden
+            this.behandlingsresultat = behandlingsresultat
+            this.trygdeavgiftsperioder = lagTrygdeavgiftsperioder()
         })
 
     private fun lagTrygdeavgiftsperioder(): Set<Trygdeavgiftsperiode> {
