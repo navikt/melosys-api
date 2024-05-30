@@ -74,6 +74,10 @@ public class DokumentproduksjonsInfoMapper {
                     JournalforingsTittel.TRYGDEAVTALE.getTittel(),
                     JournalforingsTittel.TRYGDEAVTALE_VEDTAKSBREV.getTittel(),
                     JournalforingsTittel.TRYGDEAVTALE_ATTEST.getTittel()))
+            .put(INNHENTING_AV_INNTEKTSOPPLYSNINGER,
+                new DokumentproduksjonsInfo("innhenting_av_inntektsopplysninger",
+                    DokumentKategoriKode.IB.getKode(),
+                    INNHENTING_AV_INNTEKTSOPPLYSNINGER.getBeskrivelse()))
             .put(GENERELT_FRITEKSTBREV_BRUKER,
                 new DokumentproduksjonsInfo("fritekstbrev",
                     DokumentKategoriKode.IB.getKode(),
