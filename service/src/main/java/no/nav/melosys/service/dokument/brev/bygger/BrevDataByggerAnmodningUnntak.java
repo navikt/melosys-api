@@ -47,6 +47,6 @@ public class BrevDataByggerAnmodningUnntak implements BrevDataBygger {
     private Vilkaarsresultat hentFørsteGyldigeVilkaarsresultatArt16(long behandlingID) {
         return vilkaarsresultatService.finnUnntaksVilkaarsresultat(behandlingID)
             .filter(v -> v.isOppfylt() && !v.getBegrunnelser().isEmpty())
-            .orElseThrow(() -> new TekniskException("Ingen oppfylte art16-vilkår med vilkårbegrunnelser funnet for brev om orientering anmodning om unntak"));
+            .orElseThrow(() -> new TekniskException("Ingen oppfylte unntaksvilkår med vilkårbegrunnelser funnet for brev om orientering anmodning om unntak"));
     }
 }

@@ -108,10 +108,10 @@ public class BrevDataByggerA001 implements BrevDataBygger {
     private Vilkaarsresultat hentVilkårsresultat() {
         Optional<Vilkaarsresultat> vilkårsresultat = vilkaarsresultatService.finnUnntaksVilkaarsresultat(behandling.getId());
         Vilkaarsresultat resultat = vilkårsresultat.orElseThrow(() ->
-            new TekniskException("Fant ingen vilkårbegrunnelse for FO_883_2004_ART16_1"));
+            new TekniskException("Fant ingen vilkårbegrunnelse for FO_883_2004_ART16_1 eller KONV_EFTA_STORBRITANNIA_ART18_1"));
 
         if (resultat.getBegrunnelser().isEmpty()) {
-            throw new TekniskException("Brevet A001 trenger en begrunnelsekode for ART16_1");
+            throw new TekniskException("Brevet A001 trenger en begrunnelsekode for FO_883_2004_ART16_1 eller KONV_EFTA_STORBRITANNIA_ART18_1");
         }
         return resultat;
     }

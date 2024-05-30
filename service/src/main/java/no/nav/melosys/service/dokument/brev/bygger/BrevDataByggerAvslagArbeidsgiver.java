@@ -37,9 +37,14 @@ public class BrevDataByggerAvslagArbeidsgiver implements BrevDataBygger {
         brevData.setArbeidsland(landvelgerService.hentArbeidsland(behandlingID).getBeskrivelse());
 
         brevData.setVilkårbegrunnelser121(
-            vilkaarsresultatService.finnUtsendingsVilkaarsresultat(behandlingID).map(Vilkaarsresultat::getBegrunnelser).orElse(Collections.emptySet()));
+            vilkaarsresultatService.finnUtsendingsVilkaarsresultat(behandlingID)
+                .map(Vilkaarsresultat::getBegrunnelser)
+                .orElse(Collections.emptySet()));
+
         brevData.setVilkårbegrunnelser121VesentligVirksomhet(
-            vilkaarsresultatService.finnVilkaarsresultat(behandlingID, ART12_1_VESENTLIG_VIRKSOMHET).map(Vilkaarsresultat::getBegrunnelser).orElse(Collections.emptySet()));
+            vilkaarsresultatService.finnVilkaarsresultat(behandlingID, ART12_1_VESENTLIG_VIRKSOMHET)
+                .map(Vilkaarsresultat::getBegrunnelser)
+                .orElse(Collections.emptySet()));
 
         return brevData;
     }

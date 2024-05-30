@@ -47,7 +47,7 @@ public class BrevDataByggerAvslagYrkesaktiv implements BrevDataBygger {
         brevData.setArt16Vilkaar(hentFørsteGyldigeVilkaarsresultatForArt16(behandlingID));
 
         if (!brevData.getArt16Vilkaar().isOppfylt()) {
-            brevData.setAnmodningsperiodeSvar(new AnmodningsperiodeSvar()); //TODO sjekk i QA
+            brevData.setAnmodningsperiodeSvar(new AnmodningsperiodeSvar());
         } else {
             brevData.setAnmodningsperiodeSvar(hentAnmodningsperiodeSvar(behandlingID).get());
         }
@@ -67,6 +67,6 @@ public class BrevDataByggerAvslagYrkesaktiv implements BrevDataBygger {
 
     private Vilkaarsresultat hentFørsteGyldigeVilkaarsresultatForArt16(long behandlingID) {
         return vilkaarsresultatService.finnUnntaksVilkaarsresultat(behandlingID)
-            .filter(v -> !v.getBegrunnelser().isEmpty()).orElseThrow(() -> new FunksjonellException("Avslag yrkesaktiv må ha vilkår for art16"));
+            .filter(v -> !v.getBegrunnelser().isEmpty()).orElseThrow(() -> new FunksjonellException("Avslag yrkesaktiv må ha vilkår for art16 eller gb-art18"));
     }
 }

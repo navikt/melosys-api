@@ -275,6 +275,21 @@ class BrevDataByggerA001Test {
     }
 
     @Test
+    void lag_art18MedArt141_harKunArt18Begrunnelser() {
+        lagUtsendingsVilkår(Vilkaar.KONV_EFTA_STORBRITANNIA_ART14_1, UTSENDELSE_OVER_24_MN);
+        lagUnntaksVilkårResultat(Vilkaar.KONV_EFTA_STORBRITANNIA_ART18_1, ERSTATTER_EN_ANNEN_UNDER_5_AAR);
+
+
+        BrevDataA001 brevDataA001 = (BrevDataA001) brevDataByggerA001.lag(lagBrevDataGrunnlag(), SAKSBEHANDLER_ID);
+        assertThat(brevDataA001.getAnmodningUtenArt12Begrunnelser()).isEmpty();
+
+
+        assertThat(brevDataA001.getAnmodningBegrunnelser()).hasSize(1);
+        assertThat(brevDataA001.getAnmodningBegrunnelser().stream().map(VilkaarBegrunnelse::getKode))
+            .containsExactly(ERSTATTER_EN_ANNEN_UNDER_5_AAR.getKode());
+    }
+
+    @Test
     void lag_art16UtenArt12_harKunArt16UtenArt12Begrunnelser() {
         lagUnntaksVilkårResultat(Vilkaar.FO_883_2004_ART16_1, SJOEMANNSKIRKEN);
 

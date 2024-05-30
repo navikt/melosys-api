@@ -172,7 +172,6 @@ class EessiServiceTest {
         when(eessiConsumer.opprettBucOgSed(any(), any(), any(), eq(true), eq(true))).thenReturn(new OpprettSedDto());
         when(dokumentdataGrunnlagFactory.av(any())).thenReturn(Mockito.mock(SedDataGrunnlagMedSoknad.class));
         mockBehandling();
-        mockBehandlingsresultat();
         var behandlingsresultat = lagBehandlingsresultat();
         behandlingsresultat.hentAnmodningsperiode().setBestemmelse(Lovvalgbestemmelser_konv_efta_storbritannia.KONV_EFTA_STORBRITANNIA_ART18_1);
         when(behandlingsresultatService.hentBehandlingsresultat(BEHANDLING_ID)).thenReturn(behandlingsresultat);
@@ -502,6 +501,29 @@ class EessiServiceTest {
 
         verify(sedDataBygger).lagUtkast(any(SedDataGrunnlag.class), any(), eq(PeriodeType.ANMODNINGSPERIODE));
         verify(eessiConsumer).genererSedPdf(any(), any());
+        assertThat(pdf).isEqualTo(PDF);
+    }
+
+    @Test
+    void genererSedPdf_sedA001_storbritanniaKonvFårTilpassetYtterligereInformasjon() {
+        unleash.enable(ToggleName.MELOSYS_KONVENSJON_EFTA_LAND_OG_STORBRITANNIA);
+        final byte[] PDF = "pdf".getBytes();
+        when(eessiConsumer.genererSedPdf(any(), any())).thenReturn(PDF);
+        when(sedDataBygger.lagUtkast(any(SedDataGrunnlag.class), any(Behandlingsresultat.class), any(PeriodeType.class))).thenReturn(new SedDataDto());
+        when(dokumentdataGrunnlagFactory.av(any())).thenReturn(Mockito.mock(SedDataGrunnlagMedSoknad.class));
+        var sedPdfData = new SedPdfData();
+        sedPdfData.setFritekst("fritekst");
+        var behandlingsresultat = lagBehandlingsresultat();
+        behandlingsresultat.hentAnmodningsperiode().setBestemmelse(Lovvalgbestemmelser_konv_efta_storbritannia.KONV_EFTA_STORBRITANNIA_ART18_1);
+        when(behandlingsresultatService.hentBehandlingsresultat(BEHANDLING_ID)).thenReturn(behandlingsresultat);
+
+
+        byte[] pdf = eessiService.genererSedPdf(BEHANDLING_ID, SedType.A001, sedPdfData);
+
+
+        verify(sedDataBygger).lagUtkast(any(SedDataGrunnlag.class), any(), eq(PeriodeType.ANMODNINGSPERIODE));
+        verify(eessiConsumer).genererSedPdf(sedDataDtoCaptor.capture(), any());
+        assertThat(sedDataDtoCaptor.getValue().getYtterligereInformasjon()).isEqualTo("Issued under the EEA EFTA Convention.\nfritekst");
         assertThat(pdf).isEqualTo(PDF);
     }
 
