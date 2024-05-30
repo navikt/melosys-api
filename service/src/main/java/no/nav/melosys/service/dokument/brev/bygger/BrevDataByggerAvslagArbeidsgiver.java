@@ -1,7 +1,9 @@
 package no.nav.melosys.service.dokument.brev.bygger;
 
 import java.util.Collections;
+import java.util.Set;
 
+import no.nav.melosys.domain.VilkaarBegrunnelse;
 import no.nav.melosys.domain.Vilkaarsresultat;
 import no.nav.melosys.service.LandvelgerService;
 import no.nav.melosys.service.LovvalgsperiodeService;
@@ -36,16 +38,14 @@ public class BrevDataByggerAvslagArbeidsgiver implements BrevDataBygger {
         brevData.setLovvalgsperiode(lovvalgsperiodeService.hentLovvalgsperiode(behandlingID));
         brevData.setArbeidsland(landvelgerService.hentArbeidsland(behandlingID).getBeskrivelse());
 
-        brevData.setVilkårbegrunnelser121(
-            vilkaarsresultatService.finnUtsendingsVilkaarsresultat(behandlingID)
-                .map(Vilkaarsresultat::getBegrunnelser)
-                .orElse(Collections.emptySet()));
-
+        brevData.setVilkårbegrunnelser121(mapVilkaarBegrunnelse(vilkaarsresultatService.finnUtsendingsVilkaarsresultat(behandlingID)));
         brevData.setVilkårbegrunnelser121VesentligVirksomhet(
-            vilkaarsresultatService.finnVilkaarsresultat(behandlingID, ART12_1_VESENTLIG_VIRKSOMHET)
-                .map(Vilkaarsresultat::getBegrunnelser)
-                .orElse(Collections.emptySet()));
+            mapVilkaarBegrunnelse(vilkaarsresultatService.finnVilkaarsresultat(behandlingID, ART12_1_VESENTLIG_VIRKSOMHET)));
 
         return brevData;
+    }
+
+    public Set<VilkaarBegrunnelse> mapVilkaarBegrunnelse(Vilkaarsresultat vilkaarsresultat) {
+        return vilkaarsresultat != null ? vilkaarsresultat.getBegrunnelser() : Collections.emptySet();
     }
 }

@@ -4,9 +4,8 @@ import io.getunleash.FakeUnleash
 import io.kotest.assertions.throwables.shouldThrow
 import io.kotest.matchers.collections.shouldBeEmpty
 import io.kotest.matchers.collections.shouldHaveSize
+import io.kotest.matchers.nulls.shouldBeNull
 import io.kotest.matchers.nulls.shouldNotBeNull
-import io.kotest.matchers.optional.shouldBePresent
-import io.kotest.matchers.optional.shouldNotBePresent
 import io.kotest.matchers.shouldBe
 import io.mockk.every
 import io.mockk.impl.annotations.MockK
@@ -91,10 +90,7 @@ internal class VilkaarsresultatServiceTest {
         val response = vilkaarsresultatService.finnVilkaarsresultat(BEHANDLING_ID, Vilkaar.FO_883_2004_ART16_1)
 
 
-        response
-            .shouldNotBeNull()
-            .shouldBePresent()
-            .vilkaar.shouldBe(Vilkaar.FO_883_2004_ART16_1)
+        response.shouldNotBeNull().vilkaar.shouldBe(Vilkaar.FO_883_2004_ART16_1)
     }
 
     @Test
@@ -108,7 +104,7 @@ internal class VilkaarsresultatServiceTest {
         val response = vilkaarsresultatService.finnUnntaksVilkaarsresultat(BEHANDLING_ID)
 
 
-        response.shouldBePresent().vilkaar.shouldBe(Vilkaar.FO_883_2004_ART16_1)
+        response.shouldNotBeNull().vilkaar.shouldBe(Vilkaar.FO_883_2004_ART16_1)
     }
 
     @Test
@@ -123,7 +119,7 @@ internal class VilkaarsresultatServiceTest {
         val response = vilkaarsresultatService.finnUnntaksVilkaarsresultat(BEHANDLING_ID)
 
 
-        response.shouldNotBePresent()
+        response.shouldBeNull()
     }
 
     @Test
@@ -138,7 +134,7 @@ internal class VilkaarsresultatServiceTest {
         val response = vilkaarsresultatService.finnUnntaksVilkaarsresultat(BEHANDLING_ID)
 
 
-        response.shouldBePresent().vilkaar.shouldBe(Vilkaar.KONV_EFTA_STORBRITANNIA_ART18_1)
+        response.shouldNotBeNull().vilkaar.shouldBe(Vilkaar.KONV_EFTA_STORBRITANNIA_ART18_1)
     }
 
     @Test
@@ -152,7 +148,7 @@ internal class VilkaarsresultatServiceTest {
         val response = vilkaarsresultatService.finnUtsendingsVilkaarsresultat(BEHANDLING_ID)
 
 
-        response.shouldBePresent().vilkaar.shouldBe(Vilkaar.FO_883_2004_ART12_1)
+        response.shouldNotBeNull().vilkaar.shouldBe(Vilkaar.FO_883_2004_ART12_1)
     }
 
     @Test
@@ -166,7 +162,7 @@ internal class VilkaarsresultatServiceTest {
         val response = vilkaarsresultatService.finnUtsendingsVilkaarsresultat(BEHANDLING_ID)
 
 
-        response.shouldBePresent().vilkaar.shouldBe(Vilkaar.FO_883_2004_ART12_2)
+        response.shouldNotBeNull().vilkaar.shouldBe(Vilkaar.FO_883_2004_ART12_2)
     }
 
     @Test

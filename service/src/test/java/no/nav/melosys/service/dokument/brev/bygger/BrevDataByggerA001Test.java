@@ -1,7 +1,10 @@
 package no.nav.melosys.service.dokument.brev.bygger;
 
 import java.time.LocalDate;
-import java.util.*;
+import java.util.Collections;
+import java.util.HashSet;
+import java.util.List;
+import java.util.Set;
 
 import no.nav.melosys.domain.*;
 import no.nav.melosys.domain.adresse.StrukturertAdresse;
@@ -157,12 +160,12 @@ class BrevDataByggerA001Test {
 
     private void lagUnntaksVilkårResultat(Vilkaar vilkaarType, Kodeverk begrunnelseKode) {
         Vilkaarsresultat vilkaarsresultat = lagVilkaarsresultat(vilkaarType, true, begrunnelseKode);
-        when(vilkaarsresultatService.finnUnntaksVilkaarsresultat(anyLong())).thenReturn(Optional.of(vilkaarsresultat));
+        when(vilkaarsresultatService.finnUnntaksVilkaarsresultat(anyLong())).thenReturn(vilkaarsresultat);
     }
 
     private void lagUtsendingsVilkår(Vilkaar vilkaarType, Kodeverk begrunnelseKode) {
         Vilkaarsresultat vilkaarsresultat = lagVilkaarsresultat(vilkaarType, false, begrunnelseKode);
-        when(vilkaarsresultatService.finnUtsendingsVilkaarsresultat(anyLong())).thenReturn(Optional.of(vilkaarsresultat));
+        when(vilkaarsresultatService.finnUtsendingsVilkaarsresultat(anyLong())).thenReturn(vilkaarsresultat);
     }
 
     private BrevDataGrunnlag lagBrevDataGrunnlag() {

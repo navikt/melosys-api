@@ -14,7 +14,6 @@ import no.nav.melosys.service.saksbehandling.SaksbehandlingRegler
 import no.nav.melosys.service.vilkaar.VilkaarDto
 import org.springframework.stereotype.Service
 import org.springframework.transaction.annotation.Transactional
-import java.util.*
 
 
 @Service
@@ -40,11 +39,11 @@ class VilkaarsresultatService(
         }
 
     @Transactional(readOnly = true)
-    fun finnVilkaarsresultat(behandlingID: Long, vilkaar: Vilkaar): Optional<Vilkaarsresultat> =
-        Optional.ofNullable(hentBehandlingsresultat(behandlingID).vilkaarsresultater.firstOrNull { it.vilkaar == vilkaar })
+    fun finnVilkaarsresultat(behandlingID: Long, vilkaar: Vilkaar): Vilkaarsresultat? =
+        hentBehandlingsresultat(behandlingID).vilkaarsresultater.firstOrNull { it.vilkaar == vilkaar }
 
     @Transactional(readOnly = true)
-    fun finnUtsendingsVilkaarsresultat(behandlingID: Long): Optional<Vilkaarsresultat> {
+    fun finnUtsendingsVilkaarsresultat(behandlingID: Long): Vilkaarsresultat? {
         val utsendingsvilkår =
             if (unleash.isEnabled(ToggleName.MELOSYS_KONVENSJON_EFTA_LAND_OG_STORBRITANNIA)) listOf(
                 Vilkaar.FO_883_2004_ART12_1,
@@ -58,11 +57,11 @@ class VilkaarsresultatService(
                 Vilkaar.FO_883_2004_ART12_2,
             )
 
-        return Optional.ofNullable(hentBehandlingsresultat(behandlingID).vilkaarsresultater.firstOrNull { it.vilkaar in utsendingsvilkår })
+        return hentBehandlingsresultat(behandlingID).vilkaarsresultater.firstOrNull { it.vilkaar in utsendingsvilkår }
     }
 
     @Transactional(readOnly = true)
-    fun finnUnntaksVilkaarsresultat(behandlingID: Long): Optional<Vilkaarsresultat> {
+    fun finnUnntaksVilkaarsresultat(behandlingID: Long): Vilkaarsresultat? {
         val unntaksvilkår =
             if (unleash.isEnabled(ToggleName.MELOSYS_KONVENSJON_EFTA_LAND_OG_STORBRITANNIA)) listOf(
                 Vilkaar.FO_883_2004_ART16_1,
@@ -71,7 +70,7 @@ class VilkaarsresultatService(
                 Vilkaar.FO_883_2004_ART16_1
             )
 
-        return Optional.ofNullable(hentBehandlingsresultat(behandlingID).vilkaarsresultater.firstOrNull { it.vilkaar in unntaksvilkår })
+        return hentBehandlingsresultat(behandlingID).vilkaarsresultater.firstOrNull { it.vilkaar in unntaksvilkår }
     }
 
     @Transactional(readOnly = true)
@@ -79,10 +78,10 @@ class VilkaarsresultatService(
         hentBehandlingsresultat(behandlingID).vilkaarsresultater.any { vilkaar == it.vilkaar && it.isOppfylt }
 
     @Transactional(readOnly = true)
-    fun harVilkaarForUtsending(behandlingID: Long): Boolean = finnUtsendingsVilkaarsresultat(behandlingID).isPresent
+    fun harVilkaarForUtsending(behandlingID: Long): Boolean = finnUtsendingsVilkaarsresultat(behandlingID) != null
 
     @Transactional(readOnly = true)
-    fun harVilkaarForUnntak(behandlingID: Long): Boolean = finnUnntaksVilkaarsresultat(behandlingID).isPresent
+    fun harVilkaarForUnntak(behandlingID: Long): Boolean = finnUnntaksVilkaarsresultat(behandlingID) != null
 
     @Transactional
     fun registrerVilkår(behandlingID: Long, vilkaarDtoer: List<VilkaarDto>) {

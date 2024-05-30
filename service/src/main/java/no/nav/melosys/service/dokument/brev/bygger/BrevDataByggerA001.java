@@ -1,8 +1,5 @@
 package no.nav.melosys.service.dokument.brev.bygger;
 
-import java.util.*;
-import java.util.stream.Stream;
-
 import no.nav.dok.melosysbrev._000115.BostedsadresseTypeKode;
 import no.nav.melosys.domain.Anmodningsperiode;
 import no.nav.melosys.domain.Behandling;
@@ -17,14 +14,17 @@ import no.nav.melosys.exception.FunksjonellException;
 import no.nav.melosys.exception.TekniskException;
 import no.nav.melosys.service.LovvalgsperiodeService;
 import no.nav.melosys.service.aktoer.UtenlandskMyndighetService;
+import no.nav.melosys.service.behandling.VilkaarsresultatService;
 import no.nav.melosys.service.dokument.brev.BrevData;
 import no.nav.melosys.service.dokument.brev.BrevDataA001;
 import no.nav.melosys.service.dokument.brev.datagrunnlag.BrevDataGrunnlag;
 import no.nav.melosys.service.unntak.AnmodningsperiodeService;
-import no.nav.melosys.service.behandling.VilkaarsresultatService;
 import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.collections4.ListUtils;
 import org.apache.commons.collections4.map.SingletonMap;
+
+import java.util.*;
+import java.util.stream.Stream;
 
 public class BrevDataByggerA001 implements BrevDataBygger {
     private final LovvalgsperiodeService lovvalgsperiodeService;
@@ -106,14 +106,14 @@ public class BrevDataByggerA001 implements BrevDataBygger {
     }
 
     private Vilkaarsresultat hentVilkårsresultat() {
-        Optional<Vilkaarsresultat> vilkårsresultat = vilkaarsresultatService.finnUnntaksVilkaarsresultat(behandling.getId());
-        Vilkaarsresultat resultat = vilkårsresultat.orElseThrow(() ->
-            new TekniskException("Fant ingen vilkårbegrunnelse for FO_883_2004_ART16_1 eller KONV_EFTA_STORBRITANNIA_ART18_1"));
-
-        if (resultat.getBegrunnelser().isEmpty()) {
+        Vilkaarsresultat vilkårsresultat = vilkaarsresultatService.finnUnntaksVilkaarsresultat(behandling.getId());
+        if (vilkårsresultat == null) {
+            throw new TekniskException("Fant ingen vilkårbegrunnelse for FO_883_2004_ART16_1 eller KONV_EFTA_STORBRITANNIA_ART18_1");
+        }
+        if (vilkårsresultat.getBegrunnelser().isEmpty()) {
             throw new TekniskException("Brevet A001 trenger en begrunnelsekode for FO_883_2004_ART16_1 eller KONV_EFTA_STORBRITANNIA_ART18_1");
         }
-        return resultat;
+        return vilkårsresultat;
     }
 
     private Optional<String> hentUtenlandskIdent(Land_iso2 landkode) {

@@ -10,12 +10,12 @@ import no.nav.melosys.domain.kodeverk.begrunnelser.Kontroll_begrunnelser;
 import no.nav.melosys.exception.FunksjonellException;
 import no.nav.melosys.exception.TekniskException;
 import no.nav.melosys.service.LandvelgerService;
+import no.nav.melosys.service.behandling.VilkaarsresultatService;
 import no.nav.melosys.service.dokument.brev.BrevData;
 import no.nav.melosys.service.dokument.brev.BrevDataAvslagYrkesaktiv;
 import no.nav.melosys.service.dokument.brev.BrevbestillingDto;
 import no.nav.melosys.service.dokument.brev.datagrunnlag.BrevDataGrunnlag;
 import no.nav.melosys.service.unntak.AnmodningsperiodeService;
-import no.nav.melosys.service.behandling.VilkaarsresultatService;
 
 public class BrevDataByggerAvslagYrkesaktiv implements BrevDataBygger {
     private final LandvelgerService landvelgerService;
@@ -66,7 +66,10 @@ public class BrevDataByggerAvslagYrkesaktiv implements BrevDataBygger {
     }
 
     private Vilkaarsresultat hentFørsteGyldigeVilkaarsresultatForArt16(long behandlingID) {
-        return vilkaarsresultatService.finnUnntaksVilkaarsresultat(behandlingID)
-            .filter(v -> !v.getBegrunnelser().isEmpty()).orElseThrow(() -> new FunksjonellException("Avslag yrkesaktiv må ha vilkår for art16 eller gb-art18"));
+        var vilkaarsresultat = vilkaarsresultatService.finnUnntaksVilkaarsresultat(behandlingID);
+        if (vilkaarsresultat == null || vilkaarsresultat.getBegrunnelser().isEmpty()) {
+            throw new FunksjonellException("Avslag yrkesaktiv må ha vilkår for art16 eller gb-art18");
+        }
+        return vilkaarsresultat;
     }
 }
