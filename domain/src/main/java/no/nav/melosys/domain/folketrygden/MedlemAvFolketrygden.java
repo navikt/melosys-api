@@ -1,15 +1,14 @@
 package no.nav.melosys.domain.folketrygden;
 
-import no.nav.melosys.domain.Behandlingsresultat;
-import no.nav.melosys.domain.Medlemskapsperiode;
-import no.nav.melosys.domain.avgift.SkatteforholdTilNorge;
-import no.nav.melosys.domain.kodeverk.Skatteplikttype;
-
-import jakarta.persistence.*;
 import java.time.LocalDate;
 import java.util.Collection;
 import java.util.Comparator;
 import java.util.HashSet;
+
+import jakarta.persistence.*;
+import no.nav.melosys.domain.Behandlingsresultat;
+import no.nav.melosys.domain.Medlemskapsperiode;
+import no.nav.melosys.domain.kodeverk.Skatteplikttype;
 
 @Entity
 @Table(name = "medlem_av_folketrygden")
@@ -71,9 +70,14 @@ public class MedlemAvFolketrygden {
     }
 
     public Skatteplikttype utledSkatteplikttype() {
-        return fastsattTrygdeavgift.getTrygdeavgiftsgrunnlag().getSkatteforholdTilNorge().stream().findFirst()
-            .map(SkatteforholdTilNorge::getSkatteplikttype)
-            .orElseThrow(() -> new RuntimeException("SkattepliktType ikke funnet, skal ikke skje for medlemAvFolketrygden :" + id));
+        var trygdeavgiftsperiode = fastsattTrygdeavgift.getTrygdeavgiftsperioder().stream().findFirst();
+        if (trygdeavgiftsperiode.isEmpty() && erÅpenSluttdato()) {
+            return Skatteplikttype.SKATTEPLIKTIG;
+        } else if (trygdeavgiftsperiode.isEmpty()) {
+            throw new RuntimeException("Trygdeavgiftsperiode ikke funnet, og det er ikke åpen sluttdato, id = " + id);
+        }
+
+        return trygdeavgiftsperiode.get().getGrunnlagSkatteforholdTilNorge().getSkatteplikttype();
     }
 
 
@@ -100,5 +104,12 @@ public class MedlemAvFolketrygden {
             .min(Comparator.comparing(Medlemskapsperiode::getFom))
             .map(Medlemskapsperiode::getFom)
             .orElse(null);
+    }
+
+    /*
+    Åpen sluttdato på medlemskapsperiode er tillatt for arbeidsland Norge og bestemmelse 2.1. Skal ikke ha trygdeavgiftsperioder.
+     */
+    private boolean erÅpenSluttdato() {
+        return fastsattTrygdeavgift.getMedlemAvFolketrygden().utledMedlemskapsperiodeTom() == null;
     }
 }

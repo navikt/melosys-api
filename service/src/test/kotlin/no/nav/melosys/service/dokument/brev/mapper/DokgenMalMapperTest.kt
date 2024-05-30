@@ -11,7 +11,6 @@ import io.kotest.matchers.types.shouldBeInstanceOf
 import io.mockk.every
 import io.mockk.impl.annotations.MockK
 import io.mockk.junit5.MockKExtension
-import no.nav.melosys.domain.Behandling
 import no.nav.melosys.domain.Behandlingsresultat
 import no.nav.melosys.domain.Medlemskapsperiode
 import no.nav.melosys.domain.brev.*
@@ -424,9 +423,7 @@ internal class DokgenMalMapperTest {
                 medlemskapsperioder.add(Medlemskapsperiode().apply { medlemskapstype = Medlemskapstyper.FRIVILLIG })
             }
         }
-        val behandling = DokgenTestData.lagBehandling(DokgenTestData.lagFagsak(true)).apply {
-            opprinneligBehandling = Behandling().apply { id = 1L }
-        }
+        val behandling = DokgenTestData.lagBehandling(DokgenTestData.lagFagsak(true))
         val brevbestilling: DokgenBrevbestilling = VarselbrevManglendeInnbetalingBrevbestilling.Builder()
             .medProduserbartdokument(Produserbaredokumenter.VARSELBREV_MANGLENDE_INNBETALING)
             .medBehandling(behandling)
@@ -443,14 +440,13 @@ internal class DokgenMalMapperTest {
     }
 
     @Test
-    fun skalMappeVarselManglendeOpplysningerTilBrukerKasterFeilDersomOpprinneligBehandlingIkkeHarMedlemskapstype() {
+    fun skalMappeVarselManglendeOpplysningerTilBrukerKasterFeilDersomBehandlingIkkeHarMedlemskapstype() {
         every { mockDokgenMapperDatahenter.hentPersondata(any()) } returns DokgenTestData.lagPersondata()
         every { mockDokgenMapperDatahenter.hentPersonMottaker(any()) } returns DokgenTestData.lagPersondata()
         every { mockDokgenMapperDatahenter.hentNorskPoststed(any()) } returns "Andeby"
         every { mockDokgenMapperDatahenter.hentBehandlingsresultat(any()) } returns Behandlingsresultat()
-        val behandling = DokgenTestData.lagBehandling(DokgenTestData.lagFagsak(true)).apply {
-            opprinneligBehandling = Behandling().apply { id = 1L }
-        }
+        val behandling = DokgenTestData.lagBehandling(DokgenTestData.lagFagsak(true))
+
         val brevbestilling: DokgenBrevbestilling = VarselbrevManglendeInnbetalingBrevbestilling.Builder()
             .medProduserbartdokument(Produserbaredokumenter.VARSELBREV_MANGLENDE_INNBETALING)
             .medBehandling(behandling)
@@ -460,7 +456,7 @@ internal class DokgenMalMapperTest {
 
         shouldThrow<FunksjonellException> {
             dokgenMalMapper.mapBehandling(brevbestilling, DokgenTestData.lagMottaker(Mottakerroller.BRUKER))
-        }.message.shouldBe("Forventer at behandling som tilhører varselbrevet har en opprinnelig behandling med medlemskapsperioder")
+        }.message.shouldBe("Forventer at behandling som tilhører varselbrevet har medlemskapsperioder")
     }
 
     @Test

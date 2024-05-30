@@ -7,6 +7,7 @@ import com.fasterxml.jackson.core.type.TypeReference;
 import no.nav.melosys.domain.Behandling;
 import no.nav.melosys.domain.Fagsak;
 import no.nav.melosys.domain.arkiv.DokumentReferanse;
+import no.nav.melosys.domain.avgift.aarsavregning.Skattehendelse;
 import no.nav.melosys.domain.brev.*;
 import no.nav.melosys.domain.eessi.Periode;
 import no.nav.melosys.domain.eessi.melding.MelosysEessiMelding;
@@ -764,6 +765,20 @@ class ProsessinstansServiceTest {
             .isEqualTo(List.of(Mottaker.medRolle(Mottakerroller.ARBEIDSGIVER)));
         assertThat(piCaptor.getAllValues().get(2).getData(ProsessDataKey.BREVBESTILLING, DoksysBrevbestilling.class).getMottakere())
             .isEqualTo(List.of(Mottaker.medRolle(Mottakerroller.UTENLANDSK_TRYGDEMYNDIGHET)));
+    }
+
+    @Test
+    void opprettProsessinstanserArsavregning() {
+        Skattehendelse skattehendelse = new Skattehendelse("2023", "456789");
+
+
+        prosessinstansService.opprettArsavregningsBehandlingProsessflyt(skattehendelse);
+
+
+        verify(prosessinstansRepo, times(1)).save(piCaptor.capture());
+        assertThat(piCaptor.getValue()).isNotNull();
+        assertThat(piCaptor.getValue().getData(ProsessDataKey.IDENTIFIKATOR)).isEqualTo("456789");
+        assertThat(piCaptor.getValue().getData(ProsessDataKey.GJELDER_PERIODE)).isEqualTo("2023");
     }
 
     private MelosysEessiMelding lagMelosysEessiMelding() {

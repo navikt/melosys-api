@@ -14,7 +14,7 @@ import no.nav.melosys.exception.IkkeFunnetException
 import no.nav.melosys.featuretoggle.ToggleName
 import no.nav.melosys.repository.MedlemskapsperiodeRepository
 import no.nav.melosys.service.MedlemAvFolketrygdenService
-import no.nav.melosys.service.avgift.TrygdeavgiftsgrunnlagService
+import no.nav.melosys.service.avgift.TrygdeavgiftValideringService
 import no.nav.melosys.service.ftrl.GyldigeTrygdedekningerService
 import no.nav.melosys.service.kontroll.regler.PeriodeRegler
 import no.nav.melosys.service.medl.MedlPeriodeService
@@ -26,7 +26,6 @@ import java.time.LocalDate
 class MedlemskapsperiodeService(
     private val medlemskapsperiodeRepository: MedlemskapsperiodeRepository,
     private val medlemAvFolketrygdenService: MedlemAvFolketrygdenService,
-    private val trygdeavgiftsgrunnlagService: TrygdeavgiftsgrunnlagService,
     private val medlPeriodeService: MedlPeriodeService,
     private val gyldigeTrygdedekningerService: GyldigeTrygdedekningerService,
     private val unleash: Unleash
@@ -70,7 +69,7 @@ class MedlemskapsperiodeService(
         }
         medlemAvFolketrygden.addMedlemskapsperiode(nyMedlemskapsperiode)
 
-        fjernTrygdeavgiftsperioderOmDeFinnes(medlemAvFolketrygden)
+        medlemAvFolketrygden.fastsattTrygdeavgift?.trygdeavgiftsperioder?.clear()
         return medlemskapsperiodeRepository.save(nyMedlemskapsperiode)
     }
 
@@ -109,12 +108,9 @@ class MedlemskapsperiodeService(
             medlemskapstype = UtledMedlemskapstype.av(bestemmelse!!)
         }
 
-        fjernTrygdeavgiftsperioderOmDeFinnes(medlemAvFolketrygden)
+        medlemAvFolketrygden.fastsattTrygdeavgift?.trygdeavgiftsperioder?.clear()
         return medlemskapsperiodeRepository.saveAndFlush(medlemskapsperiode)
     }
-
-    private fun fjernTrygdeavgiftsperioderOmDeFinnes(medlemAvFolketrygden: MedlemAvFolketrygden) =
-        medlemAvFolketrygden.fastsattTrygdeavgift?.let { trygdeavgiftsgrunnlagService.fjernTrygdeavgiftsperioderOmDeFinnes(it) }
 
     private fun validerFelt(
         behandlingstema: Behandlingstema,
@@ -217,13 +213,13 @@ class MedlemskapsperiodeService(
             ?: throw IkkeFunnetException("Finner ingen medlemskapsperiode med id $medlemskapsperiodeID for behandling $behandlingsresultatID")
 
         medlemAvFolketrygden.removeMedlemskapsperioder(medlemskapsperiode)
-        fjernTrygdeavgiftsperioderOmDeFinnes(medlemAvFolketrygden)
+        medlemAvFolketrygden.fastsattTrygdeavgift?.trygdeavgiftsperioder?.clear()
     }
 
     @Transactional
     fun slettMedlemskapsperioder(behandlingsresultatID: Long) {
         val medlemAvFolketrygden = medlemAvFolketrygdenService.hentMedlemAvFolketrygden(behandlingsresultatID)
         medlemAvFolketrygden.medlemskapsperioder.clear()
-        fjernTrygdeavgiftsperioderOmDeFinnes(medlemAvFolketrygden)
+        medlemAvFolketrygden.fastsattTrygdeavgift?.trygdeavgiftsperioder?.clear()
     }
 }

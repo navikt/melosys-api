@@ -52,7 +52,7 @@ class InnvilgelseFtrlMapper(
             bestemmelse = medlemAvFolketrygden.medlemskapsperioder.filter { it.erInnvilget() }.sortedBy { it.fom }.first().bestemmelse,
             avslåttMedlemskapsperiodeFørMottaksdatoHelsedel = avslåttMedlemskapsperiodeFørMottaksdatoHelsedel,
             avslåttMedlemskapsperiodeFørMottaksdatoFullDekning = avslåttMedlemskapsperiodeFørMottaksdatoFullDekning,
-            trygdeavgiftMottaker = trygdeavgiftMottakerService.getTrygdeavgiftMottaker(medlemAvFolketrygden.fastsattTrygdeavgift.trygdeavgiftsgrunnlag),
+            trygdeavgiftMottaker = trygdeavgiftMottakerService.getTrygdeavgiftMottaker(medlemAvFolketrygden.fastsattTrygdeavgift),
             fullmektigTrygdeavgift = finnFullmektigTrygdeavgift(behandlingsresultat.behandling),
             skatteplikttype = medlemAvFolketrygden.utledSkatteplikttype(),
             begrunnelse = hentBegrunnelse(behandlingsresultat.vilkaarsresultater),
@@ -130,7 +130,7 @@ class InnvilgelseFtrlMapper(
             bestemmelse = medlemskapsperiode.bestemmelse,
             harLavSatsPgaAlder = harLavSatsPgaAlder,
             arbeidssituasjontype = hentAvklartFakta(behandlingsresultat, Avklartefaktatyper.ARBEIDSSITUASJON),
-            trygdeavgiftMottaker = trygdeavgiftMottakerService.getTrygdeavgiftMottaker(medlemAvFolketrygden.fastsattTrygdeavgift.trygdeavgiftsgrunnlag),
+            trygdeavgiftMottaker = trygdeavgiftMottakerService.getTrygdeavgiftMottaker(medlemAvFolketrygden.fastsattTrygdeavgift),
             fullmektigTrygdeavgift = finnFullmektigTrygdeavgift(behandling),
             skatteplikttype = medlemAvFolketrygden.utledSkatteplikttype(),
             begrunnelse = hentBegrunnelse(behandlingsresultat.vilkaarsresultater),
@@ -174,8 +174,14 @@ class InnvilgelseFtrlMapper(
     private fun mapAvslåttMedlemskapsperiodeFørMottaksdatoHelsedel(medlemAvFolketrygden: MedlemAvFolketrygden, mottattDato: Instant): Boolean =
         medlemAvFolketrygden.medlemskapsperioder.any { it.erAvslaatt() && it.harHelsedelDekning() && it.fomErFør(mottattDato) }
 
-    private fun mapAvgiftsPerioder(medlemAvFolketrygden: MedlemAvFolketrygden): List<AvgiftsperiodeDto> =
-        medlemAvFolketrygden.fastsattTrygdeavgift.trygdeavgiftsperioder.map {
+    private fun mapAvgiftsPerioder(medlemAvFolketrygden: MedlemAvFolketrygden): List<AvgiftsperiodeDto> {
+        if (medlemAvFolketrygden.fastsattTrygdeavgift.trygdeavgiftsperioder.all {
+                it.trygdeavgiftsbeløpMd.verdi == BigDecimal.ZERO && it.trygdesats == BigDecimal.ZERO
+            }) {
+            return emptyList()
+        }
+
+        return medlemAvFolketrygden.fastsattTrygdeavgift.trygdeavgiftsperioder.map {
             AvgiftsperiodeDto(
                 it.periodeFra,
                 it.periodeTil,
@@ -185,6 +191,7 @@ class InnvilgelseFtrlMapper(
                 it.grunnlagInntekstperiode.avgiftspliktigInntektMnd?.verdi ?: BigDecimal.ZERO,
             )
         }.sortedByDescending { it.fom }
+    }
 
     private fun mapTrygdeavtaleLand(landkoder: List<String>): List<String> =
         Trygdeavtale_myndighetsland.values().filter { landkoder.contains(it.kode) }.map { dokgenMapperDatahenter.hentLandnavnFraLandkode(it.kode) }
