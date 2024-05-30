@@ -12,6 +12,10 @@ class OpprettArsavregning():StegBehandler {
     }
 
     override fun utfør(prosessinstans: Prosessinstans?) {
-        println("oppretter årsavregningbehandling")
+        //ident og periode
+        //hente sak på ident FagsakService.hentFagsakerMedAktør
+        // TrygdeavgiftOppsummeringService.harFagsakBehandlingerMedTrygdeavgift
+        // nyBehandling journalpost og dokument == null
+        //opprett oppgave prosessinstans
     }
 }
