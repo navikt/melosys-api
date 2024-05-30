@@ -5,11 +5,13 @@ import io.kotest.matchers.shouldBe
 import io.mockk.every
 import io.mockk.impl.annotations.MockK
 import io.mockk.junit5.MockKExtension
-import no.nav.melosys.domain.*
+import no.nav.melosys.domain.Behandling
+import no.nav.melosys.domain.Behandlingsresultat
+import no.nav.melosys.domain.FagsakTestFactory
+import no.nav.melosys.domain.Medlemskapsperiode
 import no.nav.melosys.domain.avgift.Aarsavregning
 import no.nav.melosys.domain.brev.InnhentingAvInntektsopplysningerBrevbestilling
 import no.nav.melosys.domain.dokument.person.PersonDokument
-import no.nav.melosys.domain.folketrygden.MedlemAvFolketrygden
 import no.nav.melosys.domain.kodeverk.InnvilgelsesResultat
 import no.nav.melosys.domain.kodeverk.Sakstyper
 import no.nav.melosys.domain.kodeverk.Trygdedekninger
@@ -45,8 +47,8 @@ internal class InnhentingAvInntektsopplysningerMapperTest {
                     sammensattNavn = "Hei Test"
                 })
                 .medPersonMottaker(PersonDokument().apply {
-                        sammensattNavn = "Hei Test"
-                    })
+                    sammensattNavn = "Hei Test"
+                })
                 .build()
 
         innhentingAvInntektsopplysningerMapper.map(brevbestilling).run {
@@ -71,30 +73,30 @@ internal class InnhentingAvInntektsopplysningerMapperTest {
     private fun lagBehandlingsResultat(): Behandlingsresultat {
         return Behandlingsresultat().apply {
             behandling = lagBehandling()
-            medlemAvFolketrygden = MedlemAvFolketrygden().apply {
-                aarsavregning = Aarsavregning().apply {
-                    aar = 2023
-                }
-                medlemskapsperioder = listOf(
-                    Medlemskapsperiode().apply {
-                        fom = LocalDate.of(2022, 5, 17)
-                        tom = LocalDate.of(2022, 8, 17)
-                        trygdedekning = Trygdedekninger.FTRL_2_9_FØRSTE_LEDD_A_HELSE
-                        innvilgelsesresultat = InnvilgelsesResultat.INNVILGET
-                    },
-                    Medlemskapsperiode().apply {
-                        fom = LocalDate.of(2022, 8, 18)
-                        tom = LocalDate.of(2023, 8, 17)
-                        trygdedekning = Trygdedekninger.FTRL_2_9_FØRSTE_LEDD_A_HELSE
-                        innvilgelsesresultat = InnvilgelsesResultat.INNVILGET
-                    },
-                    Medlemskapsperiode().apply {
-                        fom = LocalDate.of(2023, 8, 18)
-                        tom = LocalDate.of(2023, 9, 1)
-                        trygdedekning = Trygdedekninger.FTRL_2_9_FØRSTE_LEDD_A_HELSE
-                        innvilgelsesresultat = InnvilgelsesResultat.INNVILGET
-                    })
+
+            aarsavregning = Aarsavregning().apply {
+                aar = 2023
             }
+            medlemskapsperioder = listOf(
+                Medlemskapsperiode().apply {
+                    fom = LocalDate.of(2022, 5, 17)
+                    tom = LocalDate.of(2022, 8, 17)
+                    trygdedekning = Trygdedekninger.FTRL_2_9_FØRSTE_LEDD_A_HELSE
+                    innvilgelsesresultat = InnvilgelsesResultat.INNVILGET
+                },
+                Medlemskapsperiode().apply {
+                    fom = LocalDate.of(2022, 8, 18)
+                    tom = LocalDate.of(2023, 8, 17)
+                    trygdedekning = Trygdedekninger.FTRL_2_9_FØRSTE_LEDD_A_HELSE
+                    innvilgelsesresultat = InnvilgelsesResultat.INNVILGET
+                },
+                Medlemskapsperiode().apply {
+                    fom = LocalDate.of(2023, 8, 18)
+                    tom = LocalDate.of(2023, 9, 1)
+                    trygdedekning = Trygdedekninger.FTRL_2_9_FØRSTE_LEDD_A_HELSE
+                    innvilgelsesresultat = InnvilgelsesResultat.INNVILGET
+                })
+
         }
     }
 }

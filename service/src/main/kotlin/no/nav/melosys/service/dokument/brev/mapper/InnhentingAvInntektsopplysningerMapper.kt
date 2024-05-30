@@ -1,8 +1,8 @@
 package no.nav.melosys.service.dokument.brev.mapper
 
 import jakarta.transaction.Transactional
+import no.nav.melosys.domain.Behandlingsresultat
 import no.nav.melosys.domain.brev.InnhentingAvInntektsopplysningerBrevbestilling
-import no.nav.melosys.domain.folketrygden.MedlemAvFolketrygden
 import no.nav.melosys.domain.kodeverk.InnvilgelsesResultat
 import no.nav.melosys.integrasjon.dokgen.dto.InnhentingAvInntektsopplysninger
 import org.springframework.stereotype.Component
@@ -15,11 +15,10 @@ class InnhentingAvInntektsopplysningerMapper(
     @Transactional
     internal fun map(brevbestilling: InnhentingAvInntektsopplysningerBrevbestilling): InnhentingAvInntektsopplysninger {
         val behandlingsresultat = dokgenMapperDatahenter.hentBehandlingsresultat(brevbestilling.behandlingId)
-        val medlemAvFolketrygden = behandlingsresultat.medlemAvFolketrygden
 
         val årsavregningsår = behandlingsresultat.aarsavregning.aar
         val fristdato = LocalDate.now().plusWeeks(4)
-        val medlemskapsperiode = mapMedlemskapsPerioder(medlemAvFolketrygden, årsavregningsår)
+        val medlemskapsperiode = mapMedlemskapsPerioder(behandlingsresultat, årsavregningsår)
 
         return InnhentingAvInntektsopplysninger(
             brevbestilling,
@@ -30,8 +29,8 @@ class InnhentingAvInntektsopplysningerMapper(
         )
     }
 
-    private fun mapMedlemskapsPerioder(medlemAvFolketrygden: MedlemAvFolketrygden, årsavregningsår: Int): Pair<LocalDate, LocalDate> {
-        val relevantePerioder = medlemAvFolketrygden.medlemskapsperioder
+    private fun mapMedlemskapsPerioder(behandlingsresultat: Behandlingsresultat, årsavregningsår: Int): Pair<LocalDate, LocalDate> {
+        val relevantePerioder = behandlingsresultat.medlemskapsperioder
             .filter { it.innvilgelsesresultat == InnvilgelsesResultat.INNVILGET }
             .filter { it.fom.year == årsavregningsår || it.tom.year == årsavregningsår }
             .sortedBy { it.fom }
