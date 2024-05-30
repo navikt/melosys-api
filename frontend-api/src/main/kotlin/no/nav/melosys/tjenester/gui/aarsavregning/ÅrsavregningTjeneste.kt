@@ -37,7 +37,22 @@ class ÅrsavregningTjeneste(
                             Skatteforholdsperiode(LocalDate.of(2023, 1, 1), LocalDate.of(2023, 7, 31), Skatteplikttype.SKATTEPLIKTIG),
                             Skatteforholdsperiode(LocalDate.of(2023, 8, 1), LocalDate.of(2023, 12, 31), Skatteplikttype.IKKE_SKATTEPLIKTIG)
                         ),
-                        inntektskperioder = listOf()
+                        inntektskperioder = listOf(
+                            Inntektsperiode(
+                                LocalDate.of(2023, 1, 1),
+                                LocalDate.of(2023, 7, 31),
+                                Inntektskildetype.ARBEIDSINNTEKT_FRA_NORGE,
+                                true,
+                                1000
+                                ),
+                            Inntektsperiode(
+                                LocalDate.of(2023, 8, 1),
+                                LocalDate.of(2023, 12, 31),
+                                Inntektskildetype.ARBEIDSINNTEKT_FRA_NORGE,
+                                false,
+                                2000
+                            )
+                        )
                     ),
                     Avgift(
                         trygdeavgiftsperioder = listOf(
