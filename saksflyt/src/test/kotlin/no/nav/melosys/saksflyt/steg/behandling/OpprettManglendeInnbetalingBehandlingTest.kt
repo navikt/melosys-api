@@ -14,7 +14,6 @@ import no.nav.melosys.domain.Behandling
 import no.nav.melosys.domain.Behandlingsresultat
 import no.nav.melosys.domain.FagsakTestFactory
 import no.nav.melosys.domain.Medlemskapsperiode
-import no.nav.melosys.domain.folketrygden.MedlemAvFolketrygden
 import no.nav.melosys.domain.kodeverk.Medlemskapstyper
 import no.nav.melosys.domain.kodeverk.Sakstyper
 import no.nav.melosys.domain.kodeverk.behandlinger.*
@@ -22,7 +21,6 @@ import no.nav.melosys.exception.FunksjonellException
 import no.nav.melosys.saksflytapi.domain.ProsessDataKey
 import no.nav.melosys.saksflytapi.domain.ProsessSteg
 import no.nav.melosys.saksflytapi.domain.Prosessinstans
-import no.nav.melosys.service.MedlemAvFolketrygdenService
 import no.nav.melosys.service.behandling.BehandlingService
 import no.nav.melosys.service.behandling.BehandlingsresultatService
 import no.nav.melosys.service.oppgave.OppgaveService
@@ -31,18 +29,15 @@ import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.extension.ExtendWith
 import java.time.LocalDate
-import java.util.*
 
 @ExtendWith(MockKExtension::class)
 class OpprettManglendeInnbetalingBehandlingTest {
+
     @MockK
     private lateinit var behandlingService: BehandlingService
 
     @MockK
     private lateinit var behandlingsresultatService: BehandlingsresultatService
-
-    @MockK
-    private lateinit var medlemAvFolketrygdenService: MedlemAvFolketrygdenService
 
     @MockK
     private lateinit var saksbehandlingRegler: SaksbehandlingRegler
@@ -58,11 +53,9 @@ class OpprettManglendeInnbetalingBehandlingTest {
             OpprettManglendeInnbetalingBehandling(
                 behandlingService,
                 behandlingsresultatService,
-                medlemAvFolketrygdenService,
                 saksbehandlingRegler,
                 oppgaveService
             )
-        every { medlemAvFolketrygdenService.finnMedlemAvFolketrygden(any<Long>()) } returns Optional.empty()
     }
 
     @Test
@@ -319,6 +312,9 @@ class OpprettManglendeInnbetalingBehandlingTest {
         val mottaksdato = LocalDate.now()
         val behandlingsresultat = lagBehandlingsresultat().apply {
             type = Behandlingsresultattyper.FASTSATT_LOVVALGSLAND
+            medlemskapsperioder.add(Medlemskapsperiode().apply {
+                medlemskapstype = Medlemskapstyper.PLIKTIG
+            })
         }
         val prosessinstans = lagProsessinstans(behandlingsresultat.fakturaserieReferanse, mottaksdato)
         val behandling = lagBehandling()
@@ -330,14 +326,8 @@ class OpprettManglendeInnbetalingBehandlingTest {
         every {
             behandlingsresultatService.finnAlleBehandlingsresultatMedFakturaserieReferanse(behandlingsresultat.fakturaserieReferanse)
         } returns listOf(behandlingsresultat)
-        every { medlemAvFolketrygdenService.finnMedlemAvFolketrygden(any()) } returns
-            Optional.of(MedlemAvFolketrygden().apply {
-                medlemskapsperioder.add(Medlemskapsperiode().apply {
-                    medlemskapstype = Medlemskapstyper.PLIKTIG
-                })
-            })
         every { behandlingService.hentBehandling(behandlingsresultat.id) } returns behandling
-        every { saksbehandlingRegler.finnBehandlingSomKanReplikeres(behandling.fagsak)} returns behandlingAvsluttet
+        every { saksbehandlingRegler.finnBehandlingSomKanReplikeres(behandling.fagsak) } returns behandlingAvsluttet
 
 
         opprettManglendeInnbetalingBehandling.utfør(prosessinstans)

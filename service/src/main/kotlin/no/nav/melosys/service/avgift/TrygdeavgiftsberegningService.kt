@@ -1,11 +1,10 @@
 package no.nav.melosys.service.avgift
 
+import no.nav.melosys.domain.Behandlingsresultat
 import no.nav.melosys.domain.Medlemskapsperiode
 import no.nav.melosys.domain.avgift.Inntektsperiode
 import no.nav.melosys.domain.avgift.SkatteforholdTilNorge
 import no.nav.melosys.domain.avgift.Trygdeavgiftsperiode
-import no.nav.melosys.domain.folketrygden.FastsattTrygdeavgift
-import no.nav.melosys.domain.folketrygden.MedlemAvFolketrygden
 import no.nav.melosys.domain.kodeverk.Fullmaktstype
 import no.nav.melosys.domain.kodeverk.Trygdeavgift_typer
 import no.nav.melosys.domain.kodeverk.Trygdeavgiftmottaker
@@ -13,7 +12,6 @@ import no.nav.melosys.integrasjon.ereg.EregFasade
 import no.nav.melosys.integrasjon.trygdeavgift.AvgiftsdekningerFraTrygdedekning
 import no.nav.melosys.integrasjon.trygdeavgift.TrygdeavgiftConsumer
 import no.nav.melosys.integrasjon.trygdeavgift.dto.*
-import no.nav.melosys.service.MedlemAvFolketrygdenService
 import no.nav.melosys.service.avgift.dto.OppdaterTrygdeavgiftsgrunnlagRequest
 import no.nav.melosys.service.avgift.dto.SkatteforholdTilNorgeRequest
 import no.nav.melosys.service.behandling.BehandlingService
@@ -31,7 +29,6 @@ class TrygdeavgiftsberegningService
     private val behandlingService: BehandlingService,
     private val eregFasade: EregFasade,
     private val behandlingsresultatService: BehandlingsresultatService,
-    private val medlemAvFolketrygdenService: MedlemAvFolketrygdenService,
     private val trygdeavgiftMottakerService: TrygdeavgiftMottakerService,
     private val persondataService: PersondataService,
     private val trygdeavgiftConsumer: TrygdeavgiftConsumer,
@@ -42,19 +39,17 @@ class TrygdeavgiftsberegningService
         behandlingsresultatID: Long,
         oppdaterTrygdeavgiftsgrunnlagRequest: OppdaterTrygdeavgiftsgrunnlagRequest
     ): Set<Trygdeavgiftsperiode> {
-        val medlemAvFolketrygden = medlemAvFolketrygdenService.hentMedlemAvFolketrygden(behandlingsresultatID)
-
-        if (medlemAvFolketrygden.fastsattTrygdeavgift == null) {
-            medlemAvFolketrygden.fastsattTrygdeavgift = nyFastsattTrygdeavgift(medlemAvFolketrygden)
-        } else {
-            medlemAvFolketrygden.fastsattTrygdeavgift.trygdeavgiftsperioder.clear()
+        val behandlingsresultat = behandlingsresultatService.hentBehandlingsresultat(behandlingsresultatID)
+        behandlingsresultat.trygdeavgiftType = Trygdeavgift_typer.FORELØPIG
+        behandlingsresultat.medlemskapsperioder.forEach {
+            it.trygdeavgiftsperioder.clear()
         }
 
-        medlemAvFolketrygdenService.lagreOgFlush(medlemAvFolketrygden)
+        behandlingsresultatService.lagreOgFlush(behandlingsresultat)
 
-        TrygdeavgiftValideringService.validerTrygdeavgiftberegningRequest(oppdaterTrygdeavgiftsgrunnlagRequest, medlemAvFolketrygden)
+        TrygdeavgiftValideringService.validerTrygdeavgiftberegningRequest(oppdaterTrygdeavgiftsgrunnlagRequest, behandlingsresultat)
 
-        val innvilgedeMedlemskapsperioder = medlemAvFolketrygden.medlemskapsperioder.filter { it.erInnvilget() }
+        val innvilgedeMedlemskapsperioder = behandlingsresultat.medlemskapsperioder.filter { it.erInnvilget() }
 
         val medlemskapsperiodeDtos = mapTilMedlemskapsperiodeDtos(innvilgedeMedlemskapsperioder)
         val skatteforholdsperioderDtos = mapTilSkatteforholdsperiodeDtos(oppdaterTrygdeavgiftsgrunnlagRequest)
@@ -69,22 +64,20 @@ class TrygdeavgiftsberegningService
 
         val beregnetTrygdeavgift = trygdeavgiftConsumer.beregnTrygdeavgift(trygdeavgiftsberegningRequest)
 
-        val nyeTrygdeavgiftsperioder = lagNyeTrygdeavgiftsperioder(
-            medlemAvFolketrygden,
+        val nyeTrygdeavgiftsperioder = lagOgLeggTilNyeTrygdeavgiftsperioder(
+            behandlingsresultat,
             skatteforholdsperioderDtos,
             inntektsperioderDtos,
             beregnetTrygdeavgift
         )
 
-        medlemAvFolketrygden.fastsattTrygdeavgift.trygdeavgiftsperioder.addAll(nyeTrygdeavgiftsperioder)
-
         val skalKunBetalesTilSkatt =
-            trygdeavgiftMottakerService.getTrygdeavgiftMottaker(medlemAvFolketrygden.fastsattTrygdeavgift) == Trygdeavgiftmottaker.TRYGDEAVGIFT_BETALES_TIL_SKATT
+            trygdeavgiftMottakerService.getTrygdeavgiftMottaker(behandlingsresultat) == Trygdeavgiftmottaker.TRYGDEAVGIFT_BETALES_TIL_SKATT
         if (skalKunBetalesTilSkatt && !erAlleTrygdeavgiftbelopNull(beregnetTrygdeavgift)) {
             throw IllegalStateException("Trygdeavgift skal ikke betales til NAV. Beregnet trygdeavgift må derfor være 0.")
         }
 
-        medlemAvFolketrygdenService.lagreOgFlush(medlemAvFolketrygden)
+        behandlingsresultatService.lagreOgFlush(behandlingsresultat)
         return nyeTrygdeavgiftsperioder
     }
 
@@ -124,14 +117,8 @@ class TrygdeavgiftsberegningService
         return null
     }
 
-    private fun nyFastsattTrygdeavgift(medlemAvFolketrygden: MedlemAvFolketrygden): FastsattTrygdeavgift =
-        FastsattTrygdeavgift().apply {
-            this.trygdeavgiftstype = Trygdeavgift_typer.FORELØPIG
-            this.medlemAvFolketrygden = medlemAvFolketrygden
-        }
-
-    private fun lagNyeTrygdeavgiftsperioder(
-        medlemAvFolketrygden: MedlemAvFolketrygden,
+    private fun lagOgLeggTilNyeTrygdeavgiftsperioder(
+        behandlingsresultat: Behandlingsresultat,
         skatteForholdTilNorgeDtos: Set<SkatteforholdsperiodeDto>,
         inntektsperiodeDtos: List<InntektsperiodeDto>,
         beregnetTrygdeavgift: List<TrygdeavgiftsberegningResponse>,
@@ -161,7 +148,7 @@ class TrygdeavgiftsberegningService
 
         return beregnetTrygdeavgift.map {
             lagTrygdeavgiftsperiode(
-                medlemAvFolketrygden,
+                behandlingsresultat,
                 skatteforholdTilNorge,
                 inntektsperioder,
                 it
@@ -170,7 +157,7 @@ class TrygdeavgiftsberegningService
     }
 
     private fun lagTrygdeavgiftsperiode(
-        medlemAvFolketrygden: MedlemAvFolketrygden,
+        behandlingsresultat: Behandlingsresultat,
         skatteforholdTilNorge: List<Pair<UUID, SkatteforholdTilNorge>>,
         inntektsperioder: List<Pair<UUID, Inntektsperiode>>,
         trygdeavgiftsberegningResponse: TrygdeavgiftsberegningResponse,
@@ -183,8 +170,7 @@ class TrygdeavgiftsberegningService
             this.periodeTil = beregnetPeriode.periode.tom
             this.trygdesats = beregnetPeriode.sats
             this.trygdeavgiftsbeløpMd = beregnetPeriode.månedsavgift.tilPenger()
-            this.fastsattTrygdeavgift = medlemAvFolketrygden.fastsattTrygdeavgift
-            this.grunnlagMedlemskapsperiode = medlemAvFolketrygden.medlemskapsperioder
+            this.grunnlagMedlemskapsperiode = behandlingsresultat.medlemskapsperioder
                 .find {
                     idToUUid(it.id) == beregningsgrunnlag.medlemskapsperiodeId
                 }
@@ -194,6 +180,8 @@ class TrygdeavgiftsberegningService
             this.grunnlagInntekstperiode = inntektsperioder.find {
                 it.first == beregningsgrunnlag.inntektsperiodeId
             }?.second
+        }.apply {
+            this.grunnlagMedlemskapsperiode.trygdeavgiftsperioder.add(this)
         }
     }
 
@@ -203,10 +191,8 @@ class TrygdeavgiftsberegningService
 
     @Transactional(readOnly = true)
     fun hentTrygdeavgiftsberegning(behandlingsresultatID: Long): Set<Trygdeavgiftsperiode> {
-        return medlemAvFolketrygdenService.finnMedlemAvFolketrygden(behandlingsresultatID)
-            .map { it.fastsattTrygdeavgift?.trygdeavgiftsperioder }
-            .orElse(null)
-            ?: emptySet()
+        return behandlingsresultatService.hentBehandlingsresultat(behandlingsresultatID)
+            .trygdeavgiftsperioder
     }
 
     @Transactional(readOnly = true)
@@ -214,7 +200,7 @@ class TrygdeavgiftsberegningService
         val behandlingsresultat = behandlingsresultatService.hentBehandlingsresultat(behandlingsresultatID)
         val behandling = behandlingsresultat.behandling
         behandling.opprinneligBehandling?.let {
-            return behandlingsresultatService.hentBehandlingsresultat(it.id).medlemAvFolketrygden.fastsattTrygdeavgift?.trygdeavgiftsperioder
+            return behandlingsresultatService.hentBehandlingsresultat(it.id).trygdeavgiftsperioder
                 ?: emptySet()
         }
         return emptySet()

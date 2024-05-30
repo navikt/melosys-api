@@ -316,6 +316,9 @@ public class DokgenService {
                 .medTrygdeavgiftFritekst(brevbestillingDto.getTrygdeavgiftFritekst());
             case IKKE_YRKESAKTIV_PLIKTIG_FTRL, IKKE_YRKESAKTIV_FRIVILLIG_FTRL, PLIKTIG_MEDLEM_FTRL -> new DokgenBrevbestilling.Builder<>()
                 .medDistribusjonstype(Distribusjonstype.VEDTAK);
+            case INNHENTING_AV_INNTEKTSOPPLYSNINGER -> new InnhentingAvInntektsopplysningerBrevbestilling.Builder()
+                .medSkalViseStandardTekstOmOpplysninger(brevbestillingDto.isSkalViseStandardTekstOmOpplysninger())
+                .medFritekst(brevbestillingDto.getFritekst());
             case GENERELT_FRITEKSTBREV_BRUKER, GENERELT_FRITEKSTBREV_ARBEIDSGIVER, GENERELT_FRITEKSTBREV_VIRKSOMHET,
                 UTENLANDSK_TRYGDEMYNDIGHET_FRITEKSTBREV, FRITEKSTBREV -> new FritekstbrevBrevbestilling.Builder()
                 .medDistribusjonstype(brevbestillingDto.getDistribusjonstype())

@@ -18,6 +18,7 @@ import org.springframework.util.StringUtils
 class DokgenMalMapper(
     private val dokgenMapperDatahenter: DokgenMapperDatahenter,
     private val innvilgelseFtrlMapper: InnvilgelseFtrlMapper,
+    private val innhentingAvInntektsopplysningerMapper: InnhentingAvInntektsopplysningerMapper,
     private val trygdeavtaleMapper: TrygdeavtaleMapper
 ) {
     fun mapBehandling(
@@ -115,9 +116,13 @@ class DokgenMalMapper(
                 DokumentasjonSvarfrist.beregnFristPaaMangelbrevFraDagensDato()
             )
 
-            Produserbaredokumenter.INNVILGELSE_FOLKETRYGDLOVEN -> innvilgelseFtrlMapper.mapYrkesaktivFrivillig(brevbestilling as InnvilgelseFtrlYrkesaktivFrivilligBrevbestilling)
+            Produserbaredokumenter.INNVILGELSE_FOLKETRYGDLOVEN ->
+                innvilgelseFtrlMapper.mapYrkesaktivFrivillig(brevbestilling as InnvilgelseFtrlYrkesaktivFrivilligBrevbestilling)
 
             Produserbaredokumenter.PLIKTIG_MEDLEM_FTRL -> innvilgelseFtrlMapper.mapYrkesaktivPliktig(brevbestilling)
+
+            Produserbaredokumenter.INNHENTING_AV_INNTEKTSOPPLYSNINGER ->
+                innhentingAvInntektsopplysningerMapper.map(brevbestilling as InnhentingAvInntektsopplysningerBrevbestilling)
 
             Produserbaredokumenter.IKKE_YRKESAKTIV_FRIVILLIG_FTRL -> innvilgelseFtrlMapper.mapIkkeYrkesaktivFrivillig(brevbestilling)
 
@@ -190,8 +195,8 @@ class DokgenMalMapper(
                 brevbestilling as VarselbrevManglendeInnbetalingBrevbestilling,
                 brevbestilling.behandling.id.let {
                     val behandlingsresultat = dokgenMapperDatahenter.hentBehandlingsresultat(it)
-                    behandlingsresultat.medlemAvFolketrygden?.medlemskapsperioder?.firstOrNull()?.medlemskapstype
-                } ?: throw FunksjonellException("Forventer at behandling som tilhører varselbrevet har medlemskapsperioder"),
+                    behandlingsresultat.medlemskapsperioder.firstOrNull()?.medlemskapstype
+                } ?: throw FunksjonellException("Forventer at behandling som tilhører varselbrevet har en opprinnelig behandling med medlemskapsperioder"),
                 dokgenMapperDatahenter.hentFullmektigNavn(brevbestilling, Fullmaktstype.FULLMEKTIG_SØKNAD)
             )
 

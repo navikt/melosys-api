@@ -18,7 +18,6 @@ import no.nav.melosys.domain.dokument.arbeidsforhold.Aktoertype
 import no.nav.melosys.domain.dokument.felles.Periode
 import no.nav.melosys.domain.dokument.organisasjon.adresse.GeografiskAdresse
 import no.nav.melosys.domain.dokument.organisasjon.adresse.SemistrukturertAdresse
-import no.nav.melosys.domain.folketrygden.MedlemAvFolketrygden
 import no.nav.melosys.domain.kodeverk.*
 import no.nav.melosys.domain.kodeverk.begrunnelser.Nyvurderingbakgrunner
 import no.nav.melosys.domain.kodeverk.begrunnelser.folketrygdloven.Ftrl_2_8_naer_tilknytning_norge_begrunnelser
@@ -59,6 +58,9 @@ internal class DokgenMalMapperTest {
     @MockK
     private lateinit var mockTrygdeavtaleMapper: TrygdeavtaleMapper
 
+    @MockK
+    private lateinit var mockInnhentingAvInntektsopplysningerMapper: InnhentingAvInntektsopplysningerMapper
+
     private lateinit var dokgenMalMapper: DokgenMalMapper
 
     @BeforeEach
@@ -66,6 +68,7 @@ internal class DokgenMalMapperTest {
         dokgenMalMapper = DokgenMalMapper(
             mockDokgenMapperDatahenter,
             mockInnvilgelseFtrlMapper,
+            mockInnhentingAvInntektsopplysningerMapper,
             mockTrygdeavtaleMapper
         )
     }
@@ -415,9 +418,7 @@ internal class DokgenMalMapperTest {
         every { mockDokgenMapperDatahenter.hentLandnavnFraLandkode(Landkoder.NO.kode) } returns Landkoder.NO.beskrivelse
         every { mockDokgenMapperDatahenter.hentFullmektigNavn(any(), any()) } returns null
         every { mockDokgenMapperDatahenter.hentBehandlingsresultat(any()) } returns Behandlingsresultat().apply {
-            medlemAvFolketrygden = MedlemAvFolketrygden().apply {
-                medlemskapsperioder.add(Medlemskapsperiode().apply { medlemskapstype = Medlemskapstyper.FRIVILLIG })
-            }
+            medlemskapsperioder.add(Medlemskapsperiode().apply { medlemskapstype = Medlemskapstyper.FRIVILLIG })
         }
         val behandling = DokgenTestData.lagBehandling(DokgenTestData.lagFagsak(true))
         val brevbestilling: DokgenBrevbestilling = VarselbrevManglendeInnbetalingBrevbestilling.Builder()
@@ -452,7 +453,7 @@ internal class DokgenMalMapperTest {
 
         shouldThrow<FunksjonellException> {
             dokgenMalMapper.mapBehandling(brevbestilling, DokgenTestData.lagMottaker(Mottakerroller.BRUKER))
-        }.message.shouldBe("Forventer at behandling som tilhører varselbrevet har medlemskapsperioder")
+        }.message.shouldBe("Forventer at behandling som tilhører varselbrevet har en opprinnelig behandling med medlemskapsperioder")
     }
 
     @Test

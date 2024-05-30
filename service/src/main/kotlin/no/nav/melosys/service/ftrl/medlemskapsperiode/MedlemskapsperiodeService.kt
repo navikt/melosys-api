@@ -2,7 +2,6 @@ package no.nav.melosys.service.ftrl.medlemskapsperiode
 
 import io.getunleash.Unleash
 import no.nav.melosys.domain.Medlemskapsperiode
-import no.nav.melosys.domain.folketrygden.MedlemAvFolketrygden
 import no.nav.melosys.domain.kodeverk.Folketrygdloven_kap2_bestemmelser
 import no.nav.melosys.domain.kodeverk.InnvilgelsesResultat
 import no.nav.melosys.domain.kodeverk.Land_iso2
@@ -13,8 +12,7 @@ import no.nav.melosys.exception.FunksjonellException
 import no.nav.melosys.exception.IkkeFunnetException
 import no.nav.melosys.featuretoggle.ToggleName
 import no.nav.melosys.repository.MedlemskapsperiodeRepository
-import no.nav.melosys.service.MedlemAvFolketrygdenService
-import no.nav.melosys.service.avgift.TrygdeavgiftValideringService
+import no.nav.melosys.service.behandling.BehandlingsresultatService
 import no.nav.melosys.service.ftrl.GyldigeTrygdedekningerService
 import no.nav.melosys.service.kontroll.regler.PeriodeRegler
 import no.nav.melosys.service.medl.MedlPeriodeService
@@ -25,16 +23,14 @@ import java.time.LocalDate
 @Service
 class MedlemskapsperiodeService(
     private val medlemskapsperiodeRepository: MedlemskapsperiodeRepository,
-    private val medlemAvFolketrygdenService: MedlemAvFolketrygdenService,
+    private val behandlingsresultatService: BehandlingsresultatService,
     private val medlPeriodeService: MedlPeriodeService,
     private val gyldigeTrygdedekningerService: GyldigeTrygdedekningerService,
     private val unleash: Unleash
 ) {
     @Transactional(readOnly = true)
     fun hentMedlemskapsperioder(behandlingsresultatID: Long): List<Medlemskapsperiode> {
-        return medlemAvFolketrygdenService.finnMedlemAvFolketrygden(behandlingsresultatID)
-            .map { it.medlemskapsperioder.toList() }
-            .orElse(emptyList())
+        return behandlingsresultatService.hentBehandlingsresultat(behandlingsresultatID).medlemskapsperioder.toList()
     }
 
     @Transactional
@@ -46,11 +42,11 @@ class MedlemskapsperiodeService(
         trygdedekning: Trygdedekninger?,
         bestemmelse: Folketrygdloven_kap2_bestemmelser?
     ): Medlemskapsperiode {
-        val medlemAvFolketrygden = medlemAvFolketrygdenService.hentMedlemAvFolketrygden(behandlingsresultatID)
-        val søknad = medlemAvFolketrygden.behandlingsresultat.behandling.mottatteOpplysninger.mottatteOpplysningerData as SøknadNorgeEllerUtenforEØS
+        val behandlingsresultat = behandlingsresultatService.hentBehandlingsresultat(behandlingsresultatID)
+        val søknad = behandlingsresultat.behandling.mottatteOpplysninger.mottatteOpplysningerData as SøknadNorgeEllerUtenforEØS
 
         validerFelt(
-            medlemAvFolketrygden.behandlingsresultat.behandling.tema,
+            behandlingsresultat.behandling.tema,
             fom,
             tom,
             innvilgelsesResultat,
@@ -67,9 +63,9 @@ class MedlemskapsperiodeService(
             this.bestemmelse = bestemmelse
             medlemskapstype = UtledMedlemskapstype.av(bestemmelse!!)
         }
-        medlemAvFolketrygden.addMedlemskapsperiode(nyMedlemskapsperiode)
+        behandlingsresultat.addMedlemskapsperiode(nyMedlemskapsperiode)
 
-        medlemAvFolketrygden.fastsattTrygdeavgift?.trygdeavgiftsperioder?.clear()
+        behandlingsresultat.clearTrygdeavgiftsperioder()
         return medlemskapsperiodeRepository.save(nyMedlemskapsperiode)
     }
 
@@ -83,11 +79,11 @@ class MedlemskapsperiodeService(
         trygdedekning: Trygdedekninger?,
         bestemmelse: Folketrygdloven_kap2_bestemmelser?
     ): Medlemskapsperiode {
-        val medlemAvFolketrygden = medlemAvFolketrygdenService.hentMedlemAvFolketrygden(behandlingsresultatID)
-        val søknad = medlemAvFolketrygden.behandlingsresultat.behandling.mottatteOpplysninger.mottatteOpplysningerData as SøknadNorgeEllerUtenforEØS
+        val behandlingsresultat = behandlingsresultatService.hentBehandlingsresultat(behandlingsresultatID)
+        val søknad = behandlingsresultat.behandling.mottatteOpplysninger.mottatteOpplysningerData as SøknadNorgeEllerUtenforEØS
 
         validerFelt(
-            medlemAvFolketrygden.behandlingsresultat.behandling.tema,
+            behandlingsresultat.behandling.tema,
             fom,
             tom,
             innvilgelsesResultat,
@@ -96,7 +92,7 @@ class MedlemskapsperiodeService(
             søknad.soeknadsland.landkoder
         )
 
-        val medlemskapsperiode = medlemAvFolketrygden.medlemskapsperioder.firstOrNull { it.id == medlemskapsperiodeID }
+        val medlemskapsperiode = behandlingsresultat.medlemskapsperioder.firstOrNull { it.id == medlemskapsperiodeID }
             ?: throw IkkeFunnetException("Behandling $behandlingsresultatID har ingen medlemskapsperiode med id $medlemskapsperiodeID")
 
         medlemskapsperiode.apply {
@@ -108,7 +104,7 @@ class MedlemskapsperiodeService(
             medlemskapstype = UtledMedlemskapstype.av(bestemmelse!!)
         }
 
-        medlemAvFolketrygden.fastsattTrygdeavgift?.trygdeavgiftsperioder?.clear()
+        behandlingsresultat.trygdeavgiftsperioder?.clear()
         return medlemskapsperiodeRepository.saveAndFlush(medlemskapsperiode)
     }
 
@@ -207,19 +203,17 @@ class MedlemskapsperiodeService(
 
     @Transactional
     fun slettMedlemskapsperiode(behandlingsresultatID: Long, medlemskapsperiodeID: Long) {
-        val medlemAvFolketrygden = medlemAvFolketrygdenService.hentMedlemAvFolketrygden(behandlingsresultatID)
-        val medlemskapsperiode = medlemAvFolketrygden.medlemskapsperioder
+        val behandlingsresultat = behandlingsresultatService.hentBehandlingsresultat(behandlingsresultatID)
+        val medlemskapsperiode = behandlingsresultat.medlemskapsperioder
             .firstOrNull { it.id == medlemskapsperiodeID }
             ?: throw IkkeFunnetException("Finner ingen medlemskapsperiode med id $medlemskapsperiodeID for behandling $behandlingsresultatID")
 
-        medlemAvFolketrygden.removeMedlemskapsperioder(medlemskapsperiode)
-        medlemAvFolketrygden.fastsattTrygdeavgift?.trygdeavgiftsperioder?.clear()
+        behandlingsresultat.removeMedlemskapsperioder(medlemskapsperiode)
     }
 
     @Transactional
     fun slettMedlemskapsperioder(behandlingsresultatID: Long) {
-        val medlemAvFolketrygden = medlemAvFolketrygdenService.hentMedlemAvFolketrygden(behandlingsresultatID)
-        medlemAvFolketrygden.medlemskapsperioder.clear()
-        medlemAvFolketrygden.fastsattTrygdeavgift?.trygdeavgiftsperioder?.clear()
+        val behandlingsresultat = behandlingsresultatService.hentBehandlingsresultat(behandlingsresultatID)
+        behandlingsresultat.medlemskapsperioder.clear()
     }
 }
