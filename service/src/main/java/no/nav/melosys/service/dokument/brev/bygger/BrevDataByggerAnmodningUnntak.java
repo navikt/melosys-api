@@ -30,20 +30,20 @@ public class BrevDataByggerAnmodningUnntak implements BrevDataBygger {
             throw new FunksjonellException(Kontroll_begrunnelser.IKKE_KUN_EN_VIRKSOMHET.getBeskrivelse());
         }
 
-        Vilkaarsresultat anmodningOmUnntakVilkaarsresultat = hentFørsteGyldigeVilkaarsresultatAnmodningOmUnntak(behandlingID);
-        Set<VilkaarBegrunnelse> anmodningOmUnntakVilkaarBegrunnelser = anmodningOmUnntakVilkaarsresultat.getBegrunnelser();
+        Vilkaarsresultat art16Vilkaar = hentFørsteGyldigeVilkaarsresultatArt16(behandlingID);
+        Set<VilkaarBegrunnelse> art16Begrunnelser = art16Vilkaar.getBegrunnelser();
 
-        boolean harVilkaarForUtsending = vilkaarsresultatService.harVilkaarForUtsending(behandlingID);
-        Set<VilkaarBegrunnelse> anmodningBegrunnelser = harVilkaarForUtsending ? anmodningOmUnntakVilkaarBegrunnelser : Collections.emptySet();
-        Set<VilkaarBegrunnelse> anmodningUtenArt12Begrunnelser = harVilkaarForUtsending ? Collections.emptySet() : anmodningOmUnntakVilkaarBegrunnelser;
+        boolean harVilkaarForArtikkel12 = vilkaarsresultatService.harVilkaarForUtsending(behandlingID);
+        Set<VilkaarBegrunnelse> anmodningBegrunnelser = harVilkaarForArtikkel12 ? art16Begrunnelser : Collections.emptySet();
+        Set<VilkaarBegrunnelse> anmodningUtenArt12Begrunnelser = harVilkaarForArtikkel12 ? Collections.emptySet() : art16Begrunnelser;
 
         var hovedvirksomhet = dataGrunnlag.getAvklarteVirksomheterGrunnlag().hentHovedvirksomhet();
-        return new BrevDataAnmodningUnntak(saksbehandler, landvelgerService.hentArbeidsland(behandlingID).getBeskrivelse(), hovedvirksomhet,
-            hovedvirksomhet.yrkesaktivitet, anmodningBegrunnelser, anmodningUtenArt12Begrunnelser, anmodningOmUnntakVilkaarsresultat.getBegrunnelseFritekst());
+        return new BrevDataAnmodningUnntak(saksbehandler, landvelgerService.hentArbeidsland(behandlingID).getBeskrivelse(),
+            hovedvirksomhet, hovedvirksomhet.yrkesaktivitet, anmodningBegrunnelser, anmodningUtenArt12Begrunnelser, art16Vilkaar.getBegrunnelseFritekst());
     }
 
     // Vilkåret for art16 er både oppfylt og har begrunnelser ved anmodning om unntak
-    private Vilkaarsresultat hentFørsteGyldigeVilkaarsresultatAnmodningOmUnntak(long behandlingID) {
+    private Vilkaarsresultat hentFørsteGyldigeVilkaarsresultatArt16(long behandlingID) {
         var vilkaarsresultat = vilkaarsresultatService.finnUnntaksVilkaarsresultat(behandlingID);
         if (vilkaarsresultat == null || !vilkaarsresultat.isOppfylt() || vilkaarsresultat.getBegrunnelser().isEmpty()) {
             throw new FunksjonellException("Ingen oppfylte unntaksvilkår med vilkårbegrunnelser funnet for brev om orientering anmodning om unntak");
