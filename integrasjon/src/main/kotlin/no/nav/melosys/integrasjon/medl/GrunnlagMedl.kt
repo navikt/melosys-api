@@ -171,6 +171,8 @@ enum class GrunnlagMedl(@JvmField val kode: String) {
     STORBRIT_NIRLAND_6_2("Storbrit_NIrland_6_2"),
     STORBRIT_NIRLAND_8_5("Storbrit_NIrland_8_5"),
 
+    KONV_STORBRIT_NIRLAND_18_1("Konv_Storbrit_NIrland_18_1"),
+
     SVEITS("Sveits"),
     SVEITS_8("Sveits_8"),
     SVEITS_8_1_A("Sveits_8_1_a"),
