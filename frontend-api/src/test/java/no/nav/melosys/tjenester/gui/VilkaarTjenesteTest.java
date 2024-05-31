@@ -6,7 +6,7 @@ import java.util.Set;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import no.nav.melosys.domain.kodeverk.Vilkaar;
-import no.nav.melosys.domain.kodeverk.begrunnelser.Art12_1_begrunnelser;
+import no.nav.melosys.domain.kodeverk.begrunnelser.Utsendt_arbeidstaker_begrunnelser;
 import no.nav.melosys.service.tilgang.Aksesskontroll;
 import no.nav.melosys.service.vilkaar.InngangsvilkaarService;
 import no.nav.melosys.service.vilkaar.VilkaarDto;
@@ -75,7 +75,7 @@ public class VilkaarTjenesteTest {
         var dto = new VilkaarDto();
         dto.setVilkaar(Vilkaar.FO_883_2004_ART12_1.getKode());
         Set<String> koder = new HashSet<>();
-        koder.add(Art12_1_begrunnelser.ERSTATTER_ANNEN.getKode());
+        koder.add(Utsendt_arbeidstaker_begrunnelser.ERSTATTER_ANNEN.getKode());
         dto.setBegrunnelseKoder(koder);
         return List.of(dto);
     }

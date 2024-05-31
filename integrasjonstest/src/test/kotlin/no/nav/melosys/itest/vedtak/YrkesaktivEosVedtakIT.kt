@@ -135,11 +135,11 @@ class YrkesaktivEosVedtakIT(
         avklartefaktaService.lagreAvklarteFakta(behandling.id, setOf(yrkesgruppe, virksomhet, yrkesaktivitet))
 
         val forutgåendeMedlemskap = VilkaarDto().apply {
-            vilkaar = "ART12_1_FORUTGAAENDE_MEDLEMSKAP"
+            vilkaar = "FORUTGAAENDE_MEDLEMSKAP"
             isOppfylt = true
         }
         val vesentlingVirksomhet = VilkaarDto().apply {
-            vilkaar = "ART12_1_VESENTLIG_VIRKSOMHET"
+            vilkaar = "VESENTLIG_VIRKSOMHET"
             isOppfylt = true
         }
         val art12_1 = VilkaarDto().apply {
@@ -281,7 +281,7 @@ class YrkesaktivEosVedtakIT(
         avklartefaktaService.lagreAvklarteFakta(behandling.id, setOf(yrkesgruppe, virksomhet, yrkesaktivitet))
 
         val normaltDriverVirksomhet = VilkaarDto().apply {
-            vilkaar = "ART12_2_NORMALT_DRIVER_VIRKSOMHET"
+            vilkaar = "NORMALT_DRIVER_VIRKSOMHET"
             isOppfylt = true
         }
         val art12_2 = VilkaarDto().apply {

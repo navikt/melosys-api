@@ -28,7 +28,7 @@ import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 
-import static no.nav.melosys.domain.kodeverk.begrunnelser.Art16_1_anmodning.KORT_OPPDRAG_RETUR_NORSK_AG;
+import static no.nav.melosys.domain.kodeverk.begrunnelser.Anmodning_begrunnelser.KORT_OPPDRAG_RETUR_NORSK_AG;
 import static no.nav.melosys.service.MottatteOpplysningerStub.lagMottatteOpplysninger;
 import static no.nav.melosys.service.SaksopplysningStubs.lagArbeidsforholdOpplysninger;
 import static no.nav.melosys.service.dokument.brev.BrevDataTestUtils.*;

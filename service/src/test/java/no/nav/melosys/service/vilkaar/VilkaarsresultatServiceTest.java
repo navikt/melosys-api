@@ -3,10 +3,9 @@ package no.nav.melosys.service.vilkaar;
 import java.util.*;
 
 import no.nav.melosys.domain.*;
-import no.nav.melosys.domain.kodeverk.Sakstemaer;
 import no.nav.melosys.domain.kodeverk.Sakstyper;
 import no.nav.melosys.domain.kodeverk.Vilkaar;
-import no.nav.melosys.domain.kodeverk.begrunnelser.Art12_1_begrunnelser;
+import no.nav.melosys.domain.kodeverk.begrunnelser.Utsendt_arbeidstaker_begrunnelser;
 import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingstema;
 import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingstyper;
 import no.nav.melosys.exception.FunksjonellException;
@@ -44,7 +43,7 @@ class VilkaarsresultatServiceTest {
         long behandlingID = 1L;
         List<Vilkaarsresultat> vilkaarsresultatListe = new ArrayList<>();
         Vilkaarsresultat vilkaarsresultat = new Vilkaarsresultat();
-        vilkaarsresultat.setVilkaar(Vilkaar.ART12_1_FORUTGAAENDE_MEDLEMSKAP);
+        vilkaarsresultat.setVilkaar(Vilkaar.FORUTGAAENDE_MEDLEMSKAP);
         vilkaarsresultat.setOppfylt(true);
         vilkaarsresultat.setBegrunnelseFritekst("begrunnelse");
         Set<VilkaarBegrunnelse> beggrunnelser = new HashSet<>();
@@ -71,7 +70,7 @@ class VilkaarsresultatServiceTest {
         VilkaarDto vilkaarDto = new VilkaarDto();
         vilkaarDto.setVilkaar(Vilkaar.FO_883_2004_ART12_1.getKode());
         Set<String> koder = new HashSet<>();
-        koder.add(Art12_1_begrunnelser.ERSTATTER_ANNEN.getKode());
+        koder.add(Utsendt_arbeidstaker_begrunnelser.ERSTATTER_ANNEN.getKode());
         vilkaarDto.setBegrunnelseKoder(koder);
 
 
@@ -82,7 +81,7 @@ class VilkaarsresultatServiceTest {
         Vilkaarsresultat vilkaarsresultat = behandlingsresultat.getVilkaarsresultater().iterator().next();
         assertThat(vilkaarsresultat.getVilkaar()).isEqualTo(Vilkaar.FO_883_2004_ART12_1);
         assertThat(vilkaarsresultat.getBegrunnelser()).hasSize(1);
-        assertThat(vilkaarsresultat.getBegrunnelser().iterator().next().getKode()).isEqualTo(Art12_1_begrunnelser.ERSTATTER_ANNEN.getKode());
+        assertThat(vilkaarsresultat.getBegrunnelser().iterator().next().getKode()).isEqualTo(Utsendt_arbeidstaker_begrunnelser.ERSTATTER_ANNEN.getKode());
     }
 
 

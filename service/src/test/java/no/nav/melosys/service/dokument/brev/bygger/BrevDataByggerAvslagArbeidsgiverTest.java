@@ -11,32 +11,30 @@ import no.nav.melosys.domain.brev.DoksysBrevbestilling;
 import no.nav.melosys.domain.dokument.organisasjon.OrganisasjonDokument;
 import no.nav.melosys.domain.dokument.organisasjon.OrganisasjonsDetaljer;
 import no.nav.melosys.domain.dokument.person.PersonDokument;
-import no.nav.melosys.domain.kodeverk.Aktoersroller;
 import no.nav.melosys.domain.kodeverk.Land_iso2;
 import no.nav.melosys.domain.kodeverk.Vilkaar;
-import no.nav.melosys.domain.kodeverk.begrunnelser.Art12_1_begrunnelser;
-import no.nav.melosys.domain.kodeverk.begrunnelser.Art12_1_vesentlig_virksomhet;
+import no.nav.melosys.domain.kodeverk.begrunnelser.Utsendt_arbeidstaker_begrunnelser;
+import no.nav.melosys.domain.kodeverk.begrunnelser.Vesentlig_virksomhet_begrunnelser;
 import no.nav.melosys.domain.person.Persondata;
 import no.nav.melosys.service.LandvelgerService;
 import no.nav.melosys.service.LovvalgsperiodeService;
-import no.nav.melosys.domain.OrganisasjonDokumentTestFactory;
 import no.nav.melosys.service.avklartefakta.AvklarteVirksomheterService;
 import no.nav.melosys.service.avklartefakta.AvklartefaktaService;
 import no.nav.melosys.service.behandling.BehandlingService;
+import no.nav.melosys.service.behandling.VilkaarsresultatService;
 import no.nav.melosys.service.dokument.brev.BrevDataAvslagArbeidsgiver;
 import no.nav.melosys.service.dokument.brev.datagrunnlag.BrevDataGrunnlag;
 import no.nav.melosys.service.kodeverk.KodeverkService;
 import no.nav.melosys.service.persondata.PersonopplysningerObjectFactory;
 import no.nav.melosys.service.registeropplysninger.OrganisasjonOppslagService;
-import no.nav.melosys.service.behandling.VilkaarsresultatService;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 
-import static no.nav.melosys.domain.kodeverk.Vilkaar.ART12_1_VESENTLIG_VIRKSOMHET;
 import static no.nav.melosys.domain.kodeverk.Vilkaar.FO_883_2004_ART12_1;
+import static no.nav.melosys.domain.kodeverk.Vilkaar.VESENTLIG_VIRKSOMHET;
 import static no.nav.melosys.service.MottatteOpplysningerStub.lagMottatteOpplysninger;
 import static no.nav.melosys.service.SaksopplysningStubs.lagArbeidsforholdOpplysninger;
 import static no.nav.melosys.service.dokument.brev.BrevDataTestUtils.lagPersonsaksopplysning;
@@ -114,11 +112,11 @@ class BrevDataByggerAvslagArbeidsgiverTest {
 
         when(organisasjonOppslagService.hentOrganisasjoner(orgSet)).thenReturn(new HashSet<>(Collections.singletonList(organisasjonDokument)));
 
-        Vilkaarsresultat vilkaarsresultatArt121 = lagVilkårresultat(Vilkaar.FO_883_2004_ART12_1, Art12_1_begrunnelser.IKKE_OMFATTET_LENGE_NOK_I_NORGE_FOER.getKode());
-        Vilkaarsresultat vesentligVirksomhet = lagVilkårresultat(Vilkaar.ART12_1_VESENTLIG_VIRKSOMHET, Art12_1_vesentlig_virksomhet.FOR_LITE_KONTRAKTER_NORGE.getKode());
+        Vilkaarsresultat vilkaarsresultatArt121 = lagVilkårresultat(Vilkaar.FO_883_2004_ART12_1, Utsendt_arbeidstaker_begrunnelser.IKKE_OMFATTET_LENGE_NOK_I_NORGE_FOER.getKode());
+        Vilkaarsresultat vesentligVirksomhet = lagVilkårresultat(Vilkaar.VESENTLIG_VIRKSOMHET, Vesentlig_virksomhet_begrunnelser.FOR_LITE_KONTRAKTER_NORGE.getKode());
 
         when(vilkaarsresultatService.finnVilkaarsresultat(anyLong(), eq(FO_883_2004_ART12_1))).thenReturn(Optional.of(vilkaarsresultatArt121));
-        when(vilkaarsresultatService.finnVilkaarsresultat(anyLong(), eq(ART12_1_VESENTLIG_VIRKSOMHET))).thenReturn(Optional.of(vesentligVirksomhet));
+        when(vilkaarsresultatService.finnVilkaarsresultat(anyLong(), eq(VESENTLIG_VIRKSOMHET))).thenReturn(Optional.of(vesentligVirksomhet));
 
         AvklarteVirksomheterService avklarteVirksomheterService = new AvklarteVirksomheterService(avklartefaktaService,
             organisasjonOppslagService, mock(BehandlingService.class), kodeverkService);
