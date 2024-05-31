@@ -66,7 +66,7 @@ internal class TrygdeavgiftsberegningServiceTest {
     private lateinit var behandlingsresultat: Behandlingsresultat
 
     private val FOM: LocalDate = LocalDate.now()
-    private val TOM: LocalDate = LocalDate.now().plusMonths(1)
+    private val TOM: LocalDate = LocalDate.now().plusMonths(2)
     private val BEHANDLING_ID: Long = 1291
     private val FULLMEKTIG_AKTØR_ID: String = "123456789"
     private val FULLMEKTIG_NAVN: String = "Herr Fullmektig"
