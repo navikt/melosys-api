@@ -138,28 +138,28 @@ internal class VilkaarsresultatServiceTest {
     }
 
     @Test
-    fun finnUtsendingsVilkaarsresultat_artikkel12_1_finnerVilkaarsresultat() {
+    fun finnUtsendingArbeidstakerVilkaarsresultat_artikkel12_1_finnerVilkaarsresultat() {
         val behandlingsresultat = lagBehandlingsresultat().apply {
             vilkaarsresultater = setOf(Vilkaarsresultat().apply { vilkaar = Vilkaar.FO_883_2004_ART12_1 })
         }
         every { behandlingsresultatRepo.findById(BEHANDLING_ID) } returns Optional.of(behandlingsresultat)
 
 
-        val response = vilkaarsresultatService.finnUtsendingsVilkaarsresultat(BEHANDLING_ID)
+        val response = vilkaarsresultatService.finnUtsendingArbeidstakerVilkaarsresultat(BEHANDLING_ID)
 
 
         response.shouldNotBeNull().vilkaar.shouldBe(Vilkaar.FO_883_2004_ART12_1)
     }
 
     @Test
-    fun finnUtsendingsVilkaarsresultat_artikkel12_2_finnerVilkaarsresultat() {
+    fun finnUtsendingNæringsdrivendeVilkaarsresultat_artikkel12_2_finnerVilkaarsresultat() {
         val behandlingsresultat = lagBehandlingsresultat().apply {
             vilkaarsresultater = setOf(Vilkaarsresultat().apply { vilkaar = Vilkaar.FO_883_2004_ART12_2 })
         }
         every { behandlingsresultatRepo.findById(BEHANDLING_ID) } returns Optional.of(behandlingsresultat)
 
 
-        val response = vilkaarsresultatService.finnUtsendingsVilkaarsresultat(BEHANDLING_ID)
+        val response = vilkaarsresultatService.finnUtsendingNæringsdrivendeVilkaarsresultat(BEHANDLING_ID)
 
 
         response.shouldNotBeNull().vilkaar.shouldBe(Vilkaar.FO_883_2004_ART12_2)

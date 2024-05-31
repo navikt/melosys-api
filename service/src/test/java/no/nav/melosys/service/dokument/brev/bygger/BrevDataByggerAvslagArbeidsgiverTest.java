@@ -113,7 +113,7 @@ class BrevDataByggerAvslagArbeidsgiverTest {
         Vilkaarsresultat vilkaarsresultatArt121 = lagVilkårresultat(Vilkaar.FO_883_2004_ART12_1, Art12_1_begrunnelser.IKKE_OMFATTET_LENGE_NOK_I_NORGE_FOER.getKode());
         Vilkaarsresultat vesentligVirksomhet = lagVilkårresultat(Vilkaar.ART12_1_VESENTLIG_VIRKSOMHET, Art12_1_vesentlig_virksomhet.FOR_LITE_KONTRAKTER_NORGE.getKode());
 
-        when(vilkaarsresultatService.finnUtsendingsVilkaarsresultat(anyLong())).thenReturn(vilkaarsresultatArt121);
+        when(vilkaarsresultatService.finnUtsendingArbeidstakerVilkaarsresultat(anyLong())).thenReturn(vilkaarsresultatArt121);
         when(vilkaarsresultatService.finnVilkaarsresultat(anyLong(), eq(ART12_1_VESENTLIG_VIRKSOMHET))).thenReturn(vesentligVirksomhet);
 
         AvklarteVirksomheterService avklarteVirksomheterService = new AvklarteVirksomheterService(avklartefaktaService,

@@ -43,18 +43,28 @@ class VilkaarsresultatService(
         hentBehandlingsresultat(behandlingID).vilkaarsresultater.firstOrNull { it.vilkaar == vilkaar }
 
     @Transactional(readOnly = true)
-    fun finnUtsendingsVilkaarsresultat(behandlingID: Long): Vilkaarsresultat? {
+    fun finnUtsendingArbeidstakerVilkaarsresultat(behandlingID: Long): Vilkaarsresultat? {
         val utsendingsvilkår =
             if (unleash.isEnabled(ToggleName.MELOSYS_KONVENSJON_EFTA_LAND_OG_STORBRITANNIA)) listOf(
                 Vilkaar.FO_883_2004_ART12_1,
-                Vilkaar.FO_883_2004_ART12_2,
                 Vilkaar.KONV_EFTA_STORBRITANNIA_ART14_1,
-                Vilkaar.KONV_EFTA_STORBRITANNIA_ART14_2,
                 Vilkaar.KONV_EFTA_STORBRITANNIA_ART16_1,
-                Vilkaar.KONV_EFTA_STORBRITANNIA_ART16_3,
             ) else listOf(
                 Vilkaar.FO_883_2004_ART12_1,
+            )
+
+        return hentBehandlingsresultat(behandlingID).vilkaarsresultater.firstOrNull { it.vilkaar in utsendingsvilkår }
+    }
+
+    @Transactional(readOnly = true)
+    fun finnUtsendingNæringsdrivendeVilkaarsresultat(behandlingID: Long): Vilkaarsresultat? {
+        val utsendingsvilkår =
+            if (unleash.isEnabled(ToggleName.MELOSYS_KONVENSJON_EFTA_LAND_OG_STORBRITANNIA)) listOf(
                 Vilkaar.FO_883_2004_ART12_2,
+                Vilkaar.KONV_EFTA_STORBRITANNIA_ART14_2,
+                Vilkaar.KONV_EFTA_STORBRITANNIA_ART16_3,
+            ) else listOf(
+                Vilkaar.FO_883_2004_ART12_2
             )
 
         return hentBehandlingsresultat(behandlingID).vilkaarsresultater.firstOrNull { it.vilkaar in utsendingsvilkår }
@@ -78,7 +88,8 @@ class VilkaarsresultatService(
         hentBehandlingsresultat(behandlingID).vilkaarsresultater.any { vilkaar == it.vilkaar && it.isOppfylt }
 
     @Transactional(readOnly = true)
-    fun harVilkaarForUtsending(behandlingID: Long): Boolean = finnUtsendingsVilkaarsresultat(behandlingID) != null
+    fun harVilkaarForUtsending(behandlingID: Long): Boolean =
+        finnUtsendingArbeidstakerVilkaarsresultat(behandlingID) != null || finnUtsendingNæringsdrivendeVilkaarsresultat(behandlingID) != null
 
     @Transactional(readOnly = true)
     fun harVilkaarForUnntak(behandlingID: Long): Boolean = finnUnntaksVilkaarsresultat(behandlingID) != null
