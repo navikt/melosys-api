@@ -6,10 +6,7 @@ import no.nav.melosys.domain.PeriodeOmLovvalg
 import no.nav.melosys.domain.kodeverk.Folketrygdloven_kap2_bestemmelser
 import no.nav.melosys.domain.kodeverk.LovvalgBestemmelse
 import no.nav.melosys.domain.kodeverk.Trygdedekninger
-import no.nav.melosys.domain.kodeverk.lovvalgsbestemmelser.Lovvalgbestemmelser_883_2004
-import no.nav.melosys.domain.kodeverk.lovvalgsbestemmelser.Lovvalgbestemmelser_987_2009
-import no.nav.melosys.domain.kodeverk.lovvalgsbestemmelser.Overgangsregelbestemmelser
-import no.nav.melosys.domain.kodeverk.lovvalgsbestemmelser.Tilleggsbestemmelser_883_2004
+import no.nav.melosys.domain.kodeverk.lovvalgsbestemmelser.*
 import no.nav.melosys.domain.kodeverk.lovvalgsbestemmelser.trygdeavtale.*
 import no.nav.melosys.exception.TekniskException
 import java.util.*
@@ -52,6 +49,9 @@ class MedlPeriodeKonverter private constructor() {
             lovvalgsbestemmelseTilGrunnlagMedlTabell[Lovvalgbestemmelser_883_2004.FO_883_2004_ART15] = GrunnlagMedl.FO_15
             lovvalgsbestemmelseTilGrunnlagMedlTabell[Lovvalgbestemmelser_883_2004.FO_883_2004_ART16_1] = GrunnlagMedl.FO_16
             lovvalgsbestemmelseTilGrunnlagMedlTabell[Lovvalgbestemmelser_987_2009.FO_987_2009_ART14_11] = GrunnlagMedl.FO_987_2009_14_11
+
+            lovvalgsbestemmelseTilGrunnlagMedlTabell[Lovvalgbestemmelser_konv_efta_storbritannia.KONV_EFTA_STORBRITANNIA_ART18_1] =
+                GrunnlagMedl.KONV_STORBRIT_NIRLAND_18_1
 
             // Australia
             lovvalgsbestemmelseTilGrunnlagMedlTabell[Lovvalgsbestemmelser_trygdeavtale_au.AUS] = GrunnlagMedl.AUSTRALIA
