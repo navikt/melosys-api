@@ -22,6 +22,10 @@ class TrygdeavgiftValideringService() {
             validerTrygdeavgiftsgrunnlag(request, behandlingsresultat)
         }
 
+        fun erAllePerioderSkattepliktige(request: OppdaterTrygdeavgiftsgrunnlagRequest): Boolean {
+            return request.skatteforholdTilNorgeList.all { it.skatteplikttype == Skatteplikttype.SKATTEPLIKTIG }
+        }
+
         private fun validerMedlemskapsperioder(behandlingsresultat: Behandlingsresultat) {
             if (behandlingsresultat.medlemskapsperioder.isEmpty()) {
                 throw FunksjonellException("Kan ikke beregne trygdeavgift uten medlemskapsperioder")
@@ -31,7 +35,7 @@ class TrygdeavgiftValideringService() {
         }
 
         private fun validerTrygdeavgiftsgrunnlag(request: OppdaterTrygdeavgiftsgrunnlagRequest, behandlingsresultat: Behandlingsresultat) {
-            if (request.inntektskilder.isEmpty()) {
+            if (request.inntektskilder.isEmpty() && !erAllePerioderSkattepliktige(request)) {
                 throw FunksjonellException("Kan ikke beregne trygdeavgift uten inntektsperioder")
             }
             if (request.skatteforholdTilNorgeList.isEmpty()) {
@@ -39,21 +43,17 @@ class TrygdeavgiftValideringService() {
             }
 
             val erSkattepliktigIHelePerioden = request.skatteforholdTilNorgeList.all { it.skatteplikttype == Skatteplikttype.SKATTEPLIKTIG }
+
             val medlemskapsperioderErÅpen = behandlingsresultat.utledMedlemskapsperiodeTom() == null
             if (medlemskapsperioderErÅpen) {
-                val skatteforholdsperiodeErÅpen = request.skatteforholdTilNorgeList.sortedBy { it.fomDato }.last().tomDato == null
+                throw FunksjonellException("Skatteforholdsperiode/inntektsperiode kan ikke ha sluttdato når medlemskapsperiode ikke har sluttdato")
+            }
 
-                if (erSkattepliktigIHelePerioden && !skatteforholdsperiodeErÅpen) {
-                    throw FunksjonellException("Skatteforholdsperiode/inntektsperiode kan ikke ha sluttdato når medlemskapsperiode ikke har sluttdato")
-                }
-
-                if (!erSkattepliktigIHelePerioden) {
-                    throw FunksjonellException("Faktura kan ikke opprettes for medlemskapsperiode uten sluttdato. Angi sluttdato på medlemskapsperiode")
-                }
-
-                if (request.skatteforholdTilNorgeList.size == 1) {
-                    return
-                }
+            if (request.skatteforholdTilNorgeList.size > 1) {
+                request.skatteforholdTilNorgeList.all { it.skatteplikttype == request.skatteforholdTilNorgeList.first().skatteplikttype }
+                    .takeIf { it }?.let {
+                        throw FunksjonellException("Alle skatteforholdsperiodene har samme svar på spørsmålet om skatteplikt")
+                    }
             }
 
             val innvilgedeMedlemskapsperioder = behandlingsresultat.medlemskapsperioder.filter { it.erInnvilget() }

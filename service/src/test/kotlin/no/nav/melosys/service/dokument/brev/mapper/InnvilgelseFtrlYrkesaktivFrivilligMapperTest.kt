@@ -30,6 +30,7 @@ import no.nav.melosys.integrasjon.dokgen.dto.felles.SaksinfoBruker
 import no.nav.melosys.service.avgift.TrygdeavgiftMottakerService
 import no.nav.melosys.service.avgift.TrygdeavgiftsberegningService
 import no.nav.melosys.service.avklartefakta.AvklarteVirksomheterService
+import no.nav.melosys.service.behandling.BehandlingsresultatService
 import no.nav.melosys.service.dokument.DokgenTestData
 import no.nav.melosys.service.dokument.brev.BrevDataTestUtils
 import org.junit.jupiter.api.BeforeEach
@@ -50,15 +51,18 @@ internal class InnvilgelseFtrlYrkesaktivFrivilligMapperTest {
     private lateinit var mockDokgenMapperDatahenter: DokgenMapperDatahenter
 
     @MockK
+    private lateinit var mockBehandlingsresultatService: BehandlingsresultatService
+
+    @MockK
     private lateinit var trygdeavgiftsberegningService: TrygdeavgiftsberegningService
 
-    private var trygdeavgiftMottakerService: TrygdeavgiftMottakerService = TrygdeavgiftMottakerService()
+    private lateinit var trygdeavgiftMottakerService: TrygdeavgiftMottakerService
 
     private lateinit var innvilgelseFtrlMapper: InnvilgelseFtrlMapper
 
     @BeforeEach
     fun setup() {
-        trygdeavgiftMottakerService = TrygdeavgiftMottakerService()
+        trygdeavgiftMottakerService = TrygdeavgiftMottakerService(mockBehandlingsresultatService)
         innvilgelseFtrlMapper = InnvilgelseFtrlMapper(
             mockAvklarteVirksomheterService,
             mockDokgenMapperDatahenter,

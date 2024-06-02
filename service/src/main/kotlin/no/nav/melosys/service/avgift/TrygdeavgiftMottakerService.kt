@@ -4,10 +4,12 @@ import no.nav.melosys.domain.Behandlingsresultat
 import no.nav.melosys.domain.kodeverk.Inntektskildetype
 import no.nav.melosys.domain.kodeverk.Skatteplikttype
 import no.nav.melosys.domain.kodeverk.Trygdeavgiftmottaker
+import no.nav.melosys.service.behandling.BehandlingsresultatService
 import org.springframework.stereotype.Service
+import org.springframework.transaction.annotation.Transactional
 
 @Service
-class TrygdeavgiftMottakerService {
+class TrygdeavgiftMottakerService(private val behandlingsresultatService: BehandlingsresultatService) {
 
     fun skalBetalesTilNav(
         behandlingsresultat: Behandlingsresultat,
@@ -15,6 +17,14 @@ class TrygdeavgiftMottakerService {
         val trygdeavgiftMottaker = getTrygdeavgiftMottaker(behandlingsresultat)
         return trygdeavgiftMottaker == Trygdeavgiftmottaker.TRYGDEAVGIFT_BETALES_TIL_NAV
             || trygdeavgiftMottaker == Trygdeavgiftmottaker.TRYGDEAVGIFT_BETALES_TIL_NAV_OG_SKATT
+    }
+
+    @Transactional(readOnly = true)
+    fun getTrygdeavgiftMottaker(
+        behandlingID: Long,
+    ): Trygdeavgiftmottaker {
+        val behandlingsresultat = behandlingsresultatService.hentBehandlingsresultat(behandlingID)
+        return getTrygdeavgiftMottaker(behandlingsresultat)
     }
 
     fun getTrygdeavgiftMottaker(
