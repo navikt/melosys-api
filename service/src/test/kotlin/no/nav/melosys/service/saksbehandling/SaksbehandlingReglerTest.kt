@@ -591,6 +591,7 @@ class SaksbehandlingReglerTest {
 fun lagBehandlingsresultat(resultatTypeFraRepo: Behandlingsresultattyper?): Optional<Behandlingsresultat> {
     if (resultatTypeFraRepo == null) return Optional.empty()
     return Optional.of(Behandlingsresultat().apply {
+        id = 1L
         type = resultatTypeFraRepo
     })
 }
