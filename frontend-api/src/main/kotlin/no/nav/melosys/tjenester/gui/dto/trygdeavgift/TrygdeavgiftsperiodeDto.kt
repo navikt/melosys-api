@@ -9,7 +9,7 @@ data class TrygdeavgiftsperiodeDto(
     val fom: LocalDate,
     val tom: LocalDate,
     val trygdedekning: Trygdedekninger,
-    val inntektskildetype: Inntektskildetype,
+    val inntektskildetype: Inntektskildetype?,
     val avgiftssats: Double,
     val avgiftPerMd: Int
 ) {
@@ -18,7 +18,7 @@ data class TrygdeavgiftsperiodeDto(
             trygdeavgiftsperiode.periodeFra,
             trygdeavgiftsperiode.periodeTil,
             trygdeavgiftsperiode.grunnlagMedlemskapsperiode.trygdedekning,
-            trygdeavgiftsperiode.grunnlagInntekstperiode.type,
+            trygdeavgiftsperiode.grunnlagInntekstperiode?.type,
             trygdeavgiftsperiode.trygdesats.toDouble(),
             trygdeavgiftsperiode.trygdeavgiftsbeløpMd.verdi.toInt()
         )

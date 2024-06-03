@@ -3,7 +3,6 @@ package no.nav.melosys.tjenester.gui.behandlinger.trygdeavgift
 import io.swagger.annotations.Api
 import no.nav.melosys.service.avgift.TrygdeavgiftMottakerService
 import no.nav.melosys.service.avgift.TrygdeavgiftsberegningService
-import no.nav.melosys.service.behandling.BehandlingsresultatService
 import no.nav.melosys.service.tilgang.Aksesskontroll
 import no.nav.melosys.tjenester.gui.dto.trygdeavgift.BeregnetTrygdeavgiftDto
 import no.nav.melosys.tjenester.gui.dto.trygdeavgift.FakturamottakerDto
@@ -19,7 +18,6 @@ import org.springframework.web.bind.annotation.*
 @RequestMapping("/behandlinger/{behandlingID}/trygdeavgift")
 class TrygdeavgiftTjeneste(
     private val trygdeavgiftsberegningService: TrygdeavgiftsberegningService,
-    private val behandlingsresultatService: BehandlingsresultatService,
     private val trygdeavgiftMottakerService: TrygdeavgiftMottakerService,
     private val aksesskontroll: Aksesskontroll
 ) {
@@ -28,11 +26,9 @@ class TrygdeavgiftTjeneste(
     fun hentTrygdeavgiftMottaker(@PathVariable("behandlingID") behandlingID: Long): ResponseEntity<TrygdeavgiftMottakerDto> {
         aksesskontroll.autoriser(behandlingID)
 
-        return behandlingsresultatService.hentBehandlingsresultat(behandlingID).let {
-            ResponseEntity.ok(
-                TrygdeavgiftMottakerDto(trygdeavgiftMottakerService.getTrygdeavgiftMottaker(it))
-            )
-        }
+        return ResponseEntity.ok(
+            TrygdeavgiftMottakerDto(trygdeavgiftMottakerService.getTrygdeavgiftMottaker(behandlingID))
+        )
     }
 
     @PutMapping("/beregning")
