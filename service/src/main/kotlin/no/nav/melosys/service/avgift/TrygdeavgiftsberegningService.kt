@@ -54,10 +54,14 @@ class TrygdeavgiftsberegningService(
         val innvilgedeMedlemskapsperioder = behandlingsresultat.medlemskapsperioder.filter { it.erInnvilget() }
         val erPliktigMedlemskap = innvilgedeMedlemskapsperioder.all { it.erPliktig() }
 
-        if (erPliktigMedlemskap && oppdaterTrygdeavgiftsgrunnlagRequest.inntektskilder.isEmpty() && oppdaterTrygdeavgiftsgrunnlagRequest.skatteforholdTilNorgeList.all { it.skatteplikttype == Skatteplikttype.SKATTEPLIKTIG }) {
-            return leggTilNyeTrygdeavgiftsperioderForPliktigMedlemskapSkattepliktig(oppdaterTrygdeavgiftsgrunnlagRequest, behandlingsresultat)
+        val inntektskilderErTomt = oppdaterTrygdeavgiftsgrunnlagRequest.inntektskilder.isEmpty()
+        val alleSkatteforholdErSkattepliktige =
+            oppdaterTrygdeavgiftsgrunnlagRequest.skatteforholdTilNorgeList.all { it.skatteplikttype == Skatteplikttype.SKATTEPLIKTIG }
+
+        return if (erPliktigMedlemskap && inntektskilderErTomt && alleSkatteforholdErSkattepliktige) {
+            leggTilNyeTrygdeavgiftsperioderForPliktigMedlemskapSkattepliktig(oppdaterTrygdeavgiftsgrunnlagRequest, behandlingsresultat)
         } else {
-            return leggTilNyeTrygdeavgiftsperioder(oppdaterTrygdeavgiftsgrunnlagRequest, behandlingsresultat)
+            leggTilNyeTrygdeavgiftsperioder(oppdaterTrygdeavgiftsgrunnlagRequest, behandlingsresultat)
         }
     }
 

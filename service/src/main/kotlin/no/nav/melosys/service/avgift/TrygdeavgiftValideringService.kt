@@ -49,11 +49,8 @@ class TrygdeavgiftValideringService() {
                 throw FunksjonellException("Skatteforholdsperiode/inntektsperiode kan ikke ha sluttdato når medlemskapsperiode ikke har sluttdato")
             }
 
-            if (request.skatteforholdTilNorgeList.size > 1) {
-                request.skatteforholdTilNorgeList.all { it.skatteplikttype == request.skatteforholdTilNorgeList.first().skatteplikttype }
-                    .takeIf { it }?.let {
-                        throw FunksjonellException("Alle skatteforholdsperiodene har samme svar på spørsmålet om skatteplikt")
-                    }
+            if (request.skatteforholdTilNorgeList.size > 1 && request.skatteforholdTilNorgeList.groupBy { it.skatteplikttype }.size == 1) {
+                throw FunksjonellException("Alle skatteforholdsperiodene har samme svar på spørsmålet om skatteplikt")
             }
 
             val innvilgedeMedlemskapsperioder = behandlingsresultat.medlemskapsperioder.filter { it.erInnvilget() }

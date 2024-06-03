@@ -13,7 +13,8 @@ data class TrygdeavgiftsgrunnlagDto(
             .sortedWith(compareBy { it.tomDato })
             .toList(),
         trygdeavgiftsperiode
-            .filter { it.grunnlagInntekstperiode != null }.map { InntekskildeDto(it.grunnlagInntekstperiode) }
+            .filter { it.grunnlagInntekstperiode != null }
+            .map { InntekskildeDto(it.grunnlagInntekstperiode) }
             .sortedWith(compareBy { it.tomDato })
             .toList()
     )
