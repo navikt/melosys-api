@@ -79,7 +79,7 @@ class TrygdeavgiftValideringService() {
             innvilgedeMedlemskapsperioder: List<Medlemskapsperiode>
         ) {
             val inntektsperiodeDateRange = inntektsperioder.sortedBy { it.fomDato }
-                .map { inntektsperiode -> LocalDateRange.of(inntektsperiode.fomDato, inntektsperiode.tomDato) }
+                .map { inntektsperiode -> LocalDateRange.ofClosed(inntektsperiode.fomDato, inntektsperiode.tomDato) }
 
             var samletInntektsperiodeDateRange: LocalDateRange? = null
             try {
@@ -95,7 +95,7 @@ class TrygdeavgiftValideringService() {
             }
 
             val sortertMedlemskapsperiode = innvilgedeMedlemskapsperioder.sortedBy { it.fom }
-            if (LocalDateRange.of(
+            if (LocalDateRange.ofClosed(
                     sortertMedlemskapsperiode.first().fom,
                     sortertMedlemskapsperiode.last().tom
                 ) != samletInntektsperiodeDateRange
