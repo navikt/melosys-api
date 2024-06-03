@@ -69,6 +69,10 @@ class TrygdeavgiftsberegningService(
         oppdaterTrygdeavgiftsgrunnlagRequest: OppdaterTrygdeavgiftsgrunnlagRequest,
         behandlingsresultat: Behandlingsresultat,
     ): Set<Trygdeavgiftsperiode> {
+        if (oppdaterTrygdeavgiftsgrunnlagRequest.skatteforholdTilNorgeList.size != 1) {
+            throw IllegalStateException("Det skal ikke være flere enn en skatteforholdsperiode når medlemskapet er pliktig og skattepliktig")
+        }
+
         val innvilgedeMedlemskapsperioder = behandlingsresultat.medlemskapsperioder.filter { it.erInnvilget() }
 
         return innvilgedeMedlemskapsperioder.map {
