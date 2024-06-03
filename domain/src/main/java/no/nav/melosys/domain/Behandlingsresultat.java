@@ -4,18 +4,19 @@ import java.time.Instant;
 import java.time.LocalDate;
 import java.util.*;
 import java.util.stream.Collectors;
-import jakarta.persistence.*;
 
+import jakarta.persistence.*;
+import no.nav.melosys.domain.avgift.Aarsavregning;
+import no.nav.melosys.domain.avgift.Inntektsperiode;
+import no.nav.melosys.domain.avgift.SkatteforholdTilNorge;
+import no.nav.melosys.domain.avgift.Trygdeavgiftsperiode;
 import no.nav.melosys.domain.avklartefakta.Avklartefakta;
-import no.nav.melosys.domain.folketrygden.MedlemAvFolketrygden;
 import no.nav.melosys.domain.kodeverk.*;
 import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingsresultattyper;
 import no.nav.melosys.domain.kodeverk.lovvalgsbestemmelser.Lovvalgbestemmelser_883_2004;
 import no.nav.melosys.domain.kodeverk.lovvalgsbestemmelser.Tilleggsbestemmelser_883_2004;
 import no.nav.melosys.exception.FunksjonellException;
 import org.springframework.data.jpa.domain.support.AuditingEntityListener;
-
-import static java.util.Optional.ofNullable;
 
 @Entity
 @Table(name = "behandlingsresultat")
@@ -86,11 +87,18 @@ public class Behandlingsresultat extends RegistreringsInfo {
     @OneToMany(mappedBy = "behandlingsresultat", cascade = CascadeType.ALL, fetch = FetchType.LAZY, orphanRemoval = true)
     private Set<Kontrollresultat> kontrollresultater = new HashSet<>(1);
 
+    @OneToMany(mappedBy = "behandlingsresultat", cascade = CascadeType.ALL, fetch = FetchType.LAZY, orphanRemoval = true)
+    private Collection<Medlemskapsperiode> medlemskapsperioder = new HashSet<>(1);
+
     @OneToMany(mappedBy = "behandlingsresultat", cascade = CascadeType.ALL, fetch = FetchType.EAGER, orphanRemoval = true)
     private Set<BehandlingsresultatBegrunnelse> behandlingsresultatBegrunnelser = new HashSet<>(1);
 
     @OneToOne(mappedBy = "behandlingsresultat", cascade = CascadeType.ALL, fetch = FetchType.LAZY, orphanRemoval = true)
-    private MedlemAvFolketrygden medlemAvFolketrygden;
+    private Aarsavregning aarsavregning;
+
+    @Column(name = "trygdeavgift_type")
+    @Enumerated(EnumType.STRING)
+    private Trygdeavgift_typer trygdeavgiftType;
 
     public Long getId() {
         return id;
@@ -236,16 +244,98 @@ public class Behandlingsresultat extends RegistreringsInfo {
         this.kontrollresultater = kontrollresultater;
     }
 
-    public MedlemAvFolketrygden getMedlemAvFolketrygden() {
-        return medlemAvFolketrygden;
+    public Aarsavregning getAarsavregning() {
+        return aarsavregning;
     }
 
-    public Optional<MedlemAvFolketrygden> finnMedlemAvFolketrygden() {
-        return ofNullable(getMedlemAvFolketrygden());
+    public void setAarsavregning(Aarsavregning aarsavregning) {
+        this.aarsavregning = aarsavregning;
     }
 
-    public void setMedlemAvFolketrygden(MedlemAvFolketrygden medlemAvFolketrygden) {
-        this.medlemAvFolketrygden = medlemAvFolketrygden;
+    public Collection<Medlemskapsperiode> getMedlemskapsperioder() {
+        return medlemskapsperioder;
+    }
+
+    public void setMedlemskapsperioder(Collection<Medlemskapsperiode> medlemskapsperioder) {
+        this.medlemskapsperioder = medlemskapsperioder;
+    }
+
+    public void addMedlemskapsperiode(Medlemskapsperiode medlemskapsperiode) {
+        this.medlemskapsperioder.add(medlemskapsperiode);
+        medlemskapsperiode.setBehandlingsresultat(this);
+    }
+
+    public void removeMedlemskapsperioder(Medlemskapsperiode medlemskapsperiode) {
+        this.medlemskapsperioder.remove(medlemskapsperiode);
+        medlemskapsperiode.setBehandlingsresultat(null);
+    }
+
+    public Skatteplikttype utledSkatteplikttype() {
+        var trygdeavgiftsperiode = getTrygdeavgiftsperioder().stream().findFirst();
+        var erÅpenSluttdato = utledMedlemskapsperiodeTom() == null;
+        if (trygdeavgiftsperiode.isEmpty() && erÅpenSluttdato) {
+            return Skatteplikttype.SKATTEPLIKTIG;
+        } else if (trygdeavgiftsperiode.isEmpty()) {
+            throw new RuntimeException("Trygdeavgiftsperiode ikke funnet, og det er ikke åpen sluttdato, id = " + id);
+        }
+
+        return trygdeavgiftsperiode.get().getGrunnlagSkatteforholdTilNorge().getSkatteplikttype();
+    }
+
+
+    public LocalDate utledMedlemskapsperiodeFom() {
+        return medlemskapsperioder.stream()
+            .filter(Medlemskapsperiode::erInnvilget)
+            .min(Comparator.comparing(Medlemskapsperiode::getFom))
+            .map(Medlemskapsperiode::getFom)
+            .orElse(null);
+    }
+
+    public LocalDate utledMedlemskapsperiodeTom() {
+        return medlemskapsperioder.stream()
+            .filter(Medlemskapsperiode::erInnvilget)
+            .filter(medlemskapsperiode -> medlemskapsperiode.getTom() != null)
+            .max(Comparator.comparing(Medlemskapsperiode::getTom))
+            .map(Medlemskapsperiode::getTom)
+            .orElse(null);
+    }
+
+    public LocalDate utledOpphørtDato() {
+        return medlemskapsperioder.stream()
+            .filter(Medlemskapsperiode::erOpphørt)
+            .min(Comparator.comparing(Medlemskapsperiode::getFom))
+            .map(Medlemskapsperiode::getFom)
+            .orElse(null);
+    }
+
+
+    public Trygdeavgift_typer getTrygdeavgiftType() {
+        return trygdeavgiftType;
+    }
+
+    public void setTrygdeavgiftType(Trygdeavgift_typer trygdeavgiftstype) {
+        this.trygdeavgiftType = trygdeavgiftstype;
+    }
+
+    public Set<Trygdeavgiftsperiode> getTrygdeavgiftsperioder() {
+        return medlemskapsperioder.stream().flatMap(medlemskapsperiode -> medlemskapsperiode.getTrygdeavgiftsperioder().stream())
+            .collect(Collectors.toSet());
+    }
+
+    public void clearTrygdeavgiftsperioder() {
+        medlemskapsperioder.forEach(medlemskapsperiode -> medlemskapsperiode.getTrygdeavgiftsperioder().clear());
+    }
+
+    public Set<SkatteforholdTilNorge> hentSkatteforholdTilNorge() {
+        return getTrygdeavgiftsperioder().stream()
+            .map(Trygdeavgiftsperiode::getGrunnlagSkatteforholdTilNorge)
+            .collect(Collectors.toSet());
+    }
+
+    public Set<Inntektsperiode> hentInntektsperioder() {
+        return getTrygdeavgiftsperioder().stream()
+            .map(Trygdeavgiftsperiode::getGrunnlagInntekstperiode)
+            .collect(Collectors.toSet());
     }
 
     @Override
@@ -380,13 +470,6 @@ public class Behandlingsresultat extends RegistreringsInfo {
             throw new UnsupportedOperationException("Flere enn en utpekingsperiode er ikke støttet");
         }
         return utpekingsperioder.stream().findFirst();
-    }
-
-    public Collection<Medlemskapsperiode> finnMedlemskapsperioder() {
-        if (medlemAvFolketrygden == null) {
-            return Collections.emptyList();
-        }
-        return medlemAvFolketrygden.getMedlemskapsperioder();
     }
 
     public Set<VilkaarBegrunnelse> hentVilkaarbegrunnelser(Vilkaar vilkaarType) {

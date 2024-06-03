@@ -11,7 +11,6 @@ import io.kotest.matchers.types.shouldBeInstanceOf
 import io.mockk.every
 import io.mockk.impl.annotations.MockK
 import io.mockk.junit5.MockKExtension
-import no.nav.melosys.domain.Behandling
 import no.nav.melosys.domain.Behandlingsresultat
 import no.nav.melosys.domain.Medlemskapsperiode
 import no.nav.melosys.domain.brev.*
@@ -19,7 +18,6 @@ import no.nav.melosys.domain.dokument.arbeidsforhold.Aktoertype
 import no.nav.melosys.domain.dokument.felles.Periode
 import no.nav.melosys.domain.dokument.organisasjon.adresse.GeografiskAdresse
 import no.nav.melosys.domain.dokument.organisasjon.adresse.SemistrukturertAdresse
-import no.nav.melosys.domain.folketrygden.MedlemAvFolketrygden
 import no.nav.melosys.domain.kodeverk.*
 import no.nav.melosys.domain.kodeverk.begrunnelser.Nyvurderingbakgrunner
 import no.nav.melosys.domain.kodeverk.begrunnelser.folketrygdloven.Ftrl_2_8_naer_tilknytning_norge_begrunnelser
@@ -60,6 +58,9 @@ internal class DokgenMalMapperTest {
     @MockK
     private lateinit var mockTrygdeavtaleMapper: TrygdeavtaleMapper
 
+    @MockK
+    private lateinit var mockInnhentingAvInntektsopplysningerMapper: InnhentingAvInntektsopplysningerMapper
+
     private lateinit var dokgenMalMapper: DokgenMalMapper
 
     @BeforeEach
@@ -67,6 +68,7 @@ internal class DokgenMalMapperTest {
         dokgenMalMapper = DokgenMalMapper(
             mockDokgenMapperDatahenter,
             mockInnvilgelseFtrlMapper,
+            mockInnhentingAvInntektsopplysningerMapper,
             mockTrygdeavtaleMapper
         )
     }
@@ -416,13 +418,9 @@ internal class DokgenMalMapperTest {
         every { mockDokgenMapperDatahenter.hentLandnavnFraLandkode(Landkoder.NO.kode) } returns Landkoder.NO.beskrivelse
         every { mockDokgenMapperDatahenter.hentFullmektigNavn(any(), any()) } returns null
         every { mockDokgenMapperDatahenter.hentBehandlingsresultat(any()) } returns Behandlingsresultat().apply {
-            medlemAvFolketrygden = MedlemAvFolketrygden().apply {
-                medlemskapsperioder.add(Medlemskapsperiode().apply { medlemskapstype = Medlemskapstyper.FRIVILLIG })
-            }
+            medlemskapsperioder.add(Medlemskapsperiode().apply { medlemskapstype = Medlemskapstyper.FRIVILLIG })
         }
-        val behandling = DokgenTestData.lagBehandling(DokgenTestData.lagFagsak(true)).apply {
-            opprinneligBehandling = Behandling().apply { id = 1L }
-        }
+        val behandling = DokgenTestData.lagBehandling(DokgenTestData.lagFagsak(true))
         val brevbestilling: DokgenBrevbestilling = VarselbrevManglendeInnbetalingBrevbestilling.Builder()
             .medProduserbartdokument(Produserbaredokumenter.VARSELBREV_MANGLENDE_INNBETALING)
             .medBehandling(behandling)
@@ -439,14 +437,13 @@ internal class DokgenMalMapperTest {
     }
 
     @Test
-    fun skalMappeVarselManglendeOpplysningerTilBrukerKasterFeilDersomOpprinneligBehandlingIkkeHarMedlemskapstype() {
+    fun skalMappeVarselManglendeOpplysningerTilBrukerKasterFeilDersomBehandlingIkkeHarMedlemskapstype() {
         every { mockDokgenMapperDatahenter.hentPersondata(any()) } returns DokgenTestData.lagPersondata()
         every { mockDokgenMapperDatahenter.hentPersonMottaker(any()) } returns DokgenTestData.lagPersondata()
         every { mockDokgenMapperDatahenter.hentNorskPoststed(any()) } returns "Andeby"
         every { mockDokgenMapperDatahenter.hentBehandlingsresultat(any()) } returns Behandlingsresultat()
-        val behandling = DokgenTestData.lagBehandling(DokgenTestData.lagFagsak(true)).apply {
-            opprinneligBehandling = Behandling().apply { id = 1L }
-        }
+        val behandling = DokgenTestData.lagBehandling(DokgenTestData.lagFagsak(true))
+
         val brevbestilling: DokgenBrevbestilling = VarselbrevManglendeInnbetalingBrevbestilling.Builder()
             .medProduserbartdokument(Produserbaredokumenter.VARSELBREV_MANGLENDE_INNBETALING)
             .medBehandling(behandling)

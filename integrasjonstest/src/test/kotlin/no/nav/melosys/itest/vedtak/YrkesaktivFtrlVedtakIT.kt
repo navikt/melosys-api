@@ -5,6 +5,9 @@ import com.fasterxml.jackson.databind.SerializationFeature
 import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule
 import com.fasterxml.jackson.module.kotlin.jacksonObjectMapper
 import com.github.tomakehurst.wiremock.client.WireMock
+import com.github.tomakehurst.wiremock.extension.ResponseTransformerV2
+import com.github.tomakehurst.wiremock.http.Response
+import com.github.tomakehurst.wiremock.stubbing.ServeEvent
 import io.getunleash.FakeUnleash
 import io.github.jaspeen.ulid.ULID
 import io.kotest.assertions.withClue
@@ -16,7 +19,9 @@ import io.kotest.matchers.types.shouldBeInstanceOf
 import io.mockk.every
 import io.mockk.mockk
 import no.nav.melosys.domain.Behandlingsmaate
+import no.nav.melosys.domain.avgift.Inntektsperiode
 import no.nav.melosys.domain.avgift.Penger
+import no.nav.melosys.domain.avgift.SkatteforholdTilNorge
 import no.nav.melosys.domain.avgift.Trygdeavgiftsperiode
 import no.nav.melosys.domain.kodeverk.*
 import no.nav.melosys.domain.kodeverk.behandlinger.*
@@ -34,8 +39,7 @@ import no.nav.melosys.melosysmock.testdata.TestDataGenerator
 import no.nav.melosys.repository.BehandlingRepository
 import no.nav.melosys.repository.FagsakRepository
 import no.nav.melosys.saksflytapi.domain.ProsessType
-import no.nav.melosys.service.MedlemAvFolketrygdenService
-import no.nav.melosys.service.avgift.TrygdeavgiftsgrunnlagService
+import no.nav.melosys.service.avgift.TrygdeavgiftsberegningService
 import no.nav.melosys.service.avgift.dto.InntektskildeRequest
 import no.nav.melosys.service.avgift.dto.OppdaterTrygdeavgiftsgrunnlagRequest
 import no.nav.melosys.service.avgift.dto.SkatteforholdTilNorgeRequest
@@ -77,14 +81,16 @@ class YrkesaktivFtrlVedtakIT(
     @Autowired private val vilkaarsresultatService: VilkaarsresultatService,
     @Autowired private val medlemskapsperiodeService: MedlemskapsperiodeService,
     @Autowired private val opprettForslagMedlemskapsperiodeService: OpprettForslagMedlemskapsperiodeService,
-    @Autowired private val medlemAvFolketrygdenService: MedlemAvFolketrygdenService,
     @Autowired private val oppfriskSaksopplysningerService: OppfriskSaksopplysningerService,
     @Autowired private val vedtaksfattingFasade: VedtaksfattingFasade,
     @Autowired private val unleash: FakeUnleash,
     @Autowired private val opprettBehandlingForSak: OpprettBehandlingForSak,
-    @Autowired private val trygdeavgiftsgrunnlagService: TrygdeavgiftsgrunnlagService,
+    @Autowired private val trygdeavgiftsberegningService: TrygdeavgiftsberegningService,
     @Autowired @Qualifier("manglendeFakturabetalingMelding") private val manglendeFakturabetalingMeldingTemplate: KafkaTemplate<String, ManglendeFakturabetalingMelding>,
-) : JournalfoeringBase(testDataGenerator, journalføringService, oppgaveService) {
+) : JournalfoeringBase(
+    testDataGenerator, journalføringService, oppgaveService,
+    DynamiskTrygdeavgiftsberegningTransformer()
+) {
 
     private var originalSubjectHandler: SubjectHandler? = null
     private val kafkaTopic = "teammelosys.manglende-fakturabetaling-local"
@@ -102,23 +108,13 @@ class YrkesaktivFtrlVedtakIT(
         every { mockHandler.userID } returns "Z123456"
         every { mockHandler.userName } returns "test"
 
-        val expectedResponse = listOf(
-            TrygdeavgiftsberegningResponse(
-                TrygdeavgiftsperiodeDto(
-                    DatoPeriodeDto(LocalDate.of(2023, 1, 1), LocalDate.of(2023, 2, 1)),
-                    6.8.toBigDecimal(), PengerDto(1000.toBigDecimal(), NOK)
-                ),
-                TrygdeavgiftsgrunnlagDto(UUID.randomUUID(), UUID.randomUUID(), UUID.randomUUID())
-            )
-        )
-
         mockServer.stubFor(
             WireMock.post("/api/v2/beregn")
                 .willReturn(
                     WireMock.aResponse()
                         .withStatus(200)
                         .withHeader("Content-Type", "application/json")
-                        .withBody(expectedResponse.toJsonNode.toString())
+                        .withTransformers("dynamisk-trygdeavgiftsberegning-transformer")
                 )
         )
 
@@ -225,7 +221,7 @@ class YrkesaktivFtrlVedtakIT(
             )
         }.behandling.id
 
-        trygdeavgiftsgrunnlagService.oppdaterTrygdeavgiftsgrunnlag(
+        trygdeavgiftsberegningService.beregnOgLagreTrygdeavgift(
             behandlingsId,
             OppdaterTrygdeavgiftsgrunnlagRequest(
                 skatteforholdTilNorgeList = listOf(
@@ -394,7 +390,7 @@ class YrkesaktivFtrlVedtakIT(
             Folketrygdloven_kap2_bestemmelser.FTRL_KAP2_2_8_FØRSTE_LEDD_A
         )
 
-        trygdeavgiftsgrunnlagService.oppdaterTrygdeavgiftsgrunnlag(
+        trygdeavgiftsberegningService.beregnOgLagreTrygdeavgift(
             behandlingId,
             OppdaterTrygdeavgiftsgrunnlagRequest(
                 skatteforholdTilNorgeList = listOf(
@@ -416,7 +412,19 @@ class YrkesaktivFtrlVedtakIT(
             )
         )
 
-        val medlemAvFolketrygden = medlemAvFolketrygdenService.hentMedlemAvFolketrygden(behandlingId)
+        val skatteforholdTilNorge = SkatteforholdTilNorge().apply {
+            fomDato = LocalDate.of(2023, 1, 1)
+            tomDato = LocalDate.of(2023, 2, 1)
+            this@apply.skatteplikttype = skatteplikttype
+        }
+
+        val inntektsperiode = Inntektsperiode().apply {
+            fomDato = LocalDate.of(2023, 1, 1)
+            tomDato = LocalDate.of(2023, 2, 1)
+            type = Inntektskildetype.INNTEKT_FRA_UTLANDET
+            isArbeidsgiversavgiftBetalesTilSkatt = arbeidsgiversavgiftBetales
+            avgiftspliktigInntektMnd = Penger(10000.toBigDecimal(), "nok")
+        }
 
         val trygdeavgiftsperioder = HashSet<Trygdeavgiftsperiode>()
         trygdeavgiftsperioder.add(
@@ -425,15 +433,13 @@ class YrkesaktivFtrlVedtakIT(
                 periodeTil = LocalDate.of(2023, 2, 1)
                 trygdesats = 6.8.toBigDecimal()
                 trygdeavgiftsbeløpMd = Penger(1000.toBigDecimal(), "nok")
-                fastsattTrygdeavgift = medlemAvFolketrygden.fastsattTrygdeavgift
                 grunnlagMedlemskapsperiode = medlemskapsperiode
-                grunnlagSkatteforholdTilNorge = medlemAvFolketrygden.fastsattTrygdeavgift.trygdeavgiftsgrunnlag.skatteforholdTilNorge.first()
-                grunnlagInntekstperiode = medlemAvFolketrygden.fastsattTrygdeavgift.trygdeavgiftsgrunnlag.inntektsperioder.first()
+                grunnlagSkatteforholdTilNorge = skatteforholdTilNorge
+                grunnlagInntekstperiode = inntektsperiode
             }
         )
 
-        medlemAvFolketrygden.fastsattTrygdeavgift.trygdeavgiftsperioder = trygdeavgiftsperioder
-        medlemAvFolketrygdenService.lagre(medlemAvFolketrygden)
+        medlemskapsperiode.trygdeavgiftsperioder = trygdeavgiftsperioder
     }
 
     private val Any.toJsonNode: JsonNode
@@ -443,4 +449,54 @@ class YrkesaktivFtrlVedtakIT(
                 .registerModule(JavaTimeModule())
                 .valueToTree(this)
         }
+}
+
+/**
+ * Wiremock transformer for å simulere dynamisk respons fra trygdeavgiftsberegning. I produksjonskoden settes det UUID.randomUUID() for id-ene, som
+ * returneres i responsen til trygdeavgiftsberegning. Derfor må denne transformeren settes opp for å returnere UUID-ene som forventes i responsen.
+ */
+class DynamiskTrygdeavgiftsberegningTransformer : ResponseTransformerV2 {
+    override fun transform(response: Response?, serveEvent: ServeEvent?): Response {
+        val mapper = jacksonObjectMapper().registerModule(JavaTimeModule())
+
+        if (serveEvent?.request?.url != "/api/v2/beregn") {
+            throw IllegalArgumentException("Invalid url. Denne transformeren støtter kun /api/v2/beregn")
+        }
+
+        val requestBody = mapper.readTree(serveEvent.request?.bodyAsString)
+        val medlemskapsperioderUuid = requestBody["medlemskapsperioder"][0]["id"].asText()
+        val skatteforholdsperioderUuid = requestBody["skatteforholdsperioder"][0]["id"].asText()
+        val inntektsperioderUuid = requestBody["inntektsperioder"][0]["id"].asText()
+
+        val skatteforhold = requestBody["skatteforholdsperioder"][0]["skatteforhold"].asText()
+        val sats = if (skatteforhold == "IKKE_SKATTEPLIKTIG") 6.8.toBigDecimal() else 0.toBigDecimal()
+        val månedsavgift = if (skatteforhold == "IKKE_SKATTEPLIKTIG") PengerDto(1000.toBigDecimal(), NOK) else PengerDto(0.toBigDecimal(), NOK)
+        val responsBodyFraTrygdeavgiftsberegning = listOf(
+            TrygdeavgiftsberegningResponse(
+                TrygdeavgiftsperiodeDto(
+                    DatoPeriodeDto(LocalDate.of(2023, 1, 1), LocalDate.of(2023, 2, 1)),
+                    sats,
+                    månedsavgift
+                ),
+                TrygdeavgiftsgrunnlagDto(
+                    UUID.fromString(medlemskapsperioderUuid),
+                    UUID.fromString(skatteforholdsperioderUuid),
+                    UUID.fromString(inntektsperioderUuid)
+                )
+            )
+        )
+
+        return Response.Builder.like(response)
+            .body(mapper.writeValueAsString(responsBodyFraTrygdeavgiftsberegning))
+            .build()
+    }
+
+
+    override fun getName(): String {
+        return "dynamisk-trygdeavgiftsberegning-transformer"
+    }
+
+    override fun applyGlobally(): Boolean {
+        return false
+    }
 }

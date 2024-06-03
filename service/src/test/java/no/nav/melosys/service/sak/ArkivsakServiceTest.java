@@ -1,8 +1,6 @@
 package no.nav.melosys.service.sak;
 
 import no.nav.melosys.domain.Tema;
-import no.nav.melosys.domain.kodeverk.Sakstemaer;
-import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingstema;
 import no.nav.melosys.integrasjon.sak.SakConsumer;
 import no.nav.melosys.integrasjon.sak.dto.SakDto;
 import org.junit.jupiter.api.BeforeEach;
@@ -15,7 +13,6 @@ import org.mockito.junit.jupiter.MockitoExtension;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 

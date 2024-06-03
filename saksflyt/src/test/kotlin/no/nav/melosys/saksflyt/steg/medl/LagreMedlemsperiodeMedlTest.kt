@@ -8,14 +8,13 @@ import io.mockk.verify
 import no.nav.melosys.domain.Behandling
 import no.nav.melosys.domain.Behandlingsresultat
 import no.nav.melosys.domain.Medlemskapsperiode
-import no.nav.melosys.domain.folketrygden.MedlemAvFolketrygden
 import no.nav.melosys.domain.kodeverk.InnvilgelsesResultat
 import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingsresultattyper
 import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingstyper
 import no.nav.melosys.saksflytapi.domain.Prosessinstans
 import no.nav.melosys.service.behandling.BehandlingsresultatService
-import no.nav.melosys.service.medl.MedlPeriodeService
 import no.nav.melosys.service.ftrl.medlemskapsperiode.MedlemskapsperiodeService
+import no.nav.melosys.service.medl.MedlPeriodeService
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.extension.ExtendWith
@@ -24,8 +23,10 @@ import org.junit.jupiter.api.extension.ExtendWith
 internal class LagreMedlemsperiodeMedlTest {
     @RelaxedMockK
     private lateinit var medlPeriodeService: MedlPeriodeService
+
     @RelaxedMockK
     private lateinit var behandlingsresultatService: BehandlingsresultatService
+
     @RelaxedMockK
     private lateinit var medlemskapsperiodeService: MedlemskapsperiodeService
 
@@ -120,7 +121,7 @@ internal class LagreMedlemsperiodeMedlTest {
         lagreMedlemsperiodeMedl.utfør(prosessinstans)
 
 
-        verify { medlemskapsperiodeService.erstattMedlemskapsperioder(BEHANDLING_ID,  1L, medlemskapsperioder) }
+        verify { medlemskapsperiodeService.erstattMedlemskapsperioder(BEHANDLING_ID, 1L, medlemskapsperioder) }
     }
 
     @Test
@@ -160,14 +161,12 @@ internal class LagreMedlemsperiodeMedlTest {
     }
 
     private fun lagBehandlingsresultat(medlemskapsperioder: List<Medlemskapsperiode>): Behandlingsresultat {
-        val medlemAvFolketrygden = MedlemAvFolketrygden()
-        medlemAvFolketrygden.medlemskapsperioder = medlemskapsperioder
         val behandling = Behandling()
         behandling.type = Behandlingstyper.FØRSTEGANG
 
         val behandlingsresultat = Behandlingsresultat()
         behandlingsresultat.type = Behandlingsresultattyper.MEDLEM_I_FOLKETRYGDEN
-        behandlingsresultat.medlemAvFolketrygden = medlemAvFolketrygden
+        behandlingsresultat.medlemskapsperioder = medlemskapsperioder
         behandlingsresultat.behandling = behandling
 
         return behandlingsresultat

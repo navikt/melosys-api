@@ -54,7 +54,7 @@ class UtkastBrevServiceTest {
     }
 
     private BrevbestillingUtkast lagBrevbestillingUtkast(String dokumentTittel) {
-        return new BrevbestillingUtkast(Produserbaredokumenter.FRITEKSTBREV, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, false, null, null, null, dokumentTittel, null);
+        return new BrevbestillingUtkast(Produserbaredokumenter.FRITEKSTBREV, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, false, null, null, null, dokumentTittel, null, true);
     }
 
     private UtkastBrev lagUtkastBrev(String dokumentTittel) {

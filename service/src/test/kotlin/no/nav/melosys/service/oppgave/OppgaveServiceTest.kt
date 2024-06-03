@@ -110,7 +110,7 @@ internal class OppgaveServiceTest {
 
         every { saksopplysningerService.finnSedOpplysninger(any()) } returns Optional.empty()
         every { oppgaveFasade.finnÅpneBehandlingsoppgaverMedSaksnummer(FagsakTestFactory.SAKSNUMMER) } returns listOf(oppgave)
-        every { oppgaveFasade.oppdaterOppgave(any(), any()) } answers {}
+        every { oppgaveFasade.oppdaterOppgave(any(), any()) } returns Unit
         every { oppgaveFasade.opprettOppgave(any<Oppgave>()) } returns BEH_OPPG_ID
         every { oppgaveFasade.opprettSensitivOppgave(any<Oppgave>()) } returns BEH_OPPG_ID
         every { persondataFasade.harStrengtFortroligAdresse(any()) } returns false
@@ -407,7 +407,7 @@ internal class OppgaveServiceTest {
             tema = Behandlingstema.UTSENDT_ARBEIDSTAKER
             fagsak = FagsakTestFactory.lagFagsak()
         }
-        every { oppgaveFasade.oppdaterOppgave(any(), any()) } answers {}
+        every { oppgaveFasade.oppdaterOppgave(any(), any()) } returns Unit
 
         oppgaveService.opprettEllerGjenbrukBehandlingsoppgave(behandling, "222", "333", tilordnetRessurs)
 
