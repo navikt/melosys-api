@@ -1,4 +1,4 @@
-package no.nav.melosys.service.kontroll.unntak
+package no.nav.melosys.service.kontroll.feature.anmodningomunntak
 
 import io.kotest.matchers.collections.shouldContainExactly
 import io.mockk.every
@@ -12,20 +12,17 @@ import no.nav.melosys.domain.mottatteopplysninger.data.arbeidssteder.FysiskArbei
 import no.nav.melosys.service.SaksbehandlingDataFactory
 import no.nav.melosys.service.avklartefakta.AvklarteVirksomheterService
 import no.nav.melosys.service.behandling.BehandlingService
-import no.nav.melosys.service.kontroll.feature.unntak.AnmodningUnntakKontrollService
 import no.nav.melosys.service.persondata.PersondataFasade
 import no.nav.melosys.service.persondata.PersonopplysningerObjectFactory
 import no.nav.melosys.service.unntak.AnmodningsperiodeService
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.extension.ExtendWith
-import org.mockito.ArgumentMatchers
-import org.mockito.junit.jupiter.MockitoExtension
 import java.time.LocalDate
 
 
 @ExtendWith(MockKExtension::class)
-internal class AnmodningUnntakKontrollTest {
+internal class AnmodningUnntakKontrollServiceTest {
     @MockK
     private lateinit var anmodningsperiodeService: AnmodningsperiodeService
 
