@@ -9,14 +9,8 @@ data class TrygdeavgiftsgrunnlagDto(
 ) {
 
     constructor(trygdeavgiftsperiode: Set<Trygdeavgiftsperiode>) : this(
-        trygdeavgiftsperiode.map { SkatteforholdTilNorgeDto(it.grunnlagSkatteforholdTilNorge) }
-            .sortedWith(compareBy { it.tomDato })
-            .toList(),
-        trygdeavgiftsperiode
-            .filter { it.grunnlagInntekstperiode != null }
-            .map { InntekskildeDto(it.grunnlagInntekstperiode) }
-            .sortedWith(compareBy { it.tomDato })
-            .toList()
+        trygdeavgiftsperiode.map { SkatteforholdTilNorgeDto(it.grunnlagSkatteforholdTilNorge) }.distinct(),
+        trygdeavgiftsperiode.map { InntekskildeDto(it.grunnlagInntekstperiode) }.distinct()
     )
 
     fun tilRequest(): OppdaterTrygdeavgiftsgrunnlagRequest =
