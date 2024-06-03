@@ -117,10 +117,12 @@ internal class InnvilgelseFtrlYrkesaktivFrivilligMapperTest {
     @Test
     fun mapYrkesaktivFrivillig_harTrygdeavtaleLand_populererFelter() {
         mockHappyCase(Case.paragraf_2_8)
-        every { mockDokgenMapperDatahenter.hentLandnavnFraLandkode(Landkoder.GB.kode) } returns Landkoder.GB.beskrivelse
-        every { mockDokgenMapperDatahenter.hentBehandlingsresultat(ofType()) } returns lagBehandlingsResultat(Case.paragraf_2_8).apply {
+        val behandlingsresultat = lagBehandlingsResultat(Case.paragraf_2_8).apply {
             behandling.mottatteOpplysninger.mottatteOpplysningerData.soeknadsland = Soeknadsland(listOf(Landkoder.GB.kode), false)
         }
+        every { mockDokgenMapperDatahenter.hentLandnavnFraLandkode(Landkoder.GB.kode) } returns Landkoder.GB.beskrivelse
+        every { mockDokgenMapperDatahenter.hentBehandlingsresultat(ofType()) } returns behandlingsresultat
+        every { mockBehandlingsresultatService.hentBehandlingsresultat(ofType()) } returns behandlingsresultat
 
         innvilgelseFtrlMapper.mapYrkesaktivFrivillig(lagBrevbestilling()).apply {
             flereLandUkjentHvilke.shouldBeFalse()
@@ -230,7 +232,7 @@ internal class InnvilgelseFtrlYrkesaktivFrivilligMapperTest {
                     trygdedekning = Trygdedekninger.FTRL_2_9_FØRSTE_LEDD_A_HELSE
                     this.behandlingsresultat = behandlingsresultat
                     bestemmelse = Folketrygdloven_kap2_bestemmelser.FTRL_KAP2_2_8_FØRSTE_LEDD_A
-                    this.trygdeavgiftsperioder= trygdeavgiftsperioder
+                    this.trygdeavgiftsperioder = trygdeavgiftsperioder
                 }
             )
         }
@@ -302,6 +304,7 @@ internal class InnvilgelseFtrlYrkesaktivFrivilligMapperTest {
 
     private fun lagBehandlingsResultat(paragraf: Case): Behandlingsresultat {
         return Behandlingsresultat().apply {
+            id = 1L
             medlemskapsperioder = lagMedlemskapsperioder(this, paragraf)
             vilkaarsresultater = setOf(Vilkaarsresultat().apply {
                 vilkaar = when (paragraf) {
@@ -385,12 +388,14 @@ internal class InnvilgelseFtrlYrkesaktivFrivilligMapperTest {
         }
 
     private fun mockHappyCase(paragraf: Case) {
+        val behandlingsresultat = lagBehandlingsResultat(paragraf)
         every { mockAvklarteVirksomheterService.hentNorskeArbeidsgivere(ofType()) } returns lagAvklarteVirksomheter()
         every { mockAvklarteVirksomheterService.hentUtenlandskeVirksomheter(ofType()) } returns emptyList()
         every { mockAvklarteVirksomheterService.hentNorskeSelvstendigeForetak(ofType()) } returns emptyList()
-        every { mockDokgenMapperDatahenter.hentBehandlingsresultat(ofType()) } returns lagBehandlingsResultat(paragraf)
+        every { mockDokgenMapperDatahenter.hentBehandlingsresultat(ofType()) } returns behandlingsresultat
         every { mockDokgenMapperDatahenter.hentLandnavnFraLandkode(Landkoder.AT.kode) } returns Landkoder.AT.beskrivelse
         every { mockDokgenMapperDatahenter.hentFullmektigNavn(any(), any()) } returns null
+        every { mockBehandlingsresultatService.hentBehandlingsresultat(ofType()) } returns behandlingsresultat
     }
 
     companion object {
