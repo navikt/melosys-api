@@ -18,6 +18,7 @@ object AnmodningUnntakKontrollsett {
         Function { AnmodningUnntakKontroll.anmodningsperiodeManglerSluttdato(it) },
         Function { AnmodningUnntakKontroll.kunEnArbeidsgiver(it) },
         Function { arbeidsstedLandManglerFelter(it.mottatteOpplysningerData) },
-        Function { foretakUtlandManglerFelter(it.mottatteOpplysningerData) }
+        Function { foretakUtlandManglerFelter(it.mottatteOpplysningerData) },
+        Function { AnmodningUnntakKontroll.storbritanniaKonvensjonBruktForTidlig(it) }
     )
 }

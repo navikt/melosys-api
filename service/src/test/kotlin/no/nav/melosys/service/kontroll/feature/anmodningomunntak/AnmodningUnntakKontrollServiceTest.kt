@@ -6,6 +6,7 @@ import io.mockk.impl.annotations.MockK
 import io.mockk.junit5.MockKExtension
 import no.nav.melosys.domain.Anmodningsperiode
 import no.nav.melosys.domain.kodeverk.begrunnelser.Kontroll_begrunnelser
+import no.nav.melosys.domain.kodeverk.lovvalgsbestemmelser.Lovvalgbestemmelser_konv_efta_storbritannia
 import no.nav.melosys.domain.mottatteopplysninger.MottatteOpplysningerData
 import no.nav.melosys.domain.mottatteopplysninger.data.ForetakUtland
 import no.nav.melosys.domain.mottatteopplysninger.data.arbeidssteder.FysiskArbeidssted
@@ -115,5 +116,17 @@ internal class AnmodningUnntakKontrollServiceTest {
 
         resultat.map { it.kode }
             .shouldContainExactly(Kontroll_begrunnelser.IKKE_KUN_EN_VIRKSOMHET)
+    }
+
+    @Test
+    fun utførKontroller_storbritanniaBestemmelseBruktFørJanuar2024_returnererKode() {
+        every { behandlingService.hentBehandlingMedSaksopplysninger(behandlingID) } returns SaksbehandlingDataFactory.lagBehandling()
+        anmodningsperiode.bestemmelse = Lovvalgbestemmelser_konv_efta_storbritannia.KONV_EFTA_STORBRITANNIA_ART18_1
+        anmodningsperiode.fom = LocalDate.parse("2023-12-31")
+
+        val resultat = anmodningUnntakKontrollService.utførKontroller(behandlingID)
+
+        resultat.map { it.kode }
+            .shouldContainExactly(Kontroll_begrunnelser.STORBRITANNIA_KONV_BRUKT_FOR_TIDLIG)
     }
 }
