@@ -1,12 +1,7 @@
 package no.nav.melosys.service.dokument.sed;
 
-import java.time.LocalDate;
-import java.util.*;
-import java.util.function.Function;
-import java.util.stream.Collectors;
-import jakarta.annotation.Nullable;
-
 import io.getunleash.Unleash;
+import jakarta.annotation.Nullable;
 import no.nav.melosys.domain.Behandling;
 import no.nav.melosys.domain.Behandlingsresultat;
 import no.nav.melosys.domain.Fagsak;
@@ -23,9 +18,11 @@ import no.nav.melosys.domain.eessi.sed.UtpekingAvvisDto;
 import no.nav.melosys.domain.kodeverk.Anmodningsperiodesvartyper;
 import no.nav.melosys.domain.kodeverk.Land_iso2;
 import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingstema;
+import no.nav.melosys.domain.kodeverk.lovvalgsbestemmelser.Lovvalgbestemmelser_konv_efta_storbritannia;
 import no.nav.melosys.domain.mottatteopplysninger.SedGrunnlag;
 import no.nav.melosys.exception.FunksjonellException;
 import no.nav.melosys.exception.IkkeFunnetException;
+import no.nav.melosys.featuretoggle.ToggleName;
 import no.nav.melosys.integrasjon.eessi.EessiConsumer;
 import no.nav.melosys.integrasjon.eessi.dto.OpprettSedDto;
 import no.nav.melosys.integrasjon.eessi.dto.SaksrelasjonDto;
@@ -43,6 +40,11 @@ import org.springframework.context.annotation.Primary;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.util.CollectionUtils;
+
+import java.time.LocalDate;
+import java.util.*;
+import java.util.function.Function;
+import java.util.stream.Collectors;
 
 import static java.util.function.Predicate.not;
 
@@ -104,10 +106,11 @@ public class EessiService {
         Fagsak fagsak = behandling.getFagsak();
 
         SedDataGrunnlag datagrunnlag = dataGrunnlagFactory.av(behandling);
-        SedDataDto sedData = sedDataBygger.lag(datagrunnlag, behandlingsresultat, PeriodeType.fraBucType(bucType, behandlingsresultat));
+        PeriodeType periodeType = PeriodeType.fraBucType(bucType, behandlingsresultat);
+        SedDataDto sedData = sedDataBygger.lag(datagrunnlag, behandlingsresultat, periodeType);
         sedData.setMottakerIder(mottakerInstitusjoner);
         sedData.setGsakSaksnummer(fagsak.getGsakSaksnummer());
-        sedData.setYtterligereInformasjon(ytterligereInformasjon);
+        sedData.setYtterligereInformasjon(mapYtterligereInformasjon(ytterligereInformasjon, periodeType, behandlingsresultat));
 
         log.info("Oppretter buc og sed for fagsak {}", fagsak.getSaksnummer());
         OpprettSedDto opprettSedDto = eessiConsumer.opprettBucOgSed(
@@ -272,10 +275,19 @@ public class EessiService {
         SedDataDto sedDataDto = sedDataBygger.lagUtkast(dataGrunnlag, behandlingsresultat, periodeType);
 
         if (sedPdfData != null) {
+            sedPdfData.setFritekst(mapYtterligereInformasjon(sedPdfData.getFritekst(), periodeType, behandlingsresultat));
             sedPdfData.utfyllSedDataDto(sedDataDto);
         }
         log.info("Henter pdf for sed med type {} for behandling {}", sedType, behandlingID);
         return eessiConsumer.genererSedPdf(sedDataDto, sedType);
+    }
+
+    private String mapYtterligereInformasjon(String fritekst, PeriodeType periodeType, Behandlingsresultat behandlingsresultat) {
+        if (unleash.isEnabled(ToggleName.MELOSYS_KONVENSJON_EFTA_LAND_OG_STORBRITANNIA) && periodeType == PeriodeType.ANMODNINGSPERIODE && behandlingsresultat.hentAnmodningsperiode().getBestemmelse() == Lovvalgbestemmelser_konv_efta_storbritannia.KONV_EFTA_STORBRITANNIA_ART18_1) {
+            var tekstGBKonv = "Issued under the EEA EFTA Convention.";
+            return fritekst == null ? tekstGBKonv : tekstGBKonv + "\n" + fritekst;
+        }
+        return fritekst;
     }
 
     public void opprettJournalpostForTidligereSed(String rinaSaksnummer) {
@@ -358,7 +370,7 @@ public class EessiService {
             }
         }
 
-        if (feilmelding.length() != 0) {
+        if (!feilmelding.isEmpty()) {
             throw new FunksjonellException(feilmelding.toString());
         } else if (valgteMottakerinstitusjoner.size() != validerteMottakerinstitusjoner.size()) {
             throw new FunksjonellException("Kan kun velge en mottakerinstitusjon per land. Validerte mottakere: " + validerteMottakerinstitusjoner
@@ -373,6 +385,7 @@ public class EessiService {
     public void lukkBuc(String rinaSaksnummer) {
         eessiConsumer.lukkBuc(rinaSaksnummer);
     }
+
     private void sendInvalideringSed(long behandlingID, String sedTypeSomSkalInvalideres, LocalDate opprettetDato) {
         var behandling = behandlingService.hentBehandlingMedSaksopplysninger(behandlingID);
         var behandlingsresultat = behandlingsresultatService.hentBehandlingsresultat(behandling.getId());

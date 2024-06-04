@@ -27,8 +27,7 @@ public class BehandlingsresultatService {
     private final BehandlingsresultatRepository behandlingsresultatRepository;
     private final VilkaarsresultatService vilkaarsresultatService;
 
-    public BehandlingsresultatService(BehandlingsresultatRepository behandlingsresultatRepository,
-                                      VilkaarsresultatService vilkaarsresultatService) {
+    public BehandlingsresultatService(BehandlingsresultatRepository behandlingsresultatRepository, VilkaarsresultatService vilkaarsresultatService) {
         this.behandlingsresultatRepository = behandlingsresultatRepository;
         this.vilkaarsresultatService = vilkaarsresultatService;
     }

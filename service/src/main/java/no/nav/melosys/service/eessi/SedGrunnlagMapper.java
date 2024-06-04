@@ -1,20 +1,20 @@
 package no.nav.melosys.service.eessi;
 
-import java.util.List;
-import java.util.stream.Stream;
-
 import io.getunleash.Unleash;
+import no.nav.melosys.domain.eessi.sed.*;
+import no.nav.melosys.domain.kodeverk.lovvalgsbestemmelser.Overgangsregelbestemmelser;
 import no.nav.melosys.domain.mottatteopplysninger.SedGrunnlag;
 import no.nav.melosys.domain.mottatteopplysninger.data.ForetakUtland;
 import no.nav.melosys.domain.mottatteopplysninger.data.OpplysningerOmBrukeren;
 import no.nav.melosys.domain.mottatteopplysninger.data.Periode;
 import no.nav.melosys.domain.mottatteopplysninger.data.UtenlandskIdent;
 import no.nav.melosys.domain.mottatteopplysninger.data.arbeidssteder.FysiskArbeidssted;
-import no.nav.melosys.domain.eessi.sed.*;
-import no.nav.melosys.domain.kodeverk.lovvalgsbestemmelser.Overgangsregelbestemmelser;
 import no.nav.melosys.exception.FunksjonellException;
 import no.nav.melosys.featuretoggle.ToggleName;
 import org.springframework.util.CollectionUtils;
+
+import java.util.List;
+import java.util.stream.Stream;
 
 public class SedGrunnlagMapper {
 
@@ -27,7 +27,7 @@ public class SedGrunnlagMapper {
 
         sedGrunnlag.personOpplysninger = tilPersonopplysninger(sedGrunnlagDto.getUtenlandskIdent());
         var arbeidsland = sedGrunnlagDto.getArbeidsland();
-        if(unleash.isEnabled(ToggleName.MELOSYS_CDM_4_3) && !arbeidsland.isEmpty()) {
+        if (unleash.isEnabled(ToggleName.MELOSYS_CDM_4_3) && !arbeidsland.isEmpty()) {
             sedGrunnlag.arbeidPaaLand.setFysiskeArbeidssteder(tilFysiskeArbeidssteder4_3(sedGrunnlagDto.getArbeidsland()));
         } else {
             sedGrunnlag.arbeidPaaLand.setFysiskeArbeidssteder(tilFysiskeArbeidssteder(sedGrunnlagDto.getArbeidssteder()));
@@ -35,7 +35,7 @@ public class SedGrunnlagMapper {
         sedGrunnlag.foretakUtland = tilForetakUtland(sedGrunnlagDto.getArbeidsgivendeVirksomheter(), sedGrunnlagDto.getSelvstendigeVirksomheter());
         sedGrunnlag.periode = tilPeriode(sedGrunnlagDto.getLovvalgsperioder());
         sedGrunnlag.setYtterligereInformasjon(sedGrunnlagDto.getYtterligereInformasjon());
-        if(!sedGrunnlagDto.erA001()) {
+        if (!sedGrunnlagDto.erA001()) {
             sedGrunnlag.soeknadsland.setLandkoder(sedGrunnlagDto.getLovvalgsperioder().stream().map(Lovvalgsperiode::getLovvalgsland).toList());
         }
 
