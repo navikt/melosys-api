@@ -5,11 +5,12 @@ import java.util.Objects;
 import java.util.Set;
 
 import jakarta.persistence.*;
+import no.nav.melosys.domain.ErPeriode;
 import no.nav.melosys.domain.kodeverk.Inntektskildetype;
 
 @Entity
 @Table(name = "inntektsperiode")
-public class Inntektsperiode {
+public class Inntektsperiode implements ErPeriode {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -112,5 +113,15 @@ public class Inntektsperiode {
 
     public Set<Trygdeavgiftsperiode> getTrygdeavgiftsperioder() {
         return trygdeavgiftsperioder;
+    }
+
+    @Override
+    public LocalDate getFom() {
+        return getFomDato();
+    }
+
+    @Override
+    public LocalDate getTom() {
+        return getTomDato();
     }
 }

@@ -5,11 +5,12 @@ import java.time.LocalDate;
 import java.util.Objects;
 
 import jakarta.persistence.*;
+import no.nav.melosys.domain.ErPeriode;
 import no.nav.melosys.domain.Medlemskapsperiode;
 
 @Entity
 @Table(name = "trygdeavgiftsperiode")
-public class Trygdeavgiftsperiode {
+public class Trygdeavgiftsperiode implements ErPeriode {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -112,12 +113,32 @@ public class Trygdeavgiftsperiode {
         if (this == o) return true;
         if (o == null || getClass() != o.getClass()) return false;
         Trygdeavgiftsperiode that = (Trygdeavgiftsperiode) o;
-        return Objects.equals(id, that.id) && Objects.equals(periodeFra, that.periodeFra) && Objects.equals(periodeTil, that.periodeTil) && Objects.equals(trygdeavgiftsbeløpMd, that.trygdeavgiftsbeløpMd) && Objects.equals(trygdesats, that.trygdesats) && Objects.equals(grunnlagInntekstperiode, that.grunnlagInntekstperiode) && Objects.equals(grunnlagMedlemskapsperiode, that.grunnlagMedlemskapsperiode) && Objects.equals(grunnlagSkatteforholdTilNorge, that.grunnlagSkatteforholdTilNorge);
+        return Objects.equals(periodeFra, that.periodeFra) && Objects.equals(periodeTil, that.periodeTil) && Objects.equals(trygdeavgiftsbeløpMd, that.trygdeavgiftsbeløpMd) && Objects.equals(trygdesats, that.trygdesats) && Objects.equals(grunnlagInntekstperiode, that.grunnlagInntekstperiode) && Objects.equals(grunnlagMedlemskapsperiode, that.grunnlagMedlemskapsperiode) && Objects.equals(grunnlagSkatteforholdTilNorge, that.grunnlagSkatteforholdTilNorge);
     }
 
     @Override
     public int hashCode() {
-        return Objects.hash(id, periodeFra, periodeTil, trygdeavgiftsbeløpMd, trygdesats, grunnlagInntekstperiode, grunnlagMedlemskapsperiode, grunnlagSkatteforholdTilNorge);
+        return Objects.hash(periodeFra, periodeTil, trygdeavgiftsbeløpMd, trygdesats, grunnlagInntekstperiode, grunnlagMedlemskapsperiode, grunnlagSkatteforholdTilNorge);
     }
 
+    @Override
+    public String toString() {
+        return "Trygdeavgiftsperiode{" +
+            "id=" + id +
+            ", periodeFra=" + periodeFra +
+            ", periodeTil=" + periodeTil +
+            ", trygdeavgiftsbeløpMd=" + trygdeavgiftsbeløpMd +
+            ", trygdesats=" + trygdesats +
+            '}';
+    }
+
+    @Override
+    public LocalDate getFom() {
+        return getPeriodeFra();
+    }
+
+    @Override
+    public LocalDate getTom() {
+        return getPeriodeTil();
+    }
 }
