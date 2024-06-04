@@ -6,7 +6,6 @@ import java.util.Objects;
 
 import jakarta.persistence.*;
 import no.nav.melosys.domain.Medlemskapsperiode;
-import no.nav.melosys.domain.folketrygden.FastsattTrygdeavgift;
 
 @Entity
 @Table(name = "trygdeavgiftsperiode")
@@ -15,10 +14,6 @@ public class Trygdeavgiftsperiode {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
-
-    @ManyToOne(optional = false, fetch = FetchType.EAGER)
-    @JoinColumn(name = "fastsatt_trygdeavgift_id")
-    private FastsattTrygdeavgift fastsattTrygdeavgift;
 
     @Column(name = "periode_fra", nullable = false)
     private LocalDate periodeFra;
@@ -50,14 +45,6 @@ public class Trygdeavgiftsperiode {
 
     public void setId(Long id) {
         this.id = id;
-    }
-
-    public FastsattTrygdeavgift getFastsattTrygdeavgift() {
-        return fastsattTrygdeavgift;
-    }
-
-    public void setFastsattTrygdeavgift(FastsattTrygdeavgift fastsattTrygdeavgift) {
-        this.fastsattTrygdeavgift = fastsattTrygdeavgift;
     }
 
     public LocalDate getPeriodeFra() {
@@ -125,11 +112,12 @@ public class Trygdeavgiftsperiode {
         if (this == o) return true;
         if (o == null || getClass() != o.getClass()) return false;
         Trygdeavgiftsperiode that = (Trygdeavgiftsperiode) o;
-        return Objects.equals(id, that.id) && Objects.equals(fastsattTrygdeavgift, that.fastsattTrygdeavgift) && Objects.equals(periodeFra, that.periodeFra) && Objects.equals(periodeTil, that.periodeTil) && Objects.equals(trygdeavgiftsbeløpMd, that.trygdeavgiftsbeløpMd) && Objects.equals(trygdesats, that.trygdesats) && Objects.equals(grunnlagInntekstperiode, that.grunnlagInntekstperiode) && Objects.equals(grunnlagMedlemskapsperiode, that.grunnlagMedlemskapsperiode) && Objects.equals(grunnlagSkatteforholdTilNorge, that.grunnlagSkatteforholdTilNorge);
+        return Objects.equals(id, that.id) && Objects.equals(periodeFra, that.periodeFra) && Objects.equals(periodeTil, that.periodeTil) && Objects.equals(trygdeavgiftsbeløpMd, that.trygdeavgiftsbeløpMd) && Objects.equals(trygdesats, that.trygdesats) && Objects.equals(grunnlagInntekstperiode, that.grunnlagInntekstperiode) && Objects.equals(grunnlagMedlemskapsperiode, that.grunnlagMedlemskapsperiode) && Objects.equals(grunnlagSkatteforholdTilNorge, that.grunnlagSkatteforholdTilNorge);
     }
 
     @Override
     public int hashCode() {
-        return Objects.hash(id, fastsattTrygdeavgift, periodeFra, periodeTil, trygdeavgiftsbeløpMd, trygdesats, grunnlagInntekstperiode, grunnlagMedlemskapsperiode, grunnlagSkatteforholdTilNorge);
+        return Objects.hash(id, periodeFra, periodeTil, trygdeavgiftsbeløpMd, trygdesats, grunnlagInntekstperiode, grunnlagMedlemskapsperiode, grunnlagSkatteforholdTilNorge);
     }
+
 }

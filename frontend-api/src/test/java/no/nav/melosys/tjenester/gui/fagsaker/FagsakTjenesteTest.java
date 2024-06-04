@@ -11,7 +11,6 @@ import no.nav.melosys.domain.dokument.inntekt.tillegsinfo.TilleggsinformasjonDet
 import no.nav.melosys.domain.dokument.person.adresse.MidlertidigPostadresse;
 import no.nav.melosys.domain.dokument.person.adresse.MidlertidigPostadresseNorge;
 import no.nav.melosys.domain.dokument.person.adresse.MidlertidigPostadresseUtland;
-import no.nav.melosys.domain.folketrygden.MedlemAvFolketrygden;
 import no.nav.melosys.domain.kodeverk.*;
 import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingsresultattyper;
 import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingsstatus;
@@ -21,7 +20,6 @@ import no.nav.melosys.domain.kodeverk.lovvalgsbestemmelser.Lovvalgbestemmelser_8
 import no.nav.melosys.domain.kodeverk.lovvalgsbestemmelser.Tilleggsbestemmelser_883_2004;
 import no.nav.melosys.domain.mottatteopplysninger.MottatteOpplysninger;
 import no.nav.melosys.domain.mottatteopplysninger.Soeknad;
-import no.nav.melosys.service.MedlemAvFolketrygdenService;
 import no.nav.melosys.service.behandling.BehandlingsresultatService;
 import no.nav.melosys.service.mottatteopplysninger.MottatteOpplysningerService;
 import no.nav.melosys.service.persondata.PersondataFasade;
@@ -92,8 +90,6 @@ class FagsakTjenesteTest {
     @MockBean
     @SuppressWarnings("unused")
     private static OpprettBehandlingForSak opprettBehandlingForSak;
-    @MockBean
-    private static MedlemAvFolketrygdenService medlemAvFolketrygdenService;
     @MockBean
     private static FerdigbehandleSakService ferdigbehandleSakService;
 
@@ -218,7 +214,8 @@ class FagsakTjenesteTest {
             .andExpect(jsonPath("$[0].behandlingOversikter[0].soknadsperiode.tom", equalTo("2019-02-01")))
             .andExpect(jsonPath("$[0].behandlingOversikter[0].lovvalgsperiode.fom", equalTo(FORVENTET_LOVVALGSPERIODE.periode.getFom().toString())))
             .andExpect(jsonPath("$[0].behandlingOversikter[0].lovvalgsperiode.tom", equalTo(FORVENTET_LOVVALGSPERIODE.periode.getTom().toString())))
-            .andExpect(jsonPath("$[0].behandlingOversikter[0].medlemskapsperiode", equalTo(null)));
+            .andExpect(jsonPath("$[0].behandlingOversikter[0].medlemskapsperiode.fom", equalTo(null))) //TODO: Her burde vi kanskje returnere null på medlemskapsperiode?
+            .andExpect(jsonPath("$[0].behandlingOversikter[0].medlemskapsperiode.tom", equalTo(null))); //TODO: Her burde vi kanskje returnere null på medlemskapsperiode?
     }
 
     @Test
@@ -231,12 +228,11 @@ class FagsakTjenesteTest {
         behandling.setId(behandlingID);
         fagsak.leggTilBehandling(behandling);
         var behandlingsresultat = new Behandlingsresultat();
-        behandlingsresultat.setMedlemAvFolketrygden(new MedlemAvFolketrygden());
         var medlemskapsperiode = new Medlemskapsperiode();
         medlemskapsperiode.setFom(FOM);
         medlemskapsperiode.setTom(TOM);
         medlemskapsperiode.setInnvilgelsesresultat(InnvilgelsesResultat.INNVILGET);
-        behandlingsresultat.getMedlemAvFolketrygden().setMedlemskapsperioder(List.of(medlemskapsperiode));
+        behandlingsresultat.setMedlemskapsperioder(List.of(medlemskapsperiode));
         mockFagsakTjeneste(fagsak, behandlingsresultat);
 
         var fagsakSokDto = new FagsakSokDto(BRUKER_AKTØR_ID, null, null);
@@ -368,7 +364,6 @@ class FagsakTjenesteTest {
         when(behandlingsresultatService.hentBehandlingsresultat(anyLong())).thenReturn(behandlingsresultat);
         when(behandlingsresultatService.hentBehandlingsresultatMedLovvalgsperioder(anyLong())).thenReturn(behandlingsresultat);
         when(mottatteOpplysningerService.finnMottatteOpplysninger(fagsak.getBehandlinger().get(0).getId())).thenReturn(Optional.of(mottatteOpplysninger));
-        when(medlemAvFolketrygdenService.finnMedlemAvFolketrygdenMedMedlemskapsperioder(anyLong())).thenReturn(Optional.ofNullable(behandlingsresultat.getMedlemAvFolketrygden()));
         when(fagsakService.hentFagsak(SAKSNUMMER)).thenReturn(fagsak);
         when(persondataFasade.hentSammensattNavn(any())).thenReturn("Joe Moe");
         doReturn(List.of(fagsak)).when(fagsakService).hentFagsakerMedAktør(Aktoersroller.BRUKER, BRUKER_AKTØR_ID);

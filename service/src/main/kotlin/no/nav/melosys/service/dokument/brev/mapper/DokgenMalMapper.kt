@@ -195,8 +195,8 @@ class DokgenMalMapper(
                 brevbestilling as VarselbrevManglendeInnbetalingBrevbestilling,
                 brevbestilling.behandling.id.let {
                     val behandlingsresultat = dokgenMapperDatahenter.hentBehandlingsresultat(it)
-                    behandlingsresultat.medlemAvFolketrygden?.medlemskapsperioder?.firstOrNull()?.medlemskapstype
-                } ?: throw FunksjonellException("Forventer at behandling som tilhører varselbrevet har medlemskapsperioder"),
+                    behandlingsresultat.medlemskapsperioder.firstOrNull()?.medlemskapstype
+                } ?: throw FunksjonellException("Forventer at behandling som tilhører varselbrevet har en opprinnelig behandling med medlemskapsperioder"),
                 dokgenMapperDatahenter.hentFullmektigNavn(brevbestilling, Fullmaktstype.FULLMEKTIG_SØKNAD)
             )
 

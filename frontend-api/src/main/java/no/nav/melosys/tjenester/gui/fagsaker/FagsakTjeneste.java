@@ -1,5 +1,10 @@
 package no.nav.melosys.tjenester.gui.fagsaker;
 
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.List;
+import java.util.Optional;
+
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
 import no.nav.melosys.domain.Behandling;
@@ -7,7 +12,6 @@ import no.nav.melosys.domain.Behandlingsresultat;
 import no.nav.melosys.domain.Fagsak;
 import no.nav.melosys.domain.kodeverk.Aktoersroller;
 import no.nav.melosys.exception.FunksjonellException;
-import no.nav.melosys.service.MedlemAvFolketrygdenService;
 import no.nav.melosys.service.behandling.BehandlingsresultatService;
 import no.nav.melosys.service.mottatteopplysninger.MottatteOpplysningerService;
 import no.nav.melosys.service.persondata.PersondataFasade;
@@ -26,11 +30,6 @@ import org.springframework.context.annotation.Scope;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.context.WebApplicationContext;
-
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.List;
-import java.util.Optional;
 
 import static no.nav.melosys.domain.util.MottatteOpplysningerUtils.hentLand;
 import static no.nav.melosys.domain.util.MottatteOpplysningerUtils.hentPeriode;
@@ -55,7 +54,6 @@ public class FagsakTjeneste {
     private final OrganisasjonOppslagService organisasjonOppslagService;
     private final OpprettBehandlingForSak opprettBehandlingForSak;
     private final FerdigbehandleSakService ferdigbehandleSakService;
-    private final MedlemAvFolketrygdenService medlemAvFolketrygdenService;
 
     public FagsakTjeneste(FagsakService fagsakService,
                           Aksesskontroll aksesskontroll,
@@ -67,8 +65,7 @@ public class FagsakTjeneste {
                           SaksopplysningerService saksopplysningerService,
                           OrganisasjonOppslagService organisasjonOppslagService,
                           OpprettBehandlingForSak opprettBehandlingForSak,
-                          FerdigbehandleSakService ferdigbehandleSakService,
-                          MedlemAvFolketrygdenService medlemAvFolketrygdenService) {
+                          FerdigbehandleSakService ferdigbehandleSakService) {
         this.fagsakService = fagsakService;
         this.aksesskontroll = aksesskontroll;
         this.mottatteOpplysningerService = mottatteOpplysningerService;
@@ -80,7 +77,6 @@ public class FagsakTjeneste {
         this.organisasjonOppslagService = organisasjonOppslagService;
         this.opprettBehandlingForSak = opprettBehandlingForSak;
         this.ferdigbehandleSakService = ferdigbehandleSakService;
-        this.medlemAvFolketrygdenService = medlemAvFolketrygdenService;
     }
 
     @GetMapping("/{saksnr}")
@@ -256,14 +252,10 @@ public class FagsakTjeneste {
             behandlingOversiktDto.setLovvalgsperiode(periode);
         });
 
-        var medlemAvFolketrygden = medlemAvFolketrygdenService.finnMedlemAvFolketrygdenMedMedlemskapsperioder(behandling.getId());
-
-        if (medlemAvFolketrygden.isPresent()) {
-            var periode = new PeriodeDto(
-                medlemAvFolketrygden.get().utledMedlemskapsperiodeFom(),
-                medlemAvFolketrygden.get().utledMedlemskapsperiodeTom());
-            behandlingOversiktDto.setMedlemskapsperiode(periode);
-        }
+        var periode = new PeriodeDto(
+            behandlingsResultat.utledMedlemskapsperiodeFom(),
+            behandlingsResultat.utledMedlemskapsperiodeTom());
+        behandlingOversiktDto.setMedlemskapsperiode(periode);
     }
 
     private String hentNavn(List<Behandling> behandlinger) {

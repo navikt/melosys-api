@@ -2,8 +2,8 @@
 
 package no.nav.melosys.service.avgift
 
+import no.nav.melosys.domain.Behandlingsresultat
 import no.nav.melosys.domain.Medlemskapsperiode
-import no.nav.melosys.domain.folketrygden.MedlemAvFolketrygden
 import no.nav.melosys.domain.kodeverk.Skatteplikttype
 import no.nav.melosys.exception.FunksjonellException
 import no.nav.melosys.service.avgift.dto.InntektskildeRequest
@@ -17,28 +17,25 @@ import java.time.DateTimeException
 class TrygdeavgiftValideringService() {
 
     companion object {
-        fun validerTrygdeavgiftberegningRequest(request: OppdaterTrygdeavgiftsgrunnlagRequest, medlemAvFolketrygden: MedlemAvFolketrygden) {
-            validerMedlemskapsperioder(medlemAvFolketrygden)
-            validerAtFastsattTrygdeavgiftFinnes(medlemAvFolketrygden)
-            validerTrygdeavgiftsgrunnlag(request, medlemAvFolketrygden)
+        fun validerTrygdeavgiftberegningRequest(request: OppdaterTrygdeavgiftsgrunnlagRequest, behandlingsresultat: Behandlingsresultat) {
+            validerMedlemskapsperioder(behandlingsresultat)
+            validerTrygdeavgiftsgrunnlag(request, behandlingsresultat)
         }
 
-        private fun validerMedlemskapsperioder(medlemAvFolketrygden: MedlemAvFolketrygden) {
-            if (medlemAvFolketrygden.medlemskapsperioder.isEmpty()) {
+        fun erAllePerioderSkattepliktige(request: OppdaterTrygdeavgiftsgrunnlagRequest): Boolean {
+            return request.skatteforholdTilNorgeList.all { it.skatteplikttype == Skatteplikttype.SKATTEPLIKTIG }
+        }
+
+        private fun validerMedlemskapsperioder(behandlingsresultat: Behandlingsresultat) {
+            if (behandlingsresultat.medlemskapsperioder.isEmpty()) {
                 throw FunksjonellException("Kan ikke beregne trygdeavgift uten medlemskapsperioder")
             }
-            medlemAvFolketrygden.utledMedlemskapsperiodeFom()
+            behandlingsresultat.utledMedlemskapsperiodeFom()
                 ?: throw FunksjonellException("Klarte ikke finne startdatoen på medlemskapet")
         }
 
-        private fun validerAtFastsattTrygdeavgiftFinnes(medlemAvFolketrygden: MedlemAvFolketrygden) {
-            if (medlemAvFolketrygden.fastsattTrygdeavgift == null) {
-                throw FunksjonellException("Kan ikke beregne trygdeavgift uten fastsattTrygdeavgift")
-            }
-        }
-
-        private fun validerTrygdeavgiftsgrunnlag(request: OppdaterTrygdeavgiftsgrunnlagRequest, medlemAvFolketrygden: MedlemAvFolketrygden) {
-            if (request.inntektskilder.isEmpty()) {
+        private fun validerTrygdeavgiftsgrunnlag(request: OppdaterTrygdeavgiftsgrunnlagRequest, behandlingsresultat: Behandlingsresultat) {
+            if (request.inntektskilder.isEmpty() && !erAllePerioderSkattepliktige(request)) {
                 throw FunksjonellException("Kan ikke beregne trygdeavgift uten inntektsperioder")
             }
             if (request.skatteforholdTilNorgeList.isEmpty()) {
@@ -46,24 +43,17 @@ class TrygdeavgiftValideringService() {
             }
 
             val erSkattepliktigIHelePerioden = request.skatteforholdTilNorgeList.all { it.skatteplikttype == Skatteplikttype.SKATTEPLIKTIG }
-            val medlemskapsperioderErÅpen = medlemAvFolketrygden.utledMedlemskapsperiodeTom() == null
+
+            val medlemskapsperioderErÅpen = behandlingsresultat.utledMedlemskapsperiodeTom() == null
             if (medlemskapsperioderErÅpen) {
-                val skatteforholdsperiodeErÅpen = request.skatteforholdTilNorgeList.sortedBy { it.fomDato }.last().tomDato == null
-
-                if (erSkattepliktigIHelePerioden && !skatteforholdsperiodeErÅpen) {
-                    throw FunksjonellException("Skatteforholdsperiode/inntektsperiode kan ikke ha sluttdato når medlemskapsperiode ikke har sluttdato")
-                }
-
-                if (!erSkattepliktigIHelePerioden) {
-                    throw FunksjonellException("Faktura kan ikke opprettes for medlemskapsperiode uten sluttdato. Angi sluttdato på medlemskapsperiode")
-                }
-
-                if (request.skatteforholdTilNorgeList.size == 1) {
-                    return
-                }
+                throw FunksjonellException("Skatteforholdsperiode/inntektsperiode kan ikke ha sluttdato når medlemskapsperiode ikke har sluttdato")
             }
 
-            val innvilgedeMedlemskapsperioder = medlemAvFolketrygden.medlemskapsperioder.filter { it.erInnvilget() }
+            if (request.skatteforholdTilNorgeList.size > 1 && request.skatteforholdTilNorgeList.groupBy { it.skatteplikttype }.size == 1) {
+                throw FunksjonellException("Alle skatteforholdsperiodene har samme svar på spørsmålet om skatteplikt")
+            }
+
+            val innvilgedeMedlemskapsperioder = behandlingsresultat.medlemskapsperioder.filter { it.erInnvilget() }
 
             validerAtSkatteforholdTilNorgeDekkerInnvilgedeMedlemskapsperioderOgOverlapperIkke(
                 request.skatteforholdTilNorgeList,
@@ -86,7 +76,7 @@ class TrygdeavgiftValideringService() {
             innvilgedeMedlemskapsperioder: List<Medlemskapsperiode>
         ) {
             val inntektsperiodeDateRange = inntektsperioder.sortedBy { it.fomDato }
-                .map { inntektsperiode -> LocalDateRange.of(inntektsperiode.fomDato, inntektsperiode.tomDato) }
+                .map { inntektsperiode -> LocalDateRange.ofClosed(inntektsperiode.fomDato, inntektsperiode.tomDato) }
 
             var samletInntektsperiodeDateRange: LocalDateRange? = null
             try {
@@ -102,7 +92,7 @@ class TrygdeavgiftValideringService() {
             }
 
             val sortertMedlemskapsperiode = innvilgedeMedlemskapsperioder.sortedBy { it.fom }
-            if (LocalDateRange.of(
+            if (LocalDateRange.ofClosed(
                     sortertMedlemskapsperiode.first().fom,
                     sortertMedlemskapsperiode.last().tom
                 ) != samletInntektsperiodeDateRange

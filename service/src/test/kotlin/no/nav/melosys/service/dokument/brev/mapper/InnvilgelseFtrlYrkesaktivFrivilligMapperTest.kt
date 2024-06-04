@@ -20,8 +20,6 @@ import no.nav.melosys.domain.avgift.SkatteforholdTilNorge
 import no.nav.melosys.domain.avgift.Trygdeavgiftsperiode
 import no.nav.melosys.domain.avklartefakta.AvklartVirksomhet
 import no.nav.melosys.domain.brev.InnvilgelseFtrlYrkesaktivFrivilligBrevbestilling
-import no.nav.melosys.domain.folketrygden.FastsattTrygdeavgift
-import no.nav.melosys.domain.folketrygden.MedlemAvFolketrygden
 import no.nav.melosys.domain.kodeverk.*
 import no.nav.melosys.domain.kodeverk.begrunnelser.folketrygdloven.Ftrl_2_7_begrunnelser
 import no.nav.melosys.domain.kodeverk.begrunnelser.folketrygdloven.Ftrl_2_8_naer_tilknytning_norge_begrunnelser
@@ -32,6 +30,7 @@ import no.nav.melosys.integrasjon.dokgen.dto.felles.SaksinfoBruker
 import no.nav.melosys.service.avgift.TrygdeavgiftMottakerService
 import no.nav.melosys.service.avgift.TrygdeavgiftsberegningService
 import no.nav.melosys.service.avklartefakta.AvklarteVirksomheterService
+import no.nav.melosys.service.behandling.BehandlingsresultatService
 import no.nav.melosys.service.dokument.DokgenTestData
 import no.nav.melosys.service.dokument.brev.BrevDataTestUtils
 import org.junit.jupiter.api.BeforeEach
@@ -52,15 +51,18 @@ internal class InnvilgelseFtrlYrkesaktivFrivilligMapperTest {
     private lateinit var mockDokgenMapperDatahenter: DokgenMapperDatahenter
 
     @MockK
+    private lateinit var mockBehandlingsresultatService: BehandlingsresultatService
+
+    @MockK
     private lateinit var trygdeavgiftsberegningService: TrygdeavgiftsberegningService
 
-    private var trygdeavgiftMottakerService: TrygdeavgiftMottakerService = TrygdeavgiftMottakerService()
+    private lateinit var trygdeavgiftMottakerService: TrygdeavgiftMottakerService
 
     private lateinit var innvilgelseFtrlMapper: InnvilgelseFtrlMapper
 
     @BeforeEach
     fun setup() {
-        trygdeavgiftMottakerService = TrygdeavgiftMottakerService()
+        trygdeavgiftMottakerService = TrygdeavgiftMottakerService(mockBehandlingsresultatService)
         innvilgelseFtrlMapper = InnvilgelseFtrlMapper(
             mockAvklarteVirksomheterService,
             mockDokgenMapperDatahenter,
@@ -115,10 +117,12 @@ internal class InnvilgelseFtrlYrkesaktivFrivilligMapperTest {
     @Test
     fun mapYrkesaktivFrivillig_harTrygdeavtaleLand_populererFelter() {
         mockHappyCase(Case.paragraf_2_8)
-        every { mockDokgenMapperDatahenter.hentLandnavnFraLandkode(Landkoder.GB.kode) } returns Landkoder.GB.beskrivelse
-        every { mockDokgenMapperDatahenter.hentBehandlingsresultat(ofType()) } returns lagBehandlingsResultat(Case.paragraf_2_8).apply {
+        val behandlingsresultat = lagBehandlingsResultat(Case.paragraf_2_8).apply {
             behandling.mottatteOpplysninger.mottatteOpplysningerData.soeknadsland = Soeknadsland(listOf(Landkoder.GB.kode), false)
         }
+        every { mockDokgenMapperDatahenter.hentLandnavnFraLandkode(Landkoder.GB.kode) } returns Landkoder.GB.beskrivelse
+        every { mockDokgenMapperDatahenter.hentBehandlingsresultat(ofType()) } returns behandlingsresultat
+        every { mockBehandlingsresultatService.hentBehandlingsresultat(ofType()) } returns behandlingsresultat
 
         innvilgelseFtrlMapper.mapYrkesaktivFrivillig(lagBrevbestilling()).apply {
             flereLandUkjentHvilke.shouldBeFalse()
@@ -147,15 +151,15 @@ internal class InnvilgelseFtrlYrkesaktivFrivilligMapperTest {
         mockHappyCase(Case.paragraf_2_8)
         val behandlingsresultat = lagBehandlingsResultat(Case.paragraf_2_8)
         every { mockDokgenMapperDatahenter.hentBehandlingsresultat(ofType()) } returns behandlingsresultat.apply {
-            medlemAvFolketrygden.medlemskapsperioder = listOf(
-                medlemAvFolketrygden.medlemskapsperioder.iterator().next(),
+            behandlingsresultat.medlemskapsperioder = listOf(
+                behandlingsresultat.medlemskapsperioder.iterator().next(),
                 Medlemskapsperiode().apply {
                     fom = LocalDate.EPOCH.minusMonths(1)
                     tom = LocalDate.EPOCH.minusMonths(4)
                     innvilgelsesresultat = InnvilgelsesResultat.AVSLAATT
                     medlemskapstype = Medlemskapstyper.FRIVILLIG
                     trygdedekning = Trygdedekninger.FTRL_2_9_FØRSTE_LEDD_A_HELSE
-                    medlemAvFolketrygden = behandlingsresultat.medlemAvFolketrygden
+                    this.behandlingsresultat = behandlingsresultat
                 }
             )
         }
@@ -219,16 +223,16 @@ internal class InnvilgelseFtrlYrkesaktivFrivilligMapperTest {
             }
         )
         every { mockDokgenMapperDatahenter.hentBehandlingsresultat(ofType()) } returns behandlingsresultat.apply {
-            medlemAvFolketrygden.fastsattTrygdeavgift.trygdeavgiftsperioder = trygdeavgiftsperioder
-            medlemAvFolketrygden.medlemskapsperioder = listOf(
+            behandlingsresultat.medlemskapsperioder = listOf(
                 Medlemskapsperiode().apply {
                     fom = LocalDate.EPOCH.plusMonths(1)
                     tom = LocalDate.EPOCH.plusMonths(4)
                     innvilgelsesresultat = InnvilgelsesResultat.INNVILGET
                     medlemskapstype = Medlemskapstyper.FRIVILLIG
                     trygdedekning = Trygdedekninger.FTRL_2_9_FØRSTE_LEDD_A_HELSE
-                    medlemAvFolketrygden = behandlingsresultat.medlemAvFolketrygden
+                    this.behandlingsresultat = behandlingsresultat
                     bestemmelse = Folketrygdloven_kap2_bestemmelser.FTRL_KAP2_2_8_FØRSTE_LEDD_A
+                    this.trygdeavgiftsperioder = trygdeavgiftsperioder
                 }
             )
         }
@@ -300,7 +304,8 @@ internal class InnvilgelseFtrlYrkesaktivFrivilligMapperTest {
 
     private fun lagBehandlingsResultat(paragraf: Case): Behandlingsresultat {
         return Behandlingsresultat().apply {
-            medlemAvFolketrygden = lagMedlemAvFolketrygden(paragraf).apply { fastsattTrygdeavgift.medlemAvFolketrygden = this }
+            id = 1L
+            medlemskapsperioder = lagMedlemskapsperioder(this, paragraf)
             vilkaarsresultater = setOf(Vilkaarsresultat().apply {
                 vilkaar = when (paragraf) {
                     Case.paragraf_2_7 -> Vilkaar.FTRL_2_7_RIMELIGHETSVURDERING
@@ -333,14 +338,7 @@ internal class InnvilgelseFtrlYrkesaktivFrivilligMapperTest {
         )
     )
 
-    private fun lagMedlemAvFolketrygden(paragraf: Case): MedlemAvFolketrygden = MedlemAvFolketrygden().apply {
-        medlemskapsperioder = lagMedlemskapsperioder(this, paragraf)
-        fastsattTrygdeavgift = FastsattTrygdeavgift().apply {
-            trygdeavgiftsperioder = lagTrygdeavgiftsperioder()
-        }
-    }
-
-    private fun lagMedlemskapsperioder(medlemAvFolketrygden: MedlemAvFolketrygden, paragraf: Case): List<Medlemskapsperiode> =
+    private fun lagMedlemskapsperioder(behandlingsresultat: Behandlingsresultat, paragraf: Case): List<Medlemskapsperiode> =
         listOf(Medlemskapsperiode().apply {
             fom = LocalDate.EPOCH.plusMonths(1)
             tom = LocalDate.EPOCH.plusMonths(4)
@@ -351,7 +349,8 @@ internal class InnvilgelseFtrlYrkesaktivFrivilligMapperTest {
                 Case.paragraf_2_7 -> Folketrygdloven_kap2_bestemmelser.FTRL_KAP2_2_7_FØRSTE_LEDD
                 Case.paragraf_2_8 -> Folketrygdloven_kap2_bestemmelser.FTRL_KAP2_2_8
             }
-            this.medlemAvFolketrygden = medlemAvFolketrygden
+            this.behandlingsresultat = behandlingsresultat
+            this.trygdeavgiftsperioder = lagTrygdeavgiftsperioder()
         })
 
     private fun lagTrygdeavgiftsperioder(): Set<Trygdeavgiftsperiode> {
@@ -389,12 +388,14 @@ internal class InnvilgelseFtrlYrkesaktivFrivilligMapperTest {
         }
 
     private fun mockHappyCase(paragraf: Case) {
+        val behandlingsresultat = lagBehandlingsResultat(paragraf)
         every { mockAvklarteVirksomheterService.hentNorskeArbeidsgivere(ofType()) } returns lagAvklarteVirksomheter()
         every { mockAvklarteVirksomheterService.hentUtenlandskeVirksomheter(ofType()) } returns emptyList()
         every { mockAvklarteVirksomheterService.hentNorskeSelvstendigeForetak(ofType()) } returns emptyList()
-        every { mockDokgenMapperDatahenter.hentBehandlingsresultat(ofType()) } returns lagBehandlingsResultat(paragraf)
+        every { mockDokgenMapperDatahenter.hentBehandlingsresultat(ofType()) } returns behandlingsresultat
         every { mockDokgenMapperDatahenter.hentLandnavnFraLandkode(Landkoder.AT.kode) } returns Landkoder.AT.beskrivelse
         every { mockDokgenMapperDatahenter.hentFullmektigNavn(any(), any()) } returns null
+        every { mockBehandlingsresultatService.hentBehandlingsresultat(ofType()) } returns behandlingsresultat
     }
 
     companion object {

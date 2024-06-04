@@ -19,6 +19,7 @@ import no.nav.melosys.domain.kodeverk.Trygdedekninger;
 import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingsresultattyper;
 import no.nav.melosys.domain.kodeverk.brev.Produserbaredokumenter;
 import no.nav.melosys.domain.kodeverk.lovvalgsbestemmelser.Lovvalgbestemmelser_883_2004;
+import no.nav.melosys.domain.kodeverk.lovvalgsbestemmelser.Lovvalgbestemmelser_konv_efta_storbritannia;
 import no.nav.melosys.domain.kodeverk.lovvalgsbestemmelser.Tilleggsbestemmelser_883_2004;
 import no.nav.melosys.saksflyt.brev.BrevBestiller;
 import no.nav.melosys.saksflytapi.domain.ProsessDataKey;
@@ -84,6 +85,19 @@ class SendAnmodningOmUnntakTest {
 
         verify(eessiService).opprettOgSendSed(anyLong(), eq(List.of(MOTTAKER_INSTITSJON)), eq(BucType.LA_BUC_01),
             argThat(collection -> collection.contains(forventetVedlegg)), isNull());
+        verify(anmodningsperiodeService).oppdaterAnmodningsperiodeSendtForBehandling(BEHANDLING_ID);
+    }
+
+    @Test
+    void utfør_artikkel18_1_sendSed() {
+        prosessinstans.setData(ProsessDataKey.EESSI_MOTTAKERE, List.of(MOTTAKER_INSTITSJON));
+        Behandlingsresultat behandlingsresultat = hentBehandlingsresultat();
+        behandlingsresultat.getAnmodningsperioder().forEach(periode -> periode.setBestemmelse(Lovvalgbestemmelser_konv_efta_storbritannia.KONV_EFTA_STORBRITANNIA_ART18_1));
+        when(behandlingsresultatService.hentBehandlingsresultat(BEHANDLING_ID)).thenReturn(behandlingsresultat);
+
+        sendAnmodningOmUnntak.utfør(prosessinstans);
+
+        verify(eessiService).opprettOgSendSed(anyLong(), eq(List.of(MOTTAKER_INSTITSJON)), eq(BucType.LA_BUC_01), any(), isNull());
         verify(anmodningsperiodeService).oppdaterAnmodningsperiodeSendtForBehandling(BEHANDLING_ID);
     }
 

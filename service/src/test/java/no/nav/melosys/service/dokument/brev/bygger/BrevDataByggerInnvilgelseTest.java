@@ -183,8 +183,8 @@ class BrevDataByggerInnvilgelseTest {
 
     @Test
     void lag_erArt12_art16UtenArt12False() {
-        when(vilkaarsresultatService.harVilkaarForArtikkel12(anyLong())).thenReturn(true);
-        when(vilkaarsresultatService.harVilkaarForArtikkel16(anyLong())).thenReturn(true);
+        when(vilkaarsresultatService.harVilkaarForUtsending(anyLong())).thenReturn(true);
+        when(vilkaarsresultatService.harVilkaarForUnntak(anyLong())).thenReturn(true);
 
         BrevDataInnvilgelse brevData = (BrevDataInnvilgelse) brevDataByggerInnvilgelse.lag(lagBrevdataGrunnlag(), saksbehandler);
         assertThat(brevData.getArt16UtenArt12()).isFalse();
@@ -192,8 +192,8 @@ class BrevDataByggerInnvilgelseTest {
 
     @Test
     void lag_erArt16UtenArt12_art16UtenArt12True() {
-        when(vilkaarsresultatService.harVilkaarForArtikkel12(anyLong())).thenReturn(false);
-        when(vilkaarsresultatService.harVilkaarForArtikkel16(anyLong())).thenReturn(true);
+        when(vilkaarsresultatService.harVilkaarForUtsending(anyLong())).thenReturn(false);
+        when(vilkaarsresultatService.harVilkaarForUnntak(anyLong())).thenReturn(true);
 
         BrevDataInnvilgelse brevData = (BrevDataInnvilgelse) brevDataByggerInnvilgelse.lag(lagBrevdataGrunnlag(), saksbehandler);
         assertThat(brevData.getArt16UtenArt12()).isTrue();

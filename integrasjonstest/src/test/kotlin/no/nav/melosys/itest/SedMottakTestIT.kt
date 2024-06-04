@@ -135,7 +135,7 @@ class SedMottakTestIT(
         prosessinstanserSortert.first { it.behandling != null }.behandling.run {
             status.shouldBe(Behandlingsstatus.AVSLUTTET)
             fagsak.status.shouldBe(Saksstatuser.ANNULLERT)
-            behandlingsresultatRepository.findWithLovvalgsperioderById(id)
+            behandlingsresultatRepository.findWithLovvalgOgMedlemskapsperioderById(id)
                 .shouldBePresent()
                 .type.shouldBe(Behandlingsresultattyper.HENLEGGELSE)
         }
@@ -194,7 +194,7 @@ class SedMottakTestIT(
         prosessinstanserSortert.first { it.behandling != null }.behandling.run {
             status.shouldBe(Behandlingsstatus.AVSLUTTET)
             fagsak.status.shouldBe(Saksstatuser.ANNULLERT)
-            behandlingsresultatRepository.findWithLovvalgsperioderById(id)
+            behandlingsresultatRepository.findWithLovvalgOgMedlemskapsperioderById(id)
                 .shouldBePresent()
                 .type.shouldBe(Behandlingsresultattyper.HENLEGGELSE)
         }
@@ -243,7 +243,7 @@ class SedMottakTestIT(
         prosessinstanserSortert.first { it.behandling != null }.behandling.run {
             status.shouldBe(Behandlingsstatus.VURDER_DOKUMENT)
             fagsak.status.shouldBe(Saksstatuser.OPPRETTET)
-            behandlingsresultatRepository.findWithLovvalgsperioderById(id)
+            behandlingsresultatRepository.findWithLovvalgOgMedlemskapsperioderById(id)
                 .shouldBePresent().type.shouldBe(Behandlingsresultattyper.IKKE_FASTSATT)
         }
     }
@@ -297,7 +297,7 @@ class SedMottakTestIT(
         prosessinstanserSortert.first { it.behandling != null }.behandling.run {
             status.shouldBe(Behandlingsstatus.VURDER_DOKUMENT)
             fagsak.status.shouldBe(Saksstatuser.OPPRETTET)
-            behandlingsresultatRepository.findWithLovvalgsperioderById(id).shouldBePresent().type
+            behandlingsresultatRepository.findWithLovvalgOgMedlemskapsperioderById(id).shouldBePresent().type
                 .shouldBe(Behandlingsresultattyper.IKKE_FASTSATT)
         }
     }
@@ -455,7 +455,7 @@ class SedMottakTestIT(
         vedtaksProsessInstans.behandling.run {
             status.shouldBe(Behandlingsstatus.AVSLUTTET)
             fagsak.status.shouldBe(Saksstatuser.LOVVALG_AVKLART)
-            behandlingsresultatRepository.findWithLovvalgsperioderById(id).shouldBePresent()
+            behandlingsresultatRepository.findWithLovvalgOgMedlemskapsperioderById(id).shouldBePresent()
                 .type.shouldBe(Behandlingsresultattyper.FORELOEPIG_FASTSATT_LOVVALGSLAND)
         }
     }
@@ -568,7 +568,7 @@ class SedMottakTestIT(
         vedtaksProsessInstans.behandling.apply {
             status.shouldBe(Behandlingsstatus.AVSLUTTET)
             fagsak.status.shouldBe(Saksstatuser.LOVVALG_AVKLART)
-            behandlingsresultatRepository.findWithLovvalgsperioderById(id).get().type.shouldBe(
+            behandlingsresultatRepository.findWithLovvalgOgMedlemskapsperioderById(id).get().type.shouldBe(
                 Behandlingsresultattyper.FORELOEPIG_FASTSATT_LOVVALGSLAND
             )
         }

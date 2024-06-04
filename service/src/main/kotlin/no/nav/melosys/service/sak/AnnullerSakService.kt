@@ -21,9 +21,8 @@ class AnnullerSakService(
         val behandlingsresultat = behandlingsresultatService.hentBehandlingsresultat(behandling.id)
 
         oppgaveService.ferdigstillOppgaveMedSaksnummer(saksnummer)
-        if (behandlingsresultat.medlemAvFolketrygden != null) {
-            medlemskapsperiodeService.slettMedlemskapsperioder(behandlingsresultat.id)
-        }
+        medlemskapsperiodeService.slettMedlemskapsperioder(behandlingsresultat.id)
+
         behandlingsresultatService.oppdaterBehandlingsresultattype(behandlingsresultat.id, Behandlingsresultattyper.ANNULLERT)
         prosessinstansService.opprettAnnullerFagsakProsessflyt(behandling)
     }

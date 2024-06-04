@@ -27,8 +27,7 @@ public class BehandlingsresultatService {
     private final BehandlingsresultatRepository behandlingsresultatRepository;
     private final VilkaarsresultatService vilkaarsresultatService;
 
-    public BehandlingsresultatService(BehandlingsresultatRepository behandlingsresultatRepository,
-                                      VilkaarsresultatService vilkaarsresultatService) {
+    public BehandlingsresultatService(BehandlingsresultatRepository behandlingsresultatRepository, VilkaarsresultatService vilkaarsresultatService) {
         this.behandlingsresultatRepository = behandlingsresultatRepository;
         this.vilkaarsresultatService = vilkaarsresultatService;
     }
@@ -41,8 +40,8 @@ public class BehandlingsresultatService {
         log.info("Fjerner avklarte fakta, lovvalgsperioder, medlemAvFolketrygden og vilkårsresultater fra behandlingsresultat med behandlingID: {} ", behandlingID);
         behandlingsresultat.getAvklartefakta().clear();
         behandlingsresultat.getLovvalgsperioder().clear();
+        behandlingsresultat.getMedlemskapsperioder().clear();
         fjernMedlemAvFolketrygdenHvisDenFinnes(behandlingsresultat);
-        behandlingsresultat.setMedlemAvFolketrygden(null);
         behandlingsresultat.setUtfallRegistreringUnntak(null);
         behandlingsresultat.setBegrunnelseFritekst(null);
         behandlingsresultat.setInnledningFritekst(null);
@@ -67,7 +66,7 @@ public class BehandlingsresultatService {
     }
 
     public Behandlingsresultat hentBehandlingsresultatMedLovvalgsperioder(long behandlingsid) {
-        return behandlingsresultatRepository.findWithLovvalgsperioderById(behandlingsid)
+        return behandlingsresultatRepository.findWithLovvalgOgMedlemskapsperioderById(behandlingsid)
             .orElseThrow(() -> new IkkeFunnetException(KAN_IKKE_FINNE_BEHANDLINGSRESULTAT + behandlingsid));
     }
 
@@ -83,6 +82,10 @@ public class BehandlingsresultatService {
 
     public Behandlingsresultat lagre(Behandlingsresultat resultat) {
         return behandlingsresultatRepository.save(resultat);
+    }
+
+    public Behandlingsresultat lagreOgFlush(Behandlingsresultat resultat) {
+        return behandlingsresultatRepository.saveAndFlush(resultat);
     }
 
     public void lagreNyttBehandlingsresultat(Behandling behandling) {
@@ -170,9 +173,7 @@ public class BehandlingsresultatService {
     }
 
     private void fjernMedlemAvFolketrygdenHvisDenFinnes(Behandlingsresultat behandlingsresultat) {
-        if (behandlingsresultat.getMedlemAvFolketrygden() != null && behandlingsresultat.getMedlemAvFolketrygden().getFastsattTrygdeavgift() != null) {
-            behandlingsresultat.getMedlemAvFolketrygden().getFastsattTrygdeavgift().getTrygdeavgiftsperioder().clear();
+            behandlingsresultat.getTrygdeavgiftsperioder().clear();
             behandlingsresultatRepository.saveAndFlush(behandlingsresultat);
-        }
     }
 }
