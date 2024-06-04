@@ -1,6 +1,8 @@
 package no.nav.melosys.service.sak
 
+import no.nav.melosys.domain.Behandlingsresultat
 import no.nav.melosys.domain.Medlemskapsperiode
+import no.nav.melosys.domain.avgift.Aarsavregning
 import no.nav.melosys.domain.avgift.Inntektsperiode
 import no.nav.melosys.domain.avgift.SkatteforholdTilNorge
 import no.nav.melosys.domain.avgift.Trygdeavgiftsperiode
@@ -34,6 +36,15 @@ class ÅrsavregningService(
             nyttTotalbeloep = aarsavregning.nyttTotalbeloep,
             tilFaktureringBeloep = aarsavregning.tilFaktureringBeloep
         )
+    }
+
+    fun oppretteÅrsavregning(behandlingsresultat: Behandlingsresultat, gjelderPeriode: Int) {
+        Aarsavregning().apply {
+            aar = gjelderPeriode
+            this.behandlingsresultat = behandlingsresultat
+        }.also {
+            aarsavregningRepository.save(it)
+        }
     }
 }
 
