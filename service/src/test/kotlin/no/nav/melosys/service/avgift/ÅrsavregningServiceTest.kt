@@ -64,7 +64,7 @@ internal class ÅrsavregningServiceTest {
         every { aarsavregningRepository.findById(any()) }.returns(Optional.of(årsavregningEntity))
 
         årsavregningService.hentÅrsavregning(1) shouldBe Årsavregning(
-            aar = 2023,
+            år = 2023,
             tidligereGrunnlag = null,
             tidligereAvgift = emptyList(),
             nyttGrunnlag = null,
@@ -85,7 +85,7 @@ internal class ÅrsavregningServiceTest {
         every { aarsavregningRepository.findById(any()) }.returns(Optional.of(årsavregningEntity))
 
         årsavregningService.hentÅrsavregning(1) shouldBe Årsavregning(
-            aar = 2023,
+            år = 2023,
             tidligereGrunnlag = Trygdeavgiftsgrunnlag(
                 listOf(
                     MedlemskapsperiodeForAvgift(

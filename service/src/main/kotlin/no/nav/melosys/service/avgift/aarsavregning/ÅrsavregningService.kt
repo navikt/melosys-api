@@ -33,7 +33,7 @@ class ÅrsavregningService(
         val aarsavregning = aarsavregningRepository.findById(avregningID).orElseThrow { IkkeFunnetException("Fant ikke årsavregning $avregningID") }
         val år = aarsavregning.aar
         return Årsavregning(
-            aar = år,
+            år = år,
             tidligereGrunnlag = hentTidligereTrygdeavgiftsgrunnlag(år, aarsavregning.tidligereBehandlingsresultat),
             tidligereAvgift = aarsavregning.tidligereBehandlingsresultat?.trygdeavgiftsperioder?.filter { it.overlapperMedÅr(år) }.orEmpty(),
             nyttGrunnlag = hentNyttTrygdeavgiftsgrunnlag(aarsavregning),
@@ -68,7 +68,7 @@ class ÅrsavregningService(
 }
 
 data class Årsavregning(
-    val aar: Int,
+    val år: Int,
     val tidligereGrunnlag: Trygdeavgiftsgrunnlag?,
     val tidligereAvgift: List<Trygdeavgiftsperiode>,
     val nyttGrunnlag: Trygdeavgiftsgrunnlag?,
