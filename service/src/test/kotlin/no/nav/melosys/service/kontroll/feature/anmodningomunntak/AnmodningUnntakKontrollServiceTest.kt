@@ -4,7 +4,12 @@ import io.kotest.matchers.collections.shouldContainExactly
 import io.mockk.every
 import io.mockk.impl.annotations.MockK
 import io.mockk.junit5.MockKExtension
+import no.nav.melosys.domain.Aktoer
 import no.nav.melosys.domain.Anmodningsperiode
+import no.nav.melosys.domain.dokument.organisasjon.OrganisasjonDokument
+import no.nav.melosys.domain.dokument.organisasjon.OrganisasjonsDetaljer
+import no.nav.melosys.domain.kodeverk.Aktoersroller
+import no.nav.melosys.domain.kodeverk.Fullmaktstype
 import no.nav.melosys.domain.kodeverk.begrunnelser.Kontroll_begrunnelser
 import no.nav.melosys.domain.kodeverk.lovvalgsbestemmelser.Lovvalgbestemmelser_konv_efta_storbritannia
 import no.nav.melosys.domain.mottatteopplysninger.MottatteOpplysningerData
@@ -15,6 +20,7 @@ import no.nav.melosys.service.avklartefakta.AvklarteVirksomheterService
 import no.nav.melosys.service.behandling.BehandlingService
 import no.nav.melosys.service.persondata.PersondataFasade
 import no.nav.melosys.service.persondata.PersonopplysningerObjectFactory
+import no.nav.melosys.service.registeropplysninger.OrganisasjonOppslagService
 import no.nav.melosys.service.unntak.AnmodningsperiodeService
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
@@ -36,6 +42,9 @@ internal class AnmodningUnntakKontrollServiceTest {
     @MockK
     private lateinit var persondataFasade: PersondataFasade
 
+    @MockK
+    private lateinit var organisasjonOppslagService: OrganisasjonOppslagService
+
     private val behandlingID = 33L
     private val anmodningsperiode = Anmodningsperiode()
 
@@ -51,12 +60,12 @@ internal class AnmodningUnntakKontrollServiceTest {
         every { avklarteVirksomheterService.hentAntallAvklarteVirksomheter(any()) } returns 1
 
         anmodningUnntakKontrollService = AnmodningUnntakKontrollService(
-            anmodningsperiodeService, avklarteVirksomheterService, behandlingService, persondataFasade
+            anmodningsperiodeService, avklarteVirksomheterService, behandlingService, persondataFasade, organisasjonOppslagService
         )
     }
 
     @Test
-    fun utførKontroller_manglerAdresse_returnererKode() {
+    fun utførKontroller_brukerManglerAdresse_returnererKode() {
         every { behandlingService.hentBehandlingMedSaksopplysninger(behandlingID) } returns SaksbehandlingDataFactory.lagBehandling()
         every { persondataFasade.hentPerson(any<String>()) } returns PersonopplysningerObjectFactory.lagPersonopplysningerUtenAdresser()
 
@@ -64,6 +73,40 @@ internal class AnmodningUnntakKontrollServiceTest {
 
         resultat.map { it.kode }
             .shouldContainExactly(Kontroll_begrunnelser.MANGLENDE_REGISTRERTE_ADRESSE)
+    }
+
+    @Test
+    fun utførKontroller_fullmektigPersonManglerAdresse_returnererKode() {
+        every { behandlingService.hentBehandlingMedSaksopplysninger(behandlingID) } returns SaksbehandlingDataFactory.lagBehandling().apply {
+            fagsak.aktører.add(Aktoer().apply {
+                rolle = Aktoersroller.FULLMEKTIG
+                personIdent = "11111111111"
+                setFullmaktstyper(listOf(Fullmaktstype.FULLMEKTIG_SØKNAD))
+            })
+        }
+        every { persondataFasade.hentPerson("11111111111") } returns PersonopplysningerObjectFactory.lagPersonopplysningerUtenAdresser()
+
+        val resultat = anmodningUnntakKontrollService.utførKontroller(behandlingID)
+
+        resultat.map { it.kode }
+            .shouldContainExactly(Kontroll_begrunnelser.MANGLENDE_REGISTRERTE_ADRESSE_REPRESENTANT)
+    }
+
+    @Test
+    fun utførKontroller_fullmektigOrganisasjonManglerAdresse_returnererKode() {
+        every { behandlingService.hentBehandlingMedSaksopplysninger(behandlingID) } returns SaksbehandlingDataFactory.lagBehandling().apply {
+            fagsak.aktører.add(Aktoer().apply {
+                rolle = Aktoersroller.FULLMEKTIG
+                orgnr = "111111111"
+                setFullmaktstyper(listOf(Fullmaktstype.FULLMEKTIG_SØKNAD))
+            })
+        }
+        every { organisasjonOppslagService.hentOrganisasjon(any()) } returns OrganisasjonDokument("", "null", null, OrganisasjonsDetaljer(), "null")
+
+        val resultat = anmodningUnntakKontrollService.utførKontroller(behandlingID)
+
+        resultat.map { it.kode }
+            .shouldContainExactly(Kontroll_begrunnelser.MANGLENDE_REGISTRERTE_ADRESSE_REPRESENTANT)
     }
 
     @Test

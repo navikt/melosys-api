@@ -14,7 +14,8 @@ object AnmodningUnntakKontrollsett {
     }
 
     private val REGLER_ANMODNING_UNNTAK: Regelsett = setOf(
-        Function { AnmodningUnntakKontroll.harRegistrertAdresse(it) },
+        Function { AnmodningUnntakKontroll.brukerManglerAdresse(it) },
+        Function { AnmodningUnntakKontroll.fullmektigManglerAdresse(it) },
         Function { AnmodningUnntakKontroll.anmodningsperiodeManglerSluttdato(it) },
         Function { AnmodningUnntakKontroll.kunEnArbeidsgiver(it) },
         Function { arbeidsstedLandManglerFelter(it.mottatteOpplysningerData) },

@@ -2,6 +2,7 @@ package no.nav.melosys.service.kontroll.feature.anmodningomunntak.kontroll
 
 import no.nav.melosys.domain.kodeverk.begrunnelser.Kontroll_begrunnelser
 import no.nav.melosys.domain.kodeverk.lovvalgsbestemmelser.Lovvalgbestemmelser_konv_efta_storbritannia
+import no.nav.melosys.exception.TekniskException
 import no.nav.melosys.service.kontroll.feature.anmodningomunntak.data.AnmodningUnntakKontrollData
 import no.nav.melosys.service.kontroll.regler.PersonRegler.harRegistrertAdresse
 import no.nav.melosys.service.validering.Kontrollfeil
@@ -9,9 +10,29 @@ import java.time.LocalDate
 
 
 object AnmodningUnntakKontroll {
-    fun harRegistrertAdresse(kontrollData: AnmodningUnntakKontrollData): Kontrollfeil? {
+    fun brukerManglerAdresse(kontrollData: AnmodningUnntakKontrollData): Kontrollfeil? {
         if (!harRegistrertAdresse(kontrollData.persondata, kontrollData.mottatteOpplysningerData)) {
             return Kontrollfeil(Kontroll_begrunnelser.MANGLENDE_REGISTRERTE_ADRESSE)
+        }
+
+        return null
+    }
+
+    fun fullmektigManglerAdresse(kontrollData: AnmodningUnntakKontrollData): Kontrollfeil? {
+        val fullmektig = kontrollData.fullmektig ?: return null
+
+        if (fullmektig.erOrganisasjon()) {
+            val organisasjon = kontrollData.organisasjonDokument ?: throw TekniskException("OrganisasjonDokument kan ikke være null")
+
+            if (!organisasjon.harRegistrertPostadresse() && !organisasjon.harRegistrertForretningsadresse()) {
+                return Kontrollfeil(Kontroll_begrunnelser.MANGLENDE_REGISTRERTE_ADRESSE_REPRESENTANT)
+            }
+        } else {
+            val persondata = kontrollData.persondataTilFullmektig ?: throw TekniskException("Persondata til fullmektig kan ikke være null")
+
+            if (!harRegistrertAdresse(persondata, kontrollData.mottatteOpplysningerData)) {
+                return Kontrollfeil(Kontroll_begrunnelser.MANGLENDE_REGISTRERTE_ADRESSE_REPRESENTANT)
+            }
         }
 
         return null
