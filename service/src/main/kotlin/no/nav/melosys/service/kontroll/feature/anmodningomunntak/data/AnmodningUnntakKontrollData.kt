@@ -13,6 +13,6 @@ data class AnmodningUnntakKontrollData(
     val anmodningsperiode: Anmodningsperiode,
     val antallArbeidsgivere: Int,
     val fullmektig: Aktoer?,
-    val organisasjonDokument: OrganisasjonDokument?,
+    val organisasjonDokumentTilFullmektig: OrganisasjonDokument?,
     val persondataTilFullmektig: Persondata?,
 )

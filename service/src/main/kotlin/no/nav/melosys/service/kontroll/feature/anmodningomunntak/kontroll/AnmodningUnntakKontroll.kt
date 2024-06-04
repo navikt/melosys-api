@@ -22,7 +22,7 @@ object AnmodningUnntakKontroll {
         val fullmektig = kontrollData.fullmektig ?: return null
 
         if (fullmektig.erOrganisasjon()) {
-            val organisasjon = kontrollData.organisasjonDokument ?: throw TekniskException("OrganisasjonDokument kan ikke være null")
+            val organisasjon = kontrollData.organisasjonDokumentTilFullmektig ?: throw TekniskException("OrganisasjonDokument kan ikke være null")
 
             if (!organisasjon.harRegistrertPostadresse() && !organisasjon.harRegistrertForretningsadresse()) {
                 return Kontrollfeil(Kontroll_begrunnelser.MANGLENDE_REGISTRERTE_ADRESSE_REPRESENTANT)

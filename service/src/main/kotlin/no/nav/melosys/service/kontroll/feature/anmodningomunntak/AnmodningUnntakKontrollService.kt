@@ -33,7 +33,7 @@ class AnmodningUnntakKontrollService(
             anmodningsperiode = anmodningsperiodeService.hentFørsteAnmodningsperiode(behandlingID),
             antallArbeidsgivere = avklarteVirksomheterService.hentAntallAvklarteVirksomheter(behandling),
             fullmektig = fullmektig,
-            organisasjonDokument = hentOrganisasjonFullmektig(fullmektig),
+            organisasjonDokumentTilFullmektig = hentOrganisasjonFullmektig(fullmektig),
             persondataTilFullmektig = hentPersondataFullmektig(fullmektig),
         )
 
