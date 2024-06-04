@@ -1,6 +1,8 @@
 package no.nav.melosys.service.avgift
 
 import io.kotest.matchers.shouldBe
+import io.mockk.impl.annotations.MockK
+import io.mockk.junit5.MockKExtension
 import no.nav.melosys.domain.Medlemskapsperiode
 import no.nav.melosys.domain.avgift.Inntektsperiode
 import no.nav.melosys.domain.avgift.SkatteforholdTilNorge
@@ -8,15 +10,26 @@ import no.nav.melosys.domain.avgift.Trygdeavgiftsperiode
 import no.nav.melosys.domain.kodeverk.Inntektskildetype
 import no.nav.melosys.domain.kodeverk.Inntektskildetype.*
 import no.nav.melosys.domain.kodeverk.Skatteplikttype
-
 import no.nav.melosys.domain.kodeverk.Trygdeavgiftmottaker.*
 import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingsresultattyper
+import no.nav.melosys.service.behandling.BehandlingsresultatService
 import no.nav.melosys.service.saksbehandling.lagBehandlingsresultat
+import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
+import org.junit.jupiter.api.extension.ExtendWith
 
+@ExtendWith(MockKExtension::class)
 internal class TrygdeavgiftMottakerServiceTest {
 
-    val trygdeavgiftMottakerService = TrygdeavgiftMottakerService()
+    @MockK
+    lateinit var mockBehandlingsresultatService: BehandlingsresultatService
+
+    private lateinit var trygdeavgiftMottakerService: TrygdeavgiftMottakerService
+
+    @BeforeEach
+    fun setUp() {
+        trygdeavgiftMottakerService = TrygdeavgiftMottakerService(mockBehandlingsresultatService)
+    }
 
     @Test
     fun `trygdeavgiftsmottaker skal være NAV hvis bruker ikke er skattepliktig og aga er false`() {

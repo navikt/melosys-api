@@ -44,8 +44,6 @@ class TrygdeavgiftTjenesteTest {
     @MockBean
     private TrygdeavgiftsberegningService trygdeavgiftsberegningService;
     @MockBean
-    private BehandlingsresultatService behandlingsresultatService;
-    @MockBean
     private TrygdeavgiftMottakerService trygdeavgiftMottakerService;
     @Autowired
     private MockMvc mockMvc;

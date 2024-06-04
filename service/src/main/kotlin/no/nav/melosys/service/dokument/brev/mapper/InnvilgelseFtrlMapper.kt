@@ -192,8 +192,13 @@ class InnvilgelseFtrlMapper(
     private fun mapTrygdeavtaleLand(landkoder: List<String>): List<String> =
         Trygdeavtale_myndighetsland.values().filter { landkoder.contains(it.kode) }.map { dokgenMapperDatahenter.hentLandnavnFraLandkode(it.kode) }
 
-    private fun erBetalerArbeidsgiveravgift(behandlingsresultat: Behandlingsresultat) =
-        behandlingsresultat.trygdeavgiftsperioder?.any { it.grunnlagInntekstperiode.isArbeidsgiversavgiftBetalesTilSkatt } ?: false
+    private fun erBetalerArbeidsgiveravgift(behandlingsresultat: Behandlingsresultat): Boolean {
+        val trygdeavgiftmottaker = trygdeavgiftMottakerService.getTrygdeavgiftMottaker(behandlingsresultat.id)
+        if (trygdeavgiftmottaker == Trygdeavgiftmottaker.TRYGDEAVGIFT_BETALES_TIL_SKATT) {
+            return true
+        }
+        return behandlingsresultat.trygdeavgiftsperioder?.any { it.grunnlagInntekstperiode.isArbeidsgiversavgiftBetalesTilSkatt } ?: false
+    }
 
     private fun finnFullmektigTrygdeavgift(behandling: Behandling): String? {
         if (behandling.fagsak.finnFullmektig(Fullmaktstype.FULLMEKTIG_TRYGDEAVGIFT) == null) return null
