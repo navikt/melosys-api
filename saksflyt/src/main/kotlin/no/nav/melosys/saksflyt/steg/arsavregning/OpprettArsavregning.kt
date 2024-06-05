@@ -68,10 +68,10 @@ class OpprettArsavregning(
 
         val aktiveÅrsavregninger: List<Behandling> = sakMedTrygdeavgit.hentAktiveÅrsavregninger()
 
-        val årsAvregninger = aktiveÅrsavregninger.filter {
-            val behandlingsresultat = behandslingsresultatService.hentBehandlingsresultat(it.id)
-            behandlingsresultat.aarsavregning.aar == gjelderPeriode && it.status != Behandlingsstatus.OPPRETTET
-        }
+        val årsAvregninger = aktiveÅrsavregninger.also { if (it.isEmpty()) log.info("Fant ingen aktive årsavregninger") }
+            .filter {
+                behandslingsresultatService.hentBehandlingsresultat(it.id).aarsavregning.aar == gjelderPeriode && it.status != Behandlingsstatus.OPPRETTET
+            }
 
         when {
             årsAvregninger.isEmpty() -> {
