@@ -27,7 +27,7 @@ import org.springframework.test.context.ActiveProfiles
 @AutoConfigureTestDatabase(replace = AutoConfigureTestDatabase.Replace.NONE)
 @DirtiesContext
 @EnableMockOAuth2Server
-class AarsavregningBehandlingTest(
+class AarsavregningBehandlingIT(
     @Autowired private val prosessinstansService: ProsessinstansService,
     @Autowired private val prosessRegister: ProsessRegister,
     @Autowired private val prosessinstansTestManager: ProsessinstansTestManager,
