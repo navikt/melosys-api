@@ -1,5 +1,6 @@
 package no.nav.melosys.saksflyt.steg.oppgave
 
+import io.getunleash.FakeUnleash
 import io.kotest.matchers.shouldBe
 import io.kotest.matchers.string.shouldNotBeBlank
 import io.mockk.every
@@ -13,6 +14,7 @@ import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingsresultattyper
 import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingstyper
 import no.nav.melosys.domain.kodeverk.lovvalgsbestemmelser.Lovvalgbestemmelser_883_2004
 import no.nav.melosys.domain.oppgave.Oppgave
+import no.nav.melosys.featuretoggle.ToggleName
 import no.nav.melosys.saksflytapi.domain.Prosessinstans
 import no.nav.melosys.service.behandling.BehandlingsresultatService
 import no.nav.melosys.service.oppgave.OppgaveService
@@ -29,6 +31,8 @@ internal class OpprettAvgiftsoppgaveTest {
     @MockK
     private lateinit var oppgaveService: OppgaveService
 
+    private val unleash = FakeUnleash()
+
     @Captor
     private val oppgaveSlot = slot<Oppgave>()
     private lateinit var opprettAvgiftsoppgave: OpprettAvgiftsoppgave
@@ -36,11 +40,21 @@ internal class OpprettAvgiftsoppgaveTest {
 
     @BeforeEach
     fun setUp() {
-        opprettAvgiftsoppgave = OpprettAvgiftsoppgave(behandlingsresultatService, oppgaveService)
+        unleash.resetAll()
+        opprettAvgiftsoppgave = OpprettAvgiftsoppgave(behandlingsresultatService, oppgaveService, unleash)
         behandlingsresultat = Behandlingsresultat().apply {
             type = Behandlingsresultattyper.FASTSATT_LOVVALGSLAND
         }
         every { behandlingsresultatService.hentBehandlingsresultat(any<Long>()) } returns behandlingsresultat
+    }
+
+    @Test
+    fun utfør_togglePå_gjørIngenting() {
+        unleash.enable(ToggleName.MELOSYS_IKKE_SEND_TRYGDEAGIFT_OPPGAVE)
+
+        opprettAvgiftsoppgave.utfør(lagProsessinstans())
+
+        verify(exactly = 0) { oppgaveService.opprettOppgave(any()) }
     }
 
     @Test
