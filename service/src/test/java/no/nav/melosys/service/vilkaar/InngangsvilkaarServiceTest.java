@@ -3,10 +3,12 @@ package no.nav.melosys.service.vilkaar;
 import java.time.LocalDate;
 import java.util.Collections;
 import java.util.List;
-import java.util.Optional;
 import java.util.Set;
 
-import no.nav.melosys.domain.*;
+import no.nav.melosys.domain.Behandling;
+import no.nav.melosys.domain.FagsakTestFactory;
+import no.nav.melosys.domain.VilkaarBegrunnelse;
+import no.nav.melosys.domain.Vilkaarsresultat;
 import no.nav.melosys.domain.dokument.felles.Land;
 import no.nav.melosys.domain.inngangsvilkar.Feilmelding;
 import no.nav.melosys.domain.inngangsvilkar.InngangsvilkarResponse;
@@ -200,7 +202,7 @@ class InngangsvilkaarServiceTest {
 
     @Test
     void overstyrInngangsvilkårTilOppfylt_ingenInngangsvilkårFunnet_kasterFunksjonellException() {
-        when(vilkaarsresultatService.finnVilkaarsresultat(anyLong(), eq(Vilkaar.FO_883_2004_INNGANGSVILKAAR))).thenReturn(Optional.empty());
+        when(vilkaarsresultatService.finnVilkaarsresultat(anyLong(), eq(Vilkaar.FO_883_2004_INNGANGSVILKAAR))).thenReturn(null);
 
         assertThatExceptionOfType(FunksjonellException.class)
             .isThrownBy(() -> inngangsvilkaarService.overstyrInngangsvilkårTilOppfylt(1L))
@@ -210,7 +212,7 @@ class InngangsvilkaarServiceTest {
     @Test
     void overstyrInngangsvilkårTilOppfylt_manglerLandOgPeriode_kasterFunksjonellException() {
         when(behandlingService.hentBehandling(1L)).thenReturn(lagBehandling());
-        when(vilkaarsresultatService.finnVilkaarsresultat(anyLong(), eq(Vilkaar.FO_883_2004_INNGANGSVILKAAR))).thenReturn(Optional.of(new Vilkaarsresultat()));
+        when(vilkaarsresultatService.finnVilkaarsresultat(anyLong(), eq(Vilkaar.FO_883_2004_INNGANGSVILKAAR))).thenReturn(new Vilkaarsresultat());
 
         assertThatExceptionOfType(FunksjonellException.class)
             .isThrownBy(() -> inngangsvilkaarService.overstyrInngangsvilkårTilOppfylt(1L))
@@ -221,7 +223,7 @@ class InngangsvilkaarServiceTest {
     void overstyrInngangsvilkårTilOppfylt_inngangsvilkårFunnet_oppfyllerVilkår() {
         when(behandlingService.hentBehandling(1L)).thenReturn(lagBehandlingMedPeriodeOgLand());
         Vilkaarsresultat vilkaarsresultat = new Vilkaarsresultat();
-        when(vilkaarsresultatService.finnVilkaarsresultat(anyLong(), eq(Vilkaar.FO_883_2004_INNGANGSVILKAAR))).thenReturn(Optional.of(vilkaarsresultat));
+        when(vilkaarsresultatService.finnVilkaarsresultat(anyLong(), eq(Vilkaar.FO_883_2004_INNGANGSVILKAAR))).thenReturn(vilkaarsresultat);
 
 
         inngangsvilkaarService.overstyrInngangsvilkårTilOppfylt(1L);
@@ -237,7 +239,7 @@ class InngangsvilkaarServiceTest {
         vilkaarBegrunnelse.setKode(Inngangsvilkaar.MANGLER_STATSBORGERSKAP.getKode());
         Vilkaarsresultat vilkaarsresultat = new Vilkaarsresultat();
         vilkaarsresultat.setBegrunnelser(Set.of(vilkaarBegrunnelse));
-        when(vilkaarsresultatService.finnVilkaarsresultat(anyLong(), eq(Vilkaar.FO_883_2004_INNGANGSVILKAAR))).thenReturn(Optional.of(vilkaarsresultat));
+        when(vilkaarsresultatService.finnVilkaarsresultat(anyLong(), eq(Vilkaar.FO_883_2004_INNGANGSVILKAAR))).thenReturn(vilkaarsresultat);
 
 
         inngangsvilkaarService.overstyrInngangsvilkårTilOppfylt(1L);

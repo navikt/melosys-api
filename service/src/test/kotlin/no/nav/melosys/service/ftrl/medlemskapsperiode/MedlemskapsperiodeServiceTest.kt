@@ -1,6 +1,5 @@
 package no.nav.melosys.service.ftrl.medlemskapsperiode
 
-import io.getunleash.FakeUnleash
 import io.kotest.assertions.throwables.shouldNotThrow
 import io.kotest.assertions.throwables.shouldThrow
 import io.kotest.matchers.collections.shouldBeEmpty
@@ -46,8 +45,6 @@ class MedlemskapsperiodeServiceTest {
     @MockK
     lateinit var gyldigeTrygdedekningerService: GyldigeTrygdedekningerService
 
-    private val unleash = FakeUnleash()
-
     private val BEHANDLING_ID_1 = 1L
     private val BEHANDLING_ID_2 = 2L
     private val MEDLEMSKAPSPERIODE_ID_1 = 11L
@@ -60,13 +57,11 @@ class MedlemskapsperiodeServiceTest {
 
     @BeforeEach
     fun setUp() {
-        unleash.resetAll()
         medlemskapsperiodeService = MedlemskapsperiodeService(
             medlemskapsperiodeRepository,
             behandlingsresultatService,
             medlPeriodeService,
-            gyldigeTrygdedekningerService,
-            unleash
+            gyldigeTrygdedekningerService
         )
     }
 

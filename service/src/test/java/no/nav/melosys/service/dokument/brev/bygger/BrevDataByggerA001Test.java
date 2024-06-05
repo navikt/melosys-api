@@ -1,7 +1,10 @@
 package no.nav.melosys.service.dokument.brev.bygger;
 
 import java.time.LocalDate;
-import java.util.*;
+import java.util.Collections;
+import java.util.HashSet;
+import java.util.List;
+import java.util.Set;
 
 import no.nav.melosys.domain.*;
 import no.nav.melosys.domain.adresse.StrukturertAdresse;
@@ -55,7 +58,8 @@ import static no.nav.melosys.service.persondata.PersonopplysningerObjectFactory.
 import static no.nav.melosys.service.persondata.PersonopplysningerObjectFactory.lagPersonopplysningerUtenBostedsadresseOgKontaktadresse;
 import static org.assertj.core.api.AssertionsForClassTypes.assertThatExceptionOfType;
 import static org.assertj.core.api.AssertionsForInterfaceTypes.assertThat;
-import static org.mockito.ArgumentMatchers.*;
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.anyLong;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 
@@ -108,7 +112,7 @@ class BrevDataByggerA001Test {
         UtenlandskMyndighet utenlandskMyndighet = new UtenlandskMyndighet();
         when(myndighetsService.hentUtenlandskMyndighet(any())).thenReturn(utenlandskMyndighet);
 
-        lagVilkårResultat(Vilkaar.FO_883_2004_ART16_1, true, ERSTATTER_EN_ANNEN_UNDER_5_AAR);
+        lagUnntaksVilkårResultat(Vilkaar.FO_883_2004_ART16_1, ERSTATTER_EN_ANNEN_UNDER_5_AAR);
 
         StrukturertAdresse oppgittAdresse = new StrukturertAdresse();
         oppgittAdresse.setGatenavn("HjemmeGata");
@@ -150,13 +154,13 @@ class BrevDataByggerA001Test {
         leggTilTestorganisasjon("navn1", orgnr1, detaljer);
         leggTilTestorganisasjon("navn2", orgnr2, detaljer);
 
-        when(vilkaarsresultatService.harVilkaarForArtikkel12(anyLong())).thenCallRealMethod();
+        when(vilkaarsresultatService.harVilkaarForUtsending(anyLong())).thenCallRealMethod();
         brevDataByggerA001 = new BrevDataByggerA001(lovvalgsperiodeService, anmodningsperiodeService, myndighetsService, vilkaarsresultatService);
     }
 
-    private void lagVilkårResultat(Vilkaar vilkaarType, boolean oppfylt, Kodeverk begrunnelseKode) {
-        Vilkaarsresultat vilkaarsresultat = lagVilkaarsresultat(vilkaarType, oppfylt, begrunnelseKode);
-        when(vilkaarsresultatService.finnVilkaarsresultat(anyLong(), eq(vilkaarType))).thenReturn(Optional.of(vilkaarsresultat));
+    private void lagUnntaksVilkårResultat(Vilkaar vilkaarType, Kodeverk begrunnelseKode) {
+        Vilkaarsresultat vilkaarsresultat = lagVilkaarsresultat(vilkaarType, true, begrunnelseKode);
+        when(vilkaarsresultatService.finnUnntaksVilkaarsresultat(anyLong())).thenReturn(vilkaarsresultat);
     }
 
     private BrevDataGrunnlag lagBrevDataGrunnlag() {
@@ -244,8 +248,9 @@ class BrevDataByggerA001Test {
 
     @Test
     void lag_art16MedArt121_harKunArt16Begrunnelser() {
-        lagVilkårResultat(Vilkaar.FO_883_2004_ART12_1, false, UTSENDELSE_OVER_24_MN);
-        lagVilkårResultat(Vilkaar.FO_883_2004_ART16_1, true, ERSTATTER_EN_ANNEN_UNDER_5_AAR);
+        Vilkaarsresultat vilkaarsresultat = lagVilkaarsresultat(Vilkaar.FO_883_2004_ART12_1, false, UTSENDELSE_OVER_24_MN);
+        when(vilkaarsresultatService.finnUtsendingArbeidstakerVilkaarsresultat(anyLong())).thenReturn(vilkaarsresultat);
+        lagUnntaksVilkårResultat(Vilkaar.FO_883_2004_ART16_1, ERSTATTER_EN_ANNEN_UNDER_5_AAR);
 
         BrevDataA001 brevDataA001 = (BrevDataA001) brevDataByggerA001.lag(lagBrevDataGrunnlag(), SAKSBEHANDLER_ID);
         assertThat(brevDataA001.getAnmodningUtenArt12Begrunnelser()).isEmpty();
@@ -257,8 +262,9 @@ class BrevDataByggerA001Test {
 
     @Test
     void lag_art16MedArt122_harKunArt16Begrunnelser() {
-        lagVilkårResultat(Vilkaar.FO_883_2004_ART12_2, false, NORMALT_IKKE_DRIFT_NORGE);
-        lagVilkårResultat(Vilkaar.FO_883_2004_ART16_1, true, ERSTATTER_EN_ANNEN_UNDER_5_AAR);
+        Vilkaarsresultat vilkaarsresultat = lagVilkaarsresultat(Vilkaar.FO_883_2004_ART12_2, false, NORMALT_IKKE_DRIFT_NORGE);
+        when(vilkaarsresultatService.finnUtsendingNæringsdrivendeVilkaarsresultat(anyLong())).thenReturn(vilkaarsresultat);
+        lagUnntaksVilkårResultat(Vilkaar.FO_883_2004_ART16_1, ERSTATTER_EN_ANNEN_UNDER_5_AAR);
 
         BrevDataA001 brevDataA001 = (BrevDataA001) brevDataByggerA001.lag(lagBrevDataGrunnlag(), SAKSBEHANDLER_ID);
         assertThat(brevDataA001.getAnmodningUtenArt12Begrunnelser()).isEmpty();
@@ -269,8 +275,24 @@ class BrevDataByggerA001Test {
     }
 
     @Test
+    void lag_art18MedArt141_harKunArt18Begrunnelser() {
+        Vilkaarsresultat vilkaarsresultat = lagVilkaarsresultat(Vilkaar.KONV_EFTA_STORBRITANNIA_ART14_1, false, UTSENDELSE_OVER_24_MN);
+        when(vilkaarsresultatService.finnUtsendingArbeidstakerVilkaarsresultat(anyLong())).thenReturn(vilkaarsresultat);
+        lagUnntaksVilkårResultat(Vilkaar.KONV_EFTA_STORBRITANNIA_ART18_1, ERSTATTER_EN_ANNEN_UNDER_5_AAR);
+
+
+        BrevDataA001 brevDataA001 = (BrevDataA001) brevDataByggerA001.lag(lagBrevDataGrunnlag(), SAKSBEHANDLER_ID);
+        assertThat(brevDataA001.getAnmodningUtenArt12Begrunnelser()).isEmpty();
+
+
+        assertThat(brevDataA001.getAnmodningBegrunnelser()).hasSize(1);
+        assertThat(brevDataA001.getAnmodningBegrunnelser().stream().map(VilkaarBegrunnelse::getKode))
+            .containsExactly(ERSTATTER_EN_ANNEN_UNDER_5_AAR.getKode());
+    }
+
+    @Test
     void lag_art16UtenArt12_harKunArt16UtenArt12Begrunnelser() {
-        lagVilkårResultat(Vilkaar.FO_883_2004_ART16_1, true, SJOEMANNSKIRKEN);
+        lagUnntaksVilkårResultat(Vilkaar.FO_883_2004_ART16_1, SJOEMANNSKIRKEN);
 
         BrevDataA001 brevDataA001 = (BrevDataA001) brevDataByggerA001.lag(lagBrevDataGrunnlag(), SAKSBEHANDLER_ID);
         assertThat(brevDataA001.getAnmodningBegrunnelser()).isEmpty();

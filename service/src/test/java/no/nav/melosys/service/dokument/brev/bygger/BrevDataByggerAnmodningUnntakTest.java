@@ -1,6 +1,9 @@
 package no.nav.melosys.service.dokument.brev.bygger;
 
-import java.util.*;
+import java.util.Collections;
+import java.util.HashSet;
+import java.util.List;
+import java.util.Set;
 
 import no.nav.melosys.domain.*;
 import no.nav.melosys.domain.brev.DoksysBrevbestilling;
@@ -36,7 +39,6 @@ import static no.nav.melosys.service.SaksopplysningStubs.lagArbeidsforholdOpplys
 import static no.nav.melosys.service.dokument.brev.BrevDataTestUtils.*;
 import static org.assertj.core.api.AssertionsForInterfaceTypes.assertThat;
 import static org.mockito.ArgumentMatchers.anyLong;
-import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 
@@ -62,9 +64,9 @@ class BrevDataByggerAnmodningUnntakTest {
     public void setUp() {
         brevDataByggerAnmodningUnntak = new BrevDataByggerAnmodningUnntak(landvelgerService, vilkaarsresultatService);
 
-        when(vilkaarsresultatService.harVilkaarForArtikkel12(anyLong())).thenCallRealMethod();
-        when(vilkaarsresultatService.finnVilkaarsresultat(anyLong(), eq(Vilkaar.FO_883_2004_ART16_1)))
-            .thenReturn(Optional.of(lagVilkaarsresultat(Vilkaar.FO_883_2004_ART16_1, true, KORT_OPPDRAG_RETUR_NORSK_AG)));
+        when(vilkaarsresultatService.harVilkaarForUtsending(anyLong())).thenCallRealMethod();
+        when(vilkaarsresultatService.finnUnntaksVilkaarsresultat(anyLong()))
+            .thenReturn(lagVilkaarsresultat(Vilkaar.FO_883_2004_ART16_1, true, KORT_OPPDRAG_RETUR_NORSK_AG));
     }
 
     @Test
@@ -126,8 +128,8 @@ class BrevDataByggerAnmodningUnntakTest {
 
     @Test
     void lag_brevDataMedArt121_girAnmodningBegrunnelser() {
-        when(vilkaarsresultatService.finnVilkaarsresultat(anyLong(), eq(Vilkaar.FO_883_2004_ART12_2)))
-            .thenReturn(Optional.of(lagVilkaarsresultat(Vilkaar.FO_883_2004_ART12_2, false, UTSENDELSE_OVER_24_MN)));
+        when(vilkaarsresultatService.finnUtsendingNæringsdrivendeVilkaarsresultat(anyLong()))
+            .thenReturn(lagVilkaarsresultat(Vilkaar.FO_883_2004_ART12_2, false, UTSENDELSE_OVER_24_MN));
 
         Behandling behandling = lagBehandling();
         BrevDataAnmodningUnntak brevData = (BrevDataAnmodningUnntak) brevDataByggerAnmodningUnntak.lag(lagBrevressurser(behandling), saksbehandler);
@@ -137,8 +139,8 @@ class BrevDataByggerAnmodningUnntakTest {
 
     @Test
     void lag_brevDataMedArt122_girAnmodningBegrunnelser() {
-        when(vilkaarsresultatService.finnVilkaarsresultat(anyLong(), eq(Vilkaar.FO_883_2004_ART12_2)))
-            .thenReturn(Optional.of(lagVilkaarsresultat(Vilkaar.FO_883_2004_ART12_2, false, UTSENDELSE_OVER_24_MN)));
+        when(vilkaarsresultatService.finnUtsendingNæringsdrivendeVilkaarsresultat(anyLong()))
+            .thenReturn(lagVilkaarsresultat(Vilkaar.FO_883_2004_ART12_2, false, UTSENDELSE_OVER_24_MN));
 
         Behandling behandling = lagBehandling();
         BrevDataAnmodningUnntak brevData = (BrevDataAnmodningUnntak) brevDataByggerAnmodningUnntak.lag(lagBrevressurser(behandling), saksbehandler);
@@ -148,8 +150,8 @@ class BrevDataByggerAnmodningUnntakTest {
 
     @Test
     void lag_brevDataMedOppfyltArt121_girAnmodningBegrunnelser() {
-        when(vilkaarsresultatService.finnVilkaarsresultat(anyLong(), eq(Vilkaar.FO_883_2004_ART12_2)))
-            .thenReturn(Optional.of(lagVilkaarsresultat(Vilkaar.FO_883_2004_ART12_2, true)));
+        when(vilkaarsresultatService.finnUtsendingArbeidstakerVilkaarsresultat(anyLong()))
+            .thenReturn(lagVilkaarsresultat(Vilkaar.FO_883_2004_ART12_1, true));
 
         Behandling behandling = lagBehandling();
         BrevDataAnmodningUnntak brevData = (BrevDataAnmodningUnntak) brevDataByggerAnmodningUnntak.lag(lagBrevressurser(behandling), saksbehandler);
@@ -161,7 +163,7 @@ class BrevDataByggerAnmodningUnntakTest {
     void lag_brevDataMedFritekst() {
         Vilkaarsresultat vilkaar = lagVilkaarsresultat(Vilkaar.FO_883_2004_ART16_1, true, KORT_OPPDRAG_RETUR_NORSK_AG);
         vilkaar.setBegrunnelseFritekst("FRITEKST");
-        when(vilkaarsresultatService.finnVilkaarsresultat(anyLong(), eq(Vilkaar.FO_883_2004_ART16_1))).thenReturn(Optional.of(vilkaar));
+        when(vilkaarsresultatService.finnUnntaksVilkaarsresultat(anyLong())).thenReturn(vilkaar);
 
         Behandling behandling = lagBehandling();
         BrevDataAnmodningUnntak brevData = (BrevDataAnmodningUnntak) brevDataByggerAnmodningUnntak.lag(lagBrevressurser(behandling), saksbehandler);

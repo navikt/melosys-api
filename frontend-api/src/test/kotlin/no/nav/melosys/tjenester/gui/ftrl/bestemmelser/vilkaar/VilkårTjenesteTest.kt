@@ -8,7 +8,6 @@ import io.mockk.justRun
 import no.nav.melosys.domain.kodeverk.Folketrygdloven_kap2_bestemmelser
 import no.nav.melosys.domain.kodeverk.Vilkaar
 import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingstema
-import no.nav.melosys.featuretoggle.ToggleName.MELOSYS_FTRL_YRKESAKTIV_PLIKTIGE_BESTEMMELSER
 import no.nav.melosys.service.ftrl.bestemmelse.vilkaar.Vilkår
 import no.nav.melosys.service.ftrl.bestemmelse.vilkaar.VilkårForBestemmelse
 import no.nav.melosys.service.tilgang.Aksesskontroll
@@ -25,18 +24,16 @@ import org.springframework.test.web.servlet.result.MockMvcResultMatchers.status
 class VilkårTjenesteTest(@Autowired private val mockMvc: MockMvc) {
     @MockkBean
     lateinit var vilkårForBestemmelse: VilkårForBestemmelse
+
     @MockkBean
     lateinit var aksesskontroll: Aksesskontroll
-    @MockkBean
-    lateinit var unleash: Unleash
 
     @Test
-    fun `hent vilkår for ftrl bestemmelse`() {
+    fun `hent vilkår for ftrl bestemmelse yrkesaktiv`() {
         val bestemmelse = Folketrygdloven_kap2_bestemmelser.FTRL_KAP2_2_1
 
         justRun { aksesskontroll.autoriser(any()) }
-        every { unleash.isEnabled(any()) } returns false
-        every { vilkårForBestemmelse.hentVilkår(bestemmelse, Behandlingstema.IKKE_YRKESAKTIV, emptyMap(), 1) } returns listOf(
+        every { vilkårForBestemmelse.hentVilkår(bestemmelse, Behandlingstema.YRKESAKTIV, emptyMap(), 1) } returns listOf(
             Vilkår(
                 Vilkaar.FTRL_2_1_BOSATT_NORGE_FORUT
             ),
@@ -48,17 +45,19 @@ class VilkårTjenesteTest(@Autowired private val mockMvc: MockMvc) {
             ),
         )
 
-        mockMvc.perform(get("/api/ftrl/bestemmelser/{bestemmelse}/vilkaar", bestemmelse)
-            .param("behandlingID", "1"))
+        mockMvc.perform(
+            get("/api/ftrl/bestemmelser/{bestemmelse}/vilkaar", bestemmelse)
+                .param("behandlingstema", "YRKESAKTIV")
+                .param("behandlingID", "1")
+        )
             .andExpect(status().isOk())
     }
 
     @Test
-    fun `hent vilkår for ftrl bestemmelse med toggle MELOSYS_FTRL_BESTEMMELSER_2`() {
+    fun `hent vilkår for ftrl bestemmelse ikke yrkesaktiv`() {
         val bestemmelse = Folketrygdloven_kap2_bestemmelser.FTRL_KAP2_2_1
 
         justRun { aksesskontroll.autoriser(any()) }
-        every { unleash.isEnabled(MELOSYS_FTRL_YRKESAKTIV_PLIKTIGE_BESTEMMELSER) } returns true
         every { vilkårForBestemmelse.hentVilkår(bestemmelse, Behandlingstema.IKKE_YRKESAKTIV, emptyMap(), 1) } returns listOf(
             Vilkår(
                 Vilkaar.FTRL_2_1_BOSATT_NORGE_FORUT
@@ -72,9 +71,11 @@ class VilkårTjenesteTest(@Autowired private val mockMvc: MockMvc) {
         )
 
 
-        mockMvc.perform(get("/api/ftrl/bestemmelser/{bestemmelse}/vilkaar", bestemmelse)
-            .param("behandlingstema", "IKKE_YRKESAKTIV")
-            .param("behandlingID", "1"))
+        mockMvc.perform(
+            get("/api/ftrl/bestemmelser/{bestemmelse}/vilkaar", bestemmelse)
+                .param("behandlingstema", "IKKE_YRKESAKTIV")
+                .param("behandlingID", "1")
+        )
             .andExpect(status().isOk())
     }
 }

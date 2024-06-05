@@ -5,7 +5,6 @@ import java.util.*;
 
 import com.google.common.collect.Sets;
 import io.getunleash.FakeUnleash;
-import io.getunleash.Unleash;
 import no.nav.melosys.domain.*;
 import no.nav.melosys.domain.arkiv.ArkivDokument;
 import no.nav.melosys.domain.arkiv.DokumentReferanse;
@@ -22,6 +21,7 @@ import no.nav.melosys.domain.kodeverk.Land_iso2;
 import no.nav.melosys.domain.kodeverk.Landkoder;
 import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingstyper;
 import no.nav.melosys.domain.kodeverk.lovvalgsbestemmelser.Lovvalgbestemmelser_883_2004;
+import no.nav.melosys.domain.kodeverk.lovvalgsbestemmelser.Lovvalgbestemmelser_konv_efta_storbritannia;
 import no.nav.melosys.exception.FunksjonellException;
 import no.nav.melosys.exception.IntegrasjonException;
 import no.nav.melosys.featuretoggle.ToggleName;
@@ -40,7 +40,10 @@ import org.jeasy.random.EasyRandom;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
-import org.mockito.*;
+import org.mockito.ArgumentCaptor;
+import org.mockito.Captor;
+import org.mockito.Mock;
+import org.mockito.Mockito;
 import org.mockito.junit.jupiter.MockitoExtension;
 
 import static org.assertj.core.api.Assertions.assertThat;
@@ -136,7 +139,7 @@ class EessiServiceTest {
     }
 
     @Test
-    void opprettOgSendSed_buc03_ingenMedlemsperiodeType() throws Exception {
+    void opprettOgSendSed_buc03_ingenMedlemsperiodeType() {
         when(sedDataBygger.lag(any(SedDataGrunnlag.class), any(Behandlingsresultat.class), any(PeriodeType.class))).thenReturn(new SedDataDto());
         when(eessiConsumer.opprettBucOgSed(any(), any(), any(), eq(true), eq(true))).thenReturn(new OpprettSedDto());
         when(dokumentdataGrunnlagFactory.av(any())).thenReturn(Mockito.mock(SedDataGrunnlagMedSoknad.class));
@@ -150,7 +153,7 @@ class EessiServiceTest {
     }
 
     @Test
-    void opprettOgSendSed_buc01_medlemsperiodeTypeAnmodningsperiode() throws Exception {
+    void opprettOgSendSed_buc01_medlemsperiodeTypeAnmodningsperiode() {
         when(sedDataBygger.lag(any(SedDataGrunnlag.class), any(Behandlingsresultat.class), any(PeriodeType.class))).thenReturn(new SedDataDto());
         when(eessiConsumer.opprettBucOgSed(any(), any(), any(), eq(true), eq(true))).thenReturn(new OpprettSedDto());
         when(dokumentdataGrunnlagFactory.av(any())).thenReturn(Mockito.mock(SedDataGrunnlagMedSoknad.class));
@@ -163,7 +166,27 @@ class EessiServiceTest {
     }
 
     @Test
-    void opprettOgSendSed_buc02IngenUtpekingsperiode_medlemsperiodeTypeLovvalgsperiode() throws Exception {
+    void opprettOgSendSed_a001MedStorbritanniaKonv_mapperKorrektYtterligereInformasjon() {
+        unleash.enable(ToggleName.MELOSYS_KONVENSJON_EFTA_LAND_OG_STORBRITANNIA);
+        when(sedDataBygger.lag(any(SedDataGrunnlag.class), any(Behandlingsresultat.class), any(PeriodeType.class))).thenReturn(new SedDataDto());
+        when(eessiConsumer.opprettBucOgSed(any(), any(), any(), eq(true), eq(true))).thenReturn(new OpprettSedDto());
+        when(dokumentdataGrunnlagFactory.av(any())).thenReturn(Mockito.mock(SedDataGrunnlagMedSoknad.class));
+        mockBehandling();
+        var behandlingsresultat = lagBehandlingsresultat();
+        behandlingsresultat.hentAnmodningsperiode().setBestemmelse(Lovvalgbestemmelser_konv_efta_storbritannia.KONV_EFTA_STORBRITANNIA_ART18_1);
+        when(behandlingsresultatService.hentBehandlingsresultat(BEHANDLING_ID)).thenReturn(behandlingsresultat);
+
+
+        eessiService.opprettOgSendSed(BEHANDLING_ID, List.of("SE:123"), BucType.LA_BUC_01, null, "fritekst");
+
+
+        verify(sedDataBygger).lag(any(SedDataGrunnlag.class), eq(lagBehandlingsresultat()), eq(PeriodeType.ANMODNINGSPERIODE));
+        verify(eessiConsumer).opprettBucOgSed(sedDataDtoCaptor.capture(), any(), eq(BucType.LA_BUC_01), eq(true), eq(true));
+        assertThat(sedDataDtoCaptor.getValue().getYtterligereInformasjon()).isEqualTo("Issued under the EEA EFTA Convention.\nfritekst");
+    }
+
+    @Test
+    void opprettOgSendSed_buc02IngenUtpekingsperiode_medlemsperiodeTypeLovvalgsperiode() {
         when(sedDataBygger.lag(any(SedDataGrunnlag.class), any(Behandlingsresultat.class), any(PeriodeType.class))).thenReturn(new SedDataDto());
         when(eessiConsumer.opprettBucOgSed(any(), any(), any(), eq(true), eq(true))).thenReturn(new OpprettSedDto());
         when(dokumentdataGrunnlagFactory.av(any())).thenReturn(Mockito.mock(SedDataGrunnlagMedSoknad.class));
@@ -176,7 +199,7 @@ class EessiServiceTest {
     }
 
     @Test
-    void opprettOgSendSed_buc02MedUtpekingsperiode_medlemsperiodeTypeUtpekingsperiode() throws Exception {
+    void opprettOgSendSed_buc02MedUtpekingsperiode_medlemsperiodeTypeUtpekingsperiode() {
         Behandlingsresultat behandlingsresultat = lagBehandlingsresultat();
         behandlingsresultat.getUtpekingsperioder().add(new Utpekingsperiode());
         when(behandlingsresultatService.hentBehandlingsresultat(BEHANDLING_ID)).thenReturn(behandlingsresultat);
@@ -191,7 +214,7 @@ class EessiServiceTest {
     }
 
     @Test
-    void opprettOgSendSed_buc04_medlemsperiodeTypeLovvalgsperiode() throws Exception {
+    void opprettOgSendSed_buc04_medlemsperiodeTypeLovvalgsperiode() {
         when(sedDataBygger.lag(any(SedDataGrunnlag.class), any(Behandlingsresultat.class), any(PeriodeType.class))).thenReturn(new SedDataDto());
         when(eessiConsumer.opprettBucOgSed(any(), any(), any(), eq(true), eq(true))).thenReturn(new OpprettSedDto());
         when(dokumentdataGrunnlagFactory.av(any())).thenReturn(Mockito.mock(SedDataGrunnlagMedSoknad.class));
@@ -253,7 +276,7 @@ class EessiServiceTest {
     }
 
     @Test
-    void støtterAutomatiskBehandling_verifiserA001A003A009A010støtterAutomatiskBehandling() throws Exception {
+    void støtterAutomatiskBehandling_verifiserA001A003A009A010støtterAutomatiskBehandling() {
         List<String> sedTyperAutomatiskBehandling = Arrays.asList(
             SedType.A001.name(),
             SedType.A009.name(),
@@ -271,7 +294,7 @@ class EessiServiceTest {
     }
 
     @Test
-    void støtterAutomatiskBehandling_verifiserStøtterIkkeAutomatiskBehandling() throws Exception {
+    void støtterAutomatiskBehandling_verifiserStøtterIkkeAutomatiskBehandling() {
         List<String> sedTyperIkkeAutomatiskBehandling = Arrays.asList(
             SedType.H001.name(),
             SedType.A002.name(),
@@ -295,7 +318,7 @@ class EessiServiceTest {
     }
 
     @Test
-    void støtterAutomatiskBehandling_nullVerdi_forventFalse() throws Exception {
+    void støtterAutomatiskBehandling_nullVerdi_forventFalse() {
         MelosysEessiMelding melosysEessiMelding = new MelosysEessiMelding();
         melosysEessiMelding.setSedType(null);
         when(eessiConsumer.hentMelosysEessiMeldingFraJournalpostID("123")).thenReturn(melosysEessiMelding);
@@ -303,7 +326,7 @@ class EessiServiceTest {
     }
 
     @Test
-    void støtterAutomatiskBehandling_a003ikkeUtpekt_verifiserStøtterAutomatiskBehandling() throws Exception {
+    void støtterAutomatiskBehandling_a003ikkeUtpekt_verifiserStøtterAutomatiskBehandling() {
         MelosysEessiMelding melosysEessiMelding = new MelosysEessiMelding();
         melosysEessiMelding.setLovvalgsland(Landkoder.SE.name());
         melosysEessiMelding.setSedType("A003");
@@ -312,7 +335,7 @@ class EessiServiceTest {
     }
 
     @Test
-    void støtterAutomatiskBehandling_a003erUtpekt_verifiserStøtterIkkeAutomatiskBehandling() throws Exception {
+    void støtterAutomatiskBehandling_a003erUtpekt_verifiserStøtterIkkeAutomatiskBehandling() {
         MelosysEessiMelding melosysEessiMelding = new MelosysEessiMelding();
         melosysEessiMelding.setLovvalgsland(Landkoder.NO.name());
         melosysEessiMelding.setSedType("A003");
@@ -478,6 +501,29 @@ class EessiServiceTest {
 
         verify(sedDataBygger).lagUtkast(any(SedDataGrunnlag.class), any(), eq(PeriodeType.ANMODNINGSPERIODE));
         verify(eessiConsumer).genererSedPdf(any(), any());
+        assertThat(pdf).isEqualTo(PDF);
+    }
+
+    @Test
+    void genererSedPdf_sedA001_storbritanniaKonvFårTilpassetYtterligereInformasjon() {
+        unleash.enable(ToggleName.MELOSYS_KONVENSJON_EFTA_LAND_OG_STORBRITANNIA);
+        final byte[] PDF = "pdf".getBytes();
+        when(eessiConsumer.genererSedPdf(any(), any())).thenReturn(PDF);
+        when(sedDataBygger.lagUtkast(any(SedDataGrunnlag.class), any(Behandlingsresultat.class), any(PeriodeType.class))).thenReturn(new SedDataDto());
+        when(dokumentdataGrunnlagFactory.av(any())).thenReturn(Mockito.mock(SedDataGrunnlagMedSoknad.class));
+        var sedPdfData = new SedPdfData();
+        sedPdfData.setFritekst("fritekst");
+        var behandlingsresultat = lagBehandlingsresultat();
+        behandlingsresultat.hentAnmodningsperiode().setBestemmelse(Lovvalgbestemmelser_konv_efta_storbritannia.KONV_EFTA_STORBRITANNIA_ART18_1);
+        when(behandlingsresultatService.hentBehandlingsresultat(BEHANDLING_ID)).thenReturn(behandlingsresultat);
+
+
+        byte[] pdf = eessiService.genererSedPdf(BEHANDLING_ID, SedType.A001, sedPdfData);
+
+
+        verify(sedDataBygger).lagUtkast(any(SedDataGrunnlag.class), any(), eq(PeriodeType.ANMODNINGSPERIODE));
+        verify(eessiConsumer).genererSedPdf(sedDataDtoCaptor.capture(), any());
+        assertThat(sedDataDtoCaptor.getValue().getYtterligereInformasjon()).isEqualTo("Issued under the EEA EFTA Convention.\nfritekst");
         assertThat(pdf).isEqualTo(PDF);
     }
 

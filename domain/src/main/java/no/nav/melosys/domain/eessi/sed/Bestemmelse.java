@@ -2,15 +2,14 @@ package no.nav.melosys.domain.eessi.sed;
 
 
 import java.util.Arrays;
+import java.util.Map;
 
 import com.google.common.collect.BiMap;
 import com.google.common.collect.HashBiMap;
 import com.google.common.collect.ImmutableMap;
+import com.google.common.collect.Maps;
 import no.nav.melosys.domain.kodeverk.LovvalgBestemmelse;
-import no.nav.melosys.domain.kodeverk.lovvalgsbestemmelser.Lovvalgbestemmelser_883_2004;
-import no.nav.melosys.domain.kodeverk.lovvalgsbestemmelser.Lovvalgbestemmelser_987_2009;
-import no.nav.melosys.domain.kodeverk.lovvalgsbestemmelser.Overgangsregelbestemmelser;
-import no.nav.melosys.domain.kodeverk.lovvalgsbestemmelser.Tilleggsbestemmelser_883_2004;
+import no.nav.melosys.domain.kodeverk.lovvalgsbestemmelser.*;
 import org.springframework.util.Assert;
 
 public enum Bestemmelse {
@@ -84,6 +83,34 @@ public enum Bestemmelse {
             .put(Overgangsregelbestemmelser.FO_1408_1971_ART14C_B, Bestemmelse.ART_14_c_b)
             .build());
 
+    private static final Map<LovvalgBestemmelse, Bestemmelse> GB_KONV_BESTEMMELSE_MAP =
+        Maps.newHashMap(ImmutableMap.<LovvalgBestemmelse, Bestemmelse>builder()
+            .put(Tilleggsbestemmelser_konv_efta_storbritannia.KONV_EFTA_STORBRITANNIA_ART13_4_1, Bestemmelse.ART_11_4)
+            .put(Tilleggsbestemmelser_konv_efta_storbritannia.KONV_EFTA_STORBRITANNIA_ART13_2, Bestemmelse.ART_11_2)
+            .put(Lovvalgbestemmelser_konv_efta_storbritannia.KONV_EFTA_STORBRITANNIA_ART13_3A, Bestemmelse.ART_11_3_a)
+            .put(Lovvalgbestemmelser_konv_efta_storbritannia.KONV_EFTA_STORBRITANNIA_ART13_3B, Bestemmelse.ART_11_3_b)
+            .put(Lovvalgbestemmelser_konv_efta_storbritannia.KONV_EFTA_STORBRITANNIA_ART13_3C, Bestemmelse.ART_11_3_d)
+            .put(Lovvalgbestemmelser_konv_efta_storbritannia.KONV_EFTA_STORBRITANNIA_ART13_3D, Bestemmelse.ART_11_3_e)
+            .put(Lovvalgbestemmelser_konv_efta_storbritannia.KONV_EFTA_STORBRITANNIA_ART13_4, Bestemmelse.ART_11_4)
+            .put(Tilleggsbestemmelser_konv_efta_storbritannia.KONV_EFTA_STORBRITANNIA_ART13_5, Bestemmelse.ART_11_5)
+            .put(Lovvalgbestemmelser_konv_efta_storbritannia.KONV_EFTA_STORBRITANNIA_ART14_1, Bestemmelse.ART_12_1)
+            .put(Lovvalgbestemmelser_konv_efta_storbritannia.KONV_EFTA_STORBRITANNIA_ART16_1, Bestemmelse.ART_12_1)
+            .put(Lovvalgbestemmelser_konv_efta_storbritannia.KONV_EFTA_STORBRITANNIA_ART14_2, Bestemmelse.ART_12_2)
+            .put(Lovvalgbestemmelser_konv_efta_storbritannia.KONV_EFTA_STORBRITANNIA_ART16_3, Bestemmelse.ART_12_2)
+            .put(Lovvalgbestemmelser_konv_efta_storbritannia.KONV_EFTA_STORBRITANNIA_ART15_1A, Bestemmelse.ART_13_1_a)
+            .put(Lovvalgbestemmelser_konv_efta_storbritannia.KONV_EFTA_STORBRITANNIA_ART15_1B1, Bestemmelse.ART_13_1_b_1)
+            .put(Lovvalgbestemmelser_konv_efta_storbritannia.KONV_EFTA_STORBRITANNIA_ART15_1_B2, Bestemmelse.ART_13_1_b_2)
+            .put(Lovvalgbestemmelser_konv_efta_storbritannia.KONV_EFTA_STORBRITANNIA_ART15_1_B3, Bestemmelse.ART_13_1_b_3)
+            .put(Lovvalgbestemmelser_konv_efta_storbritannia.KONV_EFTA_STORBRITANNIA_ART15_1_B4, Bestemmelse.ART_13_1_b_4)
+            .put(Lovvalgbestemmelser_konv_efta_storbritannia.KONV_EFTA_STORBRITANNIA_ART15_2A, Bestemmelse.ART_13_2_a)
+            .put(Lovvalgbestemmelser_konv_efta_storbritannia.KONV_EFTA_STORBRITANNIA_ART15_2B, Bestemmelse.ART_13_2_b)
+            .put(Lovvalgbestemmelser_konv_efta_storbritannia.KONV_EFTA_STORBRITANNIA_ART15_3, Bestemmelse.ART_13_3)
+            .put(Lovvalgbestemmelser_konv_efta_storbritannia.KONV_EFTA_STORBRITANNIA_ART15_4, Bestemmelse.ART_13_4)
+            .put(Lovvalgbestemmelser_konv_efta_storbritannia.KONV_EFTA_STORBRITANNIA_ART18_1, Bestemmelse.ART_16_1)
+            .put(Lovvalgbestemmelser_konv_efta_storbritannia.KONV_EFTA_STORBRITANNIA_ART18_2, Bestemmelse.ART_16_2)
+            .put(Lovvalgbestemmelser_konv_efta_storbritannia.KONV_EFTA_STORBRITANNIA_ART15_5, Bestemmelse.ANNET)
+            .build());
+
     private String value;
 
     Bestemmelse(String value) {
@@ -112,6 +139,10 @@ public enum Bestemmelse {
 
         if (BESTEMMELSE_MAP.containsKey(lovvalgBestemmelse)) {
             return BESTEMMELSE_MAP.get(lovvalgBestemmelse);
+        }
+
+        if (GB_KONV_BESTEMMELSE_MAP.containsKey(lovvalgBestemmelse)) {
+            return GB_KONV_BESTEMMELSE_MAP.get(lovvalgBestemmelse);
         }
 
         throw new IllegalArgumentException("Støtte for kode: " + lovvalgBestemmelse.getKode() + " er ikke implementert");

@@ -3,7 +3,6 @@ package no.nav.melosys.service.dokument.brev.bygger;
 import java.time.LocalDate;
 import java.util.Collections;
 import java.util.HashSet;
-import java.util.Optional;
 import java.util.Set;
 
 import no.nav.melosys.domain.*;
@@ -33,7 +32,6 @@ import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 
-import static no.nav.melosys.domain.kodeverk.Vilkaar.FO_883_2004_ART12_1;
 import static no.nav.melosys.domain.kodeverk.Vilkaar.VESENTLIG_VIRKSOMHET;
 import static no.nav.melosys.service.MottatteOpplysningerStub.lagMottatteOpplysninger;
 import static no.nav.melosys.service.SaksopplysningStubs.lagArbeidsforholdOpplysninger;
@@ -115,8 +113,8 @@ class BrevDataByggerAvslagArbeidsgiverTest {
         Vilkaarsresultat vilkaarsresultatArt121 = lagVilkårresultat(Vilkaar.FO_883_2004_ART12_1, Utsendt_arbeidstaker_begrunnelser.IKKE_OMFATTET_LENGE_NOK_I_NORGE_FOER.getKode());
         Vilkaarsresultat vesentligVirksomhet = lagVilkårresultat(Vilkaar.VESENTLIG_VIRKSOMHET, Vesentlig_virksomhet_begrunnelser.FOR_LITE_KONTRAKTER_NORGE.getKode());
 
-        when(vilkaarsresultatService.finnVilkaarsresultat(anyLong(), eq(FO_883_2004_ART12_1))).thenReturn(Optional.of(vilkaarsresultatArt121));
-        when(vilkaarsresultatService.finnVilkaarsresultat(anyLong(), eq(VESENTLIG_VIRKSOMHET))).thenReturn(Optional.of(vesentligVirksomhet));
+        when(vilkaarsresultatService.finnUtsendingArbeidstakerVilkaarsresultat(anyLong())).thenReturn(vilkaarsresultatArt121);
+        when(vilkaarsresultatService.finnVilkaarsresultat(anyLong(), eq(VESENTLIG_VIRKSOMHET))).thenReturn(vesentligVirksomhet);
 
         AvklarteVirksomheterService avklarteVirksomheterService = new AvklarteVirksomheterService(avklartefaktaService,
             organisasjonOppslagService, mock(BehandlingService.class), kodeverkService);
