@@ -37,9 +37,13 @@ import no.nav.melosys.integrasjon.trygdeavgift.dto.*
 import no.nav.melosys.itest.JournalfoeringBase
 import no.nav.melosys.melosysmock.medl.MedlRepo
 import no.nav.melosys.melosysmock.testdata.TestDataGenerator
+import no.nav.melosys.repository.AvklarteFaktaRepository
 import no.nav.melosys.repository.BehandlingRepository
+import no.nav.melosys.repository.BehandlingsresultatRepository
 import no.nav.melosys.repository.FagsakRepository
+import no.nav.melosys.saksflyt.ProsessinstansRepository
 import no.nav.melosys.saksflytapi.domain.ProsessType
+import no.nav.melosys.saksflytapi.domain.Prosessinstans
 import no.nav.melosys.service.avgift.TrygdeavgiftsberegningService
 import no.nav.melosys.service.avgift.dto.InntektskildeRequest
 import no.nav.melosys.service.avgift.dto.OppdaterTrygdeavgiftsgrunnlagRequest
@@ -88,7 +92,10 @@ class YrkesaktivFtrlVedtakIT(
     @Autowired private val opprettBehandlingForSak: OpprettBehandlingForSak,
     @Autowired private val trygdeavgiftsberegningService: TrygdeavgiftsberegningService,
     @Autowired @Qualifier("manglendeFakturabetalingMelding") private val manglendeFakturabetalingMeldingTemplate: KafkaTemplate<String, ManglendeFakturabetalingMelding>,
-    @Autowired private val skatteHendelseMeldingKafkaTemplate: KafkaTemplate<String, Skattehendelse>
+    @Autowired private val skatteHendelseMeldingKafkaTemplate: KafkaTemplate<String, Skattehendelse>,
+    @Autowired private val avklarteFaktaRepository: AvklarteFaktaRepository,
+    @Autowired private val behandlingsResultRepository: BehandlingsresultatRepository,
+    @Autowired private val prosessinstansRepository: ProsessinstansRepository
 ) : JournalfoeringBase(
     testDataGenerator, journalføringService, oppgaveService,
     DynamiskTrygdeavgiftsberegningTransformer()
@@ -294,6 +301,29 @@ class YrkesaktivFtrlVedtakIT(
         }
 
         //TODO verifisere opprettet behandling
+
+        // TODO: make this run in after by registering what needs to cleanup. Look at whats done in faktureringskomponenten
+        fagsakRepository.findBySaksnummer(saksnummer).also {
+            val fagsak = it.get()
+            behandlingRepository.findById(fagsak.hentSistRegistrertBehandling().id).also { behandlingOption ->
+                val behandling = behandlingOption.get()
+                val behandlingId = behandling.id
+                avklarteFaktaRepository.findById(behandlingId).also { avklarteFaktaOption ->
+                    if (avklarteFaktaOption.isPresent)
+                        avklarteFaktaRepository.delete(avklarteFaktaOption.get())
+                }
+                behandlingsResultRepository.findById(behandlingId).also { behandlingsResultOption ->
+                    behandlingsResultRepository.delete(behandlingsResultOption.get())
+                }
+                prosessinstansRepository.findAll().filter { pi ->
+                    pi?.behandling?.id == behandlingId
+                }.forEach { prosessInstans ->
+                    prosessinstansRepository.delete(prosessInstans)
+                }
+                behandlingRepository.delete(behandling)
+            }
+            fagsakRepository.delete(fagsak)
+        }
     }
 
 
