@@ -1,10 +1,12 @@
 package no.nav.melosys.saksflyt.steg.oppgave
 
+import io.getunleash.Unleash
 import no.nav.melosys.domain.Behandling
 import no.nav.melosys.domain.Fagsystem
 import no.nav.melosys.domain.Tema
 import no.nav.melosys.domain.kodeverk.Oppgavetyper
 import no.nav.melosys.domain.oppgave.Oppgave
+import no.nav.melosys.featuretoggle.ToggleName
 import no.nav.melosys.saksflyt.steg.StegBehandler
 import no.nav.melosys.saksflytapi.domain.ProsessSteg
 import no.nav.melosys.saksflytapi.domain.Prosessinstans
@@ -16,16 +18,21 @@ import java.time.LocalDate
 @Component
 class OpprettAvgiftsoppgave(
     private val behandlingsresultatService: BehandlingsresultatService,
-    private val oppgaveService: OppgaveService
+    private val oppgaveService: OppgaveService,
+    private val unleash: Unleash
 ) : StegBehandler {
     override fun inngangsSteg(): ProsessSteg = ProsessSteg.OPPRETT_AVGIFTSOPPGAVE
 
     override fun utfør(prosessinstans: Prosessinstans) {
+        // Når denne fjernes kan hele steget slettes, OPPRETT_AVGIFTSOPPGAVE kan slettes fra både ProsessSteg-enum og database-tabellen PROSESS_STEG
+        // Dobbeltsjekk at det ikke finne ProsessinstansHendelse.steg == OPPRETT_AVGIFTSOPPGAVE eller Prosessinstans.sistFullførtSteg == OPPRETT_AVGIFTSOPPGAVE i databasen
+        // (Her kan man høre med Eirik)
+        if (unleash.isEnabled(ToggleName.MELOSYS_IKKE_SEND_TRYGDEAGIFT_OPPGAVE)) return
         val behandling = prosessinstans.behandling
         val behandlingID = behandling.id
         val behandlingsresultat = behandlingsresultatService.hentBehandlingsresultat(behandlingID)
 
-        if (behandlingsresultat.erAvslag() || behandling.fagsak.erSakstypeFtrl())  return
+        if (behandlingsresultat.erAvslag() || behandling.fagsak.erSakstypeFtrl()) return
 
         val lovvalgsperiode = behandlingsresultat.hentLovvalgsperiode()
         if (lovvalgsperiode.erArtikkel11() || lovvalgsperiode.erArtikkel13()) return

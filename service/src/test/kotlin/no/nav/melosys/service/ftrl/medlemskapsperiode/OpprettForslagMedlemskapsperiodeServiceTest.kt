@@ -1,6 +1,5 @@
 package no.nav.melosys.service.ftrl.medlemskapsperiode
 
-import io.getunleash.FakeUnleash
 import io.kotest.assertions.throwables.shouldThrow
 import io.kotest.matchers.collections.shouldBeEmpty
 import io.kotest.matchers.collections.shouldHaveSize
@@ -11,6 +10,7 @@ import io.kotest.matchers.shouldNotBe
 import io.kotest.matchers.string.shouldContain
 import io.mockk.every
 import io.mockk.impl.annotations.MockK
+import io.mockk.impl.annotations.RelaxedMockK
 import io.mockk.junit5.MockKExtension
 import io.mockk.mockk
 import io.mockk.verify
@@ -43,10 +43,8 @@ class OpprettForslagMedlemskapsperiodeServiceTest {
     @MockK
     private lateinit var utledMottaksdato: UtledMottaksdato
 
-    @MockK
+    @RelaxedMockK
     private lateinit var avklartefaktaService: AvklartefaktaService
-
-    private val utledBestemmelserOgVilkår = UtledBestemmelserOgVilkår()
 
     private val vilkårForBestemmelse = VilkårForBestemmelse(VilkårForBestemmelseYrkesaktiv(mockk()), VilkårForBestemmelseIkkeYrkesaktiv(mockk()))
 
@@ -62,8 +60,6 @@ class OpprettForslagMedlemskapsperiodeServiceTest {
             OpprettForslagMedlemskapsperiodeService(
                 behandlingsresultatService,
                 utledMottaksdato,
-                utledBestemmelserOgVilkår,
-                FakeUnleash(),
                 avklartefaktaService,
                 vilkårForBestemmelse
             )

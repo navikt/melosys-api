@@ -1,6 +1,5 @@
 package no.nav.melosys.service.ftrl.medlemskapsperiode
 
-import io.getunleash.Unleash
 import no.nav.melosys.domain.Medlemskapsperiode
 import no.nav.melosys.domain.kodeverk.Folketrygdloven_kap2_bestemmelser
 import no.nav.melosys.domain.kodeverk.InnvilgelsesResultat
@@ -10,7 +9,6 @@ import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingstema
 import no.nav.melosys.domain.mottatteopplysninger.SøknadNorgeEllerUtenforEØS
 import no.nav.melosys.exception.FunksjonellException
 import no.nav.melosys.exception.IkkeFunnetException
-import no.nav.melosys.featuretoggle.ToggleName
 import no.nav.melosys.repository.MedlemskapsperiodeRepository
 import no.nav.melosys.service.behandling.BehandlingsresultatService
 import no.nav.melosys.service.ftrl.GyldigeTrygdedekningerService
@@ -25,8 +23,7 @@ class MedlemskapsperiodeService(
     private val medlemskapsperiodeRepository: MedlemskapsperiodeRepository,
     private val behandlingsresultatService: BehandlingsresultatService,
     private val medlPeriodeService: MedlPeriodeService,
-    private val gyldigeTrygdedekningerService: GyldigeTrygdedekningerService,
-    private val unleash: Unleash
+    private val gyldigeTrygdedekningerService: GyldigeTrygdedekningerService
 ) {
     @Transactional(readOnly = true)
     fun hentMedlemskapsperioder(behandlingsresultatID: Long): List<Medlemskapsperiode> {
@@ -121,10 +118,8 @@ class MedlemskapsperiodeService(
             Land_iso2.NO.kode in land && land.size == 1 && bestemmelse in listOf(
                 Folketrygdloven_kap2_bestemmelser.FTRL_KAP2_2_1
             )
-        val toggleEnabled =
-            behandlingstema != Behandlingstema.YRKESAKTIV || unleash.isEnabled(ToggleName.MELOSYS_FTRL_YRKESAKTIV_PLIKTIGE_BESTEMMELSER)
 
-        if (toggleEnabled && tom == null && !nullTilOgMedDatoErTillatt) {
+        if (tom == null && !nullTilOgMedDatoErTillatt) {
             throw FunksjonellException("Tom-dato er påkrevd")
         } else if (fom == null || innvilgelsesResultat == null || bestemmelse == null || trygdedekning == null) {
             throw FunksjonellException("Fom-dato, innvilgelsesresultat, bestemmelse og trygdedekning er påkrevd")

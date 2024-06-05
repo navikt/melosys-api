@@ -2,7 +2,6 @@ package no.nav.melosys.service.ftrl.bestemmelse
 
 import no.nav.melosys.domain.kodeverk.Folketrygdloven_kap2_bestemmelser.*
 
-// Styres av ToggleName.MELOSYS_FTRL_YRKESAKTIV_PLIKTIGE_BESTEMMELSER
 object YrkesaktivBestemmelser {
     val bestemmelser = listOf(
         FTRL_KAP2_2_1,
