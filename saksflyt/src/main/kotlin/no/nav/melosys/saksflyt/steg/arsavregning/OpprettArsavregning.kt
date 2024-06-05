@@ -50,20 +50,21 @@ class OpprettArsavregning(
 
         val fagsaker = fagsakService.hentFagsakerMedAktør(Aktoersroller.BRUKER, aktørId)
 
-        val sakMedTrygdeavgit = fagsaker.filter {
-            // og der det har vært en overlapp i medlemskaps eller lovvalgsperioden for det året skatteoppgjør gjelder for
-            trygdeavgiftOppsummeringService.harFagsakBehandlingerMedTrygdeavgift(it.saksnummer)
-        }.let { sakerMedTrygdeavgit ->
-            when {
-                sakerMedTrygdeavgit.isEmpty() -> {
-                    log.info("Fant ingen saker med trygdeavgift saker: ${fagsaker.map { it.saksnummer }}")
-                    return
-                }
+        val sakMedTrygdeavgit = fagsaker.also { if (it.isEmpty()) log.info("Fant ingen fagsaker for aktør $aktørId") }
+            .filter {
+                // og der det har vært en overlapp i medlemskaps eller lovvalgsperioden for det året skatteoppgjør gjelder for
+                trygdeavgiftOppsummeringService.harFagsakBehandlingerMedTrygdeavgift(it.saksnummer)
+            }.let { sakerMedTrygdeavgit ->
+                when {
+                    sakerMedTrygdeavgit.isEmpty() -> {
+                        log.info("Fant ingen saker med trygdeavgift saker: ${fagsaker.map { it.saksnummer }}")
+                        return
+                    }
 
-                sakerMedTrygdeavgit.size > 1 -> throw TekniskException("Flere saker med trygdeavgift funnet")
-                else -> sakerMedTrygdeavgit.single()
+                    sakerMedTrygdeavgit.size > 1 -> throw TekniskException("Flere saker med trygdeavgift funnet")
+                    else -> sakerMedTrygdeavgit.single()
+                }
             }
-        }
 
         val aktiveÅrsavregninger: List<Behandling> = sakMedTrygdeavgit.hentAktiveÅrsavregninger()
 
