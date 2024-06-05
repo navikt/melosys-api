@@ -38,9 +38,11 @@ class ÅrsavregningService(
         )
     }
 
+    @Transactional
     fun oppretteÅrsavregning(behandlingsresultat: Behandlingsresultat, gjelderPeriode: Int) {
         Aarsavregning().apply {
             aar = gjelderPeriode
+            behandlingsresultat.aarsavregning = this
             this.behandlingsresultat = behandlingsresultat
         }.also {
             aarsavregningRepository.save(it)
