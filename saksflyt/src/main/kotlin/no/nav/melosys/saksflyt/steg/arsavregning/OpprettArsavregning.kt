@@ -51,29 +51,12 @@ class OpprettArsavregning(
             if (it == null) log.info("Fant ingen sak med trygdeavgift for prossesInstansId: ${prosessinstans.id}")
         } ?: return
 
-        val aktiveÅrsavregninger: List<Behandling> = sakMedTrygdeavgift.hentAktiveÅrsavregninger()
-        val årsAvregninger = aktiveÅrsavregninger.also { if (it.isEmpty()) log.info("Fant ingen aktive årsavregninger") }
-            .filter { behandslingsresultatService.hentBehandlingsresultat(it.id).aarsavregning.aar == gjelderPeriode }
-
-        when {
-            årsAvregninger.isEmpty() -> {
-                log.info("Fant ingen aktive årsavregninger for år $gjelderPeriode")
+        finnAktivÅrsavregning(sakMedTrygdeavgift, gjelderPeriode)?.run {
+            if (this.status != Behandlingsstatus.OPPRETTET) {
+                status = Behandlingsstatus.VURDER_DOKUMENT
+                behandlingService.lagre(this)
             }
-
-            årsAvregninger.size > 1 -> {
-                throw TekniskException("Flere aktive årsavregninger funnet")
-            }
-
-            else -> {
-                log.info("Fant aktiv årsavregning for år $gjelderPeriode")
-                årsAvregninger.single().run {
-                    if (this.status != Behandlingsstatus.OPPRETTET) {
-                        status = Behandlingsstatus.VURDER_DOKUMENT
-                        behandlingService.lagre(this)
-                    }
-                    return
-                }
-            }
+            return
         }
 
         val trygdeavgiftsBehandlinger = trygdeavgiftOppsummeringService.hentTrygdeavgiftBehandlinger(sakMedTrygdeavgift.saksnummer)
@@ -103,6 +86,27 @@ class OpprettArsavregning(
         val behandlingsresultat = behandslingsresultatService.hentBehandlingsresultat(nyBehandling.id)
         oppretteÅrsavregning.oppretteÅrsavregning(behandlingsresultat, gjelderPeriode)
         prosessinstans.behandling = nyBehandling
+    }
+
+    private fun finnAktivÅrsavregning(sakMedTrygdeavgift: Fagsak, gjelderPeriode: Int): Behandling? {
+        val årsAvregninger = sakMedTrygdeavgift.hentAktiveÅrsavregninger().also { if (it.isEmpty()) log.info("Fant ingen aktive årsavregninger") }
+            .filter { behandslingsresultatService.hentBehandlingsresultat(it.id).aarsavregning.aar == gjelderPeriode }
+
+        when {
+            årsAvregninger.isEmpty() -> {
+                log.info("Fant ingen aktive årsavregninger for år $gjelderPeriode")
+                return null
+            }
+
+            årsAvregninger.size > 1 -> {
+                throw TekniskException("Flere aktive årsavregninger funnet")
+            }
+
+            else -> {
+                log.info("Fant aktiv årsavregning for år $gjelderPeriode")
+                return årsAvregninger.single()
+            }
+        }
     }
 
     private fun finnSakMedTrygdeavgift(aktørId: String): Fagsak? =
