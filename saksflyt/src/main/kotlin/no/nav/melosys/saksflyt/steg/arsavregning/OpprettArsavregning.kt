@@ -48,22 +48,9 @@ class OpprettArsavregning(
         val ident = prosessinstans.getData(ProsessDataKey.IDENTIFIKATOR)
         val aktørId = persondataService.hentAktørIdForIdent(ident)
 
-        val fagsaker = fagsakService.hentFagsakerMedAktør(Aktoersroller.BRUKER, aktørId)
-
-        val sakMedTrygdeavgift = fagsaker.also { if (it.isEmpty()) log.info("Fant ingen fagsaker for aktør $aktørId") }
-            .filter {
-                trygdeavgiftOppsummeringService.harFagsakBehandlingerMedTrygdeavgift(it.saksnummer)
-            }.let { sakerMedTrygdeavgift ->
-                when {
-                    sakerMedTrygdeavgift.isEmpty() -> {
-                        log.info("Fant ingen saker med trygdeavgift saker: ${fagsaker.map { it.saksnummer }}")
-                        return
-                    }
-
-                    sakerMedTrygdeavgift.size > 1 -> throw TekniskException("Flere saker med trygdeavgift funnet")
-                    else -> sakerMedTrygdeavgift.single()
-                }
-            }
+        val sakMedTrygdeavgift = finnSakMedTrygdeavgift(aktørId).also {
+            if (it == null) log.info("Fant ingen sak med trygdeavgift for prossesInstansId: ${prosessinstans.id}")
+        } ?: return
 
         val aktiveÅrsavregninger: List<Behandling> = sakMedTrygdeavgift.hentAktiveÅrsavregninger()
         val årsAvregninger = aktiveÅrsavregninger.also { if (it.isEmpty()) log.info("Fant ingen aktive årsavregninger") }
@@ -121,6 +108,18 @@ class OpprettArsavregning(
         oppretteÅrsavregning.oppretteÅrsavregning(behandlingsresultat, gjelderPeriode)
         prosessinstans.behandling = nyBehandling
     }
+
+    private fun finnSakMedTrygdeavgift(aktørId: String): Fagsak? =
+        fagsakService.hentFagsakerMedAktør(Aktoersroller.BRUKER, aktørId)
+            .filter {
+                trygdeavgiftOppsummeringService.harFagsakBehandlingerMedTrygdeavgift(it.saksnummer)
+            }.let { sakerMedTrygdeavgift ->
+                when {
+                    sakerMedTrygdeavgift.isEmpty() -> null
+                    sakerMedTrygdeavgift.size > 1 -> throw TekniskException("Flere saker med trygdeavgift funnet")
+                    else -> sakerMedTrygdeavgift.single()
+                }
+            }
 
     private fun hentTeamaMedRiktigPeriode(fagsak: Fagsak): Behandlingstema? {
         // TODO: Avklar om vi trenger å finne riktig periode
