@@ -4,7 +4,6 @@ import mu.KotlinLogging
 import no.nav.melosys.domain.Behandling
 import no.nav.melosys.domain.ErPeriode
 import no.nav.melosys.domain.Fagsak
-import no.nav.melosys.domain.Lovvalgsperiode
 import no.nav.melosys.domain.kodeverk.Aktoersroller
 import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingsaarsaktyper
 import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingsstatus
@@ -59,17 +58,12 @@ class OpprettArsavregning(
             return
         }
 
-        val trygdeavgiftsBehandlinger = trygdeavgiftOppsummeringService.hentTrygdeavgiftBehandlinger(sakMedTrygdeavgift.saksnummer)
-        val trygdeavgiftsBehandlingerMedGyldigPeriode: Behandling = trygdeavgiftsBehandlinger.firstOrNull {
-            val lovvalgsperioder: MutableCollection<Lovvalgsperiode> = lovvalgsperiodeService.hentLovvalgsperioder(it.id)
-            val medlemskapsperioder = medlemskapsperiodeService.hentMedlemskapsperioder(it.id)
-
-            val isWithinPeriod: (ErPeriode) -> Boolean = { it.fom.year <= gjelderPeriode && it.tom.year >= gjelderPeriode }
-            lovvalgsperioder.none(isWithinPeriod) || medlemskapsperioder.none(isWithinPeriod)
-        }.also {
-            if (it == null) {
-                log.info("Fant ingen behandlinger med overlappende lovvalgsperioder eller medlemskapsperioder for sak: ${sakMedTrygdeavgift.saksnummer} og år: $gjelderPeriode")
-            }
+        val trygdeavgiftsBehandlingerMedGyldigPeriode = finnTrygdeavgiftsBehandlingerMedGyldigPeriode(sakMedTrygdeavgift, gjelderPeriode).also {
+            if (it == null) log.info(
+                "Fant ingen behandlinger med overlappende lovvalgsperioder eller medlemskapsperioder for sak: ${
+                    sakMedTrygdeavgift.saksnummer
+                } og år: $gjelderPeriode"
+            )
         } ?: return
 
         val nyBehandling = behandlingService.nyBehandling(
@@ -86,6 +80,16 @@ class OpprettArsavregning(
         val behandlingsresultat = behandslingsresultatService.hentBehandlingsresultat(nyBehandling.id)
         oppretteÅrsavregning.oppretteÅrsavregning(behandlingsresultat, gjelderPeriode)
         prosessinstans.behandling = nyBehandling
+    }
+
+    private fun finnTrygdeavgiftsBehandlingerMedGyldigPeriode(sakMedTrygdeavgift: Fagsak, gjelderPeriode: Int): Behandling? {
+        return trygdeavgiftOppsummeringService.hentTrygdeavgiftBehandlinger(sakMedTrygdeavgift.saksnummer).firstOrNull {
+            val lovvalgsperioder = lovvalgsperiodeService.hentLovvalgsperioder(it.id)
+            val medlemskapsperioder = medlemskapsperiodeService.hentMedlemskapsperioder(it.id)
+
+            val isWithinPeriod: (ErPeriode) -> Boolean = { it.fom.year <= gjelderPeriode && it.tom.year >= gjelderPeriode }
+            lovvalgsperioder.none(isWithinPeriod) || medlemskapsperioder.none(isWithinPeriod)
+        }
     }
 
     private fun finnAktivÅrsavregning(sakMedTrygdeavgift: Fagsak, gjelderPeriode: Int): Behandling? {
