@@ -29,7 +29,8 @@ import no.nav.melosys.domain.person.Persondata;
         @JsonSubTypes.Type(value = InnvilgelseFtrlYrkesaktivFrivilligBrevbestilling.class),
         @JsonSubTypes.Type(value = VarselbrevManglendeInnbetalingBrevbestilling.class),
         @JsonSubTypes.Type(value = VedtakOpphoertMedlemskapBrevbestilling.class),
-        @JsonSubTypes.Type(value = InnhentingAvInntektsopplysningerBrevbestilling.class)
+        @JsonSubTypes.Type(value = InnhentingAvInntektsopplysningerBrevbestilling.class),
+        @JsonSubTypes.Type(value = OrienteringAnmodningUnntakBrevbestilling.class)
     }
 )
 public class DokgenBrevbestilling extends Brevbestilling {

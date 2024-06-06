@@ -38,6 +38,9 @@ class DokgenMalMapperIkkeYrkesaktivTest {
     private lateinit var mockTrygdeavtaleMapper: TrygdeavtaleMapper
 
     @MockK
+    private lateinit var mockOrienteringAnmodningUnntakMapper: OrienteringAnmodningUnntakMapper
+
+    @MockK
     private lateinit var mockInnhentingAvInntektsopplysningerMapper: InnhentingAvInntektsopplysningerMapper
 
     @MockK
@@ -51,7 +54,8 @@ class DokgenMalMapperIkkeYrkesaktivTest {
             mockDokgenMapperDatahenter,
             mockInnvilgelseFtrlMapper,
             mockInnhentingAvInntektsopplysningerMapper,
-            mockTrygdeavtaleMapper
+            mockTrygdeavtaleMapper,
+            mockOrienteringAnmodningUnntakMapper
         )
     }
 

@@ -14,7 +14,6 @@ import org.springframework.stereotype.Component;
 @Component
 public class BrevBestiller {
     private static final Logger log = LoggerFactory.getLogger(BrevBestiller.class);
-
     private final DokumentServiceFasade dokumentServiceFasade;
 
     public BrevBestiller(DokumentServiceFasade dokumentServiceFasade) {
