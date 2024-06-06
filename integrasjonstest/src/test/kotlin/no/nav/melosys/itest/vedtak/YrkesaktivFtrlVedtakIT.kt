@@ -43,7 +43,6 @@ import no.nav.melosys.repository.BehandlingsresultatRepository
 import no.nav.melosys.repository.FagsakRepository
 import no.nav.melosys.saksflyt.ProsessinstansRepository
 import no.nav.melosys.saksflytapi.domain.ProsessType
-import no.nav.melosys.saksflytapi.domain.Prosessinstans
 import no.nav.melosys.service.avgift.TrygdeavgiftsberegningService
 import no.nav.melosys.service.avgift.dto.InntektskildeRequest
 import no.nav.melosys.service.avgift.dto.OppdaterTrygdeavgiftsgrunnlagRequest
@@ -289,6 +288,12 @@ class YrkesaktivFtrlVedtakIT(
 
     @Test
     fun `oppretter prosess og påfølgende årsavregningsbehandling`() {
+        avklarteFaktaRepository.deleteAll()
+        behandlingsResultRepository.deleteAll()
+        prosessinstansRepository.deleteAll()
+        behandlingRepository.deleteAll()
+        fagsakRepository.deleteAll()
+
         val saksnummer = lagFørstegangsBehandling(Skatteplikttype.IKKE_SKATTEPLIKTIG, false)
 
         val skattehendelse = Skattehendelse("2023", "30056928150")
@@ -300,32 +305,22 @@ class YrkesaktivFtrlVedtakIT(
             skatteHendelseMeldingKafkaTemplate.send("teammelosys.skattehendelser.v1-local", skattehendelse)
         }
 
-        //TODO verifisere opprettet behandling
-
-        // TODO: make this run in after by registering what needs to cleanup. Look at whats done in faktureringskomponenten
-        fagsakRepository.findBySaksnummer(saksnummer).also {
-            val fagsak = it.get()
-            behandlingRepository.findById(fagsak.hentSistRegistrertBehandling().id).also { behandlingOption ->
-                val behandling = behandlingOption.get()
-                val behandlingId = behandling.id
-                avklarteFaktaRepository.findById(behandlingId).also { avklarteFaktaOption ->
-                    if (avklarteFaktaOption.isPresent)
-                        avklarteFaktaRepository.delete(avklarteFaktaOption.get())
-                }
-                behandlingsResultRepository.findById(behandlingId).also { behandlingsResultOption ->
-                    behandlingsResultRepository.delete(behandlingsResultOption.get())
-                }
-                prosessinstansRepository.findAll().filter { pi ->
-                    pi?.behandling?.id == behandlingId
-                }.forEach { prosessInstans ->
-                    prosessinstansRepository.delete(prosessInstans)
-                }
-                behandlingRepository.delete(behandling)
+        fagsakRepository.findBySaksnummer(saksnummer)
+            .shouldBePresent().run {
+                behandlinger.shouldHaveSize(2)
+                    .firstOrNull { it.type == Behandlingstyper.ÅRSAVREGNING }
+                    .shouldNotBeNull()
+                    .run {
+                        behandlingsResultRepository.findById(id)
+                            .shouldBePresent()
+                            .aarsavregning
+                            .shouldNotBeNull()
+                            .run {
+                                aar shouldBe 2023
+                            }
+                    }
             }
-            fagsakRepository.delete(fagsak)
-        }
     }
-
 
     private fun lagOpprettSakDto(): OpprettSakDto {
         val opprettsakdto = OpprettSakDto()
