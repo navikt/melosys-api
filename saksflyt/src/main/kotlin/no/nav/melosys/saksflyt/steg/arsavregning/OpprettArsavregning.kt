@@ -50,24 +50,22 @@ class OpprettArsavregning(
 
         val fagsaker = fagsakService.hentFagsakerMedAktør(Aktoersroller.BRUKER, aktørId)
 
-        val sakMedTrygdeavgit = fagsaker.also { if (it.isEmpty()) log.info("Fant ingen fagsaker for aktør $aktørId") }
+        val sakMedTrygdeavgift = fagsaker.also { if (it.isEmpty()) log.info("Fant ingen fagsaker for aktør $aktørId") }
             .filter {
-                // og der det har vært en overlapp i medlemskaps eller lovvalgsperioden for det året skatteoppgjør gjelder for
                 trygdeavgiftOppsummeringService.harFagsakBehandlingerMedTrygdeavgift(it.saksnummer)
-            }.let { sakerMedTrygdeavgit ->
+            }.let { sakerMedTrygdeavgift ->
                 when {
-                    sakerMedTrygdeavgit.isEmpty() -> {
+                    sakerMedTrygdeavgift.isEmpty() -> {
                         log.info("Fant ingen saker med trygdeavgift saker: ${fagsaker.map { it.saksnummer }}")
                         return
                     }
 
-                    sakerMedTrygdeavgit.size > 1 -> throw TekniskException("Flere saker med trygdeavgift funnet")
-                    else -> sakerMedTrygdeavgit.single()
+                    sakerMedTrygdeavgift.size > 1 -> throw TekniskException("Flere saker med trygdeavgift funnet")
+                    else -> sakerMedTrygdeavgift.single()
                 }
             }
 
-        val aktiveÅrsavregninger: List<Behandling> = sakMedTrygdeavgit.hentAktiveÅrsavregninger()
-
+        val aktiveÅrsavregninger: List<Behandling> = sakMedTrygdeavgift.hentAktiveÅrsavregninger()
         val årsAvregninger = aktiveÅrsavregninger.also { if (it.isEmpty()) log.info("Fant ingen aktive årsavregninger") }
             .filter {
                 behandslingsresultatService.hentBehandlingsresultat(it.id).aarsavregning.aar == gjelderPeriode && it.status != Behandlingsstatus.OPPRETTET
@@ -92,7 +90,7 @@ class OpprettArsavregning(
             }
         }
 
-        val trygdeavgiftsBehandlinger = trygdeavgiftOppsummeringService.hentTrygdeavgiftBehandlinger(sakMedTrygdeavgit.saksnummer)
+        val trygdeavgiftsBehandlinger = trygdeavgiftOppsummeringService.hentTrygdeavgiftBehandlinger(sakMedTrygdeavgift.saksnummer)
         trygdeavgiftsBehandlinger.firstOrNull {
             val lovvalgsperioder: MutableCollection<Lovvalgsperiode> = lovvalgsperiodeService.hentLovvalgsperioder(it.id)
             val medlemskapsperioder = medlemskapsperiodeService.hentMedlemskapsperioder(it.id)
@@ -101,7 +99,7 @@ class OpprettArsavregning(
             lovvalgsperioder.none(isWithinPeriod) || medlemskapsperioder.none(isWithinPeriod)
         }.also {
             if (it == null) {
-                log.info("Fant ingen behandlinger med overlappende lovvalgsperioder eller medlemskapsperioder for sak: ${sakMedTrygdeavgit.saksnummer} og år: $gjelderPeriode")
+                log.info("Fant ingen behandlinger med overlappende lovvalgsperioder eller medlemskapsperioder for sak: ${sakMedTrygdeavgift.saksnummer} og år: $gjelderPeriode")
                 return
             }
         }
@@ -109,10 +107,10 @@ class OpprettArsavregning(
         //og har vært fakturert trygdeavgift forskuddsvis for fra Melosys, for det året
 
         val nyBehandling = behandlingService.nyBehandling(
-            sakMedTrygdeavgit,
+            sakMedTrygdeavgift,
             Behandlingsstatus.VURDER_DOKUMENT,
             Behandlingstyper.ÅRSAVREGNING,
-            hentTeamaMedRiktigPeriode(sakMedTrygdeavgit),
+            hentTeamaMedRiktigPeriode(sakMedTrygdeavgift),
             null,
             null,
             LocalDate.now(),
