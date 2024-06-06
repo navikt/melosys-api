@@ -4,6 +4,7 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 
+import io.getunleash.Unleash;
 import no.nav.melosys.domain.Aktoer;
 import no.nav.melosys.domain.Behandling;
 import no.nav.melosys.domain.FagsakTestFactory;
@@ -54,6 +55,8 @@ class BrevmalListeByggerTest {
     private SaksbehandlingRegler saksbehandlingRegler;
     @Mock
     private UtenlandskMyndighetService utenlandskMyndighetService;
+    @Mock
+    private Unleash unleash;
 
     private BrevmalListeBygger brevmalListeBygger;
 
@@ -66,7 +69,7 @@ class BrevmalListeByggerTest {
             hentMuligeProduserbaredokumenterService,
             hentBrevAdresseTilMottakereService);
 
-        brevmalListeBygger = new BrevmalListeBygger(brevmalListeService, behandlingService, saksbehandlingRegler, utenlandskMyndighetService);
+        brevmalListeBygger = new BrevmalListeBygger(brevmalListeService, behandlingService, saksbehandlingRegler, utenlandskMyndighetService, unleash);
     }
 
     @Test

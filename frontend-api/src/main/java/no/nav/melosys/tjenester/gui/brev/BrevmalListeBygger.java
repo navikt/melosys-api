@@ -2,6 +2,7 @@ package no.nav.melosys.tjenester.gui.brev;
 
 import java.util.*;
 
+import io.getunleash.Unleash;
 import no.nav.melosys.domain.Behandling;
 import no.nav.melosys.domain.kodeverk.Land_iso2;
 import no.nav.melosys.domain.kodeverk.Mottakerroller;
@@ -22,6 +23,7 @@ import org.springframework.stereotype.Component;
 import static java.util.Arrays.asList;
 import static no.nav.melosys.domain.kodeverk.Aktoersroller.VIRKSOMHET;
 import static no.nav.melosys.domain.kodeverk.begrunnelser.Kontroll_begrunnelser.*;
+import static no.nav.melosys.featuretoggle.ToggleName.MELOSYS_TRYGDEAVTALE_KOREA;
 import static no.nav.melosys.tjenester.gui.brev.BrevFelt.*;
 
 @Component
@@ -33,12 +35,15 @@ public class BrevmalListeBygger {
     private final BehandlingService behandlingService;
     private final SaksbehandlingRegler saksbehandlingRegler;
     private final UtenlandskMyndighetService utenlandskMyndighetService;
+    private final Unleash unleash;
 
-    public BrevmalListeBygger(BrevmalListeService brevmalListeService, BehandlingService behandlingService, SaksbehandlingRegler saksbehandlingRegler, UtenlandskMyndighetService utenlandskMyndighetService) {
+    public BrevmalListeBygger(BrevmalListeService brevmalListeService, BehandlingService behandlingService,
+                              SaksbehandlingRegler saksbehandlingRegler, UtenlandskMyndighetService utenlandskMyndighetService, Unleash unleash) {
         this.brevmalListeService = brevmalListeService;
         this.behandlingService = behandlingService;
         this.saksbehandlingRegler = saksbehandlingRegler;
         this.utenlandskMyndighetService = utenlandskMyndighetService;
+        this.unleash = unleash;
     }
 
     public List<BrevmalResponse> byggBrevmalDtoListe(long behandlingId) {
@@ -271,10 +276,15 @@ public class BrevmalListeBygger {
             );
         }
 
+        boolean koreaToggleEnabled = unleash.isEnabled(MELOSYS_TRYGDEAVTALE_KOREA);
         List<String> trygdeavtaleLandkoder = Arrays.stream(Trygdeavtale_myndighetsland.values()).map(Trygdeavtale_myndighetsland::getKode).toList();
         return new FeltValgDto(
             utenlandskMyndighetService.hentAlleUtenlandskeMyndigheter().stream()
                 .filter(utenlandskMyndighet -> trygdeavtaleLandkoder.contains(utenlandskMyndighet.getLandkode().getKode()))
+                .filter(utenlandskMyndighet -> {
+                    if (koreaToggleEnabled) return true;
+                    return !utenlandskMyndighet.getLandkode().equals(Land_iso2.KR);
+                })
                 .map(utenlandskMyndighet -> {
                     String beskrivelse = "Trygdemyndighetene i %s".formatted(utenlandskMyndighet.getLandkode().getBeskrivelse());
                     return new FeltvalgAlternativDto(utenlandskMyndighet.hentInstitusjonID(), beskrivelse, true);
