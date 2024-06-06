@@ -92,15 +92,18 @@ class OpprettArsavregning(
             }
         }
 
-        val behandling = sakMedTrygdeavgit.hentSistRegistrertBehandling()
-        val lovvalgsperioder: MutableCollection<Lovvalgsperiode> = lovvalgsperiodeService.hentLovvalgsperioder(behandling.id)
-        val medlemskapsperioder = medlemskapsperiodeService.hentMedlemskapsperioder(behandling.id)
+        val trygdeavgiftsBehandlinger = trygdeavgiftOppsummeringService.hentTrygdeavgiftBehandlinger(sakMedTrygdeavgit.saksnummer)
+        trygdeavgiftsBehandlinger.firstOrNull {
+            val lovvalgsperioder: MutableCollection<Lovvalgsperiode> = lovvalgsperiodeService.hentLovvalgsperioder(it.id)
+            val medlemskapsperioder = medlemskapsperiodeService.hentMedlemskapsperioder(it.id)
 
-        val isWithinPeriod: (ErPeriode) -> Boolean = { it.fom.year <= gjelderPeriode && it.tom.year >= gjelderPeriode }
-
-        if (lovvalgsperioder.none(isWithinPeriod) || medlemskapsperioder.none(isWithinPeriod)) {
-            log.info("Fant ingen lovvalgsperioder eller medlemskapsperioder for behandling: ${behandling.id}")
-            return
+            val isWithinPeriod: (ErPeriode) -> Boolean = { it.fom.year <= gjelderPeriode && it.tom.year >= gjelderPeriode }
+            lovvalgsperioder.none(isWithinPeriod) || medlemskapsperioder.none(isWithinPeriod)
+        }.also {
+            if (it == null) {
+                log.info("Fant ingen behandlinger med overlappende lovvalgsperioder eller medlemskapsperioder for sak: ${sakMedTrygdeavgit.saksnummer} og år: $gjelderPeriode")
+                return
+            }
         }
 
         //og har vært fakturert trygdeavgift forskuddsvis for fra Melosys, for det året
@@ -109,7 +112,7 @@ class OpprettArsavregning(
             sakMedTrygdeavgit,
             Behandlingsstatus.VURDER_DOKUMENT,
             Behandlingstyper.ÅRSAVREGNING,
-            hentMedRiktigPeriode(sakMedTrygdeavgit),
+            hentTeamaMedRiktigPeriode(sakMedTrygdeavgit),
             null,
             null,
             LocalDate.now(),
@@ -118,11 +121,11 @@ class OpprettArsavregning(
         )
         val behandlingsresultat = behandslingsresultatService.hentBehandlingsresultat(nyBehandling.id)
         oppretteÅrsavregning.oppretteÅrsavregning(behandlingsresultat, gjelderPeriode)
-
+        prosessinstans.behandling = nyBehandling
     }
 
-    private fun hentMedRiktigPeriode(fagsak: Fagsak): Behandlingstema? {
-        // TODO: Avklar om vi tenger å finne riktig periode
+    private fun hentTeamaMedRiktigPeriode(fagsak: Fagsak): Behandlingstema? {
+        // TODO: Avklar om vi trenger å finne riktig periode
         return fagsak.hentSistRegistrertBehandling().tema
     }
 }
