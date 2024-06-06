@@ -8,7 +8,6 @@ import no.nav.melosys.domain.Lovvalgsperiode
 import no.nav.melosys.domain.kodeverk.Aktoersroller
 import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingsaarsaktyper
 import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingsstatus
-import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingstema
 import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingstyper
 import no.nav.melosys.exception.TekniskException
 import no.nav.melosys.saksflyt.steg.StegBehandler
@@ -78,7 +77,7 @@ class OpprettArsavregning(
         }
 
         val trygdeavgiftsBehandlinger = trygdeavgiftOppsummeringService.hentTrygdeavgiftBehandlinger(sakMedTrygdeavgift.saksnummer)
-        trygdeavgiftsBehandlinger.firstOrNull {
+        val trygdeavgiftsBehandlingerMedGyldigPeriode: Behandling = trygdeavgiftsBehandlinger.firstOrNull {
             val lovvalgsperioder: MutableCollection<Lovvalgsperiode> = lovvalgsperiodeService.hentLovvalgsperioder(it.id)
             val medlemskapsperioder = medlemskapsperiodeService.hentMedlemskapsperioder(it.id)
 
@@ -87,17 +86,14 @@ class OpprettArsavregning(
         }.also {
             if (it == null) {
                 log.info("Fant ingen behandlinger med overlappende lovvalgsperioder eller medlemskapsperioder for sak: ${sakMedTrygdeavgift.saksnummer} og år: $gjelderPeriode")
-                return
             }
-        }
-
-        //og har vært fakturert trygdeavgift forskuddsvis for fra Melosys, for det året
+        } ?: return
 
         val nyBehandling = behandlingService.nyBehandling(
             sakMedTrygdeavgift,
             Behandlingsstatus.VURDER_DOKUMENT,
             Behandlingstyper.ÅRSAVREGNING,
-            hentTeamaMedRiktigPeriode(sakMedTrygdeavgift),
+            trygdeavgiftsBehandlingerMedGyldigPeriode.tema,
             null,
             null,
             LocalDate.now(),
@@ -120,9 +116,4 @@ class OpprettArsavregning(
                     else -> sakerMedTrygdeavgift.single()
                 }
             }
-
-    private fun hentTeamaMedRiktigPeriode(fagsak: Fagsak): Behandlingstema? {
-        // TODO: Avklar om vi trenger å finne riktig periode
-        return fagsak.hentSistRegistrertBehandling().tema
-    }
 }
