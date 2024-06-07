@@ -281,8 +281,8 @@ class LovligeKombinasjonerSaksbehandlingServiceUtenKlageTest {
 
         Set<Behandlingstyper> muligeBehandlingstyper = lovligeKombinasjonerSaksbehandlingService.hentMuligeBehandlingstyper(Aktoersroller.BRUKER, EU_EOS, MEDLEMSKAP_LOVVALG, UTSENDT_ARBEIDSTAKER, null, sisteBehandling, null);
         assertThat(muligeBehandlingstyper)
-            .hasSize(2)
-            .containsExactly(NY_VURDERING, HENVENDELSE);
+            .hasSize(3)
+            .containsExactly(NY_VURDERING, HENVENDELSE, ÅRSAVREGNING);
     }
 
     @Test

@@ -122,7 +122,8 @@ class LovligeKombinasjonerSaksbehandlingServiceTest {
             Behandlingstyper.NY_VURDERING,
             Behandlingstyper.FØRSTEGANG,
             Behandlingstyper.HENVENDELSE,
-            Behandlingstyper.KLAGE
+            Behandlingstyper.KLAGE,
+            Behandlingstyper.ÅRSAVREGNING
         )
     }
 
@@ -183,7 +184,8 @@ class LovligeKombinasjonerSaksbehandlingServiceTest {
             Behandlingstyper.NY_VURDERING,
             Behandlingstyper.FØRSTEGANG,
             Behandlingstyper.HENVENDELSE,
-            Behandlingstyper.KLAGE
+            Behandlingstyper.KLAGE,
+            Behandlingstyper.ÅRSAVREGNING
         )
     }
 
@@ -206,7 +208,8 @@ class LovligeKombinasjonerSaksbehandlingServiceTest {
             Behandlingstyper.NY_VURDERING,
             Behandlingstyper.HENVENDELSE,
             Behandlingstyper.KLAGE,
-            Behandlingstyper.MANGLENDE_INNBETALING_TRYGDEAVGIFT
+            Behandlingstyper.MANGLENDE_INNBETALING_TRYGDEAVGIFT,
+            Behandlingstyper.ÅRSAVREGNING
         )
     }
 
@@ -225,7 +228,12 @@ class LovligeKombinasjonerSaksbehandlingServiceTest {
                 sisteBehandling.id
             )
 
-        muligeTyper shouldContainExactlyInAnyOrder listOf(Behandlingstyper.NY_VURDERING, Behandlingstyper.HENVENDELSE, Behandlingstyper.KLAGE)
+        muligeTyper shouldContainExactlyInAnyOrder listOf(
+            Behandlingstyper.NY_VURDERING,
+            Behandlingstyper.HENVENDELSE,
+            Behandlingstyper.KLAGE,
+            Behandlingstyper.ÅRSAVREGNING
+        )
     }
 
     @Test
@@ -243,7 +251,8 @@ class LovligeKombinasjonerSaksbehandlingServiceTest {
             Behandlingstyper.NY_VURDERING,
             Behandlingstyper.FØRSTEGANG,
             Behandlingstyper.HENVENDELSE,
-            Behandlingstyper.KLAGE
+            Behandlingstyper.KLAGE,
+            Behandlingstyper.ÅRSAVREGNING
         )
     }
 
@@ -302,7 +311,8 @@ class LovligeKombinasjonerSaksbehandlingServiceTest {
             Behandlingstyper.NY_VURDERING,
             Behandlingstyper.FØRSTEGANG,
             Behandlingstyper.HENVENDELSE,
-            Behandlingstyper.KLAGE
+            Behandlingstyper.KLAGE,
+            Behandlingstyper.ÅRSAVREGNING
         )
     }
 
@@ -385,8 +395,12 @@ class LovligeKombinasjonerSaksbehandlingServiceTest {
                 null
             )
 
-        muligeTyper shouldContainExactlyInAnyOrder listOf(Behandlingstyper.NY_VURDERING, Behandlingstyper.HENVENDELSE, Behandlingstyper.KLAGE)
-        muligeTyper shouldNotContain Behandlingstyper.FØRSTEGANG
+        muligeTyper shouldContainExactlyInAnyOrder listOf(
+            Behandlingstyper.NY_VURDERING,
+            Behandlingstyper.HENVENDELSE,
+            Behandlingstyper.KLAGE,
+            Behandlingstyper.ÅRSAVREGNING
+        )
     }
 
     @Test
@@ -407,7 +421,12 @@ class LovligeKombinasjonerSaksbehandlingServiceTest {
                 null
             )
 
-        muligeTyper shouldContainExactlyInAnyOrder listOf(Behandlingstyper.NY_VURDERING, Behandlingstyper.HENVENDELSE, Behandlingstyper.KLAGE)
+        muligeTyper shouldContainExactlyInAnyOrder listOf(
+            Behandlingstyper.NY_VURDERING,
+            Behandlingstyper.HENVENDELSE,
+            Behandlingstyper.KLAGE,
+            Behandlingstyper.ÅRSAVREGNING
+        )
         muligeTyper shouldNotContain Behandlingstyper.FØRSTEGANG
     }
 
@@ -553,8 +572,12 @@ class LovligeKombinasjonerSaksbehandlingServiceTest {
             sisteBehandling,
             null
         )
-        muligeBehandlingstyper shouldHaveSize 3
-        muligeBehandlingstyper shouldContainExactly listOf(Behandlingstyper.NY_VURDERING, Behandlingstyper.KLAGE, Behandlingstyper.HENVENDELSE)
+        muligeBehandlingstyper shouldContainExactly listOf(
+            Behandlingstyper.NY_VURDERING,
+            Behandlingstyper.KLAGE,
+            Behandlingstyper.HENVENDELSE,
+            Behandlingstyper.ÅRSAVREGNING
+        )
     }
 
     @Test
@@ -646,7 +669,8 @@ class LovligeKombinasjonerSaksbehandlingServiceTest {
             Behandlingstyper.FØRSTEGANG,
             Behandlingstyper.NY_VURDERING,
             Behandlingstyper.KLAGE,
-            Behandlingstyper.HENVENDELSE
+            Behandlingstyper.HENVENDELSE,
+            Behandlingstyper.ÅRSAVREGNING
         )
     }
 
