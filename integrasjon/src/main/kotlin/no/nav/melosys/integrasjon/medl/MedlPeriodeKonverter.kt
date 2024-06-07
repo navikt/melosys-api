@@ -21,7 +21,8 @@ class MedlPeriodeKonverter private constructor() {
         private var ftrlKap2BestemmelserTilGrunnLagMedlTabell: BiMap<Folketrygdloven_kap2_bestemmelser, GrunnlagMedl> = HashBiMap.create()
         private val TILLEGGSBESTEMMELSER_MAPPES_TIL_MEDL: Collection<LovvalgBestemmelse> = setOf(
             Tilleggsbestemmelser_883_2004.FO_883_2004_ART11_4_1,
-            Tilleggsbestemmelser_883_2004.FO_883_2004_ART11_5
+            Tilleggsbestemmelser_883_2004.FO_883_2004_ART11_5,
+            Tilleggsbestemmelser_konv_efta_storbritannia.KONV_EFTA_STORBRITANNIA_ART13_4_1
         )
 
         init {
@@ -50,6 +51,18 @@ class MedlPeriodeKonverter private constructor() {
             lovvalgsbestemmelseTilGrunnlagMedlTabell[Lovvalgbestemmelser_883_2004.FO_883_2004_ART16_1] = GrunnlagMedl.FO_16
             lovvalgsbestemmelseTilGrunnlagMedlTabell[Lovvalgbestemmelser_987_2009.FO_987_2009_ART14_11] = GrunnlagMedl.FO_987_2009_14_11
 
+            lovvalgsbestemmelseTilGrunnlagMedlTabell[Tilleggsbestemmelser_konv_efta_storbritannia.KONV_EFTA_STORBRITANNIA_ART13_4_1] =
+                GrunnlagMedl.KONV_STORBRIT_NIRLAND_13_4_1
+            lovvalgsbestemmelseTilGrunnlagMedlTabell[Lovvalgbestemmelser_konv_efta_storbritannia.KONV_EFTA_STORBRITANNIA_ART13_4_2] =
+                GrunnlagMedl.KONV_STORBRIT_NIRLAND_13_4_2
+            lovvalgsbestemmelseTilGrunnlagMedlTabell[Lovvalgbestemmelser_konv_efta_storbritannia.KONV_EFTA_STORBRITANNIA_ART14_1] =
+                GrunnlagMedl.KONV_STORBRIT_NIRLAND_14_1
+            lovvalgsbestemmelseTilGrunnlagMedlTabell[Lovvalgbestemmelser_konv_efta_storbritannia.KONV_EFTA_STORBRITANNIA_ART14_2] =
+                GrunnlagMedl.KONV_STORBRIT_NIRLAND_14_2
+            lovvalgsbestemmelseTilGrunnlagMedlTabell[Lovvalgbestemmelser_konv_efta_storbritannia.KONV_EFTA_STORBRITANNIA_ART16_1] =
+                GrunnlagMedl.KONV_STORBRIT_NIRLAND_16_1
+            lovvalgsbestemmelseTilGrunnlagMedlTabell[Lovvalgbestemmelser_konv_efta_storbritannia.KONV_EFTA_STORBRITANNIA_ART16_3] =
+                GrunnlagMedl.KONV_STORBRIT_NIRLAND_16_3
             lovvalgsbestemmelseTilGrunnlagMedlTabell[Lovvalgbestemmelser_konv_efta_storbritannia.KONV_EFTA_STORBRITANNIA_ART18_1] =
                 GrunnlagMedl.KONV_STORBRIT_NIRLAND_18_1
 
