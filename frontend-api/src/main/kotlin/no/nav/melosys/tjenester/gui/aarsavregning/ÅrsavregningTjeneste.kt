@@ -17,37 +17,37 @@ import java.time.LocalDate
 class ÅrsavregningTjeneste(
     private val årsavregningService: ÅrsavregningService,
 ) {
-    @GetMapping("/{avregningID}")
-    fun hentAvregning(@PathVariable("avregningID") avregningID: Long): ResponseEntity<ÅrsavregningResponse> {
+    @PostMapping("/{avregningID}/aar/{aar}")
+    fun hentAvregning(@PathVariable("avregningID") avregningID: Long, @PathVariable("aar") aar: Int): ResponseEntity<ÅrsavregningResponse> {
         // TODO bruk årsavregningService
         return ResponseEntity.ok(
             ÅrsavregningResponse(
-                aar = 2023,
+                aar = aar,
                 tidligereOpplysninger = TidligereOpplysninger(
                     Trygdeavgiftsgrunnlag(
                         medlemskapsperioder = listOf(
-                            Medlemskapsperiode(LocalDate.of(2023, 1, 1), LocalDate.of(2023, 7, 31), Trygdedekninger.FTRL_2_9_FØRSTE_LEDD_B_PENSJON),
+                            Medlemskapsperiode(LocalDate.of(aar, 1, 1), LocalDate.of(aar, 7, 31), Trygdedekninger.FTRL_2_9_FØRSTE_LEDD_B_PENSJON),
                             Medlemskapsperiode(
-                                LocalDate.of(2023, 8, 1),
-                                LocalDate.of(2023, 12, 31),
+                                LocalDate.of(aar, 8, 1),
+                                LocalDate.of(aar, 12, 31),
                                 Trygdedekninger.FTRL_2_9_FØRSTE_LEDD_C_ANDRE_LEDD_HELSE_PENSJON_SYKE_FORELDREPENGER
                             )
                         ),
                         skatteforholdsperioder = listOf(
-                            Skatteforholdsperiode(LocalDate.of(2023, 1, 1), LocalDate.of(2023, 7, 31), Skatteplikttype.SKATTEPLIKTIG),
-                            Skatteforholdsperiode(LocalDate.of(2023, 8, 1), LocalDate.of(2023, 12, 31), Skatteplikttype.IKKE_SKATTEPLIKTIG)
+                            Skatteforholdsperiode(LocalDate.of(aar, 1, 1), LocalDate.of(aar, 7, 31), Skatteplikttype.SKATTEPLIKTIG),
+                            Skatteforholdsperiode(LocalDate.of(aar, 8, 1), LocalDate.of(aar, 12, 31), Skatteplikttype.IKKE_SKATTEPLIKTIG)
                         ),
                         inntektskperioder = listOf(
                             Inntektsperiode(
-                                LocalDate.of(2023, 1, 1),
-                                LocalDate.of(2023, 7, 31),
+                                LocalDate.of(aar, 1, 1),
+                                LocalDate.of(aar, 7, 31),
                                 Inntektskildetype.ARBEIDSINNTEKT_FRA_NORGE,
                                 true,
                                 1000
-                                ),
+                            ),
                             Inntektsperiode(
-                                LocalDate.of(2023, 8, 1),
-                                LocalDate.of(2023, 12, 31),
+                                LocalDate.of(aar, 8, 1),
+                                LocalDate.of(aar, 12, 31),
                                 Inntektskildetype.ARBEIDSINNTEKT_FRA_NORGE,
                                 false,
                                 2000
@@ -57,9 +57,9 @@ class ÅrsavregningTjeneste(
                     Avgift(
                         trygdeavgiftsperioder = listOf(
                             Trygdeavgiftsperiode(
-                                LocalDate.of(2023, 1, 1), LocalDate.of(2023, 7, 31), Inntektskildetype.ARBEIDSINNTEKT_FRA_NORGE, true, 40000, 0.0, 0
+                                LocalDate.of(aar, 1, 1), LocalDate.of(aar, 7, 31), Inntektskildetype.ARBEIDSINNTEKT_FRA_NORGE, true, 40000, 0.0, 0
                             ), Trygdeavgiftsperiode(
-                                LocalDate.of(2023, 8, 1), LocalDate.of(2023, 12, 31), Inntektskildetype.INNTEKT_FRA_UTLANDET, false, 15000, 42.2, 6330
+                                LocalDate.of(aar, 8, 1), LocalDate.of(aar, 12, 31), Inntektskildetype.INNTEKT_FRA_UTLANDET, false, 15000, 42.2, 6330
                             )
                         ),
                         totalInntektPerMd = 690000,
@@ -70,20 +70,20 @@ class ÅrsavregningTjeneste(
                 nyttGrunnlag = Trygdeavgiftsgrunnlag(
                     medlemskapsperioder = listOf(),
                     skatteforholdsperioder = listOf(
-                        Skatteforholdsperiode(LocalDate.of(2023, 1, 1), LocalDate.of(2023, 7, 31), Skatteplikttype.SKATTEPLIKTIG),
-                        Skatteforholdsperiode(LocalDate.of(2023, 8, 1), LocalDate.of(2023, 12, 31), Skatteplikttype.IKKE_SKATTEPLIKTIG)
+                        Skatteforholdsperiode(LocalDate.of(aar, 1, 1), LocalDate.of(aar, 7, 31), Skatteplikttype.SKATTEPLIKTIG),
+                        Skatteforholdsperiode(LocalDate.of(aar, 8, 1), LocalDate.of(aar, 12, 31), Skatteplikttype.IKKE_SKATTEPLIKTIG)
                     ),
                     inntektskperioder = listOf(
-                        Inntektsperiode(LocalDate.of(2023, 1, 1), LocalDate.of(2023, 7, 31), Inntektskildetype.ARBEIDSINNTEKT_FRA_NORGE, true, 95000)
+                        Inntektsperiode(LocalDate.of(aar, 1, 1), LocalDate.of(aar, 7, 31), Inntektskildetype.ARBEIDSINNTEKT_FRA_NORGE, true, 95000)
                     ),
 
-                ),
+                    ),
                 endeligAvgift = Avgift(
                     trygdeavgiftsperioder = listOf(
                         Trygdeavgiftsperiode(
-                            LocalDate.of(2023, 1, 1), LocalDate.of(2023, 7, 31), Inntektskildetype.ARBEIDSINNTEKT_FRA_NORGE, true, 40000, 0.0, 0
+                            LocalDate.of(aar, 1, 1), LocalDate.of(aar, 7, 31), Inntektskildetype.ARBEIDSINNTEKT_FRA_NORGE, true, 40000, 0.0, 0
                         ), Trygdeavgiftsperiode(
-                            LocalDate.of(2023, 8, 1), LocalDate.of(2023, 12, 31), Inntektskildetype.INNTEKT_FRA_UTLANDET, false, 15000, 42.2, 6330
+                            LocalDate.of(aar, 8, 1), LocalDate.of(aar, 12, 31), Inntektskildetype.INNTEKT_FRA_UTLANDET, false, 15000, 42.2, 6330
                         )
                     ),
                     totalInntektPerMd = 690000,
