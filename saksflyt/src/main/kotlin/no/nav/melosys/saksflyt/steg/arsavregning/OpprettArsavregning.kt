@@ -74,7 +74,7 @@ class OpprettArsavregning(
             null,
             null,
             LocalDate.now(),
-            Behandlingsaarsaktyper.ANNET, // Trenger vi en ny type?
+            Behandlingsaarsaktyper.ANNET, // TODO: Her kommer en ny type
             null
         ).also { nyBehandling ->
             val behandlingsresultat = behandslingsresultatService.hentBehandlingsresultat(nyBehandling.id)
@@ -83,15 +83,14 @@ class OpprettArsavregning(
         }
     }
 
-    private fun finnTrygdeavgiftsBehandlingerMedGyldigPeriode(sakMedTrygdeavgift: Fagsak, gjelderPeriode: Int): Behandling? {
-        return trygdeavgiftOppsummeringService.hentTrygdeavgiftBehandlinger(sakMedTrygdeavgift.saksnummer).firstOrNull {
-            val lovvalgsperioder = lovvalgsperiodeService.hentLovvalgsperioder(it.id)
-            val medlemskapsperioder = medlemskapsperiodeService.hentMedlemskapsperioder(it.id)
+    private fun finnTrygdeavgiftsBehandlingerMedGyldigPeriode(sakMedTrygdeavgift: Fagsak, gjelderPeriode: Int): Behandling? =
+        trygdeavgiftOppsummeringService.hentTrygdeavgiftBehandlinger(sakMedTrygdeavgift.saksnummer).firstOrNull { behandling ->
+            val lovvalgsperioder = lovvalgsperiodeService.hentLovvalgsperioder(behandling.id)
+            val medlemskapsperioder = medlemskapsperiodeService.hentMedlemskapsperioder(behandling.id)
 
-            val isWithinPeriod: (ErPeriode) -> Boolean = { it.fom.year <= gjelderPeriode && it.tom.year >= gjelderPeriode }
+            val isWithinPeriod: (ErPeriode) -> Boolean = { periode -> periode.fom.year <= gjelderPeriode && periode.tom.year >= gjelderPeriode }
             lovvalgsperioder.none(isWithinPeriod) || medlemskapsperioder.none(isWithinPeriod)
         }
-    }
 
     private fun finnAktivÅrsavregning(sakMedTrygdeavgift: Fagsak, gjelderPeriode: Int): Behandling? {
         val årsAvregninger = sakMedTrygdeavgift.hentAktiveÅrsavregninger().also { if (it.isEmpty()) log.info("Fant ingen aktive årsavregninger") }
