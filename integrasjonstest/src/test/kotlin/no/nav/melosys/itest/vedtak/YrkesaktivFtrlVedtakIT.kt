@@ -8,6 +8,8 @@ import com.github.tomakehurst.wiremock.client.WireMock
 import com.github.tomakehurst.wiremock.extension.ResponseTransformerV2
 import com.github.tomakehurst.wiremock.http.Response
 import com.github.tomakehurst.wiremock.stubbing.ServeEvent
+import io.getunleash.FakeUnleash
+import io.getunleash.Unleash
 import io.github.jaspeen.ulid.ULID
 import io.kotest.assertions.withClue
 import io.kotest.matchers.collections.shouldHaveSize
@@ -30,6 +32,7 @@ import no.nav.melosys.domain.manglendebetaling.ManglendeFakturabetalingMelding
 import no.nav.melosys.domain.mottatteopplysninger.SøknadNorgeEllerUtenforEØS
 import no.nav.melosys.domain.mottatteopplysninger.data.Periode
 import no.nav.melosys.domain.mottatteopplysninger.data.Soeknadsland
+import no.nav.melosys.featuretoggle.ToggleName
 import no.nav.melosys.integrasjon.faktureringskomponenten.NyFakturaserieResponseDto
 import no.nav.melosys.integrasjon.trygdeavgift.dto.*
 import no.nav.melosys.itest.JournalfoeringBase
@@ -91,7 +94,8 @@ class YrkesaktivFtrlVedtakIT(
     @Autowired private val skatteHendelseMeldingKafkaTemplate: KafkaTemplate<String, Skattehendelse>,
     @Autowired private val avklarteFaktaRepository: AvklarteFaktaRepository,
     @Autowired private val behandlingsResultRepository: BehandlingsresultatRepository,
-    @Autowired private val prosessinstansRepository: ProsessinstansRepository
+    @Autowired private val prosessinstansRepository: ProsessinstansRepository,
+    @Autowired private val fakeUnleash: FakeUnleash
 ) : JournalfoeringBase(
     testDataGenerator, journalføringService, oppgaveService,
     DynamiskTrygdeavgiftsberegningTransformer()
@@ -284,6 +288,7 @@ class YrkesaktivFtrlVedtakIT(
 
     @Test
     fun `oppretter prosess og påfølgende årsavregningsbehandling`() {
+        fakeUnleash.enable(ToggleName.MELOSYS_SKATTEHENDELSE_CONSUMER)
         avklarteFaktaRepository.deleteAll()
         behandlingsResultRepository.deleteAll()
         prosessinstansRepository.deleteAll()
