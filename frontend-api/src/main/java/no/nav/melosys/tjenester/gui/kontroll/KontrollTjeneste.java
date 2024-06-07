@@ -7,16 +7,14 @@ import io.swagger.annotations.Api;
 import no.nav.melosys.exception.FunksjonellException;
 import no.nav.melosys.service.behandling.BehandlingService;
 import no.nav.melosys.service.dokument.sed.EessiService;
+import no.nav.melosys.service.kontroll.feature.anmodningomunntak.AnmodningUnntakKontrollService;
 import no.nav.melosys.service.kontroll.feature.ferdigbehandling.FerdigbehandlingKontrollFacade;
 import no.nav.melosys.service.kontroll.feature.postadresse.PostadresseKontrollService;
 import no.nav.melosys.service.kontroll.feature.postadresse.PostadressesjekkKontekst;
 import no.nav.melosys.service.tilgang.Aksesskontroll;
 import no.nav.melosys.service.tilgang.Aksesstype;
 import no.nav.melosys.service.validering.Kontrollfeil;
-import no.nav.melosys.tjenester.gui.dto.kontroller.FerdigbehandlingKontrollerDto;
-import no.nav.melosys.tjenester.gui.dto.kontroller.KontrollerAdresseBrukerFullmektigDto;
-import no.nav.melosys.tjenester.gui.dto.kontroller.KontrollerAdresseBrukerFullmektigResponse;
-import no.nav.melosys.tjenester.gui.dto.kontroller.KontrollerFerdigbehandlingResponse;
+import no.nav.melosys.tjenester.gui.dto.kontroller.*;
 import no.nav.security.token.support.core.api.Protected;
 import org.springframework.context.annotation.Scope;
 import org.springframework.http.ResponseEntity;
@@ -34,14 +32,20 @@ public class KontrollTjeneste {
     private final BehandlingService behandlingService;
     private final EessiService eessiService;
     private final PostadresseKontrollService postadresseKontrollService;
+    private final AnmodningUnntakKontrollService anmodningUnntakKontrollService;
 
-    public KontrollTjeneste(FerdigbehandlingKontrollFacade ferdigbehandlingKontrollFacade, Aksesskontroll aksesskontroll,
-                            EessiService eessiService, BehandlingService behandlingService, PostadresseKontrollService postadresseKontrollService) {
+    public KontrollTjeneste(FerdigbehandlingKontrollFacade ferdigbehandlingKontrollFacade,
+                            Aksesskontroll aksesskontroll,
+                            EessiService eessiService,
+                            BehandlingService behandlingService,
+                            PostadresseKontrollService postadresseKontrollService,
+                            AnmodningUnntakKontrollService anmodningUnntakKontrollService) {
         this.aksesskontroll = aksesskontroll;
         this.ferdigbehandlingKontrollFacade = ferdigbehandlingKontrollFacade;
         this.behandlingService = behandlingService;
         this.eessiService = eessiService;
         this.postadresseKontrollService = postadresseKontrollService;
+        this.anmodningUnntakKontrollService = anmodningUnntakKontrollService;
     }
 
     @GetMapping("{behandlingId}/erBucAapen")
@@ -58,7 +62,7 @@ public class KontrollTjeneste {
     }
 
     @PostMapping("/ferdigbehandling")
-    public ResponseEntity<KontrollerFerdigbehandlingResponse> kontrollerFerdigbehandling(@RequestBody FerdigbehandlingKontrollerDto ferdigbehandlingKontrollerDto) {
+    public ResponseEntity<KontrollerBehandlingResponse> kontrollerFerdigbehandling(@RequestBody FerdigbehandlingKontrollerDto ferdigbehandlingKontrollerDto) {
 
         if (ferdigbehandlingKontrollerDto.vedtakstype() == null) {
             throw new FunksjonellException("Vedtakstype mangler.");
@@ -75,6 +79,15 @@ public class KontrollTjeneste {
             ferdigbehandlingKontrollerDto.kontrollerSomSkalIgnoreres()
         );
 
-        return ResponseEntity.ok(new KontrollerFerdigbehandlingResponse(kontrollfeil.stream().map(Kontrollfeil::tilDto).toList()));
+        return ResponseEntity.ok(new KontrollerBehandlingResponse(kontrollfeil.stream().map(Kontrollfeil::tilDto).toList()));
+    }
+
+    @PostMapping("/anmodningomunntak")
+    public ResponseEntity<KontrollerBehandlingResponse> kontrollerAnmodningOmUnntak(@RequestBody AnmodningOmUnntakKontrollerDto anmodningOmUnntakKontrollerDto) {
+        aksesskontroll.autoriser(anmodningOmUnntakKontrollerDto.behandlingID());
+
+        Collection<Kontrollfeil> kontrollfeil = anmodningUnntakKontrollService.utførKontroller(anmodningOmUnntakKontrollerDto.behandlingID());
+
+        return ResponseEntity.ok(new KontrollerBehandlingResponse(kontrollfeil.stream().map(Kontrollfeil::tilDto).toList()));
     }
 }

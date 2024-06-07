@@ -8,7 +8,6 @@ import com.github.tomakehurst.wiremock.client.WireMock
 import com.github.tomakehurst.wiremock.extension.ResponseTransformerV2
 import com.github.tomakehurst.wiremock.http.Response
 import com.github.tomakehurst.wiremock.stubbing.ServeEvent
-import io.getunleash.FakeUnleash
 import io.github.jaspeen.ulid.ULID
 import io.kotest.assertions.withClue
 import io.kotest.matchers.collections.shouldHaveSize
@@ -31,7 +30,6 @@ import no.nav.melosys.domain.manglendebetaling.ManglendeFakturabetalingMelding
 import no.nav.melosys.domain.mottatteopplysninger.SøknadNorgeEllerUtenforEØS
 import no.nav.melosys.domain.mottatteopplysninger.data.Periode
 import no.nav.melosys.domain.mottatteopplysninger.data.Soeknadsland
-import no.nav.melosys.featuretoggle.ToggleName
 import no.nav.melosys.integrasjon.faktureringskomponenten.NyFakturaserieResponseDto
 import no.nav.melosys.integrasjon.trygdeavgift.dto.*
 import no.nav.melosys.itest.JournalfoeringBase
@@ -87,7 +85,6 @@ class YrkesaktivFtrlVedtakIT(
     @Autowired private val opprettForslagMedlemskapsperiodeService: OpprettForslagMedlemskapsperiodeService,
     @Autowired private val oppfriskSaksopplysningerService: OppfriskSaksopplysningerService,
     @Autowired private val vedtaksfattingFasade: VedtaksfattingFasade,
-    @Autowired private val unleash: FakeUnleash,
     @Autowired private val opprettBehandlingForSak: OpprettBehandlingForSak,
     @Autowired private val trygdeavgiftsberegningService: TrygdeavgiftsberegningService,
     @Autowired @Qualifier("manglendeFakturabetalingMelding") private val manglendeFakturabetalingMeldingTemplate: KafkaTemplate<String, ManglendeFakturabetalingMelding>,
@@ -107,7 +104,6 @@ class YrkesaktivFtrlVedtakIT(
     @BeforeEach
     fun setup() {
         fakturaserieReferanse = ULID.random().toString()
-        unleash.enableAllExcept(ToggleName.MELOSYS_FTRL_YRKESAKTIV_PLIKTIGE_BESTEMMELSER)
         MedlRepo.repo.clear()
         originalSubjectHandler = SubjectHandler.getInstance()
 

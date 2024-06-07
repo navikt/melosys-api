@@ -4,7 +4,7 @@ import io.swagger.annotations.Api
 import no.nav.melosys.domain.kodeverk.Inntektskildetype
 import no.nav.melosys.domain.kodeverk.Skatteplikttype
 import no.nav.melosys.domain.kodeverk.Trygdedekninger
-import no.nav.melosys.service.sak.ÅrsavregningService
+import no.nav.melosys.service.avgift.aarsavregning.ÅrsavregningService
 import no.nav.security.token.support.core.api.Protected
 import org.springframework.http.ResponseEntity
 import org.springframework.web.bind.annotation.*

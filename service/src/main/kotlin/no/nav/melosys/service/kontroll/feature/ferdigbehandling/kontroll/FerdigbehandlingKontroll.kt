@@ -4,6 +4,7 @@ import no.nav.melosys.domain.Lovvalgsperiode
 import no.nav.melosys.domain.kodeverk.LovvalgBestemmelse
 import no.nav.melosys.domain.kodeverk.begrunnelser.Kontroll_begrunnelser
 import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingstema
+import no.nav.melosys.domain.kodeverk.lovvalgsbestemmelser.Lovvalgbestemmelser_konv_efta_storbritannia
 import no.nav.melosys.domain.kodeverk.lovvalgsbestemmelser.trygdeavtale.Lovvalgsbestemmelser_trygdeavtale_au
 import no.nav.melosys.domain.kodeverk.lovvalgsbestemmelser.trygdeavtale.Lovvalgsbestemmelser_trygdeavtale_ca
 import no.nav.melosys.domain.kodeverk.lovvalgsbestemmelser.trygdeavtale.Lovvalgsbestemmelser_trygdeavtale_gb
@@ -23,6 +24,7 @@ import no.nav.melosys.service.kontroll.regler.OverlappendeMedlemskapsperioderReg
 import no.nav.melosys.service.kontroll.regler.PeriodeRegler
 import no.nav.melosys.service.kontroll.regler.PersonRegler.harRegistrertAdresse
 import no.nav.melosys.service.validering.Kontrollfeil
+import java.time.LocalDate
 
 object FerdigbehandlingKontroll {
     fun overlappendePeriode(kontrollData: FerdigbehandlingKontrollData): Kontrollfeil? {
@@ -179,6 +181,18 @@ object FerdigbehandlingKontroll {
 
     fun åpentUtkastFinnes(kontrollData: FerdigbehandlingKontrollData): Kontrollfeil? =
         if (kontrollData.brevUtkast.isEmpty()) null else Kontrollfeil(Kontroll_begrunnelser.ÅPENT_UTKAST)
+
+    fun storbritanniaKonvensjonBruktForTidlig(kontrollData: FerdigbehandlingKontrollData): Kontrollfeil? {
+        val lovvalgsperiode = kontrollData.hentLovvalgsperiode()
+        val JANUAR_2024 = LocalDate.of(2024, 1, 1)
+        val storbritanniaBestemmelser = Lovvalgbestemmelser_konv_efta_storbritannia.values()
+
+        if (lovvalgsperiode.bestemmelse in storbritanniaBestemmelser && lovvalgsperiode.fom?.isBefore(JANUAR_2024) == true) {
+            return Kontrollfeil(Kontroll_begrunnelser.STORBRITANNIA_KONV_BRUKT_FOR_TIDLIG)
+        }
+
+        return null
+    }
 
     fun adresseRegistrert(kontrollData: FerdigbehandlingKontrollData): Kontrollfeil? {
         val fullmektig = kontrollData.fullmektig

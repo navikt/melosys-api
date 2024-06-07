@@ -114,7 +114,7 @@ public class BrevDataByggerInnvilgelse implements BrevDataBygger {
             .map(Anmodningsperiode::getAnmodningsperiodeSvar)
             .orElse(null));
 
-        brevDataInnvilgelse.setArt16UtenArt12(vilkaarsresultatService.harVilkaarForArtikkel16(behandlingID) && !vilkaarsresultatService.harVilkaarForArtikkel12(behandlingID));
+        brevDataInnvilgelse.setArt16UtenArt12(vilkaarsresultatService.harVilkaarForUnntak(behandlingID) && !vilkaarsresultatService.harVilkaarForUtsending(behandlingID));
         brevDataInnvilgelse.setTuristskip(vilkaarsresultatService.oppfyllerVilkaar(behandlingID, Vilkaar.FTRL_2_12_UNNTAK_TURISTSKIP));
         brevDataInnvilgelse.setAvklarteMedfolgendeBarn(hentAvklarteMedfølgendeBarn(behandlingID));
 

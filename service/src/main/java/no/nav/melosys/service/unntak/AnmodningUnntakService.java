@@ -1,10 +1,5 @@
 package no.nav.melosys.service.unntak;
 
-import java.util.Collection;
-import java.util.Collections;
-import java.util.List;
-import java.util.Set;
-
 import no.nav.melosys.domain.AnmodningsperiodeSvar;
 import no.nav.melosys.domain.Behandling;
 import no.nav.melosys.domain.Fagsak;
@@ -27,7 +22,7 @@ import no.nav.melosys.service.LovvalgsperiodeService;
 import no.nav.melosys.service.behandling.BehandlingService;
 import no.nav.melosys.service.behandling.BehandlingsresultatService;
 import no.nav.melosys.service.dokument.sed.EessiService;
-import no.nav.melosys.service.kontroll.feature.unntak.AnmodningUnntakKontrollService;
+import no.nav.melosys.service.kontroll.feature.anmodningomunntak.AnmodningUnntakKontrollService;
 import no.nav.melosys.service.oppgave.OppgaveService;
 import no.nav.melosys.service.validering.Kontrollfeil;
 import no.nav.melosys.sikkerhet.context.SubjectHandler;
@@ -36,6 +31,11 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+
+import java.util.Collection;
+import java.util.Collections;
+import java.util.List;
+import java.util.Set;
 
 @Service
 public class AnmodningUnntakService {
@@ -53,13 +53,15 @@ public class AnmodningUnntakService {
     private final JoarkFasade joarkFasade;
 
     public AnmodningUnntakService(BehandlingService behandlingService,
-                                  BehandlingsresultatService behandlingsresultatService, OppgaveService oppgaveService,
+                                  BehandlingsresultatService behandlingsresultatService,
+                                  OppgaveService oppgaveService,
                                   ProsessinstansService prosessinstansService,
                                   AnmodningsperiodeService anmodningsperiodeService,
                                   LovvalgsperiodeService lovvalgsperiodeService,
                                   LandvelgerService landvelgerService,
                                   EessiService eessiService,
-                                  AnmodningUnntakKontrollService anmodningUnntakKontrollService, JoarkFasade joarkFasade) {
+                                  AnmodningUnntakKontrollService anmodningUnntakKontrollService,
+                                  JoarkFasade joarkFasade) {
         this.behandlingService = behandlingService;
         this.behandlingsresultatService = behandlingsresultatService;
         this.oppgaveService = oppgaveService;

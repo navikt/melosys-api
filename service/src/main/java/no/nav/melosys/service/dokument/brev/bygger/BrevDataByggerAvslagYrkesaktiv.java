@@ -10,14 +10,12 @@ import no.nav.melosys.domain.kodeverk.begrunnelser.Kontroll_begrunnelser;
 import no.nav.melosys.exception.FunksjonellException;
 import no.nav.melosys.exception.TekniskException;
 import no.nav.melosys.service.LandvelgerService;
+import no.nav.melosys.service.behandling.VilkaarsresultatService;
 import no.nav.melosys.service.dokument.brev.BrevData;
 import no.nav.melosys.service.dokument.brev.BrevDataAvslagYrkesaktiv;
 import no.nav.melosys.service.dokument.brev.BrevbestillingDto;
 import no.nav.melosys.service.dokument.brev.datagrunnlag.BrevDataGrunnlag;
 import no.nav.melosys.service.unntak.AnmodningsperiodeService;
-import no.nav.melosys.service.behandling.VilkaarsresultatService;
-
-import static no.nav.melosys.domain.kodeverk.Vilkaar.FO_883_2004_ART16_1;
 
 public class BrevDataByggerAvslagYrkesaktiv implements BrevDataBygger {
     private final LandvelgerService landvelgerService;
@@ -27,11 +25,11 @@ public class BrevDataByggerAvslagYrkesaktiv implements BrevDataBygger {
 
     public BrevDataByggerAvslagYrkesaktiv(LandvelgerService landvelgerService,
                                           AnmodningsperiodeService anmodningsperiodeService,
-                                          BrevbestillingDto brebestilling,
+                                          BrevbestillingDto brevbestillingDto,
                                           VilkaarsresultatService vilkaarsresultatService) {
         this.landvelgerService = landvelgerService;
         this.anmodningsperiodeService = anmodningsperiodeService;
-        this.brevbestilling = brebestilling;
+        this.brevbestilling = brevbestillingDto;
         this.vilkaarsresultatService = vilkaarsresultatService;
     }
 
@@ -49,12 +47,12 @@ public class BrevDataByggerAvslagYrkesaktiv implements BrevDataBygger {
         brevData.setArt16Vilkaar(hentFørsteGyldigeVilkaarsresultatForArt16(behandlingID));
 
         if (!brevData.getArt16Vilkaar().isOppfylt()) {
-            brevData.setAnmodningsperiodeSvar(new AnmodningsperiodeSvar()); //TODO sjekk i QA
+            brevData.setAnmodningsperiodeSvar(new AnmodningsperiodeSvar());
         } else {
             brevData.setAnmodningsperiodeSvar(hentAnmodningsperiodeSvar(behandlingID).get());
         }
 
-        brevData.setArt16UtenArt12(vilkaarsresultatService.harVilkaarForArtikkel16(behandlingID) && !vilkaarsresultatService.harVilkaarForArtikkel12(behandlingID));
+        brevData.setArt16UtenArt12(vilkaarsresultatService.harVilkaarForUnntak(behandlingID) && !vilkaarsresultatService.harVilkaarForUtsending(behandlingID));
 
         return brevData;
     }
@@ -68,7 +66,10 @@ public class BrevDataByggerAvslagYrkesaktiv implements BrevDataBygger {
     }
 
     private Vilkaarsresultat hentFørsteGyldigeVilkaarsresultatForArt16(long behandlingID) {
-        return vilkaarsresultatService.finnVilkaarsresultat(behandlingID, FO_883_2004_ART16_1)
-            .filter(v -> !v.getBegrunnelser().isEmpty()).orElseThrow(() -> new FunksjonellException("Avslag yrkesaktiv må ha vilkår for art16"));
+        var vilkaarsresultat = vilkaarsresultatService.finnUnntaksVilkaarsresultat(behandlingID);
+        if (vilkaarsresultat == null || vilkaarsresultat.getBegrunnelser().isEmpty()) {
+            throw new FunksjonellException("Avslag yrkesaktiv må ha vilkår for art16 eller gb-art18");
+        }
+        return vilkaarsresultat;
     }
 }

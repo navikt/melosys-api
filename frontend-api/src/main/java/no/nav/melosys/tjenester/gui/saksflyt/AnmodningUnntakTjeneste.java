@@ -22,7 +22,7 @@ import org.springframework.web.context.WebApplicationContext;
 @Api(tags = {"saksflyt", "anmodningsperioder"})
 @Scope(value = WebApplicationContext.SCOPE_REQUEST)
 public class AnmodningUnntakTjeneste {
-    
+
     private final AnmodningUnntakService anmodningUnntakService;
     private final Aksesskontroll aksesskontroll;
 

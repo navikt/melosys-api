@@ -1,5 +1,13 @@
 package no.nav.melosys.service.vilkaar;
 
+import java.time.LocalDate;
+import java.util.Collection;
+import java.util.Collections;
+import java.util.List;
+import java.util.Set;
+import java.util.stream.Collectors;
+import java.util.stream.Stream;
+
 import no.nav.melosys.domain.Behandling;
 import no.nav.melosys.domain.ErPeriode;
 import no.nav.melosys.domain.VilkaarBegrunnelse;
@@ -20,14 +28,6 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
-
-import java.time.LocalDate;
-import java.util.Collection;
-import java.util.Collections;
-import java.util.List;
-import java.util.Set;
-import java.util.stream.Collectors;
-import java.util.stream.Stream;
 
 import static no.nav.melosys.domain.kodeverk.Vilkaar.FO_883_2004_INNGANGSVILKAAR;
 import static no.nav.melosys.domain.util.IsoLandkodeKonverterer.tilIso3;
@@ -134,14 +134,14 @@ public class InngangsvilkaarService {
     @Transactional
     public void overstyrInngangsvilkårTilOppfylt(long behandlingID) {
         final var inngangsvilkaar = vilkaarsresultatService.finnVilkaarsresultat(behandlingID, FO_883_2004_INNGANGSVILKAAR);
-        if (inngangsvilkaar.isEmpty()) {
+        if (inngangsvilkaar == null) {
             throw new FunksjonellException("Inngangsvilkår er ikke vurdert for behandling " + behandlingID);
         }
         var behandling = behandlingService.hentBehandling(behandlingID);
         if (!behandling.harPeriodeOgSøknadsland()) {
             throw new FunksjonellException("Mangler land eller periode for behandling " + behandlingID);
         }
-        final var inngangsvilkaarBegrunnelseKoder = inngangsvilkaar.get().getBegrunnelser().stream()
+        final var inngangsvilkaarBegrunnelseKoder = inngangsvilkaar.getBegrunnelser().stream()
             .map(VilkaarBegrunnelse::getKode)
             .map(Inngangsvilkaar::valueOf)
             .collect(Collectors.toSet());

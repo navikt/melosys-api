@@ -1,4 +1,4 @@
-package no.nav.melosys.service.kontroll.ferdigbehandling
+package no.nav.melosys.service.kontroll.feature.arbeidutland.kontroll
 
 import no.nav.melosys.domain.kodeverk.begrunnelser.Fartsomrader
 import no.nav.melosys.domain.kodeverk.begrunnelser.Kontroll_begrunnelser
