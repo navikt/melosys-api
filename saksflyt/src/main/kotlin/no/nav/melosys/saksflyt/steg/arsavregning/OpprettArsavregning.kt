@@ -74,7 +74,7 @@ class OpprettArsavregning(
             null,
             null,
             LocalDate.now(),
-            Behandlingsaarsaktyper.ANNET, // TODO: Her kommer en ny type
+            Behandlingsaarsaktyper.ANNET, // TODO: Her kommer en ny type SKATTEHENDELSE
             null
         ).also { nyBehandling ->
             val behandlingsresultat = behandslingsresultatService.hentBehandlingsresultat(nyBehandling.id)
