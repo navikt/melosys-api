@@ -41,8 +41,9 @@ class ÅrsavregningTjeneste(
                                 avgiftPerMd = it.trygdeavgiftsbeløpMd.verdi.intValueExact()
                             )
                         },
-                        totalInntektPerMd = årsavregning.tidligereGrunnlag?.innteksperioder?.sumOf { it.avgiftspliktigInntektMnd.verdi.intValueExact() } ?: 0,
-                        totalAvgiftPerMd = årsavregning.tidligereAvgift?.sumOf { it.trygdeavgiftsbeløpMd.verdi.intValueExact() } ?:0
+                        // TODO totalene må beregnes og ta hensyn til perioder ref. MELOSYS-6570
+                        totalInntekt = årsavregning.tidligereGrunnlag?.innteksperioder?.sumOf { it.avgiftspliktigInntektMnd.verdi.intValueExact() } ?: 0,
+                        totalAvgift = årsavregning.tidligereAvgift?.sumOf { it.trygdeavgiftsbeløpMd.verdi.intValueExact() } ?:0
                     )
                 ),
                 avvikFunnet = årsavregning.nyttGrunnlag != null,
@@ -93,8 +94,8 @@ data class Trygdeavgiftsgrunnlag(
 
 data class Avgift(
     val trygdeavgiftsperioder: List<Trygdeavgiftsperiode>,
-    val totalInntektPerMd: Int,
-    val totalAvgiftPerMd: Int
+    val totalInntekt: Int,
+    val totalAvgift: Int
 )
 
 data class Skatteforholdsperiode(
