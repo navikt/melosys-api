@@ -89,7 +89,7 @@ class OpprettArsavregning(
             val medlemskapsperioder = medlemskapsperiodeService.hentMedlemskapsperioder(behandling.id)
 
             val isWithinPeriod: (ErPeriode) -> Boolean = { periode -> periode.fom.year <= gjelderPeriode && periode.tom.year >= gjelderPeriode }
-            lovvalgsperioder.none(isWithinPeriod) || medlemskapsperioder.none(isWithinPeriod)
+            lovvalgsperioder.any(isWithinPeriod) || medlemskapsperioder.any(isWithinPeriod)
         }
 
     private fun finnAktivÅrsavregning(sakMedTrygdeavgift: Fagsak, gjelderPeriode: Int): Behandling? {
