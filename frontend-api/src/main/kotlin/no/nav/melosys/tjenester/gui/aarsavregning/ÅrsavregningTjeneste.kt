@@ -19,65 +19,40 @@ class ÅrsavregningTjeneste(
 ) {
     @GetMapping("/{avregningID}")
     fun hentAvregning(@PathVariable("avregningID") avregningID: Long): ResponseEntity<ÅrsavregningResponse> {
-        // TODO bruk årsavregningService
+        val årsavregning = årsavregningService.hentÅrsavregning(avregningID)
         return ResponseEntity.ok(
             ÅrsavregningResponse(
-                aar = 2023,
+                aar = årsavregning.år,
                 tidligereOpplysninger = TidligereOpplysninger(
                     Trygdeavgiftsgrunnlag(
-                        medlemskapsperioder = listOf(
-                            Medlemskapsperiode(LocalDate.of(2023, 1, 1), LocalDate.of(2023, 7, 31), Trygdedekninger.FTRL_2_9_FØRSTE_LEDD_B_PENSJON),
-                            Medlemskapsperiode(
-                                LocalDate.of(2023, 8, 1),
-                                LocalDate.of(2023, 12, 31),
-                                Trygdedekninger.FTRL_2_9_FØRSTE_LEDD_C_ANDRE_LEDD_HELSE_PENSJON_SYKE_FORELDREPENGER
-                            )
-                        ),
-                        skatteforholdsperioder = listOf(
-                            Skatteforholdsperiode(LocalDate.of(2023, 1, 1), LocalDate.of(2023, 7, 31), Skatteplikttype.SKATTEPLIKTIG),
-                            Skatteforholdsperiode(LocalDate.of(2023, 8, 1), LocalDate.of(2023, 12, 31), Skatteplikttype.IKKE_SKATTEPLIKTIG)
-                        ),
-                        inntektskperioder = listOf()
+                        medlemskapsperioder = årsavregning.tidligereGrunnlag?.medlemskapsperioder?.map { Medlemskapsperiode(it.fom, it.tom, it.dekning) }.orEmpty(),
+                        skatteforholdsperioder = årsavregning.tidligereGrunnlag?.skatteforholdsperioder?.map { Skatteforholdsperiode(it.fom, it.tom, it.skatteplikttype) }.orEmpty(),
+                        inntektskperioder = årsavregning.tidligereGrunnlag?.innteksperioder?.map { Inntektsperiode(it.fom, it.tom, it.type, it.isArbeidsgiversavgiftBetalesTilSkatt, it.avgiftspliktigInntektMnd.verdi.intValueExact()) }.orEmpty(),
                     ),
                     Avgift(
-                        trygdeavgiftsperioder = listOf(
+                        trygdeavgiftsperioder = årsavregning.tidligereAvgift.map {
                             Trygdeavgiftsperiode(
-                                LocalDate.of(2023, 1, 1), LocalDate.of(2023, 7, 31), Inntektskildetype.ARBEIDSINNTEKT_FRA_NORGE, true, 40000, 0.0, 0
-                            ), Trygdeavgiftsperiode(
-                                LocalDate.of(2023, 8, 1), LocalDate.of(2023, 12, 31), Inntektskildetype.INNTEKT_FRA_UTLANDET, false, 15000, 42.2, 6330
+                                fom = it.fom,
+                                tom = it.tom,
+                                inntektskildetype = it.grunnlagInntekstperiode.type,
+                                inntektPerMd = it.grunnlagInntekstperiode.avgiftspliktigInntektMnd.verdi.intValueExact(),
+                                arbeidsgiversavgiftBetales = it.grunnlagInntekstperiode.isArbeidsgiversavgiftBetalesTilSkatt,
+                                avgiftssats = it.trygdesats.toDouble(),
+                                avgiftPerMd = it.trygdeavgiftsbeløpMd.verdi.intValueExact()
                             )
-                        ),
-                        totalInntektPerMd = 690000,
-                        totalAvgiftPerMd = 127020
+                        },
+                        // TODO totalene må beregnes og ta hensyn til perioder ref. MELOSYS-6570
+                        totalInntekt = 55000,
+                        totalAvgift = 42
                     )
                 ),
-                avvikFunnet = true,
-                nyttGrunnlag = Trygdeavgiftsgrunnlag(
-                    medlemskapsperioder = listOf(),
-                    skatteforholdsperioder = listOf(
-                        Skatteforholdsperiode(LocalDate.of(2023, 1, 1), LocalDate.of(2023, 7, 31), Skatteplikttype.SKATTEPLIKTIG),
-                        Skatteforholdsperiode(LocalDate.of(2023, 8, 1), LocalDate.of(2023, 12, 31), Skatteplikttype.IKKE_SKATTEPLIKTIG)
-                    ),
-                    inntektskperioder = listOf(
-                        Inntektsperiode(LocalDate.of(2023, 1, 1), LocalDate.of(2023, 7, 31), Inntektskildetype.ARBEIDSINNTEKT_FRA_NORGE, true, 95000)
-                    ),
-
-                ),
-                endeligAvgift = Avgift(
-                    trygdeavgiftsperioder = listOf(
-                        Trygdeavgiftsperiode(
-                            LocalDate.of(2023, 1, 1), LocalDate.of(2023, 7, 31), Inntektskildetype.ARBEIDSINNTEKT_FRA_NORGE, true, 40000, 0.0, 0
-                        ), Trygdeavgiftsperiode(
-                            LocalDate.of(2023, 8, 1), LocalDate.of(2023, 12, 31), Inntektskildetype.INNTEKT_FRA_UTLANDET, false, 15000, 42.2, 6330
-                        )
-                    ),
-                    totalInntektPerMd = 690000,
-                    totalAvgiftPerMd = 127020
-                ),
+                avvikFunnet = årsavregning.nyttGrunnlag != null,
+                nyttGrunnlag = null,
+                endeligAvgift = null,
                 avregning = Avregning(
-                    nyttTotalbeloep = 24280,
-                    tidligereFakturertBeloep = 21170,
-                    tilFaktureringBeloep = 3110
+                    nyttTotalbeloep = årsavregning?.nyttTotalbeloep?.intValueExact() ?: 0,
+                    tidligereFakturertBeloep = årsavregning?.tidligereFakturertBeloep?.intValueExact() ?: 0,
+                    tilFaktureringBeloep = årsavregning?.tilFaktureringBeloep?.intValueExact() ?: 0,
                 )
             )
         )
@@ -119,8 +94,8 @@ data class Trygdeavgiftsgrunnlag(
 
 data class Avgift(
     val trygdeavgiftsperioder: List<Trygdeavgiftsperiode>,
-    val totalInntektPerMd: Int,
-    val totalAvgiftPerMd: Int
+    val totalInntekt: Int,
+    val totalAvgift: Int
 )
 
 data class Skatteforholdsperiode(
