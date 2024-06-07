@@ -97,6 +97,13 @@ class ÅrsavregningTjeneste(
             )
         )
     }
+
+    @PostMapping("/opprettAarsavregning")
+    fun opprettNyÅrsavregning(@RequestBody årsavregningRequest: LagÅrsavregningRequest): ResponseEntity<Long> {
+        // TODO opprett ny årsavregning via årsavregningService
+        val avregningId = 1L
+        return ResponseEntity.ok(avregningId)
+    }
 }
 
 @PutMapping("/{avregningID}")
@@ -119,6 +126,11 @@ data class ÅrsavregningRequest(
     val tidligereFakturertBeloep: Int?,
     val skatteforholdsperioder: List<Skatteforholdsperiode>,
     val inntektskperioder: List<Inntektsperiode>,
+)
+
+data class LagÅrsavregningRequest(
+    val aar: Int,
+    val behandlingsId: Long
 )
 
 data class TidligereOpplysninger(
