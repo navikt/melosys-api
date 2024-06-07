@@ -44,6 +44,17 @@ class ÅrsavregningService(
         )
     }
 
+    @Transactional
+    fun oppretteÅrsavregning(behandlingsresultat: Behandlingsresultat, gjelderPeriode: Int) {
+        Aarsavregning().apply {
+            aar = gjelderPeriode
+            behandlingsresultat.aarsavregning = this
+            this.behandlingsresultat = behandlingsresultat
+        }.also {
+            aarsavregningRepository.save(it)
+        }
+    }
+
     private fun hentTidligereTrygdeavgiftsgrunnlag(år: Int, behandlingsresultat: Behandlingsresultat?): Trygdeavgiftsgrunnlag? {
         if (behandlingsresultat == null) return null
 

@@ -3,13 +3,13 @@ package no.nav.melosys.saksflyt.steg.arsavregning
 import io.mockk.impl.annotations.MockK
 import io.mockk.junit5.MockKExtension
 import no.nav.melosys.service.LovvalgsperiodeService
+import no.nav.melosys.service.avgift.aarsavregning.ÅrsavregningService
 import no.nav.melosys.service.behandling.BehandlingService
 import no.nav.melosys.service.behandling.BehandlingsresultatService
 import no.nav.melosys.service.ftrl.medlemskapsperiode.MedlemskapsperiodeService
 import no.nav.melosys.service.persondata.PersondataService
 import no.nav.melosys.service.sak.FagsakService
 import no.nav.melosys.service.sak.TrygdeavgiftOppsummeringService
-import no.nav.melosys.service.sak.ÅrsavregningService
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.extension.ExtendWith
