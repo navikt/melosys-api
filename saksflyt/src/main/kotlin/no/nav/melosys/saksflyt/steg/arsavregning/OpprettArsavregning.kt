@@ -66,7 +66,7 @@ class OpprettArsavregning(
             )
         } ?: return
 
-        val nyBehandling = behandlingService.nyBehandling(
+        behandlingService.nyBehandling(
             sakMedTrygdeavgift,
             Behandlingsstatus.VURDER_DOKUMENT,
             Behandlingstyper.ÅRSAVREGNING,
@@ -76,10 +76,11 @@ class OpprettArsavregning(
             LocalDate.now(),
             Behandlingsaarsaktyper.ANNET, // Trenger vi en ny type?
             null
-        )
-        val behandlingsresultat = behandslingsresultatService.hentBehandlingsresultat(nyBehandling.id)
-        oppretteÅrsavregning.oppretteÅrsavregning(behandlingsresultat, gjelderPeriode)
-        prosessinstans.behandling = nyBehandling
+        ).also { nyBehandling ->
+            val behandlingsresultat = behandslingsresultatService.hentBehandlingsresultat(nyBehandling.id)
+            oppretteÅrsavregning.oppretteÅrsavregning(behandlingsresultat, gjelderPeriode)
+            prosessinstans.behandling = nyBehandling
+        }
     }
 
     private fun finnTrygdeavgiftsBehandlingerMedGyldigPeriode(sakMedTrygdeavgift: Fagsak, gjelderPeriode: Int): Behandling? {
