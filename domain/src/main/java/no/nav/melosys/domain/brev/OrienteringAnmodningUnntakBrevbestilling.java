@@ -1,7 +1,5 @@
 package no.nav.melosys.domain.brev;
 
-import java.util.List;
-
 public class OrienteringAnmodningUnntakBrevbestilling extends DokgenBrevbestilling {
     private String fritekst;
 

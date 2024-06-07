@@ -1,17 +1,14 @@
 package no.nav.melosys.service.dokument.brev.mapper
 
 import jakarta.transaction.Transactional
-import no.nav.melosys.domain.VilkaarBegrunnelse
 import no.nav.melosys.domain.Vilkaarsresultat
 import no.nav.melosys.domain.avklartefakta.AvklartYrkesgruppeType
 import no.nav.melosys.domain.brev.OrienteringAnmodningUnntakBrevbestilling
 import no.nav.melosys.domain.kodeverk.Avklartefaktatyper
-import no.nav.melosys.domain.kodeverk.Kodeverk
 import no.nav.melosys.domain.kodeverk.Vilkaar
 import no.nav.melosys.integrasjon.dokgen.dto.OrienteringAnmodningUnntak
 import no.nav.melosys.service.behandling.VilkaarsresultatService
 import org.springframework.stereotype.Component
-import java.time.LocalDate
 
 @Component
 class OrienteringAnmodningUnntakMapper(
