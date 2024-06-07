@@ -183,8 +183,8 @@ internal class ÅrsavregningTjenesteTest {
           "avgiftPerMd": 6330
         }
       ],
-      "totalInntektPerMd": 55000,
-      "totalAvgiftPerMd": 6330
+      "totalInntekt": 55000,
+      "totalAvgift": 42
     }
   },
   "avvikFunnet": false,

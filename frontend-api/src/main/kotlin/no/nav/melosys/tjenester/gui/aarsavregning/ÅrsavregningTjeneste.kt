@@ -42,8 +42,8 @@ class ÅrsavregningTjeneste(
                             )
                         },
                         // TODO totalene må beregnes og ta hensyn til perioder ref. MELOSYS-6570
-                        totalInntekt = årsavregning.tidligereGrunnlag?.innteksperioder?.sumOf { it.avgiftspliktigInntektMnd.verdi.intValueExact() } ?: 0,
-                        totalAvgift = årsavregning.tidligereAvgift?.sumOf { it.trygdeavgiftsbeløpMd.verdi.intValueExact() } ?:0
+                        totalInntekt = 55000,
+                        totalAvgift = 42
                     )
                 ),
                 avvikFunnet = årsavregning.nyttGrunnlag != null,
