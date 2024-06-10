@@ -52,7 +52,7 @@ internal open class OppgaveGosysMapping {
         return Oppgave(
             oppgaveBehandlingstema = null,
             oppgaveType = Oppgavetyper.VURD_HENV,
-            tema = teamaUtleder.utledTema(sakstype, sakstema, behandlingstema),
+            tema = teamaUtleder.utledTema(sakstype, sakstema, behandlingstema, behandlingstype),
             beskrivelsefelt = Beskrivelsefelt.TOMT,
             regelTruffet = Regel.HENVENDELSE_OG_VIRKSOMHET
 
@@ -72,7 +72,7 @@ internal open class OppgaveGosysMapping {
             Oppgave(
                 oppgaveBehandlingstema = it.oppgaveBehandlingstema,
                 oppgaveType = Oppgavetyper.VURD_HENV,
-                tema = teamaUtleder.utledTema(sakstype, sakstema, behandlingstema),
+                tema = teamaUtleder.utledTema(sakstype, sakstema, behandlingstema, behandlingstype),
                 beskrivelsefelt = Beskrivelsefelt.SED_ELLER_TOMT,
                 regelTruffet = Regel.HENVENDELSE
             )

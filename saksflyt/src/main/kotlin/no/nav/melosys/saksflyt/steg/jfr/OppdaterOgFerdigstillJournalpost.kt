@@ -37,7 +37,7 @@ class OppdaterOgFerdigstillJournalpost(private val joarkFasade: JoarkFasade, pri
             .medHovedDokumentID(prosessinstans.getData(ProsessDataKey.DOKUMENT_ID))
             .medTittel(prosessinstans.getData(ProsessDataKey.HOVEDDOKUMENT_TITTEL))
             .medMottattDato(prosessinstans.getData(ProsessDataKey.MOTTATT_DATO, LocalDate::class.java))
-            .medTema(oppgaveFactory.utledTema(fagsak.type, fagsak.tema, behandling.tema).kode)
+            .medTema(oppgaveFactory.utledTema(fagsak.type, fagsak.tema, behandling.tema, behandling.type).kode)
             .medAvsenderID(avsenderID)
             .medAvsenderNavn(avsenderNavn)
             .medAvsenderType(prosessinstans.getData(ProsessDataKey.AVSENDER_TYPE, Avsendertyper::class.java, null))

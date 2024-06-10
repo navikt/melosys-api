@@ -66,7 +66,8 @@ internal class OppgaveFactoryNyMappingTest {
                 it.oppgave.beskrivelsefelt != OppgaveGosysMapping.Beskrivelsefelt.A1_ANMODNING_OM_UNNTAK_PAPIR
             }.filter {
                 it.oppgave.beskrivelsefelt != OppgaveGosysMapping.Beskrivelsefelt.BEHANDLINGSTEMA
-            }.shouldHaveSize(56).forEach { sak ->
+            }
+            .shouldHaveSize(64).forEach { sak ->
                 val behandling = sak.lagBehandlingMedSpy()
                 val oppgave =
                     oppgaveFactory.lagBehandlingsoppgave(behandling, LocalDate.now(), behandling::hentSedDokument)
@@ -194,8 +195,19 @@ internal class OppgaveFactoryNyMappingTest {
 
     @Test
     fun `oppgave tema skal være av riktig type`() {
-        rowsMedAlleKombinasjoner.forEach { sak ->
-            val tema: Tema = oppgaveFactory.utledTema(sak.sakstype, sak.sakstema, sak.behandlingstema)
+        rowsMedAlleKombinasjoner.filter { it.behandlingstype != Behandlingstyper.ÅRSAVREGNING }.forEach { sak ->
+            val tema: Tema = oppgaveFactory.utledTema(sak.sakstype, sak.sakstema, sak.behandlingstema, sak.behandlingstype)
+
+            withClue("sakstype${sak.sakstype}, sakstema=${sak.sakstema}, behandlingstema:${sak.behandlingstema}") {
+                tema.shouldBe(sak.oppgave.tema)
+            }
+        }
+    }
+
+    @Test
+    fun `oppgave tema skal være av riktig type når det er årsavregning`() {
+        rowsMedAlleKombinasjoner.filter { it.behandlingstype == Behandlingstyper.ÅRSAVREGNING }.forEach { sak ->
+            val tema: Tema = oppgaveFactory.utledTema(sak.sakstype, sak.sakstema, sak.behandlingstema, sak.behandlingstype)
 
             withClue("sakstype${sak.sakstype}, sakstema=${sak.sakstema}, behandlingstema:${sak.behandlingstema}") {
                 tema.shouldBe(sak.oppgave.tema)
@@ -310,7 +322,7 @@ internal class OppgaveFactoryNyMappingTest {
 
     @ParameterizedTest(name = "{0} - {1} - {2} - {3}")
     @MethodSource("henvendelseVirksomhetPermutasjoner")
-    fun `hånter henvendelse og virksomhet med egne regler`(
+    fun `håndter henvendelse og virksomhet med egne regler`(
         sakstype: Sakstyper,
         sakstema: Sakstemaer,
         behandlingstema: Behandlingstema,
@@ -319,7 +331,7 @@ internal class OppgaveFactoryNyMappingTest {
         val oppgave = oppgaveGosysMapping.finnOppgave(sakstype, sakstema, behandlingstema, behandlingstype)
 
         oppgave.apply {
-            tema.shouldBe(OppgaveTemaUtleder().utledTema(sakstype, sakstema, behandlingstema))
+            tema.shouldBe(OppgaveTemaUtleder().utledTema(sakstype, sakstema, behandlingstema, behandlingstype))
             oppgaveBehandlingstema?.kode.shouldBe(null)
             oppgaveType.shouldBe(Oppgavetyper.VURD_HENV)
             beskrivelsefelt.shouldBe(OppgaveGosysMapping.Beskrivelsefelt.TOMT)
