@@ -45,7 +45,7 @@ class OrienteringAnmodningUnntakMapper(
             )
         )
 
-        val lovvalgsbestemmelse = behandlingsresultat.hentLovvalgsperiode().bestemmelse.name()
+        val lovvalgsbestemmelse = anmodningsperiode.bestemmelse.name()
         val begrunnelser = hentBegrunnelser(behandlingID)
         val erDirekteTilAnmodning = behandlingsresultat.avklartefakta.find { it.fakta == AvklartYrkesgruppeType.ORDINAER_UTEN_ART12.name } != null
 

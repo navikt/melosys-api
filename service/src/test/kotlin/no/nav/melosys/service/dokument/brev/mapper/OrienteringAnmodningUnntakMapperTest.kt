@@ -138,7 +138,7 @@ internal class OrienteringAnmodningUnntakMapperTest {
         return Anmodningsperiode(
             LocalDate.now().minusMonths(4),
             LocalDate.now().plusMonths(4),
-            Land_iso2.NO, Lovvalgbestemmelser_883_2004.FO_883_2004_ART16_1, null,
+            Land_iso2.NO, Lovvalgbestemmelser_konv_efta_storbritannia.KONV_EFTA_STORBRITANNIA_ART18_1, null,
             Land_iso2.SE, Lovvalgbestemmelser_883_2004.FO_883_2004_ART12_1, Trygdedekninger.FULL_DEKNING_EOSFO
         )
     }
