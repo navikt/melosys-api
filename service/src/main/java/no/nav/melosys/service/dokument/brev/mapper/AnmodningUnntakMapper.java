@@ -91,11 +91,11 @@ public class AnmodningUnntakMapper implements BrevDataMapper {
 
         fag.setArt121Begrunnelse(mapArt121BegrunnelseType(resultat.hentVilkaarbegrunnelser(FO_883_2004_ART12_1)));
         fag.setArt121ForutgåendeBegrunnelse(
-            mapArt121ForutgaaendeBegrunnelseType(resultat.hentVilkaarbegrunnelser(ART12_1_FORUTGAAENDE_MEDLEMSKAP)));
+            mapArt121ForutgaaendeBegrunnelseType(resultat.hentVilkaarbegrunnelser(FORUTGAAENDE_MEDLEMSKAP)));
 
         fag.setArt122Begrunnelse(mapArt122BegrunnelseType(resultat.hentVilkaarbegrunnelser(FO_883_2004_ART12_2)));
         fag.setArt122NormalVirksomhetBegrunnelse(mapArt122NormalVirksomhetBegrunnelseType(
-            resultat.hentVilkaarbegrunnelser(ART12_2_NORMALT_DRIVER_VIRKSOMHET)));
+            resultat.hentVilkaarbegrunnelser(NORMALT_DRIVER_VIRKSOMHET)));
 
         mapAnmodningBegrunnelser(brevData.getAnmodningBegrunnelser()).ifPresent(fag::setArt161AnmodningBegrunnelse);
 

@@ -36,8 +36,8 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.xml.sax.SAXException;
 
-import static no.nav.melosys.domain.kodeverk.begrunnelser.Art16_1_anmodning.UTSENDELSE_MELLOM_24_MN_OG_5_AAR;
-import static no.nav.melosys.domain.kodeverk.begrunnelser.Art16_1_anmodning_uten_art12.SJOEMANNSKIRKEN;
+import static no.nav.melosys.domain.kodeverk.begrunnelser.Anmodning_begrunnelser.UTSENDELSE_MELLOM_24_MN_OG_5_AAR;
+import static no.nav.melosys.domain.kodeverk.begrunnelser.Direkte_til_anmodning_begrunnelser.SJOEMANNSKIRKEN;
 import static no.nav.melosys.service.dokument.brev.BrevDataTestUtils.*;
 import static no.nav.melosys.service.dokument.brev.BrevDataUtils.lagKontaktInformasjon;
 import static no.nav.melosys.service.dokument.brev.BrevDataUtils.lagNorskPostadresse;
