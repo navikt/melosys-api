@@ -11,9 +11,6 @@ import no.nav.melosys.domain.avklartefakta.Avklartefakta
 import no.nav.melosys.domain.brev.OrienteringAnmodningUnntakBrevbestilling
 import no.nav.melosys.domain.dokument.person.PersonDokument
 import no.nav.melosys.domain.kodeverk.*
-import no.nav.melosys.domain.kodeverk.begrunnelser.Art12_1_begrunnelser.UTSENDELSE_OVER_24_MN
-import no.nav.melosys.domain.kodeverk.begrunnelser.Art12_2_begrunnelser.IKKE_LIGNENDE_VIRKSOMHET
-import no.nav.melosys.domain.kodeverk.begrunnelser.Art16_1_anmodning.ERSTATTER_EN_ANNEN_UNDER_5_AAR
 import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingstema
 import no.nav.melosys.domain.kodeverk.lovvalgsbestemmelser.Lovvalgbestemmelser_883_2004
 import no.nav.melosys.domain.kodeverk.lovvalgsbestemmelser.Lovvalgbestemmelser_konv_efta_storbritannia
@@ -22,6 +19,11 @@ import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.extension.ExtendWith
 import java.time.LocalDate
+
+import no.nav.melosys.domain.kodeverk.begrunnelser.Utsendt_arbeidstaker_begrunnelser.UTSENDELSE_OVER_24_MN
+import no.nav.melosys.domain.kodeverk.begrunnelser.Utsendt_naeringsdrivende_begrunnelser.IKKE_LIGNENDE_VIRKSOMHET
+import no.nav.melosys.domain.kodeverk.begrunnelser.Anmodning_begrunnelser.ERSTATTER_EN_ANNEN_UNDER_5_AAR
+
 
 @ExtendWith(MockKExtension::class)
 internal class OrienteringAnmodningUnntakMapperTest {
@@ -71,6 +73,7 @@ internal class OrienteringAnmodningUnntakMapperTest {
         every { mockVilkaarsresultatService.finnUnntaksVilkaarsresultat(ofType()) } returns unntaksVilkaar
         every { mockVilkaarsresultatService.finnUtsendingArbeidstakerVilkaarsresultat(ofType()) } returns vilkaarsresultatArbeidstaker
         every { mockVilkaarsresultatService.finnUtsendingNæringsdrivendeVilkaarsresultat(ofType()) } returns vilkaarsresultatNæringsdrivende
+        every { mockVilkaarsresultatService.finnVilkaarsresultat(ofType(), ofType()) } returns vilkaarsresultatNæringsdrivende
 
         val brevbestilling =
             OrienteringAnmodningUnntakBrevbestilling.Builder()

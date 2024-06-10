@@ -81,19 +81,19 @@ class OrienteringAnmodningUnntakMapper(
         val UTSENDT_NÆRINGSDRIVENDE_begrunnelser =
             vilkaarsresultatService.finnUtsendingNæringsdrivendeVilkaarsresultat(behandlingID)?.begrunnelser?.stream()?.toList()?.map { it.kode }
                 .orEmpty()
-//        val FORUTGÅENDE_MEDL_begrunnelser =
-//            hentVilkårsresultat(behandlingID, Vilkaar.FORUTGAAENDE_MEDLEMSKAP)?.begrunnelser?.stream()?.toList()?.map { it.kode }.orEmpty()
-//        val NORMALT_VIRKSOMHET_begrunnelser =
-//            hentVilkårsresultat(behandlingID, Vilkaar.NORMALT_DRIVER_VIRKSOMHET)?.begrunnelser?.stream()?.toList()?.map { it.kode }.orEmpty()
-//        val VESENTLIG_VIRKSOMHET_begrunnelser =
-//            hentVilkårsresultat(behandlingID, Vilkaar.VESENTLIG_VIRKSOMHET)?.begrunnelser?.stream()?.toList()?.map { it.kode }.orEmpty()
+        val FORUTGÅENDE_MEDL_begrunnelser =
+            hentVilkårsresultat(behandlingID, Vilkaar.FORUTGAAENDE_MEDLEMSKAP)?.begrunnelser?.stream()?.toList()?.map { it.kode }.orEmpty()
+        val NORMALT_VIRKSOMHET_begrunnelser =
+            hentVilkårsresultat(behandlingID, Vilkaar.NORMALT_DRIVER_VIRKSOMHET)?.begrunnelser?.stream()?.toList()?.map { it.kode }.orEmpty()
+        val VESENTLIG_VIRKSOMHET_begrunnelser =
+            hentVilkårsresultat(behandlingID, Vilkaar.VESENTLIG_VIRKSOMHET)?.begrunnelser?.stream()?.toList()?.map { it.kode }.orEmpty()
 
 
-        return UTSENDT_ARBEIDSTAKER_begrunnelser +
-            UTSENDT_NÆRINGSDRIVENDE_begrunnelser
-//            FORUTGÅENDE_MEDL_begrunnelser +
-//            NORMALT_VIRKSOMHET_begrunnelser +
-//            VESENTLIG_VIRKSOMHET_begrunnelser
+        return (UTSENDT_ARBEIDSTAKER_begrunnelser +
+            UTSENDT_NÆRINGSDRIVENDE_begrunnelser +
+            FORUTGÅENDE_MEDL_begrunnelser +
+            NORMALT_VIRKSOMHET_begrunnelser +
+            VESENTLIG_VIRKSOMHET_begrunnelser).toSet().toList()
     }
 
 
