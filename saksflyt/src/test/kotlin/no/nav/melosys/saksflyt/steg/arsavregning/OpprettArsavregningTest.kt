@@ -1,14 +1,10 @@
 package no.nav.melosys.saksflyt.steg.arsavregning
 
 import io.kotest.matchers.shouldBe
-import io.mockk.Called
-import io.mockk.every
+import io.mockk.*
 import io.mockk.impl.annotations.MockK
 import io.mockk.junit5.MockKExtension
-import io.mockk.verify
-import no.nav.melosys.domain.Behandlingsresultat
-import no.nav.melosys.domain.Lovvalgsperiode
-import no.nav.melosys.domain.Medlemskapsperiode
+import no.nav.melosys.domain.*
 import no.nav.melosys.domain.kodeverk.Aktoersroller
 import no.nav.melosys.domain.kodeverk.behandlinger.*
 import no.nav.melosys.saksflyt.TestdataFactory
@@ -73,14 +69,11 @@ class OpprettArsavregningTest {
 
     @Test
     fun `opprette ny behandling ved skatteoppgjør med overlappende medlemskapsperiode og fakturert trygdeavgift`() {
-        val prosessinstans = Prosessinstans().apply {
-            setData(ProsessDataKey.GJELDER_PERIODE, "2023")
-            setData(ProsessDataKey.AKTØR_ID, "456789123")
-        }
+        val prosessinstans = lagProsessInstans()
 
-        val fagsak = TestdataFactory.lagFagsak()
-        val behandling = TestdataFactory.lagBehandling()
-        val årsavregningsBehandling = TestdataFactory.lagBehandling().apply {
+        val fagsak = lagFagsak()
+        val behandling = lagBehandling()
+        val årsavregningsBehandling = lagBehandling {
             id = 2
             type = Behandlingstyper.ÅRSAVREGNING
         }
@@ -131,13 +124,9 @@ class OpprettArsavregningTest {
 
     @Test
     fun `ikke opprette ny behandling ved skatteoppgjør ved ikke overlappende medlemskapsperiode`() {
-        val prosessinstans = Prosessinstans().apply {
-            setData(ProsessDataKey.GJELDER_PERIODE, "2023")
-            setData(ProsessDataKey.AKTØR_ID, "456789123")
-        }
-
-        val fagsak = TestdataFactory.lagFagsak()
-        val behandling = TestdataFactory.lagBehandling()
+        val prosessinstans = lagProsessInstans()
+        val fagsak = lagFagsak()
+        val behandling = lagBehandling()
 
         every { persondataService.hentAktørIdForIdent(any()) } returns "789"
         every { fagsakService.hentFagsakerMedAktør(Aktoersroller.BRUKER, "789") } returns listOf(fagsak)
@@ -147,7 +136,7 @@ class OpprettArsavregningTest {
             fom = LocalDate.of(2022, 1, 1)
             tom = LocalDate.of(2022, 10, 10)
         })
-        every { medlemskapsperiodeService.hentMedlemskapsperioder(behandling.id) } returns listOf(Medlemskapsperiode().apply {
+            every { medlemskapsperiodeService.hentMedlemskapsperioder(behandling.id) } returns listOf(Medlemskapsperiode().apply {
             fom = LocalDate.of(2022, 1, 1)
             tom = LocalDate.of(2022, 10, 10)
         })
@@ -187,5 +176,20 @@ class OpprettArsavregningTest {
     @Test
     fun `opprette ny behandling ved skatteoppgjør uten tidligere årsavregningsbehandling eller avsluttet årsavregningsbehandling`() {
 
+    }
+
+    private fun lagBehandling(block: Behandling.() -> Unit = {}): Behandling = TestdataFactory.lagBehandling().apply {
+        block()
+    }
+
+    private fun lagFagsak(block: Fagsak.() -> Unit = {}): Fagsak = TestdataFactory.lagFagsak().apply {
+        block()
+    }
+
+
+    private fun lagProsessInstans(block: Prosessinstans.() -> Unit = {}): Prosessinstans = Prosessinstans().apply {
+        setData(ProsessDataKey.GJELDER_PERIODE, "2023")
+        setData(ProsessDataKey.AKTØR_ID, "456789123")
+        block()
     }
 }
