@@ -15,6 +15,7 @@ import no.nav.melosys.domain.Lovvalgsperiode;
 import no.nav.melosys.domain.adresse.StrukturertAdresse;
 import no.nav.melosys.domain.avklartefakta.AvklartVirksomhet;
 import no.nav.melosys.domain.dokument.felles.Land;
+import no.nav.melosys.domain.eessi.sed.Bestemmelse;
 import no.nav.melosys.domain.kodeverk.Land_iso2;
 import no.nav.melosys.domain.person.Persondata;
 import no.nav.melosys.domain.person.adresse.Kontaktadresse;
@@ -128,7 +129,11 @@ class A1Mapper {
     private LovvalgsperiodeType mapLovvalgsperiode(Lovvalgsperiode lovvalgsperiode) {
         LovvalgsperiodeType brevPeriode = new LovvalgsperiodeType();
         brevPeriode.setLovvalgsLand(lovvalgsperiode.getLovvalgsland().getKode());
-        brevPeriode.setLovvalgsbestemmelse(LovvalgsbestemmelseKode.fromValue(lovvalgsperiode.getBestemmelse().getKode()));
+        Boolean erStorbritannia = lovvalgsperiode.getBestemmelse().name().startsWith("KONV_EFTA");
+
+        brevPeriode.setLovvalgsbestemmelse(LovvalgsbestemmelseKode.fromValue(
+            erStorbritannia ? Bestemmelse.GB_KONV_BESTEMMELSE_MAP.get(lovvalgsperiode.getBestemmelse()).getValue() : lovvalgsperiode.getBestemmelse().getKode())
+        );
         if (lovvalgsperiode.getTilleggsbestemmelse() != null) {
             brevPeriode.setTilleggsbestemmelse(TilleggsbestemmelseKode.fromValue(lovvalgsperiode.getTilleggsbestemmelse().getKode()));
         }
