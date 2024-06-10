@@ -8,10 +8,10 @@ import java.util.stream.Collectors;
 import no.nav.melosys.domain.VilkaarBegrunnelse;
 import no.nav.melosys.domain.Vilkaarsresultat;
 import no.nav.melosys.domain.kodeverk.Kodeverk;
-import no.nav.melosys.domain.kodeverk.begrunnelser.Art16_1_anmodning;
-import no.nav.melosys.domain.kodeverk.begrunnelser.Art16_1_anmodning_engelsk;
-import no.nav.melosys.domain.kodeverk.begrunnelser.Art16_1_anmodning_uten_art12;
-import no.nav.melosys.domain.kodeverk.begrunnelser.Art16_1_anmodning_uten_art12_engelsk;
+import no.nav.melosys.domain.kodeverk.begrunnelser.Anmodning_begrunnelser;
+import no.nav.melosys.domain.kodeverk.begrunnelser.Anmodning_engelsk_begrunnelser;
+import no.nav.melosys.domain.kodeverk.begrunnelser.Direkte_til_anmodning_begrunnelser;
+import no.nav.melosys.domain.kodeverk.begrunnelser.Direkte_til_anmodning_engelsk_begrunnelser;
 
 public final class VilkaarsresultatTilBegrunnelseMapper {
 
@@ -29,20 +29,20 @@ public final class VilkaarsresultatTilBegrunnelseMapper {
     }
 
     private static Kodeverk getEngelskKodeverk(String begrunnelseKode) {
-        if (isArt16_1_Anmodning_Begrunnelse(begrunnelseKode)) {
-            return Art16_1_anmodning_engelsk.valueOf(begrunnelseKode);
-        } else if (isArt16_1_Anmodning_UtenArt12_Begrunnelse(begrunnelseKode)) {
-            return Art16_1_anmodning_uten_art12_engelsk.valueOf(begrunnelseKode);
+        if (isAnmodningBegrunnelse(begrunnelseKode)) {
+            return Anmodning_engelsk_begrunnelser.valueOf(begrunnelseKode);
+        } else if (isDirekteTilAnmodningBegrunnelse(begrunnelseKode)) {
+            return Direkte_til_anmodning_engelsk_begrunnelser.valueOf(begrunnelseKode);
         }
         return null;
     }
 
     private static String tilFritekst(Kodeverk begrunnelseKode, String fritekst) {
         final Collection<Kodeverk> særligGrunnKoder = Arrays.asList(
-            Art16_1_anmodning.SAERLIG_GRUNN,
-            Art16_1_anmodning_engelsk.SAERLIG_GRUNN,
-            Art16_1_anmodning_uten_art12.SAERLIG_GRUNN,
-            Art16_1_anmodning_uten_art12_engelsk.SAERLIG_GRUNN);
+            Anmodning_begrunnelser.SAERLIG_GRUNN,
+            Anmodning_engelsk_begrunnelser.SAERLIG_GRUNN,
+            Direkte_til_anmodning_begrunnelser.SAERLIG_GRUNN,
+            Direkte_til_anmodning_engelsk_begrunnelser.SAERLIG_GRUNN);
 
         if (særligGrunnKoder.contains(begrunnelseKode)) {
             return fritekst;
@@ -50,13 +50,13 @@ public final class VilkaarsresultatTilBegrunnelseMapper {
         return begrunnelseKode.getBeskrivelse();
     }
 
-    private static boolean isArt16_1_Anmodning_Begrunnelse(String kode) {
-        return Arrays.stream(Art16_1_anmodning.values())
+    private static boolean isAnmodningBegrunnelse(String kode) {
+        return Arrays.stream(Anmodning_begrunnelser.values())
             .anyMatch(begrunnelse -> begrunnelse.getKode().equals(kode));
     }
 
-    private static boolean isArt16_1_Anmodning_UtenArt12_Begrunnelse(String kode) {
-        return Arrays.stream(Art16_1_anmodning_uten_art12.values())
+    private static boolean isDirekteTilAnmodningBegrunnelse(String kode) {
+        return Arrays.stream(Direkte_til_anmodning_begrunnelser.values())
             .anyMatch(begrunnelse -> begrunnelse.getKode().equals(kode));
     }
 }

@@ -1,6 +1,5 @@
 package no.nav.melosys.tjenester.gui.ftrl.bestemmelser.vilkaar
 
-import io.getunleash.Unleash
 import io.swagger.annotations.Api
 import mu.KotlinLogging
 import no.nav.melosys.domain.kodeverk.Avklartefaktatyper
@@ -8,7 +7,6 @@ import no.nav.melosys.domain.kodeverk.Folketrygdloven_kap2_bestemmelser
 import no.nav.melosys.domain.kodeverk.Vilkaar
 import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingstema
 import no.nav.melosys.exception.FunksjonellException
-import no.nav.melosys.featuretoggle.ToggleName
 import no.nav.melosys.service.ftrl.bestemmelse.vilkaar.VilkårForBestemmelse
 import no.nav.melosys.service.tilgang.Aksesskontroll
 import no.nav.security.token.support.core.api.Protected
@@ -26,8 +24,7 @@ private const val BEHANDLING_ID = "behandlingID"
 @Api(tags = ["ftrl", "bestemmelser", "avklarte fakta", "vilkår"])
 class VilkårTjeneste(
     private val vilkårForBestemmelse: VilkårForBestemmelse,
-    private val aksessKontroll: Aksesskontroll,
-    private val unleash: Unleash
+    private val aksessKontroll: Aksesskontroll
 ) {
     private val log = KotlinLogging.logger { }
 
@@ -36,7 +33,7 @@ class VilkårTjeneste(
     @GetMapping("/ftrl/bestemmelser/{bestemmelse}/vilkaar")
     fun hentVilkår(
         @PathVariable bestemmelse: Folketrygdloven_kap2_bestemmelser,
-        @RequestParam requestParams : Map<String, String>
+        @RequestParam requestParams: Map<String, String>
     ): ResponseEntity<VilkårForBestemmelseDto> {
         validerRequestParams(requestParams)
         val behandlingID = requestParams[BEHANDLING_ID]?.toLong()
@@ -44,12 +41,7 @@ class VilkårTjeneste(
             aksessKontroll.autoriser(behandlingID)
         }
 
-        var behandlingstema: String
-        if (unleash.isEnabled(ToggleName.MELOSYS_FTRL_YRKESAKTIV_PLIKTIGE_BESTEMMELSER)) {
-            behandlingstema = requestParams[BEHANDLINGSTEMA] ?: throw FunksjonellException("?behandlingstema er påkrevd")
-        } else {
-            behandlingstema = Behandlingstema.IKKE_YRKESAKTIV.name
-        }
+        val behandlingstema = requestParams[BEHANDLINGSTEMA] ?: throw FunksjonellException("?behandlingstema er påkrevd")
 
         val avklarteFakta = requestParams.filterKeys { k -> k in avklartefaktatyperNavn }
             .mapKeys { (k, _) -> Avklartefaktatyper.valueOf(k) }
@@ -67,7 +59,7 @@ class VilkårTjeneste(
     private fun validerRequestParams(queryParams: Map<String, String>) {
         val validKeys = listOf(BEHANDLING_ID, BEHANDLINGSTEMA) + avklartefaktatyperNavn
 
-        val unknownKeys = queryParams.keys.filterNot { key ->  validKeys.any { it.equals(key, ignoreCase = true) } }
+        val unknownKeys = queryParams.keys.filterNot { key -> validKeys.any { it.equals(key, ignoreCase = true) } }
         if (unknownKeys.isNotEmpty()) {
             throw FunksjonellException("Følgende request params støttes ikke: " + unknownKeys)
         }

@@ -12,7 +12,7 @@ import no.nav.melosys.service.dokument.brev.BrevData;
 import no.nav.melosys.service.dokument.brev.BrevDataAvslagArbeidsgiver;
 import no.nav.melosys.service.dokument.brev.datagrunnlag.BrevDataGrunnlag;
 
-import static no.nav.melosys.domain.kodeverk.Vilkaar.ART12_1_VESENTLIG_VIRKSOMHET;
+import static no.nav.melosys.domain.kodeverk.Vilkaar.VESENTLIG_VIRKSOMHET;
 
 public class BrevDataByggerAvslagArbeidsgiver implements BrevDataBygger {
     private final LandvelgerService landvelgerService;
@@ -40,7 +40,7 @@ public class BrevDataByggerAvslagArbeidsgiver implements BrevDataBygger {
 
         brevData.setVilkårbegrunnelser121(mapVilkaarBegrunnelse(vilkaarsresultatService.finnUtsendingArbeidstakerVilkaarsresultat(behandlingID)));
         brevData.setVilkårbegrunnelser121VesentligVirksomhet(
-            mapVilkaarBegrunnelse(vilkaarsresultatService.finnVilkaarsresultat(behandlingID, ART12_1_VESENTLIG_VIRKSOMHET)));
+            mapVilkaarBegrunnelse(vilkaarsresultatService.finnVilkaarsresultat(behandlingID, VESENTLIG_VIRKSOMHET)));
 
         return brevData;
     }

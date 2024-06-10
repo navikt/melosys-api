@@ -14,8 +14,8 @@ import no.nav.melosys.domain.avklartefakta.AvklartVirksomhet;
 import no.nav.melosys.domain.dokument.person.PersonDokument;
 import no.nav.melosys.domain.kodeverk.Land_iso2;
 import no.nav.melosys.domain.kodeverk.Vilkaar;
-import no.nav.melosys.domain.kodeverk.begrunnelser.Art12_1_begrunnelser;
-import no.nav.melosys.domain.kodeverk.begrunnelser.Art12_1_vesentlig_virksomhet;
+import no.nav.melosys.domain.kodeverk.begrunnelser.Utsendt_arbeidstaker_begrunnelser;
+import no.nav.melosys.domain.kodeverk.begrunnelser.Vesentlig_virksomhet_begrunnelser;
 import no.nav.melosys.domain.kodeverk.yrker.Yrkesaktivitetstyper;
 import no.nav.melosys.service.dokument.brev.BrevDataAvslagArbeidsgiver;
 import org.junit.jupiter.api.Test;
@@ -55,17 +55,17 @@ class AvslagArbeidsgiverMapperTest {
         lovvalgsperiode.setTom(LocalDate.now());
         brevData.setLovvalgsperiode(lovvalgsperiode);
 
-        Vilkaarsresultat vilkaarsresultat12_1 = new Vilkaarsresultat();
-        vilkaarsresultat12_1.setVilkaar(Vilkaar.FO_883_2004_ART12_1);
-        VilkaarBegrunnelse begrunnelse12_1 = new VilkaarBegrunnelse();
-        begrunnelse12_1.setKode(Art12_1_begrunnelser.IKKE_VESENTLIG_VIRKSOMHET.getKode());
-        vilkaarsresultat12_1.setBegrunnelser(Collections.singleton(begrunnelse12_1));
-        brevData.setVilkårbegrunnelser121(vilkaarsresultat12_1.getBegrunnelser());
+        Vilkaarsresultat vilkaarsresultat = new Vilkaarsresultat();
+        vilkaarsresultat.setVilkaar(Vilkaar.FO_883_2004_ART12_1);
+        VilkaarBegrunnelse vilkaarBegrunnelse = new VilkaarBegrunnelse();
+        vilkaarBegrunnelse.setKode(Utsendt_arbeidstaker_begrunnelser.IKKE_VESENTLIG_VIRKSOMHET.getKode());
+        vilkaarsresultat.setBegrunnelser(Collections.singleton(vilkaarBegrunnelse));
+        brevData.setVilkårbegrunnelser121(vilkaarsresultat.getBegrunnelser());
 
         VilkaarBegrunnelse vesentligVirksomhetBegrunnelse = new VilkaarBegrunnelse();
-        vesentligVirksomhetBegrunnelse.setKode(Art12_1_vesentlig_virksomhet.FOR_LITE_KONTRAKTER_NORGE.getKode());
+        vesentligVirksomhetBegrunnelse.setKode(Vesentlig_virksomhet_begrunnelser.FOR_LITE_KONTRAKTER_NORGE.getKode());
         Vilkaarsresultat vesentligVirksomhet = new Vilkaarsresultat();
-        vesentligVirksomhet.setVilkaar(Vilkaar.ART12_1_VESENTLIG_VIRKSOMHET);
+        vesentligVirksomhet.setVilkaar(Vilkaar.VESENTLIG_VIRKSOMHET);
         vesentligVirksomhet.setBegrunnelser(Collections.singleton(vesentligVirksomhetBegrunnelse));
         brevData.setVilkårbegrunnelser121VesentligVirksomhet(vesentligVirksomhet.getBegrunnelser());
 

@@ -17,6 +17,8 @@ import no.nav.melosys.domain.kodeverk.Medlemskapstyper
 import no.nav.melosys.domain.kodeverk.Trygdedekninger
 import no.nav.melosys.domain.kodeverk.begrunnelser.Kontroll_begrunnelser
 import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingstema
+import no.nav.melosys.domain.kodeverk.lovvalgsbestemmelser.Lovvalgbestemmelser_883_2004
+import no.nav.melosys.domain.kodeverk.lovvalgsbestemmelser.Lovvalgbestemmelser_konv_efta_storbritannia
 import no.nav.melosys.domain.kodeverk.lovvalgsbestemmelser.trygdeavtale.Lovvalgsbestemmelser_trygdeavtale_us
 import no.nav.melosys.domain.mottatteopplysninger.MottatteOpplysningerData
 import no.nav.melosys.domain.mottatteopplysninger.data.Soeknadsland
@@ -158,6 +160,55 @@ class FerdigbehandlingKontrollTest {
             type.shouldBe(KontrolldataFeilType.FEIL)
             felter.shouldBeEmpty()
         }
+    }
+
+    @Test
+    fun `storbritannia-konv-lovvalgsbestemmelse brukt for periode før 01-01-2024 skal gi kontrollfeil`() {
+        val lovvalgsperiode = Lovvalgsperiode().apply {
+            bestemmelse = Lovvalgbestemmelser_konv_efta_storbritannia.KONV_EFTA_STORBRITANNIA_ART14_1
+            fom = LocalDate.parse("2023-12-31")
+        }
+        val kontrollData = lagFerdigbehandlingKontrollData(lovvalgsperiode = lovvalgsperiode)
+
+
+        val kontrollfeil = FerdigbehandlingKontroll.storbritanniaKonvensjonBruktForTidlig(kontrollData)
+
+
+        kontrollfeil.shouldNotBeNull().run {
+            kode.shouldBe(Kontroll_begrunnelser.STORBRITANNIA_KONV_BRUKT_FOR_TIDLIG)
+            type.shouldBe(KontrolldataFeilType.FEIL)
+            felter.shouldBeEmpty()
+        }
+    }
+
+    @Test
+    fun `storbritannia-konv-lovvalgsbestemmelse brukt for periode etter 01-01-2024 skal ikke gi kontrollfeil`() {
+        val lovvalgsperiode = Lovvalgsperiode().apply {
+            bestemmelse = Lovvalgbestemmelser_konv_efta_storbritannia.KONV_EFTA_STORBRITANNIA_ART14_1
+            fom = LocalDate.parse("2024-06-01")
+        }
+        val kontrollData = lagFerdigbehandlingKontrollData(lovvalgsperiode = lovvalgsperiode)
+
+
+        val kontrollfeil = FerdigbehandlingKontroll.storbritanniaKonvensjonBruktForTidlig(kontrollData)
+
+
+        kontrollfeil.shouldBeNull()
+    }
+
+    @Test
+    fun `ikke storbritannia-konv-lovvalgsbestemmelse brukt for periode før 01-01-2024 skal ikke gi kontrollfeil`() {
+        val lovvalgsperiode = Lovvalgsperiode().apply {
+            bestemmelse = Lovvalgbestemmelser_883_2004.FO_883_2004_ART12_1
+            fom = LocalDate.parse("2023-12-31")
+        }
+        val kontrollData = lagFerdigbehandlingKontrollData(lovvalgsperiode = lovvalgsperiode)
+
+
+        val kontrollfeil = FerdigbehandlingKontroll.storbritanniaKonvensjonBruktForTidlig(kontrollData)
+
+
+        kontrollfeil.shouldBeNull()
     }
 
     @Test

@@ -6,15 +6,15 @@ import java.util.stream.Stream;
 
 import no.nav.melosys.domain.VilkaarBegrunnelse;
 import no.nav.melosys.domain.Vilkaarsresultat;
-import no.nav.melosys.domain.kodeverk.begrunnelser.Art16_1_anmodning;
-import no.nav.melosys.domain.kodeverk.begrunnelser.Art16_1_anmodning_engelsk;
-import no.nav.melosys.domain.kodeverk.begrunnelser.Art16_1_anmodning_uten_art12;
-import no.nav.melosys.domain.kodeverk.begrunnelser.Art16_1_anmodning_uten_art12_engelsk;
+import no.nav.melosys.domain.kodeverk.begrunnelser.Anmodning_begrunnelser;
+import no.nav.melosys.domain.kodeverk.begrunnelser.Anmodning_engelsk_begrunnelser;
+import no.nav.melosys.domain.kodeverk.begrunnelser.Direkte_til_anmodning_begrunnelser;
+import no.nav.melosys.domain.kodeverk.begrunnelser.Direkte_til_anmodning_engelsk_begrunnelser;
 import org.junit.jupiter.api.Test;
 
-import static no.nav.melosys.domain.kodeverk.begrunnelser.Art16_1_anmodning.SAERLIG_GRUNN;
-import static no.nav.melosys.domain.kodeverk.begrunnelser.Art16_1_anmodning.UTSENDELSE_MELLOM_24_MN_OG_5_AAR;
-import static no.nav.melosys.domain.kodeverk.begrunnelser.Art16_1_anmodning_uten_art12.SJOEMANNSKIRKEN;
+import static no.nav.melosys.domain.kodeverk.begrunnelser.Anmodning_begrunnelser.SAERLIG_GRUNN;
+import static no.nav.melosys.domain.kodeverk.begrunnelser.Anmodning_begrunnelser.UTSENDELSE_MELLOM_24_MN_OG_5_AAR;
+import static no.nav.melosys.domain.kodeverk.begrunnelser.Direkte_til_anmodning_begrunnelser.SJOEMANNSKIRKEN;
 import static no.nav.melosys.service.dokument.brev.mapper.felles.FellesBrevtypeMappingTest.hentAlleVerdierFraKodeverk;
 import static org.assertj.core.api.Assertions.assertThat;
 
@@ -25,7 +25,7 @@ public class VilkaarsresultatTilBegrunnelseMapperTest {
         Vilkaarsresultat vilkaarsresultat = lagVilkaarsresultatMedBegrunnelser(Collections.singletonList(UTSENDELSE_MELLOM_24_MN_OG_5_AAR.getKode()));
 
         assertThat(VilkaarsresultatTilBegrunnelseMapper.tilEngelskBegrunnelseString(vilkaarsresultat))
-            .isEqualTo(Art16_1_anmodning_engelsk.UTSENDELSE_MELLOM_24_MN_OG_5_AAR.getBeskrivelse());
+            .isEqualTo(Anmodning_engelsk_begrunnelser.UTSENDELSE_MELLOM_24_MN_OG_5_AAR.getBeskrivelse());
     }
 
     @Test
@@ -38,24 +38,24 @@ public class VilkaarsresultatTilBegrunnelseMapperTest {
 
     @Test
     public void testArt161Anmodning_motArt161AnmodningEngelsk() throws Exception {
-        Stream<String> begrunnelserArt16 = hentAlleVerdierFraKodeverk(Art16_1_anmodning.class);
-        Stream<String> begrunnelserArt16Engelsk = hentAlleVerdierFraKodeverk(Art16_1_anmodning_engelsk.class);
+        Stream<String> begrunnelserArt16 = hentAlleVerdierFraKodeverk(Anmodning_begrunnelser.class);
+        Stream<String> begrunnelserArt16Engelsk = hentAlleVerdierFraKodeverk(Anmodning_engelsk_begrunnelser.class);
 
         assertThat(begrunnelserArt16).containsExactlyElementsOf(begrunnelserArt16Engelsk.collect(Collectors.toList()));
     }
 
     @Test
     public void testArt16AnmodningUtenArt12_motArt16AnmodningUtenArt12Engelsk() throws Exception {
-        Stream<String> begrunnelserArt16Uten12 = hentAlleVerdierFraKodeverk(Art16_1_anmodning_uten_art12.class);
-        Stream<String> begrunnelserArt16Uten12Engelsk = hentAlleVerdierFraKodeverk(Art16_1_anmodning_uten_art12_engelsk.class);
+        Stream<String> begrunnelserArt16Uten12 = hentAlleVerdierFraKodeverk(Direkte_til_anmodning_begrunnelser.class);
+        Stream<String> begrunnelserArt16Uten12Engelsk = hentAlleVerdierFraKodeverk(Direkte_til_anmodning_engelsk_begrunnelser.class);
 
         assertThat(begrunnelserArt16Uten12).containsExactlyElementsOf(begrunnelserArt16Uten12Engelsk.collect(Collectors.toList()));
     }
 
     @Test
     public void testArt161anmodning_motArt161AnmodningUtenArt12Engelsk() throws Exception {
-        Set<String> begrunnelserArt16Engelsk = hentAlleVerdierFraKodeverk(Art16_1_anmodning_engelsk.class).collect(Collectors.toSet());
-        Set<String> begrunnelserArt16Uten12Engelsk = hentAlleVerdierFraKodeverk(Art16_1_anmodning_uten_art12_engelsk.class).collect(Collectors.toSet());
+        Set<String> begrunnelserArt16Engelsk = hentAlleVerdierFraKodeverk(Anmodning_engelsk_begrunnelser.class).collect(Collectors.toSet());
+        Set<String> begrunnelserArt16Uten12Engelsk = hentAlleVerdierFraKodeverk(Direkte_til_anmodning_engelsk_begrunnelser.class).collect(Collectors.toSet());
 
         // Ok å ha samme kode i begge listene, så lenge den engelske beskrivelsen også er lik
         Set<String> koderTilstedeIBeggeLister = new HashSet<>(begrunnelserArt16Engelsk);
@@ -63,8 +63,8 @@ public class VilkaarsresultatTilBegrunnelseMapperTest {
         koderTilstedeIBeggeLister.remove(SAERLIG_GRUNN.getKode());
 
         for (String kode : koderTilstedeIBeggeLister) {
-            String art16Beskrivelse_engelsk = Art16_1_anmodning_engelsk.valueOf(kode).getBeskrivelse();
-            String art16UtenArt12Beskrivelse_engelsk = Art16_1_anmodning_uten_art12_engelsk.valueOf(kode).getBeskrivelse();
+            String art16Beskrivelse_engelsk = Anmodning_engelsk_begrunnelser.valueOf(kode).getBeskrivelse();
+            String art16UtenArt12Beskrivelse_engelsk = Direkte_til_anmodning_engelsk_begrunnelser.valueOf(kode).getBeskrivelse();
 
             assertThat(art16Beskrivelse_engelsk).isEqualTo(art16UtenArt12Beskrivelse_engelsk);
         }
@@ -78,8 +78,8 @@ public class VilkaarsresultatTilBegrunnelseMapperTest {
         ));
 
         assertThat(VilkaarsresultatTilBegrunnelseMapper.tilEngelskBegrunnelseString(vilkaarsresultat))
-            .isEqualTo(Art16_1_anmodning_engelsk.UTSENDELSE_MELLOM_24_MN_OG_5_AAR.getBeskrivelse() + "\n"
-                + Art16_1_anmodning_engelsk.IDEELL_ORGANISASJON_IKKE_VESENTLIG_VIRK.getBeskrivelse());
+            .isEqualTo(Anmodning_engelsk_begrunnelser.UTSENDELSE_MELLOM_24_MN_OG_5_AAR.getBeskrivelse() + "\n"
+                + Anmodning_engelsk_begrunnelser.IDEELL_ORGANISASJON_IKKE_VESENTLIG_VIRK.getBeskrivelse());
     }
 
     @Test
@@ -102,9 +102,9 @@ public class VilkaarsresultatTilBegrunnelseMapperTest {
         vilkaarsresultat.setBegrunnelseFritekstEessi(fritekstEngelsk);
 
         assertThat(VilkaarsresultatTilBegrunnelseMapper.tilEngelskBegrunnelseString(vilkaarsresultat))
-            .isEqualTo(Art16_1_anmodning_engelsk.UTSENDELSE_MELLOM_24_MN_OG_5_AAR.getBeskrivelse() + "\n"
+            .isEqualTo(Anmodning_engelsk_begrunnelser.UTSENDELSE_MELLOM_24_MN_OG_5_AAR.getBeskrivelse() + "\n"
                 + fritekstEngelsk + "\n"
-                + Art16_1_anmodning_engelsk.IDEELL_ORGANISASJON_IKKE_VESENTLIG_VIRK.getBeskrivelse());
+                + Anmodning_engelsk_begrunnelser.IDEELL_ORGANISASJON_IKKE_VESENTLIG_VIRK.getBeskrivelse());
     }
 
     @Test

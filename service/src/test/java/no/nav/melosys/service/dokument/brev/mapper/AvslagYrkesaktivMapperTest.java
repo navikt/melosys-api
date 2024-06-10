@@ -12,9 +12,9 @@ import no.nav.melosys.domain.*;
 import no.nav.melosys.domain.adresse.StrukturertAdresse;
 import no.nav.melosys.domain.avklartefakta.AvklartVirksomhet;
 import no.nav.melosys.domain.kodeverk.*;
-import no.nav.melosys.domain.kodeverk.begrunnelser.Art12_1_begrunnelser;
-import no.nav.melosys.domain.kodeverk.begrunnelser.Art16_1_anmodning;
-import no.nav.melosys.domain.kodeverk.begrunnelser.Art16_1_avslag;
+import no.nav.melosys.domain.kodeverk.begrunnelser.Utsendt_arbeidstaker_begrunnelser;
+import no.nav.melosys.domain.kodeverk.begrunnelser.Anmodning_begrunnelser;
+import no.nav.melosys.domain.kodeverk.begrunnelser.Avslag_anmodning_begrunnelser;
 import no.nav.melosys.domain.kodeverk.yrker.Yrkesaktivitetstyper;
 import no.nav.melosys.domain.mottatteopplysninger.MottatteOpplysninger;
 import no.nav.melosys.domain.mottatteopplysninger.Soeknad;
@@ -77,16 +77,16 @@ class AvslagYrkesaktivMapperTest {
 
         resultat.setVilkaarsresultater(new HashSet<>());
 
-        Vilkaarsresultat vilkaarsresultat12_1 = lagVilkaarsresultat(Vilkaar.FO_883_2004_ART12_1, false, Art12_1_begrunnelser.IKKE_VESENTLIG_VIRKSOMHET);
+        Vilkaarsresultat vilkaarsresultat12_1 = lagVilkaarsresultat(Vilkaar.FO_883_2004_ART12_1, false, Utsendt_arbeidstaker_begrunnelser.IKKE_VESENTLIG_VIRKSOMHET);
         resultat.getVilkaarsresultater().add(vilkaarsresultat12_1);
 
         Vilkaarsresultat vilkaarsresultat12_2 = lagVilkaarsresultat(Vilkaar.FO_883_2004_ART12_2, false);
         resultat.getVilkaarsresultater().add(vilkaarsresultat12_2);
 
         Vilkaarsresultat vilkaarsresultat16_1 = lagVilkaarsresultat(Vilkaar.FO_883_2004_ART16_1, false,
-            Art16_1_avslag.OVER_5_AAR,
-            Art16_1_avslag.SOEKT_FOR_SENT,
-            Art16_1_avslag.SAERLIG_AVSLAGSGRUNN);
+            Avslag_anmodning_begrunnelser.OVER_5_AAR,
+            Avslag_anmodning_begrunnelser.SOEKT_FOR_SENT,
+            Avslag_anmodning_begrunnelser.SAERLIG_AVSLAGSGRUNN);
         vilkaarsresultat16_1.setBegrunnelseFritekst("Fritekst");
 
         BrevDataAvslagYrkesaktiv brevData = new BrevDataAvslagYrkesaktiv(new BrevbestillingDto(), "Z999999");
@@ -103,7 +103,7 @@ class AvslagYrkesaktivMapperTest {
     }
 
     @Test
-    void mapTilBrevXML_medOppfyltArt16OgAnmodningsperiode_brukerAnmodningsperiode() throws JAXBException, SAXException {
+    void mapTilBrevXML_medOppfyltArt16OgAnmodningsperiode_brukerAnmodningsperiode() {
         AvslagYrkesaktivMapper spy = Mockito.spy(new AvslagYrkesaktivMapper());
 
         BrevDataAvslagYrkesaktiv brevData = new BrevDataAvslagYrkesaktiv(new BrevbestillingDto(), "Z999999");
@@ -112,11 +112,11 @@ class AvslagYrkesaktivMapperTest {
         brevData.setAnmodningsperiodeSvar(lagAnmodningsperiodeSvarAvslag());
         brevData.setYrkesaktivitet(Yrkesaktivitetstyper.LOENNET_ARBEID);
 
-        Vilkaarsresultat vilkår16_1_oppfylt = lagVilkaarsresultat(Vilkaar.FO_883_2004_ART16_1, true, Art16_1_anmodning.ERSTATTER_EN_ANNEN_UNDER_5_AAR);
+        Vilkaarsresultat vilkår16_1_oppfylt = lagVilkaarsresultat(Vilkaar.FO_883_2004_ART16_1, true, Anmodning_begrunnelser.ERSTATTER_EN_ANNEN_UNDER_5_AAR);
         brevData.setArt16Vilkaar(vilkår16_1_oppfylt);
 
         Behandlingsresultat resultat = lagBehandlingsresultat();
-        Vilkaarsresultat vilkår12_1_avslått = lagVilkaarsresultat(Vilkaar.FO_883_2004_ART12_1, false, Art12_1_begrunnelser.IKKE_VESENTLIG_VIRKSOMHET);
+        Vilkaarsresultat vilkår12_1_avslått = lagVilkaarsresultat(Vilkaar.FO_883_2004_ART12_1, false, Utsendt_arbeidstaker_begrunnelser.IKKE_VESENTLIG_VIRKSOMHET);
         resultat.getVilkaarsresultater().add(vilkår12_1_avslått);
 
         String xml = spy.mapTilBrevXML(fellesType, navFelles, behandling, resultat, brevData);
@@ -127,7 +127,7 @@ class AvslagYrkesaktivMapperTest {
     void mapTilBrevXml_kanMappeAlleKodeverksverdierForArt16_1_avslag() throws Exception {
         AvslagYrkesaktivMapper spy = Mockito.spy(new AvslagYrkesaktivMapper());
         BrevDataAvslagYrkesaktiv brevdata = new BrevDataAvslagYrkesaktiv(new BrevbestillingDto(), "");
-        Set<VilkaarBegrunnelse> begrunnelser = lagAlleVilkaarBegrunnelser(Art16_1_avslag.class);
+        Set<VilkaarBegrunnelse> begrunnelser = lagAlleVilkaarBegrunnelser(Avslag_anmodning_begrunnelser.class);
         for (VilkaarBegrunnelse begrunnelse : begrunnelser) {
             Vilkaarsresultat vilkaarsresultat = new Vilkaarsresultat();
             vilkaarsresultat.setBegrunnelser(Collections.singleton(begrunnelse));

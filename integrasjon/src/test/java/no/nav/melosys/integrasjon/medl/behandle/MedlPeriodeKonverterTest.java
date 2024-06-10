@@ -4,9 +4,7 @@ import no.nav.melosys.domain.Lovvalgsperiode;
 import no.nav.melosys.domain.kodeverk.Folketrygdloven_kap2_bestemmelser;
 import no.nav.melosys.domain.kodeverk.LovvalgBestemmelse;
 import no.nav.melosys.domain.kodeverk.Trygdedekninger;
-import no.nav.melosys.domain.kodeverk.lovvalgsbestemmelser.Lovvalgbestemmelser_883_2004;
-import no.nav.melosys.domain.kodeverk.lovvalgsbestemmelser.Lovvalgbestemmelser_987_2009;
-import no.nav.melosys.domain.kodeverk.lovvalgsbestemmelser.Tilleggsbestemmelser_883_2004;
+import no.nav.melosys.domain.kodeverk.lovvalgsbestemmelser.*;
 import no.nav.melosys.domain.kodeverk.lovvalgsbestemmelser.trygdeavtale.Lovvalgsbestemmelser_trygdeavtale_gb;
 import no.nav.melosys.exception.TekniskException;
 import no.nav.melosys.integrasjon.medl.DekningMedl;
@@ -73,6 +71,8 @@ class MedlPeriodeKonverterTest {
             .isEqualTo(Tilleggsbestemmelser_883_2004.FO_883_2004_ART11_5);
         assertThat(MedlPeriodeKonverter.hentLovvalgBestemmelse(lovvalgsperiode(Lovvalgbestemmelser_883_2004.FO_883_2004_ART12_1, Tilleggsbestemmelser_883_2004.FO_883_2004_ART11_4_1)))
             .isEqualTo(Tilleggsbestemmelser_883_2004.FO_883_2004_ART11_4_1);
+        assertThat(MedlPeriodeKonverter.hentLovvalgBestemmelse(lovvalgsperiode(Lovvalgbestemmelser_konv_efta_storbritannia.KONV_EFTA_STORBRITANNIA_ART13_3A, Tilleggsbestemmelser_konv_efta_storbritannia.KONV_EFTA_STORBRITANNIA_ART13_4_1)))
+            .isEqualTo(Tilleggsbestemmelser_konv_efta_storbritannia.KONV_EFTA_STORBRITANNIA_ART13_4_1);
     }
 
     private Lovvalgsperiode lovvalgsperiode(LovvalgBestemmelse lovvalgBestemmelse, LovvalgBestemmelse tilleggBestemmelse) {

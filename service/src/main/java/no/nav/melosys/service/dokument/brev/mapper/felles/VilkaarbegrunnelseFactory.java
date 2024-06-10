@@ -21,8 +21,8 @@ public final class VilkaarbegrunnelseFactory {
     public static Art121BegrunnelseType mapArt121BegrunnelseType(Set<VilkaarBegrunnelse> begrunnelser) {
         Art121BegrunnelseType art121BegrunnelseType = lagArt121BegrunnelseType();
         for (VilkaarBegrunnelse vilkaarBegrunnelse : begrunnelser) {
-            Art12_1_begrunnelser artikkel12_1 = Art12_1_begrunnelser.valueOf(vilkaarBegrunnelse.getKode());
-            switch (artikkel12_1) {
+            Utsendt_arbeidstaker_begrunnelser utsendtArbeidstakerBegrunnelser = Utsendt_arbeidstaker_begrunnelser.valueOf(vilkaarBegrunnelse.getKode());
+            switch (utsendtArbeidstakerBegrunnelser) {
                 case UTSENDELSE_OVER_24_MN:
                     art121BegrunnelseType.setUtsendelseOver24Mn(JA);
                     break;
@@ -45,7 +45,7 @@ public final class VilkaarbegrunnelseFactory {
                     art121BegrunnelseType.setIkkeNorskAgRegning(JA);
                     break;
                 default:
-                    throw new TekniskException(artikkel12_1 + IKKE_STØTTET);
+                    throw new TekniskException(utsendtArbeidstakerBegrunnelser + IKKE_STØTTET);
             }
         }
         return art121BegrunnelseType;
@@ -67,7 +67,7 @@ public final class VilkaarbegrunnelseFactory {
         Art121ForutgaaendeBegrunnelseType art121ForutgaaendeBegrunnelseType = lagArt121ForutgaaendeBegrunnelseType();
 
         for (VilkaarBegrunnelse vilkaarBegrunnelse : begrunnelser) {
-            Art12_1_forutgaaende_medl forutgaaendeMedlemskap = Art12_1_forutgaaende_medl.valueOf(vilkaarBegrunnelse.getKode());
+            Forutgaaende_medl_begrunnelser forutgaaendeMedlemskap = Forutgaaende_medl_begrunnelser.valueOf(vilkaarBegrunnelse.getKode());
             switch (forutgaaendeMedlemskap) {
                 case UNNTATT_MEDLEMSKAP:
                     art121ForutgaaendeBegrunnelseType.setUntattMedlemskap(JA);
@@ -96,7 +96,7 @@ public final class VilkaarbegrunnelseFactory {
     public static Art121VesentligVirksomhetBegrunnelse mapArt121VesentligVirksomhetBegrunnelse(Set<VilkaarBegrunnelse> begrunnelser) {
         Art121VesentligVirksomhetBegrunnelse brevBegrunnelse = lagArt121VesentligVirksomhetBegrunnelseType();
         for (VilkaarBegrunnelse vilkaarBegrunnelse : begrunnelser) {
-            Art12_1_vesentlig_virksomhet vesentligVirksomhetBegrunnelse = Art12_1_vesentlig_virksomhet.valueOf(vilkaarBegrunnelse.getKode());
+            Vesentlig_virksomhet_begrunnelser vesentligVirksomhetBegrunnelse = Vesentlig_virksomhet_begrunnelser.valueOf(vilkaarBegrunnelse.getKode());
             switch (vesentligVirksomhetBegrunnelse) {
                 case FOR_LITE_KONTRAKTER_NORGE:
                     brevBegrunnelse.setForLiteKontrakterNorge(JA);
@@ -141,7 +141,7 @@ public final class VilkaarbegrunnelseFactory {
     public static Art122BegrunnelseType mapArt122BegrunnelseType(Set<VilkaarBegrunnelse> begrunnelser) {
         Art122BegrunnelseType art122BegrunnelseType = lagArt122BegrunnelseType();
         for (VilkaarBegrunnelse vilkaarBegrunnelse : begrunnelser) {
-            Art12_2_begrunnelser artikkel12_2 = Art12_2_begrunnelser.valueOf(vilkaarBegrunnelse.getKode());
+            Utsendt_naeringsdrivende_begrunnelser artikkel12_2 = Utsendt_naeringsdrivende_begrunnelser.valueOf(vilkaarBegrunnelse.getKode());
             switch (artikkel12_2) {
                 case UTSENDELSE_OVER_24_MN:
                     art122BegrunnelseType.setUtsendelseOver24Mn(JA);
@@ -170,7 +170,7 @@ public final class VilkaarbegrunnelseFactory {
     public static Art122NormalVirksomhetBegrunnelseType mapArt122NormalVirksomhetBegrunnelseType(Set<VilkaarBegrunnelse> begrunnelser) {
         Art122NormalVirksomhetBegrunnelseType art122NormalVirksomhetBegrunnelseType = lagArt122NormalVirksomhetBegrunnelseType();
         for (VilkaarBegrunnelse vilkaarBegrunnelse : begrunnelser) {
-            Art12_2_normalt_virksomhet normaltDriverVirksomhet = Art12_2_normalt_virksomhet.valueOf(vilkaarBegrunnelse.getKode());
+            Normalt_virksomhet_begrunnelser normaltDriverVirksomhet = Normalt_virksomhet_begrunnelser.valueOf(vilkaarBegrunnelse.getKode());
             switch (normaltDriverVirksomhet) {
                 case IKKE_FORUTGAAENDE_DRIFT:
                     art122NormalVirksomhetBegrunnelseType.setIkkeForutgåendeDrift(JA);
