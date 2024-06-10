@@ -47,7 +47,7 @@ class OpprettArsavregning(
         val aktørId = persondataService.hentAktørIdForIdent(ident)
 
         val sakMedTrygdeavgift = finnSakMedTrygdeavgift(aktørId).also {
-            if (it == null) log.info("Fant ingen sak med trygdeavgift for prossesInstansId: ${prosessinstans.id}")
+            if (it == null) log.warn("Fant ingen sak med trygdeavgift for prossesInstansId: ${prosessinstans.id}")
         } ?: return
 
         finnAktivÅrsavregning(sakMedTrygdeavgift, gjelderPeriode)?.run {
