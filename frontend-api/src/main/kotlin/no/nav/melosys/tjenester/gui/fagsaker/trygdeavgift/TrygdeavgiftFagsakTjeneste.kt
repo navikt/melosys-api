@@ -2,7 +2,7 @@ package no.nav.melosys.tjenester.gui.fagsaker.trygdeavgift
 
 import io.swagger.annotations.Api
 import io.swagger.annotations.ApiOperation
-import no.nav.melosys.service.sak.TrygdeavgiftOppsummeringService
+import no.nav.melosys.service.avgift.TrygdeavgiftService
 import no.nav.melosys.service.tilgang.Aksesskontroll
 import no.nav.security.token.support.core.api.Protected
 import org.springframework.context.annotation.Scope
@@ -20,7 +20,7 @@ import org.springframework.web.context.WebApplicationContext
 @RequestMapping("/fagsaker/{saksnummer}/trygdeavgift")
 class TrygdeavgiftFagsakTjeneste(
     private val aksesskontroll: Aksesskontroll,
-    private val trygdeavgiftOppsummeringService: TrygdeavgiftOppsummeringService
+    private val trygdeavgiftService: TrygdeavgiftService
 ) {
     @GetMapping("/oppsummering")
     @ApiOperation("Hent oppsummering på trygdeavgift på fagsaken")
@@ -28,7 +28,7 @@ class TrygdeavgiftFagsakTjeneste(
         aksesskontroll.autoriserSakstilgang(saksnummer)
         return ResponseEntity.ok(
             TrygdeavgiftOppsummering(
-                trygdeavgiftOppsummeringService.harFagsakBehandlingerMedTrygdeavgift(
+                trygdeavgiftService.harFagsakBehandlingerMedTrygdeavgift(
                     saksnummer
                 )
             )

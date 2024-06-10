@@ -14,13 +14,13 @@ import no.nav.melosys.saksflytapi.domain.ProsessDataKey
 import no.nav.melosys.saksflytapi.domain.ProsessSteg
 import no.nav.melosys.saksflytapi.domain.Prosessinstans
 import no.nav.melosys.service.LovvalgsperiodeService
+import no.nav.melosys.service.avgift.TrygdeavgiftService
 import no.nav.melosys.service.avgift.aarsavregning.ÅrsavregningService
 import no.nav.melosys.service.behandling.BehandlingService
 import no.nav.melosys.service.behandling.BehandlingsresultatService
 import no.nav.melosys.service.ftrl.medlemskapsperiode.MedlemskapsperiodeService
 import no.nav.melosys.service.persondata.PersondataService
 import no.nav.melosys.service.sak.FagsakService
-import no.nav.melosys.service.sak.TrygdeavgiftOppsummeringService
 import org.springframework.stereotype.Component
 import java.time.LocalDate
 
@@ -30,7 +30,7 @@ private val log = KotlinLogging.logger { }
 class OpprettArsavregning(
     private val fagsakService: FagsakService,
     private val persondataService: PersondataService,
-    private val trygdeavgiftOppsummeringService: TrygdeavgiftOppsummeringService,
+    private val trygdeavgiftService: TrygdeavgiftService,
     private val behandlingService: BehandlingService,
     private val lovvalgsperiodeService: LovvalgsperiodeService,
     private val medlemskapsperiodeService: MedlemskapsperiodeService,
@@ -84,7 +84,7 @@ class OpprettArsavregning(
     }
 
     private fun finnTrygdeavgiftsBehandlingerMedGyldigPeriode(sakMedTrygdeavgift: Fagsak, gjelderPeriode: Int): Behandling? =
-        trygdeavgiftOppsummeringService.hentTrygdeavgiftBehandlinger(sakMedTrygdeavgift.saksnummer).firstOrNull { behandling ->
+        trygdeavgiftService.hentTrygdeavgiftBehandlinger(sakMedTrygdeavgift.saksnummer).firstOrNull { behandling ->
             val lovvalgsperioder = lovvalgsperiodeService.hentLovvalgsperioder(behandling.id)
             val medlemskapsperioder = medlemskapsperiodeService.hentMedlemskapsperioder(behandling.id)
 
@@ -116,7 +116,7 @@ class OpprettArsavregning(
     private fun finnSakMedTrygdeavgift(aktørId: String): Fagsak? =
         fagsakService.hentFagsakerMedAktør(Aktoersroller.BRUKER, aktørId)
             .filter {
-                trygdeavgiftOppsummeringService.harFagsakBehandlingerMedTrygdeavgift(it.saksnummer)
+                trygdeavgiftService.harFagsakBehandlingerMedTrygdeavgift(it.saksnummer)
             }.let { sakerMedTrygdeavgift ->
                 when {
                     sakerMedTrygdeavgift.isEmpty() -> null

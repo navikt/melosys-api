@@ -19,13 +19,13 @@ import no.nav.melosys.saksflyt.TestdataFactory.lagBruker
 import no.nav.melosys.saksflytapi.domain.ProsessDataKey
 import no.nav.melosys.saksflytapi.domain.Prosessinstans
 import no.nav.melosys.service.LovvalgsperiodeService
+import no.nav.melosys.service.avgift.TrygdeavgiftService
 import no.nav.melosys.service.avgift.aarsavregning.ÅrsavregningService
 import no.nav.melosys.service.behandling.BehandlingService
 import no.nav.melosys.service.behandling.BehandlingsresultatService
 import no.nav.melosys.service.ftrl.medlemskapsperiode.MedlemskapsperiodeService
 import no.nav.melosys.service.persondata.PersondataService
 import no.nav.melosys.service.sak.FagsakService
-import no.nav.melosys.service.sak.TrygdeavgiftOppsummeringService
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.extension.ExtendWith
@@ -47,7 +47,7 @@ class OpprettArsavregningTest {
     private lateinit var lovvalgsperiodeService: LovvalgsperiodeService
 
     @MockK
-    private lateinit var trygdeavgiftOppsummeringService: TrygdeavgiftOppsummeringService
+    private lateinit var trygdeavgiftService: TrygdeavgiftService
 
     @MockK
     private lateinit var medlemskapsperiodeService: MedlemskapsperiodeService
@@ -65,7 +65,7 @@ class OpprettArsavregningTest {
         opprettArsavregning = OpprettArsavregning(
             fagsakService,
             persondataService,
-            trygdeavgiftOppsummeringService,
+            trygdeavgiftService,
             behandlingService,
             lovvalgsperiodeService,
             medlemskapsperiodeService,
@@ -93,8 +93,8 @@ class OpprettArsavregningTest {
 
         every { persondataService.hentAktørIdForIdent(any()) } returns AKTØR_ID
         every { fagsakService.hentFagsakerMedAktør(Aktoersroller.BRUKER, AKTØR_ID) } returns listOf(fagsak)
-        every { trygdeavgiftOppsummeringService.harFagsakBehandlingerMedTrygdeavgift(fagsak.saksnummer) } returns true
-        every { trygdeavgiftOppsummeringService.hentTrygdeavgiftBehandlinger(fagsak.saksnummer) } returns listOf(behandling)
+        every { trygdeavgiftService.harFagsakBehandlingerMedTrygdeavgift(fagsak.saksnummer) } returns true
+        every { trygdeavgiftService.hentTrygdeavgiftBehandlinger(fagsak.saksnummer) } returns listOf(behandling)
         every { lovvalgsperiodeService.hentLovvalgsperioder(behandling.id) } returns listOf(Lovvalgsperiode().apply {
             fom = LocalDate.of(2023, 1, 1)
             tom = LocalDate.of(2023, 10, 10)
@@ -137,7 +137,7 @@ class OpprettArsavregningTest {
 
         every { persondataService.hentAktørIdForIdent(any()) } returns AKTØR_ID
         every { fagsakService.hentFagsakerMedAktør(Aktoersroller.BRUKER, AKTØR_ID) } returns listOf(fagsak)
-        every { trygdeavgiftOppsummeringService.harFagsakBehandlingerMedTrygdeavgift(fagsak.saksnummer) } returns false
+        every { trygdeavgiftService.harFagsakBehandlingerMedTrygdeavgift(fagsak.saksnummer) } returns false
 
 
         opprettArsavregning.utfør(prosessinstans)
@@ -154,8 +154,8 @@ class OpprettArsavregningTest {
 
         every { persondataService.hentAktørIdForIdent(any()) } returns AKTØR_ID
         every { fagsakService.hentFagsakerMedAktør(Aktoersroller.BRUKER, AKTØR_ID) } returns listOf(fagsak)
-        every { trygdeavgiftOppsummeringService.harFagsakBehandlingerMedTrygdeavgift(fagsak.saksnummer) } returns true
-        every { trygdeavgiftOppsummeringService.hentTrygdeavgiftBehandlinger(fagsak.saksnummer) } returns listOf(behandling)
+        every { trygdeavgiftService.harFagsakBehandlingerMedTrygdeavgift(fagsak.saksnummer) } returns true
+        every { trygdeavgiftService.hentTrygdeavgiftBehandlinger(fagsak.saksnummer) } returns listOf(behandling)
         every { lovvalgsperiodeService.hentLovvalgsperioder(behandling.id) } returns listOf(Lovvalgsperiode().apply {
             fom = LocalDate.of(2022, 1, 1)
             tom = LocalDate.of(2022, 10, 10)
@@ -195,8 +195,8 @@ class OpprettArsavregningTest {
 
         every { persondataService.hentAktørIdForIdent(any()) } returns AKTØR_ID
         every { fagsakService.hentFagsakerMedAktør(Aktoersroller.BRUKER, AKTØR_ID) } returns listOf(fagsak)
-        every { trygdeavgiftOppsummeringService.harFagsakBehandlingerMedTrygdeavgift(fagsak.saksnummer) } returns true
-        every { trygdeavgiftOppsummeringService.hentTrygdeavgiftBehandlinger(fagsak.saksnummer) } returns listOf(behandling)
+        every { trygdeavgiftService.harFagsakBehandlingerMedTrygdeavgift(fagsak.saksnummer) } returns true
+        every { trygdeavgiftService.hentTrygdeavgiftBehandlinger(fagsak.saksnummer) } returns listOf(behandling)
 
         every { behandslingsresultatService.hentBehandlingsresultat(behandling.id) } returns behandlingsresultat
         every { årsavregningService.oppretteÅrsavregning(any(), any()) } returns Unit
