@@ -4,16 +4,17 @@ import jakarta.transaction.Transactional
 import no.nav.melosys.domain.Vilkaarsresultat
 import no.nav.melosys.domain.avklartefakta.AvklartYrkesgruppeType
 import no.nav.melosys.domain.brev.OrienteringAnmodningUnntakBrevbestilling
-import no.nav.melosys.domain.kodeverk.Avklartefaktatyper
 import no.nav.melosys.domain.kodeverk.Vilkaar
 import no.nav.melosys.integrasjon.dokgen.dto.OrienteringAnmodningUnntak
+import no.nav.melosys.service.LandvelgerService
 import no.nav.melosys.service.behandling.VilkaarsresultatService
 import org.springframework.stereotype.Component
 
 @Component
 class OrienteringAnmodningUnntakMapper(
     private val dokgenMapperDatahenter: DokgenMapperDatahenter,
-    private val vilkaarsresultatService: VilkaarsresultatService
+    private val vilkaarsresultatService: VilkaarsresultatService,
+    private val landvelgerService: LandvelgerService
 ) {
     @Transactional
     internal fun map(brevbestilling: OrienteringAnmodningUnntakBrevbestilling): OrienteringAnmodningUnntak {
@@ -22,7 +23,7 @@ class OrienteringAnmodningUnntakMapper(
         val anmodningsperiode = behandlingsresultat.hentAnmodningsperiode()
         val periodeFom = anmodningsperiode.fom
         val periodeTom = anmodningsperiode.tom
-        val arbeidsland = behandlingsresultat.avklartefakta.find { it.type == Avklartefaktatyper.ARBEIDSLAND }!!.fakta
+        val arbeidsland = landvelgerService.hentArbeidsland(behandlingID).getBeskrivelse()
 
         val erDirekteTilAnmodningOmUnntak =
             behandlingsresultat.avklartefakta.find { it.fakta == AvklartYrkesgruppeType.ORDINAER_UTEN_ART12.name } != null

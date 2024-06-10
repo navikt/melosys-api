@@ -23,6 +23,7 @@ import java.time.LocalDate
 import no.nav.melosys.domain.kodeverk.begrunnelser.Utsendt_arbeidstaker_begrunnelser.UTSENDELSE_OVER_24_MN
 import no.nav.melosys.domain.kodeverk.begrunnelser.Utsendt_naeringsdrivende_begrunnelser.IKKE_LIGNENDE_VIRKSOMHET
 import no.nav.melosys.domain.kodeverk.begrunnelser.Anmodning_begrunnelser.ERSTATTER_EN_ANNEN_UNDER_5_AAR
+import no.nav.melosys.service.LandvelgerService
 
 
 @ExtendWith(MockKExtension::class)
@@ -34,13 +35,17 @@ internal class OrienteringAnmodningUnntakMapperTest {
     @MockK
     private lateinit var mockVilkaarsresultatService: VilkaarsresultatService
 
+    @MockK
+    private  lateinit var mockLandvelgerService: LandvelgerService
+
     private lateinit var orienteringAnmodningUnntakMapper: OrienteringAnmodningUnntakMapper
 
     @BeforeEach
     fun setup() {
         orienteringAnmodningUnntakMapper = OrienteringAnmodningUnntakMapper(
             mockDokgenMapperDatahenter,
-            mockVilkaarsresultatService
+            mockVilkaarsresultatService,
+            mockLandvelgerService
         )
     }
 
@@ -74,6 +79,7 @@ internal class OrienteringAnmodningUnntakMapperTest {
         every { mockVilkaarsresultatService.finnUtsendingArbeidstakerVilkaarsresultat(ofType()) } returns vilkaarsresultatArbeidstaker
         every { mockVilkaarsresultatService.finnUtsendingNæringsdrivendeVilkaarsresultat(ofType()) } returns vilkaarsresultatNæringsdrivende
         every { mockVilkaarsresultatService.finnVilkaarsresultat(ofType(), ofType()) } returns vilkaarsresultatNæringsdrivende
+        every { mockLandvelgerService.hentArbeidsland(ofType()) } returns Land_iso2.NO
 
         val brevbestilling =
             OrienteringAnmodningUnntakBrevbestilling.Builder()
@@ -89,7 +95,7 @@ internal class OrienteringAnmodningUnntakMapperTest {
         orienteringAnmodningUnntakMapper.map(brevbestilling).run {
             periodeFom.shouldBe(LocalDate.now().minusMonths(4))
             periodeTom.shouldBe(LocalDate.now().plusMonths(4))
-            arbeidsland.shouldBe(Land_iso2.NO.name)
+            arbeidsland.shouldBe(Land_iso2.NO.beskrivelse)
             erDirekteTilAnmodningOmUnntak.shouldBe(true)
             erAnmodningOmUnntakViaArbeidstaker.shouldBe(true)
             erAnmodningOmUnntakViaNæringsdrivende.shouldBe(false)
@@ -116,9 +122,6 @@ internal class OrienteringAnmodningUnntakMapperTest {
             behandling = lagBehandling()
             avklartefakta = setOf(Avklartefakta().apply {
                 fakta = AvklartYrkesgruppeType.ORDINAER_UTEN_ART12.name
-            }, Avklartefakta().apply {
-                fakta = "NO"
-                type = Avklartefaktatyper.ARBEIDSLAND
             })
             lovvalgsperioder = setOf(no.nav.melosys.domain.Lovvalgsperiode().apply {
                 fom = LocalDate.of(2020, 1, 1)
