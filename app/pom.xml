@@ -129,22 +129,4 @@
             </plugin>
         </plugins>
     </build>
-
-    <profiles>
-        <profile>
-            <id>local-mock</id>
-            <build>
-                <resources>
-                    <resource>
-                        <directory>src/main/resources</directory>
-                        <filtering>false</filtering>
-                        <includes>
-                            <include>**/*</include>
-                            <include>application-local-mock.properties</include>
-                        </includes>
-                    </resource>
-                </resources>
-            </build>
-        </profile>
-    </profiles>
 </project>
