@@ -5,6 +5,7 @@ import io.mockk.Called
 import io.mockk.every
 import io.mockk.impl.annotations.MockK
 import io.mockk.junit5.MockKExtension
+import io.mockk.slot
 import io.mockk.verify
 import no.nav.melosys.domain.*
 import no.nav.melosys.domain.avgift.Aarsavregning
@@ -199,23 +200,16 @@ class OpprettArsavregningTest {
 
         every { behandslingsresultatService.hentBehandlingsresultat(behandling.id) } returns behandlingsresultat
         every { årsavregningService.oppretteÅrsavregning(any(), any()) } returns Unit
-        every { behandlingService.lagre(any()) } returns Unit
+        val behandlingSlot = slot<Behandling>()
+        every { behandlingService.lagre(capture(behandlingSlot)) } returns Unit
+
 
         opprettArsavregning.utfør(prosessinstans)
 
 
         verify { behandlingService.lagre(behandling) }
         verify { årsavregningService wasNot Called }
-    }
-
-
-    @Test
-    fun `ikke opprette ny behandling ved skatteoppgjør med tidligere årsavregningsbehandling som ikke er avsluttet`() {
-
-    }
-
-    @Test
-    fun `opprette ny behandling ved skatteoppgjør uten tidligere årsavregningsbehandling eller avsluttet årsavregningsbehandling`() {
+        behandlingSlot.captured.status shouldBe Behandlingsstatus.VURDER_DOKUMENT
 
     }
 
