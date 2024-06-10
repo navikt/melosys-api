@@ -19,7 +19,8 @@ class DokgenMalMapper(
     private val dokgenMapperDatahenter: DokgenMapperDatahenter,
     private val innvilgelseFtrlMapper: InnvilgelseFtrlMapper,
     private val innhentingAvInntektsopplysningerMapper: InnhentingAvInntektsopplysningerMapper,
-    private val trygdeavtaleMapper: TrygdeavtaleMapper
+    private val trygdeavtaleMapper: TrygdeavtaleMapper,
+    private val orienteringAnmodningUnntakMapper: OrienteringAnmodningUnntakMapper
 ) {
     fun mapBehandling(
         mottattBrevbestilling: DokgenBrevbestilling,
@@ -123,6 +124,9 @@ class DokgenMalMapper(
 
             Produserbaredokumenter.INNHENTING_AV_INNTEKTSOPPLYSNINGER ->
                 innhentingAvInntektsopplysningerMapper.map(brevbestilling as InnhentingAvInntektsopplysningerBrevbestilling)
+
+            Produserbaredokumenter.ORIENTERING_ANMODNING_UNNTAK ->
+                orienteringAnmodningUnntakMapper.map(brevbestilling as OrienteringAnmodningUnntakBrevbestilling)
 
             Produserbaredokumenter.IKKE_YRKESAKTIV_FRIVILLIG_FTRL -> innvilgelseFtrlMapper.mapIkkeYrkesaktivFrivillig(brevbestilling)
 

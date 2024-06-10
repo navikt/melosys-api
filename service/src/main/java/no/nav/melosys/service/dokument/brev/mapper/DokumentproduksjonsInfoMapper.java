@@ -78,6 +78,10 @@ public class DokumentproduksjonsInfoMapper {
                 new DokumentproduksjonsInfo("innhenting_av_inntektsopplysninger",
                     DokumentKategoriKode.IB.getKode(),
                     INNHENTING_AV_INNTEKTSOPPLYSNINGER.getBeskrivelse()))
+            .put(ORIENTERING_ANMODNING_UNNTAK,
+                new DokumentproduksjonsInfo("orientering_anmodning_unntak",
+                    DokumentKategoriKode.IB.getKode(),
+                    ORIENTERING_ANMODNING_UNNTAK.getBeskrivelse()))
             .put(GENERELT_FRITEKSTBREV_BRUKER,
                 new DokumentproduksjonsInfo("fritekstbrev",
                     DokumentKategoriKode.IB.getKode(),
