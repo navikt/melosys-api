@@ -105,7 +105,7 @@ class OpprettArsavregningTest {
                 null,
                 null,
                 any(),
-                Behandlingsaarsaktyper.ANNET,
+                Behandlingsaarsaktyper.MELDING_FRA_SKATT,
                 null
             )
         } returns årsavregningsBehandling
