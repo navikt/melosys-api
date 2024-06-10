@@ -15,8 +15,8 @@ import io.mockk.verify
 import no.nav.melosys.domain.*
 import no.nav.melosys.domain.kodeverk.Sakstyper
 import no.nav.melosys.domain.kodeverk.Vilkaar
-import no.nav.melosys.domain.kodeverk.begrunnelser.Art12_1_begrunnelser
-import no.nav.melosys.domain.kodeverk.begrunnelser.Art12_1_forutgaaende_medl
+import no.nav.melosys.domain.kodeverk.begrunnelser.Forutgaaende_medl_begrunnelser
+import no.nav.melosys.domain.kodeverk.begrunnelser.Utsendt_arbeidstaker_begrunnelser
 import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingstema
 import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingstyper
 import no.nav.melosys.exception.FunksjonellException
@@ -54,10 +54,10 @@ internal class VilkaarsresultatServiceTest {
         val behandlingsresultat = lagBehandlingsresultat().apply {
             vilkaarsresultater = setOf(
                 Vilkaarsresultat().apply {
-                    vilkaar = Vilkaar.ART12_1_FORUTGAAENDE_MEDLEMSKAP
+                    vilkaar = Vilkaar.FORUTGAAENDE_MEDLEMSKAP
                     isOppfylt = true
                     begrunnelser =
-                        setOf(VilkaarBegrunnelse().apply { kode = Art12_1_forutgaaende_medl.IKKE_FOLKEREGISTRERT_ELLER_ARBEIDET_I_NORGE.kode })
+                        setOf(VilkaarBegrunnelse().apply { kode = Forutgaaende_medl_begrunnelser.IKKE_FOLKEREGISTRERT_ELLER_ARBEIDET_I_NORGE.kode })
                     begrunnelseFritekst = "begrunnelse"
                     begrunnelseFritekstEessi = "kommer ikke på hva begrunnelse er på engelsk"
                 }
@@ -73,8 +73,8 @@ internal class VilkaarsresultatServiceTest {
             .shouldNotBeNull()
             .shouldHaveSize(1)
             .single().run {
-                vilkaar.shouldBe(Vilkaar.ART12_1_FORUTGAAENDE_MEDLEMSKAP.kode)
-                begrunnelseKoder.shouldHaveSize(1).single().shouldBe(Art12_1_forutgaaende_medl.IKKE_FOLKEREGISTRERT_ELLER_ARBEIDET_I_NORGE.kode)
+                vilkaar.shouldBe(Vilkaar.FORUTGAAENDE_MEDLEMSKAP.kode)
+                begrunnelseKoder.shouldHaveSize(1).single().shouldBe(Forutgaaende_medl_begrunnelser.IKKE_FOLKEREGISTRERT_ELLER_ARBEIDET_I_NORGE.kode)
                 begrunnelseFritekstEngelsk.shouldBe("kommer ikke på hva begrunnelse er på engelsk")
             }
     }
@@ -170,7 +170,7 @@ internal class VilkaarsresultatServiceTest {
         val behandlingsresultat = lagBehandlingsresultat()
         val vilkaarDto = VilkaarDto().apply {
             vilkaar = Vilkaar.FO_883_2004_ART12_1.kode
-            begrunnelseKoder = setOf(Art12_1_begrunnelser.ERSTATTER_ANNEN.kode)
+            begrunnelseKoder = setOf(Utsendt_arbeidstaker_begrunnelser.ERSTATTER_ANNEN.kode)
         }
         every { behandlingsresultatRepo.findById(BEHANDLING_ID) } returns Optional.of(behandlingsresultat)
         every { behandlingsresultatRepo.saveAndFlush(any()) } returnsArgument 0
@@ -186,7 +186,7 @@ internal class VilkaarsresultatServiceTest {
             .shouldHaveSize(1)
             .single().run {
                 vilkaar.shouldBe(Vilkaar.FO_883_2004_ART12_1)
-                begrunnelser.shouldHaveSize(1).single().kode.shouldBe(Art12_1_begrunnelser.ERSTATTER_ANNEN.kode)
+                begrunnelser.shouldHaveSize(1).single().kode.shouldBe(Utsendt_arbeidstaker_begrunnelser.ERSTATTER_ANNEN.kode)
             }
     }
 

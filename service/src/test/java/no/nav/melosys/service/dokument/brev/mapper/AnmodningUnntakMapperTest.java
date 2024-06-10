@@ -15,8 +15,8 @@ import no.nav.melosys.domain.*;
 import no.nav.melosys.domain.adresse.StrukturertAdresse;
 import no.nav.melosys.domain.avklartefakta.AvklartVirksomhet;
 import no.nav.melosys.domain.kodeverk.*;
-import no.nav.melosys.domain.kodeverk.begrunnelser.Art12_1_begrunnelser;
-import no.nav.melosys.domain.kodeverk.begrunnelser.Art16_1_anmodning;
+import no.nav.melosys.domain.kodeverk.begrunnelser.Utsendt_arbeidstaker_begrunnelser;
+import no.nav.melosys.domain.kodeverk.begrunnelser.Anmodning_begrunnelser;
 import no.nav.melosys.domain.kodeverk.lovvalgsbestemmelser.Lovvalgbestemmelser_883_2004;
 import no.nav.melosys.domain.kodeverk.yrker.Yrkesaktivitetstyper;
 import no.nav.melosys.domain.mottatteopplysninger.MottatteOpplysninger;
@@ -65,13 +65,13 @@ class AnmodningUnntakMapperTest {
         Vilkaarsresultat vilkaarsresultat16_1 = new Vilkaarsresultat();
         vilkaarsresultat16_1.setVilkaar(Vilkaar.FO_883_2004_ART16_1);
         VilkaarBegrunnelse begrunnelse_16_1 = new VilkaarBegrunnelse();
-        begrunnelse_16_1.setKode(Art16_1_anmodning.UTSENDELSE_MELLOM_24_MN_OG_5_AAR.getKode());
+        begrunnelse_16_1.setKode(Anmodning_begrunnelser.UTSENDELSE_MELLOM_24_MN_OG_5_AAR.getKode());
         vilkaarsresultat16_1.setBegrunnelser(Collections.singleton(begrunnelse_16_1));
 
         BrevDataAnmodningUnntak brevData = lagBrevData(resultat);
 
         String xml = mapper.mapTilBrevXML(fellesType, navFelles, behandling, resultat, brevData);
-        String expectedXml = hentBrevXmlFraFil("unntakbrev/unntakbrev.xml");
+        String expectedXml = hentBrevXmlFraFil();
 
 
         Diff diff = createDiffIgnoreNameSpace(expectedXml, xml);
@@ -102,15 +102,15 @@ class AnmodningUnntakMapperTest {
             .build();
     }
 
-    private String hentBrevXmlFraFil(String filnavn) throws IOException {
-        return new String(getClass().getClassLoader().getResourceAsStream(filnavn).readAllBytes());
+    private String hentBrevXmlFraFil() throws IOException {
+        return new String(getClass().getClassLoader().getResourceAsStream("unntakbrev/unntakbrev.xml").readAllBytes());
     }
 
     @Test
-    void mapTilBrevXML_kodeverkArt16_1_anmodning_valider() throws Exception {
+    void mapTilBrevXML_kodeverkAnmodning_begrunnelser_valider() throws Exception {
         Behandling behandling = lagBehandling();
         Behandlingsresultat resultat = lagBehandlingsresultat();
-        Set<VilkaarBegrunnelse> begrunnelser = lagAlleVilkaarBegrunnelser(Art16_1_anmodning.class);
+        Set<VilkaarBegrunnelse> begrunnelser = lagAlleVilkaarBegrunnelser(Anmodning_begrunnelser.class);
         for (VilkaarBegrunnelse begrunnelse : begrunnelser) {
             BrevDataAnmodningUnntak brevdata = lagBrevData(resultat);
             brevdata.setAnmodningBegrunnelser(Set.of(begrunnelse));
@@ -213,7 +213,7 @@ class AnmodningUnntakMapperTest {
         vilkaarsresultat12_1.setVilkaar(Vilkaar.FO_883_2004_ART12_1);
         vilkaarsresultat12_1.setOppfylt(false);
         VilkaarBegrunnelse begrunnelse12_1 = new VilkaarBegrunnelse();
-        begrunnelse12_1.setKode(Art12_1_begrunnelser.IKKE_VESENTLIG_VIRKSOMHET.getKode());
+        begrunnelse12_1.setKode(Utsendt_arbeidstaker_begrunnelser.IKKE_VESENTLIG_VIRKSOMHET.getKode());
         vilkaarsresultat12_1.setBegrunnelser(Collections.singleton(begrunnelse12_1));
         resultat.getVilkaarsresultater().add(vilkaarsresultat12_1);
 

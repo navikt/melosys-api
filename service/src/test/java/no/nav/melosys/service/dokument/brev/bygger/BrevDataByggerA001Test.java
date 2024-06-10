@@ -1,5 +1,11 @@
 package no.nav.melosys.service.dokument.brev.bygger;
 
+import java.time.LocalDate;
+import java.util.Collections;
+import java.util.HashSet;
+import java.util.List;
+import java.util.Set;
+
 import no.nav.melosys.domain.*;
 import no.nav.melosys.domain.adresse.StrukturertAdresse;
 import no.nav.melosys.domain.brev.DoksysBrevbestilling;
@@ -42,16 +48,10 @@ import org.mockito.junit.jupiter.MockitoExtension;
 import org.mockito.junit.jupiter.MockitoSettings;
 import org.mockito.quality.Strictness;
 
-import java.time.LocalDate;
-import java.util.Collections;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Set;
-
-import static no.nav.melosys.domain.kodeverk.begrunnelser.Art12_1_begrunnelser.UTSENDELSE_OVER_24_MN;
-import static no.nav.melosys.domain.kodeverk.begrunnelser.Art12_2_begrunnelser.NORMALT_IKKE_DRIFT_NORGE;
-import static no.nav.melosys.domain.kodeverk.begrunnelser.Art16_1_anmodning.ERSTATTER_EN_ANNEN_UNDER_5_AAR;
-import static no.nav.melosys.domain.kodeverk.begrunnelser.Art16_1_anmodning_uten_art12.SJOEMANNSKIRKEN;
+import static no.nav.melosys.domain.kodeverk.begrunnelser.Anmodning_begrunnelser.ERSTATTER_EN_ANNEN_UNDER_5_AAR;
+import static no.nav.melosys.domain.kodeverk.begrunnelser.Direkte_til_anmodning_begrunnelser.SJOEMANNSKIRKEN;
+import static no.nav.melosys.domain.kodeverk.begrunnelser.Utsendt_arbeidstaker_begrunnelser.UTSENDELSE_OVER_24_MN;
+import static no.nav.melosys.domain.kodeverk.begrunnelser.Utsendt_naeringsdrivende_begrunnelser.NORMALT_IKKE_DRIFT_NORGE;
 import static no.nav.melosys.service.dokument.brev.BrevDataTestUtils.lagStrukturertAdresse;
 import static no.nav.melosys.service.dokument.brev.BrevDataTestUtils.lagVilkaarsresultat;
 import static no.nav.melosys.service.persondata.PersonopplysningerObjectFactory.lagPersonopplysningerUtenBostedsadresse;

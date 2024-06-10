@@ -11,7 +11,7 @@ import no.nav.melosys.domain.Behandling
 import no.nav.melosys.domain.Behandlingsresultat
 import no.nav.melosys.domain.kodeverk.Sakstyper
 import no.nav.melosys.domain.kodeverk.Vilkaar.*
-import no.nav.melosys.domain.kodeverk.begrunnelser.Art16_1_avslag
+import no.nav.melosys.domain.kodeverk.begrunnelser.Avslag_anmodning_begrunnelser
 import no.nav.melosys.exception.TekniskException
 import no.nav.melosys.service.dokument.brev.BrevData
 import no.nav.melosys.service.dokument.brev.BrevDataAvslagYrkesaktiv
@@ -64,9 +64,9 @@ open class AvslagYrkesaktivMapper : BrevDataMapper {
         lovvalgsperiode = lagLovvalgsperiodeType(resultat)
 
         art121Begrunnelse = mapArt121BegrunnelseType(resultat.hentVilkaarbegrunnelser(FO_883_2004_ART12_1))
-        art121ForutgåendeBegrunnelse = mapArt121ForutgaaendeBegrunnelseType(resultat.hentVilkaarbegrunnelser(ART12_1_FORUTGAAENDE_MEDLEMSKAP))
+        art121ForutgåendeBegrunnelse = mapArt121ForutgaaendeBegrunnelseType(resultat.hentVilkaarbegrunnelser(FORUTGAAENDE_MEDLEMSKAP))
         art122Begrunnelse = mapArt122BegrunnelseType(resultat.hentVilkaarbegrunnelser(FO_883_2004_ART12_2))
-        art122NormalVirksomhetBegrunnelse = mapArt122NormalVirksomhetBegrunnelseType(resultat.hentVilkaarbegrunnelser(ART12_2_NORMALT_DRIVER_VIRKSOMHET))
+        art122NormalVirksomhetBegrunnelse = mapArt122NormalVirksomhetBegrunnelseType(resultat.hentVilkaarbegrunnelser(NORMALT_DRIVER_VIRKSOMHET))
 
         fritekst = brevData.fritekst
 
@@ -79,21 +79,21 @@ open class AvslagYrkesaktivMapper : BrevDataMapper {
         }
     }
 
-    public fun mapArt161Avslag(fag: Fag, brevdata: BrevDataAvslagYrkesaktiv) {
+    fun mapArt161Avslag(fag: Fag, brevdata: BrevDataAvslagYrkesaktiv) {
         val vilkaarsresultat = brevdata.art16Vilkaar
         val art161Begrunnelser = vilkaarsresultat?.begrunnelser
         val art161AvslagBegrunnelser = lagTomArt161AvslagBegrunnelse()
         art161Begrunnelser?.forEach { vilkaarBegrunnelse ->
-            val artikkel161AvslagKode = Art16_1_avslag.valueOf(vilkaarBegrunnelse.kode)
-            when (artikkel161AvslagKode) {
-                Art16_1_avslag.OVER_5_AAR -> art161AvslagBegrunnelser.over5Aar = JA
-                Art16_1_avslag.INGEN_SPESIELLE_FORHOLD -> art161AvslagBegrunnelser.ingenSpesielleForhold = JA
-                Art16_1_avslag.SAERLIG_AVSLAGSGRUNN -> {
+            val begrunnelseKode = Avslag_anmodning_begrunnelser.valueOf(vilkaarBegrunnelse.kode)
+            when (begrunnelseKode) {
+                Avslag_anmodning_begrunnelser.OVER_5_AAR -> art161AvslagBegrunnelser.over5Aar = JA
+                Avslag_anmodning_begrunnelser.INGEN_SPESIELLE_FORHOLD -> art161AvslagBegrunnelser.ingenSpesielleForhold = JA
+                Avslag_anmodning_begrunnelser.SAERLIG_AVSLAGSGRUNN -> {
                     art161AvslagBegrunnelser.saerligAvslagsgrunn = JA
                     fag.begrunnelseFritekst = validerFritekstbegrunnelse(vilkaarsresultat.begrunnelseFritekst)
                 }
-                Art16_1_avslag.SOEKT_FOR_SENT -> art161AvslagBegrunnelser.soektForSent = JA
-                else -> throw TekniskException("$artikkel161AvslagKode støttes ikke.")
+                Avslag_anmodning_begrunnelser.SOEKT_FOR_SENT -> art161AvslagBegrunnelser.soektForSent = JA
+                else -> throw TekniskException("$begrunnelseKode støttes ikke.")
             }
         }
 

@@ -319,6 +319,8 @@ public class DokgenService {
             case INNHENTING_AV_INNTEKTSOPPLYSNINGER -> new InnhentingAvInntektsopplysningerBrevbestilling.Builder()
                 .medSkalViseStandardTekstOmOpplysninger(brevbestillingDto.isSkalViseStandardTekstOmOpplysninger())
                 .medFritekst(brevbestillingDto.getFritekst());
+            case ORIENTERING_ANMODNING_UNNTAK -> new OrienteringAnmodningUnntakBrevbestilling.Builder()
+                .medFritekst(brevbestillingDto.getFritekst());
             case GENERELT_FRITEKSTBREV_BRUKER, GENERELT_FRITEKSTBREV_ARBEIDSGIVER, GENERELT_FRITEKSTBREV_VIRKSOMHET,
                 UTENLANDSK_TRYGDEMYNDIGHET_FRITEKSTBREV, FRITEKSTBREV -> new FritekstbrevBrevbestilling.Builder()
                 .medDistribusjonstype(brevbestillingDto.getDistribusjonstype())
