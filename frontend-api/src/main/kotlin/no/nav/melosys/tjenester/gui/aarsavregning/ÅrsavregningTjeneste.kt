@@ -4,6 +4,9 @@ import io.swagger.annotations.Api
 import no.nav.melosys.domain.kodeverk.Inntektskildetype
 import no.nav.melosys.domain.kodeverk.Skatteplikttype
 import no.nav.melosys.domain.kodeverk.Trygdedekninger
+import no.nav.melosys.integrasjon.faktureringskomponenten.dto.BeregnTotalBeløpDto
+import no.nav.melosys.integrasjon.faktureringskomponenten.dto.FakturaseriePeriodeDto
+import no.nav.melosys.service.avgift.aarsavregning.Årsavregning
 import no.nav.melosys.service.avgift.aarsavregning.ÅrsavregningService
 import no.nav.security.token.support.core.api.Protected
 import org.springframework.http.ResponseEntity
@@ -23,29 +26,7 @@ class ÅrsavregningTjeneste(
         return ResponseEntity.ok(
             ÅrsavregningResponse(
                 aar = årsavregning.år,
-                tidligereOpplysninger = TidligereOpplysninger(
-                    Trygdeavgiftsgrunnlag(
-                        medlemskapsperioder = årsavregning.tidligereGrunnlag?.medlemskapsperioder?.map { Medlemskapsperiode(it.fom, it.tom, it.dekning) }.orEmpty(),
-                        skatteforholdsperioder = årsavregning.tidligereGrunnlag?.skatteforholdsperioder?.map { Skatteforholdsperiode(it.fom, it.tom, it.skatteplikttype) }.orEmpty(),
-                        inntektskperioder = årsavregning.tidligereGrunnlag?.innteksperioder?.map { Inntektsperiode(it.fom, it.tom, it.type, it.isArbeidsgiversavgiftBetalesTilSkatt, it.avgiftspliktigInntektMnd.verdi.intValueExact()) }.orEmpty(),
-                    ),
-                    Avgift(
-                        trygdeavgiftsperioder = årsavregning.tidligereAvgift.map {
-                            Trygdeavgiftsperiode(
-                                fom = it.fom,
-                                tom = it.tom,
-                                inntektskildetype = it.grunnlagInntekstperiode.type,
-                                inntektPerMd = it.grunnlagInntekstperiode.avgiftspliktigInntektMnd.verdi.intValueExact(),
-                                arbeidsgiversavgiftBetales = it.grunnlagInntekstperiode.isArbeidsgiversavgiftBetalesTilSkatt,
-                                avgiftssats = it.trygdesats.toDouble(),
-                                avgiftPerMd = it.trygdeavgiftsbeløpMd.verdi.intValueExact()
-                            )
-                        },
-                        // TODO totalene må beregnes og ta hensyn til perioder ref. MELOSYS-6570
-                        totalInntekt = 55000,
-                        totalAvgift = 42
-                    )
-                ),
+                tidligereOpplysninger = hentTidligereOpplysninger(årsavregning),
                 avvikFunnet = årsavregning.nyttGrunnlag != null,
                 nyttGrunnlag = null,
                 endeligAvgift = null,
@@ -56,6 +37,71 @@ class ÅrsavregningTjeneste(
                 )
             )
         )
+    }
+
+    private fun hentTidligereOpplysninger(årsavregning: Årsavregning): TidligereOpplysninger? {
+        return if (årsavregning.tidligereGrunnlag == null) null else
+            TidligereOpplysninger(
+                Trygdeavgiftsgrunnlag(
+                    medlemskapsperioder = årsavregning.tidligereGrunnlag?.medlemskapsperioder?.map { Medlemskapsperiode(it.fom, it.tom, it.dekning) }
+                        .orEmpty(),
+                    skatteforholdsperioder = årsavregning.tidligereGrunnlag?.skatteforholdsperioder?.map {
+                        Skatteforholdsperiode(
+                            it.fom,
+                            it.tom,
+                            it.skatteplikttype
+                        )
+                    }.orEmpty(),
+                    inntektskperioder = årsavregning.tidligereGrunnlag?.innteksperioder?.map {
+                        Inntektsperiode(
+                            it.fom,
+                            it.tom,
+                            it.type,
+                            it.isArbeidsgiversavgiftBetalesTilSkatt,
+                            it.avgiftspliktigInntektMnd.verdi.intValueExact()
+                        )
+                    }.orEmpty(),
+                ),
+                Avgift(
+                    trygdeavgiftsperioder = årsavregning.tidligereAvgift.map {
+                        Trygdeavgiftsperiode(
+                            fom = it.fom,
+                            tom = it.tom,
+                            inntektskildetype = it.grunnlagInntekstperiode.type,
+                            inntektPerMd = it.grunnlagInntekstperiode.avgiftspliktigInntektMnd.verdi.intValueExact(),
+                            arbeidsgiversavgiftBetales = it.grunnlagInntekstperiode.isArbeidsgiversavgiftBetalesTilSkatt,
+                            avgiftssats = it.trygdesats.toDouble(),
+                            avgiftPerMd = it.trygdeavgiftsbeløpMd.verdi.intValueExact()
+                        )
+                    },
+                    totalInntekt = hentTotaltInntekt(årsavregning.tidligereAvgift),
+                    totalAvgift = hentTotaltAvgift(årsavregning.tidligereAvgift)
+                )
+            )
+    }
+
+    private fun hentTotaltInntekt(trygdeavgiftsperioder: List<no.nav.melosys.domain.avgift.Trygdeavgiftsperiode>): Int {
+        val fakturaseriePerioder = trygdeavgiftsperioder.map {
+            FakturaseriePeriodeDto(
+                startDato = it.periodeFra,
+                sluttDato = it.periodeTil,
+                enhetsprisPerManed = it.grunnlagInntekstperiode.avgiftspliktigInntektMnd.verdi,
+                beskrivelse = "FIXME"
+            )
+        }
+        return årsavregningService.beregnTotalbeløpForPeriode(BeregnTotalBeløpDto(fakturaseriePerioder)).intValueExact()
+    }
+
+    private fun hentTotaltAvgift(trygdeavgiftsperioder: List<no.nav.melosys.domain.avgift.Trygdeavgiftsperiode>): Int {
+        val fakturaseriePerioder = trygdeavgiftsperioder.map {
+            FakturaseriePeriodeDto(
+                startDato = it.periodeFra,
+                sluttDato = it.periodeTil,
+                enhetsprisPerManed = it.trygdeavgiftsbeløpMd.verdi,
+                beskrivelse = "FIXME"
+            )
+        }
+        return årsavregningService.beregnTotalbeløpForPeriode(BeregnTotalBeløpDto(fakturaseriePerioder)).intValueExact()
     }
 }
 
