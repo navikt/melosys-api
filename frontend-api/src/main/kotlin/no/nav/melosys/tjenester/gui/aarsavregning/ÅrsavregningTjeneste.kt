@@ -89,7 +89,7 @@ class ÅrsavregningTjeneste(
                 beskrivelse = "FIXME"
             )
         }
-        return årsavregningService.beregnTotalTrygdeavgiftForPeriode(BeregnTotalBeløpDto(fakturaseriePerioder)).intValueExact()
+        return årsavregningService.beregnTotalbeløpForPeriode(BeregnTotalBeløpDto(fakturaseriePerioder)).intValueExact()
     }
 
     private fun hentTotaltAvgift(trygdeavgiftsperioder: List<no.nav.melosys.domain.avgift.Trygdeavgiftsperiode>): Int {
@@ -101,7 +101,7 @@ class ÅrsavregningTjeneste(
                 beskrivelse = "FIXME"
             )
         }
-        return årsavregningService.beregnTotalTrygdeavgiftForPeriode(BeregnTotalBeløpDto(fakturaseriePerioder)).intValueExact()
+        return årsavregningService.beregnTotalbeløpForPeriode(BeregnTotalBeløpDto(fakturaseriePerioder)).intValueExact()
     }
 }
 

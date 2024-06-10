@@ -115,7 +115,7 @@ internal class ÅrsavregningTjenesteTest {
             nyttTotalbeloep = BigDecimal(24280.0),
             tilFaktureringBeloep = BigDecimal(3110.0)
         )
-        every { årsavregningService.beregnTotalTrygdeavgiftForPeriode(any()) } returns BigDecimal(42)
+        every { årsavregningService.beregnTotalbeløpForPeriode(any()) } returns BigDecimal(42)
 
 
         val expectedJson = """{
