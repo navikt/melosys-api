@@ -54,6 +54,9 @@ class Fagsak(
     fun hentAktivBehandlingIkkeÅrsavregning(): Behandling = finnAktivBehandlingIkkeÅrsavregning()
         ?: throw FunksjonellException("Finner ingen aktiv behandling på fagsak $saksnummer")
 
+    fun hentAktivBehandling(): Behandling = behandlinger.firstOrNull { it.erAktiv() }
+        ?: throw FunksjonellException("Finner ingen aktiv behandling på fagsak $saksnummer")
+
     fun hentAktiveÅrsavregninger(): List<Behandling> = behandlinger.filter { it.erAktiv() && it.erÅrsavregning() }
 
     fun hentInaktiveBehandlinger(): List<Behandling> = behandlinger.filter { it.erInaktiv() }

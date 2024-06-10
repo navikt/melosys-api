@@ -81,8 +81,13 @@ class BehandlingfristKriterier : Behandling() {
         ): Boolean {
             val sakstemaer = setOf(Sakstemaer.MEDLEMSKAP_LOVVALG, Sakstemaer.TRYGDEAVGIFT)
             val behandlingstemaer = setOf(Behandlingstema.BESLUTNING_LOVVALG_ANNET_LAND)
-            val behandlingstyper =
-                setOf(Behandlingstyper.FØRSTEGANG, Behandlingstyper.NY_VURDERING, Behandlingstyper.ENDRET_PERIODE, Behandlingstyper.MANGLENDE_INNBETALING_TRYGDEAVGIFT)
+            val behandlingstyper = setOf(
+                Behandlingstyper.FØRSTEGANG,
+                Behandlingstyper.NY_VURDERING,
+                Behandlingstyper.ENDRET_PERIODE,
+                Behandlingstyper.MANGLENDE_INNBETALING_TRYGDEAVGIFT,
+                Behandlingstyper.ÅRSAVREGNING
+            )
             return sakstemaer.contains(sakstema) && !behandlingstemaer.contains(behandlingstema) && behandlingstyper.contains(
                 behandlingstype
             )
