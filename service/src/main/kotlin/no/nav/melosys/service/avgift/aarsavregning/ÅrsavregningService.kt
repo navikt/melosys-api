@@ -52,12 +52,9 @@ class ÅrsavregningService(
 
     private fun harFlereAarsavregningerPåsammeAarPåFagsak(behandlingsId: Long, aar: Int): Boolean {
         val behandling = behandlingRepository.findById(behandlingsId).orElseThrow { IkkeFunnetException("Fant ikke behandling $behandlingsId") }
-        val fagsak = behandling.fagsak
-        val aarsavregningsBehandlinger = fagsak.behandlinger.filter { it.type == Behandlingstyper.ÅRSAVREGNING }
+        val aarsavregningsBehandlinger = behandling.fagsak.behandlinger.filter { it.type == Behandlingstyper.ÅRSAVREGNING }
 
         val count = aarsavregningsBehandlinger.count {
-            var test = aarsavregningRepository.findByIdAndAar(it.id, aar).isPresent
-
             aarsavregningRepository.findByIdAndAar(it.id, aar).isPresent
         }
 
