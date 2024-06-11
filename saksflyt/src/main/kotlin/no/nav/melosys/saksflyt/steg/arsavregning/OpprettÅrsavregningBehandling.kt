@@ -83,7 +83,7 @@ class OpprettÅrsavregningBehandling(
     }
 
     private fun finnTrygdeavgiftsBehandlingMedRelevantPeriode(sakMedTrygdeavgift: Fagsak, gjelderPeriode: Int): Behandling? =
-        trygdeavgiftService.hentTrygdeavgiftBehandlinger(sakMedTrygdeavgift.saksnummer).firstOrNull { behandling ->
+        trygdeavgiftService.hentTrygdeavgiftBehandlinger(sakMedTrygdeavgift.saksnummer).lastOrNull { behandling ->
             val lovvalgsperioder = lovvalgsperiodeService.hentLovvalgsperioder(behandling.id)
             val medlemskapsperioder = medlemskapsperiodeService.hentMedlemskapsperioder(behandling.id)
 
