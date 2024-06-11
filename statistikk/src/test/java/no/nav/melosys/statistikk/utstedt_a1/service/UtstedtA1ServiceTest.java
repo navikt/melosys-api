@@ -5,6 +5,7 @@ import java.time.LocalDate;
 import java.util.List;
 import java.util.Set;
 
+import io.getunleash.FakeUnleash;
 import no.nav.melosys.domain.*;
 import no.nav.melosys.domain.kodeverk.*;
 import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingsresultattyper;
@@ -48,7 +49,7 @@ class UtstedtA1ServiceTest {
 
     @BeforeEach
     void setUp() {
-        utstedtA1Service = new UtstedtA1Service(utstedtA1AivenProducer, behandlingsresultatService, landvelgerService);
+        utstedtA1Service = new UtstedtA1Service(utstedtA1AivenProducer, behandlingsresultatService, landvelgerService, new FakeUnleash());
     }
 
     @Test
