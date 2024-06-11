@@ -74,13 +74,13 @@ class ÅrsavregningTjeneste(
                             avgiftPerMd = it.trygdeavgiftsbeløpMd.verdi.intValueExact()
                         )
                     },
-                    totalInntekt = hentTotaltInntekt(årsavregning.tidligereAvgift),
-                    totalAvgift = hentTotaltAvgift(årsavregning.tidligereAvgift)
+                    totalInntekt = hentTotalInntekt(årsavregning.tidligereAvgift),
+                    totalAvgift = hentTotalAvgift(årsavregning.tidligereAvgift)
                 )
             )
     }
 
-    private fun hentTotaltInntekt(trygdeavgiftsperioder: List<no.nav.melosys.domain.avgift.Trygdeavgiftsperiode>): Int {
+    private fun hentTotalInntekt(trygdeavgiftsperioder: List<no.nav.melosys.domain.avgift.Trygdeavgiftsperiode>): Int {
         val fakturaseriePerioder = trygdeavgiftsperioder.map {
             FakturaseriePeriodeDto(
                 startDato = it.periodeFra,
@@ -92,7 +92,7 @@ class ÅrsavregningTjeneste(
         return årsavregningService.beregnTotalbeløpForPeriode(BeregnTotalBeløpDto(fakturaseriePerioder)).intValueExact()
     }
 
-    private fun hentTotaltAvgift(trygdeavgiftsperioder: List<no.nav.melosys.domain.avgift.Trygdeavgiftsperiode>): Int {
+    private fun hentTotalAvgift(trygdeavgiftsperioder: List<no.nav.melosys.domain.avgift.Trygdeavgiftsperiode>): Int {
         val fakturaseriePerioder = trygdeavgiftsperioder.map {
             FakturaseriePeriodeDto(
                 startDato = it.periodeFra,
