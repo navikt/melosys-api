@@ -1,5 +1,6 @@
 package no.nav.melosys.saksflyt.steg.arsavregning
 
+import io.kotest.assertions.throwables.shouldThrow
 import io.kotest.matchers.shouldBe
 import io.mockk.Called
 import io.mockk.every
@@ -140,10 +141,9 @@ class OpprettArsavregningTest {
         every { trygdeavgiftService.harFagsakBehandlingerMedTrygdeavgift(fagsak.saksnummer) } returns false
 
 
-        opprettArsavregning.utfør(prosessinstans)
-
-
-        verify { årsavregningService wasNot Called }
+        shouldThrow<IllegalStateException> {
+            opprettArsavregning.utfør(prosessinstans)
+        }.message.shouldBe("Fant ingen sak med trygdeavgift for aktør: $AKTØR_ID")
     }
 
     @Test
