@@ -2,7 +2,6 @@ package no.nav.melosys.saksflyt.steg.arsavregning
 
 import mu.KotlinLogging
 import no.nav.melosys.domain.Behandling
-import no.nav.melosys.domain.ErPeriode
 import no.nav.melosys.domain.Fagsak
 import no.nav.melosys.domain.kodeverk.Aktoersroller
 import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingsaarsaktyper
@@ -88,8 +87,7 @@ class OpprettArsavregning(
             val lovvalgsperioder = lovvalgsperiodeService.hentLovvalgsperioder(behandling.id)
             val medlemskapsperioder = medlemskapsperiodeService.hentMedlemskapsperioder(behandling.id)
 
-            val isWithinPeriod: (ErPeriode) -> Boolean = { periode -> periode.fom.year <= gjelderPeriode && periode.tom.year >= gjelderPeriode }
-            lovvalgsperioder.any(isWithinPeriod) || medlemskapsperioder.any(isWithinPeriod)
+            lovvalgsperioder.any { it.overlapperMedÅr(gjelderPeriode) } || medlemskapsperioder.any { it.overlapperMedÅr(gjelderPeriode) }
         }
 
     private fun finnAktivÅrsavregning(sakMedTrygdeavgift: Fagsak, gjelderPeriode: Int): Behandling? {
