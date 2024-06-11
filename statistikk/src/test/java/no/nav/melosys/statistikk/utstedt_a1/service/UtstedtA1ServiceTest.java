@@ -5,12 +5,15 @@ import java.time.LocalDate;
 import java.util.List;
 import java.util.Set;
 
+import io.getunleash.FakeUnleash;
 import no.nav.melosys.domain.*;
 import no.nav.melosys.domain.kodeverk.*;
 import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingsresultattyper;
 import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingsstatus;
 import no.nav.melosys.domain.kodeverk.lovvalgsbestemmelser.Lovvalgbestemmelser_883_2004;
+import no.nav.melosys.domain.kodeverk.lovvalgsbestemmelser.Lovvalgbestemmelser_konv_efta_storbritannia;
 import no.nav.melosys.domain.kodeverk.lovvalgsbestemmelser.Tilleggsbestemmelser_883_2004;
+import no.nav.melosys.featuretoggle.ToggleName;
 import no.nav.melosys.service.LandvelgerService;
 import no.nav.melosys.service.behandling.BehandlingsresultatService;
 import no.nav.melosys.statistikk.utstedt_a1.integrasjon.UtstedtA1AivenProducer;
@@ -42,13 +45,16 @@ class UtstedtA1ServiceTest {
     @Captor
     private ArgumentCaptor<UtstedtA1Melding> captor;
 
+    private final FakeUnleash unleash = new FakeUnleash();
+
     private UtstedtA1Service utstedtA1Service;
 
     private static final Long BEHANDLING_ID = 123L;
 
     @BeforeEach
     void setUp() {
-        utstedtA1Service = new UtstedtA1Service(utstedtA1AivenProducer, behandlingsresultatService, landvelgerService);
+        unleash.resetAll();
+        utstedtA1Service = new UtstedtA1Service(utstedtA1AivenProducer, behandlingsresultatService, landvelgerService, unleash);
     }
 
     @Test
@@ -94,6 +100,18 @@ class UtstedtA1ServiceTest {
     @Test
     void sendMeldingOmUtstedtA1_avslag_forventIngenMelding() {
         when(behandlingsresultatService.hentBehandlingsresultat(BEHANDLING_ID)).thenReturn(lagBehandlingsresultat(true, lagBehandling()));
+
+        utstedtA1Service.sendMeldingOmUtstedtA1(BEHANDLING_ID);
+
+        verify(behandlingsresultatService).hentBehandlingsresultat(BEHANDLING_ID);
+        verify(landvelgerService, never()).hentUtenlandskTrygdemyndighetsland(anyLong());
+        verify(utstedtA1AivenProducer, never()).produserMelding(any(UtstedtA1Melding.class));
+    }
+
+    @Test
+    void sendMeldingOmUtstedtA1_gbBestemmelseTogglePaa_forventIngenMelding() {
+        unleash.enable(ToggleName.MELOSYS_KONVENSJON_EFTA_LAND_OG_STORBRITANNIA);
+        when(behandlingsresultatService.hentBehandlingsresultat(BEHANDLING_ID)).thenReturn(lagBehandlingsresultat(false, lagBehandling(), Lovvalgbestemmelser_konv_efta_storbritannia.KONV_EFTA_STORBRITANNIA_ART14_2));
 
         utstedtA1Service.sendMeldingOmUtstedtA1(BEHANDLING_ID);
 
