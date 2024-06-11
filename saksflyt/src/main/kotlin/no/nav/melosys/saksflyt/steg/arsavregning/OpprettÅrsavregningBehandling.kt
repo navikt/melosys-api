@@ -49,7 +49,7 @@ class OpprettÅrsavregningBehandling(
             checkNotNull(it) { "Fant ingen sak med trygdeavgift for aktør: $aktørId" }
         } ?: return
 
-        finnAktivÅrsavregning(sakMedTrygdeavgift, gjelderPeriode)?.run {
+        finnAktivÅrsavregningBehandling(sakMedTrygdeavgift, gjelderPeriode)?.run {
             if (this.status != Behandlingsstatus.OPPRETTET) {
                 status = Behandlingsstatus.VURDER_DOKUMENT
                 behandlingService.lagre(this)
@@ -90,7 +90,7 @@ class OpprettÅrsavregningBehandling(
             lovvalgsperioder.any { it.overlapperMedÅr(gjelderPeriode) } || medlemskapsperioder.any { it.overlapperMedÅr(gjelderPeriode) }
         }
 
-    private fun finnAktivÅrsavregning(sakMedTrygdeavgift: Fagsak, gjelderPeriode: Int): Behandling? {
+    private fun finnAktivÅrsavregningBehandling(sakMedTrygdeavgift: Fagsak, gjelderPeriode: Int): Behandling? {
         val årsAvregninger = sakMedTrygdeavgift.hentAktiveÅrsavregninger().also { if (it.isEmpty()) log.info("Fant ingen aktive årsavregninger") }
             .filter { behandslingsresultatService.hentBehandlingsresultat(it.id).aarsavregning.aar == gjelderPeriode }
 
