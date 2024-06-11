@@ -1,14 +1,10 @@
 package no.nav.melosys.service.dokument.brev.mapper;
 
-import java.time.Instant;
-import java.util.*;
-import java.util.stream.Collectors;
-import java.util.stream.Stream;
-import javax.xml.datatype.DatatypeConfigurationException;
-
-import no.nav.dok.melosysbrev._000067.LovvalgsperiodeType;
 import no.nav.dok.melosysbrev._000067.*;
-import no.nav.dok.melosysbrev.felles.melosys_felles.*;
+import no.nav.dok.melosysbrev.felles.melosys_felles.BostedsadresseType;
+import no.nav.dok.melosysbrev.felles.melosys_felles.KjoennKode;
+import no.nav.dok.melosysbrev.felles.melosys_felles.YrkesaktivitetsKode;
+import no.nav.dok.melosysbrev.felles.melosys_felles.YrkesgruppeKode;
 import no.nav.melosys.domain.Behandling;
 import no.nav.melosys.domain.Behandlingsresultat;
 import no.nav.melosys.domain.Lovvalgsperiode;
@@ -21,11 +17,19 @@ import no.nav.melosys.domain.person.adresse.Kontaktadresse;
 import no.nav.melosys.domain.person.adresse.Oppholdsadresse;
 import no.nav.melosys.domain.util.IsoLandkodeKonverterer;
 import no.nav.melosys.exception.TekniskException;
+import no.nav.melosys.service.brev.felles.LovvalgsbestemmelseKodeMapper;
+import no.nav.melosys.service.brev.felles.TilleggsbestemmelseKodeMapper;
 import no.nav.melosys.service.dokument.brev.BrevDataA1;
 import no.nav.melosys.service.dokument.brev.mapper.arbeidssted.Arbeidssted;
 import no.nav.melosys.service.dokument.brev.mapper.arbeidssted.IkkeFysiskArbeidssted;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.text.WordUtils;
+
+import javax.xml.datatype.DatatypeConfigurationException;
+import java.time.Instant;
+import java.util.*;
+import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
 import static no.nav.melosys.service.dokument.brev.BrevDataUtils.lagPersonnavn;
 import static no.nav.melosys.service.dokument.brev.mapper.felles.BrevMapperUtils.convertToXMLGregorianCalendarRemoveTimezone;
@@ -128,9 +132,9 @@ class A1Mapper {
     private LovvalgsperiodeType mapLovvalgsperiode(Lovvalgsperiode lovvalgsperiode) {
         LovvalgsperiodeType brevPeriode = new LovvalgsperiodeType();
         brevPeriode.setLovvalgsLand(lovvalgsperiode.getLovvalgsland().getKode());
-        brevPeriode.setLovvalgsbestemmelse(LovvalgsbestemmelseKode.fromValue(lovvalgsperiode.getBestemmelse().getKode()));
+        brevPeriode.setLovvalgsbestemmelse(LovvalgsbestemmelseKodeMapper.map(lovvalgsperiode.getBestemmelse()));
         if (lovvalgsperiode.getTilleggsbestemmelse() != null) {
-            brevPeriode.setTilleggsbestemmelse(TilleggsbestemmelseKode.fromValue(lovvalgsperiode.getTilleggsbestemmelse().getKode()));
+            brevPeriode.setTilleggsbestemmelse(TilleggsbestemmelseKodeMapper.map(lovvalgsperiode.getTilleggsbestemmelse()));
         }
 
         try {

@@ -1,16 +1,11 @@
 package no.nav.melosys.service.dokument.brev.mapper;
 
-import java.math.BigInteger;
-import java.util.Collection;
-import java.util.List;
-import java.util.stream.Collectors;
 import jakarta.xml.bind.JAXBElement;
 import jakarta.xml.bind.JAXBException;
-
-import no.nav.dok.melosysbrev._000083.LovvalgsperiodeType;
-import no.nav.dok.melosysbrev._000083.ObjectFactory;
 import no.nav.dok.melosysbrev._000083.*;
-import no.nav.dok.melosysbrev.felles.melosys_felles.*;
+import no.nav.dok.melosysbrev.felles.melosys_felles.FellesType;
+import no.nav.dok.melosysbrev.felles.melosys_felles.MelosysNAVFelles;
+import no.nav.dok.melosysbrev.felles.melosys_felles.VedtaksTypeKode;
 import no.nav.dok.melosysbrev.felles.melosys_vedlegg.VedleggType;
 import no.nav.melosys.domain.Behandling;
 import no.nav.melosys.domain.Behandlingsresultat;
@@ -18,9 +13,16 @@ import no.nav.melosys.domain.Lovvalgsperiode;
 import no.nav.melosys.domain.avklartefakta.AvklartVirksomhet;
 import no.nav.melosys.domain.kodeverk.Vedtakstyper;
 import no.nav.melosys.exception.TekniskException;
+import no.nav.melosys.service.brev.felles.LovvalgsbestemmelseKodeMapper;
+import no.nav.melosys.service.brev.felles.TilleggsbestemmelseKodeMapper;
 import no.nav.melosys.service.dokument.brev.BrevData;
 import no.nav.melosys.service.dokument.brev.BrevDataInnvilgelseFlereLand;
 import org.xml.sax.SAXException;
+
+import java.math.BigInteger;
+import java.util.Collection;
+import java.util.List;
+import java.util.stream.Collectors;
 
 import static no.nav.melosys.service.dokument.brev.mapper.felles.BrevMapperUtils.lagXmlDato;
 
@@ -95,13 +97,13 @@ public final class InnvilgelsesbrevFlereLandMapper implements BrevDataMapper {
         }
 
         Lovvalgsperiode periode = brevdata.getLovvalgsperiode();
-        fag.setLovvalgsbestemmelse(LovvalgsbestemmelseKode.fromValue(periode.getBestemmelse().getKode()));
+        fag.setLovvalgsbestemmelse(LovvalgsbestemmelseKodeMapper.map(periode.getBestemmelse()));
         fag.setLovvalgsperiode(new LovvalgsperiodeType()
             .withFomDato(lagXmlDato(periode.getFom()))
             .withTomDato(lagXmlDato(periode.getTom())));
 
         if (periode.getTilleggsbestemmelse() != null) {
-            fag.setTilleggsbestemmelse(TilleggsbestemmelseKode.fromValue(periode.getTilleggsbestemmelse().getKode()));
+            fag.setTilleggsbestemmelse(TilleggsbestemmelseKodeMapper.map(periode.getTilleggsbestemmelse()));
         }
 
         if (resultat.getVedtakMetadata() != null) {
