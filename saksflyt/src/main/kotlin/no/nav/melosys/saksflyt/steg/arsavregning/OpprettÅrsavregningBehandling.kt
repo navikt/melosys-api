@@ -57,7 +57,7 @@ class OpprettÅrsavregningBehandling(
             return
         }
 
-        val trygdeavgiftsBehandlingerMedGyldigPeriode = finnTrygdeavgiftsBehandlingerMedGyldigPeriode(sakMedTrygdeavgift, gjelderPeriode).also {
+        val trygdeavgiftsBehandlingMedRelevantPeriode = finnTrygdeavgiftsBehandlingMedRelevantPeriode(sakMedTrygdeavgift, gjelderPeriode).also {
             if (it == null) log.info(
                 "Fant ingen behandlinger med overlappende lovvalgsperioder eller medlemskapsperioder for sak: ${
                     sakMedTrygdeavgift.saksnummer
@@ -69,7 +69,7 @@ class OpprettÅrsavregningBehandling(
             sakMedTrygdeavgift,
             Behandlingsstatus.VURDER_DOKUMENT,
             Behandlingstyper.ÅRSAVREGNING,
-            trygdeavgiftsBehandlingerMedGyldigPeriode.tema,
+            trygdeavgiftsBehandlingMedRelevantPeriode.tema,
             null,
             null,
             LocalDate.now(),
@@ -82,7 +82,7 @@ class OpprettÅrsavregningBehandling(
         }
     }
 
-    private fun finnTrygdeavgiftsBehandlingerMedGyldigPeriode(sakMedTrygdeavgift: Fagsak, gjelderPeriode: Int): Behandling? =
+    private fun finnTrygdeavgiftsBehandlingMedRelevantPeriode(sakMedTrygdeavgift: Fagsak, gjelderPeriode: Int): Behandling? =
         trygdeavgiftService.hentTrygdeavgiftBehandlinger(sakMedTrygdeavgift.saksnummer).firstOrNull { behandling ->
             val lovvalgsperioder = lovvalgsperiodeService.hentLovvalgsperioder(behandling.id)
             val medlemskapsperioder = medlemskapsperiodeService.hentMedlemskapsperioder(behandling.id)
