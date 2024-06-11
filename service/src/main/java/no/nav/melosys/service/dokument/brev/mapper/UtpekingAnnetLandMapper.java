@@ -2,23 +2,23 @@ package no.nav.melosys.service.dokument.brev.mapper;
 
 import jakarta.xml.bind.JAXBElement;
 import jakarta.xml.bind.JAXBException;
-import javax.xml.datatype.DatatypeConfigurationException;
-
 import no.nav.dok.melosysbrev._000168.BrevdataType;
 import no.nav.dok.melosysbrev._000168.Fag;
 import no.nav.dok.melosysbrev._000168.LovvalgsperiodeType;
 import no.nav.dok.melosysbrev._000168.ObjectFactory;
 import no.nav.dok.melosysbrev.felles.melosys_felles.FellesType;
-import no.nav.dok.melosysbrev.felles.melosys_felles.LovvalgsbestemmelseKode;
 import no.nav.dok.melosysbrev.felles.melosys_felles.MelosysNAVFelles;
-import no.nav.dok.melosysbrev.felles.melosys_felles.TilleggsbestemmelseKode;
 import no.nav.melosys.domain.Behandling;
 import no.nav.melosys.domain.Behandlingsresultat;
 import no.nav.melosys.domain.Utpekingsperiode;
 import no.nav.melosys.exception.TekniskException;
+import no.nav.melosys.service.brev.felles.LovvalgsbestemmelseKodeMapper;
+import no.nav.melosys.service.brev.felles.TilleggsbestemmelseKodeMapper;
 import no.nav.melosys.service.dokument.brev.BrevData;
 import no.nav.melosys.service.dokument.brev.BrevDataUtpekingAnnetLand;
 import org.xml.sax.SAXException;
+
+import javax.xml.datatype.DatatypeConfigurationException;
 
 import static no.nav.melosys.service.dokument.brev.mapper.felles.BrevMapperUtils.convertToXMLGregorianCalendarRemoveTimezone;
 
@@ -31,7 +31,7 @@ public final class UtpekingAnnetLandMapper implements BrevDataMapper {
                                 Behandling behandling,
                                 Behandlingsresultat resultat,
                                 BrevData brevData) throws JAXBException, SAXException {
-        Fag fag = mapFag((BrevDataUtpekingAnnetLand)brevData);
+        Fag fag = mapFag((BrevDataUtpekingAnnetLand) brevData);
         JAXBElement<BrevdataType> brevdataTypeJAXBElement = mapintoBrevdataType(fellesType, navFelles, fag);
         return JaxbHelper.marshalAndValidate(brevdataTypeJAXBElement, XSD_LOCATION);
     }
@@ -42,9 +42,9 @@ public final class UtpekingAnnetLandMapper implements BrevDataMapper {
 
         fag.setLovvalgsland(utpekingsperiode.getLovvalgsland().getBeskrivelse());
         fag.setLovvalgsperiode(lagLovvalgsperiodeType(utpekingsperiode));
-        fag.setLovvalgsbestemmelse(LovvalgsbestemmelseKode.fromValue(utpekingsperiode.getBestemmelse().getKode()));
+        fag.setLovvalgsbestemmelse(LovvalgsbestemmelseKodeMapper.map(utpekingsperiode.getBestemmelse()));
         if (utpekingsperiode.getTilleggsbestemmelse() != null) {
-            fag.setTilleggsbestemmelse(TilleggsbestemmelseKode.fromValue(utpekingsperiode.getTilleggsbestemmelse().getKode()));
+            fag.setTilleggsbestemmelse(TilleggsbestemmelseKodeMapper.map(utpekingsperiode.getTilleggsbestemmelse()));
         }
         fag.setFritekst(brevDataUtpekingAnnetLand.getFritekst());
 

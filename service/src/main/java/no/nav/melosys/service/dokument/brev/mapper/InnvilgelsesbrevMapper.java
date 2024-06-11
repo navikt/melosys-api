@@ -1,15 +1,7 @@
 package no.nav.melosys.service.dokument.brev.mapper;
 
-import java.math.BigInteger;
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Map;
-import java.util.Set;
-import java.util.stream.Collectors;
-
 import jakarta.xml.bind.JAXBElement;
 import jakarta.xml.bind.JAXBException;
-
 import no.nav.dok.melosysbrev._000108.LovvalgsperiodeType;
 import no.nav.dok.melosysbrev._000108.ObjectFactory;
 import no.nav.dok.melosysbrev._000108.*;
@@ -29,9 +21,18 @@ import no.nav.melosys.domain.person.familie.AvklarteMedfolgendeFamilie;
 import no.nav.melosys.domain.person.familie.IkkeOmfattetFamilie;
 import no.nav.melosys.domain.person.familie.OmfattetFamilie;
 import no.nav.melosys.exception.TekniskException;
+import no.nav.melosys.service.brev.felles.LovvalgsbestemmelseKodeMapper;
+import no.nav.melosys.service.brev.felles.TilleggsbestemmelseKodeMapper;
 import no.nav.melosys.service.dokument.brev.BrevData;
 import no.nav.melosys.service.dokument.brev.BrevDataInnvilgelse;
 import org.xml.sax.SAXException;
+
+import java.math.BigInteger;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Map;
+import java.util.Set;
+import java.util.stream.Collectors;
 
 import static java.util.Map.entry;
 import static no.nav.melosys.domain.kodeverk.Vilkaar.FO_883_2004_ART12_1;
@@ -112,14 +113,14 @@ public final class InnvilgelsesbrevMapper implements BrevDataMapper {
             .ifPresent(fag::setAnmodningsPeriodeSvarType);
 
         Lovvalgsperiode periode = brevdata.getLovvalgsperiode();
-        fag.setLovvalgsbestemmelse(LovvalgsbestemmelseKode.fromValue(periode.getBestemmelse().getKode()));
+        fag.setLovvalgsbestemmelse(LovvalgsbestemmelseKodeMapper.map(periode.getBestemmelse()));
         fag.setLovvalgsperiode(new LovvalgsperiodeType()
             .withFomDato(lagXmlDato(periode.getFom()))
             .withTomDato(lagXmlDato(periode.getTom()))
         );
 
         if (periode.getTilleggsbestemmelse() != null) {
-            fag.setTilleggsbestemmelse(TilleggsbestemmelseKode.fromValue(periode.getTilleggsbestemmelse().getKode()));
+            fag.setTilleggsbestemmelse(TilleggsbestemmelseKodeMapper.map(periode.getTilleggsbestemmelse()));
         }
         if (brevdata.getBegrunnelseKode() != null) {
             fag.setEndretPeriodeBegrunnelse(EndretPeriodeBegrunnelseKode.fromValue(brevdata.getBegrunnelseKode()));
