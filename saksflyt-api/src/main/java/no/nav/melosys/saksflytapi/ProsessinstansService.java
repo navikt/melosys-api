@@ -173,7 +173,7 @@ public class ProsessinstansService {
         Prosessinstans prosessinstans = new Prosessinstans();
         prosessinstans.setType(ProsessType.OPPRETT_NY_BEHANDLING_AARSAVREGNING);
 
-        prosessinstans.setData(GJELDER_PERIODE, skattehendelse.getGjelderPeriode());
+        prosessinstans.setData(GJELDER_ÅR, skattehendelse.getGjelderPeriode());
         prosessinstans.setData(IDENTIFIKATOR, skattehendelse.getIdentifikator());
 
         return lagre(prosessinstans);

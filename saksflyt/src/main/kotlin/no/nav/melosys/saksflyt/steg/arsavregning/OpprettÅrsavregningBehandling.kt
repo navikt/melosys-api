@@ -41,7 +41,7 @@ class OpprettÅrsavregningBehandling(
     }
 
     override fun utfør(prosessinstans: Prosessinstans) {
-        val gjelderPeriode = prosessinstans.getData(ProsessDataKey.GJELDER_PERIODE).toInt()
+        val gjelderÅr = prosessinstans.getData(ProsessDataKey.GJELDER_ÅR).toInt()
         val ident = prosessinstans.getData(ProsessDataKey.IDENTIFIKATOR)
         val aktørId = persondataService.hentAktørIdForIdent(ident)
 
@@ -49,7 +49,7 @@ class OpprettÅrsavregningBehandling(
             checkNotNull(it) { "Fant ingen sak med trygdeavgift for aktør: $aktørId" }
         } ?: return
 
-        finnAktivÅrsavregningBehandling(sakMedTrygdeavgift, gjelderPeriode)?.run {
+        finnAktivÅrsavregningBehandling(sakMedTrygdeavgift, gjelderÅr)?.run {
             if (this.status != Behandlingsstatus.OPPRETTET) {
                 status = Behandlingsstatus.VURDER_DOKUMENT
                 behandlingService.lagre(this)
@@ -57,11 +57,11 @@ class OpprettÅrsavregningBehandling(
             return
         }
 
-        val trygdeavgiftsBehandlingMedRelevantPeriode = finnTrygdeavgiftsBehandlingMedRelevantPeriode(sakMedTrygdeavgift, gjelderPeriode).also {
+        val trygdeavgiftsBehandlingMedRelevantPeriode = finnTrygdeavgiftsBehandlingMedRelevantPeriode(sakMedTrygdeavgift, gjelderÅr).also {
             if (it == null) log.info(
                 "Fant ingen behandlinger med overlappende lovvalgsperioder eller medlemskapsperioder for sak: ${
                     sakMedTrygdeavgift.saksnummer
-                } og år: $gjelderPeriode"
+                } og år: $gjelderÅr"
             )
         } ?: return
 
@@ -77,7 +77,7 @@ class OpprettÅrsavregningBehandling(
             null
         ).also { nyBehandling ->
             val behandlingsresultat = behandslingsresultatService.hentBehandlingsresultat(nyBehandling.id)
-            oppretteÅrsavregning.oppretteÅrsavregning(behandlingsresultat, gjelderPeriode)
+            oppretteÅrsavregning.oppretteÅrsavregning(behandlingsresultat, gjelderÅr)
             prosessinstans.behandling = nyBehandling
         }
     }

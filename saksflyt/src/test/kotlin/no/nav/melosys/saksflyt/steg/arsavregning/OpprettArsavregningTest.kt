@@ -231,7 +231,7 @@ class OpprettArsavregningTest {
 
 
     private fun lagProsessInstans(block: Prosessinstans.() -> Unit = {}): Prosessinstans = Prosessinstans().apply {
-        setData(ProsessDataKey.GJELDER_PERIODE, GJELDER_ÅR)
+        setData(ProsessDataKey.GJELDER_ÅR, GJELDER_ÅR)
         setData(ProsessDataKey.AKTØR_ID, AKTØR_ID)
         block()
     }
