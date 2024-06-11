@@ -23,7 +23,7 @@ class OrienteringAnmodningUnntakMapper(
         val anmodningsperiode = behandlingsresultat.hentAnmodningsperiode()
         val periodeFom = anmodningsperiode.fom
         val periodeTom = anmodningsperiode.tom
-        val arbeidsland = landvelgerService.hentArbeidsland(behandlingID).getBeskrivelse()
+        val arbeidsland = landvelgerService.hentArbeidsland(behandlingID).beskrivelse
 
         val erDirekteTilAnmodningOmUnntak =
             behandlingsresultat.avklartefakta.find { it.fakta == AvklartYrkesgruppeType.ORDINAER_UTEN_ART12.name } != null
@@ -78,7 +78,7 @@ class OrienteringAnmodningUnntakMapper(
 
     private fun hentBegrunnelser(behandlingID: Long): List<String> {
         val UTSENDT_ARBEIDSTAKER_begrunnelser =
-            vilkaarsresultatService.finnUnntaksVilkaarsresultat(behandlingID)?.begrunnelser?.stream()?.toList()?.map { it.kode }.orEmpty()
+            vilkaarsresultatService.finnUtsendingArbeidstakerVilkaarsresultat(behandlingID)?.begrunnelser?.stream()?.toList()?.map { it.kode }.orEmpty()
         val UTSENDT_NÆRINGSDRIVENDE_begrunnelser =
             vilkaarsresultatService.finnUtsendingNæringsdrivendeVilkaarsresultat(behandlingID)?.begrunnelser?.stream()?.toList()?.map { it.kode }
                 .orEmpty()

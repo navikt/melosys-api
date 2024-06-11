@@ -100,7 +100,7 @@ internal class OrienteringAnmodningUnntakMapperTest {
             erAnmodningOmUnntakViaArbeidstaker.shouldBe(true)
             erAnmodningOmUnntakViaNæringsdrivende.shouldBe(false)
             lovvalgsbestemmelse.shouldBe(Lovvalgbestemmelser_konv_efta_storbritannia.KONV_EFTA_STORBRITANNIA_ART18_1.name)
-            begrunnelser.shouldBe(listOf(ERSTATTER_EN_ANNEN_UNDER_5_AAR.name, IKKE_LIGNENDE_VIRKSOMHET.name))
+            begrunnelser.shouldBe(listOf(UTSENDELSE_OVER_24_MN.name, IKKE_LIGNENDE_VIRKSOMHET.name))
             direkteTilAnmodningBegrunnelser.shouldBe(listOf(ERSTATTER_EN_ANNEN_UNDER_5_AAR.name))
             anmodningBegrunnelser.shouldBe(listOf())
             fritekst.shouldBeNull()
