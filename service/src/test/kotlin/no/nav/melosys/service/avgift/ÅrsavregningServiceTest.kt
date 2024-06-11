@@ -5,16 +5,16 @@ import io.mockk.every
 import io.mockk.impl.annotations.RelaxedMockK
 import io.mockk.junit5.MockKExtension
 import io.mockk.verify
-import no.nav.melosys.domain.Behandlingsresultat
-import no.nav.melosys.domain.Medlemskapsperiode
-import no.nav.melosys.domain.VedtakMetadata
+import no.nav.melosys.domain.*
 import no.nav.melosys.domain.avgift.*
 import no.nav.melosys.domain.kodeverk.*
 import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingsresultattyper
+import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingstyper
 import no.nav.melosys.integrasjon.faktureringskomponenten.FaktureringskomponentenConsumer
 import no.nav.melosys.integrasjon.faktureringskomponenten.dto.BeregnTotalBeløpDto
 import no.nav.melosys.integrasjon.faktureringskomponenten.dto.FakturaseriePeriodeDto
 import no.nav.melosys.repository.AarsavregningRepository
+import no.nav.melosys.repository.BehandlingRepository
 import no.nav.melosys.service.avgift.aarsavregning.MedlemskapsperiodeForAvgift
 import no.nav.melosys.service.avgift.aarsavregning.Trygdeavgiftsgrunnlag
 import no.nav.melosys.service.avgift.aarsavregning.Årsavregning
@@ -23,6 +23,7 @@ import no.nav.melosys.sikkerhet.context.SpringSubjectHandler
 import no.nav.melosys.sikkerhet.context.TestSubjectHandler
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
+import org.junit.jupiter.api.assertThrows
 import org.junit.jupiter.api.extension.ExtendWith
 import java.math.BigDecimal
 import java.time.LocalDate
@@ -34,6 +35,8 @@ internal class ÅrsavregningServiceTest {
     private lateinit var faktureringskomponentenConsumer: FaktureringskomponentenConsumer
     @RelaxedMockK
     private lateinit var aarsavregningRepository: AarsavregningRepository
+    @RelaxedMockK
+    private lateinit var behandlingRepository: BehandlingRepository
 
     private lateinit var årsavregningService: ÅrsavregningService
 
@@ -41,8 +44,49 @@ internal class ÅrsavregningServiceTest {
 
     @BeforeEach
     fun setup() {
-        årsavregningService = ÅrsavregningService(faktureringskomponentenConsumer, aarsavregningRepository)
+        årsavregningService = ÅrsavregningService(faktureringskomponentenConsumer, aarsavregningRepository, behandlingRepository)
         SpringSubjectHandler.set(TestSubjectHandler())
+
+        every { behandlingRepository.findById(any()) }.returns(Optional.of(Behandling().apply {
+            fagsak = Fagsak(saksnummer = "1", type = Sakstyper.EU_EOS, status = Saksstatuser.OPPRETTET, tema = Sakstemaer.MEDLEMSKAP_LOVVALG, behandlinger = mutableListOf(
+                Behandling().apply {
+                    id = 1L
+                    type = Behandlingstyper.ÅRSAVREGNING
+                },
+                Behandling().apply {
+                    id = 2L
+                    type = Behandlingstyper.ÅRSAVREGNING
+                }
+            ))
+        }))
+    }
+
+    @Test
+    fun `hentÅrsavregning kaster exception når flere Aarsavregninger eksisterer for samme år på samme Fagsak`() {
+        val årsavregningEntity1 = Aarsavregning().apply {
+            aar = 2023
+            behandlingsresultat = Behandlingsresultat()
+        }
+        every { aarsavregningRepository.findById(1L) }.returns(Optional.of(årsavregningEntity1))
+        every { aarsavregningRepository.findByIdAndAar(1, 2023) }.returns(Optional.of(årsavregningEntity1))
+        every { aarsavregningRepository.findByIdAndAar(2, 2023) }.returns(Optional.of(årsavregningEntity1))
+
+        every { behandlingRepository.findById(any()) }.returns(Optional.of(Behandling().apply {
+            fagsak = Fagsak(saksnummer = "1", type = Sakstyper.EU_EOS, status = Saksstatuser.OPPRETTET, tema = Sakstemaer.MEDLEMSKAP_LOVVALG, behandlinger = mutableListOf(
+                Behandling().apply {
+                    id = 1L
+                    type = Behandlingstyper.ÅRSAVREGNING
+                },
+                Behandling().apply {
+                    id = 2L
+                    type = Behandlingstyper.ÅRSAVREGNING
+                }
+            ))
+        }))
+
+        assertThrows<IllegalStateException> {
+            årsavregningService.hentÅrsavregning(1)
+        }
     }
 
     @Test
@@ -61,7 +105,7 @@ internal class ÅrsavregningServiceTest {
             aar = 2023
             behandlingsresultat = Behandlingsresultat()
         }
-        every { aarsavregningRepository.findById(any()) }.returns(Optional.of(årsavregningEntity))
+        every { aarsavregningRepository.findById(1) }.returns(Optional.of(årsavregningEntity))
 
         årsavregningService.hentÅrsavregning(1) shouldBe Årsavregning(
             år = 2023,
@@ -82,7 +126,8 @@ internal class ÅrsavregningServiceTest {
             behandlingsresultat = Behandlingsresultat()
             tidligereBehandlingsresultat = lagTidligereBehandlingsresultat()
         }
-        every { aarsavregningRepository.findById(any()) }.returns(Optional.of(årsavregningEntity))
+        every { aarsavregningRepository.findById(1) }.returns(Optional.of(årsavregningEntity))
+
 
         årsavregningService.hentÅrsavregning(1) shouldBe Årsavregning(
             år = 2023,

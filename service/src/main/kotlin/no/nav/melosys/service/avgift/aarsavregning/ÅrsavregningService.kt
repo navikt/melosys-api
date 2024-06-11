@@ -8,10 +8,12 @@ import no.nav.melosys.domain.avgift.SkatteforholdTilNorge
 import no.nav.melosys.domain.avgift.Trygdeavgiftsperiode
 import no.nav.melosys.domain.kodeverk.Folketrygdloven_kap2_bestemmelser
 import no.nav.melosys.domain.kodeverk.Trygdedekninger
+import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingstyper
 import no.nav.melosys.exception.IkkeFunnetException
 import no.nav.melosys.integrasjon.faktureringskomponenten.FaktureringskomponentenConsumer
 import no.nav.melosys.integrasjon.faktureringskomponenten.dto.BeregnTotalBeløpDto
 import no.nav.melosys.repository.AarsavregningRepository
+import no.nav.melosys.repository.BehandlingRepository
 import no.nav.melosys.sikkerhet.context.SubjectHandler
 import org.springframework.stereotype.Service
 import org.springframework.transaction.annotation.Transactional
@@ -22,6 +24,7 @@ import java.time.LocalDate
 class ÅrsavregningService(
     private val faktureringskomponentenConsumer: FaktureringskomponentenConsumer,
     private val aarsavregningRepository: AarsavregningRepository,
+    private val behandlingRepository: BehandlingRepository
 ) {
     fun beregnTotalbeløpForPeriode(beregnTotalBeløpDto: BeregnTotalBeløpDto): BigDecimal {
         val saksbehandlerIdent = SubjectHandler.getInstance().getUserID()
@@ -32,6 +35,9 @@ class ÅrsavregningService(
     fun hentÅrsavregning(avregningID: Long): Årsavregning {
         val aarsavregning = aarsavregningRepository.findById(avregningID).orElseThrow { IkkeFunnetException("Fant ikke årsavregning $avregningID") }
         val år = aarsavregning.aar
+        if (harFlereAarsavregningerPåsammeAarPåFagsak(avregningID, år)) {
+            throw IllegalStateException("Det finnes flere årsavregninger på samme år på samme fagsak")
+        }
         return Årsavregning(
             år = år,
             tidligereGrunnlag = hentTidligereTrygdeavgiftsgrunnlag(år, aarsavregning.tidligereBehandlingsresultat),
@@ -42,6 +48,20 @@ class ÅrsavregningService(
             nyttTotalbeloep = aarsavregning.nyttTotalbeloep,
             tilFaktureringBeloep = aarsavregning.tilFaktureringBeloep
         )
+    }
+
+    private fun harFlereAarsavregningerPåsammeAarPåFagsak(behandlingsId: Long, aar: Int): Boolean {
+        val behandling = behandlingRepository.findById(behandlingsId).orElseThrow { IkkeFunnetException("Fant ikke behandling $behandlingsId") }
+        val fagsak = behandling.fagsak
+        val aarsavregningsBehandlinger = fagsak.behandlinger.filter { it.type == Behandlingstyper.ÅRSAVREGNING }
+
+        val count = aarsavregningsBehandlinger.count {
+            var test = aarsavregningRepository.findByIdAndAar(it.id, aar).isPresent
+
+            aarsavregningRepository.findByIdAndAar(it.id, aar).isPresent
+        }
+
+        return count > 1
     }
 
     private fun hentTidligereTrygdeavgiftsgrunnlag(år: Int, behandlingsresultat: Behandlingsresultat?): Trygdeavgiftsgrunnlag? {

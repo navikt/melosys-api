@@ -20,6 +20,7 @@ import java.time.LocalDate
 class ÅrsavregningTjeneste(
     private val årsavregningService: ÅrsavregningService,
 ) {
+
     @GetMapping("/{avregningID}")
     fun hentAvregning(@PathVariable("avregningID") avregningID: Long): ResponseEntity<ÅrsavregningResponse> {
         val årsavregning = årsavregningService.hentÅrsavregning(avregningID)
