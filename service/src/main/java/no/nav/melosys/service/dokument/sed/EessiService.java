@@ -1,11 +1,13 @@
 package no.nav.melosys.service.dokument.sed;
 
+import java.time.LocalDate;
+import java.util.*;
+import java.util.function.Function;
+import java.util.stream.Collectors;
+
 import io.getunleash.Unleash;
 import jakarta.annotation.Nullable;
-import no.nav.melosys.domain.Behandling;
-import no.nav.melosys.domain.Behandlingsresultat;
-import no.nav.melosys.domain.Fagsak;
-import no.nav.melosys.domain.PeriodeType;
+import no.nav.melosys.domain.*;
 import no.nav.melosys.domain.arkiv.DokumentReferanse;
 import no.nav.melosys.domain.arkiv.Journalpost;
 import no.nav.melosys.domain.arkiv.Vedlegg;
@@ -40,11 +42,6 @@ import org.springframework.context.annotation.Primary;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.util.CollectionUtils;
-
-import java.time.LocalDate;
-import java.util.*;
-import java.util.function.Function;
-import java.util.stream.Collectors;
 
 import static java.util.function.Predicate.not;
 
@@ -237,8 +234,9 @@ public class EessiService {
 
         String rinaSaksnummer = behandling.hentSedDokument().getRinaSaksnummer();
 
-        SedDataDto sedDataDto = sedDataBygger.lagUtkast(dataGrunnlag, behandlingsresultat, PeriodeType.LOVVALGSPERIODE);
-        sedDataDto.setYtterligereInformasjon(utpekingAvvis.getFritekst());
+        PeriodeType periodeType = PeriodeType.LOVVALGSPERIODE;
+        SedDataDto sedDataDto = sedDataBygger.lagUtkast(dataGrunnlag, behandlingsresultat, periodeType);
+        sedDataDto.setYtterligereInformasjon(mapYtterligereInformasjon(utpekingAvvis.getFritekst(), periodeType, behandlingsresultat));
         sedDataDto.setUtpekingAvvis(new UtpekingAvvisDto(
             utpekingAvvis.getNyttLovvalgsland(),
             utpekingAvvis.getBegrunnelse(),
@@ -283,7 +281,16 @@ public class EessiService {
     }
 
     private String mapYtterligereInformasjon(String fritekst, PeriodeType periodeType, Behandlingsresultat behandlingsresultat) {
-        if (unleash.isEnabled(ToggleName.MELOSYS_KONVENSJON_EFTA_LAND_OG_STORBRITANNIA) && periodeType == PeriodeType.ANMODNINGSPERIODE && behandlingsresultat.hentAnmodningsperiode().getBestemmelse() == Lovvalgbestemmelser_konv_efta_storbritannia.KONV_EFTA_STORBRITANNIA_ART18_1) {
+        var bestemmelse = switch (periodeType) {
+            case LOVVALGSPERIODE -> behandlingsresultat.finnLovvalgsperiode().map(Lovvalgsperiode::getBestemmelse).orElse(null);
+            case ANMODNINGSPERIODE -> behandlingsresultat.finnAnmodningsperiode().map(Anmodningsperiode::getBestemmelse).orElse(null);
+            case UTPEKINGSPERIODE -> behandlingsresultat.finnValidertUtpekingsperiode().map(Utpekingsperiode::getBestemmelse).orElse(null);
+            case INGEN -> null;
+        };
+        var bestemmelseErStorbritanniaBestemmelse = bestemmelse != null && Arrays
+            .stream(Lovvalgbestemmelser_konv_efta_storbritannia.values())
+            .anyMatch(kodeTerm -> Objects.equals(kodeTerm.getKode(), bestemmelse.getKode()));
+        if (unleash.isEnabled(ToggleName.MELOSYS_KONVENSJON_EFTA_LAND_OG_STORBRITANNIA) && bestemmelseErStorbritanniaBestemmelse) {
             var tekstGBKonv = "Issued under the EEA EFTA Convention.";
             return fritekst == null ? tekstGBKonv : tekstGBKonv + "\n" + fritekst;
         }
@@ -433,7 +440,7 @@ public class EessiService {
         SedDataGrunnlag dataGrunnlag = dataGrunnlagFactory.av(behandling, sedType);
 
         SedDataDto sedDataDto = sedDataBygger.lagUtkast(dataGrunnlag, behandlingsresultat, periodeType);
-        sedDataDto.setYtterligereInformasjon(ytterligereInformasjon);
+        sedDataDto.setYtterligereInformasjon(mapYtterligereInformasjon(ytterligereInformasjon, periodeType, behandlingsresultat));
         String rinaSaksnummer = behandling.hentSedDokument().getRinaSaksnummer();
 
         log.info("Forsøker å sende sed {} for behandling {}", sedType, behandlingID);
