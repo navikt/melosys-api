@@ -25,6 +25,7 @@ import no.nav.melosys.exception.TekniskException;
 import no.nav.melosys.service.dokument.brev.BrevDataA1;
 import no.nav.melosys.service.dokument.brev.mapper.arbeidssted.Arbeidssted;
 import no.nav.melosys.service.dokument.brev.mapper.arbeidssted.IkkeFysiskArbeidssted;
+import no.nav.melosys.service.dokument.brev.mapper.felles.KonvEftaStorbritanniaLovvalgbestemmelser;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.text.WordUtils;
 
@@ -132,10 +133,13 @@ class A1Mapper {
         Boolean erStorbritannia = lovvalgsperiode.getBestemmelse().name().startsWith("KONV_EFTA");
 
         brevPeriode.setLovvalgsbestemmelse(LovvalgsbestemmelseKode.fromValue(
-            erStorbritannia ? Bestemmelse.GB_KONV_BESTEMMELSE_MAP.get(lovvalgsperiode.getBestemmelse()).getValue() : lovvalgsperiode.getBestemmelse().getKode())
+            erStorbritannia ? KonvEftaStorbritanniaLovvalgbestemmelser.GB_KONV_LOVVALGBESTEMMELSE_MAP.get(lovvalgsperiode.getBestemmelse()).getKode() : lovvalgsperiode.getBestemmelse().getKode())
         );
+
         if (lovvalgsperiode.getTilleggsbestemmelse() != null) {
-            brevPeriode.setTilleggsbestemmelse(TilleggsbestemmelseKode.fromValue(lovvalgsperiode.getTilleggsbestemmelse().getKode()));
+            brevPeriode.setTilleggsbestemmelse(TilleggsbestemmelseKode.fromValue(
+                erStorbritannia ? KonvEftaStorbritanniaLovvalgbestemmelser.GB_KONV_TILLEGGBESTEMMELSE_MAP.get(lovvalgsperiode.getTilleggsbestemmelse()).getKode() : lovvalgsperiode.getTilleggsbestemmelse().getKode())
+            );
         }
 
         try {
