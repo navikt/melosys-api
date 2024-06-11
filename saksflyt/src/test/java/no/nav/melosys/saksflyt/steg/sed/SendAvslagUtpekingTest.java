@@ -5,6 +5,7 @@ import java.util.Set;
 
 import io.getunleash.FakeUnleash;
 import no.nav.melosys.domain.Behandling;
+import no.nav.melosys.domain.Behandlingsresultat;
 import no.nav.melosys.domain.Saksopplysning;
 import no.nav.melosys.domain.SaksopplysningType;
 import no.nav.melosys.domain.dokument.medlemskap.Periode;
@@ -71,6 +72,7 @@ class SendAvslagUtpekingTest {
 
         when(sedDataBygger.lagUtkast(any(), any(), any())).thenReturn(new SedDataDto());
         when(behandlingService.hentBehandlingMedSaksopplysninger(1L)).thenReturn(behandling);
+        when(behandlingsresultatService.hentBehandlingsresultat(1L)).thenReturn(new Behandlingsresultat());
     }
 
     @Test
