@@ -26,7 +26,7 @@ import java.time.LocalDate
 private val log = KotlinLogging.logger { }
 
 @Component
-class OpprettArsavregning(
+class OpprettÅrsavregningBehandling(
     private val fagsakService: FagsakService,
     private val persondataService: PersondataService,
     private val trygdeavgiftService: TrygdeavgiftService,

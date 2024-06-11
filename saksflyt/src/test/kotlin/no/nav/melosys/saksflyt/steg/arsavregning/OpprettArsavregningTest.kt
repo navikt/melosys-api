@@ -59,11 +59,11 @@ class OpprettArsavregningTest {
     @MockK
     private lateinit var årsavregningService: ÅrsavregningService
 
-    private lateinit var opprettArsavregning: OpprettArsavregning
+    private lateinit var opprettÅrsavregningBehandling: OpprettÅrsavregningBehandling
 
     @BeforeEach
     fun setUp() {
-        opprettArsavregning = OpprettArsavregning(
+        opprettÅrsavregningBehandling = OpprettÅrsavregningBehandling(
             fagsakService,
             persondataService,
             trygdeavgiftService,
@@ -122,7 +122,7 @@ class OpprettArsavregningTest {
         every { behandslingsresultatService.hentBehandlingsresultat(årsavregningsBehandling.id) } returns behandlingsresultat
         every { årsavregningService.oppretteÅrsavregning(any(), any()) } returns Unit
 
-        opprettArsavregning.utfør(prosessinstans)
+        opprettÅrsavregningBehandling.utfør(prosessinstans)
 
 
         verify { årsavregningService.oppretteÅrsavregning(behandlingsresultat, 2023) }
@@ -142,7 +142,7 @@ class OpprettArsavregningTest {
 
 
         shouldThrow<IllegalStateException> {
-            opprettArsavregning.utfør(prosessinstans)
+            opprettÅrsavregningBehandling.utfør(prosessinstans)
         }.message.shouldBe("Fant ingen sak med trygdeavgift for aktør: $AKTØR_ID")
     }
 
@@ -166,7 +166,7 @@ class OpprettArsavregningTest {
         })
 
 
-        opprettArsavregning.utfør(prosessinstans)
+        opprettÅrsavregningBehandling.utfør(prosessinstans)
 
 
         verify { årsavregningService wasNot Called }
@@ -204,7 +204,7 @@ class OpprettArsavregningTest {
         every { behandlingService.lagre(capture(behandlingSlot)) } returns Unit
 
 
-        opprettArsavregning.utfør(prosessinstans)
+        opprettÅrsavregningBehandling.utfør(prosessinstans)
 
 
         verify { behandlingService.lagre(behandling) }
