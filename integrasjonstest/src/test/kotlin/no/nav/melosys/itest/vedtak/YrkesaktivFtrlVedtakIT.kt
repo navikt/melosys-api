@@ -37,11 +37,9 @@ import no.nav.melosys.integrasjon.trygdeavgift.dto.*
 import no.nav.melosys.itest.JournalfoeringBase
 import no.nav.melosys.melosysmock.medl.MedlRepo
 import no.nav.melosys.melosysmock.testdata.TestDataGenerator
-import no.nav.melosys.repository.AvklarteFaktaRepository
 import no.nav.melosys.repository.BehandlingRepository
 import no.nav.melosys.repository.BehandlingsresultatRepository
 import no.nav.melosys.repository.FagsakRepository
-import no.nav.melosys.saksflyt.ProsessinstansRepository
 import no.nav.melosys.saksflytapi.domain.ProsessType
 import no.nav.melosys.service.avgift.TrygdeavgiftsberegningService
 import no.nav.melosys.service.avgift.dto.InntektskildeRequest
@@ -91,9 +89,7 @@ class YrkesaktivFtrlVedtakIT(
     @Autowired private val trygdeavgiftsberegningService: TrygdeavgiftsberegningService,
     @Autowired @Qualifier("manglendeFakturabetalingMelding") private val manglendeFakturabetalingMeldingTemplate: KafkaTemplate<String, ManglendeFakturabetalingMelding>,
     @Autowired private val skatteHendelseMeldingKafkaTemplate: KafkaTemplate<String, Skattehendelse>,
-    @Autowired private val avklarteFaktaRepository: AvklarteFaktaRepository,
     @Autowired private val behandlingsResultRepository: BehandlingsresultatRepository,
-    @Autowired private val prosessinstansRepository: ProsessinstansRepository,
     @Autowired private val fakeUnleash: FakeUnleash
 ) : JournalfoeringBase(
     testDataGenerator, journalføringService, oppgaveService,
