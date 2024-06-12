@@ -46,11 +46,11 @@ internal class ÅrsavregningServiceTest {
     }
 
     @Test
-    fun `test beregnTotalTrygdeavgiftForPeriode beregner totalbeløp for 1 år`() {
+    fun `test beregner totalbeløp for 1 år`() {
         val fakturaseriePeriodeDto = FakturaseriePeriodeDto(
             enhetsprisPerManed = BigDecimal(100), startDato = LocalDate.now().minusYears(1), sluttDato = LocalDate.now(), beskrivelse = "test")
         val dto = BeregnTotalBeløpDto(listOf(fakturaseriePeriodeDto, fakturaseriePeriodeDto, fakturaseriePeriodeDto))
-        årsavregningService.beregnTotalTrygdeavgiftForPeriode(dto)
+        årsavregningService.beregnTotalbeløpForPeriode(dto)
 
         verify(exactly = 1) { faktureringskomponentenConsumer.hentTotalTrygdeavgiftForPeriode((eq(dto)), eq(SAKSBEHANDLER_IDENT)) }
     }
