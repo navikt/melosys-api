@@ -98,7 +98,7 @@ data class Oppgave(
     var ferdigstiltTidspunkt: LocalDateTime? = null,
     val fristFerdigstillelse: LocalDate? = null,
     val identer: Long? = null,
-    val journalpostId: String,
+    val journalpostId: String?,
     val journalpostkilde: String? = null,
     val mappeId: Int? = null,
     val oppgavetype: String? = null,

@@ -14,10 +14,10 @@ import no.nav.melosys.saksflytapi.domain.ProsessDataKey
 import no.nav.melosys.saksflytapi.domain.ProsessSteg
 import no.nav.melosys.saksflytapi.domain.Prosessinstans
 import no.nav.melosys.service.avgift.TrygdeavgiftMottakerService
+import no.nav.melosys.service.avgift.TrygdeavgiftService
 import no.nav.melosys.service.behandling.BehandlingService
 import no.nav.melosys.service.behandling.BehandlingsresultatService
 import no.nav.melosys.service.persondata.PersondataService
-import no.nav.melosys.service.sak.TrygdeavgiftOppsummeringService
 import org.springframework.stereotype.Component
 import java.time.ZoneId
 import java.time.format.DateTimeFormatter
@@ -31,7 +31,7 @@ class OpprettFakturaserie(
     private val faktureringskomponentenConsumer: FaktureringskomponentenConsumer,
     private val pdlService: PersondataService,
     private val trygdeavgiftMottakerService: TrygdeavgiftMottakerService,
-    private val trygdeavgiftOppsummeringService: TrygdeavgiftOppsummeringService,
+    private val trygdeavgiftService: TrygdeavgiftService,
 ) : StegBehandler {
 
     override fun inngangsSteg(): ProsessSteg {
@@ -86,7 +86,7 @@ class OpprettFakturaserie(
 
     private fun harOpprinneligBehandlingMedTrygdeavgift(behandling: Behandling): Boolean =
         behandling.opprinneligBehandling?.let {
-            trygdeavgiftOppsummeringService.harTrygdeavgiftOgBestiltFaktura(behandlingsresultatService.hentBehandlingsresultat(it.id))
+            trygdeavgiftService.harTrygdeavgiftOgBestiltFaktura(behandlingsresultatService.hentBehandlingsresultat(it.id))
         } ?: false
 
     private fun betalerNåKunTilSkatt(behandlingsresultat: Behandlingsresultat): Boolean {

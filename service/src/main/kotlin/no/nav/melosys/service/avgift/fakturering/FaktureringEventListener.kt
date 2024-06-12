@@ -7,9 +7,9 @@ import no.nav.melosys.domain.kodeverk.Fullmaktstype
 import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingsstatus
 import no.nav.melosys.saksflytapi.ProsessinstansService
 import no.nav.melosys.service.aktoer.AktoerHistorikkService
+import no.nav.melosys.service.avgift.TrygdeavgiftService
 import no.nav.melosys.service.behandling.BehandlingService
 import no.nav.melosys.service.behandling.BehandlingsresultatService
-import no.nav.melosys.service.sak.TrygdeavgiftOppsummeringService
 import org.springframework.context.event.EventListener
 import org.springframework.stereotype.Component
 import org.springframework.transaction.annotation.Transactional
@@ -19,7 +19,7 @@ class FaktureringEventListener(
     val behandlingService: BehandlingService,
     val behandlingsresultatService: BehandlingsresultatService,
     val aktoerHistorikkService: AktoerHistorikkService,
-    val trygdeavgiftOppsummeringService: TrygdeavgiftOppsummeringService,
+    val trygdeavgiftService: TrygdeavgiftService,
     val prosessinstansService: ProsessinstansService
 ) {
     @EventListener
@@ -43,7 +43,7 @@ class FaktureringEventListener(
 
         if (fullmektigForBetalingAvTrygdeavgiftBleEndret(
                 fullmektigForTrygdeavgift, gjeldendeFullmektigerNårBehandlingBleOpprettet
-            ) && trygdeavgiftOppsummeringService.harFagsakBehandlingerMedTrygdeavgift(fagsak.saksnummer)
+            ) && trygdeavgiftService.harFagsakBehandlingerMedTrygdeavgift(fagsak.saksnummer)
         ) {
             // Bestill prosess i stedet for å kalle faktureringskomponent direkte, for å få støtte for feilhåndtering og rekjøring
             prosessinstansService.opprettProsessinstansOppdaterFaktura(behandling)

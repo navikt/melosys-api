@@ -7,7 +7,6 @@ import io.mockk.junit5.MockKExtension
 import io.mockk.verify
 import no.nav.melosys.domain.Behandling
 import no.nav.melosys.domain.Behandlingsresultat
-import no.nav.melosys.domain.Fagsak
 import no.nav.melosys.domain.FagsakTestFactory
 import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingstyper
 import no.nav.melosys.integrasjon.faktureringskomponenten.FaktureringskomponentenConsumer
@@ -16,7 +15,6 @@ import no.nav.melosys.saksflyt.steg.fakturering.KansellerFakturaserie
 import no.nav.melosys.saksflytapi.domain.ProsessDataKey
 import no.nav.melosys.saksflytapi.domain.Prosessinstans
 import no.nav.melosys.service.behandling.BehandlingsresultatService
-import no.nav.melosys.service.sak.TrygdeavgiftOppsummeringService
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.extension.ExtendWith
 import java.time.Instant
