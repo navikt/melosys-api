@@ -28,7 +28,6 @@ public enum ProsessSteg {
     OPPRETT_ANMODNINGSPERIODESVAR("ANMODNINGSPERIODESVAR", "Oppretter svar for en anmodningsperiode"),
     OPPRETT_ANMODNINGSPERIODE_FRA_SED("OPPRETT_ANMODNINGSPERIODE_FRA_SED", "Oppretter anmodningsperiode fra SED"),
     OPPRETT_ARKIVSAK("OPPRETT_ARKIVSAK", "Oppretter arkivsak"),
-    OPPRETT_AVGIFTSOPPGAVE("OPPRETT_AVGIFTSOPPGAVE", "Oppretter en vurderingsoppgave for innregistrering i avgiftsystemet"),
     OPPRETT_FAKTURASERIE("OPPRETT_FAKTURASERIE", "Oppretter fakturaserie i faktureringskomponenten"),
     OPPRETT_MOTTATTEOPPLYSNINGER("OPPRETT_MOTTATTEOPPLYSNINGER", "Oppretter mottatteopplysninger"),
     OPPRETT_OG_JOURNALFØR_BREV("OPPRETT_BREV", "Opprett nytt brev"),
