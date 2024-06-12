@@ -62,7 +62,7 @@ class HentMuligeProduserbaredokumenterService(private val behandlingService: Beh
     }
 
     private fun getDefaultProduserbareDokumenter(): List<Produserbaredokumenter> =
-        if (unleash.isEnabled(ToggleName.MELOSYS_BREV_INNHENTING_INNTEKTOPPLYSNINGER))
+        if (unleash.isEnabled(ToggleName.MELOSYS_KONVENSJON_EFTA_LAND_OG_STORBRITANNIA))
             listOf(
                 Produserbaredokumenter.MANGELBREV_BRUKER,
                 Produserbaredokumenter.INNHENTING_AV_INNTEKTSOPPLYSNINGER,
