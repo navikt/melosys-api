@@ -1,11 +1,23 @@
 package no.nav.melosys.itest
 
+import org.junit.jupiter.api.AfterEach
 import org.springframework.test.context.DynamicPropertyRegistry
 import org.springframework.test.context.DynamicPropertySource
 import org.testcontainers.containers.OracleContainer
 import org.testcontainers.utility.DockerImageName
 
 open class OracleTestContainerBase {
+    private val dbCleanUpActions = mutableListOf<() -> Unit>()
+
+    protected fun addCleanUpAction(deleteAction: () -> Unit) {
+        dbCleanUpActions.add(deleteAction)
+    }
+
+    @AfterEach
+    fun oracleTestContainerBaseAfterEach() {
+        dbCleanUpActions.forEach { it() }
+    }
+
     companion object {
         var oracleContainer = OracleContainer(
             DockerImageName.parse("ghcr.io/navikt/melosys-legacy-avhengigheter/oracle-xe:18.4.0-slim")

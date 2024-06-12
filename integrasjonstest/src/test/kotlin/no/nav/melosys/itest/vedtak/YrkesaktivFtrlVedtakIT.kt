@@ -9,7 +9,6 @@ import com.github.tomakehurst.wiremock.extension.ResponseTransformerV2
 import com.github.tomakehurst.wiremock.http.Response
 import com.github.tomakehurst.wiremock.stubbing.ServeEvent
 import io.getunleash.FakeUnleash
-import io.getunleash.Unleash
 import io.github.jaspeen.ulid.ULID
 import io.kotest.assertions.withClue
 import io.kotest.matchers.collections.shouldHaveSize
@@ -289,13 +288,26 @@ class YrkesaktivFtrlVedtakIT(
     @Test
     fun `oppretter prosess og påfølgende årsavregningsbehandling`() {
         fakeUnleash.enable(ToggleName.MELOSYS_SKATTEHENDELSE_CONSUMER)
-        avklarteFaktaRepository.deleteAll()
-        behandlingsResultRepository.deleteAll()
-        prosessinstansRepository.deleteAll()
-        behandlingRepository.deleteAll()
-        fagsakRepository.deleteAll()
 
         val saksnummer = lagFørstegangsBehandling(Skatteplikttype.IKKE_SKATTEPLIKTIG, false)
+        addCleanUpAction {
+            // TODO: flytt dette til egen util klasse. Fikser i egen pr.
+            fagsakRepository.findBySaksnummer(saksnummer).shouldBePresent().also { fagsak ->
+                fagsak.behandlinger.forEach { behandling ->
+                    avklarteFaktaRepository.findByBehandlingsresultatId(behandling.id).forEach {
+                        avklarteFaktaRepository.delete(it)
+                    }
+                    behandlingsResultRepository.findById(behandling.id).shouldBePresent().also {
+                        behandlingsResultRepository.delete(it)
+                    }
+                    prosessinstansRepository.findAll()
+                        .filter { it?.behandling?.id == behandling.id }
+                        .forEach { prosessinstansRepository.delete(it) }
+                    behandlingRepository.delete(behandling)
+                }
+                fagsakRepository.delete(fagsak)
+            }
+        }
 
         val skattehendelse = Skattehendelse("2023", "30056928150")
 
