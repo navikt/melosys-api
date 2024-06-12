@@ -8,6 +8,7 @@ import com.github.tomakehurst.wiremock.client.WireMock
 import com.github.tomakehurst.wiremock.extension.ResponseTransformerV2
 import com.github.tomakehurst.wiremock.http.Response
 import com.github.tomakehurst.wiremock.stubbing.ServeEvent
+import io.getunleash.FakeUnleash
 import io.github.jaspeen.ulid.ULID
 import io.kotest.assertions.withClue
 import io.kotest.matchers.collections.shouldHaveSize
@@ -22,6 +23,7 @@ import no.nav.melosys.domain.avgift.Inntektsperiode
 import no.nav.melosys.domain.avgift.Penger
 import no.nav.melosys.domain.avgift.SkatteforholdTilNorge
 import no.nav.melosys.domain.avgift.Trygdeavgiftsperiode
+import no.nav.melosys.domain.avgift.aarsavregning.Skattehendelse
 import no.nav.melosys.domain.kodeverk.*
 import no.nav.melosys.domain.kodeverk.behandlinger.*
 import no.nav.melosys.domain.manglendebetaling.Betalingsstatus
@@ -29,13 +31,17 @@ import no.nav.melosys.domain.manglendebetaling.ManglendeFakturabetalingMelding
 import no.nav.melosys.domain.mottatteopplysninger.SøknadNorgeEllerUtenforEØS
 import no.nav.melosys.domain.mottatteopplysninger.data.Periode
 import no.nav.melosys.domain.mottatteopplysninger.data.Soeknadsland
+import no.nav.melosys.featuretoggle.ToggleName
 import no.nav.melosys.integrasjon.faktureringskomponenten.NyFakturaserieResponseDto
 import no.nav.melosys.integrasjon.trygdeavgift.dto.*
 import no.nav.melosys.itest.JournalfoeringBase
 import no.nav.melosys.melosysmock.medl.MedlRepo
 import no.nav.melosys.melosysmock.testdata.TestDataGenerator
+import no.nav.melosys.repository.AvklarteFaktaRepository
 import no.nav.melosys.repository.BehandlingRepository
+import no.nav.melosys.repository.BehandlingsresultatRepository
 import no.nav.melosys.repository.FagsakRepository
+import no.nav.melosys.saksflyt.ProsessinstansRepository
 import no.nav.melosys.saksflytapi.domain.ProsessType
 import no.nav.melosys.service.avgift.TrygdeavgiftsberegningService
 import no.nav.melosys.service.avgift.dto.InntektskildeRequest
@@ -84,6 +90,11 @@ class YrkesaktivFtrlVedtakIT(
     @Autowired private val opprettBehandlingForSak: OpprettBehandlingForSak,
     @Autowired private val trygdeavgiftsberegningService: TrygdeavgiftsberegningService,
     @Autowired @Qualifier("manglendeFakturabetalingMelding") private val manglendeFakturabetalingMeldingTemplate: KafkaTemplate<String, ManglendeFakturabetalingMelding>,
+    @Autowired private val skatteHendelseMeldingKafkaTemplate: KafkaTemplate<String, Skattehendelse>,
+    @Autowired private val avklarteFaktaRepository: AvklarteFaktaRepository,
+    @Autowired private val behandlingsResultRepository: BehandlingsresultatRepository,
+    @Autowired private val prosessinstansRepository: ProsessinstansRepository,
+    @Autowired private val fakeUnleash: FakeUnleash
 ) : JournalfoeringBase(
     testDataGenerator, journalføringService, oppgaveService,
     DynamiskTrygdeavgiftsberegningTransformer()
@@ -272,6 +283,38 @@ class YrkesaktivFtrlVedtakIT(
 
         mockServer.verify(1, WireMock.postRequestedFor(WireMock.urlEqualTo("/fakturaserier")))
         mockServer.verify(1, WireMock.deleteRequestedFor(WireMock.urlEqualTo("/fakturaserier/$fakturaserieReferanse")))
+    }
+
+    @Test
+    fun `oppretter prosess og påfølgende årsavregningsbehandling`() {
+        fakeUnleash.enable(ToggleName.MELOSYS_SKATTEHENDELSE_CONSUMER)
+
+        val saksnummer = lagFørstegangsBehandling(Skatteplikttype.IKKE_SKATTEPLIKTIG, false)
+
+        val skattehendelse = Skattehendelse("2023", "30056928150")
+
+        executeAndWait(
+            waitForprosessType = ProsessType.OPPRETT_NY_BEHANDLING_AARSAVREGNING,
+            count = 5
+        ) {
+            skatteHendelseMeldingKafkaTemplate.send("teammelosys.skattehendelser.v1-local", skattehendelse)
+        }
+
+        fagsakRepository.findBySaksnummer(saksnummer)
+            .shouldBePresent().run {
+                behandlinger.shouldHaveSize(2)
+                    .firstOrNull { it.type == Behandlingstyper.ÅRSAVREGNING }
+                    .shouldNotBeNull()
+                    .run {
+                        behandlingsResultRepository.findById(id)
+                            .shouldBePresent()
+                            .aarsavregning
+                            .shouldNotBeNull()
+                            .run {
+                                aar shouldBe 2023
+                            }
+                    }
+            }
     }
 
     private fun lagOpprettSakDto(): OpprettSakDto {
