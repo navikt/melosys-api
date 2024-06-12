@@ -8,14 +8,15 @@ import org.springframework.test.context.DynamicPropertySource
 import org.testcontainers.containers.OracleContainer
 import org.testcontainers.utility.DockerImageName
 
+
 open class OracleTestContainerBase {
     private val dbCleanUpActions = mutableListOf<() -> Unit>()
 
     @Autowired
-    private lateinit var dbCleanup: DBCleanup
+    var dbCleanup: DBCleanup? = null
 
     protected fun addCleanUpAction(deleteAction: DBCleanup.() -> Unit) {
-        dbCleanUpActions.add { dbCleanup.deleteAction() }
+        dbCleanUpActions.add { dbCleanup?.deleteAction() }
     }
 
     @AfterEach
