@@ -23,7 +23,7 @@ class ÅrsavregningService(
     private val faktureringskomponentenConsumer: FaktureringskomponentenConsumer,
     private val aarsavregningRepository: AarsavregningRepository,
 ) {
-    fun beregnTotalTrygdeavgiftForPeriode(beregnTotalBeløpDto: BeregnTotalBeløpDto): BigDecimal {
+    fun beregnTotalbeløpForPeriode(beregnTotalBeløpDto: BeregnTotalBeløpDto): BigDecimal {
         val saksbehandlerIdent = SubjectHandler.getInstance().getUserID()
         return faktureringskomponentenConsumer.hentTotalTrygdeavgiftForPeriode(beregnTotalBeløpDto, saksbehandlerIdent)
     }
