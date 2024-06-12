@@ -40,6 +40,19 @@ class ÅrsavregningTjeneste(
         )
     }
 
+    @PostMapping("/opprettAarsavregning")
+    fun opprettNyÅrsavregning(@RequestBody årsavregningRequest: LagÅrsavregningRequest): ResponseEntity<Long> {
+        // TODO opprett ny årsavregning via årsavregningService
+
+        val avregningId = 1L
+        return ResponseEntity.ok(avregningId)
+    }
+
+    data class LagÅrsavregningRequest(
+        val aar: Int,
+        val behandlingsId: Long
+    )
+
     private fun hentTidligereOpplysninger(årsavregning: Årsavregning): TidligereOpplysninger? {
         return if (årsavregning.tidligereGrunnlag == null) null else
             TidligereOpplysninger(

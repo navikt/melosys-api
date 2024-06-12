@@ -50,6 +50,14 @@ class ÅrsavregningService(
         )
     }
 
+    fun opprettNyÅrsavregning(behandlingsId: Long, aar: Int): Long {
+        val årsavreging = Aarsavregning()
+        årsavreging.aar = aar
+        årsavreging.id = behandlingsId
+
+        return aarsavregningRepository.save(årsavreging).id
+    }
+
     private fun harFlereAarsavregningerPåsammeAarPåFagsak(behandlingsId: Long, aar: Int): Boolean {
         val behandling = behandlingRepository.findById(behandlingsId).orElseThrow { IkkeFunnetException("Fant ikke behandling $behandlingsId") }
         val aarsavregningsBehandlinger = behandling.fagsak.behandlinger.filter { it.type == Behandlingstyper.ÅRSAVREGNING }
