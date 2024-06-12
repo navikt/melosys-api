@@ -155,7 +155,12 @@ class YrkesaktivFtrlVedtakIT(
 
     @Test
     fun `yrkesaktiv vedtak - FTRL - skal hverken opprette fakturaserier eller kansellere dersom det ikke eksisterer førstegangsbehandling`() {
-        lagFørstegangsBehandling(Skatteplikttype.SKATTEPLIKTIG, true)
+        lagFørstegangsBehandling(Skatteplikttype.SKATTEPLIKTIG, true).also {
+            addCleanUpAction {
+                slettSakEtterTesst(it)
+            }
+        }
+
         mockServer.verify(0, WireMock.deleteRequestedFor(WireMock.urlEqualTo("/fakturaserier/$fakturaserieReferanse")))
         mockServer.verify(0, WireMock.postRequestedFor(WireMock.urlEqualTo("/fakturaserier")))
     }
@@ -163,6 +168,10 @@ class YrkesaktivFtrlVedtakIT(
     @Test
     fun `Håndtere manglende innbetaling i sak som allerede har en åpen behandling`() {
         val saksnummer = lagFørstegangsBehandling(Skatteplikttype.IKKE_SKATTEPLIKTIG, false)
+        addCleanUpAction {
+            slettSakEtterTesst(saksnummer)
+        }
+
 
         val behandlingsId = executeAndWait(waitForprosessType = ProsessType.OPPRETT_REPLIKERT_BEHANDLING_FOR_SAK) {
             opprettBehandlingForSak.opprettBehandling(
@@ -220,6 +229,9 @@ class YrkesaktivFtrlVedtakIT(
     @Test
     fun `yrkesaktiv vedtak - FTRL - opprett fakturaserie for førstegangsbehandling og kanseller fakturaserie i ny vurdering`() {
         val saksnummer = lagFørstegangsBehandling(Skatteplikttype.IKKE_SKATTEPLIKTIG, false)
+        addCleanUpAction {
+            slettSakEtterTesst(saksnummer)
+        }
 
         val behandlingsId = executeAndWait(waitForprosessType = ProsessType.OPPRETT_REPLIKERT_BEHANDLING_FOR_SAK) {
             opprettBehandlingForSak.opprettBehandling(
@@ -292,21 +304,7 @@ class YrkesaktivFtrlVedtakIT(
         val saksnummer = lagFørstegangsBehandling(Skatteplikttype.IKKE_SKATTEPLIKTIG, false)
         addCleanUpAction {
             // TODO: flytt dette til egen util klasse. Fikser i egen pr.
-            fagsakRepository.findBySaksnummer(saksnummer).shouldBePresent().also { fagsak ->
-                fagsak.behandlinger.forEach { behandling ->
-                    avklarteFaktaRepository.findByBehandlingsresultatId(behandling.id).forEach {
-                        avklarteFaktaRepository.delete(it)
-                    }
-                    behandlingsResultRepository.findById(behandling.id).shouldBePresent().also {
-                        behandlingsResultRepository.delete(it)
-                    }
-                    prosessinstansRepository.findAll()
-                        .filter { it?.behandling?.id == behandling.id }
-                        .forEach { prosessinstansRepository.delete(it) }
-                    behandlingRepository.delete(behandling)
-                }
-                fagsakRepository.delete(fagsak)
-            }
+            slettSakEtterTesst(saksnummer)
         }
 
         val skattehendelse = Skattehendelse("2023", "30056928150")
@@ -333,6 +331,24 @@ class YrkesaktivFtrlVedtakIT(
                             }
                     }
             }
+    }
+
+    private fun slettSakEtterTesst(saksnummer: String) {
+        fagsakRepository.findBySaksnummer(saksnummer).shouldBePresent().also { fagsak ->
+            fagsak.behandlinger.forEach { behandling ->
+                avklarteFaktaRepository.findByBehandlingsresultatId(behandling.id).forEach {
+                    avklarteFaktaRepository.delete(it)
+                }
+                behandlingsResultRepository.findById(behandling.id).shouldBePresent().also {
+                    behandlingsResultRepository.delete(it)
+                }
+                prosessinstansRepository.findAll()
+                    .filter { it?.behandling?.id == behandling.id }
+                    .forEach { prosessinstansRepository.delete(it) }
+                behandlingRepository.delete(behandling)
+            }
+            fagsakRepository.delete(fagsak)
+        }
     }
 
     private fun lagOpprettSakDto(): OpprettSakDto {
