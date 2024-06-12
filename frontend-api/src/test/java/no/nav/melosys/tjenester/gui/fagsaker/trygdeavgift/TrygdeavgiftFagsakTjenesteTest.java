@@ -1,6 +1,6 @@
 package no.nav.melosys.tjenester.gui.fagsaker.trygdeavgift;
 
-import no.nav.melosys.service.sak.TrygdeavgiftOppsummeringService;
+import no.nav.melosys.service.avgift.TrygdeavgiftService;
 import no.nav.melosys.service.tilgang.Aksesskontroll;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -18,7 +18,7 @@ class TrygdeavgiftFagsakTjenesteTest {
     @MockBean
     private static Aksesskontroll aksesskontroll;
     @MockBean
-    private static TrygdeavgiftOppsummeringService trygdeavgiftOppsummeringService;
+    private static TrygdeavgiftService trygdeavgiftService;
     @Autowired
     private MockMvc mockMvc;
 
@@ -29,6 +29,6 @@ class TrygdeavgiftFagsakTjenesteTest {
             .andExpect(status().isOk());
 
         verify(aksesskontroll).autoriserSakstilgang("123");
-        verify(trygdeavgiftOppsummeringService).harFagsakBehandlingerMedTrygdeavgift("123");
+        verify(trygdeavgiftService).harFagsakBehandlingerMedTrygdeavgift("123");
     }
 }

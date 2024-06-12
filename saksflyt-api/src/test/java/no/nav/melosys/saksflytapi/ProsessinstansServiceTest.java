@@ -778,7 +778,7 @@ class ProsessinstansServiceTest {
         verify(prosessinstansRepo, times(1)).save(piCaptor.capture());
         assertThat(piCaptor.getValue()).isNotNull();
         assertThat(piCaptor.getValue().getData(ProsessDataKey.IDENTIFIKATOR)).isEqualTo("456789");
-        assertThat(piCaptor.getValue().getData(ProsessDataKey.GJELDER_PERIODE)).isEqualTo("2023");
+        assertThat(piCaptor.getValue().getData(ProsessDataKey.GJELDER_ÅR)).isEqualTo("2023");
     }
 
     private MelosysEessiMelding lagMelosysEessiMelding() {

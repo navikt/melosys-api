@@ -37,9 +37,9 @@ class JournalfoeringBase(
     protected val mockServer: WireMockServer =
         WireMockServer(
             if (extensionForWireMock == null) WireMockConfiguration.options().port(8094) else
-            WireMockConfiguration
-                .options().extensions(extensionForWireMock)
-                .port(8094)
+                WireMockConfiguration
+                    .options().extensions(extensionForWireMock)
+                    .port(8094)
         )
 
     private val processUUID = UUID.randomUUID()
@@ -109,18 +109,20 @@ class JournalfoeringBase(
         jfrOppgave: Oppgave,
         journalfoeringOpprettDto: JournalfoeringOpprettDto
     ): JournalfoeringOpprettDto {
-        val hentJournalpost = journalføringService.hentJournalpost(jfrOppgave.journalpostId)
-        return lagJournalføringDto(jfrOppgave, hentJournalpost.hoveddokument, journalfoeringOpprettDto)
+
+        val hentJournalpost = if (jfrOppgave.journalpostId != null) journalføringService.hentJournalpost(jfrOppgave.journalpostId) else null
+        return lagJournalføringDto(jfrOppgave, hentJournalpost?.hoveddokument, journalfoeringOpprettDto)
     }
 
     private fun lagJournalføringDto(
-        oppgave: Oppgave, dokument: ArkivDokument,
+        oppgave: Oppgave,
+        dokument: ArkivDokument?,
         journalfoeringOpprettDto: JournalfoeringOpprettDto
     ): JournalfoeringOpprettDto {
         return journalfoeringOpprettDto.apply {
             this.journalpostID = oppgave.journalpostId
             oppgaveID = oppgave.id.toString()
-            hoveddokument = DokumentDto(dokument.dokumentId, dokument.tittel).apply {
+            hoveddokument = DokumentDto(dokument?.dokumentId, dokument?.tittel).apply {
                 logiskeVedlegg = emptyList()
             }
         }.apply {
@@ -158,13 +160,13 @@ class JournalfoeringBase(
         journalfoeringTilordneDto: JournalfoeringTilordneDto = defaultJournalfoeringTilordneDto()
     ): JournalfoeringTilordneDto {
         val jfrOppgave: Oppgave = lagJfrOppgave()
-        val hentJournalpost = journalføringService.hentJournalpost(jfrOppgave.journalpostId)
+        val hentJournalpost = if (jfrOppgave.journalpostId != null) journalføringService.hentJournalpost(jfrOppgave.journalpostId) else null
         return journalfoeringTilordneDto
             .apply {
                 this.saksnummer = saksnummer
                 journalpostID = jfrOppgave.journalpostId
                 oppgaveID = jfrOppgave.id.toString()
-                hoveddokument = DokumentDto(hentJournalpost.hoveddokument.dokumentId, hentJournalpost.hoveddokument.tittel).apply {
+                hoveddokument = DokumentDto(hentJournalpost?.hoveddokument?.dokumentId, hentJournalpost?.hoveddokument?.tittel).apply {
                     logiskeVedlegg = emptyList()
                 }
             }.apply {

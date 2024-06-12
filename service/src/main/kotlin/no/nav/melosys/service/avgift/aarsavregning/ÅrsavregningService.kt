@@ -23,7 +23,7 @@ class ÅrsavregningService(
     private val faktureringskomponentenConsumer: FaktureringskomponentenConsumer,
     private val aarsavregningRepository: AarsavregningRepository,
 ) {
-    fun beregnTotalTrygdeavgiftForPeriode(beregnTotalBeløpDto: BeregnTotalBeløpDto): BigDecimal {
+    fun beregnTotalbeløpForPeriode(beregnTotalBeløpDto: BeregnTotalBeløpDto): BigDecimal {
         val saksbehandlerIdent = SubjectHandler.getInstance().getUserID()
         return faktureringskomponentenConsumer.hentTotalTrygdeavgiftForPeriode(beregnTotalBeløpDto, saksbehandlerIdent)
     }
@@ -42,6 +42,17 @@ class ÅrsavregningService(
             nyttTotalbeloep = aarsavregning.nyttTotalbeloep,
             tilFaktureringBeloep = aarsavregning.tilFaktureringBeloep
         )
+    }
+
+    @Transactional
+    fun oppretteÅrsavregning(behandlingsresultat: Behandlingsresultat, gjelderPeriode: Int) {
+        Aarsavregning().apply {
+            aar = gjelderPeriode
+            behandlingsresultat.aarsavregning = this
+            this.behandlingsresultat = behandlingsresultat
+        }.also {
+            aarsavregningRepository.save(it)
+        }
     }
 
     private fun hentTidligereTrygdeavgiftsgrunnlag(år: Int, behandlingsresultat: Behandlingsresultat?): Trygdeavgiftsgrunnlag? {
