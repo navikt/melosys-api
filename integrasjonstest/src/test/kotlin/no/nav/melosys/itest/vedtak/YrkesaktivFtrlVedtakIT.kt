@@ -157,7 +157,7 @@ class YrkesaktivFtrlVedtakIT(
     fun `yrkesaktiv vedtak - FTRL - skal hverken opprette fakturaserier eller kansellere dersom det ikke eksisterer førstegangsbehandling`() {
         lagFørstegangsBehandling(Skatteplikttype.SKATTEPLIKTIG, true).also {
             addCleanUpAction {
-                slettSakEtterTesst(it)
+                slettSakEtterTest(it)
             }
         }
 
@@ -169,7 +169,7 @@ class YrkesaktivFtrlVedtakIT(
     fun `Håndtere manglende innbetaling i sak som allerede har en åpen behandling`() {
         val saksnummer = lagFørstegangsBehandling(Skatteplikttype.IKKE_SKATTEPLIKTIG, false)
         addCleanUpAction {
-            slettSakEtterTesst(saksnummer)
+            slettSakEtterTest(saksnummer)
         }
 
 
@@ -230,7 +230,7 @@ class YrkesaktivFtrlVedtakIT(
     fun `yrkesaktiv vedtak - FTRL - opprett fakturaserie for førstegangsbehandling og kanseller fakturaserie i ny vurdering`() {
         val saksnummer = lagFørstegangsBehandling(Skatteplikttype.IKKE_SKATTEPLIKTIG, false)
         addCleanUpAction {
-            slettSakEtterTesst(saksnummer)
+            slettSakEtterTest(saksnummer)
         }
 
         val behandlingsId = executeAndWait(waitForprosessType = ProsessType.OPPRETT_REPLIKERT_BEHANDLING_FOR_SAK) {
@@ -304,7 +304,7 @@ class YrkesaktivFtrlVedtakIT(
         val saksnummer = lagFørstegangsBehandling(Skatteplikttype.IKKE_SKATTEPLIKTIG, false)
         addCleanUpAction {
             // TODO: flytt dette til egen util klasse. Fikser i egen pr.
-            slettSakEtterTesst(saksnummer)
+            slettSakEtterTest(saksnummer)
         }
 
         val skattehendelse = Skattehendelse("2023", "30056928150")
@@ -333,7 +333,7 @@ class YrkesaktivFtrlVedtakIT(
             }
     }
 
-    private fun slettSakEtterTesst(saksnummer: String) {
+    private fun slettSakEtterTest(saksnummer: String) {
         fagsakRepository.findBySaksnummer(saksnummer).shouldBePresent().also { fagsak ->
             fagsak.behandlinger.forEach { behandling ->
                 avklarteFaktaRepository.findByBehandlingsresultatId(behandling.id).forEach {
