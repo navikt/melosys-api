@@ -22,12 +22,20 @@ import no.nav.melosys.domain.person.adresse.Kontaktadresse;
 import no.nav.melosys.domain.person.adresse.Oppholdsadresse;
 import no.nav.melosys.domain.util.IsoLandkodeKonverterer;
 import no.nav.melosys.exception.TekniskException;
+import no.nav.melosys.service.brev.felles.LovvalgsbestemmelseKodeMapper;
+import no.nav.melosys.service.brev.felles.TilleggsbestemmelseKodeMapper;
 import no.nav.melosys.service.dokument.brev.BrevDataA1;
 import no.nav.melosys.service.dokument.brev.mapper.arbeidssted.Arbeidssted;
 import no.nav.melosys.service.dokument.brev.mapper.arbeidssted.IkkeFysiskArbeidssted;
 import no.nav.melosys.service.dokument.brev.mapper.felles.KonvEftaStorbritanniaLovvalgbestemmelser;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.text.WordUtils;
+
+import javax.xml.datatype.DatatypeConfigurationException;
+import java.time.Instant;
+import java.util.*;
+import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
 import static no.nav.melosys.service.dokument.brev.BrevDataUtils.lagPersonnavn;
 import static no.nav.melosys.service.dokument.brev.mapper.felles.BrevMapperUtils.convertToXMLGregorianCalendarRemoveTimezone;
@@ -132,13 +140,13 @@ class A1Mapper {
         brevPeriode.setLovvalgsLand(lovvalgsperiode.getLovvalgsland().getKode());
         Boolean erStorbritannia = lovvalgsperiode.getBestemmelse().name().startsWith("KONV_EFTA");
 
-        brevPeriode.setLovvalgsbestemmelse(LovvalgsbestemmelseKode.fromValue(
-            erStorbritannia ? KonvEftaStorbritanniaLovvalgbestemmelser.GB_KONV_LOVVALGBESTEMMELSE_MAP.get(lovvalgsperiode.getBestemmelse()).getKode() : lovvalgsperiode.getBestemmelse().getKode())
+        brevPeriode.setLovvalgsbestemmelse(LovvalgsbestemmelseKodeMapper.map(
+            erStorbritannia ? KonvEftaStorbritanniaLovvalgbestemmelser.GB_KONV_LOVVALGBESTEMMELSE_MAP.get(lovvalgsperiode.getBestemmelse()) : lovvalgsperiode.getBestemmelse())
         );
 
         if (lovvalgsperiode.getTilleggsbestemmelse() != null) {
-            brevPeriode.setTilleggsbestemmelse(TilleggsbestemmelseKode.fromValue(
-                erStorbritannia ? KonvEftaStorbritanniaLovvalgbestemmelser.GB_KONV_TILLEGGBESTEMMELSE_MAP.get(lovvalgsperiode.getTilleggsbestemmelse()).getKode() : lovvalgsperiode.getTilleggsbestemmelse().getKode())
+            brevPeriode.setTilleggsbestemmelse(TilleggsbestemmelseKodeMapper.map(
+                erStorbritannia ? KonvEftaStorbritanniaLovvalgbestemmelser.GB_KONV_TILLEGGBESTEMMELSE_MAP.get(lovvalgsperiode.getTilleggsbestemmelse()) : lovvalgsperiode.getTilleggsbestemmelse())
             );
         }
 

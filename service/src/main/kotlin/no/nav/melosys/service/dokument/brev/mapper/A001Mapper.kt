@@ -1,8 +1,9 @@
 package no.nav.melosys.service.dokument.brev.mapper
 
 import no.nav.dok.melosysbrev._000115.*
-import no.nav.dok.melosysbrev._000115.BostedsadresseType
-import no.nav.dok.melosysbrev.felles.melosys_felles.*
+import no.nav.dok.melosysbrev.felles.melosys_felles.KjoennKode
+import no.nav.dok.melosysbrev.felles.melosys_felles.YrkesaktivitetsKode
+import no.nav.dok.melosysbrev.felles.melosys_felles.YrkesgruppeKode
 import no.nav.melosys.domain.Anmodningsperiode
 import no.nav.melosys.domain.Lovvalgsperiode
 import no.nav.melosys.domain.UtenlandskMyndighet
@@ -10,15 +11,12 @@ import no.nav.melosys.domain.adresse.Adresse
 import no.nav.melosys.domain.adresse.StrukturertAdresse
 import no.nav.melosys.domain.avklartefakta.AvklartVirksomhet
 import no.nav.melosys.domain.kodeverk.Landkoder
-import no.nav.melosys.domain.kodeverk.LovvalgBestemmelse
-import no.nav.melosys.domain.kodeverk.lovvalgsbestemmelser.Lovvalgbestemmelser_883_2004
-import no.nav.melosys.domain.kodeverk.lovvalgsbestemmelser.Lovvalgbestemmelser_konv_efta_storbritannia
-import no.nav.melosys.domain.kodeverk.lovvalgsbestemmelser.Tilleggsbestemmelser_883_2004
-import no.nav.melosys.domain.kodeverk.lovvalgsbestemmelser.Tilleggsbestemmelser_konv_efta_storbritannia
 import no.nav.melosys.domain.person.Persondata
 import no.nav.melosys.domain.util.IsoLandkodeKonverterer
 import no.nav.melosys.exception.FunksjonellException
 import no.nav.melosys.exception.TekniskException
+import no.nav.melosys.service.brev.felles.LovvalgsbestemmelseKodeMapper
+import no.nav.melosys.service.brev.felles.TilleggsbestemmelseKodeMapper
 import no.nav.melosys.service.dokument.brev.BrevDataA001
 import no.nav.melosys.service.dokument.brev.BrevDataUtils
 import no.nav.melosys.service.dokument.brev.mapper.arbeidssted.Arbeidssted
@@ -61,11 +59,11 @@ internal class A001Mapper {
 
         // Alle lovvalgsperiodene må ha samme landkode
         val anmodningsperiode = brevData.anmodningsperioder.first()
-        seda001.lovvalgsbestemmelse = mapLovvalgsbestemmelse(anmodningsperiode.unntakFraBestemmelse)
+        seda001.lovvalgsbestemmelse = LovvalgsbestemmelseKodeMapper.map(anmodningsperiode.unntakFraBestemmelse)
         seda001.lovvalgsLand = hentIso3Landkode(anmodningsperiode.lovvalgsland.kode) // Alltid Norge
 
         anmodningsperiode.tilleggsbestemmelse?.let {
-            seda001.tilleggsbestemmelse = TilleggsbestemmelseKode.fromValue(anmodningsperiode.tilleggsbestemmelse.kode)
+            seda001.tilleggsbestemmelse = TilleggsbestemmelseKodeMapper.map(anmodningsperiode.tilleggsbestemmelse)
         }
 
         // Mangler implementasjon i oppgavene. Lev1 støtter ikke purring
@@ -94,7 +92,7 @@ internal class A001Mapper {
     }
 
     private fun mapYtterligereInformasjon(brevData: BrevDataA001): String? {
-        if (brevData.anmodningsperioder.first().unntakFraBestemmelse in GB_KONV_BESTEMMELSER) {
+        if (brevData.anmodningsperioder.first().unntakFraBestemmelse in LovvalgsbestemmelseKodeMapper.GB_KONV_BESTEMMELSER) {
             val tekstGBKonv = "Issued under the EEA EFTA Convention."
             return if (brevData.ytterligereInformasjon == null) tekstGBKonv else tekstGBKonv + "\n" + brevData.ytterligereInformasjon
         }
@@ -111,7 +109,7 @@ internal class A001Mapper {
             } catch (e: DatatypeConfigurationException) {
                 throw TekniskException("Feil ved konvertering av dato for tidligere lovvalgsperiode", e)
             }
-            periode.lovvalgsbestemmelse = LovvalgsbestemmelseKode.fromValue(lovvalgsperiode.bestemmelse.kode) // TODO
+            periode.lovvalgsbestemmelse = LovvalgsbestemmelseKodeMapper.map(lovvalgsperiode.bestemmelse)
             tidligereLovvalgsperiodeListeType.tidligereLovvalgsperiode.add(periode)
         }
         return tidligereLovvalgsperiodeListeType
@@ -302,43 +300,5 @@ internal class A001Mapper {
         //A001 krever ISO-3
         private fun hentIso3Landkode(landkode: String): String =
             if (landkode.length == 2) IsoLandkodeKonverterer.tilIso3(landkode) else landkode
-
-        private val GB_KONV_BESTEMMELSER: List<LovvalgBestemmelse> =
-            listOf(*Lovvalgbestemmelser_konv_efta_storbritannia.values(), *Tilleggsbestemmelser_konv_efta_storbritannia.values())
-
-        private fun mapLovvalgsbestemmelse(unntakFraBestemmelse: LovvalgBestemmelse): LovvalgsbestemmelseKode {
-            if (unntakFraBestemmelse !in GB_KONV_BESTEMMELSER) {
-                return LovvalgsbestemmelseKode.fromValue(unntakFraBestemmelse.kode)
-            }
-            val eøsBestemmelseForGBKonv: LovvalgBestemmelse = when (unntakFraBestemmelse) {
-                Lovvalgbestemmelser_konv_efta_storbritannia.KONV_EFTA_STORBRITANNIA_ART13_3A -> Lovvalgbestemmelser_883_2004.FO_883_2004_ART11_3A
-                Lovvalgbestemmelser_konv_efta_storbritannia.KONV_EFTA_STORBRITANNIA_ART13_3B -> Lovvalgbestemmelser_883_2004.FO_883_2004_ART11_3B
-                Lovvalgbestemmelser_konv_efta_storbritannia.KONV_EFTA_STORBRITANNIA_ART13_3C -> Lovvalgbestemmelser_883_2004.FO_883_2004_ART11_3D
-                Lovvalgbestemmelser_konv_efta_storbritannia.KONV_EFTA_STORBRITANNIA_ART13_3D -> Lovvalgbestemmelser_883_2004.FO_883_2004_ART11_3E
-                Lovvalgbestemmelser_konv_efta_storbritannia.KONV_EFTA_STORBRITANNIA_ART13_4 -> Lovvalgbestemmelser_883_2004.FO_883_2004_ART11_4
-                Lovvalgbestemmelser_konv_efta_storbritannia.KONV_EFTA_STORBRITANNIA_ART14_1, Lovvalgbestemmelser_konv_efta_storbritannia.KONV_EFTA_STORBRITANNIA_ART16_1 -> Lovvalgbestemmelser_883_2004.FO_883_2004_ART12_1
-                Lovvalgbestemmelser_konv_efta_storbritannia.KONV_EFTA_STORBRITANNIA_ART14_2, Lovvalgbestemmelser_konv_efta_storbritannia.KONV_EFTA_STORBRITANNIA_ART16_3 -> Lovvalgbestemmelser_883_2004.FO_883_2004_ART12_2
-                Lovvalgbestemmelser_konv_efta_storbritannia.KONV_EFTA_STORBRITANNIA_ART15_1A -> Lovvalgbestemmelser_883_2004.FO_883_2004_ART13_1A
-                Lovvalgbestemmelser_konv_efta_storbritannia.KONV_EFTA_STORBRITANNIA_ART15_1B1 -> Lovvalgbestemmelser_883_2004.FO_883_2004_ART13_1B1
-                Lovvalgbestemmelser_konv_efta_storbritannia.KONV_EFTA_STORBRITANNIA_ART15_1_B2 -> Lovvalgbestemmelser_883_2004.FO_883_2004_ART13_1B2
-                Lovvalgbestemmelser_konv_efta_storbritannia.KONV_EFTA_STORBRITANNIA_ART15_1_B3 -> Lovvalgbestemmelser_883_2004.FO_883_2004_ART13_1B3
-                Lovvalgbestemmelser_konv_efta_storbritannia.KONV_EFTA_STORBRITANNIA_ART15_1_B4 -> Lovvalgbestemmelser_883_2004.FO_883_2004_ART13_1B4
-                Lovvalgbestemmelser_konv_efta_storbritannia.KONV_EFTA_STORBRITANNIA_ART15_2A -> Lovvalgbestemmelser_883_2004.FO_883_2004_ART13_2A
-                Lovvalgbestemmelser_konv_efta_storbritannia.KONV_EFTA_STORBRITANNIA_ART15_2B -> Lovvalgbestemmelser_883_2004.FO_883_2004_ART13_2B
-                Lovvalgbestemmelser_konv_efta_storbritannia.KONV_EFTA_STORBRITANNIA_ART15_3 -> Lovvalgbestemmelser_883_2004.FO_883_2004_ART13_3
-                Lovvalgbestemmelser_konv_efta_storbritannia.KONV_EFTA_STORBRITANNIA_ART15_4 -> Lovvalgbestemmelser_883_2004.FO_883_2004_ART13_4
-                Lovvalgbestemmelser_konv_efta_storbritannia.KONV_EFTA_STORBRITANNIA_ART15_5 -> Lovvalgbestemmelser_883_2004.FO_883_2004_ANNET
-                Lovvalgbestemmelser_konv_efta_storbritannia.KONV_EFTA_STORBRITANNIA_ART18_1 -> Lovvalgbestemmelser_883_2004.FO_883_2004_ART16_1
-                Lovvalgbestemmelser_konv_efta_storbritannia.KONV_EFTA_STORBRITANNIA_ART18_2 -> Lovvalgbestemmelser_883_2004.FO_883_2004_ART16_2
-
-                Tilleggsbestemmelser_konv_efta_storbritannia.KONV_EFTA_STORBRITANNIA_ART13_2 -> Tilleggsbestemmelser_883_2004.FO_883_2004_ART11_2
-                Tilleggsbestemmelser_konv_efta_storbritannia.KONV_EFTA_STORBRITANNIA_ART13_4_1 -> Tilleggsbestemmelser_883_2004.FO_883_2004_ART11_4_1
-                Tilleggsbestemmelser_konv_efta_storbritannia.KONV_EFTA_STORBRITANNIA_ART13_5 -> Tilleggsbestemmelser_883_2004.FO_883_2004_ART11_5
-                else -> throw FunksjonellException("Klarer ikke finne LovvalgsbestemmelseKode fra bestemmelse $unntakFraBestemmelse")
-            }
-
-            return LovvalgsbestemmelseKode.fromValue(eøsBestemmelseForGBKonv.kode)
-        }
-
     }
 }
