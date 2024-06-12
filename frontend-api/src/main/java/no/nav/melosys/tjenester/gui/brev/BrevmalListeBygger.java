@@ -59,6 +59,7 @@ public class BrevmalListeBygger {
                 case MELDING_FORVENTET_SAKSBEHANDLINGSTID_SOKNAD, MELDING_FORVENTET_SAKSBEHANDLINGSTID_KLAGE ->
                     lagBrevmalForMELDING_FORVENTET_SAKSBEHANDLINGSTID(dokument);
                 case MANGELBREV_BRUKER, MANGELBREV_ARBEIDSGIVER -> lagBrevmalForMANGELBREV(dokument, behandlingId);
+                case INNHENTING_AV_INNTEKTSOPPLYSNINGER -> lagBrevmalForINNHENTING_AV_INNTEKTSOPPLYSNINGER(dokument);
                 case GENERELT_FRITEKSTBREV_BRUKER, GENERELT_FRITEKSTBREV_ARBEIDSGIVER, GENERELT_FRITEKSTBREV_VIRKSOMHET ->
                     lagBrevmalForGENERELT_FRITEKSTBREV(dokument, behandlingId);
                 case UTENLANDSK_TRYGDEMYNDIGHET_FRITEKSTBREV -> lagBrevmalForUTENLANDSK_TRYGDEMYNDIGHET_FRITEKSTBREV(dokument, behandlingId);
@@ -179,25 +180,19 @@ public class BrevmalListeBygger {
     }
 
     private BrevmalTypeDto lagBrevmalForMANGELBREV(Produserbaredokumenter produserbartdokument, long behandlingId) {
-        List<FeltvalgAlternativDto> feltvalgAlternativDtos = new ArrayList<>();
+        BrevmalFeltDto brevmalFeltDto;
         Behandling behandling = behandlingService.hentBehandling(behandlingId);
 
         if (harStandardTekstIMangelbrev(behandling)) {
-            feltvalgAlternativDtos.add(new FeltvalgAlternativDto(FeltvalgAlternativKode.STANDARD));
+            brevmalFeltDto = lagErstatterStandardtekstRadioFritekst(new FeltvalgAlternativDto(FeltvalgAlternativKode.STANDARD));
+        } else {
+            brevmalFeltDto = lagErstatterStandardtekstRadioFritekst();
         }
-        feltvalgAlternativDtos.add(new FeltvalgAlternativDto(FeltvalgAlternativKode.FRITEKST.getKode(), "Fritekst (erstatter standardtekst)", true));
-
-        FeltValgDto feltValgDto = new FeltValgDto(feltvalgAlternativDtos, FeltValgType.RADIO);
 
         return new BrevmalTypeDto.Builder()
             .medType(produserbartdokument)
             .medFelter(asList(
-                new BrevmalFeltDto.Builder()
-                    .medKodeOgBeskrivelse(BrevmalFeltKode.INNLEDNING_FRITEKST)
-                    .medFeltType(FeltType.FRITEKST)
-                    .erPåkrevd()
-                    .medValg(feltValgDto)
-                    .build(),
+                brevmalFeltDto,
                 FELT_MANGLER_FRITEKST
             ))
             .build();
@@ -205,6 +200,16 @@ public class BrevmalListeBygger {
 
     private boolean harStandardTekstIMangelbrev(Behandling behandling) {
         return behandling.getFagsak().getTema() == Sakstemaer.MEDLEMSKAP_LOVVALG && behandling.getType() == Behandlingstyper.FØRSTEGANG;
+    }
+
+    private BrevmalTypeDto lagBrevmalForINNHENTING_AV_INNTEKTSOPPLYSNINGER(Produserbaredokumenter produserbartDokument) {
+        return new BrevmalTypeDto.Builder()
+            .medType(produserbartDokument)
+            .medFelter(asList(
+                lagErstatterStandardtekstRadioFritekst(new FeltvalgAlternativDto(FeltvalgAlternativKode.STANDARD)),
+                FELT_MANGLER_FRITEKST
+            ))
+            .build();
     }
 
     private BrevmalTypeDto lagBrevmalForGENERELT_FRITEKSTBREV(Produserbaredokumenter produserbartdokument, long behandlingId) {

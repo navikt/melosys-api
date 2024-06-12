@@ -1,13 +1,14 @@
 package no.nav.melosys.tjenester.gui.brev;
 
+import java.util.List;
+
 import no.nav.melosys.domain.kodeverk.brev.Distribusjonstype;
 import no.nav.melosys.tjenester.gui.dto.brev.*;
 
-import java.util.List;
-
 class BrevFelt {
 
-    private BrevFelt() {}
+    private BrevFelt() {
+    }
 
     static final BrevmalFeltDto FELT_MANGLER_FRITEKST = new BrevmalFeltDto.Builder()
         .medKodeOgBeskrivelse(BrevmalFeltKode.MANGLER_FRITEKST)
@@ -61,6 +62,18 @@ class BrevFelt {
             .medTegnBegrensning(60)
             .erPåkrevd()
             .build();
+    }
+
+    static BrevmalFeltDto lagErstatterStandardtekstRadioFritekst(FeltvalgAlternativDto... feltvalgAlternativDtos) {
+        List<FeltvalgAlternativDto> feltvalgAlternativ = new java.util.ArrayList<>(List.of(feltvalgAlternativDtos));
+        feltvalgAlternativ.add(new FeltvalgAlternativDto(FeltvalgAlternativKode.FRITEKST.getKode(), "Fritekst (erstatter standardtekst)", true));
+        return new BrevmalFeltDto.Builder()
+            .medKodeOgBeskrivelse(BrevmalFeltKode.INNLEDNING_FRITEKST)
+            .medFeltType(FeltType.FRITEKST)
+            .erPåkrevd()
+            .medValg(new FeltValgDto(feltvalgAlternativ, FeltValgType.RADIO))
+            .build();
+
     }
 
     private static FeltValgDto hentDistribusjonstyper() {

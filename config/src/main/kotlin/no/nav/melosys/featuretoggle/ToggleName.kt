@@ -10,4 +10,5 @@ object ToggleName {
     const val MELOSYS_SKATTEHENDELSE_CONSUMER = "melosys.skattehendelse.consumer"
     const val MELOSYS_IKKE_SEND_TRYGDEAGIFT_OPPGAVE = "melosys.ikke-send-trygdeavgift-oppgave"
     const val MELOSYS_TRYGDEAVTALE_KOREA = "melosys.trygdeavtale.korea"
+    const val MELOSYS_BREV_INNHENTING_INNTEKTOPPLYSNINGER = "melosys.brev.INNHENTING_AV_INNTEKTSOPPLYSNINGER"
 }
