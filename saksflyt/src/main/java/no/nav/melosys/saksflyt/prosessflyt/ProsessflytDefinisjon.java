@@ -1,11 +1,11 @@
 package no.nav.melosys.saksflyt.prosessflyt;
 
+import no.nav.melosys.saksflytapi.domain.ProsessSteg;
+import no.nav.melosys.saksflytapi.domain.ProsessType;
+
 import java.util.EnumMap;
 import java.util.Map;
 import java.util.Optional;
-
-import no.nav.melosys.saksflytapi.domain.ProsessSteg;
-import no.nav.melosys.saksflytapi.domain.ProsessType;
 
 import static no.nav.melosys.saksflytapi.domain.ProsessSteg.*;
 
@@ -204,7 +204,6 @@ public final class ProsessflytDefinisjon {
                 SEND_VEDTAKSBREV_INNLAND,
                 SEND_VEDTAK_UTLAND,
                 DISTRIBUER_JOURNALPOST_UTLAND,
-                OPPRETT_AVGIFTSOPPGAVE,
                 AVSLUTT_SAK_OG_BEHANDLING,
                 SEND_MELDING_OM_VEDTAK
             )
@@ -217,7 +216,6 @@ public final class ProsessflytDefinisjon {
                 SEND_VEDTAKSBREV_INNLAND,
                 SEND_VEDTAK_UTLAND,
                 DISTRIBUER_JOURNALPOST_UTLAND,
-                OPPRETT_AVGIFTSOPPGAVE,
                 AVSLUTT_SAK_OG_BEHANDLING,
                 SEND_MELDING_OM_VEDTAK
             )
@@ -226,11 +224,9 @@ public final class ProsessflytDefinisjon {
         PROSESS_FLYT_MAP.put(ProsessType.IVERKSETT_VEDTAK_FTRL,
             new ProsessFlyt(ProsessType.IVERKSETT_VEDTAK_FTRL,
                 LAGRE_MEDLEMSKAPSPERIODE_MEDL,
-                OPPRETT_AVGIFTSOPPGAVE,
                 OPPRETT_FAKTURASERIE,
                 AVSLUTT_SAK_OG_BEHANDLING,
                 SEND_MELDING_OM_VEDTAK
-
             )
         );
 
@@ -239,7 +235,6 @@ public final class ProsessflytDefinisjon {
                 AVKLAR_MYNDIGHET,
                 AVKLAR_ARBEIDSGIVER,
                 LAGRE_LOVVALGSPERIODE_MEDL,
-                OPPRETT_AVGIFTSOPPGAVE,
                 AVSLUTT_SAK_OG_BEHANDLING,
                 SEND_MELDING_OM_VEDTAK
             )
