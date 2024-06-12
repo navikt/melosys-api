@@ -6,6 +6,7 @@ import com.github.tomakehurst.wiremock.client.WireMock.equalTo
 import com.github.tomakehurst.wiremock.core.WireMockConfiguration
 import com.github.tomakehurst.wiremock.extension.Extension
 import io.kotest.matchers.nulls.shouldNotBeNull
+import no.nav.melosys.DBCleanup
 import no.nav.melosys.ProsessinstansTestManager
 import no.nav.melosys.domain.arkiv.ArkivDokument
 import no.nav.melosys.domain.kodeverk.Avsendertyper
@@ -31,7 +32,7 @@ class JournalfoeringBase(
     protected val testDataGenerator: TestDataGenerator,
     protected val journalføringService: JournalfoeringService,
     protected val oppgaveService: OppgaveService,
-    protected val extensionForWireMock: Extension? = null
+    extensionForWireMock: Extension? = null
 ) : ComponentTestBase() {
 
     protected val mockServer: WireMockServer =
@@ -46,6 +47,8 @@ class JournalfoeringBase(
 
     @Autowired
     private lateinit var prosessinstansTestManager: ProsessinstansTestManager
+
+    @Autowired lateinit var dbCleanup: DBCleanup
 
     @BeforeEach
     fun before() {
