@@ -26,7 +26,7 @@ class ÅrsavregningTjeneste(
         return ResponseEntity.ok(
             ÅrsavregningResponse(
                 aar = årsavregning.år,
-                tidligereOpplysninger = hentTidligereOpplysninger(årsavregning),
+                tidligereGrunnlagsopplysninger = hentTidligereGrunnlagsopplysninger(årsavregning),
                 avvikFunnet = årsavregning.nyttGrunnlag != null,
                 nyttGrunnlag = null,
                 endeligAvgift = null,
@@ -39,9 +39,9 @@ class ÅrsavregningTjeneste(
         )
     }
 
-    private fun hentTidligereOpplysninger(årsavregning: Årsavregning): TidligereOpplysninger? {
+    private fun hentTidligereGrunnlagsopplysninger(årsavregning: Årsavregning): TidligereGrunnlagsopplysninger? {
         return if (årsavregning.tidligereGrunnlag == null) null else
-            TidligereOpplysninger(
+            TidligereGrunnlagsopplysninger(
                 Trygdeavgiftsgrunnlag(
                     medlemskapsperioder = årsavregning.tidligereGrunnlag?.medlemskapsperioder?.map { Medlemskapsperiode(it.fom, it.tom, it.dekning) }
                         .orEmpty(),
@@ -113,7 +113,7 @@ fun hentAvregning(@PathVariable("avregningID") avregningID: Long, @RequestBody �
 
 data class ÅrsavregningResponse(
     val aar: Int,
-    val tidligereOpplysninger: TidligereOpplysninger?,
+    val tidligereGrunnlagsopplysninger: TidligereGrunnlagsopplysninger?,
     val avvikFunnet: Boolean?,
     val nyttGrunnlag: Trygdeavgiftsgrunnlag?,
     val endeligAvgift: Avgift?,
@@ -127,7 +127,7 @@ data class ÅrsavregningRequest(
     val inntektskperioder: List<Inntektsperiode>,
 )
 
-data class TidligereOpplysninger(
+data class TidligereGrunnlagsopplysninger(
     val trygdeavgiftsgrunnlag: Trygdeavgiftsgrunnlag,
     val avgift: Avgift
 )
