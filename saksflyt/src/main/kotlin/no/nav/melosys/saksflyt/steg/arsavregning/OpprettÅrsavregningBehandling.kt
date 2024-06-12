@@ -118,6 +118,7 @@ class OpprettÅrsavregningBehandling(
             }.let { sakerMedTrygdeavgift ->
                 when {
                     sakerMedTrygdeavgift.isEmpty() -> null
+                    // FIXME: Det kommer en ny oppgave som skal håntere flere saker med trygdeavgift
                     sakerMedTrygdeavgift.size > 1 -> throw TekniskException("Flere saker med trygdeavgift funnet")
                     else -> sakerMedTrygdeavgift.single()
                 }
