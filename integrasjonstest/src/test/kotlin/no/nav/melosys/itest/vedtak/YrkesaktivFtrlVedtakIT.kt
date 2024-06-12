@@ -145,7 +145,9 @@ class YrkesaktivFtrlVedtakIT(
     @Test
     fun `yrkesaktiv vedtak - FTRL - skal hverken opprette fakturaserier eller kansellere dersom det ikke eksisterer førstegangsbehandling`() {
         lagFørstegangsBehandling(Skatteplikttype.SKATTEPLIKTIG, true).also {
-            dbCleanup.slettSakMedAvhengigheter(it)
+            addCleanUpAction {
+                dbCleanup.slettSakMedAvhengigheter(it)
+            }
         }
         mockServer.verify(0, WireMock.deleteRequestedFor(WireMock.urlEqualTo("/fakturaserier/$fakturaserieReferanse")))
         mockServer.verify(0, WireMock.postRequestedFor(WireMock.urlEqualTo("/fakturaserier")))
@@ -154,7 +156,11 @@ class YrkesaktivFtrlVedtakIT(
     @Test
     fun `Håndtere manglende innbetaling i sak som allerede har en åpen behandling`() {
         val saksnummer = lagFørstegangsBehandling(Skatteplikttype.IKKE_SKATTEPLIKTIG, false)
-        dbCleanup.slettSakMedAvhengigheter(saksnummer)
+        addCleanUpAction {
+            dbCleanup.slettSakMedAvhengigheter(saksnummer)
+        }
+
+
 
         val behandlingsId = executeAndWait(waitForprosessType = ProsessType.OPPRETT_REPLIKERT_BEHANDLING_FOR_SAK) {
             opprettBehandlingForSak.opprettBehandling(
@@ -212,7 +218,10 @@ class YrkesaktivFtrlVedtakIT(
     @Test
     fun `yrkesaktiv vedtak - FTRL - opprett fakturaserie for førstegangsbehandling og kanseller fakturaserie i ny vurdering`() {
         val saksnummer = lagFørstegangsBehandling(Skatteplikttype.IKKE_SKATTEPLIKTIG, false)
-        dbCleanup.slettSakMedAvhengigheter(saksnummer)
+        addCleanUpAction {
+            dbCleanup.slettSakMedAvhengigheter(saksnummer)
+        }
+
 
         val behandlingsId = executeAndWait(waitForprosessType = ProsessType.OPPRETT_REPLIKERT_BEHANDLING_FOR_SAK) {
             opprettBehandlingForSak.opprettBehandling(
