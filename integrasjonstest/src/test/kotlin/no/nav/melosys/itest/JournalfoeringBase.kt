@@ -6,7 +6,6 @@ import com.github.tomakehurst.wiremock.client.WireMock.equalTo
 import com.github.tomakehurst.wiremock.core.WireMockConfiguration
 import com.github.tomakehurst.wiremock.extension.Extension
 import io.kotest.matchers.nulls.shouldNotBeNull
-import no.nav.melosys.DBCleanup
 import no.nav.melosys.ProsessinstansTestManager
 import no.nav.melosys.domain.arkiv.ArkivDokument
 import no.nav.melosys.domain.kodeverk.Avsendertyper
@@ -47,8 +46,6 @@ class JournalfoeringBase(
 
     @Autowired
     private lateinit var prosessinstansTestManager: ProsessinstansTestManager
-
-    @Autowired lateinit var dbCleanup: DBCleanup
 
     @BeforeEach
     fun before() {

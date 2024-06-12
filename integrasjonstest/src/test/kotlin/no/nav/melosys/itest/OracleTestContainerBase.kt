@@ -1,6 +1,8 @@
 package no.nav.melosys.itest
 
+import no.nav.melosys.DBCleanup
 import org.junit.jupiter.api.AfterEach
+import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.test.context.DynamicPropertyRegistry
 import org.springframework.test.context.DynamicPropertySource
 import org.testcontainers.containers.OracleContainer
@@ -9,8 +11,11 @@ import org.testcontainers.utility.DockerImageName
 open class OracleTestContainerBase {
     private val dbCleanUpActions = mutableListOf<() -> Unit>()
 
-    protected fun addCleanUpAction(deleteAction: () -> Unit) {
-        dbCleanUpActions.add(deleteAction)
+    @Autowired
+    private lateinit var dbCleanup: DBCleanup
+
+    protected fun addCleanUpAction(deleteAction: DBCleanup.() -> Unit) {
+        dbCleanUpActions.add { dbCleanup.deleteAction() }
     }
 
     @AfterEach
