@@ -94,6 +94,7 @@ internal open class OppgaveGosysMapping {
         HENVENDELSE_OG_VIRKSOMHET("henv-virksomhet"),
         KUN_VED_MIGRERING("migrering")
     }
+
     internal data class Oppgave(
         val oppgaveBehandlingstema: OppgaveBehandlingstema?,
         val tema: Tema,
@@ -121,7 +122,7 @@ internal open class OppgaveGosysMapping {
                     Behandlingstyper.FØRSTEGANG,
                     Behandlingstyper.NY_VURDERING,
                     Behandlingstyper.ENDRET_PERIODE,
-                    Behandlingstyper.KLAGE
+                    Behandlingstyper.KLAGE,
                 ),
                 setOf(
                     Behandlingstema.UTSENDT_ARBEIDSTAKER,
@@ -132,6 +133,27 @@ internal open class OppgaveGosysMapping {
                 ),
                 Oppgave(
                     OppgaveBehandlingstema.EU_EOS_YRKESAKTIV, // ab0483
+                    Tema.MED,
+                    Oppgavetyper.BEH_SAK_MK,
+                    Beskrivelsefelt.BEHANDLINGSTEMA
+                )
+            ),
+            TableRow(
+                Sakstyper.EU_EOS,
+                Sakstemaer.MEDLEMSKAP_LOVVALG,
+                setOf(
+                    Behandlingstyper.ÅRSAVREGNING
+                ),
+                setOf(
+                    Behandlingstema.YRKESAKTIV,
+                    Behandlingstema.UTSENDT_ARBEIDSTAKER,
+                    Behandlingstema.UTSENDT_SELVSTENDIG,
+                    Behandlingstema.ARBEID_TJENESTEPERSON_ELLER_FLY,
+                    Behandlingstema.ARBEID_FLERE_LAND,
+                    Behandlingstema.ARBEID_KUN_NORGE
+                ),
+                Oppgave(
+                    OppgaveBehandlingstema.EU_EOS_YRKESAKTIV, // ab0483 //TODO: Blir dette riktig?
                     Tema.MED,
                     Oppgavetyper.BEH_SAK_MK,
                     Beskrivelsefelt.BEHANDLINGSTEMA
@@ -262,6 +284,22 @@ internal open class OppgaveGosysMapping {
                 )
             ),
             TableRow(
+                Sakstyper.FTRL,
+                Sakstemaer.MEDLEMSKAP_LOVVALG,
+                setOf(
+                    Behandlingstyper.ÅRSAVREGNING
+                ),
+                setOf(
+                    Behandlingstema.YRKESAKTIV,
+                ),
+                Oppgave(
+                    OppgaveBehandlingstema.UTENFOR_AVTALAND_YRKESAKTIV,
+                    Tema.MED,
+                    Oppgavetyper.BEH_SAK_MK,
+                    Beskrivelsefelt.BEHANDLINGSTEMA
+                )
+            ),
+            TableRow(
                 Sakstyper.TRYGDEAVTALE,
                 Sakstemaer.MEDLEMSKAP_LOVVALG,
                 setOf(Behandlingstyper.FØRSTEGANG, Behandlingstyper.NY_VURDERING, Behandlingstyper.KLAGE),
@@ -295,6 +333,22 @@ internal open class OppgaveGosysMapping {
                     Tema.MED,
                     Oppgavetyper.BEH_SAK_MK,
                     Beskrivelsefelt.TOMT
+                )
+            ),
+            TableRow(
+                Sakstyper.TRYGDEAVTALE,
+                Sakstemaer.MEDLEMSKAP_LOVVALG,
+                setOf(
+                    Behandlingstyper.ÅRSAVREGNING
+                ),
+                setOf(
+                    Behandlingstema.YRKESAKTIV,
+                ),
+                Oppgave(
+                    OppgaveBehandlingstema.AVTALAND_YRKESAKTIV,
+                    Tema.MED,
+                    Oppgavetyper.BEH_SAK_MK,
+                    Beskrivelsefelt.BEHANDLINGSTEMA
                 )
             ),
             TableRow(

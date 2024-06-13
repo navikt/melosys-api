@@ -9,6 +9,7 @@ import no.nav.melosys.domain.*
 import no.nav.melosys.domain.avgift.Penger
 import no.nav.melosys.domain.avgift.Trygdeavgiftsperiode
 import no.nav.melosys.domain.kodeverk.Medlemskapstyper
+import no.nav.melosys.service.avgift.TrygdeavgiftService
 import no.nav.melosys.service.behandling.BehandlingsresultatService
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
@@ -16,7 +17,7 @@ import org.junit.jupiter.api.extension.ExtendWith
 import java.math.BigDecimal
 
 @ExtendWith(MockKExtension::class)
-class TrygdeavgiftOppsummeringServiceTest {
+class TrygdeavgiftServiceTest {
 
     private val BEHANDLING_ID = 123L
 
@@ -26,14 +27,14 @@ class TrygdeavgiftOppsummeringServiceTest {
     @MockK
     private lateinit var behandlingsresultatService: BehandlingsresultatService
 
-    private lateinit var trygdeavgiftOppsummeringService: TrygdeavgiftOppsummeringService
+    private lateinit var trygdeavgiftService: TrygdeavgiftService
 
     private lateinit var fagsak: Fagsak
     private lateinit var behandlingsresultat: Behandlingsresultat
 
     @BeforeEach
     fun setup() {
-        trygdeavgiftOppsummeringService = TrygdeavgiftOppsummeringService(fagsakService, behandlingsresultatService)
+        trygdeavgiftService = TrygdeavgiftService(fagsakService, behandlingsresultatService)
         fagsak = FagsakTestFactory.builder().apply { leggTilBehandling(Behandling().apply { id = BEHANDLING_ID }) }.build()
         behandlingsresultat = Behandlingsresultat()
         every { fagsakService.hentFagsak(FagsakTestFactory.SAKSNUMMER) }.returns(fagsak)
@@ -42,7 +43,7 @@ class TrygdeavgiftOppsummeringServiceTest {
 
     @Test
     fun harFagsakBehandlingerMedTrygdeavgift_harIkkeMedlemAvFolketrygden_returnererFalse() {
-        trygdeavgiftOppsummeringService.harFagsakBehandlingerMedTrygdeavgift(FagsakTestFactory.SAKSNUMMER).shouldBeFalse()
+        trygdeavgiftService.harFagsakBehandlingerMedTrygdeavgift(FagsakTestFactory.SAKSNUMMER).shouldBeFalse()
     }
 
     @Test
@@ -57,7 +58,7 @@ class TrygdeavgiftOppsummeringServiceTest {
             )
         }
 
-        trygdeavgiftOppsummeringService.harFagsakBehandlingerMedTrygdeavgift(FagsakTestFactory.SAKSNUMMER).shouldBeFalse()
+        trygdeavgiftService.harFagsakBehandlingerMedTrygdeavgift(FagsakTestFactory.SAKSNUMMER).shouldBeFalse()
     }
 
     @Test
@@ -75,7 +76,7 @@ class TrygdeavgiftOppsummeringServiceTest {
             )
         }
 
-        trygdeavgiftOppsummeringService.harFagsakBehandlingerMedTrygdeavgift(FagsakTestFactory.SAKSNUMMER).shouldBeFalse()
+        trygdeavgiftService.harFagsakBehandlingerMedTrygdeavgift(FagsakTestFactory.SAKSNUMMER).shouldBeFalse()
     }
 
     @Test
@@ -93,7 +94,7 @@ class TrygdeavgiftOppsummeringServiceTest {
             )
         }
 
-        trygdeavgiftOppsummeringService.harFagsakBehandlingerMedTrygdeavgift(FagsakTestFactory.SAKSNUMMER).shouldBeFalse()
+        trygdeavgiftService.harFagsakBehandlingerMedTrygdeavgift(FagsakTestFactory.SAKSNUMMER).shouldBeFalse()
     }
 
     @Test
@@ -118,6 +119,6 @@ class TrygdeavgiftOppsummeringServiceTest {
         }
 
 
-        trygdeavgiftOppsummeringService.harFagsakBehandlingerMedTrygdeavgift(FagsakTestFactory.SAKSNUMMER).shouldBeTrue()
+        trygdeavgiftService.harFagsakBehandlingerMedTrygdeavgift(FagsakTestFactory.SAKSNUMMER).shouldBeTrue()
     }
 }

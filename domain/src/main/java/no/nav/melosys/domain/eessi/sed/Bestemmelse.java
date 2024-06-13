@@ -85,7 +85,6 @@ public enum Bestemmelse {
 
     private static final Map<LovvalgBestemmelse, Bestemmelse> GB_KONV_BESTEMMELSE_MAP =
         Maps.newHashMap(ImmutableMap.<LovvalgBestemmelse, Bestemmelse>builder()
-            .put(Tilleggsbestemmelser_konv_efta_storbritannia.KONV_EFTA_STORBRITANNIA_ART13_4_1, Bestemmelse.ART_11_4)
             .put(Tilleggsbestemmelser_konv_efta_storbritannia.KONV_EFTA_STORBRITANNIA_ART13_2, Bestemmelse.ART_11_2)
             .put(Lovvalgbestemmelser_konv_efta_storbritannia.KONV_EFTA_STORBRITANNIA_ART13_3A, Bestemmelse.ART_11_3_a)
             .put(Lovvalgbestemmelser_konv_efta_storbritannia.KONV_EFTA_STORBRITANNIA_ART13_3B, Bestemmelse.ART_11_3_b)
@@ -133,7 +132,9 @@ public enum Bestemmelse {
         Assert.notNull(lovvalgBestemmelse, "LovvalgBestemmelse er null.");
 
         if (lovvalgBestemmelse == Tilleggsbestemmelser_883_2004.FO_883_2004_ART11_4_1
-            || lovvalgBestemmelse == Lovvalgbestemmelser_883_2004.FO_883_2004_ART11_4_2) {
+            || lovvalgBestemmelse == Lovvalgbestemmelser_883_2004.FO_883_2004_ART11_4_2
+            || lovvalgBestemmelse == Tilleggsbestemmelser_konv_efta_storbritannia.KONV_EFTA_STORBRITANNIA_ART13_4_1
+            || lovvalgBestemmelse == Lovvalgbestemmelser_konv_efta_storbritannia.KONV_EFTA_STORBRITANNIA_ART13_4_2) {
             return Bestemmelse.ART_11_4;
         }
 
