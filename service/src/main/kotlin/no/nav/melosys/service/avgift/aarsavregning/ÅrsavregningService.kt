@@ -1,5 +1,6 @@
 package no.nav.melosys.service.avgift.aarsavregning
 
+import jakarta.ws.rs.NotAllowedException
 import no.nav.melosys.domain.Behandlingsresultat
 import no.nav.melosys.domain.Medlemskapsperiode
 import no.nav.melosys.domain.avgift.Aarsavregning
@@ -8,7 +9,6 @@ import no.nav.melosys.domain.avgift.SkatteforholdTilNorge
 import no.nav.melosys.domain.avgift.Trygdeavgiftsperiode
 import no.nav.melosys.domain.kodeverk.Folketrygdloven_kap2_bestemmelser
 import no.nav.melosys.domain.kodeverk.Trygdedekninger
-import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingstyper
 import no.nav.melosys.exception.IkkeFunnetException
 import no.nav.melosys.integrasjon.faktureringskomponenten.FaktureringskomponentenConsumer
 import no.nav.melosys.integrasjon.faktureringskomponenten.dto.BeregnTotalBeløpDto
@@ -35,9 +35,6 @@ class ÅrsavregningService(
     fun hentÅrsavregning(avregningID: Long): Årsavregning {
         val aarsavregning = aarsavregningRepository.findById(avregningID).orElseThrow { IkkeFunnetException("Fant ikke årsavregning $avregningID") }
         val år = aarsavregning.aar
-        if (harFlereAarsavregningerPåsammeAarPåFagsak(avregningID, år)) {
-            throw IllegalStateException("Det finnes flere årsavregninger på samme år på samme fagsak")
-        }
         return Årsavregning(
             år = år,
             tidligereGrunnlag = hentTidligereTrygdeavgiftsgrunnlag(år, aarsavregning.tidligereBehandlingsresultat),
@@ -51,22 +48,13 @@ class ÅrsavregningService(
     }
 
     fun opprettNyÅrsavregning(behandlingsId: Long, aar: Int): Long {
+        if (aarsavregningRepository.existsAarsavregningByBehandlingAndYear(behandlingsId, aar))
+            throw NotAllowedException("Du har ikke lov til å ha 2 åpne behandlinger for årsavregning på samme år")
+
         val årsavreging = Aarsavregning()
         årsavreging.aar = aar
         årsavreging.id = behandlingsId
-
         return aarsavregningRepository.save(årsavreging).id
-    }
-
-    private fun harFlereAarsavregningerPåsammeAarPåFagsak(behandlingsId: Long, aar: Int): Boolean {
-        val behandling = behandlingRepository.findById(behandlingsId).orElseThrow { IkkeFunnetException("Fant ikke behandling $behandlingsId") }
-        val aarsavregningsBehandlinger = behandling.fagsak.behandlinger.filter { it.type == Behandlingstyper.ÅRSAVREGNING }
-
-        val count = aarsavregningsBehandlinger.count {
-            aarsavregningRepository.findByIdAndAar(it.id, aar).isPresent
-        }
-
-        return count > 1
     }
 
     private fun hentTidligereTrygdeavgiftsgrunnlag(år: Int, behandlingsresultat: Behandlingsresultat?): Trygdeavgiftsgrunnlag? {

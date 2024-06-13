@@ -42,10 +42,7 @@ class ÅrsavregningTjeneste(
 
     @PostMapping("/opprettAarsavregning")
     fun opprettNyÅrsavregning(@RequestBody årsavregningRequest: LagÅrsavregningRequest): ResponseEntity<Long> {
-        // TODO opprett ny årsavregning via årsavregningService
-
-        val avregningId = 1L
-        return ResponseEntity.ok(avregningId)
+        return ResponseEntity.ok(årsavregningService.opprettNyÅrsavregning(årsavregningRequest.behandlingsId, årsavregningRequest.aar))
     }
 
     data class LagÅrsavregningRequest(
@@ -122,6 +119,7 @@ class ÅrsavregningTjeneste(
 @PutMapping("/{avregningID}")
 fun hentAvregning(@PathVariable("avregningID") avregningID: Long, @RequestBody årsavregningRequest: ÅrsavregningRequest): ResponseEntity<Unit> {
     // TODO bruk årsavregningService
+
     return ResponseEntity.noContent().build()
 }
 
