@@ -105,7 +105,7 @@ internal class ÅrsavregningServiceTest {
             aar = 2023
             behandlingsresultat = Behandlingsresultat()
         }
-        every { aarsavregningRepository.findById(1) }.returns(Optional.of(årsavregningEntity))
+        every { aarsavregningRepository.findById(any()) }.returns(Optional.of(årsavregningEntity))
 
         årsavregningService.hentÅrsavregning(1) shouldBe Årsavregning(
             år = 2023,
@@ -126,8 +126,7 @@ internal class ÅrsavregningServiceTest {
             behandlingsresultat = Behandlingsresultat()
             tidligereBehandlingsresultat = lagTidligereBehandlingsresultat()
         }
-        every { aarsavregningRepository.findById(1) }.returns(Optional.of(årsavregningEntity))
-
+        every { aarsavregningRepository.findById(any()) }.returns(Optional.of(årsavregningEntity))
 
         årsavregningService.hentÅrsavregning(1) shouldBe Årsavregning(
             år = 2023,

@@ -3,7 +3,7 @@
 
     <appender name="console" class="ch.qos.logback.core.ConsoleAppender">
         <encoder>
-            <pattern>%d{HH:mm:ss.SSS} %highlight(%-5level) %logger{10} [%X{sedId}] [%thread] - %msg%n</pattern>
+            <pattern>%d{HH:mm:ss.SSS} %highlight(%-5level) %logger [%X{sedId}] [%thread] - %msg%n</pattern>
         </encoder>
     </appender>
 
@@ -12,10 +12,12 @@
     </root>
 
     <logger name="org.apache.kafka" level="WARN"/>
+    <logger name="state.change.logger" level="WARN"/>
     <logger name="org.apache.zookeeper" level="WARN"/>
     <logger name="org.springframework.kafka" level="WARN"/>
     <logger name="org.flywaydb.core.internal" level="WARN"/>
     <logger name="org.hibernate" level="WARN"/>
     <logger name="kafka" level="WARN"/>
     <logger name="springfox" level="WARN"/>
+    <logger name="graphql.kickstart.tools" level="ERROR"/>
 </configuration>

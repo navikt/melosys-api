@@ -120,7 +120,7 @@ internal class ÅrsavregningTjenesteTest {
 
         val expectedJson = """{
   "aar": 2023,
-  "tidligereOpplysninger": {
+  "tidligereGrunnlagsopplysninger": {
     "trygdeavgiftsgrunnlag": {
       "medlemskapsperioder": [
         {

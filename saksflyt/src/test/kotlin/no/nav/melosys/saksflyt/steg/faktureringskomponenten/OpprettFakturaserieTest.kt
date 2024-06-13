@@ -28,10 +28,10 @@ import no.nav.melosys.saksflyt.steg.fakturering.OpprettFakturaserie.Companion.DE
 import no.nav.melosys.saksflytapi.domain.ProsessDataKey
 import no.nav.melosys.saksflytapi.domain.Prosessinstans
 import no.nav.melosys.service.avgift.TrygdeavgiftMottakerService
+import no.nav.melosys.service.avgift.TrygdeavgiftService
 import no.nav.melosys.service.behandling.BehandlingService
 import no.nav.melosys.service.behandling.BehandlingsresultatService
 import no.nav.melosys.service.persondata.PersondataService
-import no.nav.melosys.service.sak.TrygdeavgiftOppsummeringService
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.extension.ExtendWith
@@ -57,7 +57,7 @@ class OpprettFakturaserieTest {
     lateinit var pdlService: PersondataService
 
     @RelaxedMockK
-    lateinit var trygdeavgiftOppsummeringService: TrygdeavgiftOppsummeringService
+    lateinit var trygdeavgiftService: TrygdeavgiftService
 
     lateinit var trygdeavgiftMottakerService: TrygdeavgiftMottakerService
 
@@ -81,7 +81,7 @@ class OpprettFakturaserieTest {
             faktureringskomponentenConsumer,
             pdlService,
             trygdeavgiftMottakerService,
-            trygdeavgiftOppsummeringService
+            trygdeavgiftService
         )
     }
 
@@ -187,7 +187,7 @@ class OpprettFakturaserieTest {
         val opprinneligBehandlingsresultat = Behandlingsresultat().apply { fakturaserieReferanse = behandlingsresultat.fakturaserieReferanse }
         every { behandlingsresultatService.hentBehandlingsresultat(BEHANDLING_ID) } returns behandlingsresultat
         every { behandlingsresultatService.hentBehandlingsresultat(OPPRINNELIG_BEHANDLING_ID) } returns opprinneligBehandlingsresultat
-        every { trygdeavgiftOppsummeringService.harTrygdeavgiftOgBestiltFaktura(opprinneligBehandlingsresultat) } returns true
+        every { trygdeavgiftService.harTrygdeavgiftOgBestiltFaktura(opprinneligBehandlingsresultat) } returns true
         every { behandlingService.hentBehandling(BEHANDLING_ID) } returns behandling
         every { pdlService.finnFolkeregisterident(BRUKER_FNR) } returns Optional.of(BRUKER_AKTØRID)
         every { faktureringskomponentenConsumer.kansellerFakturaserie(FAKTURASERIE_REFERANSE, BRUKER_AKTØRID) } returns
@@ -215,7 +215,7 @@ class OpprettFakturaserieTest {
         val opprinneligBehandlingsresultat = Behandlingsresultat().apply { fakturaserieReferanse = behandlingsresultat.fakturaserieReferanse }
         every { behandlingsresultatService.hentBehandlingsresultat(BEHANDLING_ID) } returns behandlingsresultat
         every { behandlingsresultatService.hentBehandlingsresultat(OPPRINNELIG_BEHANDLING_ID) } returns opprinneligBehandlingsresultat
-        every { trygdeavgiftOppsummeringService.harTrygdeavgiftOgBestiltFaktura(opprinneligBehandlingsresultat) } returns true
+        every { trygdeavgiftService.harTrygdeavgiftOgBestiltFaktura(opprinneligBehandlingsresultat) } returns true
         every { behandlingService.hentBehandling(BEHANDLING_ID) } returns behandling
         every { pdlService.finnFolkeregisterident(BRUKER_FNR) } returns Optional.of(BRUKER_AKTØRID)
         every { faktureringskomponentenConsumer.kansellerFakturaserie(FAKTURASERIE_REFERANSE, BRUKER_AKTØRID) } returns

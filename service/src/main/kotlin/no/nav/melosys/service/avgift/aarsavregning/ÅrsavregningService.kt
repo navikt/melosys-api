@@ -1,6 +1,7 @@
 package no.nav.melosys.service.avgift.aarsavregning
 
 import jakarta.ws.rs.NotAllowedException
+import jakarta.ws.rs.NotAllowedException
 import no.nav.melosys.domain.Behandlingsresultat
 import no.nav.melosys.domain.Medlemskapsperiode
 import no.nav.melosys.domain.avgift.Aarsavregning
@@ -47,14 +48,18 @@ class ÅrsavregningService(
         )
     }
 
-    fun opprettNyÅrsavregning(behandlingsId: Long, aar: Int): Long {
-        if (aarsavregningRepository.existsAarsavregningByBehandlingAndYear(behandlingsId, aar))
+    @Transactional
+    fun oppretteÅrsavregning(behandlingsresultat: Behandlingsresultat, gjelderPeriode: Int) {
+        if (aarsavregningRepository.existsAarsavregningByBehandlingAndYear(behandlingsresultat.behandling.id, gjelderPeriode))
             throw NotAllowedException("Du har ikke lov til å ha 2 åpne behandlinger for årsavregning på samme år")
 
-        val årsavreging = Aarsavregning()
-        årsavreging.aar = aar
-        årsavreging.id = behandlingsId
-        return aarsavregningRepository.save(årsavreging).id
+        Aarsavregning().apply {
+            aar = gjelderPeriode
+            behandlingsresultat.aarsavregning = this
+            this.behandlingsresultat = behandlingsresultat
+        }.also {
+            aarsavregningRepository.save(it)
+        }
     }
 
     private fun hentTidligereTrygdeavgiftsgrunnlag(år: Int, behandlingsresultat: Behandlingsresultat?): Trygdeavgiftsgrunnlag? {
