@@ -64,7 +64,7 @@ class OrienteringAnmodningUnntakMapper(
             begrunnelser,
             direkteTilAnmodningBegrunnelser,
             anmodningBegrunnelser,
-            brevbestilling.fritekst
+            brevbestilling.anmodningUnntakFritekst
         )
     }
 

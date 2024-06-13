@@ -1,9 +1,5 @@
 package no.nav.melosys.service.dokument.brev.mapper;
 
-import java.math.BigInteger;
-import java.util.*;
-import java.util.stream.Collectors;
-
 import jakarta.xml.bind.JAXBElement;
 import jakarta.xml.bind.JAXBException;
 
@@ -35,15 +31,11 @@ import no.nav.melosys.service.dokument.brev.mapper.felles.KonvEftaStorbritanniaL
 import org.xml.sax.SAXException;
 
 import java.math.BigInteger;
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Map;
-import java.util.Set;
+import java.util.*;
 import java.util.stream.Collectors;
 
 import static java.util.Map.entry;
-import static no.nav.melosys.domain.kodeverk.Vilkaar.FO_883_2004_ART12_1;
-import static no.nav.melosys.domain.kodeverk.Vilkaar.FO_883_2004_ART12_2;
+import static no.nav.melosys.domain.kodeverk.Vilkaar.*;
 import static no.nav.melosys.service.dokument.brev.mapper.felles.BrevMapperUtils.lagXmlDato;
 import static no.nav.melosys.service.dokument.brev.mapper.felles.VilkaarbegrunnelseFactory.mapArt121BegrunnelseType;
 import static no.nav.melosys.service.dokument.brev.mapper.felles.VilkaarbegrunnelseFactory.mapArt122BegrunnelseType;
@@ -140,14 +132,14 @@ public final class InnvilgelsesbrevMapper implements BrevDataMapper {
             fag.setEndretPeriodeBegrunnelse(EndretPeriodeBegrunnelseKode.fromValue(brevdata.getBegrunnelseKode()));
         }
 
-        Set<VilkaarBegrunnelse> art121Begrunnelser = resultat.hentVilkaarbegrunnelser(FO_883_2004_ART12_1);
+        Set<VilkaarBegrunnelse> art121Begrunnelser = resultat.hentVilkaarbegrunnelser(FO_883_2004_ART12_1, KONV_EFTA_STORBRITANNIA_ART14_1, KONV_EFTA_STORBRITANNIA_ART16_1);
         fag.setArt121Begrunnelse(mapArt121BegrunnelseType(art121Begrunnelser));
 
         if (brevdata.getTuristskip()) {
             fag.setVilkår(VilkaarKode.FTRL_2_12_UNNTAK_TURISTSKIP);
         }
 
-        Set<VilkaarBegrunnelse> art122Begrunnelser = resultat.hentVilkaarbegrunnelser(FO_883_2004_ART12_2);
+        Set<VilkaarBegrunnelse> art122Begrunnelser = resultat.hentVilkaarbegrunnelser(FO_883_2004_ART12_2, KONV_EFTA_STORBRITANNIA_ART14_2, KONV_EFTA_STORBRITANNIA_ART16_3);
         fag.setArt122Begrunnelse(mapArt122BegrunnelseType(art122Begrunnelser));
 
         fag.setFritekst(brevdata.getFritekst());

@@ -11,6 +11,7 @@ import no.nav.melosys.domain.kodeverk.Fullmaktstype;
 import no.nav.melosys.domain.kodeverk.Mottakerroller;
 import no.nav.melosys.domain.kodeverk.brev.Produserbaredokumenter;
 import no.nav.melosys.domain.kodeverk.lovvalgsbestemmelser.Lovvalgbestemmelser_883_2004;
+import no.nav.melosys.domain.kodeverk.lovvalgsbestemmelser.Lovvalgbestemmelser_konv_efta_storbritannia;
 import no.nav.melosys.domain.kodeverk.lovvalgsbestemmelser.trygdeavtale.Lovvalgsbestemmelser_trygdeavtale_gb;
 import no.nav.melosys.exception.FunksjonellException;
 import no.nav.melosys.exception.TekniskException;
@@ -250,7 +251,8 @@ public class BrevmottakerService {
         Lovvalgsperiode lovvalgsperiode =
             behandlingsresultatService.hentBehandlingsresultat(behandling.getId()).hentLovvalgsperiode();
         return lovvalgsperiode.erArtikkel12() || lovvalgsperiode.erArtikkel11_4()
-            || lovvalgsperiode.getBestemmelse() == Lovvalgbestemmelser_883_2004.FO_883_2004_ART11_3B;
+            || lovvalgsperiode.getBestemmelse() == Lovvalgbestemmelser_883_2004.FO_883_2004_ART11_3B
+            || lovvalgsperiode.getBestemmelse() == Lovvalgbestemmelser_konv_efta_storbritannia.KONV_EFTA_STORBRITANNIA_ART13_3B;
     }
 
     private boolean myndighetØnskerA1(UtenlandskMyndighet utenlandskMyndighet) {
