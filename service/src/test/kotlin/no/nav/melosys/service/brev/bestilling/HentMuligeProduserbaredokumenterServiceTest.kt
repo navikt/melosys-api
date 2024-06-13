@@ -1,5 +1,6 @@
 package no.nav.melosys.service.brev.bestilling
 
+import io.getunleash.FakeUnleash
 import io.kotest.matchers.collections.shouldBeEmpty
 import io.kotest.matchers.collections.shouldContainInOrder
 import io.kotest.matchers.collections.shouldHaveSize
@@ -9,7 +10,6 @@ import io.mockk.impl.annotations.MockK
 import io.mockk.junit5.MockKExtension
 import no.nav.melosys.domain.Aktoer
 import no.nav.melosys.domain.Behandling
-import no.nav.melosys.domain.Fagsak
 import no.nav.melosys.domain.FagsakTestFactory
 import no.nav.melosys.domain.kodeverk.Aktoersroller
 import no.nav.melosys.domain.kodeverk.Mottakerroller
@@ -28,6 +28,8 @@ class HentMuligeProduserbaredokumenterServiceTest {
     @MockK
     private lateinit var behandlingService: BehandlingService
 
+    private val fakeUnleash = FakeUnleash()
+
     private lateinit var hentMuligeProduserbaredokumenterService: HentMuligeProduserbaredokumenterService
 
     private lateinit var behandling: Behandling
@@ -35,7 +37,8 @@ class HentMuligeProduserbaredokumenterServiceTest {
 
     @BeforeEach
     fun setUp() {
-        hentMuligeProduserbaredokumenterService = HentMuligeProduserbaredokumenterService(behandlingService)
+        fakeUnleash.enableAll()
+        hentMuligeProduserbaredokumenterService = HentMuligeProduserbaredokumenterService(behandlingService, fakeUnleash)
         behandling = lagBehandling()
         every { behandlingService.hentBehandlingMedSaksopplysninger(BEHANDLING_ID) } returns behandling
     }
@@ -44,8 +47,12 @@ class HentMuligeProduserbaredokumenterServiceTest {
     fun hentMuligeProduserbaredokumenter_tilBruker_returnererKorrektListe() {
         hentMuligeProduserbaredokumenterService.hentMuligeProduserbaredokumenter(BEHANDLING_ID, Mottakerroller.BRUKER)
             .shouldNotBeNull()
-            .shouldHaveSize(2)
-            .shouldContainInOrder(Produserbaredokumenter.MANGELBREV_BRUKER, Produserbaredokumenter.GENERELT_FRITEKSTBREV_BRUKER)
+            .shouldHaveSize(3)
+            .shouldContainInOrder(
+                Produserbaredokumenter.MANGELBREV_BRUKER,
+                Produserbaredokumenter.INNHENTING_AV_INNTEKTSOPPLYSNINGER,
+                Produserbaredokumenter.GENERELT_FRITEKSTBREV_BRUKER
+            )
     }
 
     @Test
@@ -80,10 +87,11 @@ class HentMuligeProduserbaredokumenterServiceTest {
 
         hentMuligeProduserbaredokumenterService.hentMuligeProduserbaredokumenter(BEHANDLING_ID, Mottakerroller.BRUKER)
             .shouldNotBeNull()
-            .shouldHaveSize(3)
+            .shouldHaveSize(4)
             .shouldContainInOrder(
                 Produserbaredokumenter.MELDING_FORVENTET_SAKSBEHANDLINGSTID_SOKNAD,
                 Produserbaredokumenter.MANGELBREV_BRUKER,
+                Produserbaredokumenter.INNHENTING_AV_INNTEKTSOPPLYSNINGER,
                 Produserbaredokumenter.GENERELT_FRITEKSTBREV_BRUKER
             )
     }
@@ -96,10 +104,11 @@ class HentMuligeProduserbaredokumenterServiceTest {
 
         hentMuligeProduserbaredokumenterService.hentMuligeProduserbaredokumenter(BEHANDLING_ID, Mottakerroller.BRUKER)
             .shouldNotBeNull()
-            .shouldHaveSize(3)
+            .shouldHaveSize(4)
             .shouldContainInOrder(
                 Produserbaredokumenter.MELDING_FORVENTET_SAKSBEHANDLINGSTID_SOKNAD,
                 Produserbaredokumenter.MANGELBREV_BRUKER,
+                Produserbaredokumenter.INNHENTING_AV_INNTEKTSOPPLYSNINGER,
                 Produserbaredokumenter.GENERELT_FRITEKSTBREV_BRUKER
             )
     }
@@ -158,8 +167,12 @@ class HentMuligeProduserbaredokumenterServiceTest {
 
         hentMuligeProduserbaredokumenterService.hentMuligeProduserbaredokumenter(BEHANDLING_ID, Mottakerroller.BRUKER)
             .shouldNotBeNull()
-            .shouldHaveSize(2)
-            .shouldContainInOrder(Produserbaredokumenter.MANGELBREV_BRUKER, Produserbaredokumenter.GENERELT_FRITEKSTBREV_BRUKER)
+            .shouldHaveSize(3)
+            .shouldContainInOrder(
+                Produserbaredokumenter.MANGELBREV_BRUKER,
+                Produserbaredokumenter.INNHENTING_AV_INNTEKTSOPPLYSNINGER,
+                Produserbaredokumenter.GENERELT_FRITEKSTBREV_BRUKER
+            )
     }
 
     private fun lagBehandling(): Behandling = Behandling().apply { fagsak = FagsakTestFactory.lagFagsak() }
