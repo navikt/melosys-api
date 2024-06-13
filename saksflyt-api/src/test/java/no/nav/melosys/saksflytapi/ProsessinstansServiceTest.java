@@ -769,7 +769,7 @@ class ProsessinstansServiceTest {
 
     @Test
     void opprettProsessinstanserArsavregning() {
-        Skattehendelse skattehendelse = new Skattehendelse("2023", "456789");
+        Skattehendelse skattehendelse = new Skattehendelse("2023", "456789", "ny");
 
 
         prosessinstansService.opprettArsavregningsBehandlingProsessflyt(skattehendelse);
