@@ -228,7 +228,7 @@ public class DokgenService {
 
     private boolean erTogglet(Produserbaredokumenter produserbartDokument) {
         return switch (produserbartDokument) {
-            case ORIENTERING_ANMODNING_UNNTAK, INNHENTING_AV_INNTEKTSOPPLYSNINGER ->
+            case INNHENTING_AV_INNTEKTSOPPLYSNINGER ->
                 unleash.isEnabled(ToggleName.MELOSYS_KONVENSJON_EFTA_LAND_OG_STORBRITANNIA);
             default -> true;
         };
