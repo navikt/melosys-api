@@ -8,6 +8,7 @@ import no.nav.melosys.exception.FunksjonellException;
 import no.nav.melosys.featuretoggle.ToggleName;
 import no.nav.melosys.service.LandvelgerService;
 import no.nav.melosys.service.behandling.BehandlingsresultatService;
+import no.nav.melosys.service.dokument.brev.mapper.felles.KonvEftaStorbritanniaLovvalgbestemmelser;
 import no.nav.melosys.statistikk.utstedt_a1.integrasjon.UtstedtA1AivenProducer;
 import no.nav.melosys.statistikk.utstedt_a1.integrasjon.dto.A1TypeUtstedelse;
 import no.nav.melosys.statistikk.utstedt_a1.integrasjon.dto.Lovvalgsbestemmelse;
@@ -73,7 +74,11 @@ public class UtstedtA1Service {
         final String aktørID = fagsak.hentBrukersAktørID();
 
         final Lovvalgsperiode lovvalgsperiode = behandlingsresultat.hentLovvalgsperiode();
-        final Lovvalgsbestemmelse artikkel = Lovvalgsbestemmelse.av(lovvalgsperiode.getBestemmelse());
+        boolean erStorbritannia = lovvalgsperiode.getBestemmelse().name().startsWith("KONV_EFTA");
+        final Lovvalgsbestemmelse artikkel = erStorbritannia
+            ? Lovvalgsbestemmelse.avKonvensjonEftaStorbritannia((KonvEftaStorbritanniaLovvalgbestemmelser) lovvalgsperiode.getBestemmelse())
+            : Lovvalgsbestemmelse.av(lovvalgsperiode.getBestemmelse());
+        
         final String utsendtTilLand = hentUtsendtTilLand(behandlingID, lovvalgsperiode);
 
         final VedtakMetadata vedtakMetadata = behandlingsresultat.getVedtakMetadata();

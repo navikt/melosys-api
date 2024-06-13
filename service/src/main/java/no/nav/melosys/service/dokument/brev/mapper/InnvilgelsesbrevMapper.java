@@ -1,10 +1,7 @@
 package no.nav.melosys.service.dokument.brev.mapper;
 
 import java.math.BigInteger;
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Map;
-import java.util.Set;
+import java.util.*;
 import java.util.stream.Collectors;
 
 import jakarta.xml.bind.JAXBElement;
@@ -23,6 +20,7 @@ import no.nav.melosys.domain.kodeverk.Maritimtyper;
 import no.nav.melosys.domain.kodeverk.Vedtakstyper;
 import no.nav.melosys.domain.kodeverk.begrunnelser.Fartsomrader;
 import no.nav.melosys.domain.kodeverk.begrunnelser.Medfolgende_barn_begrunnelser;
+import no.nav.melosys.domain.kodeverk.lovvalgsbestemmelser.Lovvalgbestemmelser_konv_efta_storbritannia;
 import no.nav.melosys.domain.mottatteopplysninger.MottatteOpplysningerData;
 import no.nav.melosys.domain.mottatteopplysninger.data.arbeidssteder.MaritimtArbeid;
 import no.nav.melosys.domain.person.familie.AvklarteMedfolgendeFamilie;
@@ -122,7 +120,7 @@ public final class InnvilgelsesbrevMapper implements BrevDataMapper {
             .ifPresent(fag::setAnmodningsPeriodeSvarType);
 
         Lovvalgsperiode periode = brevdata.getLovvalgsperiode();
-        Boolean erStorbritannia = periode.getBestemmelse().name().startsWith("KONV_EFTA");
+        Boolean erStorbritannia = Arrays.stream(Lovvalgbestemmelser_konv_efta_storbritannia.values()).anyMatch(bestemmelse -> bestemmelse == periode.getBestemmelse());
 
         fag.setLovvalgsbestemmelse(LovvalgsbestemmelseKodeMapper.map(
             erStorbritannia ? KonvEftaStorbritanniaLovvalgbestemmelser.GB_KONV_LOVVALGBESTEMMELSE_MAP.get(periode.getBestemmelse()) : periode.getBestemmelse())

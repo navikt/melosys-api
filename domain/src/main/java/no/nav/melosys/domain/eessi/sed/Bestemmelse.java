@@ -83,7 +83,7 @@ public enum Bestemmelse {
             .put(Overgangsregelbestemmelser.FO_1408_1971_ART14C_B, Bestemmelse.ART_14_c_b)
             .build());
 
-    public static final Map<LovvalgBestemmelse, Bestemmelse> GB_KONV_BESTEMMELSE_MAP =
+    private static final Map<LovvalgBestemmelse, Bestemmelse> GB_KONV_BESTEMMELSE_MAP =
         Maps.newHashMap(ImmutableMap.<LovvalgBestemmelse, Bestemmelse>builder()
             .put(Tilleggsbestemmelser_konv_efta_storbritannia.KONV_EFTA_STORBRITANNIA_ART13_4_1, Bestemmelse.ART_11_4)
             .put(Tilleggsbestemmelser_konv_efta_storbritannia.KONV_EFTA_STORBRITANNIA_ART13_2, Bestemmelse.ART_11_2)

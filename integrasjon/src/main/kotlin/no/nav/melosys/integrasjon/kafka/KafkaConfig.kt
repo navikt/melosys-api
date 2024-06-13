@@ -63,7 +63,7 @@ class KafkaConfig(
         @Value("\${kafka.aiven.soknad-mottak.groupid}") groupId: String
     ): KafkaListenerContainerFactory<ConcurrentMessageListenerContainer<String, SoknadMottatt>> =
         kafkaListenerContainerFactory<SoknadMottatt>(kafkaProperties, groupId)
-
+//
 //    @Bean
 //    fun aivenSkattehendelserListenerContainerFactory(
 //        kafkaProperties: KafkaProperties,
