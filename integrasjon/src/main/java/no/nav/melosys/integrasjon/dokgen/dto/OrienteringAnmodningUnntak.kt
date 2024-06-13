@@ -50,6 +50,6 @@ class OrienteringAnmodningUnntak(
         begrunnelser,
         direkteTilAnmodningBegrunnelser,
         anmodningBegrunnelser,
-        brevbestilling.fritekst
+        brevbestilling.anmodningUnntakFritekst
     )
 }
