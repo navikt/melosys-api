@@ -218,12 +218,27 @@ class BrevmalListeBygger(
     }
 
     private fun lagBrevmalForINNHENTING_AV_INNTEKTSOPPLYSNINGER(produserbartDokument: Produserbaredokumenter): BrevmalTypeDto {
+        val feltvalgAlternativ = mutableListOf(
+            FeltvalgAlternativDto(
+                FeltvalgAlternativKode.STANDARD,
+            ),
+            FeltvalgAlternativDto(
+                FeltvalgAlternativKode.FRITEKST.kode,
+                "Fritekst",
+                true
+            )
+        )
+        val felter = BrevmalFeltDto.Builder()
+            .medKodeOgBeskrivelse(BrevmalFeltKode.INNLEDNING_FRITEKST)
+            .medFeltType(FeltType.FRITEKST)
+            .erPåkrevd()
+            .medValg(FeltValgDto(feltvalgAlternativ, FeltValgType.CHECKBOX))
+            .build()
         return BrevmalTypeDto.Builder()
             .medType(produserbartDokument)
             .medFelter(
                 listOf(
-                    lagErstatterStandardtekstRadioFritekst(FeltvalgAlternativDto(FeltvalgAlternativKode.STANDARD)),
-                    FELT_MANGLER_FRITEKST
+                    felter
                 )
             )
             .build()
