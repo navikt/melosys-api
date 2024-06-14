@@ -4,6 +4,7 @@ import no.nav.melosys.domain.Lovvalgsperiode
 import no.nav.melosys.domain.kodeverk.LovvalgBestemmelse
 import no.nav.melosys.domain.kodeverk.begrunnelser.Kontroll_begrunnelser
 import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingstema
+import no.nav.melosys.domain.kodeverk.lovvalgsbestemmelser.Lovvalgbestemmelser_883_2004
 import no.nav.melosys.domain.kodeverk.lovvalgsbestemmelser.Lovvalgbestemmelser_konv_efta_storbritannia
 import no.nav.melosys.domain.kodeverk.lovvalgsbestemmelser.trygdeavtale.Lovvalgsbestemmelser_trygdeavtale_au
 import no.nav.melosys.domain.kodeverk.lovvalgsbestemmelser.trygdeavtale.Lovvalgsbestemmelser_trygdeavtale_ca
@@ -82,7 +83,9 @@ object FerdigbehandlingKontroll {
     fun periodeOver24Mnd(kontrollData: FerdigbehandlingKontrollData): Kontrollfeil? {
         val lovvalgsperiode = kontrollData.hentLovvalgsperiode()
 
-        if (lovvalgsperiode.erArtikkel12() && PeriodeRegler.periodeOver24Måneder(lovvalgsperiode.fom, lovvalgsperiode.tom)) {
+        if (!lovvalgsperiode.erAvslått() && erBestemmelseDerInnvilgetMedlemskapsperiodeIkkeKanOverskride24mnd(lovvalgsperiode.bestemmelse) &&
+            PeriodeRegler.periodeOver24Måneder(lovvalgsperiode.fom, lovvalgsperiode.tom)
+        ) {
             return Kontrollfeil(Kontroll_begrunnelser.PERIODEN_OVER_24_MD)
         }
 
@@ -256,6 +259,14 @@ object FerdigbehandlingKontroll {
 
     private fun erBestemmelseDerTrygdeavtaleAttestSendesCanada(bestemmelse: LovvalgBestemmelse): Boolean =
         bestemmelse in Lovvalgsbestemmelser_trygdeavtale_ca.values()
+
+    private fun erBestemmelseDerInnvilgetMedlemskapsperiodeIkkeKanOverskride24mnd(bestemmelse: LovvalgBestemmelse): Boolean =
+        bestemmelse in listOf(
+            Lovvalgbestemmelser_883_2004.FO_883_2004_ART12_1,
+            Lovvalgbestemmelser_883_2004.FO_883_2004_ART12_2,
+            Lovvalgbestemmelser_konv_efta_storbritannia.KONV_EFTA_STORBRITANNIA_ART14_1,
+            Lovvalgbestemmelser_konv_efta_storbritannia.KONV_EFTA_STORBRITANNIA_ART14_2,
+        )
 
     private fun FerdigbehandlingKontrollData.hentLovvalgsperiode() =
         this.lovvalgsperiode ?: throw TekniskException("Lovvalgsperiode kan ikke være null")
