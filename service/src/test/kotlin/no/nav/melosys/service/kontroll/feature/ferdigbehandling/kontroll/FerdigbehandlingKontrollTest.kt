@@ -516,6 +516,60 @@ class FerdigbehandlingKontrollTest {
         kontrollfeil.shouldNotBeNull().kode.shouldBe(Kontroll_begrunnelser.MANGLENDE_REGISTRERTE_ADRESSE_REPRESENTANT)
     }
 
+    @Test
+    fun `innvilget medlemsskapsperiode over 24 måneder med lovvalgsbestemmelse KONV_EFTA_STORBRITANNIA_ART14_1 skal gi kontrollfeil`() {
+        val lovvalgsperiode = Lovvalgsperiode().apply {
+            id = 1
+            fom = LocalDate.now()
+            tom = LocalDate.now().plusMonths(25)
+            innvilgelsesresultat = InnvilgelsesResultat.INNVILGET
+            bestemmelse = Lovvalgbestemmelser_konv_efta_storbritannia.KONV_EFTA_STORBRITANNIA_ART14_1
+        }
+        val kontrollData = lagFerdigbehandlingKontrollData(
+            lovvalgsperiode = lovvalgsperiode,
+        )
+
+        val kontrollfeil = FerdigbehandlingKontroll.periodeOver24Mnd(kontrollData)
+
+        kontrollfeil.shouldNotBeNull().kode.shouldBe(Kontroll_begrunnelser.PERIODEN_OVER_24_MD)
+    }
+
+    @Test
+    fun `avslått medlemsskapsperiode over 24 måneder med lovvalgsbestemmelse KONV_EFTA_STORBRITANNIA_ART14_1 skal ikke gi kontrollfeil`() {
+        val lovvalgsperiode = Lovvalgsperiode().apply {
+            id = 1
+            fom = LocalDate.now()
+            tom = LocalDate.now().plusMonths(25)
+            innvilgelsesresultat = InnvilgelsesResultat.AVSLAATT
+            bestemmelse = Lovvalgbestemmelser_konv_efta_storbritannia.KONV_EFTA_STORBRITANNIA_ART14_1
+        }
+        val kontrollData = lagFerdigbehandlingKontrollData(
+            lovvalgsperiode = lovvalgsperiode,
+        )
+
+        val kontrollfeil = FerdigbehandlingKontroll.periodeOver24Mnd(kontrollData)
+
+        kontrollfeil.shouldBeNull()
+    }
+
+    @Test
+    fun `innvilget medlemsskapsperiode over 24 måneder med lovvalgsbestemmelse KONV_EFTA_STORBRITANNIA_ART16_3 skal ikke gi kontrollfeil`() {
+        val lovvalgsperiode = Lovvalgsperiode().apply {
+            id = 1
+            fom = LocalDate.now()
+            tom = LocalDate.now().plusMonths(25)
+            innvilgelsesresultat = InnvilgelsesResultat.INNVILGET
+            bestemmelse = Lovvalgbestemmelser_konv_efta_storbritannia.KONV_EFTA_STORBRITANNIA_ART16_3
+        }
+        val kontrollData = lagFerdigbehandlingKontrollData(
+            lovvalgsperiode = lovvalgsperiode,
+        )
+
+        val kontrollfeil = FerdigbehandlingKontroll.periodeOver24Mnd(kontrollData)
+
+        kontrollfeil.shouldBeNull()
+    }
+
     private fun lagAktoerFullmektigOrganisasjon(): Aktoer {
         val aktoer = Aktoer()
         aktoer.rolle = Aktoersroller.FULLMEKTIG
