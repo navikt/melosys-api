@@ -1,7 +1,7 @@
 package no.nav.melosys.service.avgift.aarsavregning
 
 import jakarta.ws.rs.NotAllowedException
-import jakarta.ws.rs.NotAllowedException
+import jakarta.ws.rs.NotFoundException
 import no.nav.melosys.domain.Behandlingsresultat
 import no.nav.melosys.domain.Medlemskapsperiode
 import no.nav.melosys.domain.avgift.Aarsavregning
@@ -14,7 +14,7 @@ import no.nav.melosys.exception.IkkeFunnetException
 import no.nav.melosys.integrasjon.faktureringskomponenten.FaktureringskomponentenConsumer
 import no.nav.melosys.integrasjon.faktureringskomponenten.dto.BeregnTotalBeløpDto
 import no.nav.melosys.repository.AarsavregningRepository
-import no.nav.melosys.repository.BehandlingRepository
+import no.nav.melosys.repository.BehandlingsresultatRepository
 import no.nav.melosys.sikkerhet.context.SubjectHandler
 import org.springframework.stereotype.Service
 import org.springframework.transaction.annotation.Transactional
@@ -25,7 +25,7 @@ import java.time.LocalDate
 class ÅrsavregningService(
     private val faktureringskomponentenConsumer: FaktureringskomponentenConsumer,
     private val aarsavregningRepository: AarsavregningRepository,
-    private val behandlingRepository: BehandlingRepository
+    private val behandlingsresultatRepository: BehandlingsresultatRepository
 ) {
     fun beregnTotalbeløpForPeriode(beregnTotalBeløpDto: BeregnTotalBeløpDto): BigDecimal {
         val saksbehandlerIdent = SubjectHandler.getInstance().getUserID()
@@ -46,6 +46,16 @@ class ÅrsavregningService(
             nyttTotalbeloep = aarsavregning.nyttTotalbeloep,
             tilFaktureringBeloep = aarsavregning.tilFaktureringBeloep
         )
+    }
+
+    fun opprettNyÅrsavregning(behandlingsId: Long, gjelderPeriode: Int): Long {
+        val behandlingsresultat = behandlingsresultatRepository.findById(behandlingsId)
+        if (behandlingsresultat.isPresent) {
+            oppretteÅrsavregning(behandlingsresultat.get(), gjelderPeriode)
+            return behandlingsId
+        } else {
+            throw NotFoundException("Finner ingen tidligere behandlingsresultat")
+        }
     }
 
     @Transactional

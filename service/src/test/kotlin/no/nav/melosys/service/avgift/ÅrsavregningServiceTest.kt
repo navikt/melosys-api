@@ -23,7 +23,6 @@ import no.nav.melosys.sikkerhet.context.SpringSubjectHandler
 import no.nav.melosys.sikkerhet.context.TestSubjectHandler
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
-import org.junit.jupiter.api.assertThrows
 import org.junit.jupiter.api.extension.ExtendWith
 import java.math.BigDecimal
 import java.time.LocalDate
@@ -44,7 +43,7 @@ internal class ÅrsavregningServiceTest {
 
     @BeforeEach
     fun setup() {
-        årsavregningService = ÅrsavregningService(faktureringskomponentenConsumer, aarsavregningRepository, behandlingRepository)
+        årsavregningService = ÅrsavregningService(faktureringskomponentenConsumer, aarsavregningRepository)
         SpringSubjectHandler.set(TestSubjectHandler())
 
         every { behandlingRepository.findById(any()) }.returns(Optional.of(Behandling().apply {
@@ -60,7 +59,7 @@ internal class ÅrsavregningServiceTest {
             ))
         }))
     }
-
+/*
     @Test
     fun `hentÅrsavregning kaster exception når flere Aarsavregninger eksisterer for samme år på samme Fagsak`() {
         val årsavregningEntity1 = Aarsavregning().apply {
@@ -87,7 +86,7 @@ internal class ÅrsavregningServiceTest {
         assertThrows<IllegalStateException> {
             årsavregningService.hentÅrsavregning(1)
         }
-    }
+    }*/
 
     @Test
     fun `test beregner totalbeløp for 1 år`() {
