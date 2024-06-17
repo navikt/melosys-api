@@ -15,6 +15,7 @@ import no.nav.melosys.integrasjon.faktureringskomponenten.dto.BeregnTotalBeløpD
 import no.nav.melosys.integrasjon.faktureringskomponenten.dto.FakturaseriePeriodeDto
 import no.nav.melosys.repository.AarsavregningRepository
 import no.nav.melosys.repository.BehandlingRepository
+import no.nav.melosys.repository.BehandlingsresultatRepository
 import no.nav.melosys.service.avgift.aarsavregning.MedlemskapsperiodeForAvgift
 import no.nav.melosys.service.avgift.aarsavregning.Trygdeavgiftsgrunnlag
 import no.nav.melosys.service.avgift.aarsavregning.Årsavregning
@@ -23,6 +24,7 @@ import no.nav.melosys.sikkerhet.context.SpringSubjectHandler
 import no.nav.melosys.sikkerhet.context.TestSubjectHandler
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
+import org.junit.jupiter.api.assertThrows
 import org.junit.jupiter.api.extension.ExtendWith
 import java.math.BigDecimal
 import java.time.LocalDate
@@ -36,6 +38,8 @@ internal class ÅrsavregningServiceTest {
     private lateinit var aarsavregningRepository: AarsavregningRepository
     @RelaxedMockK
     private lateinit var behandlingRepository: BehandlingRepository
+    @RelaxedMockK
+    private lateinit var behandlingsresultatRepository: BehandlingsresultatRepository
 
     private lateinit var årsavregningService: ÅrsavregningService
 
@@ -43,7 +47,7 @@ internal class ÅrsavregningServiceTest {
 
     @BeforeEach
     fun setup() {
-        årsavregningService = ÅrsavregningService(faktureringskomponentenConsumer, aarsavregningRepository)
+        årsavregningService = ÅrsavregningService(faktureringskomponentenConsumer, aarsavregningRepository, behandlingsresultatRepository)
         SpringSubjectHandler.set(TestSubjectHandler())
 
         every { behandlingRepository.findById(any()) }.returns(Optional.of(Behandling().apply {
@@ -59,9 +63,9 @@ internal class ÅrsavregningServiceTest {
             ))
         }))
     }
-/*
+
     @Test
-    fun `hentÅrsavregning kaster exception når flere Aarsavregninger eksisterer for samme år på samme Fagsak`() {
+    fun `opprettNyÅrsavregning kaster exception når flere Aarsavregninger eksisterer for samme år på samme Fagsak`() {
         val årsavregningEntity1 = Aarsavregning().apply {
             aar = 2023
             behandlingsresultat = Behandlingsresultat()
@@ -84,9 +88,9 @@ internal class ÅrsavregningServiceTest {
         }))
 
         assertThrows<IllegalStateException> {
-            årsavregningService.hentÅrsavregning(1)
+            årsavregningService.opprettNyÅrsavregning(1, 2023)
         }
-    }*/
+    }
 
     @Test
     fun `test beregner totalbeløp for 1 år`() {

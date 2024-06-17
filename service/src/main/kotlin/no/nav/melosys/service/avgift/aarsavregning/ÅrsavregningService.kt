@@ -48,6 +48,7 @@ class ÅrsavregningService(
         )
     }
 
+    @Transactional
     fun opprettNyÅrsavregning(behandlingsId: Long, gjelderPeriode: Int): Long {
         val behandlingsresultat = behandlingsresultatRepository.findById(behandlingsId)
         if (behandlingsresultat.isPresent) {
