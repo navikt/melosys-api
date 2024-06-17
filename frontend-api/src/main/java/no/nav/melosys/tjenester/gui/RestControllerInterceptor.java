@@ -1,11 +1,10 @@
 package no.nav.melosys.tjenester.gui;
 
-import no.nav.melosys.service.AdminTjeneste;
-import no.nav.melosys.sikkerhet.context.ThreadLocalAccessInfo;
-import org.springframework.web.servlet.HandlerInterceptor;
-
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
+import no.nav.melosys.service.AdminController;
+import no.nav.melosys.sikkerhet.context.ThreadLocalAccessInfo;
+import org.springframework.web.servlet.HandlerInterceptor;
 
 public class RestControllerInterceptor implements HandlerInterceptor {
 
@@ -22,7 +21,7 @@ public class RestControllerInterceptor implements HandlerInterceptor {
     }
 
     private boolean isAdminRequest(HttpServletRequest request) {
-        boolean hasApiKeyHeader = request.getHeader(AdminTjeneste.API_KEY_HEADER) != null;
+        boolean hasApiKeyHeader = request.getHeader(AdminController.API_KEY_HEADER) != null;
         boolean requestStartsWithAdmin = request.getRequestURI().startsWith("/admin/");
         return hasApiKeyHeader && requestStartsWithAdmin;
     }
