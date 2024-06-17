@@ -48,11 +48,17 @@ public class UtstedtA1Service {
         Behandlingsresultat behandlingsresultat = behandlingsresultatService.hentBehandlingsresultat(behandlingID);
         if (behandlingsresultat.a1Produseres()) {
             var lovvalgsbestemmelse = behandlingsresultat.finnLovvalgsperiode().map(Lovvalgsperiode::getBestemmelse).orElse(null);
-            if (unleash.isEnabled(ToggleName.MELOSYS_KONVENSJON_EFTA_LAND_OG_STORBRITANNIA) && Arrays.stream(Lovvalgbestemmelser_konv_efta_storbritannia.values()).anyMatch(bestemmelse -> bestemmelse == lovvalgsbestemmelse)) {
-                // TODO Thang fikser sending for GB-bestemmelser i JIRA-sak MELOSYS-6651
+            var erStorbritannia = Arrays.stream(Lovvalgbestemmelser_konv_efta_storbritannia.values()).anyMatch(bestemmelse -> bestemmelse == lovvalgsbestemmelse);
+
+            if (unleash.isEnabled(ToggleName.MELOSYS_KONVENSJON_EFTA_LAND_OG_STORBRITANNIA) && erStorbritannia) {
+                log.info("Produserer melding om utstedt A1(GB-bestemmelser) for behandling {}, med bestemmelse {}", behandlingID, lovvalgsbestemmelse);
+                sendMeldingOmUtstedtA1(behandlingsresultat);
+            }
+            if (!unleash.isEnabled(ToggleName.MELOSYS_KONVENSJON_EFTA_LAND_OG_STORBRITANNIA) && erStorbritannia) {
                 log.info("Produserer ikke melding om utstedt A1 for behandling {} siden vi ikke støtter GB-bestemmelser enda", behandlingID);
                 return;
             }
+
             log.info("Produserer melding om utstedt A1 for behandling {}", behandlingID);
             sendMeldingOmUtstedtA1(behandlingsresultat);
         } else {
@@ -74,11 +80,12 @@ public class UtstedtA1Service {
         final String aktørID = fagsak.hentBrukersAktørID();
 
         final Lovvalgsperiode lovvalgsperiode = behandlingsresultat.hentLovvalgsperiode();
-        boolean erStorbritannia = lovvalgsperiode.getBestemmelse().name().startsWith("KONV_EFTA");
+        boolean erStorbritannia = Arrays.stream(Lovvalgbestemmelser_konv_efta_storbritannia.values()).anyMatch(bestemmelse -> bestemmelse == lovvalgsperiode.getBestemmelse());
+
         final Lovvalgsbestemmelse artikkel = erStorbritannia
-            ? Lovvalgsbestemmelse.avKonvensjonEftaStorbritannia((KonvEftaStorbritanniaLovvalgbestemmelser) lovvalgsperiode.getBestemmelse())
+            ? Lovvalgsbestemmelse.avKonvensjonEftaStorbritannia((Lovvalgbestemmelser_konv_efta_storbritannia) lovvalgsperiode.getBestemmelse())
             : Lovvalgsbestemmelse.av(lovvalgsperiode.getBestemmelse());
-        
+
         final String utsendtTilLand = hentUtsendtTilLand(behandlingID, lovvalgsperiode);
 
         final VedtakMetadata vedtakMetadata = behandlingsresultat.getVedtakMetadata();

@@ -112,7 +112,7 @@ public final class InnvilgelsesbrevMapper implements BrevDataMapper {
             .ifPresent(fag::setAnmodningsPeriodeSvarType);
 
         Lovvalgsperiode periode = brevdata.getLovvalgsperiode();
-        Boolean erStorbritannia = Arrays.stream(Lovvalgbestemmelser_konv_efta_storbritannia.values()).anyMatch(bestemmelse -> bestemmelse == periode.getBestemmelse());
+        boolean erStorbritannia = Arrays.stream(Lovvalgbestemmelser_konv_efta_storbritannia.values()).anyMatch(bestemmelse -> bestemmelse == periode.getBestemmelse());
 
         fag.setLovvalgsbestemmelse(LovvalgsbestemmelseKodeMapper.map(
             erStorbritannia ? KonvEftaStorbritanniaLovvalgbestemmelser.GB_KONV_LOVVALGBESTEMMELSE_MAP.get(periode.getBestemmelse()) : periode.getBestemmelse())

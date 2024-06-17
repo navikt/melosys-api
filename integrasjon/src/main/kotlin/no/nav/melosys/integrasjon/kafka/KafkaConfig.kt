@@ -63,17 +63,17 @@ class KafkaConfig(
         @Value("\${kafka.aiven.soknad-mottak.groupid}") groupId: String
     ): KafkaListenerContainerFactory<ConcurrentMessageListenerContainer<String, SoknadMottatt>> =
         kafkaListenerContainerFactory<SoknadMottatt>(kafkaProperties, groupId)
-//
-//    @Bean
-//    fun aivenSkattehendelserListenerContainerFactory(
-//        kafkaProperties: KafkaProperties,
-//        @Value("\${kafka.aiven.skattehendelser.groupid}") groupId: String
-//    ): KafkaConsumerContainerFactory<Skattehendelse> =
-//        kafkaListenerContainerFactory<Skattehendelse>(kafkaProperties, groupId).apply {
-//            setCommonErrorHandler(CommonContainerStoppingErrorHandler())
-//
-//            containerProperties.ackMode = ContainerProperties.AckMode.RECORD
-//        }
+
+    @Bean
+    fun aivenSkattehendelserListenerContainerFactory(
+        kafkaProperties: KafkaProperties,
+        @Value("\${kafka.aiven.skattehendelser.groupid}") groupId: String
+    ): KafkaConsumerContainerFactory<Skattehendelse> =
+        kafkaListenerContainerFactory<Skattehendelse>(kafkaProperties, groupId).apply {
+            setCommonErrorHandler(CommonContainerStoppingErrorHandler())
+
+            containerProperties.ackMode = ContainerProperties.AckMode.RECORD
+        }
 
     @Bean
     fun producerFactoryMelosysHendelse(objectMapper: ObjectMapper): ProducerFactory<String, MelosysHendelse> =
