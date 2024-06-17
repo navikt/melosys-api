@@ -70,9 +70,12 @@ internal class ÅrsavregningServiceTest {
             aar = 2023
             behandlingsresultat = Behandlingsresultat()
         }
+        val eksisterendeBehandling = Behandling()
+        eksisterendeBehandling.id = 1L
         every { aarsavregningRepository.findById(1L) }.returns(Optional.of(årsavregningEntity1))
         every { aarsavregningRepository.eksisterendeÅrsavregningFinnesPåÅr(1, 2023) }.returns(true)
         every { aarsavregningRepository.eksisterendeÅrsavregningFinnesPåÅr(2, 2023) }.returns(true)
+        every { behandlingsresultatRepository.findById(1L) }.returns(Optional.of(Behandlingsresultat().apply { behandling = eksisterendeBehandling }))
 
         every { behandlingRepository.findById(any()) }.returns(Optional.of(Behandling().apply {
             fagsak = Fagsak(saksnummer = "1", type = Sakstyper.EU_EOS, status = Saksstatuser.OPPRETTET, tema = Sakstemaer.MEDLEMSKAP_LOVVALG, behandlinger = mutableListOf(

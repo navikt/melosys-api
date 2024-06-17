@@ -1,6 +1,5 @@
 package no.nav.melosys.service.avgift.aarsavregning
 
-import jakarta.ws.rs.NotAllowedException
 import jakarta.ws.rs.NotFoundException
 import no.nav.melosys.domain.Behandlingsresultat
 import no.nav.melosys.domain.Medlemskapsperiode
@@ -62,7 +61,7 @@ class ÅrsavregningService(
     @Transactional
     fun oppretteÅrsavregning(behandlingsresultat: Behandlingsresultat, gjelderPeriode: Int) {
         if (aarsavregningRepository.eksisterendeÅrsavregningFinnesPåÅr(behandlingsresultat.behandling.id, gjelderPeriode))
-            throw NotAllowedException("Du har ikke lov til å ha 2 åpne behandlinger for årsavregning på samme år")
+            throw IllegalStateException("Du har ikke lov til å ha 2 åpne behandlinger for årsavregning på samme år")
 
         Aarsavregning().apply {
             aar = gjelderPeriode
