@@ -31,7 +31,7 @@ class JournalfoeringBase(
     protected val testDataGenerator: TestDataGenerator,
     protected val journalføringService: JournalfoeringService,
     protected val oppgaveService: OppgaveService,
-    protected val extensionForWireMock: Extension? = null
+    extensionForWireMock: Extension? = null
 ) : ComponentTestBase() {
 
     protected val mockServer: WireMockServer =
