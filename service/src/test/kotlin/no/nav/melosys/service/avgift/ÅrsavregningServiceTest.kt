@@ -73,8 +73,8 @@ internal class ÅrsavregningServiceTest {
         val eksisterendeBehandling = Behandling()
         eksisterendeBehandling.id = 1L
         every { aarsavregningRepository.findById(1L) }.returns(Optional.of(årsavregningEntity1))
-        every { aarsavregningRepository.eksisterendeÅrsavregningFinnesPåÅr(1, 2023) }.returns(true)
-        every { aarsavregningRepository.eksisterendeÅrsavregningFinnesPåÅr(2, 2023) }.returns(true)
+        every { aarsavregningRepository.eksisterendeÅrsavregningFinnesPåÅr(1, 2023) }.returns(BigDecimal(1))
+        every { aarsavregningRepository.eksisterendeÅrsavregningFinnesPåÅr(2, 2023) }.returns(BigDecimal(1))
         every { behandlingsresultatRepository.findById(1L) }.returns(Optional.of(Behandlingsresultat().apply { behandling = eksisterendeBehandling }))
 
         every { behandlingRepository.findById(any()) }.returns(Optional.of(Behandling().apply {
