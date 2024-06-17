@@ -8,16 +8,14 @@ import java.util.*
 
 interface AarsavregningRepository : JpaRepository<Aarsavregning, Long> {
 
-    fun findByIdAndAar(id: Long, aar: Int): Optional<Aarsavregning>
-
     @Query("""
         SELECT COUNT(a.id) > 0
         FROM aarsavregning a
         JOIN behandling b ON a.id = b.id
-        WHERE a.aar = :year
+        WHERE a.aar = :år
           AND b.saksnummer = (SELECT beh.fagsak_saksnummer FROM behandling beh WHERE beh.id = :behandlingId)
           AND b.beh_type = 'ÅRSAVREGNING'
           AND b.status <> 'AVSLUTTET'
     """, nativeQuery = true)
-    fun existsAarsavregningByBehandlingAndYear(@Param("behandlingId") behandlingId: Long, @Param("year") year: Int): Boolean
+    fun eksisterendeÅrsavregningFinnesPåÅr(@Param("behandlingId") behandlingId: Long, @Param("aar") år: Int): Boolean
 }

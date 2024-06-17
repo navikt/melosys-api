@@ -71,8 +71,8 @@ internal class ÅrsavregningServiceTest {
             behandlingsresultat = Behandlingsresultat()
         }
         every { aarsavregningRepository.findById(1L) }.returns(Optional.of(årsavregningEntity1))
-        every { aarsavregningRepository.findByIdAndAar(1, 2023) }.returns(Optional.of(årsavregningEntity1))
-        every { aarsavregningRepository.findByIdAndAar(2, 2023) }.returns(Optional.of(årsavregningEntity1))
+        every { aarsavregningRepository.eksisterendeÅrsavregningFinnesPåÅr(1, 2023) }.returns(true)
+        every { aarsavregningRepository.eksisterendeÅrsavregningFinnesPåÅr(2, 2023) }.returns(true)
 
         every { behandlingRepository.findById(any()) }.returns(Optional.of(Behandling().apply {
             fagsak = Fagsak(saksnummer = "1", type = Sakstyper.EU_EOS, status = Saksstatuser.OPPRETTET, tema = Sakstemaer.MEDLEMSKAP_LOVVALG, behandlinger = mutableListOf(
