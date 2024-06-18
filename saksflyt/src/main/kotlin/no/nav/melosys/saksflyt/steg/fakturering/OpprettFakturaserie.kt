@@ -92,7 +92,7 @@ class OpprettFakturaserie(
     private fun betalerNåKunTilSkatt(behandlingsresultat: Behandlingsresultat): Boolean {
         return behandlingsresultat.let {
             trygdeavgiftMottakerService.betalerKunTrygdeavgiftTilSkatt(it)
-        } ?: false
+        }
     }
 
     private fun trygdeavgiftsperioderMedAvgift(behandlingsresultat: Behandlingsresultat): List<Trygdeavgiftsperiode> {

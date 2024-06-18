@@ -45,7 +45,7 @@ class TrygdeavgiftMottakerService(private val behandlingsresultatService: Behand
             && behandlingsresultat.hentInntektsperioder().filterNotNull().all { it.isArbeidsgiversavgiftBetalesTilSkatt || erMisjonær(it.type) }
     }
 
-    fun betalerKunTrygdeavgiftTilNav(
+    private fun betalerKunTrygdeavgiftTilNav(
         behandlingsresultat: Behandlingsresultat,
     ): Boolean {
 
