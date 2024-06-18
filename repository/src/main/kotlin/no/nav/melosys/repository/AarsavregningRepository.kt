@@ -22,5 +22,5 @@ interface AarsavregningRepository : JpaRepository<Aarsavregning, Long> {
           AND b.beh_type = 'ÅRSAVREGNING'
           AND b.status <> 'AVSLUTTET'
     """, nativeQuery = true)
-    fun eksisterendeÅrsavregningFinnesPåÅr(@Param("behandlingId") behandlingId: Long, @Param("aar") år: Int): BigDecimal
+    fun eksisterendeÅrsavregningFinnesPåÅr(@Param("behandlingId") behandlingId: Long, @Param("aar") år: Int): Int
 }

@@ -60,7 +60,7 @@ class ÅrsavregningService(
 
     @Transactional
     fun oppretteÅrsavregning(behandlingsresultat: Behandlingsresultat, gjelderPeriode: Int) {
-        if (aarsavregningRepository.eksisterendeÅrsavregningFinnesPåÅr(behandlingsresultat.behandling.id, gjelderPeriode) != BigDecimal(0))
+        if (aarsavregningRepository.eksisterendeÅrsavregningFinnesPåÅr(behandlingsresultat.behandling.id, gjelderPeriode) != 0)
             throw IllegalStateException("Du har ikke lov til å ha 2 åpne behandlinger for årsavregning på samme år")
 
         Aarsavregning().apply {
