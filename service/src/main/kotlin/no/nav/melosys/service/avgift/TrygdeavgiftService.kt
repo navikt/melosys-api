@@ -17,12 +17,12 @@ class TrygdeavgiftService(
         listOf(Saksstatuser.ANNULLERT, Saksstatuser.OPPHØRT, Saksstatuser.HENLAGT, Saksstatuser.HENLAGT_BORTFALT, Saksstatuser.VIDERESENDT)
 
     @Transactional
-    fun harFagsakBehandlingerMedTrygdeavgift(saksnummer: String): Boolean {
-        return hentTrygdeavgiftBehandlinger(saksnummer).isNotEmpty()
+    fun harFagsakBehandlingerMedTrygdeavgift(saksnummer: String, sjekkFakturaserie: Boolean = false): Boolean {
+        return hentTrygdeavgiftBehandlinger(saksnummer, sjekkFakturaserie).isNotEmpty()
     }
 
     @Transactional
-    fun hentTrygdeavgiftBehandlinger(saksnummer: String): List<Behandling> {
+    fun hentTrygdeavgiftBehandlinger(saksnummer: String, sjekkFakturaserie: Boolean = false): List<Behandling> {
         val fagsak = fagsakService.hentFagsak(saksnummer)
 
         if (fagsak.status in UGYLDIGE_SAKSSTATUSER_FOR_TRYGDEAVGIFT) {
@@ -32,11 +32,16 @@ class TrygdeavgiftService(
         return fagsak
             .behandlinger
             .filter {
-                harTrygdeavgift(behandlingsresultatService.hentBehandlingsresultat(it.id))
+                val resultat = behandlingsresultatService.hentBehandlingsresultat(it.id)
+                harTrygdeavgift(resultat) && (!sjekkFakturaserie || harBestiltFakturaserie(resultat))
             }
     }
 
     fun harTrygdeavgift(behandlingsresultat: Behandlingsresultat): Boolean {
         return behandlingsresultat.trygdeavgiftsperioder.any { it.harAvgift() }
+    }
+
+    private fun harBestiltFakturaserie(behandlingsresultat: Behandlingsresultat): Boolean {
+        return behandlingsresultat.fakturaserieReferanse?.isNotBlank() ?: false
     }
 }

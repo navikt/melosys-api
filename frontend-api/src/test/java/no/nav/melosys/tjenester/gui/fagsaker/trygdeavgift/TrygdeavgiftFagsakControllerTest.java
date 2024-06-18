@@ -29,6 +29,6 @@ class TrygdeavgiftFagsakControllerTest {
             .andExpect(status().isOk());
 
         verify(aksesskontroll).autoriserSakstilgang("123");
-        verify(trygdeavgiftService).harFagsakBehandlingerMedTrygdeavgift("123");
+        verify(trygdeavgiftService).harFagsakBehandlingerMedTrygdeavgift("123", false);
     }
 }

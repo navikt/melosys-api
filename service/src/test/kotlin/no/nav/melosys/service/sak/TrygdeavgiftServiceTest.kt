@@ -106,6 +106,24 @@ class TrygdeavgiftServiceTest {
     }
 
     @Test
+    fun `harFagsakBehandlingerMedTrygdeavgift med sjekk av fakturaserie, trygedavgiftsperioder men ikke bestilt faktura, returnerer false`() {
+        val trygdeavgiftsperiode = Trygdeavgiftsperiode().apply {
+            trygdeavgiftsbeløpMd = Penger(2345.56)
+            trygdesats = BigDecimal(3.56)
+        }
+        behandlingsresultat.apply {
+            medlemskapsperioder.add(
+                Medlemskapsperiode().apply {
+                    medlemskapstype = Medlemskapstyper.PLIKTIG
+                    trygdeavgiftsperioder.add(trygdeavgiftsperiode)
+                }
+            )
+        }
+
+        trygdeavgiftService.harFagsakBehandlingerMedTrygdeavgift(FagsakTestFactory.SAKSNUMMER, true).shouldBeFalse()
+    }
+
+    @Test
     fun harFagsakBehandlingerMedTrygdeavgift_harTrygedavgiftsperioderBådeMedOgUtenAvgift_returnererTrue() {
         val trygdeavgiftsperiode1 = Trygdeavgiftsperiode().apply {
             trygdeavgiftsbeløpMd = Penger(0.0)
