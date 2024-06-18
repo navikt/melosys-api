@@ -9,6 +9,7 @@ import no.nav.melosys.domain.*
 import no.nav.melosys.domain.avgift.Penger
 import no.nav.melosys.domain.avgift.Trygdeavgiftsperiode
 import no.nav.melosys.domain.kodeverk.Medlemskapstyper
+import no.nav.melosys.domain.kodeverk.Saksstatuser
 import no.nav.melosys.service.avgift.TrygdeavgiftService
 import no.nav.melosys.service.behandling.BehandlingsresultatService
 import org.junit.jupiter.api.BeforeEach
@@ -78,6 +79,28 @@ class TrygdeavgiftServiceTest {
                 }
             )
         }
+
+        trygdeavgiftService.harFagsakBehandlingerMedTrygdeavgift(FagsakTestFactory.SAKSNUMMER).shouldBeFalse()
+    }
+
+    @Test
+    fun `harFagsakBehandlingerMedTrygdeavgift, fagsak har ugyldig status, returnerer false`() {
+        fagsak.apply {
+            status = Saksstatuser.HENLAGT
+        }
+        val trygdeavgiftsperiode = Trygdeavgiftsperiode().apply {
+            trygdeavgiftsbeløpMd = Penger(30000.0)
+            trygdesats = BigDecimal(3.56)
+        }
+        behandlingsresultat.apply {
+            medlemskapsperioder.add(
+                Medlemskapsperiode().apply {
+                    medlemskapstype = Medlemskapstyper.PLIKTIG
+                    trygdeavgiftsperioder.add(trygdeavgiftsperiode)
+                }
+            )
+        }
+
 
         trygdeavgiftService.harFagsakBehandlingerMedTrygdeavgift(FagsakTestFactory.SAKSNUMMER).shouldBeFalse()
     }
