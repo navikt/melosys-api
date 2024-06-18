@@ -187,7 +187,7 @@ class OpprettFakturaserieTest {
         val opprinneligBehandlingsresultat = Behandlingsresultat().apply { fakturaserieReferanse = behandlingsresultat.fakturaserieReferanse }
         every { behandlingsresultatService.hentBehandlingsresultat(BEHANDLING_ID) } returns behandlingsresultat
         every { behandlingsresultatService.hentBehandlingsresultat(OPPRINNELIG_BEHANDLING_ID) } returns opprinneligBehandlingsresultat
-        every { trygdeavgiftService.harTrygdeavgiftOgBestiltFaktura(opprinneligBehandlingsresultat) } returns true
+        every { trygdeavgiftService.harTrygdeavgift(opprinneligBehandlingsresultat) } returns true
         every { behandlingService.hentBehandling(BEHANDLING_ID) } returns behandling
         every { pdlService.finnFolkeregisterident(BRUKER_FNR) } returns Optional.of(BRUKER_AKTØRID)
         every { faktureringskomponentenConsumer.kansellerFakturaserie(FAKTURASERIE_REFERANSE, BRUKER_AKTØRID) } returns
@@ -215,7 +215,7 @@ class OpprettFakturaserieTest {
         val opprinneligBehandlingsresultat = Behandlingsresultat().apply { fakturaserieReferanse = behandlingsresultat.fakturaserieReferanse }
         every { behandlingsresultatService.hentBehandlingsresultat(BEHANDLING_ID) } returns behandlingsresultat
         every { behandlingsresultatService.hentBehandlingsresultat(OPPRINNELIG_BEHANDLING_ID) } returns opprinneligBehandlingsresultat
-        every { trygdeavgiftService.harTrygdeavgiftOgBestiltFaktura(opprinneligBehandlingsresultat) } returns true
+        every { trygdeavgiftService.harTrygdeavgift(opprinneligBehandlingsresultat) } returns true
         every { behandlingService.hentBehandling(BEHANDLING_ID) } returns behandling
         every { pdlService.finnFolkeregisterident(BRUKER_FNR) } returns Optional.of(BRUKER_AKTØRID)
         every { faktureringskomponentenConsumer.kansellerFakturaserie(FAKTURASERIE_REFERANSE, BRUKER_AKTØRID) } returns

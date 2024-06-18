@@ -42,13 +42,16 @@ class TrygdeavgiftServiceTest {
     }
 
     @Test
-    fun harFagsakBehandlingerMedTrygdeavgift_harIkkeMedlemAvFolketrygden_returnererFalse() {
+    fun `harFagsakBehandlingerMedTrygdeavgift, uten avgiftsperioder, returnerer false`() {
         trygdeavgiftService.harFagsakBehandlingerMedTrygdeavgift(FagsakTestFactory.SAKSNUMMER).shouldBeFalse()
     }
 
     @Test
-    fun harFagsakBehandlingerMedTrygdeavgift_harTrygedavgiftsperiodeMenDenHarIkkeSattMndBeløp_returnererFalse() {
-        val trygdeavgiftsperiode = Trygdeavgiftsperiode().apply { trygdeavgiftsbeløpMd = null }
+    fun `harFagsakBehandlingerMedTrygdeavgift, med avgiftsperioder men uten mndBeløp, returnerer false`() {
+        val trygdeavgiftsperiode = Trygdeavgiftsperiode().apply {
+            trygdeavgiftsbeløpMd = Penger(0.0)
+            trygdesats = BigDecimal(3.5)
+        }
         behandlingsresultat.apply {
             medlemskapsperioder.add(
                 Medlemskapsperiode().apply {
@@ -80,25 +83,7 @@ class TrygdeavgiftServiceTest {
     }
 
     @Test
-    fun harFagsakBehandlingerMedTrygdeavgift_harTrygedavgiftsperiodeMenDenHarIkkeBestiltFaktura_returnererFalse() {
-        val trygdeavgiftsperiode = Trygdeavgiftsperiode().apply {
-            trygdeavgiftsbeløpMd = Penger(2345.56)
-            trygdesats = BigDecimal(3.56)
-        }
-        behandlingsresultat.apply {
-            medlemskapsperioder.add(
-                Medlemskapsperiode().apply {
-                    medlemskapstype = Medlemskapstyper.PLIKTIG
-                    trygdeavgiftsperioder.add(trygdeavgiftsperiode)
-                }
-            )
-        }
-
-        trygdeavgiftService.harFagsakBehandlingerMedTrygdeavgift(FagsakTestFactory.SAKSNUMMER).shouldBeFalse()
-    }
-
-    @Test
-    fun harFagsakBehandlingerMedTrygdeavgift_harTrygedavgiftsperioderBådeMedOgUtenAvgiftOgFakturaErBestilt_returnererTrue() {
+    fun harFagsakBehandlingerMedTrygdeavgift_harTrygedavgiftsperioderBådeMedOgUtenAvgift_returnererTrue() {
         val trygdeavgiftsperiode1 = Trygdeavgiftsperiode().apply {
             trygdeavgiftsbeløpMd = Penger(0.0)
             trygdesats = BigDecimal.ZERO
@@ -113,11 +98,9 @@ class TrygdeavgiftServiceTest {
                     medlemskapstype = Medlemskapstyper.PLIKTIG
                     trygdeavgiftsperioder.add(trygdeavgiftsperiode1)
                     trygdeavgiftsperioder.add(trygdeavgiftsperiode2)
-                    fakturaserieReferanse = "FakturaserieReferanse"
                 }
             )
         }
-
 
         trygdeavgiftService.harFagsakBehandlingerMedTrygdeavgift(FagsakTestFactory.SAKSNUMMER).shouldBeTrue()
     }

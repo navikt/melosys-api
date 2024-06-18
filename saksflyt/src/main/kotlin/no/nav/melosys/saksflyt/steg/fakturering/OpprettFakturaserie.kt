@@ -86,7 +86,7 @@ class OpprettFakturaserie(
 
     private fun harOpprinneligBehandlingMedTrygdeavgift(behandling: Behandling): Boolean =
         behandling.opprinneligBehandling?.let {
-            trygdeavgiftService.harTrygdeavgiftOgBestiltFaktura(behandlingsresultatService.hentBehandlingsresultat(it.id))
+            trygdeavgiftService.harTrygdeavgift(behandlingsresultatService.hentBehandlingsresultat(it.id))
         } ?: false
 
     private fun betalerNåKunTilSkatt(behandlingsresultat: Behandlingsresultat): Boolean {
