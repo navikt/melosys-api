@@ -16,12 +16,12 @@ class TrygdeavgiftService(
     private val UGYLDIGE_SAKSSTATUSER_FOR_TRYGDEAVGIFT =
         listOf(Saksstatuser.ANNULLERT, Saksstatuser.OPPHØRT, Saksstatuser.HENLAGT, Saksstatuser.HENLAGT_BORTFALT, Saksstatuser.VIDERESENDT)
 
-    @Transactional
+    @Transactional(readOnly = true)
     fun harFagsakBehandlingerMedTrygdeavgift(saksnummer: String, sjekkFakturaserie: Boolean = false): Boolean {
         return hentTrygdeavgiftBehandlinger(saksnummer, sjekkFakturaserie).isNotEmpty()
     }
 
-    @Transactional
+    @Transactional(readOnly = true)
     fun hentTrygdeavgiftBehandlinger(saksnummer: String, sjekkFakturaserie: Boolean = false): List<Behandling> {
         val fagsak = fagsakService.hentFagsak(saksnummer)
 
