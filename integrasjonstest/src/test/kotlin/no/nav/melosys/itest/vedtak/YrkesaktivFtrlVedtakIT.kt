@@ -37,11 +37,9 @@ import no.nav.melosys.integrasjon.trygdeavgift.dto.*
 import no.nav.melosys.itest.JournalfoeringBase
 import no.nav.melosys.melosysmock.medl.MedlRepo
 import no.nav.melosys.melosysmock.testdata.TestDataGenerator
-import no.nav.melosys.repository.AvklarteFaktaRepository
 import no.nav.melosys.repository.BehandlingRepository
 import no.nav.melosys.repository.BehandlingsresultatRepository
 import no.nav.melosys.repository.FagsakRepository
-import no.nav.melosys.saksflyt.ProsessinstansRepository
 import no.nav.melosys.saksflytapi.domain.ProsessType
 import no.nav.melosys.service.avgift.TrygdeavgiftsberegningService
 import no.nav.melosys.service.avgift.dto.InntektskildeRequest
@@ -91,9 +89,7 @@ class YrkesaktivFtrlVedtakIT(
     @Autowired private val trygdeavgiftsberegningService: TrygdeavgiftsberegningService,
     @Autowired @Qualifier("manglendeFakturabetalingMelding") private val manglendeFakturabetalingMeldingTemplate: KafkaTemplate<String, ManglendeFakturabetalingMelding>,
     @Autowired private val skatteHendelseMeldingKafkaTemplate: KafkaTemplate<String, Skattehendelse>,
-    @Autowired private val avklarteFaktaRepository: AvklarteFaktaRepository,
     @Autowired private val behandlingsResultRepository: BehandlingsresultatRepository,
-    @Autowired private val prosessinstansRepository: ProsessinstansRepository,
     @Autowired private val fakeUnleash: FakeUnleash
 ) : JournalfoeringBase(
     testDataGenerator, journalføringService, oppgaveService,
@@ -155,12 +151,7 @@ class YrkesaktivFtrlVedtakIT(
 
     @Test
     fun `yrkesaktiv vedtak - FTRL - skal hverken opprette fakturaserier eller kansellere dersom det ikke eksisterer førstegangsbehandling`() {
-        lagFørstegangsBehandling(Skatteplikttype.SKATTEPLIKTIG, true).also {
-            addCleanUpAction {
-                slettSakEtterTest(it)
-            }
-        }
-
+        lagFørstegangsBehandling(Skatteplikttype.SKATTEPLIKTIG, true)
         mockServer.verify(0, WireMock.deleteRequestedFor(WireMock.urlEqualTo("/fakturaserier/$fakturaserieReferanse")))
         mockServer.verify(0, WireMock.postRequestedFor(WireMock.urlEqualTo("/fakturaserier")))
     }
@@ -168,10 +159,6 @@ class YrkesaktivFtrlVedtakIT(
     @Test
     fun `Håndtere manglende innbetaling i sak som allerede har en åpen behandling`() {
         val saksnummer = lagFørstegangsBehandling(Skatteplikttype.IKKE_SKATTEPLIKTIG, false)
-        addCleanUpAction {
-            slettSakEtterTest(saksnummer)
-        }
-
 
         val behandlingsId = executeAndWait(waitForprosessType = ProsessType.OPPRETT_REPLIKERT_BEHANDLING_FOR_SAK) {
             opprettBehandlingForSak.opprettBehandling(
@@ -229,9 +216,6 @@ class YrkesaktivFtrlVedtakIT(
     @Test
     fun `yrkesaktiv vedtak - FTRL - opprett fakturaserie for førstegangsbehandling og kanseller fakturaserie i ny vurdering`() {
         val saksnummer = lagFørstegangsBehandling(Skatteplikttype.IKKE_SKATTEPLIKTIG, false)
-        addCleanUpAction {
-            slettSakEtterTest(saksnummer)
-        }
 
         val behandlingsId = executeAndWait(waitForprosessType = ProsessType.OPPRETT_REPLIKERT_BEHANDLING_FOR_SAK) {
             opprettBehandlingForSak.opprettBehandling(
@@ -302,10 +286,6 @@ class YrkesaktivFtrlVedtakIT(
         fakeUnleash.enable(ToggleName.MELOSYS_SKATTEHENDELSE_CONSUMER)
 
         val saksnummer = lagFørstegangsBehandling(Skatteplikttype.IKKE_SKATTEPLIKTIG, false)
-        addCleanUpAction {
-            // TODO: flytt dette til egen util klasse. Fikser i egen pr.
-            slettSakEtterTest(saksnummer)
-        }
 
         val skattehendelse = Skattehendelse("2023", "30056928150")
 
@@ -331,24 +311,6 @@ class YrkesaktivFtrlVedtakIT(
                             }
                     }
             }
-    }
-
-    private fun slettSakEtterTest(saksnummer: String) {
-        fagsakRepository.findBySaksnummer(saksnummer).shouldBePresent().also { fagsak ->
-            fagsak.behandlinger.forEach { behandling ->
-                avklarteFaktaRepository.findByBehandlingsresultatId(behandling.id).forEach {
-                    avklarteFaktaRepository.delete(it)
-                }
-                behandlingsResultRepository.findById(behandling.id).shouldBePresent().also {
-                    behandlingsResultRepository.delete(it)
-                }
-                prosessinstansRepository.findAll()
-                    .filter { it?.behandling?.id == behandling.id }
-                    .forEach { prosessinstansRepository.delete(it) }
-                behandlingRepository.delete(behandling)
-            }
-            fagsakRepository.delete(fagsak)
-        }
     }
 
     private fun lagOpprettSakDto(): OpprettSakDto {
@@ -444,7 +406,11 @@ class YrkesaktivFtrlVedtakIT(
             vedtaksfattingFasade.fattVedtak(behandling.id, vedtakRequest)
         }
 
-        return behandling.fagsak.saksnummer
+        return behandling.fagsak.saksnummer.also {
+            addCleanUpAction {
+                slettSakMedAvhengigheter(it)
+            }
+        }
     }
 
     private fun setupTrygdeavgiftBeregning(behandlingId: Long, skatteplikttype: Skatteplikttype, arbeidsgiversavgiftBetales: Boolean) {

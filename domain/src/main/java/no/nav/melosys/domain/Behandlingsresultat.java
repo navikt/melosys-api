@@ -14,7 +14,9 @@ import no.nav.melosys.domain.avklartefakta.Avklartefakta;
 import no.nav.melosys.domain.kodeverk.*;
 import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingsresultattyper;
 import no.nav.melosys.domain.kodeverk.lovvalgsbestemmelser.Lovvalgbestemmelser_883_2004;
+import no.nav.melosys.domain.kodeverk.lovvalgsbestemmelser.Lovvalgbestemmelser_konv_efta_storbritannia;
 import no.nav.melosys.domain.kodeverk.lovvalgsbestemmelser.Tilleggsbestemmelser_883_2004;
+import no.nav.melosys.domain.kodeverk.lovvalgsbestemmelser.Tilleggsbestemmelser_konv_efta_storbritannia;
 import no.nav.melosys.exception.FunksjonellException;
 import org.springframework.data.jpa.domain.support.AuditingEntityListener;
 
@@ -472,15 +474,15 @@ public class Behandlingsresultat extends RegistreringsInfo {
         return utpekingsperioder.stream().findFirst();
     }
 
-    public Set<VilkaarBegrunnelse> hentVilkaarbegrunnelser(Vilkaar vilkaarType) {
+    public Set<VilkaarBegrunnelse> hentVilkaarbegrunnelser(Vilkaar... vilkaarTypeArray) {
         return getVilkaarsresultater().stream()
-            .filter(vr -> vr.getVilkaar() == vilkaarType)
+            .filter(vr -> Arrays.stream(vilkaarTypeArray).anyMatch(vilkaarType -> vilkaarType == vr.getVilkaar()))
             .flatMap(vr -> vr.getBegrunnelser().stream())
             .collect(Collectors.toSet());
     }
 
-    public boolean manglerVilkår(Vilkaar vilkår) {
-        return vilkaarsresultater.stream().noneMatch(v -> v.getVilkaar() == vilkår);
+    public boolean manglerVilkår(Vilkaar... vilkaarArray) {
+        return vilkaarsresultater.stream().noneMatch(vilkår -> Arrays.stream(vilkaarArray).anyMatch(vilkaar -> vilkaar == vilkår.getVilkaar()));
     }
 
     public boolean oppfyllerVilkår(Collection<Vilkaar> vilkår) {
@@ -500,8 +502,8 @@ public class Behandlingsresultat extends RegistreringsInfo {
     public boolean erInnvilgetArbeidPåSkipOmfattetAvArbeidsland() {
         return finnLovvalgsperiode().stream()
             .anyMatch(l -> l.erInnvilget()
-                && l.getBestemmelse() == Lovvalgbestemmelser_883_2004.FO_883_2004_ART11_3A
-                && l.getTilleggsbestemmelse() == Tilleggsbestemmelser_883_2004.FO_883_2004_ART11_4_1);
+                && (l.getBestemmelse() == Lovvalgbestemmelser_883_2004.FO_883_2004_ART11_3A || l.getBestemmelse() == Lovvalgbestemmelser_konv_efta_storbritannia.KONV_EFTA_STORBRITANNIA_ART13_3A)
+                && (l.getTilleggsbestemmelse() == Tilleggsbestemmelser_883_2004.FO_883_2004_ART11_4_1 || l.getTilleggsbestemmelse() == Tilleggsbestemmelser_konv_efta_storbritannia.KONV_EFTA_STORBRITANNIA_ART13_4_1));
     }
 
     public boolean erRegistrertUnntak() {
@@ -518,7 +520,7 @@ public class Behandlingsresultat extends RegistreringsInfo {
 
     public boolean utlandSkalVarslesOmVedtak() {
         return harVedtak()
-            && ((erInnvilgelse() && !harLovvalgsperiodeMedBestemmelse(Lovvalgbestemmelser_883_2004.FO_883_2004_ART16_1))
+            && ((erInnvilgelse() && !harLovvalgsperiodeMedBestemmelse(Lovvalgbestemmelser_883_2004.FO_883_2004_ART16_1) && !harLovvalgsperiodeMedBestemmelse(Lovvalgbestemmelser_konv_efta_storbritannia.KONV_EFTA_STORBRITANNIA_ART18_1))
             || erInnvilgelseFlereLand()
             || erUtpeking());
     }

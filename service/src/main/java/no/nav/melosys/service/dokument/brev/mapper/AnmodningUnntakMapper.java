@@ -1,13 +1,13 @@
 package no.nav.melosys.service.dokument.brev.mapper;
 
 import java.util.Optional;
-import jakarta.xml.bind.JAXBElement;
-import jakarta.xml.bind.JAXBException;
 import javax.xml.datatype.DatatypeConfigurationException;
 
 import com.google.common.collect.BiMap;
 import com.google.common.collect.HashBiMap;
 import com.google.common.collect.ImmutableMap;
+import jakarta.xml.bind.JAXBElement;
+import jakarta.xml.bind.JAXBException;
 import no.nav.dok.melosysbrev._000084.*;
 import no.nav.dok.melosysbrev.felles.melosys_felles.FellesType;
 import no.nav.dok.melosysbrev.felles.melosys_felles.InngangsvilkaarBegrunnelseKode;
@@ -82,7 +82,7 @@ public class AnmodningUnntakMapper implements BrevDataMapper {
         fag.setArbeidsland(brevData.getArbeidsland());
         fag.setLovvalgsperiode(lagLovvalgsperiodeType(anmodningsperiode));
 
-        if (resultat.manglerVilkår(FO_883_2004_ART12_1) && resultat.manglerVilkår(FO_883_2004_ART12_2)) {
+        if (manglerUtsendingsvilkår(resultat)) {
             // bestemmelseDetSoekesUnntakFra støttes feilaktig bare i forkortet flyt, direkte anmodning om art.16
             Optional.ofNullable(anmodningsperiode.getUnntakFraBestemmelse())
                 .map(BESTEMMELSE_DET_SOEKES_UNNTAK_FRA_KODE_MAP::get)
@@ -106,6 +106,10 @@ public class AnmodningUnntakMapper implements BrevDataMapper {
         fag.setBegrunnelseFritekst(brevData.getFritekst());
 
         return fag;
+    }
+
+    boolean manglerUtsendingsvilkår(Behandlingsresultat resultat) {
+        return resultat.manglerVilkår(FO_883_2004_ART12_1, FO_883_2004_ART12_2, KONV_EFTA_STORBRITANNIA_ART14_1, KONV_EFTA_STORBRITANNIA_ART14_1, KONV_EFTA_STORBRITANNIA_ART16_1, KONV_EFTA_STORBRITANNIA_ART16_3);
     }
 
     LovvalgsperiodeType lagLovvalgsperiodeType(Anmodningsperiode anmodningsperiode) {

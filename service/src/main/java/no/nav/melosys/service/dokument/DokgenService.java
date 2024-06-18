@@ -223,8 +223,15 @@ public class DokgenService {
     }
 
     public boolean erTilgjengeligDokgenmal(Produserbaredokumenter produserbartDokument) {
-        return dokumentproduksjonsInfoMapper.tilgjengeligeMalerIDokgen().contains(produserbartDokument) &&
-            (produserbartDokument != Produserbaredokumenter.ORIENTERING_ANMODNING_UNNTAK || unleash.isEnabled(ToggleName.MELOSYS_KONVENSJON_EFTA_LAND_OG_STORBRITANNIA));
+        return dokumentproduksjonsInfoMapper.tilgjengeligeMalerIDokgen().contains(produserbartDokument) && erTogglet(produserbartDokument);
+    }
+
+    private boolean erTogglet(Produserbaredokumenter produserbartDokument) {
+        return switch (produserbartDokument) {
+            case INNHENTING_AV_INNTEKTSOPPLYSNINGER, ORIENTERING_ANMODNING_UNNTAK ->
+                unleash.isEnabled(ToggleName.MELOSYS_KONVENSJON_EFTA_LAND_OG_STORBRITANNIA);
+            default -> true;
+        };
     }
 
     private void settOrganisasjonsOpplysninger(Behandling behandling, String orgnr,
