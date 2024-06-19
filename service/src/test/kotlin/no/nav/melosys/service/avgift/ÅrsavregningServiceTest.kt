@@ -10,6 +10,7 @@ import no.nav.melosys.domain.avgift.*
 import no.nav.melosys.domain.kodeverk.*
 import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingsresultattyper
 import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingstyper
+import no.nav.melosys.exception.FunksjonellException
 import no.nav.melosys.integrasjon.faktureringskomponenten.FaktureringskomponentenConsumer
 import no.nav.melosys.integrasjon.faktureringskomponenten.dto.BeregnTotalBeløpDto
 import no.nav.melosys.integrasjon.faktureringskomponenten.dto.FakturaseriePeriodeDto
@@ -90,7 +91,7 @@ internal class ÅrsavregningServiceTest {
             ))
         }))
 
-        assertThrows<IllegalStateException> {
+        assertThrows<FunksjonellException> {
             årsavregningService.opprettNyÅrsavregning(1, 2023)
         }
     }
