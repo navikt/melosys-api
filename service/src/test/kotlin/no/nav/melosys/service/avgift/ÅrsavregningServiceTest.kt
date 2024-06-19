@@ -5,22 +5,23 @@ import io.mockk.every
 import io.mockk.impl.annotations.RelaxedMockK
 import io.mockk.junit5.MockKExtension
 import io.mockk.verify
-import no.nav.melosys.domain.*
+import no.nav.melosys.domain.Behandling
+import no.nav.melosys.domain.Behandlingsresultat
+import no.nav.melosys.domain.Medlemskapsperiode
+import no.nav.melosys.domain.VedtakMetadata
 import no.nav.melosys.domain.avgift.*
 import no.nav.melosys.domain.kodeverk.*
 import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingsresultattyper
-import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingstyper
 import no.nav.melosys.exception.FunksjonellException
 import no.nav.melosys.integrasjon.faktureringskomponenten.FaktureringskomponentenConsumer
 import no.nav.melosys.integrasjon.faktureringskomponenten.dto.BeregnTotalBeløpDto
 import no.nav.melosys.integrasjon.faktureringskomponenten.dto.FakturaseriePeriodeDto
 import no.nav.melosys.repository.AarsavregningRepository
-import no.nav.melosys.repository.BehandlingRepository
-import no.nav.melosys.repository.BehandlingsresultatRepository
 import no.nav.melosys.service.avgift.aarsavregning.MedlemskapsperiodeForAvgift
 import no.nav.melosys.service.avgift.aarsavregning.Trygdeavgiftsgrunnlag
 import no.nav.melosys.service.avgift.aarsavregning.Årsavregning
 import no.nav.melosys.service.avgift.aarsavregning.ÅrsavregningService
+import no.nav.melosys.service.behandling.BehandlingsresultatService
 import no.nav.melosys.sikkerhet.context.SpringSubjectHandler
 import no.nav.melosys.sikkerhet.context.TestSubjectHandler
 import org.junit.jupiter.api.BeforeEach
@@ -38,9 +39,7 @@ internal class ÅrsavregningServiceTest {
     @RelaxedMockK
     private lateinit var aarsavregningRepository: AarsavregningRepository
     @RelaxedMockK
-    private lateinit var behandlingRepository: BehandlingRepository
-    @RelaxedMockK
-    private lateinit var behandlingsresultatRepository: BehandlingsresultatRepository
+    private lateinit var behandlingsresultatService: BehandlingsresultatService
 
     private lateinit var årsavregningService: ÅrsavregningService
 
@@ -48,21 +47,8 @@ internal class ÅrsavregningServiceTest {
 
     @BeforeEach
     fun setup() {
-        årsavregningService = ÅrsavregningService(faktureringskomponentenConsumer, aarsavregningRepository, behandlingsresultatRepository)
+        årsavregningService = ÅrsavregningService(faktureringskomponentenConsumer, aarsavregningRepository, behandlingsresultatService)
         SpringSubjectHandler.set(TestSubjectHandler())
-
-        every { behandlingRepository.findById(any()) }.returns(Optional.of(Behandling().apply {
-            fagsak = Fagsak(saksnummer = "1", type = Sakstyper.EU_EOS, status = Saksstatuser.OPPRETTET, tema = Sakstemaer.MEDLEMSKAP_LOVVALG, behandlinger = mutableListOf(
-                Behandling().apply {
-                    id = 1L
-                    type = Behandlingstyper.ÅRSAVREGNING
-                },
-                Behandling().apply {
-                    id = 2L
-                    type = Behandlingstyper.ÅRSAVREGNING
-                }
-            ))
-        }))
     }
 
     @Test
@@ -76,20 +62,7 @@ internal class ÅrsavregningServiceTest {
         every { aarsavregningRepository.findById(1L) }.returns(Optional.of(årsavregningEntity1))
         every { aarsavregningRepository.finnAntallÅrsavregningerPåFagsakForÅr(1, 2023) }.returns(1)
         every { aarsavregningRepository.finnAntallÅrsavregningerPåFagsakForÅr(2, 2023) }.returns(1)
-        every { behandlingsresultatRepository.findById(1L) }.returns(Optional.of(Behandlingsresultat().apply { behandling = eksisterendeBehandling }))
-
-        every { behandlingRepository.findById(any()) }.returns(Optional.of(Behandling().apply {
-            fagsak = Fagsak(saksnummer = "1", type = Sakstyper.EU_EOS, status = Saksstatuser.OPPRETTET, tema = Sakstemaer.MEDLEMSKAP_LOVVALG, behandlinger = mutableListOf(
-                Behandling().apply {
-                    id = 1L
-                    type = Behandlingstyper.ÅRSAVREGNING
-                },
-                Behandling().apply {
-                    id = 2L
-                    type = Behandlingstyper.ÅRSAVREGNING
-                }
-            ))
-        }))
+        every { behandlingsresultatService.hentBehandlingsresultat(1L) }.returns(Behandlingsresultat().apply { behandling = eksisterendeBehandling })
 
         assertThrows<FunksjonellException> {
             årsavregningService.opprettNyÅrsavregning(1, 2023)

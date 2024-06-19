@@ -1,6 +1,5 @@
 package no.nav.melosys.service.avgift.aarsavregning
 
-import jakarta.ws.rs.NotFoundException
 import no.nav.melosys.domain.Behandlingsresultat
 import no.nav.melosys.domain.Medlemskapsperiode
 import no.nav.melosys.domain.avgift.Aarsavregning
@@ -14,7 +13,7 @@ import no.nav.melosys.exception.IkkeFunnetException
 import no.nav.melosys.integrasjon.faktureringskomponenten.FaktureringskomponentenConsumer
 import no.nav.melosys.integrasjon.faktureringskomponenten.dto.BeregnTotalBeløpDto
 import no.nav.melosys.repository.AarsavregningRepository
-import no.nav.melosys.repository.BehandlingsresultatRepository
+import no.nav.melosys.service.behandling.BehandlingsresultatService
 import no.nav.melosys.sikkerhet.context.SubjectHandler
 import org.springframework.stereotype.Service
 import org.springframework.transaction.annotation.Transactional
@@ -25,7 +24,7 @@ import java.time.LocalDate
 class ÅrsavregningService(
     private val faktureringskomponentenConsumer: FaktureringskomponentenConsumer,
     private val aarsavregningRepository: AarsavregningRepository,
-    private val behandlingsresultatRepository: BehandlingsresultatRepository
+    private val behandlingsresultatService: BehandlingsresultatService
 ) {
     fun beregnTotalbeløpForPeriode(beregnTotalBeløpDto: BeregnTotalBeløpDto): BigDecimal {
         val saksbehandlerIdent = SubjectHandler.getInstance().getUserID()
@@ -50,13 +49,9 @@ class ÅrsavregningService(
 
     @Transactional
     fun opprettNyÅrsavregning(behandlingsId: Long, gjelderÅr: Int): Long {
-        val behandlingsresultat = behandlingsresultatRepository.findById(behandlingsId)
-        if (behandlingsresultat.isPresent) {
-            oppretteÅrsavregning(behandlingsresultat.get(), gjelderÅr)
-            return behandlingsId
-        } else {
-            throw NotFoundException("Finner ingen tidligere behandlingsresultat")
-        }
+        val behandlingsresultat = behandlingsresultatService.hentBehandlingsresultat(behandlingsId)
+        oppretteÅrsavregning(behandlingsresultat, gjelderÅr)
+        return behandlingsId
     }
 
     @Transactional
