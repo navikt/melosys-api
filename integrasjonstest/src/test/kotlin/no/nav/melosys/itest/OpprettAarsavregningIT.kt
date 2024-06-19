@@ -1,5 +1,7 @@
 package no.nav.melosys.itest
 
+import io.kotest.matchers.nulls.shouldNotBeNull
+import io.kotest.matchers.shouldBe
 import no.nav.melosys.domain.Behandling
 import no.nav.melosys.domain.Behandlingsmaate
 import no.nav.melosys.domain.Behandlingsresultat
@@ -39,7 +41,9 @@ class OpprettAarsavregningIT @Autowired constructor(
         val result = årsavregningService.opprettNyÅrsavregning(behandlingsresultat.id!!, 2024)
 
         val avregning = aarsavregningRepository.findById(result).orElseThrow()
-        assert(avregning.aar == 2024)
+        avregning.aar.shouldBe(2024)
+        avregning.id.shouldNotBeNull()
+        avregning.behandlingsresultat.shouldNotBeNull()
     }
 
     @Test
