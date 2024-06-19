@@ -1,4 +1,4 @@
-package no.nav.melosys.itest.vedtak
+package no.nav.melosys.itest
 
 import no.nav.melosys.domain.Behandling
 import no.nav.melosys.domain.Behandlingsmaate
@@ -10,36 +10,26 @@ import no.nav.melosys.domain.kodeverk.Sakstyper
 import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingsstatus
 import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingstema
 import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingstyper
-import no.nav.melosys.itest.ComponentTestBase
 import no.nav.melosys.repository.AarsavregningRepository
 import no.nav.melosys.repository.BehandlingRepository
 import no.nav.melosys.repository.BehandlingsresultatRepository
 import no.nav.melosys.repository.FagsakRepository
 import no.nav.melosys.service.avgift.aarsavregning.ÅrsavregningService
-import org.junit.jupiter.api.Assertions.assertThrows
-import org.junit.jupiter.api.Test
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.boot.test.context.SpringBootTest
 import org.springframework.transaction.annotation.Transactional
 import java.time.LocalDate
+import kotlin.test.Test
+import kotlin.test.assertFailsWith
 
 @SpringBootTest
-class OpprettAarsavregningIT : ComponentTestBase() {
-
-    @Autowired
-    lateinit var årsavregningService: ÅrsavregningService
-
-    @Autowired
-    lateinit var aarsavregningRepository: AarsavregningRepository
-
-    @Autowired
-    lateinit var behandlingsresultatRepository: BehandlingsresultatRepository
-
-    @Autowired
-    lateinit var behandlingRepository: BehandlingRepository
-
-    @Autowired
-    lateinit var fagsakRepository: FagsakRepository
+class OpprettAarsavregningIT @Autowired constructor(
+    private val årsavregningService: ÅrsavregningService,
+    private val aarsavregningRepository: AarsavregningRepository,
+    private val behandlingsresultatRepository: BehandlingsresultatRepository,
+    private val behandlingRepository: BehandlingRepository,
+    private val fagsakRepository: FagsakRepository
+) : ComponentTestBase() {
     @Test
     @Transactional
     fun `opprettNyÅrsavregning should create a new årsavregning when no existing avregning exists`() {
@@ -59,7 +49,7 @@ class OpprettAarsavregningIT : ComponentTestBase() {
         //Oppretter først en aarsavregning for å simulere at det allerede finnes en årsavregning for samme år
         årsavregningService.opprettNyÅrsavregning(behandlingsresultat.id!!, 2024)
 
-        assertThrows(IllegalStateException::class.java) {
+        assertFailsWith<IllegalStateException> {
             årsavregningService.opprettNyÅrsavregning(behandlingsresultat.id!!, 2024)
         }
     }
