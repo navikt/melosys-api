@@ -1,16 +1,19 @@
 package no.nav.melosys.service.avgift
 
+import io.kotest.assertions.throwables.shouldThrow
 import io.kotest.matchers.shouldBe
 import io.mockk.every
 import io.mockk.impl.annotations.RelaxedMockK
 import io.mockk.junit5.MockKExtension
 import io.mockk.verify
+import no.nav.melosys.domain.Behandling
 import no.nav.melosys.domain.Behandlingsresultat
 import no.nav.melosys.domain.Medlemskapsperiode
 import no.nav.melosys.domain.VedtakMetadata
 import no.nav.melosys.domain.avgift.*
 import no.nav.melosys.domain.kodeverk.*
 import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingsresultattyper
+import no.nav.melosys.exception.FunksjonellException
 import no.nav.melosys.integrasjon.faktureringskomponenten.FaktureringskomponentenConsumer
 import no.nav.melosys.integrasjon.faktureringskomponenten.dto.BeregnTotalBeløpDto
 import no.nav.melosys.integrasjon.faktureringskomponenten.dto.FakturaseriePeriodeDto
@@ -19,6 +22,7 @@ import no.nav.melosys.service.avgift.aarsavregning.MedlemskapsperiodeForAvgift
 import no.nav.melosys.service.avgift.aarsavregning.Trygdeavgiftsgrunnlag
 import no.nav.melosys.service.avgift.aarsavregning.Årsavregning
 import no.nav.melosys.service.avgift.aarsavregning.ÅrsavregningService
+import no.nav.melosys.service.behandling.BehandlingsresultatService
 import no.nav.melosys.sikkerhet.context.SpringSubjectHandler
 import no.nav.melosys.sikkerhet.context.TestSubjectHandler
 import org.junit.jupiter.api.BeforeEach
@@ -34,6 +38,8 @@ internal class ÅrsavregningServiceTest {
     private lateinit var faktureringskomponentenConsumer: FaktureringskomponentenConsumer
     @RelaxedMockK
     private lateinit var aarsavregningRepository: AarsavregningRepository
+    @RelaxedMockK
+    private lateinit var behandlingsresultatService: BehandlingsresultatService
 
     private lateinit var årsavregningService: ÅrsavregningService
 
@@ -41,8 +47,24 @@ internal class ÅrsavregningServiceTest {
 
     @BeforeEach
     fun setup() {
-        årsavregningService = ÅrsavregningService(faktureringskomponentenConsumer, aarsavregningRepository)
+        årsavregningService = ÅrsavregningService(faktureringskomponentenConsumer, aarsavregningRepository, behandlingsresultatService)
         SpringSubjectHandler.set(TestSubjectHandler())
+    }
+
+    @Test
+    fun `opprettNyÅrsavregning kaster exception når flere Aarsavregninger eksisterer for samme år på samme Fagsak`() {
+        val årsavregningEntity1 = Aarsavregning().apply {
+            aar = 2023
+            behandlingsresultat = Behandlingsresultat()
+        }
+        val eksisterendeBehandling = Behandling().apply { id = 1L }
+        every { aarsavregningRepository.findById(1L) }.returns(Optional.of(årsavregningEntity1))
+        every { aarsavregningRepository.finnAntallÅrsavregningerPåFagsakForÅr(1, 2023) }.returns(1)
+        every { behandlingsresultatService.hentBehandlingsresultat(1L) }.returns(Behandlingsresultat().apply { behandling = eksisterendeBehandling })
+
+        shouldThrow<FunksjonellException> {
+            årsavregningService.opprettNyÅrsavregning(1, 2023)
+        }
     }
 
     @Test

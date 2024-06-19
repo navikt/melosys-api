@@ -20,6 +20,7 @@ import java.time.LocalDate
 class ÅrsavregningController(
     private val årsavregningService: ÅrsavregningService,
 ) {
+
     @GetMapping("/{avregningID}")
     fun hentAvregning(@PathVariable("avregningID") avregningID: Long): ResponseEntity<ÅrsavregningResponse> {
         val årsavregning = årsavregningService.hentÅrsavregning(avregningID)
@@ -38,6 +39,16 @@ class ÅrsavregningController(
             )
         )
     }
+
+    @PostMapping
+    fun opprettNyÅrsavregning(@RequestBody årsavregningRequest: LagÅrsavregningRequest): ResponseEntity<Long> {
+        return ResponseEntity.ok(årsavregningService.opprettNyÅrsavregning(årsavregningRequest.behandlingsId, årsavregningRequest.aar))
+    }
+
+    data class LagÅrsavregningRequest(
+        val aar: Int,
+        val behandlingsId: Long
+    )
 
     private fun hentTidligereGrunnlagsopplysninger(årsavregning: Årsavregning): TidligereGrunnlagsopplysninger? {
         return if (årsavregning.tidligereGrunnlag == null) null else
@@ -108,6 +119,7 @@ class ÅrsavregningController(
 @PutMapping("/{avregningID}")
 fun hentAvregning(@PathVariable("avregningID") avregningID: Long, @RequestBody årsavregningRequest: ÅrsavregningRequest): ResponseEntity<Unit> {
     // TODO bruk årsavregningService
+
     return ResponseEntity.noContent().build()
 }
 
