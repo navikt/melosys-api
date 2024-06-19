@@ -9,6 +9,7 @@ import no.nav.melosys.domain.avgift.SkatteforholdTilNorge
 import no.nav.melosys.domain.avgift.Trygdeavgiftsperiode
 import no.nav.melosys.domain.kodeverk.Folketrygdloven_kap2_bestemmelser
 import no.nav.melosys.domain.kodeverk.Trygdedekninger
+import no.nav.melosys.exception.FunksjonellException
 import no.nav.melosys.exception.IkkeFunnetException
 import no.nav.melosys.integrasjon.faktureringskomponenten.FaktureringskomponentenConsumer
 import no.nav.melosys.integrasjon.faktureringskomponenten.dto.BeregnTotalBeløpDto
@@ -61,7 +62,7 @@ class ÅrsavregningService(
     @Transactional
     fun oppretteÅrsavregning(behandlingsresultat: Behandlingsresultat, gjelderPeriode: Int) {
         if (aarsavregningRepository.finnAntallÅrsavregningerPåFagsakForÅr(behandlingsresultat.behandling.id, gjelderPeriode) != 0)
-            throw IllegalStateException("Det finnes en annen åpen årsavregningsbehandling for samme år på saken. \n" +
+            throw FunksjonellException("Det finnes en annen åpen årsavregningsbehandling for samme år på saken. \n" +
                 "Vurder hvilke behandling du vil fortsette med og avslutt den som ikke er aktuell via behandlingsmenyen.")
 
         Aarsavregning().apply {

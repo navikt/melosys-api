@@ -10,6 +10,7 @@ import no.nav.melosys.domain.kodeverk.Sakstyper
 import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingsstatus
 import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingstema
 import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingstyper
+import no.nav.melosys.exception.FunksjonellException
 import no.nav.melosys.repository.AarsavregningRepository
 import no.nav.melosys.repository.BehandlingRepository
 import no.nav.melosys.repository.BehandlingsresultatRepository
@@ -49,7 +50,7 @@ class OpprettAarsavregningIT @Autowired constructor(
         //Oppretter først en aarsavregning for å simulere at det allerede finnes en årsavregning for samme år
         årsavregningService.opprettNyÅrsavregning(behandlingsresultat.id!!, 2024)
 
-        assertFailsWith<IllegalStateException> {
+        assertFailsWith<FunksjonellException> {
             årsavregningService.opprettNyÅrsavregning(behandlingsresultat.id!!, 2024)
         }
     }
