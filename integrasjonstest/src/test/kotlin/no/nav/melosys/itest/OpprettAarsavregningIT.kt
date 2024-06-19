@@ -76,7 +76,7 @@ class OpprettAarsavregningIT @Autowired constructor(
         val behandlingsresultat = Behandlingsresultat()
         behandlingsresultat.behandling = behandling
         behandlingsresultat.behandlingsmåte = Behandlingsmaate.MANUELT
-        behandlingRepository.save(behandling) // Save behandling with the mapped behandlingsresultat
+        behandlingRepository.save(behandling)
         behandlingsresultatRepository.save(behandlingsresultat)
         return behandlingsresultat
     }
