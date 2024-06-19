@@ -60,7 +60,6 @@ internal class ÅrsavregningServiceTest {
         val eksisterendeBehandling = Behandling().apply { id = 1L }
         every { aarsavregningRepository.findById(1L) }.returns(Optional.of(årsavregningEntity1))
         every { aarsavregningRepository.finnAntallÅrsavregningerPåFagsakForÅr(1, 2023) }.returns(1)
-        every { aarsavregningRepository.finnAntallÅrsavregningerPåFagsakForÅr(2, 2023) }.returns(1)
         every { behandlingsresultatService.hentBehandlingsresultat(1L) }.returns(Behandlingsresultat().apply { behandling = eksisterendeBehandling })
 
         shouldThrow<FunksjonellException> {
