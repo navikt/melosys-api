@@ -1,5 +1,9 @@
 package no.nav.melosys.saksflyt.steg.brev;
 
+import java.util.ArrayList;
+import java.util.List;
+
+import io.getunleash.Unleash;
 import no.nav.melosys.domain.Anmodningsperiode;
 import no.nav.melosys.domain.Behandling;
 import no.nav.melosys.domain.Behandlingsresultat;
@@ -15,6 +19,7 @@ import no.nav.melosys.domain.kodeverk.begrunnelser.Endretperiode;
 import no.nav.melosys.domain.kodeverk.brev.Produserbaredokumenter;
 import no.nav.melosys.domain.mottatteopplysninger.MottatteOpplysninger;
 import no.nav.melosys.exception.FunksjonellException;
+import no.nav.melosys.featuretoggle.ToggleName;
 import no.nav.melosys.saksflyt.steg.StegBehandler;
 import no.nav.melosys.saksflytapi.ProsessinstansService;
 import no.nav.melosys.saksflytapi.domain.ProsessDataKey;
@@ -28,9 +33,6 @@ import org.jetbrains.annotations.NotNull;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Component;
-
-import java.util.ArrayList;
-import java.util.List;
 
 import static no.nav.melosys.domain.kodeverk.brev.Produserbaredokumenter.*;
 import static no.nav.melosys.domain.kodeverk.lovvalgsbestemmelser.Lovvalgbestemmelser_883_2004.FO_883_2004_ART13_4;
@@ -49,14 +51,18 @@ public class SendVedtaksbrevInnland implements StegBehandler {
     private final ProsessinstansService prosessinstansService;
     private final SaksbehandlingRegler saksbehandlingRegler;
 
+    private final Unleash unleash;
+
     public SendVedtaksbrevInnland(BehandlingService behandlingService,
                                   BehandlingsresultatService behandlingsresultatService,
                                   ProsessinstansService prosessinstansService,
-                                  SaksbehandlingRegler saksbehandlingRegler) {
+                                  SaksbehandlingRegler saksbehandlingRegler,
+                                  Unleash unleash) {
         this.behandlingService = behandlingService;
         this.behandlingsresultatService = behandlingsresultatService;
         this.prosessinstansService = prosessinstansService;
         this.saksbehandlingRegler = saksbehandlingRegler;
+        this.unleash = unleash;
     }
 
     @Override
@@ -80,6 +86,9 @@ public class SendVedtaksbrevInnland implements StegBehandler {
             log.info("Sendt utpekingsbrev for behandling {}", behandling.getId());
         } else if (resultat.erInnvilgelse()) {
             sendInnvilgelsesbrev(behandling, resultat, saksbehandler, begrunnelseKode, fritekst);
+            if (unleash.isEnabled(ToggleName.MELOSYS_KONVENSJON_EFTA_LAND_OG_STORBRITANNIA)) {
+                sendAttestA1(behandling, saksbehandler, begrunnelseKode, fritekst);
+            }
             log.info("Sendt innvilgelsesbrev for behandling {}", behandling.getId());
             if (prosessinstans.getData(ProsessDataKey.ARBEIDSGIVER_SKAL_HA_KOPI, Boolean.class, true)) {
                 sendOrienteringTilArbeidsgiver(behandling, resultat, saksbehandler);
@@ -121,12 +130,6 @@ public class SendVedtaksbrevInnland implements StegBehandler {
         Produserbaredokumenter produserbaredokument = hentProduserbarDokumentForInnvilgelse(behandling, resultat);
 
         List<Mottaker> mottakerListe = new ArrayList<>(List.of(Mottaker.medRolle(Mottakerroller.BRUKER)));
-        if (brevSendesTilStatligSkatteoppkreving(
-            resultat.hentLovvalgsperiode(),
-            behandling.getMottatteOpplysninger()
-        )) {
-            mottakerListe.add(Mottaker.av(NorskMyndighet.SKATTEINNKREVER_UTLAND));
-        }
 
         DoksysBrevbestilling innvilgelseBrukerOgSkatt = new DoksysBrevbestilling.Builder().medProduserbartDokument(produserbaredokument)
             .medAvsenderID(saksbehandler)
@@ -135,6 +138,20 @@ public class SendVedtaksbrevInnland implements StegBehandler {
             .build();
         prosessinstansService.opprettProsessinstanserSendBrev(behandling, innvilgelseBrukerOgSkatt, mottakerListe);
     }
+
+    private void sendAttestA1(Behandling behandling,
+                              String saksbehandler,
+                              String begrunnelseKode,
+                              String fritekst) {
+
+        DoksysBrevbestilling innvilgelseBrukerOgSkatt = new DoksysBrevbestilling.Builder().medProduserbartDokument(ATTEST_A1)
+            .medAvsenderID(saksbehandler)
+            .medBegrunnelseKode(begrunnelseKode)
+            .medFritekst(fritekst)
+            .build();
+        prosessinstansService.opprettProsessinstanserSendBrev(behandling, innvilgelseBrukerOgSkatt, List.of(Mottaker.medRolle(Mottakerroller.BRUKER)));
+    }
+
 
     @NotNull
     private Produserbaredokumenter hentProduserbarDokumentForInnvilgelse(Behandling behandling, Behandlingsresultat resultat) {

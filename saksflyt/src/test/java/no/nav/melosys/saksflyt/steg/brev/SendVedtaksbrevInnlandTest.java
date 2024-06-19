@@ -3,6 +3,7 @@ package no.nav.melosys.saksflyt.steg.brev;
 import java.time.LocalDate;
 import java.util.*;
 
+import io.getunleash.FakeUnleash;
 import no.nav.melosys.domain.*;
 import no.nav.melosys.domain.avklartefakta.Avklartefakta;
 import no.nav.melosys.domain.brev.DoksysBrevbestilling;
@@ -68,7 +69,7 @@ class SendVedtaksbrevInnlandTest {
         when(behandlingService.hentBehandlingMedSaksopplysninger(BEHANDLINGID)).thenReturn(behandling);
 
         sendVedtaksbrevInnland = new SendVedtaksbrevInnland(behandlingService, behandlingsresultatService,
-            prosessinstansService, saksbehandlingRegler);
+            prosessinstansService, saksbehandlingRegler, new FakeUnleash());
     }
 
     @Test
