@@ -17,9 +17,8 @@ class TrygdeavgiftService(
         listOf(Saksstatuser.ANNULLERT, Saksstatuser.OPPHØRT, Saksstatuser.HENLAGT, Saksstatuser.HENLAGT_BORTFALT, Saksstatuser.VIDERESENDT)
 
     @Transactional(readOnly = true)
-    fun harFagsakBehandlingerMedTrygdeavgift(saksnummer: String, sjekkFakturaserie: Boolean = false): Boolean {
-        return hentTrygdeavgiftBehandlinger(saksnummer, sjekkFakturaserie).isNotEmpty()
-    }
+    fun harFagsakBehandlingerMedTrygdeavgift(saksnummer: String, sjekkFakturaserie: Boolean = false): Boolean =
+        hentTrygdeavgiftBehandlinger(saksnummer, sjekkFakturaserie).isNotEmpty()
 
     @Transactional(readOnly = true)
     fun hentTrygdeavgiftBehandlinger(saksnummer: String, sjekkFakturaserie: Boolean = false): List<Behandling> {
@@ -37,11 +36,8 @@ class TrygdeavgiftService(
             }
     }
 
-    fun harTrygdeavgift(behandlingsresultat: Behandlingsresultat): Boolean {
-        return behandlingsresultat.trygdeavgiftsperioder.any { it.harAvgift() }
-    }
+    fun harTrygdeavgift(behandlingsresultat: Behandlingsresultat): Boolean = behandlingsresultat.trygdeavgiftsperioder.any { it.harAvgift() }
 
-    private fun harBestiltFakturaserie(behandlingsresultat: Behandlingsresultat): Boolean {
-        return behandlingsresultat.fakturaserieReferanse?.isNotBlank() ?: false
-    }
+    private fun harBestiltFakturaserie(behandlingsresultat: Behandlingsresultat): Boolean =
+        behandlingsresultat.fakturaserieReferanse?.isNotBlank() ?: false
 }
