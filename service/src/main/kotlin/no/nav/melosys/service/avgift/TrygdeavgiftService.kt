@@ -2,7 +2,7 @@ package no.nav.melosys.service.avgift
 
 import no.nav.melosys.domain.Behandling
 import no.nav.melosys.domain.Behandlingsresultat
-import no.nav.melosys.domain.avgift.Trygdeavgiftsperiode
+import no.nav.melosys.domain.kodeverk.Saksstatuser
 import no.nav.melosys.service.behandling.BehandlingsresultatService
 import no.nav.melosys.service.sak.FagsakService
 import org.springframework.stereotype.Service
@@ -13,28 +13,31 @@ class TrygdeavgiftService(
     private val fagsakService: FagsakService,
     private val behandlingsresultatService: BehandlingsresultatService,
 ) {
-    @Transactional
-    fun harFagsakBehandlingerMedTrygdeavgift(saksnummer: String): Boolean {
-        return hentTrygdeavgiftBehandlinger(saksnummer).isNotEmpty()
-    }
+    private val UGYLDIGE_SAKSSTATUSER_FOR_TRYGDEAVGIFT =
+        listOf(Saksstatuser.ANNULLERT, Saksstatuser.OPPHØRT, Saksstatuser.HENLAGT, Saksstatuser.HENLAGT_BORTFALT, Saksstatuser.VIDERESENDT)
 
-    @Transactional
-    fun hentTrygdeavgiftBehandlinger(saksnummer: String): List<Behandling> {
-        return fagsakService.hentFagsak(saksnummer)
+    @Transactional(readOnly = true)
+    fun harFagsakBehandlingerMedTrygdeavgift(saksnummer: String, sjekkFakturaserie: Boolean = false): Boolean =
+        hentTrygdeavgiftBehandlinger(saksnummer, sjekkFakturaserie).isNotEmpty()
+
+    @Transactional(readOnly = true)
+    fun hentTrygdeavgiftBehandlinger(saksnummer: String, sjekkFakturaserie: Boolean = false): List<Behandling> {
+        val fagsak = fagsakService.hentFagsak(saksnummer)
+
+        if (fagsak.status in UGYLDIGE_SAKSSTATUSER_FOR_TRYGDEAVGIFT) {
+            return emptyList()
+        }
+
+        return fagsak
             .behandlinger
             .filter {
-                harTrygdeavgiftOgBestiltFaktura(behandlingsresultatService.hentBehandlingsresultat(it.id))
+                val resultat = behandlingsresultatService.hentBehandlingsresultat(it.id)
+                harTrygdeavgift(resultat) && (!sjekkFakturaserie || harBestiltFakturaserie(resultat))
             }
     }
 
+    fun harTrygdeavgift(behandlingsresultat: Behandlingsresultat): Boolean = behandlingsresultat.trygdeavgiftsperioder.any { it.harAvgift() }
 
-    fun harTrygdeavgiftOgBestiltFaktura(behandlingsresultat: Behandlingsresultat): Boolean {
-        val harTrygdeavgift = behandlingsresultat.trygdeavgiftsperioder?.any { trygdeavgiftsperiodeHarAvgift(it) } ?: false
-        val bestiltFaktura = behandlingsresultat.fakturaserieReferanse?.isNotBlank() ?: false
-        return harTrygdeavgift && bestiltFaktura
-    }
-
-    private fun trygdeavgiftsperiodeHarAvgift(trygdeavgiftsperiode: Trygdeavgiftsperiode?): Boolean {
-        return (trygdeavgiftsperiode != null) && (trygdeavgiftsperiode.trygdeavgiftsbeløpMd != null) && trygdeavgiftsperiode.harAvgift()
-    }
+    private fun harBestiltFakturaserie(behandlingsresultat: Behandlingsresultat): Boolean =
+        behandlingsresultat.fakturaserieReferanse?.isNotBlank() ?: false
 }

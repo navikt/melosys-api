@@ -9,6 +9,7 @@ import no.nav.melosys.domain.*
 import no.nav.melosys.domain.avgift.Penger
 import no.nav.melosys.domain.avgift.Trygdeavgiftsperiode
 import no.nav.melosys.domain.kodeverk.Medlemskapstyper
+import no.nav.melosys.domain.kodeverk.Saksstatuser
 import no.nav.melosys.service.avgift.TrygdeavgiftService
 import no.nav.melosys.service.behandling.BehandlingsresultatService
 import org.junit.jupiter.api.BeforeEach
@@ -42,13 +43,16 @@ class TrygdeavgiftServiceTest {
     }
 
     @Test
-    fun harFagsakBehandlingerMedTrygdeavgift_harIkkeMedlemAvFolketrygden_returnererFalse() {
+    fun `harFagsakBehandlingerMedTrygdeavgift, uten avgiftsperioder, returnerer false`() {
         trygdeavgiftService.harFagsakBehandlingerMedTrygdeavgift(FagsakTestFactory.SAKSNUMMER).shouldBeFalse()
     }
 
     @Test
-    fun harFagsakBehandlingerMedTrygdeavgift_harTrygedavgiftsperiodeMenDenHarIkkeSattMndBeløp_returnererFalse() {
-        val trygdeavgiftsperiode = Trygdeavgiftsperiode().apply { trygdeavgiftsbeløpMd = null }
+    fun `harFagsakBehandlingerMedTrygdeavgift, med avgiftsperioder men uten mndBeløp, returnerer false`() {
+        val trygdeavgiftsperiode = Trygdeavgiftsperiode().apply {
+            trygdeavgiftsbeløpMd = Penger(0.0)
+            trygdesats = BigDecimal(3.5)
+        }
         behandlingsresultat.apply {
             medlemskapsperioder.add(
                 Medlemskapsperiode().apply {
@@ -80,7 +84,29 @@ class TrygdeavgiftServiceTest {
     }
 
     @Test
-    fun harFagsakBehandlingerMedTrygdeavgift_harTrygedavgiftsperiodeMenDenHarIkkeBestiltFaktura_returnererFalse() {
+    fun `harFagsakBehandlingerMedTrygdeavgift, fagsak har ugyldig status, returnerer false`() {
+        fagsak.apply {
+            status = Saksstatuser.HENLAGT
+        }
+        val trygdeavgiftsperiode = Trygdeavgiftsperiode().apply {
+            trygdeavgiftsbeløpMd = Penger(30000.0)
+            trygdesats = BigDecimal(3.56)
+        }
+        behandlingsresultat.apply {
+            medlemskapsperioder.add(
+                Medlemskapsperiode().apply {
+                    medlemskapstype = Medlemskapstyper.PLIKTIG
+                    trygdeavgiftsperioder.add(trygdeavgiftsperiode)
+                }
+            )
+        }
+
+
+        trygdeavgiftService.harFagsakBehandlingerMedTrygdeavgift(FagsakTestFactory.SAKSNUMMER).shouldBeFalse()
+    }
+
+    @Test
+    fun `harFagsakBehandlingerMedTrygdeavgift med sjekk av fakturaserie, trygedavgiftsperioder men ikke bestilt faktura, returnerer false`() {
         val trygdeavgiftsperiode = Trygdeavgiftsperiode().apply {
             trygdeavgiftsbeløpMd = Penger(2345.56)
             trygdesats = BigDecimal(3.56)
@@ -94,11 +120,11 @@ class TrygdeavgiftServiceTest {
             )
         }
 
-        trygdeavgiftService.harFagsakBehandlingerMedTrygdeavgift(FagsakTestFactory.SAKSNUMMER).shouldBeFalse()
+        trygdeavgiftService.harFagsakBehandlingerMedTrygdeavgift(FagsakTestFactory.SAKSNUMMER, true).shouldBeFalse()
     }
 
     @Test
-    fun harFagsakBehandlingerMedTrygdeavgift_harTrygedavgiftsperioderBådeMedOgUtenAvgiftOgFakturaErBestilt_returnererTrue() {
+    fun harFagsakBehandlingerMedTrygdeavgift_harTrygedavgiftsperioderBådeMedOgUtenAvgift_returnererTrue() {
         val trygdeavgiftsperiode1 = Trygdeavgiftsperiode().apply {
             trygdeavgiftsbeløpMd = Penger(0.0)
             trygdesats = BigDecimal.ZERO
@@ -113,11 +139,9 @@ class TrygdeavgiftServiceTest {
                     medlemskapstype = Medlemskapstyper.PLIKTIG
                     trygdeavgiftsperioder.add(trygdeavgiftsperiode1)
                     trygdeavgiftsperioder.add(trygdeavgiftsperiode2)
-                    fakturaserieReferanse = "FakturaserieReferanse"
                 }
             )
         }
-
 
         trygdeavgiftService.harFagsakBehandlingerMedTrygdeavgift(FagsakTestFactory.SAKSNUMMER).shouldBeTrue()
     }
