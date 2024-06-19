@@ -75,29 +75,22 @@ class OpprettFakturaserie(
         behandlingsresultatService.lagre(behandlingsresultat)
     }
 
-    private fun skalOppretteFakturaserie(behandlingsresultat: Behandlingsresultat): Boolean {
-        return trygdeavgiftsperioderMedAvgift(behandlingsresultat).isNotEmpty()
-            && trygdeavgiftMottakerService.skalBetalesTilNav(behandlingsresultat)
-    }
+    private fun skalOppretteFakturaserie(behandlingsresultat: Behandlingsresultat): Boolean =
+        trygdeavgiftsperioderMedAvgift(behandlingsresultat).isNotEmpty() && trygdeavgiftMottakerService.skalBetalesTilNav(behandlingsresultat)
 
-    private fun andregangsvurderingHarFjernetTrygdeavgift(behandling: Behandling, behandlingsresultat: Behandlingsresultat): Boolean {
-        return behandling.erAndregangsbehandling() && harOpprinneligBehandlingMedTrygdeavgift(behandling) && betalerNåKunTilSkatt(behandlingsresultat)
-    }
+    private fun andregangsvurderingHarFjernetTrygdeavgift(behandling: Behandling, behandlingsresultat: Behandlingsresultat): Boolean =
+        behandling.erAndregangsbehandling() && harOpprinneligBehandlingMedTrygdeavgift(behandling) && betalerNåKunTilSkatt(behandlingsresultat)
 
     private fun harOpprinneligBehandlingMedTrygdeavgift(behandling: Behandling): Boolean =
         behandling.opprinneligBehandling?.let {
             trygdeavgiftService.harTrygdeavgift(behandlingsresultatService.hentBehandlingsresultat(it.id))
         } ?: false
 
-    private fun betalerNåKunTilSkatt(behandlingsresultat: Behandlingsresultat): Boolean {
-        return behandlingsresultat.let {
-            trygdeavgiftMottakerService.betalerKunTrygdeavgiftTilSkatt(it)
-        }
-    }
+    private fun betalerNåKunTilSkatt(behandlingsresultat: Behandlingsresultat): Boolean =
+        trygdeavgiftMottakerService.betalerKunTrygdeavgiftTilSkatt(behandlingsresultat)
 
-    private fun trygdeavgiftsperioderMedAvgift(behandlingsresultat: Behandlingsresultat): List<Trygdeavgiftsperiode> {
-        return behandlingsresultat.trygdeavgiftsperioder?.filter { it.harAvgift() } ?: emptyList()
-    }
+    private fun trygdeavgiftsperioderMedAvgift(behandlingsresultat: Behandlingsresultat): List<Trygdeavgiftsperiode> =
+        behandlingsresultat.trygdeavgiftsperioder?.filter { it.harAvgift() } ?: emptyList()
 
     private fun mapFakturaserieDto(behandlingsresultat: Behandlingsresultat, prosessinstans: Prosessinstans): FakturaserieDto {
         val behandling = behandlingService.hentBehandling(behandlingsresultat.id)
@@ -120,9 +113,8 @@ class OpprettFakturaserie(
         )
     }
 
-    private fun hentBetalingsIntervall(prosessinstans: Prosessinstans): FaktureringsIntervall {
-        return prosessinstans.getData(ProsessDataKey.BETALINGSINTERVALL, FaktureringsIntervall::class.java, FaktureringsIntervall.KVARTAL)
-    }
+    private fun hentBetalingsIntervall(prosessinstans: Prosessinstans): FaktureringsIntervall =
+        prosessinstans.getData(ProsessDataKey.BETALINGSINTERVALL, FaktureringsIntervall::class.java, FaktureringsIntervall.KVARTAL)
 
     private fun hentOpprinneligFakturaserieReferanse(behandling: Behandling): String? {
         if (behandling.opprinneligBehandling != null) {
