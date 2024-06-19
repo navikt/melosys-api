@@ -4,8 +4,6 @@ import no.nav.melosys.domain.avgift.Aarsavregning
 import org.springframework.data.jpa.repository.JpaRepository
 import org.springframework.data.jpa.repository.Query
 import org.springframework.data.repository.query.Param
-import java.math.BigDecimal
-import java.util.*
 
 interface AarsavregningRepository : JpaRepository<Aarsavregning, Long> {
 
@@ -22,5 +20,5 @@ interface AarsavregningRepository : JpaRepository<Aarsavregning, Long> {
           AND b.beh_type = 'ÅRSAVREGNING'
           AND b.status <> 'AVSLUTTET'
     """, nativeQuery = true)
-    fun eksisterendeÅrsavregningFinnesPåÅr(@Param("behandlingId") behandlingId: Long, @Param("aar") år: Int): Int
+    fun finnAntallÅrsavregningerPåFagsakForÅr(@Param("behandlingId") behandlingId: Long, @Param("aar") år: Int): Int
 }
