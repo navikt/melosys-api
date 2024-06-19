@@ -1,6 +1,8 @@
 package no.nav.melosys.itest
 
+import io.kotest.assertions.throwables.shouldThrow
 import io.kotest.matchers.nulls.shouldNotBeNull
+import io.kotest.matchers.optional.shouldBePresent
 import io.kotest.matchers.shouldBe
 import no.nav.melosys.domain.Behandling
 import no.nav.melosys.domain.Behandlingsmaate
@@ -23,7 +25,6 @@ import org.springframework.boot.test.context.SpringBootTest
 import org.springframework.transaction.annotation.Transactional
 import java.time.LocalDate
 import kotlin.test.Test
-import kotlin.test.assertFailsWith
 
 @SpringBootTest
 class OpprettAarsavregningIT @Autowired constructor(
@@ -40,47 +41,45 @@ class OpprettAarsavregningIT @Autowired constructor(
 
         val result = årsavregningService.opprettNyÅrsavregning(behandlingsresultat.id!!, 2024)
 
-        val avregning = aarsavregningRepository.findById(result).orElseThrow()
-        avregning.aar.shouldBe(2024)
-        avregning.id.shouldNotBeNull()
-        avregning.behandlingsresultat.shouldNotBeNull()
+        aarsavregningRepository.findById(result).shouldBePresent().aar.shouldBe(2024)
     }
 
     @Test
     @Transactional
     fun `opprettNyÅrsavregning should throw exception when existing avregning exists for the same year`() {
-        val behandlingsresultat = lagBehandlingsResultat()
+        val behandlingsresultat = lagBehandlingsResultat().shouldNotBeNull()
 
         //Oppretter først en aarsavregning for å simulere at det allerede finnes en årsavregning for samme år
-        årsavregningService.opprettNyÅrsavregning(behandlingsresultat.id!!, 2024)
+        årsavregningService.opprettNyÅrsavregning(behandlingsresultat.id, 2024)
 
-        assertFailsWith<FunksjonellException> {
-            årsavregningService.opprettNyÅrsavregning(behandlingsresultat.id!!, 2024)
+        shouldThrow<FunksjonellException> {
+            årsavregningService.opprettNyÅrsavregning(behandlingsresultat.id, 2024)
         }
     }
 
     private fun lagBehandlingsResultat(): Behandlingsresultat {
-        val fagsak = Fagsak(
+        val eksempelFagsak = Fagsak(
             saksnummer = "123456",
             type = Sakstyper.FTRL,
             tema = Sakstemaer.MEDLEMSKAP_LOVVALG,
             status = Saksstatuser.OPPRETTET
         )
-        fagsakRepository.save(fagsak)
+        fagsakRepository.save(eksempelFagsak)
 
-        val behandling = Behandling()
-        behandling.fagsak = fagsak
-        behandling.status = Behandlingsstatus.OPPRETTET
-        behandling.type = Behandlingstyper.ÅRSAVREGNING
-        behandling.tema = Behandlingstema.YRKESAKTIV
-        behandling.behandlingsfrist = LocalDate.now()
+        val eksempelBehandling = Behandling().apply {
+            fagsak = eksempelFagsak
+            status = Behandlingsstatus.OPPRETTET
+            type = Behandlingstyper.ÅRSAVREGNING
+            tema = Behandlingstema.YRKESAKTIV
+            behandlingsfrist = LocalDate.now()
+        }
 
-        behandlingRepository.save(behandling)
+        behandlingRepository.save(eksempelBehandling)
 
-        val behandlingsresultat = Behandlingsresultat()
-        behandlingsresultat.behandling = behandling
-        behandlingsresultat.behandlingsmåte = Behandlingsmaate.MANUELT
-        behandlingRepository.save(behandling)
+        val behandlingsresultat = Behandlingsresultat().apply {
+            behandling = eksempelBehandling
+            behandlingsmåte = Behandlingsmaate.MANUELT
+        }
         behandlingsresultatRepository.save(behandlingsresultat)
         return behandlingsresultat
     }

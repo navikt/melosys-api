@@ -1,5 +1,6 @@
 package no.nav.melosys.service.avgift
 
+import io.kotest.assertions.throwables.shouldThrow
 import io.kotest.matchers.shouldBe
 import io.mockk.every
 import io.mockk.impl.annotations.RelaxedMockK
@@ -26,7 +27,6 @@ import no.nav.melosys.sikkerhet.context.SpringSubjectHandler
 import no.nav.melosys.sikkerhet.context.TestSubjectHandler
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
-import org.junit.jupiter.api.assertThrows
 import org.junit.jupiter.api.extension.ExtendWith
 import java.math.BigDecimal
 import java.time.LocalDate
@@ -57,14 +57,13 @@ internal class ÅrsavregningServiceTest {
             aar = 2023
             behandlingsresultat = Behandlingsresultat()
         }
-        val eksisterendeBehandling = Behandling()
-        eksisterendeBehandling.id = 1L
+        val eksisterendeBehandling = Behandling().apply { id = 1L }
         every { aarsavregningRepository.findById(1L) }.returns(Optional.of(årsavregningEntity1))
         every { aarsavregningRepository.finnAntallÅrsavregningerPåFagsakForÅr(1, 2023) }.returns(1)
         every { aarsavregningRepository.finnAntallÅrsavregningerPåFagsakForÅr(2, 2023) }.returns(1)
         every { behandlingsresultatService.hentBehandlingsresultat(1L) }.returns(Behandlingsresultat().apply { behandling = eksisterendeBehandling })
 
-        assertThrows<FunksjonellException> {
+        shouldThrow<FunksjonellException> {
             årsavregningService.opprettNyÅrsavregning(1, 2023)
         }
     }
