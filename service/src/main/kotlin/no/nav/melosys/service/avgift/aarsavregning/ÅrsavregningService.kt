@@ -49,10 +49,10 @@ class ÅrsavregningService(
     }
 
     @Transactional
-    fun opprettNyÅrsavregning(behandlingsId: Long, gjelderPeriode: Int): Long {
+    fun opprettNyÅrsavregning(behandlingsId: Long, gjelderÅr: Int): Long {
         val behandlingsresultat = behandlingsresultatRepository.findById(behandlingsId)
         if (behandlingsresultat.isPresent) {
-            oppretteÅrsavregning(behandlingsresultat.get(), gjelderPeriode)
+            oppretteÅrsavregning(behandlingsresultat.get(), gjelderÅr)
             return behandlingsId
         } else {
             throw NotFoundException("Finner ingen tidligere behandlingsresultat")
