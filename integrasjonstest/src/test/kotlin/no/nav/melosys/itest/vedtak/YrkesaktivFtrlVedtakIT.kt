@@ -287,7 +287,7 @@ class YrkesaktivFtrlVedtakIT(
 
         val saksnummer = lagFørstegangsBehandling(Skatteplikttype.IKKE_SKATTEPLIKTIG, false)
 
-        val skattehendelse = Skattehendelse("2023", "30056928150")
+        val skattehendelse = Skattehendelse("2023", "30056928150", "ny")
 
         executeAndWait(
             waitForprosessType = ProsessType.OPPRETT_NY_BEHANDLING_AARSAVREGNING,
