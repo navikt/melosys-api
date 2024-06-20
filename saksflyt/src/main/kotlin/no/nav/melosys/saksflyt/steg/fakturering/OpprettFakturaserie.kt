@@ -76,21 +76,18 @@ class OpprettFakturaserie(
     }
 
     private fun skalOppretteFakturaserie(behandlingsresultat: Behandlingsresultat): Boolean =
-        trygdeavgiftsperioderMedAvgift(behandlingsresultat).isNotEmpty() && trygdeavgiftMottakerService.skalBetalesTilNav(behandlingsresultat)
+        behandlingsresultat.trygdeavgiftsperioder.filter { it.harAvgift() }.isNotEmpty() && trygdeavgiftMottakerService.skalBetalesTilNav(behandlingsresultat)
 
     private fun andregangsvurderingHarFjernetTrygdeavgift(behandling: Behandling, behandlingsresultat: Behandlingsresultat): Boolean =
-        behandling.erAndregangsbehandling() && harOpprinneligBehandlingMedTrygdeavgift(behandling) && betalerNåKunTilSkatt(behandlingsresultat)
+        behandling.erAndregangsbehandling() && harOpprinneligBehandlingTrygdeavgift(behandling) && betalerNåKunTilSkatt(behandlingsresultat)
 
-    private fun harOpprinneligBehandlingMedTrygdeavgift(behandling: Behandling): Boolean =
+    private fun harOpprinneligBehandlingTrygdeavgift(behandling: Behandling): Boolean =
         behandling.opprinneligBehandling?.let {
             trygdeavgiftService.harTrygdeavgift(behandlingsresultatService.hentBehandlingsresultat(it.id))
         } ?: false
 
     private fun betalerNåKunTilSkatt(behandlingsresultat: Behandlingsresultat): Boolean =
         trygdeavgiftMottakerService.betalerKunTrygdeavgiftTilSkatt(behandlingsresultat)
-
-    private fun trygdeavgiftsperioderMedAvgift(behandlingsresultat: Behandlingsresultat): List<Trygdeavgiftsperiode> =
-        behandlingsresultat.trygdeavgiftsperioder?.filter { it.harAvgift() } ?: emptyList()
 
     private fun mapFakturaserieDto(behandlingsresultat: Behandlingsresultat, prosessinstans: Prosessinstans): FakturaserieDto {
         val behandling = behandlingService.hentBehandling(behandlingsresultat.id)
@@ -109,7 +106,7 @@ class OpprettFakturaserie(
             fakturaGjelderInnbetalingstype = Innbetalingstype.TRYGDEAVGIFT,
             intervall = hentBetalingsIntervall(prosessinstans),
             referanseBruker = "Vedtak om medlemskap datert $vedtaksdato",
-            perioder = mapFakturaseriePeriodeDto(trygdeavgiftsperioderMedAvgift(behandlingsresultat))
+            perioder = mapFakturaseriePeriodeDto(behandlingsresultat.trygdeavgiftsperioder.filter { it.harAvgift() })
         )
     }
 

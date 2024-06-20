@@ -32,11 +32,14 @@ class TrygdeavgiftService(
             .behandlinger
             .filter {
                 val resultat = behandlingsresultatService.hentBehandlingsresultat(it.id)
-                harTrygdeavgift(resultat) && (!sjekkFakturaserie || harBestiltFakturaserie(resultat))
+                harTrygdeavgift(resultat, sjekkFakturaserie)
             }
     }
 
-    fun harTrygdeavgift(behandlingsresultat: Behandlingsresultat): Boolean = behandlingsresultat.trygdeavgiftsperioder.any { it.harAvgift() }
+    fun harTrygdeavgift(resultat: Behandlingsresultat, sjekkFakturaserie: Boolean = false) =
+        harTrygdeavgift(resultat) && (!sjekkFakturaserie || harBestiltFakturaserie(resultat))
+
+    private fun harTrygdeavgift(behandlingsresultat: Behandlingsresultat): Boolean = behandlingsresultat.trygdeavgiftsperioder.any { it.harAvgift() }
 
     private fun harBestiltFakturaserie(behandlingsresultat: Behandlingsresultat): Boolean =
         behandlingsresultat.fakturaserieReferanse?.isNotBlank() ?: false
