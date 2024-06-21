@@ -80,7 +80,6 @@ class OpprettFakturaserieTest {
             behandlingsresultatService,
             faktureringskomponentenConsumer,
             pdlService,
-            trygdeavgiftMottakerService,
             trygdeavgiftService
         )
     }
