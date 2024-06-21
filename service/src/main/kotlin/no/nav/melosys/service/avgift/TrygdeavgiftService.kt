@@ -40,7 +40,7 @@ class TrygdeavgiftService(
     fun harFakturerbarTrygdeavgift(resultat: Behandlingsresultat) =
         harTrygdeavgift(resultat) && trygdeavgiftMottakerService.skalBetalesTilNav(resultat)
 
-    fun harTrygdeavgift(resultat: Behandlingsresultat, sjekkFakturaserie: Boolean = false) =
+    private fun harTrygdeavgift(resultat: Behandlingsresultat, sjekkFakturaserie: Boolean = false) =
         harTrygdeavgift(resultat) && (!sjekkFakturaserie || harBestiltFakturaserie(resultat))
 
     private fun harTrygdeavgift(behandlingsresultat: Behandlingsresultat): Boolean = behandlingsresultat.trygdeavgiftsperioder.any { it.harAvgift() }

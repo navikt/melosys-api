@@ -76,18 +76,15 @@ class OpprettFakturaserie(
     }
 
     private fun skalOppretteFakturaserie(behandlingsresultat: Behandlingsresultat): Boolean =
-        behandlingsresultat.trygdeavgiftsperioder.filter { it.harAvgift() }.isNotEmpty() && trygdeavgiftMottakerService.skalBetalesTilNav(behandlingsresultat)
+        trygdeavgiftService.harFakturerbarTrygdeavgift(behandlingsresultat)
 
     private fun andregangsvurderingHarFjernetTrygdeavgift(behandling: Behandling, behandlingsresultat: Behandlingsresultat): Boolean =
-        behandling.erAndregangsbehandling() && harOpprinneligBehandlingTrygdeavgift(behandling) && betalerNåKunTilSkatt(behandlingsresultat)
+        behandling.erAndregangsbehandling() && harOpprinneligBehandlingFakturerbarTrygdeavgift(behandling) && !trygdeavgiftService.harFakturerbarTrygdeavgift(behandlingsresultat)
 
-    private fun harOpprinneligBehandlingTrygdeavgift(behandling: Behandling): Boolean =
+    private fun harOpprinneligBehandlingFakturerbarTrygdeavgift(behandling: Behandling): Boolean =
         behandling.opprinneligBehandling?.let {
-            trygdeavgiftService.harTrygdeavgift(behandlingsresultatService.hentBehandlingsresultat(it.id))
+            trygdeavgiftService.harFakturerbarTrygdeavgift(behandlingsresultatService.hentBehandlingsresultat(it.id))
         } ?: false
-
-    private fun betalerNåKunTilSkatt(behandlingsresultat: Behandlingsresultat): Boolean =
-        trygdeavgiftMottakerService.betalerKunTrygdeavgiftTilSkatt(behandlingsresultat)
 
     private fun mapFakturaserieDto(behandlingsresultat: Behandlingsresultat, prosessinstans: Prosessinstans): FakturaserieDto {
         val behandling = behandlingService.hentBehandling(behandlingsresultat.id)
