@@ -12,6 +12,7 @@ import org.springframework.transaction.annotation.Transactional
 class TrygdeavgiftService(
     private val fagsakService: FagsakService,
     private val behandlingsresultatService: BehandlingsresultatService,
+    private val trygdeavgiftMottakerService: TrygdeavgiftMottakerService,
 ) {
     private val UGYLDIGE_SAKSSTATUSER_FOR_TRYGDEAVGIFT =
         listOf(Saksstatuser.ANNULLERT, Saksstatuser.OPPHØRT, Saksstatuser.HENLAGT, Saksstatuser.HENLAGT_BORTFALT, Saksstatuser.VIDERESENDT)
@@ -35,6 +36,9 @@ class TrygdeavgiftService(
                 harTrygdeavgift(resultat, sjekkFakturaserie)
             }
     }
+
+    fun harFakturerbarTrygdeavgift(resultat: Behandlingsresultat) =
+        harTrygdeavgift(resultat) && trygdeavgiftMottakerService.skalBetalesTilNav(resultat)
 
     fun harTrygdeavgift(resultat: Behandlingsresultat, sjekkFakturaserie: Boolean = false) =
         harTrygdeavgift(resultat) && (!sjekkFakturaserie || harBestiltFakturaserie(resultat))
