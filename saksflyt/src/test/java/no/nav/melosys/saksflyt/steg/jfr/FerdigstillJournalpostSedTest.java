@@ -11,6 +11,7 @@ import no.nav.melosys.domain.kodeverk.Aktoersroller;
 import no.nav.melosys.domain.kodeverk.Sakstemaer;
 import no.nav.melosys.domain.kodeverk.Sakstyper;
 import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingstema;
+import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingstyper;
 import no.nav.melosys.integrasjon.joark.JoarkFasade;
 import no.nav.melosys.integrasjon.joark.JournalpostOppdatering;
 import no.nav.melosys.saksflytapi.domain.ProsessDataKey;
@@ -123,6 +124,7 @@ class FerdigstillJournalpostSedTest {
 
         Behandling behandling = new Behandling();
         behandling.setTema(Behandlingstema.UTSENDT_ARBEIDSTAKER);
+        behandling.setType(Behandlingstyper.FØRSTEGANG);
         behandling.setFagsak(fagsak);
 
         MelosysEessiMelding eessiMelding = new MelosysEessiMelding();

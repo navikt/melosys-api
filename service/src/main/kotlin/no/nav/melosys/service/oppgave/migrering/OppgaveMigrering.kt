@@ -269,7 +269,7 @@ class OppgaveMigrering(
 
     private fun SakOgBehandlingDTO.utledTema(): Tema =
         temaUtleder.utledTema(
-            sakstype, sakstema, behandlingstema
+            sakstype, sakstema, behandlingstema, behandlingstype
         )
 
     private fun SakOgBehandlingDTO.utledBeskrivelse(): String {

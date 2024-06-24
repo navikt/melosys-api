@@ -108,7 +108,7 @@ public class OpprettOgJournalforBrev implements StegBehandler {
 
         settHovedpart(behandling, bestilling);
 
-        String journalpostId = joarkFasade.opprettJournalpost(OpprettJournalpost.lagJournalpostForBrev(bestilling.build(), oppgaveFactory.utledTema(fagsak.getType(), fagsak.getTema(), behandling.getTema())), true);
+        String journalpostId = joarkFasade.opprettJournalpost(OpprettJournalpost.lagJournalpostForBrev(bestilling.build(), oppgaveFactory.utledTema(fagsak.getType(), fagsak.getTema(), behandling.getTema(), behandling.getType())), true);
 
         log.info("Brev for behandling {} er journalført, journalpostId {}", behandling.getId(), journalpostId);
         prosessinstans.setData(DISTRIBUERBAR_JOURNALPOST_ID, journalpostId);

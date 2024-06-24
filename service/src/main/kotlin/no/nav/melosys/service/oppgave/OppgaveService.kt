@@ -206,7 +206,7 @@ class OppgaveService(
 
     private fun lagBehandlingsoppgaveDto(oppgave: Oppgave): BehandlingsoppgaveDto {
         val fagsak = fagsakService.hentFagsak(oppgave.saksnummer)
-        var sistAktiveBehandling = fagsak.hentSistAktivBehandlingIkkeÅrsavregning()
+        var sistAktiveBehandling = fagsak.hentAktivBehandling()
         sistAktiveBehandling = behandlingService.hentBehandling(sistAktiveBehandling.id)
         val orgnr = fagsak.finnVirksomhetsOrgnr()
 
