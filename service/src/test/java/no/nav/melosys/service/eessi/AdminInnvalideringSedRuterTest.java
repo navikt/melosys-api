@@ -69,6 +69,7 @@ class AdminInnvalideringSedRuterTest {
 
         melosysEessiMelding.setAktoerId("12312412");
         melosysEessiMelding.setRinaSaksnummer("143141");
+        melosysEessiMelding.setJournalpostId("1111111");
         prosessinstans.setData(ProsessDataKey.EESSI_MELDING, melosysEessiMelding);
     }
 
@@ -165,7 +166,7 @@ class AdminInnvalideringSedRuterTest {
 
         adminInnvalideringSedRuter.rutSedTilBehandling(prosessinstans, arkivsakID);
         verify(oppgaveService).opprettEllerGjenbrukBehandlingsoppgave(any(Behandling.class),
-            eq(melosysEessiMelding.getJournalpostId()), eq(melosysEessiMelding.getAktoerId()), isNull());
+            eq(melosysEessiMelding.getJournalpostId()), eq(melosysEessiMelding.getAktoerId()), isNull(), isNull());
     }
 
 

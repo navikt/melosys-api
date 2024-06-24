@@ -505,7 +505,7 @@ public class ProsessinstansService {
         lagre(prosessinstans);
     }
 
-    private Prosessinstans prosessinstansForSedMottak(MelosysEessiMelding melosysEessiMelding) { //TODO gjør etteleraant her
+    private Prosessinstans prosessinstansForSedMottak(MelosysEessiMelding melosysEessiMelding) {
         Prosessinstans prosessinstans = new ProsessinstansBuilder()
             .medType(ProsessType.MOTTAK_SED)
             .medEessiMelding(melosysEessiMelding)

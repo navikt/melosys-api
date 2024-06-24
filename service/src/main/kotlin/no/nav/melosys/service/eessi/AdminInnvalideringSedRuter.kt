@@ -3,6 +3,7 @@ package no.nav.melosys.service.eessi
 import no.nav.melosys.domain.dokument.sed.SedDokument
 import no.nav.melosys.domain.eessi.SedInformasjon
 import no.nav.melosys.domain.eessi.SedType
+import no.nav.melosys.domain.eessi.melding.MelosysEessiMelding
 import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingsresultattyper
 import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingsstatus
 import no.nav.melosys.saksflytapi.ProsessinstansService
@@ -66,7 +67,7 @@ class AdminInnvalideringSedRuter(
 
         val aktivBehandlingErInvalidert = erAktivBehandlingInvalidert(sedDokument, arkivsakID)
 
-        if (behandlingSkalAnnuleres(melosysEessiMelding.sedType, sedDokument.get().sedType)
+        if (behandlingSkalAnnuleres(melosysEessiMelding, sedDokument.get())
             || aktivBehandlingErInvalidert && (sistAktiveBehandling.erRegisteringAvUnntak() || sistAktiveBehandling.erAnmodningOmUnntak())
         ) {
             annullerSakOgBehandling(sistAktiveBehandling)
@@ -77,8 +78,8 @@ class AdminInnvalideringSedRuter(
         opprettJournalføringProsess(melosysEessiMelding, sistAktiveBehandling)
     }
 
-    private fun behandlingSkalAnnuleres(sedType: String, sistAktiveSedType: SedType): Boolean {
-        return sedType == SedType.X008.toString() && sistAktiveSedType == SedType.A003
+    private fun behandlingSkalAnnuleres(melosysEessiMelding: MelosysEessiMelding, sistAktiveSedDokument: SedDokument): Boolean {
+        return melosysEessiMelding.sedType == SedType.X008.toString() && sistAktiveSedDokument.sedType == SedType.A003
     }
 
     private fun erAktivBehandlingInvalidert(sedDokument: Optional<SedDokument>, arkivsakID: Long?): Boolean {
