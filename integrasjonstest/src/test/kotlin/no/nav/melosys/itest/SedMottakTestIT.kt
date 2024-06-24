@@ -303,6 +303,60 @@ class SedMottakTestIT(
     }
 
     @Test
+    fun `A003 med etterfølgende X008 og lovvalgsland ikke er NO skal gjøre ettelerannet`() {
+        val ref = Random().nextInt(100000).toString()
+
+        val sedInfo = SedInformasjon(ref, SedType.A003.name, LocalDate.now(), LocalDate.now(), null, "VURDER_DOKUMENT", null)
+        val bucInformasjon = BucInformasjon(ref, true, null, LocalDate.now(), null, listOf(sedInfo))
+        MelosysEessiRepo.opprettBucinformasjon(bucInformasjon)
+
+        val eessiMeldingA003 = eessiMeldingTestDataFactory.melosysEessiMelding {
+            bucType = BucType.LA_BUC_02.name
+            rinaSaksnummer = ref
+            sedType = SedType.A003.name
+            periode = Periode(LocalDate.now(), LocalDate.now().plusYears(1))
+            artikkel = "13_1_a"
+            lovvalgsland = "PL"
+        }
+        val eessiMeldingX008 = eessiMeldingTestDataFactory.melosysEessiMelding {
+            bucType = BucType.LA_BUC_02.name
+            rinaSaksnummer = ref
+            sedType = SedType.X008.name
+            periode = null
+            artikkel = null
+        }
+
+        prosessinstansTestManager.executeAndWait(
+            waitForprosessType = ProsessType.MOTTAK_SED,
+            alsoWaitForprosessType = listOf(ProsessType.ARBEID_FLERE_LAND_NY_SAK, ProsessType.MOTTAK_SED_JOURNALFØRING),
+            waitForProcessCount = 4
+        ) {
+            melosysEessiMeldingKafkaTemplate.send(kafkaTopic, eessiMeldingA003)
+            melosysEessiMeldingKafkaTemplate.send(kafkaTopic, eessiMeldingX008)
+        }
+
+
+        val prosessinstanserSortert = prosessinstansRepository.findAllByLåsReferanseStartingWith(ref)
+            .sortedBy { it.endretDato }
+
+        extracting(prosessinstanserSortert) { låsReferanse }
+            .shouldHaveSize(4)
+            .shouldContainInOrder(
+                eessiMeldingA003.lagUnikIdentifikator(),
+                eessiMeldingA003.lagUnikIdentifikator(),
+                eessiMeldingX008.lagUnikIdentifikator(),
+                eessiMeldingX008.lagUnikIdentifikator(),
+            )
+
+        prosessinstanserSortert.first { it.behandling != null }.behandling.run {
+            status.shouldBe(Behandlingsstatus.AVSLUTTET)
+            fagsak.status.shouldBe(Saksstatuser.ANNULLERT)
+            behandlingsresultatRepository.findWithLovvalgOgMedlemskapsperioderById(id).shouldBePresent().type
+                .shouldBe(Behandlingsresultattyper.HENLEGGELSE)
+        }
+    }
+
+    @Test
     fun mottaSED_mottar3SED_blirBehandletEtterHverandre() {
         val rinaSaksnummer = Random().nextInt(100000).toString()
 
