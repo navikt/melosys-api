@@ -90,27 +90,21 @@ class MelosysHendelseTest {
                     "folkeregisterIdent": "12345",
                     "sakstype": "TRYGDEAVTALE",
                     "sakstema": "TRYGDEAVGIFT",
-                    "medlemskapsperiode": {
-                          "fom": null,
-                          "tom": null
-                    }
+                    "medlemskapsperiode": null
                 }
             }"""
 
 
         val result = objectMapper.readValue<MelosysHendelse>(json)
 
-        result.melding
-            .shouldBeInstanceOf<VedtakHendelseMelding>().run {
-                folkeregisterIdent shouldBe "12345"
-                sakstype shouldBe Sakstyper.TRYGDEAVTALE
-                sakstema shouldBe Sakstemaer.TRYGDEAVGIFT
-                medlemskapsperiode.shouldBeInstanceOf<Periode>().run {
-                    fom shouldBe null
-                    tom shouldBe null
-                }
-            }
-    }
+        result.melding.shouldBe(
+            VedtakHendelseMelding(
+                folkeregisterIdent = "12345",
+                sakstype = Sakstyper.TRYGDEAVTALE,
+                sakstema = Sakstemaer.TRYGDEAVGIFT,
+                medlemskapsperiode = null
+            )
+        )    }
 
     @Test
     fun `deserialize og ignorer ekstra felter i VedtakHendelseMelding`() {
@@ -121,10 +115,7 @@ class MelosysHendelseTest {
                     "folkeregisterIdent": "12345",
                     "sakstype": "TRYGDEAVTALE",
                     "sakstema": "TRYGDEAVGIFT",
-                    "medlemskapsperiode": {
-                          "fom": null,
-                          "tom": null
-                    },
+                    "medlemskapsperiode": null,
                     "ekstarfelt": "DUMMY"
                 }
             }"""
@@ -133,16 +124,14 @@ class MelosysHendelseTest {
         val result = objectMapper.readValue<MelosysHendelse>(json)
 
 
-        result.melding
-            .shouldBeInstanceOf<VedtakHendelseMelding>().run {
-                folkeregisterIdent shouldBe "12345"
-                sakstype shouldBe Sakstyper.TRYGDEAVTALE
-                sakstema shouldBe Sakstemaer.TRYGDEAVGIFT
-                medlemskapsperiode.shouldBeInstanceOf<Periode>().run {
-                    fom shouldBe null
-                    tom shouldBe null
-                }
-            }
+        result.melding.shouldBe(
+            VedtakHendelseMelding(
+                folkeregisterIdent = "12345",
+                sakstype = Sakstyper.TRYGDEAVTALE,
+                sakstema = Sakstemaer.TRYGDEAVGIFT,
+                medlemskapsperiode = null
+            )
+        )
     }
 
     data class DummyMelding(

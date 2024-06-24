@@ -23,6 +23,6 @@ data class VedtakHendelseMelding(
     val folkeregisterIdent: String,
     val sakstype: Sakstyper,
     val sakstema: Sakstemaer = Sakstemaer.TRYGDEAVGIFT,
-    val medlemskapsperiode: Periode
+    val medlemskapsperiode: Periode?
 ) : HendelseMelding()
 

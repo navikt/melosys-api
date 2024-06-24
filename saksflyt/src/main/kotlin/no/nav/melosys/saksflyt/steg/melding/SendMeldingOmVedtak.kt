@@ -56,11 +56,11 @@ class SendMeldingOmVedtak(
         )
     }
 
-    private fun finnPeriode(behandlingId: Long): Periode =
+    private fun finnPeriode(behandlingId: Long): Periode? =
         behandlingsresultatRepository.findWithLovvalgOgMedlemskapsperioderById(behandlingId).getOrNull()?.let {
             Periode(
                 it.utledMedlemskapsperiodeFom(),
                 it.utledMedlemskapsperiodeTom()
             )
-        } ?: Periode()
+        }
 }
