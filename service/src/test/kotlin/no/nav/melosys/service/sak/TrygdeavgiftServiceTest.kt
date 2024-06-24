@@ -6,16 +6,21 @@ import io.mockk.every
 import io.mockk.impl.annotations.MockK
 import io.mockk.junit5.MockKExtension
 import no.nav.melosys.domain.*
+import no.nav.melosys.domain.avgift.Inntektsperiode
 import no.nav.melosys.domain.avgift.Penger
+import no.nav.melosys.domain.avgift.SkatteforholdTilNorge
 import no.nav.melosys.domain.avgift.Trygdeavgiftsperiode
 import no.nav.melosys.domain.kodeverk.Medlemskapstyper
 import no.nav.melosys.domain.kodeverk.Saksstatuser
+import no.nav.melosys.domain.kodeverk.Skatteplikttype
+import no.nav.melosys.service.avgift.TrygdeavgiftMottakerService
 import no.nav.melosys.service.avgift.TrygdeavgiftService
 import no.nav.melosys.service.behandling.BehandlingsresultatService
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.extension.ExtendWith
 import java.math.BigDecimal
+import java.time.LocalDate
 
 @ExtendWith(MockKExtension::class)
 class TrygdeavgiftServiceTest {
@@ -35,7 +40,8 @@ class TrygdeavgiftServiceTest {
 
     @BeforeEach
     fun setup() {
-        trygdeavgiftService = TrygdeavgiftService(fagsakService, behandlingsresultatService)
+        val trygdeavgiftMottakerService = TrygdeavgiftMottakerService(behandlingsresultatService)
+        trygdeavgiftService = TrygdeavgiftService(fagsakService, behandlingsresultatService, trygdeavgiftMottakerService)
         fagsak = FagsakTestFactory.builder().apply { leggTilBehandling(Behandling().apply { id = BEHANDLING_ID }) }.build()
         behandlingsresultat = Behandlingsresultat()
         every { fagsakService.hentFagsak(FagsakTestFactory.SAKSNUMMER) }.returns(fagsak)
@@ -144,5 +150,58 @@ class TrygdeavgiftServiceTest {
         }
 
         trygdeavgiftService.harFagsakBehandlingerMedTrygdeavgift(FagsakTestFactory.SAKSNUMMER).shouldBeTrue()
+    }
+
+    @Test
+    fun `harFakturerbarTrygdeavgift, trygdeavgift + betaler til NAV, true`() {
+        behandlingsresultat.apply {
+            medlemskapsperioder.add(
+                Medlemskapsperiode().apply {
+                    medlemskapstype = Medlemskapstyper.PLIKTIG
+                    trygdeavgiftsperioder.add(lagTrygdeavgift())
+                }
+            )
+        }
+
+        trygdeavgiftService.harFakturerbarTrygdeavgift(behandlingsresultat).shouldBeTrue()
+    }
+
+    @Test
+    fun `harFakturerbarTrygdeavgift, ingen trygdeavgift, false`() {
+        val ingenAvgift = Trygdeavgiftsperiode().apply {
+            trygdeavgiftsbeløpMd = Penger(0.0)
+            trygdesats = BigDecimal.ZERO
+        }
+        behandlingsresultat.apply {
+            medlemskapsperioder.add(
+                Medlemskapsperiode().apply {
+                    medlemskapstype = Medlemskapstyper.PLIKTIG
+                    trygdeavgiftsperioder.add(ingenAvgift)
+                }
+            )
+        }
+
+        trygdeavgiftService.harFakturerbarTrygdeavgift(behandlingsresultat).shouldBeFalse()
+    }
+
+    private fun lagTrygdeavgift(): Trygdeavgiftsperiode = Trygdeavgiftsperiode().apply {
+        periodeFra = LocalDate.of(2023, 1, 1)
+        periodeTil = LocalDate.of(2023, 5, 1)
+        trygdeavgiftsbeløpMd = Penger(5000.0)
+        trygdesats = BigDecimal(3.5)
+        grunnlagInntekstperiode = lagInntektsperiode()
+        grunnlagSkatteforholdTilNorge = lagSkatteforholdTilNorge()
+    }
+
+    private fun lagInntektsperiode(): Inntektsperiode = Inntektsperiode().apply {
+        fomDato = LocalDate.of(2023, 1, 1)
+        tomDato = LocalDate.of(2023, 5, 1)
+        avgiftspliktigInntektMnd = Penger(5000.0)
+    }
+
+    private fun lagSkatteforholdTilNorge(): SkatteforholdTilNorge = SkatteforholdTilNorge().apply {
+        fomDato = LocalDate.of(2022, 1, 1)
+        tomDato = LocalDate.of(2023, 5, 31)
+        skatteplikttype = Skatteplikttype.IKKE_SKATTEPLIKTIG
     }
 }
