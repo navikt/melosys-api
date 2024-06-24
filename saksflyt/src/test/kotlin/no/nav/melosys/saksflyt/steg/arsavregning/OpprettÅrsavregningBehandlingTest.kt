@@ -34,7 +34,7 @@ import java.time.LocalDate
 
 
 @ExtendWith(MockKExtension::class)
-class OpprettArsavregningTest {
+class OpprettÅrsavregningBehandlingTest {
     @MockK
     private lateinit var fagsakService: FagsakService
 
