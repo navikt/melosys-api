@@ -95,7 +95,7 @@ class OpprettÅrsavregningBehandlingTest {
         every { persondataService.hentAktørIdForIdent(any()) } returns AKTØR_ID
         every { fagsakService.hentFagsakerMedAktør(Aktoersroller.BRUKER, AKTØR_ID) } returns listOf(fagsak)
         every { trygdeavgiftService.harFagsakBehandlingerMedTrygdeavgift(fagsak.saksnummer) } returns true
-        every { trygdeavgiftService.hentTrygdeavgiftBehandlinger(fagsak.saksnummer) } returns listOf(behandling)
+        every { trygdeavgiftService.finnSistTrygdeavgiftsbehandlingForÅr(fagsak.saksnummer, any()) } returns behandling
         every { lovvalgsperiodeService.hentLovvalgsperioder(behandling.id) } returns listOf(Lovvalgsperiode().apply {
             fom = LocalDate.of(2023, 1, 1)
             tom = LocalDate.of(2023, 10, 10)
@@ -150,25 +150,17 @@ class OpprettÅrsavregningBehandlingTest {
     fun `ikke opprette ny behandling ved skatteoppgjør uten overlappende medlemskapsperiode`() {
         val prosessinstans = lagProsessInstans()
         val fagsak = lagFagsak()
-        val behandling = lagBehandling()
 
         every { persondataService.hentAktørIdForIdent(any()) } returns AKTØR_ID
         every { fagsakService.hentFagsakerMedAktør(Aktoersroller.BRUKER, AKTØR_ID) } returns listOf(fagsak)
         every { trygdeavgiftService.harFagsakBehandlingerMedTrygdeavgift(fagsak.saksnummer) } returns true
-        every { trygdeavgiftService.hentTrygdeavgiftBehandlinger(fagsak.saksnummer) } returns listOf(behandling)
-        every { lovvalgsperiodeService.hentLovvalgsperioder(behandling.id) } returns listOf(Lovvalgsperiode().apply {
-            fom = LocalDate.of(2022, 1, 1)
-            tom = LocalDate.of(2022, 10, 10)
-        })
-        every { medlemskapsperiodeService.hentMedlemskapsperioder(behandling.id) } returns listOf(Medlemskapsperiode().apply {
-            fom = LocalDate.of(2022, 1, 1)
-            tom = LocalDate.of(2022, 10, 10)
-        })
+        every { trygdeavgiftService.finnSistTrygdeavgiftsbehandlingForÅr(fagsak.saksnummer, any()) } returns null
 
 
         opprettÅrsavregningBehandling.utfør(prosessinstans)
 
 
+        verify(exactly = 0) { behandlingService.nyBehandling(any(), any(), any(), any(), any(), any(), any(), any(), any()) }
         verify { årsavregningService wasNot Called }
     }
 
@@ -196,7 +188,7 @@ class OpprettÅrsavregningBehandlingTest {
         every { persondataService.hentAktørIdForIdent(any()) } returns AKTØR_ID
         every { fagsakService.hentFagsakerMedAktør(Aktoersroller.BRUKER, AKTØR_ID) } returns listOf(fagsak)
         every { trygdeavgiftService.harFagsakBehandlingerMedTrygdeavgift(fagsak.saksnummer) } returns true
-        every { trygdeavgiftService.hentTrygdeavgiftBehandlinger(fagsak.saksnummer) } returns listOf(behandling)
+        every { trygdeavgiftService.finnSistTrygdeavgiftsbehandlingForÅr(fagsak.saksnummer, any()) } returns behandling
 
         every { behandslingsresultatService.hentBehandlingsresultat(behandling.id) } returns behandlingsresultat
         every { årsavregningService.oppretteÅrsavregning(any(), any()) } returns Unit

@@ -34,7 +34,7 @@ class OpprettÅrsavregningBehandling(
     private val lovvalgsperiodeService: LovvalgsperiodeService,
     private val medlemskapsperiodeService: MedlemskapsperiodeService,
     private val behandslingsresultatService: BehandlingsresultatService,
-    private val oppretteÅrsavregning: ÅrsavregningService
+    private val årsavregningService: ÅrsavregningService
 ) : StegBehandler {
     override fun inngangsSteg(): ProsessSteg {
         return ProsessSteg.OPPRETT_AARSAVREGNING_BEHANDLING
@@ -57,7 +57,7 @@ class OpprettÅrsavregningBehandling(
             return
         }
 
-        val trygdeavgiftsBehandlingMedRelevantPeriode = finnTrygdeavgiftsBehandlingMedRelevantPeriode(sakMedTrygdeavgift, gjelderÅr).also {
+        val trygdeavgiftsBehandlingMedRelevantPeriode = trygdeavgiftService.finnSistTrygdeavgiftsbehandlingForÅr(sakMedTrygdeavgift.saksnummer, gjelderÅr).also {
             if (it == null) log.info(
                 "Fant ingen behandlinger med overlappende lovvalgsperioder eller medlemskapsperioder for sak: ${
                     sakMedTrygdeavgift.saksnummer
@@ -77,26 +77,18 @@ class OpprettÅrsavregningBehandling(
             null
         ).also { nyBehandling ->
             val behandlingsresultat = behandslingsresultatService.hentBehandlingsresultat(nyBehandling.id)
-            oppretteÅrsavregning.oppretteÅrsavregning(behandlingsresultat, gjelderÅr)
+            årsavregningService.oppretteÅrsavregning(behandlingsresultat, gjelderÅr)
             prosessinstans.behandling = nyBehandling
         }
     }
 
-    private fun finnTrygdeavgiftsBehandlingMedRelevantPeriode(sakMedTrygdeavgift: Fagsak, gjelderPeriode: Int): Behandling? =
-        trygdeavgiftService.hentTrygdeavgiftBehandlinger(sakMedTrygdeavgift.saksnummer).lastOrNull { behandling ->
-            val lovvalgsperioder = lovvalgsperiodeService.hentLovvalgsperioder(behandling.id)
-            val medlemskapsperioder = medlemskapsperiodeService.hentMedlemskapsperioder(behandling.id)
-
-            lovvalgsperioder.any { it.overlapperMedÅr(gjelderPeriode) } || medlemskapsperioder.any { it.overlapperMedÅr(gjelderPeriode) }
-        }
-
-    private fun finnAktivÅrsavregningBehandling(sakMedTrygdeavgift: Fagsak, gjelderPeriode: Int): Behandling? {
+    private fun finnAktivÅrsavregningBehandling(sakMedTrygdeavgift: Fagsak, gjelderÅr: Int): Behandling? {
         val årsAvregninger = sakMedTrygdeavgift.hentAktiveÅrsavregninger().also { if (it.isEmpty()) log.info("Fant ingen aktive årsavregninger") }
-            .filter { behandslingsresultatService.hentBehandlingsresultat(it.id).aarsavregning.aar == gjelderPeriode }
+            .filter { behandslingsresultatService.hentBehandlingsresultat(it.id).aarsavregning.aar == gjelderÅr }
 
         when {
             årsAvregninger.isEmpty() -> {
-                log.info("Fant ingen aktive årsavregninger for år $gjelderPeriode")
+                log.info("Fant ingen aktive årsavregninger for år $gjelderÅr")
                 return null
             }
 
@@ -105,7 +97,7 @@ class OpprettÅrsavregningBehandling(
             }
 
             else -> {
-                log.info("Fant aktiv årsavregning for år $gjelderPeriode")
+                log.info("Fant aktiv årsavregning for år $gjelderÅr")
                 return årsAvregninger.single()
             }
         }
