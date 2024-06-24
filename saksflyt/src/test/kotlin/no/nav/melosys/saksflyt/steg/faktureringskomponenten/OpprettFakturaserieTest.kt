@@ -97,9 +97,10 @@ class OpprettFakturaserieTest {
 
 
         verify(exactly = 1) { faktureringskomponentenConsumer.lagFakturaserie(capture(slotFakturaserieDto), eq(SAKSBEHANDLER_IDENT)) }
-        slotFakturaserieDto.captured.shouldNotBeNull()
-        slotFakturaserieDto.captured.referanseBruker.shouldContain("Vedtak om medlemskap datert ")
-        slotFakturaserieDto.captured.fakturaserieReferanse.shouldBeNull()
+        slotFakturaserieDto.captured.shouldNotBeNull().run {
+            referanseBruker.shouldContain("Vedtak om medlemskap datert ")
+            fakturaserieReferanse.shouldBeNull()
+        }
     }
 
     @Test
@@ -118,11 +119,11 @@ class OpprettFakturaserieTest {
 
 
         verify(exactly = 1) { faktureringskomponentenConsumer.lagFakturaserie(capture(slotFakturaserieDto), eq(SAKSBEHANDLER_IDENT)) }
-        val fakturaserieDto = slotFakturaserieDto.captured
-        fakturaserieDto.shouldNotBeNull()
-        fakturaserieDto.referanseBruker.shouldContain("Vedtak om medlemskap datert ")
-        fakturaserieDto.fakturaserieReferanse.shouldBeNull()
-        fakturaserieDto.perioder.single().beskrivelse.shouldContain("Dekning: $DEFAULT_PENSJON_DEKNING_TEKST_HELSEDEL")
+        slotFakturaserieDto.captured.shouldNotBeNull().run {
+            referanseBruker.shouldContain("Vedtak om medlemskap datert ")
+            fakturaserieReferanse.shouldBeNull()
+            perioder.single().beskrivelse.shouldContain("Dekning: $DEFAULT_PENSJON_DEKNING_TEKST_HELSEDEL")
+        }
     }
 
     @Test
@@ -141,10 +142,11 @@ class OpprettFakturaserieTest {
 
 
         verify(exactly = 1) { faktureringskomponentenConsumer.lagFakturaserie(capture(slotFakturaserieDto), eq(SAKSBEHANDLER_IDENT)) }
-        slotFakturaserieDto.captured.shouldNotBeNull()
-        slotFakturaserieDto.captured.referanseBruker.shouldContain("Vedtak om medlemskap datert ")
-        slotFakturaserieDto.captured.fakturaserieReferanse.shouldBeNull()
-        slotFakturaserieDto.captured.perioder.single().beskrivelse.shouldContain("Dekning: $DEFAULT_PENSJON_DEKNING_TEKST_HELSEDEL")
+        slotFakturaserieDto.captured.shouldNotBeNull().run {
+            referanseBruker.shouldContain("Vedtak om medlemskap datert ")
+            fakturaserieReferanse.shouldBeNull()
+            perioder.single().beskrivelse.shouldContain("Dekning: $DEFAULT_PENSJON_DEKNING_TEKST_HELSEDEL")
+        }
     }
 
     @Test
