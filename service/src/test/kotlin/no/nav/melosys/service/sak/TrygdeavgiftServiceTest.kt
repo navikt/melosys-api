@@ -184,30 +184,24 @@ class TrygdeavgiftServiceTest {
         trygdeavgiftService.harFakturerbarTrygdeavgift(behandlingsresultat).shouldBeFalse()
     }
 
-    private fun lagTrygdeavgift(): Trygdeavgiftsperiode {
-        return Trygdeavgiftsperiode().apply {
-            periodeFra = LocalDate.of(2023, 1, 1)
-            periodeTil = LocalDate.of(2023, 5, 1)
-            trygdeavgiftsbeløpMd = Penger(5000.0)
-            trygdesats = BigDecimal(3.5)
-            grunnlagInntekstperiode = lagInntektsperiode()
-            grunnlagSkatteforholdTilNorge = lagSkatteforholdTilNorge()
-        }
+    private fun lagTrygdeavgift(): Trygdeavgiftsperiode = Trygdeavgiftsperiode().apply {
+        periodeFra = LocalDate.of(2023, 1, 1)
+        periodeTil = LocalDate.of(2023, 5, 1)
+        trygdeavgiftsbeløpMd = Penger(5000.0)
+        trygdesats = BigDecimal(3.5)
+        grunnlagInntekstperiode = lagInntektsperiode()
+        grunnlagSkatteforholdTilNorge = lagSkatteforholdTilNorge()
     }
 
-    private fun lagInntektsperiode(): Inntektsperiode {
-        return Inntektsperiode().apply {
-            fomDato = LocalDate.of(2023, 1, 1)
-            tomDato = LocalDate.of(2023, 5, 1)
-            avgiftspliktigInntektMnd = Penger(5000.0)
-        }
+    private fun lagInntektsperiode(): Inntektsperiode = Inntektsperiode().apply {
+        fomDato = LocalDate.of(2023, 1, 1)
+        tomDato = LocalDate.of(2023, 5, 1)
+        avgiftspliktigInntektMnd = Penger(5000.0)
     }
 
-    private fun lagSkatteforholdTilNorge(): SkatteforholdTilNorge {
-        return SkatteforholdTilNorge().apply {
-            fomDato = LocalDate.of(2022, 1, 1)
-            tomDato = LocalDate.of(2023, 5, 31)
-            skatteplikttype = Skatteplikttype.IKKE_SKATTEPLIKTIG
-        }
+    private fun lagSkatteforholdTilNorge(): SkatteforholdTilNorge = SkatteforholdTilNorge().apply {
+        fomDato = LocalDate.of(2022, 1, 1)
+        tomDato = LocalDate.of(2023, 5, 31)
+        skatteplikttype = Skatteplikttype.IKKE_SKATTEPLIKTIG
     }
 }
