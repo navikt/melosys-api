@@ -12,12 +12,10 @@ import no.nav.melosys.saksflyt.steg.StegBehandler
 import no.nav.melosys.saksflytapi.domain.ProsessDataKey
 import no.nav.melosys.saksflytapi.domain.ProsessSteg
 import no.nav.melosys.saksflytapi.domain.Prosessinstans
-import no.nav.melosys.service.LovvalgsperiodeService
 import no.nav.melosys.service.avgift.TrygdeavgiftService
 import no.nav.melosys.service.avgift.aarsavregning.ÅrsavregningService
 import no.nav.melosys.service.behandling.BehandlingService
 import no.nav.melosys.service.behandling.BehandlingsresultatService
-import no.nav.melosys.service.ftrl.medlemskapsperiode.MedlemskapsperiodeService
 import no.nav.melosys.service.persondata.PersondataService
 import no.nav.melosys.service.sak.FagsakService
 import org.springframework.stereotype.Component
@@ -31,8 +29,6 @@ class OpprettÅrsavregningBehandling(
     private val persondataService: PersondataService,
     private val trygdeavgiftService: TrygdeavgiftService,
     private val behandlingService: BehandlingService,
-    private val lovvalgsperiodeService: LovvalgsperiodeService,
-    private val medlemskapsperiodeService: MedlemskapsperiodeService,
     private val behandslingsresultatService: BehandlingsresultatService,
     private val årsavregningService: ÅrsavregningService
 ) : StegBehandler {
