@@ -165,11 +165,6 @@
             <artifactId>archunit-junit5</artifactId>
             <scope>test</scope>
         </dependency>
-        <dependency>
-            <groupId>io.github.jaspeen</groupId>
-            <artifactId>ulid-java</artifactId>
-            <scope>test</scope>
-        </dependency>
     </dependencies>
 
     <build>
