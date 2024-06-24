@@ -1,7 +1,5 @@
 package no.nav.melosys.saksflyt.steg.jfr;
 
-import java.util.Optional;
-
 import no.nav.melosys.domain.Behandling;
 import no.nav.melosys.domain.Fagsak;
 import no.nav.melosys.exception.FunksjonellException;

@@ -1,7 +1,6 @@
 package no.nav.melosys.saksflyt.steg.brev;
 
 import java.util.List;
-import java.util.Set;
 import java.util.UUID;
 
 import no.nav.melosys.domain.*;
@@ -10,7 +9,6 @@ import no.nav.melosys.domain.brev.*;
 import no.nav.melosys.domain.kodeverk.Aktoersroller;
 import no.nav.melosys.domain.kodeverk.Mottakerroller;
 import no.nav.melosys.domain.kodeverk.Sakstemaer;
-import no.nav.melosys.domain.kodeverk.Sakstyper;
 import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingstema;
 import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingstyper;
 import no.nav.melosys.domain.kodeverk.brev.Produserbaredokumenter;
