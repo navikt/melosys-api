@@ -304,12 +304,13 @@ class MedlPeriodeKonverter private constructor() {
             } else {
                 lovvalgsperiode.getBestemmelse()
             }
-            return bestemmelse
+            return bestemmelse ?: throw IllegalStateException("Lovvalgsbestemmelse kan ikke være null")
         }
 
         @JvmStatic
         fun skalTilleggsbestemmelseMappes(lovvalgsperiode: PeriodeOmLovvalg): Boolean {
             val tilleggsbestemmelse = lovvalgsperiode.getTilleggsbestemmelse()
+
             if (tilleggsbestemmelse != null) {
                 return (lovvalgsperiode.bestemmelse === Lovvalgbestemmelser_883_2004.FO_883_2004_ART11_3A && tilleggsbestemmelse ===
                     Tilleggsbestemmelser_883_2004.FO_883_2004_ART11_4_1) ||
