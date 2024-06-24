@@ -4,18 +4,21 @@ import com.fasterxml.jackson.annotation.JsonAnySetter
 import com.fasterxml.jackson.annotation.JsonSubTypes
 import com.fasterxml.jackson.annotation.JsonTypeInfo
 import com.fasterxml.jackson.databind.JsonNode
+import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule
 import com.fasterxml.jackson.module.kotlin.jacksonObjectMapper
 import com.fasterxml.jackson.module.kotlin.readValue
 import io.kotest.assertions.json.shouldEqualJson
 import io.kotest.matchers.shouldBe
 import io.kotest.matchers.types.shouldBeInstanceOf
+import no.nav.melosys.domain.dokument.felles.Periode
 import no.nav.melosys.domain.kodeverk.Sakstemaer
 import no.nav.melosys.domain.kodeverk.Sakstyper
 import org.junit.jupiter.api.Test
+import java.time.LocalDate
 
 
 class MelosysHendelseTest {
-    val objectMapper = jacksonObjectMapper()
+    val objectMapper = jacksonObjectMapper().registerModules(JavaTimeModule())
 
     @Test
     fun `serialize tom hendelse`() {
@@ -37,7 +40,11 @@ class MelosysHendelseTest {
             VedtakHendelseMelding(
                 folkeregisterIdent = "12345",
                 sakstype = Sakstyper.TRYGDEAVTALE,
-                sakstema = Sakstemaer.TRYGDEAVGIFT
+                sakstema = Sakstemaer.TRYGDEAVGIFT,
+                medlemskapsperiode = Periode(
+                    LocalDate.of(2021, 1, 1),
+                    LocalDate.of(2022, 1, 1),
+                )
             )
         )
 
@@ -48,8 +55,12 @@ class MelosysHendelseTest {
                     "type": "VedtakHendelseMelding",
                     "folkeregisterIdent": "12345",
                     "sakstype": "TRYGDEAVTALE",
-                    "sakstema": "TRYGDEAVGIFT"
-                }
+                    "sakstema": "TRYGDEAVGIFT",
+                      "medlemskapsperiode": {
+                          "fom": [2021, 1, 1],
+                          "tom": [2022, 1, 1]
+                    }
+                  }
             }"""
     }
 
@@ -78,21 +89,27 @@ class MelosysHendelseTest {
                     "type": "VedtakHendelseMelding",
                     "folkeregisterIdent": "12345",
                     "sakstype": "TRYGDEAVTALE",
-                    "sakstema": "TRYGDEAVGIFT"
+                    "sakstema": "TRYGDEAVGIFT",
+                    "medlemskapsperiode": {
+                          "fom": null,
+                          "tom": null
+                    }
                 }
             }"""
 
 
         val result = objectMapper.readValue<MelosysHendelse>(json)
 
-
-        result.melding.shouldBe(
-            VedtakHendelseMelding(
-                folkeregisterIdent = "12345",
-                sakstype = Sakstyper.TRYGDEAVTALE,
-                sakstema = Sakstemaer.TRYGDEAVGIFT
-            )
-        )
+        result.melding
+            .shouldBeInstanceOf<VedtakHendelseMelding>().run {
+                folkeregisterIdent shouldBe "12345"
+                sakstype shouldBe Sakstyper.TRYGDEAVTALE
+                sakstema shouldBe Sakstemaer.TRYGDEAVGIFT
+                medlemskapsperiode.shouldBeInstanceOf<Periode>().run {
+                    fom shouldBe null
+                    tom shouldBe null
+                }
+            }
     }
 
     @Test
@@ -104,6 +121,10 @@ class MelosysHendelseTest {
                     "folkeregisterIdent": "12345",
                     "sakstype": "TRYGDEAVTALE",
                     "sakstema": "TRYGDEAVGIFT",
+                    "medlemskapsperiode": {
+                          "fom": null,
+                          "tom": null
+                    },
                     "ekstarfelt": "DUMMY"
                 }
             }"""
@@ -112,13 +133,16 @@ class MelosysHendelseTest {
         val result = objectMapper.readValue<MelosysHendelse>(json)
 
 
-        result.melding.shouldBe(
-            VedtakHendelseMelding(
-                folkeregisterIdent = "12345",
-                sakstype = Sakstyper.TRYGDEAVTALE,
-                sakstema = Sakstemaer.TRYGDEAVGIFT
-            )
-        )
+        result.melding
+            .shouldBeInstanceOf<VedtakHendelseMelding>().run {
+                folkeregisterIdent shouldBe "12345"
+                sakstype shouldBe Sakstyper.TRYGDEAVTALE
+                sakstema shouldBe Sakstemaer.TRYGDEAVGIFT
+                medlemskapsperiode.shouldBeInstanceOf<Periode>().run {
+                    fom shouldBe null
+                    tom shouldBe null
+                }
+            }
     }
 
     data class DummyMelding(
