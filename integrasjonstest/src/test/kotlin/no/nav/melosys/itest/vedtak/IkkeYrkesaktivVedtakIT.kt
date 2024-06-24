@@ -191,7 +191,8 @@ class IkkeYrkesaktivVedtakIT(
                 VedtakHendelseMelding(
                     folkeregisterIdent = "30056928150",
                     sakstype = Sakstyper.EU_EOS,
-                    sakstema = Sakstemaer.MEDLEMSKAP_LOVVALG
+                    sakstema = Sakstemaer.MEDLEMSKAP_LOVVALG,
+                    medlemskapsperiode =  null
                 )
             )
     }
