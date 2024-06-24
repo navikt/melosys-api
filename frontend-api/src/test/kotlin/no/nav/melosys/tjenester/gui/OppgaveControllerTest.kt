@@ -17,6 +17,7 @@ import no.nav.melosys.service.oppgave.Oppgaveplukker
 import no.nav.melosys.service.oppgave.dto.PlukkOppgaveInnDto
 import no.nav.melosys.sikkerhet.context.SpringSubjectHandler
 import no.nav.melosys.sikkerhet.context.TestSubjectHandler
+import no.nav.melosys.tjenester.gui.dto.OppgaveSokDto
 import no.nav.melosys.tjenester.gui.dto.oppgave.PlukketOppgaveDto
 import no.nav.melosys.tjenester.gui.util.ResponseBodyMatchers.responseBody
 import org.junit.jupiter.api.BeforeEach
@@ -91,12 +92,13 @@ internal class OppgaveControllerTest {
 
     @Test
     fun søkOppgaverMedPersonIdentEllerOrgnr_fnrSendesInn_kallerRettFunksjon() {
+        val innData = OppgaveSokDto("fnr", null)
         every { oppgaveSoekFilter.finnBehandlingsoppgaverMedPersonIdent(any<String>()) } returns emptyList()
 
         mockMvc.perform(
-            MockMvcRequestBuilders.get("$BASE_URL/sok")
+            MockMvcRequestBuilders.post("$BASE_URL/sok")
                 .contentType(MediaType.APPLICATION_JSON)
-                .param("personIdent", "fnr")
+                .content(objectMapper.writeValueAsString(innData))
         )
             .andExpect(status().isOk())
 
@@ -106,12 +108,13 @@ internal class OppgaveControllerTest {
 
     @Test
     fun søkOppgaverMedPersonIdentEllerOrgnr_orgnrSendesInn_kallerRettFunksjon() {
+        val innData = OppgaveSokDto(null, "orgnr")
         every { oppgaveSoekFilter.finnBehandlingsoppgaverMedOrgnr(any<String>()) } returns emptyList()
 
         mockMvc.perform(
-            MockMvcRequestBuilders.get("$BASE_URL/sok")
+            MockMvcRequestBuilders.post("$BASE_URL/sok")
                 .contentType(MediaType.APPLICATION_JSON)
-                .param("orgnr", "orgnr")
+                .content(objectMapper.writeValueAsString(innData))
         )
             .andExpect(status().isOk())
 
@@ -121,11 +124,11 @@ internal class OppgaveControllerTest {
 
     @Test
     fun søkOppgaverMedPersonIdentEllerOrgnr_fnrOgOrgnrSendesInn_kasterFeil() {
+        val innData = OppgaveSokDto("fnr", "orgnr")
         mockMvc.perform(
-            MockMvcRequestBuilders.get("$BASE_URL/sok")
+            MockMvcRequestBuilders.post("$BASE_URL/sok")
                 .contentType(MediaType.APPLICATION_JSON)
-                .param("personIdent", "fnr")
-                .param("orgnr", "orgnr")
+                .content(objectMapper.writeValueAsString(innData))
         )
             .andExpect(status().is4xxClientError())
             .andExpect(
@@ -136,9 +139,11 @@ internal class OppgaveControllerTest {
 
     @Test
     fun søkOppgaverMedPersonIdentEllerOrgnr_ingentingSendesInn_kasterFeil() {
+        val innData = OppgaveSokDto(null, null)
         mockMvc.perform(
-            MockMvcRequestBuilders.get("$BASE_URL/sok")
+            MockMvcRequestBuilders.post("$BASE_URL/sok")
                 .contentType(MediaType.APPLICATION_JSON)
+                .content(objectMapper.writeValueAsString(innData))
         )
             .andExpect(status().is4xxClientError())
             .andExpect(

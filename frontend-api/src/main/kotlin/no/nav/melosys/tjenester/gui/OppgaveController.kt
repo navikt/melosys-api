@@ -14,6 +14,7 @@ import no.nav.melosys.service.oppgave.dto.JournalfoeringsoppgaveDto
 import no.nav.melosys.service.oppgave.dto.PlukkOppgaveInnDto
 import no.nav.melosys.service.oppgave.dto.TilbakeleggingDto
 import no.nav.melosys.sikkerhet.context.SubjectHandler
+import no.nav.melosys.tjenester.gui.dto.OppgaveSokDto
 import no.nav.melosys.tjenester.gui.dto.oppgave.OppgaveDto
 import no.nav.melosys.tjenester.gui.dto.oppgave.OppgaveOversiktDto
 import no.nav.melosys.tjenester.gui.dto.oppgave.PlukketOppgaveDto
@@ -99,16 +100,17 @@ class OppgaveController(
         )
     }
 
-    @GetMapping("/sok")
+    @PostMapping("/sok")
     @ApiOperation(
         value = "Søk etter oppgaver knyttet til et fødselsnummer, d-nummer, eller organisasjonsnummer",
         response = OppgaveDto::class,
         responseContainer = "List"
     )
     fun søkOppgaverMedPersonIdentEllerOrgnr(
-        @RequestParam(name = "personIdent", required = false) personIdent: String?,
-        @RequestParam(name = "orgnr", required = false) orgnr: String?
+        @RequestBody oppgaveSokDto: OppgaveSokDto
     ): ResponseEntity<List<OppgaveDto>> {
+        val personIdent = oppgaveSokDto.personIdent
+        val orgnr = oppgaveSokDto.orgnr
         if (personIdent.isNullOrEmpty() && orgnr.isNullOrEmpty()) {
             throw FunksjonellException("Finner ingen søkekriteria. API støtter personIdent(fnr eller dnr) og orgnr")
         }
