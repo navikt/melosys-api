@@ -11,6 +11,7 @@ import no.nav.melosys.saksflytapi.domain.Prosessinstans
 import no.nav.melosys.integrasjon.hendelser.MelosysHendelse
 import no.nav.melosys.integrasjon.hendelser.VedtakHendelseMelding
 import no.nav.melosys.repository.BehandlingsresultatRepository
+import no.nav.melosys.service.behandling.BehandlingsresultatService
 import no.nav.melosys.service.persondata.PersondataService
 import org.springframework.stereotype.Component
 import kotlin.jvm.optionals.getOrNull
@@ -21,7 +22,7 @@ private val log = KotlinLogging.logger { }
 class SendMeldingOmVedtak(
     private val kafkaMelosysHendelseProducer: KafkaMelosysHendelseProducer,
     private val persondataService: PersondataService,
-    private val behandlingsresultatRepository: BehandlingsresultatRepository,
+    private val behandlingsresultatService: BehandlingsresultatService,
     private val unleash: Unleash
 ) : StegBehandler {
 
@@ -57,7 +58,7 @@ class SendMeldingOmVedtak(
     }
 
     private fun finnPeriode(behandlingId: Long): Periode? =
-        behandlingsresultatRepository.findWithLovvalgOgMedlemskapsperioderById(behandlingId).getOrNull()?.let {
+        behandlingsresultatService.finnBehandlingsresultatMedLovvalgsperioder(behandlingId)?.let {
             Periode(
                 it.utledMedlemskapsperiodeFom(),
                 it.utledMedlemskapsperiodeTom()
