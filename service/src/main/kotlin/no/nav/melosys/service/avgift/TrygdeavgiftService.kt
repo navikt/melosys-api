@@ -37,7 +37,7 @@ class TrygdeavgiftService(
 
     @Transactional(readOnly = true)
     fun finnSistFakturerbarTrygdeavgiftsbehandlingForÅr(saksnummer: String, år: Int): Behandling? =
-        hentFakturerbarTrygdeavgiftBehandlingsresultater(saksnummer).lastOrNull {
+        hentFakturerbarTrygdeavgiftBehandlingsresultater(saksnummer).sortedBy { it.registrertDato }.lastOrNull {
             it.medlemskapsperioder.any { it.overlapperMedÅr(år) } || it.lovvalgsperioder.any { it.overlapperMedÅr(år) }
         }?.behandling
 
