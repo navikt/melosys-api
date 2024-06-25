@@ -7,6 +7,8 @@ import org.springframework.data.repository.query.Param
 
 interface AarsavregningRepository : JpaRepository<Aarsavregning, Long> {
 
+    fun findByBehandlingsresultatId(behandlingID: Long): Aarsavregning?
+
     @Query("""
         SELECT COUNT(a.behandlingsresultat_id)
         FROM aarsavregning a
