@@ -245,7 +245,7 @@ public class FagsakController {
                 }
             });
 
-        Behandlingsresultat behandlingsResultat = behandlingsresultatService.hentBehandlingsresultatMedLovvalgsperioder(behandling.getId());
+        Behandlingsresultat behandlingsResultat = behandlingsresultatService.hentBehandlingsresultatMedPerioder(behandling.getId());
 
         behandlingsResultat.finnLovvalgsperiode().ifPresent(lovvalgsperiode -> {
             var periode = new PeriodeDto(lovvalgsperiode.getFom(), lovvalgsperiode.getTom());

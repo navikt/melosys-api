@@ -55,11 +55,11 @@ class BehandlingsresultatService(
             .orElseThrowIkkeFunnetException(behandlingsid)
     }
 
-    fun finnBehandlingsresultatMedLovvalgsperioder(behandlingsid: Long): Behandlingsresultat? {
+    fun finnBehandlingsresultatMedPerioder(behandlingsid: Long): Behandlingsresultat? {
         return behandlingsresultatRepository.findWithLovvalgOgMedlemskapsperioderById(behandlingsid).orElse(null)
     }
 
-    fun hentBehandlingsresultatMedLovvalgsperioder(behandlingsid: Long): Behandlingsresultat {
+    fun hentBehandlingsresultatMedPerioder(behandlingsid: Long): Behandlingsresultat {
         return behandlingsresultatRepository.findWithLovvalgOgMedlemskapsperioderById(behandlingsid)
             .orElseThrowIkkeFunnetException(behandlingsid)
     }
