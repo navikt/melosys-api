@@ -65,6 +65,10 @@ public class BehandlingsresultatService {
             .orElseThrow(() -> new IkkeFunnetException(KAN_IKKE_FINNE_BEHANDLINGSRESULTAT + behandlingsid));
     }
 
+    public Behandlingsresultat finnBehandlingsresultatMedLovvalgsperioder(long behandlingsid) {
+        return behandlingsresultatRepository.findWithLovvalgOgMedlemskapsperioderById(behandlingsid).orElse(null);
+    }
+
     public Behandlingsresultat hentBehandlingsresultatMedLovvalgsperioder(long behandlingsid) {
         return behandlingsresultatRepository.findWithLovvalgOgMedlemskapsperioderById(behandlingsid)
             .orElseThrow(() -> new IkkeFunnetException(KAN_IKKE_FINNE_BEHANDLINGSRESULTAT + behandlingsid));

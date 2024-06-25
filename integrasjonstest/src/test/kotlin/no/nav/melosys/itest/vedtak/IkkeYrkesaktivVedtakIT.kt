@@ -25,7 +25,6 @@ import no.nav.melosys.domain.kodeverk.lovvalgsbestemmelser.trygdeavtale.Lovvalgs
 import no.nav.melosys.domain.mottatteopplysninger.SøknadIkkeYrkesaktiv
 import no.nav.melosys.domain.mottatteopplysninger.data.Periode
 import no.nav.melosys.domain.mottatteopplysninger.data.Soeknadsland
-import no.nav.melosys.integrasjon.hendelser.MelosysHendelse
 import no.nav.melosys.integrasjon.hendelser.VedtakHendelseMelding
 import no.nav.melosys.itest.JournalfoeringBase
 import no.nav.melosys.itest.MelosysHendelseKafkaConsumer
@@ -186,14 +185,16 @@ class IkkeYrkesaktivVedtakIT(
 
         melosysHendelseKafkaConsumer.melosysHendelser.shouldHaveSize(1)
             .single().value()
-            .shouldBeInstanceOf<MelosysHendelse>()
-            .melding.shouldBe(
-                VedtakHendelseMelding(
-                    folkeregisterIdent = "30056928150",
-                    sakstype = Sakstyper.EU_EOS,
-                    sakstema = Sakstemaer.MEDLEMSKAP_LOVVALG
-                )
-            )
+            .melding.shouldBeInstanceOf<VedtakHendelseMelding>()
+            .run {
+                folkeregisterIdent shouldBe "30056928150"
+                sakstype shouldBe Sakstyper.EU_EOS
+                sakstema shouldBe Sakstemaer.MEDLEMSKAP_LOVVALG
+                medlemskapsperiode.shouldNotBeNull().run {
+                    fom shouldBe null
+                    tom shouldBe null
+                }
+            }
     }
 
     @Test
