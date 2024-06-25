@@ -64,8 +64,8 @@ class AdminInnvalideringSedRuterTest {
 
     @BeforeEach
     void setup() {
-        adminInnvalideringSedRuter = new AdminInnvalideringSedRuter(fagsakService, prosessinstansService, oppgaveService,
-            behandlingsresultatService, medlPeriodeService, eessiService, behandlingService);
+        adminInnvalideringSedRuter = new AdminInnvalideringSedRuter(fagsakService, prosessinstansService,
+            behandlingsresultatService, medlPeriodeService, oppgaveService, eessiService, behandlingService);
 
         melosysEessiMelding.setAktoerId("12312412");
         melosysEessiMelding.setRinaSaksnummer("143141");
