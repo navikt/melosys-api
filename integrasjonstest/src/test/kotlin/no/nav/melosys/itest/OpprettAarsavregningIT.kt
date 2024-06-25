@@ -39,7 +39,7 @@ class OpprettAarsavregningIT @Autowired constructor(
     fun `opprettNyÅrsavregning should create a new årsavregning when no existing avregning exists`() {
         val behandlingsresultat = lagBehandlingsResultat()
 
-        val result = årsavregningService.opprettNyÅrsavregning(behandlingsresultat.id!!, 2024)
+        val result = årsavregningService.opprettÅrsavregning(behandlingsresultat.id!!, 2024)
 
         aarsavregningRepository.findById(result).shouldBePresent().aar.shouldBe(2024)
     }
@@ -50,10 +50,10 @@ class OpprettAarsavregningIT @Autowired constructor(
         val behandlingsresultat = lagBehandlingsResultat().shouldNotBeNull()
 
         //Oppretter først en aarsavregning for å simulere at det allerede finnes en årsavregning for samme år
-        årsavregningService.opprettNyÅrsavregning(behandlingsresultat.id, 2024)
+        årsavregningService.opprettÅrsavregning(behandlingsresultat.id, 2024)
 
         shouldThrow<FunksjonellException> {
-            årsavregningService.opprettNyÅrsavregning(behandlingsresultat.id, 2024)
+            årsavregningService.opprettÅrsavregning(behandlingsresultat.id, 2024)
         }
     }
 

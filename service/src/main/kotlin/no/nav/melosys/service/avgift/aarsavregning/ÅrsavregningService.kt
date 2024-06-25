@@ -50,7 +50,7 @@ class ÅrsavregningService(
     }
 
     @Transactional
-    fun opprettNyÅrsavregning(behandlingID: Long, gjelderÅr: Int): Long {
+    fun opprettÅrsavregning(behandlingID: Long, gjelderÅr: Int): Long {
         val behandlingsresultat = behandlingsresultatService.hentBehandlingsresultat(behandlingID)
         oppretteÅrsavregning(behandlingsresultat, gjelderÅr)
         return behandlingID

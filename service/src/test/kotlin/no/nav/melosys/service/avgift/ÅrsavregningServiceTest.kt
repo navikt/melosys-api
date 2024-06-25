@@ -70,7 +70,7 @@ internal class ÅrsavregningServiceTest {
         every { behandlingsresultatService.hentBehandlingsresultat(1L) }.returns(Behandlingsresultat().apply { behandling = eksisterendeBehandling })
 
         shouldThrow<FunksjonellException> {
-            årsavregningService.opprettNyÅrsavregning(1, 2023)
+            årsavregningService.opprettÅrsavregning(1, 2023)
         }
     }
 

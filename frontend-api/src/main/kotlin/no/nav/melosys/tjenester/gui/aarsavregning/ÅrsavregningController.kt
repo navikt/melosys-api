@@ -42,7 +42,7 @@ class ÅrsavregningController(
 
     @PostMapping
     fun opprettNyÅrsavregning(@RequestBody årsavregningRequest: LagÅrsavregningRequest): ResponseEntity<Long> {
-        return ResponseEntity.ok(årsavregningService.opprettNyÅrsavregning(årsavregningRequest.behandlingsId, årsavregningRequest.aar))
+        return ResponseEntity.ok(årsavregningService.opprettÅrsavregning(årsavregningRequest.behandlingsId, årsavregningRequest.aar))
     }
 
     data class LagÅrsavregningRequest(
