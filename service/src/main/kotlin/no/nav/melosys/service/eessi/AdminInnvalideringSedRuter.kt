@@ -67,8 +67,7 @@ class AdminInnvalideringSedRuter(
 
         val aktivBehandlingErInvalidert = erAktivBehandlingInvalidert(sedDokument, arkivsakID)
 
-        if (behandlingSkalAnnuleres(melosysEessiMelding, sedDokument.get())
-            || aktivBehandlingErInvalidert && (sistAktiveBehandling.erRegisteringAvUnntak() || sistAktiveBehandling.erAnmodningOmUnntak())
+        if (aktivBehandlingErInvalidert && (sistAktiveBehandling.erRegisteringAvUnntak() || sistAktiveBehandling.erAnmodningOmUnntak())
         ) {
             annullerSakOgBehandling(sistAktiveBehandling)
             behandlingsresultatService.oppdaterBehandlingsresultattype(sistAktiveBehandling.id, Behandlingsresultattyper.HENLEGGELSE)

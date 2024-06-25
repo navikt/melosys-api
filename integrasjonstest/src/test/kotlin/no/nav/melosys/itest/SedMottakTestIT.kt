@@ -306,7 +306,7 @@ class SedMottakTestIT(
     fun `A003 med etterfølgende X008 og lovvalgsland ikke NO skal annullere saken og henlegge i melosys`() {
         val ref = Random().nextInt(100000).toString()
 
-        val sedInfo = SedInformasjon(ref, SedType.A003.name, LocalDate.now(), LocalDate.now(), null, "VURDER_DOKUMENT", null)
+        val sedInfo = SedInformasjon(ref, SedType.A003.name, LocalDate.now(), LocalDate.now(), null, "AVBRUTT", null)
         val bucInformasjon = BucInformasjon(ref, true, null, LocalDate.now(), null, listOf(sedInfo))
         MelosysEessiRepo.opprettBucinformasjon(bucInformasjon)
 
