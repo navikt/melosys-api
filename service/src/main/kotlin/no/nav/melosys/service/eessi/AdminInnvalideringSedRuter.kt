@@ -67,13 +67,11 @@ class AdminInnvalideringSedRuter(
 
         val aktivBehandlingErInvalidert = erAktivBehandlingInvalidert(sedDokument, arkivsakID)
 
-        if (aktivBehandlingErInvalidert && (sistAktiveBehandling.erRegisteringAvUnntak() || sistAktiveBehandling.erAnmodningOmUnntak())
-        ) {
+        if (aktivBehandlingErInvalidert && (sistAktiveBehandling.erRegisteringAvUnntak() || sistAktiveBehandling.erAnmodningOmUnntak())) {
             annullerSakOgBehandling(sistAktiveBehandling)
             behandlingsresultatService.oppdaterBehandlingsresultattype(sistAktiveBehandling.id, Behandlingsresultattyper.HENLEGGELSE)
-        } else {
-            oppgaveService.opprettEllerGjenbrukBehandlingsoppgave(sistAktiveBehandling, melosysEessiMelding.journalpostId, melosysEessiMelding.aktoerId, null)
         }
+        oppgaveService.opprettEllerGjenbrukBehandlingsoppgave(sistAktiveBehandling, melosysEessiMelding.journalpostId, melosysEessiMelding.aktoerId, null)
         opprettJournalføringProsess(melosysEessiMelding, sistAktiveBehandling)
     }
 
