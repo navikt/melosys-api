@@ -1,183 +1,195 @@
-package no.nav.melosys.service.behandling;
+package no.nav.melosys.service.behandling
 
-import java.util.List;
-import java.util.Optional;
-import java.util.Set;
-
-import no.nav.melosys.domain.Behandling;
-import no.nav.melosys.domain.Behandlingsmaate;
-import no.nav.melosys.domain.Behandlingsresultat;
-import no.nav.melosys.domain.BehandlingsresultatBegrunnelse;
-import no.nav.melosys.domain.kodeverk.Utfallregistreringunntak;
-import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingsresultattyper;
-import no.nav.melosys.exception.FunksjonellException;
-import no.nav.melosys.exception.IkkeFunnetException;
-import no.nav.melosys.repository.BehandlingsresultatRepository;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-import org.springframework.stereotype.Service;
-import org.springframework.transaction.annotation.Transactional;
+import no.nav.melosys.domain.Behandling
+import no.nav.melosys.domain.Behandlingsmaate
+import no.nav.melosys.domain.Behandlingsresultat
+import no.nav.melosys.domain.BehandlingsresultatBegrunnelse
+import no.nav.melosys.domain.kodeverk.Utfallregistreringunntak
+import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingsresultattyper
+import no.nav.melosys.exception.FunksjonellException
+import no.nav.melosys.exception.IkkeFunnetException
+import no.nav.melosys.repository.BehandlingsresultatRepository
+import org.slf4j.Logger
+import org.slf4j.LoggerFactory
+import org.springframework.stereotype.Service
+import org.springframework.transaction.annotation.Transactional
+import java.util.function.Consumer
 
 @Service
-public class BehandlingsresultatService {
-    private static final Logger log = LoggerFactory.getLogger(BehandlingsresultatService.class);
-    //TODO: Ha generisk toppklasse?
-    public static final String KAN_IKKE_FINNE_BEHANDLINGSRESULTAT = "Kan ikke finne behandlingsresultat for behandling: ";
-
-    private final BehandlingsresultatRepository behandlingsresultatRepository;
-    private final VilkaarsresultatService vilkaarsresultatService;
-
-    public BehandlingsresultatService(BehandlingsresultatRepository behandlingsresultatRepository, VilkaarsresultatService vilkaarsresultatService) {
-        this.behandlingsresultatRepository = behandlingsresultatRepository;
-        this.vilkaarsresultatService = vilkaarsresultatService;
-    }
-
+class BehandlingsresultatService(
+    private val behandlingsresultatRepository: BehandlingsresultatRepository,
+    private val vilkaarsresultatService: VilkaarsresultatService
+) {
     @Transactional
-    public void tømBehandlingsresultat(long behandlingID) {
-        Behandlingsresultat behandlingsresultat = behandlingsresultatRepository.findById(behandlingID)
-            .orElseThrow(() -> new IkkeFunnetException(KAN_IKKE_FINNE_BEHANDLINGSRESULTAT + behandlingID));
+    fun tømBehandlingsresultat(behandlingID: Long) {
+        val behandlingsresultat = behandlingsresultatRepository.findById(behandlingID)
+            .orElseThrow { IkkeFunnetException(KAN_IKKE_FINNE_BEHANDLINGSRESULTAT + behandlingID) }
 
-        log.info("Fjerner avklarte fakta, lovvalgsperioder, medlemAvFolketrygden og vilkårsresultater fra behandlingsresultat med behandlingID: {} ", behandlingID);
-        behandlingsresultat.getAvklartefakta().clear();
-        behandlingsresultat.getLovvalgsperioder().clear();
-        behandlingsresultat.getMedlemskapsperioder().clear();
-        fjernMedlemAvFolketrygdenHvisDenFinnes(behandlingsresultat);
-        behandlingsresultat.setUtfallRegistreringUnntak(null);
-        behandlingsresultat.setBegrunnelseFritekst(null);
-        behandlingsresultat.setInnledningFritekst(null);
-        behandlingsresultat.setNyVurderingBakgrunn(null);
-        behandlingsresultat.setTrygdeavgiftFritekst(null);
-        vilkaarsresultatService.tømVilkårsresultatFraBehandlingsresultat(behandlingID);
-        behandlingsresultatRepository.save(behandlingsresultat);
+        log.info(
+            "Fjerner avklarte fakta, lovvalgsperioder, medlemAvFolketrygden og vilkårsresultater fra behandlingsresultat med behandlingID: {} ",
+            behandlingID
+        )
+        behandlingsresultat.avklartefakta.clear()
+        behandlingsresultat.lovvalgsperioder.clear()
+        behandlingsresultat.medlemskapsperioder.clear()
+        fjernMedlemAvFolketrygdenHvisDenFinnes(behandlingsresultat)
+        behandlingsresultat.utfallRegistreringUnntak = null
+        behandlingsresultat.begrunnelseFritekst = null
+        behandlingsresultat.innledningFritekst = null
+        behandlingsresultat.nyVurderingBakgrunn = null
+        behandlingsresultat.trygdeavgiftFritekst = null
+        vilkaarsresultatService.tømVilkårsresultatFraBehandlingsresultat(behandlingID)
+        behandlingsresultatRepository.save(behandlingsresultat)
     }
 
-    public Behandlingsresultat hentBehandlingsresultat(long behandlingsid) {
+    fun hentBehandlingsresultat(behandlingsid: Long): Behandlingsresultat {
         return behandlingsresultatRepository.findById(behandlingsid)
-            .orElseThrow(() -> new IkkeFunnetException(KAN_IKKE_FINNE_BEHANDLINGSRESULTAT + behandlingsid));
+            .orElseThrow { IkkeFunnetException(KAN_IKKE_FINNE_BEHANDLINGSRESULTAT + behandlingsid) }
     }
 
-    public List<Behandlingsresultat> finnAlleBehandlingsresultatMedFakturaserieReferanse(String fakturaserieReferanse) {
-        return behandlingsresultatRepository.findAllByFakturaserieReferanse(fakturaserieReferanse);
+    fun finnAlleBehandlingsresultatMedFakturaserieReferanse(fakturaserieReferanse: String?): List<Behandlingsresultat> {
+        return behandlingsresultatRepository.findAllByFakturaserieReferanse(fakturaserieReferanse!!)
     }
 
-    public Behandlingsresultat hentBehandlingsresultatMedAnmodningsperioder(long behandlingsid) {
+    fun hentBehandlingsresultatMedAnmodningsperioder(behandlingsid: Long): Behandlingsresultat {
         return behandlingsresultatRepository.findWithAnmodningsperioderById(behandlingsid)
-            .orElseThrow(() -> new IkkeFunnetException(KAN_IKKE_FINNE_BEHANDLINGSRESULTAT + behandlingsid));
+            .orElseThrow { IkkeFunnetException(KAN_IKKE_FINNE_BEHANDLINGSRESULTAT + behandlingsid) }
     }
 
-    public Behandlingsresultat finnBehandlingsresultatMedLovvalgsperioder(long behandlingsid) {
-        return behandlingsresultatRepository.findWithLovvalgOgMedlemskapsperioderById(behandlingsid).orElse(null);
+    fun finnBehandlingsresultatMedLovvalgsperioder(behandlingsid: Long): Behandlingsresultat {
+        return behandlingsresultatRepository.findWithLovvalgOgMedlemskapsperioderById(behandlingsid).orElse(null)
     }
 
-    public Behandlingsresultat hentBehandlingsresultatMedLovvalgsperioder(long behandlingsid) {
+    fun hentBehandlingsresultatMedLovvalgsperioder(behandlingsid: Long): Behandlingsresultat {
         return behandlingsresultatRepository.findWithLovvalgOgMedlemskapsperioderById(behandlingsid)
-            .orElseThrow(() -> new IkkeFunnetException(KAN_IKKE_FINNE_BEHANDLINGSRESULTAT + behandlingsid));
+            .orElseThrow { IkkeFunnetException(KAN_IKKE_FINNE_BEHANDLINGSRESULTAT + behandlingsid) }
     }
 
-    public Behandlingsresultat hentBehandlingsresultatMedKontrollresultat(long behandlingsid) {
+    fun hentBehandlingsresultatMedKontrollresultat(behandlingsid: Long): Behandlingsresultat {
         return behandlingsresultatRepository.findWithKontrollresultaterById(behandlingsid)
-            .orElseThrow(() -> new IkkeFunnetException(KAN_IKKE_FINNE_BEHANDLINGSRESULTAT + behandlingsid));
+            .orElseThrow { IkkeFunnetException(KAN_IKKE_FINNE_BEHANDLINGSRESULTAT + behandlingsid) }
     }
 
-    public Behandlingsresultat hentBehandlingsresultatMedAvklartefakta(long behandlingsid) {
+    fun hentBehandlingsresultatMedAvklartefakta(behandlingsid: Long): Behandlingsresultat {
         return behandlingsresultatRepository.findWithAvklartefaktaById(behandlingsid)
-            .orElseThrow(() -> new IkkeFunnetException(KAN_IKKE_FINNE_BEHANDLINGSRESULTAT + behandlingsid));
+            .orElseThrow { IkkeFunnetException(KAN_IKKE_FINNE_BEHANDLINGSRESULTAT + behandlingsid) }
     }
 
-    public Behandlingsresultat lagre(Behandlingsresultat resultat) {
-        return behandlingsresultatRepository.save(resultat);
+    fun lagre(resultat: Behandlingsresultat): Behandlingsresultat {
+        return behandlingsresultatRepository.save(resultat)
     }
 
-    public Behandlingsresultat lagreOgFlush(Behandlingsresultat resultat) {
-        return behandlingsresultatRepository.saveAndFlush(resultat);
+    fun lagreOgFlush(resultat: Behandlingsresultat): Behandlingsresultat {
+        return behandlingsresultatRepository.saveAndFlush(resultat)
     }
 
-    public void lagreNyttBehandlingsresultat(Behandling behandling) {
-        Behandlingsresultat nyttBehandlingsresultat = new Behandlingsresultat();
-        nyttBehandlingsresultat.setBehandling(behandling);
-        nyttBehandlingsresultat.setType(Behandlingsresultattyper.IKKE_FASTSATT);
-        nyttBehandlingsresultat.setBehandlingsmåte(Behandlingsmaate.MANUELT);
-        behandlingsresultatRepository.save(nyttBehandlingsresultat);
+    fun lagreNyttBehandlingsresultat(behandling: Behandling?) {
+        val nyttBehandlingsresultat = Behandlingsresultat()
+        nyttBehandlingsresultat.behandling = behandling
+        nyttBehandlingsresultat.type = Behandlingsresultattyper.IKKE_FASTSATT
+        nyttBehandlingsresultat.behandlingsmåte = Behandlingsmaate.MANUELT
+        behandlingsresultatRepository.save(nyttBehandlingsresultat)
     }
 
-    public void oppdaterBehandlingsresultattype(Long id, Behandlingsresultattyper behandlingsresultattype) {
-        Optional<Behandlingsresultat> optionalBehandlingsresultat = behandlingsresultatRepository.findById(id);
-        if (optionalBehandlingsresultat.isPresent()) {
-            Behandlingsresultat behandlingsresultat = optionalBehandlingsresultat.get();
-            log.info("Setter behandlingsresultattype på {} til {}", id, behandlingsresultattype);
-            behandlingsresultat.setType(behandlingsresultattype);
-            behandlingsresultatRepository.save(behandlingsresultat);
+    fun oppdaterBehandlingsresultattype(id: Long, behandlingsresultattype: Behandlingsresultattyper?) {
+        val optionalBehandlingsresultat = behandlingsresultatRepository.findById(id)
+        if (optionalBehandlingsresultat.isPresent) {
+            val behandlingsresultat = optionalBehandlingsresultat.get()
+            log.info("Setter behandlingsresultattype på {} til {}", id, behandlingsresultattype)
+            behandlingsresultat.type = behandlingsresultattype
+            behandlingsresultatRepository.save(behandlingsresultat)
         }
     }
 
-    public void oppdaterBehandlingsMaate(Long id, Behandlingsmaate behandlingsmaate) {
-        Behandlingsresultat behandlingsresultat = hentBehandlingsresultat(id);
+    fun oppdaterBehandlingsMaate(id: Long, behandlingsmaate: Behandlingsmaate?) {
+        val behandlingsresultat = hentBehandlingsresultat(id)
 
-        behandlingsresultat.setBehandlingsmåte(behandlingsmaate);
-        behandlingsresultatRepository.save(behandlingsresultat);
+        behandlingsresultat.behandlingsmåte = behandlingsmaate
+        behandlingsresultatRepository.save(behandlingsresultat)
     }
 
-    public void settUtfallRegistreringUnntakOgType(long behandlingID, Utfallregistreringunntak utfallRegistreringUnntak) {
-        final Behandlingsresultat behandlingsresultat = hentBehandlingsresultat(behandlingID);
-        if (behandlingsresultat.getUtfallRegistreringUnntak() != null) {
-            throw new FunksjonellException("Utfall for registrering av unntak er allerede satt for behandlingsresultat " + behandlingID);
+    fun settUtfallRegistreringUnntakOgType(behandlingID: Long, utfallRegistreringUnntak: Utfallregistreringunntak) {
+        val behandlingsresultat = hentBehandlingsresultat(behandlingID)
+        if (behandlingsresultat.utfallRegistreringUnntak != null) {
+            throw FunksjonellException("Utfall for registrering av unntak er allerede satt for behandlingsresultat $behandlingID")
         }
 
-        behandlingsresultat.setType(finnKorrektBehandlingsResultat(utfallRegistreringUnntak));
-        oppdaterUtfallRegistreringUnntak(behandlingID, utfallRegistreringUnntak);
+        behandlingsresultat.type = finnKorrektBehandlingsResultat(utfallRegistreringUnntak)
+        oppdaterUtfallRegistreringUnntak(behandlingID, utfallRegistreringUnntak)
     }
 
-    public Behandlingsresultat oppdaterUtfallRegistreringUnntak(long behandlingID, Utfallregistreringunntak utfallUtpeking) {
-        final Behandlingsresultat behandlingsresultat = hentBehandlingsresultatMedKontrollresultat(behandlingID);
-        behandlingsresultat.setUtfallRegistreringUnntak(utfallUtpeking);
-        return behandlingsresultatRepository.save(behandlingsresultat);
+    fun oppdaterUtfallRegistreringUnntak(
+        behandlingID: Long,
+        utfallUtpeking: Utfallregistreringunntak?
+    ): Behandlingsresultat {
+        val behandlingsresultat = hentBehandlingsresultatMedKontrollresultat(behandlingID)
+        behandlingsresultat.utfallRegistreringUnntak = utfallUtpeking
+        return behandlingsresultatRepository.save(behandlingsresultat)
     }
 
-    public void oppdaterUtfallUtpeking(long behandlingID, Utfallregistreringunntak utfallUtpeking) {
-        final Behandlingsresultat behandlingsresultat = hentBehandlingsresultat(behandlingID);
-        if (behandlingsresultat.getUtfallUtpeking() != null) {
-            throw new FunksjonellException("Utfall for utpeking er allerede satt for behandlingsresultat " + behandlingID);
+    fun oppdaterUtfallUtpeking(behandlingID: Long, utfallUtpeking: Utfallregistreringunntak?) {
+        val behandlingsresultat = hentBehandlingsresultat(behandlingID)
+        if (behandlingsresultat.utfallUtpeking != null) {
+            throw FunksjonellException("Utfall for utpeking er allerede satt for behandlingsresultat $behandlingID")
         }
 
-        behandlingsresultat.setUtfallUtpeking(utfallUtpeking);
-        behandlingsresultatRepository.save(behandlingsresultat);
+        behandlingsresultat.utfallUtpeking = utfallUtpeking
+        behandlingsresultatRepository.save(behandlingsresultat)
     }
 
-    private static Behandlingsresultattyper finnKorrektBehandlingsResultat(Utfallregistreringunntak utfallregistreringunntak) {
-        if (utfallregistreringunntak.equals(Utfallregistreringunntak.GODKJENT) || utfallregistreringunntak.equals(Utfallregistreringunntak.DELVIS_GODKJENT)) {
-            return (Behandlingsresultattyper.REGISTRERT_UNNTAK);
-        } else if (utfallregistreringunntak.equals(Utfallregistreringunntak.IKKE_GODKJENT)) {
-            return (Behandlingsresultattyper.FERDIGBEHANDLET);
+    fun oppdaterBegrunnelser(
+        behandlingID: Long,
+        begrunnelser: Set<BehandlingsresultatBegrunnelse>,
+        begrunnelseFritekst: String?
+    ) {
+        val behandlingsresultat = hentBehandlingsresultat(behandlingID)
+        begrunnelser.forEach(Consumer { b: BehandlingsresultatBegrunnelse ->
+            b.behandlingsresultat = behandlingsresultat
+        })
+        behandlingsresultat.behandlingsresultatBegrunnelser.addAll(begrunnelser)
+        behandlingsresultat.begrunnelseFritekst = begrunnelseFritekst
+        behandlingsresultatRepository.save(behandlingsresultat)
+    }
+
+    fun oppdaterFritekster(
+        behandlingID: Long,
+        begrunnelseFritekst: String?,
+        innledningFritekst: String?,
+        trygdeavgiftFritekst: String?
+    ): Behandlingsresultat {
+        val behandlingsresultat = hentBehandlingsresultat(behandlingID)
+        behandlingsresultat.begrunnelseFritekst = begrunnelseFritekst
+        behandlingsresultat.innledningFritekst = innledningFritekst
+        behandlingsresultat.trygdeavgiftFritekst = trygdeavgiftFritekst
+        return behandlingsresultatRepository.save(behandlingsresultat)
+    }
+
+    fun oppdaterNyVurderingBakgrunn(behandlingID: Long, nyVurderingBakgrunn: String?): Behandlingsresultat {
+        val behandlingsresultat = hentBehandlingsresultat(behandlingID)
+
+        behandlingsresultat.nyVurderingBakgrunn = nyVurderingBakgrunn
+
+        return behandlingsresultatRepository.save(behandlingsresultat)
+    }
+
+    private fun fjernMedlemAvFolketrygdenHvisDenFinnes(behandlingsresultat: Behandlingsresultat) {
+        behandlingsresultat.trygdeavgiftsperioder.clear()
+        behandlingsresultatRepository.saveAndFlush(behandlingsresultat)
+    }
+
+    companion object {
+        private val log: Logger = LoggerFactory.getLogger(BehandlingsresultatService::class.java)
+
+        //TODO: Ha generisk toppklasse?
+        const val KAN_IKKE_FINNE_BEHANDLINGSRESULTAT: String = "Kan ikke finne behandlingsresultat for behandling: "
+
+        private fun finnKorrektBehandlingsResultat(utfallregistreringunntak: Utfallregistreringunntak): Behandlingsresultattyper {
+            if (utfallregistreringunntak == Utfallregistreringunntak.GODKJENT || utfallregistreringunntak == Utfallregistreringunntak.DELVIS_GODKJENT) {
+                return (Behandlingsresultattyper.REGISTRERT_UNNTAK)
+            } else if (utfallregistreringunntak == Utfallregistreringunntak.IKKE_GODKJENT) {
+                return (Behandlingsresultattyper.FERDIGBEHANDLET)
+            }
+            return Behandlingsresultattyper.IKKE_FASTSATT
         }
-        return Behandlingsresultattyper.IKKE_FASTSATT;
-    }
-
-    public void oppdaterBegrunnelser(long behandlingID, Set<BehandlingsresultatBegrunnelse> begrunnelser, String begrunnelseFritekst) {
-        final Behandlingsresultat behandlingsresultat = hentBehandlingsresultat(behandlingID);
-        begrunnelser.forEach(b -> b.setBehandlingsresultat(behandlingsresultat));
-        behandlingsresultat.getBehandlingsresultatBegrunnelser().addAll(begrunnelser);
-        behandlingsresultat.setBegrunnelseFritekst(begrunnelseFritekst);
-        behandlingsresultatRepository.save(behandlingsresultat);
-    }
-
-    public Behandlingsresultat oppdaterFritekster(long behandlingID, String begrunnelseFritekst, String innledningFritekst, String trygdeavgiftFritekst) {
-        final Behandlingsresultat behandlingsresultat = hentBehandlingsresultat(behandlingID);
-        behandlingsresultat.setBegrunnelseFritekst(begrunnelseFritekst);
-        behandlingsresultat.setInnledningFritekst(innledningFritekst);
-        behandlingsresultat.setTrygdeavgiftFritekst(trygdeavgiftFritekst);
-        return behandlingsresultatRepository.save(behandlingsresultat);
-    }
-
-    public Behandlingsresultat oppdaterNyVurderingBakgrunn(long behandlingID, String nyVurderingBakgrunn) {
-        final Behandlingsresultat behandlingsresultat = hentBehandlingsresultat(behandlingID);
-
-        behandlingsresultat.setNyVurderingBakgrunn(nyVurderingBakgrunn);
-
-        return behandlingsresultatRepository.save(behandlingsresultat);
-    }
-
-    private void fjernMedlemAvFolketrygdenHvisDenFinnes(Behandlingsresultat behandlingsresultat) {
-            behandlingsresultat.getTrygdeavgiftsperioder().clear();
-            behandlingsresultatRepository.saveAndFlush(behandlingsresultat);
     }
 }
