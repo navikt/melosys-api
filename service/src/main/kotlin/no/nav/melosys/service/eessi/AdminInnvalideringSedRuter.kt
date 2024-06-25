@@ -2,7 +2,6 @@ package no.nav.melosys.service.eessi
 
 import mu.KotlinLogging
 import no.nav.melosys.domain.dokument.sed.SedDokument
-import no.nav.melosys.domain.eessi.SedInformasjon
 import no.nav.melosys.domain.eessi.SedType
 import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingsresultattyper
 import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingsstatus
@@ -81,11 +80,10 @@ class AdminInnvalideringSedRuter(
         }
         return sedDokument.filter { dokument ->
             eessiService.hentTilknyttedeBucer(arkivsakID, listOf())
-                .stream()
                 .filter { b -> b.id == dokument.rinaSaksnummer }
-                .flatMap { b -> b.seder.stream() }
+                .flatMap { b -> b.seder }
                 .filter { s -> s.sedId == dokument.rinaDokumentID }
-                .anyMatch(SedInformasjon::erAvbrutt)
+                .any { it.erAvbrutt() }
         }.isPresent
     }
 }
