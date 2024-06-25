@@ -9,6 +9,7 @@ import no.nav.melosys.exception.IkkeFunnetException
 import no.nav.melosys.repository.BehandlingsresultatRepository
 import org.springframework.stereotype.Service
 import org.springframework.transaction.annotation.Transactional
+import java.util.Optional
 import kotlin.jvm.optionals.getOrNull
 
 private val log = KotlinLogging.logger { }
@@ -21,29 +22,28 @@ class BehandlingsresultatService(
     fun tømBehandlingsresultat(behandlingID: Long) {
         log.info("Fjerner avklarte fakta, lovvalgsperioder, medlemAvFolketrygden og vilkårsresultater fra behandlingsresultat med behandlingID: $behandlingID")
 
-        behandlingsresultatRepository.findById(behandlingID).orElseThrow {
-            IkkeFunnetException(KAN_IKKE_FINNE_BEHANDLINGSRESULTAT + behandlingID)
-        }.apply {
-            avklartefakta.clear()
-            lovvalgsperioder.clear()
-            medlemskapsperioder.clear()
-            trygdeavgiftsperioder.clear()
-            utfallRegistreringUnntak = null
-            begrunnelseFritekst = null
-            innledningFritekst = null
-            nyVurderingBakgrunn = null
-            trygdeavgiftFritekst = null
-            // Tidligere kode bruker vilkaarsresultatService.tømVilkårsresultatFraBehandlingsresultat(behandlingID)
-            // men dette brude vel være like greit å gjøre her? Er det tilfeller vi ikke vil cleare denne her?
-            vilkaarsresultater.clear()
-        }.also {
-            behandlingsresultatRepository.save(it)
-        }
+        behandlingsresultatRepository.findById(behandlingID)
+            .orElseThrowIkkeFunnetException(behandlingID).apply {
+                avklartefakta.clear()
+                lovvalgsperioder.clear()
+                medlemskapsperioder.clear()
+                trygdeavgiftsperioder.clear()
+                utfallRegistreringUnntak = null
+                begrunnelseFritekst = null
+                innledningFritekst = null
+                nyVurderingBakgrunn = null
+                trygdeavgiftFritekst = null
+                // Tidligere kode bruker vilkaarsresultatService.tømVilkårsresultatFraBehandlingsresultat(behandlingID)
+                // men dette brude vel være like greit å gjøre her? Er det tilfeller vi ikke vil cleare denne her?
+                vilkaarsresultater.clear()
+            }.also {
+                behandlingsresultatRepository.save(it)
+            }
     }
 
     fun hentBehandlingsresultat(behandlingsid: Long): Behandlingsresultat {
         return behandlingsresultatRepository.findById(behandlingsid)
-            .orElseThrow { IkkeFunnetException(KAN_IKKE_FINNE_BEHANDLINGSRESULTAT + behandlingsid) }
+            .orElseThrowIkkeFunnetException(behandlingsid)
     }
 
     fun finnAlleBehandlingsresultatMedFakturaserieReferanse(fakturaserieReferanse: String): List<Behandlingsresultat> {
@@ -52,7 +52,7 @@ class BehandlingsresultatService(
 
     fun hentBehandlingsresultatMedAnmodningsperioder(behandlingsid: Long): Behandlingsresultat {
         return behandlingsresultatRepository.findWithAnmodningsperioderById(behandlingsid)
-            .orElseThrow { IkkeFunnetException(KAN_IKKE_FINNE_BEHANDLINGSRESULTAT + behandlingsid) }
+            .orElseThrowIkkeFunnetException(behandlingsid)
     }
 
     fun finnBehandlingsresultatMedLovvalgsperioder(behandlingsid: Long): Behandlingsresultat? {
@@ -61,17 +61,17 @@ class BehandlingsresultatService(
 
     fun hentBehandlingsresultatMedLovvalgsperioder(behandlingsid: Long): Behandlingsresultat {
         return behandlingsresultatRepository.findWithLovvalgOgMedlemskapsperioderById(behandlingsid)
-            .orElseThrow { IkkeFunnetException(KAN_IKKE_FINNE_BEHANDLINGSRESULTAT + behandlingsid) }
+            .orElseThrowIkkeFunnetException(behandlingsid)
     }
 
     fun hentBehandlingsresultatMedKontrollresultat(behandlingsid: Long): Behandlingsresultat {
         return behandlingsresultatRepository.findWithKontrollresultaterById(behandlingsid)
-            .orElseThrow { IkkeFunnetException(KAN_IKKE_FINNE_BEHANDLINGSRESULTAT + behandlingsid) }
+            .orElseThrowIkkeFunnetException(behandlingsid)
     }
 
     fun hentBehandlingsresultatMedAvklartefakta(behandlingsid: Long): Behandlingsresultat {
         return behandlingsresultatRepository.findWithAvklartefaktaById(behandlingsid)
-            .orElseThrow { IkkeFunnetException(KAN_IKKE_FINNE_BEHANDLINGSRESULTAT + behandlingsid) }
+            .orElseThrowIkkeFunnetException(behandlingsid)
     }
 
     fun lagre(resultat: Behandlingsresultat): Behandlingsresultat {
@@ -134,13 +134,6 @@ class BehandlingsresultatService(
         behandlingsresultatRepository.save(behandlingsresultat)
     }
 
-    private fun finnKorrektBehandlingsResultat(utfallregistreringunntak: Utfallregistreringunntak): Behandlingsresultattyper =
-        when (utfallregistreringunntak) {
-            Utfallregistreringunntak.GODKJENT, Utfallregistreringunntak.DELVIS_GODKJENT -> Behandlingsresultattyper.REGISTRERT_UNNTAK
-            Utfallregistreringunntak.IKKE_GODKJENT -> Behandlingsresultattyper.FERDIGBEHANDLET
-            else -> Behandlingsresultattyper.IKKE_FASTSATT
-        }
-
     fun oppdaterBegrunnelser(behandlingID: Long, begrunnelser: Set<BehandlingsresultatBegrunnelse>, begrunnelseFritekst: String) {
         hentBehandlingsresultat(behandlingID).let { behandlingsresultat ->
             begrunnelser.forEach { it.behandlingsresultat = behandlingsresultat }
@@ -168,8 +161,14 @@ class BehandlingsresultatService(
         return behandlingsresultatRepository.save(behandlingsresultat)
     }
 
-    companion object {
-        //TODO: Ha generisk toppklasse? (kommentar fra Erik)
-        const val KAN_IKKE_FINNE_BEHANDLINGSRESULTAT = "Kan ikke finne behandlingsresultat for behandling: "
-    }
+    private fun finnKorrektBehandlingsResultat(utfallregistreringunntak: Utfallregistreringunntak): Behandlingsresultattyper =
+        when (utfallregistreringunntak) {
+            Utfallregistreringunntak.GODKJENT, Utfallregistreringunntak.DELVIS_GODKJENT -> Behandlingsresultattyper.REGISTRERT_UNNTAK
+            Utfallregistreringunntak.IKKE_GODKJENT -> Behandlingsresultattyper.FERDIGBEHANDLET
+            else -> Behandlingsresultattyper.IKKE_FASTSATT
+        }
+
+
+    private fun <T> Optional<T>.orElseThrowIkkeFunnetException(behandlingsid: Long): T =
+        this.orElseThrow { IkkeFunnetException("Kan ikke finne behandlingsresultat for behandling: $behandlingsid") }
 }

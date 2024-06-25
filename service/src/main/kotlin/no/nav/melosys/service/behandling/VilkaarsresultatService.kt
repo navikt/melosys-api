@@ -24,7 +24,7 @@ class VilkaarsresultatService(
 ) {
     private fun hentBehandlingsresultat(behandlingsid: Long): Behandlingsresultat =
         behandlingsresultatRepository.findById(behandlingsid)
-            .orElseThrow { IkkeFunnetException(BehandlingsresultatService.KAN_IKKE_FINNE_BEHANDLINGSRESULTAT + behandlingsid) }
+            .orElseThrow { IkkeFunnetException("Kan ikke finne behandlingsresultat for behandling: $behandlingsid") }
 
     @Transactional(readOnly = true)
     fun hentVilkaar(behandlingID: Long): List<VilkaarDto> =
