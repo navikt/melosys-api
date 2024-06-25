@@ -37,12 +37,9 @@ class BehandlingsresultatServiceTest {
     @Mock
     private BehandlingsresultatService behandlingsresultatService;
 
-    @Mock
-    private VilkaarsresultatService vilkaarsresultatService;
-
     @BeforeEach
     public void setUp() {
-        behandlingsresultatService = spy(new BehandlingsresultatService(behandlingsresultatRepo, vilkaarsresultatService));
+        behandlingsresultatService = spy(new BehandlingsresultatService(behandlingsresultatRepo));
     }
 
     @Test
@@ -77,7 +74,7 @@ class BehandlingsresultatServiceTest {
         assertThat(behandlingsresultat.getBegrunnelseFritekst()).isNull();
         assertThat(behandlingsresultat.getNyVurderingBakgrunn()).isNull();
         assertThat(behandlingsresultat.getTrygdeavgiftFritekst()).isNull();
-        verify(vilkaarsresultatService).tømVilkårsresultatFraBehandlingsresultat(behandlingsresultat.getId());
+        assertThat(behandlingsresultat.getVilkaarsresultater()).isEmpty();
     }
 
     @Test
@@ -127,6 +124,7 @@ class BehandlingsresultatServiceTest {
         Behandlingsresultat mockBehandlingsresultat = new Behandlingsresultat();
         when(behandlingsresultatRepo.findById(behandlingID)).thenReturn(Optional.of(mockBehandlingsresultat));
         when(behandlingsresultatRepo.findWithKontrollresultaterById(behandlingID)).thenReturn(Optional.of(mockBehandlingsresultat));
+        when(behandlingsresultatRepo.save(mockBehandlingsresultat)).thenReturn(mockBehandlingsresultat);
 
 
         behandlingsresultatService.settUtfallRegistreringUnntakOgType(behandlingID, utfallUtpeking);
@@ -142,6 +140,7 @@ class BehandlingsresultatServiceTest {
         Behandlingsresultat mockBehandlingsresultat = new Behandlingsresultat();
         when(behandlingsresultatRepo.findById(behandlingID)).thenReturn(Optional.of(mockBehandlingsresultat));
         when(behandlingsresultatRepo.findWithKontrollresultaterById(behandlingID)).thenReturn(Optional.of(mockBehandlingsresultat));
+        when(behandlingsresultatRepo.save(mockBehandlingsresultat)).thenReturn(mockBehandlingsresultat);
 
         behandlingsresultatService.settUtfallRegistreringUnntakOgType(behandlingID, utfallUtpeking);
         assertEquals(Behandlingsresultattyper.FERDIGBEHANDLET, mockBehandlingsresultat.getType());
@@ -187,6 +186,7 @@ class BehandlingsresultatServiceTest {
         Behandlingsresultat behandlingsresultat = new Behandlingsresultat();
         when(behandlingsresultatRepo.findById(1L)).thenReturn(Optional.of(behandlingsresultat));
         when(behandlingsresultatRepo.findWithKontrollresultaterById(1L)).thenReturn(Optional.of(behandlingsresultat));
+        when(behandlingsresultatRepo.save(behandlingsresultat)).thenReturn(behandlingsresultat);
 
 
         behandlingsresultatService.settUtfallRegistreringUnntakOgType(1, Utfallregistreringunntak.GODKJENT);
@@ -214,6 +214,7 @@ class BehandlingsresultatServiceTest {
         Behandlingsresultat behandlingsresultat = new Behandlingsresultat();
         behandlingsresultat.setUtfallRegistreringUnntak(Utfallregistreringunntak.GODKJENT);
         when(behandlingsresultatRepo.findWithKontrollresultaterById(1L)).thenReturn(Optional.of(behandlingsresultat));
+        when(behandlingsresultatRepo.save(behandlingsresultat)).thenReturn(behandlingsresultat);
 
 
         behandlingsresultatService.oppdaterUtfallRegistreringUnntak(1, Utfallregistreringunntak.DELVIS_GODKJENT);
@@ -242,7 +243,9 @@ class BehandlingsresultatServiceTest {
     void oppdaterFritekster_altOk_blirLagret() {
         ArgumentCaptor<Behandlingsresultat> captor = ArgumentCaptor.forClass(Behandlingsresultat.class);
         var behandlingsresultat = new Behandlingsresultat();
+        behandlingsresultat.setId(1L);
         when(behandlingsresultatRepo.findById(1L)).thenReturn(Optional.of(behandlingsresultat));
+        when(behandlingsresultatRepo.save(behandlingsresultat)).thenReturn(behandlingsresultat);
 
 
         behandlingsresultatService.oppdaterFritekster(
