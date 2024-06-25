@@ -4,6 +4,7 @@ import com.fasterxml.jackson.databind.JsonNode
 import com.fasterxml.jackson.databind.SerializationFeature
 import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule
 import com.fasterxml.jackson.module.kotlin.jacksonObjectMapper
+import com.github.f4b6a3.ulid.UlidCreator
 import com.github.tomakehurst.wiremock.client.WireMock
 import com.github.tomakehurst.wiremock.extension.ResponseTransformerV2
 import com.github.tomakehurst.wiremock.http.Response
@@ -63,7 +64,6 @@ import no.nav.melosys.service.vedtak.VedtaksfattingFasade
 import no.nav.melosys.service.vilkaar.VilkaarDto
 import no.nav.melosys.sikkerhet.context.SpringSubjectHandler
 import no.nav.melosys.sikkerhet.context.SubjectHandler
-import no.nav.melosys.util.ULID
 import org.junit.jupiter.api.AfterEach
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
@@ -106,7 +106,7 @@ class YrkesaktivFtrlVedtakIT(
 
     @BeforeEach
     fun setup() {
-        fakturaserieReferanse = ULID.random().toString()
+        fakturaserieReferanse = UlidCreator.getUlid().toString()
         MedlRepo.repo.clear()
         originalSubjectHandler = SubjectHandler.getInstance()
 
