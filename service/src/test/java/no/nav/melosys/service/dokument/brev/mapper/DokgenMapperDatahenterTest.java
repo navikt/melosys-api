@@ -12,6 +12,7 @@ import no.nav.melosys.domain.kodeverk.Aktoersroller;
 import no.nav.melosys.domain.kodeverk.Fullmaktstype;
 import no.nav.melosys.domain.kodeverk.Mottakerroller;
 import no.nav.melosys.integrasjon.ereg.EregFasade;
+import no.nav.melosys.service.avklartefakta.AvklarteVirksomheterService;
 import no.nav.melosys.service.behandling.BehandlingsresultatService;
 import no.nav.melosys.service.kodeverk.KodeverkService;
 import no.nav.melosys.service.persondata.PersondataFasade;
@@ -37,12 +38,14 @@ class DokgenMapperDatahenterTest {
     private KodeverkService kodeverkService;
     @Mock
     private PersondataFasade persondataFasade;
+    @Mock
+    private AvklarteVirksomheterService avklarteVirksomheterService;
 
     private DokgenMapperDatahenter dokgenMapperDatahenter;
 
     @BeforeEach
     void init() {
-        dokgenMapperDatahenter = new DokgenMapperDatahenter(behandlingsresultatService, eregFasade, persondataFasade, kodeverkService);
+        dokgenMapperDatahenter = new DokgenMapperDatahenter(behandlingsresultatService, eregFasade, persondataFasade, kodeverkService, avklarteVirksomheterService);
     }
 
     @Test

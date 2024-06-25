@@ -10,9 +10,11 @@ import no.nav.melosys.domain.kodeverk.Fullmaktstype;
 import no.nav.melosys.domain.person.Persondata;
 import no.nav.melosys.exception.FunksjonellException;
 import no.nav.melosys.integrasjon.ereg.EregFasade;
+import no.nav.melosys.service.avklartefakta.AvklarteVirksomheterService;
 import no.nav.melosys.service.behandling.BehandlingsresultatService;
 import no.nav.melosys.service.kodeverk.KodeverkService;
 import no.nav.melosys.service.persondata.PersondataFasade;
+import org.jetbrains.annotations.Nullable;
 import org.springframework.stereotype.Component;
 import org.springframework.util.StringUtils;
 
@@ -28,15 +30,18 @@ public class DokgenMapperDatahenter {
     private final EregFasade eregFasade;
     private final KodeverkService kodeverkService;
     private final PersondataFasade persondataFasade;
+    private final AvklarteVirksomheterService avklarteVirksomheterService;
 
     protected DokgenMapperDatahenter(BehandlingsresultatService behandlingsresultatService,
                                      EregFasade eregFasade,
                                      PersondataFasade persondataFasade,
-                                     KodeverkService kodeverkService) {
+                                     KodeverkService kodeverkService,
+                                     AvklarteVirksomheterService avklarteVirksomheterService) {
         this.behandlingsresultatService = behandlingsresultatService;
         this.eregFasade = eregFasade;
         this.kodeverkService = kodeverkService;
         this.persondataFasade = persondataFasade;
+        this.avklarteVirksomheterService = avklarteVirksomheterService;
     }
 
     String hentNorskPoststed(String postnr) {
@@ -100,5 +105,9 @@ public class DokgenMapperDatahenter {
 
     public Behandlingsresultat hentBehandlingsresultat(Long behandlingId) {
         return behandlingsresultatService.hentBehandlingsresultat(behandlingId);
+    }
+
+    public String hentAvklartVirksomhet(Behandling behandling) {
+        return null;
     }
 }
