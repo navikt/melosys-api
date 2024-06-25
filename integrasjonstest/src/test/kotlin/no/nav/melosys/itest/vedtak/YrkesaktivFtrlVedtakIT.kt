@@ -31,10 +31,11 @@ import no.nav.melosys.domain.manglendebetaling.ManglendeFakturabetalingMelding
 import no.nav.melosys.domain.mottatteopplysninger.SøknadNorgeEllerUtenforEØS
 import no.nav.melosys.domain.mottatteopplysninger.data.Periode
 import no.nav.melosys.domain.mottatteopplysninger.data.Soeknadsland
-import no.nav.melosys.featuretoggle.ToggleName
 import no.nav.melosys.integrasjon.faktureringskomponenten.NyFakturaserieResponseDto
+import no.nav.melosys.integrasjon.hendelser.VedtakHendelseMelding
 import no.nav.melosys.integrasjon.trygdeavgift.dto.*
 import no.nav.melosys.itest.JournalfoeringBase
+import no.nav.melosys.itest.MelosysHendelseKafkaConsumer
 import no.nav.melosys.melosysmock.medl.MedlRepo
 import no.nav.melosys.melosysmock.testdata.TestDataGenerator
 import no.nav.melosys.repository.BehandlingRepository
@@ -90,7 +91,8 @@ class YrkesaktivFtrlVedtakIT(
     @Autowired @Qualifier("manglendeFakturabetalingMelding") private val manglendeFakturabetalingMeldingTemplate: KafkaTemplate<String, ManglendeFakturabetalingMelding>,
     @Autowired private val skatteHendelseMeldingKafkaTemplate: KafkaTemplate<String, Skattehendelse>,
     @Autowired private val behandlingsResultRepository: BehandlingsresultatRepository,
-    @Autowired private val fakeUnleash: FakeUnleash
+    @Autowired private val unleash: FakeUnleash,
+    @Autowired private val melosysHendelseKafkaConsumer: MelosysHendelseKafkaConsumer
 ) : JournalfoeringBase(
     testDataGenerator, journalføringService, oppgaveService,
     DynamiskTrygdeavgiftsberegningTransformer()
@@ -141,10 +143,12 @@ class YrkesaktivFtrlVedtakIT(
                         .withBody(fakturaResponse.toJsonNode.toString())
                 )
         )
+        unleash.enableAll()
     }
 
     @AfterEach
     fun afterEach() {
+        melosysHendelseKafkaConsumer.clear()
         MedlRepo.repo.clear()
         SubjectHandler.set(originalSubjectHandler)
     }
@@ -277,17 +281,29 @@ class YrkesaktivFtrlVedtakIT(
                 }
             }
 
+        melosysHendelseKafkaConsumer.melosysHendelser.shouldHaveSize(2)
+            .last().value()
+            .melding.shouldBeInstanceOf<VedtakHendelseMelding>()
+            .run {
+                folkeregisterIdent shouldBe "30056928150"
+                sakstype shouldBe Sakstyper.FTRL
+                sakstema shouldBe Sakstemaer.MEDLEMSKAP_LOVVALG
+                medlemskapsperiode.shouldNotBeNull().run {
+                    fom shouldBe LocalDate.of(2023, 1, 1)
+                    tom shouldBe LocalDate.of(2023, 2, 1)
+                }
+            }
+
+
         mockServer.verify(1, WireMock.postRequestedFor(WireMock.urlEqualTo("/fakturaserier")))
         mockServer.verify(1, WireMock.deleteRequestedFor(WireMock.urlEqualTo("/fakturaserier/$fakturaserieReferanse")))
     }
 
     @Test
     fun `oppretter prosess og påfølgende årsavregningsbehandling`() {
-        fakeUnleash.enable(ToggleName.MELOSYS_SKATTEHENDELSE_CONSUMER)
-
         val saksnummer = lagFørstegangsBehandling(Skatteplikttype.IKKE_SKATTEPLIKTIG, false)
 
-        val skattehendelse = Skattehendelse("2023", "30056928150")
+        val skattehendelse = Skattehendelse("2023", "30056928150", "ny")
 
         executeAndWait(
             waitForprosessType = ProsessType.OPPRETT_NY_BEHANDLING_AARSAVREGNING,

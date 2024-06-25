@@ -13,7 +13,6 @@ import no.nav.melosys.saksflyt.steg.StegBehandler
 import no.nav.melosys.saksflytapi.domain.ProsessDataKey
 import no.nav.melosys.saksflytapi.domain.ProsessSteg
 import no.nav.melosys.saksflytapi.domain.Prosessinstans
-import no.nav.melosys.service.avgift.TrygdeavgiftMottakerService
 import no.nav.melosys.service.avgift.TrygdeavgiftService
 import no.nav.melosys.service.behandling.BehandlingService
 import no.nav.melosys.service.behandling.BehandlingsresultatService
@@ -30,7 +29,6 @@ class OpprettFakturaserie(
     private val behandlingsresultatService: BehandlingsresultatService,
     private val faktureringskomponentenConsumer: FaktureringskomponentenConsumer,
     private val pdlService: PersondataService,
-    private val trygdeavgiftMottakerService: TrygdeavgiftMottakerService,
     private val trygdeavgiftService: TrygdeavgiftService,
 ) : StegBehandler {
 
@@ -76,21 +74,15 @@ class OpprettFakturaserie(
     }
 
     private fun skalOppretteFakturaserie(behandlingsresultat: Behandlingsresultat): Boolean =
-        trygdeavgiftsperioderMedAvgift(behandlingsresultat).isNotEmpty() && trygdeavgiftMottakerService.skalBetalesTilNav(behandlingsresultat)
+        trygdeavgiftService.harFakturerbarTrygdeavgift(behandlingsresultat)
 
     private fun andregangsvurderingHarFjernetTrygdeavgift(behandling: Behandling, behandlingsresultat: Behandlingsresultat): Boolean =
-        behandling.erAndregangsbehandling() && harOpprinneligBehandlingMedTrygdeavgift(behandling) && betalerNåKunTilSkatt(behandlingsresultat)
+        behandling.erAndregangsbehandling() && harOpprinneligBehandlingFakturerbarTrygdeavgift(behandling) && !trygdeavgiftService.harFakturerbarTrygdeavgift(behandlingsresultat)
 
-    private fun harOpprinneligBehandlingMedTrygdeavgift(behandling: Behandling): Boolean =
+    private fun harOpprinneligBehandlingFakturerbarTrygdeavgift(behandling: Behandling): Boolean =
         behandling.opprinneligBehandling?.let {
-            trygdeavgiftService.harTrygdeavgift(behandlingsresultatService.hentBehandlingsresultat(it.id))
+            trygdeavgiftService.harFakturerbarTrygdeavgift(behandlingsresultatService.hentBehandlingsresultat(it.id))
         } ?: false
-
-    private fun betalerNåKunTilSkatt(behandlingsresultat: Behandlingsresultat): Boolean =
-        trygdeavgiftMottakerService.betalerKunTrygdeavgiftTilSkatt(behandlingsresultat)
-
-    private fun trygdeavgiftsperioderMedAvgift(behandlingsresultat: Behandlingsresultat): List<Trygdeavgiftsperiode> =
-        behandlingsresultat.trygdeavgiftsperioder?.filter { it.harAvgift() } ?: emptyList()
 
     private fun mapFakturaserieDto(behandlingsresultat: Behandlingsresultat, prosessinstans: Prosessinstans): FakturaserieDto {
         val behandling = behandlingService.hentBehandling(behandlingsresultat.id)
@@ -109,7 +101,7 @@ class OpprettFakturaserie(
             fakturaGjelderInnbetalingstype = Innbetalingstype.TRYGDEAVGIFT,
             intervall = hentBetalingsIntervall(prosessinstans),
             referanseBruker = "Vedtak om medlemskap datert $vedtaksdato",
-            perioder = mapFakturaseriePeriodeDto(trygdeavgiftsperioderMedAvgift(behandlingsresultat))
+            perioder = mapFakturaseriePeriodeDto(behandlingsresultat.trygdeavgiftsperioder.filter { it.harAvgift() })
         )
     }
 

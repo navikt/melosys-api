@@ -19,11 +19,6 @@ class MedlPeriodeKonverter private constructor() {
     companion object {
         private var lovvalgsbestemmelseTilGrunnlagMedlTabell: BiMap<LovvalgBestemmelse, GrunnlagMedl> = HashBiMap.create()
         private var ftrlKap2BestemmelserTilGrunnLagMedlTabell: BiMap<Folketrygdloven_kap2_bestemmelser, GrunnlagMedl> = HashBiMap.create()
-        private val TILLEGGSBESTEMMELSER_MAPPES_TIL_MEDL: Collection<LovvalgBestemmelse> = setOf(
-            Tilleggsbestemmelser_883_2004.FO_883_2004_ART11_4_1,
-            Tilleggsbestemmelser_883_2004.FO_883_2004_ART11_5,
-            Tilleggsbestemmelser_konv_efta_storbritannia.KONV_EFTA_STORBRITANNIA_ART13_4_1
-        )
 
         init {
             lovvalgsbestemmelseTilGrunnlagMedlTabell[Lovvalgbestemmelser_883_2004.FO_883_2004_ART11_3A] = GrunnlagMedl.FO_11_3_A
@@ -304,14 +299,25 @@ class MedlPeriodeKonverter private constructor() {
 
         @JvmStatic
         fun hentLovvalgBestemmelse(lovvalgsperiode: PeriodeOmLovvalg): LovvalgBestemmelse {
-            val tilleggsbestemmelseSkalMappes = (lovvalgsperiode.getTilleggsbestemmelse() != null
-                && TILLEGGSBESTEMMELSER_MAPPES_TIL_MEDL.contains(lovvalgsperiode.getTilleggsbestemmelse()))
-            val bestemmelse = if (tilleggsbestemmelseSkalMappes) {
+            val bestemmelse = if (skalTilleggsbestemmelseMappes(lovvalgsperiode)) {
                 lovvalgsperiode.getTilleggsbestemmelse()
             } else {
                 lovvalgsperiode.getBestemmelse()
             }
-            return bestemmelse
+            return bestemmelse ?: throw IllegalStateException("Lovvalgsbestemmelse kan ikke være null")
+        }
+
+        @JvmStatic
+        fun skalTilleggsbestemmelseMappes(lovvalgsperiode: PeriodeOmLovvalg): Boolean {
+            val tilleggsbestemmelse = lovvalgsperiode.getTilleggsbestemmelse()
+
+            if (tilleggsbestemmelse != null) {
+                return (lovvalgsperiode.bestemmelse === Lovvalgbestemmelser_883_2004.FO_883_2004_ART11_3A && tilleggsbestemmelse ===
+                    Tilleggsbestemmelser_883_2004.FO_883_2004_ART11_4_1) ||
+                    (lovvalgsperiode.bestemmelse === Lovvalgbestemmelser_konv_efta_storbritannia.KONV_EFTA_STORBRITANNIA_ART13_3A &&
+                        tilleggsbestemmelse === Tilleggsbestemmelser_konv_efta_storbritannia.KONV_EFTA_STORBRITANNIA_ART13_4_1)
+            }
+            return false
         }
     }
 }
