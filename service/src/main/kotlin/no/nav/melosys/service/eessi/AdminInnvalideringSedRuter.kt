@@ -1,9 +1,9 @@
 package no.nav.melosys.service.eessi
 
+import mu.KotlinLogging
 import no.nav.melosys.domain.dokument.sed.SedDokument
 import no.nav.melosys.domain.eessi.SedInformasjon
 import no.nav.melosys.domain.eessi.SedType
-import no.nav.melosys.domain.eessi.melding.MelosysEessiMelding
 import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingsresultattyper
 import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingsstatus
 import no.nav.melosys.saksflytapi.ProsessinstansService
@@ -16,8 +16,6 @@ import no.nav.melosys.service.eessi.ruting.SedRuterForSedTyper
 import no.nav.melosys.service.medl.MedlPeriodeService
 import no.nav.melosys.service.oppgave.OppgaveService
 import no.nav.melosys.service.sak.FagsakService
-import org.slf4j.Logger
-import org.slf4j.LoggerFactory
 import org.springframework.stereotype.Component
 import java.util.*
 
@@ -25,20 +23,16 @@ import java.util.*
 class AdminInnvalideringSedRuter(
     fagsakService: FagsakService,
     prosessinstansService: ProsessinstansService,
-    private val oppgaveService: OppgaveService,
     behandlingsresultatService: BehandlingsresultatService,
     medlPeriodeService: MedlPeriodeService,
+    private val oppgaveService: OppgaveService,
     private val eessiService: EessiService,
     private val behandlingService: BehandlingService
 ) : AdminSedRuter(fagsakService, behandlingsresultatService, medlPeriodeService, prosessinstansService), SedRuterForSedTyper {
 
-    companion object {
-        private val log: Logger = LoggerFactory.getLogger(AdminInnvalideringSedRuter::class.java)
-    }
+    private val log = KotlinLogging.logger { }
 
-    override fun gjelderSedTyper(): Collection<SedType> {
-        return setOf(SedType.X008)
-    }
+    override fun gjelderSedTyper(): Collection<SedType> = setOf(SedType.X008)
 
     override fun rutSedTilBehandling(prosessinstans: Prosessinstans, arkivsakID: Long?) {
         val melosysEessiMelding = prosessinstans.hentMelosysEessiMelding()
@@ -52,31 +46,33 @@ class AdminInnvalideringSedRuter(
 
         val sistAktiveBehandling = fagsak.get().hentSistAktivBehandlingIkkeÅrsavregning()
 
-        if (sistAktiveBehandling.erNorgeUtpekt()) {
-            if (sistAktiveBehandling.erAktiv()) {
+        when {
+            sistAktiveBehandling.erNorgeUtpekt() && sistAktiveBehandling.erAktiv() -> {
                 behandlingService.endreStatus(sistAktiveBehandling.id, Behandlingsstatus.VURDER_DOKUMENT)
                 opprettJournalføringProsess(melosysEessiMelding, sistAktiveBehandling)
-                return
-            } else {
+            }
+
+            sistAktiveBehandling.erNorgeUtpekt() -> {
                 oppgaveService.opprettJournalføringsoppgave(melosysEessiMelding.journalpostId, melosysEessiMelding.aktoerId)
-                return
+            }
+
+            else -> {
+                val sedDokument = sistAktiveBehandling.finnSedDokument()
+                val aktivBehandlingErInvalidert = erAktivBehandlingInvalidert(sedDokument, arkivsakID)
+
+                if (aktivBehandlingErInvalidert && (sistAktiveBehandling.erRegisteringAvUnntak() || sistAktiveBehandling.erAnmodningOmUnntak())) {
+                    annullerSakOgBehandling(sistAktiveBehandling)
+                    behandlingsresultatService.oppdaterBehandlingsresultattype(sistAktiveBehandling.id, Behandlingsresultattyper.HENLEGGELSE)
+                }
+                oppgaveService.opprettEllerGjenbrukBehandlingsoppgave(
+                    sistAktiveBehandling,
+                    melosysEessiMelding.journalpostId,
+                    melosysEessiMelding.aktoerId,
+                    null
+                )
+                opprettJournalføringProsess(melosysEessiMelding, sistAktiveBehandling)
             }
         }
-
-        val sedDokument = sistAktiveBehandling.finnSedDokument()
-
-        val aktivBehandlingErInvalidert = erAktivBehandlingInvalidert(sedDokument, arkivsakID)
-
-        if (aktivBehandlingErInvalidert && (sistAktiveBehandling.erRegisteringAvUnntak() || sistAktiveBehandling.erAnmodningOmUnntak())) {
-            annullerSakOgBehandling(sistAktiveBehandling)
-            behandlingsresultatService.oppdaterBehandlingsresultattype(sistAktiveBehandling.id, Behandlingsresultattyper.HENLEGGELSE)
-        }
-        oppgaveService.opprettEllerGjenbrukBehandlingsoppgave(sistAktiveBehandling, melosysEessiMelding.journalpostId, melosysEessiMelding.aktoerId, null)
-        opprettJournalføringProsess(melosysEessiMelding, sistAktiveBehandling)
-    }
-
-    private fun behandlingSkalAnnuleres(melosysEessiMelding: MelosysEessiMelding, sistAktiveSedDokument: SedDokument): Boolean {
-        return melosysEessiMelding.sedType == SedType.X008.toString() && sistAktiveSedDokument.sedType == SedType.A003
     }
 
     private fun erAktivBehandlingInvalidert(sedDokument: Optional<SedDokument>, arkivsakID: Long?): Boolean {
