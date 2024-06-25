@@ -19,9 +19,9 @@ class TrygdeavgiftService(
 
     @Transactional(readOnly = true)
     fun harFagsakBehandlingerMedTrygdeavgift(saksnummer: String, sjekkFakturaserie: Boolean = false): Boolean =
-        hentTrygdeavgiftBehandlingsresultater(saksnummer, sjekkFakturaserie).isNotEmpty()
+        hentFakturerbarTrygdeavgiftBehandlingsresultater(saksnummer, sjekkFakturaserie).isNotEmpty()
 
-    private fun hentTrygdeavgiftBehandlingsresultater(saksnummer: String, sjekkFakturaserie: Boolean = false): List<Behandlingsresultat> {
+    private fun hentFakturerbarTrygdeavgiftBehandlingsresultater(saksnummer: String, sjekkFakturaserie: Boolean = false): List<Behandlingsresultat> {
         val fagsak = fagsakService.hentFagsak(saksnummer)
 
         if (fagsak.status in UGYLDIGE_SAKSSTATUSER_FOR_TRYGDEAVGIFT) {
@@ -31,18 +31,18 @@ class TrygdeavgiftService(
         return fagsak.behandlinger
             .map { behandlingsresultatService.hentBehandlingsresultat(it.id) }
             .filter {
-                harTrygdeavgift(it, sjekkFakturaserie)
+                harFakturerbarTrygdeavgift(it, sjekkFakturaserie)
             }
     }
 
     @Transactional(readOnly = true)
     fun finnSistFakturerbarTrygdeavgiftsbehandlingForÅr(saksnummer: String, år: Int): Behandling? =
-        hentTrygdeavgiftBehandlingsresultater(saksnummer).lastOrNull {
+        hentFakturerbarTrygdeavgiftBehandlingsresultater(saksnummer).lastOrNull {
             it.medlemskapsperioder.any { it.overlapperMedÅr(år) } || it.lovvalgsperioder.any { it.overlapperMedÅr(år) }
         }?.behandling
 
-    fun harFakturerbarTrygdeavgift(resultat: Behandlingsresultat) =
-        harTrygdeavgift(resultat) && trygdeavgiftMottakerService.skalBetalesTilNav(resultat)
+    fun harFakturerbarTrygdeavgift(resultat: Behandlingsresultat, sjekkFakturaserie: Boolean = false) =
+        harTrygdeavgift(resultat, sjekkFakturaserie) && trygdeavgiftMottakerService.skalBetalesTilNav(resultat)
 
     private fun harTrygdeavgift(resultat: Behandlingsresultat, sjekkFakturaserie: Boolean = false) =
         harTrygdeavgift(resultat) && (!sjekkFakturaserie || harBestiltFakturaserie(resultat))

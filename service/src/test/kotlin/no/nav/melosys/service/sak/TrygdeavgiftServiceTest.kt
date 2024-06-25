@@ -131,11 +131,11 @@ class TrygdeavgiftServiceTest {
 
     @Test
     fun harFagsakBehandlingerMedTrygdeavgift_harTrygedavgiftsperioderBådeMedOgUtenAvgift_returnererTrue() {
-        val trygdeavgiftsperiode1 = Trygdeavgiftsperiode().apply {
+        val periodeUtenAvgift = lagTrygdeavgift().apply {
             trygdeavgiftsbeløpMd = Penger(0.0)
             trygdesats = BigDecimal.ZERO
         }
-        val trygdeavgiftsperiode2 = Trygdeavgiftsperiode().apply {
+        val periodeMedAvgift = lagTrygdeavgift().apply {
             trygdeavgiftsbeløpMd = Penger(2345.56)
             trygdesats = BigDecimal(3.56)
         }
@@ -143,8 +143,8 @@ class TrygdeavgiftServiceTest {
             medlemskapsperioder.add(
                 Medlemskapsperiode().apply {
                     medlemskapstype = Medlemskapstyper.PLIKTIG
-                    trygdeavgiftsperioder.add(trygdeavgiftsperiode1)
-                    trygdeavgiftsperioder.add(trygdeavgiftsperiode2)
+                    trygdeavgiftsperioder.add(periodeUtenAvgift)
+                    trygdeavgiftsperioder.add(periodeMedAvgift)
                 }
             )
         }
