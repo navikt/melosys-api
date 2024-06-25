@@ -303,7 +303,7 @@ class SedMottakTestIT(
     }
 
     @Test
-    fun `A003 med etterfølgende X008 og lovvalgsland ikke er NO skal gjøre ettelerannet`() {
+    fun `A003 med etterfølgende X008 og lovvalgsland ikke NO skal annullere saken og henlegge i melosys`() {
         val ref = Random().nextInt(100000).toString()
 
         val sedInfo = SedInformasjon(ref, SedType.A003.name, LocalDate.now(), LocalDate.now(), null, "VURDER_DOKUMENT", null)
