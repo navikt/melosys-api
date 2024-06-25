@@ -1,261 +1,277 @@
-package no.nav.melosys.service.behandling;
+package no.nav.melosys.service.behandling
 
-import java.util.Collections;
-import java.util.HashSet;
-import java.util.Optional;
-import java.util.Set;
+import io.kotest.matchers.collections.shouldBeEmpty
+import io.kotest.matchers.nulls.shouldBeNull
+import io.kotest.matchers.shouldBe
+import io.kotest.assertions.throwables.shouldThrow
+import io.kotest.matchers.string.shouldContain
+import io.mockk.*
+import io.mockk.impl.annotations.MockK
+import io.mockk.junit5.MockKExtension
+import no.nav.melosys.domain.*
+import no.nav.melosys.domain.avklartefakta.Avklartefakta
+import no.nav.melosys.domain.kodeverk.Utfallregistreringunntak
+import no.nav.melosys.domain.kodeverk.begrunnelser.Henleggelsesgrunner
+import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingsresultattyper
+import no.nav.melosys.exception.FunksjonellException
+import no.nav.melosys.exception.IkkeFunnetException
+import no.nav.melosys.repository.BehandlingsresultatRepository
+import org.junit.jupiter.api.BeforeEach
+import org.junit.jupiter.api.Test
+import org.junit.jupiter.api.extension.ExtendWith
+import java.util.*
 
-import no.nav.melosys.domain.*;
-import no.nav.melosys.domain.avklartefakta.Avklartefakta;
-import no.nav.melosys.domain.kodeverk.Utfallregistreringunntak;
-import no.nav.melosys.domain.kodeverk.begrunnelser.Henleggelsesgrunner;
-import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingsresultattyper;
-import no.nav.melosys.exception.FunksjonellException;
-import no.nav.melosys.exception.IkkeFunnetException;
-import no.nav.melosys.repository.BehandlingsresultatRepository;
-import org.junit.jupiter.api.BeforeEach;
-import org.junit.jupiter.api.Test;
-import org.junit.jupiter.api.extension.ExtendWith;
-import org.mockito.ArgumentCaptor;
-import org.mockito.Captor;
-import org.mockito.Mock;
-import org.mockito.junit.jupiter.MockitoExtension;
-
-import static org.assertj.core.api.Assertions.assertThat;
-import static org.assertj.core.api.Assertions.assertThatExceptionOfType;
-import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.mockito.Mockito.*;
-
-@ExtendWith(MockitoExtension.class)
+@ExtendWith(MockKExtension::class)
 class BehandlingsresultatServiceTest {
-    @Captor
-    private ArgumentCaptor<Behandlingsresultat> behandlingsresultatCaptor;
 
-    @Mock
-    private BehandlingsresultatRepository behandlingsresultatRepo;
+    @MockK
+    private lateinit var behandlingsresultatRepo: BehandlingsresultatRepository
 
-    @Mock
-    private BehandlingsresultatService behandlingsresultatService;
+    private lateinit var behandlingsresultatService: BehandlingsresultatService
+    private val behandlingsresultatCaptor = slot<Behandlingsresultat>()
 
     @BeforeEach
-    public void setUp() {
-        behandlingsresultatService = spy(new BehandlingsresultatService(behandlingsresultatRepo));
+    fun setUp() {
+        behandlingsresultatService = BehandlingsresultatService(behandlingsresultatRepo)
     }
 
     @Test
-    void tømBehandlingsresultat() {
-        long behandlingID = 1L;
-        Behandlingsresultat behandlingsresultat = new Behandlingsresultat();
-        behandlingsresultat.setId(behandlingID);
-        behandlingsresultat.setAvklartefakta(new HashSet<>(Collections.singletonList(new Avklartefakta())));
-        behandlingsresultat.setLovvalgsperioder(new HashSet<>(Collections.singletonList(new Lovvalgsperiode())));
-        behandlingsresultat.setVilkaarsresultater(new HashSet<>(Collections.singleton(new Vilkaarsresultat())));
-        behandlingsresultat.setUtfallRegistreringUnntak(Utfallregistreringunntak.GODKJENT);
-        behandlingsresultat.setInnledningFritekst("Innledning fritekst");
-        behandlingsresultat.setBegrunnelseFritekst("Begrunnelse fritekst");
-        behandlingsresultat.setNyVurderingBakgrunn("ny vurdering bakgrunn");
-        behandlingsresultat.setTrygdeavgiftFritekst("trygdeavgift fritekst");
-        Fagsak fagsak = FagsakTestFactory.lagFagsak();
-        Behandling behandling = new Behandling();
-        behandling.setFagsak(fagsak);
-        behandling.setId(behandlingID);
-        behandlingsresultat.setBehandling(behandling);
+    fun tømBehandlingsresultat() {
+        val behandlingID = 1L
+        val behandlingsresultat = Behandlingsresultat().apply {
+            id = behandlingID
+            avklartefakta = hashSetOf(Avklartefakta())
+            lovvalgsperioder = hashSetOf(Lovvalgsperiode())
+            vilkaarsresultater = hashSetOf(Vilkaarsresultat())
+            utfallRegistreringUnntak = Utfallregistreringunntak.GODKJENT
+            innledningFritekst = "Innledning fritekst"
+            begrunnelseFritekst = "Begrunnelse fritekst"
+            nyVurderingBakgrunn = "ny vurdering bakgrunn"
+            trygdeavgiftFritekst = "trygdeavgift fritekst"
+            behandling = Behandling().apply {
+                id = behandlingID
+                fagsak = FagsakTestFactory.lagFagsak()
+            }
+        }
 
-        when(behandlingsresultatRepo.findById(anyLong())).thenReturn(Optional.of(behandlingsresultat));
-
-
-        behandlingsresultatService.tømBehandlingsresultat(1L);
+        every { behandlingsresultatRepo.findById(any()) } returns Optional.of(behandlingsresultat)
+        every { behandlingsresultatRepo.save(behandlingsresultat) } returns behandlingsresultat
 
 
-        assertThat(behandlingsresultat.getAvklartefakta()).isEmpty();
-        assertThat(behandlingsresultat.getLovvalgsperioder()).isEmpty();
-        assertThat(behandlingsresultat.getUtfallRegistreringUnntak()).isNull();
-        assertThat(behandlingsresultat.getInnledningFritekst()).isNull();
-        assertThat(behandlingsresultat.getBegrunnelseFritekst()).isNull();
-        assertThat(behandlingsresultat.getNyVurderingBakgrunn()).isNull();
-        assertThat(behandlingsresultat.getTrygdeavgiftFritekst()).isNull();
-        assertThat(behandlingsresultat.getVilkaarsresultater()).isEmpty();
+        behandlingsresultatService.tømBehandlingsresultat(1L)
+
+
+        behandlingsresultat.run {
+            avklartefakta.shouldBeEmpty()
+            lovvalgsperioder.shouldBeEmpty()
+            utfallRegistreringUnntak.shouldBeNull()
+            innledningFritekst.shouldBeNull()
+            begrunnelseFritekst.shouldBeNull()
+            nyVurderingBakgrunn.shouldBeNull()
+            trygdeavgiftFritekst.shouldBeNull()
+            vilkaarsresultater.shouldBeEmpty()
+        }
     }
 
     @Test
-    void hentBehandlingsresultat_medTomtResultat_forventerException() {
-        when(behandlingsresultatRepo.findById(anyLong())).thenReturn(Optional.empty());
-        assertThatExceptionOfType(IkkeFunnetException.class)
-            .isThrownBy(() -> behandlingsresultatService.hentBehandlingsresultat(4L))
-            .withMessageContaining("Kan ikke finne");
+    fun hentBehandlingsresultat_medTomtResultat_forventerException() {
+        every { behandlingsresultatRepo.findById(any()) } returns Optional.empty()
+
+        shouldThrow<IkkeFunnetException> {
+            behandlingsresultatService.hentBehandlingsresultat(4L)
+        }.message shouldContain "Kan ikke finne"
     }
 
     @Test
-    void hentBehandlingsresultat_returnererBehandlingsresultat() {
-        Behandlingsresultat resultat = new Behandlingsresultat();
-        BehandlingsresultatBegrunnelse begrunnelse = new BehandlingsresultatBegrunnelse();
-        begrunnelse.setKode(Henleggelsesgrunner.ANNET.getKode());
-        resultat.getBehandlingsresultatBegrunnelser().add(begrunnelse);
-        when(behandlingsresultatRepo.findById(anyLong())).thenReturn(Optional.of(resultat));
+    fun hentBehandlingsresultat_returnererBehandlingsresultat() {
+        val resultat = Behandlingsresultat().apply {
+            behandlingsresultatBegrunnelser = mutableSetOf(BehandlingsresultatBegrunnelse().apply {
+                kode = Henleggelsesgrunner.ANNET.kode
+            })
+        }
+        every { behandlingsresultatRepo.findById(any()) } returns Optional.of(resultat)
 
 
-        Behandlingsresultat behandlingsresultat = behandlingsresultatService.hentBehandlingsresultat(4L);
+        val behandlingsresultat = behandlingsresultatService.hentBehandlingsresultat(4L)
 
 
-        begrunnelse = behandlingsresultat.getBehandlingsresultatBegrunnelser().iterator().next();
-        assertThat(begrunnelse.getKode()).isEqualTo(Henleggelsesgrunner.ANNET.getKode());
+        val begrunnelse = behandlingsresultat.behandlingsresultatBegrunnelser.first()
+        begrunnelse.kode shouldBe Henleggelsesgrunner.ANNET.kode
     }
 
     @Test
-    void lagreNyttBehandlingsresultat_lagresKorrekt() {
-        var behandling = new Behandling();
+    fun lagreNyttBehandlingsresultat_lagresKorrekt() {
+        val behandling = Behandling()
+
+        every { behandlingsresultatRepo.save(capture(behandlingsresultatCaptor)) } returns Behandlingsresultat()
 
 
-        behandlingsresultatService.lagreNyttBehandlingsresultat(behandling);
+        behandlingsresultatService.lagreNyttBehandlingsresultat(behandling)
 
 
-        verify(behandlingsresultatRepo).save(behandlingsresultatCaptor.capture());
-        var behandlingsresultat = behandlingsresultatCaptor.getValue();
-        assertThat(behandlingsresultat.getBehandling()).isEqualTo(behandling);
-        assertThat(behandlingsresultat.getBehandlingsmåte()).isEqualTo(Behandlingsmaate.MANUELT);
-        assertThat(behandlingsresultat.getType()).isEqualTo(Behandlingsresultattyper.IKKE_FASTSATT);
+        with(behandlingsresultatCaptor.captured) {
+            behandling shouldBe behandling
+            behandlingsmåte shouldBe Behandlingsmaate.MANUELT
+            type shouldBe Behandlingsresultattyper.IKKE_FASTSATT
+        }
     }
 
     @Test
-    void lagreBehandlingsResultat_godkjent_erRegistrertUnntak() {
-        long behandlingID = 123;
-        Utfallregistreringunntak utfallUtpeking = Utfallregistreringunntak.GODKJENT;
+    fun lagreBehandlingsResultat_godkjent_erRegistrertUnntak() {
+        val behandlingID = 123L
+        val utfallUtpeking = Utfallregistreringunntak.GODKJENT
 
-        Behandlingsresultat mockBehandlingsresultat = new Behandlingsresultat();
-        when(behandlingsresultatRepo.findById(behandlingID)).thenReturn(Optional.of(mockBehandlingsresultat));
-        when(behandlingsresultatRepo.findWithKontrollresultaterById(behandlingID)).thenReturn(Optional.of(mockBehandlingsresultat));
-        when(behandlingsresultatRepo.save(mockBehandlingsresultat)).thenReturn(mockBehandlingsresultat);
+        val mockBehandlingsresultat = Behandlingsresultat()
+        every { behandlingsresultatRepo.findById(behandlingID) } returns Optional.of(mockBehandlingsresultat)
+        every { behandlingsresultatRepo.findWithKontrollresultaterById(behandlingID) } returns Optional.of(mockBehandlingsresultat)
+        every { behandlingsresultatRepo.save(any()) } returns mockBehandlingsresultat
 
 
-        behandlingsresultatService.settUtfallRegistreringUnntakOgType(behandlingID, utfallUtpeking);
+        behandlingsresultatService.settUtfallRegistreringUnntakOgType(behandlingID, utfallUtpeking)
 
-        assertEquals(Behandlingsresultattyper.REGISTRERT_UNNTAK, mockBehandlingsresultat.getType());
+
+        mockBehandlingsresultat.type shouldBe Behandlingsresultattyper.REGISTRERT_UNNTAK
     }
 
     @Test
-    void lagreBehandlingsResultat_ikkeGodkjent_erFerdigbehandlet() {
-        long behandlingID = 123;
-        Utfallregistreringunntak utfallUtpeking = Utfallregistreringunntak.IKKE_GODKJENT;
+    fun lagreBehandlingsResultat_ikkeGodkjent_erFerdigbehandlet() {
+        val behandlingID = 123L
+        val utfallUtpeking = Utfallregistreringunntak.IKKE_GODKJENT
 
-        Behandlingsresultat mockBehandlingsresultat = new Behandlingsresultat();
-        when(behandlingsresultatRepo.findById(behandlingID)).thenReturn(Optional.of(mockBehandlingsresultat));
-        when(behandlingsresultatRepo.findWithKontrollresultaterById(behandlingID)).thenReturn(Optional.of(mockBehandlingsresultat));
-        when(behandlingsresultatRepo.save(mockBehandlingsresultat)).thenReturn(mockBehandlingsresultat);
+        val mockBehandlingsresultat = Behandlingsresultat()
+        every { behandlingsresultatRepo.findById(behandlingID) } returns Optional.of(mockBehandlingsresultat)
+        every { behandlingsresultatRepo.findWithKontrollresultaterById(behandlingID) } returns Optional.of(mockBehandlingsresultat)
+        every { behandlingsresultatRepo.save(any()) } returns mockBehandlingsresultat
 
-        behandlingsresultatService.settUtfallRegistreringUnntakOgType(behandlingID, utfallUtpeking);
-        assertEquals(Behandlingsresultattyper.FERDIGBEHANDLET, mockBehandlingsresultat.getType());
+
+        behandlingsresultatService.settUtfallRegistreringUnntakOgType(behandlingID, utfallUtpeking)
+
+
+        mockBehandlingsresultat.type shouldBe Behandlingsresultattyper.FERDIGBEHANDLET
     }
 
     @Test
-    void oppdaterBehandlingsresultattype_idEksisterer_oppdatererBehandlingsresultattype() {
-        Behandlingsresultat behandlingsresultat = new Behandlingsresultat();
-        behandlingsresultat.setType(Behandlingsresultattyper.ANMODNING_OM_UNNTAK);
-        doReturn(Optional.of(behandlingsresultat)).when(behandlingsresultatRepo).findById(1L);
+    fun oppdaterBehandlingsresultattype_idEksisterer_oppdatererBehandlingsresultattype() {
+        val behandlingsresultat = Behandlingsresultat().apply {
+            type = Behandlingsresultattyper.ANMODNING_OM_UNNTAK
+        }
+        every { behandlingsresultatRepo.findById(1L) } returns Optional.of(behandlingsresultat)
+        every { behandlingsresultatRepo.save(any()) } returns behandlingsresultat
 
 
-        behandlingsresultatService.oppdaterBehandlingsresultattype(1L, Behandlingsresultattyper.IKKE_FASTSATT);
+        behandlingsresultatService.oppdaterBehandlingsresultattype(1L, Behandlingsresultattyper.IKKE_FASTSATT)
 
 
-        assertThat(behandlingsresultat.getType()).isEqualTo(Behandlingsresultattyper.IKKE_FASTSATT);
-        verify(behandlingsresultatRepo).save(behandlingsresultat);
+        behandlingsresultat.type shouldBe Behandlingsresultattyper.IKKE_FASTSATT
+        verify { behandlingsresultatRepo.save(behandlingsresultat) }
     }
 
     @Test
-    void oppdaterBehandlingsresultattype_idEksistererIkke_gjørIngenting() {
-        behandlingsresultatService.oppdaterBehandlingsresultattype(1L, Behandlingsresultattyper.IKKE_FASTSATT);
-        verify(behandlingsresultatRepo).findById(1L);
-        verify(behandlingsresultatRepo, never()).save(any());
+    fun oppdaterBehandlingsresultattype_idEksistererIkke_gjørIngenting() {
+        every { behandlingsresultatRepo.findById(1L) } returns Optional.empty()
+
+
+        behandlingsresultatService.oppdaterBehandlingsresultattype(1L, Behandlingsresultattyper.IKKE_FASTSATT)
+
+
+        verify { behandlingsresultatRepo.findById(1L) }
+        verify(exactly = 0) { behandlingsresultatRepo.save(any()) }
     }
 
     @Test
-    void oppdaterBehandlingsmaate_bhmåteUdefinert_verifiserOppdatert() {
-        Behandlingsresultat behandlingsresultat = new Behandlingsresultat();
-        behandlingsresultat.setBehandlingsmåte(Behandlingsmaate.MANUELT);
-        when(behandlingsresultatRepo.findById(anyLong())).thenReturn(Optional.of(behandlingsresultat));
+    fun oppdaterBehandlingsmaate_bhmåteUdefinert_verifiserOppdatert() {
+        val behandlingsresultat = Behandlingsresultat().apply {
+            behandlingsmåte = Behandlingsmaate.MANUELT
+        }
+        every { behandlingsresultatRepo.findById(any()) } returns Optional.of(behandlingsresultat)
+        every { behandlingsresultatRepo.save(any()) } returns behandlingsresultat
 
 
-        behandlingsresultatService.oppdaterBehandlingsMaate(1L, Behandlingsmaate.AUTOMATISERT);
+        behandlingsresultatService.oppdaterBehandlingsMaate(1L, Behandlingsmaate.AUTOMATISERT)
 
 
-        verify(behandlingsresultatRepo).save(behandlingsresultat);
-        assertThat(behandlingsresultat.getBehandlingsmåte()).isEqualTo(Behandlingsmaate.AUTOMATISERT);
+        verify { behandlingsresultatRepo.save(behandlingsresultat) }
+        behandlingsresultat.behandlingsmåte shouldBe Behandlingsmaate.AUTOMATISERT
     }
 
     @Test
-    void settUtfallRegistreringUnntakOgType_ikkeSatt_lagres() {
-        Behandlingsresultat behandlingsresultat = new Behandlingsresultat();
-        when(behandlingsresultatRepo.findById(1L)).thenReturn(Optional.of(behandlingsresultat));
-        when(behandlingsresultatRepo.findWithKontrollresultaterById(1L)).thenReturn(Optional.of(behandlingsresultat));
-        when(behandlingsresultatRepo.save(behandlingsresultat)).thenReturn(behandlingsresultat);
+    fun settUtfallRegistreringUnntakOgType_ikkeSatt_lagres() {
+        val behandlingsresultat = Behandlingsresultat()
+        every { behandlingsresultatRepo.findById(1L) } returns Optional.of(behandlingsresultat)
+        every { behandlingsresultatRepo.findWithKontrollresultaterById(1L) } returns Optional.of(behandlingsresultat)
+        every { behandlingsresultatRepo.save(any()) } returns behandlingsresultat
 
 
-        behandlingsresultatService.settUtfallRegistreringUnntakOgType(1, Utfallregistreringunntak.GODKJENT);
+        behandlingsresultatService.settUtfallRegistreringUnntakOgType(1, Utfallregistreringunntak.GODKJENT)
 
 
-        verify(behandlingsresultatRepo).save(behandlingsresultat);
+        verify { behandlingsresultatRepo.save(behandlingsresultat) }
     }
 
     @Test
-    void settUtfallRegistreringUnntakOgType_alleredeSatt_kasterException() {
-        Behandlingsresultat behandlingsresultat = new Behandlingsresultat();
+    fun settUtfallRegistreringUnntakOgType_alleredeSatt_kasterException() {
+        val behandlingsresultat = Behandlingsresultat().apply {
+            utfallRegistreringUnntak = Utfallregistreringunntak.GODKJENT
+        }
+        every { behandlingsresultatRepo.findById(1L) } returns Optional.of(behandlingsresultat)
 
 
-        behandlingsresultat.setUtfallRegistreringUnntak(Utfallregistreringunntak.GODKJENT);
-
-
-        when(behandlingsresultatRepo.findById(1L)).thenReturn(Optional.of(behandlingsresultat));
-        assertThatExceptionOfType(FunksjonellException.class)
-            .isThrownBy(() -> behandlingsresultatService.settUtfallRegistreringUnntakOgType(1, Utfallregistreringunntak.GODKJENT))
-            .withMessageContaining("Utfall for registrering av unntak er allerede satt for behandlingsresultat");
+        shouldThrow<FunksjonellException> {
+            behandlingsresultatService.settUtfallRegistreringUnntakOgType(1, Utfallregistreringunntak.GODKJENT)
+        }.message shouldContain "Utfall for registrering av unntak er allerede satt for behandlingsresultat"
     }
 
     @Test
-    void oppdaterUtfallRegistreringUnntak_alleredeSatt_oppdaterer() {
-        Behandlingsresultat behandlingsresultat = new Behandlingsresultat();
-        behandlingsresultat.setUtfallRegistreringUnntak(Utfallregistreringunntak.GODKJENT);
-        when(behandlingsresultatRepo.findWithKontrollresultaterById(1L)).thenReturn(Optional.of(behandlingsresultat));
-        when(behandlingsresultatRepo.save(behandlingsresultat)).thenReturn(behandlingsresultat);
+    fun oppdaterUtfallRegistreringUnntak_alleredeSatt_oppdaterer() {
+        val behandlingsresultat = Behandlingsresultat().apply {
+            utfallRegistreringUnntak = Utfallregistreringunntak.GODKJENT
+        }
+        every { behandlingsresultatRepo.findWithKontrollresultaterById(1L) } returns Optional.of(behandlingsresultat)
+        every { behandlingsresultatRepo.save(any()) } returns behandlingsresultat
 
 
-        behandlingsresultatService.oppdaterUtfallRegistreringUnntak(1, Utfallregistreringunntak.DELVIS_GODKJENT);
+        behandlingsresultatService.oppdaterUtfallRegistreringUnntak(1, Utfallregistreringunntak.DELVIS_GODKJENT)
 
 
-        verify(behandlingsresultatRepo).save(behandlingsresultat);
+        verify { behandlingsresultatRepo.save(behandlingsresultat) }
     }
 
     @Test
-    void oppdaterBegrunnelser_enBegrunnelse_blirLagret() {
-        var behandlingsresultatBegrunnelse = new BehandlingsresultatBegrunnelse();
-        behandlingsresultatBegrunnelse.setKode("koden");
-
-        Behandlingsresultat behandlingsresultat = new Behandlingsresultat();
-        when(behandlingsresultatRepo.findById(1L)).thenReturn(Optional.of(behandlingsresultat));
-
-
-        behandlingsresultatService.oppdaterBegrunnelser(1L, Set.of(behandlingsresultatBegrunnelse), "fri");
+    fun oppdaterBegrunnelser_enBegrunnelse_blirLagret() {
+        val behandlingsresultatBegrunnelse = BehandlingsresultatBegrunnelse().apply {
+            kode = "koden"
+        }
+        val behandlingsresultat = Behandlingsresultat()
+        every { behandlingsresultatRepo.findById(1L) } returns Optional.of(behandlingsresultat)
+        every { behandlingsresultatRepo.save(any()) } returns behandlingsresultat
 
 
-        verify(behandlingsresultatRepo).save(behandlingsresultat);
-        assertThat(behandlingsresultatBegrunnelse.getBehandlingsresultat()).isEqualTo(behandlingsresultat);
+        behandlingsresultatService.oppdaterBegrunnelser(1L, setOf(behandlingsresultatBegrunnelse), "fri")
+
+
+        verify { behandlingsresultatRepo.save(behandlingsresultat) }
+        behandlingsresultatBegrunnelse.behandlingsresultat shouldBe behandlingsresultat
     }
 
     @Test
-    void oppdaterFritekster_altOk_blirLagret() {
-        ArgumentCaptor<Behandlingsresultat> captor = ArgumentCaptor.forClass(Behandlingsresultat.class);
-        var behandlingsresultat = new Behandlingsresultat();
-        behandlingsresultat.setId(1L);
-        when(behandlingsresultatRepo.findById(1L)).thenReturn(Optional.of(behandlingsresultat));
-        when(behandlingsresultatRepo.save(behandlingsresultat)).thenReturn(behandlingsresultat);
+    fun oppdaterFritekster_altOk_blirLagret() {
+        val behandlingsresultat = Behandlingsresultat().apply {
+            id = 1L
+        }
+        every { behandlingsresultatRepo.findById(1L) } returns Optional.of(behandlingsresultat)
+        every { behandlingsresultatRepo.save(any()) } returns behandlingsresultat
 
 
         behandlingsresultatService.oppdaterFritekster(
-            1L, "fritekst for begrunnelse", "fritekst for innledning", "fritekst for trygdeavgift");
+            1L, "fritekst for begrunnelse", "fritekst for innledning", "fritekst for trygdeavgift"
+        )
 
 
-        verify(behandlingsresultatRepo).save(captor.capture());
-        Behandlingsresultat capturedBehandlingsresultat = captor.getValue();
-        assertThat(capturedBehandlingsresultat.getBegrunnelseFritekst()).isEqualTo("fritekst for begrunnelse");
-        assertThat(capturedBehandlingsresultat.getInnledningFritekst()).isEqualTo("fritekst for innledning");
-        assertThat(capturedBehandlingsresultat.getTrygdeavgiftFritekst()).isEqualTo("fritekst for trygdeavgift");
+        verify { behandlingsresultatRepo.save(capture(behandlingsresultatCaptor)) }
+        with(behandlingsresultatCaptor.captured) {
+            begrunnelseFritekst shouldBe "fritekst for begrunnelse"
+            innledningFritekst shouldBe "fritekst for innledning"
+            trygdeavgiftFritekst shouldBe "fritekst for trygdeavgift"
+        }
     }
 }
