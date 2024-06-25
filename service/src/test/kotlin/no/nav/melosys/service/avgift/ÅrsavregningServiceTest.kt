@@ -35,11 +35,13 @@ import java.util.*
 @ExtendWith(MockKExtension::class)
 internal class ÅrsavregningServiceTest {
     @RelaxedMockK
-    private lateinit var faktureringskomponentenConsumer: FaktureringskomponentenConsumer
-    @RelaxedMockK
     private lateinit var aarsavregningRepository: AarsavregningRepository
     @RelaxedMockK
     private lateinit var behandlingsresultatService: BehandlingsresultatService
+    @RelaxedMockK
+    private lateinit var faktureringskomponentenConsumer: FaktureringskomponentenConsumer
+    @RelaxedMockK
+    private lateinit var trygdeavgiftService: TrygdeavgiftService
 
     private lateinit var årsavregningService: ÅrsavregningService
 
@@ -47,7 +49,12 @@ internal class ÅrsavregningServiceTest {
 
     @BeforeEach
     fun setup() {
-        årsavregningService = ÅrsavregningService(faktureringskomponentenConsumer, aarsavregningRepository, behandlingsresultatService)
+        årsavregningService = ÅrsavregningService(
+            aarsavregningRepository,
+            behandlingsresultatService,
+            faktureringskomponentenConsumer,
+            trygdeavgiftService
+        )
         SpringSubjectHandler.set(TestSubjectHandler())
     }
 
