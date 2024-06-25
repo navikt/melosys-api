@@ -53,7 +53,7 @@ class OpprettÅrsavregningBehandling(
             return
         }
 
-        val trygdeavgiftsBehandlingMedRelevantPeriode = trygdeavgiftService.finnSistTrygdeavgiftsbehandlingForÅr(sakMedTrygdeavgift.saksnummer, gjelderÅr).also {
+        val trygdeavgiftsBehandlingMedRelevantPeriode = trygdeavgiftService.finnSistFakturerbarTrygdeavgiftsbehandlingForÅr(sakMedTrygdeavgift.saksnummer, gjelderÅr).also {
             if (it == null) log.info(
                 "Fant ingen behandlinger med overlappende lovvalgsperioder eller medlemskapsperioder for sak: ${
                     sakMedTrygdeavgift.saksnummer

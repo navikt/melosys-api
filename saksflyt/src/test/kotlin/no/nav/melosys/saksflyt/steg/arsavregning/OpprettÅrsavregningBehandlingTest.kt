@@ -86,7 +86,7 @@ class OpprettÅrsavregningBehandlingTest {
         every { persondataService.hentAktørIdForIdent(any()) } returns AKTØR_ID
         every { fagsakService.hentFagsakerMedAktør(Aktoersroller.BRUKER, AKTØR_ID) } returns listOf(fagsak)
         every { trygdeavgiftService.harFagsakBehandlingerMedTrygdeavgift(fagsak.saksnummer) } returns true
-        every { trygdeavgiftService.finnSistTrygdeavgiftsbehandlingForÅr(fagsak.saksnummer, any()) } returns behandling
+        every { trygdeavgiftService.finnSistFakturerbarTrygdeavgiftsbehandlingForÅr(fagsak.saksnummer, any()) } returns behandling
 
         every {
             behandlingService.nyBehandling(
@@ -137,7 +137,7 @@ class OpprettÅrsavregningBehandlingTest {
         every { persondataService.hentAktørIdForIdent(any()) } returns AKTØR_ID
         every { fagsakService.hentFagsakerMedAktør(Aktoersroller.BRUKER, AKTØR_ID) } returns listOf(fagsak)
         every { trygdeavgiftService.harFagsakBehandlingerMedTrygdeavgift(fagsak.saksnummer) } returns true
-        every { trygdeavgiftService.finnSistTrygdeavgiftsbehandlingForÅr(fagsak.saksnummer, any()) } returns null
+        every { trygdeavgiftService.finnSistFakturerbarTrygdeavgiftsbehandlingForÅr(fagsak.saksnummer, any()) } returns null
 
 
         opprettÅrsavregningBehandling.utfør(prosessinstans)
@@ -171,7 +171,7 @@ class OpprettÅrsavregningBehandlingTest {
         every { persondataService.hentAktørIdForIdent(any()) } returns AKTØR_ID
         every { fagsakService.hentFagsakerMedAktør(Aktoersroller.BRUKER, AKTØR_ID) } returns listOf(fagsak)
         every { trygdeavgiftService.harFagsakBehandlingerMedTrygdeavgift(fagsak.saksnummer) } returns true
-        every { trygdeavgiftService.finnSistTrygdeavgiftsbehandlingForÅr(fagsak.saksnummer, any()) } returns behandling
+        every { trygdeavgiftService.finnSistFakturerbarTrygdeavgiftsbehandlingForÅr(fagsak.saksnummer, any()) } returns behandling
 
         every { behandslingsresultatService.hentBehandlingsresultat(behandling.id) } returns behandlingsresultat
         every { årsavregningService.oppretteÅrsavregning(any(), any()) } returns Unit
