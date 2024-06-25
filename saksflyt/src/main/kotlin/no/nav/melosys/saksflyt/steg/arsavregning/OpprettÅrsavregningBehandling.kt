@@ -72,8 +72,7 @@ class OpprettÅrsavregningBehandling(
             Behandlingsaarsaktyper.MELDING_FRA_SKATT,
             null
         ).also { nyBehandling ->
-            val behandlingsresultat = behandslingsresultatService.hentBehandlingsresultat(nyBehandling.id)
-            årsavregningService.oppretteÅrsavregning(behandlingsresultat, gjelderÅr)
+            årsavregningService.opprettÅrsavregning(nyBehandling.id, gjelderÅr)
             prosessinstans.behandling = nyBehandling
         }
     }

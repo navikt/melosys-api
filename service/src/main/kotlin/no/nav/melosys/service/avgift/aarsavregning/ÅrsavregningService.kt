@@ -52,15 +52,11 @@ class ÅrsavregningService(
     @Transactional
     fun opprettÅrsavregning(behandlingID: Long, gjelderÅr: Int): Long {
         val behandlingsresultat = behandlingsresultatService.hentBehandlingsresultat(behandlingID)
-        oppretteÅrsavregning(behandlingsresultat, gjelderÅr)
-        return behandlingID
-    }
 
-    @Transactional
-    fun oppretteÅrsavregning(behandlingsresultat: Behandlingsresultat, gjelderÅr: Int) {
-        if (aarsavregningRepository.finnAntallÅrsavregningerPåFagsakForÅr(behandlingsresultat.behandling.id, gjelderÅr) != 0)
+        if (aarsavregningRepository.finnAntallÅrsavregningerPåFagsakForÅr(behandlingID, gjelderÅr) != 0) {
             throw FunksjonellException("Det finnes en annen åpen årsavregningsbehandling for samme år på saken. \n" +
                 "Vurder hvilke behandling du vil fortsette med og avslutt den som ikke er aktuell via behandlingsmenyen.")
+        }
 
         Aarsavregning().apply {
             behandlingsresultat.aarsavregning = this
@@ -70,6 +66,7 @@ class ÅrsavregningService(
         }.also {
             aarsavregningRepository.save(it)
         }
+        return behandlingID
     }
 
     private fun finnTidligereBehandlingsresultatMedAvgift(saksnummer: String, gjelderÅr: Int): Behandlingsresultat? =

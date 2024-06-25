@@ -103,12 +103,12 @@ class OpprettÅrsavregningBehandlingTest {
         } returns årsavregningsBehandling
 
         every { behandslingsresultatService.hentBehandlingsresultat(årsavregningsBehandling.id) } returns behandlingsresultat
-        every { årsavregningService.oppretteÅrsavregning(any(), any()) } returns Unit
+        every { årsavregningService.opprettÅrsavregning(any(), any()) } returns årsavregningsBehandling.id
 
         opprettÅrsavregningBehandling.utfør(prosessinstans)
 
 
-        verify { årsavregningService.oppretteÅrsavregning(behandlingsresultat, 2023) }
+        verify { årsavregningService.opprettÅrsavregning(behandlingsresultat.id, 2023) }
 
 
         prosessinstans.behandling.id shouldBe 2
@@ -174,7 +174,7 @@ class OpprettÅrsavregningBehandlingTest {
         every { trygdeavgiftService.finnSistFakturerbarTrygdeavgiftsbehandlingForÅr(fagsak.saksnummer, any()) } returns behandling
 
         every { behandslingsresultatService.hentBehandlingsresultat(behandling.id) } returns behandlingsresultat
-        every { årsavregningService.oppretteÅrsavregning(any(), any()) } returns Unit
+        every { årsavregningService.opprettÅrsavregning(any(), any()) } returns behandling.id
         val behandlingSlot = slot<Behandling>()
         every { behandlingService.lagre(capture(behandlingSlot)) } returns Unit
 
