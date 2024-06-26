@@ -1,7 +1,6 @@
 package no.nav.melosys.saksflyt.steg.brev;
 
 import java.util.List;
-import java.util.Set;
 import java.util.UUID;
 
 import no.nav.melosys.domain.*;
@@ -10,8 +9,8 @@ import no.nav.melosys.domain.brev.*;
 import no.nav.melosys.domain.kodeverk.Aktoersroller;
 import no.nav.melosys.domain.kodeverk.Mottakerroller;
 import no.nav.melosys.domain.kodeverk.Sakstemaer;
-import no.nav.melosys.domain.kodeverk.Sakstyper;
 import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingstema;
+import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingstyper;
 import no.nav.melosys.domain.kodeverk.brev.Produserbaredokumenter;
 import no.nav.melosys.exception.FunksjonellException;
 import no.nav.melosys.exception.IkkeFunnetException;
@@ -133,6 +132,7 @@ class OpprettOgJournalforBrevTest {
         var fagsak = FagsakTestFactory.builder().aktører(virksomhet).build();
         Behandling behandling = new Behandling();
         behandling.setFagsak(fagsak);
+        behandling.setType(Behandlingstyper.FØRSTEGANG);
         behandling.setTema(Behandlingstema.YRKESAKTIV);
         behandling.setId(1L);
 

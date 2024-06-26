@@ -65,7 +65,7 @@ public class FerdigstillJournalpostSed implements StegBehandler {
                 .medBrukerID(brukerID)
                 .medSaksnummer(saksnummer)
                 .medTittel(tittel)
-                .medTema(oppgaveFactory.utledTema(fagsak.getType(), fagsak.getTema(), behandling.getTema()).getKode())
+                .medTema(oppgaveFactory.utledTema(fagsak.getType(), fagsak.getTema(), behandling.getTema(), behandling.getType()).getKode())
                 .build();
 
             joarkFasade.oppdaterOgFerdigstillJournalpost(eessiMelding.getJournalpostId(), journalpostOppdatering);

@@ -73,6 +73,7 @@ public class LovligeBehandlingsKombinasjoner {
     public static final BehandlingstemaBehandlingstyperKombinasjon TRYGDEAVTALE_TRYGDEAVGIFT_BEHANDLINGS_KOMBINASJON = new BehandlingstemaBehandlingstyperKombinasjon(TRYGDEAVTALE_TRYGDEAVGIFT_BEHANDLINGSTEMA, TRYGDEAVTALE_TRYGDEAVGIFT_BEHANDLINGSTYPE);
     public static final BehandlingstemaBehandlingstyperKombinasjon TRYGDEAVTALE_ÅRSAVREGNING_BEHANDLINGS_KOMBINASJON = new BehandlingstemaBehandlingstyperKombinasjon(TRYGDEAVTALE_ÅRSAVREGNING_BEHANDLINGSTEMA, TRYGDEAVTALE_ÅRSAVREGNING_BEHANDLINGSTYPE);
 
+
     //EU_EOS
     private static final Set<Behandlingstema> EU_EOS_LOVVALG_MEDLEMSKAP_BEHANDLINGSTEMA_VIRKSOMHET = Set.of(VIRKSOMHET);
     private static final Set<Behandlingstyper> EU_EOS_LOVVALG_MEDLEMSKAP_BEHANDLINGSTYPER_VIRKSOMHET = Set.of(HENVENDELSE);
