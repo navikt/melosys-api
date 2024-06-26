@@ -12,12 +12,10 @@ import no.nav.melosys.saksflyt.steg.StegBehandler
 import no.nav.melosys.saksflytapi.domain.ProsessDataKey
 import no.nav.melosys.saksflytapi.domain.ProsessSteg
 import no.nav.melosys.saksflytapi.domain.Prosessinstans
-import no.nav.melosys.service.LovvalgsperiodeService
 import no.nav.melosys.service.avgift.TrygdeavgiftService
 import no.nav.melosys.service.avgift.aarsavregning.ÅrsavregningService
 import no.nav.melosys.service.behandling.BehandlingService
 import no.nav.melosys.service.behandling.BehandlingsresultatService
-import no.nav.melosys.service.ftrl.medlemskapsperiode.MedlemskapsperiodeService
 import no.nav.melosys.service.persondata.PersondataService
 import no.nav.melosys.service.sak.FagsakService
 import org.springframework.stereotype.Component
@@ -31,10 +29,8 @@ class OpprettÅrsavregningBehandling(
     private val persondataService: PersondataService,
     private val trygdeavgiftService: TrygdeavgiftService,
     private val behandlingService: BehandlingService,
-    private val lovvalgsperiodeService: LovvalgsperiodeService,
-    private val medlemskapsperiodeService: MedlemskapsperiodeService,
     private val behandslingsresultatService: BehandlingsresultatService,
-    private val oppretteÅrsavregning: ÅrsavregningService
+    private val årsavregningService: ÅrsavregningService
 ) : StegBehandler {
     override fun inngangsSteg(): ProsessSteg {
         return ProsessSteg.OPPRETT_AARSAVREGNING_BEHANDLING
@@ -57,7 +53,7 @@ class OpprettÅrsavregningBehandling(
             return
         }
 
-        val trygdeavgiftsBehandlingMedRelevantPeriode = finnTrygdeavgiftsBehandlingMedRelevantPeriode(sakMedTrygdeavgift, gjelderÅr).also {
+        val trygdeavgiftsBehandlingMedRelevantPeriode = trygdeavgiftService.finnSistFakturerbarTrygdeavgiftsbehandlingForÅr(sakMedTrygdeavgift.saksnummer, gjelderÅr).also {
             if (it == null) log.info(
                 "Fant ingen behandlinger med overlappende lovvalgsperioder eller medlemskapsperioder for sak: ${
                     sakMedTrygdeavgift.saksnummer
@@ -76,27 +72,18 @@ class OpprettÅrsavregningBehandling(
             Behandlingsaarsaktyper.MELDING_FRA_SKATT,
             null
         ).also { nyBehandling ->
-            val behandlingsresultat = behandslingsresultatService.hentBehandlingsresultat(nyBehandling.id)
-            oppretteÅrsavregning.oppretteÅrsavregning(behandlingsresultat, gjelderÅr)
+            årsavregningService.opprettÅrsavregning(nyBehandling.id, gjelderÅr)
             prosessinstans.behandling = nyBehandling
         }
     }
 
-    private fun finnTrygdeavgiftsBehandlingMedRelevantPeriode(sakMedTrygdeavgift: Fagsak, gjelderPeriode: Int): Behandling? =
-        trygdeavgiftService.hentTrygdeavgiftBehandlinger(sakMedTrygdeavgift.saksnummer).lastOrNull { behandling ->
-            val lovvalgsperioder = lovvalgsperiodeService.hentLovvalgsperioder(behandling.id)
-            val medlemskapsperioder = medlemskapsperiodeService.hentMedlemskapsperioder(behandling.id)
-
-            lovvalgsperioder.any { it.overlapperMedÅr(gjelderPeriode) } || medlemskapsperioder.any { it.overlapperMedÅr(gjelderPeriode) }
-        }
-
-    private fun finnAktivÅrsavregningBehandling(sakMedTrygdeavgift: Fagsak, gjelderPeriode: Int): Behandling? {
+    private fun finnAktivÅrsavregningBehandling(sakMedTrygdeavgift: Fagsak, gjelderÅr: Int): Behandling? {
         val årsAvregninger = sakMedTrygdeavgift.hentAktiveÅrsavregninger().also { if (it.isEmpty()) log.info("Fant ingen aktive årsavregninger") }
-            .filter { behandslingsresultatService.hentBehandlingsresultat(it.id).aarsavregning.aar == gjelderPeriode }
+            .filter { behandslingsresultatService.hentBehandlingsresultat(it.id).aarsavregning.aar == gjelderÅr }
 
         when {
             årsAvregninger.isEmpty() -> {
-                log.info("Fant ingen aktive årsavregninger for år $gjelderPeriode")
+                log.info("Fant ingen aktive årsavregninger for år $gjelderÅr")
                 return null
             }
 
@@ -105,7 +92,7 @@ class OpprettÅrsavregningBehandling(
             }
 
             else -> {
-                log.info("Fant aktiv årsavregning for år $gjelderPeriode")
+                log.info("Fant aktiv årsavregning for år $gjelderÅr")
                 return årsAvregninger.single()
             }
         }
