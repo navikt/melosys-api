@@ -198,7 +198,9 @@ class LovligeKombinasjonerSaksbehandlingService(
                 sisteBehandling,
                 sisteBehandling?.tema,
                 sisteBehandling?.fagsak?.status
-            )
+            ).filter {
+                unleash.isEnabled(ToggleName.MELOSYS_ÅRSAVREGNING) || it != Behandlingstyper.ÅRSAVREGNING
+            }.toSet()
 
             Aktoersroller.VIRKSOMHET -> LovligeSakskombinasjoner.muligeSaksKombinasjonerVirksomhet.getOrDefault(sakstype, emptySet())
                 .filter { it.sakstema == sakstema }
