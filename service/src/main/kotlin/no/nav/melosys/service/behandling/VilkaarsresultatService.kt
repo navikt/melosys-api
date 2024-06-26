@@ -102,7 +102,7 @@ class VilkaarsresultatService(
     fun registrerVilkår(behandlingID: Long, vilkaarDtoer: List<VilkaarDto>) {
         validerVilkår(vilkaarDtoer)
         val behandlingsresultat = hentBehandlingsresultat(behandlingID)
-        tilbakestillVilkårsresultatFraBehandlingsresultatOgLagre(behandlingID)
+        tilbakestillVilkårsresultatFraBehandlingsresultatMedSaveAndFlush(behandlingID)
         // Flush fordi vi potensielt legger til samme vilkåret igjen. INSERT kommer før DELETE i Hibernate, som skaper UNIQUE constraint problemer uten flush.
         behandlingsresultatRepository.saveAndFlush(behandlingsresultat)
         for (vilkaarDto in vilkaarDtoer) {
@@ -120,7 +120,7 @@ class VilkaarsresultatService(
     }
 
     @Transactional
-    fun tilbakestillVilkårsresultatFraBehandlingsresultatOgLagre(behandlingID: Long) {
+    fun tilbakestillVilkårsresultatFraBehandlingsresultatMedSaveAndFlush(behandlingID: Long) {
         val behandlingsresultat = hentBehandlingsresultat(behandlingID)
         tilbakestillVilkårsresultatFraBehandlingsresultat(behandlingsresultat)
         behandlingsresultatRepository.saveAndFlush(behandlingsresultat)

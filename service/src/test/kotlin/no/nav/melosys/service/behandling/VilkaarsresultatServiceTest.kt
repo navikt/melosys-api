@@ -209,7 +209,7 @@ internal class VilkaarsresultatServiceTest {
         every { behandlingsresultatRepo.saveAndFlush(any()) } returnsArgument 0
 
 
-        vilkaarsresultatService.tilbakestillVilkårsresultatFraBehandlingsresultatOgLagre(BEHANDLING_ID)
+        vilkaarsresultatService.tilbakestillVilkårsresultatFraBehandlingsresultatMedSaveAndFlush(BEHANDLING_ID)
 
 
         verify { behandlingsresultatRepo.saveAndFlush(behandlingsresultat) }
@@ -233,7 +233,7 @@ internal class VilkaarsresultatServiceTest {
         every { behandlingsresultatRepo.saveAndFlush(any()) } returnsArgument 0
 
 
-        vilkaarsresultatService.tilbakestillVilkårsresultatFraBehandlingsresultatOgLagre(BEHANDLING_ID)
+        vilkaarsresultatService.tilbakestillVilkårsresultatFraBehandlingsresultatMedSaveAndFlush(BEHANDLING_ID)
 
 
         verify { behandlingsresultatRepo.saveAndFlush(behandlingsresultat) }
@@ -266,7 +266,7 @@ internal class VilkaarsresultatServiceTest {
         every { behandlingsresultatRepo.saveAndFlush(any()) } returnsArgument 0
 
 
-        vilkaarsresultatService.tilbakestillVilkårsresultatFraBehandlingsresultatOgLagre(BEHANDLING_ID)
+        vilkaarsresultatService.tilbakestillVilkårsresultatFraBehandlingsresultatMedSaveAndFlush(BEHANDLING_ID)
 
 
         verify { behandlingsresultatRepo.saveAndFlush(behandlingsresultat) }
