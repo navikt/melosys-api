@@ -46,13 +46,20 @@ class Fagsak(
     fun finnAktivBehandlingIkkeÅrsavregning(): Behandling? {
         val aktiveBehandlinger = behandlinger.filter { it.erAktiv() && !it.erÅrsavregning() }
         if (aktiveBehandlinger.size > 1)
-            throw TekniskException("Det finnes mer enn en aktiv behandling for sak $saksnummer")
+            throw TekniskException("Det finnes mer enn én aktiv behandling for sak $saksnummer")
 
         return aktiveBehandlinger.firstOrNull()
     }
 
-    fun hentAktivBehandling(): Behandling = behandlinger.firstOrNull { it.erAktiv() }
-        ?: throw FunksjonellException("Finner ingen aktiv behandling på fagsak $saksnummer")
+    fun hentAktivBehandling(): Behandling {
+        behandlinger.firstOrNull { it.erAktiv() }
+        val aktiveBehandlinger = behandlinger.filter { it.erAktiv() }
+        if (aktiveBehandlinger.size > 1)
+            throw TekniskException("Det finnes mer enn én aktiv behandling for sak $saksnummer")
+
+        return aktiveBehandlinger.firstOrNull()
+            ?: throw FunksjonellException("Finner ingen aktiv behandling på fagsak $saksnummer")
+    }
 
     fun hentAktivBehandlingIkkeÅrsavregning(): Behandling = finnAktivBehandlingIkkeÅrsavregning()
         ?: throw FunksjonellException("Finner ingen aktiv behandling på fagsak $saksnummer")
