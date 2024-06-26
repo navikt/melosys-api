@@ -19,26 +19,30 @@ class TrygdeavgiftService(
 
     @Transactional(readOnly = true)
     fun harFagsakBehandlingerMedTrygdeavgift(saksnummer: String, sjekkFakturaserie: Boolean = false): Boolean =
-        hentTrygdeavgiftBehandlinger(saksnummer, sjekkFakturaserie).isNotEmpty()
+        hentFakturerbarTrygdeavgiftBehandlingsresultater(saksnummer, sjekkFakturaserie).isNotEmpty()
 
-    @Transactional(readOnly = true)
-    fun hentTrygdeavgiftBehandlinger(saksnummer: String, sjekkFakturaserie: Boolean = false): List<Behandling> {
+    private fun hentFakturerbarTrygdeavgiftBehandlingsresultater(saksnummer: String, sjekkFakturaserie: Boolean = false): List<Behandlingsresultat> {
         val fagsak = fagsakService.hentFagsak(saksnummer)
 
         if (fagsak.status in UGYLDIGE_SAKSSTATUSER_FOR_TRYGDEAVGIFT) {
             return emptyList()
         }
 
-        return fagsak
-            .behandlinger
+        return fagsak.behandlinger
+            .map { behandlingsresultatService.hentBehandlingsresultat(it.id) }
             .filter {
-                val resultat = behandlingsresultatService.hentBehandlingsresultat(it.id)
-                harTrygdeavgift(resultat, sjekkFakturaserie)
+                harFakturerbarTrygdeavgift(it, sjekkFakturaserie)
             }
     }
 
-    fun harFakturerbarTrygdeavgift(resultat: Behandlingsresultat) =
-        harTrygdeavgift(resultat) && trygdeavgiftMottakerService.skalBetalesTilNav(resultat)
+    @Transactional(readOnly = true)
+    fun finnSistFakturerbarTrygdeavgiftsbehandlingForÅr(saksnummer: String, år: Int): Behandling? =
+        hentFakturerbarTrygdeavgiftBehandlingsresultater(saksnummer).sortedBy { it.registrertDato }.lastOrNull {
+            it.medlemskapsperioder.any { it.overlapperMedÅr(år) } || it.lovvalgsperioder.any { it.overlapperMedÅr(år) }
+        }?.behandling
+
+    fun harFakturerbarTrygdeavgift(resultat: Behandlingsresultat, sjekkFakturaserie: Boolean = false) =
+        harTrygdeavgift(resultat, sjekkFakturaserie) && trygdeavgiftMottakerService.skalBetalesTilNav(resultat)
 
     private fun harTrygdeavgift(resultat: Behandlingsresultat, sjekkFakturaserie: Boolean = false) =
         harTrygdeavgift(resultat) && (!sjekkFakturaserie || harBestiltFakturaserie(resultat))
