@@ -42,46 +42,35 @@ class BehandlingsresultatService(
             }
     }
 
-    fun hentBehandlingsresultat(behandlingsid: Long): Behandlingsresultat {
-        return behandlingsresultatRepository.findById(behandlingsid)
+    fun hentBehandlingsresultat(behandlingsid: Long): Behandlingsresultat =
+        behandlingsresultatRepository.findById(behandlingsid)
             .orElseThrowIkkeFunnetException(behandlingsid)
-    }
 
-    fun finnAlleBehandlingsresultatMedFakturaserieReferanse(fakturaserieReferanse: String): List<Behandlingsresultat> {
-        return behandlingsresultatRepository.findAllByFakturaserieReferanse(fakturaserieReferanse)
-    }
+    fun finnAlleBehandlingsresultatMedFakturaserieReferanse(fakturaserieReferanse: String): List<Behandlingsresultat> =
+        behandlingsresultatRepository.findAllByFakturaserieReferanse(fakturaserieReferanse)
 
-    fun hentBehandlingsresultatMedAnmodningsperioder(behandlingsid: Long): Behandlingsresultat {
-        return behandlingsresultatRepository.findWithAnmodningsperioderById(behandlingsid)
+    fun hentBehandlingsresultatMedAnmodningsperioder(behandlingsid: Long): Behandlingsresultat =
+        behandlingsresultatRepository.findWithAnmodningsperioderById(behandlingsid)
             .orElseThrowIkkeFunnetException(behandlingsid)
-    }
 
-    fun finnBehandlingsresultatMedPerioder(behandlingsid: Long): Behandlingsresultat? {
-        return behandlingsresultatRepository.findWithLovvalgOgMedlemskapsperioderById(behandlingsid).orElse(null)
-    }
+    fun finnBehandlingsresultatMedPerioder(behandlingsid: Long): Behandlingsresultat? =
+        behandlingsresultatRepository.findWithLovvalgOgMedlemskapsperioderById(behandlingsid).orElse(null)
 
-    fun hentBehandlingsresultatMedPerioder(behandlingsid: Long): Behandlingsresultat {
-        return behandlingsresultatRepository.findWithLovvalgOgMedlemskapsperioderById(behandlingsid)
+    fun hentBehandlingsresultatMedPerioder(behandlingsid: Long): Behandlingsresultat =
+        behandlingsresultatRepository.findWithLovvalgOgMedlemskapsperioderById(behandlingsid)
             .orElseThrowIkkeFunnetException(behandlingsid)
-    }
 
-    fun hentBehandlingsresultatMedKontrollresultat(behandlingsid: Long): Behandlingsresultat {
-        return behandlingsresultatRepository.findWithKontrollresultaterById(behandlingsid)
+    fun hentBehandlingsresultatMedKontrollresultat(behandlingsid: Long): Behandlingsresultat =
+        behandlingsresultatRepository.findWithKontrollresultaterById(behandlingsid)
             .orElseThrowIkkeFunnetException(behandlingsid)
-    }
 
-    fun hentBehandlingsresultatMedAvklartefakta(behandlingsid: Long): Behandlingsresultat {
-        return behandlingsresultatRepository.findWithAvklartefaktaById(behandlingsid)
+    fun hentBehandlingsresultatMedAvklartefakta(behandlingsid: Long): Behandlingsresultat =
+        behandlingsresultatRepository.findWithAvklartefaktaById(behandlingsid)
             .orElseThrowIkkeFunnetException(behandlingsid)
-    }
 
-    fun lagre(resultat: Behandlingsresultat): Behandlingsresultat {
-        return behandlingsresultatRepository.save(resultat)
-    }
+    fun lagre(resultat: Behandlingsresultat): Behandlingsresultat = behandlingsresultatRepository.save(resultat)
 
-    fun lagreOgFlush(resultat: Behandlingsresultat): Behandlingsresultat {
-        return behandlingsresultatRepository.saveAndFlush(resultat)
-    }
+    fun lagreOgFlush(resultat: Behandlingsresultat): Behandlingsresultat = behandlingsresultatRepository.saveAndFlush(resultat)
 
     fun lagreNyttBehandlingsresultat(behandling: Behandling) {
         Behandlingsresultat().apply {
