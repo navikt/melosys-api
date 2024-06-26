@@ -362,7 +362,7 @@ class FagsakControllerTest {
         Behandlingsresultat behandlingsresultat = eksisterendeBehres == null ? nyttBehres : eksisterendeBehres;
 
         when(behandlingsresultatService.hentBehandlingsresultat(anyLong())).thenReturn(behandlingsresultat);
-        when(behandlingsresultatService.hentBehandlingsresultatMedPerioder(anyLong())).thenReturn(behandlingsresultat);
+        when(behandlingsresultatService.hentResultatMedMedlemskapOgLovvalg(anyLong())).thenReturn(behandlingsresultat);
         when(mottatteOpplysningerService.finnMottatteOpplysninger(fagsak.getBehandlinger().get(0).getId())).thenReturn(Optional.of(mottatteOpplysninger));
         when(fagsakService.hentFagsak(SAKSNUMMER)).thenReturn(fagsak);
         when(persondataFasade.hentSammensattNavn(any())).thenReturn("Joe Moe");

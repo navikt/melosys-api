@@ -53,10 +53,10 @@ class BehandlingsresultatService(
         behandlingsresultatRepository.findWithAnmodningsperioderById(behandlingsid)
             .orElseThrowIkkeFunnetException(behandlingsid)
 
-    fun finnBehandlingsresultatMedPerioder(behandlingsid: Long): Behandlingsresultat? =
+    fun finnResultatMedMedlemskapOgLovvalg(behandlingsid: Long): Behandlingsresultat? =
         behandlingsresultatRepository.findWithLovvalgOgMedlemskapsperioderById(behandlingsid).orElse(null)
 
-    fun hentBehandlingsresultatMedPerioder(behandlingsid: Long): Behandlingsresultat =
+    fun hentResultatMedMedlemskapOgLovvalg(behandlingsid: Long): Behandlingsresultat =
         behandlingsresultatRepository.findWithLovvalgOgMedlemskapsperioderById(behandlingsid)
             .orElseThrowIkkeFunnetException(behandlingsid)
 
@@ -145,11 +145,11 @@ class BehandlingsresultatService(
         behandlingsresultatRepository.save(behandlingsresultat)
     }
 
-    fun oppdaterNyVurderingBakgrunn(behandlingID: Long, nyVurderingBakgrunn: String): Behandlingsresultat {
-        val behandlingsresultat = hentBehandlingsresultat(behandlingID)
-        behandlingsresultat.nyVurderingBakgrunn = nyVurderingBakgrunn
-        return behandlingsresultatRepository.save(behandlingsresultat)
-    }
+    fun oppdaterNyVurderingBakgrunn(behandlingID: Long, nyVurderingBakgrunn: String): Behandlingsresultat =
+        hentBehandlingsresultat(behandlingID).let { behandlingsresultat ->
+            behandlingsresultat.nyVurderingBakgrunn = nyVurderingBakgrunn
+            behandlingsresultatRepository.save(behandlingsresultat)
+        }
 
     private fun finnKorrektBehandlingsResultat(utfallregistreringunntak: Utfallregistreringunntak): Behandlingsresultattyper =
         when (utfallregistreringunntak) {
