@@ -108,6 +108,11 @@
         <testcontainers.version>1.17.1</testcontainers.version>
         <jna.version>5.11.0</jna.version>
         <graphql.java.extended.scalars.version>21.0</graphql.java.extended.scalars.version>
+        <ulid-java>5.2.3</ulid-java>
+        <!-- Spring-data-envers, hibernate, antlr4 Downgraded due to: https://hibernate.atlassian.net/browse/HHH-17612 and compatability-->
+        <spring-data-envers.version>3.3.1</spring-data-envers.version>
+        <hibernate.version>6.2.4.Final</hibernate.version>
+        <antlr4.version>4.10.1</antlr4.version>
 
         <!-- Transitive avhengigheter -->
         <asm.version>9.6</asm.version>
@@ -117,10 +122,6 @@
         <xmlsec.version>3.0.4</xmlsec.version>
         <wiremock-standalone.version>3.0.1</wiremock-standalone.version>
         <nav-foedselsnummer.core.version>1.0-SNAPSHOT.6</nav-foedselsnummer.core.version>
-        <ulid-java>0.1.1</ulid-java>
-        <hibernate.version>6.2.4.Final</hibernate.version>
-        <spring-data-envers.version>3.3.1</spring-data-envers.version>
-        <antlr4.version>4.10.1</antlr4.version>
     </properties>
 
     <!-- Unngå å put scope i dependency management. Sett det heller der det
@@ -694,7 +695,7 @@
             <dependency>
                 <groupId>com.github.f4b6a3</groupId>
                 <artifactId>ulid-creator</artifactId>
-                <version>5.2.3</version>
+                <version>${ulid-java}</version>
                 <scope>test</scope>
             </dependency>
         </dependencies>
