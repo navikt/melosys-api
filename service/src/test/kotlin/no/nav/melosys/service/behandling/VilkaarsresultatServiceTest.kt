@@ -199,7 +199,7 @@ internal class VilkaarsresultatServiceTest {
     }
 
     @Test
-    fun tømVilkårsresultatFraBehandlingsresultat_sakstypeIkkeEøs_sletterAlleVilkår() {
+    fun tilbakestillVilkårsresultatFraBehandlingsresultat_OgLagre_sakstypeIkkeEøs_sletterAlleVilkår() {
         val behandlingsresultat = Behandlingsresultat().apply {
             id = BEHANDLING_ID
             behandling = Behandling().apply { fagsak = FagsakTestFactory.builder().type(Sakstyper.FTRL).build() }
@@ -209,7 +209,7 @@ internal class VilkaarsresultatServiceTest {
         every { behandlingsresultatRepo.saveAndFlush(any()) } returnsArgument 0
 
 
-        vilkaarsresultatService.tømVilkårsresultatFraBehandlingsresultat(BEHANDLING_ID)
+        vilkaarsresultatService.tilbakestillVilkårsresultatFraBehandlingsresultatOgLagre(BEHANDLING_ID)
 
 
         verify { behandlingsresultatRepo.saveAndFlush(behandlingsresultat) }
@@ -217,7 +217,7 @@ internal class VilkaarsresultatServiceTest {
     }
 
     @Test
-    fun tømVilkårsresultatFraBehandlingsresultat_sakstypeEøsMenIngenFlyt_sletterAlleVilkår() {
+    fun tilbakestillVilkårsresultatFraBehandlingsresultat_OgLagre_sakstypeEøsMenIngenFlyt_sletterAlleVilkår() {
         val behandlingsresultat = Behandlingsresultat().apply {
             id = BEHANDLING_ID
             behandling = Behandling().apply {
@@ -233,7 +233,7 @@ internal class VilkaarsresultatServiceTest {
         every { behandlingsresultatRepo.saveAndFlush(any()) } returnsArgument 0
 
 
-        vilkaarsresultatService.tømVilkårsresultatFraBehandlingsresultat(BEHANDLING_ID)
+        vilkaarsresultatService.tilbakestillVilkårsresultatFraBehandlingsresultatOgLagre(BEHANDLING_ID)
 
 
         verify { behandlingsresultatRepo.saveAndFlush(behandlingsresultat) }
@@ -241,7 +241,7 @@ internal class VilkaarsresultatServiceTest {
     }
 
     @Test
-    fun tømVilkårsresultatFraBehandlingsresultat_sakstypeEøsOgHarFlyt_sletterIkkeInngangsvilkår() {
+    fun tilbakestillVilkårsresultatFraBehandlingsresultat_OgLagre_sakstypeEøsOgHarFlyt_sletterIkkeInngangsvilkår() {
         val behandlingsresultat = Behandlingsresultat().apply {
             id = BEHANDLING_ID
             behandling = Behandling().apply {
@@ -266,7 +266,7 @@ internal class VilkaarsresultatServiceTest {
         every { behandlingsresultatRepo.saveAndFlush(any()) } returnsArgument 0
 
 
-        vilkaarsresultatService.tømVilkårsresultatFraBehandlingsresultat(BEHANDLING_ID)
+        vilkaarsresultatService.tilbakestillVilkårsresultatFraBehandlingsresultatOgLagre(BEHANDLING_ID)
 
 
         verify { behandlingsresultatRepo.saveAndFlush(behandlingsresultat) }

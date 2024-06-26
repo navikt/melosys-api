@@ -17,7 +17,8 @@ private val log = KotlinLogging.logger { }
 
 @Service
 class BehandlingsresultatService(
-    private val behandlingsresultatRepository: BehandlingsresultatRepository
+    private val behandlingsresultatRepository: BehandlingsresultatRepository,
+    private val vilkaarsresultatService: VilkaarsresultatService
 ) {
     @Transactional
     fun tømBehandlingsresultat(behandlingID: Long) {
@@ -34,10 +35,8 @@ class BehandlingsresultatService(
                 innledningFritekst = null
                 nyVurderingBakgrunn = null
                 trygdeavgiftFritekst = null
-                // Tidligere kode bruker vilkaarsresultatService.tømVilkårsresultatFraBehandlingsresultat(behandlingID)
-                // men dette brude vel være like greit å gjøre her? Er det tilfeller vi ikke vil cleare denne her?
-                vilkaarsresultater.clear()
             }.also {
+                vilkaarsresultatService.tilbakestillVilkårsresultatFraBehandlingsresultat(it)
                 behandlingsresultatRepository.save(it)
             }
     }

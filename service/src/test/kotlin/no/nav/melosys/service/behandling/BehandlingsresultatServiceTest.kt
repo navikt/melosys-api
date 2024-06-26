@@ -1,13 +1,15 @@
 package no.nav.melosys.service.behandling
 
+import io.kotest.assertions.throwables.shouldThrow
 import io.kotest.matchers.collections.shouldBeEmpty
 import io.kotest.matchers.nulls.shouldBeNull
 import io.kotest.matchers.shouldBe
-import io.kotest.assertions.throwables.shouldThrow
 import io.kotest.matchers.string.shouldContain
-import io.mockk.*
+import io.mockk.every
 import io.mockk.impl.annotations.MockK
 import io.mockk.junit5.MockKExtension
+import io.mockk.slot
+import io.mockk.verify
 import no.nav.melosys.domain.*
 import no.nav.melosys.domain.avklartefakta.Avklartefakta
 import no.nav.melosys.domain.kodeverk.Utfallregistreringunntak
@@ -27,12 +29,15 @@ class BehandlingsresultatServiceTest {
     @MockK
     private lateinit var behandlingsresultatRepo: BehandlingsresultatRepository
 
+    @MockK
+    private lateinit var vilkaarsresultatService: VilkaarsresultatService
+
     private lateinit var behandlingsresultatService: BehandlingsresultatService
     private val behandlingsresultatCaptor = slot<Behandlingsresultat>()
 
     @BeforeEach
     fun setUp() {
-        behandlingsresultatService = BehandlingsresultatService(behandlingsresultatRepo)
+        behandlingsresultatService = BehandlingsresultatService(behandlingsresultatRepo, vilkaarsresultatService)
     }
 
     @Test
@@ -56,6 +61,7 @@ class BehandlingsresultatServiceTest {
 
         every { behandlingsresultatRepo.findById(any()) } returns Optional.of(behandlingsresultat)
         every { behandlingsresultatRepo.save(behandlingsresultat) } returns behandlingsresultat
+        every { vilkaarsresultatService.tilbakestillVilkårsresultatFraBehandlingsresultat(behandlingsresultat) } returns Unit
 
 
         behandlingsresultatService.tømBehandlingsresultat(1L)
@@ -69,8 +75,9 @@ class BehandlingsresultatServiceTest {
             begrunnelseFritekst.shouldBeNull()
             nyVurderingBakgrunn.shouldBeNull()
             trygdeavgiftFritekst.shouldBeNull()
-            vilkaarsresultater.shouldBeEmpty()
         }
+        verify(exactly = 1) { vilkaarsresultatService.tilbakestillVilkårsresultatFraBehandlingsresultat(behandlingsresultat) }
+        verify(exactly = 1) { behandlingsresultatRepo.save(behandlingsresultat) }
     }
 
     @Test
