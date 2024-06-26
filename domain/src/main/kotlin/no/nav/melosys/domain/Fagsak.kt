@@ -51,6 +51,7 @@ class Fagsak(
         return aktiveBehandlinger.firstOrNull()
     }
 
+    //TODO: Denne metoden skal endres når vi har støtte for flere aktive behandlinger https://jira.adeo.no/browse/MELOSYS-6520
     fun hentAktivBehandling(): Behandling {
         behandlinger.firstOrNull { it.erAktiv() }
         val aktiveBehandlinger = behandlinger.filter { it.erAktiv() }
