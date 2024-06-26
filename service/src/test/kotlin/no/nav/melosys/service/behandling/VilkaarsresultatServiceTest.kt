@@ -206,13 +206,11 @@ internal class VilkaarsresultatServiceTest {
             vilkaarsresultater = mutableSetOf(Vilkaarsresultat().apply { id = BEHANDLING_ID })
         }
         every { behandlingsresultatRepo.findById(BEHANDLING_ID) } returns Optional.of(behandlingsresultat)
-        every { behandlingsresultatRepo.saveAndFlush(any()) } returnsArgument 0
 
 
-        vilkaarsresultatService.tilbakestillVilkårsresultatFraBehandlingsresultatMedSaveAndFlush(BEHANDLING_ID)
+        vilkaarsresultatService.tilbakestillVilkårsresultatFraBehandlingsresultat(behandlingsresultat)
 
 
-        verify { behandlingsresultatRepo.saveAndFlush(behandlingsresultat) }
         behandlingsresultat.vilkaarsresultater.shouldBeEmpty()
     }
 
@@ -230,13 +228,11 @@ internal class VilkaarsresultatServiceTest {
         }
         every { saksbehandlingRegler.harIngenFlyt(behandlingsresultat.behandling) } returns true
         every { behandlingsresultatRepo.findById(BEHANDLING_ID) } returns Optional.of(behandlingsresultat)
-        every { behandlingsresultatRepo.saveAndFlush(any()) } returnsArgument 0
 
 
-        vilkaarsresultatService.tilbakestillVilkårsresultatFraBehandlingsresultatMedSaveAndFlush(BEHANDLING_ID)
+        vilkaarsresultatService.tilbakestillVilkårsresultatFraBehandlingsresultat(behandlingsresultat)
 
 
-        verify { behandlingsresultatRepo.saveAndFlush(behandlingsresultat) }
         behandlingsresultat.vilkaarsresultater.shouldBeEmpty()
     }
 
@@ -263,13 +259,11 @@ internal class VilkaarsresultatServiceTest {
         }
 
         every { behandlingsresultatRepo.findById(BEHANDLING_ID) } returns Optional.of(behandlingsresultat)
-        every { behandlingsresultatRepo.saveAndFlush(any()) } returnsArgument 0
 
 
-        vilkaarsresultatService.tilbakestillVilkårsresultatFraBehandlingsresultatMedSaveAndFlush(BEHANDLING_ID)
+        vilkaarsresultatService.tilbakestillVilkårsresultatFraBehandlingsresultat(behandlingsresultat)
 
 
-        verify { behandlingsresultatRepo.saveAndFlush(behandlingsresultat) }
         behandlingsresultat.vilkaarsresultater
             .shouldHaveSize(1)
             .single().run {

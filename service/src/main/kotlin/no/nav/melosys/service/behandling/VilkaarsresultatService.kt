@@ -119,13 +119,6 @@ class VilkaarsresultatService(
         behandlingsresultatRepository.save(behandlingsresultat)
     }
 
-    @Transactional
-    fun tilbakestillVilkårsresultatFraBehandlingsresultatMedSaveAndFlush(behandlingID: Long) {
-        val behandlingsresultat = hentBehandlingsresultat(behandlingID)
-        tilbakestillVilkårsresultatFraBehandlingsresultat(behandlingsresultat)
-        behandlingsresultatRepository.saveAndFlush(behandlingsresultat)
-    }
-
     fun tilbakestillVilkårsresultatFraBehandlingsresultat(behandlingsresultat: Behandlingsresultat) {
         val behandling = behandlingsresultat.behandling
         if (behandling.fagsak.erSakstypeEøs() && !saksbehandlingRegler.harIngenFlyt(behandling)) {
