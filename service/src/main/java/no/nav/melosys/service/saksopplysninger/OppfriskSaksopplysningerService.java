@@ -89,7 +89,7 @@ public class OppfriskSaksopplysningerService {
             ufmKontrollService.utførKontrollerOgRegistrerFeil(behandlingID);
         }
 
-        if (inngangsvilkaarService.skalVurdereInngangsvilkår(behandling) && !inngangsvilkaarService.oppfyllervurderingEF_883_2004(behandlingID)) {
+        if (inngangsvilkaarService.skalVurdereInngangsvilkår(behandling)) {
             inngangsvilkaarService.vurderOgLagreInngangsvilkår(
                 behandlingID,
                 behandling.hentSøknadsLand(),

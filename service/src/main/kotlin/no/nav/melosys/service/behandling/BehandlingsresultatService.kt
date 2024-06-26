@@ -17,8 +17,7 @@ private val log = KotlinLogging.logger { }
 
 @Service
 class BehandlingsresultatService(
-    private val behandlingsresultatRepository: BehandlingsresultatRepository,
-    private val vilkaarsresultatService: VilkaarsresultatService
+    private val behandlingsresultatRepository: BehandlingsresultatRepository
 ) {
     @Transactional
     fun tømBehandlingsresultat(behandlingID: Long) {
@@ -30,13 +29,13 @@ class BehandlingsresultatService(
                 lovvalgsperioder.clear()
                 medlemskapsperioder.clear()
                 trygdeavgiftsperioder.clear()
+                vilkaarsresultater.clear()
                 utfallRegistreringUnntak = null
                 begrunnelseFritekst = null
                 innledningFritekst = null
                 nyVurderingBakgrunn = null
                 trygdeavgiftFritekst = null
             }.also {
-                vilkaarsresultatService.tilbakestillVilkårsresultatFraBehandlingsresultat(it)
                 behandlingsresultatRepository.save(it)
             }
     }
