@@ -56,10 +56,6 @@ public class InngangsvilkaarService {
         this.saksbehandlingRegler = saksbehandlingRegler;
     }
 
-    public boolean oppfyllervurderingEF_883_2004(long behandlingID) {
-        return vilkaarsresultatService.oppfyllerVilkaar(behandlingID, FO_883_2004_INNGANGSVILKAAR);
-    }
-
     public boolean skalVurdereInngangsvilkår(Behandling behandling) {
         return behandling.getFagsak().erSakstypeEøs()
             && !saksbehandlingRegler.harIngenFlyt(behandling)
