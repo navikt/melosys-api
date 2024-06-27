@@ -10,7 +10,6 @@ import no.nav.melosys.saksflytapi.domain.ProsessSteg
 import no.nav.melosys.saksflytapi.domain.Prosessinstans
 import no.nav.melosys.integrasjon.hendelser.MelosysHendelse
 import no.nav.melosys.integrasjon.hendelser.VedtakHendelseMelding
-import no.nav.melosys.repository.BehandlingsresultatRepository
 import no.nav.melosys.service.behandling.BehandlingsresultatService
 import no.nav.melosys.service.persondata.PersondataService
 import org.springframework.stereotype.Component
@@ -58,7 +57,7 @@ class SendMeldingOmVedtak(
     }
 
     private fun finnPeriode(behandlingId: Long): Periode? =
-        behandlingsresultatService.finnBehandlingsresultatMedLovvalgsperioder(behandlingId)?.let {
+        behandlingsresultatService.finnResultatMedMedlemskapOgLovvalg(behandlingId)?.let {
             Periode(
                 it.utledMedlemskapsperiodeFom(),
                 it.utledMedlemskapsperiodeTom()
