@@ -359,9 +359,8 @@ class SedMottakTestIT(
                 .shouldBe(Behandlingsresultattyper.HENLEGGELSE)
         }
         oppgaveRepo.repo.values
-            .shouldHaveSize(1)
-            .first()
-            .apply {
+            .single()
+            .run {
                 status.shouldBe("FERDIGSTILT")
             }
     }

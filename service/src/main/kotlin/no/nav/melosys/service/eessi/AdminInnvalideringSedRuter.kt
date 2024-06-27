@@ -81,7 +81,7 @@ class AdminInnvalideringSedRuter(
             return false
         }
         return sedDokument.filter { dokument ->
-            eessiService.hentTilknyttedeBucer(arkivsakID, listOf())
+            eessiService.hentTilknyttedeBucer(arkivsakID, emptyList())
                 .filter { b -> b.id == dokument.rinaSaksnummer }
                 .flatMap { b -> b.seder }
                 .filter { s -> s.sedId == dokument.rinaDokumentID }
