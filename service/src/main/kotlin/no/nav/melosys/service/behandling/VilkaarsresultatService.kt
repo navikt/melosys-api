@@ -13,6 +13,7 @@ import no.nav.melosys.repository.BehandlingsresultatRepository
 import no.nav.melosys.service.saksbehandling.SaksbehandlingRegler
 import no.nav.melosys.service.vilkaar.VilkaarDto
 import org.springframework.stereotype.Service
+import org.springframework.transaction.annotation.Propagation
 import org.springframework.transaction.annotation.Transactional
 
 
@@ -119,6 +120,7 @@ class VilkaarsresultatService(
         behandlingsresultatRepository.save(behandlingsresultat)
     }
 
+    @Transactional(propagation = Propagation.MANDATORY)
     fun tilbakestillVilkårsresultatFraBehandlingsresultat(behandlingsresultat: Behandlingsresultat) {
         val behandling = behandlingsresultat.behandling
         if (behandling.fagsak.erSakstypeEøs() && !saksbehandlingRegler.harIngenFlyt(behandling)) {
