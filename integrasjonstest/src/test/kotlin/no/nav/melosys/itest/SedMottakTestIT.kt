@@ -22,6 +22,7 @@ import no.nav.melosys.domain.kodeverk.behandlinger.*
 import no.nav.melosys.domain.kodeverk.lovvalgsbestemmelser.Lovvalgbestemmelser_883_2004
 import no.nav.melosys.melosysmock.medl.MedlRepo
 import no.nav.melosys.melosysmock.melosyseessi.MelosysEessiRepo
+import no.nav.melosys.melosysmock.oppgave.OppgaveRepo
 import no.nav.melosys.melosysmock.sak.SakRepo
 import no.nav.melosys.repository.BehandlingsresultatRepository
 import no.nav.melosys.saksflyt.ProsessinstansRepository
@@ -58,9 +59,10 @@ class SedMottakTestIT(
     @Autowired private val behandlingsresultatRepository: BehandlingsresultatRepository,
     @Autowired private val unleash: FakeUnleash,
     @Autowired private val avklartefaktaService: AvklartefaktaService,
-    @Autowired private val prosessinstansTestManager: ProsessinstansTestManager
+    @Autowired private val prosessinstansTestManager: ProsessinstansTestManager,
+    @Autowired private val oppgaveRepo: OppgaveRepo,
 
-) : ComponentTestBase() {
+    ) : ComponentTestBase() {
 
     private val kafkaTopic = "teammelosys.eessi.v1-local"
 
@@ -74,6 +76,7 @@ class SedMottakTestIT(
         ThreadLocalAccessInfo.beforeExecuteProcess(randomUUID, "steg")
         SakRepo.clear()
         MedlRepo.repo.clear()
+        oppgaveRepo.repo.clear()
         MelosysEessiRepo.sedRepo.clear()
         unleash.resetAll()
     }
@@ -81,6 +84,7 @@ class SedMottakTestIT(
     @AfterEach
     fun after() {
         ThreadLocalAccessInfo.afterExecuteProcess(randomUUID)
+        oppgaveRepo.repo.clear()
         prosessinstansTestManager.clear()
     }
 
@@ -354,6 +358,12 @@ class SedMottakTestIT(
             behandlingsresultatRepository.findWithLovvalgOgMedlemskapsperioderById(id).shouldBePresent().type
                 .shouldBe(Behandlingsresultattyper.HENLEGGELSE)
         }
+        oppgaveRepo.repo.values
+            .shouldHaveSize(1)
+            .first()
+            .apply {
+                status.shouldBe("FERDIGSTILT")
+            }
     }
 
     @Test
