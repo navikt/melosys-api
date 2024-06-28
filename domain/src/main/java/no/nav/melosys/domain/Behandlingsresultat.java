@@ -337,6 +337,7 @@ public class Behandlingsresultat extends RegistreringsInfo {
     public Set<Inntektsperiode> hentInntektsperioder() {
         return getTrygdeavgiftsperioder().stream()
             .map(Trygdeavgiftsperiode::getGrunnlagInntekstperiode)
+            .filter(Objects::nonNull)
             .collect(Collectors.toSet());
     }
 

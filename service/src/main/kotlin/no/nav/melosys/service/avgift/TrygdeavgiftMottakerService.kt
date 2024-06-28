@@ -34,7 +34,7 @@ class TrygdeavgiftMottakerService(private val behandlingsresultatService: Behand
 
     fun betalerKunTrygdeavgiftTilSkatt(behandlingsresultat: Behandlingsresultat): Boolean =
         behandlingsresultat.hentSkatteforholdTilNorge().all { it.skatteplikttype == Skatteplikttype.SKATTEPLIKTIG }
-            && behandlingsresultat.hentInntektsperioder().filterNotNull().all { it.isArbeidsgiversavgiftBetalesTilSkatt || erMisjonær(it.type) }
+            && behandlingsresultat.hentInntektsperioder().all { it.isArbeidsgiversavgiftBetalesTilSkatt || erMisjonær(it.type) }
 
     private fun betalerKunTrygdeavgiftTilNav(behandlingsresultat: Behandlingsresultat): Boolean =
         (behandlingsresultat.hentSkatteforholdTilNorge().all { it.skatteplikttype == Skatteplikttype.IKKE_SKATTEPLIKTIG }
