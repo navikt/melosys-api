@@ -171,7 +171,19 @@ class LovligeKombinasjonerSaksbehandlingService(
             behandlingstyper = behandlingstyper.filter { it != Behandlingstyper.FØRSTEGANG }.toSet()
         }
         if (fagsak.behandlinger.any { it.erManglendeInnbetalingTrygdeavgift() } != true) {
-            return behandlingstyper.filter { it != Behandlingstyper.MANGLENDE_INNBETALING_TRYGDEAVGIFT }.toSet()
+            behandlingstyper = behandlingstyper.filter { it != Behandlingstyper.MANGLENDE_INNBETALING_TRYGDEAVGIFT }.toSet()
+        }
+        if (fagsak.behandlinger.any {
+                it.tema in setOf(
+                    Behandlingstema.YRKESAKTIV,
+                    Behandlingstema.UTSENDT_ARBEIDSTAKER,
+                    Behandlingstema.UTSENDT_SELVSTENDIG,
+                    Behandlingstema.ARBEID_TJENESTEPERSON_ELLER_FLY,
+                    Behandlingstema.ARBEID_FLERE_LAND,
+                    Behandlingstema.ARBEID_KUN_NORGE
+                )
+            }) {
+            return behandlingstyper.plus(Behandlingstyper.ÅRSAVREGNING)
         }
         return behandlingstyper
     }
