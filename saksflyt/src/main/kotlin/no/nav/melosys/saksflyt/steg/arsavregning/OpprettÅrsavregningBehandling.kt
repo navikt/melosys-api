@@ -38,12 +38,7 @@ class OpprettÅrsavregningBehandling(
 
     override fun utfør(prosessinstans: Prosessinstans) {
         val gjelderÅr = prosessinstans.getData(ProsessDataKey.GJELDER_ÅR).toInt()
-        val ident = prosessinstans.getData(ProsessDataKey.IDENTIFIKATOR)
-        val aktørId = persondataService.hentAktørIdForIdent(ident)
-
-        val sakMedTrygdeavgift = finnSakMedTrygdeavgift(aktørId).also {
-            checkNotNull(it) { "Fant ingen sak med trygdeavgift for aktør: $aktørId" }
-        } ?: return
+        val sakMedTrygdeavgift = fagsakService.hentFagsak(prosessinstans.getData(ProsessDataKey.SAKSNUMMER))
 
         finnAktivÅrsavregningBehandling(sakMedTrygdeavgift, gjelderÅr)?.run {
             if (this.status != Behandlingsstatus.OPPRETTET) {
@@ -53,13 +48,14 @@ class OpprettÅrsavregningBehandling(
             return
         }
 
-        val trygdeavgiftsBehandlingMedRelevantPeriode = trygdeavgiftService.finnSistFakturerbarTrygdeavgiftsbehandlingForÅr(sakMedTrygdeavgift.saksnummer, gjelderÅr).also {
-            if (it == null) log.info(
-                "Fant ingen behandlinger med overlappende lovvalgsperioder eller medlemskapsperioder for sak: ${
-                    sakMedTrygdeavgift.saksnummer
-                } og år: $gjelderÅr"
-            )
-        } ?: return
+        val trygdeavgiftsBehandlingMedRelevantPeriode =
+            trygdeavgiftService.finnSistFakturerbarTrygdeavgiftsbehandlingForÅr(sakMedTrygdeavgift.saksnummer, gjelderÅr).also {
+                if (it == null) log.info(
+                    "Fant ingen behandlinger med overlappende lovvalgsperioder eller medlemskapsperioder for sak: ${
+                        sakMedTrygdeavgift.saksnummer
+                    } og år: $gjelderÅr"
+                )
+            } ?: return
 
         behandlingService.nyBehandling(
             sakMedTrygdeavgift,
@@ -97,17 +93,4 @@ class OpprettÅrsavregningBehandling(
             }
         }
     }
-
-    private fun finnSakMedTrygdeavgift(aktørId: String): Fagsak? =
-        fagsakService.hentFagsakerMedAktør(Aktoersroller.BRUKER, aktørId)
-            .filter {
-                trygdeavgiftService.harFagsakBehandlingerMedTrygdeavgift(it.saksnummer)
-            }.let { sakerMedTrygdeavgift ->
-                when {
-                    sakerMedTrygdeavgift.isEmpty() -> null
-                    // FIXME: Det kommer en ny oppgave som skal håntere flere saker med trygdeavgift
-                    sakerMedTrygdeavgift.size > 1 -> throw TekniskException("Flere saker med trygdeavgift funnet")
-                    else -> sakerMedTrygdeavgift.single()
-                }
-            }
 }

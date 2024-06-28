@@ -302,12 +302,13 @@ class YrkesaktivFtrlVedtakIT(
     @Test
     fun `oppretter prosess og påfølgende årsavregningsbehandling`() {
         val saksnummer = lagFørstegangsBehandling(Skatteplikttype.IKKE_SKATTEPLIKTIG, false)
+        lagFørstegangsBehandling(Skatteplikttype.IKKE_SKATTEPLIKTIG, false)
 
         val skattehendelse = Skattehendelse("2023", "30056928150", "ny")
 
         executeAndWait(
             waitForprosessType = ProsessType.OPPRETT_NY_BEHANDLING_AARSAVREGNING,
-            count = 5
+            count = 10
         ) {
             skatteHendelseMeldingKafkaTemplate.send("teammelosys.skattehendelser.v1-local", skattehendelse)
         }
