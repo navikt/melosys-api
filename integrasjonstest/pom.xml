@@ -165,10 +165,6 @@
             <artifactId>archunit-junit5</artifactId>
             <scope>test</scope>
         </dependency>
-        <dependency>
-            <groupId>com.github.f4b6a3</groupId>
-            <artifactId>ulid-creator</artifactId>
-        </dependency>
     </dependencies>
 
     <build>

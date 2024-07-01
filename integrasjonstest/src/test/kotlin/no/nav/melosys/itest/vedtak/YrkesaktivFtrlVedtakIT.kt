@@ -4,7 +4,6 @@ import com.fasterxml.jackson.databind.JsonNode
 import com.fasterxml.jackson.databind.SerializationFeature
 import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule
 import com.fasterxml.jackson.module.kotlin.jacksonObjectMapper
-import com.github.f4b6a3.ulid.UlidCreator
 import com.github.tomakehurst.wiremock.client.WireMock
 import com.github.tomakehurst.wiremock.extension.ResponseTransformerV2
 import com.github.tomakehurst.wiremock.http.Response
@@ -102,11 +101,11 @@ class YrkesaktivFtrlVedtakIT(
 
     private var originalSubjectHandler: SubjectHandler? = null
     private val kafkaTopic = "teammelosys.manglende-fakturabetaling-local"
-    private lateinit var fakturaserieReferanse: String
+    private val fakturaserieReferanse: String = "01J17B5NTTDYKFB5DZTSSQEHJ0"
 
     @BeforeEach
     fun setup() {
-        fakturaserieReferanse = UlidCreator.getUlid().toString()
+        //fakturaserieReferanse = UlidCreator.getUlid().toString()
         MedlRepo.repo.clear()
         originalSubjectHandler = SubjectHandler.getInstance()
 
