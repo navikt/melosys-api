@@ -356,13 +356,11 @@ class LovligeKombinasjonerSaksbehandlingService(
         behandlingstype: Behandlingstyper
     ) {
         validerBehandlingstema(fagsak.hovedpartRolle, fagsak.type, fagsak.tema, behandlingstema, null, sistBehandling.tema)
-        validerBehandlingstype(
+        validerBehandlingstypeForKnyttTilSak(
             fagsak.hovedpartRolle,
-            fagsak.type,
-            fagsak.tema,
+            fagsak.saksnummer,
             behandlingstema,
             behandlingstype,
-            sistBehandling
         )
     }
 
@@ -399,6 +397,22 @@ class LovligeKombinasjonerSaksbehandlingService(
                 sakstema,
                 behandlingstema,
                 sistBehandling,
+            ).contains(behandlingstype)
+        ) {
+            throw FunksjonellException("$behandlingstype er ikke en lovlig behandlingstype med de andre valgte verdiene")
+        }
+    }
+
+    private fun validerBehandlingstypeForKnyttTilSak(
+        hovedpart: Aktoersroller,
+        saksnummer: String,
+        behandlingstema: Behandlingstema,
+        behandlingstype: Behandlingstyper
+    ) {
+        if (!hentMuligeBehandlingstyperForKnyttTilSak(
+                hovedpart,
+                saksnummer,
+                behandlingstema,
             ).contains(behandlingstype)
         ) {
             throw FunksjonellException("$behandlingstype er ikke en lovlig behandlingstype med de andre valgte verdiene")
