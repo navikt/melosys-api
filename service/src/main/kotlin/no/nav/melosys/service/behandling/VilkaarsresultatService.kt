@@ -93,6 +93,10 @@ class VilkaarsresultatService(
         hentBehandlingsresultat(behandlingID).vilkaarsresultater.any { vilkaar.contains(it.vilkaar) && it.isOppfylt }
 
     @Transactional(readOnly = true)
+    fun harVilkaar(behandlingID: Long, vilkaar: List<Vilkaar>): Boolean =
+        hentBehandlingsresultat(behandlingID).vilkaarsresultater.any { vilkaar.contains(it.vilkaar) }
+
+    @Transactional(readOnly = true)
     fun harVilkaarForUtsending(behandlingID: Long): Boolean =
         finnUtsendingArbeidstakerVilkaarsresultat(behandlingID) != null || finnUtsendingNæringsdrivendeVilkaarsresultat(behandlingID) != null
 
