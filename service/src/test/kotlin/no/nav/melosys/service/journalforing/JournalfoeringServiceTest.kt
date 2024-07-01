@@ -924,7 +924,7 @@ internal class JournalfoeringServiceTest {
             behandling.fagsak = this
         }
 
-    private fun lagFagsak(behandling: Behandling): Fagsak = lagFagsak(FagsakTestFactory.SAKSNUMMER, behandling)
+    private fun lagFagsak(behandling: Behandling): Fagsak = lagFagsak(MELOSYS_SAKSNUMMER, behandling)
 
     private fun lagBehandling(): Behandling =
         Behandling().apply {
