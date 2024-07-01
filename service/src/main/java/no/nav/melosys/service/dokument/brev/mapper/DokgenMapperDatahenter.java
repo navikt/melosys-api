@@ -1,8 +1,12 @@
 package no.nav.melosys.service.dokument.brev.mapper;
 
+import java.time.Instant;
+import java.util.Optional;
+
 import no.nav.melosys.domain.Behandling;
 import no.nav.melosys.domain.Behandlingsresultat;
 import no.nav.melosys.domain.FellesKodeverk;
+import no.nav.melosys.domain.avklartefakta.AvklartVirksomhet;
 import no.nav.melosys.domain.brev.DokgenBrevbestilling;
 import no.nav.melosys.domain.brev.Mottaker;
 import no.nav.melosys.domain.kodeverk.Aktoersroller;
@@ -14,12 +18,8 @@ import no.nav.melosys.service.avklartefakta.AvklarteVirksomheterService;
 import no.nav.melosys.service.behandling.BehandlingsresultatService;
 import no.nav.melosys.service.kodeverk.KodeverkService;
 import no.nav.melosys.service.persondata.PersondataFasade;
-import org.jetbrains.annotations.Nullable;
 import org.springframework.stereotype.Component;
 import org.springframework.util.StringUtils;
-
-import java.time.Instant;
-import java.util.Optional;
 
 import static org.springframework.util.StringUtils.hasText;
 
@@ -107,7 +107,11 @@ public class DokgenMapperDatahenter {
         return behandlingsresultatService.hentBehandlingsresultat(behandlingId);
     }
 
-    public String hentAvklartVirksomhet(Behandling behandling) {
-        return null;
+     AvklartVirksomhet hentAvklartVirksomhet(Behandling behandling) {
+            var avklarteVirksomheter = avklarteVirksomheterService.hentUtenlandskeVirksomheter(behandling);
+        if (avklarteVirksomheter.size() != 1) {
+            throw new FunksjonellException("Fant " + avklarteVirksomheter.size() + " avklarte virksomheter for behandling: " + behandling + ". Må være 1 for trygdeavtale");
+        }
+        return avklarteVirksomheter.get(0);
     }
 }

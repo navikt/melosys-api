@@ -209,7 +209,7 @@ class DokgenMalMapper(
 
             Produserbaredokumenter.AVSLAG_EFTA_STORBRITANNIA -> AvslagEftaStorbritannia(
                 brevbestilling as AvslagEftaStorbritanniaBrevbestilling, dokgenMapperDatahenter.hentBehandlingsresultat(brevbestilling
-                    .behandlingId).hentValidertPeriodeOmLovvalg(), dokgenMapperDatahenter.hentAvklartVirksomhet(brevbestilling.behandling))
+                    .behandlingId).hentValidertPeriodeOmLovvalg(), dokgenMapperDatahenter.hentAvklartVirksomhet(brevbestilling.behandling).navn)
 
         else -> throw FunksjonellException("ProduserbartDokument ${brevbestilling.produserbartdokument} er ikke støttet av melosys-dokgen")
     }
