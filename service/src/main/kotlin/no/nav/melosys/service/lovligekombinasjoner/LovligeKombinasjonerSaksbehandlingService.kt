@@ -284,7 +284,14 @@ class LovligeKombinasjonerSaksbehandlingService(
             behandlingstyper = mutableSetOf(Behandlingstyper.NY_VURDERING, Behandlingstyper.KLAGE, Behandlingstyper.HENVENDELSE)
         }
 
-        if (sistSaksstatus in setOf(Saksstatuser.HENLAGT, Saksstatuser.HENLAGT_BORTFALT, Saksstatuser.AVSLUTTET)) {
+        if (sistSaksstatus in setOf(
+                Saksstatuser.HENLAGT,
+                Saksstatuser.HENLAGT_BORTFALT,
+                Saksstatuser.AVSLUTTET,
+                Saksstatuser.OPPHØRT,
+                Saksstatuser.ANNULLERT
+            )
+        ) {
             behandlingstyper = mutableSetOf(Behandlingstyper.HENVENDELSE)
         }
         if (!unleash.isEnabled(ToggleName.BEHANDLINGSTYPE_KLAGE)) {
