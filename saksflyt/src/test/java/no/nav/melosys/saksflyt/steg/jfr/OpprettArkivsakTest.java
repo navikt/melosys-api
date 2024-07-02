@@ -4,6 +4,7 @@ import no.nav.melosys.domain.Behandling;
 import no.nav.melosys.domain.Fagsak;
 import no.nav.melosys.domain.FagsakTestFactory;
 import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingstema;
+import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingstyper;
 import no.nav.melosys.exception.FunksjonellException;
 import no.nav.melosys.saksflytapi.domain.Prosessinstans;
 import no.nav.melosys.service.oppgave.OppgaveFactory;
@@ -44,12 +45,13 @@ class OpprettArkivsakTest {
 
         Behandling behandling = new Behandling();
         behandling.setTema(Behandlingstema.UTSENDT_ARBEIDSTAKER);
+        behandling.setType(Behandlingstyper.FØRSTEGANG);
         behandling.setFagsak(fagsak);
 
         Prosessinstans prosessinstans = new Prosessinstans();
         prosessinstans.setBehandling(behandling);
 
-        when(arkivsakService.opprettSakForBruker(fagsak.getSaksnummer(), oppgaveFactory.utledTema(fagsak.getType(), fagsak.getTema(), behandling.getTema()), FagsakTestFactory.BRUKER_AKTØR_ID)).thenReturn(forventetArkivsakID);
+        when(arkivsakService.opprettSakForBruker(fagsak.getSaksnummer(), oppgaveFactory.utledTema(fagsak.getType(), fagsak.getTema(), behandling.getTema(), behandling.getType()), FagsakTestFactory.BRUKER_AKTØR_ID)).thenReturn(forventetArkivsakID);
         opprettArkivsak.utfør(prosessinstans);
 
         assertThat(fagsak.getGsakSaksnummer()).isEqualTo(forventetArkivsakID);
@@ -63,12 +65,13 @@ class OpprettArkivsakTest {
 
         Behandling behandling = new Behandling();
         behandling.setTema(Behandlingstema.YRKESAKTIV);
+        behandling.setType(Behandlingstyper.FØRSTEGANG);
         behandling.setFagsak(fagsak);
 
         Prosessinstans prosessinstans = new Prosessinstans();
         prosessinstans.setBehandling(behandling);
 
-        when(arkivsakService.opprettSakForBruker(fagsak.getSaksnummer(), oppgaveFactory.utledTema(fagsak.getType(), fagsak.getTema(), behandling.getTema()),
+        when(arkivsakService.opprettSakForBruker(fagsak.getSaksnummer(), oppgaveFactory.utledTema(fagsak.getType(), fagsak.getTema(), behandling.getTema(), behandling.getType()),
             FagsakTestFactory.BRUKER_AKTØR_ID)).thenReturn(forventetArkivsakID);
         opprettArkivsak.utfør(prosessinstans);
 
@@ -83,13 +86,14 @@ class OpprettArkivsakTest {
 
         Behandling behandling = new Behandling();
         behandling.setTema(Behandlingstema.YRKESAKTIV);
+        behandling.setType(Behandlingstyper.FØRSTEGANG);
         behandling.setFagsak(fagsak);
 
         Prosessinstans prosessinstans = new Prosessinstans();
         prosessinstans.setBehandling(behandling);
 
         when(arkivsakService
-            .opprettSakForVirksomhet(fagsak.getSaksnummer(), oppgaveFactory.utledTema(fagsak.getType(), fagsak.getTema(), behandling.getTema()), FagsakTestFactory.ORGNR))
+            .opprettSakForVirksomhet(fagsak.getSaksnummer(), oppgaveFactory.utledTema(fagsak.getType(), fagsak.getTema(), behandling.getTema(), behandling.getType()), FagsakTestFactory.ORGNR))
             .thenReturn(forventetArkivsakID);
 
 
@@ -105,6 +109,7 @@ class OpprettArkivsakTest {
 
         Behandling behandling = new Behandling();
         behandling.setFagsak(fagsak);
+        behandling.setType(Behandlingstyper.FØRSTEGANG);
 
         Prosessinstans prosessinstans = new Prosessinstans();
         prosessinstans.setBehandling(behandling);
@@ -121,6 +126,7 @@ class OpprettArkivsakTest {
 
         Behandling behandling = new Behandling();
         behandling.setTema(Behandlingstema.YRKESAKTIV);
+        behandling.setType(Behandlingstyper.FØRSTEGANG);
         behandling.setFagsak(fagsak);
 
         Prosessinstans prosessinstans = new Prosessinstans();

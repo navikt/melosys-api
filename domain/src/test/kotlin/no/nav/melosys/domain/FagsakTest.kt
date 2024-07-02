@@ -140,7 +140,7 @@ internal class FagsakTest {
         val fagsak = FagsakTestFactory.builder().behandlinger(behandlinger).build()
 
         assertFailsWith<TekniskException> { fagsak.hentAktivBehandlingIkkeÅrsavregning() }
-            .shouldHaveMessage("Det finnes mer enn en aktiv behandling for sak ${fagsak.saksnummer}")
+            .shouldHaveMessage("Det finnes mer enn én aktiv behandling for sak ${fagsak.saksnummer}")
     }
 
     @Test

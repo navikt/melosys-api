@@ -52,7 +52,7 @@ internal open class OppgaveGosysMapping {
         return Oppgave(
             oppgaveBehandlingstema = null,
             oppgaveType = Oppgavetyper.VURD_HENV,
-            tema = teamaUtleder.utledTema(sakstype, sakstema, behandlingstema),
+            tema = teamaUtleder.utledTema(sakstype, sakstema, behandlingstema, behandlingstype),
             beskrivelsefelt = Beskrivelsefelt.TOMT,
             regelTruffet = Regel.HENVENDELSE_OG_VIRKSOMHET
 
@@ -72,7 +72,7 @@ internal open class OppgaveGosysMapping {
             Oppgave(
                 oppgaveBehandlingstema = it.oppgaveBehandlingstema,
                 oppgaveType = Oppgavetyper.VURD_HENV,
-                tema = teamaUtleder.utledTema(sakstype, sakstema, behandlingstema),
+                tema = teamaUtleder.utledTema(sakstype, sakstema, behandlingstema, behandlingstype),
                 beskrivelsefelt = Beskrivelsefelt.SED_ELLER_TOMT,
                 regelTruffet = Regel.HENVENDELSE
             )
@@ -153,10 +153,10 @@ internal open class OppgaveGosysMapping {
                     Behandlingstema.ARBEID_KUN_NORGE
                 ),
                 Oppgave(
-                    OppgaveBehandlingstema.EU_EOS_YRKESAKTIV, // ab0483 //TODO: Blir dette riktig?
-                    Tema.MED,
+                    OppgaveBehandlingstema.EU_EOS_YRKESAKTIV,
+                    Tema.TRY,
                     Oppgavetyper.BEH_SAK_MK,
-                    Beskrivelsefelt.BEHANDLINGSTEMA
+                    Beskrivelsefelt.TOMT
                 )
             ),
             TableRow(
@@ -294,9 +294,9 @@ internal open class OppgaveGosysMapping {
                 ),
                 Oppgave(
                     OppgaveBehandlingstema.UTENFOR_AVTALAND_YRKESAKTIV,
-                    Tema.MED,
+                    Tema.TRY,
                     Oppgavetyper.BEH_SAK_MK,
-                    Beskrivelsefelt.BEHANDLINGSTEMA
+                    Beskrivelsefelt.TOMT
                 )
             ),
             TableRow(
@@ -346,9 +346,9 @@ internal open class OppgaveGosysMapping {
                 ),
                 Oppgave(
                     OppgaveBehandlingstema.AVTALAND_YRKESAKTIV,
-                    Tema.MED,
+                    Tema.TRY,
                     Oppgavetyper.BEH_SAK_MK,
-                    Beskrivelsefelt.BEHANDLINGSTEMA
+                    Beskrivelsefelt.TOMT
                 )
             ),
             TableRow(

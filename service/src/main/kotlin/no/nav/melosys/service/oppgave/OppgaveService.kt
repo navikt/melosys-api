@@ -24,6 +24,7 @@ import no.nav.melosys.service.sak.FagsakService
 import no.nav.melosys.service.saksopplysninger.SaksopplysningerService
 import org.apache.commons.lang3.StringUtils
 import org.springframework.stereotype.Service
+import org.springframework.transaction.annotation.Transactional
 import java.util.*
 
 @Service
@@ -40,6 +41,7 @@ class OppgaveService(
 ) {
     private val log = KotlinLogging.logger {}
 
+    @Transactional(readOnly = true)
     fun hentOppgaverMedAnsvarlig(ansvarligID: String): List<OppgaveDto> =
         oppgaveFasade.finnOppgaverMedAnsvarlig(ansvarligID).tilDtoer()
 
@@ -206,8 +208,7 @@ class OppgaveService(
 
     private fun lagBehandlingsoppgaveDto(oppgave: Oppgave): BehandlingsoppgaveDto {
         val fagsak = fagsakService.hentFagsak(oppgave.saksnummer)
-        var sistAktiveBehandling = fagsak.hentSistAktivBehandlingIkkeÅrsavregning()
-        sistAktiveBehandling = behandlingService.hentBehandling(sistAktiveBehandling.id)
+        val sistAktiveBehandling = fagsak.hentAktivBehandling()
         val orgnr = fagsak.finnVirksomhetsOrgnr()
 
         return BehandlingsoppgaveDto(

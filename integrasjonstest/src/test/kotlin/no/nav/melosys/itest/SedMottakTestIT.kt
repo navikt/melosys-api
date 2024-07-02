@@ -22,6 +22,7 @@ import no.nav.melosys.domain.kodeverk.behandlinger.*
 import no.nav.melosys.domain.kodeverk.lovvalgsbestemmelser.Lovvalgbestemmelser_883_2004
 import no.nav.melosys.melosysmock.medl.MedlRepo
 import no.nav.melosys.melosysmock.melosyseessi.MelosysEessiRepo
+import no.nav.melosys.melosysmock.oppgave.OppgaveRepo
 import no.nav.melosys.melosysmock.sak.SakRepo
 import no.nav.melosys.repository.BehandlingsresultatRepository
 import no.nav.melosys.saksflyt.ProsessinstansRepository
@@ -58,9 +59,10 @@ class SedMottakTestIT(
     @Autowired private val behandlingsresultatRepository: BehandlingsresultatRepository,
     @Autowired private val unleash: FakeUnleash,
     @Autowired private val avklartefaktaService: AvklartefaktaService,
-    @Autowired private val prosessinstansTestManager: ProsessinstansTestManager
+    @Autowired private val prosessinstansTestManager: ProsessinstansTestManager,
+    @Autowired private val oppgaveRepo: OppgaveRepo,
 
-) : ComponentTestBase() {
+    ) : ComponentTestBase() {
 
     private val kafkaTopic = "teammelosys.eessi.v1-local"
 
@@ -74,6 +76,7 @@ class SedMottakTestIT(
         ThreadLocalAccessInfo.beforeExecuteProcess(randomUUID, "steg")
         SakRepo.clear()
         MedlRepo.repo.clear()
+        oppgaveRepo.repo.clear()
         MelosysEessiRepo.sedRepo.clear()
         unleash.resetAll()
     }
@@ -81,6 +84,7 @@ class SedMottakTestIT(
     @AfterEach
     fun after() {
         ThreadLocalAccessInfo.afterExecuteProcess(randomUUID)
+        oppgaveRepo.repo.clear()
         prosessinstansTestManager.clear()
     }
 
@@ -300,6 +304,65 @@ class SedMottakTestIT(
             behandlingsresultatRepository.findWithLovvalgOgMedlemskapsperioderById(id).shouldBePresent().type
                 .shouldBe(Behandlingsresultattyper.IKKE_FASTSATT)
         }
+    }
+
+    @Test
+    fun `A003 med etterfølgende X008 og lovvalgsland ikke NO skal annullere saken og henlegge i melosys`() {
+        val ref = Random().nextInt(100000).toString()
+
+        val sedInfo = SedInformasjon(ref, SedType.A003.name, LocalDate.now(), LocalDate.now(), null, "AVBRUTT", null)
+        val bucInformasjon = BucInformasjon(ref, true, null, LocalDate.now(), null, listOf(sedInfo))
+        MelosysEessiRepo.opprettBucinformasjon(bucInformasjon)
+
+        val eessiMeldingA003 = eessiMeldingTestDataFactory.melosysEessiMelding {
+            bucType = BucType.LA_BUC_02.name
+            rinaSaksnummer = ref
+            sedType = SedType.A003.name
+            periode = Periode(LocalDate.now(), LocalDate.now().plusYears(1))
+            artikkel = "13_1_a"
+            lovvalgsland = "PL"
+        }
+        val eessiMeldingX008 = eessiMeldingTestDataFactory.melosysEessiMelding {
+            bucType = BucType.LA_BUC_02.name
+            rinaSaksnummer = ref
+            sedType = SedType.X008.name
+            periode = null
+            artikkel = null
+        }
+
+        prosessinstansTestManager.executeAndWait(
+            waitForprosessType = ProsessType.MOTTAK_SED,
+            alsoWaitForprosessType = listOf(ProsessType.ARBEID_FLERE_LAND_NY_SAK, ProsessType.MOTTAK_SED_JOURNALFØRING),
+            waitForProcessCount = 4
+        ) {
+            melosysEessiMeldingKafkaTemplate.send(kafkaTopic, eessiMeldingA003)
+            melosysEessiMeldingKafkaTemplate.send(kafkaTopic, eessiMeldingX008)
+        }
+
+
+        val prosessinstanserSortert = prosessinstansRepository.findAllByLåsReferanseStartingWith(ref)
+            .sortedBy { it.endretDato }
+
+        extracting(prosessinstanserSortert) { låsReferanse }
+            .shouldHaveSize(4)
+            .shouldContainInOrder(
+                eessiMeldingA003.lagUnikIdentifikator(),
+                eessiMeldingA003.lagUnikIdentifikator(),
+                eessiMeldingX008.lagUnikIdentifikator(),
+                eessiMeldingX008.lagUnikIdentifikator(),
+            )
+
+        prosessinstanserSortert.first { it.behandling != null }.behandling.run {
+            status.shouldBe(Behandlingsstatus.AVSLUTTET)
+            fagsak.status.shouldBe(Saksstatuser.ANNULLERT)
+            behandlingsresultatRepository.findWithLovvalgOgMedlemskapsperioderById(id).shouldBePresent().type
+                .shouldBe(Behandlingsresultattyper.HENLEGGELSE)
+        }
+        oppgaveRepo.repo.values
+            .single()
+            .run {
+                status.shouldBe("FERDIGSTILT")
+            }
     }
 
     @Test

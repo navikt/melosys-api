@@ -43,7 +43,7 @@ class FaktureringEventListener(
 
         if (fullmektigForBetalingAvTrygdeavgiftBleEndret(
                 fullmektigForTrygdeavgift, gjeldendeFullmektigerNårBehandlingBleOpprettet
-            ) && trygdeavgiftService.harFagsakBehandlingerMedTrygdeavgift(fagsak.saksnummer)
+            ) && trygdeavgiftService.harFagsakBehandlingerMedTrygdeavgift(fagsak.saksnummer, sjekkFakturaserie = true)
         ) {
             // Bestill prosess i stedet for å kalle faktureringskomponent direkte, for å få støtte for feilhåndtering og rekjøring
             prosessinstansService.opprettProsessinstansOppdaterFaktura(behandling)

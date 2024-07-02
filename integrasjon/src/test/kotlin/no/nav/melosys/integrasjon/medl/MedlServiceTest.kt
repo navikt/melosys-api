@@ -22,6 +22,7 @@ import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingsresultattyper
 import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingsstatus
 import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingstema
 import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingstyper
+import no.nav.melosys.domain.kodeverk.lovvalgsbestemmelser.Lovvalgbestemmelser_883_2004
 import no.nav.melosys.domain.kodeverk.lovvalgsbestemmelser.Overgangsregelbestemmelser
 import no.nav.melosys.domain.kodeverk.lovvalgsbestemmelser.Tilleggsbestemmelser_883_2004
 import no.nav.melosys.domain.mottatteopplysninger.MottatteOpplysninger
@@ -82,7 +83,9 @@ internal class MedlServiceTest {
     @Test
     fun skalOpprettPeriodeEndelig() {
         val medlemskapsunntakForPostCapturingSlot = slot<MedlemskapsunntakForPost>()
-        val lovvalgsperiode = lagLovvalgsPeriode()
+        val lovvalgsperiode = lagLovvalgsPeriode().apply {
+            bestemmelse = Lovvalgbestemmelser_883_2004.FO_883_2004_ART11_3A
+        }
         every {
             mockRestConsumer.opprettPeriode(capture(medlemskapsunntakForPostCapturingSlot))
         }.answers {
@@ -109,7 +112,9 @@ internal class MedlServiceTest {
 
     @Test
     fun skalOpprettPeriodeUnderAvklaring() {
-        val lovvalgsperiode = lagLovvalgsPeriode()
+        val lovvalgsperiode = lagLovvalgsPeriode().apply {
+            bestemmelse = Lovvalgbestemmelser_883_2004.FO_883_2004_ART11_3A
+        }
         val medlemskapsunntakForPostCapturingSlot = slot<MedlemskapsunntakForPost>()
         every {
             mockRestConsumer.opprettPeriode(capture(medlemskapsunntakForPostCapturingSlot))
@@ -170,7 +175,9 @@ internal class MedlServiceTest {
 
     @Test
     fun skalOpprettPeriodeForeløpig() {
-        val lovvalgsperiode = lagLovvalgsPeriode()
+        val lovvalgsperiode = lagLovvalgsPeriode().apply {
+            bestemmelse = Lovvalgbestemmelser_883_2004.FO_883_2004_ART11_3A
+        }
         val medlemskapsunntakForPostCapturingSlot = slot<MedlemskapsunntakForPost>()
         every {
             mockRestConsumer.opprettPeriode(capture(medlemskapsunntakForPostCapturingSlot))
@@ -199,7 +206,11 @@ internal class MedlServiceTest {
     @Test
     fun skalOppdaterePeriodeEndelig() {
         every { mockRestConsumer.hentPeriode(any()) } returns hentMedlemskapsunntak()
-        val lovvalgsperiode = lagLovvalgsPeriode().apply { medlPeriodeID = 123456L }
+        val lovvalgsperiode = lagLovvalgsPeriode().apply {
+            medlPeriodeID = 123456L
+            bestemmelse = Lovvalgbestemmelser_883_2004.FO_883_2004_ART11_3A
+            tilleggsbestemmelse = Tilleggsbestemmelser_883_2004.FO_883_2004_ART11_4_1
+        }
         val medlemskapsunntakForPutCapturingSlot = slot<MedlemskapsunntakForPut>()
         every {
             mockRestConsumer.oppdaterPeriode(capture(medlemskapsunntakForPutCapturingSlot))
@@ -227,9 +238,11 @@ internal class MedlServiceTest {
 
     @Test
     fun skalOpprettPeriodeForeløpigUnntak() {
-        val lovvalgsperiode = lagLovvalgsPeriode()
+        val lovvalgsperiode = lagLovvalgsPeriode().apply {
+            bestemmelse = Lovvalgbestemmelser_883_2004.FO_883_2004_ART12_1
+            tilleggsbestemmelse = Tilleggsbestemmelser_883_2004.FO_883_2004_ART11_5
+        }
         val medlemskapsunntakForPostCapturingSlot = slot<MedlemskapsunntakForPost>()
-        lovvalgsperiode.tilleggsbestemmelse = Tilleggsbestemmelser_883_2004.FO_883_2004_ART11_5
         every {
             mockRestConsumer.opprettPeriode(capture(medlemskapsunntakForPostCapturingSlot))
         } answers {
@@ -242,7 +255,7 @@ internal class MedlServiceTest {
                     dekning = DekningMedl.FULL.kode,
                     lovvalgsland = "BEL",
                     lovvalg = LovvalgMedl.FORL.kode,
-                    grunnlag = GrunnlagMedl.FO_11_5.kode,
+                    grunnlag = GrunnlagMedl.FO_12_1.kode,
                     sporingsinformasjon = MedlemskapsunntakForPost.SporingsinformasjonForPost(
                         kildedokument = KildedokumenttypeMedl.HENV_SOKNAD.kode
                     )
@@ -346,7 +359,10 @@ internal class MedlServiceTest {
     @Test
     fun skalOppdaterePeriodeForeløpig() {
         every { mockRestConsumer.hentPeriode(any()) } returns hentMedlemskapsunntak()
-        val lovvalgsperiode = lagLovvalgsPeriode().apply { medlPeriodeID = 123456L }
+        val lovvalgsperiode = lagLovvalgsPeriode().apply {
+            medlPeriodeID = 123456L
+            bestemmelse = Lovvalgbestemmelser_883_2004.FO_883_2004_ART11_3A
+        }
         val medlemskapsunntakForPutCapturingSlot = slot<MedlemskapsunntakForPut>()
         every {
             mockRestConsumer.oppdaterPeriode(capture(medlemskapsunntakForPutCapturingSlot))

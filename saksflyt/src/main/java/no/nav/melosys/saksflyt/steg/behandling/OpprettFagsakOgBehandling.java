@@ -70,7 +70,7 @@ public class OpprettFagsakOgBehandling implements StegBehandler {
             .medInitierendeDokumentId(initierendeDokumentId)
             .build();
         Fagsak fagsak = fagsakService.nyFagsakOgBehandling(opprettSakRequest);
-        Behandling behandling = fagsak.hentAktivBehandlingIkkeÅrsavregning();
+        Behandling behandling = fagsak.hentAktivBehandling();
         prosessinstans.setBehandling(behandling);
         log.info("Opprettet fagsak {} med behandling {}", fagsak.getSaksnummer(), behandling.getId());
     }

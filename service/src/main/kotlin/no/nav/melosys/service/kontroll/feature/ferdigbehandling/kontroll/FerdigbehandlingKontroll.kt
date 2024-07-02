@@ -83,7 +83,7 @@ object FerdigbehandlingKontroll {
     fun periodeOver24Mnd(kontrollData: FerdigbehandlingKontrollData): Kontrollfeil? {
         val lovvalgsperiode = kontrollData.hentLovvalgsperiode()
 
-        if (!lovvalgsperiode.erAvslått() && erBestemmelseDerInnvilgetMedlemskapsperiodeIkkeKanOverskride24mnd(lovvalgsperiode.bestemmelse) &&
+        if (!lovvalgsperiode.erAvslått() && erBestemmelseDerInnvilgetMedlemskapsperiodeIkkeKanOverskride24mnd(lovvalgsperiode?.bestemmelse) &&
             PeriodeRegler.periodeOver24Måneder(lovvalgsperiode.fom, lovvalgsperiode.tom)
         ) {
             return Kontrollfeil(Kontroll_begrunnelser.PERIODEN_OVER_24_MD)
@@ -260,13 +260,10 @@ object FerdigbehandlingKontroll {
     private fun erBestemmelseDerTrygdeavtaleAttestSendesCanada(bestemmelse: LovvalgBestemmelse): Boolean =
         bestemmelse in Lovvalgsbestemmelser_trygdeavtale_ca.values()
 
-    private fun erBestemmelseDerInnvilgetMedlemskapsperiodeIkkeKanOverskride24mnd(bestemmelse: LovvalgBestemmelse): Boolean =
-        bestemmelse in listOf(
-            Lovvalgbestemmelser_883_2004.FO_883_2004_ART12_1,
-            Lovvalgbestemmelser_883_2004.FO_883_2004_ART12_2,
-            Lovvalgbestemmelser_konv_efta_storbritannia.KONV_EFTA_STORBRITANNIA_ART14_1,
-            Lovvalgbestemmelser_konv_efta_storbritannia.KONV_EFTA_STORBRITANNIA_ART14_2,
-        )
+    private fun erBestemmelseDerInnvilgetMedlemskapsperiodeIkkeKanOverskride24mnd(bestemmelse: LovvalgBestemmelse?): Boolean =
+        bestemmelse === Lovvalgbestemmelser_883_2004.FO_883_2004_ART12_1 || bestemmelse === Lovvalgbestemmelser_883_2004.FO_883_2004_ART12_2 ||
+            bestemmelse === Lovvalgbestemmelser_konv_efta_storbritannia.KONV_EFTA_STORBRITANNIA_ART14_1 || bestemmelse ===
+            Lovvalgbestemmelser_konv_efta_storbritannia.KONV_EFTA_STORBRITANNIA_ART14_2
 
     private fun FerdigbehandlingKontrollData.hentLovvalgsperiode() =
         this.lovvalgsperiode ?: throw TekniskException("Lovvalgsperiode kan ikke være null")

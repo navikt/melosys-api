@@ -21,7 +21,6 @@ import no.nav.melosys.saksflytapi.domain.Prosessinstans;
 import no.nav.melosys.service.behandling.BehandlingService;
 import no.nav.melosys.service.behandling.BehandlingsresultatService;
 import no.nav.melosys.service.dokument.sed.EessiService;
-import no.nav.melosys.service.eessi.ruting.AdminInnvalideringSedRuter;
 import no.nav.melosys.service.medl.MedlPeriodeService;
 import no.nav.melosys.service.oppgave.OppgaveService;
 import no.nav.melosys.service.sak.FagsakService;
@@ -65,11 +64,12 @@ class AdminInnvalideringSedRuterTest {
 
     @BeforeEach
     void setup() {
-        adminInnvalideringSedRuter = new AdminInnvalideringSedRuter(fagsakService, prosessinstansService, oppgaveService,
-            behandlingsresultatService, medlPeriodeService, eessiService, behandlingService);
+        adminInnvalideringSedRuter = new AdminInnvalideringSedRuter(fagsakService, prosessinstansService,
+            behandlingsresultatService, medlPeriodeService, oppgaveService, eessiService, behandlingService);
 
         melosysEessiMelding.setAktoerId("12312412");
         melosysEessiMelding.setRinaSaksnummer("143141");
+        melosysEessiMelding.setJournalpostId("1111111");
         prosessinstans.setData(ProsessDataKey.EESSI_MELDING, melosysEessiMelding);
     }
 
@@ -166,7 +166,7 @@ class AdminInnvalideringSedRuterTest {
 
         adminInnvalideringSedRuter.rutSedTilBehandling(prosessinstans, arkivsakID);
         verify(oppgaveService).opprettEllerGjenbrukBehandlingsoppgave(any(Behandling.class),
-            eq(melosysEessiMelding.getJournalpostId()), eq(melosysEessiMelding.getAktoerId()), isNull());
+            eq(melosysEessiMelding.getJournalpostId()), eq(melosysEessiMelding.getAktoerId()), isNull(), isNull());
     }
 
 
