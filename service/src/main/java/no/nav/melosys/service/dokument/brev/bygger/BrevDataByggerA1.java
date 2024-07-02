@@ -40,6 +40,7 @@ public class BrevDataByggerA1 implements BrevDataBygger {
         brevData.setHovedvirksomhet(dataGrunnlag.getAvklarteVirksomheterGrunnlag().hentHovedvirksomhet());
         brevData.setBivirksomheter(dataGrunnlag.getAvklarteVirksomheterGrunnlag().hentBivirksomheter());
 
+
         // Feltet 5.1 i A1 fletter arbeidsgivere og oppdragsgivere.
         // Oppdragsgiver defineres for arbeidsstedet og må utledes derfra
         brevData.getBivirksomheter().addAll(hentForetakFraArbeidssteder(arbeidssteder));
