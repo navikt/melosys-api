@@ -130,6 +130,12 @@ public class SendVedtaksbrevInnland implements StegBehandler {
         Produserbaredokumenter produserbaredokument = hentProduserbarDokumentForInnvilgelse(behandling, resultat);
 
         List<Mottaker> mottakerListe = new ArrayList<>(List.of(Mottaker.medRolle(Mottakerroller.BRUKER)));
+        if (brevSendesTilStatligSkatteoppkreving(
+            resultat.hentLovvalgsperiode(),
+            behandling.getMottatteOpplysninger()
+        )) {
+            mottakerListe.add(Mottaker.av(NorskMyndighet.SKATTEINNKREVER_UTLAND));
+        }
 
         DoksysBrevbestilling innvilgelseBrukerOgSkatt = new DoksysBrevbestilling.Builder().medProduserbartDokument(produserbaredokument)
             .medAvsenderID(saksbehandler)
