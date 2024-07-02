@@ -22,7 +22,7 @@ import org.springframework.test.context.ActiveProfiles
     brokerProperties = ["offsets.topic.replication.factor=1", "transaction.state.log.replication.factor=1", "transaction.state.log.min.isr=1"]
 )
 @Import(
-    ComponentTestConfig::class, TestWithTransactionHelper::class
+    ComponentTestConfig::class
 )
 @DirtiesContext
 @EnableMockOAuth2Server

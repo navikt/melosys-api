@@ -1,5 +1,6 @@
 package no.nav.melosys.itest
 
+import io.kotest.matchers.collections.shouldHaveSize
 import no.nav.melosys.domain.Fagsak
 import no.nav.melosys.domain.RegistreringsInfo
 import no.nav.melosys.domain.kodeverk.*
@@ -7,54 +8,37 @@ import no.nav.melosys.repository.FagsakRepository
 import no.nav.melosys.service.aktoer.AktoerDto
 import no.nav.melosys.service.aktoer.AktoerHistorikkService
 import no.nav.melosys.service.aktoer.AktoerService
+import org.junit.jupiter.api.AfterEach
 import org.junit.jupiter.api.Test
 import org.springframework.beans.factory.annotation.Autowired
 
 import java.time.Instant
-import kotlin.test.assertTrue
 
 class AktoerHistorikkServiceIT(
     @Autowired val aktoerHistorikkService: AktoerHistorikkService,
     @Autowired val aktoerService: AktoerService,
     @Autowired val fagsakRepository: FagsakRepository,
-    @Autowired val transactionHelper: TestWithTransactionHelper,
 ) : ComponentTestBase() {
+    val saksnummer = "MEL-aktoerhistorikk"
 
-
-    @Test
-    fun testAktoerHistorikk() {
-        val fagSak = lagFagsak()
-        val aktoerDto = lagAktoerDto()
-        val revisionCount = aktoerHistorikkService.hentAktørHistorikk(fagSak, Aktoersroller.BRUKER).size
-
-        aktoerService.lagEllerOppdaterAktoer(fagSak, aktoerDto).also {
-            val revisionCountAfterAktoerCreation = aktoerHistorikkService.hentAktørHistorikk(fagSak, Aktoersroller.BRUKER).size
-            assertTrue { revisionCount + 1 == revisionCountAfterAktoerCreation }
-
-            addCleanUpAction {
-                ryddDbEtterTest(it, fagSak.saksnummer)
-            }
+    @AfterEach
+    fun clean() {
+        addCleanUpAction {
+            slettSakMedAvhengigheter(saksnummer)
         }
     }
 
-    private fun ryddDbEtterTest(id: Long, saksnummer: String) {
-        val deleteFullmaktQuery = TestWithTransactionHelper.Q(
-            "DELETE FROM FULLMAKT WHERE AKTOER_ID = :aktoerId",
-            arrayOf(Pair("aktoerId", id))
-        )
+    @Test
+    fun testAktoerHistorikk() {
+        val fagSak = lagFagsak(saksnummer)
+        val aktoerDto = lagAktoerDto()
 
-        val deleteAktoerQuery = TestWithTransactionHelper.Q(
-            "DELETE FROM AKTOER WHERE ID = :id",
-            arrayOf(Pair("id", id))
-        )
+        val revisionCount = aktoerHistorikkService.hentAktørHistorikk(fagSak, Aktoersroller.BRUKER).size
 
-        val deleteFagsakQUery =
-            TestWithTransactionHelper.Q(
-                "DELETE FROM FAGSAK WHERE SAKSNUMMER = :saksnummer",
-                arrayOf(Pair("saksnummer", saksnummer))
-            )
-
-        transactionHelper.execute(deleteFullmaktQuery, deleteAktoerQuery, deleteFagsakQUery)
+        aktoerService.lagEllerOppdaterAktoer(fagSak, aktoerDto).also {
+            aktoerHistorikkService.hentAktørHistorikk(fagSak, Aktoersroller.BRUKER)
+                .shouldHaveSize(revisionCount + 1)
+        }
     }
 
     private fun lagAktoerDto(): AktoerDto {
@@ -68,9 +52,9 @@ class AktoerHistorikkServiceIT(
         return aktoerDto
     }
 
-    private fun lagFagsak(): Fagsak {
+    private fun lagFagsak(saksnummer: String): Fagsak {
         return Fagsak(
-            "MEL-aktoerhistorikk", null, Sakstyper.EU_EOS, Sakstemaer.MEDLEMSKAP_LOVVALG, Saksstatuser.OPPRETTET
+            saksnummer, null, Sakstyper.EU_EOS, Sakstemaer.MEDLEMSKAP_LOVVALG, Saksstatuser.OPPRETTET
         ).apply { leggTilRegisteringInfo() }.also { fagsakRepository.save(it) }
     }
 
