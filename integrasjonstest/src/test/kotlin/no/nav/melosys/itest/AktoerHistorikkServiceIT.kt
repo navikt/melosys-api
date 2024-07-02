@@ -23,9 +23,7 @@ class AktoerHistorikkServiceIT(
 
     @AfterEach
     fun clean() {
-        addCleanUpAction {
-            slettSakMedAvhengigheter(saksnummer)
-        }
+        dbCleanup?.slettSakMedAvhengigheter(saksnummer)
     }
 
     @Test
@@ -42,14 +40,14 @@ class AktoerHistorikkServiceIT(
     }
 
     private fun lagAktoerDto(): AktoerDto {
-        val aktoerDto = AktoerDto()
-        aktoerDto.rolleKode = "BRUKER"
-        aktoerDto.institusjonsID = "institusjonsID"
-        aktoerDto.utenlandskPersonID = "utenlandskPersonID"
-        aktoerDto.orgnr = "orgnr"
-        aktoerDto.personIdent = "21075114491"
-        aktoerDto.fullmakter = setOf(Fullmaktstype.FULLMEKTIG_SØKNAD)
-        return aktoerDto
+        return AktoerDto().apply {
+            rolleKode = "BRUKER"
+            institusjonsID = "institusjonsID"
+            utenlandskPersonID = "utenlandskPersonID"
+            orgnr = "orgnr"
+            personIdent = "21075114491"
+            fullmakter = setOf(Fullmaktstype.FULLMEKTIG_SØKNAD)
+        }
     }
 
     private fun lagFagsak(saksnummer: String): Fagsak {
