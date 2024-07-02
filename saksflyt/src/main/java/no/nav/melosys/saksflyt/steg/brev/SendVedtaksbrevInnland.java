@@ -1,6 +1,7 @@
 package no.nav.melosys.saksflyt.steg.brev;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 
 import io.getunleash.Unleash;
@@ -17,6 +18,7 @@ import no.nav.melosys.domain.kodeverk.Avklartefaktatyper;
 import no.nav.melosys.domain.kodeverk.Mottakerroller;
 import no.nav.melosys.domain.kodeverk.begrunnelser.Endretperiode;
 import no.nav.melosys.domain.kodeverk.brev.Produserbaredokumenter;
+import no.nav.melosys.domain.kodeverk.lovvalgsbestemmelser.Lovvalgbestemmelser_konv_efta_storbritannia;
 import no.nav.melosys.domain.mottatteopplysninger.MottatteOpplysninger;
 import no.nav.melosys.exception.FunksjonellException;
 import no.nav.melosys.featuretoggle.ToggleName;
@@ -77,6 +79,8 @@ public class SendVedtaksbrevInnland implements StegBehandler {
         String saksbehandler = hentSaksbehandler(prosessinstans, resultat);
         String begrunnelseKode = hentBegrunnelsekodeTilForkortetPeriode(resultat);
         String fritekst = hentBegrunnelseFritekst(prosessinstans);
+        final Lovvalgsperiode lovvalgsperiode = resultat.hentLovvalgsperiode();
+        Boolean erStorbritannia = Arrays.stream(Lovvalgbestemmelser_konv_efta_storbritannia.values()).anyMatch(bestemmelse -> bestemmelse == lovvalgsperiode.getBestemmelse());
 
         if (resultat.erAvslag()) {
             sendAvslagsbrev(behandling, saksbehandler, fritekst);
@@ -86,7 +90,7 @@ public class SendVedtaksbrevInnland implements StegBehandler {
             log.info("Sendt utpekingsbrev for behandling {}", behandling.getId());
         } else if (resultat.erInnvilgelse()) {
             sendInnvilgelsesbrev(behandling, resultat, saksbehandler, begrunnelseKode, fritekst);
-            if (unleash.isEnabled(ToggleName.MELOSYS_KONVENSJON_EFTA_LAND_OG_STORBRITANNIA)) {
+            if (unleash.isEnabled(ToggleName.MELOSYS_KONVENSJON_EFTA_LAND_OG_STORBRITANNIA) && erStorbritannia) {
                 sendAttestA1(behandling, saksbehandler, begrunnelseKode, fritekst);
             }
             log.info("Sendt innvilgelsesbrev for behandling {}", behandling.getId());
