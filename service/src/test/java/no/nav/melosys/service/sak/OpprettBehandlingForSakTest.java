@@ -78,6 +78,7 @@ class OpprettBehandlingForSakTest {
         anmodningsperiode.setSendtUtland(true);
         Behandlingsresultat behandlingsresultat = new Behandlingsresultat();
         behandlingsresultat.getAnmodningsperioder().add(anmodningsperiode);
+        when(behandlingsresultatService.hentBehandlingsresultatMedAnmodningsperioder(aktivBehandling.getId())).thenReturn(behandlingsresultat);
         when(behandlingsresultatService.hentBehandlingsresultat(aktivBehandling.getId())).thenReturn(behandlingsresultat);
 
 

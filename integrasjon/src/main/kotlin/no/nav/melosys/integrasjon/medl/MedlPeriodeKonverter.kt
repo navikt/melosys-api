@@ -315,7 +315,9 @@ class MedlPeriodeKonverter private constructor() {
                 return (lovvalgsperiode.bestemmelse === Lovvalgbestemmelser_883_2004.FO_883_2004_ART11_3A && tilleggsbestemmelse ===
                     Tilleggsbestemmelser_883_2004.FO_883_2004_ART11_4_1) ||
                     (lovvalgsperiode.bestemmelse === Lovvalgbestemmelser_konv_efta_storbritannia.KONV_EFTA_STORBRITANNIA_ART13_3A &&
-                        tilleggsbestemmelse === Tilleggsbestemmelser_konv_efta_storbritannia.KONV_EFTA_STORBRITANNIA_ART13_4_1)
+                        tilleggsbestemmelse === Tilleggsbestemmelser_konv_efta_storbritannia.KONV_EFTA_STORBRITANNIA_ART13_4_1) ||
+                    (lovvalgsperiode.bestemmelse === Lovvalgbestemmelser_883_2004.FO_883_2004_ART11_3A && tilleggsbestemmelse ===
+                        Tilleggsbestemmelser_883_2004.FO_883_2004_ART11_5)
             }
             return false
         }

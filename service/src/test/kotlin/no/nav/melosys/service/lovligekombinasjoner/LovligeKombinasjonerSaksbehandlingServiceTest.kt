@@ -45,78 +45,92 @@ class LovligeKombinasjonerSaksbehandlingServiceTest {
     }
 
     @Test
-    fun `hentMuligeSakstyper_saksnummerErNull_returnererAlleSakstyper`() {
+    fun hentMuligeSakstyper_saksnummerErNull_returnererAlleSakstyper() {
         val muligeSakstyper = lovligeKombinasjonerSaksbehandlingService.hentMuligeSakstyper(null)
+
+
         muligeSakstyper shouldHaveSize 3
         muligeSakstyper shouldContainExactlyInAnyOrder listOf(Sakstyper.EU_EOS, Sakstyper.FTRL, Sakstyper.TRYGDEAVTALE)
     }
 
     @Test
-    fun `hentMuligeSakstyper_saksnummerIkkeNullSakKanEndres_returnererAlleSakstyper`() {
+    fun hentMuligeSakstyper_saksnummerIkkeNullSakKanEndres_returnererAlleSakstyper() {
         val fagsak = FagsakTestFactory.builder().behandlinger(Behandling()).build()
         every { fagsakService.hentFagsak(FagsakTestFactory.SAKSNUMMER) } returns fagsak
 
+
         val muligeSakstyper = lovligeKombinasjonerSaksbehandlingService.hentMuligeSakstyper(FagsakTestFactory.SAKSNUMMER)
+
+
         muligeSakstyper shouldHaveSize 3
         muligeSakstyper shouldContainExactlyInAnyOrder listOf(Sakstyper.EU_EOS, Sakstyper.FTRL, Sakstyper.TRYGDEAVTALE)
     }
 
     @Test
-    fun `hentMuligeSakstyper_saksnummerIkkeNullSakKanIkkeEndres_returnererTomListe`() {
+    fun hentMuligeSakstyper_saksnummerIkkeNullSakKanIkkeEndres_returnererTomListe() {
         val behandling1 = Behandling().apply { status = Behandlingsstatus.AVSLUTTET }
         val behandling2 = Behandling()
         val fagsak = FagsakTestFactory.builder().behandlinger(listOf(behandling1, behandling2)).build()
         every { fagsakService.hentFagsak(FagsakTestFactory.SAKSNUMMER) } returns fagsak
 
+
         val muligeSakstyper = lovligeKombinasjonerSaksbehandlingService.hentMuligeSakstyper(FagsakTestFactory.SAKSNUMMER)
+
+
         muligeSakstyper.shouldBeEmpty()
     }
 
     @Test
-    fun `hentMuligeSakstemaer_saksnummerErNull_returnererLovligeSakstemaer`() {
+    fun hentMuligeSakstemaer_saksnummerErNull_returnererLovligeSakstemaer() {
         val muligeSakstemaer = lovligeKombinasjonerSaksbehandlingService.hentMuligeSakstemaer(Aktoersroller.VIRKSOMHET, Sakstyper.TRYGDEAVTALE, null)
+
+
         muligeSakstemaer.shouldNotBeEmpty()
     }
 
     @Test
-    fun `hentMuligeSakstemaer_saksnummerErIkkeNullSakKanEndres_returnererLovligeSakstemaer`() {
+    fun hentMuligeSakstemaer_saksnummerErIkkeNullSakKanEndres_returnererLovligeSakstemaer() {
         val fagsak = FagsakTestFactory.builder().behandlinger(Behandling()).build()
         every { fagsakService.hentFagsak(FagsakTestFactory.SAKSNUMMER) } returns fagsak
+
 
         val muligeSakstemaer = lovligeKombinasjonerSaksbehandlingService.hentMuligeSakstemaer(
             Aktoersroller.VIRKSOMHET,
             Sakstyper.TRYGDEAVTALE,
             FagsakTestFactory.SAKSNUMMER
         )
+
+
         muligeSakstemaer.shouldNotBeEmpty()
     }
 
     @Test
-    fun `hentMuligeSakstemaer_saksnummerErIkkeNullSakKanIkkeEndres_returnererTomListe`() {
+    fun hentMuligeSakstemaer_saksnummerErIkkeNullSakKanIkkeEndres_returnererTomListe() {
         val behandling1 = Behandling().apply { status = Behandlingsstatus.AVSLUTTET }
         val behandling2 = Behandling()
         val fagsak = FagsakTestFactory.builder().behandlinger(listOf(behandling1, behandling2)).build()
         every { fagsakService.hentFagsak(FagsakTestFactory.SAKSNUMMER) } returns fagsak
 
+
         val muligeSakstemaer = lovligeKombinasjonerSaksbehandlingService.hentMuligeSakstemaer(
             Aktoersroller.VIRKSOMHET,
             Sakstyper.TRYGDEAVTALE,
             FagsakTestFactory.SAKSNUMMER
         )
+
+
         muligeSakstemaer.shouldBeEmpty()
     }
 
     @Test
-    fun `hentMuligeBehandlingstyper_temaArbeidThenestepersonEllerFly_returnererLovligKombinasjon`() {
-        val muligeTyper = lovligeKombinasjonerSaksbehandlingService
-            .hentMuligeBehandlingstyper(
-                Aktoersroller.BRUKER,
-                Sakstyper.EU_EOS,
-                Sakstemaer.MEDLEMSKAP_LOVVALG,
-                Behandlingstema.ARBEID_TJENESTEPERSON_ELLER_FLY,
-                null,
-                null
-            )
+    fun hentMuligeBehandlingstyper_temaArbeidThenestepersonEllerFly_returnererLovligKombinasjon() {
+        val muligeTyper = lovligeKombinasjonerSaksbehandlingService.hentMuligeBehandlingstyper(
+            Aktoersroller.BRUKER,
+            Sakstyper.EU_EOS,
+            Sakstemaer.MEDLEMSKAP_LOVVALG,
+            Behandlingstema.ARBEID_TJENESTEPERSON_ELLER_FLY
+        )
+
 
         muligeTyper shouldContainExactlyInAnyOrder listOf(
             Behandlingstyper.NY_VURDERING,
@@ -128,16 +142,14 @@ class LovligeKombinasjonerSaksbehandlingServiceTest {
     }
 
     @Test
-    fun `hentMuligeBehandlingstyper_EU_EOS_MEDLEMSKAP_LOVVALG_temaIkkeYrkesAktiv_returnererLovligKombinasjon`() {
-        val muligeTyper = lovligeKombinasjonerSaksbehandlingService
-            .hentMuligeBehandlingstyper(
-                Aktoersroller.BRUKER,
-                Sakstyper.EU_EOS,
-                Sakstemaer.MEDLEMSKAP_LOVVALG,
-                Behandlingstema.IKKE_YRKESAKTIV,
-                null,
-                null
-            )
+    fun hentMuligeBehandlingstyper_EU_EOS_MEDLEMSKAP_LOVVALG_temaIkkeYrkesAktiv_returnererLovligKombinasjon() {
+        val muligeTyper = lovligeKombinasjonerSaksbehandlingService.hentMuligeBehandlingstyper(
+            Aktoersroller.BRUKER,
+            Sakstyper.EU_EOS,
+            Sakstemaer.MEDLEMSKAP_LOVVALG,
+            Behandlingstema.IKKE_YRKESAKTIV
+        )
+
 
         muligeTyper shouldContainExactlyInAnyOrder listOf(
             Behandlingstyper.NY_VURDERING,
@@ -148,24 +160,27 @@ class LovligeKombinasjonerSaksbehandlingServiceTest {
     }
 
     @Test
-    fun `hentMuligeBehandlingstyper_EU_EOS_UNNTAK_temaForesporselTrygdemyndighet_returnererLovligKombinasjon`() {
-        val muligeTyper = lovligeKombinasjonerSaksbehandlingService
-            .hentMuligeBehandlingstyper(
-                Aktoersroller.BRUKER,
-                Sakstyper.EU_EOS,
-                Sakstemaer.UNNTAK,
-                Behandlingstema.FORESPØRSEL_TRYGDEMYNDIGHET,
-                null,
-                null
-            )
+    fun hentMuligeBehandlingstyper_EU_EOS_UNNTAK_temaForesporselTrygdemyndighet_returnererLovligKombinasjon() {
+        val muligeTyper = lovligeKombinasjonerSaksbehandlingService.hentMuligeBehandlingstyper(
+            Aktoersroller.BRUKER,
+            Sakstyper.EU_EOS,
+            Sakstemaer.UNNTAK,
+            Behandlingstema.FORESPØRSEL_TRYGDEMYNDIGHET
+        )
+
 
         muligeTyper shouldContainExactlyInAnyOrder listOf(Behandlingstyper.HENVENDELSE)
     }
 
     @Test
-    fun `hentMuligeBehandlingstyper_EU_EOS_TRYGDEAVGIFT_temaYrkesaktiv_returnererLovligKombinasjon`() {
-        val muligeTyper = lovligeKombinasjonerSaksbehandlingService
-            .hentMuligeBehandlingstyper(Aktoersroller.BRUKER, Sakstyper.EU_EOS, Sakstemaer.TRYGDEAVGIFT, Behandlingstema.YRKESAKTIV, null, null)
+    fun hentMuligeBehandlingstyper_EU_EOS_TRYGDEAVGIFT_temaYrkesaktiv_returnererLovligKombinasjon() {
+        val muligeTyper = lovligeKombinasjonerSaksbehandlingService.hentMuligeBehandlingstyper(
+            Aktoersroller.BRUKER,
+            Sakstyper.EU_EOS,
+            Sakstemaer.TRYGDEAVGIFT,
+            Behandlingstema.YRKESAKTIV
+        )
+
 
         muligeTyper shouldContainExactlyInAnyOrder listOf(
             Behandlingstyper.NY_VURDERING,
@@ -176,9 +191,14 @@ class LovligeKombinasjonerSaksbehandlingServiceTest {
     }
 
     @Test
-    fun `hentMuligeBehandlingstyper_FTRL_LOVVALG_MEDLEMSKAP_temaYrkesaktiv_ikkeIKnyttTilSakKontekst_returnererLovligKombinasjon`() {
-        val muligeTyper = lovligeKombinasjonerSaksbehandlingService
-            .hentMuligeBehandlingstyper(Aktoersroller.BRUKER, Sakstyper.FTRL, Sakstemaer.MEDLEMSKAP_LOVVALG, Behandlingstema.YRKESAKTIV, null, null)
+    fun hentMuligeBehandlingstyper_FTRL_LOVVALG_MEDLEMSKAP_temaYrkesaktiv_ikkeIKnyttTilSakKontekst_returnererLovligKombinasjon() {
+        val muligeTyper = lovligeKombinasjonerSaksbehandlingService.hentMuligeBehandlingstyper(
+            Aktoersroller.BRUKER,
+            Sakstyper.FTRL,
+            Sakstemaer.MEDLEMSKAP_LOVVALG,
+            Behandlingstema.YRKESAKTIV
+        )
+
 
         muligeTyper shouldContainExactlyInAnyOrder listOf(
             Behandlingstyper.NY_VURDERING,
@@ -190,19 +210,20 @@ class LovligeKombinasjonerSaksbehandlingServiceTest {
     }
 
     @Test
-    fun `hentMuligeBehandlingstyper_FTRL_LOVVALG_MEDLEMSKAP_temaYrkesaktiv_iKnyttTilSakKontekstOgSakHarBehandlingMedManglendeInnbetaling_returnererLovligKombinasjon`() {
+    fun hentMuligeBehandlingstyperForKnyttTilSak_FTRL_LOVVALG_MEDLEMSKAP_temaYrkesaktiv_iKnyttTilSakKontekstOgSakHarBehandlingMedManglendeInnbetaling_returnererLovligKombinasjon() {
         val sisteBehandling = sisteBehandling(Behandlingstyper.MANGLENDE_INNBETALING_TRYGDEAVGIFT)
+        sisteBehandling.fagsak.tema = Sakstemaer.MEDLEMSKAP_LOVVALG
+        sisteBehandling.fagsak.type = Sakstyper.FTRL
         every { behandlingService.hentBehandling(sisteBehandling.id) } returns sisteBehandling
+        every { fagsakService.hentFagsak(sisteBehandling.fagsak.saksnummer) } returns sisteBehandling.fagsak
 
-        val muligeTyper = lovligeKombinasjonerSaksbehandlingService
-            .hentMuligeBehandlingstyper(
-                Aktoersroller.BRUKER,
-                Sakstyper.FTRL,
-                Sakstemaer.MEDLEMSKAP_LOVVALG,
-                Behandlingstema.YRKESAKTIV,
-                null,
-                sisteBehandling.id
-            )
+
+        val muligeTyper = lovligeKombinasjonerSaksbehandlingService.hentMuligeBehandlingstyperForKnyttTilSak(
+            Aktoersroller.BRUKER,
+            sisteBehandling.fagsak.saksnummer,
+            Behandlingstema.YRKESAKTIV
+        )
+
 
         muligeTyper shouldContainExactlyInAnyOrder listOf(
             Behandlingstyper.NY_VURDERING,
@@ -214,19 +235,20 @@ class LovligeKombinasjonerSaksbehandlingServiceTest {
     }
 
     @Test
-    fun `hentMuligeBehandlingstyper_FTRL_LOVVALG_MEDLEMSKAP_temaYrkesaktiv_iKnyttTilSakKontekstMenSakHarIkkeBehandlingMedManglendeInnbetaling_returnererLovligKombinasjon`() {
+    fun hentMuligeBehandlingstyperForKnyttTilSak_FTRL_LOVVALG_MEDLEMSKAP_temaYrkesaktiv_iKnyttTilSakKontekstMenSakHarIkkeBehandlingMedManglendeInnbetaling_returnererLovligKombinasjon() {
         val sisteBehandling = sisteBehandling(Behandlingstyper.FØRSTEGANG)
+        sisteBehandling.fagsak.tema = Sakstemaer.MEDLEMSKAP_LOVVALG
+        sisteBehandling.fagsak.type = Sakstyper.FTRL
         every { behandlingService.hentBehandling(sisteBehandling.id) } returns sisteBehandling
+        every { fagsakService.hentFagsak(sisteBehandling.fagsak.saksnummer) } returns sisteBehandling.fagsak
 
-        val muligeTyper = lovligeKombinasjonerSaksbehandlingService
-            .hentMuligeBehandlingstyper(
-                Aktoersroller.BRUKER,
-                Sakstyper.FTRL,
-                Sakstemaer.MEDLEMSKAP_LOVVALG,
-                Behandlingstema.YRKESAKTIV,
-                null,
-                sisteBehandling.id
-            )
+
+        val muligeTyper = lovligeKombinasjonerSaksbehandlingService.hentMuligeBehandlingstyperForKnyttTilSak(
+            Aktoersroller.BRUKER,
+            sisteBehandling.fagsak.saksnummer,
+            Behandlingstema.YRKESAKTIV
+        )
+
 
         muligeTyper shouldContainExactlyInAnyOrder listOf(
             Behandlingstyper.NY_VURDERING,
@@ -237,15 +259,14 @@ class LovligeKombinasjonerSaksbehandlingServiceTest {
     }
 
     @Test
-    fun `hentMuligeBehandlingstyper_FTRL_LOVVALG_MEDLEMSKAP_temaYrkesaktiv_returnererLovligKombinasjon`() {
+    fun hentMuligeBehandlingstyper_FTRL_LOVVALG_MEDLEMSKAP_temaYrkesaktiv_returnererLovligKombinasjon() {
         val muligeTyper = lovligeKombinasjonerSaksbehandlingService.hentMuligeBehandlingstyper(
             Aktoersroller.BRUKER,
             Sakstyper.FTRL,
             Sakstemaer.MEDLEMSKAP_LOVVALG,
-            Behandlingstema.YRKESAKTIV,
-            null,
-            null
+            Behandlingstema.YRKESAKTIV
         )
+
 
         muligeTyper shouldContainExactlyInAnyOrder listOf(
             Behandlingstyper.NY_VURDERING,
@@ -257,9 +278,14 @@ class LovligeKombinasjonerSaksbehandlingServiceTest {
     }
 
     @Test
-    fun `hentMuligeBehandlingstyper_FTRL_LOVVALG_MEDLEMSKAP_temaPensjonist_returnererLovligKombinasjon`() {
-        val muligeTyper = lovligeKombinasjonerSaksbehandlingService
-            .hentMuligeBehandlingstyper(Aktoersroller.BRUKER, Sakstyper.FTRL, Sakstemaer.MEDLEMSKAP_LOVVALG, Behandlingstema.PENSJONIST, null, null)
+    fun hentMuligeBehandlingstyper_FTRL_LOVVALG_MEDLEMSKAP_temaPensjonist_returnererLovligKombinasjon() {
+        val muligeTyper = lovligeKombinasjonerSaksbehandlingService.hentMuligeBehandlingstyper(
+            Aktoersroller.BRUKER,
+            Sakstyper.FTRL,
+            Sakstemaer.MEDLEMSKAP_LOVVALG,
+            Behandlingstema.PENSJONIST
+        )
+
 
         muligeTyper shouldContainExactlyInAnyOrder listOf(
             Behandlingstyper.NY_VURDERING,
@@ -270,9 +296,14 @@ class LovligeKombinasjonerSaksbehandlingServiceTest {
     }
 
     @Test
-    fun `hentMuligeBehandlingstyper_FTRL_TRYGDEAVGIFT_temaPensjonist_returnererLovligKombinasjon`() {
-        val muligeTyper = lovligeKombinasjonerSaksbehandlingService
-            .hentMuligeBehandlingstyper(Aktoersroller.BRUKER, Sakstyper.FTRL, Sakstemaer.TRYGDEAVGIFT, Behandlingstema.PENSJONIST, null, null)
+    fun hentMuligeBehandlingstyper_FTRL_TRYGDEAVGIFT_temaPensjonist_returnererLovligKombinasjon() {
+        val muligeTyper = lovligeKombinasjonerSaksbehandlingService.hentMuligeBehandlingstyper(
+            Aktoersroller.BRUKER,
+            Sakstyper.FTRL,
+            Sakstemaer.TRYGDEAVGIFT,
+            Behandlingstema.PENSJONIST
+        )
+
 
         muligeTyper shouldContainExactlyInAnyOrder listOf(
             Behandlingstyper.NY_VURDERING,
@@ -283,9 +314,14 @@ class LovligeKombinasjonerSaksbehandlingServiceTest {
     }
 
     @Test
-    fun `hentMuligeBehandlingstyper_FTRL_TRYGDEAVGIFT_temaYrkesaktiv_returnererLovligKombinasjon`() {
-        val muligeTyper = lovligeKombinasjonerSaksbehandlingService
-            .hentMuligeBehandlingstyper(Aktoersroller.BRUKER, Sakstyper.FTRL, Sakstemaer.TRYGDEAVGIFT, Behandlingstema.YRKESAKTIV, null, null)
+    fun hentMuligeBehandlingstyper_FTRL_TRYGDEAVGIFT_temaYrkesaktiv_returnererLovligKombinasjon() {
+        val muligeTyper = lovligeKombinasjonerSaksbehandlingService.hentMuligeBehandlingstyper(
+            Aktoersroller.BRUKER,
+            Sakstyper.FTRL,
+            Sakstemaer.TRYGDEAVGIFT,
+            Behandlingstema.YRKESAKTIV
+        )
+
 
         muligeTyper shouldContainExactlyInAnyOrder listOf(
             Behandlingstyper.NY_VURDERING,
@@ -296,16 +332,14 @@ class LovligeKombinasjonerSaksbehandlingServiceTest {
     }
 
     @Test
-    fun `hentMuligeBehandlingstyper_TRYGDEAVTALE_LOVVALG_MEDLEMSKAP_temaYrkesaktiv_returnererLovligKombinasjon`() {
-        val muligeTyper = lovligeKombinasjonerSaksbehandlingService
-            .hentMuligeBehandlingstyper(
+    fun hentMuligeBehandlingstyper_TRYGDEAVTALE_LOVVALG_MEDLEMSKAP_temaYrkesaktiv_returnererLovligKombinasjon() {
+        val muligeTyper = lovligeKombinasjonerSaksbehandlingService.hentMuligeBehandlingstyper(
                 Aktoersroller.BRUKER,
                 Sakstyper.TRYGDEAVTALE,
                 Sakstemaer.MEDLEMSKAP_LOVVALG,
-                Behandlingstema.YRKESAKTIV,
-                null,
-                null
+                Behandlingstema.YRKESAKTIV
             )
+
 
         muligeTyper shouldContainExactlyInAnyOrder listOf(
             Behandlingstyper.NY_VURDERING,
@@ -317,16 +351,14 @@ class LovligeKombinasjonerSaksbehandlingServiceTest {
     }
 
     @Test
-    fun `hentMuligeBehandlingstyper_TRYGDEAVTALE_LOVVALG_MEDLEMSKAP_temaPensjonist_returnererLovligKombinasjon`() {
-        val muligeTyper = lovligeKombinasjonerSaksbehandlingService
-            .hentMuligeBehandlingstyper(
+    fun hentMuligeBehandlingstyper_TRYGDEAVTALE_LOVVALG_MEDLEMSKAP_temaPensjonist_returnererLovligKombinasjon() {
+        val muligeTyper = lovligeKombinasjonerSaksbehandlingService.hentMuligeBehandlingstyper(
                 Aktoersroller.BRUKER,
                 Sakstyper.TRYGDEAVTALE,
                 Sakstemaer.MEDLEMSKAP_LOVVALG,
-                Behandlingstema.PENSJONIST,
-                null,
-                null
+                Behandlingstema.PENSJONIST
             )
+
 
         muligeTyper shouldContainExactlyInAnyOrder listOf(
             Behandlingstyper.NY_VURDERING,
@@ -337,24 +369,26 @@ class LovligeKombinasjonerSaksbehandlingServiceTest {
     }
 
     @Test
-    fun `hentMuligeBehandlingstyper_TRYGDEAVTALE_UNNTAK_temaForesporselTrygdemyndighet_returnererLovligKombinasjon`() {
-        val muligeTyper = lovligeKombinasjonerSaksbehandlingService
-            .hentMuligeBehandlingstyper(
+    fun hentMuligeBehandlingstyper_TRYGDEAVTALE_UNNTAK_temaForesporselTrygdemyndighet_returnererLovligKombinasjon() {
+        val muligeTyper = lovligeKombinasjonerSaksbehandlingService.hentMuligeBehandlingstyper(
                 Aktoersroller.BRUKER,
                 Sakstyper.TRYGDEAVTALE,
                 Sakstemaer.UNNTAK,
-                Behandlingstema.FORESPØRSEL_TRYGDEMYNDIGHET,
-                null,
-                null
+                Behandlingstema.FORESPØRSEL_TRYGDEMYNDIGHET
             )
+
 
         muligeTyper shouldContainExactlyInAnyOrder listOf(Behandlingstyper.HENVENDELSE)
     }
 
     @Test
-    fun `hentMuligeBehandlingstyper_TRYGDEAVTALE_TRYGDEAVGIFT_temaYrkesaktiv_returnererLovligKombinasjon`() {
-        val muligeTyper = lovligeKombinasjonerSaksbehandlingService
-            .hentMuligeBehandlingstyper(Aktoersroller.BRUKER, Sakstyper.TRYGDEAVTALE, Sakstemaer.TRYGDEAVGIFT, Behandlingstema.YRKESAKTIV, null, null)
+    fun hentMuligeBehandlingstyper_TRYGDEAVTALE_TRYGDEAVGIFT_temaYrkesaktiv_returnererLovligKombinasjon() {
+        val muligeTyper = lovligeKombinasjonerSaksbehandlingService.hentMuligeBehandlingstyper(
+            Aktoersroller.BRUKER,
+            Sakstyper.TRYGDEAVTALE,
+            Sakstemaer.TRYGDEAVGIFT,
+            Behandlingstema.YRKESAKTIV)
+
 
         muligeTyper shouldContainExactlyInAnyOrder listOf(
             Behandlingstyper.NY_VURDERING,
@@ -365,9 +399,13 @@ class LovligeKombinasjonerSaksbehandlingServiceTest {
     }
 
     @Test
-    fun `hentMuligeBehandlingstyper_TRYGDEAVTALE_TRYGDEAVGIFT_temaPensjonist_returnererLovligKombinasjon`() {
-        val muligeTyper = lovligeKombinasjonerSaksbehandlingService
-            .hentMuligeBehandlingstyper(Aktoersroller.BRUKER, Sakstyper.TRYGDEAVTALE, Sakstemaer.TRYGDEAVGIFT, Behandlingstema.PENSJONIST, null, null)
+    fun hentMuligeBehandlingstyper_TRYGDEAVTALE_TRYGDEAVGIFT_temaPensjonist_returnererLovligKombinasjon() {
+        val muligeTyper = lovligeKombinasjonerSaksbehandlingService.hentMuligeBehandlingstyper(
+            Aktoersroller.BRUKER,
+            Sakstyper.TRYGDEAVTALE,
+            Sakstemaer.TRYGDEAVGIFT,
+            Behandlingstema.PENSJONIST)
+
 
         muligeTyper shouldContainExactlyInAnyOrder listOf(
             Behandlingstyper.NY_VURDERING,
@@ -378,22 +416,23 @@ class LovligeKombinasjonerSaksbehandlingServiceTest {
     }
 
     @Test
-    fun `hentMuligeBehandlingstyper_avsluttet_returnererIkkeFørstegang`() {
+    fun hentMuligeBehandlingstyperForKnyttTilSak_avsluttet_returnererIkkeFørstegang() {
         val sisteBehandling = behandlingMedTemaOgType(Behandlingstema.UTSENDT_ARBEIDSTAKER, Behandlingstyper.FØRSTEGANG).apply {
             status = Behandlingsstatus.AVSLUTTET
             fagsak = FagsakTestFactory.lagFagsak()
         }
+        sisteBehandling.fagsak.type = Sakstyper.EU_EOS
+        sisteBehandling.fagsak.tema = Sakstemaer.MEDLEMSKAP_LOVVALG
+        sisteBehandling.fagsak.behandlinger.add(sisteBehandling)
+        every { fagsakService.hentFagsak(sisteBehandling.fagsak.saksnummer) } returns sisteBehandling.fagsak
 
-        val muligeTyper = lovligeKombinasjonerSaksbehandlingService
-            .hentMuligeBehandlingstyper(
+
+        val muligeTyper = lovligeKombinasjonerSaksbehandlingService.hentMuligeBehandlingstyperForKnyttTilSak(
                 Aktoersroller.BRUKER,
-                Sakstyper.EU_EOS,
-                Sakstemaer.MEDLEMSKAP_LOVVALG,
-                Behandlingstema.UTSENDT_ARBEIDSTAKER,
-                null,
-                sisteBehandling,
-                null
+                sisteBehandling.fagsak.saksnummer,
+                Behandlingstema.UTSENDT_ARBEIDSTAKER
             )
+
 
         muligeTyper shouldContainExactlyInAnyOrder listOf(
             Behandlingstyper.NY_VURDERING,
@@ -404,22 +443,22 @@ class LovligeKombinasjonerSaksbehandlingServiceTest {
     }
 
     @Test
-    fun `hentMuligeBehandlingstyper_midlertidigLovvalgsbesluttet_returnererIkkeFørstegang`() {
+    fun hentMuligeBehandlingstyperForKnyttTilSak_midlertidigLovvalgsbesluttet_returnererIkkeFørstegang() {
         val sisteBehandling = behandlingMedTemaOgType(Behandlingstema.UTSENDT_ARBEIDSTAKER, Behandlingstyper.FØRSTEGANG).apply {
             status = Behandlingsstatus.MIDLERTIDIG_LOVVALGSBESLUTNING
             fagsak = FagsakTestFactory.lagFagsak()
         }
 
-        val muligeTyper = lovligeKombinasjonerSaksbehandlingService
-            .hentMuligeBehandlingstyper(
-                Aktoersroller.BRUKER,
-                Sakstyper.EU_EOS,
-                Sakstemaer.MEDLEMSKAP_LOVVALG,
-                Behandlingstema.UTSENDT_ARBEIDSTAKER,
-                null,
-                sisteBehandling,
-                null
-            )
+        sisteBehandling.fagsak.behandlinger.add(sisteBehandling)
+        every { fagsakService.hentFagsak(sisteBehandling.fagsak.saksnummer) } returns sisteBehandling.fagsak
+
+
+        val muligeTyper = lovligeKombinasjonerSaksbehandlingService.hentMuligeBehandlingstyperForKnyttTilSak(
+            Aktoersroller.BRUKER,
+            sisteBehandling.fagsak.saksnummer,
+            Behandlingstema.UTSENDT_ARBEIDSTAKER
+        )
+
 
         muligeTyper shouldContainExactlyInAnyOrder listOf(
             Behandlingstyper.NY_VURDERING,
@@ -431,7 +470,7 @@ class LovligeKombinasjonerSaksbehandlingServiceTest {
     }
 
     @Test
-    fun `hentMuligeBehandlingstemaer_hovedpartVIRKSOMHETIkkeTrygdeavgift_skalReturnereBehandlingsTemaVIRKSOMHET`() {
+    fun hentMuligeBehandlingstemaer_hovedpartVIRKSOMHETIkkeTrygdeavgift_skalReturnereBehandlingsTemaVIRKSOMHET() {
         val behandlingstemas = lovligeKombinasjonerSaksbehandlingService.hentMuligeBehandlingstemaer(
             Aktoersroller.VIRKSOMHET,
             Sakstyper.TRYGDEAVTALE,
@@ -443,7 +482,7 @@ class LovligeKombinasjonerSaksbehandlingServiceTest {
     }
 
     @Test
-    fun `hentMuligeBehandlingstemaer_hovedpartVIRKSOMHETTrygdeavgift_skalReturnereBehandlingsTemaYRKESAKTIV`() {
+    fun hentMuligeBehandlingstemaer_hovedpartVIRKSOMHETTrygdeavgift_skalReturnereBehandlingsTemaYRKESAKTIV() {
         val behandlingstemas = lovligeKombinasjonerSaksbehandlingService.hentMuligeBehandlingstemaer(
             Aktoersroller.VIRKSOMHET,
             Sakstyper.TRYGDEAVTALE,
@@ -455,7 +494,7 @@ class LovligeKombinasjonerSaksbehandlingServiceTest {
     }
 
     @Test
-    fun `hentMuligeBehandlingstemaer_ingenHovedpart_skalReturnereSammeSomHovedpartVIRKSOMHETogBRUKER`() {
+    fun hentMuligeBehandlingstemaer_ingenHovedpart_skalReturnereSammeSomHovedpartVIRKSOMHETogBRUKER() {
         val behandlingstemaer =
             lovligeKombinasjonerSaksbehandlingService.hentMuligeBehandlingstemaer(null, Sakstyper.TRYGDEAVTALE, Sakstemaer.TRYGDEAVGIFT, null, null)
 
@@ -479,14 +518,14 @@ class LovligeKombinasjonerSaksbehandlingServiceTest {
     }
 
     @Test
-    fun `hentMuligeBehandlingstemaer_ingenHovedpartMedlemskapLovvalg_skalReturnereSedBehandlingstema`() {
+    fun hentMuligeBehandlingstemaer_ingenHovedpartMedlemskapLovvalg_skalReturnereSedBehandlingstema() {
         val behandlingstemaer =
             lovligeKombinasjonerSaksbehandlingService.hentMuligeBehandlingstemaer(null, Sakstyper.EU_EOS, Sakstemaer.MEDLEMSKAP_LOVVALG, null, null)
         behandlingstemaer shouldContain Behandlingstema.BESLUTNING_LOVVALG_NORGE
     }
 
     @Test
-    fun `hentMuligeBehandlingstemaer_ingenHovedpartUnntak_skalReturnereSedBehandlingstema`() {
+    fun hentMuligeBehandlingstemaer_ingenHovedpartUnntak_skalReturnereSedBehandlingstema() {
         val behandlingstemaer =
             lovligeKombinasjonerSaksbehandlingService.hentMuligeBehandlingstemaer(null, Sakstyper.EU_EOS, Sakstemaer.UNNTAK, null, null)
         behandlingstemaer shouldContainAll listOf(
@@ -498,7 +537,7 @@ class LovligeKombinasjonerSaksbehandlingServiceTest {
     }
 
     @Test
-    fun `hentMuligeBehandlingstemaer_ingenHovedpartTrygdeavgift_skalReturnereIngenSedBehandlingstema`() {
+    fun hentMuligeBehandlingstemaer_ingenHovedpartTrygdeavgift_skalReturnereIngenSedBehandlingstema() {
         val behandlingstemaer =
             lovligeKombinasjonerSaksbehandlingService.hentMuligeBehandlingstemaer(null, Sakstyper.EU_EOS, Sakstemaer.TRYGDEAVGIFT, null, null)
         behandlingstemaer shouldNotContainAll listOf(
@@ -511,7 +550,7 @@ class LovligeKombinasjonerSaksbehandlingServiceTest {
     }
 
     @Test
-    fun `hentMuligeBehandlingstemaer_EuEosUnntak_skalReturnereA1AnmodningOmUnntakPapir`() {
+    fun hentMuligeBehandlingstemaer_EuEosUnntak_skalReturnereA1AnmodningOmUnntakPapir() {
         val behandlingstemaer = lovligeKombinasjonerSaksbehandlingService.hentMuligeBehandlingstemaer(
             Aktoersroller.BRUKER,
             Sakstyper.EU_EOS,
@@ -526,7 +565,7 @@ class LovligeKombinasjonerSaksbehandlingServiceTest {
     }
 
     @Test
-    fun `hentMuligeBehandlingstemaer_manglendeInnbetalingTrygdeavgift_skalKunReturnereEksisterendeBehTema`() {
+    fun hentMuligeBehandlingstemaer_manglendeInnbetalingTrygdeavgift_skalKunReturnereEksisterendeBehTema() {
         val aktivBehandling = Behandling().apply {
             tema = Behandlingstema.YRKESAKTIV
             type = Behandlingstyper.MANGLENDE_INNBETALING_TRYGDEAVGIFT
@@ -544,7 +583,7 @@ class LovligeKombinasjonerSaksbehandlingServiceTest {
     }
 
     @Test
-    fun `hentMuligeBehandlingstemaer_sistBehandlingstemaErSedTema_skalKunReturnereSistBehandlingstema`() {
+    fun hentMuligeBehandlingstemaer_sistBehandlingstemaErSedTema_skalKunReturnereSistBehandlingstema() {
         val behandlingstemaer = lovligeKombinasjonerSaksbehandlingService.hentMuligeBehandlingstemaer(
             Aktoersroller.BRUKER,
             Sakstyper.EU_EOS,
@@ -556,22 +595,23 @@ class LovligeKombinasjonerSaksbehandlingServiceTest {
     }
 
     @Test
-    fun `hentMuligeBehandlingstyper_sisteBehandlingFinnes_skalIkkeReturnereFørstegangsbehandling`() {
+    fun hentMuligeBehandlingstyperForKnyttTilSak_sisteBehandlingFinnes_skalIkkeReturnereFørstegangsbehandling() {
         val fagsak = FagsakTestFactory.lagFagsak()
         val sisteBehandling = behandlingMedTemaOgType(Behandlingstema.UTSENDT_ARBEIDSTAKER, Behandlingstyper.FØRSTEGANG).apply {
             this.fagsak = fagsak
             status = Behandlingsstatus.AVSLUTTET
         }
+        sisteBehandling.fagsak.behandlinger.add(sisteBehandling)
+        every { fagsakService.hentFagsak(sisteBehandling.fagsak.saksnummer) } returns sisteBehandling.fagsak
 
-        val muligeBehandlingstyper = lovligeKombinasjonerSaksbehandlingService.hentMuligeBehandlingstyper(
+
+        val muligeBehandlingstyper = lovligeKombinasjonerSaksbehandlingService.hentMuligeBehandlingstyperForKnyttTilSak(
             Aktoersroller.BRUKER,
-            Sakstyper.EU_EOS,
-            Sakstemaer.MEDLEMSKAP_LOVVALG,
-            Behandlingstema.UTSENDT_ARBEIDSTAKER,
-            null,
-            sisteBehandling,
-            null
+            sisteBehandling.fagsak.saksnummer,
+            Behandlingstema.UTSENDT_ARBEIDSTAKER
         )
+
+
         muligeBehandlingstyper shouldContainExactly listOf(
             Behandlingstyper.NY_VURDERING,
             Behandlingstyper.KLAGE,
@@ -581,16 +621,15 @@ class LovligeKombinasjonerSaksbehandlingServiceTest {
     }
 
     @Test
-    fun `hentMuligeBehandlingstyper_unntakA1AnmodningOmUnntakPåPapir_skalReturnereBehTypeFØRSTEGANG_NY_VURDERING_KLAGE`() {
+    fun hentMuligeBehandlingstyper_unntakA1AnmodningOmUnntakPåPapir_skalReturnereBehTypeFØRSTEGANG_NY_VURDERING_KLAGE() {
         val muligeBehandlingstyper = lovligeKombinasjonerSaksbehandlingService.hentMuligeBehandlingstyper(
             Aktoersroller.BRUKER,
             Sakstyper.EU_EOS,
             Sakstemaer.UNNTAK,
-            Behandlingstema.A1_ANMODNING_OM_UNNTAK_PAPIR,
-            null,
-            null,
-            null
+            Behandlingstema.A1_ANMODNING_OM_UNNTAK_PAPIR
         )
+
+
         muligeBehandlingstyper shouldHaveSize 4
         muligeBehandlingstyper shouldContainExactly listOf(
             Behandlingstyper.FØRSTEGANG,
@@ -601,52 +640,55 @@ class LovligeKombinasjonerSaksbehandlingServiceTest {
     }
 
     @Test
-    fun `hentMuligeBehandlingstyper_sisteBehandlingAktiv_skalReturnereTomListe`() {
+    fun hentMuligeBehandlingstyperForKnyttTilSak_sisteBehandlingAktiv_skalReturnereTomListe() {
         val fagsak = FagsakTestFactory.lagFagsak()
         val sisteBehandling = behandlingMedTemaOgType(Behandlingstema.UTSENDT_ARBEIDSTAKER, Behandlingstyper.FØRSTEGANG).apply {
+            id = 1L
             this.fagsak = fagsak
             status = Behandlingsstatus.UNDER_BEHANDLING
         }
+        fagsak.behandlinger.add(sisteBehandling)
+        every { fagsakService.hentFagsak(sisteBehandling.fagsak.saksnummer) } returns sisteBehandling.fagsak
 
-        val muligeBehandlingstyper = lovligeKombinasjonerSaksbehandlingService.hentMuligeBehandlingstyper(
+
+        val muligeBehandlingstyper = lovligeKombinasjonerSaksbehandlingService.hentMuligeBehandlingstyperForKnyttTilSak(
             Aktoersroller.BRUKER,
-            Sakstyper.EU_EOS,
-            Sakstemaer.MEDLEMSKAP_LOVVALG,
+            fagsak.saksnummer,
             Behandlingstema.UTSENDT_ARBEIDSTAKER,
-            null,
-            sisteBehandling,
-            Behandlingsresultat()
         )
+
 
         muligeBehandlingstyper.shouldBeEmpty()
     }
 
     @Test
-    fun `hentMuligeBehandlingstyper_sisteBehandlingAktivOgAnmodningsperiodeSendt_skalReturnereKunNyVurdering`() {
+    fun hentMuligeBehandlingstyperForKnyttTilSak_sisteBehandlingAktivOgAnmodningsperiodeSendt_skalReturnereKunNyVurdering() {
         val fagsak = FagsakTestFactory.lagFagsak()
         val sisteBehandling = behandlingMedTemaOgType(Behandlingstema.UTSENDT_ARBEIDSTAKER, Behandlingstyper.FØRSTEGANG).apply {
+            id = 1L
             this.fagsak = fagsak
             status = Behandlingsstatus.UNDER_BEHANDLING
         }
         val anmodningsperiode = Anmodningsperiode().apply { setSendtUtland(true) }
         val sisteBehandlingsresultat = Behandlingsresultat().apply { anmodningsperioder.add(anmodningsperiode) }
+        fagsak.behandlinger.add(sisteBehandling)
+        every { behandlingsresultatService.hentBehandlingsresultatMedAnmodningsperioder(sisteBehandling.id) } returns sisteBehandlingsresultat
+        every { fagsakService.hentFagsak(fagsak.saksnummer) } returns sisteBehandling.fagsak
 
-        val muligeBehandlingstyper = lovligeKombinasjonerSaksbehandlingService.hentMuligeBehandlingstyper(
+
+        val muligeBehandlingstyper = lovligeKombinasjonerSaksbehandlingService.hentMuligeBehandlingstyperForKnyttTilSak(
             Aktoersroller.BRUKER,
-            Sakstyper.EU_EOS,
-            Sakstemaer.MEDLEMSKAP_LOVVALG,
+            sisteBehandling.fagsak.saksnummer,
             Behandlingstema.UTSENDT_ARBEIDSTAKER,
-            null,
-            sisteBehandling,
-            sisteBehandlingsresultat
         )
+
 
         muligeBehandlingstyper shouldHaveSize 1
         muligeBehandlingstyper shouldContainExactly listOf(Behandlingstyper.NY_VURDERING)
     }
 
     @Test
-    fun `hentMuligeBehandlingstyper_aktivBehandlingSomErFørst_skalReturnereAlleBehandlingstyper`() {
+    fun hentMuligeBehandlingstyperForEndring_aktivBehandlingSomErFørst_skalReturnereAlleBehandlingstyper() {
         val fagsak = FagsakTestFactory.lagFagsak()
         val aktivBehandling = behandlingMedTemaOgType(Behandlingstema.UTSENDT_ARBEIDSTAKER, Behandlingstyper.FØRSTEGANG).apply {
             id = 1L
@@ -655,15 +697,17 @@ class LovligeKombinasjonerSaksbehandlingServiceTest {
         }
         fagsak.leggTilBehandling(aktivBehandling)
         every { behandlingService.hentBehandling(aktivBehandling.id) } returns aktivBehandling
+        every { fagsakService.hentFagsak(aktivBehandling.fagsak.saksnummer) } returns fagsak
 
-        val muligeBehandlingstyper = lovligeKombinasjonerSaksbehandlingService.hentMuligeBehandlingstyper(
+
+        val muligeBehandlingstyper = lovligeKombinasjonerSaksbehandlingService.hentMuligeBehandlingstyperForEndring(
             Aktoersroller.BRUKER,
             Sakstyper.EU_EOS,
             Sakstemaer.MEDLEMSKAP_LOVVALG,
             Behandlingstema.UTSENDT_ARBEIDSTAKER,
-            aktivBehandling.id,
-            null
+            fagsak.saksnummer
         )
+
 
         muligeBehandlingstyper shouldContainExactly listOf(
             Behandlingstyper.FØRSTEGANG,
@@ -675,7 +719,7 @@ class LovligeKombinasjonerSaksbehandlingServiceTest {
     }
 
     @Test
-    fun `hentMuligeBehandlingstyper_aktivBehandlingSomIkkeErFørst_skalIkkeHaFørstegang`() {
+    fun hentMuligeBehandlingstyperForKnyttTilSak_aktivBehandlingSomIkkeErFørst_skalIkkeHaFørstegang() {
         val fagsak = FagsakTestFactory.lagFagsak()
 
         val forrigeBehandling = behandlingMedTemaOgType(Behandlingstema.UTSENDT_ARBEIDSTAKER, Behandlingstyper.FØRSTEGANG).apply {
@@ -693,27 +737,27 @@ class LovligeKombinasjonerSaksbehandlingServiceTest {
         fagsak.leggTilBehandling(aktivBehandling)
 
         every { behandlingService.hentBehandling(aktivBehandling.id) } returns aktivBehandling
+        every { fagsakService.hentFagsak(aktivBehandling.fagsak.saksnummer) } returns fagsak
 
-        val muligeBehandlingstyper = lovligeKombinasjonerSaksbehandlingService.hentMuligeBehandlingstyper(
+
+        val muligeBehandlingstyper = lovligeKombinasjonerSaksbehandlingService.hentMuligeBehandlingstyperForKnyttTilSak(
             Aktoersroller.BRUKER,
-            Sakstyper.EU_EOS,
-            Sakstemaer.MEDLEMSKAP_LOVVALG,
-            Behandlingstema.UTSENDT_ARBEIDSTAKER,
-            aktivBehandling.id,
-            null
+            fagsak.saksnummer,
+            Behandlingstema.UTSENDT_ARBEIDSTAKER
         )
+
 
         muligeBehandlingstyper shouldNotContain Behandlingstyper.FØRSTEGANG
     }
 
     @Test
-    fun `hentMuligeBehandlingsårsaktyper_behandlingstypeErManglendeInnbetalingTrygdeavgift`() {
+    fun hentMuligeBehandlingsårsaktyper_behandlingstypeErManglendeInnbetalingTrygdeavgift() {
         val typer = lovligeKombinasjonerSaksbehandlingService.hentMuligeBehandlingsårsaktyper(Behandlingstyper.MANGLENDE_INNBETALING_TRYGDEAVGIFT)
         typer shouldContainExactly listOf(Behandlingsaarsaktyper.MELDING_OM_MANGLENDE_INNBETALING)
     }
 
     @Test
-    fun `hentMuligeBehandlingsårsaktyper_behandlingstypeErAnnetEnnManglendeInnbetalingTrygdeavgift`() {
+    fun hentMuligeBehandlingsårsaktyper_behandlingstypeErAnnetEnnManglendeInnbetalingTrygdeavgift() {
         val typer = lovligeKombinasjonerSaksbehandlingService.hentMuligeBehandlingsårsaktyper(Behandlingstyper.FØRSTEGANG)
         typer shouldContainExactly listOf(
             Behandlingsaarsaktyper.SØKNAD,
@@ -724,7 +768,7 @@ class LovligeKombinasjonerSaksbehandlingServiceTest {
     }
 
     @Test
-    fun `hentMuligeBehandlingStatuser_harNoyaktigRekkefolgePaMuligeStatus`() {
+    fun hentMuligeBehandlingStatuser_harNoyaktigRekkefolgePaMuligeStatus() {
         val muligeStatuser = lovligeKombinasjonerSaksbehandlingService.hentMuligeBehandlingStatuser()
         muligeStatuser shouldContainExactly listOf(
             Behandlingsstatus.UNDER_BEHANDLING,
@@ -735,7 +779,7 @@ class LovligeKombinasjonerSaksbehandlingServiceTest {
     }
 
     @Test
-    fun `hentMuligeBehandlingStatuser_avsluttetErIkkeMulig`() {
+    fun hentMuligeBehandlingStatuser_avsluttetErIkkeMulig() {
         val muligeStatuser = lovligeKombinasjonerSaksbehandlingService.hentMuligeBehandlingStatuser()
         muligeStatuser shouldContainExactlyInAnyOrder listOf(
             Behandlingsstatus.UNDER_BEHANDLING,

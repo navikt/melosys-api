@@ -75,6 +75,8 @@ class MedlPeriodeKonverterTest {
             .isEqualTo(Tilleggsbestemmelser_konv_efta_storbritannia.KONV_EFTA_STORBRITANNIA_ART13_4_1);
         assertThat(MedlPeriodeKonverter.hentLovvalgBestemmelse(lovvalgsperiode(Lovvalgbestemmelser_883_2004.FO_883_2004_ART11_3A, Tilleggsbestemmelser_883_2004.FO_883_2004_ART11_4_1)))
             .isEqualTo(Tilleggsbestemmelser_883_2004.FO_883_2004_ART11_4_1);
+        assertThat(MedlPeriodeKonverter.hentLovvalgBestemmelse(lovvalgsperiode(Lovvalgbestemmelser_883_2004.FO_883_2004_ART11_3A, Tilleggsbestemmelser_883_2004.FO_883_2004_ART11_5)))
+            .isEqualTo(Tilleggsbestemmelser_883_2004.FO_883_2004_ART11_5);
     }
 
     private Lovvalgsperiode lovvalgsperiode(LovvalgBestemmelse lovvalgBestemmelse, LovvalgBestemmelse tilleggBestemmelse) {
