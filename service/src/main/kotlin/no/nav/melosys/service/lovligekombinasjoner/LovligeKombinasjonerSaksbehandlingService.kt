@@ -166,7 +166,7 @@ class LovligeKombinasjonerSaksbehandlingService(
         val fagsak = fagsakService.hentFagsak(saksnummer)
         val sisteBehandling = fagsak.hentSistRegistrertBehandling()
 
-        var behandlingstyper = hentMuligeBehandlingstyper(hovedpart, fagsak.type, fagsak.tema, behandlingstema, sisteBehandling).toMutableSet()
+        val behandlingstyper = hentMuligeBehandlingstyper(hovedpart, fagsak.type, fagsak.tema, behandlingstema, sisteBehandling).toMutableSet()
         if (sisteBehandling.erInaktiv()) {
             behandlingstyper.remove(Behandlingstyper.FØRSTEGANG)
         }
@@ -224,7 +224,7 @@ class LovligeKombinasjonerSaksbehandlingService(
     ): Set<Behandlingstyper> {
         val fagsak = fagsakService.hentFagsak(saksnummer)
         val aktivBehandling = fagsak.hentAktivBehandlingIkkeÅrsavregning()
-        var behandlingstyper =
+        val behandlingstyper =
             hentMuligeBehandlingstyper(hovedpart, sakstype, sakstema, behandlingstema, null).toMutableSet()
 
         if (aktivBehandling.fagsak.behandlinger.size > 1) {
@@ -357,7 +357,7 @@ class LovligeKombinasjonerSaksbehandlingService(
     ) {
         validerSakstema(hovedpart, sakstype, sakstema)
         validerBehandlingstema(hovedpart, sakstype, sakstema, behandlingstema, aktivBehandling, null)
-        validerBehandlingstype(hovedpart, sakstype, sakstema, behandlingstema, behandlingstype, null)
+        validerBehandlingstype(hovedpart, sakstype, sakstema, behandlingstema, behandlingstype)
     }
 
     fun validerBehandlingstemaOgBehandlingstypeForAndregangsbehandling(
@@ -401,14 +401,12 @@ class LovligeKombinasjonerSaksbehandlingService(
         sakstema: Sakstemaer,
         behandlingstema: Behandlingstema,
         behandlingstype: Behandlingstyper,
-        sistBehandling: Behandling?
     ) {
         if (!hentMuligeBehandlingstyper(
                 hovedpart,
                 sakstype,
                 sakstema,
                 behandlingstema,
-                sistBehandling,
             ).contains(behandlingstype)
         ) {
             throw FunksjonellException("$behandlingstype er ikke en lovlig behandlingstype med de andre valgte verdiene")

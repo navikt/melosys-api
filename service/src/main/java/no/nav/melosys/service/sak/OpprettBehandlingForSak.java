@@ -1,7 +1,5 @@
 package no.nav.melosys.service.sak;
 
-import java.util.Objects;
-
 import no.nav.melosys.domain.Behandling;
 import no.nav.melosys.domain.Behandlingsresultat;
 import no.nav.melosys.domain.Fagsak;
