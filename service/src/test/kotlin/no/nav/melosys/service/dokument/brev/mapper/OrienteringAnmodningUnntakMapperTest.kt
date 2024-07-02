@@ -58,7 +58,7 @@ internal class OrienteringAnmodningUnntakMapperTest {
 
         every { mockDokgenMapperDatahenter.hentBehandlingsresultat(ofType()) } returns lagBehandlingsResultat()
         every {
-            mockVilkaarsresultatService.oppfyllerVilkaar(
+            mockVilkaarsresultatService.harVilkaar(
                 ofType(), listOf(
                     Vilkaar.FO_883_2004_ART12_1,
                     Vilkaar.KONV_EFTA_STORBRITANNIA_ART14_1,
@@ -67,7 +67,7 @@ internal class OrienteringAnmodningUnntakMapperTest {
             )
         } returns true
         every {
-            mockVilkaarsresultatService.oppfyllerVilkaar(
+            mockVilkaarsresultatService.harVilkaar(
                 ofType(), listOf(
                     Vilkaar.FO_883_2004_ART12_2,
                     Vilkaar.KONV_EFTA_STORBRITANNIA_ART14_2,
