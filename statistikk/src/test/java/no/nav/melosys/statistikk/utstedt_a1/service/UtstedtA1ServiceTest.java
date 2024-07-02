@@ -109,6 +109,18 @@ class UtstedtA1ServiceTest {
     }
 
     @Test
+    void sendMeldingOmUtstedtA1_gbBestemmelseTogglePaa_forventIngenMelding() {
+        unleash.enable(ToggleName.MELOSYS_KONVENSJON_EFTA_LAND_OG_STORBRITANNIA);
+        when(behandlingsresultatService.hentBehandlingsresultat(BEHANDLING_ID)).thenReturn(lagBehandlingsresultat(false, lagBehandling(), Lovvalgbestemmelser_konv_efta_storbritannia.KONV_EFTA_STORBRITANNIA_ART14_2));
+
+        utstedtA1Service.sendMeldingOmUtstedtA1(BEHANDLING_ID);
+
+        verify(behandlingsresultatService).hentBehandlingsresultat(BEHANDLING_ID);
+        verify(landvelgerService, never()).hentUtenlandskTrygdemyndighetsland(anyLong());
+        verify(utstedtA1AivenProducer, never()).produserMelding(any(UtstedtA1Melding.class));
+    }
+
+    @Test
     void sendMeldingOmUtstedtA1_art13_forventTomLandkode() {
         when(behandlingsresultatService.hentBehandlingsresultat(BEHANDLING_ID)).thenReturn(lagBehandlingsresultat(false, lagBehandling(), Lovvalgbestemmelser_883_2004.FO_883_2004_ART13_1A));
         when(utstedtA1AivenProducer.produserMelding(any(UtstedtA1Melding.class))).thenAnswer(returnsFirstArg());

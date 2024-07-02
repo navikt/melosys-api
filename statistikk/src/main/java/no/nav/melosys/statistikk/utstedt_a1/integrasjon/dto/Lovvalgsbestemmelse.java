@@ -8,8 +8,6 @@ import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.Maps;
 import no.nav.melosys.domain.kodeverk.LovvalgBestemmelse;
 import no.nav.melosys.domain.kodeverk.lovvalgsbestemmelser.Lovvalgbestemmelser_883_2004;
-import no.nav.melosys.domain.kodeverk.lovvalgsbestemmelser.Lovvalgbestemmelser_konv_efta_storbritannia;
-import no.nav.melosys.service.dokument.brev.mapper.felles.KonvEftaStorbritanniaLovvalgbestemmelser;
 
 public enum Lovvalgsbestemmelse {
     ART_11_3_a("11.3a"),
@@ -54,10 +52,6 @@ public enum Lovvalgsbestemmelse {
         return Optional.ofNullable(LOVVALGSBESTEMMELSE_MAP.get(lovvalgBestemmelse))
             .orElseThrow(() -> new UnsupportedOperationException(
                 String.format("Lovvalgsbestemmelse %s støttes ikke for melding om utstedt A1", lovvalgBestemmelse)));
-    }
-
-    public static Lovvalgsbestemmelse avKonvensjonEftaStorbritannia(Lovvalgbestemmelser_konv_efta_storbritannia lovvalgBestemmelse) {
-        return av(KonvEftaStorbritanniaLovvalgbestemmelser.GB_KONV_LOVVALGBESTEMMELSE_MAP.get(lovvalgBestemmelse));
     }
 
     Lovvalgsbestemmelse(String kode) {
