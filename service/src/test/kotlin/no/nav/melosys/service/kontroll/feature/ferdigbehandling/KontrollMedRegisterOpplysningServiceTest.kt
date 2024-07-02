@@ -17,6 +17,7 @@ import no.nav.melosys.domain.dokument.medlemskap.MedlemskapDokument
 import no.nav.melosys.domain.kodeverk.Sakstyper
 import no.nav.melosys.domain.kodeverk.begrunnelser.Kontroll_begrunnelser
 import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingsresultattyper
+import no.nav.melosys.domain.kodeverk.lovvalgsbestemmelser.Lovvalgbestemmelser_883_2004
 import no.nav.melosys.domain.mottatteopplysninger.MottatteOpplysningerData
 import no.nav.melosys.service.LovvalgsperiodeService
 import no.nav.melosys.service.SaksbehandlingDataFactory
@@ -86,7 +87,10 @@ internal class KontrollMedRegisterOpplysningServiceTest {
     @Test
     fun kontrollerVedtak_oppdatererRegisteropplysningerOgFårKontrollFeilFraKontroller() {
         every { persondataFasade.hentPerson(any()) } returns PersonopplysningerObjectFactory.lagPersonopplysninger()
-        every { lovvalgsperiodeService.hentLovvalgsperiode(BEHANDLING_ID) } returns Lovvalgsperiode().apply { tom = null }
+        every { lovvalgsperiodeService.hentLovvalgsperiode(BEHANDLING_ID) } returns Lovvalgsperiode().apply {
+            tom = null
+            bestemmelse = Lovvalgbestemmelser_883_2004.FO_883_2004_ART16_1
+        }
         every { lovvalgsperiodeService.finnOpprinneligLovvalgsperiode(BEHANDLING_ID) } returns Optional.empty()
         behandling.saksopplysninger.add(Saksopplysning().apply {
             type = SaksopplysningType.MEDL

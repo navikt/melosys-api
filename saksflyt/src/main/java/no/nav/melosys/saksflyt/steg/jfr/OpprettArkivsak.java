@@ -1,7 +1,5 @@
 package no.nav.melosys.saksflyt.steg.jfr;
 
-import java.util.Optional;
-
 import no.nav.melosys.domain.Behandling;
 import no.nav.melosys.domain.Fagsak;
 import no.nav.melosys.exception.FunksjonellException;
@@ -50,7 +48,7 @@ public class OpprettArkivsak implements StegBehandler {
         String aktørId = fagsak.finnBrukersAktørID();
         String virksomhetOrgnr = fagsak.finnVirksomhetsOrgnr();
 
-        var tema = oppgaveFactory.utledTema(fagsak.getType(), fagsak.getTema(), behandling.getTema());
+        var tema = oppgaveFactory.utledTema(fagsak.getType(), fagsak.getTema(), behandling.getTema(), behandling.getType());
 
         Long arkivsakID;
         if (aktørId != null) {

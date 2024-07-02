@@ -12,6 +12,7 @@ import no.nav.melosys.domain.Behandling
 import no.nav.melosys.domain.FagsakTestFactory
 import no.nav.melosys.domain.kodeverk.Avsendertyper
 import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingstema
+import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingstyper
 import no.nav.melosys.exception.FunksjonellException
 import no.nav.melosys.integrasjon.joark.JoarkFasade
 import no.nav.melosys.integrasjon.joark.JournalpostOppdatering
@@ -27,6 +28,7 @@ import java.time.LocalDate
 
 @ExtendWith(MockKExtension::class)
 internal class OppdaterOgFerdigstillJournalpostTest {
+
     @RelaxedMockK
     private lateinit var joarkFasade: JoarkFasade
     private val oppgaveFactory = OppgaveFactory()
@@ -141,6 +143,7 @@ internal class OppdaterOgFerdigstillJournalpostTest {
         behandling = Behandling().apply {
             tema = Behandlingstema.UTSENDT_ARBEIDSTAKER
             fagsak = FagsakTestFactory.lagFagsak()
+            type = Behandlingstyper.FØRSTEGANG
         }
     }
 

@@ -17,6 +17,7 @@ import no.nav.melosys.domain.kodeverk.Sakstemaer
 import no.nav.melosys.domain.kodeverk.Sakstyper
 import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingsstatus
 import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingstema
+import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingstyper
 import no.nav.melosys.integrasjon.joark.JoarkFasade
 import no.nav.melosys.service.aktoer.UtenlandskMyndighetService
 import no.nav.melosys.service.dokument.sed.EessiService
@@ -62,6 +63,7 @@ class SedSomBrevServiceTest {
         val behandling = Behandling()
         behandling.id = 123
         behandling.tema = Behandlingstema.YRKESAKTIV
+        behandling.type = Behandlingstyper.FØRSTEGANG
         behandling.status = Behandlingsstatus.UNDER_BEHANDLING
         behandling.fagsak = fagsak
 

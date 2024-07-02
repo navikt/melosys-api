@@ -99,7 +99,7 @@ internal class FaktureringEventListenerTest {
                 avsluttetBehandling.registrertDato
             )
         } returns listOf(historiskFullmektig)
-        every { trygdeavgiftService.harFagsakBehandlingerMedTrygdeavgift(fagsak.saksnummer) } returns true
+        every { trygdeavgiftService.harFagsakBehandlingerMedTrygdeavgift(fagsak.saksnummer, true) } returns true
         every { prosessinstansService.opprettProsessinstansOppdaterFaktura(avsluttetBehandling) } just runs
 
 
@@ -225,7 +225,7 @@ internal class FaktureringEventListenerTest {
                 avsluttetBehandling.registrertDato
             )
         } returns listOf(historiskFullmektig)
-        every { trygdeavgiftService.harFagsakBehandlingerMedTrygdeavgift(fagsak.saksnummer) } returns true
+        every { trygdeavgiftService.harFagsakBehandlingerMedTrygdeavgift(fagsak.saksnummer, true) } returns true
         every { prosessinstansService.opprettProsessinstansOppdaterFaktura(avsluttetBehandling) } just runs
 
 
