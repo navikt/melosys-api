@@ -8,7 +8,6 @@ import no.nav.melosys.exception.FunksjonellException;
 import no.nav.melosys.featuretoggle.ToggleName;
 import no.nav.melosys.service.LandvelgerService;
 import no.nav.melosys.service.behandling.BehandlingsresultatService;
-import no.nav.melosys.service.dokument.brev.mapper.felles.KonvEftaStorbritanniaLovvalgbestemmelser;
 import no.nav.melosys.statistikk.utstedt_a1.integrasjon.UtstedtA1AivenProducer;
 import no.nav.melosys.statistikk.utstedt_a1.integrasjon.dto.A1TypeUtstedelse;
 import no.nav.melosys.statistikk.utstedt_a1.integrasjon.dto.Lovvalgsbestemmelse;
@@ -48,17 +47,11 @@ public class UtstedtA1Service {
         Behandlingsresultat behandlingsresultat = behandlingsresultatService.hentBehandlingsresultat(behandlingID);
         if (behandlingsresultat.a1Produseres()) {
             var lovvalgsbestemmelse = behandlingsresultat.finnLovvalgsperiode().map(Lovvalgsperiode::getBestemmelse).orElse(null);
-            var erStorbritannia = Arrays.stream(Lovvalgbestemmelser_konv_efta_storbritannia.values()).anyMatch(bestemmelse -> bestemmelse == lovvalgsbestemmelse);
-
-            if (unleash.isEnabled(ToggleName.MELOSYS_KONVENSJON_EFTA_LAND_OG_STORBRITANNIA) && erStorbritannia) {
-                log.info("Produserer melding om utstedt A1(GB-bestemmelser) for behandling {}, med bestemmelse {}", behandlingID, lovvalgsbestemmelse);
-                sendMeldingOmUtstedtA1(behandlingsresultat);
-            }
-            if (!unleash.isEnabled(ToggleName.MELOSYS_KONVENSJON_EFTA_LAND_OG_STORBRITANNIA) && erStorbritannia) {
+            if (unleash.isEnabled(ToggleName.MELOSYS_KONVENSJON_EFTA_LAND_OG_STORBRITANNIA) && Arrays.stream(Lovvalgbestemmelser_konv_efta_storbritannia.values()).anyMatch(bestemmelse -> bestemmelse == lovvalgsbestemmelse)) {
+                // TODO Thang fikser sending for GB-bestemmelser i JIRA-sak MELOSYS-6651
                 log.info("Produserer ikke melding om utstedt A1 for behandling {} siden vi ikke støtter GB-bestemmelser enda", behandlingID);
                 return;
             }
-
             log.info("Produserer melding om utstedt A1 for behandling {}", behandlingID);
             sendMeldingOmUtstedtA1(behandlingsresultat);
         } else {
@@ -80,12 +73,7 @@ public class UtstedtA1Service {
         final String aktørID = fagsak.hentBrukersAktørID();
 
         final Lovvalgsperiode lovvalgsperiode = behandlingsresultat.hentLovvalgsperiode();
-        boolean erStorbritannia = Arrays.stream(Lovvalgbestemmelser_konv_efta_storbritannia.values()).anyMatch(bestemmelse -> bestemmelse == lovvalgsperiode.getBestemmelse());
-
-        final Lovvalgsbestemmelse artikkel = erStorbritannia
-            ? Lovvalgsbestemmelse.avKonvensjonEftaStorbritannia((Lovvalgbestemmelser_konv_efta_storbritannia) lovvalgsperiode.getBestemmelse())
-            : Lovvalgsbestemmelse.av(lovvalgsperiode.getBestemmelse());
-
+        final Lovvalgsbestemmelse artikkel = Lovvalgsbestemmelse.av(lovvalgsperiode.getBestemmelse());
         final String utsendtTilLand = hentUtsendtTilLand(behandlingID, lovvalgsperiode);
 
         final VedtakMetadata vedtakMetadata = behandlingsresultat.getVedtakMetadata();

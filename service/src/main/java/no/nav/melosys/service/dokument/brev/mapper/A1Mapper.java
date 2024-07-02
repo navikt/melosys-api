@@ -1,23 +1,17 @@
 package no.nav.melosys.service.dokument.brev.mapper;
 
-import java.time.Instant;
-import java.util.*;
-import java.util.stream.Collectors;
-import java.util.stream.Stream;
-import javax.xml.datatype.DatatypeConfigurationException;
-
-import no.nav.dok.melosysbrev._000067.LovvalgsperiodeType;
 import no.nav.dok.melosysbrev._000067.*;
-import no.nav.dok.melosysbrev.felles.melosys_felles.*;
+import no.nav.dok.melosysbrev.felles.melosys_felles.BostedsadresseType;
+import no.nav.dok.melosysbrev.felles.melosys_felles.KjoennKode;
+import no.nav.dok.melosysbrev.felles.melosys_felles.YrkesaktivitetsKode;
+import no.nav.dok.melosysbrev.felles.melosys_felles.YrkesgruppeKode;
 import no.nav.melosys.domain.Behandling;
 import no.nav.melosys.domain.Behandlingsresultat;
 import no.nav.melosys.domain.Lovvalgsperiode;
 import no.nav.melosys.domain.adresse.StrukturertAdresse;
 import no.nav.melosys.domain.avklartefakta.AvklartVirksomhet;
 import no.nav.melosys.domain.dokument.felles.Land;
-import no.nav.melosys.domain.eessi.sed.Bestemmelse;
 import no.nav.melosys.domain.kodeverk.Land_iso2;
-import no.nav.melosys.domain.kodeverk.lovvalgsbestemmelser.Lovvalgbestemmelser_konv_efta_storbritannia;
 import no.nav.melosys.domain.person.Persondata;
 import no.nav.melosys.domain.person.adresse.Kontaktadresse;
 import no.nav.melosys.domain.person.adresse.Oppholdsadresse;
@@ -28,7 +22,6 @@ import no.nav.melosys.service.brev.felles.TilleggsbestemmelseKodeMapper;
 import no.nav.melosys.service.dokument.brev.BrevDataA1;
 import no.nav.melosys.service.dokument.brev.mapper.arbeidssted.Arbeidssted;
 import no.nav.melosys.service.dokument.brev.mapper.arbeidssted.IkkeFysiskArbeidssted;
-import no.nav.melosys.service.dokument.brev.mapper.felles.KonvEftaStorbritanniaLovvalgbestemmelser;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.text.WordUtils;
 
@@ -139,16 +132,9 @@ class A1Mapper {
     private LovvalgsperiodeType mapLovvalgsperiode(Lovvalgsperiode lovvalgsperiode) {
         LovvalgsperiodeType brevPeriode = new LovvalgsperiodeType();
         brevPeriode.setLovvalgsLand(lovvalgsperiode.getLovvalgsland().getKode());
-        Boolean erStorbritannia = Arrays.stream(Lovvalgbestemmelser_konv_efta_storbritannia.values()).anyMatch(bestemmelse -> bestemmelse == lovvalgsperiode.getBestemmelse());
-
-        brevPeriode.setLovvalgsbestemmelse(LovvalgsbestemmelseKodeMapper.map(
-            erStorbritannia ? KonvEftaStorbritanniaLovvalgbestemmelser.GB_KONV_LOVVALGBESTEMMELSE_MAP.get(lovvalgsperiode.getBestemmelse()) : lovvalgsperiode.getBestemmelse())
-        );
-
+        brevPeriode.setLovvalgsbestemmelse(LovvalgsbestemmelseKodeMapper.map(lovvalgsperiode.getBestemmelse()));
         if (lovvalgsperiode.getTilleggsbestemmelse() != null) {
-            brevPeriode.setTilleggsbestemmelse(TilleggsbestemmelseKodeMapper.map(
-                erStorbritannia ? KonvEftaStorbritanniaLovvalgbestemmelser.GB_KONV_TILLEGGBESTEMMELSE_MAP.get(lovvalgsperiode.getTilleggsbestemmelse()) : lovvalgsperiode.getTilleggsbestemmelse())
-            );
+            brevPeriode.setTilleggsbestemmelse(TilleggsbestemmelseKodeMapper.map(lovvalgsperiode.getTilleggsbestemmelse()));
         }
 
         try {
