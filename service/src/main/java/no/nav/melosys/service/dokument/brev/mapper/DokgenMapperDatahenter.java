@@ -107,11 +107,17 @@ public class DokgenMapperDatahenter {
         return behandlingsresultatService.hentBehandlingsresultat(behandlingId);
     }
 
-     AvklartVirksomhet hentAvklartVirksomhet(Behandling behandling) {
-            var avklarteVirksomheter = avklarteVirksomheterService.hentUtenlandskeVirksomheter(behandling);
+    public AvklartVirksomhet hentAvklartVirksomhet(Behandling behandling) {
+        var avklarteVirksomheter = avklarteVirksomheterService.hentAlleNorskeVirksomheter(behandling);
+        if (avklarteVirksomheter.size() == 1) {
+            return avklarteVirksomheter.get(0);
+        }
+        avklarteVirksomheter = avklarteVirksomheterService.hentUtenlandskeVirksomheter(behandling);
+
         if (avklarteVirksomheter.size() != 1) {
             throw new FunksjonellException("Fant " + avklarteVirksomheter.size() + " avklarte virksomheter for behandling: " + behandling + ". Må være 1 for trygdeavtale");
         }
+
         return avklarteVirksomheter.get(0);
     }
 }
