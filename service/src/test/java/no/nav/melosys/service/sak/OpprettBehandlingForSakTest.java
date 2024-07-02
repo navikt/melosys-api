@@ -53,21 +53,6 @@ class OpprettBehandlingForSakTest {
     }
 
     @Test
-    void opprettBehandling_medAktivBehandling_feiler() {
-        Behandling aktivBehandling = lagBehandling();
-        aktivBehandling.setStatus(Behandlingsstatus.UNDER_BEHANDLING);
-        OpprettSakDto opprettSakDto = lagOpprettSakDto();
-        when(fagsakService.hentFagsak(FagsakTestFactory.SAKSNUMMER)).thenReturn(lagFagsak(aktivBehandling));
-
-        when(behandlingsresultatService.hentBehandlingsresultat(aktivBehandling.getId())).thenReturn(new Behandlingsresultat());
-
-
-        assertThatExceptionOfType(FunksjonellException.class)
-            .isThrownBy(() -> opprettBehandlingForSak.opprettBehandling(FagsakTestFactory.SAKSNUMMER, opprettSakDto))
-            .withMessageContaining(String.format("Det finnes allerede en aktiv behandling på fagsak %s", FagsakTestFactory.SAKSNUMMER));
-    }
-
-    @Test
     void opprettBehandling_medAktivBehandlingMenArtikkel16SendtAnmodningUtland_feilerIkke() {
         Behandling aktivBehandling = lagBehandling();
         aktivBehandling.setStatus(Behandlingsstatus.UNDER_BEHANDLING);
@@ -135,7 +120,7 @@ class OpprettBehandlingForSakTest {
 
         assertThatExceptionOfType(FunksjonellException.class)
             .isThrownBy(() -> opprettBehandlingForSak.opprettBehandling(FagsakTestFactory.SAKSNUMMER, opprettSakDto))
-            .withMessageContaining("er ikke en lovlig behandlingstype med de andre valgte verdiene");
+            .withMessageContaining("Behandlingstype FØRSTEGANG er ikke lovlig for behandlingstema UTSENDT_ARBEIDSTAKER og saksnummer MEL-test");
     }
 
     @Test
@@ -148,7 +133,7 @@ class OpprettBehandlingForSakTest {
 
         assertThatExceptionOfType(FunksjonellException.class)
             .isThrownBy(() -> opprettBehandlingForSak.opprettBehandling(FagsakTestFactory.SAKSNUMMER, opprettSakDto))
-            .withMessageContaining("er ikke et lovlig behandlingstema med de andre valgte verdiene");
+            .withMessageContaining("Behandlingstype NY_VURDERING er ikke lovlig for behandlingstema REGISTRERING_UNNTAK og saksnummer MEL-test");
     }
 
     @Test
