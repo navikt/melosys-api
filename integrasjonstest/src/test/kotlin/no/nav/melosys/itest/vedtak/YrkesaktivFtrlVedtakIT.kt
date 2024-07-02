@@ -9,7 +9,6 @@ import com.github.tomakehurst.wiremock.extension.ResponseTransformerV2
 import com.github.tomakehurst.wiremock.http.Response
 import com.github.tomakehurst.wiremock.stubbing.ServeEvent
 import io.getunleash.FakeUnleash
-import io.github.jaspeen.ulid.ULID
 import io.kotest.assertions.withClue
 import io.kotest.matchers.collections.shouldHaveSize
 import io.kotest.matchers.nulls.shouldNotBeNull
@@ -100,11 +99,11 @@ class YrkesaktivFtrlVedtakIT(
 
     private var originalSubjectHandler: SubjectHandler? = null
     private val kafkaTopic = "teammelosys.manglende-fakturabetaling-local"
-    private lateinit var fakturaserieReferanse: String
+    private val fakturaserieReferanse: String = "01J17B5NTTDYKFB5DZTSSQEHJ0"
 
     @BeforeEach
     fun setup() {
-        fakturaserieReferanse = ULID.random().toString()
+        //fakturaserieReferanse = UlidCreator.getUlid().toString()
         MedlRepo.repo.clear()
         originalSubjectHandler = SubjectHandler.getInstance()
 
