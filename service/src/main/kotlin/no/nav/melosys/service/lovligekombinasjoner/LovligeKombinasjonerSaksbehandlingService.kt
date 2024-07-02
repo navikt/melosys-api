@@ -183,7 +183,7 @@ class LovligeKombinasjonerSaksbehandlingService(
                     Behandlingstema.ARBEID_KUN_NORGE
                 )
             }) {
-            return behandlingstyper.plus(Behandlingstyper.ÅRSAVREGNING)
+            behandlingstyper.add(Behandlingstyper.ÅRSAVREGNING)
         }
         return behandlingstyper
     }
