@@ -3,7 +3,6 @@ package no.nav.melosys.saksflyt.steg.arsavregning
 import mu.KotlinLogging
 import no.nav.melosys.domain.Behandling
 import no.nav.melosys.domain.Fagsak
-import no.nav.melosys.domain.kodeverk.Aktoersroller
 import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingsaarsaktyper
 import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingsstatus
 import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingstyper
@@ -16,7 +15,6 @@ import no.nav.melosys.service.avgift.TrygdeavgiftService
 import no.nav.melosys.service.avgift.aarsavregning.ÅrsavregningService
 import no.nav.melosys.service.behandling.BehandlingService
 import no.nav.melosys.service.behandling.BehandlingsresultatService
-import no.nav.melosys.service.persondata.PersondataService
 import no.nav.melosys.service.sak.FagsakService
 import org.springframework.stereotype.Component
 import java.time.LocalDate
@@ -26,7 +24,6 @@ private val log = KotlinLogging.logger { }
 @Component
 class OpprettÅrsavregningBehandling(
     private val fagsakService: FagsakService,
-    private val persondataService: PersondataService,
     private val trygdeavgiftService: TrygdeavgiftService,
     private val behandlingService: BehandlingService,
     private val behandslingsresultatService: BehandlingsresultatService,
