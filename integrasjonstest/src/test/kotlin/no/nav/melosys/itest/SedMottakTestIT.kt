@@ -111,13 +111,12 @@ class SedMottakTestIT(
 
 
         prosessinstansTestManager.executeAndWait(
-            waitForprosessType = ProsessType.MOTTAK_SED,
-            alsoWaitForprosessType = listOf(
-                ProsessType.REGISTRERING_UNNTAK_NY_SAK,
-                ProsessType.REGISTRERING_UNNTAK_GODKJENN,
-                ProsessType.MOTTAK_SED_JOURNALFØRING
-            ),
-            waitForProcessCount = 5
+            mapOf(
+                ProsessType.MOTTAK_SED to 2,
+                ProsessType.REGISTRERING_UNNTAK_NY_SAK to 1,
+                ProsessType.MOTTAK_SED_JOURNALFØRING to 1,
+                ProsessType.REGISTRERING_UNNTAK_GODKJENN to 1
+            )
         ) {
             melosysEessiMeldingKafkaTemplate.send(kafkaTopic, eessiMeldingA009)
             melosysEessiMeldingKafkaTemplate.send(kafkaTopic, eessiMeldingX008)
@@ -170,13 +169,12 @@ class SedMottakTestIT(
 
 
         prosessinstansTestManager.executeAndWait(
-            waitForprosessType = ProsessType.MOTTAK_SED,
-            alsoWaitForprosessType = listOf(
-                ProsessType.REGISTRERING_UNNTAK_NY_SAK,
-                ProsessType.REGISTRERING_UNNTAK_GODKJENN,
-                ProsessType.MOTTAK_SED_JOURNALFØRING
-            ),
-            waitForProcessCount = 5
+            mapOf(
+                ProsessType.MOTTAK_SED to 2,
+                ProsessType.REGISTRERING_UNNTAK_NY_SAK to 1,
+                ProsessType.MOTTAK_SED_JOURNALFØRING to 1,
+                ProsessType.REGISTRERING_UNNTAK_GODKJENN to 1
+            )
         ) {
             melosysEessiMeldingKafkaTemplate.send(kafkaTopic, eessiMeldingA009)
             melosysEessiMeldingKafkaTemplate.send(kafkaTopic, eessiMeldingX006)
@@ -224,9 +222,11 @@ class SedMottakTestIT(
         }
 
         prosessinstansTestManager.executeAndWait(
-            waitForprosessType = ProsessType.MOTTAK_SED,
-            alsoWaitForprosessType = listOf(ProsessType.ARBEID_FLERE_LAND_NY_SAK, ProsessType.MOTTAK_SED_JOURNALFØRING),
-            waitForProcessCount = 4
+            mapOf(
+                ProsessType.MOTTAK_SED to 2,
+                ProsessType.ARBEID_FLERE_LAND_NY_SAK to 1,
+                ProsessType.MOTTAK_SED_JOURNALFØRING to 1
+            )
         ) {
             melosysEessiMeldingKafkaTemplate.send(kafkaTopic, eessiMeldingA003)
             melosysEessiMeldingKafkaTemplate.send(kafkaTopic, eessiMeldingX006)
@@ -277,9 +277,11 @@ class SedMottakTestIT(
         }
 
         prosessinstansTestManager.executeAndWait(
-            waitForprosessType = ProsessType.MOTTAK_SED,
-            alsoWaitForprosessType = listOf(ProsessType.ARBEID_FLERE_LAND_NY_SAK, ProsessType.MOTTAK_SED_JOURNALFØRING),
-            waitForProcessCount = 4
+            mapOf(
+                ProsessType.MOTTAK_SED to 2,
+                ProsessType.ARBEID_FLERE_LAND_NY_SAK to 1,
+                ProsessType.MOTTAK_SED_JOURNALFØRING to 1
+            )
         ) {
             melosysEessiMeldingKafkaTemplate.send(kafkaTopic, eessiMeldingA003)
             melosysEessiMeldingKafkaTemplate.send(kafkaTopic, eessiMeldingX008)
@@ -331,9 +333,11 @@ class SedMottakTestIT(
         }
 
         prosessinstansTestManager.executeAndWait(
-            waitForprosessType = ProsessType.MOTTAK_SED,
-            alsoWaitForprosessType = listOf(ProsessType.ARBEID_FLERE_LAND_NY_SAK, ProsessType.MOTTAK_SED_JOURNALFØRING),
-            waitForProcessCount = 4
+            mapOf(
+                ProsessType.ARBEID_FLERE_LAND_NY_SAK to 1,
+                ProsessType.MOTTAK_SED_JOURNALFØRING to 1,
+                ProsessType.MOTTAK_SED to 2,
+            )
         ) {
             melosysEessiMeldingKafkaTemplate.send(kafkaTopic, eessiMeldingA003)
             melosysEessiMeldingKafkaTemplate.send(kafkaTopic, eessiMeldingX008)
@@ -389,12 +393,11 @@ class SedMottakTestIT(
         }
 
         prosessinstansTestManager.executeAndWait(
-            waitForprosessType = ProsessType.MOTTAK_SED,
-            alsoWaitForprosessType = listOf(
-                ProsessType.REGISTRERING_UNNTAK_NY_SAK,
-                ProsessType.MOTTAK_SED_JOURNALFØRING
-            ),
-            waitForProcessCount = 6
+            mapOf(
+                ProsessType.MOTTAK_SED to 3,
+                ProsessType.REGISTRERING_UNNTAK_NY_SAK to 1,
+                ProsessType.MOTTAK_SED_JOURNALFØRING to 1
+            )
         ) {
             melosysEessiMeldingKafkaTemplate.send(kafkaTopic, eessiMeldingA009)
             melosysEessiMeldingKafkaTemplate.send(kafkaTopic, eessiMeldingX001)
@@ -475,8 +478,10 @@ class SedMottakTestIT(
         )
 
         val vedtaksProsessInstans = prosessinstansTestManager.executeAndWait(
-            waitForprosessType = ProsessType.IVERKSETT_VEDTAK_EOS,
-            alsoWaitForprosessType = listOf(ProsessType.SEND_BREV)
+            mapOf(
+                ProsessType.IVERKSETT_VEDTAK_EOS to 1,
+                ProsessType.SEND_BREV to 2
+            ),
         ) {
             vedtaksfattingFasade.fattVedtak(
                 prosessinstanserSortert.get(1).behandling.id, FattVedtakRequest.Builder()
@@ -484,7 +489,7 @@ class SedMottakTestIT(
                     .medVedtakstype(Vedtakstyper.FØRSTEGANGSVEDTAK)
                     .build()
             )
-        }
+        }[ProsessType.IVERKSETT_VEDTAK_EOS]?.firstOrNull() ?: error("Fant ikke prosessinstans for vedtak")
 
         verify(exactly = 1) { utstedtA1AivenProducer.produserMelding(any()) }
         utstedtA1MeldingCapturingSlot.captured.apply {
@@ -607,8 +612,10 @@ class SedMottakTestIT(
         )
 
         val vedtaksProsessInstans = prosessinstansTestManager.executeAndWait(
-            waitForprosessType = ProsessType.IVERKSETT_VEDTAK_EOS,
-            alsoWaitForprosessType = listOf(ProsessType.SEND_BREV)
+            mapOf(
+                ProsessType.IVERKSETT_VEDTAK_EOS to 1,
+                ProsessType.SEND_BREV to 2
+            )
         ) {
             vedtaksfattingFasade.fattVedtak(
                 opprettNyVurderingProsessinstans.behandling.id, FattVedtakRequest.Builder()
@@ -616,7 +623,7 @@ class SedMottakTestIT(
                     .medVedtakstype(Vedtakstyper.KORRIGERT_VEDTAK)
                     .build()
             )
-        }
+        }[ProsessType.IVERKSETT_VEDTAK_EOS]?.firstOrNull() ?: error("Fant ikke prosessinstans for vedtak")
 
         verify(exactly = 1) { utstedtA1AivenProducer.produserMelding(any()) }
         utstedtA1MeldingCapturingSlot.captured.apply {
