@@ -47,20 +47,21 @@ class ProsessinstansTestManager(
         returnProsessOfType: ProsessType = waitForProsesses.keys.first(),
         process: () -> Unit
     ): Prosessinstans {
-        val startTime = LocalDateTime.now()
-        process()
-        waitForProcessesToStart(waitForProsesses, startTime)
-        val prosessTypes = waitForProsesses.map { it.key }
-        return withClue("Wait for $prosessTypes") {
-            prosessTypes
-                .map { waitForAndReturnProcess(it, startTime) }
-                .firstOrNull { it.type == returnProsessOfType } ?: error("Fant ikke prosess for $returnProsessOfType")
-        }.also {
+        try {
+            process()
+            waitForProcessesToStart(waitForProsesses)
+            val prosessTypes = waitForProsesses.map { it.key }
+            return withClue("Wait for $prosessTypes") {
+                prosessTypes
+                    .map { waitForAndReturnProcess(it) }
+                    .firstOrNull { it.type == returnProsessOfType } ?: error("Fant ikke prosess for $returnProsessOfType")
+            }
+        } finally {
             clear()
         }
     }
 
-    private fun waitForProcessesToStart(waitForProsesses: Map<ProsessType, Int>, startTime: LocalDateTime) {
+    private fun waitForProcessesToStart(waitForProsesses: Map<ProsessType, Int>) {
         withClue("wait for $waitForProsesses processes to start") {
             AwaitUtil.awaitWithFailOnLogErrors {
                 pollDelay(pollDelay)
@@ -68,39 +69,36 @@ class ProsessinstansTestManager(
                     .onTimeout { e ->
                         val abortMessage =
                             if (e is AwaitUtil.ConditionAbortException) "waitUntil was aborted because because the number of created process instances (${
-                                prosessinstanserOpprettet.filterOnTime(startTime).size
+                                prosessinstanserOpprettet.size
                             }) >  exceeds the expected total (${waitForProsesses.values.sum()})"
                             else "waitUntil timed out"
                         withClue(abortMessage) {
-                            prosessinstanserOpprettet.filterOnTime(startTime).toTypeToCountMap() shouldBe waitForProsesses
+                            prosessinstanserOpprettet.toTypeToCountMap() shouldBe waitForProsesses
                         }
-                    }.waitUntil(abort = { prosessinstanserOpprettet.filterOnTime(startTime).size > waitForProsesses.values.sum() }) {
-                        waitForProsesses == prosessinstanserOpprettet.filterOnTime(startTime).toTypeToCountMap()
+                    }.waitUntil(abort = { prosessinstanserOpprettet.size > waitForProsesses.values.sum() }) {
+                        waitForProsesses == prosessinstanserOpprettet.toTypeToCountMap()
                     }
             }
         }
     }
 
-    private fun waitForAndReturnProcess(prosessType: ProsessType, startTime: LocalDateTime): Prosessinstans {
+    private fun waitForAndReturnProcess(prosessType: ProsessType): Prosessinstans {
         withClue("wait for prosees type:$prosessType to have status FERDIG") {
             return AwaitUtil.awaitWithFailOnLogErrors {
                 var current: Prosessinstans? = null
                 pollDelay(pollDelay)
                     .timeout(timeOut)
                     .onTimeout { e ->
-                        val prosesserStartet = prosessinstanserFerdig.filterOnTime(startTime)
-                            .firstOrNull { it.type == prosessType }?.status
+                        val prosesserStartet = prosessinstanserFerdig.firstOrNull { it.type == prosessType }?.status
                         withClue(e.message) {
                             withClue("prosess med type: $prosessType har status $prosesserStartet") {
-                                prosessinstanserOpprettet.filterOnTime(startTime).map { it.type } shouldContain prosessType
-                                prosessinstanserOpprettet.filterOnTime(startTime).firstOrNull() { it.type == prosessType }
-                                    ?.status shouldBe ProsessStatus.FERDIG
+                                prosessinstanserOpprettet.map { it.type } shouldContain prosessType
+                                prosessinstanserOpprettet.firstOrNull { it.type == prosessType }?.status shouldBe ProsessStatus.FERDIG
                             }
                         }
                     }
                     .waitUntil(abort = { prosessinstanserOpprettet.any { it.status == ProsessStatus.FEILET } }) {
-                        current = prosessinstanserFerdig.filterOnTime(startTime)
-                            .firstOrNull { it.type == prosessType && it.status == ProsessStatus.FERDIG }
+                        current = prosessinstanserFerdig.firstOrNull { it.type == prosessType && it.status == ProsessStatus.FERDIG }
                         current != null
                     }
                 current.shouldNotBeNull()
@@ -111,8 +109,6 @@ class ProsessinstansTestManager(
     private fun List<Prosessinstans>.toTypeToCountMap(): Map<ProsessType, Int> {
         return groupBy { it.type }.mapValues { it.value.size }
     }
-
-    private fun List<Prosessinstans>.filterOnTime(startTime: LocalDateTime) = map { it }
 
     companion object {
         private val defaultTimeOut: Duration = Duration.ofSeconds(30)
