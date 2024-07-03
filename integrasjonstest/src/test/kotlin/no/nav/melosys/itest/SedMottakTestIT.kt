@@ -481,7 +481,7 @@ class SedMottakTestIT(
             mapOf(
                 ProsessType.IVERKSETT_VEDTAK_EOS to 1,
                 ProsessType.SEND_BREV to 2
-            ),
+            )
         ) {
             vedtaksfattingFasade.fattVedtak(
                 prosessinstanserSortert.get(1).behandling.id, FattVedtakRequest.Builder()
@@ -489,7 +489,7 @@ class SedMottakTestIT(
                     .medVedtakstype(Vedtakstyper.FØRSTEGANGSVEDTAK)
                     .build()
             )
-        }[ProsessType.IVERKSETT_VEDTAK_EOS]?.firstOrNull() ?: error("Fant ikke prosessinstans for vedtak")
+        }
 
         verify(exactly = 1) { utstedtA1AivenProducer.produserMelding(any()) }
         utstedtA1MeldingCapturingSlot.captured.apply {
@@ -623,7 +623,7 @@ class SedMottakTestIT(
                     .medVedtakstype(Vedtakstyper.KORRIGERT_VEDTAK)
                     .build()
             )
-        }[ProsessType.IVERKSETT_VEDTAK_EOS]?.firstOrNull() ?: error("Fant ikke prosessinstans for vedtak")
+        }
 
         verify(exactly = 1) { utstedtA1AivenProducer.produserMelding(any()) }
         utstedtA1MeldingCapturingSlot.captured.apply {

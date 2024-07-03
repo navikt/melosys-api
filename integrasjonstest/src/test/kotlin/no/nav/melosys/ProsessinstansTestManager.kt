@@ -68,8 +68,9 @@ class ProsessinstansTestManager(
 
     fun executeAndWait(
         waitForProsesses: Map<ProsessType, Int>,
+        returnProsessOfType: ProsessType = waitForProsesses.keys.first(),
         process: () -> Unit
-    ): Map<ProsessType, List<Prosessinstans>> {
+    ): Prosessinstans {
         val startTime = LocalDateTime.now()
         process()
         waitForProcessesToStart(waitForProsesses, startTime)
@@ -78,6 +79,7 @@ class ProsessinstansTestManager(
             prosessTypes
                 .associateWith { waitForAndReturnProcess(it, startTime) }
                 .entries.groupBy({ it.key }, { it.value })
+                .get(returnProsessOfType)?.firstOrNull() ?: error("Fant ikke prosess for $returnProsessOfType")
         }
     }
 

@@ -192,7 +192,7 @@ class ProsessinstansTestManagerTest {
             )
         ) {
         }.also {
-            it[ProsessType.JFR_KNYTT]?.first()?.id shouldBe randomUUID
+            it.id shouldBe randomUUID
         }
 
     }
