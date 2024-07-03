@@ -36,13 +36,17 @@ class ProsessinstansTestManagerTest {
     fun `assert med beskrivelse om prosess ikke finnes i databasen`() {
         shouldThrow<AssertionError> {
             ProsessinstansTestManager().executeAndWait(
-                waitForprosessType = ProsessType.JFR_KNYTT
+                mapOf(
+                    ProsessType.JFR_KNYTT to 1
+                )
             ) {
             }
-        }.message shouldBe "wait for prosees type:JFR_KNYTT to have status FERDIG\n" +
-            "Condition with no.nav.melosys.AwaitUtil was not fulfilled within 2 milliseconds.\n" +
-            "prosess med type: JFR_KNYTT har status null\n" +
-            "Collection should contain element JFR_KNYTT based on object equality; but the collection is []"
+        }.message shouldBe "Values differed at keys \n" +
+            "wait for {JFR_KNYTT=1} processes to start\n" +
+            "waitUntil timed out\n" +
+            "expected:<{\n" +
+            "  JFR_KNYTT = 1\n" +
+            "}> but was:<{}>"
     }
 
     @Test
@@ -57,13 +61,19 @@ class ProsessinstansTestManagerTest {
 
         shouldThrow<AssertionError> {
             ProsessinstansTestManager(prosessinstanser, prosessinstanser).executeAndWait(
-                waitForprosessType = ProsessType.JFR_KNYTT
+                mapOf(
+                    ProsessType.JFR_KNYTT to 1
+                )
             ) {
             }
-        }.message shouldBe "wait for prosees type:JFR_KNYTT to have status FERDIG\n" +
-            "Condition with no.nav.melosys.AwaitUtil was not fulfilled within 2 milliseconds.\n" +
-            "prosess med type: JFR_KNYTT har status null\n" +
-            "Collection should contain element JFR_KNYTT based on object equality; but the collection is [IVERKSETT_VEDTAK_EOS]"
+        }.message shouldBe "Values differed at keys IVERKSETT_VEDTAK_EOS\n" +
+            "wait for {JFR_KNYTT=1} processes to start\n" +
+            "waitUntil timed out\n" +
+            "expected:<{\n" +
+            "  JFR_KNYTT = 1\n" +
+            "}> but was:<{\n" +
+            "  IVERKSETT_VEDTAK_EOS = 1\n" +
+            "}>"
     }
 
     @Test
@@ -77,15 +87,21 @@ class ProsessinstansTestManagerTest {
 
         shouldThrow<AssertionError> {
             ProsessinstansTestManager(prosessinstanser, prosessinstanser).executeAndWait(
-                waitForprosessType = ProsessType.JFR_KNYTT,
-                alsoWaitForprosessType = listOf(ProsessType.IVERKSETT_VEDTAK_EOS)
+                mapOf(
+                    ProsessType.JFR_KNYTT to 1,
+                    ProsessType.IVERKSETT_VEDTAK_EOS to 1
+                )
             ) {
             }
-        }.message shouldBe "also wait for prosessTypes: [IVERKSETT_VEDTAK_EOS]\n" +
-            "wait for prosees type:IVERKSETT_VEDTAK_EOS to have status FERDIG\n" +
-            "Condition with no.nav.melosys.AwaitUtil was not fulfilled within 2 milliseconds.\n" +
-            "prosess med type: IVERKSETT_VEDTAK_EOS har status null\n" +
-            "Collection should contain element IVERKSETT_VEDTAK_EOS based on object equality; but the collection is [JFR_KNYTT]"
+        }.message shouldBe "Values differed at keys \n" +
+            "wait for {JFR_KNYTT=1, IVERKSETT_VEDTAK_EOS=1} processes to start\n" +
+            "waitUntil timed out\n" +
+            "expected:<{\n" +
+            "  JFR_KNYTT = 1,\n" +
+            "  IVERKSETT_VEDTAK_EOS = 1\n" +
+            "}> but was:<{\n" +
+            "  JFR_KNYTT = 1\n" +
+            "}>"
     }
 
     @Test
@@ -107,11 +123,13 @@ class ProsessinstansTestManagerTest {
 
         shouldThrow<AssertionError> {
             ProsessinstansTestManager(prosessinstanser, prosessinstanser).executeAndWait(
-                waitForprosessType = ProsessType.JFR_KNYTT,
-                alsoWaitForprosessType = listOf(ProsessType.IVERKSETT_VEDTAK_EOS)
+                mapOf(
+                    ProsessType.JFR_KNYTT to 1,
+                    ProsessType.IVERKSETT_VEDTAK_EOS to 1
+                )
             ) {
             }
-        }.message shouldBe "also wait for prosessTypes: [IVERKSETT_VEDTAK_EOS]\n" +
+        }.message shouldBe "Wait for [JFR_KNYTT, IVERKSETT_VEDTAK_EOS]\n" +
             "wait for prosees type:IVERKSETT_VEDTAK_EOS to have status FERDIG\n" +
             "Condition with no.nav.melosys.AwaitUtil was not fulfilled within 2 milliseconds.\n" +
             "prosess med type: IVERKSETT_VEDTAK_EOS har status KLAR\n" +
@@ -221,11 +239,12 @@ class ProsessinstansTestManagerTest {
                 }
             }.message.shouldBe("Values differed at keys JFR_KNYTT\n" +
                 "wait for {JFR_KNYTT=2, MOTTAK_SED=1} processes to start\n" +
+                "waitUntil was aborted because because the number of created process instances (4) >  exceeds the expected total (3)\n" +
                 "expected:<{\n" +
-                "  JFR_KNYTT = 3,\n" +
+                "  JFR_KNYTT = 2,\n" +
                 "  MOTTAK_SED = 1\n" +
                 "}> but was:<{\n" +
-                "  JFR_KNYTT = 2,\n" +
+                "  JFR_KNYTT = 3,\n" +
                 "  MOTTAK_SED = 1\n" +
                 "}>")
 
