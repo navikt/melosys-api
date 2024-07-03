@@ -77,9 +77,8 @@ class ProsessinstansTestManager(
         val prosessTypes = waitForProsesses.map { it.key }
         return withClue("Wait for $prosessTypes") {
             prosessTypes
-                .associateWith { waitForAndReturnProcess(it, startTime) }
-                .entries.groupBy({ it.key }, { it.value })
-                .get(returnProsessOfType)?.firstOrNull() ?: error("Fant ikke prosess for $returnProsessOfType")
+                .map { waitForAndReturnProcess(it, startTime) }
+                .firstOrNull { it.type == returnProsessOfType } ?: error("Fant ikke prosess for $returnProsessOfType")
         }
     }
 
