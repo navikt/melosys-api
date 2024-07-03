@@ -2,7 +2,6 @@ package no.nav.melosys
 
 import io.kotest.assertions.withClue
 import io.kotest.matchers.collections.shouldContain
-import io.kotest.matchers.collections.shouldHaveSize
 import io.kotest.matchers.nulls.shouldNotBeNull
 import io.kotest.matchers.shouldBe
 import mu.KotlinLogging
@@ -44,29 +43,6 @@ class ProsessinstansTestManager(
     }
 
     fun executeAndWait(
-        waitForprosessType: ProsessType,
-        alsoWaitForprosessType: List<ProsessType> = listOf(),
-        waitForProcessCount: Int = 0,
-        process: () -> Unit
-    ): Prosessinstans {
-        val startTime = LocalDateTime.now()
-        process()
-        if (waitForProcessCount > 0) waitForProcessesToStart(waitForProcessCount)
-        val journalføringProsess = waitForAndReturnProcess(waitForprosessType, startTime)
-        withClue("also wait for prosessTypes: $alsoWaitForprosessType") {
-            alsoWaitForprosessType.forEach { waitForAndReturnProcess(it, startTime) }
-        }
-        withClue("started prosess types should be in waitForprosessType or alsoWaitForprosessType") {
-            val waitFor = alsoWaitForprosessType + waitForprosessType
-            prosessinstanserOpprettet.filter { it.registrertDato > startTime }.forEach {
-                waitFor shouldContain it.type
-            }
-        }
-        if (waitForProcessCount > 0) waitForProcessesToFinnish(waitForProcessCount)
-        return journalføringProsess
-    }
-
-    fun executeAndWait(
         waitForProsesses: Map<ProsessType, Int>,
         returnProsessOfType: ProsessType = waitForProsesses.keys.first(),
         process: () -> Unit
@@ -103,34 +79,6 @@ class ProsessinstansTestManager(
         }
     }
 
-    private fun waitForProcessesToStart(count: Int) {
-        withClue("wait for $count processes to start") {
-            AwaitUtil.awaitWithFailOnLogErrors {
-                pollDelay(pollDelay)
-                    .timeout(timeOutFindingProsess)
-                    .onTimeout { e ->
-                        withClue("wait for $count processes to start - ${e.message}") {
-                            prosessinstanserOpprettet.shouldHaveSize(count)
-                        }
-                    }.waitUntil { prosessinstanserOpprettet.size == count }
-            }
-        }
-    }
-
-    private fun waitForProcessesToFinnish(count: Int) {
-        withClue("wait for $count processes to finnish") {
-            AwaitUtil.awaitWithFailOnLogErrors {
-                pollDelay(pollDelay)
-                    .timeout(timeOutFindingProsess)
-                    .onTimeout { e ->
-                        withClue("wait for $count processes to finnish - ${e.message}") {
-                            prosessinstanserFerdig.shouldHaveSize(count)
-                        }
-                    }.waitUntil { prosessinstanserFerdig.size == count }
-            }
-        }
-    }
-
     private fun waitForAndReturnProcess(prosessType: ProsessType, startTime: LocalDateTime): Prosessinstans {
         withClue("wait for prosees type:$prosessType to have status FERDIG") {
             return AwaitUtil.awaitWithFailOnLogErrors {
@@ -158,7 +106,6 @@ class ProsessinstansTestManager(
         }
     }
 
-
     private fun List<Prosessinstans>.toTypeToCountMap(): Map<ProsessType, Int> {
         return groupBy { it.type }.mapValues { it.value.size }
     }
@@ -183,5 +130,4 @@ class ProsessinstansTestManager(
             pollDelay = defaultPollDelay
         }
     }
-
 }
