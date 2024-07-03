@@ -8,15 +8,15 @@ import org.awaitility.core.ConditionTimeoutException
 import org.awaitility.kotlin.await
 
 object AwaitUtil {
-    private var threadLocalOnTimeoutLambda: ThreadLocal<(ConditionTimeoutException) -> Unit> =
-        ThreadLocal.withInitial { { e: ConditionTimeoutException -> throw e } }
+    private var threadLocalOnTimeoutLambda: ThreadLocal<(RuntimeException) -> Unit> =
+        ThreadLocal.withInitial { { e: RuntimeException -> throw e } }
 
     fun <T> awaitWithFailOnLogErrors(block: ConditionFactory.(log: List<ILoggingEvent>) -> T): T =
         LoggingTestUtils.withLogCapture { logEvents ->
             await.throwOnLogError(logEvents).block(logEvents)
         }
 
-    fun ConditionFactory.onTimeout(onTimeout: (e: ConditionTimeoutException) -> Unit) = apply {
+    fun ConditionFactory.onTimeout(onTimeout: (e: RuntimeException) -> Unit) = apply {
         threadLocalOnTimeoutLambda.set(onTimeout)
     }
 
@@ -27,15 +27,19 @@ object AwaitUtil {
         try {
             until {
                 if (abort()) {
-                    throw ConditionTimeoutException("Aborted")
+                    throw ConditionAbortException()
                 }
                 waitUntil()
             }
             threadLocalOnTimeoutLambda.remove()
         } catch (e: ConditionTimeoutException) {
             threadLocalOnTimeoutLambda.get().invoke(e)
+        } catch (e: ConditionAbortException) {
+            threadLocalOnTimeoutLambda.get().invoke(e)
         }
     }
+
+    class ConditionAbortException : RuntimeException()
 
     fun ConditionFactory.throwOnLogError(logEvents: List<ILoggingEvent>): ConditionFactory = this.conditionEvaluationListener {
         findWithErrors(logEvents)?.let {

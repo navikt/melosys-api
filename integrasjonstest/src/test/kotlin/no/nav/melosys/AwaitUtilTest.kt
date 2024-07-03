@@ -81,14 +81,17 @@ class AwaitUtilTest {
             await.atMost(Duration.ofMillis(100))
                 .pollInterval(Duration.ofMillis(1))
                 .pollDelay(Duration.ofMillis(1))
-                .onTimeout {
-                    "foo" shouldBe "bar"
+                .onTimeout { e ->
+                    val message = if(e is AwaitUtil.ConditionAbortException) "waitUntil was aborted" else "waitUntil timed out"
+                    withClue(message) {
+                        "foo" shouldBe "bar"
+                    }
                 }
                 .waitUntil(abort = { i == 5 }) {
                     i++ == 10
                 }
         }.message.shouldBe(
-            "expected:<\"bar\"> but was:<\"foo\">"
+            "waitUntil was aborted\nexpected:<\"bar\"> but was:<\"foo\">"
         )
     }
 }
