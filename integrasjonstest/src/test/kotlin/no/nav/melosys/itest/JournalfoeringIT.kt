@@ -64,8 +64,10 @@ class JournalfoeringIT(
 
         val journalføringProsess = journalførOgVentTilProsesserErFerdige(
             journalfoeringOpprettDto,
-            waitFor = ProsessType.JFR_NY_SAK_BRUKER,
-            alsoWaitForprosessType = listOf(ProsessType.OPPRETT_OG_DISTRIBUER_BREV)
+            mapOf(
+                ProsessType.JFR_NY_SAK_BRUKER to 1,
+                ProsessType.OPPRETT_OG_DISTRIBUER_BREV to 1
+            )
         )
 
 
@@ -123,8 +125,10 @@ class JournalfoeringIT(
 
 
         executeAndWait(
-            waitForprosessType =  ProsessType.JFR_ANDREGANG_REPLIKER_BEHANDLING,
-            alsoWaitForprosessType = listOf(ProsessType.OPPRETT_OG_DISTRIBUER_BREV)
+            mapOf(
+                ProsessType.OPPRETT_OG_DISTRIBUER_BREV to 1,
+                ProsessType.JFR_ANDREGANG_REPLIKER_BEHANDLING to 1
+            )
         ) {
             journalføringService.journalførOgOpprettAndregangsBehandling(journalfoeringTilordneDto)
         }
@@ -181,8 +185,10 @@ class JournalfoeringIT(
 
 
         executeAndWait(
-            waitForprosessType = ProsessType.JFR_KNYTT,
-            alsoWaitForprosessType = listOf(ProsessType.OPPRETT_OG_DISTRIBUER_BREV)
+            mapOf(
+                ProsessType.JFR_KNYTT to 1,
+                ProsessType.OPPRETT_OG_DISTRIBUER_BREV to 1
+            )
         ) {
             journalføringService.journalførOgKnyttTilEksisterendeSak(journalfoeringTilordneDto)
         }
@@ -244,8 +250,10 @@ class JournalfoeringIT(
 
 
         executeAndWait(
-            waitForprosessType = ProsessType.JFR_ANDREGANG_NY_BEHANDLING,
-            alsoWaitForprosessType = listOf(ProsessType.OPPRETT_OG_DISTRIBUER_BREV)
+            mapOf(
+                ProsessType.JFR_ANDREGANG_NY_BEHANDLING to 1,
+                ProsessType.OPPRETT_OG_DISTRIBUER_BREV to 1
+            )
         ) {
             journalføringService.journalførOgOpprettAndregangsBehandling(journalfoeringTilordneDto)
         }
@@ -303,8 +311,10 @@ class JournalfoeringIT(
 
 
         executeAndWait(
-            waitForprosessType =  ProsessType.JFR_ANDREGANG_NY_BEHANDLING,
-            alsoWaitForprosessType = listOf(ProsessType.OPPRETT_OG_DISTRIBUER_BREV)
+            mapOf(
+                ProsessType.JFR_ANDREGANG_NY_BEHANDLING to 1,
+                ProsessType.OPPRETT_OG_DISTRIBUER_BREV to 1
+            )
         ) {
             journalføringService.journalførOgOpprettAndregangsBehandling(journalfoeringTilordneDto)
         }
