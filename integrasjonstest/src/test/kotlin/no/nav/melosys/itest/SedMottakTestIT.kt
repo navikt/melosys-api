@@ -445,9 +445,10 @@ class SedMottakTestIT(
         }
 
         prosessinstansTestManager.executeAndWait(
-            waitForprosessType = ProsessType.MOTTAK_SED,
-            alsoWaitForprosessType = listOf(ProsessType.ARBEID_FLERE_LAND_NY_SAK),
-            waitForProcessCount = 2
+            mapOf(
+                ProsessType.MOTTAK_SED to 1,
+                ProsessType.ARBEID_FLERE_LAND_NY_SAK to 1
+            )
         ) {
             melosysEessiMeldingKafkaTemplate.send(kafkaTopic, eessiMeldingA003)
         }
@@ -496,7 +497,9 @@ class SedMottakTestIT(
             artikkel.shouldBe(Lovvalgsbestemmelse.ART_11_3_a)
         }
 
-        val opprettNyVurderingProsessinstans = prosessinstansTestManager.executeAndWait(ProsessType.OPPRETT_REPLIKERT_BEHANDLING_FOR_SAK) {
+        val opprettNyVurderingProsessinstans = prosessinstansTestManager.executeAndWait(
+            mapOf(ProsessType.OPPRETT_REPLIKERT_BEHANDLING_FOR_SAK to 1)
+        ) {
             opprettBehandlingForSak.opprettBehandling(
                 prosessinstanserSortert.get(1).behandling.fagsak.saksnummer,
                 OpprettSakDto().apply {
@@ -508,7 +511,9 @@ class SedMottakTestIT(
                 })
         }
 
-        prosessinstansTestManager.executeAndWait(ProsessType.UTPEKING_AVVIS) {
+        prosessinstansTestManager.executeAndWait(
+            mapOf(ProsessType.UTPEKING_AVVIS to 1)
+        ) {
             utpekingService.avvisUtpeking(opprettNyVurderingProsessinstans.behandling.id, UtpekingAvvis().apply {
                 begrunnelse = "lol"
                 etterspørInformasjon = false
@@ -556,11 +561,10 @@ class SedMottakTestIT(
 
 
         prosessinstansTestManager.executeAndWait(
-            waitForprosessType = ProsessType.MOTTAK_SED,
-            alsoWaitForprosessType = listOf(
-                ProsessType.ARBEID_FLERE_LAND_NY_SAK
-            ),
-            waitForProcessCount = 2
+            mapOf(
+                ProsessType.MOTTAK_SED to 1,
+                ProsessType.ARBEID_FLERE_LAND_NY_SAK to 1
+            )
         ) {
             melosysEessiMeldingKafkaTemplate.send(kafkaTopic, eessiMeldingA003)
         }
@@ -570,14 +574,18 @@ class SedMottakTestIT(
             .sortedBy { it.endretDato }
 
 
-        prosessinstansTestManager.executeAndWait(ProsessType.UTPEKING_AVVIS) {
+        prosessinstansTestManager.executeAndWait(
+            mapOf(ProsessType.UTPEKING_AVVIS to 1)
+        ) {
             utpekingService.avvisUtpeking(prosessinstanserSortert.get(1).behandling.id, UtpekingAvvis().apply {
                 begrunnelse = "lol"
                 etterspørInformasjon = false
             })
         }
 
-        val opprettNyVurderingProsessinstans = prosessinstansTestManager.executeAndWait(ProsessType.OPPRETT_REPLIKERT_BEHANDLING_FOR_SAK) {
+        val opprettNyVurderingProsessinstans = prosessinstansTestManager.executeAndWait(
+            mapOf(ProsessType.OPPRETT_REPLIKERT_BEHANDLING_FOR_SAK to 1)
+        ) {
             opprettBehandlingForSak.opprettBehandling(
                 prosessinstanserSortert.get(1).behandling.fagsak.saksnummer,
                 OpprettSakDto().apply {
