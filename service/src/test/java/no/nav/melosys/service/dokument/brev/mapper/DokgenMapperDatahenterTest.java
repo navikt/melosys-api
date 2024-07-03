@@ -1,21 +1,26 @@
 package no.nav.melosys.service.dokument.brev.mapper;
 
+import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Set;
 
 import no.nav.melosys.domain.Aktoer;
 import no.nav.melosys.domain.Behandling;
 import no.nav.melosys.domain.Fagsak;
 import no.nav.melosys.domain.FagsakTestFactory;
+import no.nav.melosys.domain.avklartefakta.AvklartVirksomhet;
 import no.nav.melosys.domain.brev.DokgenBrevbestilling;
 import no.nav.melosys.domain.dokument.arbeidsforhold.Aktoertype;
 import no.nav.melosys.domain.kodeverk.Aktoersroller;
 import no.nav.melosys.domain.kodeverk.Fullmaktstype;
 import no.nav.melosys.domain.kodeverk.Mottakerroller;
+import no.nav.melosys.exception.FunksjonellException;
 import no.nav.melosys.integrasjon.ereg.EregFasade;
 import no.nav.melosys.service.avklartefakta.AvklarteVirksomheterService;
 import no.nav.melosys.service.behandling.BehandlingsresultatService;
 import no.nav.melosys.service.kodeverk.KodeverkService;
 import no.nav.melosys.service.persondata.PersondataFasade;
+import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -113,5 +118,48 @@ class DokgenMapperDatahenterTest {
         dokgenMapperDatahenter.hentPersonMottaker(lagMottakerFullmektig(Aktoertype.PERSON));
 
         verify(persondataFasade).hentPerson(FNR_FULLMEKTIG);
+    }
+
+    @Test
+    void hentAvklartVirksomhet_benytter_norsk_register_ved_treff() {
+        var behandling = lagBehandling();
+        var avklartVirksomhetMock = mock(AvklartVirksomhet.class);
+
+        when(avklarteVirksomheterService.hentAlleNorskeVirksomheter(behandling))
+            .thenReturn(Arrays.asList(avklartVirksomhetMock));
+
+        var response = dokgenMapperDatahenter.hentAvklartVirksomhet(behandling);
+
+        assertThat(response).isEqualTo(avklartVirksomhetMock);
+        verify(avklarteVirksomheterService, times(0)).hentUtenlandskeVirksomheter(behandling);
+    }
+
+    @Test
+    void hentAvklartVirksomhet_benytter_det_utenlandsk_registeret_dersom_det_ikke_eksisterer_i_norsk_register() {
+        var avklartVirksomhetMock = mock(AvklartVirksomhet.class);
+        when(avklarteVirksomheterService.hentAlleNorskeVirksomheter(any(Behandling.class)))
+            .thenReturn(new ArrayList<>());
+
+        when(avklarteVirksomheterService.hentUtenlandskeVirksomheter(any(Behandling.class)))
+            .thenReturn(Arrays.asList(avklartVirksomhetMock));
+
+        var behandling = lagBehandling();
+        var response = dokgenMapperDatahenter.hentAvklartVirksomhet(behandling);
+
+        assertThat(response).isEqualTo(avklartVirksomhetMock);
+        verify(avklarteVirksomheterService).hentUtenlandskeVirksomheter(behandling);
+    }
+
+    @Test
+    void hentAvklartVirksomhet_kaster_funksjonelt_exception_dersom_org_ikke_eksisterer() {
+        when(avklarteVirksomheterService.hentAlleNorskeVirksomheter(any(Behandling.class)))
+            .thenReturn(new ArrayList<>());
+
+        when(avklarteVirksomheterService.hentUtenlandskeVirksomheter(any(Behandling.class)))
+            .thenReturn(new ArrayList<>());
+
+        Assertions.assertThrows(FunksjonellException.class, () -> {
+            dokgenMapperDatahenter.hentAvklartVirksomhet(lagBehandling());
+        });
     }
 }
