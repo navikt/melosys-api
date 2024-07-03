@@ -20,6 +20,7 @@ import java.time.LocalDateTime
 import java.util.concurrent.CopyOnWriteArrayList
 
 private val log = KotlinLogging.logger { }
+
 @Component
 class ProsessinstansTestManager(
     private val prosessinstanserOpprettet: MutableList<Prosessinstans> = CopyOnWriteArrayList(),
@@ -27,13 +28,13 @@ class ProsessinstansTestManager(
 ) {
     @EventListener
     private fun prosessinstansOpprettet(prosessinstansOpprettetEvent: ProsessinstansOpprettetEvent) {
-        log.info ("Prosessinstans Opprettet - ${prosessinstansOpprettetEvent.hentProsessinstans().type}")
+        log.info("Prosessinstans Opprettet - ${prosessinstansOpprettetEvent.hentProsessinstans().type}")
         prosessinstanserOpprettet.add(prosessinstansOpprettetEvent.hentProsessinstans())
     }
 
     @EventListener
     private fun prosessinstansFerdig(prosessinstansFerdigEvent: ProsessinstansFerdigEvent) {
-        log.info ("Prosessinstans Ferdig - ${prosessinstansFerdigEvent.hentProsessinstans().type}")
+        log.info("Prosessinstans Ferdig - ${prosessinstansFerdigEvent.hentProsessinstans().type}")
         prosessinstanserFerdig.add(prosessinstansFerdigEvent.hentProsessinstans())
     }
 
@@ -65,6 +66,35 @@ class ProsessinstansTestManager(
         return journalføringProsess
     }
 
+    fun executeAndWait(
+        waitForProsesses: Map<ProsessType, Int>,
+        process: () -> Unit
+    ): Map<ProsessType, List<Prosessinstans>> {
+        val startTime = LocalDateTime.now()
+        process()
+        waitForProcessesToStart(waitForProsesses)
+        val prosessTypes = waitForProsesses.map { it.key }
+        return withClue("Wait for $prosessTypes") {
+            prosessTypes
+                .associateWith { waitForAndReturnProcess(it, startTime) }
+                .entries.groupBy({ it.key }, { it.value })
+        }
+    }
+
+    private fun waitForProcessesToStart(waitForProsesses: Map<ProsessType, Int>) {
+        withClue("wait for $waitForProsesses processes to start") {
+            AwaitUtil.awaitWithFailOnLogErrors {
+                pollDelay(pollDelay)
+                    .timeout(timeOutFindingProsess)
+                    .onTimeout {
+                        waitForProsesses shouldBe prosessinstanserOpprettet.toTypeToCountMap()
+                    }.waitUntil(abort = { prosessinstanserOpprettet.size > waitForProsesses.values.sum() }) {
+                        waitForProsesses == prosessinstanserOpprettet.toTypeToCountMap()
+                    }
+            }
+        }
+    }
+
     private fun waitForProcessesToStart(count: Int) {
         withClue("wait for $count processes to start") {
             AwaitUtil.awaitWithFailOnLogErrors {
@@ -74,10 +104,13 @@ class ProsessinstansTestManager(
                         withClue("wait for $count processes to start - ${e.message}") {
                             prosessinstanserOpprettet.shouldHaveSize(count)
                         }
-                    }.waitUntil { prosessinstanserOpprettet.size == count }
+                    }.waitUntil {
+                        prosessinstanserOpprettet.size >= count
+                    }
             }
         }
     }
+
 
     private fun waitForProcessesToFinnish(count: Int) {
         withClue("wait for $count processes to finnish") {
@@ -93,44 +126,34 @@ class ProsessinstansTestManager(
         }
     }
 
-
     private fun waitForAndReturnProcess(prosessType: ProsessType, startTime: LocalDateTime): Prosessinstans {
-        withClue("wait for process type:$prosessType to start") {
-            AwaitUtil.awaitWithFailOnLogErrors {
-                pollDelay(pollDelay)
-                    .timeout(timeOutFindingProsess)
-                    .onTimeout { e ->
-                        withClue(e.message) {
-                            val types = prosessinstanserOpprettet.filter { it.registrertDato > startTime }.map { it.type }
-                            types shouldContain prosessType
-                        }
-                    }
-                    .waitUntil { prosessinstanserOpprettet.filter { it.registrertDato > startTime }.any { it.type == prosessType } }
-            }
-        }
-
         withClue("wait for prosees type:$prosessType to have status FERDIG") {
             return AwaitUtil.awaitWithFailOnLogErrors {
                 var current: Prosessinstans? = null
                 pollDelay(pollDelay)
                     .timeout(timeOut)
                     .onTimeout { e ->
-                        val prosesserStartet = prosessinstanserFerdig.filter { it.registrertDato > startTime }
-                            .firstOrNull { it.type == prosessType }?.status
+                        val prosesserStartet = prosessinstanserFerdig.firstOrNull { it.type == prosessType }?.status
                         withClue(e.message) {
                             withClue("prosess med type: $prosessType har status $prosesserStartet") {
-                                prosesserStartet shouldBe ProsessStatus.FERDIG
+                                prosessinstanserOpprettet.map { it.type } shouldContain prosessType
+                                prosessinstanserOpprettet.firstOrNull() { it.type == prosessType }
+                                    ?.status shouldBe ProsessStatus.FERDIG
                             }
                         }
                     }
-                    .waitUntil {
-                        current = prosessinstanserFerdig.filter { it.registrertDato > startTime }
-                            .firstOrNull { it.type == prosessType && it.status == ProsessStatus.FERDIG }
+                    .waitUntil(abort = { prosessinstanserOpprettet.any { it.status == ProsessStatus.FEILET } }) {
+                        current = prosessinstanserFerdig.firstOrNull { it.type == prosessType && it.status == ProsessStatus.FERDIG }
                         current != null
                     }
                 current.shouldNotBeNull()
             }
         }
+    }
+
+
+    private fun List<Prosessinstans>.toTypeToCountMap(): Map<ProsessType, Int> {
+        return groupBy { it.type }.mapValues { it.value.size }
     }
 
     companion object {
