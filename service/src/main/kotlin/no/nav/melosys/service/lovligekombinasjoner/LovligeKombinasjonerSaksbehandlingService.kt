@@ -166,12 +166,24 @@ class LovligeKombinasjonerSaksbehandlingService(
         val fagsak = fagsakService.hentFagsak(saksnummer)
         val sisteBehandling = fagsak.hentSistRegistrertBehandling()
 
-        var behandlingstyper = hentMuligeBehandlingstyper(hovedpart, fagsak.type, fagsak.tema, behandlingstema, sisteBehandling)
+        val behandlingstyper = hentMuligeBehandlingstyper(hovedpart, fagsak.type, fagsak.tema, behandlingstema, sisteBehandling).toMutableSet()
         if (sisteBehandling.erInaktiv()) {
-            behandlingstyper = behandlingstyper.filter { it != Behandlingstyper.FØRSTEGANG }.toSet()
+            behandlingstyper.remove(Behandlingstyper.FØRSTEGANG)
         }
-        if (fagsak.behandlinger.any { it.erManglendeInnbetalingTrygdeavgift() } != true) {
-            return behandlingstyper.filter { it != Behandlingstyper.MANGLENDE_INNBETALING_TRYGDEAVGIFT }.toSet()
+        if (fagsak.behandlinger.none { it.erManglendeInnbetalingTrygdeavgift() }) {
+            behandlingstyper.remove(Behandlingstyper.MANGLENDE_INNBETALING_TRYGDEAVGIFT)
+        }
+        if (fagsak.behandlinger.any {
+                it.tema in setOf(
+                    Behandlingstema.YRKESAKTIV,
+                    Behandlingstema.UTSENDT_ARBEIDSTAKER,
+                    Behandlingstema.UTSENDT_SELVSTENDIG,
+                    Behandlingstema.ARBEID_TJENESTEPERSON_ELLER_FLY,
+                    Behandlingstema.ARBEID_FLERE_LAND,
+                    Behandlingstema.ARBEID_KUN_NORGE
+                )
+            }) {
+            behandlingstyper.add(Behandlingstyper.ÅRSAVREGNING)
         }
         return behandlingstyper
     }
@@ -212,11 +224,11 @@ class LovligeKombinasjonerSaksbehandlingService(
     ): Set<Behandlingstyper> {
         val fagsak = fagsakService.hentFagsak(saksnummer)
         val aktivBehandling = fagsak.hentAktivBehandlingIkkeÅrsavregning()
-        var behandlingstyper =
-            hentMuligeBehandlingstyper(hovedpart, sakstype, sakstema, behandlingstema, null)
+        val behandlingstyper =
+            hentMuligeBehandlingstyper(hovedpart, sakstype, sakstema, behandlingstema, null).toMutableSet()
 
         if (aktivBehandling.fagsak.behandlinger.size > 1) {
-            behandlingstyper = behandlingstyper.filter { it != Behandlingstyper.FØRSTEGANG }.toSet()
+            behandlingstyper.remove(Behandlingstyper.FØRSTEGANG)
         }
         if (aktivBehandling.erManglendeInnbetalingTrygdeavgift()) {
             return mutableSetOf(aktivBehandling.type)
@@ -345,7 +357,7 @@ class LovligeKombinasjonerSaksbehandlingService(
     ) {
         validerSakstema(hovedpart, sakstype, sakstema)
         validerBehandlingstema(hovedpart, sakstype, sakstema, behandlingstema, aktivBehandling, null)
-        validerBehandlingstype(hovedpart, sakstype, sakstema, behandlingstema, behandlingstype, null)
+        validerBehandlingstype(hovedpart, sakstype, sakstema, behandlingstema, behandlingstype)
     }
 
     fun validerBehandlingstemaOgBehandlingstypeForAndregangsbehandling(
@@ -389,14 +401,12 @@ class LovligeKombinasjonerSaksbehandlingService(
         sakstema: Sakstemaer,
         behandlingstema: Behandlingstema,
         behandlingstype: Behandlingstyper,
-        sistBehandling: Behandling?
     ) {
         if (!hentMuligeBehandlingstyper(
                 hovedpart,
                 sakstype,
                 sakstema,
                 behandlingstema,
-                sistBehandling,
             ).contains(behandlingstype)
         ) {
             throw FunksjonellException("$behandlingstype er ikke en lovlig behandlingstype med de andre valgte verdiene")
