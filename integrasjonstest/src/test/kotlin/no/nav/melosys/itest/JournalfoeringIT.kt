@@ -107,8 +107,11 @@ class JournalfoeringIT(
 
         val prosessinstans = journalførOgVentTilProsesserErFerdige(
             journalfoeringOpprettDto,
-            waitFor = ProsessType.JFR_NY_SAK_BRUKER,
-            alsoWaitForprosessType = listOf(ProsessType.OPPRETT_OG_DISTRIBUER_BREV)
+            mapOf(
+                ProsessType.JFR_NY_SAK_BRUKER to 1,
+                ProsessType.OPPRETT_OG_DISTRIBUER_BREV to 1
+            )
+
         )
         val behandling = prosessinstans.behandling
 
@@ -167,8 +170,10 @@ class JournalfoeringIT(
 
         val prosessinstans = journalførOgVentTilProsesserErFerdige(
             journalfoeringOpprettDto,
-            waitFor = ProsessType.JFR_NY_SAK_BRUKER,
-            alsoWaitForprosessType = listOf(ProsessType.OPPRETT_OG_DISTRIBUER_BREV)
+            mapOf(
+                ProsessType.JFR_NY_SAK_BRUKER to 1,
+                ProsessType.OPPRETT_OG_DISTRIBUER_BREV to 1
+            )
         )
         val behandling = prosessinstans.behandling
 
@@ -228,8 +233,10 @@ class JournalfoeringIT(
         }
         val prosessinstans = journalførOgVentTilProsesserErFerdige(
             journalfoeringOpprettDto,
-            waitFor = ProsessType.JFR_NY_SAK_BRUKER,
-            alsoWaitForprosessType = listOf(ProsessType.OPPRETT_OG_DISTRIBUER_BREV)
+            mapOf(
+                ProsessType.JFR_NY_SAK_BRUKER to 1,
+                ProsessType.OPPRETT_OG_DISTRIBUER_BREV to 1
+            )
         )
         val behandling = prosessinstans.behandling
 
@@ -289,7 +296,9 @@ class JournalfoeringIT(
         }
         val prosessinstans = journalførOgVentTilProsesserErFerdige(
             journalfoeringOpprettDto,
-            waitFor = ProsessType.JFR_NY_SAK_BRUKER,
+            mapOf(
+                ProsessType.JFR_NY_SAK_BRUKER to 1
+            )
         )
         val behandling = prosessinstans.behandling
         behandling.mottatteOpplysninger.shouldBeNull()

@@ -83,14 +83,6 @@ class JournalfoeringBase(
 
     protected fun journalførOgVentTilProsesserErFerdige(
         journalfoeringOpprettDto: JournalfoeringOpprettDto,
-        waitFor: ProsessType = ProsessType.JFR_NY_SAK_BRUKER,
-        alsoWaitForprosessType: List<ProsessType> = listOf()
-    ): Prosessinstans = journalførOgVentTilProsesserErFerdige(
-        journalfoeringOpprettDto = journalfoeringOpprettDto,
-        waitFor = mapOf(waitFor to 1) + alsoWaitForprosessType.map { it to 1 })
-
-    protected fun journalførOgVentTilProsesserErFerdige(
-        journalfoeringOpprettDto: JournalfoeringOpprettDto,
         waitFor: Map<ProsessType, Int>,
     ): Prosessinstans {
         val jfrOppgave: Oppgave = lagJfrOppgave()
@@ -101,13 +93,6 @@ class JournalfoeringBase(
             oppgaveService.ferdigstillOppgave(lagJournalfoeringOpprettDto.oppgaveID)
         }
     }
-
-    protected fun executeAndWait(
-        waitForprosessType: ProsessType,
-        alsoWaitForprosessType: List<ProsessType> = listOf(),
-        count: Int = 0,
-        process: () -> Unit
-    ): Prosessinstans = prosessinstansTestManager.executeAndWait(waitForprosessType, alsoWaitForprosessType, count, process)
 
     protected fun executeAndWait(
         waitForProsesses: Map<ProsessType, Int>,
