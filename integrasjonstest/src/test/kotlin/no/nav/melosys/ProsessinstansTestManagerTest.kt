@@ -148,7 +148,9 @@ class ProsessinstansTestManagerTest {
         )
 
         ProsessinstansTestManager(prosessinstanser, prosessinstanser).executeAndWait(
-            waitForprosessType = ProsessType.JFR_KNYTT
+            mapOf(
+                ProsessType.JFR_KNYTT to 1
+            )
         ) {
         }
     }
@@ -164,7 +166,9 @@ class ProsessinstansTestManagerTest {
         })
 
         ProsessinstansTestManager(prosessinstanser, prosessinstanser).executeAndWait(
-            waitForprosessType = ProsessType.JFR_KNYTT
+            mapOf(
+                ProsessType.JFR_KNYTT to 1
+            )
         ) {
         }.id shouldBe randomUUID
     }
@@ -237,16 +241,18 @@ class ProsessinstansTestManagerTest {
                     )
                 ) {
                 }
-            }.message.shouldBe("Values differed at keys JFR_KNYTT\n" +
-                "wait for {JFR_KNYTT=2, MOTTAK_SED=1} processes to start\n" +
-                "waitUntil was aborted because because the number of created process instances (4) >  exceeds the expected total (3)\n" +
-                "expected:<{\n" +
-                "  JFR_KNYTT = 2,\n" +
-                "  MOTTAK_SED = 1\n" +
-                "}> but was:<{\n" +
-                "  JFR_KNYTT = 3,\n" +
-                "  MOTTAK_SED = 1\n" +
-                "}>")
+            }.message.shouldBe(
+                "Values differed at keys JFR_KNYTT\n" +
+                    "wait for {JFR_KNYTT=2, MOTTAK_SED=1} processes to start\n" +
+                    "waitUntil was aborted because because the number of created process instances (4) >  exceeds the expected total (3)\n" +
+                    "expected:<{\n" +
+                    "  JFR_KNYTT = 2,\n" +
+                    "  MOTTAK_SED = 1\n" +
+                    "}> but was:<{\n" +
+                    "  JFR_KNYTT = 3,\n" +
+                    "  MOTTAK_SED = 1\n" +
+                    "}>"
+            )
 
         }.shouldBeLessThan(100)
     }
