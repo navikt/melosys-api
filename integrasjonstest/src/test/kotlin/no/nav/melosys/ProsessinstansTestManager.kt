@@ -55,6 +55,8 @@ class ProsessinstansTestManager(
             prosessTypes
                 .map { waitForAndReturnProcess(it, startTime) }
                 .firstOrNull { it.type == returnProsessOfType } ?: error("Fant ikke prosess for $returnProsessOfType")
+        }.also {
+            clear()
         }
     }
 
@@ -86,18 +88,18 @@ class ProsessinstansTestManager(
                 pollDelay(pollDelay)
                     .timeout(timeOut)
                     .onTimeout { e ->
-                        val prosesserStartet = prosessinstanserFerdig.filter { it.registrertDato > startTime }
+                        val prosesserStartet = prosessinstanserFerdig.filterOnTime(startTime)
                             .firstOrNull { it.type == prosessType }?.status
                         withClue(e.message) {
                             withClue("prosess med type: $prosessType har status $prosesserStartet") {
-                                prosessinstanserOpprettet.filter { it.registrertDato > startTime }.map { it.type } shouldContain prosessType
-                                prosessinstanserOpprettet.filter { it.registrertDato > startTime }.firstOrNull() { it.type == prosessType }
+                                prosessinstanserOpprettet.filterOnTime(startTime).map { it.type } shouldContain prosessType
+                                prosessinstanserOpprettet.filterOnTime(startTime).firstOrNull() { it.type == prosessType }
                                     ?.status shouldBe ProsessStatus.FERDIG
                             }
                         }
                     }
                     .waitUntil(abort = { prosessinstanserOpprettet.any { it.status == ProsessStatus.FEILET } }) {
-                        current = prosessinstanserFerdig.filter { it.registrertDato > startTime }
+                        current = prosessinstanserFerdig.filterOnTime(startTime)
                             .firstOrNull { it.type == prosessType && it.status == ProsessStatus.FERDIG }
                         current != null
                     }
@@ -110,7 +112,7 @@ class ProsessinstansTestManager(
         return groupBy { it.type }.mapValues { it.value.size }
     }
 
-    private fun List<Prosessinstans>.filterOnTime(startTime: LocalDateTime) = filter { it.registrertDato > startTime }
+    private fun List<Prosessinstans>.filterOnTime(startTime: LocalDateTime) = map { it }
 
     companion object {
         private val defaultTimeOut: Duration = Duration.ofSeconds(30)
