@@ -21,10 +21,16 @@ object AwaitUtil {
     }
 
     fun ConditionFactory.waitUntil(
-        waitUntil: () -> Boolean,
+        abort: () -> Boolean = { false },
+        waitUntil: () -> Boolean
     ) {
         try {
-            until { waitUntil() }
+            until {
+                if (abort()) {
+                    throw ConditionTimeoutException("Aborted")
+                }
+                waitUntil()
+            }
             threadLocalOnTimeoutLambda.remove()
         } catch (e: ConditionTimeoutException) {
             threadLocalOnTimeoutLambda.get().invoke(e)
