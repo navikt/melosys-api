@@ -214,15 +214,6 @@ public class TrygdeavtaleMapper {
             .build();
     }
 
-    private static StrukturertAdresse lagStrukturertAdresse() {
-        StrukturertAdresse sadr = new StrukturertAdresse();
-        sadr.setLandkode("NL");
-        sadr.setPoststed("Sted");
-        sadr.setPostnummer("1234");
-        sadr.setGatenavn("Gate");
-        sadr.setHusnummerEtasjeLeilighet("1");
-        return sadr;
-    }
     private AvklartVirksomhet hentAvklartVirksomhet(Behandling behandling) {
         boolean skalHenteSelvstendigeForetak = lovvalgsperiodeService.harSelvstendigNæringsdrivendeLovvalgsbestemmelse(behandling.getId());
         var avklarteVirksomheter = skalHenteSelvstendigeForetak ?
