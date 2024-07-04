@@ -163,7 +163,11 @@ class YrkesaktivFtrlVedtakIT(
     fun `Håndtere manglende innbetaling i sak som allerede har en åpen behandling`() {
         val saksnummer = lagFørstegangsBehandling(Skatteplikttype.IKKE_SKATTEPLIKTIG, false)
 
-        val behandlingsId = executeAndWait(waitForprosessType = ProsessType.OPPRETT_REPLIKERT_BEHANDLING_FOR_SAK) {
+        val behandlingsId = executeAndWait(
+            mapOf(
+                ProsessType.OPPRETT_REPLIKERT_BEHANDLING_FOR_SAK to 1
+            )
+        ) {
             opprettBehandlingForSak.opprettBehandling(
                 saksnummer,
                 lagOpprettSakDto()
@@ -171,8 +175,10 @@ class YrkesaktivFtrlVedtakIT(
         }.behandling.id
 
         executeAndWait(
-            waitForprosessType = ProsessType.OPPRETT_NY_BEHANDLING_MANGLENDE_INNBETALING,
-            alsoWaitForprosessType = listOf(ProsessType.OPPRETT_OG_DISTRIBUER_BREV)
+            mapOf(
+                ProsessType.OPPRETT_NY_BEHANDLING_MANGLENDE_INNBETALING to 1,
+                ProsessType.OPPRETT_OG_DISTRIBUER_BREV to 1
+            )
         ) {
             val kafkaMelding = ManglendeFakturabetalingMelding(
                 fakturaserieReferanse = fakturaserieReferanse,
@@ -220,7 +226,11 @@ class YrkesaktivFtrlVedtakIT(
     fun `yrkesaktiv vedtak - FTRL - opprett fakturaserie for førstegangsbehandling og kanseller fakturaserie i ny vurdering`() {
         val saksnummer = lagFørstegangsBehandling(Skatteplikttype.IKKE_SKATTEPLIKTIG, false)
 
-        val behandlingsId = executeAndWait(waitForprosessType = ProsessType.OPPRETT_REPLIKERT_BEHANDLING_FOR_SAK) {
+        val behandlingsId = executeAndWait(
+            mapOf(
+                ProsessType.OPPRETT_REPLIKERT_BEHANDLING_FOR_SAK to 1
+            )
+        ) {
             opprettBehandlingForSak.opprettBehandling(
                 saksnummer,
                 lagOpprettSakDto()
@@ -256,8 +266,10 @@ class YrkesaktivFtrlVedtakIT(
             .build()
 
         executeAndWait(
-            waitForprosessType = ProsessType.IVERKSETT_VEDTAK_FTRL,
-            alsoWaitForprosessType = listOf(ProsessType.OPPRETT_OG_DISTRIBUER_BREV)
+            mapOf(
+                ProsessType.IVERKSETT_VEDTAK_FTRL to 1,
+                ProsessType.OPPRETT_OG_DISTRIBUER_BREV to 1
+            )
         ) {
             vedtaksfattingFasade.fattVedtak(behandlingsId, vedtakRequest)
         }
@@ -305,8 +317,9 @@ class YrkesaktivFtrlVedtakIT(
         val skattehendelse = Skattehendelse("2023", "30056928150", "ny")
 
         executeAndWait(
-            waitForprosessType = ProsessType.OPPRETT_NY_BEHANDLING_AARSAVREGNING,
-            count = 5
+            mapOf(
+                ProsessType.OPPRETT_NY_BEHANDLING_AARSAVREGNING to 1,
+            )
         ) {
             skatteHendelseMeldingKafkaTemplate.send("teammelosys.skattehendelser.v1-local", skattehendelse)
         }
@@ -345,8 +358,10 @@ class YrkesaktivFtrlVedtakIT(
                 behandlingstypeKode = Behandlingstyper.FØRSTEGANG.kode
                 behandlingstemaKode = Behandlingstema.YRKESAKTIV.name
             },
-            waitFor = ProsessType.JFR_NY_SAK_BRUKER,
-            alsoWaitForprosessType = listOf(ProsessType.OPPRETT_OG_DISTRIBUER_BREV)
+            mapOf(
+                ProsessType.JFR_NY_SAK_BRUKER to 1,
+                ProsessType.OPPRETT_OG_DISTRIBUER_BREV to 1
+            )
         ).behandling.shouldNotBeNull()
 
         val mottatteOpplysninger =
@@ -415,8 +430,10 @@ class YrkesaktivFtrlVedtakIT(
             .build()
 
         executeAndWait(
-            waitForprosessType = ProsessType.IVERKSETT_VEDTAK_FTRL,
-            alsoWaitForprosessType = listOf(ProsessType.OPPRETT_OG_DISTRIBUER_BREV)
+            mapOf(
+                ProsessType.IVERKSETT_VEDTAK_FTRL to 1,
+                ProsessType.OPPRETT_OG_DISTRIBUER_BREV to 1
+            )
         ) {
             vedtaksfattingFasade.fattVedtak(behandling.id, vedtakRequest)
         }

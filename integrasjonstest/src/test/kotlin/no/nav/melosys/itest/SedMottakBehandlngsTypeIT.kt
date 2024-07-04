@@ -73,8 +73,9 @@ class SedMottakBehandlngsTypeIT(
 
 
         executeAndWait(
-            ProsessType.MOTTAK_SED, listOf(
-                ProsessType.ARBEID_FLERE_LAND_NY_SAK
+            mapOf(
+                ProsessType.MOTTAK_SED to 1,
+                ProsessType.ARBEID_FLERE_LAND_NY_SAK to 1
             )
         ) {
             melosysEessiMeldingKafkaTemplate.send(kafkaTopic, eessiMeldingA003)
@@ -107,8 +108,10 @@ class SedMottakBehandlngsTypeIT(
         }
         val prosessinstansArbeidFlereLand =
             executeAndWait(
-                waitForprosessType = ProsessType.ARBEID_FLERE_LAND_NY_SAK,
-                alsoWaitForprosessType = listOf(ProsessType.MOTTAK_SED)
+                mapOf(
+                    ProsessType.ARBEID_FLERE_LAND_NY_SAK to 1,
+                    ProsessType.MOTTAK_SED to 1
+                )
             ) {
                 melosysEessiMeldingKafkaTemplate.send(kafkaTopic, eessiMeldingA003)
             }
@@ -127,8 +130,14 @@ class SedMottakBehandlngsTypeIT(
 
 
         val saksnummer: String = behandling.fagsak.saksnummer
-        executeAndWait(ProsessType.OPPRETT_REPLIKERT_BEHANDLING_FOR_SAK) {
-            opprettBehandlingForSak.opprettBehandling(saksnummer, opprettSakDto)
+        executeAndWait(
+            mapOf(
+                ProsessType.OPPRETT_REPLIKERT_BEHANDLING_FOR_SAK to 1
+            )
+        ) {
+            opprettBehandlingForSak.opprettBehandling(
+                saksnummer, opprettSakDto
+            )
         }
 
 

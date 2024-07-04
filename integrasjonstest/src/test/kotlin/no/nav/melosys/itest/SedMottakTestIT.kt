@@ -88,9 +88,19 @@ class SedMottakTestIT(
         prosessinstansTestManager.clear()
     }
 
+    fun getRinaSaksnummer(): String = Random().nextInt(100000).toString().also {
+        println("rand:$it")
+    }.also { it ->
+        addCleanUpAction {
+            println("deleting findAllByLåsReferanseStartingWith $it")
+            prosessinstansRepository.findAllByLåsReferanseStartingWith(it)
+                .forEach { prosessinstans -> prosessinstansRepository.delete(prosessinstans) }
+        }
+    }
+
     @Test
     fun `A009 med etterfølgende X008 skal gi fagsak annullert`() {
-        val ref = Random().nextInt(100000).toString()
+        val ref = getRinaSaksnummer()
 
         val sedInfo = SedInformasjon(ref, SedType.A009.name, LocalDate.now(), LocalDate.now(), null, "AVBRUTT", null)
         val bucInformasjon = BucInformasjon(ref, true, null, LocalDate.now(), null, listOf(sedInfo))
@@ -111,13 +121,12 @@ class SedMottakTestIT(
 
 
         prosessinstansTestManager.executeAndWait(
-            waitForprosessType = ProsessType.MOTTAK_SED,
-            alsoWaitForprosessType = listOf(
-                ProsessType.REGISTRERING_UNNTAK_NY_SAK,
-                ProsessType.REGISTRERING_UNNTAK_GODKJENN,
-                ProsessType.MOTTAK_SED_JOURNALFØRING
-            ),
-            waitForProcessCount = 5
+            mapOf(
+                ProsessType.MOTTAK_SED to 2,
+                ProsessType.REGISTRERING_UNNTAK_NY_SAK to 1,
+                ProsessType.MOTTAK_SED_JOURNALFØRING to 1,
+                ProsessType.REGISTRERING_UNNTAK_GODKJENN to 1
+            )
         ) {
             melosysEessiMeldingKafkaTemplate.send(kafkaTopic, eessiMeldingA009)
             melosysEessiMeldingKafkaTemplate.send(kafkaTopic, eessiMeldingX008)
@@ -148,7 +157,7 @@ class SedMottakTestIT(
 
     @Test
     fun `A009 med etterfølgende X006 skal gi fagsak annullert`() {
-        val ref = Random().nextInt(100000).toString()
+        val ref = getRinaSaksnummer()
 
         val sedInfo = SedInformasjon(ref, SedType.A009.name, LocalDate.now(), LocalDate.now(), null, "AVBRUTT", null)
         val bucInformasjon = BucInformasjon(ref, true, null, LocalDate.now(), null, listOf(sedInfo))
@@ -170,13 +179,12 @@ class SedMottakTestIT(
 
 
         prosessinstansTestManager.executeAndWait(
-            waitForprosessType = ProsessType.MOTTAK_SED,
-            alsoWaitForprosessType = listOf(
-                ProsessType.REGISTRERING_UNNTAK_NY_SAK,
-                ProsessType.REGISTRERING_UNNTAK_GODKJENN,
-                ProsessType.MOTTAK_SED_JOURNALFØRING
-            ),
-            waitForProcessCount = 5
+            mapOf(
+                ProsessType.MOTTAK_SED to 2,
+                ProsessType.REGISTRERING_UNNTAK_NY_SAK to 1,
+                ProsessType.MOTTAK_SED_JOURNALFØRING to 1,
+                ProsessType.REGISTRERING_UNNTAK_GODKJENN to 1
+            )
         ) {
             melosysEessiMeldingKafkaTemplate.send(kafkaTopic, eessiMeldingA009)
             melosysEessiMeldingKafkaTemplate.send(kafkaTopic, eessiMeldingX006)
@@ -206,7 +214,7 @@ class SedMottakTestIT(
 
     @Test
     fun `A003 med etterfølgende X006 og lovvalgsland er NO skal gi manuelt behandling`() {
-        val ref = Random().nextInt(100000).toString()
+        val ref = getRinaSaksnummer()
 
         val eessiMeldingA003 = eessiMeldingTestDataFactory.melosysEessiMelding {
             bucType = BucType.LA_BUC_02.name
@@ -224,9 +232,11 @@ class SedMottakTestIT(
         }
 
         prosessinstansTestManager.executeAndWait(
-            waitForprosessType = ProsessType.MOTTAK_SED,
-            alsoWaitForprosessType = listOf(ProsessType.ARBEID_FLERE_LAND_NY_SAK, ProsessType.MOTTAK_SED_JOURNALFØRING),
-            waitForProcessCount = 4
+            mapOf(
+                ProsessType.MOTTAK_SED to 2,
+                ProsessType.ARBEID_FLERE_LAND_NY_SAK to 1,
+                ProsessType.MOTTAK_SED_JOURNALFØRING to 1
+            )
         ) {
             melosysEessiMeldingKafkaTemplate.send(kafkaTopic, eessiMeldingA003)
             melosysEessiMeldingKafkaTemplate.send(kafkaTopic, eessiMeldingX006)
@@ -254,7 +264,7 @@ class SedMottakTestIT(
 
     @Test
     fun `A003 med etterfølgende X008 og lovvalgsland er NO skal gi manuelt behandling`() {
-        val ref = Random().nextInt(100000).toString()
+        val ref = getRinaSaksnummer()
 
         val sedInfo = SedInformasjon(ref, SedType.A003.name, LocalDate.now(), LocalDate.now(), null, "AVBRUTT", null)
         val bucInformasjon = BucInformasjon(ref, true, null, LocalDate.now(), null, listOf(sedInfo))
@@ -277,9 +287,11 @@ class SedMottakTestIT(
         }
 
         prosessinstansTestManager.executeAndWait(
-            waitForprosessType = ProsessType.MOTTAK_SED,
-            alsoWaitForprosessType = listOf(ProsessType.ARBEID_FLERE_LAND_NY_SAK, ProsessType.MOTTAK_SED_JOURNALFØRING),
-            waitForProcessCount = 4
+            mapOf(
+                ProsessType.MOTTAK_SED to 2,
+                ProsessType.ARBEID_FLERE_LAND_NY_SAK to 1,
+                ProsessType.MOTTAK_SED_JOURNALFØRING to 1
+            )
         ) {
             melosysEessiMeldingKafkaTemplate.send(kafkaTopic, eessiMeldingA003)
             melosysEessiMeldingKafkaTemplate.send(kafkaTopic, eessiMeldingX008)
@@ -308,7 +320,7 @@ class SedMottakTestIT(
 
     @Test
     fun `A003 med etterfølgende X008 og lovvalgsland ikke NO skal annullere saken og henlegge i melosys`() {
-        val ref = Random().nextInt(100000).toString()
+        val ref = getRinaSaksnummer()
 
         val sedInfo = SedInformasjon(ref, SedType.A003.name, LocalDate.now(), LocalDate.now(), null, "AVBRUTT", null)
         val bucInformasjon = BucInformasjon(ref, true, null, LocalDate.now(), null, listOf(sedInfo))
@@ -331,9 +343,11 @@ class SedMottakTestIT(
         }
 
         prosessinstansTestManager.executeAndWait(
-            waitForprosessType = ProsessType.MOTTAK_SED,
-            alsoWaitForprosessType = listOf(ProsessType.ARBEID_FLERE_LAND_NY_SAK, ProsessType.MOTTAK_SED_JOURNALFØRING),
-            waitForProcessCount = 4
+            mapOf(
+                ProsessType.ARBEID_FLERE_LAND_NY_SAK to 1,
+                ProsessType.MOTTAK_SED_JOURNALFØRING to 1,
+                ProsessType.MOTTAK_SED to 2,
+            )
         ) {
             melosysEessiMeldingKafkaTemplate.send(kafkaTopic, eessiMeldingA003)
             melosysEessiMeldingKafkaTemplate.send(kafkaTopic, eessiMeldingX008)
@@ -367,7 +381,7 @@ class SedMottakTestIT(
 
     @Test
     fun mottaSED_mottar3SED_blirBehandletEtterHverandre() {
-        val rinaSaksnummer = Random().nextInt(100000).toString()
+        val rinaSaksnummer = getRinaSaksnummer()
 
         //Periode på 6 år - fører til et kontrolltreff
         val eessiMeldingA009 = eessiMeldingTestDataFactory.melosysEessiMelding {
@@ -389,12 +403,11 @@ class SedMottakTestIT(
         }
 
         prosessinstansTestManager.executeAndWait(
-            waitForprosessType = ProsessType.MOTTAK_SED,
-            alsoWaitForprosessType = listOf(
-                ProsessType.REGISTRERING_UNNTAK_NY_SAK,
-                ProsessType.MOTTAK_SED_JOURNALFØRING
-            ),
-            waitForProcessCount = 6
+            mapOf(
+                ProsessType.MOTTAK_SED to 3,
+                ProsessType.REGISTRERING_UNNTAK_NY_SAK to 1,
+                ProsessType.MOTTAK_SED_JOURNALFØRING to 2
+            )
         ) {
             melosysEessiMeldingKafkaTemplate.send(kafkaTopic, eessiMeldingA009)
             melosysEessiMeldingKafkaTemplate.send(kafkaTopic, eessiMeldingX001)
@@ -421,7 +434,7 @@ class SedMottakTestIT(
         val utstedtA1MeldingCapturingSlot = slot<UtstedtA1Melding>()
         every { utstedtA1AivenProducer.produserMelding(capture(utstedtA1MeldingCapturingSlot)) } returns mockk<UtstedtA1Melding>()
 
-        val rinaSaksnummer = Random().nextInt(100000).toString()
+        val rinaSaksnummer = getRinaSaksnummer()
 
         val datoOmToÅr = LocalDate.now().plusYears(2)
         val sedInfoA003 =
@@ -442,9 +455,10 @@ class SedMottakTestIT(
         }
 
         prosessinstansTestManager.executeAndWait(
-            waitForprosessType = ProsessType.MOTTAK_SED,
-            alsoWaitForprosessType = listOf(ProsessType.ARBEID_FLERE_LAND_NY_SAK),
-            waitForProcessCount = 2
+            mapOf(
+                ProsessType.MOTTAK_SED to 1,
+                ProsessType.ARBEID_FLERE_LAND_NY_SAK to 1
+            )
         ) {
             melosysEessiMeldingKafkaTemplate.send(kafkaTopic, eessiMeldingA003)
         }
@@ -475,8 +489,10 @@ class SedMottakTestIT(
         )
 
         val vedtaksProsessInstans = prosessinstansTestManager.executeAndWait(
-            waitForprosessType = ProsessType.IVERKSETT_VEDTAK_EOS,
-            alsoWaitForprosessType = listOf(ProsessType.SEND_BREV)
+            mapOf(
+                ProsessType.IVERKSETT_VEDTAK_EOS to 1,
+                ProsessType.SEND_BREV to 2
+            )
         ) {
             vedtaksfattingFasade.fattVedtak(
                 prosessinstanserSortert.get(1).behandling.id, FattVedtakRequest.Builder()
@@ -491,7 +507,9 @@ class SedMottakTestIT(
             artikkel.shouldBe(Lovvalgsbestemmelse.ART_11_3_a)
         }
 
-        val opprettNyVurderingProsessinstans = prosessinstansTestManager.executeAndWait(ProsessType.OPPRETT_REPLIKERT_BEHANDLING_FOR_SAK) {
+        val opprettNyVurderingProsessinstans = prosessinstansTestManager.executeAndWait(
+            mapOf(ProsessType.OPPRETT_REPLIKERT_BEHANDLING_FOR_SAK to 1)
+        ) {
             opprettBehandlingForSak.opprettBehandling(
                 prosessinstanserSortert.get(1).behandling.fagsak.saksnummer,
                 OpprettSakDto().apply {
@@ -503,7 +521,9 @@ class SedMottakTestIT(
                 })
         }
 
-        prosessinstansTestManager.executeAndWait(ProsessType.UTPEKING_AVVIS) {
+        prosessinstansTestManager.executeAndWait(
+            mapOf(ProsessType.UTPEKING_AVVIS to 1)
+        ) {
             utpekingService.avvisUtpeking(opprettNyVurderingProsessinstans.behandling.id, UtpekingAvvis().apply {
                 begrunnelse = "lol"
                 etterspørInformasjon = false
@@ -528,7 +548,7 @@ class SedMottakTestIT(
         val utstedtA1MeldingCapturingSlot = slot<UtstedtA1Melding>()
         every { utstedtA1AivenProducer.produserMelding(capture(utstedtA1MeldingCapturingSlot)) } returns mockk<UtstedtA1Melding>()
 
-        val rinaSaksnummer = Random().nextInt(100000).toString()
+        val rinaSaksnummer = getRinaSaksnummer()
 
         val datoNå = LocalDate.now()
         val sedInfoA003 =
@@ -551,11 +571,10 @@ class SedMottakTestIT(
 
 
         prosessinstansTestManager.executeAndWait(
-            waitForprosessType = ProsessType.MOTTAK_SED,
-            alsoWaitForprosessType = listOf(
-                ProsessType.ARBEID_FLERE_LAND_NY_SAK
-            ),
-            waitForProcessCount = 2
+            mapOf(
+                ProsessType.MOTTAK_SED to 1,
+                ProsessType.ARBEID_FLERE_LAND_NY_SAK to 1
+            )
         ) {
             melosysEessiMeldingKafkaTemplate.send(kafkaTopic, eessiMeldingA003)
         }
@@ -565,14 +584,18 @@ class SedMottakTestIT(
             .sortedBy { it.endretDato }
 
 
-        prosessinstansTestManager.executeAndWait(ProsessType.UTPEKING_AVVIS) {
+        prosessinstansTestManager.executeAndWait(
+            mapOf(ProsessType.UTPEKING_AVVIS to 1)
+        ) {
             utpekingService.avvisUtpeking(prosessinstanserSortert.get(1).behandling.id, UtpekingAvvis().apply {
                 begrunnelse = "lol"
                 etterspørInformasjon = false
             })
         }
 
-        val opprettNyVurderingProsessinstans = prosessinstansTestManager.executeAndWait(ProsessType.OPPRETT_REPLIKERT_BEHANDLING_FOR_SAK) {
+        val opprettNyVurderingProsessinstans = prosessinstansTestManager.executeAndWait(
+            mapOf(ProsessType.OPPRETT_REPLIKERT_BEHANDLING_FOR_SAK to 1)
+        ) {
             opprettBehandlingForSak.opprettBehandling(
                 prosessinstanserSortert.get(1).behandling.fagsak.saksnummer,
                 OpprettSakDto().apply {
@@ -607,8 +630,10 @@ class SedMottakTestIT(
         )
 
         val vedtaksProsessInstans = prosessinstansTestManager.executeAndWait(
-            waitForprosessType = ProsessType.IVERKSETT_VEDTAK_EOS,
-            alsoWaitForprosessType = listOf(ProsessType.SEND_BREV)
+            mapOf(
+                ProsessType.IVERKSETT_VEDTAK_EOS to 1,
+                ProsessType.SEND_BREV to 2
+            )
         ) {
             vedtaksfattingFasade.fattVedtak(
                 opprettNyVurderingProsessinstans.behandling.id, FattVedtakRequest.Builder()

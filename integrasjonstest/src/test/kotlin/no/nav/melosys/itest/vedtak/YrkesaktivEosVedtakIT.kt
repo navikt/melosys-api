@@ -66,7 +66,7 @@ class YrkesaktivEosVedtakIT(
     @Autowired private val oppfriskSaksopplysningerService: OppfriskSaksopplysningerService,
     @Autowired private val vedtaksfattingFasade: VedtaksfattingFasade,
     @Autowired private val unleash: FakeUnleash
-    ) : JournalfoeringBase(testDataGenerator, journalføringService, oppgaveService) {
+) : JournalfoeringBase(testDataGenerator, journalføringService, oppgaveService) {
 
     @MockkBean
     private lateinit var utstedtA1AivenProducer: UtstedtA1AivenProducer
@@ -91,8 +91,10 @@ class YrkesaktivEosVedtakIT(
                 behandlingstypeKode = Behandlingstyper.FØRSTEGANG.kode
                 behandlingstemaKode = Behandlingstema.UTSENDT_ARBEIDSTAKER.kode
             },
-            waitFor = ProsessType.JFR_NY_SAK_BRUKER,
-            alsoWaitForprosessType = listOf(ProsessType.OPPRETT_OG_DISTRIBUER_BREV)
+            mapOf(
+                ProsessType.JFR_NY_SAK_BRUKER to 1,
+                ProsessType.OPPRETT_OG_DISTRIBUER_BREV to 1
+            )
         ).behandling
 
         val mottatteOpplysninger =
@@ -172,8 +174,10 @@ class YrkesaktivEosVedtakIT(
 
 
         executeAndWait(
-            waitForprosessType = ProsessType.IVERKSETT_VEDTAK_EOS,
-            alsoWaitForprosessType = listOf(ProsessType.SEND_BREV)
+            mapOf(
+                ProsessType.IVERKSETT_VEDTAK_EOS to 1,
+                ProsessType.SEND_BREV to 3
+            )
         ) {
             vedtaksfattingFasade.fattVedtak(behandling.id, vedtakRequest)
         }
@@ -237,8 +241,10 @@ class YrkesaktivEosVedtakIT(
                 behandlingstypeKode = Behandlingstyper.FØRSTEGANG.kode
                 behandlingstemaKode = Behandlingstema.UTSENDT_ARBEIDSTAKER.kode
             },
-            waitFor = ProsessType.JFR_NY_SAK_BRUKER,
-            alsoWaitForprosessType = listOf(ProsessType.OPPRETT_OG_DISTRIBUER_BREV)
+            mapOf(
+                ProsessType.JFR_NY_SAK_BRUKER to 1,
+                ProsessType.OPPRETT_OG_DISTRIBUER_BREV to 1
+            )
         ).behandling
 
         val mottatteOpplysninger =
@@ -313,8 +319,10 @@ class YrkesaktivEosVedtakIT(
 
 
         executeAndWait(
-            waitForprosessType = ProsessType.IVERKSETT_VEDTAK_EOS,
-            alsoWaitForprosessType = listOf(ProsessType.SEND_BREV)
+            mapOf(
+                ProsessType.IVERKSETT_VEDTAK_EOS to 1,
+                ProsessType.SEND_BREV to 1
+            )
         ) {
             vedtaksfattingFasade.fattVedtak(behandling.id, vedtakRequest)
         }
