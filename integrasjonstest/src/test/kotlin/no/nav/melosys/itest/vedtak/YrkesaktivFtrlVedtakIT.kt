@@ -311,34 +311,40 @@ class YrkesaktivFtrlVedtakIT(
     }
 
     @Test
-    fun `oppretter prosess og påfølgende årsavregningsbehandling`() {
-        val saksnummer = lagFørstegangsBehandling(Skatteplikttype.IKKE_SKATTEPLIKTIG, false)
+    fun `oppretter prosess og påfølgende årsavregningsbehandling for alle saker knyttet til skattehendelse `() {
+        val saksnummer1 = lagFørstegangsBehandling(Skatteplikttype.IKKE_SKATTEPLIKTIG, false)
+        val saksnummer2 = lagFørstegangsBehandling(Skatteplikttype.IKKE_SKATTEPLIKTIG, false)
 
-        val skattehendelse = Skattehendelse("2023", "30056928150", "ny")
 
         executeAndWait(
             mapOf(
-                ProsessType.OPPRETT_NY_BEHANDLING_AARSAVREGNING to 1,
+                ProsessType.OPPRETT_NY_BEHANDLING_AARSAVREGNING to 2
             )
         ) {
-            skatteHendelseMeldingKafkaTemplate.send("teammelosys.skattehendelser.v1-local", skattehendelse)
+            skatteHendelseMeldingKafkaTemplate.send(
+                "teammelosys.skattehendelser.v1-local",
+                Skattehendelse("2023", "30056928150", "ny")
+            )
         }
 
-        fagsakRepository.findBySaksnummer(saksnummer)
-            .shouldBePresent().run {
-                behandlinger.shouldHaveSize(2)
-                    .firstOrNull { it.type == Behandlingstyper.ÅRSAVREGNING }
-                    .shouldNotBeNull()
-                    .run {
-                        behandlingsResultRepository.findById(id)
-                            .shouldBePresent()
-                            .aarsavregning
-                            .shouldNotBeNull()
-                            .run {
-                                aar shouldBe 2023
-                            }
-                    }
-            }
+
+        listOf(saksnummer1, saksnummer2).forEach { saksnummer ->
+            fagsakRepository.findBySaksnummer(saksnummer)
+                .shouldBePresent().run {
+                    behandlinger.shouldHaveSize(2)
+                        .firstOrNull { it.type == Behandlingstyper.ÅRSAVREGNING }
+                        .shouldNotBeNull()
+                        .run {
+                            behandlingsResultRepository.findById(id)
+                                .shouldBePresent()
+                                .aarsavregning
+                                .shouldNotBeNull()
+                                .run {
+                                    aar shouldBe 2023
+                                }
+                        }
+                }
+        }
     }
 
     private fun lagOpprettSakDto(): OpprettSakDto {
