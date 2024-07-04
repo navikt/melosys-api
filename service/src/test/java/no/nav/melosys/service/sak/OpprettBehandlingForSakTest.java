@@ -1,10 +1,10 @@
 package no.nav.melosys.service.sak;
 
+import java.time.LocalDate;
+import java.util.Optional;
+
 import io.getunleash.FakeUnleash;
 import no.nav.melosys.domain.*;
-import no.nav.melosys.domain.kodeverk.Aktoersroller;
-import no.nav.melosys.domain.kodeverk.Sakstemaer;
-import no.nav.melosys.domain.kodeverk.Sakstyper;
 import no.nav.melosys.domain.kodeverk.behandlinger.*;
 import no.nav.melosys.exception.FunksjonellException;
 import no.nav.melosys.repository.BehandlingsresultatRepository;
@@ -18,9 +18,6 @@ import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
-
-import java.time.LocalDate;
-import java.util.Optional;
 
 import static org.assertj.core.api.Assertions.assertThatExceptionOfType;
 import static org.assertj.core.api.Assertions.assertThatNoException;
@@ -50,21 +47,6 @@ class OpprettBehandlingForSakTest {
         LovligeKombinasjonerSaksbehandlingService lovligeKombinasjonerSaksbehandlingService = new LovligeKombinasjonerSaksbehandlingService(fagsakService, behandlingService, behandlingsresultatService, unleash);
         SaksbehandlingRegler saksbehandlingRegler = new SaksbehandlingRegler(behandlingsresultatRepository);
         opprettBehandlingForSak = new OpprettBehandlingForSak(fagsakService, prosessinstansService, saksbehandlingRegler, lovligeKombinasjonerSaksbehandlingService, behandlingService, behandlingsresultatService);
-    }
-
-    @Test
-    void opprettBehandling_medAktivBehandling_feiler() {
-        Behandling aktivBehandling = lagBehandling();
-        aktivBehandling.setStatus(Behandlingsstatus.UNDER_BEHANDLING);
-        OpprettSakDto opprettSakDto = lagOpprettSakDto();
-        when(fagsakService.hentFagsak(FagsakTestFactory.SAKSNUMMER)).thenReturn(lagFagsak(aktivBehandling));
-
-        when(behandlingsresultatService.hentBehandlingsresultat(aktivBehandling.getId())).thenReturn(new Behandlingsresultat());
-
-
-        assertThatExceptionOfType(FunksjonellException.class)
-            .isThrownBy(() -> opprettBehandlingForSak.opprettBehandling(FagsakTestFactory.SAKSNUMMER, opprettSakDto))
-            .withMessageContaining(String.format("Det finnes allerede en aktiv behandling på fagsak %s", FagsakTestFactory.SAKSNUMMER));
     }
 
     @Test
@@ -135,7 +117,7 @@ class OpprettBehandlingForSakTest {
 
         assertThatExceptionOfType(FunksjonellException.class)
             .isThrownBy(() -> opprettBehandlingForSak.opprettBehandling(FagsakTestFactory.SAKSNUMMER, opprettSakDto))
-            .withMessageContaining("er ikke en lovlig behandlingstype med de andre valgte verdiene");
+            .withMessageContaining("Behandlingstype FØRSTEGANG er ikke lovlig for behandlingstema UTSENDT_ARBEIDSTAKER og saksnummer MEL-test");
     }
 
     @Test
@@ -148,7 +130,7 @@ class OpprettBehandlingForSakTest {
 
         assertThatExceptionOfType(FunksjonellException.class)
             .isThrownBy(() -> opprettBehandlingForSak.opprettBehandling(FagsakTestFactory.SAKSNUMMER, opprettSakDto))
-            .withMessageContaining("er ikke et lovlig behandlingstema med de andre valgte verdiene");
+            .withMessageContaining("Behandlingstype NY_VURDERING er ikke lovlig for behandlingstema REGISTRERING_UNNTAK og saksnummer MEL-test");
     }
 
     @Test

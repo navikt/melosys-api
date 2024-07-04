@@ -62,20 +62,28 @@ internal class JournalfoeringServiceTest {
 
     @MockK
     private lateinit var joarkFasade: JoarkFasade
+
     @RelaxedMockK
     private lateinit var prosessinstansService: ProsessinstansService
+
     @MockK
     private lateinit var eessiService: EessiService
+
     @MockK
     private lateinit var fagsakService: FagsakService
+
     @MockK
     private lateinit var persondataFasade: PersondataFasade
+
     @MockK
     private lateinit var behandlingService: BehandlingService
+
     @RelaxedMockK
     private lateinit var behandlingsresultatService: BehandlingsresultatService
+
     @MockK
     private lateinit var behandlingsresultatRepository: BehandlingsresultatRepository
+
     @MockK
     private lateinit var utenlandskMyndighetService: UtenlandskMyndighetService
 
@@ -799,16 +807,16 @@ internal class JournalfoeringServiceTest {
     }
 
     @Test
-    fun journalførOgOpprettAndregangsBehandling_fagsakHarAktivBehandling_feilKastes() {
+    fun journalførOgOpprettAndregangsBehandling_ikkeTillattBehandlingstype_feilKastes() {
         tilordneDto.saksnummer = MELOSYS_SAKSNUMMER
         val aktivBehandling = lagBehandling().apply { status = Behandlingsstatus.UNDER_BEHANDLING }
         every { joarkFasade.hentJournalpost(tilordneDto.journalpostID) } returns journalpost
-        every { fagsakService.hentFagsak(MELOSYS_SAKSNUMMER) } returns builder().behandlinger(aktivBehandling).build()
+        every { fagsakService.hentFagsak(MELOSYS_SAKSNUMMER) } returns builder().saksnummer(MELOSYS_SAKSNUMMER).behandlinger(aktivBehandling).build()
         every { behandlingsresultatService.hentBehandlingsresultatMedAnmodningsperioder(aktivBehandling.id) } returns Behandlingsresultat()
 
 
         shouldThrow<FunksjonellException> { journalfoeringService.journalførOgOpprettAndregangsBehandling(tilordneDto) }
-            .message.shouldBe("Det finnes allerede en aktiv behandling på fagsak ${FagsakTestFactory.SAKSNUMMER}")
+            .message.shouldBe("Behandlingstype ENDRET_PERIODE er ikke tillatt for behandlingstema UTSENDT_ARBEIDSTAKER og fagsak MEL-0123")
     }
 
     @Test
@@ -831,9 +839,21 @@ internal class JournalfoeringServiceTest {
     fun journalførOgOpprettAndregangsBehandling_sedSakTilknyttetAnnenFagsak_kasterException() {
         journalpost.mottaksKanal = "EESSI"
         val melosysEessiMelding = MelosysEessiMelding().apply { rinaSaksnummer = RINA_SAKSNUMMER }
-        val fagsak1 = lagFagsak("FAGSAK KOBLET TIL SED FRA FØR", lagBehandling().apply { status = Behandlingsstatus.UNDER_BEHANDLING })
-        val fagsak2 = lagFagsak("FAGSAK SOM PRØVER Å KNYTTE JOURNALPOST FOR SED TIL SEG", lagBehandling())
+        val fagsak1Behandling = lagBehandling().apply {
+            status = Behandlingsstatus.UNDER_BEHANDLING
+            tema = Behandlingstema.UTSENDT_SELVSTENDIG
+        }
+        val fagsak1 = lagFagsak("FAGSAK KOBLET TIL SED FRA FØR", fagsak1Behandling)
+        fagsak1.type = Sakstyper.EU_EOS
+        fagsak1.tema = Sakstemaer.MEDLEMSKAP_LOVVALG
+        val fagsak2Behandling = lagBehandling().apply {
+            status = Behandlingsstatus.UNDER_BEHANDLING
+            tema = Behandlingstema.YRKESAKTIV
+        }
+        val fagsak2 = lagFagsak("FAGSAK SOM PRØVER Å KNYTTE JOURNALPOST FOR SED TIL SEG", fagsak2Behandling)
         tilordneDto.saksnummer = fagsak2.saksnummer
+        tilordneDto.behandlingstemaKode = Behandlingstema.YRKESAKTIV.kode
+        tilordneDto.behandlingstypeKode = Behandlingstyper.ÅRSAVREGNING.kode
         every { eessiService.hentSedTilknyttetJournalpost(journalpost.journalpostId) } returns melosysEessiMelding
         every { eessiService.støtterAutomatiskBehandling(melosysEessiMelding) } returns false
         every { eessiService.finnSakForRinasaksnummer(RINA_SAKSNUMMER) } returns Optional.of(ARKIVSAK_ID)

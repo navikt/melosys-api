@@ -107,7 +107,7 @@ class JournalfoeringService(
         val behandlingstema = Behandlingstema.valueOf(journalfoeringDto.behandlingstemaKode)
         val behandlingstype = Behandlingstyper.valueOf(journalfoeringDto.behandlingstypeKode)
 
-        journalfoeringValidering.validerJournalførOgOpprettAndregangsbehandling(journalfoeringDto, journalpost, fagsak)
+        journalfoeringValidering.validerJournalførOgOpprettAndregangsbehandling(journalfoeringDto, journalpost, fagsak, behandlingstema, behandlingstype)
 
         val sistBehandling = fagsak.hentSistRegistrertBehandling()
         if (sistBehandling.erAktiv()) {

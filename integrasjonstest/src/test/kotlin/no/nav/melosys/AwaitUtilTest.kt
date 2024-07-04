@@ -73,4 +73,25 @@ class AwaitUtilTest {
                 "expected:<\"hei\"> but was:<\"1\">"
         )
     }
+
+    @Test
+    fun `await builder skal kjøre assert ved abort`() {
+        var i = 0
+        shouldThrow<AssertionFailedError> {
+            await.atMost(Duration.ofMillis(100))
+                .pollInterval(Duration.ofMillis(1))
+                .pollDelay(Duration.ofMillis(1))
+                .onTimeout { e ->
+                    val message = if(e is AwaitUtil.ConditionAbortException) "waitUntil was aborted" else "waitUntil timed out"
+                    withClue(message) {
+                        "foo" shouldBe "bar"
+                    }
+                }
+                .waitUntil(abort = { i == 5 }) {
+                    i++ == 10
+                }
+        }.message.shouldBe(
+            "waitUntil was aborted\nexpected:<\"bar\"> but was:<\"foo\">"
+        )
+    }
 }

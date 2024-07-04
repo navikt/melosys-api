@@ -3,6 +3,7 @@ package no.nav.melosys.service.sak;
 import no.nav.melosys.domain.Behandling;
 import no.nav.melosys.domain.Behandlingsresultat;
 import no.nav.melosys.domain.Fagsak;
+import no.nav.melosys.domain.kodeverk.Aktoersroller;
 import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingsaarsaktyper;
 import no.nav.melosys.exception.FunksjonellException;
 import no.nav.melosys.saksflytapi.ProsessinstansService;
@@ -45,7 +46,7 @@ public class OpprettBehandlingForSak {
         var behandlingstema = opprettSakDto.getBehandlingstema();
         var behandlingstype = opprettSakDto.getBehandlingstype();
 
-        valider(fagsak, sistBehandlingsresultat, opprettSakDto);
+        valider(fagsak, opprettSakDto);
         lovligeKombinasjonerSaksbehandlingService.validerBehandlingstemaOgBehandlingstypeForAndregangsbehandling(fagsak, sistBehandling, sistBehandlingsresultat, behandlingstema, behandlingstype);
 
         if (sistBehandling.erAktiv()) {
@@ -59,16 +60,21 @@ public class OpprettBehandlingForSak {
         }
     }
 
-    private void valider(Fagsak fagsak, Behandlingsresultat sistBehandlingsresultat, OpprettSakDto opprettSakDto) {
-        if (fagsak.finnAktivBehandlingIkkeÅrsavregning() != null && sistBehandlingsresultat.erIkkeArtikkel16MedSendtAnmodningOmUnntak()) {
-            throw new FunksjonellException(String.format("Det finnes allerede en aktiv behandling på fagsak %s", fagsak.getSaksnummer()));
-        }
+    private void valider(Fagsak fagsak, OpprettSakDto opprettSakDto) {
         if (opprettSakDto.getBehandlingstema() == null) {
             throw new FunksjonellException("Behandlingstema mangler");
         }
         if (opprettSakDto.getBehandlingstype() == null) {
             throw new FunksjonellException("Behandlingstype mangler");
         }
+
+        var muligeBehandlingstyper =
+            lovligeKombinasjonerSaksbehandlingService.hentMuligeBehandlingstyperForKnyttTilSak(Aktoersroller.BRUKER, fagsak.getSaksnummer(), opprettSakDto.getBehandlingstema());
+
+        if (!muligeBehandlingstyper.contains(opprettSakDto.getBehandlingstype())){
+            throw new FunksjonellException(String.format("Behandlingstype %s er ikke lovlig for behandlingstema %s og saksnummer %s", opprettSakDto.getBehandlingstype(), opprettSakDto.getBehandlingstema(), fagsak.getSaksnummer()));
+        }
+
         if (opprettSakDto.getMottaksdato() == null) {
             throw new FunksjonellException("Mottaksdato er påkrevd for å opprette behandling");
         }

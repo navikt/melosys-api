@@ -28,7 +28,7 @@ class OrienteringAnmodningUnntakMapper(
         val erDirekteTilAnmodningOmUnntak =
             behandlingsresultat.avklartefakta.find { it.fakta == AvklartYrkesgruppeType.ORDINAER_UTEN_ART12.name } != null
 
-        val erAnmodningOmUnntakViaArbeidstaker = erGyldigVilkaar(
+        val erAnmodningOmUnntakViaArbeidstaker = harVilkaar(
             behandlingID,
             listOf(
                 Vilkaar.FO_883_2004_ART12_1,
@@ -36,7 +36,7 @@ class OrienteringAnmodningUnntakMapper(
                 Vilkaar.KONV_EFTA_STORBRITANNIA_ART16_1
             )
         )
-        val erAnmodningOmUnntakViaNæringsdrivende = erGyldigVilkaar(
+        val erAnmodningOmUnntakViaNæringsdrivende = harVilkaar(
             behandlingID,
             listOf(
                 Vilkaar.FO_883_2004_ART12_2,
@@ -68,8 +68,8 @@ class OrienteringAnmodningUnntakMapper(
         )
     }
 
-    private fun erGyldigVilkaar(behandlingID: Long, vilkaarListe: List<Vilkaar>): Boolean {
-        return vilkaarsresultatService.oppfyllerVilkaar(behandlingID, vilkaarListe)
+    private fun harVilkaar(behandlingID: Long, vilkaarListe: List<Vilkaar>): Boolean {
+        return vilkaarsresultatService.harVilkaar(behandlingID, vilkaarListe)
     }
 
     private fun hentVilkårsresultat(behandlingID: Long, vilkaar: Vilkaar): Vilkaarsresultat? {

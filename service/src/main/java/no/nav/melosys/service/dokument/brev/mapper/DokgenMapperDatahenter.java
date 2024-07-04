@@ -1,8 +1,12 @@
 package no.nav.melosys.service.dokument.brev.mapper;
 
+import java.time.Instant;
+import java.util.Optional;
+
 import no.nav.melosys.domain.Behandling;
 import no.nav.melosys.domain.Behandlingsresultat;
 import no.nav.melosys.domain.FellesKodeverk;
+import no.nav.melosys.domain.avklartefakta.AvklartVirksomhet;
 import no.nav.melosys.domain.brev.DokgenBrevbestilling;
 import no.nav.melosys.domain.brev.Mottaker;
 import no.nav.melosys.domain.kodeverk.Aktoersroller;
@@ -10,14 +14,12 @@ import no.nav.melosys.domain.kodeverk.Fullmaktstype;
 import no.nav.melosys.domain.person.Persondata;
 import no.nav.melosys.exception.FunksjonellException;
 import no.nav.melosys.integrasjon.ereg.EregFasade;
+import no.nav.melosys.service.avklartefakta.AvklarteVirksomheterService;
 import no.nav.melosys.service.behandling.BehandlingsresultatService;
 import no.nav.melosys.service.kodeverk.KodeverkService;
 import no.nav.melosys.service.persondata.PersondataFasade;
 import org.springframework.stereotype.Component;
 import org.springframework.util.StringUtils;
-
-import java.time.Instant;
-import java.util.Optional;
 
 import static org.springframework.util.StringUtils.hasText;
 
@@ -28,15 +30,18 @@ public class DokgenMapperDatahenter {
     private final EregFasade eregFasade;
     private final KodeverkService kodeverkService;
     private final PersondataFasade persondataFasade;
+    private final AvklarteVirksomheterService avklarteVirksomheterService;
 
     protected DokgenMapperDatahenter(BehandlingsresultatService behandlingsresultatService,
                                      EregFasade eregFasade,
                                      PersondataFasade persondataFasade,
-                                     KodeverkService kodeverkService) {
+                                     KodeverkService kodeverkService,
+                                     AvklarteVirksomheterService avklarteVirksomheterService) {
         this.behandlingsresultatService = behandlingsresultatService;
         this.eregFasade = eregFasade;
         this.kodeverkService = kodeverkService;
         this.persondataFasade = persondataFasade;
+        this.avklarteVirksomheterService = avklarteVirksomheterService;
     }
 
     String hentNorskPoststed(String postnr) {
@@ -100,5 +105,19 @@ public class DokgenMapperDatahenter {
 
     public Behandlingsresultat hentBehandlingsresultat(Long behandlingId) {
         return behandlingsresultatService.hentBehandlingsresultat(behandlingId);
+    }
+
+    public AvklartVirksomhet hentAvklartVirksomhet(Behandling behandling) {
+        var avklarteVirksomheter = avklarteVirksomheterService.hentAlleNorskeVirksomheter(behandling);
+        if (avklarteVirksomheter.size() == 1) {
+            return avklarteVirksomheter.get(0);
+        }
+        avklarteVirksomheter = avklarteVirksomheterService.hentUtenlandskeVirksomheter(behandling);
+
+        if (avklarteVirksomheter.size() != 1) {
+            throw new FunksjonellException("Fant " + avklarteVirksomheter.size() + " avklarte virksomheter for behandling: " + behandling + ". Må være 1 for trygdeavtale");
+        }
+
+        return avklarteVirksomheter.get(0);
     }
 }

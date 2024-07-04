@@ -200,13 +200,18 @@ class DokgenMalMapper(
                 brevbestilling.behandling.id.let {
                     val behandlingsresultat = dokgenMapperDatahenter.hentBehandlingsresultat(it)
                     behandlingsresultat.medlemskapsperioder.firstOrNull()?.medlemskapstype
-                } ?: throw FunksjonellException("Forventer at behandling som tilhører varselbrevet har en opprinnelig behandling med medlemskapsperioder"),
+                }
+                    ?: throw FunksjonellException("Forventer at behandling som tilhører varselbrevet har en opprinnelig behandling med medlemskapsperioder"),
                 dokgenMapperDatahenter.hentFullmektigNavn(brevbestilling, Fullmaktstype.FULLMEKTIG_SØKNAD)
             )
 
             Produserbaredokumenter.VEDTAK_OPPHOERT_MEDLEMSKAP -> VedtakOpphoertMedlemskap(brevbestilling as VedtakOpphoertMedlemskapBrevbestilling)
 
-            else -> throw FunksjonellException("ProduserbartDokument ${brevbestilling.produserbartdokument} er ikke støttet av melosys-dokgen")
-        }
+            Produserbaredokumenter.AVSLAG_EFTA_STORBRITANNIA -> AvslagEftaStorbritannia(
+                brevbestilling as AvslagEftaStorbritanniaBrevbestilling, dokgenMapperDatahenter.hentBehandlingsresultat(brevbestilling
+                    .behandlingId).hentValidertPeriodeOmLovvalg(), dokgenMapperDatahenter.hentAvklartVirksomhet(brevbestilling.behandling).navn)
+
+        else -> throw FunksjonellException("ProduserbartDokument ${brevbestilling.produserbartdokument} er ikke støttet av melosys-dokgen")
     }
+}
 }
