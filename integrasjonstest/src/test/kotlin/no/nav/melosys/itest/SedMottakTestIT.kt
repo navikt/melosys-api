@@ -88,9 +88,19 @@ class SedMottakTestIT(
         prosessinstansTestManager.clear()
     }
 
+    fun getRinaSaksnummer(): String = Random().nextInt(100000).toString().also {
+        println("rand:$it")
+    }.also { it ->
+        addCleanUpAction {
+            println("deleting findAllByLåsReferanseStartingWith $it")
+            prosessinstansRepository.findAllByLåsReferanseStartingWith(it)
+                .forEach { prosessinstans -> prosessinstansRepository.delete(prosessinstans) }
+        }
+    }
+
     @Test
     fun `A009 med etterfølgende X008 skal gi fagsak annullert`() {
-        val ref = Random().nextInt(100000).toString()
+        val ref = getRinaSaksnummer()
 
         val sedInfo = SedInformasjon(ref, SedType.A009.name, LocalDate.now(), LocalDate.now(), null, "AVBRUTT", null)
         val bucInformasjon = BucInformasjon(ref, true, null, LocalDate.now(), null, listOf(sedInfo))
@@ -147,7 +157,7 @@ class SedMottakTestIT(
 
     @Test
     fun `A009 med etterfølgende X006 skal gi fagsak annullert`() {
-        val ref = Random().nextInt(100000).toString()
+        val ref = getRinaSaksnummer()
 
         val sedInfo = SedInformasjon(ref, SedType.A009.name, LocalDate.now(), LocalDate.now(), null, "AVBRUTT", null)
         val bucInformasjon = BucInformasjon(ref, true, null, LocalDate.now(), null, listOf(sedInfo))
@@ -204,7 +214,7 @@ class SedMottakTestIT(
 
     @Test
     fun `A003 med etterfølgende X006 og lovvalgsland er NO skal gi manuelt behandling`() {
-        val ref = Random().nextInt(100000).toString()
+        val ref = getRinaSaksnummer()
 
         val eessiMeldingA003 = eessiMeldingTestDataFactory.melosysEessiMelding {
             bucType = BucType.LA_BUC_02.name
@@ -254,7 +264,7 @@ class SedMottakTestIT(
 
     @Test
     fun `A003 med etterfølgende X008 og lovvalgsland er NO skal gi manuelt behandling`() {
-        val ref = Random().nextInt(100000).toString()
+        val ref = getRinaSaksnummer()
 
         val sedInfo = SedInformasjon(ref, SedType.A003.name, LocalDate.now(), LocalDate.now(), null, "AVBRUTT", null)
         val bucInformasjon = BucInformasjon(ref, true, null, LocalDate.now(), null, listOf(sedInfo))
@@ -310,7 +320,7 @@ class SedMottakTestIT(
 
     @Test
     fun `A003 med etterfølgende X008 og lovvalgsland ikke NO skal annullere saken og henlegge i melosys`() {
-        val ref = Random().nextInt(100000).toString()
+        val ref = getRinaSaksnummer()
 
         val sedInfo = SedInformasjon(ref, SedType.A003.name, LocalDate.now(), LocalDate.now(), null, "AVBRUTT", null)
         val bucInformasjon = BucInformasjon(ref, true, null, LocalDate.now(), null, listOf(sedInfo))
@@ -371,7 +381,7 @@ class SedMottakTestIT(
 
     @Test
     fun mottaSED_mottar3SED_blirBehandletEtterHverandre() {
-        val rinaSaksnummer = Random().nextInt(100000).toString()
+        val rinaSaksnummer = getRinaSaksnummer()
 
         //Periode på 6 år - fører til et kontrolltreff
         val eessiMeldingA009 = eessiMeldingTestDataFactory.melosysEessiMelding {
@@ -396,7 +406,7 @@ class SedMottakTestIT(
             mapOf(
                 ProsessType.MOTTAK_SED to 3,
                 ProsessType.REGISTRERING_UNNTAK_NY_SAK to 1,
-                ProsessType.MOTTAK_SED_JOURNALFØRING to 1
+                ProsessType.MOTTAK_SED_JOURNALFØRING to 2
             )
         ) {
             melosysEessiMeldingKafkaTemplate.send(kafkaTopic, eessiMeldingA009)
@@ -424,7 +434,7 @@ class SedMottakTestIT(
         val utstedtA1MeldingCapturingSlot = slot<UtstedtA1Melding>()
         every { utstedtA1AivenProducer.produserMelding(capture(utstedtA1MeldingCapturingSlot)) } returns mockk<UtstedtA1Melding>()
 
-        val rinaSaksnummer = Random().nextInt(100000).toString()
+        val rinaSaksnummer = getRinaSaksnummer()
 
         val datoOmToÅr = LocalDate.now().plusYears(2)
         val sedInfoA003 =
@@ -538,7 +548,7 @@ class SedMottakTestIT(
         val utstedtA1MeldingCapturingSlot = slot<UtstedtA1Melding>()
         every { utstedtA1AivenProducer.produserMelding(capture(utstedtA1MeldingCapturingSlot)) } returns mockk<UtstedtA1Melding>()
 
-        val rinaSaksnummer = Random().nextInt(100000).toString()
+        val rinaSaksnummer = getRinaSaksnummer()
 
         val datoNå = LocalDate.now()
         val sedInfoA003 =
