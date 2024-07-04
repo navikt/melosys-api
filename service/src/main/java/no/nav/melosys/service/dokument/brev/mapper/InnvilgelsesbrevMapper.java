@@ -115,7 +115,7 @@ public final class InnvilgelsesbrevMapper implements BrevDataMapper {
         boolean erStorbritannia = Arrays.stream(Lovvalgbestemmelser_konv_efta_storbritannia.values()).anyMatch(bestemmelse -> bestemmelse == periode.getBestemmelse());
 
         fag.setLovvalgsbestemmelse(LovvalgsbestemmelseKodeMapper.map(
-            erStorbritannia ? KonvEftaStorbritanniaLovvalgbestemmelser.GB_KONV_LOVVALGBESTEMMELSE_MAP.get(periode.getBestemmelse()) : periode.getBestemmelse())
+            erStorbritannia ? KonvEftaStorbritanniaLovvalgbestemmelser.getGB_KONV_LOVVALGBESTEMMELSE_MAP().get(periode.getBestemmelse()) : periode.getBestemmelse())
         );
 
         fag.setLovvalgsperiode(new LovvalgsperiodeType()
@@ -125,7 +125,7 @@ public final class InnvilgelsesbrevMapper implements BrevDataMapper {
 
         if (periode.getTilleggsbestemmelse() != null) {
             fag.setTilleggsbestemmelse(TilleggsbestemmelseKodeMapper.map(
-                erStorbritannia ? KonvEftaStorbritanniaLovvalgbestemmelser.GB_KONV_TILLEGGBESTEMMELSE_MAP.get(periode.getTilleggsbestemmelse()) : periode.getTilleggsbestemmelse())
+                erStorbritannia ? KonvEftaStorbritanniaLovvalgbestemmelser.getGB_KONV_TILLEGGBESTEMMELSE_MAP().get(periode.getTilleggsbestemmelse()) : periode.getTilleggsbestemmelse())
             );
         }
         if (brevdata.getBegrunnelseKode() != null) {

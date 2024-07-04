@@ -142,12 +142,12 @@ class A1Mapper {
         Boolean erStorbritannia = Arrays.stream(Lovvalgbestemmelser_konv_efta_storbritannia.values()).anyMatch(bestemmelse -> bestemmelse == lovvalgsperiode.getBestemmelse());
 
         brevPeriode.setLovvalgsbestemmelse(LovvalgsbestemmelseKodeMapper.map(
-            erStorbritannia ? KonvEftaStorbritanniaLovvalgbestemmelser.GB_KONV_LOVVALGBESTEMMELSE_MAP.get(lovvalgsperiode.getBestemmelse()) : lovvalgsperiode.getBestemmelse())
+            erStorbritannia ? KonvEftaStorbritanniaLovvalgbestemmelser.getGB_KONV_LOVVALGBESTEMMELSE_MAP().get(lovvalgsperiode.getBestemmelse()) : lovvalgsperiode.getBestemmelse())
         );
 
         if (lovvalgsperiode.getTilleggsbestemmelse() != null) {
             brevPeriode.setTilleggsbestemmelse(TilleggsbestemmelseKodeMapper.map(
-                erStorbritannia ? KonvEftaStorbritanniaLovvalgbestemmelser.GB_KONV_TILLEGGBESTEMMELSE_MAP.get(lovvalgsperiode.getTilleggsbestemmelse()) : lovvalgsperiode.getTilleggsbestemmelse())
+                erStorbritannia ? KonvEftaStorbritanniaLovvalgbestemmelser.getGB_KONV_TILLEGGBESTEMMELSE_MAP().get(lovvalgsperiode.getTilleggsbestemmelse()) : lovvalgsperiode.getTilleggsbestemmelse())
             );
         }
 

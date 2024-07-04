@@ -57,7 +57,7 @@ public enum Lovvalgsbestemmelse {
     }
 
     public static Lovvalgsbestemmelse avKonvensjonEftaStorbritannia(Lovvalgbestemmelser_konv_efta_storbritannia lovvalgBestemmelse) {
-        return av(KonvEftaStorbritanniaLovvalgbestemmelser.GB_KONV_LOVVALGBESTEMMELSE_MAP.get(lovvalgBestemmelse));
+        return av(KonvEftaStorbritanniaLovvalgbestemmelser.getGB_KONV_LOVVALGBESTEMMELSE_MAP().get(lovvalgBestemmelse));
     }
 
     Lovvalgsbestemmelse(String kode) {
