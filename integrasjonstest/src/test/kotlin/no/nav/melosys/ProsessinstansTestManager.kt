@@ -15,7 +15,6 @@ import no.nav.melosys.saksflytapi.domain.Prosessinstans
 import org.springframework.context.event.EventListener
 import org.springframework.stereotype.Component
 import java.time.Duration
-import java.time.LocalDateTime
 import java.util.concurrent.CopyOnWriteArrayList
 
 private val log = KotlinLogging.logger { }
@@ -55,6 +54,10 @@ class ProsessinstansTestManager(
                 prosessTypes
                     .map { waitForAndReturnProcess(it) }
                     .firstOrNull { it.type == returnProsessOfType } ?: error("Fant ikke prosess for $returnProsessOfType")
+            }.also {
+                // Vi sjekker dette igjen siden vi kan få false positive første gang vi sjekker
+                // Det kan skje at kun en prosess er startet, og waitForProsesses inneholder feilaktig bare denne
+                prosessinstanserOpprettet.toTypeToCountMap() shouldBe waitForProsesses
             }
         } finally {
             clear()
