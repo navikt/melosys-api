@@ -769,15 +769,12 @@ class ProsessinstansServiceTest {
 
     @Test
     void opprettProsessinstanserArsavregning() {
-        Skattehendelse skattehendelse = new Skattehendelse("2023", "456789", "ny");
-
-
-        prosessinstansService.opprettArsavregningsBehandlingProsessflyt(skattehendelse);
+        prosessinstansService.opprettArsavregningsBehandlingProsessflyt("MEL-2", "2023");
 
 
         verify(prosessinstansRepo, times(1)).save(piCaptor.capture());
         assertThat(piCaptor.getValue()).isNotNull();
-        assertThat(piCaptor.getValue().getData(ProsessDataKey.IDENTIFIKATOR)).isEqualTo("456789");
+        assertThat(piCaptor.getValue().getData(ProsessDataKey.SAKSNUMMER)).isEqualTo("MEL-2");
         assertThat(piCaptor.getValue().getData(ProsessDataKey.GJELDER_ÅR)).isEqualTo("2023");
     }
 
