@@ -44,6 +44,9 @@ class DokgenMalMapperIkkeYrkesaktivTest {
     private lateinit var mockInnhentingAvInntektsopplysningerMapper: InnhentingAvInntektsopplysningerMapper
 
     @MockK
+    private lateinit var mockInnvilgelseEftaStorbritanniaMapper: InnvilgelseEftaStorbritanniaMapper
+
+    @MockK
     private lateinit var mockInnvilgelseFtrlMapper: InnvilgelseFtrlMapper
 
     private lateinit var dokgenMalMapper: DokgenMalMapper
@@ -53,6 +56,7 @@ class DokgenMalMapperIkkeYrkesaktivTest {
         dokgenMalMapper = DokgenMalMapper(
             mockDokgenMapperDatahenter,
             mockInnvilgelseFtrlMapper,
+            mockInnvilgelseEftaStorbritanniaMapper,
             mockInnhentingAvInntektsopplysningerMapper,
             mockTrygdeavtaleMapper,
             mockOrienteringAnmodningUnntakMapper
