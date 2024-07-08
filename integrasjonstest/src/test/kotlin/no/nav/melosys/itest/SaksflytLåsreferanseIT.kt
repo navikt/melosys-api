@@ -80,8 +80,9 @@ internal class SaksflytLåsreferanseIT(
 
 
             prosessinstansTestManager.executeAndWait(
-                waitForprosessType = ProsessType.OPPRETT_NY_BEHANDLING_MANGLENDE_INNBETALING,
-                waitForProcessCount = 2
+                mapOf(
+                    ProsessType.OPPRETT_NY_BEHANDLING_MANGLENDE_INNBETALING to 2
+                )
             ) {
                 prosessRegister.registrer("manglendeInnbetaling-1-Prosess") {
                     prosessinstansService.opprettManglendeInnbetalingProsessflyt(manglendeFakturabetalingMelding1)
@@ -125,8 +126,9 @@ internal class SaksflytLåsreferanseIT(
             val manglendeInnbetalingLås1 = LåsReferanseFactory.lagString(manglendeFakturabetalingMelding1)
 
             prosessinstansTestManager.executeAndWait(
-                waitForprosessType = ProsessType.OPPRETT_NY_BEHANDLING_MANGLENDE_INNBETALING,
-                waitForProcessCount = 2
+                mapOf(
+                    ProsessType.OPPRETT_NY_BEHANDLING_MANGLENDE_INNBETALING to 2
+                )
             ) {
                 prosessRegister.registrer("manglendeInnbetaling-1-Prosess") {
                     prosessinstansService.opprettManglendeInnbetalingProsessflyt(manglendeFakturabetalingMelding1)

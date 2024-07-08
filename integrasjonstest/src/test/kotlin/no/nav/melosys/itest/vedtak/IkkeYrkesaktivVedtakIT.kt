@@ -91,8 +91,10 @@ class IkkeYrkesaktivVedtakIT(
                 behandlingstypeKode = Behandlingstyper.FØRSTEGANG.kode
                 behandlingstemaKode = Behandlingstema.IKKE_YRKESAKTIV.kode
             },
-            waitFor = ProsessType.JFR_NY_SAK_BRUKER,
-            alsoWaitForprosessType = listOf(ProsessType.OPPRETT_OG_DISTRIBUER_BREV)
+            mapOf(
+                ProsessType.JFR_NY_SAK_BRUKER to 1,
+                ProsessType.OPPRETT_OG_DISTRIBUER_BREV to 1
+            )
         ).behandling
 
         val mottatteOpplysninger =
@@ -133,8 +135,11 @@ class IkkeYrkesaktivVedtakIT(
 
 
         executeAndWait(
-            waitForprosessType = ProsessType.IVERKSETT_VEDTAK_IKKE_YRKESAKTIV,
-            alsoWaitForprosessType = listOf(ProsessType.OPPRETT_OG_DISTRIBUER_BREV, ProsessType.SEND_BREV)
+            mapOf(
+                ProsessType.IVERKSETT_VEDTAK_IKKE_YRKESAKTIV to 1,
+                ProsessType.OPPRETT_OG_DISTRIBUER_BREV to 1,
+                ProsessType.SEND_BREV to 1
+            )
         ) {
             vedtaksfattingFasade.fattVedtak(behandling.id, vedtakRequest)
         }
@@ -206,8 +211,10 @@ class IkkeYrkesaktivVedtakIT(
                 behandlingstypeKode = Behandlingstyper.FØRSTEGANG.kode
                 behandlingstemaKode = Behandlingstema.IKKE_YRKESAKTIV.kode
             },
-            waitFor = ProsessType.JFR_NY_SAK_BRUKER,
-            alsoWaitForprosessType = listOf(ProsessType.OPPRETT_OG_DISTRIBUER_BREV)
+            mapOf(
+                ProsessType.JFR_NY_SAK_BRUKER to 1,
+                ProsessType.OPPRETT_OG_DISTRIBUER_BREV to 1
+            )
         ).behandling
 
         val mottatteOpplysninger =
@@ -250,8 +257,11 @@ class IkkeYrkesaktivVedtakIT(
 
 
         executeAndWait(
-            waitForprosessType = ProsessType.IVERKSETT_VEDTAK_IKKE_YRKESAKTIV,
-            alsoWaitForprosessType = listOf(ProsessType.OPPRETT_OG_DISTRIBUER_BREV, ProsessType.SEND_BREV)
+            mapOf(
+                ProsessType.IVERKSETT_VEDTAK_IKKE_YRKESAKTIV to 1,
+                ProsessType.OPPRETT_OG_DISTRIBUER_BREV to 1,
+                ProsessType.SEND_BREV to 1
+            )
         ) {
             vedtaksfattingFasade.fattVedtak(behandling.id, vedtakRequest)
         }
@@ -312,8 +322,10 @@ class IkkeYrkesaktivVedtakIT(
                 behandlingstypeKode = Behandlingstyper.FØRSTEGANG.kode
                 behandlingstemaKode = Behandlingstema.IKKE_YRKESAKTIV.kode
             },
-            waitFor = ProsessType.JFR_NY_SAK_BRUKER,
-            alsoWaitForprosessType = listOf(ProsessType.OPPRETT_OG_DISTRIBUER_BREV)
+            mapOf(
+                ProsessType.JFR_NY_SAK_BRUKER to 1,
+                ProsessType.OPPRETT_OG_DISTRIBUER_BREV to 1
+            )
         ).behandling
 
         val mottatteOpplysninger =
@@ -352,8 +364,11 @@ class IkkeYrkesaktivVedtakIT(
             .build()
 
         executeAndWait(
-            waitForprosessType = ProsessType.IVERKSETT_VEDTAK_IKKE_YRKESAKTIV,
-            alsoWaitForprosessType = listOf(ProsessType.OPPRETT_OG_DISTRIBUER_BREV, ProsessType.SEND_BREV)
+            mapOf(
+                ProsessType.IVERKSETT_VEDTAK_IKKE_YRKESAKTIV to 1,
+                ProsessType.OPPRETT_OG_DISTRIBUER_BREV to 1,
+                ProsessType.SEND_BREV to 1
+            )
         ) {
             vedtaksfattingFasade.fattVedtak(behandling.id, vedtakRequest)
         }

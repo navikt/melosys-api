@@ -72,8 +72,9 @@ internal class SedLåsreferanseIT(
             val sed2ås = sed2.lagUnikIdentifikator()
 
             prosessinstansTestManager.executeAndWait(
-                waitForprosessType = ProsessType.MOTTAK_SED,
-                waitForProcessCount = 2
+                mapOf(
+                    ProsessType.MOTTAK_SED to 2
+                )
             ) {
                 prosessRegister.registrer("sed1Prosess") { prosessinstansService.opprettProsessinstansSedMottak(sed1) }
                 prosessRegister.registrer("sed2Prosess") { prosessinstansService.opprettProsessinstansSedMottak(sed2) }
@@ -106,8 +107,9 @@ internal class SedLåsreferanseIT(
             val sed1ås = sed1.lagUnikIdentifikator()
 
             prosessinstansTestManager.executeAndWait(
-                waitForprosessType = ProsessType.MOTTAK_SED,
-                waitForProcessCount = 2
+                mapOf(
+                    ProsessType.MOTTAK_SED to 2
+                )
             ) {
                 prosessRegister.registrer("førsteProsess") { prosessinstansService.opprettProsessinstansSedMottak(sed1) }
                 prosessRegister.registrer("duplikatProsess") { prosessinstansService.opprettProsessinstansSedMottak(sed1) }

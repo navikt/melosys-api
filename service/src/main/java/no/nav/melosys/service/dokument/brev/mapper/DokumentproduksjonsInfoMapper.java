@@ -139,6 +139,10 @@ public class DokumentproduksjonsInfoMapper {
                     DokumentKategoriKode.IB.getKode(),
                     JournalforingsTittel.MELDING_MANGLENDE_INNBETALING.getTittel(),
                     JournalforingsTittel.VARSEL_OPPHØRT_MEDLEMSKAP.getTittel()))
+            .put(AVSLAG_EFTA_STORBRITANNIA,
+                new DokumentproduksjonsInfo("avslag_efta_storbritannia",
+                    DokumentKategoriKode.VB.getKode(),
+                    JournalforingsTittel.MELDING_MANGLENDE_INNBETALING.getTittel()))
             .build());
     }
 
@@ -178,7 +182,8 @@ public class DokumentproduksjonsInfoMapper {
         MELDING_HENLAGT_SAK("Henleggelse av søknad"),
         IKKE_YRKESAKTIV_VEDTAKSBREV("Vedtak om medlemskap"),
         MELDING_MANGLENDE_INNBETALING("Melding om manglende innbetaling av trygdeavgift"),
-        VARSEL_OPPHØRT_MEDLEMSKAP("Varsel om opphør av frivillig medlemskap");
+        VARSEL_OPPHØRT_MEDLEMSKAP("Varsel om opphør av frivillig medlemskap"),
+        AVSLAG_EFTA_STORBRITANNIA("Avslag på søknad om medlemskap");
 
         private final String tittel;
 

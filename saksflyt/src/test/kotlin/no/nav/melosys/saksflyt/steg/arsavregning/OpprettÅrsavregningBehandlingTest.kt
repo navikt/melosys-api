@@ -1,6 +1,5 @@
 package no.nav.melosys.saksflyt.steg.arsavregning
 
-import io.kotest.assertions.throwables.shouldThrow
 import io.kotest.matchers.shouldBe
 import io.mockk.Called
 import io.mockk.every
@@ -58,7 +57,6 @@ class OpprettÅrsavregningBehandlingTest {
     fun setUp() {
         opprettÅrsavregningBehandling = OpprettÅrsavregningBehandling(
             fagsakService,
-            persondataService,
             trygdeavgiftService,
             behandlingService,
             behandslingsresultatService,
@@ -85,6 +83,7 @@ class OpprettÅrsavregningBehandlingTest {
 
         every { persondataService.hentAktørIdForIdent(any()) } returns AKTØR_ID
         every { fagsakService.hentFagsakerMedAktør(Aktoersroller.BRUKER, AKTØR_ID) } returns listOf(fagsak)
+        every { fagsakService.hentFagsak(SAKSNUMMER) } returns fagsak
         every { trygdeavgiftService.harFagsakBehandlingerMedTrygdeavgift(fagsak.saksnummer) } returns true
         every { trygdeavgiftService.finnSistFakturerbarTrygdeavgiftsbehandlingForÅr(fagsak.saksnummer, any()) } returns behandling
 
@@ -115,27 +114,13 @@ class OpprettÅrsavregningBehandlingTest {
     }
 
     @Test
-    fun `ikke opprette ny behandling ved skatteoppgjør uten fakturert trygdeavgift`() {
-        val prosessinstans = lagProsessInstans()
-        val fagsak = lagFagsak()
-
-        every { persondataService.hentAktørIdForIdent(any()) } returns AKTØR_ID
-        every { fagsakService.hentFagsakerMedAktør(Aktoersroller.BRUKER, AKTØR_ID) } returns listOf(fagsak)
-        every { trygdeavgiftService.harFagsakBehandlingerMedTrygdeavgift(fagsak.saksnummer) } returns false
-
-
-        shouldThrow<IllegalStateException> {
-            opprettÅrsavregningBehandling.utfør(prosessinstans)
-        }.message.shouldBe("Fant ingen sak med trygdeavgift for aktør: $AKTØR_ID")
-    }
-
-    @Test
     fun `ikke opprette ny behandling ved skatteoppgjør uten overlappende medlemskapsperiode`() {
         val prosessinstans = lagProsessInstans()
         val fagsak = lagFagsak()
 
         every { persondataService.hentAktørIdForIdent(any()) } returns AKTØR_ID
         every { fagsakService.hentFagsakerMedAktør(Aktoersroller.BRUKER, AKTØR_ID) } returns listOf(fagsak)
+        every { fagsakService.hentFagsak(SAKSNUMMER) } returns fagsak
         every { trygdeavgiftService.harFagsakBehandlingerMedTrygdeavgift(fagsak.saksnummer) } returns true
         every { trygdeavgiftService.finnSistFakturerbarTrygdeavgiftsbehandlingForÅr(fagsak.saksnummer, any()) } returns null
 
@@ -170,6 +155,7 @@ class OpprettÅrsavregningBehandlingTest {
 
         every { persondataService.hentAktørIdForIdent(any()) } returns AKTØR_ID
         every { fagsakService.hentFagsakerMedAktør(Aktoersroller.BRUKER, AKTØR_ID) } returns listOf(fagsak)
+        every { fagsakService.hentFagsak(SAKSNUMMER) } returns fagsak
         every { trygdeavgiftService.harFagsakBehandlingerMedTrygdeavgift(fagsak.saksnummer) } returns true
         every { trygdeavgiftService.finnSistFakturerbarTrygdeavgiftsbehandlingForÅr(fagsak.saksnummer, any()) } returns behandling
 
@@ -193,7 +179,7 @@ class OpprettÅrsavregningBehandlingTest {
     }
 
     private fun lagFagsak(block: Fagsak.() -> Unit = {}): Fagsak = Fagsak(
-        "MEL-test",
+        SAKSNUMMER,
         123L,
         Sakstyper.EU_EOS,
         Sakstemaer.MEDLEMSKAP_LOVVALG,
@@ -208,11 +194,13 @@ class OpprettÅrsavregningBehandlingTest {
     private fun lagProsessInstans(block: Prosessinstans.() -> Unit = {}): Prosessinstans = Prosessinstans().apply {
         setData(ProsessDataKey.GJELDER_ÅR, GJELDER_ÅR)
         setData(ProsessDataKey.AKTØR_ID, AKTØR_ID)
+        setData(ProsessDataKey.SAKSNUMMER, SAKSNUMMER)
         block()
     }
 
     companion object {
         const val AKTØR_ID = "456789123"
         const val GJELDER_ÅR = 2023
+        const val SAKSNUMMER = "MEL-test"
     }
 }

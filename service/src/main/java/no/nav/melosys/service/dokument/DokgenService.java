@@ -228,7 +228,7 @@ public class DokgenService {
 
     private boolean erTogglet(Produserbaredokumenter produserbartDokument) {
         return switch (produserbartDokument) {
-            case INNHENTING_AV_INNTEKTSOPPLYSNINGER, ORIENTERING_ANMODNING_UNNTAK, INNVILGELSE_EFTA_STORBRITANNIA ->
+            case INNHENTING_AV_INNTEKTSOPPLYSNINGER, ORIENTERING_ANMODNING_UNNTAK, AVSLAG_EFTA_STORBRITANNIA, INNVILGELSE_EFTA_STORBRITANNIA ->
                 unleash.isEnabled(ToggleName.MELOSYS_KONVENSJON_EFTA_LAND_OG_STORBRITANNIA);
             default -> true;
         };
@@ -373,6 +373,9 @@ public class DokgenService {
                 .medDistribusjonstype(Distribusjonstype.VEDTAK)
                 .medOpphørtDato(brevbestillingDto.getOpphørtDato())
                 .medOpphørtBegrunnelseFritekst(brevbestillingDto.getBegrunnelseFritekst());
+            case AVSLAG_EFTA_STORBRITANNIA -> new AvslagEftaStorbritanniaBrevbestilling.Builder()
+                .medInnledningFritekst(brevbestillingDto.getInnledningFritekst())
+                .medBegrunnelseFritekst(brevbestillingDto.getBegrunnelseFritekst());
 
             default -> new DokgenBrevbestilling.Builder<>().medDistribusjonstype(Distribusjonstype.VIKTIG);
         };

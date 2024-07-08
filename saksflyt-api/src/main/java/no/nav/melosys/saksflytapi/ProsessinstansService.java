@@ -169,12 +169,12 @@ public class ProsessinstansService {
     }
 
     @Transactional
-    public UUID opprettArsavregningsBehandlingProsessflyt(Skattehendelse skattehendelse) {
+    public UUID opprettArsavregningsBehandlingProsessflyt(String saksnummer, String gjelderPeriode) {
         Prosessinstans prosessinstans = new Prosessinstans();
         prosessinstans.setType(ProsessType.OPPRETT_NY_BEHANDLING_AARSAVREGNING);
 
-        prosessinstans.setData(GJELDER_ÅR, skattehendelse.getGjelderPeriode());
-        prosessinstans.setData(IDENTIFIKATOR, skattehendelse.getIdentifikator());
+        prosessinstans.setData(GJELDER_ÅR, gjelderPeriode);
+        prosessinstans.setData(SAKSNUMMER, saksnummer);
 
         return lagre(prosessinstans);
     }

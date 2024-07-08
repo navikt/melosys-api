@@ -3,7 +3,6 @@ package no.nav.melosys.saksflyt.steg.arsavregning
 import mu.KotlinLogging
 import no.nav.melosys.domain.Behandling
 import no.nav.melosys.domain.Fagsak
-import no.nav.melosys.domain.kodeverk.Aktoersroller
 import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingsaarsaktyper
 import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingsstatus
 import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingstyper
@@ -16,7 +15,6 @@ import no.nav.melosys.service.avgift.TrygdeavgiftService
 import no.nav.melosys.service.avgift.aarsavregning.ÅrsavregningService
 import no.nav.melosys.service.behandling.BehandlingService
 import no.nav.melosys.service.behandling.BehandlingsresultatService
-import no.nav.melosys.service.persondata.PersondataService
 import no.nav.melosys.service.sak.FagsakService
 import org.springframework.stereotype.Component
 import java.time.LocalDate
@@ -26,7 +24,6 @@ private val log = KotlinLogging.logger { }
 @Component
 class OpprettÅrsavregningBehandling(
     private val fagsakService: FagsakService,
-    private val persondataService: PersondataService,
     private val trygdeavgiftService: TrygdeavgiftService,
     private val behandlingService: BehandlingService,
     private val behandslingsresultatService: BehandlingsresultatService,
@@ -38,12 +35,7 @@ class OpprettÅrsavregningBehandling(
 
     override fun utfør(prosessinstans: Prosessinstans) {
         val gjelderÅr = prosessinstans.getData(ProsessDataKey.GJELDER_ÅR).toInt()
-        val ident = prosessinstans.getData(ProsessDataKey.IDENTIFIKATOR)
-        val aktørId = persondataService.hentAktørIdForIdent(ident)
-
-        val sakMedTrygdeavgift = finnSakMedTrygdeavgift(aktørId).also {
-            checkNotNull(it) { "Fant ingen sak med trygdeavgift for aktør: $aktørId" }
-        } ?: return
+        val sakMedTrygdeavgift = fagsakService.hentFagsak(prosessinstans.getData(ProsessDataKey.SAKSNUMMER))
 
         finnAktivÅrsavregningBehandling(sakMedTrygdeavgift, gjelderÅr)?.run {
             if (this.status != Behandlingsstatus.OPPRETTET) {
@@ -53,13 +45,14 @@ class OpprettÅrsavregningBehandling(
             return
         }
 
-        val trygdeavgiftsBehandlingMedRelevantPeriode = trygdeavgiftService.finnSistFakturerbarTrygdeavgiftsbehandlingForÅr(sakMedTrygdeavgift.saksnummer, gjelderÅr).also {
-            if (it == null) log.info(
-                "Fant ingen behandlinger med overlappende lovvalgsperioder eller medlemskapsperioder for sak: ${
-                    sakMedTrygdeavgift.saksnummer
-                } og år: $gjelderÅr"
-            )
-        } ?: return
+        val trygdeavgiftsBehandlingMedRelevantPeriode =
+            trygdeavgiftService.finnSistFakturerbarTrygdeavgiftsbehandlingForÅr(sakMedTrygdeavgift.saksnummer, gjelderÅr).also {
+                if (it == null) log.info(
+                    "Fant ingen behandlinger med overlappende lovvalgsperioder eller medlemskapsperioder for sak: ${
+                        sakMedTrygdeavgift.saksnummer
+                    } og år: $gjelderÅr"
+                )
+            } ?: return
 
         behandlingService.nyBehandling(
             sakMedTrygdeavgift,
@@ -97,17 +90,4 @@ class OpprettÅrsavregningBehandling(
             }
         }
     }
-
-    private fun finnSakMedTrygdeavgift(aktørId: String): Fagsak? =
-        fagsakService.hentFagsakerMedAktør(Aktoersroller.BRUKER, aktørId)
-            .filter {
-                trygdeavgiftService.harFagsakBehandlingerMedTrygdeavgift(it.saksnummer)
-            }.let { sakerMedTrygdeavgift ->
-                when {
-                    sakerMedTrygdeavgift.isEmpty() -> null
-                    // FIXME: Det kommer en ny oppgave som skal håntere flere saker med trygdeavgift
-                    sakerMedTrygdeavgift.size > 1 -> throw TekniskException("Flere saker med trygdeavgift funnet")
-                    else -> sakerMedTrygdeavgift.single()
-                }
-            }
 }

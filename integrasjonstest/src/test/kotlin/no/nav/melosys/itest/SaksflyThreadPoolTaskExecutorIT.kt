@@ -59,8 +59,9 @@ internal class SaksflyThreadPoolTaskExecutorIT(
     fun test() {
         val events = LoggingTestUtils.captureLog<ProsessinstansService> {
             prosessinstansTestManager.executeAndWait(
-                waitForprosessType = ProsessType.MOTTAK_SED,
-                waitForProcessCount = 10
+                mapOf(
+                    ProsessType.MOTTAK_SED to 10
+                )
             ) {
                 for (i in 1..10) {
                     val msg = MelosysEessiMelding().apply {
