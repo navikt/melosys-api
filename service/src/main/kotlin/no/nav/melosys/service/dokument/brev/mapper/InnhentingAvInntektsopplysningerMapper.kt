@@ -3,7 +3,6 @@ package no.nav.melosys.service.dokument.brev.mapper
 import jakarta.transaction.Transactional
 import no.nav.melosys.domain.Behandlingsresultat
 import no.nav.melosys.domain.brev.InnhentingAvInntektsopplysningerBrevbestilling
-import no.nav.melosys.domain.kodeverk.InnvilgelsesResultat
 import no.nav.melosys.integrasjon.dokgen.dto.InnhentingAvInntektsopplysninger
 import org.springframework.stereotype.Component
 import java.time.LocalDate
@@ -16,7 +15,7 @@ class InnhentingAvInntektsopplysningerMapper(
     internal fun map(brevbestilling: InnhentingAvInntektsopplysningerBrevbestilling): InnhentingAvInntektsopplysninger {
         val behandlingsresultat = dokgenMapperDatahenter.hentBehandlingsresultat(brevbestilling.behandlingId)
 
-        val årsavregningsår = behandlingsresultat.aarsavregning.aar
+        val årsavregningsår = 2024
         val fristdato = LocalDate.now().plusWeeks(4)
         val medlemskapsperiode = mapMedlemskapsPerioder(behandlingsresultat, årsavregningsår)
 
@@ -30,13 +29,10 @@ class InnhentingAvInntektsopplysningerMapper(
     }
 
     private fun mapMedlemskapsPerioder(behandlingsresultat: Behandlingsresultat, årsavregningsår: Int): Pair<LocalDate, LocalDate> {
-        val relevantePerioder = behandlingsresultat.medlemskapsperioder
-            .filter { it.innvilgelsesresultat == InnvilgelsesResultat.INNVILGET }
-            .filter { it.fom.year == årsavregningsår || it.tom.year == årsavregningsår }
-            .sortedBy { it.fom }
 
-        val fom = relevantePerioder.first().fom.hentGyldigDatoForÅr(årsavregningsår)
-        val tom = relevantePerioder.last().tom.hentGyldigDatoForÅr(årsavregningsår)
+
+        val fom = LocalDate.now().minusWeeks(4)
+        val tom = LocalDate.now().plusWeeks(4)
 
         return Pair(fom, tom)
     }
