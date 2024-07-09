@@ -224,7 +224,7 @@ class BrevmalListeBygger(
             ),
             FeltvalgAlternativDto(
                 FeltvalgAlternativKode.FRITEKST.kode,
-                "Fritekst",
+                FeltvalgAlternativKode.FRITEKST.beskrivelse,
                 true
             )
         )
