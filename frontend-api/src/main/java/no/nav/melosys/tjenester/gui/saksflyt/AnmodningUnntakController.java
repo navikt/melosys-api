@@ -42,7 +42,8 @@ public class AnmodningUnntakController {
             anmodningUnntakDto.getVedlegg().stream()
                 .map(v -> new DokumentReferanse(v.journalpostID(), v.dokumentID()))
                 .collect(Collectors.toUnmodifiableSet()),
-            anmodningUnntakDto.getFritekstSed());
+            anmodningUnntakDto.getFritekstSed(),
+            anmodningUnntakDto.getBegrunnelseFritekst());
         return ResponseEntity.noContent().build();
     }
 
