@@ -97,12 +97,12 @@ class AnmodningUnntakServiceTest {
         when(behandlingService.hentBehandlingMedSaksopplysninger(BEHANDLING_ID)).thenReturn(behandling);
         when(landvelgerService.hentUtenlandskTrygdemyndighetsland(BEHANDLING_ID)).thenReturn(Collections.singletonList(Land_iso2.SE));
 
-        anmodningUnntakService.anmodningOmUnntak(BEHANDLING_ID, MOTTAKER_INSTITUSJON, Set.of(dokumentReferanse), FRITEKST_SED);
+        anmodningUnntakService.anmodningOmUnntak(BEHANDLING_ID, MOTTAKER_INSTITUSJON, Set.of(dokumentReferanse), FRITEKST_SED, "");
 
         verify(anmodningUnntakKontrollService).utførKontroller(BEHANDLING_ID);
         verify(anmodningsperiodeService).oppdaterAnmodetAvForBehandling(BEHANDLING_ID, "Z990007");
         verify(prosessinstansService).opprettProsessinstansAnmodningOmUnntak(any(Behandling.class),
-            anySet(), eq(Set.of(dokumentReferanse)), eq(FRITEKST_SED));
+            anySet(), eq(Set.of(dokumentReferanse)), eq(FRITEKST_SED), "");
         verify(oppgaveService).leggTilbakeBehandlingsoppgaveMedSaksnummer(any());
         verify(behandlingsresultatService).oppdaterBehandlingsresultattype(BEHANDLING_ID, Behandlingsresultattyper.ANMODNING_OM_UNNTAK);
     }
@@ -117,12 +117,12 @@ class AnmodningUnntakServiceTest {
         when(behandlingService.hentBehandlingMedSaksopplysninger(BEHANDLING_ID)).thenReturn(behandling);
         when(landvelgerService.hentUtenlandskTrygdemyndighetsland(BEHANDLING_ID)).thenReturn(Collections.singletonList(Land_iso2.SE));
 
-        anmodningUnntakService.anmodningOmUnntak(BEHANDLING_ID, null, Collections.emptySet(), FRITEKST_SED);
+        anmodningUnntakService.anmodningOmUnntak(BEHANDLING_ID, null, Collections.emptySet(), FRITEKST_SED, "");
 
         verify(anmodningUnntakKontrollService).utførKontroller(BEHANDLING_ID);
         verify(anmodningsperiodeService).oppdaterAnmodetAvForBehandling(BEHANDLING_ID, "Z990007");
         verify(prosessinstansService).opprettProsessinstansAnmodningOmUnntak(any(Behandling.class), anySet(),
-            anySet(), eq(FRITEKST_SED));
+            anySet(), eq(FRITEKST_SED), "");
         verify(oppgaveService).leggTilbakeBehandlingsoppgaveMedSaksnummer(any());
         verify(behandlingsresultatService).oppdaterBehandlingsresultattype(BEHANDLING_ID, Behandlingsresultattyper.ANMODNING_OM_UNNTAK);
     }
