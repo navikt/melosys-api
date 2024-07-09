@@ -41,7 +41,7 @@
         <kotlin.compiler.jvmTarget>${java.version}</kotlin.compiler.jvmTarget>
 
         <!-- Melosys -->
-        <melosys.internt.kodeverk.version>5.15.273</melosys.internt.kodeverk.version>
+        <melosys.internt.kodeverk.version>5.15.275</melosys.internt.kodeverk.version>
         <melosys.brev.version>1.2.154-midlertidig</melosys.brev.version>
 
         <!-- NAV -->
@@ -108,6 +108,11 @@
         <testcontainers.version>1.17.1</testcontainers.version>
         <jna.version>5.11.0</jna.version>
         <graphql.java.extended.scalars.version>21.0</graphql.java.extended.scalars.version>
+        <ulid-java>5.2.3</ulid-java>
+        <!-- Spring-data-envers, hibernate, antlr4 Downgraded due to: https://hibernate.atlassian.net/browse/HHH-17612 and compatability-->
+        <spring-data-envers.version>3.3.1</spring-data-envers.version>
+        <hibernate.version>6.2.4.Final</hibernate.version>
+        <antlr4.version>4.10.1</antlr4.version>
 
         <!-- Transitive avhengigheter -->
         <asm.version>9.6</asm.version>
@@ -117,7 +122,6 @@
         <xmlsec.version>3.0.4</xmlsec.version>
         <wiremock-standalone.version>3.0.1</wiremock-standalone.version>
         <nav-foedselsnummer.core.version>1.0-SNAPSHOT.6</nav-foedselsnummer.core.version>
-        <ulid-java>0.1.1</ulid-java>
     </properties>
 
     <!-- Unngå å put scope i dependency management. Sett det heller der det
@@ -202,6 +206,21 @@
             </dependency>
 
             <!-- Eksterne biblioteker -->
+            <dependency>
+                <groupId>org.hibernate.orm</groupId>
+                <artifactId>hibernate-core</artifactId>
+                <version>${hibernate.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>org.springframework.data</groupId>
+                <artifactId>spring-data-envers</artifactId>
+                <version>${spring-data-envers.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>org.antlr</groupId>
+                <artifactId>antlr4-runtime</artifactId>
+                <version>${antlr4.version}</version>
+            </dependency>
             <dependency>
                 <groupId>commons-cli</groupId>
                 <artifactId>commons-cli</artifactId>
@@ -388,11 +407,6 @@
                 <groupId>org.apache.cxf.services.sts</groupId>
                 <artifactId>cxf-services-sts-core</artifactId>
                 <version>${cxf.version}</version>
-            </dependency>
-            <dependency>
-                <groupId>org.hibernate</groupId>
-                <artifactId>hibernate-core</artifactId>
-                <version>${hibernate.version}</version>
             </dependency>
             <dependency>
                 <groupId>org.springframework.kafka</groupId>
@@ -668,12 +682,6 @@
                 <scope>test</scope>
             </dependency>
             <dependency>
-                <groupId>io.github.jaspeen</groupId>
-                <artifactId>ulid-java</artifactId>
-                <version>${ulid-java}</version>
-                <scope>test</scope>
-            </dependency>
-            <dependency>
                 <groupId>org.mockito</groupId>
                 <artifactId>mockito-inline</artifactId>
                 <version>${mockito.inline.version}</version>
@@ -684,7 +692,6 @@
                 <version>${springmockk.version}</version>
                 <scope>test</scope>
             </dependency>
-
         </dependencies>
     </dependencyManagement>
 

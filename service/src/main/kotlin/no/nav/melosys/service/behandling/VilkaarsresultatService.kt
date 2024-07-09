@@ -13,6 +13,7 @@ import no.nav.melosys.repository.BehandlingsresultatRepository
 import no.nav.melosys.service.saksbehandling.SaksbehandlingRegler
 import no.nav.melosys.service.vilkaar.VilkaarDto
 import org.springframework.stereotype.Service
+import org.springframework.transaction.annotation.Propagation
 import org.springframework.transaction.annotation.Transactional
 
 
@@ -24,7 +25,7 @@ class VilkaarsresultatService(
 ) {
     private fun hentBehandlingsresultat(behandlingsid: Long): Behandlingsresultat =
         behandlingsresultatRepository.findById(behandlingsid)
-            .orElseThrow { IkkeFunnetException(BehandlingsresultatService.KAN_IKKE_FINNE_BEHANDLINGSRESULTAT + behandlingsid) }
+            .orElseThrow { IkkeFunnetException("Kan ikke finne behandlingsresultat for behandling: $behandlingsid") }
 
     @Transactional(readOnly = true)
     fun hentVilkaar(behandlingID: Long): List<VilkaarDto> =
@@ -88,8 +89,8 @@ class VilkaarsresultatService(
         hentBehandlingsresultat(behandlingID).vilkaarsresultater.any { vilkaar == it.vilkaar && it.isOppfylt }
 
     @Transactional(readOnly = true)
-    fun oppfyllerVilkaar(behandlingID: Long, vilkaar: List<Vilkaar>): Boolean =
-        hentBehandlingsresultat(behandlingID).vilkaarsresultater.any { vilkaar.contains(it.vilkaar) && it.isOppfylt }
+    fun harVilkaar(behandlingID: Long, vilkaar: List<Vilkaar>): Boolean =
+        hentBehandlingsresultat(behandlingID).vilkaarsresultater.any { vilkaar.contains(it.vilkaar) }
 
     @Transactional(readOnly = true)
     fun harVilkaarForUtsending(behandlingID: Long): Boolean =
@@ -102,7 +103,7 @@ class VilkaarsresultatService(
     fun registrerVilkår(behandlingID: Long, vilkaarDtoer: List<VilkaarDto>) {
         validerVilkår(vilkaarDtoer)
         val behandlingsresultat = hentBehandlingsresultat(behandlingID)
-        tømVilkårsresultatFraBehandlingsresultat(behandlingID)
+        tilbakestillVilkårsresultatFraBehandlingsresultat(behandlingsresultat)
         // Flush fordi vi potensielt legger til samme vilkåret igjen. INSERT kommer før DELETE i Hibernate, som skaper UNIQUE constraint problemer uten flush.
         behandlingsresultatRepository.saveAndFlush(behandlingsresultat)
         for (vilkaarDto in vilkaarDtoer) {
@@ -119,16 +120,14 @@ class VilkaarsresultatService(
         behandlingsresultatRepository.save(behandlingsresultat)
     }
 
-    @Transactional
-    fun tømVilkårsresultatFraBehandlingsresultat(behandlingID: Long) {
-        val behandlingsresultat = hentBehandlingsresultat(behandlingID)
+    @Transactional(propagation = Propagation.MANDATORY)
+    fun tilbakestillVilkårsresultatFraBehandlingsresultat(behandlingsresultat: Behandlingsresultat) {
         val behandling = behandlingsresultat.behandling
         if (behandling.fagsak.erSakstypeEøs() && !saksbehandlingRegler.harIngenFlyt(behandling)) {
             behandlingsresultat.vilkaarsresultater.removeIf { it.vilkaar !in IMMUTABLE_VILKAAR }
         } else {
             behandlingsresultat.vilkaarsresultater.clear()
         }
-        behandlingsresultatRepository.saveAndFlush(behandlingsresultat)
     }
 
     private fun validerVilkår(vilkaarDtoer: List<VilkaarDto>) {

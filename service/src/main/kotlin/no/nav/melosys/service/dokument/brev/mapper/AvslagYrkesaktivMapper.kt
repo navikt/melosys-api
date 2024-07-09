@@ -1,6 +1,7 @@
 package no.nav.melosys.service.dokument.brev.mapper
 
 
+import jakarta.xml.bind.JAXBElement
 import no.nav.dok.melosysbrev._000081.BrevdataType
 import no.nav.dok.melosysbrev._000081.Fag
 import no.nav.dok.melosysbrev._000081.LovvalgsperiodeType
@@ -17,7 +18,6 @@ import no.nav.melosys.service.dokument.brev.BrevData
 import no.nav.melosys.service.dokument.brev.BrevDataAvslagYrkesaktiv
 import no.nav.melosys.service.dokument.brev.mapper.felles.BrevMapperUtils.convertToXMLGregorianCalendarRemoveTimezone
 import no.nav.melosys.service.dokument.brev.mapper.felles.VilkaarbegrunnelseFactory.*
-import jakarta.xml.bind.JAXBElement
 
 
 open class AvslagYrkesaktivMapper : BrevDataMapper {
@@ -63,9 +63,21 @@ open class AvslagYrkesaktivMapper : BrevDataMapper {
         arbeidsland = brevData.arbeidsland
         lovvalgsperiode = lagLovvalgsperiodeType(resultat)
 
-        art121Begrunnelse = mapArt121BegrunnelseType(resultat.hentVilkaarbegrunnelser(FO_883_2004_ART12_1))
+        art121Begrunnelse = mapArt121BegrunnelseType(
+            resultat.hentVilkaarbegrunnelser(
+                FO_883_2004_ART12_1,
+                KONV_EFTA_STORBRITANNIA_ART14_1,
+                KONV_EFTA_STORBRITANNIA_ART16_1
+            )
+        )
         art121ForutgåendeBegrunnelse = mapArt121ForutgaaendeBegrunnelseType(resultat.hentVilkaarbegrunnelser(FORUTGAAENDE_MEDLEMSKAP))
-        art122Begrunnelse = mapArt122BegrunnelseType(resultat.hentVilkaarbegrunnelser(FO_883_2004_ART12_2))
+        art122Begrunnelse = mapArt122BegrunnelseType(
+            resultat.hentVilkaarbegrunnelser(
+                FO_883_2004_ART12_2,
+                KONV_EFTA_STORBRITANNIA_ART14_2,
+                KONV_EFTA_STORBRITANNIA_ART16_3
+            )
+        )
         art122NormalVirksomhetBegrunnelse = mapArt122NormalVirksomhetBegrunnelseType(resultat.hentVilkaarbegrunnelser(NORMALT_DRIVER_VIRKSOMHET))
 
         fritekst = brevData.fritekst
@@ -92,6 +104,7 @@ open class AvslagYrkesaktivMapper : BrevDataMapper {
                     art161AvslagBegrunnelser.saerligAvslagsgrunn = JA
                     fag.begrunnelseFritekst = validerFritekstbegrunnelse(vilkaarsresultat.begrunnelseFritekst)
                 }
+
                 Avslag_anmodning_begrunnelser.SOEKT_FOR_SENT -> art161AvslagBegrunnelser.soektForSent = JA
                 else -> throw TekniskException("$begrunnelseKode støttes ikke.")
             }

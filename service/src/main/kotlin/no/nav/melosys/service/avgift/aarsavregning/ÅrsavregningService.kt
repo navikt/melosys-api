@@ -8,10 +8,13 @@ import no.nav.melosys.domain.avgift.SkatteforholdTilNorge
 import no.nav.melosys.domain.avgift.Trygdeavgiftsperiode
 import no.nav.melosys.domain.kodeverk.Folketrygdloven_kap2_bestemmelser
 import no.nav.melosys.domain.kodeverk.Trygdedekninger
+import no.nav.melosys.exception.FunksjonellException
 import no.nav.melosys.exception.IkkeFunnetException
 import no.nav.melosys.integrasjon.faktureringskomponenten.FaktureringskomponentenConsumer
 import no.nav.melosys.integrasjon.faktureringskomponenten.dto.BeregnTotalBeløpDto
 import no.nav.melosys.repository.AarsavregningRepository
+import no.nav.melosys.service.avgift.TrygdeavgiftService
+import no.nav.melosys.service.behandling.BehandlingsresultatService
 import no.nav.melosys.sikkerhet.context.SubjectHandler
 import org.springframework.stereotype.Service
 import org.springframework.transaction.annotation.Transactional
@@ -20,10 +23,12 @@ import java.time.LocalDate
 
 @Service
 class ÅrsavregningService(
-    private val faktureringskomponentenConsumer: FaktureringskomponentenConsumer,
     private val aarsavregningRepository: AarsavregningRepository,
+    private val behandlingsresultatService: BehandlingsresultatService,
+    private val faktureringskomponentenConsumer: FaktureringskomponentenConsumer,
+    private val trygdeavgiftService: TrygdeavgiftService
 ) {
-    fun beregnTotalTrygdeavgiftForPeriode(beregnTotalBeløpDto: BeregnTotalBeløpDto): BigDecimal {
+    fun beregnTotalbeløpForPeriode(beregnTotalBeløpDto: BeregnTotalBeløpDto): BigDecimal {
         val saksbehandlerIdent = SubjectHandler.getInstance().getUserID()
         return faktureringskomponentenConsumer.hentTotalTrygdeavgiftForPeriode(beregnTotalBeløpDto, saksbehandlerIdent)
     }
@@ -43,6 +48,30 @@ class ÅrsavregningService(
             tilFaktureringBeloep = aarsavregning.tilFaktureringBeloep
         )
     }
+
+    @Transactional
+    fun opprettÅrsavregning(behandlingID: Long, gjelderÅr: Int): Long {
+        val behandlingsresultat = behandlingsresultatService.hentBehandlingsresultat(behandlingID)
+
+        if (aarsavregningRepository.finnAntallÅrsavregningerPåFagsakForÅr(behandlingID, gjelderÅr) != 0) {
+            throw FunksjonellException("Det finnes en annen åpen årsavregningsbehandling for samme år på saken. \n" +
+                "Vurder hvilke behandling du vil fortsette med og avslutt den som ikke er aktuell via behandlingsmenyen.")
+        }
+
+        Aarsavregning().apply {
+            behandlingsresultat.aarsavregning = this
+            aar = gjelderÅr
+            this.behandlingsresultat = behandlingsresultat
+            tidligereBehandlingsresultat = finnTidligereBehandlingsresultatMedAvgift(behandlingsresultat.behandling.fagsak.saksnummer, gjelderÅr)
+        }.also {
+            aarsavregningRepository.save(it)
+        }
+        return behandlingID
+    }
+
+    private fun finnTidligereBehandlingsresultatMedAvgift(saksnummer: String, gjelderÅr: Int): Behandlingsresultat? =
+        trygdeavgiftService.finnSistFakturerbarTrygdeavgiftsbehandlingForÅr(saksnummer, gjelderÅr)
+            ?.let { behandlingsresultatService.hentBehandlingsresultat(it.id) }
 
     private fun hentTidligereTrygdeavgiftsgrunnlag(år: Int, behandlingsresultat: Behandlingsresultat?): Trygdeavgiftsgrunnlag? {
         if (behandlingsresultat == null) return null

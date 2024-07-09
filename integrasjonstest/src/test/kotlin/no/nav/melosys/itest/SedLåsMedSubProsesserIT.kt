@@ -85,9 +85,11 @@ internal class SedLåsMedSubProsesserIT(
         LoggingTestUtils.withLogCapture { logItems ->
 
             prosessinstansTestManager.executeAndWait(
-                waitForprosessType = ProsessType.MOTTAK_SED,
-                alsoWaitForprosessType = listOf(ProsessType.MOTTAK_SED_JOURNALFØRING, ProsessType.REGISTRERING_UNNTAK_NY_SAK),
-                waitForProcessCount = 5
+                mapOf(
+                    ProsessType.MOTTAK_SED to 2,
+                    ProsessType.MOTTAK_SED_JOURNALFØRING to 2,
+                    ProsessType.REGISTRERING_UNNTAK_NY_SAK to 1
+                )
             ) {
                 prosessRegister.registrer("a009Prosess") { prosessinstansService.opprettProsessinstansSedMottak(a009) }
                 prosessRegister.registrer("x008Prosess") { prosessinstansService.opprettProsessinstansSedMottak(x008) }
@@ -154,9 +156,10 @@ internal class SedLåsMedSubProsesserIT(
         LoggingTestUtils.withLogCapture { logItems ->
 
             prosessinstansTestManager.executeAndWait(
-                waitForprosessType = ProsessType.MOTTAK_SED,
-                alsoWaitForprosessType = listOf(ProsessType.MOTTAK_SED_JOURNALFØRING),
-                waitForProcessCount = 6
+                mapOf(
+                    ProsessType.MOTTAK_SED to 2,
+                    ProsessType.MOTTAK_SED_JOURNALFØRING to 4
+                )
             ) {
                 prosessRegister.registrer("førsteProsess") { prosessinstansService.opprettProsessinstansSedMottak(a009) }
                 prosessRegister.registrer("duplikatProsess") { prosessinstansService.opprettProsessinstansSedMottak(a009) }

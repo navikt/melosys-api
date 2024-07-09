@@ -199,25 +199,23 @@ internal class VilkaarsresultatServiceTest {
     }
 
     @Test
-    fun tømVilkårsresultatFraBehandlingsresultat_sakstypeIkkeEøs_sletterAlleVilkår() {
+    fun tilbakestillVilkårsresultatFraBehandlingsresultat_OgLagre_sakstypeIkkeEøs_sletterAlleVilkår() {
         val behandlingsresultat = Behandlingsresultat().apply {
             id = BEHANDLING_ID
             behandling = Behandling().apply { fagsak = FagsakTestFactory.builder().type(Sakstyper.FTRL).build() }
             vilkaarsresultater = mutableSetOf(Vilkaarsresultat().apply { id = BEHANDLING_ID })
         }
         every { behandlingsresultatRepo.findById(BEHANDLING_ID) } returns Optional.of(behandlingsresultat)
-        every { behandlingsresultatRepo.saveAndFlush(any()) } returnsArgument 0
 
 
-        vilkaarsresultatService.tømVilkårsresultatFraBehandlingsresultat(BEHANDLING_ID)
+        vilkaarsresultatService.tilbakestillVilkårsresultatFraBehandlingsresultat(behandlingsresultat)
 
 
-        verify { behandlingsresultatRepo.saveAndFlush(behandlingsresultat) }
         behandlingsresultat.vilkaarsresultater.shouldBeEmpty()
     }
 
     @Test
-    fun tømVilkårsresultatFraBehandlingsresultat_sakstypeEøsMenIngenFlyt_sletterAlleVilkår() {
+    fun tilbakestillVilkårsresultatFraBehandlingsresultat_OgLagre_sakstypeEøsMenIngenFlyt_sletterAlleVilkår() {
         val behandlingsresultat = Behandlingsresultat().apply {
             id = BEHANDLING_ID
             behandling = Behandling().apply {
@@ -230,18 +228,16 @@ internal class VilkaarsresultatServiceTest {
         }
         every { saksbehandlingRegler.harIngenFlyt(behandlingsresultat.behandling) } returns true
         every { behandlingsresultatRepo.findById(BEHANDLING_ID) } returns Optional.of(behandlingsresultat)
-        every { behandlingsresultatRepo.saveAndFlush(any()) } returnsArgument 0
 
 
-        vilkaarsresultatService.tømVilkårsresultatFraBehandlingsresultat(BEHANDLING_ID)
+        vilkaarsresultatService.tilbakestillVilkårsresultatFraBehandlingsresultat(behandlingsresultat)
 
 
-        verify { behandlingsresultatRepo.saveAndFlush(behandlingsresultat) }
         behandlingsresultat.vilkaarsresultater.shouldBeEmpty()
     }
 
     @Test
-    fun tømVilkårsresultatFraBehandlingsresultat_sakstypeEøsOgHarFlyt_sletterIkkeInngangsvilkår() {
+    fun tilbakestillVilkårsresultatFraBehandlingsresultat_OgLagre_sakstypeEøsOgHarFlyt_sletterIkkeInngangsvilkår() {
         val behandlingsresultat = Behandlingsresultat().apply {
             id = BEHANDLING_ID
             behandling = Behandling().apply {
@@ -263,13 +259,11 @@ internal class VilkaarsresultatServiceTest {
         }
 
         every { behandlingsresultatRepo.findById(BEHANDLING_ID) } returns Optional.of(behandlingsresultat)
-        every { behandlingsresultatRepo.saveAndFlush(any()) } returnsArgument 0
 
 
-        vilkaarsresultatService.tømVilkårsresultatFraBehandlingsresultat(BEHANDLING_ID)
+        vilkaarsresultatService.tilbakestillVilkårsresultatFraBehandlingsresultat(behandlingsresultat)
 
 
-        verify { behandlingsresultatRepo.saveAndFlush(behandlingsresultat) }
         behandlingsresultat.vilkaarsresultater
             .shouldHaveSize(1)
             .single().run {

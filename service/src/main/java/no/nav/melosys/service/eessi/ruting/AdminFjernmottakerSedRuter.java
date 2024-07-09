@@ -76,6 +76,7 @@ public class AdminFjernmottakerSedRuter extends AdminSedRuter implements SedRute
             log.info("Nav er fjernet på sed {} i RINA-sak {}, og behandlingen vil bli avsluttet", melosysEessiMelding.getSedId(), melosysEessiMelding.getRinaSaksnummer());
             annullerSakOgBehandling(sistAktiveBehandling);
             behandlingsresultatService.oppdaterBehandlingsresultattype(sistAktiveBehandling.getId(), Behandlingsresultattyper.HENLEGGELSE);
+            oppgaveService.ferdigstillOppgaveMedSaksnummer(fagsak.get().getSaksnummer());
         } else {
             log.info("Mottakerinstitusjon på sed {} i RINA-sak {} er ikke Nav", melosysEessiMelding.getSedId(), melosysEessiMelding.getRinaSaksnummer());
         }

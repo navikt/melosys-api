@@ -1,7 +1,7 @@
 package no.nav.melosys.domain.brev;
 
 public class OrienteringAnmodningUnntakBrevbestilling extends DokgenBrevbestilling {
-    private String fritekst;
+    private String anmodningUnntakFritekst;
 
     public OrienteringAnmodningUnntakBrevbestilling() {
         super();
@@ -9,8 +9,8 @@ public class OrienteringAnmodningUnntakBrevbestilling extends DokgenBrevbestilli
     }
 
 
-    public String getFritekst() {
-        return fritekst;
+    public String getAnmodningUnntakFritekst() {
+        return anmodningUnntakFritekst;
     }
 
     public OrienteringAnmodningUnntakBrevbestilling.Builder toBuilder() {
@@ -19,18 +19,18 @@ public class OrienteringAnmodningUnntakBrevbestilling extends DokgenBrevbestilli
 
     private OrienteringAnmodningUnntakBrevbestilling(Builder builder) {
         super(builder);
-        this.fritekst = builder.fritekst;
+        this.anmodningUnntakFritekst = builder.anmodningUnntakFritekst;
     }
 
     public static final class Builder extends DokgenBrevbestilling.Builder<Builder> {
-        private String fritekst;
+        private String anmodningUnntakFritekst;
 
         public Builder() {
         }
 
         public Builder(OrienteringAnmodningUnntakBrevbestilling brevbestilling) {
             super(brevbestilling);
-            this.fritekst = brevbestilling.fritekst;
+            this.anmodningUnntakFritekst = brevbestilling.anmodningUnntakFritekst;
         }
 
         public OrienteringAnmodningUnntakBrevbestilling build() {
@@ -39,7 +39,7 @@ public class OrienteringAnmodningUnntakBrevbestilling extends DokgenBrevbestilli
 
 
         public Builder medFritekst(String fritekst) {
-            this.fritekst = fritekst;
+            this.anmodningUnntakFritekst = fritekst;
             return this;
         }
     }

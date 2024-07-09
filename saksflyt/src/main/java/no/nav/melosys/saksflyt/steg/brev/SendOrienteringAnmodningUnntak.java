@@ -14,6 +14,7 @@ import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Component;
 
 import static no.nav.melosys.domain.kodeverk.brev.Produserbaredokumenter.ORIENTERING_ANMODNING_UNNTAK;
+import static no.nav.melosys.saksflytapi.domain.ProsessDataKey.BEGRUNNELSE_FRITEKST;
 import static no.nav.melosys.saksflytapi.domain.ProsessDataKey.SAKSBEHANDLER;
 
 @Component("AnmodningOmUnntakSendBrev")
@@ -38,11 +39,13 @@ public class SendOrienteringAnmodningUnntak implements StegBehandler {
     public void utfør(Prosessinstans prosessinstans) {
         Behandling behandling = behandlingService.hentBehandlingMedSaksopplysninger(prosessinstans.getBehandling().getId());
         String saksbehandler = prosessinstans.getData(SAKSBEHANDLER);
+
         DoksysBrevbestilling brevbestilling = new DoksysBrevbestilling.Builder()
             .medProduserbartDokument(ORIENTERING_ANMODNING_UNNTAK)
             .medAvsenderID(saksbehandler)
             .medMottakere(Mottaker.medRolle(Mottakerroller.BRUKER))
             .medBehandling(behandling)
+            .medFritekst(prosessinstans.getData(BEGRUNNELSE_FRITEKST))
             .build();
         brevBestiller.bestill(brevbestilling);
         log.info("Sendt alle brev for anmodning om unntak i behandling {}", behandling.getId());

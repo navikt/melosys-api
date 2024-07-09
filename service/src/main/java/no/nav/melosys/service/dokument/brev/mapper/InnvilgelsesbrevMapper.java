@@ -2,6 +2,7 @@ package no.nav.melosys.service.dokument.brev.mapper;
 
 import jakarta.xml.bind.JAXBElement;
 import jakarta.xml.bind.JAXBException;
+
 import no.nav.dok.melosysbrev._000108.LovvalgsperiodeType;
 import no.nav.dok.melosysbrev._000108.ObjectFactory;
 import no.nav.dok.melosysbrev._000108.*;
@@ -15,6 +16,7 @@ import no.nav.melosys.domain.kodeverk.Maritimtyper;
 import no.nav.melosys.domain.kodeverk.Vedtakstyper;
 import no.nav.melosys.domain.kodeverk.begrunnelser.Fartsomrader;
 import no.nav.melosys.domain.kodeverk.begrunnelser.Medfolgende_barn_begrunnelser;
+import no.nav.melosys.domain.kodeverk.lovvalgsbestemmelser.Lovvalgbestemmelser_konv_efta_storbritannia;
 import no.nav.melosys.domain.mottatteopplysninger.MottatteOpplysningerData;
 import no.nav.melosys.domain.mottatteopplysninger.data.arbeidssteder.MaritimtArbeid;
 import no.nav.melosys.domain.person.familie.AvklarteMedfolgendeFamilie;
@@ -25,18 +27,15 @@ import no.nav.melosys.service.brev.felles.LovvalgsbestemmelseKodeMapper;
 import no.nav.melosys.service.brev.felles.TilleggsbestemmelseKodeMapper;
 import no.nav.melosys.service.dokument.brev.BrevData;
 import no.nav.melosys.service.dokument.brev.BrevDataInnvilgelse;
+import no.nav.melosys.service.dokument.brev.mapper.felles.KonvEftaStorbritanniaLovvalgbestemmelser;
 import org.xml.sax.SAXException;
 
 import java.math.BigInteger;
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Map;
-import java.util.Set;
+import java.util.*;
 import java.util.stream.Collectors;
 
 import static java.util.Map.entry;
-import static no.nav.melosys.domain.kodeverk.Vilkaar.FO_883_2004_ART12_1;
-import static no.nav.melosys.domain.kodeverk.Vilkaar.FO_883_2004_ART12_2;
+import static no.nav.melosys.domain.kodeverk.Vilkaar.*;
 import static no.nav.melosys.service.dokument.brev.mapper.felles.BrevMapperUtils.lagXmlDato;
 import static no.nav.melosys.service.dokument.brev.mapper.felles.VilkaarbegrunnelseFactory.mapArt121BegrunnelseType;
 import static no.nav.melosys.service.dokument.brev.mapper.felles.VilkaarbegrunnelseFactory.mapArt122BegrunnelseType;
@@ -113,27 +112,34 @@ public final class InnvilgelsesbrevMapper implements BrevDataMapper {
             .ifPresent(fag::setAnmodningsPeriodeSvarType);
 
         Lovvalgsperiode periode = brevdata.getLovvalgsperiode();
-        fag.setLovvalgsbestemmelse(LovvalgsbestemmelseKodeMapper.map(periode.getBestemmelse()));
+        boolean erStorbritannia = Arrays.stream(Lovvalgbestemmelser_konv_efta_storbritannia.values()).anyMatch(bestemmelse -> bestemmelse == periode.getBestemmelse());
+
+        fag.setLovvalgsbestemmelse(LovvalgsbestemmelseKodeMapper.map(
+            erStorbritannia ? KonvEftaStorbritanniaLovvalgbestemmelser.getGB_KONV_LOVVALGBESTEMMELSE_MAP().get(periode.getBestemmelse()) : periode.getBestemmelse())
+        );
+
         fag.setLovvalgsperiode(new LovvalgsperiodeType()
             .withFomDato(lagXmlDato(periode.getFom()))
             .withTomDato(lagXmlDato(periode.getTom()))
         );
 
         if (periode.getTilleggsbestemmelse() != null) {
-            fag.setTilleggsbestemmelse(TilleggsbestemmelseKodeMapper.map(periode.getTilleggsbestemmelse()));
+            fag.setTilleggsbestemmelse(TilleggsbestemmelseKodeMapper.map(
+                erStorbritannia ? KonvEftaStorbritanniaLovvalgbestemmelser.getGB_KONV_TILLEGGBESTEMMELSE_MAP().get(periode.getTilleggsbestemmelse()) : periode.getTilleggsbestemmelse())
+            );
         }
         if (brevdata.getBegrunnelseKode() != null) {
             fag.setEndretPeriodeBegrunnelse(EndretPeriodeBegrunnelseKode.fromValue(brevdata.getBegrunnelseKode()));
         }
 
-        Set<VilkaarBegrunnelse> art121Begrunnelser = resultat.hentVilkaarbegrunnelser(FO_883_2004_ART12_1);
+        Set<VilkaarBegrunnelse> art121Begrunnelser = resultat.hentVilkaarbegrunnelser(FO_883_2004_ART12_1, KONV_EFTA_STORBRITANNIA_ART14_1, KONV_EFTA_STORBRITANNIA_ART16_1);
         fag.setArt121Begrunnelse(mapArt121BegrunnelseType(art121Begrunnelser));
 
         if (brevdata.getTuristskip()) {
             fag.setVilkår(VilkaarKode.FTRL_2_12_UNNTAK_TURISTSKIP);
         }
 
-        Set<VilkaarBegrunnelse> art122Begrunnelser = resultat.hentVilkaarbegrunnelser(FO_883_2004_ART12_2);
+        Set<VilkaarBegrunnelse> art122Begrunnelser = resultat.hentVilkaarbegrunnelser(FO_883_2004_ART12_2, KONV_EFTA_STORBRITANNIA_ART14_2, KONV_EFTA_STORBRITANNIA_ART16_3);
         fag.setArt122Begrunnelse(mapArt122BegrunnelseType(art122Begrunnelser));
 
         fag.setFritekst(brevdata.getFritekst());

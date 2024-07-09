@@ -5,7 +5,6 @@ import io.mockk.impl.annotations.RelaxedMockK
 import io.mockk.junit5.MockKExtension
 import io.mockk.verify
 import no.nav.melosys.domain.Behandling
-import no.nav.melosys.domain.Fagsak
 import no.nav.melosys.domain.FagsakTestFactory
 import no.nav.melosys.domain.kodeverk.Saksstatuser
 import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingsresultattyper
@@ -41,7 +40,10 @@ class FerdigbehandleSakServiceTest {
     @Test
     fun ferdigbehandleSak_saksstatusOPPRETTET_lagrerKorrekt() {
         val fagsak = FagsakTestFactory.lagFagsak()
-        val behandling = Behandling().apply { this.fagsak = fagsak }
+        val behandling = Behandling().apply {
+            id = 1
+            this.fagsak = fagsak
+        }
         fagsak.behandlinger.add(behandling)
         every { fagsakService.hentFagsak(FagsakTestFactory.SAKSNUMMER) } returns fagsak
 
@@ -59,7 +61,11 @@ class FerdigbehandleSakServiceTest {
         val fagsak = FagsakTestFactory.builder().apply {
             status = Saksstatuser.LOVVALG_AVKLART
         }.build()
-        val behandling = Behandling().apply { this.fagsak = fagsak }
+        val behandling = Behandling().apply {
+            id = 1
+            this.fagsak = fagsak
+
+        }
         fagsak.behandlinger.add(behandling)
         every { fagsakService.hentFagsak(FagsakTestFactory.SAKSNUMMER) } returns fagsak
 

@@ -25,7 +25,6 @@ import no.nav.melosys.domain.kodeverk.lovvalgsbestemmelser.trygdeavtale.Lovvalgs
 import no.nav.melosys.domain.mottatteopplysninger.SøknadIkkeYrkesaktiv
 import no.nav.melosys.domain.mottatteopplysninger.data.Periode
 import no.nav.melosys.domain.mottatteopplysninger.data.Soeknadsland
-import no.nav.melosys.integrasjon.hendelser.MelosysHendelse
 import no.nav.melosys.integrasjon.hendelser.VedtakHendelseMelding
 import no.nav.melosys.itest.JournalfoeringBase
 import no.nav.melosys.itest.MelosysHendelseKafkaConsumer
@@ -92,8 +91,10 @@ class IkkeYrkesaktivVedtakIT(
                 behandlingstypeKode = Behandlingstyper.FØRSTEGANG.kode
                 behandlingstemaKode = Behandlingstema.IKKE_YRKESAKTIV.kode
             },
-            waitFor = ProsessType.JFR_NY_SAK_BRUKER,
-            alsoWaitForprosessType = listOf(ProsessType.OPPRETT_OG_DISTRIBUER_BREV)
+            mapOf(
+                ProsessType.JFR_NY_SAK_BRUKER to 1,
+                ProsessType.OPPRETT_OG_DISTRIBUER_BREV to 1
+            )
         ).behandling
 
         val mottatteOpplysninger =
@@ -134,8 +135,11 @@ class IkkeYrkesaktivVedtakIT(
 
 
         executeAndWait(
-            waitForprosessType = ProsessType.IVERKSETT_VEDTAK_IKKE_YRKESAKTIV,
-            alsoWaitForprosessType = listOf(ProsessType.OPPRETT_OG_DISTRIBUER_BREV, ProsessType.SEND_BREV)
+            mapOf(
+                ProsessType.IVERKSETT_VEDTAK_IKKE_YRKESAKTIV to 1,
+                ProsessType.OPPRETT_OG_DISTRIBUER_BREV to 1,
+                ProsessType.SEND_BREV to 1
+            )
         ) {
             vedtaksfattingFasade.fattVedtak(behandling.id, vedtakRequest)
         }
@@ -186,14 +190,16 @@ class IkkeYrkesaktivVedtakIT(
 
         melosysHendelseKafkaConsumer.melosysHendelser.shouldHaveSize(1)
             .single().value()
-            .shouldBeInstanceOf<MelosysHendelse>()
-            .melding.shouldBe(
-                VedtakHendelseMelding(
-                    folkeregisterIdent = "30056928150",
-                    sakstype = Sakstyper.EU_EOS,
-                    sakstema = Sakstemaer.MEDLEMSKAP_LOVVALG
-                )
-            )
+            .melding.shouldBeInstanceOf<VedtakHendelseMelding>()
+            .run {
+                folkeregisterIdent shouldBe "30056928150"
+                sakstype shouldBe Sakstyper.EU_EOS
+                sakstema shouldBe Sakstemaer.MEDLEMSKAP_LOVVALG
+                medlemskapsperiode.shouldNotBeNull().run {
+                    fom shouldBe null
+                    tom shouldBe null
+                }
+            }
     }
 
     @Test
@@ -205,8 +211,10 @@ class IkkeYrkesaktivVedtakIT(
                 behandlingstypeKode = Behandlingstyper.FØRSTEGANG.kode
                 behandlingstemaKode = Behandlingstema.IKKE_YRKESAKTIV.kode
             },
-            waitFor = ProsessType.JFR_NY_SAK_BRUKER,
-            alsoWaitForprosessType = listOf(ProsessType.OPPRETT_OG_DISTRIBUER_BREV)
+            mapOf(
+                ProsessType.JFR_NY_SAK_BRUKER to 1,
+                ProsessType.OPPRETT_OG_DISTRIBUER_BREV to 1
+            )
         ).behandling
 
         val mottatteOpplysninger =
@@ -249,8 +257,11 @@ class IkkeYrkesaktivVedtakIT(
 
 
         executeAndWait(
-            waitForprosessType = ProsessType.IVERKSETT_VEDTAK_IKKE_YRKESAKTIV,
-            alsoWaitForprosessType = listOf(ProsessType.OPPRETT_OG_DISTRIBUER_BREV, ProsessType.SEND_BREV)
+            mapOf(
+                ProsessType.IVERKSETT_VEDTAK_IKKE_YRKESAKTIV to 1,
+                ProsessType.OPPRETT_OG_DISTRIBUER_BREV to 1,
+                ProsessType.SEND_BREV to 1
+            )
         ) {
             vedtaksfattingFasade.fattVedtak(behandling.id, vedtakRequest)
         }
@@ -311,8 +322,10 @@ class IkkeYrkesaktivVedtakIT(
                 behandlingstypeKode = Behandlingstyper.FØRSTEGANG.kode
                 behandlingstemaKode = Behandlingstema.IKKE_YRKESAKTIV.kode
             },
-            waitFor = ProsessType.JFR_NY_SAK_BRUKER,
-            alsoWaitForprosessType = listOf(ProsessType.OPPRETT_OG_DISTRIBUER_BREV)
+            mapOf(
+                ProsessType.JFR_NY_SAK_BRUKER to 1,
+                ProsessType.OPPRETT_OG_DISTRIBUER_BREV to 1
+            )
         ).behandling
 
         val mottatteOpplysninger =
@@ -351,8 +364,11 @@ class IkkeYrkesaktivVedtakIT(
             .build()
 
         executeAndWait(
-            waitForprosessType = ProsessType.IVERKSETT_VEDTAK_IKKE_YRKESAKTIV,
-            alsoWaitForprosessType = listOf(ProsessType.OPPRETT_OG_DISTRIBUER_BREV, ProsessType.SEND_BREV)
+            mapOf(
+                ProsessType.IVERKSETT_VEDTAK_IKKE_YRKESAKTIV to 1,
+                ProsessType.OPPRETT_OG_DISTRIBUER_BREV to 1,
+                ProsessType.SEND_BREV to 1
+            )
         ) {
             vedtaksfattingFasade.fattVedtak(behandling.id, vedtakRequest)
         }

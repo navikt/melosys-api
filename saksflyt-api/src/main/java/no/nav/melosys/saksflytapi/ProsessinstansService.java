@@ -169,12 +169,12 @@ public class ProsessinstansService {
     }
 
     @Transactional
-    public UUID opprettArsavregningsBehandlingProsessflyt(Skattehendelse skattehendelse) {
+    public UUID opprettArsavregningsBehandlingProsessflyt(String saksnummer, String gjelderPeriode) {
         Prosessinstans prosessinstans = new Prosessinstans();
         prosessinstans.setType(ProsessType.OPPRETT_NY_BEHANDLING_AARSAVREGNING);
 
-        prosessinstans.setData(GJELDER_PERIODE, skattehendelse.getGjelderPeriode());
-        prosessinstans.setData(IDENTIFIKATOR, skattehendelse.getIdentifikator());
+        prosessinstans.setData(GJELDER_ÅR, gjelderPeriode);
+        prosessinstans.setData(SAKSNUMMER, saksnummer);
 
         return lagre(prosessinstans);
     }
@@ -297,13 +297,14 @@ public class ProsessinstansService {
 
     public void opprettProsessinstansAnmodningOmUnntak(Behandling behandling, Set<String> mottakerInstitusjon,
                                                        Set<DokumentReferanse> vedleggReferanserTilSed,
-                                                       String ytterligereInformasjonSed) {
+                                                       String ytterligereInformasjonSed, String begrunnelseFritekst) {
         Prosessinstans prosessinstans = new ProsessinstansBuilder()
             .medType(ProsessType.ANMODNING_OM_UNNTAK)
             .medBehandling(behandling)
             .medEessiMottakere(mottakerInstitusjon)
             .medVedleggTilSed(vedleggReferanserTilSed)
             .medYtterligereinformasjonSed(ytterligereInformasjonSed)
+            .medBegrunnelseFritekst(begrunnelseFritekst)
             .build();
 
         lagre(prosessinstans);

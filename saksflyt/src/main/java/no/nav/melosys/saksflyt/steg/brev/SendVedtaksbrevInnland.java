@@ -1,8 +1,10 @@
 package no.nav.melosys.saksflyt.steg.brev;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 
+import io.getunleash.Unleash;
 import no.nav.melosys.domain.Anmodningsperiode;
 import no.nav.melosys.domain.Behandling;
 import no.nav.melosys.domain.Behandlingsresultat;
@@ -16,8 +18,10 @@ import no.nav.melosys.domain.kodeverk.Avklartefaktatyper;
 import no.nav.melosys.domain.kodeverk.Mottakerroller;
 import no.nav.melosys.domain.kodeverk.begrunnelser.Endretperiode;
 import no.nav.melosys.domain.kodeverk.brev.Produserbaredokumenter;
+import no.nav.melosys.domain.kodeverk.lovvalgsbestemmelser.Lovvalgbestemmelser_konv_efta_storbritannia;
 import no.nav.melosys.domain.mottatteopplysninger.MottatteOpplysninger;
 import no.nav.melosys.exception.FunksjonellException;
+import no.nav.melosys.featuretoggle.ToggleName;
 import no.nav.melosys.saksflyt.steg.StegBehandler;
 import no.nav.melosys.saksflytapi.ProsessinstansService;
 import no.nav.melosys.saksflytapi.domain.ProsessDataKey;
@@ -35,6 +39,8 @@ import org.springframework.stereotype.Component;
 import static no.nav.melosys.domain.kodeverk.brev.Produserbaredokumenter.*;
 import static no.nav.melosys.domain.kodeverk.lovvalgsbestemmelser.Lovvalgbestemmelser_883_2004.FO_883_2004_ART13_4;
 import static no.nav.melosys.domain.kodeverk.lovvalgsbestemmelser.Lovvalgbestemmelser_883_2004.FO_883_2004_ART16_1;
+import static no.nav.melosys.domain.kodeverk.lovvalgsbestemmelser.Lovvalgbestemmelser_konv_efta_storbritannia.KONV_EFTA_STORBRITANNIA_ART15_4;
+import static no.nav.melosys.domain.kodeverk.lovvalgsbestemmelser.Lovvalgbestemmelser_konv_efta_storbritannia.KONV_EFTA_STORBRITANNIA_ART18_1;
 import static no.nav.melosys.saksflytapi.domain.ProsessDataKey.SAKSBEHANDLER;
 import static no.nav.melosys.saksflytapi.domain.ProsessSteg.SEND_VEDTAKSBREV_INNLAND;
 
@@ -47,14 +53,18 @@ public class SendVedtaksbrevInnland implements StegBehandler {
     private final ProsessinstansService prosessinstansService;
     private final SaksbehandlingRegler saksbehandlingRegler;
 
+    private final Unleash unleash;
+
     public SendVedtaksbrevInnland(BehandlingService behandlingService,
                                   BehandlingsresultatService behandlingsresultatService,
                                   ProsessinstansService prosessinstansService,
-                                  SaksbehandlingRegler saksbehandlingRegler) {
+                                  SaksbehandlingRegler saksbehandlingRegler,
+                                  Unleash unleash) {
         this.behandlingService = behandlingService;
         this.behandlingsresultatService = behandlingsresultatService;
         this.prosessinstansService = prosessinstansService;
         this.saksbehandlingRegler = saksbehandlingRegler;
+        this.unleash = unleash;
     }
 
     @Override
@@ -69,6 +79,8 @@ public class SendVedtaksbrevInnland implements StegBehandler {
         String saksbehandler = hentSaksbehandler(prosessinstans, resultat);
         String begrunnelseKode = hentBegrunnelsekodeTilForkortetPeriode(resultat);
         String fritekst = hentBegrunnelseFritekst(prosessinstans);
+        final Lovvalgsperiode lovvalgsperiode = resultat.hentLovvalgsperiode();
+        Boolean erStorbritannia = Arrays.stream(Lovvalgbestemmelser_konv_efta_storbritannia.values()).anyMatch(bestemmelse -> bestemmelse == lovvalgsperiode.getBestemmelse());
 
         if (resultat.erAvslag()) {
             sendAvslagsbrev(behandling, saksbehandler, fritekst);
@@ -78,6 +90,9 @@ public class SendVedtaksbrevInnland implements StegBehandler {
             log.info("Sendt utpekingsbrev for behandling {}", behandling.getId());
         } else if (resultat.erInnvilgelse()) {
             sendInnvilgelsesbrev(behandling, resultat, saksbehandler, begrunnelseKode, fritekst);
+            if (unleash.isEnabled(ToggleName.MELOSYS_KONVENSJON_EFTA_LAND_OG_STORBRITANNIA) && erStorbritannia) {
+                sendAttestA1(behandling, saksbehandler, begrunnelseKode, fritekst);
+            }
             log.info("Sendt innvilgelsesbrev for behandling {}", behandling.getId());
             if (prosessinstans.getData(ProsessDataKey.ARBEIDSGIVER_SKAL_HA_KOPI, Boolean.class, true)) {
                 sendOrienteringTilArbeidsgiver(behandling, resultat, saksbehandler);
@@ -134,6 +149,20 @@ public class SendVedtaksbrevInnland implements StegBehandler {
         prosessinstansService.opprettProsessinstanserSendBrev(behandling, innvilgelseBrukerOgSkatt, mottakerListe);
     }
 
+    private void sendAttestA1(Behandling behandling,
+                              String saksbehandler,
+                              String begrunnelseKode,
+                              String fritekst) {
+
+        DoksysBrevbestilling innvilgelseBrukerOgSkatt = new DoksysBrevbestilling.Builder().medProduserbartDokument(ATTEST_A1)
+            .medAvsenderID(saksbehandler)
+            .medBegrunnelseKode(begrunnelseKode)
+            .medFritekst(fritekst)
+            .build();
+        prosessinstansService.opprettProsessinstanserSendBrev(behandling, innvilgelseBrukerOgSkatt, List.of(Mottaker.medRolle(Mottakerroller.BRUKER)));
+    }
+
+
     @NotNull
     private Produserbaredokumenter hentProduserbarDokumentForInnvilgelse(Behandling behandling, Behandlingsresultat resultat) {
         if (saksbehandlingRegler.harIkkeYrkesaktivFlyt(behandling.getFagsak().getType(), behandling.getTema())) {
@@ -155,7 +184,7 @@ public class SendVedtaksbrevInnland implements StegBehandler {
 
     private void sendOrienteringTilArbeidsgiver(Behandling behandling, Behandlingsresultat resultat, String saksbehandler) {
         final Lovvalgsperiode lovvalgsperiode = resultat.hentLovvalgsperiode();
-        // Saker med kun selvstendig næringsdrivende skal ikke sende brevet INNVILGESE_ARBEIDSGIVER
+        // Saker med kun selvstendig næringsdrivende skal ikke sende brevet INNVILGELSE_ARBEIDSGIVER
         if (behandling.getFagsak().harAktørMedRolleType(Aktoersroller.ARBEIDSGIVER)
             && !lovvalgsperiode.erArtikkel13()
             && !lovvalgsperiode.erArtikkel11_4()) {
@@ -167,8 +196,7 @@ public class SendVedtaksbrevInnland implements StegBehandler {
         }
     }
 
-    private static boolean brevSendesTilStatligSkatteoppkreving(Lovvalgsperiode lovvalgsperiode,
-                                                                MottatteOpplysninger mottatteOpplysninger) {
+    private static boolean brevSendesTilStatligSkatteoppkreving(Lovvalgsperiode lovvalgsperiode, MottatteOpplysninger mottatteOpplysninger) {
         return harArtikkelRelevantForStatligSkatteoppkreving(lovvalgsperiode)
             && finnesArbeidsgiverUtland(mottatteOpplysninger);
     }
@@ -177,7 +205,9 @@ public class SendVedtaksbrevInnland implements StegBehandler {
         return lovvalgsperiode.erArtikkel11()
             || lovvalgsperiode.erArtikkel13_1()
             || lovvalgsperiode.getBestemmelse() == FO_883_2004_ART13_4
-            || lovvalgsperiode.getBestemmelse() == FO_883_2004_ART16_1;
+            || lovvalgsperiode.getBestemmelse() == KONV_EFTA_STORBRITANNIA_ART15_4
+            || lovvalgsperiode.getBestemmelse() == FO_883_2004_ART16_1
+            || lovvalgsperiode.getBestemmelse() == KONV_EFTA_STORBRITANNIA_ART18_1;
     }
 
     private static boolean finnesArbeidsgiverUtland(MottatteOpplysninger mottatteOpplysninger) {

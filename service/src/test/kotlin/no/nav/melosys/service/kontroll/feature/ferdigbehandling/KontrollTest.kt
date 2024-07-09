@@ -76,7 +76,10 @@ internal class KontrollTest {
 
 
     private val behandlingID = 1L
-    private val lovvalgsperiode = Lovvalgsperiode().apply { tom = LocalDate.now() }
+    private val lovvalgsperiode = Lovvalgsperiode().apply {
+        tom = LocalDate.now()
+        bestemmelse = Lovvalgbestemmelser_883_2004.FO_883_2004_ART16_1
+    }
     private val mottatteOpplysningerData = MottatteOpplysningerData()
     private val behandling = SaksbehandlingDataFactory.lagBehandling(mottatteOpplysningerData)
 

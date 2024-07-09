@@ -40,7 +40,7 @@ class OppgaveFactory {
             .setPrioritet(PrioritetType.NORM)
             .setBehandlingstema(oppgaveBehandlingstema?.kode)
             .setBehandlingstype(null)
-            .setTema(utledTema(sakstype, sakstema, behandlingstema))
+            .setTema(utledTema(sakstype, sakstema, behandlingstema, behandlingstype))
             .setOppgavetype(utledOppgavetype(sakstype, sakstema, behandlingstema, behandlingstype))
             .setBeskrivelse(
                 utledBeskrivelse(
@@ -64,8 +64,8 @@ class OppgaveFactory {
             sakstype, sakstema, behandlingstema, behandlingstype
         )
 
-    fun utledTema(sakstype: Sakstyper, sakstema: Sakstemaer?, behandlingstema: Behandlingstema): Tema =
-        temaUtleder.utledTema(sakstype, sakstema, behandlingstema)
+    fun utledTema(sakstype: Sakstyper, sakstema: Sakstemaer?, behandlingstema: Behandlingstema, behandlingstype: Behandlingstyper): Tema =
+        temaUtleder.utledTema(sakstype, sakstema, behandlingstema, behandlingstype)
 
     internal fun utledOppgavetype(
         sakstype: Sakstyper,

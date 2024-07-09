@@ -111,7 +111,7 @@ class ProsessinstansServiceTest {
 
 
         prosessinstansService.opprettProsessinstansAnmodningOmUnntak(behandling, Set.of(mottakerInstitusjon),
-            Set.of(dokumentReferanse), "FRITEKST_SED");
+            Set.of(dokumentReferanse), "FRITEKST_SED", "");
 
 
         verify(prosessinstansRepo).save(piCaptor.capture());
@@ -769,16 +769,13 @@ class ProsessinstansServiceTest {
 
     @Test
     void opprettProsessinstanserArsavregning() {
-        Skattehendelse skattehendelse = new Skattehendelse("2023", "456789");
-
-
-        prosessinstansService.opprettArsavregningsBehandlingProsessflyt(skattehendelse);
+        prosessinstansService.opprettArsavregningsBehandlingProsessflyt("MEL-2", "2023");
 
 
         verify(prosessinstansRepo, times(1)).save(piCaptor.capture());
         assertThat(piCaptor.getValue()).isNotNull();
-        assertThat(piCaptor.getValue().getData(ProsessDataKey.IDENTIFIKATOR)).isEqualTo("456789");
-        assertThat(piCaptor.getValue().getData(ProsessDataKey.GJELDER_PERIODE)).isEqualTo("2023");
+        assertThat(piCaptor.getValue().getData(ProsessDataKey.SAKSNUMMER)).isEqualTo("MEL-2");
+        assertThat(piCaptor.getValue().getData(ProsessDataKey.GJELDER_ÅR)).isEqualTo("2023");
     }
 
     private MelosysEessiMelding lagMelosysEessiMelding() {

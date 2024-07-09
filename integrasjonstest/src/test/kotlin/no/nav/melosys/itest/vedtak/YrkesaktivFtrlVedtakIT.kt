@@ -8,7 +8,7 @@ import com.github.tomakehurst.wiremock.client.WireMock
 import com.github.tomakehurst.wiremock.extension.ResponseTransformerV2
 import com.github.tomakehurst.wiremock.http.Response
 import com.github.tomakehurst.wiremock.stubbing.ServeEvent
-import io.github.jaspeen.ulid.ULID
+import io.getunleash.FakeUnleash
 import io.kotest.assertions.withClue
 import io.kotest.matchers.collections.shouldHaveSize
 import io.kotest.matchers.nulls.shouldNotBeNull
@@ -22,6 +22,7 @@ import no.nav.melosys.domain.avgift.Inntektsperiode
 import no.nav.melosys.domain.avgift.Penger
 import no.nav.melosys.domain.avgift.SkatteforholdTilNorge
 import no.nav.melosys.domain.avgift.Trygdeavgiftsperiode
+import no.nav.melosys.domain.avgift.aarsavregning.Skattehendelse
 import no.nav.melosys.domain.kodeverk.*
 import no.nav.melosys.domain.kodeverk.behandlinger.*
 import no.nav.melosys.domain.manglendebetaling.Betalingsstatus
@@ -30,11 +31,14 @@ import no.nav.melosys.domain.mottatteopplysninger.SøknadNorgeEllerUtenforEØS
 import no.nav.melosys.domain.mottatteopplysninger.data.Periode
 import no.nav.melosys.domain.mottatteopplysninger.data.Soeknadsland
 import no.nav.melosys.integrasjon.faktureringskomponenten.NyFakturaserieResponseDto
+import no.nav.melosys.integrasjon.hendelser.VedtakHendelseMelding
 import no.nav.melosys.integrasjon.trygdeavgift.dto.*
 import no.nav.melosys.itest.JournalfoeringBase
+import no.nav.melosys.itest.MelosysHendelseKafkaConsumer
 import no.nav.melosys.melosysmock.medl.MedlRepo
 import no.nav.melosys.melosysmock.testdata.TestDataGenerator
 import no.nav.melosys.repository.BehandlingRepository
+import no.nav.melosys.repository.BehandlingsresultatRepository
 import no.nav.melosys.repository.FagsakRepository
 import no.nav.melosys.saksflytapi.domain.ProsessType
 import no.nav.melosys.service.avgift.TrygdeavgiftsberegningService
@@ -84,6 +88,10 @@ class YrkesaktivFtrlVedtakIT(
     @Autowired private val opprettBehandlingForSak: OpprettBehandlingForSak,
     @Autowired private val trygdeavgiftsberegningService: TrygdeavgiftsberegningService,
     @Autowired @Qualifier("manglendeFakturabetalingMelding") private val manglendeFakturabetalingMeldingTemplate: KafkaTemplate<String, ManglendeFakturabetalingMelding>,
+    @Autowired private val skatteHendelseMeldingKafkaTemplate: KafkaTemplate<String, Skattehendelse>,
+    @Autowired private val behandlingsResultRepository: BehandlingsresultatRepository,
+    @Autowired private val unleash: FakeUnleash,
+    @Autowired private val melosysHendelseKafkaConsumer: MelosysHendelseKafkaConsumer
 ) : JournalfoeringBase(
     testDataGenerator, journalføringService, oppgaveService,
     DynamiskTrygdeavgiftsberegningTransformer()
@@ -91,11 +99,11 @@ class YrkesaktivFtrlVedtakIT(
 
     private var originalSubjectHandler: SubjectHandler? = null
     private val kafkaTopic = "teammelosys.manglende-fakturabetaling-local"
-    private lateinit var fakturaserieReferanse: String
+    private val fakturaserieReferanse: String = "01J17B5NTTDYKFB5DZTSSQEHJ0"
 
     @BeforeEach
     fun setup() {
-        fakturaserieReferanse = ULID.random().toString()
+        //fakturaserieReferanse = UlidCreator.getUlid().toString()
         MedlRepo.repo.clear()
         originalSubjectHandler = SubjectHandler.getInstance()
 
@@ -134,10 +142,12 @@ class YrkesaktivFtrlVedtakIT(
                         .withBody(fakturaResponse.toJsonNode.toString())
                 )
         )
+        unleash.enableAll()
     }
 
     @AfterEach
     fun afterEach() {
+        melosysHendelseKafkaConsumer.clear()
         MedlRepo.repo.clear()
         SubjectHandler.set(originalSubjectHandler)
     }
@@ -153,7 +163,11 @@ class YrkesaktivFtrlVedtakIT(
     fun `Håndtere manglende innbetaling i sak som allerede har en åpen behandling`() {
         val saksnummer = lagFørstegangsBehandling(Skatteplikttype.IKKE_SKATTEPLIKTIG, false)
 
-        val behandlingsId = executeAndWait(waitForprosessType = ProsessType.OPPRETT_REPLIKERT_BEHANDLING_FOR_SAK) {
+        val behandlingsId = executeAndWait(
+            mapOf(
+                ProsessType.OPPRETT_REPLIKERT_BEHANDLING_FOR_SAK to 1
+            )
+        ) {
             opprettBehandlingForSak.opprettBehandling(
                 saksnummer,
                 lagOpprettSakDto()
@@ -161,8 +175,10 @@ class YrkesaktivFtrlVedtakIT(
         }.behandling.id
 
         executeAndWait(
-            waitForprosessType = ProsessType.OPPRETT_NY_BEHANDLING_MANGLENDE_INNBETALING,
-            alsoWaitForprosessType = listOf(ProsessType.OPPRETT_OG_DISTRIBUER_BREV)
+            mapOf(
+                ProsessType.OPPRETT_NY_BEHANDLING_MANGLENDE_INNBETALING to 1,
+                ProsessType.OPPRETT_OG_DISTRIBUER_BREV to 1
+            )
         ) {
             val kafkaMelding = ManglendeFakturabetalingMelding(
                 fakturaserieReferanse = fakturaserieReferanse,
@@ -210,7 +226,11 @@ class YrkesaktivFtrlVedtakIT(
     fun `yrkesaktiv vedtak - FTRL - opprett fakturaserie for førstegangsbehandling og kanseller fakturaserie i ny vurdering`() {
         val saksnummer = lagFørstegangsBehandling(Skatteplikttype.IKKE_SKATTEPLIKTIG, false)
 
-        val behandlingsId = executeAndWait(waitForprosessType = ProsessType.OPPRETT_REPLIKERT_BEHANDLING_FOR_SAK) {
+        val behandlingsId = executeAndWait(
+            mapOf(
+                ProsessType.OPPRETT_REPLIKERT_BEHANDLING_FOR_SAK to 1
+            )
+        ) {
             opprettBehandlingForSak.opprettBehandling(
                 saksnummer,
                 lagOpprettSakDto()
@@ -246,8 +266,10 @@ class YrkesaktivFtrlVedtakIT(
             .build()
 
         executeAndWait(
-            waitForprosessType = ProsessType.IVERKSETT_VEDTAK_FTRL,
-            alsoWaitForprosessType = listOf(ProsessType.OPPRETT_OG_DISTRIBUER_BREV)
+            mapOf(
+                ProsessType.IVERKSETT_VEDTAK_FTRL to 1,
+                ProsessType.OPPRETT_OG_DISTRIBUER_BREV to 1
+            )
         ) {
             vedtaksfattingFasade.fattVedtak(behandlingsId, vedtakRequest)
         }
@@ -270,8 +292,59 @@ class YrkesaktivFtrlVedtakIT(
                 }
             }
 
+        melosysHendelseKafkaConsumer.melosysHendelser.shouldHaveSize(2)
+            .last().value()
+            .melding.shouldBeInstanceOf<VedtakHendelseMelding>()
+            .run {
+                folkeregisterIdent shouldBe "30056928150"
+                sakstype shouldBe Sakstyper.FTRL
+                sakstema shouldBe Sakstemaer.MEDLEMSKAP_LOVVALG
+                medlemskapsperiode.shouldNotBeNull().run {
+                    fom shouldBe LocalDate.of(2023, 1, 1)
+                    tom shouldBe LocalDate.of(2023, 2, 1)
+                }
+            }
+
+
         mockServer.verify(1, WireMock.postRequestedFor(WireMock.urlEqualTo("/fakturaserier")))
         mockServer.verify(1, WireMock.deleteRequestedFor(WireMock.urlEqualTo("/fakturaserier/$fakturaserieReferanse")))
+    }
+
+    @Test
+    fun `oppretter prosess og påfølgende årsavregningsbehandling for alle saker knyttet til skattehendelse `() {
+        val saksnummer1 = lagFørstegangsBehandling(Skatteplikttype.IKKE_SKATTEPLIKTIG, false)
+        val saksnummer2 = lagFørstegangsBehandling(Skatteplikttype.IKKE_SKATTEPLIKTIG, false)
+
+
+        executeAndWait(
+            mapOf(
+                ProsessType.OPPRETT_NY_BEHANDLING_AARSAVREGNING to 2
+            )
+        ) {
+            skatteHendelseMeldingKafkaTemplate.send(
+                "teammelosys.skattehendelser.v1-local",
+                Skattehendelse("2023", "30056928150", "ny")
+            )
+        }
+
+
+        listOf(saksnummer1, saksnummer2).forEach { saksnummer ->
+            fagsakRepository.findBySaksnummer(saksnummer)
+                .shouldBePresent().run {
+                    behandlinger.shouldHaveSize(2)
+                        .firstOrNull { it.type == Behandlingstyper.ÅRSAVREGNING }
+                        .shouldNotBeNull()
+                        .run {
+                            behandlingsResultRepository.findById(id)
+                                .shouldBePresent()
+                                .aarsavregning
+                                .shouldNotBeNull()
+                                .run {
+                                    aar shouldBe 2023
+                                }
+                        }
+                }
+        }
     }
 
     private fun lagOpprettSakDto(): OpprettSakDto {
@@ -291,8 +364,10 @@ class YrkesaktivFtrlVedtakIT(
                 behandlingstypeKode = Behandlingstyper.FØRSTEGANG.kode
                 behandlingstemaKode = Behandlingstema.YRKESAKTIV.name
             },
-            waitFor = ProsessType.JFR_NY_SAK_BRUKER,
-            alsoWaitForprosessType = listOf(ProsessType.OPPRETT_OG_DISTRIBUER_BREV)
+            mapOf(
+                ProsessType.JFR_NY_SAK_BRUKER to 1,
+                ProsessType.OPPRETT_OG_DISTRIBUER_BREV to 1
+            )
         ).behandling.shouldNotBeNull()
 
         val mottatteOpplysninger =
@@ -361,13 +436,19 @@ class YrkesaktivFtrlVedtakIT(
             .build()
 
         executeAndWait(
-            waitForprosessType = ProsessType.IVERKSETT_VEDTAK_FTRL,
-            alsoWaitForprosessType = listOf(ProsessType.OPPRETT_OG_DISTRIBUER_BREV)
+            mapOf(
+                ProsessType.IVERKSETT_VEDTAK_FTRL to 1,
+                ProsessType.OPPRETT_OG_DISTRIBUER_BREV to 1
+            )
         ) {
             vedtaksfattingFasade.fattVedtak(behandling.id, vedtakRequest)
         }
 
-        return behandling.fagsak.saksnummer
+        return behandling.fagsak.saksnummer.also {
+            addCleanUpAction {
+                slettSakMedAvhengigheter(it)
+            }
+        }
     }
 
     private fun setupTrygdeavgiftBeregning(behandlingId: Long, skatteplikttype: Skatteplikttype, arbeidsgiversavgiftBetales: Boolean) {

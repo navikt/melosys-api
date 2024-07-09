@@ -93,7 +93,9 @@ class JournalfoeringValidering(
     internal fun validerJournalførOgOpprettAndregangsbehandling(
         journalfoeringDto: JournalfoeringTilordneDto,
         journalpost: Journalpost,
-        fagsak: Fagsak
+        fagsak: Fagsak,
+        nyttBehandlingstema: Behandlingstema,
+        nyBehandlingstype: Behandlingstyper
     ) {
         if (unleash.isEnabled(MELOSYS_HINDRE_JOURNALFOERING_AV_FERDIGSTILTE_JOURNALPOSTER)) {
             validerJournalpostIkkeAlleredeFerdigstilt(journalpost)
@@ -101,9 +103,11 @@ class JournalfoeringValidering(
 
         val sistBehandling = fagsak.hentSistRegistrertBehandling()
         val sistBehandlingsresultat = behandlingsresultatService.hentBehandlingsresultatMedAnmodningsperioder(sistBehandling.id)
+        val muligeBehandlingstyper =
+            lovligeKombinasjonerSaksbehandlingService.hentMuligeBehandlingstyperForKnyttTilSak(Aktoersroller.BRUKER, fagsak.saksnummer, nyttBehandlingstema)
 
-        if (fagsak.finnAktivBehandlingIkkeÅrsavregning() != null && sistBehandlingsresultat.erIkkeArtikkel16MedSendtAnmodningOmUnntak()) {
-            throw FunksjonellException("Det finnes allerede en aktiv behandling på fagsak ${fagsak.saksnummer}")
+        if (!muligeBehandlingstyper.contains(nyBehandlingstype)) {
+            throw FunksjonellException("Behandlingstype $nyBehandlingstype er ikke tillatt for behandlingstema $nyttBehandlingstema og fagsak ${fagsak.saksnummer}")
         }
 
         if (journalpost.mottaksKanalErEessi()) {

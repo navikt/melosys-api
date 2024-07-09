@@ -150,43 +150,104 @@ class LovligeKombinasjonerSaksbehandlingService(
 
 
     /**
-     * Henter mulige behandlingstyper
+     * Henter mulige behandlingstyper for knytting til eksisterende sak
      *
-     * @param hovedpart         Hovedpart knyttet til fagsaken.
-     * @param sakstype          Allerede valgt sakstype.
-     * @param sakstema          Allerede valgt sakstema.
-     * @param behandlingstema   Allerede valgt behandlingstema.
-     * @param aktivBehandlingID Nåværende behandling i fagsaken. (default = null) Brukt ved endring av sak.
-     * @param sisteBehandlingID Forrige behandling i fagsaken. (default = null)
+     * @param hovedpart         Den valgte hovedpart knyttet til fagsaken.
+     * @param saksnummer        Saksnummer til eksisterende fagsak
+     * @param behandlingstema   Valgt behandlingstema.
+     *
      * Brukt ved knytting til eksisterende sak.
+     */
+    fun hentMuligeBehandlingstyperForKnyttTilSak(
+        hovedpart: Aktoersroller,
+        saksnummer: String,
+        behandlingstema: Behandlingstema?,
+    ): Set<Behandlingstyper> {
+        val fagsak = fagsakService.hentFagsak(saksnummer)
+        val sisteBehandling = fagsak.hentSistRegistrertBehandling()
+
+        val behandlingstyper = hentMuligeBehandlingstyper(hovedpart, fagsak.type, fagsak.tema, behandlingstema, sisteBehandling).toMutableSet()
+        if (sisteBehandling.erInaktiv()) {
+            behandlingstyper.remove(Behandlingstyper.FØRSTEGANG)
+        }
+        if (fagsak.behandlinger.none { it.erManglendeInnbetalingTrygdeavgift() }) {
+            behandlingstyper.remove(Behandlingstyper.MANGLENDE_INNBETALING_TRYGDEAVGIFT)
+        }
+        if (fagsak.behandlinger.any {
+                it.tema in setOf(
+                    Behandlingstema.YRKESAKTIV,
+                    Behandlingstema.UTSENDT_ARBEIDSTAKER,
+                    Behandlingstema.UTSENDT_SELVSTENDIG,
+                    Behandlingstema.ARBEID_TJENESTEPERSON_ELLER_FLY,
+                    Behandlingstema.ARBEID_FLERE_LAND,
+                    Behandlingstema.ARBEID_KUN_NORGE
+                )
+            }) {
+            behandlingstyper.add(Behandlingstyper.ÅRSAVREGNING)
+        }
+        return behandlingstyper
+    }
+
+    /**
+     * Henter mulige behandlingstyper for opprettelse av ny behandling og sak
+     *
+     * @param hovedpart         Den valgte hovedpart knyttet til fagsaken.
+     * @param sakstype          Valgt sakstype.
+     * @param sakstema          Valgt sakstema.
+     * @param behandlingstema    Valgt behandlingstema.
      */
     fun hentMuligeBehandlingstyper(
         hovedpart: Aktoersroller,
         sakstype: Sakstyper,
         sakstema: Sakstemaer,
         behandlingstema: Behandlingstema?,
-        aktivBehandlingID: Long?,
-        sisteBehandlingID: Long?
     ): Set<Behandlingstyper> {
-        val aktivBehandling = if (aktivBehandlingID != null) behandlingService.hentBehandling(aktivBehandlingID) else null
-        val sisteBehandling = if (sisteBehandlingID != null) behandlingService.hentBehandling(sisteBehandlingID) else null
-        val sisteBehandlingsresultat =
-            if (sisteBehandlingID != null) behandlingsresultatService.hentBehandlingsresultatMedAnmodningsperioder(sisteBehandlingID) else null
-
-        return hentMuligeBehandlingstyper(hovedpart, sakstype, sakstema, behandlingstema, aktivBehandling, sisteBehandling, sisteBehandlingsresultat)
+        return hentMuligeBehandlingstyper(hovedpart, sakstype, sakstema, behandlingstema, null)
+            .filter { it != Behandlingstyper.MANGLENDE_INNBETALING_TRYGDEAVGIFT }.toSet()
     }
 
-    fun hentMuligeBehandlingstyper(
+    /**
+     * Henter mulige behandlingstyper for endring av eksisterende behandling
+     * @param hovedpart         Den valgte hovedpart knyttet til fagsaken.
+     * @param sakstype          Valgt sakstype.
+     * @param sakstema          Valgt sakstema.
+     * @param behandlingstema    Valgt behandlingstema.
+     * @param saksnummer        Saksnummer
+     *
+     */
+    fun hentMuligeBehandlingstyperForEndring(
         hovedpart: Aktoersroller,
         sakstype: Sakstyper,
         sakstema: Sakstemaer,
         behandlingstema: Behandlingstema?,
-        aktivBehandling: Behandling?,
+        saksnummer: String
+    ): Set<Behandlingstyper> {
+        val fagsak = fagsakService.hentFagsak(saksnummer)
+        val aktivBehandling = fagsak.hentAktivBehandlingIkkeÅrsavregning()
+        val behandlingstyper =
+            hentMuligeBehandlingstyper(hovedpart, sakstype, sakstema, behandlingstema, null).toMutableSet()
+
+        if (aktivBehandling.fagsak.behandlinger.size > 1) {
+            behandlingstyper.remove(Behandlingstyper.FØRSTEGANG)
+        }
+        if (aktivBehandling.erManglendeInnbetalingTrygdeavgift()) {
+            return mutableSetOf(aktivBehandling.type)
+        }
+        return behandlingstyper
+    }
+
+
+    private fun hentMuligeBehandlingstyper(
+        hovedpart: Aktoersroller,
+        sakstype: Sakstyper,
+        sakstema: Sakstemaer,
+        behandlingstema: Behandlingstema?,
         sisteBehandling: Behandling?,
-        sisteBehandlingsresultat: Behandlingsresultat?
     ): Set<Behandlingstyper> {
         if (sisteBehandling?.erAktiv() == true) {
-            return if (sisteBehandlingsresultat!!.erArtikkel16MedSendtAnmodningOmUnntak()) setOf(Behandlingstyper.NY_VURDERING) else emptySet()
+            val sisteBehandlingsresultat = behandlingsresultatService.hentBehandlingsresultatMedAnmodningsperioder(sisteBehandling.id)
+
+            return if (sisteBehandlingsresultat.erArtikkel16MedSendtAnmodningOmUnntak()) setOf(Behandlingstyper.NY_VURDERING) else emptySet()
         }
 
         return when (hovedpart) {
@@ -194,11 +255,11 @@ class LovligeKombinasjonerSaksbehandlingService(
                 sakstype,
                 sakstema,
                 behandlingstema,
-                aktivBehandling,
-                sisteBehandling,
                 sisteBehandling?.tema,
                 sisteBehandling?.fagsak?.status
-            )
+            ).filter {
+                unleash.isEnabled(ToggleName.MELOSYS_ÅRSAVREGNING) || it != Behandlingstyper.ÅRSAVREGNING
+            }.toSet()
 
             Aktoersroller.VIRKSOMHET -> LovligeSakskombinasjoner.muligeSaksKombinasjonerVirksomhet.getOrDefault(sakstype, emptySet())
                 .filter { it.sakstema == sakstema }
@@ -213,8 +274,9 @@ class LovligeKombinasjonerSaksbehandlingService(
 
     private fun behandlingstyperForBruker(
         sakstype: Sakstyper?, sakstema: Sakstemaer,
-        behandlingstema: Behandlingstema?, aktivBehandling: Behandling?, sisteBehandling: Behandling?,
-        sistBehandlingstema: Behandlingstema?, sistSaksstatus: Saksstatuser?
+        behandlingstema: Behandlingstema?,
+        sistBehandlingstema: Behandlingstema?,
+        sistSaksstatus: Saksstatuser?
     ): Set<Behandlingstyper> {
         var behandlingstyper = LovligeSakskombinasjoner.muligeSaksKombinasjonerBruker.getOrDefault(sakstype, emptySet())
             .filter { it.sakstema == sakstema }
@@ -233,24 +295,20 @@ class LovligeKombinasjonerSaksbehandlingService(
         ) {
             behandlingstyper = mutableSetOf(Behandlingstyper.NY_VURDERING, Behandlingstyper.KLAGE, Behandlingstyper.HENVENDELSE)
         }
-        if (aktivBehandling != null && aktivBehandling.fagsak.behandlinger.size > 1) {
-            behandlingstyper.remove(Behandlingstyper.FØRSTEGANG)
-        }
-        if (sisteBehandling?.erInaktiv() == true) {
-            behandlingstyper.remove(Behandlingstyper.FØRSTEGANG)
-        }
-        if (sistSaksstatus in setOf(Saksstatuser.HENLAGT, Saksstatuser.HENLAGT_BORTFALT, Saksstatuser.AVSLUTTET)) {
+
+        if (sistSaksstatus in setOf(
+                Saksstatuser.HENLAGT,
+                Saksstatuser.HENLAGT_BORTFALT,
+                Saksstatuser.AVSLUTTET,
+                Saksstatuser.OPPHØRT,
+                Saksstatuser.ANNULLERT
+            )
+        ) {
             behandlingstyper = mutableSetOf(Behandlingstyper.HENVENDELSE)
         }
         if (!unleash.isEnabled(ToggleName.BEHANDLINGSTYPE_KLAGE)) {
             behandlingstyper.remove(Behandlingstyper.KLAGE)
         }
-        if (aktivBehandling?.erManglendeInnbetalingTrygdeavgift() == true) {
-            behandlingstyper = mutableSetOf(aktivBehandling.type)
-        } else if (sisteBehandling?.fagsak?.behandlinger?.any { it.erManglendeInnbetalingTrygdeavgift() } != true) {
-            behandlingstyper.remove(Behandlingstyper.MANGLENDE_INNBETALING_TRYGDEAVGIFT)
-        }
-
 
         return behandlingstyper
     }
@@ -299,7 +357,7 @@ class LovligeKombinasjonerSaksbehandlingService(
     ) {
         validerSakstema(hovedpart, sakstype, sakstema)
         validerBehandlingstema(hovedpart, sakstype, sakstema, behandlingstema, aktivBehandling, null)
-        validerBehandlingstype(hovedpart, sakstype, sakstema, behandlingstema, behandlingstype, aktivBehandling, null, null)
+        validerBehandlingstype(hovedpart, sakstype, sakstema, behandlingstema, behandlingstype)
     }
 
     fun validerBehandlingstemaOgBehandlingstypeForAndregangsbehandling(
@@ -310,15 +368,11 @@ class LovligeKombinasjonerSaksbehandlingService(
         behandlingstype: Behandlingstyper
     ) {
         validerBehandlingstema(fagsak.hovedpartRolle, fagsak.type, fagsak.tema, behandlingstema, null, sistBehandling.tema)
-        validerBehandlingstype(
+        validerBehandlingstypeForKnyttTilSak(
             fagsak.hovedpartRolle,
-            fagsak.type,
-            fagsak.tema,
+            fagsak.saksnummer,
             behandlingstema,
             behandlingstype,
-            null,
-            sistBehandling,
-            sistBehandlingsresultat
         )
     }
 
@@ -342,18 +396,33 @@ class LovligeKombinasjonerSaksbehandlingService(
     }
 
     private fun validerBehandlingstype(
-        hovedpart: Aktoersroller, sakstype: Sakstyper, sakstema: Sakstemaer,
-        behandlingstema: Behandlingstema, behandlingstype: Behandlingstyper,
-        aktivBehandling: Behandling?, sistBehandling: Behandling?, sistBehandlingsresultat: Behandlingsresultat?
+        hovedpart: Aktoersroller,
+        sakstype: Sakstyper,
+        sakstema: Sakstemaer,
+        behandlingstema: Behandlingstema,
+        behandlingstype: Behandlingstyper,
     ) {
         if (!hentMuligeBehandlingstyper(
                 hovedpart,
                 sakstype,
                 sakstema,
                 behandlingstema,
-                aktivBehandling,
-                sistBehandling,
-                sistBehandlingsresultat
+            ).contains(behandlingstype)
+        ) {
+            throw FunksjonellException("$behandlingstype er ikke en lovlig behandlingstype med de andre valgte verdiene")
+        }
+    }
+
+    private fun validerBehandlingstypeForKnyttTilSak(
+        hovedpart: Aktoersroller,
+        saksnummer: String,
+        behandlingstema: Behandlingstema,
+        behandlingstype: Behandlingstyper
+    ) {
+        if (!hentMuligeBehandlingstyperForKnyttTilSak(
+                hovedpart,
+                saksnummer,
+                behandlingstema,
             ).contains(behandlingstype)
         ) {
             throw FunksjonellException("$behandlingstype er ikke en lovlig behandlingstype med de andre valgte verdiene")

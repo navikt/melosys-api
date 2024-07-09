@@ -24,6 +24,7 @@ object LovvalgsbestemmelseKodeMapper {
             Lovvalgbestemmelser_konv_efta_storbritannia.KONV_EFTA_STORBRITANNIA_ART13_3C -> Lovvalgbestemmelser_883_2004.FO_883_2004_ART11_3D
             Lovvalgbestemmelser_konv_efta_storbritannia.KONV_EFTA_STORBRITANNIA_ART13_3D -> Lovvalgbestemmelser_883_2004.FO_883_2004_ART11_3E
             Lovvalgbestemmelser_konv_efta_storbritannia.KONV_EFTA_STORBRITANNIA_ART13_4 -> Lovvalgbestemmelser_883_2004.FO_883_2004_ART11_4
+            Lovvalgbestemmelser_konv_efta_storbritannia.KONV_EFTA_STORBRITANNIA_ART13_4_2 -> Lovvalgbestemmelser_883_2004.FO_883_2004_ART11_4_2
 
             Lovvalgbestemmelser_konv_efta_storbritannia.KONV_EFTA_STORBRITANNIA_ART14_1,
             Lovvalgbestemmelser_konv_efta_storbritannia.KONV_EFTA_STORBRITANNIA_ART16_1 -> Lovvalgbestemmelser_883_2004.FO_883_2004_ART12_1

@@ -11,9 +11,9 @@ import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingsstatus.AVSLUTTET
 import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingsstatus.VURDER_DOKUMENT
 import no.nav.melosys.saksflytapi.ProsessinstansService
 import no.nav.melosys.service.aktoer.AktoerHistorikkService
+import no.nav.melosys.service.avgift.TrygdeavgiftService
 import no.nav.melosys.service.behandling.BehandlingService
 import no.nav.melosys.service.behandling.BehandlingsresultatService
-import no.nav.melosys.service.sak.TrygdeavgiftOppsummeringService
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.extension.ExtendWith
@@ -30,7 +30,7 @@ internal class FaktureringEventListenerTest {
     @MockK
     private lateinit var aktoerHistorikkService: AktoerHistorikkService
     @MockK
-    private lateinit var trygdeavgiftOppsummeringService: TrygdeavgiftOppsummeringService
+    private lateinit var trygdeavgiftService: TrygdeavgiftService
     @MockK
     private lateinit var prosessinstansService: ProsessinstansService
 
@@ -42,7 +42,7 @@ internal class FaktureringEventListenerTest {
             behandlingService,
             behandlingsresultatService,
             aktoerHistorikkService,
-            trygdeavgiftOppsummeringService,
+            trygdeavgiftService,
             prosessinstansService
         )
 
@@ -99,7 +99,7 @@ internal class FaktureringEventListenerTest {
                 avsluttetBehandling.registrertDato
             )
         } returns listOf(historiskFullmektig)
-        every { trygdeavgiftOppsummeringService.harFagsakBehandlingerMedTrygdeavgift(fagsak.saksnummer) } returns true
+        every { trygdeavgiftService.harFagsakBehandlingerMedTrygdeavgift(fagsak.saksnummer, true) } returns true
         every { prosessinstansService.opprettProsessinstansOppdaterFaktura(avsluttetBehandling) } just runs
 
 
@@ -225,7 +225,7 @@ internal class FaktureringEventListenerTest {
                 avsluttetBehandling.registrertDato
             )
         } returns listOf(historiskFullmektig)
-        every { trygdeavgiftOppsummeringService.harFagsakBehandlingerMedTrygdeavgift(fagsak.saksnummer) } returns true
+        every { trygdeavgiftService.harFagsakBehandlingerMedTrygdeavgift(fagsak.saksnummer, true) } returns true
         every { prosessinstansService.opprettProsessinstansOppdaterFaktura(avsluttetBehandling) } just runs
 
 
