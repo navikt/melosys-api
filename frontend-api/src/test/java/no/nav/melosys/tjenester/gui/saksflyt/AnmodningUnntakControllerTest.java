@@ -41,10 +41,12 @@ class AnmodningUnntakControllerTest {
 
         final String mottakerInstitusjon = "SE:321";
         final String fritekstSed = "hei hei";
+        final String begrunnelseFritekst = "begrunnelse";
 
         var anmodningUnntakDto = new AnmodningUnntakDto();
         anmodningUnntakDto.setMottakerinstitusjon(mottakerInstitusjon);
         anmodningUnntakDto.setFritekstSed(fritekstSed);
+        anmodningUnntakDto.setBegrunnelseFritekst(begrunnelseFritekst);
         final var vedleggDto = new VedleggDto("jpID", "dokID");
         anmodningUnntakDto.setVedlegg(Set.of(vedleggDto));
 
@@ -55,7 +57,7 @@ class AnmodningUnntakControllerTest {
 
         verify(aksesskontroll).autoriserSkriv(BEHANDLING_ID);
         verify(anmodningUnntakService).anmodningOmUnntak(BEHANDLING_ID, mottakerInstitusjon,
-            Set.of(new DokumentReferanse(vedleggDto.journalpostID(), vedleggDto.dokumentID())), fritekstSed, "");
+            Set.of(new DokumentReferanse(vedleggDto.journalpostID(), vedleggDto.dokumentID())), fritekstSed, begrunnelseFritekst);
 
     }
 

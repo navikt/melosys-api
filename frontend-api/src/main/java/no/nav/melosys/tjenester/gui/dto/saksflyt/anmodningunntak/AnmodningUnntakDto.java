@@ -8,7 +8,6 @@ import no.nav.melosys.tjenester.gui.dto.dokumentarkiv.VedleggDto;
 public class AnmodningUnntakDto {
     private String mottakerinstitusjon;
     private String fritekstSed;
-
     private String begrunnelseFritekst;
     private Collection<VedleggDto> vedlegg = new ArrayList<>();
 
