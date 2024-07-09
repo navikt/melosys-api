@@ -111,7 +111,7 @@ class ProsessinstansServiceTest {
 
 
         prosessinstansService.opprettProsessinstansAnmodningOmUnntak(behandling, Set.of(mottakerInstitusjon),
-            Set.of(dokumentReferanse), "FRITEKST_SED");
+            Set.of(dokumentReferanse), "FRITEKST_SED", "");
 
 
         verify(prosessinstansRepo).save(piCaptor.capture());

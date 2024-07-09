@@ -297,13 +297,14 @@ public class ProsessinstansService {
 
     public void opprettProsessinstansAnmodningOmUnntak(Behandling behandling, Set<String> mottakerInstitusjon,
                                                        Set<DokumentReferanse> vedleggReferanserTilSed,
-                                                       String ytterligereInformasjonSed) {
+                                                       String ytterligereInformasjonSed, String begrunnelseFritekst) {
         Prosessinstans prosessinstans = new ProsessinstansBuilder()
             .medType(ProsessType.ANMODNING_OM_UNNTAK)
             .medBehandling(behandling)
             .medEessiMottakere(mottakerInstitusjon)
             .medVedleggTilSed(vedleggReferanserTilSed)
             .medYtterligereinformasjonSed(ytterligereInformasjonSed)
+            .medBegrunnelseFritekst(begrunnelseFritekst)
             .build();
 
         lagre(prosessinstans);

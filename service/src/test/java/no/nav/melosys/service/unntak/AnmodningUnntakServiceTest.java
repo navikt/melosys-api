@@ -72,6 +72,7 @@ class AnmodningUnntakServiceTest {
 
     private static final long BEHANDLING_ID = 1L;
     private static final String FRITEKST_SED = "Ytterligere info som fritekst";
+    private static final String BEGRUNNELSE_FRITEKST = "FRITEKST";
     private static final String MOTTAKER_INSTITUSJON = "SE:432";
 
     @Captor
@@ -97,12 +98,12 @@ class AnmodningUnntakServiceTest {
         when(behandlingService.hentBehandlingMedSaksopplysninger(BEHANDLING_ID)).thenReturn(behandling);
         when(landvelgerService.hentUtenlandskTrygdemyndighetsland(BEHANDLING_ID)).thenReturn(Collections.singletonList(Land_iso2.SE));
 
-        anmodningUnntakService.anmodningOmUnntak(BEHANDLING_ID, MOTTAKER_INSTITUSJON, Set.of(dokumentReferanse), FRITEKST_SED);
+        anmodningUnntakService.anmodningOmUnntak(BEHANDLING_ID, MOTTAKER_INSTITUSJON, Set.of(dokumentReferanse), FRITEKST_SED, BEGRUNNELSE_FRITEKST);
 
         verify(anmodningUnntakKontrollService).utførKontroller(BEHANDLING_ID);
         verify(anmodningsperiodeService).oppdaterAnmodetAvForBehandling(BEHANDLING_ID, "Z990007");
         verify(prosessinstansService).opprettProsessinstansAnmodningOmUnntak(any(Behandling.class),
-            anySet(), eq(Set.of(dokumentReferanse)), eq(FRITEKST_SED));
+            anySet(), eq(Set.of(dokumentReferanse)), eq(FRITEKST_SED), eq(BEGRUNNELSE_FRITEKST));
         verify(oppgaveService).leggTilbakeBehandlingsoppgaveMedSaksnummer(any());
         verify(behandlingsresultatService).oppdaterBehandlingsresultattype(BEHANDLING_ID, Behandlingsresultattyper.ANMODNING_OM_UNNTAK);
     }
@@ -117,12 +118,12 @@ class AnmodningUnntakServiceTest {
         when(behandlingService.hentBehandlingMedSaksopplysninger(BEHANDLING_ID)).thenReturn(behandling);
         when(landvelgerService.hentUtenlandskTrygdemyndighetsland(BEHANDLING_ID)).thenReturn(Collections.singletonList(Land_iso2.SE));
 
-        anmodningUnntakService.anmodningOmUnntak(BEHANDLING_ID, null, Collections.emptySet(), FRITEKST_SED);
+        anmodningUnntakService.anmodningOmUnntak(BEHANDLING_ID, null, Collections.emptySet(), FRITEKST_SED, BEGRUNNELSE_FRITEKST);
 
         verify(anmodningUnntakKontrollService).utførKontroller(BEHANDLING_ID);
         verify(anmodningsperiodeService).oppdaterAnmodetAvForBehandling(BEHANDLING_ID, "Z990007");
         verify(prosessinstansService).opprettProsessinstansAnmodningOmUnntak(any(Behandling.class), anySet(),
-            anySet(), eq(FRITEKST_SED));
+            anySet(), eq(FRITEKST_SED), eq(BEGRUNNELSE_FRITEKST));
         verify(oppgaveService).leggTilbakeBehandlingsoppgaveMedSaksnummer(any());
         verify(behandlingsresultatService).oppdaterBehandlingsresultattype(BEHANDLING_ID, Behandlingsresultattyper.ANMODNING_OM_UNNTAK);
     }
