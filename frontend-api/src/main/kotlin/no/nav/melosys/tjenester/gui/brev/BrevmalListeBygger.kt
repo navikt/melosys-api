@@ -229,7 +229,7 @@ class BrevmalListeBygger(
             )
         )
         val felter = BrevmalFeltDto.Builder()
-            .medKodeOgBeskrivelse(BrevmalFeltKode.INNLEDNING_FRITEKST)
+            .medKodeOgBeskrivelse(BrevmalFeltKode.MANGLER_FRITEKST)
             .medFeltType(FeltType.FRITEKST)
             .erPåkrevd()
             .medValg(FeltValgDto(feltvalgAlternativ, FeltValgType.CHECKBOX))
