@@ -16,7 +16,7 @@ import org.springframework.web.context.annotation.RequestScope
 @RequestMapping("/dokumenter/v2")
 @Api(tags = ["dokumenterv2"])
 @RequestScope
-class BrevbestillingTjeneste(
+class BrevbestillingController(
     private val brevbestillingFasade: BrevbestillingFasade,
     private val brevmalListeBygger: BrevmalListeBygger,
     private val aksesskontroll: Aksesskontroll

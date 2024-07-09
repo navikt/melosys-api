@@ -17,7 +17,7 @@ import org.springframework.web.bind.annotation.*
 @RestController
 @RequestMapping("/brev/utkast")
 @Api(tags = ["brev", "utkast"])
-class UtkastBrevTjeneste(
+class UtkastBrevController(
     private val utkastBrevService: UtkastBrevService,
     private val aksesskontroll: Aksesskontroll
 ) {
