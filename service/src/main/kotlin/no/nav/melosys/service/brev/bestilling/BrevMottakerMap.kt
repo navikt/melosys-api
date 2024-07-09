@@ -19,6 +19,8 @@ object BrevMottakerMap {
         Produserbaredokumenter.IKKE_YRKESAKTIV_PLIKTIG_FTRL to Mottakerliste(Mottakerroller.BRUKER),
         Produserbaredokumenter.IKKE_YRKESAKTIV_FRIVILLIG_FTRL to Mottakerliste(Mottakerroller.BRUKER),
 
+        Produserbaredokumenter.INNHENTING_AV_INNTEKTSOPPLYSNINGER to Mottakerliste(Mottakerroller.BRUKER),
+
         Produserbaredokumenter.IKKE_YRKESAKTIV_VEDTAKSBREV to Mottakerliste(Mottakerroller.BRUKER),
 
         Produserbaredokumenter.VEDTAK_OPPHOERT_MEDLEMSKAP to Mottakerliste(Mottakerroller.BRUKER),
