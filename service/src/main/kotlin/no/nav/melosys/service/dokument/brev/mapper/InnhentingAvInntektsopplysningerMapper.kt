@@ -20,20 +20,25 @@ class InnhentingAvInntektsopplysningerMapper(
         val fristdato = LocalDate.now().plusWeeks(4)
         val medlemskapsperiode = mapMedlemskapsPerioder(behandlingsresultat, årsavregningsår)
 
+        val medlemskapsperiodeFom = medlemskapsperiode?.first
+        val medlemskapsperiodeTom = medlemskapsperiode?.second
+
         return InnhentingAvInntektsopplysninger(
             brevbestilling,
             årsavregningsår,
             fristdato,
-            medlemskapsperiode.first,
-            medlemskapsperiode.second,
+            medlemskapsperiodeFom,
+            medlemskapsperiodeTom,
         )
     }
 
-    private fun mapMedlemskapsPerioder(behandlingsresultat: Behandlingsresultat, årsavregningsår: Int): Pair<LocalDate, LocalDate> {
+    private fun mapMedlemskapsPerioder(behandlingsresultat: Behandlingsresultat, årsavregningsår: Int): Pair<LocalDate, LocalDate>? {
         val relevantePerioder = behandlingsresultat.medlemskapsperioder
             .filter { it.innvilgelsesresultat == InnvilgelsesResultat.INNVILGET }
             .filter { it.fom.year == årsavregningsår || it.tom.year == årsavregningsår }
             .sortedBy { it.fom }
+
+        if (relevantePerioder.isEmpty()) return null;
 
         val fom = relevantePerioder.first().fom.hentGyldigDatoForÅr(årsavregningsår)
         val tom = relevantePerioder.last().tom.hentGyldigDatoForÅr(årsavregningsår)
