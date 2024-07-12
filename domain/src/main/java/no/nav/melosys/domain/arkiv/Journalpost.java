@@ -2,6 +2,7 @@ package no.nav.melosys.domain.arkiv;
 
 import java.time.Instant;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 import java.util.Optional;
 
@@ -198,6 +199,10 @@ public class Journalpost {
 
     public boolean mottaksKanalErEessi() {
         return "EESSI".equals(mottaksKanal);
+    }
+
+    public boolean mottaksKanalErElektroniskSoeknad() {
+        return List.of("NAV_NO", "EESSI", "ALTINN", "NAV_NO_CHAT").contains(mottaksKanal);
     }
 
     public String getTema() {

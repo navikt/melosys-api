@@ -20,11 +20,12 @@ public final class JournalpostDto {
     private final List<DokumentDto> vedlegg;
     private BehandlingsInformasjon behandlingsInformasjon;
     private final Boolean mottaksKanalErEessi;
+    private final Boolean mottaksKanalErElektroniskSoeknad;
 
     private JournalpostDto(Instant mottattDato, String brukerID,
                            String virksomhetOrgnr, String avsenderID, String avsenderNavn,
                            Avsendertyper avsenderType, boolean erHovedpartAvsender,
-                           DokumentDto hoveddokument, List<DokumentDto> vedlegg, Boolean mottaksKanalErEessi) {
+                           DokumentDto hoveddokument, List<DokumentDto> vedlegg, Boolean mottaksKanalErEessi, Boolean mottaksKanalErElektroniskSoeknad) {
         this.mottattDato = mottattDato;
         this.brukerID = brukerID;
         this.virksomhetOrgnr = virksomhetOrgnr;
@@ -35,6 +36,7 @@ public final class JournalpostDto {
         this.hoveddokument = hoveddokument;
         this.vedlegg = vedlegg;
         this.mottaksKanalErEessi = mottaksKanalErEessi;
+        this.mottaksKanalErElektroniskSoeknad = mottaksKanalErElektroniskSoeknad;
     }
 
     public static JournalpostDto av(Journalpost journalpost, String hovedpartIdent) {
@@ -58,7 +60,9 @@ public final class JournalpostDto {
             avsenderID != null && avsenderID.equalsIgnoreCase(hovedpartIdent),
             hoveddokument,
             vedlegg,
-            journalpost.mottaksKanalErEessi());
+            journalpost.mottaksKanalErEessi(),
+            journalpost.mottaksKanalErElektroniskSoeknad()
+        );
     }
 
     public Instant getMottattDato() {
@@ -107,5 +111,9 @@ public final class JournalpostDto {
 
     public Boolean getMottaksKanalErEessi() {
         return mottaksKanalErEessi;
+    }
+
+    public Boolean getMottaksKanalErElektroniskSoeknad() {
+        return mottaksKanalErElektroniskSoeknad;
     }
 }
