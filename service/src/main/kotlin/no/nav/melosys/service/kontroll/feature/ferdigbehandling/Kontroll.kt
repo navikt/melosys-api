@@ -126,7 +126,8 @@ class Kontroll(
             fullmektig = fullmektig,
             organisasjonDokument = hentOrganisasjonFullmektig(fullmektig),
             persondataTilFullmektig = hentPersondataFullmektig(fullmektig),
-            brevUtkast = utkastBrevService.hentUtkast(behandling.id)
+            brevUtkast = utkastBrevService.hentUtkast(behandling.id),
+            antallArbeidsgivere = avklarteVirksomheterService.hentAntallAvklarteVirksomheter(behandling)
         )
     }
 
