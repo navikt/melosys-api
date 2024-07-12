@@ -41,7 +41,8 @@ object FerdigbehandlingKontrollsett {
         Function { FerdigbehandlingKontroll.selvstendigUtlandManglerFelter(it) },
         Function { FerdigbehandlingKontroll.orgnrErOpphørt(it) },
         Function { FerdigbehandlingKontroll.åpentUtkastFinnes(it) },
-        Function { FerdigbehandlingKontroll.storbritanniaKonvensjonBruktForTidlig(it) })
+        Function { FerdigbehandlingKontroll.storbritanniaKonvensjonBruktForTidlig(it) },
+        Function { FerdigbehandlingKontroll.kunEnAvklartVirksomhet(it) })
 
     private val REGELSETT_FTRL: Regelsett = setOf(
         Function { FerdigbehandlingKontroll.adresseRegistrert(it) },

@@ -570,6 +570,42 @@ class FerdigbehandlingKontrollTest {
         kontrollfeil.shouldBeNull()
     }
 
+    @Test
+    fun `EØS behandling med behandlingstema UTSENDT_SELVSTENDIG og to avklarte virksomheter skal gi kontrollfeil`() {
+        val kontrollData = lagFerdigbehandlingKontrollData(
+            antallArbeidsgivere = 2,
+            behandlingstema = Behandlingstema.UTSENDT_SELVSTENDIG
+        )
+
+        val kontrollfeil = FerdigbehandlingKontroll.kunEnAvklartVirksomhet(kontrollData)
+
+        kontrollfeil.shouldNotBeNull().kode.shouldBe(Kontroll_begrunnelser.IKKE_KUN_EN_VIRKSOMHET_BREV)
+    }
+
+    @Test
+    fun `EØS behandling med behandlingstema UTSENDT_SELVSTENDIG og en avklart virksomhet skal ikke gi kontrollfeil`() {
+        val kontrollData = lagFerdigbehandlingKontrollData(
+            antallArbeidsgivere = 1,
+            behandlingstema = Behandlingstema.UTSENDT_SELVSTENDIG
+        )
+
+        val kontrollfeil = FerdigbehandlingKontroll.kunEnAvklartVirksomhet(kontrollData)
+
+        kontrollfeil.shouldBeNull()
+    }
+
+    @Test
+    fun `EØS behandling med behandlingstema ARBEID_FLERE_LAND og to avklarte virksomheter skal ikke gi kontrollfeil`() {
+        val kontrollData = lagFerdigbehandlingKontrollData(
+            antallArbeidsgivere = 2,
+            behandlingstema = Behandlingstema.ARBEID_FLERE_LAND
+        )
+
+        val kontrollfeil = FerdigbehandlingKontroll.kunEnAvklartVirksomhet(kontrollData)
+
+        kontrollfeil.shouldBeNull()
+    }
+
     private fun lagAktoerFullmektigOrganisasjon(): Aktoer {
         val aktoer = Aktoer()
         aktoer.rolle = Aktoersroller.FULLMEKTIG
@@ -619,7 +655,7 @@ class FerdigbehandlingKontrollTest {
             .build()
     }
 
-    private fun lagMottatteOpplysningerdata(): MottatteOpplysningerData? {
+    private fun lagMottatteOpplysningerdata(): MottatteOpplysningerData {
         val mottatteOpplysningerData = MottatteOpplysningerData()
         mottatteOpplysningerData.soeknadsland = Soeknadsland(listOf("AT"), false)
         return mottatteOpplysningerData
@@ -649,7 +685,8 @@ class FerdigbehandlingKontrollTest {
         organisasjonDokument: OrganisasjonDokument? = null,
         persondataTilFullmektig: Persondata? = null,
         medlemskapsperiodeData: MedlemskapsperiodeData? = null,
-        brevUtkast: List<UtkastBrev> = emptyList()
+        brevUtkast: List<UtkastBrev> = emptyList(),
+        antallArbeidsgivere: Int = 1
     ) = FerdigbehandlingKontrollData(
         medlemskapDokument,
         persondata,
@@ -662,6 +699,7 @@ class FerdigbehandlingKontrollTest {
         organisasjonDokument,
         persondataTilFullmektig,
         medlemskapsperiodeData,
-        brevUtkast
+        brevUtkast,
+        antallArbeidsgivere
     )
 }

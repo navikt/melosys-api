@@ -1,6 +1,7 @@
 package no.nav.melosys.service.kontroll.feature.ferdigbehandling
 
 import io.kotest.matchers.collections.shouldBeEmpty
+import io.kotest.matchers.collections.shouldContainExactly
 import io.kotest.matchers.collections.shouldHaveSize
 import io.kotest.matchers.collections.shouldNotBeEmpty
 import io.kotest.matchers.nulls.shouldNotBeNull
@@ -105,8 +106,9 @@ internal class KontrollMedRegisterOpplysningServiceTest {
 
         alleKontrollfeil
             .shouldNotBeNull()
-            .shouldHaveSize(1)
-            .single().kode.shouldBe(Kontroll_begrunnelser.INGEN_SLUTTDATO)
+            .shouldHaveSize(2)
+            .map { it.kode }
+            .shouldContainExactly(Kontroll_begrunnelser.INGEN_SLUTTDATO, Kontroll_begrunnelser.IKKE_KUN_EN_VIRKSOMHET_BREV)
         verify { registeropplysningerService.hentOgLagreOpplysninger(any()) }
     }
 
