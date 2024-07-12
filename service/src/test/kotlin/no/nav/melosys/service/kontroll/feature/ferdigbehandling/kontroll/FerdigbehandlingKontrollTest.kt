@@ -577,7 +577,7 @@ class FerdigbehandlingKontrollTest {
             behandlingstema = Behandlingstema.UTSENDT_SELVSTENDIG
         )
 
-        val kontrollfeil = FerdigbehandlingKontroll.kunEnArbeidsgiver(kontrollData)
+        val kontrollfeil = FerdigbehandlingKontroll.kunEnAvklartVirksomhet(kontrollData)
 
         kontrollfeil.shouldNotBeNull().kode.shouldBe(Kontroll_begrunnelser.IKKE_KUN_EN_VIRKSOMHET_BREV)
     }
@@ -589,7 +589,7 @@ class FerdigbehandlingKontrollTest {
             behandlingstema = Behandlingstema.UTSENDT_SELVSTENDIG
         )
 
-        val kontrollfeil = FerdigbehandlingKontroll.kunEnArbeidsgiver(kontrollData)
+        val kontrollfeil = FerdigbehandlingKontroll.kunEnAvklartVirksomhet(kontrollData)
 
         kontrollfeil.shouldBeNull()
     }
@@ -601,7 +601,7 @@ class FerdigbehandlingKontrollTest {
             behandlingstema = Behandlingstema.ARBEID_FLERE_LAND
         )
 
-        val kontrollfeil = FerdigbehandlingKontroll.kunEnArbeidsgiver(kontrollData)
+        val kontrollfeil = FerdigbehandlingKontroll.kunEnAvklartVirksomhet(kontrollData)
 
         kontrollfeil.shouldBeNull()
     }
@@ -655,7 +655,7 @@ class FerdigbehandlingKontrollTest {
             .build()
     }
 
-    private fun lagMottatteOpplysningerdata(): MottatteOpplysningerData? {
+    private fun lagMottatteOpplysningerdata(): MottatteOpplysningerData {
         val mottatteOpplysningerData = MottatteOpplysningerData()
         mottatteOpplysningerData.soeknadsland = Soeknadsland(listOf("AT"), false)
         return mottatteOpplysningerData

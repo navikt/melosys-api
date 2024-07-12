@@ -42,7 +42,7 @@ object FerdigbehandlingKontrollsett {
         Function { FerdigbehandlingKontroll.orgnrErOpphørt(it) },
         Function { FerdigbehandlingKontroll.åpentUtkastFinnes(it) },
         Function { FerdigbehandlingKontroll.storbritanniaKonvensjonBruktForTidlig(it) },
-        Function { FerdigbehandlingKontroll.kunEnArbeidsgiver(it) })
+        Function { FerdigbehandlingKontroll.kunEnAvklartVirksomhet(it) })
 
     private val REGELSETT_FTRL: Regelsett = setOf(
         Function { FerdigbehandlingKontroll.adresseRegistrert(it) },
