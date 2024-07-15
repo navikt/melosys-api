@@ -2,13 +2,11 @@ package no.nav.melosys.integrasjon.dokgen.dto
 
 import com.fasterxml.jackson.annotation.JsonFormat
 import com.fasterxml.jackson.databind.annotation.JsonSerialize
-import com.fasterxml.jackson.datatype.jsr310.ser.InstantSerializer
 import com.fasterxml.jackson.datatype.jsr310.ser.LocalDateSerializer
 import no.nav.melosys.domain.brev.InnvilgelseEftaStorbritanniaBrevbestilling
 import no.nav.melosys.domain.dokument.felles.Periode
 import no.nav.melosys.domain.kodeverk.Mottakerroller
 import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingstyper
-import java.time.Instant
 import java.time.LocalDate
 
 class InnvilgelseEftaStorbritannia(
@@ -24,7 +22,7 @@ class InnvilgelseEftaStorbritannia(
     val erUnntakTuristskip: Boolean?,
     val lovvalgsperiode: Periode?,
     val innledningFritekst: String?,
-    val tillegsbestemmelse: String?,
+    val tilleggsbestemmelse: String?,
     val erArtikkel13_3_a_eller_13_4: Boolean?,
     val erArtikkel14_1_eller_14_2: Boolean?,
     val erArtikkel16_1_eller_16_3: Boolean?,
@@ -43,7 +41,7 @@ class InnvilgelseEftaStorbritannia(
         erUnntakTuristskip: Boolean?,
         lovvalgsperiode: Periode?,
         innledningFritekst: String?,
-        tillegsbestemmelse: String?,
+        tilleggsbestemmelse: String?,
         erArtikkel13_3_a_eller_13_4: Boolean?,
         erArtikkel14_1_eller_14_2: Boolean?,
         erArtikkel16_1_eller_16_3: Boolean?,
@@ -62,7 +60,7 @@ class InnvilgelseEftaStorbritannia(
         erUnntakTuristskip,
         lovvalgsperiode,
         innledningFritekst,
-        tillegsbestemmelse,
+        tilleggsbestemmelse,
         erArtikkel13_3_a_eller_13_4,
         erArtikkel14_1_eller_14_2,
         erArtikkel16_1_eller_16_3,

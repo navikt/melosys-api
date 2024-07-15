@@ -45,7 +45,7 @@ class InnvilgelseEftaStorbritanniaMapper(
             erUnntakTuristskip = erUnntakTuristskip,
             lovvalgsperiode = Periode(lovvalgsperiode.fom, lovvalgsperiode.tom),
             innledningFritekst = brevbestilling.innledningFritekst,
-            tillegsbestemmelse = if (lovvalgsperiode.tilleggsbestemmelse != null) lovvalgsperiode.tilleggsbestemmelse.name() else "",
+            tilleggsbestemmelse = if (lovvalgsperiode.tilleggsbestemmelse != null) lovvalgsperiode.tilleggsbestemmelse.name() else "",
             erArtikkel13_3_a_eller_13_4 = lovvalgsperiode.erArtikkel13_3_a_eller_13_4(),
             erArtikkel14_1_eller_14_2 = lovvalgsperiode.erArtikkel14_1_eller_14_2(),
             erArtikkel16_1_eller_16_3 = lovvalgsperiode.erArtikkel16_1_eller_16_3(),
