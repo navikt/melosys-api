@@ -26,7 +26,7 @@ class InnvilgelseEftaStorbritannia(
     val innledningFritekst: String?,
     val tillegsbestemmelse: String?,
     val erArtikkel13_3_a_eller_13_4: Boolean?,
-    val erArtikkel14_1ller_14_2: Boolean?,
+    val erArtikkel14_1_eller_14_2: Boolean?,
     val erArtikkel16_1_eller_16_3: Boolean?,
     val erArtikkel18_1: Boolean?,
     val bosted: String?,

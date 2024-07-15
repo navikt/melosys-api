@@ -2,16 +2,12 @@ package no.nav.melosys.service.dokument.brev.mapper
 
 import jakarta.transaction.Transactional
 import no.nav.melosys.domain.Bostedsland
-import no.nav.melosys.domain.PeriodeOmLovvalg
 import no.nav.melosys.domain.brev.InnvilgelseEftaStorbritanniaBrevbestilling
 import no.nav.melosys.domain.dokument.felles.Periode
 import no.nav.melosys.domain.kodeverk.Vilkaar
-import no.nav.melosys.domain.util.MottatteOpplysningerUtils
-import no.nav.melosys.exception.FunksjonellException
 import no.nav.melosys.integrasjon.dokgen.dto.InnvilgelseEftaStorbritannia
-import no.nav.melosys.service.avgift.TrygdeavgiftMottakerService
-import no.nav.melosys.service.avgift.TrygdeavgiftsberegningService
 import no.nav.melosys.service.avklartefakta.AvklarteVirksomheterService
+import no.nav.melosys.service.avklartefakta.AvklartefaktaService
 import no.nav.melosys.service.behandling.VilkaarsresultatService
 import org.springframework.stereotype.Component
 
@@ -19,6 +15,8 @@ import org.springframework.stereotype.Component
 class InnvilgelseEftaStorbritanniaMapper(
     private val vilkaarsresultatService: VilkaarsresultatService,
     private val dokgenMapperDatahenter: DokgenMapperDatahenter,
+    private val virksomheterService: AvklarteVirksomheterService,
+    private val avklartefaktaService: AvklartefaktaService
 ) {
     @Transactional
     internal fun mapInnvilgelseEftaStorbritannia(brevbestilling: InnvilgelseEftaStorbritanniaBrevbestilling): InnvilgelseEftaStorbritannia {
@@ -27,11 +25,19 @@ class InnvilgelseEftaStorbritanniaMapper(
         val anmodningsperiode = behandlingsresultat.finnAnmodningsperiode()
         val erUnntakTuristskip = vilkaarsresultatService.oppfyllerVilkaar(behandlingsresultat.id, Vilkaar.FTRL_2_12_UNNTAK_TURISTSKIP)
 
-        val bostedsland = if(brevbestilling.personMottaker.finnBostedsadresse().isPresent && brevbestilling.personMottaker.finnBostedsadresse().get().strukturertAdresse.erGyldig()) Bostedsland(brevbestilling.personMottaker.finnBostedsadresse().get().strukturertAdresse.landkode).landkodeobjekt.beskrivelse else ""
+        val bostedsland = if (brevbestilling.personMottaker.finnBostedsadresse().isPresent && brevbestilling.personMottaker.finnBostedsadresse()
+                .get().strukturertAdresse.erGyldig()
+        ) Bostedsland(brevbestilling.personMottaker.finnBostedsadresse().get().strukturertAdresse.landkode).landkodeobjekt.beskrivelse else ""
+        val alleAvklarteOrgnr = avklartefaktaService.hentAvklarteOrgnrOgUuid(behandlingsresultat.id)
+        val alleVirksomheter = virksomheterService.hentAlleNorskeVirksomheter(behandlingsresultat.behandling)
+
+        val navnVirksomhet = alleVirksomheter.stream()
+            .filter { alleAvklarteOrgnr.contains(it.orgnr) }
+            .findFirst().get().navn
 
         return InnvilgelseEftaStorbritannia(
             brevbestilling = brevbestilling,
-            navnVirksomhet = brevbestilling.org?.navn,
+            navnVirksomhet = navnVirksomhet,
             behandlingstype = behandlingsresultat.behandling.type,
             nyVurderingBakgrunn = brevbestilling.nyVurderingBakgrunn,
             innvilgelseFritekst = brevbestilling.innvilgelseFritekst,
@@ -39,13 +45,13 @@ class InnvilgelseEftaStorbritanniaMapper(
             erUnntakTuristskip = erUnntakTuristskip,
             lovvalgsperiode = Periode(lovvalgsperiode.fom, lovvalgsperiode.tom),
             innledningFritekst = brevbestilling.innledningFritekst,
-            tillegsbestemmelse = if(lovvalgsperiode.tilleggsbestemmelse != null) lovvalgsperiode.tilleggsbestemmelse.name() else "",
+            tillegsbestemmelse = if (lovvalgsperiode.tilleggsbestemmelse != null) lovvalgsperiode.tilleggsbestemmelse.name() else "",
             erArtikkel13_3_a_eller_13_4 = lovvalgsperiode.erArtikkel13_3_a_eller_13_4(),
             erArtikkel14_1_eller_14_2 = lovvalgsperiode.erArtikkel14_1_eller_14_2(),
             erArtikkel16_1_eller_16_3 = lovvalgsperiode.erArtikkel16_1_eller_16_3(),
             erArtikkel18_1 = lovvalgsperiode.erArtikkel18_1(),
             bosted = bostedsland,
-            anmodningsperiodeSvarType = if(anmodningsperiode.isPresent) anmodningsperiode.get().anmodningsperiodeSvar.anmodningsperiodeSvarType.name else "",
+            anmodningsperiodeSvarType = if (anmodningsperiode.isPresent) anmodningsperiode.get().anmodningsperiodeSvar.anmodningsperiodeSvarType.name else "",
             begrunnelseFritekst = brevbestilling.begrunnelseFritekst,
         )
     }
