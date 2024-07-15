@@ -89,6 +89,7 @@ internal class KontrollTest {
     fun setup() {
         every { persondataFasade.hentPerson(any()) } returns PersonopplysningerObjectFactory.lagPersonopplysninger()
         every { behandlingService.hentBehandlingMedSaksopplysninger(behandlingID) } returns behandling
+        every { avklarteVirksomheterService.hentAntallAvklarteVirksomheter(behandling) } returns 1
         behandling.saksopplysninger.add(Saksopplysning().apply {
             type = SaksopplysningType.MEDL
             dokument = MedlemskapDokument()

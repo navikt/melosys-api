@@ -21,5 +21,6 @@ data class FerdigbehandlingKontrollData(
     val organisasjonDokument: OrganisasjonDokument?,
     val persondataTilFullmektig: Persondata?,
     val medlemskapsperiodeData: MedlemskapsperiodeData? = null,
-    val brevUtkast: List<UtkastBrev>
+    val brevUtkast: List<UtkastBrev>,
+    val antallArbeidsgivere: Int = 0
 )
