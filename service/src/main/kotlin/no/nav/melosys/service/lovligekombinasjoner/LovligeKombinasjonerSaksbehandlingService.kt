@@ -166,24 +166,32 @@ class LovligeKombinasjonerSaksbehandlingService(
         val fagsak = fagsakService.hentFagsak(saksnummer)
         val sisteBehandling = fagsak.hentSistRegistrertBehandling()
 
-        val behandlingstyper = hentMuligeBehandlingstyper(hovedpart, fagsak.type, fagsak.tema, behandlingstema, sisteBehandling).toMutableSet()
+        val behandlingstyper = hentMuligeBehandlingstyper(
+            hovedpart,
+            fagsak.type,
+            fagsak.tema,
+            behandlingstema,
+            sisteBehandling
+        ).toMutableSet()
         if (sisteBehandling.erInaktiv()) {
             behandlingstyper.remove(Behandlingstyper.FØRSTEGANG)
         }
         if (fagsak.behandlinger.none { it.erManglendeInnbetalingTrygdeavgift() }) {
             behandlingstyper.remove(Behandlingstyper.MANGLENDE_INNBETALING_TRYGDEAVGIFT)
         }
-        if (fagsak.behandlinger.any {
-                it.tema in setOf(
-                    Behandlingstema.YRKESAKTIV,
-                    Behandlingstema.UTSENDT_ARBEIDSTAKER,
-                    Behandlingstema.UTSENDT_SELVSTENDIG,
-                    Behandlingstema.ARBEID_TJENESTEPERSON_ELLER_FLY,
-                    Behandlingstema.ARBEID_FLERE_LAND,
-                    Behandlingstema.ARBEID_KUN_NORGE
-                )
-            }) {
-            behandlingstyper.add(Behandlingstyper.ÅRSAVREGNING)
+        if (unleash.isEnabled(ToggleName.MELOSYS_ÅRSAVREGNING)) {
+            if (fagsak.behandlinger.any {
+                    it.tema in setOf(
+                        Behandlingstema.YRKESAKTIV,
+                        Behandlingstema.UTSENDT_ARBEIDSTAKER,
+                        Behandlingstema.UTSENDT_SELVSTENDIG,
+                        Behandlingstema.ARBEID_TJENESTEPERSON_ELLER_FLY,
+                        Behandlingstema.ARBEID_FLERE_LAND,
+                        Behandlingstema.ARBEID_KUN_NORGE
+                    )
+                }) {
+                behandlingstyper.add(Behandlingstyper.ÅRSAVREGNING)
+            }
         }
         return behandlingstyper
     }
