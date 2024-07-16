@@ -180,7 +180,6 @@ class LovligeKombinasjonerSaksbehandlingService(
             behandlingstyper.remove(Behandlingstyper.MANGLENDE_INNBETALING_TRYGDEAVGIFT)
         }
         if (unleash.isEnabled(ToggleName.MELOSYS_ÅRSAVREGNING)) {
-            behandlingstyper.add(Behandlingstyper.KLAGE)
             if (fagsak.behandlinger.any {
                     it.tema in setOf(
                         Behandlingstema.YRKESAKTIV,
