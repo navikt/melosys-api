@@ -841,7 +841,7 @@ internal class JournalfoeringServiceTest {
         journalpost.mottaksKanal = "EESSI"
         val melosysEessiMelding = MelosysEessiMelding().apply { rinaSaksnummer = RINA_SAKSNUMMER }
         val fagsak1Behandling = lagBehandling().apply {
-            status = Behandlingsstatus.UNDER_BEHANDLING
+            status = Behandlingsstatus.AVSLUTTET
             tema = Behandlingstema.UTSENDT_SELVSTENDIG
         }
         val fagsak1 = lagFagsak("FAGSAK KOBLET TIL SED FRA FØR", fagsak1Behandling)
@@ -849,11 +849,11 @@ internal class JournalfoeringServiceTest {
         fagsak1.tema = Sakstemaer.MEDLEMSKAP_LOVVALG
         val fagsak2Behandling = lagBehandling().apply {
             status = Behandlingsstatus.AVSLUTTET
-            tema = Behandlingstema.BESLUTNING_LOVVALG_NORGE
+            tema = Behandlingstema.UTSENDT_SELVSTENDIG
         }
         val fagsak2 = lagFagsak("FAGSAK SOM PRØVER Å KNYTTE JOURNALPOST FOR SED TIL SEG", fagsak2Behandling)
         tilordneDto.saksnummer = fagsak2.saksnummer
-        tilordneDto.behandlingstemaKode = Behandlingstema.YRKESAKTIV.kode
+        tilordneDto.behandlingstemaKode = Behandlingstema.UTSENDT_SELVSTENDIG.kode
         tilordneDto.behandlingstypeKode = Behandlingstyper.NY_VURDERING.kode
         every { eessiService.hentSedTilknyttetJournalpost(journalpost.journalpostId) } returns melosysEessiMelding
         every { eessiService.støtterAutomatiskBehandling(melosysEessiMelding) } returns false
