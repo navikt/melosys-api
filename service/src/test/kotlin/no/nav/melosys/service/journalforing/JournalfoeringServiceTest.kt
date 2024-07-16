@@ -837,7 +837,6 @@ internal class JournalfoeringServiceTest {
 
     @Test
     fun journalførOgOpprettAndregangsBehandling_sedSakTilknyttetAnnenFagsak_kasterException() {
-        unleash.enable(ToggleName.MELOSYS_ÅRSAVREGNING)
         journalpost.mottaksKanal = "EESSI"
         val melosysEessiMelding = MelosysEessiMelding().apply { rinaSaksnummer = RINA_SAKSNUMMER }
         val fagsak1Behandling = lagBehandling().apply {
