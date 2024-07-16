@@ -848,13 +848,13 @@ internal class JournalfoeringServiceTest {
         fagsak1.type = Sakstyper.EU_EOS
         fagsak1.tema = Sakstemaer.MEDLEMSKAP_LOVVALG
         val fagsak2Behandling = lagBehandling().apply {
-            status = Behandlingsstatus.UNDER_BEHANDLING
-            tema = Behandlingstema.YRKESAKTIV
+            status = Behandlingsstatus.AVSLUTTET
+            tema = Behandlingstema.BESLUTNING_LOVVALG_NORGE
         }
         val fagsak2 = lagFagsak("FAGSAK SOM PRØVER Å KNYTTE JOURNALPOST FOR SED TIL SEG", fagsak2Behandling)
         tilordneDto.saksnummer = fagsak2.saksnummer
         tilordneDto.behandlingstemaKode = Behandlingstema.YRKESAKTIV.kode
-        tilordneDto.behandlingstypeKode = Behandlingstyper.ÅRSAVREGNING.kode
+        tilordneDto.behandlingstypeKode = Behandlingstyper.NY_VURDERING.kode
         every { eessiService.hentSedTilknyttetJournalpost(journalpost.journalpostId) } returns melosysEessiMelding
         every { eessiService.støtterAutomatiskBehandling(melosysEessiMelding) } returns false
         every { eessiService.finnSakForRinasaksnummer(RINA_SAKSNUMMER) } returns Optional.of(ARKIVSAK_ID)
