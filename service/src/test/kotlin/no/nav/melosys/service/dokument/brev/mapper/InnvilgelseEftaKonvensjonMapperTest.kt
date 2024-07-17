@@ -68,7 +68,7 @@ internal class InnvilgelseEftaKonvensjonMapperTest {
     }
 
     @Test
-    fun `hent orientering anmodning unntak brevbestilling`() {
+    fun `Innvilgelse efta Storbritannia brevbestilling`() {
         every { mockDokgenMapperDatahenter.hentBehandlingsresultat(ofType()) } returns lagBehandlingsResultat()
         every {
             mockVilkaarsresultatService.harVilkaar(
@@ -107,7 +107,6 @@ internal class InnvilgelseEftaKonvensjonMapperTest {
             erArtikkel18_1?.shouldBeTrue()
             bosted.shouldBe("Storbritannia")
             lovvalgsbestemmelse.shouldBe(Lovvalgbestemmelser_konv_efta_storbritannia.KONV_EFTA_STORBRITANNIA_ART18_1.name)
-
         }
     }
 
