@@ -18,6 +18,7 @@ import org.springframework.util.StringUtils
 class DokgenMalMapper(
     private val dokgenMapperDatahenter: DokgenMapperDatahenter,
     private val innvilgelseFtrlMapper: InnvilgelseFtrlMapper,
+    private val innvilgelseEftaMapper: InnvilgelseEftaStorbritanniaMapper,
     private val innhentingAvInntektsopplysningerMapper: InnhentingAvInntektsopplysningerMapper,
     private val trygdeavtaleMapper: TrygdeavtaleMapper,
     private val orienteringAnmodningUnntakMapper: OrienteringAnmodningUnntakMapper
@@ -119,6 +120,9 @@ class DokgenMalMapper(
 
             Produserbaredokumenter.INNVILGELSE_FOLKETRYGDLOVEN ->
                 innvilgelseFtrlMapper.mapYrkesaktivFrivillig(brevbestilling as InnvilgelseFtrlYrkesaktivFrivilligBrevbestilling)
+
+            Produserbaredokumenter.INNVILGELSE_EFTA_STORBRITANNIA ->
+                innvilgelseEftaMapper.mapInnvilgelseEftaStorbritannia(brevbestilling as InnvilgelseEftaStorbritanniaBrevbestilling)
 
             Produserbaredokumenter.PLIKTIG_MEDLEM_FTRL -> innvilgelseFtrlMapper.mapYrkesaktivPliktig(brevbestilling)
 

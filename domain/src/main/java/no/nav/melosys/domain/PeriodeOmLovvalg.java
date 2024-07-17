@@ -29,6 +29,27 @@ public interface PeriodeOmLovvalg extends ErPeriode, HarBestemmelse<LovvalgBeste
             || getBestemmelse() == KONV_EFTA_STORBRITANNIA_ART16_1 || getBestemmelse() == KONV_EFTA_STORBRITANNIA_ART16_3;
     }
 
+    default boolean erArtikkel14_1_eller_14_2() {
+        return getBestemmelse() == KONV_EFTA_STORBRITANNIA_ART14_1 || getBestemmelse() == KONV_EFTA_STORBRITANNIA_ART14_2;
+    }
+
+    default boolean erEftaStorbritannia() {
+        return getBestemmelse().name().startsWith("KONV_EFTA");
+    }
+
+    default boolean erArtikkel13_3_a_eller_13_4() {
+        return getBestemmelse() == KONV_EFTA_STORBRITANNIA_ART13_3A || getBestemmelse() == KONV_EFTA_STORBRITANNIA_ART13_4;
+    }
+
+    default boolean erArtikkel16_1_eller_16_3() {
+        return getBestemmelse() == KONV_EFTA_STORBRITANNIA_ART16_1 || getBestemmelse() == KONV_EFTA_STORBRITANNIA_ART16_3;
+    }
+
+    default boolean erArtikkel18_1() {
+        return getBestemmelse() == KONV_EFTA_STORBRITANNIA_ART18_1;
+    }
+
+
     default boolean erArtikkel13() {
         return erArtikkel13_1()
             || getBestemmelse() == FO_883_2004_ART13_2A || getBestemmelse() == FO_883_2004_ART13_2B

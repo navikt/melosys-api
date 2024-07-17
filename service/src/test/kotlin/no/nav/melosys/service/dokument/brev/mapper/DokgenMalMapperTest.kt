@@ -62,6 +62,9 @@ internal class DokgenMalMapperTest {
     private lateinit var mockOrienteringAnmodningUnntakMapper: OrienteringAnmodningUnntakMapper
 
     @MockK
+    private lateinit var mockInnvilgelseEftaStorbritanniaMapper: InnvilgelseEftaStorbritanniaMapper
+
+    @MockK
     private lateinit var mockInnhentingAvInntektsopplysningerMapper: InnhentingAvInntektsopplysningerMapper
 
     private lateinit var dokgenMalMapper: DokgenMalMapper
@@ -71,6 +74,7 @@ internal class DokgenMalMapperTest {
         dokgenMalMapper = DokgenMalMapper(
             mockDokgenMapperDatahenter,
             mockInnvilgelseFtrlMapper,
+            mockInnvilgelseEftaStorbritanniaMapper,
             mockInnhentingAvInntektsopplysningerMapper,
             mockTrygdeavtaleMapper,
             mockOrienteringAnmodningUnntakMapper

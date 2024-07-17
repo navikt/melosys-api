@@ -54,7 +54,7 @@ public class BrevmottakerService {
     Mottakerroller avklarMottakerRolleFraDokument(Produserbaredokumenter produserbartDokument) {
         return switch (produserbartDokument) {
             case AVSLAG_YRKESAKTIV, ORIENTERING_ANMODNING_UNNTAK,
-                INNVILGELSE_YRKESAKTIV, IKKE_YRKESAKTIV_VEDTAKSBREV -> Mottakerroller.BRUKER;
+                INNVILGELSE_YRKESAKTIV, IKKE_YRKESAKTIV_VEDTAKSBREV, INNVILGELSE_EFTA_STORBRITANNIA -> Mottakerroller.BRUKER;
             case INNVILGELSE_ARBEIDSGIVER, AVSLAG_ARBEIDSGIVER -> Mottakerroller.ARBEIDSGIVER;
             case ANMODNING_UNNTAK, ATTEST_A1 -> Mottakerroller.UTENLANDSK_TRYGDEMYNDIGHET;
             default -> throw new TekniskException("Valg av mottakerRolle støttes ikke for " + produserbartDokument);
@@ -154,6 +154,7 @@ public class BrevmottakerService {
         // Vedtaksbrevene er imidlertid sendt til både bruker og fullmektig (gjelder ikke forhåndsvisning).
         boolean tilBegge = false;
         if (produserbartDokument == INNVILGELSE_YRKESAKTIV ||
+            produserbartDokument == INNVILGELSE_EFTA_STORBRITANNIA ||
             produserbartDokument == INNVILGELSE_YRKESAKTIV_FLERE_LAND ||
             produserbartDokument == AVSLAG_YRKESAKTIV ||
             produserbartDokument == VARSELBREV_MANGLENDE_INNBETALING) {

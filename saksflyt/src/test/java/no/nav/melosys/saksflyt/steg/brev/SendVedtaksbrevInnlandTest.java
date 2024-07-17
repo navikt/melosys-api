@@ -14,11 +14,13 @@ import no.nav.melosys.domain.kodeverk.begrunnelser.Endretperiode;
 import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingsresultattyper;
 import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingstema;
 import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingstyper;
+import no.nav.melosys.domain.kodeverk.lovvalgsbestemmelser.Lovvalgbestemmelser_konv_efta_storbritannia;
 import no.nav.melosys.domain.kodeverk.lovvalgsbestemmelser.Tilleggsbestemmelser_883_2004;
 import no.nav.melosys.domain.mottatteopplysninger.MottatteOpplysninger;
 import no.nav.melosys.domain.mottatteopplysninger.Soeknad;
 import no.nav.melosys.domain.mottatteopplysninger.data.ForetakUtland;
 import no.nav.melosys.exception.FunksjonellException;
+import no.nav.melosys.featuretoggle.ToggleName;
 import no.nav.melosys.saksflytapi.ProsessinstansService;
 import no.nav.melosys.saksflytapi.domain.ProsessDataKey;
 import no.nav.melosys.saksflytapi.domain.ProsessType;
@@ -61,15 +63,17 @@ class SendVedtaksbrevInnlandTest {
 
     private Behandling behandling;
 
+    private final FakeUnleash fakeUnleash = new FakeUnleash();
     private SendVedtaksbrevInnland sendVedtaksbrevInnland;
 
     @BeforeEach
     public void setUp() {
         behandling = lagBehandling();
+        fakeUnleash.resetAll();
         when(behandlingService.hentBehandlingMedSaksopplysninger(BEHANDLINGID)).thenReturn(behandling);
 
         sendVedtaksbrevInnland = new SendVedtaksbrevInnland(behandlingService, behandlingsresultatService,
-            prosessinstansService, saksbehandlingRegler, new FakeUnleash());
+            prosessinstansService, saksbehandlingRegler, fakeUnleash);
     }
 
     @Test
@@ -110,6 +114,25 @@ class SendVedtaksbrevInnlandTest {
         var mottakere = List.of(Mottaker.medRolle(BRUKER));
         verify(prosessinstansService).opprettProsessinstanserSendBrev(eq(behandling), doksysBrevbestillingArgumentCaptor.capture(), eq(mottakere));
         assertThat(doksysBrevbestillingArgumentCaptor.getValue().getProduserbartdokument()).isEqualTo(INNVILGELSE_YRKESAKTIV);
+    }
+
+    @Test
+    void utfør_innvilgelseEfta_vedtak() {
+        fakeUnleash.enable(ToggleName.MELOSYS_KONVENSJON_EFTA_LAND_OG_STORBRITANNIA);
+        when(behandlingsresultatService.hentBehandlingsresultat(BEHANDLINGID))
+            .thenReturn(lagBehandlingsresultat(lagInnvilgetLovvalgsperiode(Lovvalgbestemmelser_konv_efta_storbritannia.KONV_EFTA_STORBRITANNIA_ART13_3A)));
+
+
+        sendVedtaksbrevInnland.utfør(lagProsessinstans());
+
+        var mottakere = List.of(Mottaker.medRolle(BRUKER));
+        verify(prosessinstansService, times(2)).opprettProsessinstanserSendBrev(eq(behandling), doksysBrevbestillingArgumentCaptor.capture(), eq(mottakere));
+
+        List<DoksysBrevbestilling> capturedValues = doksysBrevbestillingArgumentCaptor.getAllValues();
+        assertThat(capturedValues).hasSize(2);
+
+        assertThat(capturedValues.get(0).getProduserbartdokument()).isEqualTo(INNVILGELSE_EFTA_STORBRITANNIA);
+        assertThat(capturedValues.get(1).getProduserbartdokument()).isEqualTo(ATTEST_A1);
     }
 
     @Test
@@ -357,6 +380,7 @@ class SendVedtaksbrevInnlandTest {
         Behandling behandling = new Behandling();
         behandling.setId(BEHANDLINGID);
         behandling.setType(Behandlingstyper.FØRSTEGANG);
+        behandling.setTema(Behandlingstema.UTSENDT_ARBEIDSTAKER);
         behandling.setMottatteOpplysninger(new MottatteOpplysninger());
         behandling.getMottatteOpplysninger().setMottatteOpplysningerData(new Soeknad());
         behandling.setFagsak(lagFagsak());
