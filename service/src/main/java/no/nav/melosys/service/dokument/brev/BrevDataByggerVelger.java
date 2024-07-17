@@ -59,7 +59,6 @@ public class BrevDataByggerVelger {
             case ORIENTERING_ANMODNING_UNNTAK -> new BrevDataByggerAnmodningUnntak(landvelgerService, vilkaarsresultatService);
             case ANMODNING_UNNTAK -> lagBrevDataByggerA001(brevbestillingDto);
             case INNVILGELSE_YRKESAKTIV -> lagBrevDataByggerInnvilgelse(brevbestillingDto);
-            case INNVILGELSE_EFTA_STORBRITANNIA -> lagBrevDataByggerInnvilgelseEftaStorbritannia(brevbestillingDto);
             case INNVILGELSE_YRKESAKTIV_FLERE_LAND -> lagBrevDataByggerInnvilgelseFlereLand(brevbestillingDto);
             case INNVILGELSE_ARBEIDSGIVER -> new BrevDataByggerInnvilgelse(avklartefaktaService, landvelgerService, lovvalgsperiodeService,
                 anmodningsperiodeService, brevbestillingDto,

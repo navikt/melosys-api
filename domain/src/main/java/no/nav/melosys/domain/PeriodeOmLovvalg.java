@@ -28,6 +28,7 @@ public interface PeriodeOmLovvalg extends ErPeriode, HarBestemmelse<LovvalgBeste
             || getBestemmelse() == KONV_EFTA_STORBRITANNIA_ART14_1 || getBestemmelse() == KONV_EFTA_STORBRITANNIA_ART14_2
             || getBestemmelse() == KONV_EFTA_STORBRITANNIA_ART16_1 || getBestemmelse() == KONV_EFTA_STORBRITANNIA_ART16_3;
     }
+
     default boolean erArtikkel14_1_eller_14_2() {
         return getBestemmelse() == KONV_EFTA_STORBRITANNIA_ART14_1 || getBestemmelse() == KONV_EFTA_STORBRITANNIA_ART14_2;
     }
