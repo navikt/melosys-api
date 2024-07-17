@@ -100,17 +100,6 @@ public class BrevDataByggerVelger {
             mottatteOpplysningerService);
     }
 
-    private BrevDataBygger lagBrevDataByggerInnvilgelseEftaStorbritannia(BrevbestillingDto brevbestillingDto) {
-        return new BrevDataByggerInnvilgelse(avklartefaktaService,
-            landvelgerService,
-            lovvalgsperiodeService,
-            anmodningsperiodeService,
-            brevbestillingDto,
-            vilkaarsresultatService,
-            persondataFasade,
-            mottatteOpplysningerService);
-    }
-
     private BrevDataBygger lagBrevDataByggerInnvilgelseFlereLand(BrevbestillingDto brevbestillingDto) {
         BrevDataByggerA1 brevbyggerA1 =
             new BrevDataByggerA1(avklartefaktaService, landvelgerService);

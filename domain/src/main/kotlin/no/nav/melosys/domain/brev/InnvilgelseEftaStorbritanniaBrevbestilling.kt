@@ -21,9 +21,9 @@ class InnvilgelseEftaStorbritanniaBrevbestilling : DokgenBrevbestilling {
 
     class Builder : DokgenBrevbestilling.Builder<Builder> {
         internal var innledningFritekst: String? = null
-        var begrunnelseFritekst: String? = null
-        var innvilgelseFritekst: String? = null
-        var nyVurderingBakgrunn: String? = null
+        internal var begrunnelseFritekst: String? = null
+        internal var innvilgelseFritekst: String? = null
+        internal var nyVurderingBakgrunn: String? = null
 
         constructor()
 

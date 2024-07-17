@@ -78,8 +78,7 @@ public class SendVedtaksbrevInnland implements StegBehandler {
         String saksbehandler = hentSaksbehandler(prosessinstans, resultat);
         String begrunnelseKode = hentBegrunnelsekodeTilForkortetPeriode(resultat);
         String fritekst = hentBegrunnelseFritekst(prosessinstans);
-        final Lovvalgsperiode lovvalgsperiode = resultat.hentLovvalgsperiode();
-        Boolean erStorbritanniaBestemmelse = lovvalgsperiode.erEftaStorbritannia();
+
 
         if (resultat.erAvslag()) {
             sendAvslagsbrev(behandling, saksbehandler, fritekst);
@@ -88,6 +87,9 @@ public class SendVedtaksbrevInnland implements StegBehandler {
             sendUtpekingsbrev(behandling, saksbehandler, fritekst);
             log.info("Sendt utpekingsbrev for behandling {}", behandling.getId());
         } else if (resultat.erInnvilgelse()) {
+            final Lovvalgsperiode lovvalgsperiode = resultat.hentLovvalgsperiode();
+            boolean erStorbritanniaBestemmelse = lovvalgsperiode.erEftaStorbritannia();
+
             sendInnvilgelsesbrev(behandling, resultat, saksbehandler, begrunnelseKode, fritekst, erStorbritanniaBestemmelse);
             if (unleash.isEnabled(ToggleName.MELOSYS_KONVENSJON_EFTA_LAND_OG_STORBRITANNIA) && erStorbritanniaBestemmelse) {
                 sendAttestA1(behandling, saksbehandler, begrunnelseKode, fritekst);

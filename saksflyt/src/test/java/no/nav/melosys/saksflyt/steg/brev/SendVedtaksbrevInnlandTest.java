@@ -69,6 +69,7 @@ class SendVedtaksbrevInnlandTest {
     @BeforeEach
     public void setUp() {
         behandling = lagBehandling();
+        fakeUnleash.resetAll();
         when(behandlingService.hentBehandlingMedSaksopplysninger(BEHANDLINGID)).thenReturn(behandling);
 
         sendVedtaksbrevInnland = new SendVedtaksbrevInnland(behandlingService, behandlingsresultatService,
