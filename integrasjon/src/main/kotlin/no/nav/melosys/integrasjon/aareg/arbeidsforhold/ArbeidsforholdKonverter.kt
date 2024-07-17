@@ -20,17 +20,17 @@ class ArbeidsforholdKonverter(
             arbeidsforholdResponse.arbeidsforhold.map { src ->
                 Arbeidsforhold().apply {
                     arbeidsforholdID = src.arbeidsforholdId
-                    arbeidsforholdIDnav = src.navArbeidsforholdId.toLong()
+                    arbeidsforholdIDnav = src.navArbeidsforholdId!!.toLong()
                     ansettelsesPeriode = getPeriode(src.periode)
-                    arbeidsforholdstype = src.getType()
-                    arbeidsavtaler = getArbeidsAvtaler(src.getArbeidsavtaler())
-                    permisjonOgPermittering = getPermisjonPermitteringer(src.getPermisjonPermitteringer())
+                    arbeidsforholdstype = src.type
+                    arbeidsavtaler = getArbeidsAvtaler(src.arbeidsavtaler)
+                    permisjonOgPermittering = getPermisjonPermitteringer(src.permisjonPermitteringer)
                     utenlandsopphold = getUtenlandsopphold(src.utenlandsopphold)
-                    arbeidsgivertype = Aktoertype.valueOf(src.arbeidsgiver.type().uppercase(Locale.getDefault()))
-                    arbeidsgiverID = src.arbeidsgiver.organisasjonsnummer()
-                    arbeidstakerID = src.getArbeidstaker().offentligIdent()
+                    arbeidsgivertype = Aktoertype.valueOf(src.arbeidsgiver!!.type.uppercase(Locale.getDefault()))
+                    arbeidsgiverID = src.arbeidsgiver!!.organisasjonsnummer
+                    arbeidstakerID = src.arbeidstaker!!.offentligIdent
                     opplysningspliktigtype = Aktoertype.valueOf(src.opplysningspliktigtype)
-                    opplysningspliktigID = src.opplysningspliktig.organisasjonsnummer()
+                    opplysningspliktigID = src.opplysningspliktig?.organisasjonsnummer
                     arbeidsforholdInnrapportertEtterAOrdningen = src.innrapportertEtterAOrdningen
                     opprettelsestidspunkt = getOffsetDateTime(src.registrert)
                     sistBekreftet = getOffsetDateTime(src.sistBekreftet)
@@ -44,9 +44,9 @@ class ArbeidsforholdKonverter(
         if (antallTimerForTimeloennet == null) return emptyList()
         return antallTimerForTimeloennet.map {
             AntallTimerIPerioden().apply {
-                antallTimer = it.antallTimer()
-                timelonnetPeriode = getPeriode(it.periode())
-                rapporteringsAarMaaned = YearMonth.parse(it.rapporteringsperiode())
+                antallTimer = it.antallTimer
+                timelonnetPeriode = getPeriode(it.periode)
+                rapporteringsAarMaaned = YearMonth.parse(it.rapporteringsperiode)
             }
         }
     }
@@ -66,9 +66,9 @@ class ArbeidsforholdKonverter(
         if (utenlandsopphold == null) return emptyList()
         return utenlandsopphold.map {
             Utenlandsopphold().apply {
-                land = it.landkode()
-                periode = getPeriode(it.periode())
-                rapporteringsperiode = YearMonth.parse(it.rapporteringsperiode())
+                land = it.landkode
+                periode = getPeriode(it.periode)
+                rapporteringsperiode = YearMonth.parse(it.rapporteringsperiode)
             }
         }
     }
@@ -77,11 +77,11 @@ class ArbeidsforholdKonverter(
         if (permisjonPermitteringer == null) return emptyList()
         return permisjonPermitteringer.map {
             PermisjonOgPermittering().apply {
-                permisjonsId = it.permisjonPermitteringId()
-                permisjonsPeriode = getPeriode(it.periode())
-                permisjonsprosent = it.prosent()
+                permisjonsId = it.permisjonPermitteringId
+                permisjonsPeriode = getPeriode(it.periode)
+                permisjonsprosent = it.prosent
                 permisjonOgPermittering =
-                    kodeOppslag.getTermFraKodeverk(FellesKodeverk.PERMISJONS_OG_PERMITTERINGS_BESKRIVELSE, it.type())
+                    kodeOppslag.getTermFraKodeverk(FellesKodeverk.PERMISJONS_OG_PERMITTERINGS_BESKRIVELSE, it.type)
             }
         }
     }
@@ -90,15 +90,15 @@ class ArbeidsforholdKonverter(
         if (arbeidsavtalerSrc == null) return emptyList()
         return arbeidsavtalerSrc.map {
             Arbeidsavtale(
-                yrke = Yrke(term = kodeOppslag.getTermFraKodeverk(FellesKodeverk.YRKER, it.yrke()), kode = it.yrke()),
+                yrke = Yrke(term = kodeOppslag.getTermFraKodeverk(FellesKodeverk.YRKER, it.yrke), kode = it.yrke),
                 arbeidstidsordning = Arbeidstidsordning().apply { kode = it.arbeidstidsordning },
                 avloenningstype = "", // Finnes ikke i nytt rest api
-                gyldighetsperiode = getPeriode(it.gyldighetsperiode()),
-                beregnetAntallTimerPrUke = it.beregnetAntallTimerPrUke(),
-                stillingsprosent = it.stillingsprosent(),
-                sisteLoennsendringsdato = it.sistLoennsendring(),
-                endringsdatoStillingsprosent = it.sistStillingsendring(),
-                avtaltArbeidstimerPerUke = it.antallTimerPrUke(),
+                gyldighetsperiode = getPeriode(it.gyldighetsperiode),
+                beregnetAntallTimerPrUke = it.beregnetAntallTimerPrUke,
+                stillingsprosent = it.stillingsprosent,
+                sisteLoennsendringsdato = it.sistLoennsendring,
+                endringsdatoStillingsprosent = it.sistStillingsendring,
+                avtaltArbeidstimerPerUke = it.antallTimerPrUke,
 
                 // Disse ikke er med i ny aareg rest api
                 maritimArbeidsavtale = false,
@@ -109,6 +109,6 @@ class ArbeidsforholdKonverter(
     }
 
     private fun getPeriode(periode: ArbeidsforholdResponse.Periode): Periode {
-        return Periode(periode.fom(), periode.tom())
+        return Periode(periode.fom, periode.tom)
     }
 }
