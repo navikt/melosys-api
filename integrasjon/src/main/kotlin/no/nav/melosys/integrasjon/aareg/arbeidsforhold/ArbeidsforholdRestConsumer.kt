@@ -9,7 +9,7 @@ import org.springframework.web.reactive.function.client.bodyToMono
 import org.springframework.web.util.UriBuilder
 
 @Retryable
-class ArbeidsforholdRestConsumer(private val webClient: WebClient) : WebClientConfig {
+open class ArbeidsforholdRestConsumer(private val webClient: WebClient) : WebClientConfig {
     fun finnArbeidsforholdPrArbeidstaker(
         fnr: String,
         arbeidsforholdQuery: ArbeidsforholdQuery

@@ -7,7 +7,9 @@ import org.springframework.web.reactive.function.client.WebClient
 import org.springframework.web.reactive.function.client.bodyToMono
 
 @Retryable
-class InntektRestConsumer(private val webClient: WebClient) {
+open class InntektRestConsumer(private val webClient: WebClient) {
+    // Metoder må være open for at retry skal funke og at webClient ikke skal bli null
+    // https://github.com/spring-projects/spring-framework/issues/26729
     fun hentInntektListe(inntektRequest: InntektRequest) : InntektResponse = webClient.post()
         .uri("/hentinntektliste")
         .accept(MediaType.APPLICATION_JSON)

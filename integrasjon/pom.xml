@@ -240,9 +240,6 @@
                         <plugin>spring</plugin>
                     </compilerPlugins>
                     <jvmTarget>${java.version}</jvmTarget>
-                    <pluginOptions>
-                        <option>spring:annotation=org.springframework.retry.annotation.Retryable</option>
-                    </pluginOptions>
                 </configuration>
                 <dependencies>
                     <dependency>
