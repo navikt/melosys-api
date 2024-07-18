@@ -20,17 +20,17 @@ class ArbeidsforholdKonverter(
             arbeidsforholdResponse.arbeidsforhold.map { src ->
                 Arbeidsforhold().apply {
                     arbeidsforholdID = src.arbeidsforholdId
-                    arbeidsforholdIDnav = src.navArbeidsforholdId!!.toLong()
+                    arbeidsforholdIDnav = src.navArbeidsforholdId.toLong()
                     ansettelsesPeriode = getPeriode(src.periode)
                     arbeidsforholdstype = src.type
                     arbeidsavtaler = getArbeidsAvtaler(src.arbeidsavtaler)
                     permisjonOgPermittering = getPermisjonPermitteringer(src.permisjonPermitteringer)
                     utenlandsopphold = getUtenlandsopphold(src.utenlandsopphold)
-                    arbeidsgivertype = Aktoertype.valueOf(src.arbeidsgiver!!.type.uppercase(Locale.getDefault()))
-                    arbeidsgiverID = src.arbeidsgiver!!.organisasjonsnummer
-                    arbeidstakerID = src.arbeidstaker!!.offentligIdent
+                    arbeidsgivertype = Aktoertype.valueOf(src.arbeidsgiver.type.uppercase(Locale.getDefault()))
+                    arbeidsgiverID = src.arbeidsgiver.organisasjonsnummer
+                    arbeidstakerID = src.arbeidstaker.offentligIdent
                     opplysningspliktigtype = Aktoertype.valueOf(src.opplysningspliktigtype)
-                    opplysningspliktigID = src.opplysningspliktig?.organisasjonsnummer
+                    opplysningspliktigID = src.opplysningspliktig.organisasjonsnummer
                     arbeidsforholdInnrapportertEtterAOrdningen = src.innrapportertEtterAOrdningen
                     opprettelsestidspunkt = getOffsetDateTime(src.registrert)
                     sistBekreftet = getOffsetDateTime(src.sistBekreftet)
@@ -43,11 +43,11 @@ class ArbeidsforholdKonverter(
     private fun getAntallTimerForTimeloennet(antallTimerForTimeloennet: List<AntallTimerForTimeloennet>?): List<AntallTimerIPerioden> {
         if (antallTimerForTimeloennet == null) return emptyList()
         return antallTimerForTimeloennet.map {
-            AntallTimerIPerioden().apply {
-                antallTimer = it.antallTimer
-                timelonnetPeriode = getPeriode(it.periode)
+            AntallTimerIPerioden(
+                antallTimer = it.antallTimer,
+                timelonnetPeriode = getPeriode(it.periode),
                 rapporteringsAarMaaned = YearMonth.parse(it.rapporteringsperiode)
-            }
+            )
         }
     }
 
