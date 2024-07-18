@@ -1,5 +1,6 @@
 package no.nav.melosys.integrasjon.aareg.arbeidsforhold
 
+import no.nav.melosys.exception.TekniskException
 import no.nav.melosys.integrasjon.felles.WebClientConfig
 import org.springframework.http.MediaType
 import org.springframework.retry.annotation.Retryable
@@ -30,5 +31,5 @@ class ArbeidsforholdRestConsumer(private val webClient: WebClient) : WebClientCo
         .accept(MediaType.APPLICATION_JSON)
         .retrieve()
         .bodyToMono<List<ArbeidsforholdResponse.Arbeidsforhold>>()
-        .block()!!
+        .block()?: throw TekniskException("ArbeidsforholdResponse er null")
 }
