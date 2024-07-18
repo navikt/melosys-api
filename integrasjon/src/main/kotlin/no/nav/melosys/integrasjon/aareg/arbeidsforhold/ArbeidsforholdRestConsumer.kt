@@ -10,7 +10,7 @@ import org.springframework.web.util.UriBuilder
 
 @Retryable
 open class ArbeidsforholdRestConsumer(private val webClient: WebClient) : WebClientConfig {
-    fun finnArbeidsforholdPrArbeidstaker(
+    open fun finnArbeidsforholdPrArbeidstaker(
         fnr: String,
         arbeidsforholdQuery: ArbeidsforholdQuery
     ): ArbeidsforholdResponse = ArbeidsforholdResponse(hentArbeidsforhold(fnr, arbeidsforholdQuery))
@@ -31,5 +31,5 @@ open class ArbeidsforholdRestConsumer(private val webClient: WebClient) : WebCli
         .accept(MediaType.APPLICATION_JSON)
         .retrieve()
         .bodyToMono<List<ArbeidsforholdResponse.Arbeidsforhold>>()
-        .block()?: throw TekniskException("ArbeidsforholdResponse er null")
+        .block() ?: throw TekniskException("ArbeidsforholdResponse er null")
 }
