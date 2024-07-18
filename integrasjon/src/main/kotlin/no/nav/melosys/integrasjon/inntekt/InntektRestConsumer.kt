@@ -8,13 +8,11 @@ import org.springframework.web.reactive.function.client.bodyToMono
 
 @Retryable
 class InntektRestConsumer(private val webClient: WebClient) {
-    fun hentInntektListe(inntektRequest: InntektRequest) : InntektResponse {
-        return webClient.post()
-            .uri("/hentinntektliste")
-            .accept(MediaType.APPLICATION_JSON)
-            .bodyValue(inntektRequest)
-            .retrieve()
-            .bodyToMono<InntektResponse>()
-            .block() ?: throw TekniskException("InntektResponse er null")
-    }
+    fun hentInntektListe(inntektRequest: InntektRequest) : InntektResponse = webClient.post()
+        .uri("/hentinntektliste")
+        .accept(MediaType.APPLICATION_JSON)
+        .bodyValue(inntektRequest)
+        .retrieve()
+        .bodyToMono<InntektResponse>()
+        .block() ?: throw TekniskException("InntektResponse er null")
 }
