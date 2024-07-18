@@ -31,14 +31,14 @@ class ArbeidsforholdResponse(val arbeidsforhold: List<Arbeidsforhold>) {
         val arbeidstaker: Arbeidstaker,
         val arbeidsavtaler: List<Arbeidsavtale>?,
         @JsonInclude(JsonInclude.Include.NON_NULL)
-        val permisjonPermitteringer: List<PermisjonPermittering>,
-        val utenlandsopphold: List<Utenlandsopphold>,
+        val permisjonPermitteringer: List<PermisjonPermittering>?,
+        val utenlandsopphold: List<Utenlandsopphold>?,
         val arbeidsgiver: Arbeidsgiver,
         val opplysningspliktig: Opplysningspliktig,
         val innrapportertEtterAOrdningen: Boolean?,
         val registrert: String?,
         val sistBekreftet: String?,
-        val antallTimerForTimeloennet: List<AntallTimerForTimeloennet>
+        val antallTimerForTimeloennet: List<AntallTimerForTimeloennet>?
     ) {
         val periode: Periode
             get() = ansettelsesperiode.periode
