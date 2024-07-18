@@ -15,10 +15,8 @@ class ArbeidsforholdRestConsumerConfig(@Value("\${arbeidsforhold.rest.url}") pri
         webClientBuilder: WebClient.Builder,
         systemContextExchangeFilter: ArbeidsforholdContextExchangeFilter,
         correlationIdOutgoingFilter: CorrelationIdOutgoingFilter
-    ): ArbeidsforholdRestConsumer {
-        return ArbeidsforholdRestConsumer(
-            webClientBuilder.baseUrl(url).filter(systemContextExchangeFilter).filter(correlationIdOutgoingFilter)
-                .filter(errorFilter("Henting av arbeidsforhold fra Aareg feilet")).build()
-        )
-    }
+    ): ArbeidsforholdRestConsumer = ArbeidsforholdRestConsumer(
+        webClientBuilder.baseUrl(url).filter(systemContextExchangeFilter).filter(correlationIdOutgoingFilter)
+            .filter(errorFilter("Henting av arbeidsforhold fra Aareg feilet")).build()
+    )
 }
