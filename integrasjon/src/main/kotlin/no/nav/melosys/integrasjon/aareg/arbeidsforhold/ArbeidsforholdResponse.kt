@@ -24,7 +24,7 @@ class ArbeidsforholdResponse(val arbeidsforhold: List<Arbeidsforhold>) {
     }
 
     data class Arbeidsforhold(
-        private val unknownProperties: MutableMap<String?, Any> = HashMap(),
+        private val unknownProperties: MutableMap<String?, Any> = mutableMapOf(),
         val arbeidsforholdId: String, // Arbeidsforhold-id fra opplysningspliktig
         val navArbeidsforholdId: Int, // Arbeidsforhold-id i AAREG
         val ansettelsesperiode: Ansettelsesperiode,
