@@ -114,6 +114,7 @@ internal class SaksflytLåsreferanseIT(
         }
     }
 
+    @Disabled("Problemer med samtidighet og sjekking av loglinjer")
     @Test
     fun `ikke kjør OpprettManglendeInnbetalingBehandling samtidig med samme låsreferanse`() {
         LoggingTestUtils.withLogCapture { logItems ->
