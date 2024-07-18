@@ -7,6 +7,7 @@ import org.springframework.retry.annotation.Retryable
 import org.springframework.web.reactive.function.client.WebClient
 import org.springframework.web.reactive.function.client.bodyToMono
 import org.springframework.web.util.UriBuilder
+import java.util.*
 
 @Retryable
 open class ArbeidsforholdRestConsumer(private val webClient: WebClient) : WebClientConfig {
@@ -21,9 +22,9 @@ open class ArbeidsforholdRestConsumer(private val webClient: WebClient) : WebCli
     ): List<ArbeidsforholdResponse.Arbeidsforhold> = webClient.get().uri("") { uriBuilder: UriBuilder ->
         uriBuilder
             .queryParam("regelverk", arbeidsforholdQuery.regelverk)
-            .queryParamIfPresent("arbeidsforholdType", arbeidsforholdQuery.arbeidsforholdType)
-            .queryParamIfPresent("ansettelsesperiodeFom", arbeidsforholdQuery.ansettelsesperiodeFom)
-            .queryParamIfPresent("ansettelsesperiodeTom", arbeidsforholdQuery.ansettelsesperiodeTom)
+            .queryParamIfPresent("arbeidsforholdType", Optional.ofNullable(arbeidsforholdQuery.arbeidsforholdType))
+            .queryParamIfPresent("ansettelsesperiodeFom", Optional.ofNullable(arbeidsforholdQuery.ansettelsesperiodeFom))
+            .queryParamIfPresent("ansettelsesperiodeTom", Optional.ofNullable(arbeidsforholdQuery.ansettelsesperiodeTom))
             .build()
     } // Om vi ønsker å se request med mer detaljer i grafana må vi gjøre det samme som er gjort i MedlemskapRestConsumer
         // Nå ser vi bare request på host
