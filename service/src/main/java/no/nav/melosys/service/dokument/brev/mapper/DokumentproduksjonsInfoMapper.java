@@ -122,6 +122,10 @@ public class DokumentproduksjonsInfoMapper {
                 new DokumentproduksjonsInfo("ikke_yrkesaktiv_pliktig_ftrl",
                     DokumentKategoriKode.VB.getKode(),
                     JournalforingsTittel.INNVILGELSE_FTRL_PLIKTIG.getTittel()))
+            .put(INNVILGELSE_EFTA_STORBRITANNIA,
+                new DokumentproduksjonsInfo("innvilgelse_efta_storbritannia",
+                    DokumentKategoriKode.VB.getKode(),
+                    JournalforingsTittel.INNVILGELSE_EFTA_STORBRITANNIA.getTittel()))
             .put(IKKE_YRKESAKTIV_FRIVILLIG_FTRL,
                 new DokumentproduksjonsInfo("ikke_yrkesaktiv_frivillig_ftrl",
                     DokumentKategoriKode.VB.getKode(),
@@ -170,6 +174,7 @@ public class DokumentproduksjonsInfoMapper {
         MANGELBREV("Melding om manglende opplysninger"),
         INNVILGELSE_FTRL_FRIVILLIG("Vedtak om frivillig medlemskap"),
         INNVILGELSE_FTRL_PLIKTIG("Vedtak om pliktig medlemskap"),
+        INNVILGELSE_EFTA_STORBRITANNIA("Vedtak om medlemskap"),
         TRYGDEAVTALE("Vedtak om medlemskap, Attest for medlemskap i folketrygden"),
         TRYGDEAVTALE_VEDTAKSBREV("Vedtak om medlemskap"),
         TRYGDEAVTALE_ATTEST("Attest for medlemskap i folketrygden"),

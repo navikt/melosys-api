@@ -228,7 +228,7 @@ public class DokgenService {
 
     private boolean erTogglet(Produserbaredokumenter produserbartDokument) {
         return switch (produserbartDokument) {
-            case INNHENTING_AV_INNTEKTSOPPLYSNINGER, ORIENTERING_ANMODNING_UNNTAK, AVSLAG_EFTA_STORBRITANNIA ->
+            case INNHENTING_AV_INNTEKTSOPPLYSNINGER, ORIENTERING_ANMODNING_UNNTAK, AVSLAG_EFTA_STORBRITANNIA, INNVILGELSE_EFTA_STORBRITANNIA ->
                 unleash.isEnabled(ToggleName.MELOSYS_KONVENSJON_EFTA_LAND_OG_STORBRITANNIA);
             default -> true;
         };
@@ -326,6 +326,12 @@ public class DokgenService {
                 .medInnledningFritekst(brevbestillingDto.getInnledningFritekst())
                 .medBegrunnelseFritekst(brevbestillingDto.getBegrunnelseFritekst())
                 .medTrygdeavgiftFritekst(brevbestillingDto.getTrygdeavgiftFritekst());
+            case INNVILGELSE_EFTA_STORBRITANNIA -> new InnvilgelseEftaStorbritanniaBrevbestilling.Builder()
+                .medDistribusjonstype(Distribusjonstype.VEDTAK)
+                .medNyVurderingBakgrunn(brevbestillingDto.getNyVurderingBakgrunn())
+                .medInnledningFritekst(brevbestillingDto.getInnledningFritekst())
+                .medBegrunnelseFritekst(brevbestillingDto.getBegrunnelseFritekst())
+                .medInnvilgelseFritekst(brevbestillingDto.getFritekst());
             case IKKE_YRKESAKTIV_PLIKTIG_FTRL, IKKE_YRKESAKTIV_FRIVILLIG_FTRL, PLIKTIG_MEDLEM_FTRL -> new DokgenBrevbestilling.Builder<>()
                 .medDistribusjonstype(Distribusjonstype.VEDTAK);
             case INNHENTING_AV_INNTEKTSOPPLYSNINGER -> new InnhentingAvInntektsopplysningerBrevbestilling.Builder()
