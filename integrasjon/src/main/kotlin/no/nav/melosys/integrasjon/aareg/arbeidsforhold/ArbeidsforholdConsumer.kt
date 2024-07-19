@@ -10,7 +10,7 @@ import org.springframework.web.util.UriBuilder
 import java.util.*
 
 @Retryable
-open class ArbeidsforholdRestConsumer(private val webClient: WebClient) : WebClientConfig {
+open class ArbeidsforholdConsumer(private val webClient: WebClient) : WebClientConfig {
     open fun finnArbeidsforholdPrArbeidstaker(
         fnr: String,
         arbeidsforholdQuery: ArbeidsforholdQuery

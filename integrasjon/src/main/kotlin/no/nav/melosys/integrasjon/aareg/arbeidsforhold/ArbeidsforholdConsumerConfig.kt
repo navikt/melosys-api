@@ -9,13 +9,13 @@ import org.springframework.web.reactive.function.client.WebClient
 
 
 @Configuration
-class ArbeidsforholdRestConsumerConfig(@Value("\${arbeidsforhold.rest.url}") private val url: String) : WebClientConfig {
+class ArbeidsforholdConsumerConfig(@Value("\${arbeidsforhold.rest.url}") private val url: String) : WebClientConfig {
     @Bean
-    fun arbeidsforholdRestConsumer(
+    fun arbeidsforholdConsumer(
         webClientBuilder: WebClient.Builder,
         systemContextExchangeFilter: ArbeidsforholdContextExchangeFilter,
         correlationIdOutgoingFilter: CorrelationIdOutgoingFilter
-    ): ArbeidsforholdRestConsumer = ArbeidsforholdRestConsumer(
+    ): ArbeidsforholdConsumer = ArbeidsforholdConsumer(
         webClientBuilder.baseUrl(url)
             .filter(systemContextExchangeFilter)
             .filter(correlationIdOutgoingFilter)

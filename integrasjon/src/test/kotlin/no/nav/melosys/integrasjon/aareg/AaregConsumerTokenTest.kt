@@ -23,14 +23,14 @@ import org.springframework.test.context.ActiveProfiles
     RestSTSService::class,
     OAuthMockServer::class,
 
-    ArbeidsforholdRestConsumerConfig::class,
+    ArbeidsforholdConsumerConfig::class,
     ArbeidsforholdContextExchangeFilter::class
 )
 @WebMvcTest
 @ActiveProfiles("wiremock-test")
 @AutoConfigureWebClient
 private class AaregConsumerTokenTest(
-    @Autowired private val arbeidsforholdRestConsumer: ArbeidsforholdRestConsumer,
+    @Autowired private val arbeidsforholdConsumer: ArbeidsforholdConsumer,
     @Value("\${mockserver.port}") mockServiceUnderTestPort: Int,
     @Value("\${mockserver.security.port}") mockSecurityPort: Int,
     @Autowired oAuthMockServer: OAuthMockServer
@@ -91,5 +91,5 @@ private class AaregConsumerTokenTest(
     }
 
     override fun executeRequest() =
-        arbeidsforholdRestConsumer.finnArbeidsforholdPrArbeidstaker("121", ArbeidsforholdQuery())
+        arbeidsforholdConsumer.finnArbeidsforholdPrArbeidstaker("121", ArbeidsforholdQuery())
 }
