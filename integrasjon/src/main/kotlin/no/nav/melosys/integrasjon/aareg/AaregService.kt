@@ -24,9 +24,8 @@ class AaregService(
         )
 
         val response = arbeidsforholdRestConsumer.finnArbeidsforholdPrArbeidstaker(ident, arbeidsforholdQuery)
-        val arbeidsforholdKonverter = ArbeidsforholdKonverter(response, kodeOppslag)
 
-        return arbeidsforholdKonverter.createSaksopplysning().apply {
+        return ArbeidsforholdKonverter(response, kodeOppslag).createSaksopplysning().apply {
             leggTilKildesystemOgMottattDokument(SaksopplysningKildesystem.AAREG, response.tilSaksopplysning())
             type = SaksopplysningType.ARBFORH
             versjon = ARBEIDSFORHOLD_REST_VERSJON
