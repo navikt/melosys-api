@@ -2,27 +2,20 @@ package no.nav.melosys
 
 import ch.qos.logback.classic.Logger
 import ch.qos.logback.classic.spi.ILoggingEvent
+import ch.qos.logback.core.AppenderBase
 import ch.qos.logback.core.read.ListAppender
 import io.kotest.assertions.withClue
 import io.kotest.matchers.collections.shouldHaveAtLeastSize
 import mu.KotlinLogging
 import org.slf4j.LoggerFactory
+import java.util.*
+import java.util.concurrent.locks.ReentrantReadWriteLock
+import kotlin.ConcurrentModificationException
 
 object LoggingTestUtils {
     val log = KotlinLogging.logger { } // på være public siden brukes av inline funksjon
-    inline fun <reified T> captureLog(block: () -> Unit): List<ILoggingEvent> {
-        val logger = LoggerFactory.getLogger(T::class.java) as Logger
-        val listAppender = ListAppender<ILoggingEvent>().apply { start() }
-        logger.addAppender(listAppender)
-        try {
-            block()
-        } finally {
-            logger.detachAppender(listAppender)
-        }
-        return listAppender.list
-    }
 
-    fun <T> withLogCapture(block: (logEvents: List<ILoggingEvent>) -> T): T {
+    fun <T> withLogCaptureNotThreadSafe(block: (logEvents: List<ILoggingEvent>) -> T): T {
         val logger = LoggerFactory.getLogger(Logger.ROOT_LOGGER_NAME) as Logger
         val listAppender = ListAppender<ILoggingEvent>().apply { start() }
         logger.addAppender(listAppender)
@@ -31,6 +24,74 @@ object LoggingTestUtils {
         } finally {
             logger.detachAppender(listAppender)
         }
+    }
+
+    class ThreadSafeListAppender<E> : AppenderBase<E>() {
+        val list: MutableList<E> = Collections.synchronizedList(mutableListOf())
+
+        override fun append(e: E) {
+            list.add(e)
+        }
+    }
+
+    fun <T> withLogCapture(block: (logEvents: List<ILoggingEvent>) -> T): T {
+        val logger = LoggerFactory.getLogger(Logger.ROOT_LOGGER_NAME) as Logger
+        val listAppender = ThreadSafeListAppender<ILoggingEvent>().apply { start() }
+        val lock = ReentrantReadWriteLock()
+        logger.addAppender(listAppender)
+
+        try {
+            return block(object : List<ILoggingEvent> {
+                override val size: Int
+                    get() = lock.read { listAppender.list.size }
+
+                override fun isEmpty(): Boolean = lock.read { listAppender.list.isEmpty() }
+
+                override fun contains(element: ILoggingEvent): Boolean = lock.read { listAppender.list.contains(element) }
+
+                override fun iterator(): Iterator<ILoggingEvent> = lock.read { ArrayList(listAppender.list).iterator() }
+
+                override fun containsAll(elements: Collection<ILoggingEvent>): Boolean = lock.read { listAppender.list.containsAll(elements) }
+
+                override fun get(index: Int): ILoggingEvent = lock.read { listAppender.list[index] }
+
+                override fun indexOf(element: ILoggingEvent): Int = lock.read { listAppender.list.indexOf(element) }
+
+                override fun lastIndexOf(element: ILoggingEvent): Int = lock.read { listAppender.list.lastIndexOf(element) }
+
+                override fun listIterator(): ListIterator<ILoggingEvent> = lock.read { ArrayList(listAppender.list).listIterator() }
+
+                override fun listIterator(index: Int): ListIterator<ILoggingEvent> = lock.read { ArrayList(listAppender.list).listIterator(index) }
+
+                override fun subList(fromIndex: Int, toIndex: Int): List<ILoggingEvent> =
+                    lock.read { ArrayList(listAppender.list.subList(fromIndex, toIndex)) }
+            })
+        } finally {
+            logger.detachAppender(listAppender)
+        }
+    }
+
+    inline fun <T> ReentrantReadWriteLock.read(action: () -> T): T {
+        readLock().run {
+            lock()
+            return try {
+                action()
+            } finally {
+                unlock()
+            }
+        }
+    }
+
+    inline fun <reified T> captureLog(block: () -> Unit): List<ILoggingEvent> {
+        val logger = LoggerFactory.getLogger(T::class.java) as Logger
+        val listAppender = ThreadSafeListAppender<ILoggingEvent>().apply { start() }
+        logger.addAppender(listAppender)
+        try {
+            block()
+        } finally {
+            logger.detachAppender(listAppender)
+        }
+        return listAppender.list
     }
 
     class LogFilterBuilder(val logItems: Collection<ILoggingEvent>) {

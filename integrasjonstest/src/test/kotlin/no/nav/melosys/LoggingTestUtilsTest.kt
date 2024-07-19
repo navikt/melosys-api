@@ -3,6 +3,7 @@ package no.nav.melosys
 import ch.qos.logback.classic.Level
 import io.kotest.matchers.collections.shouldContainInOrder
 import io.kotest.matchers.collections.shouldHaveSize
+import io.kotest.matchers.nulls.shouldNotBeNull
 import io.kotest.matchers.shouldBe
 import mu.KotlinLogging
 import no.nav.melosys.LoggingTestUtils.filterBuilder
@@ -99,6 +100,43 @@ class LoggingTestUtilsTest {
                 .sort(Regex("gruppe-prefiks: \\[(.*?)]"))
                 .build().first().formattedMessage
                 .shouldBe("Prosessinstans(er) på vent med samme gruppe-prefiks: [<a009Prosess>, <x008Prosess>]")
+        }
+    }
+
+    @Test
+    fun `should run multiple threads without getting ConcurrentException`() {
+        val someClassLogger = LoggerFactory.getLogger(SomeClass1::class.java)
+
+        repeat(100) { // Concurrent exceptions do not happen every time so run many times
+            LoggingTestUtils.withLogCapture { logs ->
+                val threads = mutableListOf<Thread>()
+                repeat(1) { threadNum ->
+                    val thread = Thread {
+                        repeat(200) { i ->
+                            someClassLogger.info("$threadNum - $i")
+                        }
+                    }
+                    threads.add(thread)
+                    thread.start()
+                }
+
+                do {
+                    if (logs.filterBuilder
+                            .match<SomeClass1>()
+                            .build()
+                            .firstOrNull()?.formattedMessage?.contains("199") == true
+                    ) break
+
+                } while (logs.size < 200)
+                println("--------- hangs after this with two threds -----------")
+
+                logs.filterBuilder
+                    .match<SomeClass1>()
+                    .build()
+                    .forEach {
+                        it.shouldNotBeNull() // just do something
+                    }
+            }
         }
     }
 }
