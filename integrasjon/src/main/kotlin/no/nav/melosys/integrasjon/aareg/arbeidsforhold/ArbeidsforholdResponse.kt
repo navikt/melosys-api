@@ -51,9 +51,7 @@ class ArbeidsforholdResponse(val arbeidsforhold: List<Arbeidsforhold>) {
         }
 
         @JsonAnyGetter
-        fun getUnknownProperty(key: String): Any? {
-            return unknownProperties[key]
-        }
+        fun getUnknownProperty(key: String): Any? = unknownProperties[key]
     }
 
     data class AntallTimerForTimeloennet(
