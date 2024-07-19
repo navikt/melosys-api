@@ -15,7 +15,6 @@ class ArbeidsforholdResponse(val arbeidsforhold: List<Arbeidsforhold>) {
     fun tilSaksopplysning(): String {
         val objectMapper = ObjectMapper().apply { registerModule(JavaTimeModule()) }
         try {
-            // serialize to json or find out if we want to convert to xml doc?
             return objectMapper.writeValueAsString(arbeidsforhold)
         } catch (e: JsonProcessingException) {
             throw TekniskException("Kunne ikke konvertere arbeidsforhold til json string", e)

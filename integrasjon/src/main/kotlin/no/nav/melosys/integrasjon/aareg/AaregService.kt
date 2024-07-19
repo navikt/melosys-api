@@ -16,10 +16,6 @@ class AaregService(
     private val kodeOppslag: KodeOppslag
 ) : AaregFasade {
     override fun finnArbeidsforholdPrArbeidstaker(ident: String, fom: LocalDate?, tom: LocalDate?): Saksopplysning {
-        return finnArbeidsforholdPrArbeidstakerRest(ident, fom, tom)
-    }
-
-    private fun finnArbeidsforholdPrArbeidstakerRest(ident: String, fom: LocalDate?, tom: LocalDate?): Saksopplysning {
         val arbeidsforholdQuery = ArbeidsforholdQuery(
             regelverk = ArbeidsforholdQuery.Regelverk.A_ORDNINGEN,
             arbeidsforholdType = ArbeidsforholdQuery.ArbeidsforholdType.ALLE,
@@ -30,14 +26,11 @@ class AaregService(
         val response = arbeidsforholdRestConsumer.finnArbeidsforholdPrArbeidstaker(ident, arbeidsforholdQuery)
         val arbeidsforholdKonverter = ArbeidsforholdKonverter(response, kodeOppslag)
 
-        val saksopplysning = arbeidsforholdKonverter.createSaksopplysning()
-        saksopplysning.leggTilKildesystemOgMottattDokument(
-            SaksopplysningKildesystem.AAREG, response.tilSaksopplysning()
-        )
-        saksopplysning.type = SaksopplysningType.ARBFORH
-        saksopplysning.versjon = ARBEIDSFORHOLD_REST_VERSJON
-
-        return saksopplysning
+        return arbeidsforholdKonverter.createSaksopplysning().apply {
+            leggTilKildesystemOgMottattDokument(SaksopplysningKildesystem.AAREG, response.tilSaksopplysning())
+            type = SaksopplysningType.ARBFORH
+            versjon = ARBEIDSFORHOLD_REST_VERSJON
+        }
     }
 
     companion object {
