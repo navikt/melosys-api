@@ -13,11 +13,11 @@ class ArbeidsforholdConsumerConfig(@Value("\${arbeidsforhold.rest.url}") private
     @Bean
     fun arbeidsforholdConsumer(
         webClientBuilder: WebClient.Builder,
-        systemContextExchangeFilter: ArbeidsforholdContextExchangeFilter,
+        stsAuthExchangeFilter: StsAuthExchangeFilter,
         correlationIdOutgoingFilter: CorrelationIdOutgoingFilter
     ): ArbeidsforholdConsumer = ArbeidsforholdConsumer(
         webClientBuilder.baseUrl(url)
-            .filter(systemContextExchangeFilter)
+            .filter(stsAuthExchangeFilter)
             .filter(correlationIdOutgoingFilter)
             .filter(errorFilter("Henting av arbeidsforhold fra Aareg feilet"))
             .build()

@@ -10,8 +10,9 @@ import org.springframework.web.reactive.function.client.ExchangeFunction
 import reactor.core.publisher.Mono
 import java.util.function.Supplier
 
+@Deprecated("Entra (Azure AD) må brukes")
 @Component
-class ArbeidsforholdContextExchangeFilter(private val restSTSService: RestSTSService) : ExchangeFilterFunction {
+class StsAuthExchangeFilter(private val restSTSService: RestSTSService) : ExchangeFilterFunction {
     override fun filter(
         clientRequest: ClientRequest,
         exchangeFunction: ExchangeFunction,

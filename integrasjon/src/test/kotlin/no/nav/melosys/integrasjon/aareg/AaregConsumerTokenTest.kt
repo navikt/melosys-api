@@ -24,7 +24,7 @@ import org.springframework.test.context.ActiveProfiles
     OAuthMockServer::class,
 
     ArbeidsforholdConsumerConfig::class,
-    ArbeidsforholdContextExchangeFilter::class
+    StsAuthExchangeFilter::class
 )
 @WebMvcTest
 @ActiveProfiles("wiremock-test")
