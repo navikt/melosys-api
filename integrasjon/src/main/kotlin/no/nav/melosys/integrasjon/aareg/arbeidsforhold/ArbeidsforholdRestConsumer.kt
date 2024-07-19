@@ -23,8 +23,8 @@ open class ArbeidsforholdRestConsumer(private val webClient: WebClient) : WebCli
         uriBuilder
             .queryParam("regelverk", arbeidsforholdQuery.regelverk)
             .queryParamIfPresent("arbeidsforholdType", Optional.ofNullable(arbeidsforholdQuery.arbeidsforholdType.queryParam))
-            .queryParamIfPresent("ansettelsesperiodeFom", Optional.ofNullable(arbeidsforholdQuery.ansettelsesperiodeFom?.toString()))
-            .queryParamIfPresent("ansettelsesperiodeTom", Optional.ofNullable(arbeidsforholdQuery.ansettelsesperiodeTom?.toString()))
+            .queryParamIfPresent("ansettelsesperiodeFom", Optional.ofNullable(arbeidsforholdQuery.ansettelsesperiodeFom))
+            .queryParamIfPresent("ansettelsesperiodeTom", Optional.ofNullable(arbeidsforholdQuery.ansettelsesperiodeTom))
             .build()
     } // Om vi ønsker å se request med mer detaljer i grafana må vi gjøre det samme som er gjort i MedlemskapRestConsumer
         // Nå ser vi bare request på host
