@@ -91,5 +91,5 @@ private class AaregConsumerTokenTest(
     }
 
     override fun executeRequest() =
-        arbeidsforholdRestConsumer.finnArbeidsforholdPrArbeidstaker("121", ArbeidsforholdQuery.Builder().build())
+        arbeidsforholdRestConsumer.finnArbeidsforholdPrArbeidstaker("121", ArbeidsforholdQuery())
 }

@@ -20,12 +20,12 @@ class AaregService(
     }
 
     private fun finnArbeidsforholdPrArbeidstakerRest(ident: String, fom: LocalDate?, tom: LocalDate?): Saksopplysning {
-        val arbeidsforholdQuery = ArbeidsforholdQuery.Builder()
-            .arbeidsforholdType(ArbeidsforholdQuery.ArbeidsforholdType.ALLE)
-            .regelverk(ArbeidsforholdQuery.Regelverk.A_ORDNINGEN)
-            .ansettelsesperiodeFom(fom)
-            .ansettelsesperiodeTom(tom)
-            .build()
+        val arbeidsforholdQuery = ArbeidsforholdQuery(
+            regelverk = ArbeidsforholdQuery.Regelverk.A_ORDNINGEN,
+            arbeidsforholdType = ArbeidsforholdQuery.ArbeidsforholdType.ALLE,
+            ansettelsesperiodeFom = fom,
+            ansettelsesperiodeTom = tom
+        )
 
         val response = arbeidsforholdRestConsumer.finnArbeidsforholdPrArbeidstaker(ident, arbeidsforholdQuery)
         val arbeidsforholdKonverter = ArbeidsforholdKonverter(response, kodeOppslag)
