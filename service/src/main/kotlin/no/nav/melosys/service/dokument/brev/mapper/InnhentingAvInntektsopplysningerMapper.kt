@@ -33,23 +33,22 @@ class InnhentingAvInntektsopplysningerMapper(
     }
 
     private fun mapMedlemskapsPerioder(behandlingsresultat: Behandlingsresultat, årsavregningsår: Int): Pair<LocalDate, LocalDate>? {
-        val relevantePerioder = behandlingsresultat.medlemskapsperioder
+        val relevantePerioder = hentMedlemskapsPerioderForÅrsavregning(behandlingsresultat, årsavregningsår)
+
+        return if (relevantePerioder.isEmpty()) null
+        else relevantePerioder.first().fom.tilDatoInnenforÅrsavregningsåret(årsavregningsår) to relevantePerioder.last().tom.tilDatoInnenforÅrsavregningsåret(årsavregningsår)
+    }
+
+    private fun hentMedlemskapsPerioderForÅrsavregning(behandlingsresultat: Behandlingsresultat, årsavregningsår: Int) =
+        behandlingsresultat.medlemskapsperioder
             .filter { it.innvilgelsesresultat == InnvilgelsesResultat.INNVILGET }
-            .filter { it.fom.year == årsavregningsår || it.tom.year == årsavregningsår }
+            .filter { it.overlapperMedÅr(årsavregningsår) }
             .sortedBy { it.fom }
 
-        if (relevantePerioder.isEmpty()) return null;
-
-        val fom = relevantePerioder.first().fom.hentGyldigDatoForÅr(årsavregningsår)
-        val tom = relevantePerioder.last().tom.hentGyldigDatoForÅr(årsavregningsår)
-
-        return Pair(fom, tom)
-    }
-
-    private fun LocalDate.hentGyldigDatoForÅr(årsavregningsår: Int): LocalDate {
-        if (year > årsavregningsår) return LocalDate.of(årsavregningsår, 12, 31)
-        if (year < årsavregningsår) return LocalDate.of(årsavregningsår, 1, 1)
-        return this
-    }
-
+    private fun LocalDate.tilDatoInnenforÅrsavregningsåret(årsavregningsår: Int): LocalDate =
+        when {
+            this.year > årsavregningsår -> LocalDate.of(årsavregningsår, 12, 31)
+            this.year < årsavregningsår -> LocalDate.of(årsavregningsår, 1, 1)
+            else -> this
+        }
 }

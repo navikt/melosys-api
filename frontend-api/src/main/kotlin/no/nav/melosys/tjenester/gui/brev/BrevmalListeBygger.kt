@@ -217,20 +217,29 @@ class BrevmalListeBygger(
         return behandling.fagsak.tema == Sakstemaer.MEDLEMSKAP_LOVVALG && behandling.type == Behandlingstyper.FØRSTEGANG
     }
 
-    private fun lagBrevmalForINNHENTING_AV_INNTEKTSOPPLYSNINGER(produserbartDokument: Produserbaredokumenter): BrevmalTypeDto {
+    private fun lagBrevmalForINNHENTING_AV_INNTEKTSOPPLYSNINGER(produserbartDokument: Produserbaredokumenter): BrevmalTypeDto { //TODO FIKS HER
         val feltvalgAlternativ = mutableListOf(
             FeltvalgAlternativDto(
-                FeltvalgAlternativKode.STANDARD,
-            ),
+                FeltvalgAlternativKode.STANDARD.kode,
+                FeltvalgAlternativKode.STANDARD.beskrivelse,
+                false
+                )
+        )
+        val feltvalgAlternativ2 = mutableListOf(
             FeltvalgAlternativDto(
                 FeltvalgAlternativKode.FRITEKST.kode,
                 FeltvalgAlternativKode.FRITEKST.beskrivelse,
                 true
             )
         )
-        val felter = BrevmalFeltDto.Builder()
-            .medKodeOgBeskrivelse(BrevmalFeltKode.MANGLER_FRITEKST)
+        val felt1 = BrevmalFeltDto.Builder()
+            .medKodeOgBeskrivelse(BrevmalFeltKode.FRITEKST)
             .medFeltType(FeltType.FRITEKST)
+            .erPåkrevd()
+            .medValg(FeltValgDto(feltvalgAlternativ2, FeltValgType.CHECKBOX))
+            .build()
+        val felt2 = BrevmalFeltDto.Builder()
+            .medKodeOgBeskrivelse(BrevmalFeltKode.STANDARDTEKST_HVA_SKAL_SØKER_SENDE_INN)
             .erPåkrevd()
             .medValg(FeltValgDto(feltvalgAlternativ, FeltValgType.CHECKBOX))
             .build()
@@ -238,7 +247,8 @@ class BrevmalListeBygger(
             .medType(produserbartDokument)
             .medFelter(
                 listOf(
-                    felter
+                    felt1,
+                    felt2
                 )
             )
             .build()
