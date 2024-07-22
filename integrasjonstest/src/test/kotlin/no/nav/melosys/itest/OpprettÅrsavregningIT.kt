@@ -2,7 +2,6 @@ package no.nav.melosys.itest
 
 import io.kotest.assertions.throwables.shouldThrow
 import io.kotest.matchers.nulls.shouldNotBeNull
-import io.kotest.matchers.optional.shouldBePresent
 import io.kotest.matchers.shouldBe
 import no.nav.melosys.domain.Behandling
 import no.nav.melosys.domain.Behandlingsmaate
@@ -27,22 +26,22 @@ import java.time.LocalDate
 import kotlin.test.Test
 
 @SpringBootTest
-class OpprettAarsavregningIT @Autowired constructor(
+class OpprettÅrsavregningIT @Autowired constructor(
     private val årsavregningService: ÅrsavregningService,
     private val aarsavregningRepository: AarsavregningRepository,
     private val behandlingsresultatRepository: BehandlingsresultatRepository,
     private val behandlingRepository: BehandlingRepository,
     private val fagsakRepository: FagsakRepository
 ) : ComponentTestBase() {
+
     @Test
     @Transactional
-    fun `opprettNyÅrsavregning should create a new årsavregning when no existing avregning exists`() {
+    fun `opprettNyÅrsavregning skal lage ny årsavregning når det ikke finnes avregning`() {
         val behandlingsresultat = lagBehandlingsResultat()
 
         val result = årsavregningService.opprettÅrsavregning(behandlingsresultat.id!!, 2024)
 
-        //TODO: Fiks
-//        aarsavregningRepository.findById(result.).shouldBePresent().aar.shouldBe(2024)
+        result.år shouldBe 2024
     }
 
     @Test
