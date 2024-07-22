@@ -25,7 +25,7 @@ open class OracleTestContainerBase {
     }
 
     companion object {
-        var oracleContainer = OracleContainer(
+        val oracleContainer = OracleContainer(
             DockerImageName.parse("ghcr.io/navikt/melosys-legacy-avhengigheter/oracle-xe:18.4.0-slim")
                 .asCompatibleSubstituteFor("gvenzl/oracle-xe")
         )
