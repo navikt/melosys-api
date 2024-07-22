@@ -102,7 +102,7 @@ internal class AaregServiceTest {
 
     private val expectedRestResult = """
         [ {
-          "arbeidsforholdID" : "abc-321",
+          "arbeidsforholdID" : null,
           "arbeidsforholdIDnav" : 123456,
           "ansettelsesPeriode" : {
             "fom" : [ 2014, 7, 1 ],
@@ -243,7 +243,7 @@ internal class AaregServiceTest {
                 "yrke": "2130123"
               }
             ],
-            "arbeidsforholdId": "abc-321",
+            "arbeidsforholdId": null,
             "arbeidsgiver": {
               "type": "Organisasjon",
               "organisasjonsnummer": "991609407"
