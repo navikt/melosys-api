@@ -104,13 +104,13 @@ class LoggingTestUtilsTest {
     }
 
     @Test
-    fun `should run multiple threads without getting ConcurrentException`() {
+    fun `should manage multiple threads without getting ConcurrentModificationException`() {
         val someClassLogger = LoggerFactory.getLogger(SomeClass1::class.java)
 
-        repeat(100) { // Concurrent exceptions do not happen every time so run many times
+        repeat(10) { // Concurrent exceptions do not happen every time so run many times
             LoggingTestUtils.withLogCapture { logs ->
                 val threads = mutableListOf<Thread>()
-                repeat(1) { threadNum ->
+                repeat(10) { threadNum ->
                     val thread = Thread {
                         repeat(200) { i ->
                             someClassLogger.info("$threadNum - $i")
@@ -120,22 +120,25 @@ class LoggingTestUtilsTest {
                     thread.start()
                 }
 
-                do {
-                    if (logs.filterBuilder
-                            .match<SomeClass1>()
-                            .build()
-                            .firstOrNull()?.formattedMessage?.contains("199") == true
-                    ) break
+                while (!logs.filterBuilder
+                        .match<SomeClass1>()
+                        .build()
+                        .any {
+                            it.formattedMessage.contains("199")
+                        }
+                ) {
+                    Thread.sleep(1)
+                }
 
-                } while (logs.size < 200)
-                println("--------- hangs after this with two threds -----------")
-
+                println("--------")
                 logs.filterBuilder
                     .match<SomeClass1>()
                     .build()
                     .forEach {
                         it.shouldNotBeNull() // just do something
                     }
+
+                threads.forEach { it.join() }
             }
         }
     }

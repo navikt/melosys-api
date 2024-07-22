@@ -11,6 +11,8 @@ import org.slf4j.LoggerFactory
 import java.util.*
 import java.util.concurrent.locks.ReentrantReadWriteLock
 import kotlin.ConcurrentModificationException
+import kotlin.concurrent.read
+import kotlin.concurrent.write
 
 object LoggingTestUtils {
     val log = KotlinLogging.logger { } // på være public siden brukes av inline funksjon
@@ -27,59 +29,57 @@ object LoggingTestUtils {
     }
 
     class ThreadSafeListAppender<E> : AppenderBase<E>() {
-        val list: MutableList<E> = Collections.synchronizedList(mutableListOf())
+        private val _list: MutableList<E> = ArrayList()
+        private val lock = ReentrantReadWriteLock()
+
+        val list: List<E>
+            get() = lock.read { _list.toList() }
 
         override fun append(e: E) {
-            list.add(e)
+            lock.write {
+                _list.add(e)
+            }
         }
+
+        fun <T> withReadLock(action: (List<E>) -> T): T = lock.read { action(_list) }
     }
 
     fun <T> withLogCapture(block: (logEvents: List<ILoggingEvent>) -> T): T {
         val logger = LoggerFactory.getLogger(Logger.ROOT_LOGGER_NAME) as Logger
         val listAppender = ThreadSafeListAppender<ILoggingEvent>().apply { start() }
-        val lock = ReentrantReadWriteLock()
         logger.addAppender(listAppender)
-
-        try {
-            return block(object : List<ILoggingEvent> {
-                override val size: Int
-                    get() = lock.read { listAppender.list.size }
-
-                override fun isEmpty(): Boolean = lock.read { listAppender.list.isEmpty() }
-
-                override fun contains(element: ILoggingEvent): Boolean = lock.read { listAppender.list.contains(element) }
-
-                override fun iterator(): Iterator<ILoggingEvent> = lock.read { ArrayList(listAppender.list).iterator() }
-
-                override fun containsAll(elements: Collection<ILoggingEvent>): Boolean = lock.read { listAppender.list.containsAll(elements) }
-
-                override fun get(index: Int): ILoggingEvent = lock.read { listAppender.list[index] }
-
-                override fun indexOf(element: ILoggingEvent): Int = lock.read { listAppender.list.indexOf(element) }
-
-                override fun lastIndexOf(element: ILoggingEvent): Int = lock.read { listAppender.list.lastIndexOf(element) }
-
-                override fun listIterator(): ListIterator<ILoggingEvent> = lock.read { ArrayList(listAppender.list).listIterator() }
-
-                override fun listIterator(index: Int): ListIterator<ILoggingEvent> = lock.read { ArrayList(listAppender.list).listIterator(index) }
-
-                override fun subList(fromIndex: Int, toIndex: Int): List<ILoggingEvent> =
-                    lock.read { ArrayList(listAppender.list.subList(fromIndex, toIndex)) }
-            })
+        return try {
+            block(SynchronizedList(listAppender))
         } finally {
             logger.detachAppender(listAppender)
         }
     }
 
-    inline fun <T> ReentrantReadWriteLock.read(action: () -> T): T {
-        readLock().run {
-            lock()
-            return try {
-                action()
-            } finally {
-                unlock()
-            }
-        }
+    class SynchronizedList<E>(
+        private val appender: ThreadSafeListAppender<E>
+    ) : List<E> {
+        override val size: Int
+            get() = appender.withReadLock { it.size }
+
+        override fun isEmpty(): Boolean = appender.withReadLock { it.isEmpty() }
+
+        override fun contains(element: E): Boolean = appender.withReadLock { it.contains(element) }
+
+        override fun iterator(): Iterator<E> = appender.withReadLock { it.toList().iterator() }
+
+        override fun containsAll(elements: Collection<E>): Boolean = appender.withReadLock { it.containsAll(elements) }
+
+        override fun get(index: Int): E = appender.withReadLock { it[index] }
+
+        override fun indexOf(element: E): Int = appender.withReadLock { it.indexOf(element) }
+
+        override fun lastIndexOf(element: E): Int = appender.withReadLock { it.lastIndexOf(element) }
+
+        override fun listIterator(): ListIterator<E> = appender.withReadLock { it.toList().listIterator() }
+
+        override fun listIterator(index: Int): ListIterator<E> = appender.withReadLock { it.toList().listIterator(index) }
+
+        override fun subList(fromIndex: Int, toIndex: Int): List<E> = appender.withReadLock { it.subList(fromIndex, toIndex).toList() }
     }
 
     inline fun <reified T> captureLog(block: () -> Unit): List<ILoggingEvent> {
