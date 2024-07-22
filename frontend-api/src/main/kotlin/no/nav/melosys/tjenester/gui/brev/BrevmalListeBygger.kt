@@ -218,13 +218,13 @@ class BrevmalListeBygger(
     }
 
     private fun lagBrevmalForINNHENTING_AV_INNTEKTSOPPLYSNINGER(produserbartDokument: Produserbaredokumenter): BrevmalTypeDto { //TODO FIKS HER
-        val feltvalgAlternativ = mutableListOf(
+        /*val feltvalgAlternativ = mutableListOf(
             FeltvalgAlternativDto(
                 FeltvalgAlternativKode.STANDARD.kode,
                 FeltvalgAlternativKode.STANDARD.beskrivelse,
                 false
                 )
-        )
+        )*/
         val feltvalgAlternativ2 = mutableListOf(
             FeltvalgAlternativDto(
                 FeltvalgAlternativKode.FRITEKST.kode,
@@ -235,13 +235,11 @@ class BrevmalListeBygger(
         val felt1 = BrevmalFeltDto.Builder()
             .medKodeOgBeskrivelse(BrevmalFeltKode.FRITEKST)
             .medFeltType(FeltType.FRITEKST)
-            .erPåkrevd()
             .medValg(FeltValgDto(feltvalgAlternativ2, FeltValgType.CHECKBOX))
             .build()
         val felt2 = BrevmalFeltDto.Builder()
             .medKodeOgBeskrivelse(BrevmalFeltKode.STANDARDTEKST_HVA_SKAL_SØKER_SENDE_INN)
-            .erPåkrevd()
-            .medValg(FeltValgDto(feltvalgAlternativ, FeltValgType.CHECKBOX))
+            .medFeltType(FeltType.SJEKKBOKS)
             .build()
         return BrevmalTypeDto.Builder()
             .medType(produserbartDokument)
