@@ -9,7 +9,6 @@ import no.nav.melosys.domain.avgift.Trygdeavgiftsperiode
 import no.nav.melosys.domain.kodeverk.Folketrygdloven_kap2_bestemmelser
 import no.nav.melosys.domain.kodeverk.Trygdedekninger
 import no.nav.melosys.exception.FunksjonellException
-import no.nav.melosys.exception.IkkeFunnetException
 import no.nav.melosys.integrasjon.faktureringskomponenten.FaktureringskomponentenConsumer
 import no.nav.melosys.integrasjon.faktureringskomponenten.dto.BeregnTotalBeløpDto
 import no.nav.melosys.repository.AarsavregningRepository
@@ -34,9 +33,48 @@ class ÅrsavregningService(
     }
 
     @Transactional(readOnly = true)
-    fun hentÅrsavregning(avregningID: Long): Årsavregning {
-        val aarsavregning = aarsavregningRepository.findById(avregningID).orElseThrow { IkkeFunnetException("Fant ikke årsavregning $avregningID") }
+    fun hentÅrsavregning(behandlingID: Long): Årsavregning? {
+        val behandlingsresultat = behandlingsresultatService.hentBehandlingsresultat(behandlingID)
+        if (!behandlingsresultat.behandling.erÅrsavregning()) {
+            throw FunksjonellException("Behandling med id $behandlingID er ikke en årsavregning")
+        }
+
+        val aarsavregning = behandlingsresultat.aarsavregning ?: return null
+
+        return lagÅrsavregningFraAarsavregning(aarsavregning)
+    }
+
+    @Transactional
+    fun opprettÅrsavregning(behandlingID: Long, gjelderÅr: Int): Årsavregning {
+        val behandlingsresultat = behandlingsresultatService.hentBehandlingsresultat(behandlingID)
+
+        if (aarsavregningRepository.finnAntallÅrsavregningerPåFagsakForÅr(behandlingID, gjelderÅr) != 0) {
+            throw FunksjonellException(
+                "Det finnes en annen åpen årsavregningsbehandling for samme år på saken. " +
+                    "Vurder hvilke behandling du vil fortsette med og avslutt den uaktuelle behandlingen via behandlingsmeny."
+            )
+        }
+
+        behandlingsresultat.aarsavregning?.behandlingsresultat = null
+        behandlingsresultat.aarsavregning = null;
+        behandlingsresultatService.lagreOgFlush(behandlingsresultat)
+
+        val aarsavregning = Aarsavregning().apply {
+            behandlingsresultat.aarsavregning = this
+            aar = gjelderÅr
+            this.behandlingsresultat = behandlingsresultat
+            tidligereBehandlingsresultat = finnTidligereBehandlingsresultatMedAvgift(behandlingsresultat, gjelderÅr)
+        }.also {
+            behandlingsresultatService.lagre(behandlingsresultat)
+        }
+
+        return lagÅrsavregningFraAarsavregning(aarsavregning)
+    }
+
+    //TODO: Seriøst, disse to objektene er forvirrende. Controller har tilgang til Årsavregning, men ikke Aarsavregning.
+    private fun lagÅrsavregningFraAarsavregning(aarsavregning: Aarsavregning): Årsavregning {
         val år = aarsavregning.aar
+
         return Årsavregning(
             år = år,
             tidligereGrunnlag = hentTidligereTrygdeavgiftsgrunnlag(år, aarsavregning.tidligereBehandlingsresultat),
@@ -49,29 +87,14 @@ class ÅrsavregningService(
         )
     }
 
-    @Transactional
-    fun opprettÅrsavregning(behandlingID: Long, gjelderÅr: Int): Long {
-        val behandlingsresultat = behandlingsresultatService.hentBehandlingsresultat(behandlingID)
-
-        if (aarsavregningRepository.finnAntallÅrsavregningerPåFagsakForÅr(behandlingID, gjelderÅr) != 0) {
-            throw FunksjonellException("Det finnes en annen åpen årsavregningsbehandling for samme år på saken. \n" +
-                "Vurder hvilke behandling du vil fortsette med og avslutt den som ikke er aktuell via behandlingsmenyen.")
+    private fun finnTidligereBehandlingsresultatMedAvgift(behandlingsresultat: Behandlingsresultat, gjelderÅr: Int): Behandlingsresultat? {
+        val saksnummer = behandlingsresultat.behandling.fagsak.saksnummer
+        val behandling = trygdeavgiftService.finnSistFakturerbarTrygdeavgiftsbehandlingForÅr(saksnummer, gjelderÅr) ?: return null
+        if (behandlingsresultat.behandling == behandling) {
+            return null
         }
-
-        Aarsavregning().apply {
-            behandlingsresultat.aarsavregning = this
-            aar = gjelderÅr
-            this.behandlingsresultat = behandlingsresultat
-            tidligereBehandlingsresultat = finnTidligereBehandlingsresultatMedAvgift(behandlingsresultat.behandling.fagsak.saksnummer, gjelderÅr)
-        }.also {
-            aarsavregningRepository.save(it)
-        }
-        return behandlingID
+        return behandlingsresultatService.hentBehandlingsresultat(behandling.id)
     }
-
-    private fun finnTidligereBehandlingsresultatMedAvgift(saksnummer: String, gjelderÅr: Int): Behandlingsresultat? =
-        trygdeavgiftService.finnSistFakturerbarTrygdeavgiftsbehandlingForÅr(saksnummer, gjelderÅr)
-            ?.let { behandlingsresultatService.hentBehandlingsresultat(it.id) }
 
     private fun hentTidligereTrygdeavgiftsgrunnlag(år: Int, behandlingsresultat: Behandlingsresultat?): Trygdeavgiftsgrunnlag? {
         if (behandlingsresultat == null) return null
@@ -85,7 +108,9 @@ class ÅrsavregningService(
 
     private fun hentNyttTrygdeavgiftsgrunnlag(aarsavregning: Aarsavregning): Trygdeavgiftsgrunnlag? {
         val behandlingsresultat = aarsavregning.behandlingsresultat
-        if (behandlingsresultat.medlemskapsperioder.isEmpty() && behandlingsresultat.hentSkatteforholdTilNorge().isEmpty() && behandlingsresultat.hentInntektsperioder().isEmpty()) {
+        if (behandlingsresultat.medlemskapsperioder.isEmpty() && behandlingsresultat.hentSkatteforholdTilNorge()
+                .isEmpty() && behandlingsresultat.hentInntektsperioder().isEmpty()
+        ) {
             return null
         }
         return Trygdeavgiftsgrunnlag(

@@ -9,6 +9,7 @@ import no.nav.melosys.domain.Behandlingsresultat;
 @Entity
 @Table(name = "aarsavregning")
 public class Aarsavregning {
+
     @Id
     private Long id;
 

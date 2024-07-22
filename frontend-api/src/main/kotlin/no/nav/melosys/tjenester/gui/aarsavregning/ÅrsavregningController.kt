@@ -21,34 +21,45 @@ class ÅrsavregningController(
     private val årsavregningService: ÅrsavregningService,
 ) {
 
-    @GetMapping("/{avregningID}")
-    fun hentAvregning(@PathVariable("avregningID") avregningID: Long): ResponseEntity<ÅrsavregningResponse> {
-        val årsavregning = årsavregningService.hentÅrsavregning(avregningID)
+    @GetMapping("/{behandlingID}")
+    fun hentAvregning(@PathVariable("behandlingID") behandlingID: Long): ResponseEntity<ÅrsavregningResponse?> {
+        val årsavregning = årsavregningService.hentÅrsavregning(behandlingID) ?: return ResponseEntity.notFound().build()
+
         return ResponseEntity.ok(
-            ÅrsavregningResponse(
-                aar = årsavregning.år,
-                tidligereGrunnlagsopplysninger = hentTidligereGrunnlagsopplysninger(årsavregning),
-                avvikFunnet = årsavregning.nyttGrunnlag != null,
-                nyttGrunnlag = null,
-                endeligAvgift = null,
-                avregning = Avregning(
-                    nyttTotalbeloep = årsavregning?.nyttTotalbeloep?.intValueExact() ?: 0,
-                    tidligereFakturertBeloep = årsavregning?.tidligereFakturertBeloep?.intValueExact() ?: 0,
-                    tilFaktureringBeloep = årsavregning?.tilFaktureringBeloep?.intValueExact() ?: 0,
-                )
-            )
+            lagÅrsavregningResponse(årsavregning)
         )
     }
 
-    @PostMapping
-    fun opprettNyÅrsavregning(@RequestBody årsavregningRequest: LagÅrsavregningRequest): ResponseEntity<Long> {
-        return ResponseEntity.ok(årsavregningService.opprettÅrsavregning(årsavregningRequest.behandlingsId, årsavregningRequest.aar))
+    @PostMapping("/{behandlingID}")
+    fun opprettNyÅrsavregning(
+        @PathVariable("behandlingID") behandlingID: Long,
+        @RequestBody årsavregningRequest: LagÅrsavregningRequest
+    ): ResponseEntity<ÅrsavregningResponse> {
+        val årsavregning = årsavregningService.opprettÅrsavregning(behandlingID, årsavregningRequest.aar)
+
+        return ResponseEntity.ok(
+            lagÅrsavregningResponse(årsavregning)
+        )
     }
 
     data class LagÅrsavregningRequest(
-        val aar: Int,
-        val behandlingsId: Long
+        val aar: Int
     )
+
+    private fun lagÅrsavregningResponse(årsavregning: Årsavregning) =
+        ÅrsavregningResponse(
+            aar = årsavregning.år,
+            tidligereGrunnlagsopplysninger = hentTidligereGrunnlagsopplysninger(årsavregning),
+            avvikFunnet = årsavregning.nyttGrunnlag != null,
+            nyttGrunnlag = null,
+            endeligAvgift = null,
+            avregning = Avregning(
+                nyttTotalbeloep = årsavregning.nyttTotalbeloep?.intValueExact() ?: 0,
+                tidligereFakturertBeloep = årsavregning.tidligereFakturertBeloep?.intValueExact() ?: 0,
+                tilFaktureringBeloep = årsavregning.tilFaktureringBeloep?.intValueExact() ?: 0,
+            )
+        )
+
 
     private fun hentTidligereGrunnlagsopplysninger(årsavregning: Årsavregning): TidligereGrunnlagsopplysninger? {
         return if (årsavregning.tidligereGrunnlag == null) null else

@@ -9,18 +9,18 @@ interface AarsavregningRepository : JpaRepository<Aarsavregning, Long> {
 
     fun findByBehandlingsresultatId(behandlingID: Long): Aarsavregning?
 
-    @Query("""
-        SELECT COUNT(a.behandlingsresultat_id)
-        FROM aarsavregning a
-        JOIN behandling b ON a.behandlingsresultat_id = b.id
-        WHERE a.aar = :aar
-          AND b.saksnummer = (
-                SELECT beh.saksnummer
-                FROM behandling beh
-                WHERE beh.id = :behandlingId
-            )
-          AND b.beh_type = 'ÅRSAVREGNING'
-          AND b.status <> 'AVSLUTTET'
-    """, nativeQuery = true)
+    @Query(
+        """
+    SELECT COUNT(DISTINCT a.behandlingsresultat_id)
+    FROM behandling b
+    JOIN fagsak f ON b.saksnummer = f.saksnummer
+    JOIN behandling b2 ON b2.saksnummer = f.saksnummer
+    JOIN aarsavregning a ON b2.id = a.behandlingsresultat_id
+    WHERE b.id = :behandlingId
+      AND a.aar = :aar
+      AND b2.beh_type = 'ÅRSAVREGNING'
+      AND b2.status != 'AVSLUTTET'
+    """, nativeQuery = true
+    )
     fun finnAntallÅrsavregningerPåFagsakForÅr(@Param("behandlingId") behandlingId: Long, @Param("aar") år: Int): Int
 }
