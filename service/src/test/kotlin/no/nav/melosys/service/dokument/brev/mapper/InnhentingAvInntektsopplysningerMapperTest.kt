@@ -9,7 +9,7 @@ import no.nav.melosys.domain.Behandling
 import no.nav.melosys.domain.Behandlingsresultat
 import no.nav.melosys.domain.FagsakTestFactory
 import no.nav.melosys.domain.Medlemskapsperiode
-import no.nav.melosys.domain.avgift.Aarsavregning
+import no.nav.melosys.domain.avgift.Årsavregning
 import no.nav.melosys.domain.brev.InnhentingAvInntektsopplysningerBrevbestilling
 import no.nav.melosys.domain.dokument.person.PersonDokument
 import no.nav.melosys.domain.kodeverk.InnvilgelsesResultat
@@ -74,7 +74,7 @@ internal class InnhentingAvInntektsopplysningerMapperTest {
         return Behandlingsresultat().apply {
             behandling = lagBehandling()
 
-            aarsavregning = Aarsavregning().apply {
+            aarsavregning = Årsavregning().apply {
                 aar = 2023
             }
             medlemskapsperioder = listOf(

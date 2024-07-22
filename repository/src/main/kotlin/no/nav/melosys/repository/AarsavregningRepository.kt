@@ -1,13 +1,13 @@
 package no.nav.melosys.repository
 
-import no.nav.melosys.domain.avgift.Aarsavregning
+import no.nav.melosys.domain.avgift.Årsavregning
 import org.springframework.data.jpa.repository.JpaRepository
 import org.springframework.data.jpa.repository.Query
 import org.springframework.data.repository.query.Param
 
-interface AarsavregningRepository : JpaRepository<Aarsavregning, Long> {
+interface AarsavregningRepository : JpaRepository<Årsavregning, Long> {
 
-    fun findByBehandlingsresultatId(behandlingID: Long): Aarsavregning?
+    fun findByBehandlingsresultatId(behandlingID: Long): Årsavregning?
 
     @Query(
         """

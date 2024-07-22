@@ -6,7 +6,7 @@ import java.util.*;
 import java.util.stream.Collectors;
 
 import jakarta.persistence.*;
-import no.nav.melosys.domain.avgift.Aarsavregning;
+import no.nav.melosys.domain.avgift.Årsavregning;
 import no.nav.melosys.domain.avgift.Inntektsperiode;
 import no.nav.melosys.domain.avgift.SkatteforholdTilNorge;
 import no.nav.melosys.domain.avgift.Trygdeavgiftsperiode;
@@ -96,7 +96,7 @@ public class Behandlingsresultat extends RegistreringsInfo {
     private Set<BehandlingsresultatBegrunnelse> behandlingsresultatBegrunnelser = new HashSet<>(1);
 
     @OneToOne(mappedBy = "behandlingsresultat", cascade = CascadeType.ALL, fetch = FetchType.LAZY, orphanRemoval = true)
-    private Aarsavregning aarsavregning;
+    private Årsavregning årsavregning;
 
     @Column(name = "trygdeavgift_type")
     @Enumerated(EnumType.STRING)
@@ -246,12 +246,12 @@ public class Behandlingsresultat extends RegistreringsInfo {
         this.kontrollresultater = kontrollresultater;
     }
 
-    public Aarsavregning getAarsavregning() {
-        return aarsavregning;
+    public Årsavregning getAarsavregning() {
+        return årsavregning;
     }
 
-    public void setAarsavregning(Aarsavregning aarsavregning) {
-        this.aarsavregning = aarsavregning;
+    public void setAarsavregning(Årsavregning årsavregning) {
+        this.årsavregning = årsavregning;
     }
 
     public Collection<Medlemskapsperiode> getMedlemskapsperioder() {

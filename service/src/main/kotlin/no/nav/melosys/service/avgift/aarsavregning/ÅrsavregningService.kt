@@ -2,10 +2,10 @@ package no.nav.melosys.service.avgift.aarsavregning
 
 import no.nav.melosys.domain.Behandlingsresultat
 import no.nav.melosys.domain.Medlemskapsperiode
-import no.nav.melosys.domain.avgift.Aarsavregning
 import no.nav.melosys.domain.avgift.Inntektsperiode
 import no.nav.melosys.domain.avgift.SkatteforholdTilNorge
 import no.nav.melosys.domain.avgift.Trygdeavgiftsperiode
+import no.nav.melosys.domain.avgift.Årsavregning
 import no.nav.melosys.domain.kodeverk.Folketrygdloven_kap2_bestemmelser
 import no.nav.melosys.domain.kodeverk.Trygdedekninger
 import no.nav.melosys.exception.FunksjonellException
@@ -33,7 +33,7 @@ class ÅrsavregningService(
     }
 
     @Transactional(readOnly = true)
-    fun hentÅrsavregning(behandlingID: Long): Årsavregning? {
+    fun finnÅrsavregning(behandlingID: Long): ÅrsavregningModel? {
         val behandlingsresultat = behandlingsresultatService.hentBehandlingsresultat(behandlingID)
         if (!behandlingsresultat.behandling.erÅrsavregning()) {
             throw FunksjonellException("Behandling med id $behandlingID er ikke en årsavregning")
@@ -45,7 +45,7 @@ class ÅrsavregningService(
     }
 
     @Transactional
-    fun opprettÅrsavregning(behandlingID: Long, gjelderÅr: Int): Årsavregning {
+    fun opprettÅrsavregning(behandlingID: Long, gjelderÅr: Int): ÅrsavregningModel {
         val behandlingsresultat = behandlingsresultatService.hentBehandlingsresultat(behandlingID)
 
         if (aarsavregningRepository.finnAntallÅrsavregningerPåFagsakForÅr(behandlingID, gjelderÅr) != 0) {
@@ -55,11 +55,13 @@ class ÅrsavregningService(
             )
         }
 
-        behandlingsresultat.aarsavregning?.behandlingsresultat = null
-        behandlingsresultat.aarsavregning = null;
-        behandlingsresultatService.lagreOgFlush(behandlingsresultat)
+        if (behandlingsresultat.aarsavregning != null) {
+            behandlingsresultat.aarsavregning?.behandlingsresultat = null
+            behandlingsresultat.aarsavregning = null;
+            behandlingsresultatService.lagreOgFlush(behandlingsresultat)
+        }
 
-        val aarsavregning = Aarsavregning().apply {
+        val årsavregning = Årsavregning().apply {
             behandlingsresultat.aarsavregning = this
             aar = gjelderÅr
             this.behandlingsresultat = behandlingsresultat
@@ -68,32 +70,31 @@ class ÅrsavregningService(
             behandlingsresultatService.lagre(behandlingsresultat)
         }
 
-        return lagÅrsavregningFraAarsavregning(aarsavregning)
+        return lagÅrsavregningFraAarsavregning(årsavregning)
     }
 
-    //TODO: Seriøst, disse to objektene er forvirrende. Controller har tilgang til Årsavregning, men ikke Aarsavregning.
-    private fun lagÅrsavregningFraAarsavregning(aarsavregning: Aarsavregning): Årsavregning {
-        val år = aarsavregning.aar
+    private fun lagÅrsavregningFraAarsavregning(årsavregning: Årsavregning): ÅrsavregningModel {
+        val år = årsavregning.aar
 
-        return Årsavregning(
+        return ÅrsavregningModel(
             år = år,
-            tidligereGrunnlag = hentTidligereTrygdeavgiftsgrunnlag(år, aarsavregning.tidligereBehandlingsresultat),
-            tidligereAvgift = aarsavregning.tidligereBehandlingsresultat?.trygdeavgiftsperioder?.filter { it.overlapperMedÅr(år) }.orEmpty(),
-            nyttGrunnlag = hentNyttTrygdeavgiftsgrunnlag(aarsavregning),
-            endeligAvgift = aarsavregning.behandlingsresultat.trygdeavgiftsperioder.toList(),
-            tidligereFakturertBeloep = aarsavregning.tidligereFakturertBeloep,
-            nyttTotalbeloep = aarsavregning.nyttTotalbeloep,
-            tilFaktureringBeloep = aarsavregning.tilFaktureringBeloep
+            tidligereGrunnlag = hentTidligereTrygdeavgiftsgrunnlag(år, årsavregning.tidligereBehandlingsresultat),
+            tidligereAvgift = årsavregning.tidligereBehandlingsresultat?.trygdeavgiftsperioder?.filter { it.overlapperMedÅr(år) }.orEmpty(),
+            nyttGrunnlag = hentNyttTrygdeavgiftsgrunnlag(årsavregning),
+            endeligAvgift = årsavregning.behandlingsresultat.trygdeavgiftsperioder.toList(),
+            tidligereFakturertBeloep = årsavregning.tidligereFakturertBeloep,
+            nyttTotalbeloep = årsavregning.nyttTotalbeloep,
+            tilFaktureringBeloep = årsavregning.tilFaktureringBeloep
         )
     }
 
     private fun finnTidligereBehandlingsresultatMedAvgift(behandlingsresultat: Behandlingsresultat, gjelderÅr: Int): Behandlingsresultat? {
         val saksnummer = behandlingsresultat.behandling.fagsak.saksnummer
         val behandling = trygdeavgiftService.finnSistFakturerbarTrygdeavgiftsbehandlingForÅr(saksnummer, gjelderÅr) ?: return null
-        if (behandlingsresultat.behandling == behandling) {
-            return null
-        }
-        return behandlingsresultatService.hentBehandlingsresultat(behandling.id)
+        return if (behandlingsresultat.behandling == behandling) {
+            null
+        } else
+            behandlingsresultatService.hentBehandlingsresultat(behandling.id)
     }
 
     private fun hentTidligereTrygdeavgiftsgrunnlag(år: Int, behandlingsresultat: Behandlingsresultat?): Trygdeavgiftsgrunnlag? {
@@ -106,8 +107,8 @@ class ÅrsavregningService(
         )
     }
 
-    private fun hentNyttTrygdeavgiftsgrunnlag(aarsavregning: Aarsavregning): Trygdeavgiftsgrunnlag? {
-        val behandlingsresultat = aarsavregning.behandlingsresultat
+    private fun hentNyttTrygdeavgiftsgrunnlag(årsavregning: Årsavregning): Trygdeavgiftsgrunnlag? {
+        val behandlingsresultat = årsavregning.behandlingsresultat
         if (behandlingsresultat.medlemskapsperioder.isEmpty() && behandlingsresultat.hentSkatteforholdTilNorge()
                 .isEmpty() && behandlingsresultat.hentInntektsperioder().isEmpty()
         ) {
@@ -121,7 +122,7 @@ class ÅrsavregningService(
     }
 }
 
-data class Årsavregning(
+data class ÅrsavregningModel(
     val år: Int,
     val tidligereGrunnlag: Trygdeavgiftsgrunnlag?,
     val tidligereAvgift: List<Trygdeavgiftsperiode>,

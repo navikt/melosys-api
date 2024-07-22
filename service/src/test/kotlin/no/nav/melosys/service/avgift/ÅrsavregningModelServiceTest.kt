@@ -20,7 +20,7 @@ import no.nav.melosys.integrasjon.faktureringskomponenten.dto.FakturaseriePeriod
 import no.nav.melosys.repository.AarsavregningRepository
 import no.nav.melosys.service.avgift.aarsavregning.MedlemskapsperiodeForAvgift
 import no.nav.melosys.service.avgift.aarsavregning.Trygdeavgiftsgrunnlag
-import no.nav.melosys.service.avgift.aarsavregning.Årsavregning
+import no.nav.melosys.service.avgift.aarsavregning.ÅrsavregningModel
 import no.nav.melosys.service.avgift.aarsavregning.ÅrsavregningService
 import no.nav.melosys.service.behandling.BehandlingsresultatService
 import no.nav.melosys.sikkerhet.context.SpringSubjectHandler
@@ -33,7 +33,7 @@ import java.time.LocalDate
 import java.util.*
 
 @ExtendWith(MockKExtension::class)
-internal class ÅrsavregningServiceTest {
+internal class ÅrsavregningModelServiceTest {
     @RelaxedMockK
     private lateinit var aarsavregningRepository: AarsavregningRepository
     @RelaxedMockK
@@ -60,7 +60,7 @@ internal class ÅrsavregningServiceTest {
 
     @Test
     fun `opprettNyÅrsavregning kaster exception når flere Aarsavregninger eksisterer for samme år på samme Fagsak`() {
-        val årsavregningEntity1 = Aarsavregning().apply {
+        val årsavregningEntity1 = Årsavregning().apply {
             aar = 2023
             behandlingsresultat = Behandlingsresultat()
         }
@@ -86,13 +86,13 @@ internal class ÅrsavregningServiceTest {
 
     @Test
     fun `hentÅrsavregning for ny årsavregning uten info i Melosys`() {
-        val årsavregningEntity = Aarsavregning().apply {
+        val årsavregningEntity = Årsavregning().apply {
             aar = 2023
             behandlingsresultat = Behandlingsresultat()
         }
         every { aarsavregningRepository.findById(any()) }.returns(Optional.of(årsavregningEntity))
 
-        årsavregningService.hentÅrsavregning(1) shouldBe Årsavregning(
+        årsavregningService.finnÅrsavregning(1) shouldBe ÅrsavregningModel(
             år = 2023,
             tidligereGrunnlag = null,
             tidligereAvgift = emptyList(),
@@ -106,14 +106,14 @@ internal class ÅrsavregningServiceTest {
 
     @Test
     fun `hentÅrsavregning for ny årsavregning, grunnlag finnes i Melosys`() {
-        val årsavregningEntity = Aarsavregning().apply {
+        val årsavregningEntity = Årsavregning().apply {
             aar = 2023
             behandlingsresultat = Behandlingsresultat()
             tidligereBehandlingsresultat = lagTidligereBehandlingsresultat()
         }
         every { aarsavregningRepository.findById(any()) }.returns(Optional.of(årsavregningEntity))
 
-        årsavregningService.hentÅrsavregning(1) shouldBe Årsavregning(
+        årsavregningService.finnÅrsavregning(1) shouldBe ÅrsavregningModel(
             år = 2023,
             tidligereGrunnlag = Trygdeavgiftsgrunnlag(
                 listOf(
