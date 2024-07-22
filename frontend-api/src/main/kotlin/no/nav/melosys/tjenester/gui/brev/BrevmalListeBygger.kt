@@ -218,13 +218,6 @@ class BrevmalListeBygger(
     }
 
     private fun lagBrevmalForINNHENTING_AV_INNTEKTSOPPLYSNINGER(produserbartDokument: Produserbaredokumenter): BrevmalTypeDto { //TODO FIKS HER
-        /*val feltvalgAlternativ = mutableListOf(
-            FeltvalgAlternativDto(
-                FeltvalgAlternativKode.STANDARD.kode,
-                FeltvalgAlternativKode.STANDARD.beskrivelse,
-                false
-                )
-        )*/
         val feltvalgAlternativ2 = mutableListOf(
             FeltvalgAlternativDto(
                 FeltvalgAlternativKode.FRITEKST.kode,
