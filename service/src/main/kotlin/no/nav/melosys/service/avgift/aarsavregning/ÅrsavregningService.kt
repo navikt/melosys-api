@@ -27,6 +27,9 @@ class ÅrsavregningService(
     private val faktureringskomponentenConsumer: FaktureringskomponentenConsumer,
     private val trygdeavgiftService: TrygdeavgiftService
 ) {
+
+
+
     fun beregnTotalbeløpForPeriode(beregnTotalBeløpDto: BeregnTotalBeløpDto): BigDecimal {
         val saksbehandlerIdent = SubjectHandler.getInstance().getUserID()
         return faktureringskomponentenConsumer.hentTotalTrygdeavgiftForPeriode(beregnTotalBeløpDto, saksbehandlerIdent)
@@ -48,11 +51,18 @@ class ÅrsavregningService(
     fun opprettÅrsavregning(behandlingID: Long, gjelderÅr: Int): ÅrsavregningModel {
         val behandlingsresultat = behandlingsresultatService.hentBehandlingsresultat(behandlingID)
 
+        if (behandlingsresultat.aarsavregning != null && behandlingsresultat.aarsavregning?.aar == gjelderÅr) {
+            throw FunksjonellException("Året $gjelderÅr er allerede lagret på denne årsavregningen")
+        }
         if (aarsavregningRepository.finnAntallÅrsavregningerPåFagsakForÅr(behandlingID, gjelderÅr) != 0) {
             throw FunksjonellException(
                 "Det finnes en annen åpen årsavregningsbehandling for samme år på saken. " +
                     "Vurder hvilke behandling du vil fortsette med og avslutt den uaktuelle behandlingen via behandlingsmeny."
             )
+        }
+
+        if (gjelderÅr < LocalDate.now().year - antall_år_tilbake_i_tid) {
+            throw FunksjonellException("Årsavregning kan ikke opprettes for år eldre enn 6 år før inneværende år.")
         }
 
         if (behandlingsresultat.aarsavregning != null) {
@@ -119,6 +129,10 @@ class ÅrsavregningService(
             skatteforholdsperioder = behandlingsresultat.hentSkatteforholdTilNorge().toList(),
             innteksperioder = behandlingsresultat.hentInntektsperioder().toList()
         )
+    }
+
+    companion object {
+        private val antall_år_tilbake_i_tid = 7  //Fjoråret - 6 år
     }
 }
 
