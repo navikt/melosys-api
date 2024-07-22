@@ -13,6 +13,7 @@ import no.nav.melosys.domain.VedtakMetadata
 import no.nav.melosys.domain.avgift.*
 import no.nav.melosys.domain.kodeverk.*
 import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingsresultattyper
+import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingstyper
 import no.nav.melosys.exception.FunksjonellException
 import no.nav.melosys.integrasjon.faktureringskomponenten.FaktureringskomponentenConsumer
 import no.nav.melosys.integrasjon.faktureringskomponenten.dto.BeregnTotalBeløpDto
@@ -33,13 +34,17 @@ import java.time.LocalDate
 import java.util.*
 
 @ExtendWith(MockKExtension::class)
-internal class ÅrsavregningModelServiceTest {
+internal class ÅrsavregningServiceTest {
+
     @RelaxedMockK
     private lateinit var aarsavregningRepository: AarsavregningRepository
+
     @RelaxedMockK
     private lateinit var behandlingsresultatService: BehandlingsresultatService
+
     @RelaxedMockK
     private lateinit var faktureringskomponentenConsumer: FaktureringskomponentenConsumer
+
     @RelaxedMockK
     private lateinit var trygdeavgiftService: TrygdeavgiftService
 
@@ -77,7 +82,8 @@ internal class ÅrsavregningModelServiceTest {
     @Test
     fun `test beregner totalbeløp for 1 år`() {
         val fakturaseriePeriodeDto = FakturaseriePeriodeDto(
-            enhetsprisPerManed = BigDecimal(100), startDato = LocalDate.now().minusYears(1), sluttDato = LocalDate.now(), beskrivelse = "test")
+            enhetsprisPerManed = BigDecimal(100), startDato = LocalDate.now().minusYears(1), sluttDato = LocalDate.now(), beskrivelse = "test"
+        )
         val dto = BeregnTotalBeløpDto(listOf(fakturaseriePeriodeDto, fakturaseriePeriodeDto, fakturaseriePeriodeDto))
         årsavregningService.beregnTotalbeløpForPeriode(dto)
 
@@ -85,12 +91,19 @@ internal class ÅrsavregningModelServiceTest {
     }
 
     @Test
-    fun `hentÅrsavregning for ny årsavregning uten info i Melosys`() {
+    fun `finnÅrsavregning for ny årsavregning uten info i Melosys`() {
+        val behandlingsresultat = Behandlingsresultat().apply {
+            behandling = Behandling().apply {
+                id = 1L
+                type = Behandlingstyper.ÅRSAVREGNING
+            }
+        }
         val årsavregningEntity = Årsavregning().apply {
             aar = 2023
-            behandlingsresultat = Behandlingsresultat()
+            this.behandlingsresultat = behandlingsresultat
         }
-        every { aarsavregningRepository.findById(any()) }.returns(Optional.of(årsavregningEntity))
+        behandlingsresultat.aarsavregning = årsavregningEntity
+        every { behandlingsresultatService.hentBehandlingsresultat(1L) }.returns(behandlingsresultat)
 
         årsavregningService.finnÅrsavregning(1) shouldBe ÅrsavregningModel(
             år = 2023,
@@ -105,13 +118,36 @@ internal class ÅrsavregningModelServiceTest {
     }
 
     @Test
+    fun `finnÅrsavregning feiler når behandling ikke er av type årsavregning`() {
+        val behandlingsresultat = Behandlingsresultat().apply {
+            behandling = Behandling().apply {
+                id = 1L
+                type = Behandlingstyper.FØRSTEGANG
+            }
+        }
+
+        every { behandlingsresultatService.hentBehandlingsresultat(1L) }.returns(behandlingsresultat)
+
+        shouldThrow<FunksjonellException> {
+            årsavregningService.finnÅrsavregning(1)
+        }.message shouldBe "Behandling med id 1 er ikke en årsavregning"
+    }
+
+    @Test
     fun `hentÅrsavregning for ny årsavregning, grunnlag finnes i Melosys`() {
+        val behandlingsresultat = Behandlingsresultat().apply {
+            behandling = Behandling().apply {
+                id = 1L
+                type = Behandlingstyper.ÅRSAVREGNING
+            }
+        }
         val årsavregningEntity = Årsavregning().apply {
             aar = 2023
-            behandlingsresultat = Behandlingsresultat()
+            this.behandlingsresultat = behandlingsresultat
             tidligereBehandlingsresultat = lagTidligereBehandlingsresultat()
         }
-        every { aarsavregningRepository.findById(any()) }.returns(Optional.of(årsavregningEntity))
+        behandlingsresultat.aarsavregning = årsavregningEntity
+        every { behandlingsresultatService.hentBehandlingsresultat(1L) }.returns(behandlingsresultat)
 
         årsavregningService.finnÅrsavregning(1) shouldBe ÅrsavregningModel(
             år = 2023,
