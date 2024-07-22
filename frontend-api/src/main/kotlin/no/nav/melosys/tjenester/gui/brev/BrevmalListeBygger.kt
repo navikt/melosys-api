@@ -238,7 +238,7 @@ class BrevmalListeBygger(
             .medValg(FeltValgDto(feltvalgAlternativ2, FeltValgType.CHECKBOX))
             .build()
         val felt2 = BrevmalFeltDto.Builder()
-            .medKodeOgBeskrivelse(BrevmalFeltKode.STANDARDTEKST_HVA_SKAL_SØKER_SENDE_INN)
+            .medKodeOgBeskrivelse(BrevmalFeltKode.STANDARDTEKST)
             .medFeltType(FeltType.SJEKKBOKS)
             .build()
         return BrevmalTypeDto.Builder()
