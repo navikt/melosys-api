@@ -25,24 +25,21 @@ open class OracleTestContainerBase {
     }
 
     companion object {
+        val oracleContainer = OracleContainer(
+            DockerImageName.parse("ghcr.io/navikt/melosys-legacy-avhengigheter/oracle-xe:18.4.0-slim")
+                .asCompatibleSubstituteFor("gvenzl/oracle-xe")
+        )
         private const val useContainer = true // easy way to switch to run against local docker
 
         @DynamicPropertySource
         @JvmStatic
         fun oracleProperties(registry: DynamicPropertyRegistry) {
-            if (!useLocalDB()) {
-                val oracleContainer = OracleContainer(
-                    DockerImageName.parse("ghcr.io/navikt/melosys-legacy-avhengigheter/oracle-xe:18.4.0-slim")
-                        .asCompatibleSubstituteFor("gvenzl/oracle-xe")
-                )
+            if (useTestContainer()) {
+                registry.add("spring.datasource.url") { oracleContainer.jdbcUrl }
+                registry.add("spring.datasource.password") { oracleContainer.password }
+                registry.add("spring.datasource.username") { oracleContainer.username }
 
-                if (useTestContainer()) {
-                    registry.add("spring.datasource.url") { oracleContainer.jdbcUrl }
-                    registry.add("spring.datasource.password") { oracleContainer.password }
-                    registry.add("spring.datasource.username") { oracleContainer.username }
-
-                    oracleContainer.start()
-                }
+                oracleContainer.start()
             }
         }
 
