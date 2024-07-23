@@ -1,9 +1,8 @@
 package no.nav.melosys.domain.brev;
 
 public class AvslagEftaStorbritanniaBrevbestilling extends DokgenBrevbestilling {
-
-    private String innledningFritekst;
-    private String begrunnelseFritekst;
+    private String innledningFritekstAvslagEfta;
+    private String begrunnelseFritekstAvslagEfta;
 
     public AvslagEftaStorbritanniaBrevbestilling() {
         super();
@@ -12,16 +11,16 @@ public class AvslagEftaStorbritanniaBrevbestilling extends DokgenBrevbestilling 
 
     public AvslagEftaStorbritanniaBrevbestilling(AvslagEftaStorbritanniaBrevbestilling.Builder builder) {
         super(builder);
-        this.innledningFritekst = builder.innledningFritekst;
-        this.begrunnelseFritekst = builder.begrunnelseFritekst;
+        this.innledningFritekstAvslagEfta = builder.innledningFritekstavslagEfta;
+        this.begrunnelseFritekstAvslagEfta = builder.begrunnelseFritekstavslagEfta;
     }
 
-    public String getInnledningFritekst() {
-        return innledningFritekst;
+    public String getInnledningFritekstAvslagEfta() {
+        return innledningFritekstAvslagEfta;
     }
 
-    public String getBegrunnelseFritekst() {
-        return begrunnelseFritekst;
+    public String getBegrunnelseFritekstAvslagEfta() {
+        return begrunnelseFritekstAvslagEfta;
     }
 
     public AvslagEftaStorbritanniaBrevbestilling.Builder toBuilder() {
@@ -29,25 +28,26 @@ public class AvslagEftaStorbritanniaBrevbestilling extends DokgenBrevbestilling 
     }
 
     public static final class Builder extends DokgenBrevbestilling.Builder<AvslagEftaStorbritanniaBrevbestilling.Builder> {
-        private String innledningFritekst;
-        private String begrunnelseFritekst;
+        private String innledningFritekstavslagEfta;
+        private String begrunnelseFritekstavslagEfta;
+        private String lolcat;
 
         public Builder() {
         }
 
-        public Builder(AvslagEftaStorbritanniaBrevbestilling fritekstbrevBrevbestilling) {
-            super(fritekstbrevBrevbestilling);
-            this.innledningFritekst = fritekstbrevBrevbestilling.innledningFritekst;
-            this.begrunnelseFritekst = fritekstbrevBrevbestilling.begrunnelseFritekst;
+        public Builder(AvslagEftaStorbritanniaBrevbestilling avslagEftaStorbritanniaBrevbestilling) {
+            super(avslagEftaStorbritanniaBrevbestilling);
+            this.innledningFritekstavslagEfta = avslagEftaStorbritanniaBrevbestilling.innledningFritekstAvslagEfta;
+            this.begrunnelseFritekstavslagEfta = avslagEftaStorbritanniaBrevbestilling.begrunnelseFritekstAvslagEfta;
         }
 
-        public AvslagEftaStorbritanniaBrevbestilling.Builder medInnledningFritekst(String innledningFritekst) {
-            this.innledningFritekst = innledningFritekst;
+        public AvslagEftaStorbritanniaBrevbestilling.Builder medInnledningFritekstAvslagEfta(String innledningFritekst) {
+            this.innledningFritekstavslagEfta = innledningFritekst;
             return this;
         }
 
-        public AvslagEftaStorbritanniaBrevbestilling.Builder medBegrunnelseFritekst(String begrunnelseFritekst) {
-            this.begrunnelseFritekst = begrunnelseFritekst;
+        public AvslagEftaStorbritanniaBrevbestilling.Builder medBegrunnelseFritekstAvslagEfta(String begrunnelseFritekst) {
+            this.begrunnelseFritekstavslagEfta = begrunnelseFritekst;
             return this;
         }
 

@@ -374,8 +374,8 @@ public class DokgenService {
                 .medOpphørtDato(brevbestillingDto.getOpphørtDato())
                 .medOpphørtBegrunnelseFritekst(brevbestillingDto.getBegrunnelseFritekst());
             case AVSLAG_EFTA_STORBRITANNIA -> new AvslagEftaStorbritanniaBrevbestilling.Builder()
-                .medInnledningFritekst(brevbestillingDto.getInnledningFritekst())
-                .medBegrunnelseFritekst(brevbestillingDto.getBegrunnelseFritekst());
+                .medInnledningFritekstAvslagEfta(brevbestillingDto.getInnledningFritekst())
+                .medBegrunnelseFritekstAvslagEfta(brevbestillingDto.getBegrunnelseFritekst());
 
             default -> new DokgenBrevbestilling.Builder<>().medDistribusjonstype(Distribusjonstype.VIKTIG);
         };
