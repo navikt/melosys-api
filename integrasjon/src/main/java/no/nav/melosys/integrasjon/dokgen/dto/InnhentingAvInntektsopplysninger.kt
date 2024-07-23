@@ -18,11 +18,11 @@ class InnhentingAvInntektsopplysninger(
 
     @JsonSerialize(using = LocalDateSerializer::class)
     @JsonFormat(shape = JsonFormat.Shape.STRING)
-    val medlemskapsperiodeFom: LocalDate,
+    val medlemskapsperiodeFom: LocalDate?,
 
     @JsonSerialize(using = LocalDateSerializer::class)
     @JsonFormat(shape = JsonFormat.Shape.STRING)
-    val medlemskapsperiodeTom: LocalDate,
+    val medlemskapsperiodeTom: LocalDate?,
 
     val skalViseStandardTekstOmOpplysninger: Boolean,
 
@@ -33,8 +33,8 @@ class InnhentingAvInntektsopplysninger(
         brevbestilling: InnhentingAvInntektsopplysningerBrevbestilling,
         årsavregningsår: Int,
         fristdato: LocalDate,
-        medlemskapsperiodeFom: LocalDate,
-        medlemskapsperiodeTom: LocalDate
+        medlemskapsperiodeFom: LocalDate?,
+        medlemskapsperiodeTom: LocalDate?
     ) : this(
         brevbestilling,
         årsavregningsår,
