@@ -45,13 +45,11 @@ import static no.nav.melosys.domain.kodeverk.lovvalgsbestemmelser.Lovvalgbestemm
 import static no.nav.melosys.saksflytapi.domain.ProsessDataKey.SAKSBEHANDLER;
 import static no.nav.melosys.saksflytapi.domain.ProsessSteg.SEND_VEDTAKSBREV_INNLAND;
 
-// TODO fix dokgen ved avslag under efta bestemmelsen
 @Component
 public class SendVedtaksbrevInnland implements StegBehandler {
     private static final Logger log = LoggerFactory.getLogger(SendVedtaksbrevInnland.class);
 
     private final BehandlingService behandlingService;
-    //private final BrevBestiller brevBestiller;
     private final BehandlingsresultatService behandlingsresultatService;
     private final ProsessinstansService prosessinstansService;
     private final SaksbehandlingRegler saksbehandlingRegler;
@@ -59,13 +57,11 @@ public class SendVedtaksbrevInnland implements StegBehandler {
     private final Unleash unleash;
 
     public SendVedtaksbrevInnland(BehandlingService behandlingService,
-                                  //BrevBestiller brevBestiller,
                                   BehandlingsresultatService behandlingsresultatService,
                                   ProsessinstansService prosessinstansService,
                                   SaksbehandlingRegler saksbehandlingRegler,
                                   Unleash unleash) {
         this.behandlingService = behandlingService;
-        // this.brevBestiller = brevBestiller;
         this.behandlingsresultatService = behandlingsresultatService;
         this.prosessinstansService = prosessinstansService;
         this.saksbehandlingRegler = saksbehandlingRegler;
@@ -90,11 +86,10 @@ public class SendVedtaksbrevInnland implements StegBehandler {
 
         if (resultat.erAvslag()) {
             if (unleash.isEnabled(ToggleName.MELOSYS_KONVENSJON_EFTA_LAND_OG_STORBRITANNIA) && erStorBrittanniaArt18) {
-                sendAvslagsbrev(behandling, saksbehandler, fritekst, erStorBrittanniaArt18);
+                sendAvslagsbrev(behandling, saksbehandler, fritekst, true);
             } else {
-                sendAvslagsbrev(behandling, saksbehandler, fritekst, erStorBrittanniaArt18);
+                sendAvslagsbrev(behandling, saksbehandler, fritekst, false);
             }
-
             log.info("Sendt avslagsbrev for behandling {}", behandling.getId());
         } else if (resultat.erUtpeking()) {
             sendUtpekingsbrev(behandling, saksbehandler, fritekst);
@@ -113,13 +108,6 @@ public class SendVedtaksbrevInnland implements StegBehandler {
             throw new FunksjonellException("Vedtaksbrev kan ikke sendes for behandling " + behandling.getId());
         }
     }
-    /*
-    private void sendAvslagsbrevDokgen(final String saksbehandler, final String fritekst, final String begrunnelseKode, final Behandling behandling) {
-        var mottakere = List.of(Mottaker.medRolle(Mottakerroller.BRUKER), Mottaker.av(NorskMyndighet.HELFO), Mottaker.av(NorskMyndighet.SKATTEETATEN));
-        brevBestiller.bestill(AVSLAG_EFTA_STORBRITANNIA, mottakere, fritekst, saksbehandler, begrunnelseKode, behandling);
-    }
-
-     */
 
     private void sendAvslagsbrev(Behandling behandling, String saksbehandler, String fritekst, boolean erStorBrittanniaArt18) {
         var mottakerListe = List.of(Mottaker.medRolle(Mottakerroller.BRUKER), Mottaker.av(NorskMyndighet.HELFO), Mottaker.av(NorskMyndighet.SKATTEETATEN));

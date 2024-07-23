@@ -1,5 +1,6 @@
 package no.nav.melosys.saksflyt.steg.brev;
 
+import java.util.Collections;
 import java.util.List;
 import java.util.UUID;
 
@@ -101,6 +102,33 @@ class OpprettOgJournalforBrevTest {
         assertThatThrownBy(() -> opprettJournalforBrev.utfør(prosessinstans))
             .isInstanceOf(FunksjonellException.class)
             .hasMessage("Mangler mottaker");
+    }
+
+    @Test
+    void utførOpprettJournalforEftaStorbrittaniaBrevTilBruker() {
+        Behandling behandling = TestdataFactory.lagBehandling();
+        when(mockBehandlingService.hentBehandling(anyLong())).thenReturn(behandling);
+        when(mockJoarkFasade.opprettJournalpost(any(), anyBoolean())).thenReturn("12234");
+        when(mockDokgenService.hentDokumentInfo(any())).thenReturn(TestdataFactory.lagDokumentInfo());
+
+        AvslagEftaStorbritanniaBrevbestilling avslagEftaStorbritanniaBrevbestilling = new AvslagEftaStorbritanniaBrevbestilling.Builder()
+            .medInnledningFritekstAvslagEfta("blabla")
+            .medBegrunnelseFritekstAvslagEfta("blabla")
+            .medBehandlingId(12994)
+            .medProduserbartdokument(AVSLAG_EFTA_STORBRITANNIA)
+            .medSaksbehandlerNavn("F_Z994255 E_Z994255")
+            .medSaksvedleggBestilling(Collections.emptyList())
+            .medFritekstvedleggBestilling(Collections.emptyList())
+            .build();
+
+        Prosessinstans prosessinstans = lagProsessinstans(behandling, avslagEftaStorbritanniaBrevbestilling);
+
+        opprettJournalforBrev.utfør(prosessinstans);
+
+        verify(mockPersondataFasade, times(2)).hentFolkeregisterident(any());
+        verify(mockBehandlingService).hentBehandling(anyLong());
+        verify(mockDokgenService).produserBrev(any(Mottaker.class), any(DokgenBrevbestilling.class));
+        verify(mockJoarkFasade).opprettJournalpost(any(), anyBoolean());
     }
 
     @Test

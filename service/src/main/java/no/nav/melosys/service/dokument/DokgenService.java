@@ -374,6 +374,7 @@ public class DokgenService {
                 .medOpphørtDato(brevbestillingDto.getOpphørtDato())
                 .medOpphørtBegrunnelseFritekst(brevbestillingDto.getBegrunnelseFritekst());
             case AVSLAG_EFTA_STORBRITANNIA -> new AvslagEftaStorbritanniaBrevbestilling.Builder()
+                .medDistribusjonstype(Distribusjonstype.VEDTAK)
                 .medInnledningFritekstAvslagEfta(brevbestillingDto.getInnledningFritekst())
                 .medBegrunnelseFritekstAvslagEfta(brevbestillingDto.getBegrunnelseFritekst());
 
