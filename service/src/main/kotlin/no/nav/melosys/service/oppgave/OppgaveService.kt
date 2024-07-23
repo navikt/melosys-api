@@ -182,7 +182,7 @@ class OppgaveService(
         try {
             tilOppgaveDto(oppgave)
         } catch (e: Exception) {
-            log.error("Kan ikke mappe oppgave ${oppgave.oppgaveId}", e)
+            log.warn("Kan ikke mappe oppgave ${oppgave.oppgaveId}", e)
             null
         }
 
