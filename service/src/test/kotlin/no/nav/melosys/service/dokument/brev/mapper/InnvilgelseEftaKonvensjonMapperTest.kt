@@ -23,6 +23,7 @@ import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingstema
 import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingstyper
 import no.nav.melosys.domain.kodeverk.lovvalgsbestemmelser.Lovvalgbestemmelser_883_2004
 import no.nav.melosys.domain.kodeverk.lovvalgsbestemmelser.Lovvalgbestemmelser_konv_efta_storbritannia
+import no.nav.melosys.service.LandvelgerService
 import no.nav.melosys.service.avklartefakta.AvklarteVirksomheterService
 import no.nav.melosys.service.avklartefakta.AvklartefaktaService
 import no.nav.melosys.service.behandling.VilkaarsresultatService
@@ -47,6 +48,8 @@ internal class InnvilgelseEftaKonvensjonMapperTest {
 
     @MockK
     private lateinit var mockAvklartefaktaService: AvklartefaktaService
+    @MockK
+    private lateinit var mockLandvelgerService: LandvelgerService
 
     private lateinit var innvilgelseEftaStorbritanniaMapper: InnvilgelseEftaStorbritanniaMapper
 
@@ -63,7 +66,8 @@ internal class InnvilgelseEftaKonvensjonMapperTest {
             mockVilkaarsresultatService,
             mockDokgenMapperDatahenter,
             mockVirksomheterService,
-            mockAvklartefaktaService
+            mockAvklartefaktaService,
+            mockLandvelgerService
         )
     }
 
@@ -81,6 +85,7 @@ internal class InnvilgelseEftaKonvensjonMapperTest {
 
         every { mockVirksomheterService.hentAlleNorskeVirksomheter(ofType()) } returns listOf(BrevDataTestUtils.lagNorskVirksomhet())
         every { mockAvklartefaktaService.hentAvklarteOrgnrOgUuid(ofType()) } returns setOf(orgnr1, orgnr2, orgnr3, orgnr4, uuid1, uuid2)
+        every { mockLandvelgerService.hentBostedsland(ofType()) } returns Bostedsland("GB")
 
 
         val brevbestilling =
