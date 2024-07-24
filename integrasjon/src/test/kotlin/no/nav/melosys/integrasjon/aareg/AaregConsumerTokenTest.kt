@@ -2,9 +2,11 @@ package no.nav.melosys.integrasjon.aareg
 
 import com.github.tomakehurst.wiremock.client.WireMock
 import com.github.tomakehurst.wiremock.matching.StringValuePattern
+import io.getunleash.FakeUnleash
 import no.nav.melosys.integrasjon.ConsumerWireMockTestBase
 import no.nav.melosys.integrasjon.OAuthMockServer
 import no.nav.melosys.integrasjon.aareg.arbeidsforhold.*
+import no.nav.melosys.integrasjon.felles.GenericAuthFilterFactory
 import no.nav.melosys.integrasjon.reststs.RestSTSService
 import no.nav.melosys.integrasjon.reststs.SecurityTokenServiceConsumer
 import no.nav.melosys.integrasjon.reststs.StsWebClientProducer
@@ -24,7 +26,9 @@ import org.springframework.test.context.ActiveProfiles
     OAuthMockServer::class,
 
     ArbeidsforholdConsumerConfig::class,
-    StsAuthExchangeFilter::class
+    GenericAuthFilterFactory::class,
+    StsAuthExchangeFilter::class,
+    FakeUnleash::class
 )
 @WebMvcTest
 @ActiveProfiles("wiremock-test")
@@ -35,6 +39,8 @@ private class AaregConsumerTokenTest(
     @Value("\${mockserver.security.port}") mockSecurityPort: Int,
     @Autowired oAuthMockServer: OAuthMockServer
 ) : ConsumerWireMockTestBase<String, ArbeidsforholdResponse>(mockServiceUnderTestPort, mockSecurityPort, oAuthMockServer) {
+
+
 
     @Test
     fun authorizationSkalKommeFraBruker() {
