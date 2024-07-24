@@ -80,16 +80,13 @@ public class SendVedtaksbrevInnland implements StegBehandler {
         String saksbehandler = hentSaksbehandler(prosessinstans, resultat);
         String begrunnelseKode = hentBegrunnelsekodeTilForkortetPeriode(resultat);
         String fritekst = hentBegrunnelseFritekst(prosessinstans);
+
         final Lovvalgsperiode lovvalgsperiode = resultat.hentLovvalgsperiode();
         boolean erStorbritannia = Arrays.stream(Lovvalgbestemmelser_konv_efta_storbritannia.values()).anyMatch(bestemmelse -> bestemmelse == lovvalgsperiode.getBestemmelse());
         boolean erStorBrittanniaArt18 = KONV_EFTA_STORBRITANNIA_ART18_1 == lovvalgsperiode.getBestemmelse();
 
         if (resultat.erAvslag()) {
-            if (unleash.isEnabled(ToggleName.MELOSYS_KONVENSJON_EFTA_LAND_OG_STORBRITANNIA) && erStorBrittanniaArt18) {
-                sendAvslagsbrev(behandling, saksbehandler, fritekst, true);
-            } else {
-                sendAvslagsbrev(behandling, saksbehandler, fritekst, false);
-            }
+            sendAvslagsbrev(behandling, saksbehandler, fritekst, erStorBrittanniaArt18);
             log.info("Sendt avslagsbrev for behandling {}", behandling.getId());
         } else if (resultat.erUtpeking()) {
             sendUtpekingsbrev(behandling, saksbehandler, fritekst);
@@ -111,23 +108,15 @@ public class SendVedtaksbrevInnland implements StegBehandler {
 
     private void sendAvslagsbrev(Behandling behandling, String saksbehandler, String fritekst, boolean erStorBrittanniaArt18) {
         var mottakerListe = List.of(Mottaker.medRolle(Mottakerroller.BRUKER), Mottaker.av(NorskMyndighet.HELFO), Mottaker.av(NorskMyndighet.SKATTEETATEN));
-        var produserBartDokument = erStorBrittanniaArt18 ? AVSLAG_EFTA_STORBRITANNIA : AVSLAG_YRKESAKTIV;
 
-        DoksysBrevbestilling brevbestilling = new DoksysBrevbestilling.Builder()
-            .medProduserbartDokument(produserBartDokument)
-            .medAvsenderID(saksbehandler)
-            .medFritekst(fritekst)
-            .build();
+        var produserBartDokument = unleash.isEnabled(ToggleName.MELOSYS_KONVENSJON_EFTA_LAND_OG_STORBRITANNIA) &&
+            erStorBrittanniaArt18 ? AVSLAG_EFTA_STORBRITANNIA : AVSLAG_YRKESAKTIV;
+
+        DoksysBrevbestilling brevbestilling = lagDoksysBrevbestilling(produserBartDokument, saksbehandler, fritekst);
         prosessinstansService.opprettProsessinstanserSendBrev(behandling, brevbestilling, mottakerListe);
 
         if (behandling.getFagsak().harAktørMedRolleType(Aktoersroller.ARBEIDSGIVER)) {
-
-            DoksysBrevbestilling brevbestillingArbeidsgiver = new DoksysBrevbestilling.Builder()
-                .medProduserbartDokument(AVSLAG_ARBEIDSGIVER)
-                .medAvsenderID(saksbehandler)
-                .medFritekst(fritekst)
-                .build();
-
+            DoksysBrevbestilling brevbestillingArbeidsgiver = lagDoksysBrevbestilling(AVSLAG_ARBEIDSGIVER, saksbehandler, fritekst);
             prosessinstansService.opprettProsessinstansSendBrev(behandling, brevbestillingArbeidsgiver, Mottaker.medRolle(Mottakerroller.ARBEIDSGIVER));
         }
     }
@@ -139,7 +128,7 @@ public class SendVedtaksbrevInnland implements StegBehandler {
                                       String fritekst,
                                       Boolean erStorbritannia) {
 
-        Produserbaredokumenter produserbaredokument = hentProduserbarDokumentForInnvilgelse(behandling, resultat, erStorbritannia);
+        Produserbaredokumenter produserbartDokument = hentProduserbarDokumentForInnvilgelse(behandling, resultat, erStorbritannia);
 
         List<Mottaker> mottakerListe = new ArrayList<>(List.of(Mottaker.medRolle(Mottakerroller.BRUKER)));
         if (brevSendesTilStatligSkatteoppkreving(
@@ -149,11 +138,13 @@ public class SendVedtaksbrevInnland implements StegBehandler {
             mottakerListe.add(Mottaker.av(NorskMyndighet.SKATTEINNKREVER_UTLAND));
         }
 
-        DoksysBrevbestilling innvilgelseBrukerOgSkatt = new DoksysBrevbestilling.Builder().medProduserbartDokument(produserbaredokument)
+        DoksysBrevbestilling innvilgelseBrukerOgSkatt = new DoksysBrevbestilling.Builder()
+            .medProduserbartDokument(produserbartDokument)
             .medAvsenderID(saksbehandler)
             .medBegrunnelseKode(begrunnelseKode)
             .medFritekst(fritekst)
             .build();
+
         prosessinstansService.opprettProsessinstanserSendBrev(behandling, innvilgelseBrukerOgSkatt, mottakerListe);
     }
 
@@ -189,10 +180,7 @@ public class SendVedtaksbrevInnland implements StegBehandler {
     }
 
     private void sendUtpekingsbrev(Behandling behandling, String saksbehandler, String fritekst) {
-        DoksysBrevbestilling brevbestilling = new DoksysBrevbestilling.Builder().medProduserbartDokument(ORIENTERING_UTPEKING_UTLAND)
-            .medAvsenderID(saksbehandler)
-            .medFritekst(fritekst)
-            .build();
+        DoksysBrevbestilling brevbestilling = lagDoksysBrevbestilling(ORIENTERING_UTPEKING_UTLAND, saksbehandler, fritekst);
         prosessinstansService.opprettProsessinstansSendBrev(behandling, brevbestilling, Mottaker.medRolle(Mottakerroller.BRUKER));
     }
 
@@ -206,6 +194,7 @@ public class SendVedtaksbrevInnland implements StegBehandler {
                 .medProduserbartDokument(INNVILGELSE_ARBEIDSGIVER)
                 .medAvsenderID(saksbehandler)
                 .build();
+
             prosessinstansService.opprettProsessinstansSendBrev(behandling, brevbestilling, Mottaker.medRolle(Mottakerroller.ARBEIDSGIVER));
         }
     }
@@ -251,5 +240,13 @@ public class SendVedtaksbrevInnland implements StegBehandler {
                 .orElse(prosessinstans.getBehandling().getFagsak().getRegistrertAv());
         }
         return saksbehandler;
+    }
+
+    private DoksysBrevbestilling lagDoksysBrevbestilling(Produserbaredokumenter produserBartDokument, String saksbehandler, String fritekst) {
+        return new DoksysBrevbestilling.Builder()
+            .medProduserbartDokument(produserBartDokument)
+            .medAvsenderID(saksbehandler)
+            .medFritekst(fritekst)
+            .build();
     }
 }
