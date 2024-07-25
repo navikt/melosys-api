@@ -1,33 +1,33 @@
 package no.nav.melosys.service.dokument.brev.mapper
 
-import jakarta.transaction.Transactional
-import no.nav.melosys.domain.Bostedsland
 import no.nav.melosys.domain.brev.InnvilgelseEftaStorbritanniaBrevbestilling
 import no.nav.melosys.domain.dokument.felles.Periode
 import no.nav.melosys.domain.kodeverk.Vilkaar
 import no.nav.melosys.integrasjon.dokgen.dto.InnvilgelseEftaStorbritannia
+import no.nav.melosys.service.LandvelgerService
 import no.nav.melosys.service.avklartefakta.AvklarteVirksomheterService
 import no.nav.melosys.service.avklartefakta.AvklartefaktaService
 import no.nav.melosys.service.behandling.VilkaarsresultatService
 import org.springframework.stereotype.Component
+import org.springframework.transaction.annotation.Transactional
 
 @Component
 class InnvilgelseEftaStorbritanniaMapper(
     private val vilkaarsresultatService: VilkaarsresultatService,
     private val dokgenMapperDatahenter: DokgenMapperDatahenter,
     private val virksomheterService: AvklarteVirksomheterService,
-    private val avklartefaktaService: AvklartefaktaService
+    private val avklartefaktaService: AvklartefaktaService,
+    private val landvelgerService: LandvelgerService
 ) {
-    @Transactional
+    @Transactional(readOnly = true)
     internal fun mapInnvilgelseEftaStorbritannia(brevbestilling: InnvilgelseEftaStorbritanniaBrevbestilling): InnvilgelseEftaStorbritannia {
         val behandlingsresultat = dokgenMapperDatahenter.hentBehandlingsresultat(brevbestilling.behandlingId)
         val lovvalgsperiode = behandlingsresultat.hentLovvalgsperiode()
         val anmodningsperiode = behandlingsresultat.finnAnmodningsperiode()
         val erUnntakTuristskip = vilkaarsresultatService.oppfyllerVilkaar(behandlingsresultat.id, Vilkaar.FTRL_2_12_UNNTAK_TURISTSKIP)
 
-        val bostedsland = if (brevbestilling.personMottaker.finnBostedsadresse().isPresent && brevbestilling.personMottaker.finnBostedsadresse()
-                .get().strukturertAdresse.erGyldig()
-        ) Bostedsland(brevbestilling.personMottaker.finnBostedsadresse().get().strukturertAdresse.landkode).landkodeobjekt.beskrivelse else ""
+        val bostedsland = landvelgerService.hentBostedsland(behandlingsresultat.behandling).landkodeobjekt.beskrivelse
+
         val alleAvklarteOrgnr = avklartefaktaService.hentAvklarteOrgnrOgUuid(behandlingsresultat.id)
         val alleVirksomheter = virksomheterService.hentAlleNorskeVirksomheter(behandlingsresultat.behandling)
 
