@@ -1,7 +1,6 @@
 package no.nav.melosys.saksflyt.steg.brev;
 
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.List;
 
 import io.getunleash.Unleash;
@@ -19,7 +18,6 @@ import no.nav.melosys.domain.kodeverk.Mottakerroller;
 import no.nav.melosys.domain.kodeverk.begrunnelser.Endretperiode;
 import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingstema;
 import no.nav.melosys.domain.kodeverk.brev.Produserbaredokumenter;
-import no.nav.melosys.domain.kodeverk.lovvalgsbestemmelser.Lovvalgbestemmelser_konv_efta_storbritannia;
 import no.nav.melosys.domain.mottatteopplysninger.MottatteOpplysninger;
 import no.nav.melosys.exception.FunksjonellException;
 import no.nav.melosys.featuretoggle.ToggleName;
