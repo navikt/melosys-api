@@ -3,6 +3,8 @@ package no.nav.melosys.integrasjon.aareg
 import com.github.tomakehurst.wiremock.client.WireMock
 import com.github.tomakehurst.wiremock.matching.StringValuePattern
 import io.getunleash.FakeUnleash
+import io.getunleash.Unleash
+import no.nav.melosys.featuretoggle.ToggleName
 import no.nav.melosys.integrasjon.ConsumerWireMockTestBase
 import no.nav.melosys.integrasjon.OAuthMockServer
 import no.nav.melosys.integrasjon.aareg.arbeidsforhold.*
@@ -16,8 +18,20 @@ import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.beans.factory.annotation.Value
 import org.springframework.boot.test.autoconfigure.web.client.AutoConfigureWebClient
 import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest
+import org.springframework.boot.test.context.TestConfiguration
+import org.springframework.context.annotation.Bean
 import org.springframework.context.annotation.Import
 import org.springframework.test.context.ActiveProfiles
+
+@TestConfiguration
+class UnleashTestConfig {
+    @Bean
+    fun unleash(): Unleash {
+        val fakeUnleash = FakeUnleash()
+        fakeUnleash.enable(ToggleName.MELOSYS_AAREG_AZURE)
+        return fakeUnleash
+    }
+}
 
 @Import(
     StsWebClientProducer::class,
@@ -28,7 +42,7 @@ import org.springframework.test.context.ActiveProfiles
     ArbeidsforholdConsumerConfig::class,
     GenericAuthFilterFactory::class,
     StsAuthExchangeFilter::class,
-    FakeUnleash::class
+    UnleashTestConfig::class
 )
 @WebMvcTest
 @ActiveProfiles("wiremock-test")
@@ -40,14 +54,12 @@ private class AaregConsumerTokenTest(
     @Autowired oAuthMockServer: OAuthMockServer
 ) : ConsumerWireMockTestBase<String, ArbeidsforholdResponse>(mockServiceUnderTestPort, mockSecurityPort, oAuthMockServer) {
 
-
-
     @Test
     fun authorizationSkalKommeFraBruker() {
         verifyHeaders(
             mapOf<String, StringValuePattern>(
-                Pair("Authorization", WireMock.equalTo("Bearer --token-from-system--")),
-                Pair("Nav-Consumer-Token", WireMock.equalTo("Bearer --token-from-system--"))
+                Pair("Authorization", WireMock.equalTo("Bearer -- user_access_token --")),
+                Pair("Nav-Consumer-Token", WireMock.absent())
             )
         )
         executeFromController()
@@ -57,8 +69,8 @@ private class AaregConsumerTokenTest(
     fun authorizationSkalKommeFraSystem() {
         verifyHeaders(
             mapOf<String, StringValuePattern>(
-                Pair("Authorization", WireMock.equalTo("Bearer --token-from-system--")),
-                Pair("Nav-Consumer-Token", WireMock.equalTo("Bearer --token-from-system--"))
+                Pair("Authorization", WireMock.equalTo("Bearer --azure-token-from-system--")),
+                Pair("Nav-Consumer-Id", WireMock.equalTo("srvmelosys"))
             )
         )
         executeFromSystem()
@@ -68,8 +80,8 @@ private class AaregConsumerTokenTest(
     fun authorizationSkalKommeFraSystemNårHverkenSystemEllerBrukerErKilde() {
         verifyHeaders(
             mapOf<String, StringValuePattern>(
-                Pair("Authorization", WireMock.equalTo("Bearer --token-from-system--")),
-                Pair("Nav-Consumer-Token", WireMock.equalTo("Bearer --token-from-system--"))
+                Pair("Authorization", WireMock.equalTo("Bearer --azure-token-from-system--")),
+                Pair("Nav-Consumer-Id", WireMock.equalTo("srvmelosys"))
             )
         )
         executeRequest()

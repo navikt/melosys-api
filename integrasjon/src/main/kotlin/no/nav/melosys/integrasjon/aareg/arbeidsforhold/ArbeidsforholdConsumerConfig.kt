@@ -30,6 +30,7 @@ class ArbeidsforholdConsumerConfig(@Value("\${arbeidsforhold.rest.url}") private
         correlationIdOutgoingFilter: CorrelationIdOutgoingFilter
     ) = ArbeidsforholdConsumer(
         webClientBuilder.baseUrl(url)
+            .defaultHeader(NAV_CONSUMER_ID_NAME, MELOSYS_CONSUMER_ID)
             .filter(authFilterFactory.getAzureFilter(CLIENT_NAME))
             .filter(correlationIdOutgoingFilter)
             .filter(errorFilter("Henting av arbeidsforhold fra Aareg feilet"))
@@ -50,5 +51,7 @@ class ArbeidsforholdConsumerConfig(@Value("\${arbeidsforhold.rest.url}") private
 
     companion object {
         private const val CLIENT_NAME = "aareg"
+        private const val NAV_CONSUMER_ID_NAME = "Nav-Consumer-Id"
+        private const val MELOSYS_CONSUMER_ID = "srvmelosys"
     }
 }
