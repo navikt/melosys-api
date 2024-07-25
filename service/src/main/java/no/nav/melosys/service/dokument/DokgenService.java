@@ -376,7 +376,7 @@ public class DokgenService {
             case AVSLAG_EFTA_STORBRITANNIA -> new AvslagEftaStorbritanniaBrevbestilling.Builder()
                 .medDistribusjonstype(Distribusjonstype.VEDTAK)
                 .medInnledningFritekstAvslagEfta(brevbestillingDto.getInnledningFritekst())
-                .medBegrunnelseFritekstAvslagEfta(brevbestillingDto.getBegrunnelseFritekst());
+                .medBegrunnelseFritekstAvslagEfta(brevbestillingDto.getFritekst());
 
             default -> new DokgenBrevbestilling.Builder<>().medDistribusjonstype(Distribusjonstype.VIKTIG);
         };
