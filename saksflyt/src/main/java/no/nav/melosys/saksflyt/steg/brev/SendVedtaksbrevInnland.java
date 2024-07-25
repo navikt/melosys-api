@@ -82,18 +82,18 @@ public class SendVedtaksbrevInnland implements StegBehandler {
         String fritekst = hentBegrunnelseFritekst(prosessinstans);
 
         final Lovvalgsperiode lovvalgsperiode = resultat.hentLovvalgsperiode();
-        boolean erStorbritannia = Arrays.stream(Lovvalgbestemmelser_konv_efta_storbritannia.values()).anyMatch(bestemmelse -> bestemmelse == lovvalgsperiode.getBestemmelse());
-        boolean erStorBrittanniaArt18 = KONV_EFTA_STORBRITANNIA_ART18_1 == lovvalgsperiode.getBestemmelse();
 
         if (resultat.erAvslag()) {
+            boolean erStorBrittanniaArt18 = KONV_EFTA_STORBRITANNIA_ART18_1 == lovvalgsperiode.getBestemmelse();
             sendAvslagsbrev(behandling, saksbehandler, fritekst, erStorBrittanniaArt18);
             log.info("Sendt avslagsbrev for behandling {}", behandling.getId());
         } else if (resultat.erUtpeking()) {
             sendUtpekingsbrev(behandling, saksbehandler, fritekst);
             log.info("Sendt utpekingsbrev for behandling {}", behandling.getId());
         } else if (resultat.erInnvilgelse()) {
-            sendInnvilgelsesbrev(behandling, resultat, saksbehandler, begrunnelseKode, fritekst, erStorbritannia);
-            if (unleash.isEnabled(ToggleName.MELOSYS_KONVENSJON_EFTA_LAND_OG_STORBRITANNIA) && erStorbritannia) {
+            boolean erStorbritanniaBestemmelse = lovvalgsperiode.erEftaStorbritannia();
+            sendInnvilgelsesbrev(behandling, resultat, saksbehandler, begrunnelseKode, fritekst, erStorbritanniaBestemmelse);
+            if (unleash.isEnabled(ToggleName.MELOSYS_KONVENSJON_EFTA_LAND_OG_STORBRITANNIA) && erStorbritanniaBestemmelse) {
                 sendAttestA1(behandling, saksbehandler, begrunnelseKode, fritekst);
             }
             log.info("Sendt innvilgelsesbrev for behandling {}", behandling.getId());
@@ -128,7 +128,7 @@ public class SendVedtaksbrevInnland implements StegBehandler {
                                       String fritekst,
                                       Boolean erStorbritannia) {
 
-        Produserbaredokumenter produserbartDokument = hentProduserbarDokumentForInnvilgelse(behandling, resultat, erStorbritannia);
+        Produserbaredokumenter produserbaredokument = hentProduserbarDokumentForInnvilgelse(behandling, resultat, erStorbritannia);
 
         List<Mottaker> mottakerListe = new ArrayList<>(List.of(Mottaker.medRolle(Mottakerroller.BRUKER)));
         if (brevSendesTilStatligSkatteoppkreving(
@@ -138,13 +138,11 @@ public class SendVedtaksbrevInnland implements StegBehandler {
             mottakerListe.add(Mottaker.av(NorskMyndighet.SKATTEINNKREVER_UTLAND));
         }
 
-        DoksysBrevbestilling innvilgelseBrukerOgSkatt = new DoksysBrevbestilling.Builder()
-            .medProduserbartDokument(produserbartDokument)
+        DoksysBrevbestilling innvilgelseBrukerOgSkatt = new DoksysBrevbestilling.Builder().medProduserbartDokument(produserbaredokument)
             .medAvsenderID(saksbehandler)
             .medBegrunnelseKode(begrunnelseKode)
             .medFritekst(fritekst)
             .build();
-
         prosessinstansService.opprettProsessinstanserSendBrev(behandling, innvilgelseBrukerOgSkatt, mottakerListe);
     }
 
@@ -194,7 +192,6 @@ public class SendVedtaksbrevInnland implements StegBehandler {
                 .medProduserbartDokument(INNVILGELSE_ARBEIDSGIVER)
                 .medAvsenderID(saksbehandler)
                 .build();
-
             prosessinstansService.opprettProsessinstansSendBrev(behandling, brevbestilling, Mottaker.medRolle(Mottakerroller.ARBEIDSGIVER));
         }
     }
