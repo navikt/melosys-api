@@ -3,13 +3,14 @@ package no.nav.melosys.integrasjon.kodeverk.impl;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import jakarta.ws.rs.NotFoundException;
 
+import jakarta.ws.rs.NotFoundException;
 import no.nav.melosys.integrasjon.kodeverk.Kode;
 import no.nav.melosys.integrasjon.kodeverk.Kodeverk;
 import no.nav.melosys.integrasjon.kodeverk.KodeverkRegister;
 import no.nav.melosys.integrasjon.kodeverk.UkjentKodeverkException;
 import no.nav.melosys.integrasjon.kodeverk.impl.dto.KodeDto;
+import org.springframework.cache.annotation.Cacheable;
 import org.springframework.stereotype.Component;
 
 @Component
@@ -24,6 +25,7 @@ public class KodeverkRegisterImpl implements KodeverkRegister {
     }
 
     @Override
+    @Cacheable("kodeverk")
     public Kodeverk hentKodeverk(String kodeverkNavn) {
         try {
             KodeDto kodeDto = kodeverkConsumer.hentKodeverk(kodeverkNavn);

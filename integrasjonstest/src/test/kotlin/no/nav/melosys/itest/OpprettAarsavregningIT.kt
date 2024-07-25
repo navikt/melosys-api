@@ -21,12 +21,10 @@ import no.nav.melosys.repository.BehandlingsresultatRepository
 import no.nav.melosys.repository.FagsakRepository
 import no.nav.melosys.service.avgift.aarsavregning.ÅrsavregningService
 import org.springframework.beans.factory.annotation.Autowired
-import org.springframework.boot.test.context.SpringBootTest
 import org.springframework.transaction.annotation.Transactional
 import java.time.LocalDate
 import kotlin.test.Test
 
-@SpringBootTest
 class OpprettAarsavregningIT @Autowired constructor(
     private val årsavregningService: ÅrsavregningService,
     private val aarsavregningRepository: AarsavregningRepository,

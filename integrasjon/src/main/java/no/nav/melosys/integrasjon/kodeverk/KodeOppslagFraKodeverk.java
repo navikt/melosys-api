@@ -6,7 +6,6 @@ import java.util.List;
 import no.nav.melosys.domain.FellesKodeverk;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.cache.annotation.Cacheable;
 import org.springframework.stereotype.Component;
 
 @Component
@@ -28,7 +27,7 @@ public class KodeOppslagFraKodeverk implements KodeOppslag {
 
     @Override
     public String getTermFraKodeverk(FellesKodeverk kodeverk, String kode, LocalDate dato) {
-        return getTermFraKodeverk(kodeverk, kode, dato, getKodeverk(kodeverk.getNavn()).getKoder().get(kode));
+        return getTermFraKodeverk(kodeverk, kode, dato, kodeverkRegister.hentKodeverk(kodeverk.getNavn()).getKoder().get(kode));
     }
 
     @Override
@@ -45,12 +44,5 @@ public class KodeOppslagFraKodeverk implements KodeOppslag {
         }
         log.warn("Fant ingen gyldig term for kode {} i kodeverk {}", kode, kodeverk.getNavn());
         return UKJENT;
-    }
-
-    // Diskutert med Andreas og det blir en egen PR på en bedre løsning her
-    // Bør bli en felles løsning som også kan brukes av KodeverkService så den ikke gjør cahing selv
-    @Cacheable("kodeverk")
-    public Kodeverk getKodeverk(String kodeverkName) {
-        return kodeverkRegister.hentKodeverk(kodeverkName);
     }
 }

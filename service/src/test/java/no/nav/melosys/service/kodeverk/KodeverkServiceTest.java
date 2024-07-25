@@ -47,10 +47,6 @@ class KodeverkServiceTest {
         String res = kodeverkService.dekod(LANDKODER, BAK);
         assertThat(res).isEqualTo(BAKVENDTLAND);
         verify(kodeverkRegisterMock, atMost(1)).hentKodeverk(any());
-        // Sjekk opphenting fra cache...
-        String cacheRes = kodeverkService.dekod(LANDKODER, BAK);
-        verify(kodeverkRegisterMock, atMost(1)).hentKodeverk(any());
-        assertThat(res).isEqualTo(cacheRes);
     }
 
     @Test

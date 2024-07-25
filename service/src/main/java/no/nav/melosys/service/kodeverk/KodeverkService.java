@@ -1,8 +1,10 @@
 package no.nav.melosys.service.kodeverk;
 
 import java.time.LocalDate;
-import java.time.LocalTime;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.List;
+import java.util.Map;
 
 import net.javacrumbs.shedlock.spring.annotation.SchedulerLock;
 import no.nav.melosys.domain.FellesKodeverk;
@@ -10,7 +12,6 @@ import no.nav.melosys.integrasjon.kodeverk.*;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.boot.context.event.ApplicationReadyEvent;
-import org.springframework.cache.annotation.Cacheable;
 import org.springframework.context.event.EventListener;
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Service;
@@ -22,15 +23,12 @@ public class KodeverkService {
 
     public static final String UKJENT = KodeOppslagFraKodeverk.UKJENT;
 
-
-    private Map<String, no.nav.melosys.integrasjon.kodeverk.Kodeverk> kodeverkCache;
     private KodeverkRegister kodeverkRegister;
     private KodeOppslag kodeOppslag;
 
     public KodeverkService(KodeverkRegister kodeverkRegister, KodeOppslag kodeOppslag) {
         this.kodeverkRegister = kodeverkRegister;
         this.kodeOppslag = kodeOppslag;
-        this.kodeverkCache = new HashMap<>();
     }
 
     @EventListener
@@ -65,7 +63,7 @@ public class KodeverkService {
             return Collections.emptyList();
         }
 
-        no.nav.melosys.integrasjon.kodeverk.Kodeverk hentetKodeverk = hentKodeverk(kodeverk.getNavn());
+        Kodeverk hentetKodeverk = hentKodeverk(kodeverk.getNavn());
 
         if (hentetKodeverk == null) {
             log.warn("Fant ikke kodeverk {}", kodeverk.getNavn());
@@ -81,22 +79,15 @@ public class KodeverkService {
         return gyldigeKoder;
     }
 
-    private synchronized no.nav.melosys.integrasjon.kodeverk.Kodeverk hentKodeverk(String kodeverkNavn) {
-        no.nav.melosys.integrasjon.kodeverk.Kodeverk kodeverk = kodeverkCache.get(kodeverkNavn);
-        if (kodeverk != null) {
-            return kodeverk;
-        }
-        kodeverk = kodeverkRegister.hentKodeverk(kodeverkNavn);
-        kodeverkCache.put(kodeverkNavn, kodeverk);
+    private Kodeverk hentKodeverk(String kodeverkNavn) {
         log.debug("Hentet og cachet Kodeverk {}", kodeverkNavn);
-        return kodeverk;
+        return kodeverkRegister.hentKodeverk(kodeverkNavn);
     }
 
     @Scheduled(cron = "0 0 6 * * *")
     @SchedulerLock(name = "KodeverkSchedulerJobb", lockAtLeastFor = "10m")
-    public void kodeverkScheduler(){
-        log.info("Tømmer kodeverkcache og henter alle kodeverk");
-        kodeverkCache.clear();
+    public void kodeverkScheduler() {
+        log.info("Henter alle kodeverk");
         for (FellesKodeverk kodeverk : FellesKodeverk.values()) {
             hentKodeverk(kodeverk.getNavn());
         }
