@@ -4,15 +4,15 @@ import java.time.LocalDate;
 import java.time.LocalTime;
 import java.util.*;
 
+import net.javacrumbs.shedlock.spring.annotation.SchedulerLock;
 import no.nav.melosys.domain.FellesKodeverk;
-import no.nav.melosys.integrasjon.kodeverk.Kode;
-import no.nav.melosys.integrasjon.kodeverk.KodeOppslag;
-import no.nav.melosys.integrasjon.kodeverk.KodeOppslagFraKodeverk;
-import no.nav.melosys.integrasjon.kodeverk.KodeverkRegister;
+import no.nav.melosys.integrasjon.kodeverk.*;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.boot.context.event.ApplicationReadyEvent;
+import org.springframework.cache.annotation.Cacheable;
 import org.springframework.context.event.EventListener;
+import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Service;
 import org.springframework.util.StringUtils;
 
@@ -20,8 +20,6 @@ import org.springframework.util.StringUtils;
 public class KodeverkService {
     private static final Logger log = LoggerFactory.getLogger(KodeverkService.class);
 
-    private static final long MILLIS_MELLOM_VÅKNE_OPP = 3600000;
-    private static final long KLOKKESLETT_FOR_CACHE_REFRESH = 6;
     public static final String UKJENT = KodeOppslagFraKodeverk.UKJENT;
 
 
@@ -37,7 +35,7 @@ public class KodeverkService {
 
     @EventListener
     public void onApplicationEvent(ApplicationReadyEvent event) {
-        new TømCacheScheduler().start();
+        kodeverkScheduler();
     }
 
     public KodeDto getKodeverdi(FellesKodeverk kodeverk, String kode) {
@@ -94,31 +92,13 @@ public class KodeverkService {
         return kodeverk;
     }
 
-
-    private class TømCacheScheduler extends Thread {
-
-        private synchronized void henteAlleKodeVerkData() {
-            log.info("Tømmer cache og henter Kodeverk på nytt");
-            kodeverkCache.clear();
-            for (FellesKodeverk kodeverk : FellesKodeverk.values()) {
-                hentKodeverk(kodeverk.getNavn());
-            }
-        }
-
-        @Override
-        public void run() {
-            henteAlleKodeVerkData();
-            for (; ; ) {
-                if (KLOKKESLETT_FOR_CACHE_REFRESH == LocalTime.now().getHour()) { // Tømme cache og hente Kodeverk på nytt hvertdag kl 06:00
-                    henteAlleKodeVerkData();
-                }
-                try {
-                    sleep(MILLIS_MELLOM_VÅKNE_OPP);
-                } catch (InterruptedException e) {
-                    Thread.currentThread().interrupt();
-                }
-
-            }
+    @Scheduled(cron = "0 0 6 * * *")
+    @SchedulerLock(name = "KodeverkSchedulerJobb", lockAtLeastFor = "10m")
+    public void kodeverkScheduler(){
+        log.info("Tømmer kodeverkcache og henter alle kodeverk");
+        kodeverkCache.clear();
+        for (FellesKodeverk kodeverk : FellesKodeverk.values()) {
+            hentKodeverk(kodeverk.getNavn());
         }
     }
 
