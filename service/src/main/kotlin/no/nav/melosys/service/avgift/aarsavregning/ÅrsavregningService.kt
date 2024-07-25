@@ -42,7 +42,7 @@ class ÅrsavregningService(
             throw FunksjonellException("Behandling med id $behandlingID er ikke en årsavregning")
         }
 
-        val aarsavregning = behandlingsresultat.aarsavregning ?: return null
+        val aarsavregning = behandlingsresultat.Årsavregning ?: return null
 
         return lagÅrsavregningFraAarsavregning(aarsavregning)
     }
@@ -51,7 +51,7 @@ class ÅrsavregningService(
     fun opprettÅrsavregning(behandlingID: Long, gjelderÅr: Int): ÅrsavregningModel {
         val behandlingsresultat = behandlingsresultatService.hentBehandlingsresultat(behandlingID)
 
-        if (behandlingsresultat.aarsavregning != null && behandlingsresultat.aarsavregning?.aar == gjelderÅr) {
+        if (behandlingsresultat.Årsavregning != null && behandlingsresultat.Årsavregning?.aar == gjelderÅr) {
             throw FunksjonellException("Året $gjelderÅr er allerede lagret på denne årsavregningen")
         }
         if (aarsavregningRepository.finnAntallÅrsavregningerPåFagsakForÅr(behandlingID, gjelderÅr) != 0) {
@@ -65,14 +65,14 @@ class ÅrsavregningService(
             throw FunksjonellException("Årsavregning kan ikke opprettes for år eldre enn 6 år før inneværende år.")
         }
 
-        if (behandlingsresultat.aarsavregning != null) {
-            behandlingsresultat.aarsavregning?.behandlingsresultat = null
-            behandlingsresultat.aarsavregning = null;
+        if (behandlingsresultat.Årsavregning != null) {
+            behandlingsresultat.Årsavregning?.behandlingsresultat = null
+            behandlingsresultat.Årsavregning = null;
             behandlingsresultatService.lagreOgFlush(behandlingsresultat)
         }
 
         val årsavregning = Årsavregning().apply {
-            behandlingsresultat.aarsavregning = this
+            behandlingsresultat.Årsavregning = this
             aar = gjelderÅr
             this.behandlingsresultat = behandlingsresultat
             tidligereBehandlingsresultat = finnTidligereBehandlingsresultatMedAvgift(behandlingsresultat, gjelderÅr)

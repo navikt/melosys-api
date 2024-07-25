@@ -102,7 +102,7 @@ internal class ÅrsavregningServiceTest {
             aar = 2023
             this.behandlingsresultat = behandlingsresultat
         }
-        behandlingsresultat.aarsavregning = årsavregningEntity
+        behandlingsresultat.Årsavregning = årsavregningEntity
         every { behandlingsresultatService.hentBehandlingsresultat(1L) }.returns(behandlingsresultat)
 
         årsavregningService.finnÅrsavregning(1) shouldBe ÅrsavregningModel(
@@ -146,7 +146,7 @@ internal class ÅrsavregningServiceTest {
             this.behandlingsresultat = behandlingsresultat
             tidligereBehandlingsresultat = lagTidligereBehandlingsresultat()
         }
-        behandlingsresultat.aarsavregning = årsavregningEntity
+        behandlingsresultat.Årsavregning = årsavregningEntity
         every { behandlingsresultatService.hentBehandlingsresultat(1L) }.returns(behandlingsresultat)
 
         årsavregningService.finnÅrsavregning(1) shouldBe ÅrsavregningModel(

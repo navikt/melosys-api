@@ -246,11 +246,11 @@ public class Behandlingsresultat extends RegistreringsInfo {
         this.kontrollresultater = kontrollresultater;
     }
 
-    public Årsavregning getAarsavregning() {
+    public Årsavregning getÅrsavregning() {
         return årsavregning;
     }
 
-    public void setAarsavregning(Årsavregning årsavregning) {
+    public void setÅrsavregning(Årsavregning årsavregning) {
         this.årsavregning = årsavregning;
     }
 

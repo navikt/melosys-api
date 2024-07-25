@@ -16,7 +16,7 @@ class InnhentingAvInntektsopplysningerMapper(
     internal fun map(brevbestilling: InnhentingAvInntektsopplysningerBrevbestilling): InnhentingAvInntektsopplysninger {
         val behandlingsresultat = dokgenMapperDatahenter.hentBehandlingsresultat(brevbestilling.behandlingId)
 
-        val årsavregningsår = behandlingsresultat.aarsavregning.aar
+        val årsavregningsår = behandlingsresultat.Årsavregning.aar
         val fristdato = LocalDate.now().plusWeeks(4)
         val medlemskapsperiode = mapMedlemskapsPerioder(behandlingsresultat, årsavregningsår)
 
