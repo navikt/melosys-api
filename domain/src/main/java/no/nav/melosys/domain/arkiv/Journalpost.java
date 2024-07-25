@@ -200,6 +200,10 @@ public class Journalpost {
         return "EESSI".equals(mottaksKanal);
     }
 
+    public boolean mottaksKanalErElektronisk() {
+        return List.of("NAV_NO", "EESSI", "ALTINN", "NAV_NO_CHAT").contains(mottaksKanal);
+    }
+
     public String getTema() {
         return tema;
     }
