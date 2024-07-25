@@ -1,6 +1,5 @@
 package no.nav.melosys.service.dokument.brev.mapper
 
-import jakarta.transaction.Transactional
 import no.nav.melosys.domain.brev.InnvilgelseEftaStorbritanniaBrevbestilling
 import no.nav.melosys.domain.dokument.felles.Periode
 import no.nav.melosys.domain.kodeverk.Vilkaar
@@ -10,6 +9,7 @@ import no.nav.melosys.service.avklartefakta.AvklarteVirksomheterService
 import no.nav.melosys.service.avklartefakta.AvklartefaktaService
 import no.nav.melosys.service.behandling.VilkaarsresultatService
 import org.springframework.stereotype.Component
+import org.springframework.transaction.annotation.Transactional
 
 @Component
 class InnvilgelseEftaStorbritanniaMapper(
@@ -19,7 +19,7 @@ class InnvilgelseEftaStorbritanniaMapper(
     private val avklartefaktaService: AvklartefaktaService,
     private val landvelgerService: LandvelgerService
 ) {
-    @Transactional
+    @Transactional(readOnly = true)
     internal fun mapInnvilgelseEftaStorbritannia(brevbestilling: InnvilgelseEftaStorbritanniaBrevbestilling): InnvilgelseEftaStorbritannia {
         val behandlingsresultat = dokgenMapperDatahenter.hentBehandlingsresultat(brevbestilling.behandlingId)
         val lovvalgsperiode = behandlingsresultat.hentLovvalgsperiode()
@@ -39,7 +39,7 @@ class InnvilgelseEftaStorbritanniaMapper(
             brevbestilling = brevbestilling,
             navnVirksomhet = navnVirksomhet,
             behandlingstype = behandlingsresultat.behandling.type,
-            nyVurderingBakgrunn = behandlingsresultat.nyVurderingBakgrunn,
+            nyVurderingBakgrunn = brevbestilling.nyVurderingBakgrunn,
             innvilgelseFritekst = brevbestilling.innvilgelseFritekst,
             lovvalgsbestemmelse = lovvalgsperiode.bestemmelse.name(),
             erUnntakTuristskip = erUnntakTuristskip,
