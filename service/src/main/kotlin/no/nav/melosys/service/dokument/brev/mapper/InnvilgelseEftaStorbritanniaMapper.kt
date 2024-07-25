@@ -39,7 +39,7 @@ class InnvilgelseEftaStorbritanniaMapper(
             brevbestilling = brevbestilling,
             navnVirksomhet = navnVirksomhet,
             behandlingstype = behandlingsresultat.behandling.type,
-            nyVurderingBakgrunn = brevbestilling.nyVurderingBakgrunn,
+            nyVurderingBakgrunn = behandlingsresultat.nyVurderingBakgrunn,
             innvilgelseFritekst = brevbestilling.innvilgelseFritekst,
             lovvalgsbestemmelse = lovvalgsperiode.bestemmelse.name(),
             erUnntakTuristskip = erUnntakTuristskip,
