@@ -1,7 +1,10 @@
 package no.nav.melosys.saksflyt.steg.brev;
 
 import java.time.LocalDate;
-import java.util.*;
+import java.util.Collections;
+import java.util.List;
+import java.util.NoSuchElementException;
+import java.util.Set;
 
 import io.getunleash.FakeUnleash;
 import no.nav.melosys.domain.*;
@@ -41,7 +44,7 @@ import static no.nav.melosys.domain.kodeverk.Mottakerroller.ARBEIDSGIVER;
 import static no.nav.melosys.domain.kodeverk.Mottakerroller.BRUKER;
 import static no.nav.melosys.domain.kodeverk.brev.Produserbaredokumenter.*;
 import static no.nav.melosys.domain.kodeverk.lovvalgsbestemmelser.Lovvalgbestemmelser_883_2004.*;
-import static no.nav.melosys.domain.kodeverk.lovvalgsbestemmelser.Lovvalgbestemmelser_konv_efta_storbritannia.*;
+import static no.nav.melosys.domain.kodeverk.lovvalgsbestemmelser.Lovvalgbestemmelser_konv_efta_storbritannia.KONV_EFTA_STORBRITANNIA_ART18_1;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatExceptionOfType;
 import static org.mockito.Mockito.*;
@@ -142,7 +145,9 @@ class SendVedtaksbrevInnlandTest {
         when(behandlingsresultatService.hentBehandlingsresultat(BEHANDLINGID))
             .thenReturn(lagBehandlingsresultat(lagLovvalgsperiode(KONV_EFTA_STORBRITANNIA_ART18_1, LocalDate.now(), Land_iso2.HR, false)));
 
+
         sendVedtaksbrevInnland.utfør(lagProsessinstans());
+
 
         var mottakere = List.of(Mottaker.medRolle(Mottakerroller.BRUKER), Mottaker.av(NorskMyndighet.HELFO), Mottaker.av(NorskMyndighet.SKATTEETATEN));
 
@@ -160,7 +165,9 @@ class SendVedtaksbrevInnlandTest {
         when(behandlingsresultatService.hentBehandlingsresultat(BEHANDLINGID))
             .thenReturn(lagBehandlingsresultat(lagLovvalgsperiode(KONV_EFTA_STORBRITANNIA_ART18_1, LocalDate.now(), Land_iso2.HR, false)));
 
+
         sendVedtaksbrevInnland.utfør(lagProsessinstans());
+
 
         var mottakere = List.of(Mottaker.medRolle(Mottakerroller.BRUKER), Mottaker.av(NorskMyndighet.HELFO), Mottaker.av(NorskMyndighet.SKATTEETATEN));
 
