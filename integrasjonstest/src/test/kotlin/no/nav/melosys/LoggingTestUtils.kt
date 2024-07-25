@@ -3,45 +3,31 @@ package no.nav.melosys
 import ch.qos.logback.classic.Logger
 import ch.qos.logback.classic.spi.ILoggingEvent
 import ch.qos.logback.core.AppenderBase
-import ch.qos.logback.core.read.ListAppender
 import io.kotest.assertions.withClue
 import io.kotest.matchers.collections.shouldHaveAtLeastSize
 import mu.KotlinLogging
 import org.slf4j.LoggerFactory
 import java.util.*
 import java.util.concurrent.locks.ReentrantReadWriteLock
-import kotlin.ConcurrentModificationException
 import kotlin.concurrent.read
 import kotlin.concurrent.write
 
 object LoggingTestUtils {
     val log = KotlinLogging.logger { } // på være public siden brukes av inline funksjon
-
-    fun <T> withLogCaptureNotThreadSafe(block: (logEvents: List<ILoggingEvent>) -> T): T {
-        val logger = LoggerFactory.getLogger(Logger.ROOT_LOGGER_NAME) as Logger
-        val listAppender = ListAppender<ILoggingEvent>().apply { start() }
-        logger.addAppender(listAppender)
-        try {
-            return block(listAppender.list)
-        } finally {
-            logger.detachAppender(listAppender)
-        }
-    }
-
     class ThreadSafeListAppender<E> : AppenderBase<E>() {
-        private val _list: MutableList<E> = ArrayList()
+        private val loggingEvents: MutableList<E> = ArrayList()
         private val lock = ReentrantReadWriteLock()
 
         val list: List<E>
-            get() = lock.read { _list.toList() }
+            get() = lock.read { loggingEvents.toList() }
 
         override fun append(e: E) {
             lock.write {
-                _list.add(e)
+                loggingEvents.add(e)
             }
         }
 
-        fun <T> withReadLock(action: (List<E>) -> T): T = lock.read { action(_list) }
+        fun <T> withReadLock(action: (List<E>) -> T): T = lock.read { action(loggingEvents) }
     }
 
     fun <T> withLogCapture(block: (logEvents: List<ILoggingEvent>) -> T): T {
@@ -175,18 +161,4 @@ object LoggingTestUtils {
 
     val Collection<ILoggingEvent>.filterBuilder: LogFilterBuilder
         get() = LogFilterBuilder(this)
-
-
-    inline fun <reified T : Any> Collection<ILoggingEvent>.last(): String? {
-        val findLast = { filterBuilder.match<T>().build().lastOrNull()?.formattedMessage }
-        for (i in 1..3) {
-            try {
-                return findLast()
-            } catch (e: ConcurrentModificationException) {
-                // Siden dette gjelder test er det raskere og prøve på nytt, en å synkronisere
-                log.warn("ConcurrentModification during find last log message, retrying $i", e)
-            }
-        }
-        return findLast()
-    }
 }

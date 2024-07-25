@@ -3,7 +3,6 @@ package no.nav.melosys
 import ch.qos.logback.classic.Level
 import io.kotest.matchers.collections.shouldContainInOrder
 import io.kotest.matchers.collections.shouldHaveSize
-import io.kotest.matchers.nulls.shouldNotBeNull
 import io.kotest.matchers.shouldBe
 import mu.KotlinLogging
 import no.nav.melosys.LoggingTestUtils.filterBuilder
@@ -107,12 +106,14 @@ class LoggingTestUtilsTest {
     fun `should manage multiple threads without getting ConcurrentModificationException`() {
         val someClassLogger = LoggerFactory.getLogger(SomeClass1::class.java)
 
+        val threadCount = 10
+        val logMessageCount = 200
         repeat(10) { // Concurrent exceptions do not happen every time so run many times
             LoggingTestUtils.withLogCapture { logs ->
                 val threads = mutableListOf<Thread>()
-                repeat(10) { threadNum ->
+                repeat(threadCount) { threadNum ->
                     val thread = Thread {
-                        repeat(200) { i ->
+                        repeat(logMessageCount) { i ->
                             someClassLogger.info("$threadNum - $i")
                         }
                     }
@@ -120,23 +121,19 @@ class LoggingTestUtilsTest {
                     thread.start()
                 }
 
-                while (!logs.filterBuilder
-                        .match<SomeClass1>()
-                        .build()
-                        .any {
-                            it.formattedMessage.contains("199")
-                        }
-                ) {
-                    Thread.sleep(1)
+
+                var foundCount = 0
+                while (true) {
+                    if (logs.any { it.formattedMessage.contains("199") }) {
+                        if (foundCount++ == threadCount) break
+                    }
+                    Thread.sleep(1) // To avid using all cpu
                 }
 
-                println("--------")
                 logs.filterBuilder
                     .match<SomeClass1>()
                     .build()
-                    .forEach {
-                        it.shouldNotBeNull() // just do something
-                    }
+                    .count().shouldBe(threadCount * logMessageCount)
 
                 threads.forEach { it.join() }
             }
