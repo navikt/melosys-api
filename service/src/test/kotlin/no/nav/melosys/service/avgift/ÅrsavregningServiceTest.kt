@@ -118,22 +118,6 @@ internal class ÅrsavregningServiceTest {
     }
 
     @Test
-    fun `finnÅrsavregning feiler når behandling ikke er av type årsavregning`() {
-        val behandlingsresultat = Behandlingsresultat().apply {
-            behandling = Behandling().apply {
-                id = 1L
-                type = Behandlingstyper.FØRSTEGANG
-            }
-        }
-
-        every { behandlingsresultatService.hentBehandlingsresultat(1L) }.returns(behandlingsresultat)
-
-        shouldThrow<FunksjonellException> {
-            årsavregningService.finnÅrsavregning(1)
-        }.message shouldBe "Behandling med id 1 er ikke en årsavregning"
-    }
-
-    @Test
     fun `hentÅrsavregning for ny årsavregning, grunnlag finnes i Melosys`() {
         val behandlingsresultat = Behandlingsresultat().apply {
             behandling = Behandling().apply {

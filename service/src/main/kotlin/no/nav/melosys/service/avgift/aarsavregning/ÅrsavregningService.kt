@@ -28,8 +28,6 @@ class ÅrsavregningService(
     private val trygdeavgiftService: TrygdeavgiftService
 ) {
 
-
-
     fun beregnTotalbeløpForPeriode(beregnTotalBeløpDto: BeregnTotalBeløpDto): BigDecimal {
         val saksbehandlerIdent = SubjectHandler.getInstance().getUserID()
         return faktureringskomponentenConsumer.hentTotalTrygdeavgiftForPeriode(beregnTotalBeløpDto, saksbehandlerIdent)
@@ -38,9 +36,6 @@ class ÅrsavregningService(
     @Transactional(readOnly = true)
     fun finnÅrsavregning(behandlingID: Long): ÅrsavregningModel? {
         val behandlingsresultat = behandlingsresultatService.hentBehandlingsresultat(behandlingID)
-        if (!behandlingsresultat.behandling.erÅrsavregning()) {
-            throw FunksjonellException("Behandling med id $behandlingID er ikke en årsavregning")
-        }
 
         val aarsavregning = behandlingsresultat.Årsavregning ?: return null
 
