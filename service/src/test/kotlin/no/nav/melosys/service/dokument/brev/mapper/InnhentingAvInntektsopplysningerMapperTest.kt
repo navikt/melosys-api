@@ -74,7 +74,7 @@ internal class InnhentingAvInntektsopplysningerMapperTest {
         return Behandlingsresultat().apply {
             behandling = lagBehandling()
 
-            Årsavregning = Årsavregning().apply {
+            årsavregning = Årsavregning().apply {
                 aar = 2023
             }
             medlemskapsperioder = listOf(

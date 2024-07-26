@@ -337,7 +337,7 @@ class YrkesaktivFtrlVedtakIT(
                         .run {
                             behandlingsResultRepository.findById(id)
                                 .shouldBePresent()
-                                .Årsavregning
+                                .årsavregning
                                 .shouldNotBeNull()
                                 .run {
                                     aar shouldBe 2023

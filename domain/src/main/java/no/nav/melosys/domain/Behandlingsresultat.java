@@ -246,11 +246,13 @@ public class Behandlingsresultat extends RegistreringsInfo {
         this.kontrollresultater = kontrollresultater;
     }
 
-    public Årsavregning getÅrsavregning() {
+    //Kotlin skjønner ikke at "å" er liten bokstav for "Å".
+    public Årsavregning getårsavregning() {
         return årsavregning;
     }
 
-    public void setÅrsavregning(Årsavregning årsavregning) {
+    //Kotlin skjønner ikke at "å" er liten bokstav for "Å".
+    public void setårsavregning(Årsavregning årsavregning) {
         this.årsavregning = årsavregning;
     }
 

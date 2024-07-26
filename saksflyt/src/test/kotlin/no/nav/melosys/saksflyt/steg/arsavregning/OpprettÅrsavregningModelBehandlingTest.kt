@@ -149,7 +149,7 @@ class OpprettÅrsavregningModelBehandlingTest {
         val behandlingsresultat = Behandlingsresultat().apply {
             id = 2
             type = Behandlingsresultattyper.IKKE_FASTSATT
-            Årsavregning = Årsavregning().apply {
+            årsavregning = Årsavregning().apply {
                 aar = GJELDER_ÅR
             }
         }

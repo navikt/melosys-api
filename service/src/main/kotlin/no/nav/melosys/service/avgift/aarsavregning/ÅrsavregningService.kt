@@ -37,7 +37,7 @@ class ÅrsavregningService(
     fun finnÅrsavregning(behandlingID: Long): ÅrsavregningModel? {
         val behandlingsresultat = behandlingsresultatService.hentBehandlingsresultat(behandlingID)
 
-        val aarsavregning = behandlingsresultat.Årsavregning ?: return null
+        val aarsavregning = behandlingsresultat.årsavregning ?: return null
 
         return lagÅrsavregningFraAarsavregning(aarsavregning)
     }
@@ -46,7 +46,7 @@ class ÅrsavregningService(
     fun opprettÅrsavregning(behandlingID: Long, gjelderÅr: Int): ÅrsavregningModel {
         val behandlingsresultat = behandlingsresultatService.hentBehandlingsresultat(behandlingID)
 
-        if (behandlingsresultat.Årsavregning != null && behandlingsresultat.Årsavregning?.aar == gjelderÅr) {
+        if (behandlingsresultat.årsavregning != null && behandlingsresultat.årsavregning?.aar == gjelderÅr) {
             throw FunksjonellException("Året $gjelderÅr er allerede lagret på denne årsavregningen")
         }
         if (aarsavregningRepository.finnAntallÅrsavregningerPåFagsakForÅr(behandlingID, gjelderÅr) != 0) {
@@ -60,14 +60,14 @@ class ÅrsavregningService(
             throw FunksjonellException("Årsavregning kan ikke opprettes for år eldre enn 6 år før inneværende år.")
         }
 
-        if (behandlingsresultat.Årsavregning != null) {
-            behandlingsresultat.Årsavregning?.behandlingsresultat = null
-            behandlingsresultat.Årsavregning = null;
+        if (behandlingsresultat.årsavregning != null) {
+            behandlingsresultat.årsavregning?.behandlingsresultat = null
+            behandlingsresultat.årsavregning = null;
             behandlingsresultatService.lagreOgFlush(behandlingsresultat)
         }
 
         val årsavregning = Årsavregning().apply {
-            behandlingsresultat.Årsavregning = this
+            behandlingsresultat.årsavregning = this
             aar = gjelderÅr
             this.behandlingsresultat = behandlingsresultat
             tidligereBehandlingsresultat = finnTidligereBehandlingsresultatMedAvgift(behandlingsresultat, gjelderÅr)
