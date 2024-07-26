@@ -25,24 +25,9 @@ class OppgaveIdMigrering(
     @Volatile
     var stopMigrering: Boolean = false
 
-
-    fun status(): Map<String, Any> {
-        return migreringsRapport.status()
-    }
-
-
     @Async
     @Synchronized
-    fun go(dryrun: Boolean) {
-        ThreadLocalAccessInfo.executeProcess("Migrer oppgaveIder") {
-            migrering(dryrun)
-        }
-    }
-
-
-    @Async
-    @Synchronized
-    fun migrerOppgaveId(dryrun: Boolean) {
+    fun migrerOppgaver(dryrun: Boolean) {
         ThreadLocalAccessInfo.executeProcess("Migrer oppgaveIder") {
             migrering(dryrun)
         }

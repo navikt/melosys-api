@@ -37,13 +37,6 @@ class OppgaveIdMigreringRapport(
     private val oppgaveMigrert = mutableListOf<OppgaveMigrert>()
     private val sakerMedFlereÅpneBehandlinger = mutableListOf<String>()
 
-    data class OppgaveMigrert(
-        val saksnummer: String?,
-        val behandlingId: Long?,
-        val oppgave: Oppgave,
-        val sakHarFlereÅpneBehandlinger: Boolean = false
-    )
-
     fun status(): Map<String, Any> {
         return mapOf(
             "antallOppgaverFunnet" to antallOppgaverFunnet,
@@ -87,12 +80,11 @@ class OppgaveIdMigreringRapport(
             }"
         File(timeForRun).mkdirs()
 
-        File("$timeForRun/rapport.json").writeText(migreringsSakListeSomJsonString())
+        File("$timeForRun/rapport.json").writeText(migreringsOppgaveMigrertListeSomJsonString())
         File("$timeForRun/status.json").writeText(status)
     }
 
-    fun migreringsSakListeSomJsonString(): String = oppgaveMigrert.toJsonNode.toPrettyString()
-
+    fun migreringsOppgaveMigrertListeSomJsonString(): String = oppgaveMigrert.toJsonNode.toPrettyString()
 
     private val Any.toJsonNode: JsonNode
         get() {
@@ -102,3 +94,10 @@ class OppgaveIdMigreringRapport(
                 .valueToTree(this)
         }
 }
+
+data class OppgaveMigrert(
+    val saksnummer: String?,
+    val behandlingId: Long?,
+    val oppgave: Oppgave,
+    val sakHarFlereÅpneBehandlinger: Boolean = false
+)
