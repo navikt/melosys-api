@@ -22,6 +22,7 @@ class OppgaveIdMigrering(
     private val oppgaveFasade: OppgaveFasade,
     private val migreringsRapport: OppgaveIdMigreringRapport
 ) {
+
     @Volatile
     var stopMigrering: Boolean = false
 
@@ -44,11 +45,9 @@ class OppgaveIdMigrering(
 
     internal fun migrering(
         dryrun: Boolean,
-        options: Options = Options()
     ) {
         log.info(
-            "Utfører OppgaveMigrering. \n" +
-                options.toJsonNode.toPrettyString()
+            "Utfører OppgaveMigrering. \n"
         )
         finnÅpneOppgaver().apply {
             migreringsRapport.antallOppgaverFunnet = size
@@ -100,11 +99,4 @@ class OppgaveIdMigrering(
                 .registerModule(JavaTimeModule())
                 .valueToTree(this)
         }
-
-
-    data class Options(
-        val migrerOppgaver: Boolean = true,
-    )
-
-
 }
