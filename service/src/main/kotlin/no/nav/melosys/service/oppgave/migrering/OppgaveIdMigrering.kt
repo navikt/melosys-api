@@ -47,7 +47,7 @@ class OppgaveIdMigrering(
         dryrun: Boolean,
     ) {
         log.info(
-            "Utfører OppgaveMigrering. \n"
+            "Utfører OppgaveMigrering.  Dryrun: $dryrun"
         )
         finnÅpneOppgaver().apply {
             migreringsRapport.antallOppgaverFunnet = size
