@@ -2,7 +2,6 @@ package no.nav.melosys.itest
 
 import io.kotest.assertions.throwables.shouldThrow
 import io.kotest.matchers.nulls.shouldNotBeNull
-import io.kotest.matchers.optional.shouldBePresent
 import io.kotest.matchers.shouldBe
 import no.nav.melosys.domain.Behandling
 import no.nav.melosys.domain.Behandlingsmaate
@@ -27,34 +26,59 @@ import java.time.LocalDate
 import kotlin.test.Test
 
 @SpringBootTest
-class OpprettAarsavregningIT @Autowired constructor(
+class OpprettÅrsavregningIT @Autowired constructor(
     private val årsavregningService: ÅrsavregningService,
     private val aarsavregningRepository: AarsavregningRepository,
     private val behandlingsresultatRepository: BehandlingsresultatRepository,
     private val behandlingRepository: BehandlingRepository,
     private val fagsakRepository: FagsakRepository
 ) : ComponentTestBase() {
+
     @Test
     @Transactional
-    fun `opprettNyÅrsavregning should create a new årsavregning when no existing avregning exists`() {
+    fun `opprettNyÅrsavregning skal lage ny årsavregning når det ikke finnes avregning`() {
         val behandlingsresultat = lagBehandlingsResultat()
 
         val result = årsavregningService.opprettÅrsavregning(behandlingsresultat.id!!, 2024)
 
-        aarsavregningRepository.findById(result).shouldBePresent().aar.shouldBe(2024)
+        result.år shouldBe 2024
     }
 
     @Test
     @Transactional
-    fun `opprettNyÅrsavregning should throw exception when existing avregning exists for the same year`() {
-        val behandlingsresultat = lagBehandlingsResultat().shouldNotBeNull()
+    fun `opprettNyÅrsavregning skal kaste feil når man prøver å endre samme behandling til samme år som allerede er lagret`() {
+        val behandlingsresultat = lagBehandlingsResultat()
 
-        //Oppretter først en aarsavregning for å simulere at det allerede finnes en årsavregning for samme år
         årsavregningService.opprettÅrsavregning(behandlingsresultat.id, 2024)
 
         shouldThrow<FunksjonellException> {
             årsavregningService.opprettÅrsavregning(behandlingsresultat.id, 2024)
-        }
+        }.message shouldBe "Året 2024 er allerede lagret på denne årsavregningen"
+    }
+
+    @Test
+    @Transactional
+    fun `opprettNyÅrsavregning skal kaste feil når man prøver å endre en annen behandling til et år som allerede finnes på en aktiv behandling`() {
+        val behandlingsresultat1 = lagBehandlingsResultat()
+        val behandlingsresultat2 = lagBehandlingsResultat()
+
+        årsavregningService.opprettÅrsavregning(behandlingsresultat1.id, 2024)
+
+        shouldThrow<FunksjonellException> {
+            årsavregningService.opprettÅrsavregning(behandlingsresultat2.id, 2024)
+        }.message shouldBe "Det finnes en annen åpen årsavregningsbehandling for samme år på saken. " +
+            "Vurder hvilke behandling du vil fortsette med og avslutt den uaktuelle behandlingen via behandlingsmeny."
+    }
+
+    @Test
+    @Transactional
+    fun `opprettNyÅrsavregning skal feile dersom man prøver å endre til for gammelt år`() {
+        val behandlingsresultat = lagBehandlingsResultat()
+
+        shouldThrow<FunksjonellException> {
+            // i fjor - 7 år (som er ett år eldre enn det vi skal støtte)
+            årsavregningService.opprettÅrsavregning(behandlingsresultat.id, LocalDate.now().year - 8)
+        }.message shouldBe "Årsavregning kan ikke opprettes for år eldre enn 6 år før inneværende år."
     }
 
     private fun lagBehandlingsResultat(): Behandlingsresultat {

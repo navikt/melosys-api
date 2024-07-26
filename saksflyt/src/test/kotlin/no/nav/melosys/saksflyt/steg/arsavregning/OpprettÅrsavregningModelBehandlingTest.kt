@@ -10,7 +10,7 @@ import io.mockk.verify
 import no.nav.melosys.domain.Behandling
 import no.nav.melosys.domain.Behandlingsresultat
 import no.nav.melosys.domain.Fagsak
-import no.nav.melosys.domain.avgift.Aarsavregning
+import no.nav.melosys.domain.avgift.Årsavregning
 import no.nav.melosys.domain.kodeverk.Aktoersroller
 import no.nav.melosys.domain.kodeverk.Saksstatuser
 import no.nav.melosys.domain.kodeverk.Sakstemaer
@@ -21,6 +21,7 @@ import no.nav.melosys.saksflyt.TestdataFactory.lagBruker
 import no.nav.melosys.saksflytapi.domain.ProsessDataKey
 import no.nav.melosys.saksflytapi.domain.Prosessinstans
 import no.nav.melosys.service.avgift.TrygdeavgiftService
+import no.nav.melosys.service.avgift.aarsavregning.ÅrsavregningModel
 import no.nav.melosys.service.avgift.aarsavregning.ÅrsavregningService
 import no.nav.melosys.service.behandling.BehandlingService
 import no.nav.melosys.service.behandling.BehandlingsresultatService
@@ -32,7 +33,7 @@ import org.junit.jupiter.api.extension.ExtendWith
 
 
 @ExtendWith(MockKExtension::class)
-class OpprettÅrsavregningBehandlingTest {
+class OpprettÅrsavregningModelBehandlingTest {
     @MockK
     private lateinit var fagsakService: FagsakService
 
@@ -102,7 +103,7 @@ class OpprettÅrsavregningBehandlingTest {
         } returns årsavregningsBehandling
 
         every { behandslingsresultatService.hentBehandlingsresultat(årsavregningsBehandling.id) } returns behandlingsresultat
-        every { årsavregningService.opprettÅrsavregning(any(), any()) } returns årsavregningsBehandling.id
+        every { årsavregningService.opprettÅrsavregning(any(), any()) } returns ÅrsavregningModel(2023, null, emptyList(), null, emptyList(), null, null, null)
 
         opprettÅrsavregningBehandling.utfør(prosessinstans)
 
@@ -148,7 +149,7 @@ class OpprettÅrsavregningBehandlingTest {
         val behandlingsresultat = Behandlingsresultat().apply {
             id = 2
             type = Behandlingsresultattyper.IKKE_FASTSATT
-            aarsavregning = Aarsavregning().apply {
+            årsavregning = Årsavregning().apply {
                 aar = GJELDER_ÅR
             }
         }
@@ -160,7 +161,7 @@ class OpprettÅrsavregningBehandlingTest {
         every { trygdeavgiftService.finnSistFakturerbarTrygdeavgiftsbehandlingForÅr(fagsak.saksnummer, any()) } returns behandling
 
         every { behandslingsresultatService.hentBehandlingsresultat(behandling.id) } returns behandlingsresultat
-        every { årsavregningService.opprettÅrsavregning(any(), any()) } returns behandling.id
+        every { årsavregningService.opprettÅrsavregning(any(), any()) } returns ÅrsavregningModel(2023, null, emptyList(), null, emptyList(), null, null, null)
         val behandlingSlot = slot<Behandling>()
         every { behandlingService.lagre(capture(behandlingSlot)) } returns Unit
 

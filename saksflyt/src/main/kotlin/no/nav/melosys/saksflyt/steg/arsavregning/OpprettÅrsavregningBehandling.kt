@@ -72,7 +72,7 @@ class OpprettÅrsavregningBehandling(
 
     private fun finnAktivÅrsavregningBehandling(sakMedTrygdeavgift: Fagsak, gjelderÅr: Int): Behandling? {
         val årsAvregninger = sakMedTrygdeavgift.hentAktiveÅrsavregninger().also { if (it.isEmpty()) log.info("Fant ingen aktive årsavregninger") }
-            .filter { behandslingsresultatService.hentBehandlingsresultat(it.id).aarsavregning.aar == gjelderÅr }
+            .filter { behandslingsresultatService.hentBehandlingsresultat(it.id).årsavregning.aar == gjelderÅr }
 
         when {
             årsAvregninger.isEmpty() -> {
