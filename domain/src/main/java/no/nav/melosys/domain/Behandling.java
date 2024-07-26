@@ -66,6 +66,9 @@ public class Behandling extends RegistreringsInfo {
     @Column(name = "behandlingsfrist")
     private LocalDate behandlingsfrist;
 
+    @Column(name = "oppgave_id")
+    private String oppgaveId;
+
     @OneToMany(mappedBy = "behandling", cascade = CascadeType.ALL, fetch = FetchType.LAZY, orphanRemoval = true)
     private Set<Saksopplysning> saksopplysninger = new HashSet<>(1);
 
@@ -474,5 +477,13 @@ public class Behandling extends RegistreringsInfo {
             ", type=" + type +
             ", status=" + status +
             "} ";
+    }
+
+    public String getOppgaveId() {
+        return oppgaveId;
+    }
+
+    public void setOppgaveId(String oppgaveId) {
+        this.oppgaveId = oppgaveId;
     }
 }

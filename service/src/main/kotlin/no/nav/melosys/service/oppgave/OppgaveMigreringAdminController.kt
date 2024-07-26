@@ -3,6 +3,7 @@ package no.nav.melosys.service.oppgave
 import mu.KotlinLogging
 import no.nav.melosys.service.AdminController
 import no.nav.melosys.service.oppgave.migrering.MigreringsRapport
+import no.nav.melosys.service.oppgave.migrering.OppgaveIdMigrering
 import no.nav.melosys.service.oppgave.migrering.OppgaveMigrering
 import no.nav.security.token.support.core.api.Unprotected
 import org.springframework.beans.factory.annotation.Value
@@ -18,9 +19,11 @@ private val log = KotlinLogging.logger { }
 @RequestMapping("/admin/oppgaver/migrering")
 class OppgaveMigreringAdminController(
     private val oppgaveMigrering: OppgaveMigrering,
+    private val oppgaveIdMigrering: OppgaveIdMigrering,
     private val migreringsRapport: MigreringsRapport,
     @Value("\${Melosys-admin.apikey}") private val apiKey: String
 ) : AdminController {
+
     @PostMapping("")
     fun migrer(
         @RequestHeader(AdminController.API_KEY_HEADER) apiKey: String?,
@@ -33,6 +36,20 @@ class OppgaveMigreringAdminController(
         validerApikey(apiKey)
 
         oppgaveMigrering.go(bruker, saksnummer, dryrun, options)
+
+        return ResponseEntity.noContent().build()
+    }
+
+    @PostMapping("/oppgave-id-pa-behandling")
+    fun migrerOppgaveIdPaBehandling(
+        @RequestHeader(AdminController.API_KEY_HEADER) apiKey: String?,
+        @RequestParam(required = false, defaultValue = "true") dryrun: Boolean,
+        @RequestBody(required = false) options: OppgaveMigrering.Options = OppgaveMigrering.Options()
+    ): ResponseEntity<Unit> {
+        log.info("Migrer alle behandlinger for å sette oppgave_id, dryrun=$dryrun")
+        validerApikey(apiKey)
+
+        oppgaveIdMigrering.go(dryrun)
 
         return ResponseEntity.noContent().build()
     }

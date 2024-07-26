@@ -275,6 +275,22 @@ public class OppgaveFasadeImpl implements OppgaveFasade {
             .toList();
     }
 
+
+    //TODO: Brukes for migrering av oppgaveId til behandling: MELOSYS-6707. Fjern når migrering er ferdig.
+    @Override
+    public List<Oppgave> finnÅpneBehandlingsoppgaver() {
+        OppgaveSearchRequest oppgaveSearchRequest = new OppgaveSearchRequest.Builder(String.valueOf(MELOSYS_ENHET_ID))
+            .medTema(OPPGAVE_TEMA)
+            .medOppgaveTyper(OPPGAVETYPER_BEHANDLINGSOPPGAVE)
+            .medStatusKategori(OPPGAVE_STATUSKATEGORI_AAPEN)
+            .build();
+
+        return oppgaveConsumer.hentOppgaveListe(oppgaveSearchRequest).stream()
+            .map(OppgaveFasadeImpl::oppgaveMappingDtoTilDomain)
+            .toList();
+    }
+
+
     @Override
     public List<Oppgave> finnAvsluttetBehandlingsoppgaverMedSaksnummer(String saksnummer) {
         OppgaveSearchRequest oppgaveSearchRequest = new OppgaveSearchRequest.Builder(String.valueOf(MELOSYS_ENHET_ID))

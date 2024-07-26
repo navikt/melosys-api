@@ -26,6 +26,7 @@ import org.apache.commons.lang3.StringUtils
 import org.springframework.stereotype.Service
 import org.springframework.transaction.annotation.Transactional
 import java.util.*
+import kotlin.jvm.optionals.getOrNull
 
 @Service
 class OppgaveService(
@@ -95,8 +96,10 @@ class OppgaveService(
         @Nullable tilordnetRessurs: String?,
         @Nullable orgnr: String? = null
     ) {
-        val eksisterendeOppgave = finnÅpenBehandlingsoppgaveMedFagsaksnummer(behandling.fagsak.saksnummer)
-        if (eksisterendeOppgave.isEmpty) {
+        val eksisterendeOppgave =
+            if (behandling.oppgaveId != null) oppgaveFasade.hentOppgave(behandling.oppgaveId) else
+                finnÅpenBehandlingsoppgaveMedFagsaksnummer(behandling.fagsak.saksnummer).getOrNull()
+        if (eksisterendeOppgave == null) {
             val oppgaveBuilder =
                 lagBehandlingsoppgave(behandling).setTilordnetRessurs(tilordnetRessurs).setJournalpostId(journalpostID).setAktørId(aktørID)
                     .setOrgnr(orgnr).setSaksnummer(behandling.fagsak.saksnummer)
@@ -104,13 +107,24 @@ class OppgaveService(
                 if (StringUtils.isNotEmpty(aktørID) && harBeskyttelsesbehov(behandling.id))
                     oppgaveFasade.opprettSensitivOppgave(oppgaveBuilder.build())
                 else oppgaveFasade.opprettOppgave(oppgaveBuilder.build())
+            settOppgaveIdPåBehandling(behandling, oppgaveID)
             log.info("Opprettet oppgave $oppgaveID for behandling ${behandling.id}")
-        } else if (tilordnetRessurs != null && tilordnetRessurs != eksisterendeOppgave.get().tilordnetRessurs) {
+        } else if (tilordnetRessurs != eksisterendeOppgave.tilordnetRessurs) {
             log.info("Oppgave eksisterer, oppdaterer tilordnetRessurs for oppgave tilknyttet behandling ${behandling.id}")
-            tildelOppgave(eksisterendeOppgave.get().oppgaveId, tilordnetRessurs)
+            tildelOppgave(eksisterendeOppgave.oppgaveId, tilordnetRessurs)
         } else {
             log.info("Oppgave tilknyttet behandling ${behandling.id} eksisterer og er allerede tilordnet ressurs $tilordnetRessurs.")
         }
+
+        // TODO: Denne blir ikke nødvendig etter migreringen er ferdig. MELOSYS-6707
+        if (behandling.oppgaveId == null && eksisterendeOppgave != null) {
+            settOppgaveIdPåBehandling(behandling, eksisterendeOppgave.oppgaveId)
+        }
+    }
+
+    fun settOppgaveIdPåBehandling(behandling: Behandling, oppgaveId: String) {
+        behandling.oppgaveId = oppgaveId
+        behandlingService.lagre(behandling)
     }
 
     fun lagBehandlingsoppgave(behandling: Behandling): Oppgave.Builder =

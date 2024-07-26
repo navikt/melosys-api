@@ -21,6 +21,8 @@ public interface OppgaveFasade {
 
     List<Oppgave> finnÅpneBehandlingsoppgaverMedSaksnummer(String saksnummer);
 
+    List<Oppgave> finnÅpneBehandlingsoppgaver();
+
     List<Oppgave> finnAvsluttetBehandlingsoppgaverMedSaksnummer(String saksnummer);
 
     Oppgave hentOppgave(String oppgaveId);
