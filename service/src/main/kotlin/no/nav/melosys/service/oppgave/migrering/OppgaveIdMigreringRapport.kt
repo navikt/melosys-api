@@ -17,7 +17,6 @@ private val log = KotlinLogging.logger { }
 @Component
 class OppgaveIdMigreringRapport(
     private val environment: Environment,
-    private val oppgaveIdMigrering: OppgaveIdMigrering
 ) {
 
     @Volatile
