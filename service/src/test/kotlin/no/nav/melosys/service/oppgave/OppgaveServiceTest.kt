@@ -3,6 +3,7 @@ package no.nav.melosys.service.oppgave
 import io.kotest.matchers.booleans.shouldBeFalse
 import io.kotest.matchers.booleans.shouldBeTrue
 import io.kotest.matchers.collections.shouldHaveSize
+import io.kotest.matchers.equals.shouldBeEqual
 import io.kotest.matchers.nulls.shouldBeNull
 import io.kotest.matchers.nulls.shouldNotBeNull
 import io.kotest.matchers.optional.shouldBeEmpty
@@ -343,11 +344,14 @@ internal class OppgaveServiceTest {
         every { behandlingService.hentBehandling(any<Long>()) } returns behandling
         every { utledMottaksdato.getMottaksdato(behandling) } returns LocalDate.now()
         every { oppgaveFasade.finnÅpneBehandlingsoppgaverMedSaksnummer(FagsakTestFactory.SAKSNUMMER) } returns emptyList()
+        every { behandlingService.lagre(behandling) } returns Unit
 
         oppgaveService.opprettEllerGjenbrukBehandlingsoppgave(behandling, "222", "333", "Z99999")
 
         verify { oppgaveFasade.opprettOppgave(any()) }
         verify(exactly = 0) { oppgaveFasade.opprettSensitivOppgave(any()) }
+        verify { behandlingService.lagre(behandling) }
+        behandling.oppgaveId shouldBeEqual  BEH_OPPG_ID
     }
 
     @Test
@@ -362,11 +366,14 @@ internal class OppgaveServiceTest {
         every { behandlingService.hentBehandling(any<Long>()) } returns behandling
         every { utledMottaksdato.getMottaksdato(behandling) } returns LocalDate.now()
         every { oppgaveFasade.finnÅpneBehandlingsoppgaverMedSaksnummer(FagsakTestFactory.SAKSNUMMER) } returns emptyList()
+        every { behandlingService.lagre(behandling) } returns Unit
 
         oppgaveService.opprettEllerGjenbrukBehandlingsoppgave(behandling, "222", "333", "Z99999")
 
         verify { oppgaveFasade.opprettOppgave(capture(oppgaveSlot)) }
         oppgaveSlot.captured.beskrivelse.shouldBe(behandling.tema.beskrivelse)
+        verify { behandlingService.lagre(behandling) }
+        behandling.oppgaveId shouldBeEqual  BEH_OPPG_ID
     }
 
     @Test
@@ -378,6 +385,7 @@ internal class OppgaveServiceTest {
         every { behandlingService.hentBehandling(any<Long>()) } returns behandling
         every { utledMottaksdato.getMottaksdato(behandling) } returns LocalDate.now()
         every { oppgaveFasade.finnÅpneBehandlingsoppgaverMedSaksnummer(FagsakTestFactory.SAKSNUMMER) } returns emptyList()
+        every { behandlingService.lagre(behandling) } returns Unit
 
         oppgaveService.opprettEllerGjenbrukBehandlingsoppgave(behandling, "222", "333", "Z99999")
 
@@ -392,6 +400,7 @@ internal class OppgaveServiceTest {
             tema = Behandlingstema.UTSENDT_ARBEIDSTAKER
             fagsak = FagsakTestFactory.lagFagsak()
         }
+        every { behandlingService.lagre(behandling) } returns Unit
 
         oppgaveService.opprettEllerGjenbrukBehandlingsoppgave(behandling, "222", "333", oppgave.tilordnetRessurs)
 
@@ -408,6 +417,7 @@ internal class OppgaveServiceTest {
             fagsak = FagsakTestFactory.lagFagsak()
         }
         every { oppgaveFasade.oppdaterOppgave(any(), any()) } returns Unit
+        every { behandlingService.lagre(behandling) } returns Unit
 
         oppgaveService.opprettEllerGjenbrukBehandlingsoppgave(behandling, "222", "333", tilordnetRessurs)
 
@@ -423,6 +433,7 @@ internal class OppgaveServiceTest {
         every { persondataFasade.harStrengtFortroligAdresse(FagsakTestFactory.BRUKER_AKTØR_ID) } returns true
         every { utledMottaksdato.getMottaksdato(behandling) } returns LocalDate.now()
         every { oppgaveFasade.finnÅpneBehandlingsoppgaverMedSaksnummer(FagsakTestFactory.SAKSNUMMER) } returns emptyList()
+        every { behandlingService.lagre(behandling) } returns Unit
 
         oppgaveService.opprettEllerGjenbrukBehandlingsoppgave(behandling, "222", "333", "Z99999")
 
@@ -445,6 +456,7 @@ internal class OppgaveServiceTest {
         every { behandlingService.hentBehandling(any<Long>()) } returns behandling
         every { utledMottaksdato.getMottaksdato(behandling) } returns LocalDate.now()
         every { oppgaveFasade.finnÅpneBehandlingsoppgaverMedSaksnummer(FagsakTestFactory.SAKSNUMMER) } returns emptyList()
+        every { behandlingService.lagre(behandling) } returns Unit
 
         oppgaveService.opprettEllerGjenbrukBehandlingsoppgave(behandling, "222", "333", "Z99999")
 
@@ -471,6 +483,7 @@ internal class OppgaveServiceTest {
         every { oppgaveFasade.finnÅpneBehandlingsoppgaverMedSaksnummer(FagsakTestFactory.SAKSNUMMER) } returns emptyList()
         every { fagsakService.hentFagsak(FagsakTestFactory.SAKSNUMMER) } returns fagsak
         every { utledMottaksdato.getMottaksdato(behandling) } returns LocalDate.now()
+        every { behandlingService.lagre(behandling) } returns Unit
 
         oppgaveService.opprettOppgaveForSak(FagsakTestFactory.SAKSNUMMER)
 
