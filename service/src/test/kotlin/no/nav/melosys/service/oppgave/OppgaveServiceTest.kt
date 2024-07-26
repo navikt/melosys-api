@@ -128,7 +128,7 @@ internal class OppgaveServiceTest {
             .setOppgaveId(JFR_OPPG_ID)
             .setOppgavetype(Oppgavetyper.JFR)
         val oppgaver = setOf(oppgave1.build(), oppgave2.build())
-        val behandling = lagBehandling()
+        val behandling = lagBehandling().apply { oppgaveId = BEH_OPPG_ID }
         val fagsak = FagsakTestFactory.builder().behandlinger(behandling).build()
         every { oppgaveFasade.finnOppgaverMedAnsvarlig(TILORDNET_RESSURS) } returns oppgaver
         every { behandlingService.hentBehandling(any<Long>()) } returns behandling
@@ -154,7 +154,7 @@ internal class OppgaveServiceTest {
 
     @Test
     fun hentOppgaverMedAnsvarlig_mottatteopplysningerFinnesIkke_mappesKorrekt() {
-        val behandling = lagBehandling()
+        val behandling = lagBehandling().apply { oppgaveId = BEH_OPPG_ID }
         val fagsak = FagsakTestFactory.builder().behandlinger(behandling).build()
         every { oppgaveFasade.finnOppgaverMedAnsvarlig(TILORDNET_RESSURS) } returns setOf(oppgave)
         every { behandlingService.hentBehandling(any<Long>()) } returns behandling
@@ -176,7 +176,7 @@ internal class OppgaveServiceTest {
 
     @Test
     fun hentOppgaverMedAnsvarlig_mottatteopplysningerDataErAnmodningEllerAttest_mappesKorrekt() {
-        val behandling = lagBehandling()
+        val behandling = lagBehandling().apply { oppgaveId = BEH_OPPG_ID }
         val fagsak = FagsakTestFactory.builder().behandlinger(behandling).build()
         val mottatteOpplysninger = lagMottatteOpplysninger().apply {
             mottatteOpplysningerData = AnmodningEllerAttest()
@@ -209,6 +209,7 @@ internal class OppgaveServiceTest {
             tekst = "Test2"
         }
         val behandling = lagBehandling().apply {
+            oppgaveId = BEH_OPPG_ID
             behandlingsnotater = setOf(behandlingsnotat1, behandlingsnotat2)
         }
         val fagsak = FagsakTestFactory.builder().behandlinger(behandling).build()

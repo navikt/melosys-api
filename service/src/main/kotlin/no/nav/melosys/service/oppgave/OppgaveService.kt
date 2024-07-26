@@ -222,7 +222,8 @@ class OppgaveService(
 
     private fun lagBehandlingsoppgaveDto(oppgave: Oppgave): BehandlingsoppgaveDto {
         val fagsak = fagsakService.hentFagsak(oppgave.saksnummer)
-        val sistAktiveBehandling = fagsak.hentAktivBehandling()
+        val relevantBehandling = fagsak.behandlinger.firstOrNull { it.oppgaveId == oppgave.oppgaveId }
+            ?: throw TekniskException("Fant ikke behandling til oppgave ${oppgave.oppgaveId}")
         val orgnr = fagsak.finnVirksomhetsOrgnr()
 
         return BehandlingsoppgaveDto(
@@ -233,14 +234,14 @@ class OppgaveService(
             navn = hentNavn(oppgave),
             hovedpartIdent = hentHovedpartIdent(oppgave),
             versjon = oppgave.versjon,
-            behandling = mapBehandling(sistAktiveBehandling),
+            behandling = mapBehandling(relevantBehandling),
             saksnummer = fagsak.saksnummer,
             sakstype = fagsak.type,
             sakstema = fagsak.tema,
-            land = hentLand(orgnr, sistAktiveBehandling.id),
-            periode = hentPeriode(orgnr, sistAktiveBehandling.id),
+            land = hentLand(orgnr, relevantBehandling.id),
+            periode = hentPeriode(orgnr, relevantBehandling.id),
             oppgaveBeskrivelse = oppgave.beskrivelse,
-            sisteNotat = hentSisteBehandlingsNotat(sistAktiveBehandling),
+            sisteNotat = hentSisteBehandlingsNotat(relevantBehandling),
         )
     }
 
