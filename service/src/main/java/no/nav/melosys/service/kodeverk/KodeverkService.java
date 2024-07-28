@@ -15,7 +15,7 @@ import org.springframework.boot.context.event.ApplicationReadyEvent;
 import org.springframework.context.event.EventListener;
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Service;
-import org.springframework.util.StringUtils;
+import org.springframework.util.ObjectUtils;
 
 @Service
 public class KodeverkService {
@@ -23,8 +23,8 @@ public class KodeverkService {
 
     public static final String UKJENT = KodeOppslagFraKodeverk.UKJENT;
 
-    private KodeverkRegister kodeverkRegister;
-    private KodeOppslag kodeOppslag;
+    private final KodeverkRegister kodeverkRegister;
+    private final KodeOppslag kodeOppslag;
 
     public KodeverkService(KodeverkRegister kodeverkRegister, KodeOppslag kodeOppslag) {
         this.kodeverkRegister = kodeverkRegister;
@@ -48,7 +48,7 @@ public class KodeverkService {
     }
 
     private String dekod(FellesKodeverk kodeverk, String kode, LocalDate dato) {
-        if (StringUtils.isEmpty(kode)) {
+        if (ObjectUtils.isEmpty(kode)) {
             log.warn("Metode dekod kalt for kodeverk {} med kode {}", kodeverk, kode);
             return UKJENT;
         }
@@ -58,7 +58,7 @@ public class KodeverkService {
     }
 
     public List<KodeDto> hentGyldigeKoderForKodeverk(FellesKodeverk kodeverk) {
-        if (StringUtils.isEmpty(kodeverk)) {
+        if (ObjectUtils.isEmpty(kodeverk)) {
             log.error("Metode hentGyldigeKoderForKodeverk kalt for kodeverk {}", kodeverk);
             return Collections.emptyList();
         }

@@ -37,9 +37,9 @@ public class KodeOppslagFraKodeverk implements KodeOppslag {
             return UKJENT;
         }
         // kodeperioder er en liste med samme kode men med forskjellige gyldighetsperiode. Det holder at en er gyldig.
-        for (Kode kandidat : kodeperioder) {
-            if (!kandidat.getGyldigFom().isAfter(dato) && !kandidat.getGyldigTom().isBefore(dato)) {
-                return kandidat.getNavn();
+        for (Kode kodeperiode : kodeperioder) {
+            if (!kodeperiode.getGyldigFom().isAfter(dato) && !kodeperiode.getGyldigTom().isBefore(dato)) {
+                return kodeperiode.getNavn();
             }
         }
         log.warn("Fant ingen gyldig term for kode {} i kodeverk {}", kode, kodeverk.getNavn());
