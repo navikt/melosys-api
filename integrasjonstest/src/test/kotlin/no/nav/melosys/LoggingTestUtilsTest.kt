@@ -122,10 +122,9 @@ class LoggingTestUtilsTest {
                 }
 
 
-                var foundCount = 0
                 while (true) {
-                    if (logs.any { it.formattedMessage.contains("199") }) {
-                        if (foundCount++ == threadCount) break
+                    if (logs.count { it.formattedMessage.contains("199") } == threadCount) {
+                        break
                     }
                     Thread.sleep(1) // To avid using all cpu
                 }
