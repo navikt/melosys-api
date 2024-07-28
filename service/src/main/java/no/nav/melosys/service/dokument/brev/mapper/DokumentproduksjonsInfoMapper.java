@@ -142,7 +142,7 @@ public class DokumentproduksjonsInfoMapper {
             .put(AVSLAG_EFTA_STORBRITANNIA,
                 new DokumentproduksjonsInfo("avslag_efta_storbritannia",
                     DokumentKategoriKode.VB.getKode(),
-                    JournalforingsTittel.MELDING_MANGLENDE_INNBETALING.getTittel()))
+                    JournalforingsTittel.AVSLAG_EFTA_STORBRITANNIA.getTittel()))
             .build());
     }
 

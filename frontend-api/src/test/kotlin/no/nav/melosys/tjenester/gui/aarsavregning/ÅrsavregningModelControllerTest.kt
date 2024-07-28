@@ -12,7 +12,7 @@ import no.nav.melosys.domain.kodeverk.Skatteplikttype
 import no.nav.melosys.domain.kodeverk.Trygdedekninger
 import no.nav.melosys.service.avgift.aarsavregning.MedlemskapsperiodeForAvgift
 import no.nav.melosys.service.avgift.aarsavregning.Trygdeavgiftsgrunnlag
-import no.nav.melosys.service.avgift.aarsavregning.Årsavregning
+import no.nav.melosys.service.avgift.aarsavregning.ÅrsavregningModel
 import no.nav.melosys.service.avgift.aarsavregning.ÅrsavregningService
 import org.junit.jupiter.api.Test
 import org.springframework.beans.factory.annotation.Autowired
@@ -26,7 +26,7 @@ import java.math.BigDecimal
 import java.time.LocalDate
 
 @WebMvcTest(controllers = [ÅrsavregningController::class])
-internal class ÅrsavregningControllerTest {
+internal class ÅrsavregningModelControllerTest {
     @Autowired
     private lateinit var mockMvc: MockMvc
 
@@ -35,7 +35,7 @@ internal class ÅrsavregningControllerTest {
 
     @Test
     fun `hent avregning basert på ID`() {
-        every { årsavregningService.hentÅrsavregning(any()) } returns Årsavregning(
+        every { årsavregningService.finnÅrsavregning(any()) } returns ÅrsavregningModel(
             år = 2023,
             tidligereGrunnlag = Trygdeavgiftsgrunnlag(
                 medlemskapsperioder = listOf(

@@ -72,6 +72,7 @@ public class DokumentServiceFasade {
         var brevbestillingDto = new BrevbestillingDto();
         brevbestillingDto.setProduserbardokument(dokumentType);
         brevbestillingDto.setMottaker(mottaker.getRolle());
+        brevbestillingDto.setOrgnr(mottaker.getOrgnr());
         brevbestillingDto.setFritekst(brevbestilling.getFritekst());
         brevbestillingDto.setBegrunnelseKode(brevbestilling.getBegrunnelseKode());
         brevbestillingDto.setBestillersId(brevbestilling.getAvsenderID());

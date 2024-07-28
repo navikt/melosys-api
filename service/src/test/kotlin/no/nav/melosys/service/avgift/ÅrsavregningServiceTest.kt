@@ -13,6 +13,7 @@ import no.nav.melosys.domain.VedtakMetadata
 import no.nav.melosys.domain.avgift.*
 import no.nav.melosys.domain.kodeverk.*
 import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingsresultattyper
+import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingstyper
 import no.nav.melosys.exception.FunksjonellException
 import no.nav.melosys.integrasjon.faktureringskomponenten.FaktureringskomponentenConsumer
 import no.nav.melosys.integrasjon.faktureringskomponenten.dto.BeregnTotalBeløpDto
@@ -20,7 +21,7 @@ import no.nav.melosys.integrasjon.faktureringskomponenten.dto.FakturaseriePeriod
 import no.nav.melosys.repository.AarsavregningRepository
 import no.nav.melosys.service.avgift.aarsavregning.MedlemskapsperiodeForAvgift
 import no.nav.melosys.service.avgift.aarsavregning.Trygdeavgiftsgrunnlag
-import no.nav.melosys.service.avgift.aarsavregning.Årsavregning
+import no.nav.melosys.service.avgift.aarsavregning.ÅrsavregningModel
 import no.nav.melosys.service.avgift.aarsavregning.ÅrsavregningService
 import no.nav.melosys.service.behandling.BehandlingsresultatService
 import no.nav.melosys.sikkerhet.context.SpringSubjectHandler
@@ -34,12 +35,16 @@ import java.util.*
 
 @ExtendWith(MockKExtension::class)
 internal class ÅrsavregningServiceTest {
+
     @RelaxedMockK
     private lateinit var aarsavregningRepository: AarsavregningRepository
+
     @RelaxedMockK
     private lateinit var behandlingsresultatService: BehandlingsresultatService
+
     @RelaxedMockK
     private lateinit var faktureringskomponentenConsumer: FaktureringskomponentenConsumer
+
     @RelaxedMockK
     private lateinit var trygdeavgiftService: TrygdeavgiftService
 
@@ -60,7 +65,7 @@ internal class ÅrsavregningServiceTest {
 
     @Test
     fun `opprettNyÅrsavregning kaster exception når flere Aarsavregninger eksisterer for samme år på samme Fagsak`() {
-        val årsavregningEntity1 = Aarsavregning().apply {
+        val årsavregningEntity1 = Årsavregning().apply {
             aar = 2023
             behandlingsresultat = Behandlingsresultat()
         }
@@ -77,7 +82,8 @@ internal class ÅrsavregningServiceTest {
     @Test
     fun `test beregner totalbeløp for 1 år`() {
         val fakturaseriePeriodeDto = FakturaseriePeriodeDto(
-            enhetsprisPerManed = BigDecimal(100), startDato = LocalDate.now().minusYears(1), sluttDato = LocalDate.now(), beskrivelse = "test")
+            enhetsprisPerManed = BigDecimal(100), startDato = LocalDate.now().minusYears(1), sluttDato = LocalDate.now(), beskrivelse = "test"
+        )
         val dto = BeregnTotalBeløpDto(listOf(fakturaseriePeriodeDto, fakturaseriePeriodeDto, fakturaseriePeriodeDto))
         årsavregningService.beregnTotalbeløpForPeriode(dto)
 
@@ -85,14 +91,21 @@ internal class ÅrsavregningServiceTest {
     }
 
     @Test
-    fun `hentÅrsavregning for ny årsavregning uten info i Melosys`() {
-        val årsavregningEntity = Aarsavregning().apply {
-            aar = 2023
-            behandlingsresultat = Behandlingsresultat()
+    fun `finnÅrsavregning for ny årsavregning uten info i Melosys`() {
+        val behandlingsresultat = Behandlingsresultat().apply {
+            behandling = Behandling().apply {
+                id = 1L
+                type = Behandlingstyper.ÅRSAVREGNING
+            }
         }
-        every { aarsavregningRepository.findById(any()) }.returns(Optional.of(årsavregningEntity))
+        val årsavregningEntity = Årsavregning().apply {
+            aar = 2023
+            this.behandlingsresultat = behandlingsresultat
+        }
+        behandlingsresultat.årsavregning = årsavregningEntity
+        every { behandlingsresultatService.hentBehandlingsresultat(1L) }.returns(behandlingsresultat)
 
-        årsavregningService.hentÅrsavregning(1) shouldBe Årsavregning(
+        årsavregningService.finnÅrsavregning(1) shouldBe ÅrsavregningModel(
             år = 2023,
             tidligereGrunnlag = null,
             tidligereAvgift = emptyList(),
@@ -106,14 +119,21 @@ internal class ÅrsavregningServiceTest {
 
     @Test
     fun `hentÅrsavregning for ny årsavregning, grunnlag finnes i Melosys`() {
-        val årsavregningEntity = Aarsavregning().apply {
+        val behandlingsresultat = Behandlingsresultat().apply {
+            behandling = Behandling().apply {
+                id = 1L
+                type = Behandlingstyper.ÅRSAVREGNING
+            }
+        }
+        val årsavregningEntity = Årsavregning().apply {
             aar = 2023
-            behandlingsresultat = Behandlingsresultat()
+            this.behandlingsresultat = behandlingsresultat
             tidligereBehandlingsresultat = lagTidligereBehandlingsresultat()
         }
-        every { aarsavregningRepository.findById(any()) }.returns(Optional.of(årsavregningEntity))
+        behandlingsresultat.årsavregning = årsavregningEntity
+        every { behandlingsresultatService.hentBehandlingsresultat(1L) }.returns(behandlingsresultat)
 
-        årsavregningService.hentÅrsavregning(1) shouldBe Årsavregning(
+        årsavregningService.finnÅrsavregning(1) shouldBe ÅrsavregningModel(
             år = 2023,
             tidligereGrunnlag = Trygdeavgiftsgrunnlag(
                 listOf(

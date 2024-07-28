@@ -7,11 +7,11 @@ import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule
 import com.github.tomakehurst.wiremock.WireMockServer
 import com.github.tomakehurst.wiremock.client.WireMock
 import com.github.tomakehurst.wiremock.core.WireMockConfiguration
+import io.kotest.matchers.shouldBe
 import no.nav.melosys.domain.FellesKodeverk
 import no.nav.melosys.domain.dokument.arbeidsforhold.ArbeidsforholdDokument
 import no.nav.melosys.integrasjon.aareg.arbeidsforhold.ArbeidsforholdRestConsumer
 import no.nav.melosys.integrasjon.kodeverk.KodeOppslag
-import org.assertj.core.api.Assertions
 import org.junit.jupiter.api.AfterAll
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.TestInstance
@@ -20,7 +20,6 @@ import org.mockito.Mockito
 import org.mockito.kotlin.whenever
 import org.springframework.web.reactive.function.client.WebClient
 import java.time.LocalDate
-import java.util.*
 
 @TestInstance(TestInstance.Lifecycle.PER_CLASS)
 internal class AaregServiceTest {
@@ -76,11 +75,15 @@ internal class AaregServiceTest {
                         .withBody(responsAaregRestBody)
                 )
         )
+
+
         val saksopplysning = aaregService.finnArbeidsforholdPrArbeidstaker(
             NAV_PERSONIDENT,
             LocalDate.of(2014, 7, 1),
             LocalDate.of(2015, 12, 31)
         )
+
+
         val arbeidsforholdDokument = saksopplysning.dokument as ArbeidsforholdDokument
         val arbeidsforhold = arbeidsforholdDokument.getArbeidsforhold()
         val objectMapper = ObjectMapper().apply {
@@ -88,17 +91,18 @@ internal class AaregServiceTest {
             setAnnotationIntrospector(object : JacksonAnnotationIntrospector() {
                 override fun hasIgnoreMarker(m: AnnotatedMember): Boolean {
                     // Ikke sjekk disse siden daylight saving vil forandre offset med 1 time og få testen til å feile
-                    val exclusions = Arrays.asList("opprettelsestidspunkt", "sistBekreftet")
+                    val exclusions = listOf("opprettelsestidspunkt", "sistBekreftet")
                     return exclusions.contains(m.name) || super.hasIgnoreMarker(m)
                 }
             })
         }
         val result = objectMapper.writerWithDefaultPrettyPrinter().writeValueAsString(arbeidsforhold)
-        Assertions.assertThat(result).isEqualToIgnoringWhitespace(expectedRestResult)
+        result shouldBe expectedRestResult
     }
 
-    private val expectedRestResult = """[ {
-          "arbeidsforholdID" : "abc-321",
+    private val expectedRestResult = """
+        [ {
+          "arbeidsforholdID" : null,
           "arbeidsforholdIDnav" : 123456,
           "ansettelsesPeriode" : {
             "fom" : [ 2014, 7, 1 ],
@@ -161,7 +165,8 @@ internal class AaregServiceTest {
             },
             "rapporteringsAarMaaned" : [ 2018, 5 ]
           } ]
-} ]""".trimIndent()
+        } ]
+""".trimIndent()
 
     private val responsAaregRestBody = """
         [
@@ -238,7 +243,7 @@ internal class AaregServiceTest {
                 "yrke": "2130123"
               }
             ],
-            "arbeidsforholdId": "abc-321",
+            "arbeidsforholdId": null,
             "arbeidsgiver": {
               "type": "Organisasjon",
               "organisasjonsnummer": "991609407"
