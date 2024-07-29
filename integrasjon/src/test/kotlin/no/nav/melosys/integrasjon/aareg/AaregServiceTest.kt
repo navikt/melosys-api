@@ -10,7 +10,7 @@ import com.github.tomakehurst.wiremock.core.WireMockConfiguration
 import io.kotest.matchers.shouldBe
 import no.nav.melosys.domain.FellesKodeverk
 import no.nav.melosys.domain.dokument.arbeidsforhold.ArbeidsforholdDokument
-import no.nav.melosys.integrasjon.aareg.arbeidsforhold.ArbeidsforholdRestConsumer
+import no.nav.melosys.integrasjon.aareg.arbeidsforhold.ArbeidsforholdConsumer
 import no.nav.melosys.integrasjon.kodeverk.KodeOppslag
 import org.junit.jupiter.api.AfterAll
 import org.junit.jupiter.api.Test
@@ -35,7 +35,7 @@ internal class AaregServiceTest {
     private val mockedKodeOppslag: KodeOppslag = Mockito.mock(KodeOppslag::class.java)
     private val aaregService: AaregService = AaregService(arbeidsforholdRestConsumer(), mockedKodeOppslag)
 
-    private fun arbeidsforholdRestConsumer() = ArbeidsforholdRestConsumer(
+    private fun arbeidsforholdRestConsumer() = ArbeidsforholdConsumer(
         WebClient.builder()
             .baseUrl("http://localhost:" + wireMockServer.port())
             .build()

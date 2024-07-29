@@ -2,9 +2,13 @@ package no.nav.melosys.integrasjon.aareg
 
 import com.github.tomakehurst.wiremock.client.WireMock
 import com.github.tomakehurst.wiremock.matching.StringValuePattern
+import io.getunleash.FakeUnleash
+import io.getunleash.Unleash
+import no.nav.melosys.featuretoggle.ToggleName
 import no.nav.melosys.integrasjon.ConsumerWireMockTestBase
 import no.nav.melosys.integrasjon.OAuthMockServer
 import no.nav.melosys.integrasjon.aareg.arbeidsforhold.*
+import no.nav.melosys.integrasjon.felles.GenericAuthFilterFactory
 import no.nav.melosys.integrasjon.reststs.RestSTSService
 import no.nav.melosys.integrasjon.reststs.SecurityTokenServiceConsumer
 import no.nav.melosys.integrasjon.reststs.StsWebClientProducer
@@ -14,8 +18,20 @@ import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.beans.factory.annotation.Value
 import org.springframework.boot.test.autoconfigure.web.client.AutoConfigureWebClient
 import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest
+import org.springframework.boot.test.context.TestConfiguration
+import org.springframework.context.annotation.Bean
 import org.springframework.context.annotation.Import
 import org.springframework.test.context.ActiveProfiles
+
+@TestConfiguration
+class UnleashTestConfig {
+    @Bean
+    fun unleash(): Unleash {
+        val fakeUnleash = FakeUnleash()
+        fakeUnleash.enable(ToggleName.MELOSYS_AAREG_AZURE)
+        return fakeUnleash
+    }
+}
 
 @Import(
     StsWebClientProducer::class,
@@ -23,14 +39,16 @@ import org.springframework.test.context.ActiveProfiles
     RestSTSService::class,
     OAuthMockServer::class,
 
-    ArbeidsforholdRestConsumerConfig::class,
-    ArbeidsforholdContextExchangeFilter::class
+    ArbeidsforholdConsumerConfig::class,
+    GenericAuthFilterFactory::class,
+    StsAuthExchangeFilter::class,
+    UnleashTestConfig::class
 )
 @WebMvcTest
 @ActiveProfiles("wiremock-test")
 @AutoConfigureWebClient
 private class AaregConsumerTokenTest(
-    @Autowired private val arbeidsforholdRestConsumer: ArbeidsforholdRestConsumer,
+    @Autowired private val arbeidsforholdConsumer: ArbeidsforholdConsumer,
     @Value("\${mockserver.port}") mockServiceUnderTestPort: Int,
     @Value("\${mockserver.security.port}") mockSecurityPort: Int,
     @Autowired oAuthMockServer: OAuthMockServer
@@ -40,8 +58,8 @@ private class AaregConsumerTokenTest(
     fun authorizationSkalKommeFraBruker() {
         verifyHeaders(
             mapOf<String, StringValuePattern>(
-                Pair("Authorization", WireMock.equalTo("Bearer --token-from-system--")),
-                Pair("Nav-Consumer-Token", WireMock.equalTo("Bearer --token-from-system--"))
+                Pair("Authorization", WireMock.equalTo("Bearer -- user_access_token --")),
+                Pair("Nav-Consumer-Token", WireMock.absent())
             )
         )
         executeFromController()
@@ -51,8 +69,8 @@ private class AaregConsumerTokenTest(
     fun authorizationSkalKommeFraSystem() {
         verifyHeaders(
             mapOf<String, StringValuePattern>(
-                Pair("Authorization", WireMock.equalTo("Bearer --token-from-system--")),
-                Pair("Nav-Consumer-Token", WireMock.equalTo("Bearer --token-from-system--"))
+                Pair("Authorization", WireMock.equalTo("Bearer --azure-token-from-system--")),
+                Pair("Nav-Consumer-Id", WireMock.equalTo("srvmelosys"))
             )
         )
         executeFromSystem()
@@ -62,8 +80,8 @@ private class AaregConsumerTokenTest(
     fun authorizationSkalKommeFraSystemNårHverkenSystemEllerBrukerErKilde() {
         verifyHeaders(
             mapOf<String, StringValuePattern>(
-                Pair("Authorization", WireMock.equalTo("Bearer --token-from-system--")),
-                Pair("Nav-Consumer-Token", WireMock.equalTo("Bearer --token-from-system--"))
+                Pair("Authorization", WireMock.equalTo("Bearer --azure-token-from-system--")),
+                Pair("Nav-Consumer-Id", WireMock.equalTo("srvmelosys"))
             )
         )
         executeRequest()
@@ -91,5 +109,5 @@ private class AaregConsumerTokenTest(
     }
 
     override fun executeRequest() =
-        arbeidsforholdRestConsumer.finnArbeidsforholdPrArbeidstaker("121", ArbeidsforholdQuery())
+        arbeidsforholdConsumer.finnArbeidsforholdPrArbeidstaker("121", ArbeidsforholdQuery())
 }
