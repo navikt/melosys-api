@@ -56,7 +56,6 @@ import no.nav.melosys.service.dokument.brev.bygger.BrevDataByggerInnvilgelse;
 import no.nav.melosys.service.dokument.brev.bygger.BrevDataByggerVedlegg;
 import no.nav.melosys.service.dokument.brev.datagrunnlag.BrevDataGrunnlag;
 import no.nav.melosys.service.dokument.brev.datagrunnlag.BrevdataGrunnlagFactory;
-import no.nav.melosys.service.kodeverk.KodeOppslag;
 import no.nav.melosys.service.kodeverk.KodeverkService;
 import no.nav.melosys.service.mottatteopplysninger.MottatteOpplysningerService;
 import no.nav.melosys.service.persondata.PersondataFasade;
@@ -258,8 +257,8 @@ final class DokumentServiceTest {
 
     private BrevdataGrunnlagFactory lagBrevinput(AvklartefaktaService avklartefaktaService) {
         KodeverkRegister kodeverkRegister = mockKodeverkRegister();
-        KodeOppslag kodeOppslag = mock(KodeOppslag.class);
-        KodeverkService kodeverkService = new KodeverkService(kodeverkRegister, kodeOppslag);
+        KodeverkService kodeverkServiceMock = mock(KodeverkService.class);
+        KodeverkService kodeverkService = new KodeverkService(kodeverkRegister);
         EregFasade eregFasade = mockEregFasade();
         OrganisasjonOppslagService registerOppslagService = new OrganisasjonOppslagService(eregFasade);
         AvklarteVirksomheterService avklarteVirksomheterService = new AvklarteVirksomheterService(avklartefaktaService, registerOppslagService, mock(BehandlingService.class), mock(KodeverkService.class));

@@ -6,7 +6,6 @@ import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
 import no.nav.melosys.domain.FellesKodeverk;
 import no.nav.melosys.service.kodeverk.KodeverkService;
-import no.nav.melosys.tjenester.gui.dto.periode.KodeDto;
 import no.nav.security.token.support.core.api.Protected;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -36,6 +35,8 @@ public class NavFellesKodeverkController {
     @ApiOperation("Henter kodeverk fra felles kodeverk")
     public ResponseEntity<List<KodeDto>> hentKodeverk(@PathVariable("kodeverkNavn") FellesKodeverk kodeverkNavn) {
         log.info("Henter kodeverket {} fra felles kodeverk.", kodeverkNavn);
-        return ResponseEntity.ok().body(kodeverkService.hentGyldigeKoderForKodeverk(kodeverkNavn));
+        return ResponseEntity.ok().body(
+            KodeDto.tilKodeDto(kodeverkService.hentGyldigeKoderForKodeverk(kodeverkNavn))
+        );
     }
 }

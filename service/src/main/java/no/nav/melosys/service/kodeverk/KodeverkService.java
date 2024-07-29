@@ -11,7 +11,6 @@ import no.nav.melosys.domain.FellesKodeverk;
 import no.nav.melosys.integrasjon.kodeverk.Kode;
 import no.nav.melosys.integrasjon.kodeverk.Kodeverk;
 import no.nav.melosys.integrasjon.kodeverk.KodeverkRegister;
-import no.nav.melosys.tjenester.gui.dto.periode.KodeDto;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.boot.context.event.ApplicationReadyEvent;
@@ -24,14 +23,12 @@ import org.springframework.util.ObjectUtils;
 public class KodeverkService {
     private static final Logger log = LoggerFactory.getLogger(KodeverkService.class);
 
-    public static final String UKJENT = KodeOppslagFraKodeverk.UKJENT;
+    public static final String UKJENT = "UKJENT";
 
     private final KodeverkRegister kodeverkRegister;
-    private final KodeOppslag kodeOppslag;
 
-    public KodeverkService(KodeverkRegister kodeverkRegister, KodeOppslag kodeOppslag) {
+    public KodeverkService(KodeverkRegister kodeverkRegister) {
         this.kodeverkRegister = kodeverkRegister;
-        this.kodeOppslag = kodeOppslag;
     }
 
     @EventListener
@@ -50,10 +47,10 @@ public class KodeverkService {
         }
 
         List<Kode> kodeperioder = hentKodeverk(kodeverk.getNavn()).getKoder().get(kode);
-        return kodeOppslag.getTermFraKodeverk(kodeverk, kode, dato, kodeperioder);
+        return getTermFraKodeverk(kodeverk, kode, dato, kodeperioder);
     }
 
-    public List<KodeDto> hentGyldigeKoderForKodeverk(FellesKodeverk kodeverk) {
+    public List<Kode> hentGyldigeKoderForKodeverk(FellesKodeverk kodeverk) {
         if (ObjectUtils.isEmpty(kodeverk)) {
             log.error("Metode hentGyldigeKoderForKodeverk kalt for kodeverk {}", kodeverk);
             return Collections.emptyList();
@@ -66,11 +63,11 @@ public class KodeverkService {
             return Collections.emptyList();
         }
 
-        List<KodeDto> gyldigeKoder = new ArrayList<>();
+        List<Kode> gyldigeKoder = new ArrayList<>();
         LocalDate idag = LocalDate.now();
 
         for (Map.Entry<String, List<Kode>> entry : hentetKodeverk.getKoder().entrySet()) {
-            entry.getValue().stream().filter(kode -> !kode.getGyldigFom().isAfter(idag) && !kode.getGyldigTom().isBefore(idag)).findFirst().map(kode -> new KodeDto(kode.getKode(), kode.getNavn())).ifPresent(gyldigeKoder::add);
+            entry.getValue().stream().filter(kode -> !kode.getGyldigFom().isAfter(idag) && !kode.getGyldigTom().isBefore(idag)).findFirst().ifPresent(gyldigeKoder::add);
         }
         return gyldigeKoder;
     }
@@ -78,6 +75,25 @@ public class KodeverkService {
     private Kodeverk hentKodeverk(String kodeverkNavn) {
         log.debug("Hentet og cachet Kodeverk {}", kodeverkNavn);
         return kodeverkRegister.hentKodeverk(kodeverkNavn);
+    }
+
+    public String getTermFraKodeverk(FellesKodeverk kodeverk, String kode) {
+        return getTermFraKodeverk(kodeverk, kode, LocalDate.now(), kodeverkRegister.hentKodeverk(kodeverk.getNavn()).getKoder().get(kode));
+    }
+
+    private String getTermFraKodeverk(FellesKodeverk kodeverk, String kode, LocalDate dato, List<Kode> kodeperioder) {
+        if (kodeperioder == null) {
+            log.warn("Fant ikke term for kode {} i kodeverk {}", kode, kodeverk.getNavn());
+            return UKJENT;
+        }
+        // kodeperioder er en liste med samme kode men med forskjellige gyldighetsperiode. Det holder at en er gyldig.
+        for (Kode kodeperiode : kodeperioder) {
+            if (!kodeperiode.getGyldigFom().isAfter(dato) && !kodeperiode.getGyldigTom().isBefore(dato)) {
+                return kodeperiode.getNavn();
+            }
+        }
+        log.warn("Fant ingen gyldig term for kode {} i kodeverk {}", kode, kodeverk.getNavn());
+        return UKJENT;
     }
 
     @Scheduled(cron = "0 0 6 * * *")

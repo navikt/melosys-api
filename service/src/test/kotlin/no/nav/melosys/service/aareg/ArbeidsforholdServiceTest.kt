@@ -11,7 +11,7 @@ import io.kotest.matchers.shouldBe
 import no.nav.melosys.domain.FellesKodeverk
 import no.nav.melosys.domain.dokument.arbeidsforhold.ArbeidsforholdDokument
 import no.nav.melosys.integrasjon.aareg.arbeidsforhold.ArbeidsforholdRestConsumer
-import no.nav.melosys.service.kodeverk.KodeOppslag
+import no.nav.melosys.service.kodeverk.KodeverkService
 import org.junit.jupiter.api.AfterAll
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.TestInstance
@@ -32,8 +32,8 @@ internal class ArbeidsforholdServiceTest {
             start()
         }
 
-    private val mockedKodeOppslag: KodeOppslag = Mockito.mock(KodeOppslag::class.java)
-    private val arbeidsforholdService: ArbeidsforholdService = ArbeidsforholdService(arbeidsforholdRestConsumer(), mockedKodeOppslag)
+    private val kodeverkServiceMock: KodeverkService = Mockito.mock(KodeverkService::class.java)
+    private val arbeidsforholdService: ArbeidsforholdService = ArbeidsforholdService(arbeidsforholdRestConsumer(), kodeverkServiceMock)
 
     private fun arbeidsforholdRestConsumer() = ArbeidsforholdRestConsumer(
         WebClient.builder()
@@ -49,14 +49,14 @@ internal class ArbeidsforholdServiceTest {
     @Test
     fun testDokumentFromRestService() {
         whenever(
-            mockedKodeOppslag.getTermFraKodeverk(
+            kodeverkServiceMock.getTermFraKodeverk(
                 ArgumentMatchers.eq(FellesKodeverk.PERMISJONS_OG_PERMITTERINGS_BESKRIVELSE),
                 ArgumentMatchers.anyString()
             )
         ).thenReturn("Permisjon med foreldrepenger")
 
         whenever(
-            mockedKodeOppslag.getTermFraKodeverk(
+            kodeverkServiceMock.getTermFraKodeverk(
                 ArgumentMatchers.eq(FellesKodeverk.YRKER),
                 ArgumentMatchers.anyString()
             )

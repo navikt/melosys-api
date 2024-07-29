@@ -4,11 +4,9 @@ import java.time.LocalDate;
 import java.util.List;
 import java.util.Map;
 
-import no.nav.melosys.domain.FellesKodeverk;
 import no.nav.melosys.integrasjon.kodeverk.Kode;
 import no.nav.melosys.integrasjon.kodeverk.Kodeverk;
 import no.nav.melosys.integrasjon.kodeverk.KodeverkRegister;
-import no.nav.melosys.service.kodeverk.KodeOppslag;
 import no.nav.melosys.service.kodeverk.KodeverkService;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
 import org.springframework.context.annotation.Bean;
@@ -26,28 +24,8 @@ public class TestApplication {
     }
 
     @Bean
-    public KodeOppslag kodeOppslagStub() {
-        return new KodeOppslag() {
-            @Override
-            public String getTermFraKodeverk(FellesKodeverk kodeverk, String kode) {
-                return "DUMMY";
-            }
-
-            @Override
-            public String getTermFraKodeverk(FellesKodeverk kodeverk, String kode, LocalDate dato) {
-                return "DUMMY";
-            }
-
-            @Override
-            public String getTermFraKodeverk(FellesKodeverk kodeverk, String kode, LocalDate dato, List<Kode> kodeperioder) {
-                return "DUMMY";
-            }
-        };
-    }
-
-    @Bean
-    public KodeverkService kodeverkService(KodeverkRegister kodeverkRegister, KodeOppslag kodeOppslag) {
-        return new KodeverkService(kodeverkRegister, kodeOppslag);
+    public KodeverkService kodeverkService(KodeverkRegister kodeverkRegister) {
+        return new KodeverkService(kodeverkRegister);
     }
 
 
