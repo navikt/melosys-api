@@ -81,7 +81,7 @@ internal class InnvilgelseEftaKonvensjonMapperTest {
                 )
             )
         } returns true
-        every { mockVilkaarsresultatService.oppfyllerVilkaar(ofType(), Vilkaar.FTRL_2_12_UNNTAK_TURISTSKIP) } returns true
+        every { mockVilkaarsresultatService.finnVilkaarsresultat(ofType(), Vilkaar.FTRL_2_12_UNNTAK_TURISTSKIP) } returns null
 
         every { mockVirksomheterService.hentAlleNorskeVirksomheter(ofType()) } returns listOf(BrevDataTestUtils.lagNorskVirksomhet())
         every { mockAvklartefaktaService.hentAvklarteOrgnrOgUuid(ofType()) } returns setOf(orgnr1, orgnr2, orgnr3, orgnr4, uuid1, uuid2)

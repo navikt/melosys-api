@@ -24,7 +24,7 @@ class InnvilgelseEftaStorbritanniaMapper(
         val behandlingsresultat = dokgenMapperDatahenter.hentBehandlingsresultat(brevbestilling.behandlingId)
         val lovvalgsperiode = behandlingsresultat.hentLovvalgsperiode()
         val anmodningsperiode = behandlingsresultat.finnAnmodningsperiode()
-        val erUnntakTuristskip = vilkaarsresultatService.oppfyllerVilkaar(behandlingsresultat.id, Vilkaar.FTRL_2_12_UNNTAK_TURISTSKIP)
+        val erUnntakTuristskip = vilkaarsresultatService.finnVilkaarsresultat(behandlingsresultat.id, Vilkaar.FTRL_2_12_UNNTAK_TURISTSKIP) != null
 
         val bostedsland = landvelgerService.hentBostedsland(behandlingsresultat.behandling).landkodeobjekt.beskrivelse
 
