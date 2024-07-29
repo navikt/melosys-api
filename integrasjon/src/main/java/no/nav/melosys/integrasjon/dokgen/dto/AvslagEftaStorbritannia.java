@@ -25,8 +25,8 @@ public class AvslagEftaStorbritannia extends DokgenDto {
     public AvslagEftaStorbritannia(AvslagEftaStorbritanniaBrevbestilling brevbestilling, PeriodeOmLovvalg lovvalgsperiode, String virksomhetNavn) {
         super(brevbestilling, Mottakerroller.BRUKER);
 
-        this.innledningFritekst = brevbestilling.getInnledningFritekst();
-        this.begrunnelseFritekst = brevbestilling.getBegrunnelseFritekst();
+        this.innledningFritekst = brevbestilling.getInnledningFritekstAvslagEfta();
+        this.begrunnelseFritekst = brevbestilling.getBegrunnelseFritekstAvslagEfta();
         this.datoMottatt = instantTilLocalDate(brevbestilling.getForsendelseMottatt());
         this.periodeFom = lovvalgsperiode.getFom();
         this.periodeTom = lovvalgsperiode.getTom();

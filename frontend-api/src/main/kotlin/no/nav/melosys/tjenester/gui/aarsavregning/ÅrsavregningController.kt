@@ -6,7 +6,7 @@ import no.nav.melosys.domain.kodeverk.Skatteplikttype
 import no.nav.melosys.domain.kodeverk.Trygdedekninger
 import no.nav.melosys.integrasjon.faktureringskomponenten.dto.BeregnTotalBeløpDto
 import no.nav.melosys.integrasjon.faktureringskomponenten.dto.FakturaseriePeriodeDto
-import no.nav.melosys.service.avgift.aarsavregning.Årsavregning
+import no.nav.melosys.service.avgift.aarsavregning.ÅrsavregningModel
 import no.nav.melosys.service.avgift.aarsavregning.ÅrsavregningService
 import no.nav.security.token.support.core.api.Protected
 import org.springframework.http.ResponseEntity
@@ -21,49 +21,60 @@ class ÅrsavregningController(
     private val årsavregningService: ÅrsavregningService,
 ) {
 
-    @GetMapping("/{avregningID}")
-    fun hentAvregning(@PathVariable("avregningID") avregningID: Long): ResponseEntity<ÅrsavregningResponse> {
-        val årsavregning = årsavregningService.hentÅrsavregning(avregningID)
+    @GetMapping("/{behandlingID}")
+    fun hentAvregning(@PathVariable("behandlingID") behandlingID: Long): ResponseEntity<ÅrsavregningResponse?> {
+        val årsavregning = årsavregningService.finnÅrsavregning(behandlingID) ?: return ResponseEntity.notFound().build()
+
         return ResponseEntity.ok(
-            ÅrsavregningResponse(
-                aar = årsavregning.år,
-                tidligereGrunnlagsopplysninger = hentTidligereGrunnlagsopplysninger(årsavregning),
-                avvikFunnet = årsavregning.nyttGrunnlag != null,
-                nyttGrunnlag = null,
-                endeligAvgift = null,
-                avregning = Avregning(
-                    nyttTotalbeloep = årsavregning?.nyttTotalbeloep?.intValueExact() ?: 0,
-                    tidligereFakturertBeloep = årsavregning?.tidligereFakturertBeloep?.intValueExact() ?: 0,
-                    tilFaktureringBeloep = årsavregning?.tilFaktureringBeloep?.intValueExact() ?: 0,
-                )
-            )
+            lagÅrsavregningResponse(årsavregning)
         )
     }
 
-    @PostMapping
-    fun opprettNyÅrsavregning(@RequestBody årsavregningRequest: LagÅrsavregningRequest): ResponseEntity<Long> {
-        return ResponseEntity.ok(årsavregningService.opprettÅrsavregning(årsavregningRequest.behandlingsId, årsavregningRequest.aar))
+    @PostMapping("/{behandlingID}")
+    fun opprettNyÅrsavregning(
+        @PathVariable("behandlingID") behandlingID: Long,
+        @RequestBody årsavregningRequest: LagÅrsavregningRequest
+    ): ResponseEntity<ÅrsavregningResponse> {
+        val årsavregning = årsavregningService.opprettÅrsavregning(behandlingID, årsavregningRequest.aar)
+
+        return ResponseEntity.ok(
+            lagÅrsavregningResponse(årsavregning)
+        )
     }
 
     data class LagÅrsavregningRequest(
-        val aar: Int,
-        val behandlingsId: Long
+        val aar: Int
     )
 
-    private fun hentTidligereGrunnlagsopplysninger(årsavregning: Årsavregning): TidligereGrunnlagsopplysninger? {
-        return if (årsavregning.tidligereGrunnlag == null) null else
+    private fun lagÅrsavregningResponse(årsavregningModel: ÅrsavregningModel) =
+        ÅrsavregningResponse(
+            aar = årsavregningModel.år,
+            tidligereGrunnlagsopplysninger = hentTidligereGrunnlagsopplysninger(årsavregningModel),
+            avvikFunnet = årsavregningModel.nyttGrunnlag != null,
+            nyttGrunnlag = null,
+            endeligAvgift = null,
+            avregning = Avregning(
+                nyttTotalbeloep = årsavregningModel.nyttTotalbeloep?.intValueExact() ?: 0,
+                tidligereFakturertBeloep = årsavregningModel.tidligereFakturertBeloep?.intValueExact() ?: 0,
+                tilFaktureringBeloep = årsavregningModel.tilFaktureringBeloep?.intValueExact() ?: 0,
+            )
+        )
+
+
+    private fun hentTidligereGrunnlagsopplysninger(årsavregningModel: ÅrsavregningModel): TidligereGrunnlagsopplysninger? {
+        return if (årsavregningModel.tidligereGrunnlag == null) null else
             TidligereGrunnlagsopplysninger(
                 Trygdeavgiftsgrunnlag(
-                    medlemskapsperioder = årsavregning.tidligereGrunnlag?.medlemskapsperioder?.map { Medlemskapsperiode(it.fom, it.tom, it.dekning) }
+                    medlemskapsperioder = årsavregningModel.tidligereGrunnlag?.medlemskapsperioder?.map { Medlemskapsperiode(it.fom, it.tom, it.dekning) }
                         .orEmpty(),
-                    skatteforholdsperioder = årsavregning.tidligereGrunnlag?.skatteforholdsperioder?.map {
+                    skatteforholdsperioder = årsavregningModel.tidligereGrunnlag?.skatteforholdsperioder?.map {
                         Skatteforholdsperiode(
                             it.fom,
                             it.tom,
                             it.skatteplikttype
                         )
                     }.orEmpty(),
-                    inntektskperioder = årsavregning.tidligereGrunnlag?.innteksperioder?.map {
+                    inntektskperioder = årsavregningModel.tidligereGrunnlag?.innteksperioder?.map {
                         Inntektsperiode(
                             it.fom,
                             it.tom,
@@ -74,7 +85,7 @@ class ÅrsavregningController(
                     }.orEmpty(),
                 ),
                 Avgift(
-                    trygdeavgiftsperioder = årsavregning.tidligereAvgift.map {
+                    trygdeavgiftsperioder = årsavregningModel.tidligereAvgift.map {
                         Trygdeavgiftsperiode(
                             fom = it.fom,
                             tom = it.tom,
@@ -85,8 +96,8 @@ class ÅrsavregningController(
                             avgiftPerMd = it.trygdeavgiftsbeløpMd.verdi.intValueExact()
                         )
                     },
-                    totalInntekt = hentTotalInntekt(årsavregning.tidligereAvgift),
-                    totalAvgift = hentTotalAvgift(årsavregning.tidligereAvgift)
+                    totalInntekt = hentTotalInntekt(årsavregningModel.tidligereAvgift),
+                    totalAvgift = hentTotalAvgift(årsavregningModel.tidligereAvgift)
                 )
             )
     }

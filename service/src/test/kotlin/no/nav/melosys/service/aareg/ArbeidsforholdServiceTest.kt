@@ -10,9 +10,9 @@ import com.github.tomakehurst.wiremock.core.WireMockConfiguration
 import io.kotest.matchers.shouldBe
 import no.nav.melosys.domain.FellesKodeverk
 import no.nav.melosys.domain.dokument.arbeidsforhold.ArbeidsforholdDokument
-import no.nav.melosys.integrasjon.aareg.arbeidsforhold.ArbeidsforholdRestConsumer
-import no.nav.melosys.service.kodeverk.KodeverkService
 import org.junit.jupiter.api.AfterAll
+import no.nav.melosys.integrasjon.aareg.arbeidsforhold.ArbeidsforholdConsumer
+import no.nav.melosys.service.kodeverk.KodeverkService
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.TestInstance
 import org.mockito.ArgumentMatchers
@@ -35,7 +35,7 @@ internal class ArbeidsforholdServiceTest {
     private val kodeverkServiceMock: KodeverkService = Mockito.mock(KodeverkService::class.java)
     private val arbeidsforholdService: ArbeidsforholdService = ArbeidsforholdService(arbeidsforholdRestConsumer(), kodeverkServiceMock)
 
-    private fun arbeidsforholdRestConsumer() = ArbeidsforholdRestConsumer(
+    private fun arbeidsforholdRestConsumer() = ArbeidsforholdConsumer(
         WebClient.builder()
             .baseUrl("http://localhost:" + wireMockServer.port())
             .build()

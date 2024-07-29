@@ -8,7 +8,8 @@ import no.nav.melosys.domain.Behandlingsresultat;
 
 @Entity
 @Table(name = "aarsavregning")
-public class Aarsavregning {
+public class Årsavregning {
+
     @Id
     private Long id;
 
@@ -92,7 +93,7 @@ public class Aarsavregning {
     @Override
     public boolean equals(Object o) {
         if (this == o) return true;
-        if (!(o instanceof Aarsavregning that)) return false;
+        if (!(o instanceof Årsavregning that)) return false;
         return Objects.equals(id, that.id) && Objects.equals(aar, that.aar) && Objects.equals(tidligereFakturertBeloep, that.tidligereFakturertBeloep) && Objects.equals(nyttTotalbeloep, that.nyttTotalbeloep) && Objects.equals(tilFaktureringBeloep, that.tilFaktureringBeloep);
     }
 

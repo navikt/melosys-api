@@ -38,7 +38,7 @@ public interface PeriodeOmLovvalg extends ErPeriode, HarBestemmelse<LovvalgBeste
     }
 
     default boolean erArtikkel13_3_a_eller_13_4() {
-        return getBestemmelse() == KONV_EFTA_STORBRITANNIA_ART13_3A || getBestemmelse() == KONV_EFTA_STORBRITANNIA_ART13_4;
+        return getBestemmelse() == KONV_EFTA_STORBRITANNIA_ART13_3A || getBestemmelse() == KONV_EFTA_STORBRITANNIA_ART13_4 || getBestemmelse() == KONV_EFTA_STORBRITANNIA_ART13_4_2;
     }
 
     default boolean erArtikkel16_1_eller_16_3() {
