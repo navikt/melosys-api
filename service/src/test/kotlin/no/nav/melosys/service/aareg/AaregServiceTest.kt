@@ -1,4 +1,4 @@
-package no.nav.melosys.integrasjon.aareg
+package no.nav.melosys.service.aareg
 
 import com.fasterxml.jackson.databind.ObjectMapper
 import com.fasterxml.jackson.databind.introspect.AnnotatedMember
@@ -11,7 +11,7 @@ import io.kotest.matchers.shouldBe
 import no.nav.melosys.domain.FellesKodeverk
 import no.nav.melosys.domain.dokument.arbeidsforhold.ArbeidsforholdDokument
 import no.nav.melosys.integrasjon.aareg.arbeidsforhold.ArbeidsforholdRestConsumer
-import no.nav.melosys.integrasjon.kodeverk.KodeOppslag
+import no.nav.melosys.service.kodeverk.KodeOppslag
 import org.junit.jupiter.api.AfterAll
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.TestInstance

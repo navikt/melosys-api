@@ -1,9 +1,11 @@
-package no.nav.melosys.integrasjon.kodeverk;
+package no.nav.melosys.service.kodeverk;
 
 import java.time.LocalDate;
 import java.util.List;
 
 import no.nav.melosys.domain.FellesKodeverk;
+import no.nav.melosys.integrasjon.kodeverk.Kode;
+import no.nav.melosys.integrasjon.kodeverk.KodeverkRegister;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Component;

@@ -4,7 +4,6 @@ import java.time.LocalDate;
 import java.util.*;
 
 import no.nav.melosys.integrasjon.kodeverk.Kode;
-import no.nav.melosys.integrasjon.kodeverk.KodeOppslag;
 import no.nav.melosys.integrasjon.kodeverk.Kodeverk;
 import no.nav.melosys.integrasjon.kodeverk.KodeverkRegister;
 import org.junit.jupiter.api.BeforeEach;

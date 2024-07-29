@@ -1,12 +1,11 @@
-package no.nav.melosys.integrasjon.aareg
+package no.nav.melosys.service.aareg
 
 import no.nav.melosys.domain.Saksopplysning
 import no.nav.melosys.domain.SaksopplysningKildesystem
 import no.nav.melosys.domain.SaksopplysningType
-import no.nav.melosys.integrasjon.aareg.arbeidsforhold.ArbeidsforholdKonverter
 import no.nav.melosys.integrasjon.aareg.arbeidsforhold.ArbeidsforholdQuery
 import no.nav.melosys.integrasjon.aareg.arbeidsforhold.ArbeidsforholdRestConsumer
-import no.nav.melosys.integrasjon.kodeverk.KodeOppslag
+import no.nav.melosys.service.kodeverk.KodeOppslag
 import org.springframework.stereotype.Service
 import java.time.LocalDate
 

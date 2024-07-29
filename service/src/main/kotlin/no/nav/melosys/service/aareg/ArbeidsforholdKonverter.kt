@@ -1,12 +1,13 @@
-package no.nav.melosys.integrasjon.aareg.arbeidsforhold
+package no.nav.melosys.service.aareg
 
 import no.nav.melosys.domain.FellesKodeverk
 import no.nav.melosys.domain.Saksopplysning
 import no.nav.melosys.domain.dokument.arbeidsforhold.*
 import no.nav.melosys.domain.dokument.felles.Periode
+import no.nav.melosys.integrasjon.aareg.arbeidsforhold.ArbeidsforholdResponse
 import no.nav.melosys.integrasjon.aareg.arbeidsforhold.ArbeidsforholdResponse.AntallTimerForTimeloennet
 import no.nav.melosys.integrasjon.aareg.arbeidsforhold.ArbeidsforholdResponse.PermisjonPermittering
-import no.nav.melosys.integrasjon.kodeverk.KodeOppslag
+import no.nav.melosys.service.kodeverk.KodeOppslag
 import java.time.OffsetDateTime
 import java.time.YearMonth
 import java.util.*

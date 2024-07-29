@@ -1,4 +1,4 @@
-package no.nav.melosys.integrasjon.aareg
+package no.nav.melosys.service.aareg
 
 import no.nav.melosys.domain.Saksopplysning
 import java.time.LocalDate
