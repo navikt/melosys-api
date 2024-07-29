@@ -1,66 +1,91 @@
-package no.nav.melosys.service.kodeverk;
+package no.nav.melosys.service.kodeverk
 
-import java.time.LocalDate;
-import java.util.*;
+import io.kotest.matchers.collections.shouldHaveSize
+import io.kotest.matchers.shouldBe
+import io.mockk.every
+import io.mockk.junit5.MockKExtension
+import io.mockk.mockk
+import no.nav.melosys.domain.FellesKodeverk
+import no.nav.melosys.integrasjon.kodeverk.Kode
+import no.nav.melosys.integrasjon.kodeverk.Kodeverk
+import no.nav.melosys.integrasjon.kodeverk.KodeverkRegister
+import org.junit.jupiter.api.BeforeEach
+import org.junit.jupiter.api.Test
+import org.junit.jupiter.api.extension.ExtendWith
+import java.time.LocalDate
 
-import no.nav.melosys.integrasjon.kodeverk.Kode;
-import no.nav.melosys.integrasjon.kodeverk.Kodeverk;
-import no.nav.melosys.integrasjon.kodeverk.KodeverkRegister;
-import org.junit.jupiter.api.BeforeEach;
-import org.junit.jupiter.api.Test;
-import org.junit.jupiter.api.extension.ExtendWith;
-import org.mockito.Mock;
-import org.mockito.Mockito;
-import org.mockito.junit.jupiter.MockitoExtension;
+@ExtendWith(MockKExtension::class)
+internal class KodeverkServiceTest {
+    private val landkoder: MutableMap<String, List<Kode>> = HashMap()
+    private lateinit var kodeverkService: KodeverkService
 
-import static no.nav.melosys.domain.FellesKodeverk.LANDKODER;
-import static org.assertj.core.api.Assertions.assertThat;
-
-@ExtendWith(MockitoExtension.class)
-class KodeverkServiceTest {
-
-    private static String BAK = "BAK", BAKVENDTLAND = "BAKVENDTLAND";
-    private static String OPP = "OPP", OPPNEDLAND = "OPPNEDLAND";
-    private Map<String, List<Kode>> landkoder = new HashMap<>();
-    private KodeverkService kodeverkService;
-
-    @Mock
-    private KodeverkRegister kodeverkRegisterMock;
+    private val kodeverkRegisterMock: KodeverkRegister = mockk()
 
     @BeforeEach
-    public void setup() {
-        kodeverkService = new KodeverkService(kodeverkRegisterMock);
-        landkoder.put(BAK, Collections.singletonList(new Kode(BAK, BAKVENDTLAND, LocalDate.MIN, LocalDate.MAX)));
-        Kodeverk mockLandkoder = new Kodeverk(LANDKODER.getNavn(), landkoder);
-        Mockito.when(kodeverkRegisterMock.hentKodeverk(LANDKODER.getNavn())).thenReturn(mockLandkoder);
+    fun setup() {
+        kodeverkService = KodeverkService(kodeverkRegisterMock)
+        landkoder[BAK] = listOf(
+            Kode(
+                BAK,
+                BAKVENDTLAND,
+                LocalDate.MIN,
+                LocalDate.MAX
+            )
+        )
+        every { kodeverkRegisterMock.hentKodeverk(FellesKodeverk.LANDKODER.navn) } returns Kodeverk(FellesKodeverk.LANDKODER.navn, landkoder)
     }
 
     @Test
-    void dekodOgCache_altOK() {
-        String res = kodeverkService.dekod(LANDKODER, BAK);
-        assertThat(res).isEqualTo(BAKVENDTLAND);
+    fun `dekoder kode BAK til BAKVENDTLAND`() {
+        val res = kodeverkService.dekod(FellesKodeverk.LANDKODER, BAK)
+
+
+        res shouldBe BAKVENDTLAND
     }
 
     @Test
-    void hentGyldigeKoderForKodeverk_altOK() {
-        LocalDate idag = LocalDate.now();
-        landkoder.put(OPP, Arrays.asList(new Kode(OPP, BAKVENDTLAND, LocalDate.MIN, idag.minusDays(1)), new Kode(OPP, OPPNEDLAND, idag, LocalDate.MAX)));
+    fun `skal hente alle gyldige koder for kodeverk`() {
+        val idag = LocalDate.now()
+        landkoder[OPP] = listOf(
+            Kode(
+                OPP,
+                BAKVENDTLAND,
+                LocalDate.MIN,
+                idag.minusDays(1)
+            ), Kode(OPP, OPPNEDLAND, idag, LocalDate.MAX)
+        )
 
-        List<Kode> res = kodeverkService.hentGyldigeKoderForKodeverk(LANDKODER);
 
-        assertThat(res).hasSize(2);
-        assertThat(res.get(0).getKode()).isEqualTo(BAK);
-        assertThat(res.get(1).getKode()).isEqualTo(OPP);
-        assertThat(res.get(1).getNavn()).isEqualTo(OPPNEDLAND);
+        val res = kodeverkService.hentGyldigeKoderForKodeverk(FellesKodeverk.LANDKODER)
+
+
+        res shouldHaveSize 2
+        res[0].kode shouldBe BAK
+        res[0].navn shouldBe BAKVENDTLAND
+        res[1].kode shouldBe OPP
+        res[1].navn shouldBe OPPNEDLAND
     }
 
     @Test
-    void hentGyldigeKoderForKodeverk_ingenGyldigeTermerForOpp_kommerIkkeMedIListen() {
-        LocalDate idag = LocalDate.now();
-        landkoder.put(OPP, Arrays.asList(new Kode(OPP, BAKVENDTLAND, LocalDate.MIN, idag.minusDays(1)), new Kode(OPP, OPPNEDLAND, idag.plusDays(1), LocalDate.MAX)));
+    fun `skal kun hente koder for kodeverk som er gyldige`() {
+        val idag = LocalDate.now()
+        landkoder[OPP] = listOf(
+            Kode(OPP, BAKVENDTLAND, LocalDate.MIN, idag.minusDays(1)),
+            Kode(OPP, OPPNEDLAND, idag.plusDays(1), LocalDate.MAX)
+        )
 
-        List<Kode> res = kodeverkService.hentGyldigeKoderForKodeverk(LANDKODER);
 
-        assertThat(res).hasSize(1).extracting(Kode::getKode).containsExactly(BAK);
+        val res = kodeverkService.hentGyldigeKoderForKodeverk(FellesKodeverk.LANDKODER)
+
+
+        res shouldHaveSize 1
+        res.single().kode shouldBe BAK
+    }
+
+    companion object {
+        private const val BAK = "BAK"
+        private const val BAKVENDTLAND = "BAKVENDTLAND"
+        private const val OPP = "OPP"
+        private const val OPPNEDLAND = "OPPNEDLAND"
     }
 }

@@ -8,20 +8,22 @@ import com.github.tomakehurst.wiremock.WireMockServer
 import com.github.tomakehurst.wiremock.client.WireMock
 import com.github.tomakehurst.wiremock.core.WireMockConfiguration
 import io.kotest.matchers.shouldBe
+import io.mockk.every
+import io.mockk.junit5.MockKExtension
+import io.mockk.mockk
 import no.nav.melosys.domain.FellesKodeverk
 import no.nav.melosys.domain.dokument.arbeidsforhold.ArbeidsforholdDokument
-import org.junit.jupiter.api.AfterAll
 import no.nav.melosys.integrasjon.aareg.arbeidsforhold.ArbeidsforholdConsumer
 import no.nav.melosys.service.kodeverk.KodeverkService
+import org.junit.jupiter.api.AfterAll
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.TestInstance
-import org.mockito.ArgumentMatchers
-import org.mockito.Mockito
-import org.mockito.kotlin.whenever
+import org.junit.jupiter.api.extension.ExtendWith
 import org.springframework.web.reactive.function.client.WebClient
 import java.time.LocalDate
 
 @TestInstance(TestInstance.Lifecycle.PER_CLASS)
+@ExtendWith(MockKExtension::class)
 internal class ArbeidsforholdServiceTest {
     companion object {
         private const val NAV_PERSONIDENT = "12345678990"
@@ -32,7 +34,7 @@ internal class ArbeidsforholdServiceTest {
             start()
         }
 
-    private val kodeverkServiceMock: KodeverkService = Mockito.mock(KodeverkService::class.java)
+    private val kodeverkServiceMock: KodeverkService = mockk()
     private val arbeidsforholdService: ArbeidsforholdService = ArbeidsforholdService(arbeidsforholdRestConsumer(), kodeverkServiceMock)
 
     private fun arbeidsforholdRestConsumer() = ArbeidsforholdConsumer(
@@ -48,19 +50,19 @@ internal class ArbeidsforholdServiceTest {
 
     @Test
     fun testDokumentFromRestService() {
-        whenever(
+        every {
             kodeverkServiceMock.getTermFraKodeverk(
-                ArgumentMatchers.eq(FellesKodeverk.PERMISJONS_OG_PERMITTERINGS_BESKRIVELSE),
-                ArgumentMatchers.anyString()
+                FellesKodeverk.PERMISJONS_OG_PERMITTERINGS_BESKRIVELSE,
+                any()
             )
-        ).thenReturn("Permisjon med foreldrepenger")
+        } returns "Permisjon med foreldrepenger"
 
-        whenever(
+        every {
             kodeverkServiceMock.getTermFraKodeverk(
-                ArgumentMatchers.eq(FellesKodeverk.YRKER),
-                ArgumentMatchers.anyString()
+                FellesKodeverk.YRKER,
+                any()
             )
-        ).thenReturn("IT-KONSULENT")
+        } returns "IT-KONSULENT"
 
         wireMockServer.stubFor(
             WireMock.get(WireMock.urlPathEqualTo("/"))

@@ -1,15 +1,15 @@
 package no.nav.melosys.integrasjon.kodeverk.impl;
 
 import java.time.LocalDate;
+
 import jakarta.ws.rs.client.Client;
 import jakarta.ws.rs.client.ClientBuilder;
 import jakarta.ws.rs.client.WebTarget;
 import jakarta.ws.rs.core.HttpHeaders;
 import jakarta.ws.rs.core.MediaType;
-
 import no.nav.melosys.integrasjon.felles.CallIdAware;
 import no.nav.melosys.integrasjon.felles.JacksonObjectMapperProvider;
-import no.nav.melosys.integrasjon.kodeverk.impl.dto.KodeDto;
+import no.nav.melosys.integrasjon.kodeverk.impl.dto.FellesKodeverkDto;
 
 import static no.nav.melosys.config.MDCOperations.X_CORRELATION_ID;
 import static no.nav.melosys.config.MDCOperations.getCorrelationId;
@@ -28,7 +28,7 @@ public class KodeverkConsumerImpl implements CallIdAware {
         target = client.register(JacksonObjectMapperProvider.class).target(endpointUrl);
     }
 
-    public KodeDto hentKodeverk(String navn) {
+    public FellesKodeverkDto hentKodeverk(String navn) {
         String path = String.format("/%s/kodeverk/%s/koder/betydninger", VERSJON, navn);
         return target
             .path(path)
@@ -40,6 +40,6 @@ public class KodeverkConsumerImpl implements CallIdAware {
             .header("Nav-Call-Id", getCallID())
             .header("Nav-Consumer-Id", CONSUMER_ID)
             .header(X_CORRELATION_ID, getCorrelationId())
-            .get(KodeDto.class);
+            .get(FellesKodeverkDto.class);
     }
 }

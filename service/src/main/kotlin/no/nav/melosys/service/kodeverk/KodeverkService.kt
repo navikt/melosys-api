@@ -1,108 +1,98 @@
-package no.nav.melosys.service.kodeverk;
+package no.nav.melosys.service.kodeverk
 
-import java.time.LocalDate;
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.List;
-import java.util.Map;
-
-import net.javacrumbs.shedlock.spring.annotation.SchedulerLock;
-import no.nav.melosys.domain.FellesKodeverk;
-import no.nav.melosys.integrasjon.kodeverk.Kode;
-import no.nav.melosys.integrasjon.kodeverk.Kodeverk;
-import no.nav.melosys.integrasjon.kodeverk.KodeverkRegister;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-import org.springframework.boot.context.event.ApplicationReadyEvent;
-import org.springframework.context.event.EventListener;
-import org.springframework.scheduling.annotation.Scheduled;
-import org.springframework.stereotype.Service;
-import org.springframework.util.ObjectUtils;
+import net.javacrumbs.shedlock.spring.annotation.SchedulerLock
+import no.nav.melosys.domain.FellesKodeverk
+import no.nav.melosys.integrasjon.kodeverk.Kode
+import no.nav.melosys.integrasjon.kodeverk.Kodeverk
+import no.nav.melosys.integrasjon.kodeverk.KodeverkRegister
+import org.slf4j.LoggerFactory
+import org.springframework.boot.context.event.ApplicationReadyEvent
+import org.springframework.context.event.EventListener
+import org.springframework.scheduling.annotation.Scheduled
+import org.springframework.stereotype.Service
+import org.springframework.util.ObjectUtils
+import java.time.LocalDate
 
 @Service
-public class KodeverkService {
-    private static final Logger log = LoggerFactory.getLogger(KodeverkService.class);
-
-    public static final String UKJENT = "UKJENT";
-
-    private final KodeverkRegister kodeverkRegister;
-
-    public KodeverkService(KodeverkRegister kodeverkRegister) {
-        this.kodeverkRegister = kodeverkRegister;
-    }
-
+class KodeverkService(private val kodeverkRegister: KodeverkRegister) {
     @EventListener
-    public void onApplicationEvent(ApplicationReadyEvent event) {
-        kodeverkScheduler();
+    fun onApplicationEvent(event: ApplicationReadyEvent?) {
+        kodeverkScheduler()
     }
 
-    public String dekod(FellesKodeverk kodeverk, String kode) {
-        return dekod(kodeverk, kode, LocalDate.now());
+    fun dekod(kodeverk: FellesKodeverk, kode: String?): String {
+        return dekod(kodeverk, kode, LocalDate.now())
     }
 
-    private String dekod(FellesKodeverk kodeverk, String kode, LocalDate dato) {
+    private fun dekod(kodeverk: FellesKodeverk, kode: String?, dato: LocalDate): String {
         if (ObjectUtils.isEmpty(kode)) {
-            log.warn("Metode dekod kalt for kodeverk {} med kode {}", kodeverk, kode);
-            return UKJENT;
+            log.warn("Metode dekod kalt for kodeverk {} med kode {}", kodeverk, kode)
+            return UKJENT
         }
-
-        List<Kode> kodeperioder = hentKodeverk(kodeverk.getNavn()).getKoder().get(kode);
-        return getTermFraKodeverk(kodeverk, kode, dato, kodeperioder);
+        val kodeperioder = hentKodeverk(kodeverk.navn).koder[kode]
+        return getTermFraKodeverk(kodeverk, kode, dato, kodeperioder)
     }
 
-    public List<Kode> hentGyldigeKoderForKodeverk(FellesKodeverk kodeverk) {
+    fun hentGyldigeKoderForKodeverk(kodeverk: FellesKodeverk): List<Kode> {
         if (ObjectUtils.isEmpty(kodeverk)) {
-            log.error("Metode hentGyldigeKoderForKodeverk kalt for kodeverk {}", kodeverk);
-            return Collections.emptyList();
+            log.error("Metode hentGyldigeKoderForKodeverk kalt for kodeverk {}", kodeverk)
+            return emptyList()
         }
-
-        Kodeverk hentetKodeverk = hentKodeverk(kodeverk.getNavn());
-
-        if (hentetKodeverk == null) {
-            log.warn("Fant ikke kodeverk {}", kodeverk.getNavn());
-            return Collections.emptyList();
+        val hentetKodeverk = hentKodeverk(kodeverk.navn)
+        val gyldigeKoder: MutableList<Kode> = ArrayList()
+        val idag = LocalDate.now()
+        for ((_, value) in hentetKodeverk.koder) {
+            value.stream().filter { kode: Kode -> !kode.gyldigFom.isAfter(idag) && !kode.gyldigTom.isBefore(idag) }
+                .findFirst().ifPresent { e: Kode -> gyldigeKoder.add(e) }
         }
-
-        List<Kode> gyldigeKoder = new ArrayList<>();
-        LocalDate idag = LocalDate.now();
-
-        for (Map.Entry<String, List<Kode>> entry : hentetKodeverk.getKoder().entrySet()) {
-            entry.getValue().stream().filter(kode -> !kode.getGyldigFom().isAfter(idag) && !kode.getGyldigTom().isBefore(idag)).findFirst().ifPresent(gyldigeKoder::add);
-        }
-        return gyldigeKoder;
+        return gyldigeKoder
     }
 
-    private Kodeverk hentKodeverk(String kodeverkNavn) {
-        log.debug("Hentet og cachet Kodeverk {}", kodeverkNavn);
-        return kodeverkRegister.hentKodeverk(kodeverkNavn);
+    private fun hentKodeverk(kodeverkNavn: String): Kodeverk {
+        log.debug("Hentet og cachet Kodeverk {}", kodeverkNavn)
+        return kodeverkRegister.hentKodeverk(kodeverkNavn)
     }
 
-    public String getTermFraKodeverk(FellesKodeverk kodeverk, String kode) {
-        return getTermFraKodeverk(kodeverk, kode, LocalDate.now(), kodeverkRegister.hentKodeverk(kodeverk.getNavn()).getKoder().get(kode));
+    fun getTermFraKodeverk(kodeverk: FellesKodeverk, kode: String?): String {
+        return getTermFraKodeverk(
+            kodeverk,
+            kode,
+            LocalDate.now(),
+            kodeverkRegister.hentKodeverk(kodeverk.navn).koder[kode]
+        )
     }
 
-    private String getTermFraKodeverk(FellesKodeverk kodeverk, String kode, LocalDate dato, List<Kode> kodeperioder) {
+    private fun getTermFraKodeverk(
+        kodeverk: FellesKodeverk,
+        kode: String?,
+        dato: LocalDate,
+        kodeperioder: List<Kode>?
+    ): String {
         if (kodeperioder == null) {
-            log.warn("Fant ikke term for kode {} i kodeverk {}", kode, kodeverk.getNavn());
-            return UKJENT;
+            log.warn("Fant ikke term for kode {} i kodeverk {}", kode, kodeverk.navn)
+            return UKJENT
         }
         // kodeperioder er en liste med samme kode men med forskjellige gyldighetsperiode. Det holder at en er gyldig.
-        for (Kode kodeperiode : kodeperioder) {
-            if (!kodeperiode.getGyldigFom().isAfter(dato) && !kodeperiode.getGyldigTom().isBefore(dato)) {
-                return kodeperiode.getNavn();
+        for (kodeperiode in kodeperioder) {
+            if (!kodeperiode.gyldigFom.isAfter(dato) && !kodeperiode.gyldigTom.isBefore(dato)) {
+                return kodeperiode.navn
             }
         }
-        log.warn("Fant ingen gyldig term for kode {} i kodeverk {}", kode, kodeverk.getNavn());
-        return UKJENT;
+        log.warn("Fant ingen gyldig term for kode {} i kodeverk {}", kode, kodeverk.navn)
+        return UKJENT
     }
 
     @Scheduled(cron = "0 0 6 * * *")
     @SchedulerLock(name = "KodeverkSchedulerJobb", lockAtLeastFor = "10m")
-    public void kodeverkScheduler() {
-        log.info("Henter alle kodeverk");
-        for (FellesKodeverk kodeverk : FellesKodeverk.values()) {
-            hentKodeverk(kodeverk.getNavn());
+    fun kodeverkScheduler() {
+        log.info("Henter alle kodeverk")
+        for (kodeverk in FellesKodeverk.values()) {
+            hentKodeverk(kodeverk.navn)
         }
     }
 
+    companion object {
+        private val log = LoggerFactory.getLogger(KodeverkService::class.java)
+        const val UKJENT = "UKJENT"
+    }
 }

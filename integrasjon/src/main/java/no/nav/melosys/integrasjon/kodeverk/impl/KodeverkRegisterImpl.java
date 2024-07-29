@@ -9,7 +9,7 @@ import no.nav.melosys.integrasjon.kodeverk.Kode;
 import no.nav.melosys.integrasjon.kodeverk.Kodeverk;
 import no.nav.melosys.integrasjon.kodeverk.KodeverkRegister;
 import no.nav.melosys.integrasjon.kodeverk.UkjentKodeverkException;
-import no.nav.melosys.integrasjon.kodeverk.impl.dto.KodeDto;
+import no.nav.melosys.integrasjon.kodeverk.impl.dto.FellesKodeverkDto;
 import org.springframework.cache.annotation.Cacheable;
 import org.springframework.stereotype.Component;
 
@@ -28,7 +28,7 @@ public class KodeverkRegisterImpl implements KodeverkRegister {
     @Cacheable("kodeverk")
     public Kodeverk hentKodeverk(String kodeverkNavn) {
         try {
-            KodeDto kodeDto = kodeverkConsumer.hentKodeverk(kodeverkNavn);
+            FellesKodeverkDto kodeDto = kodeverkConsumer.hentKodeverk(kodeverkNavn);
             Map<String, List<Kode>> koder = new HashMap<>();
             kodeDto.betydninger.forEach((kode, betydninger) -> {
                 List<Kode> termer = betydninger.stream().map(betydning -> {
