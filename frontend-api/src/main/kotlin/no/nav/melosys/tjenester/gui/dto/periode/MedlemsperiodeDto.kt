@@ -1,7 +1,5 @@
 package no.nav.melosys.tjenester.gui.dto.periode
 
-import no.nav.melosys.service.kodeverk.KodeDto
-
 class MedlemsperiodeDto {
 
     var periodeID: Long = 0L

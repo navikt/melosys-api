@@ -8,7 +8,10 @@ import java.util.Map;
 
 import net.javacrumbs.shedlock.spring.annotation.SchedulerLock;
 import no.nav.melosys.domain.FellesKodeverk;
-import no.nav.melosys.integrasjon.kodeverk.*;
+import no.nav.melosys.integrasjon.kodeverk.Kode;
+import no.nav.melosys.integrasjon.kodeverk.Kodeverk;
+import no.nav.melosys.integrasjon.kodeverk.KodeverkRegister;
+import no.nav.melosys.tjenester.gui.dto.periode.KodeDto;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.boot.context.event.ApplicationReadyEvent;
@@ -34,13 +37,6 @@ public class KodeverkService {
     @EventListener
     public void onApplicationEvent(ApplicationReadyEvent event) {
         kodeverkScheduler();
-    }
-
-    public KodeDto getKodeverdi(FellesKodeverk kodeverk, String kode) {
-        if (kode == null) {
-            return null;
-        }
-        return new KodeDto(kode, dekod(kodeverk, kode));
     }
 
     public String dekod(FellesKodeverk kodeverk, String kode) {

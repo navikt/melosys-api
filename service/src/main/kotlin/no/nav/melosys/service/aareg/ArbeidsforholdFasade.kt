@@ -6,7 +6,7 @@ import java.time.LocalDate
 /**
  * Fasade mot Arbeidsforholdsregisteret (AAREG)
  */
-interface AaregFasade {
+interface ArbeidsforholdFasade {
     /**
      * Etterspør en liste av arbeidsforhold fra AA-registeret for en arbeidstaker.
      *

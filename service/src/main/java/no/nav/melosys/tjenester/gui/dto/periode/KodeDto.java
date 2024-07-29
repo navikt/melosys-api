@@ -1,4 +1,4 @@
-package no.nav.melosys.service.kodeverk;
+package no.nav.melosys.tjenester.gui.dto.periode;
 
 public class KodeDto {
     private String kode;

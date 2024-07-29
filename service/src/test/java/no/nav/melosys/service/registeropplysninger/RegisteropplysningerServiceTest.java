@@ -16,7 +16,7 @@ import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingstema;
 import no.nav.melosys.integrasjon.ereg.EregFasade;
 import no.nav.melosys.integrasjon.inntekt.InntektService;
 import no.nav.melosys.integrasjon.utbetaling.UtbetaldataRestService;
-import no.nav.melosys.service.aareg.AaregFasade;
+import no.nav.melosys.service.aareg.ArbeidsforholdFasade;
 import no.nav.melosys.service.behandling.BehandlingService;
 import no.nav.melosys.service.medl.MedlPeriodeService;
 import no.nav.melosys.service.saksopplysninger.SaksopplysningerService;
@@ -43,7 +43,7 @@ class RegisteropplysningerServiceTest {
     @Mock
     private EregFasade eregFasade;
     @Mock
-    private AaregFasade aaregFasade;
+    private ArbeidsforholdFasade arbeidsforholdFasade;
     @Mock
     private BehandlingService behandlingService;
     @Mock
@@ -59,10 +59,10 @@ class RegisteropplysningerServiceTest {
 
     @BeforeEach
     public void setUp() throws Exception {
-        registeropplysningerService = new RegisteropplysningerService(medlPeriodeService, eregFasade, aaregFasade, behandlingService,
+        registeropplysningerService = new RegisteropplysningerService(medlPeriodeService, eregFasade, arbeidsforholdFasade, behandlingService,
             inntektService, saksopplysningerService, registeropplysningerPeriodeFactory, utbetaldataRestService);
 
-        when(aaregFasade.finnArbeidsforholdPrArbeidstaker(anyString(), anyLocalDate(), anyLocalDate())).thenReturn(lagSaksopplysning(SaksopplysningType.ARBFORH));
+        when(arbeidsforholdFasade.finnArbeidsforholdPrArbeidstaker(anyString(), anyLocalDate(), anyLocalDate())).thenReturn(lagSaksopplysning(SaksopplysningType.ARBFORH));
         when(medlPeriodeService.hentPeriodeListe(anyString(), anyLocalDate(), anyLocalDate())).thenReturn(lagSaksopplysning(SaksopplysningType.MEDL));
         when(inntektService.hentInntektListe(anyString(), anyYearMonth(), anyYearMonth())).thenReturn(lagSaksopplysning(SaksopplysningType.INNTK));
         when(eregFasade.hentOrganisasjon(anyString())).thenReturn(lagSaksopplysning(SaksopplysningType.ORG));
@@ -95,7 +95,7 @@ class RegisteropplysningerServiceTest {
 
         verify(behandlingService).lagre(any(Behandling.class));
 
-        verify(aaregFasade).finnArbeidsforholdPrArbeidstaker(anyString(), anyLocalDate(), anyLocalDate());
+        verify(arbeidsforholdFasade).finnArbeidsforholdPrArbeidstaker(anyString(), anyLocalDate(), anyLocalDate());
         verify(inntektService).hentInntektListe(anyString(), anyYearMonth(), anyYearMonth());
         verify(medlPeriodeService).hentPeriodeListe(anyString(), anyLocalDate(), anyLocalDate());
         verify(eregFasade).hentOrganisasjon(anyString());
@@ -132,8 +132,8 @@ class RegisteropplysningerServiceTest {
         inntektFørOrg.verify(inntektService).hentInntektListe(anyString(), anyYearMonth(), anyYearMonth());
         inntektFørOrg.verify(eregFasade).hentOrganisasjon(anyString());
 
-        InOrder arbeidsforholdFørOrg = inOrder(aaregFasade, eregFasade);
-        arbeidsforholdFørOrg.verify(aaregFasade).finnArbeidsforholdPrArbeidstaker(anyString(), anyLocalDate(), anyLocalDate());
+        InOrder arbeidsforholdFørOrg = inOrder(arbeidsforholdFasade, eregFasade);
+        arbeidsforholdFørOrg.verify(arbeidsforholdFasade).finnArbeidsforholdPrArbeidstaker(anyString(), anyLocalDate(), anyLocalDate());
         arbeidsforholdFørOrg.verify(eregFasade).hentOrganisasjon(anyString());
 
         verify(medlPeriodeService).hentPeriodeListe(anyString(), anyLocalDate(), anyLocalDate());
@@ -143,13 +143,13 @@ class RegisteropplysningerServiceTest {
     void hentArbeidsforholdopplysninger() {
         LocalDate fom = LocalDate.now().minusMonths(1);
         LocalDate tom = LocalDate.now();
-        when(aaregFasade.finnArbeidsforholdPrArbeidstaker(anyString(), anyLocalDate(), anyLocalDate())).thenReturn(lagSaksopplysning(SaksopplysningType.ARBFORH));
+        when(arbeidsforholdFasade.finnArbeidsforholdPrArbeidstaker(anyString(), anyLocalDate(), anyLocalDate())).thenReturn(lagSaksopplysning(SaksopplysningType.ARBFORH));
 
         registeropplysningerService.hentOgLagreOpplysninger(registeropplysningerRequest(fom, tom)
             .saksopplysningTyper(saksopplysningstyper().arbeidsforholdopplysninger().build())
             .build());
 
-        verify(aaregFasade).finnArbeidsforholdPrArbeidstaker(eq(FNR), anyLocalDate(), anyLocalDate());
+        verify(arbeidsforholdFasade).finnArbeidsforholdPrArbeidstaker(eq(FNR), anyLocalDate(), anyLocalDate());
         verify(behandlingService).lagre(any(Behandling.class));
     }
 
@@ -215,7 +215,7 @@ class RegisteropplysningerServiceTest {
             .tom(tom)
             .build());
 
-        verify(aaregFasade, never()).finnArbeidsforholdPrArbeidstaker(anyString(), any(), any());
+        verify(arbeidsforholdFasade, never()).finnArbeidsforholdPrArbeidstaker(anyString(), any(), any());
         verify(inntektService, never()).hentInntektListe(anyString(), any(), any());
         verify(medlPeriodeService, never()).hentPeriodeListe(anyString(), any(), any());
 

@@ -10,10 +10,10 @@ import org.springframework.stereotype.Service
 import java.time.LocalDate
 
 @Service
-class AaregService(
+class ArbeidsforholdService(
     private val arbeidsforholdRestConsumer: ArbeidsforholdRestConsumer,
     private val kodeOppslag: KodeOppslag
-) : AaregFasade {
+) : ArbeidsforholdFasade {
     override fun finnArbeidsforholdPrArbeidstaker(ident: String, fom: LocalDate?, tom: LocalDate?): Saksopplysning {
         val arbeidsforholdQuery = ArbeidsforholdQuery(
             regelverk = ArbeidsforholdQuery.Regelverk.A_ORDNINGEN,

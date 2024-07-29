@@ -22,7 +22,7 @@ import org.springframework.web.reactive.function.client.WebClient
 import java.time.LocalDate
 
 @TestInstance(TestInstance.Lifecycle.PER_CLASS)
-internal class AaregServiceTest {
+internal class ArbeidsforholdServiceTest {
     companion object {
         private const val NAV_PERSONIDENT = "12345678990"
     }
@@ -33,7 +33,7 @@ internal class AaregServiceTest {
         }
 
     private val mockedKodeOppslag: KodeOppslag = Mockito.mock(KodeOppslag::class.java)
-    private val aaregService: AaregService = AaregService(arbeidsforholdRestConsumer(), mockedKodeOppslag)
+    private val arbeidsforholdService: ArbeidsforholdService = ArbeidsforholdService(arbeidsforholdRestConsumer(), mockedKodeOppslag)
 
     private fun arbeidsforholdRestConsumer() = ArbeidsforholdRestConsumer(
         WebClient.builder()
@@ -77,7 +77,7 @@ internal class AaregServiceTest {
         )
 
 
-        val saksopplysning = aaregService.finnArbeidsforholdPrArbeidstaker(
+        val saksopplysning = arbeidsforholdService.finnArbeidsforholdPrArbeidstaker(
             NAV_PERSONIDENT,
             LocalDate.of(2014, 7, 1),
             LocalDate.of(2015, 12, 31)
