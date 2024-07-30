@@ -5,13 +5,10 @@ import ch.qos.logback.classic.spi.ILoggingEvent
 import ch.qos.logback.core.AppenderBase
 import io.kotest.assertions.withClue
 import io.kotest.matchers.collections.shouldHaveAtLeastSize
-import mu.KotlinLogging
 import org.slf4j.LoggerFactory
 import java.util.concurrent.CopyOnWriteArrayList
 
 object LoggingTestUtils {
-    val log = KotlinLogging.logger { } // på være public siden brukes av inline funksjon
-
     class ThreadSafeListAppender<E> : AppenderBase<E>() {
         private val loggingEvents: MutableList<E> = CopyOnWriteArrayList()
 
