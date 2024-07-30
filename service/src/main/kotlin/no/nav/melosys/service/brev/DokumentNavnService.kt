@@ -97,7 +97,7 @@ class DokumentNavnService(
             return "Søknad om unntak"
         }
 
-        return tittel
+        return tittel.orEmpty()
     }
 
     private fun utledTittelTrygdeavtale(
