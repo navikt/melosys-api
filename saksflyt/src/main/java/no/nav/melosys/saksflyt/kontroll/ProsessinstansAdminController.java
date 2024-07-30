@@ -14,7 +14,6 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
-@Unprotected
 @RestController
 @RequestMapping("/admin/prosessinstanser")
 public class ProsessinstansAdminController implements AdminController {

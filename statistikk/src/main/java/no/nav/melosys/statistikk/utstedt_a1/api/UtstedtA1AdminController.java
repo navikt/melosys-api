@@ -20,7 +20,6 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.context.WebApplicationContext;
 
-@Unprotected
 @RestController
 @RequestMapping("/admin/utstedtA1")
 @Scope(value = WebApplicationContext.SCOPE_REQUEST)

@@ -13,7 +13,6 @@ import org.springframework.web.bind.annotation.*
 
 private val log = KotlinLogging.logger { }
 
-@Unprotected
 @RestController
 @RequestMapping("/admin/oppgaver/migrering")
 class OppgaveMigreringAdminController(
