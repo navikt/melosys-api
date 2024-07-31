@@ -3,8 +3,8 @@ package no.nav.melosys.service.aareg
 import no.nav.melosys.domain.Saksopplysning
 import no.nav.melosys.domain.SaksopplysningKildesystem
 import no.nav.melosys.domain.SaksopplysningType
-import no.nav.melosys.integrasjon.aareg.arbeidsforhold.ArbeidsforholdQuery
 import no.nav.melosys.integrasjon.aareg.arbeidsforhold.ArbeidsforholdConsumer
+import no.nav.melosys.integrasjon.aareg.arbeidsforhold.ArbeidsforholdQuery
 import no.nav.melosys.service.kodeverk.KodeverkService
 import org.springframework.stereotype.Service
 import java.time.LocalDate
@@ -13,8 +13,8 @@ import java.time.LocalDate
 class ArbeidsforholdService(
     private val arbeidsforholdConsumer: ArbeidsforholdConsumer,
     private val kodeverkService: KodeverkService
-) : ArbeidsforholdFasade {
-    override fun finnArbeidsforholdPrArbeidstaker(ident: String, fom: LocalDate?, tom: LocalDate?): Saksopplysning {
+) {
+    fun finnArbeidsforholdPrArbeidstaker(ident: String, fom: LocalDate?, tom: LocalDate?): Saksopplysning {
         val arbeidsforholdQuery = ArbeidsforholdQuery(
             regelverk = ArbeidsforholdQuery.Regelverk.A_ORDNINGEN,
             arbeidsforholdType = ArbeidsforholdQuery.ArbeidsforholdType.ALLE,
