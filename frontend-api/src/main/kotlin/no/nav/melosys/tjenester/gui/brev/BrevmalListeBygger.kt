@@ -229,6 +229,7 @@ class BrevmalListeBygger(
             .medKodeOgBeskrivelse(BrevmalFeltKode.FRITEKST)
             .medFeltType(FeltType.FRITEKST)
             .medValg(FeltValgDto(feltValgAlternativFritekst, FeltValgType.CHECKBOX))
+            .medVisBeskrivelse(false)
             .build()
         val feltStandardTekst = BrevmalFeltDto.Builder()
             .medKodeOgBeskrivelse(BrevmalFeltKode.STANDARDTEKST)
@@ -238,8 +239,8 @@ class BrevmalListeBygger(
             .medType(produserbartDokument)
             .medFelter(
                 listOf(
-                    feltFritekst,
-                    feltStandardTekst
+                    feltStandardTekst,
+                    feltFritekst
                 )
             )
             .build()

@@ -335,6 +335,7 @@ public class DokgenService {
             case IKKE_YRKESAKTIV_PLIKTIG_FTRL, IKKE_YRKESAKTIV_FRIVILLIG_FTRL, PLIKTIG_MEDLEM_FTRL -> new DokgenBrevbestilling.Builder<>()
                 .medDistribusjonstype(Distribusjonstype.VEDTAK);
             case INNHENTING_AV_INNTEKTSOPPLYSNINGER -> new InnhentingAvInntektsopplysningerBrevbestilling.Builder()
+                .medDistribusjonstype(Distribusjonstype.VIKTIG)
                 .medSkalViseStandardTekstOmOpplysninger(brevbestillingDto.isSkalViseStandardTekstOmOpplysninger())
                 .medFritekst(brevbestillingDto.getFritekst());
             case ORIENTERING_ANMODNING_UNNTAK -> new OrienteringAnmodningUnntakBrevbestilling.Builder()

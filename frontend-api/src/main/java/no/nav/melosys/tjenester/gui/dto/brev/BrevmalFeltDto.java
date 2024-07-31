@@ -2,7 +2,7 @@ package no.nav.melosys.tjenester.gui.dto.brev;
 
 /**
  * Informasjon om et felt som skal være med i malen.
- *
+ * <p>
  * Dersom {@param valg} ikke er null, vil instans av dette feltet være usynlig med mindre brukeren velger
  * et valgalternativ fra {@param valg} som har {@link FeltvalgAlternativDto#isVisFelt()} = true.
  */
@@ -10,6 +10,7 @@ public class BrevmalFeltDto {
 
     private final String kode;
     private final String beskrivelse;
+    private final boolean visBeskrivelse;
     private final FeltType feltType;
     private final String hjelpetekst;
     private final boolean paakrevd;
@@ -24,6 +25,7 @@ public class BrevmalFeltDto {
         this.paakrevd = builder.paakrevd;
         this.valg = builder.valg;
         this.tegnBegrensning = builder.tegnBegrensning;
+        visBeskrivelse = builder.visBeskrivelse;
     }
 
     public String getKode() {
@@ -32,6 +34,10 @@ public class BrevmalFeltDto {
 
     public String getBeskrivelse() {
         return beskrivelse;
+    }
+
+    public boolean isVisBeskrivelse() {
+        return visBeskrivelse;
     }
 
     public FeltType getFeltType() {
@@ -57,6 +63,7 @@ public class BrevmalFeltDto {
     public static final class Builder {
         private String kode;
         private String beskrivelse;
+        public boolean visBeskrivelse = true;
         private FeltType feltType;
         private String hjelpetekst;
         private boolean paakrevd = false;
@@ -66,6 +73,11 @@ public class BrevmalFeltDto {
         public Builder medKodeOgBeskrivelse(BrevmalFeltKode brevmalFeltKode) {
             this.kode = brevmalFeltKode.getKode();
             this.beskrivelse = brevmalFeltKode.getBeskrivelse();
+            return this;
+        }
+
+        public Builder medVisBeskrivelse(boolean visBeskrivelse) {
+            this.visBeskrivelse = visBeskrivelse;
             return this;
         }
 
