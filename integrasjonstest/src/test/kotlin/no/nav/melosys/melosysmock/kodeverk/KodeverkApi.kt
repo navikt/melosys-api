@@ -16,16 +16,22 @@ import java.time.LocalDate
 class KodeverkApi {
     @GetMapping("{kodeverkNavn}/koder/betydninger")
     fun hent(@PathVariable kodeverkNavn: String): FellesKodeverkDto {
-        return FellesKodeverkDto().apply {
-            betydninger = mapOf("andreSkift" to listOf(BetydningDto().apply {
-                gyldigFra = LocalDate.of(2019, 1, 1)
-                gyldigTil = LocalDate.of(9999, 12, 31)
-                beskrivelser = mapOf("nb" to BeskrivelseDto().apply {
-                    term = "Andre skift"
-                    tekst = "Andre skift"
-                })
-            }))
-        }
+        return FellesKodeverkDto(
+            betydninger = mapOf(
+                "andreSkift" to listOf(
+                    BetydningDto(
+                        gyldigFra = LocalDate.of(2019, 1, 1),
+                        gyldigTil = LocalDate.of(9999, 12, 31),
+                        beskrivelser = mapOf(
+                            "nb" to BeskrivelseDto(
+                                term = "Andre skift",
+                                tekst = "Andre skift"
+                            )
+                        )
+                    )
+                )
+            )
+        )
     }
 }
 

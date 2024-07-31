@@ -1,45 +1,41 @@
-package no.nav.melosys.integrasjon.kodeverk.impl;
+package no.nav.melosys.integrasjon.kodeverk.impl
 
-import java.time.LocalDate;
+import jakarta.ws.rs.client.ClientBuilder
+import jakarta.ws.rs.client.WebTarget
+import jakarta.ws.rs.core.HttpHeaders
+import jakarta.ws.rs.core.MediaType
+import no.nav.melosys.config.MDCOperations
+import no.nav.melosys.config.MDCOperations.Companion.getCorrelationId
+import no.nav.melosys.integrasjon.felles.CallIdAware
+import no.nav.melosys.integrasjon.felles.JacksonObjectMapperProvider
+import no.nav.melosys.integrasjon.kodeverk.impl.dto.FellesKodeverkDto
+import java.time.LocalDate
 
-import jakarta.ws.rs.client.Client;
-import jakarta.ws.rs.client.ClientBuilder;
-import jakarta.ws.rs.client.WebTarget;
-import jakarta.ws.rs.core.HttpHeaders;
-import jakarta.ws.rs.core.MediaType;
-import no.nav.melosys.integrasjon.felles.CallIdAware;
-import no.nav.melosys.integrasjon.felles.JacksonObjectMapperProvider;
-import no.nav.melosys.integrasjon.kodeverk.impl.dto.FellesKodeverkDto;
+class KodeverkConsumerImpl internal constructor(endpointUrl: String) : CallIdAware {
+    private val target: WebTarget
 
-import static no.nav.melosys.config.MDCOperations.X_CORRELATION_ID;
-import static no.nav.melosys.config.MDCOperations.getCorrelationId;
-import static no.nav.melosys.integrasjon.kodeverk.impl.KodeverkRegisterImpl.BOKMÅL;
-
-
-public class KodeverkConsumerImpl implements CallIdAware {
-
-    private static final String VERSJON = "v1";
-    private static final String CONSUMER_ID = "srvmelosys";
-
-    private final WebTarget target;
-
-    KodeverkConsumerImpl(String endpointUrl) {
-        Client client = ClientBuilder.newBuilder().build();
-        target = client.register(JacksonObjectMapperProvider.class).target(endpointUrl);
+    init {
+        val client = ClientBuilder.newBuilder().build()
+        target = client.register(JacksonObjectMapperProvider::class.java).target(endpointUrl)
     }
 
-    public FellesKodeverkDto hentKodeverk(String navn) {
-        String path = String.format("/%s/kodeverk/%s/koder/betydninger", VERSJON, navn);
+    fun hentKodeverk(navn: String): FellesKodeverkDto {
+        val path = "/$VERSJON/kodeverk/$navn/koder/betydninger"
         return target
             .path(path)
             .queryParam("ekskluderUgyldige", false)
             .queryParam("oppslagsdato", LocalDate.MIN)
-            .queryParam("spraak", BOKMÅL)
+            .queryParam("spraak", KodeverkRegisterImpl.BOKMÅL)
             .request()
             .header(HttpHeaders.ACCEPT, MediaType.APPLICATION_JSON)
             .header("Nav-Call-Id", getCallID())
             .header("Nav-Consumer-Id", CONSUMER_ID)
-            .header(X_CORRELATION_ID, getCorrelationId())
-            .get(FellesKodeverkDto.class);
+            .header(MDCOperations.X_CORRELATION_ID, getCorrelationId())
+            .get(FellesKodeverkDto::class.java)
+    }
+
+    companion object {
+        private const val VERSJON = "v1"
+        private const val CONSUMER_ID = "srvmelosys"
     }
 }

@@ -1,5 +1,5 @@
-package no.nav.melosys.integrasjon.kodeverk;
+package no.nav.melosys.integrasjon.kodeverk
 
-public interface KodeverkRegister {
-    Kodeverk hentKodeverk(String kodeverkNavn);
+interface KodeverkRegister {
+    fun hentKodeverk(kodeverkNavn: String): Kodeverk
 }

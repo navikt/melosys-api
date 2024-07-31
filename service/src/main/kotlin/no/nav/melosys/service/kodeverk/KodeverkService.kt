@@ -1,17 +1,19 @@
 package no.nav.melosys.service.kodeverk
 
+import mu.KotlinLogging
 import net.javacrumbs.shedlock.spring.annotation.SchedulerLock
 import no.nav.melosys.domain.FellesKodeverk
 import no.nav.melosys.integrasjon.kodeverk.Kode
 import no.nav.melosys.integrasjon.kodeverk.Kodeverk
 import no.nav.melosys.integrasjon.kodeverk.KodeverkRegister
-import org.slf4j.LoggerFactory
 import org.springframework.boot.context.event.ApplicationReadyEvent
 import org.springframework.context.event.EventListener
 import org.springframework.scheduling.annotation.Scheduled
 import org.springframework.stereotype.Service
 import org.springframework.util.ObjectUtils
 import java.time.LocalDate
+
+private val log = KotlinLogging.logger { }
 
 @Service
 class KodeverkService(private val kodeverkRegister: KodeverkRegister) {
@@ -92,7 +94,6 @@ class KodeverkService(private val kodeverkRegister: KodeverkRegister) {
     }
 
     companion object {
-        private val log = LoggerFactory.getLogger(KodeverkService::class.java)
         const val UKJENT = "UKJENT"
     }
 }

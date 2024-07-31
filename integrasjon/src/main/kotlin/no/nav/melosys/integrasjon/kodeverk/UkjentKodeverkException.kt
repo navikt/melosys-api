@@ -1,13 +1,6 @@
-package no.nav.melosys.integrasjon.kodeverk;
+package no.nav.melosys.integrasjon.kodeverk
 
-public class UkjentKodeverkException extends RuntimeException {
-    
-    public UkjentKodeverkException(String message) {
-        super(message);
-    }
-    
-    public UkjentKodeverkException(String message, Exception cause) {
-        super(message, cause);
-    }
-
+class UkjentKodeverkException : RuntimeException {
+    constructor(message: String?) : super(message)
+    constructor(message: String?, cause: Exception?) : super(message, cause)
 }
