@@ -30,6 +30,6 @@ public class KodeDto {
     }
 
     public static List<KodeDto> tilKodeDto(List<Kode> kodeliste) {
-        return kodeliste.stream().map(kode -> new KodeDto(kode.kode, kode.navn)).toList();
+        return kodeliste.stream().map(kode -> new KodeDto(kode.getKode(), kode.getNavn())).toList();
     }
 }
