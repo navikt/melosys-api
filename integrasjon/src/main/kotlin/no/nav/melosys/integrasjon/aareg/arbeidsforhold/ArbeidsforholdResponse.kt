@@ -76,14 +76,14 @@ class ArbeidsforholdResponse(val arbeidsforhold: List<Arbeidsforhold>) {
 
     data class Arbeidstaker(val type: String?, val offentligIdent: String?, val aktoerId: String?)
 
-    data class Periode(val fom: LocalDate, val tom: LocalDate?)
+    data class Periode(val fom: LocalDate?, val tom: LocalDate?)
 
     data class PermisjonPermittering(
         val periode: Periode,
         val permisjonPermitteringId: String?,
         val prosent: BigDecimal?,
         val type: String?,  // https://kodeverk-web.dev.adeo.no/kodeverksoversikt/kodeverk/PermisjonsOgPermitteringsBeskrivelse
-        val varslingskode: String
+        val varslingskode: String?
     )
 
     data class Arbeidsavtale(

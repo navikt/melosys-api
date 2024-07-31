@@ -127,7 +127,7 @@ class ReplikerBehandlingsresultatService(val behandlingsresultatService: Behandl
 
         behandlingsresultatReplika.trygdeavgiftsperioder.onEach {
             it.id = null
-            it.grunnlagInntekstperiode.id = null
+            it.grunnlagInntekstperiode?.id = null
             it.grunnlagMedlemskapsperiode.id = null
             it.grunnlagSkatteforholdTilNorge.id = null
         }

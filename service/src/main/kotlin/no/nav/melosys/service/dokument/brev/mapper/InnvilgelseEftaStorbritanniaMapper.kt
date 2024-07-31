@@ -24,8 +24,8 @@ class InnvilgelseEftaStorbritanniaMapper(
         val behandlingsresultat = dokgenMapperDatahenter.hentBehandlingsresultat(brevbestilling.behandlingId)
         val lovvalgsperiode = behandlingsresultat.hentLovvalgsperiode()
         val anmodningsperiode = behandlingsresultat.finnAnmodningsperiode()
+        val erNorskSkip = vilkaarsresultatService.finnVilkaarsresultat(behandlingsresultat.id, Vilkaar.FTRL_2_12_UNNTAK_TURISTSKIP)
         val erUnntakTuristskip = vilkaarsresultatService.oppfyllerVilkaar(behandlingsresultat.id, Vilkaar.FTRL_2_12_UNNTAK_TURISTSKIP)
-
         val bostedsland = landvelgerService.hentBostedsland(behandlingsresultat.behandling).landkodeobjekt.beskrivelse
 
         val alleAvklarteOrgnr = avklartefaktaService.hentAvklarteOrgnrOgUuid(behandlingsresultat.id)
@@ -43,6 +43,7 @@ class InnvilgelseEftaStorbritanniaMapper(
             innvilgelseFritekst = brevbestilling.innvilgelseFritekst,
             lovvalgsbestemmelse = lovvalgsperiode.bestemmelse.name(),
             erUnntakTuristskip = erUnntakTuristskip,
+            erNorskSkip = erNorskSkip != null,
             lovvalgsperiode = Periode(lovvalgsperiode.fom, lovvalgsperiode.tom),
             innledningFritekst = brevbestilling.innledningFritekst,
             tilleggsbestemmelse = if (lovvalgsperiode.tilleggsbestemmelse != null) lovvalgsperiode.tilleggsbestemmelse.name() else "",

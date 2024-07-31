@@ -101,4 +101,41 @@ class LoggingTestUtilsTest {
                 .shouldBe("Prosessinstans(er) på vent med samme gruppe-prefiks: [<a009Prosess>, <x008Prosess>]")
         }
     }
+
+    @Test
+    fun `should manage multiple threads without getting ConcurrentModificationException`() {
+        val someClassLogger = LoggerFactory.getLogger(SomeClass1::class.java)
+
+        val threadCount = 10
+        val logMessageCount = 200
+        repeat(10) { // Concurrent exceptions do not happen every time so run many times
+            LoggingTestUtils.withLogCapture { logs ->
+                val threads = mutableListOf<Thread>()
+                repeat(threadCount) { threadNum ->
+                    val thread = Thread {
+                        repeat(logMessageCount) { i ->
+                            someClassLogger.info("$threadNum - $i")
+                        }
+                    }
+                    threads.add(thread)
+                    thread.start()
+                }
+
+
+                while (true) {
+                    if (logs.count { it.formattedMessage.contains("199") } == threadCount) {
+                        break
+                    }
+                    Thread.sleep(1) // To avid using all cpu
+                }
+
+                logs.filterBuilder
+                    .match<SomeClass1>()
+                    .build()
+                    .count().shouldBe(threadCount * logMessageCount)
+
+                threads.forEach { it.join() }
+            }
+        }
+    }
 }
