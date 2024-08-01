@@ -222,7 +222,7 @@ class OppgaveService(
 
     private fun lagBehandlingsoppgaveDto(oppgave: Oppgave): BehandlingsoppgaveDto {
         val fagsak = fagsakService.hentFagsak(oppgave.saksnummer)
-        val relevantBehandling = fagsak.behandlinger.firstOrNull { it.oppgaveId == oppgave.oppgaveId }
+        val tilknyttetBehandling = fagsak.behandlinger.firstOrNull { it.oppgaveId == oppgave.oppgaveId }
             ?: throw TekniskException("Fant ikke behandling til oppgave ${oppgave.oppgaveId}")
         val orgnr = fagsak.finnVirksomhetsOrgnr()
 
@@ -234,14 +234,14 @@ class OppgaveService(
             navn = hentNavn(oppgave),
             hovedpartIdent = hentHovedpartIdent(oppgave),
             versjon = oppgave.versjon,
-            behandling = mapBehandling(relevantBehandling),
+            behandling = mapBehandling(tilknyttetBehandling),
             saksnummer = fagsak.saksnummer,
             sakstype = fagsak.type,
             sakstema = fagsak.tema,
-            land = hentLand(orgnr, relevantBehandling.id),
-            periode = hentPeriode(orgnr, relevantBehandling.id),
+            land = hentLand(orgnr, tilknyttetBehandling.id),
+            periode = hentPeriode(orgnr, tilknyttetBehandling.id),
             oppgaveBeskrivelse = oppgave.beskrivelse,
-            sisteNotat = hentSisteBehandlingsNotat(relevantBehandling),
+            sisteNotat = hentSisteBehandlingsNotat(tilknyttetBehandling),
         )
     }
 
