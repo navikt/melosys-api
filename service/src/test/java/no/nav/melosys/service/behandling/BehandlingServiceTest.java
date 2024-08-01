@@ -683,11 +683,15 @@ class BehandlingServiceTest {
         String saksnummer = "MEL-1234";
         String saksbehandlerId = "Z123456";
         Oppgave oppgave = new Oppgave.Builder()
+            .setOppgaveId("1")
             .setTilordnetRessurs(saksbehandlerId)
             .build();
-        when(oppgaveService.finnÅpenBehandlingsoppgaveMedFagsaksnummer(saksnummer)).thenReturn(Optional.of(oppgave));
+        Behandling behandling = new Behandling();
+        behandling.setId(BEHANDLING_ID);
+        behandling.setOppgaveId("1");
+        when(oppgaveService.finnBehandlingsoppgaveForBehandlingID(BEHANDLING_ID)).thenReturn(oppgave);
 
-        boolean result = behandlingService.behandlingMedSaksnummerTilhørerSaksbehandlerID(saksnummer, saksbehandlerId);
+        boolean result = behandlingService.behandlingMedSaksnummerTilhørerSaksbehandlerID(BEHANDLING_ID, saksbehandlerId);
 
         assertTrue(result);
     }
@@ -695,12 +699,16 @@ class BehandlingServiceTest {
     @Test
     void behandlingMedSaksnummerTilhørerSaksbehandlerID_saksbehandlerErIkkeSattPåOppgaven_forventFalse() {
         Oppgave oppgave = new Oppgave.Builder()
-            .setTilordnetRessurs("TYBO")
+            .setOppgaveId("1")
+            .setTilordnetRessurs("lol")
             .build();
+        Behandling behandling = new Behandling();
+        behandling.setId(BEHANDLING_ID);
+        behandling.setOppgaveId("1");
 
-        when(oppgaveService.finnÅpenBehandlingsoppgaveMedFagsaksnummer("MEL-1234")).thenReturn(Optional.of(oppgave));
+        when(oppgaveService.finnBehandlingsoppgaveForBehandlingID(BEHANDLING_ID)).thenReturn(oppgave);
 
-        boolean result = behandlingService.behandlingMedSaksnummerTilhørerSaksbehandlerID("MEL-1234", "Z123456");
+        boolean result = behandlingService.behandlingMedSaksnummerTilhørerSaksbehandlerID(BEHANDLING_ID, "Z123456");
 
         assertFalse(result);
     }

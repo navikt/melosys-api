@@ -127,14 +127,14 @@ public class AksesskontrollImpl implements Aksesskontroll {
     @Override
     public boolean behandlingKanRedigeresAvSaksbehandler(Behandling behandling, String saksbehandler) {
         return redigerbarKontroll.behandlingErRedigerbar(behandling)
-            && sakErTilordnetSaksbehandler(behandling.getFagsak().getSaksnummer(), saksbehandler);
+            && sakErTilordnetSaksbehandler(behandling.getId(), saksbehandler);
     }
 
     @Override
     public boolean behandlingKanRedigeresAvSaksbehandler(long behandlingID) {
         Behandling behandling = behandlingService.hentBehandling(behandlingID);
         return redigerbarKontroll.behandlingErRedigerbar(behandling)
-            && sakErTilordnetSaksbehandler(behandling.getFagsak().getSaksnummer(), SubjectHandler.getInstance().getUserID());
+            && sakErTilordnetSaksbehandler(behandling.getId(), SubjectHandler.getInstance().getUserID());
     }
 
     private void autoriser(Behandling behandling, Aksesstype aksesstype, Ressurs ressurs, boolean validerTilordnet) {
@@ -150,14 +150,14 @@ public class AksesskontrollImpl implements Aksesskontroll {
     }
 
     private void sjekkTilordnetSaksbehandler(Behandling behandling, String saksbehandler) {
-        if (!sakErTilordnetSaksbehandler(behandling.getFagsak().getSaksnummer(), saksbehandler)) {
+        if (!sakErTilordnetSaksbehandler(behandling.getId(), saksbehandler)) {
             throw new FunksjonellException(
                 "Forsøk på å endre behandling med id %s som er ikke-redigerbar eller ikke er tilordnet %s".formatted(behandling.getId(), saksbehandler)
             );
         }
     }
 
-    private boolean sakErTilordnetSaksbehandler(String saksnummer, String saksbehandler) {
-        return oppgaveService.saksbehandlerErTilordnetOppgaveForSaksnummer(saksbehandler, saksnummer);
+    private boolean sakErTilordnetSaksbehandler(Long behandlingID, String saksbehandler) {
+        return oppgaveService.saksbehandlerErTilordnetOppgaveForBehandling(saksbehandler, behandlingID);
     }
 }
