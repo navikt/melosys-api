@@ -1,4 +1,8 @@
-package no.nav.melosys.service.kodeverk;
+package no.nav.melosys.tjenester.gui.kodeverk;
+
+import java.util.List;
+
+import no.nav.melosys.integrasjon.kodeverk.Kode;
 
 public class KodeDto {
     private String kode;
@@ -23,5 +27,9 @@ public class KodeDto {
 
     public void setTerm(String term) {
         this.term = term;
+    }
+
+    public static List<KodeDto> tilKodeDto(List<Kode> kodeliste) {
+        return kodeliste.stream().map(kode -> new KodeDto(kode.getKode(), kode.getNavn())).toList();
     }
 }

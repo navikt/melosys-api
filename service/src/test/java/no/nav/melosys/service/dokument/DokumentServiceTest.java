@@ -34,7 +34,6 @@ import no.nav.melosys.exception.IkkeFunnetException;
 import no.nav.melosys.integrasjon.doksys.DoksysFasade;
 import no.nav.melosys.integrasjon.doksys.Dokumentbestilling;
 import no.nav.melosys.integrasjon.ereg.EregFasade;
-import no.nav.melosys.integrasjon.kodeverk.KodeOppslag;
 import no.nav.melosys.integrasjon.kodeverk.Kodeverk;
 import no.nav.melosys.integrasjon.kodeverk.KodeverkRegister;
 import no.nav.melosys.repository.AvklarteFaktaRepository;
@@ -49,6 +48,7 @@ import no.nav.melosys.service.avklartefakta.AvklartefaktaDtoKonverterer;
 import no.nav.melosys.service.avklartefakta.AvklartefaktaService;
 import no.nav.melosys.service.behandling.BehandlingService;
 import no.nav.melosys.service.behandling.BehandlingsresultatService;
+import no.nav.melosys.service.behandling.VilkaarsresultatService;
 import no.nav.melosys.service.bruker.SaksbehandlerService;
 import no.nav.melosys.service.dokument.brev.*;
 import no.nav.melosys.service.dokument.brev.bygger.BrevDataByggerAvslagArbeidsgiver;
@@ -64,7 +64,6 @@ import no.nav.melosys.service.registeropplysninger.OrganisasjonOppslagService;
 import no.nav.melosys.service.saksopplysninger.SaksopplysningerService;
 import no.nav.melosys.service.unntak.AnmodningsperiodeService;
 import no.nav.melosys.service.utpeking.UtpekingService;
-import no.nav.melosys.service.behandling.VilkaarsresultatService;
 import no.nav.melosys.sikkerhet.context.SpringSubjectHandler;
 import no.nav.melosys.sikkerhet.context.TestSubjectHandler;
 import org.junit.jupiter.api.BeforeEach;
@@ -258,8 +257,8 @@ final class DokumentServiceTest {
 
     private BrevdataGrunnlagFactory lagBrevinput(AvklartefaktaService avklartefaktaService) {
         KodeverkRegister kodeverkRegister = mockKodeverkRegister();
-        KodeOppslag kodeOppslag = mock(KodeOppslag.class);
-        KodeverkService kodeverkService = new KodeverkService(kodeverkRegister, kodeOppslag);
+        KodeverkService kodeverkServiceMock = mock(KodeverkService.class);
+        KodeverkService kodeverkService = new KodeverkService(kodeverkRegister);
         EregFasade eregFasade = mockEregFasade();
         OrganisasjonOppslagService registerOppslagService = new OrganisasjonOppslagService(eregFasade);
         AvklarteVirksomheterService avklarteVirksomheterService = new AvklarteVirksomheterService(avklartefaktaService, registerOppslagService, mock(BehandlingService.class), mock(KodeverkService.class));

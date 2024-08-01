@@ -1,6 +1,6 @@
 package no.nav.melosys.tjenester.gui.dto.periode
 
-import no.nav.melosys.service.kodeverk.KodeDto
+import no.nav.melosys.tjenester.gui.kodeverk.KodeDto
 
 class MedlemsperiodeDto {
 

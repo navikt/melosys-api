@@ -11,7 +11,7 @@ import no.nav.melosys.domain.Tema;
 import no.nav.melosys.domain.kodeverk.*;
 import no.nav.melosys.domain.kodeverk.begrunnelser.Fartsomrader;
 import no.nav.melosys.domain.kodeverk.begrunnelser.Ikkeyrkesaktivsituasjontype;
-import no.nav.melosys.service.kodeverk.KodeDto;
+import no.nav.melosys.tjenester.gui.kodeverk.KodeDto;
 
 /**
  * Alle klasser som implementerer {@code Kodeverk} serialiseres enten som kode og term, eller som string,
