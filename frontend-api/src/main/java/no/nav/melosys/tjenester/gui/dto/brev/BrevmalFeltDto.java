@@ -10,7 +10,6 @@ public class BrevmalFeltDto {
 
     private final String kode;
     private final String beskrivelse;
-    private final boolean visBeskrivelse;
     private final FeltType feltType;
     private final String hjelpetekst;
     private final boolean paakrevd;
@@ -25,7 +24,6 @@ public class BrevmalFeltDto {
         this.paakrevd = builder.paakrevd;
         this.valg = builder.valg;
         this.tegnBegrensning = builder.tegnBegrensning;
-        visBeskrivelse = builder.visBeskrivelse;
     }
 
     public String getKode() {
@@ -34,10 +32,6 @@ public class BrevmalFeltDto {
 
     public String getBeskrivelse() {
         return beskrivelse;
-    }
-
-    public boolean isVisBeskrivelse() {
-        return visBeskrivelse;
     }
 
     public FeltType getFeltType() {
@@ -63,21 +57,20 @@ public class BrevmalFeltDto {
     public static final class Builder {
         private String kode;
         private String beskrivelse;
-        public boolean visBeskrivelse = true;
         private FeltType feltType;
         private String hjelpetekst;
         private boolean paakrevd = false;
         private FeltValgDto valg;
         private Integer tegnBegrensning;
 
-        public Builder medKodeOgBeskrivelse(BrevmalFeltKode brevmalFeltKode) {
+        public Builder medKode(BrevmalFeltKode brevmalFeltKode) {
             this.kode = brevmalFeltKode.getKode();
-            this.beskrivelse = brevmalFeltKode.getBeskrivelse();
             return this;
         }
 
-        public Builder medVisBeskrivelse(boolean visBeskrivelse) {
-            this.visBeskrivelse = visBeskrivelse;
+        public Builder medKodeOgBeskrivelse(BrevmalFeltKode brevmalFeltKode) {
+            this.kode = brevmalFeltKode.getKode();
+            this.beskrivelse = brevmalFeltKode.getBeskrivelse();
             return this;
         }
 
