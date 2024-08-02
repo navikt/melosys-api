@@ -26,4 +26,8 @@ public enum FeltType {
      * journalføres og sendes sammen med hovedbrevet
      */
     FRITEKSTVEDLEGG,
+    /**
+     * TITTEL er en tekst uten funksjonalitet og kan benyttes til å lage tittel på utfyllingsformet til dokumentet
+     */
+    FORMTITTEL
 }

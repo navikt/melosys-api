@@ -18,6 +18,7 @@ import no.nav.melosys.tjenester.gui.brev.BrevFelt.FELT_DISTRIBUSJONSTYPE
 import no.nav.melosys.tjenester.gui.brev.BrevFelt.FELT_DOKUMENT_TITTEL
 import no.nav.melosys.tjenester.gui.brev.BrevFelt.FELT_FRITEKST
 import no.nav.melosys.tjenester.gui.brev.BrevFelt.FELT_FRITEKSTVEDLEGG
+import no.nav.melosys.tjenester.gui.brev.BrevFelt.FELT_INNHENTINGBREVFORMTITTEL
 import no.nav.melosys.tjenester.gui.brev.BrevFelt.FELT_MANGLER_FRITEKST
 import no.nav.melosys.tjenester.gui.brev.BrevFelt.FELT_STANDARDTEKST_SJEKKBOKS
 import no.nav.melosys.tjenester.gui.brev.BrevFelt.FELT_VEDLEGG
@@ -238,6 +239,7 @@ class BrevmalListeBygger(
             .medType(produserbartDokument)
             .medFelter(
                 listOf(
+                    FELT_INNHENTINGBREVFORMTITTEL,
                     feltStandardTekst,
                     feltFritekst
                 )

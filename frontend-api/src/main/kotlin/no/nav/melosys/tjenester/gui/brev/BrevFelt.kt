@@ -4,6 +4,11 @@ import no.nav.melosys.domain.kodeverk.brev.Distribusjonstype
 import no.nav.melosys.tjenester.gui.dto.brev.*
 
 internal object BrevFelt {
+    val FELT_INNHENTINGBREVFORMTITTEL = BrevmalFeltDto.Builder()
+        .medKodeOgBeskrivelse(BrevmalFeltKode.STANDARDTEKST_INNHENTINGBREVFORMTITTEL)
+        .medFeltType(FeltType.FORMTITTEL)
+        .build()
+
     val FELT_MANGLER_FRITEKST = BrevmalFeltDto.Builder()
         .medKodeOgBeskrivelse(BrevmalFeltKode.MANGLER_FRITEKST)
         .medFeltType(FeltType.FRITEKST)
