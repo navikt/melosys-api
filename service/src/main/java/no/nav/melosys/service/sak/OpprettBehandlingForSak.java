@@ -49,7 +49,7 @@ public class OpprettBehandlingForSak {
         valider(fagsak, opprettSakDto);
         lovligeKombinasjonerSaksbehandlingService.validerBehandlingstemaOgBehandlingstypeForAndregangsbehandling(fagsak, sistBehandling, sistBehandlingsresultat, behandlingstema, behandlingstype);
 
-        if (sistBehandling.erAktiv()) {
+        if (sistBehandling.erAktiv() && !sistBehandling.erÅrsavregning()) {
             behandlingService.avsluttBehandling(sistBehandling.getId());
         }
 

@@ -19,7 +19,6 @@ import no.nav.melosys.domain.*
 import no.nav.melosys.domain.dokument.felles.Land
 import no.nav.melosys.domain.dokument.person.Diskresjonskode
 import no.nav.melosys.domain.dokument.person.PersonDokument
-import no.nav.melosys.domain.kodeverk.Aktoersroller
 import no.nav.melosys.domain.kodeverk.Landkoder
 import no.nav.melosys.domain.kodeverk.Mottatteopplysningertyper
 import no.nav.melosys.domain.kodeverk.Oppgavetyper
@@ -128,7 +127,7 @@ internal class OppgaveServiceTest {
             .setOppgaveId(JFR_OPPG_ID)
             .setOppgavetype(Oppgavetyper.JFR)
         val oppgaver = setOf(oppgave1.build(), oppgave2.build())
-        val behandling = lagBehandling()
+        val behandling = lagBehandling().apply { oppgaveId = BEH_OPPG_ID }
         val fagsak = FagsakTestFactory.builder().behandlinger(behandling).build()
         every { oppgaveFasade.finnOppgaverMedAnsvarlig(TILORDNET_RESSURS) } returns oppgaver
         every { behandlingService.hentBehandling(any<Long>()) } returns behandling
@@ -154,7 +153,7 @@ internal class OppgaveServiceTest {
 
     @Test
     fun hentOppgaverMedAnsvarlig_mottatteopplysningerFinnesIkke_mappesKorrekt() {
-        val behandling = lagBehandling()
+        val behandling = lagBehandling().apply { oppgaveId = BEH_OPPG_ID }
         val fagsak = FagsakTestFactory.builder().behandlinger(behandling).build()
         every { oppgaveFasade.finnOppgaverMedAnsvarlig(TILORDNET_RESSURS) } returns setOf(oppgave)
         every { behandlingService.hentBehandling(any<Long>()) } returns behandling
@@ -176,7 +175,7 @@ internal class OppgaveServiceTest {
 
     @Test
     fun hentOppgaverMedAnsvarlig_mottatteopplysningerDataErAnmodningEllerAttest_mappesKorrekt() {
-        val behandling = lagBehandling()
+        val behandling = lagBehandling().apply { oppgaveId = BEH_OPPG_ID }
         val fagsak = FagsakTestFactory.builder().behandlinger(behandling).build()
         val mottatteOpplysninger = lagMottatteOpplysninger().apply {
             mottatteOpplysningerData = AnmodningEllerAttest()
@@ -209,6 +208,7 @@ internal class OppgaveServiceTest {
             tekst = "Test2"
         }
         val behandling = lagBehandling().apply {
+            oppgaveId = BEH_OPPG_ID
             behandlingsnotater = setOf(behandlingsnotat1, behandlingsnotat2)
         }
         val fagsak = FagsakTestFactory.builder().behandlinger(behandling).build()
@@ -496,32 +496,41 @@ internal class OppgaveServiceTest {
 
     @Test
     fun saksbehandlerErTilordnetOppgaveForSaksnummer_erTilordnet_erSann() {
-        val saksnummer = "MEL-0"
+        val saksnummer = "MEL-test"
         val saksbehandler = "Z12111"
-        val oppgave = Oppgave.Builder().setTilordnetRessurs(saksbehandler).build()
+        val behandling = lagBehandling()
+        behandling.oppgaveId = "1"
+        val oppgave = Oppgave.Builder().setTilordnetRessurs(saksbehandler).setOppgaveId("1").build()
         every { oppgaveFasade.finnÅpneBehandlingsoppgaverMedSaksnummer(saksnummer) } returns listOf(oppgave)
+        every { behandlingService.hentBehandling(behandling.id) } returns behandling
 
-        oppgaveService.saksbehandlerErTilordnetOppgaveForSaksnummer(saksbehandler, saksnummer)
+        oppgaveService.saksbehandlerErTilordnetOppgaveForBehandling(saksbehandler, behandling.id)
             .shouldBeTrue()
     }
 
     @Test
     fun saksbehandlerErTilordnetOppgaveForSaksnummer_erIkkeTilordnet_erIkkeSann() {
-        val saksnummer = "MEL-0"
+        val saksnummer = "MEL-test"
         val saksbehandler = "Z12111"
-        val oppgave = Oppgave.Builder().build()
+        val behandling = lagBehandling()
+        behandling.oppgaveId = "1"
+        val oppgave = Oppgave.Builder().setOppgaveId("1").build()
         every { oppgaveFasade.finnÅpneBehandlingsoppgaverMedSaksnummer(saksnummer) } returns listOf(oppgave)
+        every { behandlingService.hentBehandling(behandling.id) } returns behandling
 
-        oppgaveService.saksbehandlerErTilordnetOppgaveForSaksnummer(saksbehandler, saksnummer)
+        oppgaveService.saksbehandlerErTilordnetOppgaveForBehandling(saksbehandler, behandling.id)
             .shouldBeFalse()
     }
 
     @Test
     fun saksbehandlerErTilordnetOppgaveForSaksnummer_finnesIngenOppgaver_erIkkeSann() {
-        val saksnummer = "MEL-0"
+        val saksnummer = "MEL-test"
+        val behandling = lagBehandling()
+        behandling.fagsak.apply { leggTilBehandling(behandling) }
         every { oppgaveFasade.finnÅpneBehandlingsoppgaverMedSaksnummer(saksnummer) } returns emptyList()
+        every { behandlingService.hentBehandling(behandling.id) } returns behandling
 
-        oppgaveService.saksbehandlerErTilordnetOppgaveForSaksnummer("Z12111", saksnummer)
+        oppgaveService.saksbehandlerErTilordnetOppgaveForBehandling("Z12111", behandling.id)
             .shouldBeFalse()
     }
 

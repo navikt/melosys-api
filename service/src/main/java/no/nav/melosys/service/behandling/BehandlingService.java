@@ -299,6 +299,7 @@ public class BehandlingService {
         behandlingsreplika.setId(null);
         behandlingsreplika.setType(behandlingstype);
         behandlingsreplika.setStatus(OPPRETTET);
+        behandlingsreplika.setOppgaveId(null);
         behandlingsreplika.setOpprinneligBehandling(tidligsteInaktiveBehandling);
         behandlingsreplika.setMottatteOpplysninger(replikerMottatteOpplysninger(behandlingsreplika, tidligsteInaktiveBehandling.getMottatteOpplysninger()));
         behandlingsreplika.setBehandlingsårsak(null);
@@ -368,8 +369,7 @@ public class BehandlingService {
     }
 
     public void oppdaterBehandlingsstatusHvisTilhørendeSaksbehandler(Behandling behandling, String saksbehandlerID) {
-        String saksnummer = behandling.getFagsak().getSaksnummer();
-        if (behandlingMedSaksnummerTilhørerSaksbehandlerID(saksnummer, saksbehandlerID)) {
+        if (behandlingMedSaksnummerTilhørerSaksbehandlerID(behandling.getId(), saksbehandlerID)) {
             endreBehandlingsstatusFraOpprettetTilUnderBehandling(behandling);
         }
     }
@@ -381,10 +381,10 @@ public class BehandlingService {
         }
     }
 
-    boolean behandlingMedSaksnummerTilhørerSaksbehandlerID(String saksnummer, String saksbehandlerID) {
-        Optional<Oppgave> oppgave = oppgaveService.finnÅpenBehandlingsoppgaveMedFagsaksnummer(saksnummer);
-        if (oppgave.isPresent()) {
-            return saksbehandlerID.equalsIgnoreCase(oppgave.get().getTilordnetRessurs());
+    boolean behandlingMedSaksnummerTilhørerSaksbehandlerID(Long behandlingID, String saksbehandlerID) {
+        var oppgave = oppgaveService.finnBehandlingsoppgaveForBehandlingID(behandlingID);
+        if (oppgave != null) {
+            return saksbehandlerID.equalsIgnoreCase(oppgave.getTilordnetRessurs());
         }
         return false;
     }

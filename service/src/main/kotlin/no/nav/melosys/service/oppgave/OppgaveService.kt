@@ -66,6 +66,14 @@ class OppgaveService(
             .filter { filtrerUtAvgiftsoppgaver(it) }
             .maxByOrNull { it.opprettetTidspunkt }
 
+    @Transactional(readOnly = true)
+    fun finnBehandlingsoppgaveForBehandlingID(behandlingID: Long): Oppgave? {
+        val behandling = behandlingService.hentBehandling(behandlingID)
+        val oppgaver = oppgaveFasade.finnÅpneBehandlingsoppgaverMedSaksnummer(behandling.fagsak.saksnummer)
+
+        return oppgaver.firstOrNull { it.oppgaveId == behandling.oppgaveId }
+    }
+
     fun finnÅpenBehandlingsoppgaveMedFagsaksnummer(saksnummer: String): Optional<Oppgave> {
         val oppgaver = oppgaveFasade.finnÅpneBehandlingsoppgaverMedSaksnummer(saksnummer)
             .filter { filtrerUtAvgiftsoppgaver(it) }
@@ -97,8 +105,15 @@ class OppgaveService(
         @Nullable orgnr: String? = null
     ) {
         val eksisterendeOppgave =
-            if (behandling.oppgaveId != null) oppgaveFasade.hentOppgave(behandling.oppgaveId) else
-                finnÅpenBehandlingsoppgaveMedFagsaksnummer(behandling.fagsak.saksnummer).getOrNull()
+            if (behandling.oppgaveId != null) {
+                oppgaveFasade.hentOppgave(behandling.oppgaveId)
+            } else {
+                val åpenOppgave = finnÅpenBehandlingsoppgaveMedFagsaksnummer(behandling.fagsak.saksnummer).getOrNull()
+                if (åpenOppgave != null && behandling.fagsak.behandlinger.none { it.oppgaveId == åpenOppgave.oppgaveId }) {
+                    åpenOppgave
+                } else null
+            }
+
         if (eksisterendeOppgave == null) {
             val oppgaveBuilder =
                 lagBehandlingsoppgave(behandling).setTilordnetRessurs(tilordnetRessurs).setJournalpostId(journalpostID).setAktørId(aktørID)
@@ -183,11 +198,9 @@ class OppgaveService(
         )
     }
 
-    fun saksbehandlerErTilordnetOppgaveForSaksnummer(saksbehandler: String, saksnummer: String): Boolean =
-        finnÅpenBehandlingsoppgaveMedFagsaksnummer(saksnummer)
-            .map { obj: Oppgave -> obj.tilordnetRessurs }
-            .filter { anObject: String? -> saksbehandler.equals(anObject) }
-            .isPresent
+    @Transactional
+    fun saksbehandlerErTilordnetOppgaveForBehandling(saksbehandler: String, behandlingID: Long): Boolean =
+        finnBehandlingsoppgaveForBehandlingID(behandlingID)?.tilordnetRessurs == saksbehandler
 
     private fun Collection<Oppgave>.tilDtoer(): List<OppgaveDto> = this.mapNotNull { tilOppgaveDtoHåndterException(it) }
 
@@ -222,7 +235,11 @@ class OppgaveService(
 
     private fun lagBehandlingsoppgaveDto(oppgave: Oppgave): BehandlingsoppgaveDto {
         val fagsak = fagsakService.hentFagsak(oppgave.saksnummer)
-        val sistAktiveBehandling = fagsak.hentAktivBehandling()
+        var tilknyttetBehandling = fagsak.behandlinger.firstOrNull { it.oppgaveId == oppgave.oppgaveId }
+        if (tilknyttetBehandling == null) {
+            val sistAktivBehandling = checkNotNull(fagsak.hentAktivBehandling()) { "Finner ingen aktiv behandling for oppgave ${oppgave.oppgaveId}" }
+            tilknyttetBehandling = sistAktivBehandling
+        }
         val orgnr = fagsak.finnVirksomhetsOrgnr()
 
         return BehandlingsoppgaveDto(
@@ -233,14 +250,14 @@ class OppgaveService(
             navn = hentNavn(oppgave),
             hovedpartIdent = hentHovedpartIdent(oppgave),
             versjon = oppgave.versjon,
-            behandling = mapBehandling(sistAktiveBehandling),
+            behandling = mapBehandling(tilknyttetBehandling),
             saksnummer = fagsak.saksnummer,
             sakstype = fagsak.type,
             sakstema = fagsak.tema,
-            land = hentLand(orgnr, sistAktiveBehandling.id),
-            periode = hentPeriode(orgnr, sistAktiveBehandling.id),
+            land = hentLand(orgnr, tilknyttetBehandling.id),
+            periode = hentPeriode(orgnr, tilknyttetBehandling.id),
             oppgaveBeskrivelse = oppgave.beskrivelse,
-            sisteNotat = hentSisteBehandlingsNotat(sistAktiveBehandling),
+            sisteNotat = hentSisteBehandlingsNotat(tilknyttetBehandling),
         )
     }
 

@@ -1,10 +1,8 @@
 package no.nav.melosys.service.tilgang;
 
-import no.nav.melosys.domain.Aktoer;
 import no.nav.melosys.domain.Behandling;
 import no.nav.melosys.domain.Fagsak;
 import no.nav.melosys.domain.FagsakTestFactory;
-import no.nav.melosys.domain.kodeverk.Aktoersroller;
 import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingsstatus;
 import no.nav.melosys.service.behandling.BehandlingService;
 import no.nav.melosys.service.oppgave.OppgaveService;
@@ -152,7 +150,7 @@ class AksesskontrollImplTest {
     void behandlingKanRedigeresAvSaksbehandler_behandlingRedigerbarOppgaveIkkeTilordnet_ikkeSann() {
         final var saksbehandler = "Z111111";
         when(redigerbarKontroll.behandlingErRedigerbar(behandling)).thenReturn(true);
-        when(oppgaveService.saksbehandlerErTilordnetOppgaveForSaksnummer(saksbehandler, SAKSNUMMER)).thenReturn(false);
+        when(oppgaveService.saksbehandlerErTilordnetOppgaveForBehandling(saksbehandler, behandlingID)).thenReturn(false);
 
         var saksbehandlerHarTilgang = aksesskontroll.behandlingKanRedigeresAvSaksbehandler(behandling, saksbehandler);
 
@@ -163,7 +161,7 @@ class AksesskontrollImplTest {
     void behandlingKanRedigeresAvSaksbehandler_behandlingRedigerbarOppgaveTilordnet_sann() {
         final var saksbehandler = "Z111111";
         when(redigerbarKontroll.behandlingErRedigerbar(behandling)).thenReturn(true);
-        when(oppgaveService.saksbehandlerErTilordnetOppgaveForSaksnummer(saksbehandler, SAKSNUMMER)).thenReturn(true);
+        when(oppgaveService.saksbehandlerErTilordnetOppgaveForBehandling(saksbehandler, behandlingID)).thenReturn(true);
 
         var saksbehandlerHarTilgang = aksesskontroll.behandlingKanRedigeresAvSaksbehandler(behandling, saksbehandler);
 
