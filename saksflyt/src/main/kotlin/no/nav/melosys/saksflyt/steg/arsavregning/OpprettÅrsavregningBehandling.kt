@@ -48,7 +48,7 @@ class OpprettÅrsavregningBehandling(
         val trygdeavgiftsBehandlingMedRelevantPeriode =
             trygdeavgiftService.finnSistFakturerbarTrygdeavgiftsbehandlingForÅr(sakMedTrygdeavgift.saksnummer, gjelderÅr).also {
                 if (it == null) log.info(
-                    "Fant ingen behandlinger med overlappende lovvalgsperioder eller medlemskapsperioder for sak: ${
+                    "Fant ingen behandlinger med overlappende trygdeavgiftsperiode for sak: ${
                         sakMedTrygdeavgift.saksnummer
                     } og år: $gjelderÅr"
                 )

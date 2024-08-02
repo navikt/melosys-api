@@ -60,10 +60,16 @@ class ReplikerBehandlingsresultatService(val behandlingsresultatService: Behandl
         behandlingsresultatReplika: Behandlingsresultat,
         behandlingstype: Behandlingstyper
     ) {
-        replikerMedlemskapsperioderBasertPåBehandlingstype(behandlingsresultatOriginal, behandlingsresultatReplika, behandlingstype)
-        replikerTrygdeavgift(behandlingsresultatOriginal, behandlingsresultatReplika)
 
-        behandlingsresultatReplika.medlemskapsperioder.onEach { it.id = null }
+        if (behandlingstype != Behandlingstyper.ÅRSAVREGNING) {
+            replikerMedlemskapsperioderBasertPåBehandlingstype(behandlingsresultatOriginal, behandlingsresultatReplika, behandlingstype)
+            replikerTrygdeavgift(behandlingsresultatOriginal, behandlingsresultatReplika)
+
+            behandlingsresultatReplika.medlemskapsperioder.onEach { it.id = null }
+        } else {
+            behandlingsresultatReplika.medlemskapsperioder = emptySet()
+        }
+
     }
 
     @Throws(
@@ -109,7 +115,7 @@ class ReplikerBehandlingsresultatService(val behandlingsresultatService: Behandl
             BeanUtils.cloneBean(it) as SkatteforholdTilNorge
         }
 
-        behandlingsresultatReplika.medlemskapsperioder.forEach{
+        behandlingsresultatReplika.medlemskapsperioder.forEach {
             it.trygdeavgiftsperioder = HashSet()
         }
         for (trygdeavgiftsperiodeOriginal in behandlingsresultatOriginal.trygdeavgiftsperioder) {
