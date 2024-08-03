@@ -61,236 +61,231 @@ class ReplikerBehandlingsresultatService(val behandlingsresultatService: Behandl
         behandlingstype: Behandlingstyper
     ) {
 
-        if (behandlingstype != Behandlingstyper.ÅRSAVREGNING) {
-            replikerMedlemskapsperioderBasertPåBehandlingstype(behandlingsresultatOriginal, behandlingsresultatReplika, behandlingstype)
-            replikerTrygdeavgift(behandlingsresultatOriginal, behandlingsresultatReplika)
+        replikerMedlemskapsperioderBasertPåBehandlingstype(behandlingsresultatOriginal, behandlingsresultatReplika, behandlingstype)
+        replikerTrygdeavgift(behandlingsresultatOriginal, behandlingsresultatReplika)
 
-            behandlingsresultatReplika.medlemskapsperioder.onEach { it.id = null }
-        } else {
-            behandlingsresultatReplika.medlemskapsperioder = emptySet()
-        }
-
+        behandlingsresultatReplika.medlemskapsperioder.onEach { it.id = null }
     }
 
-    @Throws(
-        InvocationTargetException::class,
-        NoSuchMethodException::class,
-        InstantiationException::class,
-        IllegalAccessException::class
-    )
-    private fun replikerMedlemskapsperioderBasertPåBehandlingstype(
-        behandlingsresultatOriginal: Behandlingsresultat,
-        behandlingsresultatReplika: Behandlingsresultat,
-        behandlingstype: Behandlingstyper
-    ) {
-        behandlingsresultatReplika.medlemskapsperioder = HashSet()
+}
 
-        val filtrertMedlemskapsperioderOriginal = if (behandlingstype == Behandlingstyper.MANGLENDE_INNBETALING_TRYGDEAVGIFT) {
-            behandlingsresultatOriginal.medlemskapsperioder.filter { it.erInnvilget() || it.erOpphørt() }
-        } else {
-            behandlingsresultatOriginal.medlemskapsperioder.filter { it.erInnvilget() }
-        }
+@Throws(
+    InvocationTargetException::class,
+    NoSuchMethodException::class,
+    InstantiationException::class,
+    IllegalAccessException::class
+)
+private fun replikerMedlemskapsperioderBasertPåBehandlingstype(
+    behandlingsresultatOriginal: Behandlingsresultat,
+    behandlingsresultatReplika: Behandlingsresultat,
+    behandlingstype: Behandlingstyper
+) {
+    behandlingsresultatReplika.medlemskapsperioder = HashSet()
 
-        for (medlemskapsperiodeOriginal in filtrertMedlemskapsperioderOriginal) {
-            val medlemskapsperiodeReplika = BeanUtils.cloneBean(medlemskapsperiodeOriginal) as Medlemskapsperiode
-            medlemskapsperiodeReplika.behandlingsresultat = behandlingsresultatReplika
-            behandlingsresultatReplika.medlemskapsperioder.add(medlemskapsperiodeReplika)
-        }
+    val filtrertMedlemskapsperioderOriginal = if (behandlingstype == Behandlingstyper.MANGLENDE_INNBETALING_TRYGDEAVGIFT) {
+        behandlingsresultatOriginal.medlemskapsperioder.filter { it.erInnvilget() || it.erOpphørt() }
+    } else {
+        behandlingsresultatOriginal.medlemskapsperioder.filter { it.erInnvilget() }
     }
 
-    @Throws(
-        InvocationTargetException::class,
-        NoSuchMethodException::class,
-        InstantiationException::class,
-        IllegalAccessException::class
-    )
-    private fun replikerTrygdeavgift(
-        behandlingsresultatOriginal: Behandlingsresultat,
-        behandlingsresultatReplika: Behandlingsresultat,
-    ) {
-        val inntektsperioderReplika = behandlingsresultatOriginal.hentInntektsperioder().map {
-            BeanUtils.cloneBean(it) as Inntektsperiode
-        }
-        val skatteforholdTilNorgeReplika = behandlingsresultatOriginal.hentSkatteforholdTilNorge().map {
-            BeanUtils.cloneBean(it) as SkatteforholdTilNorge
-        }
+    for (medlemskapsperiodeOriginal in filtrertMedlemskapsperioderOriginal) {
+        val medlemskapsperiodeReplika = BeanUtils.cloneBean(medlemskapsperiodeOriginal) as Medlemskapsperiode
+        medlemskapsperiodeReplika.behandlingsresultat = behandlingsresultatReplika
+        behandlingsresultatReplika.medlemskapsperioder.add(medlemskapsperiodeReplika)
+    }
+}
 
-        behandlingsresultatReplika.medlemskapsperioder.forEach {
-            it.trygdeavgiftsperioder = HashSet()
-        }
-        for (trygdeavgiftsperiodeOriginal in behandlingsresultatOriginal.trygdeavgiftsperioder) {
-            val trygdeavgiftsperiodeReplika = BeanUtils.cloneBean(trygdeavgiftsperiodeOriginal) as Trygdeavgiftsperiode
-
-            trygdeavgiftsperiodeReplika.grunnlagMedlemskapsperiode = behandlingsresultatReplika.medlemskapsperioder
-                .find { it.id == trygdeavgiftsperiodeOriginal.grunnlagMedlemskapsperiode.id }
-            trygdeavgiftsperiodeReplika.grunnlagInntekstperiode =
-                inntektsperioderReplika.find { it.id == trygdeavgiftsperiodeOriginal.grunnlagInntekstperiode.id }
-            trygdeavgiftsperiodeReplika.grunnlagSkatteforholdTilNorge =
-                skatteforholdTilNorgeReplika.find { it.id == trygdeavgiftsperiodeOriginal.grunnlagSkatteforholdTilNorge.id }
-
-            trygdeavgiftsperiodeReplika.grunnlagMedlemskapsperiode.trygdeavgiftsperioder.add(trygdeavgiftsperiodeReplika)
-        }
-
-        behandlingsresultatReplika.trygdeavgiftsperioder.onEach {
-            it.id = null
-            it.grunnlagInntekstperiode?.id = null
-            it.grunnlagMedlemskapsperiode.id = null
-            it.grunnlagSkatteforholdTilNorge.id = null
-        }
+@Throws(
+    InvocationTargetException::class,
+    NoSuchMethodException::class,
+    InstantiationException::class,
+    IllegalAccessException::class
+)
+private fun replikerTrygdeavgift(
+    behandlingsresultatOriginal: Behandlingsresultat,
+    behandlingsresultatReplika: Behandlingsresultat,
+) {
+    val inntektsperioderReplika = behandlingsresultatOriginal.hentInntektsperioder().map {
+        BeanUtils.cloneBean(it) as Inntektsperiode
+    }
+    val skatteforholdTilNorgeReplika = behandlingsresultatOriginal.hentSkatteforholdTilNorge().map {
+        BeanUtils.cloneBean(it) as SkatteforholdTilNorge
     }
 
-    @Throws(
-        InvocationTargetException::class,
-        NoSuchMethodException::class,
-        InstantiationException::class,
-        IllegalAccessException::class
-    )
-    private fun replikerUtpekingsperioder(
-        behandlingsresultatOrig: Behandlingsresultat,
-        behandlingsresultatsReplika: Behandlingsresultat
-    ) {
-        behandlingsresultatsReplika.utpekingsperioder = HashSet()
-        for (utpekingsperiodeOriginal in behandlingsresultatOrig.utpekingsperioder) {
-            val utpekingsperiodeReplika = BeanUtils.cloneBean(utpekingsperiodeOriginal) as Utpekingsperiode
-            utpekingsperiodeReplika.behandlingsresultat = behandlingsresultatsReplika
-            utpekingsperiodeReplika.id = null
-            utpekingsperiodeReplika.medlPeriodeID = null
-            utpekingsperiodeReplika.sendtUtland = null
-            behandlingsresultatsReplika.utpekingsperioder.add(utpekingsperiodeReplika)
-        }
+    behandlingsresultatReplika.medlemskapsperioder.forEach {
+        it.trygdeavgiftsperioder = HashSet()
+    }
+    for (trygdeavgiftsperiodeOriginal in behandlingsresultatOriginal.trygdeavgiftsperioder) {
+        val trygdeavgiftsperiodeReplika = BeanUtils.cloneBean(trygdeavgiftsperiodeOriginal) as Trygdeavgiftsperiode
+
+        trygdeavgiftsperiodeReplika.grunnlagMedlemskapsperiode = behandlingsresultatReplika.medlemskapsperioder
+            .find { it.id == trygdeavgiftsperiodeOriginal.grunnlagMedlemskapsperiode.id }
+        trygdeavgiftsperiodeReplika.grunnlagInntekstperiode =
+            inntektsperioderReplika.find { it.id == trygdeavgiftsperiodeOriginal.grunnlagInntekstperiode.id }
+        trygdeavgiftsperiodeReplika.grunnlagSkatteforholdTilNorge =
+            skatteforholdTilNorgeReplika.find { it.id == trygdeavgiftsperiodeOriginal.grunnlagSkatteforholdTilNorge.id }
+
+        trygdeavgiftsperiodeReplika.grunnlagMedlemskapsperiode.trygdeavgiftsperioder.add(trygdeavgiftsperiodeReplika)
     }
 
-    @Throws(
-        InvocationTargetException::class,
-        NoSuchMethodException::class,
-        InstantiationException::class,
-        IllegalAccessException::class
-    )
-    private fun replikerAnmodningsperioder(
-        behandlingsresultatOrig: Behandlingsresultat,
-        behandlingsresultatReplika: Behandlingsresultat
-    ) {
-        behandlingsresultatReplika.anmodningsperioder = HashSet()
-        for (anmodningsperiodeOriginal in behandlingsresultatOrig.anmodningsperioder) {
-            val anmodningsperiodeReplika = BeanUtils.cloneBean(anmodningsperiodeOriginal) as Anmodningsperiode
-            anmodningsperiodeReplika.behandlingsresultat = behandlingsresultatReplika
-            anmodningsperiodeReplika.id = null
-            anmodningsperiodeReplika.medlPeriodeID = null
-            anmodningsperiodeReplika.setSendtUtland(false)
-            anmodningsperiodeReplika.anmodningsperiodeSvar = null
-            behandlingsresultatReplika.anmodningsperioder.add(anmodningsperiodeReplika)
-        }
+    behandlingsresultatReplika.trygdeavgiftsperioder.onEach {
+        it.id = null
+        it.grunnlagInntekstperiode?.id = null
+        it.grunnlagMedlemskapsperiode.id = null
+        it.grunnlagSkatteforholdTilNorge.id = null
     }
+}
 
-    @Throws(
-        IllegalAccessException::class,
-        InstantiationException::class,
-        InvocationTargetException::class,
-        NoSuchMethodException::class
-    )
-    private fun replikerVilkaarsresultat(
-        behandlingsresultatOrig: Behandlingsresultat,
-        behandlingsresultatReplika: Behandlingsresultat
-    ) {
-        behandlingsresultatReplika.vilkaarsresultater = HashSet()
-        for (vilkaarsresultatOriginal in behandlingsresultatOrig.vilkaarsresultater) {
-            val vilkaarsresultatReplika = BeanUtils.cloneBean(vilkaarsresultatOriginal) as Vilkaarsresultat
-            vilkaarsresultatReplika.behandlingsresultat = behandlingsresultatReplika
-            vilkaarsresultatReplika.id = null
-            vilkaarsresultatReplika.begrunnelser = HashSet()
-            for (vilkaarBegrunnelseOriginal in vilkaarsresultatOriginal.begrunnelser) {
-                val vilkaarBegrunnelsesReplika = BeanUtils.cloneBean(vilkaarBegrunnelseOriginal) as VilkaarBegrunnelse
-                vilkaarBegrunnelsesReplika.vilkaarsresultat = vilkaarsresultatReplika
-                vilkaarBegrunnelsesReplika.id = null
-                vilkaarsresultatReplika.begrunnelser.add(vilkaarBegrunnelsesReplika)
-            }
-            behandlingsresultatReplika.vilkaarsresultater.add(vilkaarsresultatReplika)
-        }
+@Throws(
+    InvocationTargetException::class,
+    NoSuchMethodException::class,
+    InstantiationException::class,
+    IllegalAccessException::class
+)
+private fun replikerUtpekingsperioder(
+    behandlingsresultatOrig: Behandlingsresultat,
+    behandlingsresultatsReplika: Behandlingsresultat
+) {
+    behandlingsresultatsReplika.utpekingsperioder = HashSet()
+    for (utpekingsperiodeOriginal in behandlingsresultatOrig.utpekingsperioder) {
+        val utpekingsperiodeReplika = BeanUtils.cloneBean(utpekingsperiodeOriginal) as Utpekingsperiode
+        utpekingsperiodeReplika.behandlingsresultat = behandlingsresultatsReplika
+        utpekingsperiodeReplika.id = null
+        utpekingsperiodeReplika.medlPeriodeID = null
+        utpekingsperiodeReplika.sendtUtland = null
+        behandlingsresultatsReplika.utpekingsperioder.add(utpekingsperiodeReplika)
     }
+}
 
-    @Throws(
-        IllegalAccessException::class,
-        InstantiationException::class,
-        InvocationTargetException::class,
-        NoSuchMethodException::class
-    )
-    private fun replikerLovvalgsperioder(
-        behandlingsresultatOrig: Behandlingsresultat,
-        behandlingsresultatReplika: Behandlingsresultat
-    ) {
-        behandlingsresultatReplika.lovvalgsperioder = HashSet()
-        for (lovvalgsperiodeOriginal in behandlingsresultatOrig.lovvalgsperioder) {
-            val lovvalgsperiodeReplika = BeanUtils.cloneBean(lovvalgsperiodeOriginal) as Lovvalgsperiode
-            lovvalgsperiodeReplika.behandlingsresultat = behandlingsresultatReplika
-            lovvalgsperiodeReplika.id = null
-            behandlingsresultatReplika.lovvalgsperioder.add(lovvalgsperiodeReplika)
-        }
+@Throws(
+    InvocationTargetException::class,
+    NoSuchMethodException::class,
+    InstantiationException::class,
+    IllegalAccessException::class
+)
+private fun replikerAnmodningsperioder(
+    behandlingsresultatOrig: Behandlingsresultat,
+    behandlingsresultatReplika: Behandlingsresultat
+) {
+    behandlingsresultatReplika.anmodningsperioder = HashSet()
+    for (anmodningsperiodeOriginal in behandlingsresultatOrig.anmodningsperioder) {
+        val anmodningsperiodeReplika = BeanUtils.cloneBean(anmodningsperiodeOriginal) as Anmodningsperiode
+        anmodningsperiodeReplika.behandlingsresultat = behandlingsresultatReplika
+        anmodningsperiodeReplika.id = null
+        anmodningsperiodeReplika.medlPeriodeID = null
+        anmodningsperiodeReplika.setSendtUtland(false)
+        anmodningsperiodeReplika.anmodningsperiodeSvar = null
+        behandlingsresultatReplika.anmodningsperioder.add(anmodningsperiodeReplika)
     }
+}
 
-    @Throws(
-        IllegalAccessException::class,
-        InstantiationException::class,
-        InvocationTargetException::class,
-        NoSuchMethodException::class
-    )
-    private fun replikerBehandlingsresultatBegrunnelser(
-        behandlingsresultatOrig: Behandlingsresultat,
-        behandlingsresultatReplika: Behandlingsresultat
-    ) {
-        behandlingsresultatReplika.behandlingsresultatBegrunnelser = HashSet()
-        for (behandlingsresultatBegrunnelseOriginal in behandlingsresultatOrig.behandlingsresultatBegrunnelser) {
-            val behandlingsresultatBegrunnelseReplika =
-                BeanUtils.cloneBean(behandlingsresultatBegrunnelseOriginal) as BehandlingsresultatBegrunnelse
-            behandlingsresultatBegrunnelseReplika.behandlingsresultat = behandlingsresultatReplika
-            behandlingsresultatBegrunnelseReplika.id = null
-            behandlingsresultatReplika.behandlingsresultatBegrunnelser.add(behandlingsresultatBegrunnelseReplika)
+@Throws(
+    IllegalAccessException::class,
+    InstantiationException::class,
+    InvocationTargetException::class,
+    NoSuchMethodException::class
+)
+private fun replikerVilkaarsresultat(
+    behandlingsresultatOrig: Behandlingsresultat,
+    behandlingsresultatReplika: Behandlingsresultat
+) {
+    behandlingsresultatReplika.vilkaarsresultater = HashSet()
+    for (vilkaarsresultatOriginal in behandlingsresultatOrig.vilkaarsresultater) {
+        val vilkaarsresultatReplika = BeanUtils.cloneBean(vilkaarsresultatOriginal) as Vilkaarsresultat
+        vilkaarsresultatReplika.behandlingsresultat = behandlingsresultatReplika
+        vilkaarsresultatReplika.id = null
+        vilkaarsresultatReplika.begrunnelser = HashSet()
+        for (vilkaarBegrunnelseOriginal in vilkaarsresultatOriginal.begrunnelser) {
+            val vilkaarBegrunnelsesReplika = BeanUtils.cloneBean(vilkaarBegrunnelseOriginal) as VilkaarBegrunnelse
+            vilkaarBegrunnelsesReplika.vilkaarsresultat = vilkaarsresultatReplika
+            vilkaarBegrunnelsesReplika.id = null
+            vilkaarsresultatReplika.begrunnelser.add(vilkaarBegrunnelsesReplika)
         }
+        behandlingsresultatReplika.vilkaarsresultater.add(vilkaarsresultatReplika)
     }
+}
 
-    @Throws(
-        IllegalAccessException::class,
-        InstantiationException::class,
-        InvocationTargetException::class,
-        NoSuchMethodException::class
-    )
-    private fun replikerAvklartefakta(
-        behandlingsresultatOrig: Behandlingsresultat,
-        behandlingsresultatReplika: Behandlingsresultat
-    ) {
-        behandlingsresultatReplika.avklartefakta = HashSet()
-        for (avklartefaktaOriginal in behandlingsresultatOrig.avklartefakta) {
-            val avklartefaktaReplika = BeanUtils.cloneBean(avklartefaktaOriginal) as Avklartefakta
-            avklartefaktaReplika.behandlingsresultat = behandlingsresultatReplika
-            avklartefaktaReplika.id = null
-            avklartefaktaReplika.registreringer = HashSet()
-            for (avklartefaktaRegistreringOriginal in avklartefaktaOriginal.registreringer) {
-                val avklartefaktaRegistreringReplika =
-                    BeanUtils.cloneBean(avklartefaktaRegistreringOriginal) as AvklartefaktaRegistrering
-                avklartefaktaRegistreringReplika.avklartefakta = avklartefaktaReplika
-                avklartefaktaRegistreringReplika.id = null
-                avklartefaktaReplika.registreringer.add(avklartefaktaRegistreringReplika)
-            }
-            behandlingsresultatReplika.avklartefakta.add(avklartefaktaReplika)
+@Throws(
+    IllegalAccessException::class,
+    InstantiationException::class,
+    InvocationTargetException::class,
+    NoSuchMethodException::class
+)
+private fun replikerLovvalgsperioder(
+    behandlingsresultatOrig: Behandlingsresultat,
+    behandlingsresultatReplika: Behandlingsresultat
+) {
+    behandlingsresultatReplika.lovvalgsperioder = HashSet()
+    for (lovvalgsperiodeOriginal in behandlingsresultatOrig.lovvalgsperioder) {
+        val lovvalgsperiodeReplika = BeanUtils.cloneBean(lovvalgsperiodeOriginal) as Lovvalgsperiode
+        lovvalgsperiodeReplika.behandlingsresultat = behandlingsresultatReplika
+        lovvalgsperiodeReplika.id = null
+        behandlingsresultatReplika.lovvalgsperioder.add(lovvalgsperiodeReplika)
+    }
+}
+
+@Throws(
+    IllegalAccessException::class,
+    InstantiationException::class,
+    InvocationTargetException::class,
+    NoSuchMethodException::class
+)
+private fun replikerBehandlingsresultatBegrunnelser(
+    behandlingsresultatOrig: Behandlingsresultat,
+    behandlingsresultatReplika: Behandlingsresultat
+) {
+    behandlingsresultatReplika.behandlingsresultatBegrunnelser = HashSet()
+    for (behandlingsresultatBegrunnelseOriginal in behandlingsresultatOrig.behandlingsresultatBegrunnelser) {
+        val behandlingsresultatBegrunnelseReplika =
+            BeanUtils.cloneBean(behandlingsresultatBegrunnelseOriginal) as BehandlingsresultatBegrunnelse
+        behandlingsresultatBegrunnelseReplika.behandlingsresultat = behandlingsresultatReplika
+        behandlingsresultatBegrunnelseReplika.id = null
+        behandlingsresultatReplika.behandlingsresultatBegrunnelser.add(behandlingsresultatBegrunnelseReplika)
+    }
+}
+
+@Throws(
+    IllegalAccessException::class,
+    InstantiationException::class,
+    InvocationTargetException::class,
+    NoSuchMethodException::class
+)
+private fun replikerAvklartefakta(
+    behandlingsresultatOrig: Behandlingsresultat,
+    behandlingsresultatReplika: Behandlingsresultat
+) {
+    behandlingsresultatReplika.avklartefakta = HashSet()
+    for (avklartefaktaOriginal in behandlingsresultatOrig.avklartefakta) {
+        val avklartefaktaReplika = BeanUtils.cloneBean(avklartefaktaOriginal) as Avklartefakta
+        avklartefaktaReplika.behandlingsresultat = behandlingsresultatReplika
+        avklartefaktaReplika.id = null
+        avklartefaktaReplika.registreringer = HashSet()
+        for (avklartefaktaRegistreringOriginal in avklartefaktaOriginal.registreringer) {
+            val avklartefaktaRegistreringReplika =
+                BeanUtils.cloneBean(avklartefaktaRegistreringOriginal) as AvklartefaktaRegistrering
+            avklartefaktaRegistreringReplika.avklartefakta = avklartefaktaReplika
+            avklartefaktaRegistreringReplika.id = null
+            avklartefaktaReplika.registreringer.add(avklartefaktaRegistreringReplika)
         }
+        behandlingsresultatReplika.avklartefakta.add(avklartefaktaReplika)
     }
+}
 
-    @Throws(
-        InvocationTargetException::class,
-        NoSuchMethodException::class,
-        InstantiationException::class,
-        IllegalAccessException::class
-    )
-    private fun replikerKontrollResultater(
-        behandlingsresultatOrig: Behandlingsresultat,
-        behandlingsresultatReplika: Behandlingsresultat
-    ) {
-        behandlingsresultatReplika.kontrollresultater = HashSet()
-        for (kontrollresultatOriginal in behandlingsresultatOrig.kontrollresultater) {
-            val kontrollresultatReplika = BeanUtils.cloneBean(kontrollresultatOriginal) as Kontrollresultat
-            kontrollresultatReplika.behandlingsresultat = behandlingsresultatReplika
-            kontrollresultatReplika.id = null
-            behandlingsresultatReplika.kontrollresultater.add(kontrollresultatReplika)
-        }
+@Throws(
+    InvocationTargetException::class,
+    NoSuchMethodException::class,
+    InstantiationException::class,
+    IllegalAccessException::class
+)
+private fun replikerKontrollResultater(
+    behandlingsresultatOrig: Behandlingsresultat,
+    behandlingsresultatReplika: Behandlingsresultat
+) {
+    behandlingsresultatReplika.kontrollresultater = HashSet()
+    for (kontrollresultatOriginal in behandlingsresultatOrig.kontrollresultater) {
+        val kontrollresultatReplika = BeanUtils.cloneBean(kontrollresultatOriginal) as Kontrollresultat
+        kontrollresultatReplika.behandlingsresultat = behandlingsresultatReplika
+        kontrollresultatReplika.id = null
+        behandlingsresultatReplika.kontrollresultater.add(kontrollresultatReplika)
     }
-
 }
