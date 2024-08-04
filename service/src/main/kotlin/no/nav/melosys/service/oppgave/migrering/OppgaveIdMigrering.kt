@@ -58,26 +58,31 @@ class OppgaveIdMigrering(
             }
             .forEach {
                 // Oppdater oppgave
-                val fagsak = fagsakRepository.findBySaksnummer(it.saksnummer)
-                if (fagsak.isEmpty) {
-                    migreringsRapport.oppgaveMigrert(it, null, null)
+                try {
+                    val fagsak = fagsakRepository.findBySaksnummer(it.saksnummer)
+                    if (fagsak.isEmpty) {
+                        migreringsRapport.oppgaveMigrert(it, null, null)
 
-                    return@forEach
-                }
-
-                val åpneBehandlinger = fagsak.get().behandlinger.filter { it.erAktiv() }
-                if (åpneBehandlinger.isEmpty()) {
-                    migreringsRapport.oppgaveMigrert(it, it.saksnummer, null)
-                } else if (åpneBehandlinger.size > 1) {
-                    migreringsRapport.oppgaveMigrert(it, it.saksnummer, null, true)
-                } else {
-                    val behandling = åpneBehandlinger.first()
-                    if (!dryrun) {
-                        behandling.oppgaveId = it.oppgaveId
-                        behandlingRepository.save(behandling)
+                        return@forEach
                     }
-                    migreringsRapport.oppgaveMigrert(it, it.saksnummer, behandling.id)
-                    migreringsRapport.antallSakerMigrert++
+
+                    val åpneBehandlinger = fagsak.get().behandlinger.filter { it.erAktiv() }
+                    if (åpneBehandlinger.isEmpty()) {
+                        migreringsRapport.oppgaveMigrert(it, it.saksnummer, null)
+                    } else if (åpneBehandlinger.size > 1) {
+                        migreringsRapport.oppgaveMigrert(it, it.saksnummer, null, true)
+                    } else {
+                        val behandling = åpneBehandlinger.first()
+                        if (!dryrun) {
+                            behandling.oppgaveId = it.oppgaveId
+                            behandlingRepository.save(behandling)
+                        }
+                        migreringsRapport.oppgaveMigrert(it, it.saksnummer, behandling.id)
+                        migreringsRapport.antallSakerMigrert++
+                    }
+                } catch (e: Exception) {
+                    log.error("Feil ved migrering av oppgaveId for oppgave ${it.oppgaveId}", e)
+                    migreringsRapport.oppgaveMigrert(it, null, null, false)
                 }
             }
 
