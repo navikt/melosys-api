@@ -51,9 +51,14 @@ public class OpprettNyBehandling implements StegBehandler {
 
         Fagsak fagsak = fagsakService.hentFagsak(saksnummer);
         Behandling behandling = behandlingService.nyBehandling(fagsak,
-            Behandlingsstatus.OPPRETTET, behandlingstype, behandlingstema,
-            initierendeJournalpostId, initierendeDokumentId, mottaksdato,
-            behandlingsårsaktype, behandlingsårsakFritekst);
+            Behandlingsstatus.OPPRETTET,
+            behandlingstype,
+            behandlingstema,
+            initierendeJournalpostId,
+            initierendeDokumentId,
+            mottaksdato,
+            behandlingsårsaktype,
+            behandlingsårsakFritekst);
         prosessinstans.setBehandling(behandling);
         log.info("Opprettet ny behandling {} på eksiterende fagsak {}", behandling.getId(), fagsak.getSaksnummer());
     }

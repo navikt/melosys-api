@@ -97,32 +97,40 @@ class OppgaveMigrering(
             migreringsRapport.antallSakerFunnet = size
         }.filter { it.erRedigerbar() }.sortedBy { it.saksnummer }.apply {
             migreringsRapport.antallSakerErRedigerbar = size
-        }.asSequence().filter {
-            options.saksFilter.filtrer(it)
-        }.filter { !stopMigrering }.map {
-            val oppgaver = oppgaveFasade.finnÅpneBehandlingsoppgaverMedSaksnummer(it.saksnummer)
-            MigreringsSak(
-                sak = it,
-                oppgaver = oppgaver.ifEmpty { mutableListOf() },
-                ny = nyOppgaveMapping(it)
-            )
-        }.filter {
-            if (options.lagManglendeOppgaver) it.oppgaver.isEmpty()
-            else options.migrerOppgaver
-        }.filter {
-            erGyldig(it.sak)
-        }.onEach {
-            migreringsRapport.antallSakerProssessert++
-            leggTilRapport(it)
-        }.filterNot {
-            it.ny.fantIkkeOppgaveMapping()
-        }.forEach {
-            if (it.oppgaver.isEmpty() && options.lagManglendeOppgaver) {
-                lagOppgave(dryrun, it)
-            } else if (options.migrerOppgaver) {
-                oppdaterOppgave(dryrun, it)
+        }.asSequence()
+            .filter {
+                options.saksFilter.filtrer(it)
             }
-        }
+            .filter { !stopMigrering }
+            .map {
+                val oppgaver = oppgaveFasade.finnÅpneBehandlingsoppgaverMedSaksnummer(it.saksnummer)
+                MigreringsSak(
+                    sak = it,
+                    oppgaver = oppgaver.ifEmpty { mutableListOf() },
+                    ny = nyOppgaveMapping(it)
+                )
+            }
+            .filter {
+                if (options.lagManglendeOppgaver) it.oppgaver.isEmpty()
+                else options.migrerOppgaver
+            }
+            .filter {
+                erGyldig(it.sak)
+            }
+            .onEach {
+                migreringsRapport.antallSakerProssessert++
+                leggTilRapport(it)
+            }
+            .filterNot {
+                it.ny.fantIkkeOppgaveMapping()
+            }
+            .forEach {
+                if (it.oppgaver.isEmpty() && options.lagManglendeOppgaver) {
+                    lagOppgave(dryrun, it)
+                } else if (options.migrerOppgaver) {
+                    oppdaterOppgave(dryrun, it)
+                }
+            }
         log.info("OppgaveMigrering utført! ${if (stopMigrering) "Stoppet manuelt!" else ""}")
         lagRapport()
     }
