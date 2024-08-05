@@ -27,6 +27,8 @@ class SaksbehandlingRegler(private val behandlingsresultatRepository: Behandling
             )
         ) return false
 
+        if (behandlingstype == Behandlingstyper.ÅRSAVREGNING) return false
+
         return finnBehandlingSomKanReplikeres(fagsak) != null
     }
 
