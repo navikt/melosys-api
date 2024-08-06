@@ -20,7 +20,7 @@ class AnnullerSakService(
         val behandling = fagsak.hentAktivBehandlingIkkeÅrsavregning()
         val behandlingsresultat = behandlingsresultatService.hentBehandlingsresultat(behandling.id)
 
-        oppgaveService.ferdigstillOppgaveMedSaksnummer(saksnummer)
+        oppgaveService.ferdigstillOppgaveMedBehandlingID(behandling.id)
         medlemskapsperiodeService.slettMedlemskapsperioder(behandlingsresultat.id)
 
         behandlingsresultatService.oppdaterBehandlingsresultattype(behandlingsresultat.id, Behandlingsresultattyper.ANNULLERT)

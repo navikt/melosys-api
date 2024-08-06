@@ -154,7 +154,7 @@ class AnmodningUnntakServiceTest {
         assertThat(lovvalgsperioder.getValue()).containsExactly(
             Lovvalgsperiode.av(lagAnmodningsperiodeSvar(), Medlemskapstyper.PLIKTIG));
         verify(prosessinstansService).opprettProsessinstansAnmodningOmUnntakMottakSvar(behandling, FRITEKST_SED);
-        verify(oppgaveService).ferdigstillOppgaveMedSaksnummer(FagsakTestFactory.SAKSNUMMER);
+        verify(oppgaveService).ferdigstillOppgaveMedBehandlingID(BEHANDLING_ID);
         verify(behandlingsresultatService).oppdaterBehandlingsresultattype(BEHANDLING_ID, Behandlingsresultattyper.REGISTRERT_UNNTAK);
     }
 

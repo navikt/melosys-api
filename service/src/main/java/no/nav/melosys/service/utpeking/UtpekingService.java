@@ -135,7 +135,7 @@ public class UtpekingService {
         prosessinstansService.opprettProsessinstansUtpekAnnetLand(
             behandling, utpekingsperiode.getLovvalgsland(), mottakerinstitusjoner, ytterligereInformasjonSed, fritekstBrev
         );
-        oppgaveService.ferdigstillOppgaveMedSaksnummer(fagsak.getSaksnummer());
+        oppgaveService.ferdigstillOppgaveMedBehandlingID(behandling.getId());
     }
 
     private void oppdaterBehandlingsresultat(Behandlingsresultat behandlingsresultat) {
@@ -184,7 +184,7 @@ public class UtpekingService {
 
 
         prosessinstansService.opprettProsessinstansAvvisUtpeking(behandling, utpekingAvvis);
-        oppgaveService.ferdigstillOppgaveMedSaksnummer(behandling.getFagsak().getSaksnummer());
+        oppgaveService.ferdigstillOppgaveMedBehandlingID(behandling.getId());
     }
 
     private void validerAvslagUtpeking(UtpekingAvvis utpekingAvvis) {

@@ -105,7 +105,7 @@ class FtrlVedtakServiceTest {
         verify { behandlingsresultatService.lagre(capture(behandlingsresultatSlot)) }
         verify { behandlingService.endreStatus(capture(behandlingSlot), Behandlingsstatus.IVERKSETTER_VEDTAK) }
         verify { prosessinstansService.opprettProsessinstansIverksettVedtakFTRL(any(), request.tilVedtakRequest(), Saksstatuser.LOVVALG_AVKLART) }
-        verify { oppgaveService.ferdigstillOppgaveMedSaksnummer(FagsakTestFactory.SAKSNUMMER) }
+        verify { oppgaveService.ferdigstillOppgaveMedBehandlingID(BEH_ID) }
         verify { dokgenService.produserOgDistribuerBrev(BEH_ID, capture(brevbestillingRequestSlot)) }
 
         behandlingsresultatSlot.captured.shouldNotBeNull().run {
@@ -217,7 +217,7 @@ class FtrlVedtakServiceTest {
         verify { behandlingsresultatService.lagre(capture(behandlingsresultatSlot)) }
         verify { behandlingService.endreStatus(capture(behandlingSlot), Behandlingsstatus.IVERKSETTER_VEDTAK) }
         verify { prosessinstansService.opprettProsessinstansIverksettVedtakFTRL(any(), request.tilVedtakRequest(), Saksstatuser.LOVVALG_AVKLART) }
-        verify { oppgaveService.ferdigstillOppgaveMedSaksnummer(FagsakTestFactory.SAKSNUMMER) }
+        verify { oppgaveService.ferdigstillOppgaveMedBehandlingID(BEH_ID) }
         verify { dokgenService.produserOgDistribuerBrev(BEH_ID, capture(brevbestillingRequestSlot)) }
 
         behandlingsresultatSlot.captured.shouldNotBeNull().run {
@@ -257,7 +257,7 @@ class FtrlVedtakServiceTest {
         verify { behandlingsresultatService.lagre(capture(behandlingsresultatSlot)) }
         verify { behandlingService.endreStatus(capture(behandlingSlot), Behandlingsstatus.IVERKSETTER_VEDTAK) }
         verify { prosessinstansService.opprettProsessinstansIverksettVedtakFTRL(any(), request.tilVedtakRequest(), Saksstatuser.LOVVALG_AVKLART) }
-        verify { oppgaveService.ferdigstillOppgaveMedSaksnummer(FagsakTestFactory.SAKSNUMMER) }
+        verify { oppgaveService.ferdigstillOppgaveMedBehandlingID(BEH_ID) }
         verify { dokgenService.produserOgDistribuerBrev(BEH_ID, capture(brevbestillingRequestSlot)) }
         verify(exactly = 0) { vilkaarsresultatService.tilbakestillVilkårsresultatFraBehandlingsresultat(any()) }
 
@@ -321,7 +321,7 @@ class FtrlVedtakServiceTest {
         verify { behandlingsresultatService.lagre(capture(behandlingsresultatSlot)) }
         verify { behandlingService.endreStatus(capture(behandlingSlot), Behandlingsstatus.IVERKSETTER_VEDTAK) }
         verify { prosessinstansService.opprettProsessinstansIverksettVedtakFTRL(any(), request.tilVedtakRequest(), Saksstatuser.OPPHØRT) }
-        verify { oppgaveService.ferdigstillOppgaveMedSaksnummer(FagsakTestFactory.SAKSNUMMER) }
+        verify { oppgaveService.ferdigstillOppgaveMedBehandlingID(BEH_ID) }
         verify { dokgenService.produserOgDistribuerBrev(BEH_ID, capture(brevbestillingRequestSlot)) }
         verify { vilkaarsresultatService.tilbakestillVilkårsresultatFraBehandlingsresultat(capture(behandlingsresultatSlot)) }
 

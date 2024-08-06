@@ -62,7 +62,7 @@ class AdminInnvalideringSedRuter(
                 if (aktivBehandlingErInvalidert && (sistAktiveBehandling.erRegisteringAvUnntak() || sistAktiveBehandling.erAnmodningOmUnntak())) {
                     annullerSakOgBehandling(sistAktiveBehandling)
                     behandlingsresultatService.oppdaterBehandlingsresultattype(sistAktiveBehandling.id, Behandlingsresultattyper.HENLEGGELSE)
-                    oppgaveService.ferdigstillOppgaveMedSaksnummer(fagsak.get().saksnummer)
+                    oppgaveService.ferdigstillOppgaveMedBehandlingID(sistAktiveBehandling.id)
                 } else {
                     oppgaveService.opprettEllerGjenbrukBehandlingsoppgave(
                         sistAktiveBehandling,

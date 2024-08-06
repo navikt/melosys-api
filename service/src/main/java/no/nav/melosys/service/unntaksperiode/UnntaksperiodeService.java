@@ -63,7 +63,7 @@ public class UnntaksperiodeService {
             unntaksperiodeGodkjenning.fritekst(),
             unntaksperiodeGodkjenning.melosysEessiMelding()
         );
-        oppgaveService.ferdigstillOppgaveMedSaksnummer(behandling.getFagsak().getSaksnummer());
+        oppgaveService.ferdigstillOppgaveMedBehandlingID(behandling.getId());
     }
 
     private void validerPeriode(Behandling behandling, UnntaksperiodeGodkjenning unntaksperiodeGodkjenning) {
@@ -114,7 +114,7 @@ public class UnntaksperiodeService {
         );
 
         prosessinstansService.opprettProsessinstansUnntaksperiodeAvvist(behandling, fritekst);
-        oppgaveService.ferdigstillOppgaveMedSaksnummer(behandling.getFagsak().getSaksnummer());
+        oppgaveService.ferdigstillOppgaveMedBehandlingID(behandling.getId());
     }
 
     private Behandling hentOgValiderBehandling(long behandlingID) {

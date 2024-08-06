@@ -10,7 +10,6 @@ import io.mockk.slot
 import io.mockk.verify
 import no.nav.melosys.domain.Behandling
 import no.nav.melosys.domain.Behandlingsresultat
-import no.nav.melosys.domain.Fagsak
 import no.nav.melosys.domain.FagsakTestFactory
 import no.nav.melosys.domain.kodeverk.Land_iso2
 import no.nav.melosys.domain.kodeverk.Mottakerroller
@@ -68,7 +67,7 @@ class AvslagServiceTest {
         every { behandlingsresultatService.lagre(any()) } returnsArgument 0
         every { dokgenService.produserOgDistribuerBrev(any(), any()) }.returns(Unit)
         every { fagsakService.avsluttFagsakOgBehandling(any(), any()) }.returns(Unit)
-        every { oppgaveService.ferdigstillOppgaveMedSaksnummer(any()) }.returns(Unit)
+        every { oppgaveService.ferdigstillOppgaveMedBehandlingID(any()) }.returns(Unit)
 
 
         avslagService.avslåPgaManglendeOpplysninger(1L, "fritekst", "Z123456")
@@ -77,7 +76,7 @@ class AvslagServiceTest {
         verify(exactly = 1) { behandlingsresultatService.lagre(capture(slotBehandlingsresultat)) }
         verify(exactly = 1) { dokgenService.produserOgDistribuerBrev(eq(1L), capture(slotBrevbestillingDto)) }
         verify(exactly = 1) { fagsakService.avsluttFagsakOgBehandling(behandling.fagsak, Saksstatuser.LOVVALG_AVKLART) }
-        verify(exactly = 1) { oppgaveService.ferdigstillOppgaveMedSaksnummer(behandling.fagsak.saksnummer) }
+        verify(exactly = 1) { oppgaveService.ferdigstillOppgaveMedBehandlingID(behandling.id) }
 
         slotBehandlingsresultat.captured.run {
             fastsattAvLand.shouldBe(Land_iso2.NO)

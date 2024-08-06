@@ -6,7 +6,6 @@ import no.nav.melosys.domain.*;
 import no.nav.melosys.domain.brev.DokumentasjonSvarfrist;
 import no.nav.melosys.domain.kodeverk.behandlinger.*;
 import no.nav.melosys.domain.mottatteopplysninger.MottatteOpplysninger;
-import no.nav.melosys.domain.oppgave.Oppgave;
 import no.nav.melosys.exception.FunksjonellException;
 import no.nav.melosys.exception.IkkeFunnetException;
 import no.nav.melosys.exception.TekniskException;
@@ -194,7 +193,7 @@ public class BehandlingService {
                 OppgaveOppdatering.builder().beskrivelse(status.getBeskrivelse()).build()
             );
         } else if (status == Behandlingsstatus.AVSLUTTET) {
-            oppgaveService.ferdigstillOppgaveMedSaksnummer(behandling.getFagsak().getSaksnummer());
+            oppgaveService.ferdigstillOppgaveMedBehandlingID(behandling.getId());
         }
 
         applicationEventPublisher.publishEvent(new BehandlingEndretStatusEvent(status, behandling));

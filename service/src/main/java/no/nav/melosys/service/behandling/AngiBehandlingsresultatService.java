@@ -51,7 +51,7 @@ public class AngiBehandlingsresultatService {
         behandlingsresultat.setType(behandlingsresultattype);
         behandlingsresultatService.lagre(behandlingsresultat);
         fagsakService.avsluttFagsakOgBehandling(fagsak, Saksstatuser.LOVVALG_AVKLART);
-        oppgaveService.ferdigstillOppgaveMedSaksnummer(fagsak.getSaksnummer());
+        oppgaveService.ferdigstillOppgaveMedBehandlingID(behandlingID);
     }
 
     private void validerBehandlingsresultattype(Behandlingsresultattyper behandlingsresultattype, Behandling behandling, Fagsak fagsak) {

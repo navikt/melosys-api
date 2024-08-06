@@ -40,8 +40,9 @@ class FerdigbehandleSakServiceTest {
     @Test
     fun ferdigbehandleSak_saksstatusOPPRETTET_lagrerKorrekt() {
         val fagsak = FagsakTestFactory.lagFagsak()
+        val behandlingID : Long = 1
         val behandling = Behandling().apply {
-            id = 1
+            id = behandlingID
             this.fagsak = fagsak
         }
         fagsak.behandlinger.add(behandling)
@@ -53,7 +54,7 @@ class FerdigbehandleSakServiceTest {
 
         verify { fagsakService.avsluttFagsakOgBehandling(fagsak, behandling, Saksstatuser.AVSLUTTET) }
         verify { behandlingsresultatService.oppdaterBehandlingsresultattype(behandling.id, Behandlingsresultattyper.FERDIGBEHANDLET) }
-        verify { oppgaveService.ferdigstillOppgaveMedSaksnummer(fagsak.saksnummer) }
+        verify { oppgaveService.ferdigstillOppgaveMedBehandlingID(behandlingID) }
     }
 
     @Test
@@ -61,8 +62,9 @@ class FerdigbehandleSakServiceTest {
         val fagsak = FagsakTestFactory.builder().apply {
             status = Saksstatuser.LOVVALG_AVKLART
         }.build()
+        val behandlingID: Long = 1
         val behandling = Behandling().apply {
-            id = 1
+            id = behandlingID
             this.fagsak = fagsak
 
         }
@@ -74,7 +76,7 @@ class FerdigbehandleSakServiceTest {
 
 
         verify { fagsakService.avsluttFagsakOgBehandling(fagsak, behandling, Saksstatuser.LOVVALG_AVKLART) }
-        verify { behandlingsresultatService.oppdaterBehandlingsresultattype(behandling.id, Behandlingsresultattyper.FERDIGBEHANDLET) }
-        verify { oppgaveService.ferdigstillOppgaveMedSaksnummer(fagsak.saksnummer) }
+        verify { behandlingsresultatService.oppdaterBehandlingsresultattype(behandlingID, Behandlingsresultattyper.FERDIGBEHANDLET) }
+        verify { oppgaveService.ferdigstillOppgaveMedBehandlingID(behandlingID) }
     }
 }
