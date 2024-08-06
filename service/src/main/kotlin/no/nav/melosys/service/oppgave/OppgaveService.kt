@@ -245,7 +245,6 @@ class OppgaveService(
         if (tilknyttetBehandling == null) {
             val sistAktivBehandling = checkNotNull(fagsak.hentAktivBehandling()) { "Finner ingen aktiv behandling for oppgave ${oppgave.oppgaveId}" }
             tilknyttetBehandling = sistAktivBehandling
-//            settOppgaveIdPåBehandling(tilknyttetBehandling, oppgave.oppgaveId)
         }
         val orgnr = fagsak.finnVirksomhetsOrgnr()
 
