@@ -29,7 +29,7 @@ public final class BrevbestillingDto {
     private String fritekstTittel;
     private String fritekst;
     private Distribusjonstype distribusjonstype;
-    private boolean kontaktopplysninger;
+    private boolean skalViseStandardTekstOmkontaktopplysninger;
     private String nyVurderingBakgrunn;
     private List<SaksvedleggDto> saksVedlegg;
     private List<FritekstvedleggDto> fritekstvedlegg;
@@ -66,7 +66,7 @@ public final class BrevbestillingDto {
         String fritekstTittel,
         String fritekst,
         Distribusjonstype distribusjonstype,
-        boolean kontaktopplysninger,
+        boolean skalViseStandardTekstOmkontaktopplysninger,
         String nyVurderingBakgrunn,
         List<SaksvedleggDto> saksVedlegg,
         List<FritekstvedleggDto> fritekstvedlegg,
@@ -99,7 +99,7 @@ public final class BrevbestillingDto {
         this.fritekstTittel = fritekstTittel;
         this.fritekst = fritekst;
         this.distribusjonstype = distribusjonstype;
-        this.kontaktopplysninger = kontaktopplysninger;
+        this.skalViseStandardTekstOmkontaktopplysninger = skalViseStandardTekstOmkontaktopplysninger;
         this.nyVurderingBakgrunn = nyVurderingBakgrunn;
         this.saksVedlegg = saksVedlegg;
         this.fritekstvedlegg = fritekstvedlegg;
@@ -227,8 +227,8 @@ public final class BrevbestillingDto {
         this.distribusjonstype = distribusjonstype;
     }
 
-    public void setKontaktopplysninger(boolean kontaktopplysninger) {
-        this.kontaktopplysninger = kontaktopplysninger;
+    public void setSkalViseStandardTekstOmkontaktopplysninger(boolean skalViseStandardTekstOmkontaktopplysninger) {
+        this.skalViseStandardTekstOmkontaktopplysninger = skalViseStandardTekstOmkontaktopplysninger;
     }
 
     public void setNyVurderingBakgrunn(String nyVurderingBakgrunn) {
@@ -341,8 +341,8 @@ public final class BrevbestillingDto {
         return distribusjonstype;
     }
 
-    public boolean getKontaktopplysninger() {
-        return kontaktopplysninger;
+    public boolean isSkalViseStandardTekstOmKontaktopplysninger() {
+        return skalViseStandardTekstOmkontaktopplysninger;
     }
 
     public String getNyVurderingBakgrunn() {
@@ -383,10 +383,6 @@ public final class BrevbestillingDto {
         this.trygdeavgiftFritekst = trygdeavgiftFritekst;
     }
 
-    public boolean isKontaktopplysninger() {
-        return kontaktopplysninger;
-    }
-
     public LocalDate getOpphørtDato() {
         return opphørtDato;
     }
@@ -400,7 +396,7 @@ public final class BrevbestillingDto {
         if (this == o) return true;
         if (o == null || getClass() != o.getClass()) return false;
         BrevbestillingDto that = (BrevbestillingDto) o;
-        return kontaktopplysninger == that.kontaktopplysninger && produserbardokument == that.produserbardokument && mottaker == that.mottaker &&
+        return skalViseStandardTekstOmkontaktopplysninger == that.skalViseStandardTekstOmkontaktopplysninger && produserbardokument == that.produserbardokument && mottaker == that.mottaker &&
             Objects.equals(orgnr, that.orgnr) && Objects.equals(orgnrNorskMyndighet, that.orgnrNorskMyndighet) &&
             Objects.equals(institusjonID, that.institusjonID) && Objects.equals(innledningFritekst, that.innledningFritekst) &&
             Objects.equals(manglerFritekst, that.manglerFritekst) && Objects.equals(begrunnelseFritekst, that.begrunnelseFritekst) &&
@@ -420,7 +416,7 @@ public final class BrevbestillingDto {
     @Override
     public int hashCode() {
         return Objects.hash(produserbardokument, mottaker, orgnr, orgnrNorskMyndighet, institusjonID, innledningFritekst, manglerFritekst,
-            begrunnelseFritekst, ektefelleFritekst, barnFritekst, trygdeavgiftFritekst, kontaktpersonNavn, kopiMottakere, bestillersId, fritekstTittel, fritekst, distribusjonstype, kontaktopplysninger, nyVurderingBakgrunn, saksVedlegg, fritekstvedlegg, dokumentTittel, saksbehandlerNrToIdent, begrunnelseKode, ytterligereInformasjon, fakturanummer, betalingsstatus, fullmektigForBetaling, betalingsfrist, annenPersonMottakerIdent, opphørtDato);
+            begrunnelseFritekst, ektefelleFritekst, barnFritekst, trygdeavgiftFritekst, kontaktpersonNavn, kopiMottakere, bestillersId, fritekstTittel, fritekst, distribusjonstype, skalViseStandardTekstOmkontaktopplysninger, nyVurderingBakgrunn, saksVedlegg, fritekstvedlegg, dokumentTittel, saksbehandlerNrToIdent, begrunnelseKode, ytterligereInformasjon, fakturanummer, betalingsstatus, fullmektigForBetaling, betalingsfrist, annenPersonMottakerIdent, opphørtDato);
     }
 
     @Override
@@ -443,7 +439,7 @@ public final class BrevbestillingDto {
             ", fritekstTittel='" + fritekstTittel + '\'' +
             ", fritekst='" + fritekst + '\'' +
             ", distribusjonstype=" + distribusjonstype +
-            ", kontaktopplysninger=" + kontaktopplysninger +
+            ", kontaktopplysninger=" + skalViseStandardTekstOmkontaktopplysninger +
             ", nyVurderingBakgrunn='" + nyVurderingBakgrunn + '\'' +
             ", saksVedlegg=" + saksVedlegg +
             ", fritekstvedlegg=" + fritekstvedlegg +
