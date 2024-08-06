@@ -156,7 +156,7 @@ class ArbeidFlereLandSedRuterTest {
 
         arbeidFlereLandSedRuter.rutSedTilBehandling(prosessinstans, gsakSaksnummer);
 
-        verify(oppgaveService).opprettEllerGjenbrukBehandlingsoppgave(eq(behandling), any(), any(), any());
+        verify(oppgaveService).opprettEllerGjenbrukBehandlingsoppgave(eq(behandling), any(), any(), any(), any());
         verify(prosessinstansService).opprettProsessinstansSedJournalføring(behandling, melosysEessiMelding);
     }
 
