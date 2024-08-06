@@ -12,6 +12,7 @@ import no.nav.melosys.repository.FagsakRepository
 import no.nav.melosys.sikkerhet.context.ThreadLocalAccessInfo
 import org.springframework.scheduling.annotation.Async
 import org.springframework.stereotype.Component
+import org.springframework.transaction.annotation.Transactional
 
 private val log = KotlinLogging.logger { }
 
@@ -28,6 +29,7 @@ class OppgaveIdMigrering(
 
     @Async
     @Synchronized
+    @Transactional
     fun migrerOppgaver(dryrun: Boolean) {
         ThreadLocalAccessInfo.executeProcess("Migrer oppgaveIder") {
             migrering(dryrun)
@@ -40,7 +42,7 @@ class OppgaveIdMigrering(
     }
 
     private fun finnÅpneOppgaver(): MutableCollection<Oppgave> {
-        return oppgaveFasade.finnÅpneBehandlingsoppgaver()
+        return oppgaveFasade.finnÅpneOppgaver()
     }
 
     internal fun migrering(
@@ -73,12 +75,17 @@ class OppgaveIdMigrering(
                         migreringsRapport.oppgaveMigrert(it, it.saksnummer, null, true)
                     } else {
                         val behandling = åpneBehandlinger.first()
-                        if (!dryrun) {
-                            behandling.oppgaveId = it.oppgaveId
-                            behandlingRepository.save(behandling)
+                        if(behandling.oppgaveId == it.oppgaveId) {
+                            migreringsRapport.oppgaveAlleredeMigrert()
+                        } else {
+                            if (!dryrun) {
+                                behandling.oppgaveId = it.oppgaveId
+                                behandlingRepository.save(behandling)
+                            }
+                            migreringsRapport.oppgaveMigrert(it, it.saksnummer, behandling.id)
+                            migreringsRapport.antallSakerMigrert++
                         }
-                        migreringsRapport.oppgaveMigrert(it, it.saksnummer, behandling.id)
-                        migreringsRapport.antallSakerMigrert++
+
                     }
                 } catch (e: Exception) {
                     log.error("Feil ved migrering av oppgaveId for oppgave ${it.oppgaveId}", e)

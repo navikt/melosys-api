@@ -278,10 +278,10 @@ public class OppgaveFasadeImpl implements OppgaveFasade {
 
     //TODO: Brukes for migrering av oppgaveId til behandling: MELOSYS-6707. Fjern når migrering er ferdig.
     @Override
-    public List<Oppgave> finnÅpneBehandlingsoppgaver() {
+    public List<Oppgave> finnÅpneOppgaver() {
         OppgaveSearchRequest oppgaveSearchRequest = new OppgaveSearchRequest.Builder(String.valueOf(MELOSYS_ENHET_ID))
             .medTema(OPPGAVE_TEMA)
-            .medOppgaveTyper(OPPGAVETYPER_BEHANDLINGSOPPGAVE)
+            .medOppgaveTyper(hentGyldigeOppgavetyper())
             .medStatusKategori(OPPGAVE_STATUSKATEGORI_AAPEN)
             .build();
 

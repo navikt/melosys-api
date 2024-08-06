@@ -34,7 +34,6 @@ class OppgaveIdMigreringRapport(
 
     private val oppgaveIdMigrert = mutableListOf<String>()
     private val oppgaveMigrert = mutableListOf<OppgaveMigrert>()
-    private val sakerMedFlereÅpneBehandlinger = mutableListOf<String>()
 
     fun status(): Map<String, Any> {
         return mapOf(
@@ -42,6 +41,7 @@ class OppgaveIdMigreringRapport(
             "antallSakerProssessert" to antallSakerProssessert,
             "antallSakerMigrert" to antallSakerMigrert,
             "alleredeMigrert" to alleredeMigrert,
+            "antall hvor sak har flere åpne behandlinger" to oppgaveMigrert.count { it.sakHarFlereÅpneBehandlinger },
             "antallOppgaverHvorMappingFeiler" to oppgaveMigrert.count { it.saksnummer == null || it.behandlingId == null },
             )
     }
@@ -54,6 +54,11 @@ class OppgaveIdMigreringRapport(
         oppgaveIdMigrert.add(oppgave.oppgaveId)
         oppgaveMigrert.add(OppgaveMigrert(saksnummer, behandlingId, oppgave, sakHarFlereÅpneBehandlinger))
         antallSakerProssessert++
+    }
+
+    internal fun oppgaveAlleredeMigrert() {
+        alleredeMigrert++
+        antallSakerProssessert++;
     }
 
 

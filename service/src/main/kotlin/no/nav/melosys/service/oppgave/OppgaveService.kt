@@ -100,12 +100,12 @@ class OppgaveService(
 
     fun hentSistAktiveBehandling(saksnummer: String): Behandling = fagsakService.hentFagsak(saksnummer).hentSistAktivBehandlingIkkeÅrsavregning()
 
-    @JvmOverloads
+    @Transactional
     fun opprettEllerGjenbrukBehandlingsoppgave(
         behandling: Behandling,
-        @Nullable journalpostID: String?,
-        @Nullable aktørID: String?,
-        @Nullable tilordnetRessurs: String?,
+        @Nullable journalpostID: String? = null,
+        @Nullable aktørID: String?  = null,
+        @Nullable tilordnetRessurs: String?  = null,
         @Nullable orgnr: String? = null
     ) {
         val eksisterendeOppgave =
@@ -141,7 +141,7 @@ class OppgaveService(
         }
     }
 
-    fun settOppgaveIdPåBehandling(behandling: Behandling, oppgaveId: String) {
+    private fun settOppgaveIdPåBehandling(behandling: Behandling, oppgaveId: String) {
         behandling.oppgaveId = oppgaveId
         behandlingService.lagre(behandling)
     }
