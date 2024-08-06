@@ -42,7 +42,7 @@ class OppgaveIdMigrering(
     }
 
     private fun finnÅpneOppgaver(): MutableCollection<Oppgave> {
-        return oppgaveFasade.finnÅpneBehandlingsoppgaver()
+        return oppgaveFasade.finnÅpneOppgaver()
     }
 
     internal fun migrering(
