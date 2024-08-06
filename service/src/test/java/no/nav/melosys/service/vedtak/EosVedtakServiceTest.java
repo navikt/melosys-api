@@ -118,7 +118,7 @@ class EosVedtakServiceTest {
             eq(mottakerinstitusjoner),
             eq(true)
         );
-        verify(oppgaveService).ferdigstillOppgaveMedSaksnummer(any());
+        verify(oppgaveService).ferdigstillOppgaveMedBehandlingID(behandlingID);
         verify(ferdigbehandlingKontrollFacade).kontrollerVedtakMedRegisteropplysninger(any(Behandling.class), eq(Sakstyper.EU_EOS), any(Behandlingsresultattyper.class), eq(null));
     }
 
@@ -149,7 +149,7 @@ class EosVedtakServiceTest {
             eq(mottakerinstitusjoner),
             eq(true)
         );
-        verify(oppgaveService).ferdigstillOppgaveMedSaksnummer(any());
+        verify(oppgaveService).ferdigstillOppgaveMedBehandlingID(behandlingID);
     }
 
     @Test
@@ -177,7 +177,7 @@ class EosVedtakServiceTest {
             anySet(),
             eq(true)
         );
-        verify(oppgaveService).ferdigstillOppgaveMedSaksnummer(any());
+        verify(oppgaveService).ferdigstillOppgaveMedBehandlingID(behandlingID);
     }
 
     @Test
@@ -311,7 +311,7 @@ class EosVedtakServiceTest {
             eq("FRITEKST"),
             eq("FRITEKST_SED")
         );
-        verify(oppgaveService).ferdigstillOppgaveMedSaksnummer(any());
+        verify(oppgaveService).ferdigstillOppgaveMedBehandlingID(behandlingID);
     }
 
     @Test

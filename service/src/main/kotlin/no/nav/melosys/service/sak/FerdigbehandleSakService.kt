@@ -21,6 +21,6 @@ class FerdigbehandleSakService(
 
         fagsakService.avsluttFagsakOgBehandling(fagsak, behandling, nyStatus)
         behandlingsresultatService.oppdaterBehandlingsresultattype(behandling.id, Behandlingsresultattyper.FERDIGBEHANDLET)
-        oppgaveService.ferdigstillOppgaveMedSaksnummer(fagsak.saksnummer)
+        oppgaveService.ferdigstillOppgaveMedBehandlingID(behandling.id)
     }
 }

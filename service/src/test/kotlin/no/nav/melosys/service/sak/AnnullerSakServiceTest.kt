@@ -60,7 +60,7 @@ class AnnullerSakServiceTest {
         annullerSakService.annullerSak(saksnummer)
 
 
-        verify { oppgaveService.ferdigstillOppgaveMedSaksnummer(saksnummer) }
+        verify { oppgaveService.ferdigstillOppgaveMedBehandlingID(behandlingId) }
         verify { medlemskapsperiodeService.slettMedlemskapsperioder(behandlingId) }
         verify { behandlingsresultatService.oppdaterBehandlingsresultattype(behandlingId, Behandlingsresultattyper.ANNULLERT) }
         verify { prosessinstansService.opprettAnnullerFagsakProsessflyt(fagsak.finnAktivBehandlingIkkeÅrsavregning()) }

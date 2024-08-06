@@ -88,7 +88,7 @@ class OpprettManglendeInnbetalingBehandling(
                 aktivBehandling.opprinneligBehandling == null -> {
                 behandlingService.avsluttBehandling(aktivBehandling.id)
                 behandlingsresultatService.oppdaterBehandlingsresultattype(aktivBehandling.id, Behandlingsresultattyper.AVBRUTT)
-                oppgaveService.ferdigstillOppgaveMedSaksnummer(aktivBehandling.fagsak.saksnummer)
+                oppgaveService.ferdigstillOppgaveMedBehandlingID(aktivBehandling.id)
                 lagNyBehandling(prosessinstans, aktivBehandling.fagsak, mottaksDato)
                 return
             }

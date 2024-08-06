@@ -63,7 +63,7 @@ public class HenleggFagsakService {
             fagsakService.avsluttFagsakOgBehandling(fagsak, Saksstatuser.HENLAGT);
         }
         prosessinstansService.opprettProsessinstansFagsakHenlagt(aktivBehandling);
-        oppgaveService.ferdigstillOppgaveMedSaksnummer(fagsak.getSaksnummer());
+        oppgaveService.ferdigstillOppgaveMedBehandlingID(aktivBehandling.getId());
     }
 
     private void oppdaterBehandlingsresultat(long behandlingID, Henleggelsesgrunner begrunnelseKode, String fritekst) {
@@ -86,25 +86,25 @@ public class HenleggFagsakService {
         Behandling aktivBehandling = fagsak.finnAktivBehandlingIkkeÅrsavregning();
 
         if (aktivBehandling.erAndregangsbehandling()) {
-            henleggBehandlingSomBortfalt(aktivBehandling.getId(), saksnummer);
+            henleggBehandlingSomBortfalt(aktivBehandling.getId());
         } else {
             henleggSakSomBortfalt(fagsak);
         }
     }
 
-    private void henleggBehandlingSomBortfalt(long behandlingId, String saksnummer) {
+    private void henleggBehandlingSomBortfalt(long behandlingId) {
         behandlingService.avsluttAndregangsbehandling(behandlingId, Behandlingsresultattyper.HENLEGGELSE_BORTFALT);
-        oppgaveService.ferdigstillOppgaveMedSaksnummer(saksnummer);
+        oppgaveService.ferdigstillOppgaveMedBehandlingID(behandlingId);
     }
 
     private void henleggSakSomBortfalt(Fagsak fagsak) {
         log.info("Fagsak {}: {}", fagsak.getSaksnummer(), Saksstatuser.HENLAGT_BORTFALT.getBeskrivelse());
         fagsak.getBehandlinger().forEach(behandling -> {
             behandlingsresultatService.oppdaterBehandlingsresultattype(behandling.getId(), Behandlingsresultattyper.HENLEGGELSE_BORTFALT);
+            oppgaveService.ferdigstillOppgaveMedBehandlingID(behandling.getId());
             if (behandling.getStatus() != Behandlingsstatus.AVSLUTTET) behandlingService.avsluttBehandling(behandling.getId());
         });
         fagsak.setStatus(Saksstatuser.HENLAGT_BORTFALT);
         fagsakService.lagre(fagsak);
-        oppgaveService.ferdigstillOppgaveMedSaksnummer(fagsak.getSaksnummer());
     }
 }

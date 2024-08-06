@@ -51,10 +51,14 @@ class OppgaveService(
         oppgaveFasade.ferdigstillOppgave(oppgaveID)
     }
 
-    fun ferdigstillOppgaveMedSaksnummer(fagsaksnummer: String) =
-        finnÅpenBehandlingsoppgaveMedFagsaksnummer(fagsaksnummer).ifPresentOrElse(
-            { oppgave: Oppgave -> ferdigstillOppgave(oppgave.oppgaveId) }
-        ) { log.warn("Sak $fagsaksnummer har ingen oppgaver å ferdigstille.") }
+    fun ferdigstillOppgaveMedBehandlingID(behandlingID: Long) {
+        val oppgave = finnBehandlingsoppgaveForBehandlingID(behandlingID)
+        if (oppgave != null) {
+            ferdigstillOppgave(oppgave.oppgaveId)
+        } else {
+            log.warn("Finner ingen oppgave for behandling $behandlingID")
+        }
+    }
 
     fun leggTilbakeBehandlingsoppgaveMedSaksnummer(fagSaksnummer: String) {
         val oppgave = hentÅpenBehandlingsoppgaveMedFagsaksnummer(fagSaksnummer)
@@ -366,3 +370,4 @@ class OppgaveService(
         }
     }
 }
+

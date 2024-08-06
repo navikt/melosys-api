@@ -47,7 +47,7 @@ class FtrlVedtakService(
         behandlingService.endreStatus(behandling, Behandlingsstatus.IVERKSETTER_VEDTAK)
         prosessinstansService.opprettProsessinstansIverksettVedtakFTRL(behandling, request.tilVedtakRequest(), nyStatus)
         dokgenService.produserOgDistribuerBrev(behandlingID, lagBrevbestilling(request, behandling, behandlingsresultat))
-        oppgaveService.ferdigstillOppgaveMedSaksnummer(behandling.fagsak.saksnummer)
+        oppgaveService.ferdigstillOppgaveMedBehandlingID(behandling.id)
     }
 
     private fun validerRequest(behandlingsresultat: Behandlingsresultat, request: FattVedtakRequest) {

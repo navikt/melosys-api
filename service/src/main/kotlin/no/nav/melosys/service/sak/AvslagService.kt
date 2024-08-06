@@ -37,7 +37,7 @@ class AvslagService(
 
         dokgenService.produserOgDistribuerBrev(behandlingID, lagBrevbestillingDto(fritekst, bestillersId))
         fagsakService.avsluttFagsakOgBehandling(behandling.fagsak, Saksstatuser.LOVVALG_AVKLART)
-        oppgaveService.ferdigstillOppgaveMedSaksnummer(behandling.fagsak.saksnummer)
+        oppgaveService.ferdigstillOppgaveMedBehandlingID(behandling.id)
     }
 
     private fun lagBrevbestillingDto(fritekst: String, bestillersId: String): BrevbestillingDto =

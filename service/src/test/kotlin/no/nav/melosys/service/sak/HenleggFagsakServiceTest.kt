@@ -9,7 +9,6 @@ import io.mockk.junit5.MockKExtension
 import io.mockk.verify
 import no.nav.melosys.domain.Behandling
 import no.nav.melosys.domain.Behandlingsresultat
-import no.nav.melosys.domain.Fagsak
 import no.nav.melosys.domain.FagsakTestFactory
 import no.nav.melosys.domain.kodeverk.Saksstatuser
 import no.nav.melosys.domain.kodeverk.begrunnelser.Henleggelsesgrunner
@@ -73,7 +72,7 @@ internal class HenleggFagsakServiceTest {
 
         verify { behandlingsresultatService.lagre(behandlingsresultat) }
         verify { prosessinstansService.opprettProsessinstansFagsakHenlagt(behandling) }
-        verify { oppgaveService.ferdigstillOppgaveMedSaksnummer(FagsakTestFactory.SAKSNUMMER) }
+        verify { oppgaveService.ferdigstillOppgaveMedBehandlingID(BEHANDLING_ID) }
         behandlingsresultat.run {
             type.shouldBe(Behandlingsresultattyper.HENLEGGELSE)
             begrunnelseFritekst.shouldBe(BEGRUNNELSE_FRITEKST)
@@ -92,7 +91,7 @@ internal class HenleggFagsakServiceTest {
 
         verify { behandlingService.avsluttAndregangsbehandling(BEHANDLING_ID, Behandlingsresultattyper.HENLEGGELSE) }
         verify { prosessinstansService.opprettProsessinstansFagsakHenlagt(behandling) }
-        verify { oppgaveService.ferdigstillOppgaveMedSaksnummer(FagsakTestFactory.SAKSNUMMER) }
+        verify { oppgaveService.ferdigstillOppgaveMedBehandlingID(BEHANDLING_ID) }
         verify(exactly = 0) { fagsakService.avsluttFagsakOgBehandling(any(), any()) }
     }
 
@@ -107,7 +106,7 @@ internal class HenleggFagsakServiceTest {
 
         verify { behandlingService.avsluttAndregangsbehandling(BEHANDLING_ID, Behandlingsresultattyper.HENLEGGELSE) }
         verify { prosessinstansService.opprettProsessinstansFagsakHenlagt(behandling) }
-        verify { oppgaveService.ferdigstillOppgaveMedSaksnummer(FagsakTestFactory.SAKSNUMMER) }
+        verify { oppgaveService.ferdigstillOppgaveMedBehandlingID(BEHANDLING_ID) }
         verify(exactly = 0) { fagsakService.avsluttFagsakOgBehandling(any(), any()) }
     }
 
@@ -123,7 +122,7 @@ internal class HenleggFagsakServiceTest {
 
         verify { fagsakService.avsluttFagsakOgBehandling(fagsak, Saksstatuser.HENLAGT) }
         verify { prosessinstansService.opprettProsessinstansFagsakHenlagt(behandling) }
-        verify { oppgaveService.ferdigstillOppgaveMedSaksnummer(FagsakTestFactory.SAKSNUMMER) }
+        verify { oppgaveService.ferdigstillOppgaveMedBehandlingID(BEHANDLING_ID) }
         verify(exactly = 0) { behandlingService.avsluttAndregangsbehandling(any(), any()) }
     }
 
@@ -157,7 +156,7 @@ internal class HenleggFagsakServiceTest {
         verify { fagsakService.lagre(fagsak) }
         verify { behandlingsresultatService.oppdaterBehandlingsresultattype(123L, Behandlingsresultattyper.HENLEGGELSE_BORTFALT) }
         verify { behandlingsresultatService.oppdaterBehandlingsresultattype(BEHANDLING_ID, Behandlingsresultattyper.HENLEGGELSE_BORTFALT) }
-        verify { oppgaveService.ferdigstillOppgaveMedSaksnummer(FagsakTestFactory.SAKSNUMMER) }
+        verify { oppgaveService.ferdigstillOppgaveMedBehandlingID(BEHANDLING_ID) }
         verify { behandlingService.avsluttBehandling(BEHANDLING_ID) }
         verify(exactly = 0) { behandlingService.avsluttBehandling(123L) }
         verify(exactly = 0) { behandlingService.avsluttAndregangsbehandling(any(), any()) }
@@ -180,7 +179,7 @@ internal class HenleggFagsakServiceTest {
 
 
         verify { behandlingService.avsluttAndregangsbehandling(BEHANDLING_ID, Behandlingsresultattyper.HENLEGGELSE_BORTFALT) }
-        verify { oppgaveService.ferdigstillOppgaveMedSaksnummer(FagsakTestFactory.SAKSNUMMER) }
+        verify { oppgaveService.ferdigstillOppgaveMedBehandlingID(BEHANDLING_ID) }
         verify(exactly = 0) { behandlingsresultatService.oppdaterBehandlingsresultattype(any(), any()) }
         verify(exactly = 0) { behandlingService.avsluttBehandling(any()) }
         verify(exactly = 0) { fagsakService.avsluttFagsakOgBehandling(any(), any()) }
@@ -201,7 +200,7 @@ internal class HenleggFagsakServiceTest {
 
 
         verify { behandlingService.avsluttAndregangsbehandling(BEHANDLING_ID, Behandlingsresultattyper.HENLEGGELSE_BORTFALT) }
-        verify { oppgaveService.ferdigstillOppgaveMedSaksnummer(FagsakTestFactory.SAKSNUMMER) }
+        verify { oppgaveService.ferdigstillOppgaveMedBehandlingID(BEHANDLING_ID) }
         verify(exactly = 0) { behandlingsresultatService.oppdaterBehandlingsresultattype(any(), any()) }
         verify(exactly = 0) { behandlingService.avsluttBehandling(any()) }
         verify(exactly = 0) { fagsakService.avsluttFagsakOgBehandling(any(), any()) }

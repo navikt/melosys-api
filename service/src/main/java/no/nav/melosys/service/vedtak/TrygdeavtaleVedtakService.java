@@ -101,7 +101,7 @@ public class TrygdeavtaleVedtakService {
             dokgenService.produserOgDistribuerBrev(behandlingID, brevbestillingDto);
         }
 
-        oppgaveService.ferdigstillOppgaveMedSaksnummer(saksnummer);
+        oppgaveService.ferdigstillOppgaveMedBehandlingID(behandlingID);
     }
 
     private BrevbestillingDto lagBrevbestilling(Behandling behandling, FattVedtakRequest request) {
