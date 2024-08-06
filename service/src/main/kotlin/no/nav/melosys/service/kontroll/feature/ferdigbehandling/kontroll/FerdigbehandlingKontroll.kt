@@ -3,6 +3,7 @@ package no.nav.melosys.service.kontroll.feature.ferdigbehandling.kontroll
 import no.nav.melosys.domain.Lovvalgsperiode
 import no.nav.melosys.domain.kodeverk.LovvalgBestemmelse
 import no.nav.melosys.domain.kodeverk.begrunnelser.Kontroll_begrunnelser
+import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingsstatus
 import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingstema
 import no.nav.melosys.domain.kodeverk.lovvalgsbestemmelser.Lovvalgbestemmelser_883_2004
 import no.nav.melosys.domain.kodeverk.lovvalgsbestemmelser.Lovvalgbestemmelser_konv_efta_storbritannia
@@ -44,6 +45,15 @@ object FerdigbehandlingKontroll {
             && OverlappendeMedlemskapsperioderRegler.harOverlappendeUnntaksperiode(medlemskapDokument, kontrollPeriode, opprinneligLovvalgsperiode)
         ) {
             return Kontrollfeil(Kontroll_begrunnelser.OVERLAPPENDE_UNNTAK_PERIODER, KontrolldataFeilType.ADVARSEL)
+        }
+
+        if (OverlappendeMedlemskapsperioderRegler.harOverlappendePeriode(
+                medlemskapDokument,
+                kontrollPeriode,
+                opprinneligLovvalgsperiode
+            ) && kontrollPeriode?.behandlingsresultat?.behandling?.status == Behandlingsstatus.SVAR_ANMODNING_MOTTATT
+        ) {
+            return Kontrollfeil(Kontroll_begrunnelser.OVERLAPPENDE_MEDL_PERIODER, KontrolldataFeilType.ADVARSEL)
         }
 
         if (OverlappendeMedlemskapsperioderRegler.harOverlappendePeriode(medlemskapDokument, kontrollPeriode, opprinneligLovvalgsperiode)) {
@@ -198,8 +208,11 @@ object FerdigbehandlingKontroll {
     }
 
     fun kunEnAvklartVirksomhet(kontrollData: FerdigbehandlingKontrollData): Kontrollfeil? {
-        if (kontrollData.antallArbeidsgivere != 1 && kontrollData.behandlingstema in listOf(Behandlingstema.UTSENDT_ARBEIDSTAKER, Behandlingstema
-            .UTSENDT_SELVSTENDIG, Behandlingstema.ARBEID_TJENESTEPERSON_ELLER_FLY)) {
+        if (kontrollData.antallArbeidsgivere != 1 && kontrollData.behandlingstema in listOf(
+                Behandlingstema.UTSENDT_ARBEIDSTAKER, Behandlingstema
+                    .UTSENDT_SELVSTENDIG, Behandlingstema.ARBEID_TJENESTEPERSON_ELLER_FLY
+            )
+        ) {
             return Kontrollfeil(Kontroll_begrunnelser.IKKE_KUN_EN_VIRKSOMHET_BREV)
         }
 

@@ -35,6 +35,7 @@ class AnmodningUnntakKontrollService(
             fullmektig = fullmektig,
             organisasjonDokumentTilFullmektig = hentOrganisasjonFullmektig(fullmektig),
             persondataTilFullmektig = hentPersondataFullmektig(fullmektig),
+            medlemskapDokument = behandling.hentMedlemskapDokument(),
         )
 
         return AnmodningUnntakKontrollsett.hentRegler().mapNotNull { it.apply(kontrollData) }

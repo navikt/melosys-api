@@ -1,15 +1,41 @@
 package no.nav.melosys.service.kontroll.feature.anmodningomunntak.kontroll
 
+import no.nav.melosys.domain.ErPeriode
+import no.nav.melosys.domain.dokument.medlemskap.MedlemskapDokument
+import no.nav.melosys.domain.dokument.medlemskap.Medlemsperiode
 import no.nav.melosys.domain.kodeverk.begrunnelser.Kontroll_begrunnelser
 import no.nav.melosys.domain.kodeverk.lovvalgsbestemmelser.Lovvalgbestemmelser_konv_efta_storbritannia
+import no.nav.melosys.exception.KontrolldataFeilType
 import no.nav.melosys.exception.TekniskException
+import no.nav.melosys.integrasjon.medl.PeriodestatusMedl
 import no.nav.melosys.service.kontroll.feature.anmodningomunntak.data.AnmodningUnntakKontrollData
+import no.nav.melosys.service.kontroll.regler.PeriodeRegler
 import no.nav.melosys.service.kontroll.regler.PersonRegler.harRegistrertAdresse
 import no.nav.melosys.service.validering.Kontrollfeil
 import java.time.LocalDate
 
 
 object AnmodningUnntakKontroll {
+    fun overlappendePerioderMedl(kontrollData: AnmodningUnntakKontrollData): Kontrollfeil? {
+        val medlemskapDokument = kontrollData.medlemskapDokument
+
+        if (medlemskapDokument != null && harOverlappendeMedlemsperiodeMerEnn1DagFraSed(medlemskapDokument, kontrollData.anmodningsperiode)) {
+            return Kontrollfeil(Kontroll_begrunnelser.OVERLAPPENDE_MEDL_PERIODER, KontrolldataFeilType.ADVARSEL)
+        }
+
+        return null
+    }
+
+    fun harOverlappendeMedlemsperiodeMerEnn1DagFraSed(
+        medlemskapDokument: MedlemskapDokument,
+        kontrollperiode: ErPeriode?
+    ): Boolean {
+        return medlemskapDokument.hentMedlemsperioderHvorKildeIkkeLånekassen().stream().anyMatch { medlemsperiode: Medlemsperiode ->
+            (PeriodestatusMedl.AVST.kode != medlemsperiode.status
+                && PeriodeRegler.periodeOverlapper(kontrollperiode, medlemsperiode.periode))
+        }
+    }
+
     fun brukerManglerAdresse(kontrollData: AnmodningUnntakKontrollData): Kontrollfeil? {
         if (!harRegistrertAdresse(kontrollData.persondata, kontrollData.mottatteOpplysningerData)) {
             return Kontrollfeil(Kontroll_begrunnelser.MANGLENDE_REGISTRERTE_ADRESSE)
