@@ -143,6 +143,7 @@ class UnntaksregistreringServiceTest {
         anmodningEllerAttest.setLovvalgsland(lovvalgsland);
 
         var behandling = new Behandling();
+        behandling.setId(BEHANDLING_ID);
         behandling.setFagsak(fagsak);
         behandling.setMottatteOpplysninger(new MottatteOpplysninger());
         behandling.getMottatteOpplysninger().setMottatteOpplysningerData(anmodningEllerAttest);
