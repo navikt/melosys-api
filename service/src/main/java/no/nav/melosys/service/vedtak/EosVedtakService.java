@@ -119,7 +119,7 @@ public class EosVedtakService {
                 request.getFritekst(), request.getFritekstSed(), mottakerinstitusjoner, request.isKopiTilArbeidsgiver());
         }
 
-        oppgaveService.ferdigstillOppgaveMedSaksnummer(behandling.getFagsak().getSaksnummer());
+        oppgaveService.ferdigstillOppgaveMedBehandlingID(behandling.getId());
     }
     public void endreVedtaksperiode(Behandling behandling, Endretperiode endretperiode, String fritekst, String fritekstSed) {
         final long behandlingID = behandling.getId();
@@ -142,7 +142,7 @@ public class EosVedtakService {
         );
         log.info("Endrer vedtaksperiode for sak: {} behandling: {}", behandling.getFagsak().getSaksnummer(),
             behandlingID);
-        oppgaveService.ferdigstillOppgaveMedSaksnummer(behandling.getFagsak().getSaksnummer());
+        oppgaveService.ferdigstillOppgaveMedBehandlingID(behandling.getId());
     }
 
     private void oppdaterBehandlingsresultat(Behandlingsresultat behandlingsresultat,

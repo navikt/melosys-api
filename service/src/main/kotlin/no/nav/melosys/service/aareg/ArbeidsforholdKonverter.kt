@@ -1,19 +1,20 @@
-package no.nav.melosys.integrasjon.aareg.arbeidsforhold
+package no.nav.melosys.service.aareg
 
 import no.nav.melosys.domain.FellesKodeverk
 import no.nav.melosys.domain.Saksopplysning
 import no.nav.melosys.domain.dokument.arbeidsforhold.*
 import no.nav.melosys.domain.dokument.felles.Periode
+import no.nav.melosys.integrasjon.aareg.arbeidsforhold.ArbeidsforholdResponse
 import no.nav.melosys.integrasjon.aareg.arbeidsforhold.ArbeidsforholdResponse.AntallTimerForTimeloennet
 import no.nav.melosys.integrasjon.aareg.arbeidsforhold.ArbeidsforholdResponse.PermisjonPermittering
-import no.nav.melosys.integrasjon.kodeverk.KodeOppslag
+import no.nav.melosys.service.kodeverk.KodeverkService
 import java.time.OffsetDateTime
 import java.time.YearMonth
 import java.util.*
 
 class ArbeidsforholdKonverter(
     private val arbeidsforholdResponse: ArbeidsforholdResponse,
-    private val kodeOppslag: KodeOppslag
+    private val kodeverkService: KodeverkService
 ) {
     fun createSaksopplysning() = Saksopplysning().apply {
         dokument = ArbeidsforholdDokument(
@@ -81,7 +82,7 @@ class ArbeidsforholdKonverter(
                 permisjonsPeriode = getPeriode(it.periode)
                 permisjonsprosent = it.prosent
                 permisjonOgPermittering =
-                    kodeOppslag.getTermFraKodeverk(FellesKodeverk.PERMISJONS_OG_PERMITTERINGS_BESKRIVELSE, it.type)
+                    kodeverkService.getTermFraKodeverk(FellesKodeverk.PERMISJONS_OG_PERMITTERINGS_BESKRIVELSE, it.type)
             }
         }
     }
@@ -90,7 +91,7 @@ class ArbeidsforholdKonverter(
         if (arbeidsavtalerSrc == null) return emptyList()
         return arbeidsavtalerSrc.map {
             Arbeidsavtale(
-                yrke = Yrke(term = kodeOppslag.getTermFraKodeverk(FellesKodeverk.YRKER, it.yrke), kode = it.yrke),
+                yrke = Yrke(term = kodeverkService.getTermFraKodeverk(FellesKodeverk.YRKER, it.yrke), kode = it.yrke),
                 arbeidstidsordning = Arbeidstidsordning().apply { kode = it.arbeidstidsordning },
                 avloenningstype = "", // Finnes ikke i nytt rest api
                 gyldighetsperiode = getPeriode(it.gyldighetsperiode),

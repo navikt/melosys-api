@@ -127,7 +127,7 @@ class UnntaksperiodeServiceTest {
         Collection<Lovvalgsperiode> forventedeLovvalgsperioder = Collections.singleton(forventetLovvalgsperiode);
         verify(lovvalgsperiodeService).lagreLovvalgsperioder(1L, forventedeLovvalgsperioder);
         verify(prosessinstansService).opprettProsessinstansGodkjennUnntaksperiode(any(), eq(false), eq(null), eq(null));
-        verify(oppgaveService).ferdigstillOppgaveMedSaksnummer(behandling.getFagsak().getSaksnummer());
+        verify(oppgaveService).ferdigstillOppgaveMedBehandlingID(behandling.getId());
         verify(unntaksperiodeKontrollService).kontrollPeriode(sedDokument, new Periode(unntaksperiode.fom(),
             unntaksperiode.tom()));
     }

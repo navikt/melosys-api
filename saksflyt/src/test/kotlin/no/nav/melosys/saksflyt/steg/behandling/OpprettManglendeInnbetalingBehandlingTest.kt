@@ -258,7 +258,7 @@ class OpprettManglendeInnbetalingBehandlingTest {
                 }
                 every { behandlingService.avsluttBehandling(any()) } returns Unit
                 every { behandlingsresultatService.oppdaterBehandlingsresultattype(any(), any()) } returns Unit
-                every { oppgaveService.ferdigstillOppgaveMedSaksnummer(any()) } returns Unit
+                every { oppgaveService.ferdigstillOppgaveMedBehandlingID(any()) } returns Unit
 
 
                 opprettManglendeInnbetalingBehandling.utfør(prosessinstans)
@@ -273,7 +273,7 @@ class OpprettManglendeInnbetalingBehandlingTest {
                 verify(exactly = 1) { saksbehandlingRegler.finnBehandlingSomKanReplikeres(behandling.fagsak) }
                 verify(exactly = 1) { behandlingService.avsluttBehandling(1L) }
                 verify(exactly = 1) { behandlingsresultatService.oppdaterBehandlingsresultattype(1L, Behandlingsresultattyper.AVBRUTT) }
-                verify(exactly = 1) { oppgaveService.ferdigstillOppgaveMedSaksnummer(behandling.fagsak.saksnummer) }
+                verify(exactly = 1) { oppgaveService.ferdigstillOppgaveMedBehandlingID(behandling.id) }
 
                 prosessinstans.behandling.shouldNotBeNull().run {
                     this.shouldBe(behandling)

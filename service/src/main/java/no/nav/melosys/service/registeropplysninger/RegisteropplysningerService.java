@@ -14,10 +14,10 @@ import no.nav.melosys.domain.SaksopplysningType;
 import no.nav.melosys.domain.dokument.arbeidsforhold.ArbeidsforholdDokument;
 import no.nav.melosys.domain.dokument.inntekt.InntektDokument;
 import no.nav.melosys.exception.TekniskException;
-import no.nav.melosys.integrasjon.aareg.AaregFasade;
 import no.nav.melosys.integrasjon.ereg.EregFasade;
 import no.nav.melosys.integrasjon.inntekt.InntektService;
 import no.nav.melosys.integrasjon.utbetaling.UtbetaldataRestService;
+import no.nav.melosys.service.aareg.ArbeidsforholdService;
 import no.nav.melosys.service.behandling.BehandlingService;
 import no.nav.melosys.service.kontroll.regler.PeriodeRegler;
 import no.nav.melosys.service.medl.MedlPeriodeService;
@@ -48,7 +48,7 @@ public class RegisteropplysningerService {
 
     private final MedlPeriodeService medlPeriodeService;
     private final EregFasade eregFasade;
-    private final AaregFasade aaregFasade;
+    private final ArbeidsforholdService arbeidsforholdService;
     private final BehandlingService behandlingService;
     private final InntektService inntektService;
     private final SaksopplysningerService saksopplysningerService;
@@ -57,7 +57,7 @@ public class RegisteropplysningerService {
 
     public RegisteropplysningerService(MedlPeriodeService medlPeriodeService,
                                        EregFasade eregFasade,
-                                       AaregFasade aaregFasade,
+                                       ArbeidsforholdService arbeidsforholdService,
                                        BehandlingService behandlingService,
                                        InntektService inntektService,
                                        SaksopplysningerService saksopplysningerService,
@@ -65,7 +65,7 @@ public class RegisteropplysningerService {
                                        UtbetaldataRestService utbetaldataRestService) {
         this.medlPeriodeService = medlPeriodeService;
         this.eregFasade = eregFasade;
-        this.aaregFasade = aaregFasade;
+        this.arbeidsforholdService = arbeidsforholdService;
         this.behandlingService = behandlingService;
         this.inntektService = inntektService;
         this.saksopplysningerService = saksopplysningerService;
@@ -138,7 +138,7 @@ public class RegisteropplysningerService {
         LocalDate tom = registeropplysningerRequest.getTom();
 
         RegisteropplysningerPeriodeFactory.DatoPeriode periodeForArbeidsforhold = registeropplysningerPeriodeFactory.hentPeriodeForArbeidsforhold(fom, tom);
-        Saksopplysning saksopplysning = aaregFasade.finnArbeidsforholdPrArbeidstaker(registeropplysningerRequest.getFnr(), periodeForArbeidsforhold.fom, periodeForArbeidsforhold.tom);
+        Saksopplysning saksopplysning = arbeidsforholdService.finnArbeidsforholdPrArbeidstaker(registeropplysningerRequest.getFnr(), periodeForArbeidsforhold.fom, periodeForArbeidsforhold.tom);
 
         return List.of(saksopplysning);
     }

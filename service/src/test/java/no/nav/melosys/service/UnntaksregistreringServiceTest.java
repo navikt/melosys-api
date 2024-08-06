@@ -2,7 +2,6 @@ package no.nav.melosys.service;
 
 import no.nav.melosys.domain.Behandling;
 import no.nav.melosys.domain.Behandlingsresultat;
-import no.nav.melosys.domain.Fagsak;
 import no.nav.melosys.domain.FagsakTestFactory;
 import no.nav.melosys.domain.kodeverk.Land_iso2;
 import no.nav.melosys.domain.kodeverk.Saksstatuser;
@@ -67,7 +66,7 @@ class UnntaksregistreringServiceTest {
 
 
         verify(prosessinstansService).opprettProsessinstansRegistrerUnntakFraMedlemskap(behandling, Saksstatuser.LOVVALG_AVKLART);
-        verify(oppgaveService).ferdigstillOppgaveMedSaksnummer(FagsakTestFactory.SAKSNUMMER);
+        verify(oppgaveService).ferdigstillOppgaveMedBehandlingID(BEHANDLING_ID);
         verify(behandlingsresultatService).lagre(captor.capture());
 
         var capturedBehandlingsresultat = captor.getValue();
@@ -90,7 +89,7 @@ class UnntaksregistreringServiceTest {
 
 
         verify(prosessinstansService).opprettProsessinstansRegistrerUnntakFraMedlemskap(behandling, Saksstatuser.LOVVALG_AVKLART);
-        verify(oppgaveService).ferdigstillOppgaveMedSaksnummer(FagsakTestFactory.SAKSNUMMER);
+        verify(oppgaveService).ferdigstillOppgaveMedBehandlingID(BEHANDLING_ID);
         verify(behandlingsresultatService).lagre(captor.capture());
 
         var capturedBehandlingsresultat = captor.getValue();
@@ -113,7 +112,7 @@ class UnntaksregistreringServiceTest {
 
 
         verify(prosessinstansService).opprettProsessinstansRegistrerUnntakFraMedlemskap(behandling, Saksstatuser.AVSLUTTET);
-        verify(oppgaveService).ferdigstillOppgaveMedSaksnummer(FagsakTestFactory.SAKSNUMMER);
+        verify(oppgaveService).ferdigstillOppgaveMedBehandlingID(BEHANDLING_ID);
         verify(behandlingsresultatService).lagre(captor.capture());
 
         var capturedBehandlingsresultat = captor.getValue();
@@ -144,6 +143,7 @@ class UnntaksregistreringServiceTest {
         anmodningEllerAttest.setLovvalgsland(lovvalgsland);
 
         var behandling = new Behandling();
+        behandling.setId(BEHANDLING_ID);
         behandling.setFagsak(fagsak);
         behandling.setMottatteOpplysninger(new MottatteOpplysninger());
         behandling.getMottatteOpplysninger().setMottatteOpplysningerData(anmodningEllerAttest);

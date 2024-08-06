@@ -129,7 +129,7 @@ public class AnmodningUnntakService {
         }
 
         prosessinstansService.opprettProsessinstansAnmodningOmUnntakMottakSvar(behandling, ytterligereInfo);
-        oppgaveService.ferdigstillOppgaveMedSaksnummer(behandling.getFagsak().getSaksnummer());
+        oppgaveService.ferdigstillOppgaveMedBehandlingID(behandling.getId());
     }
 
     private static void validerBehandlingstemaUnntak(Behandling behandling) {

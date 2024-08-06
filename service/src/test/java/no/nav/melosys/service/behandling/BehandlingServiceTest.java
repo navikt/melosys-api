@@ -9,10 +9,8 @@ import java.util.*;
 
 import no.nav.melosys.domain.*;
 import no.nav.melosys.domain.brev.utkast.UtkastBrev;
-import no.nav.melosys.domain.kodeverk.Aktoersroller;
 import no.nav.melosys.domain.kodeverk.Landkoder;
 import no.nav.melosys.domain.kodeverk.Sakstemaer;
-import no.nav.melosys.domain.kodeverk.Sakstyper;
 import no.nav.melosys.domain.kodeverk.behandlinger.*;
 import no.nav.melosys.domain.mottatteopplysninger.MottatteOpplysninger;
 import no.nav.melosys.domain.mottatteopplysninger.MottatteOpplysningerData;
@@ -25,7 +23,6 @@ import no.nav.melosys.repository.TidligereMedlemsperiodeRepository;
 import no.nav.melosys.service.brev.UtkastBrevService;
 import no.nav.melosys.service.lovligekombinasjoner.LovligeKombinasjonerSaksbehandlingService;
 import no.nav.melosys.service.oppgave.OppgaveService;
-import org.assertj.core.util.Sets;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -252,7 +249,7 @@ class BehandlingServiceTest {
         behandling.setId(BEHANDLING_ID);
         when(behandlingRepository.findById(anyLong())).thenReturn(Optional.of(behandling));
         behandlingService.endreStatus(BEHANDLING_ID, Behandlingsstatus.AVSLUTTET);
-        verify(oppgaveService).ferdigstillOppgaveMedSaksnummer(fagsak.getSaksnummer());
+        verify(oppgaveService).ferdigstillOppgaveMedBehandlingID(BEHANDLING_ID);
     }
 
     @Test
@@ -683,11 +680,15 @@ class BehandlingServiceTest {
         String saksnummer = "MEL-1234";
         String saksbehandlerId = "Z123456";
         Oppgave oppgave = new Oppgave.Builder()
+            .setOppgaveId("1")
             .setTilordnetRessurs(saksbehandlerId)
             .build();
-        when(oppgaveService.finnÅpenBehandlingsoppgaveMedFagsaksnummer(saksnummer)).thenReturn(Optional.of(oppgave));
+        Behandling behandling = new Behandling();
+        behandling.setId(BEHANDLING_ID);
+        behandling.setOppgaveId("1");
+        when(oppgaveService.finnBehandlingsoppgaveForBehandlingID(BEHANDLING_ID)).thenReturn(oppgave);
 
-        boolean result = behandlingService.behandlingMedSaksnummerTilhørerSaksbehandlerID(saksnummer, saksbehandlerId);
+        boolean result = behandlingService.behandlingMedSaksnummerTilhørerSaksbehandlerID(BEHANDLING_ID, saksbehandlerId);
 
         assertTrue(result);
     }
@@ -695,12 +696,16 @@ class BehandlingServiceTest {
     @Test
     void behandlingMedSaksnummerTilhørerSaksbehandlerID_saksbehandlerErIkkeSattPåOppgaven_forventFalse() {
         Oppgave oppgave = new Oppgave.Builder()
-            .setTilordnetRessurs("TYBO")
+            .setOppgaveId("1")
+            .setTilordnetRessurs("lol")
             .build();
+        Behandling behandling = new Behandling();
+        behandling.setId(BEHANDLING_ID);
+        behandling.setOppgaveId("1");
 
-        when(oppgaveService.finnÅpenBehandlingsoppgaveMedFagsaksnummer("MEL-1234")).thenReturn(Optional.of(oppgave));
+        when(oppgaveService.finnBehandlingsoppgaveForBehandlingID(BEHANDLING_ID)).thenReturn(oppgave);
 
-        boolean result = behandlingService.behandlingMedSaksnummerTilhørerSaksbehandlerID("MEL-1234", "Z123456");
+        boolean result = behandlingService.behandlingMedSaksnummerTilhørerSaksbehandlerID(BEHANDLING_ID, "Z123456");
 
         assertFalse(result);
     }

@@ -40,7 +40,7 @@ public class UnntaksregistreringService {
             ? Saksstatuser.AVSLUTTET
             : Saksstatuser.LOVVALG_AVKLART;
         prosessinstansService.opprettProsessinstansRegistrerUnntakFraMedlemskap(behandling, saksstatus);
-        oppgaveService.ferdigstillOppgaveMedSaksnummer(behandling.getFagsak().getSaksnummer());
+        oppgaveService.ferdigstillOppgaveMedBehandlingID(behandling.getId());
     }
 
     private void oppdaterBehandlingsresultatet(Behandling behandling, Behandlingsresultat behandlingsresultat) {

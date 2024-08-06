@@ -47,7 +47,7 @@ public class BrevDataByggerAvslagYrkesaktiv implements BrevDataBygger {
         brevData.setArt16Vilkaar(hentFørsteGyldigeVilkaarsresultatForArt16(behandlingID));
 
         if (!brevData.getArt16Vilkaar().isOppfylt()) {
-            brevData.setAnmodningsperiodeSvar(new AnmodningsperiodeSvar());
+            brevData.setAnmodningsperiodeSvar(null);
         } else {
             brevData.setAnmodningsperiodeSvar(hentAnmodningsperiodeSvar(behandlingID).get());
         }

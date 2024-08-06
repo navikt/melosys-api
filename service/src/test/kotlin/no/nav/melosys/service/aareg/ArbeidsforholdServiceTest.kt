@@ -1,4 +1,4 @@
-package no.nav.melosys.integrasjon.aareg
+package no.nav.melosys.service.aareg
 
 import com.fasterxml.jackson.databind.ObjectMapper
 import com.fasterxml.jackson.databind.introspect.AnnotatedMember
@@ -8,21 +8,23 @@ import com.github.tomakehurst.wiremock.WireMockServer
 import com.github.tomakehurst.wiremock.client.WireMock
 import com.github.tomakehurst.wiremock.core.WireMockConfiguration
 import io.kotest.matchers.shouldBe
+import io.mockk.every
+import io.mockk.junit5.MockKExtension
+import io.mockk.mockk
 import no.nav.melosys.domain.FellesKodeverk
 import no.nav.melosys.domain.dokument.arbeidsforhold.ArbeidsforholdDokument
 import no.nav.melosys.integrasjon.aareg.arbeidsforhold.ArbeidsforholdConsumer
-import no.nav.melosys.integrasjon.kodeverk.KodeOppslag
+import no.nav.melosys.service.kodeverk.KodeverkService
 import org.junit.jupiter.api.AfterAll
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.TestInstance
-import org.mockito.ArgumentMatchers
-import org.mockito.Mockito
-import org.mockito.kotlin.whenever
+import org.junit.jupiter.api.extension.ExtendWith
 import org.springframework.web.reactive.function.client.WebClient
 import java.time.LocalDate
 
 @TestInstance(TestInstance.Lifecycle.PER_CLASS)
-internal class AaregServiceTest {
+@ExtendWith(MockKExtension::class)
+internal class ArbeidsforholdServiceTest {
     companion object {
         private const val NAV_PERSONIDENT = "12345678990"
     }
@@ -32,8 +34,8 @@ internal class AaregServiceTest {
             start()
         }
 
-    private val mockedKodeOppslag: KodeOppslag = Mockito.mock(KodeOppslag::class.java)
-    private val aaregService: AaregService = AaregService(arbeidsforholdRestConsumer(), mockedKodeOppslag)
+    private val kodeverkServiceMock: KodeverkService = mockk()
+    private val arbeidsforholdService: ArbeidsforholdService = ArbeidsforholdService(arbeidsforholdRestConsumer(), kodeverkServiceMock)
 
     private fun arbeidsforholdRestConsumer() = ArbeidsforholdConsumer(
         WebClient.builder()
@@ -48,19 +50,19 @@ internal class AaregServiceTest {
 
     @Test
     fun testDokumentFromRestService() {
-        whenever(
-            mockedKodeOppslag.getTermFraKodeverk(
-                ArgumentMatchers.eq(FellesKodeverk.PERMISJONS_OG_PERMITTERINGS_BESKRIVELSE),
-                ArgumentMatchers.anyString()
+        every {
+            kodeverkServiceMock.getTermFraKodeverk(
+                FellesKodeverk.PERMISJONS_OG_PERMITTERINGS_BESKRIVELSE,
+                any()
             )
-        ).thenReturn("Permisjon med foreldrepenger")
+        } returns "Permisjon med foreldrepenger"
 
-        whenever(
-            mockedKodeOppslag.getTermFraKodeverk(
-                ArgumentMatchers.eq(FellesKodeverk.YRKER),
-                ArgumentMatchers.anyString()
+        every {
+            kodeverkServiceMock.getTermFraKodeverk(
+                FellesKodeverk.YRKER,
+                any()
             )
-        ).thenReturn("IT-KONSULENT")
+        } returns "IT-KONSULENT"
 
         wireMockServer.stubFor(
             WireMock.get(WireMock.urlPathEqualTo("/"))
@@ -77,7 +79,7 @@ internal class AaregServiceTest {
         )
 
 
-        val saksopplysning = aaregService.finnArbeidsforholdPrArbeidstaker(
+        val saksopplysning = arbeidsforholdService.finnArbeidsforholdPrArbeidstaker(
             NAV_PERSONIDENT,
             LocalDate.of(2014, 7, 1),
             LocalDate.of(2015, 12, 31)

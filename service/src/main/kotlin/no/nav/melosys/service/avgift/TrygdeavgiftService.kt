@@ -21,14 +21,23 @@ class TrygdeavgiftService(
     fun harFagsakBehandlingerMedTrygdeavgift(saksnummer: String, sjekkFakturaserie: Boolean = false): Boolean =
         hentFakturerbarTrygdeavgiftBehandlingsresultater(saksnummer, sjekkFakturaserie).isNotEmpty()
 
-    private fun hentFakturerbarTrygdeavgiftBehandlingsresultater(saksnummer: String, sjekkFakturaserie: Boolean = false): List<Behandlingsresultat> {
+    private fun hentFakturerbarTrygdeavgiftBehandlingsresultater(
+        saksnummer: String,
+        sjekkFakturaserie: Boolean = false,
+        erBehandlingFerdig: Boolean = false
+    ): List<Behandlingsresultat> {
         val fagsak = fagsakService.hentFagsak(saksnummer)
 
         if (fagsak.status in UGYLDIGE_SAKSSTATUSER_FOR_TRYGDEAVGIFT) {
             return emptyList()
         }
 
-        return fagsak.behandlinger
+        val behandlinger = if (erBehandlingFerdig) {
+            fagsak.behandlinger.filter { it.erInaktiv() }
+        } else {
+            fagsak.behandlinger
+        }
+        return behandlinger
             .map { behandlingsresultatService.hentBehandlingsresultat(it.id) }
             .filter {
                 harFakturerbarTrygdeavgift(it, sjekkFakturaserie)
@@ -37,10 +46,10 @@ class TrygdeavgiftService(
 
     @Transactional(readOnly = true)
     fun finnSistFakturerbarTrygdeavgiftsbehandlingForÅr(saksnummer: String, år: Int): Behandling? =
-        hentFakturerbarTrygdeavgiftBehandlingsresultater(saksnummer)
+        hentFakturerbarTrygdeavgiftBehandlingsresultater(saksnummer, erBehandlingFerdig = true)
             .sortedBy { it.registrertDato }
             .lastOrNull {
-                it.medlemskapsperioder.any { it.overlapperMedÅr(år) } || it.lovvalgsperioder.any { it.overlapperMedÅr(år) }
+                it.trygdeavgiftsperioder.any { it.overlapperMedÅr(år) }
             }?.behandling
 
     fun harFakturerbarTrygdeavgift(resultat: Behandlingsresultat, sjekkFakturaserie: Boolean = false) =

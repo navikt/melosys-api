@@ -83,7 +83,7 @@ public class VideresendSoknadService {
             fritekst,
             vedleggReferanser
         );
-        oppgaveService.ferdigstillOppgaveMedSaksnummer(behandling.getFagsak().getSaksnummer());
+        oppgaveService.ferdigstillOppgaveMedBehandlingID(behandling.getId());
     }
 
     private void valider(Behandling behandling, Bostedsland bostedsland) {

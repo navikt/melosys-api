@@ -8,7 +8,6 @@ import java.util.Set;
 import no.nav.melosys.domain.Behandling;
 import no.nav.melosys.domain.Bostedsland;
 import no.nav.melosys.domain.Fagsak;
-import no.nav.melosys.domain.FagsakTestFactory;
 import no.nav.melosys.domain.arkiv.DokumentReferanse;
 import no.nav.melosys.domain.eessi.BucType;
 import no.nav.melosys.domain.kodeverk.Land_iso2;
@@ -91,7 +90,7 @@ class VideresendSoknadServiceTest {
         verify(fagsakService).avsluttFagsakOgBehandling(fagsak, Saksstatuser.VIDERESENDT);
         verify(prosessinstansService).opprettProsessinstansVideresendSoknad(behandling,
             validerteMottakere.iterator().next(), "fritekst", Set.of(dokumentReferanse));
-        verify(oppgaveService).ferdigstillOppgaveMedSaksnummer(SAKSNUMMER);
+        verify(oppgaveService).ferdigstillOppgaveMedBehandlingID(behandling.getId());
         verify(behandlingsresultatService).oppdaterBehandlingsresultattype(behandling.getId(), Behandlingsresultattyper.HENLEGGELSE);
     }
 
