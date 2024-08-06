@@ -60,6 +60,7 @@ class AvslagServiceTest {
     @Test
     fun avslåPgaManglendeOpplysninger_lagrerOgKallerRiktig() {
         val behandling = Behandling().apply {
+            id = 1L
             fagsak = FagsakTestFactory.lagFagsak()
         }
         every { behandlingService.hentBehandling(1L) }.returns(behandling)
