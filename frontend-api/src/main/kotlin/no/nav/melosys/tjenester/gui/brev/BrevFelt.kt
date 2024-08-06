@@ -20,6 +20,11 @@ internal object BrevFelt {
         .medFeltType(FeltType.SJEKKBOKS)
         .build()
 
+    val FELT_STANDARDTEKST_INNTEKTSOPPLYSNINGER_SJEKKBOKS = BrevmalFeltDto.Builder()
+        .medKodeOgBeskrivelse(BrevmalFeltKode.STANDARDTEKST_INNTEKTSOPPLYSNINGER)
+        .medFeltType(FeltType.SJEKKBOKS)
+        .build()
+
     val FELT_DISTRIBUSJONSTYPE = BrevmalFeltDto.Builder()
         .medKodeOgBeskrivelse(BrevmalFeltKode.DISTRIBUSJONSTYPE)
         .medHjelpetekst("Type brev må angis slik at bruker får riktig varseltekst om brevet som sendes. Gjelder det et vedtak eller en forespørsel, vil bruker få en påminnelse hvis brevet ikke har blitt lest innen 7 dager.")
@@ -56,6 +61,22 @@ internal object BrevFelt {
             .medKodeOgBeskrivelse(BrevmalFeltKode.UTENLANDSK_TRYGDEMYNDIGHET_MOTTAKER)
             .medValg(valg)
             .erPåkrevd()
+            .build()
+    }
+
+    fun lagFritekstFeltMedValg(): BrevmalFeltDto {
+        val feltValgAlternativFritekst = mutableListOf(
+            FeltvalgAlternativDto(
+                FeltvalgAlternativKode.FRITEKST.kode,
+                FeltvalgAlternativKode.FRITEKST.beskrivelse,
+                true
+            )
+        )
+
+        return BrevmalFeltDto.Builder()
+            .medKode(BrevmalFeltKode.FRITEKST)
+            .medFeltType(FeltType.FRITEKST)
+            .medValg(FeltValgDto(feltValgAlternativFritekst, FeltValgType.CHECKBOX))
             .build()
     }
 
