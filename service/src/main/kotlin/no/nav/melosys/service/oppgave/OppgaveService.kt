@@ -100,6 +100,7 @@ class OppgaveService(
 
     fun hentSistAktiveBehandling(saksnummer: String): Behandling = fagsakService.hentFagsak(saksnummer).hentSistAktivBehandlingIkkeÅrsavregning()
 
+    @Transactional
     @JvmOverloads
     fun opprettEllerGjenbrukBehandlingsoppgave(
         behandling: Behandling,
@@ -141,6 +142,7 @@ class OppgaveService(
         }
     }
 
+    @Transactional
     fun settOppgaveIdPåBehandling(behandling: Behandling, oppgaveId: String) {
         behandling.oppgaveId = oppgaveId
         behandlingService.lagre(behandling)
@@ -243,6 +245,7 @@ class OppgaveService(
         if (tilknyttetBehandling == null) {
             val sistAktivBehandling = checkNotNull(fagsak.hentAktivBehandling()) { "Finner ingen aktiv behandling for oppgave ${oppgave.oppgaveId}" }
             tilknyttetBehandling = sistAktivBehandling
+//            settOppgaveIdPåBehandling(tilknyttetBehandling, oppgave.oppgaveId)
         }
         val orgnr = fagsak.finnVirksomhetsOrgnr()
 

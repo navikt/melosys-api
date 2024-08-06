@@ -281,7 +281,7 @@ public class OppgaveFasadeImpl implements OppgaveFasade {
     public List<Oppgave> finnÅpneBehandlingsoppgaver() {
         OppgaveSearchRequest oppgaveSearchRequest = new OppgaveSearchRequest.Builder(String.valueOf(MELOSYS_ENHET_ID))
             .medTema(OPPGAVE_TEMA)
-            .medOppgaveTyper(OPPGAVETYPER_BEHANDLINGSOPPGAVE)
+            .medOppgaveTyper(hentGyldigeOppgavetyper())
             .medStatusKategori(OPPGAVE_STATUSKATEGORI_AAPEN)
             .build();
 
