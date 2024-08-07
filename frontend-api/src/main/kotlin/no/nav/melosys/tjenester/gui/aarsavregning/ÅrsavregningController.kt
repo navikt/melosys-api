@@ -42,6 +42,13 @@ class ÅrsavregningController(
         )
     }
 
+    @PutMapping("/{behandlingID}/ferdigstill")
+    fun ferdigstillÅrsavregning(@PathVariable("behandlingID") behandlingID: Long): ResponseEntity<Void> {
+        årsavregningService.ferdigstillÅrsavregning(behandlingID)
+
+        return ResponseEntity.noContent().build()
+    }
+
     data class LagÅrsavregningRequest(
         val aar: Int
     )

@@ -23,7 +23,9 @@ import no.nav.melosys.service.avgift.aarsavregning.MedlemskapsperiodeForAvgift
 import no.nav.melosys.service.avgift.aarsavregning.Trygdeavgiftsgrunnlag
 import no.nav.melosys.service.avgift.aarsavregning.ÅrsavregningModel
 import no.nav.melosys.service.avgift.aarsavregning.ÅrsavregningService
+import no.nav.melosys.service.behandling.BehandlingService
 import no.nav.melosys.service.behandling.BehandlingsresultatService
+import no.nav.melosys.service.oppgave.OppgaveService
 import no.nav.melosys.sikkerhet.context.SpringSubjectHandler
 import no.nav.melosys.sikkerhet.context.TestSubjectHandler
 import org.junit.jupiter.api.BeforeEach
@@ -40,6 +42,9 @@ internal class ÅrsavregningServiceTest {
     private lateinit var aarsavregningRepository: AarsavregningRepository
 
     @RelaxedMockK
+    private lateinit var behandlingService: BehandlingService
+
+    @RelaxedMockK
     private lateinit var behandlingsresultatService: BehandlingsresultatService
 
     @RelaxedMockK
@@ -47,6 +52,9 @@ internal class ÅrsavregningServiceTest {
 
     @RelaxedMockK
     private lateinit var trygdeavgiftService: TrygdeavgiftService
+
+    @RelaxedMockK
+    private lateinit var oppgaveService: OppgaveService
 
     private lateinit var årsavregningService: ÅrsavregningService
 
@@ -56,9 +64,11 @@ internal class ÅrsavregningServiceTest {
     fun setup() {
         årsavregningService = ÅrsavregningService(
             aarsavregningRepository,
+            behandlingService,
             behandlingsresultatService,
             faktureringskomponentenConsumer,
-            trygdeavgiftService
+            trygdeavgiftService,
+            oppgaveService
         )
         SpringSubjectHandler.set(TestSubjectHandler())
     }
@@ -77,6 +87,16 @@ internal class ÅrsavregningServiceTest {
         shouldThrow<FunksjonellException> {
             årsavregningService.opprettÅrsavregning(1, 2023)
         }
+    }
+
+    @Test
+    fun `ferdigstillÅrsavregning avslutter behandling og oppgave`() {
+        val behandlingId = 1L
+        årsavregningService.ferdigstillÅrsavregning(behandlingId)
+
+        verify { behandlingsresultatService.oppdaterBehandlingsresultattype(behandlingId, Behandlingsresultattyper.FERDIGBEHANDLET) }
+        verify { behandlingService.avsluttBehandling(behandlingId) }
+        verify { oppgaveService.ferdigstillOppgaveMedBehandlingID(behandlingId) }
     }
 
     @Test
