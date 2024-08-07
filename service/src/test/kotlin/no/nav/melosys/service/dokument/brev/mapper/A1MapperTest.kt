@@ -49,6 +49,7 @@ import java.time.LocalDate
 import java.util.List
 import jakarta.xml.bind.JAXBElement
 import no.nav.melosys.domain.*
+import no.nav.melosys.domain.kodeverk.lovvalgsbestemmelser.Lovvalgbestemmelser_konv_efta_storbritannia
 
 @ExtendWith(MockKExtension::class)
 @TestInstance(TestInstance.Lifecycle.PER_CLASS)
@@ -159,6 +160,24 @@ internal class A1MapperTest {
         }
         mapTilBrevXML(brevData).shouldNotBeNull()
     }
+
+    @Test
+    fun mapBrevTilXML_harEftaTekst_fyllerTekstOmEftaStorbritannia() {
+        val lovvalgsperiode = Lovvalgsperiode().apply {
+            lovvalgsland = Land_iso2.GB
+            bestemmelse = Lovvalgbestemmelser_konv_efta_storbritannia.KONV_EFTA_STORBRITANNIA_ART18_1
+            fom = LocalDate.now()
+            tom = LocalDate.now()
+        }
+
+        every { behandlingsresultat.hentLovvalgsperiode() } returns lovvalgsperiode
+
+        val a1 = mapper.mapA1(behandling, behandlingsresultat, brevData)
+        a1.bivirksomhetListe.bivirksomhet.forExactly(1) {
+            it.navn.shouldBe("Issued under the EEA EFTA Convention")
+        }
+    }
+
 
     @Test
     fun mapBrevTilXML_harFlyvendeArbeidssted_fyllerUtHjemmebaseNavnOgLand() {
