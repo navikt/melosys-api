@@ -42,6 +42,13 @@ class ÅrsavregningController(
         )
     }
 
+    @PutMapping("/{behandlingID}/ferdigstill")
+    fun ferdigstillÅrsavregning(@PathVariable("behandlingID") behandlingID: Long): ResponseEntity<Void> {
+        årsavregningService.ferdigstillÅrsavregning(behandlingID)
+
+        return ResponseEntity.noContent().build()
+    }
+
     data class LagÅrsavregningRequest(
         val aar: Int
     )
@@ -65,7 +72,13 @@ class ÅrsavregningController(
         return if (årsavregningModel.tidligereGrunnlag == null) null else
             TidligereGrunnlagsopplysninger(
                 Trygdeavgiftsgrunnlag(
-                    medlemskapsperioder = årsavregningModel.tidligereGrunnlag?.medlemskapsperioder?.map { Medlemskapsperiode(it.fom, it.tom, it.dekning) }
+                    medlemskapsperioder = årsavregningModel.tidligereGrunnlag?.medlemskapsperioder?.map {
+                        Medlemskapsperiode(
+                            it.fom,
+                            it.tom,
+                            it.dekning
+                        )
+                    }
                         .orEmpty(),
                     skatteforholdsperioder = årsavregningModel.tidligereGrunnlag?.skatteforholdsperioder?.map {
                         Skatteforholdsperiode(
