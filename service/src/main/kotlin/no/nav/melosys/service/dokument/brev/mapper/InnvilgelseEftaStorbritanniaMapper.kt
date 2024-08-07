@@ -51,7 +51,6 @@ class InnvilgelseEftaStorbritanniaMapper(
             erArtikkel18_1 = lovvalgsperiode.erArtikkel18_1(),
             bosted = bostedsland,
             anmodningsperiodeSvarType = if (anmodningsperiode.isPresent) anmodningsperiode.get().anmodningsperiodeSvar.anmodningsperiodeSvarType.name else "",
-            // TODO: Frontend støtter ikke flere fritekst felt enda. Dette kommer i en annen sak.
             innvilgelseFritekst = brevbestilling.innvilgelseFritekst,
             innledningFritekst = brevbestilling.innledningFritekst,
             begrunnelseFritekst = brevbestilling.begrunnelseFritekst,
