@@ -39,21 +39,7 @@ public class BrevDataByggerA1 implements BrevDataBygger {
         brevData.setYrkesgruppe(avklartefaktaService.finnYrkesGruppe(dataGrunnlag.getBehandling().getId()).orElse(null));
         brevData.setBostedsadresse(dataGrunnlag.getBostedGrunnlag().finnBostedsadresse().orElse(null));
 
-        List<Arbeidssted> arbeidssteder = new ArrayList<>();
-        Lovvalgsperiode lovvalgsperiode = lovvalgsperiodeService.hentLovvalgsperiode(dataGrunnlag.getBehandling().getId());
-
-        // For å unngå bestilling av nytt felt i Attest A1 brevet fra CCM,
-        // har vi bestemt at vi bare sender en statisk tekst i feltet 5.1.
-        if (lovvalgsperiode.erEftaStorbritannia()) {
-            StrukturertAdresse placeholderAdresseEfta = new StrukturertAdresse();
-            placeholderAdresseEfta.setLandkode("GB");
-            FysiskArbeidssted placeholderArbeidsstedEfta = new FysiskArbeidssted("Issued under the EEA EFTA Convention", "", placeholderAdresseEfta);
-            FysiskArbeidssted placeholderArbeidsstedEftaLinjeskift = new FysiskArbeidssted(" ", "", placeholderAdresseEfta);
-            arbeidssteder.add(placeholderArbeidsstedEfta);
-            arbeidssteder.add(placeholderArbeidsstedEftaLinjeskift);
-        }
-
-        arbeidssteder.addAll(dataGrunnlag.getArbeidsstedGrunnlag().hentArbeidssteder());
+        List<Arbeidssted> arbeidssteder = dataGrunnlag.getArbeidsstedGrunnlag().hentArbeidssteder();
         brevData.setArbeidssteder(arbeidssteder);
         brevData.setArbeidsland(landvelgerService.hentAlleArbeidsland(dataGrunnlag.getBehandling().getId()));
         brevData.setUkjenteEllerAlleEosLand(dataGrunnlag.getMottatteOpplysningerData().soeknadsland.isFlereLandUkjentHvilke());
