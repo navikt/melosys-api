@@ -78,6 +78,7 @@ class ÅrsavregningService(
         return lagÅrsavregningFraAarsavregning(årsavregning)
     }
 
+    // TODO [MELOSYS-6757] mangler støtte for årsavregning uten tidligere behandling
     private fun lagÅrsavregningFraAarsavregning(årsavregning: Årsavregning): ÅrsavregningModel {
         val år = årsavregning.aar
 

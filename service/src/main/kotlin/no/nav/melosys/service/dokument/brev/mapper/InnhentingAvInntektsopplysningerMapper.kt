@@ -12,7 +12,7 @@ import java.time.LocalDate
 class InnhentingAvInntektsopplysningerMapper(
     private val dokgenMapperDatahenter: DokgenMapperDatahenter,
 ) {
-    // TODO [JIRA-SAK] mangler støtte for årsavregning uten tidligere behandling
+    // TODO [MELOSYS-6757] mangler støtte for årsavregning uten tidligere behandling
     @Transactional
     internal fun map(brevbestilling: InnhentingAvInntektsopplysningerBrevbestilling): InnhentingAvInntektsopplysninger {
         val behandlingsresultat = dokgenMapperDatahenter.hentBehandlingsresultat(brevbestilling.behandlingId)
