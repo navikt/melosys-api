@@ -1,31 +1,24 @@
 package no.nav.melosys.service.dokument.brev.bygger;
 
-import java.util.ArrayList;
 import java.util.List;
 
-import no.nav.melosys.domain.Lovvalgsperiode;
-import no.nav.melosys.domain.adresse.StrukturertAdresse;
 import no.nav.melosys.domain.avklartefakta.AvklartVirksomhet;
 import no.nav.melosys.exception.FunksjonellException;
 import no.nav.melosys.service.LandvelgerService;
-import no.nav.melosys.service.LovvalgsperiodeService;
 import no.nav.melosys.service.avklartefakta.AvklartefaktaService;
 import no.nav.melosys.service.dokument.brev.BrevData;
 import no.nav.melosys.service.dokument.brev.BrevDataA1;
 import no.nav.melosys.service.dokument.brev.datagrunnlag.BrevDataGrunnlag;
 import no.nav.melosys.service.dokument.brev.mapper.arbeidssted.Arbeidssted;
-import no.nav.melosys.service.dokument.brev.mapper.arbeidssted.FysiskArbeidssted;
 import org.apache.commons.lang3.StringUtils;
 
 public class BrevDataByggerA1 implements BrevDataBygger {
     private final AvklartefaktaService avklartefaktaService;
     private final LandvelgerService landvelgerService;
-    private final LovvalgsperiodeService lovvalgsperiodeService;
 
-    public BrevDataByggerA1(AvklartefaktaService avklartefaktaService, LandvelgerService landvelgerService, LovvalgsperiodeService lovvalgsperiodeService) {
+    public BrevDataByggerA1(AvklartefaktaService avklartefaktaService, LandvelgerService landvelgerService) {
         this.avklartefaktaService = avklartefaktaService;
         this.landvelgerService = landvelgerService;
-        this.lovvalgsperiodeService = lovvalgsperiodeService;
     }
 
     @Override

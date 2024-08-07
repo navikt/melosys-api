@@ -73,7 +73,7 @@ public class BrevDataByggerVelger {
 
     private BrevDataBygger lagBrevDataByggerA1(BrevbestillingDto brevbestillingDto) {
         BrevDataByggerA1 a1Bygger =
-            new BrevDataByggerA1(avklartefaktaService, landvelgerService, lovvalgsperiodeService);
+            new BrevDataByggerA1(avklartefaktaService, landvelgerService);
         return new BrevDataByggerVedlegg(a1Bygger, brevbestillingDto);
     }
 
@@ -88,7 +88,7 @@ public class BrevDataByggerVelger {
 
     private BrevDataBygger lagBrevDataByggerInnvilgelse(BrevbestillingDto brevbestillingDto) {
         BrevDataByggerA1 brevbyggerA1 =
-            new BrevDataByggerA1(avklartefaktaService, landvelgerService, lovvalgsperiodeService);
+            new BrevDataByggerA1(avklartefaktaService, landvelgerService);
         return new BrevDataByggerInnvilgelse(avklartefaktaService,
             landvelgerService,
             lovvalgsperiodeService,
@@ -102,7 +102,7 @@ public class BrevDataByggerVelger {
 
     private BrevDataBygger lagBrevDataByggerInnvilgelseFlereLand(BrevbestillingDto brevbestillingDto) {
         BrevDataByggerA1 brevbyggerA1 =
-            new BrevDataByggerA1(avklartefaktaService, landvelgerService, lovvalgsperiodeService);
+            new BrevDataByggerA1(avklartefaktaService, landvelgerService);
 
         return new BrevDataByggerInnvilgelseFlereLand(avklartefaktaService,
             landvelgerService,

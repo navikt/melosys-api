@@ -9,8 +9,8 @@ import no.nav.melosys.domain.brev.DoksysBrevbestilling;
 import no.nav.melosys.domain.dokument.organisasjon.OrganisasjonDokument;
 import no.nav.melosys.domain.dokument.organisasjon.OrganisasjonsDetaljer;
 import no.nav.melosys.domain.dokument.person.PersonDokument;
-import no.nav.melosys.domain.kodeverk.*;
-import no.nav.melosys.domain.kodeverk.lovvalgsbestemmelser.Lovvalgbestemmelser_883_2004;
+import no.nav.melosys.domain.kodeverk.Land_iso2;
+import no.nav.melosys.domain.kodeverk.Landkoder;
 import no.nav.melosys.domain.kodeverk.lovvalgsbestemmelser.Lovvalgbestemmelser_konv_efta_storbritannia;
 import no.nav.melosys.domain.kodeverk.lovvalgsbestemmelser.Tilleggsbestemmelser_883_2004;
 import no.nav.melosys.domain.mottatteopplysninger.MottatteOpplysninger;
@@ -19,7 +19,6 @@ import no.nav.melosys.domain.mottatteopplysninger.data.ForetakUtland;
 import no.nav.melosys.domain.mottatteopplysninger.data.SelvstendigForetak;
 import no.nav.melosys.domain.mottatteopplysninger.data.arbeidssteder.FysiskArbeidssted;
 import no.nav.melosys.service.LandvelgerService;
-import no.nav.melosys.domain.OrganisasjonDokumentTestFactory;
 import no.nav.melosys.service.LovvalgsperiodeService;
 import no.nav.melosys.service.avklartefakta.AvklarteVirksomheterService;
 import no.nav.melosys.service.avklartefakta.AvklartefaktaService;
@@ -104,7 +103,7 @@ class BrevDataByggerA1Test {
             kodeverkService);
         DoksysBrevbestilling brevbestilling = new DoksysBrevbestilling.Builder().medBehandling(behandling).build();
         dataGrunnlag = new BrevDataGrunnlag(brevbestilling, kodeverkService, avklarteVirksomheterService, avklartefaktaService, personDok);
-        brevDataByggerA1 = new BrevDataByggerA1(avklartefaktaService, landvelgerService, lovvalgsperiodeService);
+        brevDataByggerA1 = new BrevDataByggerA1(avklartefaktaService, landvelgerService);
     }
 
     private void mockAvklarteOrganisasjoner(List<String> orgnumre) {
@@ -151,18 +150,6 @@ class BrevDataByggerA1Test {
         BrevDataA1 brevDataDto = (BrevDataA1) brevDataByggerA1.lag(dataGrunnlag, saksbehandler);
         assertThat(brevDataDto.getHovedvirksomhet().orgnr).isEqualTo(foretak.getOrgnr());
     }
-
-    @Test
-    void lag_sjekkFørsteArbeidsstederEftaStorbritannia_erTekstOmEfta() {
-        mockAvklarteOrganisasjoner(Collections.singletonList("999"));
-        SelvstendigForetak foretak = new SelvstendigForetak();
-        foretak.setOrgnr("999");
-        søknad.selvstendigArbeid.getSelvstendigForetak().add(foretak);
-
-        BrevDataA1 brevDataDto = (BrevDataA1) brevDataByggerA1.lag(dataGrunnlag, saksbehandler);
-        assertThat(brevDataDto.getArbeidssteder().get(0).getForetakNavn()).isEqualTo("Issued under the EEA EFTA Convention");
-    }
-
 
     @Test
     void lag_hentAvklarteArbeidsgivere() {
