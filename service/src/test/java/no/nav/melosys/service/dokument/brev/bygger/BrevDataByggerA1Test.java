@@ -1,6 +1,5 @@
 package no.nav.melosys.service.dokument.brev.bygger;
 
-import java.time.LocalDate;
 import java.util.*;
 
 import no.nav.melosys.domain.*;
@@ -9,17 +8,15 @@ import no.nav.melosys.domain.brev.DoksysBrevbestilling;
 import no.nav.melosys.domain.dokument.organisasjon.OrganisasjonDokument;
 import no.nav.melosys.domain.dokument.organisasjon.OrganisasjonsDetaljer;
 import no.nav.melosys.domain.dokument.person.PersonDokument;
-import no.nav.melosys.domain.kodeverk.Land_iso2;
+import no.nav.melosys.domain.kodeverk.Aktoersroller;
 import no.nav.melosys.domain.kodeverk.Landkoder;
-import no.nav.melosys.domain.kodeverk.lovvalgsbestemmelser.Lovvalgbestemmelser_konv_efta_storbritannia;
-import no.nav.melosys.domain.kodeverk.lovvalgsbestemmelser.Tilleggsbestemmelser_883_2004;
 import no.nav.melosys.domain.mottatteopplysninger.MottatteOpplysninger;
 import no.nav.melosys.domain.mottatteopplysninger.Soeknad;
 import no.nav.melosys.domain.mottatteopplysninger.data.ForetakUtland;
 import no.nav.melosys.domain.mottatteopplysninger.data.SelvstendigForetak;
 import no.nav.melosys.domain.mottatteopplysninger.data.arbeidssteder.FysiskArbeidssted;
 import no.nav.melosys.service.LandvelgerService;
-import no.nav.melosys.service.LovvalgsperiodeService;
+import no.nav.melosys.domain.OrganisasjonDokumentTestFactory;
 import no.nav.melosys.service.avklartefakta.AvklarteVirksomheterService;
 import no.nav.melosys.service.avklartefakta.AvklartefaktaService;
 import no.nav.melosys.service.behandling.BehandlingService;
@@ -46,8 +43,6 @@ class BrevDataByggerA1Test {
     @Mock
     private LandvelgerService landvelgerService;
     @Mock
-    private LovvalgsperiodeService lovvalgsperiodeService;
-    @Mock
     OrganisasjonOppslagService organisasjonOppslagService;
 
     private Set<String> avklarteOrganisasjoner;
@@ -70,9 +65,6 @@ class BrevDataByggerA1Test {
 
         when(avklartefaktaService.hentAvklarteOrgnrOgUuid(anyLong()))
             .thenReturn(avklarteOrganisasjoner);
-
-        when(lovvalgsperiodeService.hentLovvalgsperiode(anyLong()))
-            .thenReturn(lagLovvalgsperiode());
 
         StrukturertAdresse oppgittAdresse = lagStrukturertAdresse();
         søknad = new Soeknad();
@@ -183,15 +175,5 @@ class BrevDataByggerA1Test {
             .filter(no.nav.melosys.service.dokument.brev.mapper.arbeidssted.Arbeidssted::erFysisk)
             .map(no.nav.melosys.service.dokument.brev.mapper.arbeidssted.FysiskArbeidssted.class::cast)
             .map(no.nav.melosys.service.dokument.brev.mapper.arbeidssted.FysiskArbeidssted::getAdresse)).contains(fysiskArbeidssted.getAdresse());
-    }
-
-    private static Lovvalgsperiode lagLovvalgsperiode() {
-        Lovvalgsperiode periode = new Lovvalgsperiode();
-        periode.setBestemmelse(Lovvalgbestemmelser_konv_efta_storbritannia.KONV_EFTA_STORBRITANNIA_ART13_3A);
-        periode.setFom(LocalDate.now());
-        periode.setTom(LocalDate.now());
-        periode.setLovvalgsland(Land_iso2.NO);
-        periode.setTilleggsbestemmelse(Tilleggsbestemmelser_883_2004.FO_883_2004_ART11_4_1);
-        return periode;
     }
 }
