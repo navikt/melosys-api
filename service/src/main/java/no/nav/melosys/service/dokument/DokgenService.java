@@ -329,9 +329,7 @@ public class DokgenService {
             case INNVILGELSE_EFTA_STORBRITANNIA -> new InnvilgelseEftaStorbritanniaBrevbestilling.Builder()
                 .medDistribusjonstype(Distribusjonstype.VEDTAK)
                 .medNyVurderingBakgrunn(brevbestillingDto.getNyVurderingBakgrunn())
-                .medInnledningFritekst(brevbestillingDto.getInnledningFritekst())
-                .medBegrunnelseFritekst(brevbestillingDto.getBegrunnelseFritekst())
-                .medInnvilgelseFritekst(brevbestillingDto.getFritekst());
+                .medBegrunnelseFritekst(brevbestillingDto.getBegrunnelseFritekst());
             case IKKE_YRKESAKTIV_PLIKTIG_FTRL, IKKE_YRKESAKTIV_FRIVILLIG_FTRL, PLIKTIG_MEDLEM_FTRL -> new DokgenBrevbestilling.Builder<>()
                 .medDistribusjonstype(Distribusjonstype.VEDTAK);
             case INNHENTING_AV_INNTEKTSOPPLYSNINGER -> new InnhentingAvInntektsopplysningerBrevbestilling.Builder()

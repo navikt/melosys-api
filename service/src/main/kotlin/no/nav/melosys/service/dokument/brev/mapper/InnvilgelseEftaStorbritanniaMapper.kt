@@ -40,12 +40,10 @@ class InnvilgelseEftaStorbritanniaMapper(
             navnVirksomhet = navnVirksomhet,
             behandlingstype = behandlingsresultat.behandling.type,
             nyVurderingBakgrunn = brevbestilling.nyVurderingBakgrunn,
-            innvilgelseFritekst = brevbestilling.innvilgelseFritekst,
             lovvalgsbestemmelse = lovvalgsperiode.bestemmelse.name(),
             erUnntakTuristskip = erUnntakTuristskip,
             erNorskSkip = erNorskSkip != null,
             lovvalgsperiode = Periode(lovvalgsperiode.fom, lovvalgsperiode.tom),
-            innledningFritekst = brevbestilling.innledningFritekst,
             tilleggsbestemmelse = if (lovvalgsperiode.tilleggsbestemmelse != null) lovvalgsperiode.tilleggsbestemmelse.name() else "",
             erArtikkel13_3_a_eller_13_4 = lovvalgsperiode.erArtikkel13_3_a_eller_13_4(),
             erArtikkel14_1_eller_14_2 = lovvalgsperiode.erArtikkel14_1_eller_14_2(),
@@ -53,6 +51,8 @@ class InnvilgelseEftaStorbritanniaMapper(
             erArtikkel18_1 = lovvalgsperiode.erArtikkel18_1(),
             bosted = bostedsland,
             anmodningsperiodeSvarType = if (anmodningsperiode.isPresent) anmodningsperiode.get().anmodningsperiodeSvar.anmodningsperiodeSvarType.name else "",
+            innvilgelseFritekst = brevbestilling.innvilgelseFritekst,
+            innledningFritekst = brevbestilling.innledningFritekst,
             begrunnelseFritekst = brevbestilling.begrunnelseFritekst,
         )
     }
