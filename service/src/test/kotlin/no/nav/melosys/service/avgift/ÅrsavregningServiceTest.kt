@@ -58,7 +58,7 @@ internal class ÅrsavregningServiceTest {
             aarsavregningRepository,
             behandlingsresultatService,
             faktureringskomponentenConsumer,
-            trygdeavgiftService
+            trygdeavgiftService,
         )
         SpringSubjectHandler.set(TestSubjectHandler())
     }

@@ -25,7 +25,7 @@ class ÅrsavregningService(
     private val aarsavregningRepository: AarsavregningRepository,
     private val behandlingsresultatService: BehandlingsresultatService,
     private val faktureringskomponentenConsumer: FaktureringskomponentenConsumer,
-    private val trygdeavgiftService: TrygdeavgiftService
+    private val trygdeavgiftService: TrygdeavgiftService,
 ) {
 
     fun beregnTotalbeløpForPeriode(beregnTotalBeløpDto: BeregnTotalBeløpDto): BigDecimal {
@@ -78,6 +78,7 @@ class ÅrsavregningService(
         return lagÅrsavregningFraAarsavregning(årsavregning)
     }
 
+    // TODO [MELOSYS-6757] mangler støtte for årsavregning uten tidligere behandling
     private fun lagÅrsavregningFraAarsavregning(årsavregning: Årsavregning): ÅrsavregningModel {
         val år = årsavregning.aar
 

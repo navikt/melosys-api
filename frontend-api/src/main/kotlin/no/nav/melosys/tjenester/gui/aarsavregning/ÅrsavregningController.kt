@@ -65,7 +65,13 @@ class ÅrsavregningController(
         return if (årsavregningModel.tidligereGrunnlag == null) null else
             TidligereGrunnlagsopplysninger(
                 Trygdeavgiftsgrunnlag(
-                    medlemskapsperioder = årsavregningModel.tidligereGrunnlag?.medlemskapsperioder?.map { Medlemskapsperiode(it.fom, it.tom, it.dekning) }
+                    medlemskapsperioder = årsavregningModel.tidligereGrunnlag?.medlemskapsperioder?.map {
+                        Medlemskapsperiode(
+                            it.fom,
+                            it.tom,
+                            it.dekning
+                        )
+                    }
                         .orEmpty(),
                     skatteforholdsperioder = årsavregningModel.tidligereGrunnlag?.skatteforholdsperioder?.map {
                         Skatteforholdsperiode(
