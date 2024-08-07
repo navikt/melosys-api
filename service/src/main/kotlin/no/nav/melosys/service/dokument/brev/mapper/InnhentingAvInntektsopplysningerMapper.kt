@@ -12,13 +12,15 @@ import java.time.LocalDate
 class InnhentingAvInntektsopplysningerMapper(
     private val dokgenMapperDatahenter: DokgenMapperDatahenter,
 ) {
+    // TODO [JIRA-SAK] mangler støtte for årsavregning uten tidligere behandling
     @Transactional
     internal fun map(brevbestilling: InnhentingAvInntektsopplysningerBrevbestilling): InnhentingAvInntektsopplysninger {
         val behandlingsresultat = dokgenMapperDatahenter.hentBehandlingsresultat(brevbestilling.behandlingId)
+        val tidligereBehandlingsresultat = behandlingsresultat.årsavregning.tidligereBehandlingsresultat
 
         val årsavregningsår = behandlingsresultat.årsavregning.aar
         val fristdato = LocalDate.now().plusWeeks(4)
-        val medlemskapsperiode = mapMedlemskapsPerioder(behandlingsresultat, årsavregningsår)
+        val medlemskapsperiode = mapMedlemskapsPerioder(tidligereBehandlingsresultat, årsavregningsår)
 
         val medlemskapsperiodeFom = medlemskapsperiode?.first
         val medlemskapsperiodeTom = medlemskapsperiode?.second
@@ -36,7 +38,9 @@ class InnhentingAvInntektsopplysningerMapper(
         val relevantePerioder = hentMedlemskapsPerioderForÅrsavregning(behandlingsresultat, årsavregningsår)
 
         return if (relevantePerioder.isEmpty()) null
-        else relevantePerioder.first().fom.tilDatoInnenforÅrsavregningsåret(årsavregningsår) to relevantePerioder.last().tom.tilDatoInnenforÅrsavregningsåret(årsavregningsår)
+        else relevantePerioder.first().fom.tilDatoInnenforÅrsavregningsåret(årsavregningsår) to relevantePerioder.last().tom.tilDatoInnenforÅrsavregningsåret(
+            årsavregningsår
+        )
     }
 
     private fun hentMedlemskapsPerioderForÅrsavregning(behandlingsresultat: Behandlingsresultat, årsavregningsår: Int) =
