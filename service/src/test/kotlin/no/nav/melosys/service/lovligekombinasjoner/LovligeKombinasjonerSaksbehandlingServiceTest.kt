@@ -22,6 +22,7 @@ import no.nav.melosys.service.sak.FagsakService
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.extension.ExtendWith
+import java.time.Instant
 
 @ExtendWith(MockKExtension::class)
 class LovligeKombinasjonerSaksbehandlingServiceTest {
@@ -666,6 +667,88 @@ class LovligeKombinasjonerSaksbehandlingServiceTest {
     }
 
     @Test
+    fun `hentMuligeBehandlingstyperForKnyttTilSak med avsluttet FØRSTEGANG og åpen ÅRSAVREGNING skal ikke ta hensyn til ÅRSAVREGNING`() {
+        val fagsak = FagsakTestFactory.Builder()
+            .type(Sakstyper.FTRL)
+            .tema(Sakstemaer.MEDLEMSKAP_LOVVALG)
+            .build()
+        val førstegangsbehandling = behandlingMedTemaOgType(Behandlingstema.YRKESAKTIV, Behandlingstyper.FØRSTEGANG).apply {
+            id = 1L
+            this.fagsak = fagsak
+            tema = Behandlingstema.ARBEID_FLERE_LAND
+            status = Behandlingsstatus.AVSLUTTET
+        }
+        val aktivBehandling = behandlingMedTemaOgType(Behandlingstema.YRKESAKTIV, Behandlingstyper.ÅRSAVREGNING).apply {
+            id = 2L
+            this.fagsak = fagsak
+            tema = Behandlingstema.ARBEID_FLERE_LAND
+            status = Behandlingsstatus.UNDER_BEHANDLING
+        }
+        fagsak.behandlinger.add(førstegangsbehandling)
+        fagsak.behandlinger.add(aktivBehandling)
+
+        every { fagsakService.hentFagsak(førstegangsbehandling.fagsak.saksnummer) } returns førstegangsbehandling.fagsak
+
+
+        val muligeBehandlingstyper = lovligeKombinasjonerSaksbehandlingService.hentMuligeBehandlingstyperForKnyttTilSak(
+            Aktoersroller.BRUKER,
+            fagsak.saksnummer,
+            Behandlingstema.YRKESAKTIV,
+        )
+
+
+        muligeBehandlingstyper shouldHaveSize 4
+        muligeBehandlingstyper shouldContainExactly listOf(
+            Behandlingstyper.NY_VURDERING,
+            Behandlingstyper.KLAGE,
+            Behandlingstyper.HENVENDELSE,
+            Behandlingstyper.ÅRSAVREGNING
+        )
+    }
+
+    @Test
+    fun `hentMuligeBehandlingstyperForKnyttTilSak med avsluttet FØRSTEGANG og åpen NY_VURDERING og lukket ÅRSAVREGNING skal kun returnere ÅRSAVREGNING`() {
+        val fagsak = FagsakTestFactory.Builder()
+            .type(Sakstyper.FTRL)
+            .tema(Sakstemaer.MEDLEMSKAP_LOVVALG)
+            .build()
+        val førstegangsbehandling = behandlingMedTemaOgType(Behandlingstema.YRKESAKTIV, Behandlingstyper.FØRSTEGANG).apply {
+            id = 1L
+            this.fagsak = fagsak
+            tema = Behandlingstema.ARBEID_FLERE_LAND
+            status = Behandlingsstatus.AVSLUTTET
+        }
+        val nyVurderingAktiv = behandlingMedTemaOgType(Behandlingstema.YRKESAKTIV, Behandlingstyper.NY_VURDERING).apply {
+            id = 2L
+            this.fagsak = fagsak
+            tema = Behandlingstema.ARBEID_FLERE_LAND
+            status = Behandlingsstatus.UNDER_BEHANDLING
+        }
+        val årsavregningAvsluttet = behandlingMedTemaOgType(Behandlingstema.YRKESAKTIV, Behandlingstyper.ÅRSAVREGNING).apply {
+            id = 3L
+            this.fagsak = fagsak
+            tema = Behandlingstema.ARBEID_FLERE_LAND
+            status = Behandlingsstatus.AVSLUTTET
+        }
+        fagsak.behandlinger.add(førstegangsbehandling)
+        fagsak.behandlinger.add(nyVurderingAktiv)
+        fagsak.behandlinger.add(årsavregningAvsluttet)
+
+        every { fagsakService.hentFagsak(førstegangsbehandling.fagsak.saksnummer) } returns førstegangsbehandling.fagsak
+
+
+        val muligeBehandlingstyper = lovligeKombinasjonerSaksbehandlingService.hentMuligeBehandlingstyperForKnyttTilSak(
+            Aktoersroller.BRUKER,
+            fagsak.saksnummer,
+            Behandlingstema.YRKESAKTIV,
+        )
+
+
+        muligeBehandlingstyper shouldHaveSize 1
+        muligeBehandlingstyper shouldContainExactly listOf(Behandlingstyper.ÅRSAVREGNING)
+    }
+
+    @Test
     fun hentMuligeBehandlingstyperForKnyttTilSak_sisteBehandlingAktiv_skalReturnereTomListe() {
         val fagsak = FagsakTestFactory.lagFagsak()
         val sisteBehandling = behandlingMedTemaOgType(Behandlingstema.UTSENDT_ARBEIDSTAKER, Behandlingstyper.FØRSTEGANG).apply {
@@ -832,6 +915,7 @@ class LovligeKombinasjonerSaksbehandlingServiceTest {
         return Behandling().apply {
             this.tema = tema
             this.type = type
+            this.registrertDato = Instant.now()
         }
     }
 }
