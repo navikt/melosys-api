@@ -2,6 +2,7 @@ package no.nav.melosys.service.dokument.brev.mapper
 
 import no.nav.melosys.domain.brev.InnvilgelseEftaStorbritanniaBrevbestilling
 import no.nav.melosys.domain.dokument.felles.Periode
+import no.nav.melosys.domain.kodeverk.Land_iso2
 import no.nav.melosys.domain.kodeverk.Vilkaar
 import no.nav.melosys.integrasjon.dokgen.dto.InnvilgelseEftaStorbritannia
 import no.nav.melosys.service.LandvelgerService
@@ -26,7 +27,7 @@ class InnvilgelseEftaStorbritanniaMapper(
         val anmodningsperiode = behandlingsresultat.finnAnmodningsperiode()
         val erNorskSkip = vilkaarsresultatService.finnVilkaarsresultat(behandlingsresultat.id, Vilkaar.FTRL_2_12_UNNTAK_TURISTSKIP)
         val erUnntakTuristskip = vilkaarsresultatService.oppfyllerVilkaar(behandlingsresultat.id, Vilkaar.FTRL_2_12_UNNTAK_TURISTSKIP)
-        val bostedsland = landvelgerService.hentBostedsland(behandlingsresultat.behandling).landkodeobjekt.beskrivelse
+        val bostedsland = landvelgerService.hentBostedsland(behandlingsresultat.behandling).landkodeobjekt
 
         val alleAvklarteOrgnr = avklartefaktaService.hentAvklarteOrgnrOgUuid(behandlingsresultat.id)
         val alleVirksomheter = virksomheterService.hentAlleNorskeVirksomheter(behandlingsresultat.behandling)
@@ -34,6 +35,8 @@ class InnvilgelseEftaStorbritanniaMapper(
         val navnVirksomhet = alleVirksomheter.stream()
             .filter { alleAvklarteOrgnr.contains(it.orgnr) }
             .findFirst().get().navn
+
+        val arbeidINorge = bostedsland.kode == Land_iso2.NO.name;
 
         return InnvilgelseEftaStorbritannia(
             brevbestilling = brevbestilling,
@@ -45,11 +48,12 @@ class InnvilgelseEftaStorbritanniaMapper(
             erNorskSkip = erNorskSkip != null,
             lovvalgsperiode = Periode(lovvalgsperiode.fom, lovvalgsperiode.tom),
             tilleggsbestemmelse = if (lovvalgsperiode.tilleggsbestemmelse != null) lovvalgsperiode.tilleggsbestemmelse.name() else "",
-            erArtikkel13_3_a_eller_13_4 = lovvalgsperiode.erArtikkel13_3_a_eller_13_4(),
+            erArtikkel11_3_a_eller_13_3a = if(arbeidINorge) lovvalgsperiode.erArtikkel11_3_a_eller_13_3a() else false,
+            erArtikkel13_3_a_eller_13_4 = if(!arbeidINorge) lovvalgsperiode.erArtikkel13_3_a_eller_13_4() else false,
             erArtikkel14_1_eller_14_2 = lovvalgsperiode.erArtikkel14_1_eller_14_2(),
             erArtikkel16_1_eller_16_3 = lovvalgsperiode.erArtikkel16_1_eller_16_3(),
             erArtikkel18_1 = lovvalgsperiode.erArtikkel18_1(),
-            bosted = bostedsland,
+            bosted = bostedsland.beskrivelse,
             anmodningsperiodeSvarType = if (anmodningsperiode.isPresent) anmodningsperiode.get().anmodningsperiodeSvar.anmodningsperiodeSvarType.name else "",
             innvilgelseFritekst = brevbestilling.innvilgelseFritekst,
             innledningFritekst = brevbestilling.innledningFritekst,
