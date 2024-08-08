@@ -55,7 +55,6 @@ internal class AnmodningUnntakKontrollServiceTest {
         anmodningsperiode.fom = LocalDate.now()
         anmodningsperiode.tom = LocalDate.now().plusYears(2)
         every { anmodningsperiodeService.hentFørsteAnmodningsperiode(behandlingID) } returns anmodningsperiode
-
         every { persondataFasade.hentPerson(any<String>()) } returns PersonopplysningerObjectFactory.lagPersonopplysninger()
         every { avklarteVirksomheterService.hentAntallAvklarteVirksomheter(any()) } returns 1
 
@@ -74,6 +73,18 @@ internal class AnmodningUnntakKontrollServiceTest {
         resultat.map { it.kode }
             .shouldContainExactly(Kontroll_begrunnelser.MANGLENDE_REGISTRERTE_ADRESSE)
     }
+
+    @Test
+    fun utførKontroller_periodeOverlapper_returnererKode() {
+        every { behandlingService.hentBehandlingMedSaksopplysninger(behandlingID) } returns SaksbehandlingDataFactory.lagBehandlingMedMedlPerioder()
+        every { persondataFasade.hentPerson(any<String>()) } returns PersonopplysningerObjectFactory.lagPersonopplysninger()
+
+        val resultat = anmodningUnntakKontrollService.utførKontroller(behandlingID)
+
+        resultat.map { it.kode }
+            .shouldContainExactly(Kontroll_begrunnelser.OVERLAPPENDE_MEDL_PERIODER)
+    }
+
 
     @Test
     fun utførKontroller_fullmektigPersonManglerAdresse_returnererKode() {
