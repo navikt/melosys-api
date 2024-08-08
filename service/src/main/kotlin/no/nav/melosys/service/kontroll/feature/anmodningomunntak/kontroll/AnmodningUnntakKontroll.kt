@@ -19,14 +19,14 @@ object AnmodningUnntakKontroll {
     fun overlappendePerioderMedl(kontrollData: AnmodningUnntakKontrollData): Kontrollfeil? {
         val medlemskapDokument = kontrollData.medlemskapDokument
 
-        if (medlemskapDokument != null && harOverlappendeMedlemsperiodeMerEnn1DagFraSed(medlemskapDokument, kontrollData.anmodningsperiode)) {
+        if (medlemskapDokument != null && harOverlappendeMedlemsperiodeFraSed(medlemskapDokument, kontrollData.anmodningsperiode)) {
             return Kontrollfeil(Kontroll_begrunnelser.OVERLAPPENDE_MEDL_PERIODER, KontrolldataFeilType.ADVARSEL)
         }
 
         return null
     }
 
-    fun harOverlappendeMedlemsperiodeMerEnn1DagFraSed(
+    fun harOverlappendeMedlemsperiodeFraSed(
         medlemskapDokument: MedlemskapDokument,
         kontrollperiode: ErPeriode?
     ): Boolean {
