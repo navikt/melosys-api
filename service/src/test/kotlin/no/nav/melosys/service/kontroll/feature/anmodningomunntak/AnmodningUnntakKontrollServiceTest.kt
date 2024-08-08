@@ -76,7 +76,7 @@ internal class AnmodningUnntakKontrollServiceTest {
 
     @Test
     fun utførKontroller_periodeOverlapper_returnererKode() {
-        every { behandlingService.hentBehandlingMedSaksopplysninger(behandlingID) } returns SaksbehandlingDataFactory.lagBehandlingMedMedlPerioder()
+        every { behandlingService.hentBehandlingMedSaksopplysninger(behandlingID) } returns SaksbehandlingDataFactory.lagBehandlingMedMedlemskapDokument()
         every { persondataFasade.hentPerson(any<String>()) } returns PersonopplysningerObjectFactory.lagPersonopplysninger()
 
         val resultat = anmodningUnntakKontrollService.utførKontroller(behandlingID)

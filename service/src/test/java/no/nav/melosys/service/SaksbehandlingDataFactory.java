@@ -3,16 +3,12 @@ package no.nav.melosys.service;
 import java.time.Instant;
 import java.time.LocalDate;
 import java.time.temporal.ChronoUnit;
-import java.util.Collections;
 import java.util.Set;
 
 import no.nav.melosys.domain.*;
 import no.nav.melosys.domain.dokument.medlemskap.MedlemskapDokument;
 import no.nav.melosys.domain.dokument.medlemskap.Medlemsperiode;
 import no.nav.melosys.domain.dokument.medlemskap.Periode;
-import no.nav.melosys.domain.dokument.sed.SedDokument;
-import no.nav.melosys.domain.kodeverk.Landkoder;
-import no.nav.melosys.domain.kodeverk.lovvalgsbestemmelser.Lovvalgbestemmelser_883_2004;
 import no.nav.melosys.domain.mottatteopplysninger.MottatteOpplysninger;
 import no.nav.melosys.domain.mottatteopplysninger.MottatteOpplysningerData;
 import no.nav.melosys.domain.kodeverk.Vedtakstyper;
@@ -23,15 +19,13 @@ import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingstyper;
 import no.nav.melosys.integrasjon.medl.GrunnlagMedl;
 import no.nav.melosys.integrasjon.medl.PeriodestatusMedl;
 
-import static no.nav.melosys.domain.kodeverk.Aktoersroller.BRUKER;
-
 public final class SaksbehandlingDataFactory {
     public static Behandling lagBehandling() {
         return lagBehandling(lagFagsak(), new MottatteOpplysningerData());
     }
 
-    public static Behandling lagBehandlingMedMedlPerioder() {
-        return lagBehandlingMedMedlPerioder(lagFagsak(), new MottatteOpplysningerData());
+    public static Behandling lagBehandlingMedMedlemskapDokument() {
+        return lagBehandlingMedMedlemskapDokument(lagFagsak(), new MottatteOpplysningerData());
     }
 
     public static Behandling lagBehandling(MottatteOpplysningerData mottatteOpplysningerData) {
@@ -45,11 +39,6 @@ public final class SaksbehandlingDataFactory {
     public static Behandling lagBehandling(Fagsak fagsak, MottatteOpplysningerData mottatteOpplysningerData) {
         Behandling behandling = new Behandling();
 
-        MedlemskapDokument medlDokument = new MedlemskapDokument();
-        Saksopplysning medl = new Saksopplysning();
-        medl.setDokument(medlDokument);
-        medl.setType(SaksopplysningType.MEDL);
-
         behandling.setId(1L);
         behandling.setStatus(Behandlingsstatus.UNDER_BEHANDLING);
         behandling.setType(Behandlingstyper.FØRSTEGANG);
@@ -57,14 +46,13 @@ public final class SaksbehandlingDataFactory {
         behandling.setFagsak(fagsak);
         behandling.setMottatteOpplysninger(new MottatteOpplysninger());
         behandling.getMottatteOpplysninger().setMottatteOpplysningerData(mottatteOpplysningerData);
-        behandling.setSaksopplysninger(Set.of(medl));
         final Instant nå = Instant.now();
         behandling.setRegistrertDato(nå.minus(30, ChronoUnit.DAYS));
         behandling.setEndretDato(nå);
         return behandling;
     }
 
-    public static Behandling lagBehandlingMedMedlPerioder(Fagsak fagsak, MottatteOpplysningerData mottatteOpplysningerData) {
+    public static Behandling lagBehandlingMedMedlemskapDokument(Fagsak fagsak, MottatteOpplysningerData mottatteOpplysningerData) {
         Behandling behandling = lagBehandling(fagsak, mottatteOpplysningerData);
         Medlemsperiode medlemsperiode = lagMedlemsperiode(23L, GrunnlagMedl.FO_12_2.kode);
         MedlemskapDokument medlDokument = new MedlemskapDokument();

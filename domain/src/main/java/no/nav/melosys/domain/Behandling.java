@@ -264,6 +264,12 @@ public class Behandling extends RegistreringsInfo {
         return finnDokument(SaksopplysningType.UTBETAL).map(UtbetalingDokument.class::cast);
     }
 
+
+    public Optional<MedlemskapDokument> finnMedlemskapDokument() {
+        return finnDokument(SaksopplysningType.MEDL).map(MedlemskapDokument.class::cast);
+    }
+
+
     public Optional<SaksopplysningDokument> finnDokument(SaksopplysningType saksopplysningType) {
         return getSaksopplysninger().stream()
             .filter(saksopplysning -> saksopplysning.getType().equals(saksopplysningType))
