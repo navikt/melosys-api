@@ -208,10 +208,7 @@ object FerdigbehandlingKontroll {
     }
 
     fun kunEnAvklartVirksomhet(kontrollData: FerdigbehandlingKontrollData): Kontrollfeil? {
-        if (kontrollData.antallArbeidsgivere != 1 && kontrollData.behandlingstema in listOf(
-                Behandlingstema.UTSENDT_ARBEIDSTAKER, Behandlingstema
-                    .UTSENDT_SELVSTENDIG, Behandlingstema.ARBEID_TJENESTEPERSON_ELLER_FLY
-            )
+        if (kontrollData.antallArbeidsgivere != 1 && kontrollData.behandlingstema in listOf(Behandlingstema.UTSENDT_ARBEIDSTAKER, Behandlingstema.UTSENDT_SELVSTENDIG, Behandlingstema.ARBEID_TJENESTEPERSON_ELLER_FLY)
         ) {
             return Kontrollfeil(Kontroll_begrunnelser.IKKE_KUN_EN_VIRKSOMHET_BREV)
         }

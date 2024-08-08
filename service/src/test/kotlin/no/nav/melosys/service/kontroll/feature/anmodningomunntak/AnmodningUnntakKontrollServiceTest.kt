@@ -85,7 +85,6 @@ internal class AnmodningUnntakKontrollServiceTest {
             .shouldContainExactly(Kontroll_begrunnelser.OVERLAPPENDE_MEDL_PERIODER)
     }
 
-
     @Test
     fun utførKontroller_fullmektigPersonManglerAdresse_returnererKode() {
         every { behandlingService.hentBehandlingMedSaksopplysninger(behandlingID) } returns SaksbehandlingDataFactory.lagBehandling().apply {

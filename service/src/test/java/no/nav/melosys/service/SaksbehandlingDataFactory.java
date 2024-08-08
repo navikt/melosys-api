@@ -38,7 +38,6 @@ public final class SaksbehandlingDataFactory {
 
     public static Behandling lagBehandling(Fagsak fagsak, MottatteOpplysningerData mottatteOpplysningerData) {
         Behandling behandling = new Behandling();
-
         behandling.setId(1L);
         behandling.setStatus(Behandlingsstatus.UNDER_BEHANDLING);
         behandling.setType(Behandlingstyper.FØRSTEGANG);
