@@ -15,6 +15,7 @@ object AnmodningUnntakKontrollsett {
 
     private val REGLER_ANMODNING_UNNTAK: Regelsett = setOf(
         Function { AnmodningUnntakKontroll.brukerManglerAdresse(it) },
+        Function { AnmodningUnntakKontroll.overlappendePerioderMedl(it) },
         Function { AnmodningUnntakKontroll.fullmektigManglerAdresse(it) },
         Function { AnmodningUnntakKontroll.anmodningsperiodeManglerSluttdato(it) },
         Function { AnmodningUnntakKontroll.kunEnArbeidsgiver(it) },
