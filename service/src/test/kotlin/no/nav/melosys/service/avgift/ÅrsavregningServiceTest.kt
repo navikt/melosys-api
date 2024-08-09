@@ -25,7 +25,6 @@ import no.nav.melosys.service.avgift.aarsavregning.ÅrsavregningModel
 import no.nav.melosys.service.avgift.aarsavregning.ÅrsavregningService
 import no.nav.melosys.service.behandling.BehandlingService
 import no.nav.melosys.service.behandling.BehandlingsresultatService
-import no.nav.melosys.service.oppgave.OppgaveService
 import no.nav.melosys.sikkerhet.context.SpringSubjectHandler
 import no.nav.melosys.sikkerhet.context.TestSubjectHandler
 import org.junit.jupiter.api.BeforeEach
@@ -53,9 +52,6 @@ internal class ÅrsavregningServiceTest {
     @RelaxedMockK
     private lateinit var trygdeavgiftService: TrygdeavgiftService
 
-    @RelaxedMockK
-    private lateinit var oppgaveService: OppgaveService
-
     private lateinit var årsavregningService: ÅrsavregningService
 
     val SAKSBEHANDLER_IDENT = "Z990007"
@@ -67,8 +63,7 @@ internal class ÅrsavregningServiceTest {
             behandlingService,
             behandlingsresultatService,
             faktureringskomponentenConsumer,
-            trygdeavgiftService,
-            oppgaveService
+            trygdeavgiftService
         )
         SpringSubjectHandler.set(TestSubjectHandler())
     }
@@ -87,16 +82,6 @@ internal class ÅrsavregningServiceTest {
         shouldThrow<FunksjonellException> {
             årsavregningService.opprettÅrsavregning(1, 2023)
         }
-    }
-
-    @Test
-    fun `ferdigstillÅrsavregning avslutter behandling og oppgave`() {
-        val behandlingId = 1L
-        årsavregningService.ferdigstillÅrsavregning(behandlingId)
-
-        verify { behandlingsresultatService.oppdaterBehandlingsresultattype(behandlingId, Behandlingsresultattyper.FERDIGBEHANDLET) }
-        verify { behandlingService.avsluttBehandling(behandlingId) }
-        verify { oppgaveService.ferdigstillOppgaveMedBehandlingID(behandlingId) }
     }
 
     @Test

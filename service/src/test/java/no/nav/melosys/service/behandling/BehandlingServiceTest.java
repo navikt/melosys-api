@@ -29,6 +29,7 @@ import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.ArgumentCaptor;
 import org.mockito.Captor;
 import org.mockito.Mock;
+import org.mockito.Mockito;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.context.ApplicationEventPublisher;
 
@@ -95,6 +96,20 @@ class BehandlingServiceTest {
         assertThatExceptionOfType(IkkeFunnetException.class)
             .isThrownBy(() -> behandlingService.hentBehandlingMedSaksopplysninger(BEHANDLING_ID))
             .withMessage("Finner ikke behandling med id " + BEHANDLING_ID);
+    }
+
+    @Test
+    void ferdigstillÅrsavregning() {
+        BehandlingService behandlingServiceSpy = Mockito.spy(behandlingService);
+        when(behandlingRepository.findById(BEHANDLING_ID)).thenReturn(Optional.of(behandling));
+
+
+        behandlingServiceSpy.ferdigstillÅrsavregning(BEHANDLING_ID);
+
+
+        verify(behandlingsresultatService).oppdaterBehandlingsresultattype(BEHANDLING_ID, Behandlingsresultattyper.FERDIGBEHANDLET);
+        verify(behandlingServiceSpy).avsluttBehandling(BEHANDLING_ID);
+        verify(oppgaveService).ferdigstillOppgaveMedBehandlingID(BEHANDLING_ID);
     }
 
     @Test

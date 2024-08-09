@@ -1,5 +1,10 @@
 package no.nav.melosys.service.behandling;
 
+import java.lang.reflect.InvocationTargetException;
+import java.time.Instant;
+import java.time.LocalDate;
+import java.util.*;
+
 import io.micrometer.core.instrument.Counter;
 import io.micrometer.core.instrument.Metrics;
 import no.nav.melosys.domain.*;
@@ -22,11 +27,6 @@ import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.context.annotation.Lazy;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
-
-import java.lang.reflect.InvocationTargetException;
-import java.time.Instant;
-import java.time.LocalDate;
-import java.util.*;
 
 import static no.nav.melosys.domain.kodeverk.behandlinger.Behandlingsstatus.*;
 import static no.nav.melosys.metrics.MetrikkerNavn.*;
@@ -120,6 +120,14 @@ public class BehandlingService {
         Metrics.counter(BEHANDLINGSTEMAER_OPPRETTET, TAG_TEMA, behandlingstema.getKode()).increment();
         Metrics.counter(BEHANDLINGSTYPER_OPPRETTET, TAG_TYPE, behandlingstype.getKode()).increment();
         return behandling;
+    }
+
+    @Transactional
+    public void ferdigstillÅrsavregning(long behandlingId) {
+        behandlingsresultatService.tømBehandlingsresultat(behandlingId);
+        behandlingsresultatService.oppdaterBehandlingsresultattype(behandlingId, Behandlingsresultattyper.FERDIGBEHANDLET);
+        avsluttBehandling(behandlingId);
+        oppgaveService.ferdigstillOppgaveMedBehandlingID(behandlingId);
     }
 
     @Transactional
@@ -341,6 +349,7 @@ public class BehandlingService {
         replikertMottatteOpplysninger.setBehandling(behandlingsreplika);
         return replikertMottatteOpplysninger;
     }
+
 
     public void avsluttBehandling(long behandlingId) {
         Behandling behandling = hentBehandling(behandlingId);

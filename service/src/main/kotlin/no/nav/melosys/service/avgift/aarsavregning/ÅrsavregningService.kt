@@ -8,7 +8,6 @@ import no.nav.melosys.domain.avgift.Trygdeavgiftsperiode
 import no.nav.melosys.domain.avgift.Årsavregning
 import no.nav.melosys.domain.kodeverk.Folketrygdloven_kap2_bestemmelser
 import no.nav.melosys.domain.kodeverk.Trygdedekninger
-import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingsresultattyper
 import no.nav.melosys.exception.FunksjonellException
 import no.nav.melosys.integrasjon.faktureringskomponenten.FaktureringskomponentenConsumer
 import no.nav.melosys.integrasjon.faktureringskomponenten.dto.BeregnTotalBeløpDto
@@ -16,7 +15,6 @@ import no.nav.melosys.repository.AarsavregningRepository
 import no.nav.melosys.service.avgift.TrygdeavgiftService
 import no.nav.melosys.service.behandling.BehandlingService
 import no.nav.melosys.service.behandling.BehandlingsresultatService
-import no.nav.melosys.service.oppgave.OppgaveService
 import no.nav.melosys.sikkerhet.context.SubjectHandler
 import org.springframework.stereotype.Service
 import org.springframework.transaction.annotation.Transactional
@@ -29,8 +27,7 @@ class ÅrsavregningService(
     private val behandlingService: BehandlingService,
     private val behandlingsresultatService: BehandlingsresultatService,
     private val faktureringskomponentenConsumer: FaktureringskomponentenConsumer,
-    private val trygdeavgiftService: TrygdeavgiftService,
-    private val oppgaveService: OppgaveService
+    private val trygdeavgiftService: TrygdeavgiftService
 ) {
 
     fun beregnTotalbeløpForPeriode(beregnTotalBeløpDto: BeregnTotalBeløpDto): BigDecimal {
@@ -85,9 +82,7 @@ class ÅrsavregningService(
 
     @Transactional
     fun ferdigstillÅrsavregning(behandlingID: Long) {
-        behandlingsresultatService.oppdaterBehandlingsresultattype(behandlingID, Behandlingsresultattyper.FERDIGBEHANDLET)
-        behandlingService.avsluttBehandling(behandlingID)
-        oppgaveService.ferdigstillOppgaveMedBehandlingID(behandlingID)
+        behandlingService.ferdigstillÅrsavregning(behandlingID);
     }
 
     private fun lagÅrsavregningFraAarsavregning(årsavregning: Årsavregning): ÅrsavregningModel {
