@@ -41,15 +41,21 @@ public class BehandlingController {
     private final BehandlingsresultatService behandlingsresultatService;
 
     public BehandlingController(BehandlingService behandlingService,
-                              SaksopplysningerTilDto saksopplysningerTilDto,
-                              SaksbehandlerService saksbehandlerService,
-                              Aksesskontroll aksesskontroll,
-                              BehandlingsresultatService behandlingsresultatService) {
+                                SaksopplysningerTilDto saksopplysningerTilDto,
+                                SaksbehandlerService saksbehandlerService,
+                                Aksesskontroll aksesskontroll,
+                                BehandlingsresultatService behandlingsresultatService) {
         this.behandlingService = behandlingService;
         this.saksopplysningerTilDto = saksopplysningerTilDto;
         this.saksbehandlerService = saksbehandlerService;
         this.aksesskontroll = aksesskontroll;
         this.behandlingsresultatService = behandlingsresultatService;
+    }
+
+    @PutMapping("/{behandlingID}/ferdigstill")
+    public ResponseEntity<Void> ferdigstillÅrsavregning(@PathVariable("behandlingID") long behandlingID) {
+        behandlingService.ferdigstillÅrsavregning(behandlingID);
+        return ResponseEntity.noContent().build();
     }
 
     @PostMapping("{behandlingID}/tidligere-medlemsperioder")
