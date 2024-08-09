@@ -13,7 +13,6 @@ import no.nav.melosys.integrasjon.faktureringskomponenten.Faktureringskomponente
 import no.nav.melosys.integrasjon.faktureringskomponenten.dto.BeregnTotalBeløpDto
 import no.nav.melosys.repository.AarsavregningRepository
 import no.nav.melosys.service.avgift.TrygdeavgiftService
-import no.nav.melosys.service.behandling.BehandlingService
 import no.nav.melosys.service.behandling.BehandlingsresultatService
 import no.nav.melosys.sikkerhet.context.SubjectHandler
 import org.springframework.stereotype.Service
@@ -24,7 +23,6 @@ import java.time.LocalDate
 @Service
 class ÅrsavregningService(
     private val aarsavregningRepository: AarsavregningRepository,
-    private val behandlingService: BehandlingService,
     private val behandlingsresultatService: BehandlingsresultatService,
     private val faktureringskomponentenConsumer: FaktureringskomponentenConsumer,
     private val trygdeavgiftService: TrygdeavgiftService

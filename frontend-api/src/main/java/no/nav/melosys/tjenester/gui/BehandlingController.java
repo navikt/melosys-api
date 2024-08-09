@@ -3,6 +3,7 @@ package no.nav.melosys.tjenester.gui;
 import java.util.Collection;
 
 import com.fasterxml.jackson.annotation.JsonView;
+import io.getunleash.Unleash;
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
 import no.nav.melosys.domain.Behandling;
@@ -26,6 +27,8 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.context.WebApplicationContext;
 
+import static no.nav.melosys.featuretoggle.ToggleName.MELOSYS_ÅRSAVREGNING;
+
 @Protected
 @RestController
 @RequestMapping("/behandlinger")
@@ -39,22 +42,30 @@ public class BehandlingController {
     private final SaksbehandlerService saksbehandlerService;
     private final Aksesskontroll aksesskontroll;
     private final BehandlingsresultatService behandlingsresultatService;
+    private final Unleash unleash;
 
     public BehandlingController(BehandlingService behandlingService,
                                 SaksopplysningerTilDto saksopplysningerTilDto,
                                 SaksbehandlerService saksbehandlerService,
                                 Aksesskontroll aksesskontroll,
-                                BehandlingsresultatService behandlingsresultatService) {
+                                BehandlingsresultatService behandlingsresultatService,
+                                Unleash unleash) {
         this.behandlingService = behandlingService;
         this.saksopplysningerTilDto = saksopplysningerTilDto;
         this.saksbehandlerService = saksbehandlerService;
         this.aksesskontroll = aksesskontroll;
         this.behandlingsresultatService = behandlingsresultatService;
+        this.unleash = unleash;
     }
 
-    @PutMapping("/{behandlingID}/ferdigstill")
+    @PutMapping("/{behandlingID}/ferdigstillAarsavregning")
     public ResponseEntity<Void> ferdigstillÅrsavregning(@PathVariable("behandlingID") long behandlingID) {
-        behandlingService.ferdigstillÅrsavregning(behandlingID);
+        aksesskontroll.autoriserSkriv(behandlingID);
+
+        if (unleash.isEnabled(MELOSYS_ÅRSAVREGNING)) {
+            behandlingService.ferdigstillÅrsavregning(behandlingID);
+        }
+
         return ResponseEntity.noContent().build();
     }
 

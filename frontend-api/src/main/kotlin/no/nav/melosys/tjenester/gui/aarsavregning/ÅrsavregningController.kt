@@ -18,7 +18,7 @@ import java.time.LocalDate
 @Api(tags = ["årsavregning", "trygdeavgift"])
 @RequestMapping("/aarsavregninger")
 class ÅrsavregningController(
-    private val årsavregningService: ÅrsavregningService,
+    private val årsavregningService: ÅrsavregningService
 ) {
 
     @GetMapping("/{behandlingID}")

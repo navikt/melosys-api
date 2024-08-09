@@ -23,7 +23,6 @@ import no.nav.melosys.service.avgift.aarsavregning.MedlemskapsperiodeForAvgift
 import no.nav.melosys.service.avgift.aarsavregning.Trygdeavgiftsgrunnlag
 import no.nav.melosys.service.avgift.aarsavregning.ÅrsavregningModel
 import no.nav.melosys.service.avgift.aarsavregning.ÅrsavregningService
-import no.nav.melosys.service.behandling.BehandlingService
 import no.nav.melosys.service.behandling.BehandlingsresultatService
 import no.nav.melosys.sikkerhet.context.SpringSubjectHandler
 import no.nav.melosys.sikkerhet.context.TestSubjectHandler
@@ -39,9 +38,6 @@ internal class ÅrsavregningServiceTest {
 
     @RelaxedMockK
     private lateinit var aarsavregningRepository: AarsavregningRepository
-
-    @RelaxedMockK
-    private lateinit var behandlingService: BehandlingService
 
     @RelaxedMockK
     private lateinit var behandlingsresultatService: BehandlingsresultatService
@@ -60,7 +56,6 @@ internal class ÅrsavregningServiceTest {
     fun setup() {
         årsavregningService = ÅrsavregningService(
             aarsavregningRepository,
-            behandlingService,
             behandlingsresultatService,
             faktureringskomponentenConsumer,
             trygdeavgiftService,
