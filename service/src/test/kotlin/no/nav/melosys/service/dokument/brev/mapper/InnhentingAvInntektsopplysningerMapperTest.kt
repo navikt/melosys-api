@@ -71,32 +71,37 @@ internal class InnhentingAvInntektsopplysningerMapperTest {
     }
 
     private fun lagBehandlingsResultat(): Behandlingsresultat {
-        return Behandlingsresultat().apply {
-            behandling = lagBehandling()
-
+        val tidligereBehandlingsResultat = Behandlingsresultat()
+        tidligereBehandlingsResultat.apply {
             årsavregning = Årsavregning().apply {
                 aar = 2023
+                medlemskapsperioder = listOf(
+                    Medlemskapsperiode().apply {
+                        fom = LocalDate.of(2022, 5, 17)
+                        tom = LocalDate.of(2022, 8, 17)
+                        trygdedekning = Trygdedekninger.FTRL_2_9_FØRSTE_LEDD_A_HELSE
+                        innvilgelsesresultat = InnvilgelsesResultat.INNVILGET
+                    },
+                    Medlemskapsperiode().apply {
+                        fom = LocalDate.of(2022, 8, 18)
+                        tom = LocalDate.of(2023, 8, 17)
+                        trygdedekning = Trygdedekninger.FTRL_2_9_FØRSTE_LEDD_A_HELSE
+                        innvilgelsesresultat = InnvilgelsesResultat.INNVILGET
+                    },
+                    Medlemskapsperiode().apply {
+                        fom = LocalDate.of(2023, 8, 18)
+                        tom = LocalDate.of(2023, 9, 1)
+                        trygdedekning = Trygdedekninger.FTRL_2_9_FØRSTE_LEDD_A_HELSE
+                        innvilgelsesresultat = InnvilgelsesResultat.INNVILGET
+                    })
             }
-            medlemskapsperioder = listOf(
-                Medlemskapsperiode().apply {
-                    fom = LocalDate.of(2022, 5, 17)
-                    tom = LocalDate.of(2022, 8, 17)
-                    trygdedekning = Trygdedekninger.FTRL_2_9_FØRSTE_LEDD_A_HELSE
-                    innvilgelsesresultat = InnvilgelsesResultat.INNVILGET
-                },
-                Medlemskapsperiode().apply {
-                    fom = LocalDate.of(2022, 8, 18)
-                    tom = LocalDate.of(2023, 8, 17)
-                    trygdedekning = Trygdedekninger.FTRL_2_9_FØRSTE_LEDD_A_HELSE
-                    innvilgelsesresultat = InnvilgelsesResultat.INNVILGET
-                },
-                Medlemskapsperiode().apply {
-                    fom = LocalDate.of(2023, 8, 18)
-                    tom = LocalDate.of(2023, 9, 1)
-                    trygdedekning = Trygdedekninger.FTRL_2_9_FØRSTE_LEDD_A_HELSE
-                    innvilgelsesresultat = InnvilgelsesResultat.INNVILGET
-                })
-
+        }
+        return Behandlingsresultat().apply {
+            behandling = lagBehandling()
+            årsavregning = Årsavregning().apply {
+                aar = 2023
+                tidligereBehandlingsresultat = tidligereBehandlingsResultat
+            }
         }
     }
 }

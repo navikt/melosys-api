@@ -2,6 +2,7 @@ package no.nav.melosys.service.kontroll.feature.anmodningomunntak.data
 
 import no.nav.melosys.domain.Aktoer
 import no.nav.melosys.domain.Anmodningsperiode
+import no.nav.melosys.domain.dokument.medlemskap.MedlemskapDokument
 import no.nav.melosys.domain.dokument.organisasjon.OrganisasjonDokument
 import no.nav.melosys.domain.mottatteopplysninger.MottatteOpplysningerData
 import no.nav.melosys.domain.person.Persondata
@@ -15,4 +16,5 @@ data class AnmodningUnntakKontrollData(
     val fullmektig: Aktoer?,
     val organisasjonDokumentTilFullmektig: OrganisasjonDokument?,
     val persondataTilFullmektig: Persondata?,
+    val medlemskapDokument: MedlemskapDokument?,
 )

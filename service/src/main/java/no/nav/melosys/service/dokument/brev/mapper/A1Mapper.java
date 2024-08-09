@@ -6,16 +6,17 @@ import java.util.stream.Collectors;
 import java.util.stream.Stream;
 import javax.xml.datatype.DatatypeConfigurationException;
 
-import no.nav.dok.melosysbrev._000067.LovvalgsperiodeType;
 import no.nav.dok.melosysbrev._000067.*;
-import no.nav.dok.melosysbrev.felles.melosys_felles.*;
+import no.nav.dok.melosysbrev.felles.melosys_felles.BostedsadresseType;
+import no.nav.dok.melosysbrev.felles.melosys_felles.KjoennKode;
+import no.nav.dok.melosysbrev.felles.melosys_felles.YrkesaktivitetsKode;
+import no.nav.dok.melosysbrev.felles.melosys_felles.YrkesgruppeKode;
 import no.nav.melosys.domain.Behandling;
 import no.nav.melosys.domain.Behandlingsresultat;
 import no.nav.melosys.domain.Lovvalgsperiode;
 import no.nav.melosys.domain.adresse.StrukturertAdresse;
 import no.nav.melosys.domain.avklartefakta.AvklartVirksomhet;
 import no.nav.melosys.domain.dokument.felles.Land;
-import no.nav.melosys.domain.eessi.sed.Bestemmelse;
 import no.nav.melosys.domain.kodeverk.Land_iso2;
 import no.nav.melosys.domain.kodeverk.lovvalgsbestemmelser.Lovvalgbestemmelser_konv_efta_storbritannia;
 import no.nav.melosys.domain.person.Persondata;
@@ -31,12 +32,6 @@ import no.nav.melosys.service.dokument.brev.mapper.arbeidssted.IkkeFysiskArbeids
 import no.nav.melosys.service.dokument.brev.mapper.felles.KonvEftaStorbritanniaLovvalgbestemmelser;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.text.WordUtils;
-
-import javax.xml.datatype.DatatypeConfigurationException;
-import java.time.Instant;
-import java.util.*;
-import java.util.stream.Collectors;
-import java.util.stream.Stream;
 
 import static no.nav.melosys.service.dokument.brev.BrevDataUtils.lagPersonnavn;
 import static no.nav.melosys.service.dokument.brev.mapper.felles.BrevMapperUtils.convertToXMLGregorianCalendarRemoveTimezone;
@@ -55,6 +50,8 @@ class A1Mapper {
     public A1 mapA1(Behandling behandling, Behandlingsresultat resultat, BrevDataA1 brevData) {
         this.brevData = brevData;
 
+        boolean skalLeggeTilEftaTekst = resultat.hentLovvalgsperiode().erEftaStorbritannia();
+
         A1 a1 = new A1();
         a1.setSerienummer(behandling.getFagsak().getSaksnummer() + behandling.getId());
 
@@ -70,7 +67,7 @@ class A1Mapper {
 
         a1.setHovedvirksomhet(mapHovedvirksomhet(brevData.getHovedvirksomhet()));
 
-        a1.setBivirksomhetListe(mapBivirksomheter(brevData.getBivirksomheter(), brevData.getArbeidssteder()));
+        a1.setBivirksomhetListe(mapBivirksomheter(brevData.getBivirksomheter(), brevData.getArbeidssteder(), skalLeggeTilEftaTekst));
 
         a1.setFysiskArbeidsstedAdresseListe(mapFysiskeAdresser(brevData.getArbeidssteder(), brevData.getArbeidsland()));
 
@@ -183,11 +180,24 @@ class A1Mapper {
      * Fyller derfor opp med tomme elementer for resterende felter
      */
     private BivirksomhetListeType mapBivirksomheter(
-        Collection<AvklartVirksomhet> avklarteVirksomheter, List<Arbeidssted> arbeidssteder) {
+        Collection<AvklartVirksomhet> avklarteVirksomheter, List<Arbeidssted> arbeidssteder, boolean skalLeggeTilEftaTekst) {
 
         BivirksomhetListeType bivirksomheterBrev = new BivirksomhetListeType();
+        Stream<BivirksomhetType> statiskEftaPlaceholderListe = Stream.empty();
+
+        // For å unngå bestilling av nytt felt i Attest A1 brevet fra CCM,
+        // har vi bestemt at vi bare sender en statisk tekst i feltet 5.1.
+        if (skalLeggeTilEftaTekst) {
+            BivirksomhetType placeholderArbeidsstedEfta = new BivirksomhetType();
+            placeholderArbeidsstedEfta.setNavn("Issued under the EEA EFTA Convention");
+
+            statiskEftaPlaceholderListe = Stream.of(placeholderArbeidsstedEfta, A1Mapper.lagTomBivirksomhetType());
+        }
+
         Stream.concat(
-                hentAvklarteVirksomheterOgIkkeFysiskeArbeidssteder(avklarteVirksomheter, arbeidssteder),
+                Stream.concat(
+                    statiskEftaPlaceholderListe,
+                    hentAvklarteVirksomheterOgIkkeFysiskeArbeidssteder(avklarteVirksomheter, arbeidssteder)),
                 Stream.generate(A1Mapper::lagTomBivirksomhetType))
             .limit(ANTALL_PÅKREVDE_FELTER_I_LISTE_5_1)
             .forEach(bivirksomhetType -> bivirksomheterBrev.getBivirksomhet().add(bivirksomhetType));

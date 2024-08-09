@@ -18,11 +18,14 @@ import no.nav.melosys.tjenester.gui.brev.BrevFelt.FELT_DISTRIBUSJONSTYPE
 import no.nav.melosys.tjenester.gui.brev.BrevFelt.FELT_DOKUMENT_TITTEL
 import no.nav.melosys.tjenester.gui.brev.BrevFelt.FELT_FRITEKST
 import no.nav.melosys.tjenester.gui.brev.BrevFelt.FELT_FRITEKSTVEDLEGG
+import no.nav.melosys.tjenester.gui.brev.BrevFelt.FELT_INNHENTINGBREVFORMTITTEL
 import no.nav.melosys.tjenester.gui.brev.BrevFelt.FELT_MANGLER_FRITEKST
+import no.nav.melosys.tjenester.gui.brev.BrevFelt.FELT_STANDARDTEKST_INNTEKTSOPPLYSNINGER_SJEKKBOKS
 import no.nav.melosys.tjenester.gui.brev.BrevFelt.FELT_STANDARDTEKST_SJEKKBOKS
 import no.nav.melosys.tjenester.gui.brev.BrevFelt.FELT_VEDLEGG
 import no.nav.melosys.tjenester.gui.brev.BrevFelt.lagBrevTittelFelt
 import no.nav.melosys.tjenester.gui.brev.BrevFelt.lagErstatterStandardtekstRadioFritekst
+import no.nav.melosys.tjenester.gui.brev.BrevFelt.lagFritekstFeltMedValg
 import no.nav.melosys.tjenester.gui.brev.BrevFelt.lagUtenlandskTrygdemyndighetMottakerFelt
 import no.nav.melosys.tjenester.gui.dto.brev.*
 import org.springframework.stereotype.Component
@@ -218,28 +221,15 @@ class BrevmalListeBygger(
     }
 
     private fun lagBrevmalForINNHENTING_AV_INNTEKTSOPPLYSNINGER(produserbartDokument: Produserbaredokumenter): BrevmalTypeDto { //TODO FIKS HER
-        val feltValgAlternativFritekst = mutableListOf(
-            FeltvalgAlternativDto(
-                FeltvalgAlternativKode.FRITEKST.kode,
-                FeltvalgAlternativKode.FRITEKST.beskrivelse,
-                true
-            )
-        )
-        val feltFritekst = BrevmalFeltDto.Builder()
-            .medKodeOgBeskrivelse(BrevmalFeltKode.FRITEKST)
-            .medFeltType(FeltType.FRITEKST)
-            .medValg(FeltValgDto(feltValgAlternativFritekst, FeltValgType.CHECKBOX))
-            .build()
-        val feltStandardTekst = BrevmalFeltDto.Builder()
-            .medKodeOgBeskrivelse(BrevmalFeltKode.STANDARDTEKST)
-            .medFeltType(FeltType.SJEKKBOKS)
-            .build()
+        val feltFritekst = lagFritekstFeltMedValg()
+
         return BrevmalTypeDto.Builder()
             .medType(produserbartDokument)
             .medFelter(
                 listOf(
-                    feltFritekst,
-                    feltStandardTekst
+                    FELT_INNHENTINGBREVFORMTITTEL,
+                    FELT_STANDARDTEKST_INNTEKTSOPPLYSNINGER_SJEKKBOKS,
+                    feltFritekst
                 )
             )
             .build()

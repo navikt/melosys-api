@@ -4,6 +4,11 @@ import no.nav.melosys.domain.kodeverk.brev.Distribusjonstype
 import no.nav.melosys.tjenester.gui.dto.brev.*
 
 internal object BrevFelt {
+    val FELT_INNHENTINGBREVFORMTITTEL = BrevmalFeltDto.Builder()
+        .medKodeOgBeskrivelse(BrevmalFeltKode.STANDARDTEKST_INNHENTINGBREVFORMTITTEL)
+        .medFeltType(FeltType.FORMTITTEL)
+        .build()
+
     val FELT_MANGLER_FRITEKST = BrevmalFeltDto.Builder()
         .medKodeOgBeskrivelse(BrevmalFeltKode.MANGLER_FRITEKST)
         .medFeltType(FeltType.FRITEKST)
@@ -12,6 +17,11 @@ internal object BrevFelt {
 
     val FELT_STANDARDTEKST_SJEKKBOKS = BrevmalFeltDto.Builder()
         .medKodeOgBeskrivelse(BrevmalFeltKode.STANDARDTEKST_KONTAKTINFORMASJON)
+        .medFeltType(FeltType.SJEKKBOKS)
+        .build()
+
+    val FELT_STANDARDTEKST_INNTEKTSOPPLYSNINGER_SJEKKBOKS = BrevmalFeltDto.Builder()
+        .medKodeOgBeskrivelse(BrevmalFeltKode.STANDARDTEKST_INNTEKTSOPPLYSNINGER)
         .medFeltType(FeltType.SJEKKBOKS)
         .build()
 
@@ -51,6 +61,22 @@ internal object BrevFelt {
             .medKodeOgBeskrivelse(BrevmalFeltKode.UTENLANDSK_TRYGDEMYNDIGHET_MOTTAKER)
             .medValg(valg)
             .erPåkrevd()
+            .build()
+    }
+
+    fun lagFritekstFeltMedValg(): BrevmalFeltDto {
+        val feltValgAlternativFritekst = mutableListOf(
+            FeltvalgAlternativDto(
+                FeltvalgAlternativKode.FRITEKST.kode,
+                FeltvalgAlternativKode.FRITEKST.beskrivelse,
+                true
+            )
+        )
+
+        return BrevmalFeltDto.Builder()
+            .medKode(BrevmalFeltKode.FRITEKST)
+            .medFeltType(FeltType.FRITEKST)
+            .medValg(FeltValgDto(feltValgAlternativFritekst, FeltValgType.CHECKBOX))
             .build()
     }
 

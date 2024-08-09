@@ -1,7 +1,10 @@
 package no.nav.melosys.service.kontroll.feature.anmodningomunntak
 
 import no.nav.melosys.domain.Aktoer
+import no.nav.melosys.domain.SaksopplysningType
+import no.nav.melosys.domain.dokument.medlemskap.MedlemskapDokument
 import no.nav.melosys.domain.dokument.organisasjon.OrganisasjonDokument
+import no.nav.melosys.domain.dokument.utbetaling.UtbetalingDokument
 import no.nav.melosys.domain.kodeverk.Fullmaktstype
 import no.nav.melosys.domain.person.Persondata
 import no.nav.melosys.service.avklartefakta.AvklarteVirksomheterService
@@ -13,6 +16,7 @@ import no.nav.melosys.service.registeropplysninger.OrganisasjonOppslagService
 import no.nav.melosys.service.unntak.AnmodningsperiodeService
 import no.nav.melosys.service.validering.Kontrollfeil
 import org.springframework.stereotype.Service
+import kotlin.jvm.optionals.getOrNull
 
 
 @Service
@@ -35,6 +39,7 @@ class AnmodningUnntakKontrollService(
             fullmektig = fullmektig,
             organisasjonDokumentTilFullmektig = hentOrganisasjonFullmektig(fullmektig),
             persondataTilFullmektig = hentPersondataFullmektig(fullmektig),
+            medlemskapDokument = behandling.finnMedlemskapDokument().getOrNull()
         )
 
         return AnmodningUnntakKontrollsett.hentRegler().mapNotNull { it.apply(kontrollData) }

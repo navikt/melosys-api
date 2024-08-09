@@ -2,7 +2,7 @@ package no.nav.melosys.tjenester.gui.dto.brev;
 
 /**
  * Informasjon om et felt som skal være med i malen.
- *
+ * <p>
  * Dersom {@param valg} ikke er null, vil instans av dette feltet være usynlig med mindre brukeren velger
  * et valgalternativ fra {@param valg} som har {@link FeltvalgAlternativDto#isVisFelt()} = true.
  */
@@ -62,6 +62,11 @@ public class BrevmalFeltDto {
         private boolean paakrevd = false;
         private FeltValgDto valg;
         private Integer tegnBegrensning;
+
+        public Builder medKode(BrevmalFeltKode brevmalFeltKode) {
+            this.kode = brevmalFeltKode.getKode();
+            return this;
+        }
 
         public Builder medKodeOgBeskrivelse(BrevmalFeltKode brevmalFeltKode) {
             this.kode = brevmalFeltKode.getKode();

@@ -73,6 +73,10 @@ class Fagsak(
     fun hentSistRegistrertBehandling(): Behandling = hentBehandlingerSortertSynkendePåRegistrertDato().firstOrNull()
         ?: throw IkkeFunnetException(FINNER_IKKE_BEHANDLINGER_FOR_FAGSAK + saksnummer)
 
+    fun hentSistRegistrertBehandlingIkkeÅrsavregning(): Behandling =
+        hentBehandlingerSortertSynkendePåRegistrertDato().firstOrNull { !it.erÅrsavregning() }
+            ?: throw IkkeFunnetException(FINNER_IKKE_BEHANDLINGER_FOR_FAGSAK + saksnummer)
+
     fun hentSistOppdatertBehandlingIkkeÅrsavregning(): Behandling = behandlinger
         .filter { !it.erÅrsavregning() }
         .maxByOrNull { it.endretDato }

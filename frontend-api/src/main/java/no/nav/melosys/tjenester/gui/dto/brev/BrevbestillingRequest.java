@@ -1,5 +1,10 @@
 package no.nav.melosys.tjenester.gui.dto.brev;
 
+import java.time.LocalDate;
+import java.util.Collections;
+import java.util.List;
+import java.util.function.Function;
+
 import no.nav.melosys.domain.arkiv.Distribusjonstype;
 import no.nav.melosys.domain.brev.utkast.BrevbestillingUtkast;
 import no.nav.melosys.domain.kodeverk.Mottakerroller;
@@ -9,11 +14,6 @@ import no.nav.melosys.service.dokument.brev.FritekstvedleggDto;
 import no.nav.melosys.service.dokument.brev.KopiMottakerDto;
 import no.nav.melosys.service.dokument.brev.SaksvedleggDto;
 import no.nav.melosys.sikkerhet.context.SubjectHandler;
-
-import java.time.LocalDate;
-import java.util.Collections;
-import java.util.List;
-import java.util.function.Function;
 
 import static java.util.Optional.ofNullable;
 
@@ -34,7 +34,7 @@ public record BrevbestillingRequest(
     String fritekstTittel,
     String fritekst,
     Distribusjonstype distribusjonstype,
-    boolean kontaktopplysninger,
+    boolean skalViseStandardTekstOmkontaktopplysninger,
     String nyVurderingBakgrunn,
     List<SaksvedleggDto> saksvedlegg,
     List<FritekstvedleggDto> fritekstvedlegg,
@@ -64,7 +64,7 @@ public record BrevbestillingRequest(
             this.fritekstTittel,
             this.fritekst,
             this.distribusjonstype,
-            this.kontaktopplysninger,
+            this.skalViseStandardTekstOmkontaktopplysninger,
             this.nyVurderingBakgrunn,
             this.saksvedlegg,
             this.fritekstvedlegg,
@@ -104,7 +104,7 @@ public record BrevbestillingRequest(
             this.fritekstTittel(),
             this.fritekst(),
             this.distribusjonstype(),
-            this.kontaktopplysninger(),
+            this.skalViseStandardTekstOmkontaktopplysninger(),
             this.nyVurderingBakgrunn(),
             konverterListeTil(this.saksvedlegg(), SaksvedleggDto::tilUtkast),
             konverterListeTil(this.fritekstvedlegg(), FritekstvedleggDto::tilUtkast),

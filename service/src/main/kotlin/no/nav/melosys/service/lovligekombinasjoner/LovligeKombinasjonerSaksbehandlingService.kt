@@ -164,7 +164,7 @@ class LovligeKombinasjonerSaksbehandlingService(
         behandlingstema: Behandlingstema?,
     ): Set<Behandlingstyper> {
         val fagsak = fagsakService.hentFagsak(saksnummer)
-        val sisteBehandling = fagsak.hentSistRegistrertBehandling()
+        val sisteBehandling = fagsak.hentSistRegistrertBehandlingIkkeÅrsavregning()
 
         val behandlingstyper = hentMuligeBehandlingstyper(
             hovedpart,
