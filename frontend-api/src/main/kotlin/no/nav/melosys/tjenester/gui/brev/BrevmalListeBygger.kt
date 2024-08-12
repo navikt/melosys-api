@@ -8,7 +8,6 @@ import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingstyper
 import no.nav.melosys.domain.kodeverk.brev.Produserbaredokumenter
 import no.nav.melosys.exception.FunksjonellException
 import no.nav.melosys.exception.TekniskException
-import no.nav.melosys.featuretoggle.ToggleName.MELOSYS_TRYGDEAVTALE_KOREA
 import no.nav.melosys.service.aktoer.UtenlandskMyndighetService
 import no.nav.melosys.service.behandling.BehandlingService
 import no.nav.melosys.service.brev.BrevAdresse
@@ -35,8 +34,7 @@ class BrevmalListeBygger(
     private val brevmalListeService: BrevmalListeService,
     private val behandlingService: BehandlingService,
     private val saksbehandlingRegler: SaksbehandlingRegler,
-    private val utenlandskMyndighetService: UtenlandskMyndighetService,
-    private val unleash: Unleash
+    private val utenlandskMyndighetService: UtenlandskMyndighetService
 ) {
     fun byggBrevmalDtoListe(behandlingId: Long): List<BrevmalResponse> =
         hentTilgjengeligeMottakere(behandlingId).map { mottakerTilBrevmalDto(behandlingId, it) }
@@ -314,15 +312,10 @@ class BrevmalListeBygger(
                 FeltValgType.SELECT
             )
         }
-        val koreaToggleEnabled = unleash.isEnabled(MELOSYS_TRYGDEAVTALE_KOREA)
         val trygdeavtaleLandkoder = Trygdeavtale_myndighetsland.values().map { it.kode }
         return FeltValgDto(
             utenlandskMyndighetService.hentAlleUtenlandskeMyndigheter()
                 .filter { trygdeavtaleLandkoder.contains(it.landkode.kode) }
-                .filter {
-                    if (koreaToggleEnabled) return@filter true
-                    it.landkode != Land_iso2.KR
-                }
                 .map {
                     val beskrivelse = "Trygdemyndighetene i ${it.landkode.beskrivelse}"
                     FeltvalgAlternativDto(it.hentInstitusjonID(), beskrivelse, true)
