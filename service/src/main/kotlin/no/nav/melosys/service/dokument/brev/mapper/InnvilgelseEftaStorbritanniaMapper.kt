@@ -57,7 +57,7 @@ class InnvilgelseEftaStorbritanniaMapper(
             anmodningsperiodeSvarType = if (anmodningsperiode.isPresent) anmodningsperiode.get().anmodningsperiodeSvar.anmodningsperiodeSvarType.name else "",
             innvilgelseFritekst = brevbestilling.innvilgelseFritekst,
             innledningFritekst = brevbestilling.innledningFritekst,
-            begrunnelseFritekst = brevbestilling.begrunnelseFritekst,
+            begrunnelseFritekst = if(brevbestilling.begrunnelseFritekst.isNullOrEmpty()) behandlingsresultat.begrunnelseFritekst else brevbestilling.begrunnelseFritekst
         )
     }
 }
