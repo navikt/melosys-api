@@ -1,9 +1,11 @@
 package no.nav.melosys.service.dokument.brev.mapper
 
+import io.getunleash.Unleash
 import no.nav.melosys.domain.brev.InnvilgelseEftaStorbritanniaBrevbestilling
 import no.nav.melosys.domain.dokument.felles.Periode
 import no.nav.melosys.domain.kodeverk.Land_iso2
 import no.nav.melosys.domain.kodeverk.Vilkaar
+import no.nav.melosys.featuretoggle.ToggleName
 import no.nav.melosys.integrasjon.dokgen.dto.InnvilgelseEftaStorbritannia
 import no.nav.melosys.service.LandvelgerService
 import no.nav.melosys.service.avklartefakta.AvklarteVirksomheterService
@@ -18,7 +20,8 @@ class InnvilgelseEftaStorbritanniaMapper(
     private val dokgenMapperDatahenter: DokgenMapperDatahenter,
     private val virksomheterService: AvklarteVirksomheterService,
     private val avklartefaktaService: AvklartefaktaService,
-    private val landvelgerService: LandvelgerService
+    private val landvelgerService: LandvelgerService,
+    private val unleash: Unleash
 ) {
     @Transactional(readOnly = true)
     internal fun mapInnvilgelseEftaStorbritannia(brevbestilling: InnvilgelseEftaStorbritanniaBrevbestilling): InnvilgelseEftaStorbritannia {
@@ -36,7 +39,7 @@ class InnvilgelseEftaStorbritanniaMapper(
             .filter { alleAvklarteOrgnr.contains(it.orgnr) }
             .findFirst().get().navn
 
-        val arbeidINorge = bostedsland.kode == Land_iso2.NO.name;
+        val arbeidINorge = if(unleash.isEnabled(ToggleName.MELOSYS_KONVENSJON_EFTA_LAND_OG_STORBRITANNIA)) bostedsland.kode == Land_iso2.NO.name else false
 
         return InnvilgelseEftaStorbritannia(
             brevbestilling = brevbestilling,
@@ -48,7 +51,7 @@ class InnvilgelseEftaStorbritanniaMapper(
             erNorskSkip = erNorskSkip != null,
             lovvalgsperiode = Periode(lovvalgsperiode.fom, lovvalgsperiode.tom),
             tilleggsbestemmelse = if (lovvalgsperiode.tilleggsbestemmelse != null) lovvalgsperiode.tilleggsbestemmelse.name() else "",
-            erArtikkel11_3_a_eller_13_3a = if(arbeidINorge) lovvalgsperiode.erArtikkel11_3_a_eller_13_3a() else false,
+            erArtikkel11_3_a_eller_13_3_a_arbeid_norge = if(arbeidINorge) lovvalgsperiode.erArtikkel11_3_a_eller_13_3a() else false,
             erArtikkel13_3_a_eller_13_4 = if(!arbeidINorge) lovvalgsperiode.erArtikkel13_3_a_eller_13_4() else false,
             erArtikkel14_1_eller_14_2 = lovvalgsperiode.erArtikkel14_1_eller_14_2(),
             erArtikkel16_1_eller_16_3 = lovvalgsperiode.erArtikkel16_1_eller_16_3(),

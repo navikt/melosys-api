@@ -1,5 +1,6 @@
 package no.nav.melosys.service.dokument.brev.mapper
 
+import io.getunleash.FakeUnleash
 import io.kotest.matchers.booleans.shouldBeFalse
 import io.kotest.matchers.booleans.shouldBeTrue
 import io.kotest.matchers.nulls.shouldBeNull
@@ -48,10 +49,13 @@ internal class InnvilgelseEftaKonvensjonMapperTest {
 
     @MockK
     private lateinit var mockAvklartefaktaService: AvklartefaktaService
+
     @MockK
     private lateinit var mockLandvelgerService: LandvelgerService
 
     private lateinit var innvilgelseEftaStorbritanniaMapper: InnvilgelseEftaStorbritanniaMapper
+
+    private val unleash = FakeUnleash()
 
     private val orgnr1 = "111111111"
     private val orgnr2 = "222222222"
@@ -67,7 +71,8 @@ internal class InnvilgelseEftaKonvensjonMapperTest {
             mockDokgenMapperDatahenter,
             mockVirksomheterService,
             mockAvklartefaktaService,
-            mockLandvelgerService
+            mockLandvelgerService,
+            unleash
         )
     }
 
