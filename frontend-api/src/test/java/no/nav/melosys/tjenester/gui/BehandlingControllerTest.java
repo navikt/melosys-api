@@ -76,6 +76,16 @@ class BehandlingControllerTest {
     private final Behandlingsresultat BEHANDLINGSRESULTAT = new Behandlingsresultat();
     private static final Set<Behandlingsstatus> MULIGE_STATUSER = Set.of(AVVENT_DOK_PART, AVVENT_DOK_UTL, UNDER_BEHANDLING, AVVENT_FAGLIG_AVKLARING);
 
+    @TestConfiguration
+    static class BehandlingControllerTestConfiguration {
+        @Bean
+        Unleash unleash() {
+            FakeUnleash fakeUnleash = new FakeUnleash();
+            fakeUnleash.enableAll();
+            return fakeUnleash;
+        }
+    }
+
     @BeforeEach
     void setUp() {
         random = new EasyRandom(new EasyRandomParameters()
@@ -146,15 +156,5 @@ class BehandlingControllerTest {
         behandling.setFagsak(FagsakTestFactory.lagFagsak());
 
         return behandling;
-    }
-
-    @TestConfiguration
-    static class BehandlingControllerTestConfiguration {
-        @Bean
-        Unleash unleash() {
-            FakeUnleash fakeUnleash = new FakeUnleash();
-            fakeUnleash.enableAll();
-            return fakeUnleash;
-        }
     }
 }
