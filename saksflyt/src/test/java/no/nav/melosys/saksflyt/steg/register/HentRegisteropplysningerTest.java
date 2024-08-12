@@ -4,6 +4,7 @@ import java.time.LocalDate;
 import java.util.Collections;
 import java.util.HashSet;
 
+import io.getunleash.FakeUnleash;
 import no.nav.melosys.domain.Aktoer;
 import no.nav.melosys.domain.Behandling;
 import no.nav.melosys.domain.Fagsak;
@@ -54,9 +55,10 @@ class HentRegisteropplysningerTest {
 
     private final Behandling behandling = new Behandling();
 
+    private FakeUnleash fakeUnleash = new FakeUnleash();
     @BeforeEach
     public void setUp() {
-        RegisteropplysningerFactory registeropplysningerFactory = new RegisteropplysningerFactory(saksbehandlingRegler);
+        RegisteropplysningerFactory registeropplysningerFactory = new RegisteropplysningerFactory(saksbehandlingRegler, fakeUnleash);
         hentRegisteropplysninger = new HentRegisteropplysninger(registeropplysningerService, behandlingService, saksbehandlingRegler, persondataFasade, registeropplysningerFactory);
 
         behandling.setId(222L);

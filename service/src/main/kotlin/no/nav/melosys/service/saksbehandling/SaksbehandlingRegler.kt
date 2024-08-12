@@ -1,5 +1,6 @@
 package no.nav.melosys.service.saksbehandling
 
+import io.getunleash.Unleash
 import no.nav.melosys.domain.Behandling
 import no.nav.melosys.domain.Fagsak
 import no.nav.melosys.domain.kodeverk.Sakstemaer
@@ -8,11 +9,12 @@ import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingsresultattyper
 import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingstema
 import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingstema.*
 import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingstyper
+import no.nav.melosys.featuretoggle.ToggleName
 import no.nav.melosys.repository.BehandlingsresultatRepository
 import org.springframework.stereotype.Component
 
 @Component
-class SaksbehandlingRegler(private val behandlingsresultatRepository: BehandlingsresultatRepository) {
+class SaksbehandlingRegler(private val behandlingsresultatRepository: BehandlingsresultatRepository, private val unleash: Unleash) {
 
     fun skalTidligereBehandlingReplikeres(
         fagsak: Fagsak,
@@ -72,7 +74,6 @@ class SaksbehandlingRegler(private val behandlingsresultatRepository: Behandling
         ) return false
 
         return when (behandlingstema) {
-            ARBEID_KUN_NORGE,
             PENSJONIST,
             REGISTRERING_UNNTAK,
             UNNTAK_MEDLEMSKAP,
@@ -80,6 +81,8 @@ class SaksbehandlingRegler(private val behandlingsresultatRepository: Behandling
             TRYGDETID,
             A1_ANMODNING_OM_UNNTAK_PAPIR
             -> true
+
+            ARBEID_KUN_NORGE -> !unleash.isEnabled(ToggleName.MELOSYS_AAREG_AZURE)
 
             ANMODNING_OM_UNNTAK_HOVEDREGEL -> sakstype == Sakstyper.TRYGDEAVTALE
 

@@ -6,6 +6,7 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 
+import io.getunleash.FakeUnleash;
 import no.nav.melosys.domain.*;
 import no.nav.melosys.domain.dokument.sed.SedDokument;
 import no.nav.melosys.domain.kodeverk.Aktoersroller;
@@ -62,11 +63,13 @@ class OppfriskSaksopplysningerServiceTest {
 
     private OppfriskSaksopplysningerService oppfriskSaksopplysningerService;
 
+    private FakeUnleash fakeUnleash = new FakeUnleash();
+
     private static final long BEHANDLING_ID = 11L;
 
     @BeforeEach
     public void setUp() {
-        RegisteropplysningerFactory registeropplysningerFactory = new RegisteropplysningerFactory(saksbehandlingRegler);
+        RegisteropplysningerFactory registeropplysningerFactory = new RegisteropplysningerFactory(saksbehandlingRegler, fakeUnleash);
         oppfriskSaksopplysningerService = new OppfriskSaksopplysningerService(
             anmodningsperiodeService,
             behandlingService,

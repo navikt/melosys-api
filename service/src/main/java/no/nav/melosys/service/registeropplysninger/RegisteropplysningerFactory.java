@@ -1,10 +1,12 @@
 package no.nav.melosys.service.registeropplysninger;
 
+import io.getunleash.Unleash;
 import no.nav.melosys.domain.kodeverk.Sakstemaer;
 import no.nav.melosys.domain.kodeverk.Sakstyper;
 import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingstema;
 import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingstyper;
 import no.nav.melosys.exception.TekniskException;
+import no.nav.melosys.featuretoggle.ToggleName;
 import no.nav.melosys.service.saksbehandling.SaksbehandlingRegler;
 import org.springframework.stereotype.Component;
 
@@ -16,8 +18,11 @@ public class RegisteropplysningerFactory {
 
     private final SaksbehandlingRegler saksbehandlingRegler;
 
-    public RegisteropplysningerFactory(SaksbehandlingRegler saksbehandlingRegler) {
+    private final Unleash unleash;
+
+    public RegisteropplysningerFactory(SaksbehandlingRegler saksbehandlingRegler, Unleash unleash) {
         this.saksbehandlingRegler = saksbehandlingRegler;
+        this.unleash = unleash;
     }
 
     public RegisteropplysningerRequest.SaksopplysningTyper utledSaksopplysningTyper(
@@ -28,6 +33,10 @@ public class RegisteropplysningerFactory {
         }
         if (saksbehandlingRegler.harRegistreringUnntakFraMedlemskapFlyt(sakstype, sakstema, behandlingstema)) {
             return hentSaksopplysningTyperForRegistreringUnntakFraMedlemskap();
+        }
+
+        if(unleash.isEnabled(ToggleName.MELOSYS_KONVENSJON_EFTA_LAND_OG_STORBRITANNIA)) {
+            return hentSaksopplysningTyperForBehandlingAvSøknad();
         }
 
         return switch (behandlingstema) {
