@@ -99,12 +99,12 @@ class BehandlingServiceTest {
     }
 
     @Test
-    void ferdigstillÅrsavregning() {
+    void ferdigbehandleÅrsavregning() {
         BehandlingService behandlingServiceSpy = Mockito.spy(behandlingService);
         when(behandlingRepository.findById(BEHANDLING_ID)).thenReturn(Optional.of(behandling));
 
 
-        behandlingServiceSpy.ferdigstillÅrsavregning(BEHANDLING_ID);
+        behandlingServiceSpy.ferdigbehandleÅrsavregning(BEHANDLING_ID);
 
 
         verify(behandlingsresultatService).oppdaterBehandlingsresultattype(BEHANDLING_ID, Behandlingsresultattyper.FERDIGBEHANDLET);

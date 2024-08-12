@@ -53,8 +53,6 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 @WebMvcTest(controllers = {BehandlingController.class})
 class BehandlingControllerTest {
     @MockBean
-    private Unleash unleash;
-    @MockBean
     private BehandlingService behandlingService;
     @MockBean
     private SaksopplysningerTilDto saksopplysningerTilDto;

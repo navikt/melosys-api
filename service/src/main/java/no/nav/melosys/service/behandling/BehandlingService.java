@@ -123,7 +123,7 @@ public class BehandlingService {
     }
 
     @Transactional
-    public void ferdigstillÅrsavregning(long behandlingId) {
+    public void ferdigbehandleÅrsavregning(long behandlingId) {
         behandlingsresultatService.tømBehandlingsresultat(behandlingId);
         behandlingsresultatService.oppdaterBehandlingsresultattype(behandlingId, Behandlingsresultattyper.FERDIGBEHANDLET);
         avsluttBehandling(behandlingId);
