@@ -39,7 +39,7 @@ class InnvilgelseEftaStorbritanniaMapper(
             .filter { alleAvklarteOrgnr.contains(it.orgnr) }
             .findFirst().get().navn
 
-        val arbeidINorge = if(unleash.isEnabled(ToggleName.MELOSYS_KONVENSJON_EFTA_LAND_OG_STORBRITANNIA)) bostedsland.kode == Land_iso2.NO.name else false
+        val arbeidINorge = if(unleash.isEnabled(ToggleName.MELOSYS_ARBEID_KUN_NORGE)) bostedsland.kode == Land_iso2.NO.name else false
 
         return InnvilgelseEftaStorbritannia(
             brevbestilling = brevbestilling,
