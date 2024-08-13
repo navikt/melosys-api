@@ -29,7 +29,6 @@ import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.ArgumentCaptor;
 import org.mockito.Captor;
 import org.mockito.Mock;
-import org.mockito.Mockito;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.context.ApplicationEventPublisher;
 
@@ -100,16 +99,19 @@ class BehandlingServiceTest {
 
     @Test
     void ferdigbehandleÅrsavregning() {
-        BehandlingService behandlingServiceSpy = Mockito.spy(behandlingService);
         when(behandlingRepository.findById(BEHANDLING_ID)).thenReturn(Optional.of(behandling));
 
 
-        behandlingServiceSpy.ferdigbehandleÅrsavregning(BEHANDLING_ID);
+        behandlingService.ferdigbehandleÅrsavregning(BEHANDLING_ID);
 
 
-        verify(behandlingsresultatService).oppdaterBehandlingsresultattype(BEHANDLING_ID, Behandlingsresultattyper.FERDIGBEHANDLET);
-        verify(behandlingServiceSpy).avsluttBehandling(BEHANDLING_ID);
+        verify(behandlingRepository).save(behandlingCaptor.capture());
+        verify(behandlingsresultatService).oppdaterBehandlingsresultattype(BEHANDLING_ID,
+            Behandlingsresultattyper.FERDIGBEHANDLET);
         verify(oppgaveService).ferdigstillOppgaveMedBehandlingID(BEHANDLING_ID);
+
+        Behandling lagretBehandling = behandlingCaptor.getValue();
+        assertThat(lagretBehandling.getStatus()).isEqualTo(Behandlingsstatus.AVSLUTTET);
     }
 
     @Test
