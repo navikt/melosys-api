@@ -35,7 +35,7 @@ public class RegisteropplysningerFactory {
             return hentSaksopplysningTyperForRegistreringUnntakFraMedlemskap();
         }
 
-        if(unleash.isEnabled(ToggleName.MELOSYS_KONVENSJON_EFTA_LAND_OG_STORBRITANNIA)) {
+        if(behandlingstema == Behandlingstema.ARBEID_KUN_NORGE && unleash.isEnabled(ToggleName.MELOSYS_ARBEID_KUN_NORGE)) {
             return hentSaksopplysningTyperForBehandlingAvSøknad();
         }
 

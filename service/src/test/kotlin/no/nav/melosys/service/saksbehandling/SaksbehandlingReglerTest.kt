@@ -16,6 +16,7 @@ import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingsresultattyper
 import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingsstatus
 import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingstema
 import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingstyper
+import no.nav.melosys.featuretoggle.ToggleName
 import no.nav.melosys.repository.BehandlingsresultatRepository
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.TestInstance
@@ -42,6 +43,7 @@ class SaksbehandlingReglerTest {
 
     @BeforeEach
     fun setUp() {
+        unleash.resetAll()
         saksbehandlingRegler = SaksbehandlingRegler(behandlingsresultatRepository, unleash)
     }
 
@@ -117,6 +119,24 @@ class SaksbehandlingReglerTest {
                 Behandlingstema.IKKE_YRKESAKTIV,
                 false
             ),
+            Arguments.of(
+                Sakstyper.EU_EOS,
+                Sakstemaer.MEDLEMSKAP_LOVVALG,
+                Behandlingstyper.FØRSTEGANG,
+                Behandlingstema.ARBEID_KUN_NORGE,
+                true
+            ),
+        )
+
+    fun testHarFlytParametereToggle() =
+        listOf(
+            Arguments.of(
+                Sakstyper.EU_EOS,
+                Sakstemaer.MEDLEMSKAP_LOVVALG,
+                Behandlingstyper.FØRSTEGANG,
+                Behandlingstema.ARBEID_KUN_NORGE,
+                false
+            ),
         )
 
 
@@ -131,6 +151,20 @@ class SaksbehandlingReglerTest {
     ) {
         val result = saksbehandlingRegler.harIngenFlyt(sakstype, sakstema, behandlingstype, behandlingstema)
 
+        result.shouldBe(expected)
+    }
+
+    @ParameterizedTest
+    @MethodSource("testHarFlytParametereToggle")
+    fun testHarFlytToggle(
+        sakstype: Sakstyper,
+        sakstema: Sakstemaer,
+        behandlingstype: Behandlingstyper,
+        behandlingstema: Behandlingstema,
+        expected: Boolean
+    ) {
+        unleash.enable(ToggleName.MELOSYS_ARBEID_KUN_NORGE)
+        val result = saksbehandlingRegler.harIngenFlyt(sakstype, sakstema, behandlingstype, behandlingstema)
 
         result.shouldBe(expected)
     }
