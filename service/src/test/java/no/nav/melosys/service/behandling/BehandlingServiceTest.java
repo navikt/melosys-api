@@ -102,7 +102,7 @@ class BehandlingServiceTest {
         when(behandlingRepository.findById(BEHANDLING_ID)).thenReturn(Optional.of(behandling));
 
 
-        behandlingService.ferdigbehandleÅrsavregning(BEHANDLING_ID);
+        behandlingService.ferdigbehandle(BEHANDLING_ID);
 
 
         verify(behandlingRepository).save(behandlingCaptor.capture());

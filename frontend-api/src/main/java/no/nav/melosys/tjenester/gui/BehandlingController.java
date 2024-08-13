@@ -58,12 +58,12 @@ public class BehandlingController {
         this.unleash = unleash;
     }
 
-    @PutMapping("/{behandlingID}/ferdigbehandleAarsavregning")
-    public ResponseEntity<Void> ferdigbehandleÅrsavregning(@PathVariable("behandlingID") long behandlingID) {
+    @PutMapping("/{behandlingID}/ferdigbehandle")
+    public ResponseEntity<Void> ferdigbehandle(@PathVariable("behandlingID") long behandlingID) {
         aksesskontroll.autoriserSkriv(behandlingID);
 
         if (unleash.isEnabled(MELOSYS_ÅRSAVREGNING)) {
-            behandlingService.ferdigbehandleÅrsavregning(behandlingID);
+            behandlingService.ferdigbehandle(behandlingID);
         }
 
         return ResponseEntity.noContent().build();
