@@ -25,7 +25,7 @@ class ÅrsavregningService(
     private val aarsavregningRepository: AarsavregningRepository,
     private val behandlingsresultatService: BehandlingsresultatService,
     private val faktureringskomponentenConsumer: FaktureringskomponentenConsumer,
-    private val trygdeavgiftService: TrygdeavgiftService,
+    private val trygdeavgiftService: TrygdeavgiftService
 ) {
 
     fun beregnTotalbeløpForPeriode(beregnTotalBeløpDto: BeregnTotalBeløpDto): BigDecimal {
