@@ -124,17 +124,6 @@ class SaksbehandlingReglerTest {
                 Sakstemaer.MEDLEMSKAP_LOVVALG,
                 Behandlingstyper.FØRSTEGANG,
                 Behandlingstema.ARBEID_KUN_NORGE,
-                true
-            ),
-        )
-
-    fun testHarFlytParametereToggle() =
-        listOf(
-            Arguments.of(
-                Sakstyper.EU_EOS,
-                Sakstemaer.MEDLEMSKAP_LOVVALG,
-                Behandlingstyper.FØRSTEGANG,
-                Behandlingstema.ARBEID_KUN_NORGE,
                 false
             ),
         )
@@ -143,20 +132,6 @@ class SaksbehandlingReglerTest {
     @ParameterizedTest
     @MethodSource("testHarIngenFlytParametere")
     fun testHarIngenFlyt(
-        sakstype: Sakstyper,
-        sakstema: Sakstemaer,
-        behandlingstype: Behandlingstyper,
-        behandlingstema: Behandlingstema,
-        expected: Boolean
-    ) {
-        val result = saksbehandlingRegler.harIngenFlyt(sakstype, sakstema, behandlingstype, behandlingstema)
-
-        result.shouldBe(expected)
-    }
-
-    @ParameterizedTest
-    @MethodSource("testHarFlytParametereToggle")
-    fun testHarFlytToggle(
         sakstype: Sakstyper,
         sakstema: Sakstemaer,
         behandlingstype: Behandlingstyper,

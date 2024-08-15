@@ -35,7 +35,7 @@ public class RegisteropplysningerFactory {
             return hentSaksopplysningTyperForRegistreringUnntakFraMedlemskap();
         }
 
-        if(behandlingstema == Behandlingstema.ARBEID_KUN_NORGE && unleash.isEnabled(ToggleName.MELOSYS_ARBEID_KUN_NORGE)) {
+        if(behandlingstema == Behandlingstema.ARBEID_KUN_NORGE && unleash.isEnabled(ToggleName.MELOSYS_ARBEID_KUN_NORGE)) { //legg til i switch case når vi fjerner toggle
             return hentSaksopplysningTyperForBehandlingAvSøknad();
         }
 
