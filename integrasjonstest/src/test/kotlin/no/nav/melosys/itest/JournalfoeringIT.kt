@@ -291,7 +291,7 @@ class JournalfoeringIT(
             fagsak.sakstype = Sakstyper.EU_EOS.kode
             fagsak.sakstema = Sakstemaer.MEDLEMSKAP_LOVVALG.kode
             behandlingstypeKode = Behandlingstyper.FØRSTEGANG.kode
-            behandlingstemaKode = Behandlingstema.ARBEID_KUN_NORGE.kode
+            behandlingstemaKode = Behandlingstema.PENSJONIST.kode
             forvaltningsmeldingMottaker = ForvaltningsmeldingMottaker.INGEN
         }
         val prosessinstans = journalførOgVentTilProsesserErFerdige(
