@@ -26,7 +26,6 @@ import no.nav.melosys.service.journalforing.JournalfoeringService
 import no.nav.melosys.service.oppgave.OppgaveService
 import org.junit.jupiter.api.AfterEach
 import org.junit.jupiter.api.BeforeEach
-import org.junit.jupiter.api.Disabled
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.TestInstance
 import org.springframework.beans.factory.annotation.Autowired
@@ -287,13 +286,12 @@ class JournalfoeringIT(
     }
 
     @Test
-    @Disabled("TODO: Når arbeid kun kan vedtakssteg har blitt utformet, må denne testen endres til å samsvare med det")
     fun journalførOgOpprettAndregangsBehandling_fraIngenFlyt_flytMedPeriodeOgLand() {
         val journalfoeringOpprettDto = defaultJournalføringDto().apply {
             fagsak.sakstype = Sakstyper.EU_EOS.kode
             fagsak.sakstema = Sakstemaer.MEDLEMSKAP_LOVVALG.kode
             behandlingstypeKode = Behandlingstyper.FØRSTEGANG.kode
-            behandlingstemaKode = Behandlingstema.ARBEID_KUN_NORGE.kode
+            behandlingstemaKode = Behandlingstema.PENSJONIST.kode
             forvaltningsmeldingMottaker = ForvaltningsmeldingMottaker.INGEN
         }
         val prosessinstans = journalførOgVentTilProsesserErFerdige(
