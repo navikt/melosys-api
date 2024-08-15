@@ -21,7 +21,8 @@ class DokgenMalMapper(
     private val innvilgelseEftaMapper: InnvilgelseEftaStorbritanniaMapper,
     private val innhentingAvInntektsopplysningerMapper: InnhentingAvInntektsopplysningerMapper,
     private val trygdeavtaleMapper: TrygdeavtaleMapper,
-    private val orienteringAnmodningUnntakMapper: OrienteringAnmodningUnntakMapper
+    private val orienteringAnmodningUnntakMapper: OrienteringAnmodningUnntakMapper,
+    private val orienteringTilArbeidsgiverOmVedtakMapper: OrienteringTilArbeidsgiverOmVedtakMapper
 ) {
     fun mapBehandling(
         mottattBrevbestilling: DokgenBrevbestilling,
@@ -123,6 +124,9 @@ class DokgenMalMapper(
 
             Produserbaredokumenter.INNVILGELSE_EFTA_STORBRITANNIA ->
                 innvilgelseEftaMapper.mapInnvilgelseEftaStorbritannia(brevbestilling as InnvilgelseEftaStorbritanniaBrevbestilling)
+
+            Produserbaredokumenter.ORIENTERING_TIL_ARBEIDSGIVER_OM_VEDTAK ->
+                orienteringTilArbeidsgiverOmVedtakMapper.map(brevbestilling as OrienteringTilArbeidsgiverOmVedtakBrevbestilling)
 
             Produserbaredokumenter.PLIKTIG_MEDLEM_FTRL -> innvilgelseFtrlMapper.mapYrkesaktivPliktig(brevbestilling)
 

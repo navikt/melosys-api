@@ -33,6 +33,7 @@ import no.nav.melosys.domain.person.Persondata;
         @JsonSubTypes.Type(value = OrienteringAnmodningUnntakBrevbestilling.class),
         @JsonSubTypes.Type(value = InnvilgelseEftaStorbritanniaBrevbestilling.class),
         @JsonSubTypes.Type(value = AvslagEftaStorbritanniaBrevbestilling.class),
+        @JsonSubTypes.Type(value = OrienteringTilArbeidsgiverOmVedtakBrevbestilling.class),
     }
 )
 public class DokgenBrevbestilling extends Brevbestilling {

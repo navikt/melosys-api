@@ -55,7 +55,7 @@ public class BrevmottakerService {
         return switch (produserbartDokument) {
             case AVSLAG_YRKESAKTIV, ORIENTERING_ANMODNING_UNNTAK,
                 INNVILGELSE_YRKESAKTIV, IKKE_YRKESAKTIV_VEDTAKSBREV, INNVILGELSE_EFTA_STORBRITANNIA -> Mottakerroller.BRUKER;
-            case INNVILGELSE_ARBEIDSGIVER, AVSLAG_ARBEIDSGIVER -> Mottakerroller.ARBEIDSGIVER;
+            case INNVILGELSE_ARBEIDSGIVER, AVSLAG_ARBEIDSGIVER,  ORIENTERING_TIL_ARBEIDSGIVER_OM_VEDTAK-> Mottakerroller.ARBEIDSGIVER;
             case ANMODNING_UNNTAK, ATTEST_A1 -> Mottakerroller.UTENLANDSK_TRYGDEMYNDIGHET;
             default -> throw new TekniskException("Valg av mottakerRolle støttes ikke for " + produserbartDokument);
         };
