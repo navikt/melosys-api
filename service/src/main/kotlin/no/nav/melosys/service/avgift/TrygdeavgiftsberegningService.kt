@@ -63,6 +63,10 @@ class TrygdeavgiftsberegningService(
         } else {
             leggTilNyeTrygdeavgiftsperioder(oppdaterTrygdeavgiftsgrunnlagRequest, behandlingsresultat)
         }
+
+//        if (behandlingsresultat.årsavregning != null) {
+//            fakturer
+//        }
     }
 
     private fun leggTilNyeTrygdeavgiftsperioderForPliktigMedlemskapSkattepliktig(

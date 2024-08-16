@@ -184,4 +184,10 @@ public class Medlemskapsperiode implements ErPeriode, HarBestemmelse<Folketrygdl
     public void setTrygdeavgiftsperioder(Set<Trygdeavgiftsperiode> trygdeavgiftsperioder) {
         this.trygdeavgiftsperioder = trygdeavgiftsperioder;
     }
+
+    public void avkortFomDato(int gjelderÅr) {
+        if(this.overlapperMedÅr(gjelderÅr) && this.tom.getYear() > gjelderÅr){
+            this.tom = LocalDate.of(gjelderÅr, 12, 31);
+        }
+    }
 }

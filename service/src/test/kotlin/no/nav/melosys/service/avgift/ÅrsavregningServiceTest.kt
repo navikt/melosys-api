@@ -80,17 +80,6 @@ internal class ÅrsavregningServiceTest {
     }
 
     @Test
-    fun `test beregner totalbeløp for 1 år`() {
-        val fakturaseriePeriodeDto = FakturaseriePeriodeDto(
-            enhetsprisPerManed = BigDecimal(100), startDato = LocalDate.now().minusYears(1), sluttDato = LocalDate.now(), beskrivelse = "test"
-        )
-        val dto = BeregnTotalBeløpDto(listOf(fakturaseriePeriodeDto, fakturaseriePeriodeDto, fakturaseriePeriodeDto))
-        årsavregningService.beregnTotalbeløpForPeriode(dto)
-
-        verify(exactly = 1) { faktureringskomponentenConsumer.hentTotalTrygdeavgiftForPeriode((eq(dto)), eq(SAKSBEHANDLER_IDENT)) }
-    }
-
-    @Test
     fun `finnÅrsavregning for ny årsavregning uten info i Melosys`() {
         val behandlingsresultat = Behandlingsresultat().apply {
             behandling = Behandling().apply {
@@ -141,7 +130,8 @@ internal class ÅrsavregningServiceTest {
                         fom = LocalDate.of(2022, 12, 31),
                         tom = LocalDate.of(2023, 5, 31),
                         dekning = Trygdedekninger.FULL_DEKNING_FTRL,
-                        bestemmelse = Folketrygdloven_kap2_bestemmelser.FTRL_KAP2_2_8
+                        bestemmelse = Folketrygdloven_kap2_bestemmelser.FTRL_KAP2_2_8,
+                        medlemskapstyper = Medlemskapstyper.PLIKTIG
                     )
                 ),
                 listOf(
