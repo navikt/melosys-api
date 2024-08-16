@@ -16,7 +16,7 @@ class ArbeidsforholdConsumerConfig(@Value("\${arbeidsforhold.rest.url}") private
         webClientBuilder: WebClient.Builder,
         authFilterFactory: GenericAuthFilterFactory,
         correlationIdOutgoingFilter: CorrelationIdOutgoingFilter
-    ): ArbeidsforholdConsumer = ArbeidsforholdConsumer(
+    ) = ArbeidsforholdConsumer(
         webClientBuilder.baseUrl(url)
             .defaultHeader(NAV_CONSUMER_ID_NAME, MELOSYS_CONSUMER_ID)
             .filter(authFilterFactory.getAzureFilter(CLIENT_NAME))
