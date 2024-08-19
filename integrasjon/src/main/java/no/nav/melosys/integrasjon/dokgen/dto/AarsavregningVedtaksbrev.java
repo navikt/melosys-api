@@ -15,8 +15,8 @@ public class AarsavregningVedtaksbrev extends DokgenDto {
     public AarsavregningVedtaksbrev(AarsavregningVedtakBrevBestilling brevbestilling) {
         super(brevbestilling, Mottakerroller.BRUKER);
 
-        this.innledningFritekst = brevbestilling.getInnledningFritekst();
-        this.begrunnelseFritekst = brevbestilling.getBegrunnelseFritekst();
+        this.innledningFritekst = brevbestilling.getInnledningFritekstAarsavregning();
+        this.begrunnelseFritekst = brevbestilling.getBegrunnelseFritekstAarsavregning();
         this.datoMottatt = instantTilLocalDate(brevbestilling.getForsendelseMottatt());
     }
 

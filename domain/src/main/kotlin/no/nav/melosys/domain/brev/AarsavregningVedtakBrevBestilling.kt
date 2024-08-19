@@ -1,15 +1,15 @@
 package no.nav.melosys.domain.brev
 
 class AarsavregningVedtakBrevBestilling : DokgenBrevbestilling {
-    var innledningFritekst: String? = null
-    var begrunnelseFritekst: String? = null
+    var innledningFritekstAarsavregning: String? = null
+    var begrunnelseFritekstAarsavregning: String? = null
 
 
     constructor() : super()
 
     constructor(builder: Builder) : super(builder) {
-        this.innledningFritekst = builder.innledningFritekst
-        this.begrunnelseFritekst = builder.begrunnelseFritekst
+        this.innledningFritekstAarsavregning = builder.innledningFritekst
+        this.begrunnelseFritekstAarsavregning = builder.begrunnelseFritekst
     }
 
     override fun toBuilder(): Builder {
@@ -25,8 +25,8 @@ class AarsavregningVedtakBrevBestilling : DokgenBrevbestilling {
         constructor(aarsavregningVedtakBrevBestilling: AarsavregningVedtakBrevBestilling) : super(
             aarsavregningVedtakBrevBestilling
         ) {
-            this.innledningFritekst = aarsavregningVedtakBrevBestilling.innledningFritekst
-            this.begrunnelseFritekst = aarsavregningVedtakBrevBestilling.begrunnelseFritekst
+            this.innledningFritekst = aarsavregningVedtakBrevBestilling.innledningFritekstAarsavregning
+            this.begrunnelseFritekst = aarsavregningVedtakBrevBestilling.begrunnelseFritekstAarsavregning
         }
 
         fun medInnledningFritekst(innledningFritekst: String?): Builder {
