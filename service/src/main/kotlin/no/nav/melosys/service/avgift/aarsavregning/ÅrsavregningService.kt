@@ -11,12 +11,9 @@ import no.nav.melosys.domain.kodeverk.Medlemskapstyper
 import no.nav.melosys.domain.kodeverk.Trygdedekninger
 import no.nav.melosys.exception.FunksjonellException
 import no.nav.melosys.integrasjon.faktureringskomponenten.FaktureringskomponentenConsumer
-import no.nav.melosys.integrasjon.faktureringskomponenten.dto.BeregnTotalBeløpDto
-import no.nav.melosys.integrasjon.faktureringskomponenten.dto.FakturaseriePeriodeDto
 import no.nav.melosys.repository.AarsavregningRepository
 import no.nav.melosys.service.avgift.TrygdeavgiftService
 import no.nav.melosys.service.behandling.BehandlingsresultatService
-import no.nav.melosys.sikkerhet.context.SubjectHandler
 import org.apache.commons.beanutils.BeanUtils
 import org.springframework.stereotype.Service
 import org.springframework.transaction.annotation.Transactional
@@ -81,33 +78,29 @@ class ÅrsavregningService(
         return lagÅrsavregningModelFraÅrsavregning(årsavregning)
     }
 
-    public fun hentTotalAvgift(trygdeavgiftsperioder: List<Trygdeavgiftsperiode>): BigDecimal? {
+    fun hentTotalAvgift(trygdeavgiftsperioder: List<Trygdeavgiftsperiode>): BigDecimal? {
         if (trygdeavgiftsperioder.isEmpty()) {
             return null
         }
-        val fakturaseriePerioder = trygdeavgiftsperioder.map {
-            FakturaseriePeriodeDto(
-                startDato = it.periodeFra,
-                sluttDato = it.periodeTil,
-                enhetsprisPerManed = it.trygdeavgiftsbeløpMd.verdi,
-                beskrivelse = "FIXME"
+        val belopsperioder = trygdeavgiftsperioder.map {
+            Belopsperiode(
+                enhetspris = it.trygdeavgiftsbeløpMd.verdi,
+                fom = it.periodeFra,
+                tom = it.periodeTil,
             )
         }
-        val saksbehandlerIdent = SubjectHandler.getInstance().getUserID()
-        return faktureringskomponentenConsumer.hentTotalTrygdeavgiftForPeriode(BeregnTotalBeløpDto(fakturaseriePerioder), saksbehandlerIdent)
+        return BeløpBeregner.totalBeløpForAllePerioder(belopsperioder)
     }
 
-    public fun hentTotalInntekt(trygdeavgiftsperioder: List<Trygdeavgiftsperiode>): BigDecimal {
-        val fakturaseriePerioder = trygdeavgiftsperioder.map {
-            FakturaseriePeriodeDto(
-                startDato = it.periodeFra,
-                sluttDato = it.periodeTil,
-                enhetsprisPerManed = it.grunnlagInntekstperiode.avgiftspliktigInntektMnd.verdi,
-                beskrivelse = "FIXME"
+    fun hentTotalInntekt(trygdeavgiftsperioder: List<Trygdeavgiftsperiode>): BigDecimal {
+        val belopsperioder = trygdeavgiftsperioder.map {
+            Belopsperiode(
+                enhetspris = it.grunnlagInntekstperiode.avgiftspliktigInntektMnd.verdi,
+                fom = it.periodeFra,
+                tom = it.periodeTil,
             )
         }
-        val saksbehandlerIdent = SubjectHandler.getInstance().getUserID()
-        return faktureringskomponentenConsumer.hentTotalTrygdeavgiftForPeriode(BeregnTotalBeløpDto(fakturaseriePerioder), saksbehandlerIdent)
+        return BeløpBeregner.totalBeløpForAllePerioder(belopsperioder)
     }
 
     private fun replikerMedlemskapsperioder(
