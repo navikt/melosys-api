@@ -348,15 +348,18 @@ public class ProsessinstansService {
     }
 
     public void opprettProsessinstansIverksettVedtakFTRL(Behandling behandling, VedtakRequest request, Saksstatuser saksstatus) {
-        Prosessinstans prosessinstans = new ProsessinstansBuilder()
-            .medType(ProsessType.IVERKSETT_VEDTAK_FTRL)
-            .medBehandling(behandling)
-            .build();
+        // TODO: Implementer nødvendige steg for årsavregningsvedtak
+        if (!behandling.getType().equals(Behandlingstyper.ÅRSAVREGNING)) {
+            Prosessinstans prosessinstans = new ProsessinstansBuilder()
+                .medType(ProsessType.IVERKSETT_VEDTAK_FTRL)
+                .medBehandling(behandling)
+                .build();
 
-        prosessinstans.setData(SAKSSTATUS, saksstatus);
-        prosessinstans.setData(BETALINGSINTERVALL, request.getBetalingsintervall());
+            prosessinstans.setData(SAKSSTATUS, saksstatus);
+            prosessinstans.setData(BETALINGSINTERVALL, request.getBetalingsintervall());
 
-        lagre(prosessinstans);
+            lagre(prosessinstans);
+        }
     }
 
     public void opprettProsessinstansIverksettVedtakTrygdeavtale(Behandling behandling) {

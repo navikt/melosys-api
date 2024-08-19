@@ -149,6 +149,8 @@ public class DokgenBrevbestilling extends Brevbestilling {
         return distribusjonstype;
     }
 
+
+    // TODO: Skriv om til interface metode. Dersom metoden ikke er overridet i subklassen vil man få en ClassCastException i DokgenMalMapper.lagDokgenDtoFraBestilling
     public Builder toBuilder() {
         return new Builder(this);
     }

@@ -211,13 +211,16 @@ class DokgenMalMapper(
 
             Produserbaredokumenter.VEDTAK_OPPHOERT_MEDLEMSKAP -> VedtakOpphoertMedlemskap(brevbestilling as VedtakOpphoertMedlemskapBrevbestilling)
 
-            Produserbaredokumenter.AVSLAG_EFTA_STORBRITANNIA -> AvslagEftaStorbritannia(
-                brevbestilling as AvslagEftaStorbritanniaBrevbestilling, dokgenMapperDatahenter.hentBehandlingsresultat(brevbestilling
-                    .behandlingId).hentValidertPeriodeOmLovvalg(), dokgenMapperDatahenter.hentAvklartVirksomhet(brevbestilling.behandling).navn)
+                Produserbaredokumenter.AVSLAG_EFTA_STORBRITANNIA -> AvslagEftaStorbritannia(
+                brevbestilling as AvslagEftaStorbritanniaBrevbestilling, dokgenMapperDatahenter.hentBehandlingsresultat(
+                    brevbestilling
+                        .behandlingId
+                ).hentValidertPeriodeOmLovvalg(), dokgenMapperDatahenter.hentAvklartVirksomhet(brevbestilling.behandling).navn
+            )
 
             Produserbaredokumenter.AARSAVREGNING_VEDTAKSBREV -> AarsavregningVedtaksbrev(brevbestilling as AarsavregningVedtakBrevBestilling)
 
-        else -> throw FunksjonellException("ProduserbartDokument ${brevbestilling.produserbartdokument} er ikke støttet av melosys-dokgen")
+            else -> throw FunksjonellException("ProduserbartDokument ${brevbestilling.produserbartdokument} er ikke støttet av melosys-dokgen")
+        }
     }
-}
 }
