@@ -15,7 +15,8 @@
   "APP_NAME_FAKTURERINGSKOMPONENTEN": "faktureringskomponenten-q1",
   "APP_NAME_ARBEIDSFORHOLD": "aareg-services-nais-q1",
   "APP_NAME_INNTEKTSKOMPONENTEN": "inntektskomponenten",
-  "NAIS_CLUSTER_NAME_FAKTURERINGSKOMPONENTEN": "dev-gcp",
+  "APP_NAME_FELLESKODEVERK": "kodeverk-api",
+  "NAIS_CLUSTER_NAME_GCP": "dev-gcp",
   "APP_NAME_UTBETALING": "sokos-utbetaldata",
   "UNLEASH_ENVIRONMENT": "development"
 }
