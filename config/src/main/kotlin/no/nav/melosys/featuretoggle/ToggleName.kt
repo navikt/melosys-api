@@ -10,5 +10,4 @@ object ToggleName {
     const val MELOSYS_HINDRE_JOURNALFOERING_AV_FERDIGSTILTE_JOURNALPOSTER = "melosys.hindre-journalfoering-av-ferdigstilte-journalposter"
     const val MELOSYS_SKATTEHENDELSE_CONSUMER = "melosys.skattehendelse.consumer"
     const val MELOSYS_ÅRSAVREGNING = "melosys.arsavregning"
-    const val MELOSYS_AAREG_AZURE = "melosys.aareg.azure"
 }

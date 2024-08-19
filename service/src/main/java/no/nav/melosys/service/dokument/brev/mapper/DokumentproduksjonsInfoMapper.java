@@ -82,6 +82,10 @@ public class DokumentproduksjonsInfoMapper {
                 new DokumentproduksjonsInfo("orientering_anmodning_unntak",
                     DokumentKategoriKode.IB.getKode(),
                     ORIENTERING_ANMODNING_UNNTAK.getBeskrivelse()))
+            .put(ORIENTERING_TIL_ARBEIDSGIVER_OM_VEDTAK,
+                new DokumentproduksjonsInfo("orientering_til_arbeidsgiver_om_vedtak",
+                    DokumentKategoriKode.IB.getKode(),
+                    ORIENTERING_TIL_ARBEIDSGIVER_OM_VEDTAK.getBeskrivelse()))
             .put(GENERELT_FRITEKSTBREV_BRUKER,
                 new DokumentproduksjonsInfo("fritekstbrev",
                     DokumentKategoriKode.IB.getKode(),

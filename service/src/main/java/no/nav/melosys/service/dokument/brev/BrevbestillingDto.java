@@ -44,6 +44,7 @@ public final class BrevbestillingDto {
     private LocalDate betalingsfrist;
     private String annenPersonMottakerIdent;
     private LocalDate opphørtDato;
+    private boolean erInnvilgelse;
 
     public BrevbestillingDto() {
     }
@@ -80,7 +81,8 @@ public final class BrevbestillingDto {
         String fullmektigForBetaling,
         LocalDate betalingsfrist,
         String annenPersonMottakerIdent,
-        LocalDate opphørtDato) {
+        LocalDate opphørtDato,
+        boolean erInnvilgelse) {
 
         this.produserbardokument = produserbardokument;
         this.mottaker = mottaker;
@@ -114,6 +116,7 @@ public final class BrevbestillingDto {
         this.betalingsfrist = betalingsfrist;
         this.annenPersonMottakerIdent = annenPersonMottakerIdent;
         this.opphørtDato = opphørtDato;
+        this.erInnvilgelse = erInnvilgelse;
     }
 
 
@@ -155,7 +158,8 @@ public final class BrevbestillingDto {
             null,
             null,
             null,
-            null
+            null,
+            false
         );
     }
 
@@ -410,7 +414,7 @@ public final class BrevbestillingDto {
             Objects.equals(begrunnelseKode, that.begrunnelseKode) && Objects.equals(ytterligereInformasjon, that.ytterligereInformasjon) &&
             Objects.equals(fakturanummer, that.fakturanummer) && betalingsstatus == that.betalingsstatus &&
             Objects.equals(fullmektigForBetaling, that.fullmektigForBetaling) && Objects.equals(betalingsfrist, that.betalingsfrist) &&
-            Objects.equals(annenPersonMottakerIdent, that.annenPersonMottakerIdent) && Objects.equals(opphørtDato, that.opphørtDato);
+            Objects.equals(annenPersonMottakerIdent, that.annenPersonMottakerIdent) && Objects.equals(opphørtDato, that.opphørtDato) && Objects.equals(erInnvilgelse, that.erInnvilgelse);
     }
 
     @Override
@@ -453,6 +457,7 @@ public final class BrevbestillingDto {
             ", betalingsfrist=" + betalingsfrist +
             ", annenPersonMottakerIdent='" + annenPersonMottakerIdent + '\'' +
             ", opphørtDato='" + opphørtDato + '\'' +
+            ", erInnvilgelse='" + erInnvilgelse + '\'' +
             '}';
     }
 
@@ -494,5 +499,13 @@ public final class BrevbestillingDto {
 
     public void setAnnenPersonMottakerIdent(String annenPersonMottakerIdent) {
         this.annenPersonMottakerIdent = annenPersonMottakerIdent;
+    }
+
+    public boolean isErInnvilgelse() {
+        return erInnvilgelse;
+    }
+
+    public void setErInnvilgelse(boolean erInnvilgelse) {
+        this.erInnvilgelse = erInnvilgelse;
     }
 }

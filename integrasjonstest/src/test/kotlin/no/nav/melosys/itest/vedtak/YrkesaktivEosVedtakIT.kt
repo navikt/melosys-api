@@ -176,7 +176,8 @@ class YrkesaktivEosVedtakIT(
         executeAndWait(
             mapOf(
                 ProsessType.IVERKSETT_VEDTAK_EOS to 1,
-                ProsessType.SEND_BREV to 3
+                ProsessType.SEND_BREV to 3,
+                ProsessType.OPPRETT_OG_DISTRIBUER_BREV to 1
             )
         ) {
             vedtaksfattingFasade.fattVedtak(behandling.id, vedtakRequest)
