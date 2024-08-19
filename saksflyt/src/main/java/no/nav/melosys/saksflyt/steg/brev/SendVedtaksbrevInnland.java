@@ -114,7 +114,7 @@ public class SendVedtaksbrevInnland implements StegBehandler {
         prosessinstansService.opprettProsessinstanserSendBrev(behandling, brevbestilling, mottakerListe);
 
         if (behandling.getFagsak().harAktørMedRolleType(Aktoersroller.ARBEIDSGIVER)) {
-            DoksysBrevbestilling brevbestillingArbeidsgiver = lagDoksysBrevbestilling(AVSLAG_ARBEIDSGIVER, saksbehandler, fritekst);
+            DoksysBrevbestilling brevbestillingArbeidsgiver = lagDoksysBrevbestilling(unleash.isEnabled(ToggleName.MELOSYS_KONVENSJON_EFTA_LAND_OG_STORBRITANNIA) ? ORIENTERING_TIL_ARBEIDSGIVER_OM_VEDTAK : AVSLAG_ARBEIDSGIVER, saksbehandler, fritekst);
             prosessinstansService.opprettProsessinstansSendBrev(behandling, brevbestillingArbeidsgiver, Mottaker.medRolle(Mottakerroller.ARBEIDSGIVER));
         }
     }
@@ -186,8 +186,9 @@ public class SendVedtaksbrevInnland implements StegBehandler {
         if (behandling.getFagsak().harAktørMedRolleType(Aktoersroller.ARBEIDSGIVER)
             && !lovvalgsperiode.erArtikkel13()
             && !lovvalgsperiode.erArtikkel11_4()) {
+
             DoksysBrevbestilling brevbestilling = new DoksysBrevbestilling.Builder()
-                .medProduserbartDokument(INNVILGELSE_ARBEIDSGIVER)
+                .medProduserbartDokument(unleash.isEnabled(ToggleName.MELOSYS_KONVENSJON_EFTA_LAND_OG_STORBRITANNIA) ? ORIENTERING_TIL_ARBEIDSGIVER_OM_VEDTAK : INNVILGELSE_ARBEIDSGIVER)
                 .medAvsenderID(saksbehandler)
                 .build();
             prosessinstansService.opprettProsessinstansSendBrev(behandling, brevbestilling, Mottaker.medRolle(Mottakerroller.ARBEIDSGIVER));
