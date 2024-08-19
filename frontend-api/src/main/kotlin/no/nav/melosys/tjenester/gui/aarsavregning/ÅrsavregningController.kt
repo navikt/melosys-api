@@ -55,7 +55,7 @@ class ÅrsavregningController(
             aar = årsavregningModel.år,
             tidligereGrunnlagsopplysninger = hentTidligereGrunnlagsopplysninger(årsavregningModel),
             avvikFunnet = årsavregningModel.nyttGrunnlag != null,
-            nyttGrunnlag = mapTrygdeavgiftsgrunnlag(årsavregningModel.nyttGrunnlag),
+            nyttGrunnlag = if (årsavregningModel.nyttGrunnlag == null) null else mapTrygdeavgiftsgrunnlag(årsavregningModel.nyttGrunnlag),
             endeligAvgift = null,
             avregning = AvregningDto(
                 nyttTotalbeloep = årsavregningModel.nyttTotalbeloep?.intValueExact() ?: 0,
@@ -65,7 +65,7 @@ class ÅrsavregningController(
         )
 
     private fun mapTrygdeavgiftsgrunnlag(trygdeavgiftsgrunnlag: Trygdeavgiftsgrunnlag?) =
-         TrygdeavgiftsgrunnlagDto(
+        TrygdeavgiftsgrunnlagDto(
             medlemskapsperioder = trygdeavgiftsgrunnlag?.medlemskapsperioder?.map {
                 MedlemskapsperiodeDto(
                     0,
@@ -93,7 +93,8 @@ class ÅrsavregningController(
                     it.fom,
                     it.tom,
                 )
-            }.orEmpty())
+            }.orEmpty()
+        )
 
 
     private fun hentTidligereGrunnlagsopplysninger(årsavregningModel: ÅrsavregningModel): TidligereGrunnlagsopplysningerDto? {

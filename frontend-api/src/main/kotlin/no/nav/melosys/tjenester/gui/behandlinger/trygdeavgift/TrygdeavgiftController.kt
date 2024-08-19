@@ -74,4 +74,11 @@ class TrygdeavgiftController(
         aksesskontroll.autoriser(behandlingID)
         return ResponseEntity.ok(FakturamottakerDto(trygdeavgiftsberegningService.finnFakturamottakerNavn(behandlingID)))
     }
+
+    @DeleteMapping
+    fun deleteÅrsavregningPerioder(@PathVariable("behandlingID") behandlingID: Long): ResponseEntity<Unit> {
+        aksesskontroll.autoriser(behandlingID)
+        trygdeavgiftsberegningService.slettTrygdeavgitsperioderPåBehandlingsresultat(behandlingID)
+        return ResponseEntity.noContent().build()
+    }
 }

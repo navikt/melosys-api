@@ -72,7 +72,8 @@ class ÅrsavregningService(
             aar = gjelderÅr
             this.behandlingsresultat = behandlingsresultat
             tidligereBehandlingsresultat = tidligereBehandlingsresultatMedAvgift
-            tidligereFakturertBeloep = hentTotalAvgift(tidligereBehandlingsresultat?.trygdeavgiftsperioder?.filter { it.overlapperMedÅr(gjelderÅr) }.orEmpty())
+            tidligereFakturertBeloep =
+                hentTotalAvgift(tidligereBehandlingsresultat?.trygdeavgiftsperioder?.filter { it.overlapperMedÅr(gjelderÅr) }.orEmpty())
         }.also {
             behandlingsresultatService.lagre(behandlingsresultat)
         }
@@ -81,7 +82,7 @@ class ÅrsavregningService(
     }
 
     public fun hentTotalAvgift(trygdeavgiftsperioder: List<Trygdeavgiftsperiode>): BigDecimal? {
-        if(trygdeavgiftsperioder.isEmpty()){
+        if (trygdeavgiftsperioder.isEmpty()) {
             return null
         }
         val fakturaseriePerioder = trygdeavgiftsperioder.map {
@@ -109,12 +110,16 @@ class ÅrsavregningService(
         return faktureringskomponentenConsumer.hentTotalTrygdeavgiftForPeriode(BeregnTotalBeløpDto(fakturaseriePerioder), saksbehandlerIdent)
     }
 
-    private fun replikerMedlemskapsperioder(behandlingsresultat: Behandlingsresultat, tidligereBehandlingsresultat: Behandlingsresultat?, gjelderÅr: Int) {
+    private fun replikerMedlemskapsperioder(
+        behandlingsresultat: Behandlingsresultat,
+        tidligereBehandlingsresultat: Behandlingsresultat?,
+        gjelderÅr: Int
+    ) {
         behandlingsresultat.medlemskapsperioder.clear()
         behandlingsresultatService.lagreOgFlush(behandlingsresultat)
         if (tidligereBehandlingsresultat != null) {
             for (medlemskapsperiodeOriginal in tidligereBehandlingsresultat.medlemskapsperioder) {
-                if(medlemskapsperiodeOriginal.overlapperMedÅr(gjelderÅr)) {
+                if (medlemskapsperiodeOriginal.overlapperMedÅr(gjelderÅr)) {
                     val medlemskapsperiodeReplika = BeanUtils.cloneBean(medlemskapsperiodeOriginal) as Medlemskapsperiode
                     medlemskapsperiodeReplika.behandlingsresultat = behandlingsresultat
                     medlemskapsperiodeReplika.trygdeavgiftsperioder = HashSet()
@@ -126,7 +131,6 @@ class ÅrsavregningService(
         }
     }
 
-    // TODO [MELOSYS-6757] mangler støtte for årsavregning uten tidligere behandling
     private fun lagÅrsavregningModelFraÅrsavregning(årsavregning: Årsavregning): ÅrsavregningModel {
         val år = årsavregning.aar
 
@@ -163,7 +167,7 @@ class ÅrsavregningService(
 
     private fun hentNyttTrygdeavgiftsgrunnlag(årsavregning: Årsavregning): Trygdeavgiftsgrunnlag? {
         val behandlingsresultat = årsavregning.behandlingsresultat
-        if (behandlingsresultat.medlemskapsperioder.isEmpty() && behandlingsresultat.hentSkatteforholdTilNorge()
+        if (behandlingsresultat.hentSkatteforholdTilNorge()
                 .isEmpty() && behandlingsresultat.hentInntektsperioder().isEmpty()
         ) {
             return null
@@ -198,7 +202,11 @@ data class Trygdeavgiftsgrunnlag(
 )
 
 data class MedlemskapsperiodeForAvgift(
-    val fom: LocalDate, val tom: LocalDate, val dekning: Trygdedekninger, val bestemmelse: Folketrygdloven_kap2_bestemmelser, val medlemskapstyper: Medlemskapstyper
+    val fom: LocalDate,
+    val tom: LocalDate,
+    val dekning: Trygdedekninger,
+    val bestemmelse: Folketrygdloven_kap2_bestemmelser,
+    val medlemskapstyper: Medlemskapstyper
 ) {
     constructor(medlemskapsperiode: Medlemskapsperiode) : this(
         fom = medlemskapsperiode.fom,
