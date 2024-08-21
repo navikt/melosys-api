@@ -33,6 +33,7 @@ import no.nav.melosys.domain.person.Persondata;
         @JsonSubTypes.Type(value = OrienteringAnmodningUnntakBrevbestilling.class),
         @JsonSubTypes.Type(value = InnvilgelseEftaStorbritanniaBrevbestilling.class),
         @JsonSubTypes.Type(value = AvslagEftaStorbritanniaBrevbestilling.class),
+        @JsonSubTypes.Type(value = ÅrsavregningVedtakBrevBestilling.class),
         @JsonSubTypes.Type(value = OrienteringTilArbeidsgiverOmVedtakBrevbestilling.class),
     }
 )
@@ -149,6 +150,8 @@ public class DokgenBrevbestilling extends Brevbestilling {
         return distribusjonstype;
     }
 
+
+    // TODO: Skriv om til interface metode. Dersom metoden ikke er overridet i subklassen vil man få en ClassCastException i DokgenMalMapper.lagDokgenDtoFraBestilling
     public Builder toBuilder() {
         return new Builder(this);
     }

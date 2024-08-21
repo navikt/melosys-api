@@ -39,7 +39,8 @@ object BrevMottakerMap {
             Mottakerliste(Mottakerroller.ARBEIDSGIVER, listOf(BrevkopiRegel.BRUKER_FÅR_KOPI)),
         Produserbaredokumenter.GENERELT_FRITEKSTBREV_VIRKSOMHET to Mottakerliste(Mottakerroller.VIRKSOMHET),
         Produserbaredokumenter.FRITEKSTBREV to Mottakerliste(Mottakerroller.NORSK_MYNDIGHET),
-        Produserbaredokumenter.UTENLANDSK_TRYGDEMYNDIGHET_FRITEKSTBREV to Mottakerliste(Mottakerroller.UTENLANDSK_TRYGDEMYNDIGHET)
+        Produserbaredokumenter.UTENLANDSK_TRYGDEMYNDIGHET_FRITEKSTBREV to Mottakerliste(Mottakerroller.UTENLANDSK_TRYGDEMYNDIGHET),
+        Produserbaredokumenter.AARSAVREGNING_VEDTAKSBREV to Mottakerliste(Mottakerroller.BRUKER)
     )
 
     @JvmStatic

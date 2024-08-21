@@ -6,6 +6,7 @@ import no.nav.melosys.domain.kodeverk.*
 import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingsresultattyper
 import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingsstatus
 import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingstema
+import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingstyper
 import no.nav.melosys.domain.kodeverk.brev.Produserbaredokumenter
 import no.nav.melosys.exception.FunksjonellException
 import no.nav.melosys.saksflytapi.ProsessinstansService
@@ -71,6 +72,9 @@ class FtrlVedtakService(
         val medlemskapstype = behandlingsresultat.medlemskapsperioder?.firstOrNull()?.medlemskapstype
 
         return when {
+            behandlingstema.erYrkesaktiv() && behandling.type.equals(Behandlingstyper.ÅRSAVREGNING) ->
+                lagBrevbestillingAarsavregning(request, Produserbaredokumenter.AARSAVREGNING_VEDTAKSBREV)
+
             behandlingstema.erIkkeYrkesaktiv() && medlemskapstype.erPliktig() ->
                 lagBrevbestillingUtenFritekster(request, Produserbaredokumenter.IKKE_YRKESAKTIV_PLIKTIG_FTRL)
 
@@ -125,6 +129,16 @@ class FtrlVedtakService(
             mottaker = Mottakerroller.BRUKER
             kopiMottakere = request.kopiMottakere
             bestillersId = request.bestillersId
+        }
+
+    private fun lagBrevbestillingAarsavregning(request: FattVedtakRequest, produserbaredokument: Produserbaredokumenter): BrevbestillingDto =
+        BrevbestillingDto().apply {
+            produserbardokument = produserbaredokument
+            mottaker = Mottakerroller.BRUKER
+            kopiMottakere = request.kopiMottakere
+            bestillersId = request.bestillersId
+            innledningFritekst = request.innledningFritekst
+            begrunnelseFritekst = request.begrunnelseFritekst
         }
 
 
