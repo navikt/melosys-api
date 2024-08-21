@@ -10,14 +10,9 @@ import no.nav.melosys.domain.kodeverk.Folketrygdloven_kap2_bestemmelser
 import no.nav.melosys.domain.kodeverk.Medlemskapstyper
 import no.nav.melosys.domain.kodeverk.Trygdedekninger
 import no.nav.melosys.exception.FunksjonellException
-import no.nav.melosys.integrasjon.faktureringskomponenten.FaktureringskomponentenConsumer
-import no.nav.melosys.integrasjon.faktureringskomponenten.dto.BeregnTotalBeløpDto
-import no.nav.melosys.integrasjon.faktureringskomponenten.dto.FakturaseriePeriodeDto
 import no.nav.melosys.repository.AarsavregningRepository
 import no.nav.melosys.service.avgift.TrygdeavgiftService
 import no.nav.melosys.service.behandling.BehandlingsresultatService
-import no.nav.melosys.sikkerhet.context.SubjectHandler
-import no.nav.melosys.sikkerhet.context.ThreadLocalAccessInfo
 import org.apache.commons.beanutils.BeanUtils
 import org.springframework.stereotype.Service
 import org.springframework.transaction.annotation.Transactional
@@ -28,8 +23,8 @@ import java.time.LocalDate
 class ÅrsavregningService(
     private val aarsavregningRepository: AarsavregningRepository,
     private val behandlingsresultatService: BehandlingsresultatService,
-    private val faktureringskomponentenConsumer: FaktureringskomponentenConsumer,
     private val trygdeavgiftService: TrygdeavgiftService,
+    private val avgiftService: AvgiftService
 ) {
 
     @Transactional(readOnly = true)
@@ -66,7 +61,13 @@ class ÅrsavregningService(
         }
 
         val tidligereBehandlingsresultatMedAvgift = finnTidligereBehandlingsresultatMedAvgift(behandlingsresultat, gjelderÅr)
-        replikerMedlemskapsperioder(behandlingsresultat, tidligereBehandlingsresultatMedAvgift, gjelderÅr)
+        if (tidligereBehandlingsresultatMedAvgift != null) {
+            replikerMedlemskapsperioder(
+                behandlingsresultat,
+                tidligereBehandlingsresultatMedAvgift,
+                gjelderÅr
+            )
+        }
 
         val årsavregning = Årsavregning().apply {
             behandlingsresultat.årsavregning = this
@@ -74,41 +75,12 @@ class ÅrsavregningService(
             this.behandlingsresultat = behandlingsresultat
             tidligereBehandlingsresultat = tidligereBehandlingsresultatMedAvgift
             tidligereFakturertBeloep =
-                hentTotalAvgift(tidligereBehandlingsresultat?.trygdeavgiftsperioder?.filter { it.overlapperMedÅr(gjelderÅr) }.orEmpty())
+                avgiftService.hentTotalAvgift(tidligereBehandlingsresultat?.trygdeavgiftsperioder?.filter { it.overlapperMedÅr(gjelderÅr) }.orEmpty())
         }.also {
             behandlingsresultatService.lagre(behandlingsresultat)
         }
 
         return lagÅrsavregningModelFraÅrsavregning(årsavregning)
-    }
-
-    public fun hentTotalAvgift(trygdeavgiftsperioder: List<Trygdeavgiftsperiode>): BigDecimal? {
-        if (trygdeavgiftsperioder.isEmpty()) {
-            return null
-        }
-        val fakturaseriePerioder = trygdeavgiftsperioder.map {
-            FakturaseriePeriodeDto(
-                startDato = it.periodeFra,
-                sluttDato = it.periodeTil,
-                enhetsprisPerManed = it.trygdeavgiftsbeløpMd.verdi,
-                beskrivelse = "FIXME"
-            )
-        }
-        val saksbehandlerIdent = SubjectHandler.getInstance().getUserID() ?: ThreadLocalAccessInfo.getSaksbehandler()
-        return faktureringskomponentenConsumer.hentTotalTrygdeavgiftForPeriode(BeregnTotalBeløpDto(fakturaseriePerioder), saksbehandlerIdent)
-    }
-
-    public fun hentTotalInntekt(trygdeavgiftsperioder: List<Trygdeavgiftsperiode>): BigDecimal {
-        val fakturaseriePerioder = trygdeavgiftsperioder.map {
-            FakturaseriePeriodeDto(
-                startDato = it.periodeFra,
-                sluttDato = it.periodeTil,
-                enhetsprisPerManed = it.grunnlagInntekstperiode.avgiftspliktigInntektMnd.verdi,
-                beskrivelse = "FIXME"
-            )
-        }
-        val saksbehandlerIdent = SubjectHandler.getInstance().getUserID() ?: ThreadLocalAccessInfo.getSaksbehandler()
-        return faktureringskomponentenConsumer.hentTotalTrygdeavgiftForPeriode(BeregnTotalBeløpDto(fakturaseriePerioder), saksbehandlerIdent)
     }
 
     private fun replikerMedlemskapsperioder(
@@ -125,6 +97,7 @@ class ÅrsavregningService(
                     medlemskapsperiodeReplika.behandlingsresultat = behandlingsresultat
                     medlemskapsperiodeReplika.trygdeavgiftsperioder = HashSet()
                     medlemskapsperiodeReplika.avkortFomDato(gjelderÅr)
+                    medlemskapsperiodeReplika.avkortTomDato(gjelderÅr)
                     medlemskapsperiodeReplika.id = null
                     behandlingsresultat.addMedlemskapsperiode(medlemskapsperiodeReplika)
                 }

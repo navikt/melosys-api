@@ -5,6 +5,7 @@ import no.nav.melosys.domain.kodeverk.Inntektskildetype
 import no.nav.melosys.domain.kodeverk.InnvilgelsesResultat
 import no.nav.melosys.domain.kodeverk.Skatteplikttype
 import no.nav.melosys.domain.kodeverk.Trygdedekninger
+import no.nav.melosys.service.avgift.aarsavregning.AvgiftService
 import no.nav.melosys.service.avgift.aarsavregning.Trygdeavgiftsgrunnlag
 import no.nav.melosys.service.avgift.aarsavregning.ÅrsavregningModel
 import no.nav.melosys.service.avgift.aarsavregning.ÅrsavregningService
@@ -23,6 +24,7 @@ import java.time.LocalDate
 @RequestMapping("/aarsavregninger")
 class ÅrsavregningController(
     private val årsavregningService: ÅrsavregningService,
+    private val avgiftService: AvgiftService
 ) {
 
     @GetMapping("/{behandlingID}")
@@ -113,7 +115,7 @@ class ÅrsavregningController(
                             avgiftPerMd = it.trygdeavgiftsbeløpMd.verdi.intValueExact()
                         )
                     },
-                    totalInntekt = årsavregningService.hentTotalInntekt(årsavregningModel.tidligereAvgift),
+                    totalInntekt = avgiftService.hentTotalInntekt(årsavregningModel.tidligereAvgift),
                     totalAvgift = årsavregningModel.tidligereFakturertBeloep!!
                 )
             )

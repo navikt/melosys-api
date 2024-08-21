@@ -185,9 +185,15 @@ public class Medlemskapsperiode implements ErPeriode, HarBestemmelse<Folketrygdl
         this.trygdeavgiftsperioder = trygdeavgiftsperioder;
     }
 
-    public void avkortFomDato(int gjelderÅr) {
-        if(this.overlapperMedÅr(gjelderÅr) && this.tom.getYear() > gjelderÅr){
+    public void avkortTomDato(int gjelderÅr) {
+        if (this.overlapperMedÅr(gjelderÅr) && this.tom.getYear() > gjelderÅr) {
             this.tom = LocalDate.of(gjelderÅr, 12, 31);
+        }
+    }
+
+    public void avkortFomDato(int gjelderÅr) {
+        if (this.overlapperMedÅr(gjelderÅr) && this.fom.getYear() < gjelderÅr) {
+            this.fom = LocalDate.of(gjelderÅr, 1, 1);
         }
     }
 }

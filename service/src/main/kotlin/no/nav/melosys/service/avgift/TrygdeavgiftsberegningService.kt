@@ -65,12 +65,6 @@ class TrygdeavgiftsberegningService(
         }
     }
 
-    @Transactional
-    fun slettTrygdeavgitsperioderPåBehandlingsresultat(behandlingID: Long) {
-        val behandlingsresultat = behandlingsresultatService.hentBehandlingsresultat(behandlingID)
-        behandlingsresultat.clearTrygdeavgiftsperioder()
-    }
-
     private fun leggTilNyeTrygdeavgiftsperioderForPliktigMedlemskapSkattepliktig(
         oppdaterTrygdeavgiftsgrunnlagRequest: OppdaterTrygdeavgiftsgrunnlagRequest,
         behandlingsresultat: Behandlingsresultat,

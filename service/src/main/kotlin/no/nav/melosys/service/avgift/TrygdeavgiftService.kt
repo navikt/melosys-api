@@ -52,6 +52,12 @@ class TrygdeavgiftService(
                 it.trygdeavgiftsperioder.any { it.overlapperMedÅr(år) }
             }?.behandling
 
+    @Transactional
+    fun slettTrygdeavgiftsperioderPåBehandlingsresultat(behandlingID: Long) {
+        val behandlingsresultat = behandlingsresultatService.hentBehandlingsresultat(behandlingID)
+        behandlingsresultat.clearTrygdeavgiftsperioder()
+    }
+
     fun harFakturerbarTrygdeavgift(resultat: Behandlingsresultat, sjekkFakturaserie: Boolean = false) =
         harTrygdeavgift(resultat, sjekkFakturaserie) && trygdeavgiftMottakerService.skalBetalesTilNav(resultat)
 

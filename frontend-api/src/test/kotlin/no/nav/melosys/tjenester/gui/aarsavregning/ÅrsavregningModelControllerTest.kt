@@ -11,10 +11,7 @@ import no.nav.melosys.domain.kodeverk.Inntektskildetype
 import no.nav.melosys.domain.kodeverk.Medlemskapstyper
 import no.nav.melosys.domain.kodeverk.Skatteplikttype
 import no.nav.melosys.domain.kodeverk.Trygdedekninger
-import no.nav.melosys.service.avgift.aarsavregning.MedlemskapsperiodeForAvgift
-import no.nav.melosys.service.avgift.aarsavregning.Trygdeavgiftsgrunnlag
-import no.nav.melosys.service.avgift.aarsavregning.ÅrsavregningModel
-import no.nav.melosys.service.avgift.aarsavregning.ÅrsavregningService
+import no.nav.melosys.service.avgift.aarsavregning.*
 import org.junit.jupiter.api.Test
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest
@@ -33,6 +30,9 @@ internal class ÅrsavregningModelControllerTest {
 
     @MockkBean
     private lateinit var årsavregningService: ÅrsavregningService
+
+    @MockkBean
+    private lateinit var avgiftService: AvgiftService
 
     @Test
     fun `hent avregning basert på ID`() {
@@ -118,7 +118,7 @@ internal class ÅrsavregningModelControllerTest {
             nyttTotalbeloep = BigDecimal(24280.0),
             tilFaktureringBeloep = BigDecimal(3110.0)
         )
-        every { årsavregningService.hentTotalInntekt(any()) } returns BigDecimal(42)
+        every { avgiftService.hentTotalInntekt(any()) } returns BigDecimal(42)
 
 
         val expectedJson = """{

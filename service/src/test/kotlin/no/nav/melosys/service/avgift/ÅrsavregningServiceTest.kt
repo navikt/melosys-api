@@ -14,12 +14,8 @@ import no.nav.melosys.domain.kodeverk.*
 import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingsresultattyper
 import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingstyper
 import no.nav.melosys.exception.FunksjonellException
-import no.nav.melosys.integrasjon.faktureringskomponenten.FaktureringskomponentenConsumer
 import no.nav.melosys.repository.AarsavregningRepository
-import no.nav.melosys.service.avgift.aarsavregning.MedlemskapsperiodeForAvgift
-import no.nav.melosys.service.avgift.aarsavregning.Trygdeavgiftsgrunnlag
-import no.nav.melosys.service.avgift.aarsavregning.ÅrsavregningModel
-import no.nav.melosys.service.avgift.aarsavregning.ÅrsavregningService
+import no.nav.melosys.service.avgift.aarsavregning.*
 import no.nav.melosys.service.behandling.BehandlingsresultatService
 import no.nav.melosys.sikkerhet.context.SpringSubjectHandler
 import no.nav.melosys.sikkerhet.context.TestSubjectHandler
@@ -40,22 +36,20 @@ internal class ÅrsavregningServiceTest {
     private lateinit var behandlingsresultatService: BehandlingsresultatService
 
     @RelaxedMockK
-    private lateinit var faktureringskomponentenConsumer: FaktureringskomponentenConsumer
+    private lateinit var avgiftService: AvgiftService
 
     @RelaxedMockK
     private lateinit var trygdeavgiftService: TrygdeavgiftService
 
     private lateinit var årsavregningService: ÅrsavregningService
 
-    val SAKSBEHANDLER_IDENT = "Z990007"
-
     @BeforeEach
     fun setup() {
         årsavregningService = ÅrsavregningService(
             aarsavregningRepository,
             behandlingsresultatService,
-            faktureringskomponentenConsumer,
             trygdeavgiftService,
+            avgiftService,
         )
         SpringSubjectHandler.set(TestSubjectHandler())
     }
