@@ -1,9 +1,5 @@
 package no.nav.melosys.saksflyt.steg.behandling;
 
-import java.time.LocalDate;
-import java.util.Optional;
-
-import com.google.common.collect.Lists;
 import no.nav.melosys.domain.Behandling;
 import no.nav.melosys.domain.Fagsak;
 import no.nav.melosys.domain.FagsakTestFactory;
@@ -23,6 +19,9 @@ import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
+
+import java.time.LocalDate;
+import java.util.Optional;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatExceptionOfType;
@@ -56,6 +55,10 @@ class OpprettNyBehandlingFraSedTest {
     @Test
     void utfør_gsakSaksnummerIkkeSatt_forventException() {
         Prosessinstans prosessinstans = new Prosessinstans();
+        MelosysEessiMelding eessiMelding = new MelosysEessiMelding();
+        eessiMelding.setErEndring(false);
+        prosessinstans.setData(ProsessDataKey.EESSI_MELDING, eessiMelding);
+
         assertThatExceptionOfType(TekniskException.class)
             .isThrownBy(() -> opprettNyBehandlingFraSed.utfør(prosessinstans))
             .withMessageContaining("ArkivsakID kan ikke være null");
@@ -65,6 +68,11 @@ class OpprettNyBehandlingFraSedTest {
     void utfør_behandlingstypeIkkeSatt_forventException() {
         Prosessinstans prosessinstans = new Prosessinstans();
         prosessinstans.setData(ProsessDataKey.GSAK_SAK_ID, 123L);
+
+        MelosysEessiMelding eessiMelding = new MelosysEessiMelding();
+        eessiMelding.setErEndring(false);
+
+        prosessinstans.setData(ProsessDataKey.EESSI_MELDING, eessiMelding);
 
         assertThatExceptionOfType(TekniskException.class)
             .isThrownBy(() -> opprettNyBehandlingFraSed.utfør(prosessinstans))

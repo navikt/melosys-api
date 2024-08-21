@@ -182,6 +182,7 @@ internal class SaksflytOppstartIT(
         sedType = "X001"
         sedId = "komptest oppstart"
         rinaSaksnummer = "Rina brief case"
+        erEndring = false
     }
 
     fun applicationReadyEvent(): ApplicationReadyEvent {

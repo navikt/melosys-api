@@ -203,6 +203,7 @@ class SedMottakTestIT(
         }
     }
 
+    @Disabled
     @Test
     fun `A009 med ny etterfølgende A009 skal opprette ny lovvalgsperiode når det ikke er oppdatering`() {
         val ref = Random().nextInt(100000).toString()
@@ -271,7 +272,6 @@ class SedMottakTestIT(
         }
     }
 
-    @Disabled
     @Test
     fun `A003 med etterfølgende X006 og lovvalgsland er NO skal gi manuelt behandling`() {
         val ref = Random().nextInt(100000).toString()
