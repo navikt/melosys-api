@@ -28,6 +28,9 @@ import org.springframework.transaction.annotation.Transactional;
 import static no.nav.melosys.domain.Preferanse.PreferanseEnum.RESERVERT_FRA_A1;
 import static no.nav.melosys.domain.brev.BrevkopiRegel.*;
 import static no.nav.melosys.domain.kodeverk.brev.Produserbaredokumenter.*;
+import static no.nav.melosys.domain.kodeverk.lovvalgsbestemmelser.Lovvalgbestemmelser_konv_efta_storbritannia.KONV_EFTA_STORBRITANNIA_ART13_4_2;
+import static no.nav.melosys.domain.kodeverk.lovvalgsbestemmelser.Tilleggsbestemmelser_883_2004.FO_883_2004_ART11_4_1;
+import static no.nav.melosys.domain.kodeverk.lovvalgsbestemmelser.Tilleggsbestemmelser_konv_efta_storbritannia.KONV_EFTA_STORBRITANNIA_ART13_4_1;
 
 @Service
 public class BrevmottakerService {
@@ -251,9 +254,13 @@ public class BrevmottakerService {
     private boolean kanReservereMotA1(Behandling behandling) {
         Lovvalgsperiode lovvalgsperiode =
             behandlingsresultatService.hentBehandlingsresultat(behandling.getId()).hentLovvalgsperiode();
-        return lovvalgsperiode.erArtikkel12() || lovvalgsperiode.erArtikkel11_4()
+        return lovvalgsperiode.erArtikkel12()
+            || lovvalgsperiode.erArtikkel11_4()
             || lovvalgsperiode.getBestemmelse() == Lovvalgbestemmelser_883_2004.FO_883_2004_ART11_3B
-            || lovvalgsperiode.getBestemmelse() == Lovvalgbestemmelser_konv_efta_storbritannia.KONV_EFTA_STORBRITANNIA_ART13_3B;
+            || lovvalgsperiode.getBestemmelse() == Lovvalgbestemmelser_konv_efta_storbritannia.KONV_EFTA_STORBRITANNIA_ART13_3B
+            || lovvalgsperiode.getTilleggsbestemmelse() == FO_883_2004_ART11_4_1
+            || lovvalgsperiode.getBestemmelse() == KONV_EFTA_STORBRITANNIA_ART13_4_2
+            || lovvalgsperiode.getTilleggsbestemmelse() == KONV_EFTA_STORBRITANNIA_ART13_4_1;
     }
 
     private boolean myndighetØnskerA1(UtenlandskMyndighet utenlandskMyndighet) {

@@ -35,8 +35,6 @@ class OrienteringTilArbeidsgiverOmVedtakMapper(
             .findFirst().get().navn
         val vilkaarResultat = vilkaarsresultatService.finnVilkaarsresultat(behandlingID, Vilkaar.VESENTLIG_VIRKSOMHET)
 
-
-
         val erInnvilgelse = brevbestilling.erInnvilgelse || behandlingsresultat.erInnvilgelse()
         var erVesentligVirksomhetOppfyllt = false
         var vesentligVirksomhetBegrunnelser = listOf<String>()

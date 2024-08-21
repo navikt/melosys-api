@@ -94,10 +94,7 @@ public interface PeriodeOmLovvalg extends ErPeriode, HarBestemmelse<LovvalgBeste
     }
 
     default boolean erArtikkel11_4() {
-        return getBestemmelse() == FO_883_2004_ART11_4_2
-            || getTilleggsbestemmelse() == FO_883_2004_ART11_4_1
-            || getBestemmelse() == KONV_EFTA_STORBRITANNIA_ART13_4_2
-            || getTilleggsbestemmelse() == KONV_EFTA_STORBRITANNIA_ART13_4_1;
+        return getBestemmelse() == FO_883_2004_ART11_4_2;
     }
 
     default boolean erArtikkel11_3aMed11_5Tilleggsbestemmelse() {
