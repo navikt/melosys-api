@@ -62,6 +62,10 @@ public class BrevDataTestUtils {
         return new AvklartVirksomhet("Bedrift AS", "123456789", lagStrukturertAdresse(), Yrkesaktivitetstyper.LOENNET_ARBEID);
     }
 
+    public static AvklartVirksomhet lagUtenlandskVirksomhet() {
+        return new AvklartVirksomhet("Bedrift Utenlandsk AS", "123123123", lagStrukturertAdresse(), Yrkesaktivitetstyper.LOENNET_ARBEID);
+    }
+
     public static ForetakUtland lagForetakUtland(Boolean selvstendig) {
         ForetakUtland foretakUtland = new ForetakUtland();
         foretakUtland.setNavn("Company International Ltd.");
