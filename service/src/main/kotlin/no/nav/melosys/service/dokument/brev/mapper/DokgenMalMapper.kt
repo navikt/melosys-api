@@ -222,7 +222,7 @@ class DokgenMalMapper(
                 ).hentValidertPeriodeOmLovvalg(), dokgenMapperDatahenter.hentAvklartVirksomhet(brevbestilling.behandling).navn
             )
 
-            Produserbaredokumenter.AARSAVREGNING_VEDTAKSBREV -> AarsavregningVedtaksbrev(brevbestilling as AarsavregningVedtakBrevBestilling)
+            Produserbaredokumenter.AARSAVREGNING_VEDTAKSBREV -> ÅrsavregningVedtaksbrev(brevbestilling as ÅrsavregningVedtakBrevBestilling)
 
             else -> throw FunksjonellException("ProduserbartDokument ${brevbestilling.produserbartdokument} er ikke støttet av melosys-dokgen")
         }

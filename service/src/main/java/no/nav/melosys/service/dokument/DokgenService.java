@@ -379,7 +379,7 @@ public class DokgenService {
                 .medDistribusjonstype(Distribusjonstype.VEDTAK)
                 .medInnledningFritekstAvslagEfta(brevbestillingDto.getInnledningFritekst())
                 .medBegrunnelseFritekstAvslagEfta(brevbestillingDto.getFritekst());
-            case AARSAVREGNING_VEDTAKSBREV -> new AarsavregningVedtakBrevBestilling.Builder()
+            case AARSAVREGNING_VEDTAKSBREV -> new ÅrsavregningVedtakBrevBestilling.Builder()
                 .medDistribusjonstype(Distribusjonstype.VEDTAK)
                 .medInnledningFritekst(brevbestillingDto.getInnledningFritekst())
                 .medBegrunnelseFritekst(brevbestillingDto.getBegrunnelseFritekst());
