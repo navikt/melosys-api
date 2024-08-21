@@ -51,8 +51,8 @@ public class OpprettNyBehandlingFraSed implements StegBehandler {
     public void utfør(Prosessinstans prosessinstans) {
         var arkivsakID = prosessinstans.getData(ProsessDataKey.GSAK_SAK_ID, Long.class);
         var behandlingstema = prosessinstans.getData(ProsessDataKey.BEHANDLINGSTEMA, Behandlingstema.class);
-        prosessinstans.setData(ProsessDataKey.ER_OPPDATERT_SED, true);
         var eessiMelding = prosessinstans.getData(ProsessDataKey.EESSI_MELDING, MelosysEessiMelding.class);
+        prosessinstans.setData(ProsessDataKey.ER_OPPDATERT_SED, eessiMelding.getErEndring());
 
         if (arkivsakID == null) {
             throw new TekniskException("ArkivsakID kan ikke være null");

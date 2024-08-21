@@ -203,6 +203,74 @@ class SedMottakTestIT(
     }
 
     @Test
+    fun `A009 med ny etterfølgende A009 skal opprette ny lovvalgsperiode når det ikke er oppdatering`() {
+        val ref = Random().nextInt(100000).toString()
+
+        val sedInfo = SedInformasjon(ref, SedType.A009.name, LocalDate.now(), LocalDate.now(), null, "AVBRUTT", null)
+        val bucInformasjon = BucInformasjon(ref, true, null, LocalDate.now(), null, listOf(sedInfo))
+        MelosysEessiRepo.opprettBucinformasjon(bucInformasjon)
+
+        val eessiMeldingA009 = eessiMeldingTestDataFactory.melosysEessiMelding {
+            bucType = BucType.LA_BUC_04.name
+            rinaSaksnummer = ref
+            sedType = SedType.A009.name
+            periode = Periode(LocalDate.now().minusYears(2), LocalDate.now().minusYears(1))
+            artikkel = "12_1"
+            erEndring = false
+        }
+        val eessiMeldingA009_2 = eessiMeldingTestDataFactory.melosysEessiMelding {
+            bucType = BucType.LA_BUC_04.name
+            rinaSaksnummer = ref
+            sedType = SedType.A009.name
+            periode = Periode(LocalDate.now(), LocalDate.now().plusYears(1))
+            artikkel = "12_1"
+            erEndring = false
+        }
+
+
+        prosessinstansTestManager.executeAndWait(
+            mapOf(
+                ProsessType.MOTTAK_SED to 2,
+                ProsessType.REGISTRERING_UNNTAK_NY_SAK to 1,
+                ProsessType.REGISTRERING_UNNTAK_GODKJENN to 2,
+                ProsessType.REGISTRERING_UNNTAK_NY_BEHANDLING to 1
+            )
+        ) {
+            melosysEessiMeldingKafkaTemplate.send(kafkaTopic, eessiMeldingA009)
+            melosysEessiMeldingKafkaTemplate.send(kafkaTopic, eessiMeldingA009_2)
+        }
+
+        val prosessinstanserSortert = prosessinstansRepository.findAllByLåsReferanseStartingWith(ref)
+            .sortedBy { it.endretDato }
+
+        extracting(prosessinstanserSortert) { låsReferanse }
+            .shouldHaveSize(6)
+            .shouldContainInOrder(
+                eessiMeldingA009.lagUnikIdentifikator(),
+                eessiMeldingA009.lagUnikIdentifikator(),
+                eessiMeldingA009.lagUnikIdentifikator(),
+                eessiMeldingA009_2.lagUnikIdentifikator(),
+                eessiMeldingA009_2.lagUnikIdentifikator(),
+                eessiMeldingA009_2.lagUnikIdentifikator(),
+                )
+
+        val test = prosessinstanserSortert.first { it.behandling != null }.behandling.fagsak
+
+        val test2 = behandlingsresultatRepository.findWithLovvalgOgMedlemskapsperioderById(test.behandlinger[0].id)
+        test2.get().lovvalgsperioder
+        val test3 = behandlingsresultatRepository.findWithLovvalgOgMedlemskapsperioderById(test.behandlinger[1].id)
+
+        prosessinstanserSortert.first { it.behandling != null }.behandling.run {
+            status.shouldBe(Behandlingsstatus.AVSLUTTET)
+            tema.shouldBe(Behandlingstema.REGISTRERING_UNNTAK_NORSK_TRYGD_UTSTASJONERING)
+            fagsak.status.shouldBe(Saksstatuser.LOVVALG_AVKLART)
+            behandlingsresultatRepository.findWithLovvalgOgMedlemskapsperioderById(id)
+                .shouldBePresent()
+                .lovvalgsperioder.size.shouldBe(2)
+        }
+    }
+
+    @Test
     fun `A003 med etterfølgende X006 og lovvalgsland er NO skal gi manuelt behandling`() {
         val ref = Random().nextInt(100000).toString()
 

@@ -28,7 +28,7 @@ public class AvsluttTidligereMedlPeriode implements StegBehandler {
     @Override
     public void utfør(Prosessinstans prosessinstans) {
         if (Boolean.TRUE.equals(prosessinstans.getData(ProsessDataKey.ER_OPPDATERT_SED, Boolean.class))) {
-            medlPeriodeService.avsluttTidligerMedlPeriode(prosessinstans.getBehandling().getFagsak().getSaksnummer());
+            medlPeriodeService.avsluttTidligerMedlPeriode(prosessinstans.getBehandling().getFagsak().getSaksnummer()); //TODO What
             log.info("Avsluttet tidligere medl-periode for behandling {}", prosessinstans.getBehandling().getId());
         }
     }
