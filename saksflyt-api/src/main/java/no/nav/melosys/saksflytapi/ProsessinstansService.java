@@ -347,7 +347,11 @@ public class ProsessinstansService {
     }
 
     public void opprettProsessinstansIverksettVedtakFTRL(Behandling behandling, VedtakRequest request, Saksstatuser saksstatus) {
-        // TODO: Implementer nødvendige steg for årsavregningsvedtak
+        if (behandling.getType().equals(Behandlingstyper.ÅRSAVREGNING)) {
+            // TODO Implementer nødvendige steg for årsavregningsvedtak i separat prosess
+            return;
+        }
+
         Prosessinstans prosessinstans = new ProsessinstansBuilder()
             .medType(ProsessType.IVERKSETT_VEDTAK_FTRL)
             .medBehandling(behandling)
