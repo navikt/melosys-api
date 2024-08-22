@@ -32,11 +32,11 @@ class InnvilgelseEftaStorbritanniaMapper(
         val erUnntakTuristskip = vilkaarsresultatService.oppfyllerVilkaar(behandlingsresultat.id, Vilkaar.FTRL_2_12_UNNTAK_TURISTSKIP)
         val bostedsland = landvelgerService.hentBostedsland(behandlingsresultat.behandling).landkodeobjekt
 
-        val alleAvklarteOrgnr = avklartefaktaService.hentAvklarteOrgnrOgUuid(behandlingsresultat.id)
-        val alleVirksomheter = virksomheterService.hentAlleNorskeVirksomheter(behandlingsresultat.behandling)
+        val alleVirksomheterNorge = virksomheterService.hentAlleNorskeVirksomheter(behandlingsresultat.behandling)
+        val alleVirksomheterUtlandet = virksomheterService.hentUtenlandskeVirksomheter(behandlingsresultat.behandling)
+        val alleVirksomheter = alleVirksomheterNorge + alleVirksomheterUtlandet
 
         val navnVirksomhet = alleVirksomheter.stream()
-            .filter { alleAvklarteOrgnr.contains(it.orgnr) }
             .findFirst().get().navn
 
         val arbeidINorge = if(unleash.isEnabled(ToggleName.MELOSYS_ARBEID_KUN_NORGE)) bostedsland.kode == Land_iso2.NO.name else false

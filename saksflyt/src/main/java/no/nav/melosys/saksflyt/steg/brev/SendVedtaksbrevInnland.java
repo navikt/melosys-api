@@ -83,7 +83,7 @@ public class SendVedtaksbrevInnland implements StegBehandler {
 
         if (resultat.erAvslag()) {
             boolean erStorBrittanniaArt18 = KONV_EFTA_STORBRITANNIA_ART18_1 == lovvalgsperiode.getBestemmelse();
-            sendAvslagsbrev(behandling, saksbehandler, fritekst, erStorBrittanniaArt18);
+            sendAvslagsbrev(behandling, saksbehandler, fritekst, erStorBrittanniaArt18, prosessinstans.getData(ProsessDataKey.ARBEIDSGIVER_SKAL_HA_KOPI, Boolean.class, true));
             log.info("Sendt avslagsbrev for behandling {}", behandling.getId());
         } else if (resultat.erUtpeking()) {
             sendUtpekingsbrev(behandling, saksbehandler, fritekst);
@@ -104,7 +104,7 @@ public class SendVedtaksbrevInnland implements StegBehandler {
         }
     }
 
-    private void sendAvslagsbrev(Behandling behandling, String saksbehandler, String fritekst, boolean erStorBrittanniaArt18) {
+    private void sendAvslagsbrev(Behandling behandling, String saksbehandler, String fritekst, boolean erStorBrittanniaArt18, boolean arbeidsgiverSkalHaKopi) {
         var mottakerListe = List.of(Mottaker.medRolle(Mottakerroller.BRUKER), Mottaker.av(NorskMyndighet.HELFO), Mottaker.av(NorskMyndighet.SKATTEETATEN));
 
         var produserBartDokument = unleash.isEnabled(ToggleName.MELOSYS_KONVENSJON_EFTA_LAND_OG_STORBRITANNIA) &&
@@ -113,7 +113,7 @@ public class SendVedtaksbrevInnland implements StegBehandler {
         DoksysBrevbestilling brevbestilling = lagDoksysBrevbestilling(produserBartDokument, saksbehandler, fritekst);
         prosessinstansService.opprettProsessinstanserSendBrev(behandling, brevbestilling, mottakerListe);
 
-        if (behandling.getFagsak().harAktørMedRolleType(Aktoersroller.ARBEIDSGIVER)) {
+        if (behandling.getFagsak().harAktørMedRolleType(Aktoersroller.ARBEIDSGIVER) && arbeidsgiverSkalHaKopi) {
             DoksysBrevbestilling brevbestillingArbeidsgiver = lagDoksysBrevbestilling(unleash.isEnabled(ToggleName.MELOSYS_KONVENSJON_EFTA_LAND_OG_STORBRITANNIA) ? ORIENTERING_TIL_ARBEIDSGIVER_OM_VEDTAK : AVSLAG_ARBEIDSGIVER, saksbehandler, fritekst);
             prosessinstansService.opprettProsessinstansSendBrev(behandling, brevbestillingArbeidsgiver, Mottaker.medRolle(Mottakerroller.ARBEIDSGIVER));
         }
