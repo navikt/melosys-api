@@ -32,7 +32,7 @@ internal class ÅrsavregningModelControllerTest {
     private lateinit var årsavregningService: ÅrsavregningService
 
     @MockkBean
-    private lateinit var avgiftService: AvgiftService
+    private lateinit var trygdeavgiftTotalBeregner: TrygdeavgiftTotalBeregner
 
     @Test
     fun `hent avregning basert på ID`() {
@@ -118,7 +118,7 @@ internal class ÅrsavregningModelControllerTest {
             nyttTotalbeloep = BigDecimal(24280.0),
             tilFaktureringBeloep = BigDecimal(3110.0)
         )
-        every { avgiftService.hentTotalInntekt(any()) } returns BigDecimal(42)
+        every { trygdeavgiftTotalBeregner.hentTotalInntekt(any()) } returns BigDecimal(42)
 
 
         val expectedJson = """{

@@ -7,11 +7,10 @@ import no.nav.melosys.integrasjon.faktureringskomponenten.dto.FakturaseriePeriod
 import no.nav.melosys.sikkerhet.context.SubjectHandler
 import no.nav.melosys.sikkerhet.context.ThreadLocalAccessInfo
 import org.springframework.stereotype.Component
-import org.springframework.stereotype.Service
 import java.math.BigDecimal
 
 @Component
-class AvgiftTotalBeregner(
+class TrygdeavgiftTotalBeregner(
     private val faktureringskomponentenConsumer: FaktureringskomponentenConsumer,
 ) {
 

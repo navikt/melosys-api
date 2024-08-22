@@ -36,7 +36,7 @@ internal class ÅrsavregningServiceTest {
     private lateinit var behandlingsresultatService: BehandlingsresultatService
 
     @RelaxedMockK
-    private lateinit var avgiftService: AvgiftService
+    private lateinit var trygdeavgiftTotalBeregner: TrygdeavgiftTotalBeregner
 
     @RelaxedMockK
     private lateinit var trygdeavgiftService: TrygdeavgiftService
@@ -49,7 +49,7 @@ internal class ÅrsavregningServiceTest {
             aarsavregningRepository,
             behandlingsresultatService,
             trygdeavgiftService,
-            avgiftService,
+            trygdeavgiftTotalBeregner,
         )
         SpringSubjectHandler.set(TestSubjectHandler())
     }

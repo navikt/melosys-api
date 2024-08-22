@@ -24,7 +24,7 @@ class ÅrsavregningService(
     private val aarsavregningRepository: AarsavregningRepository,
     private val behandlingsresultatService: BehandlingsresultatService,
     private val trygdeavgiftService: TrygdeavgiftService,
-    private val avgiftService: AvgiftService
+    private val trygdeavgiftTotalBeregner: TrygdeavgiftTotalBeregner
 ) {
 
     @Transactional(readOnly = true)
@@ -75,7 +75,7 @@ class ÅrsavregningService(
             this.behandlingsresultat = behandlingsresultat
             tidligereBehandlingsresultat = tidligereBehandlingsresultatMedAvgift
             tidligereFakturertBeloep =
-                avgiftService.hentTotalAvgift(tidligereBehandlingsresultat?.trygdeavgiftsperioder?.filter { it.overlapperMedÅr(gjelderÅr) }.orEmpty())
+                trygdeavgiftTotalBeregner.hentTotalAvgift(tidligereBehandlingsresultat?.trygdeavgiftsperioder?.filter { it.overlapperMedÅr(gjelderÅr) }.orEmpty())
         }.also {
             behandlingsresultatService.lagre(behandlingsresultat)
         }
