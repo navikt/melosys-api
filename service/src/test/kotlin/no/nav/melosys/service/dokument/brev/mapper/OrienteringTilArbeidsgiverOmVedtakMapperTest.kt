@@ -1,22 +1,16 @@
 package no.nav.melosys.service.dokument.brev.mapper
 
-import io.getunleash.FakeUnleash
 import io.kotest.matchers.booleans.shouldBeFalse
 import io.kotest.matchers.booleans.shouldBeTrue
 import io.kotest.matchers.shouldBe
 import io.mockk.every
 import io.mockk.impl.annotations.MockK
 import io.mockk.junit5.MockKExtension
-import no.nav.melosys.domain.Behandling
-import no.nav.melosys.domain.Behandlingsresultat
-import no.nav.melosys.domain.Bostedsland
-import no.nav.melosys.domain.FagsakTestFactory
+import no.nav.melosys.domain.*
 import no.nav.melosys.domain.avklartefakta.AvklartYrkesgruppeType
 import no.nav.melosys.domain.avklartefakta.Avklartefakta
-import no.nav.melosys.domain.brev.InnvilgelseEftaStorbritanniaBrevbestilling
-import no.nav.melosys.domain.dokument.felles.Land
+import no.nav.melosys.domain.brev.OrienteringTilArbeidsgiverOmVedtakBrevbestilling
 import no.nav.melosys.domain.dokument.person.PersonDokument
-import no.nav.melosys.domain.dokument.person.adresse.Bostedsadresse
 import no.nav.melosys.domain.kodeverk.Land_iso2
 import no.nav.melosys.domain.kodeverk.LovvalgBestemmelse
 import no.nav.melosys.domain.kodeverk.Sakstyper
@@ -24,8 +18,6 @@ import no.nav.melosys.domain.kodeverk.Vilkaar
 import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingstema
 import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingstyper
 import no.nav.melosys.domain.kodeverk.lovvalgsbestemmelser.Lovvalgbestemmelser_883_2004
-import no.nav.melosys.domain.kodeverk.lovvalgsbestemmelser.Lovvalgbestemmelser_konv_efta_storbritannia
-import no.nav.melosys.featuretoggle.ToggleName
 import no.nav.melosys.service.LandvelgerService
 import no.nav.melosys.service.avklartefakta.AvklarteVirksomheterService
 import no.nav.melosys.service.avklartefakta.AvklartefaktaService
@@ -38,7 +30,7 @@ import java.time.LocalDate
 
 
 @ExtendWith(MockKExtension::class)
-internal class InnvilgelseEftaKonvensjonMapperTest {
+internal class OrienteringTilArbeidsgiverOmVedtakMapperTest {
 
     @MockK
     private lateinit var mockDokgenMapperDatahenter: DokgenMapperDatahenter
@@ -55,9 +47,7 @@ internal class InnvilgelseEftaKonvensjonMapperTest {
     @MockK
     private lateinit var mockLandvelgerService: LandvelgerService
 
-    private lateinit var innvilgelseEftaStorbritanniaMapper: InnvilgelseEftaStorbritanniaMapper
-
-    private val unleash = FakeUnleash()
+    private lateinit var orienteringTilArbeidsgiverOmVedtakMapper: OrienteringTilArbeidsgiverOmVedtakMapper
 
     private val orgnr1 = "111111111"
     private val orgnr2 = "222222222"
@@ -68,20 +58,17 @@ internal class InnvilgelseEftaKonvensjonMapperTest {
 
     @BeforeEach
     fun setup() {
-        unleash.resetAll()
-        innvilgelseEftaStorbritanniaMapper = InnvilgelseEftaStorbritanniaMapper(
-            mockVilkaarsresultatService,
+        orienteringTilArbeidsgiverOmVedtakMapper = OrienteringTilArbeidsgiverOmVedtakMapper(
             mockDokgenMapperDatahenter,
-            mockVirksomheterService,
+            mockVilkaarsresultatService,
             mockAvklartefaktaService,
+            mockVirksomheterService,
             mockLandvelgerService,
-            unleash
         )
     }
 
     @Test
-    fun `Innvilgelse efta Storbritannia brevbestilling, arbeid kun norge`() {
-        unleash.enable(ToggleName.MELOSYS_ARBEID_KUN_NORGE)
+    fun `Orienteringsbrev til arbeidsgiver om vedtak, innvilgelse`() {
         every { mockDokgenMapperDatahenter.hentBehandlingsresultat(ofType()) } returns lagBehandlingsResultat(Lovvalgbestemmelser_883_2004.FO_883_2004_ART11_3A)
         every {
             mockVilkaarsresultatService.harVilkaar(
@@ -90,45 +77,40 @@ internal class InnvilgelseEftaKonvensjonMapperTest {
                 )
             )
         } returns true
-        every { mockVilkaarsresultatService.finnVilkaarsresultat(ofType(), Vilkaar.FTRL_2_12_UNNTAK_TURISTSKIP) } returns null
-        every { mockVilkaarsresultatService.oppfyllerVilkaar(ofType(), Vilkaar.FTRL_2_12_UNNTAK_TURISTSKIP) } returns true
+        every { mockVilkaarsresultatService.finnVilkaarsresultat(ofType(), Vilkaar.VESENTLIG_VIRKSOMHET) } returns Vilkaarsresultat().apply {
+            isOppfylt = true
+        }
 
         every { mockVirksomheterService.hentAlleNorskeVirksomheter(ofType()) } returns listOf(BrevDataTestUtils.lagNorskVirksomhet())
         every { mockAvklartefaktaService.hentAvklarteOrgnrOgUuid(ofType()) } returns setOf(orgnr1, orgnr2, orgnr3, orgnr4, uuid1, uuid2)
-        every { mockLandvelgerService.hentBostedsland(ofType()) } returns Bostedsland("NO")
+        every { mockLandvelgerService.hentArbeidsland(ofType()) } returns Land_iso2.DE
 
 
-        val brevbestilling =
-            InnvilgelseEftaStorbritanniaBrevbestilling.Builder()
-                .medBehandling(lagBehandling())
-                .medPersonDokument(PersonDokument().apply {
-                    sammensattNavn = "Hei Test"
+        val brevbestilling = OrienteringTilArbeidsgiverOmVedtakBrevbestilling.Builder()
+            .medErInnvilgelse(true)
+            .medPersonDokument(PersonDokument().apply {
+                sammensattNavn = "Hei Test"
+            })
+            .medPersonMottaker(PersonDokument().apply {
+                sammensattNavn = "Hei Test"
+            })
+            .medBehandling(lagBehandling())
+            .build()
 
-                })
-                .medPersonMottaker(PersonDokument().apply {
-                    sammensattNavn = "Hei Test"
-                    bostedsadresse = Bostedsadresse().apply {
-                        land = Land.av("NOR")
-                    }
-                })
-                .build()
-
-        innvilgelseEftaStorbritanniaMapper.mapInnvilgelseEftaStorbritannia(brevbestilling).run {
+        orienteringTilArbeidsgiverOmVedtakMapper.map(brevbestilling).run {
             navnVirksomhet.shouldBe("Bedrift AS")
-            behandlingstype.shouldBe(Behandlingstyper.FØRSTEGANG)
-            erArtikkel11_3_a_eller_13_3_a_arbeid_norge?.shouldBeTrue()
-            erArtikkel13_3_a_eller_13_4?.shouldBeFalse()
-            erArtikkel14_1_eller_14_2?.shouldBeFalse()
-            erArtikkel16_1_eller_16_3?.shouldBeFalse()
-            erArtikkel18_1?.shouldBeFalse()
-            bosted.shouldBe("Norge")
-            lovvalgsbestemmelse.shouldBe(Lovvalgbestemmelser_883_2004.FO_883_2004_ART11_3A.name)
+            erInnvilgelse.shouldBeTrue()
+            arbeidsland.shouldBe("Tyskland")
+            periodeFom.shouldBe(LocalDate.of(2020, 1, 1))
+            periodeTom.shouldBe(LocalDate.of(2021, 2, 1))
+            erVesentligVirksomhetOppfyllt.shouldBeTrue()
+            vesentligVirksomhetBegrunnelser.shouldBe(listOf())
         }
     }
 
     @Test
-    fun `Innvilgelse efta Storbritannia brevbestilling`() {
-        every { mockDokgenMapperDatahenter.hentBehandlingsresultat(ofType()) } returns lagBehandlingsResultat(Lovvalgbestemmelser_konv_efta_storbritannia.KONV_EFTA_STORBRITANNIA_ART18_1)
+    fun `Orienteringsbrev til arbeidsgiver om vedtak, avslag`() {
+        every { mockDokgenMapperDatahenter.hentBehandlingsresultat(ofType()) } returns lagBehandlingsResultat(Lovvalgbestemmelser_883_2004.FO_883_2004_ART11_3A)
         every {
             mockVilkaarsresultatService.harVilkaar(
                 ofType(), listOf(
@@ -136,38 +118,38 @@ internal class InnvilgelseEftaKonvensjonMapperTest {
                 )
             )
         } returns true
-        every { mockVilkaarsresultatService.finnVilkaarsresultat(ofType(), Vilkaar.FTRL_2_12_UNNTAK_TURISTSKIP) } returns null
-        every { mockVilkaarsresultatService.oppfyllerVilkaar(ofType(), Vilkaar.FTRL_2_12_UNNTAK_TURISTSKIP) } returns true
+        every { mockVilkaarsresultatService.finnVilkaarsresultat(ofType(), Vilkaar.VESENTLIG_VIRKSOMHET) } returns Vilkaarsresultat().apply {
+            isOppfylt = true
+            begrunnelser = setOf(
+                VilkaarBegrunnelse().apply { kode = "KUN_ADMIN_ANSATTE" },
+                VilkaarBegrunnelse().apply { kode = "FOR_LITE_OMSETNING_NORGE" },
+                VilkaarBegrunnelse().apply { kode = "REKRUTTERER_ANSATTE_UTL" })
+        }
 
         every { mockVirksomheterService.hentAlleNorskeVirksomheter(ofType()) } returns listOf(BrevDataTestUtils.lagNorskVirksomhet())
         every { mockAvklartefaktaService.hentAvklarteOrgnrOgUuid(ofType()) } returns setOf(orgnr1, orgnr2, orgnr3, orgnr4, uuid1, uuid2)
-        every { mockLandvelgerService.hentBostedsland(ofType()) } returns Bostedsland("GB")
+        every { mockLandvelgerService.hentArbeidsland(ofType()) } returns Land_iso2.DE
 
 
-        val brevbestilling =
-            InnvilgelseEftaStorbritanniaBrevbestilling.Builder()
-                .medBehandling(lagBehandling())
-                .medPersonDokument(PersonDokument().apply {
-                    sammensattNavn = "Hei Test"
+        val brevbestilling = OrienteringTilArbeidsgiverOmVedtakBrevbestilling.Builder()
+            .medErInnvilgelse(false)
+            .medPersonDokument(PersonDokument().apply {
+                sammensattNavn = "Hei Test"
+            })
+            .medPersonMottaker(PersonDokument().apply {
+                sammensattNavn = "Hei Test"
+            })
+            .medBehandling(lagBehandling())
+            .build()
 
-                })
-                .medPersonMottaker(PersonDokument().apply {
-                    sammensattNavn = "Hei Test"
-                    bostedsadresse = Bostedsadresse().apply {
-                        land = Land.av("GBR")
-                    }
-                })
-                .build()
-
-        innvilgelseEftaStorbritanniaMapper.mapInnvilgelseEftaStorbritannia(brevbestilling).run {
+        orienteringTilArbeidsgiverOmVedtakMapper.map(brevbestilling).run {
             navnVirksomhet.shouldBe("Bedrift AS")
-            behandlingstype.shouldBe(Behandlingstyper.FØRSTEGANG)
-            erArtikkel13_3_a_eller_13_4?.shouldBeFalse()
-            erArtikkel14_1_eller_14_2?.shouldBeFalse()
-            erArtikkel16_1_eller_16_3?.shouldBeFalse()
-            erArtikkel18_1?.shouldBeTrue()
-            bosted.shouldBe("Storbritannia")
-            lovvalgsbestemmelse.shouldBe(Lovvalgbestemmelser_konv_efta_storbritannia.KONV_EFTA_STORBRITANNIA_ART18_1.name)
+            erInnvilgelse.shouldBeFalse()
+            arbeidsland.shouldBe("Tyskland")
+            periodeFom.shouldBe(LocalDate.of(2020, 1, 1))
+            periodeTom.shouldBe(LocalDate.of(2021, 2, 1))
+            erVesentligVirksomhetOppfyllt.shouldBeTrue()
+            vesentligVirksomhetBegrunnelser.shouldBe(listOf("KUN_ADMIN_ANSATTE", "FOR_LITE_OMSETNING_NORGE", "REKRUTTERER_ANSATTE_UTL"))
         }
     }
 

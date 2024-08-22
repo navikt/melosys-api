@@ -43,7 +43,8 @@ public record BrevbestillingRequest(
     boolean skalViseStandardTekstOmOpplysninger,
     String begrunnelseKode,
     String ytterligereInformasjon,
-    LocalDate opphoerDato) {
+    LocalDate opphoerDato,
+    boolean erInnvilgelse) {
 
     public BrevbestillingDto tilBrevbestillingDto(String bestillersId) {
         return new BrevbestillingDto(
@@ -78,7 +79,8 @@ public record BrevbestillingRequest(
             null,
             null,
             null,
-            this.opphoerDato
+            this.opphoerDato,
+            this.erInnvilgelse
         );
     }
 
@@ -141,7 +143,8 @@ public record BrevbestillingRequest(
             utkast.skalViseStandardTekstOmOpplysninger(),
             null,
             null,
-            null
+            null,
+            false
         );
     }
 

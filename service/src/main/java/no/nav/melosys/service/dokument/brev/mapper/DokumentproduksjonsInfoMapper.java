@@ -82,6 +82,10 @@ public class DokumentproduksjonsInfoMapper {
                 new DokumentproduksjonsInfo("orientering_anmodning_unntak",
                     DokumentKategoriKode.IB.getKode(),
                     ORIENTERING_ANMODNING_UNNTAK.getBeskrivelse()))
+            .put(ORIENTERING_TIL_ARBEIDSGIVER_OM_VEDTAK,
+                new DokumentproduksjonsInfo("orientering_til_arbeidsgiver_om_vedtak",
+                    DokumentKategoriKode.IB.getKode(),
+                    ORIENTERING_TIL_ARBEIDSGIVER_OM_VEDTAK.getBeskrivelse()))
             .put(GENERELT_FRITEKSTBREV_BRUKER,
                 new DokumentproduksjonsInfo("fritekstbrev",
                     DokumentKategoriKode.IB.getKode(),
@@ -143,6 +147,10 @@ public class DokumentproduksjonsInfoMapper {
                 new DokumentproduksjonsInfo("avslag_efta_storbritannia",
                     DokumentKategoriKode.VB.getKode(),
                     JournalforingsTittel.AVSLAG_EFTA_STORBRITANNIA.getTittel()))
+            .put(AARSAVREGNING_VEDTAKSBREV,
+                new DokumentproduksjonsInfo("aarsavregning_vedtaksbrev",
+                    DokumentKategoriKode.VB.getKode(),
+                    JournalforingsTittel.AARSAVREGNING_VEDTAKSBREV.getTittel()))
             .build());
     }
 
@@ -183,7 +191,8 @@ public class DokumentproduksjonsInfoMapper {
         IKKE_YRKESAKTIV_VEDTAKSBREV("Vedtak om medlemskap"),
         MELDING_MANGLENDE_INNBETALING("Melding om manglende innbetaling av trygdeavgift"),
         VARSEL_OPPHØRT_MEDLEMSKAP("Varsel om opphør av frivillig medlemskap"),
-        AVSLAG_EFTA_STORBRITANNIA("Avslag på søknad om medlemskap");
+        AVSLAG_EFTA_STORBRITANNIA("Avslag på søknad om medlemskap"),
+        AARSAVREGNING_VEDTAKSBREV("Vedtak om årsavregning");
 
         private final String tittel;
 
