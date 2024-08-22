@@ -7,14 +7,13 @@ import no.nav.melosys.domain.avgift.SkatteforholdTilNorge
 import no.nav.melosys.domain.avgift.Trygdeavgiftsperiode
 import no.nav.melosys.domain.avgift.Årsavregning
 import no.nav.melosys.domain.kodeverk.Folketrygdloven_kap2_bestemmelser
+import no.nav.melosys.domain.kodeverk.Medlemskapstyper
 import no.nav.melosys.domain.kodeverk.Trygdedekninger
 import no.nav.melosys.exception.FunksjonellException
-import no.nav.melosys.integrasjon.faktureringskomponenten.FaktureringskomponentenConsumer
-import no.nav.melosys.integrasjon.faktureringskomponenten.dto.BeregnTotalBeløpDto
 import no.nav.melosys.repository.AarsavregningRepository
 import no.nav.melosys.service.avgift.TrygdeavgiftService
 import no.nav.melosys.service.behandling.BehandlingsresultatService
-import no.nav.melosys.sikkerhet.context.SubjectHandler
+import org.apache.commons.beanutils.BeanUtils
 import org.springframework.stereotype.Service
 import org.springframework.transaction.annotation.Transactional
 import java.math.BigDecimal
@@ -24,14 +23,9 @@ import java.time.LocalDate
 class ÅrsavregningService(
     private val aarsavregningRepository: AarsavregningRepository,
     private val behandlingsresultatService: BehandlingsresultatService,
-    private val faktureringskomponentenConsumer: FaktureringskomponentenConsumer,
-    private val trygdeavgiftService: TrygdeavgiftService
+    private val trygdeavgiftService: TrygdeavgiftService,
+    private val trygdeavgiftTotalBeregner: TrygdeavgiftTotalBeregner
 ) {
-
-    fun beregnTotalbeløpForPeriode(beregnTotalBeløpDto: BeregnTotalBeløpDto): BigDecimal {
-        val saksbehandlerIdent = SubjectHandler.getInstance().getUserID()
-        return faktureringskomponentenConsumer.hentTotalTrygdeavgiftForPeriode(beregnTotalBeløpDto, saksbehandlerIdent)
-    }
 
     @Transactional(readOnly = true)
     fun finnÅrsavregning(behandlingID: Long): ÅrsavregningModel? {
@@ -39,7 +33,7 @@ class ÅrsavregningService(
 
         val aarsavregning = behandlingsresultat.årsavregning ?: return null
 
-        return lagÅrsavregningFraAarsavregning(aarsavregning)
+        return lagÅrsavregningModelFraÅrsavregning(aarsavregning)
     }
 
     @Transactional
@@ -63,23 +57,53 @@ class ÅrsavregningService(
         if (behandlingsresultat.årsavregning != null) {
             behandlingsresultat.årsavregning?.behandlingsresultat = null
             behandlingsresultat.årsavregning = null;
+            behandlingsresultat.medlemskapsperioder.clear()
             behandlingsresultatService.lagreOgFlush(behandlingsresultat)
+        }
+
+        val tidligereBehandlingsresultatMedAvgift = finnTidligereBehandlingsresultatMedAvgift(behandlingsresultat, gjelderÅr)
+        if (tidligereBehandlingsresultatMedAvgift != null) {
+            replikerMedlemskapsperioder(
+                behandlingsresultat,
+                tidligereBehandlingsresultatMedAvgift,
+                gjelderÅr
+            )
         }
 
         val årsavregning = Årsavregning().apply {
             behandlingsresultat.årsavregning = this
             aar = gjelderÅr
             this.behandlingsresultat = behandlingsresultat
-            tidligereBehandlingsresultat = finnTidligereBehandlingsresultatMedAvgift(behandlingsresultat, gjelderÅr)
+            tidligereBehandlingsresultat = tidligereBehandlingsresultatMedAvgift
+            tidligereFakturertBeloep =
+                trygdeavgiftTotalBeregner.hentTotalAvgift(tidligereBehandlingsresultat?.trygdeavgiftsperioder?.filter { it.overlapperMedÅr(gjelderÅr) }
+                    .orEmpty())
         }.also {
             behandlingsresultatService.lagre(behandlingsresultat)
         }
 
-        return lagÅrsavregningFraAarsavregning(årsavregning)
+        return lagÅrsavregningModelFraÅrsavregning(årsavregning)
     }
 
-    // TODO [MELOSYS-6757] mangler støtte for årsavregning uten tidligere behandling
-    private fun lagÅrsavregningFraAarsavregning(årsavregning: Årsavregning): ÅrsavregningModel {
+    private fun replikerMedlemskapsperioder(
+        behandlingsresultat: Behandlingsresultat,
+        tidligereBehandlingsresultat: Behandlingsresultat,
+        gjelderÅr: Int
+    ) {
+        for (medlemskapsperiodeOriginal in tidligereBehandlingsresultat.medlemskapsperioder) {
+            if (medlemskapsperiodeOriginal.overlapperMedÅr(gjelderÅr)) {
+                val medlemskapsperiodeReplika = BeanUtils.cloneBean(medlemskapsperiodeOriginal) as Medlemskapsperiode
+                medlemskapsperiodeReplika.behandlingsresultat = behandlingsresultat
+                medlemskapsperiodeReplika.trygdeavgiftsperioder = HashSet()
+                medlemskapsperiodeReplika.avkortFomDato(gjelderÅr)
+                medlemskapsperiodeReplika.avkortTomDato(gjelderÅr)
+                medlemskapsperiodeReplika.id = null
+                behandlingsresultat.addMedlemskapsperiode(medlemskapsperiodeReplika)
+            }
+        }
+    }
+
+    private fun lagÅrsavregningModelFraÅrsavregning(årsavregning: Årsavregning): ÅrsavregningModel {
         val år = årsavregning.aar
 
         return ÅrsavregningModel(
@@ -115,7 +139,7 @@ class ÅrsavregningService(
 
     private fun hentNyttTrygdeavgiftsgrunnlag(årsavregning: Årsavregning): Trygdeavgiftsgrunnlag? {
         val behandlingsresultat = årsavregning.behandlingsresultat
-        if (behandlingsresultat.medlemskapsperioder.isEmpty() && behandlingsresultat.hentSkatteforholdTilNorge()
+        if (behandlingsresultat.hentSkatteforholdTilNorge()
                 .isEmpty() && behandlingsresultat.hentInntektsperioder().isEmpty()
         ) {
             return null
@@ -150,12 +174,17 @@ data class Trygdeavgiftsgrunnlag(
 )
 
 data class MedlemskapsperiodeForAvgift(
-    val fom: LocalDate, val tom: LocalDate, val dekning: Trygdedekninger, val bestemmelse: Folketrygdloven_kap2_bestemmelser
+    val fom: LocalDate,
+    val tom: LocalDate,
+    val dekning: Trygdedekninger,
+    val bestemmelse: Folketrygdloven_kap2_bestemmelser,
+    val medlemskapstyper: Medlemskapstyper
 ) {
     constructor(medlemskapsperiode: Medlemskapsperiode) : this(
         fom = medlemskapsperiode.fom,
         tom = medlemskapsperiode.tom,
         dekning = medlemskapsperiode.trygdedekning,
-        bestemmelse = medlemskapsperiode.bestemmelse
+        bestemmelse = medlemskapsperiode.bestemmelse,
+        medlemskapstyper = medlemskapsperiode.medlemskapstype
     )
 }

@@ -16,6 +16,7 @@ import no.nav.melosys.domain.kodeverk.Inntektskildetype;
 import no.nav.melosys.domain.kodeverk.Skatteplikttype;
 import no.nav.melosys.domain.kodeverk.Trygdedekninger;
 import no.nav.melosys.service.avgift.TrygdeavgiftMottakerService;
+import no.nav.melosys.service.avgift.TrygdeavgiftService;
 import no.nav.melosys.service.avgift.TrygdeavgiftsberegningService;
 import no.nav.melosys.service.tilgang.Aksesskontroll;
 import no.nav.melosys.tjenester.gui.behandlinger.trygdeavgift.TrygdeavgiftController;
@@ -42,6 +43,8 @@ class TrygdeavgiftControllerTest {
     private Aksesskontroll aksesskontroll;
     @MockBean
     private TrygdeavgiftsberegningService trygdeavgiftsberegningService;
+    @MockBean
+    private TrygdeavgiftService trygdeavgiftService;
     @MockBean
     private TrygdeavgiftMottakerService trygdeavgiftMottakerService;
     @Autowired
