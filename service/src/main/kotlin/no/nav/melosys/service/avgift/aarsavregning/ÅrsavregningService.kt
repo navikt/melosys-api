@@ -57,6 +57,7 @@ class ÅrsavregningService(
         if (behandlingsresultat.årsavregning != null) {
             behandlingsresultat.årsavregning?.behandlingsresultat = null
             behandlingsresultat.årsavregning = null;
+            behandlingsresultat.medlemskapsperioder.clear()
             behandlingsresultatService.lagreOgFlush(behandlingsresultat)
         }
 
@@ -75,7 +76,8 @@ class ÅrsavregningService(
             this.behandlingsresultat = behandlingsresultat
             tidligereBehandlingsresultat = tidligereBehandlingsresultatMedAvgift
             tidligereFakturertBeloep =
-                trygdeavgiftTotalBeregner.hentTotalAvgift(tidligereBehandlingsresultat?.trygdeavgiftsperioder?.filter { it.overlapperMedÅr(gjelderÅr) }.orEmpty())
+                trygdeavgiftTotalBeregner.hentTotalAvgift(tidligereBehandlingsresultat?.trygdeavgiftsperioder?.filter { it.overlapperMedÅr(gjelderÅr) }
+                    .orEmpty())
         }.also {
             behandlingsresultatService.lagre(behandlingsresultat)
         }
@@ -85,22 +87,18 @@ class ÅrsavregningService(
 
     private fun replikerMedlemskapsperioder(
         behandlingsresultat: Behandlingsresultat,
-        tidligereBehandlingsresultat: Behandlingsresultat?,
+        tidligereBehandlingsresultat: Behandlingsresultat,
         gjelderÅr: Int
     ) {
-        behandlingsresultat.medlemskapsperioder.clear()
-        behandlingsresultatService.lagreOgFlush(behandlingsresultat)
-        if (tidligereBehandlingsresultat != null) {
-            for (medlemskapsperiodeOriginal in tidligereBehandlingsresultat.medlemskapsperioder) {
-                if (medlemskapsperiodeOriginal.overlapperMedÅr(gjelderÅr)) {
-                    val medlemskapsperiodeReplika = BeanUtils.cloneBean(medlemskapsperiodeOriginal) as Medlemskapsperiode
-                    medlemskapsperiodeReplika.behandlingsresultat = behandlingsresultat
-                    medlemskapsperiodeReplika.trygdeavgiftsperioder = HashSet()
-                    medlemskapsperiodeReplika.avkortFomDato(gjelderÅr)
-                    medlemskapsperiodeReplika.avkortTomDato(gjelderÅr)
-                    medlemskapsperiodeReplika.id = null
-                    behandlingsresultat.addMedlemskapsperiode(medlemskapsperiodeReplika)
-                }
+        for (medlemskapsperiodeOriginal in tidligereBehandlingsresultat.medlemskapsperioder) {
+            if (medlemskapsperiodeOriginal.overlapperMedÅr(gjelderÅr)) {
+                val medlemskapsperiodeReplika = BeanUtils.cloneBean(medlemskapsperiodeOriginal) as Medlemskapsperiode
+                medlemskapsperiodeReplika.behandlingsresultat = behandlingsresultat
+                medlemskapsperiodeReplika.trygdeavgiftsperioder = HashSet()
+                medlemskapsperiodeReplika.avkortFomDato(gjelderÅr)
+                medlemskapsperiodeReplika.avkortTomDato(gjelderÅr)
+                medlemskapsperiodeReplika.id = null
+                behandlingsresultat.addMedlemskapsperiode(medlemskapsperiodeReplika)
             }
         }
     }
