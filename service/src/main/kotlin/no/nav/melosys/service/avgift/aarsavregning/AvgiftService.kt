@@ -6,11 +6,12 @@ import no.nav.melosys.integrasjon.faktureringskomponenten.dto.BeregnTotalBeløpD
 import no.nav.melosys.integrasjon.faktureringskomponenten.dto.FakturaseriePeriodeDto
 import no.nav.melosys.sikkerhet.context.SubjectHandler
 import no.nav.melosys.sikkerhet.context.ThreadLocalAccessInfo
+import org.springframework.stereotype.Component
 import org.springframework.stereotype.Service
 import java.math.BigDecimal
 
-@Service
-class AvgiftService(
+@Component
+class AvgiftTotalBeregner(
     private val faktureringskomponentenConsumer: FaktureringskomponentenConsumer,
 ) {
 
