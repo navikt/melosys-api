@@ -1,0 +1,1 @@
+INSERT INTO PROSESS_TYPE (KODE, NAVN) VALUES ('IVERKSETT_VEDTAK_AARSAVREGNING', 'Iverksett vedtak for en årsavregning');

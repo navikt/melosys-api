@@ -144,6 +144,10 @@ object ProsessflytDefinisjon {
             VURDER_INNGANGSVILKÅR,
             OPPRETT_OPPGAVE
         ),
+        IVERKSETT_VEDTAK_AARSAVREGNING to ProsessFlyt(
+            prosessType = IVERKSETT_VEDTAK_AARSAVREGNING,
+            AVSLUTT_SAK_OG_BEHANDLING
+        ),
         IVERKSETT_VEDTAK_EOS to ProsessFlyt(
             prosessType = IVERKSETT_VEDTAK_EOS,
             AVKLAR_MYNDIGHET,

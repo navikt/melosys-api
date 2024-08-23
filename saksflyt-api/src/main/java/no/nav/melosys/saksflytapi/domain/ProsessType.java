@@ -12,6 +12,7 @@ public enum ProsessType {
     ARBEID_FLERE_LAND_NY_BEHANDLING("ARBEID_FLERE_LAND_NY_BEHANDLING", "Mottak av A003 - ny behandling"),
     ARBEID_FLERE_LAND_NY_SAK("ARBEID_FLERE_LAND_NY_SAK", "Mottak av A003 - ny sak"),
     HENLEGG_SAK("HENLEGG_SAK", "Henlegg en sak"),
+    IVERKSETT_VEDTAK_AARSAVREGNING("IVERKSETT_VEDTAK_AARSAVREGNING", "Iverksett vedtak for en årsavregning"),
     IVERKSETT_VEDTAK_EOS("IVERKSETT_VEDTAK_EOS", "Iverksett vedtak EOS"),
     IVERKSETT_VEDTAK_EOS_FORKORT_PERIODE("IVERKSETT_VEDTAK_EOS_FORKORT_PERIODE", "Iverksett nytt vedtak etter lovvalgsperioden har blitt forkortet"),
     IVERKSETT_VEDTAK_FTRL("IVERKSETT_VEDTAK_FTRL", "Iverksett vedtak Folketrygdloven"),
