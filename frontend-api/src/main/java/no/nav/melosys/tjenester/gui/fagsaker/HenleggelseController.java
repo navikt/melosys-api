@@ -32,13 +32,14 @@ public class HenleggelseController {
         return ResponseEntity.noContent().build();
     }
 
-    @PutMapping(value = "/fagsaker/{saksnr}/henlegg-som-bortfalt")
+    // Todo thomas eksisterende bortfalt
+    @PutMapping(value = "/fagsaker/{behandlingID}/henlegg-som-bortfalt")
     @ApiOperation(value = "Henlegger en fagsak i Melosys som bortfalt, fordi den ikke skal behandles i Melosys. " +
         "Henlegger kun den aktive behandlingen uten endring av saksstatus dersom behandlingtype er NY_VURDERING.")
-    public ResponseEntity<Void> henleggSakSomBortfalt(@PathVariable("saksnr") String saksnummer) {
-        aksesskontroll.autoriserSakstilgang(saksnummer);
+    public ResponseEntity<Void> henleggSakSomBortfalt(@PathVariable("behandlingID") long behandlingID) {
+        aksesskontroll.autoriserSkriv(behandlingID);
 
-        henleggFagsakService.henleggSakEllerBehandlingSomBortfalt(saksnummer);
+        henleggFagsakService.henleggSakEllerBehandlingSomBortfalt(behandlingID);
         return ResponseEntity.noContent().build();
     }
 }

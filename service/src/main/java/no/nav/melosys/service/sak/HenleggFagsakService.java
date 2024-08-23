@@ -80,29 +80,54 @@ public class HenleggFagsakService {
         behandlingsresultatService.lagre(behandlingsresultat);
     }
 
+    /*
+    TODO
+    - Benytt behandlingsId istedefor saksnummer
+    - (A) hvis flere åpne behandlinger -> 	BR: HENLAGT_BORTFALT,SAK:URØRT
+    - (B) hvis kun en aktiv behandling -> BR:HENLAGT_BORTFALT,SAK:HENLEGGELSE_BORTFALT
+    - (C) hvis FØRSTEGANG eller HENDVENDELSE som første behandling uten andre åpne behandlinger-> BR: HENLAGT_BORTFALT, SAK: HENLEGGELSE_BORTFALT
+     */
     @Transactional
-    public void henleggSakEllerBehandlingSomBortfalt(String saksnummer) {
-        Fagsak fagsak = fagsakService.hentFagsak(saksnummer);
-        Behandling aktivBehandling = fagsak.finnAktivBehandlingIkkeÅrsavregning();
+    public void henleggSakEllerBehandlingSomBortfalt(long behandlingID) { // TODO sjekk om inneholder alt som hentFagsak,
+        var behandling = behandlingService.hentBehandling(behandlingID);
+        Fagsak fagsak = fagsakService.hentFagsak(behandling.getFagsak().getSaksnummer());
 
-        if (aktivBehandling.erAndregangsbehandling()) {
-            henleggBehandlingSomBortfalt(aktivBehandling.getId());
-        } else {
-            henleggSakSomBortfalt(fagsak);
+        switch (behandling.getType()) {
+            case ÅRSAVREGNING -> {
+                if (fagsak.harAndreAktiveBehandlinger(behandlingID)) {
+                    henleggBehandlingSomBortfalt(behandling);
+                } else if (fagsak.erEnesteAktivBehandling(behandlingID)) {
+                    henleggSakSomBortfalt(fagsak);
+                }
+            }
+            case FØRSTEGANG, HENVENDELSE -> {
+                if (fagsak.erEnesteBehandling(behandlingID)) {
+                    henleggSakSomBortfalt(fagsak);
+                }
+            }
+            default -> {
+                Behandling aktivBehandling = fagsak.finnAktivBehandlingIkkeÅrsavregning();
+                if (aktivBehandling.erAndregangsbehandling()) {
+                    henleggBehandlingSomBortfalt(aktivBehandling);
+                } else {
+                    henleggSakSomBortfalt(fagsak);
+                }
+            }
         }
     }
 
-    private void henleggBehandlingSomBortfalt(long behandlingId) {
-        behandlingService.avsluttAndregangsbehandling(behandlingId, Behandlingsresultattyper.HENLEGGELSE_BORTFALT);
+    private void henleggBehandlingSomBortfalt(Behandling behandling) {
+        long behandlingId = behandling.getId();
+
+        behandlingsresultatService.oppdaterBehandlingsresultattype(behandlingId, Behandlingsresultattyper.HENLEGGELSE_BORTFALT);
+        if (behandling.getStatus() != Behandlingsstatus.AVSLUTTET) behandlingService.avsluttBehandling(behandling.getId());
         oppgaveService.ferdigstillOppgaveMedBehandlingID(behandlingId);
     }
 
     private void henleggSakSomBortfalt(Fagsak fagsak) {
         log.info("Fagsak {}: {}", fagsak.getSaksnummer(), Saksstatuser.HENLAGT_BORTFALT.getBeskrivelse());
         fagsak.getBehandlinger().forEach(behandling -> {
-            behandlingsresultatService.oppdaterBehandlingsresultattype(behandling.getId(), Behandlingsresultattyper.HENLEGGELSE_BORTFALT);
-            oppgaveService.ferdigstillOppgaveMedBehandlingID(behandling.getId());
-            if (behandling.getStatus() != Behandlingsstatus.AVSLUTTET) behandlingService.avsluttBehandling(behandling.getId());
+            henleggBehandlingSomBortfalt(behandling);
         });
         fagsak.setStatus(Saksstatuser.HENLAGT_BORTFALT);
         fagsakService.lagre(fagsak);

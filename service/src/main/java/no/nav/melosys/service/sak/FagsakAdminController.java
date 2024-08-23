@@ -22,13 +22,13 @@ public class FagsakAdminController implements AdminController {
         this.henleggFagsakService = henleggFagsakService;
     }
 
-    @PutMapping("/{saksnummer}/henlegg-bortfalt")
-    public ResponseEntity<Void> henleggFagsakSomBortfalt(@PathVariable String saksnummer,
+    // TODO thomas fix client
+    @PutMapping("/{behandlingID}/henlegg-bortfalt")
+    public ResponseEntity<Void> henleggFagsakSomBortfalt(@PathVariable long behandlingID,
                                                          @RequestHeader(API_KEY_HEADER) String apiKey) {
         validerApikey(apiKey);
 
-        log.info("Forsøker å henlegge sak {}", saksnummer);
-        henleggFagsakService.henleggSakEllerBehandlingSomBortfalt(saksnummer);
+        henleggFagsakService.henleggSakEllerBehandlingSomBortfalt(behandlingID);
 
         return ResponseEntity.noContent().build();
     }
