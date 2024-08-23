@@ -3,45 +3,46 @@ package no.nav.melosys.saksflyt.prosessflyt
 import no.nav.melosys.saksflytapi.domain.ProsessSteg
 import no.nav.melosys.saksflytapi.domain.ProsessSteg.*
 import no.nav.melosys.saksflytapi.domain.ProsessType
+import no.nav.melosys.saksflytapi.domain.ProsessType.*
 import java.util.*
 
 object ProsessflytDefinisjon {
     private val PROSESS_FLYT_MAP: Map<ProsessType, ProsessFlyt> = mapOf(
-        ProsessType.OPPRETT_OG_DISTRIBUER_BREV to ProsessFlyt(
-            ProsessType.OPPRETT_OG_DISTRIBUER_BREV,
+        OPPRETT_OG_DISTRIBUER_BREV to ProsessFlyt(
+            prosessType = OPPRETT_OG_DISTRIBUER_BREV,
             OPPRETT_OG_JOURNALFØR_BREV,
             DISTRIBUER_JOURNALPOST
         ),
-        ProsessType.SEND_BREV to ProsessFlyt(
-            ProsessType.SEND_BREV,
+        SEND_BREV to ProsessFlyt(
+            prosessType = SEND_BREV,
             BESTILL_BREV
         ),
-        ProsessType.HENLEGG_SAK to ProsessFlyt(
-            ProsessType.HENLEGG_SAK,
+        HENLEGG_SAK to ProsessFlyt(
+            prosessType = HENLEGG_SAK,
             SEND_HENLEGGELSESBREV
         ),
-        ProsessType.VIDERESEND_SOKNAD to ProsessFlyt(
-            ProsessType.VIDERESEND_SOKNAD,
+        VIDERESEND_SOKNAD to ProsessFlyt(
+            prosessType = VIDERESEND_SOKNAD,
             AVKLAR_MYNDIGHET,
             SEND_ORIENTERINGSBREV_VIDERESENDING_SØKNAD,
             VIDERESEND_SØKNAD,
             DISTRIBUER_JOURNALPOST_UTLAND
         ),
-        ProsessType.ANMODNING_OM_UNNTAK to ProsessFlyt(
-            ProsessType.ANMODNING_OM_UNNTAK,
+        ANMODNING_OM_UNNTAK to ProsessFlyt(
+            prosessType = ANMODNING_OM_UNNTAK,
             AVKLAR_MYNDIGHET,
             LAGRE_ANMODNINGSPERIODE_MEDL,
             SEND_ORIENTERING_ANMODNING_UNNTAK,
             SEND_ANMODNING_OM_UNNTAK,
             OPPDATER_OPPGAVE_ANMODNING_UNNTAK_SENDT
         ),
-        ProsessType.REGISTRERE_UNNTAK_FRA_MEDLEMSKAP to ProsessFlyt(
-            ProsessType.REGISTRERE_UNNTAK_FRA_MEDLEMSKAP,
+        REGISTRERE_UNNTAK_FRA_MEDLEMSKAP to ProsessFlyt(
+            prosessType = REGISTRERE_UNNTAK_FRA_MEDLEMSKAP,
             LAGRE_LOVVALGSPERIODE_MEDL,
             AVSLUTT_SAK_OG_BEHANDLING
         ),
-        ProsessType.JFR_NY_SAK_BRUKER to ProsessFlyt(
-            ProsessType.JFR_NY_SAK_BRUKER,
+        JFR_NY_SAK_BRUKER to ProsessFlyt(
+            prosessType = JFR_NY_SAK_BRUKER,
             OPPRETT_SAK_OG_BEH,
             OPPRETT_MOTTATTEOPPLYSNINGER,
             OPPRETT_ARKIVSAK,
@@ -52,23 +53,23 @@ object ProsessflytDefinisjon {
             OPPRETT_OPPGAVE,
             SEND_FORVALTNINGSMELDING
         ),
-        ProsessType.JFR_NY_SAK_VIRKSOMHET to ProsessFlyt(
-            ProsessType.JFR_NY_SAK_VIRKSOMHET,
+        JFR_NY_SAK_VIRKSOMHET to ProsessFlyt(
+            prosessType = JFR_NY_SAK_VIRKSOMHET,
             OPPRETT_SAK_OG_BEH,
             OPPRETT_ARKIVSAK,
             OPPDATER_OG_FERDIGSTILL_JOURNALPOST,
             OPPRETT_OPPGAVE
         ),
-        ProsessType.JFR_ANDREGANG_REPLIKER_BEHANDLING to ProsessFlyt(
-            ProsessType.JFR_ANDREGANG_REPLIKER_BEHANDLING,
+        JFR_ANDREGANG_REPLIKER_BEHANDLING to ProsessFlyt(
+            prosessType = JFR_ANDREGANG_REPLIKER_BEHANDLING,
             REPLIKER_BEHANDLING,
             OPPDATER_OG_FERDIGSTILL_JOURNALPOST,
             OPPDATER_SAKSRELASJON,
             OPPRETT_OPPGAVE,
             SEND_FORVALTNINGSMELDING
         ),
-        ProsessType.JFR_ANDREGANG_NY_BEHANDLING to ProsessFlyt(
-            ProsessType.JFR_ANDREGANG_NY_BEHANDLING,
+        JFR_ANDREGANG_NY_BEHANDLING to ProsessFlyt(
+            prosessType = JFR_ANDREGANG_NY_BEHANDLING,
             OPPRETT_NY_BEHANDLING,
             OPPRETT_MOTTATTEOPPLYSNINGER,
             OPPDATER_OG_FERDIGSTILL_JOURNALPOST,
@@ -78,14 +79,14 @@ object ProsessflytDefinisjon {
             OPPRETT_OPPGAVE,
             SEND_FORVALTNINGSMELDING
         ),
-        ProsessType.ANNULLER_SAK to ProsessFlyt(
-            ProsessType.ANNULLER_SAK,
+        ANNULLER_SAK to ProsessFlyt(
+            prosessType = ANNULLER_SAK,
             LAGRE_MEDLEMSKAPSPERIODE_MEDL,
             KANSELLER_FAKTURASERIE,
             AVSLUTT_SAK_OG_BEHANDLING
         ),
-        ProsessType.JFR_KNYTT to ProsessFlyt(
-            ProsessType.JFR_KNYTT,
+        JFR_KNYTT to ProsessFlyt(
+            prosessType = JFR_KNYTT,
             OPPDATER_OG_FERDIGSTILL_JOURNALPOST,
             OPPDATER_SAKSRELASJON,
             OPPRETT_TIDLIGERE_JOURNALPOSTER_FOR_SAK,
@@ -93,8 +94,8 @@ object ProsessflytDefinisjon {
             JFR_TILDEL_BEHANDLINGSOPPGAVE,
             SEND_FORVALTNINGSMELDING
         ),
-        ProsessType.OPPRETT_NY_SAK_EOS_FRA_OPPGAVE to ProsessFlyt(
-            ProsessType.OPPRETT_NY_SAK_EOS_FRA_OPPGAVE,
+        OPPRETT_NY_SAK_EOS_FRA_OPPGAVE to ProsessFlyt(
+            prosessType = OPPRETT_NY_SAK_EOS_FRA_OPPGAVE,
             OPPRETT_SAK_OG_BEH,
             OPPRETT_MOTTATTEOPPLYSNINGER,
             OPPRETT_ARKIVSAK,
@@ -103,15 +104,15 @@ object ProsessflytDefinisjon {
             VURDER_INNGANGSVILKÅR,
             GJENBRUK_OPPGAVE
         ),
-        ProsessType.OPPRETT_NY_SAK_FTRL_TRYGDEAVTALE_FRA_OPPGAVE to ProsessFlyt(
-            ProsessType.OPPRETT_NY_SAK_FTRL_TRYGDEAVTALE_FRA_OPPGAVE,
+        OPPRETT_NY_SAK_FTRL_TRYGDEAVTALE_FRA_OPPGAVE to ProsessFlyt(
+            prosessType = OPPRETT_NY_SAK_FTRL_TRYGDEAVTALE_FRA_OPPGAVE,
             OPPRETT_SAK_OG_BEH,
             OPPRETT_MOTTATTEOPPLYSNINGER,
             OPPRETT_ARKIVSAK,
             GJENBRUK_OPPGAVE
         ),
-        ProsessType.OPPRETT_SAK to ProsessFlyt(
-            ProsessType.OPPRETT_SAK,
+        OPPRETT_SAK to ProsessFlyt(
+            prosessType = OPPRETT_SAK,
             OPPRETT_SAK_OG_BEH,
             OPPRETT_MOTTATTEOPPLYSNINGER,
             OPPRETT_ARKIVSAK,
@@ -119,32 +120,32 @@ object ProsessflytDefinisjon {
             VURDER_INNGANGSVILKÅR,
             OPPRETT_OPPGAVE
         ),
-        ProsessType.OPPRETT_NY_BEHANDLING_MANGLENDE_INNBETALING to ProsessFlyt(
-            ProsessType.OPPRETT_NY_BEHANDLING_MANGLENDE_INNBETALING,
+        OPPRETT_NY_BEHANDLING_MANGLENDE_INNBETALING to ProsessFlyt(
+            prosessType = OPPRETT_NY_BEHANDLING_MANGLENDE_INNBETALING,
             OPPRETT_MANGLENDE_INNBETALING_BEHANDLING,
             OPPRETT_OPPGAVE,
             SEND_MANGLENDE_INNBETALING_VARSELBREV
         ),
-        ProsessType.OPPRETT_NY_BEHANDLING_AARSAVREGNING to ProsessFlyt(
-            ProsessType.OPPRETT_NY_BEHANDLING_AARSAVREGNING,
+        OPPRETT_NY_BEHANDLING_AARSAVREGNING to ProsessFlyt(
+            prosessType = OPPRETT_NY_BEHANDLING_AARSAVREGNING,
             OPPRETT_AARSAVREGNING_BEHANDLING,
             OPPRETT_OPPGAVE
         ),
-        ProsessType.OPPRETT_REPLIKERT_BEHANDLING_FOR_SAK to ProsessFlyt(
-            ProsessType.OPPRETT_REPLIKERT_BEHANDLING_FOR_SAK,
+        OPPRETT_REPLIKERT_BEHANDLING_FOR_SAK to ProsessFlyt(
+            prosessType = OPPRETT_REPLIKERT_BEHANDLING_FOR_SAK,
             REPLIKER_BEHANDLING,
             OPPRETT_OPPGAVE
         ),
-        ProsessType.OPPRETT_NY_BEHANDLING_FOR_SAK to ProsessFlyt(
-            ProsessType.OPPRETT_NY_BEHANDLING_FOR_SAK,
+        OPPRETT_NY_BEHANDLING_FOR_SAK to ProsessFlyt(
+            prosessType = OPPRETT_NY_BEHANDLING_FOR_SAK,
             OPPRETT_NY_BEHANDLING,
             OPPRETT_MOTTATTEOPPLYSNINGER,
             HENT_REGISTEROPPLYSNINGER,
             VURDER_INNGANGSVILKÅR,
             OPPRETT_OPPGAVE
         ),
-        ProsessType.IVERKSETT_VEDTAK_EOS to ProsessFlyt(
-            ProsessType.IVERKSETT_VEDTAK_EOS,
+        IVERKSETT_VEDTAK_EOS to ProsessFlyt(
+            prosessType = IVERKSETT_VEDTAK_EOS,
             AVKLAR_MYNDIGHET,
             AVKLAR_ARBEIDSGIVER,
             LAGRE_LOVVALGSPERIODE_MEDL,
@@ -154,8 +155,8 @@ object ProsessflytDefinisjon {
             AVSLUTT_SAK_OG_BEHANDLING,
             SEND_MELDING_OM_VEDTAK
         ),
-        ProsessType.IVERKSETT_VEDTAK_EOS_FORKORT_PERIODE to ProsessFlyt(
-            ProsessType.IVERKSETT_VEDTAK_EOS_FORKORT_PERIODE,
+        IVERKSETT_VEDTAK_EOS_FORKORT_PERIODE to ProsessFlyt(
+            prosessType = IVERKSETT_VEDTAK_EOS_FORKORT_PERIODE,
             HENT_MOTTAKERINSTITUSJON_FORKORTET_PERIODE,
             LAGRE_LOVVALGSPERIODE_MEDL,
             SEND_VEDTAKSBREV_INNLAND,
@@ -164,39 +165,38 @@ object ProsessflytDefinisjon {
             AVSLUTT_SAK_OG_BEHANDLING,
             SEND_MELDING_OM_VEDTAK
         ),
-        ProsessType.IVERKSETT_VEDTAK_FTRL to ProsessFlyt(
-            ProsessType.IVERKSETT_VEDTAK_FTRL,
+        IVERKSETT_VEDTAK_FTRL to ProsessFlyt(
+            prosessType = IVERKSETT_VEDTAK_FTRL,
             LAGRE_MEDLEMSKAPSPERIODE_MEDL,
             OPPRETT_FAKTURASERIE,
             AVSLUTT_SAK_OG_BEHANDLING,
             SEND_MELDING_OM_VEDTAK
         ),
-        ProsessType.IVERKSETT_VEDTAK_TRYGDEAVTALE to ProsessFlyt(
-            ProsessType.IVERKSETT_VEDTAK_TRYGDEAVTALE,
+        IVERKSETT_VEDTAK_TRYGDEAVTALE to ProsessFlyt(
+            prosessType = IVERKSETT_VEDTAK_TRYGDEAVTALE,
             AVKLAR_MYNDIGHET,
             AVKLAR_ARBEIDSGIVER,
             LAGRE_LOVVALGSPERIODE_MEDL,
             AVSLUTT_SAK_OG_BEHANDLING,
             SEND_MELDING_OM_VEDTAK
         ),
-        ProsessType.IVERKSETT_VEDTAK_IKKE_YRKESAKTIV to ProsessFlyt(
-            ProsessType.IVERKSETT_VEDTAK_IKKE_YRKESAKTIV,
+        IVERKSETT_VEDTAK_IKKE_YRKESAKTIV to ProsessFlyt(
+            prosessType = IVERKSETT_VEDTAK_IKKE_YRKESAKTIV,
             LAGRE_LOVVALGSPERIODE_MEDL,
             SEND_VEDTAKSBREV_INNLAND,
             AVSLUTT_SAK_OG_BEHANDLING,
             SEND_MELDING_OM_VEDTAK
-
         ),
-        ProsessType.MOTTAK_SED to ProsessFlyt(
-            ProsessType.MOTTAK_SED,
+        MOTTAK_SED to ProsessFlyt(
+            prosessType = MOTTAK_SED,
             SED_MOTTAK_RUTING
         ),
-        ProsessType.MOTTAK_SED_JOURNALFØRING to ProsessFlyt(
-            ProsessType.MOTTAK_SED_JOURNALFØRING,
+        MOTTAK_SED_JOURNALFØRING to ProsessFlyt(
+            prosessType = MOTTAK_SED_JOURNALFØRING,
             SED_MOTTAK_FERDIGSTILL_JOURNALPOST
         ),
-        ProsessType.REGISTRERING_UNNTAK_NY_SAK to ProsessFlyt(
-            ProsessType.REGISTRERING_UNNTAK_NY_SAK,
+        REGISTRERING_UNNTAK_NY_SAK to ProsessFlyt(
+            prosessType = REGISTRERING_UNNTAK_NY_SAK,
             SED_MOTTAK_OPPRETT_FAGSAK_OG_BEH,
             OPPRETT_ARKIVSAK,
             OPPDATER_SAKSRELASJON,
@@ -206,8 +206,8 @@ object ProsessflytDefinisjon {
             REGISTERKONTROLL,
             BESTEM_BEHANDLINGMÅTE_SED
         ),
-        ProsessType.REGISTRERING_UNNTAK_NY_BEHANDLING to ProsessFlyt(
-            ProsessType.REGISTRERING_UNNTAK_NY_BEHANDLING,
+        REGISTRERING_UNNTAK_NY_BEHANDLING to ProsessFlyt(
+            prosessType = REGISTRERING_UNNTAK_NY_BEHANDLING,
             SED_MOTTAK_OPPRETT_NY_BEHANDLING,
             SED_MOTTAK_FERDIGSTILL_JOURNALPOST,
             AVSLUTT_TIDLIGERE_MEDL_PERIODE,
@@ -216,8 +216,8 @@ object ProsessflytDefinisjon {
             REGISTERKONTROLL,
             BESTEM_BEHANDLINGMÅTE_SED
         ),
-        ProsessType.ARBEID_FLERE_LAND_NY_SAK to ProsessFlyt(
-            ProsessType.ARBEID_FLERE_LAND_NY_SAK,
+        ARBEID_FLERE_LAND_NY_SAK to ProsessFlyt(
+            prosessType = ARBEID_FLERE_LAND_NY_SAK,
             SED_MOTTAK_OPPRETT_FAGSAK_OG_BEH,
             OPPRETT_ARKIVSAK,
             OPPDATER_SAKSRELASJON,
@@ -229,8 +229,8 @@ object ProsessflytDefinisjon {
             REGISTERKONTROLL,
             BESTEM_BEHANDLINGMÅTE_SED
         ),
-        ProsessType.ARBEID_FLERE_LAND_NY_BEHANDLING to ProsessFlyt(
-            ProsessType.ARBEID_FLERE_LAND_NY_BEHANDLING,
+        ARBEID_FLERE_LAND_NY_BEHANDLING to ProsessFlyt(
+            prosessType = ARBEID_FLERE_LAND_NY_BEHANDLING,
             SED_MOTTAK_OPPRETT_NY_BEHANDLING,
             SED_MOTTAK_FERDIGSTILL_JOURNALPOST,
             AVSLUTT_TIDLIGERE_MEDL_PERIODE,
@@ -241,14 +241,14 @@ object ProsessflytDefinisjon {
             REGISTERKONTROLL,
             BESTEM_BEHANDLINGMÅTE_SED
         ),
-        ProsessType.ANMODNING_OM_UNNTAK_SVAR to ProsessFlyt(
-            ProsessType.ANMODNING_OM_UNNTAK_SVAR,
+        ANMODNING_OM_UNNTAK_SVAR to ProsessFlyt(
+            prosessType = ANMODNING_OM_UNNTAK_SVAR,
             SED_MOTTAK_FERDIGSTILL_JOURNALPOST,
             OPPRETT_ANMODNINGSPERIODESVAR,
             BESTEM_BEHANDLINGSMÅTE_SVAR_ANMODNING_UNNTAK
         ),
-        ProsessType.ANMODNING_OM_UNNTAK_MOTTAK_NY_SAK to ProsessFlyt(
-            ProsessType.ANMODNING_OM_UNNTAK_MOTTAK_NY_SAK,
+        ANMODNING_OM_UNNTAK_MOTTAK_NY_SAK to ProsessFlyt(
+            prosessType = ANMODNING_OM_UNNTAK_MOTTAK_NY_SAK,
             SED_MOTTAK_OPPRETT_FAGSAK_OG_BEH,
             OPPRETT_ARKIVSAK,
             OPPDATER_SAKSRELASJON,
@@ -261,8 +261,8 @@ object ProsessflytDefinisjon {
             LAGRE_ANMODNINGSPERIODE_MEDL,
             BESTEM_BEHANDLINGMÅTE_SED
         ),
-        ProsessType.ANMODNING_OM_UNNTAK_MOTTAK_NY_BEHANDLING to ProsessFlyt(
-            ProsessType.ANMODNING_OM_UNNTAK_MOTTAK_NY_BEHANDLING,
+        ANMODNING_OM_UNNTAK_MOTTAK_NY_BEHANDLING to ProsessFlyt(
+            prosessType = ANMODNING_OM_UNNTAK_MOTTAK_NY_BEHANDLING,
             SED_MOTTAK_OPPRETT_NY_BEHANDLING,
             SED_MOTTAK_FERDIGSTILL_JOURNALPOST,
             OPPRETT_SEDDOKUMENT,
@@ -275,29 +275,29 @@ object ProsessflytDefinisjon {
             LAGRE_ANMODNINGSPERIODE_MEDL,
             BESTEM_BEHANDLINGMÅTE_SED
         ),
-        ProsessType.REGISTRERING_UNNTAK_GODKJENN to ProsessFlyt(
-            ProsessType.REGISTRERING_UNNTAK_GODKJENN,
+        REGISTRERING_UNNTAK_GODKJENN to ProsessFlyt(
+            prosessType = REGISTRERING_UNNTAK_GODKJENN,
             LAGRE_LOVVALGSPERIODE_MEDL,
             SEND_GODKJENNING_REGISTRERING_UNNTAK,
             AVSLUTT_SAK_OG_BEHANDLING
         ),
-        ProsessType.REGISTRERING_UNNTAK_AVVIS to ProsessFlyt(
-            ProsessType.REGISTRERING_UNNTAK_AVVIS,
+        REGISTRERING_UNNTAK_AVVIS to ProsessFlyt(
+            prosessType = REGISTRERING_UNNTAK_AVVIS,
             AVSLUTT_SAK_OG_BEHANDLING
         ),
-        ProsessType.UTPEKING_AVVIS to ProsessFlyt(
-            ProsessType.UTPEKING_AVVIS,
+        UTPEKING_AVVIS to ProsessFlyt(
+            prosessType = UTPEKING_AVVIS,
             UTPEKING_SEND_AVSLAG,
             AVSLUTT_SAK_OG_BEHANDLING
         ),
-        ProsessType.ANMODNING_OM_UNNTAK_MOTTAK_SVAR to ProsessFlyt(
-            ProsessType.ANMODNING_OM_UNNTAK_MOTTAK_SVAR,
+        ANMODNING_OM_UNNTAK_MOTTAK_SVAR to ProsessFlyt(
+            prosessType = ANMODNING_OM_UNNTAK_MOTTAK_SVAR,
             LAGRE_LOVVALGSPERIODE_MEDL,
             SEND_SVAR_ANMODNING_UNNTAK,
             AVSLUTT_SAK_OG_BEHANDLING
         ),
-        ProsessType.MOTTAK_SOKNAD_ALTINN to ProsessFlyt(
-            ProsessType.MOTTAK_SOKNAD_ALTINN,
+        MOTTAK_SOKNAD_ALTINN to ProsessFlyt(
+            prosessType = MOTTAK_SOKNAD_ALTINN,
             OPPRETT_SAK_OG_BEHANDLING_FRA_ALTINN_SØKNAD,
             OPPRETT_ARKIVSAK,
             OPPRETT_OG_FERDIGSTILL_JOURNALPOST_FRA_ALTINN,
@@ -307,8 +307,8 @@ object ProsessflytDefinisjon {
             SEND_FORVALTNINGSMELDING
         ),
         ProsessType.OPPDATER_FAKTURAMOTTAKER to ProsessFlyt(
-            ProsessType.OPPDATER_FAKTURAMOTTAKER,
-            OPPDATER_FAKTURAMOTTAKER
+            prosessType = ProsessType.OPPDATER_FAKTURAMOTTAKER,
+            ProsessSteg.OPPDATER_FAKTURAMOTTAKER
         )
     )
 
