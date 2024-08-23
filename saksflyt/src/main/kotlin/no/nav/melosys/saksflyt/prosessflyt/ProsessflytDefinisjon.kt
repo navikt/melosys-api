@@ -172,18 +172,18 @@ object ProsessflytDefinisjon {
             AVSLUTT_SAK_OG_BEHANDLING,
             SEND_MELDING_OM_VEDTAK
         ),
+        IVERKSETT_VEDTAK_IKKE_YRKESAKTIV to ProsessFlyt(
+            prosessType = IVERKSETT_VEDTAK_IKKE_YRKESAKTIV,
+            LAGRE_LOVVALGSPERIODE_MEDL,
+            SEND_VEDTAKSBREV_INNLAND,
+            AVSLUTT_SAK_OG_BEHANDLING,
+            SEND_MELDING_OM_VEDTAK
+        ),
         IVERKSETT_VEDTAK_TRYGDEAVTALE to ProsessFlyt(
             prosessType = IVERKSETT_VEDTAK_TRYGDEAVTALE,
             AVKLAR_MYNDIGHET,
             AVKLAR_ARBEIDSGIVER,
             LAGRE_LOVVALGSPERIODE_MEDL,
-            AVSLUTT_SAK_OG_BEHANDLING,
-            SEND_MELDING_OM_VEDTAK
-        ),
-        IVERKSETT_VEDTAK_IKKE_YRKESAKTIV to ProsessFlyt(
-            prosessType = IVERKSETT_VEDTAK_IKKE_YRKESAKTIV,
-            LAGRE_LOVVALGSPERIODE_MEDL,
-            SEND_VEDTAKSBREV_INNLAND,
             AVSLUTT_SAK_OG_BEHANDLING,
             SEND_MELDING_OM_VEDTAK
         ),
