@@ -1,9 +1,10 @@
 package no.nav.melosys.saksflyt.prosessflyt
 
+import io.kotest.assertions.throwables.shouldThrow
 import io.kotest.matchers.shouldBe
+import io.kotest.matchers.string.shouldContain
 import no.nav.melosys.saksflytapi.domain.ProsessSteg
 import no.nav.melosys.saksflytapi.domain.ProsessType
-import org.assertj.core.api.AssertionsForClassTypes
 import org.junit.jupiter.api.Test
 
 
@@ -32,17 +33,17 @@ internal class ProsessFlytTest {
 
     @Test
     fun nesteSteg_forrigeStegIkkeEnDelAvFlyt_kasterException() {
-        val prosessFlyt = lagProsessFlyt()
-        AssertionsForClassTypes.assertThatExceptionOfType(IllegalArgumentException::class.java)
-            .isThrownBy { prosessFlyt.nesteSteg(ProsessSteg.AVSLUTT_TIDLIGERE_MEDL_PERIODE) }
-            .withMessageContaining("ikke gyldig for prosesstype")
+        shouldThrow<IllegalArgumentException> {
+            val prosessFlyt = lagProsessFlyt()
+            prosessFlyt.nesteSteg(ProsessSteg.AVSLUTT_TIDLIGERE_MEDL_PERIODE)
+        }.message.shouldContain("ikke gyldig for prosesstype")
     }
 
     @Test
     fun opprettProsessflyt_medDuplikatSteg_kasterException() {
-        AssertionsForClassTypes.assertThatExceptionOfType(IllegalArgumentException::class.java)
-            .isThrownBy { ProsessFlyt(ProsessType.ANMODNING_OM_UNNTAK, førsteSteg, andreSteg, sisteSteg, førsteSteg) }
-            .withMessageContaining("er definert to eller flere ganger")
+        shouldThrow<IllegalArgumentException> {
+            ProsessFlyt(ProsessType.ANMODNING_OM_UNNTAK, førsteSteg, andreSteg, sisteSteg, førsteSteg)
+        }.message.shouldContain("er definert to eller flere ganger")
     }
 
     private fun lagProsessFlyt(): ProsessFlyt {
