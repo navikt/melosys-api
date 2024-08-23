@@ -1,6 +1,5 @@
 package no.nav.melosys.saksflyt.prosessflyt
 
-import jakarta.annotation.Nullable
 import no.nav.melosys.saksflytapi.domain.ProsessSteg
 import no.nav.melosys.saksflytapi.domain.ProsessType
 
@@ -10,18 +9,13 @@ class ProsessFlyt internal constructor(prosessType: ProsessType, vararg prosessS
     private val stegListe: List<ProsessSteg>
 
     init {
-        val prosessStegListe = ArrayList<ProsessSteg>()
-
-        for (steg in prosessSteg) {
-            require(!prosessStegListe.contains(steg)) { "Prosessteg $steg er definert to eller flere ganger!" }
-            prosessStegListe.add(steg)
-        }
+        val duplikater = prosessSteg.groupingBy { it }.eachCount().filter { it.value > 1 }.keys
+        require(duplikater.isEmpty()) { "Prosessteg $duplikater er definert to eller flere ganger!" }
 
         this.prosessType = prosessType
-        this.stegListe = java.util.List.copyOf(prosessStegListe)
+        this.stegListe = prosessSteg.toList()
     }
 
-    @Nullable
     fun nesteSteg(forrigeSteg: ProsessSteg?): ProsessSteg? {
         val iter = stegListe.iterator()
 
