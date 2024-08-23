@@ -41,18 +41,12 @@ class Fagsak(
 
     fun leggTilBehandling(behandling: Behandling) = behandlinger.add(behandling)
 
-    fun harAndreAktiveBehandlinger(behandlingID: Long): Boolean {
-        val aktiveBehandlinger = behandlinger.filter { it.erAktiv() && it.id != behandlingID }
-
-        return !aktiveBehandlinger.isEmpty()
-    }
-
     fun erEnesteBehandling(behandlingID: Long): Boolean {
         return behandlinger.filter { it.id != behandlingID }.isEmpty()
     }
 
     fun erEnesteAktivBehandling(behandlingID: Long): Boolean {
-        val aktiveBehandlinger = behandlinger.filter { !it.erAktiv() && it.id != behandlingID }
+        val aktiveBehandlinger = behandlinger.filter { it.erAktiv() && it.id != behandlingID }
 
         return aktiveBehandlinger.isEmpty()
     }

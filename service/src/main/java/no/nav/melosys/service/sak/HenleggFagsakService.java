@@ -94,10 +94,10 @@ public class HenleggFagsakService {
 
         switch (behandling.getType()) {
             case ÅRSAVREGNING -> {
-                if (fagsak.harAndreAktiveBehandlinger(behandlingID)) {
-                    henleggBehandlingSomBortfalt(behandling);
-                } else if (fagsak.erEnesteAktivBehandling(behandlingID)) {
+                if (fagsak.erEnesteAktivBehandling(behandlingID)) {
                     henleggSakSomBortfalt(fagsak);
+                } else {
+                    henleggBehandlingSomBortfalt(behandling);
                 }
             }
             case FØRSTEGANG, HENVENDELSE -> {

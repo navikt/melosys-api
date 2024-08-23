@@ -171,9 +171,11 @@ internal class HenleggFagsakServiceTest {
 
         @Test
         fun henleggFagsakEllerBehandlingSomBortfalt_årsavregningsbehandling_som_eneste_aktiv_behandlingSakBlirHENLAGT_BORTFALT() {
+            val førstegangsBehandling =
+                lagBehandling(id = 123, status = Behandlingsstatus.AVSLUTTET, type = Behandlingstyper.FØRSTEGANG)
             val årsavregningsBehandling =
                 lagBehandling(id = BEHANDLING_ID, status = Behandlingsstatus.UNDER_BEHANDLING, type = Behandlingstyper.ÅRSAVREGNING)
-            val fagsak = lagFagsakMedBehandlinger(årsavregningsBehandling)
+            val fagsak = lagFagsakMedBehandlinger(årsavregningsBehandling, førstegangsBehandling)
 
             every { behandlingService.hentBehandling(BEHANDLING_ID) } returns årsavregningsBehandling
             every { fagsakService.hentFagsak(FagsakTestFactory.SAKSNUMMER) } returns fagsak
