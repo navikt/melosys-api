@@ -1,11 +1,15 @@
 package no.nav.melosys.tjenester.gui.aarsavregning
 
 import io.swagger.annotations.Api
+import no.nav.melosys.domain.avgift.Trygdeavgiftsperiode
 import no.nav.melosys.domain.kodeverk.Inntektskildetype
 import no.nav.melosys.domain.kodeverk.InnvilgelsesResultat
 import no.nav.melosys.domain.kodeverk.Skatteplikttype
 import no.nav.melosys.domain.kodeverk.Trygdedekninger
-import no.nav.melosys.service.avgift.aarsavregning.*
+import no.nav.melosys.service.avgift.aarsavregning.TrygdeavgiftTotalBeregner
+import no.nav.melosys.service.avgift.aarsavregning.Trygdeavgiftsgrunnlag
+import no.nav.melosys.service.avgift.aarsavregning.ÅrsavregningModel
+import no.nav.melosys.service.avgift.aarsavregning.ÅrsavregningService
 import no.nav.melosys.tjenester.gui.dto.trygdeavgift.InntekskildeDto
 import no.nav.melosys.tjenester.gui.dto.trygdeavgift.SkatteforholdTilNorgeDto
 import no.nav.melosys.tjenester.gui.ftrl.medlemskapsperiode.dto.MedlemskapsperiodeDto
@@ -52,14 +56,14 @@ class ÅrsavregningController(
     private fun lagÅrsavregningResponse(årsavregningModel: ÅrsavregningModel) =
         ÅrsavregningResponse(
             aar = årsavregningModel.år,
-            tidligereGrunnlagsopplysninger = hentTidligereGrunnlagsopplysninger(årsavregningModel),
+            tidligereGrunnlagsopplysninger = hentÅrsavregningsOpplysninger(årsavregningModel.tidligereGrunnlag, årsavregningModel.tidligereAvgift),
             avvikFunnet = årsavregningModel.nyttGrunnlag != null,
-            nyttGrunnlag = if (årsavregningModel.nyttGrunnlag == null) null else mapTrygdeavgiftsgrunnlag(årsavregningModel.nyttGrunnlag),
+            nyttGrunnlag = hentÅrsavregningsOpplysninger(årsavregningModel.nyttGrunnlag, årsavregningModel.endeligAvgift),
             endeligAvgift = null,
             avregning = AvregningDto(
-                nyttTotalbeloep = årsavregningModel.nyttTotalbeloep?.intValueExact() ?: 0,
-                tidligereFakturertBeloep = årsavregningModel.tidligereFakturertBeloep?.intValueExact() ?: 0,
-                tilFaktureringBeloep = årsavregningModel.tilFaktureringBeloep?.intValueExact() ?: 0,
+                nyttTotalbeloep = årsavregningModel.nyttTotalbeloep,
+                tidligereFakturertBeloep = årsavregningModel.tidligereFakturertBeloep,
+                tilFaktureringBeloep = årsavregningModel.tilFaktureringBeloep,
             )
         )
 
@@ -96,12 +100,15 @@ class ÅrsavregningController(
         )
 
 
-    private fun hentTidligereGrunnlagsopplysninger(årsavregningModel: ÅrsavregningModel): TidligereGrunnlagsopplysningerDto? {
-        return if (årsavregningModel.tidligereGrunnlag == null) null else
-            TidligereGrunnlagsopplysningerDto(
-                mapTrygdeavgiftsgrunnlag(årsavregningModel.tidligereGrunnlag),
+    private fun hentÅrsavregningsOpplysninger(
+        trygdeavgiftsgrunnlag: Trygdeavgiftsgrunnlag?,
+        trygdeavgiftsperioder: List<Trygdeavgiftsperiode>
+    ): ÅrsavregningsOpplysningerDto? {
+        return if (trygdeavgiftsgrunnlag == null) null else
+            ÅrsavregningsOpplysningerDto(
+                mapTrygdeavgiftsgrunnlag(trygdeavgiftsgrunnlag),
                 AvgiftDto(
-                    trygdeavgiftsperioder = årsavregningModel.tidligereAvgift.map {
+                    trygdeavgiftsperioder = trygdeavgiftsperioder.map {
                         TrygdeavgiftsperiodeDto(
                             fom = it.fom,
                             tom = it.tom,
@@ -112,8 +119,8 @@ class ÅrsavregningController(
                             avgiftPerMd = it.trygdeavgiftsbeløpMd.verdi.intValueExact()
                         )
                     },
-                    totalInntekt = trygdeavgiftTotalBeregner.hentTotalInntekt(årsavregningModel.tidligereAvgift),
-                    totalAvgift = årsavregningModel.tidligereFakturertBeloep!!
+                    totalInntekt = trygdeavgiftTotalBeregner.hentTotalInntekt(trygdeavgiftsperioder),
+                    totalAvgift = trygdeavgiftTotalBeregner.hentTotalAvgift(trygdeavgiftsperioder) ?: BigDecimal.ZERO
                 )
             )
     }
@@ -129,9 +136,9 @@ class ÅrsavregningController(
 
 data class ÅrsavregningResponse(
     val aar: Int,
-    val tidligereGrunnlagsopplysninger: TidligereGrunnlagsopplysningerDto?,
+    val tidligereGrunnlagsopplysninger: ÅrsavregningsOpplysningerDto?,
     val avvikFunnet: Boolean?,
-    val nyttGrunnlag: TrygdeavgiftsgrunnlagDto?,
+    val nyttGrunnlag: ÅrsavregningsOpplysningerDto?,
     val endeligAvgift: AvgiftDto?,
     val avregning: AvregningDto?
 )
@@ -143,7 +150,7 @@ data class ÅrsavregningRequest(
     val inntektskperioder: List<InntektsperiodeDto>,
 )
 
-data class TidligereGrunnlagsopplysningerDto(
+data class ÅrsavregningsOpplysningerDto(
     val trygdeavgiftsgrunnlag: TrygdeavgiftsgrunnlagDto,
     val avgift: AvgiftDto
 )
@@ -187,7 +194,7 @@ data class InntektsperiodeDto(
 )
 
 data class AvregningDto(
-    val nyttTotalbeloep: Int,
-    val tidligereFakturertBeloep: Int,
-    val tilFaktureringBeloep: Int,
+    val nyttTotalbeloep: BigDecimal?,
+    val tidligereFakturertBeloep: BigDecimal?,
+    val tilFaktureringBeloep: BigDecimal?,
 )
