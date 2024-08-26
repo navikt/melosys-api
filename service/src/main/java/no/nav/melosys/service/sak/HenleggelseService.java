@@ -19,8 +19,8 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 @Service
-public class HenleggFagsakService {
-    private static final Logger log = LoggerFactory.getLogger(HenleggFagsakService.class);
+public class HenleggelseService {
+    private static final Logger log = LoggerFactory.getLogger(HenleggelseService.class);
 
     private final FagsakService fagsakService;
     private final BehandlingsresultatService behandlingsresultatService;
@@ -28,11 +28,11 @@ public class HenleggFagsakService {
     private final OppgaveService oppgaveService;
     private final BehandlingService behandlingService;
 
-    public HenleggFagsakService(FagsakService fagsakService,
-                                BehandlingsresultatService behandlingsresultatService,
-                                ProsessinstansService prosessinstansService,
-                                OppgaveService oppgaveService,
-                                BehandlingService behandlingService) {
+    public HenleggelseService(FagsakService fagsakService,
+                              BehandlingsresultatService behandlingsresultatService,
+                              ProsessinstansService prosessinstansService,
+                              OppgaveService oppgaveService,
+                              BehandlingService behandlingService) {
         this.fagsakService = fagsakService;
         this.behandlingsresultatService = behandlingsresultatService;
         this.prosessinstansService = prosessinstansService;

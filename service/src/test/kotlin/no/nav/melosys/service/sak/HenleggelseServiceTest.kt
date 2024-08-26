@@ -28,7 +28,7 @@ import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.extension.ExtendWith
 
 @ExtendWith(MockKExtension::class)
-internal class HenleggFagsakServiceTest {
+internal class HenleggelseServiceTest {
     @RelaxedMockK
     private lateinit var prosessinstansService: ProsessinstansService
 
@@ -44,13 +44,13 @@ internal class HenleggFagsakServiceTest {
     @RelaxedMockK
     private lateinit var behandlingService: BehandlingService
 
-    private lateinit var henleggFagsakService: HenleggFagsakService
+    private lateinit var henleggelseService: HenleggelseService
 
     private val BEGRUNNELSE_FRITEKST = "Dette er grunnen til at jeg henla saken"
 
     @BeforeEach
     fun setup() {
-        henleggFagsakService = HenleggFagsakService(
+        henleggelseService = HenleggelseService(
             fagsakService,
             behandlingsresultatService,
             prosessinstansService,
@@ -69,7 +69,7 @@ internal class HenleggFagsakServiceTest {
             every { behandlingsresultatService.hentBehandlingsresultat(BEHANDLING_ID) } returns behandlingsresultat
 
 
-            henleggFagsakService.henleggFagsakEllerBehandling(FagsakTestFactory.SAKSNUMMER, Henleggelsesgrunner.ANNET.kode, BEGRUNNELSE_FRITEKST)
+            henleggelseService.henleggFagsakEllerBehandling(FagsakTestFactory.SAKSNUMMER, Henleggelsesgrunner.ANNET.kode, BEGRUNNELSE_FRITEKST)
 
 
             verify { behandlingsresultatService.lagre(behandlingsresultat) }
@@ -89,7 +89,7 @@ internal class HenleggFagsakServiceTest {
             every { fagsakService.hentFagsak(FagsakTestFactory.SAKSNUMMER) } returns fagsak
 
 
-            henleggFagsakService.henleggFagsakEllerBehandling(FagsakTestFactory.SAKSNUMMER, Henleggelsesgrunner.ANNET.kode, BEGRUNNELSE_FRITEKST)
+            henleggelseService.henleggFagsakEllerBehandling(FagsakTestFactory.SAKSNUMMER, Henleggelsesgrunner.ANNET.kode, BEGRUNNELSE_FRITEKST)
 
 
             verify { fagsakService.avsluttFagsakOgBehandling(fagsak, Saksstatuser.HENLAGT) }
@@ -106,7 +106,7 @@ internal class HenleggFagsakServiceTest {
             every { fagsakService.hentFagsak(FagsakTestFactory.SAKSNUMMER) } returns fagsak
 
 
-            henleggFagsakService.henleggFagsakEllerBehandling(FagsakTestFactory.SAKSNUMMER, Henleggelsesgrunner.ANNET.kode, BEGRUNNELSE_FRITEKST)
+            henleggelseService.henleggFagsakEllerBehandling(FagsakTestFactory.SAKSNUMMER, Henleggelsesgrunner.ANNET.kode, BEGRUNNELSE_FRITEKST)
 
 
             verify(exactly = 0) { fagsakService.avsluttFagsakOgBehandling(fagsak, Saksstatuser.HENLAGT) }
@@ -118,7 +118,7 @@ internal class HenleggFagsakServiceTest {
         @Test
         fun henleggFagsakEllerBehandling_ikkeGyldigHenleggelsesgrunn_kasterException() {
             shouldThrow<TekniskException> {
-                henleggFagsakService.henleggFagsakEllerBehandling(
+                henleggelseService.henleggFagsakEllerBehandling(
                     FagsakTestFactory.SAKSNUMMER,
                     "UGYLDIGKODE",
                     BEGRUNNELSE_FRITEKST
@@ -142,7 +142,7 @@ internal class HenleggFagsakServiceTest {
             every { fagsakService.hentFagsak(FagsakTestFactory.SAKSNUMMER) } returns fagsak
 
 
-            henleggFagsakService.henleggSakEllerBehandlingSomBortfalt(BEHANDLING_ID)
+            henleggelseService.henleggSakEllerBehandlingSomBortfalt(BEHANDLING_ID)
 
 
             verify { behandlingsresultatService.oppdaterBehandlingsresultattype(BEHANDLING_ID, Behandlingsresultattyper.HENLEGGELSE_BORTFALT) }
@@ -160,7 +160,7 @@ internal class HenleggFagsakServiceTest {
             every { fagsakService.hentFagsak(FagsakTestFactory.SAKSNUMMER) } returns fagsak
 
 
-            henleggFagsakService.henleggSakEllerBehandlingSomBortfalt(BEHANDLING_ID)
+            henleggelseService.henleggSakEllerBehandlingSomBortfalt(BEHANDLING_ID)
 
 
             verify { fagsakService.lagre(withArg { it.status shouldBe Saksstatuser.HENLAGT_BORTFALT }) }
@@ -168,6 +168,5 @@ internal class HenleggFagsakServiceTest {
             verify { oppgaveService.ferdigstillOppgaveMedBehandlingID(BEHANDLING_ID) }
             verify { behandlingService.avsluttBehandling(BEHANDLING_ID) }
         }
-
     }
 }

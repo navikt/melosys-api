@@ -5,7 +5,7 @@ import no.nav.melosys.domain.Behandling;
 import no.nav.melosys.domain.Fagsak;
 import no.nav.melosys.domain.kodeverk.begrunnelser.Henleggelsesgrunner;
 import no.nav.melosys.service.behandling.BehandlingService;
-import no.nav.melosys.service.sak.HenleggFagsakService;
+import no.nav.melosys.service.sak.HenleggelseService;
 import no.nav.melosys.service.tilgang.Aksesskontroll;
 import no.nav.melosys.tjenester.gui.dto.HenleggelseDto;
 import org.junit.jupiter.api.Test;
@@ -35,7 +35,7 @@ class HenleggelseControllerTest {
     @MockBean
     private BehandlingService behandlingService;
     @MockBean
-    private HenleggFagsakService henleggFagsakService;
+    private HenleggelseService henleggelseService;
 
     @Test
     void henleggFagsak() throws Exception {
@@ -49,7 +49,7 @@ class HenleggelseControllerTest {
                 .content(objectMapper.writeValueAsString(henleggelseDto)))
             .andExpect(status().isNoContent());
 
-        verify(henleggFagsakService).henleggFagsakEllerBehandling(saksnummer, begrunnelseKode, fritekst);
+        verify(henleggelseService).henleggFagsakEllerBehandling(saksnummer, begrunnelseKode, fritekst);
     }
 
     @Test
@@ -66,6 +66,6 @@ class HenleggelseControllerTest {
                 .accept(MediaType.TEXT_PLAIN))
             .andExpect(status().isNoContent());
 
-        verify(henleggFagsakService).henleggSakEllerBehandlingSomBortfalt(behandlingId);
+        verify(henleggelseService).henleggSakEllerBehandlingSomBortfalt(behandlingId);
     }
 }
