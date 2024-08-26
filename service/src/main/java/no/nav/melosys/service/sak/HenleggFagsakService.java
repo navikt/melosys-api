@@ -57,62 +57,25 @@ public class HenleggFagsakService {
 
         Behandling aktivBehandling = fagsak.finnAktivBehandlingIkkeÅrsavregning();
         oppdaterBehandlingsresultat(aktivBehandling.getId(), begrunnelseKode, fritekst);
-        if (aktivBehandling.erAndregangsbehandling()) {
-            behandlingService.avsluttAndregangsbehandling(aktivBehandling.getId(), Behandlingsresultattyper.HENLEGGELSE);
-        } else {
+
+        if (fagsak.erEnesteAktivBehandling(aktivBehandling.getId())) {
             fagsakService.avsluttFagsakOgBehandling(fagsak, Saksstatuser.HENLAGT);
+        } else {
+            behandlingService.avsluttAndregangsbehandling(aktivBehandling.getId(), Behandlingsresultattyper.HENLEGGELSE);
         }
         prosessinstansService.opprettProsessinstansFagsakHenlagt(aktivBehandling);
         oppgaveService.ferdigstillOppgaveMedBehandlingID(aktivBehandling.getId());
     }
 
-    private void oppdaterBehandlingsresultat(long behandlingID, Henleggelsesgrunner begrunnelseKode, String fritekst) {
-        Behandlingsresultat behandlingsresultat = behandlingsresultatService.hentBehandlingsresultat(behandlingID);
-
-        behandlingsresultat.setType(Behandlingsresultattyper.HENLEGGELSE);
-        behandlingsresultat.setBegrunnelseFritekst(fritekst);
-
-        BehandlingsresultatBegrunnelse begrunnelse = new BehandlingsresultatBegrunnelse();
-        begrunnelse.setBehandlingsresultat(behandlingsresultat);
-        begrunnelse.setKode(begrunnelseKode.getKode());
-        behandlingsresultat.getBehandlingsresultatBegrunnelser().add(begrunnelse);
-
-        behandlingsresultatService.lagre(behandlingsresultat);
-    }
-
-    /*
-    TODO
-    - Benytt behandlingsId istedefor saksnummer
-    - (A) hvis flere åpne behandlinger -> 	BR: HENLAGT_BORTFALT,SAK:URØRT
-    - (B) hvis kun en aktiv behandling -> BR:HENLAGT_BORTFALT,SAK:HENLEGGELSE_BORTFALT
-    - (C) hvis FØRSTEGANG eller HENDVENDELSE som første behandling uten andre åpne behandlinger-> BR: HENLAGT_BORTFALT, SAK: HENLEGGELSE_BORTFALT
-     */
     @Transactional
-    public void henleggSakEllerBehandlingSomBortfalt(long behandlingID) { // TODO sjekk om inneholder alt som hentFagsak,
+    public void henleggSakEllerBehandlingSomBortfalt(long behandlingID) {
         var behandling = behandlingService.hentBehandling(behandlingID);
         Fagsak fagsak = fagsakService.hentFagsak(behandling.getFagsak().getSaksnummer());
 
-        switch (behandling.getType()) {
-            case ÅRSAVREGNING -> {
-                if (fagsak.erEnesteAktivBehandling(behandlingID)) {
-                    henleggSakSomBortfalt(fagsak);
-                } else {
-                    henleggBehandlingSomBortfalt(behandling);
-                }
-            }
-            case FØRSTEGANG, HENVENDELSE -> {
-                if (fagsak.erEnesteBehandling(behandlingID)) {
-                    henleggSakSomBortfalt(fagsak);
-                }
-            }
-            default -> {
-                Behandling aktivBehandling = fagsak.finnAktivBehandlingIkkeÅrsavregning();
-                if (aktivBehandling.erAndregangsbehandling()) {
-                    henleggBehandlingSomBortfalt(aktivBehandling);
-                } else {
-                    henleggSakSomBortfalt(fagsak);
-                }
-            }
+        if (fagsak.erEnesteBehandling(behandlingID)) {
+            henleggSakSomBortfalt(fagsak);
+        } else {
+            henleggBehandlingSomBortfalt(behandling);
         }
     }
 
@@ -131,5 +94,19 @@ public class HenleggFagsakService {
         });
         fagsak.setStatus(Saksstatuser.HENLAGT_BORTFALT);
         fagsakService.lagre(fagsak);
+    }
+
+    private void oppdaterBehandlingsresultat(long behandlingID, Henleggelsesgrunner begrunnelseKode, String fritekst) {
+        Behandlingsresultat behandlingsresultat = behandlingsresultatService.hentBehandlingsresultat(behandlingID);
+
+        behandlingsresultat.setType(Behandlingsresultattyper.HENLEGGELSE);
+        behandlingsresultat.setBegrunnelseFritekst(fritekst);
+
+        BehandlingsresultatBegrunnelse begrunnelse = new BehandlingsresultatBegrunnelse();
+        begrunnelse.setBehandlingsresultat(behandlingsresultat);
+        begrunnelse.setKode(begrunnelseKode.getKode());
+        behandlingsresultat.getBehandlingsresultatBegrunnelser().add(begrunnelse);
+
+        behandlingsresultatService.lagre(behandlingsresultat);
     }
 }

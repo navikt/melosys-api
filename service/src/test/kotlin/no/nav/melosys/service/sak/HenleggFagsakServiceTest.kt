@@ -86,37 +86,7 @@ internal class HenleggFagsakServiceTest {
         }
 
         @Test
-        fun henleggFagsakEllerBehandling_avslutterKunBehandling_nårBehandlingTypeErNyVurdering() {
-            val behandling = lagBehandling(type = Behandlingstyper.NY_VURDERING)
-            every { fagsakService.hentFagsak(FagsakTestFactory.SAKSNUMMER) } returns FagsakTestFactory.builder().behandlinger(behandling).build()
-
-
-            henleggFagsakService.henleggFagsakEllerBehandling(FagsakTestFactory.SAKSNUMMER, Henleggelsesgrunner.ANNET.kode, BEGRUNNELSE_FRITEKST)
-
-
-            verify { behandlingService.avsluttAndregangsbehandling(BEHANDLING_ID, Behandlingsresultattyper.HENLEGGELSE) }
-            verify { prosessinstansService.opprettProsessinstansFagsakHenlagt(behandling) }
-            verify { oppgaveService.ferdigstillOppgaveMedBehandlingID(BEHANDLING_ID) }
-            verify(exactly = 0) { fagsakService.avsluttFagsakOgBehandling(any(), any()) }
-        }
-
-        @Test
-        fun henleggFagsakEllerBehandling_avslutterKunBehandling_nårBehandlingTypeErManglendeInnbetalingTrygdeavgift() {
-            val behandling = lagBehandling(type = Behandlingstyper.MANGLENDE_INNBETALING_TRYGDEAVGIFT)
-            every { fagsakService.hentFagsak(FagsakTestFactory.SAKSNUMMER) } returns FagsakTestFactory.builder().behandlinger(behandling).build()
-
-
-            henleggFagsakService.henleggFagsakEllerBehandling(FagsakTestFactory.SAKSNUMMER, Henleggelsesgrunner.ANNET.kode, BEGRUNNELSE_FRITEKST)
-
-
-            verify { behandlingService.avsluttAndregangsbehandling(BEHANDLING_ID, Behandlingsresultattyper.HENLEGGELSE) }
-            verify { prosessinstansService.opprettProsessinstansFagsakHenlagt(behandling) }
-            verify { oppgaveService.ferdigstillOppgaveMedBehandlingID(BEHANDLING_ID) }
-            verify(exactly = 0) { fagsakService.avsluttFagsakOgBehandling(any(), any()) }
-        }
-
-        @Test
-        fun henleggFagsakEllerBehandling_avslutterFagsakOgBehandling_nårBehandlingIkkeErAndregang() {
+        fun henleggFagsakEllerBehandling_nårBehandlingErEnesteBehandling_avslutterFagsakOgBehandling() {
             val behandling = lagBehandling()
             val fagsak = FagsakTestFactory.builder().behandlinger(behandling).build()
             every { fagsakService.hentFagsak(FagsakTestFactory.SAKSNUMMER) } returns fagsak
@@ -129,6 +99,23 @@ internal class HenleggFagsakServiceTest {
             verify { prosessinstansService.opprettProsessinstansFagsakHenlagt(behandling) }
             verify { oppgaveService.ferdigstillOppgaveMedBehandlingID(BEHANDLING_ID) }
             verify(exactly = 0) { behandlingService.avsluttAndregangsbehandling(any(), any()) }
+        }
+
+        @Test
+        fun henleggFagsakEllerBehandling_vedFlereBehandlinger_avslutterKunBehandling() {
+            val førstegangsBehandling = lagBehandling(123, type = Behandlingstyper.ÅRSAVREGNING)
+            val annengangsBehandling = lagBehandling(BEHANDLING_ID)
+            val fagsak = FagsakTestFactory.builder().behandlinger(listOf(førstegangsBehandling, annengangsBehandling)).build()
+            every { fagsakService.hentFagsak(FagsakTestFactory.SAKSNUMMER) } returns fagsak
+
+
+            henleggFagsakService.henleggFagsakEllerBehandling(FagsakTestFactory.SAKSNUMMER, Henleggelsesgrunner.ANNET.kode, BEGRUNNELSE_FRITEKST)
+
+
+            verify(exactly = 0) { fagsakService.avsluttFagsakOgBehandling(fagsak, Saksstatuser.HENLAGT) }
+            verify { prosessinstansService.opprettProsessinstansFagsakHenlagt(annengangsBehandling) }
+            verify { oppgaveService.ferdigstillOppgaveMedBehandlingID(BEHANDLING_ID) }
+            verify { behandlingService.avsluttAndregangsbehandling(BEHANDLING_ID, Behandlingsresultattyper.HENLEGGELSE) }
         }
 
         @Test
