@@ -42,7 +42,7 @@ class Fagsak(
     fun leggTilBehandling(behandling: Behandling) = behandlinger.add(behandling)
 
     fun erEnesteBehandling(behandlingID: Long): Boolean {
-        return behandlinger.filter { it.id != behandlingID }.isEmpty()
+        return behandlinger.size == 1 && behandlinger.filter { it.id != behandlingID }.isEmpty()
     }
 
     fun erEnesteAktivBehandling(behandlingID: Long): Boolean {

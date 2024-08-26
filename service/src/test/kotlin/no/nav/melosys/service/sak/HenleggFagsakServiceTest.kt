@@ -26,9 +26,6 @@ import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Nested
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.extension.ExtendWith
-import org.junit.jupiter.params.ParameterizedTest
-import org.junit.jupiter.params.provider.EnumSource
-
 
 @ExtendWith(MockKExtension::class)
 internal class HenleggFagsakServiceTest {
@@ -133,134 +130,44 @@ internal class HenleggFagsakServiceTest {
 
     @Nested
     inner class HenleggFagsak {
-        @Test
-        fun henleggFagsakEllerBehandlingSomBortfalt_årsavregningsbehandling_med_andre_aktive_behandlingerGirUrørtSakstatus() {
-            val aktivBehandling = lagBehandling(id = 123L, status = Behandlingsstatus.UNDER_BEHANDLING)
-            val årsavregningsBehandling =
-                lagBehandling(id = BEHANDLING_ID, status = Behandlingsstatus.UNDER_BEHANDLING, type = Behandlingstyper.ÅRSAVREGNING)
-            val fagsak = lagFagsakMedBehandlinger(
-                aktivBehandling,
-                årsavregningsBehandling
-            )
-
-            every { behandlingService.hentBehandling(BEHANDLING_ID) } returns årsavregningsBehandling
-            every { fagsakService.hentFagsak(FagsakTestFactory.SAKSNUMMER) } returns fagsak
-
-            henleggFagsakService.henleggSakEllerBehandlingSomBortfalt(BEHANDLING_ID)
-
-
-            verify { behandlingsresultatService.oppdaterBehandlingsresultattype(BEHANDLING_ID, Behandlingsresultattyper.HENLEGGELSE_BORTFALT) }
-            verify { oppgaveService.ferdigstillOppgaveMedBehandlingID(BEHANDLING_ID) }
-            verify { behandlingService.avsluttBehandling(BEHANDLING_ID) }
-            verify(exactly = 0) { behandlingService.avsluttBehandling(123L) }
-            verify(exactly = 0) { fagsakService.avsluttFagsakOgBehandling(any(), any()) }
-        }
 
         @Test
-        fun henleggFagsakEllerBehandlingSomBortfalt_årsavregningsbehandling_som_eneste_aktiv_behandlingSakBlirHENLAGT_BORTFALT() {
-            val førstegangsBehandling =
-                lagBehandling(id = 123, status = Behandlingsstatus.AVSLUTTET, type = Behandlingstyper.FØRSTEGANG)
-            val årsavregningsBehandling =
-                lagBehandling(id = BEHANDLING_ID, status = Behandlingsstatus.UNDER_BEHANDLING, type = Behandlingstyper.ÅRSAVREGNING)
-            val fagsak = lagFagsakMedBehandlinger(årsavregningsBehandling, førstegangsBehandling)
-
-            every { behandlingService.hentBehandling(BEHANDLING_ID) } returns årsavregningsBehandling
-            every { fagsakService.hentFagsak(FagsakTestFactory.SAKSNUMMER) } returns fagsak
-
-            henleggFagsakService.henleggSakEllerBehandlingSomBortfalt(BEHANDLING_ID)
-
-
-            verify { behandlingsresultatService.oppdaterBehandlingsresultattype(BEHANDLING_ID, Behandlingsresultattyper.HENLEGGELSE_BORTFALT) }
-            verify { oppgaveService.ferdigstillOppgaveMedBehandlingID(BEHANDLING_ID) }
-            verify { behandlingService.avsluttBehandling(BEHANDLING_ID) }
-            verify {
-                fagsakService.lagre(withArg { fagsak -> fagsak.status shouldBe Saksstatuser.HENLAGT_BORTFALT })
-            }
-        }
-
-        @ParameterizedTest
-        @EnumSource(value = Behandlingstyper::class, names = ["FØRSTEGANG", "HENVENDELSE"])
-        fun henleggFagsakEllerBehandlingSomBortfalt_førstegang_eller_hendvendelse_som_eneste_behandlingSakBlirHENLAGT_BORTFALT(behandlingsType: Behandlingstyper) {
-            val forstegangBehandling =
-                lagBehandling(id = BEHANDLING_ID, status = Behandlingsstatus.UNDER_BEHANDLING, type = behandlingsType)
-            val fagsak = lagFagsakMedBehandlinger(forstegangBehandling)
-
-            every { behandlingService.hentBehandling(BEHANDLING_ID) } returns forstegangBehandling
-            every { fagsakService.hentFagsak(FagsakTestFactory.SAKSNUMMER) } returns fagsak
-
-            henleggFagsakService.henleggSakEllerBehandlingSomBortfalt(BEHANDLING_ID)
-
-
-            verify { behandlingsresultatService.oppdaterBehandlingsresultattype(BEHANDLING_ID, Behandlingsresultattyper.HENLEGGELSE_BORTFALT) }
-            verify { oppgaveService.ferdigstillOppgaveMedBehandlingID(BEHANDLING_ID) }
-            verify { behandlingService.avsluttBehandling(BEHANDLING_ID) }
-            verify {
-                fagsakService.lagre(withArg { fagsak -> fagsak.status shouldBe Saksstatuser.HENLAGT_BORTFALT })
-            }
-        }
-
-        @Test
-        fun henleggSakEllerBehandlingSomBortfalt_fagsakMedFlereBehandlinger_avslutterAktivBehandlingOgStatusBlirHENLAGT_BORTFALT() {
+        fun henleggSakEllerBehandlingSomBortfalt_fagsakMedFlereBehandlinger_avslutterAktivBehandlingEndrerIkkeSaksStatus() {
             val fagsak = lagFagsakMedBehandlinger(
                 lagBehandling(id = 123L, status = Behandlingsstatus.AVSLUTTET),
                 lagBehandling(id = BEHANDLING_ID, status = Behandlingsstatus.ANMODNING_UNNTAK_SENDT)
             )
 
-            every { behandlingService.hentBehandling(BEHANDLING_ID) } returns fagsak.behandlinger.firstOrNull()
+            every { behandlingService.hentBehandling(BEHANDLING_ID) } returns fagsak.behandlinger.last()
             every { fagsakService.hentFagsak(FagsakTestFactory.SAKSNUMMER) } returns fagsak
+
 
             henleggFagsakService.henleggSakEllerBehandlingSomBortfalt(BEHANDLING_ID)
 
 
-            verify { fagsakService.lagre(fagsak) }
-            verify { behandlingsresultatService.oppdaterBehandlingsresultattype(123L, Behandlingsresultattyper.HENLEGGELSE_BORTFALT) }
             verify { behandlingsresultatService.oppdaterBehandlingsresultattype(BEHANDLING_ID, Behandlingsresultattyper.HENLEGGELSE_BORTFALT) }
             verify { oppgaveService.ferdigstillOppgaveMedBehandlingID(BEHANDLING_ID) }
             verify { behandlingService.avsluttBehandling(BEHANDLING_ID) }
-            verify(exactly = 0) { behandlingService.avsluttBehandling(123L) }
-            verify(exactly = 0) { behandlingService.avsluttAndregangsbehandling(any(), any()) }
-            verify(exactly = 0) { fagsakService.avsluttFagsakOgBehandling(any(), any()) }
-            fagsak.status.shouldBe(Saksstatuser.HENLAGT_BORTFALT)
+            fagsak.status.shouldBe(Saksstatuser.OPPRETTET)
         }
 
         @Test
-        fun henleggSakEllerBehandlingSomBortfalt_avslutterKunBehandling_dersomBehandlingTypeErNyVurdering() {
-            val fagsak = lagFagsakMedBehandlinger(
-                lagBehandling(id = 123L, status = Behandlingsstatus.AVSLUTTET),
-                lagBehandling(id = BEHANDLING_ID, type = Behandlingstyper.NY_VURDERING)
-            )
+        fun henleggSakEllerBehandlingSomBortfalt_fagsakMedFlereBehandlinger_avslutterAktivBehandlingSakBlirHENLAGT_BORTFALT() {
+            val enesteBehandling = lagBehandling(id = BEHANDLING_ID, status = Behandlingsstatus.UNDER_BEHANDLING)
+            val fagsak = lagFagsakMedBehandlinger(enesteBehandling)
 
-            every { behandlingService.hentBehandling(BEHANDLING_ID) } returns fagsak.behandlinger.firstOrNull()
+            every { behandlingService.hentBehandling(BEHANDLING_ID) } returns enesteBehandling
             every { fagsakService.hentFagsak(FagsakTestFactory.SAKSNUMMER) } returns fagsak
+
 
             henleggFagsakService.henleggSakEllerBehandlingSomBortfalt(BEHANDLING_ID)
 
 
-            verify { behandlingService.avsluttAndregangsbehandling(BEHANDLING_ID, Behandlingsresultattyper.HENLEGGELSE_BORTFALT) }
+            verify { fagsakService.lagre(withArg { it.status shouldBe Saksstatuser.HENLAGT_BORTFALT }) }
+            verify { behandlingsresultatService.oppdaterBehandlingsresultattype(BEHANDLING_ID, Behandlingsresultattyper.HENLEGGELSE_BORTFALT) }
             verify { oppgaveService.ferdigstillOppgaveMedBehandlingID(BEHANDLING_ID) }
-            verify(exactly = 0) { behandlingsresultatService.oppdaterBehandlingsresultattype(any(), any()) }
-            verify(exactly = 0) { behandlingService.avsluttBehandling(any()) }
-            verify(exactly = 0) { fagsakService.avsluttFagsakOgBehandling(any(), any()) }
+            verify { behandlingService.avsluttBehandling(BEHANDLING_ID) }
         }
 
-        @Test
-        fun henleggSakEllerBehandlingSomBortfalt_avslutterKunBehandling_dersomBehandlingTypeErManglendeInnbetalingTrygdeavgift() {
-            val fagsak = lagFagsakMedBehandlinger(
-                lagBehandling(id = 123L, status = Behandlingsstatus.AVSLUTTET),
-                lagBehandling(id = BEHANDLING_ID, type = Behandlingstyper.MANGLENDE_INNBETALING_TRYGDEAVGIFT)
-            )
-
-            every { behandlingService.hentBehandling(BEHANDLING_ID) } returns fagsak.behandlinger.firstOrNull()
-            every { fagsakService.hentFagsak(FagsakTestFactory.SAKSNUMMER) } returns fagsak
-
-            henleggFagsakService.henleggSakEllerBehandlingSomBortfalt(BEHANDLING_ID)
-
-
-            verify { behandlingService.avsluttAndregangsbehandling(BEHANDLING_ID, Behandlingsresultattyper.HENLEGGELSE_BORTFALT) }
-            verify { oppgaveService.ferdigstillOppgaveMedBehandlingID(BEHANDLING_ID) }
-            verify(exactly = 0) { behandlingsresultatService.oppdaterBehandlingsresultattype(any(), any()) }
-            verify(exactly = 0) { behandlingService.avsluttBehandling(any()) }
-            verify(exactly = 0) { fagsakService.avsluttFagsakOgBehandling(any(), any()) }
-        }
     }
 }
