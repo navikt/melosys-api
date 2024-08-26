@@ -292,7 +292,7 @@ public class EessiService {
             .anyMatch(kodeTerm -> Objects.equals(kodeTerm.getKode(), bestemmelse.getKode()));
         if (unleash.isEnabled(ToggleName.MELOSYS_KONVENSJON_EFTA_LAND_OG_STORBRITANNIA) && bestemmelseErStorbritanniaBestemmelse) {
             var tekstGBKonv = "Issued under the EEA EFTA Convention.";
-            return fritekst == null ? tekstGBKonv : tekstGBKonv + "\n" + fritekst;
+            return fritekst == null ? tekstGBKonv : tekstGBKonv + " " + fritekst;
         }
         return fritekst;
     }
