@@ -94,7 +94,7 @@ internal class A001Mapper {
     private fun mapYtterligereInformasjon(brevData: BrevDataA001): String? {
         if (brevData.anmodningsperioder.first().unntakFraBestemmelse in LovvalgsbestemmelseKodeMapper.GB_KONV_BESTEMMELSER) {
             val tekstGBKonv = "Issued under the EEA EFTA Convention."
-            return if (brevData.ytterligereInformasjon == null) tekstGBKonv else tekstGBKonv + "\n" + brevData.ytterligereInformasjon
+            return if (brevData.ytterligereInformasjon == null) tekstGBKonv else tekstGBKonv + " " + brevData.ytterligereInformasjon
         }
         return brevData.ytterligereInformasjon
     }
