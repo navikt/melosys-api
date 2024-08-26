@@ -119,6 +119,7 @@ internal class ÅrsavregningModelControllerTest {
             tilFaktureringBeloep = BigDecimal(3110.0)
         )
         every { trygdeavgiftTotalBeregner.hentTotalInntekt(any()) } returns BigDecimal(42)
+        every { trygdeavgiftTotalBeregner.hentTotalAvgift(any()) } returns BigDecimal(21170)
 
 
         val expectedJson = """{
