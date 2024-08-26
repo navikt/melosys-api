@@ -20,7 +20,7 @@ object AnmodningUnntakKontroll {
         val medlemskapDokument = kontrollData.medlemskapDokument
 
         if (medlemskapDokument != null && harOverlappendeMedlemsperiodeFraSed(medlemskapDokument, kontrollData.anmodningsperiode)) {
-            return Kontrollfeil(Kontroll_begrunnelser.OVERLAPPENDE_MEDL_PERIODER, KontrolldataFeilType.ADVARSEL)
+            return Kontrollfeil(Kontroll_begrunnelser.OVERLAPPENDE_MEDL_PERIODER, KontrolldataFeilType.FEIL)
         }
 
         return null
