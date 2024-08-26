@@ -348,8 +348,8 @@ public class ProsessinstansService {
 
     public void opprettProsessinstansIverksettVedtakFTRL(Behandling behandling, VedtakRequest request, Saksstatuser saksstatus) {
         if (behandling.getType().equals(Behandlingstyper.ÅRSAVREGNING)) {
-            // TODO Implementer nødvendige steg for årsavregningsvedtak i separat prosess
-            return;
+            // TODO Denne må kalles direkte fra VedtaksfattingFasade
+            opprettProsessinstansIverksettVedtakÅrsavregning(behandling);
         }
 
         Prosessinstans prosessinstans = new ProsessinstansBuilder()
@@ -366,6 +366,15 @@ public class ProsessinstansService {
     public void opprettProsessinstansIverksettVedtakTrygdeavtale(Behandling behandling) {
         Prosessinstans prosessinstans = new ProsessinstansBuilder()
             .medType(ProsessType.IVERKSETT_VEDTAK_TRYGDEAVTALE)
+            .medBehandling(behandling)
+            .build();
+
+        lagre(prosessinstans);
+    }
+
+    public void opprettProsessinstansIverksettVedtakÅrsavregning(Behandling behandling) {
+        Prosessinstans prosessinstans = new ProsessinstansBuilder()
+            .medType(ProsessType.IVERKSETT_VEDTAK_AARSAVREGNING)
             .medBehandling(behandling)
             .build();
 
