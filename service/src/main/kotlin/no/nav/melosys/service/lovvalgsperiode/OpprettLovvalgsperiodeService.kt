@@ -45,7 +45,7 @@ class OpprettLovvalgsperiodeService(
         val behandling = behandlingService.hentBehandling(behandlingId)
 
         if (harUtsendtArbeidsTakerKunNorgeFlyt(behandling)) {
-            oppdaterLovvalgsperiodeForUtsendtArbeidsTakerKunNorgeFlyt(
+            return oppdaterLovvalgsperiodeForUtsendtArbeidsTakerKunNorgeFlyt(
                 behandling,
                 eksisterendeLovvalgsperiode,
                 request.lovvalgsbestemmelse,
