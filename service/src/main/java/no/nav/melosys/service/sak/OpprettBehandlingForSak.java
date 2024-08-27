@@ -5,6 +5,7 @@ import no.nav.melosys.domain.Behandlingsresultat;
 import no.nav.melosys.domain.Fagsak;
 import no.nav.melosys.domain.kodeverk.Aktoersroller;
 import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingsaarsaktyper;
+import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingstyper;
 import no.nav.melosys.exception.FunksjonellException;
 import no.nav.melosys.saksflytapi.ProsessinstansService;
 import no.nav.melosys.service.behandling.BehandlingService;
@@ -49,7 +50,7 @@ public class OpprettBehandlingForSak {
         valider(fagsak, opprettSakDto);
         lovligeKombinasjonerSaksbehandlingService.validerBehandlingstemaOgBehandlingstypeForAndregangsbehandling(fagsak, sistBehandling, sistBehandlingsresultat, behandlingstema, behandlingstype);
 
-        if (sistBehandling.erAktiv() && !sistBehandling.erÅrsavregning()) {
+        if (sistBehandling.erAktiv() && behandlingstype != Behandlingstyper.ÅRSAVREGNING) {
             behandlingService.avsluttBehandling(sistBehandling.getId());
         }
 
@@ -71,7 +72,7 @@ public class OpprettBehandlingForSak {
         var muligeBehandlingstyper =
             lovligeKombinasjonerSaksbehandlingService.hentMuligeBehandlingstyperForKnyttTilSak(Aktoersroller.BRUKER, fagsak.getSaksnummer(), opprettSakDto.getBehandlingstema());
 
-        if (!muligeBehandlingstyper.contains(opprettSakDto.getBehandlingstype())){
+        if (!muligeBehandlingstyper.contains(opprettSakDto.getBehandlingstype())) {
             throw new FunksjonellException(String.format("Behandlingstype %s er ikke lovlig for behandlingstema %s og saksnummer %s", opprettSakDto.getBehandlingstype(), opprettSakDto.getBehandlingstema(), fagsak.getSaksnummer()));
         }
 
