@@ -27,8 +27,6 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.context.WebApplicationContext;
 
-import static no.nav.melosys.featuretoggle.ToggleName.MELOSYS_ÅRSAVREGNING;
-
 @Protected
 @RestController
 @RequestMapping("/behandlinger")
@@ -56,17 +54,6 @@ public class BehandlingController {
         this.aksesskontroll = aksesskontroll;
         this.behandlingsresultatService = behandlingsresultatService;
         this.unleash = unleash;
-    }
-
-    @PutMapping("/{behandlingID}/ferdigbehandle")
-    public ResponseEntity<Void> ferdigbehandle(@PathVariable("behandlingID") long behandlingID) {
-        aksesskontroll.autoriserSkriv(behandlingID);
-
-        if (unleash.isEnabled(MELOSYS_ÅRSAVREGNING)) {
-            behandlingService.ferdigbehandle(behandlingID);
-        }
-
-        return ResponseEntity.noContent().build();
     }
 
     @PostMapping("{behandlingID}/tidligere-medlemsperioder")
