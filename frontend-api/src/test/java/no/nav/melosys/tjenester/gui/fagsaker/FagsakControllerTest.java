@@ -344,12 +344,12 @@ class FagsakControllerTest {
 
     @Test
     void ferdigbehandleSak() throws Exception {
-        mockMvc.perform(put(BASE_URL + "/{saksnr}/ferdigbehandle", SAKSNUMMER)
+        mockMvc.perform(put(BASE_URL + "/{behandlingID}/ferdigbehandle", BEHANDLING_ID)
                 .contentType(MediaType.APPLICATION_JSON))
             .andExpect(status().isNoContent());
 
-        verify(aksesskontroll).autoriserSakstilgang(SAKSNUMMER);
-        verify(ferdigbehandleSakService).ferdigbehandleSak(SAKSNUMMER);
+        verify(aksesskontroll).autoriserSkriv(BEHANDLING_ID);
+        verify(ferdigbehandleSakService).ferdigbehandle(BEHANDLING_ID);
     }
 
     private void mockFagsakController(Fagsak fagsak, Behandlingsresultat eksisterendeBehres) {
