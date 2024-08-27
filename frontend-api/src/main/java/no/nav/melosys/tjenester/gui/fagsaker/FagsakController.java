@@ -158,7 +158,7 @@ public class FagsakController {
     @PutMapping("/{behandlingID}/ferdigbehandle")
     @ApiOperation("Avslutt behandling med Ferdigbehandlet som resultat og oppdatere saksstatus")
     public ResponseEntity<Void> ferdigbehandleSak(@PathVariable("behandlingID") long behandlingID) {
-        log.info("Saksbehandler {} ber om å avslutte aktiv behandling og oppdatere saksstatus på {}", SubjectHandler.getInstance().getUserID(), behandlingID);
+        log.info("Saksbehandler {} ber om å ferdigbehandle behandling {}", SubjectHandler.getInstance().getUserID(), behandlingID);
         aksesskontroll.autoriserSkriv(behandlingID);
 
         ferdigbehandleSakService.ferdigbehandle(behandlingID);
