@@ -45,12 +45,6 @@ class Fagsak(
         return behandlinger.size == 1 && behandlinger.filter { it.id != behandlingID }.isEmpty()
     }
 
-    fun erEnesteAktivBehandling(behandlingID: Long): Boolean {
-        val aktiveBehandlinger = behandlinger.filter { it.erAktiv() && it.id != behandlingID }
-
-        return aktiveBehandlinger.isEmpty()
-    }
-
     fun harAktivBehandlingIkkeÅrsavregning(): Boolean = finnAktivBehandlingIkkeÅrsavregning() != null
 
     fun finnAktivBehandlingIkkeÅrsavregning(): Behandling? {

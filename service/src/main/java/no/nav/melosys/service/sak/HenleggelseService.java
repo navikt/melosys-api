@@ -58,7 +58,7 @@ public class HenleggelseService {
         Behandling aktivBehandling = fagsak.finnAktivBehandlingIkkeÅrsavregning();
         oppdaterBehandlingsresultat(aktivBehandling.getId(), begrunnelseKode, fritekst);
 
-        if (fagsak.erEnesteAktivBehandling(aktivBehandling.getId())) {
+        if (fagsak.erEnesteBehandling(aktivBehandling.getId())) {
             fagsakService.avsluttFagsakOgBehandling(fagsak, Saksstatuser.HENLAGT);
         } else {
             behandlingService.avsluttAndregangsbehandling(aktivBehandling.getId(), Behandlingsresultattyper.HENLEGGELSE);
