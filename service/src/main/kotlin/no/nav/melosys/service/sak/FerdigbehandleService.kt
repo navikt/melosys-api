@@ -10,7 +10,7 @@ import org.springframework.stereotype.Service
 import org.springframework.transaction.annotation.Transactional
 
 @Service
-class FerdigbehandleSakService(
+class FerdigbehandleService(
     private val fagsakService: FagsakService,
     private val behandlingService: BehandlingService,
     private val behandlingsresultatService: BehandlingsresultatService,

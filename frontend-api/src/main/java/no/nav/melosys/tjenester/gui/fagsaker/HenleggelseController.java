@@ -33,8 +33,8 @@ public class HenleggelseController {
     }
 
     @PutMapping(value = "/fagsaker/{behandlingID}/henlegg-som-bortfalt")
-    @ApiOperation(value = "Henlegger en fagsak i Melosys som bortfalt, fordi den ikke skal behandles i Melosys. " +
-        "Henlegger kun den aktive behandlingen uten endring av saksstatus dersom behandlingtype er NY_VURDERING.")
+    @ApiOperation(value = "Henlegger behandlingen som bortfalt " +
+        "Saken settes til bortfalt dersom det ikke eksisterer andre behandlinger")
     public ResponseEntity<Void> henleggSakSomBortfalt(@PathVariable("behandlingID") long behandlingID) {
         aksesskontroll.autoriserSkriv(behandlingID);
 

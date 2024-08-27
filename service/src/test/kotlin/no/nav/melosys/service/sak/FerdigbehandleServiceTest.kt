@@ -19,7 +19,7 @@ import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.extension.ExtendWith
 
 @ExtendWith(MockKExtension::class)
-class FerdigbehandleSakServiceTest {
+class FerdigbehandleServiceTest {
 
     @RelaxedMockK
     lateinit var fagsakService: FagsakService
@@ -36,11 +36,11 @@ class FerdigbehandleSakServiceTest {
     @RelaxedMockK
     lateinit var prosessinstansService: ProsessinstansService
 
-    private lateinit var ferdigbehandleSakService: FerdigbehandleSakService
+    private lateinit var ferdigbehandleService: FerdigbehandleService
 
     @BeforeEach
     fun setup() {
-        ferdigbehandleSakService = FerdigbehandleSakService(fagsakService, behandlingService, behandlingsresultatService, oppgaveService)
+        ferdigbehandleService = FerdigbehandleService(fagsakService, behandlingService, behandlingsresultatService, oppgaveService)
     }
 
     @Test
@@ -58,7 +58,7 @@ class FerdigbehandleSakServiceTest {
         every { fagsakService.hentFagsak(FagsakTestFactory.SAKSNUMMER) } returns fagsak
 
 
-        ferdigbehandleSakService.ferdigbehandle(BEHANDLING_ID)
+        ferdigbehandleService.ferdigbehandle(BEHANDLING_ID)
 
 
         verify { fagsakService.avsluttFagsakOgBehandling(fagsak, behandling, Saksstatuser.AVSLUTTET) }
@@ -86,7 +86,7 @@ class FerdigbehandleSakServiceTest {
         every { fagsakService.hentFagsak(FagsakTestFactory.SAKSNUMMER) } returns fagsak
 
 
-        ferdigbehandleSakService.ferdigbehandle(BEHANDLING_ID)
+        ferdigbehandleService.ferdigbehandle(BEHANDLING_ID)
 
 
         verify(exactly = 0) { fagsakService.avsluttFagsakOgBehandling(fagsak, any(), any()) }
@@ -110,7 +110,7 @@ class FerdigbehandleSakServiceTest {
         every { fagsakService.hentFagsak(FagsakTestFactory.SAKSNUMMER) } returns fagsak
 
 
-        ferdigbehandleSakService.ferdigbehandle(BEHANDLING_ID)
+        ferdigbehandleService.ferdigbehandle(BEHANDLING_ID)
 
         verify { behandlingsresultatService.tømBehandlingsresultat(BEHANDLING_ID) }
     }
@@ -131,7 +131,7 @@ class FerdigbehandleSakServiceTest {
         every { fagsakService.hentFagsak(FagsakTestFactory.SAKSNUMMER) } returns fagsak
 
 
-        ferdigbehandleSakService.ferdigbehandle(BEHANDLING_ID)
+        ferdigbehandleService.ferdigbehandle(BEHANDLING_ID)
 
         verify(exactly = 0) { behandlingsresultatService.tømBehandlingsresultat(any()) }
     }

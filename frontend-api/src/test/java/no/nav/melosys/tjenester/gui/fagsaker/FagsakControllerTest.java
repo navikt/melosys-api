@@ -91,7 +91,7 @@ class FagsakControllerTest {
     @SuppressWarnings("unused")
     private static OpprettBehandlingForSak opprettBehandlingForSak;
     @MockBean
-    private static FerdigbehandleSakService ferdigbehandleSakService;
+    private static FerdigbehandleService ferdigbehandleService;
 
     @Autowired
     private MockMvc mockMvc;
@@ -349,7 +349,7 @@ class FagsakControllerTest {
             .andExpect(status().isNoContent());
 
         verify(aksesskontroll).autoriserSkriv(BEHANDLING_ID);
-        verify(ferdigbehandleSakService).ferdigbehandle(BEHANDLING_ID);
+        verify(ferdigbehandleService).ferdigbehandle(BEHANDLING_ID);
     }
 
     private void mockFagsakController(Fagsak fagsak, Behandlingsresultat eksisterendeBehres) {

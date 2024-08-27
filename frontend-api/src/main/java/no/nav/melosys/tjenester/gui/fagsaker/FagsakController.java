@@ -53,7 +53,7 @@ public class FagsakController {
     private final SaksopplysningerService saksopplysningerService;
     private final OrganisasjonOppslagService organisasjonOppslagService;
     private final OpprettBehandlingForSak opprettBehandlingForSak;
-    private final FerdigbehandleSakService ferdigbehandleSakService;
+    private final FerdigbehandleService ferdigbehandleService;
 
     public FagsakController(FagsakService fagsakService,
                             Aksesskontroll aksesskontroll,
@@ -65,7 +65,7 @@ public class FagsakController {
                             SaksopplysningerService saksopplysningerService,
                             OrganisasjonOppslagService organisasjonOppslagService,
                             OpprettBehandlingForSak opprettBehandlingForSak,
-                            FerdigbehandleSakService ferdigbehandleSakService) {
+                            FerdigbehandleService ferdigbehandleService) {
         this.fagsakService = fagsakService;
         this.aksesskontroll = aksesskontroll;
         this.mottatteOpplysningerService = mottatteOpplysningerService;
@@ -76,7 +76,7 @@ public class FagsakController {
         this.saksopplysningerService = saksopplysningerService;
         this.organisasjonOppslagService = organisasjonOppslagService;
         this.opprettBehandlingForSak = opprettBehandlingForSak;
-        this.ferdigbehandleSakService = ferdigbehandleSakService;
+        this.ferdigbehandleService = ferdigbehandleService;
     }
 
     @GetMapping("/{saksnr}")
@@ -161,7 +161,7 @@ public class FagsakController {
         log.info("Saksbehandler {} ber om å ferdigbehandle behandling {}", SubjectHandler.getInstance().getUserID(), behandlingID);
         aksesskontroll.autoriserSkriv(behandlingID);
 
-        ferdigbehandleSakService.ferdigbehandle(behandlingID);
+        ferdigbehandleService.ferdigbehandle(behandlingID);
 
         return ResponseEntity.noContent().build();
     }
