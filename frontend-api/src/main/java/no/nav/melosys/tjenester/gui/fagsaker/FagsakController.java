@@ -56,16 +56,16 @@ public class FagsakController {
     private final FerdigbehandleSakService ferdigbehandleSakService;
 
     public FagsakController(FagsakService fagsakService,
-                          Aksesskontroll aksesskontroll,
-                          MottatteOpplysningerService mottatteOpplysningerService,
-                          OpprettSak opprettSak,
-                          EndreSakService endreSakService,
-                          BehandlingsresultatService behandlingsresultatService,
-                          PersondataFasade persondataFasade,
-                          SaksopplysningerService saksopplysningerService,
-                          OrganisasjonOppslagService organisasjonOppslagService,
-                          OpprettBehandlingForSak opprettBehandlingForSak,
-                          FerdigbehandleSakService ferdigbehandleSakService) {
+                            Aksesskontroll aksesskontroll,
+                            MottatteOpplysningerService mottatteOpplysningerService,
+                            OpprettSak opprettSak,
+                            EndreSakService endreSakService,
+                            BehandlingsresultatService behandlingsresultatService,
+                            PersondataFasade persondataFasade,
+                            SaksopplysningerService saksopplysningerService,
+                            OrganisasjonOppslagService organisasjonOppslagService,
+                            OpprettBehandlingForSak opprettBehandlingForSak,
+                            FerdigbehandleSakService ferdigbehandleSakService) {
         this.fagsakService = fagsakService;
         this.aksesskontroll = aksesskontroll;
         this.mottatteOpplysningerService = mottatteOpplysningerService;
@@ -155,16 +155,17 @@ public class FagsakController {
         return Collections.emptyList();
     }
 
-    @PutMapping("/{saksnummer}/ferdigbehandle")
+    @PutMapping("/{behandlingID}/ferdigbehandle")
     @ApiOperation("Avslutt behandling med Ferdigbehandlet som resultat og oppdatere saksstatus")
-    public ResponseEntity<Void> ferdigbehandleSak(@PathVariable("saksnummer") String saksnummer) {
-        log.info("Saksbehandler {} ber om å avslutte aktiv behandling og oppdatere saksstatus på {}", SubjectHandler.getInstance().getUserID(), saksnummer);
-        aksesskontroll.autoriserSakstilgang(saksnummer);
+    public ResponseEntity<Void> ferdigbehandleSak(@PathVariable("behandlingID") long behandlingID) {
+        log.info("Saksbehandler {} ber om å avslutte aktiv behandling og oppdatere saksstatus på {}", SubjectHandler.getInstance().getUserID(), behandlingID);
+        aksesskontroll.autoriserSkriv(behandlingID);
 
-        ferdigbehandleSakService.ferdigbehandleSak(saksnummer);
+        ferdigbehandleSakService.ferdigbehandle(behandlingID);
 
         return ResponseEntity.noContent().build();
     }
+
 
     private FagsakDto tilFagsakDto(Fagsak fagsak) {
         FagsakDto fagsakDto = new FagsakDto();
