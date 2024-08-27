@@ -3,7 +3,6 @@ package no.nav.melosys.service.lovvalgsperiode
 import no.nav.melosys.domain.Behandling
 import no.nav.melosys.domain.Lovvalgsperiode
 import no.nav.melosys.domain.kodeverk.*
-import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingstema
 import no.nav.melosys.domain.kodeverk.lovvalgsbestemmelser.trygdeavtale.Lovvalgsbestemmelser_trygdeavtale_ca
 import no.nav.melosys.domain.kodeverk.lovvalgsbestemmelser.trygdeavtale.Lovvalgsbestemmelser_trygdeavtale_us
 import no.nav.melosys.domain.mottatteopplysninger.AnmodningEllerAttest
@@ -44,16 +43,6 @@ class OpprettLovvalgsperiodeService(
     ): Lovvalgsperiode {
         val behandling = behandlingService.hentBehandling(behandlingId)
 
-        if (harUtsendtArbeidsTakerKunNorgeFlyt(behandling)) {
-            return oppdaterLovvalgsperiodeForUtsendtArbeidsTakerKunNorgeFlyt(
-                behandling,
-                eksisterendeLovvalgsperiode,
-                request.lovvalgsbestemmelse,
-                request.fomDato,
-                request.tomDato
-            )
-        }
-
         if (saksbehandlingRegler.harRegistreringUnntakFraMedlemskapFlyt(behandling)) {
             validerRequestForUnntaksregistrering(request)
             return oppdaterLovvalgsperiodeForUnntaksregistrering(
@@ -73,6 +62,16 @@ class OpprettLovvalgsperiodeService(
                 eksisterendeLovvalgsperiode,
                 request.lovvalgsbestemmelse,
                 request.innvilgelsesResultat!!
+            )
+        }
+
+        if (saksbehandlingRegler.harUtsendtArbeidsTakerKunNorgeFlyt(behandling.fagsak.erSakstypeEøs(), behandling.tema, landvelgerService.hentArbeidsland(behandlingId))) {
+            return oppdaterLovvalgsperiodeForUtsendtArbeidsTakerKunNorgeFlyt(
+                behandling,
+                eksisterendeLovvalgsperiode,
+                request.lovvalgsbestemmelse,
+                request.fomDato,
+                request.tomDato
             )
         }
 
@@ -174,14 +173,6 @@ class OpprettLovvalgsperiodeService(
         lovvalgsperiode.innvilgelsesresultat = InnvilgelsesResultat.INNVILGET
         lovvalgsperiode.lovvalgsland = Land_iso2.NO
         return lovvalgsperiodeRepository.save(lovvalgsperiode)
-    }
-
-    private fun harUtsendtArbeidsTakerKunNorgeFlyt(behandling: Behandling): Boolean {
-        return behandling.fagsak.erSakstypeEøs()
-            && (behandling.tema.equals(Behandlingstema.UTSENDT_ARBEIDSTAKER)
-            || behandling.tema.equals(Behandlingstema.UTSENDT_SELVSTENDIG)
-            || behandling.tema.equals(Behandlingstema.ARBEID_KUN_NORGE)
-            && landvelgerService.hentArbeidsland(behandling.id).equals(Land_iso2.NO))
     }
 
 }

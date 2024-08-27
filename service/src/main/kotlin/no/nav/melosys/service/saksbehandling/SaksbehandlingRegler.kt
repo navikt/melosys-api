@@ -3,6 +3,7 @@ package no.nav.melosys.service.saksbehandling
 import io.getunleash.Unleash
 import no.nav.melosys.domain.Behandling
 import no.nav.melosys.domain.Fagsak
+import no.nav.melosys.domain.kodeverk.Land_iso2
 import no.nav.melosys.domain.kodeverk.Sakstemaer
 import no.nav.melosys.domain.kodeverk.Sakstyper
 import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingsresultattyper
@@ -130,6 +131,14 @@ class SaksbehandlingRegler(private val behandlingsresultatRepository: Behandling
         behandlingstema: Behandlingstema
     ): Boolean {
         return (sakstype == Sakstyper.EU_EOS || sakstype == Sakstyper.TRYGDEAVTALE) && behandlingstema == IKKE_YRKESAKTIV
+    }
+
+     fun harUtsendtArbeidsTakerKunNorgeFlyt(erSakstypeEøs: Boolean, behandlingstema: Behandlingstema, land: Land_iso2): Boolean {
+        return erSakstypeEøs
+            && (behandlingstema.equals(UTSENDT_ARBEIDSTAKER)
+            || behandlingstema.equals(UTSENDT_SELVSTENDIG)
+            || behandlingstema.equals(ARBEID_KUN_NORGE))
+            && land == Land_iso2.NO
     }
 
     companion object {

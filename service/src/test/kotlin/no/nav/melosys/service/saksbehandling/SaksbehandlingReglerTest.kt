@@ -10,6 +10,7 @@ import no.nav.melosys.domain.Behandling
 import no.nav.melosys.domain.Behandlingsresultat
 import no.nav.melosys.domain.Fagsak
 import no.nav.melosys.domain.FagsakTestFactory
+import no.nav.melosys.domain.kodeverk.Land_iso2
 import no.nav.melosys.domain.kodeverk.Sakstemaer
 import no.nav.melosys.domain.kodeverk.Sakstyper
 import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingsresultattyper
@@ -46,6 +47,46 @@ class SaksbehandlingReglerTest {
         unleash.resetAll()
         saksbehandlingRegler = SaksbehandlingRegler(behandlingsresultatRepository, unleash)
     }
+
+    fun harUtsendtArbeidsTakerKunNorgeFlytParametere() =
+        listOf(
+            Arguments.of(
+                true,
+                Behandlingstema.ARBEID_KUN_NORGE,
+                Land_iso2.NO,
+                true
+            ),
+            Arguments.of(
+                true,
+                Behandlingstema.UTSENDT_SELVSTENDIG,
+                Land_iso2.NO,
+                true
+            ),
+            Arguments.of(
+                true,
+                Behandlingstema.UTSENDT_ARBEIDSTAKER,
+                Land_iso2.NO,
+                true
+            ),
+            Arguments.of(
+                false,
+                Behandlingstema.UTSENDT_ARBEIDSTAKER,
+                Land_iso2.NO,
+                false
+            ),
+            Arguments.of(
+                true,
+                Behandlingstema.UTSENDT_ARBEIDSTAKER,
+                Land_iso2.FI,
+                false
+            ),
+            Arguments.of(
+                true,
+                Behandlingstema.YRKESAKTIV,
+                Land_iso2.NO,
+                false
+            ),
+        )
 
     fun testHarIngenFlytParametere() =
         listOf(
@@ -140,6 +181,20 @@ class SaksbehandlingReglerTest {
     ) {
         unleash.enable(ToggleName.MELOSYS_ARBEID_KUN_NORGE)
         val result = saksbehandlingRegler.harIngenFlyt(sakstype, sakstema, behandlingstype, behandlingstema)
+
+        result.shouldBe(expected)
+    }
+
+    @ParameterizedTest
+    @MethodSource("harUtsendtArbeidsTakerKunNorgeFlytParametere")
+    fun harUtsendtArbeidsTakerKunNorgeFlyt(
+        erSakstypeEøs: Boolean,
+        behandlingstema: Behandlingstema,
+        land: Land_iso2,
+        expected: Boolean,
+    ) {
+        unleash.enable(ToggleName.MELOSYS_ARBEID_KUN_NORGE)
+        val result = saksbehandlingRegler.harUtsendtArbeidsTakerKunNorgeFlyt(erSakstypeEøs, behandlingstema, land)
 
         result.shouldBe(expected)
     }
