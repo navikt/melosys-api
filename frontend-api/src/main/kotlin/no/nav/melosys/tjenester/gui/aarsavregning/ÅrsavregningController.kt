@@ -56,9 +56,9 @@ class ÅrsavregningController(
     private fun lagÅrsavregningResponse(årsavregningModel: ÅrsavregningModel) =
         ÅrsavregningResponse(
             aar = årsavregningModel.år,
-            tidligereGrunnlagsopplysninger = hentÅrsavregningsOpplysninger(årsavregningModel.tidligereGrunnlag, årsavregningModel.tidligereAvgift),
+            tidligereGrunnlagsopplysninger = hentGrunnlagsopplysninger(årsavregningModel.tidligereGrunnlag, årsavregningModel.tidligereAvgift),
             avvikFunnet = årsavregningModel.nyttGrunnlag != null,
-            nyttGrunnlag = hentÅrsavregningsOpplysninger(årsavregningModel.nyttGrunnlag, årsavregningModel.endeligAvgift),
+            nyttGrunnlag = hentGrunnlagsopplysninger(årsavregningModel.nyttGrunnlag, årsavregningModel.endeligAvgift),
             endeligAvgift = null,
             avregning = AvregningDto(
                 nyttTotalbeloep = årsavregningModel.nyttTotalbeloep,
@@ -100,12 +100,12 @@ class ÅrsavregningController(
         )
 
 
-    private fun hentÅrsavregningsOpplysninger(
+    private fun hentGrunnlagsopplysninger(
         trygdeavgiftsgrunnlag: Trygdeavgiftsgrunnlag?,
         trygdeavgiftsperioder: List<Trygdeavgiftsperiode>
-    ): ÅrsavregningsOpplysningerDto? {
+    ): GrunnlagsOpplysningerDto? {
         return if (trygdeavgiftsgrunnlag == null) null else
-            ÅrsavregningsOpplysningerDto(
+            GrunnlagsOpplysningerDto(
                 mapTrygdeavgiftsgrunnlag(trygdeavgiftsgrunnlag),
                 AvgiftDto(
                     trygdeavgiftsperioder = trygdeavgiftsperioder.map {
@@ -136,9 +136,9 @@ class ÅrsavregningController(
 
 data class ÅrsavregningResponse(
     val aar: Int,
-    val tidligereGrunnlagsopplysninger: ÅrsavregningsOpplysningerDto?,
+    val tidligereGrunnlagsopplysninger: GrunnlagsOpplysningerDto?,
     val avvikFunnet: Boolean?,
-    val nyttGrunnlag: ÅrsavregningsOpplysningerDto?,
+    val nyttGrunnlag: GrunnlagsOpplysningerDto?,
     val endeligAvgift: AvgiftDto?,
     val avregning: AvregningDto?
 )
@@ -150,7 +150,7 @@ data class ÅrsavregningRequest(
     val inntektskperioder: List<InntektsperiodeDto>,
 )
 
-data class ÅrsavregningsOpplysningerDto(
+data class GrunnlagsOpplysningerDto(
     val trygdeavgiftsgrunnlag: TrygdeavgiftsgrunnlagDto,
     val avgift: AvgiftDto
 )
