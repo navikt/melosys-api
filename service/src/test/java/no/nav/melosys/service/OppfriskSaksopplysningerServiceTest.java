@@ -21,6 +21,7 @@ import no.nav.melosys.domain.mottatteopplysninger.data.Periode;
 import no.nav.melosys.domain.mottatteopplysninger.data.Soeknadsland;
 import no.nav.melosys.domain.mottatteopplysninger.data.arbeidssteder.FysiskArbeidssted;
 import no.nav.melosys.exception.FunksjonellException;
+import no.nav.melosys.service.avgift.aarsavregning.ÅrsavregningService;
 import no.nav.melosys.service.behandling.BehandlingService;
 import no.nav.melosys.service.behandling.BehandlingsresultatService;
 import no.nav.melosys.service.kontroll.feature.ufm.UfmKontrollService;
@@ -60,6 +61,8 @@ class OppfriskSaksopplysningerServiceTest {
     private PersondataFasade persondataFasade;
     @Mock
     private SaksbehandlingRegler saksbehandlingRegler;
+    @Mock
+    private ÅrsavregningService årsavregningService;
 
     private OppfriskSaksopplysningerService oppfriskSaksopplysningerService;
 
@@ -78,7 +81,8 @@ class OppfriskSaksopplysningerServiceTest {
             inngangsvilkaarService,
             registeropplysningerService,
             persondataFasade,
-            registeropplysningerFactory);
+            registeropplysningerFactory,
+            årsavregningService);
     }
 
     @Test

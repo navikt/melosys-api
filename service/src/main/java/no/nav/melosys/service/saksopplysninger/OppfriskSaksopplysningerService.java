@@ -1,11 +1,15 @@
 package no.nav.melosys.service.saksopplysninger;
 
+import java.time.LocalDate;
+import java.time.Month;
 import java.util.Optional;
 
 import no.nav.melosys.domain.Behandling;
 import no.nav.melosys.domain.ErPeriode;
 import no.nav.melosys.domain.dokument.felles.Periode;
 import no.nav.melosys.exception.FunksjonellException;
+import no.nav.melosys.service.avgift.aarsavregning.ÅrsavregningModel;
+import no.nav.melosys.service.avgift.aarsavregning.ÅrsavregningService;
 import no.nav.melosys.service.behandling.BehandlingService;
 import no.nav.melosys.service.behandling.BehandlingsresultatService;
 import no.nav.melosys.service.kontroll.feature.ufm.UfmKontrollService;
@@ -32,6 +36,7 @@ public class OppfriskSaksopplysningerService {
     private final RegisteropplysningerService registeropplysningerService;
     private final PersondataFasade persondataFasade;
     private final RegisteropplysningerFactory registeropplysningerFactory;
+    private final ÅrsavregningService årsavregningService;
 
     public OppfriskSaksopplysningerService(AnmodningsperiodeService anmodningsperiodeService,
                                            BehandlingService behandlingService,
@@ -40,7 +45,8 @@ public class OppfriskSaksopplysningerService {
                                            InngangsvilkaarService inngangsvilkaarService,
                                            RegisteropplysningerService registeropplysningerService,
                                            PersondataFasade persondataFasade,
-                                           RegisteropplysningerFactory registeropplysningerFactory) {
+                                           RegisteropplysningerFactory registeropplysningerFactory,
+                                           ÅrsavregningService årsavregningService) {
         this.anmodningsperiodeService = anmodningsperiodeService;
         this.behandlingService = behandlingService;
         this.behandlingsresultatService = behandlingsresultatService;
@@ -49,6 +55,7 @@ public class OppfriskSaksopplysningerService {
         this.registeropplysningerService = registeropplysningerService;
         this.persondataFasade = persondataFasade;
         this.registeropplysningerFactory = registeropplysningerFactory;
+        this.årsavregningService = årsavregningService;
     }
 
     @Transactional
@@ -64,7 +71,8 @@ public class OppfriskSaksopplysningerService {
         String brukerID = aktørIdOptional.map(persondataFasade::hentFolkeregisterident).orElse(null);
 
         //OK om perioden er tom. Ikke alle behandlingstema krever periode.
-        ErPeriode periode = behandling.finnPeriode().orElse(new Periode());
+        ErPeriode periode = behandling.erÅrsavregning() ?
+            hentPeriodeForÅrsavregning(behandlingID) : behandling.finnPeriode().orElse(new Periode());
 
         RegisteropplysningerRequest registeropplysningerRequest = RegisteropplysningerRequest.builder()
             .behandlingID(behandlingID)
@@ -97,5 +105,20 @@ public class OppfriskSaksopplysningerService {
                 periode
             );
         }
+    }
+
+    private ErPeriode hentPeriodeForÅrsavregning(Long behandlingID) {
+        ÅrsavregningModel årsavregning = årsavregningService.finnÅrsavregning(behandlingID);
+        int år = årsavregning == null ? LocalDate.now().getYear() : årsavregning.getår();
+
+        return new Periode(LocalDate.of(år, Month.JANUARY, 1), hentTomForÅrsavregning(år));
+    }
+
+    private LocalDate hentTomForÅrsavregning(int år) {
+        LocalDate now = LocalDate.now();
+        if (now.getYear() == år) {
+            return now;
+        }
+        return LocalDate.of(år, Month.DECEMBER, 31);
     }
 }
