@@ -1,227 +1,251 @@
-package no.nav.melosys.service.sak;
+package no.nav.melosys.service.sak
 
-import java.time.LocalDate;
-import java.util.Optional;
+import io.getunleash.FakeUnleash
+import io.mockk.Runs
+import io.mockk.every
+import io.mockk.impl.annotations.MockK
+import io.mockk.impl.annotations.RelaxedMockK
+import io.mockk.junit5.MockKExtension
+import io.mockk.just
+import io.mockk.verify
+import no.nav.melosys.domain.*
+import no.nav.melosys.domain.FagsakTestFactory.builder
+import no.nav.melosys.domain.kodeverk.Sakstemaer
+import no.nav.melosys.domain.kodeverk.Sakstyper
+import no.nav.melosys.domain.kodeverk.behandlinger.*
+import no.nav.melosys.exception.FunksjonellException
+import no.nav.melosys.repository.BehandlingsresultatRepository
+import no.nav.melosys.saksflytapi.ProsessinstansService
+import no.nav.melosys.service.behandling.BehandlingService
+import no.nav.melosys.service.behandling.BehandlingsresultatService
+import no.nav.melosys.service.lovligekombinasjoner.LovligeKombinasjonerSaksbehandlingService
+import no.nav.melosys.service.saksbehandling.SaksbehandlingRegler
+import org.assertj.core.api.Assertions
+import org.junit.jupiter.api.BeforeEach
+import org.junit.jupiter.api.Test
+import org.junit.jupiter.api.extension.ExtendWith
+import java.time.LocalDate
+import java.util.*
 
-import io.getunleash.FakeUnleash;
-import no.nav.melosys.domain.*;
-import no.nav.melosys.domain.kodeverk.Sakstemaer;
-import no.nav.melosys.domain.kodeverk.Sakstyper;
-import no.nav.melosys.domain.kodeverk.behandlinger.*;
-import no.nav.melosys.exception.FunksjonellException;
-import no.nav.melosys.repository.BehandlingsresultatRepository;
-import no.nav.melosys.saksflytapi.ProsessinstansService;
-import no.nav.melosys.service.behandling.BehandlingService;
-import no.nav.melosys.service.behandling.BehandlingsresultatService;
-import no.nav.melosys.service.lovligekombinasjoner.LovligeKombinasjonerSaksbehandlingService;
-import no.nav.melosys.service.saksbehandling.SaksbehandlingRegler;
-import org.junit.jupiter.api.BeforeEach;
-import org.junit.jupiter.api.Test;
-import org.junit.jupiter.api.extension.ExtendWith;
-import org.mockito.Mock;
-import org.mockito.junit.jupiter.MockitoExtension;
+@ExtendWith(MockKExtension::class)
+internal class OpprettBehandlingForSakTest {
+    @RelaxedMockK
+    private lateinit var prosessinstansService: ProsessinstansService
 
-import static org.assertj.core.api.Assertions.assertThatExceptionOfType;
-import static org.assertj.core.api.Assertions.assertThatNoException;
-import static org.mockito.Mockito.*;
+    @MockK
+    private lateinit var fagsakService: FagsakService
 
-@ExtendWith(MockitoExtension.class)
-class OpprettBehandlingForSakTest {
+    @MockK
+    private lateinit var behandlingsresultatRepository: BehandlingsresultatRepository
 
-    @Mock
-    private ProsessinstansService prosessinstansService;
-    @Mock
-    private FagsakService fagsakService;
-    @Mock
-    private BehandlingsresultatRepository behandlingsresultatRepository;
-    @Mock
-    private BehandlingService behandlingService;
-    @Mock
-    private BehandlingsresultatService behandlingsresultatService;
+    @MockK
+    private lateinit var behandlingService: BehandlingService
 
-    private final FakeUnleash unleash = new FakeUnleash();
+    @MockK
+    private lateinit var behandlingsresultatService: BehandlingsresultatService
 
-    private OpprettBehandlingForSak opprettBehandlingForSak;
+    private val unleash = FakeUnleash()
+
+    private lateinit var opprettBehandlingForSak: OpprettBehandlingForSak
 
     @BeforeEach
-    public void setUp() {
-        LovligeKombinasjonerSaksbehandlingService lovligeKombinasjonerSaksbehandlingService = new LovligeKombinasjonerSaksbehandlingService(fagsakService, behandlingService, behandlingsresultatService, unleash);
-        SaksbehandlingRegler saksbehandlingRegler = new SaksbehandlingRegler(behandlingsresultatRepository, unleash);
-        opprettBehandlingForSak = new OpprettBehandlingForSak(fagsakService, prosessinstansService, saksbehandlingRegler, lovligeKombinasjonerSaksbehandlingService, behandlingService);
+    fun setUp() {
+        val lovligeKombinasjonerSaksbehandlingService = LovligeKombinasjonerSaksbehandlingService(
+            fagsakService, behandlingService, behandlingsresultatService, unleash
+        )
+        val saksbehandlingRegler = SaksbehandlingRegler(behandlingsresultatRepository, unleash)
+        opprettBehandlingForSak = OpprettBehandlingForSak(
+            fagsakService,
+            prosessinstansService,
+            saksbehandlingRegler,
+            lovligeKombinasjonerSaksbehandlingService,
+            behandlingService
+        )
+
+        every { behandlingService.avsluttBehandling(any()) }  just Runs
     }
 
     @Test
-    void opprettBehandling_medAktivBehandlingVednyÅrsavregningBehandlingAvslutterIkkeAktivBehanding() {
-        unleash.enableAll();
-        long behandlingId = 1L;
+    fun opprettBehandling_medAktivBehandlingVednyÅrsavregningBehandlingAvslutterIkkeAktivBehanding() {
+        unleash.enableAll()
+        val behandlingId = 1L
 
-        Behandling aktivBehandling = lagBehandling();
-        aktivBehandling.setStatus(Behandlingsstatus.UNDER_BEHANDLING);
+        val aktivBehandling = lagBehandling()
+        aktivBehandling.status = Behandlingsstatus.UNDER_BEHANDLING
 
-        Fagsak fagsak = lagFagsak(aktivBehandling);
-        fagsak.setType(Sakstyper.FTRL);
-        fagsak.setTema(Sakstemaer.MEDLEMSKAP_LOVVALG);
+        val fagsak = lagFagsak(aktivBehandling)
+        fagsak.type = Sakstyper.FTRL
+        fagsak.tema = Sakstemaer.MEDLEMSKAP_LOVVALG
 
-        when(fagsakService.hentFagsak(FagsakTestFactory.SAKSNUMMER)).thenReturn(fagsak);
-        when(behandlingsresultatService.hentBehandlingsresultatMedAnmodningsperioder(behandlingId)).thenReturn(new Behandlingsresultat());
-
-
-        opprettBehandlingForSak.opprettBehandling(FagsakTestFactory.SAKSNUMMER, lagOpprettSakDto(Behandlingstema.YRKESAKTIV, Behandlingstyper.ÅRSAVREGNING));
+        every { fagsakService.hentFagsak(FagsakTestFactory.SAKSNUMMER) }.returns(fagsak)
+        every { behandlingsresultatService.hentBehandlingsresultatMedAnmodningsperioder(behandlingId) }.returns(Behandlingsresultat())
 
 
-        verify(behandlingService, never()).avsluttBehandling(behandlingId);
+        opprettBehandlingForSak!!.opprettBehandling(
+            FagsakTestFactory.SAKSNUMMER,
+            lagOpprettSakDto(Behandlingstema.YRKESAKTIV, Behandlingstyper.ÅRSAVREGNING)
+        )
+
+
+        verify(exactly = 0) { behandlingService.avsluttBehandling(behandlingId) }
     }
 
     @Test
-    void opprettBehandling_medAktivBehandlingMenArtikkel16SendtAnmodningUtland_feilerIkke() {
-        OpprettSakDto opprettSakDto = lagOpprettSakDto(Behandlingstema.UTSENDT_ARBEIDSTAKER, Behandlingstyper.NY_VURDERING);
-        Behandling aktivBehandling = lagBehandling();
-        aktivBehandling.setStatus(Behandlingsstatus.UNDER_BEHANDLING);
-        when(fagsakService.hentFagsak(FagsakTestFactory.SAKSNUMMER)).thenReturn(lagFagsak(aktivBehandling));
+    fun opprettBehandling_medAktivBehandlingMenArtikkel16SendtAnmodningUtland_feilerIkke() {
+        val opprettSakDto = lagOpprettSakDto(Behandlingstema.UTSENDT_ARBEIDSTAKER, Behandlingstyper.NY_VURDERING)
+        val aktivBehandling = lagBehandling()
+        aktivBehandling.status = Behandlingsstatus.UNDER_BEHANDLING
+        every { fagsakService.hentFagsak(FagsakTestFactory.SAKSNUMMER) }.returns(lagFagsak(aktivBehandling))
+
+        val anmodningsperiode = Anmodningsperiode()
+        anmodningsperiode.setSendtUtland(true)
+        val behandlingsresultat = Behandlingsresultat()
+        behandlingsresultat.anmodningsperioder.add(anmodningsperiode)
+        every { behandlingsresultatService.hentBehandlingsresultatMedAnmodningsperioder(aktivBehandling.id) }.returns(behandlingsresultat)
 
 
-        Anmodningsperiode anmodningsperiode = new Anmodningsperiode();
-        anmodningsperiode.setSendtUtland(true);
-        Behandlingsresultat behandlingsresultat = new Behandlingsresultat();
-        behandlingsresultat.getAnmodningsperioder().add(anmodningsperiode);
-        when(behandlingsresultatService.hentBehandlingsresultatMedAnmodningsperioder(aktivBehandling.getId())).thenReturn(behandlingsresultat);
-
-        assertThatNoException().isThrownBy(() -> opprettBehandlingForSak.opprettBehandling(FagsakTestFactory.SAKSNUMMER, opprettSakDto));
+        Assertions.assertThatNoException()
+            .isThrownBy { opprettBehandlingForSak.opprettBehandling(FagsakTestFactory.SAKSNUMMER, opprettSakDto) }
     }
 
 
     @Test
-    void opprettBehandling_utenBehandlingstema_feiler() {
-        OpprettSakDto opprettSakDto = lagOpprettSakDto(null, Behandlingstyper.NY_VURDERING);
-        when(fagsakService.hentFagsak(FagsakTestFactory.SAKSNUMMER)).thenReturn(lagFagsak(lagBehandling()));
+    fun opprettBehandling_utenBehandlingstema_feiler() {
+        val opprettSakDto = lagOpprettSakDto(null, Behandlingstyper.NY_VURDERING)
+        every { fagsakService.hentFagsak(FagsakTestFactory.SAKSNUMMER) }.returns(lagFagsak(lagBehandling()))
 
 
-        assertThatExceptionOfType(FunksjonellException.class)
-            .isThrownBy(() -> opprettBehandlingForSak.opprettBehandling(FagsakTestFactory.SAKSNUMMER, opprettSakDto))
-            .withMessageContaining("Behandlingstema mangler");
+        Assertions.assertThatExceptionOfType(FunksjonellException::class.java)
+            .isThrownBy { opprettBehandlingForSak.opprettBehandling(FagsakTestFactory.SAKSNUMMER, opprettSakDto) }
+            .withMessageContaining("Behandlingstema mangler")
     }
 
     @Test
-    void opprettBehandling_utenBehandlingstype_feiler() {
-        OpprettSakDto opprettSakDto = lagOpprettSakDto(Behandlingstema.UTSENDT_ARBEIDSTAKER, null);
-        when(fagsakService.hentFagsak(FagsakTestFactory.SAKSNUMMER)).thenReturn(lagFagsak(lagBehandling()));
+    fun opprettBehandling_utenBehandlingstype_feiler() {
+        val opprettSakDto = lagOpprettSakDto(Behandlingstema.UTSENDT_ARBEIDSTAKER, null)
+        every { fagsakService.hentFagsak(FagsakTestFactory.SAKSNUMMER) }.returns(lagFagsak(lagBehandling()))
 
 
-        assertThatExceptionOfType(FunksjonellException.class)
-            .isThrownBy(() -> opprettBehandlingForSak.opprettBehandling(FagsakTestFactory.SAKSNUMMER, opprettSakDto))
-            .withMessageContaining("Behandlingstype mangler");
+        Assertions.assertThatExceptionOfType(FunksjonellException::class.java)
+            .isThrownBy { opprettBehandlingForSak.opprettBehandling(FagsakTestFactory.SAKSNUMMER, opprettSakDto) }
+            .withMessageContaining("Behandlingstype mangler")
     }
 
     @Test
-    void opprettBehandling_utenMottaksdato_feiler() {
-        OpprettSakDto opprettSakDto = lagOpprettSakDto(Behandlingstema.UTSENDT_ARBEIDSTAKER, Behandlingstyper.NY_VURDERING);
-        opprettSakDto.setMottaksdato(null);
+    fun opprettBehandling_utenMottaksdato_feiler() {
+        val opprettSakDto = lagOpprettSakDto(Behandlingstema.UTSENDT_ARBEIDSTAKER, Behandlingstyper.NY_VURDERING)
+        opprettSakDto.mottaksdato = null
+        every { fagsakService.hentFagsak(FagsakTestFactory.SAKSNUMMER) }.returns(lagFagsak(lagBehandling()))
 
-        when(fagsakService.hentFagsak(FagsakTestFactory.SAKSNUMMER)).thenReturn(lagFagsak(lagBehandling()));
 
-
-        assertThatExceptionOfType(FunksjonellException.class)
-            .isThrownBy(() -> opprettBehandlingForSak.opprettBehandling(FagsakTestFactory.SAKSNUMMER, opprettSakDto))
-            .withMessageContaining("Mottaksdato");
+        Assertions.assertThatExceptionOfType(FunksjonellException::class.java)
+            .isThrownBy { opprettBehandlingForSak.opprettBehandling(FagsakTestFactory.SAKSNUMMER, opprettSakDto) }
+            .withMessageContaining("Mottaksdato")
     }
 
     @Test
-    void opprettBehandling_ugyldigBehandlingstype_feiler() {
-        OpprettSakDto opprettSakDto = lagOpprettSakDto(Behandlingstema.UTSENDT_ARBEIDSTAKER, Behandlingstyper.FØRSTEGANG);
+    fun opprettBehandling_ugyldigBehandlingstype_feiler() {
+        val opprettSakDto = lagOpprettSakDto(Behandlingstema.UTSENDT_ARBEIDSTAKER, Behandlingstyper.FØRSTEGANG)
+        every { fagsakService.hentFagsak(FagsakTestFactory.SAKSNUMMER) }.returns(lagFagsak(lagBehandling()))
 
-        when(fagsakService.hentFagsak(FagsakTestFactory.SAKSNUMMER)).thenReturn(lagFagsak(lagBehandling()));
 
-
-        assertThatExceptionOfType(FunksjonellException.class)
-            .isThrownBy(() -> opprettBehandlingForSak.opprettBehandling(FagsakTestFactory.SAKSNUMMER, opprettSakDto))
-            .withMessageContaining("Behandlingstype FØRSTEGANG er ikke lovlig for behandlingstema UTSENDT_ARBEIDSTAKER og saksnummer MEL-test");
+        Assertions.assertThatExceptionOfType(FunksjonellException::class.java)
+            .isThrownBy { opprettBehandlingForSak.opprettBehandling(FagsakTestFactory.SAKSNUMMER, opprettSakDto) }
+            .withMessageContaining("Behandlingstype FØRSTEGANG er ikke lovlig for behandlingstema UTSENDT_ARBEIDSTAKER og saksnummer MEL-test")
     }
 
     @Test
-    void opprettBehandling_ugyldigBehandlingstema_feiler() {
-        OpprettSakDto opprettSakDto = lagOpprettSakDto(Behandlingstema.REGISTRERING_UNNTAK, Behandlingstyper.NY_VURDERING);
+    fun opprettBehandling_ugyldigBehandlingstema_feiler() {
+        val opprettSakDto = lagOpprettSakDto(Behandlingstema.REGISTRERING_UNNTAK, Behandlingstyper.NY_VURDERING)
+        every { fagsakService.hentFagsak(FagsakTestFactory.SAKSNUMMER) }.returns(lagFagsak(lagBehandling()))
 
-        when(fagsakService.hentFagsak(FagsakTestFactory.SAKSNUMMER)).thenReturn(lagFagsak(lagBehandling()));
 
-
-        assertThatExceptionOfType(FunksjonellException.class)
-            .isThrownBy(() -> opprettBehandlingForSak.opprettBehandling(FagsakTestFactory.SAKSNUMMER, opprettSakDto))
-            .withMessageContaining("Behandlingstype NY_VURDERING er ikke lovlig for behandlingstema REGISTRERING_UNNTAK og saksnummer MEL-test");
+        Assertions.assertThatExceptionOfType(FunksjonellException::class.java)
+            .isThrownBy { opprettBehandlingForSak.opprettBehandling(FagsakTestFactory.SAKSNUMMER, opprettSakDto) }
+            .withMessageContaining("Behandlingstype NY_VURDERING er ikke lovlig for behandlingstema REGISTRERING_UNNTAK og saksnummer MEL-test")
     }
 
     @Test
-    void opprettBehandling_fritekstMenFeilType_feiler() {
-        OpprettSakDto opprettSakDto = lagOpprettSakDto(Behandlingstema.UTSENDT_ARBEIDSTAKER, Behandlingstyper.NY_VURDERING);
-        opprettSakDto.setBehandlingsaarsakFritekst("Fritekst");
-        opprettSakDto.setBehandlingsaarsakType(Behandlingsaarsaktyper.SØKNAD);
+    fun opprettBehandling_fritekstMenFeilType_feiler() {
+        val opprettSakDto = lagOpprettSakDto(Behandlingstema.UTSENDT_ARBEIDSTAKER, Behandlingstyper.NY_VURDERING)
+        opprettSakDto.behandlingsaarsakFritekst = "Fritekst"
+        opprettSakDto.behandlingsaarsakType = Behandlingsaarsaktyper.SØKNAD
 
-        when(fagsakService.hentFagsak(FagsakTestFactory.SAKSNUMMER)).thenReturn(lagFagsak(lagBehandling()));
+        every { fagsakService.hentFagsak(FagsakTestFactory.SAKSNUMMER) }.returns(lagFagsak(lagBehandling()))
 
 
-        assertThatExceptionOfType(FunksjonellException.class)
-            .isThrownBy(() -> opprettBehandlingForSak.opprettBehandling(FagsakTestFactory.SAKSNUMMER, opprettSakDto))
-            .withMessageContaining("Kan ikke lagre fritekst som årsak når årsakstype");
+        Assertions.assertThatExceptionOfType(FunksjonellException::class.java)
+            .isThrownBy { opprettBehandlingForSak.opprettBehandling(FagsakTestFactory.SAKSNUMMER, opprettSakDto) }
+            .withMessageContaining("Kan ikke lagre fritekst som årsak når årsakstype")
     }
 
     @Test
-    void opprettBehandling_opprettetBehandlingFårIngenFlyt_oppretterProsessSomIkkeReplikerer() {
-        OpprettSakDto opprettSakDto = lagOpprettSakDto(Behandlingstema.PENSJONIST, Behandlingstyper.HENVENDELSE);
+    fun opprettBehandling_opprettetBehandlingFårIngenFlyt_oppretterProsessSomIkkeReplikerer() {
+        val opprettSakDto = lagOpprettSakDto(Behandlingstema.PENSJONIST, Behandlingstyper.HENVENDELSE)
 
-        when(fagsakService.hentFagsak(FagsakTestFactory.SAKSNUMMER)).thenReturn(lagFagsak(lagBehandling()));
-
-
-        opprettBehandlingForSak.opprettBehandling(FagsakTestFactory.SAKSNUMMER, opprettSakDto);
+        every { fagsakService.hentFagsak(FagsakTestFactory.SAKSNUMMER) }.returns(lagFagsak(lagBehandling()))
 
 
-        verify(prosessinstansService).opprettNyBehandlingForSak(FagsakTestFactory.SAKSNUMMER, opprettSakDto.tilOpprettSakRequest());
+        opprettBehandlingForSak.opprettBehandling(FagsakTestFactory.SAKSNUMMER, opprettSakDto)
+
+
+        verify { prosessinstansService.opprettNyBehandlingForSak(FagsakTestFactory.SAKSNUMMER, opprettSakDto.tilOpprettSakRequest()) }
     }
 
     @Test
-    void opprettBehandling_eksisterendeBehandlingKanReplikeres_oppretterProsessSomReplikerer() {
-        OpprettSakDto opprettSakDto = lagOpprettSakDto(Behandlingstema.UTSENDT_ARBEIDSTAKER, Behandlingstyper.NY_VURDERING);
+    fun opprettBehandling_eksisterendeBehandlingKanReplikeres_oppretterProsessSomReplikerer() {
+        val opprettSakDto = lagOpprettSakDto(Behandlingstema.UTSENDT_ARBEIDSTAKER, Behandlingstyper.NY_VURDERING)
 
-        Behandling eksisterendeBehandling = lagBehandling();
-        eksisterendeBehandling.setStatus(Behandlingsstatus.AVSLUTTET);
+        val eksisterendeBehandling = lagBehandling()
+        eksisterendeBehandling.status = Behandlingsstatus.AVSLUTTET
 
-        Fagsak fagsak = lagFagsak(eksisterendeBehandling);
-        eksisterendeBehandling.setFagsak(fagsak);
-        when(fagsakService.hentFagsak(FagsakTestFactory.SAKSNUMMER)).thenReturn(fagsak);
+        val fagsak = lagFagsak(eksisterendeBehandling)
+        eksisterendeBehandling.fagsak = fagsak
 
-        Behandlingsresultat eksisterendeResultat = new Behandlingsresultat();
-        eksisterendeResultat.setType(Behandlingsresultattyper.FASTSATT_LOVVALGSLAND);
-        when(behandlingsresultatRepository.findById(eksisterendeBehandling.getId())).thenReturn(Optional.of(eksisterendeResultat));
+        every { fagsakService.hentFagsak(FagsakTestFactory.SAKSNUMMER) }.returns(fagsak)
+
+        val eksisterendeResultat = Behandlingsresultat()
+        eksisterendeResultat.type = Behandlingsresultattyper.FASTSATT_LOVVALGSLAND
+
+        every { behandlingsresultatRepository.findById(eksisterendeBehandling.id) }.returns(Optional.of(eksisterendeResultat))
 
 
-        opprettBehandlingForSak.opprettBehandling(FagsakTestFactory.SAKSNUMMER, opprettSakDto);
+        opprettBehandlingForSak.opprettBehandling(FagsakTestFactory.SAKSNUMMER, opprettSakDto)
 
 
-        verify(prosessinstansService).opprettOgReplikerBehandlingForSak(FagsakTestFactory.SAKSNUMMER, opprettSakDto.tilOpprettSakRequest());
+        verify { prosessinstansService.opprettOgReplikerBehandlingForSak(FagsakTestFactory.SAKSNUMMER, opprettSakDto.tilOpprettSakRequest()) }
     }
 
-    private OpprettSakDto lagOpprettSakDto(Behandlingstema behandlingstema, Behandlingstyper behandlingstyper) {
-        var opprettsakdto = new OpprettSakDto();
-        opprettsakdto.setBehandlingstema(behandlingstema);
-        opprettsakdto.setBehandlingstype(behandlingstyper);
-        opprettsakdto.setMottaksdato(LocalDate.now());
-        opprettsakdto.setBehandlingsaarsakType(Behandlingsaarsaktyper.SØKNAD);
-        return opprettsakdto;
+    private fun lagOpprettSakDto(
+        behandlingstema: Behandlingstema?,
+        behandlingstyper: Behandlingstyper?
+    ): OpprettSakDto {
+        val opprettsakdto = OpprettSakDto()
+        opprettsakdto.behandlingstema = behandlingstema
+        opprettsakdto.behandlingstype = behandlingstyper
+        opprettsakdto.mottaksdato = LocalDate.now()
+        opprettsakdto.behandlingsaarsakType = Behandlingsaarsaktyper.SØKNAD
+
+        return opprettsakdto
     }
 
-    private Behandling lagBehandling() {
-        Behandling behandling = new Behandling();
-        behandling.setId(1L);
-        behandling.setTema(Behandlingstema.UTSENDT_ARBEIDSTAKER);
-        behandling.setType(Behandlingstyper.FØRSTEGANG);
-        behandling.setStatus(Behandlingsstatus.AVSLUTTET);
-        return behandling;
+    private fun lagBehandling(): Behandling {
+        val behandling = Behandling()
+        behandling.id = 1L
+        behandling.tema = Behandlingstema.UTSENDT_ARBEIDSTAKER
+        behandling.type = Behandlingstyper.FØRSTEGANG
+        behandling.status = Behandlingsstatus.AVSLUTTET
+
+        return behandling
     }
 
-    private Fagsak lagFagsak(Behandling behandling) {
-        Fagsak fagsak = FagsakTestFactory.builder()
+    private fun lagFagsak(behandling: Behandling): Fagsak {
+        val fagsak = builder()
             .medBruker()
             .behandlinger(behandling)
-            .build();
-        behandling.setFagsak(fagsak);
-        return fagsak;
+            .build()
+        behandling.fagsak = fagsak
+
+        return fagsak
     }
 }
