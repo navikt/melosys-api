@@ -114,7 +114,7 @@ class OpprettBehandlingForSakTest {
 
     @Test
     void opprettBehandling_utenMottaksdato_feiler() {
-        OpprettSakDto opprettSakDto = lagOpprettSakDto(Behandlingstema.UTSENDT_ARBEIDSTAKER, Behandlingstyper.FØRSTEGANG);
+        OpprettSakDto opprettSakDto = lagOpprettSakDto(Behandlingstema.UTSENDT_ARBEIDSTAKER, Behandlingstyper.NY_VURDERING);
         opprettSakDto.setMottaksdato(null);
 
         when(fagsakService.hentFagsak(FagsakTestFactory.SAKSNUMMER)).thenReturn(lagFagsak(lagBehandling()));
