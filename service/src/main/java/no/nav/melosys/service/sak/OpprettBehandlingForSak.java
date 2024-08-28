@@ -8,7 +8,6 @@ import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingstyper;
 import no.nav.melosys.exception.FunksjonellException;
 import no.nav.melosys.saksflytapi.ProsessinstansService;
 import no.nav.melosys.service.behandling.BehandlingService;
-import no.nav.melosys.service.behandling.BehandlingsresultatService;
 import no.nav.melosys.service.lovligekombinasjoner.LovligeKombinasjonerSaksbehandlingService;
 import no.nav.melosys.service.saksbehandling.SaksbehandlingRegler;
 import org.apache.commons.lang3.StringUtils;
@@ -22,20 +21,17 @@ public class OpprettBehandlingForSak {
     private final SaksbehandlingRegler saksbehandlingRegler;
     private final LovligeKombinasjonerSaksbehandlingService lovligeKombinasjonerSaksbehandlingService;
     private final BehandlingService behandlingService;
-    private final BehandlingsresultatService behandlingsresultatService;
 
     public OpprettBehandlingForSak(FagsakService fagsakService,
                                    ProsessinstansService prosessinstansService,
                                    SaksbehandlingRegler saksbehandlingRegler,
                                    LovligeKombinasjonerSaksbehandlingService lovligeKombinasjonerSaksbehandlingService,
-                                   BehandlingService behandlingService,
-                                   BehandlingsresultatService behandlingsresultatService) {
+                                   BehandlingService behandlingService) {
         this.fagsakService = fagsakService;
         this.prosessinstansService = prosessinstansService;
         this.saksbehandlingRegler = saksbehandlingRegler;
         this.lovligeKombinasjonerSaksbehandlingService = lovligeKombinasjonerSaksbehandlingService;
         this.behandlingService = behandlingService;
-        this.behandlingsresultatService = behandlingsresultatService;
     }
 
     @Transactional

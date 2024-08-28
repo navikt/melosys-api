@@ -47,7 +47,7 @@ class OpprettBehandlingForSakTest {
     public void setUp() {
         LovligeKombinasjonerSaksbehandlingService lovligeKombinasjonerSaksbehandlingService = new LovligeKombinasjonerSaksbehandlingService(fagsakService, behandlingService, behandlingsresultatService, unleash);
         SaksbehandlingRegler saksbehandlingRegler = new SaksbehandlingRegler(behandlingsresultatRepository, unleash);
-        opprettBehandlingForSak = new OpprettBehandlingForSak(fagsakService, prosessinstansService, saksbehandlingRegler, lovligeKombinasjonerSaksbehandlingService, behandlingService, behandlingsresultatService);
+        opprettBehandlingForSak = new OpprettBehandlingForSak(fagsakService, prosessinstansService, saksbehandlingRegler, lovligeKombinasjonerSaksbehandlingService, behandlingService);
     }
 
     @Test
