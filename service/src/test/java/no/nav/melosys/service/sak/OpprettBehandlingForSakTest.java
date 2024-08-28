@@ -179,8 +179,6 @@ class OpprettBehandlingForSakTest {
     @Test
     void opprettBehandling_eksisterendeBehandlingKanReplikeres_oppretterProsessSomReplikerer() {
         OpprettSakDto opprettSakDto = lagOpprettSakDto(Behandlingstema.UTSENDT_ARBEIDSTAKER, Behandlingstyper.NY_VURDERING);
-        opprettSakDto.setBehandlingstema(Behandlingstema.UTSENDT_ARBEIDSTAKER);
-        opprettSakDto.setBehandlingstype(Behandlingstyper.NY_VURDERING);
 
         Behandling eksisterendeBehandling = lagBehandling();
         eksisterendeBehandling.setStatus(Behandlingsstatus.AVSLUTTET);
