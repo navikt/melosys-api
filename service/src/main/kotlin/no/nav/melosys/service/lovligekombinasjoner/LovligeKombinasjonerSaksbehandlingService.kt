@@ -2,7 +2,6 @@ package no.nav.melosys.service.lovligekombinasjoner
 
 import io.getunleash.Unleash
 import no.nav.melosys.domain.Behandling
-import no.nav.melosys.domain.Behandlingsresultat
 import no.nav.melosys.domain.Fagsak
 import no.nav.melosys.domain.kodeverk.Aktoersroller
 import no.nav.melosys.domain.kodeverk.Saksstatuser
@@ -371,7 +370,6 @@ class LovligeKombinasjonerSaksbehandlingService(
     fun validerBehandlingstemaOgBehandlingstypeForAndregangsbehandling(
         fagsak: Fagsak,
         sistBehandling: Behandling,
-        sistBehandlingsresultat: Behandlingsresultat?,
         behandlingstema: Behandlingstema,
         behandlingstype: Behandlingstyper
     ) {

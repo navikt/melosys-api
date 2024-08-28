@@ -5,6 +5,8 @@ import java.util.Optional;
 
 import io.getunleash.FakeUnleash;
 import no.nav.melosys.domain.*;
+import no.nav.melosys.domain.kodeverk.Sakstemaer;
+import no.nav.melosys.domain.kodeverk.Sakstyper;
 import no.nav.melosys.domain.kodeverk.behandlinger.*;
 import no.nav.melosys.exception.FunksjonellException;
 import no.nav.melosys.repository.BehandlingsresultatRepository;
@@ -21,8 +23,7 @@ import org.mockito.junit.jupiter.MockitoExtension;
 
 import static org.assertj.core.api.Assertions.assertThatExceptionOfType;
 import static org.assertj.core.api.Assertions.assertThatNoException;
-import static org.mockito.Mockito.verify;
-import static org.mockito.Mockito.when;
+import static org.mockito.Mockito.*;
 
 @ExtendWith(MockitoExtension.class)
 class OpprettBehandlingForSakTest {
@@ -50,19 +51,40 @@ class OpprettBehandlingForSakTest {
     }
 
     @Test
-    void opprettBehandling_medAktivBehandlingMenArtikkel16SendtAnmodningUtland_feilerIkke() {
+    void opprettBehandling_medAktivBehandlingVednyÅrsavregningBehandlingAvslutterIkkeAktivBehanding() {
+        unleash.enableAll();
+        long behandlingId = 1L;
+
         Behandling aktivBehandling = lagBehandling();
         aktivBehandling.setStatus(Behandlingsstatus.UNDER_BEHANDLING);
-        OpprettSakDto opprettSakDto = lagOpprettSakDto();
+
+        Fagsak fagsak = lagFagsak(aktivBehandling);
+        fagsak.setType(Sakstyper.FTRL);
+        fagsak.setTema(Sakstemaer.MEDLEMSKAP_LOVVALG);
+
+        when(fagsakService.hentFagsak(FagsakTestFactory.SAKSNUMMER)).thenReturn(fagsak);
+        when(behandlingsresultatService.hentBehandlingsresultatMedAnmodningsperioder(behandlingId)).thenReturn(new Behandlingsresultat());
+
+
+        opprettBehandlingForSak.opprettBehandling(FagsakTestFactory.SAKSNUMMER, lagOpprettSakDto(Behandlingstema.YRKESAKTIV, Behandlingstyper.ÅRSAVREGNING));
+
+
+        verify(behandlingService, never()).avsluttBehandling(behandlingId);
+    }
+
+    @Test
+    void opprettBehandling_medAktivBehandlingMenArtikkel16SendtAnmodningUtland_feilerIkke() {
+        OpprettSakDto opprettSakDto = lagOpprettSakDto(Behandlingstema.UTSENDT_ARBEIDSTAKER, Behandlingstyper.NY_VURDERING);
+        Behandling aktivBehandling = lagBehandling();
+        aktivBehandling.setStatus(Behandlingsstatus.UNDER_BEHANDLING);
         when(fagsakService.hentFagsak(FagsakTestFactory.SAKSNUMMER)).thenReturn(lagFagsak(aktivBehandling));
+
 
         Anmodningsperiode anmodningsperiode = new Anmodningsperiode();
         anmodningsperiode.setSendtUtland(true);
         Behandlingsresultat behandlingsresultat = new Behandlingsresultat();
         behandlingsresultat.getAnmodningsperioder().add(anmodningsperiode);
         when(behandlingsresultatService.hentBehandlingsresultatMedAnmodningsperioder(aktivBehandling.getId())).thenReturn(behandlingsresultat);
-        when(behandlingsresultatService.hentBehandlingsresultat(aktivBehandling.getId())).thenReturn(behandlingsresultat);
-
 
         assertThatNoException().isThrownBy(() -> opprettBehandlingForSak.opprettBehandling(FagsakTestFactory.SAKSNUMMER, opprettSakDto));
     }
@@ -70,9 +92,7 @@ class OpprettBehandlingForSakTest {
 
     @Test
     void opprettBehandling_utenBehandlingstema_feiler() {
-        OpprettSakDto opprettSakDto = lagOpprettSakDto();
-        opprettSakDto.setBehandlingstema(null);
-
+        OpprettSakDto opprettSakDto = lagOpprettSakDto(null, Behandlingstyper.NY_VURDERING);
         when(fagsakService.hentFagsak(FagsakTestFactory.SAKSNUMMER)).thenReturn(lagFagsak(lagBehandling()));
 
 
@@ -83,9 +103,7 @@ class OpprettBehandlingForSakTest {
 
     @Test
     void opprettBehandling_utenBehandlingstype_feiler() {
-        OpprettSakDto opprettSakDto = lagOpprettSakDto();
-        opprettSakDto.setBehandlingstype(null);
-
+        OpprettSakDto opprettSakDto = lagOpprettSakDto(Behandlingstema.UTSENDT_ARBEIDSTAKER, null);
         when(fagsakService.hentFagsak(FagsakTestFactory.SAKSNUMMER)).thenReturn(lagFagsak(lagBehandling()));
 
 
@@ -96,7 +114,7 @@ class OpprettBehandlingForSakTest {
 
     @Test
     void opprettBehandling_utenMottaksdato_feiler() {
-        OpprettSakDto opprettSakDto = lagOpprettSakDto();
+        OpprettSakDto opprettSakDto = lagOpprettSakDto(Behandlingstema.UTSENDT_ARBEIDSTAKER, Behandlingstyper.FØRSTEGANG);
         opprettSakDto.setMottaksdato(null);
 
         when(fagsakService.hentFagsak(FagsakTestFactory.SAKSNUMMER)).thenReturn(lagFagsak(lagBehandling()));
@@ -109,8 +127,7 @@ class OpprettBehandlingForSakTest {
 
     @Test
     void opprettBehandling_ugyldigBehandlingstype_feiler() {
-        OpprettSakDto opprettSakDto = lagOpprettSakDto();
-        opprettSakDto.setBehandlingstype(Behandlingstyper.FØRSTEGANG);
+        OpprettSakDto opprettSakDto = lagOpprettSakDto(Behandlingstema.UTSENDT_ARBEIDSTAKER, Behandlingstyper.FØRSTEGANG);
 
         when(fagsakService.hentFagsak(FagsakTestFactory.SAKSNUMMER)).thenReturn(lagFagsak(lagBehandling()));
 
@@ -122,8 +139,7 @@ class OpprettBehandlingForSakTest {
 
     @Test
     void opprettBehandling_ugyldigBehandlingstema_feiler() {
-        OpprettSakDto opprettSakDto = lagOpprettSakDto();
-        opprettSakDto.setBehandlingstema(Behandlingstema.REGISTRERING_UNNTAK);
+        OpprettSakDto opprettSakDto = lagOpprettSakDto(Behandlingstema.REGISTRERING_UNNTAK, Behandlingstyper.NY_VURDERING);
 
         when(fagsakService.hentFagsak(FagsakTestFactory.SAKSNUMMER)).thenReturn(lagFagsak(lagBehandling()));
 
@@ -135,7 +151,7 @@ class OpprettBehandlingForSakTest {
 
     @Test
     void opprettBehandling_fritekstMenFeilType_feiler() {
-        OpprettSakDto opprettSakDto = lagOpprettSakDto();
+        OpprettSakDto opprettSakDto = lagOpprettSakDto(Behandlingstema.UTSENDT_ARBEIDSTAKER, Behandlingstyper.NY_VURDERING);
         opprettSakDto.setBehandlingsaarsakFritekst("Fritekst");
         opprettSakDto.setBehandlingsaarsakType(Behandlingsaarsaktyper.SØKNAD);
 
@@ -149,9 +165,7 @@ class OpprettBehandlingForSakTest {
 
     @Test
     void opprettBehandling_opprettetBehandlingFårIngenFlyt_oppretterProsessSomIkkeReplikerer() {
-        OpprettSakDto opprettSakDto = lagOpprettSakDto();
-        opprettSakDto.setBehandlingstema(Behandlingstema.PENSJONIST);
-        opprettSakDto.setBehandlingstype(Behandlingstyper.HENVENDELSE);
+        OpprettSakDto opprettSakDto = lagOpprettSakDto(Behandlingstema.PENSJONIST, Behandlingstyper.HENVENDELSE);
 
         when(fagsakService.hentFagsak(FagsakTestFactory.SAKSNUMMER)).thenReturn(lagFagsak(lagBehandling()));
 
@@ -164,7 +178,7 @@ class OpprettBehandlingForSakTest {
 
     @Test
     void opprettBehandling_eksisterendeBehandlingKanReplikeres_oppretterProsessSomReplikerer() {
-        OpprettSakDto opprettSakDto = lagOpprettSakDto();
+        OpprettSakDto opprettSakDto = lagOpprettSakDto(Behandlingstema.UTSENDT_ARBEIDSTAKER, Behandlingstyper.NY_VURDERING);
         opprettSakDto.setBehandlingstema(Behandlingstema.UTSENDT_ARBEIDSTAKER);
         opprettSakDto.setBehandlingstype(Behandlingstyper.NY_VURDERING);
 
@@ -186,10 +200,10 @@ class OpprettBehandlingForSakTest {
         verify(prosessinstansService).opprettOgReplikerBehandlingForSak(FagsakTestFactory.SAKSNUMMER, opprettSakDto.tilOpprettSakRequest());
     }
 
-    private OpprettSakDto lagOpprettSakDto() {
+    private OpprettSakDto lagOpprettSakDto(Behandlingstema behandlingstema, Behandlingstyper behandlingstyper) {
         var opprettsakdto = new OpprettSakDto();
-        opprettsakdto.setBehandlingstema(Behandlingstema.UTSENDT_ARBEIDSTAKER);
-        opprettsakdto.setBehandlingstype(Behandlingstyper.NY_VURDERING);
+        opprettsakdto.setBehandlingstema(behandlingstema);
+        opprettsakdto.setBehandlingstype(behandlingstyper);
         opprettsakdto.setMottaksdato(LocalDate.now());
         opprettsakdto.setBehandlingsaarsakType(Behandlingsaarsaktyper.SØKNAD);
         return opprettsakdto;

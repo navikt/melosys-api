@@ -1,7 +1,6 @@
 package no.nav.melosys.service.sak;
 
 import no.nav.melosys.domain.Behandling;
-import no.nav.melosys.domain.Behandlingsresultat;
 import no.nav.melosys.domain.Fagsak;
 import no.nav.melosys.domain.kodeverk.Aktoersroller;
 import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingsaarsaktyper;
@@ -43,12 +42,11 @@ public class OpprettBehandlingForSak {
     public void opprettBehandling(String saksnummer, OpprettSakDto opprettSakDto) {
         Fagsak fagsak = fagsakService.hentFagsak(saksnummer);
         final Behandling sistBehandling = fagsak.hentSistRegistrertBehandling();
-        final Behandlingsresultat sistBehandlingsresultat = behandlingsresultatService.hentBehandlingsresultat(sistBehandling.getId());
         var behandlingstema = opprettSakDto.getBehandlingstema();
         var behandlingstype = opprettSakDto.getBehandlingstype();
 
         valider(fagsak, opprettSakDto);
-        lovligeKombinasjonerSaksbehandlingService.validerBehandlingstemaOgBehandlingstypeForAndregangsbehandling(fagsak, sistBehandling, sistBehandlingsresultat, behandlingstema, behandlingstype);
+        lovligeKombinasjonerSaksbehandlingService.validerBehandlingstemaOgBehandlingstypeForAndregangsbehandling(fagsak, sistBehandling, behandlingstema, behandlingstype);
 
         if (sistBehandling.erAktiv() && behandlingstype != Behandlingstyper.ÅRSAVREGNING) {
             behandlingService.avsluttBehandling(sistBehandling.getId());
