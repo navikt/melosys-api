@@ -4,10 +4,13 @@ import no.nav.melosys.domain.kodeverk.Aktoersroller
 import no.nav.melosys.domain.kodeverk.Saksstatuser
 import no.nav.melosys.domain.kodeverk.Sakstemaer
 import no.nav.melosys.domain.kodeverk.Sakstyper
+import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingsstatus
+import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingstyper
 import java.time.Instant
 
 object FagsakTestFactory {
     const val SAKSNUMMER = "MEL-test"
+    const val BEHANDLING_ID: Long = 1L
     const val GSAK_SAKSNUMMER = 123456L
     val SAKSTYPE = Sakstyper.EU_EOS
     val SAKSTEMA = Sakstemaer.MEDLEMSKAP_LOVVALG
@@ -81,5 +84,27 @@ object FagsakTestFactory {
             fagsak.endretDato = Instant.now()
             return fagsak
         }
+    }
+
+    @JvmStatic
+    fun lagFagsakMedBehandlinger(vararg behandlinger: Behandling): Fagsak {
+        val fagsak = builder()
+            .status(Saksstatuser.OPPRETTET)
+            .saksnummer(SAKSNUMMER)
+            .behandlinger(listOf(*behandlinger)).build()
+        behandlinger.forEach { bh -> bh.apply { this.fagsak = fagsak } }
+
+        return fagsak
+    }
+
+    @JvmStatic
+    fun lagBehandling(
+        id: Long = BEHANDLING_ID,
+        status: Behandlingsstatus = Behandlingsstatus.UNDER_BEHANDLING,
+        type: Behandlingstyper = Behandlingstyper.FØRSTEGANG,
+    ) = Behandling().apply {
+        this.id = id
+        this.status = status
+        this.type = type
     }
 }
