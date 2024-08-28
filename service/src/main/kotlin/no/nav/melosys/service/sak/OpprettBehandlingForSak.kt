@@ -1,83 +1,86 @@
-package no.nav.melosys.service.sak;
+package no.nav.melosys.service.sak
 
-import no.nav.melosys.domain.Behandling;
-import no.nav.melosys.domain.Fagsak;
-import no.nav.melosys.domain.kodeverk.Aktoersroller;
-import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingsaarsaktyper;
-import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingstyper;
-import no.nav.melosys.exception.FunksjonellException;
-import no.nav.melosys.saksflytapi.ProsessinstansService;
-import no.nav.melosys.service.behandling.BehandlingService;
-import no.nav.melosys.service.lovligekombinasjoner.LovligeKombinasjonerSaksbehandlingService;
-import no.nav.melosys.service.saksbehandling.SaksbehandlingRegler;
-import org.apache.commons.lang3.StringUtils;
-import org.springframework.stereotype.Service;
-import org.springframework.transaction.annotation.Transactional;
+import no.nav.melosys.domain.Fagsak
+import no.nav.melosys.domain.kodeverk.Aktoersroller
+import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingsaarsaktyper
+import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingstyper
+import no.nav.melosys.exception.FunksjonellException
+import no.nav.melosys.saksflytapi.ProsessinstansService
+import no.nav.melosys.service.behandling.BehandlingService
+import no.nav.melosys.service.lovligekombinasjoner.LovligeKombinasjonerSaksbehandlingService
+import no.nav.melosys.service.saksbehandling.SaksbehandlingRegler
+import org.apache.commons.lang3.StringUtils
+import org.springframework.stereotype.Service
+import org.springframework.transaction.annotation.Transactional
 
 @Service
-public class OpprettBehandlingForSak {
-    private final FagsakService fagsakService;
-    private final ProsessinstansService prosessinstansService;
-    private final SaksbehandlingRegler saksbehandlingRegler;
-    private final LovligeKombinasjonerSaksbehandlingService lovligeKombinasjonerSaksbehandlingService;
-    private final BehandlingService behandlingService;
-
-    public OpprettBehandlingForSak(FagsakService fagsakService,
-                                   ProsessinstansService prosessinstansService,
-                                   SaksbehandlingRegler saksbehandlingRegler,
-                                   LovligeKombinasjonerSaksbehandlingService lovligeKombinasjonerSaksbehandlingService,
-                                   BehandlingService behandlingService) {
-        this.fagsakService = fagsakService;
-        this.prosessinstansService = prosessinstansService;
-        this.saksbehandlingRegler = saksbehandlingRegler;
-        this.lovligeKombinasjonerSaksbehandlingService = lovligeKombinasjonerSaksbehandlingService;
-        this.behandlingService = behandlingService;
-    }
-
+class OpprettBehandlingForSak(
+    private val fagsakService: FagsakService,
+    private val prosessinstansService: ProsessinstansService,
+    private val saksbehandlingRegler: SaksbehandlingRegler,
+    private val lovligeKombinasjonerSaksbehandlingService: LovligeKombinasjonerSaksbehandlingService,
+    private val behandlingService: BehandlingService
+) {
     @Transactional
-    public void opprettBehandling(String saksnummer, OpprettSakDto opprettSakDto) {
-        Fagsak fagsak = fagsakService.hentFagsak(saksnummer);
-        final Behandling sistBehandling = fagsak.hentSistRegistrertBehandling();
-        var behandlingstema = opprettSakDto.getBehandlingstema();
-        var behandlingstype = opprettSakDto.getBehandlingstype();
+    fun opprettBehandling(saksnummer: String?, opprettSakDto: OpprettSakDto) {
+        val fagsak = fagsakService.hentFagsak(saksnummer)
+        val sistBehandling = fagsak.hentSistRegistrertBehandling()
+        val behandlingstema = opprettSakDto.behandlingstema
+        val behandlingstype = opprettSakDto.behandlingstype
 
-        valider(fagsak, opprettSakDto);
-        lovligeKombinasjonerSaksbehandlingService.validerBehandlingstemaOgBehandlingstypeForAndregangsbehandling(fagsak, sistBehandling, behandlingstema, behandlingstype);
+        valider(fagsak, opprettSakDto)
+        lovligeKombinasjonerSaksbehandlingService.validerBehandlingstemaOgBehandlingstypeForAndregangsbehandling(
+            fagsak,
+            sistBehandling,
+            behandlingstema!!,
+            behandlingstype!!
+        )
 
         if (sistBehandling.erAktiv() && behandlingstype != Behandlingstyper.ÅRSAVREGNING) {
-            behandlingService.avsluttBehandling(sistBehandling.getId());
+            behandlingService.avsluttBehandling(sistBehandling.id)
         }
 
         if (saksbehandlingRegler.skalTidligereBehandlingReplikeres(fagsak, behandlingstype, behandlingstema)) {
-            prosessinstansService.opprettOgReplikerBehandlingForSak(saksnummer, opprettSakDto.tilOpprettSakRequest());
+            prosessinstansService.opprettOgReplikerBehandlingForSak(saksnummer, opprettSakDto.tilOpprettSakRequest())
         } else {
-            prosessinstansService.opprettNyBehandlingForSak(saksnummer, opprettSakDto.tilOpprettSakRequest());
+            prosessinstansService.opprettNyBehandlingForSak(saksnummer, opprettSakDto.tilOpprettSakRequest())
         }
     }
 
-    private void valider(Fagsak fagsak, OpprettSakDto opprettSakDto) {
-        if (opprettSakDto.getBehandlingstema() == null) {
-            throw new FunksjonellException("Behandlingstema mangler");
+    private fun valider(fagsak: Fagsak, opprettSakDto: OpprettSakDto) {
+        if (opprettSakDto.behandlingstema == null) {
+            throw FunksjonellException("Behandlingstema mangler")
         }
-        if (opprettSakDto.getBehandlingstype() == null) {
-            throw new FunksjonellException("Behandlingstype mangler");
-        }
-
-        var muligeBehandlingstyper =
-            lovligeKombinasjonerSaksbehandlingService.hentMuligeBehandlingstyperForKnyttTilSak(Aktoersroller.BRUKER, fagsak.getSaksnummer(), opprettSakDto.getBehandlingstema());
-
-        if (!muligeBehandlingstyper.contains(opprettSakDto.getBehandlingstype())) {
-            throw new FunksjonellException(String.format("Behandlingstype %s er ikke lovlig for behandlingstema %s og saksnummer %s", opprettSakDto.getBehandlingstype(), opprettSakDto.getBehandlingstema(), fagsak.getSaksnummer()));
+        if (opprettSakDto.behandlingstype == null) {
+            throw FunksjonellException("Behandlingstype mangler")
         }
 
-        if (opprettSakDto.getMottaksdato() == null) {
-            throw new FunksjonellException("Mottaksdato er påkrevd for å opprette behandling");
+        val muligeBehandlingstyper: Set<Behandlingstyper?> =
+            lovligeKombinasjonerSaksbehandlingService.hentMuligeBehandlingstyperForKnyttTilSak(
+                Aktoersroller.BRUKER,
+                fagsak.saksnummer,
+                opprettSakDto.behandlingstema
+            )
+
+        if (!muligeBehandlingstyper.contains(opprettSakDto.behandlingstype)) {
+            throw FunksjonellException(
+                String.format(
+                    "Behandlingstype %s er ikke lovlig for behandlingstema %s og saksnummer %s",
+                    opprettSakDto.behandlingstype,
+                    opprettSakDto.behandlingstema,
+                    fagsak.saksnummer
+                )
+            )
         }
-        if (opprettSakDto.getBehandlingsaarsakType() == null) {
-            throw new FunksjonellException("Årsak er påkrevd for å opprette behandling");
+
+        if (opprettSakDto.mottaksdato == null) {
+            throw FunksjonellException("Mottaksdato er påkrevd for å opprette behandling")
         }
-        if (StringUtils.isNotEmpty(opprettSakDto.getBehandlingsaarsakFritekst()) && opprettSakDto.getBehandlingsaarsakType() != Behandlingsaarsaktyper.FRITEKST) {
-            throw new FunksjonellException("Kan ikke lagre fritekst som årsak når årsakstype er " + opprettSakDto.getBehandlingsaarsakType());
+        if (opprettSakDto.behandlingsaarsakType == null) {
+            throw FunksjonellException("Årsak er påkrevd for å opprette behandling")
+        }
+        if (StringUtils.isNotEmpty(opprettSakDto.behandlingsaarsakFritekst) && opprettSakDto.behandlingsaarsakType != Behandlingsaarsaktyper.FRITEKST) {
+            throw FunksjonellException("Kan ikke lagre fritekst som årsak når årsakstype er " + opprettSakDto.behandlingsaarsakType)
         }
     }
 }
