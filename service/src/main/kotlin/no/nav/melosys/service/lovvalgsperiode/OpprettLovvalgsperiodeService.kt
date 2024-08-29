@@ -8,6 +8,7 @@ import no.nav.melosys.domain.kodeverk.lovvalgsbestemmelser.trygdeavtale.Lovvalgs
 import no.nav.melosys.domain.mottatteopplysninger.AnmodningEllerAttest
 import no.nav.melosys.exception.FunksjonellException
 import no.nav.melosys.repository.LovvalgsperiodeRepository
+import no.nav.melosys.service.LandvelgerService
 import no.nav.melosys.service.behandling.BehandlingService
 import no.nav.melosys.service.behandling.BehandlingsresultatService
 import no.nav.melosys.service.saksbehandling.SaksbehandlingRegler
@@ -20,7 +21,8 @@ class OpprettLovvalgsperiodeService(
     val lovvalgsperiodeRepository: LovvalgsperiodeRepository,
     val behandlingService: BehandlingService,
     val behandlingsresultatService: BehandlingsresultatService,
-    val saksbehandlingRegler: SaksbehandlingRegler
+    val saksbehandlingRegler: SaksbehandlingRegler,
+    val landvelgerService: LandvelgerService
 ) {
 
     @Transactional
@@ -60,6 +62,16 @@ class OpprettLovvalgsperiodeService(
                 eksisterendeLovvalgsperiode,
                 request.lovvalgsbestemmelse,
                 request.innvilgelsesResultat!!
+            )
+        }
+
+        if (saksbehandlingRegler.harUtsendtArbeidsTakerKunNorgeFlyt(behandling.fagsak.erSakstypeEøs(), behandling.tema, landvelgerService.hentArbeidsland(behandlingId))) {
+            return oppdaterLovvalgsperiodeForUtsendtArbeidsTakerKunNorgeFlyt(
+                behandling,
+                eksisterendeLovvalgsperiode,
+                request.lovvalgsbestemmelse,
+                request.fomDato,
+                request.tomDato,
             )
         }
 
@@ -144,4 +156,25 @@ class OpprettLovvalgsperiodeService(
         lovvalgsperiode.dekning = Trygdedekninger.FULL_DEKNING
         return lovvalgsperiodeRepository.save(lovvalgsperiode)
     }
+
+    private fun oppdaterLovvalgsperiodeForUtsendtArbeidsTakerKunNorgeFlyt(
+        behandling: Behandling,
+        eksisterendeLovvalgsperiode: Lovvalgsperiode?,
+        bestemmelse: LovvalgBestemmelse?,
+        fomDato: LocalDate?,
+        tomDato: LocalDate?,
+    ): Lovvalgsperiode {
+        val lovvalgsperiode = eksisterendeLovvalgsperiode ?: Lovvalgsperiode().apply {
+            behandlingsresultat = behandlingsresultatService.hentBehandlingsresultat(behandling.id)
+        }
+        lovvalgsperiode.fom = fomDato
+        lovvalgsperiode.tom = tomDato
+        lovvalgsperiode.bestemmelse = bestemmelse
+        lovvalgsperiode.innvilgelsesresultat = InnvilgelsesResultat.INNVILGET
+        lovvalgsperiode.lovvalgsland = Land_iso2.NO
+        lovvalgsperiode.dekning = Trygdedekninger.FULL_DEKNING_EOSFO
+
+        return lovvalgsperiodeRepository.save(lovvalgsperiode)
+    }
+
 }

@@ -11,12 +11,15 @@ import io.mockk.slot
 import io.mockk.verify
 import no.nav.melosys.domain.*
 import no.nav.melosys.domain.kodeverk.*
+import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingstema
+import no.nav.melosys.domain.kodeverk.lovvalgsbestemmelser.Tilleggsbestemmelser_883_2004
 import no.nav.melosys.domain.kodeverk.lovvalgsbestemmelser.trygdeavtale.*
 import no.nav.melosys.domain.mottatteopplysninger.AnmodningEllerAttest
 import no.nav.melosys.domain.mottatteopplysninger.MottatteOpplysninger
 import no.nav.melosys.domain.mottatteopplysninger.data.Periode
 import no.nav.melosys.exception.FunksjonellException
 import no.nav.melosys.repository.LovvalgsperiodeRepository
+import no.nav.melosys.service.LandvelgerService
 import no.nav.melosys.service.behandling.BehandlingService
 import no.nav.melosys.service.behandling.BehandlingsresultatService
 import no.nav.melosys.service.saksbehandling.SaksbehandlingRegler
@@ -37,6 +40,9 @@ class OpprettLovvalgsperiodeServiceTest {
     private lateinit var behandlingsresultatService: BehandlingsresultatService
 
     @MockK
+    private lateinit var landvelgerService: LandvelgerService
+
+    @MockK
     private lateinit var saksbehandlingRegler: SaksbehandlingRegler
 
     private val slotLovvalgsperiode = slot<Lovvalgsperiode>()
@@ -50,8 +56,11 @@ class OpprettLovvalgsperiodeServiceTest {
             lovvalgsperiodeRepository,
             behandlingService,
             behandlingsresultatService,
-            saksbehandlingRegler
+            saksbehandlingRegler,
+            landvelgerService
         )
+
+        every { landvelgerService.hentArbeidsland(1L) } returns Land_iso2.NO
     }
 
     @Test
@@ -194,7 +203,7 @@ class OpprettLovvalgsperiodeServiceTest {
 
     @Test
     fun opprettLovvalgsperiode_unntaksregistreringsflytManglerFomDato_kasterFeil() {
-        every { behandlingService.hentBehandling(any()) } returns Behandling()
+        every { behandlingService.hentBehandling(any()) } returns lagBehandling(Land_iso2.NO)
         every { saksbehandlingRegler.harRegistreringUnntakFraMedlemskapFlyt(any()) } returns true
         every { lovvalgsperiodeRepository.findByBehandlingsresultatId(any()) } returns emptyList()
         val request = OpprettLovvalgsperiodeRequest(null, LocalDate.now(), null, null, null)
@@ -206,7 +215,7 @@ class OpprettLovvalgsperiodeServiceTest {
 
     @Test
     fun opprettLovvalgsperiode_unntaksregistreringsflytTomDatoFørFomDato_kasterFeil() {
-        every { behandlingService.hentBehandling(any()) } returns Behandling()
+        every { behandlingService.hentBehandling(any()) } returns lagBehandling(Land_iso2.NO)
         every { saksbehandlingRegler.harRegistreringUnntakFraMedlemskapFlyt(any()) } returns true
         every { lovvalgsperiodeRepository.findByBehandlingsresultatId(any()) } returns emptyList()
         val request = OpprettLovvalgsperiodeRequest(LocalDate.now(), LocalDate.now().minusMonths(2), null, null, null)
@@ -218,7 +227,7 @@ class OpprettLovvalgsperiodeServiceTest {
 
     @Test
     fun opprettLovvalgsperiode_unntaksregistreringsflytManglerBestemmelse_kasterFeil() {
-        every { behandlingService.hentBehandling(any()) } returns Behandling()
+        every { behandlingService.hentBehandling(any()) } returns lagBehandling(Land_iso2.NO)
         every { saksbehandlingRegler.harRegistreringUnntakFraMedlemskapFlyt(any()) } returns true
         every { lovvalgsperiodeRepository.findByBehandlingsresultatId(any()) } returns emptyList()
         val request = OpprettLovvalgsperiodeRequest(LocalDate.now(), null, null, null, null)
@@ -281,7 +290,7 @@ class OpprettLovvalgsperiodeServiceTest {
 
     @Test
     fun opprettLovvalgsperiode_ikkeYrkesaktivflytManglerInnvilgelsesresultat_kasterFeil() {
-        every { behandlingService.hentBehandling(any()) } returns Behandling()
+        every { behandlingService.hentBehandling(any()) } returns lagBehandling(Land_iso2.NO)
         every { saksbehandlingRegler.harRegistreringUnntakFraMedlemskapFlyt(any()) } returns false
         every { saksbehandlingRegler.harIkkeYrkesaktivFlyt(any()) } returns true
         every { lovvalgsperiodeRepository.findByBehandlingsresultatId(any()) } returns emptyList()
@@ -290,6 +299,43 @@ class OpprettLovvalgsperiodeServiceTest {
 
         shouldThrow<FunksjonellException> { opprettLovvalgsperiodeService.opprettLovvalgsperiode(1L, request) }
             .shouldHaveMessage("Kan ikke opprette lovvalgsperiode for ikke-yrkesaktive uten innvilgelsesresultat")
+    }
+
+    @Test
+    fun `opprettLovvalgsperiode should create a new lovvalgsperiode if none exists`() {
+        val behandlingId = 1L
+        val request = OpprettLovvalgsperiodeRequest(
+            lovvalgsbestemmelse = Tilleggsbestemmelser_883_2004.FO_883_2004_ART11_4_1,
+            fomDato = LocalDate.now(),
+            tomDato = LocalDate.now().plusMonths(1),
+            trygdedekning = null,
+            innvilgelsesResultat = null
+        )
+        every { lovvalgsperiodeRepository.findByBehandlingsresultatId(behandlingId) } returns emptyList()
+        val behandling = Behandling().apply {
+            id = behandlingId
+            fagsak = Fagsak(type = Sakstyper.EU_EOS, status = Saksstatuser.OPPRETTET, tema = Sakstemaer.MEDLEMSKAP_LOVVALG, saksnummer = "test")
+            tema = Behandlingstema.UTSENDT_ARBEIDSTAKER
+        }
+        mockHappyCase(behandling)
+        every { behandlingService.hentBehandling(any()) } returns behandling
+        every { saksbehandlingRegler.harRegistreringUnntakFraMedlemskapFlyt(any()) } returns false
+        every { saksbehandlingRegler.harIkkeYrkesaktivFlyt(any()) } returns false
+        every { saksbehandlingRegler.harUtsendtArbeidsTakerKunNorgeFlyt(true, Behandlingstema.UTSENDT_ARBEIDSTAKER, Land_iso2.NO) } returns true
+
+        val lovvalgsperiodeSlot = slot<Lovvalgsperiode>()
+        every { lovvalgsperiodeRepository.save(capture(lovvalgsperiodeSlot)) } answers { lovvalgsperiodeSlot.captured }
+
+        val result = opprettLovvalgsperiodeService.opprettLovvalgsperiode(behandlingId, request)
+
+        result.fom.shouldBe(request.fomDato)
+        result.tom.shouldBe(request.tomDato)
+        result.bestemmelse.shouldBe(request.lovvalgsbestemmelse)
+        result.innvilgelsesresultat.shouldBe(InnvilgelsesResultat.INNVILGET)
+        result.lovvalgsland.shouldBe(Land_iso2.NO)
+
+        verify(exactly = 1) { lovvalgsperiodeRepository.save(capture(slotLovvalgsperiode)) }
+        slotLovvalgsperiode.captured.shouldNotBeNull()
     }
 
     private fun requestForIkkeYrkesaktivFlyt(
@@ -306,12 +352,13 @@ class OpprettLovvalgsperiodeServiceTest {
 
     @Test
     fun opprettLovvalgsperiode_ikkeStoettetFlyt_kasterFeil() {
-        every { behandlingService.hentBehandling(any()) } returns Behandling()
+        every { behandlingService.hentBehandling(any()) } returns lagBehandling(Land_iso2.NO)
         every { lovvalgsperiodeRepository.findByBehandlingsresultatId(any()) } returns emptyList()
         every { saksbehandlingRegler.harRegistreringUnntakFraMedlemskapFlyt(any()) } returns false
         every { saksbehandlingRegler.harIkkeYrkesaktivFlyt(any()) } returns false
-        val request = OpprettLovvalgsperiodeRequest(null, null, null, null, null)
+        every { saksbehandlingRegler.harUtsendtArbeidsTakerKunNorgeFlyt(any(), any(), any()) } returns false
 
+        val request = OpprettLovvalgsperiodeRequest(null, null, null, null, null)
 
         shouldThrow<FunksjonellException> { opprettLovvalgsperiodeService.opprettLovvalgsperiode(1L, request) }
             .shouldHaveMessage("Støtter ikke opprettelse av lovvalgsperiode for denne flyten")
@@ -347,5 +394,6 @@ class OpprettLovvalgsperiodeServiceTest {
                     periode = Periode(LocalDate.now(), LocalDate.now().plusMonths(6))
                 }
             }
+            tema = Behandlingstema.YRKESAKTIV
         }
 }
