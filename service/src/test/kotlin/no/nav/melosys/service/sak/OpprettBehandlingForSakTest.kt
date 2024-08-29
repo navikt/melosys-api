@@ -24,6 +24,8 @@ import org.assertj.core.api.Assertions
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.extension.ExtendWith
+import org.junit.jupiter.params.ParameterizedTest
+import org.junit.jupiter.params.provider.EnumSource
 import java.time.LocalDate
 import java.util.*
 
@@ -64,20 +66,27 @@ internal class OpprettBehandlingForSakTest {
 
         every { behandlingService.avsluttBehandling(any()) } just Runs
     }
-    // TODO
-    // NyVurdering
-    // Henvendelse
-    @Test
-    fun opprettBehandling_medAktivÅrsavregningVedBehandlingAvslutterIkkeAktivÅrsavregningBehandling() {
+
+    @ParameterizedTest
+    @EnumSource(value = Behandlingstyper::class, names = ["HENVENDELSE", "NY_VURDERING"])
+    fun opprettBehandling_medAktivÅrsavregningVedBehandlingAvslutterIkkeAktivÅrsavregningBehandling(behandlingsType: Behandlingstyper) {
         unleash.enableAll()
         val behandlingId = 1L
 
+        val førstegangsBehandling =
+            lagBehandling(tema = Behandlingstema.YRKESAKTIV, type = Behandlingstyper.FØRSTEGANG, status = Behandlingsstatus.AVSLUTTET)
         val årsavregningBehandling =
             lagBehandling(tema = Behandlingstema.YRKESAKTIV, type = Behandlingstyper.ÅRSAVREGNING, status = Behandlingsstatus.UNDER_BEHANDLING)
 
-        val fagsak = lagFagsak(årsavregningBehandling)
+        val fagsak = lagFagsak(førstegangsBehandling, årsavregningBehandling)
         fagsak.type = Sakstyper.FTRL
         fagsak.tema = Sakstemaer.MEDLEMSKAP_LOVVALG
+
+        val eksisterendeResultat = Behandlingsresultat()
+        eksisterendeResultat.type = Behandlingsresultattyper.FASTSATT_LOVVALGSLAND
+
+        every { behandlingsresultatRepository.findById(behandlingId) }.returns(Optional.of(eksisterendeResultat))
+
 
         every { fagsakService.hentFagsak(FagsakTestFactory.SAKSNUMMER) }.returns(fagsak)
         every { behandlingsresultatService.hentBehandlingsresultatMedAnmodningsperioder(behandlingId) }.returns(Behandlingsresultat())
@@ -85,7 +94,7 @@ internal class OpprettBehandlingForSakTest {
 
         opprettBehandlingForSak.opprettBehandling(
             FagsakTestFactory.SAKSNUMMER,
-            lagOpprettSakDto(Behandlingstema.YRKESAKTIV, Behandlingstyper.FØRSTEGANG)
+            lagOpprettSakDto(Behandlingstema.YRKESAKTIV, behandlingsType)
         )
 
 
@@ -270,12 +279,13 @@ internal class OpprettBehandlingForSakTest {
         return behandling
     }
 
-    private fun lagFagsak(behandling: Behandling): Fagsak {
+    private fun lagFagsak(vararg behandlinger: Behandling): Fagsak {
         val fagsak = builder()
             .medBruker()
-            .behandlinger(behandling)
+            .behandlinger(listOf(*behandlinger))
             .build()
-        behandling.fagsak = fagsak
+
+        behandlinger.forEach { it.fagsak = fagsak }
 
         return fagsak
     }
