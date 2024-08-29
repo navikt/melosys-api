@@ -98,23 +98,6 @@ class BehandlingServiceTest {
     }
 
     @Test
-    void ferdigbehandleÅrsavregning() {
-        when(behandlingRepository.findById(BEHANDLING_ID)).thenReturn(Optional.of(behandling));
-
-
-        behandlingService.ferdigbehandle(BEHANDLING_ID);
-
-
-        verify(behandlingRepository).save(behandlingCaptor.capture());
-        verify(behandlingsresultatService).oppdaterBehandlingsresultattype(BEHANDLING_ID,
-            Behandlingsresultattyper.FERDIGBEHANDLET);
-        verify(oppgaveService).ferdigstillOppgaveMedBehandlingID(BEHANDLING_ID);
-
-        Behandling lagretBehandling = behandlingCaptor.getValue();
-        assertThat(lagretBehandling.getStatus()).isEqualTo(Behandlingsstatus.AVSLUTTET);
-    }
-
-    @Test
     void endreBehandling() {
         Fagsak fagsak = FagsakTestFactory.builder().medBruker().build();
 

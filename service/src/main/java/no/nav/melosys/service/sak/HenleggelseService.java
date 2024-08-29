@@ -19,8 +19,8 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 @Service
-public class HenleggFagsakService {
-    private static final Logger log = LoggerFactory.getLogger(HenleggFagsakService.class);
+public class HenleggelseService {
+    private static final Logger log = LoggerFactory.getLogger(HenleggelseService.class);
 
     private final FagsakService fagsakService;
     private final BehandlingsresultatService behandlingsresultatService;
@@ -28,11 +28,11 @@ public class HenleggFagsakService {
     private final OppgaveService oppgaveService;
     private final BehandlingService behandlingService;
 
-    public HenleggFagsakService(FagsakService fagsakService,
-                                BehandlingsresultatService behandlingsresultatService,
-                                ProsessinstansService prosessinstansService,
-                                OppgaveService oppgaveService,
-                                BehandlingService behandlingService) {
+    public HenleggelseService(FagsakService fagsakService,
+                              BehandlingsresultatService behandlingsresultatService,
+                              ProsessinstansService prosessinstansService,
+                              OppgaveService oppgaveService,
+                              BehandlingService behandlingService) {
         this.fagsakService = fagsakService;
         this.behandlingsresultatService = behandlingsresultatService;
         this.prosessinstansService = prosessinstansService;
@@ -57,13 +57,43 @@ public class HenleggFagsakService {
 
         Behandling aktivBehandling = fagsak.finnAktivBehandlingIkkeÅrsavregning();
         oppdaterBehandlingsresultat(aktivBehandling.getId(), begrunnelseKode, fritekst);
-        if (aktivBehandling.erAndregangsbehandling()) {
-            behandlingService.avsluttAndregangsbehandling(aktivBehandling.getId(), Behandlingsresultattyper.HENLEGGELSE);
-        } else {
+
+        if (fagsak.erEnesteBehandling(aktivBehandling.getId())) {
             fagsakService.avsluttFagsakOgBehandling(fagsak, Saksstatuser.HENLAGT);
+        } else {
+            behandlingService.avsluttAndregangsbehandling(aktivBehandling.getId(), Behandlingsresultattyper.HENLEGGELSE);
         }
         prosessinstansService.opprettProsessinstansFagsakHenlagt(aktivBehandling);
         oppgaveService.ferdigstillOppgaveMedBehandlingID(aktivBehandling.getId());
+    }
+
+    @Transactional
+    public void henleggSakEllerBehandlingSomBortfalt(long behandlingID) {
+        var behandling = behandlingService.hentBehandling(behandlingID);
+        Fagsak fagsak = fagsakService.hentFagsak(behandling.getFagsak().getSaksnummer());
+
+        if (fagsak.erEnesteBehandling(behandlingID)) {
+            henleggSakSomBortfalt(fagsak);
+        } else {
+            henleggBehandlingSomBortfalt(behandling);
+        }
+    }
+
+    private void henleggBehandlingSomBortfalt(Behandling behandling) {
+        long behandlingId = behandling.getId();
+
+        behandlingsresultatService.oppdaterBehandlingsresultattype(behandlingId, Behandlingsresultattyper.HENLEGGELSE_BORTFALT);
+        if (behandling.getStatus() != Behandlingsstatus.AVSLUTTET) behandlingService.avsluttBehandling(behandling.getId());
+        oppgaveService.ferdigstillOppgaveMedBehandlingID(behandlingId);
+    }
+
+    private void henleggSakSomBortfalt(Fagsak fagsak) {
+        log.info("Fagsak {}: {}", fagsak.getSaksnummer(), Saksstatuser.HENLAGT_BORTFALT.getBeskrivelse());
+        fagsak.getBehandlinger().forEach(behandling -> {
+            henleggBehandlingSomBortfalt(behandling);
+        });
+        fagsak.setStatus(Saksstatuser.HENLAGT_BORTFALT);
+        fagsakService.lagre(fagsak);
     }
 
     private void oppdaterBehandlingsresultat(long behandlingID, Henleggelsesgrunner begrunnelseKode, String fritekst) {
@@ -78,33 +108,5 @@ public class HenleggFagsakService {
         behandlingsresultat.getBehandlingsresultatBegrunnelser().add(begrunnelse);
 
         behandlingsresultatService.lagre(behandlingsresultat);
-    }
-
-    @Transactional
-    public void henleggSakEllerBehandlingSomBortfalt(String saksnummer) {
-        Fagsak fagsak = fagsakService.hentFagsak(saksnummer);
-        Behandling aktivBehandling = fagsak.finnAktivBehandlingIkkeÅrsavregning();
-
-        if (aktivBehandling.erAndregangsbehandling()) {
-            henleggBehandlingSomBortfalt(aktivBehandling.getId());
-        } else {
-            henleggSakSomBortfalt(fagsak);
-        }
-    }
-
-    private void henleggBehandlingSomBortfalt(long behandlingId) {
-        behandlingService.avsluttAndregangsbehandling(behandlingId, Behandlingsresultattyper.HENLEGGELSE_BORTFALT);
-        oppgaveService.ferdigstillOppgaveMedBehandlingID(behandlingId);
-    }
-
-    private void henleggSakSomBortfalt(Fagsak fagsak) {
-        log.info("Fagsak {}: {}", fagsak.getSaksnummer(), Saksstatuser.HENLAGT_BORTFALT.getBeskrivelse());
-        fagsak.getBehandlinger().forEach(behandling -> {
-            behandlingsresultatService.oppdaterBehandlingsresultattype(behandling.getId(), Behandlingsresultattyper.HENLEGGELSE_BORTFALT);
-            oppgaveService.ferdigstillOppgaveMedBehandlingID(behandling.getId());
-            if (behandling.getStatus() != Behandlingsstatus.AVSLUTTET) behandlingService.avsluttBehandling(behandling.getId());
-        });
-        fagsak.setStatus(Saksstatuser.HENLAGT_BORTFALT);
-        fagsakService.lagre(fagsak);
     }
 }

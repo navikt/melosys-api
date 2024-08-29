@@ -123,14 +123,6 @@ public class BehandlingService {
     }
 
     @Transactional
-    public void ferdigbehandle(long behandlingId) {
-        behandlingsresultatService.tømBehandlingsresultat(behandlingId);
-        behandlingsresultatService.oppdaterBehandlingsresultattype(behandlingId, Behandlingsresultattyper.FERDIGBEHANDLET);
-        avsluttBehandling(behandlingId);
-        oppgaveService.ferdigstillOppgaveMedBehandlingID(behandlingId);
-    }
-
-    @Transactional
     public void endreBehandling(long behandlingID, Behandlingstyper nyType, Behandlingstema nyTema, Behandlingsstatus nyStatus, LocalDate nyMottaksdato) {
         var behandling = hentBehandling(behandlingID);
 

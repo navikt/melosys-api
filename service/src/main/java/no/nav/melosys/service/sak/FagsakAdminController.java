@@ -13,22 +13,21 @@ import org.springframework.web.bind.annotation.*;
 @RequestMapping("/admin/fagsaker")
 public class FagsakAdminController implements AdminController {
     private final String apiKey;
-    private final HenleggFagsakService henleggFagsakService;
+    private final HenleggelseService henleggelseService;
 
     private static final Logger log = LoggerFactory.getLogger(FagsakAdminController.class);
 
-    public FagsakAdminController(@Value("${Melosys-admin.apikey}") String apiKey, HenleggFagsakService henleggFagsakService) {
+    public FagsakAdminController(@Value("${Melosys-admin.apikey}") String apiKey, HenleggelseService henleggelseService) {
         this.apiKey = apiKey;
-        this.henleggFagsakService = henleggFagsakService;
+        this.henleggelseService = henleggelseService;
     }
 
-    @PutMapping("/{saksnummer}/henlegg-bortfalt")
-    public ResponseEntity<Void> henleggFagsakSomBortfalt(@PathVariable String saksnummer,
+    @PutMapping("/{behandlingID}/henlegg-bortfalt")
+    public ResponseEntity<Void> henleggFagsakSomBortfalt(@PathVariable long behandlingID,
                                                          @RequestHeader(API_KEY_HEADER) String apiKey) {
         validerApikey(apiKey);
 
-        log.info("Forsøker å henlegge sak {}", saksnummer);
-        henleggFagsakService.henleggSakEllerBehandlingSomBortfalt(saksnummer);
+        henleggelseService.henleggSakEllerBehandlingSomBortfalt(behandlingID);
 
         return ResponseEntity.noContent().build();
     }

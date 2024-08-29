@@ -1,11 +1,11 @@
 package no.nav.melosys.tjenester.gui.fagsaker;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
+import no.nav.melosys.domain.Behandling;
 import no.nav.melosys.domain.Fagsak;
-import no.nav.melosys.domain.FagsakTestFactory;
 import no.nav.melosys.domain.kodeverk.begrunnelser.Henleggelsesgrunner;
-import no.nav.melosys.service.sak.FagsakService;
-import no.nav.melosys.service.sak.HenleggFagsakService;
+import no.nav.melosys.service.behandling.BehandlingService;
+import no.nav.melosys.service.sak.HenleggelseService;
 import no.nav.melosys.service.tilgang.Aksesskontroll;
 import no.nav.melosys.tjenester.gui.dto.HenleggelseDto;
 import org.junit.jupiter.api.Test;
@@ -33,9 +33,9 @@ class HenleggelseControllerTest {
     @MockBean
     private Aksesskontroll aksesskontroll;
     @MockBean
-    private FagsakService fagsakService;
+    private BehandlingService behandlingService;
     @MockBean
-    private HenleggFagsakService henleggFagsakService;
+    private HenleggelseService henleggelseService;
 
     @Test
     void henleggFagsak() throws Exception {
@@ -45,23 +45,27 @@ class HenleggelseControllerTest {
         String saksnummer = "123";
 
         mockMvc.perform(post(BASE_URL + "/{saksnr}/henlegg", saksnummer)
-                            .contentType(MediaType.APPLICATION_JSON)
-                            .content(objectMapper.writeValueAsString(henleggelseDto)))
+                .contentType(MediaType.APPLICATION_JSON)
+                .content(objectMapper.writeValueAsString(henleggelseDto)))
             .andExpect(status().isNoContent());
 
-        verify(henleggFagsakService).henleggFagsakEllerBehandling(saksnummer, begrunnelseKode, fritekst);
+        verify(henleggelseService).henleggFagsakEllerBehandling(saksnummer, begrunnelseKode, fritekst);
     }
 
     @Test
     void henleggSakSomBortfalt() throws Exception {
+        long behandlingId = 123;
         Fagsak fagsak = lagFagsak();
-        when(fagsakService.hentFagsak(FagsakTestFactory.SAKSNUMMER)).thenReturn(fagsak);
+        Behandling behandling = new Behandling();
+        behandling.setFagsak(fagsak);
 
-        mockMvc.perform(put(BASE_URL + "/{saksnr}/henlegg-som-bortfalt", FagsakTestFactory.SAKSNUMMER)
-                            .contentType(MediaType.TEXT_PLAIN)
-                            .accept(MediaType.TEXT_PLAIN))
+        when(behandlingService.hentBehandling(behandlingId)).thenReturn(behandling);
+
+        mockMvc.perform(put(BASE_URL + "/{behandlingId}/henlegg-som-bortfalt", behandlingId)
+                .contentType(MediaType.TEXT_PLAIN)
+                .accept(MediaType.TEXT_PLAIN))
             .andExpect(status().isNoContent());
 
-        verify(henleggFagsakService).henleggSakEllerBehandlingSomBortfalt(FagsakTestFactory.SAKSNUMMER);
+        verify(henleggelseService).henleggSakEllerBehandlingSomBortfalt(behandlingId);
     }
 }
