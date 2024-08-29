@@ -71,7 +71,7 @@ class OpprettLovvalgsperiodeService(
                 eksisterendeLovvalgsperiode,
                 request.lovvalgsbestemmelse,
                 request.fomDato,
-                request.tomDato
+                request.tomDato,
             )
         }
 
@@ -162,7 +162,7 @@ class OpprettLovvalgsperiodeService(
         eksisterendeLovvalgsperiode: Lovvalgsperiode?,
         bestemmelse: LovvalgBestemmelse?,
         fomDato: LocalDate?,
-        tomDato: LocalDate?
+        tomDato: LocalDate?,
     ): Lovvalgsperiode {
         val lovvalgsperiode = eksisterendeLovvalgsperiode ?: Lovvalgsperiode().apply {
             behandlingsresultat = behandlingsresultatService.hentBehandlingsresultat(behandling.id)
@@ -172,6 +172,8 @@ class OpprettLovvalgsperiodeService(
         lovvalgsperiode.bestemmelse = bestemmelse
         lovvalgsperiode.innvilgelsesresultat = InnvilgelsesResultat.INNVILGET
         lovvalgsperiode.lovvalgsland = Land_iso2.NO
+        lovvalgsperiode.dekning = Trygdedekninger.FULL_DEKNING_EOSFO
+
         return lovvalgsperiodeRepository.save(lovvalgsperiode)
     }
 
