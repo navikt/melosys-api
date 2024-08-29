@@ -162,7 +162,7 @@ public class SendVedtaksbrevInnland implements StegBehandler {
     private Produserbaredokumenter hentProduserbarDokumentForInnvilgelse(Behandling behandling, Behandlingsresultat resultat, boolean erStorbritanniaBestemmelse) {
         boolean erUtsendtArbeidstakerEllerSelvstendig = behandling.getTema() == Behandlingstema.UTSENDT_ARBEIDSTAKER || behandling.getTema() == Behandlingstema.UTSENDT_SELVSTENDIG || behandling.getTema() == Behandlingstema.ARBEID_KUN_NORGE;
 
-        if ((erStorbritanniaBestemmelse || erUtsendtArbeidstakerEllerSelvstendig) && unleash.isEnabled(ToggleName.MELOSYS_KONVENSJON_EFTA_LAND_OG_STORBRITANNIA)) {
+        if ((erStorbritanniaBestemmelse && erUtsendtArbeidstakerEllerSelvstendig) && unleash.isEnabled(ToggleName.MELOSYS_KONVENSJON_EFTA_LAND_OG_STORBRITANNIA)) {
             return INNVILGELSE_EFTA_STORBRITANNIA;
         }
 
