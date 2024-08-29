@@ -338,6 +338,31 @@ internal class OppgaveServiceTest {
     }
 
     @Test
+    fun opprettEllerGjenBrukBehandlingsoppgave_medEksisterendeÅrsavregningOppgave_ÅrsavregningoppgaveBlirOpprettet() {
+        val behandling = Behandling().apply {
+            id = 1L
+            fagsak = FagsakTestFactory.builder().medBruker().build()
+            type = Behandlingstyper.ÅRSAVREGNING
+            tema = Behandlingstema.YRKESAKTIV
+        }
+
+        every { oppgaveFasade.finnÅpneBehandlingsoppgaverMedSaksnummer(FagsakTestFactory.SAKSNUMMER) } returns listOf(oppgave)
+        every { behandlingService.hentBehandlingMedSaksopplysninger(any<Long>()) } returns behandling
+        every { behandlingService.hentBehandling(any<Long>()) } returns behandling
+        every { utledMottaksdato.getMottaksdato(behandling) } returns LocalDate.now()
+        every { behandlingService.lagre(behandling) } returns Unit
+
+
+        oppgaveService.opprettEllerGjenbrukBehandlingsoppgave(behandling, "222", "333", TILORDNET_RESSURS)
+
+
+        verify { oppgaveFasade.opprettOppgave(any()) }
+        verify(exactly = 0) { oppgaveFasade.opprettSensitivOppgave(any()) }
+        verify { behandlingService.lagre(behandling) }
+        behandling.oppgaveId shouldBeEqual BEH_OPPG_ID
+    }
+
+    @Test
     fun opprettEllerGjenbrukBehandlingsoppgave_ingenEksisterendeOppgave_oppgaveBlirOpprettet() {
         val behandling = lagBehandling()
         every { behandlingService.hentBehandlingMedSaksopplysninger(any<Long>()) } returns behandling
@@ -351,7 +376,7 @@ internal class OppgaveServiceTest {
         verify { oppgaveFasade.opprettOppgave(any()) }
         verify(exactly = 0) { oppgaveFasade.opprettSensitivOppgave(any()) }
         verify { behandlingService.lagre(behandling) }
-        behandling.oppgaveId shouldBeEqual  BEH_OPPG_ID
+        behandling.oppgaveId shouldBeEqual BEH_OPPG_ID
     }
 
     @Test
@@ -373,7 +398,7 @@ internal class OppgaveServiceTest {
         verify { oppgaveFasade.opprettOppgave(capture(oppgaveSlot)) }
         oppgaveSlot.captured.beskrivelse.shouldBe(behandling.tema.beskrivelse)
         verify { behandlingService.lagre(behandling) }
-        behandling.oppgaveId shouldBeEqual  BEH_OPPG_ID
+        behandling.oppgaveId shouldBeEqual BEH_OPPG_ID
     }
 
     @Test
