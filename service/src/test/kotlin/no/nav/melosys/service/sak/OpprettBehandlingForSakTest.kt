@@ -62,7 +62,34 @@ internal class OpprettBehandlingForSakTest {
             behandlingService
         )
 
-        every { behandlingService.avsluttBehandling(any()) }  just Runs
+        every { behandlingService.avsluttBehandling(any()) } just Runs
+    }
+    // TODO
+    // NyVurdering
+    // Henvendelse
+    @Test
+    fun opprettBehandling_medAktivÅrsavregningVedBehandlingAvslutterIkkeAktivÅrsavregningBehandling() {
+        unleash.enableAll()
+        val behandlingId = 1L
+
+        val årsavregningBehandling =
+            lagBehandling(tema = Behandlingstema.YRKESAKTIV, type = Behandlingstyper.ÅRSAVREGNING, status = Behandlingsstatus.UNDER_BEHANDLING)
+
+        val fagsak = lagFagsak(årsavregningBehandling)
+        fagsak.type = Sakstyper.FTRL
+        fagsak.tema = Sakstemaer.MEDLEMSKAP_LOVVALG
+
+        every { fagsakService.hentFagsak(FagsakTestFactory.SAKSNUMMER) }.returns(fagsak)
+        every { behandlingsresultatService.hentBehandlingsresultatMedAnmodningsperioder(behandlingId) }.returns(Behandlingsresultat())
+
+
+        opprettBehandlingForSak.opprettBehandling(
+            FagsakTestFactory.SAKSNUMMER,
+            lagOpprettSakDto(Behandlingstema.YRKESAKTIV, Behandlingstyper.FØRSTEGANG)
+        )
+
+
+        verify(exactly = 0) { behandlingService.avsluttBehandling(behandlingId) }
     }
 
     @Test
@@ -70,8 +97,7 @@ internal class OpprettBehandlingForSakTest {
         unleash.enableAll()
         val behandlingId = 1L
 
-        val aktivBehandling = lagBehandling()
-        aktivBehandling.status = Behandlingsstatus.UNDER_BEHANDLING
+        val aktivBehandling = lagBehandling(status = Behandlingsstatus.UNDER_BEHANDLING)
 
         val fagsak = lagFagsak(aktivBehandling)
         fagsak.type = Sakstyper.FTRL
@@ -81,7 +107,7 @@ internal class OpprettBehandlingForSakTest {
         every { behandlingsresultatService.hentBehandlingsresultatMedAnmodningsperioder(behandlingId) }.returns(Behandlingsresultat())
 
 
-        opprettBehandlingForSak!!.opprettBehandling(
+        opprettBehandlingForSak.opprettBehandling(
             FagsakTestFactory.SAKSNUMMER,
             lagOpprettSakDto(Behandlingstema.YRKESAKTIV, Behandlingstyper.ÅRSAVREGNING)
         )
@@ -229,12 +255,17 @@ internal class OpprettBehandlingForSakTest {
         return opprettsakdto
     }
 
-    private fun lagBehandling(): Behandling {
+    private fun lagBehandling(
+        tema: Behandlingstema = Behandlingstema.UTSENDT_ARBEIDSTAKER,
+        type: Behandlingstyper = Behandlingstyper.FØRSTEGANG,
+        status: Behandlingsstatus = Behandlingsstatus.AVSLUTTET
+    ): Behandling {
         val behandling = Behandling()
+
         behandling.id = 1L
-        behandling.tema = Behandlingstema.UTSENDT_ARBEIDSTAKER
-        behandling.type = Behandlingstyper.FØRSTEGANG
-        behandling.status = Behandlingsstatus.AVSLUTTET
+        behandling.tema = tema
+        behandling.type = type
+        behandling.status = status
 
         return behandling
     }
