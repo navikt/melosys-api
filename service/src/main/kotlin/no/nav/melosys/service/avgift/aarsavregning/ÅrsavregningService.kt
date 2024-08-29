@@ -36,6 +36,10 @@ class ÅrsavregningService(
         return lagÅrsavregningModelFraÅrsavregning(aarsavregning)
     }
 
+    fun finnGjeldendeÅrForÅrsavregning(behandlingID: Long): Int? {
+        return finnÅrsavregning(behandlingID)?.år
+    }
+
     @Transactional
     fun opprettÅrsavregning(behandlingID: Long, gjelderÅr: Int): ÅrsavregningModel {
         val behandlingsresultat = behandlingsresultatService.hentBehandlingsresultat(behandlingID)

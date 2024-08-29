@@ -8,7 +8,6 @@ import no.nav.melosys.domain.Behandling;
 import no.nav.melosys.domain.ErPeriode;
 import no.nav.melosys.domain.dokument.felles.Periode;
 import no.nav.melosys.exception.FunksjonellException;
-import no.nav.melosys.service.avgift.aarsavregning.ÅrsavregningModel;
 import no.nav.melosys.service.avgift.aarsavregning.ÅrsavregningService;
 import no.nav.melosys.service.behandling.BehandlingService;
 import no.nav.melosys.service.behandling.BehandlingsresultatService;
@@ -108,8 +107,8 @@ public class OppfriskSaksopplysningerService {
     }
 
     private ErPeriode hentPeriodeForÅrsavregning(Long behandlingID) {
-        ÅrsavregningModel årsavregning = årsavregningService.finnÅrsavregning(behandlingID);
-        int år = årsavregning == null ? LocalDate.now().getYear() : årsavregning.getår();
+        Integer gjeldendeÅrForÅrsavregning = årsavregningService.finnGjeldendeÅrForÅrsavregning(behandlingID);
+        int år = gjeldendeÅrForÅrsavregning == null ? LocalDate.now().getYear() : gjeldendeÅrForÅrsavregning;
 
         return new Periode(LocalDate.of(år, Month.JANUARY, 1), hentTomForÅrsavregning(år));
     }

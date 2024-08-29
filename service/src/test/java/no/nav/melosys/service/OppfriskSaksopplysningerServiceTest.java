@@ -1,16 +1,15 @@
 package no.nav.melosys.service;
 
 import java.time.LocalDate;
+import java.time.Month;
 import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.List;
-import java.util.Set;
 
 import io.getunleash.FakeUnleash;
 import no.nav.melosys.domain.*;
 import no.nav.melosys.domain.dokument.sed.SedDokument;
 import no.nav.melosys.domain.kodeverk.Aktoersroller;
-import no.nav.melosys.domain.kodeverk.Sakstemaer;
 import no.nav.melosys.domain.kodeverk.Sakstyper;
 import no.nav.melosys.domain.kodeverk.Vilkaar;
 import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingstema;
@@ -36,9 +35,12 @@ import no.nav.melosys.service.vilkaar.InngangsvilkaarService;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
+import org.mockito.ArgumentCaptor;
+import org.mockito.Captor;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 
+import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatExceptionOfType;
 import static org.mockito.ArgumentMatchers.*;
 import static org.mockito.Mockito.*;
@@ -63,6 +65,9 @@ class OppfriskSaksopplysningerServiceTest {
     private SaksbehandlingRegler saksbehandlingRegler;
     @Mock
     private ÅrsavregningService årsavregningService;
+
+    @Captor
+    private ArgumentCaptor<RegisteropplysningerRequest> captor;
 
     private OppfriskSaksopplysningerService oppfriskSaksopplysningerService;
 
@@ -183,6 +188,23 @@ class OppfriskSaksopplysningerServiceTest {
 
 
         verify(inngangsvilkaarService, never()).vurderOgLagreInngangsvilkår(anyLong(), any(), anyBoolean(), any(Periode.class));
+    }
+
+    @Test
+    void oppfriskSaksopplysning_utlederPeriodeForÅrsavregning() {
+        Behandling behandling = lagBehandling();
+        behandling.setType(Behandlingstyper.ÅRSAVREGNING);
+        when(behandlingService.hentBehandling(anyLong())).thenReturn(behandling);
+        when(persondataFasade.hentFolkeregisterident(anyString())).thenReturn("322211");
+        when(inngangsvilkaarService.skalVurdereInngangsvilkår(any())).thenReturn(false);
+        when(årsavregningService.finnGjeldendeÅrForÅrsavregning(anyLong())).thenReturn(2023);
+
+        oppfriskSaksopplysningerService.oppfriskSaksopplysning(BEHANDLING_ID, false);
+
+        verify(registeropplysningerService).hentOgLagreOpplysninger(captor.capture());
+        RegisteropplysningerRequest request = captor.getValue();
+        assertThat(request.getFom()).isEqualTo(LocalDate.of(2023, Month.JANUARY, 1));
+        assertThat(request.getTom()).isEqualTo(LocalDate.of(2023, Month.DECEMBER, 31));
     }
 
     private Saksopplysning lagSED() {
