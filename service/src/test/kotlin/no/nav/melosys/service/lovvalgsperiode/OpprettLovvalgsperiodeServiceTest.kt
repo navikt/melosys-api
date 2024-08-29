@@ -321,7 +321,7 @@ class OpprettLovvalgsperiodeServiceTest {
         every { behandlingService.hentBehandling(any()) } returns behandling
         every { saksbehandlingRegler.harRegistreringUnntakFraMedlemskapFlyt(any()) } returns false
         every { saksbehandlingRegler.harIkkeYrkesaktivFlyt(any()) } returns false
-        every { saksbehandlingRegler.harUtsendtArbeidsTakerKunNorgeFlyt(true, Behandlingstema.UTSENDT_SELVSTENDIG, Land_iso2.NO) } returns true
+        every { saksbehandlingRegler.harUtsendtArbeidsTakerKunNorgeFlyt(true, Behandlingstema.UTSENDT_ARBEIDSTAKER, Land_iso2.NO) } returns true
 
         val lovvalgsperiodeSlot = slot<Lovvalgsperiode>()
         every { lovvalgsperiodeRepository.save(capture(lovvalgsperiodeSlot)) } answers { lovvalgsperiodeSlot.captured }
@@ -394,5 +394,6 @@ class OpprettLovvalgsperiodeServiceTest {
                     periode = Periode(LocalDate.now(), LocalDate.now().plusMonths(6))
                 }
             }
+            tema = Behandlingstema.YRKESAKTIV
         }
 }
