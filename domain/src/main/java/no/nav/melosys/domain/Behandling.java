@@ -21,6 +21,7 @@ import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingstema;
 import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingstyper;
 import no.nav.melosys.domain.mottatteopplysninger.AnmodningEllerAttest;
 import no.nav.melosys.domain.mottatteopplysninger.MottatteOpplysninger;
+import no.nav.melosys.exception.FunksjonellException;
 import no.nav.melosys.exception.IkkeFunnetException;
 import no.nav.melosys.exception.TekniskException;
 import org.springframework.data.jpa.domain.support.AuditingEntityListener;
@@ -312,6 +313,9 @@ public class Behandling extends RegistreringsInfo {
     }
 
     public Optional<ErPeriode> finnPeriode() {
+        if (erÅrsavregning()) {
+            throw new FunksjonellException("Kan ikke hente periode for årsavregning " + id);
+        }
         var optionalSeddokument = finnSedDokument();
         if (optionalSeddokument.isPresent()) {
             return Optional.of(optionalSeddokument.get().getLovvalgsperiode());
