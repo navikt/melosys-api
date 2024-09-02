@@ -37,9 +37,9 @@ import static java.util.Collections.emptyList;
 import static no.nav.melosys.domain.kodeverk.Mottakerroller.*;
 import static no.nav.melosys.domain.kodeverk.brev.Produserbaredokumenter.*;
 import static org.assertj.core.api.Assertions.*;
+import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyLong;
-import static org.mockito.Mockito.verifyNoInteractions;
-import static org.mockito.Mockito.when;
+import static org.mockito.Mockito.*;
 
 @ExtendWith(MockitoExtension.class)
 class BrevmottakerServiceTest {
@@ -190,7 +190,8 @@ class BrevmottakerServiceTest {
         when(behandling.getMottatteOpplysninger()).thenReturn(lagMottatteOpplysninger(null, null));
         when(behandling.finnArbeidsforholdDokument()).thenReturn(Optional.of(lagArbeidsforholdDokument(null)));
 
-        List<Mottaker> arbeidsgivere = brevmottakerService.avklarMottakere(null, Mottaker.medRolle(ARBEIDSGIVER), behandling, false, false);
+        List<Mottaker> arbeidsgivere = brevmottakerService.avklarMottakere(GENERELT_FRITEKSTBREV_ARBEIDSGIVER, Mottaker.medRolle(ARBEIDSGIVER), behandling,
+            false, false);
 
         assertThat(arbeidsgivere).isEmpty();
     }
@@ -201,11 +202,26 @@ class BrevmottakerServiceTest {
         when(behandling.getMottatteOpplysninger()).thenReturn(lagMottatteOpplysninger("987654321", null));
         when(behandling.finnArbeidsforholdDokument()).thenReturn(Optional.of(lagArbeidsforholdDokument("123456789")));
 
-        List<Mottaker> arbeidsgivere = brevmottakerService.avklarMottakere(null, Mottaker.medRolle(ARBEIDSGIVER), behandling, false, false);
+        List<Mottaker> arbeidsgivere = brevmottakerService.avklarMottakere(GENERELT_FRITEKSTBREV_ARBEIDSGIVER, Mottaker.medRolle(ARBEIDSGIVER), behandling,
+            false, false);
 
         assertThat(arbeidsgivere)
             .flatExtracting(Mottaker::getOrgnr)
             .containsExactlyInAnyOrder("123456789", "987654321");
+    }
+
+    @Test
+    void avklarMottakere_medArbeidsgiverRolle_medProduserbartDokumentORIENTERING_TIL_ARBEIDSGIVER_OM_VEDTAK_girAvklarteVirksomheterSomMottakere() {
+        when(behandling.getFagsak()).thenReturn(lagFagsakMedBruker());
+        when(avklarteVirksomheterService.hentNorskeArbeidsgivendeOrgnumre(any())).thenReturn(Set.of("123456789"));
+
+        List<Mottaker> arbeidsgivere = brevmottakerService.avklarMottakere(ORIENTERING_TIL_ARBEIDSGIVER_OM_VEDTAK, Mottaker.medRolle(ARBEIDSGIVER), behandling,
+            false, false);
+
+        assertThat(arbeidsgivere)
+            .flatExtracting(Mottaker::getOrgnr)
+            .containsExactlyInAnyOrder("123456789");
+        verify(behandling, never()).getMottatteOpplysninger();
     }
 
     @Test
@@ -214,7 +230,8 @@ class BrevmottakerServiceTest {
         when(behandling.getMottatteOpplysninger()).thenReturn(lagMottatteOpplysninger(null, "uuid"));
         when(behandling.finnArbeidsforholdDokument()).thenReturn(Optional.of(lagArbeidsforholdDokument(null)));
 
-        List<Mottaker> arbeidsgivere = brevmottakerService.avklarMottakere(null, Mottaker.medRolle(ARBEIDSGIVER), behandling, false, false);
+        List<Mottaker> arbeidsgivere = brevmottakerService.avklarMottakere(GENERELT_FRITEKSTBREV_ARBEIDSGIVER, Mottaker.medRolle(ARBEIDSGIVER), behandling,
+            false, false);
         assertThat(arbeidsgivere).isEmpty();
     }
 
