@@ -107,47 +107,22 @@ class OppgaveService(
         @Nullable tilordnetRessurs: String? = null,
         @Nullable orgnr: String? = null
     ) {
-        if (behandling.type == Behandlingstyper.ÅRSAVREGNING) {
+        val eksisterendeOppgave = hentEksisterendeOppgave(behandling)
+
+        if (eksisterendeOppgave == null || kreverNyOppgave(behandling.type)) {
             lagBehandlingsoppgave(behandling, tilordnetRessurs, journalpostID, aktørID, orgnr)
         } else {
-            val eksisterendeOppgave = hentEksisterendeOppgave(behandling)
-
-            if (eksisterendeOppgave == null) {
-                lagBehandlingsoppgave(behandling, tilordnetRessurs, journalpostID, aktørID, orgnr)
-            } else if (tilordnetRessurs != eksisterendeOppgave.tilordnetRessurs) {
+            if (tilordnetRessurs != eksisterendeOppgave.tilordnetRessurs) {
                 log.info("Oppgave eksisterer, oppdaterer tilordnetRessurs for oppgave tilknyttet behandling ${behandling.id}")
-                tildelOppgave(eksisterendeOppgave.oppgaveId, tilordnetRessurs)
+                oppdaterOppgave(eksisterendeOppgave.oppgaveId, OppgaveOppdatering.builder().tilordnetRessurs(tilordnetRessurs).build())
             } else {
                 log.info("Oppgave tilknyttet behandling ${behandling.id} eksisterer og er allerede tilordnet ressurs $tilordnetRessurs.")
             }
 
-            // TODO: Denne blir ikke nødvendig etter migreringen er ferdig. MELOSYS-6707
-            if (behandling.oppgaveId == null && eksisterendeOppgave != null) {
+            if (behandling.oppgaveId == null) {
                 settOppgaveIdPåBehandling(behandling, eksisterendeOppgave.oppgaveId)
             }
         }
-    }
-
-    private fun lagBehandlingsoppgave(
-        behandling: Behandling, tilordnetRessurs: String?, journalpostID: String?,
-        aktørID: String?, orgnr: String?
-    ) {
-        val oppgaveBuilder =
-            lagBehandlingsoppgave(behandling)
-                .setTilordnetRessurs(tilordnetRessurs)
-                .setJournalpostId(journalpostID)
-                .setAktørId(aktørID)
-                .setOrgnr(orgnr).setSaksnummer(behandling.fagsak.saksnummer)
-
-        val oppgaveID =
-            if (StringUtils.isNotEmpty(aktørID) && harBeskyttelsesbehov(behandling.id)) {
-                oppgaveFasade.opprettSensitivOppgave(oppgaveBuilder.build())
-            } else {
-                oppgaveFasade.opprettOppgave(oppgaveBuilder.build())
-            }
-
-        settOppgaveIdPåBehandling(behandling, oppgaveID)
-        log.info("Opprettet oppgave $oppgaveID for behandling ${behandling.id}")
     }
 
     fun lagBehandlingsoppgave(behandling: Behandling): Oppgave.Builder =
@@ -210,6 +185,30 @@ class OppgaveService(
     @Transactional
     fun saksbehandlerErTilordnetOppgaveForBehandling(saksbehandler: String, behandlingID: Long): Boolean =
         finnBehandlingsoppgaveForBehandlingID(behandlingID)?.tilordnetRessurs == saksbehandler
+
+    private fun kreverNyOppgave(behandlingsType: Behandlingstyper): Boolean = behandlingsType == Behandlingstyper.ÅRSAVREGNING
+
+    private fun lagBehandlingsoppgave(
+        behandling: Behandling, tilordnetRessurs: String?, journalpostID: String?,
+        aktørID: String?, orgnr: String?
+    ) {
+        val oppgaveBuilder =
+            lagBehandlingsoppgave(behandling)
+                .setTilordnetRessurs(tilordnetRessurs)
+                .setJournalpostId(journalpostID)
+                .setAktørId(aktørID)
+                .setOrgnr(orgnr).setSaksnummer(behandling.fagsak.saksnummer)
+
+        val oppgaveID =
+            if (StringUtils.isNotEmpty(aktørID) && harBeskyttelsesbehov(behandling.id)) {
+                oppgaveFasade.opprettSensitivOppgave(oppgaveBuilder.build())
+            } else {
+                oppgaveFasade.opprettOppgave(oppgaveBuilder.build())
+            }
+
+        settOppgaveIdPåBehandling(behandling, oppgaveID)
+        log.info("Opprettet oppgave $oppgaveID for behandling ${behandling.id}")
+    }
 
     private fun hentEksisterendeOppgave(behandling: Behandling): Oppgave? {
         val eksisterendeOppgave = if (behandling.oppgaveId != null) {

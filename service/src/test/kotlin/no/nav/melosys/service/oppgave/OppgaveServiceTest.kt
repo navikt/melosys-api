@@ -51,6 +51,7 @@ import java.time.Instant
 import java.time.LocalDate
 import java.time.ZoneId
 import java.util.*
+import kotlin.test.assertTrue
 
 @ExtendWith(MockKExtension::class)
 internal class OppgaveServiceTest {
@@ -338,6 +339,23 @@ internal class OppgaveServiceTest {
     }
 
     @Test
+    fun opprettEllerGjenbrukBehandlingsOppgave_setterOppgaveIdPåBehandling_dersomBehandlingManglerOppgaveId() {
+        val behandling = Behandling().apply {
+            type = Behandlingstyper.FØRSTEGANG
+            tema = Behandlingstema.UTSENDT_ARBEIDSTAKER
+            fagsak = FagsakTestFactory.lagFagsak()
+        }
+
+        every { oppgaveFasade.oppdaterOppgave(any(), any()) } returns Unit
+        every { behandlingService.lagre(behandling) } returns Unit
+
+        oppgaveService.opprettEllerGjenbrukBehandlingsoppgave(behandling, "222", "333", TILORDNET_RESSURS)
+
+        verify(exactly = 0) { oppgaveFasade.opprettOppgave(any()) }
+        verify { behandlingService.lagre(withArg { assertTrue { it.oppgaveId == oppgave.oppgaveId } }) }
+    }
+
+    @Test
     fun opprettEllerGjenBrukBehandlingsoppgave_medEksisterendeÅrsavregningOppgave_ÅrsavregningoppgaveBlirOpprettet() {
         val behandling = Behandling().apply {
             id = 1L
@@ -359,7 +377,7 @@ internal class OppgaveServiceTest {
         verify { oppgaveFasade.opprettOppgave(any()) }
         verify(exactly = 0) { oppgaveFasade.opprettSensitivOppgave(any()) }
         verify { behandlingService.lagre(behandling) }
-        behandling.oppgaveId shouldBeEqual BEH_OPPG_ID
+        behandling.oppgaveId shouldBeEqual oppgave.oppgaveId
     }
 
     @Test
