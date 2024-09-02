@@ -140,6 +140,52 @@ class SendVedtaksbrevInnlandTest {
     }
 
     @Test
+    void utfør_innvilgelseEfta_vedtak_SenderIkkeORIENTERING_TIL_ARBEIDSGIVER_OM_VEDTAKNårSelvstendigLovvalgsbestemmelse() {
+        fakeUnleash.enable(ToggleName.MELOSYS_KONVENSJON_EFTA_LAND_OG_STORBRITANNIA);
+        when(behandlingsresultatService.hentBehandlingsresultat(BEHANDLINGID))
+            .thenReturn(lagBehandlingsresultat(lagInnvilgetLovvalgsperiode(Lovvalgbestemmelser_konv_efta_storbritannia.KONV_EFTA_STORBRITANNIA_ART14_2)));
+
+        Prosessinstans prosessinstans = lagProsessinstans();
+        prosessinstans.setData(ProsessDataKey.ARBEIDSGIVER_SKAL_HA_KOPI, true);
+
+
+        sendVedtaksbrevInnland.utfør(prosessinstans);
+
+        var mottakere = List.of(Mottaker.medRolle(BRUKER));
+        verify(prosessinstansService, times(2)).opprettProsessinstanserSendBrev(eq(behandling), doksysBrevbestillingArgumentCaptor.capture(), eq(mottakere));
+
+        List<DoksysBrevbestilling> capturedValues = doksysBrevbestillingArgumentCaptor.getAllValues();
+        assertThat(capturedValues).hasSize(2);
+
+        assertThat(capturedValues.get(0).getProduserbartdokument()).isEqualTo(INNVILGELSE_EFTA_STORBRITANNIA);
+        assertThat(capturedValues.get(1).getProduserbartdokument()).isEqualTo(ATTEST_A1);
+    }
+
+    // TODO: FIXME
+    @Test
+    void utfør_innvilgelseEfta_vedtak_SenderORIENTERING_TIL_ARBEIDSGIVER_OM_VEDTAK() {
+        fakeUnleash.enable(ToggleName.MELOSYS_KONVENSJON_EFTA_LAND_OG_STORBRITANNIA);
+        when(behandlingsresultatService.hentBehandlingsresultat(BEHANDLINGID))
+            .thenReturn(lagBehandlingsresultat(lagInnvilgetLovvalgsperiode(Lovvalgbestemmelser_konv_efta_storbritannia.KONV_EFTA_STORBRITANNIA_ART13_4)));
+
+        Prosessinstans prosessinstans = lagProsessinstans();
+        prosessinstans.setData(ProsessDataKey.ARBEIDSGIVER_SKAL_HA_KOPI, true);
+
+
+        sendVedtaksbrevInnland.utfør(prosessinstans);
+
+        var mottakere = List.of(Mottaker.medRolle(BRUKER));
+        verify(prosessinstansService, times(2)).opprettProsessinstanserSendBrev(eq(behandling), doksysBrevbestillingArgumentCaptor.capture(), eq(mottakere));
+
+        List<DoksysBrevbestilling> capturedValues = doksysBrevbestillingArgumentCaptor.getAllValues();
+        assertThat(capturedValues).hasSize(3);
+
+        assertThat(capturedValues.get(0).getProduserbartdokument()).isEqualTo(INNVILGELSE_EFTA_STORBRITANNIA);
+        assertThat(capturedValues.get(1).getProduserbartdokument()).isEqualTo(ATTEST_A1);
+        assertThat(capturedValues.get(2).getProduserbartdokument()).isEqualTo(ORIENTERING_TIL_ARBEIDSGIVER_OM_VEDTAK);
+    }
+
+    @Test
     void utfør_avslagEfta118_vedtak_sender_avslag_efta_storbritannia_brev_naar_toggled() {
         fakeUnleash.enable(ToggleName.MELOSYS_KONVENSJON_EFTA_LAND_OG_STORBRITANNIA);
         when(behandlingsresultatService.hentBehandlingsresultat(BEHANDLINGID))

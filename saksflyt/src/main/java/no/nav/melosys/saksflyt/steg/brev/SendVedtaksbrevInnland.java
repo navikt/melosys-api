@@ -36,10 +36,8 @@ import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Component;
 
 import static no.nav.melosys.domain.kodeverk.brev.Produserbaredokumenter.*;
-import static no.nav.melosys.domain.kodeverk.lovvalgsbestemmelser.Lovvalgbestemmelser_883_2004.FO_883_2004_ART13_4;
-import static no.nav.melosys.domain.kodeverk.lovvalgsbestemmelser.Lovvalgbestemmelser_883_2004.FO_883_2004_ART16_1;
-import static no.nav.melosys.domain.kodeverk.lovvalgsbestemmelser.Lovvalgbestemmelser_konv_efta_storbritannia.KONV_EFTA_STORBRITANNIA_ART15_4;
-import static no.nav.melosys.domain.kodeverk.lovvalgsbestemmelser.Lovvalgbestemmelser_konv_efta_storbritannia.KONV_EFTA_STORBRITANNIA_ART18_1;
+import static no.nav.melosys.domain.kodeverk.lovvalgsbestemmelser.Lovvalgbestemmelser_883_2004.*;
+import static no.nav.melosys.domain.kodeverk.lovvalgsbestemmelser.Lovvalgbestemmelser_konv_efta_storbritannia.*;
 import static no.nav.melosys.saksflytapi.domain.ProsessDataKey.SAKSBEHANDLER;
 import static no.nav.melosys.saksflytapi.domain.ProsessSteg.SEND_VEDTAKSBREV_INNLAND;
 
@@ -96,7 +94,11 @@ public class SendVedtaksbrevInnland implements StegBehandler {
             }
             log.info("Sendt innvilgelsesbrev for behandling {}", behandling.getId());
             if (prosessinstans.getData(ProsessDataKey.ARBEIDSGIVER_SKAL_HA_KOPI, Boolean.class, true)) {
-                sendOrienteringTilArbeidsgiver(behandling, resultat, saksbehandler);
+                if (unleash.isEnabled(ToggleName.MELOSYS_KONVENSJON_EFTA_LAND_OG_STORBRITANNIA)) {
+                    sendOrienteringTilArbeidsgiverEFTATogglet(behandling, resultat, saksbehandler);
+                } else {
+                    sendOrienteringTilArbeidsgiver(behandling, resultat, saksbehandler);
+                }
                 log.info("Sendt orienteringsbrev til arbeidsgiver for behandling {}", behandling.getId());
             }
         } else {
@@ -188,7 +190,27 @@ public class SendVedtaksbrevInnland implements StegBehandler {
             && !lovvalgsperiode.erArtikkel11_4()) {
 
             DoksysBrevbestilling brevbestilling = new DoksysBrevbestilling.Builder()
-                .medProduserbartDokument(unleash.isEnabled(ToggleName.MELOSYS_KONVENSJON_EFTA_LAND_OG_STORBRITANNIA) ? ORIENTERING_TIL_ARBEIDSGIVER_OM_VEDTAK : INNVILGELSE_ARBEIDSGIVER)
+                .medProduserbartDokument(INNVILGELSE_ARBEIDSGIVER)
+                .medAvsenderID(saksbehandler)
+                .build();
+            prosessinstansService.opprettProsessinstansSendBrev(behandling, brevbestilling, Mottaker.medRolle(Mottakerroller.ARBEIDSGIVER));
+        }
+    }
+
+    private void sendOrienteringTilArbeidsgiverEFTATogglet(Behandling behandling, Behandlingsresultat resultat, String saksbehandler) {
+        final Lovvalgsperiode lovvalgsperiode = resultat.hentLovvalgsperiode();
+        var bestemmelse = lovvalgsperiode.getBestemmelse();
+        // Saker med kun selvstendig næringsdrivende skal ikke sende brevet INNVILGELSE_ARBEIDSGIVER
+        if (behandling.getFagsak().harAktørMedRolleType(Aktoersroller.ARBEIDSGIVER)
+            && !lovvalgsperiode.erArtikkel13()
+            && !lovvalgsperiode.erArtikkel11_4()
+            && bestemmelse != FO_883_2004_ART12_2
+            && bestemmelse != KONV_EFTA_STORBRITANNIA_ART14_2
+            && bestemmelse != KONV_EFTA_STORBRITANNIA_ART16_3
+        ) {
+
+            DoksysBrevbestilling brevbestilling = new DoksysBrevbestilling.Builder()
+                .medProduserbartDokument(ORIENTERING_TIL_ARBEIDSGIVER_OM_VEDTAK)
                 .medAvsenderID(saksbehandler)
                 .build();
             prosessinstansService.opprettProsessinstansSendBrev(behandling, brevbestilling, Mottaker.medRolle(Mottakerroller.ARBEIDSGIVER));
