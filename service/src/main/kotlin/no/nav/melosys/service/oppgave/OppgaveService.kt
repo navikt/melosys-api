@@ -113,14 +113,8 @@ class OppgaveService(
             lagBehandlingsoppgave(behandling, tilordnetRessurs, journalpostID, aktørID, orgnr)
         } else {
             if (tilordnetRessurs != eksisterendeOppgave.tilordnetRessurs) {
-                log.info("Oppgave eksisterer, oppdaterer tilordnetRessurs for oppgave tilknyttet behandling ${behandling.id}")
                 oppdaterOppgave(eksisterendeOppgave.oppgaveId, OppgaveOppdatering.builder().tilordnetRessurs(tilordnetRessurs).build())
-            } else {
-                log.info("Oppgave tilknyttet behandling ${behandling.id} eksisterer og er allerede tilordnet ressurs $tilordnetRessurs.")
-            }
-
-            if (behandling.oppgaveId == null) {
-                settOppgaveIdPåBehandling(behandling, eksisterendeOppgave.oppgaveId)
+                log.info("Oppgave oppdatert med ny tilordnetRessurs, for behandling ${behandling.id}")
             }
         }
     }

@@ -51,7 +51,6 @@ import java.time.Instant
 import java.time.LocalDate
 import java.time.ZoneId
 import java.util.*
-import kotlin.test.assertTrue
 
 @ExtendWith(MockKExtension::class)
 internal class OppgaveServiceTest {
@@ -336,23 +335,6 @@ internal class OppgaveServiceTest {
         val oppgave = oppgaveService.finnÅpenBehandlingsoppgaveMedFagsaksnummer(FagsakTestFactory.SAKSNUMMER)
 
         oppgave.shouldBeEmpty()
-    }
-
-    @Test
-    fun opprettEllerGjenbrukBehandlingsOppgave_setterOppgaveIdPåBehandling_dersomBehandlingManglerOppgaveId() {
-        val behandling = Behandling().apply {
-            type = Behandlingstyper.FØRSTEGANG
-            tema = Behandlingstema.UTSENDT_ARBEIDSTAKER
-            fagsak = FagsakTestFactory.lagFagsak()
-        }
-
-        every { oppgaveFasade.oppdaterOppgave(any(), any()) } returns Unit
-        every { behandlingService.lagre(behandling) } returns Unit
-
-        oppgaveService.opprettEllerGjenbrukBehandlingsoppgave(behandling, "222", "333", TILORDNET_RESSURS)
-
-        verify(exactly = 0) { oppgaveFasade.opprettOppgave(any()) }
-        verify { behandlingService.lagre(withArg { assertTrue { it.oppgaveId == oppgave.oppgaveId } }) }
     }
 
     @Test
