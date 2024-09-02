@@ -69,7 +69,7 @@ internal class OpprettBehandlingForSakTest {
 
     @ParameterizedTest
     @EnumSource(value = Behandlingstyper::class, names = ["HENVENDELSE", "NY_VURDERING"])
-    fun opprettBehandling_medAktivÅrsavregningVedBehandlingAvslutterIkkeAktivÅrsavregningBehandling(behandlingsType: Behandlingstyper) {
+    fun opprettBehandling_medAktivÅrsavregningVedBehandling_AvslutterIkkeAktivÅrsavregningBehandling(behandlingsType: Behandlingstyper) {
         unleash.enableAll()
         val behandlingId = 1L
 
