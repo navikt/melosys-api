@@ -37,7 +37,6 @@ class ÅrsavregningVedtakService(
         oppgaveService.ferdigstillOppgaveMedBehandlingID(behandling.id)
     }
 
-    // TODO tilpasninger bla datoMottatt
     private fun lagVedtaksbrev(request: FattVedtakRequest): BrevbestillingDto =
         BrevbestillingDto().apply {
 
