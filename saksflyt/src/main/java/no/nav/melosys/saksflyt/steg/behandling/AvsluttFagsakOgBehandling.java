@@ -71,7 +71,7 @@ public class AvsluttFagsakOgBehandling implements StegBehandler {
         log.info("Avslutter behandling {}, og setter saksstatus til {} på tilhørende fagsak", behandlingID, saksstatus);
         fagsakService.avsluttFagsakOgBehandling(fagsak, saksstatus);
     }
-
+    // TODO    behandlingsresultatService.tømBehandlingsresultat(behandlingId)? erEnesteBehandling som i ferdigbehandle?
     private void avsluttÅrsavregning(Behandlingsresultat behandlingsresultat, long behandlingID, Fagsak fagsak, Behandling behandling) {
         Årsavregning årsavregning = behandlingsresultat.getårsavregning();
         behandlingsresultatService.oppdaterBehandlingsresultattype(behandlingID, Behandlingsresultattyper.FERDIGBEHANDLET);
