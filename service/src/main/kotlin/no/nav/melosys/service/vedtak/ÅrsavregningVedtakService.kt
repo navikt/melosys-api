@@ -11,7 +11,10 @@ import no.nav.melosys.service.dokument.DokgenService
 import no.nav.melosys.service.dokument.brev.BrevbestillingDto
 import no.nav.melosys.service.oppgave.OppgaveService
 import org.slf4j.LoggerFactory
+import org.springframework.stereotype.Service
+
 // TODO 6793
+@Service
 class ÅrsavregningVedtakService(
     val prosessinstansService: ProsessinstansService,
     val behandlingService: BehandlingService,

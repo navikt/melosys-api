@@ -28,7 +28,8 @@ public class VedtaksfattingFasade {
     public VedtaksfattingFasade(BehandlingService behandlingService,
                                 EosVedtakService eosVedtakService,
                                 FtrlVedtakService ftrlVedtakService,
-                                TrygdeavtaleVedtakService trygdeavtaleVedtakService, ÅrsavregningVedtakService årsavregningVedtakService) {
+                                TrygdeavtaleVedtakService trygdeavtaleVedtakService,
+                                ÅrsavregningVedtakService årsavregningVedtakService) {
         this.behandlingService = behandlingService;
         this.eosVedtakService = eosVedtakService;
         this.ftrlVedtakService = ftrlVedtakService;
