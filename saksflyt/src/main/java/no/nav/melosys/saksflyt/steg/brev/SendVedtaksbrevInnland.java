@@ -26,6 +26,7 @@ import no.nav.melosys.saksflytapi.ProsessinstansService;
 import no.nav.melosys.saksflytapi.domain.ProsessDataKey;
 import no.nav.melosys.saksflytapi.domain.ProsessSteg;
 import no.nav.melosys.saksflytapi.domain.Prosessinstans;
+import no.nav.melosys.service.avklartefakta.AvklarteVirksomheterService;
 import no.nav.melosys.service.behandling.BehandlingService;
 import no.nav.melosys.service.behandling.BehandlingsresultatService;
 import no.nav.melosys.service.saksbehandling.SaksbehandlingRegler;
@@ -49,6 +50,7 @@ public class SendVedtaksbrevInnland implements StegBehandler {
     private final BehandlingsresultatService behandlingsresultatService;
     private final ProsessinstansService prosessinstansService;
     private final SaksbehandlingRegler saksbehandlingRegler;
+    private final AvklarteVirksomheterService avklarteVirksomheterService;
 
     private final Unleash unleash;
 
@@ -56,11 +58,13 @@ public class SendVedtaksbrevInnland implements StegBehandler {
                                   BehandlingsresultatService behandlingsresultatService,
                                   ProsessinstansService prosessinstansService,
                                   SaksbehandlingRegler saksbehandlingRegler,
+                                  AvklarteVirksomheterService avklarteVirksomheterService,
                                   Unleash unleash) {
         this.behandlingService = behandlingService;
         this.behandlingsresultatService = behandlingsresultatService;
         this.prosessinstansService = prosessinstansService;
         this.saksbehandlingRegler = saksbehandlingRegler;
+        this.avklarteVirksomheterService = avklarteVirksomheterService;
         this.unleash = unleash;
     }
 
@@ -79,9 +83,24 @@ public class SendVedtaksbrevInnland implements StegBehandler {
 
         final Lovvalgsperiode lovvalgsperiode = resultat.hentLovvalgsperiode();
 
+        var virksomhet = resultat.getAvklartefakta().stream().filter(avklartfakta -> avklartfakta.getType() == Avklartefaktatyper.VIRKSOMHET)
+            .map(Avklartefakta::getSubjekt)
+            .findFirst()
+            .orElse(null);
+
+        boolean erSelvstendigVirksomhet = avklarteVirksomheterService.hentNorskeSelvstendigeForetak(behandling).stream()
+            .anyMatch(selvstendigVirksomhet -> selvstendigVirksomhet.orgnr.equals(virksomhet));
+
+        boolean harAvhuketSelvstendigNæringsdrivende = resultat.getAvklartefakta().stream()
+            .filter(avklartfakta -> avklartfakta.getFakta().equals("SELVSTENDIG_NAERINGSDRIVENDE"))
+            .findFirst()
+            .orElse(null) != null;
+
+        boolean erSelvstendig = erSelvstendigVirksomhet || harAvhuketSelvstendigNæringsdrivende;
+
         if (resultat.erAvslag()) {
             boolean erStorBrittanniaArt18 = KONV_EFTA_STORBRITANNIA_ART18_1 == lovvalgsperiode.getBestemmelse();
-            sendAvslagsbrev(behandling, saksbehandler, fritekst, erStorBrittanniaArt18, prosessinstans.getData(ProsessDataKey.ARBEIDSGIVER_SKAL_HA_KOPI, Boolean.class, true));
+            sendAvslagsbrev(behandling, saksbehandler, fritekst, erStorBrittanniaArt18, prosessinstans.getData(ProsessDataKey.ARBEIDSGIVER_SKAL_HA_KOPI, Boolean.class, true), erSelvstendig);
             log.info("Sendt avslagsbrev for behandling {}", behandling.getId());
         } else if (resultat.erUtpeking()) {
             sendUtpekingsbrev(behandling, saksbehandler, fritekst);
@@ -95,18 +114,21 @@ public class SendVedtaksbrevInnland implements StegBehandler {
             log.info("Sendt innvilgelsesbrev for behandling {}", behandling.getId());
             if (prosessinstans.getData(ProsessDataKey.ARBEIDSGIVER_SKAL_HA_KOPI, Boolean.class, true)) {
                 if (unleash.isEnabled(ToggleName.MELOSYS_KONVENSJON_EFTA_LAND_OG_STORBRITANNIA)) {
-                    sendOrienteringTilArbeidsgiverEFTATogglet(behandling, resultat, saksbehandler);
+                    if (!erSelvstendig) {
+                        sendOrienteringTilArbeidsgiverEFTATogglet(behandling, resultat, saksbehandler);
+                        log.info("Sendt orienteringsbrev til arbeidsgiver for behandling {}", behandling.getId());
+                    }
                 } else {
                     sendOrienteringTilArbeidsgiver(behandling, resultat, saksbehandler);
+                    log.info("Sendt orienteringsbrev til arbeidsgiver for behandling {}", behandling.getId());
                 }
-                log.info("Sendt orienteringsbrev til arbeidsgiver for behandling {}", behandling.getId());
             }
         } else {
             throw new FunksjonellException("Vedtaksbrev kan ikke sendes for behandling " + behandling.getId());
         }
     }
 
-    private void sendAvslagsbrev(Behandling behandling, String saksbehandler, String fritekst, boolean erStorBrittanniaArt18, boolean arbeidsgiverSkalHaKopi) {
+    private void sendAvslagsbrev(Behandling behandling, String saksbehandler, String fritekst, boolean erStorBrittanniaArt18, boolean arbeidsgiverSkalHaKopi, boolean erSelvstendig) {
         var mottakerListe = List.of(Mottaker.medRolle(Mottakerroller.BRUKER), Mottaker.av(NorskMyndighet.HELFO), Mottaker.av(NorskMyndighet.SKATTEETATEN));
 
         var produserBartDokument = unleash.isEnabled(ToggleName.MELOSYS_KONVENSJON_EFTA_LAND_OG_STORBRITANNIA) &&
@@ -115,7 +137,7 @@ public class SendVedtaksbrevInnland implements StegBehandler {
         DoksysBrevbestilling brevbestilling = lagDoksysBrevbestilling(produserBartDokument, saksbehandler, fritekst);
         prosessinstansService.opprettProsessinstanserSendBrev(behandling, brevbestilling, mottakerListe);
 
-        if (behandling.getFagsak().harAktørMedRolleType(Aktoersroller.ARBEIDSGIVER) && arbeidsgiverSkalHaKopi) {
+        if (behandling.getFagsak().harAktørMedRolleType(Aktoersroller.ARBEIDSGIVER) && arbeidsgiverSkalHaKopi && !erSelvstendig) {
             DoksysBrevbestilling brevbestillingArbeidsgiver = lagDoksysBrevbestilling(unleash.isEnabled(ToggleName.MELOSYS_KONVENSJON_EFTA_LAND_OG_STORBRITANNIA) ? ORIENTERING_TIL_ARBEIDSGIVER_OM_VEDTAK : AVSLAG_ARBEIDSGIVER, saksbehandler, fritekst);
             prosessinstansService.opprettProsessinstansSendBrev(behandling, brevbestillingArbeidsgiver, Mottaker.medRolle(Mottakerroller.ARBEIDSGIVER));
         }
@@ -151,12 +173,15 @@ public class SendVedtaksbrevInnland implements StegBehandler {
                               String begrunnelseKode,
                               String fritekst) {
 
+        List<Mottaker> mottakerListe = new ArrayList<>(List.of(Mottaker.medRolle(Mottakerroller.BRUKER), Mottaker.medRolle(Mottakerroller.FULLMEKTIG)));
+
+
         DoksysBrevbestilling innvilgelseBrukerOgSkatt = new DoksysBrevbestilling.Builder().medProduserbartDokument(ATTEST_A1)
             .medAvsenderID(saksbehandler)
             .medBegrunnelseKode(begrunnelseKode)
             .medFritekst(fritekst)
             .build();
-        prosessinstansService.opprettProsessinstanserSendBrev(behandling, innvilgelseBrukerOgSkatt, List.of(Mottaker.medRolle(Mottakerroller.BRUKER)));
+        prosessinstansService.opprettProsessinstanserSendBrev(behandling, innvilgelseBrukerOgSkatt, mottakerListe);
     }
 
 
@@ -200,7 +225,6 @@ public class SendVedtaksbrevInnland implements StegBehandler {
     private void sendOrienteringTilArbeidsgiverEFTATogglet(Behandling behandling, Behandlingsresultat resultat, String saksbehandler) {
         final Lovvalgsperiode lovvalgsperiode = resultat.hentLovvalgsperiode();
         var bestemmelse = lovvalgsperiode.getBestemmelse();
-        // Saker med kun selvstendig næringsdrivende skal ikke sende brevet INNVILGELSE_ARBEIDSGIVER
         if (behandling.getFagsak().harAktørMedRolleType(Aktoersroller.ARBEIDSGIVER)
             && !lovvalgsperiode.erArtikkel13()
             && !lovvalgsperiode.erArtikkel11_4()
@@ -208,7 +232,6 @@ public class SendVedtaksbrevInnland implements StegBehandler {
             && bestemmelse != KONV_EFTA_STORBRITANNIA_ART14_2
             && bestemmelse != KONV_EFTA_STORBRITANNIA_ART16_3
         ) {
-
             DoksysBrevbestilling brevbestilling = new DoksysBrevbestilling.Builder()
                 .medProduserbartDokument(ORIENTERING_TIL_ARBEIDSGIVER_OM_VEDTAK)
                 .medAvsenderID(saksbehandler)

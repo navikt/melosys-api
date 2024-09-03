@@ -1,12 +1,15 @@
 package no.nav.melosys.service.dokument.brev.mapper
 
+import io.kotest.assertions.throwables.shouldThrow
 import io.kotest.matchers.booleans.shouldBeFalse
 import io.kotest.matchers.booleans.shouldBeTrue
 import io.kotest.matchers.shouldBe
+import io.kotest.matchers.string.shouldContain
 import io.mockk.every
 import io.mockk.impl.annotations.MockK
 import io.mockk.junit5.MockKExtension
 import no.nav.melosys.domain.*
+import no.nav.melosys.domain.avklartefakta.AvklartVirksomhet
 import no.nav.melosys.domain.avklartefakta.AvklartYrkesgruppeType
 import no.nav.melosys.domain.avklartefakta.Avklartefakta
 import no.nav.melosys.domain.brev.OrienteringTilArbeidsgiverOmVedtakBrevbestilling
@@ -18,6 +21,8 @@ import no.nav.melosys.domain.kodeverk.Vilkaar
 import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingstema
 import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingstyper
 import no.nav.melosys.domain.kodeverk.lovvalgsbestemmelser.Lovvalgbestemmelser_883_2004
+import no.nav.melosys.domain.kodeverk.yrker.Yrkesaktivitetstyper
+import no.nav.melosys.exception.FunksjonellException
 import no.nav.melosys.service.LandvelgerService
 import no.nav.melosys.service.avklartefakta.AvklarteVirksomheterService
 import no.nav.melosys.service.avklartefakta.AvklartefaktaService
@@ -106,6 +111,41 @@ internal class OrienteringTilArbeidsgiverOmVedtakMapperTest {
             erVesentligVirksomhetOppfyllt.shouldBeTrue()
             vesentligVirksomhetBegrunnelser.shouldBe(listOf())
         }
+    }
+
+    @Test
+    fun `Orienteringsbrev til arbeidsgiver om vedtak, innvilgelse, men selvstendig, skal throwe feil`() {
+        every { mockDokgenMapperDatahenter.hentBehandlingsresultat(ofType()) } returns lagBehandlingsResultat(Lovvalgbestemmelser_883_2004.FO_883_2004_ART11_3A)
+        every {
+            mockVilkaarsresultatService.harVilkaar(
+                ofType(), listOf(
+                    Vilkaar.FTRL_2_12_UNNTAK_TURISTSKIP
+                )
+            )
+        } returns true
+        every { mockVilkaarsresultatService.finnVilkaarsresultat(ofType(), Vilkaar.VESENTLIG_VIRKSOMHET) } returns Vilkaarsresultat().apply {
+            isOppfylt = true
+        }
+
+        var norskVirksomhet = AvklartVirksomhet("Bedrift AS", "123456789", BrevDataTestUtils.lagStrukturertAdresse(), Yrkesaktivitetstyper.SELVSTENDIG);
+        every { mockVirksomheterService.hentAlleNorskeVirksomheter(ofType()) } returns listOf(norskVirksomhet)
+        every { mockAvklartefaktaService.hentAvklarteOrgnrOgUuid(ofType()) } returns setOf(orgnr1, orgnr2, orgnr3, orgnr4, uuid1, uuid2)
+        every { mockLandvelgerService.hentArbeidsland(ofType()) } returns Land_iso2.DE
+
+
+        val brevbestilling = OrienteringTilArbeidsgiverOmVedtakBrevbestilling.Builder()
+            .medErInnvilgelse(true)
+            .medPersonDokument(PersonDokument().apply {
+                sammensattNavn = "Hei Test"
+            })
+            .medPersonMottaker(PersonDokument().apply {
+                sammensattNavn = "Hei Test"
+            })
+            .medBehandling(lagBehandling())
+            .build()
+
+        shouldThrow<FunksjonellException> { orienteringTilArbeidsgiverOmVedtakMapper.map(brevbestilling) }
+            .message.shouldContain("Virksomheten er selvstedig, sender ikke brev")
     }
 
     @Test

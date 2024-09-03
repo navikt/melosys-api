@@ -18,6 +18,7 @@ import no.nav.melosys.domain.arkiv.DokumentReferanse;
 import no.nav.melosys.domain.brev.DokgenBrevbestilling;
 import no.nav.melosys.domain.brev.DoksysBrevbestilling;
 import no.nav.melosys.domain.brev.Mottaker;
+import no.nav.melosys.domain.brev.Mottakerliste;
 import no.nav.melosys.domain.eessi.melding.MelosysEessiMelding;
 import no.nav.melosys.domain.eessi.melding.UtpekingAvvis;
 import no.nav.melosys.domain.kodeverk.*;

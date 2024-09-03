@@ -3,6 +3,7 @@ package no.nav.melosys.service.dokument.brev.mapper
 import jakarta.transaction.Transactional
 import no.nav.melosys.domain.brev.OrienteringTilArbeidsgiverOmVedtakBrevbestilling
 import no.nav.melosys.domain.kodeverk.Vilkaar
+import no.nav.melosys.exception.FunksjonellException
 import no.nav.melosys.integrasjon.dokgen.dto.OrienteringTilArbeidsgiverOmVedtak
 import no.nav.melosys.service.LandvelgerService
 import no.nav.melosys.service.avklartefakta.AvklarteVirksomheterService
@@ -30,12 +31,15 @@ class OrienteringTilArbeidsgiverOmVedtakMapper(
         val alleAvklarteOrgnr = avklartefaktaService.hentAvklarteOrgnrOgUuid(behandlingsresultat.id)
         val alleVirksomheter = virksomheterService.hentAlleNorskeVirksomheter(behandlingsresultat.behandling)
 
-        val navnVirksomhet = alleVirksomheter.stream()
+        val virksomhet = alleVirksomheter.stream()
             .filter { alleAvklarteOrgnr.contains(it.orgnr) }
-            .findFirst().get().navn
+            .findFirst().get()
+
+        if(virksomhet.erSelvstendigForetak()) {
+            throw FunksjonellException("Virksomheten er selvstedig, sender ikke brev")
+        }
+
         val vilkaarResultat = vilkaarsresultatService.finnVilkaarsresultat(behandlingID, Vilkaar.VESENTLIG_VIRKSOMHET)
-
-
 
         val erInnvilgelse = brevbestilling.erInnvilgelse || behandlingsresultat.erInnvilgelse()
         var erVesentligVirksomhetOppfyllt = false
@@ -53,7 +57,7 @@ class OrienteringTilArbeidsgiverOmVedtakMapper(
             arbeidsland,
             erInnvilgelse,
             erVesentligVirksomhetOppfyllt,
-            navnVirksomhet,
+            virksomhet.navn,
             vesentligVirksomhetBegrunnelser
         )
     }
