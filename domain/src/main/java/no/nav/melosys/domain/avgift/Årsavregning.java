@@ -102,7 +102,7 @@ public class Årsavregning {
         return Objects.hash(id, aar, tidligereFakturertBeloep, nyttTotalbeloep, tilFaktureringBeloep);
     }
 
-    public boolean erTidligereFakturert() {
-        return !(tidligereFakturertBeloep == null || tidligereFakturertBeloep.compareTo(BigDecimal.ZERO) == 0);
+    public boolean harTidligereBehandlingsResultat() {
+        return this.tidligereBehandlingsresultat != null;
     }
 }

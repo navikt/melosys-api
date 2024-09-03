@@ -77,7 +77,7 @@ public class AvsluttFagsakOgBehandling implements StegBehandler {
         behandlingsresultatService.oppdaterBehandlingsresultattype(behandlingID, Behandlingsresultattyper.FERDIGBEHANDLET);
 
         boolean sakLukkes = fagsak.erEnesteBehandling(behandlingID)
-            && !årsavregning.erTidligereFakturert()
+            && !årsavregning.harTidligereBehandlingsResultat()
             && behandlingsresultat.getMedlemskapsperioder().isEmpty();
 
         if (sakLukkes) {
