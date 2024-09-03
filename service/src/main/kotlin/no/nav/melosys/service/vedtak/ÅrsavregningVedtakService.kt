@@ -23,7 +23,6 @@ class ÅrsavregningVedtakService(
 ) {
     private val log = LoggerFactory.getLogger(FtrlVedtakService::class.java)
 
-    // Prosesstype: (sendbrev/ bestillbrev) brukes i dag via dokumentservicefacade: (OPPRETT_OG_DISTRIBUER_BREV, )
     fun fattVedtak(behandling: Behandling, request: FattVedtakRequest) {
         val behandlingID = behandling.id
         log.info("Fatter vedtak for (FTRL) sak: ${behandling.fagsak.saksnummer} behandling: $behandlingID")

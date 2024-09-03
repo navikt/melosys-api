@@ -367,7 +367,6 @@ public class ProsessinstansService {
         lagre(prosessinstans);
     }
 
-    // todo hva må vi inkludere? BETALINGSINTERVALL?
     public void opprettProsessinstansIverksettVedtakÅrsavregning(Behandling behandling) {
         Prosessinstans prosessinstans = new ProsessinstansBuilder()
             .medType(ProsessType.IVERKSETT_VEDTAK_AARSAVREGNING)
