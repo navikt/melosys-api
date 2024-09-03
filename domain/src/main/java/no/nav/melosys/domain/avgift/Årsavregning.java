@@ -101,4 +101,8 @@ public class Årsavregning {
     public int hashCode() {
         return Objects.hash(id, aar, tidligereFakturertBeloep, nyttTotalbeloep, tilFaktureringBeloep);
     }
+
+    public boolean erTidligereFakturert() {
+        return !(tidligereFakturertBeloep == null || tidligereFakturertBeloep.compareTo(BigDecimal.ZERO) == 0);
+    }
 }
