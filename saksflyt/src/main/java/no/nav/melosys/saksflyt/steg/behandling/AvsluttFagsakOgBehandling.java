@@ -48,7 +48,6 @@ public class AvsluttFagsakOgBehandling implements StegBehandler {
         return AVSLUTT_SAK_OG_BEHANDLING;
     }
 
-    // se etter medlemskapsperioder og fakturering av trygdeavgift forskuddsvis
     @Override
     public void utfør(Prosessinstans prosessinstans) {
         final Behandling behandling = prosessinstans.getBehandling();
