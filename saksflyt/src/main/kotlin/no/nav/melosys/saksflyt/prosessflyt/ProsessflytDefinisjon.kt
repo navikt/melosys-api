@@ -146,7 +146,9 @@ object ProsessflytDefinisjon {
         ),
         IVERKSETT_VEDTAK_AARSAVREGNING to ProsessFlyt(
             prosessType = IVERKSETT_VEDTAK_AARSAVREGNING,
-            AVSLUTT_SAK_OG_BEHANDLING
+            OPPRETT_FAKTURASERIE,
+            AVSLUTT_SAK_OG_BEHANDLING,
+            SEND_MELDING_OM_VEDTAK,
         ),
         IVERKSETT_VEDTAK_EOS to ProsessFlyt(
             prosessType = IVERKSETT_VEDTAK_EOS,

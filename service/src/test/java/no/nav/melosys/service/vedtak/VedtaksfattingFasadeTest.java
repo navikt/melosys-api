@@ -44,13 +44,16 @@ class VedtaksfattingFasadeTest {
     @Mock
     private TrygdeavtaleVedtakService trygdeavtaleVedtakService;
 
+    @Mock
+    private ÅrsavregningVedtakService årsavregningVedtakService;
+
     private VedtaksfattingFasade vedtaksfattingFasade;
 
     private Behandling behandling;
 
     @BeforeEach
     void init() {
-        vedtaksfattingFasade = new VedtaksfattingFasade(mockBehandlingService, mockEosVedtakService, mockFtrlVedtakService, trygdeavtaleVedtakService);
+        vedtaksfattingFasade = new VedtaksfattingFasade(mockBehandlingService, mockEosVedtakService, mockFtrlVedtakService, trygdeavtaleVedtakService, årsavregningVedtakService);
         behandling = lagBehandling();
 
         SpringSubjectHandler.set(new TestSubjectHandler());

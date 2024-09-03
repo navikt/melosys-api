@@ -5,6 +5,7 @@ import no.nav.melosys.domain.kodeverk.Sakstyper;
 import no.nav.melosys.domain.kodeverk.Vedtakstyper;
 import no.nav.melosys.domain.kodeverk.begrunnelser.Endretperiode;
 import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingsresultattyper;
+import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingstyper;
 import no.nav.melosys.exception.FunksjonellException;
 import no.nav.melosys.exception.ValideringException;
 import no.nav.melosys.service.behandling.BehandlingService;
@@ -20,17 +21,19 @@ public class VedtaksfattingFasade {
     private final EosVedtakService eosVedtakService;
     private final FtrlVedtakService ftrlVedtakService;
     private final TrygdeavtaleVedtakService trygdeavtaleVedtakService;
+    private final ÅrsavregningVedtakService årsavregningVedtakService;
 
     public static final int FRIST_KLAGE_UKER = 6;
 
     public VedtaksfattingFasade(BehandlingService behandlingService,
                                 EosVedtakService eosVedtakService,
                                 FtrlVedtakService ftrlVedtakService,
-                                TrygdeavtaleVedtakService trygdeavtaleVedtakService) {
+                                TrygdeavtaleVedtakService trygdeavtaleVedtakService, ÅrsavregningVedtakService årsavregningVedtakService) {
         this.behandlingService = behandlingService;
         this.eosVedtakService = eosVedtakService;
         this.ftrlVedtakService = ftrlVedtakService;
         this.trygdeavtaleVedtakService = trygdeavtaleVedtakService;
+        this.årsavregningVedtakService = årsavregningVedtakService;
     }
 
     @Transactional(noRollbackFor = {ValideringException.class})
@@ -47,6 +50,11 @@ public class VedtaksfattingFasade {
         validerKanFattesVedtak(behandling);
 
         Sakstyper sakstype = behandling.getFagsak().getType();
+
+        if (behandling.getType() == Behandlingstyper.ÅRSAVREGNING) {
+            årsavregningVedtakService.fattVedtak(behandling, fattVedtakRequest);
+            return;
+        }
 
         switch (sakstype) {
             case EU_EOS -> eosVedtakService.fattVedtak(behandling, fattVedtakRequest);

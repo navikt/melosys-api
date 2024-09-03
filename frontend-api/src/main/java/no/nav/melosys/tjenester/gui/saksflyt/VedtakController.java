@@ -30,6 +30,11 @@ public class VedtakController {
         this.aksesskontroll = aksesskontroll;
     }
 
+    /*
+    behandlingsresultattypekode: ferdigbehandlet
+    vedtakstype: førstegangsvedtak
+     */
+    // TODO thomas
     @PostMapping("{behandlingID}/fatt")
     @ApiOperation(value = "Fatter et vedtak for en gitt behandling")
     public ResponseEntity<Void> fattVedtak(@PathVariable("behandlingID") long behandlingID,
