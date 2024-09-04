@@ -5,6 +5,7 @@ import no.nav.melosys.domain.Behandlingsresultat
 import no.nav.melosys.domain.kodeverk.Land_iso2
 import no.nav.melosys.domain.kodeverk.Mottakerroller
 import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingsstatus
+import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingstyper
 import no.nav.melosys.domain.kodeverk.brev.Produserbaredokumenter
 import no.nav.melosys.exception.FunksjonellException
 import no.nav.melosys.saksflytapi.ProsessinstansService
@@ -28,6 +29,8 @@ class ÅrsavregningVedtakService(
     private val log = LoggerFactory.getLogger(ÅrsavregningVedtakService::class.java)
 
     fun fattVedtak(behandling: Behandling, request: FattVedtakRequest) {
+        valider(behandling)
+
         val behandlingID = behandling.id
         log.info("Fatter vedtak for (FTRL) sak: ${behandling.fagsak.saksnummer} behandling: $behandlingID")
 
@@ -40,6 +43,13 @@ class ÅrsavregningVedtakService(
         prosessinstansService.opprettProsessinstansIverksettVedtakÅrsavregning(behandling)
         dokgenService.produserOgDistribuerBrev(behandlingID, lagVedtaksbrev(request))
         oppgaveService.ferdigstillOppgaveMedBehandlingID(behandling.id)
+    }
+
+    private fun valider(behandling: Behandling) {
+        when {
+            behandling.type != Behandlingstyper.ÅRSAVREGNING -> throw FunksjonellException("Kan kun fatte vedtak for Behandlingstype: Årsavregning")
+        }
+
     }
 
     private fun lagVedtaksbrev(request: FattVedtakRequest): BrevbestillingDto =
