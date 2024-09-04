@@ -138,7 +138,7 @@ public class BrevmottakerService {
         List<Mottaker> mottakere = new ArrayList<>();
         Aktoer fullmektig = fagsak.finnFullmektig(Fullmaktstype.FULLMEKTIG_SØKNAD);
 
-        if(produserbartDokument.equals(ATTEST_A1)) {
+        if(produserbartDokument != null && produserbartDokument.equals(ATTEST_A1)) {
             mottakere.add(Mottaker.av(bruker));
             return mottakere;
         }
@@ -160,7 +160,6 @@ public class BrevmottakerService {
         // Vedtaksbrevene er imidlertid sendt til både bruker og fullmektig (gjelder ikke forhåndsvisning).
         boolean tilBegge = false;
         if (produserbartDokument == INNVILGELSE_YRKESAKTIV ||
-            produserbartDokument == ATTEST_A1 ||
             produserbartDokument == INNVILGELSE_EFTA_STORBRITANNIA ||
             produserbartDokument == INNVILGELSE_YRKESAKTIV_FLERE_LAND ||
             produserbartDokument == AVSLAG_YRKESAKTIV ||

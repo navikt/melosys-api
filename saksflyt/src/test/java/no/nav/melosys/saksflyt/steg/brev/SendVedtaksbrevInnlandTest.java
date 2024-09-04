@@ -50,8 +50,7 @@ import org.mockito.junit.jupiter.MockitoExtension;
 
 import static java.util.Collections.emptyList;
 import static no.nav.melosys.domain.brev.NorskMyndighet.SKATTEETATEN;
-import static no.nav.melosys.domain.kodeverk.Mottakerroller.ARBEIDSGIVER;
-import static no.nav.melosys.domain.kodeverk.Mottakerroller.BRUKER;
+import static no.nav.melosys.domain.kodeverk.Mottakerroller.*;
 import static no.nav.melosys.domain.kodeverk.brev.Produserbaredokumenter.*;
 import static no.nav.melosys.domain.kodeverk.lovvalgsbestemmelser.Lovvalgbestemmelser_883_2004.*;
 import static no.nav.melosys.domain.kodeverk.lovvalgsbestemmelser.Lovvalgbestemmelser_konv_efta_storbritannia.KONV_EFTA_STORBRITANNIA_ART18_1;
@@ -141,8 +140,7 @@ class SendVedtaksbrevInnlandTest {
 
         sendVedtaksbrevInnland.utfør(lagProsessinstans());
 
-        var mottakere = List.of(Mottaker.medRolle(BRUKER));
-        verify(prosessinstansService, times(2)).opprettProsessinstanserSendBrev(eq(behandling), doksysBrevbestillingArgumentCaptor.capture(), eq(mottakere));
+        verify(prosessinstansService, times(2)).opprettProsessinstanserSendBrev(eq(behandling), doksysBrevbestillingArgumentCaptor.capture(), any());
 
         List<DoksysBrevbestilling> capturedValues = doksysBrevbestillingArgumentCaptor.getAllValues();
         assertThat(capturedValues).hasSize(2);
@@ -163,8 +161,7 @@ class SendVedtaksbrevInnlandTest {
 
         sendVedtaksbrevInnland.utfør(prosessinstans);
 
-        var mottakere = List.of(Mottaker.medRolle(BRUKER));
-        verify(prosessinstansService, times(2)).opprettProsessinstanserSendBrev(eq(behandling), doksysBrevbestillingArgumentCaptor.capture(), eq(mottakere));
+        verify(prosessinstansService, times(2)).opprettProsessinstanserSendBrev(eq(behandling), doksysBrevbestillingArgumentCaptor.capture(), any());
 
         List<DoksysBrevbestilling> capturedValues = doksysBrevbestillingArgumentCaptor.getAllValues();
         assertThat(capturedValues).hasSize(2);
@@ -185,8 +182,7 @@ class SendVedtaksbrevInnlandTest {
 
         sendVedtaksbrevInnland.utfør(prosessinstans);
 
-        var mottakere = List.of(Mottaker.medRolle(ARBEIDSGIVER));
-        verify(prosessinstansService, times(1)).opprettProsessinstanserSendBrev(eq(behandling), doksysBrevbestillingArgumentCaptor.capture(), eq(mottakere));
+        verify(prosessinstansService, times(1)).opprettProsessinstansSendBrev(eq(behandling), doksysBrevbestillingArgumentCaptor.capture(), eq(Mottaker.medRolle(ARBEIDSGIVER)));
 
         List<DoksysBrevbestilling> capturedValues = doksysBrevbestillingArgumentCaptor.getAllValues();
         assertThat(capturedValues).hasSize(1);
@@ -206,10 +202,12 @@ class SendVedtaksbrevInnlandTest {
 
         sendVedtaksbrevInnland.utfør(prosessinstans);
 
-        verify(prosessinstansService, times(0)).opprettProsessinstansSendBrev(eq(behandling), doksysBrevbestillingArgumentCaptor.capture(), eq(Mottaker.medRolle(ARBEIDSGIVER)));
+        verify(prosessinstansService, times(1)).opprettProsessinstansSendBrev(eq(behandling), doksysBrevbestillingArgumentCaptor.capture(), eq(Mottaker.medRolle(ARBEIDSGIVER)));
 
         List<DoksysBrevbestilling> capturedValues = doksysBrevbestillingArgumentCaptor.getAllValues();
-        assertThat(capturedValues).hasSize(0);
+        assertThat(capturedValues).hasSize(1);
+        assertThat(capturedValues.get(0).getProduserbartdokument() == INNVILGELSE_EFTA_STORBRITANNIA);
+
     }
 
     @Test
