@@ -25,7 +25,7 @@ class ÅrsavregningVedtakService(
     val oppgaveService: OppgaveService,
     val dokgenService: DokgenService
 ) {
-    private val log = LoggerFactory.getLogger(FtrlVedtakService::class.java)
+    private val log = LoggerFactory.getLogger(ÅrsavregningVedtakService::class.java)
 
     fun fattVedtak(behandling: Behandling, request: FattVedtakRequest) {
         val behandlingID = behandling.id
