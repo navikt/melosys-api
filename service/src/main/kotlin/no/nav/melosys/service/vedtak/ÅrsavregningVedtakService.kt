@@ -44,7 +44,6 @@ class ÅrsavregningVedtakService(
 
     private fun lagVedtaksbrev(request: FattVedtakRequest): BrevbestillingDto =
         BrevbestillingDto().apply {
-
             produserbardokument = Produserbaredokumenter.AARSAVREGNING_VEDTAKSBREV
             mottaker = Mottakerroller.BRUKER
             kopiMottakere = request.kopiMottakere
