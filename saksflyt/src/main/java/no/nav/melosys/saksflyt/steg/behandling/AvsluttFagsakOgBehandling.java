@@ -3,9 +3,7 @@ package no.nav.melosys.saksflyt.steg.behandling;
 import no.nav.melosys.domain.Behandling;
 import no.nav.melosys.domain.Behandlingsresultat;
 import no.nav.melosys.domain.Fagsak;
-import no.nav.melosys.domain.avgift.Årsavregning;
 import no.nav.melosys.domain.kodeverk.Saksstatuser;
-import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingsresultattyper;
 import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingsstatus;
 import no.nav.melosys.saksflyt.steg.StegBehandler;
 import no.nav.melosys.saksflytapi.domain.ProsessDataKey;
@@ -33,10 +31,8 @@ public class AvsluttFagsakOgBehandling implements StegBehandler {
     private final SaksbehandlingRegler saksbehandlingRegler;
 
 
-    public AvsluttFagsakOgBehandling(FagsakService fagsakService,
-                                     BehandlingService behandlingService,
-                                     BehandlingsresultatService behandlingsresultatService,
-                                     SaksbehandlingRegler saksbehandlingRegler) {
+    public AvsluttFagsakOgBehandling(FagsakService fagsakService, BehandlingService behandlingService,
+                                     BehandlingsresultatService behandlingsresultatService, SaksbehandlingRegler saksbehandlingRegler) {
         this.fagsakService = fagsakService;
         this.behandlingService = behandlingService;
         this.behandlingsresultatService = behandlingsresultatService;
@@ -55,11 +51,10 @@ public class AvsluttFagsakOgBehandling implements StegBehandler {
         Behandlingsresultat behandlingsresultat = behandlingsresultatService.hentBehandlingsresultat(behandlingID);
         Fagsak fagsak = fagsakService.hentFagsak(prosessinstans.getBehandling().getFagsak().getSaksnummer());
 
-        if (behandlingsresultat.erGodkjenningEllerInnvilgelseArt13()
-            && !saksbehandlingRegler.harRegistreringUnntakFraMedlemskapFlyt(behandlingsresultat.getBehandling())) {
+        if (behandlingsresultat.erGodkjenningEllerInnvilgelseArt13() && !saksbehandlingRegler.harRegistreringUnntakFraMedlemskapFlyt(behandlingsresultat.getBehandling())) {
             behandlingService.endreStatus(behandlingID, Behandlingsstatus.MIDLERTIDIG_LOVVALGSBESLUTNING);
         } else if (prosessinstans.getType() == ProsessType.IVERKSETT_VEDTAK_AARSAVREGNING) {
-            avsluttÅrsavregning(behandlingsresultat, behandlingID, fagsak, behandling);
+            avsluttÅrsavregning(behandlingID, fagsak, behandling);
         } else {
             avsluttFagsak(prosessinstans, behandlingID, fagsak);
         }
@@ -71,14 +66,8 @@ public class AvsluttFagsakOgBehandling implements StegBehandler {
         fagsakService.avsluttFagsakOgBehandling(fagsak, saksstatus);
     }
 
-    private void avsluttÅrsavregning(Behandlingsresultat behandlingsresultat, long behandlingID, Fagsak fagsak, Behandling behandling) {
-        Årsavregning årsavregning = behandlingsresultat.getårsavregning();
-        behandlingsresultatService.oppdaterBehandlingsresultattype(behandlingID, Behandlingsresultattyper.FERDIGBEHANDLET);
-
-        boolean sakLukkes = fagsak.erEnesteBehandling(behandlingID)
-            && !årsavregning.harTidligereBehandlingsResultat()
-            && behandlingsresultat.getMedlemskapsperioder().isEmpty();
-
+    private void avsluttÅrsavregning(long behandlingID, Fagsak fagsak, Behandling behandling) {
+        boolean sakLukkes = fagsak.erEnesteBehandling(behandlingID);
         if (sakLukkes) {
             fagsakService.avsluttFagsakOgBehandling(fagsak, behandling, Saksstatuser.AVSLUTTET);
         } else {
