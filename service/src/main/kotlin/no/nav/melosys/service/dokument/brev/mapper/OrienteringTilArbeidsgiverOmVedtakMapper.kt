@@ -3,7 +3,6 @@ package no.nav.melosys.service.dokument.brev.mapper
 import jakarta.transaction.Transactional
 import no.nav.melosys.domain.brev.OrienteringTilArbeidsgiverOmVedtakBrevbestilling
 import no.nav.melosys.domain.kodeverk.Vilkaar
-import no.nav.melosys.exception.FunksjonellException
 import no.nav.melosys.integrasjon.dokgen.dto.OrienteringTilArbeidsgiverOmVedtak
 import no.nav.melosys.service.LandvelgerService
 import no.nav.melosys.service.avklartefakta.AvklarteVirksomheterService
@@ -34,10 +33,6 @@ class OrienteringTilArbeidsgiverOmVedtakMapper(
         val virksomhet = alleVirksomheter.stream()
             .filter { alleAvklarteOrgnr.contains(it.orgnr) }
             .findFirst().get()
-
-        if(virksomhet.erSelvstendigForetak()) {
-            throw FunksjonellException("Virksomheten er selvstedig, sender ikke brev")
-        }
 
         val vilkaarResultat = vilkaarsresultatService.finnVilkaarsresultat(behandlingID, Vilkaar.VESENTLIG_VIRKSOMHET)
 
