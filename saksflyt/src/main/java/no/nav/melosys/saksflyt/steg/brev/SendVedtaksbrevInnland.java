@@ -172,9 +172,10 @@ public class SendVedtaksbrevInnland implements StegBehandler {
                               String saksbehandler,
                               String begrunnelseKode,
                               String fritekst) {
-
-        List<Mottaker> mottakerListe = new ArrayList<>(List.of(Mottaker.medRolle(Mottakerroller.BRUKER), Mottaker.medRolle(Mottakerroller.FULLMEKTIG)));
-
+        List mottakerListe = List.of(
+            Mottaker.medRolle(Mottakerroller.BRUKER),
+            Mottaker.medRolle(Mottakerroller.FULLMEKTIG)
+        );
 
         DoksysBrevbestilling innvilgelseBrukerOgSkatt = new DoksysBrevbestilling.Builder().medProduserbartDokument(ATTEST_A1)
             .medAvsenderID(saksbehandler)
@@ -222,16 +223,20 @@ public class SendVedtaksbrevInnland implements StegBehandler {
         }
     }
 
-    private void sendOrienteringTilArbeidsgiverEFTATogglet(Behandling behandling, Behandlingsresultat resultat, String saksbehandler) {
+    private boolean harArtikkelRelevantForStatligSkatteoppkreving(Behandling behandling, Behandlingsresultat resultat) {
         final Lovvalgsperiode lovvalgsperiode = resultat.hentLovvalgsperiode();
         var bestemmelse = lovvalgsperiode.getBestemmelse();
-        if (behandling.getFagsak().harAktørMedRolleType(Aktoersroller.ARBEIDSGIVER)
+
+        return behandling.getFagsak().harAktørMedRolleType(Aktoersroller.ARBEIDSGIVER)
             && !lovvalgsperiode.erArtikkel13()
             && !lovvalgsperiode.erArtikkel11_4()
             && bestemmelse != FO_883_2004_ART12_2
             && bestemmelse != KONV_EFTA_STORBRITANNIA_ART14_2
-            && bestemmelse != KONV_EFTA_STORBRITANNIA_ART16_3
-        ) {
+            && bestemmelse != KONV_EFTA_STORBRITANNIA_ART16_3;
+    }
+
+    private void sendOrienteringTilArbeidsgiverEFTATogglet(Behandling behandling, Behandlingsresultat resultat, String saksbehandler) {
+        if (harArtikkelRelevantForStatligSkatteoppkreving(behandling, resultat)) {
             DoksysBrevbestilling brevbestilling = new DoksysBrevbestilling.Builder()
                 .medProduserbartDokument(ORIENTERING_TIL_ARBEIDSGIVER_OM_VEDTAK)
                 .medAvsenderID(saksbehandler)
