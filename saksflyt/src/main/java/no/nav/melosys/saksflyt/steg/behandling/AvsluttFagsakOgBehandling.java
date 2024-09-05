@@ -54,7 +54,7 @@ public class AvsluttFagsakOgBehandling implements StegBehandler {
         if (behandlingsresultat.erGodkjenningEllerInnvilgelseArt13() && !saksbehandlingRegler.harRegistreringUnntakFraMedlemskapFlyt(behandlingsresultat.getBehandling())) {
             behandlingService.endreStatus(behandlingID, Behandlingsstatus.MIDLERTIDIG_LOVVALGSBESLUTNING);
         } else if (prosessinstans.getType() == ProsessType.IVERKSETT_VEDTAK_AARSAVREGNING) {
-            avsluttÅrsavregning(behandlingID, fagsak, behandling);
+            avsluttÅrsavregning(fagsak, behandling);
         } else {
             avsluttFagsak(prosessinstans, behandlingID, fagsak);
         }
@@ -66,12 +66,12 @@ public class AvsluttFagsakOgBehandling implements StegBehandler {
         fagsakService.avsluttFagsakOgBehandling(fagsak, saksstatus);
     }
 
-    private void avsluttÅrsavregning(long behandlingID, Fagsak fagsak, Behandling behandling) {
-        boolean sakLukkes = fagsak.erEnesteBehandling(behandlingID);
+    private void avsluttÅrsavregning(Fagsak fagsak, Behandling behandling) {
+        boolean sakLukkes = fagsak.erEnesteBehandling(behandling.getId());
         if (sakLukkes) {
             fagsakService.avsluttFagsakOgBehandling(fagsak, behandling, Saksstatuser.AVSLUTTET);
         } else {
-            behandlingService.avsluttBehandling(behandlingID);
+            behandlingService.avsluttBehandling(behandling.getId());
         }
     }
 }
