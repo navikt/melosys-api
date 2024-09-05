@@ -172,9 +172,10 @@ public class SendVedtaksbrevInnland implements StegBehandler {
                               String saksbehandler,
                               String begrunnelseKode,
                               String fritekst) {
-        List mottakerListe = List.of(
+        List<Mottaker> mottakerListe = List.of(
             Mottaker.medRolle(Mottakerroller.BRUKER),
-            Mottaker.medRolle(Mottakerroller.FULLMEKTIG)
+            Mottaker.medRolle(Mottakerroller.FULLMEKTIG),
+            Mottaker.av(NorskMyndighet.SKATTEINNKREVER_UTLAND)
         );
 
         DoksysBrevbestilling innvilgelseBrukerOgSkatt = new DoksysBrevbestilling.Builder().medProduserbartDokument(ATTEST_A1)
