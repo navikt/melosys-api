@@ -1,5 +1,6 @@
 package no.nav.melosys.service.vedtak
 
+import mu.KotlinLogging
 import no.nav.melosys.domain.Behandling
 import no.nav.melosys.domain.Behandlingsresultat
 import no.nav.melosys.domain.kodeverk.Land_iso2
@@ -14,7 +15,6 @@ import no.nav.melosys.service.behandling.BehandlingsresultatService
 import no.nav.melosys.service.dokument.DokgenService
 import no.nav.melosys.service.dokument.brev.BrevbestillingDto
 import no.nav.melosys.service.oppgave.OppgaveService
-import org.slf4j.LoggerFactory
 import org.springframework.stereotype.Service
 import java.time.LocalDate
 
@@ -26,7 +26,7 @@ class ÅrsavregningVedtakService(
     val oppgaveService: OppgaveService,
     val dokgenService: DokgenService
 ) {
-    private val log = LoggerFactory.getLogger(ÅrsavregningVedtakService::class.java)
+    private val log = KotlinLogging.logger { }
 
     fun fattVedtak(behandling: Behandling, request: FattVedtakRequest) {
         valider(behandling)
