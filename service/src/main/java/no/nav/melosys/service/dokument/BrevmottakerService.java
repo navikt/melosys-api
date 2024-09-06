@@ -189,7 +189,7 @@ public class BrevmottakerService {
         if (fullmektig != null) {
             return Collections.singletonList(Mottaker.av(fullmektig));
         } else {
-            return kunAvklarteVirksomheter || produserbartDokument.equals(ORIENTERING_TIL_ARBEIDSGIVER_OM_VEDTAK) ?
+            return kunAvklarteVirksomheter || produserbartDokument == ORIENTERING_TIL_ARBEIDSGIVER_OM_VEDTAK ?
                 avklarArbeidsgiverFraAvklarteVirksomheter(behandling) :
                 avklarArbeidsgiverFraAlleVirksomheter(behandling);
         }
