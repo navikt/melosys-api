@@ -128,7 +128,6 @@ class JournalfoeringValidering(
         lovligeKombinasjonerSaksbehandlingService.validerBehandlingstemaOgBehandlingstypeForAndregangsbehandling(
             fagsak,
             sistBehandling,
-            sistBehandlingsresultat,
             behandlingstema,
             behandlingstype
         )

@@ -8,6 +8,8 @@ import java.util.Set;
 
 import io.getunleash.FakeUnleash;
 import no.nav.melosys.domain.*;
+import no.nav.melosys.domain.adresse.StrukturertAdresse;
+import no.nav.melosys.domain.avklartefakta.AvklartVirksomhet;
 import no.nav.melosys.domain.avklartefakta.Avklartefakta;
 import no.nav.melosys.domain.brev.DoksysBrevbestilling;
 import no.nav.melosys.domain.brev.Mottaker;
@@ -19,6 +21,7 @@ import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingstema;
 import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingstyper;
 import no.nav.melosys.domain.kodeverk.lovvalgsbestemmelser.Lovvalgbestemmelser_konv_efta_storbritannia;
 import no.nav.melosys.domain.kodeverk.lovvalgsbestemmelser.Tilleggsbestemmelser_883_2004;
+import no.nav.melosys.domain.kodeverk.yrker.Yrkesaktivitetstyper;
 import no.nav.melosys.domain.mottatteopplysninger.MottatteOpplysninger;
 import no.nav.melosys.domain.mottatteopplysninger.Soeknad;
 import no.nav.melosys.domain.mottatteopplysninger.data.ForetakUtland;
@@ -28,6 +31,7 @@ import no.nav.melosys.saksflytapi.ProsessinstansService;
 import no.nav.melosys.saksflytapi.domain.ProsessDataKey;
 import no.nav.melosys.saksflytapi.domain.ProsessType;
 import no.nav.melosys.saksflytapi.domain.Prosessinstans;
+import no.nav.melosys.service.avklartefakta.AvklarteVirksomheterService;
 import no.nav.melosys.service.behandling.BehandlingService;
 import no.nav.melosys.service.behandling.BehandlingsresultatService;
 import no.nav.melosys.service.dokument.brev.BrevData;
@@ -40,8 +44,7 @@ import org.mockito.Captor;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 
-import static no.nav.melosys.domain.kodeverk.Mottakerroller.ARBEIDSGIVER;
-import static no.nav.melosys.domain.kodeverk.Mottakerroller.BRUKER;
+import static no.nav.melosys.domain.kodeverk.Mottakerroller.*;
 import static no.nav.melosys.domain.kodeverk.brev.Produserbaredokumenter.*;
 import static no.nav.melosys.domain.kodeverk.lovvalgsbestemmelser.Lovvalgbestemmelser_883_2004.*;
 import static no.nav.melosys.domain.kodeverk.lovvalgsbestemmelser.Lovvalgbestemmelser_konv_efta_storbritannia.KONV_EFTA_STORBRITANNIA_ART18_1;
@@ -64,6 +67,8 @@ class SendVedtaksbrevInnlandTest {
     private BehandlingsresultatService behandlingsresultatService;
     @Mock
     private SaksbehandlingRegler saksbehandlingRegler;
+    @Mock
+    private AvklarteVirksomheterService avklarteVirksomheterService;
 
     private Behandling behandling;
 
@@ -77,7 +82,7 @@ class SendVedtaksbrevInnlandTest {
         when(behandlingService.hentBehandlingMedSaksopplysninger(BEHANDLINGID)).thenReturn(behandling);
 
         sendVedtaksbrevInnland = new SendVedtaksbrevInnland(behandlingService, behandlingsresultatService,
-            prosessinstansService, saksbehandlingRegler, fakeUnleash);
+            prosessinstansService, saksbehandlingRegler, avklarteVirksomheterService, fakeUnleash);
     }
 
     @Test
@@ -129,14 +134,74 @@ class SendVedtaksbrevInnlandTest {
 
         sendVedtaksbrevInnland.utfør(lagProsessinstans());
 
-        var mottakere = List.of(Mottaker.medRolle(BRUKER));
-        verify(prosessinstansService, times(2)).opprettProsessinstanserSendBrev(eq(behandling), doksysBrevbestillingArgumentCaptor.capture(), eq(mottakere));
+        verify(prosessinstansService, times(2)).opprettProsessinstanserSendBrev(eq(behandling), doksysBrevbestillingArgumentCaptor.capture(), any());
 
         List<DoksysBrevbestilling> capturedValues = doksysBrevbestillingArgumentCaptor.getAllValues();
         assertThat(capturedValues).hasSize(2);
 
         assertThat(capturedValues.get(0).getProduserbartdokument()).isEqualTo(INNVILGELSE_EFTA_STORBRITANNIA);
         assertThat(capturedValues.get(1).getProduserbartdokument()).isEqualTo(ATTEST_A1);
+    }
+
+    @Test
+    void utfør_innvilgelseEfta_vedtak_SenderIkkeORIENTERING_TIL_ARBEIDSGIVER_OM_VEDTAKNårSelvstendigLovvalgsbestemmelse() {
+        fakeUnleash.enable(ToggleName.MELOSYS_KONVENSJON_EFTA_LAND_OG_STORBRITANNIA);
+        when(behandlingsresultatService.hentBehandlingsresultat(BEHANDLINGID))
+            .thenReturn(lagBehandlingsresultat(lagInnvilgetLovvalgsperiode(Lovvalgbestemmelser_konv_efta_storbritannia.KONV_EFTA_STORBRITANNIA_ART14_2)));
+
+        Prosessinstans prosessinstans = lagProsessinstans();
+        prosessinstans.setData(ProsessDataKey.ARBEIDSGIVER_SKAL_HA_KOPI, true);
+
+
+        sendVedtaksbrevInnland.utfør(prosessinstans);
+
+        verify(prosessinstansService, times(2)).opprettProsessinstanserSendBrev(eq(behandling), doksysBrevbestillingArgumentCaptor.capture(), any());
+
+        List<DoksysBrevbestilling> capturedValues = doksysBrevbestillingArgumentCaptor.getAllValues();
+        assertThat(capturedValues).hasSize(2);
+
+        assertThat(capturedValues.get(0).getProduserbartdokument()).isEqualTo(INNVILGELSE_EFTA_STORBRITANNIA);
+        assertThat(capturedValues.get(1).getProduserbartdokument()).isEqualTo(ATTEST_A1);
+    }
+
+    @Test
+    void utfør_innvilgelseEfta_vedtak_SenderORIENTERING_TIL_ARBEIDSGIVER_OM_VEDTAK() {
+        fakeUnleash.enable(ToggleName.MELOSYS_KONVENSJON_EFTA_LAND_OG_STORBRITANNIA);
+        when(behandlingsresultatService.hentBehandlingsresultat(BEHANDLINGID))
+            .thenReturn(lagBehandlingsresultat(lagInnvilgetLovvalgsperiode(Lovvalgbestemmelser_konv_efta_storbritannia.KONV_EFTA_STORBRITANNIA_ART13_4)));
+
+        Prosessinstans prosessinstans = lagProsessinstans();
+        prosessinstans.setData(ProsessDataKey.ARBEIDSGIVER_SKAL_HA_KOPI, true);
+
+
+        sendVedtaksbrevInnland.utfør(prosessinstans);
+
+        verify(prosessinstansService, times(1)).opprettProsessinstansSendBrev(eq(behandling), doksysBrevbestillingArgumentCaptor.capture(), eq(Mottaker.medRolle(ARBEIDSGIVER)));
+
+        List<DoksysBrevbestilling> capturedValues = doksysBrevbestillingArgumentCaptor.getAllValues();
+        assertThat(capturedValues).hasSize(1);
+
+        assertThat(capturedValues.get(0).getProduserbartdokument()).isEqualTo(ORIENTERING_TIL_ARBEIDSGIVER_OM_VEDTAK);
+    }
+
+    @Test
+    void utfør_innvilgelseEfta_vedtak_SenderIkkeORIENTERING_TIL_ARBEIDSGIVER_OM_VEDTAK_nårMottakerErSelvstendig() {
+        fakeUnleash.enable(ToggleName.MELOSYS_KONVENSJON_EFTA_LAND_OG_STORBRITANNIA);
+        when(behandlingsresultatService.hentBehandlingsresultat(BEHANDLINGID))
+            .thenReturn(lagBehandlingsresultat(lagInnvilgetLovvalgsperiode(KONV_EFTA_STORBRITANNIA_ART18_1)));
+
+        Prosessinstans prosessinstans = lagProsessinstans();
+        prosessinstans.setData(ProsessDataKey.ARBEIDSGIVER_SKAL_HA_KOPI, true);
+
+
+        sendVedtaksbrevInnland.utfør(prosessinstans);
+
+        verify(prosessinstansService, times(1)).opprettProsessinstansSendBrev(eq(behandling), doksysBrevbestillingArgumentCaptor.capture(), eq(Mottaker.medRolle(ARBEIDSGIVER)));
+
+        List<DoksysBrevbestilling> capturedValues = doksysBrevbestillingArgumentCaptor.getAllValues();
+        assertThat(capturedValues).hasSize(1);
+        assertThat(capturedValues.get(0).getProduserbartdokument() == INNVILGELSE_EFTA_STORBRITANNIA);
+
     }
 
     @Test
@@ -519,5 +584,15 @@ class SendVedtaksbrevInnlandTest {
 
     private static Behandlingsresultat lagBehandlingsresultatUtenPerioder(Behandlingsresultattyper behandlingstype) {
         return lagBehandlingsresultat(behandlingstype, Collections.emptySet(), Land_iso2.NO);
+    }
+
+    private static AvklartVirksomhet lagNorskSelvstendigVirksomhet() {
+        StrukturertAdresse addr = new StrukturertAdresse();
+        addr.setGatenavn("Strukturert Gate");
+        addr.setHusnummerEtasjeLeilighet("12B");
+        addr.setPoststed("Poststed");
+        addr.setPostnummer("4321");
+        addr.setLandkode(Landkoder.BG.getKode());
+        return new AvklartVirksomhet("Bedrift AS", "123456789", addr, Yrkesaktivitetstyper.SELVSTENDIG);
     }
 }

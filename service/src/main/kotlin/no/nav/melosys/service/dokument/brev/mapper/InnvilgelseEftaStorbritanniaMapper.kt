@@ -3,8 +3,10 @@ package no.nav.melosys.service.dokument.brev.mapper
 import io.getunleash.Unleash
 import no.nav.melosys.domain.brev.InnvilgelseEftaStorbritanniaBrevbestilling
 import no.nav.melosys.domain.dokument.felles.Periode
+import no.nav.melosys.domain.kodeverk.Avklartefaktatyper
 import no.nav.melosys.domain.kodeverk.Land_iso2
 import no.nav.melosys.domain.kodeverk.Vilkaar
+import no.nav.melosys.domain.kodeverk.yrker.Yrkesgrupper
 import no.nav.melosys.featuretoggle.ToggleName
 import no.nav.melosys.integrasjon.dokgen.dto.InnvilgelseEftaStorbritannia
 import no.nav.melosys.service.LandvelgerService
@@ -39,7 +41,9 @@ class InnvilgelseEftaStorbritanniaMapper(
         val navnVirksomhet = alleVirksomheter.stream()
             .findFirst().get().navn
 
-        val arbeidINorge = if(unleash.isEnabled(ToggleName.MELOSYS_ARBEID_KUN_NORGE)) bostedsland.kode == Land_iso2.NO.name else false
+        val erOrdinaerYrkesgruppe = behandlingsresultat.avklartefakta.find { it.type == Avklartefaktatyper.YRKESGRUPPE && it.fakta == Yrkesgrupper.ORDINAER.name } != null
+
+        val arbeidINorge = if(unleash.isEnabled(ToggleName.MELOSYS_ARBEID_KUN_NORGE)) bostedsland.kode == Land_iso2.NO.name && erOrdinaerYrkesgruppe else false
 
         return InnvilgelseEftaStorbritannia(
             brevbestilling = brevbestilling,

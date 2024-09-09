@@ -60,19 +60,18 @@ internal class InnhentingAvInntektsopplysningerMapperTest {
         }
     }
 
-    private fun lagBehandling(block: Behandling.() -> Unit = {}): Behandling = Behandling().apply behandling@{
-        id = 1L
-        fagsak = FagsakTestFactory.builder().apply {
-            type = Sakstyper.FTRL
-            leggTilBehandling(this@behandling)
-        }.build()
-        tema = Behandlingstema.YRKESAKTIV
-        block()
-    }
+    private fun lagBehandling() =
+        Behandling().apply behandling@{
+            id = 1L
+            fagsak = FagsakTestFactory.builder().apply {
+                type = Sakstyper.FTRL
+                leggTilBehandling(this@behandling)
+            }.build()
+            tema = Behandlingstema.YRKESAKTIV
+        }
 
     private fun lagBehandlingsResultat(): Behandlingsresultat {
-        val tidligereBehandlingsResultat = Behandlingsresultat()
-        tidligereBehandlingsResultat.apply {
+        return Behandlingsresultat().apply {
             årsavregning = Årsavregning().apply {
                 aar = 2023
                 medlemskapsperioder = listOf(
@@ -94,13 +93,6 @@ internal class InnhentingAvInntektsopplysningerMapperTest {
                         trygdedekning = Trygdedekninger.FTRL_2_9_FØRSTE_LEDD_A_HELSE
                         innvilgelsesresultat = InnvilgelsesResultat.INNVILGET
                     })
-            }
-        }
-        return Behandlingsresultat().apply {
-            behandling = lagBehandling()
-            årsavregning = Årsavregning().apply {
-                aar = 2023
-                tidligereBehandlingsresultat = tidligereBehandlingsResultat
             }
         }
     }

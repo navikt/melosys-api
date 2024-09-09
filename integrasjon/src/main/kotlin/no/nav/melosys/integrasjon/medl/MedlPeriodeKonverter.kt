@@ -48,6 +48,8 @@ class MedlPeriodeKonverter private constructor() {
 
             lovvalgsbestemmelseTilGrunnlagMedlTabell[Tilleggsbestemmelser_konv_efta_storbritannia.KONV_EFTA_STORBRITANNIA_ART13_4_1] =
                 GrunnlagMedl.KONV_STORBRIT_NIRLAND_13_4_1
+            lovvalgsbestemmelseTilGrunnlagMedlTabell[Lovvalgbestemmelser_konv_efta_storbritannia.KONV_EFTA_STORBRITANNIA_ART13_3A] =
+                GrunnlagMedl.KONV_STORBRIT_NIRLAND_13_3_A
             lovvalgsbestemmelseTilGrunnlagMedlTabell[Lovvalgbestemmelser_konv_efta_storbritannia.KONV_EFTA_STORBRITANNIA_ART13_4_2] =
                 GrunnlagMedl.KONV_STORBRIT_NIRLAND_13_4_2
             lovvalgsbestemmelseTilGrunnlagMedlTabell[Lovvalgbestemmelser_konv_efta_storbritannia.KONV_EFTA_STORBRITANNIA_ART14_1] =

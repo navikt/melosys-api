@@ -36,6 +36,11 @@ class ÅrsavregningService(
         return lagÅrsavregningModelFraÅrsavregning(aarsavregning)
     }
 
+    @Transactional(readOnly = true)
+    fun finnGjeldendeÅrForÅrsavregning(behandlingID: Long): Int? {
+        return finnÅrsavregning(behandlingID)?.år
+    }
+
     @Transactional
     fun opprettÅrsavregning(behandlingID: Long, gjelderÅr: Int): ÅrsavregningModel {
         val behandlingsresultat = behandlingsresultatService.hentBehandlingsresultat(behandlingID)
@@ -149,6 +154,19 @@ class ÅrsavregningService(
             skatteforholdsperioder = behandlingsresultat.hentSkatteforholdTilNorge().toList(),
             innteksperioder = behandlingsresultat.hentInntektsperioder().toList()
         )
+    }
+
+    @Transactional
+    fun oppdaterTotalbelop(behandlingID: Long, tidligereFakturertBeloep: BigDecimal?, nyttTotalbeloep: BigDecimal?): ÅrsavregningModel {
+        val behandlingsresultat = behandlingsresultatService.hentBehandlingsresultat(behandlingID)
+
+        val aarsavregning =
+            behandlingsresultat.årsavregning ?: throw RuntimeException("Det eksisterer ikke årsavregning for behandling med id: $behandlingID")
+        if (tidligereFakturertBeloep != null) aarsavregning.tidligereFakturertBeloep = tidligereFakturertBeloep
+        if (nyttTotalbeloep != null) aarsavregning.nyttTotalbeloep = nyttTotalbeloep
+        aarsavregning.beregnTilFaktureringsBeloep()
+
+        return lagÅrsavregningModelFraÅrsavregning(aarsavregning)
     }
 
     companion object {

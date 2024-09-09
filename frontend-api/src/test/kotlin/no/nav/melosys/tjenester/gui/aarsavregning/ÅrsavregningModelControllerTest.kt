@@ -12,9 +12,11 @@ import no.nav.melosys.domain.kodeverk.Medlemskapstyper
 import no.nav.melosys.domain.kodeverk.Skatteplikttype
 import no.nav.melosys.domain.kodeverk.Trygdedekninger
 import no.nav.melosys.service.avgift.aarsavregning.*
+import no.nav.melosys.service.tilgang.Aksesskontroll
 import org.junit.jupiter.api.Test
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest
+import org.springframework.boot.test.mock.mockito.MockBean
 import org.springframework.http.MediaType
 import org.springframework.test.web.servlet.MockMvc
 import org.springframework.test.web.servlet.request.MockMvcRequestBuilders
@@ -33,6 +35,9 @@ internal class ÅrsavregningModelControllerTest {
 
     @MockkBean
     private lateinit var trygdeavgiftTotalBeregner: TrygdeavgiftTotalBeregner
+
+    @MockBean
+    private lateinit var aksesskontroll: Aksesskontroll
 
     @Test
     fun `hent avregning basert på ID`() {

@@ -120,7 +120,7 @@ public class BrevmottakerService {
         return switch (mottaker.getRolle()) {
             case BRUKER -> avklarMottakereForBruker(produserbartDokument, behandling, forhåndsvisning);
             case VIRKSOMHET -> avklarMottakereForVirksomhet(behandling);
-            case ARBEIDSGIVER -> avklarMottakereForArbeidsgiver(behandling, kunAvklarteVirksomheter);
+            case ARBEIDSGIVER -> avklarMottakereForArbeidsgiver(behandling, kunAvklarteVirksomheter, produserbartDokument);
             case UTENLANDSK_TRYGDEMYNDIGHET -> avklarMottakereForUtenlandskTrygdemyndighet(behandling, produserbartDokument);
             case NORSK_MYNDIGHET -> avklarMottakereForNorskMyndighet(mottaker);
             case FULLMEKTIG -> avklarMottakereForFullmektig(behandling.getFagsak());
@@ -137,6 +137,12 @@ public class BrevmottakerService {
 
         List<Mottaker> mottakere = new ArrayList<>();
         Aktoer fullmektig = fagsak.finnFullmektig(Fullmaktstype.FULLMEKTIG_SØKNAD);
+
+        if(produserbartDokument != null && produserbartDokument.equals(ATTEST_A1)) {
+            mottakere.add(Mottaker.av(bruker));
+            return mottakere;
+        }
+
         if (fullmektig != null) {
             boolean erTilBådeBrukerOgFullmektig = erTilBådeBrukerOgFullmektig(produserbartDokument, forhåndsvisning);
             mottakere.add(Mottaker.av(fullmektig));
@@ -177,13 +183,15 @@ public class BrevmottakerService {
         return List.of(Mottaker.av(virksomhet));
     }
 
-    private List<Mottaker> avklarMottakereForArbeidsgiver(Behandling behandling, boolean kunAvklarteVirksomheter) {
+    private List<Mottaker> avklarMottakereForArbeidsgiver(Behandling behandling, boolean kunAvklarteVirksomheter, Produserbaredokumenter produserbartDokument) {
         Fagsak fagsak = behandling.getFagsak();
         Aktoer fullmektig = fagsak.finnFullmektig(Fullmaktstype.FULLMEKTIG_ARBEIDSGIVER);
         if (fullmektig != null) {
             return Collections.singletonList(Mottaker.av(fullmektig));
         } else {
-            return kunAvklarteVirksomheter ? avklarArbeidsgiverFraAvklarteVirksomheter(behandling) : avklarArbeidsgiverFraAlleVirksomheter(behandling);
+            return kunAvklarteVirksomheter || produserbartDokument == ORIENTERING_TIL_ARBEIDSGIVER_OM_VEDTAK ?
+                avklarArbeidsgiverFraAvklarteVirksomheter(behandling) :
+                avklarArbeidsgiverFraAlleVirksomheter(behandling);
         }
     }
 
