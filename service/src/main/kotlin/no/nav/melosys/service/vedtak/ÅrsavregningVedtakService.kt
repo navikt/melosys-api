@@ -25,14 +25,14 @@ class ÅrsavregningVedtakService(
     val behandlingsresultatService: BehandlingsresultatService,
     val oppgaveService: OppgaveService,
     val dokgenService: DokgenService
-) {
+) : FattVedtakInterface {
     private val log = KotlinLogging.logger { }
 
-    fun fattVedtak(behandling: Behandling, request: FattVedtakRequest) {
+    override fun fattVedtak(behandling: Behandling, request: FattVedtakRequest) {
         valider(behandling)
 
         val behandlingID = behandling.id
-        log.info("Fatter vedtak for (FTRL) sak: ${behandling.fagsak.saksnummer} behandling: $behandlingID")
+        log.info("Fatter årsavregningsvedtak for sak: ${behandling.fagsak.saksnummer} behandling: $behandlingID")
 
         if (prosessinstansService.harVedtakInstans(behandlingID)) {
             throw FunksjonellException("Det finnes allerede en vedtak-prosess for behandling $behandlingID")

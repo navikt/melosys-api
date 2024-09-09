@@ -5,7 +5,6 @@ import no.nav.melosys.domain.kodeverk.Sakstyper;
 import no.nav.melosys.domain.kodeverk.Vedtakstyper;
 import no.nav.melosys.domain.kodeverk.begrunnelser.Endretperiode;
 import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingsresultattyper;
-import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingstyper;
 import no.nav.melosys.exception.FunksjonellException;
 import no.nav.melosys.exception.ValideringException;
 import no.nav.melosys.service.behandling.BehandlingService;
@@ -18,23 +17,15 @@ import static no.nav.melosys.domain.kodeverk.Sakstyper.EU_EOS;
 public class VedtaksfattingFasade {
 
     private final BehandlingService behandlingService;
-    private final EosVedtakService eosVedtakService;
-    private final FtrlVedtakService ftrlVedtakService;
-    private final TrygdeavtaleVedtakService trygdeavtaleVedtakService;
-    private final ÅrsavregningVedtakService årsavregningVedtakService;
-
+    private final FattVedtakVelger fattVedtakVelger;
     public static final int FRIST_KLAGE_UKER = 6;
+    private final EosVedtakService eosVedtakService;
 
     public VedtaksfattingFasade(BehandlingService behandlingService,
-                                EosVedtakService eosVedtakService,
-                                FtrlVedtakService ftrlVedtakService,
-                                TrygdeavtaleVedtakService trygdeavtaleVedtakService,
-                                ÅrsavregningVedtakService årsavregningVedtakService) {
+                                FattVedtakVelger fattVedtakVelger, EosVedtakService eosVedtakService) {
         this.behandlingService = behandlingService;
         this.eosVedtakService = eosVedtakService;
-        this.ftrlVedtakService = ftrlVedtakService;
-        this.trygdeavtaleVedtakService = trygdeavtaleVedtakService;
-        this.årsavregningVedtakService = årsavregningVedtakService;
+        this.fattVedtakVelger = fattVedtakVelger;
     }
 
     @Transactional(noRollbackFor = {ValideringException.class})
@@ -50,21 +41,11 @@ public class VedtaksfattingFasade {
 
         validerKanFattesVedtak(behandling);
 
-        Sakstyper sakstype = behandling.getFagsak().getType();
-
-        if (behandling.getType() == Behandlingstyper.ÅRSAVREGNING) {
-            årsavregningVedtakService.fattVedtak(behandling, fattVedtakRequest);
-            return;
-        }
-
-        switch (sakstype) {
-            case EU_EOS -> eosVedtakService.fattVedtak(behandling, fattVedtakRequest);
-            case FTRL -> ftrlVedtakService.fattVedtak(behandling, fattVedtakRequest);
-            case TRYGDEAVTALE -> trygdeavtaleVedtakService.fattVedtak(behandling, fattVedtakRequest);
-            default -> throw new FunksjonellException("Vedtaksfatting for sakstype " + sakstype + " er ikke støttet.");
-        }
+        FattVedtakInterface fattVedtakInterface = fattVedtakVelger.getFattVedtakService(behandling);
+        fattVedtakInterface.fattVedtak(behandling, fattVedtakRequest);
     }
 
+    // TODO sjekk om benyttes
     @Transactional(noRollbackFor = {ValideringException.class})
     public void endreVedtak(long behandlingID, Endretperiode endretperiode, String fritekst, String fritekstSed) {
         var behandling = behandlingService.hentBehandling(behandlingID);
