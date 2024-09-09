@@ -120,6 +120,7 @@ internal class ÅrsavregningModelControllerTest {
         )
         every { trygdeavgiftTotalBeregner.hentTotalInntekt(any()) } returns BigDecimal(42)
         every { trygdeavgiftTotalBeregner.hentTotalAvgift(any()) } returns BigDecimal(21170)
+        every { trygdeavgiftTotalBeregner.hentTotalInntektForInntektkilde(any()) } returns BigDecimal(24280)
 
 
         val expectedJson = """{
@@ -164,14 +165,16 @@ internal class ÅrsavregningModelControllerTest {
           "tomDato": "2023-07-31",
           "type": "ARBEIDSINNTEKT_FRA_NORGE",
           "arbeidsgiversavgiftBetales": true,
-          "avgiftspliktigInntektMnd": 40000
+          "avgiftspliktigInntektMnd": 40000,
+          "totalInntektForPerioden": 24280
         },
         {
           "fomDato": "2023-08-01",
           "tomDato": "2023-12-31",
           "type": "INNTEKT_FRA_UTLANDET",
           "arbeidsgiversavgiftBetales": false,
-          "avgiftspliktigInntektMnd": 15000
+          "avgiftspliktigInntektMnd": 15000,
+          "totalInntektForPerioden": 24280
         }
       ]
     },
