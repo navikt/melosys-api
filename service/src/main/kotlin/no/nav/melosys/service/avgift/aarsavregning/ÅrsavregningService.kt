@@ -97,7 +97,8 @@ class ÅrsavregningService(
         )
     }
 
-    private fun erFørstegangsÅrsavregning(behandlingID: Long) = aarsavregningRepository.finnAntallÅrsavregningerPåFagsak(behandlingID) == 0
+    private fun erFørstegangsÅrsavregning(behandlingID: Long) =
+        aarsavregningRepository.finnAntallFerdigbehandledeÅrsavregningerPåFagsak(behandlingID) == 0
 
     private fun replikerMedlemskapsperioder(
         behandlingsresultat: Behandlingsresultat,

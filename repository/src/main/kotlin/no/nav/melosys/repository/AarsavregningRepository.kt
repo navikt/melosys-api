@@ -9,7 +9,6 @@ interface AarsavregningRepository : JpaRepository<Årsavregning, Long> {
 
     fun findByBehandlingsresultatId(behandlingID: Long): Årsavregning?
 
-    // TODO fix behandlingsresultat ferdigbehandlet
     @Query(
         """
     SELECT COUNT(DISTINCT a.behandlingsresultat_id)
@@ -17,10 +16,11 @@ interface AarsavregningRepository : JpaRepository<Årsavregning, Long> {
     JOIN fagsak f ON b.saksnummer = f.saksnummer
     JOIN behandling b2 ON b2.saksnummer = f.saksnummer
     JOIN aarsavregning a ON b2.id = a.behandlingsresultat_id
+    JOIN behandlingsresultat br ON b2.id = br.behandling_id
     WHERE b.id = :behandlingId
       AND b2.beh_type = 'ÅRSAVREGNING'
-      AND b2.status != 'AVSLUTTET'
+      AND br.resultat_type = 'FERDIGBEHANDLET'
     """, nativeQuery = true
     )
-    fun finnAntallÅrsavregningerPåFagsak(@Param("behandlingId") behandlingId: Long): Int
+    fun finnAntallFerdigbehandledeÅrsavregningerPåFagsak(@Param("behandlingId") behandlingId: Long): Int
 }
