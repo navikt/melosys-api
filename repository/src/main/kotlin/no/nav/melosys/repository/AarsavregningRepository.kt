@@ -19,8 +19,9 @@ interface AarsavregningRepository : JpaRepository<Årsavregning, Long> {
     JOIN behandlingsresultat br ON b2.id = br.behandling_id
     WHERE b.id = :behandlingId
       AND b2.beh_type = 'ÅRSAVREGNING'
+      AND b2.id != :behandlingId
       AND br.resultat_type = 'FERDIGBEHANDLET'
     """, nativeQuery = true
     )
-    fun finnAntallFerdigbehandledeÅrsavregningerPåFagsak(@Param("behandlingId") behandlingId: Long): Int
+    fun finnAndreFerdigbehandledeÅrsavregningerPåFagsak(@Param("behandlingId") behandlingId: Long): Int
 }

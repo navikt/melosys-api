@@ -1,6 +1,5 @@
 package no.nav.melosys.service.avgift
 
-import io.kotest.assertions.throwables.shouldThrow
 import io.kotest.matchers.shouldBe
 import io.mockk.every
 import io.mockk.impl.annotations.RelaxedMockK
@@ -13,7 +12,6 @@ import no.nav.melosys.domain.avgift.*
 import no.nav.melosys.domain.kodeverk.*
 import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingsresultattyper
 import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingstyper
-import no.nav.melosys.exception.FunksjonellException
 import no.nav.melosys.repository.AarsavregningRepository
 import no.nav.melosys.service.avgift.aarsavregning.*
 import no.nav.melosys.service.behandling.BehandlingsresultatService
@@ -25,6 +23,8 @@ import org.junit.jupiter.api.extension.ExtendWith
 import java.math.BigDecimal
 import java.time.LocalDate
 import java.util.*
+import kotlin.test.assertFalse
+import kotlin.test.assertTrue
 
 @ExtendWith(MockKExtension::class)
 internal class ÅrsavregningServiceTest {
@@ -54,20 +54,54 @@ internal class ÅrsavregningServiceTest {
         SpringSubjectHandler.set(TestSubjectHandler())
     }
 
+    /* TODO?
+     fagsak = Fagsak(
+                "MEL-1",
+                123L,
+                Sakstyper.FTRL,
+                Sakstemaer.MEDLEMSKAP_LOVVALG,
+                Saksstatuser.OPPRETTET,
+                mutableSetOf(),
+                mutableListOf()
+            ).apply { }
+     */
     @Test
-    fun `opprettNyÅrsavregning kaster exception når flere Aarsavregninger eksisterer for samme år på samme Fagsak`() {
+    fun `opprettNyÅrsavregning setter førstegangsÅrsavregning til false når flere ferdigbehandlede Aarsavregninger eksisterer for samme år på samme Fagsak`() {
+        val årsavregningEntity1 = Årsavregning().apply {
+            aar = 2023
+            behandlingsresultat = Behandlingsresultat()
+        }
+        val eksisterendeBehandling = Behandling().apply {
+            id = 1L
+
+        }
+        every { aarsavregningRepository.findById(1L) }.returns(Optional.of(årsavregningEntity1))
+        every { aarsavregningRepository.finnAndreFerdigbehandledeÅrsavregningerPåFagsak(1) }.returns(2)
+        every { behandlingsresultatService.hentBehandlingsresultat(1L) }.returns(Behandlingsresultat().apply { behandling = eksisterendeBehandling })
+
+
+        val årsavregning = årsavregningService.opprettÅrsavregning(1, 2023)
+
+
+        assertFalse { årsavregning.erFørstegangsÅrsavregning }
+    }
+
+    @Test
+    fun `opprettNyÅrsavregning setter førstegangsÅrsavregning til true når vi ikke har andre ferdigbehandlede Aarsavregninger på samme Fagsak`() {
         val årsavregningEntity1 = Årsavregning().apply {
             aar = 2023
             behandlingsresultat = Behandlingsresultat()
         }
         val eksisterendeBehandling = Behandling().apply { id = 1L }
         every { aarsavregningRepository.findById(1L) }.returns(Optional.of(årsavregningEntity1))
-        every { aarsavregningRepository.finnAntallFerdigbehandledeÅrsavregningerPåFagsak(1) }.returns(1)
+        every { aarsavregningRepository.finnAndreFerdigbehandledeÅrsavregningerPåFagsak(1) }.returns(0)
         every { behandlingsresultatService.hentBehandlingsresultat(1L) }.returns(Behandlingsresultat().apply { behandling = eksisterendeBehandling })
 
-        shouldThrow<FunksjonellException> {
-            årsavregningService.opprettÅrsavregning(1, 2023)
-        }
+
+        val årsavregning = årsavregningService.opprettÅrsavregning(1, 2023)
+
+
+        assertTrue { årsavregning.erFørstegangsÅrsavregning }
     }
 
     @Test
@@ -93,7 +127,8 @@ internal class ÅrsavregningServiceTest {
             endeligAvgift = emptyList(),
             tidligereFakturertBeloep = null,
             nyttTotalbeloep = null,
-            tilFaktureringBeloep = null
+            tilFaktureringBeloep = null,
+            erFørstegangsÅrsavregning = true
         )
     }
 

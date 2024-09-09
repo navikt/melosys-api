@@ -28,7 +28,7 @@ class ÅrsavregningService(
 
         return ÅrsavregningModel.lagÅrsavregningModelFraÅrsavregning(
             aarsavregning,
-            hentTidligereTrygdeavgiftsgrunnlag(aarsavregning.aar, behandlingsresultat),
+            hentTidligereTrygdeavgiftsgrunnlag(aarsavregning.aar, aarsavregning.tidligereBehandlingsresultat),
             hentNyttTrygdeavgiftsgrunnlag(aarsavregning),
             erFørstegangsÅrsavregning(behandlingID)
         )
@@ -91,14 +91,14 @@ class ÅrsavregningService(
 
         return ÅrsavregningModel.lagÅrsavregningModelFraÅrsavregning(
             årsavregning,
-            hentTidligereTrygdeavgiftsgrunnlag(årsavregning.aar, behandlingsresultat),
+            hentTidligereTrygdeavgiftsgrunnlag(årsavregning.aar, årsavregning.tidligereBehandlingsresultat),
             hentNyttTrygdeavgiftsgrunnlag(årsavregning),
             erFørstegangsÅrsavregning(behandlingID)
         )
     }
 
     private fun erFørstegangsÅrsavregning(behandlingID: Long) =
-        aarsavregningRepository.finnAntallFerdigbehandledeÅrsavregningerPåFagsak(behandlingID) == 0
+        aarsavregningRepository.finnAndreFerdigbehandledeÅrsavregningerPåFagsak(behandlingID) == 0
 
     private fun replikerMedlemskapsperioder(
         behandlingsresultat: Behandlingsresultat,
