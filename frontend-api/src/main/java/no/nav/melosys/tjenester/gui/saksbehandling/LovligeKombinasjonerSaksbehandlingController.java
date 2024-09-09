@@ -89,6 +89,7 @@ public class LovligeKombinasjonerSaksbehandlingController {
         return ResponseEntity.ok(lovligeKombinasjonerSaksbehandlingService.hentMuligeBehandlingstyperForEndring(hovedpart, sakstype, sakstema, behandlingstema, saksnummer));
     }
 
+    // TODO fix bug with noe sak with åpen behandling
     @GetMapping("{saksnummer}/behandlingstyper/kombinasjoner-for-knytt-sak")
     @ApiOperation(value = "Henter alle mulige behandlingstyper basert på sakstype, sakstema og behandlingstema",
         notes = ("Henter alle mulige behandlingstyper basert på sakstype, sakstema og behandlingstema"))
