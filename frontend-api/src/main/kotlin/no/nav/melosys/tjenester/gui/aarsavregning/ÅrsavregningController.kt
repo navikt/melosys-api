@@ -95,6 +95,7 @@ class ÅrsavregningController(
                     it.avgiftspliktigInntektMnd.verdi,
                     it.fom,
                     it.tom,
+                    trygdeavgiftTotalBeregner.hentTotalInntektForInntektkilde(it)
                 )
             }.orEmpty()
         )

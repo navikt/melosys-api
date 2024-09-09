@@ -101,7 +101,7 @@ class TrygdeavgiftControllerTest {
         List<SkatteforholdTilNorgeDto> skatteforholdTilNorgeDtos = trygdeavgiftsperioder.stream().map(Trygdeavgiftsperiode::getGrunnlagSkatteforholdTilNorge)
             .map(SkatteforholdTilNorgeDto::new).collect(Collectors.toList());
         List<InntekskildeDto> inntekskildeDtos = trygdeavgiftsperioder.stream().map(Trygdeavgiftsperiode::getGrunnlagInntekstperiode)
-            .map(InntekskildeDto::new).collect(Collectors.toList());
+            .map((inntektsperiode) -> new InntekskildeDto(inntektsperiode, null)).collect(Collectors.toList());
 
         return new TrygdeavgiftsgrunnlagDto(skatteforholdTilNorgeDtos, inntekskildeDtos);
     }

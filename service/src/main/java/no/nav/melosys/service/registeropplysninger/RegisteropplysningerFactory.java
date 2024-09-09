@@ -39,6 +39,10 @@ public class RegisteropplysningerFactory {
             return hentSaksopplysningTyperForBehandlingAvSøknad();
         }
 
+        if (behandlingstype == Behandlingstyper.ÅRSAVREGNING) {
+            return hentSaksopplysningTyperForBehandlingAvÅrsavregning();
+        }
+
         return switch (behandlingstema) {
             case UTSENDT_ARBEIDSTAKER,
                 UTSENDT_SELVSTENDIG,
@@ -55,6 +59,15 @@ public class RegisteropplysningerFactory {
             default -> throw new TekniskException(
                 "Kan ikke utlede relevante saksopplysninger fra behandlingstema " + behandlingstema);
         };
+    }
+
+    private RegisteropplysningerRequest.SaksopplysningTyper hentSaksopplysningTyperForBehandlingAvÅrsavregning() {
+        return RegisteropplysningerRequest.SaksopplysningTyper.builder()
+            .arbeidsforholdopplysninger()
+            .inntektsopplysninger()
+            .medlemskapsopplysninger()
+            .organisasjonsopplysninger()
+            .build();
     }
 
     private RegisteropplysningerRequest.SaksopplysningTyper hentSaksopplysningTyperForBehandlingAvSøknad() {

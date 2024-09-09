@@ -1,6 +1,8 @@
 package no.nav.melosys.service.avgift.aarsavregning
 
+import no.nav.melosys.domain.avgift.Inntektsperiode
 import no.nav.melosys.domain.avgift.Trygdeavgiftsperiode
+import no.nav.melosys.domain.dokument.inntekt.Inntekt
 import no.nav.melosys.integrasjon.faktureringskomponenten.FaktureringskomponentenConsumer
 import no.nav.melosys.integrasjon.faktureringskomponenten.dto.BeregnTotalBeløpDto
 import no.nav.melosys.integrasjon.faktureringskomponenten.dto.FakturaseriePeriodeDto
@@ -39,6 +41,17 @@ class TrygdeavgiftTotalBeregner(
                 beskrivelse = "FIXME"
             )
         }
+        val saksbehandlerIdent = SubjectHandler.getInstance().getUserID() ?: ThreadLocalAccessInfo.getSaksbehandler()
+        return faktureringskomponentenConsumer.hentTotalTrygdeavgiftForPeriode(BeregnTotalBeløpDto(fakturaseriePerioder), saksbehandlerIdent)
+    }
+
+    fun hentTotalInntektForInntektkilde(inntektsperiode: Inntektsperiode): BigDecimal {
+        val fakturaseriePerioder = listOf(FakturaseriePeriodeDto(
+            startDato = inntektsperiode.fomDato,
+            sluttDato = inntektsperiode.tomDato,
+            enhetsprisPerManed = inntektsperiode.avgiftspliktigInntektMnd.verdi,
+            beskrivelse = "FIXME"
+        ))
         val saksbehandlerIdent = SubjectHandler.getInstance().getUserID() ?: ThreadLocalAccessInfo.getSaksbehandler()
         return faktureringskomponentenConsumer.hentTotalTrygdeavgiftForPeriode(BeregnTotalBeløpDto(fakturaseriePerioder), saksbehandlerIdent)
     }

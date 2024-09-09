@@ -12,7 +12,7 @@ data class TrygdeavgiftsgrunnlagDto(
         trygdeavgiftsperiode.map { SkatteforholdTilNorgeDto(it.grunnlagSkatteforholdTilNorge) }.distinct(),
         trygdeavgiftsperiode
             .filter { it.grunnlagInntekstperiode != null }
-            .map { InntekskildeDto(it.grunnlagInntekstperiode) }
+            .map { InntekskildeDto(it.grunnlagInntekstperiode, null) }
             .distinct()
     )
 

@@ -12,13 +12,15 @@ data class InntekskildeDto(
     val avgiftspliktigInntektMnd: BigDecimal?,
     val fomDato: LocalDate,
     val tomDato: LocalDate,
+    val totalInntektForPerioden: BigDecimal?,
 ) {
-    constructor(inntektsperiode: Inntektsperiode) : this(
+    constructor(inntektsperiode: Inntektsperiode, totalInntektForPerioden: BigDecimal?) : this(
         inntektsperiode.type,
         inntektsperiode.isArbeidsgiversavgiftBetalesTilSkatt,
         inntektsperiode.avgiftspliktigInntektMnd?.verdi,
         inntektsperiode.fomDato,
-        inntektsperiode.tomDato
+        inntektsperiode.tomDato,
+        totalInntektForPerioden,
     )
 
     fun tilRequest(): InntektskildeRequest =
