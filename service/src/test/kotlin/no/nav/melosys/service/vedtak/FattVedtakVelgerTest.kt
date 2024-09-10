@@ -1,5 +1,6 @@
 package no.nav.melosys.service.vedtak
 
+import io.mockk.mockk
 import no.nav.melosys.domain.Behandling
 import no.nav.melosys.domain.Fagsak
 import no.nav.melosys.domain.kodeverk.Saksstatuser
@@ -9,16 +10,15 @@ import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingstyper
 import org.junit.jupiter.params.ParameterizedTest
 import org.junit.jupiter.params.provider.Arguments
 import org.junit.jupiter.params.provider.MethodSource
-import org.mockito.Mockito
 import org.springframework.util.Assert
 import java.util.stream.Stream
 
 internal class FattVedtakVelgerTest {
-    var fattVedtakVelger: FattVedtakVelger = FattVedtakVelger(
-        Mockito.mock(EosVedtakService::class.java),
-        Mockito.mock(FtrlVedtakService::class.java),
-        Mockito.mock(TrygdeavtaleVedtakService::class.java),
-        Mockito.mock(ÅrsavregningVedtakService::class.java)
+    val fattVedtakVelger: FattVedtakVelger = FattVedtakVelger(
+        mockk<EosVedtakService>(),
+        mockk<FtrlVedtakService>(),
+        mockk<TrygdeavtaleVedtakService>(),
+        mockk<ÅrsavregningVedtakService>()
     )
 
     @ParameterizedTest
