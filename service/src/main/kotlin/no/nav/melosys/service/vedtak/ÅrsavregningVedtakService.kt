@@ -46,10 +46,9 @@ class ÅrsavregningVedtakService(
     }
 
     private fun valider(behandling: Behandling) {
-        when {
-            behandling.type != Behandlingstyper.ÅRSAVREGNING -> throw FunksjonellException("Kan kun fatte vedtak for Behandlingstype: Årsavregning")
+        if (behandling.type != Behandlingstyper.ÅRSAVREGNING) {
+            throw FunksjonellException("Kan kun fatte vedtak for Behandlingstype: Årsavregning")
         }
-
     }
 
     private fun lagVedtaksbrev(request: FattVedtakRequest): BrevbestillingDto =
