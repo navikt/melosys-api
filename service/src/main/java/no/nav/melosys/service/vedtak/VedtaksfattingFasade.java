@@ -36,7 +36,6 @@ public class VedtaksfattingFasade {
         fattVedtakInterface.fattVedtak(behandling, fattVedtakRequest);
     }
 
-    // TODO sjekk om benyttes
     @Transactional(noRollbackFor = {ValideringException.class})
     public void endreVedtak(long behandlingID, Endretperiode endretperiode, String fritekst, String fritekstSed) {
         var behandling = behandlingService.hentBehandling(behandlingID);
