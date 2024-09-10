@@ -41,7 +41,7 @@ class ÅrsavregningVedtakService(
         oppdaterBehandlingsresultat(behandlingID, request)
         behandlingService.endreStatus(behandling, Behandlingsstatus.IVERKSETTER_VEDTAK)
         prosessinstansService.opprettProsessinstansIverksettVedtakÅrsavregning(behandling)
-        dokgenService.produserOgDistribuerBrev(behandlingID, lagVedtaksbrev(request))
+        dokgenService.produserOgDistribuerBrev(behandlingID, lagBrevbestilling(request))
         oppgaveService.ferdigstillOppgaveMedBehandlingID(behandling.id)
     }
 
@@ -51,7 +51,7 @@ class ÅrsavregningVedtakService(
         }
     }
 
-    private fun lagVedtaksbrev(request: FattVedtakRequest): BrevbestillingDto =
+    private fun lagBrevbestilling(request: FattVedtakRequest): BrevbestillingDto =
         BrevbestillingDto().apply {
             produserbardokument = Produserbaredokumenter.AARSAVREGNING_VEDTAKSBREV
             mottaker = Mottakerroller.BRUKER
