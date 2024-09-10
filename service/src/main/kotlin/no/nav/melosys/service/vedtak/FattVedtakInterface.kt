@@ -1,7 +1,7 @@
-package no.nav.melosys.service.vedtak;
+package no.nav.melosys.service.vedtak
 
-import no.nav.melosys.domain.Behandling;
+import no.nav.melosys.domain.Behandling
 
-public interface FattVedtakInterface {
-    void fattVedtak(Behandling behandling, FattVedtakRequest fattVedtakRequest);
+interface FattVedtakInterface {
+    fun fattVedtak(behandling: Behandling?, fattVedtakRequest: FattVedtakRequest?)
 }
