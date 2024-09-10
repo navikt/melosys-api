@@ -85,9 +85,18 @@ class VedtaksfattingFasadeTest {
     void fattVedtak_delvisAutomatisert_skalKalleEosVedtakSystemService() {
         when(mockBehandlingService.hentBehandling(behandlingID)).thenReturn(behandling);
 
-        vedtaksfattingFasade.fattVedtak(behandlingID, FASTSATT_LOVVALGSLAND);
+        FattVedtakRequest request = new FattVedtakRequest.Builder()
+            .medBehandlingsresultatType(FASTSATT_LOVVALGSLAND)
+            .medVedtakstype(FØRSTEGANGSVEDTAK).build();
 
-        verify(mockEosVedtakService).fattVedtak(behandling, FASTSATT_LOVVALGSLAND, FØRSTEGANGSVEDTAK);
+
+        vedtaksfattingFasade.fattVedtak(behandlingID, request);
+
+
+        verify(mockEosVedtakService).fattVedtak(argThat(behandling1 ->
+            behandling1.getId() == behandlingID), argThat(fattVedtakRequest ->
+            fattVedtakRequest.getVedtakstype() == FØRSTEGANGSVEDTAK
+                && fattVedtakRequest.getBehandlingsresultatTypeKode() == FASTSATT_LOVVALGSLAND));
         verifyNoInteractions(mockFtrlVedtakService);
     }
 
