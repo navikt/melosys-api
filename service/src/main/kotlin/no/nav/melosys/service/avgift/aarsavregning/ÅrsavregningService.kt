@@ -156,6 +156,19 @@ class ÅrsavregningService(
         )
     }
 
+    @Transactional
+    fun oppdaterTotalbelop(behandlingID: Long, tidligereFakturertBeloep: BigDecimal?, nyttTotalbeloep: BigDecimal?): ÅrsavregningModel {
+        val behandlingsresultat = behandlingsresultatService.hentBehandlingsresultat(behandlingID)
+
+        val aarsavregning =
+            behandlingsresultat.årsavregning ?: throw RuntimeException("Det eksisterer ikke årsavregning for behandling med id: $behandlingID")
+        if (tidligereFakturertBeloep != null) aarsavregning.tidligereFakturertBeloep = tidligereFakturertBeloep
+        if (nyttTotalbeloep != null) aarsavregning.nyttTotalbeloep = nyttTotalbeloep
+        aarsavregning.beregnTilFaktureringsBeloep()
+
+        return lagÅrsavregningModelFraÅrsavregning(aarsavregning)
+    }
+
     companion object {
         private val antall_år_tilbake_i_tid = 7  //Fjoråret - 6 år
     }

@@ -30,12 +30,11 @@ class OrienteringTilArbeidsgiverOmVedtakMapper(
         val alleAvklarteOrgnr = avklartefaktaService.hentAvklarteOrgnrOgUuid(behandlingsresultat.id)
         val alleVirksomheter = virksomheterService.hentAlleNorskeVirksomheter(behandlingsresultat.behandling)
 
-        val navnVirksomhet = alleVirksomheter.stream()
+        val virksomhet = alleVirksomheter.stream()
             .filter { alleAvklarteOrgnr.contains(it.orgnr) }
-            .findFirst().get().navn
+            .findFirst().get()
+
         val vilkaarResultat = vilkaarsresultatService.finnVilkaarsresultat(behandlingID, Vilkaar.VESENTLIG_VIRKSOMHET)
-
-
 
         val erInnvilgelse = brevbestilling.erInnvilgelse || behandlingsresultat.erInnvilgelse()
         var erVesentligVirksomhetOppfyllt = false
@@ -53,7 +52,7 @@ class OrienteringTilArbeidsgiverOmVedtakMapper(
             arbeidsland,
             erInnvilgelse,
             erVesentligVirksomhetOppfyllt,
-            navnVirksomhet,
+            virksomhet.navn,
             vesentligVirksomhetBegrunnelser
         )
     }
