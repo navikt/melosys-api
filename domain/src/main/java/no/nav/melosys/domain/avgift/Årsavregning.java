@@ -102,8 +102,8 @@ public class Årsavregning {
         return Objects.hash(id, aar, tidligereFakturertBeloep, nyttTotalbeloep, tilFaktureringBeloep);
     }
 
-    public void beregnTilFaktureringsBeloep(){
-        if(tidligereFakturertBeloep != null && nyttTotalbeloep != null){
+    public void beregnTilFaktureringsBeloep() {
+        if (tidligereFakturertBeloep != null && nyttTotalbeloep != null) {
             tilFaktureringBeloep = nyttTotalbeloep.subtract(tidligereFakturertBeloep);
         }
     }

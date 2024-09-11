@@ -48,16 +48,6 @@ class ÅrsavregningService(
             throw FunksjonellException("Året $gjelderÅr er allerede lagret på denne årsavregningen")
         }
 
-        /*
-                if (aarsavregningRepository.finnAntallÅrsavregningerPåFagsakForÅr(behandlingID, gjelderÅr) != 0) {
-                    throw FunksjonellException(
-                        "Det finnes en annen åpen årsavregningsbehandling for samme år på saken. " +
-                            "Vurder hvilke behandling du vil fortsette med og avslutt den uaktuelle behandlingen via behandlingsmeny."
-                    )
-                }
-
-         */
-
         if (gjelderÅr < LocalDate.now().year - MAX_ANTALL_ÅR_TILBAKE_I_TID) {
             throw FunksjonellException("Årsavregning kan ikke opprettes for år eldre enn 6 år før inneværende år.")
         }
@@ -94,6 +84,24 @@ class ÅrsavregningService(
             årsavregning,
             hentTidligereTrygdeavgiftsgrunnlag(årsavregning.aar, årsavregning.tidligereBehandlingsresultat),
             hentNyttTrygdeavgiftsgrunnlag(årsavregning),
+            erFørstegangsÅrsavregning(behandlingID)
+        )
+    }
+
+    @Transactional
+    fun oppdaterTotalbelop(behandlingID: Long, tidligereFakturertBeloep: BigDecimal?, nyttTotalbeloep: BigDecimal?): ÅrsavregningModel {
+        val behandlingsresultat = behandlingsresultatService.hentBehandlingsresultat(behandlingID)
+
+        val aarsavregning =
+            behandlingsresultat.årsavregning ?: throw RuntimeException("Det eksisterer ikke årsavregning for behandling med id: $behandlingID")
+        if (tidligereFakturertBeloep != null) aarsavregning.tidligereFakturertBeloep = tidligereFakturertBeloep
+        if (nyttTotalbeloep != null) aarsavregning.nyttTotalbeloep = nyttTotalbeloep
+        aarsavregning.beregnTilFaktureringsBeloep()
+
+        return ÅrsavregningModel.lagÅrsavregningModelFraÅrsavregning(
+            aarsavregning,
+            hentTidligereTrygdeavgiftsgrunnlag(aarsavregning.aar, aarsavregning.tidligereBehandlingsresultat),
+            hentNyttTrygdeavgiftsgrunnlag(aarsavregning),
             erFørstegangsÅrsavregning(behandlingID)
         )
     }
@@ -150,17 +158,5 @@ class ÅrsavregningService(
             skatteforholdsperioder = behandlingsresultat.hentSkatteforholdTilNorge().toList(),
             innteksperioder = behandlingsresultat.hentInntektsperioder().toList()
         )
-    }
-    @Transactional
-    fun oppdaterTotalbelop(behandlingID: Long, tidligereFakturertBeloep: BigDecimal?, nyttTotalbeloep: BigDecimal?): ÅrsavregningModel {
-        val behandlingsresultat = behandlingsresultatService.hentBehandlingsresultat(behandlingID)
-
-        val aarsavregning =
-            behandlingsresultat.årsavregning ?: throw RuntimeException("Det eksisterer ikke årsavregning for behandling med id: $behandlingID")
-        if (tidligereFakturertBeloep != null) aarsavregning.tidligereFakturertBeloep = tidligereFakturertBeloep
-        if (nyttTotalbeloep != null) aarsavregning.nyttTotalbeloep = nyttTotalbeloep
-        aarsavregning.beregnTilFaktureringsBeloep()
-
-        return lagÅrsavregningModelFraÅrsavregning(aarsavregning)
     }
 }
