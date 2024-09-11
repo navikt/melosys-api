@@ -4,10 +4,7 @@ import io.kotest.matchers.shouldBe
 import io.mockk.every
 import io.mockk.impl.annotations.RelaxedMockK
 import io.mockk.junit5.MockKExtension
-import no.nav.melosys.domain.Behandling
-import no.nav.melosys.domain.Behandlingsresultat
-import no.nav.melosys.domain.Medlemskapsperiode
-import no.nav.melosys.domain.VedtakMetadata
+import no.nav.melosys.domain.*
 import no.nav.melosys.domain.avgift.*
 import no.nav.melosys.domain.kodeverk.*
 import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingsresultattyper
@@ -54,17 +51,6 @@ internal class ÅrsavregningServiceTest {
         SpringSubjectHandler.set(TestSubjectHandler())
     }
 
-    /* TODO?
-     fagsak = Fagsak(
-                "MEL-1",
-                123L,
-                Sakstyper.FTRL,
-                Sakstemaer.MEDLEMSKAP_LOVVALG,
-                Saksstatuser.OPPRETTET,
-                mutableSetOf(),
-                mutableListOf()
-            ).apply { }
-     */
     @Test
     fun `opprettNyÅrsavregning setter førstegangsÅrsavregning til false når flere ferdigbehandlede Aarsavregninger eksisterer for samme år på samme Fagsak`() {
         val årsavregningEntity1 = Årsavregning().apply {
@@ -73,8 +59,18 @@ internal class ÅrsavregningServiceTest {
         }
         val eksisterendeBehandling = Behandling().apply {
             id = 1L
-
+            fagsak = Fagsak(
+                "MEL-1",
+                123L,
+                Sakstyper.FTRL,
+                Sakstemaer.MEDLEMSKAP_LOVVALG,
+                Saksstatuser.OPPRETTET,
+                mutableSetOf(),
+                mutableListOf()
+            )
         }
+
+        every { trygdeavgiftService.finnSistFakturerbarTrygdeavgiftsbehandlingForÅr("MEL-1", 2023) }.returns(null)
         every { aarsavregningRepository.findById(1L) }.returns(Optional.of(årsavregningEntity1))
         every { aarsavregningRepository.finnAndreFerdigbehandledeÅrsavregningerPåFagsak(1) }.returns(2)
         every { behandlingsresultatService.hentBehandlingsresultat(1L) }.returns(Behandlingsresultat().apply { behandling = eksisterendeBehandling })
@@ -92,7 +88,20 @@ internal class ÅrsavregningServiceTest {
             aar = 2023
             behandlingsresultat = Behandlingsresultat()
         }
-        val eksisterendeBehandling = Behandling().apply { id = 1L }
+        val eksisterendeBehandling = Behandling().apply {
+            id = 1L
+            fagsak = Fagsak(
+                "MEL-1",
+                123L,
+                Sakstyper.FTRL,
+                Sakstemaer.MEDLEMSKAP_LOVVALG,
+                Saksstatuser.OPPRETTET,
+                mutableSetOf(),
+                mutableListOf()
+            )
+        }
+
+        every { trygdeavgiftService.finnSistFakturerbarTrygdeavgiftsbehandlingForÅr("MEL-1", 2023) }.returns(null)
         every { aarsavregningRepository.findById(1L) }.returns(Optional.of(årsavregningEntity1))
         every { aarsavregningRepository.finnAndreFerdigbehandledeÅrsavregningerPåFagsak(1) }.returns(0)
         every { behandlingsresultatService.hentBehandlingsresultat(1L) }.returns(Behandlingsresultat().apply { behandling = eksisterendeBehandling })
