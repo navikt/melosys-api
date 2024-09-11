@@ -5,14 +5,14 @@ import no.nav.melosys.service.avgift.dto.OppdaterTrygdeavgiftsgrunnlagRequest
 
 data class TrygdeavgiftsgrunnlagDto(
     val skatteforholdsperioder: List<SkatteforholdTilNorgeDto>,
-    val inntektskilder: List<InntekskildeDto>
+    val inntektskilder: List<InntektskildeDto>
 ) {
 
     constructor(trygdeavgiftsperiode: Set<Trygdeavgiftsperiode>) : this(
         trygdeavgiftsperiode.map { SkatteforholdTilNorgeDto(it.grunnlagSkatteforholdTilNorge) }.distinct(),
         trygdeavgiftsperiode
             .filter { it.grunnlagInntekstperiode != null }
-            .map { InntekskildeDto(it.grunnlagInntekstperiode, null) }
+            .map { InntektskildeDto(it.grunnlagInntekstperiode) }
             .distinct()
     )
 

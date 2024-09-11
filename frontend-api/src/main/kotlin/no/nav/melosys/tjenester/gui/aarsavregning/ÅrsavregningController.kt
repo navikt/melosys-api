@@ -6,11 +6,11 @@ import no.nav.melosys.domain.kodeverk.Inntektskildetype
 import no.nav.melosys.domain.kodeverk.InnvilgelsesResultat
 import no.nav.melosys.domain.kodeverk.Skatteplikttype
 import no.nav.melosys.domain.kodeverk.Trygdedekninger
-import no.nav.melosys.service.avgift.aarsavregning.TrygdeavgiftTotalBeregner
+import no.nav.melosys.service.avgift.aarsavregning.TotalBeløpBeregner
 import no.nav.melosys.service.avgift.aarsavregning.Trygdeavgiftsgrunnlag
 import no.nav.melosys.service.avgift.aarsavregning.ÅrsavregningModel
 import no.nav.melosys.service.avgift.aarsavregning.ÅrsavregningService
-import no.nav.melosys.tjenester.gui.dto.trygdeavgift.InntekskildeDto
+import no.nav.melosys.tjenester.gui.dto.trygdeavgift.InntektskildeDto
 import no.nav.melosys.tjenester.gui.dto.trygdeavgift.SkatteforholdTilNorgeDto
 import no.nav.melosys.tjenester.gui.ftrl.medlemskapsperiode.dto.MedlemskapsperiodeDto
 import no.nav.security.token.support.core.api.Protected
@@ -25,7 +25,7 @@ import java.time.LocalDate
 @RequestMapping("/aarsavregninger")
 class ÅrsavregningController(
     private val årsavregningService: ÅrsavregningService,
-    private val trygdeavgiftTotalBeregner: TrygdeavgiftTotalBeregner
+    private val totalBeløpBeregner: TotalBeløpBeregner
 ) {
 
     @GetMapping("/{behandlingID}")
@@ -89,13 +89,13 @@ class ÅrsavregningController(
                 )
             }.orEmpty(),
             inntektskperioder = trygdeavgiftsgrunnlag?.innteksperioder?.map {
-                InntekskildeDto(
+                InntektskildeDto(
                     it.type,
                     it.isArbeidsgiversavgiftBetalesTilSkatt,
                     it.avgiftspliktigInntektMnd.verdi,
                     it.fom,
                     it.tom,
-                    trygdeavgiftTotalBeregner.hentTotalInntektForInntektkilde(it)
+                    totalBeløpBeregner.hentTotalInntektForInntektkilde(it)
                 )
             }.orEmpty()
         )
@@ -120,8 +120,8 @@ class ÅrsavregningController(
                             avgiftPerMd = it.trygdeavgiftsbeløpMd.verdi.intValueExact()
                         )
                     },
-                    totalInntekt = trygdeavgiftTotalBeregner.hentTotalInntekt(trygdeavgiftsperioder),
-                    totalAvgift = trygdeavgiftTotalBeregner.hentTotalAvgift(trygdeavgiftsperioder) ?: BigDecimal.ZERO
+                    totalInntekt = totalBeløpBeregner.hentTotalInntekt(trygdeavgiftsperioder),
+                    totalAvgift = totalBeløpBeregner.hentTotalAvgift(trygdeavgiftsperioder) ?: BigDecimal.ZERO
                 )
             )
     }
@@ -159,7 +159,7 @@ data class GrunnlagsOpplysningerDto(
 data class TrygdeavgiftsgrunnlagDto(
     val medlemskapsperioder: List<MedlemskapsperiodeDto>,
     val skatteforholdsperioder: List<SkatteforholdTilNorgeDto>,
-    val inntektskperioder: List<InntekskildeDto>,
+    val inntektskperioder: List<InntektskildeDto>,
 )
 
 data class AvgiftDto(

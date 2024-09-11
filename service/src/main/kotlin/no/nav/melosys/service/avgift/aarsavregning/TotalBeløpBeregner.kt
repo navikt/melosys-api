@@ -2,7 +2,6 @@ package no.nav.melosys.service.avgift.aarsavregning
 
 import no.nav.melosys.domain.avgift.Inntektsperiode
 import no.nav.melosys.domain.avgift.Trygdeavgiftsperiode
-import no.nav.melosys.domain.dokument.inntekt.Inntekt
 import no.nav.melosys.integrasjon.faktureringskomponenten.FaktureringskomponentenConsumer
 import no.nav.melosys.integrasjon.faktureringskomponenten.dto.BeregnTotalBeløpDto
 import no.nav.melosys.integrasjon.faktureringskomponenten.dto.FakturaseriePeriodeDto
@@ -12,7 +11,7 @@ import org.springframework.stereotype.Component
 import java.math.BigDecimal
 
 @Component
-class TrygdeavgiftTotalBeregner(
+class TotalBeløpBeregner(
     private val faktureringskomponentenConsumer: FaktureringskomponentenConsumer,
 ) {
 

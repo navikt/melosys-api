@@ -6,7 +6,7 @@ import no.nav.melosys.service.avgift.dto.InntektskildeRequest
 import java.math.BigDecimal
 import java.time.LocalDate
 
-data class InntekskildeDto(
+data class InntektskildeDto(
     val type: Inntektskildetype,
     val arbeidsgiversavgiftBetales: Boolean,
     val avgiftspliktigInntektMnd: BigDecimal?,
@@ -21,6 +21,10 @@ data class InntekskildeDto(
         inntektsperiode.fomDato,
         inntektsperiode.tomDato,
         totalInntektForPerioden,
+    )
+
+    constructor(inntektsperiode: Inntektsperiode) : this(
+        inntektsperiode, null
     )
 
     fun tilRequest(): InntektskildeRequest =
