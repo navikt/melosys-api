@@ -39,7 +39,7 @@ import static no.nav.melosys.domain.kodeverk.Utfallregistreringunntak.GODKJENT;
 import static no.nav.melosys.service.vedtak.VedtaksfattingFasade.FRIST_KLAGE_UKER;
 
 @Service
-public class EosVedtakService {
+public class EosVedtakService implements FattVedtakInterface {
     private static final Logger log = LoggerFactory.getLogger(EosVedtakService.class);
 
     private final BehandlingService behandlingService;
@@ -78,6 +78,7 @@ public class EosVedtakService {
         fattVedtak(behandling, request);
     }
 
+    @Override
     public void fattVedtak(Behandling behandling, FattVedtakRequest request) throws ValideringException {
         long behandlingID = behandling.getId();
 
@@ -121,6 +122,7 @@ public class EosVedtakService {
 
         oppgaveService.ferdigstillOppgaveMedBehandlingID(behandling.getId());
     }
+
     public void endreVedtaksperiode(Behandling behandling, Endretperiode endretperiode, String fritekst, String fritekstSed) {
         final long behandlingID = behandling.getId();
         var behandlingsresultat = behandlingsresultatService.hentBehandlingsresultat(behandlingID);

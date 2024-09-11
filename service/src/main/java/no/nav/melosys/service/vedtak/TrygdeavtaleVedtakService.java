@@ -33,7 +33,7 @@ import org.springframework.stereotype.Service;
 import static no.nav.melosys.service.vedtak.VedtaksfattingFasade.FRIST_KLAGE_UKER;
 
 @Service
-public class TrygdeavtaleVedtakService {
+public class TrygdeavtaleVedtakService implements FattVedtakInterface {
     private static final Logger log = LoggerFactory.getLogger(TrygdeavtaleVedtakService.class);
 
     private final BehandlingsresultatService behandlingsresultatService;
@@ -61,6 +61,7 @@ public class TrygdeavtaleVedtakService {
         this.saksbehandlingRegler = saksbehandlingRegler;
     }
 
+    @Override
     public void fattVedtak(Behandling behandling, FattVedtakRequest request) throws ValideringException {
         long behandlingID = behandling.getId();
 
@@ -90,7 +91,7 @@ public class TrygdeavtaleVedtakService {
 
         behandlingService.endreStatus(behandling, Behandlingsstatus.IVERKSETTER_VEDTAK);
 
-        if(saksbehandlingRegler.harIkkeYrkesaktivFlyt(behandling)) {
+        if (saksbehandlingRegler.harIkkeYrkesaktivFlyt(behandling)) {
             behandlingsresultat.setFastsattAvLand(Land_iso2.NO);
             prosessinstansService.opprettProsessinstansIverksettIkkeYrkesaktiv(behandling);
         } else {

@@ -143,6 +143,36 @@ internal class ÅrsavregningServiceTest {
         )
     }
 
+    @Test
+    fun `tilFaktureringBeloep skal ikke settes hvis tidligere eller ny avgift er null`() {
+        val behandlingsresultat = Behandlingsresultat().apply resultat@{
+            behandling = Behandling()
+            årsavregning = Årsavregning().apply {
+                aar = 2023
+                behandlingsresultat = this@resultat
+            }
+        }
+        every { behandlingsresultatService.hentBehandlingsresultat(1L) }.returns(behandlingsresultat)
+
+        årsavregningService.oppdaterTotalbelop(1L, null, BigDecimal.ONE)
+        behandlingsresultat.årsavregning.tilFaktureringBeloep shouldBe null
+    }
+
+    @Test
+    fun `tilFaktureringBeloep skal settes til diff mellom nytt totalbeloep og tidligere fakturert beloep`() {
+        val behandlingsresultat = Behandlingsresultat().apply resultat@{
+            behandling = Behandling()
+            årsavregning = Årsavregning().apply {
+                aar = 2023
+                behandlingsresultat = this@resultat
+            }
+        }
+        every { behandlingsresultatService.hentBehandlingsresultat(1L) }.returns(behandlingsresultat)
+
+        årsavregningService.oppdaterTotalbelop(1L, BigDecimal.valueOf(12.4), BigDecimal.valueOf(5.2))
+        behandlingsresultat.årsavregning.tilFaktureringBeloep shouldBe BigDecimal.valueOf(-7.2)
+    }
+
     fun lagTidligereBehandlingsresultat(): Behandlingsresultat = Behandlingsresultat().apply {
         id = 1L
         type = Behandlingsresultattyper.FERDIGBEHANDLET
