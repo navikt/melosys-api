@@ -13,6 +13,7 @@ import no.nav.melosys.domain.eessi.SvarAnmodningUnntak;
 import no.nav.melosys.domain.eessi.melding.MelosysEessiMelding;
 import no.nav.melosys.domain.kodeverk.Anmodningsperiodesvartyper;
 import no.nav.melosys.domain.kodeverk.Medlemskapstyper;
+import no.nav.melosys.domain.kodeverk.Vedtakstyper;
 import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingsresultattyper;
 import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingsstatus;
 import no.nav.melosys.exception.TekniskException;
@@ -28,6 +29,7 @@ import no.nav.melosys.service.behandling.BehandlingsresultatService;
 import no.nav.melosys.service.kontroll.feature.ferdigbehandling.FerdigbehandlingKontrollFacade;
 import no.nav.melosys.service.unntak.AnmodningsperiodeService;
 import no.nav.melosys.service.validering.Kontrollfeil;
+import no.nav.melosys.service.vedtak.FattVedtakRequest;
 import no.nav.melosys.service.vedtak.VedtaksfattingFasade;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -113,7 +115,12 @@ public class BestemBehandlingsmåteSvarAnmodningUnntak implements StegBehandler 
 
     private void fattVedtak(long behandlingID) {
         try {
-            vedtaksfattingFasade.fattVedtak(behandlingID, Behandlingsresultattyper.FASTSATT_LOVVALGSLAND);
+            FattVedtakRequest request = new FattVedtakRequest.Builder()
+                .medBehandlingsresultatType(Behandlingsresultattyper.FASTSATT_LOVVALGSLAND)
+                .medVedtakstype(Vedtakstyper.FØRSTEGANGSVEDTAK)
+                .build();
+
+            vedtaksfattingFasade.fattVedtak(behandlingID, request);
             behandlingsresultatService.oppdaterBehandlingsMaate(behandlingID, Behandlingsmaate.DELVIS_AUTOMATISERT);
         } catch (ValideringException e) {
             log.info("Kan ikke fatte vedtak automatisk pga. treff i vedtakkontroller: {}. Endrer behandlingsstatus til {}",

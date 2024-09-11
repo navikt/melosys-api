@@ -1,10 +1,12 @@
 package no.nav.melosys.saksflyt.steg.behandling;
 
-import java.util.Collections;
 import java.util.Set;
 
 import no.nav.melosys.domain.*;
-import no.nav.melosys.domain.kodeverk.*;
+import no.nav.melosys.domain.kodeverk.InnvilgelsesResultat;
+import no.nav.melosys.domain.kodeverk.Land_iso2;
+import no.nav.melosys.domain.kodeverk.Saksstatuser;
+import no.nav.melosys.domain.kodeverk.Sakstemaer;
 import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingsresultattyper;
 import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingsstatus;
 import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingstema;
@@ -117,5 +119,35 @@ class AvsluttFagsakOgBehandlingTest {
         avsluttFagsakOgBehandling.utfør(prosessinstans);
 
         verify(fagsakService).avsluttFagsakOgBehandling(fagsak, Saksstatuser.AVSLUTTET);
+    }
+
+    @Test
+    void utfør_fattIverksettVedtakÅrsavregningProsess_MedFlereEnnEnBehandlingAvslutterKunBehandling() {
+        prosessinstans.setType(ProsessType.IVERKSETT_VEDTAK_AARSAVREGNING);
+
+        var behandling2 = new Behandling();
+        behandling2.setId(1234L);
+        fagsak.getBehandlinger().add(behandling2);
+
+        when(fagsakService.hentFagsak(FagsakTestFactory.SAKSNUMMER)).thenReturn(fagsak);
+
+
+        avsluttFagsakOgBehandling.utfør(prosessinstans);
+
+
+        verify(behandlingService).avsluttBehandling(behandling.getId());
+    }
+
+    @Test
+    void utfør_fattIverksettVedtakÅrsavregningProsess_MedKunEnBehandlingAvslutterKunSakOgBehandling() {
+        prosessinstans.setType(ProsessType.IVERKSETT_VEDTAK_AARSAVREGNING);
+
+        when(fagsakService.hentFagsak(FagsakTestFactory.SAKSNUMMER)).thenReturn(fagsak);
+
+
+        avsluttFagsakOgBehandling.utfør(prosessinstans);
+
+
+        verify(fagsakService).avsluttFagsakOgBehandling(fagsak, behandling, Saksstatuser.AVSLUTTET);
     }
 }

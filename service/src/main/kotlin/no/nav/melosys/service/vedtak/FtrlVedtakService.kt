@@ -6,7 +6,6 @@ import no.nav.melosys.domain.kodeverk.*
 import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingsresultattyper
 import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingsstatus
 import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingstema
-import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingstyper
 import no.nav.melosys.domain.kodeverk.brev.Produserbaredokumenter
 import no.nav.melosys.exception.FunksjonellException
 import no.nav.melosys.saksflytapi.ProsessinstansService
@@ -28,10 +27,10 @@ class FtrlVedtakService(
     val oppgaveService: OppgaveService,
     val dokgenService: DokgenService,
     val vilkaarsresultatService: VilkaarsresultatService
-) {
+) : FattVedtakInterface {
     private val log = LoggerFactory.getLogger(FtrlVedtakService::class.java)
 
-    fun fattVedtak(behandling: Behandling, request: FattVedtakRequest) {
+    override fun fattVedtak(behandling: Behandling, request: FattVedtakRequest) {
         val behandlingID = behandling.id
         log.info("Fatter vedtak for (FTRL) sak: ${behandling.fagsak.saksnummer} behandling: $behandlingID")
 
@@ -72,9 +71,6 @@ class FtrlVedtakService(
         val medlemskapstype = behandlingsresultat.medlemskapsperioder?.firstOrNull()?.medlemskapstype
 
         return when {
-            behandlingstema.erYrkesaktiv() && behandling.type.equals(Behandlingstyper.ÅRSAVREGNING) ->
-                lagBrevbestillingAarsavregning(request, Produserbaredokumenter.AARSAVREGNING_VEDTAKSBREV)
-
             behandlingstema.erIkkeYrkesaktiv() && medlemskapstype.erPliktig() ->
                 lagBrevbestillingUtenFritekster(request, Produserbaredokumenter.IKKE_YRKESAKTIV_PLIKTIG_FTRL)
 
