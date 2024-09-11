@@ -1,5 +1,6 @@
 package no.nav.melosys.service.vedtak
 
+import io.kotest.matchers.shouldBe
 import io.mockk.mockk
 import no.nav.melosys.domain.Behandling
 import no.nav.melosys.domain.Fagsak
@@ -10,7 +11,6 @@ import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingstyper
 import org.junit.jupiter.params.ParameterizedTest
 import org.junit.jupiter.params.provider.Arguments
 import org.junit.jupiter.params.provider.MethodSource
-import org.springframework.util.Assert
 import java.util.stream.Stream
 
 internal class FattVedtakVelgerTest {
@@ -45,8 +45,7 @@ internal class FattVedtakVelgerTest {
         val fattVedtakService = fattVedtakVelger.getFattVedtakService(behandling)
 
 
-        val erForventetImplementasjon = fattVedtakService.javaClass == fattVedtakServiceImplementasjon
-        Assert.isTrue(erForventetImplementasjon, "implementasjon skal være $fattVedtakServiceImplementasjon")
+        fattVedtakService.javaClass shouldBe fattVedtakServiceImplementasjon
     }
 
     companion object {
