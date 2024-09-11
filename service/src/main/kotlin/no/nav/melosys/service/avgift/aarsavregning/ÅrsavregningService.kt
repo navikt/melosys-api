@@ -10,6 +10,7 @@ import no.nav.melosys.service.behandling.BehandlingsresultatService
 import org.apache.commons.beanutils.BeanUtils
 import org.springframework.stereotype.Service
 import org.springframework.transaction.annotation.Transactional
+import java.math.BigDecimal
 import java.time.LocalDate
 
 @Service
@@ -149,5 +150,17 @@ class ÅrsavregningService(
             skatteforholdsperioder = behandlingsresultat.hentSkatteforholdTilNorge().toList(),
             innteksperioder = behandlingsresultat.hentInntektsperioder().toList()
         )
+    }
+    @Transactional
+    fun oppdaterTotalbelop(behandlingID: Long, tidligereFakturertBeloep: BigDecimal?, nyttTotalbeloep: BigDecimal?): ÅrsavregningModel {
+        val behandlingsresultat = behandlingsresultatService.hentBehandlingsresultat(behandlingID)
+
+        val aarsavregning =
+            behandlingsresultat.årsavregning ?: throw RuntimeException("Det eksisterer ikke årsavregning for behandling med id: $behandlingID")
+        if (tidligereFakturertBeloep != null) aarsavregning.tidligereFakturertBeloep = tidligereFakturertBeloep
+        if (nyttTotalbeloep != null) aarsavregning.nyttTotalbeloep = nyttTotalbeloep
+        aarsavregning.beregnTilFaktureringsBeloep()
+
+        return lagÅrsavregningModelFraÅrsavregning(aarsavregning)
     }
 }

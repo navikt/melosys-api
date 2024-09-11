@@ -27,7 +27,6 @@ import org.apache.commons.lang3.StringUtils
 import org.springframework.stereotype.Service
 import org.springframework.transaction.annotation.Transactional
 import java.util.*
-import kotlin.jvm.optionals.getOrNull
 
 @Service
 class OppgaveService(
@@ -92,6 +91,11 @@ class OppgaveService(
         }
     }
 
+    fun finnÅpneBehandlingsoppgaveMedFagsaksnummer(saksnummer: String): List<Oppgave> {
+        return oppgaveFasade.finnÅpneBehandlingsoppgaverMedSaksnummer(saksnummer)
+            .filter { filtrerUtAvgiftsoppgaver(it) }
+    }
+
     fun hentÅpenBehandlingsoppgaveMedFagsaksnummer(saksnummer: String): Oppgave =
         finnÅpenBehandlingsoppgaveMedFagsaksnummer(saksnummer).orElseThrow { IkkeFunnetException("Finner ingen åpen oppgave med saksnummer $saksnummer") }
 
@@ -107,11 +111,15 @@ class OppgaveService(
         @Nullable tilordnetRessurs: String? = null,
         @Nullable orgnr: String? = null
     ) {
-        val eksisterendeOppgave = hentEksisterendeOppgave(behandling)
+        val eksisterendeOppgave = hentEksisterendeOppgaveSomIkkeErTilknyttetBehandling(behandling)
 
         if (eksisterendeOppgave == null || kreverNyOppgave(behandling.type)) {
             lagBehandlingsoppgave(behandling, tilordnetRessurs, journalpostID, aktørID, orgnr)
         } else {
+            if (behandling.oppgaveId == null) {
+                behandling.oppgaveId = eksisterendeOppgave.oppgaveId
+                behandlingService.lagre(behandling)
+            }
             if (tilordnetRessurs != eksisterendeOppgave.tilordnetRessurs) {
                 oppdaterOppgave(eksisterendeOppgave.oppgaveId, OppgaveOppdatering.builder().tilordnetRessurs(tilordnetRessurs).build())
                 log.info("Oppgave oppdatert med ny tilordnetRessurs, for behandling ${behandling.id}")
@@ -204,15 +212,22 @@ class OppgaveService(
         log.info("Opprettet oppgave $oppgaveID for behandling ${behandling.id}")
     }
 
-    private fun hentEksisterendeOppgave(behandling: Behandling): Oppgave? {
+    private fun hentEksisterendeOppgaveSomIkkeErTilknyttetBehandling(behandling: Behandling): Oppgave? {
         val eksisterendeOppgave = if (behandling.oppgaveId != null) {
             oppgaveFasade.hentOppgave(behandling.oppgaveId)
         } else {
-            val åpenOppgave = finnÅpenBehandlingsoppgaveMedFagsaksnummer(behandling.fagsak.saksnummer).getOrNull()
+            val fagsak = behandling.fagsak
 
-            if (åpenOppgave != null && behandling.fagsak.behandlinger.none { it.oppgaveId == åpenOppgave.oppgaveId }) {
-                åpenOppgave
-            } else null
+            val åpneOppgave = finnÅpneBehandlingsoppgaveMedFagsaksnummer(behandling.fagsak.saksnummer).filterNot { oppgave ->
+                fagsak.behandlinger.any {
+                    it.oppgaveId == oppgave.oppgaveId
+                }
+            }
+            if (åpneOppgave.size > 1) {
+                throw TekniskException("Det finnes flere aktive behandlingsoppgaver for sak ${behandling.fagsak.saksnummer}")
+            }
+
+            return åpneOppgave.firstOrNull()
         }
 
         return eksisterendeOppgave
