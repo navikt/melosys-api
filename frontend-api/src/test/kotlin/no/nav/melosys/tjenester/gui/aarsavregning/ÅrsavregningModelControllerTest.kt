@@ -34,7 +34,7 @@ internal class ÅrsavregningModelControllerTest {
     private lateinit var årsavregningService: ÅrsavregningService
 
     @MockkBean
-    private lateinit var trygdeavgiftTotalBeregner: TrygdeavgiftTotalBeregner
+    private lateinit var totalBeløpBeregner: TotalBeløpBeregner
 
     @MockBean
     private lateinit var aksesskontroll: Aksesskontroll
@@ -123,8 +123,9 @@ internal class ÅrsavregningModelControllerTest {
             nyttTotalbeloep = BigDecimal(24280.0),
             tilFaktureringBeloep = BigDecimal(3110.0)
         )
-        every { trygdeavgiftTotalBeregner.hentTotalInntekt(any()) } returns BigDecimal(42)
-        every { trygdeavgiftTotalBeregner.hentTotalAvgift(any()) } returns BigDecimal(21170)
+        every { totalBeløpBeregner.hentTotalInntekt(any()) } returns BigDecimal(42)
+        every { totalBeløpBeregner.hentTotalAvgift(any()) } returns BigDecimal(21170)
+        every { totalBeløpBeregner.hentTotalInntektForInntektkilde(any()) } returns BigDecimal(24280)
 
 
         val expectedJson = """{
@@ -169,14 +170,16 @@ internal class ÅrsavregningModelControllerTest {
           "tomDato": "2023-07-31",
           "type": "ARBEIDSINNTEKT_FRA_NORGE",
           "arbeidsgiversavgiftBetales": true,
-          "avgiftspliktigInntektMnd": 40000
+          "avgiftspliktigInntektMnd": 40000,
+          "totalInntektForPerioden": 24280
         },
         {
           "fomDato": "2023-08-01",
           "tomDato": "2023-12-31",
           "type": "INNTEKT_FRA_UTLANDET",
           "arbeidsgiversavgiftBetales": false,
-          "avgiftspliktigInntektMnd": 15000
+          "avgiftspliktigInntektMnd": 15000,
+          "totalInntektForPerioden": 24280
         }
       ]
     },
