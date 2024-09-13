@@ -70,7 +70,8 @@ class ÅrsavregningController(
                 nyttTotalbeloep = årsavregningModel.nyttTotalbeloep,
                 tidligereFakturertBeloep = årsavregningModel.tidligereFakturertBeloep,
                 tilFaktureringBeloep = årsavregningModel.tilFaktureringBeloep,
-            )
+            ),
+            antallFerdigBehandledeÅrsavregninger = årsavregningModel.antallFerdigBehandledeÅrsavregninger
         )
 
     private fun mapTrygdeavgiftsgrunnlag(trygdeavgiftsgrunnlag: Trygdeavgiftsgrunnlag?) =
@@ -150,7 +151,8 @@ data class ÅrsavregningResponse(
     val avvikFunnet: Boolean?,
     val nyttGrunnlag: GrunnlagsOpplysningerDto?,
     val endeligAvgift: AvgiftDto?,
-    val avregning: AvregningDto?
+    val avregning: AvregningDto?,
+    val antallFerdigBehandledeÅrsavregninger: Int
 )
 
 data class ÅrsavregningRequest(

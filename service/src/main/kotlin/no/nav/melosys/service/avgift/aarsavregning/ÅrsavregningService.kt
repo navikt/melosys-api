@@ -55,6 +55,7 @@ class ÅrsavregningService(
             )
         }
 
+
         if (gjelderÅr < LocalDate.now().year - antall_år_tilbake_i_tid) {
             throw FunksjonellException("Årsavregning kan ikke opprettes for år eldre enn 6 år før inneværende år.")
         }
@@ -87,6 +88,7 @@ class ÅrsavregningService(
             behandlingsresultatService.lagre(behandlingsresultat)
         }
 
+
         return lagÅrsavregningModelFraÅrsavregning(årsavregning)
     }
 
@@ -110,8 +112,9 @@ class ÅrsavregningService(
 
     private fun lagÅrsavregningModelFraÅrsavregning(årsavregning: Årsavregning): ÅrsavregningModel {
         val år = årsavregning.aar
+        val behandlingId = årsavregning.behandlingsresultat.behandling.id
 
-        return ÅrsavregningModel(
+        val modellen = ÅrsavregningModel(
             år = år,
             tidligereGrunnlag = hentTidligereTrygdeavgiftsgrunnlag(år, årsavregning.tidligereBehandlingsresultat),
             tidligereAvgift = årsavregning.tidligereBehandlingsresultat?.trygdeavgiftsperioder?.filter { it.overlapperMedÅr(år) }.orEmpty(),
@@ -119,8 +122,16 @@ class ÅrsavregningService(
             endeligAvgift = årsavregning.behandlingsresultat.trygdeavgiftsperioder.toList(),
             tidligereFakturertBeloep = årsavregning.tidligereFakturertBeloep,
             nyttTotalbeloep = årsavregning.nyttTotalbeloep,
-            tilFaktureringBeloep = årsavregning.tilFaktureringBeloep
+            tilFaktureringBeloep = årsavregning.tilFaktureringBeloep,
+            antallFerdigBehandledeÅrsavregninger = finnAntallFerdigBehandledeÅrsavregninger(behandlingId, årsavregning.aar)
         )
+        return modellen
+    }
+
+    private fun finnAntallFerdigBehandledeÅrsavregninger(behandlingID: Long, gjelderÅr: Int): Int {
+        val antallFerdigBehandledeÅrsavregninger =
+            aarsavregningRepository.finnAntallFerdigbehandledeÅrsavregningerPåFagsakForÅr(behandlingID, gjelderÅr)
+        return antallFerdigBehandledeÅrsavregninger
     }
 
     private fun finnTidligereBehandlingsresultatMedAvgift(behandlingsresultat: Behandlingsresultat, gjelderÅr: Int): Behandlingsresultat? {
@@ -183,6 +194,7 @@ data class ÅrsavregningModel(
     val tidligereFakturertBeloep: BigDecimal?,
     val nyttTotalbeloep: BigDecimal?,
     val tilFaktureringBeloep: BigDecimal?,
+    val antallFerdigBehandledeÅrsavregninger: Int
 )
 
 data class Trygdeavgiftsgrunnlag(
