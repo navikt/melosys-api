@@ -11,5 +11,5 @@ data class FakturaseriePeriodeDto(
 
     val sluttDato: LocalDate,
 
-    val beskrivelse: String
+    val beskrivelse: String = "NA"
 )

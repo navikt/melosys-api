@@ -36,11 +36,9 @@ class TotalBeløpBeregner(
             FakturaseriePeriodeDto(
                 startDato = it.periodeFra,
                 sluttDato = it.periodeTil,
-                enhetsprisPerManed = it.grunnlagInntekstperiode.avgiftspliktigInntektMnd.verdi,
-                beskrivelse = "FIXME"
+                enhetsprisPerManed = it.grunnlagInntekstperiode.avgiftspliktigInntektMnd.verdi
             )
         }
-        val saksbehandlerIdent = SubjectHandler.getInstance().getUserID() ?: ThreadLocalAccessInfo.getSaksbehandler()
         return faktureringskomponentenConsumer.hentTotalTrygdeavgiftForPeriode(BeregnTotalBeløpDto(fakturaseriePerioder), saksbehandlerIdent)
     }
 
@@ -48,10 +46,12 @@ class TotalBeløpBeregner(
         val fakturaseriePerioder = listOf(FakturaseriePeriodeDto(
             startDato = inntektsperiode.fomDato,
             sluttDato = inntektsperiode.tomDato,
-            enhetsprisPerManed = inntektsperiode.avgiftspliktigInntektMnd.verdi,
-            beskrivelse = "FIXME"
+            enhetsprisPerManed = inntektsperiode.avgiftspliktigInntektMnd.verdi
         ))
-        val saksbehandlerIdent = SubjectHandler.getInstance().getUserID() ?: ThreadLocalAccessInfo.getSaksbehandler()
         return faktureringskomponentenConsumer.hentTotalTrygdeavgiftForPeriode(BeregnTotalBeløpDto(fakturaseriePerioder), saksbehandlerIdent)
     }
+
+    private val saksbehandlerIdent
+        get() = SubjectHandler.getInstance().getUserID() ?: ThreadLocalAccessInfo.getSaksbehandler() ?: SubjectHandler.SYSTEMBRUKER
+
 }
