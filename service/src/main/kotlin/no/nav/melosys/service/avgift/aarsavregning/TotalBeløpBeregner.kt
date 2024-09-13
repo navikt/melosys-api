@@ -52,6 +52,6 @@ class TotalBeløpBeregner(
     }
 
     private val saksbehandlerIdent
-        get() = SubjectHandler.getInstance().getUserID() ?: ThreadLocalAccessInfo.getSaksbehandler() ?: "MELOSYS"
+        get() = SubjectHandler.getInstance().getUserID() ?: ThreadLocalAccessInfo.getSaksbehandler() ?: SubjectHandler.SYSTEMBRUKER
 
 }
