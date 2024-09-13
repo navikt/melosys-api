@@ -171,7 +171,7 @@ enum class GrunnlagMedl(@JvmField val kode: String) {
     STORBRIT_NIRLAND_6_2("Storbrit_NIrland_6_2"),
     STORBRIT_NIRLAND_8_5("Storbrit_NIrland_8_5"),
 
-    KONV_STORBRIT_NIRLAND_13_3_A("Konv_Storbrit_NIrland_13_3_A"),
+    KONV_STORBRIT_NIRLAND_13_3_A("Konv_Storbrit_NIrland_13_3_a"),
     KONV_STORBRIT_NIRLAND_13_4_1("Konv_Storbrit_NIrland_13_4_1"),
     KONV_STORBRIT_NIRLAND_13_4_2("Konv_Storbrit_NIrland_13_4_2"),
     KONV_STORBRIT_NIRLAND_14_1("Konv_Storbrit_NIrland_14_1"),
