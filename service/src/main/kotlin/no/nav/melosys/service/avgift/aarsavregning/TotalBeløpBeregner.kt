@@ -40,7 +40,6 @@ class TotalBeløpBeregner(
                 beskrivelse = "FIXME"
             )
         }
-        val saksbehandlerIdent = SubjectHandler.getInstance().getUserID() ?: ThreadLocalAccessInfo.getSaksbehandler()
         return faktureringskomponentenConsumer.hentTotalTrygdeavgiftForPeriode(BeregnTotalBeløpDto(fakturaseriePerioder), saksbehandlerIdent)
     }
 
@@ -51,7 +50,10 @@ class TotalBeløpBeregner(
             enhetsprisPerManed = inntektsperiode.avgiftspliktigInntektMnd.verdi,
             beskrivelse = "FIXME"
         ))
-        val saksbehandlerIdent = SubjectHandler.getInstance().getUserID() ?: ThreadLocalAccessInfo.getSaksbehandler()
         return faktureringskomponentenConsumer.hentTotalTrygdeavgiftForPeriode(BeregnTotalBeløpDto(fakturaseriePerioder), saksbehandlerIdent)
     }
+
+    private val saksbehandlerIdent
+        get() = SubjectHandler.getInstance().getUserID() ?: ThreadLocalAccessInfo.getSaksbehandler() ?: "MELOSYS"
+
 }
