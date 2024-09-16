@@ -24,10 +24,8 @@ class TotalBeløpBeregner(
                 startDato = it.periodeFra,
                 sluttDato = it.periodeTil,
                 enhetsprisPerManed = it.trygdeavgiftsbeløpMd.verdi,
-                beskrivelse = "FIXME"
             )
         }
-        val saksbehandlerIdent = SubjectHandler.getInstance().getUserID() ?: ThreadLocalAccessInfo.getSaksbehandler()
         return faktureringskomponentenConsumer.hentTotalTrygdeavgiftForPeriode(BeregnTotalBeløpDto(fakturaseriePerioder), saksbehandlerIdent)
     }
 
