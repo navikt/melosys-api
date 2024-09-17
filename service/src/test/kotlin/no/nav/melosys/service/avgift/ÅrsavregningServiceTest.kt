@@ -147,31 +147,35 @@ internal class ÅrsavregningServiceTest {
 
     @Test
     fun `tilFaktureringBeloep skal ikke settes hvis tidligere eller ny avgift er null`() {
+        val behandlingsId = 1L
         val behandlingsresultat = Behandlingsresultat().apply resultat@{
-            behandling = Behandling()
+            behandling = Behandling().apply {
+                id = behandlingsId
+            }
             årsavregning = Årsavregning().apply {
                 aar = 2023
                 behandlingsresultat = this@resultat
             }
         }
-        every { behandlingsresultatService.hentBehandlingsresultat(1L) }.returns(behandlingsresultat)
+        every { behandlingsresultatService.hentBehandlingsresultat(behandlingsId) }.returns(behandlingsresultat)
 
-        årsavregningService.oppdaterTotalbelop(1L, null, BigDecimal.ONE)
+        årsavregningService.oppdaterTotalbelop(behandlingsId, null, BigDecimal.ONE)
         behandlingsresultat.årsavregning.tilFaktureringBeloep shouldBe null
     }
 
     @Test
     fun `tilFaktureringBeloep skal settes til diff mellom nytt totalbeloep og tidligere fakturert beloep`() {
+        val behandlingsId = 1L
         val behandlingsresultat = Behandlingsresultat().apply resultat@{
-            behandling = Behandling()
+            behandling = Behandling().apply { id = behandlingsId }
             årsavregning = Årsavregning().apply {
                 aar = 2023
                 behandlingsresultat = this@resultat
             }
         }
-        every { behandlingsresultatService.hentBehandlingsresultat(1L) }.returns(behandlingsresultat)
+        every { behandlingsresultatService.hentBehandlingsresultat(behandlingsId) }.returns(behandlingsresultat)
 
-        årsavregningService.oppdaterTotalbelop(1L, BigDecimal.valueOf(12.4), BigDecimal.valueOf(5.2))
+        årsavregningService.oppdaterTotalbelop(behandlingsId, BigDecimal.valueOf(12.4), BigDecimal.valueOf(5.2))
         behandlingsresultat.årsavregning.tilFaktureringBeloep shouldBe BigDecimal.valueOf(-7.2)
     }
 
