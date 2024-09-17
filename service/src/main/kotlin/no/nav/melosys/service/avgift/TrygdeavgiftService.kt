@@ -1,6 +1,5 @@
 package no.nav.melosys.service.avgift
 
-import no.nav.melosys.domain.Behandling
 import no.nav.melosys.domain.Behandlingsresultat
 import no.nav.melosys.domain.kodeverk.Saksstatuser
 import no.nav.melosys.service.behandling.BehandlingsresultatService
@@ -14,8 +13,10 @@ class TrygdeavgiftService(
     private val behandlingsresultatService: BehandlingsresultatService,
     private val trygdeavgiftMottakerService: TrygdeavgiftMottakerService,
 ) {
-    private val UGYLDIGE_SAKSSTATUSER_FOR_TRYGDEAVGIFT =
-        listOf(Saksstatuser.ANNULLERT, Saksstatuser.OPPHØRT, Saksstatuser.HENLAGT, Saksstatuser.HENLAGT_BORTFALT, Saksstatuser.VIDERESENDT)
+    companion object {
+        val UGYLDIGE_SAKSSTATUSER_FOR_TRYGDEAVGIFT =
+            listOf(Saksstatuser.ANNULLERT, Saksstatuser.OPPHØRT, Saksstatuser.HENLAGT, Saksstatuser.HENLAGT_BORTFALT, Saksstatuser.VIDERESENDT)
+    }
 
     @Transactional(readOnly = true)
     fun harFagsakBehandlingerMedTrygdeavgift(saksnummer: String, sjekkFakturaserie: Boolean = false): Boolean =
@@ -24,7 +25,6 @@ class TrygdeavgiftService(
     private fun hentFakturerbarTrygdeavgiftBehandlingsresultater(
         saksnummer: String,
         sjekkFakturaserie: Boolean = false,
-        erBehandlingFerdig: Boolean = false
     ): List<Behandlingsresultat> {
         val fagsak = fagsakService.hentFagsak(saksnummer)
 
@@ -32,25 +32,12 @@ class TrygdeavgiftService(
             return emptyList()
         }
 
-        val behandlinger = if (erBehandlingFerdig) {
-            fagsak.behandlinger.filter { it.erInaktiv() }
-        } else {
-            fagsak.behandlinger
-        }
-        return behandlinger
+        return fagsak.behandlinger
             .map { behandlingsresultatService.hentBehandlingsresultat(it.id) }
             .filter {
                 harFakturerbarTrygdeavgift(it, sjekkFakturaserie)
             }
     }
-
-    @Transactional(readOnly = true)
-    fun finnSistFakturerbarTrygdeavgiftsbehandlingForÅr(saksnummer: String, år: Int): Behandling? =
-        hentFakturerbarTrygdeavgiftBehandlingsresultater(saksnummer, erBehandlingFerdig = true)
-            .sortedBy { it.registrertDato }
-            .lastOrNull {
-                it.trygdeavgiftsperioder.any { it.overlapperMedÅr(år) }
-            }?.behandling
 
     @Transactional
     fun slettTrygdeavgiftsperioderPåBehandlingsresultat(behandlingID: Long) {

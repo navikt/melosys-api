@@ -2,8 +2,6 @@ package no.nav.melosys.service.sak
 
 import io.kotest.matchers.booleans.shouldBeFalse
 import io.kotest.matchers.booleans.shouldBeTrue
-import io.kotest.matchers.nulls.shouldNotBeNull
-import io.kotest.matchers.shouldBe
 import io.mockk.every
 import io.mockk.impl.annotations.MockK
 import io.mockk.junit5.MockKExtension
@@ -15,7 +13,6 @@ import no.nav.melosys.domain.avgift.Trygdeavgiftsperiode
 import no.nav.melosys.domain.kodeverk.Medlemskapstyper
 import no.nav.melosys.domain.kodeverk.Saksstatuser
 import no.nav.melosys.domain.kodeverk.Skatteplikttype
-import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingsstatus
 import no.nav.melosys.service.avgift.TrygdeavgiftMottakerService
 import no.nav.melosys.service.avgift.TrygdeavgiftService
 import no.nav.melosys.service.behandling.BehandlingsresultatService
@@ -187,36 +184,6 @@ class TrygdeavgiftServiceTest {
         }
 
         trygdeavgiftService.harFakturerbarTrygdeavgift(behandlingsresultat).shouldBeFalse()
-    }
-
-    @Test
-    fun `Henter den siste behandlingen med trygdeavgiftsperiode som overlapper gjeldende år`() {
-        val avsluttetBehandling = behandling.apply {
-            status = Behandlingsstatus.AVSLUTTET
-        }
-
-        val trygdeavgiftsperiode = Trygdeavgiftsperiode().apply {
-            periodeFra = LocalDate.of(2023, 1, 1)
-            periodeTil = LocalDate.of(2023, 12, 31)
-            trygdeavgiftsbeløpMd = Penger(2345.56)
-            trygdesats = BigDecimal(3.56)
-            grunnlagSkatteforholdTilNorge = SkatteforholdTilNorge().apply {
-                skatteplikttype = Skatteplikttype.IKKE_SKATTEPLIKTIG
-            }
-        }
-        behandlingsresultat.apply {
-            medlemskapsperioder.add(
-                Medlemskapsperiode().apply {
-                    medlemskapstype = Medlemskapstyper.PLIKTIG
-                    trygdeavgiftsperioder.add(trygdeavgiftsperiode)
-                }
-            )
-            behandling = avsluttetBehandling
-        }
-
-        trygdeavgiftService.finnSistFakturerbarTrygdeavgiftsbehandlingForÅr(FagsakTestFactory.SAKSNUMMER, 2023)
-            .shouldNotBeNull()
-            .id shouldBe BEHANDLING_ID
     }
 
     private fun lagTrygdeavgift(): Trygdeavgiftsperiode = Trygdeavgiftsperiode().apply {
