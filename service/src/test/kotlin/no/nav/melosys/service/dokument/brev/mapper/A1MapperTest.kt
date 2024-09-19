@@ -13,6 +13,7 @@ import io.kotest.matchers.string.shouldContainInOrder
 import io.mockk.every
 import io.mockk.impl.annotations.MockK
 import io.mockk.junit5.MockKExtension
+import jakarta.xml.bind.JAXBElement
 import no.nav.dok.melosysbrev._000067.AdresseType
 import no.nav.dok.melosysbrev._000116.BrevdataType
 import no.nav.dok.melosysbrev._000116.Fag
@@ -20,12 +21,17 @@ import no.nav.dok.melosysbrev._000116.ObjectFactory
 import no.nav.dok.melosysbrev.felles.melosys_felles.FellesType
 import no.nav.dok.melosysbrev.felles.melosys_felles.MelosysNAVFelles
 import no.nav.dok.melosysbrev.felles.melosys_vedlegg.VedleggType
+import no.nav.melosys.domain.Behandling
+import no.nav.melosys.domain.Behandlingsresultat
+import no.nav.melosys.domain.FagsakTestFactory
+import no.nav.melosys.domain.Lovvalgsperiode
 import no.nav.melosys.domain.adresse.StrukturertAdresse
 import no.nav.melosys.domain.avklartefakta.AvklartVirksomhet
 import no.nav.melosys.domain.kodeverk.Land_iso2
 import no.nav.melosys.domain.kodeverk.Landkoder
 import no.nav.melosys.domain.kodeverk.Maritimtyper
 import no.nav.melosys.domain.kodeverk.lovvalgsbestemmelser.Lovvalgbestemmelser_883_2004
+import no.nav.melosys.domain.kodeverk.lovvalgsbestemmelser.Lovvalgbestemmelser_konv_efta_storbritannia
 import no.nav.melosys.domain.kodeverk.lovvalgsbestemmelser.Tilleggsbestemmelser_883_2004
 import no.nav.melosys.domain.kodeverk.yrker.Yrkesaktivitetstyper
 import no.nav.melosys.domain.kodeverk.yrker.Yrkesgrupper
@@ -47,9 +53,6 @@ import org.junit.jupiter.api.extension.ExtendWith
 import java.time.Instant
 import java.time.LocalDate
 import java.util.List
-import jakarta.xml.bind.JAXBElement
-import no.nav.melosys.domain.*
-import no.nav.melosys.domain.kodeverk.lovvalgsbestemmelser.Lovvalgbestemmelser_konv_efta_storbritannia
 
 @ExtendWith(MockKExtension::class)
 @TestInstance(TestInstance.Lifecycle.PER_CLASS)
@@ -175,6 +178,23 @@ internal class A1MapperTest {
         val a1 = mapper.mapA1(behandling, behandlingsresultat, brevData)
         a1.bivirksomhetListe.bivirksomhet.forExactly(1) {
             it.navn.shouldBe("Issued under the EEA EFTA Convention")
+        }
+    }
+
+    @Test
+    fun mapBrevTilXML_harIkkeEftaTekst_11_3A() {
+        val lovvalgsperiode = Lovvalgsperiode().apply {
+            lovvalgsland = Land_iso2.GB
+            bestemmelse = Lovvalgbestemmelser_883_2004.FO_883_2004_ART11_3A
+            fom = LocalDate.now()
+            tom = LocalDate.now()
+        }
+
+        every { behandlingsresultat.hentLovvalgsperiode() } returns lovvalgsperiode
+
+        val a1 = mapper.mapA1(behandling, behandlingsresultat, brevData)
+        a1.bivirksomhetListe.bivirksomhet.forExactly(1) {
+            it.navn.shouldBe("JARLSBERG INTERNATIONAL")
         }
     }
 

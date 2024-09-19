@@ -34,7 +34,11 @@ public interface PeriodeOmLovvalg extends ErPeriode, HarBestemmelse<LovvalgBeste
     }
 
     default boolean erEftaStorbritannia() {
-        return getBestemmelse().name().startsWith("KONV_EFTA") || getBestemmelse() == FO_883_2004_ART11_3A;
+        return getBestemmelse().name().startsWith("KONV_EFTA");
+    }
+
+    default boolean erArbeidKunNorge() {
+        return getBestemmelse() == FO_883_2004_ART11_3A;
     }
 
     default boolean erArtikkel13_3_a_eller_13_4() {
