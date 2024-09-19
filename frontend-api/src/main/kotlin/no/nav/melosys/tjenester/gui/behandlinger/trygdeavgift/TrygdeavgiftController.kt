@@ -2,6 +2,7 @@ package no.nav.melosys.tjenester.gui.behandlinger.trygdeavgift
 
 import io.swagger.annotations.Api
 import no.nav.melosys.service.avgift.TrygdeavgiftMottakerService
+import no.nav.melosys.service.avgift.TrygdeavgiftService
 import no.nav.melosys.service.avgift.TrygdeavgiftsberegningService
 import no.nav.melosys.service.tilgang.Aksesskontroll
 import no.nav.melosys.tjenester.gui.dto.trygdeavgift.BeregnetTrygdeavgiftDto
@@ -19,6 +20,7 @@ import org.springframework.web.bind.annotation.*
 class TrygdeavgiftController(
     private val trygdeavgiftsberegningService: TrygdeavgiftsberegningService,
     private val trygdeavgiftMottakerService: TrygdeavgiftMottakerService,
+    private val trygdeavgiftService: TrygdeavgiftService,
     private val aksesskontroll: Aksesskontroll
 ) {
 
@@ -73,5 +75,12 @@ class TrygdeavgiftController(
     fun hentFakturamottaker(@PathVariable("behandlingID") behandlingID: Long): ResponseEntity<FakturamottakerDto> {
         aksesskontroll.autoriser(behandlingID)
         return ResponseEntity.ok(FakturamottakerDto(trygdeavgiftsberegningService.finnFakturamottakerNavn(behandlingID)))
+    }
+
+    @DeleteMapping
+    fun slettTrygdeavgiftsperioder(@PathVariable("behandlingID") behandlingID: Long): ResponseEntity<Unit> {
+        aksesskontroll.autoriser(behandlingID)
+        trygdeavgiftService.slettTrygdeavgiftsperioderPåBehandlingsresultat(behandlingID)
+        return ResponseEntity.noContent().build()
     }
 }

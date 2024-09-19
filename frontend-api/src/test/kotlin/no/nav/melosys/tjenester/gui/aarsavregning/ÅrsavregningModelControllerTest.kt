@@ -8,15 +8,15 @@ import no.nav.melosys.domain.avgift.SkatteforholdTilNorge
 import no.nav.melosys.domain.avgift.Trygdeavgiftsperiode
 import no.nav.melosys.domain.kodeverk.Folketrygdloven_kap2_bestemmelser.FTRL_KAP2_2_8
 import no.nav.melosys.domain.kodeverk.Inntektskildetype
+import no.nav.melosys.domain.kodeverk.Medlemskapstyper
 import no.nav.melosys.domain.kodeverk.Skatteplikttype
 import no.nav.melosys.domain.kodeverk.Trygdedekninger
-import no.nav.melosys.service.avgift.aarsavregning.MedlemskapsperiodeForAvgift
-import no.nav.melosys.service.avgift.aarsavregning.Trygdeavgiftsgrunnlag
-import no.nav.melosys.service.avgift.aarsavregning.ÅrsavregningModel
-import no.nav.melosys.service.avgift.aarsavregning.ÅrsavregningService
+import no.nav.melosys.service.avgift.aarsavregning.*
+import no.nav.melosys.service.tilgang.Aksesskontroll
 import org.junit.jupiter.api.Test
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest
+import org.springframework.boot.test.mock.mockito.MockBean
 import org.springframework.http.MediaType
 import org.springframework.test.web.servlet.MockMvc
 import org.springframework.test.web.servlet.request.MockMvcRequestBuilders
@@ -33,6 +33,12 @@ internal class ÅrsavregningModelControllerTest {
     @MockkBean
     private lateinit var årsavregningService: ÅrsavregningService
 
+    @MockkBean
+    private lateinit var totalBeløpBeregner: TotalBeløpBeregner
+
+    @MockBean
+    private lateinit var aksesskontroll: Aksesskontroll
+
     @Test
     fun `hent avregning basert på ID`() {
         every { årsavregningService.finnÅrsavregning(any()) } returns ÅrsavregningModel(
@@ -43,13 +49,15 @@ internal class ÅrsavregningModelControllerTest {
                         LocalDate.parse("2023-01-01"),
                         LocalDate.parse("2023-07-31"),
                         Trygdedekninger.FTRL_2_9_FØRSTE_LEDD_B_PENSJON,
-                        FTRL_KAP2_2_8
+                        FTRL_KAP2_2_8,
+                        Medlemskapstyper.PLIKTIG
                     ),
                     MedlemskapsperiodeForAvgift(
                         LocalDate.parse("2023-08-01"),
                         LocalDate.parse("2023-12-31"),
                         Trygdedekninger.FTRL_2_9_FØRSTE_LEDD_C_ANDRE_LEDD_HELSE_PENSJON_SYKE_FORELDREPENGER,
-                        FTRL_KAP2_2_8
+                        FTRL_KAP2_2_8,
+                        Medlemskapstyper.PLIKTIG
                     )
                 ),
                 skatteforholdsperioder = listOf(
@@ -115,7 +123,9 @@ internal class ÅrsavregningModelControllerTest {
             nyttTotalbeloep = BigDecimal(24280.0),
             tilFaktureringBeloep = BigDecimal(3110.0)
         )
-        every { årsavregningService.beregnTotalbeløpForPeriode(any()) } returns BigDecimal(42)
+        every { totalBeløpBeregner.hentTotalInntekt(any()) } returns BigDecimal(42)
+        every { totalBeløpBeregner.hentTotalAvgift(any()) } returns BigDecimal(21170)
+        every { totalBeløpBeregner.hentTotalInntektForInntektkilde(any()) } returns BigDecimal(24280)
 
 
         val expectedJson = """{
@@ -124,42 +134,52 @@ internal class ÅrsavregningModelControllerTest {
     "trygdeavgiftsgrunnlag": {
       "medlemskapsperioder": [
         {
-          "fom": "2023-01-01",
-          "tom": "2023-07-31",
-          "trygdedekning": "FTRL_2_9_FØRSTE_LEDD_B_PENSJON"
+          "id": 0,
+          "fomDato": "2023-01-01",
+          "tomDato": "2023-07-31",
+          "bestemmelse": "FTRL_KAP2_2_8",
+          "innvilgelsesResultat": "INNVILGET",
+          "trygdedekning": "FTRL_2_9_FØRSTE_LEDD_B_PENSJON",
+          "medlemskapstype": "PLIKTIG"
         },
         {
-          "fom": "2023-08-01",
-          "tom": "2023-12-31",
-          "trygdedekning": "FTRL_2_9_FØRSTE_LEDD_C_ANDRE_LEDD_HELSE_PENSJON_SYKE_FORELDREPENGER"
+          "id": 0,
+          "fomDato": "2023-08-01",
+          "tomDato": "2023-12-31",
+          "bestemmelse": "FTRL_KAP2_2_8",
+          "innvilgelsesResultat": "INNVILGET",
+          "trygdedekning": "FTRL_2_9_FØRSTE_LEDD_C_ANDRE_LEDD_HELSE_PENSJON_SYKE_FORELDREPENGER",
+          "medlemskapstype": "PLIKTIG"
         }
       ],
       "skatteforholdsperioder": [
         {
-          "fom": "2023-01-01",
-          "tom": "2023-07-31",
+          "fomDato": "2023-01-01",
+          "tomDato": "2023-07-31",
           "skatteplikttype": "SKATTEPLIKTIG"
         },
         {
-          "fom": "2023-08-01",
-          "tom": "2023-12-31",
+          "fomDato": "2023-08-01",
+          "tomDato": "2023-12-31",
           "skatteplikttype": "IKKE_SKATTEPLIKTIG"
         }
       ],
       "inntektskperioder": [
         {
-          "fom": "2023-01-01",
-          "tom": "2023-07-31",
+          "fomDato": "2023-01-01",
+          "tomDato": "2023-07-31",
           "type": "ARBEIDSINNTEKT_FRA_NORGE",
           "arbeidsgiversavgiftBetales": true,
-          "inntektPerMd": 40000
+          "avgiftspliktigInntektMnd": 40000,
+          "totalInntektForPerioden": 24280
         },
         {
-          "fom": "2023-08-01",
-          "tom": "2023-12-31",
+          "fomDato": "2023-08-01",
+          "tomDato": "2023-12-31",
           "type": "INNTEKT_FRA_UTLANDET",
           "arbeidsgiversavgiftBetales": false,
-          "inntektPerMd": 15000
+          "avgiftspliktigInntektMnd": 15000,
+          "totalInntektForPerioden": 24280
         }
       ]
     },
@@ -185,7 +205,7 @@ internal class ÅrsavregningModelControllerTest {
         }
       ],
       "totalInntekt": 42,
-      "totalAvgift": 42
+      "totalAvgift": 21170
     }
   },
   "avvikFunnet": false,

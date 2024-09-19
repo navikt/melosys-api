@@ -5,6 +5,7 @@ import mu.KotlinLogging
 import no.nav.melosys.domain.Behandling
 import no.nav.melosys.domain.Tema
 import no.nav.melosys.domain.kodeverk.Oppgavetyper
+import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingstyper
 import no.nav.melosys.domain.mottatteopplysninger.MottatteOpplysningerData
 import no.nav.melosys.domain.oppgave.Oppgave
 import no.nav.melosys.domain.util.MottatteOpplysningerUtils
@@ -26,7 +27,6 @@ import org.apache.commons.lang3.StringUtils
 import org.springframework.stereotype.Service
 import org.springframework.transaction.annotation.Transactional
 import java.util.*
-import kotlin.jvm.optionals.getOrNull
 
 @Service
 class OppgaveService(
@@ -91,7 +91,10 @@ class OppgaveService(
         }
     }
 
-    private fun filtrerUtAvgiftsoppgaver(oppgave: Oppgave): Boolean = !(Tema.TRY == oppgave.tema && Oppgavetyper.VUR == oppgave.oppgavetype)
+    fun finnÅpneBehandlingsoppgaveMedFagsaksnummer(saksnummer: String): List<Oppgave> {
+        return oppgaveFasade.finnÅpneBehandlingsoppgaverMedSaksnummer(saksnummer)
+            .filter { filtrerUtAvgiftsoppgaver(it) }
+    }
 
     fun hentÅpenBehandlingsoppgaveMedFagsaksnummer(saksnummer: String): Oppgave =
         finnÅpenBehandlingsoppgaveMedFagsaksnummer(saksnummer).orElseThrow { IkkeFunnetException("Finner ingen åpen oppgave med saksnummer $saksnummer") }
@@ -104,46 +107,24 @@ class OppgaveService(
     fun opprettEllerGjenbrukBehandlingsoppgave(
         behandling: Behandling,
         @Nullable journalpostID: String? = null,
-        @Nullable aktørID: String?  = null,
-        @Nullable tilordnetRessurs: String?  = null,
+        @Nullable aktørID: String? = null,
+        @Nullable tilordnetRessurs: String? = null,
         @Nullable orgnr: String? = null
     ) {
-        val eksisterendeOppgave =
-            if (behandling.oppgaveId != null) {
-                oppgaveFasade.hentOppgave(behandling.oppgaveId)
-            } else {
-                val åpenOppgave = finnÅpenBehandlingsoppgaveMedFagsaksnummer(behandling.fagsak.saksnummer).getOrNull()
-                if (åpenOppgave != null && behandling.fagsak.behandlinger.none { it.oppgaveId == åpenOppgave.oppgaveId }) {
-                    åpenOppgave
-                } else null
-            }
+        val eksisterendeOppgave = hentEksisterendeOppgaveSomIkkeErTilknyttetBehandling(behandling)
 
-        if (eksisterendeOppgave == null) {
-            val oppgaveBuilder =
-                lagBehandlingsoppgave(behandling).setTilordnetRessurs(tilordnetRessurs).setJournalpostId(journalpostID).setAktørId(aktørID)
-                    .setOrgnr(orgnr).setSaksnummer(behandling.fagsak.saksnummer)
-            val oppgaveID =
-                if (StringUtils.isNotEmpty(aktørID) && harBeskyttelsesbehov(behandling.id))
-                    oppgaveFasade.opprettSensitivOppgave(oppgaveBuilder.build())
-                else oppgaveFasade.opprettOppgave(oppgaveBuilder.build())
-            settOppgaveIdPåBehandling(behandling, oppgaveID)
-            log.info("Opprettet oppgave $oppgaveID for behandling ${behandling.id}")
-        } else if (tilordnetRessurs != eksisterendeOppgave.tilordnetRessurs) {
-            log.info("Oppgave eksisterer, oppdaterer tilordnetRessurs for oppgave tilknyttet behandling ${behandling.id}")
-            tildelOppgave(eksisterendeOppgave.oppgaveId, tilordnetRessurs)
+        if (eksisterendeOppgave == null || kreverNyOppgave(behandling.type)) {
+            lagBehandlingsoppgave(behandling, tilordnetRessurs, journalpostID, aktørID, orgnr)
         } else {
-            log.info("Oppgave tilknyttet behandling ${behandling.id} eksisterer og er allerede tilordnet ressurs $tilordnetRessurs.")
+            if (behandling.oppgaveId == null) {
+                behandling.oppgaveId = eksisterendeOppgave.oppgaveId
+                behandlingService.lagre(behandling)
+            }
+            if (tilordnetRessurs != eksisterendeOppgave.tilordnetRessurs) {
+                oppdaterOppgave(eksisterendeOppgave.oppgaveId, OppgaveOppdatering.builder().tilordnetRessurs(tilordnetRessurs).build())
+                log.info("Oppgave oppdatert med ny tilordnetRessurs, for behandling ${behandling.id}")
+            }
         }
-
-        // TODO: Denne blir ikke nødvendig etter migreringen er ferdig. MELOSYS-6707
-        if (behandling.oppgaveId == null && eksisterendeOppgave != null) {
-            settOppgaveIdPåBehandling(behandling, eksisterendeOppgave.oppgaveId)
-        }
-    }
-
-    private fun settOppgaveIdPåBehandling(behandling: Behandling, oppgaveId: String) {
-        behandling.oppgaveId = oppgaveId
-        behandlingService.lagre(behandling)
     }
 
     fun lagBehandlingsoppgave(behandling: Behandling): Oppgave.Builder =
@@ -197,6 +178,7 @@ class OppgaveService(
         val behandling = fagsak.hentSistAktivBehandlingIkkeÅrsavregning()
         val oppgave = finnSisteAvsluttetBehandlingsoppgaveMedFagsaksnummer(saksnummer)
         val tilordnetRessurs = oppgave?.tilordnetRessurs
+
         opprettEllerGjenbrukBehandlingsoppgave(
             behandling, behandling.initierendeJournalpostId, fagsak.hentBrukersAktørID(), tilordnetRessurs, null
         )
@@ -205,6 +187,56 @@ class OppgaveService(
     @Transactional
     fun saksbehandlerErTilordnetOppgaveForBehandling(saksbehandler: String, behandlingID: Long): Boolean =
         finnBehandlingsoppgaveForBehandlingID(behandlingID)?.tilordnetRessurs == saksbehandler
+
+    private fun kreverNyOppgave(behandlingsType: Behandlingstyper): Boolean = behandlingsType == Behandlingstyper.ÅRSAVREGNING
+
+    private fun lagBehandlingsoppgave(
+        behandling: Behandling, tilordnetRessurs: String?, journalpostID: String?,
+        aktørID: String?, orgnr: String?
+    ) {
+        val oppgaveBuilder =
+            lagBehandlingsoppgave(behandling)
+                .setTilordnetRessurs(tilordnetRessurs)
+                .setJournalpostId(journalpostID)
+                .setAktørId(aktørID)
+                .setOrgnr(orgnr).setSaksnummer(behandling.fagsak.saksnummer)
+
+        val oppgaveID =
+            if (StringUtils.isNotEmpty(aktørID) && harBeskyttelsesbehov(behandling.id)) {
+                oppgaveFasade.opprettSensitivOppgave(oppgaveBuilder.build())
+            } else {
+                oppgaveFasade.opprettOppgave(oppgaveBuilder.build())
+            }
+
+        settOppgaveIdPåBehandling(behandling, oppgaveID)
+        log.info("Opprettet oppgave $oppgaveID for behandling ${behandling.id}")
+    }
+
+    private fun hentEksisterendeOppgaveSomIkkeErTilknyttetBehandling(behandling: Behandling): Oppgave? {
+        val eksisterendeOppgave = if (behandling.oppgaveId != null) {
+            oppgaveFasade.hentOppgave(behandling.oppgaveId)
+        } else {
+            val fagsak = behandling.fagsak
+
+            val åpneOppgave = finnÅpneBehandlingsoppgaveMedFagsaksnummer(behandling.fagsak.saksnummer).filterNot { oppgave ->
+                fagsak.behandlinger.any {
+                    it.oppgaveId == oppgave.oppgaveId
+                }
+            }
+            if (åpneOppgave.size > 1) {
+                throw TekniskException("Det finnes flere aktive behandlingsoppgaver for sak ${behandling.fagsak.saksnummer}")
+            }
+
+            return åpneOppgave.firstOrNull()
+        }
+
+        return eksisterendeOppgave
+    }
+
+    private fun settOppgaveIdPåBehandling(behandling: Behandling, oppgaveId: String) {
+        behandling.oppgaveId = oppgaveId
+        behandlingService.lagre(behandling)
+    }
 
     private fun Collection<Oppgave>.tilDtoer(): List<OppgaveDto> = this.mapNotNull { tilOppgaveDtoHåndterException(it) }
 
@@ -264,6 +296,8 @@ class OppgaveService(
             sisteNotat = hentSisteBehandlingsNotat(tilknyttetBehandling),
         )
     }
+
+    private fun filtrerUtAvgiftsoppgaver(oppgave: Oppgave): Boolean = !(Tema.TRY == oppgave.tema && Oppgavetyper.VUR == oppgave.oppgavetype)
 
     private fun hentSisteBehandlingsNotat(behandling: Behandling): String? =
         behandling.behandlingsnotater.maxByOrNull { it.registrertDato }?.tekst

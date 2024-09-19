@@ -27,10 +27,10 @@ class FtrlVedtakService(
     val oppgaveService: OppgaveService,
     val dokgenService: DokgenService,
     val vilkaarsresultatService: VilkaarsresultatService
-) {
+) : FattVedtakInterface {
     private val log = LoggerFactory.getLogger(FtrlVedtakService::class.java)
 
-    fun fattVedtak(behandling: Behandling, request: FattVedtakRequest) {
+    override fun fattVedtak(behandling: Behandling, request: FattVedtakRequest) {
         val behandlingID = behandling.id
         log.info("Fatter vedtak for (FTRL) sak: ${behandling.fagsak.saksnummer} behandling: $behandlingID")
 
@@ -125,6 +125,16 @@ class FtrlVedtakService(
             mottaker = Mottakerroller.BRUKER
             kopiMottakere = request.kopiMottakere
             bestillersId = request.bestillersId
+        }
+
+    private fun lagBrevbestillingAarsavregning(request: FattVedtakRequest, produserbaredokument: Produserbaredokumenter): BrevbestillingDto =
+        BrevbestillingDto().apply {
+            produserbardokument = produserbaredokument
+            mottaker = Mottakerroller.BRUKER
+            kopiMottakere = request.kopiMottakere
+            bestillersId = request.bestillersId
+            innledningFritekst = request.innledningFritekst
+            begrunnelseFritekst = request.begrunnelseFritekst
         }
 
 

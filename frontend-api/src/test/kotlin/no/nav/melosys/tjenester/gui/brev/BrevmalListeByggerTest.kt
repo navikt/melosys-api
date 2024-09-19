@@ -70,8 +70,7 @@ internal class BrevmalListeByggerTest {
             brevmalListeService,
             behandlingService,
             saksbehandlingRegler,
-            utenlandskMyndighetService,
-            fakeUnleash
+            utenlandskMyndighetService
         )
         every { hentBrevAdresseTilMottakereService.hentBrevAdresseTilMottakere(any<Long>(), any()) } returns emptyList()
         every { saksbehandlingRegler.harIngenFlyt(any()) } returns false

@@ -1,18 +1,21 @@
 package no.nav.melosys.service.saksbehandling
 
+import io.getunleash.Unleash
 import no.nav.melosys.domain.Behandling
 import no.nav.melosys.domain.Fagsak
+import no.nav.melosys.domain.kodeverk.Land_iso2
 import no.nav.melosys.domain.kodeverk.Sakstemaer
 import no.nav.melosys.domain.kodeverk.Sakstyper
 import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingsresultattyper
 import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingstema
 import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingstema.*
 import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingstyper
+import no.nav.melosys.featuretoggle.ToggleName
 import no.nav.melosys.repository.BehandlingsresultatRepository
 import org.springframework.stereotype.Component
 
 @Component
-class SaksbehandlingRegler(private val behandlingsresultatRepository: BehandlingsresultatRepository) {
+class SaksbehandlingRegler(private val behandlingsresultatRepository: BehandlingsresultatRepository, private val unleash: Unleash) {
 
     fun skalTidligereBehandlingReplikeres(
         fagsak: Fagsak,
@@ -72,7 +75,6 @@ class SaksbehandlingRegler(private val behandlingsresultatRepository: Behandling
         ) return false
 
         return when (behandlingstema) {
-            ARBEID_KUN_NORGE,
             PENSJONIST,
             REGISTRERING_UNNTAK,
             UNNTAK_MEDLEMSKAP,
@@ -80,6 +82,8 @@ class SaksbehandlingRegler(private val behandlingsresultatRepository: Behandling
             TRYGDETID,
             A1_ANMODNING_OM_UNNTAK_PAPIR
             -> true
+
+            ARBEID_KUN_NORGE -> !unleash.isEnabled(ToggleName.MELOSYS_ARBEID_KUN_NORGE)
 
             ANMODNING_OM_UNNTAK_HOVEDREGEL -> sakstype == Sakstyper.TRYGDEAVTALE
 
@@ -127,6 +131,14 @@ class SaksbehandlingRegler(private val behandlingsresultatRepository: Behandling
         behandlingstema: Behandlingstema
     ): Boolean {
         return (sakstype == Sakstyper.EU_EOS || sakstype == Sakstyper.TRYGDEAVTALE) && behandlingstema == IKKE_YRKESAKTIV
+    }
+
+     fun harUtsendtArbeidsTakerKunNorgeFlyt(erSakstypeEøs: Boolean, behandlingstema: Behandlingstema, land: Land_iso2): Boolean {
+        return erSakstypeEøs
+            && (behandlingstema.equals(UTSENDT_ARBEIDSTAKER)
+            || behandlingstema.equals(UTSENDT_SELVSTENDIG)
+            || behandlingstema.equals(ARBEID_KUN_NORGE))
+            && land == Land_iso2.NO
     }
 
     companion object {

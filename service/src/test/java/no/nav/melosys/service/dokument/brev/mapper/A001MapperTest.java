@@ -200,7 +200,7 @@ class A001MapperTest {
         var SEDA001 = mapper.mapSEDA001(brevData);
 
         assertThat(SEDA001.getLovvalgsbestemmelse().value()).isEqualTo(Lovvalgbestemmelser_883_2004.FO_883_2004_ART11_3E.getKode());
-        assertThat(SEDA001.getYtterligereInformasjon()).isEqualTo("Issued under the EEA EFTA Convention.\nFritekst fra saksbehandler.");
+        assertThat(SEDA001.getYtterligereInformasjon()).isEqualTo("Issued under the EEA EFTA Convention. Fritekst fra saksbehandler.");
     }
 
 

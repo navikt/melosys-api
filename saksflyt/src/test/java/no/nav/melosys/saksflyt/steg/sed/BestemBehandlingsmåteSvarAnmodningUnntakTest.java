@@ -9,6 +9,7 @@ import no.nav.melosys.domain.eessi.SvarAnmodningUnntak;
 import no.nav.melosys.domain.eessi.melding.MelosysEessiMelding;
 import no.nav.melosys.domain.kodeverk.Anmodningsperiodesvartyper;
 import no.nav.melosys.domain.kodeverk.InnvilgelsesResultat;
+import no.nav.melosys.domain.kodeverk.Vedtakstyper;
 import no.nav.melosys.domain.kodeverk.begrunnelser.Kontroll_begrunnelser;
 import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingsresultattyper;
 import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingsstatus;
@@ -21,6 +22,7 @@ import no.nav.melosys.service.behandling.BehandlingService;
 import no.nav.melosys.service.behandling.BehandlingsresultatService;
 import no.nav.melosys.service.kontroll.feature.ferdigbehandling.FerdigbehandlingKontrollFacade;
 import no.nav.melosys.service.unntak.AnmodningsperiodeService;
+import no.nav.melosys.service.vedtak.FattVedtakRequest;
 import no.nav.melosys.service.vedtak.VedtaksfattingFasade;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -103,9 +105,14 @@ class BestemBehandlingsmåteSvarAnmodningUnntakTest {
 
         when(behandlingService.hentBehandlingMedSaksopplysninger(behandling.getId())).thenReturn(behandling);
 
+
         bestemBehandlingsmåteSvarAnmodningUnntak.utfør(prosessinstans);
 
-        verify(vedtakService).fattVedtak(eq(behandling.getId()), eq(Behandlingsresultattyper.FASTSATT_LOVVALGSLAND));
+
+        verify(vedtakService).fattVedtak(eq(behandling.getId()), argThat((FattVedtakRequest req) ->
+            req.getBehandlingsresultatTypeKode() == Behandlingsresultattyper.FASTSATT_LOVVALGSLAND
+                && req.getVedtakstype() == Vedtakstyper.FØRSTEGANGSVEDTAK));
+
         verify(behandlingsresultatService).oppdaterBehandlingsMaate(anyLong(), any());
         verify(lovvalgsperiodeService).lagreLovvalgsperioder(anyLong(), captor.capture());
 
@@ -132,7 +139,7 @@ class BestemBehandlingsmåteSvarAnmodningUnntakTest {
 
         bestemBehandlingsmåteSvarAnmodningUnntak.utfør(prosessinstans);
 
-        verify(vedtakService, never()).fattVedtak(anyLong(), eq(Behandlingsresultattyper.FASTSATT_LOVVALGSLAND));
+        verify(vedtakService, never()).fattVedtak(anyLong(), any(FattVedtakRequest.class));
         verify(behandlingService).endreStatus(anyLong(), eq(Behandlingsstatus.SVAR_ANMODNING_MOTTATT));
     }
 
@@ -168,7 +175,7 @@ class BestemBehandlingsmåteSvarAnmodningUnntakTest {
         doThrow(new ValideringException(
             "Kunne ikke fatte vedtak",
             Set.of(kontrollfeilDto))
-        ).when(vedtakService).fattVedtak(anyLong(), any(Behandlingsresultattyper.class));
+        ).when(vedtakService).fattVedtak(anyLong(), any(FattVedtakRequest.class));
 
         anmodningsperiode.getAnmodningsperiodeSvar().setAnmodningsperiodeSvarType(Anmodningsperiodesvartyper.INNVILGELSE);
         MelosysEessiMelding melosysEessiMelding = new MelosysEessiMelding();
@@ -182,9 +189,12 @@ class BestemBehandlingsmåteSvarAnmodningUnntakTest {
 
         when(behandlingService.hentBehandlingMedSaksopplysninger(behandling.getId())).thenReturn(behandling);
 
+
         bestemBehandlingsmåteSvarAnmodningUnntak.utfør(prosessinstans);
 
-        verify(vedtakService).fattVedtak(123L, Behandlingsresultattyper.FASTSATT_LOVVALGSLAND);
+
+        verify(vedtakService).fattVedtak(eq(behandling.getId()), any(FattVedtakRequest.class));
+
         verify(behandlingsresultatService, never()).oppdaterBehandlingsMaate(123L, Behandlingsmaate.DELVIS_AUTOMATISERT);
         verify(behandlingService).endreStatus(anyLong(), eq(Behandlingsstatus.SVAR_ANMODNING_MOTTATT));
         verify(lovvalgsperiodeService).lagreLovvalgsperioder(anyLong(), captor.capture());

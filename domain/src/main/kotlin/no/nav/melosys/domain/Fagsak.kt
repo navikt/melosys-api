@@ -41,6 +41,10 @@ class Fagsak(
 
     fun leggTilBehandling(behandling: Behandling) = behandlinger.add(behandling)
 
+    fun erEnesteBehandling(behandlingID: Long): Boolean {
+        return behandlinger.size == 1 && behandlinger.filter { it.id != behandlingID }.isEmpty()
+    }
+
     fun harAktivBehandlingIkkeÅrsavregning(): Boolean = finnAktivBehandlingIkkeÅrsavregning() != null
 
     fun finnAktivBehandlingIkkeÅrsavregning(): Behandling? {

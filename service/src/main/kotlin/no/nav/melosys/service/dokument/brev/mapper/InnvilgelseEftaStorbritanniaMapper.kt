@@ -34,12 +34,14 @@ class InnvilgelseEftaStorbritanniaMapper(
         val erUnntakTuristskip = vilkaarsresultatService.oppfyllerVilkaar(behandlingsresultat.id, Vilkaar.FTRL_2_12_UNNTAK_TURISTSKIP)
         val bostedsland = landvelgerService.hentBostedsland(behandlingsresultat.behandling).landkodeobjekt
 
-
         val alleVirksomheterNorge = virksomheterService.hentAlleNorskeVirksomheter(behandlingsresultat.behandling)
         val alleVirksomheterUtlandet = virksomheterService.hentUtenlandskeVirksomheter(behandlingsresultat.behandling)
         val alleVirksomheter = alleVirksomheterNorge + alleVirksomheterUtlandet
         val navnVirksomheter = alleVirksomheter
             .map { it.navn }
+
+        val navnVirksomhet = alleVirksomheter.stream()
+            .findFirst().get().navn
 
         val erOrdinaerYrkesgruppe = behandlingsresultat.avklartefakta.find { it.type == Avklartefaktatyper.YRKESGRUPPE && it.fakta == Yrkesgrupper.ORDINAER.name } != null
 

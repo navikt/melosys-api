@@ -17,15 +17,11 @@ import no.nav.melosys.domain.brev.InnvilgelseEftaStorbritanniaBrevbestilling
 import no.nav.melosys.domain.dokument.felles.Land
 import no.nav.melosys.domain.dokument.person.PersonDokument
 import no.nav.melosys.domain.dokument.person.adresse.Bostedsadresse
-import no.nav.melosys.domain.kodeverk.Land_iso2
-import no.nav.melosys.domain.kodeverk.LovvalgBestemmelse
-import no.nav.melosys.domain.kodeverk.Sakstyper
-import no.nav.melosys.domain.kodeverk.Vilkaar
+import no.nav.melosys.domain.kodeverk.*
 import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingstema
 import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingstyper
 import no.nav.melosys.domain.kodeverk.lovvalgsbestemmelser.Lovvalgbestemmelser_883_2004
 import no.nav.melosys.domain.kodeverk.lovvalgsbestemmelser.Lovvalgbestemmelser_konv_efta_storbritannia
-import no.nav.melosys.featuretoggle.ToggleName
 import no.nav.melosys.service.LandvelgerService
 import no.nav.melosys.service.avklartefakta.AvklarteVirksomheterService
 import no.nav.melosys.service.avklartefakta.AvklartefaktaService
@@ -59,16 +55,9 @@ internal class InnvilgelseEftaKonvensjonMapperTest {
 
     private val unleash = FakeUnleash()
 
-    private val orgnr1 = "111111111"
-    private val orgnr2 = "222222222"
-    private val orgnr3 = "123456789"
-    private val orgnr4 = "444444444"
-    private val uuid1 = "a2k2jf-a3khs"
-    private val uuid2 = "0dkf93-kj701"
-
     @BeforeEach
     fun setup() {
-        unleash.resetAll()
+        unleash.enableAll()
         innvilgelseEftaStorbritanniaMapper = InnvilgelseEftaStorbritanniaMapper(
             mockVilkaarsresultatService,
             mockDokgenMapperDatahenter,
@@ -81,7 +70,6 @@ internal class InnvilgelseEftaKonvensjonMapperTest {
 
     @Test
     fun `Innvilgelse efta Storbritannia brevbestilling, arbeid kun norge`() {
-        unleash.enable(ToggleName.MELOSYS_ARBEID_KUN_NORGE)
         every { mockDokgenMapperDatahenter.hentBehandlingsresultat(ofType()) } returns lagBehandlingsResultat(Lovvalgbestemmelser_883_2004.FO_883_2004_ART11_3A)
         every {
             mockVilkaarsresultatService.harVilkaar(
@@ -94,7 +82,7 @@ internal class InnvilgelseEftaKonvensjonMapperTest {
         every { mockVilkaarsresultatService.oppfyllerVilkaar(ofType(), Vilkaar.FTRL_2_12_UNNTAK_TURISTSKIP) } returns true
 
         every { mockVirksomheterService.hentAlleNorskeVirksomheter(ofType()) } returns listOf(BrevDataTestUtils.lagNorskVirksomhet())
-        every { mockAvklartefaktaService.hentAvklarteOrgnrOgUuid(ofType()) } returns setOf(orgnr1, orgnr2, orgnr3, orgnr4, uuid1, uuid2)
+        every { mockVirksomheterService.hentUtenlandskeVirksomheter(ofType()) } returns listOf(BrevDataTestUtils.lagUtenlandskVirksomhet())
         every { mockLandvelgerService.hentBostedsland(ofType()) } returns Bostedsland("NO")
 
 
@@ -114,7 +102,7 @@ internal class InnvilgelseEftaKonvensjonMapperTest {
                 .build()
 
         innvilgelseEftaStorbritanniaMapper.mapInnvilgelseEftaStorbritannia(brevbestilling).run {
-            navnVirksomheter.shouldBe("Bedrift AS")
+            navnVirksomhet.shouldBe("Bedrift AS")
             behandlingstype.shouldBe(Behandlingstyper.FØRSTEGANG)
             erArtikkel11_3_a_eller_13_3_a_arbeid_norge?.shouldBeTrue()
             erArtikkel13_3_a_eller_13_4?.shouldBeFalse()
@@ -140,7 +128,7 @@ internal class InnvilgelseEftaKonvensjonMapperTest {
         every { mockVilkaarsresultatService.oppfyllerVilkaar(ofType(), Vilkaar.FTRL_2_12_UNNTAK_TURISTSKIP) } returns true
 
         every { mockVirksomheterService.hentAlleNorskeVirksomheter(ofType()) } returns listOf(BrevDataTestUtils.lagNorskVirksomhet())
-        every { mockAvklartefaktaService.hentAvklarteOrgnrOgUuid(ofType()) } returns setOf(orgnr1, orgnr2, orgnr3, orgnr4, uuid1, uuid2)
+        every { mockVirksomheterService.hentUtenlandskeVirksomheter(ofType()) } returns listOf(BrevDataTestUtils.lagUtenlandskVirksomhet())
         every { mockLandvelgerService.hentBostedsland(ofType()) } returns Bostedsland("GB")
 
 
@@ -160,7 +148,7 @@ internal class InnvilgelseEftaKonvensjonMapperTest {
                 .build()
 
         innvilgelseEftaStorbritanniaMapper.mapInnvilgelseEftaStorbritannia(brevbestilling).run {
-            navnVirksomheter.shouldBe("Bedrift AS")
+            navnVirksomhet.shouldBe("Bedrift AS")
             behandlingstype.shouldBe(Behandlingstyper.FØRSTEGANG)
             erArtikkel13_3_a_eller_13_4?.shouldBeFalse()
             erArtikkel14_1_eller_14_2?.shouldBeFalse()
@@ -187,7 +175,8 @@ internal class InnvilgelseEftaKonvensjonMapperTest {
             id = 1L
             behandling = lagBehandling()
             avklartefakta = setOf(Avklartefakta().apply {
-                fakta = AvklartYrkesgruppeType.ORDINAER_UTEN_ART12.name
+                fakta = AvklartYrkesgruppeType.ORDINAER.name
+                type = Avklartefaktatyper.YRKESGRUPPE
             })
             lovvalgsperioder = setOf(no.nav.melosys.domain.Lovvalgsperiode().apply {
                 fom = LocalDate.of(2020, 1, 1)

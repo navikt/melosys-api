@@ -1,15 +1,11 @@
 package no.nav.melosys.saksflyt.steg.register;
 
 import java.time.LocalDate;
-import java.util.Collections;
-import java.util.HashSet;
 
-import no.nav.melosys.domain.Aktoer;
+import io.getunleash.FakeUnleash;
 import no.nav.melosys.domain.Behandling;
 import no.nav.melosys.domain.Fagsak;
 import no.nav.melosys.domain.FagsakTestFactory;
-import no.nav.melosys.domain.kodeverk.Aktoersroller;
-import no.nav.melosys.domain.kodeverk.Sakstemaer;
 import no.nav.melosys.domain.kodeverk.Sakstyper;
 import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingstema;
 import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingstyper;
@@ -54,9 +50,11 @@ class HentRegisteropplysningerTest {
 
     private final Behandling behandling = new Behandling();
 
+    private FakeUnleash fakeUnleash = new FakeUnleash();
+
     @BeforeEach
     public void setUp() {
-        RegisteropplysningerFactory registeropplysningerFactory = new RegisteropplysningerFactory(saksbehandlingRegler);
+        RegisteropplysningerFactory registeropplysningerFactory = new RegisteropplysningerFactory(saksbehandlingRegler, fakeUnleash);
         hentRegisteropplysninger = new HentRegisteropplysninger(registeropplysningerService, behandlingService, saksbehandlingRegler, persondataFasade, registeropplysningerFactory);
 
         behandling.setId(222L);

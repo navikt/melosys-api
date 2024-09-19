@@ -68,6 +68,7 @@ import org.junit.jupiter.api.Test
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.beans.factory.annotation.Qualifier
 import org.springframework.kafka.core.KafkaTemplate
+import java.math.BigDecimal
 import java.time.LocalDate
 import java.util.*
 
@@ -140,6 +141,15 @@ class YrkesaktivFtrlVedtakIT(
                         .withStatus(200)
                         .withHeader("Content-Type", "application/json")
                         .withBody(fakturaResponse.toJsonNode.toString())
+                )
+        )
+        mockServer.stubFor(
+            WireMock.post(WireMock.urlMatching("/totalbeloep/beregn"))
+                .willReturn(
+                    WireMock.aResponse()
+                        .withStatus(200)
+                        .withHeader("Content-Type", "application/json")
+                        .withBody(BigDecimal.valueOf(42).toString())
                 )
         )
         unleash.enableAll()

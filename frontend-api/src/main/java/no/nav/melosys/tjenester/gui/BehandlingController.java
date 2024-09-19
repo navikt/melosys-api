@@ -41,10 +41,10 @@ public class BehandlingController {
     private final BehandlingsresultatService behandlingsresultatService;
 
     public BehandlingController(BehandlingService behandlingService,
-                              SaksopplysningerTilDto saksopplysningerTilDto,
-                              SaksbehandlerService saksbehandlerService,
-                              Aksesskontroll aksesskontroll,
-                              BehandlingsresultatService behandlingsresultatService) {
+                                SaksopplysningerTilDto saksopplysningerTilDto,
+                                SaksbehandlerService saksbehandlerService,
+                                Aksesskontroll aksesskontroll,
+                                BehandlingsresultatService behandlingsresultatService) {
         this.behandlingService = behandlingService;
         this.saksopplysningerTilDto = saksopplysningerTilDto;
         this.saksbehandlerService = saksbehandlerService;
