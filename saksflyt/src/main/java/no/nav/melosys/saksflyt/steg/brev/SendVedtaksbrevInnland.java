@@ -106,9 +106,9 @@ public class SendVedtaksbrevInnland implements StegBehandler {
             sendUtpekingsbrev(behandling, saksbehandler, fritekst);
             log.info("Sendt utpekingsbrev for behandling {}", behandling.getId());
         } else if (resultat.erInnvilgelse()) {
-            boolean erStorbritanniaBestemmelse = lovvalgsperiode.erEftaStorbritannia() || lovvalgsperiode.erArbeidKunNorge();
-            sendInnvilgelsesbrev(behandling, resultat, saksbehandler, begrunnelseKode, fritekst, erStorbritanniaBestemmelse);
-            if (unleash.isEnabled(ToggleName.MELOSYS_KONVENSJON_EFTA_LAND_OG_STORBRITANNIA) && erStorbritanniaBestemmelse) {
+            boolean erStorbritanniaBestemmelseEllerArbeidKunNorge = lovvalgsperiode.erEftaStorbritannia() || lovvalgsperiode.erArbeidKunNorge();
+            sendInnvilgelsesbrev(behandling, resultat, saksbehandler, begrunnelseKode, fritekst, erStorbritanniaBestemmelseEllerArbeidKunNorge);
+            if (unleash.isEnabled(ToggleName.MELOSYS_KONVENSJON_EFTA_LAND_OG_STORBRITANNIA) && erStorbritanniaBestemmelseEllerArbeidKunNorge) {
                 sendAttestA1(behandling, saksbehandler, begrunnelseKode, fritekst);
             }
             log.info("Sendt innvilgelsesbrev for behandling {}", behandling.getId());
