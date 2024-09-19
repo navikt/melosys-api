@@ -11,8 +11,10 @@ import no.nav.melosys.domain.kodeverk.Inntektskildetype
 import no.nav.melosys.domain.kodeverk.Medlemskapstyper
 import no.nav.melosys.domain.kodeverk.Skatteplikttype
 import no.nav.melosys.domain.kodeverk.Trygdedekninger
-import no.nav.melosys.service.avgift.aarsavregning.*
-import no.nav.melosys.service.avgift.aarsavregning.totalbeloep.TotalBeløpBeregner
+import no.nav.melosys.service.avgift.aarsavregning.MedlemskapsperiodeForAvgift
+import no.nav.melosys.service.avgift.aarsavregning.Trygdeavgiftsgrunnlag
+import no.nav.melosys.service.avgift.aarsavregning.ÅrsavregningModel
+import no.nav.melosys.service.avgift.aarsavregning.ÅrsavregningService
 import no.nav.melosys.service.tilgang.Aksesskontroll
 import org.junit.jupiter.api.Test
 import org.springframework.beans.factory.annotation.Autowired
@@ -121,9 +123,6 @@ internal class ÅrsavregningModelControllerTest {
             nyttTotalbeloep = BigDecimal(24280.0),
             tilFaktureringBeloep = BigDecimal(3110.0)
         )
-        every { TotalBeløpBeregner.hentTotalInntekt(any()) } returns BigDecimal(42)
-        every { TotalBeløpBeregner.hentTotalAvgift(any()) } returns BigDecimal(21170)
-        every { TotalBeløpBeregner.hentTotalInntektForInntektkilde(any()) } returns BigDecimal(24280)
 
 
         val expectedJson = """{
@@ -169,7 +168,7 @@ internal class ÅrsavregningModelControllerTest {
           "type": "ARBEIDSINNTEKT_FRA_NORGE",
           "arbeidsgiversavgiftBetales": true,
           "avgiftspliktigInntektMnd": 40000,
-          "totalInntektForPerioden": 24280
+          "totalInntektForPerioden": 280000
         },
         {
           "fomDato": "2023-08-01",
@@ -177,7 +176,7 @@ internal class ÅrsavregningModelControllerTest {
           "type": "INNTEKT_FRA_UTLANDET",
           "arbeidsgiversavgiftBetales": false,
           "avgiftspliktigInntektMnd": 15000,
-          "totalInntektForPerioden": 24280
+          "totalInntektForPerioden": 75000
         }
       ]
     },
@@ -202,8 +201,8 @@ internal class ÅrsavregningModelControllerTest {
           "avgiftPerMd": 6330
         }
       ],
-      "totalInntekt": 42,
-      "totalAvgift": 21170
+      "totalInntekt": 355000,
+      "totalAvgift": 31650
     }
   },
   "avvikFunnet": false,

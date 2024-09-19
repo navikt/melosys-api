@@ -165,7 +165,7 @@ class TotalBeløpBeregnerTest {
     }
 
     @Test
-    fun `Totalbeløp, Ulike perioder med ulik trygdeavgift`() {
+    fun `Totalbeløp, Ulike perioder med ulik beløp`() {
         val fom = LocalDate.of(2023, 1, 13)
         val tom = LocalDate.of(2023, 12, 31)
         val periode1 = PeriodeMedBeløp(fom, tom, BigDecimal.valueOf(500))
