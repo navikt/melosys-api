@@ -35,14 +35,11 @@ class InnvilgelseEftaStorbritanniaMapper(
         val bostedsland = landvelgerService.hentBostedsland(behandlingsresultat.behandling).landkodeobjekt
 
 
-        val alleAvklarteOrgnr = avklartefaktaService.hentAvklarteOrgnrOgUuid(behandlingsresultat.behandling.id)
         val alleVirksomheterNorge = virksomheterService.hentAlleNorskeVirksomheter(behandlingsresultat.behandling)
         val alleVirksomheterUtlandet = virksomheterService.hentUtenlandskeVirksomheter(behandlingsresultat.behandling)
         val alleVirksomheter = alleVirksomheterNorge + alleVirksomheterUtlandet
         val navnVirksomheter = alleVirksomheter
-            .filter { alleAvklarteOrgnr.contains(it.orgnr) }
             .map { it.navn }
-
 
         val erOrdinaerYrkesgruppe = behandlingsresultat.avklartefakta.find { it.type == Avklartefaktatyper.YRKESGRUPPE && it.fakta == Yrkesgrupper.ORDINAER.name } != null
 
