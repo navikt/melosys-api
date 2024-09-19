@@ -11,7 +11,6 @@ import no.nav.melosys.featuretoggle.ToggleName
 import no.nav.melosys.integrasjon.dokgen.dto.InnvilgelseEftaStorbritannia
 import no.nav.melosys.service.LandvelgerService
 import no.nav.melosys.service.avklartefakta.AvklarteVirksomheterService
-import no.nav.melosys.service.avklartefakta.AvklartefaktaService
 import no.nav.melosys.service.behandling.VilkaarsresultatService
 import org.springframework.stereotype.Component
 import org.springframework.transaction.annotation.Transactional
@@ -21,7 +20,6 @@ class InnvilgelseEftaStorbritanniaMapper(
     private val vilkaarsresultatService: VilkaarsresultatService,
     private val dokgenMapperDatahenter: DokgenMapperDatahenter,
     private val virksomheterService: AvklarteVirksomheterService,
-    private val avklartefaktaService: AvklartefaktaService,
     private val landvelgerService: LandvelgerService,
     private val unleash: Unleash
 ) {
@@ -39,9 +37,6 @@ class InnvilgelseEftaStorbritanniaMapper(
         val alleVirksomheter = alleVirksomheterNorge + alleVirksomheterUtlandet
         val navnVirksomheter = alleVirksomheter
             .map { it.navn }
-
-        val navnVirksomhet = alleVirksomheter.stream()
-            .findFirst().get().navn
 
         val erOrdinaerYrkesgruppe = behandlingsresultat.avklartefakta.find { it.type == Avklartefaktatyper.YRKESGRUPPE && it.fakta == Yrkesgrupper.ORDINAER.name } != null
 

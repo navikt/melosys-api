@@ -46,9 +46,6 @@ internal class InnvilgelseEftaKonvensjonMapperTest {
     private lateinit var mockVirksomheterService: AvklarteVirksomheterService
 
     @MockK
-    private lateinit var mockAvklartefaktaService: AvklartefaktaService
-
-    @MockK
     private lateinit var mockLandvelgerService: LandvelgerService
 
     private lateinit var innvilgelseEftaStorbritanniaMapper: InnvilgelseEftaStorbritanniaMapper
@@ -62,7 +59,6 @@ internal class InnvilgelseEftaKonvensjonMapperTest {
             mockVilkaarsresultatService,
             mockDokgenMapperDatahenter,
             mockVirksomheterService,
-            mockAvklartefaktaService,
             mockLandvelgerService,
             unleash
         )
@@ -102,7 +98,7 @@ internal class InnvilgelseEftaKonvensjonMapperTest {
                 .build()
 
         innvilgelseEftaStorbritanniaMapper.mapInnvilgelseEftaStorbritannia(brevbestilling).run {
-            navnVirksomheter.shouldBe(listOf("Bedrift AS"))
+            navnVirksomheter.shouldBe(listOf("Bedrift AS", "Bedrift Utenlandsk AS"))
             behandlingstype.shouldBe(Behandlingstyper.FØRSTEGANG)
             erArtikkel11_3_a_eller_13_3_a_arbeid_norge?.shouldBeTrue()
             erArtikkel13_3_a_eller_13_4?.shouldBeFalse()
@@ -148,7 +144,7 @@ internal class InnvilgelseEftaKonvensjonMapperTest {
                 .build()
 
         innvilgelseEftaStorbritanniaMapper.mapInnvilgelseEftaStorbritannia(brevbestilling).run {
-            navnVirksomheter.shouldBe(listOf("Bedrift AS"))
+            navnVirksomheter.shouldBe(listOf("Bedrift AS", "Bedrift Utenlandsk AS"))
             behandlingstype.shouldBe(Behandlingstyper.FØRSTEGANG)
             erArtikkel13_3_a_eller_13_4?.shouldBeFalse()
             erArtikkel14_1_eller_14_2?.shouldBeFalse()
