@@ -12,6 +12,7 @@ import no.nav.melosys.domain.kodeverk.Medlemskapstyper
 import no.nav.melosys.domain.kodeverk.Skatteplikttype
 import no.nav.melosys.domain.kodeverk.Trygdedekninger
 import no.nav.melosys.service.avgift.aarsavregning.*
+import no.nav.melosys.service.avgift.aarsavregning.totalbeloep.TotalBeløpBeregner
 import no.nav.melosys.service.tilgang.Aksesskontroll
 import org.junit.jupiter.api.Test
 import org.springframework.beans.factory.annotation.Autowired
@@ -32,9 +33,6 @@ internal class ÅrsavregningModelControllerTest {
 
     @MockkBean
     private lateinit var årsavregningService: ÅrsavregningService
-
-    @MockkBean
-    private lateinit var totalBeløpBeregner: TotalBeløpBeregner
 
     @MockBean
     private lateinit var aksesskontroll: Aksesskontroll
@@ -123,9 +121,9 @@ internal class ÅrsavregningModelControllerTest {
             nyttTotalbeloep = BigDecimal(24280.0),
             tilFaktureringBeloep = BigDecimal(3110.0)
         )
-        every { totalBeløpBeregner.hentTotalInntekt(any()) } returns BigDecimal(42)
-        every { totalBeløpBeregner.hentTotalAvgift(any()) } returns BigDecimal(21170)
-        every { totalBeløpBeregner.hentTotalInntektForInntektkilde(any()) } returns BigDecimal(24280)
+        every { TotalBeløpBeregner.hentTotalInntekt(any()) } returns BigDecimal(42)
+        every { TotalBeløpBeregner.hentTotalAvgift(any()) } returns BigDecimal(21170)
+        every { TotalBeløpBeregner.hentTotalInntektForInntektkilde(any()) } returns BigDecimal(24280)
 
 
         val expectedJson = """{

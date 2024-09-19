@@ -12,6 +12,7 @@ import no.nav.melosys.domain.kodeverk.Trygdedekninger
 import no.nav.melosys.exception.FunksjonellException
 import no.nav.melosys.repository.AarsavregningRepository
 import no.nav.melosys.service.avgift.TrygdeavgiftService
+import no.nav.melosys.service.avgift.aarsavregning.totalbeloep.TotalBeløpBeregner
 import no.nav.melosys.service.behandling.BehandlingsresultatService
 import org.apache.commons.beanutils.BeanUtils
 import org.springframework.stereotype.Service
@@ -23,8 +24,7 @@ import java.time.LocalDate
 class ÅrsavregningService(
     private val aarsavregningRepository: AarsavregningRepository,
     private val behandlingsresultatService: BehandlingsresultatService,
-    private val trygdeavgiftService: TrygdeavgiftService,
-    private val totalBeløpBeregner: TotalBeløpBeregner
+    private val trygdeavgiftService: TrygdeavgiftService
 ) {
 
     @Transactional(readOnly = true)
@@ -81,7 +81,7 @@ class ÅrsavregningService(
             this.behandlingsresultat = behandlingsresultat
             tidligereBehandlingsresultat = tidligereBehandlingsresultatMedAvgift
             tidligereFakturertBeloep =
-                totalBeløpBeregner.hentTotalAvgift(tidligereBehandlingsresultat?.trygdeavgiftsperioder?.filter { it.overlapperMedÅr(gjelderÅr) }
+                TotalBeløpBeregner.hentTotalAvgift(tidligereBehandlingsresultat?.trygdeavgiftsperioder?.filter { it.overlapperMedÅr(gjelderÅr) }
                     .orEmpty())
         }.also {
             behandlingsresultatService.lagre(behandlingsresultat)

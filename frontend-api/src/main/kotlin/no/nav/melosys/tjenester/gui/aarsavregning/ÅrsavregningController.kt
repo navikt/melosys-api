@@ -6,7 +6,7 @@ import no.nav.melosys.domain.kodeverk.Inntektskildetype
 import no.nav.melosys.domain.kodeverk.InnvilgelsesResultat
 import no.nav.melosys.domain.kodeverk.Skatteplikttype
 import no.nav.melosys.domain.kodeverk.Trygdedekninger
-import no.nav.melosys.service.avgift.aarsavregning.TotalBeløpBeregner
+import no.nav.melosys.service.avgift.aarsavregning.totalbeloep.TotalBeløpBeregner
 import no.nav.melosys.service.avgift.aarsavregning.Trygdeavgiftsgrunnlag
 import no.nav.melosys.service.avgift.aarsavregning.ÅrsavregningModel
 import no.nav.melosys.service.avgift.aarsavregning.ÅrsavregningService
@@ -26,8 +26,7 @@ import java.time.LocalDate
 @RequestMapping("/aarsavregninger")
 class ÅrsavregningController(
     private val årsavregningService: ÅrsavregningService,
-    private val aksesskontroll: Aksesskontroll,
-    private val totalBeløpBeregner: TotalBeløpBeregner
+    private val aksesskontroll: Aksesskontroll
 ) {
 
     @GetMapping("/{behandlingID}")
@@ -101,7 +100,7 @@ class ÅrsavregningController(
                     it.avgiftspliktigInntektMnd.verdi,
                     it.fom,
                     it.tom,
-                    totalBeløpBeregner.hentTotalInntektForInntektkilde(it)
+                    TotalBeløpBeregner.hentTotalInntektForInntektkilde(it)
                 )
             }.orEmpty()
         )
@@ -126,8 +125,8 @@ class ÅrsavregningController(
                             avgiftPerMd = it.trygdeavgiftsbeløpMd.verdi.intValueExact()
                         )
                     },
-                    totalInntekt = totalBeløpBeregner.hentTotalInntekt(trygdeavgiftsperioder),
-                    totalAvgift = totalBeløpBeregner.hentTotalAvgift(trygdeavgiftsperioder) ?: BigDecimal.ZERO
+                    totalInntekt = TotalBeløpBeregner.hentTotalInntekt(trygdeavgiftsperioder),
+                    totalAvgift = TotalBeløpBeregner.hentTotalAvgift(trygdeavgiftsperioder) ?: BigDecimal.ZERO
                 )
             )
     }

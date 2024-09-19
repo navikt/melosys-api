@@ -1,4 +1,4 @@
-package no.nav.melosys.service.avgift
+package no.nav.melosys.service.avgift.aarsavregning
 
 import io.kotest.assertions.throwables.shouldThrow
 import io.kotest.matchers.shouldBe
@@ -15,7 +15,7 @@ import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingsresultattyper
 import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingstyper
 import no.nav.melosys.exception.FunksjonellException
 import no.nav.melosys.repository.AarsavregningRepository
-import no.nav.melosys.service.avgift.aarsavregning.*
+import no.nav.melosys.service.avgift.TrygdeavgiftService
 import no.nav.melosys.service.behandling.BehandlingsresultatService
 import no.nav.melosys.sikkerhet.context.SpringSubjectHandler
 import no.nav.melosys.sikkerhet.context.TestSubjectHandler
@@ -36,9 +36,6 @@ internal class ÅrsavregningServiceTest {
     private lateinit var behandlingsresultatService: BehandlingsresultatService
 
     @RelaxedMockK
-    private lateinit var totalBeløpBeregner: TotalBeløpBeregner
-
-    @RelaxedMockK
     private lateinit var trygdeavgiftService: TrygdeavgiftService
 
     private lateinit var årsavregningService: ÅrsavregningService
@@ -49,7 +46,6 @@ internal class ÅrsavregningServiceTest {
             aarsavregningRepository,
             behandlingsresultatService,
             trygdeavgiftService,
-            totalBeløpBeregner,
         )
         SpringSubjectHandler.set(TestSubjectHandler())
     }
