@@ -114,7 +114,7 @@ internal class InnvilgelseEftaKonvensjonMapperTest {
                 .build()
 
         innvilgelseEftaStorbritanniaMapper.mapInnvilgelseEftaStorbritannia(brevbestilling).run {
-            navnVirksomhet.shouldBe("Bedrift AS")
+            navnVirksomheter.shouldBe("Bedrift AS")
             behandlingstype.shouldBe(Behandlingstyper.FØRSTEGANG)
             erArtikkel11_3_a_eller_13_3_a_arbeid_norge?.shouldBeTrue()
             erArtikkel13_3_a_eller_13_4?.shouldBeFalse()
@@ -160,7 +160,7 @@ internal class InnvilgelseEftaKonvensjonMapperTest {
                 .build()
 
         innvilgelseEftaStorbritanniaMapper.mapInnvilgelseEftaStorbritannia(brevbestilling).run {
-            navnVirksomhet.shouldBe("Bedrift AS")
+            navnVirksomheter.shouldBe("Bedrift AS")
             behandlingstype.shouldBe(Behandlingstyper.FØRSTEGANG)
             erArtikkel13_3_a_eller_13_4?.shouldBeFalse()
             erArtikkel14_1_eller_14_2?.shouldBeFalse()
