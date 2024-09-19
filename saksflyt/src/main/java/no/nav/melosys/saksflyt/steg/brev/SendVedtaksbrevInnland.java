@@ -173,9 +173,12 @@ public class SendVedtaksbrevInnland implements StegBehandler {
                               String begrunnelseKode,
                               String fritekst) {
         List<Mottaker> mottakerListe = new ArrayList<>(List.of(
-            Mottaker.medRolle(Mottakerroller.BRUKER),
-            Mottaker.medRolle(Mottakerroller.FULLMEKTIG)
+            Mottaker.medRolle(Mottakerroller.BRUKER)
         ));
+
+        if(behandling.getFagsak().harBrukerFullmektig()) {
+            mottakerListe.add(Mottaker.medRolle(Mottakerroller.FULLMEKTIG));
+        }
 
         if (!avklarteVirksomheterService.hentUtenlandskeVirksomheter(behandling).isEmpty()) {
             mottakerListe.add(Mottaker.av(NorskMyndighet.SKATTEINNKREVER_UTLAND));
