@@ -200,7 +200,7 @@ public class SendVedtaksbrevInnland implements StegBehandler {
     @NotNull
     private Produserbaredokumenter hentProduserbarDokumentForInnvilgelse(Behandling behandling, Behandlingsresultat resultat, boolean skalSendeEftaStorbritanniaBrev) {
 
-        if (unleash.isEnabled(ToggleName.MELOSYS_KONVENSJON_EFTA_LAND_OG_STORBRITANNIA) || unleash.isEnabled(ToggleName.MELOSYS_ARBEID_KUN_NORGE) && skalSendeEftaStorbritanniaBrev) {
+        if ((unleash.isEnabled(ToggleName.MELOSYS_KONVENSJON_EFTA_LAND_OG_STORBRITANNIA) || unleash.isEnabled(ToggleName.MELOSYS_ARBEID_KUN_NORGE)) && skalSendeEftaStorbritanniaBrev) {
             return INNVILGELSE_EFTA_STORBRITANNIA;
         }
 
