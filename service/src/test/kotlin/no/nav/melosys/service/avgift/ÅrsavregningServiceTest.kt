@@ -39,8 +39,6 @@ internal class ÅrsavregningServiceTest {
     @RelaxedMockK
     private lateinit var totalBeløpBeregner: TotalBeløpBeregner
 
-    @RelaxedMockK
-    private lateinit var trygdeavgiftService: TrygdeavgiftService
 
     @RelaxedMockK
     private lateinit var fagsakService: FagsakService
@@ -52,7 +50,6 @@ internal class ÅrsavregningServiceTest {
         årsavregningService = ÅrsavregningService(
             aarsavregningRepository,
             behandlingsresultatService,
-            trygdeavgiftService,
             totalBeløpBeregner,
             fagsakService
         )
@@ -187,6 +184,7 @@ internal class ÅrsavregningServiceTest {
                 id = 3
                 fagsak = aktivFagsak.apply { leggTilBehandling(this@behandling) }
             }
+            registrertDato = LocalDate.of(2024, 1, 1).atStartOfDay().toInstant(ZoneOffset.UTC);
         }
 
         val eldreBehandlingsresultat = lagTidligereBehandlingsresultat().apply {

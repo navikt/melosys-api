@@ -11,10 +11,9 @@ import no.nav.melosys.domain.kodeverk.Medlemskapstyper
 import no.nav.melosys.domain.kodeverk.Trygdedekninger
 import no.nav.melosys.exception.FunksjonellException
 import no.nav.melosys.repository.AarsavregningRepository
-import no.nav.melosys.service.avgift.TrygdeavgiftService
-import no.nav.melosys.service.avgift.TrygdeavgiftService.Companion.UGYLDIGE_SAKSSTATUSER_FOR_TRYGDEAVGIFT
 import no.nav.melosys.service.behandling.BehandlingsresultatService
 import no.nav.melosys.service.sak.FagsakService
+import no.nav.melosys.service.sak.FagsakService.UGYLDIGE_SAKSSTATUSER_FOR_TRYGDEAVGIFT
 import org.apache.commons.beanutils.BeanUtils
 import org.springframework.stereotype.Service
 import org.springframework.transaction.annotation.Transactional
@@ -25,7 +24,6 @@ import java.time.LocalDate
 class ÅrsavregningService(
     private val aarsavregningRepository: AarsavregningRepository,
     private val behandlingsresultatService: BehandlingsresultatService,
-    private val trygdeavgiftService: TrygdeavgiftService,
     private val totalBeløpBeregner: TotalBeløpBeregner,
     private val fagsakService: FagsakService,
 ) {
@@ -129,7 +127,10 @@ class ÅrsavregningService(
         )
     }
 
-    public fun hentSisteBehandlingsresultatMedInnvilgetMedlemskapsperioderOgTilhørendeGrunnlag(saksnummer: String, år: Int): Behandlingsresultat? {
+    fun hentSisteBehandlingsresultatMedInnvilgetMedlemskapsperioderOgTilhørendeGrunnlag(
+        saksnummer: String,
+        år: Int,
+    ): Behandlingsresultat? {
         val fagsak = fagsakService.hentFagsak(saksnummer)
 
         if (fagsak.status in UGYLDIGE_SAKSSTATUSER_FOR_TRYGDEAVGIFT) {
@@ -139,13 +140,8 @@ class ÅrsavregningService(
         return fagsak.behandlinger
             .filter { it.erAvsluttet() }
             .map { behandlingsresultatService.hentBehandlingsresultat(it.id) }
-            .filter {
-                it.medlemskapsperioder.any { it.overlapperMedÅr(år) || it.erInnvilget() }
-            }
-            .filter {
-                it.hentInntektsperioder().isNotEmpty()
-                    && it.hentSkatteforholdTilNorge().isNotEmpty()
-            }
+            .filter { it.erInnvilgetOgOverlapperMedÅr(år) }
+            .filter { it.harInntektOgSkattePerioder() }
             .sortedBy { it.registrertDato }
             .lastOrNull()
     }

@@ -49,6 +49,7 @@ class SkattehendelserConsumer(
     private fun finnSakMedTrygdeavgift(aktørId: String): List<Fagsak> {
         return fagsakService.hentFagsakerMedAktør(Aktoersroller.BRUKER, aktørId)
             .filter {
+                //FIXME MELOSYS-6862
                 trygdeavgiftService.harFagsakBehandlingerMedTrygdeavgift(it.saksnummer)
             }
     }

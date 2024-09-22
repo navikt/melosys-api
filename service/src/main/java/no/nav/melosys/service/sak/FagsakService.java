@@ -44,6 +44,9 @@ public class FagsakService {
 
     private final Counter sakerOpprettet = Metrics.counter(SAKER_OPPRETTET);
 
+    public static final List<Saksstatuser> UGYLDIGE_SAKSSTATUSER_FOR_TRYGDEAVGIFT =
+        Arrays.asList(Saksstatuser.ANNULLERT, Saksstatuser.OPPHØRT, Saksstatuser.HENLAGT, Saksstatuser.HENLAGT_BORTFALT, Saksstatuser.VIDERESENDT);
+
     public FagsakService(FagsakRepository fagsakRepository,
                          BehandlingService behandlingService,
                          KontaktopplysningService kontaktopplysningService,
@@ -135,7 +138,7 @@ public class FagsakService {
 
     @Transactional
     public Fagsak nyFagsakOgBehandling(OpprettSakRequest opprettSakRequest) {
-        String saksnummer  = hentNesteSaksnummer();
+        String saksnummer = hentNesteSaksnummer();
         Fagsak fagsak = new Fagsak(
             saksnummer,
             null,

@@ -1,9 +1,9 @@
 package no.nav.melosys.service.avgift
 
 import no.nav.melosys.domain.Behandlingsresultat
-import no.nav.melosys.domain.kodeverk.Saksstatuser
 import no.nav.melosys.service.behandling.BehandlingsresultatService
 import no.nav.melosys.service.sak.FagsakService
+import no.nav.melosys.service.sak.FagsakService.UGYLDIGE_SAKSSTATUSER_FOR_TRYGDEAVGIFT
 import org.springframework.stereotype.Service
 import org.springframework.transaction.annotation.Transactional
 
@@ -13,30 +13,20 @@ class TrygdeavgiftService(
     private val behandlingsresultatService: BehandlingsresultatService,
     private val trygdeavgiftMottakerService: TrygdeavgiftMottakerService,
 ) {
-    companion object {
-        val UGYLDIGE_SAKSSTATUSER_FOR_TRYGDEAVGIFT =
-            listOf(Saksstatuser.ANNULLERT, Saksstatuser.OPPHØRT, Saksstatuser.HENLAGT, Saksstatuser.HENLAGT_BORTFALT, Saksstatuser.VIDERESENDT)
-    }
 
     @Transactional(readOnly = true)
-    fun harFagsakBehandlingerMedTrygdeavgift(saksnummer: String, sjekkFakturaserie: Boolean = false): Boolean =
-        hentFakturerbarTrygdeavgiftBehandlingsresultater(saksnummer, sjekkFakturaserie).isNotEmpty()
-
-    private fun hentFakturerbarTrygdeavgiftBehandlingsresultater(
-        saksnummer: String,
-        sjekkFakturaserie: Boolean = false,
-    ): List<Behandlingsresultat> {
+    fun harFagsakBehandlingerMedTrygdeavgift(saksnummer: String, sjekkFakturaserie: Boolean = false): Boolean {
         val fagsak = fagsakService.hentFagsak(saksnummer)
 
         if (fagsak.status in UGYLDIGE_SAKSSTATUSER_FOR_TRYGDEAVGIFT) {
-            return emptyList()
+            return false
         }
 
         return fagsak.behandlinger
             .map { behandlingsresultatService.hentBehandlingsresultat(it.id) }
             .filter {
                 harFakturerbarTrygdeavgift(it, sjekkFakturaserie)
-            }
+            }.isNotEmpty()
     }
 
     @Transactional
