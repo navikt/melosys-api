@@ -312,7 +312,7 @@ public class Behandlingsresultat extends RegistreringsInfo {
             .orElse(null);
     }
 
-    public boolean erInnvilgetOgOverlapperMedÅr(int år) {
+    public boolean harInnvilgetMedlemskapsperiodeSomOverlapperMedÅr(int år) {
         return this.getMedlemskapsperioder().stream()
             .anyMatch(periode -> periode.overlapperMedÅr(år) && periode.erInnvilget());
     }
