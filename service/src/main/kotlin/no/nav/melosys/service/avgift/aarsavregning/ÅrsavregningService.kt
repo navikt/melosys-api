@@ -141,7 +141,7 @@ class ÅrsavregningService(
             .filter { it.erAvsluttet() }
             .map { behandlingsresultatService.hentBehandlingsresultat(it.id) }
             .filter { it.erInnvilgetOgOverlapperMedÅr(år) }
-            .filter { it.harInntektOgSkattePerioder() }
+            .filter { it.harInntektOgSkatteforhold() }
             .sortedBy { it.registrertDato }
             .lastOrNull()
     }

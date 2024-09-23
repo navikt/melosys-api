@@ -317,7 +317,7 @@ public class Behandlingsresultat extends RegistreringsInfo {
             .anyMatch(periode -> periode.overlapperMedÅr(år) && periode.erInnvilget());
     }
 
-    public boolean harInntektOgSkattePerioder() {
+    public boolean harInntektOgSkatteforhold() {
         return !this.hentInntektsperioder().isEmpty()
             && !this.hentSkatteforholdTilNorge().isEmpty();
     }
