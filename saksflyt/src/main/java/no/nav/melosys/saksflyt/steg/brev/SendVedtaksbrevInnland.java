@@ -8,6 +8,7 @@ import no.nav.melosys.domain.Anmodningsperiode;
 import no.nav.melosys.domain.Behandling;
 import no.nav.melosys.domain.Behandlingsresultat;
 import no.nav.melosys.domain.Lovvalgsperiode;
+import no.nav.melosys.domain.avklartefakta.AvklartYrkesgruppeType;
 import no.nav.melosys.domain.avklartefakta.Avklartefakta;
 import no.nav.melosys.domain.brev.DoksysBrevbestilling;
 import no.nav.melosys.domain.brev.Mottaker;
@@ -109,10 +110,10 @@ public class SendVedtaksbrevInnland implements StegBehandler {
         } else if (resultat.erInnvilgelse()) {
             boolean erUtsendtArbeidstakerEllerSelvstendig = behandling.getTema() == Behandlingstema.UTSENDT_ARBEIDSTAKER || behandling.getTema() == Behandlingstema.UTSENDT_SELVSTENDIG || behandling.getTema() == Behandlingstema.ARBEID_KUN_NORGE;
             boolean erStorbritanniaBestemmelse = lovvalgsperiode.erEftaStorbritannia() && erUtsendtArbeidstakerEllerSelvstendig;
-            boolean erArbeidKunNorge = erUtsendtArbeidstakerEllerSelvstendig && lovvalgsperiode.erArbeidKunNorge() && resultat.getAvklartefakta().stream().anyMatch(fakta -> fakta.getType() == Avklartefaktatyper.YRKESGRUPPE && fakta.getFakta() == Yrkesgrupper.ORDINAER.name());
+            boolean erArbeidKunNorge = erUtsendtArbeidstakerEllerSelvstendig && lovvalgsperiode.erArbeidKunNorge() && resultat.getAvklartefakta().stream().anyMatch(fakta -> fakta.getType() == Avklartefaktatyper.YRKESGRUPPE && fakta.getFakta().equals(AvklartYrkesgruppeType.ORDINAER.name()));
 
             sendInnvilgelsesbrev(behandling, resultat, saksbehandler, begrunnelseKode, fritekst, erStorbritanniaBestemmelse || erArbeidKunNorge);
-            if ((unleash.isEnabled(ToggleName.MELOSYS_KONVENSJON_EFTA_LAND_OG_STORBRITANNIA) || unleash.isEnabled(ToggleName.MELOSYS_ARBEID_KUN_NORGE)) && erStorbritanniaBestemmelse || erArbeidKunNorge) {
+            if ((unleash.isEnabled(ToggleName.MELOSYS_KONVENSJON_EFTA_LAND_OG_STORBRITANNIA) || unleash.isEnabled(ToggleName.MELOSYS_ARBEID_KUN_NORGE)) && (erStorbritanniaBestemmelse || erArbeidKunNorge)) {
                 sendAttestA1(behandling, saksbehandler, begrunnelseKode, fritekst);
             }
             log.info("Sendt innvilgelsesbrev for behandling {}", behandling.getId());
