@@ -10,6 +10,7 @@ import io.getunleash.FakeUnleash;
 import no.nav.melosys.domain.*;
 import no.nav.melosys.domain.adresse.StrukturertAdresse;
 import no.nav.melosys.domain.avklartefakta.AvklartVirksomhet;
+import no.nav.melosys.domain.avklartefakta.AvklartYrkesgruppeType;
 import no.nav.melosys.domain.avklartefakta.Avklartefakta;
 import no.nav.melosys.domain.brev.DoksysBrevbestilling;
 import no.nav.melosys.domain.brev.Mottaker;
@@ -19,9 +20,11 @@ import no.nav.melosys.domain.kodeverk.begrunnelser.Endretperiode;
 import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingsresultattyper;
 import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingstema;
 import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingstyper;
+import no.nav.melosys.domain.kodeverk.lovvalgsbestemmelser.Lovvalgbestemmelser_883_2004;
 import no.nav.melosys.domain.kodeverk.lovvalgsbestemmelser.Lovvalgbestemmelser_konv_efta_storbritannia;
 import no.nav.melosys.domain.kodeverk.lovvalgsbestemmelser.Tilleggsbestemmelser_883_2004;
 import no.nav.melosys.domain.kodeverk.yrker.Yrkesaktivitetstyper;
+import no.nav.melosys.domain.kodeverk.yrker.Yrkesgrupper;
 import no.nav.melosys.domain.mottatteopplysninger.MottatteOpplysninger;
 import no.nav.melosys.domain.mottatteopplysninger.Soeknad;
 import no.nav.melosys.domain.mottatteopplysninger.data.ForetakUtland;
@@ -130,6 +133,41 @@ class SendVedtaksbrevInnlandTest {
         fakeUnleash.enable(ToggleName.MELOSYS_KONVENSJON_EFTA_LAND_OG_STORBRITANNIA);
         when(behandlingsresultatService.hentBehandlingsresultat(BEHANDLINGID))
             .thenReturn(lagBehandlingsresultat(lagInnvilgetLovvalgsperiode(Lovvalgbestemmelser_konv_efta_storbritannia.KONV_EFTA_STORBRITANNIA_ART13_3A)));
+
+
+        sendVedtaksbrevInnland.utfør(lagProsessinstans());
+
+        verify(prosessinstansService, times(2)).opprettProsessinstanserSendBrev(eq(behandling), doksysBrevbestillingArgumentCaptor.capture(), any());
+
+        List<DoksysBrevbestilling> capturedValues = doksysBrevbestillingArgumentCaptor.getAllValues();
+        assertThat(capturedValues).hasSize(2);
+
+        assertThat(capturedValues.get(0).getProduserbartdokument()).isEqualTo(INNVILGELSE_EFTA_STORBRITANNIA);
+        assertThat(capturedValues.get(1).getProduserbartdokument()).isEqualTo(ATTEST_A1);
+    }
+
+    @Test
+    void utfør_innvilgelse11_3_SokkelSkip_vedtak() {
+        fakeUnleash.enable(ToggleName.MELOSYS_ARBEID_KUN_NORGE);
+        when(behandlingsresultatService.hentBehandlingsresultat(BEHANDLINGID))
+            .thenReturn(lagBehandlingsresultatMedAvklarteFakta(lagInnvilgetLovvalgsperiode(FO_883_2004_ART11_3A), Set.of(lagAvklarteFakta(Avklartefaktatyper.YRKESGRUPPE, AvklartYrkesgruppeType.SOKKEL_ELLER_SKIP.name(), ""))));
+
+
+        sendVedtaksbrevInnland.utfør(lagProsessinstans());
+
+        verify(prosessinstansService, times(1)).opprettProsessinstanserSendBrev(eq(behandling), doksysBrevbestillingArgumentCaptor.capture(), any());
+
+        List<DoksysBrevbestilling> capturedValues = doksysBrevbestillingArgumentCaptor.getAllValues();
+        assertThat(capturedValues).hasSize(1);
+
+        assertThat(capturedValues.get(0).getProduserbartdokument()).isEqualTo(INNVILGELSE_YRKESAKTIV);
+    }
+
+    @Test
+    void utfør_innvilgelse11_3_Yrkesaktiv_vedtak() {
+        fakeUnleash.enable(ToggleName.MELOSYS_ARBEID_KUN_NORGE);
+        when(behandlingsresultatService.hentBehandlingsresultat(BEHANDLINGID))
+            .thenReturn(lagBehandlingsresultatMedAvklarteFakta(lagInnvilgetLovvalgsperiode(FO_883_2004_ART11_3A), Set.of(lagAvklarteFakta(Avklartefaktatyper.YRKESGRUPPE, AvklartYrkesgruppeType.ORDINAER.name(), ""))));
 
 
         sendVedtaksbrevInnland.utfør(lagProsessinstans());
@@ -582,8 +620,27 @@ class SendVedtaksbrevInnlandTest {
         return utenlandskLovvalgResultat;
     }
 
+    private static Behandlingsresultat lagBehandlingsresultatMedAvklarteFakta(Lovvalgsperiode periode, Set<Avklartefakta> avklartefakta) {
+        Behandlingsresultat behandlingsresultat = new Behandlingsresultat();
+        behandlingsresultat.setLovvalgsperioder(Set.of(periode));
+        behandlingsresultat.setType(Behandlingsresultattyper.FASTSATT_LOVVALGSLAND);
+        behandlingsresultat.setFastsattAvLand(Land_iso2.NO);
+        behandlingsresultat.setVilkaarsresultater(Collections.emptySet());
+        behandlingsresultat.setAvklartefakta(avklartefakta);
+
+        return behandlingsresultat;
+    }
+
     private static Behandlingsresultat lagBehandlingsresultatUtenPerioder(Behandlingsresultattyper behandlingstype) {
         return lagBehandlingsresultat(behandlingstype, Collections.emptySet(), Land_iso2.NO);
+    }
+
+    private static Avklartefakta lagAvklarteFakta(Avklartefaktatyper type, String fakta, String subjekt) {
+        Avklartefakta arbeidsgiverFaktum = new Avklartefakta();
+        arbeidsgiverFaktum.setSubjekt(subjekt);
+        arbeidsgiverFaktum.setType(type);
+        arbeidsgiverFaktum.setFakta(fakta);
+        return arbeidsgiverFaktum;
     }
 
     private static AvklartVirksomhet lagNorskSelvstendigVirksomhet() {

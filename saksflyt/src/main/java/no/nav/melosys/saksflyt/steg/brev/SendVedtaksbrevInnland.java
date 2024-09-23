@@ -8,6 +8,7 @@ import no.nav.melosys.domain.Anmodningsperiode;
 import no.nav.melosys.domain.Behandling;
 import no.nav.melosys.domain.Behandlingsresultat;
 import no.nav.melosys.domain.Lovvalgsperiode;
+import no.nav.melosys.domain.avklartefakta.AvklartYrkesgruppeType;
 import no.nav.melosys.domain.avklartefakta.Avklartefakta;
 import no.nav.melosys.domain.brev.DoksysBrevbestilling;
 import no.nav.melosys.domain.brev.Mottaker;
@@ -18,6 +19,7 @@ import no.nav.melosys.domain.kodeverk.Mottakerroller;
 import no.nav.melosys.domain.kodeverk.begrunnelser.Endretperiode;
 import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingstema;
 import no.nav.melosys.domain.kodeverk.brev.Produserbaredokumenter;
+import no.nav.melosys.domain.kodeverk.yrker.Yrkesgrupper;
 import no.nav.melosys.domain.mottatteopplysninger.MottatteOpplysninger;
 import no.nav.melosys.exception.FunksjonellException;
 import no.nav.melosys.featuretoggle.ToggleName;
@@ -106,9 +108,12 @@ public class SendVedtaksbrevInnland implements StegBehandler {
             sendUtpekingsbrev(behandling, saksbehandler, fritekst);
             log.info("Sendt utpekingsbrev for behandling {}", behandling.getId());
         } else if (resultat.erInnvilgelse()) {
-            boolean erStorbritanniaBestemmelseEllerArbeidKunNorge = lovvalgsperiode.erEftaStorbritannia() || lovvalgsperiode.erArbeidKunNorge();
-            sendInnvilgelsesbrev(behandling, resultat, saksbehandler, begrunnelseKode, fritekst, erStorbritanniaBestemmelseEllerArbeidKunNorge);
-            if (unleash.isEnabled(ToggleName.MELOSYS_KONVENSJON_EFTA_LAND_OG_STORBRITANNIA) && erStorbritanniaBestemmelseEllerArbeidKunNorge) {
+            boolean erUtsendtArbeidstakerEllerSelvstendig = behandling.getTema() == Behandlingstema.UTSENDT_ARBEIDSTAKER || behandling.getTema() == Behandlingstema.UTSENDT_SELVSTENDIG || behandling.getTema() == Behandlingstema.ARBEID_KUN_NORGE;
+            boolean erStorbritanniaBestemmelse = lovvalgsperiode.erEftaStorbritannia() && erUtsendtArbeidstakerEllerSelvstendig;
+            boolean erArbeidKunNorge = erUtsendtArbeidstakerEllerSelvstendig && lovvalgsperiode.erArbeidKunNorge() && resultat.getAvklartefakta().stream().anyMatch(fakta -> fakta.getType() == Avklartefaktatyper.YRKESGRUPPE && fakta.getFakta().equals(AvklartYrkesgruppeType.ORDINAER.name()));
+
+            sendInnvilgelsesbrev(behandling, resultat, saksbehandler, begrunnelseKode, fritekst, erStorbritanniaBestemmelse || erArbeidKunNorge);
+            if ((unleash.isEnabled(ToggleName.MELOSYS_KONVENSJON_EFTA_LAND_OG_STORBRITANNIA) || unleash.isEnabled(ToggleName.MELOSYS_ARBEID_KUN_NORGE)) && (erStorbritanniaBestemmelse || erArbeidKunNorge)) {
                 sendAttestA1(behandling, saksbehandler, begrunnelseKode, fritekst);
             }
             log.info("Sendt innvilgelsesbrev for behandling {}", behandling.getId());
@@ -148,9 +153,9 @@ public class SendVedtaksbrevInnland implements StegBehandler {
                                       String saksbehandler,
                                       String begrunnelseKode,
                                       String fritekst,
-                                      Boolean erStorbritannia) {
+                                      Boolean skalSendeEftaStorbritanniaBrev) {
 
-        Produserbaredokumenter produserbaredokument = hentProduserbarDokumentForInnvilgelse(behandling, resultat, erStorbritannia);
+        Produserbaredokumenter produserbaredokument = hentProduserbarDokumentForInnvilgelse(behandling, resultat, skalSendeEftaStorbritanniaBrev);
 
         List<Mottaker> mottakerListe = new ArrayList<>(List.of(Mottaker.medRolle(Mottakerroller.BRUKER)));
         if (brevSendesTilStatligSkatteoppkreving(
@@ -176,7 +181,7 @@ public class SendVedtaksbrevInnland implements StegBehandler {
             Mottaker.medRolle(Mottakerroller.BRUKER)
         ));
 
-        if(behandling.getFagsak().harBrukerFullmektig()) {
+        if (behandling.getFagsak().harBrukerFullmektig()) {
             mottakerListe.add(Mottaker.medRolle(Mottakerroller.FULLMEKTIG));
         }
 
@@ -194,10 +199,9 @@ public class SendVedtaksbrevInnland implements StegBehandler {
 
 
     @NotNull
-    private Produserbaredokumenter hentProduserbarDokumentForInnvilgelse(Behandling behandling, Behandlingsresultat resultat, boolean erStorbritanniaBestemmelse) {
-        boolean erUtsendtArbeidstakerEllerSelvstendig = behandling.getTema() == Behandlingstema.UTSENDT_ARBEIDSTAKER || behandling.getTema() == Behandlingstema.UTSENDT_SELVSTENDIG || behandling.getTema() == Behandlingstema.ARBEID_KUN_NORGE;
+    private Produserbaredokumenter hentProduserbarDokumentForInnvilgelse(Behandling behandling, Behandlingsresultat resultat, boolean skalSendeEftaStorbritanniaBrev) {
 
-        if ((erStorbritanniaBestemmelse && erUtsendtArbeidstakerEllerSelvstendig) && unleash.isEnabled(ToggleName.MELOSYS_KONVENSJON_EFTA_LAND_OG_STORBRITANNIA)) {
+        if ((unleash.isEnabled(ToggleName.MELOSYS_KONVENSJON_EFTA_LAND_OG_STORBRITANNIA) || unleash.isEnabled(ToggleName.MELOSYS_ARBEID_KUN_NORGE)) && skalSendeEftaStorbritanniaBrev) {
             return INNVILGELSE_EFTA_STORBRITANNIA;
         }
 
