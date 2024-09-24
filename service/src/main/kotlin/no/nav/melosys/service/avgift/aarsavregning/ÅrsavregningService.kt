@@ -113,7 +113,6 @@ class ÅrsavregningService(
 
     private fun lagÅrsavregningModelFraÅrsavregning(årsavregning: Årsavregning): ÅrsavregningModel {
         val år = årsavregning.aar
-        val behandlingId = årsavregning.behandlingsresultat.behandling.id
 
         val modellen = ÅrsavregningModel(
             år = år,
