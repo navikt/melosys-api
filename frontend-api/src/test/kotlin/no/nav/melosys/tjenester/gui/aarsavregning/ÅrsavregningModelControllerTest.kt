@@ -211,7 +211,6 @@ internal class ÅrsavregningModelControllerTest {
   "avvikFunnet": false,
   "nyttGrunnlag": null,
   "endeligAvgift": null,
-  antallFerdigBehandledeÅrsavregninger: 3,
   "avregning": {
     "nyttTotalbeloep": 24280,
     "tidligereFakturertBeloep": 21170,
