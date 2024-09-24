@@ -11,8 +11,9 @@ import no.nav.melosys.domain.kodeverk.Medlemskapstyper
 import no.nav.melosys.domain.kodeverk.Trygdedekninger
 import no.nav.melosys.exception.FunksjonellException
 import no.nav.melosys.repository.AarsavregningRepository
-import no.nav.melosys.service.avgift.TrygdeavgiftService
 import no.nav.melosys.service.behandling.BehandlingsresultatService
+import no.nav.melosys.service.sak.FagsakService
+import no.nav.melosys.service.sak.FagsakService.UGYLDIGE_SAKSSTATUSER_FOR_TRYGDEAVGIFT
 import org.apache.commons.beanutils.BeanUtils
 import org.springframework.stereotype.Service
 import org.springframework.transaction.annotation.Transactional
@@ -23,8 +24,8 @@ import java.time.LocalDate
 class ÅrsavregningService(
     private val aarsavregningRepository: AarsavregningRepository,
     private val behandlingsresultatService: BehandlingsresultatService,
-    private val trygdeavgiftService: TrygdeavgiftService,
-    private val totalBeløpBeregner: TotalBeløpBeregner
+    private val totalBeløpBeregner: TotalBeløpBeregner,
+    private val fagsakService: FagsakService,
 ) {
 
     @Transactional(readOnly = true)
@@ -66,7 +67,10 @@ class ÅrsavregningService(
             behandlingsresultatService.lagreOgFlush(behandlingsresultat)
         }
 
-        val tidligereBehandlingsresultatMedAvgift = finnTidligereBehandlingsresultatMedAvgift(behandlingsresultat, gjelderÅr)
+        val tidligereBehandlingsresultatMedAvgift = hentSisteBehandlingsresultatMedInnvilgetMedlemskapsperiodeOgAvgiftsgrunnlag(
+            behandlingsresultat.behandling.fagsak.saksnummer,
+            gjelderÅr
+        )
         if (tidligereBehandlingsresultatMedAvgift != null) {
             replikerMedlemskapsperioder(
                 behandlingsresultat,
@@ -123,13 +127,23 @@ class ÅrsavregningService(
         )
     }
 
-    private fun finnTidligereBehandlingsresultatMedAvgift(behandlingsresultat: Behandlingsresultat, gjelderÅr: Int): Behandlingsresultat? {
-        val saksnummer = behandlingsresultat.behandling.fagsak.saksnummer
-        val behandling = trygdeavgiftService.finnSistFakturerbarTrygdeavgiftsbehandlingForÅr(saksnummer, gjelderÅr) ?: return null
-        return if (behandlingsresultat.behandling == behandling) {
-            null
-        } else
-            behandlingsresultatService.hentBehandlingsresultat(behandling.id)
+    fun hentSisteBehandlingsresultatMedInnvilgetMedlemskapsperiodeOgAvgiftsgrunnlag(
+        saksnummer: String,
+        år: Int,
+    ): Behandlingsresultat? {
+        val fagsak = fagsakService.hentFagsak(saksnummer)
+
+        if (fagsak.status in UGYLDIGE_SAKSSTATUSER_FOR_TRYGDEAVGIFT) {
+            return null
+        }
+
+        return fagsak.behandlinger
+            .filter { it.erAvsluttet() }
+            .map { behandlingsresultatService.hentBehandlingsresultat(it.id) }
+            .filter { it.harInnvilgetMedlemskapsperiodeSomOverlapperMedÅr(år) }
+            .filter { it.harInntektOgSkatteforhold() }
+            .sortedBy { it.registrertDato }
+            .lastOrNull()
     }
 
     private fun hentTidligereTrygdeavgiftsgrunnlag(år: Int, behandlingsresultat: Behandlingsresultat?): Trygdeavgiftsgrunnlag? {

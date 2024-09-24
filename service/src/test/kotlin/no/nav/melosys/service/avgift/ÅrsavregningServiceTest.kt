@@ -5,18 +5,18 @@ import io.kotest.matchers.shouldBe
 import io.mockk.every
 import io.mockk.impl.annotations.RelaxedMockK
 import io.mockk.junit5.MockKExtension
-import no.nav.melosys.domain.Behandling
-import no.nav.melosys.domain.Behandlingsresultat
-import no.nav.melosys.domain.Medlemskapsperiode
-import no.nav.melosys.domain.VedtakMetadata
+import io.mockk.verify
+import no.nav.melosys.domain.*
 import no.nav.melosys.domain.avgift.*
 import no.nav.melosys.domain.kodeverk.*
 import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingsresultattyper
+import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingsstatus
 import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingstyper
 import no.nav.melosys.exception.FunksjonellException
 import no.nav.melosys.repository.AarsavregningRepository
 import no.nav.melosys.service.avgift.aarsavregning.*
 import no.nav.melosys.service.behandling.BehandlingsresultatService
+import no.nav.melosys.service.sak.FagsakService
 import no.nav.melosys.sikkerhet.context.SpringSubjectHandler
 import no.nav.melosys.sikkerhet.context.TestSubjectHandler
 import org.junit.jupiter.api.BeforeEach
@@ -24,6 +24,7 @@ import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.extension.ExtendWith
 import java.math.BigDecimal
 import java.time.LocalDate
+import java.time.ZoneOffset
 import java.util.*
 
 @ExtendWith(MockKExtension::class)
@@ -38,8 +39,9 @@ internal class ÅrsavregningServiceTest {
     @RelaxedMockK
     private lateinit var totalBeløpBeregner: TotalBeløpBeregner
 
+
     @RelaxedMockK
-    private lateinit var trygdeavgiftService: TrygdeavgiftService
+    private lateinit var fagsakService: FagsakService
 
     private lateinit var årsavregningService: ÅrsavregningService
 
@@ -48,8 +50,8 @@ internal class ÅrsavregningServiceTest {
         årsavregningService = ÅrsavregningService(
             aarsavregningRepository,
             behandlingsresultatService,
-            trygdeavgiftService,
             totalBeløpBeregner,
+            fagsakService
         )
         SpringSubjectHandler.set(TestSubjectHandler())
     }
@@ -171,6 +173,50 @@ internal class ÅrsavregningServiceTest {
 
         årsavregningService.oppdaterTotalbelop(1L, BigDecimal.valueOf(12.4), BigDecimal.valueOf(5.2))
         behandlingsresultat.årsavregning.tilFaktureringBeloep shouldBe BigDecimal.valueOf(-7.2)
+    }
+
+    @Test
+    fun `henter nyeste behandlingsresultat med grunnlag og riktig år for opprettelse av ny årsavregning`() {
+        val aktivFagsak = FagsakTestFactory.Builder().saksnummer("123456").build()
+        val årsavregningBehandlingsresultat = Behandlingsresultat().apply {
+            id = 3
+            behandling = Behandling().apply behandling@{
+                id = 3
+                fagsak = aktivFagsak.apply { leggTilBehandling(this@behandling) }
+            }
+            registrertDato = LocalDate.of(2024, 1, 1).atStartOfDay().toInstant(ZoneOffset.UTC);
+        }
+
+        val eldreBehandlingsresultat = lagTidligereBehandlingsresultat().apply {
+            id = 1
+            behandling = Behandling().apply behandling@{
+                id = 1
+                status = Behandlingsstatus.AVSLUTTET
+                fagsak = aktivFagsak.apply { leggTilBehandling(this@behandling) }
+            }
+            registrertDato = LocalDate.of(2023, 1, 1).atStartOfDay().toInstant(ZoneOffset.UTC);
+            medlemskapsperioder = listOf(lagMedlemskapsperiode("2023-09-01", "2023-12-31"))
+        }
+
+        val nyesteBehandlingsresultat = lagTidligereBehandlingsresultat().apply {
+            id = 2
+            behandling = Behandling().apply behandling@{
+                id = 2
+                status = Behandlingsstatus.AVSLUTTET
+                fagsak = aktivFagsak.apply { leggTilBehandling(this@behandling) }
+            }
+            registrertDato = LocalDate.of(2023, 1, 10).atStartOfDay().toInstant(ZoneOffset.UTC);
+            medlemskapsperioder = listOf(lagMedlemskapsperiode("2023-01-01", "2023-08-31"))
+        }
+
+
+        every { fagsakService.hentFagsak("123456") } returns aktivFagsak
+        every { behandlingsresultatService.hentBehandlingsresultat(1) } returns eldreBehandlingsresultat
+        every { behandlingsresultatService.hentBehandlingsresultat(2) } returns nyesteBehandlingsresultat
+
+        årsavregningService.hentSisteBehandlingsresultatMedInnvilgetMedlemskapsperiodeOgAvgiftsgrunnlag("123456", 2023)
+            .shouldBe(nyesteBehandlingsresultat)
+        verify(exactly = 2) { behandlingsresultatService.hentBehandlingsresultat(any()) }
     }
 
     fun lagTidligereBehandlingsresultat(): Behandlingsresultat = Behandlingsresultat().apply {

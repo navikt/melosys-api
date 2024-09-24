@@ -20,7 +20,6 @@ import no.nav.melosys.saksflyt.TestdataFactory
 import no.nav.melosys.saksflyt.TestdataFactory.lagBruker
 import no.nav.melosys.saksflytapi.domain.ProsessDataKey
 import no.nav.melosys.saksflytapi.domain.Prosessinstans
-import no.nav.melosys.service.avgift.TrygdeavgiftService
 import no.nav.melosys.service.avgift.aarsavregning.ÅrsavregningModel
 import no.nav.melosys.service.avgift.aarsavregning.ÅrsavregningService
 import no.nav.melosys.service.behandling.BehandlingService
@@ -44,9 +43,6 @@ class OpprettÅrsavregningModelBehandlingTest {
     private lateinit var behandslingsresultatService: BehandlingsresultatService
 
     @MockK
-    private lateinit var trygdeavgiftService: TrygdeavgiftService
-
-    @MockK
     private lateinit var persondataService: PersondataService
 
     @MockK
@@ -58,7 +54,6 @@ class OpprettÅrsavregningModelBehandlingTest {
     fun setUp() {
         opprettÅrsavregningBehandling = OpprettÅrsavregningBehandling(
             fagsakService,
-            trygdeavgiftService,
             behandlingService,
             behandslingsresultatService,
             årsavregningService
@@ -78,6 +73,7 @@ class OpprettÅrsavregningModelBehandlingTest {
         }
 
         val behandlingsresultat = Behandlingsresultat().apply {
+            this.behandling = behandling
             id = 2
             type = Behandlingsresultattyper.IKKE_FASTSATT
         }
@@ -85,8 +81,12 @@ class OpprettÅrsavregningModelBehandlingTest {
         every { persondataService.hentAktørIdForIdent(any()) } returns AKTØR_ID
         every { fagsakService.hentFagsakerMedAktør(Aktoersroller.BRUKER, AKTØR_ID) } returns listOf(fagsak)
         every { fagsakService.hentFagsak(SAKSNUMMER) } returns fagsak
-        every { trygdeavgiftService.harFagsakBehandlingerMedTrygdeavgift(fagsak.saksnummer) } returns true
-        every { trygdeavgiftService.finnSistFakturerbarTrygdeavgiftsbehandlingForÅr(fagsak.saksnummer, any()) } returns behandling
+        every {
+            årsavregningService.hentSisteBehandlingsresultatMedInnvilgetMedlemskapsperiodeOgAvgiftsgrunnlag(
+                fagsak.saksnummer,
+                any()
+            )
+        } returns behandlingsresultat
 
         every {
             behandlingService.nyBehandling(
@@ -103,7 +103,16 @@ class OpprettÅrsavregningModelBehandlingTest {
         } returns årsavregningsBehandling
 
         every { behandslingsresultatService.hentBehandlingsresultat(årsavregningsBehandling.id) } returns behandlingsresultat
-        every { årsavregningService.opprettÅrsavregning(any(), any()) } returns ÅrsavregningModel(2023, null, emptyList(), null, emptyList(), null, null, null)
+        every { årsavregningService.opprettÅrsavregning(any(), any()) } returns ÅrsavregningModel(
+            2023,
+            null,
+            emptyList(),
+            null,
+            emptyList(),
+            null,
+            null,
+            null
+        )
 
         opprettÅrsavregningBehandling.utfør(prosessinstans)
 
@@ -122,15 +131,19 @@ class OpprettÅrsavregningModelBehandlingTest {
         every { persondataService.hentAktørIdForIdent(any()) } returns AKTØR_ID
         every { fagsakService.hentFagsakerMedAktør(Aktoersroller.BRUKER, AKTØR_ID) } returns listOf(fagsak)
         every { fagsakService.hentFagsak(SAKSNUMMER) } returns fagsak
-        every { trygdeavgiftService.harFagsakBehandlingerMedTrygdeavgift(fagsak.saksnummer) } returns true
-        every { trygdeavgiftService.finnSistFakturerbarTrygdeavgiftsbehandlingForÅr(fagsak.saksnummer, any()) } returns null
+        every {
+            årsavregningService.hentSisteBehandlingsresultatMedInnvilgetMedlemskapsperiodeOgAvgiftsgrunnlag(
+                fagsak.saksnummer,
+                any()
+            )
+        } returns null
 
 
         opprettÅrsavregningBehandling.utfør(prosessinstans)
 
 
         verify(exactly = 0) { behandlingService.nyBehandling(any(), any(), any(), any(), any(), any(), any(), any(), any()) }
-        verify { årsavregningService wasNot Called }
+        verify(exactly = 0) { årsavregningService.opprettÅrsavregning(any(), any()) }
     }
 
 
@@ -147,6 +160,7 @@ class OpprettÅrsavregningModelBehandlingTest {
         }
 
         val behandlingsresultat = Behandlingsresultat().apply {
+            this.behandling = behandling
             id = 2
             type = Behandlingsresultattyper.IKKE_FASTSATT
             årsavregning = Årsavregning().apply {
@@ -157,11 +171,24 @@ class OpprettÅrsavregningModelBehandlingTest {
         every { persondataService.hentAktørIdForIdent(any()) } returns AKTØR_ID
         every { fagsakService.hentFagsakerMedAktør(Aktoersroller.BRUKER, AKTØR_ID) } returns listOf(fagsak)
         every { fagsakService.hentFagsak(SAKSNUMMER) } returns fagsak
-        every { trygdeavgiftService.harFagsakBehandlingerMedTrygdeavgift(fagsak.saksnummer) } returns true
-        every { trygdeavgiftService.finnSistFakturerbarTrygdeavgiftsbehandlingForÅr(fagsak.saksnummer, any()) } returns behandling
+        every {
+            årsavregningService.hentSisteBehandlingsresultatMedInnvilgetMedlemskapsperiodeOgAvgiftsgrunnlag(
+                fagsak.saksnummer,
+                any()
+            )
+        } returns behandlingsresultat
 
         every { behandslingsresultatService.hentBehandlingsresultat(behandling.id) } returns behandlingsresultat
-        every { årsavregningService.opprettÅrsavregning(any(), any()) } returns ÅrsavregningModel(2023, null, emptyList(), null, emptyList(), null, null, null)
+        every { årsavregningService.opprettÅrsavregning(any(), any()) } returns ÅrsavregningModel(
+            2023,
+            null,
+            emptyList(),
+            null,
+            emptyList(),
+            null,
+            null,
+            null
+        )
         val behandlingSlot = slot<Behandling>()
         every { behandlingService.lagre(capture(behandlingSlot)) } returns Unit
 

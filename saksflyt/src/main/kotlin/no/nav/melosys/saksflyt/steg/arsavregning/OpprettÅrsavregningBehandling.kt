@@ -11,7 +11,6 @@ import no.nav.melosys.saksflyt.steg.StegBehandler
 import no.nav.melosys.saksflytapi.domain.ProsessDataKey
 import no.nav.melosys.saksflytapi.domain.ProsessSteg
 import no.nav.melosys.saksflytapi.domain.Prosessinstans
-import no.nav.melosys.service.avgift.TrygdeavgiftService
 import no.nav.melosys.service.avgift.aarsavregning.ÅrsavregningService
 import no.nav.melosys.service.behandling.BehandlingService
 import no.nav.melosys.service.behandling.BehandlingsresultatService
@@ -24,7 +23,6 @@ private val log = KotlinLogging.logger { }
 @Component
 class OpprettÅrsavregningBehandling(
     private val fagsakService: FagsakService,
-    private val trygdeavgiftService: TrygdeavgiftService,
     private val behandlingService: BehandlingService,
     private val behandslingsresultatService: BehandlingsresultatService,
     private val årsavregningService: ÅrsavregningService
@@ -45,8 +43,11 @@ class OpprettÅrsavregningBehandling(
             return
         }
 
-        val trygdeavgiftsBehandlingMedRelevantPeriode =
-            trygdeavgiftService.finnSistFakturerbarTrygdeavgiftsbehandlingForÅr(sakMedTrygdeavgift.saksnummer, gjelderÅr).also {
+        val trygdeavgiftsBehandlingtMedRelevantPeriode =
+            årsavregningService.hentSisteBehandlingsresultatMedInnvilgetMedlemskapsperiodeOgAvgiftsgrunnlag(
+                sakMedTrygdeavgift.saksnummer,
+                gjelderÅr
+            )?.behandling.also {
                 if (it == null) log.info(
                     "Fant ingen behandlinger med overlappende trygdeavgiftsperiode for sak: ${
                         sakMedTrygdeavgift.saksnummer
@@ -58,7 +59,7 @@ class OpprettÅrsavregningBehandling(
             sakMedTrygdeavgift,
             Behandlingsstatus.VURDER_DOKUMENT,
             Behandlingstyper.ÅRSAVREGNING,
-            trygdeavgiftsBehandlingMedRelevantPeriode.tema,
+            trygdeavgiftsBehandlingtMedRelevantPeriode.tema,
             null,
             null,
             LocalDate.now(),
