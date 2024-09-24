@@ -341,37 +341,6 @@ class SaksbehandlingReglerTest {
 
     private fun tidligereBehandlingSkalReplikeresData() = listOf(
         arguments(
-            Sakstyper.EU_EOS,
-            Sakstemaer.MEDLEMSKAP_LOVVALG,
-            Behandlingstyper.ENDRET_PERIODE,
-            Behandlingstema.UTSENDT_ARBEIDSTAKER,
-            BehandlingHolder().apply {
-                add(
-                    Behandlingstyper.ENDRET_PERIODE,
-                    Behandlingstema.UTSENDT_ARBEIDSTAKER,
-                    Behandlingsresultattyper.AVVIST_KLAGE
-                )
-            }
-        ),
-        arguments(
-            Sakstyper.EU_EOS,
-            Sakstemaer.MEDLEMSKAP_LOVVALG,
-            Behandlingstyper.ENDRET_PERIODE,
-            Behandlingstema.UTSENDT_ARBEIDSTAKER,
-            BehandlingHolder().apply {
-                add(
-                    Behandlingstyper.ENDRET_PERIODE,
-                    Behandlingstema.UTSENDT_ARBEIDSTAKER,
-                    Behandlingsresultattyper.HENLEGGELSE
-                )
-                add(
-                    Behandlingstyper.NY_VURDERING,
-                    Behandlingstema.UTSENDT_ARBEIDSTAKER,
-                    Behandlingsresultattyper.AVVIST_KLAGE
-                )
-            }
-        ),
-        arguments(
             Sakstyper.FTRL,
             Sakstemaer.MEDLEMSKAP_LOVVALG,
             Behandlingstyper.NY_VURDERING,

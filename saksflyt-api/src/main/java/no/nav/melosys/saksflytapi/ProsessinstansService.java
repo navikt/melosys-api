@@ -420,21 +420,6 @@ public class ProsessinstansService {
         lagre(prosessinstans);
     }
 
-    public void opprettProsessinstansForkortPeriode(Behandling behandling,
-                                                    String fritekst,
-                                                    String fritekstSed) {
-        Prosessinstans prosessinstans = new ProsessinstansBuilder()
-            .medBehandling(behandling)
-            .medType(ProsessType.IVERKSETT_VEDTAK_EOS_FORKORT_PERIODE)
-            .medBegrunnelseFritekst(fritekst)
-            .medYtterligereinformasjonSed(fritekstSed)
-            .build();
-
-        prosessinstans.setData(ProsessDataKey.DISTRIBUSJONSTYPE, Distribusjonstype.VEDTAK);
-
-        lagre(prosessinstans);
-    }
-
     public void opprettProsessinstansRegistrerUnntakFraMedlemskap(Behandling behandling, Saksstatuser saksstatus) {
         Prosessinstans prosessinstans = new ProsessinstansBuilder()
             .medBehandling(behandling)
