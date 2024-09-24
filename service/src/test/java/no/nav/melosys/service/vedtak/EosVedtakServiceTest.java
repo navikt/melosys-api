@@ -9,7 +9,6 @@ import no.nav.melosys.domain.*;
 import no.nav.melosys.domain.eessi.BucType;
 import no.nav.melosys.domain.eessi.Institusjon;
 import no.nav.melosys.domain.kodeverk.*;
-import no.nav.melosys.domain.kodeverk.begrunnelser.Endretperiode;
 import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingsresultattyper;
 import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingsstatus;
 import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingstema;
@@ -275,48 +274,6 @@ class EosVedtakServiceTest {
         verifyNoMoreInteractions(prosessinstansService);
     }
 
-    @Test
-    void endreVedtak_fungerer() {
-        final Endretperiode endretperiodeBegrunnelse = Endretperiode.ENDRINGER_ARBEIDSSITUASJON;
-        leggTilMyndighetAktoer();
-        leggTilLovvalgsperiode();
-        when(behandlingsresultatService.hentBehandlingsresultat(anyLong())).thenReturn(behandlingsresultat);
-
-        vedtakService.endreVedtaksperiode(behandling, endretperiodeBegrunnelse, "FRITEKST", "FRITEKST_SED");
-
-        assertThat(behandlingsresultat.getVedtakMetadata()).isNotNull();
-        assertThat(behandlingsresultat.getBegrunnelseFritekst()).isEqualTo("FRITEKST");
-
-        verify(avklartefaktaService).leggTilBegrunnelse(
-            behandlingID,
-            Avklartefaktatyper.AARSAK_ENDRING_PERIODE,
-            endretperiodeBegrunnelse.getKode()
-        );
-
-        verify(prosessinstansService).opprettProsessinstansForkortPeriode(
-            any(Behandling.class),
-            eq("FRITEKST"),
-            eq("FRITEKST_SED")
-        );
-        verify(oppgaveService).ferdigstillOppgaveMedBehandlingID(behandlingID);
-    }
-
-    @Test
-    void endreVedtak_harEksisterendeProsess_kasterException() {
-        when(behandlingsresultatService.hentBehandlingsresultat(anyLong())).thenReturn(behandlingsresultat);
-        leggTilLovvalgsperiode();
-        when(prosessinstansService.harAktivProsessinstans(behandlingID)).thenReturn(true);
-
-        assertThatThrownBy(() -> vedtakService.endreVedtaksperiode(behandling, Endretperiode.ENDRINGER_ARBEIDSSITUASJON, "FRITEKST", "FRITEKST_SED"))
-            .isInstanceOf(FunksjonellException.class)
-            .hasMessageContaining("Det finnes allerede en aktiv prosess for behandling");
-
-        verify(prosessinstansService).harAktivProsessinstans(behandlingID);
-        verifyNoMoreInteractions(avklartefaktaService);
-        verifyNoMoreInteractions(prosessinstansService);
-        verifyNoInteractions(oppgaveService);
-    }
-
     private void mockBehandlingsresultat() {
         when(behandlingsresultatService.hentBehandlingsresultat(behandlingID)).thenReturn(behandlingsresultat);
     }
@@ -344,13 +301,6 @@ class EosVedtakServiceTest {
 
     private Fagsak lagFagsak() {
         return FagsakTestFactory.builder().medBruker().build();
-    }
-
-    private void leggTilMyndighetAktoer() {
-        Aktoer myndighet = new Aktoer();
-        myndighet.setRolle(Aktoersroller.TRYGDEMYNDIGHET);
-        myndighet.setInstitusjonID("SE:SE001");
-        behandling.getFagsak().leggTilAktør(myndighet);
     }
 
     private FattVedtakRequest lagRequest(Behandlingsresultattyper behandlingsresultattype, Vedtakstyper vedtakstype,

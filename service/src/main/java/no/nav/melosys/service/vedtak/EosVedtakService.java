@@ -9,11 +9,9 @@ import no.nav.melosys.domain.Behandling;
 import no.nav.melosys.domain.Behandlingsresultat;
 import no.nav.melosys.domain.VedtakMetadataLagretEvent;
 import no.nav.melosys.domain.eessi.BucType;
-import no.nav.melosys.domain.kodeverk.Avklartefaktatyper;
 import no.nav.melosys.domain.kodeverk.Land_iso2;
 import no.nav.melosys.domain.kodeverk.Sakstyper;
 import no.nav.melosys.domain.kodeverk.Vedtakstyper;
-import no.nav.melosys.domain.kodeverk.begrunnelser.Endretperiode;
 import no.nav.melosys.domain.kodeverk.begrunnelser.Kontroll_begrunnelser;
 import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingsresultattyper;
 import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingsstatus;
@@ -119,27 +117,6 @@ public class EosVedtakService implements FattVedtakInterface {
                 request.getFritekst(), request.getFritekstSed(), mottakerinstitusjoner, request.isKopiTilArbeidsgiver());
         }
 
-        oppgaveService.ferdigstillOppgaveMedBehandlingID(behandling.getId());
-    }
-
-    public void endreVedtaksperiode(Behandling behandling, Endretperiode endretperiode, String fritekst, String fritekstSed) {
-        final long behandlingID = behandling.getId();
-        var behandlingsresultat = behandlingsresultatService.hentBehandlingsresultat(behandlingID);
-        if (!behandlingsresultat.hentLovvalgsperiode().erArtikkel12()) {
-            throw new FunksjonellException("Behandling av forkortet periode gjelder kun art. 12.");
-        }
-        if (prosessinstansService.harAktivProsessinstans(behandlingID)) {
-            throw new FunksjonellException("Det finnes allerede en aktiv prosess for behandling " + behandling);
-        }
-        avklartefaktaService.leggTilBegrunnelse(behandlingID, Avklartefaktatyper.AARSAK_ENDRING_PERIODE, endretperiode.getKode());
-        oppdaterBehandlingsresultat(behandlingsresultat, Vedtakstyper.ENDRINGSVEDTAK, fritekst, null);
-        prosessinstansService.opprettProsessinstansForkortPeriode(
-            behandling,
-            fritekst,
-            fritekstSed
-        );
-        log.info("Endrer vedtaksperiode for sak: {} behandling: {}", behandling.getFagsak().getSaksnummer(),
-            behandlingID);
         oppgaveService.ferdigstillOppgaveMedBehandlingID(behandling.getId());
     }
 
