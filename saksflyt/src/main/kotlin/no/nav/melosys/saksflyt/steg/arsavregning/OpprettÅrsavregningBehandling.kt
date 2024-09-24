@@ -44,7 +44,7 @@ class OpprettÅrsavregningBehandling(
         }
 
         val trygdeavgiftsBehandlingtMedRelevantPeriode =
-            årsavregningService.hentSisteBehandlingsresultatMedInnvilgetMedlemskapsperioderOgTilhørendeGrunnlag(
+            årsavregningService.hentSisteBehandlingsresultatMedInnvilgetMedlemskapsperiodeOgAvgiftsgrunnlag(
                 sakMedTrygdeavgift.saksnummer,
                 gjelderÅr
             )?.behandling.also {

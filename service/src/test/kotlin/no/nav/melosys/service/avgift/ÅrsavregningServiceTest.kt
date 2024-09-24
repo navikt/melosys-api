@@ -214,7 +214,7 @@ internal class ÅrsavregningServiceTest {
         every { behandlingsresultatService.hentBehandlingsresultat(1) } returns eldreBehandlingsresultat
         every { behandlingsresultatService.hentBehandlingsresultat(2) } returns nyesteBehandlingsresultat
 
-        årsavregningService.hentSisteBehandlingsresultatMedInnvilgetMedlemskapsperioderOgTilhørendeGrunnlag("123456", 2023)
+        årsavregningService.hentSisteBehandlingsresultatMedInnvilgetMedlemskapsperiodeOgAvgiftsgrunnlag("123456", 2023)
             .shouldBe(nyesteBehandlingsresultat)
         verify(exactly = 2) { behandlingsresultatService.hentBehandlingsresultat(any()) }
     }

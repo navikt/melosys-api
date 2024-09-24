@@ -82,7 +82,7 @@ class OpprettÅrsavregningModelBehandlingTest {
         every { fagsakService.hentFagsakerMedAktør(Aktoersroller.BRUKER, AKTØR_ID) } returns listOf(fagsak)
         every { fagsakService.hentFagsak(SAKSNUMMER) } returns fagsak
         every {
-            årsavregningService.hentSisteBehandlingsresultatMedInnvilgetMedlemskapsperioderOgTilhørendeGrunnlag(
+            årsavregningService.hentSisteBehandlingsresultatMedInnvilgetMedlemskapsperiodeOgAvgiftsgrunnlag(
                 fagsak.saksnummer,
                 any()
             )
@@ -132,7 +132,7 @@ class OpprettÅrsavregningModelBehandlingTest {
         every { fagsakService.hentFagsakerMedAktør(Aktoersroller.BRUKER, AKTØR_ID) } returns listOf(fagsak)
         every { fagsakService.hentFagsak(SAKSNUMMER) } returns fagsak
         every {
-            årsavregningService.hentSisteBehandlingsresultatMedInnvilgetMedlemskapsperioderOgTilhørendeGrunnlag(
+            årsavregningService.hentSisteBehandlingsresultatMedInnvilgetMedlemskapsperiodeOgAvgiftsgrunnlag(
                 fagsak.saksnummer,
                 any()
             )
@@ -172,7 +172,7 @@ class OpprettÅrsavregningModelBehandlingTest {
         every { fagsakService.hentFagsakerMedAktør(Aktoersroller.BRUKER, AKTØR_ID) } returns listOf(fagsak)
         every { fagsakService.hentFagsak(SAKSNUMMER) } returns fagsak
         every {
-            årsavregningService.hentSisteBehandlingsresultatMedInnvilgetMedlemskapsperioderOgTilhørendeGrunnlag(
+            årsavregningService.hentSisteBehandlingsresultatMedInnvilgetMedlemskapsperiodeOgAvgiftsgrunnlag(
                 fagsak.saksnummer,
                 any()
             )

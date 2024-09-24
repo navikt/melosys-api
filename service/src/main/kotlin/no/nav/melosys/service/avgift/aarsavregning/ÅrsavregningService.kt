@@ -67,7 +67,7 @@ class ÅrsavregningService(
             behandlingsresultatService.lagreOgFlush(behandlingsresultat)
         }
 
-        val tidligereBehandlingsresultatMedAvgift = hentSisteBehandlingsresultatMedInnvilgetMedlemskapsperioderOgTilhørendeGrunnlag(
+        val tidligereBehandlingsresultatMedAvgift = hentSisteBehandlingsresultatMedInnvilgetMedlemskapsperiodeOgAvgiftsgrunnlag(
             behandlingsresultat.behandling.fagsak.saksnummer,
             gjelderÅr
         )
@@ -127,7 +127,7 @@ class ÅrsavregningService(
         )
     }
 
-    fun hentSisteBehandlingsresultatMedInnvilgetMedlemskapsperioderOgTilhørendeGrunnlag(
+    fun hentSisteBehandlingsresultatMedInnvilgetMedlemskapsperiodeOgAvgiftsgrunnlag(
         saksnummer: String,
         år: Int,
     ): Behandlingsresultat? {
