@@ -41,6 +41,16 @@ class ÅrsavregningController(
         )
     }
 
+    @GetMapping("/{behandlingID}/{aar}/forstegangsaarsavregning")
+    fun erFørstegangsÅrsavregning(@PathVariable("behandlingID") behandlingID: Long, @PathVariable("aar") aar: Int): ResponseEntity<Boolean> {
+        aksesskontroll.autoriser(behandlingID)
+
+        val erFørstegangsÅrsavregning = årsavregningService.erFørstegangsÅrsavregning(behandlingID, aar);
+
+        return ResponseEntity.ok(erFørstegangsÅrsavregning)
+    }
+
+
     @PostMapping("/{behandlingID}")
     fun opprettNyÅrsavregning(
         @PathVariable("behandlingID") behandlingID: Long,
@@ -71,7 +81,7 @@ class ÅrsavregningController(
                 tidligereFakturertBeloep = årsavregningModel.tidligereFakturertBeloep,
                 tilFaktureringBeloep = årsavregningModel.tilFaktureringBeloep,
             ),
-            antallFerdigBehandledeÅrsavregninger = årsavregningModel.antallFerdigBehandledeÅrsavregninger
+            erFørstegangsÅrsavregning = false
         )
 
     private fun mapTrygdeavgiftsgrunnlag(trygdeavgiftsgrunnlag: Trygdeavgiftsgrunnlag?) =
@@ -160,7 +170,7 @@ data class ÅrsavregningResponse(
     val nyttGrunnlag: GrunnlagsOpplysningerDto?,
     val endeligAvgift: AvgiftDto?,
     val avregning: AvregningDto?,
-    val antallFerdigBehandledeÅrsavregninger: Int
+    val erFørstegangsÅrsavregning: Boolean
 )
 
 data class ÅrsavregningRequest(

@@ -48,6 +48,7 @@ class ÅrsavregningService(
         if (behandlingsresultat.årsavregning != null && behandlingsresultat.årsavregning?.aar == gjelderÅr) {
             throw FunksjonellException("Året $gjelderÅr er allerede lagret på denne årsavregningen")
         }
+
         if (aarsavregningRepository.finnAntallÅrsavregningerPåFagsakForÅr(behandlingID, gjelderÅr) != 0) {
             throw FunksjonellException(
                 "Det finnes en annen åpen årsavregningsbehandling for samme år på saken. " +
@@ -122,16 +123,16 @@ class ÅrsavregningService(
             endeligAvgift = årsavregning.behandlingsresultat.trygdeavgiftsperioder.toList(),
             tidligereFakturertBeloep = årsavregning.tidligereFakturertBeloep,
             nyttTotalbeloep = årsavregning.nyttTotalbeloep,
-            tilFaktureringBeloep = årsavregning.tilFaktureringBeloep,
-            antallFerdigBehandledeÅrsavregninger = finnAntallFerdigBehandledeÅrsavregninger(behandlingId, årsavregning.aar)
+            tilFaktureringBeloep = årsavregning.tilFaktureringBeloep
         )
         return modellen
     }
 
-    private fun finnAntallFerdigBehandledeÅrsavregninger(behandlingID: Long, gjelderÅr: Int): Int {
-        val antallFerdigBehandledeÅrsavregninger =
-            aarsavregningRepository.finnAntallFerdigbehandledeÅrsavregningerPåFagsakForÅr(behandlingID, gjelderÅr)
-        return antallFerdigBehandledeÅrsavregninger
+    fun erFørstegangsÅrsavregning(behandlingID: Long, aar: Int): Boolean {
+        val antallFerdigBehandledeÅrsavregningerForAar =
+            aarsavregningRepository.finnAntallAndreFerdigbehandledeÅrsavregningerPåFagsakForÅr(behandlingID, aar)
+
+        return antallFerdigBehandledeÅrsavregningerForAar == 0;
     }
 
     private fun finnTidligereBehandlingsresultatMedAvgift(behandlingsresultat: Behandlingsresultat, gjelderÅr: Int): Behandlingsresultat? {
@@ -193,8 +194,7 @@ data class ÅrsavregningModel(
     val endeligAvgift: List<Trygdeavgiftsperiode>,
     val tidligereFakturertBeloep: BigDecimal?,
     val nyttTotalbeloep: BigDecimal?,
-    val tilFaktureringBeloep: BigDecimal?,
-    val antallFerdigBehandledeÅrsavregninger: Int
+    val tilFaktureringBeloep: BigDecimal?
 )
 
 data class Trygdeavgiftsgrunnlag(

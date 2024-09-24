@@ -121,8 +121,7 @@ internal class ÅrsavregningModelControllerTest {
             endeligAvgift = emptyList(),
             tidligereFakturertBeloep = BigDecimal(21170.0),
             nyttTotalbeloep = BigDecimal(24280.0),
-            tilFaktureringBeloep = BigDecimal(3110.0),
-            antallFerdigBehandledeÅrsavregninger = 3
+            tilFaktureringBeloep = BigDecimal(3110.0)
         )
         every { totalBeløpBeregner.hentTotalInntekt(any()) } returns BigDecimal(42)
         every { totalBeløpBeregner.hentTotalAvgift(any()) } returns BigDecimal(21170)

@@ -111,8 +111,7 @@ class OpprettÅrsavregningModelBehandlingTest {
             emptyList(),
             null,
             null,
-            null,
-            0
+            null
         )
 
         opprettÅrsavregningBehandling.utfør(prosessinstans)
@@ -179,8 +178,7 @@ class OpprettÅrsavregningModelBehandlingTest {
             emptyList(),
             null,
             null,
-            null,
-            0
+            null
         )
         val behandlingSlot = slot<Behandling>()
         every { behandlingService.lagre(capture(behandlingSlot)) } returns Unit

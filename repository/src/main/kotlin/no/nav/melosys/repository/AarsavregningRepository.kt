@@ -36,9 +36,9 @@ interface AarsavregningRepository : JpaRepository<Årsavregning, Long> {
     WHERE b.id = :behandlingId
       AND a.aar = :aar
       AND b2.beh_type = 'ÅRSAVREGNING'
-     -- AND b2.id != :behandlingId
+      AND b2.id != :behandlingId
       AND br.resultat_type = 'FERDIGBEHANDLET'
     """, nativeQuery = true
     )
-    fun finnAntallFerdigbehandledeÅrsavregningerPåFagsakForÅr(@Param("behandlingId") behandlingId: Long, @Param("aar") år: Int): Int
+    fun finnAntallAndreFerdigbehandledeÅrsavregningerPåFagsakForÅr(@Param("behandlingId") behandlingId: Long, @Param("aar") år: Int): Int
 }
