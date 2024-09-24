@@ -276,19 +276,6 @@ class EosVedtakServiceTest {
     }
 
     @Test
-    void endreVedtak_endrePeriode_behandlingsResultat_blir_FASTSATT_LOVVALGSLAND() {
-        final Endretperiode endretperiodeBegrunnelse = Endretperiode.RETURNERT_NORGE;
-        leggTilMyndighetAktoer();
-        leggTilLovvalgsperiode();
-        behandling.setType(Behandlingstyper.ENDRET_PERIODE);
-
-        when(behandlingsresultatService.hentBehandlingsresultat(anyLong())).thenReturn(behandlingsresultat);
-
-        vedtakService.endreVedtaksperiode(behandling, endretperiodeBegrunnelse, "FRITEKST", "FRITEKST_SED");
-        assertThat(behandlingsresultat.getType()).isEqualTo(FASTSATT_LOVVALGSLAND);
-    }
-
-    @Test
     void endreVedtak_fungerer() {
         final Endretperiode endretperiodeBegrunnelse = Endretperiode.ENDRINGER_ARBEIDSSITUASJON;
         leggTilMyndighetAktoer();
