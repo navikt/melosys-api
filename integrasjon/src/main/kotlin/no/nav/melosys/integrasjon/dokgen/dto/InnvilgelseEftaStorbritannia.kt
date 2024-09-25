@@ -14,7 +14,7 @@ class InnvilgelseEftaStorbritannia(
     @JsonSerialize(using = LocalDateSerializer::class)
     @JsonFormat(shape = JsonFormat.Shape.STRING)
     val datoMottatt: LocalDate?,
-    val navnVirksomhet: String?,
+    val navnVirksomheter: List<String>?,
     val behandlingstype: Behandlingstyper,
     val nyVurderingBakgrunn: String?,
     val innvilgelseFritekst: String?,
@@ -35,7 +35,7 @@ class InnvilgelseEftaStorbritannia(
 ) : DokgenDto(brevbestilling, Mottakerroller.BRUKER) {
     constructor(
         brevbestilling: InnvilgelseEftaStorbritanniaBrevbestilling,
-        navnVirksomhet: String?,
+        navnVirksomheter: List<String>?,
         behandlingstype: Behandlingstyper,
         nyVurderingBakgrunn: String?,
         innvilgelseFritekst: String?,
@@ -56,7 +56,7 @@ class InnvilgelseEftaStorbritannia(
     ) : this(
         brevbestilling,
         datoMottatt = instantTilLocalDate(brevbestilling.forsendelseMottatt),
-        navnVirksomhet,
+        navnVirksomheter,
         behandlingstype,
         nyVurderingBakgrunn,
         innvilgelseFritekst,
