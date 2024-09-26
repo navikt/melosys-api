@@ -317,11 +317,6 @@ public class Behandlingsresultat extends RegistreringsInfo {
             .anyMatch(periode -> periode.overlapperMedÅr(år) && periode.erInnvilget());
     }
 
-    public boolean harInntektOgSkatteforhold() {
-        return !this.hentInntektsperioder().isEmpty()
-            && !this.hentSkatteforholdTilNorge().isEmpty();
-    }
-
     public Trygdeavgift_typer getTrygdeavgiftType() {
         return trygdeavgiftType;
     }

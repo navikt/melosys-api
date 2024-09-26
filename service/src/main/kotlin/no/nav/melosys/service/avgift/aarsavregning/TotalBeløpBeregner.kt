@@ -30,22 +30,26 @@ class TotalBeløpBeregner(
     }
 
     fun hentTotalInntekt(trygdeavgiftsperioder: List<Trygdeavgiftsperiode>): BigDecimal {
-        val fakturaseriePerioder = trygdeavgiftsperioder.map {
-            FakturaseriePeriodeDto(
-                startDato = it.periodeFra,
-                sluttDato = it.periodeTil,
-                enhetsprisPerManed = it.grunnlagInntekstperiode.avgiftspliktigInntektMnd.verdi
-            )
-        }
+        val fakturaseriePerioder = trygdeavgiftsperioder
+            .filter { it.grunnlagInntekstperiode != null }
+            .map {
+                FakturaseriePeriodeDto(
+                    startDato = it.periodeFra,
+                    sluttDato = it.periodeTil,
+                    enhetsprisPerManed = it.grunnlagInntekstperiode.avgiftspliktigInntektMnd.verdi
+                )
+            }
         return faktureringskomponentenConsumer.hentTotalTrygdeavgiftForPeriode(BeregnTotalBeløpDto(fakturaseriePerioder), saksbehandlerIdent)
     }
 
     fun hentTotalInntektForInntektkilde(inntektsperiode: Inntektsperiode): BigDecimal {
-        val fakturaseriePerioder = listOf(FakturaseriePeriodeDto(
-            startDato = inntektsperiode.fomDato,
-            sluttDato = inntektsperiode.tomDato,
-            enhetsprisPerManed = inntektsperiode.avgiftspliktigInntektMnd.verdi
-        ))
+        val fakturaseriePerioder = listOf(
+            FakturaseriePeriodeDto(
+                startDato = inntektsperiode.fomDato,
+                sluttDato = inntektsperiode.tomDato,
+                enhetsprisPerManed = inntektsperiode.avgiftspliktigInntektMnd.verdi
+            )
+        )
         return faktureringskomponentenConsumer.hentTotalTrygdeavgiftForPeriode(BeregnTotalBeløpDto(fakturaseriePerioder), saksbehandlerIdent)
     }
 

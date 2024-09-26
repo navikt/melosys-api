@@ -119,9 +119,9 @@ class ÅrsavregningController(
                         TrygdeavgiftsperiodeDto(
                             fom = it.fom,
                             tom = it.tom,
-                            inntektskildetype = it.grunnlagInntekstperiode.type,
-                            inntektPerMd = it.grunnlagInntekstperiode.avgiftspliktigInntektMnd.verdi.intValueExact(),
-                            arbeidsgiversavgiftBetales = it.grunnlagInntekstperiode.isArbeidsgiversavgiftBetalesTilSkatt,
+                            inntektskildetype = it.grunnlagInntekstperiode?.type,
+                            inntektPerMd = it.grunnlagInntekstperiode?.avgiftspliktigInntektMnd?.verdi?.intValueExact(),
+                            arbeidsgiversavgiftBetales = it.grunnlagInntekstperiode?.isArbeidsgiversavgiftBetalesTilSkatt,
                             avgiftssats = it.trygdesats.toDouble(),
                             avgiftPerMd = it.trygdeavgiftsbeløpMd.verdi.intValueExact()
                         )
@@ -193,9 +193,9 @@ data class Medlemskapsperiode(
 data class TrygdeavgiftsperiodeDto(
     val fom: LocalDate,
     val tom: LocalDate,
-    val inntektskildetype: Inntektskildetype,
-    val arbeidsgiversavgiftBetales: Boolean,
-    val inntektPerMd: Int,
+    val inntektskildetype: Inntektskildetype?,
+    val arbeidsgiversavgiftBetales: Boolean?,
+    val inntektPerMd: Int?,
     val avgiftssats: Double,
     val avgiftPerMd: Int
 )
