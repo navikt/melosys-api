@@ -9,9 +9,10 @@ import java.time.LocalDate
 @JsonInclude(JsonInclude.Include.NON_NULL)
 class ÅrsavregningVedtaksbrev(
     brevBestilling: ÅrsavregningVedtakBrevBestilling,
+    // FIXME hordkodet data for å kunne merge PR navikt/melosys-dokgen#397 uten å gi feil når vedtaksbrevet brukes i q2
     val årsavregningsår: Int = 2023,
     val endeligTrygdeavgift: List<Avgiftsperiode> = listOf(Avgiftsperiode()),
-    val forskuddsvisFakturertTrygdeavgift: List<Avgiftsperiode> = emptyList(),
+    val forskuddsvisFakturertTrygdeavgift: List<Avgiftsperiode> = listOf(Avgiftsperiode()),
     val endeligTrygdeavgiftTotalbeløp: BigDecimal = BigDecimal.TEN,
     val forskuddsvisFakturertTrygdeavgiftTotalbeløp: BigDecimal = BigDecimal.ONE,
     val differansebeløp: BigDecimal = BigDecimal.TEN,
