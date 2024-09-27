@@ -120,7 +120,7 @@ class ÅrsavregningController(
                             TrygdeavgiftsperiodeDto(
                                 fom = it.fom,
                                 tom = it.tom,
-                                inntektskildetype = it.grunnlagInntekstperiode?.type,
+                                inntektskildetype = it.grunnlagInntekstperiode.type,
                                 inntektPerMd = it.grunnlagInntekstperiode.avgiftspliktigInntektMnd.verdi.intValueExact(),
                                 arbeidsgiversavgiftBetales = it.grunnlagInntekstperiode.isArbeidsgiversavgiftBetalesTilSkatt,
                                 avgiftssats = it.trygdesats.toDouble(),
