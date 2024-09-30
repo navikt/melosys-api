@@ -155,9 +155,9 @@ class ÅrsavregningController(
 
 data class ÅrsavregningResponse(
     val aar: Int,
-    val tidligereGrunnlagsopplysninger: GrunnlagsOpplysningerDto,
-    val avvikFunnet: Boolean,
-    val nyttGrunnlag: GrunnlagsOpplysningerDto,
+    val tidligereGrunnlagsopplysninger: GrunnlagsOpplysningerDto?,
+    val avvikFunnet: Boolean?,
+    val nyttGrunnlag: GrunnlagsOpplysningerDto?,
     val endeligAvgift: AvgiftDto?,
     val avregning: AvregningDto?
 )
