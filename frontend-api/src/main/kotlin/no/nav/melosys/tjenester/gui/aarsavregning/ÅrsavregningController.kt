@@ -155,9 +155,9 @@ class ÅrsavregningController(
 
 data class ÅrsavregningResponse(
     val aar: Int,
-    val tidligereGrunnlagsopplysninger: GrunnlagsOpplysningerDto?,
-    val avvikFunnet: Boolean?,
-    val nyttGrunnlag: GrunnlagsOpplysningerDto?,
+    val tidligereGrunnlagsopplysninger: GrunnlagsOpplysningerDto,
+    val avvikFunnet: Boolean,
+    val nyttGrunnlag: GrunnlagsOpplysningerDto,
     val endeligAvgift: AvgiftDto?,
     val avregning: AvregningDto?
 )
@@ -194,9 +194,9 @@ data class Medlemskapsperiode(
 data class TrygdeavgiftsperiodeDto(
     val fom: LocalDate,
     val tom: LocalDate,
-    val inntektskildetype: Inntektskildetype?,
-    val arbeidsgiversavgiftBetales: Boolean?,
-    val inntektPerMd: Int?,
+    val inntektskildetype: Inntektskildetype,
+    val arbeidsgiversavgiftBetales: Boolean,
+    val inntektPerMd: Int,
     val avgiftssats: Double,
     val avgiftPerMd: Int
 )
