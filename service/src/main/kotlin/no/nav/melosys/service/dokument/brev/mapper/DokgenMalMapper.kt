@@ -217,12 +217,16 @@ class DokgenMalMapper(
 
                 Produserbaredokumenter.AVSLAG_EFTA_STORBRITANNIA -> AvslagEftaStorbritannia(
                 brevbestilling as AvslagEftaStorbritanniaBrevbestilling, dokgenMapperDatahenter.hentBehandlingsresultat(
-                    brevbestilling
-                        .behandlingId
+                    brevbestilling.behandlingId
                 ).hentValidertPeriodeOmLovvalg(), dokgenMapperDatahenter.hentAvklartVirksomhet(brevbestilling.behandling).navn
             )
 
-            Produserbaredokumenter.AARSAVREGNING_VEDTAKSBREV -> ÅrsavregningVedtaksbrev(brevbestilling as ÅrsavregningVedtakBrevBestilling)
+            Produserbaredokumenter.AARSAVREGNING_VEDTAKSBREV -> ÅrsavregningVedtaksbrev(
+                brevbestilling as ÅrsavregningVedtakBrevBestilling,
+                årsavregningsår = dokgenMapperDatahenter.hentBehandlingsresultat(brevbestilling.behandlingId).årsavregning.aar,
+                endeligTrygdeavgift = //TODO,
+
+            )
 
             else -> throw FunksjonellException("ProduserbartDokument ${brevbestilling.produserbartdokument} er ikke støttet av melosys-dokgen")
         }
