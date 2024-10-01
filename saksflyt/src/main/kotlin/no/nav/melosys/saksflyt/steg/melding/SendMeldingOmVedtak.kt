@@ -58,9 +58,8 @@ class SendMeldingOmVedtak(
 
     private fun finnPeriode(behandlingId: Long): Periode? =
         behandlingsresultatService.finnResultatMedMedlemskapOgLovvalg(behandlingId)?.let {
-            Periode(
-                it.utledMedlemskapsperiodeFom(),
-                it.utledMedlemskapsperiodeTom()
-            )
+            val fom = it.utledMedlemskapsperiodeFom()
+            val tom = it.utledMedlemskapsperiodeTom()
+            if (fom == null && tom == null) null else Periode(fom, tom)
         }
 }
