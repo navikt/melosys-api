@@ -36,7 +36,9 @@ class OpprettÅrsavregningBehandling(
         val sakMedTrygdeavgift = fagsakService.hentFagsak(prosessinstans.getData(ProsessDataKey.SAKSNUMMER))
 
         finnAktivÅrsavregningBehandling(sakMedTrygdeavgift, gjelderÅr)?.run {
-            if (this.status != Behandlingsstatus.OPPRETTET) {
+            log.info { "Årsavregning behandling($id) for sak: ${sakMedTrygdeavgift.saksnummer} og år: $gjelderÅr er allerede opprettet" }
+            if (status != Behandlingsstatus.OPPRETTET) {
+                log.info { "Oppdaterer status fra $status til VURDER_DOKUMENT for behandling $id" }
                 status = Behandlingsstatus.VURDER_DOKUMENT
                 behandlingService.lagre(this)
             }
@@ -51,7 +53,7 @@ class OpprettÅrsavregningBehandling(
                 if (it == null) log.info(
                     "Fant ingen behandlinger med overlappende trygdeavgiftsperiode for sak: ${
                         sakMedTrygdeavgift.saksnummer
-                    } og år: $gjelderÅr"
+                    } og år: $gjelderÅr. Avslutter steg"
                 )
             } ?: return
 
@@ -66,13 +68,14 @@ class OpprettÅrsavregningBehandling(
             Behandlingsaarsaktyper.MELDING_FRA_SKATT,
             null
         ).also { nyBehandling ->
+            log.info { "Oppretter årsavregning for sak: ${sakMedTrygdeavgift.saksnummer} og år: $gjelderÅr" }
             årsavregningService.opprettÅrsavregning(nyBehandling.id, gjelderÅr)
             prosessinstans.behandling = nyBehandling
         }
     }
 
     private fun finnAktivÅrsavregningBehandling(sakMedTrygdeavgift: Fagsak, gjelderÅr: Int): Behandling? {
-        val årsAvregninger = sakMedTrygdeavgift.hentAktiveÅrsavregninger().also { if (it.isEmpty()) log.info("Fant ingen aktive årsavregninger") }
+        val årsAvregninger = sakMedTrygdeavgift.hentAktiveÅrsavregninger()
             .filter { behandslingsresultatService.hentBehandlingsresultat(it.id).årsavregning.aar == gjelderÅr }
 
         when {
@@ -82,11 +85,11 @@ class OpprettÅrsavregningBehandling(
             }
 
             årsAvregninger.size > 1 -> {
-                throw TekniskException("Flere aktive årsavregninger funnet")
+                throw TekniskException("Flere aktive årsavregninger funnet for sak: ${sakMedTrygdeavgift.saksnummer} og år: $gjelderÅr")
             }
 
             else -> {
-                log.info("Fant aktiv årsavregning for år $gjelderÅr")
+                log.info("Fant aktiv årsavregning for ${sakMedTrygdeavgift.saksnummer} og år $gjelderÅr")
                 return årsAvregninger.single()
             }
         }
