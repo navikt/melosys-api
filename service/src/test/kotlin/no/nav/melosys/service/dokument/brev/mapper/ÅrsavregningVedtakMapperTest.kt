@@ -73,7 +73,6 @@ class ÅrsavregningVedtakMapperTest {
         )
         assertEquals(expectedEndeligTrygdeavgift, result.endeligTrygdeavgift)
 
-        // Manually construct expected forskuddsvisFakturertTrygdeavgift
         val expectedForskuddsvisFakturertTrygdeavgift = listOf(
             Avgiftsperiode(
                 fom = LocalDate.of(2023, 1, 1),
@@ -123,7 +122,6 @@ class ÅrsavregningVedtakMapperTest {
         block()
     }
 
-    // Helper methods to create test data
     private fun createBehandlingsresultat(): Behandlingsresultat {
         val fagsak = mockk<Fagsak>(relaxed = true)
         every { fagsak.erSakstypeEøs() } returns true
@@ -143,7 +141,6 @@ class ÅrsavregningVedtakMapperTest {
     }
 
     private fun createÅrsavregningModel(): ÅrsavregningModel {
-        // Create and return a real instance of ÅrsavregningModel
         val endeligAvgift = listOf(createTrygdeavgiftsperiodeEndelig())
         val tidligereAvgift = listOf(createTrygdeavgiftsperiodeTidligere())
 
