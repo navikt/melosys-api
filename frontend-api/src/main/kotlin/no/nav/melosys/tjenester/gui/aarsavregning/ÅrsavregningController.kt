@@ -179,7 +179,7 @@ data class TrygdeavgiftsgrunnlagDto(
 
 data class AvgiftDto(
     val trygdeavgiftsperioder: List<TrygdeavgiftsperiodeDto>,
-    val totalInntekt: BigDecimal,
+    val totalInntekt: BigDecimal?,
     val totalAvgift: BigDecimal
 )
 

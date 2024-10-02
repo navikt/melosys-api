@@ -50,15 +50,15 @@ class ÅrsavregningVedtaksbrev(
 }
 
 data class Avgiftsperiode(
-    val fom: LocalDate = LocalDate.of(2021, 1, 1),
-    val tom: LocalDate = LocalDate.of(2021, 1, 31),
-    val avgiftssats: BigDecimal = BigDecimal.valueOf(13.9),
-    val avgiftPerMd: BigDecimal = BigDecimal.valueOf(12000.00),
-    val avgiftspliktigInntektPerMd: BigDecimal = BigDecimal.valueOf(50000.00),
-    val inntektskilde: String = "Donasjon",
-    val trygdedekning: String = "Briller",
-    val arbeidsgiveravgiftBetalt: Boolean = false,
-    val skatteplikt: Boolean = true
+    val fom: LocalDate,
+    val tom: LocalDate,
+    val avgiftssats: BigDecimal,
+    val avgiftPerMd: BigDecimal,
+    val avgiftspliktigInntektPerMd: BigDecimal ,
+    val inntektskilde: String,
+    val trygdedekning: String,
+    val arbeidsgiveravgiftBetalt: Boolean,
+    val skatteplikt: Boolean
 )
 
 
