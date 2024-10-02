@@ -4,13 +4,11 @@ import java.util.Set;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import no.nav.melosys.domain.kodeverk.Vedtakstyper;
-import no.nav.melosys.domain.kodeverk.begrunnelser.Endretperiode;
 import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingsresultattyper;
 import no.nav.melosys.service.kontroll.feature.ferdigbehandling.FerdigbehandlingKontrollFacade;
 import no.nav.melosys.service.tilgang.Aksesskontroll;
 import no.nav.melosys.service.vedtak.FattVedtakRequest;
 import no.nav.melosys.service.vedtak.VedtaksfattingFasade;
-import no.nav.melosys.tjenester.gui.dto.EndreVedtakDto;
 import no.nav.melosys.tjenester.gui.dto.FattVedtakDto;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -115,28 +113,5 @@ class VedtakControllerTest {
                 .content(objectMapper.writeValueAsString(dto)))
             .andExpect(status().isBadRequest())
             .andExpect(jsonPath("$.message", containsString("BehandlingsresultatTypeKode eller vedtakstype mangler.")));
-    }
-
-    @Test
-    void endreVedtak() throws Exception {
-        var dto = new EndreVedtakDto();
-        dto.setBegrunnelseKode(Endretperiode.ENDRINGER_ARBEIDSSITUASJON);
-
-        mockMvc.perform(post(BASE_URL + "/{behandlingID}/endre", BEHANDLING_ID)
-                .contentType(MediaType.APPLICATION_JSON)
-                .content(objectMapper.writeValueAsString(dto)))
-            .andExpect(status().isNoContent());
-
-        verify(aksesskontroll).autoriserSkriv(BEHANDLING_ID);
-        verify(vedtaksfattingFasade).endreVedtak(BEHANDLING_ID, Endretperiode.ENDRINGER_ARBEIDSSITUASJON, null, dto.getFritekstSed());
-    }
-
-    @Test
-    void endreVedtak_dtoManglerBehandlingresultat_girException() throws Exception {
-        mockMvc.perform(post(BASE_URL + "/{behandlingID}/endre", BEHANDLING_ID)
-                .contentType(MediaType.APPLICATION_JSON)
-                .content(objectMapper.writeValueAsString(new EndreVedtakDto())))
-            .andExpect(status().isBadRequest())
-            .andExpect(jsonPath("$.message", containsString("BegrunnelseKode mangler.")));
     }
 }

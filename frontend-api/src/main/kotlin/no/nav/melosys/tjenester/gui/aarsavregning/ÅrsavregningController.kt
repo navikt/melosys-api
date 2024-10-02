@@ -115,17 +115,18 @@ class ÅrsavregningController(
             GrunnlagsOpplysningerDto(
                 mapTrygdeavgiftsgrunnlag(trygdeavgiftsgrunnlag),
                 AvgiftDto(
-                    trygdeavgiftsperioder = trygdeavgiftsperioder.map {
-                        TrygdeavgiftsperiodeDto(
-                            fom = it.fom,
-                            tom = it.tom,
-                            inntektskildetype = it.grunnlagInntekstperiode.type,
-                            inntektPerMd = it.grunnlagInntekstperiode.avgiftspliktigInntektMnd.verdi.intValueExact(),
-                            arbeidsgiversavgiftBetales = it.grunnlagInntekstperiode.isArbeidsgiversavgiftBetalesTilSkatt,
-                            avgiftssats = it.trygdesats.toDouble(),
-                            avgiftPerMd = it.trygdeavgiftsbeløpMd.verdi.intValueExact()
-                        )
-                    },
+                    trygdeavgiftsperioder = trygdeavgiftsperioder.filter { it.grunnlagInntekstperiode != null }
+                        .map {
+                            TrygdeavgiftsperiodeDto(
+                                fom = it.fom,
+                                tom = it.tom,
+                                inntektskildetype = it.grunnlagInntekstperiode.type,
+                                inntektPerMd = it.grunnlagInntekstperiode.avgiftspliktigInntektMnd.verdi.intValueExact(),
+                                arbeidsgiversavgiftBetales = it.grunnlagInntekstperiode.isArbeidsgiversavgiftBetalesTilSkatt,
+                                avgiftssats = it.trygdesats.toDouble(),
+                                avgiftPerMd = it.trygdeavgiftsbeløpMd.verdi.intValueExact()
+                            )
+                        },
                     totalInntekt = totalBeløpBeregner.hentTotalInntekt(trygdeavgiftsperioder),
                     totalAvgift = totalBeløpBeregner.hentTotalAvgift(trygdeavgiftsperioder) ?: BigDecimal.ZERO
                 )

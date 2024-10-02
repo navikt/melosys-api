@@ -20,11 +20,9 @@ import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 
 import static no.nav.melosys.domain.kodeverk.Vedtakstyper.FØRSTEGANGSVEDTAK;
-import static no.nav.melosys.domain.kodeverk.begrunnelser.Endretperiode.ENDRINGER_ARBEIDSSITUASJON;
 import static no.nav.melosys.domain.kodeverk.behandlinger.Behandlingsresultattyper.FASTSATT_LOVVALGSLAND;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import static org.mockito.ArgumentMatchers.eq;
-import static org.mockito.ArgumentMatchers.isNull;
 import static org.mockito.Mockito.*;
 
 @ExtendWith(MockitoExtension.class)
@@ -119,41 +117,6 @@ class VedtaksfattingFasadeTest {
         vedtaksfattingFasade.fattVedtak(behandlingID, lagFattTrygdeavtaleVedtakRequest());
 
         verify(trygdeavtaleVedtakService).fattVedtak(eq(behandling), any(FattVedtakRequest.class));
-        verifyNoInteractions(mockEosVedtakService);
-    }
-
-    @Test
-    void endreVedtak_EU_EOS_skalKalleEosVedtakService() {
-        setFagsakPåBehandling(Sakstyper.EU_EOS);
-        when(mockBehandlingService.hentBehandling(behandlingID)).thenReturn(behandling);
-
-        vedtaksfattingFasade.endreVedtak(behandlingID, ENDRINGER_ARBEIDSSITUASJON, null, null);
-
-        verify(mockEosVedtakService).endreVedtaksperiode(eq(behandling), eq(ENDRINGER_ARBEIDSSITUASJON), isNull(), isNull());
-    }
-
-    @Test
-    void endreVedtak_FTRL_kasterException() {
-        setFagsakPåBehandling(Sakstyper.FTRL);
-        when(mockBehandlingService.hentBehandling(behandlingID)).thenReturn(behandling);
-
-        assertThatThrownBy(() -> vedtaksfattingFasade.endreVedtak(behandlingID, ENDRINGER_ARBEIDSSITUASJON, null, null))
-            .isInstanceOf(FunksjonellException.class)
-            .hasMessage("Vedtaksendring for sakstype FTRL er ikke støttet.");
-
-        verifyNoInteractions(mockEosVedtakService);
-    }
-
-    @Test
-    void endreVedtak_TRYGDEAVTALER_kasterException() {
-        setFagsakPåBehandling(Sakstyper.TRYGDEAVTALE);
-        when(mockBehandlingService.hentBehandling(behandlingID)).thenReturn(behandling);
-
-        assertThatThrownBy(() -> vedtaksfattingFasade.endreVedtak(behandlingID, ENDRINGER_ARBEIDSSITUASJON, null, null))
-            .isInstanceOf(FunksjonellException.class)
-            .hasMessage("Vedtaksendring for sakstype TRYGDEAVTALE er ikke støttet.");
-
-        verifyNoInteractions(mockEosVedtakService);
         verifyNoInteractions(mockEosVedtakService);
     }
 

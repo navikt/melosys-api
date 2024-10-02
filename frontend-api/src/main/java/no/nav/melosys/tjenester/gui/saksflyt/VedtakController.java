@@ -8,7 +8,6 @@ import no.nav.melosys.service.tilgang.Aksesskontroll;
 import no.nav.melosys.service.vedtak.FattVedtakRequest;
 import no.nav.melosys.service.vedtak.VedtaksfattingFasade;
 import no.nav.melosys.sikkerhet.context.SubjectHandler;
-import no.nav.melosys.tjenester.gui.dto.EndreVedtakDto;
 import no.nav.melosys.tjenester.gui.dto.FattVedtakDto;
 import no.nav.security.token.support.core.api.Protected;
 import org.springframework.context.annotation.Scope;
@@ -40,18 +39,6 @@ public class VedtakController {
         aksesskontroll.autoriserSkriv(behandlingID);
 
         vedtaksfattingFasade.fattVedtak(behandlingID, lagFattVedtakRequest(fattVedtakDto, SubjectHandler.getInstance().getUserID()));
-        return ResponseEntity.noContent().build();
-    }
-
-    @PostMapping("{behandlingID}/endre")
-    @ApiOperation(value = "Endrer et vedtak for en gitt behandling")
-    public ResponseEntity<Void> endreVedtak(@PathVariable("behandlingID") long behandlingID,
-                                            @RequestBody EndreVedtakDto endreVedtakDto) {
-        if (endreVedtakDto.getBegrunnelseKode() == null) {
-            throw new FunksjonellException("BegrunnelseKode mangler.");
-        }
-        aksesskontroll.autoriserSkriv(behandlingID);
-        vedtaksfattingFasade.endreVedtak(behandlingID, endreVedtakDto.getBegrunnelseKode(), endreVedtakDto.getFritekst(), endreVedtakDto.getFritekstSed());
         return ResponseEntity.noContent().build();
     }
 

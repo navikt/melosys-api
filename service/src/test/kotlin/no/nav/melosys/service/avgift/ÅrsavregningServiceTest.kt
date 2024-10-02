@@ -178,14 +178,6 @@ internal class ÅrsavregningServiceTest {
     @Test
     fun `henter nyeste behandlingsresultat med grunnlag og riktig år for opprettelse av ny årsavregning`() {
         val aktivFagsak = FagsakTestFactory.Builder().saksnummer("123456").build()
-        val årsavregningBehandlingsresultat = Behandlingsresultat().apply {
-            id = 3
-            behandling = Behandling().apply behandling@{
-                id = 3
-                fagsak = aktivFagsak.apply { leggTilBehandling(this@behandling) }
-            }
-            registrertDato = LocalDate.of(2024, 1, 1).atStartOfDay().toInstant(ZoneOffset.UTC);
-        }
 
         val eldreBehandlingsresultat = lagTidligereBehandlingsresultat().apply {
             id = 1
@@ -195,7 +187,7 @@ internal class ÅrsavregningServiceTest {
                 fagsak = aktivFagsak.apply { leggTilBehandling(this@behandling) }
             }
             registrertDato = LocalDate.of(2023, 1, 1).atStartOfDay().toInstant(ZoneOffset.UTC);
-            medlemskapsperioder = listOf(lagMedlemskapsperiode("2023-09-01", "2023-12-31"))
+            medlemskapsperioder = listOf(lagMedlemskapsperiode("2023-09-01", "2023-12-31").apply { trygdeavgiftsperioder = null })
         }
 
         val nyesteBehandlingsresultat = lagTidligereBehandlingsresultat().apply {
@@ -206,7 +198,7 @@ internal class ÅrsavregningServiceTest {
                 fagsak = aktivFagsak.apply { leggTilBehandling(this@behandling) }
             }
             registrertDato = LocalDate.of(2023, 1, 10).atStartOfDay().toInstant(ZoneOffset.UTC);
-            medlemskapsperioder = listOf(lagMedlemskapsperiode("2023-01-01", "2023-08-31"))
+            medlemskapsperioder = listOf(lagMedlemskapsperiode("2023-01-01", "2023-08-31").apply { trygdeavgiftsperioder = null })
         }
 
 
