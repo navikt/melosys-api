@@ -22,7 +22,8 @@ class DokgenMalMapper(
     private val innhentingAvInntektsopplysningerMapper: InnhentingAvInntektsopplysningerMapper,
     private val trygdeavtaleMapper: TrygdeavtaleMapper,
     private val orienteringAnmodningUnntakMapper: OrienteringAnmodningUnntakMapper,
-    private val orienteringTilArbeidsgiverOmVedtakMapper: OrienteringTilArbeidsgiverOmVedtakMapper
+    private val orienteringTilArbeidsgiverOmVedtakMapper: OrienteringTilArbeidsgiverOmVedtakMapper,
+    private val årsavregningVedtakMapper: ÅrsavregningVedtakMapper
 ) {
     fun mapBehandling(
         mottattBrevbestilling: DokgenBrevbestilling,
@@ -221,11 +222,8 @@ class DokgenMalMapper(
                 ).hentValidertPeriodeOmLovvalg(), dokgenMapperDatahenter.hentAvklartVirksomhet(brevbestilling.behandling).navn
             )
 
-            Produserbaredokumenter.AARSAVREGNING_VEDTAKSBREV -> ÅrsavregningVedtaksbrev(
-                brevbestilling as ÅrsavregningVedtakBrevBestilling,
-                årsavregningsår = dokgenMapperDatahenter.hentBehandlingsresultat(brevbestilling.behandlingId).årsavregning.aar,
-                endeligTrygdeavgift = //TODO,
-
+            Produserbaredokumenter.AARSAVREGNING_VEDTAKSBREV -> årsavregningVedtakMapper.mapÅrsavregning(
+                brevbestilling as ÅrsavregningVedtakBrevBestilling, dokgenMapperDatahenter.hentBehandlingsresultat(brevbestilling.behandlingId)
             )
 
             else -> throw FunksjonellException("ProduserbartDokument ${brevbestilling.produserbartdokument} er ikke støttet av melosys-dokgen")

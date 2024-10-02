@@ -98,6 +98,8 @@ class DokgenServiceTest {
     @Mock
     private OrienteringTilArbeidsgiverOmVedtakMapper orienteringTilArbeidsgiverOmVedtakMapper;
     @Mock
+    private ÅrsavregningVedtakMapper årsavregningVedtakMapper;
+    @Mock
     private UtledMottaksdato mockUtledMottaksdato;
     @Mock
     private AvklarteVirksomheterService avklarteVirksomheterService;
@@ -117,7 +119,7 @@ class DokgenServiceTest {
 
         dokgenService = new DokgenService(
             mockDokgenConsumer, new DokumentproduksjonsInfoMapper(), mockJoarkFasade,
-            new DokgenMalMapper(dokgenMapperDatahenter, mockInnvilgelseFtrlMapper, mockInnvilgelseEftaStorbritanniaMapper, mockInnhentingAvInntektsopplysningerMapper, mockTrygdeavtaleMapper, orienteringAnmodningUnntakMapper, orienteringTilArbeidsgiverOmVedtakMapper),
+            new DokgenMalMapper(dokgenMapperDatahenter, mockInnvilgelseFtrlMapper, mockInnvilgelseEftaStorbritanniaMapper, mockInnhentingAvInntektsopplysningerMapper, mockTrygdeavtaleMapper, orienteringAnmodningUnntakMapper, orienteringTilArbeidsgiverOmVedtakMapper, årsavregningVedtakMapper),
             mockBehandlingsService, mockEregFasade, mockKontaktOpplysningService,
             mockBrevMottakerService, mockProsessinstansService, mockSaksbehandlerService,
             mockUtenlandskMyndighetService, mockUtledMottaksdato, new FakeUnleash());
