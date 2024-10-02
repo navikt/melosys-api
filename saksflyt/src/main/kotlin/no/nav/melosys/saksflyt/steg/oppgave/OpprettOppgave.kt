@@ -2,6 +2,7 @@ package no.nav.melosys.saksflyt.steg.oppgave
 
 import mu.KotlinLogging
 import no.nav.melosys.saksflyt.steg.StegBehandler
+import no.nav.melosys.saksflytapi.domain.ProsessDataKey
 import no.nav.melosys.saksflytapi.domain.ProsessSteg
 import no.nav.melosys.saksflytapi.domain.Prosessinstans
 import no.nav.melosys.service.oppgave.OppgaveService
@@ -14,8 +15,9 @@ class OpprettOppgave(private val oppgaveService: OppgaveService) : StegBehandler
     override fun inngangsSteg(): ProsessSteg = ProsessSteg.OPPRETT_OPPGAVE
 
     override fun utfør(prosessinstans: Prosessinstans) {
-        if(prosessinstans.behandling == null) {
-            log.warn("Behandling har null, kan ikke opprette oppgave for prosessinstans ${prosessinstans.id}")
+        val opprettÅrsavregningUtenBbehandling = prosessinstans.getData(ProsessDataKey.ÅRSAVREGNING_STEG_KJØRT_UTEN_BEHANDLING, Boolean::class.java)
+        if (opprettÅrsavregningUtenBbehandling != null && opprettÅrsavregningUtenBbehandling) {
+            log.warn { "Årsavregning er opprettet uten behandling for sak ${prosessinstans.getData(ProsessDataKey.SAKSNUMMER)}" }
             return
         }
 

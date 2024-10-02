@@ -42,6 +42,7 @@ class OpprettÅrsavregningBehandling(
                 status = Behandlingsstatus.VURDER_DOKUMENT
                 behandlingService.lagre(this)
             }
+            prosessinstans.setData(ProsessDataKey.ÅRSAVREGNING_STEG_KJØRT_UTEN_BEHANDLING, true)
             return
         }
 
@@ -49,13 +50,17 @@ class OpprettÅrsavregningBehandling(
             årsavregningService.hentSisteBehandlingsresultatMedInnvilgetMedlemskapsperiodeOgAvgiftsgrunnlag(
                 sakMedTrygdeavgift.saksnummer,
                 gjelderÅr
-            )?.behandling.also {
-                if (it == null) log.info(
-                    "Fant ingen behandlinger med overlappende trygdeavgiftsperiode for sak: ${
-                        sakMedTrygdeavgift.saksnummer
-                    } og år: $gjelderÅr. Avslutter steg"
-                )
-            } ?: return
+            )?.behandling
+
+        if (trygdeavgiftsBehandlingtMedRelevantPeriode == null) {
+            log.info(
+                "Fant ingen behandlinger med overlappende trygdeavgiftsperiode for sak: ${
+                    sakMedTrygdeavgift.saksnummer
+                } og år: $gjelderÅr. Avslutter steg"
+            )
+            prosessinstans.setData(ProsessDataKey.ÅRSAVREGNING_STEG_KJØRT_UTEN_BEHANDLING, true)
+            return
+        }
 
         behandlingService.nyBehandling(
             sakMedTrygdeavgift,
