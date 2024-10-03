@@ -107,13 +107,12 @@ public class BehandlingController {
     }
 
     private BehandlingDto tilBehandlingDto(Behandling behandling, String saksbehandler) {
-        var behandlingDto = new BehandlingDto();
-        behandlingDto.setBehandlingID(behandling.getId());
-        behandlingDto.setRedigerbart(aksesskontroll.behandlingKanRedigeresAvSaksbehandler(behandling, saksbehandler));
-        behandlingDto.setOppsummering(tilOppsummeringDto(behandling));
-        var saksopplysningerDto = saksopplysningerTilDto.getSaksopplysningerDto(behandling.getSaksopplysninger());
-        behandlingDto.setSaksopplysninger(saksopplysningerDto);
-        return behandlingDto;
+        return new BehandlingDto(
+            behandling.getId(),
+            tilOppsummeringDto(behandling),
+            saksopplysningerTilDto.getSaksopplysningerDto(behandling.getSaksopplysninger()),
+            aksesskontroll.behandlingKanRedigeresAvSaksbehandler(behandling, saksbehandler)
+        );
     }
 
     private BehandlingOppsummeringDto tilOppsummeringDto(Behandling behandling) {
