@@ -7,6 +7,7 @@ import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
 import no.nav.melosys.domain.Behandling;
 import no.nav.melosys.domain.Behandlingsresultat;
+import no.nav.melosys.domain.avgift.Årsavregning;
 import no.nav.melosys.domain.dokument.DokumentView;
 import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingsstatus;
 import no.nav.melosys.service.behandling.BehandlingService;
@@ -92,8 +93,10 @@ public class BehandlingController {
             aksesskontroll.auditAutoriser(behandlingID, "Innsyn i behandling %d på sak %s".formatted(behandlingID, saksnummer));
         }
 
+        Årsavregning årsavregning = behandlingsresultatService.hentBehandlingsresultat(behandlingID).getårsavregning();
+
         behandlingService.oppdaterBehandlingsstatusHvisTilhørendeSaksbehandler(behandling, saksbehandlerID);
-        BehandlingDto behandlingDto = tilBehandlingDto(behandling, saksbehandlerID);
+        BehandlingDto behandlingDto = tilBehandlingDto(behandling, saksbehandlerID, årsavregning);
         return ResponseEntity.ok(behandlingDto);
     }
 
@@ -106,12 +109,13 @@ public class BehandlingController {
         return ResponseEntity.ok(behandlingService.hentMuligeStatuser(behandlingID));
     }
 
-    private BehandlingDto tilBehandlingDto(Behandling behandling, String saksbehandler) {
+    private BehandlingDto tilBehandlingDto(Behandling behandling, String saksbehandler, Årsavregning årsavregning) {
         return new BehandlingDto(
             behandling.getId(),
             tilOppsummeringDto(behandling),
             saksopplysningerTilDto.getSaksopplysningerDto(behandling.getSaksopplysninger()),
-            aksesskontroll.behandlingKanRedigeresAvSaksbehandler(behandling, saksbehandler)
+            aksesskontroll.behandlingKanRedigeresAvSaksbehandler(behandling, saksbehandler),
+            årsavregning != null ? årsavregning.getId() : null
         );
     }
 

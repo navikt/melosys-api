@@ -5,6 +5,7 @@ data class BehandlingDto(
     val behandlingID: Long,
     val oppsummering: BehandlingOppsummeringDto,
     val saksopplysninger: SaksopplysningerDto,
-    val isRedigerbart: Boolean = false,
+    val redigerbart: Boolean = false,
+    val aarsavregningID: Long?
 )
 
