@@ -18,7 +18,6 @@ import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingsresultattyper
 import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingsstatus
 import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingstyper
 import no.nav.melosys.saksflytapi.ProsessinstansService
-import no.nav.melosys.service.avgift.TrygdeavgiftService
 import no.nav.melosys.service.behandling.BehandlingService
 import no.nav.melosys.service.behandling.BehandlingsresultatService
 import no.nav.melosys.service.sak.FagsakService
@@ -37,9 +36,6 @@ class SkattehendelserConsumerTest {
 
     @MockK
     private lateinit var fagsakService: FagsakService
-
-    @MockK
-    private lateinit var trygdeavgiftService: TrygdeavgiftService
 
     @MockK
     private lateinit var behandlingService: BehandlingService
@@ -61,7 +57,6 @@ class SkattehendelserConsumerTest {
             prosessinstansService,
             unleash,
             fagsakService,
-            trygdeavgiftService,
             behandlingService,
             behandslingsresultatService,
             årsavregningService
@@ -80,7 +75,6 @@ class SkattehendelserConsumerTest {
             this.behandling = behandling
         }
 
-        every { trygdeavgiftService.harFagsakBehandlingerMedTrygdeavgift(SAKSNUMMER) } returns true
         every { fagsakService.hentFagsakerMedAktør(Aktoersroller.BRUKER, AKTØR_ID) } returns listOf(fagsak)
         every {
             årsavregningService.hentSisteBehandlingsresultatMedInnvilgetMedlemskapsperiodeOgAvgiftsgrunnlag(
@@ -125,11 +119,11 @@ class SkattehendelserConsumerTest {
             }
         }
 
-        every { trygdeavgiftService.harFagsakBehandlingerMedTrygdeavgift(SAKSNUMMER) } returns true
         every { fagsakService.hentFagsakerMedAktør(Aktoersroller.BRUKER, AKTØR_ID) } returns listOf(fagsak)
         every { behandslingsresultatService.hentBehandlingsresultat(behandling.id) } returns behandlingsresultat
         val behandlingSlot = slot<Behandling>()
         every { behandlingService.lagre(capture(behandlingSlot)) } returns Unit
+        every { årsavregningService.hentSisteBehandlingsresultatMedInnvilgetMedlemskapsperiodeOgAvgiftsgrunnlag(SAKSNUMMER, GJELDER_ÅR) } returns mockk()
 
 
         skattehendelserConsumer.lesSkattehendelser(
@@ -143,9 +137,8 @@ class SkattehendelserConsumerTest {
         )
 
 
-        verify(exactly = 0) { prosessinstansService.opprettArsavregningsBehandlingProsessflyt(any(), any()) }
+        verify { prosessinstansService wasNot Called }
         verify { behandlingService.lagre(behandling) }
-        verify { årsavregningService wasNot Called }
         behandlingSlot.captured.status shouldBe Behandlingsstatus.VURDER_DOKUMENT
     }
 
@@ -153,7 +146,6 @@ class SkattehendelserConsumerTest {
     fun `ikke opprette ny behandling ved skatteoppgjør uten overlappende medlemskapsperiode`() {
         val fagsak = lagFagsak()
 
-        every { trygdeavgiftService.harFagsakBehandlingerMedTrygdeavgift(SAKSNUMMER) } returns true
         every { fagsakService.hentFagsakerMedAktør(Aktoersroller.BRUKER, AKTØR_ID) } returns listOf(fagsak)
         every { fagsakService.hentFagsak(SAKSNUMMER) } returns fagsak
         every {
