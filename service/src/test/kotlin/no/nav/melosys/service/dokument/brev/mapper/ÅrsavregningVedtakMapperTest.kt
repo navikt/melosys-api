@@ -65,8 +65,8 @@ class ÅrsavregningVedtakMapperTest {
                 avgiftssats = BigDecimal(1000),
                 avgiftPerMd = BigDecimal(500),
                 avgiftspliktigInntektPerMd = BigDecimal(2800),
-                inntektskilde = "Inntekt fra utlandet",
-                trygdedekning = "Full dekning i trygden",
+                inntektskilde = Inntektskildetype.INNTEKT_FRA_UTLANDET.beskrivelse,
+                trygdedekning = Trygdedekninger.FULL_DEKNING.beskrivelse,
                 arbeidsgiveravgiftBetalt = true,
                 skatteplikt = true
             )
@@ -80,8 +80,8 @@ class ÅrsavregningVedtakMapperTest {
                 avgiftssats = BigDecimal(900),
                 avgiftPerMd = BigDecimal(450),
                 avgiftspliktigInntektPerMd = BigDecimal(2800),
-                inntektskilde = "Inntekt fra utlandet",
-                trygdedekning = "Full dekning i trygden",
+                inntektskilde = Inntektskildetype.INNTEKT_FRA_UTLANDET.beskrivelse,
+                trygdedekning = Trygdedekninger.FULL_DEKNING.beskrivelse,
                 arbeidsgiveravgiftBetalt = false,
                 skatteplikt = false
             )
