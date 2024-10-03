@@ -9,7 +9,6 @@ import no.nav.melosys.domain.kodeverk.Skatteplikttype
 import no.nav.melosys.exception.FunksjonellException
 import no.nav.melosys.integrasjon.dokgen.dto.Avgiftsperiode
 import no.nav.melosys.integrasjon.dokgen.dto.ÅrsavregningVedtaksbrev
-import no.nav.melosys.service.avgift.aarsavregning.ÅrsavregningModel
 import no.nav.melosys.service.avgift.aarsavregning.ÅrsavregningService
 import org.springframework.stereotype.Component
 import java.math.BigDecimal
@@ -32,17 +31,11 @@ class ÅrsavregningVedtakMapper(
             forskuddsvisFakturertTrygdeavgift = avgiftsPeriodeMapper(årsavregningModel.tidligereAvgift),
             endeligTrygdeavgiftTotalbeløp = årsavregningModel.nyttTotalbeloep,
             forskuddsvisFakturertTrygdeavgiftTotalbeløp = årsavregningModel.tidligereFakturertBeloep,
-            differansebeløp = beregnDiffForÅrsavregning(årsavregningModel),
+            differansebeløp = årsavregningModel.tidligereFakturertBeloep.subtract(årsavregningModel.nyttTotalbeloep),
             minimumsbeløpForFakturering = BigDecimal(100),
             pliktigMedlemskap = årsavregningModel.tidligereGrunnlag?.medlemskapsperioder?.all { it.medlemskapstyper == Medlemskapstyper.PLIKTIG },
             eøsEllerTrygdeavtale = fagsak.erSakstypeEøs() || fagsak.erSakstypeTrygdeavtale()
         )
-    }
-
-    private fun beregnDiffForÅrsavregning(årsavregningModel: ÅrsavregningModel): BigDecimal {
-        val tidligereTrygdeavgift = årsavregningModel.tidligereFakturertBeloep ?: BigDecimal.ZERO
-        val nyTrygdeavgift = årsavregningModel.nyttTotalbeloep ?: BigDecimal.ZERO
-        return tidligereTrygdeavgift.subtract(nyTrygdeavgift)
     }
 
     private fun avgiftsPeriodeMapper(trygdeavgiftsperioder: List<Trygdeavgiftsperiode>): List<Avgiftsperiode> {
