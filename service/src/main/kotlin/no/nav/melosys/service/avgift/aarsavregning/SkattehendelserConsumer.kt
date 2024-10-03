@@ -1,6 +1,7 @@
 package no.nav.melosys.service.avgift.aarsavregning
 
 import io.getunleash.Unleash
+import jakarta.transaction.Transactional
 import mu.KotlinLogging
 import no.nav.melosys.domain.Behandling
 import no.nav.melosys.domain.Fagsak
@@ -39,6 +40,7 @@ class SkattehendelserConsumer(
         topics = ["\${kafka.aiven.skattehendelser.topic}"],
         containerFactory = "aivenSkattehendelserListenerContainerFactory"
     )
+    @Transactional
     fun lesSkattehendelser(consumerRecord: ConsumerRecord<String, Skattehendelse>) {
         if (unleash.isEnabled(ToggleName.MELOSYS_SKATTEHENDELSE_CONSUMER)) {
             val skattehendelse = consumerRecord.value()
