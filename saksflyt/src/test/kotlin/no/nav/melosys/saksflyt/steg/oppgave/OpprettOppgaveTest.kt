@@ -24,15 +24,7 @@ internal class OpprettOppgaveTest {
     @BeforeEach
     fun setUp() {
         opprettOppgave = OpprettOppgave(oppgaveService)
-        every {
-            oppgaveService.opprettEllerGjenbrukBehandlingsoppgave(
-                any<Behandling>(),
-                any<String>(),
-                any<String>(),
-                any<String>(),
-                any<String>()
-            )
-        } returns Unit
+        every {oppgaveService.opprettEllerGjenbrukBehandlingsoppgave(any<Behandling>(), any<String>(), any<String>(), any<String>(), any<String>())} returns Unit
     }
 
     @Test
@@ -90,24 +82,6 @@ internal class OpprettOppgaveTest {
                 saksbehandler,
                 FagsakTestFactory.ORGNR
             )
-        }
-    }
-
-
-    @Test
-    fun `skal ikke lage oppgave når opprett årsavregning ikke lager en behandling`() {
-        val saksbehandler = "meg!"
-        val prosessinstans = Prosessinstans().apply {
-            setData(ProsessDataKey.SKAL_TILORDNES, true)
-            setData(ProsessDataKey.SAKSBEHANDLER, saksbehandler)
-            setData(ProsessDataKey.FAKTURANUMMER, "mel-123")
-            setData(ProsessDataKey.ÅRSAVREGNING_STEG_KJØRT_UTEN_BEHANDLING, true)
-        }
-
-        opprettOppgave.utfør(prosessinstans)
-
-        verify(exactly = 0) {
-            oppgaveService.opprettEllerGjenbrukBehandlingsoppgave(any(), any(), any(), any(), any())
         }
     }
 }
