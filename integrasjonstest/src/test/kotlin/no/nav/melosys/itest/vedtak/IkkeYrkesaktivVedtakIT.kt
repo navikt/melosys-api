@@ -198,7 +198,14 @@ class IkkeYrkesaktivVedtakIT(
                     sakstema = Sakstemaer.MEDLEMSKAP_LOVVALG,
                     behandligsresultatType = Behandlingsresultattyper.FASTSATT_LOVVALGSLAND,
                     vedtakstype = null,
-                    medlemskapsperioder = emptyList()
+                    medlemskapsperioder = listOf(),
+                    lovvalgsperioder = listOf(
+                        no.nav.melosys.integrasjon.hendelser.Periode(
+                            LocalDate.of(2022, 1, 1),
+                            LocalDate.of(2022, 2, 1),
+                            InnvilgelsesResultat.INNVILGET
+                        )
+                    )
                 )
             )
     }

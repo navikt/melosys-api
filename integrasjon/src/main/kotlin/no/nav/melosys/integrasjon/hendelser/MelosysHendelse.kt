@@ -28,7 +28,8 @@ data class VedtakHendelseMelding(
     val sakstema: Sakstemaer = Sakstemaer.TRYGDEAVGIFT,
     val behandligsresultatType: Behandlingsresultattyper,
     val vedtakstype: Vedtakstyper? = null,
-    val medlemskapsperioder: List<Periode>
+    val medlemskapsperioder: List<Periode>,
+    val lovvalgsperioder: List<Periode>
 ) : HendelseMelding()
 
 data class Periode(

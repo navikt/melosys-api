@@ -318,7 +318,8 @@ class YrkesaktivFtrlVedtakIT(
                             LocalDate.of(2023, 2, 1),
                             InnvilgelsesResultat.INNVILGET
                         )
-                    )
+                    ),
+                    lovvalgsperioder = listOf()
                 )
             )
 

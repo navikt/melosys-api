@@ -51,7 +51,8 @@ class MelosysHendelseTest {
                         LocalDate.of(2022, 1, 1),
                         InnvilgelsesResultat.INNVILGET
                     )
-                )
+                ),
+                lovvalgsperioder = listOf()
             )
         )
 
@@ -69,7 +70,8 @@ class MelosysHendelseTest {
                       "fom" : [ 2021, 1, 1 ],
                       "tom" : [ 2022, 1, 1 ],
                       "innvilgelsesResultat" : "INNVILGET"
-                    } ]
+                    } ],
+                    "lovvalgsperioder": []
                   }
             }"""
     }
@@ -102,7 +104,8 @@ class MelosysHendelseTest {
                     "sakstema": "TRYGDEAVGIFT",
                     "behandligsresultatType": "FERDIGBEHANDLET",
                     "vedtakstype": "FØRSTEGANGSVEDTAK",
-                    "medlemskapsperioder": []
+                    "medlemskapsperioder": [],
+                    "lovvalgsperioder": []
                 }
             }"""
 
@@ -116,7 +119,9 @@ class MelosysHendelseTest {
                 sakstema = Sakstemaer.TRYGDEAVGIFT,
                 behandligsresultatType = Behandlingsresultattyper.FERDIGBEHANDLET,
                 vedtakstype = Vedtakstyper.FØRSTEGANGSVEDTAK,
-                medlemskapsperioder = listOf()
+                medlemskapsperioder = listOf(),
+                lovvalgsperioder = listOf()
+
             )
         )
     }
@@ -133,6 +138,7 @@ class MelosysHendelseTest {
                     "behandligsresultatType": "FERDIGBEHANDLET",
                     "vedtakstype": "FØRSTEGANGSVEDTAK",
                     "medlemskapsperioder": [],
+                    "lovvalgsperioder": [],
                     "ekstarfelt": "DUMMY"
                 }
             }"""
@@ -148,7 +154,8 @@ class MelosysHendelseTest {
                 sakstema = Sakstemaer.TRYGDEAVGIFT,
                 behandligsresultatType = Behandlingsresultattyper.FERDIGBEHANDLET,
                 vedtakstype = Vedtakstyper.FØRSTEGANGSVEDTAK,
-                medlemskapsperioder = listOf()
+                medlemskapsperioder = listOf(),
+                lovvalgsperioder = listOf()
             )
         )
     }
