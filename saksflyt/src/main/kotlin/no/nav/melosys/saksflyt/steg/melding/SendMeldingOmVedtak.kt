@@ -2,13 +2,15 @@ package no.nav.melosys.saksflyt.steg.melding
 
 import io.getunleash.Unleash
 import mu.KotlinLogging
-import no.nav.melosys.domain.dokument.felles.Periode
+import no.nav.melosys.domain.Behandlingsresultat
+import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingsresultattyper
 import no.nav.melosys.featuretoggle.ToggleName
 import no.nav.melosys.integrasjon.hendelser.KafkaMelosysHendelseProducer
 import no.nav.melosys.saksflyt.steg.StegBehandler
 import no.nav.melosys.saksflytapi.domain.ProsessSteg
 import no.nav.melosys.saksflytapi.domain.Prosessinstans
 import no.nav.melosys.integrasjon.hendelser.MelosysHendelse
+import no.nav.melosys.integrasjon.hendelser.Periode
 import no.nav.melosys.integrasjon.hendelser.VedtakHendelseMelding
 import no.nav.melosys.service.behandling.BehandlingsresultatService
 import no.nav.melosys.service.persondata.PersondataService
@@ -44,22 +46,22 @@ class SendMeldingOmVedtak(
             return
         }
 
+        val behandlingsresultat: Behandlingsresultat = behandlingsresultatService.hentBehandlingsresultat(behandling.id)
+        val behandligsresultatType: Behandlingsresultattyper = behandlingsresultat.type
+        val vedtakstype = behandlingsresultat.vedtakMetadata?.vedtakstype
+
         kafkaMelosysHendelseProducer.produserBestillingsmelding(
             MelosysHendelse(
                 melding = VedtakHendelseMelding(
                     folkeregisterIdent = folkeregisterIdent,
                     sakstype = fagsak.type,
                     sakstema = fagsak.tema,
-                    medlemskapsperiode = finnPeriode(behandling.id)
+                    behandligsresultatType = behandligsresultatType,
+                    vedtakstype = vedtakstype,
+                    medlemskapsperioder = behandlingsresultat.medlemskapsperioder
+                        .mapNotNull { Periode(it.fom, it.tom, it.innvilgelsesresultat) }
                 )
             )
         )
     }
-
-    private fun finnPeriode(behandlingId: Long): Periode? =
-        behandlingsresultatService.finnResultatMedMedlemskapOgLovvalg(behandlingId)?.let {
-            val fom = it.utledMedlemskapsperiodeFom()
-            val tom = it.utledMedlemskapsperiodeTom()
-            if (fom == null && tom == null) null else Periode(fom, tom)
-        }
 }

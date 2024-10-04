@@ -8,7 +8,6 @@ import com.github.tomakehurst.wiremock.client.WireMock
 import io.getunleash.FakeUnleash
 import io.kotest.assertions.withClue
 import io.kotest.matchers.collections.shouldHaveSize
-import io.kotest.matchers.nulls.shouldBeNull
 import io.kotest.matchers.nulls.shouldNotBeNull
 import io.kotest.matchers.shouldBe
 import io.kotest.matchers.types.shouldBeInstanceOf
@@ -192,12 +191,16 @@ class IkkeYrkesaktivVedtakIT(
         melosysHendelseKafkaConsumer.melosysHendelser.shouldHaveSize(1)
             .single().value()
             .melding.shouldBeInstanceOf<VedtakHendelseMelding>()
-            .run {
-                folkeregisterIdent shouldBe "30056928150"
-                sakstype shouldBe Sakstyper.EU_EOS
-                sakstema shouldBe Sakstemaer.MEDLEMSKAP_LOVVALG
-                medlemskapsperiode.shouldBeNull()
-            }
+            .shouldBe(
+                VedtakHendelseMelding(
+                    folkeregisterIdent = "30056928150",
+                    sakstype = Sakstyper.EU_EOS,
+                    sakstema = Sakstemaer.MEDLEMSKAP_LOVVALG,
+                    behandligsresultatType = Behandlingsresultattyper.FASTSATT_LOVVALGSLAND,
+                    vedtakstype = null,
+                    medlemskapsperioder = emptyList()
+                )
+            )
     }
 
     @Test
