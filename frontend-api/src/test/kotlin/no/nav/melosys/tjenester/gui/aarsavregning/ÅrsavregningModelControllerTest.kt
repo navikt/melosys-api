@@ -219,11 +219,11 @@ internal class ÅrsavregningModelControllerTest {
 }"""
 
         mockMvc.perform(
-            MockMvcRequestBuilders.get("$BASE_URL/{avregningID}", 1).contentType(MediaType.APPLICATION_JSON)
+            MockMvcRequestBuilders.get("$BASE_URL/{behandlingID}/aarsavregninger/{aarsavregningID}", 1, 1).contentType(MediaType.APPLICATION_JSON)
         ).andExpect(status().isOk()).andExpect(content().json(expectedJson, true))
     }
 
     companion object {
-        private const val BASE_URL: String = "/api/aarsavregninger"
+        private const val BASE_URL: String = "/api/behandlinger"
     }
 }

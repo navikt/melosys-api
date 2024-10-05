@@ -6,6 +6,7 @@ import no.nav.melosys.domain.kodeverk.Inntektskildetype
 import no.nav.melosys.domain.kodeverk.InnvilgelsesResultat
 import no.nav.melosys.domain.kodeverk.Skatteplikttype
 import no.nav.melosys.domain.kodeverk.Trygdedekninger
+import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingsresultattyper
 import no.nav.melosys.service.avgift.aarsavregning.TotalBeløpBeregner
 import no.nav.melosys.service.avgift.aarsavregning.Trygdeavgiftsgrunnlag
 import no.nav.melosys.service.avgift.aarsavregning.ÅrsavregningModel
@@ -23,15 +24,18 @@ import java.time.LocalDate
 @Protected
 @RestController
 @Api(tags = ["årsavregning", "trygdeavgift"])
-@RequestMapping("/aarsavregninger")
+@RequestMapping("/behandlinger/{behandlingID}/aarsavregninger")
 class ÅrsavregningController(
     private val årsavregningService: ÅrsavregningService,
     private val aksesskontroll: Aksesskontroll,
-    private val totalBeløpBeregner: TotalBeløpBeregner
+    private val totalBeløpBeregner: TotalBeløpBeregner,
 ) {
 
-    @GetMapping("/{behandlingID}")
-    fun hentAvregning(@PathVariable("behandlingID") behandlingID: Long): ResponseEntity<ÅrsavregningResponse?> {
+    @GetMapping("/{aarsavregningID}")
+    fun hentÅrsavregning(
+        @PathVariable("behandlingID") behandlingID: Long,
+        @PathVariable("aarsavregningID") aarsavregningID: Long
+    ): ResponseEntity<ÅrsavregningResponse?> {
         aksesskontroll.autoriser(behandlingID)
 
         val årsavregning = årsavregningService.finnÅrsavregning(behandlingID) ?: return ResponseEntity.notFound().build()
@@ -41,7 +45,7 @@ class ÅrsavregningController(
         )
     }
 
-    @PostMapping("/{behandlingID}")
+    @PostMapping
     fun opprettNyÅrsavregning(
         @PathVariable("behandlingID") behandlingID: Long,
         @RequestBody årsavregningRequest: LagÅrsavregningRequest
@@ -56,7 +60,7 @@ class ÅrsavregningController(
     }
 
     data class LagÅrsavregningRequest(
-        val aar: Int
+        val aar: Int,
     )
 
     private fun lagÅrsavregningResponse(årsavregningModel: ÅrsavregningModel) =
@@ -134,17 +138,19 @@ class ÅrsavregningController(
     }
 
 
-    @PutMapping("/{behandlingID}")
+    @PutMapping("/{aarsavregningID}")
     fun oppdaterTotalbelop(
         @PathVariable("behandlingID") behandlingID: Long,
-        @RequestBody årsavregningRequest: ÅrsavregningRequest
+        @PathVariable("aarsavregningID") aarsavregningID: Long,
+        @RequestBody årsavregningOppdaterRequest: ÅrsavregningOppdaterRequest
     ): ResponseEntity<ÅrsavregningResponse> {
         aksesskontroll.autoriserSkriv(behandlingID)
 
         val årsavregning = årsavregningService.oppdaterTotalbelop(
             behandlingID,
-            årsavregningRequest.avregning.tidligereFakturertBeloep,
-            årsavregningRequest.avregning.nyttTotalbeloep
+            aarsavregningID,
+            årsavregningOppdaterRequest.avregning.tidligereFakturertBeloep,
+            årsavregningOppdaterRequest.avregning.nyttTotalbeloep
         )
 
         return ResponseEntity.ok(
@@ -152,6 +158,13 @@ class ÅrsavregningController(
         )
     }
 }
+
+data class ÅrsavregningListResponse(
+    val aarsavregningId: Long,
+    val behandlingID: Long,
+    val aar: Int,
+    val type: Behandlingsresultattyper,
+)
 
 data class ÅrsavregningResponse(
     val aar: Int,
@@ -162,7 +175,7 @@ data class ÅrsavregningResponse(
     val avregning: AvregningDto?
 )
 
-data class ÅrsavregningRequest(
+data class ÅrsavregningOppdaterRequest(
     val avregning: AvregningDto
 )
 

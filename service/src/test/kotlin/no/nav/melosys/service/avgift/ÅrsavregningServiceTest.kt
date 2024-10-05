@@ -150,13 +150,15 @@ internal class ÅrsavregningServiceTest {
         val behandlingsresultat = Behandlingsresultat().apply resultat@{
             behandling = Behandling()
             årsavregning = Årsavregning().apply {
+                id = 1
                 aar = 2023
                 behandlingsresultat = this@resultat
             }
         }
+        every { aarsavregningRepository.findById(1L) }.returns(Optional.of(behandlingsresultat.årsavregning))
         every { behandlingsresultatService.hentBehandlingsresultat(1L) }.returns(behandlingsresultat)
 
-        årsavregningService.oppdaterTotalbelop(1L, null, BigDecimal.ONE)
+        årsavregningService.oppdaterTotalbelop(1L, 1, BigDecimal.ONE, null)
         behandlingsresultat.årsavregning.tilFaktureringBeloep shouldBe null
     }
 
@@ -165,13 +167,15 @@ internal class ÅrsavregningServiceTest {
         val behandlingsresultat = Behandlingsresultat().apply resultat@{
             behandling = Behandling()
             årsavregning = Årsavregning().apply {
+                id = 1L
                 aar = 2023
                 behandlingsresultat = this@resultat
             }
         }
+        every { aarsavregningRepository.findById(1L) }.returns(Optional.of(behandlingsresultat.årsavregning))
         every { behandlingsresultatService.hentBehandlingsresultat(1L) }.returns(behandlingsresultat)
 
-        årsavregningService.oppdaterTotalbelop(1L, BigDecimal.valueOf(12.4), BigDecimal.valueOf(5.2))
+        årsavregningService.oppdaterTotalbelop(1L, 1L, BigDecimal.valueOf(12.4), BigDecimal.valueOf(5.2))
         behandlingsresultat.årsavregning.tilFaktureringBeloep shouldBe BigDecimal.valueOf(-7.2)
     }
 
