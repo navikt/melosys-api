@@ -194,7 +194,7 @@ data class ÅrsavregningModel(
     val nyttGrunnlag: Trygdeavgiftsgrunnlag?,
     val endeligAvgift: List<Trygdeavgiftsperiode>,
     val tidligereFakturertBeloep: BigDecimal?,
-    val nyttTotalbeloep: BigDecimal,
+    val nyttTotalbeloep: BigDecimal?,
     val tilFaktureringBeloep: BigDecimal?,
 )
 
