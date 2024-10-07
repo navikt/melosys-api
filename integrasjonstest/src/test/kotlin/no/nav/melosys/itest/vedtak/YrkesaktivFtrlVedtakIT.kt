@@ -357,6 +357,110 @@ class YrkesaktivFtrlVedtakIT(
         }
     }
 
+    @Test
+    fun `oppretter og fatter vedtak årsavregning`() {
+        val saksnummer = lagFørstegangsBehandling(Skatteplikttype.IKKE_SKATTEPLIKTIG, false)
+
+        executeAndWait(
+            mapOf(
+                ProsessType.OPPRETT_NY_BEHANDLING_AARSAVREGNING to 1
+            )
+        ) {
+            skatteHendelseMeldingKafkaTemplate.send(
+                "teammelosys.skattehendelser.v1-local",
+                Skattehendelse("2023", "30056928150", "ny")
+            )
+        }
+
+        var behandlingsId = 1L
+
+        fagsakRepository.findBySaksnummer(saksnummer)
+            .shouldBePresent().run {
+                behandlinger.shouldHaveSize(2)
+                    .firstOrNull { it.type == Behandlingstyper.ÅRSAVREGNING }
+                    .shouldNotBeNull()
+                    .run {
+                        behandlingsId = id
+                        behandlingsResultRepository.findById(id)
+                            .shouldBePresent()
+                            .årsavregning
+                            .shouldNotBeNull()
+                            .run {
+                                type shouldBe Behandlingstyper.ÅRSAVREGNING
+                                aar shouldBe 2023
+                            }
+                    }
+            }
+
+        trygdeavgiftsberegningService.beregnOgLagreTrygdeavgift(
+            behandlingsId,
+            OppdaterTrygdeavgiftsgrunnlagRequest(
+                skatteforholdTilNorgeList = listOf(
+                    SkatteforholdTilNorgeRequest(
+                        fomDato = LocalDate.of(2023, 1, 1),
+                        tomDato = LocalDate.of(2023, 2, 1),
+                        skatteplikttype = Skatteplikttype.SKATTEPLIKTIG
+                    )
+                ),
+                inntektskilder = listOf(
+                    InntektskildeRequest(
+                        type = Inntektskildetype.INNTEKT_FRA_UTLANDET,
+                        arbeidsgiversavgiftBetales = true,
+                        avgiftspliktigInntektMnd = 10000.toBigDecimal(),
+                        fomDato = LocalDate.of(2023, 1, 1),
+                        tomDato = LocalDate.of(2023, 2, 1)
+                    )
+                )
+            )
+        )
+
+        val vedtakRequest = FattVedtakRequest.Builder()
+            .medBehandlingsresultatType(Behandlingsresultattyper.FERDIGBEHANDLET)
+            .medVedtakstype(Vedtakstyper.FØRSTEGANGSVEDTAK)
+            .medBestillersId("komponent test")
+            .build()
+
+        executeAndWait(
+            mapOf(
+                ProsessType.IVERKSETT_VEDTAK_AARSAVREGNING to 1,
+                ProsessType.OPPRETT_OG_DISTRIBUER_BREV to 1
+            )
+        ) {
+            vedtaksfattingFasade.fattVedtak(behandlingsId, vedtakRequest)
+        }
+
+
+        behandlingsresultatService.hentBehandlingsresultat(behandlingsId).run {
+            type shouldBe Behandlingsresultattyper.FERDIGBEHANDLET
+            behandlingsmåte shouldBe Behandlingsmaate.MANUELT
+            fastsattAvLand shouldBe Land_iso2.NO
+        }
+        behandlingRepository.findById(behandlingsId)
+            .shouldBePresent().run {
+                withClue("Behandlingsstatus skal være AVSLUTTET") {
+                    status shouldBe Behandlingsstatus.AVSLUTTET
+                }
+                fagsak.run {
+                    withClue("Saksstatus skal være LOVVALG_AVKLART") {
+                        status shouldBe Saksstatuser.LOVVALG_AVKLART
+                    }
+                }
+            }
+
+
+        melosysHendelseKafkaConsumer.melosysHendelser.shouldHaveSize(2)
+            .last().value()
+            .melding.shouldBeInstanceOf<VedtakHendelseMelding>()
+            .run {
+                folkeregisterIdent shouldBe "30056928150"
+                sakstype shouldBe Sakstyper.FTRL
+                sakstema shouldBe Sakstemaer.MEDLEMSKAP_LOVVALG
+            }
+
+
+        mockServer.verify(1, WireMock.postRequestedFor(WireMock.urlEqualTo("/fakturaserier")))
+    }
+
     private fun lagOpprettSakDto(): OpprettSakDto {
         val opprettsakdto = OpprettSakDto()
         opprettsakdto.behandlingstema = Behandlingstema.YRKESAKTIV
