@@ -8,6 +8,7 @@ import io.mockk.junit5.MockKExtension
 import no.nav.melosys.domain.Behandling
 import no.nav.melosys.domain.Behandlingsresultat
 import no.nav.melosys.domain.Fagsak
+import no.nav.melosys.domain.FagsakTestFactory
 import no.nav.melosys.domain.avgift.aarsavregning.Skattehendelse
 import no.nav.melosys.domain.avgift.Årsavregning
 import no.nav.melosys.domain.kodeverk.Aktoersroller
@@ -123,7 +124,12 @@ class SkattehendelserConsumerTest {
         every { behandslingsresultatService.hentBehandlingsresultat(behandling.id) } returns behandlingsresultat
         val behandlingSlot = slot<Behandling>()
         every { behandlingService.lagre(capture(behandlingSlot)) } returns Unit
-        every { årsavregningService.hentSisteBehandlingsresultatMedInnvilgetMedlemskapsperiodeOgAvgiftsgrunnlag(SAKSNUMMER, GJELDER_ÅR) } returns mockk()
+        every {
+            årsavregningService.hentSisteBehandlingsresultatMedInnvilgetMedlemskapsperiodeOgAvgiftsgrunnlag(
+                SAKSNUMMER,
+                GJELDER_ÅR
+            )
+        } returns mockk()
 
 
         skattehendelserConsumer.lesSkattehendelser(
@@ -172,17 +178,14 @@ class SkattehendelserConsumerTest {
     }
 
 
-    private fun lagFagsak(block: Fagsak.() -> Unit = {}) = Fagsak(
-        SAKSNUMMER,
-        123L,
-        Sakstyper.EU_EOS,
-        Sakstemaer.MEDLEMSKAP_LOVVALG,
-        Saksstatuser.OPPRETTET,
-        mutableSetOf(),
-        mutableListOf()
-    ).apply {
-        block()
-    }
+    private fun lagFagsak(block: Fagsak.() -> Unit = {}) = FagsakTestFactory.builder()
+        .saksnummer(SAKSNUMMER)
+        .type(Sakstyper.EU_EOS)
+        .tema(Sakstemaer.MEDLEMSKAP_LOVVALG)
+        .status(Saksstatuser.OPPRETTET)
+        .build().apply {
+            block()
+        }
 
     private fun lagBehandling(block: Behandling.() -> Unit = {}) = Behandling().apply {
         block()
