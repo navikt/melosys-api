@@ -78,7 +78,6 @@ public class EosVedtakService implements FattVedtakInterface {
     @Override
     public void fattVedtak(Behandling behandling, FattVedtakRequest request) throws ValideringException {
         long behandlingID = behandling.getId();
-
         log.info("Fatter vedtak for (EU_EØS) sak: {} behandling: {}", behandling.getFagsak().getSaksnummer(), behandlingID);
 
         var behandlingsresultat = behandlingsresultatService.hentBehandlingsresultat(behandlingID);
@@ -111,10 +110,12 @@ public class EosVedtakService implements FattVedtakInterface {
             behandlingsresultat.setFastsattAvLand(Land_iso2.NO);
             prosessinstansService.opprettProsessinstansIverksettIkkeYrkesaktiv(behandling);
         } else {
-            oppdaterBehandlingsresultat(behandlingsresultat, request.getVedtakstype(), request.getFritekst(), request.getNyVurderingBakgrunn());
+            var fritekst = request.getFritekst() == null ? request.getBegrunnelseFritekst() : request.getFritekst();
+
+            oppdaterBehandlingsresultat(behandlingsresultat, request.getVedtakstype(), fritekst, request.getNyVurderingBakgrunn());
             Set<String> mottakerinstitusjoner = avklarMottakerInstitusjoner(behandling, request.getMottakerinstitusjoner(), behandlingsresultat);
             prosessinstansService.opprettProsessinstansIverksettVedtakEos(behandling, request.getBehandlingsresultatTypeKode(),
-                request.getFritekst(), request.getFritekstSed(), mottakerinstitusjoner, request.isKopiTilArbeidsgiver());
+                fritekst, request.getFritekstSed(), mottakerinstitusjoner, request.isKopiTilArbeidsgiver());
         }
 
         oppgaveService.ferdigstillOppgaveMedBehandlingID(behandling.getId());
