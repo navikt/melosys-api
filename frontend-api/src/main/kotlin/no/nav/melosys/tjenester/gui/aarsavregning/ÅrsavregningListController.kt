@@ -27,7 +27,7 @@ class ÅrsavregningListController(
         aksesskontroll.autoriserSakstilgang(saksnummer)
 
         val filtrerteÅrsavregninger = årsavregningService.finnÅrsavregningerPåFagsak(saksnummer, aar, behandlingstype)
-        val toList = filtrerteÅrsavregninger.map {
+        val årsavregningListResponse = filtrerteÅrsavregninger.map {
             ÅrsavregningListResponse(
                 aarsavregningId = it.id,
                 behandlingID = it.behandlingsresultat.behandling.id,
@@ -35,7 +35,7 @@ class ÅrsavregningListController(
                 type = it.behandlingsresultat.type
             )
         }.toList()
-        return ResponseEntity.ok(toList)
+        return ResponseEntity.ok(årsavregningListResponse)
     }
 
 }
