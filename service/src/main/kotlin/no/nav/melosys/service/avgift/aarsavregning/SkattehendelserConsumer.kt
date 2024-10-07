@@ -65,31 +65,15 @@ class SkattehendelserConsumer(
     }
 
     private fun skalOpprettArsavregningsBehandlingProsessflyt(sakMedTrygdeavgift: Fagsak, gjelderÅr: Int): Boolean {
-        finnAktivÅrsavregningBehandling(sakMedTrygdeavgift, gjelderÅr)?.let { behandling ->
-            log.info { "Årsavregning behandling(${behandling.id}) for sak: ${sakMedTrygdeavgift.saksnummer} og år: $gjelderÅr er allerede opprettet" }
-            if (behandling.status != Behandlingsstatus.OPPRETTET) {
-                log.info { "Oppdaterer status fra ${behandling.status} til VURDER_DOKUMENT for behandling ${behandling.id}" }
-                behandling.status = Behandlingsstatus.VURDER_DOKUMENT
-                behandlingService.lagre(behandling)
-            }
-            return false
+        val behandling = finnAktivÅrsavregningBehandling(sakMedTrygdeavgift, gjelderÅr) ?: return true
+
+        log.info { "Årsavregning behandling(${behandling.id}) for sak: ${sakMedTrygdeavgift.saksnummer} og år: $gjelderÅr er allerede opprettet" }
+        if (behandling.status != Behandlingsstatus.OPPRETTET) {
+            log.info { "Oppdaterer status fra ${behandling.status} til VURDER_DOKUMENT for behandling ${behandling.id}" }
+            behandling.status = Behandlingsstatus.VURDER_DOKUMENT
+            behandlingService.lagre(behandling)
         }
-
-        // Dette kan vel slettes
-        val trygdeavgiftsBehandlingtMedRelevantPeriode =
-            årsavregningService.hentSisteBehandlingsresultatMedInnvilgetMedlemskapsperiodeOgAvgiftsgrunnlag(
-                sakMedTrygdeavgift.saksnummer,
-                gjelderÅr
-            )?.behandling
-
-        if (trygdeavgiftsBehandlingtMedRelevantPeriode == null) {
-            log.info(
-                "Fant ingen behandlinger med overlappende trygdeavgiftsperiode for sak: ${sakMedTrygdeavgift.saksnummer} og år: $gjelderÅr. Avslutter steg"
-            )
-            return false
-        }
-
-        return true
+        return false
     }
 
     private fun finnAktivÅrsavregningBehandling(sakMedTrygdeavgift: Fagsak, gjelderÅr: Int): Behandling? {
