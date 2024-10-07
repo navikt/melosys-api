@@ -9,38 +9,55 @@ import java.time.LocalDate
 @JsonInclude(JsonInclude.Include.NON_NULL)
 class ÅrsavregningVedtaksbrev(
     brevBestilling: ÅrsavregningVedtakBrevBestilling,
-    // FIXME hordkodet data for å kunne merge PR navikt/melosys-dokgen#397 uten å gi feil når vedtaksbrevet brukes i q2
-    val årsavregningsår: Int = 2023,
-    val endeligTrygdeavgift: List<Avgiftsperiode> = listOf(Avgiftsperiode()),
-    val forskuddsvisFakturertTrygdeavgift: List<Avgiftsperiode> = listOf(Avgiftsperiode()),
-    val endeligTrygdeavgiftTotalbeløp: BigDecimal = BigDecimal.TEN,
-    val forskuddsvisFakturertTrygdeavgiftTotalbeløp: BigDecimal = BigDecimal.ONE,
-    val differansebeløp: BigDecimal = BigDecimal.TEN,
-    val minimumsbeløpForFakturering: BigDecimal = BigDecimal.valueOf(100),
-    val innledningFritekst: String? = "Dette er en test som ikke bør tas på alvor.",
-    val begrunnelseFritekst: String? = null,
-    val pliktigMedlemskap: Boolean = false,
-    val eøsEllerTrygdeavtale: Boolean = false,
+    val årsavregningsår: Int,
+    val endeligTrygdeavgift: List<Avgiftsperiode>,
+    val forskuddsvisFakturertTrygdeavgift: List<Avgiftsperiode>,
+    val endeligTrygdeavgiftTotalbeløp: BigDecimal,
+    val forskuddsvisFakturertTrygdeavgiftTotalbeløp: BigDecimal?,
+    val differansebeløp: BigDecimal,
+    val minimumsbeløpForFakturering: BigDecimal,
+    val innledningFritekst: String?,
+    val begrunnelseFritekst: String?,
+    val pliktigMedlemskap: Boolean,
+    val eøsEllerTrygdeavtale: Boolean,
 ) : DokgenDto(brevBestilling, Mottakerroller.BRUKER) {
     constructor(
         brevBestilling: ÅrsavregningVedtakBrevBestilling,
+        årsavregningsår: Int,
+        endeligTrygdeavgift: List<Avgiftsperiode>,
+        forskuddsvisFakturertTrygdeavgift: List<Avgiftsperiode>,
+        endeligTrygdeavgiftTotalbeløp: BigDecimal,
+        forskuddsvisFakturertTrygdeavgiftTotalbeløp: BigDecimal?,
+        differansebeløp: BigDecimal,
+        minimumsbeløpForFakturering: BigDecimal,
+        pliktigMedlemskap: Boolean,
+        eøsEllerTrygdeavtale: Boolean
     ) : this(
         brevBestilling = brevBestilling,
+        årsavregningsår = årsavregningsår,
+        endeligTrygdeavgift = endeligTrygdeavgift,
+        forskuddsvisFakturertTrygdeavgift = forskuddsvisFakturertTrygdeavgift,
+        endeligTrygdeavgiftTotalbeløp = endeligTrygdeavgiftTotalbeløp,
+        forskuddsvisFakturertTrygdeavgiftTotalbeløp = forskuddsvisFakturertTrygdeavgiftTotalbeløp,
+        differansebeløp = differansebeløp,
+        minimumsbeløpForFakturering = minimumsbeløpForFakturering,
         innledningFritekst = brevBestilling.innledningFritekstAarsavregning,
-        begrunnelseFritekst = brevBestilling.begrunnelseFritekstAarsavregning
+        begrunnelseFritekst = brevBestilling.begrunnelseFritekstAarsavregning,
+        pliktigMedlemskap = pliktigMedlemskap,
+        eøsEllerTrygdeavtale = eøsEllerTrygdeavtale
     )
 }
 
 data class Avgiftsperiode(
-    val fom: LocalDate = LocalDate.of(2021, 1, 1),
-    val tom: LocalDate = LocalDate.of(2021, 1, 31),
-    val avgiftssats: BigDecimal = BigDecimal.valueOf(13.9),
-    val avgiftPerMd: BigDecimal = BigDecimal.valueOf(12000.00),
-    val avgiftspliktigInntektPerMd: BigDecimal = BigDecimal.valueOf(50000.00),
-    val inntektskilde: String = "Donasjon",
-    val trygdedekning: String = "Briller",
-    val arbeidsgiveravgiftBetalt: Boolean = false,
-    val skatteplikt: Boolean = true
+    val fom: LocalDate,
+    val tom: LocalDate,
+    val avgiftssats: BigDecimal,
+    val avgiftPerMd: BigDecimal,
+    val avgiftspliktigInntektPerMd: BigDecimal ,
+    val inntektskilde: String,
+    val trygdedekning: String,
+    val arbeidsgiveravgiftBetalt: Boolean,
+    val skatteplikt: Boolean
 )
 
 

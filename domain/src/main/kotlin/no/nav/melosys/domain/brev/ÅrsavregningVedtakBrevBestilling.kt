@@ -16,7 +16,7 @@ class ÅrsavregningVedtakBrevBestilling : DokgenBrevbestilling {
         return Builder(this)
     }
 
-    class Builder : DokgenBrevbestilling.Builder<Builder?> {
+    class Builder : DokgenBrevbestilling.Builder<Builder> {
         internal var innledningFritekst: String? = null
         internal var begrunnelseFritekst: String? = null
 
