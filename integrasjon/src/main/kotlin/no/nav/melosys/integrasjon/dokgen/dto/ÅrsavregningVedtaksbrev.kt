@@ -18,8 +18,8 @@ class ÅrsavregningVedtaksbrev(
     val minimumsbeløpForFakturering: BigDecimal,
     val innledningFritekst: String?,
     val begrunnelseFritekst: String?,
-    val pliktigMedlemskap: Boolean?,
-    val eøsEllerTrygdeavtale: Boolean?,
+    val pliktigMedlemskap: Boolean,
+    val eøsEllerTrygdeavtale: Boolean,
 ) : DokgenDto(brevBestilling, Mottakerroller.BRUKER) {
     constructor(
         brevBestilling: ÅrsavregningVedtakBrevBestilling,
@@ -30,8 +30,8 @@ class ÅrsavregningVedtaksbrev(
         forskuddsvisFakturertTrygdeavgiftTotalbeløp: BigDecimal?,
         differansebeløp: BigDecimal,
         minimumsbeløpForFakturering: BigDecimal,
-        pliktigMedlemskap: Boolean?,
-        eøsEllerTrygdeavtale: Boolean?
+        pliktigMedlemskap: Boolean,
+        eøsEllerTrygdeavtale: Boolean
     ) : this(
         brevBestilling = brevBestilling,
         årsavregningsår = årsavregningsår,

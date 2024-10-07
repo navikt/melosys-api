@@ -1,25 +1,26 @@
 package no.nav.melosys.service.dokument.brev.mapper
 
+import io.kotest.matchers.nulls.shouldNotBeNull
+import io.kotest.matchers.shouldBe
 import io.mockk.every
 import io.mockk.mockk
-import no.nav.melosys.domain.*
+import no.nav.melosys.domain.Behandling
+import no.nav.melosys.domain.Behandlingsresultat
+import no.nav.melosys.domain.Fagsak
+import no.nav.melosys.domain.Medlemskapsperiode
 import no.nav.melosys.domain.avgift.*
 import no.nav.melosys.domain.brev.ÅrsavregningVedtakBrevBestilling
 import no.nav.melosys.domain.dokument.person.PersonDokument
 import no.nav.melosys.domain.kodeverk.Inntektskildetype
-import no.nav.melosys.domain.kodeverk.Sakstyper
 import no.nav.melosys.domain.kodeverk.Skatteplikttype
 import no.nav.melosys.domain.kodeverk.Trygdedekninger
-import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingstema
-import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingstyper
 import no.nav.melosys.exception.FunksjonellException
 import no.nav.melosys.integrasjon.dokgen.dto.Avgiftsperiode
 import no.nav.melosys.integrasjon.trygdeavgift.dto.NOK
+import no.nav.melosys.service.SaksbehandlingDataFactory.lagBehandling
 import no.nav.melosys.service.avgift.aarsavregning.Trygdeavgiftsgrunnlag
 import no.nav.melosys.service.avgift.aarsavregning.ÅrsavregningModel
 import no.nav.melosys.service.avgift.aarsavregning.ÅrsavregningService
-import org.junit.jupiter.api.Assertions.assertEquals
-import org.junit.jupiter.api.Assertions.assertNotNull
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.assertThrows
@@ -55,8 +56,8 @@ class ÅrsavregningVedtakMapperTest {
 
         val result = mapper.mapÅrsavregning(brevbestilling, behandlingsresultat)
 
-        assertNotNull(result)
-        assertEquals(behandlingsresultat.årsavregning.aar, result.årsavregningsår)
+        result.shouldNotBeNull()
+        behandlingsresultat.årsavregning.aar shouldBe result.årsavregningsår
 
         val expectedEndeligTrygdeavgift = listOf(
             Avgiftsperiode(
@@ -71,7 +72,7 @@ class ÅrsavregningVedtakMapperTest {
                 skatteplikt = true
             )
         )
-        assertEquals(expectedEndeligTrygdeavgift, result.endeligTrygdeavgift)
+        result.endeligTrygdeavgift shouldBe expectedEndeligTrygdeavgift
 
         val expectedForskuddsvisFakturertTrygdeavgift = listOf(
             Avgiftsperiode(
@@ -86,14 +87,14 @@ class ÅrsavregningVedtakMapperTest {
                 skatteplikt = false
             )
         )
-        assertEquals(expectedForskuddsvisFakturertTrygdeavgift, result.forskuddsvisFakturertTrygdeavgift)
+        result.forskuddsvisFakturertTrygdeavgift shouldBe expectedForskuddsvisFakturertTrygdeavgift
 
-        assertEquals(årsavregningModel.nyttTotalbeloep, result.endeligTrygdeavgiftTotalbeløp)
-        assertEquals(årsavregningModel.tidligereFakturertBeloep, result.forskuddsvisFakturertTrygdeavgiftTotalbeløp)
-        assertEquals(BigDecimal(1000), result.differansebeløp)
-        assertEquals(BigDecimal(100), result.minimumsbeløpForFakturering)
-        assertEquals(true, result.pliktigMedlemskap)
-        assertEquals(true, result.eøsEllerTrygdeavtale)
+        result.endeligTrygdeavgiftTotalbeløp shouldBe årsavregningModel.nyttTotalbeloep
+        result.forskuddsvisFakturertTrygdeavgiftTotalbeløp shouldBe årsavregningModel.tidligereFakturertBeloep
+        result.differansebeløp shouldBe BigDecimal(1000)
+        result.minimumsbeløpForFakturering shouldBe BigDecimal(100)
+        result.pliktigMedlemskap shouldBe true
+        result.eøsEllerTrygdeavtale shouldBe true
     }
 
     @Test
@@ -109,17 +110,7 @@ class ÅrsavregningVedtakMapperTest {
             mapper.mapÅrsavregning(brevbestilling, behandlingsresultat)
         }
 
-        assertEquals("Finner ingen årsavregning for behandling ${brevbestilling.behandlingId}", exception.message)
-    }
-
-    private fun lagBehandling(block: Behandling.() -> Unit = {}): Behandling = Behandling().apply behandling@{
-        id = 1L
-        fagsak = FagsakTestFactory.builder().apply {
-            type = Sakstyper.EU_EOS
-        }.build()
-        type = Behandlingstyper.FØRSTEGANG
-        tema = Behandlingstema.YRKESAKTIV
-        block()
+        exception.message shouldBe "Finner ingen årsavregning for behandling ${brevbestilling.behandlingId}"
     }
 
     private fun createBehandlingsresultat(): Behandlingsresultat {
