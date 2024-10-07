@@ -93,8 +93,8 @@ internal class ÅrsavregningServiceTest {
             tidligereAvgift = emptyList(),
             nyttGrunnlag = null,
             endeligAvgift = emptyList(),
-            tidligereFakturertBeloep = BigDecimal(1000),
-            nyttTotalbeloep = BigDecimal(2000),
+            tidligereFakturertBeloep = null,
+            nyttTotalbeloep = null,
             tilFaktureringBeloep = null
         )
     }
@@ -139,8 +139,8 @@ internal class ÅrsavregningServiceTest {
             ),
             nyttGrunnlag = null,
             endeligAvgift = emptyList(),
-            tidligereFakturertBeloep = BigDecimal(1000),
-            nyttTotalbeloep = BigDecimal(2000),
+            tidligereFakturertBeloep = null,
+            nyttTotalbeloep = null,
             tilFaktureringBeloep = null
         )
     }
