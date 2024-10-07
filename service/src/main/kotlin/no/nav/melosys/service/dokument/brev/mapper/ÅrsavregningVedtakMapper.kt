@@ -9,6 +9,7 @@ import no.nav.melosys.domain.kodeverk.Skatteplikttype
 import no.nav.melosys.exception.FunksjonellException
 import no.nav.melosys.integrasjon.dokgen.dto.Avgiftsperiode
 import no.nav.melosys.integrasjon.dokgen.dto.ÅrsavregningVedtaksbrev
+import no.nav.melosys.service.avgift.aarsavregning.ÅrsavregningKonstanter
 import no.nav.melosys.service.avgift.aarsavregning.ÅrsavregningModel
 import no.nav.melosys.service.avgift.aarsavregning.ÅrsavregningService
 import org.springframework.stereotype.Component
@@ -21,8 +22,9 @@ class ÅrsavregningVedtakMapper(
     @Transactional
     internal fun mapÅrsavregning(brevbestilling: ÅrsavregningVedtakBrevBestilling, behandlingsresultat: Behandlingsresultat): ÅrsavregningVedtaksbrev {
 
-        val årsavregningModel = årsavregningService.finnÅrsavregning(brevbestilling.behandlingId)
-            ?: throw FunksjonellException("Finner ingen årsavregning for behandling " + brevbestilling.behandlingId)
+        val behandlingsId = brevbestilling.behandlingId
+        val årsavregningModel = årsavregningService.finnÅrsavregning(behandlingsId)
+            ?: throw FunksjonellException("Finner ingen årsavregning for behandling $behandlingsId")
         val fagsak = behandlingsresultat.behandling.fagsak
 
         return ÅrsavregningVedtaksbrev(
@@ -30,10 +32,10 @@ class ÅrsavregningVedtakMapper(
             årsavregningsår = behandlingsresultat.årsavregning.aar,
             endeligTrygdeavgift = avgiftsPeriodeMapper(årsavregningModel.endeligAvgift),
             forskuddsvisFakturertTrygdeavgift = avgiftsPeriodeMapper(årsavregningModel.tidligereAvgift),
-            endeligTrygdeavgiftTotalbeløp = årsavregningModel.nyttTotalbeloep,
+            endeligTrygdeavgiftTotalbeløp = årsavregningModel.nyttTotalbeloep?: throw FunksjonellException("Nytt totalbeløp finnes ikke for behandling $behandlingsId"),
             forskuddsvisFakturertTrygdeavgiftTotalbeløp = årsavregningModel.tidligereFakturertBeloep,
             differansebeløp = regnUtDifferanseBeløp(årsavregningModel),
-            minimumsbeløpForFakturering = BigDecimal(100),
+            minimumsbeløpForFakturering = ÅrsavregningKonstanter.MINIMUM_BELØP_FAKTURERING.beløp,
             pliktigMedlemskap = årsavregningModel.tidligereGrunnlag?.medlemskapsperioder?.all { it.medlemskapstyper == Medlemskapstyper.PLIKTIG }?: false,
             eøsEllerTrygdeavtale = fagsak.erSakstypeEøs() || fagsak.erSakstypeTrygdeavtale()
         )
