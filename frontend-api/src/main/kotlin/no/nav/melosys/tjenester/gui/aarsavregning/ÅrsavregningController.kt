@@ -35,7 +35,7 @@ class ÅrsavregningController(
     fun hentÅrsavregning(
         @PathVariable("behandlingID") behandlingID: Long,
         @PathVariable("aarsavregningID") aarsavregningID: Long
-    ): ResponseEntity<ÅrsavregningResponse?> {
+    ): ResponseEntity<ÅrsavregningResponse> {
         aksesskontroll.autoriser(behandlingID)
 
         val årsavregning = årsavregningService.finnÅrsavregning(behandlingID) ?: return ResponseEntity.notFound().build()

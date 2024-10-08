@@ -42,8 +42,7 @@ class ÅrsavregningService(
             .filter { it.erÅrsavregning() }
             .map { behandlingsresultatService.hentBehandlingsresultat(it.id) }
             .filter { behandlingstype == null || it.type == behandlingstype }
-            .map { it.årsavregning }
-            .filterNotNull()
+            .mapNotNull { it.årsavregning }
             .filter { aar == null || it.aar == aar }
     }
 
