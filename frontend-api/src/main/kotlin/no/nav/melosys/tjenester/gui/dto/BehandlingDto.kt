@@ -6,6 +6,5 @@ data class BehandlingDto(
     val oppsummering: BehandlingOppsummeringDto,
     val saksopplysninger: SaksopplysningerDto,
     val redigerbart: Boolean = false,
-    val aarsavregningID: Long?
 )
 
