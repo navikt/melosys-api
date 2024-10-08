@@ -26,7 +26,7 @@ import java.math.BigDecimal
 import java.time.LocalDate
 
 @WebMvcTest(controllers = [ÅrsavregningController::class])
-internal class ÅrsavregningModelControllerTest {
+internal class ÅrsavregningControllerTest {
     @Autowired
     private lateinit var mockMvc: MockMvc
 
