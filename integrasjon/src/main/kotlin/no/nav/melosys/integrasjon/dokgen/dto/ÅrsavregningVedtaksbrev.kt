@@ -14,7 +14,7 @@ class ÅrsavregningVedtaksbrev(
     val forskuddsvisFakturertTrygdeavgift: List<Avgiftsperiode>,
     val endeligTrygdeavgiftTotalbeløp: BigDecimal,
     val forskuddsvisFakturertTrygdeavgiftTotalbeløp: BigDecimal,
-    val differansebeløp: BigDecimal = BigDecimal.ZERO,
+    val differansebeløp: BigDecimal,
     val minimumsbeløpForFakturering: BigDecimal,
     val innledningFritekst: String?,
     val begrunnelseFritekst: String?,
