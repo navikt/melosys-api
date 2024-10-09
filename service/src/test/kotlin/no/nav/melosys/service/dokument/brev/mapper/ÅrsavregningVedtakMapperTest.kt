@@ -70,7 +70,7 @@ class ÅrsavregningVedtakMapperTest {
         result.shouldNotBeNull()
         behandlingsresultat.årsavregning.aar shouldBe result.årsavregningsår
 
-        result.endeligTrygdeavgift shouldBe Avgiftsperiode(
+        result.endeligTrygdeavgift[0] shouldBe Avgiftsperiode(
             fom = LocalDate.of(2023, 1, 1),
             tom = LocalDate.of(2023, 12, 31),
             avgiftssats = BigDecimal(1000),
@@ -81,7 +81,7 @@ class ÅrsavregningVedtakMapperTest {
             arbeidsgiveravgiftBetalt = true,
             skatteplikt = true
         )
-        result.forskuddsvisFakturertTrygdeavgift shouldBe Avgiftsperiode(
+        result.forskuddsvisFakturertTrygdeavgift[0] shouldBe Avgiftsperiode(
             fom = LocalDate.of(2023, 1, 1),
             tom = LocalDate.of(2023, 12, 31),
             avgiftssats = BigDecimal(900),
