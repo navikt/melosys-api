@@ -62,8 +62,8 @@ class ÅrsavregningVedtakMapper(
         return avgiftsperioder
     }
 
-    private fun regnUtDifferanseBeløp(årsavregningModel: ÅrsavregningModel): BigDecimal {
-        return if (årsavregningModel.tidligereFakturertBeloep != null) årsavregningModel.tidligereFakturertBeloep.subtract(årsavregningModel.nyttTotalbeloep)
-        else BigDecimal.ZERO.subtract(årsavregningModel.nyttTotalbeloep)
+    private fun regnUtDifferanseBeløp(årsavregningModel: ÅrsavregningModel): BigDecimal? {
+        return if (årsavregningModel.tidligereFakturertBeloep != null) årsavregningModel.nyttTotalbeloep?.subtract(årsavregningModel.tidligereFakturertBeloep)
+        else BigDecimal.ZERO.add(årsavregningModel.nyttTotalbeloep)
     }
 }
