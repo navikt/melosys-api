@@ -43,7 +43,7 @@ class ÅrsavregningVedtakMapperTest {
         val brevbestilling = ÅrsavregningVedtakBrevBestilling.Builder()
             .medBehandling(lagBehandling())
             .build()
-        val behandlingsresultat = createBehandlingsresultat()
+        val behandlingsresultat = lagBehandlingsresultat()
 
         every { årsavregningService.finnÅrsavregning(any()) } returns null
 
@@ -70,8 +70,28 @@ class ÅrsavregningVedtakMapperTest {
         result.shouldNotBeNull()
         behandlingsresultat.årsavregning.aar shouldBe result.årsavregningsår
 
-        result.endeligTrygdeavgift shouldBe expectedEndeligTrygdeavgift()
-        result.forskuddsvisFakturertTrygdeavgift shouldBe expectedForskuddsvisFakturertTrygdeavgift()
+        result.endeligTrygdeavgift shouldBe Avgiftsperiode(
+            fom = LocalDate.of(2023, 1, 1),
+            tom = LocalDate.of(2023, 12, 31),
+            avgiftssats = BigDecimal(1000),
+            avgiftPerMd = BigDecimal(500),
+            avgiftspliktigInntektPerMd = BigDecimal(2800),
+            inntektskilde = Inntektskildetype.INNTEKT_FRA_UTLANDET.beskrivelse,
+            trygdedekning = Trygdedekninger.FULL_DEKNING.beskrivelse,
+            arbeidsgiveravgiftBetalt = true,
+            skatteplikt = true
+        )
+        result.forskuddsvisFakturertTrygdeavgift shouldBe Avgiftsperiode(
+            fom = LocalDate.of(2023, 1, 1),
+            tom = LocalDate.of(2023, 12, 31),
+            avgiftssats = BigDecimal(900),
+            avgiftPerMd = BigDecimal(450),
+            avgiftspliktigInntektPerMd = BigDecimal(2800),
+            inntektskilde = Inntektskildetype.INNTEKT_FRA_UTLANDET.beskrivelse,
+            trygdedekning = Trygdedekninger.FULL_DEKNING.beskrivelse,
+            arbeidsgiveravgiftBetalt = false,
+            skatteplikt = false
+        )
 
         result.endeligTrygdeavgiftTotalbeløp shouldBe årsavregningModel.nyttTotalbeloep
         result.forskuddsvisFakturertTrygdeavgiftTotalbeløp shouldBe årsavregningModel.tidligereFakturertBeloep
@@ -107,39 +127,11 @@ class ÅrsavregningVedtakMapperTest {
             .medPersonMottaker(PersonDokument().apply { sammensattNavn = "Hei Test" })
             .medBehandling(lagBehandling())
             .build()
-        val behandlingsresultat = createBehandlingsresultat()
+        val behandlingsresultat = lagBehandlingsresultat()
         return Pair(brevbestilling, behandlingsresultat)
     }
 
-    private fun expectedEndeligTrygdeavgift(): List<Avgiftsperiode> = listOf(
-        Avgiftsperiode(
-            fom = LocalDate.of(2023, 1, 1),
-            tom = LocalDate.of(2023, 12, 31),
-            avgiftssats = BigDecimal(1000),
-            avgiftPerMd = BigDecimal(500),
-            avgiftspliktigInntektPerMd = BigDecimal(2800),
-            inntektskilde = Inntektskildetype.INNTEKT_FRA_UTLANDET.beskrivelse,
-            trygdedekning = Trygdedekninger.FULL_DEKNING.beskrivelse,
-            arbeidsgiveravgiftBetalt = true,
-            skatteplikt = true
-        )
-    )
-
-    private fun expectedForskuddsvisFakturertTrygdeavgift(): List<Avgiftsperiode> = listOf(
-        Avgiftsperiode(
-            fom = LocalDate.of(2023, 1, 1),
-            tom = LocalDate.of(2023, 12, 31),
-            avgiftssats = BigDecimal(900),
-            avgiftPerMd = BigDecimal(450),
-            avgiftspliktigInntektPerMd = BigDecimal(2800),
-            inntektskilde = Inntektskildetype.INNTEKT_FRA_UTLANDET.beskrivelse,
-            trygdedekning = Trygdedekninger.FULL_DEKNING.beskrivelse,
-            arbeidsgiveravgiftBetalt = false,
-            skatteplikt = false
-        )
-    )
-
-    private fun createBehandlingsresultat(): Behandlingsresultat {
+    private fun lagBehandlingsresultat(): Behandlingsresultat {
         val fagsak = mockk<Fagsak>(relaxed = true)
         every { fagsak.erSakstypeEøs() } returns true
         every { fagsak.erSakstypeTrygdeavtale() } returns false
