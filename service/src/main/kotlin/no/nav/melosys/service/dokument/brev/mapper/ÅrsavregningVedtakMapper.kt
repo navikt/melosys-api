@@ -32,7 +32,7 @@ class ÅrsavregningVedtakMapper(
             årsavregningsår = behandlingsresultat.årsavregning.aar,
             endeligTrygdeavgift = avgiftsPeriodeMapper(årsavregningModel.endeligAvgift),
             forskuddsvisFakturertTrygdeavgift = avgiftsPeriodeMapper(årsavregningModel.tidligereAvgift),
-            endeligTrygdeavgiftTotalbeløp = årsavregningModel.nyttTotalbeloep?: BigDecimal.ZERO,
+            endeligTrygdeavgiftTotalbeløp = årsavregningModel.nyttTotalbeloep?: throw FunksjonellException("Nytt totalbeløp finnes ikke for behandling $behandlingsId"),
             forskuddsvisFakturertTrygdeavgiftTotalbeløp = årsavregningModel.tidligereFakturertBeloep?: BigDecimal.ZERO,
             differansebeløp = regnUtDifferanseBeløp(årsavregningModel),
             minimumsbeløpForFakturering = ÅrsavregningKonstanter.MINIMUM_BELØP_FAKTURERING.beløp,
@@ -63,6 +63,6 @@ class ÅrsavregningVedtakMapper(
     }
 
     private fun regnUtDifferanseBeløp(årsavregningModel: ÅrsavregningModel): BigDecimal {
-        return årsavregningModel.nyttTotalbeloep?.subtract(årsavregningModel.tidligereFakturertBeloep)?: BigDecimal.ZERO
+        return årsavregningModel.nyttTotalbeloep?.subtract(årsavregningModel.tidligereFakturertBeloep) ?: throw FunksjonellException("Nytt totalbeløp finnes ikke")
     }
 }
