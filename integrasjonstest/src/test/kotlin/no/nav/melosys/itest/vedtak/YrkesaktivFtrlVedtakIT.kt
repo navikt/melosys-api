@@ -328,6 +328,9 @@ class YrkesaktivFtrlVedtakIT(
 
     @Test
     fun `oppretter og fatter vedtak årsavregning`() {
+        oracleContainer.stop()
+        oracleContainer.start()
+
         val behandling = lagFTRLFørstegangsbehandling()
 
         val vedtakRequest = FattVedtakRequest.Builder()
