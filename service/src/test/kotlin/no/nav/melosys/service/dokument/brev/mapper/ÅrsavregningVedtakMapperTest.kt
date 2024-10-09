@@ -60,7 +60,6 @@ class ÅrsavregningVedtakMapperTest {
 
         val nyttTotalbeløp = BigDecimal(2000)
         val tidligereFakturertBeløp = BigDecimal(1000)
-        val expectedDifferansebeløp = BigDecimal(1000)
 
         val årsavregningModel = lagÅrsavregningModel(nyttTotalbeløp, tidligereFakturertBeløp)
         every { årsavregningService.finnÅrsavregning(any()) } returns årsavregningModel
@@ -95,7 +94,7 @@ class ÅrsavregningVedtakMapperTest {
 
         result.endeligTrygdeavgiftTotalbeløp shouldBe årsavregningModel.nyttTotalbeloep
         result.forskuddsvisFakturertTrygdeavgiftTotalbeløp shouldBe årsavregningModel.tidligereFakturertBeloep
-        result.differansebeløp shouldBe expectedDifferansebeløp
+        result.differansebeløp shouldBe BigDecimal(1000)
         result.minimumsbeløpForFakturering shouldBe BigDecimal(100)
         result.pliktigMedlemskap shouldBe true
         result.eøsEllerTrygdeavtale shouldBe true
@@ -107,7 +106,6 @@ class ÅrsavregningVedtakMapperTest {
 
         val nyttTotalbeløp = BigDecimal(1000)
         val tidligereFakturertBeløp = BigDecimal(2000)
-        val expectedDifferansebeløp = BigDecimal(-1000)
 
         val årsavregningModel = lagÅrsavregningModel(nyttTotalbeløp, tidligereFakturertBeløp)
         every { årsavregningService.finnÅrsavregning(any()) } returns årsavregningModel
@@ -118,7 +116,7 @@ class ÅrsavregningVedtakMapperTest {
 
         result.endeligTrygdeavgiftTotalbeløp shouldBe årsavregningModel.nyttTotalbeloep
         result.forskuddsvisFakturertTrygdeavgiftTotalbeløp shouldBe årsavregningModel.tidligereFakturertBeloep
-        result.differansebeløp shouldBe expectedDifferansebeløp
+        result.differansebeløp shouldBe BigDecimal(-1000)
     }
 
     private fun lagFellesTestdata(): Pair<ÅrsavregningVedtakBrevBestilling, Behandlingsresultat> {
