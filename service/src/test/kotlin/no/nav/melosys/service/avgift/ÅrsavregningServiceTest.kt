@@ -57,7 +57,7 @@ internal class ÅrsavregningServiceTest {
     }
 
     @Test
-    fun `opprettNyÅrsavregning kaster exception når flere Aarsavregninger eksisterer for samme år på samme Fagsak`() {
+    fun `Ny årsavregning kaster feil når flere årsavregninger eksisterer for samme år på samme Fagsak`() {
         val årsavregningEntity1 = Årsavregning().apply {
             aar = 2023
             behandlingsresultat = Behandlingsresultat()
@@ -100,7 +100,7 @@ internal class ÅrsavregningServiceTest {
     }
 
     @Test
-    fun `hentÅrsavregning for ny årsavregning, grunnlag finnes i Melosys`() {
+    fun `finnÅrsavregning for ny årsavregning, grunnlag finnes i Melosys`() {
         val behandlingsresultat = Behandlingsresultat().apply {
             behandling = Behandling().apply {
                 id = 1L
@@ -114,6 +114,7 @@ internal class ÅrsavregningServiceTest {
         }
         behandlingsresultat.årsavregning = årsavregningEntity
         every { behandlingsresultatService.hentBehandlingsresultat(1L) }.returns(behandlingsresultat)
+
 
         årsavregningService.finnÅrsavregning(1) shouldBe ÅrsavregningModel(
             år = 2023,
@@ -146,21 +147,6 @@ internal class ÅrsavregningServiceTest {
     }
 
     @Test
-    fun `tilFaktureringBeloep skal ikke settes hvis tidligere eller ny avgift er null`() {
-        val behandlingsresultat = Behandlingsresultat().apply resultat@{
-            behandling = Behandling()
-            årsavregning = Årsavregning().apply {
-                aar = 2023
-                behandlingsresultat = this@resultat
-            }
-        }
-        every { behandlingsresultatService.hentBehandlingsresultat(1L) }.returns(behandlingsresultat)
-
-        årsavregningService.oppdaterTotalbelop(1L, null, BigDecimal.ONE)
-        behandlingsresultat.årsavregning.tilFaktureringBeloep shouldBe null
-    }
-
-    @Test
     fun `tilFaktureringBeloep skal settes til diff mellom nytt totalbeloep og tidligere fakturert beloep`() {
         val behandlingsresultat = Behandlingsresultat().apply resultat@{
             behandling = Behandling()
@@ -173,6 +159,21 @@ internal class ÅrsavregningServiceTest {
 
         årsavregningService.oppdaterTotalbelop(1L, BigDecimal.valueOf(12.4), BigDecimal.valueOf(5.2))
         behandlingsresultat.årsavregning.tilFaktureringBeloep shouldBe BigDecimal.valueOf(-7.2)
+    }
+
+    @Test
+    fun `tilFaktureringBeloep skal ikke settes hvis tidligere eller ny avgift er null`() {
+        val behandlingsresultat = Behandlingsresultat().apply resultat@{
+            behandling = Behandling()
+            årsavregning = Årsavregning().apply {
+                aar = 2023
+                behandlingsresultat = this@resultat
+            }
+        }
+        every { behandlingsresultatService.hentBehandlingsresultat(1L) }.returns(behandlingsresultat)
+
+        årsavregningService.oppdaterTotalbelop(1L, null, BigDecimal.ONE)
+        behandlingsresultat.årsavregning.tilFaktureringBeloep shouldBe null
     }
 
     @Test
@@ -205,6 +206,7 @@ internal class ÅrsavregningServiceTest {
         every { fagsakService.hentFagsak("123456") } returns aktivFagsak
         every { behandlingsresultatService.hentBehandlingsresultat(1) } returns eldreBehandlingsresultat
         every { behandlingsresultatService.hentBehandlingsresultat(2) } returns nyesteBehandlingsresultat
+
 
         årsavregningService.hentSisteBehandlingsresultatMedInnvilgetMedlemskapsperiodeOgAvgiftsgrunnlag("123456", 2023)
             .shouldBe(nyesteBehandlingsresultat)
