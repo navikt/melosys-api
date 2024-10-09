@@ -149,7 +149,7 @@ class ÅrsavregningService(
         if (behandlingsresultat == null) return null
 
         return Trygdeavgiftsgrunnlag(
-            medlemskapsperioder = behandlingsresultat.medlemskapsperioder.filter { it.overlapperMedÅr(år) }.map(::MedlemskapsperiodeForAvgift),
+            medlemskapsperioder = behandlingsresultat.medlemskapsperioder.filter { it.overlapperMedÅr(år) && it.erInnvilget() }.map(::MedlemskapsperiodeForAvgift),
             skatteforholdsperioder = behandlingsresultat.hentSkatteforholdTilNorge().filter { it.overlapperMedÅr(år) },
             innteksperioder = behandlingsresultat.hentInntektsperioder().filter { it.overlapperMedÅr(år) }
         )
