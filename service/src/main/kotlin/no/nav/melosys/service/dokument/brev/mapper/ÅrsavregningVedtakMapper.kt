@@ -32,8 +32,8 @@ class ÅrsavregningVedtakMapper(
             årsavregningsår = behandlingsresultat.årsavregning.aar,
             endeligTrygdeavgift = avgiftsPeriodeMapper(årsavregningModel.endeligAvgift),
             forskuddsvisFakturertTrygdeavgift = avgiftsPeriodeMapper(årsavregningModel.tidligereAvgift),
-            endeligTrygdeavgiftTotalbeløp = årsavregningModel.nyttTotalbeloep?: throw FunksjonellException("Nytt totalbeløp finnes ikke for behandling $behandlingsId"),
-            forskuddsvisFakturertTrygdeavgiftTotalbeløp = årsavregningModel.tidligereFakturertBeloep,
+            endeligTrygdeavgiftTotalbeløp = årsavregningModel.nyttTotalbeloep?: BigDecimal.ZERO,
+            forskuddsvisFakturertTrygdeavgiftTotalbeløp = årsavregningModel.tidligereFakturertBeloep?: BigDecimal.ZERO,
             differansebeløp = regnUtDifferanseBeløp(årsavregningModel),
             minimumsbeløpForFakturering = ÅrsavregningKonstanter.MINIMUM_BELØP_FAKTURERING.beløp,
             pliktigMedlemskap = årsavregningModel.tidligereGrunnlag?.medlemskapsperioder?.all { it.medlemskapstyper == Medlemskapstyper.PLIKTIG }?: false,
@@ -62,8 +62,7 @@ class ÅrsavregningVedtakMapper(
         return avgiftsperioder
     }
 
-    private fun regnUtDifferanseBeløp(årsavregningModel: ÅrsavregningModel): BigDecimal? {
-        return if (årsavregningModel.tidligereFakturertBeloep != null) årsavregningModel.nyttTotalbeloep?.subtract(årsavregningModel.tidligereFakturertBeloep)
-        else BigDecimal.ZERO.add(årsavregningModel.nyttTotalbeloep)
+    private fun regnUtDifferanseBeløp(årsavregningModel: ÅrsavregningModel): BigDecimal {
+        return årsavregningModel.nyttTotalbeloep?.subtract(årsavregningModel.tidligereFakturertBeloep)?: BigDecimal.ZERO
     }
 }
