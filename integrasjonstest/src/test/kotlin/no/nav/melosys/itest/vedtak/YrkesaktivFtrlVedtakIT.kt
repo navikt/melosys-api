@@ -426,11 +426,7 @@ class YrkesaktivFtrlVedtakIT(
                 )
             )
         )
-        return behandling.also {
-            addCleanUpAction {
-                slettSakMedAvhengigheter(behandling.fagsak.saksnummer)
-            }
-        }
+        return behandling
     }
 
     private fun lagOpprettSakDto(): OpprettSakDto {
