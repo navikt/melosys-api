@@ -91,7 +91,7 @@ class ÅrsavregningVedtakMapperTest {
 
         result.endeligTrygdeavgiftTotalbeløp shouldBe årsavregningModel.nyttTotalbeloep
         result.forskuddsvisFakturertTrygdeavgiftTotalbeløp shouldBe årsavregningModel.tidligereFakturertBeloep
-        result.differansebeløp shouldBe BigDecimal(1000)
+        result.differansebeløp shouldBe BigDecimal(-1000)
         result.minimumsbeløpForFakturering shouldBe BigDecimal(100)
         result.pliktigMedlemskap shouldBe true
         result.eøsEllerTrygdeavtale shouldBe true
