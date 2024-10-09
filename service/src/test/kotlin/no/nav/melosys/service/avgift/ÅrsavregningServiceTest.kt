@@ -187,7 +187,7 @@ internal class ÅrsavregningServiceTest {
                 status = Behandlingsstatus.AVSLUTTET
                 fagsak = aktivFagsak.apply { leggTilBehandling(this@behandling) }
             }
-            registrertDato = LocalDate.of(2023, 1, 1).atStartOfDay().toInstant(ZoneOffset.UTC);
+            registrertDato = LocalDate.of(2023, 1, 1).atStartOfDay().toInstant(ZoneOffset.UTC)
             medlemskapsperioder = listOf(lagMedlemskapsperiode("2023-09-01", "2023-12-31").apply { trygdeavgiftsperioder = null })
         }
 
@@ -198,7 +198,7 @@ internal class ÅrsavregningServiceTest {
                 status = Behandlingsstatus.AVSLUTTET
                 fagsak = aktivFagsak.apply { leggTilBehandling(this@behandling) }
             }
-            registrertDato = LocalDate.of(2023, 1, 10).atStartOfDay().toInstant(ZoneOffset.UTC);
+            registrertDato = LocalDate.of(2023, 1, 10).atStartOfDay().toInstant(ZoneOffset.UTC)
             medlemskapsperioder = listOf(lagMedlemskapsperiode("2023-01-01", "2023-08-31").apply { trygdeavgiftsperioder = null })
         }
 
@@ -218,13 +218,21 @@ internal class ÅrsavregningServiceTest {
         type = Behandlingsresultattyper.FERDIGBEHANDLET
         vedtakMetadata = VedtakMetadata()
         vedtakMetadata.vedtakstype = Vedtakstyper.FØRSTEGANGSVEDTAK
-        medlemskapsperioder = listOf(lagMedlemskapsperiode("2022-01-01", "2022-08-31"), lagMedlemskapsperiode("2022-12-31", "2023-05-31"))
+        medlemskapsperioder = listOf(
+            lagMedlemskapsperiode("2022-01-01", "2022-08-31"),
+            lagMedlemskapsperiode("2022-12-31", "2023-05-31"),
+            lagMedlemskapsperiode("2023-07-01", "2023-08-31", InnvilgelsesResultat.AVSLAATT)
+        )
     }
 
-    private fun lagMedlemskapsperiode(start: String, slutt: String): Medlemskapsperiode {
+    private fun lagMedlemskapsperiode(
+        start: String,
+        slutt: String,
+        innvilgelsesResultat: InnvilgelsesResultat = InnvilgelsesResultat.INNVILGET
+    ): Medlemskapsperiode {
         return Medlemskapsperiode().apply {
             trygdedekning = Trygdedekninger.FULL_DEKNING_FTRL
-            innvilgelsesresultat = InnvilgelsesResultat.INNVILGET
+            innvilgelsesresultat = innvilgelsesResultat
             medlemskapstype = Medlemskapstyper.FRIVILLIG
             fom = LocalDate.parse(start)
             tom = LocalDate.parse(slutt)
