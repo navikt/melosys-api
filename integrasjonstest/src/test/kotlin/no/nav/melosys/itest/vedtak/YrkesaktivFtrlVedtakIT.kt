@@ -161,6 +161,7 @@ class YrkesaktivFtrlVedtakIT(
         melosysHendelseKafkaConsumer.clear()
         MedlRepo.repo.clear()
         SubjectHandler.set(originalSubjectHandler)
+
     }
 
     @Test
@@ -425,7 +426,11 @@ class YrkesaktivFtrlVedtakIT(
                 )
             )
         )
-        return behandling
+        return behandling.also {
+            addCleanUpAction {
+                slettSakMedAvhengigheter(behandling.fagsak.saksnummer)
+            }
+        }
     }
 
     private fun lagOpprettSakDto(): OpprettSakDto {
