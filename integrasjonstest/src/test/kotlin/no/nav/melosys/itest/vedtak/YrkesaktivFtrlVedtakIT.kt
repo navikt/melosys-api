@@ -448,7 +448,7 @@ class YrkesaktivFtrlVedtakIT(
     private fun lagOpprettSakDto(): OpprettSakDto {
         val opprettsakdto = OpprettSakDto()
         opprettsakdto.behandlingstema = Behandlingstema.YRKESAKTIV
-        opprettsakdto.behandlingstype = Behandlingstyper.FØRSTEGANG
+        opprettsakdto.behandlingstype = Behandlingstyper.NY_VURDERING
         opprettsakdto.mottaksdato = LocalDate.now()
         opprettsakdto.behandlingsaarsakType = Behandlingsaarsaktyper.SØKNAD
         return opprettsakdto
