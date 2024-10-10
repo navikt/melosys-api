@@ -39,70 +39,11 @@ class ÅrsavregningVedtakMapperTest {
     }
 
     @Test
-    fun `mapÅrsavregning skal mappe til ÅrsavregningVedtaksbrev når det finnes en årsavregning`() {
-        val brevbestilling = ÅrsavregningVedtakBrevBestilling.Builder()
-            .medPersonDokument(PersonDokument().apply {
-                sammensattNavn = "Hei Test"
-            })
-            .medPersonMottaker(PersonDokument().apply {
-                sammensattNavn = "Hei Test"
-            })
-            .medBehandling(lagBehandling())
-            .build()
-        val behandlingsresultat = createBehandlingsresultat()
-
-        val årsavregningModel = createÅrsavregningModel()
-        every { årsavregningService.finnÅrsavregning(any()) } returns årsavregningModel
-
-        val result = mapper.mapÅrsavregning(brevbestilling, behandlingsresultat)
-
-        result.shouldNotBeNull()
-        behandlingsresultat.årsavregning.aar shouldBe result.årsavregningsår
-
-        val expectedEndeligTrygdeavgift = listOf(
-            Avgiftsperiode(
-                fom = LocalDate.of(2023, 1, 1),
-                tom = LocalDate.of(2023, 12, 31),
-                avgiftssats = BigDecimal(1000),
-                avgiftPerMd = BigDecimal(500),
-                avgiftspliktigInntektPerMd = BigDecimal(2800),
-                inntektskilde = Inntektskildetype.INNTEKT_FRA_UTLANDET.beskrivelse,
-                trygdedekning = Trygdedekninger.FULL_DEKNING.beskrivelse,
-                arbeidsgiveravgiftBetalt = true,
-                skatteplikt = true
-            )
-        )
-        result.endeligTrygdeavgift shouldBe expectedEndeligTrygdeavgift
-
-        val expectedForskuddsvisFakturertTrygdeavgift = listOf(
-            Avgiftsperiode(
-                fom = LocalDate.of(2023, 1, 1),
-                tom = LocalDate.of(2023, 12, 31),
-                avgiftssats = BigDecimal(900),
-                avgiftPerMd = BigDecimal(450),
-                avgiftspliktigInntektPerMd = BigDecimal(2800),
-                inntektskilde = Inntektskildetype.INNTEKT_FRA_UTLANDET.beskrivelse,
-                trygdedekning = Trygdedekninger.FULL_DEKNING.beskrivelse,
-                arbeidsgiveravgiftBetalt = false,
-                skatteplikt = false
-            )
-        )
-        result.forskuddsvisFakturertTrygdeavgift shouldBe expectedForskuddsvisFakturertTrygdeavgift
-
-        result.endeligTrygdeavgiftTotalbeløp shouldBe årsavregningModel.nyttTotalbeloep
-        result.forskuddsvisFakturertTrygdeavgiftTotalbeløp shouldBe årsavregningModel.tidligereFakturertBeloep
-        result.differansebeløp shouldBe BigDecimal(1000)
-        result.minimumsbeløpForFakturering shouldBe BigDecimal(100)
-        result.pliktigMedlemskap shouldBe true
-        result.eøsEllerTrygdeavtale shouldBe true
-    }
-
-    @Test
     fun `mapÅrsavregning kaster FunksjonellException når årsavregning ikke funnet`() {
         val brevbestilling = ÅrsavregningVedtakBrevBestilling.Builder()
             .medBehandling(lagBehandling())
             .build()
-        val behandlingsresultat = createBehandlingsresultat()
+        val behandlingsresultat = lagBehandlingsresultat()
 
         every { årsavregningService.finnÅrsavregning(any()) } returns null
 
@@ -113,7 +54,82 @@ class ÅrsavregningVedtakMapperTest {
         exception.message shouldBe "Finner ingen årsavregning for behandling ${brevbestilling.behandlingId}"
     }
 
-    private fun createBehandlingsresultat(): Behandlingsresultat {
+    @Test
+    fun `mapÅrsavregning skal mappe til ÅrsavregningVedtaksbrev når det finnes en årsavregning, bruker skylder penger`() {
+        val (brevbestilling, behandlingsresultat) = lagFellesTestdata()
+
+        val nyttTotalbeløp = BigDecimal(2000)
+        val tidligereFakturertBeløp = BigDecimal(1000)
+
+        val årsavregningModel = lagÅrsavregningModel(nyttTotalbeløp, tidligereFakturertBeløp)
+        every { årsavregningService.finnÅrsavregning(any()) } returns årsavregningModel
+
+        val result = mapper.mapÅrsavregning(brevbestilling, behandlingsresultat)
+
+        result.shouldNotBeNull()
+        behandlingsresultat.årsavregning.aar shouldBe result.årsavregningsår
+
+        result.endeligTrygdeavgift[0] shouldBe Avgiftsperiode(
+            fom = LocalDate.of(2023, 1, 1),
+            tom = LocalDate.of(2023, 12, 31),
+            avgiftssats = BigDecimal(1000),
+            avgiftPerMd = BigDecimal(500),
+            avgiftspliktigInntektPerMd = BigDecimal(2800),
+            inntektskilde = Inntektskildetype.INNTEKT_FRA_UTLANDET.beskrivelse,
+            trygdedekning = Trygdedekninger.FULL_DEKNING.beskrivelse,
+            arbeidsgiveravgiftBetalt = true,
+            skatteplikt = true
+        )
+        result.forskuddsvisFakturertTrygdeavgift[0] shouldBe Avgiftsperiode(
+            fom = LocalDate.of(2023, 1, 1),
+            tom = LocalDate.of(2023, 12, 31),
+            avgiftssats = BigDecimal(900),
+            avgiftPerMd = BigDecimal(450),
+            avgiftspliktigInntektPerMd = BigDecimal(2800),
+            inntektskilde = Inntektskildetype.INNTEKT_FRA_UTLANDET.beskrivelse,
+            trygdedekning = Trygdedekninger.FULL_DEKNING.beskrivelse,
+            arbeidsgiveravgiftBetalt = false,
+            skatteplikt = false
+        )
+
+        result.endeligTrygdeavgiftTotalbeløp shouldBe årsavregningModel.nyttTotalbeloep
+        result.forskuddsvisFakturertTrygdeavgiftTotalbeløp shouldBe årsavregningModel.tidligereFakturertBeloep
+        result.differansebeløp shouldBe BigDecimal(1000)
+        result.minimumsbeløpForFakturering shouldBe BigDecimal(100)
+        result.pliktigMedlemskap shouldBe true
+        result.eøsEllerTrygdeavtale shouldBe true
+    }
+
+    @Test
+    fun `mapÅrsavregning skal mappe til ÅrsavregningVedtaksbrev når det finnes en årsavregning, bruker får tilbake penger`() {
+        val (brevbestilling, behandlingsresultat) = lagFellesTestdata()
+
+        val nyttTotalbeløp = BigDecimal(1000)
+        val tidligereFakturertBeløp = BigDecimal(2000)
+
+        val årsavregningModel = lagÅrsavregningModel(nyttTotalbeløp, tidligereFakturertBeløp)
+        every { årsavregningService.finnÅrsavregning(any()) } returns årsavregningModel
+
+        val result = mapper.mapÅrsavregning(brevbestilling, behandlingsresultat)
+
+        result.shouldNotBeNull()
+
+        result.endeligTrygdeavgiftTotalbeløp shouldBe årsavregningModel.nyttTotalbeloep
+        result.forskuddsvisFakturertTrygdeavgiftTotalbeløp shouldBe årsavregningModel.tidligereFakturertBeloep
+        result.differansebeløp shouldBe BigDecimal(-1000)
+    }
+
+    private fun lagFellesTestdata(): Pair<ÅrsavregningVedtakBrevBestilling, Behandlingsresultat> {
+        val brevbestilling = ÅrsavregningVedtakBrevBestilling.Builder()
+            .medPersonDokument(PersonDokument().apply { sammensattNavn = "Hei Test" })
+            .medPersonMottaker(PersonDokument().apply { sammensattNavn = "Hei Test" })
+            .medBehandling(lagBehandling())
+            .build()
+        val behandlingsresultat = lagBehandlingsresultat()
+        return Pair(brevbestilling, behandlingsresultat)
+    }
+
+    private fun lagBehandlingsresultat(): Behandlingsresultat {
         val fagsak = mockk<Fagsak>(relaxed = true)
         every { fagsak.erSakstypeEøs() } returns true
         every { fagsak.erSakstypeTrygdeavtale() } returns false
@@ -131,16 +147,16 @@ class ÅrsavregningVedtakMapperTest {
         return behandlingsresultat
     }
 
-    private fun createÅrsavregningModel(): ÅrsavregningModel {
-        val endeligAvgift = listOf(createTrygdeavgiftsperiodeEndelig())
-        val tidligereAvgift = listOf(createTrygdeavgiftsperiodeTidligere())
+    private fun lagÅrsavregningModel(nyttTotalbeloep: BigDecimal, tidligereFakturertBeloep: BigDecimal): ÅrsavregningModel {
+        val endeligAvgift = listOf(lagEndeligTrygdeavgiftsperiode())
+        val tidligereAvgift = listOf(lagTidligereTrygdeavgiftsperiode())
 
         val grunnlagMedlemskap = Trygdeavgiftsgrunnlag(emptyList(), emptyList(), emptyList());
 
-        return ÅrsavregningModel(år = 2024, tilFaktureringBeloep = BigDecimal(1000), endeligAvgift = endeligAvgift, tidligereAvgift = tidligereAvgift, nyttGrunnlag = grunnlagMedlemskap, nyttTotalbeloep = BigDecimal(1000), tidligereFakturertBeloep = BigDecimal(2000), tidligereGrunnlag = grunnlagMedlemskap)
+        return ÅrsavregningModel(år = 2024, tilFaktureringBeloep = null, endeligAvgift = endeligAvgift, tidligereAvgift = tidligereAvgift, nyttGrunnlag = grunnlagMedlemskap, nyttTotalbeloep = nyttTotalbeloep, tidligereFakturertBeloep = tidligereFakturertBeloep, tidligereGrunnlag = grunnlagMedlemskap)
     }
 
-    private fun createTrygdeavgiftsperiodeEndelig(): Trygdeavgiftsperiode {
+    private fun lagEndeligTrygdeavgiftsperiode(): Trygdeavgiftsperiode {
         val periode = Trygdeavgiftsperiode()
         periode.periodeFra = LocalDate.of(2023, 1, 1)
         periode.periodeTil = LocalDate.of(2023, 12, 31)
@@ -168,7 +184,7 @@ class ÅrsavregningVedtakMapperTest {
         return periode
     }
 
-    private fun createTrygdeavgiftsperiodeTidligere(): Trygdeavgiftsperiode {
+    private fun lagTidligereTrygdeavgiftsperiode(): Trygdeavgiftsperiode {
         val periode = Trygdeavgiftsperiode()
         periode.periodeFra = LocalDate.of(2023, 1, 1)
         periode.periodeTil = LocalDate.of(2023, 12, 31)
