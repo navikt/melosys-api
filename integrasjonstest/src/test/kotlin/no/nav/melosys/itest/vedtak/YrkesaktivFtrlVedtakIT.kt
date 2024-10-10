@@ -19,10 +19,7 @@ import io.mockk.every
 import io.mockk.mockk
 import no.nav.melosys.domain.Behandling
 import no.nav.melosys.domain.Behandlingsmaate
-import no.nav.melosys.domain.avgift.Inntektsperiode
-import no.nav.melosys.domain.avgift.Penger
-import no.nav.melosys.domain.avgift.SkatteforholdTilNorge
-import no.nav.melosys.domain.avgift.Trygdeavgiftsperiode
+import no.nav.melosys.domain.avgift.*
 import no.nav.melosys.domain.avgift.aarsavregning.Skattehendelse
 import no.nav.melosys.domain.kodeverk.*
 import no.nav.melosys.domain.kodeverk.behandlinger.*
@@ -43,6 +40,7 @@ import no.nav.melosys.repository.BehandlingsresultatRepository
 import no.nav.melosys.repository.FagsakRepository
 import no.nav.melosys.saksflytapi.domain.ProsessType
 import no.nav.melosys.service.avgift.TrygdeavgiftsberegningService
+import no.nav.melosys.service.avgift.aarsavregning.ÅrsavregningService
 import no.nav.melosys.service.avgift.dto.InntektskildeRequest
 import no.nav.melosys.service.avgift.dto.OppdaterTrygdeavgiftsgrunnlagRequest
 import no.nav.melosys.service.avgift.dto.SkatteforholdTilNorgeRequest
@@ -93,7 +91,8 @@ class YrkesaktivFtrlVedtakIT(
     @Autowired private val skatteHendelseMeldingKafkaTemplate: KafkaTemplate<String, Skattehendelse>,
     @Autowired private val behandlingsResultRepository: BehandlingsresultatRepository,
     @Autowired private val unleash: FakeUnleash,
-    @Autowired private val melosysHendelseKafkaConsumer: MelosysHendelseKafkaConsumer
+    @Autowired private val melosysHendelseKafkaConsumer: MelosysHendelseKafkaConsumer,
+    @Autowired private val årsavregningService: ÅrsavregningService
 ) : JournalfoeringBase(
     testDataGenerator, journalføringService, oppgaveService,
     DynamiskTrygdeavgiftsberegningTransformer()
@@ -236,7 +235,40 @@ class YrkesaktivFtrlVedtakIT(
 
     @Test
     fun `yrkesaktiv vedtak - FTRL - opprett fakturaserie for førstegangsbehandling og kanseller fakturaserie i ny vurdering`() {
-        val behandling = lagFTRLFørstegangsbehandling()
+        val saksnummer = lagFørstegangsBehandling(Skatteplikttype.IKKE_SKATTEPLIKTIG, false)
+
+        val behandlingsId = executeAndWait(
+            mapOf(
+                ProsessType.OPPRETT_REPLIKERT_BEHANDLING_FOR_SAK to 1
+            )
+        ) {
+            opprettBehandlingForSak.opprettBehandling(
+                saksnummer,
+                lagOpprettSakDto()
+            )
+        }.behandling.id
+
+        trygdeavgiftsberegningService.beregnOgLagreTrygdeavgift(
+            behandlingsId,
+            OppdaterTrygdeavgiftsgrunnlagRequest(
+                skatteforholdTilNorgeList = listOf(
+                    SkatteforholdTilNorgeRequest(
+                        fomDato = LocalDate.of(2023, 1, 1),
+                        tomDato = LocalDate.of(2023, 2, 1),
+                        skatteplikttype = Skatteplikttype.SKATTEPLIKTIG
+                    )
+                ),
+                inntektskilder = listOf(
+                    InntektskildeRequest(
+                        type = Inntektskildetype.INNTEKT_FRA_UTLANDET,
+                        arbeidsgiversavgiftBetales = true,
+                        avgiftspliktigInntektMnd = 10000.toBigDecimal(),
+                        fomDato = LocalDate.of(2023, 1, 1),
+                        tomDato = LocalDate.of(2023, 2, 1)
+                    )
+                )
+            )
+        )
 
         val vedtakRequest = FattVedtakRequest.Builder()
             .medBehandlingsresultatType(Behandlingsresultattyper.MEDLEM_I_FOLKETRYGDEN)
@@ -250,16 +282,16 @@ class YrkesaktivFtrlVedtakIT(
                 ProsessType.OPPRETT_OG_DISTRIBUER_BREV to 1
             )
         ) {
-            vedtaksfattingFasade.fattVedtak(behandling.id, vedtakRequest)
+            vedtaksfattingFasade.fattVedtak(behandlingsId, vedtakRequest)
         }
 
 
-        behandlingsresultatService.hentBehandlingsresultat(behandling.id).run {
+        behandlingsresultatService.hentBehandlingsresultat(behandlingsId).run {
             type shouldBe Behandlingsresultattyper.MEDLEM_I_FOLKETRYGDEN
             behandlingsmåte shouldBe Behandlingsmaate.MANUELT
             fastsattAvLand shouldBe Land_iso2.NO
         }
-        behandlingRepository.findById(behandling.id)
+        behandlingRepository.findById(behandlingsId)
             .shouldBePresent().run {
                 withClue("Behandlingsstatus skal være AVSLUTTET") {
                     status shouldBe Behandlingsstatus.AVSLUTTET
@@ -337,21 +369,6 @@ class YrkesaktivFtrlVedtakIT(
     fun `oppretter og fatter vedtak årsavregning`() {
         val behandling = lagFTRLFørstegangsbehandling()
 
-        val vedtakRequest = FattVedtakRequest.Builder()
-            .medBehandlingsresultatType(Behandlingsresultattyper.MEDLEM_I_FOLKETRYGDEN)
-            .medVedtakstype(Vedtakstyper.ENDRINGSVEDTAK)
-            .medBestillersId("komponent test")
-            .build()
-
-        executeAndWait(
-            mapOf(
-                ProsessType.IVERKSETT_VEDTAK_FTRL to 1,
-                ProsessType.OPPRETT_OG_DISTRIBUER_BREV to 1
-            )
-        ) {
-            vedtaksfattingFasade.fattVedtak(behandling.id, vedtakRequest)
-        }
-
         val behandlingsIdÅrsavregning = executeAndWait(
             mapOf(
                 ProsessType.OPPRETT_NY_BEHANDLING_FOR_SAK to 1
@@ -362,6 +379,9 @@ class YrkesaktivFtrlVedtakIT(
                 lagOpprettSakDtoÅrsavregning()
             )
         }.behandling.id
+
+        årsavregningService.opprettÅrsavregning(behandlingsIdÅrsavregning, 2023)
+        årsavregningService.oppdaterTotalbelop(behandlingsIdÅrsavregning, BigDecimal(1000), BigDecimal(2000))
 
 
         val vedtakRequestÅrsavregning = FattVedtakRequest.Builder()
@@ -383,6 +403,10 @@ class YrkesaktivFtrlVedtakIT(
             type shouldBe Behandlingsresultattyper.FERDIGBEHANDLET
             behandlingsmåte shouldBe Behandlingsmaate.MANUELT
             fastsattAvLand shouldBe Land_iso2.NO
+            årsavregning.nyttTotalbeloep shouldBe BigDecimal(2000)
+            årsavregning.tilFaktureringBeloep shouldBe BigDecimal(1000)
+            årsavregning.tidligereFakturertBeloep shouldBe BigDecimal(1000)
+            årsavregning.aar shouldBe 2023
         }
         behandlingRepository.findById(behandlingsIdÅrsavregning)
             .shouldBePresent().run {
@@ -390,27 +414,12 @@ class YrkesaktivFtrlVedtakIT(
                     type shouldBe Behandlingstyper.ÅRSAVREGNING
                     status shouldBe Behandlingsstatus.AVSLUTTET
                 }
-                fagsak.run {
-                    withClue("Saksstatus skal være LOVVALG_AVKLART") {
-                        status shouldBe Saksstatuser.LOVVALG_AVKLART
-                    }
-                }
             }
     }
 
     private fun lagFTRLFørstegangsbehandling () : Behandling {
         val saksnummer = lagFørstegangsBehandling(Skatteplikttype.IKKE_SKATTEPLIKTIG, false)
-
-        val behandling = executeAndWait(
-            mapOf(
-                ProsessType.OPPRETT_REPLIKERT_BEHANDLING_FOR_SAK to 1
-            )
-        ) {
-            opprettBehandlingForSak.opprettBehandling(
-                saksnummer,
-                lagOpprettSakDto()
-            )
-        }.behandling
+        val behandling = fagsakRepository.findBySaksnummer(saksnummer).get().hentSistRegistrertBehandling()
 
         trygdeavgiftsberegningService.beregnOgLagreTrygdeavgift(
             behandling.id,
@@ -439,7 +448,7 @@ class YrkesaktivFtrlVedtakIT(
     private fun lagOpprettSakDto(): OpprettSakDto {
         val opprettsakdto = OpprettSakDto()
         opprettsakdto.behandlingstema = Behandlingstema.YRKESAKTIV
-        opprettsakdto.behandlingstype = Behandlingstyper.NY_VURDERING
+        opprettsakdto.behandlingstype = Behandlingstyper.FØRSTEGANG
         opprettsakdto.mottaksdato = LocalDate.now()
         opprettsakdto.behandlingsaarsakType = Behandlingsaarsaktyper.SØKNAD
         return opprettsakdto
@@ -447,10 +456,12 @@ class YrkesaktivFtrlVedtakIT(
 
     private fun lagOpprettSakDtoÅrsavregning(): OpprettSakDto {
         val opprettsakdto = OpprettSakDto()
+        opprettsakdto.sakstema = Sakstemaer.MEDLEMSKAP_LOVVALG
+        opprettsakdto.sakstype = Sakstyper.FTRL
         opprettsakdto.behandlingstema = Behandlingstema.YRKESAKTIV
         opprettsakdto.behandlingstype = Behandlingstyper.ÅRSAVREGNING
-        opprettsakdto.mottaksdato = LocalDate.now()
-        opprettsakdto.behandlingsaarsakType = Behandlingsaarsaktyper.SØKNAD
+        opprettsakdto.mottaksdato = LocalDate.of(2023, 1, 1)
+        opprettsakdto.behandlingsaarsakType = Behandlingsaarsaktyper.MELDING_FRA_SKATT
         return opprettsakdto
     }
 
