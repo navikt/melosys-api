@@ -88,7 +88,7 @@ enum class JournalStatus {
 }
 
 enum class Tema {
-    MED, UFM
+    MED, UFM, TRY
 }
 
 enum class Journalposttype {
