@@ -191,15 +191,23 @@ class IkkeYrkesaktivVedtakIT(
         melosysHendelseKafkaConsumer.melosysHendelser.shouldHaveSize(1)
             .single().value()
             .melding.shouldBeInstanceOf<VedtakHendelseMelding>()
-            .run {
-                folkeregisterIdent shouldBe "30056928150"
-                sakstype shouldBe Sakstyper.EU_EOS
-                sakstema shouldBe Sakstemaer.MEDLEMSKAP_LOVVALG
-                medlemskapsperiode.shouldNotBeNull().run {
-                    fom shouldBe null
-                    tom shouldBe null
-                }
-            }
+            .shouldBe(
+                VedtakHendelseMelding(
+                    folkeregisterIdent = "30056928150",
+                    sakstype = Sakstyper.EU_EOS,
+                    sakstema = Sakstemaer.MEDLEMSKAP_LOVVALG,
+                    behandligsresultatType = Behandlingsresultattyper.FASTSATT_LOVVALGSLAND,
+                    vedtakstype = null,
+                    medlemskapsperioder = listOf(),
+                    lovvalgsperioder = listOf(
+                        no.nav.melosys.integrasjon.hendelser.Periode(
+                            LocalDate.of(2022, 1, 1),
+                            LocalDate.of(2022, 2, 1),
+                            InnvilgelsesResultat.INNVILGET
+                        )
+                    )
+                )
+            )
     }
 
     @Test

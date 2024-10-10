@@ -274,16 +274,23 @@ class YrkesaktivFtrlVedtakIT(
         melosysHendelseKafkaConsumer.melosysHendelser.shouldHaveSize(2)
             .last().value()
             .melding.shouldBeInstanceOf<VedtakHendelseMelding>()
-            .run {
-                folkeregisterIdent shouldBe "30056928150"
-                sakstype shouldBe Sakstyper.FTRL
-                sakstema shouldBe Sakstemaer.MEDLEMSKAP_LOVVALG
-                medlemskapsperiode.shouldNotBeNull().run {
-                    fom shouldBe LocalDate.of(2023, 1, 1)
-                    tom shouldBe LocalDate.of(2023, 2, 1)
-                }
-            }
-
+            .shouldBe(
+                VedtakHendelseMelding(
+                    folkeregisterIdent = "30056928150",
+                    sakstype = Sakstyper.FTRL,
+                    sakstema = Sakstemaer.MEDLEMSKAP_LOVVALG,
+                    behandligsresultatType = Behandlingsresultattyper.MEDLEM_I_FOLKETRYGDEN,
+                    vedtakstype = Vedtakstyper.ENDRINGSVEDTAK,
+                    medlemskapsperioder = listOf(
+                        no.nav.melosys.integrasjon.hendelser.Periode(
+                            LocalDate.of(2023, 1, 1),
+                            LocalDate.of(2023, 2, 1),
+                            InnvilgelsesResultat.INNVILGET
+                        )
+                    ),
+                    lovvalgsperioder = listOf()
+                )
+            )
 
         mockServer.verify(1, WireMock.postRequestedFor(WireMock.urlEqualTo("/fakturaserier")))
         mockServer.verify(1, WireMock.deleteRequestedFor(WireMock.urlEqualTo("/fakturaserier/$fakturaserieReferanse")))

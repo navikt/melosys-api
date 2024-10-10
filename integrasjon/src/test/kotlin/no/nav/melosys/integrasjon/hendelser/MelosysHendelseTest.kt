@@ -10,9 +10,11 @@ import com.fasterxml.jackson.module.kotlin.readValue
 import io.kotest.assertions.json.shouldEqualJson
 import io.kotest.matchers.shouldBe
 import io.kotest.matchers.types.shouldBeInstanceOf
-import no.nav.melosys.domain.dokument.felles.Periode
+import no.nav.melosys.domain.kodeverk.InnvilgelsesResultat
 import no.nav.melosys.domain.kodeverk.Sakstemaer
 import no.nav.melosys.domain.kodeverk.Sakstyper
+import no.nav.melosys.domain.kodeverk.Vedtakstyper
+import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingsresultattyper
 import org.junit.jupiter.api.Test
 import java.time.LocalDate
 
@@ -41,10 +43,16 @@ class MelosysHendelseTest {
                 folkeregisterIdent = "12345",
                 sakstype = Sakstyper.TRYGDEAVTALE,
                 sakstema = Sakstemaer.TRYGDEAVGIFT,
-                medlemskapsperiode = Periode(
-                    LocalDate.of(2021, 1, 1),
-                    LocalDate.of(2022, 1, 1),
-                )
+                behandligsresultatType = Behandlingsresultattyper.FERDIGBEHANDLET,
+                vedtakstype = Vedtakstyper.FØRSTEGANGSVEDTAK,
+                medlemskapsperioder = listOf(
+                    Periode(
+                        LocalDate.of(2021, 1, 1),
+                        LocalDate.of(2022, 1, 1),
+                        InnvilgelsesResultat.INNVILGET
+                    )
+                ),
+                lovvalgsperioder = listOf()
             )
         )
 
@@ -56,10 +64,14 @@ class MelosysHendelseTest {
                     "folkeregisterIdent": "12345",
                     "sakstype": "TRYGDEAVTALE",
                     "sakstema": "TRYGDEAVGIFT",
-                      "medlemskapsperiode": {
-                          "fom": [2021, 1, 1],
-                          "tom": [2022, 1, 1]
-                    }
+                    "behandligsresultatType": "FERDIGBEHANDLET",
+                    "vedtakstype": "FØRSTEGANGSVEDTAK",
+                    "medlemskapsperioder" : [ {
+                      "fom" : [ 2021, 1, 1 ],
+                      "tom" : [ 2022, 1, 1 ],
+                      "innvilgelsesResultat" : "INNVILGET"
+                    } ],
+                    "lovvalgsperioder": []
                   }
             }"""
     }
@@ -90,7 +102,10 @@ class MelosysHendelseTest {
                     "folkeregisterIdent": "12345",
                     "sakstype": "TRYGDEAVTALE",
                     "sakstema": "TRYGDEAVGIFT",
-                    "medlemskapsperiode": null
+                    "behandligsresultatType": "FERDIGBEHANDLET",
+                    "vedtakstype": "FØRSTEGANGSVEDTAK",
+                    "medlemskapsperioder": [],
+                    "lovvalgsperioder": []
                 }
             }"""
 
@@ -102,9 +117,14 @@ class MelosysHendelseTest {
                 folkeregisterIdent = "12345",
                 sakstype = Sakstyper.TRYGDEAVTALE,
                 sakstema = Sakstemaer.TRYGDEAVGIFT,
-                medlemskapsperiode = null
+                behandligsresultatType = Behandlingsresultattyper.FERDIGBEHANDLET,
+                vedtakstype = Vedtakstyper.FØRSTEGANGSVEDTAK,
+                medlemskapsperioder = listOf(),
+                lovvalgsperioder = listOf()
+
             )
-        )    }
+        )
+    }
 
     @Test
     fun `deserialize og ignorer ekstra felter i VedtakHendelseMelding`() {
@@ -115,7 +135,10 @@ class MelosysHendelseTest {
                     "folkeregisterIdent": "12345",
                     "sakstype": "TRYGDEAVTALE",
                     "sakstema": "TRYGDEAVGIFT",
-                    "medlemskapsperiode": null,
+                    "behandligsresultatType": "FERDIGBEHANDLET",
+                    "vedtakstype": "FØRSTEGANGSVEDTAK",
+                    "medlemskapsperioder": [],
+                    "lovvalgsperioder": [],
                     "ekstarfelt": "DUMMY"
                 }
             }"""
@@ -129,7 +152,10 @@ class MelosysHendelseTest {
                 folkeregisterIdent = "12345",
                 sakstype = Sakstyper.TRYGDEAVTALE,
                 sakstema = Sakstemaer.TRYGDEAVGIFT,
-                medlemskapsperiode = null
+                behandligsresultatType = Behandlingsresultattyper.FERDIGBEHANDLET,
+                vedtakstype = Vedtakstyper.FØRSTEGANGSVEDTAK,
+                medlemskapsperioder = listOf(),
+                lovvalgsperioder = listOf()
             )
         )
     }
