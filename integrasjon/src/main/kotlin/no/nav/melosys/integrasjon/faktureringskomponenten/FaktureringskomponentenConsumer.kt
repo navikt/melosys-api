@@ -40,12 +40,16 @@ open class FaktureringskomponentenConsumer(private val webClient: WebClient) : J
             .bodyToMono<Void>()
             .block()
 
-    fun hentTotalTrygdeavgiftForPeriode(beregnTotalBeløpDto: BeregnTotalBeløpDto, saksbehandlerIdent: String) =
-        webClient.post()
+    fun hentTotalTrygdeavgiftForPeriode(
+        beregnTotalBeløpDto: BeregnTotalBeløpDto,
+        saksbehandlerIdent: String
+    ): BigDecimal {
+        return webClient.post()
             .uri("/totalbeloep/beregn")
             .header("Nav-User-Id", saksbehandlerIdent)
             .bodyValue(beregnTotalBeløpDto)
             .retrieve()
             .bodyToMono<BigDecimal>()
-            .block()!!
+            .block() ?: throw IllegalStateException("Feil ved beregning av total trygdeavgift")
+    }
 }
