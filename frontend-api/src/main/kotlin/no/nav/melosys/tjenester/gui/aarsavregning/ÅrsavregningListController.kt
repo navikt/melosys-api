@@ -16,23 +16,21 @@ class ÅrsavregningListController(
     private val årsavregningService: ÅrsavregningService,
     private val aksesskontroll: Aksesskontroll,
 ) {
-
-
     @GetMapping
     fun hentAvregninger(
         @PathVariable("saksnummer") saksnummer: String,
         @RequestParam("aar") aar: Int?,
-        @RequestParam("behandlingstype") behandlingstype: Behandlingsresultattyper?
+        @RequestParam("resultattype") behandlingsresultattype: Behandlingsresultattyper?
     ): ResponseEntity<List<ÅrsavregningListResponse>> {
         aksesskontroll.autoriserSakstilgang(saksnummer)
 
-        val filtrerteÅrsavregninger = årsavregningService.finnÅrsavregningerPåFagsak(saksnummer, aar, behandlingstype)
+        val filtrerteÅrsavregninger = årsavregningService.finnÅrsavregningerPåFagsak(saksnummer, aar, behandlingsresultattype)
         val årsavregningListResponse = filtrerteÅrsavregninger.map {
             ÅrsavregningListResponse(
                 aarsavregningId = it.id,
                 behandlingID = it.behandlingsresultat.behandling.id,
                 aar = it.aar,
-                type = it.behandlingsresultat.type
+                resultattype = it.behandlingsresultat.type
             )
         }.toList()
         return ResponseEntity.ok(årsavregningListResponse)
@@ -42,6 +40,6 @@ class ÅrsavregningListController(
         val aarsavregningId: Long,
         val behandlingID: Long,
         val aar: Int,
-        val type: Behandlingsresultattyper,
+        val resultattype: Behandlingsresultattyper,
     )
 }

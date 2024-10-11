@@ -52,7 +52,7 @@ internal class ÅrsavregningListControllerTest {
             "aarsavregningId": 35,
             "behandlingID": 45,
             "aar": 2023,
-            "type": {
+            "resultattype": {
               "kode": "FERDIGBEHANDLET",
               "term": "Ferdigbehandlet"
             }
@@ -65,7 +65,7 @@ internal class ÅrsavregningListControllerTest {
                 MediaType.APPLICATION_JSON
             )
                 .queryParam("aar", "2023")
-                .queryParam("behandlingstype", "FERDIGBEHANDLET")
+                .queryParam("resultattype", "FERDIGBEHANDLET")
         ).andExpect(MockMvcResultMatchers.status().isOk()).andExpect(MockMvcResultMatchers.content().json(expectedJson, true))
 
 
