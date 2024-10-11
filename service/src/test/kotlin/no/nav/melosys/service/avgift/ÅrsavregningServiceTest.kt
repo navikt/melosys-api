@@ -87,7 +87,7 @@ internal class ÅrsavregningServiceTest {
         behandlingsresultat.årsavregning = årsavregningEntity
         every { behandlingsresultatService.hentBehandlingsresultat(1L) }.returns(behandlingsresultat)
 
-        årsavregningService.finnÅrsavregning(1) shouldBe ÅrsavregningModel(
+        årsavregningService.finnÅrsavregningForBehandling(1) shouldBe ÅrsavregningModel(
             år = 2023,
             tidligereGrunnlag = null,
             tidligereAvgift = emptyList(),
@@ -115,7 +115,7 @@ internal class ÅrsavregningServiceTest {
         behandlingsresultat.årsavregning = årsavregningEntity
         every { behandlingsresultatService.hentBehandlingsresultat(1L) }.returns(behandlingsresultat)
 
-        årsavregningService.finnÅrsavregning(1) shouldBe ÅrsavregningModel(
+        årsavregningService.finnÅrsavregningForBehandling(1) shouldBe ÅrsavregningModel(
             år = 2023,
             tidligereGrunnlag = Trygdeavgiftsgrunnlag(
                 listOf(

@@ -32,7 +32,6 @@ class ÅrsavregningService(
     fun hentÅrsavregning(aarsavregningId: Long) =
         aarsavregningRepository.findById(aarsavregningId).orElseThrow { IkkeFunnetException("Finner ingen årsavregning for id: $aarsavregningId") }
 
-
     @Transactional(readOnly = true)
     fun finnÅrsavregningerPåFagsak(saksnummer: String, aar: Int?, behandlingstype: Behandlingsresultattyper?): List<Årsavregning> {
         val fagsak = fagsakService.hentFagsak(saksnummer)
@@ -45,7 +44,7 @@ class ÅrsavregningService(
     }
 
     @Transactional(readOnly = true)
-    fun finnÅrsavregning(behandlingID: Long): ÅrsavregningModel? {
+    fun finnÅrsavregningForBehandling(behandlingID: Long): ÅrsavregningModel? {
         val behandlingsresultat = behandlingsresultatService.hentBehandlingsresultat(behandlingID)
 
         val aarsavregning = behandlingsresultat.årsavregning ?: return null
@@ -55,7 +54,7 @@ class ÅrsavregningService(
 
     @Transactional(readOnly = true)
     fun finnGjeldendeÅrForÅrsavregning(behandlingID: Long): Int? {
-        return finnÅrsavregning(behandlingID)?.år
+        return finnÅrsavregningForBehandling(behandlingID)?.år
     }
 
     @Transactional

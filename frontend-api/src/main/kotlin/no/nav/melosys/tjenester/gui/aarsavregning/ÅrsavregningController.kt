@@ -37,7 +37,7 @@ class ÅrsavregningController(
     ): ResponseEntity<ÅrsavregningResponse> {
         aksesskontroll.autoriser(behandlingID)
 
-        val årsavregning = årsavregningService.finnÅrsavregning(behandlingID) ?: return ResponseEntity.notFound().build()
+        val årsavregning = årsavregningService.finnÅrsavregningForBehandling(behandlingID) ?: return ResponseEntity.notFound().build()
 
         return ResponseEntity.ok(
             lagÅrsavregningResponse(årsavregning)

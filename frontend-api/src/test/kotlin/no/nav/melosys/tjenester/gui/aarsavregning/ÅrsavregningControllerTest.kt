@@ -41,7 +41,7 @@ internal class ÅrsavregningControllerTest {
 
     @Test
     fun `hent avregning basert på ID`() {
-        every { årsavregningService.finnÅrsavregning(any()) } returns ÅrsavregningModel(
+        every { årsavregningService.finnÅrsavregningForBehandling(any()) } returns ÅrsavregningModel(
             år = 2023,
             tidligereGrunnlag = Trygdeavgiftsgrunnlag(
                 medlemskapsperioder = listOf(
