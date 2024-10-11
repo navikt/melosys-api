@@ -28,9 +28,6 @@ class ÅrsavregningService(
     private val totalBeløpBeregner: TotalBeløpBeregner,
     private val fagsakService: FagsakService,
 ) {
-
-
-    @Transactional
     fun hentÅrsavregning(aarsavregningId: Long) =
         aarsavregningRepository.findById(aarsavregningId).orElseThrow { FunksjonellException("Finner ingen årsavregning for id: $aarsavregningId") }
 
