@@ -23,25 +23,28 @@ import java.time.LocalDate
 @Protected
 @RestController
 @Api(tags = ["årsavregning", "trygdeavgift"])
-@RequestMapping("/aarsavregninger")
+@RequestMapping("/behandlinger/{behandlingID}/aarsavregninger")
 class ÅrsavregningController(
     private val årsavregningService: ÅrsavregningService,
     private val aksesskontroll: Aksesskontroll,
-    private val totalBeløpBeregner: TotalBeløpBeregner
+    private val totalBeløpBeregner: TotalBeløpBeregner,
 ) {
 
-    @GetMapping("/{behandlingID}")
-    fun hentAvregning(@PathVariable("behandlingID") behandlingID: Long): ResponseEntity<ÅrsavregningResponse?> {
+    @GetMapping("/{aarsavregningID}")
+    fun hentÅrsavregning(
+        @PathVariable("behandlingID") behandlingID: Long,
+        @PathVariable("aarsavregningID") aarsavregningID: Long
+    ): ResponseEntity<ÅrsavregningResponse> {
         aksesskontroll.autoriser(behandlingID)
 
-        val årsavregning = årsavregningService.finnÅrsavregning(behandlingID) ?: return ResponseEntity.notFound().build()
+        val årsavregning = årsavregningService.finnÅrsavregningForBehandling(behandlingID) ?: return ResponseEntity.notFound().build()
 
         return ResponseEntity.ok(
             lagÅrsavregningResponse(årsavregning)
         )
     }
 
-    @PostMapping("/{behandlingID}")
+    @PostMapping
     fun opprettNyÅrsavregning(
         @PathVariable("behandlingID") behandlingID: Long,
         @RequestBody årsavregningRequest: LagÅrsavregningRequest
@@ -56,7 +59,7 @@ class ÅrsavregningController(
     }
 
     data class LagÅrsavregningRequest(
-        val aar: Int
+        val aar: Int,
     )
 
     private fun lagÅrsavregningResponse(årsavregningModel: ÅrsavregningModel) =
@@ -134,17 +137,19 @@ class ÅrsavregningController(
     }
 
 
-    @PutMapping("/{behandlingID}")
+    @PutMapping("/{aarsavregningID}")
     fun oppdaterTotalbelop(
         @PathVariable("behandlingID") behandlingID: Long,
-        @RequestBody årsavregningRequest: ÅrsavregningRequest
+        @PathVariable("aarsavregningID") aarsavregningID: Long,
+        @RequestBody årsavregningOppdaterRequest: ÅrsavregningOppdaterRequest
     ): ResponseEntity<ÅrsavregningResponse> {
         aksesskontroll.autoriserSkriv(behandlingID)
 
         val årsavregning = årsavregningService.oppdaterTotalbelop(
             behandlingID,
-            årsavregningRequest.avregning.tidligereFakturertBeloep,
-            årsavregningRequest.avregning.nyttTotalbeloep
+            aarsavregningID,
+            årsavregningOppdaterRequest.avregning.tidligereFakturertBeloep,
+            årsavregningOppdaterRequest.avregning.nyttTotalbeloep
         )
 
         return ResponseEntity.ok(
@@ -162,7 +167,7 @@ data class ÅrsavregningResponse(
     val avregning: AvregningDto?
 )
 
-data class ÅrsavregningRequest(
+data class ÅrsavregningOppdaterRequest(
     val avregning: AvregningDto
 )
 

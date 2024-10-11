@@ -45,7 +45,7 @@ class ÅrsavregningVedtakMapperTest {
             .build()
         val behandlingsresultat = lagBehandlingsresultat()
 
-        every { årsavregningService.finnÅrsavregning(any()) } returns null
+        every { årsavregningService.finnÅrsavregningForBehandling(any()) } returns null
 
         val exception = assertThrows<FunksjonellException> {
             mapper.mapÅrsavregning(brevbestilling, behandlingsresultat)
@@ -62,7 +62,7 @@ class ÅrsavregningVedtakMapperTest {
         val tidligereFakturertBeløp = BigDecimal(1000)
 
         val årsavregningModel = lagÅrsavregningModel(nyttTotalbeløp, tidligereFakturertBeløp)
-        every { årsavregningService.finnÅrsavregning(any()) } returns årsavregningModel
+        every { årsavregningService.finnÅrsavregningForBehandling(any()) } returns årsavregningModel
 
         val result = mapper.mapÅrsavregning(brevbestilling, behandlingsresultat)
 
@@ -108,7 +108,7 @@ class ÅrsavregningVedtakMapperTest {
         val tidligereFakturertBeløp = BigDecimal(2000)
 
         val årsavregningModel = lagÅrsavregningModel(nyttTotalbeløp, tidligereFakturertBeløp)
-        every { årsavregningService.finnÅrsavregning(any()) } returns årsavregningModel
+        every { årsavregningService.finnÅrsavregningForBehandling(any()) } returns årsavregningModel
 
         val result = mapper.mapÅrsavregning(brevbestilling, behandlingsresultat)
 

@@ -91,7 +91,7 @@ class YrkesaktivFtrlVedtakIT(
     @Autowired private val trygdeavgiftsberegningService: TrygdeavgiftsberegningService,
     @Autowired @Qualifier("manglendeFakturabetalingMelding") private val manglendeFakturabetalingMeldingTemplate: KafkaTemplate<String, ManglendeFakturabetalingMelding>,
     @Autowired private val skatteHendelseMeldingKafkaTemplate: KafkaTemplate<String, Skattehendelse>,
-    @Autowired private val behandlingsResultRepository: BehandlingsresultatRepository,
+    @Autowired private val behandlingsresultatRepository: BehandlingsresultatRepository,
     @Autowired private val unleash: FakeUnleash,
     @Autowired private val melosysHendelseKafkaConsumer: MelosysHendelseKafkaConsumer,
     @Autowired private val årsavregningService: ÅrsavregningService
@@ -355,7 +355,7 @@ class YrkesaktivFtrlVedtakIT(
                         .firstOrNull { it.type == Behandlingstyper.ÅRSAVREGNING }
                         .shouldNotBeNull()
                         .run {
-                            behandlingsResultRepository.findById(id)
+                            behandlingsresultatRepository.findById(id)
                                 .shouldBePresent()
                                 .årsavregning
                                 .shouldNotBeNull()
@@ -393,7 +393,7 @@ class YrkesaktivFtrlVedtakIT(
             )
         )
 
-        val behandlingsIdÅrsavregning = executeAndWait(
+        val årsavregningBehandlingID = executeAndWait(
             mapOf(
                 ProsessType.OPPRETT_NY_BEHANDLING_FOR_SAK to 1
             )
@@ -405,8 +405,9 @@ class YrkesaktivFtrlVedtakIT(
         }.behandling.id
         val tidligereFakturertBeloep = BigDecimal(1000)
         val nyttTotalbeloep = BigDecimal(2000)
-        årsavregningService.opprettÅrsavregning(behandlingsIdÅrsavregning, 2023)
-        årsavregningService.oppdaterTotalbelop(behandlingsIdÅrsavregning, tidligereFakturertBeloep, nyttTotalbeloep)
+        årsavregningService.opprettÅrsavregning(årsavregningBehandlingID, 2023)
+        val årsavregningID = behandlingsresultatRepository.findById(årsavregningBehandlingID).shouldBePresent().årsavregning.id
+        årsavregningService.oppdaterTotalbelop(årsavregningBehandlingID, årsavregningID, tidligereFakturertBeloep, nyttTotalbeloep)
 
         val vedtakRequestÅrsavregning = FattVedtakRequest.Builder()
             .medBehandlingsresultatType(Behandlingsresultattyper.FERDIGBEHANDLET)
@@ -420,10 +421,10 @@ class YrkesaktivFtrlVedtakIT(
                 ProsessType.OPPRETT_OG_DISTRIBUER_BREV to 1
             )
         ) {
-            vedtaksfattingFasade.fattVedtak(behandlingsIdÅrsavregning, vedtakRequestÅrsavregning)
+            vedtaksfattingFasade.fattVedtak(årsavregningBehandlingID, vedtakRequestÅrsavregning)
         }
 
-        behandlingsresultatService.hentBehandlingsresultat(behandlingsIdÅrsavregning).run {
+        behandlingsresultatService.hentBehandlingsresultat(årsavregningBehandlingID).run {
             type shouldBe Behandlingsresultattyper.FERDIGBEHANDLET
             behandlingsmåte shouldBe Behandlingsmaate.MANUELT
             årsavregning.aar shouldBe 2023
@@ -431,7 +432,7 @@ class YrkesaktivFtrlVedtakIT(
             årsavregning.nyttTotalbeloep shouldBe nyttTotalbeloep
             årsavregning.tilFaktureringBeloep shouldBe nyttTotalbeloep - tidligereFakturertBeloep
         }
-        behandlingRepository.findById(behandlingsIdÅrsavregning)
+        behandlingRepository.findById(årsavregningBehandlingID)
             .shouldBePresent().run {
                 withClue("Behandlingsstatus skal være AVSLUTTET") {
                     type shouldBe Behandlingstyper.ÅRSAVREGNING

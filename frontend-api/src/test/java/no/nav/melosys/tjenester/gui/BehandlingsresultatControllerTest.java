@@ -5,6 +5,7 @@ import com.google.common.collect.Sets;
 import no.nav.melosys.domain.Behandlingsresultat;
 import no.nav.melosys.domain.BehandlingsresultatBegrunnelse;
 import no.nav.melosys.domain.VedtakMetadata;
+import no.nav.melosys.domain.avgift.Årsavregning;
 import no.nav.melosys.domain.kodeverk.Utfallregistreringunntak;
 import no.nav.melosys.domain.kodeverk.Vedtakstyper;
 import no.nav.melosys.domain.kodeverk.begrunnelser.Henleggelsesgrunner;
@@ -105,6 +106,9 @@ class BehandlingsresultatControllerTest {
         var vedtakMetadata = new VedtakMetadata();
         vedtakMetadata.setVedtakstype(Vedtakstyper.KORRIGERT_VEDTAK);
         behandlingsresultat.setVedtakMetadata(vedtakMetadata);
+        Årsavregning årsavregning = new Årsavregning();
+        årsavregning.setId(11L);
+        behandlingsresultat.setårsavregning(årsavregning);
         return behandlingsresultat;
     }
 }

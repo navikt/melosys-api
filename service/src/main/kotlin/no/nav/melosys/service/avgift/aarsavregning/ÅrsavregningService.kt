@@ -9,7 +9,9 @@ import no.nav.melosys.domain.avgift.Årsavregning
 import no.nav.melosys.domain.kodeverk.Folketrygdloven_kap2_bestemmelser
 import no.nav.melosys.domain.kodeverk.Medlemskapstyper
 import no.nav.melosys.domain.kodeverk.Trygdedekninger
+import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingsresultattyper
 import no.nav.melosys.exception.FunksjonellException
+import no.nav.melosys.exception.IkkeFunnetException
 import no.nav.melosys.repository.AarsavregningRepository
 import no.nav.melosys.service.behandling.BehandlingsresultatService
 import no.nav.melosys.service.sak.FagsakService
@@ -27,9 +29,22 @@ class ÅrsavregningService(
     private val totalBeløpBeregner: TotalBeløpBeregner,
     private val fagsakService: FagsakService,
 ) {
+    fun hentÅrsavregning(aarsavregningId: Long) =
+        aarsavregningRepository.findById(aarsavregningId).orElseThrow { IkkeFunnetException("Finner ingen årsavregning for id: $aarsavregningId") }
 
     @Transactional(readOnly = true)
-    fun finnÅrsavregning(behandlingID: Long): ÅrsavregningModel? {
+    fun finnÅrsavregningerPåFagsak(saksnummer: String, aar: Int?, behandlingsresultattype: Behandlingsresultattyper?): List<Årsavregning> {
+        val fagsak = fagsakService.hentFagsak(saksnummer)
+        return fagsak.behandlinger
+            .filter { it.erÅrsavregning() }
+            .map { behandlingsresultatService.hentBehandlingsresultat(it.id) }
+            .filter { behandlingsresultattype == null || it.type == behandlingsresultattype }
+            .mapNotNull { it.årsavregning }
+            .filter { aar == null || it.aar == aar }
+    }
+
+    @Transactional(readOnly = true)
+    fun finnÅrsavregningForBehandling(behandlingID: Long): ÅrsavregningModel? {
         val behandlingsresultat = behandlingsresultatService.hentBehandlingsresultat(behandlingID)
 
         val aarsavregning = behandlingsresultat.årsavregning ?: return null
@@ -39,7 +54,7 @@ class ÅrsavregningService(
 
     @Transactional(readOnly = true)
     fun finnGjeldendeÅrForÅrsavregning(behandlingID: Long): Int? {
-        return finnÅrsavregning(behandlingID)?.år
+        return finnÅrsavregningForBehandling(behandlingID)?.år
     }
 
     @Transactional
@@ -170,16 +185,23 @@ class ÅrsavregningService(
     }
 
     @Transactional
-    fun oppdaterTotalbelop(behandlingID: Long, tidligereFakturertBeloep: BigDecimal?, nyttTotalbeloep: BigDecimal?): ÅrsavregningModel {
-        val behandlingsresultat = behandlingsresultatService.hentBehandlingsresultat(behandlingID)
+    fun oppdaterTotalbelop(
+        behandlingID: Long,
+        aarsavregningId: Long,
+        tidligereFakturertBeloep: BigDecimal?,
+        nyttTotalbeloep: BigDecimal?
+    ): ÅrsavregningModel {
+        val årsavregning = hentÅrsavregning(aarsavregningId)
+        val årsavregningViaBehandlingsresultat = behandlingsresultatService.hentBehandlingsresultat(behandlingID).årsavregning
+        if (årsavregning != årsavregningViaBehandlingsresultat) {
+            throw RuntimeException("Årsavregning med id: $aarsavregningId hører ikke til Behandling med Id: $behandlingID")
+        }
 
-        val aarsavregning =
-            behandlingsresultat.årsavregning ?: throw RuntimeException("Det eksisterer ikke årsavregning for behandling med id: $behandlingID")
-        if (tidligereFakturertBeloep != null) aarsavregning.tidligereFakturertBeloep = tidligereFakturertBeloep
-        if (nyttTotalbeloep != null) aarsavregning.nyttTotalbeloep = nyttTotalbeloep
-        aarsavregning.beregnTilFaktureringsBeloep()
+        if (tidligereFakturertBeloep != null) årsavregning.tidligereFakturertBeloep = tidligereFakturertBeloep
+        if (nyttTotalbeloep != null) årsavregning.nyttTotalbeloep = nyttTotalbeloep
+        årsavregning.beregnTilFaktureringsBeloep()
 
-        return lagÅrsavregningModelFraÅrsavregning(aarsavregning)
+        return lagÅrsavregningModelFraÅrsavregning(årsavregning)
     }
 
     companion object {

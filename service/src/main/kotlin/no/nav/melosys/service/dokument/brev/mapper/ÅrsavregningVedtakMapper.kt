@@ -23,7 +23,7 @@ class ÅrsavregningVedtakMapper(
     internal fun mapÅrsavregning(brevbestilling: ÅrsavregningVedtakBrevBestilling, behandlingsresultat: Behandlingsresultat): ÅrsavregningVedtaksbrev {
 
         val behandlingsId = brevbestilling.behandlingId
-        val årsavregningModel = årsavregningService.finnÅrsavregning(behandlingsId)
+        val årsavregningModel = årsavregningService.finnÅrsavregningForBehandling(behandlingsId)
             ?: throw FunksjonellException("Finner ingen årsavregning for behandling $behandlingsId")
         val fagsak = behandlingsresultat.behandling.fagsak
 

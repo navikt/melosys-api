@@ -22,6 +22,7 @@ public class BehandlingsresultatDto {
     private final String vedtakstype;
     private final List<String> kontrollresultatBegrunnelseKoder;
     private final String fakturaserieReferanse;
+    private final Long aarsavregningID;
 
     private BehandlingsresultatDto(Behandlingsresultattyper behandlingsresultatTypeKode,
                                    String begrunnelseFritekst,
@@ -32,7 +33,8 @@ public class BehandlingsresultatDto {
                                    String utfallUtpeking,
                                    String vedtakstype,
                                    List<String> kontrollresultatBegrunnelseKoder,
-                                   String fakturaserieReferanse) {
+                                   String fakturaserieReferanse,
+                                   Long aarsavregningID) {
         this.behandlingsresultatTypeKode = behandlingsresultatTypeKode.getKode();
         this.innledningFritekst = innledningFritekst;
         this.trygdeavgiftFritekst = trygdeavgiftFritekst;
@@ -44,6 +46,7 @@ public class BehandlingsresultatDto {
         this.vedtakstype = vedtakstype;
         this.kontrollresultatBegrunnelseKoder = kontrollresultatBegrunnelseKoder;
         this.fakturaserieReferanse = fakturaserieReferanse;
+        this.aarsavregningID = aarsavregningID;
     }
 
     public static BehandlingsresultatDto av(Behandlingsresultat resultat) {
@@ -58,7 +61,9 @@ public class BehandlingsresultatDto {
             resultat.getVedtakMetadata() != null && resultat.getVedtakMetadata().getVedtakstype() != null
                 ? resultat.getVedtakMetadata().getVedtakstype().getKode() : null,
             resultat.getKontrollresultater().stream().map(Kontrollresultat::getBegrunnelse).map(Kontroll_begrunnelser::getKode).collect(Collectors.toList()),
-            resultat.getFakturaserieReferanse());
+            resultat.getFakturaserieReferanse(),
+            resultat.getårsavregning() != null ? resultat.getårsavregning().getId() : null
+        );
 
         resultat.getBehandlingsresultatBegrunnelser().stream()
             .map(BehandlingsresultatBegrunnelse::getKode)
@@ -112,5 +117,9 @@ public class BehandlingsresultatDto {
 
     public String getFakturaserieReferanse() {
         return fakturaserieReferanse;
+    }
+
+    public Long getAarsavregningID() {
+        return aarsavregningID;
     }
 }
