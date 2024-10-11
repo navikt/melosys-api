@@ -32,7 +32,7 @@ class ÅrsavregningService(
         aarsavregningRepository.findById(aarsavregningId).orElseThrow { FunksjonellException("Finner ingen årsavregning for id: $aarsavregningId") }
 
 
-    @Transactional
+    @Transactional(readOnly = true)
     fun finnÅrsavregningerPåFagsak(saksnummer: String, aar: Int?, behandlingstype: Behandlingsresultattyper?): List<Årsavregning> {
         val fagsak = fagsakService.hentFagsak(saksnummer)
         return fagsak.behandlinger
