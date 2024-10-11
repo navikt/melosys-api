@@ -11,6 +11,7 @@ import no.nav.melosys.domain.kodeverk.Medlemskapstyper
 import no.nav.melosys.domain.kodeverk.Trygdedekninger
 import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingsresultattyper
 import no.nav.melosys.exception.FunksjonellException
+import no.nav.melosys.exception.IkkeFunnetException
 import no.nav.melosys.repository.AarsavregningRepository
 import no.nav.melosys.service.behandling.BehandlingsresultatService
 import no.nav.melosys.service.sak.FagsakService
@@ -29,7 +30,7 @@ class ÅrsavregningService(
     private val fagsakService: FagsakService,
 ) {
     fun hentÅrsavregning(aarsavregningId: Long) =
-        aarsavregningRepository.findById(aarsavregningId).orElseThrow { FunksjonellException("Finner ingen årsavregning for id: $aarsavregningId") }
+        aarsavregningRepository.findById(aarsavregningId).orElseThrow { IkkeFunnetException("Finner ingen årsavregning for id: $aarsavregningId") }
 
 
     @Transactional(readOnly = true)
