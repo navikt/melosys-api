@@ -6,7 +6,6 @@ import no.nav.melosys.domain.kodeverk.Inntektskildetype
 import no.nav.melosys.domain.kodeverk.InnvilgelsesResultat
 import no.nav.melosys.domain.kodeverk.Skatteplikttype
 import no.nav.melosys.domain.kodeverk.Trygdedekninger
-import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingsresultattyper
 import no.nav.melosys.service.avgift.aarsavregning.TotalBeløpBeregner
 import no.nav.melosys.service.avgift.aarsavregning.Trygdeavgiftsgrunnlag
 import no.nav.melosys.service.avgift.aarsavregning.ÅrsavregningModel
@@ -158,13 +157,6 @@ class ÅrsavregningController(
         )
     }
 }
-
-data class ÅrsavregningListResponse(
-    val aarsavregningId: Long,
-    val behandlingID: Long,
-    val aar: Int,
-    val type: Behandlingsresultattyper,
-)
 
 data class ÅrsavregningResponse(
     val aar: Int,

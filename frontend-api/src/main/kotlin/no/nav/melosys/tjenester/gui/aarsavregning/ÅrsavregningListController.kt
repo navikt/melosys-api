@@ -38,4 +38,10 @@ class ÅrsavregningListController(
         return ResponseEntity.ok(årsavregningListResponse)
     }
 
+    data class ÅrsavregningListResponse(
+        val aarsavregningId: Long,
+        val behandlingID: Long,
+        val aar: Int,
+        val type: Behandlingsresultattyper,
+    )
 }
