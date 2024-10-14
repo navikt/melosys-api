@@ -1,6 +1,5 @@
 package no.nav.melosys.service;
 
-import java.lang.reflect.InvocationTargetException;
 import java.util.*;
 import java.util.stream.Collectors;
 
@@ -19,10 +18,8 @@ import no.nav.melosys.repository.BehandlingRepository;
 import no.nav.melosys.repository.BehandlingsresultatRepository;
 import no.nav.melosys.repository.LovvalgsperiodeRepository;
 import no.nav.melosys.repository.TidligereMedlemsperiodeRepository;
-import org.apache.commons.beanutils.BeanUtils;
 import org.apache.commons.lang3.EnumUtils;
 import org.springframework.stereotype.Service;
-import org.springframework.transaction.annotation.Propagation;
 import org.springframework.transaction.annotation.Transactional;
 
 import static no.nav.melosys.integrasjon.medl.MedlPeriodeKonverter.tilLovvalgBestemmelse;
@@ -86,29 +83,15 @@ public class LovvalgsperiodeService {
         lovvalgsperiodeRepo.deleteById(lovvalgsperiodeId);
     }
 
-    @Transactional(propagation = Propagation.REQUIRED)
-    public Collection<Lovvalgsperiode> lagreLovvalgsperioder(long behandlingsid, Collection<Lovvalgsperiode> lovvalgsperioder) {
+    @Transactional
+    public List<Lovvalgsperiode> lagreLovvalgsperioder(long behandlingsid, Collection<Lovvalgsperiode> lovvalgsperioder) {
         Behandlingsresultat behandlingsresultat = behandlingsresultatRepo.findById(behandlingsid)
             .orElseThrow(() -> new IllegalStateException(String.format("Behandling %s fins ikke.", behandlingsid)));
 
-        lovvalgsperiodeRepo.deleteByBehandlingsresultat(behandlingsresultat);
-        lovvalgsperiodeRepo.flush();
-        List<Lovvalgsperiode> perioderMedBehandling = lovvalgsperioder.stream()
-            .map(l -> kopierLovvalgsperiodeMedBehandlingsResultat(l, behandlingsresultat))
-            .toList();
-        return new ArrayList<>(lovvalgsperiodeRepo.saveAll(perioderMedBehandling));
-    }
+        lovvalgsperiodeRepo.deleteByBehandlingsresultatId(behandlingsresultat.getId());
 
-    private Lovvalgsperiode kopierLovvalgsperiodeMedBehandlingsResultat(Lovvalgsperiode periode, Behandlingsresultat behandlingsresultat) {
-        Lovvalgsperiode kopi;
-        try {
-            kopi = (Lovvalgsperiode) BeanUtils.cloneBean(periode);
-        } catch (IllegalAccessException | NoSuchMethodException | InvocationTargetException |
-            InstantiationException e) {
-            throw new IllegalStateException(e);
-        }
-        kopi.setBehandlingsresultat(behandlingsresultat);
-        return kopi;
+        lovvalgsperioder.forEach(periode -> periode.setBehandlingsresultat(behandlingsresultat));
+        return lovvalgsperiodeRepo.saveAllAndFlush(lovvalgsperioder);
     }
 
     public Collection<Lovvalgsperiode> hentTidligereLovvalgsperioder(Behandling behandling) {

@@ -102,7 +102,6 @@ class YrkesaktivEosVedtakIT(
 
     @Test
     fun `yrkesaktiv vedtak - eøs - innvilgelse med selvstendig virksomhet i flere land`() {
-        // start opprett sak
         val opprettSakDto = OpprettSakDto().apply {
             hovedpart = Aktoersroller.BRUKER
             brukerID = "30056928150"
@@ -142,9 +141,6 @@ class YrkesaktivEosVedtakIT(
         oppfriskSaksopplysningerService.oppfriskSaksopplysning(behandling.id, false)
 
 
-        // slutt opprett sak
-
-        // start avklaring av fakta
         val bostedsland = AvklartefaktaDto(listOf("NO"), "BOSTEDSLAND").apply {
             avklartefaktaType = Avklartefaktatyper.BOSTEDSLAND
             subjektID = "NO"
@@ -212,7 +208,7 @@ class YrkesaktivEosVedtakIT(
         val omfattesILand = AvklartefaktaDto(
             listOf("BE"),
             "OMFATTES_I_LAND"
-        ).apply { // Det er dette valget som gjør at transaksjon i dag feiler få med i beskrivelsen av testen
+        ).apply {
             avklartefaktaType = null
             subjektID = null
             begrunnelseKoder = emptyList()
@@ -245,15 +241,6 @@ class YrkesaktivEosVedtakIT(
             bestemmelse = Lovvalgbestemmelser_883_2004.FO_883_2004_ART13_2B
         }))
 
-        //  ferdigbehandlingKontrollFacade.kontroller(behandling.id, false, null, setOf())
-
-        val vedtakRequest = FattVedtakRequest.Builder()
-            .medBehandlingsresultatType(Behandlingsresultattyper.FORELOEPIG_FASTSATT_LOVVALGSLAND)
-            .medVedtakstype(Vedtakstyper.FØRSTEGANGSVEDTAK)
-            .medBestillersId("komponent test")
-            .build()
-
-        val fagsak = behandling.fagsak
 
         executeAndWait(
             mapOf(
@@ -261,53 +248,52 @@ class YrkesaktivEosVedtakIT(
                 ProsessType.SEND_BREV to 1
             )
         ) {
-            utpekingService.utpekLovvalgsland(behandling.fagsak, mutableSetOf(), null, null) // TODO endre til fatte vedtak?
-            // vedtaksfattingFasade.fattVedtak(behandling.id, vedtakRequest)
+            utpekingService.utpekLovvalgsland(behandling.fagsak, mutableSetOf(), null, null)
         }
+
 
         behandlingsresultatService.hentBehandlingsresultat(behandling.id).apply {
             type shouldBe Behandlingsresultattyper.FORELOEPIG_FASTSATT_LOVVALGSLAND
             behandlingsmåte shouldBe Behandlingsmaate.MANUELT
             fastsattAvLand shouldBe Land_iso2.NO
         }
+
         lovvalgsperiodeService.hentLovvalgsperiode(behandling.id).apply {
             innvilgelsesresultat shouldBe InnvilgelsesResultat.INNVILGET
             bestemmelse shouldBe Lovvalgbestemmelser_883_2004.FO_883_2004_ART13_2B
             lovvalgsland shouldBe Land_iso2.BE
-            medlemskapstype shouldBe Medlemskapstyper.PLIKTIG
-            dekning shouldBe Trygdedekninger.FULL_DEKNING_EOSFO
+            medlemskapstype shouldBe Medlemskapstyper.UNNTATT
+            dekning shouldBe Trygdedekninger.UTEN_DEKNING
             fom shouldBe LocalDate.of(2021, 10, 1)
             tom shouldBe LocalDate.of(2021, 10, 2)
         }
+
         behandlingRepository.findById(behandling.id).orElse(null)
             .shouldNotBeNull().apply {
                 withClue("Behandlingsstatus skal være AVSLUTTET") {
-                    status shouldBe Behandlingsstatus.UNDER_BEHANDLING // TODO hvorfor ikke avsluttet?
+                    status shouldBe Behandlingsstatus.MIDLERTIDIG_LOVVALGSBESLUTNING
                 }
                 fagsak.apply {
                     withClue("Saksstatus skal være LOVVALG_AVKLART") {
-                        status shouldBe Saksstatuser.OPPRETTET // TODO hvorfor ikke avklart?
+                        status shouldBe Saksstatuser.OPPRETTET
                     }
                 }
             }
 
-        // TODO
         MedlRepo.repo.values
             .shouldHaveSize(1)
             .first()
             .apply {
                 fraOgMed shouldBe LocalDate.of(2021, 10, 1)
                 tilOgMed shouldBe LocalDate.of(2021, 10, 2)
-                status shouldBe "GYLD"
-                dekning shouldBe "Full"
+                status shouldBe "UAVK"
+                dekning shouldBe "Unntatt"
                 medlem shouldBe true
-                lovvalgsland shouldBe "NO"
-                lovvalg shouldBe "ENDL"
-                grunnlag shouldBe "FO_12_1"
+                lovvalgsland shouldBe "BEL"
+                lovvalg shouldBe "FORL"
+                grunnlag shouldBe "FO_13_2_b"
                 sporingsinformasjon?.kildedokument shouldBe "Henv_Soknad"
             }
-
-
     }
 
     @Test
