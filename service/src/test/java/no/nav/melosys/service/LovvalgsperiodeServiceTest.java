@@ -76,8 +76,8 @@ class LovvalgsperiodeServiceTest {
         var lovvalgsperioder = List.of(new Lovvalgsperiode());
         @SuppressWarnings("unchecked")
         Collection<Lovvalgsperiode> anyCollection = any(Collection.class);
-        when(lovvalgsperiodeRepository.saveAll(anyCollection)).thenAnswer(i -> i.getArgument(0));
         when(behandlingsresultatRepository.findById(BEH_ID)).thenReturn(Optional.of(new Behandlingsresultat()));
+        when(lovvalgsperiodeRepository.saveAllAndFlush(anyCollection)).thenAnswer(i -> i.getArgument(0));
         assertThat(lovvalgsperioder.get(0).getBehandlingsresultat()).isNull();
 
 
