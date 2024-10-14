@@ -120,7 +120,7 @@ internal class ÅrsavregningServiceTest {
             tidligereGrunnlag = Trygdeavgiftsgrunnlag(
                 listOf(
                     MedlemskapsperiodeForAvgift(
-                        fom = LocalDate.of(2022, 12, 31),
+                        fom = LocalDate.of(2023, 1, 1),
                         tom = LocalDate.of(2023, 5, 31),
                         dekning = Trygdedekninger.FULL_DEKNING_FTRL,
                         bestemmelse = Folketrygdloven_kap2_bestemmelser.FTRL_KAP2_2_8,
@@ -128,10 +128,10 @@ internal class ÅrsavregningServiceTest {
                     )
                 ),
                 listOf(
-                    lagSkatteforholdTilNorge("2023-01-01", "2023-05-01")
+                    SkatteforholdTilNorgeForAvgift(lagSkatteforholdTilNorge("2023-01-01", "2023-05-01"))
                 ),
                 listOf(
-                    lagInntektsperiode("2023-01-01", "2023-05-01")
+                    InntektsperioderForAvgift(lagInntektsperiode("2023-01-01", "2023-05-01"))
                 )
             ),
             tidligereAvgift = listOf(
@@ -223,7 +223,7 @@ internal class ÅrsavregningServiceTest {
         vedtakMetadata.vedtakstype = Vedtakstyper.FØRSTEGANGSVEDTAK
         medlemskapsperioder = listOf(
             lagMedlemskapsperiode("2022-01-01", "2022-08-31"),
-            lagMedlemskapsperiode("2022-12-31", "2023-05-31"),
+            lagMedlemskapsperiode("2022-09-01", "2023-05-31"),
             lagMedlemskapsperiode("2023-07-01", "2023-08-31", InnvilgelsesResultat.AVSLAATT)
         )
     }
@@ -257,6 +257,7 @@ internal class ÅrsavregningServiceTest {
         fomDato = LocalDate.parse(start)
         tomDato = LocalDate.parse(slutt)
         avgiftspliktigInntektMnd = Penger(5000.0)
+        type = Inntektskildetype.ARBEIDSINNTEKT_FRA_NORGE
     }
 
     private fun lagSkatteforholdTilNorge(start: String, slutt: String): SkatteforholdTilNorge = SkatteforholdTilNorge().apply {
