@@ -84,7 +84,7 @@ class ÅrsavregningController(
                     it.fom,
                     it.tom,
                     it.bestemmelse,
-                    InnvilgelsesResultat.INNVILGET,
+                    InnvilgelsesResultat.INNVILGET, //TODO ligger egentlig problemet her?
                     it.dekning,
                     it.medlemskapstyper
                 )
