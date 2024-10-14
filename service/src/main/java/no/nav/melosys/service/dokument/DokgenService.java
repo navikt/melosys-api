@@ -228,8 +228,8 @@ public class DokgenService {
 
     private boolean erTogglet(Produserbaredokumenter produserbartDokument) {
         return switch (produserbartDokument) {
-            case INNHENTING_AV_INNTEKTSOPPLYSNINGER, ORIENTERING_ANMODNING_UNNTAK, AVSLAG_EFTA_STORBRITANNIA, INNVILGELSE_EFTA_STORBRITANNIA,  ORIENTERING_TIL_ARBEIDSGIVER_OM_VEDTAK ->
-                unleash.isEnabled(ToggleName.MELOSYS_KONVENSJON_EFTA_LAND_OG_STORBRITANNIA);
+            case INNHENTING_AV_INNTEKTSOPPLYSNINGER, ORIENTERING_ANMODNING_UNNTAK, AVSLAG_EFTA_STORBRITANNIA, INNVILGELSE_EFTA_STORBRITANNIA,
+                 ORIENTERING_TIL_ARBEIDSGIVER_OM_VEDTAK -> unleash.isEnabled(ToggleName.MELOSYS_KONVENSJON_EFTA_LAND_OG_STORBRITANNIA);
             default -> true;
         };
     }
@@ -340,9 +340,10 @@ public class DokgenService {
                 .medSkalViseStandardTekstOmOpplysninger(brevbestillingDto.isSkalViseStandardTekstOmOpplysninger())
                 .medFritekst(brevbestillingDto.getFritekst());
             case ORIENTERING_ANMODNING_UNNTAK -> new OrienteringAnmodningUnntakBrevbestilling.Builder()
+                .medDistribusjonstype(Distribusjonstype.VIKTIG)
                 .medFritekst(brevbestillingDto.getFritekst());
             case GENERELT_FRITEKSTBREV_BRUKER, GENERELT_FRITEKSTBREV_ARBEIDSGIVER, GENERELT_FRITEKSTBREV_VIRKSOMHET,
-                UTENLANDSK_TRYGDEMYNDIGHET_FRITEKSTBREV, FRITEKSTBREV -> new FritekstbrevBrevbestilling.Builder()
+                 UTENLANDSK_TRYGDEMYNDIGHET_FRITEKSTBREV, FRITEKSTBREV -> new FritekstbrevBrevbestilling.Builder()
                 .medDistribusjonstype(brevbestillingDto.getDistribusjonstype())
                 .medFritekstTittel(brevbestillingDto.getFritekstTittel())
                 .medFritekst(brevbestillingDto.getFritekst())
