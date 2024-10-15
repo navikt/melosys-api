@@ -20,7 +20,7 @@ class AvslagService(
     val behandlingsresultatService: BehandlingsresultatService,
     val dokgenService: DokgenService,
     val oppgaveService: OppgaveService,
-    val fagsakService: FagsakService
+    val fagsakService: FagsakService,
 ) {
     val FRIST_KLAGE_UKER = 6L
 
@@ -33,6 +33,7 @@ class AvslagService(
             fastsattAvLand = Land_iso2.NO
             this.settVedtakMetadata(LocalDate.now().plusWeeks(FRIST_KLAGE_UKER))
         }
+        behandlingsresultat.medlemskapsperioder.clear()
         behandlingsresultatService.lagre(behandlingsresultat)
 
         dokgenService.produserOgDistribuerBrev(behandlingID, lagBrevbestillingDto(fritekst, bestillersId))

@@ -1,8 +1,12 @@
 package no.nav.melosys.service.behandling;
 
+import java.time.LocalDate;
+import java.util.ArrayList;
+
 import no.nav.melosys.domain.Behandling;
 import no.nav.melosys.domain.Behandlingsresultat;
 import no.nav.melosys.domain.FagsakTestFactory;
+import no.nav.melosys.domain.Medlemskapsperiode;
 import no.nav.melosys.domain.kodeverk.Saksstatuser;
 import no.nav.melosys.domain.kodeverk.Sakstemaer;
 import no.nav.melosys.domain.kodeverk.Sakstyper;
@@ -227,6 +231,36 @@ class AngiBehandlingsresultatServiceTest {
             .isThrownBy(() -> angiBehandlingsresultatService
                 .oppdaterBehandlingsresultattypeOgAvsluttFagsakOgBehandling(BEHANDLING_ID, Behandlingsresultattyper.MEDLEM_I_FOLKETRYGDEN))
             .withMessageContaining("Kan ikke endre behandlingsresultattype");
+    }
+
+    @Test
+    void oppdaterBehandlingsresultattypeOgAvsluttFagsakOgBehandling_fjernerMedlemskapsperioderNårFTRLOgGyldigResultattype() {
+        var behandlingsresultat = lagBehandlingsresultat(
+            Sakstemaer.MEDLEMSKAP_LOVVALG,
+            Sakstyper.FTRL,
+            Behandlingstyper.FØRSTEGANG,
+            Behandlingstema.YRKESAKTIV
+        );
+        behandlingsresultat.setMedlemskapsperioder(new ArrayList<>());
+
+        Medlemskapsperiode medlemskapsperiode = new Medlemskapsperiode();
+        medlemskapsperiode.setFom(LocalDate.of(2020,1,1));
+        medlemskapsperiode.setTom(LocalDate.of(2021,1,1));
+
+        behandlingsresultat.getMedlemskapsperioder().add(medlemskapsperiode);
+        behandlingsresultat.setType(Behandlingsresultattyper.AVSLAG_SØKNAD);
+
+        when(behandlingsresultatService.hentBehandlingsresultat(BEHANDLING_ID)).thenReturn(behandlingsresultat);
+
+        angiBehandlingsresultatService
+            .oppdaterBehandlingsresultattypeOgAvsluttFagsakOgBehandling(
+                BEHANDLING_ID,
+                Behandlingsresultattyper.AVSLAG_SØKNAD
+            );
+
+        verify(behandlingsresultatService).lagre(behandlingsresultatArgumentCaptor.capture());
+        var savedBehandlingsresultat = behandlingsresultatArgumentCaptor.getValue();
+        assertThat(savedBehandlingsresultat.getMedlemskapsperioder()).isEmpty();
     }
 
     private Behandlingsresultat lagBehandlingsresultat(Sakstemaer sakstema, Sakstyper sakstype, Behandlingstyper behandlingstype, Behandlingstema behandlingstema) {
