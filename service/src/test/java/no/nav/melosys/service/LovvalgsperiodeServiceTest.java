@@ -5,6 +5,7 @@ import java.util.Collection;
 import java.util.Collections;
 import java.util.List;
 import java.util.Optional;
+import java.util.stream.StreamSupport;
 
 import no.nav.melosys.domain.*;
 import no.nav.melosys.domain.dokument.medlemskap.MedlemskapDokument;
@@ -53,11 +54,7 @@ class LovvalgsperiodeServiceTest {
 
     @BeforeEach
     public void setUp() {
-        lovvalgsperiodeService = new LovvalgsperiodeService(
-            behandlingsresultatRepository,
-            lovvalgsperiodeRepository,
-            tidligereMedlemsperiodeRepository,
-            behandlingRepository);
+        lovvalgsperiodeService = new LovvalgsperiodeService(behandlingsresultatRepository, lovvalgsperiodeRepository, tidligereMedlemsperiodeRepository, behandlingRepository);
     }
 
     @Test
@@ -72,20 +69,21 @@ class LovvalgsperiodeServiceTest {
     }
 
     @Test
-    void lagreLovvalgsperioderGirKopiMedBehandlingsresultat() {
-        var lovvalgsperioder = List.of(new Lovvalgsperiode());
-        @SuppressWarnings("unchecked")
-        Collection<Lovvalgsperiode> anyCollection = any(Collection.class);
-        when(behandlingsresultatRepository.findById(BEH_ID)).thenReturn(Optional.of(new Behandlingsresultat()));
-        when(lovvalgsperiodeRepository.saveAllAndFlush(anyCollection)).thenAnswer(i -> i.getArgument(0));
-        assertThat(lovvalgsperioder.get(0).getBehandlingsresultat()).isNull();
+    void lagreLovvalgsperioderReturnererLovvalgsperiodeMedBehandlingsresultat() {
+        var lagretBehandlingsresultat = new Behandlingsresultat();
+        lagretBehandlingsresultat.setId(BEH_ID);
+
+        when(behandlingsresultatRepository.findById(BEH_ID)).thenReturn(Optional.of(lagretBehandlingsresultat));
+        when(lovvalgsperiodeRepository.saveAllAndFlush(argThat(this::harBehandlingsResultatMedRiktigId))).thenAnswer(i -> i.getArgument(0));
 
 
-        Collection<Lovvalgsperiode> resultat = lovvalgsperiodeService.lagreLovvalgsperioder(BEH_ID, lovvalgsperioder);
+        var lovvalgsPerioderSpy = spy(List.of(new Lovvalgsperiode()));
+        var lagretLovvalgsPeriodeMedBehandlingsresultat = lovvalgsperiodeService.lagreLovvalgsperioder(BEH_ID, lovvalgsPerioderSpy);
 
 
-        assertThat(resultat).hasSize(lovvalgsperioder.size());
-        assertThat(resultat.iterator().next().getBehandlingsresultat()).isNotNull();
+        assertThat(!harBehandlingsResultatMedRiktigId(lovvalgsPerioderSpy));
+        assertThat(lagretLovvalgsPeriodeMedBehandlingsresultat).hasSize(1);
+        assertThat(harBehandlingsResultatMedRiktigId(lagretLovvalgsPeriodeMedBehandlingsresultat));
     }
 
     @Test
@@ -93,8 +91,7 @@ class LovvalgsperiodeServiceTest {
         var lovvalgsperioder = List.of(new Lovvalgsperiode());
         when(behandlingsresultatRepository.findById(BEH_ID)).thenReturn(Optional.empty());
 
-        assertThatExceptionOfType(IllegalStateException.class).isThrownBy(() ->
-            lovvalgsperiodeService.lagreLovvalgsperioder(BEH_ID, lovvalgsperioder)).withMessageContaining("fins ikke");
+        assertThatExceptionOfType(IllegalStateException.class).isThrownBy(() -> lovvalgsperiodeService.lagreLovvalgsperioder(BEH_ID, lovvalgsperioder)).withMessageContaining("fins ikke");
     }
 
     @Test
@@ -121,16 +118,7 @@ class LovvalgsperiodeServiceTest {
 
 
         verify(lovvalgsperiodeRepository).save(captor.capture());
-        assertThat(captor.getValue())
-            .isNotNull()
-            .extracting(
-                "fom", "tom", "lovvalgsland", "bestemmelse",
-                "tilleggsbestemmelse", "innvilgelsesresultat",
-                "medlemskapstype", "dekning", "medlPeriodeID")
-            .containsExactly(
-                request.getFom(), request.getTom(), request.getLovvalgsland(), request.getBestemmelse(),
-                request.getTilleggsbestemmelse(), request.getInnvilgelsesresultat(),
-                request.getMedlemskapstype(), request.getDekning(), request.getMedlPeriodeID());
+        assertThat(captor.getValue()).isNotNull().extracting("fom", "tom", "lovvalgsland", "bestemmelse", "tilleggsbestemmelse", "innvilgelsesresultat", "medlemskapstype", "dekning", "medlPeriodeID").containsExactly(request.getFom(), request.getTom(), request.getLovvalgsland(), request.getBestemmelse(), request.getTilleggsbestemmelse(), request.getInnvilgelsesresultat(), request.getMedlemskapstype(), request.getDekning(), request.getMedlPeriodeID());
     }
 
     @Test
@@ -138,9 +126,7 @@ class LovvalgsperiodeServiceTest {
         var request = new Lovvalgsperiode();
         when(lovvalgsperiodeRepository.findById(3L)).thenReturn(Optional.empty());
 
-        assertThatExceptionOfType(FunksjonellException.class)
-            .isThrownBy(() -> lovvalgsperiodeService.oppdaterLovvalgsperiode(3L, request))
-            .withMessageContaining("Lovvalgsperioden 3 finnes ikke");
+        assertThatExceptionOfType(FunksjonellException.class).isThrownBy(() -> lovvalgsperiodeService.oppdaterLovvalgsperiode(3L, request)).withMessageContaining("Lovvalgsperioden 3 finnes ikke");
     }
 
     @Test
@@ -156,19 +142,7 @@ class LovvalgsperiodeServiceTest {
         mockTidligereMedlemsperiodeRepository(medlemsperiode.getId());
 
 
-        assertThat(lovvalgsperiodeService.hentTidligereLovvalgsperioder(behandling))
-            .hasSize(1)
-            .flatExtracting(
-                Lovvalgsperiode::getMedlPeriodeID,
-                Lovvalgsperiode::getFom,
-                Lovvalgsperiode::getTom,
-                Lovvalgsperiode::getBestemmelse
-            ).containsExactly(
-                medlemsperiode.getId(),
-                medlemsperiode.getPeriode().getFom(),
-                medlemsperiode.getPeriode().getTom(),
-                MedlPeriodeKonverter.tilLovvalgBestemmelse(GrunnlagMedl.valueOf(medlemsperiode.getGrunnlagstype()))
-            );
+        assertThat(lovvalgsperiodeService.hentTidligereLovvalgsperioder(behandling)).hasSize(1).flatExtracting(Lovvalgsperiode::getMedlPeriodeID, Lovvalgsperiode::getFom, Lovvalgsperiode::getTom, Lovvalgsperiode::getBestemmelse).containsExactly(medlemsperiode.getId(), medlemsperiode.getPeriode().getFom(), medlemsperiode.getPeriode().getTom(), MedlPeriodeKonverter.tilLovvalgBestemmelse(GrunnlagMedl.valueOf(medlemsperiode.getGrunnlagstype())));
     }
 
     @Test
@@ -185,14 +159,7 @@ class LovvalgsperiodeServiceTest {
         Collection<Lovvalgsperiode> lovvalgsperioder = lovvalgsperiodeService.hentTidligereLovvalgsperioder(behandling);
 
 
-        assertThat(lovvalgsperioder)
-            .hasSize(1)
-            .flatExtracting(
-                Lovvalgsperiode::getMedlPeriodeID,
-                Lovvalgsperiode::getBestemmelse)
-            .containsExactly(
-                medlemsperiode.getId(),
-                Lovvalgbestemmelser_883_2004.FO_883_2004_ANNET);
+        assertThat(lovvalgsperioder).hasSize(1).flatExtracting(Lovvalgsperiode::getMedlPeriodeID, Lovvalgsperiode::getBestemmelse).containsExactly(medlemsperiode.getId(), Lovvalgbestemmelser_883_2004.FO_883_2004_ANNET);
     }
 
     @Test
@@ -212,16 +179,13 @@ class LovvalgsperiodeServiceTest {
 
         Behandling behandling = new Behandling();
         behandling.setOpprinneligBehandling(opprinneligBehandling);
-        when(behandlingRepository.findById(BEH_ID))
-            .thenReturn(Optional.of(behandling));
+        when(behandlingRepository.findById(BEH_ID)).thenReturn(Optional.of(behandling));
 
         Lovvalgsperiode opprinneligLovvalgsperiode = new Lovvalgsperiode();
-        when(lovvalgsperiodeRepository.findByBehandlingsresultatId(opprinneligBehandling.getId()))
-            .thenReturn(Collections.singletonList(opprinneligLovvalgsperiode));
+        when(lovvalgsperiodeRepository.findByBehandlingsresultatId(opprinneligBehandling.getId())).thenReturn(Collections.singletonList(opprinneligLovvalgsperiode));
 
 
-        assertThat(lovvalgsperiodeService.hentOpprinneligLovvalgsperiode(BEH_ID))
-            .isEqualTo(opprinneligLovvalgsperiode);
+        assertThat(lovvalgsperiodeService.hentOpprinneligLovvalgsperiode(BEH_ID)).isEqualTo(opprinneligLovvalgsperiode);
     }
 
     @Test
@@ -229,9 +193,7 @@ class LovvalgsperiodeServiceTest {
         when(behandlingRepository.findById(BEH_ID)).thenReturn(Optional.empty());
 
 
-        assertThatExceptionOfType(IkkeFunnetException.class)
-            .isThrownBy(() -> lovvalgsperiodeService.hentOpprinneligLovvalgsperiode(BEH_ID))
-            .withMessageContaining("Fant ingen behandling");
+        assertThatExceptionOfType(IkkeFunnetException.class).isThrownBy(() -> lovvalgsperiodeService.hentOpprinneligLovvalgsperiode(BEH_ID)).withMessageContaining("Fant ingen behandling");
     }
 
     @Test
@@ -239,9 +201,7 @@ class LovvalgsperiodeServiceTest {
         when(behandlingRepository.findById(BEH_ID)).thenReturn(Optional.of(new Behandling()));
 
 
-        assertThatExceptionOfType(IkkeFunnetException.class)
-            .isThrownBy(() -> lovvalgsperiodeService.hentOpprinneligLovvalgsperiode(BEH_ID))
-            .withMessageContaining("Fant ingen opprinnelig behandling");
+        assertThatExceptionOfType(IkkeFunnetException.class).isThrownBy(() -> lovvalgsperiodeService.hentOpprinneligLovvalgsperiode(BEH_ID)).withMessageContaining("Fant ingen opprinnelig behandling");
     }
 
     @Test
@@ -254,9 +214,7 @@ class LovvalgsperiodeServiceTest {
         when(behandlingRepository.findById(BEH_ID)).thenReturn(Optional.of(behandling));
 
 
-        assertThatExceptionOfType(IkkeFunnetException.class)
-            .isThrownBy(() -> lovvalgsperiodeService.hentOpprinneligLovvalgsperiode(BEH_ID))
-            .withMessageContaining("Fant ingen opprinnelig lovvalgsperiode");
+        assertThatExceptionOfType(IkkeFunnetException.class).isThrownBy(() -> lovvalgsperiodeService.hentOpprinneligLovvalgsperiode(BEH_ID)).withMessageContaining("Fant ingen opprinnelig lovvalgsperiode");
     }
 
     @Test
@@ -266,12 +224,10 @@ class LovvalgsperiodeServiceTest {
 
         Behandling behandling = new Behandling();
         behandling.setOpprinneligBehandling(opprinneligBehandling);
-        when(behandlingRepository.findById(BEH_ID))
-            .thenReturn(Optional.of(behandling));
+        when(behandlingRepository.findById(BEH_ID)).thenReturn(Optional.of(behandling));
 
         Lovvalgsperiode opprinneligLovvalgsperiode = new Lovvalgsperiode();
-        when(lovvalgsperiodeRepository.findByBehandlingsresultatId(opprinneligBehandling.getId()))
-            .thenReturn(Collections.singletonList(opprinneligLovvalgsperiode));
+        when(lovvalgsperiodeRepository.findByBehandlingsresultatId(opprinneligBehandling.getId())).thenReturn(Collections.singletonList(opprinneligLovvalgsperiode));
 
 
         Optional<Lovvalgsperiode> lovvalgsperiode = lovvalgsperiodeService.finnOpprinneligLovvalgsperiode(BEH_ID);
@@ -287,8 +243,7 @@ class LovvalgsperiodeServiceTest {
 
         Behandling behandling = new Behandling();
         behandling.setOpprinneligBehandling(opprinneligBehandling);
-        when(behandlingRepository.findById(BEH_ID))
-            .thenReturn(Optional.of(behandling));
+        when(behandlingRepository.findById(BEH_ID)).thenReturn(Optional.of(behandling));
 
 
         Optional<Lovvalgsperiode> lovvalgsperiode = lovvalgsperiodeService.finnOpprinneligLovvalgsperiode(BEH_ID);
@@ -320,8 +275,12 @@ class LovvalgsperiodeServiceTest {
 
     private Medlemsperiode lagMedlemsperiode(long id, String grunnlagMedlKode) {
         Periode periode = new Periode(LocalDate.now(), LocalDate.now());
-        return new Medlemsperiode(
-            id, periode, null,
-            PeriodestatusMedl.GYLD.kode, grunnlagMedlKode, null, null, null, null, null);
+        return new Medlemsperiode(id, periode, null, PeriodestatusMedl.GYLD.kode, grunnlagMedlKode, null, null, null, null, null);
+    }
+
+    private boolean harBehandlingsResultatMedRiktigId(Iterable<Lovvalgsperiode> lovvalgsperioder) {
+        return StreamSupport.stream(lovvalgsperioder.spliterator(), false)
+            .allMatch(item -> item.getBehandlingsresultat() != null &&
+                item.getBehandlingsresultat().getId().equals(BEH_ID));
     }
 }

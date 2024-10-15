@@ -1,5 +1,6 @@
 package no.nav.melosys.service;
 
+import java.lang.reflect.InvocationTargetException;
 import java.util.*;
 import java.util.stream.Collectors;
 
@@ -18,6 +19,7 @@ import no.nav.melosys.repository.BehandlingRepository;
 import no.nav.melosys.repository.BehandlingsresultatRepository;
 import no.nav.melosys.repository.LovvalgsperiodeRepository;
 import no.nav.melosys.repository.TidligereMedlemsperiodeRepository;
+import org.apache.commons.beanutils.BeanUtils;
 import org.apache.commons.lang3.EnumUtils;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -84,14 +86,18 @@ public class LovvalgsperiodeService {
     }
 
     @Transactional
-    public List<Lovvalgsperiode> lagreLovvalgsperioder(long behandlingsid, Collection<Lovvalgsperiode> lovvalgsperioder) {
+    public Collection<Lovvalgsperiode> lagreLovvalgsperioder(long behandlingsid, Collection<Lovvalgsperiode> lovvalgsperioder) {
         Behandlingsresultat behandlingsresultat = behandlingsresultatRepo.findById(behandlingsid)
             .orElseThrow(() -> new IllegalStateException(String.format("Behandling %s fins ikke.", behandlingsid)));
 
         lovvalgsperiodeRepo.deleteByBehandlingsresultatId(behandlingsresultat.getId());
 
-        lovvalgsperioder.forEach(periode -> periode.setBehandlingsresultat(behandlingsresultat));
-        return lovvalgsperiodeRepo.saveAllAndFlush(lovvalgsperioder);
+        List<Lovvalgsperiode> lovvalgsperiodeKopi = lovvalgsperioder
+            .stream()
+            .map(periode -> kopierLovvalgsperiodeMedBehandlingsResultat(periode, behandlingsresultat))
+            .toList();
+
+        return lovvalgsperiodeRepo.saveAllAndFlush(lovvalgsperiodeKopi);
     }
 
     public Collection<Lovvalgsperiode> hentTidligereLovvalgsperioder(Behandling behandling) {
@@ -148,5 +154,17 @@ public class LovvalgsperiodeService {
         var lovvalgBestemmelse = hentLovvalgsperiode(behandlingId).getBestemmelse();
         return lovvalgBestemmelse.equals(Lovvalgsbestemmelser_trygdeavtale_ca.CAN_ART6_2) ||
             lovvalgBestemmelse.equals(Lovvalgsbestemmelser_trygdeavtale_us.USA_ART5_4);
+    }
+
+    private Lovvalgsperiode kopierLovvalgsperiodeMedBehandlingsResultat(Lovvalgsperiode periode, Behandlingsresultat behandlingsresultat) {
+        Lovvalgsperiode kopi;
+        try {
+            kopi = (Lovvalgsperiode) BeanUtils.cloneBean(periode);
+        } catch (IllegalAccessException | NoSuchMethodException | InvocationTargetException |
+                 InstantiationException e) {
+            throw new IllegalStateException(e);
+        }
+        kopi.setBehandlingsresultat(behandlingsresultat);
+        return kopi;
     }
 }
