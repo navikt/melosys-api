@@ -280,7 +280,7 @@ data class MedlemskapsperiodeForAvgift(
 }
 
 data class SkatteforholdTilNorgeForAvgift(
-    var trygdeavgiftsperioder: Set<Trygdeavgiftsperiode>?,
+    val trygdeavgiftsperioder: Set<Trygdeavgiftsperiode>?,
     var fom: LocalDate,
     var tom: LocalDate,
     val skatteplikttype: Skatteplikttype,
@@ -294,7 +294,7 @@ data class SkatteforholdTilNorgeForAvgift(
 }
 
 data class InntektsperioderForAvgift(
-    var trygdeavgiftsperioder: Set<Trygdeavgiftsperiode>?,
+    val trygdeavgiftsperioder: Set<Trygdeavgiftsperiode>?,
     var fom: LocalDate,
     var tom: LocalDate,
     val type: Inntektskildetype,
