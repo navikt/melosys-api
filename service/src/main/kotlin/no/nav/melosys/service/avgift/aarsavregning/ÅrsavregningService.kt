@@ -167,21 +167,15 @@ class ÅrsavregningService(
         return Trygdeavgiftsgrunnlag(
             medlemskapsperioder = behandlingsresultat.medlemskapsperioder.filter { it.overlapperMedÅr(år) && it.erInnvilget() }.map(::MedlemskapsperiodeForAvgift).map {
                 val periode = avkortDato(år, it.fom, it.tom)
-                it.tom = periode.tom
-                it.fom = periode.fom
-                it
+                it.copy(fom = periode.fom, tom = periode.tom)
             },
             skatteforholdsperioder = behandlingsresultat.hentSkatteforholdTilNorge().filter { it.overlapperMedÅr(år) }.map(::SkatteforholdTilNorgeForAvgift).map {
                 val periode = avkortDato(år, it.fom, it.tom)
-                it.tom = periode.tom
-                it.fom = periode.fom
-                it
+                it.copy(fom = periode.fom, tom = periode.tom)
             },
             innteksperioder = behandlingsresultat.hentInntektsperioder().filter { it.overlapperMedÅr(år) }.map(::InntektsperioderForAvgift).map {
                 val periode = avkortDato(år, it.fom, it.tom)
-                it.tom = periode.tom
-                it.fom = periode.fom
-                it
+                it.copy(fom = periode.fom, tom = periode.tom)
             }
         )
     }
@@ -264,8 +258,8 @@ data class Trygdeavgiftsgrunnlag(
 )
 
 data class MedlemskapsperiodeForAvgift(
-    var fom: LocalDate,
-    var tom: LocalDate,
+    val fom: LocalDate,
+    val tom: LocalDate,
     val dekning: Trygdedekninger,
     val bestemmelse: Folketrygdloven_kap2_bestemmelser,
     val medlemskapstyper: Medlemskapstyper
@@ -281,8 +275,8 @@ data class MedlemskapsperiodeForAvgift(
 
 data class SkatteforholdTilNorgeForAvgift(
     val trygdeavgiftsperioder: Set<Trygdeavgiftsperiode>?,
-    var fom: LocalDate,
-    var tom: LocalDate,
+    val fom: LocalDate,
+    val tom: LocalDate,
     val skatteplikttype: Skatteplikttype,
 ) {
     constructor(skatteforholdTilNorge: SkatteforholdTilNorge) : this(
@@ -295,8 +289,8 @@ data class SkatteforholdTilNorgeForAvgift(
 
 data class InntektsperioderForAvgift(
     val trygdeavgiftsperioder: Set<Trygdeavgiftsperiode>?,
-    var fom: LocalDate,
-    var tom: LocalDate,
+    val fom: LocalDate,
+    val tom: LocalDate,
     val type: Inntektskildetype,
     val avgiftspliktigInntektMnd: Penger,
     val isArbeidsgiversavgiftBetalesTilSkatt: Boolean
