@@ -48,7 +48,7 @@ public class AngiBehandlingsresultatService {
         var fagsak = behandlingsresultat.getBehandling().getFagsak();
 
         validerBehandlingsresultattype(behandlingsresultattype, behandlingsresultat.getBehandling(), fagsak);
-        slettMedlemskapsPerioderNårBehandlingErAvvistOgSakstypeErFTRL(behandlingsresultat, fagsak);
+        slettMedlemskapsPerioderNårBehandlingAvsluttesOgSakstypeErFTRL(behandlingsresultat, fagsak);
 
         log.info("Avslutter sak {} og setter behandlingsresultattype {} på behandling {}", fagsak.getSaksnummer(), behandlingsresultattype, behandlingID);
         behandlingsresultat.setType(behandlingsresultattype);
@@ -57,14 +57,15 @@ public class AngiBehandlingsresultatService {
         oppgaveService.ferdigstillOppgaveMedBehandlingID(behandlingID);
     }
 
-    private void slettMedlemskapsPerioderNårBehandlingErAvvistOgSakstypeErFTRL(Behandlingsresultat behandlingsResultat, Fagsak fagsak) {
+    private void slettMedlemskapsPerioderNårBehandlingAvsluttesOgSakstypeErFTRL(Behandlingsresultat behandlingsResultat, Fagsak fagsak) {
         if (fagsak.erSakstypeFtrl() && GYLDIGE_BEH_TYPER_FJERN_PERIODER.contains(behandlingsResultat.getType())) behandlingsResultat.getMedlemskapsperioder().clear();
     }
 
     private static final EnumSet<Behandlingsresultattyper> GYLDIGE_BEH_TYPER_FJERN_PERIODER = EnumSet.of(
         Behandlingsresultattyper.AVSLAG_SØKNAD,
         Behandlingsresultattyper.HENLEGGELSE_BORTFALT,
-        Behandlingsresultattyper.HENLEGGELSE
+        Behandlingsresultattyper.HENLEGGELSE,
+        Behandlingsresultattyper.FERDIGBEHANDLET
     );
 
     private void validerBehandlingsresultattype(Behandlingsresultattyper behandlingsresultattype, Behandling behandling, Fagsak fagsak) {
