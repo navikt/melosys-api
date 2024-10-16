@@ -227,7 +227,13 @@ public class FagsakService {
                                            Behandlingstema nyBehandlingstema, Behandlingstyper nyBehandlingstype,
                                            Behandlingsstatus nyBehandlingsstatus, LocalDate nyMottaksdato) {
         Fagsak fagsak = hentFagsak(saksnummer);
-        Behandling behandling = fagsak.finnAktivBehandlingIkkeÅrsavregning();
+        Behandling behandling = fagsak.hentAktivBehandling();
+
+        if(nyBehandlingstype != Behandlingstyper.ÅRSAVREGNING && !behandling.erÅrsavregning()) {
+            behandling = fagsak.hentAktivBehandlingIkkeÅrsavregning();
+        }
+
+
         validerOppdatering(fagsak, behandling, nySakstype, nySakstema, nyBehandlingstema, nyBehandlingstype);
         if (fagsak.getType() != nySakstype || fagsak.getTema() != nySakstema) {
             log.info("Endrer sakstype for fagsak {} fra {} til {}", fagsak.getSaksnummer(), fagsak.getType(), nySakstype);

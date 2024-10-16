@@ -50,7 +50,12 @@ class EndreSakService(
     ) {
         val fagsak = fagsakService.hentFagsak(saksnummer)
         validerSak(fagsak, nySakstype, nySakstema)
-        val behandling = fagsak.hentAktivBehandlingIkkeÅrsavregning()
+        var behandling = fagsak.hentAktivBehandling()
+
+        if(nyBehandlingstype != Behandlingstyper.ÅRSAVREGNING && !behandling.erÅrsavregning()) {
+            behandling = fagsak.hentAktivBehandlingIkkeÅrsavregning()
+        }
+
         validerBehandling(behandling)
 
         val sakEndres = sakEndres(fagsak, nySakstype, nySakstema)
