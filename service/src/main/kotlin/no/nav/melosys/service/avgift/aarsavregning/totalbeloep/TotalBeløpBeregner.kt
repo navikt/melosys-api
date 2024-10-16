@@ -16,7 +16,7 @@ class TotalBeløpBeregner {
             if (trygdeavgiftsperioder.isEmpty()) {
                 return null
             }
-            val periodeMedBeløpList = trygdeavgiftsperioder.map {
+            val periodeMedBeløpList = trygdeavgiftsperioder.filter { it.grunnlagInntekstperiode != null }.map {
                 PeriodeMedBeløp(
                     fom = it.periodeFra,
                     tom = it.periodeTil,
@@ -27,7 +27,7 @@ class TotalBeløpBeregner {
         }
 
         fun hentTotalInntekt(trygdeavgiftsperioder: List<Trygdeavgiftsperiode>): BigDecimal {
-            val periodeMedBeløpList = trygdeavgiftsperioder.map {
+            val periodeMedBeløpList = trygdeavgiftsperioder.filter { it.grunnlagInntekstperiode != null }.map {
                 PeriodeMedBeløp(
                     fom = it.periodeFra,
                     tom = it.periodeTil,
