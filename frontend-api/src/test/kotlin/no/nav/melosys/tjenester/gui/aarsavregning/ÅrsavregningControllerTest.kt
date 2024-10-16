@@ -61,14 +61,12 @@ internal class ÅrsavregningControllerTest {
                 ),
                 skatteforholdsperioder = listOf(
                     SkatteforholdTilNorgeForAvgift(
-                        null,
                         fom = LocalDate.parse("2023-01-01"),
                         tom = LocalDate.parse("2023-07-31"),
                         skatteplikttype = Skatteplikttype.SKATTEPLIKTIG
                     ),
 
                     SkatteforholdTilNorgeForAvgift(
-                        null,
                         fom = LocalDate.parse("2023-08-01"),
                         tom = LocalDate.parse("2023-12-31"),
                         skatteplikttype = Skatteplikttype.IKKE_SKATTEPLIKTIG
@@ -76,7 +74,6 @@ internal class ÅrsavregningControllerTest {
                 ),
                 innteksperioder = listOf(
                     InntektsperioderForAvgift(
-                        trygdeavgiftsperioder = null,
                         fom = LocalDate.parse("2023-01-01"),
                         tom = LocalDate.parse("2023-07-31"),
                         type = Inntektskildetype.ARBEIDSINNTEKT_FRA_NORGE,
@@ -84,7 +81,6 @@ internal class ÅrsavregningControllerTest {
                         isArbeidsgiversavgiftBetalesTilSkatt = true,
                     ),
                     InntektsperioderForAvgift(
-                        trygdeavgiftsperioder = null,
                         fom = LocalDate.parse("2023-08-01"),
                         tom = LocalDate.parse("2023-12-31"),
                         type = Inntektskildetype.INNTEKT_FRA_UTLANDET,

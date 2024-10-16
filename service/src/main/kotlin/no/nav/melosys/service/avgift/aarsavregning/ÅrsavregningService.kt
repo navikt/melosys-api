@@ -274,13 +274,11 @@ data class MedlemskapsperiodeForAvgift(
 }
 
 data class SkatteforholdTilNorgeForAvgift(
-    val trygdeavgiftsperioder: Set<Trygdeavgiftsperiode>?,
     val fom: LocalDate,
     val tom: LocalDate,
     val skatteplikttype: Skatteplikttype,
 ) {
     constructor(skatteforholdTilNorge: SkatteforholdTilNorge) : this(
-        trygdeavgiftsperioder = skatteforholdTilNorge.trygdeavgiftsperioder,
         fom = skatteforholdTilNorge.fom,
         tom = skatteforholdTilNorge.tom,
         skatteplikttype = skatteforholdTilNorge.skatteplikttype,
@@ -288,7 +286,6 @@ data class SkatteforholdTilNorgeForAvgift(
 }
 
 data class InntektsperioderForAvgift(
-    val trygdeavgiftsperioder: Set<Trygdeavgiftsperiode>?,
     val fom: LocalDate,
     val tom: LocalDate,
     val type: Inntektskildetype,
@@ -296,7 +293,6 @@ data class InntektsperioderForAvgift(
     val isArbeidsgiversavgiftBetalesTilSkatt: Boolean
 ) {
     constructor(inntektsperiode: Inntektsperiode) : this(
-        trygdeavgiftsperioder = inntektsperiode.trygdeavgiftsperioder,
         fom = inntektsperiode.fom,
         tom = inntektsperiode.tom,
         type = inntektsperiode.type,
