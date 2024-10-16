@@ -51,15 +51,15 @@ public class AngiBehandlingsresultatService {
 
         log.info("Avslutter sak {} og setter behandlingsresultattype {} på behandling {}", fagsak.getSaksnummer(), behandlingsresultattype, behandlingID);
         behandlingsresultat.setType(behandlingsresultattype);
-        behandlingsresultatService.lagre(behandlingsresultat);
         slettMedlemskapsPerioderNårBehandlingAvsluttesOgSakstypeErFTRL(behandlingsresultat, fagsak);
+        behandlingsresultatService.lagre(behandlingsresultat);
         fagsakService.avsluttFagsakOgBehandling(fagsak, Saksstatuser.LOVVALG_AVKLART);
         oppgaveService.ferdigstillOppgaveMedBehandlingID(behandlingID);
     }
 
-    private void slettMedlemskapsPerioderNårBehandlingAvsluttesOgSakstypeErFTRL(Behandlingsresultat behandlingsResultat, Fagsak fagsak) {
-        if (fagsak.erSakstypeFtrl() && GYLDIGE_BEH_TYPER_FJERN_PERIODER.contains(behandlingsResultat.getType())) {
-            behandlingsResultat.getMedlemskapsperioder().clear();
+    private void slettMedlemskapsPerioderNårBehandlingAvsluttesOgSakstypeErFTRL(Behandlingsresultat behandlingsresultat, Fagsak fagsak) {
+        if (fagsak.erSakstypeFtrl() && GYLDIGE_BEH_TYPER_FJERN_PERIODER.contains(behandlingsresultat.getType())) {
+            behandlingsresultat.getMedlemskapsperioder().clear();
         }
     }
 
