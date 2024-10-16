@@ -44,7 +44,7 @@ class BehandlingsresultatService(
     }
 
     @Transactional
-    fun tømMedlemskapsPerioder(behandlingID: Long) {
+    fun tømMedlemskapsperioder(behandlingID: Long) {
         hentBehandlingsresultat(behandlingID).medlemskapsperioder.clear()
     }
 

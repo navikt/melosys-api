@@ -34,7 +34,7 @@ class AvslagService(
             this.settVedtakMetadata(LocalDate.now().plusWeeks(FRIST_KLAGE_UKER))
         }
         if (behandling.fagsak.erSakstypeFtrl()) {
-            behandlingsresultatService.tømMedlemskapsPerioder(behandlingID)
+            behandlingsresultatService.tømMedlemskapsperioder(behandlingID)
         }
         behandlingsresultatService.lagre(behandlingsresultat)
 
