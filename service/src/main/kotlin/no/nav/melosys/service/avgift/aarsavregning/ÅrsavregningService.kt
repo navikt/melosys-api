@@ -4,11 +4,7 @@ import no.nav.melosys.domain.Behandlingsresultat
 import no.nav.melosys.domain.Medlemskapsperiode
 import no.nav.melosys.domain.avgift.*
 import no.nav.melosys.domain.dokument.felles.Periode
-import no.nav.melosys.domain.kodeverk.Folketrygdloven_kap2_bestemmelser
-import no.nav.melosys.domain.kodeverk.Inntektskildetype
-import no.nav.melosys.domain.kodeverk.Medlemskapstyper
-import no.nav.melosys.domain.kodeverk.Skatteplikttype
-import no.nav.melosys.domain.kodeverk.Trygdedekninger
+import no.nav.melosys.domain.kodeverk.*
 import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingsresultattyper
 import no.nav.melosys.exception.FunksjonellException
 import no.nav.melosys.exception.IkkeFunnetException
@@ -30,7 +26,7 @@ class ÅrsavregningService(
     private val totalBeløpBeregner: TotalBeløpBeregner,
     private val fagsakService: FagsakService,
 ) {
-    fun hentÅrsavregning(aarsavregningId: Long) =
+    fun hentÅrsavregning(aarsavregningId: Long): Årsavregning =
         aarsavregningRepository.findById(aarsavregningId).orElseThrow { IkkeFunnetException("Finner ingen årsavregning for id: $aarsavregningId") }
 
     @Transactional(readOnly = true)
@@ -72,7 +68,7 @@ class ÅrsavregningService(
             )
         }
 
-        if (gjelderÅr < LocalDate.now().year - antall_år_tilbake_i_tid) {
+        if (gjelderÅr < LocalDate.now().year - ANTALL_ÅR_TILBAKE_I_TID) {
             throw FunksjonellException("Årsavregning kan ikke opprettes for år eldre enn 6 år før inneværende år.")
         }
 
@@ -215,7 +211,7 @@ class ÅrsavregningService(
     }
 
 
-    fun overlapperMedÅr(år: Int, fom: LocalDate, tom: LocalDate): Boolean {
+    private fun overlapperMedÅr(år: Int, fom: LocalDate, tom: LocalDate): Boolean {
         val localDateRangeForPeriode = LocalDateRange.ofClosed(fom, tom)
         val localDateRangeForÅr = LocalDateRange.ofClosed(LocalDate.of(år, 1, 1), LocalDate.of(år, 12, 31))
         return localDateRangeForPeriode.overlaps(localDateRangeForÅr)
@@ -225,7 +221,7 @@ class ÅrsavregningService(
         var avkortetTom = tom
         var avkortetFom = fom
 
-        if (this.overlapperMedÅr(gjelderÅr, fom, tom) && fom.year < gjelderÅr) {
+        if (overlapperMedÅr(gjelderÅr, fom, tom) && fom.year < gjelderÅr) {
             avkortetFom = LocalDate.of(gjelderÅr, 1, 1)
         }
 
@@ -236,7 +232,7 @@ class ÅrsavregningService(
     }
 
     companion object {
-        private val antall_år_tilbake_i_tid = 7  //Fjoråret - 6 år
+        private const val ANTALL_ÅR_TILBAKE_I_TID = 7  //Fjoråret - 6 år
     }
 }
 
