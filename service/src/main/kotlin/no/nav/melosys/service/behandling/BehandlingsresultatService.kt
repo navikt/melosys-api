@@ -1,7 +1,10 @@
 package no.nav.melosys.service.behandling
 
 import mu.KotlinLogging
-import no.nav.melosys.domain.*
+import no.nav.melosys.domain.Behandling
+import no.nav.melosys.domain.Behandlingsmaate
+import no.nav.melosys.domain.Behandlingsresultat
+import no.nav.melosys.domain.BehandlingsresultatBegrunnelse
 import no.nav.melosys.domain.kodeverk.Utfallregistreringunntak
 import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingsresultattyper
 import no.nav.melosys.exception.FunksjonellException
@@ -9,7 +12,7 @@ import no.nav.melosys.exception.IkkeFunnetException
 import no.nav.melosys.repository.BehandlingsresultatRepository
 import org.springframework.stereotype.Service
 import org.springframework.transaction.annotation.Transactional
-import java.util.Optional
+import java.util.*
 import kotlin.jvm.optionals.getOrNull
 
 
@@ -38,6 +41,11 @@ class BehandlingsresultatService(
             }.also {
                 behandlingsresultatRepository.save(it)
             }
+    }
+
+    @Transactional
+    fun tømMedlemskapsperioder(behandlingID: Long) {
+        hentBehandlingsresultat(behandlingID).medlemskapsperioder.clear()
     }
 
     fun hentBehandlingsresultat(behandlingsid: Long): Behandlingsresultat =
