@@ -26,7 +26,7 @@ class FerdigbehandleService(
             behandlingsresultatService.tømBehandlingsresultat(behandlingId)
         }
         if (fagsak.erSakstypeFtrl()) {
-            behandlingsresultatService.hentBehandlingsresultat(behandlingId).medlemskapsperioder.clear()
+            behandlingsresultatService.tømMedlemskapsPerioder(behandlingId)
         }
         behandlingsresultatService.oppdaterBehandlingsresultattype(behandlingId, Behandlingsresultattyper.FERDIGBEHANDLET)
 
