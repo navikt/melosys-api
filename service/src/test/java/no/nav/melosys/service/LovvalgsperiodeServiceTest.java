@@ -81,11 +81,12 @@ class LovvalgsperiodeServiceTest {
         when(lovvalgsperiodeRepository.saveAllAndFlush(argThat(this::harBehandlingsResultatMedRiktigId))).thenAnswer(i -> i.getArgument(0));
 
 
-        var lovvalgsPerioderSpy = spy(List.of(new Lovvalgsperiode()));
-        var lagretLovvalgsPeriodeMedBehandlingsresultat = lovvalgsperiodeService.lagreLovvalgsperioder(BEH_ID, lovvalgsPerioderSpy);
+        var lovvalgsPerioder = List.of(new Lovvalgsperiode());
+
+        var lagretLovvalgsPeriodeMedBehandlingsresultat = lovvalgsperiodeService.lagreLovvalgsperioder(BEH_ID, lovvalgsPerioder);
 
 
-        assertThat(harBehandlingsResultatMedRiktigId(lovvalgsPerioderSpy)).isFalse();
+        assertThat(harBehandlingsResultatMedRiktigId(lovvalgsPerioder)).isFalse();
         assertThat(lagretLovvalgsPeriodeMedBehandlingsresultat).hasSize(1);
         assertThat(harBehandlingsResultatMedRiktigId(lagretLovvalgsPeriodeMedBehandlingsresultat)).isTrue();
     }
