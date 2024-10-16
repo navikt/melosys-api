@@ -14,6 +14,7 @@ import no.nav.melosys.domain.kodeverk.lovvalgsbestemmelser.trygdeavtale.Lovvalgs
 import no.nav.melosys.domain.kodeverk.lovvalgsbestemmelser.trygdeavtale.Lovvalgsbestemmelser_trygdeavtale_us;
 import no.nav.melosys.exception.FunksjonellException;
 import no.nav.melosys.exception.IkkeFunnetException;
+import no.nav.melosys.exception.TekniskException;
 import no.nav.melosys.integrasjon.medl.GrunnlagMedl;
 import no.nav.melosys.repository.BehandlingRepository;
 import no.nav.melosys.repository.BehandlingsresultatRepository;
@@ -162,7 +163,7 @@ public class LovvalgsperiodeService {
             kopi = (Lovvalgsperiode) BeanUtils.cloneBean(periode);
         } catch (IllegalAccessException | NoSuchMethodException | InvocationTargetException |
                  InstantiationException e) {
-            throw new IllegalStateException(e);
+            throw new TekniskException("Kan ikke persistere nye lovvalgsperioder: kopiering av periode feiler");
         }
         kopi.setBehandlingsresultat(behandlingsresultat);
         return kopi;
