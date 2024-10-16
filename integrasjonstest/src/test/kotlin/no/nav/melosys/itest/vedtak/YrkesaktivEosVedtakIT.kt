@@ -73,7 +73,7 @@ class YrkesaktivEosVedtakIT(
     @Autowired private val utpekingService: UtpekingService,
     @Autowired private val vedtaksfattingFasade: VedtaksfattingFasade,
     @Autowired private val unleash: FakeUnleash,
-    @Autowired private val opprettsak: OpprettSak
+    @Autowired private val opprettSak: OpprettSak
 ) : JournalfoeringBase(testDataGenerator, journalføringService, oppgaveService) {
 
     @MockkBean
@@ -124,7 +124,7 @@ class YrkesaktivEosVedtakIT(
         }
 
         val behandling = executeAndWait(mapOf(ProsessType.OPPRETT_SAK to 1)) {
-            opprettsak.opprettNySakOgBehandling(opprettSakDto);
+            opprettSak.opprettNySakOgBehandling(opprettSakDto);
         }.behandling
 
         val mottatteOpplysninger =
