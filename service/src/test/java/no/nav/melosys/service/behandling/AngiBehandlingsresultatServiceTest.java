@@ -241,6 +241,7 @@ class AngiBehandlingsresultatServiceTest {
             Behandlingstyper.FØRSTEGANG,
             Behandlingstema.YRKESAKTIV
         );
+        behandlingsresultat.setId(1L);
         behandlingsresultat.setMedlemskapsperioder(new ArrayList<>());
 
         Medlemskapsperiode medlemskapsperiode = new Medlemskapsperiode();
@@ -258,9 +259,7 @@ class AngiBehandlingsresultatServiceTest {
                 Behandlingsresultattyper.AVSLAG_SØKNAD
             );
 
-        verify(behandlingsresultatService).lagre(behandlingsresultatArgumentCaptor.capture());
-        var savedBehandlingsresultat = behandlingsresultatArgumentCaptor.getValue();
-        assertThat(savedBehandlingsresultat.getMedlemskapsperioder()).isEmpty();
+        verify(behandlingsresultatService).tømMedlemskapsperioder(behandlingsresultat.getId());
     }
 
     private Behandlingsresultat lagBehandlingsresultat(Sakstemaer sakstema, Sakstyper sakstype, Behandlingstyper behandlingstype, Behandlingstema behandlingstema) {
