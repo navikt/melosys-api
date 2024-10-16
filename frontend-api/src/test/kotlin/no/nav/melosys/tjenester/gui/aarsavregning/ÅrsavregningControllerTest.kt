@@ -29,7 +29,7 @@ import java.math.BigDecimal
 import java.time.LocalDate
 
 @WebMvcTest(controllers = [ÅrsavregningController::class])
-internal class ÅrsavregningModelControllerTest {
+internal class ÅrsavregningControllerTest {
     @Autowired
     private lateinit var mockMvc: MockMvc
 
@@ -41,7 +41,7 @@ internal class ÅrsavregningModelControllerTest {
 
     @Test
     fun `hent avregning basert på ID`() {
-        every { årsavregningService.finnÅrsavregning(any()) } returns ÅrsavregningModel(
+        every { årsavregningService.finnÅrsavregningForBehandling(any()) } returns ÅrsavregningModel(
             år = 2023,
             tidligereGrunnlag = Trygdeavgiftsgrunnlag(
                 medlemskapsperioder = listOf(
@@ -216,11 +216,11 @@ internal class ÅrsavregningModelControllerTest {
 }"""
 
         mockMvc.perform(
-            MockMvcRequestBuilders.get("$BASE_URL/{avregningID}", 1).contentType(MediaType.APPLICATION_JSON)
+            MockMvcRequestBuilders.get("$BASE_URL/{behandlingID}/aarsavregninger/{aarsavregningID}", 1, 1).contentType(MediaType.APPLICATION_JSON)
         ).andExpect(status().isOk()).andExpect(content().json(expectedJson, true))
     }
 
     companion object {
-        private const val BASE_URL: String = "/api/aarsavregninger"
+        private const val BASE_URL: String = "/api/behandlinger"
     }
 }

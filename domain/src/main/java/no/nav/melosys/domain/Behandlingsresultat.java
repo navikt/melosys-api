@@ -6,10 +6,10 @@ import java.util.*;
 import java.util.stream.Collectors;
 
 import jakarta.persistence.*;
-import no.nav.melosys.domain.avgift.Årsavregning;
 import no.nav.melosys.domain.avgift.Inntektsperiode;
 import no.nav.melosys.domain.avgift.SkatteforholdTilNorge;
 import no.nav.melosys.domain.avgift.Trygdeavgiftsperiode;
+import no.nav.melosys.domain.avgift.Årsavregning;
 import no.nav.melosys.domain.avklartefakta.Avklartefakta;
 import no.nav.melosys.domain.kodeverk.*;
 import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingsresultattyper;
@@ -312,6 +312,10 @@ public class Behandlingsresultat extends RegistreringsInfo {
             .orElse(null);
     }
 
+    public boolean harInnvilgetMedlemskapsperiodeSomOverlapperMedÅr(int år) {
+        return this.getMedlemskapsperioder().stream()
+            .anyMatch(periode -> periode.overlapperMedÅr(år) && periode.erInnvilget());
+    }
 
     public Trygdeavgift_typer getTrygdeavgiftType() {
         return trygdeavgiftType;

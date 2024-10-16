@@ -1,26 +1,63 @@
 package no.nav.melosys.integrasjon.dokgen.dto
 
-import com.fasterxml.jackson.annotation.JsonFormat
-import com.fasterxml.jackson.databind.annotation.JsonSerialize
-import com.fasterxml.jackson.datatype.jsr310.ser.LocalDateSerializer
+import com.fasterxml.jackson.annotation.JsonInclude
 import no.nav.melosys.domain.brev.ÅrsavregningVedtakBrevBestilling
 import no.nav.melosys.domain.kodeverk.Mottakerroller
+import java.math.BigDecimal
 import java.time.LocalDate
 
+@JsonInclude(JsonInclude.Include.NON_NULL)
 class ÅrsavregningVedtaksbrev(
     brevBestilling: ÅrsavregningVedtakBrevBestilling,
-    @JsonSerialize(using = LocalDateSerializer::class)
-    @JsonFormat(shape = JsonFormat.Shape.STRING)
-    val datoMottatt: LocalDate?,
+    val årsavregningsår: Int,
+    val endeligTrygdeavgift: List<Avgiftsperiode>,
+    val forskuddsvisFakturertTrygdeavgift: List<Avgiftsperiode>,
+    val endeligTrygdeavgiftTotalbeløp: BigDecimal,
+    val forskuddsvisFakturertTrygdeavgiftTotalbeløp: BigDecimal,
+    val differansebeløp: BigDecimal,
+    val minimumsbeløpForFakturering: BigDecimal,
     val innledningFritekst: String?,
     val begrunnelseFritekst: String?,
+    val pliktigMedlemskap: Boolean,
+    val eøsEllerTrygdeavtale: Boolean,
 ) : DokgenDto(brevBestilling, Mottakerroller.BRUKER) {
     constructor(
         brevBestilling: ÅrsavregningVedtakBrevBestilling,
+        årsavregningsår: Int,
+        endeligTrygdeavgift: List<Avgiftsperiode>,
+        forskuddsvisFakturertTrygdeavgift: List<Avgiftsperiode>,
+        endeligTrygdeavgiftTotalbeløp: BigDecimal,
+        forskuddsvisFakturertTrygdeavgiftTotalbeløp: BigDecimal,
+        differansebeløp: BigDecimal,
+        minimumsbeløpForFakturering: BigDecimal,
+        pliktigMedlemskap: Boolean,
+        eøsEllerTrygdeavtale: Boolean
     ) : this(
         brevBestilling = brevBestilling,
-        datoMottatt = instantTilLocalDate(brevBestilling.forsendelseMottatt),
+        årsavregningsår = årsavregningsår,
+        endeligTrygdeavgift = endeligTrygdeavgift,
+        forskuddsvisFakturertTrygdeavgift = forskuddsvisFakturertTrygdeavgift,
+        endeligTrygdeavgiftTotalbeløp = endeligTrygdeavgiftTotalbeløp,
+        forskuddsvisFakturertTrygdeavgiftTotalbeløp = forskuddsvisFakturertTrygdeavgiftTotalbeløp,
+        differansebeløp = differansebeløp,
+        minimumsbeløpForFakturering = minimumsbeløpForFakturering,
         innledningFritekst = brevBestilling.innledningFritekstAarsavregning,
-        begrunnelseFritekst = brevBestilling.begrunnelseFritekstAarsavregning
+        begrunnelseFritekst = brevBestilling.begrunnelseFritekstAarsavregning,
+        pliktigMedlemskap = pliktigMedlemskap,
+        eøsEllerTrygdeavtale = eøsEllerTrygdeavtale
     )
 }
+
+data class Avgiftsperiode(
+    val fom: LocalDate,
+    val tom: LocalDate,
+    val avgiftssats: BigDecimal,
+    val avgiftPerMd: BigDecimal,
+    val avgiftspliktigInntektPerMd: BigDecimal ,
+    val inntektskilde: String,
+    val trygdedekning: String,
+    val arbeidsgiveravgiftBetalt: Boolean,
+    val skatteplikt: Boolean
+)
+
+

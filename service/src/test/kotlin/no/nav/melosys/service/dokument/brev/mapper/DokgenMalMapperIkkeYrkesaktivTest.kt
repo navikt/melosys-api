@@ -8,7 +8,10 @@ import io.kotest.matchers.shouldBe
 import io.mockk.every
 import io.mockk.impl.annotations.MockK
 import io.mockk.junit5.MockKExtension
-import no.nav.melosys.domain.*
+import no.nav.melosys.domain.Behandling
+import no.nav.melosys.domain.Behandlingsresultat
+import no.nav.melosys.domain.FagsakTestFactory
+import no.nav.melosys.domain.Lovvalgsperiode
 import no.nav.melosys.domain.brev.IkkeYrkesaktivBrevbestilling
 import no.nav.melosys.domain.kodeverk.Land_iso2
 import no.nav.melosys.domain.kodeverk.Sakstyper
@@ -52,6 +55,9 @@ class DokgenMalMapperIkkeYrkesaktivTest {
     @MockK
     private lateinit var mockInnvilgelseFtrlMapper: InnvilgelseFtrlMapper
 
+    @MockK
+    private lateinit var mockÅrsavregningVedtakMapper: ÅrsavregningVedtakMapper
+
     private lateinit var dokgenMalMapper: DokgenMalMapper
 
     @BeforeEach
@@ -63,7 +69,8 @@ class DokgenMalMapperIkkeYrkesaktivTest {
             mockInnhentingAvInntektsopplysningerMapper,
             mockTrygdeavtaleMapper,
             mockOrienteringAnmodningUnntakMapper,
-            mockOrienteringTilArbeidsgiverOmVedtakMapper
+            mockOrienteringTilArbeidsgiverOmVedtakMapper,
+            mockÅrsavregningVedtakMapper
         )
     }
 

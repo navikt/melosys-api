@@ -1,16 +1,13 @@
 package no.nav.melosys.saksflyt.steg.arsavregning
 
 import io.kotest.matchers.shouldBe
-import io.mockk.Called
 import io.mockk.every
 import io.mockk.impl.annotations.MockK
 import io.mockk.junit5.MockKExtension
-import io.mockk.slot
 import io.mockk.verify
 import no.nav.melosys.domain.Behandling
 import no.nav.melosys.domain.Behandlingsresultat
 import no.nav.melosys.domain.Fagsak
-import no.nav.melosys.domain.avgift.Årsavregning
 import no.nav.melosys.domain.kodeverk.Aktoersroller
 import no.nav.melosys.domain.kodeverk.Saksstatuser
 import no.nav.melosys.domain.kodeverk.Sakstemaer
@@ -20,7 +17,6 @@ import no.nav.melosys.saksflyt.TestdataFactory
 import no.nav.melosys.saksflyt.TestdataFactory.lagBruker
 import no.nav.melosys.saksflytapi.domain.ProsessDataKey
 import no.nav.melosys.saksflytapi.domain.Prosessinstans
-import no.nav.melosys.service.avgift.TrygdeavgiftService
 import no.nav.melosys.service.avgift.aarsavregning.ÅrsavregningModel
 import no.nav.melosys.service.avgift.aarsavregning.ÅrsavregningService
 import no.nav.melosys.service.behandling.BehandlingService
@@ -44,9 +40,6 @@ class OpprettÅrsavregningModelBehandlingTest {
     private lateinit var behandslingsresultatService: BehandlingsresultatService
 
     @MockK
-    private lateinit var trygdeavgiftService: TrygdeavgiftService
-
-    @MockK
     private lateinit var persondataService: PersondataService
 
     @MockK
@@ -58,9 +51,7 @@ class OpprettÅrsavregningModelBehandlingTest {
     fun setUp() {
         opprettÅrsavregningBehandling = OpprettÅrsavregningBehandling(
             fagsakService,
-            trygdeavgiftService,
             behandlingService,
-            behandslingsresultatService,
             årsavregningService
         )
     }
@@ -78,6 +69,7 @@ class OpprettÅrsavregningModelBehandlingTest {
         }
 
         val behandlingsresultat = Behandlingsresultat().apply {
+            this.behandling = behandling
             id = 2
             type = Behandlingsresultattyper.IKKE_FASTSATT
         }
@@ -85,8 +77,12 @@ class OpprettÅrsavregningModelBehandlingTest {
         every { persondataService.hentAktørIdForIdent(any()) } returns AKTØR_ID
         every { fagsakService.hentFagsakerMedAktør(Aktoersroller.BRUKER, AKTØR_ID) } returns listOf(fagsak)
         every { fagsakService.hentFagsak(SAKSNUMMER) } returns fagsak
-        every { trygdeavgiftService.harFagsakBehandlingerMedTrygdeavgift(fagsak.saksnummer) } returns true
-        every { trygdeavgiftService.finnSistFakturerbarTrygdeavgiftsbehandlingForÅr(fagsak.saksnummer, any()) } returns behandling
+        every {
+            årsavregningService.hentSisteBehandlingsresultatMedInnvilgetMedlemskapsperiodeOgAvgiftsgrunnlag(
+                fagsak.saksnummer,
+                any()
+            )
+        } returns behandlingsresultat
 
         every {
             behandlingService.nyBehandling(
@@ -103,7 +99,16 @@ class OpprettÅrsavregningModelBehandlingTest {
         } returns årsavregningsBehandling
 
         every { behandslingsresultatService.hentBehandlingsresultat(årsavregningsBehandling.id) } returns behandlingsresultat
-        every { årsavregningService.opprettÅrsavregning(any(), any()) } returns ÅrsavregningModel(2023, null, emptyList(), null, emptyList(), null, null, null)
+        every { årsavregningService.opprettÅrsavregning(any(), any()) } returns ÅrsavregningModel(
+            2023,
+            null,
+            emptyList(),
+            null,
+            emptyList(),
+            null,
+            null,
+            null
+        )
 
         opprettÅrsavregningBehandling.utfør(prosessinstans)
 
@@ -112,67 +117,6 @@ class OpprettÅrsavregningModelBehandlingTest {
 
 
         prosessinstans.behandling.id shouldBe 2
-    }
-
-    @Test
-    fun `ikke opprette ny behandling ved skatteoppgjør uten overlappende medlemskapsperiode`() {
-        val prosessinstans = lagProsessInstans()
-        val fagsak = lagFagsak()
-
-        every { persondataService.hentAktørIdForIdent(any()) } returns AKTØR_ID
-        every { fagsakService.hentFagsakerMedAktør(Aktoersroller.BRUKER, AKTØR_ID) } returns listOf(fagsak)
-        every { fagsakService.hentFagsak(SAKSNUMMER) } returns fagsak
-        every { trygdeavgiftService.harFagsakBehandlingerMedTrygdeavgift(fagsak.saksnummer) } returns true
-        every { trygdeavgiftService.finnSistFakturerbarTrygdeavgiftsbehandlingForÅr(fagsak.saksnummer, any()) } returns null
-
-
-        opprettÅrsavregningBehandling.utfør(prosessinstans)
-
-
-        verify(exactly = 0) { behandlingService.nyBehandling(any(), any(), any(), any(), any(), any(), any(), any(), any()) }
-        verify { årsavregningService wasNot Called }
-    }
-
-
-    @Test
-    fun `opprette ny behandling ved skatteoppgjør med endring i tidligere skatteoppgjør og ikke avsluttet ennå med overlapp`() {
-        val prosessinstans = lagProsessInstans()
-
-        val behandling = lagBehandling {
-            id = 1
-            type = Behandlingstyper.ÅRSAVREGNING
-        }
-        val fagsak = lagFagsak {
-            this.leggTilBehandling(behandling)
-        }
-
-        val behandlingsresultat = Behandlingsresultat().apply {
-            id = 2
-            type = Behandlingsresultattyper.IKKE_FASTSATT
-            årsavregning = Årsavregning().apply {
-                aar = GJELDER_ÅR
-            }
-        }
-
-        every { persondataService.hentAktørIdForIdent(any()) } returns AKTØR_ID
-        every { fagsakService.hentFagsakerMedAktør(Aktoersroller.BRUKER, AKTØR_ID) } returns listOf(fagsak)
-        every { fagsakService.hentFagsak(SAKSNUMMER) } returns fagsak
-        every { trygdeavgiftService.harFagsakBehandlingerMedTrygdeavgift(fagsak.saksnummer) } returns true
-        every { trygdeavgiftService.finnSistFakturerbarTrygdeavgiftsbehandlingForÅr(fagsak.saksnummer, any()) } returns behandling
-
-        every { behandslingsresultatService.hentBehandlingsresultat(behandling.id) } returns behandlingsresultat
-        every { årsavregningService.opprettÅrsavregning(any(), any()) } returns ÅrsavregningModel(2023, null, emptyList(), null, emptyList(), null, null, null)
-        val behandlingSlot = slot<Behandling>()
-        every { behandlingService.lagre(capture(behandlingSlot)) } returns Unit
-
-
-        opprettÅrsavregningBehandling.utfør(prosessinstans)
-
-
-        verify { behandlingService.lagre(behandling) }
-        verify { årsavregningService wasNot Called }
-        behandlingSlot.captured.status shouldBe Behandlingsstatus.VURDER_DOKUMENT
-
     }
 
     private fun lagBehandling(block: Behandling.() -> Unit = {}): Behandling = TestdataFactory.lagBehandling().apply {
@@ -190,7 +134,6 @@ class OpprettÅrsavregningModelBehandlingTest {
     ).apply {
         block()
     }
-
 
     private fun lagProsessInstans(block: Prosessinstans.() -> Unit = {}): Prosessinstans = Prosessinstans().apply {
         setData(ProsessDataKey.GJELDER_ÅR, GJELDER_ÅR)

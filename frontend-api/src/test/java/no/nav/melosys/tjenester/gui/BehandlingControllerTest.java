@@ -22,6 +22,7 @@ import no.nav.melosys.service.behandling.BehandlingService;
 import no.nav.melosys.service.behandling.BehandlingsresultatService;
 import no.nav.melosys.service.bruker.SaksbehandlerService;
 import no.nav.melosys.service.tilgang.Aksesskontroll;
+import no.nav.melosys.tjenester.gui.dto.SaksopplysningerDto;
 import no.nav.melosys.tjenester.gui.dto.TidligereMedlemsperioderDto;
 import no.nav.melosys.tjenester.gui.dto.saksopplysninger.SaksopplysningerTilDto;
 import no.nav.melosys.tjenester.gui.util.NumericStringRandomizer;
@@ -40,6 +41,7 @@ import static no.nav.melosys.domain.kodeverk.behandlinger.Behandlingsstatus.*;
 import static no.nav.melosys.tjenester.gui.util.ResponseBodyMatchers.responseBody;
 import static org.hamcrest.Matchers.equalTo;
 import static org.jeasy.random.FieldPredicates.*;
+import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
@@ -120,6 +122,7 @@ class BehandlingControllerTest {
     void hentBehandling() throws Exception {
         when(behandlingService.hentBehandlingMedSaksopplysninger(BEHANDLING_ID)).thenReturn(opprettTomBehandlingMedId());
         when(behandlingsresultatService.hentBehandlingsresultat(BEHANDLING_ID)).thenReturn(BEHANDLINGSRESULTAT);
+        when(saksopplysningerTilDto.getSaksopplysningerDto(any())).thenReturn(new SaksopplysningerDto());
 
         mockMvc.perform(get(BASE_URL + "/{behandlingID}", BEHANDLING_ID)
                 .contentType(MediaType.APPLICATION_JSON))

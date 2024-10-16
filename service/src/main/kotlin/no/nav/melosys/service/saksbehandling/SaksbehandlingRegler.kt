@@ -144,7 +144,6 @@ class SaksbehandlingRegler(private val behandlingsresultatRepository: Behandling
     companion object {
         val behandlingstyperSomKanReplikeres = listOf(
             Behandlingstyper.NY_VURDERING,
-            Behandlingstyper.ENDRET_PERIODE,
             Behandlingstyper.FØRSTEGANG,
             Behandlingstyper.MANGLENDE_INNBETALING_TRYGDEAVGIFT
         )

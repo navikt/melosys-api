@@ -38,8 +38,7 @@ class InnvilgelseEftaStorbritanniaMapper(
         val alleVirksomheterUtlandet = virksomheterService.hentUtenlandskeVirksomheter(behandlingsresultat.behandling)
         val alleVirksomheter = alleVirksomheterNorge + alleVirksomheterUtlandet
 
-        val navnVirksomhet = alleVirksomheter.stream()
-            .findFirst().get().navn
+        val navnVirksomheter = alleVirksomheter.stream().map { it.navn }.toList()
 
         val erOrdinaerYrkesgruppe = behandlingsresultat.avklartefakta.find { it.type == Avklartefaktatyper.YRKESGRUPPE && it.fakta == Yrkesgrupper.ORDINAER.name } != null
 
@@ -47,7 +46,7 @@ class InnvilgelseEftaStorbritanniaMapper(
 
         return InnvilgelseEftaStorbritannia(
             brevbestilling = brevbestilling,
-            navnVirksomhet = navnVirksomhet,
+            navnVirksomheter = navnVirksomheter,
             behandlingstype = behandlingsresultat.behandling.type,
             nyVurderingBakgrunn = brevbestilling.nyVurderingBakgrunn,
             lovvalgsbestemmelse = lovvalgsperiode.bestemmelse.name(),

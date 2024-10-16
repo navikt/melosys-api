@@ -9,15 +9,12 @@ import no.nav.melosys.domain.Behandling;
 import no.nav.melosys.domain.Behandlingsresultat;
 import no.nav.melosys.domain.VedtakMetadataLagretEvent;
 import no.nav.melosys.domain.eessi.BucType;
-import no.nav.melosys.domain.kodeverk.Avklartefaktatyper;
 import no.nav.melosys.domain.kodeverk.Land_iso2;
 import no.nav.melosys.domain.kodeverk.Sakstyper;
 import no.nav.melosys.domain.kodeverk.Vedtakstyper;
-import no.nav.melosys.domain.kodeverk.begrunnelser.Endretperiode;
 import no.nav.melosys.domain.kodeverk.begrunnelser.Kontroll_begrunnelser;
 import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingsresultattyper;
 import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingsstatus;
-import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingstyper;
 import no.nav.melosys.exception.FunksjonellException;
 import no.nav.melosys.exception.ValideringException;
 import no.nav.melosys.saksflytapi.ProsessinstansService;
@@ -81,7 +78,6 @@ public class EosVedtakService implements FattVedtakInterface {
     @Override
     public void fattVedtak(Behandling behandling, FattVedtakRequest request) throws ValideringException {
         long behandlingID = behandling.getId();
-
         log.info("Fatter vedtak for (EU_EØS) sak: {} behandling: {}", behandling.getFagsak().getSaksnummer(), behandlingID);
 
         var behandlingsresultat = behandlingsresultatService.hentBehandlingsresultat(behandlingID);
@@ -114,36 +110,14 @@ public class EosVedtakService implements FattVedtakInterface {
             behandlingsresultat.setFastsattAvLand(Land_iso2.NO);
             prosessinstansService.opprettProsessinstansIverksettIkkeYrkesaktiv(behandling);
         } else {
-            oppdaterBehandlingsresultat(behandlingsresultat, request.getVedtakstype(), request.getFritekst(), request.getNyVurderingBakgrunn());
+            var fritekst = request.getFritekst() == null ? request.getBegrunnelseFritekst() : request.getFritekst();
+
+            oppdaterBehandlingsresultat(behandlingsresultat, request.getVedtakstype(), fritekst, request.getNyVurderingBakgrunn());
             Set<String> mottakerinstitusjoner = avklarMottakerInstitusjoner(behandling, request.getMottakerinstitusjoner(), behandlingsresultat);
             prosessinstansService.opprettProsessinstansIverksettVedtakEos(behandling, request.getBehandlingsresultatTypeKode(),
-                request.getFritekst(), request.getFritekstSed(), mottakerinstitusjoner, request.isKopiTilArbeidsgiver());
+                fritekst, request.getFritekstSed(), mottakerinstitusjoner, request.isKopiTilArbeidsgiver());
         }
 
-        oppgaveService.ferdigstillOppgaveMedBehandlingID(behandling.getId());
-    }
-
-    public void endreVedtaksperiode(Behandling behandling, Endretperiode endretperiode, String fritekst, String fritekstSed) {
-        final long behandlingID = behandling.getId();
-        var behandlingsresultat = behandlingsresultatService.hentBehandlingsresultat(behandlingID);
-        if (behandling.getType().equals(Behandlingstyper.ENDRET_PERIODE)) {
-            behandlingsresultat.setType(Behandlingsresultattyper.FASTSATT_LOVVALGSLAND);
-        }
-        if (!behandlingsresultat.hentLovvalgsperiode().erArtikkel12()) {
-            throw new FunksjonellException("Behandling av forkortet periode gjelder kun art. 12.");
-        }
-        if (prosessinstansService.harAktivProsessinstans(behandlingID)) {
-            throw new FunksjonellException("Det finnes allerede en aktiv prosess for behandling " + behandling);
-        }
-        avklartefaktaService.leggTilBegrunnelse(behandlingID, Avklartefaktatyper.AARSAK_ENDRING_PERIODE, endretperiode.getKode());
-        oppdaterBehandlingsresultat(behandlingsresultat, Vedtakstyper.ENDRINGSVEDTAK, fritekst, null);
-        prosessinstansService.opprettProsessinstansForkortPeriode(
-            behandling,
-            fritekst,
-            fritekstSed
-        );
-        log.info("Endrer vedtaksperiode for sak: {} behandling: {}", behandling.getFagsak().getSaksnummer(),
-            behandlingID);
         oppgaveService.ferdigstillOppgaveMedBehandlingID(behandling.getId());
     }
 

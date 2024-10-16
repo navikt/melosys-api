@@ -7,7 +7,6 @@ import com.fasterxml.jackson.core.type.TypeReference;
 import no.nav.melosys.domain.Behandling;
 import no.nav.melosys.domain.Fagsak;
 import no.nav.melosys.domain.arkiv.DokumentReferanse;
-import no.nav.melosys.domain.avgift.aarsavregning.Skattehendelse;
 import no.nav.melosys.domain.brev.*;
 import no.nav.melosys.domain.eessi.Periode;
 import no.nav.melosys.domain.eessi.melding.MelosysEessiMelding;
@@ -316,21 +315,6 @@ class ProsessinstansServiceTest {
         assertThat(lagretInstans.getData(ProsessDataKey.ORGNR)).isEqualTo(mottaker.getOrgnr());
         MangelbrevBrevbestilling lagretBrevbestilling = (MangelbrevBrevbestilling) lagretInstans.getData(ProsessDataKey.BREVBESTILLING, DokgenBrevbestilling.class);
         assertThat(lagretBrevbestilling.getProduserbartdokument()).isEqualTo(MANGELBREV_ARBEIDSGIVER);
-        assertThat(lagretInstans.getData(ProsessDataKey.SAKSBEHANDLER)).isEqualTo(saksbehandler);
-    }
-
-    @Test
-    void opprettProsessinstansForkortPeriode() {
-        String saksbehandler = settInnloggetSaksbehandler();
-        Behandling behandling = lagBehandling();
-
-
-        prosessinstansService.opprettProsessinstansForkortPeriode(behandling, null, null);
-
-
-        verify(prosessinstansRepo).save(piCaptor.capture());
-        Prosessinstans lagretInstans = piCaptor.getValue();
-        assertThat(lagretInstans.getType()).isEqualTo(ProsessType.IVERKSETT_VEDTAK_EOS_FORKORT_PERIODE);
         assertThat(lagretInstans.getData(ProsessDataKey.SAKSBEHANDLER)).isEqualTo(saksbehandler);
     }
 

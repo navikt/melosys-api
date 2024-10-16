@@ -5,18 +5,18 @@ import io.kotest.matchers.shouldBe
 import io.mockk.every
 import io.mockk.impl.annotations.RelaxedMockK
 import io.mockk.junit5.MockKExtension
-import no.nav.melosys.domain.Behandling
-import no.nav.melosys.domain.Behandlingsresultat
-import no.nav.melosys.domain.Medlemskapsperiode
-import no.nav.melosys.domain.VedtakMetadata
+import io.mockk.verify
+import no.nav.melosys.domain.*
 import no.nav.melosys.domain.avgift.*
 import no.nav.melosys.domain.kodeverk.*
 import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingsresultattyper
+import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingsstatus
 import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingstyper
 import no.nav.melosys.exception.FunksjonellException
 import no.nav.melosys.repository.AarsavregningRepository
 import no.nav.melosys.service.avgift.TrygdeavgiftService
 import no.nav.melosys.service.behandling.BehandlingsresultatService
+import no.nav.melosys.service.sak.FagsakService
 import no.nav.melosys.sikkerhet.context.SpringSubjectHandler
 import no.nav.melosys.sikkerhet.context.TestSubjectHandler
 import org.junit.jupiter.api.BeforeEach
@@ -24,6 +24,7 @@ import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.extension.ExtendWith
 import java.math.BigDecimal
 import java.time.LocalDate
+import java.time.ZoneOffset
 import java.util.*
 
 @ExtendWith(MockKExtension::class)
@@ -36,7 +37,7 @@ internal class ÅrsavregningServiceTest {
     private lateinit var behandlingsresultatService: BehandlingsresultatService
 
     @RelaxedMockK
-    private lateinit var trygdeavgiftService: TrygdeavgiftService
+    private lateinit var fagsakService: FagsakService
 
     private lateinit var årsavregningService: ÅrsavregningService
 
@@ -45,13 +46,13 @@ internal class ÅrsavregningServiceTest {
         årsavregningService = ÅrsavregningService(
             aarsavregningRepository,
             behandlingsresultatService,
-            trygdeavgiftService,
+            fagsakService
         )
         SpringSubjectHandler.set(TestSubjectHandler())
     }
 
     @Test
-    fun `opprettNyÅrsavregning kaster exception når flere Aarsavregninger eksisterer for samme år på samme Fagsak`() {
+    fun `Ny årsavregning kaster feil når flere årsavregninger eksisterer for samme år på samme Fagsak`() {
         val årsavregningEntity1 = Årsavregning().apply {
             aar = 2023
             behandlingsresultat = Behandlingsresultat()
@@ -81,7 +82,7 @@ internal class ÅrsavregningServiceTest {
         behandlingsresultat.årsavregning = årsavregningEntity
         every { behandlingsresultatService.hentBehandlingsresultat(1L) }.returns(behandlingsresultat)
 
-        årsavregningService.finnÅrsavregning(1) shouldBe ÅrsavregningModel(
+        årsavregningService.finnÅrsavregningForBehandling(1) shouldBe ÅrsavregningModel(
             år = 2023,
             tidligereGrunnlag = null,
             tidligereAvgift = emptyList(),
@@ -94,7 +95,7 @@ internal class ÅrsavregningServiceTest {
     }
 
     @Test
-    fun `hentÅrsavregning for ny årsavregning, grunnlag finnes i Melosys`() {
+    fun `finnÅrsavregning for ny årsavregning, grunnlag finnes i Melosys`() {
         val behandlingsresultat = Behandlingsresultat().apply {
             behandling = Behandling().apply {
                 id = 1L
@@ -109,7 +110,7 @@ internal class ÅrsavregningServiceTest {
         behandlingsresultat.årsavregning = årsavregningEntity
         every { behandlingsresultatService.hentBehandlingsresultat(1L) }.returns(behandlingsresultat)
 
-        årsavregningService.finnÅrsavregning(1) shouldBe ÅrsavregningModel(
+        årsavregningService.finnÅrsavregningForBehandling(1) shouldBe ÅrsavregningModel(
             år = 2023,
             tidligereGrunnlag = Trygdeavgiftsgrunnlag(
                 listOf(
@@ -140,33 +141,74 @@ internal class ÅrsavregningServiceTest {
     }
 
     @Test
-    fun `tilFaktureringBeloep skal ikke settes hvis tidligere eller ny avgift er null`() {
-        val behandlingsresultat = Behandlingsresultat().apply resultat@{
-            behandling = Behandling()
-            årsavregning = Årsavregning().apply {
-                aar = 2023
-                behandlingsresultat = this@resultat
-            }
-        }
-        every { behandlingsresultatService.hentBehandlingsresultat(1L) }.returns(behandlingsresultat)
-
-        årsavregningService.oppdaterTotalbelop(1L, null, BigDecimal.ONE)
-        behandlingsresultat.årsavregning.tilFaktureringBeloep shouldBe null
-    }
-
-    @Test
     fun `tilFaktureringBeloep skal settes til diff mellom nytt totalbeloep og tidligere fakturert beloep`() {
         val behandlingsresultat = Behandlingsresultat().apply resultat@{
             behandling = Behandling()
             årsavregning = Årsavregning().apply {
+                id = 1
                 aar = 2023
                 behandlingsresultat = this@resultat
             }
         }
+        every { aarsavregningRepository.findById(1L) }.returns(Optional.of(behandlingsresultat.årsavregning))
         every { behandlingsresultatService.hentBehandlingsresultat(1L) }.returns(behandlingsresultat)
 
-        årsavregningService.oppdaterTotalbelop(1L, BigDecimal.valueOf(12.4), BigDecimal.valueOf(5.2))
+        årsavregningService.oppdaterTotalbelop(1L, 1L, BigDecimal.valueOf(12.4), BigDecimal.valueOf(5.2))
         behandlingsresultat.årsavregning.tilFaktureringBeloep shouldBe BigDecimal.valueOf(-7.2)
+    }
+
+    @Test
+    fun `tilFaktureringBeloep skal ikke settes hvis tidligere eller ny avgift er null`() {
+        val behandlingsresultat = Behandlingsresultat().apply resultat@{
+            behandling = Behandling()
+            årsavregning = Årsavregning().apply {
+                id = 1L
+                aar = 2023
+                behandlingsresultat = this@resultat
+            }
+        }
+        every { aarsavregningRepository.findById(1L) }.returns(Optional.of(behandlingsresultat.årsavregning))
+        every { behandlingsresultatService.hentBehandlingsresultat(1L) }.returns(behandlingsresultat)
+
+        årsavregningService.oppdaterTotalbelop(1L, 1L, null, BigDecimal.ONE)
+        behandlingsresultat.årsavregning.tilFaktureringBeloep shouldBe null
+    }
+
+    @Test
+    fun `henter nyeste behandlingsresultat med grunnlag og riktig år for opprettelse av ny årsavregning`() {
+        val aktivFagsak = FagsakTestFactory.Builder().saksnummer("123456").build()
+
+        val eldreBehandlingsresultat = lagTidligereBehandlingsresultat().apply {
+            id = 1
+            behandling = Behandling().apply behandling@{
+                id = 1
+                status = Behandlingsstatus.AVSLUTTET
+                fagsak = aktivFagsak.apply { leggTilBehandling(this@behandling) }
+            }
+            registrertDato = LocalDate.of(2023, 1, 1).atStartOfDay().toInstant(ZoneOffset.UTC)
+            medlemskapsperioder = listOf(lagMedlemskapsperiode("2023-09-01", "2023-12-31").apply { trygdeavgiftsperioder = null })
+        }
+
+        val nyesteBehandlingsresultat = lagTidligereBehandlingsresultat().apply {
+            id = 2
+            behandling = Behandling().apply behandling@{
+                id = 2
+                status = Behandlingsstatus.AVSLUTTET
+                fagsak = aktivFagsak.apply { leggTilBehandling(this@behandling) }
+            }
+            registrertDato = LocalDate.of(2023, 1, 10).atStartOfDay().toInstant(ZoneOffset.UTC)
+            medlemskapsperioder = listOf(lagMedlemskapsperiode("2023-01-01", "2023-08-31").apply { trygdeavgiftsperioder = null })
+        }
+
+
+        every { fagsakService.hentFagsak("123456") } returns aktivFagsak
+        every { behandlingsresultatService.hentBehandlingsresultat(1) } returns eldreBehandlingsresultat
+        every { behandlingsresultatService.hentBehandlingsresultat(2) } returns nyesteBehandlingsresultat
+
+
+        årsavregningService.hentSisteBehandlingsresultatMedInnvilgetMedlemskapsperiodeOgAvgiftsgrunnlag("123456", 2023)
+            .shouldBe(nyesteBehandlingsresultat)
+        verify(exactly = 2) { behandlingsresultatService.hentBehandlingsresultat(any()) }
     }
 
     fun lagTidligereBehandlingsresultat(): Behandlingsresultat = Behandlingsresultat().apply {
@@ -174,13 +216,21 @@ internal class ÅrsavregningServiceTest {
         type = Behandlingsresultattyper.FERDIGBEHANDLET
         vedtakMetadata = VedtakMetadata()
         vedtakMetadata.vedtakstype = Vedtakstyper.FØRSTEGANGSVEDTAK
-        medlemskapsperioder = listOf(lagMedlemskapsperiode("2022-01-01", "2022-08-31"), lagMedlemskapsperiode("2022-12-31", "2023-05-31"))
+        medlemskapsperioder = listOf(
+            lagMedlemskapsperiode("2022-01-01", "2022-08-31"),
+            lagMedlemskapsperiode("2022-12-31", "2023-05-31"),
+            lagMedlemskapsperiode("2023-07-01", "2023-08-31", InnvilgelsesResultat.AVSLAATT)
+        )
     }
 
-    private fun lagMedlemskapsperiode(start: String, slutt: String): Medlemskapsperiode {
+    private fun lagMedlemskapsperiode(
+        start: String,
+        slutt: String,
+        innvilgelsesResultat: InnvilgelsesResultat = InnvilgelsesResultat.INNVILGET
+    ): Medlemskapsperiode {
         return Medlemskapsperiode().apply {
             trygdedekning = Trygdedekninger.FULL_DEKNING_FTRL
-            innvilgelsesresultat = InnvilgelsesResultat.INNVILGET
+            innvilgelsesresultat = innvilgelsesResultat
             medlemskapstype = Medlemskapstyper.FRIVILLIG
             fom = LocalDate.parse(start)
             tom = LocalDate.parse(slutt)
