@@ -142,7 +142,10 @@ class LovvalgsperiodeServiceTest {
         mockTidligereMedlemsperiodeRepository(medlemsperiode.getId());
 
 
-        assertThat(lovvalgsperiodeService.hentTidligereLovvalgsperioder(behandling)).hasSize(1).flatExtracting(Lovvalgsperiode::getMedlPeriodeID, Lovvalgsperiode::getFom, Lovvalgsperiode::getTom, Lovvalgsperiode::getBestemmelse).containsExactly(medlemsperiode.getId(), medlemsperiode.getPeriode().getFom(), medlemsperiode.getPeriode().getTom(), MedlPeriodeKonverter.tilLovvalgBestemmelse(GrunnlagMedl.valueOf(medlemsperiode.getGrunnlagstype())));
+        assertThat(lovvalgsperiodeService.hentTidligereLovvalgsperioder(behandling))
+            .hasSize(1)
+            .flatExtracting(Lovvalgsperiode::getMedlPeriodeID, Lovvalgsperiode::getFom, Lovvalgsperiode::getTom, Lovvalgsperiode::getBestemmelse)
+            .containsExactly(medlemsperiode.getId(), medlemsperiode.getPeriode().getFom(), medlemsperiode.getPeriode().getTom(), MedlPeriodeKonverter.tilLovvalgBestemmelse(GrunnlagMedl.valueOf(medlemsperiode.getGrunnlagstype())));
     }
 
     @Test
