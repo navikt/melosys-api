@@ -61,7 +61,6 @@ import java.time.LocalDate
 class YrkesaktivEosVedtakIT(
     @Autowired testDataGenerator: TestDataGenerator,
     @Autowired journalføringService: JournalfoeringService,
-    @Autowired opprettSak: OpprettSak,
     @Autowired oppgaveService: OppgaveService,
     @Autowired private val avklartefaktaService: AvklartefaktaService,
     @Autowired private val behandlingsresultatService: BehandlingsresultatService,
@@ -172,19 +171,13 @@ class YrkesaktivEosVedtakIT(
         }
 
         val arbeidUtforesIOppgittLand = AvklartefaktaDto(listOf("TRUE"), "ARBEID_UTFORES_I_OPPGITT_LAND").apply {
-            avklartefaktaType = null
-            subjektID = null
             begrunnelseKoder = emptyList()
-            begrunnelseFritekst = null
         }
 
         val yrkesaktivitet = AvklartefaktaDto(
             listOf("SELVSTENDIG_NÆRINGSDRIVENDE"), "YRKESAKTIVITET"
         ).apply {
-            avklartefaktaType = null
-            subjektID = null
             begrunnelseKoder = emptyList()
-            begrunnelseFritekst = null
         }
 
         val marginaltArbeid = AvklartefaktaDto(
@@ -193,26 +186,19 @@ class YrkesaktivEosVedtakIT(
             avklartefaktaType = Avklartefaktatyper.MARGINALT_ARBEID
             subjektID = "NO"
             begrunnelseKoder = emptyList()
-            begrunnelseFritekst = null
         }
 
         val aktivitetINorge = AvklartefaktaDto(
             listOf("UNDER_25_PROSENT"), "AKTIVITET_I_NORGE"
         ).apply {
-            avklartefaktaType = null
-            subjektID = null
             begrunnelseKoder = emptyList()
-            begrunnelseFritekst = null
         }
 
         val omfattesILand = AvklartefaktaDto(
             listOf("BE"),
             "OMFATTES_I_LAND"
         ).apply {
-            avklartefaktaType = null
-            subjektID = null
             begrunnelseKoder = emptyList()
-            begrunnelseFritekst = null
         }
 
         avklartefaktaService.lagreAvklarteFakta(
@@ -252,13 +238,13 @@ class YrkesaktivEosVedtakIT(
         }
 
 
-        behandlingsresultatService.hentBehandlingsresultat(behandling.id).apply {
+        behandlingsresultatService.hentBehandlingsresultat(behandling.id).run {
             type shouldBe Behandlingsresultattyper.FORELOEPIG_FASTSATT_LOVVALGSLAND
             behandlingsmåte shouldBe Behandlingsmaate.MANUELT
             fastsattAvLand shouldBe Land_iso2.NO
         }
 
-        lovvalgsperiodeService.hentLovvalgsperiode(behandling.id).apply {
+        lovvalgsperiodeService.hentLovvalgsperiode(behandling.id).run {
             innvilgelsesresultat shouldBe InnvilgelsesResultat.INNVILGET
             bestemmelse shouldBe Lovvalgbestemmelser_883_2004.FO_883_2004_ART13_2B
             lovvalgsland shouldBe Land_iso2.BE
@@ -269,11 +255,11 @@ class YrkesaktivEosVedtakIT(
         }
 
         behandlingRepository.findById(behandling.id).orElse(null)
-            .shouldNotBeNull().apply {
+            .shouldNotBeNull().run {
                 withClue("Behandlingsstatus skal være AVSLUTTET") {
                     status shouldBe Behandlingsstatus.MIDLERTIDIG_LOVVALGSBESLUTNING
                 }
-                fagsak.apply {
+                fagsak.run {
                     withClue("Saksstatus skal være LOVVALG_AVKLART") {
                         status shouldBe Saksstatuser.OPPRETTET
                     }
@@ -283,7 +269,7 @@ class YrkesaktivEosVedtakIT(
         MedlRepo.repo.values
             .shouldHaveSize(1)
             .first()
-            .apply {
+            .run {
                 fraOgMed shouldBe LocalDate.of(2021, 10, 1)
                 tilOgMed shouldBe LocalDate.of(2021, 10, 2)
                 status shouldBe "UAVK"
