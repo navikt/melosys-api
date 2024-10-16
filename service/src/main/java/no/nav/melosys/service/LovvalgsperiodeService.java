@@ -1,6 +1,5 @@
 package no.nav.melosys.service;
 
-import java.lang.reflect.InvocationTargetException;
 import java.util.*;
 import java.util.stream.Collectors;
 
@@ -14,7 +13,6 @@ import no.nav.melosys.domain.kodeverk.lovvalgsbestemmelser.trygdeavtale.Lovvalgs
 import no.nav.melosys.domain.kodeverk.lovvalgsbestemmelser.trygdeavtale.Lovvalgsbestemmelser_trygdeavtale_us;
 import no.nav.melosys.exception.FunksjonellException;
 import no.nav.melosys.exception.IkkeFunnetException;
-import no.nav.melosys.exception.TekniskException;
 import no.nav.melosys.integrasjon.medl.GrunnlagMedl;
 import no.nav.melosys.repository.BehandlingRepository;
 import no.nav.melosys.repository.BehandlingsresultatRepository;
@@ -22,6 +20,8 @@ import no.nav.melosys.repository.LovvalgsperiodeRepository;
 import no.nav.melosys.repository.TidligereMedlemsperiodeRepository;
 import org.apache.commons.beanutils.BeanUtils;
 import org.apache.commons.lang3.EnumUtils;
+import org.apache.commons.lang3.function.Failable;
+import org.apache.commons.lang3.function.FailableFunction;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -93,10 +93,9 @@ public class LovvalgsperiodeService {
 
         lovvalgsperiodeRepo.deleteByBehandlingsresultatId(behandlingsresultat.getId());
 
-        List<Lovvalgsperiode> lovvalgsperiodeKopi = lovvalgsperioder
-            .stream()
-            .map(periode -> kopierLovvalgsperiodeMedBehandlingsResultat(periode, behandlingsresultat))
-            .toList();
+        List<Lovvalgsperiode> lovvalgsperiodeKopi = Failable.stream(lovvalgsperioder)
+            .map(kopierLovvalgsperiodeMedBehandlingsResultat(behandlingsresultat))
+            .collect(Collectors.toList());
 
         return lovvalgsperiodeRepo.saveAllAndFlush(lovvalgsperiodeKopi);
     }
@@ -157,15 +156,12 @@ public class LovvalgsperiodeService {
             lovvalgBestemmelse.equals(Lovvalgsbestemmelser_trygdeavtale_us.USA_ART5_4);
     }
 
-    private Lovvalgsperiode kopierLovvalgsperiodeMedBehandlingsResultat(Lovvalgsperiode periode, Behandlingsresultat behandlingsresultat) {
-        Lovvalgsperiode kopi;
-        try {
-            kopi = (Lovvalgsperiode) BeanUtils.cloneBean(periode);
-        } catch (IllegalAccessException | NoSuchMethodException | InvocationTargetException |
-                 InstantiationException e) {
-            throw new TekniskException("Kan ikke persistere nye lovvalgsperioder: kopiering av periode feiler");
-        }
-        kopi.setBehandlingsresultat(behandlingsresultat);
-        return kopi;
+    private FailableFunction<Lovvalgsperiode, Lovvalgsperiode, Exception> kopierLovvalgsperiodeMedBehandlingsResultat(Behandlingsresultat behandlingsresultat) {
+        return (periode) -> {
+            Lovvalgsperiode kopi = (Lovvalgsperiode) BeanUtils.cloneBean(periode);
+            kopi.setBehandlingsresultat(behandlingsresultat);
+
+            return kopi;
+        };
     }
 }
