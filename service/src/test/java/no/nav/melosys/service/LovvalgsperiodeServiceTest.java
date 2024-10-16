@@ -76,12 +76,11 @@ class LovvalgsperiodeServiceTest {
     void lagreLovvalgsperioderReturnererLovvalgsperiodeMedBehandlingsresultat() {
         var lagretBehandlingsresultat = new Behandlingsresultat();
         lagretBehandlingsresultat.setId(BEH_ID);
+        var lovvalgsPerioder = List.of(new Lovvalgsperiode());
 
         when(behandlingsresultatRepository.findById(BEH_ID)).thenReturn(Optional.of(lagretBehandlingsresultat));
         when(lovvalgsperiodeRepository.saveAllAndFlush(argThat(this::harBehandlingsResultatMedRiktigId))).thenAnswer(i -> i.getArgument(0));
 
-
-        var lovvalgsPerioder = List.of(new Lovvalgsperiode());
 
         var lagretLovvalgsPeriodeMedBehandlingsresultat = lovvalgsperiodeService.lagreLovvalgsperioder(BEH_ID, lovvalgsPerioder);
 
