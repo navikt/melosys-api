@@ -4,7 +4,6 @@ import com.ninjasquad.springmockk.MockkBean
 import io.mockk.every
 import no.nav.melosys.domain.avgift.Inntektsperiode
 import no.nav.melosys.domain.avgift.Penger
-import no.nav.melosys.domain.avgift.SkatteforholdTilNorge
 import no.nav.melosys.domain.avgift.Trygdeavgiftsperiode
 import no.nav.melosys.domain.kodeverk.Folketrygdloven_kap2_bestemmelser.FTRL_KAP2_2_8
 import no.nav.melosys.domain.kodeverk.Inntektskildetype
@@ -61,32 +60,33 @@ internal class ÅrsavregningControllerTest {
                     )
                 ),
                 skatteforholdsperioder = listOf(
-                    SkatteforholdTilNorge().apply {
-                        fomDato = LocalDate.parse("2023-01-01")
-                        tomDato = LocalDate.parse("2023-07-31")
+                    SkatteforholdTilNorgeForAvgift(
+                        fom = LocalDate.parse("2023-01-01"),
+                        tom = LocalDate.parse("2023-07-31"),
                         skatteplikttype = Skatteplikttype.SKATTEPLIKTIG
-                    },
-                    SkatteforholdTilNorge().apply {
-                        fomDato = LocalDate.parse("2023-08-01")
-                        tomDato = LocalDate.parse("2023-12-31")
+                    ),
+
+                    SkatteforholdTilNorgeForAvgift(
+                        fom = LocalDate.parse("2023-08-01"),
+                        tom = LocalDate.parse("2023-12-31"),
                         skatteplikttype = Skatteplikttype.IKKE_SKATTEPLIKTIG
-                    },
+                    )
                 ),
                 innteksperioder = listOf(
-                    Inntektsperiode().apply {
-                        fomDato = LocalDate.parse("2023-01-01")
-                        tomDato = LocalDate.parse("2023-07-31")
-                        type = Inntektskildetype.ARBEIDSINNTEKT_FRA_NORGE
-                        isArbeidsgiversavgiftBetalesTilSkatt = true
-                        avgiftspliktigInntektMnd = Penger(40000.0)
-                    },
-                    Inntektsperiode().apply {
-                        fomDato = LocalDate.parse("2023-08-01")
-                        tomDato = LocalDate.parse("2023-12-31")
-                        type = Inntektskildetype.INNTEKT_FRA_UTLANDET
-                        isArbeidsgiversavgiftBetalesTilSkatt = false
-                        avgiftspliktigInntektMnd = Penger(15000.0)
-                    }
+                    InntektsperioderForAvgift(
+                        fom = LocalDate.parse("2023-01-01"),
+                        tom = LocalDate.parse("2023-07-31"),
+                        type = Inntektskildetype.ARBEIDSINNTEKT_FRA_NORGE,
+                        avgiftspliktigInntektMnd = Penger(40000.0),
+                        isArbeidsgiversavgiftBetalesTilSkatt = true,
+                    ),
+                    InntektsperioderForAvgift(
+                        fom = LocalDate.parse("2023-08-01"),
+                        tom = LocalDate.parse("2023-12-31"),
+                        type = Inntektskildetype.INNTEKT_FRA_UTLANDET,
+                        avgiftspliktigInntektMnd = Penger(15000.0),
+                        isArbeidsgiversavgiftBetalesTilSkatt = false,
+                    )
                 )
             ),
             tidligereAvgift = listOf(

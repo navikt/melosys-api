@@ -2,13 +2,8 @@ package no.nav.melosys.service.avgift.aarsavregning
 
 import no.nav.melosys.domain.Behandlingsresultat
 import no.nav.melosys.domain.Medlemskapsperiode
-import no.nav.melosys.domain.avgift.Inntektsperiode
-import no.nav.melosys.domain.avgift.SkatteforholdTilNorge
-import no.nav.melosys.domain.avgift.Trygdeavgiftsperiode
-import no.nav.melosys.domain.avgift.Årsavregning
-import no.nav.melosys.domain.kodeverk.Folketrygdloven_kap2_bestemmelser
-import no.nav.melosys.domain.kodeverk.Medlemskapstyper
-import no.nav.melosys.domain.kodeverk.Trygdedekninger
+import no.nav.melosys.domain.avgift.*
+import no.nav.melosys.domain.kodeverk.*
 import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingsresultattyper
 import no.nav.melosys.exception.FunksjonellException
 import no.nav.melosys.exception.IkkeFunnetException
@@ -29,7 +24,7 @@ class ÅrsavregningService(
     private val totalBeløpBeregner: TotalBeløpBeregner,
     private val fagsakService: FagsakService,
 ) {
-    fun hentÅrsavregning(aarsavregningId: Long) =
+    fun hentÅrsavregning(aarsavregningId: Long): Årsavregning =
         aarsavregningRepository.findById(aarsavregningId).orElseThrow { IkkeFunnetException("Finner ingen årsavregning for id: $aarsavregningId") }
 
     @Transactional(readOnly = true)
@@ -71,7 +66,7 @@ class ÅrsavregningService(
             )
         }
 
-        if (gjelderÅr < LocalDate.now().year - antall_år_tilbake_i_tid) {
+        if (gjelderÅr < LocalDate.now().year - ANTALL_ÅR_TILBAKE_I_TID) {
             throw FunksjonellException("Årsavregning kan ikke opprettes for år eldre enn 6 år før inneværende år.")
         }
 
@@ -164,9 +159,11 @@ class ÅrsavregningService(
         if (behandlingsresultat == null) return null
 
         return Trygdeavgiftsgrunnlag(
-            medlemskapsperioder = behandlingsresultat.medlemskapsperioder.filter { it.overlapperMedÅr(år) && it.erInnvilget() }.map(::MedlemskapsperiodeForAvgift),
-            skatteforholdsperioder = behandlingsresultat.hentSkatteforholdTilNorge().filter { it.overlapperMedÅr(år) },
-            innteksperioder = behandlingsresultat.hentInntektsperioder().filter { it.overlapperMedÅr(år) }
+            medlemskapsperioder = behandlingsresultat.medlemskapsperioder.filter { it.overlapperMedÅr(år) && it.erInnvilget() }
+                .map { MedlemskapsperiodeForAvgift(år, it) },
+            skatteforholdsperioder = behandlingsresultat.hentSkatteforholdTilNorge().filter { it.overlapperMedÅr(år) }
+                .map { SkatteforholdTilNorgeForAvgift(år, it) },
+            innteksperioder = behandlingsresultat.hentInntektsperioder().filter { it.overlapperMedÅr(år) }.map { InntektsperioderForAvgift(år, it) }
         )
     }
 
@@ -179,8 +176,8 @@ class ÅrsavregningService(
         }
         return Trygdeavgiftsgrunnlag(
             medlemskapsperioder = behandlingsresultat.medlemskapsperioder.map(::MedlemskapsperiodeForAvgift),
-            skatteforholdsperioder = behandlingsresultat.hentSkatteforholdTilNorge().toList(),
-            innteksperioder = behandlingsresultat.hentInntektsperioder().toList()
+            skatteforholdsperioder = behandlingsresultat.hentSkatteforholdTilNorge().map(::SkatteforholdTilNorgeForAvgift),
+            innteksperioder = behandlingsresultat.hentInntektsperioder().map(::InntektsperioderForAvgift)
         )
     }
 
@@ -205,7 +202,7 @@ class ÅrsavregningService(
     }
 
     companion object {
-        private val antall_år_tilbake_i_tid = 7  //Fjoråret - 6 år
+        private const val ANTALL_ÅR_TILBAKE_I_TID = 7  //Fjoråret - 6 år
     }
 }
 
@@ -222,9 +219,17 @@ data class ÅrsavregningModel(
 
 data class Trygdeavgiftsgrunnlag(
     val medlemskapsperioder: List<MedlemskapsperiodeForAvgift>,
-    val skatteforholdsperioder: List<SkatteforholdTilNorge>,
-    val innteksperioder: List<Inntektsperiode>
+    val skatteforholdsperioder: List<SkatteforholdTilNorgeForAvgift>,
+    val innteksperioder: List<InntektsperioderForAvgift>
 )
+
+private fun avkortFraOgMedDatoForÅr(gjelderÅr: Int, fom: LocalDate): LocalDate = if (fom.year < gjelderÅr) {
+    LocalDate.of(gjelderÅr, 1, 1)
+} else fom
+
+private fun avkortTilOgMedDatoForÅr(gjelderÅr: Int, tom: LocalDate): LocalDate = if (tom.year > gjelderÅr) {
+    LocalDate.of(gjelderÅr, 12, 31)
+} else tom
 
 data class MedlemskapsperiodeForAvgift(
     val fom: LocalDate,
@@ -239,5 +244,55 @@ data class MedlemskapsperiodeForAvgift(
         dekning = medlemskapsperiode.trygdedekning,
         bestemmelse = medlemskapsperiode.bestemmelse,
         medlemskapstyper = medlemskapsperiode.medlemskapstype
+    )
+
+    constructor(gjeldendeÅr: Int, medlemskapsperiode: Medlemskapsperiode) : this(
+        fom = avkortFraOgMedDatoForÅr(gjeldendeÅr, medlemskapsperiode.fom),
+        tom = avkortTilOgMedDatoForÅr(gjeldendeÅr, medlemskapsperiode.tom),
+        dekning = medlemskapsperiode.trygdedekning,
+        bestemmelse = medlemskapsperiode.bestemmelse,
+        medlemskapstyper = medlemskapsperiode.medlemskapstype
+    )
+}
+
+data class SkatteforholdTilNorgeForAvgift(
+    val fom: LocalDate,
+    val tom: LocalDate,
+    val skatteplikttype: Skatteplikttype,
+) {
+    constructor(skatteforholdTilNorge: SkatteforholdTilNorge) : this(
+        fom = skatteforholdTilNorge.fom,
+        tom = skatteforholdTilNorge.tom,
+        skatteplikttype = skatteforholdTilNorge.skatteplikttype,
+    )
+
+    constructor(gjeldendeÅr: Int, skatteforholdTilNorge: SkatteforholdTilNorge) : this(
+        fom = avkortFraOgMedDatoForÅr(gjeldendeÅr, skatteforholdTilNorge.fom),
+        tom = avkortTilOgMedDatoForÅr(gjeldendeÅr, skatteforholdTilNorge.tom),
+        skatteplikttype = skatteforholdTilNorge.skatteplikttype,
+    )
+}
+
+data class InntektsperioderForAvgift(
+    val fom: LocalDate,
+    val tom: LocalDate,
+    val type: Inntektskildetype,
+    val avgiftspliktigInntektMnd: Penger,
+    val isArbeidsgiversavgiftBetalesTilSkatt: Boolean
+) {
+    constructor(inntektsperiode: Inntektsperiode) : this(
+        fom = inntektsperiode.fom,
+        tom = inntektsperiode.tom,
+        type = inntektsperiode.type,
+        avgiftspliktigInntektMnd = inntektsperiode.avgiftspliktigInntektMnd,
+        isArbeidsgiversavgiftBetalesTilSkatt = inntektsperiode.isArbeidsgiversavgiftBetalesTilSkatt
+    )
+
+    constructor(gjeldendeÅr: Int, inntektsperiode: Inntektsperiode) : this(
+        fom = avkortFraOgMedDatoForÅr(gjeldendeÅr, inntektsperiode.fom),
+        tom = avkortTilOgMedDatoForÅr(gjeldendeÅr, inntektsperiode.tom),
+        type = inntektsperiode.type,
+        avgiftspliktigInntektMnd = inntektsperiode.avgiftspliktigInntektMnd,
+        isArbeidsgiversavgiftBetalesTilSkatt = inntektsperiode.isArbeidsgiversavgiftBetalesTilSkatt
     )
 }

@@ -4,7 +4,6 @@ import io.swagger.annotations.Api
 import no.nav.melosys.domain.avgift.Trygdeavgiftsperiode
 import no.nav.melosys.domain.kodeverk.Inntektskildetype
 import no.nav.melosys.domain.kodeverk.InnvilgelsesResultat
-import no.nav.melosys.domain.kodeverk.Skatteplikttype
 import no.nav.melosys.domain.kodeverk.Trygdedekninger
 import no.nav.melosys.service.avgift.aarsavregning.TotalBeløpBeregner
 import no.nav.melosys.service.avgift.aarsavregning.Trygdeavgiftsgrunnlag
@@ -188,10 +187,6 @@ data class AvgiftDto(
     val totalAvgift: BigDecimal
 )
 
-data class Skatteforholdsperiode(
-    val fom: LocalDate, val tom: LocalDate, val skatteplikttype: Skatteplikttype
-)
-
 data class Medlemskapsperiode(
     val fom: LocalDate, val tom: LocalDate, val trygdedekning: Trygdedekninger
 )
@@ -204,14 +199,6 @@ data class TrygdeavgiftsperiodeDto(
     val inntektPerMd: Int,
     val avgiftssats: Double,
     val avgiftPerMd: Int
-)
-
-data class InntektsperiodeDto(
-    val fom: LocalDate,
-    val tom: LocalDate,
-    val type: Inntektskildetype,
-    val arbeidsgiversavgiftBetales: Boolean,
-    val inntektPerMd: Int
 )
 
 data class AvregningDto(

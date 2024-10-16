@@ -42,11 +42,11 @@ class TotalBeløpBeregner(
         return faktureringskomponentenConsumer.hentTotalTrygdeavgiftForPeriode(BeregnTotalBeløpDto(fakturaseriePerioder), saksbehandlerIdent)
     }
 
-    fun hentTotalInntektForInntektkilde(inntektsperiode: Inntektsperiode): BigDecimal {
+    fun hentTotalInntektForInntektkilde(inntektsperiode: InntektsperioderForAvgift): BigDecimal {
         val fakturaseriePerioder = listOf(
             FakturaseriePeriodeDto(
-                startDato = inntektsperiode.fomDato,
-                sluttDato = inntektsperiode.tomDato,
+                startDato = inntektsperiode.fom,
+                sluttDato = inntektsperiode.tom,
                 enhetsprisPerManed = inntektsperiode.avgiftspliktigInntektMnd.verdi
             )
         )
