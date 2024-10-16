@@ -81,9 +81,9 @@ class LovvalgsperiodeServiceTest {
         var lagretLovvalgsPeriodeMedBehandlingsresultat = lovvalgsperiodeService.lagreLovvalgsperioder(BEH_ID, lovvalgsPerioderSpy);
 
 
-        assertThat(!harBehandlingsResultatMedRiktigId(lovvalgsPerioderSpy));
+        assertThat(harBehandlingsResultatMedRiktigId(lovvalgsPerioderSpy)).isFalse();
         assertThat(lagretLovvalgsPeriodeMedBehandlingsresultat).hasSize(1);
-        assertThat(harBehandlingsResultatMedRiktigId(lagretLovvalgsPeriodeMedBehandlingsresultat));
+        assertThat(harBehandlingsResultatMedRiktigId(lagretLovvalgsPeriodeMedBehandlingsresultat)).isTrue();
     }
 
     @Test
