@@ -11,7 +11,6 @@ import org.springframework.transaction.annotation.Propagation;
 import org.springframework.transaction.annotation.Transactional;
 
 public interface LovvalgsperiodeRepository extends JpaRepository<Lovvalgsperiode, Long> {
-
     @Transactional(propagation = Propagation.SUPPORTS)
     List<Lovvalgsperiode> findByBehandlingsresultatId(long id);
 
