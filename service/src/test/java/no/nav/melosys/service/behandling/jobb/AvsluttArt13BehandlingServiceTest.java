@@ -3,7 +3,6 @@ package no.nav.melosys.service.behandling.jobb;
 import java.time.Instant;
 import java.time.LocalDate;
 import java.time.ZoneId;
-import java.util.List;
 
 import no.nav.melosys.domain.*;
 import no.nav.melosys.domain.kodeverk.InnvilgelsesResultat;
@@ -142,7 +141,7 @@ class AvsluttArt13BehandlingServiceTest {
         behandlingsresultat.setVedtakMetadata(null);
         behandlingsresultat.getUtpekingsperioder().add(utpekingsperiode);
 
-        when(lovvalgsperiodeService.lagreLovvalgsperioder(anyLong(), anyCollection())).thenReturn(List.of(lovvalgsperiode));
+        when(lovvalgsperiodeService.lagreLovvalgsperioder(anyLong(), anyCollection())).thenAnswer(a -> a.getArgument(1));
 
 
         avsluttArt13BehandlingService.avsluttBehandlingHvisToMndPassert(behandlingID);
