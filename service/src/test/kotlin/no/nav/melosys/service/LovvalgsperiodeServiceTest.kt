@@ -4,7 +4,6 @@ import io.kotest.assertions.throwables.shouldThrow
 import io.kotest.inspectors.shouldForAll
 import io.kotest.matchers.collections.shouldBeEmpty
 import io.kotest.matchers.collections.shouldHaveSize
-import io.kotest.matchers.optional.shouldNotBePresent
 import io.kotest.matchers.shouldBe
 import io.mockk.*
 import io.mockk.impl.annotations.InjectMockKs
@@ -35,7 +34,6 @@ import org.junit.jupiter.api.extension.ExtendWith
 import org.mockito.junit.jupiter.MockitoExtension
 import java.time.LocalDate
 import java.util.*
-import java.util.List
 import java.util.stream.StreamSupport
 
 @ExtendWith(MockitoExtension::class)
@@ -58,6 +56,41 @@ internal class LovvalgsperiodeServiceTest {
     @BeforeEach
     fun setUp() {
         MockKAnnotations.init(this)
+    }
+
+    @Test
+    fun hentLovvalgsperiode_ingenLovvalgsperiode_kasterException() {
+        every { lovvalgsperiodeRepository.findByBehandlingsresultatId(BEH_ID) } returns emptyList()
+
+
+        shouldThrow<FunksjonellException> {
+            lovvalgsperiodeService.hentLovvalgsperiode(BEH_ID)
+        }.message shouldBe "Fant ikke lovvalgsperioder"
+    }
+
+    @Test
+    fun hentLovvalgsperiode_ugyldigLovvalgsperiode_kasterException() {
+        every { lovvalgsperiodeRepository.findByBehandlingsresultatId(BEH_ID) } returns
+            listOf(Lovvalgsperiode().apply { id = BEH_ID })
+
+        shouldThrow<FunksjonellException> {
+            lovvalgsperiodeService.hentLovvalgsperiode(BEH_ID)
+        }.message shouldBe "Lovvalgsperioden har en ugyldig kombinasjon av resultat og lovvalgsland"
+
+    }
+
+    @Test
+    fun hentLovvalgsperiode_enLovvalgsperiode_girResultat() {
+        every { lovvalgsperiodeRepository.findByBehandlingsresultatId(BEH_ID) } returns
+            listOf(Lovvalgsperiode().apply {
+                id = BEH_ID
+                innvilgelsesresultat = InnvilgelsesResultat.INNVILGET
+            })
+
+
+        lovvalgsperiodeService.hentLovvalgsperiode(BEH_ID).run {
+            this.id shouldBe BEH_ID
+        }
     }
 
     @Test
@@ -86,13 +119,13 @@ internal class LovvalgsperiodeServiceTest {
 
     @Test
     fun lagreLovvalgsperioderUtenBehandlingsresultatKasterException() {
-        val lovvalgsperioder = List.of(Lovvalgsperiode())
+        val lovvalgsperioder = listOf(Lovvalgsperiode())
         every { behandlingsresultatRepository.findById(BEH_ID) } returns Optional.empty()
 
         shouldThrow<IllegalStateException> {
             lovvalgsperiodeService
                 .lagreLovvalgsperioder(BEH_ID, lovvalgsperioder)
-        }.message shouldBe "Behandling 1 fins ikke."
+        }.message shouldBe "Behandling med id 1 fins ikke."
     }
 
     @Test
@@ -145,7 +178,7 @@ internal class LovvalgsperiodeServiceTest {
 
         shouldThrow<FunksjonellException> {
             lovvalgsperiodeService.oppdaterLovvalgsperiode(lovvalgsPeriodeId, request)
-        }.message shouldBe "Lovvalgsperioden 3 finnes ikke"
+        }.message shouldBe "Lovvalgsperiode med id 3 finnes ikke"
     }
 
 
@@ -265,7 +298,7 @@ internal class LovvalgsperiodeServiceTest {
         every { lovvalgsperiodeRepository.findByBehandlingsresultatId(opprinneligBehandling.id) } returns listOf(opprinneligLovvalgsperiode)
 
 
-        lovvalgsperiodeService.finnOpprinneligLovvalgsperiode(BEH_ID).get() shouldBe opprinneligLovvalgsperiode
+        lovvalgsperiodeService.finnOpprinneligLovvalgsperiode(BEH_ID) shouldBe opprinneligLovvalgsperiode
     }
 
     @Test
@@ -279,7 +312,7 @@ internal class LovvalgsperiodeServiceTest {
         every { behandlingRepository.findById(BEH_ID) } returns Optional.of(behandling)
 
 
-        lovvalgsperiodeService.finnOpprinneligLovvalgsperiode(BEH_ID).shouldNotBePresent()
+        lovvalgsperiodeService.finnOpprinneligLovvalgsperiode(BEH_ID) shouldBe null
     }
 
 

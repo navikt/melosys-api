@@ -19,8 +19,6 @@ import no.nav.melosys.repository.TidligereMedlemsperiodeRepository
 import org.apache.commons.beanutils.BeanUtils
 import org.springframework.stereotype.Service
 import org.springframework.transaction.annotation.Transactional
-import java.util.*
-import java.util.stream.Collectors
 
 @Service
 class LovvalgsperiodeService(
@@ -29,43 +27,37 @@ class LovvalgsperiodeService(
     private val tidligereMedlemsperiodeRepository: TidligereMedlemsperiodeRepository,
     private val behandlingRepository: BehandlingRepository
 ) {
-    fun hentLovvalgsperioder(behandlingsid: Long): Collection<Lovvalgsperiode> {
-        return lovvalgsperiodeRepo.findByBehandlingsresultatId(behandlingsid)
-    }
+    fun hentLovvalgsperioder(behandlingsid: Long): Collection<Lovvalgsperiode> =
+        lovvalgsperiodeRepo.findByBehandlingsresultatId(behandlingsid)
 
-    fun hentLovvalgsperiode(behandlingsid: Long): Lovvalgsperiode {
-        val lovvalgsperioder = hentLovvalgsperioder(behandlingsid)
-        if (lovvalgsperioder.size != 1) {
-            if (lovvalgsperioder.size > 1) {
-                throw FunksjonellException(
-                    "Fant %s lovvalgsperioder. Forventer kun én lovvalgsperiode"
-                        .formatted(lovvalgsperioder.size)
-                )
-            } else {
-                throw FunksjonellException("Fant ingen lovvalgsperiode. Forventer én lovvalgsperiode")
-            }
-        }
-        val lovvalgsperiode = lovvalgsperioder.iterator().next()
-        if (lovvalgsperiode.harUgyldigTilstand()) {
-            throw FunksjonellException("Lovvalgsperioden har en ugyldig kombinasjon av resultat og lovvalgsland")
-        }
-        return lovvalgsperiode
+    fun hentLovvalgsperiode(behandlingsid: Long): Lovvalgsperiode = hentLovvalgsperioder(behandlingsid).let { perioder ->
+        perioder.singleOrNull()
+            ?.takeUnless { it.harUgyldigTilstand() }
+            ?: throw FunksjonellException(
+                when {
+                    perioder.isEmpty() -> "Fant ikke lovvalgsperioder"
+                    perioder.size > 1 -> "Fant flere enn en lovvalgsperiode, forventer kun 1"
+                    else -> "Lovvalgsperioden har en ugyldig kombinasjon av resultat og lovvalgsland"
+                }
+            )
     }
 
     @Transactional
     fun oppdaterLovvalgsperiode(lovvalgsperiodeId: Long, lovvalgsperiode: Lovvalgsperiode): Lovvalgsperiode {
         val lagretLovvalgsperiode = lovvalgsperiodeRepo.findById(lovvalgsperiodeId)
-            .orElseThrow { FunksjonellException(String.format("Lovvalgsperioden %s finnes ikke", lovvalgsperiodeId)) }
+            .orElseThrow { FunksjonellException("Lovvalgsperiode med id $lovvalgsperiodeId finnes ikke") }
 
-        lagretLovvalgsperiode.fom = lovvalgsperiode.fom
-        lagretLovvalgsperiode.tom = lovvalgsperiode.tom
-        lagretLovvalgsperiode.lovvalgsland = lovvalgsperiode.lovvalgsland
-        lagretLovvalgsperiode.bestemmelse = lovvalgsperiode.bestemmelse
-        lagretLovvalgsperiode.tilleggsbestemmelse = lovvalgsperiode.tilleggsbestemmelse
-        lagretLovvalgsperiode.innvilgelsesresultat = lovvalgsperiode.innvilgelsesresultat
-        lagretLovvalgsperiode.dekning = lovvalgsperiode.dekning
-        lagretLovvalgsperiode.medlemskapstype = lovvalgsperiode.medlemskapstype
-        lagretLovvalgsperiode.medlPeriodeID = lovvalgsperiode.medlPeriodeID
+        lagretLovvalgsperiode.apply {
+            fom = lovvalgsperiode.fom
+            tom = lovvalgsperiode.tom
+            lovvalgsland = lovvalgsperiode.lovvalgsland
+            bestemmelse = lovvalgsperiode.bestemmelse
+            tilleggsbestemmelse = lovvalgsperiode.tilleggsbestemmelse
+            innvilgelsesresultat = lovvalgsperiode.innvilgelsesresultat
+            dekning = lovvalgsperiode.dekning
+            medlemskapstype = lovvalgsperiode.medlemskapstype
+            medlPeriodeID = lovvalgsperiode.medlPeriodeID
+        }
 
         return lovvalgsperiodeRepo.save(lagretLovvalgsperiode)
     }
@@ -81,7 +73,7 @@ class LovvalgsperiodeService(
         lovvalgsperioder: Collection<Lovvalgsperiode>
     ): Collection<Lovvalgsperiode> {
         val behandlingsresultat = behandlingsresultatRepo.findById(behandlingsid)
-            .orElseThrow { IllegalStateException(String.format("Behandling %s fins ikke.", behandlingsid)) }
+            .orElseThrow { IllegalStateException("Behandling med id $behandlingsid fins ikke.") }
 
         lovvalgsperiodeRepo.deleteByBehandlingsresultatId(behandlingsresultat.id)
         val lovvalgsperioderKopi = lovvalgsperioder.map { kopierLovvalgsperiodeMedBehandlingsResultat(it, behandlingsresultat) }
@@ -90,66 +82,59 @@ class LovvalgsperiodeService(
     }
 
     fun hentTidligereLovvalgsperioder(behandling: Behandling): Collection<Lovvalgsperiode> {
-        val utvalgtePeriodeIDer = tidligereMedlemsperiodeRepository.findById_BehandlingId(behandling.id).stream()
+        val utvalgtePeriodeIDer = tidligereMedlemsperiodeRepository.findById_BehandlingId(behandling.id)
             .map { utvalgtPeriode: TidligereMedlemsperiode -> utvalgtPeriode.id.periodeId }
-            .collect(Collectors.toSet())
+            .toSet()
 
         if (utvalgtePeriodeIDer.isEmpty()) {
             return emptySet()
         }
 
-        val medlemskapdokument = behandling.hentMedlemskapDokument()
-        val perioder = medlemskapdokument.getMedlemsperiode().stream()
-            .filter { periode: Medlemsperiode -> utvalgtePeriodeIDer.contains(periode.id) }
-            .collect(Collectors.toSet())
-
-        val tidligereLovvalgsperioder: MutableList<Lovvalgsperiode> = ArrayList()
-        perioder.forEach {
-            val lovvalgsperiode = Lovvalgsperiode().apply {
-                fom = it.periode?.fom
-                tom = it.periode?.tom
-                medlPeriodeID = it.id
-            }
-
-            it.grunnlagstype?.let { grunnlagsType ->
-                val isValidEnum = GrunnlagMedl.values().any { gm -> gm.name == grunnlagsType }
-                if (isValidEnum) {
-                    val grunnlagMedlKode = GrunnlagMedl.valueOf(grunnlagsType)
-                    lovvalgsperiode.bestemmelse = tilLovvalgBestemmelse(grunnlagMedlKode)
-                } else {
-                    lovvalgsperiode.bestemmelse = Lovvalgbestemmelser_883_2004.FO_883_2004_ANNET
-                }
-
-            }
-            tidligereLovvalgsperioder.add(lovvalgsperiode)
+        val perioder = behandling.hentMedlemskapDokument().run {
+            getMedlemsperiode()
+                .filter { periode: Medlemsperiode -> utvalgtePeriodeIDer.contains(periode.id) }
+                .toSet()
         }
-        return tidligereLovvalgsperioder
+
+        return perioder.map { periode ->
+            Lovvalgsperiode().apply {
+                fom = periode.periode?.fom
+                tom = periode.periode?.tom
+                medlPeriodeID = periode.id
+
+                periode.grunnlagstype?.let { grunnlagsType ->
+                    bestemmelse = GrunnlagMedl.values().find { it.name == grunnlagsType }
+                        ?.let { tilLovvalgBestemmelse(it) }
+                        ?: Lovvalgbestemmelser_883_2004.FO_883_2004_ANNET
+                }
+            }
+        }
     }
 
     fun hentOpprinneligLovvalgsperiode(behandlingId: Long): Lovvalgsperiode {
         val behandling = behandlingRepository.findById(behandlingId)
             .orElseThrow { IkkeFunnetException("Fant ingen behandling for $behandlingId") }
 
-        val opprinneligBehandling = Optional.ofNullable(behandling.opprinneligBehandling)
-            .orElseThrow { IkkeFunnetException("Fant ingen opprinnelig behandling for $behandlingId") }
+        val opprinneligBehandling = behandling.opprinneligBehandling
+            ?: throw IkkeFunnetException("Fant ingen opprinnelig behandling for $behandlingId")
 
         val lovvalgsperiodeList = lovvalgsperiodeRepo.findByBehandlingsresultatId(opprinneligBehandling.id)
-        return lovvalgsperiodeList.stream()
-            .findFirst()
-            .orElseThrow { IkkeFunnetException("Fant ingen opprinnelig lovvalgsperiode for $behandlingId") }
+
+        return lovvalgsperiodeList
+            .firstOrNull() ?: throw IkkeFunnetException("Fant ingen opprinnelig lovvalgsperiode for $behandlingId")
     }
 
-    fun finnOpprinneligLovvalgsperiode(behandlingId: Long): Optional<Lovvalgsperiode> {
-        return behandlingRepository.findById(behandlingId).map { obj: Behandling -> obj.opprinneligBehandling }
-            .flatMap { behandling: Behandling ->
-                lovvalgsperiodeRepo.findByBehandlingsresultatId(behandling.id).stream().findFirst()
-            }
+    fun finnOpprinneligLovvalgsperiode(behandlingId: Long): Lovvalgsperiode? = behandlingRepository.findById(behandlingId).let {
+        lovvalgsperiodeRepo.findByBehandlingsresultatId(it.get().opprinneligBehandling.id).firstOrNull()
     }
 
-    fun harSelvstendigNæringsdrivendeLovvalgsbestemmelse(behandlingId: Long): Boolean {
-        val lovvalgBestemmelse = hentLovvalgsperiode(behandlingId).bestemmelse
-        return lovvalgBestemmelse == Lovvalgsbestemmelser_trygdeavtale_ca.CAN_ART6_2 || lovvalgBestemmelse == Lovvalgsbestemmelser_trygdeavtale_us.USA_ART5_4
-    }
+    fun harSelvstendigNæringsdrivendeLovvalgsbestemmelse(behandlingId: Long): Boolean =
+        when (hentLovvalgsperiode(behandlingId).bestemmelse) {
+            Lovvalgsbestemmelser_trygdeavtale_ca.CAN_ART6_2,
+            Lovvalgsbestemmelser_trygdeavtale_us.USA_ART5_4 -> true
+
+            else -> false
+        }
 
     private fun kopierLovvalgsperiodeMedBehandlingsResultat(
         lovvalgsperiode: Lovvalgsperiode,
@@ -159,5 +144,4 @@ class LovvalgsperiodeService(
         kopi.behandlingsresultat = behandlingsresultat
         return kopi
     }
-
 }

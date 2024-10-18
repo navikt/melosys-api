@@ -45,7 +45,6 @@ import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.extension.ExtendWith
 import java.time.LocalDate
-import java.util.*
 
 
 @ExtendWith(MockKExtension::class)
@@ -402,7 +401,7 @@ internal class KontrollTest {
 
     private fun mockLovvalgsperiodeService() {
         every { lovvalgsperiodeService.hentLovvalgsperiode(behandlingID) } returns lovvalgsperiode
-        every { lovvalgsperiodeService.finnOpprinneligLovvalgsperiode(behandlingID) } returns Optional.empty()
+        every { lovvalgsperiodeService.finnOpprinneligLovvalgsperiode(behandlingID) } returns null
     }
 }
 
