@@ -104,6 +104,7 @@ class LovvalgsperiodeServiceTest {
         var eksisterendeLovvalgsperiode = new Lovvalgsperiode();
         eksisterendeLovvalgsperiode.setId(3L);
         when(lovvalgsperiodeRepository.findById(3L)).thenReturn(Optional.of(eksisterendeLovvalgsperiode));
+        when(lovvalgsperiodeRepository.save(any(Lovvalgsperiode.class))).thenAnswer(i -> i.getArgument(0));
 
         var request = new Lovvalgsperiode();
         request.setFom(LocalDate.now());
