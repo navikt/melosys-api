@@ -184,7 +184,7 @@ class InnvilgelseFtrlMapper(
                 it.trygdesats,
                 it.trygdeavgiftsbeløpMd.verdi,
                 it.grunnlagInntekstperiode.type,
-                it.grunnlagInntekstperiode.avgiftspliktigInntektMnd?.verdi ?: BigDecimal.ZERO,
+                it.grunnlagInntekstperiode.avgiftspliktigInntekt?.verdi ?: BigDecimal.ZERO,
             )
         }.sortedByDescending { it.fom }
     }

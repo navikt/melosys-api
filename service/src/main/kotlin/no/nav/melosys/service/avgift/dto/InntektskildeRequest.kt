@@ -15,7 +15,7 @@ class InntektskildeRequest(
     constructor(inntektsperioder: Inntektsperiode) : this(
         inntektsperioder.type,
         inntektsperioder.isArbeidsgiversavgiftBetalesTilSkatt,
-        inntektsperioder.avgiftspliktigInntektMnd?.verdi,
+        inntektsperioder.avgiftspliktigInntekt?.verdi,
         inntektsperioder.fomDato,
         inntektsperioder.tomDato
     )

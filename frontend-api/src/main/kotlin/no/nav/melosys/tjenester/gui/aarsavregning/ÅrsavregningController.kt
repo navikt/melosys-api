@@ -57,6 +57,18 @@ class ÅrsavregningController(
         )
     }
 
+    @GetMapping("/{aarsavregningID}/total")
+    fun hentMånedligBruttoInntektFraTotalbeløpForPerioden(
+        @PathVariable("behandlingID") behandlingID: Long,
+        @RequestParam("fom") fom: LocalDate,
+        @RequestParam("tom") tom: LocalDate,
+        @RequestParam("belop") belop: Long,
+    ): ResponseEntity<BigDecimal> {
+        aksesskontroll.autoriser(behandlingID)
+
+        return ResponseEntity.ok(TotalBeløpBeregner.månedligBeløpForTotalbeløp(fom, tom, belop.toBigDecimal()))
+    }
+
     data class LagÅrsavregningRequest(
         val aar: Int,
     )
@@ -100,10 +112,10 @@ class ÅrsavregningController(
                 InntektskildeDto(
                     it.type,
                     it.isArbeidsgiversavgiftBetalesTilSkatt,
-                    it.avgiftspliktigInntektMnd.verdi,
+                    it.avgiftspliktigInntekt.verdi,
                     it.fom,
                     it.tom,
-                    TotalBeløpBeregner.hentTotalInntektForInntektkilde(it)
+                    it.isErMaanedsbelop
                 )
             }.orEmpty()
         )
@@ -123,7 +135,7 @@ class ÅrsavregningController(
                                 fom = it.fom,
                                 tom = it.tom,
                                 inntektskildetype = it.grunnlagInntekstperiode.type,
-                                inntektPerMd = it.grunnlagInntekstperiode.avgiftspliktigInntektMnd.verdi.intValueExact(),
+                                inntektPerMd = it.grunnlagInntekstperiode.avgiftspliktigInntekt.verdi.intValueExact(),
                                 arbeidsgiversavgiftBetales = it.grunnlagInntekstperiode.isArbeidsgiversavgiftBetalesTilSkatt,
                                 avgiftssats = it.trygdesats.toDouble(),
                                 avgiftPerMd = it.trygdeavgiftsbeløpMd.verdi.intValueExact()

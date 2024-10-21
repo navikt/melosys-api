@@ -78,14 +78,16 @@ internal class ÅrsavregningControllerTest {
                         tomDato = LocalDate.parse("2023-07-31")
                         type = Inntektskildetype.ARBEIDSINNTEKT_FRA_NORGE
                         isArbeidsgiversavgiftBetalesTilSkatt = true
-                        avgiftspliktigInntektMnd = Penger(40000.0)
+                        avgiftspliktigInntekt = Penger(40000.0)
+                        isErMaanedsbelop = true
                     },
                     Inntektsperiode().apply {
                         fomDato = LocalDate.parse("2023-08-01")
                         tomDato = LocalDate.parse("2023-12-31")
                         type = Inntektskildetype.INNTEKT_FRA_UTLANDET
                         isArbeidsgiversavgiftBetalesTilSkatt = false
-                        avgiftspliktigInntektMnd = Penger(15000.0)
+                        avgiftspliktigInntekt = Penger(15000.0)
+                        isErMaanedsbelop = true
                     }
                 )
             ),
@@ -98,7 +100,8 @@ internal class ÅrsavregningControllerTest {
                         tomDato = LocalDate.parse("2023-07-31")
                         type = Inntektskildetype.ARBEIDSINNTEKT_FRA_NORGE
                         isArbeidsgiversavgiftBetalesTilSkatt = true
-                        avgiftspliktigInntektMnd = Penger(40000.0)
+                        avgiftspliktigInntekt = Penger(40000.0)
+                        isErMaanedsbelop = true
                     }
                     trygdesats = BigDecimal(0.0)
                     trygdeavgiftsbeløpMd = Penger(0.0)
@@ -111,7 +114,8 @@ internal class ÅrsavregningControllerTest {
                         tomDato = LocalDate.parse("2023-07-31")
                         type = Inntektskildetype.INNTEKT_FRA_UTLANDET
                         isArbeidsgiversavgiftBetalesTilSkatt = false
-                        avgiftspliktigInntektMnd = Penger(15000.0)
+                        avgiftspliktigInntekt = Penger(15000.0)
+                        isErMaanedsbelop = true
                     }
                     trygdesats = BigDecimal(42.2)
                     trygdeavgiftsbeløpMd = Penger(6330.0)
@@ -167,16 +171,16 @@ internal class ÅrsavregningControllerTest {
           "tomDato": "2023-07-31",
           "type": "ARBEIDSINNTEKT_FRA_NORGE",
           "arbeidsgiversavgiftBetales": true,
-          "avgiftspliktigInntektMnd": 40000,
-          "totalInntektForPerioden": 280000
+          "avgiftspliktigInntekt": 40000,
+          "erMaanedsbelop": true
         },
         {
           "fomDato": "2023-08-01",
           "tomDato": "2023-12-31",
           "type": "INNTEKT_FRA_UTLANDET",
           "arbeidsgiversavgiftBetales": false,
-          "avgiftspliktigInntektMnd": 15000,
-          "totalInntektForPerioden": 75000
+          "avgiftspliktigInntekt": 15000,
+          "erMaanedsbelop": true
         }
       ]
     },

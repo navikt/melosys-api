@@ -198,6 +198,7 @@ class TrygdeavgiftsberegningService(
     }
 
     private fun mapDtoTilInntektsperioderMedUUIDPair(inntektsperioder: List<InntektsperiodeDto>): List<Pair<UUID, Inntektsperiode>> {
+        // TODO: Fiks mapping av isErMaanedsbelop. Må mest sannsynlig legge til samme felt i InntektskildeRequest
         return inntektsperioder.map {
             Pair(
                 it.id,
@@ -206,7 +207,7 @@ class TrygdeavgiftsberegningService(
                     this.tomDato = it.periode.tom
                     this.type = it.inntektskilde
                     this.isArbeidsgiversavgiftBetalesTilSkatt = it.arbeidsgiverBetalerAvgift == true
-                    this.avgiftspliktigInntektMnd = it.månedsbeløp?.tilPenger()
+                    this.avgiftspliktigInntekt = it.månedsbeløp?.tilPenger()
                 })
         }
     }

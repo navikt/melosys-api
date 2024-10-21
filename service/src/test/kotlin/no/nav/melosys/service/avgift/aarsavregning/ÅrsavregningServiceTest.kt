@@ -14,7 +14,6 @@ import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingsstatus
 import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingstyper
 import no.nav.melosys.exception.FunksjonellException
 import no.nav.melosys.repository.AarsavregningRepository
-import no.nav.melosys.service.avgift.TrygdeavgiftService
 import no.nav.melosys.service.behandling.BehandlingsresultatService
 import no.nav.melosys.service.sak.FagsakService
 import no.nav.melosys.sikkerhet.context.SpringSubjectHandler
@@ -251,7 +250,7 @@ internal class ÅrsavregningServiceTest {
     private fun lagInntektsperiode(start: String, slutt: String): Inntektsperiode = Inntektsperiode().apply {
         fomDato = LocalDate.parse(start)
         tomDato = LocalDate.parse(slutt)
-        avgiftspliktigInntektMnd = Penger(5000.0)
+        avgiftspliktigInntekt = Penger(5000.0)
     }
 
     private fun lagSkatteforholdTilNorge(start: String, slutt: String): SkatteforholdTilNorge = SkatteforholdTilNorge().apply {

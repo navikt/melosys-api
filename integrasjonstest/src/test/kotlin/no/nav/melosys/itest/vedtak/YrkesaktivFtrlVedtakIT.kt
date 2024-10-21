@@ -605,7 +605,7 @@ class YrkesaktivFtrlVedtakIT(
             tomDato = LocalDate.of(2023, 2, 1)
             type = Inntektskildetype.INNTEKT_FRA_UTLANDET
             isArbeidsgiversavgiftBetalesTilSkatt = arbeidsgiversavgiftBetales
-            avgiftspliktigInntektMnd = Penger(10000.toBigDecimal(), "nok")
+            avgiftspliktigInntekt = Penger(10000.toBigDecimal(), "nok")
         }
 
         val trygdeavgiftsperioder = HashSet<Trygdeavgiftsperiode>()

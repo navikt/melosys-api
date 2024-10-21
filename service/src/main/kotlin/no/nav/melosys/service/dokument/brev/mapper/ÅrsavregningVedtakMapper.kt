@@ -51,7 +51,7 @@ class ÅrsavregningVedtakMapper(
                     tom = trygdeavgiftsperiode.tom,
                     avgiftssats = trygdeavgiftsperiode.trygdesats,
                     avgiftPerMd = trygdeavgiftsperiode.trygdeavgiftsbeløpMd.verdi,
-                    avgiftspliktigInntektPerMd = trygdeavgiftsperiode.grunnlagInntekstperiode.avgiftspliktigInntektMnd.verdi,
+                    avgiftspliktigInntektPerMd = trygdeavgiftsperiode.grunnlagInntekstperiode.avgiftspliktigInntekt.verdi,
                     inntektskilde = trygdeavgiftsperiode.grunnlagInntekstperiode.type.beskrivelse,
                     trygdedekning = trygdeavgiftsperiode.grunnlagMedlemskapsperiode.trygdedekning.beskrivelse,
                     arbeidsgiveravgiftBetalt = trygdeavgiftsperiode.grunnlagInntekstperiode.isArbeidsgiversavgiftBetalesTilSkatt,

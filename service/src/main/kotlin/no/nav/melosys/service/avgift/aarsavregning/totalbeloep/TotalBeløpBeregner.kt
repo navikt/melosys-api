@@ -1,7 +1,6 @@
 package no.nav.melosys.service.avgift.aarsavregning.totalbeloep
 
 import mu.KotlinLogging
-import no.nav.melosys.domain.avgift.Inntektsperiode
 import no.nav.melosys.domain.avgift.Trygdeavgiftsperiode
 import java.math.BigDecimal
 import java.math.RoundingMode
@@ -31,18 +30,10 @@ class TotalBeløpBeregner {
                 PeriodeMedBeløp(
                     fom = it.periodeFra,
                     tom = it.periodeTil,
-                    beløp = it.grunnlagInntekstperiode.avgiftspliktigInntektMnd.verdi
+                    beløp = it.grunnlagInntekstperiode.avgiftspliktigInntekt.verdi
                 )
             }
             return totalBeløpForAllePerioder(periodeMedBeløpList)
-        }
-
-        fun hentTotalInntektForInntektkilde(inntektsperiode: Inntektsperiode): BigDecimal {
-            return totalBeløpForPeriode(
-                fom = inntektsperiode.fomDato,
-                tom = inntektsperiode.tomDato,
-                beløp = inntektsperiode.avgiftspliktigInntektMnd.verdi
-            )
         }
 
         fun totalBeløpForAllePerioder(periodeMedBeløpList: List<PeriodeMedBeløp>): BigDecimal {
@@ -59,6 +50,13 @@ class TotalBeløpBeregner {
             val antallMåneder = AntallMdBeregner(fom, tom).beregn()
             val total = beløp.multiply(antallMåneder).setScale(2, RoundingMode.UNNECESSARY)
             log.debug { "Beløp for periode fom: $fom, tom: $tom regnes med enhetspris $total og antall: $antallMåneder ==> beløp: $total" }
+            return total
+        }
+
+        // TODO: RoundingError må fikses før merge av 6814
+        fun månedligBeløpForTotalbeløp(fom: LocalDate, tom: LocalDate, totalBeløp: BigDecimal): BigDecimal {
+            val antallMåneder = AntallMdBeregner(fom, tom).beregn()
+            val total = totalBeløp.divide(antallMåneder).setScale(2, RoundingMode.FLOOR)
             return total
         }
     }

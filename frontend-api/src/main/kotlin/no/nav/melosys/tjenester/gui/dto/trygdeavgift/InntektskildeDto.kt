@@ -2,6 +2,7 @@ package no.nav.melosys.tjenester.gui.dto.trygdeavgift
 
 import no.nav.melosys.domain.avgift.Inntektsperiode
 import no.nav.melosys.domain.kodeverk.Inntektskildetype
+import no.nav.melosys.service.avgift.aarsavregning.totalbeloep.TotalBeløpBeregner
 import no.nav.melosys.service.avgift.dto.InntektskildeRequest
 import java.math.BigDecimal
 import java.time.LocalDate
@@ -9,24 +10,23 @@ import java.time.LocalDate
 data class InntektskildeDto(
     val type: Inntektskildetype,
     val arbeidsgiversavgiftBetales: Boolean,
-    val avgiftspliktigInntektMnd: BigDecimal?,
+    val avgiftspliktigInntekt: BigDecimal?,
     val fomDato: LocalDate,
     val tomDato: LocalDate,
-    val totalInntektForPerioden: BigDecimal?,
+    val erMaanedsbelop: Boolean,
 ) {
-    constructor(inntektsperiode: Inntektsperiode, totalInntektForPerioden: BigDecimal?) : this(
+    constructor(inntektsperiode: Inntektsperiode) : this(
         inntektsperiode.type,
         inntektsperiode.isArbeidsgiversavgiftBetalesTilSkatt,
-        inntektsperiode.avgiftspliktigInntektMnd?.verdi,
+        inntektsperiode.avgiftspliktigInntekt?.verdi,
         inntektsperiode.fomDato,
         inntektsperiode.tomDato,
-        totalInntektForPerioden,
+        inntektsperiode.isErMaanedsbelop,
     )
 
-    constructor(inntektsperiode: Inntektsperiode) : this(
-        inntektsperiode, null
-    )
-
-    fun tilRequest(): InntektskildeRequest =
-        InntektskildeRequest(type, arbeidsgiversavgiftBetales, avgiftspliktigInntektMnd, fomDato, tomDato)
+    fun tilRequest(): InntektskildeRequest {
+        val avgiftspliktigInntektMnd = if (erMaanedsbelop) avgiftspliktigInntekt else TotalBeløpBeregner.månedligBeløpForTotalbeløp(fomDato,
+            tomDato, avgiftspliktigInntekt!!)
+        return InntektskildeRequest(type, arbeidsgiversavgiftBetales, avgiftspliktigInntektMnd, fomDato, tomDato)
+    }
 }
