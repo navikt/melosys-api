@@ -19,6 +19,7 @@ import no.nav.melosys.repository.TidligereMedlemsperiodeRepository
 import org.apache.commons.beanutils.BeanUtils
 import org.springframework.stereotype.Service
 import org.springframework.transaction.annotation.Transactional
+import kotlin.jvm.optionals.getOrNull
 
 @Service
 class LovvalgsperiodeService(
@@ -124,9 +125,10 @@ class LovvalgsperiodeService(
             .firstOrNull() ?: throw IkkeFunnetException("Fant ingen opprinnelig lovvalgsperiode for $behandlingId")
     }
 
-    fun finnOpprinneligLovvalgsperiode(behandlingId: Long): Lovvalgsperiode? = behandlingRepository.findById(behandlingId).let {
-        lovvalgsperiodeRepo.findByBehandlingsresultatId(it.get().opprinneligBehandling.id).firstOrNull()
-    }
+    fun finnOpprinneligLovvalgsperiode(behandlingId: Long): Lovvalgsperiode? =
+        behandlingRepository.findById(behandlingId).getOrNull()?.opprinneligBehandling?.let {
+            lovvalgsperiodeRepo.findByBehandlingsresultatId(it.id).firstOrNull()
+        }
 
     fun harSelvstendigNæringsdrivendeLovvalgsbestemmelse(behandlingId: Long): Boolean =
         when (hentLovvalgsperiode(behandlingId).bestemmelse) {
