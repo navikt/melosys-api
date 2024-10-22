@@ -33,7 +33,6 @@ import org.junit.jupiter.api.extension.ExtendWith
 import org.mockito.junit.jupiter.MockitoExtension
 import java.time.LocalDate
 import java.util.*
-import java.util.stream.StreamSupport
 
 @ExtendWith(MockitoExtension::class)
 internal class LovvalgsperiodeServiceTest {
@@ -188,8 +187,8 @@ internal class LovvalgsperiodeServiceTest {
 
     @Test
     fun hentTidligereLovvalgsperioder_enValgtMedlemsperiode_returnererEnTidligerLovvalgsperiode() {
-        val medlemsperiode = lagMedlemsperiode(23L, GrunnlagMedl.FO_12_2.kode)
-        val medlemsperiodeFeilId = lagMedlemsperiode(46L, GrunnlagMedl.FO_12_2.kode)
+        val medlemsperiode = lagMedlemskapsPeriode(23L, GrunnlagMedl.FO_12_2.kode)
+        val medlemsperiodeFeilId = lagMedlemskapsPeriode(46L, GrunnlagMedl.FO_12_2.kode)
 
         val medlDokument = MedlemskapDokument()
         medlDokument.getMedlemsperiode().add(medlemsperiode)
@@ -203,16 +202,16 @@ internal class LovvalgsperiodeServiceTest {
             .single()
             .run {
                 medlPeriodeID shouldBe medlemsperiode.id
-                fom shouldBe medlemsperiode.periode!!.fom
-                tom shouldBe medlemsperiode.periode!!.tom
-                bestemmelse shouldBe tilLovvalgBestemmelse(GrunnlagMedl.valueOf(medlemsperiode.grunnlagstype!!))
+                fom shouldBe MedlPeriode.fom
+                tom shouldBe MedlPeriode.tom
+                bestemmelse shouldBe tilLovvalgBestemmelse(GrunnlagMedl.valueOf(GrunnlagMedl.FO_12_2.kode))
             }
     }
 
 
     @Test
     fun hentTidligereLovvalgsperioder_ukjentGrunnlagskodeMedl_grunnlagMappetTilAnnet() {
-        val medlemsperiode = lagMedlemsperiode(23L, "MAPPING_SOM_MELOSYS_IKKE_KJENNER_TIL")
+        val medlemsperiode = lagMedlemskapsPeriode(23L, "MAPPING_SOM_MELOSYS_IKKE_KJENNER_TIL")
 
         val medlDokument = MedlemskapDokument()
         medlDokument.getMedlemsperiode().add(medlemsperiode)
@@ -351,17 +350,21 @@ internal class LovvalgsperiodeServiceTest {
         return behandling
     }
 
-    private fun lagMedlemsperiode(id: Long, grunnlagMedlKode: String): Medlemsperiode {
-        val periode = Periode(LocalDate.now(), LocalDate.now())
-
-        return Medlemsperiode(
-            id, periode, null,
-            PeriodestatusMedl.GYLD.kode, grunnlagMedlKode, null, null, null, null, null
-        )
+    private fun harBehandlingsResultatMedRiktigId(lovvalgsperioder: Iterable<Lovvalgsperiode>): Boolean {
+        return lovvalgsperioder.all { it.behandlingsresultat != null && it.behandlingsresultat.id == BEH_ID }
     }
 
-    private fun harBehandlingsResultatMedRiktigId(lovvalgsperioder: Iterable<Lovvalgsperiode>): Boolean {
-        return StreamSupport.stream(lovvalgsperioder.spliterator(), false)
-            .allMatch { item: Lovvalgsperiode -> item.behandlingsresultat != null && item.behandlingsresultat.id == BEH_ID }
+    companion object MedlPeriode {
+        val fom = LocalDate.now()
+        val tom = LocalDate.now()
+
+        fun lagMedlemskapsPeriode(id: Long, grunnlagMedlKode: String): Medlemsperiode {
+            return Medlemsperiode(
+                id = id,
+                periode = Periode(fom, tom),
+                status = PeriodestatusMedl.GYLD.kode,
+                grunnlagstype = grunnlagMedlKode
+            )
+        }
     }
 }
