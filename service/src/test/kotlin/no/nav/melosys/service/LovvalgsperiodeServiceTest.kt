@@ -27,7 +27,6 @@ import no.nav.melosys.repository.BehandlingRepository
 import no.nav.melosys.repository.BehandlingsresultatRepository
 import no.nav.melosys.repository.LovvalgsperiodeRepository
 import no.nav.melosys.repository.TidligereMedlemsperiodeRepository
-import org.assertj.core.api.Assertions
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.extension.ExtendWith
@@ -38,6 +37,8 @@ import java.util.stream.StreamSupport
 
 @ExtendWith(MockitoExtension::class)
 internal class LovvalgsperiodeServiceTest {
+    private val BEH_ID = 1L
+
     @RelaxedMockK
     lateinit var lovvalgsperiodeRepository: LovvalgsperiodeRepository
 
@@ -73,6 +74,7 @@ internal class LovvalgsperiodeServiceTest {
         every { lovvalgsperiodeRepository.findByBehandlingsresultatId(BEH_ID) } returns
             listOf(Lovvalgsperiode().apply { id = BEH_ID })
 
+
         shouldThrow<FunksjonellException> {
             lovvalgsperiodeService.hentLovvalgsperiode(BEH_ID)
         }.message shouldBe "Lovvalgsperioden har en ugyldig kombinasjon av resultat og lovvalgsland"
@@ -96,6 +98,7 @@ internal class LovvalgsperiodeServiceTest {
     @Test
     fun hentLovvalgsperioder_ingenLovvalgsperioder_girTomListe() {
         every { lovvalgsperiodeRepository.findByBehandlingsresultatId(BEH_ID) } returns emptyList()
+
 
         lovvalgsperiodeService.hentLovvalgsperioder(BEH_ID).shouldBeEmpty()
     }
@@ -121,6 +124,7 @@ internal class LovvalgsperiodeServiceTest {
     fun lagreLovvalgsperioderUtenBehandlingsresultatKasterException() {
         val lovvalgsperioder = listOf(Lovvalgsperiode())
         every { behandlingsresultatRepository.findById(BEH_ID) } returns Optional.empty()
+
 
         shouldThrow<IllegalStateException> {
             lovvalgsperiodeService
@@ -156,18 +160,17 @@ internal class LovvalgsperiodeServiceTest {
         lovvalgsperiodeService.oppdaterLovvalgsperiode(3L, request)
 
 
-        Assertions.assertThat(lovvalgsCaptor.captured)
-            .isNotNull()
-            .extracting(
-                "fom", "tom", "lovvalgsland", "bestemmelse",
-                "tilleggsbestemmelse", "innvilgelsesresultat",
-                "medlemskapstype", "dekning", "medlPeriodeID"
-            )
-            .containsExactly(
-                request.fom, request.tom, request.lovvalgsland, request.bestemmelse,
-                request.tilleggsbestemmelse, request.innvilgelsesresultat,
-                request.medlemskapstype, request.dekning, request.medlPeriodeID
-            )
+        lovvalgsCaptor.captured.run {
+            fom shouldBe request.fom
+            tom shouldBe request.tom
+            lovvalgsland shouldBe request.lovvalgsland
+            bestemmelse shouldBe request.bestemmelse
+            tilleggsbestemmelse shouldBe request.tilleggsbestemmelse
+            innvilgelsesresultat shouldBe request.innvilgelsesresultat
+            medlemskapstype shouldBe request.medlemskapstype
+            dekning shouldBe request.dekning
+            medlPeriodeID shouldBe request.medlPeriodeID
+        }
     }
 
     @Test
@@ -175,6 +178,7 @@ internal class LovvalgsperiodeServiceTest {
         val lovvalgsPeriodeId = 3L
         val request = Lovvalgsperiode()
         every { lovvalgsperiodeRepository.findById(lovvalgsPeriodeId) } returns Optional.empty()
+
 
         shouldThrow<FunksjonellException> {
             lovvalgsperiodeService.oppdaterLovvalgsperiode(lovvalgsPeriodeId, request)
@@ -195,12 +199,14 @@ internal class LovvalgsperiodeServiceTest {
         mockTidligereMedlemsperiodeRepository(medlemsperiode.id!!)
 
 
-        lovvalgsperiodeService.hentTidligereLovvalgsperioder(behandling).shouldForAll {
-            it.medlPeriodeID shouldBe medlemsperiode.id
-            it.fom shouldBe medlemsperiode.periode!!.fom
-            it.tom shouldBe medlemsperiode.periode!!.tom
-            it.bestemmelse shouldBe tilLovvalgBestemmelse(GrunnlagMedl.valueOf(medlemsperiode.grunnlagstype!!))
-        }.size shouldBe 1
+        lovvalgsperiodeService.hentTidligereLovvalgsperioder(behandling).shouldHaveSize(1)
+            .single()
+            .run {
+                medlPeriodeID shouldBe medlemsperiode.id
+                fom shouldBe medlemsperiode.periode!!.fom
+                tom shouldBe medlemsperiode.periode!!.tom
+                bestemmelse shouldBe tilLovvalgBestemmelse(GrunnlagMedl.valueOf(medlemsperiode.grunnlagstype!!))
+            }
     }
 
 
@@ -226,6 +232,8 @@ internal class LovvalgsperiodeServiceTest {
         val behandling = Behandling()
         behandling.id = BEH_ID
         every { tidligereMedlemsperiodeRepository.findById_BehandlingId(BEH_ID) } returns emptyList()
+
+
         lovvalgsperiodeService.hentTidligereLovvalgsperioder(behandling).shouldBeEmpty()
     }
 
@@ -242,6 +250,7 @@ internal class LovvalgsperiodeServiceTest {
 
         val opprinneligLovvalgsperiode = Lovvalgsperiode()
         every { lovvalgsperiodeRepository.findByBehandlingsresultatId(opprinneligBehandling.id) } returns listOf(opprinneligLovvalgsperiode)
+
 
         lovvalgsperiodeService.hentOpprinneligLovvalgsperiode(BEH_ID) shouldBe opprinneligLovvalgsperiode
     }
@@ -329,13 +338,16 @@ internal class LovvalgsperiodeServiceTest {
     }
 
     private fun lagBehandlingMedMedlOpplysning(medlDokument: MedlemskapDokument): Behandling {
-        val medl = Saksopplysning()
-        medl.dokument = medlDokument
-        medl.type = SaksopplysningType.MEDL
+        val medl = Saksopplysning().apply {
+            dokument = medlDokument
+            type = SaksopplysningType.MEDL
+        }
 
-        val behandling = Behandling()
-        behandling.id = BEH_ID
-        behandling.saksopplysninger.add(medl)
+        val behandling = Behandling().apply {
+            id = BEH_ID
+            saksopplysninger.add(medl)
+        }
+
         return behandling
     }
 
@@ -351,9 +363,5 @@ internal class LovvalgsperiodeServiceTest {
     private fun harBehandlingsResultatMedRiktigId(lovvalgsperioder: Iterable<Lovvalgsperiode>): Boolean {
         return StreamSupport.stream(lovvalgsperioder.spliterator(), false)
             .allMatch { item: Lovvalgsperiode -> item.behandlingsresultat != null && item.behandlingsresultat.id == BEH_ID }
-    }
-
-    companion object {
-        private const val BEH_ID = 1L
     }
 }
