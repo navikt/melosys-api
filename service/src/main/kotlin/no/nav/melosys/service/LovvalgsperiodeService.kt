@@ -91,11 +91,10 @@ class LovvalgsperiodeService(
             return emptySet()
         }
 
-        val perioder = behandling.hentMedlemskapDokument().run {
-            getMedlemsperiode()
-                .filter { periode: Medlemsperiode -> utvalgtePeriodeIDer.contains(periode.id) }
-                .toSet()
-        }
+        val perioder = behandling.hentMedlemskapDokument()
+            .getMedlemsperiode()
+            .filter { periode: Medlemsperiode -> utvalgtePeriodeIDer.contains(periode.id) }
+            .toSet()
 
         return perioder.map { periode ->
             Lovvalgsperiode().apply {
