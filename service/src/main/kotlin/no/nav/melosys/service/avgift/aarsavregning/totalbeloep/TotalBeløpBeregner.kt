@@ -53,10 +53,10 @@ class TotalBeløpBeregner {
             return total
         }
 
-        // TODO: RoundingError må fikses før merge av 6814
         fun månedligBeløpForTotalbeløp(fom: LocalDate, tom: LocalDate, totalBeløp: BigDecimal): BigDecimal {
             val antallMåneder = AntallMdBeregner(fom, tom).beregn()
-            val total = totalBeløp.divide(antallMåneder).setScale(2, RoundingMode.FLOOR)
+            val total = totalBeløp.divide(antallMåneder, 2, RoundingMode.FLOOR)        // TODO: Rounding må bestemmes før merge av 6814
+
             return total
         }
     }
