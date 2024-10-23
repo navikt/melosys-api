@@ -4,7 +4,6 @@ import com.ninjasquad.springmockk.MockkBean
 import io.mockk.every
 import no.nav.melosys.domain.avgift.Inntektsperiode
 import no.nav.melosys.domain.avgift.Penger
-import no.nav.melosys.domain.avgift.SkatteforholdTilNorge
 import no.nav.melosys.domain.avgift.Trygdeavgiftsperiode
 import no.nav.melosys.domain.kodeverk.Folketrygdloven_kap2_bestemmelser.FTRL_KAP2_2_8
 import no.nav.melosys.domain.kodeverk.Inntektskildetype
@@ -75,17 +74,17 @@ internal class ÅrsavregningControllerTest {
                         fom = LocalDate.parse("2023-01-01"),
                         tom = LocalDate.parse("2023-07-31"),
                         type = Inntektskildetype.ARBEIDSINNTEKT_FRA_NORGE,
-                        avgiftspliktigInntektMnd = Penger(40000.0),
+                        avgiftspliktigInntekt = Penger(40000.0),
                         isArbeidsgiversavgiftBetalesTilSkatt = true,
-                        isErMaanedsbelop = true
+                        erMaanedsbelop = true
                     ),
                     InntektsperioderForAvgift(
                         fom = LocalDate.parse("2023-08-01"),
                         tom = LocalDate.parse("2023-12-31"),
                         type = Inntektskildetype.INNTEKT_FRA_UTLANDET,
-                        avgiftspliktigInntektMnd = Penger(15000.0),
+                        avgiftspliktigInntekt = Penger(15000.0),
                         isArbeidsgiversavgiftBetalesTilSkatt = false,
-                        isErMaanedsbelop = true
+                        erMaanedsbelop = true
                     )
                 )
             ),

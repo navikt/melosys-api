@@ -250,7 +250,7 @@ internal class ÅrsavregningServiceTest {
     private fun lagInntektsperiode(start: String, slutt: String): Inntektsperiode = Inntektsperiode().apply {
         fomDato = LocalDate.parse(start)
         tomDato = LocalDate.parse(slutt)
-        avgiftspliktigInntektMnd = Penger(5000.0)
+        avgiftspliktigInntekt = Penger(5000.0)
         type = Inntektskildetype.ARBEIDSINNTEKT_FRA_NORGE
     }
 

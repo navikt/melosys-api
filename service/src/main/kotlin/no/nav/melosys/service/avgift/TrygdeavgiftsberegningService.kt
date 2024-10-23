@@ -14,6 +14,7 @@ import no.nav.melosys.integrasjon.ereg.EregFasade
 import no.nav.melosys.integrasjon.trygdeavgift.AvgiftsdekningerFraTrygdedekning
 import no.nav.melosys.integrasjon.trygdeavgift.TrygdeavgiftConsumer
 import no.nav.melosys.integrasjon.trygdeavgift.dto.*
+import no.nav.melosys.service.avgift.aarsavregning.totalbeloep.TotalBeløpBeregner
 import no.nav.melosys.service.avgift.dto.OppdaterTrygdeavgiftsgrunnlagRequest
 import no.nav.melosys.service.avgift.dto.SkatteforholdTilNorgeRequest
 import no.nav.melosys.service.behandling.BehandlingService
@@ -150,12 +151,18 @@ class TrygdeavgiftsberegningService(
 
     private fun mapInntektsperiodeDtos(oppdaterTrygdeavgiftsgrunnlagRequest: OppdaterTrygdeavgiftsgrunnlagRequest): List<InntektsperiodeDto> {
         return oppdaterTrygdeavgiftsgrunnlagRequest.inntektskilder.map {
+            val avgiftsPliktigInntekt = if (it.erMaanedsbelop) it.avgiftspliktigInntekt else TotalBeløpBeregner.månedligBeløpForTotalbeløp(
+                it.fomDato,
+                it.tomDato, it.avgiftspliktigInntekt!!
+            )
+
             InntektsperiodeDto(
-                UUID.randomUUID(),
-                DatoPeriodeDto(it.fomDato, it.tomDato),
-                it.type,
-                it.arbeidsgiversavgiftBetales,
-                PengerDto(it.avgiftspliktigInntektMnd ?: 0.toBigDecimal())
+                id = UUID.randomUUID(),
+                periode = DatoPeriodeDto(it.fomDato, it.tomDato),
+                inntektskilde = it.type,
+                arbeidsgiverBetalerAvgift = it.arbeidsgiversavgiftBetales,
+                månedsbeløp = PengerDto(avgiftsPliktigInntekt ?: 0.toBigDecimal()),
+                erMaanedsbelop = it.erMaanedsbelop
             )
         }
     }
@@ -172,7 +179,7 @@ class TrygdeavgiftsberegningService(
         behandlingsresultat: Behandlingsresultat,
         skatteForholdTilNorgeDtos: Set<SkatteforholdsperiodeDto>,
         inntektsperiodeDtos: List<InntektsperiodeDto>,
-        beregnetTrygdeavgift: List<TrygdeavgiftsberegningResponse>,
+        beregnetTrygdeavgift: List<TrygdeavgiftsberegningResponse>
     ): Set<Trygdeavgiftsperiode> {
 
         val skatteforholdTilNorge = skatteForholdTilNorgeDtos.map {
@@ -197,7 +204,9 @@ class TrygdeavgiftsberegningService(
         }.toSet()
     }
 
-    private fun mapDtoTilInntektsperioderMedUUIDPair(inntektsperioder: List<InntektsperiodeDto>): List<Pair<UUID, Inntektsperiode>> {
+    private fun mapDtoTilInntektsperioderMedUUIDPair(
+        inntektsperioder: List<InntektsperiodeDto>
+    ): List<Pair<UUID, Inntektsperiode>> {
         // TODO: Fiks mapping av isErMaanedsbelop. Må mest sannsynlig legge til samme felt i InntektskildeRequest
         return inntektsperioder.map {
             Pair(
@@ -208,6 +217,7 @@ class TrygdeavgiftsberegningService(
                     this.type = it.inntektskilde
                     this.isArbeidsgiversavgiftBetalesTilSkatt = it.arbeidsgiverBetalerAvgift == true
                     this.avgiftspliktigInntekt = it.månedsbeløp?.tilPenger()
+                    this.isErMaanedsbelop = it.erMaanedsbelop
                 })
         }
     }

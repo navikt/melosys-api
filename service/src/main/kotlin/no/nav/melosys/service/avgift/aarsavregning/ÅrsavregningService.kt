@@ -277,22 +277,25 @@ data class InntektsperioderForAvgift(
     val fom: LocalDate,
     val tom: LocalDate,
     val type: Inntektskildetype,
-    val avgiftspliktigInntektMnd: Penger,
-    val isArbeidsgiversavgiftBetalesTilSkatt: Boolean
+    val avgiftspliktigInntekt: Penger,
+    val isArbeidsgiversavgiftBetalesTilSkatt: Boolean,
+    val erMaanedsbelop: Boolean
 ) {
     constructor(inntektsperiode: Inntektsperiode) : this(
         fom = inntektsperiode.fom,
         tom = inntektsperiode.tom,
         type = inntektsperiode.type,
-        avgiftspliktigInntektMnd = inntektsperiode.avgiftspliktigInntektMnd,
-        isArbeidsgiversavgiftBetalesTilSkatt = inntektsperiode.isArbeidsgiversavgiftBetalesTilSkatt
+        avgiftspliktigInntekt = inntektsperiode.avgiftspliktigInntekt,
+        isArbeidsgiversavgiftBetalesTilSkatt = inntektsperiode.isArbeidsgiversavgiftBetalesTilSkatt,
+        erMaanedsbelop = inntektsperiode.isErMaanedsbelop
     )
 
     constructor(gjeldendeÅr: Int, inntektsperiode: Inntektsperiode) : this(
         fom = avkortFraOgMedDatoForÅr(gjeldendeÅr, inntektsperiode.fom),
         tom = avkortTilOgMedDatoForÅr(gjeldendeÅr, inntektsperiode.tom),
         type = inntektsperiode.type,
-        avgiftspliktigInntektMnd = inntektsperiode.avgiftspliktigInntektMnd,
-        isArbeidsgiversavgiftBetalesTilSkatt = inntektsperiode.isArbeidsgiversavgiftBetalesTilSkatt
+        avgiftspliktigInntekt = inntektsperiode.avgiftspliktigInntekt,
+        isArbeidsgiversavgiftBetalesTilSkatt = inntektsperiode.isArbeidsgiversavgiftBetalesTilSkatt,
+        erMaanedsbelop = inntektsperiode.isErMaanedsbelop
     )
 }

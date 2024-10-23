@@ -144,7 +144,12 @@ internal class TrygdeavgiftsberegningServiceTest {
                 )
             ), listOf(
                 InntektskildeRequest(
-                    Inntektskildetype.INNTEKT_FRA_UTLANDET, false, BigDecimal(10000.0), FOM, TOM
+                    type = Inntektskildetype.INNTEKT_FRA_UTLANDET,
+                    arbeidsgiversavgiftBetales = false,
+                    avgiftspliktigInntekt = BigDecimal(10000.0),
+                    fomDato = FOM,
+                    tomDato = TOM,
+                    erMaanedsbelop = true
                 )
             )
         )
@@ -194,7 +199,12 @@ internal class TrygdeavgiftsberegningServiceTest {
                 )
             ), listOf(
                 InntektskildeRequest(
-                    Inntektskildetype.INNTEKT_FRA_UTLANDET, false, BigDecimal(10000.0), FOM, TOM.minusMonths(1)
+                    type = Inntektskildetype.INNTEKT_FRA_UTLANDET,
+                    arbeidsgiversavgiftBetales = false,
+                    avgiftspliktigInntekt = BigDecimal(10000.0),
+                    fomDato = FOM,
+                    tomDato = TOM.minusMonths(1),
+                    erMaanedsbelop = true
                 )
             )
         )
@@ -223,7 +233,12 @@ internal class TrygdeavgiftsberegningServiceTest {
                 )
             ), listOf(
                 InntektskildeRequest(
-                    Inntektskildetype.INNTEKT_FRA_UTLANDET, false, BigDecimal(10000.0), FOM, TOM.minusMonths(1)
+                    type = Inntektskildetype.INNTEKT_FRA_UTLANDET,
+                    arbeidsgiversavgiftBetales = false,
+                    avgiftspliktigInntekt = BigDecimal(10000.0),
+                    fomDato = FOM,
+                    tomDato = TOM.minusMonths(1),
+                    erMaanedsbelop = true
                 )
             )
         )
@@ -257,7 +272,12 @@ internal class TrygdeavgiftsberegningServiceTest {
                 )
             ), listOf(
                 InntektskildeRequest(
-                    Inntektskildetype.ARBEIDSINNTEKT, false, BigDecimal(10000.0), FOM, TOM
+                    type = Inntektskildetype.ARBEIDSINNTEKT,
+                    arbeidsgiversavgiftBetales = false,
+                    avgiftspliktigInntekt = BigDecimal(10000.0),
+                    fomDato = FOM,
+                    tomDato = TOM,
+                    erMaanedsbelop = true
                 )
             )
         )
@@ -439,7 +459,12 @@ internal class TrygdeavgiftsberegningServiceTest {
                 )
             ), listOf(
                 InntektskildeRequest(
-                    Inntektskildetype.ARBEIDSINNTEKT_FRA_NORGE, true, BigDecimal(0), FOM, TOM
+                    type = Inntektskildetype.ARBEIDSINNTEKT_FRA_NORGE,
+                    arbeidsgiversavgiftBetales = true,
+                    avgiftspliktigInntekt = BigDecimal(0),
+                    fomDato = FOM,
+                    tomDato = TOM,
+                    erMaanedsbelop = true
                 )
             )
         )
@@ -497,7 +522,12 @@ internal class TrygdeavgiftsberegningServiceTest {
                 )
             ), listOf(
                 InntektskildeRequest(
-                    Inntektskildetype.ARBEIDSINNTEKT_FRA_NORGE, true, BigDecimal(0), FOM, TOM
+                    type = Inntektskildetype.ARBEIDSINNTEKT_FRA_NORGE,
+                    arbeidsgiversavgiftBetales = true,
+                    avgiftspliktigInntekt = BigDecimal(0),
+                    fomDato = FOM,
+                    tomDato = TOM,
+                    erMaanedsbelop = true
                 )
             )
         )
@@ -533,7 +563,12 @@ internal class TrygdeavgiftsberegningServiceTest {
                 )
             ), listOf(
                 InntektskildeRequest(
-                    Inntektskildetype.ARBEIDSINNTEKT_FRA_NORGE, true, BigDecimal(0), FOM, TOM
+                    type = Inntektskildetype.ARBEIDSINNTEKT_FRA_NORGE,
+                    arbeidsgiversavgiftBetales = true,
+                    avgiftspliktigInntekt = BigDecimal(0),
+                    fomDato = FOM,
+                    tomDato = TOM,
+                    erMaanedsbelop = true
                 )
             )
         )
@@ -569,7 +604,12 @@ internal class TrygdeavgiftsberegningServiceTest {
                 )
             ), listOf(
                 InntektskildeRequest(
-                    Inntektskildetype.ARBEIDSINNTEKT_FRA_NORGE, true, BigDecimal(0), FOM, TOM
+                    type = Inntektskildetype.ARBEIDSINNTEKT_FRA_NORGE,
+                    arbeidsgiversavgiftBetales = true,
+                    avgiftspliktigInntekt = BigDecimal(0),
+                    fomDato = FOM,
+                    tomDato = TOM,
+                    erMaanedsbelop = true
                 )
             )
         )
@@ -585,7 +625,12 @@ internal class TrygdeavgiftsberegningServiceTest {
         val oppdateringRequest = OppdaterTrygdeavgiftsgrunnlagRequest(
             listOf(), listOf(
                 InntektskildeRequest(
-                    Inntektskildetype.ARBEIDSINNTEKT_FRA_NORGE, true, BigDecimal(0), FOM, TOM
+                    type = Inntektskildetype.ARBEIDSINNTEKT_FRA_NORGE,
+                    arbeidsgiversavgiftBetales = true,
+                    avgiftspliktigInntekt = BigDecimal(0),
+                    fomDato = FOM,
+                    tomDato = TOM,
+                    erMaanedsbelop = true
                 )
             )
         )
@@ -622,7 +667,12 @@ internal class TrygdeavgiftsberegningServiceTest {
                 )
             ), listOf(
                 InntektskildeRequest(
-                    Inntektskildetype.INNTEKT_FRA_UTLANDET, true, BigDecimal(0), FOM, TOM
+                    type = Inntektskildetype.INNTEKT_FRA_UTLANDET,
+                    arbeidsgiversavgiftBetales = true,
+                    avgiftspliktigInntekt = BigDecimal(0),
+                    fomDato = FOM,
+                    tomDato = TOM,
+                    erMaanedsbelop = true
                 )
             )
         )

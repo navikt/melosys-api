@@ -48,7 +48,7 @@ class TotalBeløpBeregner {
 
         fun totalBeløpForPeriode(fom: LocalDate, tom: LocalDate, beløp: BigDecimal): BigDecimal {
             val antallMåneder = AntallMdBeregner(fom, tom).beregn()
-            val total = beløp.multiply(antallMåneder).setScale(2, RoundingMode.UNNECESSARY)
+            val total = beløp.multiply(antallMåneder).setScale(0, RoundingMode.FLOOR)
             log.debug { "Beløp for periode fom: $fom, tom: $tom regnes med enhetspris $total og antall: $antallMåneder ==> beløp: $total" }
             return total
         }
@@ -56,7 +56,8 @@ class TotalBeløpBeregner {
         // TODO: RoundingError må fikses før merge av 6814
         fun månedligBeløpForTotalbeløp(fom: LocalDate, tom: LocalDate, totalBeløp: BigDecimal): BigDecimal {
             val antallMåneder = AntallMdBeregner(fom, tom).beregn()
-            val total = totalBeløp.divide(antallMåneder).setScale(2, RoundingMode.FLOOR)
+            val total = totalBeløp.divide(antallMåneder, 2, RoundingMode.FLOOR)        // TODO: Rounding må bestemmes før merge av 6814
+
             return total
         }
     }

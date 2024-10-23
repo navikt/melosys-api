@@ -2,7 +2,6 @@ package no.nav.melosys.tjenester.gui.dto.trygdeavgift
 
 import no.nav.melosys.domain.avgift.Inntektsperiode
 import no.nav.melosys.domain.kodeverk.Inntektskildetype
-import no.nav.melosys.service.avgift.aarsavregning.totalbeloep.TotalBeløpBeregner
 import no.nav.melosys.service.avgift.dto.InntektskildeRequest
 import java.math.BigDecimal
 import java.time.LocalDate
@@ -25,8 +24,13 @@ data class InntektskildeDto(
     )
 
     fun tilRequest(): InntektskildeRequest {
-        val avgiftspliktigInntektMnd = if (erMaanedsbelop) avgiftspliktigInntekt else TotalBeløpBeregner.månedligBeløpForTotalbeløp(fomDato,
-            tomDato, avgiftspliktigInntekt!!)
-        return InntektskildeRequest(type, arbeidsgiversavgiftBetales, avgiftspliktigInntektMnd, fomDato, tomDato)
+        return InntektskildeRequest(
+            type,
+            arbeidsgiversavgiftBetales,
+            avgiftspliktigInntekt,
+            fomDato,
+            tomDato,
+            erMaanedsbelop
+        )
     }
 }

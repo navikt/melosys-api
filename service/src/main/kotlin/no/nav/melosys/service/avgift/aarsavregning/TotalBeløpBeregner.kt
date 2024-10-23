@@ -1,6 +1,5 @@
 package no.nav.melosys.service.avgift.aarsavregning
 
-import no.nav.melosys.domain.avgift.Inntektsperiode
 import no.nav.melosys.domain.avgift.Trygdeavgiftsperiode
 import no.nav.melosys.integrasjon.faktureringskomponenten.FaktureringskomponentenConsumer
 import no.nav.melosys.integrasjon.faktureringskomponenten.dto.BeregnTotalBeløpDto
@@ -36,7 +35,7 @@ class TotalBeløpBeregner(
                 FakturaseriePeriodeDto(
                     startDato = it.periodeFra,
                     sluttDato = it.periodeTil,
-                    enhetsprisPerManed = it.grunnlagInntekstperiode.avgiftspliktigInntektMnd.verdi
+                    enhetsprisPerManed = it.grunnlagInntekstperiode.avgiftspliktigInntekt.verdi
                 )
             }
         return faktureringskomponentenConsumer.hentTotalTrygdeavgiftForPeriode(BeregnTotalBeløpDto(fakturaseriePerioder), saksbehandlerIdent)
@@ -47,7 +46,7 @@ class TotalBeløpBeregner(
             FakturaseriePeriodeDto(
                 startDato = inntektsperiode.fom,
                 sluttDato = inntektsperiode.tom,
-                enhetsprisPerManed = inntektsperiode.avgiftspliktigInntektMnd.verdi
+                enhetsprisPerManed = inntektsperiode.avgiftspliktigInntekt.verdi
             )
         )
         return faktureringskomponentenConsumer.hentTotalTrygdeavgiftForPeriode(BeregnTotalBeløpDto(fakturaseriePerioder), saksbehandlerIdent)
