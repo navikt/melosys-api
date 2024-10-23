@@ -2,7 +2,7 @@ package no.nav.melosys.domain.eessi.melding
 
 
 data class Adresse(
-    var by: String = "",
+    var by: String? = null,
     var bygning: String? = null,
     var gate: String? = null,
     var land: String? = null,

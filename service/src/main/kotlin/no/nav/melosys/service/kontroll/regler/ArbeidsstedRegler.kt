@@ -14,28 +14,29 @@ object ArbeidsstedRegler {
 
     private val BYER_FRA_SVALBARD_PATTERN = Regex(BYER_FRA_SVALBARD_REGEX, RegexOption.IGNORE_CASE)
 
-    private val ARBEIDSSTED_SVALBARD_JAN_MAIEN: (Arbeidssted) -> Boolean = { arbeidssted ->
-        arbeidssted.adresse.land == Landkoder.SJ.kode ||
-            (arbeidssted.adresse.land == Landkoder.NO.kode &&
-                BYER_FRA_SVALBARD_PATTERN.containsMatchIn(arbeidssted.adresse.by))
+    private val ARBEIDSSTED_SVALBARD_JAN_MAIEN: (Arbeidssted?) -> Boolean = { arbeidssted ->
+        arbeidssted?.adresse?.let { adresse ->
+            val by = adresse.by ?: return@let false
+            (adresse.land == Landkoder.SJ.kode || (adresse.land == Landkoder.NO.kode && BYER_FRA_SVALBARD_PATTERN.containsMatchIn(by)))
+        } ?: false
     }
 
     private val ARBEIDSLAND_ARBEIDSSTED_SVALBARD_JAN_MAIEN: (Arbeidsland) -> Boolean = { arbeidsland ->
         arbeidsland.land == Landkoder.SJ.kode ||
             (arbeidsland.land == Landkoder.NO.kode &&
-                arbeidsland.arbeidssted.any { arbeidssted ->
-                    BYER_FRA_SVALBARD_PATTERN.containsMatchIn(arbeidssted.adresse.by)
-                })
+                arbeidsland.arbeidssted?.any { arbeidssted ->
+                    arbeidssted?.adresse?.by?.let { by -> BYER_FRA_SVALBARD_PATTERN.containsMatchIn(by) } ?: false
+                } ?: false)
     }
 
     @JvmStatic
     fun representantIUtlandetMangler(representantIUtlandet: RepresentantIUtlandet?): Boolean {
-        return representantIUtlandet == null || representantIUtlandet.representantNavn == null
+        return representantIUtlandet?.representantNavn == null
     }
 
     @JvmStatic
     fun erArbeidsstedFraSvalbardOgJanMayen(sedDokument: SedDokument): Boolean {
-        return sedDokument.arbeidssteder.any(ARBEIDSSTED_SVALBARD_JAN_MAIEN)
+        return sedDokument.arbeidssteder?.any(ARBEIDSSTED_SVALBARD_JAN_MAIEN) ?: false
     }
 
     @JvmStatic
