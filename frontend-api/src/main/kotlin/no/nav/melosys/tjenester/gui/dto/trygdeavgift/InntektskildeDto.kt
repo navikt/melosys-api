@@ -5,6 +5,7 @@ import no.nav.melosys.domain.kodeverk.Inntektskildetype
 import no.nav.melosys.service.avgift.dto.InntektskildeRequest
 import java.math.BigDecimal
 import java.time.LocalDate
+import java.util.*
 
 data class InntektskildeDto(
     val type: Inntektskildetype,
@@ -25,6 +26,7 @@ data class InntektskildeDto(
 
     fun tilRequest(): InntektskildeRequest {
         return InntektskildeRequest(
+            id = UUID.randomUUID(),
             type,
             arbeidsgiversavgiftBetales,
             avgiftspliktigInntekt,

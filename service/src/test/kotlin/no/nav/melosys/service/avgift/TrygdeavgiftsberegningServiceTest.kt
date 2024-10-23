@@ -140,10 +140,14 @@ internal class TrygdeavgiftsberegningServiceTest {
         val oppdateringRequest = OppdaterTrygdeavgiftsgrunnlagRequest(
             listOf(
                 SkatteforholdTilNorgeRequest(
-                    FOM, TOM, Skatteplikttype.SKATTEPLIKTIG
+                    UUID.randomUUID(),
+                    FOM,
+                    TOM,
+                    Skatteplikttype.SKATTEPLIKTIG
                 )
             ), listOf(
                 InntektskildeRequest(
+                    id = UUID.randomUUID(),
                     type = Inntektskildetype.INNTEKT_FRA_UTLANDET,
                     arbeidsgiversavgiftBetales = false,
                     avgiftspliktigInntekt = BigDecimal(10000.0),
@@ -195,10 +199,14 @@ internal class TrygdeavgiftsberegningServiceTest {
         val oppdateringRequest = OppdaterTrygdeavgiftsgrunnlagRequest(
             listOf(
                 SkatteforholdTilNorgeRequest(
-                    FOM, TOM, Skatteplikttype.SKATTEPLIKTIG
+                    UUID.randomUUID(),
+                    FOM,
+                    TOM,
+                    Skatteplikttype.SKATTEPLIKTIG
                 )
             ), listOf(
                 InntektskildeRequest(
+                    id = UUID.randomUUID(),
                     type = Inntektskildetype.INNTEKT_FRA_UTLANDET,
                     arbeidsgiversavgiftBetales = false,
                     avgiftspliktigInntekt = BigDecimal(10000.0),
@@ -229,10 +237,14 @@ internal class TrygdeavgiftsberegningServiceTest {
         val oppdateringRequest = OppdaterTrygdeavgiftsgrunnlagRequest(
             listOf(
                 SkatteforholdTilNorgeRequest(
-                    FOM, TOM.minusMonths(1), Skatteplikttype.SKATTEPLIKTIG
+                    UUID.randomUUID(),
+                    FOM,
+                    TOM.minusMonths(1),
+                    Skatteplikttype.SKATTEPLIKTIG
                 )
             ), listOf(
                 InntektskildeRequest(
+                    id = UUID.randomUUID(),
                     type = Inntektskildetype.INNTEKT_FRA_UTLANDET,
                     arbeidsgiversavgiftBetales = false,
                     avgiftspliktigInntekt = BigDecimal(10000.0),
@@ -268,10 +280,14 @@ internal class TrygdeavgiftsberegningServiceTest {
         val oppdateringRequest = OppdaterTrygdeavgiftsgrunnlagRequest(
             listOf(
                 SkatteforholdTilNorgeRequest(
-                    FOM, TOM, Skatteplikttype.IKKE_SKATTEPLIKTIG
+                    UUID.randomUUID(),
+                    FOM,
+                    TOM,
+                    Skatteplikttype.IKKE_SKATTEPLIKTIG
                 )
             ), listOf(
                 InntektskildeRequest(
+                    id = UUID.randomUUID(),
                     type = Inntektskildetype.ARBEIDSINNTEKT,
                     arbeidsgiversavgiftBetales = false,
                     avgiftspliktigInntekt = BigDecimal(10000.0),
@@ -330,7 +346,10 @@ internal class TrygdeavgiftsberegningServiceTest {
         val oppdateringRequest = OppdaterTrygdeavgiftsgrunnlagRequest(
             listOf(
                 SkatteforholdTilNorgeRequest(
-                    FOM, TOM, Skatteplikttype.SKATTEPLIKTIG
+                    UUID.randomUUID(),
+                    FOM,
+                    TOM,
+                    Skatteplikttype.SKATTEPLIKTIG
                 )
             ), emptyList()
         )
@@ -389,7 +408,10 @@ internal class TrygdeavgiftsberegningServiceTest {
         val oppdateringRequest = OppdaterTrygdeavgiftsgrunnlagRequest(
             listOf(
                 SkatteforholdTilNorgeRequest(
-                    LocalDate.of(2021, 1, 1), LocalDate.of(2021, 2, 28), Skatteplikttype.SKATTEPLIKTIG
+                    UUID.randomUUID(),
+                    LocalDate.of(2021, 1, 1),
+                    LocalDate.of(2021, 2, 28),
+                    Skatteplikttype.SKATTEPLIKTIG
                 )
             ), emptyList()
         )
@@ -438,6 +460,7 @@ internal class TrygdeavgiftsberegningServiceTest {
 
     @Test
     fun beregnTrygdeavgift_skalIkkeBetaleTrygdeavgiftTilNav_sletterEksisterendeTrygdeavgiftOgReturnererTrygdeavgiftsperiodeMedBelop0() {
+        val inntektsKildeId = UUID.randomUUID()
         behandling.apply {
             fagsak = FagsakTestFactory.builder().medBruker().build()
         }
@@ -455,10 +478,14 @@ internal class TrygdeavgiftsberegningServiceTest {
         val oppdateringRequest = OppdaterTrygdeavgiftsgrunnlagRequest(
             listOf(
                 SkatteforholdTilNorgeRequest(
-                    FOM, TOM, Skatteplikttype.SKATTEPLIKTIG
+                    UUID.randomUUID(),
+                    FOM,
+                    TOM,
+                    Skatteplikttype.SKATTEPLIKTIG
                 )
             ), listOf(
                 InntektskildeRequest(
+                    id = inntektsKildeId,
                     type = Inntektskildetype.ARBEIDSINNTEKT_FRA_NORGE,
                     arbeidsgiversavgiftBetales = true,
                     avgiftspliktigInntekt = BigDecimal(0),
@@ -476,7 +503,7 @@ internal class TrygdeavgiftsberegningServiceTest {
                     ), TrygdeavgiftsgrunnlagDto(
                         behandlingsresultat.medlemskapsperioder.first().idToUUID(),
                         oppdateringRequest.skatteforholdTilNorgeList.first().toUUID(),
-                        UUID.randomUUID()
+                        inntektsKildeId
                     )
                 )
             )
@@ -516,12 +543,19 @@ internal class TrygdeavgiftsberegningServiceTest {
         val oppdateringRequest = OppdaterTrygdeavgiftsgrunnlagRequest(
             listOf(
                 SkatteforholdTilNorgeRequest(
-                    FOM, TOM, Skatteplikttype.SKATTEPLIKTIG
+                    UUID.randomUUID(),
+                    FOM,
+                    TOM,
+                    Skatteplikttype.SKATTEPLIKTIG
                 ), SkatteforholdTilNorgeRequest(
-                    FOM, TOM, Skatteplikttype.SKATTEPLIKTIG
+                    UUID.randomUUID(),
+                    FOM,
+                    TOM,
+                    Skatteplikttype.SKATTEPLIKTIG
                 )
             ), listOf(
                 InntektskildeRequest(
+                    id = UUID.randomUUID(),
                     type = Inntektskildetype.ARBEIDSINNTEKT_FRA_NORGE,
                     arbeidsgiversavgiftBetales = true,
                     avgiftspliktigInntekt = BigDecimal(0),
@@ -559,10 +593,14 @@ internal class TrygdeavgiftsberegningServiceTest {
         val oppdateringRequest = OppdaterTrygdeavgiftsgrunnlagRequest(
             listOf(
                 SkatteforholdTilNorgeRequest(
-                    FOM, TOM, Skatteplikttype.SKATTEPLIKTIG
+                    UUID.randomUUID(),
+                    FOM,
+                    TOM,
+                    Skatteplikttype.SKATTEPLIKTIG
                 )
             ), listOf(
                 InntektskildeRequest(
+                    id = UUID.randomUUID(),
                     type = Inntektskildetype.ARBEIDSINNTEKT_FRA_NORGE,
                     arbeidsgiversavgiftBetales = true,
                     avgiftspliktigInntekt = BigDecimal(0),
@@ -600,10 +638,14 @@ internal class TrygdeavgiftsberegningServiceTest {
         val oppdateringRequest = OppdaterTrygdeavgiftsgrunnlagRequest(
             listOf(
                 SkatteforholdTilNorgeRequest(
-                    FOM, TOM, Skatteplikttype.SKATTEPLIKTIG
+                    UUID.randomUUID(),
+                    FOM,
+                    TOM,
+                    Skatteplikttype.SKATTEPLIKTIG
                 )
             ), listOf(
                 InntektskildeRequest(
+                    id = UUID.randomUUID(),
                     type = Inntektskildetype.ARBEIDSINNTEKT_FRA_NORGE,
                     arbeidsgiversavgiftBetales = true,
                     avgiftspliktigInntekt = BigDecimal(0),
@@ -625,6 +667,7 @@ internal class TrygdeavgiftsberegningServiceTest {
         val oppdateringRequest = OppdaterTrygdeavgiftsgrunnlagRequest(
             listOf(), listOf(
                 InntektskildeRequest(
+                    id = UUID.randomUUID(),
                     type = Inntektskildetype.ARBEIDSINNTEKT_FRA_NORGE,
                     arbeidsgiversavgiftBetales = true,
                     avgiftspliktigInntekt = BigDecimal(0),
@@ -645,7 +688,10 @@ internal class TrygdeavgiftsberegningServiceTest {
         val oppdateringRequest = OppdaterTrygdeavgiftsgrunnlagRequest(
             listOf(
                 SkatteforholdTilNorgeRequest(
-                    FOM, TOM, Skatteplikttype.IKKE_SKATTEPLIKTIG
+                    UUID.randomUUID(),
+                    FOM,
+                    TOM,
+                    Skatteplikttype.IKKE_SKATTEPLIKTIG
                 )
             ), listOf()
         )
@@ -663,10 +709,14 @@ internal class TrygdeavgiftsberegningServiceTest {
         val oppdateringRequest = OppdaterTrygdeavgiftsgrunnlagRequest(
             listOf(
                 SkatteforholdTilNorgeRequest(
-                    FOM, TOM, Skatteplikttype.IKKE_SKATTEPLIKTIG
+                    UUID.randomUUID(),
+                    FOM,
+                    TOM,
+                    Skatteplikttype.IKKE_SKATTEPLIKTIG
                 )
             ), listOf(
                 InntektskildeRequest(
+                    id = UUID.randomUUID(),
                     type = Inntektskildetype.INNTEKT_FRA_UTLANDET,
                     arbeidsgiversavgiftBetales = true,
                     avgiftspliktigInntekt = BigDecimal(0),
