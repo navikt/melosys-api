@@ -10,10 +10,7 @@ import io.kotest.matchers.shouldBe
 import io.kotest.matchers.types.shouldBeInstanceOf
 import no.nav.melosys.domain.Fagsystem
 import no.nav.melosys.domain.kodeverk.*
-import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingsresultattyper
-import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingsstatus
-import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingstema
-import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingstyper
+import no.nav.melosys.domain.kodeverk.behandlinger.*
 import no.nav.melosys.domain.mottatteopplysninger.Soeknad
 import no.nav.melosys.domain.mottatteopplysninger.data.Periode
 import no.nav.melosys.melosysmock.journalpost.JournalpostRepo
@@ -24,11 +21,14 @@ import no.nav.melosys.repository.FagsakRepository
 import no.nav.melosys.saksflytapi.domain.ProsessType
 import no.nav.melosys.service.journalforing.JournalfoeringService
 import no.nav.melosys.service.oppgave.OppgaveService
+import no.nav.melosys.service.sak.OpprettBehandlingForSak
+import no.nav.melosys.service.sak.OpprettSakDto
 import org.junit.jupiter.api.AfterEach
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.TestInstance
 import org.springframework.beans.factory.annotation.Autowired
+import java.time.LocalDate
 
 @TestInstance(TestInstance.Lifecycle.PER_CLASS)
 class JournalfoeringIT(
@@ -39,8 +39,9 @@ class JournalfoeringIT(
     @Autowired private val behandlingsresultatRepository: BehandlingsresultatRepository,
     @Autowired private val fagsakRepository: FagsakRepository,
     @Autowired private val unleash: FakeUnleash,
-    @Autowired private val journalpostRepo: JournalpostRepo
-) : JournalfoeringBase(testDataGenerator, journalføringService, oppgaveService) {
+    @Autowired private val journalpostRepo: JournalpostRepo,
+    @Autowired private val opprettBehandlingForSak: OpprettBehandlingForSak,
+    ) : JournalfoeringBase(testDataGenerator, journalføringService, oppgaveService) {
 
     @BeforeEach
     fun setup() {
@@ -220,6 +221,94 @@ class JournalfoeringIT(
         tilKnyttetJournalpost.any {
             it.tittel == "Melding om forventet saksbehandlingstid"
         }
+    }
+
+    @Test
+    fun journalførOgOpprettNyVurdering_etterAvslåttÅrsavregning_tilNyVurderingFTRL() {
+        val journalfoeringOpprettDto1 = defaultJournalføringDto().apply {
+            fagsak.sakstype = Sakstyper.FTRL.kode
+            fagsak.sakstema = Sakstemaer.MEDLEMSKAP_LOVVALG.kode
+            behandlingstypeKode = Behandlingstyper.FØRSTEGANG.kode
+            behandlingstemaKode = Behandlingstema.YRKESAKTIV.kode
+        }
+        println("steg 1")
+        val prosessinstans = journalførOgVentTilProsesserErFerdige(
+            journalfoeringOpprettDto1,
+            mapOf(
+                ProsessType.JFR_NY_SAK_BRUKER to 1,
+                ProsessType.OPPRETT_OG_DISTRIBUER_BREV to 1
+            )
+        )
+
+        println("steg2")
+        val behandling = fagsakRepository.findBySaksnummer(prosessinstans.behandling.fagsak.saksnummer).get().hentSistRegistrertBehandling()
+
+        val årsavregningBehandlingID = executeAndWait(
+            mapOf(
+                ProsessType.OPPRETT_NY_BEHANDLING_FOR_SAK to 1
+            )
+        ) {
+            opprettBehandlingForSak.opprettBehandling(
+                behandling.fagsak.saksnummer,
+                lagOpprettSakDtoÅrsavregning()
+            )
+        }.behandling.id
+
+        val årsavregningsBehandling = behandlingRepository.findById(årsavregningBehandlingID).get()
+
+        årsavregningsBehandling.status = Behandlingsstatus.AVSLUTTET
+        behandlingRepository.save(årsavregningsBehandling)
+
+        val behandlingsresultat = behandlingsresultatRepository.findById(årsavregningsBehandling.id).get()
+        behandlingsresultat.type = Behandlingsresultattyper.HENLEGGELSE_BORTFALT
+        behandlingsresultatRepository.save(behandlingsresultat)
+
+        println("Steg 3")
+        val journalfoeringTilordneDto3 = lagJournalfoeringOppgaveOgTilordneDto(
+            saksnummer = behandling.fagsak.saksnummer,
+            journalfoeringTilordneDto = defaultJournalfoeringTilordneDto().apply {
+                behandlingstemaKode = Behandlingstema.YRKESAKTIV.kode
+                behandlingstypeKode = Behandlingstyper.NY_VURDERING.kode
+            }
+        )
+        executeAndWait(
+            mapOf(
+                ProsessType.JFR_ANDREGANG_NY_BEHANDLING to 1,
+                ProsessType.OPPRETT_OG_DISTRIBUER_BREV to 1
+            )
+        ) {
+            journalføringService.journalførOgOpprettAndregangsBehandling(journalfoeringTilordneDto3)
+        }
+
+
+        val fagsak = fagsakRepository.findBySaksnummer(behandling.fagsak.saksnummer).get()
+        fagsak.behandlinger
+            .shouldHaveSize(3)
+            .maxBy { it.id }
+            .apply {
+                type.shouldBe(Behandlingstyper.NY_VURDERING)
+                opprinneligBehandling.shouldBeNull()
+                initierendeJournalpostId.shouldBe(journalfoeringTilordneDto3.journalpostID)
+            }
+            .mottatteOpplysninger.mottatteOpplysningerData.shouldBeInstanceOf<Soeknad>()
+            .shouldBeEqualToComparingFields(Soeknad().apply {
+                soeknadsland.apply {
+                    landkoder = listOf()
+                    isFlereLandUkjentHvilke = false
+                }
+                periode = Periode()
+            }, FieldsEqualityCheckConfig(ignorePrivateFields = false))
+    }
+
+    private fun lagOpprettSakDtoÅrsavregning(): OpprettSakDto {
+        val opprettsakdto = OpprettSakDto()
+        opprettsakdto.sakstema = Sakstemaer.MEDLEMSKAP_LOVVALG
+        opprettsakdto.sakstype = Sakstyper.FTRL
+        opprettsakdto.behandlingstema = Behandlingstema.YRKESAKTIV
+        opprettsakdto.behandlingstype = Behandlingstyper.ÅRSAVREGNING
+        opprettsakdto.mottaksdato = LocalDate.of(2023, 1, 1)
+        opprettsakdto.behandlingsaarsakType = Behandlingsaarsaktyper.HENVENDELSE
+        return opprettsakdto
     }
 
     @Test
