@@ -15,9 +15,9 @@ object ArbeidsstedRegler {
     private val BYER_FRA_SVALBARD_PATTERN = Regex(BYER_FRA_SVALBARD_REGEX, RegexOption.IGNORE_CASE)
 
     private val ARBEIDSSTED_SVALBARD_JAN_MAIEN: (Arbeidssted?) -> Boolean = { arbeidssted ->
-        arbeidssted?.adresse?.let { adresse ->
-            val by = adresse.by ?: return@let false
-            (adresse.land == Landkoder.SJ.kode || (adresse.land == Landkoder.NO.kode && BYER_FRA_SVALBARD_PATTERN.containsMatchIn(by)))
+        arbeidssted?.let {
+            val by = it.adresse.by ?: return@let false
+            (it.adresse.land == Landkoder.SJ.kode || (it.adresse.land == Landkoder.NO.kode && BYER_FRA_SVALBARD_PATTERN.containsMatchIn(by)))
         } ?: false
     }
 
@@ -25,7 +25,10 @@ object ArbeidsstedRegler {
         arbeidsland.land == Landkoder.SJ.kode ||
             (arbeidsland.land == Landkoder.NO.kode &&
                 arbeidsland.arbeidssted?.any { arbeidssted ->
-                    arbeidssted?.adresse?.by?.let { by -> BYER_FRA_SVALBARD_PATTERN.containsMatchIn(by) } ?: false
+                    arbeidssted?.let {
+                        val by = it.adresse.by ?: return@let false
+                        BYER_FRA_SVALBARD_PATTERN.containsMatchIn(by)
+                    } ?: false
                 } ?: false)
     }
 
