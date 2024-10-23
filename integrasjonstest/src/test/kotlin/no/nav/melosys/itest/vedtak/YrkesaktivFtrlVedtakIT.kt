@@ -264,9 +264,10 @@ class YrkesaktivFtrlVedtakIT(
                     InntektskildeRequest(
                         type = Inntektskildetype.INNTEKT_FRA_UTLANDET,
                         arbeidsgiversavgiftBetales = true,
-                        avgiftspliktigInntektMnd = 10000.toBigDecimal(),
+                        avgiftspliktigInntekt = 10000.toBigDecimal(),
                         fomDato = LocalDate.of(2023, 1, 1),
-                        tomDato = LocalDate.of(2023, 2, 1)
+                        tomDato = LocalDate.of(2023, 2, 1),
+                        erMaanedsbelop = true
                     )
                 )
             )
@@ -385,9 +386,10 @@ class YrkesaktivFtrlVedtakIT(
                     InntektskildeRequest(
                         type = Inntektskildetype.INNTEKT_FRA_UTLANDET,
                         arbeidsgiversavgiftBetales = true,
-                        avgiftspliktigInntektMnd = 10000.toBigDecimal(),
+                        avgiftspliktigInntekt = 10000.toBigDecimal(),
                         fomDato = LocalDate.of(2023, 1, 1),
-                        tomDato = LocalDate.of(2023, 2, 1)
+                        tomDato = LocalDate.of(2023, 2, 1),
+                        erMaanedsbelop = true
                     )
                 )
             )
@@ -586,9 +588,10 @@ class YrkesaktivFtrlVedtakIT(
                     InntektskildeRequest(
                         type = Inntektskildetype.INNTEKT_FRA_UTLANDET,
                         arbeidsgiversavgiftBetales = arbeidsgiversavgiftBetales,
-                        avgiftspliktigInntektMnd = 10000.toBigDecimal(),
+                        avgiftspliktigInntekt = 10000.toBigDecimal(),
                         fomDato = LocalDate.of(2023, 1, 1),
-                        tomDato = LocalDate.of(2023, 2, 1)
+                        tomDato = LocalDate.of(2023, 2, 1),
+                        erMaanedsbelop = true
                     )
                 )
             )
