@@ -4,7 +4,6 @@ import java.util.EnumSet;
 import java.util.Set;
 
 import no.nav.melosys.domain.Behandling;
-import no.nav.melosys.domain.Behandlingsresultat;
 import no.nav.melosys.domain.Fagsak;
 import no.nav.melosys.domain.kodeverk.Saksstatuser;
 import no.nav.melosys.domain.kodeverk.Sakstemaer;
@@ -48,17 +47,19 @@ public class AngiBehandlingsresultatService {
         var fagsak = behandlingsresultat.getBehandling().getFagsak();
 
         validerBehandlingsresultattype(behandlingsresultattype, behandlingsresultat.getBehandling(), fagsak);
-        slettMedlemskapsPerioderNårBehandlingAvsluttesOgSakstypeErFTRL(behandlingsresultat, fagsak);
 
         log.info("Avslutter sak {} og setter behandlingsresultattype {} på behandling {}", fagsak.getSaksnummer(), behandlingsresultattype, behandlingID);
         behandlingsresultat.setType(behandlingsresultattype);
+        slettMedlemskapsperioderNårBehandlingAvsluttesOgSakstypeErFTRL(behandlingsresultat.getType(), fagsak.erSakstypeFtrl(), behandlingID);
         behandlingsresultatService.lagre(behandlingsresultat);
         fagsakService.avsluttFagsakOgBehandling(fagsak, Saksstatuser.LOVVALG_AVKLART);
         oppgaveService.ferdigstillOppgaveMedBehandlingID(behandlingID);
     }
 
-    private void slettMedlemskapsPerioderNårBehandlingAvsluttesOgSakstypeErFTRL(Behandlingsresultat behandlingsResultat, Fagsak fagsak) {
-        if (fagsak.erSakstypeFtrl() && GYLDIGE_BEH_TYPER_FJERN_PERIODER.contains(behandlingsResultat.getType())) behandlingsResultat.getMedlemskapsperioder().clear();
+    private void slettMedlemskapsperioderNårBehandlingAvsluttesOgSakstypeErFTRL(Behandlingsresultattyper type, Boolean erSakstypeFtrl, long behandlingID) {
+        if (erSakstypeFtrl && GYLDIGE_BEH_TYPER_FJERN_PERIODER.contains(type)) {
+            behandlingsresultatService.tømMedlemskapsperioder(behandlingID);
+        }
     }
 
     private static final EnumSet<Behandlingsresultattyper> GYLDIGE_BEH_TYPER_FJERN_PERIODER = EnumSet.of(

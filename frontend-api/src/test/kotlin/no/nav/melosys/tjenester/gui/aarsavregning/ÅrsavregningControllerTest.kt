@@ -11,10 +11,7 @@ import no.nav.melosys.domain.kodeverk.Inntektskildetype
 import no.nav.melosys.domain.kodeverk.Medlemskapstyper
 import no.nav.melosys.domain.kodeverk.Skatteplikttype
 import no.nav.melosys.domain.kodeverk.Trygdedekninger
-import no.nav.melosys.service.avgift.aarsavregning.MedlemskapsperiodeForAvgift
-import no.nav.melosys.service.avgift.aarsavregning.Trygdeavgiftsgrunnlag
-import no.nav.melosys.service.avgift.aarsavregning.ÅrsavregningModel
-import no.nav.melosys.service.avgift.aarsavregning.ÅrsavregningService
+import no.nav.melosys.service.avgift.aarsavregning.*
 import no.nav.melosys.service.tilgang.Aksesskontroll
 import org.junit.jupiter.api.Test
 import org.springframework.beans.factory.annotation.Autowired
@@ -61,34 +58,35 @@ internal class ÅrsavregningControllerTest {
                     )
                 ),
                 skatteforholdsperioder = listOf(
-                    SkatteforholdTilNorge().apply {
-                        fomDato = LocalDate.parse("2023-01-01")
-                        tomDato = LocalDate.parse("2023-07-31")
+                    SkatteforholdTilNorgeForAvgift(
+                        fom = LocalDate.parse("2023-01-01"),
+                        tom = LocalDate.parse("2023-07-31"),
                         skatteplikttype = Skatteplikttype.SKATTEPLIKTIG
-                    },
-                    SkatteforholdTilNorge().apply {
-                        fomDato = LocalDate.parse("2023-08-01")
-                        tomDato = LocalDate.parse("2023-12-31")
+                    ),
+
+                    SkatteforholdTilNorgeForAvgift(
+                        fom = LocalDate.parse("2023-08-01"),
+                        tom = LocalDate.parse("2023-12-31"),
                         skatteplikttype = Skatteplikttype.IKKE_SKATTEPLIKTIG
-                    },
+                    )
                 ),
                 innteksperioder = listOf(
-                    Inntektsperiode().apply {
-                        fomDato = LocalDate.parse("2023-01-01")
-                        tomDato = LocalDate.parse("2023-07-31")
-                        type = Inntektskildetype.ARBEIDSINNTEKT_FRA_NORGE
-                        isArbeidsgiversavgiftBetalesTilSkatt = true
-                        avgiftspliktigInntekt = Penger(40000.0)
+                    InntektsperioderForAvgift(
+                        fom = LocalDate.parse("2023-01-01"),
+                        tom = LocalDate.parse("2023-07-31"),
+                        type = Inntektskildetype.ARBEIDSINNTEKT_FRA_NORGE,
+                        avgiftspliktigInntektMnd = Penger(40000.0),
+                        isArbeidsgiversavgiftBetalesTilSkatt = true,
                         isErMaanedsbelop = true
-                    },
-                    Inntektsperiode().apply {
-                        fomDato = LocalDate.parse("2023-08-01")
-                        tomDato = LocalDate.parse("2023-12-31")
-                        type = Inntektskildetype.INNTEKT_FRA_UTLANDET
-                        isArbeidsgiversavgiftBetalesTilSkatt = false
-                        avgiftspliktigInntekt = Penger(15000.0)
+                    ),
+                    InntektsperioderForAvgift(
+                        fom = LocalDate.parse("2023-08-01"),
+                        tom = LocalDate.parse("2023-12-31"),
+                        type = Inntektskildetype.INNTEKT_FRA_UTLANDET,
+                        avgiftspliktigInntektMnd = Penger(15000.0),
+                        isArbeidsgiversavgiftBetalesTilSkatt = false,
                         isErMaanedsbelop = true
-                    }
+                    )
                 )
             ),
             tidligereAvgift = listOf(
@@ -171,16 +169,16 @@ internal class ÅrsavregningControllerTest {
           "tomDato": "2023-07-31",
           "type": "ARBEIDSINNTEKT_FRA_NORGE",
           "arbeidsgiversavgiftBetales": true,
-          "avgiftspliktigInntekt": 40000,
-          "erMaanedsbelop": true
+          "avgiftspliktigInntektMnd": 40000,
+          "totalInntektForPerioden": 24280
         },
         {
           "fomDato": "2023-08-01",
           "tomDato": "2023-12-31",
           "type": "INNTEKT_FRA_UTLANDET",
           "arbeidsgiversavgiftBetales": false,
-          "avgiftspliktigInntekt": 15000,
-          "erMaanedsbelop": true
+          "avgiftspliktigInntektMnd": 15000,
+          "totalInntektForPerioden": 24280
         }
       ]
     },
@@ -205,8 +203,8 @@ internal class ÅrsavregningControllerTest {
           "avgiftPerMd": 6330
         }
       ],
-      "totalInntekt": 355000,
-      "totalAvgift": 31650
+      "totalInntekt": 42,
+      "totalAvgift": 21170
     }
   },
   "avvikFunnet": false,

@@ -33,7 +33,9 @@ class AvslagService(
             fastsattAvLand = Land_iso2.NO
             this.settVedtakMetadata(LocalDate.now().plusWeeks(FRIST_KLAGE_UKER))
         }
-        behandlingsresultat.medlemskapsperioder.clear()
+        if (behandling.fagsak.erSakstypeFtrl()) {
+            behandlingsresultatService.tømMedlemskapsperioder(behandlingID)
+        }
         behandlingsresultatService.lagre(behandlingsresultat)
 
         dokgenService.produserOgDistribuerBrev(behandlingID, lagBrevbestillingDto(fritekst, bestillersId))
