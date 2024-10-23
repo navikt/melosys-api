@@ -30,6 +30,14 @@ class KafkaTestConfig {
     }
 
     @Bean
+    @Qualifier("melosysEessiMeldingString")
+    fun melosysEessiMeldingKafkaTemplateString(
+        kafkaProperties: KafkaProperties,
+    ): KafkaTemplate<String, String>  = KafkaTemplate(
+        DefaultKafkaProducerFactory(kafkaProperties.buildProducerProperties(null))
+    )
+
+    @Bean
     @Qualifier("manglendeFakturabetalingMelding")
     fun ManglendeFakturabetalingMeldingKafkaTemplate(
         kafkaProperties: KafkaProperties,

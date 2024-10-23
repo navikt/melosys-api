@@ -51,6 +51,7 @@ import java.util.*
 class SedMottakTestIT(
     @Autowired private val eessiMeldingTestDataFactory: EessiMeldingTestDataFactory,
     @Autowired @Qualifier("melosysEessiMelding") private val melosysEessiMeldingKafkaTemplate: KafkaTemplate<String, MelosysEessiMelding>,
+    @Autowired @Qualifier("melosysEessiMeldingString") private val melosysEessiMeldingKafkaTemplateString: KafkaTemplate<String, String>,
     @Autowired private val prosessinstansRepository: ProsessinstansRepository,
     @Autowired private val utpekingService: UtpekingService,
     @Autowired private val vedtaksfattingFasade: VedtaksfattingFasade,
@@ -650,5 +651,88 @@ class SedMottakTestIT(
                 Behandlingsresultattyper.FORELOEPIG_FASTSATT_LOVVALGSLAND
             )
         }
+    }
+
+    @Test
+    fun `A003 skal virke med arbeidssted=null`() {
+        val ref = Random().nextInt(100000).toString()
+        val journalpostId = eessiMeldingTestDataFactory.opprettEessiJournalpost(ref)
+
+        val melosysEessiMeldingSomFeilerProd = """
+            {
+                "sedId": "31fefdf52b264a04af5cf5dfc2d5b923",
+                "sequenceId": null,
+                "rinaSaksnummer": "$ref",
+                "avsender": {
+                    "avsenderID": "NL:1001",
+                    "landkode": "NL"
+                },
+                "journalpostId": "$journalpostId",
+                "dokumentId": null,
+                "gsakSaksnummer": null,
+                "aktoerId": "1111111111111",
+                "statsborgerskap": [
+                    {
+                        "landkode": "NL"
+                    }
+                ],
+                "arbeidssteder": [],
+                "arbeidsland": [
+                    {
+                        "land": "SE",
+                        "arbeidssted": null
+                    },
+                    {
+                        "land": "HR",
+                        "arbeidssted": null
+                    }
+                ],
+                "periode": {
+                    "fom": [
+                        2025,
+                        1,
+                        1
+                    ],
+                    "tom": [
+                        2025,
+                        12,
+                        31
+                    ]
+                },
+                "lovvalgsland": "NL",
+                "artikkel": "13_1_a",
+                "erEndring": false,
+                "midlertidigBestemmelse": true,
+                "x006NavErFjernet": false,
+                "ytterligereInformasjon": null,
+                "bucType": "LA_BUC_02",
+                "sedType": "A003",
+                "sedVersjon": "1",
+                "svarAnmodningUnntak": null,
+                "anmodningUnntak": null
+            }
+        """
+
+        val sedInfo = SedInformasjon(ref, SedType.A003.name, LocalDate.now(), LocalDate.now(), null, "AVBRUTT", null)
+        val bucInformasjon = BucInformasjon(ref, true, null, LocalDate.now(), null, listOf(sedInfo))
+        MelosysEessiRepo.opprettBucinformasjon(bucInformasjon)
+
+        prosessinstansTestManager.executeAndWait(
+            mapOf(
+                ProsessType.MOTTAK_SED to 1,
+                ProsessType.ARBEID_FLERE_LAND_NY_SAK to 1
+            )
+        ) {
+            melosysEessiMeldingKafkaTemplateString.send(kafkaTopic, melosysEessiMeldingSomFeilerProd)
+        }
+
+        prosessinstansRepository.findAllByLåsReferanseStartingWith(ref)
+            .sortedBy { it.endretDato }
+            .shouldHaveSize(2).last().run {
+                behandling.status shouldBe Behandlingsstatus.OPPRETTET
+                behandlingsresultatRepository.findWithLovvalgOgMedlemskapsperioderById(behandling.id)
+                    .shouldBePresent()
+                    .type shouldBe Behandlingsresultattyper.IKKE_FASTSATT
+            }
     }
 }
