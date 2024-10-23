@@ -190,42 +190,6 @@ class TrygdeavgiftsberegningService(
         }.toSet()
     }
 
-    // TODO refactor
-    /*
-    private fun leggTilNyeTrygdeavgiftsperioder(
-        oppdaterTrygdeavgiftsgrunnlagRequest: OppdaterTrygdeavgiftsgrunnlagRequest,
-        behandlingsresultat: Behandlingsresultat,
-    ): Set<Trygdeavgiftsperiode> {
-        val innvilgedeMedlemskapsperioder = behandlingsresultat.medlemskapsperioder.filter { it.erInnvilget() }
-
-        val medlemskapsperiodeDtos = mapTilMedlemskapsperiodeDtos(innvilgedeMedlemskapsperioder)
-        val skatteforholdsperioderDtos = mapTilSkatteforholdsperiodeDtos(oppdaterTrygdeavgiftsgrunnlagRequest)
-        val inntektsperioderDtos = mapInntektsperiodeDtos(oppdaterTrygdeavgiftsgrunnlagRequest)
-        val foedselDato = hentFødselsdatoOmViHarTjenstligBehov(behandlingsresultat.id, innvilgedeMedlemskapsperioder)
-
-
-        val beregnetTrygdeavgift = beregnTrygdeAvgift(medlemskapsperiodeDtos, skatteforholdsperioderDtos, inntektsperioderDtos, foedselDato)
-
-
-        val nyeTrygdeavgiftsperioder = lagOgLeggTilNyeTrygdeavgiftsperioder(
-            behandlingsresultat,
-            skatteforholdsperioderDtos,
-            inntektsperioderDtos,
-            beregnetTrygdeavgift
-        )
-
-        val skalKunBetalesTilSkatt =
-            trygdeavgiftMottakerService.getTrygdeavgiftMottaker(behandlingsresultat) == Trygdeavgiftmottaker.TRYGDEAVGIFT_BETALES_TIL_SKATT
-        if (skalKunBetalesTilSkatt && !erAlleTrygdeavgiftbelopNull(beregnetTrygdeavgift)) {
-            throw IllegalStateException("Trygdeavgift skal ikke betales til NAV. Beregnet trygdeavgift må derfor være 0.")
-        }
-
-        behandlingsresultatService.lagreOgFlush(behandlingsresultat)
-        return nyeTrygdeavgiftsperioder
-    }
-
-     */
-
     private fun beregnTrygdeAvgift(
         medlemskapsperiodeDtos: Set<MedlemskapsperiodeDto>,
         skatteforholdsperioderDtos: Set<SkatteforholdsperiodeDto>,
@@ -327,28 +291,6 @@ class TrygdeavgiftsberegningService(
                     this.isErMaanedsbelop = it.erMaanedsbelop
                 })
         }
-
-        // TODO: Fiks mapping av isErMaanedsbelop. Må mest sannsynlig legge til samme felt i InntektskildeRequest
-        /*
-        return inntektsperioder.map {
-
-            Pair(
-                it.id,
-                Inntektsperiode().apply {
-                    this.fomDato = it.periode.fom
-                    this.tomDato = it.periode.tom
-                    this.type = it.inntektskilde
-                    this.isArbeidsgiversavgiftBetalesTilSkatt = it.arbeidsgiverBetalerAvgift == true
-                    this.avgiftspliktigInntekt = if (it.erMaanedsbelop) it.månedsbeløp?.tilPenger() else Penger(
-                        TotalBeløpBeregner.månedligBeløpForTotalbeløp(
-                            it.periode.fom,
-                            it.periode.tom, it.månedsbeløp?.tilPenger()?.verdi!!
-                        )
-                    )
-                    this.isErMaanedsbelop = it.erMaanedsbelop
-                })
-        }
-        */
     }
 
     private fun lagTrygdeavgiftsperiode(
