@@ -3,6 +3,8 @@ package no.nav.melosys.saksflytapi.domain;
 import java.io.IOException;
 import java.time.LocalDateTime;
 import java.util.*;
+
+import com.fasterxml.jackson.module.kotlin.KotlinModule;
 import jakarta.persistence.*;
 
 import com.fasterxml.jackson.core.JsonParseException;
@@ -70,7 +72,8 @@ public class Prosessinstans {
 
     private static final ObjectMapper dataMapper = new ObjectMapper()
         .registerModule(new JavaTimeModule())
-        .registerModule(new SimpleModule().addDeserializer(LovvalgBestemmelse.class, new LovvalgBestemmelseDeserializer()));
+        .registerModule(new SimpleModule().addDeserializer(LovvalgBestemmelse.class, new LovvalgBestemmelseDeserializer()))
+        .registerModule(new KotlinModule.Builder().build());
 
     public UUID getId() {
         return id;

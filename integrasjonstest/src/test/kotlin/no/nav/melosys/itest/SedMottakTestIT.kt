@@ -655,6 +655,7 @@ class SedMottakTestIT(
 
     @Test
     fun `A003 skal virke med arbeidssted=null`() {
+        unleash.enableAll()
         val ref = Random().nextInt(100000).toString()
         val journalpostId = eessiMeldingTestDataFactory.opprettEessiJournalpost(ref)
 
@@ -678,26 +679,14 @@ class SedMottakTestIT(
                 ],
                 "arbeidssteder": [],
                 "arbeidsland": [
-                    {
-                        "land": "SE",
-                        "arbeidssted": null
-                    },
-                    {
-                        "land": "HR",
-                        "arbeidssted": null
-                    }
-                ],
+                {
+                    "land": "NO",
+                    "arbeidssted": null
+                }
+              ],
                 "periode": {
-                    "fom": [
-                        2025,
-                        1,
-                        1
-                    ],
-                    "tom": [
-                        2025,
-                        12,
-                        31
-                    ]
+                    "fom": [2025,1,1],
+                    "tom": [2025,12,31]
                 },
                 "lovvalgsland": "NL",
                 "artikkel": "13_1_a",
@@ -712,10 +701,6 @@ class SedMottakTestIT(
                 "anmodningUnntak": null
             }
         """
-
-        val sedInfo = SedInformasjon(ref, SedType.A003.name, LocalDate.now(), LocalDate.now(), null, "AVBRUTT", null)
-        val bucInformasjon = BucInformasjon(ref, true, null, LocalDate.now(), null, listOf(sedInfo))
-        MelosysEessiRepo.opprettBucinformasjon(bucInformasjon)
 
         prosessinstansTestManager.executeAndWait(
             mapOf(

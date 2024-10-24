@@ -1,6 +1,6 @@
 package no.nav.melosys.domain.eessi.melding
 
-import com.fasterxml.jackson.databind.ObjectMapper
+import com.fasterxml.jackson.module.kotlin.jacksonObjectMapper
 import io.kotest.matchers.collections.shouldHaveSize
 import io.kotest.matchers.shouldBe
 import org.junit.jupiter.api.Test
@@ -9,7 +9,7 @@ class MelosysEessiMeldingTest {
 
     @Test
     fun `skal takle arbeidssted med null verdi`() {
-        val objectMapper = ObjectMapper()
+        val objectMapper = jacksonObjectMapper()
 
         val json = """
             {
