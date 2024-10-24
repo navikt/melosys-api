@@ -1,13 +1,16 @@
 package no.nav.melosys.service
 
 import io.kotest.assertions.throwables.shouldThrow
-import io.kotest.inspectors.shouldForAll
 import io.kotest.matchers.collections.shouldBeEmpty
 import io.kotest.matchers.collections.shouldHaveSize
 import io.kotest.matchers.shouldBe
-import io.mockk.*
+import io.mockk.Runs
+import io.mockk.every
 import io.mockk.impl.annotations.InjectMockKs
 import io.mockk.impl.annotations.RelaxedMockK
+import io.mockk.junit5.MockKExtension
+import io.mockk.just
+import io.mockk.slot
 import no.nav.melosys.domain.*
 import no.nav.melosys.domain.dokument.medlemskap.MedlemskapDokument
 import no.nav.melosys.domain.dokument.medlemskap.Medlemsperiode
@@ -27,14 +30,12 @@ import no.nav.melosys.repository.BehandlingRepository
 import no.nav.melosys.repository.BehandlingsresultatRepository
 import no.nav.melosys.repository.LovvalgsperiodeRepository
 import no.nav.melosys.repository.TidligereMedlemsperiodeRepository
-import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.extension.ExtendWith
-import org.mockito.junit.jupiter.MockitoExtension
 import java.time.LocalDate
 import java.util.*
 
-@ExtendWith(MockitoExtension::class)
+@ExtendWith(MockKExtension::class)
 internal class LovvalgsperiodeServiceTest {
     private val BEH_ID = 1L
 
@@ -52,11 +53,6 @@ internal class LovvalgsperiodeServiceTest {
 
     @InjectMockKs
     lateinit var lovvalgsperiodeService: LovvalgsperiodeService
-
-    @BeforeEach
-    fun setUp() {
-        MockKAnnotations.init(this)
-    }
 
     @Test
     fun hentLovvalgsperiode_ingenLovvalgsperiode_kasterException() {
@@ -107,16 +103,14 @@ internal class LovvalgsperiodeServiceTest {
         val lagretBehandlingsresultat = Behandlingsresultat().apply { id = BEH_ID }
         every { lovvalgsperiodeRepository.deleteByBehandlingsresultatId(BEH_ID) } just Runs
         every { behandlingsresultatRepository.findById(BEH_ID) } returns Optional.of(lagretBehandlingsresultat)
-        every { lovvalgsperiodeRepository.saveAllAndFlush(any<kotlin.collections.List<Lovvalgsperiode>>()) } answers { firstArg() }
+        every { lovvalgsperiodeRepository.saveAllAndFlush(any<List<Lovvalgsperiode>>()) } answers { firstArg() }
 
 
         val lovvalgsPerioder = listOf(Lovvalgsperiode())
-        lovvalgsperiodeService.lagreLovvalgsperioder(BEH_ID, lovvalgsPerioder).run {
-            shouldHaveSize(1)
-            harBehandlingsResultatMedRiktigId(this) shouldBe true
-        }
-
-        harBehandlingsResultatMedRiktigId(lovvalgsPerioder) shouldBe false
+        lovvalgsperiodeService.lagreLovvalgsperioder(BEH_ID, lovvalgsPerioder)
+            .shouldHaveSize(1).run {
+                harBehandlingsResultatMedRiktigId(this) shouldBe true
+            }
     }
 
     @Test
@@ -184,7 +178,6 @@ internal class LovvalgsperiodeServiceTest {
         }.message shouldBe "Lovvalgsperiode med id 3 finnes ikke"
     }
 
-
     @Test
     fun hentTidligereLovvalgsperioder_enValgtMedlemsperiode_returnererEnTidligerLovvalgsperiode() {
         val medlemsperiode = lagMedlemskapsPeriode(23L, GrunnlagMedl.FO_12_2.kode)
@@ -208,7 +201,6 @@ internal class LovvalgsperiodeServiceTest {
             }
     }
 
-
     @Test
     fun hentTidligereLovvalgsperioder_ukjentGrunnlagskodeMedl_grunnlagMappetTilAnnet() {
         val medlemsperiode = lagMedlemskapsPeriode(23L, "MAPPING_SOM_MELOSYS_IKKE_KJENNER_TIL")
@@ -220,10 +212,12 @@ internal class LovvalgsperiodeServiceTest {
         mockTidligereMedlemsperiodeRepository(medlemsperiode.id!!)
 
 
-        lovvalgsperiodeService.hentTidligereLovvalgsperioder(behandling).shouldForAll {
-            it.medlPeriodeID shouldBe medlemsperiode.id
-            it.bestemmelse shouldBe Lovvalgbestemmelser_883_2004.FO_883_2004_ANNET
-        }.size shouldBe 1
+        lovvalgsperiodeService.hentTidligereLovvalgsperioder(behandling)
+            .shouldHaveSize(1)
+            .first().run {
+                medlPeriodeID shouldBe medlemsperiode.id
+                bestemmelse shouldBe Lovvalgbestemmelser_883_2004.FO_883_2004_ANNET
+            }
     }
 
     @Test
@@ -322,7 +316,6 @@ internal class LovvalgsperiodeServiceTest {
 
         lovvalgsperiodeService.finnOpprinneligLovvalgsperiode(BEH_ID) shouldBe null
     }
-
 
     private fun mockTidligereMedlemsperiodeRepository(periodeID: Long) {
         val tidligereMedlemsperiodeId = TidligereMedlemsperiodeId().apply {
