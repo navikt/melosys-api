@@ -3,15 +3,24 @@ package no.nav.melosys.service.avgift.dto
 import no.nav.melosys.domain.avgift.SkatteforholdTilNorge
 import no.nav.melosys.domain.kodeverk.Skatteplikttype
 import java.time.LocalDate
+import java.util.*
 
 data class SkatteforholdTilNorgeRequest(
+    val id: UUID,
     val fomDato: LocalDate,
     val tomDato: LocalDate,
     val skatteplikttype: Skatteplikttype
 ) {
+    constructor(fomDato: LocalDate, tomDato: LocalDate, skatteplikttype: Skatteplikttype) : this(
+        id = UUID.nameUUIDFromBytes("${fomDato}${tomDato}${skatteplikttype}".toByteArray()),
+        fomDato = fomDato,
+        tomDato = tomDato,
+        skatteplikttype = skatteplikttype
+    )
+
     constructor(skatteforholdTilNorge: SkatteforholdTilNorge) : this(
-        skatteforholdTilNorge.fomDato,
-        skatteforholdTilNorge.tomDato,
-        skatteforholdTilNorge.skatteplikttype
+        fomDato = skatteforholdTilNorge.fomDato,
+        tomDato = skatteforholdTilNorge.tomDato,
+        skatteplikttype = skatteforholdTilNorge.skatteplikttype
     )
 }

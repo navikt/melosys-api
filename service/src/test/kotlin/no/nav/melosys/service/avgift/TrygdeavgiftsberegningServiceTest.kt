@@ -25,7 +25,6 @@ import no.nav.melosys.integrasjon.ereg.EregFasade
 import no.nav.melosys.integrasjon.trygdeavgift.TrygdeavgiftConsumer
 import no.nav.melosys.integrasjon.trygdeavgift.dto.*
 import no.nav.melosys.service.avgift.TrygdeavgiftsberegningService.Companion.idToUUID
-import no.nav.melosys.service.avgift.TrygdeavgiftsberegningService.Companion.toUUID
 import no.nav.melosys.service.avgift.dto.InntektskildeRequest
 import no.nav.melosys.service.avgift.dto.OppdaterTrygdeavgiftsgrunnlagRequest
 import no.nav.melosys.service.avgift.dto.SkatteforholdTilNorgeRequest
@@ -166,7 +165,7 @@ internal class TrygdeavgiftsberegningServiceTest {
                         DatoPeriodeDto(FOM, TOM), BigDecimal.valueOf(7.9), PengerDto(BigDecimal.valueOf(790), NOK)
                     ), TrygdeavgiftsgrunnlagDto(
                         behandlingsresultat.medlemskapsperioder.first().idToUUID(),
-                        oppdateringRequest.skatteforholdTilNorgeList.first().toUUID(),
+                        oppdateringRequest.skatteforholdTilNorgeList.first().id,
                         notSoRandomUuid
                     )
                 )
@@ -309,7 +308,7 @@ internal class TrygdeavgiftsberegningServiceTest {
                         DatoPeriodeDto(FOM, TOM), BigDecimal.valueOf(7.9), PengerDto(BigDecimal.valueOf(790), NOK)
                     ), TrygdeavgiftsgrunnlagDto(
                         behandlingsresultat.medlemskapsperioder.first().idToUUID(),
-                        oppdateringRequest.skatteforholdTilNorgeList.first().toUUID(),
+                        oppdateringRequest.skatteforholdTilNorgeList.first().id,
                         notSoRandomUuid
                     )
                 )
@@ -502,7 +501,7 @@ internal class TrygdeavgiftsberegningServiceTest {
                         DatoPeriodeDto(FOM, TOM), BigDecimal.valueOf(0), PengerDto(BigDecimal.valueOf(0.0), NOK)
                     ), TrygdeavgiftsgrunnlagDto(
                         behandlingsresultat.medlemskapsperioder.first().idToUUID(),
-                        oppdateringRequest.skatteforholdTilNorgeList.first().toUUID(),
+                        oppdateringRequest.skatteforholdTilNorgeList.first().id,
                         inntektsKildeId
                     )
                 )
@@ -617,7 +616,7 @@ internal class TrygdeavgiftsberegningServiceTest {
                         DatoPeriodeDto(FOM, TOM), BigDecimal.valueOf(0), PengerDto(BigDecimal.valueOf(123.0), NOK)
                     ), TrygdeavgiftsgrunnlagDto(
                         behandlingsresultat.medlemskapsperioder.first().idToUUID(),
-                        oppdateringRequest.skatteforholdTilNorgeList.first().toUUID(),
+                        oppdateringRequest.skatteforholdTilNorgeList.first().id,
                         UUID.randomUUID()
                     )
                 )

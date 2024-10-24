@@ -4,6 +4,7 @@ import no.nav.melosys.domain.avgift.SkatteforholdTilNorge
 import no.nav.melosys.domain.kodeverk.Skatteplikttype
 import no.nav.melosys.service.avgift.dto.SkatteforholdTilNorgeRequest
 import java.time.LocalDate
+import java.util.*
 
 data class SkatteforholdTilNorgeDto(
     val fomDato: LocalDate,
@@ -17,5 +18,5 @@ data class SkatteforholdTilNorgeDto(
     )
 
     fun tilRequest(): SkatteforholdTilNorgeRequest =
-        SkatteforholdTilNorgeRequest(fomDato, tomDato, skatteplikttype)
+        SkatteforholdTilNorgeRequest(UUID.randomUUID(), fomDato, tomDato, skatteplikttype)
 }
