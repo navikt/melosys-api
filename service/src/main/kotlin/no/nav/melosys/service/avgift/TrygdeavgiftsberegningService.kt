@@ -49,71 +49,10 @@ class TrygdeavgiftsberegningService(
         return if (erPliktigMedlemskapSkattePliktig(oppdaterTrygdeavgiftsgrunnlagRequest, behandlingsresultat)) {
             leggTilNyeTrygdeavgiftsperioderForPliktigMedlemskapSkattepliktig(oppdaterTrygdeavgiftsgrunnlagRequest, behandlingsresultat)
         } else {
-            val beregnetTrygdeavgift = beregnTrygdeAvgift(behandlingsresultat, oppdaterTrygdeavgiftsgrunnlagRequest)
-
-            val nyeTrygdeavgiftsperioder =
-                lagTrygdeAvgiftsperioderOgOppdaterBehandlingsresultat(
-                    behandlingsresultat,
-                    oppdaterTrygdeavgiftsgrunnlagRequest,
-                    beregnetTrygdeavgift
-                ).also {
-                    behandlingsresultatService.lagreOgFlush(behandlingsresultat)
-                }
-
-            return nyeTrygdeavgiftsperioder
+            leggTilNyeTrygdeavgiftsperioder(behandlingsresultat, oppdaterTrygdeavgiftsgrunnlagRequest).also {
+                behandlingsresultatService.lagreOgFlush(behandlingsresultat)
+            }
         }
-    }
-
-    private fun lagTrygdeAvgiftsperioderOgOppdaterBehandlingsresultat(
-        behandlingsresultat: Behandlingsresultat,
-        oppdaterTrygdeavgiftsgrunnlagRequest: OppdaterTrygdeavgiftsgrunnlagRequest,
-        beregnetTrygdeavgift: List<TrygdeavgiftsberegningResponse>,
-    ): Set<Trygdeavgiftsperiode> {
-        val nyeTrygdeavgiftsperioder = lagOgLeggTilNyeTrygdeavgiftsperioder(
-            behandlingsresultat,
-            oppdaterTrygdeavgiftsgrunnlagRequest.skatteforholdTilNorgeList,
-            oppdaterTrygdeavgiftsgrunnlagRequest.inntektskilder,
-            beregnetTrygdeavgift
-        )
-
-        val skalKunBetalesTilSkatt =
-            trygdeavgiftMottakerService.getTrygdeavgiftMottaker(behandlingsresultat) == Trygdeavgiftmottaker.TRYGDEAVGIFT_BETALES_TIL_SKATT
-        if (skalKunBetalesTilSkatt && !erAlleTrygdeavgiftbelopNull(beregnetTrygdeavgift)) {
-            throw IllegalStateException("Trygdeavgift skal ikke betales til NAV. Beregnet trygdeavgift må derfor være 0.")
-        }
-
-        return nyeTrygdeavgiftsperioder
-    }
-
-    private fun beregnTrygdeAvgift(
-        behandlingsresultat: Behandlingsresultat,
-        oppdaterTrygdeavgiftsgrunnlagRequest: OppdaterTrygdeavgiftsgrunnlagRequest
-    ): List<TrygdeavgiftsberegningResponse> {
-        val innvilgedeMedlemskapsperioder = behandlingsresultat.medlemskapsperioder.filter { it.erInnvilget() }
-
-        val medlemskapsperiodeDtos = mapTilMedlemskapsperiodeDtos(innvilgedeMedlemskapsperioder)
-        val skatteforholdsperioderDtos = mapTilSkatteforholdsperiodeDtos(oppdaterTrygdeavgiftsgrunnlagRequest)
-        val inntektsperioderDtos = mapInntektsperiodeDtos(oppdaterTrygdeavgiftsgrunnlagRequest)
-        val foedselDato = hentFødselsdatoOmViHarTjenstligBehov(behandlingsresultat.id, innvilgedeMedlemskapsperioder)
-
-
-        val beregnetTrygdeavgift = beregnTrygdeAvgift(medlemskapsperiodeDtos, skatteforholdsperioderDtos, inntektsperioderDtos, foedselDato)
-        return beregnetTrygdeavgift
-    }
-
-    fun erPliktigMedlemskapSkattePliktig(
-        oppdaterTrygdeavgiftsgrunnlagRequest: OppdaterTrygdeavgiftsgrunnlagRequest,
-        behandlingsresultat: Behandlingsresultat
-    ): Boolean {
-        val erPliktigMedlemskap = behandlingsresultat.medlemskapsperioder
-            .filter { it.erInnvilget() }
-            .all { it.erPliktig() }
-
-        val inntektskilderErTomt = oppdaterTrygdeavgiftsgrunnlagRequest.inntektskilder.isEmpty()
-        val alleSkatteforholdErSkattepliktige =
-            oppdaterTrygdeavgiftsgrunnlagRequest.skatteforholdTilNorgeList.all { it.skatteplikttype == Skatteplikttype.SKATTEPLIKTIG }
-
-        return erPliktigMedlemskap && inntektskilderErTomt && alleSkatteforholdErSkattepliktige
     }
 
     @Transactional(readOnly = true)
@@ -144,6 +83,74 @@ class TrygdeavgiftsberegningService(
                     return persondataService.hentSammensattNavn(it.personIdent)
                 return eregFasade.hentOrganisasjonNavn(it.orgnr)
             }
+    }
+
+
+    private fun leggTilNyeTrygdeavgiftsperioder(
+        behandlingsresultat: Behandlingsresultat,
+        oppdaterTrygdeavgiftsgrunnlagRequest: OppdaterTrygdeavgiftsgrunnlagRequest
+    ): Set<Trygdeavgiftsperiode> {
+        val beregnetTrygdeavgift = beregnTrygdeAvgift(behandlingsresultat, oppdaterTrygdeavgiftsgrunnlagRequest)
+
+        val nyeTrygdeavgiftsperioder = lagTrygdeAvgiftsperioderOgOppdaterBehandlingsresultat(
+            behandlingsresultat,
+            oppdaterTrygdeavgiftsgrunnlagRequest,
+            beregnetTrygdeavgift
+        )
+
+        return nyeTrygdeavgiftsperioder
+    }
+
+    private fun beregnTrygdeAvgift(
+        behandlingsresultat: Behandlingsresultat,
+        oppdaterTrygdeavgiftsgrunnlagRequest: OppdaterTrygdeavgiftsgrunnlagRequest
+    ): List<TrygdeavgiftsberegningResponse> {
+        val innvilgedeMedlemskapsperioder = behandlingsresultat.medlemskapsperioder.filter { it.erInnvilget() }
+
+        val medlemskapsperiodeDtos = mapTilMedlemskapsperiodeDtos(innvilgedeMedlemskapsperioder)
+        val skatteforholdsperioderDtos = mapTilSkatteforholdsperiodeDtos(oppdaterTrygdeavgiftsgrunnlagRequest)
+        val inntektsperioderDtos = mapInntektsperiodeDtos(oppdaterTrygdeavgiftsgrunnlagRequest)
+        val foedselDato = hentFødselsdatoOmViHarTjenstligBehov(behandlingsresultat.id, innvilgedeMedlemskapsperioder)
+
+
+        val beregnetTrygdeavgift = beregnTrygdeAvgift(medlemskapsperiodeDtos, skatteforholdsperioderDtos, inntektsperioderDtos, foedselDato)
+        return beregnetTrygdeavgift
+    }
+
+    private fun lagTrygdeAvgiftsperioderOgOppdaterBehandlingsresultat(
+        behandlingsresultat: Behandlingsresultat,
+        oppdaterTrygdeavgiftsgrunnlagRequest: OppdaterTrygdeavgiftsgrunnlagRequest,
+        beregnetTrygdeavgift: List<TrygdeavgiftsberegningResponse>,
+    ): Set<Trygdeavgiftsperiode> {
+        val nyeTrygdeavgiftsperioder = lagOgLeggTilNyeTrygdeavgiftsperioder(
+            behandlingsresultat,
+            oppdaterTrygdeavgiftsgrunnlagRequest.skatteforholdTilNorgeList,
+            oppdaterTrygdeavgiftsgrunnlagRequest.inntektskilder,
+            beregnetTrygdeavgift
+        )
+
+        val skalKunBetalesTilSkatt =
+            trygdeavgiftMottakerService.getTrygdeavgiftMottaker(behandlingsresultat) == Trygdeavgiftmottaker.TRYGDEAVGIFT_BETALES_TIL_SKATT
+        if (skalKunBetalesTilSkatt && !erAlleTrygdeavgiftbelopNull(beregnetTrygdeavgift)) {
+            throw IllegalStateException("Trygdeavgift skal ikke betales til NAV. Beregnet trygdeavgift må derfor være 0.")
+        }
+
+        return nyeTrygdeavgiftsperioder
+    }
+
+    private fun erPliktigMedlemskapSkattePliktig(
+        oppdaterTrygdeavgiftsgrunnlagRequest: OppdaterTrygdeavgiftsgrunnlagRequest,
+        behandlingsresultat: Behandlingsresultat
+    ): Boolean {
+        val erPliktigMedlemskap = behandlingsresultat.medlemskapsperioder
+            .filter { it.erInnvilget() }
+            .all { it.erPliktig() }
+
+        val inntektskilderErTomt = oppdaterTrygdeavgiftsgrunnlagRequest.inntektskilder.isEmpty()
+        val alleSkatteforholdErSkattepliktige =
+            oppdaterTrygdeavgiftsgrunnlagRequest.skatteforholdTilNorgeList.all { it.skatteplikttype == Skatteplikttype.SKATTEPLIKTIG }
+
+        return erPliktigMedlemskap && inntektskilderErTomt && alleSkatteforholdErSkattepliktige
     }
 
     private fun oppdaterBehandlingsresultatForNyeTrygdeAvgiftsperioder(behandlingsresultat: Behandlingsresultat) {
@@ -319,6 +326,7 @@ class TrygdeavgiftsberegningService(
 
         return trygdeAvgiftsperiode
     }
+
 
     private fun erAlleTrygdeavgiftbelopNull(beregnetTrygdeavgift: List<TrygdeavgiftsberegningResponse>): Boolean {
         return beregnetTrygdeavgift.all { it.beregnetPeriode.månedsavgift.verdi.compareTo(BigDecimal.ZERO) == 0 }
