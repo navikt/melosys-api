@@ -195,8 +195,8 @@ internal class LovvalgsperiodeServiceTest {
             .single()
             .run {
                 medlPeriodeID shouldBe medlemsperiode.id
-                fom shouldBe MedlPeriode.fom
-                tom shouldBe MedlPeriode.tom
+                fom shouldBe MEDLEMSPERIODE_FOM
+                tom shouldBe MEDLEMSPERIODE_TOM
                 bestemmelse shouldBe tilLovvalgBestemmelse(GrunnlagMedl.valueOf(GrunnlagMedl.FO_12_2.kode))
             }
     }
@@ -347,17 +347,17 @@ internal class LovvalgsperiodeServiceTest {
         return lovvalgsperioder.all { it.behandlingsresultat != null && it.behandlingsresultat.id == BEH_ID }
     }
 
-    companion object MedlPeriode {
-        val fom = LocalDate.now()
-        val tom = LocalDate.now()
+    private fun lagMedlemskapsPeriode(id: Long, grunnlagMedlKode: String): Medlemsperiode {
+        return Medlemsperiode(
+            id = id,
+            periode = Periode(MEDLEMSPERIODE_FOM, MEDLEMSPERIODE_TOM),
+            status = PeriodestatusMedl.GYLD.kode,
+            grunnlagstype = grunnlagMedlKode
+        )
+    }
 
-        fun lagMedlemskapsPeriode(id: Long, grunnlagMedlKode: String): Medlemsperiode {
-            return Medlemsperiode(
-                id = id,
-                periode = Periode(fom, tom),
-                status = PeriodestatusMedl.GYLD.kode,
-                grunnlagstype = grunnlagMedlKode
-            )
-        }
+    companion object {
+        private val MEDLEMSPERIODE_FOM = LocalDate.of(2021, 1, 1)
+        private val MEDLEMSPERIODE_TOM = LocalDate.of(2021, 1, 1)
     }
 }
