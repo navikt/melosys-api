@@ -13,6 +13,7 @@ import no.nav.melosys.integrasjon.trygdeavgift.dto.InntektsperiodeDto
 import no.nav.melosys.integrasjon.trygdeavgift.dto.SkatteforholdsperiodeDto
 import no.nav.melosys.service.avgift.TrygdeavgiftValideringService.INNTEKTSPERIODER_EMPTY
 import no.nav.melosys.service.avgift.TrygdeavgiftValideringService.SKATTEFORHOLDSPERIODER_EMPTY
+import no.nav.melosys.service.avgift.TrygdeavgiftValideringService.SKATTEPLIKTTYPE_LIK_FOR_ALLE_PERIODER
 import no.nav.melosys.service.avgift.dto.OppdaterTrygdeavgiftsgrunnlagRequest
 import org.junit.jupiter.api.Nested
 import org.junit.jupiter.api.Test
@@ -63,6 +64,21 @@ class TrygdeavgiftValideringServiceTest {
             }.message shouldBe TrygdeavgiftValideringService.UTLED_MEDLEMSKAPSPERIODE_FOM_MANGLER
         }
 
+        @Test
+        fun shouldThrowFunksjonellExceptionWhenUtledMedlemskapsperiodeTomIsNull() {
+            val behandlingsresultatMock = mockk<Behandlingsresultat>()
+            every { behandlingsresultatMock.medlemskapsperioder } returns listOf(Medlemskapsperiode())
+            every { behandlingsresultatMock.utledMedlemskapsperiodeFom() } returns LocalDate.now()
+            every { behandlingsresultatMock.utledMedlemskapsperiodeTom() } returns null
+
+            val oppdaterTrygdeAvgiftsGrunnlagRequest = OppdaterTrygdeavgiftsgrunnlagRequest(emptyList(), emptyList())
+
+
+            shouldThrow<FunksjonellException> {
+                TrygdeavgiftValideringService.validerTrygdeavgiftberegningRequest(oppdaterTrygdeAvgiftsGrunnlagRequest, behandlingsresultatMock)
+            }.message shouldBe TrygdeavgiftValideringService.UTLED_MEDLEMSKAPSPERIODE_TOM_MANGLER
+        }
+
         @ParameterizedTest
         @MethodSource("valideringsData")
         fun shouldThrowFunksjonellExceptionWhenInntektsPerioiderIsEmpty(valideringsInput: ValideringsInput) {
@@ -70,13 +86,13 @@ class TrygdeavgiftValideringServiceTest {
             val skatteforholdsPerioder = valideringsInput.skatteforholdsperioder
             val inntektsPerioder = valideringsInput.inntektsperioder
 
-
             shouldThrow<FunksjonellException> {
                 TrygdeavgiftValideringService.validerForTrygdeavgiftberegning(behandlingsresultatMock, skatteforholdsPerioder, inntektsPerioder)
             }.message shouldBe valideringsInput.feilmelding
         }
 
         fun valideringsData(): List<ValideringsInput> = listOf(
+
             ValideringsInput(
                 listOf(
                     SkatteforholdsperiodeDto(
@@ -92,12 +108,28 @@ class TrygdeavgiftValideringServiceTest {
                 emptyList(),
                 listOf(mockk<InntektsperiodeDto>()),
                 SKATTEFORHOLDSPERIODER_EMPTY
+            ),
+            ValideringsInput(
+                listOf(
+                    SkatteforholdsperiodeDto(
+                        UUID.randomUUID(),
+                        DatoPeriodeDto(LocalDate.now(), LocalDate.now()),
+                        Skatteplikttype.IKKE_SKATTEPLIKTIG
+                    ), SkatteforholdsperiodeDto(
+                        UUID.randomUUID(),
+                        DatoPeriodeDto(LocalDate.now(), LocalDate.now()),
+                        Skatteplikttype.IKKE_SKATTEPLIKTIG
+                    )
+                ),
+                listOf(mockk<InntektsperiodeDto>()),
+                SKATTEPLIKTTYPE_LIK_FOR_ALLE_PERIODER
             )
         )
 
         fun lagGyldigBehandlingsresultat() = mockk<Behandlingsresultat>().apply {
             every { medlemskapsperioder } returns listOf(Medlemskapsperiode())
             every { utledMedlemskapsperiodeFom() } returns LocalDate.now()
+            every { utledMedlemskapsperiodeTom() } returns LocalDate.now()
         }
     }
 }
