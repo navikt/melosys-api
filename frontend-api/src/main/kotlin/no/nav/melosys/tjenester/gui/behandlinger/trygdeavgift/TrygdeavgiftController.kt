@@ -7,6 +7,7 @@ import no.nav.melosys.service.avgift.TrygdeavgiftsberegningService
 import no.nav.melosys.service.tilgang.Aksesskontroll
 import no.nav.melosys.tjenester.gui.dto.trygdeavgift.BeregnetTrygdeavgiftDto
 import no.nav.melosys.tjenester.gui.dto.trygdeavgift.FakturamottakerDto
+import no.nav.melosys.tjenester.gui.dto.trygdeavgift.InntektskildeDto.Companion.tilInntektsPeriodeDtos
 import no.nav.melosys.tjenester.gui.dto.trygdeavgift.TrygdeavgiftMottakerDto
 import no.nav.melosys.tjenester.gui.dto.trygdeavgift.TrygdeavgiftsgrunnlagDto
 import no.nav.security.token.support.core.api.Protected
@@ -39,9 +40,11 @@ class TrygdeavgiftController(
         @RequestBody trygdeavgiftsgrunnlagDto: TrygdeavgiftsgrunnlagDto
     ): ResponseEntity<BeregnetTrygdeavgiftDto> {
         aksesskontroll.autoriserSkrivOgTilordnet(behandlingID)
+        val inntektsperioderTemp = trygdeavgiftsgrunnlagDto.inntektskilder.tilInntektsPeriodeDtos()
         val trygdeavgiftsperiodeSet = trygdeavgiftsberegningService.beregnOgLagreTrygdeavgift(
             behandlingID,
-            trygdeavgiftsgrunnlagDto.tilRequest()
+            trygdeavgiftsgrunnlagDto.tilRequest(),
+            inntektsperioderTemp
         )
 
         return ResponseEntity.ok(

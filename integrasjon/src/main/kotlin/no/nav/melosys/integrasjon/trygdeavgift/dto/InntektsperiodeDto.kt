@@ -1,5 +1,6 @@
 package no.nav.melosys.integrasjon.trygdeavgift.dto
 
+import no.nav.melosys.domain.avgift.Inntektsperiode
 import no.nav.melosys.domain.avgift.Penger
 import no.nav.melosys.domain.kodeverk.Inntektskildetype
 import java.math.BigDecimal
@@ -11,8 +12,19 @@ data class InntektsperiodeDto(
     val inntektskilde: Inntektskildetype,
     val arbeidsgiverBetalerAvgift: Boolean?,
     val månedsbeløp: PengerDto?,
-    val erMaanedsbelop: Boolean
-)
+    val erMaanedsbelop: Boolean,
+) {
+    companion object {
+        fun tilInntektskilde(inntektskildeRequest: InntektsperiodeDto) = Inntektsperiode().apply {
+            this.fomDato = inntektskildeRequest.periode.fom
+            this.tomDato = inntektskildeRequest.periode.tom
+            this.type = inntektskildeRequest.inntektskilde
+            this.isArbeidsgiversavgiftBetalesTilSkatt = inntektskildeRequest.arbeidsgiverBetalerAvgift == true
+            this.avgiftspliktigInntekt = inntektskildeRequest.månedsbeløp?.tilPenger()
+            this.isErMaanedsbelop = inntektskildeRequest.erMaanedsbelop
+        }
+    }
+}
 
 data class PengerDto(val verdi: BigDecimal, var valuta: Valuta = NOK) {
     constructor(verdi: BigDecimal) : this(verdi, NOK)
