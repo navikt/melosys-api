@@ -163,6 +163,14 @@ internal class TrygdeavgiftsberegningServiceTest {
             )
         )
 
+        val skatteforholdsperioder = listOf(
+            SkatteforholdsperiodeDto(
+                id = UUID.randomUUID(),
+                DatoPeriodeDto(FOM, TOM),
+                Skatteplikttype.SKATTEPLIKTIG
+            )
+        )
+
         every { mockBehandlingsresultatService.lagre(any()) }.returns(behandlingsresultat)
         every { mockTrygdeavgiftConsumer.beregnTrygdeavgift(ofType(TrygdeavgiftsberegningRequest::class)) }.returns(
             listOf(
@@ -180,7 +188,8 @@ internal class TrygdeavgiftsberegningServiceTest {
         every { mockBehandlingsresultatService.lagreOgFlush(behandlingsresultat) }.returns(behandlingsresultat)
 
 
-        trygdeavgiftsberegningService.beregnOgLagreTrygdeavgift(BEHANDLING_ID, oppdateringRequest, inntektsperioder).shouldNotBeNull()
+        trygdeavgiftsberegningService.beregnOgLagreTrygdeavgift(BEHANDLING_ID, oppdateringRequest, skatteforholdsperioder, inntektsperioder)
+            .shouldNotBeNull()
             .shouldNotBeEmpty()
 
 

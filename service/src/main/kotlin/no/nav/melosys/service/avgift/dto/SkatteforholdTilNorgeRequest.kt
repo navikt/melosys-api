@@ -26,6 +26,7 @@ data class SkatteforholdTilNorgeRequest(
     )
 
     companion object {
+
         fun tilSkatteforhold(skatteforholdTilNorgeRequest: SkatteforholdTilNorgeRequest) = SkatteforholdTilNorge().apply {
             this.fomDato = skatteforholdTilNorgeRequest.fomDato
             this.tomDato = skatteforholdTilNorgeRequest.tomDato
