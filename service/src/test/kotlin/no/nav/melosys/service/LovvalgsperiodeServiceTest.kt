@@ -37,7 +37,6 @@ import java.util.*
 
 @ExtendWith(MockKExtension::class)
 internal class LovvalgsperiodeServiceTest {
-    private val BEH_ID = 1L
 
     @RelaxedMockK
     lateinit var lovvalgsperiodeRepository: LovvalgsperiodeRepository
@@ -357,6 +356,7 @@ internal class LovvalgsperiodeServiceTest {
     }
 
     companion object {
+        private val BEH_ID = 1L
         private val MEDLEMSPERIODE_FOM = LocalDate.of(2021, 1, 1)
         private val MEDLEMSPERIODE_TOM = LocalDate.of(2021, 1, 1)
     }
