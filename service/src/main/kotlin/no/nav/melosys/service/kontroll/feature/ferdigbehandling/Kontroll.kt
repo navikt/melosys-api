@@ -69,7 +69,11 @@ class Kontroll(
         return true
     }
 
-    private fun utførKontroller(behandlingID: Long, sakstype: Sakstyper, behandlingsresultattype: Behandlingsresultattyper?): Collection<Kontrollfeil> {
+    private fun utførKontroller(
+        behandlingID: Long,
+        sakstype: Sakstyper,
+        behandlingsresultattype: Behandlingsresultattyper?
+    ): Collection<Kontrollfeil> {
         val behandling = behandlingService.hentBehandlingMedSaksopplysninger(behandlingID)
 
         if (behandlingsresultattype in listOf(Behandlingsresultattyper.AVSLAG_MANGLENDE_OPPL, Behandlingsresultattyper.HENLEGGELSE)) {
@@ -120,7 +124,7 @@ class Kontroll(
             persondata = hentPersondata(behandling),
             mottatteOpplysningerData = behandling.mottatteOpplysninger.mottatteOpplysningerData,
             lovvalgsperiode = lovvalgsperiodeService.hentLovvalgsperiode(behandling.id),
-            opprinneligLovvalgsperiode = lovvalgsperiodeService.finnOpprinneligLovvalgsperiode(behandling.id).orElse(null),
+            opprinneligLovvalgsperiode = lovvalgsperiodeService.finnOpprinneligLovvalgsperiode(behandling.id),
             saksopplysningerData = hentSaksopplysningerData(behandling),
             behandlingstema = behandling.tema,
             fullmektig = fullmektig,

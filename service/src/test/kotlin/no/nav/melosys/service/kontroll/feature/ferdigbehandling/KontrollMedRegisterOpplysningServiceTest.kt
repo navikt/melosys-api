@@ -34,7 +34,6 @@ import no.nav.melosys.service.saksbehandling.SaksbehandlingRegler
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.extension.ExtendWith
-import java.util.*
 
 
 @ExtendWith(MockKExtension::class)
@@ -92,7 +91,7 @@ internal class KontrollMedRegisterOpplysningServiceTest {
             tom = null
             bestemmelse = Lovvalgbestemmelser_883_2004.FO_883_2004_ART16_1
         }
-        every { lovvalgsperiodeService.finnOpprinneligLovvalgsperiode(BEHANDLING_ID) } returns Optional.empty()
+        every { lovvalgsperiodeService.finnOpprinneligLovvalgsperiode(BEHANDLING_ID) } returns null
         behandling.saksopplysninger.add(Saksopplysning().apply {
             type = SaksopplysningType.MEDL
             dokument = MedlemskapDokument()
