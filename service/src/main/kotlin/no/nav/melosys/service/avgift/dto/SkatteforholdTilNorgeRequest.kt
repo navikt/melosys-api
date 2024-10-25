@@ -18,9 +18,18 @@ data class SkatteforholdTilNorgeRequest(
         skatteplikttype = skatteplikttype
     )
 
+    // TODO remove if not needed
     constructor(skatteforholdTilNorge: SkatteforholdTilNorge) : this(
         fomDato = skatteforholdTilNorge.fomDato,
         tomDato = skatteforholdTilNorge.tomDato,
         skatteplikttype = skatteforholdTilNorge.skatteplikttype
     )
+
+    companion object {
+        fun tilSkatteforhold(skatteforholdTilNorgeRequest: SkatteforholdTilNorgeRequest) = SkatteforholdTilNorge().apply {
+            this.fomDato = skatteforholdTilNorgeRequest.fomDato
+            this.tomDato = skatteforholdTilNorgeRequest.tomDato
+            this.skatteplikttype = skatteforholdTilNorgeRequest.skatteplikttype
+        }
+    }
 }
