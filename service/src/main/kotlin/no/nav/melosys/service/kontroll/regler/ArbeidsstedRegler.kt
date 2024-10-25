@@ -24,12 +24,12 @@ object ArbeidsstedRegler {
     private val ARBEIDSLAND_ARBEIDSSTED_SVALBARD_JAN_MAIEN: (Arbeidsland) -> Boolean = { arbeidsland ->
         arbeidsland.land == Landkoder.SJ.kode ||
             (arbeidsland.land == Landkoder.NO.kode &&
-                arbeidsland.arbeidssted?.any { arbeidssted ->
-                    arbeidssted?.let {
+                arbeidsland.arbeidssted.any { arbeidssted ->
+                    arbeidssted.let {
                         val by = it.adresse.by ?: return@let false
                         BYER_FRA_SVALBARD_PATTERN.containsMatchIn(by)
-                    } ?: false
-                } ?: false)
+                    }
+                } )
     }
 
     @JvmStatic
