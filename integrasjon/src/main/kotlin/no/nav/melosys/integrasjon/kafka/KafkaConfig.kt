@@ -51,12 +51,6 @@ class KafkaConfig(
     ): KafkaConsumerContainerFactory<MelosysEessiMelding> = kafkaListenerContainerFactory<MelosysEessiMelding>(kafkaProperties, groupId)
 
     @Bean
-    fun aivenEessiMeldingListenerContainerFactoryTemp(
-        kafkaProperties: KafkaProperties,
-        @Value("\${KAFKA_AIVEN_EESSIMELDING_TEMP_GRUPEID:teammelosys-eessiMelding-temp-consumer}") groupId: String
-    ): KafkaConsumerContainerFactory<MelosysEessiMelding> = kafkaListenerContainerFactory<MelosysEessiMelding>(kafkaProperties, groupId)
-
-    @Bean
     fun aivenManglendeFakturabetalingMeldingListenerContainerFactory(
         kafkaProperties: KafkaProperties,
         @Value("\${kafka.aiven.manglende-fakturabetaling.groupid}") groupId: String
