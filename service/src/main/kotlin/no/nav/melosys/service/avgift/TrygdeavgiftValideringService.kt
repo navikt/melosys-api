@@ -79,25 +79,8 @@ object TrygdeavgiftValideringService {
         val inntektsperiodeDateRange = inntektsperioder.sortedBy { it.periode.fom }
             .map { inntektsperiode -> LocalDateRange.ofClosed(inntektsperiode.periode.fom, inntektsperiode.periode.tom) }
 
-        var samletInntektsperiodeDateRange: LocalDateRange? = null
-        try {
-            for (range in inntektsperiodeDateRange) {
-                samletInntektsperiodeDateRange = if (samletInntektsperiodeDateRange == null) {
-                    range
-                } else {
-                    samletInntektsperiodeDateRange.union(range)
-                }
-            }
-        } catch (ex: DateTimeException) {
-            throw FunksjonellException(INNTEKTSPERIODE_DEKKER_IKKE_HELE_PERIODEN)
-        }
-
-        val sortertMedlemskapsperiode = innvilgedeMedlemskapsperioder.sortedBy { it.fom }
-        if (LocalDateRange.ofClosed(
-                sortertMedlemskapsperiode.first().fom,
-                sortertMedlemskapsperiode.last().tom
-            ) != samletInntektsperiodeDateRange
-        ) {
+        var samletInntektsperiodeDateRange = finnRangeForPerioderSamlet(inntektsperiodeDateRange, INNTEKTSPERIODE_DEKKER_IKKE_HELE_PERIODEN)
+        if (validerPeriodeDekkerIkkeHeleMedlemskapsPerioden(innvilgedeMedlemskapsperioder, samletInntektsperiodeDateRange)) {
             throw FunksjonellException(INNTEKTSPERIODE_DEKKER_IKKE_HELE_PERIODEN)
         }
     }
@@ -111,27 +94,38 @@ object TrygdeavgiftValideringService {
 
         validerAtDetIkkeFinnesOverlapp(skatteforholdDateRange)
 
-        var samletSkatteforholdDateRange: LocalDateRange? = null
+        var samletSkatteforholdDateRange = finnRangeForPerioderSamlet(skatteforholdDateRange, SKATTEFORHOLDSPERIODE_DEKKER_IKKE_HELE_PERIODEN)
+
+        if (validerPeriodeDekkerIkkeHeleMedlemskapsPerioden(innvilgedeMedlemskapsperioder, samletSkatteforholdDateRange)) {
+            throw FunksjonellException(SKATTEFORHOLDSPERIODE_DEKKER_IKKE_HELE_PERIODEN)
+        }
+    }
+
+    private fun finnRangeForPerioderSamlet(periodeRanges: List<LocalDateRange>, feilmelding: String): LocalDateRange? {
+        var samletPeriodeDateRange: LocalDateRange? = null
         try {
-            for (range in skatteforholdDateRange) {
-                samletSkatteforholdDateRange = if (samletSkatteforholdDateRange == null) {
+            for (range in periodeRanges) {
+                samletPeriodeDateRange = if (samletPeriodeDateRange == null) {
                     range
                 } else {
-                    samletSkatteforholdDateRange.union(range)
+                    samletPeriodeDateRange.union(range)
                 }
             }
         } catch (ex: DateTimeException) {
-            throw FunksjonellException(SKATTEFORHOLDSPERIODE_DEKKER_IKKE_HELE_PERIODEN)
+            throw FunksjonellException(feilmelding)
         }
 
+        return samletPeriodeDateRange
+    }
+
+    private fun validerPeriodeDekkerIkkeHeleMedlemskapsPerioden(
+        innvilgedeMedlemskapsperioder: List<Medlemskapsperiode>, periodeDateRange: LocalDateRange?
+    ): Boolean {
         val sortertMedlemskapsperiode = innvilgedeMedlemskapsperioder.sortedBy { it.fom }
-        if (LocalDateRange.ofClosed(
-                sortertMedlemskapsperiode.first().fom,
-                sortertMedlemskapsperiode.last().tom
-            ) != samletSkatteforholdDateRange
-        ) {
-            throw FunksjonellException(SKATTEFORHOLDSPERIODE_DEKKER_IKKE_HELE_PERIODEN)
-        }
+        return LocalDateRange.ofClosed(
+            sortertMedlemskapsperiode.first().fom,
+            sortertMedlemskapsperiode.last().tom
+        ) != periodeDateRange
     }
 
     private fun validerAtDetIkkeFinnesOverlapp(dateRanges: List<LocalDateRange>) {
