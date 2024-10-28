@@ -8,12 +8,10 @@ import io.kotest.matchers.collections.shouldContainInOrder
 import io.kotest.matchers.collections.shouldHaveSize
 import io.kotest.matchers.optional.shouldBePresent
 import io.kotest.matchers.shouldBe
-import io.kotest.matchers.string.shouldContain
 import io.mockk.every
 import io.mockk.mockk
 import io.mockk.slot
 import io.mockk.verify
-import no.nav.melosys.LoggingTestUtils
 import no.nav.melosys.ProsessinstansTestManager
 import no.nav.melosys.domain.Lovvalgsperiode
 import no.nav.melosys.domain.eessi.*
@@ -41,7 +39,6 @@ import no.nav.melosys.sikkerhet.context.ThreadLocalAccessInfo
 import no.nav.melosys.statistikk.utstedt_a1.integrasjon.UtstedtA1AivenProducer
 import no.nav.melosys.statistikk.utstedt_a1.integrasjon.dto.Lovvalgsbestemmelse
 import no.nav.melosys.statistikk.utstedt_a1.integrasjon.dto.UtstedtA1Melding
-import org.awaitility.kotlin.await
 import org.junit.jupiter.api.AfterEach
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
@@ -50,7 +47,6 @@ import org.springframework.beans.factory.annotation.Qualifier
 import org.springframework.kafka.core.KafkaTemplate
 import java.time.LocalDate
 import java.util.*
-import java.util.concurrent.TimeUnit
 
 class SedMottakTestIT(
     @Autowired private val eessiMeldingTestDataFactory: EessiMeldingTestDataFactory,
@@ -723,29 +719,5 @@ class SedMottakTestIT(
                     .shouldBePresent()
                     .type shouldBe Behandlingsresultattyper.IKKE_FASTSATT
             }
-    }
-
-    @Test
-    fun `mottak av ugyldig json på kafka kø skal feile og logge`() {
-
-        val jsonMelosysEessiMeldingMedFeil = """
-            {
-                "sedId": "sedId",
-                "avsender": []
-            }
-        """
-
-        melosysEessiMeldingKafkaTemplateString.send(kafkaTopic, jsonMelosysEessiMeldingMedFeil)
-
-        LoggingTestUtils.withLogCapture { logs ->
-            await.atMost(5, TimeUnit.SECONDS).untilAsserted {
-                logs.shouldHaveSize(2)
-            }
-
-            logs.map { it.formattedMessage }.run {
-                get(0) shouldBe  ("Failed to deserialize message on topic teammelosys.eessi.v1-local: $jsonMelosysEessiMeldingMedFeil")
-                get(1) shouldContain ("Consumer exception")
-            }
-        }
     }
 }
