@@ -74,10 +74,11 @@ class KafkaConfig(
 
     @Bean
     fun aivenSkattehendelserListenerContainerFactory(
+        objectMapper: ObjectMapper,
         kafkaProperties: KafkaProperties,
         @Value("\${kafka.aiven.skattehendelser.groupid}") groupId: String
     ): KafkaConsumerContainerFactory<Skattehendelse> =
-        kafkaListenerContainerFactoryStopOnError<Skattehendelse>(ObjectMapper(), kafkaProperties, groupId)
+        kafkaListenerContainerFactoryStopOnError<Skattehendelse>(objectMapper, kafkaProperties, groupId)
 
     @Bean
     fun producerFactoryMelosysHendelse(objectMapper: ObjectMapper): ProducerFactory<String, MelosysHendelse> =
