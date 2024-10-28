@@ -29,6 +29,7 @@ import java.util.concurrent.TimeUnit
 @SpringBootTest
 @EmbeddedKafka(
     count = 1, controlledShutdown = true, partitions = 1,
+    topics = ["teammelosys.eessi.v1-local"],
     brokerProperties = ["offsets.topic.replication.factor=1", "transaction.state.log.replication.factor=1", "transaction.state.log.min.isr=1"]
 )
 @ContextConfiguration(
