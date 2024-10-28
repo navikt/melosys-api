@@ -6,6 +6,7 @@ import no.nav.melosys.domain.FellesKodeverk
 import no.nav.melosys.integrasjon.kodeverk.Kode
 import no.nav.melosys.integrasjon.kodeverk.Kodeverk
 import no.nav.melosys.integrasjon.kodeverk.KodeverkRegister
+import no.nav.melosys.sikkerhet.context.ThreadLocalAccessInfo
 import org.springframework.boot.context.event.ApplicationReadyEvent
 import org.springframework.context.event.EventListener
 import org.springframework.scheduling.annotation.Scheduled
@@ -88,8 +89,10 @@ class KodeverkService(private val kodeverkRegister: KodeverkRegister) {
     @SchedulerLock(name = "KodeverkSchedulerJobb", lockAtLeastFor = "10m")
     fun kodeverkScheduler() {
         log.info("Henter alle kodeverk")
-        for (kodeverk in FellesKodeverk.values()) {
-            hentKodeverk(kodeverk.navn)
+        ThreadLocalAccessInfo.executeProcess("kodeverkScheduler") {
+            for (kodeverk in FellesKodeverk.values()) {
+                hentKodeverk(kodeverk.navn)
+            }
         }
     }
 
