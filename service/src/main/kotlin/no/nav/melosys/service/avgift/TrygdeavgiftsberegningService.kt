@@ -14,6 +14,7 @@ import no.nav.melosys.integrasjon.ereg.EregFasade
 import no.nav.melosys.integrasjon.trygdeavgift.AvgiftsdekningerFraTrygdedekning
 import no.nav.melosys.integrasjon.trygdeavgift.TrygdeavgiftConsumer
 import no.nav.melosys.integrasjon.trygdeavgift.dto.*
+import no.nav.melosys.integrasjon.trygdeavgift.dto.MedlemskapsperiodeDto.Companion.idToUUID
 import no.nav.melosys.integrasjon.trygdeavgift.dto.MedlemskapsperiodeDto.Companion.tilMedlemskapsperiodeDtos
 import no.nav.melosys.service.avgift.aarsavregning.totalbeloep.TotalBeløpBeregner
 import no.nav.melosys.service.avgift.dto.OppdaterTrygdeavgiftsgrunnlagRequest
@@ -46,7 +47,6 @@ class TrygdeavgiftsberegningService(
     ): Set<Trygdeavgiftsperiode> {
         val behandlingsresultat = behandlingsresultatService.hentBehandlingsresultat(behandlingsresultatID)
         oppdaterBehandlingsresultatForNyeTrygdeAvgiftsperioder(behandlingsresultat);
-        //TrygdeavgiftValideringService.validerTrygdeavgiftberegningRequest(oppdaterTrygdeavgiftsgrunnlagRequest, behandlingsresultat)
         TrygdeavgiftValideringService.validerForTrygdeavgiftberegning(behandlingsresultat, skatteforholdsperioderTemp, inntektsPerioderTemp)
 
         return if (erPliktigMedlemskapSkattePliktig(skatteforholdsperioderTemp, inntektsPerioderTemp, behandlingsresultat)) {
@@ -316,10 +316,6 @@ class TrygdeavgiftsberegningService(
     }
 
     companion object {
-        fun Medlemskapsperiode.idToUUID(): UUID {
-            return idToUUid(this.id)
-        }
-
         private fun idToUUid(id: Long): UUID {
             return UUID.nameUUIDFromBytes(id.toString().toByteArray())
         }

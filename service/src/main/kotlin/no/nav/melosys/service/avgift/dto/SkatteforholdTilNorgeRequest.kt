@@ -26,6 +26,9 @@ data class SkatteforholdTilNorgeRequest(
     )
 
     companion object {
+        fun SkatteforholdTilNorgeRequest.toUUID(): UUID {                                                           // TODO undersøk nærmere hvor viktig det er beholde det her.. lå tidligere i trygdeavgiftsberegningservice
+            return UUID.nameUUIDFromBytes("${this.fomDato}${this.tomDato}${this.skatteplikttype}".toByteArray())
+        }
 
         fun tilSkatteforhold(skatteforholdTilNorgeRequest: SkatteforholdTilNorgeRequest) = SkatteforholdTilNorge().apply {
             this.fomDato = skatteforholdTilNorgeRequest.fomDato
