@@ -11,14 +11,10 @@ import no.nav.melosys.domain.kodeverk.Skatteplikttype
 import no.nav.melosys.domain.kodeverk.Trygdeavgift_typer
 import no.nav.melosys.domain.kodeverk.Trygdeavgiftmottaker
 import no.nav.melosys.integrasjon.ereg.EregFasade
-import no.nav.melosys.integrasjon.trygdeavgift.AvgiftsdekningerFraTrygdedekning
 import no.nav.melosys.integrasjon.trygdeavgift.TrygdeavgiftConsumer
 import no.nav.melosys.integrasjon.trygdeavgift.dto.*
-import no.nav.melosys.integrasjon.trygdeavgift.dto.MedlemskapsperiodeDto.Companion.idToUUID
 import no.nav.melosys.integrasjon.trygdeavgift.dto.MedlemskapsperiodeDto.Companion.tilMedlemskapsperiodeDtos
-import no.nav.melosys.service.avgift.aarsavregning.totalbeloep.TotalBeløpBeregner
 import no.nav.melosys.service.avgift.dto.OppdaterTrygdeavgiftsgrunnlagRequest
-import no.nav.melosys.service.avgift.dto.SkatteforholdTilNorgeRequest
 import no.nav.melosys.service.behandling.BehandlingService
 import no.nav.melosys.service.behandling.BehandlingsresultatService
 import no.nav.melosys.service.persondata.PersondataService
@@ -86,7 +82,6 @@ class TrygdeavgiftsberegningService(
                 return eregFasade.hentOrganisasjonNavn(it.orgnr)
             }
     }
-
 
     private fun leggTilNyeTrygdeavgiftsperioder(
         behandlingsresultat: Behandlingsresultat,
@@ -213,41 +208,6 @@ class TrygdeavgiftsberegningService(
         return beregnetTrygdeavgift;
     }
 
-    private fun mapTilMedlemskapsperiodeDtos(medlemskapsperioder: List<Medlemskapsperiode>) =
-        medlemskapsperioder.map {
-            MedlemskapsperiodeDto(
-                it.idToUUID(),
-                DatoPeriodeDto(it.fom, it.tom),
-                AvgiftsdekningerFraTrygdedekning.avgiftsdekningerFraTrygdedekning(it.trygdedekning),
-                it.medlemskapstype
-            )
-        }.toSet()
-
-
-    private fun mapTilSkatteforholdsperiodeDtos(oppdaterTrygdeavgiftsgrunnlagRequest: OppdaterTrygdeavgiftsgrunnlagRequest) =
-        oppdaterTrygdeavgiftsgrunnlagRequest.skatteforholdTilNorgeList.map {
-            SkatteforholdsperiodeDto(it.id, DatoPeriodeDto(it.fomDato, it.tomDato), it.skatteplikttype)
-        }.toSet()
-
-
-    private fun mapInntektsperiodeDtos(oppdaterTrygdeavgiftsgrunnlagRequest: OppdaterTrygdeavgiftsgrunnlagRequest): List<InntektsperiodeDto> {
-        return oppdaterTrygdeavgiftsgrunnlagRequest.inntektskilder.map {
-            val avgiftsPliktigInntekt = if (it.erMaanedsbelop) it.avgiftspliktigInntekt else TotalBeløpBeregner.månedligBeløpForTotalbeløp(
-                it.fomDato,
-                it.tomDato, it.avgiftspliktigInntekt!!
-            )
-
-            InntektsperiodeDto(
-                id = it.id,
-                periode = DatoPeriodeDto(it.fomDato, it.tomDato),
-                inntektskilde = it.type,
-                arbeidsgiverBetalerAvgift = it.arbeidsgiversavgiftBetales,
-                månedsbeløp = PengerDto(avgiftsPliktigInntekt ?: 0.toBigDecimal()),
-                erMaanedsbelop = it.erMaanedsbelop
-            )
-        }
-    }
-
     private fun hentFødselsdatoOmViHarTjenstligBehov(behandlingsresultatID: Long, medlemskapsperioder: List<Medlemskapsperiode>): LocalDate? {
         if (medlemskapsperioder.any { it.erPliktig() }) {
             val fagsak = behandlingService.hentBehandling(behandlingsresultatID).fagsak
@@ -310,7 +270,6 @@ class TrygdeavgiftsberegningService(
         return trygdeAvgiftsperiode
     }
 
-
     private fun erAlleTrygdeavgiftbelopNull(beregnetTrygdeavgift: List<TrygdeavgiftsberegningResponse>): Boolean {
         return beregnetTrygdeavgift.all { it.beregnetPeriode.månedsavgift.verdi.compareTo(BigDecimal.ZERO) == 0 }
     }
@@ -318,10 +277,6 @@ class TrygdeavgiftsberegningService(
     companion object {
         private fun idToUUid(id: Long): UUID {
             return UUID.nameUUIDFromBytes(id.toString().toByteArray())
-        }
-
-        fun List<SkatteforholdTilNorgeRequest>.tilSkatteforholdTilNorgeDtos(): Set<SkatteforholdsperiodeDto> {
-            return map { SkatteforholdsperiodeDto(it.id, DatoPeriodeDto(it.fomDato, it.tomDato), it.skatteplikttype) }.toSet()
         }
     }
 }
