@@ -14,7 +14,6 @@ import no.nav.melosys.integrasjon.ereg.EregFasade
 import no.nav.melosys.integrasjon.trygdeavgift.TrygdeavgiftConsumer
 import no.nav.melosys.integrasjon.trygdeavgift.dto.*
 import no.nav.melosys.integrasjon.trygdeavgift.dto.MedlemskapsperiodeDto.Companion.tilMedlemskapsperiodeDtos
-import no.nav.melosys.service.avgift.dto.OppdaterTrygdeavgiftsgrunnlagRequest
 import no.nav.melosys.service.behandling.BehandlingService
 import no.nav.melosys.service.behandling.BehandlingsresultatService
 import no.nav.melosys.service.persondata.PersondataService
@@ -37,7 +36,6 @@ class TrygdeavgiftsberegningService(
     @Transactional
     fun beregnOgLagreTrygdeavgift(
         behandlingsresultatID: Long,
-        oppdaterTrygdeavgiftsgrunnlagRequest: OppdaterTrygdeavgiftsgrunnlagRequest,
         skatteforholdsperioderTemp: List<SkatteforholdsperiodeDto>,
         inntektsPerioderTemp: List<InntektsperiodeDto>
     ): Set<Trygdeavgiftsperiode> {

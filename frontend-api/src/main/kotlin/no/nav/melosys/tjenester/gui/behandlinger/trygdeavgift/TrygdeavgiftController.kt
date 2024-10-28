@@ -46,7 +46,6 @@ class TrygdeavgiftController(
 
         val trygdeavgiftsperiodeSet = trygdeavgiftsberegningService.beregnOgLagreTrygdeavgift(
             behandlingID,
-            trygdeavgiftsgrunnlagDto.tilRequest(),
             skatteforholdsperioderTemp,
             inntektsperioderTemp
         )
