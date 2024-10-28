@@ -6,7 +6,6 @@ import no.nav.melosys.integrasjon.trygdeavgift.dto.DatoPeriodeDto
 import no.nav.melosys.integrasjon.trygdeavgift.dto.InntektsperiodeDto
 import no.nav.melosys.integrasjon.trygdeavgift.dto.PengerDto
 import no.nav.melosys.service.avgift.aarsavregning.totalbeloep.TotalBeløpBeregner
-import no.nav.melosys.service.avgift.dto.InntektskildeRequest
 import java.math.BigDecimal
 import java.time.LocalDate
 import java.util.*
@@ -27,18 +26,6 @@ data class InntektskildeDto(
         inntektsperiode.tomDato,
         inntektsperiode.isErMaanedsbelop,
     )
-
-    fun tilRequest(): InntektskildeRequest {
-        return InntektskildeRequest(
-            id = UUID.randomUUID(),
-            type,
-            arbeidsgiversavgiftBetales,
-            avgiftspliktigInntekt,
-            fomDato,
-            tomDato,
-            erMaanedsbelop
-        )
-    }
 
     companion object {
         fun List<InntektskildeDto>.tilInntektsPeriodeDtos(): List<InntektsperiodeDto> {

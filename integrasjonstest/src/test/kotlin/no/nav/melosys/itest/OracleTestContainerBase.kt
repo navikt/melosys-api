@@ -29,7 +29,7 @@ open class OracleTestContainerBase {
             DockerImageName.parse("ghcr.io/navikt/melosys-legacy-avhengigheter/oracle-xe:18.4.0-slim")
                 .asCompatibleSubstituteFor("gvenzl/oracle-xe")
         )
-        private const val useContainer = true // easy way to switch to run against local docker
+        private const val useContainer = false // easy way to switch to run against local docker
 
         @DynamicPropertySource
         @JvmStatic
