@@ -43,9 +43,6 @@ import no.nav.melosys.repository.FagsakRepository
 import no.nav.melosys.saksflytapi.domain.ProsessType
 import no.nav.melosys.service.avgift.TrygdeavgiftsberegningService
 import no.nav.melosys.service.avgift.aarsavregning.ÅrsavregningService
-import no.nav.melosys.service.avgift.dto.InntektskildeRequest
-import no.nav.melosys.service.avgift.dto.OppdaterTrygdeavgiftsgrunnlagRequest
-import no.nav.melosys.service.avgift.dto.SkatteforholdTilNorgeRequest
 import no.nav.melosys.service.avklartefakta.AvklartefaktaDto
 import no.nav.melosys.service.avklartefakta.AvklartefaktaService
 import no.nav.melosys.service.behandling.BehandlingsresultatService
@@ -250,28 +247,20 @@ class YrkesaktivFtrlVedtakIT(
             )
         }.behandling.id
 
-        trygdeavgiftsberegningService.beregnOgLagreTrygdeavgift(
-            behandlingsId,
-            OppdaterTrygdeavgiftsgrunnlagRequest(
-                skatteforholdTilNorgeList = listOf(
-                    SkatteforholdTilNorgeRequest(
-                        fomDato = LocalDate.of(2023, 1, 1),
-                        tomDato = LocalDate.of(2023, 2, 1),
-                        skatteplikttype = Skatteplikttype.SKATTEPLIKTIG
-                    )
-                ),
-                inntektskilder = listOf(
-                    InntektskildeRequest(
-                        type = Inntektskildetype.INNTEKT_FRA_UTLANDET,
-                        arbeidsgiversavgiftBetales = true,
-                        avgiftspliktigInntekt = 10000.toBigDecimal(),
-                        fomDato = LocalDate.of(2023, 1, 1),
-                        tomDato = LocalDate.of(2023, 2, 1),
-                        erMaanedsbelop = true
-                    )
-                )
+        val periode = DatoPeriodeDto(LocalDate.of(2023, 1, 1), LocalDate.of(2023, 2, 1))
+        val skattefordholdsperioder = listOf(SkatteforholdsperiodeDto(UUID.randomUUID(), periode, Skatteplikttype.SKATTEPLIKTIG))
+        val inntektsforholdsperioder = listOf(
+            InntektsperiodeDto(
+                UUID.randomUUID(),
+                periode,
+                Inntektskildetype.INNTEKT_FRA_UTLANDET,
+                arbeidsgiverBetalerAvgift = true,
+                PengerDto(10000.toBigDecimal()),
+                true
             )
         )
+
+        trygdeavgiftsberegningService.beregnOgLagreTrygdeavgift(behandlingsId, skattefordholdsperioder, inntektsforholdsperioder)
 
         val vedtakRequest = FattVedtakRequest.Builder()
             .medBehandlingsresultatType(Behandlingsresultattyper.MEDLEM_I_FOLKETRYGDEN)
@@ -372,29 +361,21 @@ class YrkesaktivFtrlVedtakIT(
     fun `oppretter og fatter vedtak årsavregning`() {
         val saksnummer = lagFørstegangsBehandling(Skatteplikttype.IKKE_SKATTEPLIKTIG, false)
         val behandling = fagsakRepository.findBySaksnummer(saksnummer).get().hentSistRegistrertBehandling()
-        trygdeavgiftsberegningService.beregnOgLagreTrygdeavgift(
-            behandling.id,
-            OppdaterTrygdeavgiftsgrunnlagRequest(
-                skatteforholdTilNorgeList = listOf(
-                    SkatteforholdTilNorgeRequest(
-                        fomDato = LocalDate.of(2023, 1, 1),
-                        tomDato = LocalDate.of(2023, 2, 1),
-                        skatteplikttype = Skatteplikttype.SKATTEPLIKTIG
-                    )
-                ),
-                inntektskilder = listOf(
-                    InntektskildeRequest(
-                        type = Inntektskildetype.INNTEKT_FRA_UTLANDET,
-                        arbeidsgiversavgiftBetales = true,
-                        avgiftspliktigInntekt = 10000.toBigDecimal(),
-                        fomDato = LocalDate.of(2023, 1, 1),
-                        tomDato = LocalDate.of(2023, 2, 1),
-                        erMaanedsbelop = true
-                    )
-                )
+
+        val periode = DatoPeriodeDto(LocalDate.of(2023, 1, 1), LocalDate.of(2023, 2, 1))
+        val skattefordholdsperioder = listOf(SkatteforholdsperiodeDto(UUID.randomUUID(), periode, Skatteplikttype.SKATTEPLIKTIG))
+        val inntektsforholdsperioder = listOf(
+            InntektsperiodeDto(
+                UUID.randomUUID(),
+                periode,
+                Inntektskildetype.INNTEKT_FRA_UTLANDET,
+                arbeidsgiverBetalerAvgift = true,
+                PengerDto(10000.toBigDecimal()),
+                true
             )
         )
 
+        trygdeavgiftsberegningService.beregnOgLagreTrygdeavgift(behandling.id, skattefordholdsperioder, inntektsforholdsperioder)
         val årsavregningBehandlingID = executeAndWait(
             mapOf(
                 ProsessType.OPPRETT_NY_BEHANDLING_FOR_SAK to 1
@@ -573,7 +554,21 @@ class YrkesaktivFtrlVedtakIT(
             Trygdedekninger.FTRL_2_9_FØRSTE_LEDD_A_HELSE,
             Folketrygdloven_kap2_bestemmelser.FTRL_KAP2_2_8_FØRSTE_LEDD_A
         )
+        val periode = DatoPeriodeDto(LocalDate.of(2023, 1, 1), LocalDate.of(2023, 2, 1))
+        val skattefordholdsperioder = listOf(SkatteforholdsperiodeDto(UUID.randomUUID(), periode, skatteplikttype))
+        val inntektsforholdsperioder = listOf(
+            InntektsperiodeDto(
+                UUID.randomUUID(),
+                periode,
+                Inntektskildetype.INNTEKT_FRA_UTLANDET,
+                arbeidsgiversavgiftBetales,
+                PengerDto(10000.toBigDecimal()),
+                true
+            )
+        )
 
+        trygdeavgiftsberegningService.beregnOgLagreTrygdeavgift(behandlingId, skattefordholdsperioder, inntektsforholdsperioder)
+        /*
         trygdeavgiftsberegningService.beregnOgLagreTrygdeavgift(
             behandlingId,
             OppdaterTrygdeavgiftsgrunnlagRequest(
@@ -596,6 +591,8 @@ class YrkesaktivFtrlVedtakIT(
                 )
             )
         )
+
+         */
 
         val skatteforholdTilNorge = SkatteforholdTilNorge().apply {
             fomDato = LocalDate.of(2023, 1, 1)
