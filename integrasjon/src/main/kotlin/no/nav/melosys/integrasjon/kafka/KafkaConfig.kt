@@ -1,7 +1,6 @@
 package no.nav.melosys.integrasjon.kafka
 
 import com.fasterxml.jackson.databind.ObjectMapper
-import com.fasterxml.jackson.module.kotlin.readValue
 import mu.KotlinLogging
 import no.nav.melosys.domain.avgift.aarsavregning.Skattehendelse
 import no.nav.melosys.domain.eessi.melding.MelosysEessiMelding
@@ -15,7 +14,6 @@ import org.apache.kafka.common.config.SslConfigs
 import org.apache.kafka.common.serialization.Deserializer
 import org.apache.kafka.common.serialization.StringDeserializer
 import org.apache.kafka.common.serialization.StringSerializer
-import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.beans.factory.annotation.Qualifier
 import org.springframework.beans.factory.annotation.Value
 import org.springframework.boot.autoconfigure.kafka.KafkaProperties
@@ -33,7 +31,6 @@ import org.springframework.kafka.core.ProducerFactory
 import org.springframework.kafka.listener.CommonContainerStoppingErrorHandler
 import org.springframework.kafka.listener.ConcurrentMessageListenerContainer
 import org.springframework.kafka.listener.ContainerProperties
-import org.springframework.kafka.support.serializer.ErrorHandlingDeserializer
 import org.springframework.kafka.support.serializer.JsonDeserializer
 import org.springframework.kafka.support.serializer.JsonSerializer
 
@@ -56,50 +53,31 @@ class KafkaConfig(
         objectMapper: ObjectMapper,
         kafkaProperties: KafkaProperties,
         @Value("\${kafka.aiven.eessi.groupid}") groupId: String
-    ) = ConcurrentKafkaListenerContainerFactory<String, MelosysEessiMelding>().apply {
-        setCommonErrorHandler(CommonContainerStoppingErrorHandler())
-
-        consumerFactory = DefaultKafkaConsumerFactory(
-            kafkaProperties.buildConsumerProperties(null) + consumerConfig(groupId),
-            StringDeserializer(),
-            LoggingMelosysHendelseDeserializer(objectMapper)
-        )
-        containerProperties.ackMode = ContainerProperties.AckMode.RECORD
-    }
-
-    class LoggingMelosysHendelseDeserializer(@Autowired private val objectMapper: ObjectMapper) : Deserializer<MelosysEessiMelding> {
-        override fun deserialize(topic: String, data: ByteArray?): MelosysEessiMelding = try {
-            objectMapper.readValue<MelosysEessiMelding>(data ?: throw KafkaException("No data to deserialize, json is null"))
-        } catch (e: Exception) {
-            log.error("Failed to deserialize message on topic $topic: ${data?.let { String(it) } ?: "null data"}", e)
-            throw e
-        }
-    }
+    ): KafkaConsumerContainerFactory<MelosysEessiMelding> =
+        kafkaListenerContainerFactoryStopOnError<MelosysEessiMelding>(objectMapper, kafkaProperties, groupId)
 
     @Bean
     fun aivenManglendeFakturabetalingMeldingListenerContainerFactory(
+        objectMapper: ObjectMapper,
         kafkaProperties: KafkaProperties,
         @Value("\${kafka.aiven.manglende-fakturabetaling.groupid}") groupId: String
     ): KafkaConsumerContainerFactory<ManglendeFakturabetalingMelding> =
-        kafkaListenerContainerFactory<ManglendeFakturabetalingMelding>(kafkaProperties, groupId)
+        kafkaListenerContainerFactoryStopOnError<ManglendeFakturabetalingMelding>(objectMapper, kafkaProperties, groupId)
 
     @Bean
     fun aivenSoknadMottattContainerFactory(
+        objectMapper: ObjectMapper,
         kafkaProperties: KafkaProperties,
         @Value("\${kafka.aiven.soknad-mottak.groupid}") groupId: String
     ): KafkaListenerContainerFactory<ConcurrentMessageListenerContainer<String, SoknadMottatt>> =
-        kafkaListenerContainerFactory<SoknadMottatt>(kafkaProperties, groupId)
+        kafkaListenerContainerFactoryStopOnError<SoknadMottatt>(objectMapper, kafkaProperties, groupId)
 
     @Bean
     fun aivenSkattehendelserListenerContainerFactory(
         kafkaProperties: KafkaProperties,
         @Value("\${kafka.aiven.skattehendelser.groupid}") groupId: String
     ): KafkaConsumerContainerFactory<Skattehendelse> =
-        kafkaListenerContainerFactory<Skattehendelse>(kafkaProperties, groupId).apply {
-            setCommonErrorHandler(CommonContainerStoppingErrorHandler())
-
-            containerProperties.ackMode = ContainerProperties.AckMode.RECORD
-        }
+        kafkaListenerContainerFactoryStopOnError<Skattehendelse>(ObjectMapper(), kafkaProperties, groupId)
 
     @Bean
     fun producerFactoryMelosysHendelse(objectMapper: ObjectMapper): ProducerFactory<String, MelosysHendelse> =
@@ -118,15 +96,19 @@ class KafkaConfig(
     fun melosysHendelseKafkaTemplate(producerFactory: ProducerFactory<String, MelosysHendelse>): KafkaTemplate<String, MelosysHendelse> =
         KafkaTemplate(producerFactory)
 
-
-    private inline fun <reified T> kafkaListenerContainerFactory(
+    private inline fun <reified T> kafkaListenerContainerFactoryStopOnError(
+        objectMapper: ObjectMapper,
         kafkaProperties: KafkaProperties,
         groupId: String
     ) = ConcurrentKafkaListenerContainerFactory<String, T>().apply {
+        setCommonErrorHandler(CommonContainerStoppingErrorHandler())
+
+        containerProperties.ackMode = ContainerProperties.AckMode.RECORD
+
         consumerFactory = DefaultKafkaConsumerFactory(
             kafkaProperties.buildConsumerProperties(null) + (consumerConfig(groupId) + securityConfig()),
             StringDeserializer(),
-            valueDeserializer<T>()
+            LoggingDeserializer(objectMapper, T::class.java)
         )
     }
 
@@ -140,11 +122,6 @@ class KafkaConfig(
         ConsumerConfig.VALUE_DESERIALIZER_CLASS_CONFIG to JsonDeserializer::class.java,
         ConsumerConfig.MAX_POLL_RECORDS_CONFIG to 1
     )
-
-    private inline fun <reified T> valueDeserializer(): ErrorHandlingDeserializer<T> =
-        ErrorHandlingDeserializer(
-            JsonDeserializer(T::class.java, false)
-        )
 
     private fun securityConfig(): Map<String, Any> =
         if (isLocal) mapOf() else mapOf<String, Any>(
@@ -164,4 +141,18 @@ class KafkaConfig(
                 it.equals("local-mock", ignoreCase = true) ||
                 it.equals("test", ignoreCase = true)
         }
+
+    class LoggingDeserializer<T>(
+        private val objectMapper: ObjectMapper,
+        private val targetType: Class<T>
+    ) : Deserializer<T> {
+        override fun deserialize(topic: String, data: ByteArray?): T {
+            return try {
+                objectMapper.readValue(data ?: throw KafkaException("No data to deserialize, JSON is null"), targetType)
+            } catch (e: Exception) {
+                log.error("Failed to deserialize message on topic $topic: ${data?.let { String(it) } ?: "null data"}", e)
+                throw e
+            }
+        }
+    }
 }
