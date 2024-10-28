@@ -128,19 +128,13 @@ object TrygdeavgiftValideringService {
         ) != periodeDateRange
     }
 
-    private fun validerAtDetIkkeFinnesOverlapp(dateRanges: List<LocalDateRange>) {
-        for (i in dateRanges.indices) {
-            val range1 = dateRanges[i]
+    private fun validerAtDetIkkeFinnesOverlapp(dateRanges: List<LocalDateRange>) = dateRanges.indices.forEach { i ->
+        val dateRange = dateRanges[i]
 
-            for (j in dateRanges.indices) {
-                if (i != j) {
-                    val range2 = dateRanges[j]
-
-                    if (range1.overlaps(range2)) {
-                        throw FunksjonellException(SKATTEFORHOLDSPERIODENE_KAN_IKKE_OVERLAPPE)
-                    }
-                }
-            }
-        }
+        dateRanges.indices
+            .filter { i != it }
+            .map { dateRanges[it] }
+            .filter { dateRange.overlaps(it) }
+            .forEach { throw FunksjonellException(SKATTEFORHOLDSPERIODENE_KAN_IKKE_OVERLAPPE) }
     }
 }
