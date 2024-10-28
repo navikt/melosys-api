@@ -17,7 +17,6 @@ import no.nav.melosys.integrasjon.trygdeavgift.dto.SkatteforholdsperiodeDto
 import no.nav.melosys.service.avgift.TrygdeavgiftValideringService.INNTEKTSPERIODER_EMPTY
 import no.nav.melosys.service.avgift.TrygdeavgiftValideringService.SKATTEFORHOLDSPERIODER_EMPTY
 import no.nav.melosys.service.avgift.TrygdeavgiftValideringService.SKATTEPLIKTTYPE_LIK_FOR_ALLE_PERIODER
-import no.nav.melosys.service.avgift.dto.OppdaterTrygdeavgiftsgrunnlagRequest
 import org.junit.jupiter.api.Nested
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.TestInstance
@@ -40,30 +39,45 @@ class TrygdeavgiftValideringServiceTest {
     @Nested
     @TestInstance(TestInstance.Lifecycle.PER_CLASS)
     inner class ValiderTrygdeavgiftberegningRequest {
-        @Test// TODO rewrite without request
+        @Test
         fun shouldThrowFunksjonellExceptionWhenMedlemskapsPerioderIsEmpty() {
             val behandlingsresultatMock = mockk<Behandlingsresultat>()
             every { behandlingsresultatMock.medlemskapsperioder } returns emptyList()
             every { behandlingsresultatMock.utledMedlemskapsperiodeFom() } returns LocalDate.now()
 
-            val oppdaterTrygdeAvgiftsGrunnlagRequest = OppdaterTrygdeavgiftsgrunnlagRequest(emptyList(), emptyList())
+            val skatteforholdsPerioder = listOf(
+                SkatteforholdsperiodeDto(
+                    UUID.randomUUID(),
+                    DatoPeriodeDto(fom = LocalDate.now(), tom = LocalDate.now()),
+                    Skatteplikttype.SKATTEPLIKTIG
+                )
+            )
 
             shouldThrow<FunksjonellException> {
-                TrygdeavgiftValideringService.validerTrygdeavgiftberegningRequest(oppdaterTrygdeAvgiftsGrunnlagRequest, behandlingsresultatMock)
+                TrygdeavgiftValideringService.validerForTrygdeavgiftberegning(
+                    behandlingsresultatMock,
+                    skatteforholdsPerioder,
+                    emptyList()
+                )
             }.message shouldBe TrygdeavgiftValideringService.MEDLEMSKAPSPERIODER_EMPTY
         }
 
-        @Test// TODO rewrite without request
+        @Test
         fun shouldThrowFunksjonellExceptionWhenUtledMedlemskapsperiodeFomIsNull() {
             val behandlingsresultatMock = mockk<Behandlingsresultat>()
             every { behandlingsresultatMock.medlemskapsperioder } returns listOf(Medlemskapsperiode())
             every { behandlingsresultatMock.utledMedlemskapsperiodeFom() } returns null
 
-            val oppdaterTrygdeAvgiftsGrunnlagRequest = OppdaterTrygdeavgiftsgrunnlagRequest(emptyList(), emptyList())
-
+            val skatteforholdsPerioder = listOf(
+                SkatteforholdsperiodeDto(
+                    UUID.randomUUID(),
+                    DatoPeriodeDto(fom = LocalDate.now(), tom = LocalDate.now()),
+                    Skatteplikttype.SKATTEPLIKTIG
+                )
+            )
 
             shouldThrow<FunksjonellException> {
-                TrygdeavgiftValideringService.validerTrygdeavgiftberegningRequest(oppdaterTrygdeAvgiftsGrunnlagRequest, behandlingsresultatMock)
+                TrygdeavgiftValideringService.validerForTrygdeavgiftberegning(behandlingsresultatMock, skatteforholdsPerioder, listOf())
             }.message shouldBe TrygdeavgiftValideringService.UTLED_MEDLEMSKAPSPERIODE_FOM_MANGLER
         }
 
@@ -74,11 +88,16 @@ class TrygdeavgiftValideringServiceTest {
             every { behandlingsresultatMock.utledMedlemskapsperiodeFom() } returns LocalDate.now()
             every { behandlingsresultatMock.utledMedlemskapsperiodeTom() } returns null
 
-            val oppdaterTrygdeAvgiftsGrunnlagRequest = OppdaterTrygdeavgiftsgrunnlagRequest(emptyList(), emptyList())
-
+            val skatteforholdsPerioder = listOf(
+                SkatteforholdsperiodeDto(
+                    UUID.randomUUID(),
+                    DatoPeriodeDto(fom = LocalDate.now(), tom = LocalDate.now()),
+                    Skatteplikttype.SKATTEPLIKTIG
+                )
+            )
 
             shouldThrow<FunksjonellException> {
-                TrygdeavgiftValideringService.validerTrygdeavgiftberegningRequest(oppdaterTrygdeAvgiftsGrunnlagRequest, behandlingsresultatMock)
+                TrygdeavgiftValideringService.validerForTrygdeavgiftberegning(behandlingsresultatMock, skatteforholdsPerioder, listOf())
             }.message shouldBe TrygdeavgiftValideringService.UTLED_MEDLEMSKAPSPERIODE_TOM_MANGLER
         }
 

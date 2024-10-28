@@ -46,7 +46,8 @@ class TrygdeavgiftsberegningService(
     ): Set<Trygdeavgiftsperiode> {
         val behandlingsresultat = behandlingsresultatService.hentBehandlingsresultat(behandlingsresultatID)
         oppdaterBehandlingsresultatForNyeTrygdeAvgiftsperioder(behandlingsresultat);
-        TrygdeavgiftValideringService.validerTrygdeavgiftberegningRequest(oppdaterTrygdeavgiftsgrunnlagRequest, behandlingsresultat)
+        //TrygdeavgiftValideringService.validerTrygdeavgiftberegningRequest(oppdaterTrygdeavgiftsgrunnlagRequest, behandlingsresultat)
+        TrygdeavgiftValideringService.validerForTrygdeavgiftberegning(behandlingsresultat, skatteforholdsperioderTemp, inntektsPerioderTemp)
 
         return if (erPliktigMedlemskapSkattePliktig(skatteforholdsperioderTemp, inntektsPerioderTemp, behandlingsresultat)) {
             leggTilNyeTrygdeavgiftsperioderForPliktigMedlemskapSkattepliktig(skatteforholdsperioderTemp, behandlingsresultat)

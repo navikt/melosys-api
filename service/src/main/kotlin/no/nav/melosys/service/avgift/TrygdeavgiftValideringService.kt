@@ -8,9 +8,6 @@ import no.nav.melosys.domain.kodeverk.Skatteplikttype
 import no.nav.melosys.exception.FunksjonellException
 import no.nav.melosys.integrasjon.trygdeavgift.dto.InntektsperiodeDto
 import no.nav.melosys.integrasjon.trygdeavgift.dto.SkatteforholdsperiodeDto
-import no.nav.melosys.service.avgift.dto.InntektskildeRequest
-import no.nav.melosys.service.avgift.dto.OppdaterTrygdeavgiftsgrunnlagRequest
-import no.nav.melosys.service.avgift.dto.SkatteforholdTilNorgeRequest
 import org.threeten.extra.LocalDateRange
 import java.time.DateTimeException
 
@@ -25,29 +22,7 @@ object TrygdeavgiftValideringService {
     val SKATTEFORHOLDSPERIODE_DEKKER_IKKE_HELE_PERIODEN = "Skatteforholdsperioden(e) du har lagt inn dekker ikke hele medlemskapsperioden(e)"
     val INNTEKTSPERIODE_DEKKER_IKKE_HELE_PERIODEN = "Inntektsperioden(e) du har lagt inn dekker ikke hele medlemskapsperioden(e)"
 
-    fun validerTrygdeavgiftberegningRequest(request: OppdaterTrygdeavgiftsgrunnlagRequest, behandlingsresultat: Behandlingsresultat) {
-        validerMedlemskapsperioder(behandlingsresultat)
-        validerTrygdeavgiftsgrunnlag(request, behandlingsresultat)
-    }
 
-    fun erAllePerioderSkattepliktige(request: OppdaterTrygdeavgiftsgrunnlagRequest): Boolean {
-        return request.skatteforholdTilNorgeList.all { it.skatteplikttype == Skatteplikttype.SKATTEPLIKTIG }
-    }
-
-    private fun validerMedlemskapsperioder(behandlingsresultat: Behandlingsresultat) {
-        if (behandlingsresultat.medlemskapsperioder.isEmpty()) {
-            throw FunksjonellException(MEDLEMSKAPSPERIODER_EMPTY)
-        }
-        behandlingsresultat.utledMedlemskapsperiodeFom()
-            ?: throw FunksjonellException(UTLED_MEDLEMSKAPSPERIODE_FOM_MANGLER)
-
-        behandlingsresultat.utledMedlemskapsperiodeTom()
-            ?: throw FunksjonellException(UTLED_MEDLEMSKAPSPERIODE_TOM_MANGLER)
-
-
-    }
-
-    // TODO
     fun validerForTrygdeavgiftberegning(
         behandlingsresultat: Behandlingsresultat,
         skatteforholdsPerioder: List<SkatteforholdsperiodeDto>,
@@ -66,8 +41,7 @@ object TrygdeavgiftValideringService {
 
         validerMedlemskapsperioder(behandlingsresultat)
 
-        val innvilgedeMedlemskapsperioder =
-            behandlingsresultat.medlemskapsperioder.filter { it.erInnvilget() }
+        val innvilgedeMedlemskapsperioder = behandlingsresultat.medlemskapsperioder.filter { it.erInnvilget() }
         validerAtSkatteforholdTilNorgeDekkerInnvilgedeMedlemskapsperioderOgOverlapperIkkeNew(
             skatteforholdsPerioder,
             innvilgedeMedlemskapsperioder
@@ -83,111 +57,20 @@ object TrygdeavgiftValideringService {
         }
     }
 
-    private fun validerTrygdeavgiftsgrunnlag(request: OppdaterTrygdeavgiftsgrunnlagRequest, behandlingsresultat: Behandlingsresultat) {
-        if (request.inntektskilder.isEmpty() && !erAllePerioderSkattepliktige(request)) {
-            throw FunksjonellException("Kan ikke beregne trygdeavgift uten inntektsperioder")
-        } //
-
-        if (request.skatteforholdTilNorgeList.isEmpty()) {
-            throw FunksjonellException("Kan ikke beregne trygdeavgift uten skatteforholdTilNorge")
-        } //
-
-        if (request.skatteforholdTilNorgeList.size > 1 && request.skatteforholdTilNorgeList.groupBy { it.skatteplikttype }.size == 1) {
-            throw FunksjonellException("Alle skatteforholdsperiodene har samme svar på spørsmålet om skatteplikt") //
-        } //
-
-        val medlemskapsperioderErÅpen = behandlingsresultat.utledMedlemskapsperiodeTom() == null //
-        if (medlemskapsperioderErÅpen) {
-            throw FunksjonellException("Skatteforholdsperiode/inntektsperiode kan ikke ha sluttdato når medlemskapsperiode ikke har sluttdato")
-        } //
-
-        val innvilgedeMedlemskapsperioder =
-            behandlingsresultat.medlemskapsperioder.filter { it.erInnvilget() } // TODO tar behandlingsresultatene til slutt
-        validerAtSkatteforholdTilNorgeDekkerInnvilgedeMedlemskapsperioderOgOverlapperIkke(
-            request.skatteforholdTilNorgeList,
-            innvilgedeMedlemskapsperioder
-        ) //
-
-        val erPliktigMedlem = innvilgedeMedlemskapsperioder.all { it.erPliktig() }
-        val erSkattepliktigIHelePerioden = request.skatteforholdTilNorgeList.all { it.skatteplikttype == Skatteplikttype.SKATTEPLIKTIG }
-        if (!(erPliktigMedlem && erSkattepliktigIHelePerioden)) {
-            validerAtInntekstperioderDekkerInnvilgedeMedlemskapsperioder(
-                request.inntektskilder,
-                innvilgedeMedlemskapsperioder
-            )
-        } //
+    fun erAllePerioderSkattepliktige(skatteforholdsPerioder: List<SkatteforholdsperiodeDto>): Boolean {
+        return skatteforholdsPerioder.all { it.skatteforhold == Skatteplikttype.SKATTEPLIKTIG }
     }
 
-    /*
-    private fun validerTrygdeavgiftsgrunnlag(request: OppdaterTrygdeavgiftsgrunnlagRequest, behandlingsresultat: Behandlingsresultat) {
-        if (request.inntektskilder.isEmpty() && !erAllePerioderSkattepliktige(request)) {
-            throw FunksjonellException("Kan ikke beregne trygdeavgift uten inntektsperioder")
+    private fun validerMedlemskapsperioder(behandlingsresultat: Behandlingsresultat) {
+        if (behandlingsresultat.medlemskapsperioder.isEmpty()) {
+            throw FunksjonellException(MEDLEMSKAPSPERIODER_EMPTY)
         }
-        if (request.skatteforholdTilNorgeList.isEmpty()) {
-            throw FunksjonellException("Kan ikke beregne trygdeavgift uten skatteforholdTilNorge")
-        }
+        behandlingsresultat.utledMedlemskapsperiodeFom()
+            ?: throw FunksjonellException(UTLED_MEDLEMSKAPSPERIODE_FOM_MANGLER)
 
-        val erSkattepliktigIHelePerioden = request.skatteforholdTilNorgeList.all { it.skatteplikttype == Skatteplikttype.SKATTEPLIKTIG }
-
-        val medlemskapsperioderErÅpen = behandlingsresultat.utledMedlemskapsperiodeTom() == null
-        if (medlemskapsperioderErÅpen) {
-            throw FunksjonellException("Skatteforholdsperiode/inntektsperiode kan ikke ha sluttdato når medlemskapsperiode ikke har sluttdato")
-        }
-
-        if (request.skatteforholdTilNorgeList.size > 1 && request.skatteforholdTilNorgeList.groupBy { it.skatteplikttype }.size == 1) {
-            throw FunksjonellException("Alle skatteforholdsperiodene har samme svar på spørsmålet om skatteplikt")
-        }
-
-        val innvilgedeMedlemskapsperioder = behandlingsresultat.medlemskapsperioder.filter { it.erInnvilget() }
-
-        validerAtSkatteforholdTilNorgeDekkerInnvilgedeMedlemskapsperioderOgOverlapperIkke(
-            request.skatteforholdTilNorgeList,
-            innvilgedeMedlemskapsperioder
-        )
-
-        val erPliktigMedlem = innvilgedeMedlemskapsperioder.all { it.erPliktig() }
-
-        if (!(erPliktigMedlem && erSkattepliktigIHelePerioden)) {
-            validerAtInntekstperioderDekkerInnvilgedeMedlemskapsperioder(
-                request.inntektskilder,
-                innvilgedeMedlemskapsperioder
-            )
-        }
+        behandlingsresultat.utledMedlemskapsperiodeTom()
+            ?: throw FunksjonellException(UTLED_MEDLEMSKAPSPERIODE_TOM_MANGLER)
     }
-
-     */
-    /* TODO REMOVE
-        private fun validerAtInntekstperioderDekkerInnvilgedeMedlemskapsperioder(
-            inntektsperioder: List<InntektsperiodeDto>,
-            innvilgedeMedlemskapsperioder: List<Medlemskapsperiode>
-        ) {
-            val inntektsperiodeDateRange = inntektsperioder.sortedBy { it.periode.fom }
-                .map { inntektsperiode -> LocalDateRange.ofClosed(inntektsperiode.periode.fom, inntektsperiode.periode.tom) }
-
-            var samletInntektsperiodeDateRange: LocalDateRange? = null
-            try {
-                for (range in inntektsperiodeDateRange) {
-                    samletInntektsperiodeDateRange = if (samletInntektsperiodeDateRange == null) {
-                        range
-                    } else {
-                        samletInntektsperiodeDateRange.union(range)
-                    }
-                }
-            } catch (ex: DateTimeException) {
-                throw FunksjonellException("Inntektsperioden(e) du har lagt inn dekker ikke hele medlemskapsperioden(e)")
-            }
-
-            val sortertMedlemskapsperiode = innvilgedeMedlemskapsperioder.sortedBy { it.fom }
-            if (LocalDateRange.ofClosed(
-                    sortertMedlemskapsperiode.first().fom,
-                    sortertMedlemskapsperiode.last().tom
-                ) != samletInntektsperiodeDateRange
-            ) {
-                throw FunksjonellException("Inntektsperioden(e) du har lagt inn dekker ikke hele medlemskapsperioden(e)")
-            }
-        }
-
-     */
 
     private fun validerAtInntekstperioderDekkerInnvilgedeMedlemskapsperioderNew(
         inntektsperioder: List<InntektsperiodeDto>,
@@ -219,41 +102,6 @@ object TrygdeavgiftValideringService {
         }
     }
 
-
-    private fun validerAtInntekstperioderDekkerInnvilgedeMedlemskapsperioder(
-        inntektsperioder: List<InntektskildeRequest>,
-        innvilgedeMedlemskapsperioder: List<Medlemskapsperiode>
-    ) {
-        val inntektsperiodeDateRange = inntektsperioder.sortedBy { it.fomDato }
-            .map { inntektsperiode -> LocalDateRange.ofClosed(inntektsperiode.fomDato, inntektsperiode.tomDato) }
-
-        var samletInntektsperiodeDateRange: LocalDateRange? = null
-        try {
-            for (range in inntektsperiodeDateRange) {
-                samletInntektsperiodeDateRange = if (samletInntektsperiodeDateRange == null) {
-                    range
-                } else {
-                    samletInntektsperiodeDateRange.union(range)
-                }
-            }
-        } catch (ex: DateTimeException) {
-            throw FunksjonellException("Inntektsperioden(e) du har lagt inn dekker ikke hele medlemskapsperioden(e)")
-        }
-
-        val sortertMedlemskapsperiode = innvilgedeMedlemskapsperioder.sortedBy { it.fom }
-        if (LocalDateRange.ofClosed(
-                sortertMedlemskapsperiode.first().fom,
-                sortertMedlemskapsperiode.last().tom
-            ) != samletInntektsperiodeDateRange
-        ) {
-            throw FunksjonellException("Inntektsperioden(e) du har lagt inn dekker ikke hele medlemskapsperioden(e)")
-        }
-    }
-
-    fun erAllePerioderSkattepliktige(skatteforholdsPerioder: List<SkatteforholdsperiodeDto>): Boolean {
-        return skatteforholdsPerioder.all { it.skatteforhold == Skatteplikttype.SKATTEPLIKTIG }
-    }
-
     private fun validerAtSkatteforholdTilNorgeDekkerInnvilgedeMedlemskapsperioderOgOverlapperIkkeNew(
         skatteforholdTilNorge: List<SkatteforholdsperiodeDto>,
         innvilgedeMedlemskapsperioder: List<Medlemskapsperiode>
@@ -283,38 +131,6 @@ object TrygdeavgiftValideringService {
             ) != samletSkatteforholdDateRange
         ) {
             throw FunksjonellException(SKATTEFORHOLDSPERIODE_DEKKER_IKKE_HELE_PERIODEN)
-        }
-    }
-
-    private fun validerAtSkatteforholdTilNorgeDekkerInnvilgedeMedlemskapsperioderOgOverlapperIkke(
-        skatteforholdTilNorge: List<SkatteforholdTilNorgeRequest>,
-        innvilgedeMedlemskapsperioder: List<Medlemskapsperiode>
-    ) {
-        val skatteforholdDateRange = skatteforholdTilNorge.sortedBy { it.fomDato }
-            .map { skatteforhold -> LocalDateRange.ofClosed(skatteforhold.fomDato, skatteforhold.tomDato) }
-
-        validerAtDetIkkeFinnesOverlapp(skatteforholdDateRange)
-
-        var samletSkatteforholdDateRange: LocalDateRange? = null
-        try {
-            for (range in skatteforholdDateRange) {
-                samletSkatteforholdDateRange = if (samletSkatteforholdDateRange == null) {
-                    range
-                } else {
-                    samletSkatteforholdDateRange.union(range)
-                }
-            }
-        } catch (ex: DateTimeException) {
-            throw FunksjonellException("Skatteforholdsperioden(e) du har lagt inn dekker ikke hele medlemskapsperioden(e)")
-        }
-
-        val sortertMedlemskapsperiode = innvilgedeMedlemskapsperioder.sortedBy { it.fom }
-        if (LocalDateRange.ofClosed(
-                sortertMedlemskapsperiode.first().fom,
-                sortertMedlemskapsperiode.last().tom
-            ) != samletSkatteforholdDateRange
-        ) {
-            throw FunksjonellException("Skatteforholdsperioden(e) du har lagt inn dekker ikke hele medlemskapsperioden(e)")
         }
     }
 
