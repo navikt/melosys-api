@@ -610,6 +610,7 @@ internal class TrygdeavgiftsberegningServiceTest {
         )
         every { mockBehandlingsresultatService.lagreOgFlush(behandlingsresultat) }.returns(behandlingsresultat)
 
+
         shouldThrow<IllegalStateException> {
             trygdeavgiftsberegningService.beregnOgLagreTrygdeavgift(BEHANDLING_ID, skatteforholdsperioder, inntektsperioder)
         }.message.shouldContain("Trygdeavgift skal ikke betales til NAV. Beregnet trygdeavgift må derfor være 0.")
@@ -640,6 +641,7 @@ internal class TrygdeavgiftsberegningServiceTest {
                 true
             )
         )
+
 
         shouldThrow<FunksjonellException> {
             trygdeavgiftsberegningService.beregnOgLagreTrygdeavgift(BEHANDLING_ID, skatteforholdsperioder, inntektsperioder)
@@ -678,6 +680,7 @@ internal class TrygdeavgiftsberegningServiceTest {
                 Skatteplikttype.IKKE_SKATTEPLIKTIG
             )
         )
+
 
         shouldThrow<FunksjonellException> {
             trygdeavgiftsberegningService.beregnOgLagreTrygdeavgift(BEHANDLING_ID, skatteforholdsperioder, emptyList())
