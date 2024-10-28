@@ -1,6 +1,8 @@
 package no.nav.melosys.integrasjon.kafka
 
 import com.fasterxml.jackson.databind.ObjectMapper
+import com.fasterxml.jackson.module.kotlin.readValue
+import mu.KotlinLogging
 import no.nav.melosys.domain.avgift.aarsavregning.Skattehendelse
 import no.nav.melosys.domain.eessi.melding.MelosysEessiMelding
 import no.nav.melosys.domain.manglendebetaling.ManglendeFakturabetalingMelding
@@ -10,14 +12,17 @@ import org.apache.kafka.clients.CommonClientConfigs
 import org.apache.kafka.clients.consumer.ConsumerConfig
 import org.apache.kafka.clients.producer.ProducerConfig
 import org.apache.kafka.common.config.SslConfigs
+import org.apache.kafka.common.serialization.Deserializer
 import org.apache.kafka.common.serialization.StringDeserializer
 import org.apache.kafka.common.serialization.StringSerializer
+import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.beans.factory.annotation.Qualifier
 import org.springframework.beans.factory.annotation.Value
 import org.springframework.boot.autoconfigure.kafka.KafkaProperties
 import org.springframework.context.annotation.Bean
 import org.springframework.context.annotation.Configuration
 import org.springframework.core.env.Environment
+import org.springframework.kafka.KafkaException
 import org.springframework.kafka.annotation.EnableKafka
 import org.springframework.kafka.config.ConcurrentKafkaListenerContainerFactory
 import org.springframework.kafka.config.KafkaListenerContainerFactory
@@ -31,6 +36,8 @@ import org.springframework.kafka.listener.ContainerProperties
 import org.springframework.kafka.support.serializer.ErrorHandlingDeserializer
 import org.springframework.kafka.support.serializer.JsonDeserializer
 import org.springframework.kafka.support.serializer.JsonSerializer
+
+private val log = KotlinLogging.logger { }
 
 typealias KafkaConsumerContainerFactory<T> = KafkaListenerContainerFactory<ConcurrentMessageListenerContainer<String, T>>
 
@@ -46,9 +53,28 @@ class KafkaConfig(
 
     @Bean
     fun aivenEessiMeldingListenerContainerFactory(
+        objectMapper: ObjectMapper,
         kafkaProperties: KafkaProperties,
         @Value("\${kafka.aiven.eessi.groupid}") groupId: String
-    ): KafkaConsumerContainerFactory<MelosysEessiMelding> = kafkaListenerContainerFactory<MelosysEessiMelding>(kafkaProperties, groupId)
+    ) = ConcurrentKafkaListenerContainerFactory<String, MelosysEessiMelding>().apply {
+        setCommonErrorHandler(CommonContainerStoppingErrorHandler())
+
+        consumerFactory = DefaultKafkaConsumerFactory(
+            kafkaProperties.buildConsumerProperties(null) + consumerConfig(groupId),
+            StringDeserializer(),
+            LoggingMelosysHendelseDeserializer(objectMapper)
+        )
+        containerProperties.ackMode = ContainerProperties.AckMode.RECORD
+    }
+
+    class LoggingMelosysHendelseDeserializer(@Autowired private val objectMapper: ObjectMapper) : Deserializer<MelosysEessiMelding> {
+        override fun deserialize(topic: String, data: ByteArray?): MelosysEessiMelding = try {
+            objectMapper.readValue<MelosysEessiMelding>(data ?: throw KafkaException("No data to deserialize, json is null"))
+        } catch (e: Exception) {
+            log.error("Failed to deserialize message on topic $topic: ${data?.let { String(it) } ?: "null data"}", e)
+            throw e
+        }
+    }
 
     @Bean
     fun aivenManglendeFakturabetalingMeldingListenerContainerFactory(
@@ -98,20 +124,22 @@ class KafkaConfig(
         groupId: String
     ) = ConcurrentKafkaListenerContainerFactory<String, T>().apply {
         consumerFactory = DefaultKafkaConsumerFactory(
-            kafkaProperties.buildConsumerProperties(null) + (mapOf<String, Any>(
-                ConsumerConfig.GROUP_ID_CONFIG to groupId,
-                ConsumerConfig.BOOTSTRAP_SERVERS_CONFIG to brokersUrl,
-                ConsumerConfig.ENABLE_AUTO_COMMIT_CONFIG to false,
-                ConsumerConfig.AUTO_OFFSET_RESET_CONFIG to "earliest",
-                ConsumerConfig.SESSION_TIMEOUT_MS_CONFIG to 15000,
-                ConsumerConfig.KEY_DESERIALIZER_CLASS_CONFIG to StringDeserializer::class.java,
-                ConsumerConfig.VALUE_DESERIALIZER_CLASS_CONFIG to JsonDeserializer::class.java,
-                ConsumerConfig.MAX_POLL_RECORDS_CONFIG to 1
-            ) + securityConfig()),
+            kafkaProperties.buildConsumerProperties(null) + (consumerConfig(groupId) + securityConfig()),
             StringDeserializer(),
             valueDeserializer<T>()
         )
     }
+
+    private fun consumerConfig(groupId: String) = mapOf<String, Any>(
+        ConsumerConfig.GROUP_ID_CONFIG to groupId,
+        ConsumerConfig.BOOTSTRAP_SERVERS_CONFIG to brokersUrl,
+        ConsumerConfig.ENABLE_AUTO_COMMIT_CONFIG to false,
+        ConsumerConfig.AUTO_OFFSET_RESET_CONFIG to "earliest",
+        ConsumerConfig.SESSION_TIMEOUT_MS_CONFIG to 15000,
+        ConsumerConfig.KEY_DESERIALIZER_CLASS_CONFIG to StringDeserializer::class.java,
+        ConsumerConfig.VALUE_DESERIALIZER_CLASS_CONFIG to JsonDeserializer::class.java,
+        ConsumerConfig.MAX_POLL_RECORDS_CONFIG to 1
+    )
 
     private inline fun <reified T> valueDeserializer(): ErrorHandlingDeserializer<T> =
         ErrorHandlingDeserializer(
