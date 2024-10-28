@@ -6,10 +6,13 @@ import io.mockk.every
 import io.mockk.mockk
 import no.nav.melosys.domain.Behandlingsresultat
 import no.nav.melosys.domain.Medlemskapsperiode
+import no.nav.melosys.domain.kodeverk.Inntektskildetype
+import no.nav.melosys.domain.kodeverk.InnvilgelsesResultat
 import no.nav.melosys.domain.kodeverk.Skatteplikttype
 import no.nav.melosys.exception.FunksjonellException
 import no.nav.melosys.integrasjon.trygdeavgift.dto.DatoPeriodeDto
 import no.nav.melosys.integrasjon.trygdeavgift.dto.InntektsperiodeDto
+import no.nav.melosys.integrasjon.trygdeavgift.dto.PengerDto
 import no.nav.melosys.integrasjon.trygdeavgift.dto.SkatteforholdsperiodeDto
 import no.nav.melosys.service.avgift.TrygdeavgiftValideringService.INNTEKTSPERIODER_EMPTY
 import no.nav.melosys.service.avgift.TrygdeavgiftValideringService.SKATTEFORHOLDSPERIODER_EMPTY
@@ -37,7 +40,7 @@ class TrygdeavgiftValideringServiceTest {
     @Nested
     @TestInstance(TestInstance.Lifecycle.PER_CLASS)
     inner class ValiderTrygdeavgiftberegningRequest {
-        @Test
+        @Test// TODO rewrite without request
         fun shouldThrowFunksjonellExceptionWhenMedlemskapsPerioderIsEmpty() {
             val behandlingsresultatMock = mockk<Behandlingsresultat>()
             every { behandlingsresultatMock.medlemskapsperioder } returns emptyList()
@@ -50,7 +53,7 @@ class TrygdeavgiftValideringServiceTest {
             }.message shouldBe TrygdeavgiftValideringService.MEDLEMSKAPSPERIODER_EMPTY
         }
 
-        @Test
+        @Test// TODO rewrite without request
         fun shouldThrowFunksjonellExceptionWhenUtledMedlemskapsperiodeFomIsNull() {
             val behandlingsresultatMock = mockk<Behandlingsresultat>()
             every { behandlingsresultatMock.medlemskapsperioder } returns listOf(Medlemskapsperiode())
@@ -64,7 +67,7 @@ class TrygdeavgiftValideringServiceTest {
             }.message shouldBe TrygdeavgiftValideringService.UTLED_MEDLEMSKAPSPERIODE_FOM_MANGLER
         }
 
-        @Test
+        @Test // TODO rewrite without request
         fun shouldThrowFunksjonellExceptionWhenUtledMedlemskapsperiodeTomIsNull() {
             val behandlingsresultatMock = mockk<Behandlingsresultat>()
             every { behandlingsresultatMock.medlemskapsperioder } returns listOf(Medlemskapsperiode())
@@ -77,6 +80,100 @@ class TrygdeavgiftValideringServiceTest {
             shouldThrow<FunksjonellException> {
                 TrygdeavgiftValideringService.validerTrygdeavgiftberegningRequest(oppdaterTrygdeAvgiftsGrunnlagRequest, behandlingsresultatMock)
             }.message shouldBe TrygdeavgiftValideringService.UTLED_MEDLEMSKAPSPERIODE_TOM_MANGLER
+        }
+
+        // SKATTEFORHOLDSPERIODER
+        @Test
+        fun shouldThrowFunksjonellExceptionWhenSkatteforholdPerioderOverlapper() {
+            val behandlingsresultat = Behandlingsresultat().apply {
+                medlemskapsperioder = listOf(Medlemskapsperiode().apply {
+                    innvilgelsesresultat = InnvilgelsesResultat.INNVILGET
+                    fom = LocalDate.now()
+                    tom = LocalDate.now().plusDays(1)
+                })
+            }
+
+            val periode = DatoPeriodeDto(fom = LocalDate.now(), tom = LocalDate.now().plusDays(1))
+
+            val skatteforholdsPerioder = listOf(
+                SkatteforholdsperiodeDto(UUID.randomUUID(), periode, Skatteplikttype.SKATTEPLIKTIG),
+                SkatteforholdsperiodeDto(UUID.randomUUID(), periode, Skatteplikttype.IKKE_SKATTEPLIKTIG)
+            )
+
+
+            shouldThrow<FunksjonellException> {
+                TrygdeavgiftValideringService.validerForTrygdeavgiftberegning(
+                    behandlingsresultat,
+                    skatteforholdsPerioder,
+                    listOf(mockk<InntektsperiodeDto>())
+                )
+            }.message shouldBe TrygdeavgiftValideringService.SKATTEFORHOLDSPERIODENE_KAN_IKKE_OVERLAPPE
+        }
+
+        // SKATTEFORHOLDSPERIODER
+        @Test
+        fun shouldThrowFunksjonellExceptionWhenSkatteforholdPerioderDekkerIkkeHelePerioden() {
+            val behandlingsresultat = Behandlingsresultat().apply {
+                medlemskapsperioder = listOf(Medlemskapsperiode().apply {
+                    innvilgelsesresultat = InnvilgelsesResultat.INNVILGET
+                    fom = LocalDate.now()
+                    tom = LocalDate.now().plusDays(3)
+                })
+            }
+
+            val periode1 = DatoPeriodeDto(fom = LocalDate.now(), tom = LocalDate.now())
+            val periode2 = DatoPeriodeDto(fom = LocalDate.now().plusDays(1), tom = LocalDate.now().plusDays(1))
+
+            val skatteforholdsPerioder = listOf(
+                SkatteforholdsperiodeDto(UUID.randomUUID(), periode1, Skatteplikttype.SKATTEPLIKTIG),
+                SkatteforholdsperiodeDto(UUID.randomUUID(), periode2, Skatteplikttype.IKKE_SKATTEPLIKTIG)
+            )
+
+
+            shouldThrow<FunksjonellException> {
+                TrygdeavgiftValideringService.validerForTrygdeavgiftberegning(
+                    behandlingsresultat,
+                    skatteforholdsPerioder,
+                    listOf(mockk<InntektsperiodeDto>())
+                )
+            }.message shouldBe TrygdeavgiftValideringService.SKATTEFORHOLDSPERIODE_DEKKER_IKKE_HELE_PERIODEN
+        }
+
+        // INNTEKTSPERIODER
+        @Test
+        fun shouldThrowFunksjonellExceptionWhenInntektsPerioderDekkerIkkeHelePerioden() {
+            val behandlingsresultat = Behandlingsresultat().apply {
+                medlemskapsperioder = listOf(Medlemskapsperiode().apply {
+                    innvilgelsesresultat = InnvilgelsesResultat.INNVILGET
+                    fom = LocalDate.now()
+                    tom = LocalDate.now().plusDays(3)
+                })
+            }
+
+            val skatteforholdsperiode = DatoPeriodeDto(fom = LocalDate.now().plusDays(0), tom = LocalDate.now().plusDays(3))
+            val inntektsperiode = DatoPeriodeDto(fom = LocalDate.now(), tom = LocalDate.now())
+
+            val skatteforholdsPerioder = listOf(SkatteforholdsperiodeDto(UUID.randomUUID(), skatteforholdsperiode, Skatteplikttype.SKATTEPLIKTIG))
+
+            val inntektsperioder = listOf(
+                InntektsperiodeDto(
+                    UUID.randomUUID(),
+                    inntektsperiode,
+                    Inntektskildetype.ARBEIDSINNTEKT,
+                    arbeidsgiverBetalerAvgift = true,
+                    mockk<PengerDto>(),
+                    true
+                )
+            )
+
+
+            shouldThrow<FunksjonellException> {
+                TrygdeavgiftValideringService.validerForTrygdeavgiftberegning(
+                    behandlingsresultat,
+                    skatteforholdsPerioder,
+                    inntektsperioder
+                )
+            }.message shouldBe TrygdeavgiftValideringService.INNTEKTSPERIODE_DEKKER_IKKE_HELE_PERIODEN
         }
 
         @ParameterizedTest
