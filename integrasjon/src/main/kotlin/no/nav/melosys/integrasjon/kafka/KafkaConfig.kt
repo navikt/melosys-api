@@ -108,7 +108,7 @@ class KafkaConfig(
         consumerFactory = DefaultKafkaConsumerFactory(
             kafkaProperties.buildConsumerProperties(null) + (consumerConfig(groupId) + securityConfig()),
             StringDeserializer(),
-            LoggingDeserializer(objectMapper, T::class.java)
+            loggingDeserializer(objectMapper, T::class.java)
         )
     }
 
@@ -142,17 +142,13 @@ class KafkaConfig(
                 it.equals("test", ignoreCase = true)
         }
 
-    class LoggingDeserializer<T>(
-        private val objectMapper: ObjectMapper,
-        private val targetType: Class<T>
-    ) : Deserializer<T> {
-        override fun deserialize(topic: String, data: ByteArray?): T {
-            return try {
+    private fun <T> loggingDeserializer(objectMapper: ObjectMapper, targetType: Class<T>): Deserializer<T> =
+        Deserializer { topic, data ->
+            try {
                 objectMapper.readValue(data ?: throw KafkaException("No data to deserialize, JSON is null"), targetType)
             } catch (e: Exception) {
                 log.error("Failed to deserialize message on topic $topic: ${data?.let { String(it) } ?: "null data"}", e)
                 throw e
             }
         }
-    }
 }
