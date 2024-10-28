@@ -32,7 +32,6 @@ import no.nav.melosys.saksflytapi.domain.ProsessDataKey
 import no.nav.melosys.saksflytapi.domain.ProsessStatus
 import no.nav.melosys.saksflytapi.domain.ProsessType
 import no.nav.melosys.saksflytapi.domain.Prosessinstans
-import no.nav.melosys.sikkerhet.context.ThreadLocalAccessInfo
 import no.nav.security.token.support.spring.test.EnableMockOAuth2Server
 import org.junit.jupiter.api.AfterEach
 import org.junit.jupiter.api.BeforeEach
@@ -49,7 +48,6 @@ import java.time.Duration
 import java.time.Instant
 import java.time.LocalDate
 import java.time.LocalDateTime
-import java.util.*
 
 @ActiveProfiles("test")
 @SpringBootTest(
@@ -71,21 +69,16 @@ internal class SaksflytOppstartIT(
     @Autowired private val applicationEventPublisher: ApplicationEventPublisher,
 ) : OracleTestContainerBase() {
 
-    private val processUUID = UUID.randomUUID()
-
     @MockkBean
     lateinit var safConsumer: SafConsumer
 
     @BeforeEach
     fun before() {
-        ThreadLocalAccessInfo.beforeExecuteProcess(processUUID, "test")
-
         SakRepo.clear()
     }
 
     @AfterEach
     fun after() {
-        ThreadLocalAccessInfo.afterExecuteProcess(processUUID)
         // Skaper trøbbel og ha prosessinstans med status PÅ_VENT liggende
         prosessinstansRepository.findAllByLåsReferanseStartingWith(LÅSREFERANSE_PROSESSINSTANS_SOM_IKKE_SKAL_REKJØRES_ENDA).forEach {
             prosessinstansRepository.delete(it)
