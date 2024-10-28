@@ -95,12 +95,12 @@ public class Inntektsperiode implements ErPeriode {
         if (this == o) return true;
         if (o == null || getClass() != o.getClass()) return false;
         Inntektsperiode that = (Inntektsperiode) o;
-        return arbeidsgiversavgiftBetalesTilSkatt == that.arbeidsgiversavgiftBetalesTilSkatt && erMaanedsbelop == that.erMaanedsbelop && Objects.equals(id, that.id) && Objects.equals(trygdeavgiftsperioder, that.trygdeavgiftsperioder) && Objects.equals(fomDato, that.fomDato) && Objects.equals(tomDato, that.tomDato) && type == that.type && Objects.equals(avgiftspliktigInntekt, that.avgiftspliktigInntekt);
+        return arbeidsgiversavgiftBetalesTilSkatt == that.arbeidsgiversavgiftBetalesTilSkatt && erMaanedsbelop == that.erMaanedsbelop && Objects.equals(id, that.id) && Objects.equals(fomDato, that.fomDato) && Objects.equals(tomDato, that.tomDato) && type == that.type && Objects.equals(avgiftspliktigInntekt, that.avgiftspliktigInntekt);
     }
 
     @Override
     public int hashCode() {
-        return Objects.hash(id, trygdeavgiftsperioder, fomDato, tomDato, type, avgiftspliktigInntekt, arbeidsgiversavgiftBetalesTilSkatt, erMaanedsbelop);
+        return Objects.hash(id, fomDato, tomDato, type, avgiftspliktigInntekt, arbeidsgiversavgiftBetalesTilSkatt, erMaanedsbelop);
     }
 
     @Override
