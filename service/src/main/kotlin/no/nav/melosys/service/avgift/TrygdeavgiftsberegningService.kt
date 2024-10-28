@@ -36,17 +36,17 @@ class TrygdeavgiftsberegningService(
     @Transactional
     fun beregnOgLagreTrygdeavgift(
         behandlingsresultatID: Long,
-        skatteforholdsperioderTemp: List<SkatteforholdsperiodeDto>,
-        inntektsPerioderTemp: List<InntektsperiodeDto>
+        skatteforholdsperioder: List<SkatteforholdsperiodeDto>,
+        inntektsPerioder: List<InntektsperiodeDto>
     ): Set<Trygdeavgiftsperiode> {
         val behandlingsresultat = behandlingsresultatService.hentBehandlingsresultat(behandlingsresultatID)
         oppdaterBehandlingsresultatForNyeTrygdeAvgiftsperioder(behandlingsresultat);
-        TrygdeavgiftValideringService.validerForTrygdeavgiftberegning(behandlingsresultat, skatteforholdsperioderTemp, inntektsPerioderTemp)
+        TrygdeavgiftValideringService.validerForTrygdeavgiftberegning(behandlingsresultat, skatteforholdsperioder, inntektsPerioder)
 
-        return if (erPliktigMedlemskapSkattePliktig(skatteforholdsperioderTemp, inntektsPerioderTemp, behandlingsresultat)) {
-            leggTilNyeTrygdeavgiftsperioderForPliktigMedlemskapSkattepliktig(skatteforholdsperioderTemp, behandlingsresultat)
+        return if (erPliktigMedlemskapSkattePliktig(skatteforholdsperioder, inntektsPerioder, behandlingsresultat)) {
+            leggTilNyeTrygdeavgiftsperioderForPliktigMedlemskapSkattepliktig(skatteforholdsperioder, behandlingsresultat)
         } else {
-            leggTilNyeTrygdeavgiftsperioder(behandlingsresultat, skatteforholdsperioderTemp, inntektsPerioderTemp)
+            leggTilNyeTrygdeavgiftsperioder(behandlingsresultat, skatteforholdsperioder, inntektsPerioder)
                 .also { behandlingsresultatService.lagreOgFlush(behandlingsresultat) }
         }
     }
