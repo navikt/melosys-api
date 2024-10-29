@@ -168,16 +168,16 @@ internal class ÅrsavregningControllerTest {
           "tomDato": "2023-07-31",
           "type": "ARBEIDSINNTEKT_FRA_NORGE",
           "arbeidsgiversavgiftBetales": true,
-          "avgiftspliktigInntektMnd": 40000,
-          "totalInntektForPerioden": 24280
+          "avgiftspliktigInntekt": 40000,
+          "erMaanedsbelop": true
         },
         {
           "fomDato": "2023-08-01",
           "tomDato": "2023-12-31",
           "type": "INNTEKT_FRA_UTLANDET",
           "arbeidsgiversavgiftBetales": false,
-          "avgiftspliktigInntektMnd": 15000,
-          "totalInntektForPerioden": 24280
+          "avgiftspliktigInntekt": 15000,
+          "erMaanedsbelop": true
         }
       ]
     },
@@ -202,8 +202,8 @@ internal class ÅrsavregningControllerTest {
           "avgiftPerMd": 6330
         }
       ],
-      "totalInntekt": 42,
-      "totalAvgift": 21170
+      "totalInntekt": 355000.0,
+      "totalAvgift": 31650.0
     }
   },
   "avvikFunnet": false,

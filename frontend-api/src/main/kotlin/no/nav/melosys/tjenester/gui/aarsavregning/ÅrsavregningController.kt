@@ -130,7 +130,13 @@ class ÅrsavregningController(
                 AvgiftDto(
                     trygdeavgiftsperioder = trygdeavgiftsperioder.filter { it.grunnlagInntekstperiode != null }
                         .map {
-                            val inntektPrMnd = it.grunnlagInntekstperiode.avgiftspliktigInntekt.verdiAvrundet // TODO MELOSYS-6814 Må håndtere dette på riktig måte
+                            val belop = it.grunnlagInntekstperiode.avgiftspliktigInntekt.verdiAvrundet
+                            val inntektPrMnd = if (it.grunnlagInntekstperiode.isErMaanedsbelop) {
+                                belop
+                            } else {
+                                TotalBeløpBeregner.månedligBeløpForTotalbeløp(it.fom, it.tom, BigDecimal(belop)).intValueExact()
+                            }
+
                             TrygdeavgiftsperiodeDto(
                                 fom = it.fom,
                                 tom = it.tom,
