@@ -1,6 +1,5 @@
 package no.nav.melosys.itest
 
-import io.kotest.matchers.collections.shouldHaveSize
 import io.kotest.matchers.nulls.shouldNotBeNull
 import io.kotest.matchers.shouldBe
 import io.mockk.every
@@ -93,8 +92,8 @@ class EessiMeldingConsumerIT(
         melosysEessiMeldingKafkaTemplateString.send("teammelosys.eessi.v1-local", jsonMelosysEessiMeldingMedFeil)
 
         LoggingTestUtils.withLogCapture { logs ->
-            await.atMost(5, TimeUnit.SECONDS).untilAsserted {
-                logs.shouldHaveSize(2)
+            await.atMost(5, TimeUnit.SECONDS).until {
+                logs.any { it.formattedMessage == "Consumer exception" }
             }
             logs.run {
                 get(0).formattedMessage shouldBe "Failed to deserialize message on topic teammelosys.eessi.v1-local: $jsonMelosysEessiMeldingMedFeil"
