@@ -1,10 +1,10 @@
 package no.nav.melosys.domain.eessi.melding
 
-import com.fasterxml.jackson.annotation.JsonCreator
-import com.fasterxml.jackson.annotation.JsonProperty
+import com.fasterxml.jackson.annotation.JsonSetter
+import com.fasterxml.jackson.annotation.Nulls
 
-data class Arbeidsland @JsonCreator(mode = JsonCreator.Mode.PROPERTIES) constructor(
-    @JsonProperty("land") val land: String,
-    @JsonProperty("arbeidssted") val arbeidssted: List<Arbeidssted?>? = emptyList(),
-) {
-}
+data class Arbeidsland (
+    val land: String,
+    @JsonSetter(nulls = Nulls.AS_EMPTY)
+    val arbeidssted: List<Arbeidssted> = emptyList(),
+)

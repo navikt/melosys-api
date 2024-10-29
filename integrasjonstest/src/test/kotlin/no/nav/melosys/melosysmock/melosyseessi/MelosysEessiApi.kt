@@ -69,6 +69,11 @@ class MelosysEessiApi {
         sedRepo[rinaSaksnummer] = newList
     }
 
+    @PostMapping("/sed/{sedType}/pdf")
+    fun genererSedPdf(@PathVariable sedType: SedType): ByteArray {
+        return "pdf".encodeToByteArray()
+    }
+
     @PostMapping("/journalfoerTidligereSendteSedFor/{rinaSaksnummer}")
     @ResponseStatus(value = HttpStatus.OK)
     fun journalfoerTidligereSendteSed(@PathVariable rinaSaksnummer: String?) {

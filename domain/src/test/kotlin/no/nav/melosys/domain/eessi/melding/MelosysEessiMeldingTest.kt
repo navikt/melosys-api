@@ -1,6 +1,7 @@
 package no.nav.melosys.domain.eessi.melding
 
-import com.fasterxml.jackson.databind.ObjectMapper
+import com.fasterxml.jackson.module.kotlin.jacksonObjectMapper
+import com.fasterxml.jackson.module.kotlin.readValue
 import io.kotest.matchers.collections.shouldHaveSize
 import io.kotest.matchers.shouldBe
 import org.junit.jupiter.api.Test
@@ -9,7 +10,7 @@ class MelosysEessiMeldingTest {
 
     @Test
     fun `skal takle arbeidssted med null verdi`() {
-        val objectMapper = ObjectMapper()
+        val objectMapper = jacksonObjectMapper()
 
         val json = """
             {
@@ -22,9 +23,9 @@ class MelosysEessiMeldingTest {
             }
         """
 
-        val melding = objectMapper.readValue(json, MelosysEessiMelding::class.java)
+        val melding = objectMapper.readValue<MelosysEessiMelding>(json)
         melding.arbeidsland.shouldHaveSize(1)
             .single()
-            .arbeidssted shouldBe null
+            .arbeidssted shouldBe emptyList()
     }
 }
