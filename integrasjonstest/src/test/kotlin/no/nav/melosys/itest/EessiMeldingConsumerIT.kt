@@ -1,5 +1,6 @@
 package no.nav.melosys.itest
 
+import ch.qos.logback.classic.Level
 import io.kotest.matchers.nulls.shouldNotBeNull
 import io.kotest.matchers.shouldBe
 import io.mockk.every
@@ -95,7 +96,7 @@ class EessiMeldingConsumerIT(
             await.atMost(5, TimeUnit.SECONDS).until {
                 logs.any { it.formattedMessage == "Consumer exception" }
             }
-            logs.run {
+            logs.filter { it.level == Level.ERROR }.run {
                 get(0).formattedMessage shouldBe "Failed to deserialize message on topic teammelosys.eessi.v1-local: $jsonMelosysEessiMeldingMedFeil"
                 get(1).run {
                     formattedMessage shouldBe "Consumer exception"
