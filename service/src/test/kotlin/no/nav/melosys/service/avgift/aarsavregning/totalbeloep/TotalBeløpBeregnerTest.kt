@@ -1,6 +1,5 @@
 package no.nav.melosys.service.avgift.aarsavregning.totalbeloep
 
-import io.kotest.assertions.throwables.shouldThrow
 import io.kotest.matchers.shouldBe
 import org.junit.jupiter.api.Test
 import java.math.BigDecimal
@@ -139,17 +138,6 @@ class TotalBeløpBeregnerTest {
 
         val forventetBeløp = BigDecimal("2100.00")
         result.shouldBe(forventetBeløp)
-    }
-
-    @Test
-    fun `Avrunding etter 2 desimaler trengs ikke, siden antall bruker 2 desimaler og enhetspris heltall`() {
-        val fom = LocalDate.of(2023, 12, 14)
-        val tom = LocalDate.of(2024, 2, 15)
-
-
-        shouldThrow<ArithmeticException> {
-            TotalBeløpBeregner.totalBeløpForPeriode(fom, tom, BigDecimal("1002.25"))
-        }
     }
 
     @Test
