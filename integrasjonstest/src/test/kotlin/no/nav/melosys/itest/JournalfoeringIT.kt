@@ -19,6 +19,7 @@ import no.nav.melosys.repository.BehandlingRepository
 import no.nav.melosys.repository.BehandlingsresultatRepository
 import no.nav.melosys.repository.FagsakRepository
 import no.nav.melosys.saksflytapi.domain.ProsessType
+import no.nav.melosys.service.avgift.aarsavregning.ÅrsavregningService
 import no.nav.melosys.service.journalforing.JournalfoeringService
 import no.nav.melosys.service.oppgave.OppgaveService
 import no.nav.melosys.service.sak.OpprettBehandlingForSak
@@ -41,6 +42,7 @@ class JournalfoeringIT(
     @Autowired private val unleash: FakeUnleash,
     @Autowired private val journalpostRepo: JournalpostRepo,
     @Autowired private val opprettBehandlingForSak: OpprettBehandlingForSak,
+    @Autowired private val årsavregningService: ÅrsavregningService
     ) : JournalfoeringBase(testDataGenerator, journalføringService, oppgaveService) {
 
     @BeforeEach
@@ -243,6 +245,9 @@ class JournalfoeringIT(
         println("steg2")
         val behandling = fagsakRepository.findBySaksnummer(prosessinstans.behandling.fagsak.saksnummer).get().hentSistRegistrertBehandling()
 
+        behandling.status = Behandlingsstatus.AVSLUTTET
+        behandlingRepository.save(behandling)
+
         val årsavregningBehandlingID = executeAndWait(
             mapOf(
                 ProsessType.OPPRETT_NY_BEHANDLING_FOR_SAK to 1
@@ -273,7 +278,7 @@ class JournalfoeringIT(
         )
         executeAndWait(
             mapOf(
-                ProsessType.JFR_ANDREGANG_NY_BEHANDLING to 1,
+                ProsessType.JFR_ANDREGANG_REPLIKER_BEHANDLING to 1,
                 ProsessType.OPPRETT_OG_DISTRIBUER_BREV to 1
             )
         ) {
@@ -287,17 +292,8 @@ class JournalfoeringIT(
             .maxBy { it.id }
             .apply {
                 type.shouldBe(Behandlingstyper.NY_VURDERING)
-                opprinneligBehandling.shouldBeNull()
-                initierendeJournalpostId.shouldBe(journalfoeringTilordneDto3.journalpostID)
+                initierendeJournalpostId.shouldBe(journalfoeringOpprettDto1.journalpostID)
             }
-            .mottatteOpplysninger.mottatteOpplysningerData.shouldBeInstanceOf<Soeknad>()
-            .shouldBeEqualToComparingFields(Soeknad().apply {
-                soeknadsland.apply {
-                    landkoder = listOf()
-                    isFlereLandUkjentHvilke = false
-                }
-                periode = Periode()
-            }, FieldsEqualityCheckConfig(ignorePrivateFields = false))
     }
 
     private fun lagOpprettSakDtoÅrsavregning(): OpprettSakDto {
