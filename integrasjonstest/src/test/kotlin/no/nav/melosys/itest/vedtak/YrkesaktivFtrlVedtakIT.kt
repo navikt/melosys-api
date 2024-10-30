@@ -248,16 +248,24 @@ class YrkesaktivFtrlVedtakIT(
         }.behandling.id
 
         val periode = DatoPeriodeDto(LocalDate.of(2023, 1, 1), LocalDate.of(2023, 2, 1))
-        val skattefordholdsperioder = listOf(SkatteforholdsperiodeDto(UUID.randomUUID(), periode, Skatteplikttype.SKATTEPLIKTIG))
+
+
+        val skattefordholdsperioder = listOf(
+            SkatteforholdTilNorge().apply {
+                fomDato = periode.fom
+                tomDato = periode.tom
+                skatteplikttype = Skatteplikttype.SKATTEPLIKTIG
+            }
+        )
         val inntektsforholdsperioder = listOf(
-            InntektsperiodeDto(
-                UUID.randomUUID(),
-                periode,
-                Inntektskildetype.INNTEKT_FRA_UTLANDET,
-                arbeidsgiverBetalerAvgift = true,
-                PengerDto(10000.toBigDecimal()),
-                true
-            )
+            Inntektsperiode().apply {
+                fomDato = periode.fom
+                tomDato = periode.tom
+                type = Inntektskildetype.INNTEKT_FRA_UTLANDET
+                isArbeidsgiversavgiftBetalesTilSkatt = true
+                avgiftspliktigInntekt = Penger(10000.toBigDecimal())
+                isErMaanedsbelop = true
+            }
         )
 
         trygdeavgiftsberegningService.beregnOgLagreTrygdeavgift(behandlingsId, skattefordholdsperioder, inntektsforholdsperioder)
@@ -363,16 +371,23 @@ class YrkesaktivFtrlVedtakIT(
         val behandling = fagsakRepository.findBySaksnummer(saksnummer).get().hentSistRegistrertBehandling()
 
         val periode = DatoPeriodeDto(LocalDate.of(2023, 1, 1), LocalDate.of(2023, 2, 1))
-        val skattefordholdsperioder = listOf(SkatteforholdsperiodeDto(UUID.randomUUID(), periode, Skatteplikttype.SKATTEPLIKTIG))
+        val skattefordholdsperioder = listOf(
+            SkatteforholdTilNorge().apply {
+                fomDato = periode.fom
+                tomDato = periode.tom
+                skatteplikttype = Skatteplikttype.SKATTEPLIKTIG
+            }
+        )
+
         val inntektsforholdsperioder = listOf(
-            InntektsperiodeDto(
-                UUID.randomUUID(),
-                periode,
-                Inntektskildetype.INNTEKT_FRA_UTLANDET,
-                arbeidsgiverBetalerAvgift = true,
-                PengerDto(10000.toBigDecimal()),
-                true
-            )
+            Inntektsperiode().apply {
+                fomDato = periode.fom
+                tomDato = periode.tom
+                type = Inntektskildetype.INNTEKT_FRA_UTLANDET
+                isArbeidsgiversavgiftBetalesTilSkatt = true
+                avgiftspliktigInntekt = Penger(10000.toBigDecimal())
+                isErMaanedsbelop = true
+            }
         )
 
         trygdeavgiftsberegningService.beregnOgLagreTrygdeavgift(behandling.id, skattefordholdsperioder, inntektsforholdsperioder)
@@ -555,44 +570,26 @@ class YrkesaktivFtrlVedtakIT(
             Folketrygdloven_kap2_bestemmelser.FTRL_KAP2_2_8_FØRSTE_LEDD_A
         )
         val periode = DatoPeriodeDto(LocalDate.of(2023, 1, 1), LocalDate.of(2023, 2, 1))
-        val skattefordholdsperioder = listOf(SkatteforholdsperiodeDto(UUID.randomUUID(), periode, skatteplikttype))
+        val skattefordholdsperioder = listOf(
+            SkatteforholdTilNorge().apply {
+                fomDato = periode.fom
+                tomDato = periode.tom
+                this.skatteplikttype = skatteplikttype
+            }
+        )
         val inntektsforholdsperioder = listOf(
-            InntektsperiodeDto(
-                UUID.randomUUID(),
-                periode,
-                Inntektskildetype.INNTEKT_FRA_UTLANDET,
-                arbeidsgiversavgiftBetales,
-                PengerDto(10000.toBigDecimal()),
-                true
-            )
+            Inntektsperiode().apply {
+                fomDato = periode.fom
+                tomDato = periode.tom
+                this.type = Inntektskildetype.INNTEKT_FRA_UTLANDET
+                isArbeidsgiversavgiftBetalesTilSkatt = arbeidsgiversavgiftBetales
+                avgiftspliktigInntekt = Penger(10000.toBigDecimal())
+                isErMaanedsbelop = true
+            }
         )
 
         trygdeavgiftsberegningService.beregnOgLagreTrygdeavgift(behandlingId, skattefordholdsperioder, inntektsforholdsperioder)
-        /*
-        trygdeavgiftsberegningService.beregnOgLagreTrygdeavgift(
-            behandlingId,
-            OppdaterTrygdeavgiftsgrunnlagRequest(
-                skatteforholdTilNorgeList = listOf(
-                    SkatteforholdTilNorgeRequest(
-                        fomDato = LocalDate.of(2023, 1, 1),
-                        tomDato = LocalDate.of(2023, 2, 1),
-                        skatteplikttype = skatteplikttype
-                    )
-                ),
-                inntektskilder = listOf(
-                    InntektskildeRequest(
-                        type = Inntektskildetype.INNTEKT_FRA_UTLANDET,
-                        arbeidsgiversavgiftBetales = arbeidsgiversavgiftBetales,
-                        avgiftspliktigInntekt = 10000.toBigDecimal(),
-                        fomDato = LocalDate.of(2023, 1, 1),
-                        tomDato = LocalDate.of(2023, 2, 1),
-                        erMaanedsbelop = true
-                    )
-                )
-            )
-        )
 
-         */
 
         val skatteforholdTilNorge = SkatteforholdTilNorge().apply {
             fomDato = LocalDate.of(2023, 1, 1)
