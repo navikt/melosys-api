@@ -37,7 +37,7 @@ data class ValideringsInput(
 class TrygdeavgiftValideringServiceTest {
     @Nested
     @TestInstance(TestInstance.Lifecycle.PER_CLASS)
-    inner class ValiderTrygdeavgiftberegningRequest {
+    inner class ValiderForTrygdeavgiftberegning {
         @Test
         fun shouldThrowFunksjonellExceptionWhenMedlemskapsPerioderIsEmpty() {
             val behandlingsresultatMock = mockk<Behandlingsresultat>()
@@ -263,5 +263,32 @@ class TrygdeavgiftValideringServiceTest {
         }
     }
 
+    @Nested
+    inner class ErAllePerioderSkattepliktige {
+        @Test
+        fun shouldReturnTrueWhenAllePerioderIsSkattepliktige() {
+            val skatteforholdsperioder = listOf(
+                SkatteforholdTilNorge().apply {
+                    skatteplikttype = Skatteplikttype.SKATTEPLIKTIG
+                }, SkatteforholdTilNorge().apply {
+                    skatteplikttype = Skatteplikttype.SKATTEPLIKTIG
+                })
+            TrygdeavgiftValideringService.erAllePerioderSkattepliktige(skatteforholdsperioder).run {
+                this shouldBe true
+            }
+        }
 
+        @Test
+        fun shouldReturnFalseWhenNotAllePerioderIsSkattepliktige() {
+            val skatteforholdsperioder = listOf(
+                SkatteforholdTilNorge().apply {
+                    skatteplikttype = Skatteplikttype.SKATTEPLIKTIG
+                }, SkatteforholdTilNorge().apply {
+                    skatteplikttype = Skatteplikttype.IKKE_SKATTEPLIKTIG
+                })
+            TrygdeavgiftValideringService.erAllePerioderSkattepliktige(skatteforholdsperioder).run {
+                this shouldBe false
+            }
+        }
+    }
 }
