@@ -1,12 +1,9 @@
 package no.nav.melosys.itest
 
-import ch.qos.logback.classic.Level
-import io.kotest.matchers.nulls.shouldNotBeNull
 import io.kotest.matchers.shouldBe
 import io.mockk.every
 import io.mockk.mockk
 import io.mockk.slot
-import no.nav.melosys.LoggingTestUtils
 import no.nav.melosys.integrasjon.kafka.KafkaConfig
 import no.nav.melosys.saksflytapi.ProsessinstansService
 import no.nav.melosys.service.mottatteopplysninger.MottatteOpplysningerService
@@ -22,7 +19,6 @@ import org.springframework.boot.test.context.TestConfiguration
 import org.springframework.context.annotation.Bean
 import org.springframework.kafka.core.KafkaTemplate
 import org.springframework.kafka.test.context.EmbeddedKafka
-import org.springframework.test.annotation.DirtiesContext
 import org.springframework.test.context.ActiveProfiles
 import org.springframework.test.context.ContextConfiguration
 import java.time.ZonedDateTime
@@ -46,7 +42,7 @@ import java.util.concurrent.TimeUnit
     ]
 )
 class SoknadMottattConsumerIT(
-    @Autowired @Qualifier("kafkaTemplateString") private val kafkaTemplateString: KafkaTemplate<String, String>,
+    @Autowired @Qualifier("kafkaTemplateString") private val kafkaTemplate: KafkaTemplate<String, String>,
     @Autowired private val testConfig: TestConfig
 ) {
 
@@ -75,7 +71,7 @@ class SoknadMottattConsumerIT(
                 "occuredOn": "${ZonedDateTime.now()}"
             }
         """
-        kafkaTemplateString.send("teammelosys.soknad-mottak.v1-local", melding)
+        kafkaTemplate.send("teammelosys.soknad-mottak.v1-local", melding)
 
         await.atMost(5, TimeUnit.SECONDS).until {
             testConfig.isCaptured()
