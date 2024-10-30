@@ -11,9 +11,10 @@ import no.nav.melosys.domain.kodeverk.Skatteplikttype
 import no.nav.melosys.domain.kodeverk.Trygdeavgift_typer
 import no.nav.melosys.domain.kodeverk.Trygdeavgiftmottaker
 import no.nav.melosys.integrasjon.ereg.EregFasade
+import no.nav.melosys.integrasjon.trygdeavgift.AvgiftsdekningerFraTrygdedekning
 import no.nav.melosys.integrasjon.trygdeavgift.TrygdeavgiftConsumer
 import no.nav.melosys.integrasjon.trygdeavgift.dto.*
-import no.nav.melosys.integrasjon.trygdeavgift.dto.MedlemskapsperiodeDto.Companion.tilMedlemskapsperiodeDtos
+import no.nav.melosys.integrasjon.trygdeavgift.dto.MedlemskapsperiodeDto.Companion.idToUUID
 import no.nav.melosys.service.avgift.aarsavregning.totalbeloep.TotalBeløpBeregner
 import no.nav.melosys.service.behandling.BehandlingService
 import no.nav.melosys.service.behandling.BehandlingsresultatService
@@ -225,6 +226,16 @@ class TrygdeavgiftsberegningService(
     }
 
     companion object {
+        private fun List<Medlemskapsperiode>.tilMedlemskapsperiodeDtos(): Set<MedlemskapsperiodeDto> {
+            return map {
+                MedlemskapsperiodeDto(
+                    it.idToUUID(),
+                    DatoPeriodeDto(it.fom, it.tom),
+                    AvgiftsdekningerFraTrygdedekning.avgiftsdekningerFraTrygdedekning(it.trygdedekning),
+                    it.medlemskapstype
+                )
+            }.toSet()
+        }
 
         private fun Inntektsperiode.tilInntektsperiodeDto(id: UUID): InntektsperiodeDto {
             val mndsBelop = if (isErMaanedsbelop) {
