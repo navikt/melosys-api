@@ -172,17 +172,17 @@ class TrygdeavgiftsberegningService(
 
         return innvilgedeMedlemskapsperioder.map {
             val skatteforholdTilNorge = SkatteforholdTilNorge().apply {
-                this.fomDato = skatteforholdsperioder.first().fom
-                this.tomDato = skatteforholdsperioder.first().tom
-                this.skatteplikttype = skatteforholdsperioder.first().skatteplikttype
+                fomDato = skatteforholdsperioder.first().fom
+                tomDato = skatteforholdsperioder.first().tom
+                skatteplikttype = skatteforholdsperioder.first().skatteplikttype
             }
             val trygdeavgiftsperiode = Trygdeavgiftsperiode().apply {
-                this.periodeFra = it.fom
-                this.periodeTil = it.tom
-                this.trygdesats = BigDecimal.ZERO
-                this.trygdeavgiftsbeløpMd = Penger(BigDecimal.ZERO)
-                this.grunnlagMedlemskapsperiode = it
-                this.grunnlagSkatteforholdTilNorge = skatteforholdTilNorge
+                periodeFra = it.fom
+                periodeTil = it.tom
+                trygdesats = BigDecimal.ZERO
+                trygdeavgiftsbeløpMd = Penger(BigDecimal.ZERO)
+                grunnlagMedlemskapsperiode = it
+                grunnlagSkatteforholdTilNorge = skatteforholdTilNorge
             }
             it.trygdeavgiftsperioder.add(trygdeavgiftsperiode)
 
