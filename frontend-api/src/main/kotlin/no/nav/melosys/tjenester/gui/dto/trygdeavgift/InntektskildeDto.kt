@@ -3,13 +3,8 @@ package no.nav.melosys.tjenester.gui.dto.trygdeavgift
 import no.nav.melosys.domain.avgift.Inntektsperiode
 import no.nav.melosys.domain.avgift.Penger
 import no.nav.melosys.domain.kodeverk.Inntektskildetype
-import no.nav.melosys.integrasjon.trygdeavgift.dto.DatoPeriodeDto
-import no.nav.melosys.integrasjon.trygdeavgift.dto.InntektsperiodeDto
-import no.nav.melosys.integrasjon.trygdeavgift.dto.PengerDto
-import no.nav.melosys.service.avgift.aarsavregning.totalbeloep.TotalBeløpBeregner
 import java.math.BigDecimal
 import java.time.LocalDate
-import java.util.*
 
 data class InntektskildeDto(
     val type: Inntektskildetype,
@@ -37,24 +32,6 @@ data class InntektskildeDto(
                 isArbeidsgiversavgiftBetalesTilSkatt = inntektsperiode.arbeidsgiversavgiftBetales
                 avgiftspliktigInntekt = Penger(inntektsperiode.avgiftspliktigInntekt ?: 0.toBigDecimal())
                 isErMaanedsbelop = inntektsperiode.erMaanedsbelop
-            }
-        }
-
-        fun List<InntektskildeDto>.tilInntektsPeriodeDtos(): List<InntektsperiodeDto> {
-            return map {
-                val avgiftsPliktigInntekt = if (it.erMaanedsbelop) it.avgiftspliktigInntekt else TotalBeløpBeregner.månedligBeløpForTotalbeløp(
-                    it.fomDato,
-                    it.tomDato, it.avgiftspliktigInntekt!!
-                )
-
-                InntektsperiodeDto(
-                    id = UUID.randomUUID(), // TODO fix
-                    periode = DatoPeriodeDto(it.fomDato, it.tomDato),
-                    inntektskilde = it.type,
-                    arbeidsgiverBetalerAvgift = it.arbeidsgiversavgiftBetales,
-                    månedsbeløp = PengerDto(avgiftsPliktigInntekt ?: 0.toBigDecimal()),
-                    erMaanedsbelop = true
-                )
             }
         }
     }

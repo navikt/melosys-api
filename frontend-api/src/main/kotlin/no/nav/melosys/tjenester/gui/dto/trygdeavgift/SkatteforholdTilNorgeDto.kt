@@ -2,10 +2,7 @@ package no.nav.melosys.tjenester.gui.dto.trygdeavgift
 
 import no.nav.melosys.domain.avgift.SkatteforholdTilNorge
 import no.nav.melosys.domain.kodeverk.Skatteplikttype
-import no.nav.melosys.integrasjon.trygdeavgift.dto.DatoPeriodeDto
-import no.nav.melosys.integrasjon.trygdeavgift.dto.SkatteforholdsperiodeDto
 import java.time.LocalDate
-import java.util.*
 
 data class SkatteforholdTilNorgeDto(
     val fomDato: LocalDate,
@@ -24,12 +21,6 @@ data class SkatteforholdTilNorgeDto(
                 fomDato = it.fomDato
                 tomDato = it.tomDato
                 skatteplikttype = it.skatteplikttype
-            }
-        }
-
-        fun List<SkatteforholdTilNorgeDto>.tilSkatteforholdsPeriodeDtos(): List<SkatteforholdsperiodeDto> {
-            return map {
-                SkatteforholdsperiodeDto(UUID.randomUUID(), DatoPeriodeDto(it.fomDato, it.tomDato), it.skatteplikttype)
             }
         }
     }
