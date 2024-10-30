@@ -72,7 +72,7 @@ class TrygdeavgiftsberegningService(
         inntektsperioder2Pair: List<Pair<UUID, Inntektsperiode>>,
         behandlingsresultat: Behandlingsresultat
     ): Trygdeavgiftsperiode {
-        val trygdeavgiftsperiode = Trygdeavgiftsperiode().apply {
+        return Trygdeavgiftsperiode().apply {
             periodeFra = response.beregnetPeriode.periode.fom
             periodeTil = response.beregnetPeriode.periode.tom
             trygdesats = response.beregnetPeriode.sats
@@ -86,8 +86,6 @@ class TrygdeavgiftsberegningService(
                 }
             grunnlagMedlemskapsperiode.trygdeavgiftsperioder.add(this)
         }
-
-        return trygdeavgiftsperiode
     }
 
     @Transactional(readOnly = true)
