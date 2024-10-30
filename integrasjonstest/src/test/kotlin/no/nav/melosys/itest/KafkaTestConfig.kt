@@ -39,7 +39,7 @@ class KafkaTestConfig {
 
     @Bean
     @Qualifier("manglendeFakturabetalingMelding")
-    fun ManglendeFakturabetalingMeldingKafkaTemplate(
+    fun manglendeFakturabetalingMeldingKafkaTemplate(
         kafkaProperties: KafkaProperties,
         objectMapper: ObjectMapper?
     ): KafkaTemplate<String, ManglendeFakturabetalingMelding> {
