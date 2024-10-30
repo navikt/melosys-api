@@ -7,8 +7,8 @@ import no.nav.melosys.service.avgift.TrygdeavgiftsberegningService
 import no.nav.melosys.service.tilgang.Aksesskontroll
 import no.nav.melosys.tjenester.gui.dto.trygdeavgift.BeregnetTrygdeavgiftDto
 import no.nav.melosys.tjenester.gui.dto.trygdeavgift.FakturamottakerDto
-import no.nav.melosys.tjenester.gui.dto.trygdeavgift.InntektskildeDto.Companion.tilInntektsPeriodeDtos
-import no.nav.melosys.tjenester.gui.dto.trygdeavgift.SkatteforholdTilNorgeDto.Companion.tilSkatteforholdsPeriodeDtos
+import no.nav.melosys.tjenester.gui.dto.trygdeavgift.InntektskildeDto.Companion.tilInntektsPerioder
+import no.nav.melosys.tjenester.gui.dto.trygdeavgift.SkatteforholdTilNorgeDto.Companion.tilSkatteforholdsPerioder
 import no.nav.melosys.tjenester.gui.dto.trygdeavgift.TrygdeavgiftMottakerDto
 import no.nav.melosys.tjenester.gui.dto.trygdeavgift.TrygdeavgiftsgrunnlagDto
 import no.nav.security.token.support.core.api.Protected
@@ -41,13 +41,14 @@ class TrygdeavgiftController(
         @RequestBody trygdeavgiftsgrunnlagDto: TrygdeavgiftsgrunnlagDto
     ): ResponseEntity<BeregnetTrygdeavgiftDto> {
         aksesskontroll.autoriserSkrivOgTilordnet(behandlingID)
-        val skatteforholdsperioderTemp = trygdeavgiftsgrunnlagDto.skatteforholdsperioder.tilSkatteforholdsPeriodeDtos()
-        val inntektsperioderTemp = trygdeavgiftsgrunnlagDto.inntektskilder.tilInntektsPeriodeDtos()
+
+        val skatteforholdsperioder = trygdeavgiftsgrunnlagDto.skatteforholdsperioder.tilSkatteforholdsPerioder()
+        val inntektsperioder = trygdeavgiftsgrunnlagDto.inntektskilder.tilInntektsPerioder()
 
         val trygdeavgiftsperiodeSet = trygdeavgiftsberegningService.beregnOgLagreTrygdeavgift(
             behandlingID,
-            skatteforholdsperioderTemp,
-            inntektsperioderTemp
+            skatteforholdsperioder,
+            inntektsperioder
         )
 
         return ResponseEntity.ok(
