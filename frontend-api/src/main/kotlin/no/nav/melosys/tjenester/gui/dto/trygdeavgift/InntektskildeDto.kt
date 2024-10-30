@@ -41,7 +41,7 @@ data class InntektskildeDto(
                     inntektskilde = it.type,
                     arbeidsgiverBetalerAvgift = it.arbeidsgiversavgiftBetales,
                     månedsbeløp = PengerDto(avgiftsPliktigInntekt ?: 0.toBigDecimal()),
-                    erMaanedsbelop = it.erMaanedsbelop
+                    erMaanedsbelop = true
                 )
             }
         }
