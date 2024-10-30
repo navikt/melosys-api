@@ -56,22 +56,9 @@ class TrygdeavgiftsberegningService(
             val skatteforholdsperioderDtos = skatteforholdsperioder2Pair.map { it.second.tilSkatteforholdDto(it.first) }
 
             val beregnetTrygdeavgift = beregnTrygdeAvgift(behandlingsresultat, skatteforholdsperioderDtos, inntektsperiodeDtos)
-            val nyeTrygdeavgiftsperioder = beregnetTrygdeavgift.map { response ->
-                Trygdeavgiftsperiode().apply {
-                    periodeFra = response.beregnetPeriode.periode.fom
-                    periodeTil = response.beregnetPeriode.periode.tom
-                    trygdesats = response.beregnetPeriode.sats
-                    trygdeavgiftsbeløpMd = response.beregnetPeriode.månedsavgift.tilPenger()
-                    grunnlagSkatteforholdTilNorge = skatteforholdsperioder2Pair.find { it.first == response.grunnlag.skatteforholdsperiodeId }?.second
-                    grunnlagInntekstperiode = inntektsperioder2Pair.find { it.first == response.grunnlag.inntektsperiodeId }?.second
-                }.apply {
-                    grunnlagMedlemskapsperiode = behandlingsresultat.medlemskapsperioder
-                        .find {
-                            idToUUid(it.id) == response.grunnlag.medlemskapsperiodeId
-                        }
-                    grunnlagMedlemskapsperiode.trygdeavgiftsperioder.add(this)
-                }
 
+            val nyeTrygdeavgiftsperioder = beregnetTrygdeavgift.map { response ->
+                lagTrygdeavgiftsperiode(response, skatteforholdsperioder2Pair, inntektsperioder2Pair, behandlingsresultat)
             }.toSet()
 
             nyeTrygdeavgiftsperioder.also {
@@ -79,6 +66,30 @@ class TrygdeavgiftsberegningService(
                 behandlingsresultatService.lagreOgFlush(behandlingsresultat)
             }
         }
+    }
+
+    private fun lagTrygdeavgiftsperiode(
+        response: TrygdeavgiftsberegningResponse,
+        skatteforholdsperioder2Pair: List<Pair<UUID, SkatteforholdTilNorge>>,
+        inntektsperioder2Pair: List<Pair<UUID, Inntektsperiode>>,
+        behandlingsresultat: Behandlingsresultat
+    ): Trygdeavgiftsperiode {
+        val trygdeavgiftsperiode = Trygdeavgiftsperiode().apply {
+            periodeFra = response.beregnetPeriode.periode.fom
+            periodeTil = response.beregnetPeriode.periode.tom
+            trygdesats = response.beregnetPeriode.sats
+            trygdeavgiftsbeløpMd = response.beregnetPeriode.månedsavgift.tilPenger()
+            grunnlagSkatteforholdTilNorge = skatteforholdsperioder2Pair.find { it.first == response.grunnlag.skatteforholdsperiodeId }?.second
+            grunnlagInntekstperiode = inntektsperioder2Pair.find { it.first == response.grunnlag.inntektsperiodeId }?.second
+        }.apply {
+            grunnlagMedlemskapsperiode = behandlingsresultat.medlemskapsperioder
+                .find {
+                    idToUUid(it.id) == response.grunnlag.medlemskapsperiodeId
+                }
+            grunnlagMedlemskapsperiode.trygdeavgiftsperioder.add(this)
+        }
+
+        return trygdeavgiftsperiode
     }
 
     @Transactional(readOnly = true)
@@ -109,27 +120,6 @@ class TrygdeavgiftsberegningService(
                     return persondataService.hentSammensattNavn(it.personIdent)
                 return eregFasade.hentOrganisasjonNavn(it.orgnr)
             }
-    }
-
-    private fun leggTilNyeTrygdeavgiftsperioder(
-        behandlingsresultat: Behandlingsresultat,
-        skatteforholdsperioder: List<SkatteforholdsperiodeDto>,
-        inntektsPerioder: List<InntektsperiodeDto>,
-        beregnetTrygdeavgift: List<TrygdeavgiftsberegningResponse>
-    ): Set<Trygdeavgiftsperiode> {
-        val skatteforholdTilNorgePair = skatteforholdsperioder.map { Pair(it.id, SkatteforholdsperiodeDto.tilSkatteforhold(it)) }
-        val inntektsperioderPair = inntektsPerioder.map { Pair(it.id, InntektsperiodeDto.tilInntektskilde(it)) }
-
-        val nyeTrygdeavgiftsperioder = beregnetTrygdeavgift.map {
-            lagTrygdeavgiftsperiode(
-                it,
-                behandlingsresultat,
-                skatteforholdTilNorgePair,
-                inntektsperioderPair
-            )
-        }.toSet()
-
-        return nyeTrygdeavgiftsperioder
     }
 
     private fun beregnTrygdeAvgift(
@@ -224,40 +214,6 @@ class TrygdeavgiftsberegningService(
             return persondataService.hentPerson(fagsak.hentBrukersAktørID()).fødselsdato
         }
         return null
-    }
-
-    private fun lagTrygdeavgiftsperiode(
-        trygdeavgiftsberegningResponse: TrygdeavgiftsberegningResponse,
-        behandlingsresultat: Behandlingsresultat,
-        skatteforholdTilNorge: List<Pair<UUID, SkatteforholdTilNorge>>,
-        inntektsPerioderTemp: List<Pair<UUID, Inntektsperiode>>
-    ): Trygdeavgiftsperiode {
-        val beregnetPeriode = trygdeavgiftsberegningResponse.beregnetPeriode
-        val beregningsgrunnlag = trygdeavgiftsberegningResponse.grunnlag
-
-        val trygdeAvgiftsperiode = Trygdeavgiftsperiode().apply {
-            periodeFra = beregnetPeriode.periode.fom
-            periodeTil = beregnetPeriode.periode.tom
-            trygdesats = beregnetPeriode.sats
-            trygdeavgiftsbeløpMd = beregnetPeriode.månedsavgift.tilPenger()
-
-            grunnlagSkatteforholdTilNorge = skatteforholdTilNorge.find {
-                it.first == beregningsgrunnlag.skatteforholdsperiodeId
-            }?.second
-
-            grunnlagInntekstperiode = inntektsPerioderTemp.find {
-                it.first == beregningsgrunnlag.inntektsperiodeId
-            }?.second
-
-        }.apply {
-            grunnlagMedlemskapsperiode = behandlingsresultat.medlemskapsperioder
-                .find {
-                    idToUUid(it.id) == beregningsgrunnlag.medlemskapsperiodeId
-                }
-            grunnlagMedlemskapsperiode.trygdeavgiftsperioder.add(this)
-        }
-
-        return trygdeAvgiftsperiode
     }
 
     private fun validerTrygdeavgiftBetalesTilNav(
