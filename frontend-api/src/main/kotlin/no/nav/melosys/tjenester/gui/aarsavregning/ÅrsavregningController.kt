@@ -135,8 +135,10 @@ class ÅrsavregningController(
                             val inntektPrMnd = if (it.grunnlagInntekstperiode.isErMaanedsbelop) {
                                 belop
                             } else {
-                                val total = TotalBeløpBeregner.månedligBeløpForTotalbeløp(it.fom, it.tom, BigDecimal(belop)) // TODO rydd opp før merge av 6814
-                                total.setScale(0, RoundingMode.FLOOR).intValueExact();
+                                val mndBelop = TotalBeløpBeregner.månedligBeløpForTotalbeløp(
+                                    it.fom, it.tom, BigDecimal(belop)
+                                )
+                                mndBelop.setScale(0, RoundingMode.FLOOR).intValueExact();
                             }
 
                             TrygdeavgiftsperiodeDto(
