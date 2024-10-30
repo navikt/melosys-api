@@ -17,6 +17,7 @@ import no.nav.security.token.support.core.api.Protected
 import org.springframework.http.ResponseEntity
 import org.springframework.web.bind.annotation.*
 import java.math.BigDecimal
+import java.math.RoundingMode
 import java.time.LocalDate
 
 @Protected
@@ -134,7 +135,8 @@ class ÅrsavregningController(
                             val inntektPrMnd = if (it.grunnlagInntekstperiode.isErMaanedsbelop) {
                                 belop
                             } else {
-                                TotalBeløpBeregner.månedligBeløpForTotalbeløp(it.fom, it.tom, BigDecimal(belop)).intValueExact()
+                                val total = TotalBeløpBeregner.månedligBeløpForTotalbeløp(it.fom, it.tom, BigDecimal(belop)) // TODO rydd opp før merge av 6814
+                                total.setScale(0, RoundingMode.FLOOR).intValueExact();
                             }
 
                             TrygdeavgiftsperiodeDto(
