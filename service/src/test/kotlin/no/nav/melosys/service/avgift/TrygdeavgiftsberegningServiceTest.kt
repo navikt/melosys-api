@@ -26,7 +26,7 @@ import no.nav.melosys.exception.FunksjonellException
 import no.nav.melosys.integrasjon.ereg.EregFasade
 import no.nav.melosys.integrasjon.trygdeavgift.TrygdeavgiftConsumer
 import no.nav.melosys.integrasjon.trygdeavgift.dto.*
-import no.nav.melosys.integrasjon.trygdeavgift.dto.MedlemskapsperiodeDto.Companion.idToUUID
+
 import no.nav.melosys.service.behandling.BehandlingService
 import no.nav.melosys.service.behandling.BehandlingsresultatService
 import no.nav.melosys.service.persondata.PersondataService
@@ -160,7 +160,7 @@ internal class TrygdeavgiftsberegningServiceTest {
                     TrygdeavgiftsperiodeDto(
                         DatoPeriodeDto(FOM, TOM), BigDecimal.valueOf(7.9), PengerDto(BigDecimal.valueOf(790), NOK)
                     ), TrygdeavgiftsgrunnlagDto(
-                        behandlingsresultat.medlemskapsperioder.first().idToUUID(),
+                        idToUUid(behandlingsresultat.medlemskapsperioder.first().id),
                         notSoRandomUuid,
                         notSoRandomUuid
                     )
@@ -303,7 +303,7 @@ internal class TrygdeavgiftsberegningServiceTest {
                     TrygdeavgiftsperiodeDto(
                         DatoPeriodeDto(FOM, TOM), BigDecimal.valueOf(7.9), PengerDto(BigDecimal.valueOf(790), NOK)
                     ), TrygdeavgiftsgrunnlagDto(
-                        behandlingsresultat.medlemskapsperioder.first().idToUUID(),
+                        idToUUid(behandlingsresultat.medlemskapsperioder.first().id),
                         notSoRandomUuid,
                         notSoRandomUuid
                     )
@@ -495,7 +495,7 @@ internal class TrygdeavgiftsberegningServiceTest {
                     TrygdeavgiftsperiodeDto(
                         DatoPeriodeDto(FOM, TOM), BigDecimal.valueOf(0), PengerDto(BigDecimal.valueOf(0.0), NOK)
                     ), TrygdeavgiftsgrunnlagDto(
-                        behandlingsresultat.medlemskapsperioder.first().idToUUID(),
+                        idToUUid(behandlingsresultat.medlemskapsperioder.first().id),
                         notSoRandomUuid,
                         notSoRandomUuid
                     )
@@ -606,13 +606,14 @@ internal class TrygdeavgiftsberegningServiceTest {
                 isErMaanedsbelop = true
             }
         )
+
         every { mockTrygdeavgiftConsumer.beregnTrygdeavgift(ofType(TrygdeavgiftsberegningRequest::class)) }.returns(
             listOf(
                 TrygdeavgiftsberegningResponse(
                     TrygdeavgiftsperiodeDto(
                         DatoPeriodeDto(FOM, TOM), BigDecimal.valueOf(0), PengerDto(BigDecimal.valueOf(123.0), NOK)
                     ), TrygdeavgiftsgrunnlagDto(
-                        behandlingsresultat.medlemskapsperioder.first().idToUUID(),
+                        idToUUid(behandlingsresultat.medlemskapsperioder.first().id),
                         notSoRandomUuid,
                         notSoRandomUuid
                     )
@@ -787,6 +788,10 @@ internal class TrygdeavgiftsberegningServiceTest {
             ).build()
         }
         trygdeavgiftsberegningService.finnFakturamottakerNavn(BEHANDLING_ID).shouldBe(BRUKER_NAVN)
+    }
+
+    fun idToUUid(id: Long): UUID {
+        return UUID.nameUUIDFromBytes(id.toString().toByteArray())
     }
 }
 
