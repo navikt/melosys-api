@@ -108,6 +108,9 @@ public class EessiService {
         sedData.setMottakerIder(mottakerInstitusjoner);
         sedData.setGsakSaksnummer(fagsak.getGsakSaksnummer());
         sedData.setYtterligereInformasjon(mapYtterligereInformasjon(ytterligereInformasjon, periodeType, behandlingsresultat));
+        if (behandling.getTema() == Behandlingstema.ARBEID_FLERE_LAND) { //TODO testing
+            sedData.setHarFastArbeidssted(null);
+        }
 
         log.info("Oppretter buc og sed for fagsak {}", fagsak.getSaksnummer());
         OpprettSedDto opprettSedDto = eessiConsumer.opprettBucOgSed(
