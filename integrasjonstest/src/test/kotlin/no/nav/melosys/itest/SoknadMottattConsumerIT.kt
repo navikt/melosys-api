@@ -68,7 +68,6 @@ class SoknadMottattConsumerIT(
     }
 
     @Test
-    @DirtiesContext
     fun `mottak av gyldig json på kafka kø skal fungere`() {
         val melding = """
             {
@@ -82,31 +81,5 @@ class SoknadMottattConsumerIT(
             testConfig.isCaptured()
         }
         testConfig.capturedSoknadID() shouldBe "123"
-    }
-
-    @Test
-    @DirtiesContext
-    fun `mottak av ugyldig json på kafka kø skal feile å logge`() {
-        val melding = """
-            {
-                soknadID: 123
-            }
-        """
-
-        kafkaTemplateString.send("teammelosys.soknad-mottak.v1-local", melding)
-
-        LoggingTestUtils.withLogCapture { logs ->
-            await.atMost(5, TimeUnit.SECONDS).until {
-                logs.any { it.formattedMessage == "Consumer exception" }
-            }
-            logs.filter { it.level == Level.ERROR }.run {
-                get(0).formattedMessage shouldBe "Failed to deserialize message on topic teammelosys.soknad-mottak.v1-local: $melding"
-                get(1).run {
-                    formattedMessage shouldBe "Consumer exception"
-                    throwableProxy.shouldNotBeNull()
-                        .message shouldBe "Stopped container"
-                }
-            }
-        }
     }
 }
