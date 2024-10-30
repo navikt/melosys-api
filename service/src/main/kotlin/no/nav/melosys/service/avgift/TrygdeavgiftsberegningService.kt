@@ -14,6 +14,7 @@ import no.nav.melosys.integrasjon.ereg.EregFasade
 import no.nav.melosys.integrasjon.trygdeavgift.TrygdeavgiftConsumer
 import no.nav.melosys.integrasjon.trygdeavgift.dto.*
 import no.nav.melosys.integrasjon.trygdeavgift.dto.MedlemskapsperiodeDto.Companion.tilMedlemskapsperiodeDtos
+import no.nav.melosys.service.avgift.aarsavregning.totalbeloep.TotalBeløpBeregner
 import no.nav.melosys.service.behandling.BehandlingService
 import no.nav.melosys.service.behandling.BehandlingsresultatService
 import no.nav.melosys.service.persondata.PersondataService
@@ -37,7 +38,9 @@ class TrygdeavgiftsberegningService(
     fun beregnOgLagreTrygdeavgift(
         behandlingsresultatID: Long,
         skatteforholdsperioder: List<SkatteforholdsperiodeDto>,
-        inntektsPerioder: List<InntektsperiodeDto>
+        inntektsPerioder: List<InntektsperiodeDto>,
+        skatteforholdsperioder2: List<SkatteforholdTilNorge> = emptyList(),
+        inntektsPerioder2: List<Inntektsperiode> = emptyList(),
     ): Set<Trygdeavgiftsperiode> {
         val behandlingsresultat = behandlingsresultatService.hentBehandlingsresultat(behandlingsresultatID)
         oppdaterBehandlingsresultatForNyeTrygdeAvgiftsperioder(behandlingsresultat);
@@ -46,12 +49,35 @@ class TrygdeavgiftsberegningService(
         return if (erPliktigMedlemskapSkattePliktig(skatteforholdsperioder, inntektsPerioder, behandlingsresultat)) {
             leggTilNyeTrygdeavgiftsperioderForPliktigMedlemskapSkattepliktig(skatteforholdsperioder, behandlingsresultat)
         } else {
-            val beregnetTrygdeavgift = beregnTrygdeAvgift(behandlingsresultat, skatteforholdsperioder, inntektsPerioder)
-            leggTilNyeTrygdeavgiftsperioder(behandlingsresultat, skatteforholdsperioder, inntektsPerioder, beregnetTrygdeavgift)
-                .also {
-                    validerTrygdeavgiftBetalesTilNav(behandlingsresultat, beregnetTrygdeavgift)
-                    behandlingsresultatService.lagreOgFlush(behandlingsresultat)
+            val inntektsperioder2Pair = inntektsPerioder2.map { Pair(UUID.randomUUID(), it) }
+            val inntektsperiodeDtos = inntektsperioder2Pair.map { it.second.tilInntektsperiodeDto(it.first) }
+
+            val skatteforholdsperioder2Pair = skatteforholdsperioder2.map { Pair(UUID.randomUUID(), it) }
+            val skatteforholdsperioderDtos = skatteforholdsperioder2Pair.map { it.second.tilSkatteforholdDto(it.first) }
+
+            val beregnetTrygdeavgift = beregnTrygdeAvgift(behandlingsresultat, skatteforholdsperioderDtos, inntektsperiodeDtos)
+            val nyeTrygdeavgiftsperioder = beregnetTrygdeavgift.map { response ->
+                Trygdeavgiftsperiode().apply {
+                    periodeFra = response.beregnetPeriode.periode.fom
+                    periodeTil = response.beregnetPeriode.periode.tom
+                    trygdesats = response.beregnetPeriode.sats
+                    trygdeavgiftsbeløpMd = response.beregnetPeriode.månedsavgift.tilPenger()
+                    grunnlagSkatteforholdTilNorge = skatteforholdsperioder2Pair.find { it.first == response.grunnlag.skatteforholdsperiodeId }?.second
+                    grunnlagInntekstperiode = inntektsperioder2Pair.find { it.first == response.grunnlag.inntektsperiodeId }?.second
+                }.apply {
+                    grunnlagMedlemskapsperiode = behandlingsresultat.medlemskapsperioder
+                        .find {
+                            idToUUid(it.id) == response.grunnlag.medlemskapsperiodeId
+                        }
+                    grunnlagMedlemskapsperiode.trygdeavgiftsperioder.add(this)
                 }
+
+            }.toSet()
+
+            nyeTrygdeavgiftsperioder.also {
+                validerTrygdeavgiftBetalesTilNav(behandlingsresultat, beregnetTrygdeavgift)
+                behandlingsresultatService.lagreOgFlush(behandlingsresultat)
+            }
         }
     }
 
@@ -247,6 +273,31 @@ class TrygdeavgiftsberegningService(
     }
 
     companion object {
+
+        private fun Inntektsperiode.tilInntektsperiodeDto(id: UUID): InntektsperiodeDto {
+            val mndsBelop = if (isErMaanedsbelop) {
+                PengerDto(avgiftspliktigInntekt)
+            } else {
+                val kalkulertBelop = TotalBeløpBeregner.månedligBeløpForTotalbeløp(fomDato, tomDato, avgiftspliktigInntekt.verdi)
+                PengerDto(kalkulertBelop)
+            }
+
+            return InntektsperiodeDto(
+                id,
+                DatoPeriodeDto(fomDato, tomDato),
+                type,
+                isArbeidsgiversavgiftBetalesTilSkatt,
+                mndsBelop,
+                true
+            )
+        }
+
+        private fun SkatteforholdTilNorge.tilSkatteforholdDto(id: UUID) = SkatteforholdsperiodeDto(
+            id,
+            DatoPeriodeDto(fomDato, tomDato),
+            skatteplikttype
+        )
+
         private fun idToUUid(id: Long): UUID {
             return UUID.nameUUIDFromBytes(id.toString().toByteArray())
         }

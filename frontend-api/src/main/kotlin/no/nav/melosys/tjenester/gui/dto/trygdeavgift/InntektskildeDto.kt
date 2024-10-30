@@ -1,6 +1,7 @@
 package no.nav.melosys.tjenester.gui.dto.trygdeavgift
 
 import no.nav.melosys.domain.avgift.Inntektsperiode
+import no.nav.melosys.domain.avgift.Penger
 import no.nav.melosys.domain.kodeverk.Inntektskildetype
 import no.nav.melosys.integrasjon.trygdeavgift.dto.DatoPeriodeDto
 import no.nav.melosys.integrasjon.trygdeavgift.dto.InntektsperiodeDto
@@ -28,6 +29,17 @@ data class InntektskildeDto(
     )
 
     companion object {
+        fun List<InntektskildeDto>.tilInntektsPerioder() = map { inntektsperiode ->
+            Inntektsperiode().apply {
+                fomDato = inntektsperiode.fomDato
+                tomDato = inntektsperiode.tomDato
+                type = inntektsperiode.type
+                isArbeidsgiversavgiftBetalesTilSkatt = inntektsperiode.arbeidsgiversavgiftBetales
+                avgiftspliktigInntekt = Penger(inntektsperiode.avgiftspliktigInntekt ?: 0.toBigDecimal())
+                isErMaanedsbelop = inntektsperiode.erMaanedsbelop
+            }
+        }
+
         fun List<InntektskildeDto>.tilInntektsPeriodeDtos(): List<InntektsperiodeDto> {
             return map {
                 val avgiftsPliktigInntekt = if (it.erMaanedsbelop) it.avgiftspliktigInntekt else TotalBeløpBeregner.månedligBeløpForTotalbeløp(
