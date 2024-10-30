@@ -46,7 +46,7 @@ import java.util.concurrent.TimeUnit
     ]
 )
 class SoknadMottattConsumerIT(
-    @Autowired @Qualifier("melosysEessiMeldingString") private val templateString: KafkaTemplate<String, String>,
+    @Autowired @Qualifier("kafkaTemplateString") private val kafkaTemplateString: KafkaTemplate<String, String>,
     @Autowired private val testConfig: TestConfig
 ) {
 
@@ -76,7 +76,7 @@ class SoknadMottattConsumerIT(
                 "occuredOn": "${ZonedDateTime.now()}"
             }
         """
-        templateString.send("teammelosys.soknad-mottak.v1-local", melding)
+        kafkaTemplateString.send("teammelosys.soknad-mottak.v1-local", melding)
 
         await.atMost(5, TimeUnit.SECONDS).until {
             testConfig.isCaptured()
@@ -93,7 +93,7 @@ class SoknadMottattConsumerIT(
             }
         """
 
-        templateString.send("teammelosys.soknad-mottak.v1-local", melding)
+        kafkaTemplateString.send("teammelosys.soknad-mottak.v1-local", melding)
 
         LoggingTestUtils.withLogCapture { logs ->
             await.atMost(5, TimeUnit.SECONDS).until {

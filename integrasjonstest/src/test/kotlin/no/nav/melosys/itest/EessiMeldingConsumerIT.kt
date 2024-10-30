@@ -46,7 +46,7 @@ import java.util.concurrent.TimeUnit
     ]
 )
 class EessiMeldingConsumerIT(
-    @Autowired @Qualifier("melosysEessiMeldingString") private val melosysEessiMeldingKafkaTemplateString: KafkaTemplate<String, String>,
+    @Autowired @Qualifier("kafkaTemplateString") private val kafkaTemplateString: KafkaTemplate<String, String>,
     @Autowired private val testConfig: TestConfig
 ) {
 
@@ -72,7 +72,7 @@ class EessiMeldingConsumerIT(
                 "sedId": "sedId"
             }
         """
-        melosysEessiMeldingKafkaTemplateString.send("teammelosys.eessi.v1-local", jsonMelosysEessiMelding)
+        kafkaTemplateString.send("teammelosys.eessi.v1-local", jsonMelosysEessiMelding)
 
         await.atMost(5, TimeUnit.SECONDS).until {
             testConfig.isCaptured()
@@ -90,7 +90,7 @@ class EessiMeldingConsumerIT(
             }
         """
 
-        melosysEessiMeldingKafkaTemplateString.send("teammelosys.eessi.v1-local", jsonMelosysEessiMeldingMedFeil)
+        kafkaTemplateString.send("teammelosys.eessi.v1-local", jsonMelosysEessiMeldingMedFeil)
 
         LoggingTestUtils.withLogCapture { logs ->
             await.atMost(5, TimeUnit.SECONDS).until {

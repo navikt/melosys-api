@@ -51,7 +51,7 @@ import java.util.*
 class SedMottakTestIT(
     @Autowired private val eessiMeldingTestDataFactory: EessiMeldingTestDataFactory,
     @Autowired @Qualifier("melosysEessiMelding") private val melosysEessiMeldingKafkaTemplate: KafkaTemplate<String, MelosysEessiMelding>,
-    @Autowired @Qualifier("melosysEessiMeldingString") private val melosysEessiMeldingKafkaTemplateString: KafkaTemplate<String, String>,
+    @Autowired @Qualifier("kafkaTemplateString") private val kafkaTemplateString: KafkaTemplate<String, String>,
     @Autowired private val prosessinstansRepository: ProsessinstansRepository,
     @Autowired private val utpekingService: UtpekingService,
     @Autowired private val vedtaksfattingFasade: VedtaksfattingFasade,
@@ -708,7 +708,7 @@ class SedMottakTestIT(
                 ProsessType.ARBEID_FLERE_LAND_NY_SAK to 1
             )
         ) {
-            melosysEessiMeldingKafkaTemplateString.send(kafkaTopic, melosysEessiMeldingSomFeilerProd)
+            kafkaTemplateString.send(kafkaTopic, melosysEessiMeldingSomFeilerProd)
         }
 
         prosessinstansRepository.findAllByLåsReferanseStartingWith(ref)
