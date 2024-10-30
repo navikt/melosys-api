@@ -33,7 +33,7 @@ class KafkaTestConfig {
     @Qualifier("jsonSomString")
     fun kafkaTemplateString(
         kafkaProperties: KafkaProperties,
-    ): KafkaTemplate<String, String>  = KafkaTemplate(
+    ): KafkaTemplate<String, String> = KafkaTemplate(
         DefaultKafkaProducerFactory(kafkaProperties.buildProducerProperties(null))
     )
 
