@@ -1,16 +1,14 @@
 package no.nav.melosys.tjenester.gui.behandlinger.trygdeavgift
 
 import io.swagger.annotations.Api
+import no.nav.melosys.domain.avgift.Inntektsperiode
+import no.nav.melosys.domain.avgift.Penger
+import no.nav.melosys.domain.avgift.SkatteforholdTilNorge
 import no.nav.melosys.service.avgift.TrygdeavgiftMottakerService
 import no.nav.melosys.service.avgift.TrygdeavgiftService
 import no.nav.melosys.service.avgift.TrygdeavgiftsberegningService
 import no.nav.melosys.service.tilgang.Aksesskontroll
-import no.nav.melosys.tjenester.gui.dto.trygdeavgift.BeregnetTrygdeavgiftDto
-import no.nav.melosys.tjenester.gui.dto.trygdeavgift.FakturamottakerDto
-import no.nav.melosys.tjenester.gui.dto.trygdeavgift.InntektskildeDto.Companion.tilInntektsPerioder
-import no.nav.melosys.tjenester.gui.dto.trygdeavgift.SkatteforholdTilNorgeDto.Companion.tilSkatteforholdsPerioder
-import no.nav.melosys.tjenester.gui.dto.trygdeavgift.TrygdeavgiftMottakerDto
-import no.nav.melosys.tjenester.gui.dto.trygdeavgift.TrygdeavgiftsgrunnlagDto
+import no.nav.melosys.tjenester.gui.dto.trygdeavgift.*
 import no.nav.security.token.support.core.api.Protected
 import org.springframework.http.ResponseEntity
 import org.springframework.web.bind.annotation.*
@@ -89,5 +87,26 @@ class TrygdeavgiftController(
         aksesskontroll.autoriser(behandlingID)
         trygdeavgiftService.slettTrygdeavgiftsperioderPåBehandlingsresultat(behandlingID)
         return ResponseEntity.noContent().build()
+    }
+
+    companion object {
+        private fun List<SkatteforholdTilNorgeDto>.tilSkatteforholdsPerioder(): List<SkatteforholdTilNorge> = map {
+            SkatteforholdTilNorge().apply {
+                fomDato = it.fomDato
+                tomDato = it.tomDato
+                skatteplikttype = it.skatteplikttype
+            }
+        }
+
+        private fun List<InntektskildeDto>.tilInntektsPerioder() = map { inntektsperiode ->
+            Inntektsperiode().apply {
+                fomDato = inntektsperiode.fomDato
+                tomDato = inntektsperiode.tomDato
+                type = inntektsperiode.type
+                isArbeidsgiversavgiftBetalesTilSkatt = inntektsperiode.arbeidsgiversavgiftBetales
+                avgiftspliktigInntekt = Penger(inntektsperiode.avgiftspliktigInntekt ?: 0.toBigDecimal())
+                isErMaanedsbelop = inntektsperiode.erMaanedsbelop
+            }
+        }
     }
 }

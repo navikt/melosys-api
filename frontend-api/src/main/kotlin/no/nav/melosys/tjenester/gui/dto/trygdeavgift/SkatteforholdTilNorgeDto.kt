@@ -14,14 +14,4 @@ data class SkatteforholdTilNorgeDto(
         skatteforholdTilNorge.tomDato,
         skatteforholdTilNorge.skatteplikttype,
     )
-
-    companion object {
-        fun List<SkatteforholdTilNorgeDto>.tilSkatteforholdsPerioder(): List<SkatteforholdTilNorge> = map {
-            SkatteforholdTilNorge().apply {
-                fomDato = it.fomDato
-                tomDato = it.tomDato
-                skatteplikttype = it.skatteplikttype
-            }
-        }
-    }
 }
