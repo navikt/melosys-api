@@ -4,10 +4,10 @@ package no.nav.melosys.service.avgift
 
 import no.nav.melosys.domain.Behandlingsresultat
 import no.nav.melosys.domain.Medlemskapsperiode
+import no.nav.melosys.domain.avgift.Inntektsperiode
+import no.nav.melosys.domain.avgift.SkatteforholdTilNorge
 import no.nav.melosys.domain.kodeverk.Skatteplikttype
 import no.nav.melosys.exception.FunksjonellException
-import no.nav.melosys.integrasjon.trygdeavgift.dto.InntektsperiodeDto
-import no.nav.melosys.integrasjon.trygdeavgift.dto.SkatteforholdsperiodeDto
 import org.threeten.extra.LocalDateRange
 import java.time.DateTimeException
 
@@ -25,8 +25,8 @@ object TrygdeavgiftValideringService {
 
     fun validerForTrygdeavgiftberegning(
         behandlingsresultat: Behandlingsresultat,
-        skatteforholdsPerioder: List<SkatteforholdsperiodeDto>,
-        inntektsPerioder: List<InntektsperiodeDto>
+        skatteforholdsPerioder: List<SkatteforholdTilNorge>,
+        inntektsPerioder: List<Inntektsperiode>
     ) {
         if (inntektsPerioder.isEmpty() && !erAllePerioderSkattepliktige(skatteforholdsPerioder)) {
             throw FunksjonellException(INNTEKTSPERIODER_EMPTY)
@@ -35,7 +35,7 @@ object TrygdeavgiftValideringService {
             throw FunksjonellException(SKATTEFORHOLDSPERIODER_EMPTY)
         }
 
-        if (skatteforholdsPerioder.size > 1 && skatteforholdsPerioder.groupBy { it.skatteforhold }.size == 1) {
+        if (skatteforholdsPerioder.size > 1 && skatteforholdsPerioder.groupBy { it.skatteplikttype }.size == 1) {
             throw FunksjonellException(SKATTEPLIKTTYPE_LIK_FOR_ALLE_PERIODER)
         }
 
@@ -48,7 +48,7 @@ object TrygdeavgiftValideringService {
         )
 
         val erPliktigMedlem = innvilgedeMedlemskapsperioder.all { it.erPliktig() }
-        val erSkattepliktigIHelePerioden = skatteforholdsPerioder.all { it.skatteforhold == Skatteplikttype.SKATTEPLIKTIG }
+        val erSkattepliktigIHelePerioden = skatteforholdsPerioder.all { it.skatteplikttype == Skatteplikttype.SKATTEPLIKTIG }
         if (!(erPliktigMedlem && erSkattepliktigIHelePerioden)) {
             validerAtInntekstperioderDekkerInnvilgedeMedlemskapsperioderNew(
                 inntektsPerioder,
@@ -57,8 +57,8 @@ object TrygdeavgiftValideringService {
         }
     }
 
-    fun erAllePerioderSkattepliktige(skatteforholdsPerioder: List<SkatteforholdsperiodeDto>): Boolean {
-        return skatteforholdsPerioder.all { it.skatteforhold == Skatteplikttype.SKATTEPLIKTIG }
+    fun erAllePerioderSkattepliktige(skatteforholdsPerioder: List<SkatteforholdTilNorge>): Boolean {
+        return skatteforholdsPerioder.all { it.skatteplikttype == Skatteplikttype.SKATTEPLIKTIG }
     }
 
     private fun validerMedlemskapsperioder(behandlingsresultat: Behandlingsresultat) {
@@ -73,11 +73,11 @@ object TrygdeavgiftValideringService {
     }
 
     private fun validerAtInntekstperioderDekkerInnvilgedeMedlemskapsperioderNew(
-        inntektsperioder: List<InntektsperiodeDto>,
+        inntektsperioder: List<Inntektsperiode>,
         innvilgedeMedlemskapsperioder: List<Medlemskapsperiode>
     ) {
-        val inntektsperiodeDateRange = inntektsperioder.sortedBy { it.periode.fom }
-            .map { inntektsperiode -> LocalDateRange.ofClosed(inntektsperiode.periode.fom, inntektsperiode.periode.tom) }
+        val inntektsperiodeDateRange = inntektsperioder.sortedBy { it.fom }
+            .map { inntektsperiode -> LocalDateRange.ofClosed(inntektsperiode.fom, inntektsperiode.tom) }
 
         var samletInntektsperiodeDateRange = finnRangeForPerioderSamlet(inntektsperiodeDateRange, INNTEKTSPERIODE_DEKKER_IKKE_HELE_PERIODEN)
         if (validerPeriodeDekkerIkkeHeleMedlemskapsPerioden(innvilgedeMedlemskapsperioder, samletInntektsperiodeDateRange)) {
@@ -86,11 +86,11 @@ object TrygdeavgiftValideringService {
     }
 
     private fun validerAtSkatteforholdTilNorgeDekkerInnvilgedeMedlemskapsperioderOgOverlapperIkkeNew(
-        skatteforholdTilNorge: List<SkatteforholdsperiodeDto>,
+        skatteforholdTilNorge: List<SkatteforholdTilNorge>,
         innvilgedeMedlemskapsperioder: List<Medlemskapsperiode>
     ) {
-        val skatteforholdDateRange = skatteforholdTilNorge.sortedBy { it.periode.fom }
-            .map { skatteforhold -> LocalDateRange.ofClosed(skatteforhold.periode.fom, skatteforhold.periode.tom) }
+        val skatteforholdDateRange = skatteforholdTilNorge.sortedBy { it.fom }
+            .map { skatteforhold -> LocalDateRange.ofClosed(skatteforhold.fom, skatteforhold.tom) }
 
         validerAtDetIkkeFinnesOverlapp(skatteforholdDateRange)
 
