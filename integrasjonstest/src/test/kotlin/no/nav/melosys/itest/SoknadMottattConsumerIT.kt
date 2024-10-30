@@ -42,7 +42,7 @@ import java.util.concurrent.TimeUnit
     ]
 )
 class SoknadMottattConsumerIT(
-    @Autowired @Qualifier("kafkaTemplateString") private val kafkaTemplate: KafkaTemplate<String, String>,
+    @Autowired @Qualifier("jsonSomString") private val kafkaTemplate: KafkaTemplate<String, String>,
     @Autowired private val testConfig: TestConfig
 ) {
 

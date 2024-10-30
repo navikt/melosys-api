@@ -30,7 +30,7 @@ class KafkaTestConfig {
     }
 
     @Bean
-    @Qualifier("kafkaTemplateString")
+    @Qualifier("jsonSomString")
     fun kafkaTemplateString(
         kafkaProperties: KafkaProperties,
     ): KafkaTemplate<String, String>  = KafkaTemplate(

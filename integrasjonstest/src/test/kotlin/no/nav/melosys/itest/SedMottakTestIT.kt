@@ -51,7 +51,7 @@ import java.util.*
 class SedMottakTestIT(
     @Autowired private val eessiMeldingTestDataFactory: EessiMeldingTestDataFactory,
     @Autowired @Qualifier("melosysEessiMelding") private val melosysEessiMeldingKafkaTemplate: KafkaTemplate<String, MelosysEessiMelding>,
-    @Autowired @Qualifier("kafkaTemplateString") private val kafkaTemplate: KafkaTemplate<String, String>,
+    @Autowired @Qualifier("jsonSomString") private val kafkaTemplate: KafkaTemplate<String, String>,
     @Autowired private val prosessinstansRepository: ProsessinstansRepository,
     @Autowired private val utpekingService: UtpekingService,
     @Autowired private val vedtaksfattingFasade: VedtaksfattingFasade,
