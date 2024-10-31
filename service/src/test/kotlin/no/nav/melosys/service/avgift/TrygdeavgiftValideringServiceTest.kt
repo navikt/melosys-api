@@ -35,9 +35,11 @@ data class ValideringsInput(
 }
 
 class TrygdeavgiftValideringServiceTest {
+
     @Nested
     @TestInstance(TestInstance.Lifecycle.PER_CLASS)
     inner class ValiderForTrygdeavgiftberegning {
+
         @Test
         fun shouldThrowFunksjonellExceptionWhenMedlemskapsPerioderIsEmpty() {
             val behandlingsresultatMock = mockk<Behandlingsresultat>()
@@ -80,7 +82,7 @@ class TrygdeavgiftValideringServiceTest {
             }.message shouldBe TrygdeavgiftValideringService.UTLED_MEDLEMSKAPSPERIODE_FOM_MANGLER
         }
 
-        @Test // TODO rewrite without request
+        @Test
         fun shouldThrowFunksjonellExceptionWhenUtledMedlemskapsperiodeTomIsNull() {
             val behandlingsresultatMock = mockk<Behandlingsresultat>()
             every { behandlingsresultatMock.medlemskapsperioder } returns listOf(Medlemskapsperiode())
@@ -132,8 +134,6 @@ class TrygdeavgiftValideringServiceTest {
                 )
             }.message shouldBe TrygdeavgiftValideringService.SKATTEFORHOLDSPERIODENE_KAN_IKKE_OVERLAPPE
         }
-
-        // SKATTEFORHOLDSPERIODER
 
         @Test
         fun shouldThrowFunksjonellExceptionWhenSkatteforholdPerioderDekkerIkkeHelePerioden() {
