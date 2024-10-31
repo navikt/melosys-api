@@ -790,9 +790,7 @@ internal class TrygdeavgiftsberegningServiceTest {
         trygdeavgiftsberegningService.finnFakturamottakerNavn(BEHANDLING_ID).shouldBe(BRUKER_NAVN)
     }
 
-    fun idToUUid(id: Long): UUID {
-        return UUID.nameUUIDFromBytes(id.toString().toByteArray())
-    }
+    fun idToUUid(id: Long): UUID = UUID.nameUUIDFromBytes(id.toString().toByteArray())
 }
 
 
