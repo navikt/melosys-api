@@ -8,7 +8,6 @@ import java.time.temporal.ChronoUnit;
 import java.util.Objects;
 
 import no.nav.melosys.domain.ErPeriode;
-import no.nav.melosys.domain.kodeverk.Land_iso2;
 import no.nav.melosys.service.kontroll.regler.overlapp.PeriodeOverlappSjekk;
 
 public final class PeriodeRegler {
@@ -65,11 +64,6 @@ public final class PeriodeRegler {
 
     public static boolean periodeErLik(LocalDate fom1, LocalDate tom1, LocalDate fom2, LocalDate tom2) {
         return datoErLik(fom1, fom2) && datoErLik(tom1, tom2);
-    }
-
-    public static boolean periodeLandErLik(Land_iso2 gammeltLovvalgsLand, String nyttLovvalgsLand) {
-        String gammeltLovvalgslandString = gammeltLovvalgsLand != null ? gammeltLovvalgsLand.getKode() : null;
-        return Objects.equals(nyttLovvalgsLand, gammeltLovvalgslandString);
     }
 
     public static boolean datoErFørFørsteJuni2012(LocalDate dato) {
