@@ -99,23 +99,22 @@ class TrygdeavgiftsberegningService(
         skatteforholdsperioder2Pair: List<Pair<UUID, SkatteforholdTilNorge>>,
         inntektsperioder2Pair: List<Pair<UUID, Inntektsperiode>>,
         behandlingsresultat: Behandlingsresultat
-    ): Trygdeavgiftsperiode {
-        return Trygdeavgiftsperiode().apply {
-            periodeFra = response.beregnetPeriode.periode.fom
-            periodeTil = response.beregnetPeriode.periode.tom
-            trygdesats = response.beregnetPeriode.sats
-            trygdeavgiftsbeløpMd = response.beregnetPeriode.månedsavgift.tilPenger()
-            grunnlagSkatteforholdTilNorge = skatteforholdsperioder2Pair.find { it.first == response.grunnlag.skatteforholdsperiodeId }?.second
-            grunnlagInntekstperiode = inntektsperioder2Pair.find { it.first == response.grunnlag.inntektsperiodeId }?.second
+    ) = Trygdeavgiftsperiode().apply {
+        periodeFra = response.beregnetPeriode.periode.fom
+        periodeTil = response.beregnetPeriode.periode.tom
+        trygdesats = response.beregnetPeriode.sats
+        trygdeavgiftsbeløpMd = response.beregnetPeriode.månedsavgift.tilPenger()
+        grunnlagSkatteforholdTilNorge = skatteforholdsperioder2Pair.find { it.first == response.grunnlag.skatteforholdsperiodeId }?.second
+        grunnlagInntekstperiode = inntektsperioder2Pair.find { it.first == response.grunnlag.inntektsperiodeId }?.second
 
-            grunnlagMedlemskapsperiode = behandlingsresultat.medlemskapsperioder
-                .find {
-                    idToUUid(it.id) == response.grunnlag.medlemskapsperiodeId
-                }?.also { it: Medlemskapsperiode ->
-                    it.trygdeavgiftsperioder.add(this)
-                } ?: throw IllegalStateException("Fant ikke medlemskapsperiode for trygdeavgiftsperiode- dette skal ikke kunne skje")
-        }
+        grunnlagMedlemskapsperiode = behandlingsresultat.medlemskapsperioder
+            .find {
+                idToUUid(it.id) == response.grunnlag.medlemskapsperiodeId
+            }?.also { it: Medlemskapsperiode ->
+                it.trygdeavgiftsperioder.add(this)
+            } ?: throw IllegalStateException("Fant ikke medlemskapsperiode for trygdeavgiftsperiode- dette skal ikke kunne skje")
     }
+
 
     private fun beregnTrygdeAvgift(
         behandlingsresultat: Behandlingsresultat,
