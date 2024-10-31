@@ -1,11 +1,13 @@
 package no.nav.melosys.service.eessi.ruting;
 
 import java.util.Collection;
+import java.util.Objects;
 
 import no.nav.melosys.domain.Behandlingsresultat;
 import no.nav.melosys.domain.dokument.medlemskap.Periode;
 import no.nav.melosys.domain.eessi.SedType;
 import no.nav.melosys.domain.eessi.melding.MelosysEessiMelding;
+import no.nav.melosys.domain.kodeverk.Land_iso2;
 import no.nav.melosys.service.kontroll.regler.PeriodeRegler;
 
 public interface SedRuterForSedTyper extends SedRuter {
@@ -18,7 +20,7 @@ public interface SedRuterForSedTyper extends SedRuter {
 
         return behandlingsresultat.finnLovvalgsperiode().map(lovvalgsperiode ->
                 !PeriodeRegler.periodeErLik(lovvalgsperiode.getFom(), lovvalgsperiode.getTom(), periode.getFom(), periode.getTom())
-                    || !lovvalgsLand.equalsIgnoreCase(lovvalgsperiode.getLovvalgsland().getKode()))
+                    || !lovvalgsPeriodeLandErLik(lovvalgsperiode.getLovvalgsland(), lovvalgsLand))
             .orElse(true);
     }
 
@@ -27,5 +29,10 @@ public interface SedRuterForSedTyper extends SedRuter {
             periode.getFom(),
             periode.getTom()
         );
+    }
+
+     private static boolean lovvalgsPeriodeLandErLik(Land_iso2 gammeltLovvalgsLand, String nyttLovvalgsLand) {
+        String gammeltLovvalgslandString = gammeltLovvalgsLand != null ? gammeltLovvalgsLand.getKode() : null;
+        return Objects.equals(nyttLovvalgsLand, gammeltLovvalgslandString);
     }
 }

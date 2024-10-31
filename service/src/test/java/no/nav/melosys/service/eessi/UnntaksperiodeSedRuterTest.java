@@ -49,7 +49,7 @@ class UnntaksperiodeSedRuterTest {
 
     @Test
     void finnSakOgBestemRuting_nySak_verifiserResultatNySak() {
-        Prosessinstans prosessinstans = hentProsessinstans(LocalDate.now(), LocalDate.now().plusYears(1));
+        Prosessinstans prosessinstans = hentProsessinstans(LocalDate.now(), LocalDate.now().plusYears(1), "SE");
 
         unntaksperiodeSedRuter.rutSedTilBehandling(prosessinstans, 1L);
 
@@ -59,11 +59,11 @@ class UnntaksperiodeSedRuterTest {
     }
 
     @Test
-    void finnSakOgBestemRuting_oppdatertSedPåEksisterendeSakIkkeEndretPeriode_skalIkkeBehandles() throws Exception {
+    void finnSakOgBestemRuting_oppdatertSedPåEksisterendeSakIkkeEndretPeriode_skalIkkeBehandles() {
 
         LocalDate fom = LocalDate.now();
         LocalDate tom = LocalDate.now().plusYears(1);
-        Prosessinstans prosessinstans = hentProsessinstans(fom, tom);
+        Prosessinstans prosessinstans = hentProsessinstans(fom, tom, "SE");
 
         Lovvalgsperiode lovvalgsperiode = new Lovvalgsperiode();
         lovvalgsperiode.setLovvalgsland(Land_iso2.SE);
@@ -83,11 +83,88 @@ class UnntaksperiodeSedRuterTest {
     }
 
     @Test
-    void finnSakOgBestemRuting_oppdatertSedPåEksisterendeSakErEndretPeriode_skalBehandles() throws Exception {
+    void finnSakOgBestemRuting_oppdatertSedPåEksisterendeSakIkkeEndretIngenLovvalgsLand_skalIkkeBehandles() {
+
+        LocalDate fom = LocalDate.now();
+        LocalDate tom = LocalDate.now().plusYears(1);
+        Prosessinstans prosessinstans = hentProsessinstans(fom, tom, null);
+
+        Lovvalgsperiode lovvalgsperiode = new Lovvalgsperiode();
+        lovvalgsperiode.setLovvalgsland(null);
+        lovvalgsperiode.setFom(fom);
+        lovvalgsperiode.setTom(tom);
+        Behandlingsresultat behandlingsresultat = new Behandlingsresultat();
+        behandlingsresultat.getLovvalgsperioder().add(lovvalgsperiode);
+
+        Fagsak fagsak = hentFagsak();
+
+        when(behandlingsresultatService.hentBehandlingsresultat(anyLong())).thenReturn(behandlingsresultat);
+        when(fagsakService.finnFagsakFraArkivsakID(anyLong())).thenReturn(Optional.of(fagsak));
+
+        unntaksperiodeSedRuter.rutSedTilBehandling(prosessinstans, 1L);
+
+        verify(prosessinstansService).opprettProsessinstansSedJournalføring(eq(fagsak.hentSistAktivBehandlingIkkeÅrsavregning()), any(MelosysEessiMelding.class));
+    }
+
+    @Test
+    void finnSakOgBestemRuting_oppdatertSedPåEksisterendeSakErEndretLovvalgsLandForPeriode_skalBehandles() {
+        final long arkivsakID = 12321L;
+        LocalDate fom = LocalDate.now();
+        LocalDate tom = LocalDate.now().plusYears(1);
+        Prosessinstans prosessinstans = hentProsessinstans(fom, tom, "SE");
+
+        Lovvalgsperiode lovvalgsperiode = new Lovvalgsperiode();
+        lovvalgsperiode.setFom(fom);
+        lovvalgsperiode.setTom(tom);
+        lovvalgsperiode.setLovvalgsland(Land_iso2.IS);
+        Behandlingsresultat behandlingsresultat = new Behandlingsresultat();
+        behandlingsresultat.getLovvalgsperioder().add(lovvalgsperiode);
+
+        Fagsak fagsak = hentFagsak();
+
+        when(behandlingsresultatService.hentBehandlingsresultat(anyLong())).thenReturn(behandlingsresultat);
+        when(fagsakService.finnFagsakFraArkivsakID(anyLong())).thenReturn(Optional.of(fagsak));
+
+        unntaksperiodeSedRuter.rutSedTilBehandling(prosessinstans, arkivsakID);
+
+        verify(prosessinstansService).opprettProsessinstansNyBehandlingUnntaksregistrering(
+            any(MelosysEessiMelding.class), eq(Behandlingstema.REGISTRERING_UNNTAK_NORSK_TRYGD_UTSTASJONERING), eq(arkivsakID)
+        );
+    }
+
+    @Test
+    void finnSakOgBestemRuting_oppdatertSedPåEksisterendeSakErEndretLovvalgsLandForPeriodeFraNull_skalBehandles() {
+        final long arkivsakID = 12321L;
+        LocalDate fom = LocalDate.now();
+        LocalDate tom = LocalDate.now().plusYears(1);
+        Prosessinstans prosessinstans = hentProsessinstans(fom, tom, "SE");
+
+        Lovvalgsperiode lovvalgsperiode = new Lovvalgsperiode();
+        lovvalgsperiode.setFom(fom);
+        lovvalgsperiode.setTom(tom);
+        lovvalgsperiode.setLovvalgsland(null);
+        Behandlingsresultat behandlingsresultat = new Behandlingsresultat();
+        behandlingsresultat.getLovvalgsperioder().add(lovvalgsperiode);
+
+        Fagsak fagsak = hentFagsak();
+
+        when(behandlingsresultatService.hentBehandlingsresultat(anyLong())).thenReturn(behandlingsresultat);
+        when(fagsakService.finnFagsakFraArkivsakID(anyLong())).thenReturn(Optional.of(fagsak));
+
+        unntaksperiodeSedRuter.rutSedTilBehandling(prosessinstans, arkivsakID);
+
+        verify(prosessinstansService).opprettProsessinstansNyBehandlingUnntaksregistrering(
+            any(MelosysEessiMelding.class), eq(Behandlingstema.REGISTRERING_UNNTAK_NORSK_TRYGD_UTSTASJONERING), eq(arkivsakID)
+        );
+    }
+
+
+    @Test
+    void finnSakOgBestemRuting_oppdatertSedPåEksisterendeSakErEndretPeriode_skalBehandles() {
         final long arkivsakID = 12321L;
         LocalDate fom = LocalDate.now();
         LocalDate tom = null;
-        Prosessinstans prosessinstans = hentProsessinstans(fom, tom);
+        Prosessinstans prosessinstans = hentProsessinstans(fom, tom, "SE");
 
         Lovvalgsperiode lovvalgsperiode = new Lovvalgsperiode();
         lovvalgsperiode.setFom(fom.plusMonths(1));
@@ -119,19 +196,19 @@ class UnntaksperiodeSedRuterTest {
         return fagsak;
     }
 
-    private Prosessinstans hentProsessinstans(LocalDate fom, LocalDate tom) {
+    private Prosessinstans hentProsessinstans(LocalDate fom, LocalDate tom, String lovvalgsLand) {
         Prosessinstans prosessinstans = new Prosessinstans();
-        prosessinstans.setData(ProsessDataKey.EESSI_MELDING, hentMelosysEessiMelding(fom, tom));
+        prosessinstans.setData(ProsessDataKey.EESSI_MELDING, hentMelosysEessiMelding(fom, tom, lovvalgsLand));
         return prosessinstans;
     }
 
-    private MelosysEessiMelding hentMelosysEessiMelding(LocalDate fom, LocalDate tom) {
+    private MelosysEessiMelding hentMelosysEessiMelding(LocalDate fom, LocalDate tom, String lovvalgsLand) {
         MelosysEessiMelding melding = new MelosysEessiMelding();
         melding.setAktoerId(aktørID);
         melding.setArtikkel("12_1");
         melding.setDokumentId("123321");
         melding.setJournalpostId("j123");
-        melding.setLovvalgsland("SE");
+        melding.setLovvalgsland(lovvalgsLand);
 
         Periode periode = new Periode();
         periode.setFom(fom);
