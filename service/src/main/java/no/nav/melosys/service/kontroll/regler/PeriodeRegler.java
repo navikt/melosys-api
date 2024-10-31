@@ -5,6 +5,7 @@ import java.time.LocalDate;
 import java.time.Period;
 import java.time.ZoneId;
 import java.time.temporal.ChronoUnit;
+import java.util.Objects;
 
 import no.nav.melosys.domain.ErPeriode;
 import no.nav.melosys.service.kontroll.regler.overlapp.PeriodeOverlappSjekk;
@@ -65,17 +66,16 @@ public final class PeriodeRegler {
         return datoErLik(fom1, fom2) && datoErLik(tom1, tom2);
     }
 
+    public static boolean periodeLandErLik(String gammeltLovvalgsLand, String nyttLovvalgsLand) {
+        return Objects.equals(nyttLovvalgsLand, gammeltLovvalgsLand);
+    }
+
     public static boolean datoErFørFørsteJuni2012(LocalDate dato) {
         return dato.isBefore(FØRSTE_JUNI_2012);
     }
 
     private static boolean datoErLik(LocalDate date1, LocalDate date2) {
-
-        if (date1 == null || date2 == null) {
-            return date1 == date2;
-        }
-
-        return date1.equals(date2);
+        return Objects.equals(date1, date2);
     }
 
     public static boolean perioderOverlapperMerEnn1Dag(ErPeriode kontrollperiode, ErPeriode medlemsperiode) {
