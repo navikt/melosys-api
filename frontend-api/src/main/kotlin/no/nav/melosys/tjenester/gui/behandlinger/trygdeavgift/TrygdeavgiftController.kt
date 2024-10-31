@@ -89,7 +89,7 @@ class TrygdeavgiftController(
         return ResponseEntity.noContent().build()
     }
 
-    private fun List<SkatteforholdTilNorgeDto>.tilSkatteforholdsPerioder(): List<SkatteforholdTilNorge> = map {
+    private fun List<SkatteforholdTilNorgeDto>.tilSkatteforholdsPerioder() = map {
         SkatteforholdTilNorge().apply {
             fomDato = it.fomDato
             tomDato = it.tomDato
@@ -97,14 +97,14 @@ class TrygdeavgiftController(
         }
     }
 
-    private fun List<InntektskildeDto>.tilInntektsPerioder() = map { inntektsperiode ->
+    private fun List<InntektskildeDto>.tilInntektsPerioder() = map {
         Inntektsperiode().apply {
-            fomDato = inntektsperiode.fomDato
-            tomDato = inntektsperiode.tomDato
-            type = inntektsperiode.type
-            isArbeidsgiversavgiftBetalesTilSkatt = inntektsperiode.arbeidsgiversavgiftBetales
-            avgiftspliktigInntekt = Penger(inntektsperiode.avgiftspliktigInntekt ?: 0.toBigDecimal())
-            isErMaanedsbelop = inntektsperiode.erMaanedsbelop
+            fomDato = it.fomDato
+            tomDato = it.tomDato
+            type = it.type
+            isArbeidsgiversavgiftBetalesTilSkatt = it.arbeidsgiversavgiftBetales
+            avgiftspliktigInntekt = Penger(it.avgiftspliktigInntekt ?: 0.toBigDecimal())
+            isErMaanedsbelop = it.erMaanedsbelop
         }
     }
 }
