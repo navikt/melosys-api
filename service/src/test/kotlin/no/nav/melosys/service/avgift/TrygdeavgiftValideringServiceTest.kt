@@ -286,9 +286,7 @@ class TrygdeavgiftValideringServiceTest {
                 }, SkatteforholdTilNorge().apply {
                     skatteplikttype = Skatteplikttype.IKKE_SKATTEPLIKTIG
                 })
-            TrygdeavgiftValideringService.erAllePerioderSkattepliktige(skatteforholdsperioder).run {
-                this shouldBe false
-            }
+            TrygdeavgiftValideringService.erAllePerioderSkattepliktige(skatteforholdsperioder) shouldBe false
         }
     }
 }
