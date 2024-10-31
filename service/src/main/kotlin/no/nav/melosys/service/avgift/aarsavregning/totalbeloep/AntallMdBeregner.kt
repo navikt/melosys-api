@@ -20,31 +20,25 @@ class AntallMdBeregner(private val fom: LocalDate, private val tom: LocalDate) {
         return totalAntall
     }
 
-    private fun beregnFørsteMånedProsent(): BigDecimal {
-        return if (erSammeMånedOgÅr) {
-            (tom.dayOfMonth.toBigDecimal() - fom.dayOfMonth.toBigDecimal() + BigDecimal.ONE)
-                .divide(antallDagerFørsteMåned, 2, RoundingMode.HALF_UP)
-        } else {
-            (antallDagerFørsteMåned - fom.dayOfMonth.toBigDecimal() + BigDecimal.ONE)
-                .divide(antallDagerFørsteMåned, 2, RoundingMode.HALF_UP)
-        }
+    private fun beregnFørsteMånedProsent(): BigDecimal = if (erSammeMånedOgÅr) {
+        (tom.dayOfMonth.toBigDecimal() - fom.dayOfMonth.toBigDecimal() + BigDecimal.ONE)
+            .divide(antallDagerFørsteMåned, 2, RoundingMode.HALF_UP)
+    } else {
+        (antallDagerFørsteMåned - fom.dayOfMonth.toBigDecimal() + BigDecimal.ONE)
+            .divide(antallDagerFørsteMåned, 2, RoundingMode.HALF_UP)
     }
 
-    private fun beregnMånederMellomProsent(): BigDecimal {
-        return if (erSammeMånedOgÅr) {
-            BigDecimal.ZERO
-        } else {
-            val start = fom.withDayOfMonth(1).plusMonths(1)
-            val end = tom.withDayOfMonth(1)
-            ChronoUnit.MONTHS.between(start, end).toBigDecimal().setScale(2, RoundingMode.HALF_UP)
-        }
+    private fun beregnMånederMellomProsent(): BigDecimal = if (erSammeMånedOgÅr) {
+        BigDecimal.ZERO
+    } else {
+        val start = fom.withDayOfMonth(1).plusMonths(1)
+        val end = tom.withDayOfMonth(1)
+        ChronoUnit.MONTHS.between(start, end).toBigDecimal().setScale(2, RoundingMode.HALF_UP)
     }
 
-    private fun beregnSisteMånedProsent(): BigDecimal {
-        return if (erSammeMånedOgÅr) {
-            BigDecimal.ZERO
-        } else {
-            tom.dayOfMonth.toBigDecimal().divide(antallDagerSisteMåned, 2, RoundingMode.HALF_UP)
-        }
+    private fun beregnSisteMånedProsent(): BigDecimal = if (erSammeMånedOgÅr) {
+        BigDecimal.ZERO
+    } else {
+        tom.dayOfMonth.toBigDecimal().divide(antallDagerSisteMåned, 2, RoundingMode.HALF_UP)
     }
 }
