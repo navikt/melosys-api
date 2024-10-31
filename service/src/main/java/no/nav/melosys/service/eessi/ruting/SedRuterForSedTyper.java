@@ -20,7 +20,7 @@ public interface SedRuterForSedTyper extends SedRuter {
 
         return behandlingsresultat.finnLovvalgsperiode().map(lovvalgsperiode ->
                 !PeriodeRegler.periodeErLik(lovvalgsperiode.getFom(), lovvalgsperiode.getTom(), periode.getFom(), periode.getTom())
-                    || !periodeLandErLik(lovvalgsperiode.getLovvalgsland(), lovvalgsLand))
+                    || !lovvalgsPeriodeLandErLik(lovvalgsperiode.getLovvalgsland(), lovvalgsLand))
             .orElse(true);
     }
 
@@ -31,7 +31,7 @@ public interface SedRuterForSedTyper extends SedRuter {
         );
     }
 
-     private static boolean periodeLandErLik(Land_iso2 gammeltLovvalgsLand, String nyttLovvalgsLand) {
+     private static boolean lovvalgsPeriodeLandErLik(Land_iso2 gammeltLovvalgsLand, String nyttLovvalgsLand) {
         String gammeltLovvalgslandString = gammeltLovvalgsLand != null ? gammeltLovvalgsLand.getKode() : null;
         return Objects.equals(nyttLovvalgsLand, gammeltLovvalgslandString);
     }
