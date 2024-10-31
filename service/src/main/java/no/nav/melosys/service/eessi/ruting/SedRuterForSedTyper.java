@@ -20,7 +20,7 @@ public interface SedRuterForSedTyper extends SedRuter {
 
         return behandlingsresultat.finnLovvalgsperiode().map(lovvalgsperiode ->
                 !PeriodeRegler.periodeErLik(lovvalgsperiode.getFom(), lovvalgsperiode.getTom(), periode.getFom(), periode.getTom())
-                    || !periodeLandErLik(lovvalgsperiode.getLovvalgsland().getKode(), lovvalgsLand))
+                    || !periodeLandErLik(lovvalgsperiode.getLovvalgsland(), lovvalgsLand))
             .orElse(true);
     }
 
