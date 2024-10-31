@@ -89,24 +89,22 @@ class TrygdeavgiftController(
         return ResponseEntity.noContent().build()
     }
 
-    companion object {
-        private fun List<SkatteforholdTilNorgeDto>.tilSkatteforholdsPerioder(): List<SkatteforholdTilNorge> = map {
-            SkatteforholdTilNorge().apply {
-                fomDato = it.fomDato
-                tomDato = it.tomDato
-                skatteplikttype = it.skatteplikttype
-            }
+    private fun List<SkatteforholdTilNorgeDto>.tilSkatteforholdsPerioder(): List<SkatteforholdTilNorge> = map {
+        SkatteforholdTilNorge().apply {
+            fomDato = it.fomDato
+            tomDato = it.tomDato
+            skatteplikttype = it.skatteplikttype
         }
+    }
 
-        private fun List<InntektskildeDto>.tilInntektsPerioder() = map { inntektsperiode ->
-            Inntektsperiode().apply {
-                fomDato = inntektsperiode.fomDato
-                tomDato = inntektsperiode.tomDato
-                type = inntektsperiode.type
-                isArbeidsgiversavgiftBetalesTilSkatt = inntektsperiode.arbeidsgiversavgiftBetales
-                avgiftspliktigInntekt = Penger(inntektsperiode.avgiftspliktigInntekt ?: 0.toBigDecimal())
-                isErMaanedsbelop = inntektsperiode.erMaanedsbelop
-            }
+    private fun List<InntektskildeDto>.tilInntektsPerioder() = map { inntektsperiode ->
+        Inntektsperiode().apply {
+            fomDato = inntektsperiode.fomDato
+            tomDato = inntektsperiode.tomDato
+            type = inntektsperiode.type
+            isArbeidsgiversavgiftBetalesTilSkatt = inntektsperiode.arbeidsgiversavgiftBetales
+            avgiftspliktigInntekt = Penger(inntektsperiode.avgiftspliktigInntekt ?: 0.toBigDecimal())
+            isErMaanedsbelop = inntektsperiode.erMaanedsbelop
         }
     }
 }

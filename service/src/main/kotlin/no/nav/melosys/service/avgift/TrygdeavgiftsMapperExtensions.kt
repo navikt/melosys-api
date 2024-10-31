@@ -9,43 +9,41 @@ import no.nav.melosys.service.avgift.aarsavregning.totalbeloep.TotalBeløpBeregn
 
 import java.util.*
 
-object TrygdeavgiftsMapperExtensions {
-    fun List<Medlemskapsperiode>.tilMedlemskapsperiodeDtos(): Set<MedlemskapsperiodeDto> {
-        return map {
-            MedlemskapsperiodeDto(
-                idToUUid(it.id),
-                DatoPeriodeDto(it.fom, it.tom),
-                AvgiftsdekningerFraTrygdedekning.avgiftsdekningerFraTrygdedekning(it.trygdedekning),
-                it.medlemskapstype
-            )
-        }.toSet()
-    }
-
-    fun Inntektsperiode.tilInntektsperiodeDto(id: UUID): InntektsperiodeDto {
-        val mndsBelop = if (isErMaanedsbelop) {
-            PengerDto(avgiftspliktigInntekt)
-        } else {
-            val kalkulertBelop = TotalBeløpBeregner.månedligBeløpForTotalbeløp(fomDato, tomDato, avgiftspliktigInntekt.verdi)
-            PengerDto(kalkulertBelop)
-        }
-
-        return InntektsperiodeDto(
-            id,
-            DatoPeriodeDto(fomDato, tomDato),
-            type,
-            isArbeidsgiversavgiftBetalesTilSkatt,
-            mndsBelop,
-            true
+fun List<Medlemskapsperiode>.tilMedlemskapsperiodeDtos(): Set<MedlemskapsperiodeDto> {
+    return map {
+        MedlemskapsperiodeDto(
+            idToUUid(it.id),
+            DatoPeriodeDto(it.fom, it.tom),
+            AvgiftsdekningerFraTrygdedekning.avgiftsdekningerFraTrygdedekning(it.trygdedekning),
+            it.medlemskapstype
         )
+    }.toSet()
+}
+
+fun Inntektsperiode.tilInntektsperiodeDto(id: UUID): InntektsperiodeDto {
+    val mndsBelop = if (isErMaanedsbelop) {
+        PengerDto(avgiftspliktigInntekt)
+    } else {
+        val kalkulertBelop = TotalBeløpBeregner.månedligBeløpForTotalbeløp(fomDato, tomDato, avgiftspliktigInntekt.verdi)
+        PengerDto(kalkulertBelop)
     }
 
-    fun SkatteforholdTilNorge.tilSkatteforholdDto(id: UUID) = SkatteforholdsperiodeDto(
+    return InntektsperiodeDto(
         id,
         DatoPeriodeDto(fomDato, tomDato),
-        skatteplikttype
+        type,
+        isArbeidsgiversavgiftBetalesTilSkatt,
+        mndsBelop,
+        true
     )
+}
 
-    fun idToUUid(id: Long): UUID {
-        return UUID.nameUUIDFromBytes(id.toString().toByteArray())
-    }
+fun SkatteforholdTilNorge.tilSkatteforholdDto(id: UUID) = SkatteforholdsperiodeDto(
+    id,
+    DatoPeriodeDto(fomDato, tomDato),
+    skatteplikttype
+)
+
+fun idToUUid(id: Long): UUID {
+    return UUID.nameUUIDFromBytes(id.toString().toByteArray())
 }
