@@ -75,6 +75,7 @@ internal class ÅrsavregningControllerTest {
                         tom = LocalDate.parse("2023-07-31"),
                         type = Inntektskildetype.ARBEIDSINNTEKT_FRA_NORGE,
                         avgiftspliktigInntekt = Penger(40000.0),
+                        avgiftspliktigTotalInntekt = Penger(280000.0),
                         isArbeidsgiversavgiftBetalesTilSkatt = true,
                         erMaanedsbelop = true
                     ),
@@ -83,6 +84,7 @@ internal class ÅrsavregningControllerTest {
                         tom = LocalDate.parse("2023-12-31"),
                         type = Inntektskildetype.INNTEKT_FRA_UTLANDET,
                         avgiftspliktigInntekt = Penger(15000.0),
+                        avgiftspliktigTotalInntekt = Penger(75000.0),
                         isArbeidsgiversavgiftBetalesTilSkatt = false,
                         erMaanedsbelop = true
                     )
