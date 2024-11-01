@@ -7,6 +7,7 @@ import no.nav.melosys.domain.avgift.SkatteforholdTilNorge
 import no.nav.melosys.service.avgift.TrygdeavgiftMottakerService
 import no.nav.melosys.service.avgift.TrygdeavgiftService
 import no.nav.melosys.service.avgift.TrygdeavgiftsberegningService
+import no.nav.melosys.service.avgift.aarsavregning.totalbeloep.TotalBeløpBeregner
 import no.nav.melosys.service.tilgang.Aksesskontroll
 import no.nav.melosys.tjenester.gui.dto.trygdeavgift.*
 import no.nav.security.token.support.core.api.Protected
@@ -98,12 +99,24 @@ class TrygdeavgiftController(
     }
 
     private fun List<InntektskildeDto>.tilInntektsPerioder() = map {
+        val mndBelop = if (it.erMaanedsbelop) {
+            it.avgiftspliktigInntekt
+        } else {
+            TotalBeløpBeregner.månedligBeløpForTotalbeløp(it.fomDato, it.tomDato, it.avgiftspliktigInntekt ?: 0.toBigDecimal())
+        }
+        val total = if (it.erMaanedsbelop) {
+            TotalBeløpBeregner.totalBeløpForPeriode(it.fomDato, it.tomDato, it.avgiftspliktigInntekt ?: 0.toBigDecimal())
+        } else {
+            it.avgiftspliktigInntekt
+        }
+
         Inntektsperiode().apply {
             fomDato = it.fomDato
             tomDato = it.tomDato
             type = it.type
             isArbeidsgiversavgiftBetalesTilSkatt = it.arbeidsgiversavgiftBetales
-            avgiftspliktigInntekt = Penger(it.avgiftspliktigInntekt ?: 0.toBigDecimal())
+            avgiftspliktigInntekt = Penger(mndBelop)
+            avgiftspliktigTotalInntekt = Penger(total)
             isErMaanedsbelop = it.erMaanedsbelop
         }
     }

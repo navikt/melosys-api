@@ -278,6 +278,8 @@ data class InntektsperioderForAvgift(
     val tom: LocalDate,
     val type: Inntektskildetype,
     val avgiftspliktigInntekt: Penger,
+    val avgiftspliktigTotalInntekt: Penger,
+
     val isArbeidsgiversavgiftBetalesTilSkatt: Boolean,
     val erMaanedsbelop: Boolean
 ) {
@@ -286,6 +288,7 @@ data class InntektsperioderForAvgift(
         tom = inntektsperiode.tom,
         type = inntektsperiode.type,
         avgiftspliktigInntekt = inntektsperiode.avgiftspliktigInntekt,
+        avgiftspliktigTotalInntekt = inntektsperiode.avgiftspliktigTotalInntekt,
         isArbeidsgiversavgiftBetalesTilSkatt = inntektsperiode.isArbeidsgiversavgiftBetalesTilSkatt,
         erMaanedsbelop = inntektsperiode.isErMaanedsbelop
     )
@@ -295,6 +298,7 @@ data class InntektsperioderForAvgift(
         tom = avkortTilOgMedDatoForÅr(gjeldendeÅr, inntektsperiode.tom),
         type = inntektsperiode.type,
         avgiftspliktigInntekt = inntektsperiode.avgiftspliktigInntekt,
+        avgiftspliktigTotalInntekt = inntektsperiode.avgiftspliktigTotalInntekt,
         isArbeidsgiversavgiftBetalesTilSkatt = inntektsperiode.isArbeidsgiversavgiftBetalesTilSkatt,
         erMaanedsbelop = inntektsperiode.isErMaanedsbelop
     )
