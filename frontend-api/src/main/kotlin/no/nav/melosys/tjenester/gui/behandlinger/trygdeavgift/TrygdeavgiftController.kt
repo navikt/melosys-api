@@ -103,7 +103,11 @@ class TrygdeavgiftController(
             tomDato = it.tomDato
             type = it.type
             isArbeidsgiversavgiftBetalesTilSkatt = it.arbeidsgiversavgiftBetales
+            if( it.erMaanedsbelop){
             avgiftspliktigInntekt = Penger(it.avgiftspliktigInntekt ?: 0.toBigDecimal())
+            } else {
+               avgiftspliktigTotalInntekt =  Penger(it.avgiftspliktigInntekt ?: 0.toBigDecimal())
+            }
             isErMaanedsbelop = it.erMaanedsbelop
         }
     }

@@ -131,7 +131,12 @@ class ÅrsavregningController(
                 AvgiftDto(
                     trygdeavgiftsperioder = trygdeavgiftsperioder.filter { it.grunnlagInntekstperiode != null }
                         .map {
-                            val belop = it.grunnlagInntekstperiode.avgiftspliktigInntekt.verdiAvrundet
+                            val belop = if (it.grunnlagInntekstperiode.isErMaanedsbelop) {
+                                it.grunnlagInntekstperiode.avgiftspliktigInntekt.verdiAvrundet
+                            } else {
+                                it.grunnlagInntekstperiode.avgiftspliktigTotalInntekt.verdiAvrundet
+                            }
+
                             val inntektPrMnd = if (it.grunnlagInntekstperiode.isErMaanedsbelop) {
                                 belop
                             } else {

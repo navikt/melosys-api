@@ -24,7 +24,7 @@ fun Inntektsperiode.tilInntektsperiodeDto(id: UUID): InntektsperiodeDto {
     val mndsBelop = if (isErMaanedsbelop) {
         PengerDto(avgiftspliktigInntekt)
     } else {
-        val kalkulertBelop = TotalBeløpBeregner.månedligBeløpForTotalbeløp(fomDato, tomDato, avgiftspliktigInntekt.verdi)
+        val kalkulertBelop = TotalBeløpBeregner.månedligBeløpForTotalbeløp(fomDato, tomDato, avgiftspliktigTotalInntekt.verdi)
         PengerDto(kalkulertBelop)
     }
 

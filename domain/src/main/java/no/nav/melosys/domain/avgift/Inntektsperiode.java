@@ -31,10 +31,17 @@ public class Inntektsperiode implements ErPeriode {
 
     @Embedded
     @AttributeOverrides({
-        @AttributeOverride(name = "verdi", column = @Column(name = "avgiftspliktig_inntekt_verdi")),
-        @AttributeOverride(name = "valuta", column = @Column(name = "avgiftspliktig_inntekt_valuta"))
+        @AttributeOverride(name = "verdi", column = @Column(name = "avgiftspliktig_inntekt_mnd_verdi")),
+        @AttributeOverride(name = "valuta", column = @Column(name = "avgiftspliktig_inntekt_mnd_valuta"))
     })
     private Penger avgiftspliktigInntekt;
+
+    @Embedded
+    @AttributeOverrides({
+        @AttributeOverride(name = "verdi", column = @Column(name = "avgiftspliktig_inntekt_total_verdi")),
+        @AttributeOverride(name = "valuta", column = @Column(name = "avgiftspliktig_inntekt_total_valuta"))
+    })
+    private Penger avgiftspliktigTotalInntekt; // TODO add equals hashcode tostring
 
     @Column(name = "aga_betales_til_skatt")
     private boolean arbeidsgiversavgiftBetalesTilSkatt;
@@ -130,5 +137,13 @@ public class Inntektsperiode implements ErPeriode {
 
     public void setErMaanedsbelop(boolean erMaanedsbelop) {
         this.erMaanedsbelop = erMaanedsbelop;
+    }
+
+    public Penger getAvgiftspliktigTotalInntekt() {
+        return avgiftspliktigTotalInntekt;
+    }
+
+    public void setAvgiftspliktigTotalInntekt(Penger avgiftspliktigTotalInntekt) {
+        this.avgiftspliktigTotalInntekt = avgiftspliktigTotalInntekt;
     }
 }
