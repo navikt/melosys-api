@@ -106,15 +106,12 @@ class TrygdeavgiftsberegningService(
         trygdeavgiftsbeløpMd = response.beregnetPeriode.månedsavgift.tilPenger()
         grunnlagSkatteforholdTilNorge = skatteforholdsperioder2Pair.find { it.first == response.grunnlag.skatteforholdsperiodeId }?.second
         grunnlagInntekstperiode = inntektsperioder2Pair.find { it.first == response.grunnlag.inntektsperiodeId }?.second
-
-        grunnlagMedlemskapsperiode = behandlingsresultat.medlemskapsperioder
-            .find {
-                idToUUid(it.id) == response.grunnlag.medlemskapsperiodeId
-            }?.also { it: Medlemskapsperiode ->
-                it.trygdeavgiftsperioder.add(this)
-            } ?: throw IllegalStateException("Fant ikke medlemskapsperiode for trygdeavgiftsperiode- dette skal ikke kunne skje")
+    }.also { trygdeavgiftsperiode ->
+        trygdeavgiftsperiode.grunnlagMedlemskapsperiode =
+            behandlingsresultat.medlemskapsperioder.first { idToUUid(it.id) == response.grunnlag.medlemskapsperiodeId }
+                ?.apply { trygdeavgiftsperioder.add(trygdeavgiftsperiode) }
+                ?: throw IllegalStateException("Fant ikke medlemskapsperiode for trygdeavgiftsperiod")
     }
-
 
     private fun beregnTrygdeAvgift(
         behandlingsresultat: Behandlingsresultat,
