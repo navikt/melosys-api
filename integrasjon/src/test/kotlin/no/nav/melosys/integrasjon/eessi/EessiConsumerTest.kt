@@ -1,6 +1,5 @@
 package no.nav.melosys.integrasjon.eessi
 
-import no.nav.melosys.integrasjon.MetricsTestConfig
 import com.fasterxml.jackson.databind.ObjectMapper
 import com.github.tomakehurst.wiremock.WireMockServer
 import com.github.tomakehurst.wiremock.client.MappingBuilder
@@ -23,7 +22,7 @@ import no.nav.melosys.domain.eessi.sed.SedDataDto
 import no.nav.melosys.domain.eessi.sed.SedGrunnlagA003Dto
 import no.nav.melosys.domain.eessi.sed.SedGrunnlagDto
 import no.nav.melosys.exception.TekniskException
-//import no.nav.melosys.integrasjon.MetricsTestConfig
+import no.nav.melosys.integrasjon.MetricsTestConfig
 import no.nav.melosys.integrasjon.OAuthMockServer
 import no.nav.melosys.integrasjon.StsMockServer
 import no.nav.melosys.integrasjon.eessi.dto.SaksrelasjonDto
@@ -64,8 +63,6 @@ class EessiConsumerTest(
     @Autowired private val eessiConsumer: EessiConsumer,
     @Autowired private val oAuthMockServer: OAuthMockServer,
     @Value("\${mockserver.port}") mockServiceUnderTestPort: Int,
-    @Autowired private val objectMapper: ObjectMapper,
-    @Autowired private val stsMockServer: StsMockServer,
 ) {
     private val processUUID = UUID.randomUUID()
     private val serviceUnderTestMockServer: WireMockServer =
@@ -73,6 +70,7 @@ class EessiConsumerTest(
 
     @BeforeAll
     fun beforeAll() {
+        ThreadLocalAccessInfo.beforeExecuteProcess(processUUID, "prossesSteg")
         serviceUnderTestMockServer.start()
         oAuthMockServer.start()
         oAuthMockServer.reset()
@@ -82,17 +80,16 @@ class EessiConsumerTest(
     fun afterAll() {
         serviceUnderTestMockServer.stop()
         oAuthMockServer.stop()
+        ThreadLocalAccessInfo.afterExecuteProcess(processUUID)
     }
 
     @BeforeEach
     fun before() {
         serviceUnderTestMockServer.resetAll()
-        ThreadLocalAccessInfo.beforeExecuteProcess(processUUID, "prossesSteg")
     }
 
     @AfterEach
     fun after() {
-        ThreadLocalAccessInfo.afterExecuteProcess(processUUID)
         MetricsTestConfig.clearMeterRegistry()
     }
 

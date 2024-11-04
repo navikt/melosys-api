@@ -1,13 +1,11 @@
 package no.nav.melosys.integrasjon.faktureringskomponenten
 
-import com.fasterxml.jackson.databind.ObjectMapper
-import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule
 import com.github.tomakehurst.wiremock.WireMockServer
 import com.github.tomakehurst.wiremock.client.MappingBuilder
 import com.github.tomakehurst.wiremock.client.WireMock
 import com.github.tomakehurst.wiremock.core.WireMockConfiguration
 import io.getunleash.FakeUnleash
-//import no.nav.melosys.integrasjon.MetricsTestConfig
+import io.kotest.matchers.shouldBe
 import no.nav.melosys.integrasjon.OAuthMockServer
 import no.nav.melosys.integrasjon.StsMockServer
 import no.nav.melosys.integrasjon.faktureringskomponenten.dto.*
@@ -49,8 +47,9 @@ import java.util.*
 @ActiveProfiles("wiremock-test")
 @TestInstance(TestInstance.Lifecycle.PER_CLASS)
 class FaktureringskomponentenConsumerTest(
-    @Autowired private val stsMockServer: StsMockServer,
-    @Value("\${mockserver.port}") mockServiceUnderTestPort: Int
+    @Value("\${mockserver.port}") mockServiceUnderTestPort: Int,
+    @Autowired private val oAuthMockServer: OAuthMockServer,
+    @Autowired private val faktureringskomponentenConsumer: FaktureringskomponentenConsumer,
 ) {
 
     private val processUUID = UUID.randomUUID()
@@ -59,33 +58,48 @@ class FaktureringskomponentenConsumerTest(
 
     @BeforeAll
     fun beforeAll() {
+        ThreadLocalAccessInfo.beforeExecuteProcess(processUUID, "prossesSteg")
         serviceUnderTestMockServer.start()
-        stsMockServer.start()
+        oAuthMockServer.start()
+        oAuthMockServer.reset()
     }
 
     @AfterAll
     fun afterAll() {
         serviceUnderTestMockServer.stop()
-        stsMockServer.stop()
+        oAuthMockServer.stop()
+        ThreadLocalAccessInfo.afterExecuteProcess(processUUID)
     }
 
     @BeforeEach
     fun before() {
         serviceUnderTestMockServer.resetAll()
-        ThreadLocalAccessInfo.beforeExecuteProcess(processUUID, "prossesSteg")
-    }
-
-    @AfterEach
-    fun after() {
-        ThreadLocalAccessInfo.afterExecuteProcess(processUUID)
-//        MetricsTestConfig.clearMeterRegistry()
     }
 
     @Test
     fun `lag en fakturaserie`() {
-        val json = ObjectMapper().registerModule(JavaTimeModule()).writeValueAsString(
-            lagFakturaserieDto()
-        )
+        val json = """
+            {
+              "fodselsnummer": "12345678911",
+              "fakturaserieReferanse": null,
+              "fullmektig": {
+                "fodselsnummer": "11987654321",
+                "organisasjonsnummer": "123456789"
+              },
+              "referanseBruker": "Nasse Nøff",
+              "referanseNAV": "NAV Medlemskap og avgift",
+              "fakturaGjelderInnbetalingstype": "TRYGDEAVGIFT",
+              "intervall": "KVARTAL",
+              "perioder": [
+                {
+                  "enhetsprisPerManed": 123,
+                  "startDato": "2024-11-04",
+                  "sluttDato": "2024-11-04",
+                  "beskrivelse": "Beskrivelse"
+                }
+              ]
+            }
+        """.trimIndent()
 
         serviceUnderTestMockServer.stubFor(
             post("/fakturaserier")
@@ -94,9 +108,49 @@ class FaktureringskomponentenConsumerTest(
                     WireMock.aResponse()
                         .withStatus(200)
                         .withHeader(HttpHeaders.CONTENT_TYPE, MediaType.APPLICATION_JSON_VALUE)
-                        .withBody("Hei")
+                        .withBody("{ \"fakturaserieReferanse\": \"456\" }")
                 )
         )
+
+        val nyFakturaserieResponseDto = faktureringskomponentenConsumer.lagFakturaserie(lagFakturaserieDto(), "melosys")
+        nyFakturaserieResponseDto.fakturaserieReferanse.shouldBe("456")
+    }
+
+    @Test
+    fun `lag en faktura`() {
+        val json = """
+            {
+                "fodselsnummer":"12345678911",
+                "fakturaserieReferanse":null,
+                "fullmektig":
+                  {
+                    "fodselsnummer":"11987654321",
+                    "organisasjonsnummer":"123456789"
+                  },
+                "referanseBruker":"Nasse Nøff",
+                "referanseNAV":"NAV Medlemskap og avgift",
+                "fakturaGjelderInnbetalingstype":"TRYGDEAVGIFT",
+                "intervall":"SINGEL",
+                "belop":2000,
+                "startDato":"2024-01-01",
+                "sluttDato":"2024-12-31",
+                "beskrivelse":"Medlemskapsperiode 2024-01-01 - 2024-12-31 endelig beregnet trygdeavgift 2000 - forskuddsvis fakturert trygdeavgift 2000"
+            }
+        """.trimIndent()
+
+        serviceUnderTestMockServer.stubFor(
+            post("/faktura")
+                .withRequestBody(WireMock.equalToJson(json))
+                .willReturn(
+                    WireMock.aResponse()
+                        .withStatus(200)
+                        .withHeader(HttpHeaders.CONTENT_TYPE, MediaType.APPLICATION_JSON_VALUE)
+                        .withBody("{ \"fakturaserieReferanse\": \"123\" }")
+                )
+        )
+
+        val nyFakturaserieResponseDto = faktureringskomponentenConsumer.lagFaktura(lagFakturaDto(), "melosys")
+        nyFakturaserieResponseDto.fakturaserieReferanse.shouldBe("123")
     }
 
     fun get(url: String): MappingBuilder =
@@ -137,6 +191,33 @@ class FaktureringskomponentenConsumerTest(
             fakturaGjelder,
             intervall,
             fakturaseriePeriode
+        )
+    }
+
+    private fun lagFakturaDto(
+        fakturaserieReferanse: String? = null,
+        fodselsnummer: String = "12345678911",
+        fullmektig: FullmektigDto = FullmektigDto("11987654321", "123456789"),
+        referanseBruker: String = "Nasse Nøff",
+        referanseNav: String = "NAV Medlemskap og avgift",
+        fakturaGjelder: Innbetalingstype = Innbetalingstype.TRYGDEAVGIFT,
+        intervall: FaktureringsIntervall = FaktureringsIntervall.SINGEL,
+        belop: BigDecimal = BigDecimal.valueOf(2000),
+        startDato: LocalDate = LocalDate.of(LocalDate.now().year, 1, 1),
+        sluttDato: LocalDate = LocalDate.of(LocalDate.now().year, 12, 31),
+    ): FakturaDto {
+        return FakturaDto(
+            fodselsnummer,
+            fakturaserieReferanse,
+            fullmektig,
+            referanseBruker,
+            referanseNav,
+            fakturaGjelder,
+            intervall,
+            belop,
+            startDato,
+            sluttDato,
+            "Medlemskapsperiode $startDato - $sluttDato endelig beregnet trygdeavgift $belop - forskuddsvis fakturert trygdeavgift $belop"
         )
     }
 

@@ -1,6 +1,7 @@
 package no.nav.melosys.integrasjon.faktureringskomponenten
 
 import no.nav.melosys.integrasjon.faktureringskomponenten.dto.BeregnTotalBeløpDto
+import no.nav.melosys.integrasjon.faktureringskomponenten.dto.FakturaDto
 import no.nav.melosys.integrasjon.faktureringskomponenten.dto.FakturaMottakerDto
 import no.nav.melosys.integrasjon.faktureringskomponenten.dto.FakturaserieDto
 import no.nav.melosys.integrasjon.felles.JsonRestIntegrasjon
@@ -52,4 +53,13 @@ open class FaktureringskomponentenConsumer(private val webClient: WebClient) : J
             .bodyToMono<BigDecimal>()
             .block() ?: throw IllegalStateException("Feil ved beregning av total trygdeavgift")
     }
+
+    fun lagFaktura(fakturaDto: FakturaDto, saksbehandlerIdent: String) =
+        webClient.post()
+            .uri("/faktura")
+            .header("Nav-User-Id", saksbehandlerIdent)
+            .bodyValue(fakturaDto)
+            .retrieve()
+            .bodyToMono<NyFakturaserieResponseDto>()
+            .block()!!
 }

@@ -1,35 +1,18 @@
 package no.nav.melosys.integrasjon
 
 import io.kotest.matchers.collections.shouldContain
-import io.kotest.matchers.collections.shouldHaveSize
-import io.kotest.matchers.shouldBe
 import io.kotest.matchers.string.shouldContain
-import io.micrometer.common.KeyValue
-import io.micrometer.common.KeyValues
 import io.micrometer.core.instrument.observation.DefaultMeterObservationHandler
 import io.micrometer.core.instrument.simple.SimpleMeterRegistry
-import io.micrometer.observation.GlobalObservationConvention
 import io.micrometer.observation.ObservationRegistry
 import org.springframework.boot.test.context.TestConfiguration
 import org.springframework.context.annotation.Bean
-import org.springframework.http.server.reactive.observation.ServerHttpObservationDocumentation
-import org.springframework.web.reactive.function.client.ClientHttpObservationDocumentation
-import org.springframework.web.reactive.function.client.ClientRequestObservationContext
 import org.springframework.web.reactive.function.client.DefaultClientRequestObservationConvention
 import org.springframework.web.reactive.function.client.WebClient
 
 
 @TestConfiguration
 class MetricsTestConfig() {
-
-//https://github.com/spring-projects/spring-boot/issues/34009
-//    @Bean
-//    fun myBuilder(): WebClient.Builder {
-//        val metricsWebClientFilterFunction = MetricsWebClientFilterFunction(
-//            meterRegistry, DefaultWebClientExchangeTagsProvider(), "test", AutoTimer.ENABLED
-//        )
-//        return WebClient.builder().filters { it.add((metricsWebClientFilterFunction)) }
-//    }
 
     @Bean
     fun myBuilder(): WebClient.Builder {
