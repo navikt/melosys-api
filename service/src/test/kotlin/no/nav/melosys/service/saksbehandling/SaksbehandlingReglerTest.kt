@@ -462,6 +462,26 @@ class SaksbehandlingReglerTest {
                         id = 0
                         type = Behandlingstyper.FØRSTEGANG
                         tema = Behandlingstema.UTSENDT_ARBEIDSTAKER
+                        status = Behandlingsstatus.AVSLUTTET
+                        fagsak = FagsakTestFactory.lagFagsak()
+                    },
+                    Behandling().apply {
+                        id = 1
+                        type = Behandlingstyper.ÅRSAVREGNING
+                        tema = Behandlingstema.UTSENDT_ARBEIDSTAKER
+                        status = Behandlingsstatus.AVSLUTTET
+                        fagsak = FagsakTestFactory.lagFagsak()
+                    },
+                ),
+                0L
+            ),
+            arguments(
+                Behandlingsresultattyper.IKKE_FASTSATT,
+                listOf(
+                    Behandling().apply {
+                        id = 0
+                        type = Behandlingstyper.FØRSTEGANG
+                        tema = Behandlingstema.UTSENDT_ARBEIDSTAKER
                         status = Behandlingsstatus.UNDER_BEHANDLING
                         fagsak = FagsakTestFactory.lagFagsak()
                     },
