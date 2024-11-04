@@ -57,7 +57,7 @@ public class ReplikerBehandling implements StegBehandler {
         ).orElseThrow(() ->
             new FunksjonellException("Finner ikke behandling som kan replikeres. Denne fantes ved opprettelse av prosessen")
         );
-        log.info("replikerBehandlingOgBehandlingsresultat: {}", behandlingBruktForReplikering.getId());
+
         Behandling nyBehandling = behandlingService.replikerBehandlingOgBehandlingsresultat(behandlingBruktForReplikering, behandlingstype);
 
         if (behandlingBruktForReplikering.erAktiv() && !behandlingBruktForReplikering.erÅrsavregning()) {

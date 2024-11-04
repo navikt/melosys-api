@@ -1,7 +1,6 @@
 package no.nav.melosys.service.saksbehandling
 
 import io.getunleash.Unleash
-import mu.KotlinLogging
 import no.nav.melosys.domain.Behandling
 import no.nav.melosys.domain.Fagsak
 import no.nav.melosys.domain.kodeverk.Land_iso2
@@ -14,7 +13,6 @@ import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingstyper
 import no.nav.melosys.featuretoggle.ToggleName
 import no.nav.melosys.repository.BehandlingsresultatRepository
 import org.springframework.stereotype.Component
-private val log = KotlinLogging.logger { }
 
 @Component
 class SaksbehandlingRegler(private val behandlingsresultatRepository: BehandlingsresultatRepository, private val unleash: Unleash) {
@@ -37,13 +35,8 @@ class SaksbehandlingRegler(private val behandlingsresultatRepository: Behandling
         return finnBehandlingSomKanReplikeres(fagsak) != null
     }
 
-    fun finnBehandlingSomKanReplikeres(fagsak: Fagsak): Behandling? {
-        val debug = finnBehandlingSomKanReplikeres(fagsak.hentBehandlingerSortertSynkendePåRegistrertDato())
-        log.debug { "finnBehandlingSomKanReplikeres: $debug" }
-
-        return debug
-    }
-
+    fun finnBehandlingSomKanReplikeres(fagsak: Fagsak): Behandling? =
+        finnBehandlingSomKanReplikeres(fagsak.hentBehandlingerSortertSynkendePåRegistrertDato())
 
     internal fun finnBehandlingSomKanReplikeres(behandlinger: List<Behandling>) =
         behandlinger
@@ -141,7 +134,7 @@ class SaksbehandlingRegler(private val behandlingsresultatRepository: Behandling
         return (sakstype == Sakstyper.EU_EOS || sakstype == Sakstyper.TRYGDEAVTALE) && behandlingstema == IKKE_YRKESAKTIV
     }
 
-     fun harUtsendtArbeidsTakerKunNorgeFlyt(erSakstypeEøs: Boolean, behandlingstema: Behandlingstema, land: Land_iso2): Boolean {
+    fun harUtsendtArbeidsTakerKunNorgeFlyt(erSakstypeEøs: Boolean, behandlingstema: Behandlingstema, land: Land_iso2): Boolean {
         return erSakstypeEøs
             && (behandlingstema.equals(UTSENDT_ARBEIDSTAKER)
             || behandlingstema.equals(UTSENDT_SELVSTENDIG)
