@@ -2,8 +2,10 @@ package no.nav.melosys.integrasjon.inntekt
 
 import com.fasterxml.jackson.annotation.JsonCreator
 import com.fasterxml.jackson.annotation.JsonIgnore
+import com.fasterxml.jackson.annotation.JsonSetter
 import com.fasterxml.jackson.annotation.JsonSubTypes
 import com.fasterxml.jackson.annotation.JsonTypeInfo
+import com.fasterxml.jackson.annotation.Nulls
 import com.fasterxml.jackson.core.JsonProcessingException
 import com.fasterxml.jackson.databind.ObjectMapper
 import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule
@@ -47,7 +49,8 @@ data class InntektResponse(
         val inntektskilde: String,
         val inntektsperiodetype: String,
         val inntektsstatus: String,
-        val leveringstidspunkt: YearMonth,
+        @JsonSetter(nulls = Nulls.AS_EMPTY)
+        val leveringstidspunkt: YearMonth = YearMonth.of(1500, 1),
         val opptjeningsland: String? = null,
         val opptjeningsperiodeFom: LocalDate? = null,
         val opptjeningsperiodeTom: LocalDate? = null,
