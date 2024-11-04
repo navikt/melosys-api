@@ -1,6 +1,7 @@
 package no.nav.melosys.service.saksbehandling
 
 import io.getunleash.Unleash
+import mu.KotlinLogging
 import no.nav.melosys.domain.Behandling
 import no.nav.melosys.domain.Fagsak
 import no.nav.melosys.domain.kodeverk.Land_iso2
@@ -13,6 +14,7 @@ import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingstyper
 import no.nav.melosys.featuretoggle.ToggleName
 import no.nav.melosys.repository.BehandlingsresultatRepository
 import org.springframework.stereotype.Component
+private val log = KotlinLogging.logger { }
 
 @Component
 class SaksbehandlingRegler(private val behandlingsresultatRepository: BehandlingsresultatRepository, private val unleash: Unleash) {
@@ -35,13 +37,19 @@ class SaksbehandlingRegler(private val behandlingsresultatRepository: Behandling
         return finnBehandlingSomKanReplikeres(fagsak) != null
     }
 
-    fun finnBehandlingSomKanReplikeres(fagsak: Fagsak): Behandling? =
-        finnBehandlingSomKanReplikeres(fagsak.hentBehandlingerSortertSynkendePåRegistrertDato())
+    fun finnBehandlingSomKanReplikeres(fagsak: Fagsak): Behandling? {
+        val debug = finnBehandlingSomKanReplikeres(fagsak.hentBehandlingerSortertSynkendePåRegistrertDato())
+        log.debug { "finnBehandlingSomKanReplikeres: $debug" }
+
+        return debug
+    }
+
 
     internal fun finnBehandlingSomKanReplikeres(behandlinger: List<Behandling>) =
         behandlinger
             .filter { it.erInaktiv() }
             .filter { !harIngenFlyt(it) }
+            .filter { !it.erÅrsavregning() }
             .firstOrNull {
                 val behandlingsresultat = behandlingsresultatRepository.findById(it.id)
                 behandlingstyperSomKanReplikeres.contains(it.type)
