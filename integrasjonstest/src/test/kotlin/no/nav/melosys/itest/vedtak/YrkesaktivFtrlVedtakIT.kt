@@ -386,6 +386,7 @@ class YrkesaktivFtrlVedtakIT(
                 type = Inntektskildetype.INNTEKT_FRA_UTLANDET
                 isArbeidsgiversavgiftBetalesTilSkatt = true
                 avgiftspliktigInntekt = Penger(10000.toBigDecimal())
+                avgiftspliktigTotalInntekt = Penger(10000.toBigDecimal())
                 isErMaanedsbelop = true
             }
         )
@@ -584,6 +585,7 @@ class YrkesaktivFtrlVedtakIT(
                 this.type = Inntektskildetype.INNTEKT_FRA_UTLANDET
                 isArbeidsgiversavgiftBetalesTilSkatt = arbeidsgiversavgiftBetales
                 avgiftspliktigInntekt = Penger(10000.toBigDecimal())
+                avgiftspliktigTotalInntekt = Penger(10000.toBigDecimal())
                 isErMaanedsbelop = true
             }
         )
