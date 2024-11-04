@@ -25,7 +25,6 @@ public class UtenlandskMyndighetService {
     private static final Logger log = LoggerFactory.getLogger(UtenlandskMyndighetService.class);
 
     private static final UtenlandskMyndighet utenlandskMyndighetUnntakUSA;
-    private static final Map<Land_iso2, Land_iso2> landkodeMap = new HashMap<>();
 
     private final UtenlandskMyndighetRepository utenlandskMyndighetRepository;
     private final LandvelgerService landvelgerService;
@@ -40,7 +39,6 @@ public class UtenlandskMyndighetService {
         utenlandskMyndighet.setLand("USA");
         utenlandskMyndighet.setLandkode(Land_iso2.US);
         utenlandskMyndighetUnntakUSA = utenlandskMyndighet;
-        landkodeMap.put(Land_iso2.AX, Land_iso2.FI);
     }
 
     public UtenlandskMyndighetService(UtenlandskMyndighetRepository utenlandskMyndighetRepository,
@@ -86,7 +84,7 @@ public class UtenlandskMyndighetService {
         if (landkode == Land_iso2.US && produserbaredokumenter == Produserbaredokumenter.UTENLANDSK_TRYGDEMYNDIGHET_FRITEKSTBREV) {
             return hentUtenlandskMyndighetUnntakUSA();
         }
-        return utenlandskMyndighetRepository.findByLandkode(landkodeMap.getOrDefault(landkode, landkode))
+        return utenlandskMyndighetRepository.findByLandkode(landkode == Land_iso2.AX ? Land_iso2.FI : landkode)
             .orElseThrow(() -> new IkkeFunnetException("Finner ikke utenlandskMyndighet for " + landkode.getKode() + "."));
     }
 
