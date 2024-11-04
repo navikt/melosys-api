@@ -251,6 +251,7 @@ internal class ÅrsavregningServiceTest {
         fomDato = LocalDate.parse(start)
         tomDato = LocalDate.parse(slutt)
         avgiftspliktigInntekt = Penger(5000.0)
+        avgiftspliktigTotalInntekt = Penger(5000.0)
         type = Inntektskildetype.ARBEIDSINNTEKT_FRA_NORGE
     }
 
