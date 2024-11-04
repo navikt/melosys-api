@@ -2,9 +2,11 @@ package no.nav.melosys.service.avgift
 
 import no.nav.melosys.domain.Medlemskapsperiode
 import no.nav.melosys.domain.avgift.Inntektsperiode
+import no.nav.melosys.domain.avgift.Penger
 import no.nav.melosys.domain.avgift.SkatteforholdTilNorge
 import no.nav.melosys.integrasjon.trygdeavgift.AvgiftsdekningerFraTrygdedekning
 import no.nav.melosys.integrasjon.trygdeavgift.dto.*
+import no.nav.melosys.service.avgift.aarsavregning.totalbeloep.TotalBeløpBeregner
 import java.util.*
 
 fun List<Medlemskapsperiode>.tilMedlemskapsperiodeDtos(): Set<MedlemskapsperiodeDto> {
@@ -19,12 +21,15 @@ fun List<Medlemskapsperiode>.tilMedlemskapsperiodeDtos(): Set<Medlemskapsperiode
 }
 
 fun Inntektsperiode.tilInntektsperiodeDto(id: UUID): InntektsperiodeDto {
+    val avgiftspliktigMdInntekt =
+        avgiftspliktigInntekt ?: Penger(TotalBeløpBeregner.månedligBeløpForTotalbeløp(fomDato, tomDato, avgiftspliktigTotalInntekt.verdi))
+
     return InntektsperiodeDto(
         id,
         DatoPeriodeDto(fomDato, tomDato),
         type,
         isArbeidsgiversavgiftBetalesTilSkatt,
-        PengerDto(avgiftspliktigInntekt),
+        PengerDto(avgiftspliktigMdInntekt),
         true
     )
 }

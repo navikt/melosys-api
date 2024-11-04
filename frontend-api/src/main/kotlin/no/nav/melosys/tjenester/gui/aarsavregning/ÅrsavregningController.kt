@@ -110,11 +110,16 @@ class ÅrsavregningController(
                 AvgiftDto(
                     trygdeavgiftsperioder = trygdeavgiftsperioder.filter { it.grunnlagInntekstperiode != null }
                         .map {
+                            val avgiftspliktigMdInntekt = (
+                                it.grunnlagInntekstperiode.avgiftspliktigInntekt
+                                    ?: it.grunnlagInntekstperiode.avgiftspliktigTotalInntekt
+                                ).verdiAvrundet
+
                             TrygdeavgiftsperiodeDto(
                                 fom = it.fom,
                                 tom = it.tom,
                                 inntektskildetype = it.grunnlagInntekstperiode.type,
-                                inntektPerMd = it.grunnlagInntekstperiode.avgiftspliktigInntekt.verdiAvrundet,
+                                inntektPerMd = avgiftspliktigMdInntekt,
                                 arbeidsgiversavgiftBetales = it.grunnlagInntekstperiode.isArbeidsgiversavgiftBetalesTilSkatt,
                                 avgiftssats = it.trygdesats.toDouble(),
                                 avgiftPerMd = it.trygdeavgiftsbeløpMd.verdi.intValueExact()
@@ -149,9 +154,9 @@ class ÅrsavregningController(
             }.orEmpty(),
             inntektskperioder = trygdeavgiftsgrunnlag?.innteksperioder?.map {
                 val avgiftspliktigInntekt = if (it.erMaanedsbelop) {
-                    it.avgiftspliktigInntekt.verdi
+                    it.avgiftspliktigInntekt?.verdi
                 } else {
-                    it.avgiftspliktigTotalInntekt.verdi
+                    it.avgiftspliktigTotalInntekt?.verdi
                 }
 
                 InntektskildeDto(
