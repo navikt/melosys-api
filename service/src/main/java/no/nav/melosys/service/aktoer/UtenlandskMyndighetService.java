@@ -84,7 +84,7 @@ public class UtenlandskMyndighetService {
         if (landkode == Land_iso2.US && produserbaredokumenter == Produserbaredokumenter.UTENLANDSK_TRYGDEMYNDIGHET_FRITEKSTBREV) {
             return hentUtenlandskMyndighetUnntakUSA();
         }
-        return utenlandskMyndighetRepository.findByLandkode(landkode)
+        return utenlandskMyndighetRepository.findByLandkode(landkode == Land_iso2.AX ? Land_iso2.FI : landkode)
             .orElseThrow(() -> new IkkeFunnetException("Finner ikke utenlandskMyndighet for " + landkode.getKode() + "."));
     }
 
