@@ -197,7 +197,6 @@ class TrygdeavgiftValideringServiceTest {
                 type = Inntektskildetype.ARBEIDSINNTEKT
                 isArbeidsgiversavgiftBetalesTilSkatt = true
                 avgiftspliktigInntekt = mockk<Penger>()
-                isErMaanedsbelop = true
             })
 
             shouldThrow<FunksjonellException> {

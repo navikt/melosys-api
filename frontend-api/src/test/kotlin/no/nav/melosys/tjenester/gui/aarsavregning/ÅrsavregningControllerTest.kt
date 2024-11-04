@@ -100,7 +100,6 @@ internal class ÅrsavregningControllerTest {
                         type = Inntektskildetype.ARBEIDSINNTEKT_FRA_NORGE
                         isArbeidsgiversavgiftBetalesTilSkatt = true
                         avgiftspliktigInntekt = Penger(40000.0)
-                        isErMaanedsbelop = true
                     }
                     trygdesats = BigDecimal(0.0)
                     trygdeavgiftsbeløpMd = Penger(0.0)
@@ -114,7 +113,6 @@ internal class ÅrsavregningControllerTest {
                         type = Inntektskildetype.INNTEKT_FRA_UTLANDET
                         isArbeidsgiversavgiftBetalesTilSkatt = false
                         avgiftspliktigInntekt = Penger(15000.0)
-                        isErMaanedsbelop = true
                     }
                     trygdesats = BigDecimal(42.2)
                     trygdeavgiftsbeløpMd = Penger(6330.0)

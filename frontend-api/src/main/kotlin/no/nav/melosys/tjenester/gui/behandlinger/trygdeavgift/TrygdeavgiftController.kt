@@ -117,7 +117,6 @@ class TrygdeavgiftController(
             isArbeidsgiversavgiftBetalesTilSkatt = it.arbeidsgiversavgiftBetales
             avgiftspliktigInntekt = Penger(mndBelop)
             avgiftspliktigTotalInntekt = Penger(total)
-            isErMaanedsbelop = it.erMaanedsbelop
         }
     }
 }

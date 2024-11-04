@@ -46,9 +46,6 @@ public class Inntektsperiode implements ErPeriode {
     @Column(name = "aga_betales_til_skatt")
     private boolean arbeidsgiversavgiftBetalesTilSkatt;
 
-    @Column(name = "er_maanedsbelop")
-    private boolean erMaanedsbelop;
-
     public Long getId() {
         return id;
     }
@@ -102,12 +99,12 @@ public class Inntektsperiode implements ErPeriode {
         if (this == o) return true;
         if (o == null || getClass() != o.getClass()) return false;
         Inntektsperiode that = (Inntektsperiode) o;
-        return arbeidsgiversavgiftBetalesTilSkatt == that.arbeidsgiversavgiftBetalesTilSkatt && erMaanedsbelop == that.erMaanedsbelop && Objects.equals(id, that.id) && Objects.equals(fomDato, that.fomDato) && Objects.equals(tomDato, that.tomDato) && type == that.type && Objects.equals(avgiftspliktigInntekt, that.avgiftspliktigInntekt);
+        return arbeidsgiversavgiftBetalesTilSkatt == that.arbeidsgiversavgiftBetalesTilSkatt && Objects.equals(id, that.id) && Objects.equals(fomDato, that.fomDato) && Objects.equals(tomDato, that.tomDato) && type == that.type && Objects.equals(avgiftspliktigInntekt, that.avgiftspliktigInntekt);
     }
 
     @Override
     public int hashCode() {
-        return Objects.hash(id, fomDato, tomDato, type, avgiftspliktigInntekt, arbeidsgiversavgiftBetalesTilSkatt, erMaanedsbelop);
+        return Objects.hash(id, fomDato, tomDato, type, avgiftspliktigInntekt, arbeidsgiversavgiftBetalesTilSkatt);
     }
 
     @Override
@@ -132,11 +129,7 @@ public class Inntektsperiode implements ErPeriode {
     }
 
     public boolean isErMaanedsbelop() {
-        return erMaanedsbelop;
-    }
-
-    public void setErMaanedsbelop(boolean erMaanedsbelop) {
-        this.erMaanedsbelop = erMaanedsbelop;
+        return avgiftspliktigInntekt != null;
     }
 
     public Penger getAvgiftspliktigTotalInntekt() {
