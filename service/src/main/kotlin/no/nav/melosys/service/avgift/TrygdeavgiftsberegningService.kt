@@ -42,7 +42,7 @@ class TrygdeavgiftsberegningService(
         oppdaterBehandlingsresultatForNyeTrygdeavgiftsperioder(behandlingsresultat)
         TrygdeavgiftValideringService.validerForTrygdeavgiftberegning(behandlingsresultat, skatteforholdsperioder, inntektsperioder)
 
-        return if (erPliktigMedlemskapSkattePliktig(skatteforholdsperioder, inntektsperioder, behandlingsresultat)) {
+        return if (erPliktigMedlemskapSkattepliktig(skatteforholdsperioder, inntektsperioder, behandlingsresultat)) {
             leggTilNyeTrygdeavgiftsperioderForPliktigMedlemskapSkattepliktig(skatteforholdsperioder, behandlingsresultat)
         } else {
             val inntektsperioderPair = inntektsperioder.map { Pair(UUID.randomUUID(), it) }
@@ -126,7 +126,7 @@ class TrygdeavgiftsberegningService(
         return beregnetTrygdeavgift
     }
 
-    private fun erPliktigMedlemskapSkattePliktig(
+    private fun erPliktigMedlemskapSkattepliktig(
         skatteforholdsperioder: List<SkatteforholdTilNorge>,
         inntektsPerioder: List<Inntektsperiode>,
         behandlingsresultat: Behandlingsresultat
