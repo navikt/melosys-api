@@ -96,16 +96,16 @@ class TrygdeavgiftsberegningService(
 
     private fun lagTrygdeavgiftsperiode(
         response: TrygdeavgiftsberegningResponse,
-        skatteforholdsperioder2Pair: List<Pair<UUID, SkatteforholdTilNorge>>,
-        inntektsperioder2Pair: List<Pair<UUID, Inntektsperiode>>,
+        skatteforholdsperioderMedUUID: List<Pair<UUID, SkatteforholdTilNorge>>,
+        inntektsperioderMedUUID: List<Pair<UUID, Inntektsperiode>>,
         behandlingsresultat: Behandlingsresultat
     ) = Trygdeavgiftsperiode().apply {
         periodeFra = response.beregnetPeriode.periode.fom
         periodeTil = response.beregnetPeriode.periode.tom
         trygdesats = response.beregnetPeriode.sats
         trygdeavgiftsbeløpMd = response.beregnetPeriode.månedsavgift.tilPenger()
-        grunnlagSkatteforholdTilNorge = skatteforholdsperioder2Pair.find { it.first == response.grunnlag.skatteforholdsperiodeId }?.second
-        grunnlagInntekstperiode = inntektsperioder2Pair.find { it.first == response.grunnlag.inntektsperiodeId }?.second
+        grunnlagSkatteforholdTilNorge = skatteforholdsperioderMedUUID.find { it.first == response.grunnlag.skatteforholdsperiodeId }?.second
+        grunnlagInntekstperiode = inntektsperioderMedUUID.find { it.first == response.grunnlag.inntektsperiodeId }?.second
         grunnlagMedlemskapsperiode = behandlingsresultat.medlemskapsperioder.first { idToUUid(it.id) == response.grunnlag.medlemskapsperiodeId }
             ?: throw IllegalStateException("Fant ikke medlemskapsperiode")
         grunnlagMedlemskapsperiode.trygdeavgiftsperioder.add(this)
