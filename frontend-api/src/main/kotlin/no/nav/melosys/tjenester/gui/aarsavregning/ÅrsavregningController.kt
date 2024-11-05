@@ -55,7 +55,7 @@ class ÅrsavregningController(
     }
 
     @PutMapping("/{aarsavregningID}")
-    fun oppdaterTotalbelop(
+    fun oppdaterÅrsavregning(
         @PathVariable("behandlingID") behandlingID: Long,
         @PathVariable("aarsavregningID") aarsavregningID: Long,
         @RequestBody årsavregningOppdaterRequest: ÅrsavregningOppdaterRequest
