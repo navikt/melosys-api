@@ -168,7 +168,7 @@ class ÅrsavregningVedtakMapperTest {
         periode.trygdesats = BigDecimal(1000)
 
         val inntektsperiode = Inntektsperiode()
-        inntektsperiode.avgiftspliktigInntektMnd = Penger(BigDecimal(2800), NOK.kode)
+        inntektsperiode.avgiftspliktigMndInntekt = Penger(BigDecimal(2800), NOK.kode)
         inntektsperiode.type = Inntektskildetype.INNTEKT_FRA_UTLANDET
         inntektsperiode.isArbeidsgiversavgiftBetalesTilSkatt = true
         periode.grunnlagInntekstperiode = inntektsperiode
@@ -196,7 +196,7 @@ class ÅrsavregningVedtakMapperTest {
         periode.trygdesats = BigDecimal(900)
 
         val inntektsperiode = Inntektsperiode()
-        inntektsperiode.avgiftspliktigInntektMnd = Penger(BigDecimal(2800), NOK.kode)
+        inntektsperiode.avgiftspliktigMndInntekt = Penger(BigDecimal(2800), NOK.kode)
         inntektsperiode.type = Inntektskildetype.INNTEKT_FRA_UTLANDET
         inntektsperiode.isArbeidsgiversavgiftBetalesTilSkatt = false
         periode.grunnlagInntekstperiode = inntektsperiode
