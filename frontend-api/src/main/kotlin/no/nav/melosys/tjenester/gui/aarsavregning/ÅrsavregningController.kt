@@ -74,18 +74,6 @@ class ÅrsavregningController(
         )
     }
 
-    @GetMapping("/{aarsavregningID}/total")
-    fun hentMånedligBruttoInntektFraTotalbeløpForPerioden(
-        @PathVariable("behandlingID") behandlingID: Long,
-        @RequestParam("fom") fom: LocalDate,
-        @RequestParam("tom") tom: LocalDate,
-        @RequestParam("belop") belop: Long,
-    ): ResponseEntity<BigDecimal> {
-        aksesskontroll.autoriser(behandlingID)
-
-        return ResponseEntity.ok(TotalBeløpBeregner.månedligBeløpForTotalbeløp(fom, tom, belop.toBigDecimal()))
-    }
-
     private fun lagÅrsavregningResponse(årsavregningModel: ÅrsavregningModel) =
         ÅrsavregningResponse(
             aar = årsavregningModel.år,
