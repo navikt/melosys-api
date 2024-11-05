@@ -80,6 +80,7 @@ class TrygdeavgiftControllerTest {
                 .containsObjectAsJson(forventetBeregnetTrygdeavgiftDto(), BeregnetTrygdeavgiftDto.class));
     }
 
+
     @Test
     void finnFakturamottaker() throws Exception {
         var MOTTAKER_NAVN = "Fornavn Etternavn";
@@ -121,6 +122,7 @@ class TrygdeavgiftControllerTest {
         inntektsperiode.setFomDato(LocalDate.now());
         inntektsperiode.setTomDato(LocalDate.now());
         inntektsperiode.setType(Inntektskildetype.INNTEKT_FRA_UTLANDET);
+        inntektsperiode.setAvgiftspliktigTotalinntekt(new Penger(5000.0));
         trygdeavgift.setGrunnlagInntekstperiode(inntektsperiode);
 
         var skatteForholdINorge = new SkatteforholdTilNorge();
