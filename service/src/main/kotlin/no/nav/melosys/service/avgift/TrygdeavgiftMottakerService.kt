@@ -24,9 +24,7 @@ class TrygdeavgiftMottakerService(private val behandlingsresultatService: Behand
     }
 
     fun getTrygdeavgiftMottaker(behandlingsresultat: Behandlingsresultat) = when {
-        betalerKunTrygdeavgiftTilSkatt(
-            behandlingsresultat,
-        ) -> Trygdeavgiftmottaker.TRYGDEAVGIFT_BETALES_TIL_SKATT
+        betalerKunTrygdeavgiftTilSkatt(behandlingsresultat,) -> Trygdeavgiftmottaker.TRYGDEAVGIFT_BETALES_TIL_SKATT
 
         betalerKunTrygdeavgiftTilNav(behandlingsresultat) -> Trygdeavgiftmottaker.TRYGDEAVGIFT_BETALES_TIL_NAV
         else -> Trygdeavgiftmottaker.TRYGDEAVGIFT_BETALES_TIL_NAV_OG_SKATT

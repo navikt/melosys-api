@@ -1,11 +1,11 @@
 package no.nav.melosys.domain.avgift;
 
+import java.math.BigDecimal;
+import java.math.RoundingMode;
+import java.util.Objects;
+
 import jakarta.persistence.Column;
 import jakarta.persistence.Embeddable;
-import org.hibernate.annotations.Struct;
-
-import java.math.BigDecimal;
-import java.util.Objects;
 
 @Embeddable
 public class Penger {
@@ -35,6 +35,10 @@ public class Penger {
 
     public BigDecimal getVerdi() {
         return verdi;
+    }
+
+    public BigDecimal getVerdiAvrundet() {
+        return verdi.setScale(0, RoundingMode.HALF_UP);
     }
 
     public void setVerdi(BigDecimal verdi) {
