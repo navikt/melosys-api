@@ -30,14 +30,21 @@ public class Inntektsperiode implements ErPeriode {
     private Inntektskildetype type;
 
     @Embedded
-    @AttributeOverrides({
-        @AttributeOverride(name = "verdi", column = @Column(name = "avgiftspliktig_inntekt_mnd_verdi")),
-        @AttributeOverride(name = "valuta", column = @Column(name = "avgiftspliktig_inntekt_mnd_valuta"))
-    })
-    private Penger avgiftspliktigInntektMnd;
+    @AttributeOverride(name = "verdi", column = @Column(name = "avgiftspliktig_inntekt_mnd_verdi"))
+    @AttributeOverride(name = "valuta", column = @Column(name = "avgiftspliktig_inntekt_mnd_valuta"))
+    private Penger avgiftspliktigMndInntekt;
+
+    @Embedded
+    @AttributeOverride(name = "verdi", column = @Column(name = "avgiftspliktig_inntekt_total_verdi"))
+    @AttributeOverride(name = "valuta", column = @Column(name = "avgiftspliktig_inntekt_total_valuta"))
+    private Penger avgiftspliktigTotalinntekt;
 
     @Column(name = "aga_betales_til_skatt")
     private boolean arbeidsgiversavgiftBetalesTilSkatt;
+
+    public boolean erMaanedsbelop() {
+        return avgiftspliktigMndInntekt != null;
+    }
 
     public Long getId() {
         return id;
@@ -71,12 +78,20 @@ public class Inntektsperiode implements ErPeriode {
         this.type = inntektskildetype;
     }
 
-    public Penger getAvgiftspliktigInntektMnd() {
-        return avgiftspliktigInntektMnd;
+    public Penger getAvgiftspliktigMndInntekt() {
+        return avgiftspliktigMndInntekt;
     }
 
-    public void setAvgiftspliktigInntektMnd(Penger avgiftspliktigInntektMnd) {
-        this.avgiftspliktigInntektMnd = avgiftspliktigInntektMnd;
+    public void setAvgiftspliktigMndInntekt(Penger avgiftspliktigInntekt) {
+        this.avgiftspliktigMndInntekt = avgiftspliktigInntekt;
+    }
+
+    public Penger getAvgiftspliktigTotalinntekt() {
+        return avgiftspliktigTotalinntekt;
+    }
+
+    public void setAvgiftspliktigTotalinntekt(Penger avgiftspliktigTotalInntekt) {
+        this.avgiftspliktigTotalinntekt = avgiftspliktigTotalInntekt;
     }
 
     public boolean isArbeidsgiversavgiftBetalesTilSkatt() {
@@ -85,30 +100,6 @@ public class Inntektsperiode implements ErPeriode {
 
     public void setArbeidsgiversavgiftBetalesTilSkatt(boolean arbeidsgiversavgiftBetalesTilSkatt) {
         this.arbeidsgiversavgiftBetalesTilSkatt = arbeidsgiversavgiftBetalesTilSkatt;
-    }
-
-    @Override
-    public boolean equals(Object o) {
-        if (this == o) return true;
-        if (o == null || getClass() != o.getClass()) return false;
-        Inntektsperiode that = (Inntektsperiode) o;
-        return Objects.equals(fomDato, that.fomDato) && Objects.equals(tomDato, that.tomDato)
-            && Objects.equals(type, that.type)
-            && Objects.equals(avgiftspliktigInntektMnd, that.avgiftspliktigInntektMnd)
-            && arbeidsgiversavgiftBetalesTilSkatt == that.arbeidsgiversavgiftBetalesTilSkatt;
-    }
-
-    @Override
-    public int hashCode() {
-        return Objects.hash(fomDato, tomDato, type, avgiftspliktigInntektMnd,
-            arbeidsgiversavgiftBetalesTilSkatt);
-    }
-
-    @Override
-    public String toString() {
-        return "Inntektsperiode{" + "id=" + id + ", fomDato=" + fomDato + ", tomDato=" + tomDato + ", type=" + type
-            + ", avgiftspliktigInntektMnd=" + avgiftspliktigInntektMnd + ", arbeidsgiversavgiftBetalesTilSkatt="
-            + arbeidsgiversavgiftBetalesTilSkatt + '}';
     }
 
     public Set<Trygdeavgiftsperiode> getTrygdeavgiftsperioder() {
@@ -123,5 +114,28 @@ public class Inntektsperiode implements ErPeriode {
     @Override
     public LocalDate getTom() {
         return getTomDato();
+    }
+
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (o == null || getClass() != o.getClass()) return false;
+        Inntektsperiode that = (Inntektsperiode) o;
+        return arbeidsgiversavgiftBetalesTilSkatt == that.arbeidsgiversavgiftBetalesTilSkatt && Objects.equals(id, that.id) && Objects.equals(fomDato, that.fomDato) && Objects.equals(tomDato, that.tomDato) && type == that.type && Objects.equals(avgiftspliktigTotalinntekt, that.avgiftspliktigTotalinntekt) &&
+            Objects.equals(avgiftspliktigMndInntekt, that.avgiftspliktigMndInntekt);
+    }
+
+    @Override
+    public int hashCode() {
+        return Objects.hash(id, fomDato, tomDato, type, avgiftspliktigMndInntekt, arbeidsgiversavgiftBetalesTilSkatt, avgiftspliktigTotalinntekt);
+    }
+
+    @Override
+    public String toString() {
+        return "Inntektsperiode{" + "id=" + id + ", fomDato=" + fomDato
+            + ", tomDato=" + tomDato + ", type=" + type
+            + ", avgiftspliktigInntektMnd=" + avgiftspliktigMndInntekt
+            + ", avgiftspliktigTotalInntekt=" + avgiftspliktigTotalinntekt
+            + ", arbeidsgiversavgiftBetalesTilSkatt=" + arbeidsgiversavgiftBetalesTilSkatt + '}';
     }
 }

@@ -1,4 +1,4 @@
-package no.nav.melosys.service.avgift
+package no.nav.melosys.service.avgift.aarsavregning
 
 import io.kotest.assertions.throwables.shouldThrow
 import io.kotest.matchers.shouldBe
@@ -14,7 +14,6 @@ import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingsstatus
 import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingstyper
 import no.nav.melosys.exception.FunksjonellException
 import no.nav.melosys.repository.AarsavregningRepository
-import no.nav.melosys.service.avgift.aarsavregning.*
 import no.nav.melosys.service.behandling.BehandlingsresultatService
 import no.nav.melosys.service.sak.FagsakService
 import no.nav.melosys.sikkerhet.context.SpringSubjectHandler
@@ -37,10 +36,6 @@ internal class ÅrsavregningServiceTest {
     private lateinit var behandlingsresultatService: BehandlingsresultatService
 
     @RelaxedMockK
-    private lateinit var totalBeløpBeregner: TotalBeløpBeregner
-
-
-    @RelaxedMockK
     private lateinit var fagsakService: FagsakService
 
     private lateinit var årsavregningService: ÅrsavregningService
@@ -50,7 +45,6 @@ internal class ÅrsavregningServiceTest {
         årsavregningService = ÅrsavregningService(
             aarsavregningRepository,
             behandlingsresultatService,
-            totalBeløpBeregner,
             fagsakService
         )
         SpringSubjectHandler.set(TestSubjectHandler())
@@ -158,7 +152,7 @@ internal class ÅrsavregningServiceTest {
         every { aarsavregningRepository.findById(1L) }.returns(Optional.of(behandlingsresultat.årsavregning))
         every { behandlingsresultatService.hentBehandlingsresultat(1L) }.returns(behandlingsresultat)
 
-        årsavregningService.oppdaterTotalbelop(1L, 1L, BigDecimal.valueOf(12.4), BigDecimal.valueOf(5.2))
+        årsavregningService.oppdater(1L, 1L, BigDecimal.valueOf(12.4), BigDecimal.valueOf(5.2))
         behandlingsresultat.årsavregning.tilFaktureringBeloep shouldBe BigDecimal.valueOf(-7.2)
     }
 
@@ -175,7 +169,7 @@ internal class ÅrsavregningServiceTest {
         every { aarsavregningRepository.findById(1L) }.returns(Optional.of(behandlingsresultat.årsavregning))
         every { behandlingsresultatService.hentBehandlingsresultat(1L) }.returns(behandlingsresultat)
 
-        årsavregningService.oppdaterTotalbelop(1L, 1L, null, BigDecimal.ONE)
+        årsavregningService.oppdater(1L, 1L, null, BigDecimal.ONE)
         behandlingsresultat.årsavregning.tilFaktureringBeloep shouldBe null
     }
 
@@ -256,7 +250,8 @@ internal class ÅrsavregningServiceTest {
     private fun lagInntektsperiode(start: String, slutt: String): Inntektsperiode = Inntektsperiode().apply {
         fomDato = LocalDate.parse(start)
         tomDato = LocalDate.parse(slutt)
-        avgiftspliktigInntektMnd = Penger(5000.0)
+        avgiftspliktigMndInntekt = Penger(5000.0)
+        avgiftspliktigTotalinntekt = Penger(5000.0)
         type = Inntektskildetype.ARBEIDSINNTEKT_FRA_NORGE
     }
 
