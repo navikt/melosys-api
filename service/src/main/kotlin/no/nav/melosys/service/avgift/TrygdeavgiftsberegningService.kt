@@ -36,16 +36,16 @@ class TrygdeavgiftsberegningService(
     fun beregnOgLagreTrygdeavgift(
         behandlingsresultatID: Long,
         skatteforholdsperioder: List<SkatteforholdTilNorge> = emptyList(),
-        inntektsPerioder: List<Inntektsperiode> = emptyList(),
+        inntektsperioder: List<Inntektsperiode> = emptyList(),
     ): Set<Trygdeavgiftsperiode> {
         val behandlingsresultat = behandlingsresultatService.hentBehandlingsresultat(behandlingsresultatID)
         oppdaterBehandlingsresultatForNyeTrygdeAvgiftsperioder(behandlingsresultat)
-        TrygdeavgiftValideringService.validerForTrygdeavgiftberegning(behandlingsresultat, skatteforholdsperioder, inntektsPerioder)
+        TrygdeavgiftValideringService.validerForTrygdeavgiftberegning(behandlingsresultat, skatteforholdsperioder, inntektsperioder)
 
-        return if (erPliktigMedlemskapSkattePliktig(skatteforholdsperioder, inntektsPerioder, behandlingsresultat)) {
+        return if (erPliktigMedlemskapSkattePliktig(skatteforholdsperioder, inntektsperioder, behandlingsresultat)) {
             leggTilNyeTrygdeavgiftsperioderForPliktigMedlemskapSkattepliktig(skatteforholdsperioder, behandlingsresultat)
         } else {
-            val inntektsperioderPair = inntektsPerioder.map { Pair(UUID.randomUUID(), it) }
+            val inntektsperioderPair = inntektsperioder.map { Pair(UUID.randomUUID(), it) }
             val inntektsperiodeDtos = inntektsperioderPair.map { it.second.tilInntektsperiodeDto(it.first) }
 
             val skatteforholdsperioderPair = skatteforholdsperioder.map { Pair(UUID.randomUUID(), it) }
