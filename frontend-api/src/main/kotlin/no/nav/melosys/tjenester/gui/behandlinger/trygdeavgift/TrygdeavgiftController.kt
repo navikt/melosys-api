@@ -107,7 +107,7 @@ class TrygdeavgiftController(
             if (it.erMaanedsbelop) {
                 avgiftspliktigInntekt = Penger(it.avgiftspliktigInntekt)
             } else {
-                avgiftspliktigTotalInntekt = Penger(it.avgiftspliktigInntekt)
+                avgiftspliktigTotalinntekt = Penger(it.avgiftspliktigInntekt)
             }
         }
     }

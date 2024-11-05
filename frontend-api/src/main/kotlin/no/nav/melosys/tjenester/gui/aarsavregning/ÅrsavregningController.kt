@@ -112,7 +112,7 @@ class ÅrsavregningController(
                         .map {
                             val avgiftspliktigMdInntekt = (
                                 it.grunnlagInntekstperiode.avgiftspliktigInntekt
-                                    ?: it.grunnlagInntekstperiode.avgiftspliktigTotalInntekt
+                                    ?: it.grunnlagInntekstperiode.avgiftspliktigTotalinntekt
                                 ).verdiAvrundet
 
                             TrygdeavgiftsperiodeDto(

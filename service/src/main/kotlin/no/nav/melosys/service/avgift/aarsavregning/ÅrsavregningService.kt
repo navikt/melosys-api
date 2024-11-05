@@ -288,7 +288,7 @@ data class InntektsperioderForAvgift(
         type = inntektsperiode.type,
         isArbeidsgiversavgiftBetalesTilSkatt = inntektsperiode.isArbeidsgiversavgiftBetalesTilSkatt,
         avgiftspliktigInntekt = inntektsperiode.avgiftspliktigInntekt ?: null,
-        avgiftspliktigTotalInntekt = inntektsperiode.avgiftspliktigTotalInntekt ?: null,
+        avgiftspliktigTotalInntekt = inntektsperiode.avgiftspliktigTotalinntekt ?: null,
         erMaanedsbelop = inntektsperiode.isErMaanedsbelop
     )
 
@@ -297,7 +297,7 @@ data class InntektsperioderForAvgift(
         tom = avkortTilOgMedDatoForÅr(gjeldendeÅr, inntektsperiode.tom),
         type = inntektsperiode.type,
         avgiftspliktigInntekt = inntektsperiode.avgiftspliktigInntekt,
-        avgiftspliktigTotalInntekt = inntektsperiode.avgiftspliktigTotalInntekt,
+        avgiftspliktigTotalInntekt = inntektsperiode.avgiftspliktigTotalinntekt,
         isArbeidsgiversavgiftBetalesTilSkatt = inntektsperiode.isArbeidsgiversavgiftBetalesTilSkatt,
         erMaanedsbelop = inntektsperiode.isErMaanedsbelop
     )
