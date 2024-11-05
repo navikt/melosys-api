@@ -42,6 +42,10 @@ public class Inntektsperiode implements ErPeriode {
     @Column(name = "aga_betales_til_skatt")
     private boolean arbeidsgiversavgiftBetalesTilSkatt;
 
+    public boolean erMaanedsbelop() {
+        return avgiftspliktigInntekt != null;
+    }
+
     public Long getId() {
         return id;
     }
@@ -110,10 +114,6 @@ public class Inntektsperiode implements ErPeriode {
     @Override
     public LocalDate getTom() {
         return getTomDato();
-    }
-
-    public boolean isErMaanedsbelop() {
-        return avgiftspliktigInntekt != null;
     }
 
     @Override

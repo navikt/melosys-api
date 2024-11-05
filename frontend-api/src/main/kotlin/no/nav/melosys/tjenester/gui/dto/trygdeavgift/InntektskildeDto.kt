@@ -19,6 +19,6 @@ data class InntektskildeDto(
         inntektsperiode.avgiftspliktigInntekt?.verdi,
         inntektsperiode.fomDato,
         inntektsperiode.tomDato,
-        inntektsperiode.isErMaanedsbelop,
+        inntektsperiode.erMaanedsbelop(),
     )
 }

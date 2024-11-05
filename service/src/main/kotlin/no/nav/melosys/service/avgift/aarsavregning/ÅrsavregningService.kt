@@ -289,7 +289,7 @@ data class InntektsperioderForAvgift(
         isArbeidsgiversavgiftBetalesTilSkatt = inntektsperiode.isArbeidsgiversavgiftBetalesTilSkatt,
         avgiftspliktigInntekt = inntektsperiode.avgiftspliktigInntekt ?: null,
         avgiftspliktigTotalInntekt = inntektsperiode.avgiftspliktigTotalinntekt ?: null,
-        erMaanedsbelop = inntektsperiode.isErMaanedsbelop
+        erMaanedsbelop = inntektsperiode.erMaanedsbelop()
     )
 
     constructor(gjeldendeÅr: Int, inntektsperiode: Inntektsperiode) : this(
@@ -299,6 +299,6 @@ data class InntektsperioderForAvgift(
         avgiftspliktigInntekt = inntektsperiode.avgiftspliktigInntekt,
         avgiftspliktigTotalInntekt = inntektsperiode.avgiftspliktigTotalinntekt,
         isArbeidsgiversavgiftBetalesTilSkatt = inntektsperiode.isArbeidsgiversavgiftBetalesTilSkatt,
-        erMaanedsbelop = inntektsperiode.isErMaanedsbelop
+        erMaanedsbelop = inntektsperiode.erMaanedsbelop()
     )
 }
