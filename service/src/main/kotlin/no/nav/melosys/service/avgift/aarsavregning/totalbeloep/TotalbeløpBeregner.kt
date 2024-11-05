@@ -8,7 +8,7 @@ import java.time.LocalDate
 
 private val log = KotlinLogging.logger { }
 
-object TotalBeløpBeregner {
+object TotalbeløpBeregner {
 
     fun hentTotalAvgift(trygdeavgiftsperioder: List<Trygdeavgiftsperiode>): BigDecimal? {
         if (trygdeavgiftsperioder.isEmpty()) {

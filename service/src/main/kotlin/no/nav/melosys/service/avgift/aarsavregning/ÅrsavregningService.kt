@@ -8,7 +8,7 @@ import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingsresultattyper
 import no.nav.melosys.exception.FunksjonellException
 import no.nav.melosys.exception.IkkeFunnetException
 import no.nav.melosys.repository.AarsavregningRepository
-import no.nav.melosys.service.avgift.aarsavregning.totalbeloep.TotalBeløpBeregner
+import no.nav.melosys.service.avgift.aarsavregning.totalbeloep.TotalbeløpBeregner
 import no.nav.melosys.service.behandling.BehandlingsresultatService
 import no.nav.melosys.service.sak.FagsakService
 import no.nav.melosys.service.sak.FagsakService.UGYLDIGE_SAKSSTATUSER_FOR_TRYGDEAVGIFT
@@ -95,7 +95,7 @@ class ÅrsavregningService(
             this.behandlingsresultat = behandlingsresultat
             tidligereBehandlingsresultat = tidligereBehandlingsresultatMedAvgift
             tidligereFakturertBeloep =
-                TotalBeløpBeregner.hentTotalAvgift(tidligereBehandlingsresultat?.trygdeavgiftsperioder?.filter { it.overlapperMedÅr(gjelderÅr) }
+                TotalbeløpBeregner.hentTotalAvgift(tidligereBehandlingsresultat?.trygdeavgiftsperioder?.filter { it.overlapperMedÅr(gjelderÅr) }
                     .orEmpty())
         }.also {
             behandlingsresultatService.lagre(behandlingsresultat)

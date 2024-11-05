@@ -5,7 +5,7 @@ import no.nav.melosys.domain.avgift.Trygdeavgiftsperiode
 import no.nav.melosys.domain.kodeverk.Inntektskildetype
 import no.nav.melosys.domain.kodeverk.InnvilgelsesResultat
 import no.nav.melosys.service.avgift.aarsavregning.Trygdeavgiftsgrunnlag
-import no.nav.melosys.service.avgift.aarsavregning.totalbeloep.TotalBeløpBeregner
+import no.nav.melosys.service.avgift.aarsavregning.totalbeloep.TotalbeløpBeregner
 import no.nav.melosys.service.avgift.aarsavregning.ÅrsavregningModel
 import no.nav.melosys.service.avgift.aarsavregning.ÅrsavregningService
 import no.nav.melosys.service.tilgang.Aksesskontroll
@@ -113,8 +113,8 @@ class ÅrsavregningController(
                                 avgiftPerMd = it.trygdeavgiftsbeløpMd.verdi.intValueExact()
                             )
                         },
-                    totalInntekt = TotalBeløpBeregner.hentTotalInntekt(trygdeavgiftsperioder),
-                    totalAvgift = TotalBeløpBeregner.hentTotalAvgift(trygdeavgiftsperioder) ?: BigDecimal.ZERO
+                    totalInntekt = TotalbeløpBeregner.hentTotalInntekt(trygdeavgiftsperioder),
+                    totalAvgift = TotalbeløpBeregner.hentTotalAvgift(trygdeavgiftsperioder) ?: BigDecimal.ZERO
                 )
             )
     }
