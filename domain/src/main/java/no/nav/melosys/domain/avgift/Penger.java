@@ -38,7 +38,7 @@ public class Penger {
     }
 
     public BigDecimal getVerdiAvrundet() {
-        return verdi.setScale(0, RoundingMode.FLOOR);
+        return verdi.setScale(0, RoundingMode.HALF_UP);
     }
 
     public void setVerdi(BigDecimal verdi) {
