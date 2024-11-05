@@ -39,7 +39,7 @@ class TrygdeavgiftsberegningService(
         inntektsperioder: List<Inntektsperiode> = emptyList(),
     ): Set<Trygdeavgiftsperiode> {
         val behandlingsresultat = behandlingsresultatService.hentBehandlingsresultat(behandlingsresultatID)
-        oppdaterBehandlingsresultatForNyeTrygdeAvgiftsperioder(behandlingsresultat)
+        oppdaterBehandlingsresultatForNyeTrygdeavgiftsperioder(behandlingsresultat)
         TrygdeavgiftValideringService.validerForTrygdeavgiftberegning(behandlingsresultat, skatteforholdsperioder, inntektsperioder)
 
         return if (erPliktigMedlemskapSkattePliktig(skatteforholdsperioder, inntektsperioder, behandlingsresultat)) {
@@ -142,7 +142,7 @@ class TrygdeavgiftsberegningService(
         return erPliktigMedlemskap && inntektskilderErTomt && alleSkatteforholdErSkattepliktige
     }
 
-    private fun oppdaterBehandlingsresultatForNyeTrygdeAvgiftsperioder(behandlingsresultat: Behandlingsresultat) {
+    private fun oppdaterBehandlingsresultatForNyeTrygdeavgiftsperioder(behandlingsresultat: Behandlingsresultat) {
         behandlingsresultat.trygdeavgiftType = Trygdeavgift_typer.FORELØPIG
         behandlingsresultat.medlemskapsperioder.forEach {
             it.trygdeavgiftsperioder.clear()
