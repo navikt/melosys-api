@@ -124,13 +124,16 @@ class A1Mapper {
             return STATSLØS_TEKST;
         }
 
-        if (statsborgerskap.contains(Land.av(Land.UNKNOWN))) {
+        List<String> gyldigeStatsborgerskap = statsborgerskap.stream()
+            .sorted(Comparator.comparing(Land::getKode))
+            .filter( iso3 -> !iso3.equals(Land.av(Land.UNKNOWN)))
+            .filter( iso3 -> !iso3.equals(Land.av(Land.KOSOVO)))
+            .map(s -> IsoLandkodeKonverterer.tilIso2(s.getKode())).toList();
+        if(gyldigeStatsborgerskap.isEmpty()) {
             return UNKNOWN_TEKST;
         }
 
-        return statsborgerskap.stream()
-            .sorted(Comparator.comparing(Land::getKode))
-            .map(s -> IsoLandkodeKonverterer.tilIso2(s.getKode())).collect(Collectors.joining(","));
+        return String.join(",", gyldigeStatsborgerskap);
     }
 
     private LovvalgsperiodeType mapLovvalgsperiode(Lovvalgsperiode lovvalgsperiode) {
