@@ -126,9 +126,9 @@ class A1Mapper {
 
         List<String> gyldigeStatsborgerskap = statsborgerskap.stream()
             .sorted(Comparator.comparing(Land::getKode))
-            .filter( iso3 -> !iso3.equals(Land.av(Land.UNKNOWN)))
-            .filter( iso3 -> !iso3.equals(Land.av(Land.KOSOVO)))
-            .map(s -> IsoLandkodeKonverterer.tilIso2(s.getKode())).toList();
+            .filter( land -> !land.equals(Land.av(Land.UNKNOWN)))
+            .filter( land -> !land.equals(Land.av(Land.KOSOVO)))
+            .map(land -> IsoLandkodeKonverterer.tilIso2(land.getKode())).toList();
         if(gyldigeStatsborgerskap.isEmpty()) {
             return UNKNOWN_TEKST;
         }
