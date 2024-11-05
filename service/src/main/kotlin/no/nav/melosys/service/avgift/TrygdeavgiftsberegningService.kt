@@ -39,8 +39,8 @@ class TrygdeavgiftsberegningService(
         inntektsperioder: List<Inntektsperiode> = emptyList(),
     ): Set<Trygdeavgiftsperiode> {
         val behandlingsresultat = behandlingsresultatService.hentBehandlingsresultat(behandlingsresultatID)
-        nullstillTrygdeavgiftsperioder(behandlingsresultat)
         TrygdeavgiftsberegningValidering.validerForTrygdeavgiftberegning(behandlingsresultat, skatteforholdsperioder, inntektsperioder)
+        nullstillTrygdeavgiftsperioder(behandlingsresultat)
 
         return if (erPliktigMedlemskapSkattepliktig(skatteforholdsperioder, inntektsperioder, behandlingsresultat)) {
             leggTilNyeTrygdeavgiftsperioderForPliktigMedlemskapSkattepliktig(skatteforholdsperioder, behandlingsresultat)
