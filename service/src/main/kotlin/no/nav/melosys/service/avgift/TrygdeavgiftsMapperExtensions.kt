@@ -29,8 +29,7 @@ fun Inntektsperiode.tilInntektsperiodeDto(id: UUID): InntektsperiodeDto {
         DatoPeriodeDto(fomDato, tomDato),
         type,
         isArbeidsgiversavgiftBetalesTilSkatt,
-        PengerDto(avgiftspliktigMdInntekt),
-        true
+        PengerDto(avgiftspliktigMdInntekt)
     )
 }
 

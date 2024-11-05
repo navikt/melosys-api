@@ -10,8 +10,7 @@ data class InntektsperiodeDto(
     val periode: DatoPeriodeDto,
     val inntektskilde: Inntektskildetype,
     val arbeidsgiverBetalerAvgift: Boolean?,
-    val månedsbeløp: PengerDto?,
-    val erMaanedsbelop: Boolean,
+    val månedsbeløp: PengerDto?
 )
 
 data class PengerDto(val verdi: BigDecimal, var valuta: Valuta = NOK) {
