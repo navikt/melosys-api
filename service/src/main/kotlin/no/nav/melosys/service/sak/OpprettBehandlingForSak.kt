@@ -36,7 +36,7 @@ class OpprettBehandlingForSak(
             behandlingstype!!
         )
 
-        if (sistBehandling.erAktiv() && !sistBehandling.erÅrsavregning() && behandlingstype != Behandlingstyper.ÅRSAVREGNING) {
+        if (sistBehandling.erAktiv() && behandlingstype != Behandlingstyper.ÅRSAVREGNING) {
             behandlingService.avsluttBehandling(sistBehandling.id)
         }
 

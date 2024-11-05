@@ -42,7 +42,7 @@ class SaksbehandlingRegler(private val behandlingsresultatRepository: Behandling
         behandlinger
             .filter { it.erInaktiv() }
             .filter { !harIngenFlyt(it) }
-            .filter { !it.erÅrsavregning() }
+            .filterNot { it.erÅrsavregning() }
             .firstOrNull {
                 val behandlingsresultat = behandlingsresultatRepository.findById(it.id)
                 behandlingstyperSomKanReplikeres.contains(it.type)
