@@ -11,7 +11,7 @@ import no.nav.melosys.exception.FunksjonellException
 import org.threeten.extra.LocalDateRange
 import java.time.DateTimeException
 
-object TrygdeavgiftValideringService {
+object TrygdeavgiftsberegningValidering {
     val MEDLEMSKAPSPERIODER_EMPTY = "Kan ikke beregne trygdeavgift uten medlemskapsperioder"
     val UTLED_MEDLEMSKAPSPERIODE_FOM_MANGLER = "Klarte ikke finne startdatoen på medlemskapet"
     val UTLED_MEDLEMSKAPSPERIODE_TOM_MANGLER = "Skatteforholdsperiode/inntektsperiode kan ikke ha sluttdato når medlemskapsperiode ikke har sluttdato"

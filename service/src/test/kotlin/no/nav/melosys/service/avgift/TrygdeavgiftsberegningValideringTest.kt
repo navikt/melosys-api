@@ -14,9 +14,9 @@ import no.nav.melosys.domain.kodeverk.InnvilgelsesResultat
 import no.nav.melosys.domain.kodeverk.Skatteplikttype
 import no.nav.melosys.exception.FunksjonellException
 import no.nav.melosys.integrasjon.trygdeavgift.dto.DatoPeriodeDto
-import no.nav.melosys.service.avgift.TrygdeavgiftValideringService.INNTEKTSPERIODER_EMPTY
-import no.nav.melosys.service.avgift.TrygdeavgiftValideringService.SKATTEFORHOLDSPERIODER_EMPTY
-import no.nav.melosys.service.avgift.TrygdeavgiftValideringService.SKATTEPLIKTTYPE_LIK_FOR_ALLE_PERIODER
+import no.nav.melosys.service.avgift.TrygdeavgiftsberegningValidering.INNTEKTSPERIODER_EMPTY
+import no.nav.melosys.service.avgift.TrygdeavgiftsberegningValidering.SKATTEFORHOLDSPERIODER_EMPTY
+import no.nav.melosys.service.avgift.TrygdeavgiftsberegningValidering.SKATTEPLIKTTYPE_LIK_FOR_ALLE_PERIODER
 import org.junit.jupiter.api.Nested
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.TestInstance
@@ -34,7 +34,7 @@ data class ValideringsInput(
     }
 }
 
-class TrygdeavgiftValideringServiceTest {
+class TrygdeavgiftsberegningValideringTest {
 
     @Nested
     @TestInstance(TestInstance.Lifecycle.PER_CLASS)
@@ -55,12 +55,12 @@ class TrygdeavgiftValideringServiceTest {
             )
 
             shouldThrow<FunksjonellException> {
-                TrygdeavgiftValideringService.validerForTrygdeavgiftberegning(
+                TrygdeavgiftsberegningValidering.validerForTrygdeavgiftberegning(
                     behandlingsresultatMock,
                     skatteforholdsPerioder,
                     emptyList()
                 )
-            }.message shouldBe TrygdeavgiftValideringService.MEDLEMSKAPSPERIODER_EMPTY
+            }.message shouldBe TrygdeavgiftsberegningValidering.MEDLEMSKAPSPERIODER_EMPTY
         }
 
         @Test
@@ -78,8 +78,8 @@ class TrygdeavgiftValideringServiceTest {
             )
 
             shouldThrow<FunksjonellException> {
-                TrygdeavgiftValideringService.validerForTrygdeavgiftberegning(behandlingsresultatMock, skatteforholdsPerioder, listOf())
-            }.message shouldBe TrygdeavgiftValideringService.UTLED_MEDLEMSKAPSPERIODE_FOM_MANGLER
+                TrygdeavgiftsberegningValidering.validerForTrygdeavgiftberegning(behandlingsresultatMock, skatteforholdsPerioder, listOf())
+            }.message shouldBe TrygdeavgiftsberegningValidering.UTLED_MEDLEMSKAPSPERIODE_FOM_MANGLER
         }
 
         @Test
@@ -98,8 +98,8 @@ class TrygdeavgiftValideringServiceTest {
             )
 
             shouldThrow<FunksjonellException> {
-                TrygdeavgiftValideringService.validerForTrygdeavgiftberegning(behandlingsresultatMock, skatteforholdsPerioder, listOf())
-            }.message shouldBe TrygdeavgiftValideringService.UTLED_MEDLEMSKAPSPERIODE_TOM_MANGLER
+                TrygdeavgiftsberegningValidering.validerForTrygdeavgiftberegning(behandlingsresultatMock, skatteforholdsPerioder, listOf())
+            }.message shouldBe TrygdeavgiftsberegningValidering.UTLED_MEDLEMSKAPSPERIODE_TOM_MANGLER
         }
 
         @Test
@@ -127,12 +127,12 @@ class TrygdeavgiftValideringServiceTest {
 
 
             shouldThrow<FunksjonellException> {
-                TrygdeavgiftValideringService.validerForTrygdeavgiftberegning(
+                TrygdeavgiftsberegningValidering.validerForTrygdeavgiftberegning(
                     behandlingsresultat,
                     skatteforholdsPerioder,
                     listOf(mockk<Inntektsperiode>())
                 )
-            }.message shouldBe TrygdeavgiftValideringService.SKATTEFORHOLDSPERIODENE_KAN_IKKE_OVERLAPPE
+            }.message shouldBe TrygdeavgiftsberegningValidering.SKATTEFORHOLDSPERIODENE_KAN_IKKE_OVERLAPPE
         }
 
         @Test
@@ -162,12 +162,12 @@ class TrygdeavgiftValideringServiceTest {
             )
 
             shouldThrow<FunksjonellException> {
-                TrygdeavgiftValideringService.validerForTrygdeavgiftberegning(
+                TrygdeavgiftsberegningValidering.validerForTrygdeavgiftberegning(
                     behandlingsresultat,
                     skatteforholdsPerioder,
                     listOf(mockk<Inntektsperiode>())
                 )
-            }.message shouldBe TrygdeavgiftValideringService.SKATTEFORHOLDSPERIODE_DEKKER_IKKE_HELE_PERIODEN
+            }.message shouldBe TrygdeavgiftsberegningValidering.SKATTEFORHOLDSPERIODE_DEKKER_IKKE_HELE_PERIODEN
         }
 
         @Test
@@ -200,12 +200,12 @@ class TrygdeavgiftValideringServiceTest {
             })
 
             shouldThrow<FunksjonellException> {
-                TrygdeavgiftValideringService.validerForTrygdeavgiftberegning(
+                TrygdeavgiftsberegningValidering.validerForTrygdeavgiftberegning(
                     behandlingsresultat,
                     skatteforholdsPerioder,
                     inntektsperioder
                 )
-            }.message shouldBe TrygdeavgiftValideringService.INNTEKTSPERIODE_DEKKER_IKKE_HELE_PERIODEN
+            }.message shouldBe TrygdeavgiftsberegningValidering.INNTEKTSPERIODE_DEKKER_IKKE_HELE_PERIODEN
         }
 
         @ParameterizedTest
@@ -216,7 +216,7 @@ class TrygdeavgiftValideringServiceTest {
             val inntektsPerioder = valideringsInput.inntektsperioder
 
             shouldThrow<FunksjonellException> {
-                TrygdeavgiftValideringService.validerForTrygdeavgiftberegning(behandlingsresultatMock, skatteforholdsPerioder, inntektsPerioder)
+                TrygdeavgiftsberegningValidering.validerForTrygdeavgiftberegning(behandlingsresultatMock, skatteforholdsPerioder, inntektsPerioder)
             }.message shouldBe valideringsInput.feilmelding
         }
 
@@ -272,7 +272,7 @@ class TrygdeavgiftValideringServiceTest {
                 }, SkatteforholdTilNorge().apply {
                     skatteplikttype = Skatteplikttype.SKATTEPLIKTIG
                 })
-            TrygdeavgiftValideringService.erAllePerioderSkattepliktige(skatteforholdsperioder) shouldBe true
+            TrygdeavgiftsberegningValidering.erAllePerioderSkattepliktige(skatteforholdsperioder) shouldBe true
         }
 
         @Test
@@ -283,7 +283,7 @@ class TrygdeavgiftValideringServiceTest {
                 }, SkatteforholdTilNorge().apply {
                     skatteplikttype = Skatteplikttype.IKKE_SKATTEPLIKTIG
                 })
-            TrygdeavgiftValideringService.erAllePerioderSkattepliktige(skatteforholdsperioder) shouldBe false
+            TrygdeavgiftsberegningValidering.erAllePerioderSkattepliktige(skatteforholdsperioder) shouldBe false
         }
     }
 }
