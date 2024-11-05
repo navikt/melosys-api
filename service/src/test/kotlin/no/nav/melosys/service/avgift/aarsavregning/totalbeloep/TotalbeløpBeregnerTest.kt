@@ -15,7 +15,7 @@ class TotalbeløpBeregnerTest {
         val tom = LocalDate.of(2023, 1, 31)
 
 
-        val result = TotalbeløpBeregner.totalBeløpForPeriode(fom, tom, enhetspris)
+        val result = TotalbeløpBeregner.totalbeløpForPeriode(fom, tom, enhetspris)
 
 
         val forventetBeløp = BigDecimal("350.00")
@@ -28,7 +28,7 @@ class TotalbeløpBeregnerTest {
         val tom = LocalDate.of(2023, 11, 15)
 
 
-        val result = TotalbeløpBeregner.totalBeløpForPeriode(fom, tom, enhetspris)
+        val result = TotalbeløpBeregner.totalbeløpForPeriode(fom, tom, enhetspris)
 
 
         val forventetBeløp = BigDecimal("500.00")
@@ -41,7 +41,7 @@ class TotalbeløpBeregnerTest {
         val tom = LocalDate.of(2023, 12, 31)
 
 
-        val result = TotalbeløpBeregner.totalBeløpForPeriode(fom, tom, enhetspris)
+        val result = TotalbeløpBeregner.totalbeløpForPeriode(fom, tom, enhetspris)
 
 
         val forventetBeløp = BigDecimal("11350.00")
@@ -55,7 +55,7 @@ class TotalbeløpBeregnerTest {
         val tom = LocalDate.of(2023, 11, 15)
 
 
-        val result = TotalbeløpBeregner.totalBeløpForPeriode(fom, tom, enhetspris)
+        val result = TotalbeløpBeregner.totalbeløpForPeriode(fom, tom, enhetspris)
 
 
         val forventetBeløp = BigDecimal("10500.00")
@@ -68,7 +68,7 @@ class TotalbeløpBeregnerTest {
         val tom = LocalDate.of(2023, 12, 31)
 
 
-        val result = TotalbeløpBeregner.totalBeløpForPeriode(fom, tom, enhetspris)
+        val result = TotalbeløpBeregner.totalbeløpForPeriode(fom, tom, enhetspris)
 
 
         val forventetBeløp = BigDecimal("10540.00")
@@ -81,7 +81,7 @@ class TotalbeløpBeregnerTest {
         val tom = LocalDate.of(2024, 2, 15)
 
 
-        val result = TotalbeløpBeregner.totalBeløpForPeriode(fom, tom, enhetspris)
+        val result = TotalbeløpBeregner.totalbeløpForPeriode(fom, tom, enhetspris)
 
 
         val forventetBeløp = BigDecimal("13520.00")
@@ -94,7 +94,7 @@ class TotalbeløpBeregnerTest {
         val tom = LocalDate.of(2024, 2, 29)
 
 
-        val result = TotalbeløpBeregner.totalBeløpForPeriode(fom, tom, enhetspris)
+        val result = TotalbeløpBeregner.totalbeløpForPeriode(fom, tom, enhetspris)
 
 
         val forventetBeløp = BigDecimal("14000.00")
@@ -107,7 +107,7 @@ class TotalbeløpBeregnerTest {
         val tom = LocalDate.of(2024, 3, 31)
 
 
-        val result = TotalbeløpBeregner.totalBeløpForPeriode(fom, tom, enhetspris)
+        val result = TotalbeløpBeregner.totalbeløpForPeriode(fom, tom, enhetspris)
 
 
         val forventetBeløp = BigDecimal("27000.00")
@@ -120,7 +120,7 @@ class TotalbeløpBeregnerTest {
         val tom = LocalDate.of(2024, 2, 29)
 
 
-        val result = TotalbeløpBeregner.totalBeløpForPeriode(fom, tom, enhetspris)
+        val result = TotalbeløpBeregner.totalbeløpForPeriode(fom, tom, enhetspris)
 
 
         val forventetBeløp = BigDecimal("1000.00")
@@ -133,7 +133,7 @@ class TotalbeløpBeregnerTest {
         val tom = LocalDate.of(2024, 2, 15)
 
 
-        val result = TotalbeløpBeregner.totalBeløpForPeriode(fom, tom, enhetspris)
+        val result = TotalbeløpBeregner.totalbeløpForPeriode(fom, tom, enhetspris)
 
 
         val forventetBeløp = BigDecimal("2100.00")
@@ -146,7 +146,7 @@ class TotalbeløpBeregnerTest {
         val tom = LocalDate.of(2023, 5, 31)
         val periodeMedBeløp = PeriodeMedBeløp(fom, tom, BigDecimal.valueOf(700))
 
-        val result = TotalbeløpBeregner.totalBeløpForAllePerioder(listOf(periodeMedBeløp))
+        val result = TotalbeløpBeregner.totalbeløpForAllePerioder(listOf(periodeMedBeløp))
 
         val forventetBeløp = BigDecimal("3500.00")
         result.shouldBe(forventetBeløp)
@@ -161,7 +161,7 @@ class TotalbeløpBeregnerTest {
         val tom2 = LocalDate.of(2023, 12, 15)
         val periode2 = PeriodeMedBeløp(fom2, tom2, BigDecimal.valueOf(1000))
 
-        val result = TotalbeløpBeregner.totalBeløpForAllePerioder(listOf(periode1, periode2))
+        val result = TotalbeløpBeregner.totalbeløpForAllePerioder(listOf(periode1, periode2))
 
         val forventetBeløp = BigDecimal("12285.00")
         result.shouldBe(forventetBeløp)

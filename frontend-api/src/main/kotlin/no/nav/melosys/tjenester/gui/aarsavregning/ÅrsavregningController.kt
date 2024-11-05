@@ -113,8 +113,8 @@ class ÅrsavregningController(
                                 avgiftPerMd = it.trygdeavgiftsbeløpMd.verdi.intValueExact()
                             )
                         },
-                    totalInntekt = TotalbeløpBeregner.hentTotalInntekt(trygdeavgiftsperioder),
-                    totalAvgift = TotalbeløpBeregner.hentTotalAvgift(trygdeavgiftsperioder) ?: BigDecimal.ZERO
+                    totalInntekt = TotalbeløpBeregner.hentTotalinntekt(trygdeavgiftsperioder),
+                    totalAvgift = TotalbeløpBeregner.hentTotalavgift(trygdeavgiftsperioder) ?: BigDecimal.ZERO
                 )
             )
     }

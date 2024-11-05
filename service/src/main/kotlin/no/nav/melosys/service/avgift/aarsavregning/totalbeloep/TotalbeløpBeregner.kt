@@ -10,7 +10,7 @@ private val log = KotlinLogging.logger { }
 
 object TotalbeløpBeregner {
 
-    fun hentTotalAvgift(trygdeavgiftsperioder: List<Trygdeavgiftsperiode>): BigDecimal? {
+    fun hentTotalavgift(trygdeavgiftsperioder: List<Trygdeavgiftsperiode>): BigDecimal? {
         if (trygdeavgiftsperioder.isEmpty()) {
             return null
         }
@@ -21,10 +21,10 @@ object TotalbeløpBeregner {
                 beløp = it.trygdeavgiftsbeløpMd.verdi,
             )
         }
-        return totalBeløpForAllePerioder(periodeMedBeløpList)
+        return totalbeløpForAllePerioder(periodeMedBeløpList)
     }
 
-    fun hentTotalInntekt(trygdeavgiftsperioder: List<Trygdeavgiftsperiode>): BigDecimal {
+    fun hentTotalinntekt(trygdeavgiftsperioder: List<Trygdeavgiftsperiode>): BigDecimal {
         val periodeMedBeløpList = trygdeavgiftsperioder.filter { it.grunnlagInntekstperiode != null }.map {
             val mdBelop = (it.grunnlagInntekstperiode.avgiftspliktigMndInntekt ?: it.grunnlagInntekstperiode.avgiftspliktigTotalinntekt).verdi
             PeriodeMedBeløp(
@@ -33,12 +33,12 @@ object TotalbeløpBeregner {
                 beløp = mdBelop
             )
         }
-        return totalBeløpForAllePerioder(periodeMedBeløpList)
+        return totalbeløpForAllePerioder(periodeMedBeløpList)
     }
 
-    fun totalBeløpForAllePerioder(periodeMedBeløpList: List<PeriodeMedBeløp>): BigDecimal {
+    fun totalbeløpForAllePerioder(periodeMedBeløpList: List<PeriodeMedBeløp>): BigDecimal {
         return periodeMedBeløpList.sumOf { periode ->
-            totalBeløpForPeriode(
+            totalbeløpForPeriode(
                 fom = periode.fom,
                 tom = periode.tom,
                 beløp = periode.beløp
@@ -46,7 +46,7 @@ object TotalbeløpBeregner {
         }
     }
 
-    fun totalBeløpForPeriode(fom: LocalDate, tom: LocalDate, beløp: BigDecimal): BigDecimal {
+    fun totalbeløpForPeriode(fom: LocalDate, tom: LocalDate, beløp: BigDecimal): BigDecimal {
         val antallMåneder = AntallMdBeregner(fom, tom).beregn()
         val total = beløp.multiply(antallMåneder).setScale(2, RoundingMode.HALF_UP)
         log.debug { "Beløp for periode fom: $fom, tom: $tom regnes med enhetspris $total og antall: $antallMåneder ==> beløp: $total" }

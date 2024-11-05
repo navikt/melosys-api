@@ -95,7 +95,7 @@ class ÅrsavregningService(
             this.behandlingsresultat = behandlingsresultat
             tidligereBehandlingsresultat = tidligereBehandlingsresultatMedAvgift
             tidligereFakturertBeloep =
-                TotalbeløpBeregner.hentTotalAvgift(tidligereBehandlingsresultat?.trygdeavgiftsperioder?.filter { it.overlapperMedÅr(gjelderÅr) }
+                TotalbeløpBeregner.hentTotalavgift(tidligereBehandlingsresultat?.trygdeavgiftsperioder?.filter { it.overlapperMedÅr(gjelderÅr) }
                     .orEmpty())
         }.also {
             behandlingsresultatService.lagre(behandlingsresultat)
