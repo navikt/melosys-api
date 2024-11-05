@@ -62,7 +62,7 @@ class ÅrsavregningController(
     ): ResponseEntity<ÅrsavregningResponse> {
         aksesskontroll.autoriserSkriv(behandlingID)
 
-        val årsavregning = årsavregningService.oppdaterTotalbelop(
+        val årsavregning = årsavregningService.oppdater(
             behandlingID,
             aarsavregningID,
             årsavregningOppdaterRequest.avregning.tidligereFakturertBeloep,

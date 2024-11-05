@@ -182,7 +182,7 @@ class ÅrsavregningService(
     }
 
     @Transactional
-    fun oppdaterTotalbelop(
+    fun oppdater(
         behandlingID: Long,
         aarsavregningId: Long,
         tidligereFakturertBeloep: BigDecimal?,

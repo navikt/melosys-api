@@ -152,7 +152,7 @@ internal class ÅrsavregningServiceTest {
         every { aarsavregningRepository.findById(1L) }.returns(Optional.of(behandlingsresultat.årsavregning))
         every { behandlingsresultatService.hentBehandlingsresultat(1L) }.returns(behandlingsresultat)
 
-        årsavregningService.oppdaterTotalbelop(1L, 1L, BigDecimal.valueOf(12.4), BigDecimal.valueOf(5.2))
+        årsavregningService.oppdater(1L, 1L, BigDecimal.valueOf(12.4), BigDecimal.valueOf(5.2))
         behandlingsresultat.årsavregning.tilFaktureringBeloep shouldBe BigDecimal.valueOf(-7.2)
     }
 
@@ -169,7 +169,7 @@ internal class ÅrsavregningServiceTest {
         every { aarsavregningRepository.findById(1L) }.returns(Optional.of(behandlingsresultat.årsavregning))
         every { behandlingsresultatService.hentBehandlingsresultat(1L) }.returns(behandlingsresultat)
 
-        årsavregningService.oppdaterTotalbelop(1L, 1L, null, BigDecimal.ONE)
+        årsavregningService.oppdater(1L, 1L, null, BigDecimal.ONE)
         behandlingsresultat.årsavregning.tilFaktureringBeloep shouldBe null
     }
 

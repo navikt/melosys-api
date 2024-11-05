@@ -404,7 +404,7 @@ class YrkesaktivFtrlVedtakIT(
         val nyttTotalbeloep = BigDecimal(2000)
         årsavregningService.opprettÅrsavregning(årsavregningBehandlingID, 2023)
         val årsavregningID = behandlingsresultatRepository.findById(årsavregningBehandlingID).shouldBePresent().årsavregning.id
-        årsavregningService.oppdaterTotalbelop(årsavregningBehandlingID, årsavregningID, tidligereFakturertBeloep, nyttTotalbeloep)
+        årsavregningService.oppdater(årsavregningBehandlingID, årsavregningID, tidligereFakturertBeloep, nyttTotalbeloep)
 
         val vedtakRequestÅrsavregning = FattVedtakRequest.Builder()
             .medBehandlingsresultatType(Behandlingsresultattyper.FERDIGBEHANDLET)
