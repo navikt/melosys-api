@@ -24,7 +24,7 @@ class OpprettBehandlingForSak(
     @Transactional
     fun opprettBehandling(saksnummer: String?, opprettSakDto: OpprettSakDto) {
         val fagsak = fagsakService.hentFagsak(saksnummer)
-        val sistBehandling = fagsak.hentSistRegistrertBehandling()
+        val sistBehandling = fagsak.hentSistRegistrertBehandlingIkkeÅrsavregning()
         val behandlingstema = opprettSakDto.behandlingstema
         val behandlingstype = opprettSakDto.behandlingstype
 
@@ -36,7 +36,7 @@ class OpprettBehandlingForSak(
             behandlingstype!!
         )
 
-        if (sistBehandling.erAktiv() && !sistBehandling.erÅrsavregning() && behandlingstype != Behandlingstyper.ÅRSAVREGNING) {
+        if (sistBehandling.erAktiv() && behandlingstype != Behandlingstyper.ÅRSAVREGNING) {
             behandlingService.avsluttBehandling(sistBehandling.id)
         }
 
