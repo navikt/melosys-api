@@ -45,23 +45,31 @@ class TrygdeavgiftsberegningService(
         return if (erPliktigMedlemskapSkattepliktig(skatteforholdsperioder, inntektsperioder, behandlingsresultat)) {
             leggTilNyeTrygdeavgiftsperioderForPliktigMedlemskapSkattepliktig(skatteforholdsperioder, behandlingsresultat)
         } else {
-            val inntektsperioderPair = inntektsperioder.map { Pair(UUID.randomUUID(), it) }
-            val inntektsperiodeDtos = inntektsperioderPair.map { it.second.tilInntektsperiodeDto(it.first) }
-
-            val skatteforholdsperioderPair = skatteforholdsperioder.map { Pair(UUID.randomUUID(), it) }
-            val skatteforholdsperioderDtos = skatteforholdsperioderPair.map { it.second.tilSkatteforholdDto(it.first) }
-
-            val beregnetTrygdeavgift = beregnTrygdeAvgift(behandlingsresultat, skatteforholdsperioderDtos, inntektsperiodeDtos)
-
-            val nyeTrygdeavgiftsperioder = beregnetTrygdeavgift.map { response ->
-                lagTrygdeavgiftsperiode(response, skatteforholdsperioderPair, inntektsperioderPair, behandlingsresultat)
-            }.toSet()
-
-            nyeTrygdeavgiftsperioder.also {
-                validerTrygdeavgiftBetalesTilNav(behandlingsresultat, beregnetTrygdeavgift)
-                behandlingsresultatService.lagreOgFlush(behandlingsresultat)
-            }
+            leggTilNyeTrygdeavgiftsperioder(inntektsperioder, skatteforholdsperioder, behandlingsresultat)
         }
+    }
+
+    private fun leggTilNyeTrygdeavgiftsperioder(
+        inntektsperioder: List<Inntektsperiode>,
+        skatteforholdsperioder: List<SkatteforholdTilNorge>,
+        behandlingsresultat: Behandlingsresultat
+    ): Set<Trygdeavgiftsperiode> {
+        val inntektsperioderPair = inntektsperioder.map { Pair(UUID.randomUUID(), it) }
+        val inntektsperiodeDtos = inntektsperioderPair.map { it.second.tilInntektsperiodeDto(it.first) }
+
+        val skatteforholdsperioderPair = skatteforholdsperioder.map { Pair(UUID.randomUUID(), it) }
+        val skatteforholdsperioderDtos = skatteforholdsperioderPair.map { it.second.tilSkatteforholdDto(it.first) }
+
+        val beregnetTrygdeavgift = beregnTrygdeAvgift(behandlingsresultat, skatteforholdsperioderDtos, inntektsperiodeDtos)
+
+        val nyeTrygdeavgiftsperioder = beregnetTrygdeavgift.map { response ->
+            lagTrygdeavgiftsperiode(response, skatteforholdsperioderPair, inntektsperioderPair, behandlingsresultat)
+        }.toSet()
+
+        validerTrygdeavgiftBetalesTilNav(behandlingsresultat, beregnetTrygdeavgift)
+        behandlingsresultatService.lagreOgFlush(behandlingsresultat)
+
+        return nyeTrygdeavgiftsperioder
     }
 
     @Transactional(readOnly = true)
