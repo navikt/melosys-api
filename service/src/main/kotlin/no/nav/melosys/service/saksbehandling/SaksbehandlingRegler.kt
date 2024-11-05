@@ -42,7 +42,6 @@ class SaksbehandlingRegler(private val behandlingsresultatRepository: Behandling
         behandlinger
             .filter { it.erInaktiv() }
             .filter { !harIngenFlyt(it) }
-            .filterNot { it.erÅrsavregning() }
             .firstOrNull {
                 val behandlingsresultat = behandlingsresultatRepository.findById(it.id)
                 behandlingstyperSomKanReplikeres.contains(it.type)
@@ -134,7 +133,7 @@ class SaksbehandlingRegler(private val behandlingsresultatRepository: Behandling
         return (sakstype == Sakstyper.EU_EOS || sakstype == Sakstyper.TRYGDEAVTALE) && behandlingstema == IKKE_YRKESAKTIV
     }
 
-    fun harUtsendtArbeidsTakerKunNorgeFlyt(erSakstypeEøs: Boolean, behandlingstema: Behandlingstema, land: Land_iso2): Boolean {
+     fun harUtsendtArbeidsTakerKunNorgeFlyt(erSakstypeEøs: Boolean, behandlingstema: Behandlingstema, land: Land_iso2): Boolean {
         return erSakstypeEøs
             && (behandlingstema.equals(UTSENDT_ARBEIDSTAKER)
             || behandlingstema.equals(UTSENDT_SELVSTENDIG)
