@@ -121,7 +121,7 @@ class OpprettFakturaserie(
                 it.trygdeavgiftsbeløpMd.verdi,
                 it.periodeFra,
                 it.periodeTil,
-                "Inntekt: ${it.grunnlagInntekstperiode.avgiftspliktigInntekt.verdi}, " +
+                "Inntekt: ${it.grunnlagInntekstperiode.avgiftspliktigMndInntekt.verdi}, " +
                     "Dekning: ${mapDekning(it)}, " +
                     "Sats: ${it.trygdesats} %"
             )

@@ -16,7 +16,7 @@ data class InntektskildeDto(
     constructor(inntektsperiode: Inntektsperiode) : this(
         inntektsperiode.type,
         inntektsperiode.isArbeidsgiversavgiftBetalesTilSkatt,
-        inntektsperiode.avgiftspliktigInntekt?.verdi,
+        inntektsperiode.avgiftspliktigMndInntekt?.verdi,
         inntektsperiode.fomDato,
         inntektsperiode.tomDato,
         inntektsperiode.erMaanedsbelop(),

@@ -263,7 +263,7 @@ class YrkesaktivFtrlVedtakIT(
                 tomDato = periode.tom
                 type = Inntektskildetype.INNTEKT_FRA_UTLANDET
                 isArbeidsgiversavgiftBetalesTilSkatt = true
-                avgiftspliktigInntekt = Penger(10000.toBigDecimal())
+                avgiftspliktigMndInntekt = Penger(10000.toBigDecimal())
             }
         )
 
@@ -384,7 +384,7 @@ class YrkesaktivFtrlVedtakIT(
                 tomDato = periode.tom
                 type = Inntektskildetype.INNTEKT_FRA_UTLANDET
                 isArbeidsgiversavgiftBetalesTilSkatt = true
-                avgiftspliktigInntekt = Penger(10000.toBigDecimal())
+                avgiftspliktigMndInntekt = Penger(10000.toBigDecimal())
                 avgiftspliktigTotalinntekt = Penger(10000.toBigDecimal())
             }
         )
@@ -582,7 +582,7 @@ class YrkesaktivFtrlVedtakIT(
                 tomDato = periode.tom
                 this.type = Inntektskildetype.INNTEKT_FRA_UTLANDET
                 isArbeidsgiversavgiftBetalesTilSkatt = arbeidsgiversavgiftBetales
-                avgiftspliktigInntekt = Penger(10000.toBigDecimal())
+                avgiftspliktigMndInntekt = Penger(10000.toBigDecimal())
                 avgiftspliktigTotalinntekt = Penger(10000.toBigDecimal())
             }
         )
@@ -601,7 +601,7 @@ class YrkesaktivFtrlVedtakIT(
             tomDato = LocalDate.of(2023, 2, 1)
             type = Inntektskildetype.INNTEKT_FRA_UTLANDET
             isArbeidsgiversavgiftBetalesTilSkatt = arbeidsgiversavgiftBetales
-            avgiftspliktigInntekt = Penger(10000.toBigDecimal(), "nok")
+            avgiftspliktigMndInntekt = Penger(10000.toBigDecimal(), "nok")
         }
 
         val trygdeavgiftsperioder = HashSet<Trygdeavgiftsperiode>()

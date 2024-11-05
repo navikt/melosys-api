@@ -22,7 +22,7 @@ fun List<Medlemskapsperiode>.tilMedlemskapsperiodeDtos(): Set<Medlemskapsperiode
 
 fun Inntektsperiode.tilInntektsperiodeDto(id: UUID): InntektsperiodeDto {
     val avgiftspliktigMdInntekt =
-        avgiftspliktigInntekt ?: Penger(TotalBeløpBeregner.månedligBeløpForTotalbeløp(fomDato, tomDato, avgiftspliktigTotalinntekt.verdi))
+        avgiftspliktigMndInntekt ?: Penger(TotalBeløpBeregner.månedligBeløpForTotalbeløp(fomDato, tomDato, avgiftspliktigTotalinntekt.verdi))
 
     return InntektsperiodeDto(
         id,

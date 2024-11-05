@@ -32,7 +32,7 @@ public class Inntektsperiode implements ErPeriode {
     @Embedded
     @AttributeOverride(name = "verdi", column = @Column(name = "avgiftspliktig_inntekt_mnd_verdi"))
     @AttributeOverride(name = "valuta", column = @Column(name = "avgiftspliktig_inntekt_mnd_valuta"))
-    private Penger avgiftspliktigInntekt;
+    private Penger avgiftspliktigMndInntekt;
 
     @Embedded
     @AttributeOverride(name = "verdi", column = @Column(name = "avgiftspliktig_inntekt_total_verdi"))
@@ -43,7 +43,7 @@ public class Inntektsperiode implements ErPeriode {
     private boolean arbeidsgiversavgiftBetalesTilSkatt;
 
     public boolean erMaanedsbelop() {
-        return avgiftspliktigInntekt != null;
+        return avgiftspliktigMndInntekt != null;
     }
 
     public Long getId() {
@@ -78,12 +78,12 @@ public class Inntektsperiode implements ErPeriode {
         this.type = inntektskildetype;
     }
 
-    public Penger getAvgiftspliktigInntekt() {
-        return avgiftspliktigInntekt;
+    public Penger getAvgiftspliktigMndInntekt() {
+        return avgiftspliktigMndInntekt;
     }
 
-    public void setAvgiftspliktigInntekt(Penger avgiftspliktigInntekt) {
-        this.avgiftspliktigInntekt = avgiftspliktigInntekt;
+    public void setAvgiftspliktigMndInntekt(Penger avgiftspliktigInntekt) {
+        this.avgiftspliktigMndInntekt = avgiftspliktigInntekt;
     }
 
     public Penger getAvgiftspliktigTotalinntekt() {
@@ -122,19 +122,19 @@ public class Inntektsperiode implements ErPeriode {
         if (o == null || getClass() != o.getClass()) return false;
         Inntektsperiode that = (Inntektsperiode) o;
         return arbeidsgiversavgiftBetalesTilSkatt == that.arbeidsgiversavgiftBetalesTilSkatt && Objects.equals(id, that.id) && Objects.equals(fomDato, that.fomDato) && Objects.equals(tomDato, that.tomDato) && type == that.type && Objects.equals(avgiftspliktigTotalinntekt, that.avgiftspliktigTotalinntekt) &&
-            Objects.equals(avgiftspliktigInntekt, that.avgiftspliktigInntekt);
+            Objects.equals(avgiftspliktigMndInntekt, that.avgiftspliktigMndInntekt);
     }
 
     @Override
     public int hashCode() {
-        return Objects.hash(id, fomDato, tomDato, type, avgiftspliktigInntekt, arbeidsgiversavgiftBetalesTilSkatt, avgiftspliktigTotalinntekt);
+        return Objects.hash(id, fomDato, tomDato, type, avgiftspliktigMndInntekt, arbeidsgiversavgiftBetalesTilSkatt, avgiftspliktigTotalinntekt);
     }
 
     @Override
     public String toString() {
         return "Inntektsperiode{" + "id=" + id + ", fomDato=" + fomDato
             + ", tomDato=" + tomDato + ", type=" + type
-            + ", avgiftspliktigInntektMnd=" + avgiftspliktigInntekt
+            + ", avgiftspliktigInntektMnd=" + avgiftspliktigMndInntekt
             + ", avgiftspliktigTotalInntekt=" + avgiftspliktigTotalinntekt
             + ", arbeidsgiversavgiftBetalesTilSkatt=" + arbeidsgiversavgiftBetalesTilSkatt + '}';
     }

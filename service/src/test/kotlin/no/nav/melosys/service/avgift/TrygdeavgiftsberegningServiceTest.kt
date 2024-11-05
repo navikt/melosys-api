@@ -140,7 +140,7 @@ internal class TrygdeavgiftsberegningServiceTest {
             tomDato = TOM
             type = Inntektskildetype.INNTEKT_FRA_UTLANDET
             isArbeidsgiversavgiftBetalesTilSkatt = false
-            avgiftspliktigInntekt = Penger(BigDecimal(10000.0))
+            avgiftspliktigMndInntekt = Penger(BigDecimal(10000.0))
         }
 
         val skatteforhold = SkatteforholdTilNorge().apply {
@@ -286,7 +286,7 @@ internal class TrygdeavgiftsberegningServiceTest {
                 tomDato = TOM
                 type = Inntektskildetype.ARBEIDSINNTEKT
                 isArbeidsgiversavgiftBetalesTilSkatt = false
-                avgiftspliktigInntekt = Penger(BigDecimal(10000.0))
+                avgiftspliktigMndInntekt = Penger(BigDecimal(10000.0))
             }
         )
 
@@ -483,7 +483,7 @@ internal class TrygdeavgiftsberegningServiceTest {
                 tomDato = TOM
                 type = Inntektskildetype.ARBEIDSINNTEKT_FRA_NORGE
                 isArbeidsgiversavgiftBetalesTilSkatt = true
-                avgiftspliktigInntekt = Penger(BigDecimal(0))
+                avgiftspliktigMndInntekt = Penger(BigDecimal(0))
             }
         )
         every { mockTrygdeavgiftConsumer.beregnTrygdeavgift(ofType(TrygdeavgiftsberegningRequest::class)) }.returns(
@@ -551,7 +551,7 @@ internal class TrygdeavgiftsberegningServiceTest {
                 tomDato = TOM
                 type = Inntektskildetype.ARBEIDSINNTEKT_FRA_NORGE
                 isArbeidsgiversavgiftBetalesTilSkatt = true
-                avgiftspliktigInntekt = Penger(BigDecimal(0))
+                avgiftspliktigMndInntekt = Penger(BigDecimal(0))
             }
         )
         every { mockBehandlingsresultatService.lagreOgFlush(behandlingsresultat) }.returns(behandlingsresultat)
@@ -598,7 +598,7 @@ internal class TrygdeavgiftsberegningServiceTest {
                 tomDato = TOM
                 type = Inntektskildetype.ARBEIDSINNTEKT_FRA_NORGE
                 isArbeidsgiversavgiftBetalesTilSkatt = true
-                avgiftspliktigInntekt = Penger(BigDecimal(0))
+                avgiftspliktigMndInntekt = Penger(BigDecimal(0))
             }
         )
 
@@ -644,7 +644,7 @@ internal class TrygdeavgiftsberegningServiceTest {
                 tomDato = TOM
                 type = Inntektskildetype.ARBEIDSINNTEKT_FRA_NORGE
                 isArbeidsgiversavgiftBetalesTilSkatt = true
-                avgiftspliktigInntekt = Penger(BigDecimal(0))
+                avgiftspliktigMndInntekt = Penger(BigDecimal(0))
             }
         )
 
@@ -664,7 +664,7 @@ internal class TrygdeavgiftsberegningServiceTest {
                 tomDato = TOM
                 type = Inntektskildetype.ARBEIDSINNTEKT_FRA_NORGE
                 isArbeidsgiversavgiftBetalesTilSkatt = true
-                avgiftspliktigInntekt = Penger(BigDecimal(0))
+                avgiftspliktigMndInntekt = Penger(BigDecimal(0))
             }
         )
 
@@ -711,7 +711,7 @@ internal class TrygdeavgiftsberegningServiceTest {
                 tomDato = TOM
                 type = Inntektskildetype.INNTEKT_FRA_UTLANDET
                 isArbeidsgiversavgiftBetalesTilSkatt = true
-                avgiftspliktigInntekt = Penger(BigDecimal(0))
+                avgiftspliktigMndInntekt = Penger(BigDecimal(0))
             }
         )
 

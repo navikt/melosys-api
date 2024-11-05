@@ -111,7 +111,7 @@ class ÅrsavregningController(
                     trygdeavgiftsperioder = trygdeavgiftsperioder.filter { it.grunnlagInntekstperiode != null }
                         .map {
                             val avgiftspliktigMdInntekt = (
-                                it.grunnlagInntekstperiode.avgiftspliktigInntekt
+                                it.grunnlagInntekstperiode.avgiftspliktigMndInntekt
                                     ?: it.grunnlagInntekstperiode.avgiftspliktigTotalinntekt
                                 ).verdiAvrundet
 
@@ -210,7 +210,7 @@ data class TrygdeavgiftsperiodeDto(
     val tom: LocalDate,
     val inntektskildetype: Inntektskildetype,
     val arbeidsgiversavgiftBetales: Boolean,
-    val inntektPerMd: Int,
+    val inntektPerMd: BigDecimal,
     val avgiftssats: Double,
     val avgiftPerMd: Int
 )

@@ -201,7 +201,7 @@ class ReplikerBehandlingsresultatServiceTest {
             .matches { it.fomDato == inntektsperiodeOriginal.fomDato }
             .matches { it.tomDato == inntektsperiodeOriginal.tomDato }
             .matches { it.type == inntektsperiodeOriginal.type }
-            .matches { it.avgiftspliktigInntekt == inntektsperiodeOriginal.avgiftspliktigInntekt }
+            .matches { it.avgiftspliktigMndInntekt == inntektsperiodeOriginal.avgiftspliktigMndInntekt }
             .matches { it.isArbeidsgiversavgiftBetalesTilSkatt == inntektsperiodeOriginal.isArbeidsgiversavgiftBetalesTilSkatt }
 
         val skatteforholdTilNorgeOriginal =
@@ -224,7 +224,7 @@ class ReplikerBehandlingsresultatServiceTest {
             .matches { it.grunnlagMedlemskapsperiode.id == null }
             .matches { it.grunnlagMedlemskapsperiode.trygdedekning == innvilgetMedlemskapsperiodeOriginal.trygdedekning }
             .matches { it.grunnlagInntekstperiode.id == null }
-            .matches { it.grunnlagInntekstperiode.avgiftspliktigInntekt == inntektsperiodeOriginal.avgiftspliktigInntekt }
+            .matches { it.grunnlagInntekstperiode.avgiftspliktigMndInntekt == inntektsperiodeOriginal.avgiftspliktigMndInntekt }
             .matches { it.grunnlagSkatteforholdTilNorge.id == null }
             .matches { it.grunnlagSkatteforholdTilNorge.skatteplikttype == skatteforholdTilNorgeOriginal.skatteplikttype }
     }
@@ -316,7 +316,7 @@ class ReplikerBehandlingsresultatServiceTest {
             fomDato = LocalDate.now()
             tomDato = LocalDate.now()
             type = Inntektskildetype.INNTEKT_FRA_UTLANDET
-            avgiftspliktigInntekt = Penger(1000.0)
+            avgiftspliktigMndInntekt = Penger(1000.0)
             isArbeidsgiversavgiftBetalesTilSkatt = false
         }
         val skatteforholdTilNorge = SkatteforholdTilNorge().apply {

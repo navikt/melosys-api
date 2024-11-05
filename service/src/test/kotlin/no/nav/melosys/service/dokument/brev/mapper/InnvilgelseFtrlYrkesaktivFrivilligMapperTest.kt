@@ -384,7 +384,7 @@ internal class InnvilgelseFtrlYrkesaktivFrivilligMapperTest {
         Inntektsperiode().apply {
             type = Inntektskildetype.ARBEIDSINNTEKT_FRA_NORGE
             isArbeidsgiversavgiftBetalesTilSkatt = true
-            avgiftspliktigInntekt = Penger(0.0)
+            avgiftspliktigMndInntekt = Penger(0.0)
         }
 
     private fun mockHappyCase(paragraf: Case) {
