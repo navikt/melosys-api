@@ -2,11 +2,13 @@ package no.nav.melosys.service.eessi.ruting;
 
 import java.util.Collection;
 import java.util.Collections;
+import java.util.Objects;
 import java.util.Optional;
 
 import no.nav.melosys.domain.Behandling;
 import no.nav.melosys.domain.Behandlingsresultat;
 import no.nav.melosys.domain.Fagsak;
+import no.nav.melosys.domain.eessi.BucType;
 import no.nav.melosys.domain.eessi.SedType;
 import no.nav.melosys.domain.eessi.melding.MelosysEessiMelding;
 import no.nav.melosys.domain.kodeverk.Landkoder;
@@ -74,11 +76,12 @@ public class ArbeidFlereLandSedRuter implements SedRuterForSedTyper {
             validerNorgeIkkeUtpektOgVedtakIkkeFattet(eksisterendeBehandling, behandlingsresultat);
             log.info("Ny A003 resulterer i nytt behandlingstema {}", nyttBehandlingstema);
             opprettNyBehandling(melosysEessiMelding, arkivsakID);
-        } else if ((eksisterendeBehandling.erBeslutningLovvalgAnnetLand() || eksisterendeBehandling.erNorgeUtpekt()) && periodeErEndret(melosysEessiMelding, behandlingsresultat)) {
+        } else if (eksisterendeBehandling.erBeslutningLovvalgAnnetLand() && periodeErEndret(melosysEessiMelding, behandlingsresultat)) {
             log.info("Mottatt oppdatert A003 i {}, rinasak {} hvor et annet land er utpekt",
                 fagsak.get().getSaksnummer(), melosysEessiMelding.getRinaSaksnummer());
             opprettNyBehandling(melosysEessiMelding, arkivsakID);
         } else if (eksisterendeBehandling.erNorgeUtpekt()) {
+
 
             if (eksisterendeBehandling.erAktiv()) {
                 log.info("Mottatt oppdatert A003 norge utpekt sak {}, oppdaterer status til {}",
@@ -86,6 +89,9 @@ public class ArbeidFlereLandSedRuter implements SedRuterForSedTyper {
                 oppgaveService.finnÅpenBehandlingsoppgaveMedFagsaksnummer(fagsak.get().getSaksnummer())
                     .ifPresent(o -> oppgaveService.oppdaterOppgave(o.getOppgaveId(), OppgaveOppdatering.builder().beskrivelse("Mottatt SED " + SedType.A003).build()));
                 behandlingService.endreStatus(eksisterendeBehandling.getId(), Behandlingsstatus.VURDER_DOKUMENT);
+            } else if (Objects.equals(melosysEessiMelding.getBucType(), BucType.LA_BUC_02.name())) {
+                log.info("Mottatt oppdatert A003 i {}, rinasak {} hvor Norge er utpekt", fagsak.get().getSaksnummer(), melosysEessiMelding.getRinaSaksnummer());
+                opprettNyBehandling(melosysEessiMelding, arkivsakID);
             } else {
                 log.info("Mottatt oppdatert A003 norge utpekt sak {}. Behandling er avsluttet, oppretter oppgave", fagsak.get().getSaksnummer());
                 oppgaveService.opprettEllerGjenbrukBehandlingsoppgave(
