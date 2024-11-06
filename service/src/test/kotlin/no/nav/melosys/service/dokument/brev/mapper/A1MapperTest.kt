@@ -27,6 +27,7 @@ import no.nav.melosys.domain.FagsakTestFactory
 import no.nav.melosys.domain.Lovvalgsperiode
 import no.nav.melosys.domain.adresse.StrukturertAdresse
 import no.nav.melosys.domain.avklartefakta.AvklartVirksomhet
+import no.nav.melosys.domain.dokument.felles.Land
 import no.nav.melosys.domain.kodeverk.Land_iso2
 import no.nav.melosys.domain.kodeverk.Landkoder
 import no.nav.melosys.domain.kodeverk.Maritimtyper
@@ -36,6 +37,8 @@ import no.nav.melosys.domain.kodeverk.lovvalgsbestemmelser.Tilleggsbestemmelser_
 import no.nav.melosys.domain.kodeverk.yrker.Yrkesaktivitetstyper
 import no.nav.melosys.domain.kodeverk.yrker.Yrkesgrupper
 import no.nav.melosys.domain.mottatteopplysninger.data.arbeidssteder.LuftfartBase
+import no.nav.melosys.domain.person.Personopplysninger
+import no.nav.melosys.domain.person.Statsborgerskap
 import no.nav.melosys.service.dokument.brev.BrevData
 import no.nav.melosys.service.dokument.brev.BrevDataA1
 import no.nav.melosys.service.dokument.brev.BrevDataTestUtils
@@ -47,12 +50,12 @@ import no.nav.melosys.service.dokument.brev.mapper.arbeidssted.MaritimtArbeidsst
 import no.nav.melosys.service.persondata.PersonopplysningerObjectFactory
 import org.apache.commons.lang3.StringUtils
 import org.junit.jupiter.api.BeforeEach
+import org.junit.jupiter.api.Nested
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.TestInstance
 import org.junit.jupiter.api.extension.ExtendWith
 import java.time.Instant
 import java.time.LocalDate
-import java.util.List
 
 @ExtendWith(MockKExtension::class)
 @TestInstance(TestInstance.Lifecycle.PER_CLASS)
@@ -156,7 +159,7 @@ internal class A1MapperTest {
 
     @Test
     fun mapBrevTilXML_arbeidslandUtenFysiskArbeidssted_fyllerPåMedArbeidsland() {
-        brevData.arbeidsland = List.of(Land_iso2.SE, Land_iso2.DK, Land_iso2.GB)
+        brevData.arbeidsland = listOf(Land_iso2.SE, Land_iso2.DK, Land_iso2.GB)
         val a1 = mapper.mapA1(behandling, behandlingsresultat, brevData)
         a1.fysiskArbeidsstedAdresseListe.adresse.forExactly(1) {
             it.adresselinje1.shouldContainInOrder("Danmark", "Sverige")
@@ -261,24 +264,90 @@ internal class A1MapperTest {
             .shouldContainExactly(A1Mapper.FLERE_UKJENTE_ELLER_IKKE_OPPGITT_LAND)
     }
 
-    @Test
-    fun mapTilBrevXML_brukerHarFlereStatsborgerskap_forventNorskSvenskOgDanskStatsborgerskapIAlfabetiskRekkefølge() {
-        val a1 = mapper.mapA1(behandling, behandlingsresultat, brevData)
+    @Nested
+    inner class Statsborgerskap {
+        @Test
+        fun `bruker har flere statsborgerskap - forvent Norsk Svensk og Dansk statsborgerskap i alfabetisk rekkefølge`() {
+            val a1 = mapper.mapA1(behandling, behandlingsresultat, brevData)
 
-        a1.person.statsborgerskap
-            .split(",".toRegex())
-            .dropLastWhile { it.isEmpty() }
-            .toTypedArray()
-            .toList()
-            .shouldContainExactly("DK", "NO", "SE")
+            a1.person.statsborgerskap shouldBe "DK,NO,SE"
+        }
+
+        @Test
+        fun `bruker med Kosovo som statsborgerskap skal vise tekst UNKNOWN`() {
+            setBrevDataPersonStatsborgerskap(
+                listOf(
+                    Land.KOSOVO
+                )
+            )
+            val a1 = mapper.mapA1(behandling, behandlingsresultat, brevData)
+
+            a1.person.statsborgerskap shouldBe A1Mapper.UNKNOWN_TEKST
+        }
+
+        @Test
+        fun `bruker med ukjent som statsborgerskap skal vise tekst UNKNOWN`() {
+            setBrevDataPersonStatsborgerskap(
+                listOf(
+                    Land.UNKNOWN
+                )
+            )
+            val a1 = mapper.mapA1(behandling, behandlingsresultat, brevData)
+
+            a1.person.statsborgerskap shouldBe A1Mapper.UNKNOWN_TEKST
+        }
+
+        @Test
+        fun `bruker med Kosovo og Norge som statsborgerskap skal fjerne Kosovo`() {
+            setBrevDataPersonStatsborgerskap(
+                listOf(
+                    Land.KOSOVO,
+                    Land.NORGE
+                )
+            )
+            val a1 = mapper.mapA1(behandling, behandlingsresultat, brevData)
+
+            a1.person.statsborgerskap shouldBe "NO"
+        }
+
+        @Test
+        fun `bruker med ukjent og Norge som statsborgerskap skal fjerne ukjent`() {
+            setBrevDataPersonStatsborgerskap(
+                listOf(
+                    Land.UNKNOWN,
+                    Land.NORGE
+                )
+            )
+            val a1 = mapper.mapA1(behandling, behandlingsresultat, brevData)
+
+            a1.person.statsborgerskap shouldBe "NO"
+        }
+
+        @Test
+        fun `om bruker er statsløs bruk statsløs tekst`() {
+            brevData.person = PersonopplysningerObjectFactory.lagPersonopplysningerStatløs()
+
+            val a1 = mapper.mapA1(behandling, behandlingsresultat, brevData)
+
+            a1.person.statsborgerskap shouldBe A1Mapper.STATSLØS_TEKST
+        }
+
+        private fun setBrevDataPersonStatsborgerskap(iso3Landkode: List<String>) {
+            (brevData.person as Personopplysninger).statsborgerskap = iso3Landkode.map {
+                Statsborgerskap(
+                    it,
+                    null,
+                    LocalDate.EPOCH,
+                    LocalDate.now(),
+                    "PDL",
+                    "Dolly",
+                    false
+                )
+            }
+        }
     }
 
-    @Test
-    fun mapTilBrevXML_brukerErStatsløs_forventStatløsTekst() {
-        brevData.person = PersonopplysningerObjectFactory.lagPersonopplysningerStatløs()
-        val a1 = mapper.mapA1(behandling, behandlingsresultat, brevData)
-        a1.person.statsborgerskap.shouldBe(A1Mapper.STATSLØS_TEKST)
-    }
+
 
     @Test
     fun mapTilBrevXML_bostedsadresserFraRegister_forventBostedsadresse() {
