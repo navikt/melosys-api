@@ -74,7 +74,7 @@ public class ArbeidFlereLandSedRuter implements SedRuterForSedTyper {
             validerNorgeIkkeUtpektOgVedtakIkkeFattet(eksisterendeBehandling, behandlingsresultat);
             log.info("Ny A003 resulterer i nytt behandlingstema {}", nyttBehandlingstema);
             opprettNyBehandling(melosysEessiMelding, arkivsakID);
-        } else if (eksisterendeBehandling.erBeslutningLovvalgAnnetLand() && periodeErEndret(melosysEessiMelding, behandlingsresultat)) {
+        } else if ((eksisterendeBehandling.erBeslutningLovvalgAnnetLand() || eksisterendeBehandling.erNorgeUtpekt()) && periodeErEndret(melosysEessiMelding, behandlingsresultat)) {
             log.info("Mottatt oppdatert A003 i {}, rinasak {} hvor et annet land er utpekt",
                 fagsak.get().getSaksnummer(), melosysEessiMelding.getRinaSaksnummer());
             opprettNyBehandling(melosysEessiMelding, arkivsakID);
