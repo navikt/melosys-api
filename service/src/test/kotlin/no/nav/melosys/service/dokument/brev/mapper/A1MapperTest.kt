@@ -27,6 +27,7 @@ import no.nav.melosys.domain.FagsakTestFactory
 import no.nav.melosys.domain.Lovvalgsperiode
 import no.nav.melosys.domain.adresse.StrukturertAdresse
 import no.nav.melosys.domain.avklartefakta.AvklartVirksomhet
+import no.nav.melosys.domain.dokument.felles.Land
 import no.nav.melosys.domain.kodeverk.Land_iso2
 import no.nav.melosys.domain.kodeverk.Landkoder
 import no.nav.melosys.domain.kodeverk.Maritimtyper
@@ -276,7 +277,7 @@ internal class A1MapperTest {
         fun `bruker med Kosovo som statsborgerskap skal vise tekst UNKNOWN`() {
             setBrevDataPersonStatsborgerskap(
                 listOf(
-                    "XXK"
+                    Land.KOSOVO
                 )
             )
             val a1 = mapper.mapA1(behandling, behandlingsresultat, brevData)
@@ -288,7 +289,7 @@ internal class A1MapperTest {
         fun `bruker med ukjent som statsborgerskap skal vise tekst UNKNOWN`() {
             setBrevDataPersonStatsborgerskap(
                 listOf(
-                    "XXK"
+                    Land.UNKNOWN
                 )
             )
             val a1 = mapper.mapA1(behandling, behandlingsresultat, brevData)
@@ -300,8 +301,8 @@ internal class A1MapperTest {
         fun `bruker med Kosovo og Norge som statsborgerskap skal fjerne Kosovo`() {
             setBrevDataPersonStatsborgerskap(
                 listOf(
-                    "XXK",
-                    "NOR"
+                    Land.KOSOVO,
+                    Land.NORGE
                 )
             )
             val a1 = mapper.mapA1(behandling, behandlingsresultat, brevData)
@@ -313,8 +314,8 @@ internal class A1MapperTest {
         fun `bruker med ukjent og Norge som statsborgerskap skal fjerne ukjent`() {
             setBrevDataPersonStatsborgerskap(
                 listOf(
-                    "XUK",
-                    "NOR"
+                    Land.UNKNOWN,
+                    Land.NORGE
                 )
             )
             val a1 = mapper.mapA1(behandling, behandlingsresultat, brevData)
