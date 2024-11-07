@@ -176,8 +176,8 @@ class FaktureringskomponentenConsumerTest(
         fakturaseriePeriode: List<FakturaseriePeriodeDto> = listOf(
             FakturaseriePeriodeDto(
                 BigDecimal.valueOf(123),
-                LocalDate.now(),
-                LocalDate.now(),
+                LocalDate.of(2024, 11, 4),
+                LocalDate.of(2024, 11, 4),
                 "Beskrivelse"
             )
         ),
