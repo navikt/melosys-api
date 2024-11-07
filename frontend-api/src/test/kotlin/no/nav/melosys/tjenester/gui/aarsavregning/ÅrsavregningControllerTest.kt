@@ -32,9 +32,6 @@ internal class ÅrsavregningControllerTest {
     @MockkBean
     private lateinit var årsavregningService: ÅrsavregningService
 
-    @MockkBean
-    private lateinit var totalBeløpBeregner: TotalBeløpBeregner
-
     @MockBean
     private lateinit var aksesskontroll: Aksesskontroll
 
@@ -77,15 +74,19 @@ internal class ÅrsavregningControllerTest {
                         fom = LocalDate.parse("2023-01-01"),
                         tom = LocalDate.parse("2023-07-31"),
                         type = Inntektskildetype.ARBEIDSINNTEKT_FRA_NORGE,
-                        avgiftspliktigInntektMnd = Penger(40000.0),
+                        avgiftspliktigInntekt = Penger(40000.0),
+                        avgiftspliktigTotalInntekt = Penger(280000.0),
                         isArbeidsgiversavgiftBetalesTilSkatt = true,
+                        erMaanedsbelop = true
                     ),
                     InntektsperioderForAvgift(
                         fom = LocalDate.parse("2023-08-01"),
                         tom = LocalDate.parse("2023-12-31"),
                         type = Inntektskildetype.INNTEKT_FRA_UTLANDET,
-                        avgiftspliktigInntektMnd = Penger(15000.0),
+                        avgiftspliktigInntekt = Penger(15000.0),
+                        avgiftspliktigTotalInntekt = Penger(75000.0),
                         isArbeidsgiversavgiftBetalesTilSkatt = false,
+                        erMaanedsbelop = true
                     )
                 )
             ),
@@ -98,7 +99,7 @@ internal class ÅrsavregningControllerTest {
                         tomDato = LocalDate.parse("2023-07-31")
                         type = Inntektskildetype.ARBEIDSINNTEKT_FRA_NORGE
                         isArbeidsgiversavgiftBetalesTilSkatt = true
-                        avgiftspliktigInntektMnd = Penger(40000.0)
+                        avgiftspliktigMndInntekt = Penger(40000.0)
                     }
                     trygdesats = BigDecimal(0.0)
                     trygdeavgiftsbeløpMd = Penger(0.0)
@@ -111,7 +112,7 @@ internal class ÅrsavregningControllerTest {
                         tomDato = LocalDate.parse("2023-07-31")
                         type = Inntektskildetype.INNTEKT_FRA_UTLANDET
                         isArbeidsgiversavgiftBetalesTilSkatt = false
-                        avgiftspliktigInntektMnd = Penger(15000.0)
+                        avgiftspliktigMndInntekt = Penger(15000.0)
                     }
                     trygdesats = BigDecimal(42.2)
                     trygdeavgiftsbeløpMd = Penger(6330.0)
@@ -123,9 +124,6 @@ internal class ÅrsavregningControllerTest {
             nyttTotalbeloep = BigDecimal(24280.0),
             tilFaktureringBeloep = BigDecimal(3110.0)
         )
-        every { totalBeløpBeregner.hentTotalInntekt(any()) } returns BigDecimal(42)
-        every { totalBeløpBeregner.hentTotalAvgift(any()) } returns BigDecimal(21170)
-        every { totalBeløpBeregner.hentTotalInntektForInntektkilde(any()) } returns BigDecimal(24280)
 
 
         val expectedJson = """{
@@ -170,16 +168,16 @@ internal class ÅrsavregningControllerTest {
           "tomDato": "2023-07-31",
           "type": "ARBEIDSINNTEKT_FRA_NORGE",
           "arbeidsgiversavgiftBetales": true,
-          "avgiftspliktigInntektMnd": 40000,
-          "totalInntektForPerioden": 24280
+          "avgiftspliktigInntekt": 40000,
+          "erMaanedsbelop": true
         },
         {
           "fomDato": "2023-08-01",
           "tomDato": "2023-12-31",
           "type": "INNTEKT_FRA_UTLANDET",
           "arbeidsgiversavgiftBetales": false,
-          "avgiftspliktigInntektMnd": 15000,
-          "totalInntektForPerioden": 24280
+          "avgiftspliktigInntekt": 15000,
+          "erMaanedsbelop": true
         }
       ]
     },
@@ -204,8 +202,8 @@ internal class ÅrsavregningControllerTest {
           "avgiftPerMd": 6330
         }
       ],
-      "totalInntekt": 42,
-      "totalAvgift": 21170
+      "totalInntekt": 355000.0,
+      "totalAvgift": 31650.0
     }
   },
   "avvikFunnet": false,

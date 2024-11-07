@@ -16,7 +16,9 @@ import io.mockk.unmockkStatic
 import io.mockk.verify
 import no.nav.melosys.domain.*
 import no.nav.melosys.domain.FagsakTestFactory.BRUKER_AKTØR_ID
+import no.nav.melosys.domain.avgift.Inntektsperiode
 import no.nav.melosys.domain.avgift.Penger
+import no.nav.melosys.domain.avgift.SkatteforholdTilNorge
 import no.nav.melosys.domain.avgift.Trygdeavgiftsperiode
 import no.nav.melosys.domain.kodeverk.*
 import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingsresultattyper
@@ -24,11 +26,7 @@ import no.nav.melosys.exception.FunksjonellException
 import no.nav.melosys.integrasjon.ereg.EregFasade
 import no.nav.melosys.integrasjon.trygdeavgift.TrygdeavgiftConsumer
 import no.nav.melosys.integrasjon.trygdeavgift.dto.*
-import no.nav.melosys.service.avgift.TrygdeavgiftsberegningService.Companion.idToUUID
-import no.nav.melosys.service.avgift.TrygdeavgiftsberegningService.Companion.toUUID
-import no.nav.melosys.service.avgift.dto.InntektskildeRequest
-import no.nav.melosys.service.avgift.dto.OppdaterTrygdeavgiftsgrunnlagRequest
-import no.nav.melosys.service.avgift.dto.SkatteforholdTilNorgeRequest
+
 import no.nav.melosys.service.behandling.BehandlingService
 import no.nav.melosys.service.behandling.BehandlingsresultatService
 import no.nav.melosys.service.persondata.PersondataService
@@ -137,17 +135,22 @@ internal class TrygdeavgiftsberegningServiceTest {
         mockkStatic(UUID::class)
         every { UUID.randomUUID() } returns notSoRandomUuid
 
-        val oppdateringRequest = OppdaterTrygdeavgiftsgrunnlagRequest(
-            listOf(
-                SkatteforholdTilNorgeRequest(
-                    FOM, TOM, Skatteplikttype.SKATTEPLIKTIG
-                )
-            ), listOf(
-                InntektskildeRequest(
-                    Inntektskildetype.INNTEKT_FRA_UTLANDET, false, BigDecimal(10000.0), FOM, TOM
-                )
-            )
-        )
+        val inntekt = Inntektsperiode().apply {
+            fomDato = FOM
+            tomDato = TOM
+            type = Inntektskildetype.INNTEKT_FRA_UTLANDET
+            isArbeidsgiversavgiftBetalesTilSkatt = false
+            avgiftspliktigMndInntekt = Penger(BigDecimal(10000.0))
+        }
+
+        val skatteforhold = SkatteforholdTilNorge().apply {
+            fomDato = FOM
+            tomDato = TOM
+            skatteplikttype = Skatteplikttype.SKATTEPLIKTIG
+        }
+
+
+        val skatteforholdsperioder = listOf(skatteforhold)
 
         every { mockBehandlingsresultatService.lagre(any()) }.returns(behandlingsresultat)
         every { mockTrygdeavgiftConsumer.beregnTrygdeavgift(ofType(TrygdeavgiftsberegningRequest::class)) }.returns(
@@ -156,8 +159,8 @@ internal class TrygdeavgiftsberegningServiceTest {
                     TrygdeavgiftsperiodeDto(
                         DatoPeriodeDto(FOM, TOM), BigDecimal.valueOf(7.9), PengerDto(BigDecimal.valueOf(790), NOK)
                     ), TrygdeavgiftsgrunnlagDto(
-                        behandlingsresultat.medlemskapsperioder.first().idToUUID(),
-                        oppdateringRequest.skatteforholdTilNorgeList.first().toUUID(),
+                        idToUUid(behandlingsresultat.medlemskapsperioder.first().id),
+                        notSoRandomUuid,
                         notSoRandomUuid
                     )
                 )
@@ -166,7 +169,9 @@ internal class TrygdeavgiftsberegningServiceTest {
         every { mockBehandlingsresultatService.lagreOgFlush(behandlingsresultat) }.returns(behandlingsresultat)
 
 
-        trygdeavgiftsberegningService.beregnOgLagreTrygdeavgift(BEHANDLING_ID, oppdateringRequest).shouldNotBeNull().shouldNotBeEmpty()
+        trygdeavgiftsberegningService.beregnOgLagreTrygdeavgift(BEHANDLING_ID, skatteforholdsperioder, listOf(inntekt))
+            .shouldNotBeNull()
+            .shouldNotBeEmpty()
 
 
         verify { mockTrygdeavgiftConsumer.beregnTrygdeavgift(ofType(TrygdeavgiftsberegningRequest::class)) }
@@ -174,6 +179,7 @@ internal class TrygdeavgiftsberegningServiceTest {
         verify(exactly = 0) { mockPersondataService.hentPerson(BRUKER_AKTØR_ID) }
         behandlingsresultat.trygdeavgiftsperioder.shouldNotBeEmpty()
     }
+
 
     @Test
     fun beregnTrygdeavgift_inntekstperioderDekkerIkkeInnvilgedeMedlemskapsperioder_kasterFeil() {
@@ -187,20 +193,28 @@ internal class TrygdeavgiftsberegningServiceTest {
         })
         every { mockBehandlingsresultatService.lagreOgFlush(behandlingsresultat) }.returns(behandlingsresultat)
 
-        val oppdateringRequest = OppdaterTrygdeavgiftsgrunnlagRequest(
-            listOf(
-                SkatteforholdTilNorgeRequest(
-                    FOM, TOM, Skatteplikttype.SKATTEPLIKTIG
-                )
-            ), listOf(
-                InntektskildeRequest(
-                    Inntektskildetype.INNTEKT_FRA_UTLANDET, false, BigDecimal(10000.0), FOM, TOM.minusMonths(1)
-                )
-            )
+        val skatteforholdsperioder = listOf(
+            SkatteforholdTilNorge().apply {
+                fomDato = FOM
+                tomDato = TOM
+                skatteplikttype = Skatteplikttype.SKATTEPLIKTIG
+            }
         )
 
+        val inntektsperioder = listOf(
+            Inntektsperiode().apply {
+                fomDato = FOM
+                tomDato = TOM.minusMonths(1)
+                type = Inntektskildetype.INNTEKT_FRA_UTLANDET
+                isArbeidsgiversavgiftBetalesTilSkatt = false
+                Penger(BigDecimal(10000.0))
+                true
+            }
+        )
+
+
         shouldThrow<FunksjonellException> {
-            trygdeavgiftsberegningService.beregnOgLagreTrygdeavgift(BEHANDLING_ID, oppdateringRequest)
+            trygdeavgiftsberegningService.beregnOgLagreTrygdeavgift(BEHANDLING_ID, skatteforholdsperioder, inntektsperioder)
         }.message.shouldContain("Inntektsperioden(e) du har lagt inn dekker ikke hele medlemskapsperioden(e)")
     }
 
@@ -216,23 +230,31 @@ internal class TrygdeavgiftsberegningServiceTest {
         })
         every { mockBehandlingsresultatService.lagreOgFlush(behandlingsresultat) }.returns(behandlingsresultat)
 
-        val oppdateringRequest = OppdaterTrygdeavgiftsgrunnlagRequest(
-            listOf(
-                SkatteforholdTilNorgeRequest(
-                    FOM, TOM.minusMonths(1), Skatteplikttype.SKATTEPLIKTIG
-                )
-            ), listOf(
-                InntektskildeRequest(
-                    Inntektskildetype.INNTEKT_FRA_UTLANDET, false, BigDecimal(10000.0), FOM, TOM.minusMonths(1)
-                )
-            )
+        val skatteforholdsperioder = listOf(
+            SkatteforholdTilNorge().apply {
+                fomDato = FOM
+                tomDato = TOM.minusMonths(1)
+                Skatteplikttype.SKATTEPLIKTIG
+
+            }
         )
 
+        val inntektsperioder = listOf(
+            Inntektsperiode().apply {
+                fomDato = FOM
+                tomDato = TOM.minusMonths(1)
+                type = Inntektskildetype.INNTEKT_FRA_UTLANDET
+                isArbeidsgiversavgiftBetalesTilSkatt = false
+                Penger(BigDecimal(10000.0))
+                true
+            }
+        )
+
+
         shouldThrow<FunksjonellException> {
-            trygdeavgiftsberegningService.beregnOgLagreTrygdeavgift(BEHANDLING_ID, oppdateringRequest)
+            trygdeavgiftsberegningService.beregnOgLagreTrygdeavgift(BEHANDLING_ID, skatteforholdsperioder, inntektsperioder)
         }.message.shouldContain("Skatteforholdsperioden(e) du har lagt inn dekker ikke hele medlemskapsperioden(e)")
     }
-
 
     @Test
     fun beregnTrygdeavgift_skalBetaleTrygeavgiftPliktigMedlem_beregnerOgLagrerTrygdeavgift() {
@@ -250,17 +272,24 @@ internal class TrygdeavgiftsberegningServiceTest {
             }
         }
 
-        val oppdateringRequest = OppdaterTrygdeavgiftsgrunnlagRequest(
-            listOf(
-                SkatteforholdTilNorgeRequest(
-                    FOM, TOM, Skatteplikttype.IKKE_SKATTEPLIKTIG
-                )
-            ), listOf(
-                InntektskildeRequest(
-                    Inntektskildetype.ARBEIDSINNTEKT, false, BigDecimal(10000.0), FOM, TOM
-                )
-            )
+        val skatteforholdsperioder = listOf(
+            SkatteforholdTilNorge().apply {
+                fomDato = FOM
+                tomDato = TOM
+                skatteplikttype = Skatteplikttype.IKKE_SKATTEPLIKTIG
+            }
         )
+
+        val inntektsperioder = listOf(
+            Inntektsperiode().apply {
+                fomDato = FOM
+                tomDato = TOM
+                type = Inntektskildetype.ARBEIDSINNTEKT
+                isArbeidsgiversavgiftBetalesTilSkatt = false
+                avgiftspliktigMndInntekt = Penger(BigDecimal(10000.0))
+            }
+        )
+
         val notSoRandomUuid = UUID.randomUUID()
         mockkStatic(UUID::class)
         every { UUID.randomUUID() } returns notSoRandomUuid
@@ -272,8 +301,8 @@ internal class TrygdeavgiftsberegningServiceTest {
                     TrygdeavgiftsperiodeDto(
                         DatoPeriodeDto(FOM, TOM), BigDecimal.valueOf(7.9), PengerDto(BigDecimal.valueOf(790), NOK)
                     ), TrygdeavgiftsgrunnlagDto(
-                        behandlingsresultat.medlemskapsperioder.first().idToUUID(),
-                        oppdateringRequest.skatteforholdTilNorgeList.first().toUUID(),
+                        idToUUid(behandlingsresultat.medlemskapsperioder.first().id),
+                        notSoRandomUuid,
                         notSoRandomUuid
                     )
                 )
@@ -282,7 +311,8 @@ internal class TrygdeavgiftsberegningServiceTest {
         every { mockBehandlingsresultatService.lagreOgFlush(behandlingsresultat) }.returns(behandlingsresultat)
 
 
-        trygdeavgiftsberegningService.beregnOgLagreTrygdeavgift(BEHANDLING_ID, oppdateringRequest).shouldNotBeNull().shouldNotBeEmpty()
+        trygdeavgiftsberegningService.beregnOgLagreTrygdeavgift(BEHANDLING_ID, skatteforholdsperioder, inntektsperioder)
+            .shouldNotBeNull().shouldNotBeEmpty()
 
 
         verify { mockTrygdeavgiftConsumer.beregnTrygdeavgift(ofType(TrygdeavgiftsberegningRequest::class)) }
@@ -307,12 +337,12 @@ internal class TrygdeavgiftsberegningServiceTest {
             }
         }
 
-        val oppdateringRequest = OppdaterTrygdeavgiftsgrunnlagRequest(
-            listOf(
-                SkatteforholdTilNorgeRequest(
-                    FOM, TOM, Skatteplikttype.SKATTEPLIKTIG
-                )
-            ), emptyList()
+        val skatteforholdsperioder = listOf(
+            SkatteforholdTilNorge().apply {
+                fomDato = FOM
+                tomDato = TOM
+                skatteplikttype = Skatteplikttype.SKATTEPLIKTIG
+            }
         )
         val notSoRandomUuid = UUID.randomUUID()
         mockkStatic(UUID::class)
@@ -322,7 +352,8 @@ internal class TrygdeavgiftsberegningServiceTest {
         every { mockBehandlingsresultatService.lagreOgFlush(behandlingsresultat) }.returns(behandlingsresultat)
 
 
-        trygdeavgiftsberegningService.beregnOgLagreTrygdeavgift(BEHANDLING_ID, oppdateringRequest).shouldNotBeNull().shouldNotBeEmpty()
+        trygdeavgiftsberegningService.beregnOgLagreTrygdeavgift(BEHANDLING_ID, skatteforholdsperioder, emptyList())
+            .shouldNotBeNull().shouldNotBeEmpty()
 
         verify { mockBehandlingsresultatService.lagreOgFlush(behandlingsresultat) }
         verify(exactly = 0) { mockTrygdeavgiftConsumer.beregnTrygdeavgift(ofType(TrygdeavgiftsberegningRequest::class)) }
@@ -366,13 +397,14 @@ internal class TrygdeavgiftsberegningServiceTest {
             })
         }
 
-        val oppdateringRequest = OppdaterTrygdeavgiftsgrunnlagRequest(
-            listOf(
-                SkatteforholdTilNorgeRequest(
-                    LocalDate.of(2021, 1, 1), LocalDate.of(2021, 2, 28), Skatteplikttype.SKATTEPLIKTIG
-                )
-            ), emptyList()
+        val skatteforholdsperioder = listOf(
+            SkatteforholdTilNorge().apply {
+                fomDato = LocalDate.of(2021, 1, 1)
+                tomDato = LocalDate.of(2021, 2, 28)
+                skatteplikttype = Skatteplikttype.SKATTEPLIKTIG
+            }
         )
+
         val notSoRandomUuid = UUID.randomUUID()
         mockkStatic(UUID::class)
         every { UUID.randomUUID() } returns notSoRandomUuid
@@ -381,7 +413,8 @@ internal class TrygdeavgiftsberegningServiceTest {
         every { mockBehandlingsresultatService.lagreOgFlush(behandlingsresultat) }.returns(behandlingsresultat)
 
 
-        trygdeavgiftsberegningService.beregnOgLagreTrygdeavgift(BEHANDLING_ID, oppdateringRequest).shouldNotBeNull().shouldNotBeEmpty()
+        trygdeavgiftsberegningService.beregnOgLagreTrygdeavgift(BEHANDLING_ID, skatteforholdsperioder, emptyList())
+            .shouldNotBeNull().shouldNotBeEmpty()
 
 
         verify { mockBehandlingsresultatService.lagreOgFlush(behandlingsresultat) }
@@ -418,6 +451,10 @@ internal class TrygdeavgiftsberegningServiceTest {
 
     @Test
     fun beregnTrygdeavgift_skalIkkeBetaleTrygdeavgiftTilNav_sletterEksisterendeTrygdeavgiftOgReturnererTrygdeavgiftsperiodeMedBelop0() {
+        val notSoRandomUuid = UUID.randomUUID()
+        mockkStatic(UUID::class)
+        every { UUID.randomUUID() } returns notSoRandomUuid
+
         behandling.apply {
             fagsak = FagsakTestFactory.builder().medBruker().build()
         }
@@ -432,16 +469,22 @@ internal class TrygdeavgiftsberegningServiceTest {
             })
         })
 
-        val oppdateringRequest = OppdaterTrygdeavgiftsgrunnlagRequest(
-            listOf(
-                SkatteforholdTilNorgeRequest(
-                    FOM, TOM, Skatteplikttype.SKATTEPLIKTIG
-                )
-            ), listOf(
-                InntektskildeRequest(
-                    Inntektskildetype.ARBEIDSINNTEKT_FRA_NORGE, true, BigDecimal(0), FOM, TOM
-                )
-            )
+        val skatteforholdsperioder = listOf(
+            SkatteforholdTilNorge().apply {
+                fomDato = FOM
+                tomDato = TOM
+                skatteplikttype = Skatteplikttype.SKATTEPLIKTIG
+            }
+        )
+
+        val inntektsperioder = listOf(
+            Inntektsperiode().apply {
+                fomDato = FOM
+                tomDato = TOM
+                type = Inntektskildetype.ARBEIDSINNTEKT_FRA_NORGE
+                isArbeidsgiversavgiftBetalesTilSkatt = true
+                avgiftspliktigMndInntekt = Penger(BigDecimal(0))
+            }
         )
         every { mockTrygdeavgiftConsumer.beregnTrygdeavgift(ofType(TrygdeavgiftsberegningRequest::class)) }.returns(
             listOf(
@@ -449,9 +492,9 @@ internal class TrygdeavgiftsberegningServiceTest {
                     TrygdeavgiftsperiodeDto(
                         DatoPeriodeDto(FOM, TOM), BigDecimal.valueOf(0), PengerDto(BigDecimal.valueOf(0.0), NOK)
                     ), TrygdeavgiftsgrunnlagDto(
-                        behandlingsresultat.medlemskapsperioder.first().idToUUID(),
-                        oppdateringRequest.skatteforholdTilNorgeList.first().toUUID(),
-                        UUID.randomUUID()
+                        idToUUid(behandlingsresultat.medlemskapsperioder.first().id),
+                        notSoRandomUuid,
+                        notSoRandomUuid
                     )
                 )
             )
@@ -459,7 +502,8 @@ internal class TrygdeavgiftsberegningServiceTest {
         every { mockBehandlingsresultatService.lagreOgFlush(behandlingsresultat) }.returns(behandlingsresultat)
 
 
-        val trygdeavgiftsperioder = trygdeavgiftsberegningService.beregnOgLagreTrygdeavgift(BEHANDLING_ID, oppdateringRequest)
+        val trygdeavgiftsperioder =
+            trygdeavgiftsberegningService.beregnOgLagreTrygdeavgift(BEHANDLING_ID, skatteforholdsperioder, inntektsperioder)
 
 
         trygdeavgiftsperioder.shouldNotBeNull()
@@ -488,29 +532,43 @@ internal class TrygdeavgiftsberegningServiceTest {
             })
         })
 
-        val oppdateringRequest = OppdaterTrygdeavgiftsgrunnlagRequest(
-            listOf(
-                SkatteforholdTilNorgeRequest(
-                    FOM, TOM, Skatteplikttype.SKATTEPLIKTIG
-                ), SkatteforholdTilNorgeRequest(
-                    FOM, TOM, Skatteplikttype.SKATTEPLIKTIG
-                )
-            ), listOf(
-                InntektskildeRequest(
-                    Inntektskildetype.ARBEIDSINNTEKT_FRA_NORGE, true, BigDecimal(0), FOM, TOM
-                )
-            )
+        val skatteforholdsperioder = listOf(
+            SkatteforholdTilNorge().apply {
+                fomDato = FOM
+                tomDato = TOM
+                skatteplikttype = Skatteplikttype.SKATTEPLIKTIG
+            },
+            SkatteforholdTilNorge().apply {
+                fomDato = FOM
+                tomDato = TOM
+                skatteplikttype = Skatteplikttype.SKATTEPLIKTIG
+            }
+        )
+
+        val inntektsperioder = listOf(
+            Inntektsperiode().apply {
+                fomDato = FOM
+                tomDato = TOM
+                type = Inntektskildetype.ARBEIDSINNTEKT_FRA_NORGE
+                isArbeidsgiversavgiftBetalesTilSkatt = true
+                avgiftspliktigMndInntekt = Penger(BigDecimal(0))
+            }
         )
         every { mockBehandlingsresultatService.lagreOgFlush(behandlingsresultat) }.returns(behandlingsresultat)
 
+
         shouldThrow<FunksjonellException> {
-            trygdeavgiftsberegningService.beregnOgLagreTrygdeavgift(BEHANDLING_ID, oppdateringRequest)
+            trygdeavgiftsberegningService.beregnOgLagreTrygdeavgift(BEHANDLING_ID, skatteforholdsperioder, inntektsperioder)
         }.message.shouldContain("Alle skatteforholdsperiodene har samme svar på spørsmålet om skatteplikt")
 
     }
 
     @Test
     fun beregnTrygdeavgift_skalIkkeBetaleTrygdeavgiftTilNav_FeilerNarTrygdeavgiftIkkeErBeløp0() {
+        val notSoRandomUuid = UUID.randomUUID()
+        mockkStatic(UUID::class)
+        every { UUID.randomUUID() } returns notSoRandomUuid
+
         behandling.apply {
             fagsak = FagsakTestFactory.builder().medBruker().build()
         }
@@ -526,87 +584,111 @@ internal class TrygdeavgiftsberegningServiceTest {
             })
         })
 
-        val oppdateringRequest = OppdaterTrygdeavgiftsgrunnlagRequest(
-            listOf(
-                SkatteforholdTilNorgeRequest(
-                    FOM, TOM, Skatteplikttype.SKATTEPLIKTIG
-                )
-            ), listOf(
-                InntektskildeRequest(
-                    Inntektskildetype.ARBEIDSINNTEKT_FRA_NORGE, true, BigDecimal(0), FOM, TOM
-                )
-            )
+        val skatteforholdsperioder = listOf(
+            SkatteforholdTilNorge().apply {
+                fomDato = FOM
+                tomDato = TOM
+                skatteplikttype = Skatteplikttype.SKATTEPLIKTIG
+            }
         )
+
+        val inntektsperioder = listOf(
+            Inntektsperiode().apply {
+                fomDato = FOM
+                tomDato = TOM
+                type = Inntektskildetype.ARBEIDSINNTEKT_FRA_NORGE
+                isArbeidsgiversavgiftBetalesTilSkatt = true
+                avgiftspliktigMndInntekt = Penger(BigDecimal(0))
+            }
+        )
+
         every { mockTrygdeavgiftConsumer.beregnTrygdeavgift(ofType(TrygdeavgiftsberegningRequest::class)) }.returns(
             listOf(
                 TrygdeavgiftsberegningResponse(
                     TrygdeavgiftsperiodeDto(
                         DatoPeriodeDto(FOM, TOM), BigDecimal.valueOf(0), PengerDto(BigDecimal.valueOf(123.0), NOK)
                     ), TrygdeavgiftsgrunnlagDto(
-                        behandlingsresultat.medlemskapsperioder.first().idToUUID(),
-                        oppdateringRequest.skatteforholdTilNorgeList.first().toUUID(),
-                        UUID.randomUUID()
+                        idToUUid(behandlingsresultat.medlemskapsperioder.first().id),
+                        notSoRandomUuid,
+                        notSoRandomUuid
                     )
                 )
             )
         )
         every { mockBehandlingsresultatService.lagreOgFlush(behandlingsresultat) }.returns(behandlingsresultat)
 
+
         shouldThrow<IllegalStateException> {
-            trygdeavgiftsberegningService.beregnOgLagreTrygdeavgift(BEHANDLING_ID, oppdateringRequest)
+            trygdeavgiftsberegningService.beregnOgLagreTrygdeavgift(BEHANDLING_ID, skatteforholdsperioder, inntektsperioder)
         }.message.shouldContain("Trygdeavgift skal ikke betales til NAV. Beregnet trygdeavgift må derfor være 0.")
 
     }
+
 
     @Test
     fun beregnTrygdeavgift_manglerMedlemskapsperioder_kasterFeil() {
         behandlingsresultat.medlemskapsperioder = emptyList()
         every { mockBehandlingsresultatService.lagreOgFlush(behandlingsresultat) }.returns(behandlingsresultat)
-        val oppdateringRequest = OppdaterTrygdeavgiftsgrunnlagRequest(
-            listOf(
-                SkatteforholdTilNorgeRequest(
-                    FOM, TOM, Skatteplikttype.SKATTEPLIKTIG
-                )
-            ), listOf(
-                InntektskildeRequest(
-                    Inntektskildetype.ARBEIDSINNTEKT_FRA_NORGE, true, BigDecimal(0), FOM, TOM
-                )
-            )
+
+        val skatteforholdsperioder = listOf(
+            SkatteforholdTilNorge().apply {
+                fomDato = FOM
+                tomDato = TOM
+                skatteplikttype = Skatteplikttype.SKATTEPLIKTIG
+            }
         )
 
+        val inntektsperioder = listOf(
+            Inntektsperiode().apply {
+                fomDato = FOM
+                tomDato = TOM
+                type = Inntektskildetype.ARBEIDSINNTEKT_FRA_NORGE
+                isArbeidsgiversavgiftBetalesTilSkatt = true
+                avgiftspliktigMndInntekt = Penger(BigDecimal(0))
+            }
+        )
+
+
         shouldThrow<FunksjonellException> {
-            trygdeavgiftsberegningService.beregnOgLagreTrygdeavgift(BEHANDLING_ID, oppdateringRequest)
+            trygdeavgiftsberegningService.beregnOgLagreTrygdeavgift(BEHANDLING_ID, skatteforholdsperioder, inntektsperioder)
         }.message.shouldContain("Kan ikke beregne trygdeavgift uten medlemskapsperioder")
     }
 
     @Test
     fun beregnTrygdeavgift_manglerSkatteforholdINorge_kasterFeil() {
         every { mockBehandlingsresultatService.lagreOgFlush(behandlingsresultat) }.returns(behandlingsresultat)
-        val oppdateringRequest = OppdaterTrygdeavgiftsgrunnlagRequest(
-            listOf(), listOf(
-                InntektskildeRequest(
-                    Inntektskildetype.ARBEIDSINNTEKT_FRA_NORGE, true, BigDecimal(0), FOM, TOM
-                )
-            )
+
+        val inntektsperioder = listOf(
+            Inntektsperiode().apply {
+                fomDato = FOM
+                tomDato = TOM
+                type = Inntektskildetype.ARBEIDSINNTEKT_FRA_NORGE
+                isArbeidsgiversavgiftBetalesTilSkatt = true
+                avgiftspliktigMndInntekt = Penger(BigDecimal(0))
+            }
         )
+
+
         shouldThrow<FunksjonellException> {
-            trygdeavgiftsberegningService.beregnOgLagreTrygdeavgift(BEHANDLING_ID, oppdateringRequest)
+            trygdeavgiftsberegningService.beregnOgLagreTrygdeavgift(BEHANDLING_ID, emptyList(), inntektsperioder)
         }.message.shouldContain("Kan ikke beregne trygdeavgift uten skatteforholdTilNorge")
     }
 
     @Test
     fun beregnTrygdeavgift_manglerInntektsperioder_kasterFeil() {
         every { mockBehandlingsresultatService.lagreOgFlush(behandlingsresultat) }.returns(behandlingsresultat)
-        val oppdateringRequest = OppdaterTrygdeavgiftsgrunnlagRequest(
-            listOf(
-                SkatteforholdTilNorgeRequest(
-                    FOM, TOM, Skatteplikttype.IKKE_SKATTEPLIKTIG
-                )
-            ), listOf()
+
+        val skatteforholdsperioder = listOf(
+            SkatteforholdTilNorge().apply {
+                fomDato = FOM
+                tomDato = TOM
+                skatteplikttype = Skatteplikttype.IKKE_SKATTEPLIKTIG
+            }
         )
 
+
         shouldThrow<FunksjonellException> {
-            trygdeavgiftsberegningService.beregnOgLagreTrygdeavgift(BEHANDLING_ID, oppdateringRequest)
+            trygdeavgiftsberegningService.beregnOgLagreTrygdeavgift(BEHANDLING_ID, skatteforholdsperioder, emptyList())
         }.message.shouldContain("Kan ikke beregne trygdeavgift uten inntektsperioder")
     }
 
@@ -615,20 +697,27 @@ internal class TrygdeavgiftsberegningServiceTest {
         behandlingsresultat.medlemskapsperioder.first().fom = null
         every { mockBehandlingsresultatService.lagreOgFlush(behandlingsresultat) }.returns(behandlingsresultat)
 
-        val oppdateringRequest = OppdaterTrygdeavgiftsgrunnlagRequest(
-            listOf(
-                SkatteforholdTilNorgeRequest(
-                    FOM, TOM, Skatteplikttype.IKKE_SKATTEPLIKTIG
-                )
-            ), listOf(
-                InntektskildeRequest(
-                    Inntektskildetype.INNTEKT_FRA_UTLANDET, true, BigDecimal(0), FOM, TOM
-                )
-            )
+        val skatteforholdsperioder = listOf(
+            SkatteforholdTilNorge().apply {
+                fomDato = FOM
+                tomDato = TOM
+                skatteplikttype = Skatteplikttype.IKKE_SKATTEPLIKTIG
+            }
         )
 
+        val inntektsperioder = listOf(
+            Inntektsperiode().apply {
+                fomDato = FOM
+                tomDato = TOM
+                type = Inntektskildetype.INNTEKT_FRA_UTLANDET
+                isArbeidsgiversavgiftBetalesTilSkatt = true
+                avgiftspliktigMndInntekt = Penger(BigDecimal(0))
+            }
+        )
+
+
         shouldThrow<FunksjonellException> {
-            trygdeavgiftsberegningService.beregnOgLagreTrygdeavgift(BEHANDLING_ID, oppdateringRequest)
+            trygdeavgiftsberegningService.beregnOgLagreTrygdeavgift(BEHANDLING_ID, skatteforholdsperioder, inntektsperioder)
         }.message.shouldContain("Klarte ikke finne startdatoen på medlemskapet")
     }
 
@@ -692,4 +781,8 @@ internal class TrygdeavgiftsberegningServiceTest {
         }
         trygdeavgiftsberegningService.finnFakturamottakerNavn(BEHANDLING_ID).shouldBe(BRUKER_NAVN)
     }
+
+    fun idToUUid(id: Long): UUID = UUID.nameUUIDFromBytes(id.toString().toByteArray())
 }
+
+

@@ -29,8 +29,8 @@ import org.springframework.http.MediaType;
 import org.springframework.test.web.servlet.MockMvc;
 
 import static no.nav.melosys.tjenester.gui.util.ResponseBodyMatchers.responseBody;
-import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.ArgumentMatchers.eq;
+import static org.mockito.ArgumentMatchers.anyList;
+import static org.mockito.ArgumentMatchers.anyLong;
 import static org.mockito.Mockito.when;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.put;
@@ -70,7 +70,7 @@ class TrygdeavgiftControllerTest {
     @Test
     void beregnTrygdeavgift() throws Exception {
         TrygdeavgiftsgrunnlagDto trygdeavgiftsgrunnlagDto = lagTrygdeavgiftsgrunnlagDto();
-        when(trygdeavgiftsberegningService.beregnOgLagreTrygdeavgift(eq(BEHANDLINGSRESULTAT_ID), any())).thenReturn(trygdeavgiftsperioder);
+        when(trygdeavgiftsberegningService.beregnOgLagreTrygdeavgift(anyLong(), anyList(), anyList())).thenReturn(trygdeavgiftsperioder);
 
         mockMvc.perform(put(BASE_URL + "/beregning", 1L)
                 .content(objectMapper.writeValueAsString(trygdeavgiftsgrunnlagDto))
@@ -79,6 +79,7 @@ class TrygdeavgiftControllerTest {
             .andExpect(responseBody(objectMapper)
                 .containsObjectAsJson(forventetBeregnetTrygdeavgiftDto(), BeregnetTrygdeavgiftDto.class));
     }
+
 
     @Test
     void finnFakturamottaker() throws Exception {
@@ -121,6 +122,7 @@ class TrygdeavgiftControllerTest {
         inntektsperiode.setFomDato(LocalDate.now());
         inntektsperiode.setTomDato(LocalDate.now());
         inntektsperiode.setType(Inntektskildetype.INNTEKT_FRA_UTLANDET);
+        inntektsperiode.setAvgiftspliktigTotalinntekt(new Penger(5000.0));
         trygdeavgift.setGrunnlagInntekstperiode(inntektsperiode);
 
         var skatteForholdINorge = new SkatteforholdTilNorge();

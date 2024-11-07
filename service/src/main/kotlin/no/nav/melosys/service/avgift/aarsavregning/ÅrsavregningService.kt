@@ -8,6 +8,7 @@ import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingsresultattyper
 import no.nav.melosys.exception.FunksjonellException
 import no.nav.melosys.exception.IkkeFunnetException
 import no.nav.melosys.repository.AarsavregningRepository
+import no.nav.melosys.service.avgift.aarsavregning.totalbeloep.TotalbeløpBeregner
 import no.nav.melosys.service.behandling.BehandlingsresultatService
 import no.nav.melosys.service.sak.FagsakService
 import no.nav.melosys.service.sak.FagsakService.UGYLDIGE_SAKSSTATUSER_FOR_TRYGDEAVGIFT
@@ -21,7 +22,6 @@ import java.time.LocalDate
 class ÅrsavregningService(
     private val aarsavregningRepository: AarsavregningRepository,
     private val behandlingsresultatService: BehandlingsresultatService,
-    private val totalBeløpBeregner: TotalBeløpBeregner,
     private val fagsakService: FagsakService,
 ) {
     fun hentÅrsavregning(aarsavregningId: Long): Årsavregning =
@@ -95,7 +95,7 @@ class ÅrsavregningService(
             this.behandlingsresultat = behandlingsresultat
             tidligereBehandlingsresultat = tidligereBehandlingsresultatMedAvgift
             tidligereFakturertBeloep =
-                totalBeløpBeregner.hentTotalAvgift(tidligereBehandlingsresultat?.trygdeavgiftsperioder?.filter { it.overlapperMedÅr(gjelderÅr) }
+                TotalbeløpBeregner.hentTotalavgift(tidligereBehandlingsresultat?.trygdeavgiftsperioder?.filter { it.overlapperMedÅr(gjelderÅr) }
                     .orEmpty())
         }.also {
             behandlingsresultatService.lagre(behandlingsresultat)
@@ -182,7 +182,7 @@ class ÅrsavregningService(
     }
 
     @Transactional
-    fun oppdaterTotalbelop(
+    fun oppdater(
         behandlingID: Long,
         aarsavregningId: Long,
         tidligereFakturertBeloep: BigDecimal?,
@@ -277,22 +277,28 @@ data class InntektsperioderForAvgift(
     val fom: LocalDate,
     val tom: LocalDate,
     val type: Inntektskildetype,
-    val avgiftspliktigInntektMnd: Penger,
-    val isArbeidsgiversavgiftBetalesTilSkatt: Boolean
+    val avgiftspliktigInntekt: Penger?,
+    val avgiftspliktigTotalInntekt: Penger?,
+    val isArbeidsgiversavgiftBetalesTilSkatt: Boolean,
+    val erMaanedsbelop: Boolean
 ) {
     constructor(inntektsperiode: Inntektsperiode) : this(
         fom = inntektsperiode.fom,
         tom = inntektsperiode.tom,
         type = inntektsperiode.type,
-        avgiftspliktigInntektMnd = inntektsperiode.avgiftspliktigInntektMnd,
-        isArbeidsgiversavgiftBetalesTilSkatt = inntektsperiode.isArbeidsgiversavgiftBetalesTilSkatt
+        isArbeidsgiversavgiftBetalesTilSkatt = inntektsperiode.isArbeidsgiversavgiftBetalesTilSkatt,
+        avgiftspliktigInntekt = inntektsperiode.avgiftspliktigMndInntekt ?: null,
+        avgiftspliktigTotalInntekt = inntektsperiode.avgiftspliktigTotalinntekt ?: null,
+        erMaanedsbelop = inntektsperiode.erMaanedsbelop()
     )
 
     constructor(gjeldendeÅr: Int, inntektsperiode: Inntektsperiode) : this(
         fom = avkortFraOgMedDatoForÅr(gjeldendeÅr, inntektsperiode.fom),
         tom = avkortTilOgMedDatoForÅr(gjeldendeÅr, inntektsperiode.tom),
         type = inntektsperiode.type,
-        avgiftspliktigInntektMnd = inntektsperiode.avgiftspliktigInntektMnd,
-        isArbeidsgiversavgiftBetalesTilSkatt = inntektsperiode.isArbeidsgiversavgiftBetalesTilSkatt
+        avgiftspliktigInntekt = inntektsperiode.avgiftspliktigMndInntekt,
+        avgiftspliktigTotalInntekt = inntektsperiode.avgiftspliktigTotalinntekt,
+        isArbeidsgiversavgiftBetalesTilSkatt = inntektsperiode.isArbeidsgiversavgiftBetalesTilSkatt,
+        erMaanedsbelop = inntektsperiode.erMaanedsbelop()
     )
 }

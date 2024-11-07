@@ -4,9 +4,8 @@ import io.swagger.annotations.Api
 import no.nav.melosys.domain.avgift.Trygdeavgiftsperiode
 import no.nav.melosys.domain.kodeverk.Inntektskildetype
 import no.nav.melosys.domain.kodeverk.InnvilgelsesResultat
-import no.nav.melosys.domain.kodeverk.Trygdedekninger
-import no.nav.melosys.service.avgift.aarsavregning.TotalBeløpBeregner
 import no.nav.melosys.service.avgift.aarsavregning.Trygdeavgiftsgrunnlag
+import no.nav.melosys.service.avgift.aarsavregning.totalbeloep.TotalbeløpBeregner
 import no.nav.melosys.service.avgift.aarsavregning.ÅrsavregningModel
 import no.nav.melosys.service.avgift.aarsavregning.ÅrsavregningService
 import no.nav.melosys.service.tilgang.Aksesskontroll
@@ -25,10 +24,8 @@ import java.time.LocalDate
 @RequestMapping("/behandlinger/{behandlingID}/aarsavregninger")
 class ÅrsavregningController(
     private val årsavregningService: ÅrsavregningService,
-    private val aksesskontroll: Aksesskontroll,
-    private val totalBeløpBeregner: TotalBeløpBeregner,
+    private val aksesskontroll: Aksesskontroll
 ) {
-
     @GetMapping("/{aarsavregningID}")
     fun hentÅrsavregning(
         @PathVariable("behandlingID") behandlingID: Long,
@@ -57,9 +54,25 @@ class ÅrsavregningController(
         )
     }
 
-    data class LagÅrsavregningRequest(
-        val aar: Int,
-    )
+    @PutMapping("/{aarsavregningID}")
+    fun oppdaterÅrsavregning(
+        @PathVariable("behandlingID") behandlingID: Long,
+        @PathVariable("aarsavregningID") aarsavregningID: Long,
+        @RequestBody årsavregningOppdaterRequest: ÅrsavregningOppdaterRequest
+    ): ResponseEntity<ÅrsavregningResponse> {
+        aksesskontroll.autoriserSkriv(behandlingID)
+
+        val årsavregning = årsavregningService.oppdater(
+            behandlingID,
+            aarsavregningID,
+            årsavregningOppdaterRequest.avregning.tidligereFakturertBeloep,
+            årsavregningOppdaterRequest.avregning.nyttTotalbeloep
+        )
+
+        return ResponseEntity.ok(
+            lagÅrsavregningResponse(årsavregning)
+        )
+    }
 
     private fun lagÅrsavregningResponse(årsavregningModel: ÅrsavregningModel) =
         ÅrsavregningResponse(
@@ -74,6 +87,37 @@ class ÅrsavregningController(
                 tilFaktureringBeloep = årsavregningModel.tilFaktureringBeloep,
             )
         )
+
+    private fun hentGrunnlagsopplysninger(
+        trygdeavgiftsgrunnlag: Trygdeavgiftsgrunnlag?,
+        trygdeavgiftsperioder: List<Trygdeavgiftsperiode>
+    ): GrunnlagsOpplysningerDto? {
+        return if (trygdeavgiftsgrunnlag == null) null else
+            GrunnlagsOpplysningerDto(
+                mapTrygdeavgiftsgrunnlag(trygdeavgiftsgrunnlag),
+                AvgiftDto(
+                    trygdeavgiftsperioder = trygdeavgiftsperioder.filter { it.grunnlagInntekstperiode != null }
+                        .map {
+                            val avgiftspliktigMdInntekt = (
+                                it.grunnlagInntekstperiode.avgiftspliktigMndInntekt
+                                    ?: it.grunnlagInntekstperiode.avgiftspliktigTotalinntekt
+                                ).verdiAvrundet
+
+                            TrygdeavgiftsperiodeDto(
+                                fom = it.fom,
+                                tom = it.tom,
+                                inntektskildetype = it.grunnlagInntekstperiode.type,
+                                inntektPerMd = avgiftspliktigMdInntekt,
+                                arbeidsgiversavgiftBetales = it.grunnlagInntekstperiode.isArbeidsgiversavgiftBetalesTilSkatt,
+                                avgiftssats = it.trygdesats.toDouble(),
+                                avgiftPerMd = it.trygdeavgiftsbeløpMd.verdi.intValueExact()
+                            )
+                        },
+                    totalInntekt = TotalbeløpBeregner.hentTotalinntekt(trygdeavgiftsperioder),
+                    totalAvgift = TotalbeløpBeregner.hentTotalavgift(trygdeavgiftsperioder) ?: BigDecimal.ZERO
+                )
+            )
+    }
 
     private fun mapTrygdeavgiftsgrunnlag(trygdeavgiftsgrunnlag: Trygdeavgiftsgrunnlag?) =
         TrygdeavgiftsgrunnlagDto(
@@ -97,65 +141,27 @@ class ÅrsavregningController(
                 )
             }.orEmpty(),
             inntektskperioder = trygdeavgiftsgrunnlag?.innteksperioder?.map {
+                val avgiftspliktigInntekt = if (it.erMaanedsbelop) {
+                    it.avgiftspliktigInntekt?.verdi
+                } else {
+                    it.avgiftspliktigTotalInntekt?.verdi
+                }
+
                 InntektskildeDto(
                     it.type,
                     it.isArbeidsgiversavgiftBetalesTilSkatt,
-                    it.avgiftspliktigInntektMnd.verdi,
+                    avgiftspliktigInntekt,
                     it.fom,
                     it.tom,
-                    totalBeløpBeregner.hentTotalInntektForInntektkilde(it)
+                    it.erMaanedsbelop
                 )
             }.orEmpty()
         )
-
-
-    private fun hentGrunnlagsopplysninger(
-        trygdeavgiftsgrunnlag: Trygdeavgiftsgrunnlag?,
-        trygdeavgiftsperioder: List<Trygdeavgiftsperiode>
-    ): GrunnlagsOpplysningerDto? {
-        return if (trygdeavgiftsgrunnlag == null) null else
-            GrunnlagsOpplysningerDto(
-                mapTrygdeavgiftsgrunnlag(trygdeavgiftsgrunnlag),
-                AvgiftDto(
-                    trygdeavgiftsperioder = trygdeavgiftsperioder.filter { it.grunnlagInntekstperiode != null }
-                        .map {
-                            TrygdeavgiftsperiodeDto(
-                                fom = it.fom,
-                                tom = it.tom,
-                                inntektskildetype = it.grunnlagInntekstperiode.type,
-                                inntektPerMd = it.grunnlagInntekstperiode.avgiftspliktigInntektMnd.verdi.intValueExact(),
-                                arbeidsgiversavgiftBetales = it.grunnlagInntekstperiode.isArbeidsgiversavgiftBetalesTilSkatt,
-                                avgiftssats = it.trygdesats.toDouble(),
-                                avgiftPerMd = it.trygdeavgiftsbeløpMd.verdi.intValueExact()
-                            )
-                        },
-                    totalInntekt = totalBeløpBeregner.hentTotalInntekt(trygdeavgiftsperioder),
-                    totalAvgift = totalBeløpBeregner.hentTotalAvgift(trygdeavgiftsperioder) ?: BigDecimal.ZERO
-                )
-            )
-    }
-
-
-    @PutMapping("/{aarsavregningID}")
-    fun oppdaterTotalbelop(
-        @PathVariable("behandlingID") behandlingID: Long,
-        @PathVariable("aarsavregningID") aarsavregningID: Long,
-        @RequestBody årsavregningOppdaterRequest: ÅrsavregningOppdaterRequest
-    ): ResponseEntity<ÅrsavregningResponse> {
-        aksesskontroll.autoriserSkriv(behandlingID)
-
-        val årsavregning = årsavregningService.oppdaterTotalbelop(
-            behandlingID,
-            aarsavregningID,
-            årsavregningOppdaterRequest.avregning.tidligereFakturertBeloep,
-            årsavregningOppdaterRequest.avregning.nyttTotalbeloep
-        )
-
-        return ResponseEntity.ok(
-            lagÅrsavregningResponse(årsavregning)
-        )
-    }
 }
+
+data class LagÅrsavregningRequest(
+    val aar: Int,
+)
 
 data class ÅrsavregningResponse(
     val aar: Int,
@@ -187,16 +193,12 @@ data class AvgiftDto(
     val totalAvgift: BigDecimal
 )
 
-data class Medlemskapsperiode(
-    val fom: LocalDate, val tom: LocalDate, val trygdedekning: Trygdedekninger
-)
-
 data class TrygdeavgiftsperiodeDto(
     val fom: LocalDate,
     val tom: LocalDate,
     val inntektskildetype: Inntektskildetype,
     val arbeidsgiversavgiftBetales: Boolean,
-    val inntektPerMd: Int,
+    val inntektPerMd: BigDecimal,
     val avgiftssats: Double,
     val avgiftPerMd: Int
 )

@@ -444,7 +444,7 @@ class OpprettFakturaserieTest {
         return Inntektsperiode().apply {
             fomDato = LocalDate.of(2023, 1, 1)
             tomDato = LocalDate.of(2023, 5, 1)
-            avgiftspliktigInntektMnd = Penger(5000.0)
+            avgiftspliktigMndInntekt = Penger(5000.0)
         }
     }
 

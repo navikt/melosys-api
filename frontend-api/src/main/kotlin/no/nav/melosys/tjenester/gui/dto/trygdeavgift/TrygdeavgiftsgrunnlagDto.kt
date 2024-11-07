@@ -1,7 +1,6 @@
 package no.nav.melosys.tjenester.gui.dto.trygdeavgift
 
 import no.nav.melosys.domain.avgift.Trygdeavgiftsperiode
-import no.nav.melosys.service.avgift.dto.OppdaterTrygdeavgiftsgrunnlagRequest
 
 data class TrygdeavgiftsgrunnlagDto(
     val skatteforholdsperioder: List<SkatteforholdTilNorgeDto>,
@@ -15,7 +14,4 @@ data class TrygdeavgiftsgrunnlagDto(
             .map { InntektskildeDto(it.grunnlagInntekstperiode) }
             .distinct()
     )
-
-    fun tilRequest(): OppdaterTrygdeavgiftsgrunnlagRequest =
-        OppdaterTrygdeavgiftsgrunnlagRequest((skatteforholdsperioder.map { it.tilRequest() }), (inntektskilder.map { it.tilRequest() }))
 }
