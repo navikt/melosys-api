@@ -1,0 +1,2 @@
+INSERT INTO PROSESS_STEG (KODE, NAVN)
+VALUES ('SEND_FAKTURA_AARSAVREGNING', 'Sender faktura for årsavregning');
