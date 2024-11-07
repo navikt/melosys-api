@@ -35,7 +35,9 @@ public class Virksomhet {
         foretakUtland.setUuid(UUID.randomUUID().toString());
         foretakUtland.setNavn(navn);
         foretakUtland.setOrgnr(orgnr);
-        foretakUtland.setAdresse(adresse.tilStrukturertAdresse());
+        if (adresse != null) {
+            foretakUtland.setAdresse(adresse.tilStrukturertAdresse());
+        }
         foretakUtland.setSelvstendigNæringsvirksomhet(erSelvstendig);
 
         return foretakUtland;
