@@ -2,13 +2,11 @@ package no.nav.melosys.service.eessi.ruting;
 
 import java.util.Collection;
 import java.util.Collections;
-import java.util.Objects;
 import java.util.Optional;
 
 import no.nav.melosys.domain.Behandling;
 import no.nav.melosys.domain.Behandlingsresultat;
 import no.nav.melosys.domain.Fagsak;
-import no.nav.melosys.domain.eessi.BucType;
 import no.nav.melosys.domain.eessi.SedType;
 import no.nav.melosys.domain.eessi.melding.MelosysEessiMelding;
 import no.nav.melosys.domain.kodeverk.Landkoder;
@@ -81,6 +79,7 @@ public class ArbeidFlereLandSedRuter implements SedRuterForSedTyper {
                 fagsak.get().getSaksnummer(), melosysEessiMelding.getRinaSaksnummer());
             opprettNyBehandling(melosysEessiMelding, arkivsakID);
         } else if (eksisterendeBehandling.erNorgeUtpekt()) {
+            
             if (eksisterendeBehandling.erAktiv()) {
                 log.info("Mottatt oppdatert A003 norge utpekt sak {}, oppdaterer status til {}",
                     fagsak.get().getSaksnummer(), Behandlingsstatus.VURDER_DOKUMENT);
