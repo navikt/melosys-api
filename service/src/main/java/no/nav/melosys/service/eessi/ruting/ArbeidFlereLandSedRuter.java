@@ -79,7 +79,7 @@ public class ArbeidFlereLandSedRuter implements SedRuterForSedTyper {
                 fagsak.get().getSaksnummer(), melosysEessiMelding.getRinaSaksnummer());
             opprettNyBehandling(melosysEessiMelding, arkivsakID);
         } else if (eksisterendeBehandling.erNorgeUtpekt()) {
-            
+
             if (eksisterendeBehandling.erAktiv()) {
                 log.info("Mottatt oppdatert A003 norge utpekt sak {}, oppdaterer status til {}",
                     fagsak.get().getSaksnummer(), Behandlingsstatus.VURDER_DOKUMENT);
