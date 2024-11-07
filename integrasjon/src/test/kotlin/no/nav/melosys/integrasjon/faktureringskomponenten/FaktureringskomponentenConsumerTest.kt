@@ -121,7 +121,7 @@ class FaktureringskomponentenConsumerTest(
         val json = """
             {
                 "fodselsnummer":"12345678911",
-                "fakturaserieReferanse":null,
+                "fakturaserieReferanse":"483756934",
                 "fullmektig":
                   {
                     "fodselsnummer":"11987654321",
@@ -130,7 +130,6 @@ class FaktureringskomponentenConsumerTest(
                 "referanseBruker":"Nasse Nøff",
                 "referanseNAV":"NAV Medlemskap og avgift",
                 "fakturaGjelderInnbetalingstype":"TRYGDEAVGIFT",
-                "intervall":"SINGEL",
                 "belop":2000,
                 "startDato":"2024-01-01",
                 "sluttDato":"2024-12-31",
@@ -139,7 +138,7 @@ class FaktureringskomponentenConsumerTest(
         """.trimIndent()
 
         serviceUnderTestMockServer.stubFor(
-            post("/faktura")
+            post("/fakturaer")
                 .withRequestBody(WireMock.equalToJson(json))
                 .willReturn(
                     WireMock.aResponse()
@@ -195,13 +194,12 @@ class FaktureringskomponentenConsumerTest(
     }
 
     private fun lagFakturaDto(
-        fakturaserieReferanse: String? = null,
+        fakturaserieReferanse: String = "483756934",
         fodselsnummer: String = "12345678911",
         fullmektig: FullmektigDto = FullmektigDto("11987654321", "123456789"),
         referanseBruker: String = "Nasse Nøff",
         referanseNav: String = "NAV Medlemskap og avgift",
         fakturaGjelder: Innbetalingstype = Innbetalingstype.TRYGDEAVGIFT,
-        intervall: FaktureringsIntervall = FaktureringsIntervall.SINGEL,
         belop: BigDecimal = BigDecimal.valueOf(2000),
         startDato: LocalDate = LocalDate.of(LocalDate.now().year, 1, 1),
         sluttDato: LocalDate = LocalDate.of(LocalDate.now().year, 12, 31),
@@ -213,7 +211,6 @@ class FaktureringskomponentenConsumerTest(
             referanseBruker,
             referanseNav,
             fakturaGjelder,
-            intervall,
             belop,
             startDato,
             sluttDato,

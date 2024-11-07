@@ -5,12 +5,11 @@ import java.time.LocalDate
 
 data class FakturaDto(
     val fodselsnummer: String,
-    val fakturaserieReferanse: String?,
+    val fakturaserieReferanse: String,
     val fullmektig: FullmektigDto?,
     val referanseBruker: String,
     val referanseNAV: String,
     val fakturaGjelderInnbetalingstype: Innbetalingstype,
-    val intervall: FaktureringsIntervall,
     val belop: BigDecimal,
     val startDato: LocalDate,
     val sluttDato: LocalDate,

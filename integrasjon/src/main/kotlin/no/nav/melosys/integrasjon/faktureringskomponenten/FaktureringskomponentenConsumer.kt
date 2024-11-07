@@ -56,7 +56,7 @@ open class FaktureringskomponentenConsumer(private val webClient: WebClient) : J
 
     fun lagFaktura(fakturaDto: FakturaDto, saksbehandlerIdent: String) =
         webClient.post()
-            .uri("/faktura")
+            .uri("/fakturaer")
             .header("Nav-User-Id", saksbehandlerIdent)
             .bodyValue(fakturaDto)
             .retrieve()

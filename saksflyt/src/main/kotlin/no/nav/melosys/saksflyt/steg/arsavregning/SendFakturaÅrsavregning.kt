@@ -6,7 +6,6 @@ import no.nav.melosys.domain.kodeverk.Fullmaktstype
 import no.nav.melosys.exception.FunksjonellException
 import no.nav.melosys.integrasjon.faktureringskomponenten.FaktureringskomponentenConsumer
 import no.nav.melosys.integrasjon.faktureringskomponenten.dto.FakturaDto
-import no.nav.melosys.integrasjon.faktureringskomponenten.dto.FaktureringsIntervall
 import no.nav.melosys.integrasjon.faktureringskomponenten.dto.FullmektigDto
 import no.nav.melosys.integrasjon.faktureringskomponenten.dto.Innbetalingstype
 import no.nav.melosys.saksflyt.steg.StegBehandler
@@ -63,7 +62,6 @@ class SendFakturaÅrsavregning(
             referanseNAV = "Medlemskap og avgift",
             fullmektig = FullmektigDto(fullmektig),
             fakturaGjelderInnbetalingstype = Innbetalingstype.TRYGDEAVGIFT,
-            intervall = FaktureringsIntervall.SINGEL,
             referanseBruker = "Årsavregning datert $vedtaksdato",
             belop = årsavregning.tilFaktureringBeloep,
             startDato = startDato,
