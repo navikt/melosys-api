@@ -105,6 +105,7 @@ internal class OppgaveServiceTest {
             .setOppgavetype(Oppgavetyper.BEH_SAK_MK)
             .setTilordnetRessurs(TILORDNET_RESSURS)
             .setOppgaveId(BEH_OPPG_ID)
+            .setStatus("AAPNET")
             .setSaksnummer(FagsakTestFactory.SAKSNUMMER)
             .build()
 
@@ -369,6 +370,32 @@ internal class OppgaveServiceTest {
         every { behandlingService.hentBehandling(any<Long>()) } returns behandling
         every { utledMottaksdato.getMottaksdato(behandling) } returns LocalDate.now()
         every { oppgaveFasade.finnÅpneBehandlingsoppgaverMedSaksnummer(FagsakTestFactory.SAKSNUMMER) } returns emptyList()
+        every { behandlingService.lagre(behandling) } returns Unit
+
+        oppgaveService.opprettEllerGjenbrukBehandlingsoppgave(behandling, "222", "333", "Z99999")
+
+        verify { oppgaveFasade.opprettOppgave(any()) }
+        verify(exactly = 0) { oppgaveFasade.opprettSensitivOppgave(any()) }
+        verify { behandlingService.lagre(behandling) }
+        behandling.oppgaveId shouldBeEqual BEH_OPPG_ID
+    }
+
+    @Test
+    fun opprettEllerGjenbrukBehandlingsoppgave_oppgaveErFerdigstilt_oppgaveBlirOpprettet() {
+        oppgave = Oppgave.Builder()
+            .setOppgavetype(Oppgavetyper.BEH_SAK_MK)
+            .setTilordnetRessurs(TILORDNET_RESSURS)
+            .setOppgaveId(BEH_OPPG_ID)
+            .setStatus("FERDIGSTILT")
+            .setSaksnummer(FagsakTestFactory.SAKSNUMMER)
+            .build()
+
+        every { oppgaveFasade.finnÅpneBehandlingsoppgaverMedSaksnummer(FagsakTestFactory.SAKSNUMMER) } returns listOf(oppgave)
+
+        val behandling = lagBehandling()
+        every { behandlingService.hentBehandlingMedSaksopplysninger(any<Long>()) } returns behandling
+        every { behandlingService.hentBehandling(any<Long>()) } returns behandling
+        every { utledMottaksdato.getMottaksdato(behandling) } returns LocalDate.now()
         every { behandlingService.lagre(behandling) } returns Unit
 
         oppgaveService.opprettEllerGjenbrukBehandlingsoppgave(behandling, "222", "333", "Z99999")

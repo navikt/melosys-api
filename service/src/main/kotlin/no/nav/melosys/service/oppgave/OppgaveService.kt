@@ -113,7 +113,7 @@ class OppgaveService(
     ) {
         val eksisterendeOppgave = hentEksisterendeOppgaveSomIkkeErTilknyttetBehandling(behandling)
 
-        if (eksisterendeOppgave == null || !eksisterendeOppgave.erAktiv() || kreverNyOppgave(behandling.type)) {
+        if ((eksisterendeOppgave == null || !eksisterendeOppgave.erAktiv()) || kreverNyOppgave(behandling.type)) {
             lagBehandlingsoppgave(behandling, tilordnetRessurs, journalpostID, aktørID, orgnr)
         } else {
             if (behandling.oppgaveId == null) {
