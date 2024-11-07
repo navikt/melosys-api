@@ -113,7 +113,7 @@ class OppgaveService(
     ) {
         val eksisterendeOppgave = hentEksisterendeOppgaveSomIkkeErTilknyttetBehandling(behandling)
 
-        if (eksisterendeOppgave == null || kreverNyOppgave(behandling.type)) {
+        if (eksisterendeOppgave == null || eksisterendeOppgave.status != "AAPNET" || kreverNyOppgave(behandling.type)) {
             lagBehandlingsoppgave(behandling, tilordnetRessurs, journalpostID, aktørID, orgnr)
         } else {
             if (behandling.oppgaveId == null) {

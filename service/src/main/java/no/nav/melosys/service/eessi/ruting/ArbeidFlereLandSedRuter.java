@@ -81,17 +81,12 @@ public class ArbeidFlereLandSedRuter implements SedRuterForSedTyper {
                 fagsak.get().getSaksnummer(), melosysEessiMelding.getRinaSaksnummer());
             opprettNyBehandling(melosysEessiMelding, arkivsakID);
         } else if (eksisterendeBehandling.erNorgeUtpekt()) {
-
-
             if (eksisterendeBehandling.erAktiv()) {
                 log.info("Mottatt oppdatert A003 norge utpekt sak {}, oppdaterer status til {}",
                     fagsak.get().getSaksnummer(), Behandlingsstatus.VURDER_DOKUMENT);
                 oppgaveService.finnÅpenBehandlingsoppgaveMedFagsaksnummer(fagsak.get().getSaksnummer())
                     .ifPresent(o -> oppgaveService.oppdaterOppgave(o.getOppgaveId(), OppgaveOppdatering.builder().beskrivelse("Mottatt SED " + SedType.A003).build()));
                 behandlingService.endreStatus(eksisterendeBehandling.getId(), Behandlingsstatus.VURDER_DOKUMENT);
-            } else if (Objects.equals(melosysEessiMelding.getBucType(), BucType.LA_BUC_02.name())) {
-                log.info("Mottatt oppdatert A003 i {}, rinasak {} hvor Norge er utpekt", fagsak.get().getSaksnummer(), melosysEessiMelding.getRinaSaksnummer());
-                opprettNyBehandling(melosysEessiMelding, arkivsakID);
             } else {
                 log.info("Mottatt oppdatert A003 norge utpekt sak {}. Behandling er avsluttet, oppretter oppgave", fagsak.get().getSaksnummer());
                 oppgaveService.opprettEllerGjenbrukBehandlingsoppgave(
