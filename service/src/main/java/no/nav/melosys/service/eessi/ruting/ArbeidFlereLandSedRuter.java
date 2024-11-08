@@ -97,12 +97,9 @@ public class ArbeidFlereLandSedRuter implements SedRuterForSedTyper {
                     null
                 );
 
-                if(eksisterendeBehandling.erNorgeUtpekt()) {
-                    opprettNyBehandling(melosysEessiMelding, arkivsakID);
-                }
+                opprettNyBehandling(melosysEessiMelding, arkivsakID);
             }
 
-            opprettJournalføringProsess(melosysEessiMelding, eksisterendeBehandling);
         } else {
             opprettJournalføringProsess(melosysEessiMelding, eksisterendeBehandling);
         }
