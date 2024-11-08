@@ -157,7 +157,6 @@ class ArbeidFlereLandSedRuterTest {
         arbeidFlereLandSedRuter.rutSedTilBehandling(prosessinstans, gsakSaksnummer);
 
         verify(oppgaveService).opprettEllerGjenbrukBehandlingsoppgave(eq(behandling), any(), any(), any(), any());
-        verify(prosessinstansService).opprettProsessinstansSedJournalføring(behandling, melosysEessiMelding);
     }
 
     @Test
@@ -178,7 +177,6 @@ class ArbeidFlereLandSedRuterTest {
 
         verify(behandlingService).endreStatus(behandlingID, Behandlingsstatus.VURDER_DOKUMENT);
         verify(oppgaveService).oppdaterOppgave(eq(oppgaveID), oppgaveOppdateringCaptor.capture());
-        verify(prosessinstansService).opprettProsessinstansSedJournalføring(behandling, melosysEessiMelding);
 
         assertThat(oppgaveOppdateringCaptor.getValue())
             .extracting(OppgaveOppdatering::getBeskrivelse)
