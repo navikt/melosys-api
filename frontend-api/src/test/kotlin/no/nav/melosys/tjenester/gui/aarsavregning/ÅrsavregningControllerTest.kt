@@ -4,7 +4,9 @@ import com.ninjasquad.springmockk.MockkBean
 import io.mockk.every
 import no.nav.melosys.domain.avgift.Inntektsperiode
 import no.nav.melosys.domain.avgift.Penger
+import no.nav.melosys.domain.avgift.SkatteforholdTilNorge
 import no.nav.melosys.domain.avgift.Trygdeavgiftsperiode
+import no.nav.melosys.domain.kodeverk.Folketrygdloven_kap2_bestemmelser.FTRL_KAP2_2_1
 import no.nav.melosys.domain.kodeverk.Folketrygdloven_kap2_bestemmelser.FTRL_KAP2_2_8
 import no.nav.melosys.domain.kodeverk.Inntektskildetype
 import no.nav.melosys.domain.kodeverk.Medlemskapstyper
@@ -214,6 +216,221 @@ internal class ÅrsavregningControllerTest {
     "tidligereFakturertBeloep": 21170,
     "tilFaktureringBeloep": 3110
   }
+}"""
+
+        mockMvc.perform(
+            MockMvcRequestBuilders.get("$BASE_URL/{behandlingID}/aarsavregninger/{aarsavregningID}", 1, 1).contentType(MediaType.APPLICATION_JSON)
+        ).andExpect(status().isOk()).andExpect(content().json(expectedJson, true))
+    }
+
+    @Test
+    fun `hent avregning basert på ID med total beløp kalkulerer riktig`() {
+        every { årsavregningService.finnÅrsavregningForBehandling(any()) } returns ÅrsavregningModel(
+            år = 2023,
+            tidligereGrunnlag = Trygdeavgiftsgrunnlag(
+                medlemskapsperioder = listOf(
+                    MedlemskapsperiodeForAvgift(
+                        LocalDate.parse("2023-01-01"),
+                        LocalDate.parse("2023-12-31"),
+                        Trygdedekninger.FULL_DEKNING_FTRL,
+                        FTRL_KAP2_2_1,
+                        Medlemskapstyper.PLIKTIG
+                    )
+                ),
+                skatteforholdsperioder = listOf(
+                    SkatteforholdTilNorgeForAvgift(
+                        fom = LocalDate.parse("2023-01-01"),
+                        tom = LocalDate.parse("2023-12-31"),
+                        skatteplikttype = Skatteplikttype.IKKE_SKATTEPLIKTIG
+                    )
+                ),
+                innteksperioder = listOf(
+                    InntektsperioderForAvgift(
+                        fom = LocalDate.parse("2023-01-01"),
+                        tom = LocalDate.parse("2023-12-31"),
+                        type = Inntektskildetype.ARBEIDSINNTEKT,
+                        avgiftspliktigInntekt = Penger(85000.0),
+                        avgiftspliktigTotalInntekt = null,
+                        isArbeidsgiversavgiftBetalesTilSkatt = false,
+                        erMaanedsbelop = true
+                    )
+                )
+            ),
+            tidligereAvgift = listOf(
+                Trygdeavgiftsperiode().apply {
+                    periodeFra = LocalDate.parse("2023-01-01")
+                    periodeTil = LocalDate.parse("2023-12-31")
+                    grunnlagInntekstperiode = Inntektsperiode().apply {
+                        fomDato = LocalDate.parse("2023-01-01")
+                        tomDato = LocalDate.parse("2023-12-31")
+                        type = Inntektskildetype.ARBEIDSINNTEKT
+                        isArbeidsgiversavgiftBetalesTilSkatt = false
+                        avgiftspliktigMndInntekt = Penger(85000.0)
+                    }
+                    trygdesats = BigDecimal(7.9)
+                    trygdeavgiftsbeløpMd = Penger(6715.0)
+                }
+            ),
+            nyttGrunnlag = Trygdeavgiftsgrunnlag(
+                medlemskapsperioder = listOf(
+                    MedlemskapsperiodeForAvgift(
+                        fom = LocalDate.of(2023, 1, 1),
+                        tom = LocalDate.of(2023, 12, 31),
+                        dekning = Trygdedekninger.FULL_DEKNING_FTRL,
+                        bestemmelse = FTRL_KAP2_2_1,
+                        medlemskapstyper = Medlemskapstyper.PLIKTIG
+                    )
+                ),
+                skatteforholdsperioder = listOf(
+                    SkatteforholdTilNorgeForAvgift(
+                        fom = LocalDate.of(2023, 1, 1),
+                        tom = LocalDate.of(2023, 12, 31),
+                        skatteplikttype = Skatteplikttype.IKKE_SKATTEPLIKTIG
+                    )
+                ),
+                innteksperioder = listOf(
+                    InntektsperioderForAvgift(
+                        fom = LocalDate.of(2023, 1, 1),
+                        tom = LocalDate.of(2023, 12, 31),
+                        type = Inntektskildetype.ARBEIDSINNTEKT,
+                        avgiftspliktigInntekt = null,
+                        avgiftspliktigTotalInntekt = Penger(85000.0),
+                        isArbeidsgiversavgiftBetalesTilSkatt = false,
+                        erMaanedsbelop = false
+                    )
+                )
+
+            ),
+            endeligAvgift = listOf(Trygdeavgiftsperiode().apply {
+                id = 14
+                periodeFra = LocalDate.of(2023, 1, 1)
+                periodeTil = LocalDate.of(2023, 12, 31)
+                trygdeavgiftsbeløpMd = Penger(559.0)
+                trygdesats = 7.9.toBigDecimal()
+                grunnlagInntekstperiode = Inntektsperiode().apply {
+                    id = 14
+                    fomDato = LocalDate.of(2023, 1, 1)
+                    tomDato = LocalDate.of(2023, 12, 31)
+                    type = Inntektskildetype.ARBEIDSINNTEKT
+                    avgiftspliktigTotalinntekt = Penger(85000.0)
+                    isArbeidsgiversavgiftBetalesTilSkatt = false
+                }
+                grunnlagSkatteforholdTilNorge = SkatteforholdTilNorge().apply {
+                    id = 14
+                    fomDato = LocalDate.of(2023, 1, 1)
+                    tomDato = LocalDate.of(2023, 12, 31)
+                    skatteplikttype = Skatteplikttype.IKKE_SKATTEPLIKTIG
+                }
+            }),
+            tidligereFakturertBeloep = BigDecimal(80580.0),
+            nyttTotalbeloep = BigDecimal(6708.0),
+            tilFaktureringBeloep = BigDecimal(-73872.0)
+        )
+
+
+        val expectedJson = """{
+    "aar": 2023,
+    "tidligereGrunnlagsopplysninger": {
+        "trygdeavgiftsgrunnlag": {
+            "medlemskapsperioder": [
+                {
+                    "id": 0,
+                    "fomDato": "2023-01-01",
+                    "tomDato": "2023-12-31",
+                    "bestemmelse": "FTRL_KAP2_2_1",
+                    "innvilgelsesResultat": "INNVILGET",
+                    "trygdedekning": "FULL_DEKNING_FTRL",
+                    "medlemskapstype": "PLIKTIG"
+                }
+            ],
+            "skatteforholdsperioder": [
+                {
+                    "fomDato": "2023-01-01",
+                    "tomDato": "2023-12-31",
+                    "skatteplikttype": "IKKE_SKATTEPLIKTIG"
+                }
+            ],
+            "inntektskperioder": [
+                {
+                    "type": "ARBEIDSINNTEKT",
+                    "arbeidsgiversavgiftBetales": false,
+                    "avgiftspliktigInntekt": 85000,
+                    "fomDato": "2023-01-01",
+                    "tomDato": "2023-12-31",
+                    "erMaanedsbelop": true
+                }
+            ]
+        },
+        "avgift": {
+            "trygdeavgiftsperioder": [
+                {
+                    "fom": "2023-01-01",
+                    "tom": "2023-12-31",
+                    "inntektskildetype": "ARBEIDSINNTEKT",
+                    "arbeidsgiversavgiftBetales": false,
+                    "inntektPerMd": 85000,
+                    "avgiftssats": 7.9,
+                    "avgiftPerMd": 6715
+                }
+            ],
+            "totalInntekt": 1020000.00,
+            "totalAvgift": 80580.00
+        }
+    },
+    "avvikFunnet": true,
+    "nyttGrunnlag": {
+        "trygdeavgiftsgrunnlag": {
+            "medlemskapsperioder": [
+                {
+                    "id": 0,
+                    "fomDato": "2023-01-01",
+                    "tomDato": "2023-12-31",
+                    "bestemmelse": "FTRL_KAP2_2_1",
+                    "innvilgelsesResultat": "INNVILGET",
+                    "trygdedekning": "FULL_DEKNING_FTRL",
+                    "medlemskapstype": "PLIKTIG"
+                }
+            ],
+            "skatteforholdsperioder": [
+                {
+                    "fomDato": "2023-01-01",
+                    "tomDato": "2023-12-31",
+                    "skatteplikttype": "IKKE_SKATTEPLIKTIG"
+                }
+            ],
+            "inntektskperioder": [
+                {
+                    "type": "ARBEIDSINNTEKT",
+                    "arbeidsgiversavgiftBetales": false,
+                    "avgiftspliktigInntekt": 85000,
+                    "fomDato": "2023-01-01",
+                    "tomDato": "2023-12-31",
+                    "erMaanedsbelop": false
+                }
+            ]
+        },
+        "avgift": {
+            "trygdeavgiftsperioder": [
+                {
+                    "fom": "2023-01-01",
+                    "tom": "2023-12-31",
+                    "inntektskildetype": "ARBEIDSINNTEKT",
+                    "arbeidsgiversavgiftBetales": false,
+                    "inntektPerMd": 7083,
+                    "avgiftssats": 7.9,
+                    "avgiftPerMd": 559
+                }
+            ],
+            "totalInntekt": 1020000.00,
+            "totalAvgift": 6708.00
+        }
+    },
+    "endeligAvgift": null,
+    "avregning": {
+        "nyttTotalbeloep": 6708,
+        "tidligereFakturertBeloep": 80580,
+        "tilFaktureringBeloep": -73872
+    }
 }"""
 
         mockMvc.perform(

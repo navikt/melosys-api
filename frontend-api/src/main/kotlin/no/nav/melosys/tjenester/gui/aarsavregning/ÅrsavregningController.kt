@@ -1,6 +1,7 @@
 package no.nav.melosys.tjenester.gui.aarsavregning
 
 import io.swagger.annotations.Api
+import no.nav.melosys.domain.avgift.Penger
 import no.nav.melosys.domain.avgift.Trygdeavgiftsperiode
 import no.nav.melosys.domain.kodeverk.Inntektskildetype
 import no.nav.melosys.domain.kodeverk.InnvilgelsesResultat
@@ -98,16 +99,22 @@ class ÅrsavregningController(
                 AvgiftDto(
                     trygdeavgiftsperioder = trygdeavgiftsperioder.filter { it.grunnlagInntekstperiode != null }
                         .map {
-                            val avgiftspliktigMdInntekt = (
+                            val avgiftspliktigMndInntekt = (if (it.grunnlagInntekstperiode.erMaanedsbelop()) {
                                 it.grunnlagInntekstperiode.avgiftspliktigMndInntekt
-                                    ?: it.grunnlagInntekstperiode.avgiftspliktigTotalinntekt
-                                ).verdiAvrundet
+                            } else {
+                                val kalkulertMndBelop = TotalbeløpBeregner.månedligBeløpForTotalbeløp(
+                                    it.fom,
+                                    it.tom,
+                                    it.grunnlagInntekstperiode.avgiftspliktigTotalinntekt.verdi
+                                )
+                                Penger(kalkulertMndBelop)
+                            }).verdiAvrundet
 
                             TrygdeavgiftsperiodeDto(
                                 fom = it.fom,
                                 tom = it.tom,
                                 inntektskildetype = it.grunnlagInntekstperiode.type,
-                                inntektPerMd = avgiftspliktigMdInntekt,
+                                inntektPerMd = avgiftspliktigMndInntekt,
                                 arbeidsgiversavgiftBetales = it.grunnlagInntekstperiode.isArbeidsgiversavgiftBetalesTilSkatt,
                                 avgiftssats = it.trygdesats.toDouble(),
                                 avgiftPerMd = it.trygdeavgiftsbeløpMd.verdi.intValueExact()
