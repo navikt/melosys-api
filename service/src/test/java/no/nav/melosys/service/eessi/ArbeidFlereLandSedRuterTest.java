@@ -146,7 +146,7 @@ class ArbeidFlereLandSedRuterTest {
     }
 
     @Test
-    void finnSakOgBestemRuting_norgeUtpektNyttTemaNorgeUtpektBehandlingInaktiv_forventOppgaveOpprettetOgProsessinstansJfr() {
+    void finnSakOgBestemRuting_norgeUtpektNyttTemaNorgeUtpektBehandlingInaktiv_forventOppgaveOpprettet() {
         behandling.setTema(Behandlingstema.BESLUTNING_LOVVALG_NORGE);
         behandling.setStatus(Behandlingsstatus.MIDLERTIDIG_LOVVALGSBESLUTNING);
         melosysEessiMelding.setLovvalgsland(Landkoder.NO.getKode());

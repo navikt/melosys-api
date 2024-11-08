@@ -86,6 +86,7 @@ public class ArbeidFlereLandSedRuter implements SedRuterForSedTyper {
                 oppgaveService.finnÅpenBehandlingsoppgaveMedFagsaksnummer(fagsak.get().getSaksnummer())
                     .ifPresent(o -> oppgaveService.oppdaterOppgave(o.getOppgaveId(), OppgaveOppdatering.builder().beskrivelse("Mottatt SED " + SedType.A003).build()));
                 behandlingService.endreStatus(eksisterendeBehandling.getId(), Behandlingsstatus.VURDER_DOKUMENT);
+                opprettJournalføringProsess(melosysEessiMelding, eksisterendeBehandling);
             } else {
                 log.info("Mottatt oppdatert A003 norge utpekt sak {}. Behandling er avsluttet, oppretter oppgave", fagsak.get().getSaksnummer());
 
