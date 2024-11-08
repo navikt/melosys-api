@@ -99,16 +99,7 @@ class ÅrsavregningController(
                 AvgiftDto(
                     trygdeavgiftsperioder = trygdeavgiftsperioder.filter { it.grunnlagInntekstperiode != null }
                         .map {
-                            val avgiftspliktigMndInntekt = (if (it.grunnlagInntekstperiode.erMaanedsbelop()) {
-                                it.grunnlagInntekstperiode.avgiftspliktigMndInntekt
-                            } else {
-                                val kalkulertMndBelop = TotalbeløpBeregner.månedligBeløpForTotalbeløp(
-                                    it.fom,
-                                    it.tom,
-                                    it.grunnlagInntekstperiode.avgiftspliktigTotalinntekt.verdi
-                                )
-                                Penger(kalkulertMndBelop)
-                            }).verdiAvrundet
+                            val avgiftspliktigMndInntekt = beregnMndBelop(it)
 
                             TrygdeavgiftsperiodeDto(
                                 fom = it.fom,
@@ -125,6 +116,19 @@ class ÅrsavregningController(
                 )
             )
     }
+
+    private fun beregnMndBelop(trygdeavgiftsperiode: Trygdeavgiftsperiode) =
+        (if (trygdeavgiftsperiode.grunnlagInntekstperiode.erMaanedsbelop()) {
+            trygdeavgiftsperiode.grunnlagInntekstperiode.avgiftspliktigMndInntekt
+        } else {
+            val kalkulertMndBelop = TotalbeløpBeregner.månedligBeløpForTotalbeløp(
+                trygdeavgiftsperiode.fom,
+                trygdeavgiftsperiode.tom,
+                trygdeavgiftsperiode.grunnlagInntekstperiode.avgiftspliktigTotalinntekt.verdi
+            )
+            Penger(kalkulertMndBelop)
+        }).verdiAvrundet
+
 
     private fun mapTrygdeavgiftsgrunnlag(trygdeavgiftsgrunnlag: Trygdeavgiftsgrunnlag?) =
         TrygdeavgiftsgrunnlagDto(
