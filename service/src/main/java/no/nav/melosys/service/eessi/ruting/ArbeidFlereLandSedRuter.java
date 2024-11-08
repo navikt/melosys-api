@@ -88,6 +88,7 @@ public class ArbeidFlereLandSedRuter implements SedRuterForSedTyper {
                 behandlingService.endreStatus(eksisterendeBehandling.getId(), Behandlingsstatus.VURDER_DOKUMENT);
             } else {
                 log.info("Mottatt oppdatert A003 norge utpekt sak {}. Behandling er avsluttet, oppretter oppgave", fagsak.get().getSaksnummer());
+
                 oppgaveService.opprettEllerGjenbrukBehandlingsoppgave(
                     eksisterendeBehandling,
                     prosessinstans.getData(ProsessDataKey.JOURNALPOST_ID),
@@ -95,6 +96,10 @@ public class ArbeidFlereLandSedRuter implements SedRuterForSedTyper {
                     prosessinstans.hentSaksbehandlerHvisTilordnes(),
                     null
                 );
+
+                if(eksisterendeBehandling.erNorgeUtpekt()) {
+                    opprettNyBehandling(melosysEessiMelding, arkivsakID);
+                }
             }
 
             opprettJournalføringProsess(melosysEessiMelding, eksisterendeBehandling);
