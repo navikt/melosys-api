@@ -146,7 +146,7 @@ class ArbeidFlereLandSedRuterTest {
     }
 
     @Test
-    void finnSakOgBestemRuting_norgeUtpektNyttTemaNorgeUtpektBehandlingInaktiv_forventOppgaveOpprettet() {
+    void finnSakOgBestemRuting_norgeUtpektNyttTemaNorgeUtpektBehandlingInaktiv_forventOppgaveOpprettetOgProsessinstansNyBehandlingArbeidFlereLand() {
         behandling.setTema(Behandlingstema.BESLUTNING_LOVVALG_NORGE);
         behandling.setStatus(Behandlingsstatus.MIDLERTIDIG_LOVVALGSBESLUTNING);
         melosysEessiMelding.setLovvalgsland(Landkoder.NO.getKode());
@@ -157,6 +157,7 @@ class ArbeidFlereLandSedRuterTest {
         arbeidFlereLandSedRuter.rutSedTilBehandling(prosessinstans, gsakSaksnummer);
 
         verify(oppgaveService).opprettEllerGjenbrukBehandlingsoppgave(eq(behandling), any(), any(), any(), any());
+        verify(prosessinstansService).opprettProsessinstansNyBehandlingArbeidFlereLand(melosysEessiMelding, Behandlingstema.BESLUTNING_LOVVALG_NORGE, gsakSaksnummer);
     }
 
     @Test
