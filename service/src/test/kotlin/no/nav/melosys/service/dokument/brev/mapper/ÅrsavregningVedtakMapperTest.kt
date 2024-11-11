@@ -153,7 +153,17 @@ class ÅrsavregningVedtakMapperTest {
 
         val grunnlagMedlemskap = Trygdeavgiftsgrunnlag(emptyList(), emptyList(), emptyList());
 
-        return ÅrsavregningModel(år = 2024, tilFaktureringBeloep = null, endeligAvgift = endeligAvgift, tidligereAvgift = tidligereAvgift, nyttGrunnlag = grunnlagMedlemskap, nyttTotalbeloep = nyttTotalbeloep, tidligereFakturertBeloep = tidligereFakturertBeloep, tidligereGrunnlag = grunnlagMedlemskap)
+        return ÅrsavregningModel(
+            årsavregningID = 112,
+            år = 2024,
+            tilFaktureringBeloep = null,
+            endeligAvgift = endeligAvgift,
+            tidligereAvgift = tidligereAvgift,
+            nyttGrunnlag = grunnlagMedlemskap,
+            nyttTotalbeloep = nyttTotalbeloep,
+            tidligereFakturertBeloep = tidligereFakturertBeloep,
+            tidligereGrunnlag = grunnlagMedlemskap
+        )
     }
 
     private fun lagEndeligTrygdeavgiftsperiode(): Trygdeavgiftsperiode {

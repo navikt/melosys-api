@@ -77,6 +77,7 @@ class ÅrsavregningController(
 
     private fun lagÅrsavregningResponse(årsavregningModel: ÅrsavregningModel) =
         ÅrsavregningResponse(
+            aarsavregningID = årsavregningModel.årsavregningID,
             aar = årsavregningModel.år,
             tidligereGrunnlagsopplysninger = hentGrunnlagsopplysninger(årsavregningModel.tidligereGrunnlag, årsavregningModel.tidligereAvgift),
             avvikFunnet = årsavregningModel.nyttGrunnlag != null,
@@ -175,6 +176,7 @@ data class LagÅrsavregningRequest(
 )
 
 data class ÅrsavregningResponse(
+    val aarsavregningID: Long,
     val aar: Int,
     val tidligereGrunnlagsopplysninger: GrunnlagsOpplysningerDto?,
     val avvikFunnet: Boolean?,
