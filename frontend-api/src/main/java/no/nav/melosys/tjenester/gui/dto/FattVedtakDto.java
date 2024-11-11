@@ -6,7 +6,7 @@ import java.util.Set;
 
 import no.nav.melosys.domain.kodeverk.Vedtakstyper;
 import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingsresultattyper;
-import no.nav.melosys.integrasjon.faktureringskomponenten.dto.FaktureringsIntervall;
+import no.nav.melosys.integrasjon.faktureringskomponenten.dto.FaktureringIntervall;
 import no.nav.melosys.service.dokument.brev.KopiMottakerDto;
 
 public class FattVedtakDto {
@@ -22,15 +22,15 @@ public class FattVedtakDto {
     private String barnFritekst;
     private String trygdeavgiftFritekst;
     private List<KopiMottakerDto> kopiMottakere;
-    private FaktureringsIntervall betalingsintervall;
+    private FaktureringIntervall betalingsintervall;
     private Boolean kopiTilArbeidsgiver;
     private LocalDate opphoerDato;
 
-    public FaktureringsIntervall getBetalingsintervall() {
+    public FaktureringIntervall getBetalingsintervall() {
         return betalingsintervall;
     }
 
-    public void setBetalingsintervall(FaktureringsIntervall betalingsintervall) {
+    public void setBetalingsintervall(FaktureringIntervall betalingsintervall) {
         this.betalingsintervall = betalingsintervall;
     }
 

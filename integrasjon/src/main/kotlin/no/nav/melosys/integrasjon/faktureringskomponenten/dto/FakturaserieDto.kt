@@ -7,6 +7,6 @@ data class FakturaserieDto(
     val referanseBruker: String,
     val referanseNAV: String,
     val fakturaGjelderInnbetalingstype: Innbetalingstype,
-    val intervall: FaktureringsIntervall,
+    val intervall: FaktureringIntervall,
     val perioder: List<FakturaseriePeriodeDto>
 )

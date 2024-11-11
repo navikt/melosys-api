@@ -439,13 +439,13 @@ class YrkesaktivFtrlVedtakIT(
             this.årsavregning.tidligereFakturertBeloep shouldBe tidligereFakturertBeloep
             this.årsavregning.nyttTotalbeloep shouldBe nyttTotalbeloep
             this.årsavregning.tilFaktureringBeloep shouldBe nyttTotalbeloep - tidligereFakturertBeloep
+            fakturaserieReferanse shouldBe this@YrkesaktivFtrlVedtakIT.fakturaserieReferanse
         }
         behandlingRepository.findById(årsavregningBehandlingID)
             .shouldBePresent().run {
                 withClue("Behandlingsstatus skal være AVSLUTTET") {
                     type shouldBe Behandlingstyper.ÅRSAVREGNING
                     status shouldBe Behandlingsstatus.AVSLUTTET
-                    fakturaserieReferanse shouldBe fakturaserieReferanse
                 }
             }
     }
