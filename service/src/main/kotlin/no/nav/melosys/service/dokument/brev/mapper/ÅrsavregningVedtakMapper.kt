@@ -9,6 +9,7 @@ import no.nav.melosys.domain.kodeverk.Skatteplikttype
 import no.nav.melosys.exception.FunksjonellException
 import no.nav.melosys.integrasjon.dokgen.dto.Avgiftsperiode
 import no.nav.melosys.integrasjon.dokgen.dto.ÅrsavregningVedtaksbrev
+import no.nav.melosys.service.avgift.aarsavregning.totalbeloep.TotalbeløpBeregner.kalkulertMndInntekt
 import no.nav.melosys.service.avgift.aarsavregning.ÅrsavregningKonstanter
 import no.nav.melosys.service.avgift.aarsavregning.ÅrsavregningModel
 import no.nav.melosys.service.avgift.aarsavregning.ÅrsavregningService
@@ -20,7 +21,10 @@ class ÅrsavregningVedtakMapper(
     private val årsavregningService: ÅrsavregningService
 ) {
     @Transactional
-    internal fun mapÅrsavregning(brevbestilling: ÅrsavregningVedtakBrevBestilling, behandlingsresultat: Behandlingsresultat): ÅrsavregningVedtaksbrev {
+    internal fun mapÅrsavregning(
+        brevbestilling: ÅrsavregningVedtakBrevBestilling,
+        behandlingsresultat: Behandlingsresultat
+    ): ÅrsavregningVedtaksbrev {
 
         val behandlingsId = brevbestilling.behandlingId
         val årsavregningModel = årsavregningService.finnÅrsavregningForBehandling(behandlingsId)
@@ -32,12 +36,14 @@ class ÅrsavregningVedtakMapper(
             årsavregningsår = behandlingsresultat.årsavregning.aar,
             endeligTrygdeavgift = avgiftsPeriodeMapper(årsavregningModel.endeligAvgift),
             forskuddsvisFakturertTrygdeavgift = avgiftsPeriodeMapper(årsavregningModel.tidligereAvgift),
-            endeligTrygdeavgiftTotalbeløp = årsavregningModel.nyttTotalbeloep?: throw FunksjonellException("Nytt totalbeløp finnes ikke for behandling $behandlingsId"),
-            forskuddsvisFakturertTrygdeavgiftTotalbeløp = årsavregningModel.tidligereFakturertBeloep?: BigDecimal.ZERO,
+            endeligTrygdeavgiftTotalbeløp = årsavregningModel.nyttTotalbeloep
+                ?: throw FunksjonellException("Nytt totalbeløp finnes ikke for behandling $behandlingsId"),
+            forskuddsvisFakturertTrygdeavgiftTotalbeløp = årsavregningModel.tidligereFakturertBeloep ?: BigDecimal.ZERO,
             differansebeløp = regnUtDifferanseBeløp(årsavregningModel),
             minimumsbeløpForFakturering = ÅrsavregningKonstanter.MINIMUM_BELØP_FAKTURERING.beløp,
-            pliktigMedlemskap = årsavregningModel.tidligereGrunnlag?.medlemskapsperioder?.all { it.medlemskapstyper == Medlemskapstyper.PLIKTIG }?: false,
-            eøsEllerTrygdeavtale = fagsak.erSakstypeEøs() || fagsak.erSakstypeTrygdeavtale()
+            pliktigMedlemskap = årsavregningModel.tidligereGrunnlag?.medlemskapsperioder?.all { it.medlemskapstyper == Medlemskapstyper.PLIKTIG }
+                ?: false,
+            eøsEllerTrygdeavtale = fagsak.erSakstypeEøs() || fagsak.erSakstypeTrygdeavtale(),
         )
     }
 
@@ -51,7 +57,7 @@ class ÅrsavregningVedtakMapper(
                     tom = trygdeavgiftsperiode.tom,
                     avgiftssats = trygdeavgiftsperiode.trygdesats,
                     avgiftPerMd = trygdeavgiftsperiode.trygdeavgiftsbeløpMd.verdi,
-                    avgiftspliktigInntektPerMd = trygdeavgiftsperiode.grunnlagInntekstperiode.avgiftspliktigMndInntekt.verdi,
+                    avgiftspliktigInntektPerMd = trygdeavgiftsperiode.grunnlagInntekstperiode.kalkulertMndInntekt(),
                     inntektskilde = trygdeavgiftsperiode.grunnlagInntekstperiode.type.beskrivelse,
                     trygdedekning = trygdeavgiftsperiode.grunnlagMedlemskapsperiode.trygdedekning.beskrivelse,
                     arbeidsgiveravgiftBetalt = trygdeavgiftsperiode.grunnlagInntekstperiode.isArbeidsgiversavgiftBetalesTilSkatt,
@@ -63,6 +69,7 @@ class ÅrsavregningVedtakMapper(
     }
 
     private fun regnUtDifferanseBeløp(årsavregningModel: ÅrsavregningModel): BigDecimal {
-        return årsavregningModel.nyttTotalbeloep?.subtract(årsavregningModel.tidligereFakturertBeloep) ?: throw FunksjonellException("Nytt totalbeløp finnes ikke")
+        return årsavregningModel.nyttTotalbeloep?.subtract(årsavregningModel.tidligereFakturertBeloep)
+            ?: throw FunksjonellException("Nytt totalbeløp finnes ikke")
     }
 }

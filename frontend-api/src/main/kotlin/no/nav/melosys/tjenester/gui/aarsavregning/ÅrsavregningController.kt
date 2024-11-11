@@ -1,12 +1,12 @@
 package no.nav.melosys.tjenester.gui.aarsavregning
 
 import io.swagger.annotations.Api
-import no.nav.melosys.domain.avgift.Penger
 import no.nav.melosys.domain.avgift.Trygdeavgiftsperiode
 import no.nav.melosys.domain.kodeverk.Inntektskildetype
 import no.nav.melosys.domain.kodeverk.InnvilgelsesResultat
 import no.nav.melosys.service.avgift.aarsavregning.Trygdeavgiftsgrunnlag
 import no.nav.melosys.service.avgift.aarsavregning.totalbeloep.TotalbeløpBeregner
+import no.nav.melosys.service.avgift.aarsavregning.totalbeloep.TotalbeløpBeregner.kalkulertMndInntekt
 import no.nav.melosys.service.avgift.aarsavregning.ÅrsavregningModel
 import no.nav.melosys.service.avgift.aarsavregning.ÅrsavregningService
 import no.nav.melosys.service.tilgang.Aksesskontroll
@@ -99,7 +99,7 @@ class ÅrsavregningController(
                 AvgiftDto(
                     trygdeavgiftsperioder = trygdeavgiftsperioder.filter { it.grunnlagInntekstperiode != null }
                         .map {
-                            val avgiftspliktigMndInntekt = beregnMndBelop(it)
+                            val avgiftspliktigMndInntekt = it.grunnlagInntekstperiode.kalkulertMndInntekt(verdiAvrundet = true)
 
                             TrygdeavgiftsperiodeDto(
                                 fom = it.fom,
@@ -116,19 +116,6 @@ class ÅrsavregningController(
                 )
             )
     }
-
-    private fun beregnMndBelop(trygdeavgiftsperiode: Trygdeavgiftsperiode) =
-        (if (trygdeavgiftsperiode.grunnlagInntekstperiode.erMaanedsbelop()) {
-            trygdeavgiftsperiode.grunnlagInntekstperiode.avgiftspliktigMndInntekt
-        } else {
-            val kalkulertMndBelop = TotalbeløpBeregner.månedligBeløpForTotalbeløp(
-                trygdeavgiftsperiode.fom,
-                trygdeavgiftsperiode.tom,
-                trygdeavgiftsperiode.grunnlagInntekstperiode.avgiftspliktigTotalinntekt.verdi
-            )
-            Penger(kalkulertMndBelop)
-        }).verdiAvrundet
-
 
     private fun mapTrygdeavgiftsgrunnlag(trygdeavgiftsgrunnlag: Trygdeavgiftsgrunnlag?) =
         TrygdeavgiftsgrunnlagDto(
