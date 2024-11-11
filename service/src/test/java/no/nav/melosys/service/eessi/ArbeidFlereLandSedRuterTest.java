@@ -146,7 +146,7 @@ class ArbeidFlereLandSedRuterTest {
     }
 
     @Test
-    void finnSakOgBestemRuting_norgeUtpektNyttTemaNorgeUtpektBehandlingInaktiv_forventOppgaveOpprettetOgProsessinstansJfr() {
+    void finnSakOgBestemRuting_norgeUtpektNyttTemaNorgeUtpektBehandlingInaktiv_forventOppgaveOpprettetOgProsessinstansNyBehandlingArbeidFlereLand() {
         behandling.setTema(Behandlingstema.BESLUTNING_LOVVALG_NORGE);
         behandling.setStatus(Behandlingsstatus.MIDLERTIDIG_LOVVALGSBESLUTNING);
         melosysEessiMelding.setLovvalgsland(Landkoder.NO.getKode());
@@ -157,7 +157,7 @@ class ArbeidFlereLandSedRuterTest {
         arbeidFlereLandSedRuter.rutSedTilBehandling(prosessinstans, gsakSaksnummer);
 
         verify(oppgaveService).opprettEllerGjenbrukBehandlingsoppgave(eq(behandling), any(), any(), any(), any());
-        verify(prosessinstansService).opprettProsessinstansSedJournalføring(behandling, melosysEessiMelding);
+        verify(prosessinstansService).opprettProsessinstansNyBehandlingArbeidFlereLand(melosysEessiMelding, Behandlingstema.BESLUTNING_LOVVALG_NORGE, gsakSaksnummer);
     }
 
     @Test
@@ -178,7 +178,6 @@ class ArbeidFlereLandSedRuterTest {
 
         verify(behandlingService).endreStatus(behandlingID, Behandlingsstatus.VURDER_DOKUMENT);
         verify(oppgaveService).oppdaterOppgave(eq(oppgaveID), oppgaveOppdateringCaptor.capture());
-        verify(prosessinstansService).opprettProsessinstansSedJournalføring(behandling, melosysEessiMelding);
 
         assertThat(oppgaveOppdateringCaptor.getValue())
             .extracting(OppgaveOppdatering::getBeskrivelse)

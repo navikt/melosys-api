@@ -3,6 +3,7 @@ package no.nav.melosys.domain.oppgave;
 import java.time.LocalDate;
 import java.time.ZonedDateTime;
 import java.util.Comparator;
+import java.util.List;
 import java.util.Objects;
 
 import no.nav.melosys.domain.Fagsystem;
@@ -296,6 +297,10 @@ public final class Oppgave {
 
     public String getMappeId() {
         return mappeId;
+    }
+
+    public boolean erAktiv() {
+        return List.of("OPPRETTET", "AAPNET", "UNDER_BEHANDLING").contains(status);
     }
 
     @Override

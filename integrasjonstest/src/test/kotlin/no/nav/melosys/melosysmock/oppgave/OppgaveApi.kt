@@ -78,6 +78,7 @@ class OppgaveApi(private val oppgaveRepo: OppgaveRepo) {
         oppgaveRepo.repo[oppgaveID] = oppgave
         oppgave.endretTidspunkt = LocalDateTime.now()
         oppgave.opprettetTidspunkt = ZonedDateTime.now()
+        oppgave.status = "AAPNET"
         return ResponseEntity.ok(oppgave)
     }
 }
@@ -109,7 +110,7 @@ data class Oppgave(
     val prioritet: String? = null,
     val saksreferanse: String? = null,
     val samhandlernr: String? = null,
-    val status: String? = null,
+    var status: String? = null,
     val tema: String? = null,
     val temagruppe: String? = null,
     val tildeltEnhetsnr: String? = null,

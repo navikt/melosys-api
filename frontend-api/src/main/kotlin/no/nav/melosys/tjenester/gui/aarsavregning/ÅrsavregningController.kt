@@ -1,6 +1,7 @@
 package no.nav.melosys.tjenester.gui.aarsavregning
 
 import io.swagger.annotations.Api
+import no.nav.melosys.domain.avgift.Penger
 import no.nav.melosys.domain.avgift.Trygdeavgiftsperiode
 import no.nav.melosys.domain.kodeverk.Inntektskildetype
 import no.nav.melosys.domain.kodeverk.InnvilgelsesResultat
@@ -98,16 +99,13 @@ class ÅrsavregningController(
                 AvgiftDto(
                     trygdeavgiftsperioder = trygdeavgiftsperioder.filter { it.grunnlagInntekstperiode != null }
                         .map {
-                            val avgiftspliktigMdInntekt = (
-                                it.grunnlagInntekstperiode.avgiftspliktigMndInntekt
-                                    ?: it.grunnlagInntekstperiode.avgiftspliktigTotalinntekt
-                                ).verdiAvrundet
+                            val avgiftspliktigMndInntekt = beregnMndBelop(it)
 
                             TrygdeavgiftsperiodeDto(
                                 fom = it.fom,
                                 tom = it.tom,
                                 inntektskildetype = it.grunnlagInntekstperiode.type,
-                                inntektPerMd = avgiftspliktigMdInntekt,
+                                inntektPerMd = avgiftspliktigMndInntekt,
                                 arbeidsgiversavgiftBetales = it.grunnlagInntekstperiode.isArbeidsgiversavgiftBetalesTilSkatt,
                                 avgiftssats = it.trygdesats.toDouble(),
                                 avgiftPerMd = it.trygdeavgiftsbeløpMd.verdi.intValueExact()
@@ -118,6 +116,19 @@ class ÅrsavregningController(
                 )
             )
     }
+
+    private fun beregnMndBelop(trygdeavgiftsperiode: Trygdeavgiftsperiode) =
+        (if (trygdeavgiftsperiode.grunnlagInntekstperiode.erMaanedsbelop()) {
+            trygdeavgiftsperiode.grunnlagInntekstperiode.avgiftspliktigMndInntekt
+        } else {
+            val kalkulertMndBelop = TotalbeløpBeregner.månedligBeløpForTotalbeløp(
+                trygdeavgiftsperiode.fom,
+                trygdeavgiftsperiode.tom,
+                trygdeavgiftsperiode.grunnlagInntekstperiode.avgiftspliktigTotalinntekt.verdi
+            )
+            Penger(kalkulertMndBelop)
+        }).verdiAvrundet
+
 
     private fun mapTrygdeavgiftsgrunnlag(trygdeavgiftsgrunnlag: Trygdeavgiftsgrunnlag?) =
         TrygdeavgiftsgrunnlagDto(
