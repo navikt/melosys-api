@@ -62,17 +62,17 @@ object TotalbeløpBeregner {
     }
 
     fun Inntektsperiode.kalkulertMndInntekt(verdiAvrundet: Boolean = false): BigDecimal {
-        val kalkulertMndInntekt = if (erMaanedsbelop()) {
+        val beregnetMndBelop = if (erMaanedsbelop()) {
             avgiftspliktigMndInntekt.verdi
         } else {
             månedligBeløpForTotalbeløp(fom, tom, avgiftspliktigTotalinntekt.verdi)
         }
 
         if (verdiAvrundet) {
-            return kalkulertMndInntekt.setScale(2, RoundingMode.HALF_UP)
+            return beregnetMndBelop.setScale(0, RoundingMode.HALF_UP)
         }
 
-        return kalkulertMndInntekt
+        return beregnetMndBelop
     }
 }
 
