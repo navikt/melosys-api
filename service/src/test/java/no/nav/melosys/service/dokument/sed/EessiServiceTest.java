@@ -414,7 +414,8 @@ class EessiServiceTest {
     void sendGodkjenningArbeidFlereLand() {
         Behandling behandling = new Behandling();
         behandling.setId(BEHANDLING_ID);
-
+        Fagsak fagsak = FagsakTestFactory.builder().medGsakSaksnummer().build();
+        behandling.setFagsak(fagsak);
         Saksopplysning saksopplysning = new Saksopplysning();
         saksopplysning.setType(SaksopplysningType.SEDOPPL);
         saksopplysning.setDokument(new SedDokument());
