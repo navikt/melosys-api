@@ -4,10 +4,7 @@ import java.time.LocalDate;
 import java.util.Set;
 
 import io.getunleash.FakeUnleash;
-import no.nav.melosys.domain.Behandling;
-import no.nav.melosys.domain.Behandlingsresultat;
-import no.nav.melosys.domain.Saksopplysning;
-import no.nav.melosys.domain.SaksopplysningType;
+import no.nav.melosys.domain.*;
 import no.nav.melosys.domain.dokument.medlemskap.Periode;
 import no.nav.melosys.domain.dokument.sed.SedDokument;
 import no.nav.melosys.domain.eessi.melding.UtpekingAvvis;
@@ -69,6 +66,8 @@ class SendAvslagUtpekingTest {
         behandling = new Behandling();
         behandling.setId(1L);
         behandling.setSaksopplysninger(Set.of(saksopplysning));
+        Fagsak fagsak = FagsakTestFactory.builder().medGsakSaksnummer().build();
+        behandling.setFagsak(fagsak);
 
         when(sedDataBygger.lagUtkast(any(), any(), any())).thenReturn(new SedDataDto());
         when(behandlingService.hentBehandlingMedSaksopplysninger(1L)).thenReturn(behandling);
