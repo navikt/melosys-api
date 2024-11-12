@@ -241,9 +241,7 @@ public class EessiService {
             utpekingAvvis.getEtterspørInformasjon()
         ));
 
-        if (behandling.erNyVurdering()) {
-            annullerSedForNyVurderingMedSendtVedtak(behandling);
-        }
+        annullerSedForNyVurderingMedSendtVedtak(behandling);
 
         eessiConsumer.sendSedPåEksisterendeBuc(sedDataDto, rinaSaksnummer, SedType.A004);
     }
