@@ -1,15 +1,15 @@
 package no.nav.melosys.service.vedtak;
 
-import no.nav.melosys.domain.kodeverk.Vedtakstyper;
-import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingsresultattyper;
-import no.nav.melosys.integrasjon.faktureringskomponenten.dto.FaktureringsIntervall;
-import no.nav.melosys.saksflytapi.journalfoering.VedtakRequest;
-import no.nav.melosys.service.dokument.brev.KopiMottakerDto;
-
 import java.time.LocalDate;
 import java.util.Collections;
 import java.util.List;
 import java.util.Set;
+
+import no.nav.melosys.domain.kodeverk.Vedtakstyper;
+import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingsresultattyper;
+import no.nav.melosys.integrasjon.faktureringskomponenten.dto.FaktureringIntervall;
+import no.nav.melosys.saksflytapi.journalfoering.VedtakRequest;
+import no.nav.melosys.service.dokument.brev.KopiMottakerDto;
 
 public class FattVedtakRequest {
     private final Behandlingsresultattyper behandlingsresultatTypeKode;
@@ -26,10 +26,10 @@ public class FattVedtakRequest {
     private final Boolean kopiTilArbeidsgiver;
     private final String bestillersId;
     private final String nyVurderingBakgrunn;
-    private final FaktureringsIntervall betalingsintervall;
+    private final FaktureringIntervall betalingsintervall;
     private final LocalDate opphørtDato;
 
-    public FaktureringsIntervall getBetalingsintervall() {
+    public FaktureringIntervall getBetalingsintervall() {
         return betalingsintervall;
     }
 
@@ -148,7 +148,7 @@ public class FattVedtakRequest {
         private List<KopiMottakerDto> kopiMottakere;
         private Boolean kopiTilArbeidsgiver;
         private String bestillersId;
-        private FaktureringsIntervall betalingsintervall;
+        private FaktureringIntervall betalingsintervall;
         private LocalDate opphørtDato;
 
         public Builder medBehandlingsresultatType(Behandlingsresultattyper behandlingsresultatTypeKode) {
@@ -221,7 +221,7 @@ public class FattVedtakRequest {
             return this;
         }
 
-        public Builder medBetalingsIntervall(FaktureringsIntervall betalingsintervall) {
+        public Builder medBetalingsIntervall(FaktureringIntervall betalingsintervall) {
             this.betalingsintervall = betalingsintervall;
             return this;
         }

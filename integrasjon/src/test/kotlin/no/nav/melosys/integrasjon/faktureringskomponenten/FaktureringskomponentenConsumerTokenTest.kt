@@ -107,7 +107,7 @@ class FaktureringskomponentenConsumerTokenTest(
         referanseBruker: String = "Nasse Nøff",
         referanseNav: String = "NAV Medlemskap og avgift",
         fakturaGjelder: Innbetalingstype = Innbetalingstype.TRYGDEAVGIFT,
-        intervall: FaktureringsIntervall = FaktureringsIntervall.KVARTAL,
+        intervall: FaktureringIntervall = FaktureringIntervall.KVARTAL,
         fakturaseriePeriode: List<FakturaseriePeriodeDto> = listOf(
             FakturaseriePeriodeDto(
                 BigDecimal.valueOf(123),
