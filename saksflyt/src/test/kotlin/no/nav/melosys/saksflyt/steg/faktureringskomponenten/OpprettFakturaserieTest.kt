@@ -22,7 +22,7 @@ import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingstyper
 import no.nav.melosys.integrasjon.faktureringskomponenten.FaktureringskomponentenConsumer
 import no.nav.melosys.integrasjon.faktureringskomponenten.NyFakturaserieResponseDto
 import no.nav.melosys.integrasjon.faktureringskomponenten.dto.FakturaserieDto
-import no.nav.melosys.integrasjon.faktureringskomponenten.dto.FaktureringsIntervall
+import no.nav.melosys.integrasjon.faktureringskomponenten.dto.FaktureringIntervall
 import no.nav.melosys.saksflyt.steg.fakturering.OpprettFakturaserie
 import no.nav.melosys.saksflyt.steg.fakturering.OpprettFakturaserie.Companion.DEFAULT_PENSJON_DEKNING_TEKST_HELSEDEL
 import no.nav.melosys.saksflytapi.domain.ProsessDataKey
@@ -385,7 +385,7 @@ class OpprettFakturaserieTest {
         this.behandling = lagBehandling(fagsak)
         prosessinstans = Prosessinstans().apply {
             setData(ProsessDataKey.SAKSBEHANDLER, "S123456")
-            setData(ProsessDataKey.BETALINGSINTERVALL, FaktureringsIntervall.KVARTAL)
+            setData(ProsessDataKey.BETALINGSINTERVALL, FaktureringIntervall.KVARTAL)
             this.behandling = this@OpprettFakturaserieTest.behandling
         }
         behandlingsresultat = lagBehandlingsresultat()

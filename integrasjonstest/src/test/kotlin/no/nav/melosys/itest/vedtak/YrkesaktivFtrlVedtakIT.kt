@@ -151,6 +151,15 @@ class YrkesaktivFtrlVedtakIT(
                         .withBody(BigDecimal.valueOf(42).toString())
                 )
         )
+        mockServer.stubFor(
+            WireMock.post(WireMock.urlMatching("/fakturaer"))
+                .willReturn(
+                    WireMock.aResponse()
+                        .withStatus(200)
+                        .withHeader("Content-Type", "application/json")
+                        .withBody(fakturaResponse.toJsonNode.toString())
+                )
+        )
         unleash.enableAll()
     }
 
@@ -403,8 +412,10 @@ class YrkesaktivFtrlVedtakIT(
         val tidligereFakturertBeloep = BigDecimal(1000)
         val nyttTotalbeloep = BigDecimal(2000)
         årsavregningService.opprettÅrsavregning(årsavregningBehandlingID, 2023)
-        val årsavregningID = behandlingsresultatRepository.findById(årsavregningBehandlingID).shouldBePresent().årsavregning.id
-        årsavregningService.oppdater(årsavregningBehandlingID, årsavregningID, tidligereFakturertBeloep, nyttTotalbeloep)
+        val årsavregning =
+            behandlingsresultatRepository.findWithLovvalgOgMedlemskapsperioderById(årsavregningBehandlingID).shouldBePresent().årsavregning
+        årsavregningService.oppdater(årsavregningBehandlingID, årsavregning.id, tidligereFakturertBeloep, nyttTotalbeloep)
+        trygdeavgiftsberegningService.beregnOgLagreTrygdeavgift(årsavregningBehandlingID, skattefordholdsperioder, inntektsforholdsperioder)
 
         val vedtakRequestÅrsavregning = FattVedtakRequest.Builder()
             .medBehandlingsresultatType(Behandlingsresultattyper.FERDIGBEHANDLET)
@@ -424,10 +435,11 @@ class YrkesaktivFtrlVedtakIT(
         behandlingsresultatService.hentBehandlingsresultat(årsavregningBehandlingID).run {
             type shouldBe Behandlingsresultattyper.FERDIGBEHANDLET
             behandlingsmåte shouldBe Behandlingsmaate.MANUELT
-            årsavregning.aar shouldBe 2023
-            årsavregning.tidligereFakturertBeloep shouldBe tidligereFakturertBeloep
-            årsavregning.nyttTotalbeloep shouldBe nyttTotalbeloep
-            årsavregning.tilFaktureringBeloep shouldBe nyttTotalbeloep - tidligereFakturertBeloep
+            this.årsavregning.aar shouldBe 2023
+            this.årsavregning.tidligereFakturertBeloep shouldBe tidligereFakturertBeloep
+            this.årsavregning.nyttTotalbeloep shouldBe nyttTotalbeloep
+            this.årsavregning.tilFaktureringBeloep shouldBe nyttTotalbeloep - tidligereFakturertBeloep
+            fakturaserieReferanse shouldBe this@YrkesaktivFtrlVedtakIT.fakturaserieReferanse
         }
         behandlingRepository.findById(årsavregningBehandlingID)
             .shouldBePresent().run {
