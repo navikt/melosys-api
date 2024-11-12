@@ -19,8 +19,7 @@ class ÅrsavregningVedtaksbrev(
     val innledningFritekst: String?,
     val begrunnelseFritekst: String?,
     val pliktigMedlemskap: Boolean,
-    val eøsEllerTrygdeavtale: Boolean,
-    val datoMottatt: LocalDate,
+    val eøsEllerTrygdeavtale: Boolean
 ) : DokgenDto(brevBestilling, Mottakerroller.BRUKER) {
     constructor(
         brevBestilling: ÅrsavregningVedtakBrevBestilling,
@@ -45,8 +44,7 @@ class ÅrsavregningVedtaksbrev(
         innledningFritekst = brevBestilling.innledningFritekstAarsavregning,
         begrunnelseFritekst = brevBestilling.begrunnelseFritekstAarsavregning,
         pliktigMedlemskap = pliktigMedlemskap,
-        eøsEllerTrygdeavtale = eøsEllerTrygdeavtale,
-        datoMottatt = instantTilLocalDate(brevBestilling.forsendelseMottatt)
+        eøsEllerTrygdeavtale = eøsEllerTrygdeavtale
     )
 }
 
