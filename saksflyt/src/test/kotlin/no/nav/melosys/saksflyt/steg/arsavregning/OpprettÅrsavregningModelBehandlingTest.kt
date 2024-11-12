@@ -100,6 +100,7 @@ class OpprettÅrsavregningModelBehandlingTest {
 
         every { behandslingsresultatService.hentBehandlingsresultat(årsavregningsBehandling.id) } returns behandlingsresultat
         every { årsavregningService.opprettÅrsavregning(any(), any()) } returns ÅrsavregningModel(
+            112,
             2023,
             null,
             emptyList(),
