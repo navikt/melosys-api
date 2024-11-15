@@ -5,7 +5,7 @@
     <parent>
         <groupId>org.springframework.boot</groupId>
         <artifactId>spring-boot-starter-parent</artifactId>
-        <version>3.2.2</version>
+        <version>3.3.5</version>
     </parent>
 
     <modelVersion>4.0.0</modelVersion>
@@ -64,7 +64,7 @@
         <findbugs.jsr305.version>3.0.2</findbugs.jsr305.version>
         <guava.version>31.1-jre</guava.version>
         <graphql-java.version>21.3</graphql-java.version>
-        <logback.version>1.4.14</logback.version>
+        <logback.version>1.5.12</logback.version>
         <logstash.version>7.3</logstash.version>
         <hikaricp.version>5.0.1</hikaricp.version>
         <javax.ws.rs-api.version>2.1.1</javax.ws.rs-api.version>
