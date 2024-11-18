@@ -58,28 +58,14 @@ public final class OverlappendeMedlemskapsperioderRegler {
 
     public static boolean harOverlappendePeriodeMedForskuddsvisFakturering(MedlemskapDokument medlemskapDokument,
                                                                            MedlemskapsperiodeData medlemskapsperiodeData) {
-        return medlemskapsperiodeData.getNyeMedlemskapsperioder().stream().anyMatch(kontrollperiode ->
+        return medlemskapsperiodeData.getNyeMedlemskapsperioderMedAvgift().stream().anyMatch(kontrollperiode ->
             medlemskapDokument.hentMedlemsperioderHvorKildeIkkeLånekassen().stream()
                 .filter(medlemsperiode -> !PeriodestatusMedl.AVST.kode.equals(medlemsperiode.getStatus()))
-                .filter(medlemsperiode -> !medlemskapsperiodeData.medlIdEksistererPåTidligereMedlemskapsperiode(medlemsperiode.getId()))
+                .filter(medlemsperiode -> medlemskapsperiodeData.medlIdEksistererPåTidligereMedlemskapsperiodeMedAvgift(medlemsperiode.getId()))
                 .anyMatch(medlemsperiode ->
-                    PeriodeRegler.periodeOverlapper(kontrollperiode, medlemsperiode.getPeriode()) && harForskuddsvisFakturering(medlemsperiode, medlemskapsperiodeData, kontrollperiode)
-                        && (kontrollperiode.getMedlPeriodeID() == null || !Objects.equals(kontrollperiode.getMedlPeriodeID(), medlemsperiode.getId()))
+                    PeriodeRegler.periodeOverlapper(kontrollperiode, medlemsperiode.getPeriode()) && (kontrollperiode.getMedlPeriodeID() == null || !Objects.equals(kontrollperiode.getMedlPeriodeID(), medlemsperiode.getId()))
                 )
         );
-    }
-
-    private static boolean harForskuddsvisFakturering(Medlemsperiode medlemsperiode, MedlemskapsperiodeData medlemsperiodeData, Medlemskapsperiode nyMedlemskapsperiode) {
-        return medlemsperiodeData.getTidligereMedlemskapsperioderForBuker().stream().anyMatch(tidligereMedlemskapsperiode -> {
-            List<Trygdeavgift_typer> trygdeavgiftTyper = List.of(Trygdeavgift_typer.FORELØPIG, Trygdeavgift_typer.ENDELIG);
-            boolean tidligereMedlemskapsperiodeHarForeløpigFakturert = trygdeavgiftTyper.contains(tidligereMedlemskapsperiode.getBehandlingsresultat().getTrygdeavgiftType()) && Objects.equals(medlemsperiode.getId(), tidligereMedlemskapsperiode.getMedlPeriodeID());
-
-            if(tidligereMedlemskapsperiodeHarForeløpigFakturert) {
-                return trygdeavgiftTyper.contains(nyMedlemskapsperiode.getBehandlingsresultat().getTrygdeavgiftType());
-            } else {
-                return false;
-            }
-        });
     }
 
     public static boolean harOverlappendeUnntaksperiode(MedlemskapDokument medlemskapDokument,

@@ -265,7 +265,7 @@ class FerdigbehandlingKontrollTest {
         )
         val kontrollData = lagFerdigbehandlingKontrollData(
             medlemskapDokument = medlemskapsDokument,
-            medlemskapsperiodeData = MedlemskapsperiodeData(overlappendeMedlemskapsperioder, tidligereMedlemskapsperioder),
+            medlemskapsperiodeData = MedlemskapsperiodeData(overlappendeMedlemskapsperioder, emptyList(), tidligereMedlemskapsperioder, emptyList()),
         )
 
 

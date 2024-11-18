@@ -10,8 +10,10 @@ import no.nav.melosys.domain.kodeverk.begrunnelser.Kontroll_begrunnelser
 import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingsresultattyper
 import no.nav.melosys.domain.person.Persondata
 import no.nav.melosys.service.LovvalgsperiodeService
+import no.nav.melosys.service.avgift.TrygdeavgiftService
 import no.nav.melosys.service.avklartefakta.AvklarteVirksomheterService
 import no.nav.melosys.service.behandling.BehandlingService
+import no.nav.melosys.service.behandling.BehandlingsresultatService
 import no.nav.melosys.service.brev.UtkastBrevService
 import no.nav.melosys.service.ftrl.medlemskapsperiode.MedlemskapsperiodeService
 import no.nav.melosys.service.kontroll.feature.ferdigbehandling.data.FerdigbehandlingKontrollData
@@ -36,7 +38,9 @@ class Kontroll(
     private val organisasjonOppslagService: OrganisasjonOppslagService,
     private val saksbehandlingRegler: SaksbehandlingRegler,
     private val medlemskapsperiodeService: MedlemskapsperiodeService,
-    private val utkastBrevService: UtkastBrevService
+    private val utkastBrevService: UtkastBrevService,
+    private val behandlingsresultatService: BehandlingsresultatService,
+    private val trygdeavgiftService: TrygdeavgiftService
 ) {
     internal fun kontroller(
         behandlingId: Long,
@@ -141,13 +145,12 @@ class Kontroll(
         val tidligereMedlemskapsperioder = behandling.fagsak.hentInaktiveBehandlinger()
             .map { medlemskapsperiodeService.hentMedlemskapsperioder(it.id) }.flatten()
         val medlemskapsdokument = behandling.hentMedlemskapDokument()
-        val tidligereMedlemskapsperioderForBuker = medlemskapsdokument.medlemsperiode.mapNotNull { medlemskapsperiode ->
-            medlemskapsperiode.id?.let {
-                medlemskapsperiodeService.hentMedlemskapsperioderMedMedlPeriodeID(it)
-            }
-        }
+        val tidligereBehandlingsresultaterMedAvgift =
+            behandlingsresultatService.finnAlleTidligereBehandlingsresultatForAktør(behandling.fagsak.hentBrukersAktørID(), behandling.id)
+                .filter { trygdeavgiftService.harFakturerbarTrygdeavgift(it) }
 
-
+        val tidligereMedlemskapsperioderMedAvgift = tidligereBehandlingsresultaterMedAvgift.flatMap { it.medlemskapsperioder }
+        val nyeMedlemskapsperioderMedAvgift = medlemskapsperioder.filter { trygdeavgiftService.harFakturerbarTrygdeavgift(it.behandlingsresultat) }
 
         return FerdigbehandlingKontrollData(
             medlemskapDokument = medlemskapsdokument,
@@ -156,7 +159,12 @@ class Kontroll(
             fullmektig = fullmektig,
             organisasjonDokument = hentOrganisasjonFullmektig(fullmektig),
             persondataTilFullmektig = hentPersondataFullmektig(fullmektig),
-            medlemskapsperiodeData = MedlemskapsperiodeData(medlemskapsperioder, tidligereMedlemskapsperioder, tidligereMedlemskapsperioderForBuker),
+            medlemskapsperiodeData = MedlemskapsperiodeData(
+                medlemskapsperioder,
+                nyeMedlemskapsperioderMedAvgift,
+                tidligereMedlemskapsperioder,
+                tidligereMedlemskapsperioderMedAvgift
+            ),
             brevUtkast = utkastBrevService.hentUtkast(behandling.id)
         )
     }

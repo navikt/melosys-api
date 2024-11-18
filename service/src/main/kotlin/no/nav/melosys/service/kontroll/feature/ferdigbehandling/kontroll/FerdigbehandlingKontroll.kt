@@ -199,13 +199,12 @@ object FerdigbehandlingKontroll {
     }
 
     fun direkteForutgåendePeriode(kontrollData: FerdigbehandlingKontrollData): Kontrollfeil? {
-        val medlemskapDokument = kontrollData.medlemskapDokument
         val medlemskapsperiodeData = kontrollData.medlemskapsperiodeData
 
-        if (medlemskapsperiodeData != null && medlemskapDokument != null) {
-            for (nyPeriode in medlemskapsperiodeData.nyeMedlemskapsperioder) {
-                for (eksisterendePeriode in medlemskapDokument.medlemsperiode) {
-                    if (nyPeriode.fom == eksisterendePeriode.periode?.tom?.plusDays(1)) {
+        if (medlemskapsperiodeData != null) {
+            for (nyPeriode in medlemskapsperiodeData.nyeMedlemskapsperioderMedAvgift) {
+                for (tidligereMedlemskapsperiode in medlemskapsperiodeData.tidligereMedlemskapsperioderForBukerMedAvgift) {
+                    if (nyPeriode.fom == tidligereMedlemskapsperiode.tom?.plusDays(1)) {
                         return Kontrollfeil(Kontroll_begrunnelser.DIREKTE_FORUTGÅENDE_PERIODE, KontrolldataFeilType.ADVARSEL)
                     }
                 }

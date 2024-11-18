@@ -6,6 +6,7 @@ import java.util.Optional;
 import no.nav.melosys.domain.Behandlingsresultat;
 import org.springframework.data.jpa.repository.EntityGraph;
 import org.springframework.data.jpa.repository.JpaRepository;
+import org.springframework.data.jpa.repository.Query;
 
 public interface BehandlingsresultatRepository extends JpaRepository<Behandlingsresultat, Long> {
     @EntityGraph(attributePaths = {"avklartefakta"}, type = EntityGraph.EntityGraphType.LOAD)
@@ -21,4 +22,17 @@ public interface BehandlingsresultatRepository extends JpaRepository<Behandlings
 
     @EntityGraph(attributePaths = {"lovvalgsperioder", "medlemskapsperioder"}, type = EntityGraph.EntityGraphType.LOAD)
     Optional<Behandlingsresultat> findWithLovvalgOgMedlemskapsperioderById(Long behandlingID);
+
+    @Query(
+        """
+            SELECT b
+            FROM Behandlingsresultat b
+            JOIN b.behandling behandling
+            JOIN behandling.fagsak fagsak
+            JOIN fagsak.aktører aktør
+            WHERE aktør.aktørId = :aktorId
+            AND b.id <> :behandlingsresultatId
+        """
+    )
+    List<Behandlingsresultat> findAllByAktorId(String aktorId, Long behandlingsresultatId);
 }
