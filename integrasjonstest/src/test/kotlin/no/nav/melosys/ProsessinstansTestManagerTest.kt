@@ -131,7 +131,7 @@ class ProsessinstansTestManagerTest {
             }
         }.message shouldBe "Wait for [JFR_KNYTT, IVERKSETT_VEDTAK_EOS]\n" +
             "wait for prosees type:IVERKSETT_VEDTAK_EOS to have status FERDIG\n" +
-            "Condition with no.nav.melosys.AwaitUtil was not fulfilled within 2 milliseconds.\n" +
+            "Condition with Lambda expression in no.nav.melosys.AwaitUtil was not fulfilled within 2 milliseconds.\n" +
             "prosess med type: IVERKSETT_VEDTAK_EOS har status KLAR\n" +
             "expected:<FERDIG> but was:<KLAR>"
     }

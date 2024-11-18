@@ -69,7 +69,7 @@ class AwaitUtilTest {
                 }
                 .waitUntil { i++.toString() == "hei" }
         }.message.shouldBe(
-            "tall kan ikke være 1 - Condition with no.nav.melosys.AwaitUtil was not fulfilled within 2 milliseconds.\n" +
+            "tall kan ikke være 1 - Condition with Lambda expression in no.nav.melosys.AwaitUtil was not fulfilled within 2 milliseconds.\n" +
                 "expected:<\"hei\"> but was:<\"1\">"
         )
     }
