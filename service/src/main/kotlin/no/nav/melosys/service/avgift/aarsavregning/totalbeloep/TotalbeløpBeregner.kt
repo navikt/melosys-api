@@ -1,6 +1,7 @@
 package no.nav.melosys.service.avgift.aarsavregning.totalbeloep
 
 import mu.KotlinLogging
+import no.nav.melosys.domain.avgift.Inntektsperiode
 import no.nav.melosys.domain.avgift.Trygdeavgiftsperiode
 import java.math.BigDecimal
 import java.math.RoundingMode
@@ -58,6 +59,20 @@ object TotalbeløpBeregner {
         val total = totalBeløp.divide(antallMåneder, 2, RoundingMode.HALF_UP)
 
         return total
+    }
+
+    fun Inntektsperiode.kalkulertMndInntekt(verdiAvrundet: Boolean = false): BigDecimal {
+        val beregnetMndBelop = if (erMaanedsbelop()) {
+            avgiftspliktigMndInntekt.verdi
+        } else {
+            månedligBeløpForTotalbeløp(fom, tom, avgiftspliktigTotalinntekt.verdi)
+        }
+
+        if (verdiAvrundet) {
+            return beregnetMndBelop.setScale(0, RoundingMode.HALF_UP)
+        }
+
+        return beregnetMndBelop
     }
 }
 

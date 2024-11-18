@@ -19,7 +19,7 @@ class ÅrsavregningVedtaksbrev(
     val innledningFritekst: String?,
     val begrunnelseFritekst: String?,
     val pliktigMedlemskap: Boolean,
-    val eøsEllerTrygdeavtale: Boolean,
+    val eøsEllerTrygdeavtale: Boolean
 ) : DokgenDto(brevBestilling, Mottakerroller.BRUKER) {
     constructor(
         brevBestilling: ÅrsavregningVedtakBrevBestilling,
@@ -53,7 +53,7 @@ data class Avgiftsperiode(
     val tom: LocalDate,
     val avgiftssats: BigDecimal,
     val avgiftPerMd: BigDecimal,
-    val avgiftspliktigInntektPerMd: BigDecimal ,
+    val avgiftspliktigInntektPerMd: BigDecimal,
     val inntektskilde: String,
     val trygdedekning: String,
     val arbeidsgiveravgiftBetalt: Boolean,
