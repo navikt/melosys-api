@@ -97,8 +97,8 @@ class ÅrsavregningService(
             tidligereFakturertBeloep =
                 TotalbeløpBeregner.hentTotalavgift(tidligereBehandlingsresultat?.trygdeavgiftsperioder?.filter { it.overlapperMedÅr(gjelderÅr) }
                     .orEmpty())
-        }.also {
-            behandlingsresultatService.lagre(behandlingsresultat)
+        }.let { årsavregning ->
+            behandlingsresultatService.lagre(årsavregning.behandlingsresultat).årsavregning
         }
 
         return lagÅrsavregningModelFraÅrsavregning(årsavregning)
@@ -126,6 +126,7 @@ class ÅrsavregningService(
         val år = årsavregning.aar
 
         return ÅrsavregningModel(
+            årsavregningID = årsavregning.id,
             år = år,
             tidligereGrunnlag = hentTidligereTrygdeavgiftsgrunnlag(år, årsavregning.tidligereBehandlingsresultat),
             tidligereAvgift = årsavregning.tidligereBehandlingsresultat?.trygdeavgiftsperioder?.filter { it.overlapperMedÅr(år) }.orEmpty(),
@@ -207,6 +208,7 @@ class ÅrsavregningService(
 }
 
 data class ÅrsavregningModel(
+    val årsavregningID: Long,
     val år: Int,
     val tidligereGrunnlag: Trygdeavgiftsgrunnlag?,
     val tidligereAvgift: List<Trygdeavgiftsperiode>,

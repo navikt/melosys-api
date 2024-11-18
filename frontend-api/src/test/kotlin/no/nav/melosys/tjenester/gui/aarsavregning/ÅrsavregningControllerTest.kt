@@ -40,6 +40,7 @@ internal class ÅrsavregningControllerTest {
     @Test
     fun `hent avregning basert på ID`() {
         every { årsavregningService.finnÅrsavregningForBehandling(any()) } returns ÅrsavregningModel(
+            årsavregningID = 112,
             år = 2023,
             tidligereGrunnlag = Trygdeavgiftsgrunnlag(
                 medlemskapsperioder = listOf(
@@ -129,6 +130,7 @@ internal class ÅrsavregningControllerTest {
 
 
         val expectedJson = """{
+  "aarsavregningID": 112,
   "aar": 2023,
   "tidligereGrunnlagsopplysninger": {
     "trygdeavgiftsgrunnlag": {
@@ -226,6 +228,7 @@ internal class ÅrsavregningControllerTest {
     @Test
     fun `hent avregning basert på ID med total beløp kalkulerer riktig`() {
         every { årsavregningService.finnÅrsavregningForBehandling(any()) } returns ÅrsavregningModel(
+            årsavregningID = 112,
             år = 2023,
             tidligereGrunnlag = Trygdeavgiftsgrunnlag(
                 medlemskapsperioder = listOf(
@@ -329,6 +332,7 @@ internal class ÅrsavregningControllerTest {
 
 
         val expectedJson = """{
+    "aarsavregningID": 112,
     "aar": 2023,
     "tidligereGrunnlagsopplysninger": {
         "trygdeavgiftsgrunnlag": {
