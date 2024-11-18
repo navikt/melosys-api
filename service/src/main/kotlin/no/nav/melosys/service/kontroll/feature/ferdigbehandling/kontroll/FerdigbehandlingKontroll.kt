@@ -34,6 +34,10 @@ object FerdigbehandlingKontroll {
         val medlemskapsperiodeData = kontrollData.medlemskapsperiodeData
 
         if (medlemskapsperiodeData != null && medlemskapsperiodeData.harNyeMedlemskapsperioder()) {
+            if(OverlappendeMedlemskapsperioderRegler.harOverlappendePeriodeMedForskuddsvisFakturering(medlemskapDokument, medlemskapsperiodeData)) {
+                return Kontrollfeil(Kontroll_begrunnelser.OVERLAPPENDE_PERIODE_MED_FORSKUDDSVIS_FAKTURERUNG, KontrolldataFeilType.ADVARSEL)
+            }
+
             return if (OverlappendeMedlemskapsperioderRegler.harOverlappendePeriode(medlemskapDokument, medlemskapsperiodeData))
                 Kontrollfeil(Kontroll_begrunnelser.OVERLAPPENDE_MEDL_PERIODER, KontrolldataFeilType.FEIL) else null
         }
@@ -55,6 +59,8 @@ object FerdigbehandlingKontroll {
         ) {
             return Kontrollfeil(Kontroll_begrunnelser.OVERLAPPENDE_MEDL_PERIODER, KontrolldataFeilType.ADVARSEL)
         }
+
+
 
         if (OverlappendeMedlemskapsperioderRegler.harOverlappendePeriode(medlemskapDokument, kontrollPeriode, opprinneligLovvalgsperiode)) {
             return Kontrollfeil(Kontroll_begrunnelser.OVERLAPPENDE_MEDL_PERIODER, KontrolldataFeilType.FEIL)
@@ -192,6 +198,23 @@ object FerdigbehandlingKontroll {
         return null
     }
 
+    fun direkteForutgåendePeriode(kontrollData: FerdigbehandlingKontrollData): Kontrollfeil? {
+        val medlemskapDokument = kontrollData.medlemskapDokument
+        val medlemskapsperiodeData = kontrollData.medlemskapsperiodeData
+
+        if (medlemskapsperiodeData != null && medlemskapDokument != null) {
+            for (nyPeriode in medlemskapsperiodeData.nyeMedlemskapsperioder) {
+                for (eksisterendePeriode in medlemskapDokument.medlemsperiode) {
+                    if (nyPeriode.fom == eksisterendePeriode.periode?.tom?.plusDays(1)) {
+                        return Kontrollfeil(Kontroll_begrunnelser.DIREKTE_FORUTGÅENDE_PERIODE, KontrolldataFeilType.ADVARSEL)
+                    }
+                }
+            }
+        }
+
+        return null
+    }
+
     fun åpentUtkastFinnes(kontrollData: FerdigbehandlingKontrollData): Kontrollfeil? =
         if (kontrollData.brevUtkast.isEmpty()) null else Kontrollfeil(Kontroll_begrunnelser.ÅPENT_UTKAST)
 
@@ -208,7 +231,11 @@ object FerdigbehandlingKontroll {
     }
 
     fun kunEnAvklartVirksomhet(kontrollData: FerdigbehandlingKontrollData): Kontrollfeil? {
-        if (kontrollData.antallArbeidsgivere != 1 && kontrollData.behandlingstema in listOf(Behandlingstema.UTSENDT_ARBEIDSTAKER, Behandlingstema.UTSENDT_SELVSTENDIG, Behandlingstema.ARBEID_TJENESTEPERSON_ELLER_FLY)
+        if (kontrollData.antallArbeidsgivere != 1 && kontrollData.behandlingstema in listOf(
+                Behandlingstema.UTSENDT_ARBEIDSTAKER,
+                Behandlingstema.UTSENDT_SELVSTENDIG,
+                Behandlingstema.ARBEID_TJENESTEPERSON_ELLER_FLY
+            )
         ) {
             return Kontrollfeil(Kontroll_begrunnelser.IKKE_KUN_EN_VIRKSOMHET_BREV)
         }

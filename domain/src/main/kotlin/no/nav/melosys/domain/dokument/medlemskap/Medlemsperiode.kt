@@ -13,7 +13,7 @@ data class Medlemsperiode(
     var lovvalg: String? = null,
     var trygdedekning: String? = null,
     var kildedokumenttype: String? = null,
-    var kilde: String? = null,
+    var kilde: String? = null
 ) : HarPeriode {
     companion object {
         private const val KILDE_LÅNEKASSEN = "LAANEKASSEN"

@@ -1,6 +1,7 @@
 package no.nav.melosys.service.kontroll.feature.ferdigbehandling.data
 
 import no.nav.melosys.domain.Aktoer
+import no.nav.melosys.domain.Behandlingsresultat
 import no.nav.melosys.domain.Lovvalgsperiode
 import no.nav.melosys.domain.brev.utkast.UtkastBrev
 import no.nav.melosys.domain.dokument.medlemskap.MedlemskapDokument

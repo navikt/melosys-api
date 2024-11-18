@@ -4,7 +4,8 @@ import no.nav.melosys.domain.Medlemskapsperiode
 
 data class MedlemskapsperiodeData(
     val nyeMedlemskapsperioder: List<Medlemskapsperiode>,
-    val tidligereMedlemskapsperioder: List<Medlemskapsperiode> = emptyList()
+    val tidligereMedlemskapsperioder: List<Medlemskapsperiode> = emptyList(),
+    val tidligereMedlemskapsperioderForBuker: List<Medlemskapsperiode> = emptyList()
 ) {
 
     fun harNyeMedlemskapsperioder(): Boolean {

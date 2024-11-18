@@ -140,15 +140,23 @@ class Kontroll(
         val medlemskapsperioder = medlemskapsperiodeService.hentMedlemskapsperioder(behandling.id)
         val tidligereMedlemskapsperioder = behandling.fagsak.hentInaktiveBehandlinger()
             .map { medlemskapsperiodeService.hentMedlemskapsperioder(it.id) }.flatten()
+        val medlemskapsdokument = behandling.hentMedlemskapDokument()
+        val tidligereMedlemskapsperioderForBuker = medlemskapsdokument.medlemsperiode.mapNotNull { medlemskapsperiode ->
+            medlemskapsperiode.id?.let {
+                medlemskapsperiodeService.hentMedlemskapsperioderMedMedlPeriodeID(it)
+            }
+        }
+
+
 
         return FerdigbehandlingKontrollData(
-            medlemskapDokument = behandling.hentMedlemskapDokument(),
+            medlemskapDokument = medlemskapsdokument,
             persondata = hentPersondata(behandling),
             mottatteOpplysningerData = behandling.mottatteOpplysninger.mottatteOpplysningerData,
             fullmektig = fullmektig,
             organisasjonDokument = hentOrganisasjonFullmektig(fullmektig),
             persondataTilFullmektig = hentPersondataFullmektig(fullmektig),
-            medlemskapsperiodeData = MedlemskapsperiodeData(medlemskapsperioder, tidligereMedlemskapsperioder),
+            medlemskapsperiodeData = MedlemskapsperiodeData(medlemskapsperioder, tidligereMedlemskapsperioder, tidligereMedlemskapsperioderForBuker),
             brevUtkast = utkastBrevService.hentUtkast(behandling.id)
         )
     }
