@@ -61,7 +61,6 @@ public final class OverlappendeMedlemskapsperioderRegler {
         return medlemskapsperiodeData.getNyeMedlemskapsperioderMedAvgift().stream().anyMatch(kontrollperiode ->
             medlemskapDokument.hentMedlemsperioderHvorKildeIkkeLånekassen().stream()
                 .filter(medlemsperiode -> !PeriodestatusMedl.AVST.kode.equals(medlemsperiode.getStatus()))
-                .filter(medlemsperiode -> medlemskapsperiodeData.medlIdEksistererPåTidligereMedlemskapsperiodeMedAvgift(medlemsperiode.getId()))
                 .anyMatch(medlemsperiode ->
                     PeriodeRegler.periodeOverlapper(kontrollperiode, medlemsperiode.getPeriode()) && (kontrollperiode.getMedlPeriodeID() == null || !Objects.equals(kontrollperiode.getMedlPeriodeID(), medlemsperiode.getId()))
                 )

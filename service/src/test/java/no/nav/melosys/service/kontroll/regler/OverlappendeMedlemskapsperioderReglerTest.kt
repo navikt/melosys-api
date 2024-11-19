@@ -3,14 +3,16 @@ package no.nav.melosys.service.kontroll.regler
 import io.kotest.assertions.throwables.shouldThrow
 import io.kotest.matchers.booleans.shouldBeFalse
 import io.kotest.matchers.booleans.shouldBeTrue
-import no.nav.melosys.domain.Behandlingsresultat
 import no.nav.melosys.domain.Lovvalgsperiode
 import no.nav.melosys.domain.Medlemskapsperiode
 import no.nav.melosys.domain.dokument.medlemskap.MedlemskapDokument
 import no.nav.melosys.domain.dokument.medlemskap.Medlemsperiode
 import no.nav.melosys.domain.dokument.medlemskap.Periode
 import no.nav.melosys.domain.dokument.sed.SedDokument
-import no.nav.melosys.domain.kodeverk.*
+import no.nav.melosys.domain.kodeverk.InnvilgelsesResultat
+import no.nav.melosys.domain.kodeverk.Landkoder
+import no.nav.melosys.domain.kodeverk.Medlemskapstyper
+import no.nav.melosys.domain.kodeverk.Trygdedekninger
 import no.nav.melosys.integrasjon.medl.PeriodestatusMedl
 import no.nav.melosys.service.kontroll.feature.ferdigbehandling.data.MedlemskapsperiodeData
 import org.junit.jupiter.api.Test
@@ -316,20 +318,19 @@ internal class OverlappendeMedlemskapsperioderReglerTest {
         ).shouldBeTrue()
     }
 
-
     @Test
     fun harOverlappendePeriode_perioderMedForskuddsvisFakturering_treff() {
         val medlemskapDokument = lagMedlemskapsDokument("NOR")
-        val kontrollMedlemskapsperioder = listOf(
-            lagMedlemskapsperiodeMedBehandlingsresultatMedTrygdeavgiftsType(LocalDate.EPOCH.plusYears(1), LocalDate.EPOCH.plusYears(2), 3L),
+        val kontrollMedlemskapsperioderMedAvgift = listOf(
+            lagMedlemskapsperiode(LocalDate.EPOCH, LocalDate.EPOCH.plusYears(2)),
         )
-        val tidligereMedlemskapsperiodeForBruker = listOf(
-            lagMedlemskapsperiodeMedBehandlingsresultatMedTrygdeavgiftsType(LocalDate.EPOCH, LocalDate.EPOCH.plusYears(2),1L),
+        val tidligereMedlemskapsperioderMedAvgift = listOf(
+            lagMedlemskapsperiode(LocalDate.EPOCH, LocalDate.EPOCH.plusYears(2)),
         )
 
         OverlappendeMedlemskapsperioderRegler.harOverlappendePeriodeMedForskuddsvisFakturering(
             medlemskapDokument,
-            MedlemskapsperiodeData(kontrollMedlemskapsperioder, emptyList(), tidligereMedlemskapsperiodeForBruker)
+            MedlemskapsperiodeData(emptyList(), emptyList(), kontrollMedlemskapsperioderMedAvgift, tidligereMedlemskapsperioderMedAvgift)
         ).shouldBeTrue()
     }
 
@@ -389,22 +390,6 @@ internal class OverlappendeMedlemskapsperioderReglerTest {
             innvilgelsesresultat = InnvilgelsesResultat.DELVIS_INNVILGET
             medlemskapstype = Medlemskapstyper.FRIVILLIG
             trygdedekning = Trygdedekninger.FTRL_2_9_FØRSTE_LEDD_C_HELSE_PENSJON
-        }
-    }
-
-
-    private fun lagMedlemskapsperiodeMedBehandlingsresultatMedTrygdeavgiftsType(fraOgMed: LocalDate, tilOgMed: LocalDate, medlemskapPeriodeID: Long): Medlemskapsperiode {
-        return Medlemskapsperiode().apply {
-            id = 1L
-            fom = fraOgMed
-            tom = tilOgMed
-            innvilgelsesresultat = InnvilgelsesResultat.DELVIS_INNVILGET
-            medlemskapstype = Medlemskapstyper.FRIVILLIG
-            trygdedekning = Trygdedekninger.FTRL_2_9_FØRSTE_LEDD_C_HELSE_PENSJON
-            behandlingsresultat = Behandlingsresultat().apply {
-                trygdeavgiftType = Trygdeavgift_typer.FORELØPIG
-            }
-            medlPeriodeID = medlemskapPeriodeID
         }
     }
 
