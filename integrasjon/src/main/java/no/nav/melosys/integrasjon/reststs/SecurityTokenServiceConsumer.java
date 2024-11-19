@@ -60,24 +60,25 @@ public class SecurityTokenServiceConsumer implements BasicAuthAware {
 
     private Map<String, Object> getResponseForSamlOnBehalfOfToken() {
         return webClient.post()
-            .uri(createUriStringForOnBehalfOfTokenSaml())
+            .uri("/token/exchange")
             .header(HttpHeaders.ACCEPT, MediaType.APPLICATION_JSON_VALUE)
             .header(HttpHeaders.CONTENT_TYPE, MediaType.APPLICATION_FORM_URLENCODED_VALUE)
             .header(HttpHeaders.AUTHORIZATION, basicAuth())
+            .bodyValue(lagFormDataForTokenExchange())
             .retrieve()
-            .bodyToMono(new ParameterizedTypeReference<Map<String, Object>>() {
-            })
+            .bodyToMono(new ParameterizedTypeReference<Map<String, Object>>() {})
             .block();
     }
 
-    private String createUriStringForOnBehalfOfTokenSaml() {
+    private MultiValueMap<String, String> lagFormDataForTokenExchange() {
         String userToken = SubjectHandler.getInstance().getOidcTokenString();
 
-        return UriComponentsBuilder.fromPath("/token/exchange")
-            .queryParam("grant_type", "urn:ietf:params:oauth:grant-type:token-exchange")
-            .queryParam("requested_token_type", "urn:ietf:params:oauth:token-type:saml2")
-            .queryParam("subject_token_type", "urn:ietf:params:oauth:token-type:access_token")
-            .queryParam("subject_token", userToken)
-            .toUriString();
+        MultiValueMap<String, String> formData = new LinkedMultiValueMap<>();
+        formData.add("grant_type", "urn:ietf:params:oauth:grant-type:token-exchange");
+        formData.add("requested_token_type", "urn:ietf:params:oauth:token-type:saml2");
+        formData.add("subject_token_type", "urn:ietf:params:oauth:token-type:access_token");
+        formData.add("subject_token", userToken);
+        return formData;
     }
+
 }
