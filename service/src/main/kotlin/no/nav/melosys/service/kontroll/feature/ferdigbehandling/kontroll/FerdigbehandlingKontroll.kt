@@ -34,7 +34,7 @@ object FerdigbehandlingKontroll {
         val medlemskapsperiodeData = kontrollData.medlemskapsperiodeData
 
         if (medlemskapsperiodeData != null && medlemskapsperiodeData.harNyeMedlemskapsperioder()) {
-            if(OverlappendeMedlemskapsperioderRegler.harOverlappendePeriodeMedForskuddsvisFakturering(medlemskapDokument, medlemskapsperiodeData)) {
+            if(OverlappendeMedlemskapsperioderRegler.harOverlappendePeriodeMedForskuddsvisFakturering(medlemskapsperiodeData)) {
                 return Kontrollfeil(Kontroll_begrunnelser.OVERLAPPENDE_PERIODE_MED_FORSKUDDSVIS_FAKTURERUNG, KontrolldataFeilType.ADVARSEL)
             }
 

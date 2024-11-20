@@ -56,7 +56,7 @@ class BehandlingsresultatService(
         behandlingsresultatRepository.findAllByFakturaserieReferanse(fakturaserieReferanse)
 
     fun finnAlleTidligereBehandlingsresultatForAktør(aktørId: String, behandlingsresultatId: Long): List<Behandlingsresultat> =
-        behandlingsresultatRepository.findAllByAktorId(aktørId, behandlingsresultatId)
+        behandlingsresultatRepository.findAllByAktorIdExceptCurrent(aktørId, behandlingsresultatId)
 
     fun hentBehandlingsresultatMedAnmodningsperioder(behandlingsid: Long): Behandlingsresultat =
         behandlingsresultatRepository.findWithAnmodningsperioderById(behandlingsid)

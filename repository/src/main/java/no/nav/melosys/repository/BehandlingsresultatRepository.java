@@ -34,5 +34,5 @@ public interface BehandlingsresultatRepository extends JpaRepository<Behandlings
             AND b.id <> :behandlingsresultatId
         """
     )
-    List<Behandlingsresultat> findAllByAktorId(String aktorId, Long behandlingsresultatId);
+    List<Behandlingsresultat> findAllByAktorIdExceptCurrent(String aktorId, Long behandlingsresultatId);
 }

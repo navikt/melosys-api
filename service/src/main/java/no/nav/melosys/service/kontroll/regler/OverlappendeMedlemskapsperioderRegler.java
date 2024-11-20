@@ -56,13 +56,11 @@ public final class OverlappendeMedlemskapsperioderRegler {
         );
     }
 
-    public static boolean harOverlappendePeriodeMedForskuddsvisFakturering(MedlemskapDokument medlemskapDokument,
-                                                                           MedlemskapsperiodeData medlemskapsperiodeData) {
+    public static boolean harOverlappendePeriodeMedForskuddsvisFakturering(MedlemskapsperiodeData medlemskapsperiodeData) {
         return medlemskapsperiodeData.getNyeMedlemskapsperioderMedAvgift().stream().anyMatch(kontrollperiode ->
-            medlemskapDokument.hentMedlemsperioderHvorKildeIkkeLånekassen().stream()
-                .filter(medlemsperiode -> !PeriodestatusMedl.AVST.kode.equals(medlemsperiode.getStatus()))
+            medlemskapsperiodeData.getTidligereMedlemskapsperioderForBukerMedAvgift().stream()
                 .anyMatch(medlemsperiode ->
-                    PeriodeRegler.periodeOverlapper(kontrollperiode, medlemsperiode.getPeriode()) && (kontrollperiode.getMedlPeriodeID() == null || !Objects.equals(kontrollperiode.getMedlPeriodeID(), medlemsperiode.getId()))
+                    PeriodeRegler.periodeOverlapper(kontrollperiode, medlemsperiode) && (kontrollperiode.getMedlPeriodeID() == null || !Objects.equals(kontrollperiode.getMedlPeriodeID(), medlemsperiode.getId()))
                 )
         );
     }
