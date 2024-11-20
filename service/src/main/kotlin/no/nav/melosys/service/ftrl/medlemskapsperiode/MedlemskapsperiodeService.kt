@@ -30,6 +30,11 @@ class MedlemskapsperiodeService(
         return behandlingsresultatService.hentBehandlingsresultat(behandlingsresultatID).medlemskapsperioder.toList()
     }
 
+    @Transactional(readOnly = true)
+    fun hentMedlemskapsperioderMedMedlPeriodeID(medlPeriodeID: Long): Medlemskapsperiode? {
+        return medlemskapsperiodeRepository.findByMedlPeriodeID(medlPeriodeID).orElse(null)
+    }
+
     @Transactional
     fun opprettMedlemskapsperiode(
         behandlingsresultatID: Long,

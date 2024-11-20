@@ -33,8 +33,10 @@ import no.nav.melosys.exception.KontrolldataFeilType
 import no.nav.melosys.integrasjon.medl.PeriodestatusMedl
 import no.nav.melosys.service.LovvalgsperiodeService
 import no.nav.melosys.service.SaksbehandlingDataFactory
+import no.nav.melosys.service.avgift.TrygdeavgiftService
 import no.nav.melosys.service.avklartefakta.AvklarteVirksomheterService
 import no.nav.melosys.service.behandling.BehandlingService
+import no.nav.melosys.service.behandling.BehandlingsresultatService
 import no.nav.melosys.service.brev.UtkastBrevService
 import no.nav.melosys.service.ftrl.medlemskapsperiode.MedlemskapsperiodeService
 import no.nav.melosys.service.persondata.PersondataFasade
@@ -73,6 +75,11 @@ internal class KontrollTest {
     @RelaxedMockK
     lateinit var utkastBrevService: UtkastBrevService
 
+    @RelaxedMockK
+    lateinit var behandlingsresultatService: BehandlingsresultatService
+
+    @RelaxedMockK
+    lateinit var trygdeavgiftService: TrygdeavgiftService
 
     private val behandlingID = 1L
     private val lovvalgsperiode = Lovvalgsperiode().apply {
@@ -95,8 +102,16 @@ internal class KontrollTest {
         })
 
         mockedKontroll = Kontroll(
-            behandlingService, lovvalgsperiodeService, avklarteVirksomheterService, persondataFasade,
-            organisasjonOppslagService, saksbehandlingRegler, medlemskapsperiodeService, utkastBrevService
+            behandlingService,
+            lovvalgsperiodeService,
+            avklarteVirksomheterService,
+            persondataFasade,
+            organisasjonOppslagService,
+            saksbehandlingRegler,
+            medlemskapsperiodeService,
+            utkastBrevService,
+            behandlingsresultatService,
+            trygdeavgiftService
         )
     }
 

@@ -319,6 +319,34 @@ internal class OverlappendeMedlemskapsperioderReglerTest {
     }
 
     @Test
+    fun harOverlappendePeriode_perioderMedForskuddsvisFakturering_treff() {
+        val kontrollMedlemskapsperioderMedAvgift = listOf(
+            lagMedlemskapsperiode(LocalDate.EPOCH, LocalDate.EPOCH.plusYears(2)),
+        )
+        val tidligereMedlemskapsperioderMedAvgift = listOf(
+            lagMedlemskapsperiode(LocalDate.EPOCH, LocalDate.EPOCH.plusYears(2)),
+        )
+
+        OverlappendeMedlemskapsperioderRegler.harOverlappendePeriodeMedForskuddsvisFakturering(
+            MedlemskapsperiodeData(emptyList(), emptyList(), kontrollMedlemskapsperioderMedAvgift, tidligereMedlemskapsperioderMedAvgift)
+        ).shouldBeTrue()
+    }
+
+    @Test
+    fun harOverlappendePeriode_perioderMedForskuddsvisFakturering_ingenTreff() {
+        val kontrollMedlemskapsperioderMedAvgift = listOf(
+            lagMedlemskapsperiode(LocalDate.EPOCH, LocalDate.EPOCH.plusYears(2)),
+        )
+        val tidligereMedlemskapsperioderMedAvgift = listOf(
+            lagMedlemskapsperiode(LocalDate.EPOCH.minusYears(3), LocalDate.EPOCH.minusYears(2)),
+        )
+
+        OverlappendeMedlemskapsperioderRegler.harOverlappendePeriodeMedForskuddsvisFakturering(
+            MedlemskapsperiodeData(emptyList(), emptyList(), kontrollMedlemskapsperioderMedAvgift, tidligereMedlemskapsperioderMedAvgift)
+        ).shouldBeFalse()
+    }
+
+    @Test
     fun harOverlappendePeriode_periodeMedAvstStatus_ingenTreff() {
         val medlemskapDokument = lagMedlemskapsDokument("NOR").apply {
             getMedlemsperiode()[0].status = "AVST"

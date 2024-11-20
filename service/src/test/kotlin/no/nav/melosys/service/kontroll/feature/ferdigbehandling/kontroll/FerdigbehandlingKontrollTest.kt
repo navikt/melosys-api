@@ -265,7 +265,7 @@ class FerdigbehandlingKontrollTest {
         )
         val kontrollData = lagFerdigbehandlingKontrollData(
             medlemskapDokument = medlemskapsDokument,
-            medlemskapsperiodeData = MedlemskapsperiodeData(overlappendeMedlemskapsperioder, tidligereMedlemskapsperioder),
+            medlemskapsperiodeData = MedlemskapsperiodeData(overlappendeMedlemskapsperioder, tidligereMedlemskapsperioder, emptyList(), emptyList()),
         )
 
 
@@ -273,6 +273,45 @@ class FerdigbehandlingKontrollTest {
 
 
         kontrollfeil.shouldBeNull()
+    }
+
+    @Test
+    fun `medlemskapsperioder med direkte forutgående periode, skal gi kontrollfeil`() {
+        val medlemskapsDokument = MedlemskapDokument().apply {
+            medlemsperiode = listOf(
+                Medlemsperiode(periode = Periode(LocalDate.now(), LocalDate.now().plusDays(4))).apply {
+                    id = 12345
+                    land = "SWE"
+                    status = "GYLD"
+                }
+            )
+        }
+
+        val nyeMedlemskapsperioderMedAvgift = listOf(
+            lagMedlemskapsperiode(
+                LocalDate.now().plusDays(2), LocalDate.now().plusDays(10)
+            )
+        )
+
+        val tidligereMedlemskapsperioderMedAvgift = listOf(
+            lagMedlemskapsperiode(
+                LocalDate.now(), LocalDate.now().plusDays(1)
+            ).apply { medlPeriodeID = 12345 }
+        )
+
+        val kontrollData = lagFerdigbehandlingKontrollData(
+            medlemskapDokument = medlemskapsDokument,
+            medlemskapsperiodeData = MedlemskapsperiodeData(emptyList(), emptyList(), nyeMedlemskapsperioderMedAvgift, tidligereMedlemskapsperioderMedAvgift),
+        )
+
+
+        val kontrollfeil = FerdigbehandlingKontroll.direkteForutgåendePeriode(kontrollData)
+
+
+        kontrollfeil.shouldNotBeNull().run {
+            kode.shouldBe(Kontroll_begrunnelser.DIREKTE_FORUTGÅENDE_PERIODE)
+            type.shouldBe(KontrolldataFeilType.ADVARSEL)
+        }
     }
 
     @Test

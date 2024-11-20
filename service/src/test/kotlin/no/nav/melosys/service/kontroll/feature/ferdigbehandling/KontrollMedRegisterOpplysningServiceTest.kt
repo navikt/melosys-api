@@ -22,8 +22,10 @@ import no.nav.melosys.domain.kodeverk.lovvalgsbestemmelser.Lovvalgbestemmelser_8
 import no.nav.melosys.domain.mottatteopplysninger.MottatteOpplysningerData
 import no.nav.melosys.service.LovvalgsperiodeService
 import no.nav.melosys.service.SaksbehandlingDataFactory
+import no.nav.melosys.service.avgift.TrygdeavgiftService
 import no.nav.melosys.service.avklartefakta.AvklarteVirksomheterService
 import no.nav.melosys.service.behandling.BehandlingService
+import no.nav.melosys.service.behandling.BehandlingsresultatService
 import no.nav.melosys.service.brev.UtkastBrevService
 import no.nav.melosys.service.ftrl.medlemskapsperiode.MedlemskapsperiodeService
 import no.nav.melosys.service.persondata.PersondataFasade
@@ -66,6 +68,12 @@ internal class KontrollMedRegisterOpplysningServiceTest {
     @RelaxedMockK
     lateinit var utkastBrevService: UtkastBrevService
 
+    @RelaxedMockK
+    lateinit var behandlingsresultatService: BehandlingsresultatService
+
+    @RelaxedMockK
+    lateinit var trygdeavgiftService: TrygdeavgiftService
+
     lateinit var mockedKontrollMedRegisterOpplysning: KontrollMedRegisteropplysning
 
     private val BEHANDLING_ID = 1L
@@ -77,8 +85,16 @@ internal class KontrollMedRegisterOpplysningServiceTest {
         every { behandlingService.hentBehandlingMedSaksopplysninger(BEHANDLING_ID) } returns behandling
 
         val mockedKontroll = Kontroll(
-            behandlingService, lovvalgsperiodeService, avklarteVirksomheterService, persondataFasade,
-            organisasjonOppslagService, saksbehandlingRegler, medlemskapsperiodeService, utkastBrevService
+            behandlingService,
+            lovvalgsperiodeService,
+            avklarteVirksomheterService,
+            persondataFasade,
+            organisasjonOppslagService,
+            saksbehandlingRegler,
+            medlemskapsperiodeService,
+            utkastBrevService,
+            behandlingsresultatService,
+            trygdeavgiftService
         )
         mockedKontrollMedRegisterOpplysning =
             KontrollMedRegisteropplysning(behandlingService, persondataFasade, registeropplysningerService, mockedKontroll)
