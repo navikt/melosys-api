@@ -39,6 +39,10 @@ class GyldigeTrygdedekningerService(private val unleash: Unleash) {
         Trygdedekninger.FTRL_2_9_FØRSTE_LEDD_C_ANDRE_LEDD_TREDJE_LEDD_HELSE_PENSJON_SYKE_FORELDREPENGER_YRKESSKADE,
     )
 
+    private val GYLDIGE_TRYGDEDEKNINGER_SPESIELLE_GRUPPER = listOf(
+        Trygdedekninger.TILLEGGSAVTALE_NATO_HELSEDEL,
+    )
+
     fun hentTrygdedekninger(behandlingstema: Behandlingstema, bestemmelse: Folketrygdloven_kap2_bestemmelser?): List<Trygdedekninger> {
         valider(behandlingstema)
 
@@ -58,13 +62,16 @@ class GyldigeTrygdedekningerService(private val unleash: Unleash) {
     }
 
     private fun trygdedekningerFraBehandlingstema(behandlingstema: Behandlingstema): List<Trygdedekninger> {
-        val trygdedekninger = when (behandlingstema) {
+        var trygdedekninger = when (behandlingstema) {
             Behandlingstema.IKKE_YRKESAKTIV -> GYLDIGE_TRYGDEDEKNINGER_IKKE_YRKESAKTIV
             Behandlingstema.YRKESAKTIV -> GYLDIGE_TRYGDEDEKNINGER_YRKESAKTIV
             else -> throw FunksjonellException("Finnes ikke gyldige trygdedekninger for behandlingstema $behandlingstema")
         }
         if (unleash.isEnabled(ToggleName.MELOSYS_FTRL_YRKESSKADEFORDEL)) {
-            return trygdedekninger + TILLEGG_GYLDIGE_TRYGDEDEKNINGER_YRESSKADEFORDEL
+            trygdedekninger = trygdedekninger + TILLEGG_GYLDIGE_TRYGDEDEKNINGER_YRESSKADEFORDEL
+        }
+        if (unleash.isEnabled(ToggleName.MELOSYS_SPESIELLE_GRUPPER)) {
+            trygdedekninger = trygdedekninger + GYLDIGE_TRYGDEDEKNINGER_SPESIELLE_GRUPPER
         }
         return trygdedekninger
     }
