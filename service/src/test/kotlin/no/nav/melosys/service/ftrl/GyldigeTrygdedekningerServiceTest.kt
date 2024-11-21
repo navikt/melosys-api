@@ -129,7 +129,7 @@ class GyldigeTrygdedekningerServiceTest {
             null
         )
             .shouldNotBeNull()
-            .shouldHaveSize(7)
+            .shouldHaveSize(8)
             .run {
                 shouldContainExactly(
                     Trygdedekninger.FULL_DEKNING_FTRL,
@@ -138,7 +138,8 @@ class GyldigeTrygdedekningerServiceTest {
                     Trygdedekninger.FTRL_2_9_FØRSTE_LEDD_B_PENSJON,
                     Trygdedekninger.FTRL_2_9_FØRSTE_LEDD_C_HELSE_PENSJON,
                     Trygdedekninger.FTRL_2_9_FØRSTE_LEDD_C_ANDRE_LEDD_HELSE_PENSJON_SYKE_FORELDREPENGER,
-                    Trygdedekninger.FTRL_2_7_TREDJE_LEDD_B_HELSE_SYKE_FORELDREPENGER
+                    Trygdedekninger.FTRL_2_7_TREDJE_LEDD_B_HELSE_SYKE_FORELDREPENGER,
+                    Trygdedekninger.TILLEGGSAVTALE_NATO_HELSEDEL
                 )
                 shouldNotContainAnyOf(
                     Trygdedekninger.FTRL_2_7A_ANDRE_LEDD_B_HELSE_SYKE_FORELDREPENGER,
@@ -146,6 +147,38 @@ class GyldigeTrygdedekningerServiceTest {
                     Trygdedekninger.FTRL_2_9_FØRSTE_LEDD_C_TREDJE_LEDD_HELSE_PENSJON_YRKESSKADE,
                     Trygdedekninger.FTRL_2_9_FØRSTE_LEDD_C_ANDRE_LEDD_TREDJE_LEDD_HELSE_PENSJON_SYKE_FORELDREPENGER_YRKESSKADE,
                     Trygdedekninger.FTRL_2_9_TREDJE_LEDD_YRKESSKADE
+                )
+            }
+    }
+
+    @Test
+    fun hentTrygdedekninger_spesielle_grupperToggleAv_returnererIkkeNatoHelsedel() {
+        unleash.enableAllExcept(ToggleName.MELOSYS_SPESIELLE_GRUPPER)
+
+
+        gyldigeTrygdedekningerService.hentTrygdedekninger(
+            Behandlingstema.IKKE_YRKESAKTIV,
+            null
+        )
+            .shouldNotBeNull()
+            .shouldHaveSize(10)
+            .run {
+                shouldContainExactly(
+                    Trygdedekninger.FULL_DEKNING_FTRL,
+                    Trygdedekninger.FTRL_2_9_FØRSTE_LEDD_A_HELSE,
+                    Trygdedekninger.FTRL_2_9_FØRSTE_LEDD_A_ANDRE_LEDD_HELSE_SYKE_FORELDREPENGER,
+                    Trygdedekninger.FTRL_2_9_FØRSTE_LEDD_B_PENSJON,
+                    Trygdedekninger.FTRL_2_9_FØRSTE_LEDD_C_HELSE_PENSJON,
+                    Trygdedekninger.FTRL_2_9_FØRSTE_LEDD_C_ANDRE_LEDD_HELSE_PENSJON_SYKE_FORELDREPENGER,
+                    Trygdedekninger.FTRL_2_7_TREDJE_LEDD_B_HELSE_SYKE_FORELDREPENGER,
+                    Trygdedekninger.FTRL_2_9_FØRSTE_LEDD_B_TREDJE_LEDD_PENSJON_YRKESSKADE,
+                    Trygdedekninger.FTRL_2_9_FØRSTE_LEDD_C_TREDJE_LEDD_HELSE_PENSJON_YRKESSKADE,
+                    Trygdedekninger.FTRL_2_9_FØRSTE_LEDD_C_ANDRE_LEDD_TREDJE_LEDD_HELSE_PENSJON_SYKE_FORELDREPENGER_YRKESSKADE
+                )
+                shouldNotContainAnyOf(
+                    Trygdedekninger.FTRL_2_7A_ANDRE_LEDD_B_HELSE_SYKE_FORELDREPENGER,
+                    Trygdedekninger.FTRL_2_9_TREDJE_LEDD_YRKESSKADE,
+                    Trygdedekninger.TILLEGGSAVTALE_NATO_HELSEDEL
                 )
             }
     }
