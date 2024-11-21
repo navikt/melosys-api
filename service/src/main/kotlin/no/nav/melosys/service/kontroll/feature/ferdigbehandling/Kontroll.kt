@@ -161,8 +161,8 @@ class Kontroll(
             persondataTilFullmektig = hentPersondataFullmektig(fullmektig),
             medlemskapsperiodeData = MedlemskapsperiodeData(
                 medlemskapsperioder,
-                nyeMedlemskapsperioderMedAvgift,
                 tidligereMedlemskapsperioder,
+                nyeMedlemskapsperioderMedAvgift,
                 tidligereMedlemskapsperioderMedAvgift
             ),
             brevUtkast = utkastBrevService.hentUtkast(behandling.id)
