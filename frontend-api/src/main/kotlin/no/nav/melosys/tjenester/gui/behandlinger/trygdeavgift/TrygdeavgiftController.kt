@@ -41,7 +41,7 @@ class TrygdeavgiftController(
         aksesskontroll.autoriserSkrivOgTilordnet(behandlingID)
 
         val skatteforholdsperioder = trygdeavgiftsgrunnlagDto.skatteforholdsperioder.tilSkatteforholdsPerioder()
-        val inntektsperioder = trygdeavgiftsgrunnlagDto.inntektskilder.tilInntektsPerioder()
+        val inntektsperioder = trygdeavgiftsgrunnlagDto.inntektskilder.filter { it.avgiftspliktigInntekt != null }.tilInntektsPerioder()
 
         val trygdeavgiftsperiodeSet = trygdeavgiftsberegningService.beregnOgLagreTrygdeavgift(
             behandlingID,

@@ -54,7 +54,7 @@ class TrygdeavgiftsberegningService(
         skatteforholdsperioder: List<SkatteforholdTilNorge>,
         behandlingsresultat: Behandlingsresultat
     ): Set<Trygdeavgiftsperiode> {
-        val inntektsperioderPair = inntektsperioder.map { Pair(UUID.randomUUID(), it) }
+        val inntektsperioderPair = inntektsperioder.filter { it.avgiftspliktigMndInntekt != null }.map { Pair(UUID.randomUUID(), it) }
         val inntektsperiodeDtos = inntektsperioderPair.map { it.second.tilInntektsperiodeDto(it.first) }
 
         val skatteforholdsperioderPair = skatteforholdsperioder.map { Pair(UUID.randomUUID(), it) }
