@@ -24,12 +24,12 @@ public class Penger {
     }
 
     public Penger(BigDecimal verdi) {
-        this.verdi = verdi;
+        this.verdi = verdi == null ? BigDecimal.ZERO : verdi;
         this.valuta = NOK;
     }
 
     public Penger(BigDecimal verdi, String valuta) {
-        this.verdi = verdi;
+        this.verdi = verdi == null ? BigDecimal.ZERO : verdi;
         this.valuta = valuta;
     }
 
