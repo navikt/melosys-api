@@ -77,7 +77,7 @@ object TrygdeavgiftsberegningValidering {
         innvilgedeMedlemskapsperioder: List<Medlemskapsperiode>
     ) {
         val inntektsperiodeDateRange = inntektsperioder.sortedBy { it.fom }
-            .map { inntektsperiode -> LocalDateRange.ofClosed(inntektsperiode.fom, inntektsperiode.tom) }
+            .map { inntektsperiode -> LocalDateRange.of(inntektsperiode.fom, inntektsperiode.tom) }
 
         var samletInntektsperiodeDateRange = finnRangeForPerioderSamlet(inntektsperiodeDateRange, INNTEKTSPERIODE_DEKKER_IKKE_HELE_PERIODEN)
         if (validerPeriodeDekkerIkkeHeleMedlemskapsPerioden(innvilgedeMedlemskapsperioder, samletInntektsperiodeDateRange)) {
@@ -90,7 +90,7 @@ object TrygdeavgiftsberegningValidering {
         innvilgedeMedlemskapsperioder: List<Medlemskapsperiode>
     ) {
         val skatteforholdDateRange = skatteforholdTilNorge.sortedBy { it.fom }
-            .map { skatteforhold -> LocalDateRange.ofClosed(skatteforhold.fom, skatteforhold.tom) }
+            .map { skatteforhold -> LocalDateRange.of(skatteforhold.fom, skatteforhold.tom) }
 
         validerAtDetIkkeFinnesOverlapp(skatteforholdDateRange)
 
@@ -122,7 +122,7 @@ object TrygdeavgiftsberegningValidering {
         innvilgedeMedlemskapsperioder: List<Medlemskapsperiode>, periodeDateRange: LocalDateRange?
     ): Boolean {
         val sortertMedlemskapsperiode = innvilgedeMedlemskapsperioder.sortedBy { it.fom }
-        return LocalDateRange.ofClosed(
+        return LocalDateRange.of(
             sortertMedlemskapsperiode.first().fom,
             sortertMedlemskapsperiode.last().tom
         ) != periodeDateRange
