@@ -101,11 +101,44 @@ class FerdigbehandlingKontrollTest {
         }
         val kontrollData = lagFerdigbehandlingKontrollData(medlemskapDokument = medlemskapsDokument, lovvalgsperiode = lovvalgsperiode)
 
+        val kontrollfeil = FerdigbehandlingKontroll.overlappendePeriode(kontrollData)
+
+        kontrollfeil.shouldNotBeNull().kode.shouldBe(Kontroll_begrunnelser.OVERLAPPENDE_MEDL_PERIODER)
+    }
+
+    @Test
+    fun `overlappende periode med forskuddsvis fakturering skal gi advarsel`() {
+        val medlemskapsperiodeData = MedlemskapsperiodeData(
+            nyeMedlemskapsperioderMedAvgift = listOf(
+                Medlemskapsperiode().apply {
+                    fom = LocalDate.of(1990, 9, 9)
+                    tom = fom.plusDays(3)
+                    medlPeriodeID = 2
+                }
+            ),
+            tidligereMedlemskapsperioderForBukerMedAvgift = listOf(
+                Medlemskapsperiode().apply {
+                    fom = LocalDate.of(1990, 9, 10)
+                    tom = fom.plusDays(1).minusDays(2)
+                    medlPeriodeID = 1
+                }
+            ),
+            nyeMedlemskapsperioder = listOf(
+                Medlemskapsperiode().apply {
+                    fom = LocalDate.of(1990, 9, 9)
+                    tom = fom.plusDays(3)
+                    medlPeriodeID = 2
+                }
+            )
+        )
+
+        val medlemskapDokument = MedlemskapDokument()
+
+        val kontrollData = lagFerdigbehandlingKontrollData(medlemskapsperiodeData = medlemskapsperiodeData, medlemskapDokument = medlemskapDokument)
 
         val kontrollfeil = FerdigbehandlingKontroll.overlappendePeriode(kontrollData)
 
-
-        kontrollfeil.shouldNotBeNull().kode.shouldBe(Kontroll_begrunnelser.OVERLAPPENDE_MEDL_PERIODER)
+        kontrollfeil.shouldNotBeNull().kode.shouldBe(Kontroll_begrunnelser.OVERLAPPENDE_PERIODE_MED_FORSKUDDSVIS_FAKTURERUNG)
     }
 
     @Test
