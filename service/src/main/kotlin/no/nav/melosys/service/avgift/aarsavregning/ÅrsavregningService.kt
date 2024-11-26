@@ -152,7 +152,7 @@ class ÅrsavregningService(
             .filter { it.erAvsluttet() }
             .map { behandlingsresultatService.hentBehandlingsresultat(it.id) }
             .filter { it.harInnvilgetMedlemskapsperiodeSomOverlapperMedÅr(år) }
-            .sortedBy { it.registrertDato }
+            .sortedByDescending { it.registrertDato }
             .lastOrNull()
     }
 
