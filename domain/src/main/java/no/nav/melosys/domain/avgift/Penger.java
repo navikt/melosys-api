@@ -24,11 +24,13 @@ public class Penger {
     }
 
     public Penger(BigDecimal verdi) {
+        Objects.requireNonNull(verdi, "Penger kan ikke være null");
         this.verdi = verdi;
         this.valuta = NOK;
     }
 
     public Penger(BigDecimal verdi, String valuta) {
+        Objects.requireNonNull(verdi, "Penger kan ikke være null");
         this.verdi = verdi;
         this.valuta = valuta;
     }
