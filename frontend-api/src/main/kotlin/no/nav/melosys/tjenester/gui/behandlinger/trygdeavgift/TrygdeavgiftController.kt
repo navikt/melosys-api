@@ -12,6 +12,8 @@ import no.nav.melosys.tjenester.gui.dto.trygdeavgift.*
 import no.nav.security.token.support.core.api.Protected
 import org.springframework.http.ResponseEntity
 import org.springframework.web.bind.annotation.*
+import java.math.BigDecimal
+import java.math.BigInteger
 
 @Protected
 @RestController
@@ -105,9 +107,9 @@ class TrygdeavgiftController(
             isArbeidsgiversavgiftBetalesTilSkatt = it.arbeidsgiversavgiftBetales
 
             if (it.erMaanedsbelop) {
-                avgiftspliktigMndInntekt = Penger(it.avgiftspliktigInntekt)
+                avgiftspliktigMndInntekt = Penger(it.avgiftspliktigInntekt ?: BigDecimal.ZERO)
             } else {
-                avgiftspliktigTotalinntekt = Penger(it.avgiftspliktigInntekt)
+                avgiftspliktigTotalinntekt = Penger(it.avgiftspliktigInntekt ?: BigDecimal.ZERO)
             }
         }
     }
