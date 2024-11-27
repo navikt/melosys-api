@@ -34,12 +34,14 @@ object FerdigbehandlingKontroll {
         val medlemskapsperiodeData = kontrollData.medlemskapsperiodeData
 
         if (medlemskapsperiodeData != null && medlemskapsperiodeData.harNyeMedlemskapsperioder()) {
-            if(OverlappendeMedlemskapsperioderRegler.harOverlappendePeriodeMedForskuddsvisFakturering(medlemskapsperiodeData)) {
+             if (OverlappendeMedlemskapsperioderRegler.harOverlappendePeriode(medlemskapDokument, medlemskapsperiodeData))
+                return Kontrollfeil(Kontroll_begrunnelser.OVERLAPPENDE_MEDL_PERIODER, KontrolldataFeilType.FEIL)
+
+            if (OverlappendeMedlemskapsperioderRegler.harOverlappendePeriodeMedForskuddsvisFakturering(medlemskapsperiodeData)) {
                 return Kontrollfeil(Kontroll_begrunnelser.OVERLAPPENDE_PERIODE_MED_FORSKUDDSVIS_FAKTURERUNG, KontrolldataFeilType.ADVARSEL)
             }
 
-            return if (OverlappendeMedlemskapsperioderRegler.harOverlappendePeriode(medlemskapDokument, medlemskapsperiodeData))
-                Kontrollfeil(Kontroll_begrunnelser.OVERLAPPENDE_MEDL_PERIODER, KontrolldataFeilType.FEIL) else null
+            return null
         }
 
         val kontrollPeriode = kontrollData.lovvalgsperiode
