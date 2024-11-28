@@ -24,15 +24,17 @@ class AvklarteFaktaForBestemmelseController(private val avklarteFaktaForBestemme
         @RequestParam("behandlingID", required = true) behandlingID: Long
     ): ResponseEntity<AvklarteFaktaForBestemmelseDto> {
         val avklarteFaktaDtoList =
-            avklarteFaktaForBestemmelse.hentAvklarteFakta(convert(bestemmelse), behandlingID).map { AvklarteFaktaDto(it.type, it.muligeFakta) }
+            avklarteFaktaForBestemmelse.hentAvklarteFakta(konverterTilBestemmelse(bestemmelse), behandlingID)
+                .map { AvklarteFaktaDto(it.type, it.muligeFakta) }
         return ResponseEntity.ok(AvklarteFaktaForBestemmelseDto(avklarteFaktaDtoList))
     }
 
-    private fun convert(source: String): Bestemmelse {
-        require(source.isNotBlank()) { "No matching Bestemmelse found for value: $source" }
+    private fun konverterTilBestemmelse(bestemmelse: String): Bestemmelse {
+        require(bestemmelse.isNotBlank()) { "Bestemmelse kode er påkrevd" }
 
-        return Folketrygdloven_kap2_bestemmelser.values().firstOrNull { it.name == source.uppercase() } ?: Vertslandsavtale_bestemmelser.values()
-            .firstOrNull { it.name == source.uppercase() } ?: throw IllegalArgumentException("No matching Bestemmelse found for value: $source")
+        return Folketrygdloven_kap2_bestemmelser.values().firstOrNull { it.name == bestemmelse.uppercase() }
+            ?: Vertslandsavtale_bestemmelser.values().firstOrNull { it.name == bestemmelse.uppercase() }
+            ?: throw IllegalArgumentException("Finner ikke kodeverk for Bestemmelse: $bestemmelse")
     }
 
     data class AvklarteFaktaForBestemmelseDto(val avklarteFakta: List<AvklarteFaktaDto>)

@@ -44,7 +44,7 @@ class VilkårController(
         val avklarteFakta = requestParams.filterKeys { k -> k in avklartefaktatyperNavn }
             .mapKeys { (k, _) -> Avklartefaktatyper.valueOf(k) }
         val vilkårDtoList = vilkårForBestemmelse.hentVilkår(
-            convert(bestemmelse),
+            konverterTilBestemmelse(bestemmelse),
             Behandlingstema.valueOf(behandlingstema),
             avklarteFakta,
             behandlingID
@@ -54,11 +54,12 @@ class VilkårController(
         return ResponseEntity.ok(VilkårForBestemmelseDto(vilkårDtoList))
     }
 
-    private fun convert(source: String): Bestemmelse {
-        require(source.isNotBlank()) { "No matching Bestemmelse found for value: $source" }
+    private fun konverterTilBestemmelse(bestemmelse: String): Bestemmelse {
+        require(bestemmelse.isNotBlank()) { "Bestemmelse kode er påkrevd" }
 
-        return Folketrygdloven_kap2_bestemmelser.values().firstOrNull { it.name == source.uppercase() } ?: Vertslandsavtale_bestemmelser.values()
-            .firstOrNull { it.name == source.uppercase() } ?: throw IllegalArgumentException("No matching Bestemmelse found for value: $source")
+        return Folketrygdloven_kap2_bestemmelser.values().firstOrNull { it.name == bestemmelse.uppercase() }
+            ?: Vertslandsavtale_bestemmelser.values().firstOrNull { it.name == bestemmelse.uppercase() }
+            ?: throw IllegalArgumentException("Finner ikke kodeverk for Bestemmelse: $bestemmelse")
     }
 
     private fun validerRequestParams(queryParams: Map<String, String>) {
