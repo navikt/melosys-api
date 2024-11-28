@@ -1,17 +1,19 @@
 package no.nav.melosys.service.ftrl.bestemmelse
 
+import no.nav.melosys.domain.kodeverk.Bestemmelse
 import no.nav.melosys.domain.kodeverk.Folketrygdloven_kap2_bestemmelser
 import no.nav.melosys.domain.kodeverk.Trygdedekninger
+import no.nav.melosys.domain.kodeverk.Vertslandsavtale_bestemmelser
 import no.nav.melosys.service.ftrl.medlemskapsperiode.PliktigeMedlemskapsbestemmelser
 
 object LovligeKombinasjonerTrygdedekningBestemmelse {
 
-    val lovligeKombinasjonerDekningBestemmelse = mapOf(
+    val lovligeKombinasjonerDekningBestemmelse: Map<List<Trygdedekninger>, List<Bestemmelse>> = mapOf(
         listOf(Trygdedekninger.FULL_DEKNING_FTRL) to listOf(
             Folketrygdloven_kap2_bestemmelser.FTRL_KAP2_2_7_FØRSTE_LEDD,
             Folketrygdloven_kap2_bestemmelser.FTRL_KAP2_2_7_FJERDE_LEDD,
             Folketrygdloven_kap2_bestemmelser.FTRL_KAP2_2_7A,
-            *PliktigeMedlemskapsbestemmelser.bestemmelser.toTypedArray()
+            *PliktigeMedlemskapsbestemmelser.bestemmelserMedSpesielleGrupper.toTypedArray()
         ),
 
         listOf(Trygdedekninger.FTRL_2_7_TREDJE_LEDD_B_HELSE_SYKE_FORELDREPENGER) to listOf(
@@ -40,20 +42,26 @@ object LovligeKombinasjonerTrygdedekningBestemmelse {
             Folketrygdloven_kap2_bestemmelser.FTRL_KAP2_2_8_FØRSTE_LEDD_D,
             Folketrygdloven_kap2_bestemmelser.FTRL_KAP2_2_8_ANDRE_LEDD,
             Folketrygdloven_kap2_bestemmelser.FTRL_KAP2_2_8_FJERDE_LEDD
+        ),
+
+        listOf(
+            Trygdedekninger.TILLEGGSAVTALE_NATO_HELSEDEL
+        ) to listOf(
+            Vertslandsavtale_bestemmelser.TILLEGGSAVTALE_NATO,
         )
     )
 
-    fun hentLovligeBestemmelser(trygdedekning: Trygdedekninger): List<Folketrygdloven_kap2_bestemmelser> =
+    fun hentLovligeBestemmelser(trygdedekning: Trygdedekninger): List<Bestemmelse> =
         lovligeKombinasjonerDekningBestemmelse[lovligeKombinasjonerDekningBestemmelse.keys.find { it.contains(trygdedekning) }] ?: emptyList()
 
     fun hentLovligeTrygdedekninger(bestemmelse: Folketrygdloven_kap2_bestemmelser): List<Trygdedekninger> =
         lovligeKombinasjonerDekningBestemmelse.filterValues { it.contains(bestemmelse) }.keys.flatten()
 
-    fun erGyldigKombinasjon(bestemmelse: Folketrygdloven_kap2_bestemmelser, trygdedekning: Trygdedekninger): Boolean =
+    fun erGyldigKombinasjon(bestemmelse: Bestemmelse, trygdedekning: Trygdedekninger): Boolean =
         bestemmelse in hentLovligeBestemmelser(trygdedekning)
 
-    fun erBestemmelseGyldigForTrygdedekning(bestemmelse: Folketrygdloven_kap2_bestemmelser, trygdedekning: Trygdedekninger): Boolean {
-        if (bestemmelse in PliktigeMedlemskapsbestemmelser.bestemmelser) {
+    fun erBestemmelseGyldigForTrygdedekning(bestemmelse: Bestemmelse, trygdedekning: Trygdedekninger): Boolean {
+        if (bestemmelse in PliktigeMedlemskapsbestemmelser.bestemmelserMedSpesielleGrupper) {
             return true
         }
         return erGyldigKombinasjon(bestemmelse, trygdedekning)
