@@ -2,6 +2,7 @@ package no.nav.melosys.tjenester.gui.ftrl.medlemskapsperiode
 
 import io.swagger.annotations.Api
 import io.swagger.annotations.ApiOperation
+import no.nav.melosys.domain.kodeverk.Bestemmelse
 import no.nav.melosys.domain.kodeverk.Folketrygdloven_kap2_bestemmelser
 import no.nav.melosys.domain.kodeverk.Trygdedekninger
 import no.nav.melosys.service.ftrl.bestemmelse.LovligeKombinasjonerTrygdedekningBestemmelse
@@ -28,7 +29,7 @@ class LovligeKombinasjonerMedlemskapsperiodeController {
             "trygdedekning",
             required = true
         ) trygdedekning: Trygdedekninger
-    ): ResponseEntity<List<Folketrygdloven_kap2_bestemmelser>> {
+    ): ResponseEntity<List<Bestemmelse>> {
         val bestemmelser = LovligeKombinasjonerTrygdedekningBestemmelse.hentLovligeBestemmelser(trygdedekning)
 
         return ResponseEntity.ok(bestemmelser)

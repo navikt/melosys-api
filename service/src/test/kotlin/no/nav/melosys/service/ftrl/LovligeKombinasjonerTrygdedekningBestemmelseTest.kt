@@ -18,8 +18,8 @@ class LovligeKombinasjonerTrygdedekningBestemmelseTest {
     fun hentLovligeBestemmelser_fullTrygdedekning_returnererAllePliktigeBestemmelseneSamtFlere() {
         LovligeKombinasjonerTrygdedekningBestemmelse.hentLovligeBestemmelser(Trygdedekninger.FULL_DEKNING_FTRL)
             .shouldNotBeNull()
-            .shouldHaveSize(15)
-            .shouldContainAll(PliktigeMedlemskapsbestemmelser.bestemmelser)
+            .shouldHaveSize(19)
+            .shouldContainAll(PliktigeMedlemskapsbestemmelser.bestemmelserMedSpesielleGrupper)
     }
 
 

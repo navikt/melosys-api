@@ -22,7 +22,7 @@ public class KodeSerializer extends StdSerializer<Kodeverk> {
         Folketrygdloven_kap2_bestemmelser.class, Innretningstyper.class, InnvilgelsesResultat.class,
         Medlemskapstyper.class, Tema.class, Trygdedekninger.class, Vilkaar.class, Mottakerroller.class,
         Aktoersroller.class, Trygdeavtale_myndighetsland.class, Land_iso2.class, Skatteplikttype.class,
-        Inntektskildetype.class, Ikkeyrkesaktivsituasjontype.class, Fullmaktstype.class
+        Inntektskildetype.class, Ikkeyrkesaktivsituasjontype.class, Fullmaktstype.class, Vertslandsavtale_bestemmelser.class
     );
 
     public KodeSerializer() {

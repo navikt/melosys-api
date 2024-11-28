@@ -1,7 +1,7 @@
 package no.nav.melosys.service.ftrl.bestemmelse.vilkaar
 
 import no.nav.melosys.domain.kodeverk.Avklartefaktatyper
-import no.nav.melosys.domain.kodeverk.Folketrygdloven_kap2_bestemmelser
+import no.nav.melosys.domain.kodeverk.Bestemmelse
 import no.nav.melosys.domain.kodeverk.Folketrygdloven_kap2_bestemmelser.*
 import no.nav.melosys.domain.kodeverk.Ikkeyrkesaktivrelasjontype
 import no.nav.melosys.domain.kodeverk.Land_iso2
@@ -14,7 +14,7 @@ import org.springframework.stereotype.Component
 @Component
 class VilkårForBestemmelseIkkeYrkesaktiv(val mottatteOpplysningerService: MottatteOpplysningerService) {
     fun hentVilkår(
-        bestemmelse: Folketrygdloven_kap2_bestemmelser,
+        bestemmelse: Bestemmelse,
         avklarteFakta: Map<Avklartefaktatyper, String>,
         behandlingID: Long?
     ): List<Vilkår> {
@@ -93,16 +93,19 @@ class VilkårForBestemmelseIkkeYrkesaktiv(val mottatteOpplysningerService: Motta
                 Vilkår(FTRL_2_5_MEDFØLGENDE_A_E),
                 Vilkår(FTRL_2_5_FORSØRGET_FAMILIEMEDLEM)
             )
+
             Ikkeyrkesaktivrelasjontype.EKTEFELLE_2_5_ANDRE_LEDD_A_TIL_B -> listOf(
                 Vilkår(FTRL_2_5_MEDFØLGENDE_A_E, defaultOppfylt = true),
                 Vilkår(FTRL_2_5_FORSØRGET_FAMILIEMEDLEM),
                 Vilkår(FTRL_2_5_NORSK_STATSBORGER_EØS_BORGER)
             )
+
             Ikkeyrkesaktivrelasjontype.EKTEFELLE_2_5_ANDRE_LEDD_C_TIL_E -> listOf(
                 Vilkår(FTRL_2_5_MEDFØLGENDE_A_E, defaultOppfylt = true),
                 Vilkår(FTRL_2_5_FORSØRGET_FAMILIEMEDLEM),
                 Vilkår(FTRL_FORUTGÅENDE_TRYGDETID)
             )
+
             else -> emptyList()
         }
     }
@@ -114,12 +117,14 @@ class VilkårForBestemmelseIkkeYrkesaktiv(val mottatteOpplysningerService: Motta
                 Vilkår(FTRL_2_1A_TRYGDEKOORDINGERING),
                 Vilkår(FTRL_2_8_FORSØRGET_FAMILIEMEDLEM)
             )
+
             Ikkeyrkesaktivrelasjontype.EKTEFELLE_2_8_FJERDE_LEDD -> listOf(
                 Vilkår(FTRL_2_1A_TRYGDEKOORDINGERING),
                 Vilkår(FTRL_2_8_FORSØRGET_FAMILIEMEDLEM),
                 Vilkår(FTRL_FORUTGÅENDE_TRYGDETID),
                 Vilkår(FTRL_2_8_NÆR_TILKNYTNING_NORGE),
             )
+
             else -> emptyList()
         }
     }
