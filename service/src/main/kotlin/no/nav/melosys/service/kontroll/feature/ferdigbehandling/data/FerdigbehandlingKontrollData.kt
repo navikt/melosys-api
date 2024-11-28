@@ -1,7 +1,7 @@
 package no.nav.melosys.service.kontroll.feature.ferdigbehandling.data
 
 import no.nav.melosys.domain.Aktoer
-import no.nav.melosys.domain.Behandlingsresultat
+import no.nav.melosys.domain.Fagsak
 import no.nav.melosys.domain.Lovvalgsperiode
 import no.nav.melosys.domain.brev.utkast.UtkastBrev
 import no.nav.melosys.domain.dokument.medlemskap.MedlemskapDokument
@@ -23,5 +23,6 @@ data class FerdigbehandlingKontrollData(
     val persondataTilFullmektig: Persondata?,
     val medlemskapsperiodeData: MedlemskapsperiodeData? = null,
     val brevUtkast: List<UtkastBrev>,
-    val antallArbeidsgivere: Int = 0
+    val antallArbeidsgivere: Int = 0,
+    val fagsak: Fagsak? = null
 )

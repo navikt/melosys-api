@@ -11,10 +11,7 @@ import no.nav.melosys.domain.dokument.medlemskap.Medlemsperiode
 import no.nav.melosys.domain.dokument.medlemskap.Periode
 import no.nav.melosys.domain.dokument.organisasjon.OrganisasjonDokument
 import no.nav.melosys.domain.dokument.organisasjon.adresse.SemistrukturertAdresse
-import no.nav.melosys.domain.kodeverk.Aktoersroller
-import no.nav.melosys.domain.kodeverk.InnvilgelsesResultat
-import no.nav.melosys.domain.kodeverk.Medlemskapstyper
-import no.nav.melosys.domain.kodeverk.Trygdedekninger
+import no.nav.melosys.domain.kodeverk.*
 import no.nav.melosys.domain.kodeverk.begrunnelser.Kontroll_begrunnelser
 import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingstema
 import no.nav.melosys.domain.kodeverk.lovvalgsbestemmelser.Lovvalgbestemmelser_883_2004
@@ -309,7 +306,7 @@ class FerdigbehandlingKontrollTest {
     }
 
     @Test
-    fun `medlemskapsperioder med direkte forutgående periode, skal gi kontrollfeil`() {
+    fun `medlemskapsperioder med direkte forutgående periode, skal gi kontrollfeil, dersom tidligere periode er en annen fagsak`() {
         val medlemskapsDokument = MedlemskapDokument().apply {
             medlemsperiode = listOf(
                 Medlemsperiode(periode = Periode(LocalDate.now(), LocalDate.now().plusDays(4))).apply {
@@ -332,19 +329,57 @@ class FerdigbehandlingKontrollTest {
             ).apply { medlPeriodeID = 12345 }
         )
 
+        val fagsak = Fagsak(saksnummer = "test1", status = Saksstatuser.OPPRETTET, tema = Sakstemaer.MEDLEMSKAP_LOVVALG, type = Sakstyper.FTRL)
+
         val kontrollData = lagFerdigbehandlingKontrollData(
             medlemskapDokument = medlemskapsDokument,
             medlemskapsperiodeData = MedlemskapsperiodeData(emptyList(), emptyList(), nyeMedlemskapsperioderMedAvgift, tidligereMedlemskapsperioderMedAvgift),
+            fagsak = fagsak
         )
 
-
         val kontrollfeil = FerdigbehandlingKontroll.direkteForutgåendePeriode(kontrollData)
-
 
         kontrollfeil.shouldNotBeNull().run {
             kode.shouldBe(Kontroll_begrunnelser.DIREKTE_FORUTGÅENDE_PERIODE)
             type.shouldBe(KontrolldataFeilType.ADVARSEL)
         }
+    }
+
+    @Test
+    fun `medlemskapsperioder med direkte forutgående periode, skal ikke gi kontrollfeil, dersom tidligere periode er i samme fagsak`() {
+        val medlemskapsDokument = MedlemskapDokument().apply {
+            medlemsperiode = listOf(
+                Medlemsperiode(periode = Periode(LocalDate.now(), LocalDate.now().plusDays(4))).apply {
+                    id = 12345
+                    land = "SWE"
+                    status = "GYLD"
+                }
+            )
+        }
+
+        val nyeMedlemskapsperioderMedAvgift = listOf(
+            lagMedlemskapsperiode(
+                LocalDate.now().plusDays(2), LocalDate.now().plusDays(10)
+            )
+        )
+
+        val tidligereMedlemskapsperioderMedAvgift = listOf(
+            lagMedlemskapsperiode(
+                LocalDate.now(), LocalDate.now().plusDays(1)
+            ).apply { medlPeriodeID = 12345 }
+        )
+
+        val fagsak = Fagsak(saksnummer = "test", status = Saksstatuser.OPPRETTET, tema = Sakstemaer.MEDLEMSKAP_LOVVALG, type = Sakstyper.FTRL)
+
+        val kontrollData = lagFerdigbehandlingKontrollData(
+            medlemskapDokument = medlemskapsDokument,
+            medlemskapsperiodeData = MedlemskapsperiodeData(emptyList(), emptyList(), nyeMedlemskapsperioderMedAvgift, tidligereMedlemskapsperioderMedAvgift),
+            fagsak = fagsak
+        )
+
+        val kontrollfeil = FerdigbehandlingKontroll.direkteForutgåendePeriode(kontrollData)
+
+        kontrollfeil.shouldBeNull()
     }
 
     @Test
@@ -741,6 +776,11 @@ class FerdigbehandlingKontrollTest {
             innvilgelsesresultat = InnvilgelsesResultat.DELVIS_INNVILGET
             medlemskapstype = Medlemskapstyper.FRIVILLIG
             trygdedekning = Trygdedekninger.FTRL_2_9_FØRSTE_LEDD_C_HELSE_PENSJON
+            behandlingsresultat = Behandlingsresultat().apply {
+                behandling = Behandling().apply {
+                    fagsak = Fagsak(saksnummer = "test", tema = Sakstemaer.MEDLEMSKAP_LOVVALG, status = Saksstatuser.OPPRETTET, type = Sakstyper.FTRL)
+                }
+            }
         }
         return medlemskapsperiode
     }
@@ -758,7 +798,8 @@ class FerdigbehandlingKontrollTest {
         persondataTilFullmektig: Persondata? = null,
         medlemskapsperiodeData: MedlemskapsperiodeData? = null,
         brevUtkast: List<UtkastBrev> = emptyList(),
-        antallArbeidsgivere: Int = 1
+        antallArbeidsgivere: Int = 1,
+        fagsak: Fagsak = Fagsak(saksnummer = "test", status = Saksstatuser.OPPRETTET, tema = Sakstemaer.MEDLEMSKAP_LOVVALG, type = Sakstyper.FTRL)
     ) = FerdigbehandlingKontrollData(
         medlemskapDokument,
         persondata,
@@ -772,6 +813,7 @@ class FerdigbehandlingKontrollTest {
         persondataTilFullmektig,
         medlemskapsperiodeData,
         brevUtkast,
-        antallArbeidsgivere
+        antallArbeidsgivere,
+        fagsak = fagsak
     )
 }

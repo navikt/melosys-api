@@ -201,18 +201,20 @@ object FerdigbehandlingKontroll {
     }
 
     fun direkteForutgåendePeriode(kontrollData: FerdigbehandlingKontrollData): Kontrollfeil? {
-        val medlemskapsperiodeData = kontrollData.medlemskapsperiodeData
+        val medlemskapsperiodeData = kontrollData.medlemskapsperiodeData ?: return null
+        val gjeldendeSaksnummer = kontrollData.fagsak?.saksnummer
+        val tidligereMedlemskapsperioderIandreFagsaker = medlemskapsperiodeData
+            .tidligereMedlemskapsperioderForBukerMedAvgift
+            .filter { it.behandlingsresultat.behandling.fagsak.saksnummer != gjeldendeSaksnummer }
 
-        if (medlemskapsperiodeData != null) {
-            for (nyPeriode in medlemskapsperiodeData.nyeMedlemskapsperioderMedAvgift) {
-                for (tidligereMedlemskapsperiode in medlemskapsperiodeData.tidligereMedlemskapsperioderForBukerMedAvgift) {
-                    if (nyPeriode.fom == tidligereMedlemskapsperiode.tom?.plusDays(1)) {
-                        return Kontrollfeil(Kontroll_begrunnelser.DIREKTE_FORUTGÅENDE_PERIODE, KontrolldataFeilType.ADVARSEL)
-                    }
-                }
+        medlemskapsperiodeData.nyeMedlemskapsperioderMedAvgift.forEach { nyPeriode ->
+            if (tidligereMedlemskapsperioderIandreFagsaker.any { it.tom?.plusDays(1) == nyPeriode.fom }) {
+                return Kontrollfeil(
+                    Kontroll_begrunnelser.DIREKTE_FORUTGÅENDE_PERIODE,
+                    KontrolldataFeilType.ADVARSEL
+                )
             }
         }
-
         return null
     }
 

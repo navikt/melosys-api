@@ -165,7 +165,8 @@ class Kontroll(
                 nyeMedlemskapsperioderMedAvgift,
                 tidligereMedlemskapsperioderMedAvgift
             ),
-            brevUtkast = utkastBrevService.hentUtkast(behandling.id)
+            brevUtkast = utkastBrevService.hentUtkast(behandling.id),
+            fagsak = behandling.fagsak
         )
     }
 
