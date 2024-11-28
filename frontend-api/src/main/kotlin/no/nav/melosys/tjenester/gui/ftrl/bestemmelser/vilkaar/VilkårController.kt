@@ -2,9 +2,7 @@ package no.nav.melosys.tjenester.gui.ftrl.bestemmelser.vilkaar
 
 import io.swagger.annotations.Api
 import mu.KotlinLogging
-import no.nav.melosys.domain.kodeverk.Avklartefaktatyper
-import no.nav.melosys.domain.kodeverk.Folketrygdloven_kap2_bestemmelser
-import no.nav.melosys.domain.kodeverk.Vilkaar
+import no.nav.melosys.domain.kodeverk.*
 import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingstema
 import no.nav.melosys.exception.FunksjonellException
 import no.nav.melosys.service.ftrl.bestemmelse.vilkaar.VilkårForBestemmelse
@@ -32,7 +30,7 @@ class VilkårController(
 
     @GetMapping("/ftrl/bestemmelser/{bestemmelse}/vilkaar")
     fun hentVilkår(
-        @PathVariable bestemmelse: Folketrygdloven_kap2_bestemmelser,
+        @PathVariable bestemmelse: String,
         @RequestParam requestParams: Map<String, String>
     ): ResponseEntity<VilkårForBestemmelseDto> {
         validerRequestParams(requestParams)
@@ -46,7 +44,7 @@ class VilkårController(
         val avklarteFakta = requestParams.filterKeys { k -> k in avklartefaktatyperNavn }
             .mapKeys { (k, _) -> Avklartefaktatyper.valueOf(k) }
         val vilkårDtoList = vilkårForBestemmelse.hentVilkår(
-            bestemmelse,
+            convert(bestemmelse),
             Behandlingstema.valueOf(behandlingstema),
             avklarteFakta,
             behandlingID
@@ -54,6 +52,13 @@ class VilkårController(
 
         log.debug { "FTRL vilkår for bestemmelse: $bestemmelse, $requestParams: $vilkårDtoList" }
         return ResponseEntity.ok(VilkårForBestemmelseDto(vilkårDtoList))
+    }
+
+    private fun convert(source: String): Bestemmelse {
+        require(source.isNotBlank()) { "No matching Bestemmelse found for value: $source" }
+
+        return Folketrygdloven_kap2_bestemmelser.values().firstOrNull { it.name == source.uppercase() } ?: Vertslandsavtale_bestemmelser.values()
+            .firstOrNull { it.name == source.uppercase() } ?: throw IllegalArgumentException("No matching Bestemmelse found for value: $source")
     }
 
     private fun validerRequestParams(queryParams: Map<String, String>) {

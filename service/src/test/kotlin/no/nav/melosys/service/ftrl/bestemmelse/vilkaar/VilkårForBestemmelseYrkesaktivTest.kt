@@ -34,11 +34,16 @@ class VilkårForBestemmelseYrkesaktivTest {
         val mottatteOpplysninger =
             MottatteOpplysninger().apply {
                 mottatteOpplysningerData =
-                    SøknadNorgeEllerUtenforEØS().apply { soeknadsland = Soeknadsland().apply { landkoder = listOf(
-                        Land_iso2.NO.toString()) } }
+                    SøknadNorgeEllerUtenforEØS().apply {
+                        soeknadsland = Soeknadsland().apply {
+                            landkoder = listOf(
+                                Land_iso2.NO.toString()
+                            )
+                        }
+                    }
             }
 
-        every {mottatteOpplysningerService.hentMottatteOpplysninger(1L)} returns mottatteOpplysninger
+        every { mottatteOpplysningerService.hentMottatteOpplysninger(1L) } returns mottatteOpplysninger
 
         val vilkår = vilkårForBestemmelse.hentVilkår(
             Folketrygdloven_kap2_bestemmelser.FTRL_KAP2_2_1,
@@ -58,11 +63,16 @@ class VilkårForBestemmelseYrkesaktivTest {
         val mottatteOpplysninger =
             MottatteOpplysninger().apply {
                 mottatteOpplysningerData =
-                    SøknadNorgeEllerUtenforEØS().apply { soeknadsland = Soeknadsland().apply { landkoder = listOf(
-                        Land_iso2.NO.toString(), Land_iso2.BA.toString()) } }
+                    SøknadNorgeEllerUtenforEØS().apply {
+                        soeknadsland = Soeknadsland().apply {
+                            landkoder = listOf(
+                                Land_iso2.NO.toString(), Land_iso2.BA.toString()
+                            )
+                        }
+                    }
             }
 
-        every {mottatteOpplysningerService.hentMottatteOpplysninger(1L)} returns mottatteOpplysninger
+        every { mottatteOpplysningerService.hentMottatteOpplysninger(1L) } returns mottatteOpplysninger
 
         val vilkår = vilkårForBestemmelse.hentVilkår(
             Folketrygdloven_kap2_bestemmelser.FTRL_KAP2_2_1,
@@ -83,11 +93,16 @@ class VilkårForBestemmelseYrkesaktivTest {
         val mottatteOpplysninger =
             MottatteOpplysninger().apply {
                 mottatteOpplysningerData =
-                    SøknadNorgeEllerUtenforEØS().apply { soeknadsland = Soeknadsland().apply { landkoder = listOf(
-                        Land_iso2.NO.toString(), Land_iso2.BA.toString()) } }
+                    SøknadNorgeEllerUtenforEØS().apply {
+                        soeknadsland = Soeknadsland().apply {
+                            landkoder = listOf(
+                                Land_iso2.NO.toString(), Land_iso2.BA.toString()
+                            )
+                        }
+                    }
             }
 
-        every {mottatteOpplysningerService.hentMottatteOpplysninger(1L)} returns mottatteOpplysninger
+        every { mottatteOpplysningerService.hentMottatteOpplysninger(1L) } returns mottatteOpplysninger
 
         val vilkår = vilkårForBestemmelse.hentVilkår(
             Folketrygdloven_kap2_bestemmelser.FTRL_KAP2_2_1,
@@ -307,5 +322,41 @@ class VilkårForBestemmelseYrkesaktivTest {
             Vilkår(Vilkaar.FTRL_FORUTGÅENDE_TRYGDETID),
             Vilkår(Vilkaar.FTRL_2_8_NÆR_TILKNYTNING_NORGE, muligeBegrunnelser = toStringList(*Ftrl_2_8_naer_tilknytning_norge_begrunnelser.values())),
         )
+    }
+
+    @Test
+    fun `vilkår for ARKTISK_RÅDS_SEKRETARIAT_ART16`() {
+        vilkårForBestemmelse.hentVilkår(
+            Vertslandsavtale_bestemmelser.ARKTISK_RÅDS_SEKRETARIAT_ART16,
+            mapOf(Avklartefaktatyper.IKKE_YRKESAKTIV_RELASJON to Ikkeyrkesaktivrelasjontype.EKTEFELLE_2_8_FJERDE_LEDD.name),
+            1L
+        ).shouldContainExactly(Vilkår(Vilkaar.ARKTISK_RÅDS_SEKRETARIAT_ART16_STABSMEDLEM))
+    }
+
+    @Test
+    fun `vilkår for DET_INTERNASJONALE_BARENTSSEKRETARIATET_ART14`() {
+        vilkårForBestemmelse.hentVilkår(
+            Vertslandsavtale_bestemmelser.DET_INTERNASJONALE_BARENTSSEKRETARIATET_ART14,
+            mapOf(Avklartefaktatyper.IKKE_YRKESAKTIV_RELASJON to Ikkeyrkesaktivrelasjontype.EKTEFELLE_2_8_FJERDE_LEDD.name),
+            1L
+        ).shouldContainExactly(Vilkår(Vilkaar.DET_INTERNASJONALE_BARENTSSEKRETARIATET_ART14_FAST_STAB))
+    }
+
+    @Test
+    fun `vilkår for DEN_NORDATLANTISKE_SJØPATTEDYRKOMMISJON_ART16`() {
+        vilkårForBestemmelse.hentVilkår(
+            Vertslandsavtale_bestemmelser.DEN_NORDATLANTISKE_SJØPATTEDYRKOMMISJON_ART16,
+            mapOf(Avklartefaktatyper.IKKE_YRKESAKTIV_RELASJON to Ikkeyrkesaktivrelasjontype.EKTEFELLE_2_8_FJERDE_LEDD.name),
+            1L
+        ).shouldContainExactly(Vilkår(Vilkaar.DEN_NORDATLANTISKE_SJØPATTEDYRKOMMISJON_ART16_TJENESTEMANN))
+    }
+
+    @Test
+    fun `vilkår for TILLEGGSAVTALE_NATO`() {
+        vilkårForBestemmelse.hentVilkår(
+            Vertslandsavtale_bestemmelser.TILLEGGSAVTALE_NATO,
+            mapOf(Avklartefaktatyper.IKKE_YRKESAKTIV_RELASJON to Ikkeyrkesaktivrelasjontype.EKTEFELLE_2_8_FJERDE_LEDD.name),
+            1L
+        ).shouldContainExactly(Vilkår(Vilkaar.TILLEGGSAVTALE_NATO_SIVILT_ANSATT))
     }
 }
