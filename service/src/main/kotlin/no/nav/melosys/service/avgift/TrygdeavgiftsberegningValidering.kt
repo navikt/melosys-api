@@ -18,7 +18,9 @@ object TrygdeavgiftsberegningValidering {
     val INNTEKTSPERIODER_EMPTY = "Kan ikke beregne trygdeavgift uten inntektsperioder"
     val SKATTEFORHOLDSPERIODER_EMPTY = "Kan ikke beregne trygdeavgift uten skatteforholdTilNorge"
     val SKATTEPLIKTTYPE_LIK_FOR_ALLE_PERIODER = "Alle skatteforholdsperiodene har samme svar på spørsmålet om skatteplikt"
+
     val SKATTEFORHOLDSPERIODENE_KAN_IKKE_OVERLAPPE = "Skatteforholdsperiodene kan ikke overlappe"
+    val INNTEKTSPERIODENE_KAN_IKKE_OVERLAPPE = "Inntektsperiodene kan ikke overlappe"
     val SKATTEFORHOLDSPERIODE_DEKKER_IKKE_HELE_PERIODEN = "Skatteforholdsperioden(e) du har lagt inn dekker ikke hele medlemskapsperioden(e)"
     val INNTEKTSPERIODE_DEKKER_IKKE_HELE_PERIODEN = "Inntektsperioden(e) du har lagt inn dekker ikke hele medlemskapsperioden(e)"
 
@@ -42,7 +44,7 @@ object TrygdeavgiftsberegningValidering {
         validerMedlemskapsperioder(behandlingsresultat)
 
         val innvilgedeMedlemskapsperioder = behandlingsresultat.medlemskapsperioder.filter { it.erInnvilget() }
-        validerAtSkatteforholdTilNorgeDekkerInnvilgedeMedlemskapsperioderOgOverlapperIkkeNew(
+        validerAtSkatteforholdTilNorgeDekkerInnvilgedeMedlemskapsperioderOgOverlapperIkke(
             skatteforholdsPerioder,
             innvilgedeMedlemskapsperioder
         )
@@ -50,7 +52,7 @@ object TrygdeavgiftsberegningValidering {
         val erPliktigMedlem = innvilgedeMedlemskapsperioder.all { it.erPliktig() }
         val erSkattepliktigIHelePerioden = skatteforholdsPerioder.all { it.skatteplikttype == Skatteplikttype.SKATTEPLIKTIG }
         if (!(erPliktigMedlem && erSkattepliktigIHelePerioden)) {
-            validerAtInntekstperioderDekkerInnvilgedeMedlemskapsperioderNew(
+            validerAtInntekstperioderDekkerInnvilgedeMedlemskapsperioder(
                 inntektsPerioder,
                 innvilgedeMedlemskapsperioder
             )
@@ -72,12 +74,15 @@ object TrygdeavgiftsberegningValidering {
             ?: throw FunksjonellException(UTLED_MEDLEMSKAPSPERIODE_TOM_MANGLER)
     }
 
-    private fun validerAtInntekstperioderDekkerInnvilgedeMedlemskapsperioderNew(
+    private fun validerAtInntekstperioderDekkerInnvilgedeMedlemskapsperioder(
         inntektsperioder: List<Inntektsperiode>,
         innvilgedeMedlemskapsperioder: List<Medlemskapsperiode>
     ) {
 
-        validerAtDetIkkeFinnesOverlapp(inntektsperioder)
+        val harOverlapp = harOverlapp(inntektsperioder)
+        if (harOverlapp) {
+            throw FunksjonellException(INNTEKTSPERIODENE_KAN_IKKE_OVERLAPPE)
+        }
 
         val periodeErDekket = validerPerioderDekkerSammenlignetPeriode(inntektsperioder, innvilgedeMedlemskapsperioder)
         if (!periodeErDekket) {
@@ -85,11 +90,14 @@ object TrygdeavgiftsberegningValidering {
         }
     }
 
-    private fun validerAtSkatteforholdTilNorgeDekkerInnvilgedeMedlemskapsperioderOgOverlapperIkkeNew(
+    private fun validerAtSkatteforholdTilNorgeDekkerInnvilgedeMedlemskapsperioderOgOverlapperIkke(
         skatteforholdTilNorge: List<SkatteforholdTilNorge>,
         innvilgedeMedlemskapsperioder: List<Medlemskapsperiode>
     ) {
-        validerAtDetIkkeFinnesOverlapp(skatteforholdTilNorge)
+        val harOverlapp = harOverlapp(skatteforholdTilNorge)
+        if (harOverlapp) {
+            throw FunksjonellException(SKATTEFORHOLDSPERIODENE_KAN_IKKE_OVERLAPPE)
+        }
 
         val periodeErDekket = validerPerioderDekkerSammenlignetPeriode(skatteforholdTilNorge, innvilgedeMedlemskapsperioder)
         if (!periodeErDekket) {
@@ -126,14 +134,11 @@ object TrygdeavgiftsberegningValidering {
         return true
     }
 
-    private fun validerAtDetIkkeFinnesOverlapp(dateRanges: List<ErPeriode>) =
-        dateRanges.sortedBy { dateRange -> dateRange.fom }.indices.forEach { index ->
-            val currentDateRange = LocalDateRange.of(dateRanges[index].fom, dateRanges[index].tom)
-
-            dateRanges.indices
-                .filter { index != it }
-                .map { dateRanges[it] }
-                .filter { currentDateRange.overlaps(LocalDateRange.of(it.fom, it.tom)) }
-                .forEach { throw FunksjonellException(SKATTEFORHOLDSPERIODENE_KAN_IKKE_OVERLAPPE) }
-        }
+    private fun harOverlapp(dateRanges: List<ErPeriode>): Boolean {
+        return dateRanges
+            .map { LocalDateRange.of(it.fom, it.tom) }
+            .sortedBy { it.start }
+            .zipWithNext()
+            .any { (current, next) -> current.end >= next.start }
+    }
 }

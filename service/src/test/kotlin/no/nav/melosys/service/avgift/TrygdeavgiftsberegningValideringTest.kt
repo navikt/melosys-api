@@ -36,7 +36,6 @@ data class ValideringsInput(
         feilmelding: String
     ) : this(emptyList<Medlemskapsperiode>(), skatteforholdsperioder, inntektsperioder, feilmelding)
 
-
     override fun toString(): String {
         return feilmelding
     }
@@ -128,7 +127,7 @@ class TrygdeavgiftsberegningValideringTest {
 
         @ParameterizedTest
         @MethodSource("valideringsDataPerioderDekkesScenarios")
-        fun shouldBeValidPeriodeWhenInntektsPerioderDekkerHelePeriodenNew(valideringsInput: ValideringsInput) {
+        fun shouldBeValidPeriodeWhenInntektsPerioderDekkerHelePerioden(valideringsInput: ValideringsInput) {
             val behandlingsresultat = Behandlingsresultat().apply {
                 medlemskapsperioder = valideringsInput.medlemskapsperioder
             }
@@ -155,6 +154,50 @@ class TrygdeavgiftsberegningValideringTest {
         }
 
         fun valideringsDataPeriodermedFeilScenarios(): List<ValideringsInput> = listOf(
+            ValideringsInput(                                                               // skatteforhold overlapper samme dag
+                listOf(Medlemskapsperiode().apply {
+                    innvilgelsesresultat = InnvilgelsesResultat.INNVILGET
+                    fom = LocalDate.now()
+                    tom = LocalDate.now().plusDays(10)
+                }),
+                listOf(
+                    SkatteforholdTilNorge().apply {
+                        fomDato = LocalDate.now()
+                        tomDato = LocalDate.now().plusDays(5)
+                        skatteplikttype = Skatteplikttype.SKATTEPLIKTIG
+                    },
+                    SkatteforholdTilNorge().apply {
+                        fomDato = LocalDate.now().plusDays(5)
+                        tomDato = LocalDate.now().plusDays(10)
+                        skatteplikttype = Skatteplikttype.IKKE_SKATTEPLIKTIG
+                    }
+                ), listOf(Inntektsperiode().apply {
+                    fomDato = LocalDate.now()
+                    tomDato = LocalDate.now().plusDays(10)
+                }), TrygdeavgiftsberegningValidering.SKATTEFORHOLDSPERIODENE_KAN_IKKE_OVERLAPPE
+            ),
+
+            ValideringsInput(                                                               // Inntektsperioder kan ikke overlappe
+                listOf(Medlemskapsperiode().apply {
+                    innvilgelsesresultat = InnvilgelsesResultat.INNVILGET
+                    fom = LocalDate.now()
+                    tom = LocalDate.now().plusDays(10)
+                }),
+                listOf(
+                    SkatteforholdTilNorge().apply {
+                        fomDato = LocalDate.now()
+                        tomDato = LocalDate.now().plusDays(10)
+                        skatteplikttype = Skatteplikttype.IKKE_SKATTEPLIKTIG
+                    }
+                ), listOf(Inntektsperiode().apply {
+                    fomDato = LocalDate.now()
+                    tomDato = LocalDate.now().plusDays(5)
+                }, Inntektsperiode().apply {
+                    fomDato = LocalDate.now().plusDays(5)
+                    tomDato = LocalDate.now().plusDays(10)
+                }), TrygdeavgiftsberegningValidering.INNTEKTSPERIODENE_KAN_IKKE_OVERLAPPE
+            ),
+
             ValideringsInput(                                                               // Skatteforhold dekker ikke hele perioden
                 listOf(Medlemskapsperiode().apply {
                     innvilgelsesresultat = InnvilgelsesResultat.INNVILGET
@@ -239,11 +282,11 @@ class TrygdeavgiftsberegningValideringTest {
                         tomDato = LocalDate.of(2023, 1, 8)
                         type = Inntektskildetype.ARBEIDSINNTEKT
                     }
-                ), TrygdeavgiftsberegningValidering.SKATTEFORHOLDSPERIODENE_KAN_IKKE_OVERLAPPE),
+                ), TrygdeavgiftsberegningValidering.INNTEKTSPERIODENE_KAN_IKKE_OVERLAPPE),
         )
 
         fun valideringsDataPerioderDekkesScenarios(): List<ValideringsInput> = listOf(
-            ValideringsInput(                                                               // Skatteforhold dekker ikke hele perioden
+            ValideringsInput(                                                               //
                 listOf(Medlemskapsperiode().apply {
                     innvilgelsesresultat = InnvilgelsesResultat.INNVILGET
                     fom = LocalDate.of(2023, 1, 1)
