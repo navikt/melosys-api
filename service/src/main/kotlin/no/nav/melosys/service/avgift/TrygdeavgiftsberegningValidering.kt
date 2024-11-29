@@ -120,32 +120,6 @@ object TrygdeavgiftsberegningValidering {
         }
     }
 
-    private fun validerPerioderDekkerSammenlignetPeriodeOld(
-        kildeperioder: List<ErPeriode>,
-        medlemskapsperioder: List<ErPeriode>,
-        feilmelding: String
-    ) {
-        val sorterteKildeperioder = kildeperioder.map { LocalDateRange.of(it.fom, it.tom) }.sortedBy { it.start }
-        val sorterteMedlemskapsperioder = medlemskapsperioder.map { LocalDateRange.of(it.fom, it.tom) }.sortedBy { it.start }
-
-        if (sorterteMedlemskapsperioder.isEmpty()) return
-
-        var startDato = sorterteMedlemskapsperioder.first().start
-        var kildeIndex = 0
-
-        sorterteMedlemskapsperioder.forEach { periode ->
-            while (kildeIndex < sorterteKildeperioder.size && sorterteKildeperioder[kildeIndex].start <= startDato) {
-                startDato = maxOf(startDato, sorterteKildeperioder[kildeIndex].end.plusDays(1))
-                kildeIndex++
-            }
-
-            if (startDato <= periode.end)
-                throw FunksjonellException(feilmelding)
-
-            startDato = maxOf(startDato, periode.start)
-        }
-    }
-
     private fun harOverlapp(perioder: List<ErPeriode>, feilmelding: String) {
         val harOverlapp = perioder
             .map { LocalDateRange.ofClosed(it.fom, it.tom) }
