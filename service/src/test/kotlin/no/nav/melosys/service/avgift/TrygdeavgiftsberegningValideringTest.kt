@@ -177,7 +177,7 @@ class TrygdeavgiftsberegningValideringTest {
                 }), TrygdeavgiftsberegningValidering.SKATTEFORHOLDSPERIODENE_KAN_IKKE_OVERLAPPE
             ),
 
-            ValideringsInput(                                                               // Skatteforhold dekker ikke hele perioden
+            ValideringsInput(                                                               // Skatteforholdsperiodene kan ikke overlappe
                 listOf(Medlemskapsperiode().apply {
                     innvilgelsesresultat = InnvilgelsesResultat.INNVILGET
                     fom = LocalDate.now()
