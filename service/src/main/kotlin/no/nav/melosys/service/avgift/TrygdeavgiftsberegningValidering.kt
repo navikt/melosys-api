@@ -99,8 +99,8 @@ object TrygdeavgiftsberegningValidering {
         }
     }
 
-    private fun harOverlapp(dateRanges: List<ErPeriode>, feilmelding: String) {
-        dateRanges
+    private fun harOverlapp(perioder: List<ErPeriode>, feilmelding: String) {
+        perioder
             .map { LocalDateRange.ofClosed(it.fom, it.tom) }
             .sortedBy { it.start }
             .zipWithNext()
