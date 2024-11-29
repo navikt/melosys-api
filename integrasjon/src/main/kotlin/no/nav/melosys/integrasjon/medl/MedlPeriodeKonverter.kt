@@ -3,9 +3,11 @@ package no.nav.melosys.integrasjon.medl
 import com.google.common.collect.BiMap
 import com.google.common.collect.HashBiMap
 import no.nav.melosys.domain.PeriodeOmLovvalg
+import no.nav.melosys.domain.kodeverk.Bestemmelse
 import no.nav.melosys.domain.kodeverk.Folketrygdloven_kap2_bestemmelser
 import no.nav.melosys.domain.kodeverk.LovvalgBestemmelse
 import no.nav.melosys.domain.kodeverk.Trygdedekninger
+import no.nav.melosys.domain.kodeverk.Vertslandsavtale_bestemmelser
 import no.nav.melosys.domain.kodeverk.lovvalgsbestemmelser.*
 import no.nav.melosys.domain.kodeverk.lovvalgsbestemmelser.trygdeavtale.*
 import no.nav.melosys.exception.TekniskException
@@ -18,7 +20,7 @@ class MedlPeriodeKonverter private constructor() {
 
     companion object {
         private var lovvalgsbestemmelseTilGrunnlagMedlTabell: BiMap<LovvalgBestemmelse, GrunnlagMedl> = HashBiMap.create()
-        private var ftrlKap2BestemmelserTilGrunnLagMedlTabell: BiMap<Folketrygdloven_kap2_bestemmelser, GrunnlagMedl> = HashBiMap.create()
+        private var ftrlKap2OgSpesielleGrupperBestemmelserTilGrunnLagMedlTabell: BiMap<Bestemmelse, GrunnlagMedl> = HashBiMap.create()
 
         init {
             lovvalgsbestemmelseTilGrunnlagMedlTabell[Lovvalgbestemmelser_883_2004.FO_883_2004_ART11_3A] = GrunnlagMedl.FO_11_3_A
@@ -224,27 +226,33 @@ class MedlPeriodeKonverter private constructor() {
             lovvalgsbestemmelseTilGrunnlagMedlTabell[Overgangsregelbestemmelser.FO_1408_1971_ART14C_A] = GrunnlagMedl.FO_1408_14_C_A
             lovvalgsbestemmelseTilGrunnlagMedlTabell[Overgangsregelbestemmelser.FO_1408_1971_ART14C_B] = GrunnlagMedl.FO_1408_14_C_B
 
-            ftrlKap2BestemmelserTilGrunnLagMedlTabell[Folketrygdloven_kap2_bestemmelser.FTRL_KAP2_2_1] = GrunnlagMedl.FTL_2_1
-            ftrlKap2BestemmelserTilGrunnLagMedlTabell[Folketrygdloven_kap2_bestemmelser.FTRL_KAP2_2_2] = GrunnlagMedl.FTL_2_2
-            ftrlKap2BestemmelserTilGrunnLagMedlTabell[Folketrygdloven_kap2_bestemmelser.FTRL_KAP2_2_3_ANDRE_LEDD] = GrunnlagMedl.FTL_2_3_2_LEDD
-            ftrlKap2BestemmelserTilGrunnLagMedlTabell[Folketrygdloven_kap2_bestemmelser.FTRL_KAP2_2_5_FØRSTE_LEDD_A] = GrunnlagMedl.FTL_2_5_1_LEDD_A
-            ftrlKap2BestemmelserTilGrunnLagMedlTabell[Folketrygdloven_kap2_bestemmelser.FTRL_KAP2_2_5_FØRSTE_LEDD_B] = GrunnlagMedl.FTL_2_5_1_LEDD_B
-            ftrlKap2BestemmelserTilGrunnLagMedlTabell[Folketrygdloven_kap2_bestemmelser.FTRL_KAP2_2_5_FØRSTE_LEDD_C] = GrunnlagMedl.FTL_2_5_1_LEDD_C
-            ftrlKap2BestemmelserTilGrunnLagMedlTabell[Folketrygdloven_kap2_bestemmelser.FTRL_KAP2_2_5_FØRSTE_LEDD_D] = GrunnlagMedl.FTL_2_5_1_LEDD_D
-            ftrlKap2BestemmelserTilGrunnLagMedlTabell[Folketrygdloven_kap2_bestemmelser.FTRL_KAP2_2_5_FØRSTE_LEDD_E] = GrunnlagMedl.FTL_2_5_1_LEDD_E
-            ftrlKap2BestemmelserTilGrunnLagMedlTabell[Folketrygdloven_kap2_bestemmelser.FTRL_KAP2_2_5_FØRSTE_LEDD_F] = GrunnlagMedl.FTL_2_5_1_LEDD_F
-            ftrlKap2BestemmelserTilGrunnLagMedlTabell[Folketrygdloven_kap2_bestemmelser.FTRL_KAP2_2_5_FØRSTE_LEDD_G] = GrunnlagMedl.FTL_2_5_1_LEDD_G
-            ftrlKap2BestemmelserTilGrunnLagMedlTabell[Folketrygdloven_kap2_bestemmelser.FTRL_KAP2_2_5_FØRSTE_LEDD_H] = GrunnlagMedl.FTL_2_5_1_LEDD_H
-            ftrlKap2BestemmelserTilGrunnLagMedlTabell[Folketrygdloven_kap2_bestemmelser.FTRL_KAP2_2_5_ANDRE_LEDD] = GrunnlagMedl.FTL_2_5_2_LEDD
-            ftrlKap2BestemmelserTilGrunnLagMedlTabell[Folketrygdloven_kap2_bestemmelser.FTRL_KAP2_2_7A] = GrunnlagMedl.FTL_2_7A
-            ftrlKap2BestemmelserTilGrunnLagMedlTabell[Folketrygdloven_kap2_bestemmelser.FTRL_KAP2_2_7_FØRSTE_LEDD] = GrunnlagMedl.FTL_2_7_1_LEDD
-            ftrlKap2BestemmelserTilGrunnLagMedlTabell[Folketrygdloven_kap2_bestemmelser.FTRL_KAP2_2_7_FJERDE_LEDD] = GrunnlagMedl.FTL_2_7_4_LEDD
-            ftrlKap2BestemmelserTilGrunnLagMedlTabell[Folketrygdloven_kap2_bestemmelser.FTRL_KAP2_2_8_FØRSTE_LEDD_A] = GrunnlagMedl.FTL_2_8_1_LEDD_A
-            ftrlKap2BestemmelserTilGrunnLagMedlTabell[Folketrygdloven_kap2_bestemmelser.FTRL_KAP2_2_8_FØRSTE_LEDD_B] = GrunnlagMedl.FTL_2_8_1_LEDD_B
-            ftrlKap2BestemmelserTilGrunnLagMedlTabell[Folketrygdloven_kap2_bestemmelser.FTRL_KAP2_2_8_FØRSTE_LEDD_C] = GrunnlagMedl.FTL_2_8_1_LEDD_C
-            ftrlKap2BestemmelserTilGrunnLagMedlTabell[Folketrygdloven_kap2_bestemmelser.FTRL_KAP2_2_8_ANDRE_LEDD] = GrunnlagMedl.FTL_2_8_2_LEDD
-            ftrlKap2BestemmelserTilGrunnLagMedlTabell[Folketrygdloven_kap2_bestemmelser.FTRL_KAP2_2_8_FJERDE_LEDD] = GrunnlagMedl.FTL_2_8_4_LEDD
-            ftrlKap2BestemmelserTilGrunnLagMedlTabell[Folketrygdloven_kap2_bestemmelser.FTRL_KAP2_2_15_ANDRE_LEDD] = GrunnlagMedl.FTL_2_15_2_LEDD
+            ftrlKap2OgSpesielleGrupperBestemmelserTilGrunnLagMedlTabell[Folketrygdloven_kap2_bestemmelser.FTRL_KAP2_2_1] = GrunnlagMedl.FTL_2_1
+            ftrlKap2OgSpesielleGrupperBestemmelserTilGrunnLagMedlTabell[Folketrygdloven_kap2_bestemmelser.FTRL_KAP2_2_2] = GrunnlagMedl.FTL_2_2
+            ftrlKap2OgSpesielleGrupperBestemmelserTilGrunnLagMedlTabell[Folketrygdloven_kap2_bestemmelser.FTRL_KAP2_2_3_ANDRE_LEDD] = GrunnlagMedl.FTL_2_3_2_LEDD
+            ftrlKap2OgSpesielleGrupperBestemmelserTilGrunnLagMedlTabell[Folketrygdloven_kap2_bestemmelser.FTRL_KAP2_2_5_FØRSTE_LEDD_A] = GrunnlagMedl.FTL_2_5_1_LEDD_A
+            ftrlKap2OgSpesielleGrupperBestemmelserTilGrunnLagMedlTabell[Folketrygdloven_kap2_bestemmelser.FTRL_KAP2_2_5_FØRSTE_LEDD_B] = GrunnlagMedl.FTL_2_5_1_LEDD_B
+            ftrlKap2OgSpesielleGrupperBestemmelserTilGrunnLagMedlTabell[Folketrygdloven_kap2_bestemmelser.FTRL_KAP2_2_5_FØRSTE_LEDD_C] = GrunnlagMedl.FTL_2_5_1_LEDD_C
+            ftrlKap2OgSpesielleGrupperBestemmelserTilGrunnLagMedlTabell[Folketrygdloven_kap2_bestemmelser.FTRL_KAP2_2_5_FØRSTE_LEDD_D] = GrunnlagMedl.FTL_2_5_1_LEDD_D
+            ftrlKap2OgSpesielleGrupperBestemmelserTilGrunnLagMedlTabell[Folketrygdloven_kap2_bestemmelser.FTRL_KAP2_2_5_FØRSTE_LEDD_E] = GrunnlagMedl.FTL_2_5_1_LEDD_E
+            ftrlKap2OgSpesielleGrupperBestemmelserTilGrunnLagMedlTabell[Folketrygdloven_kap2_bestemmelser.FTRL_KAP2_2_5_FØRSTE_LEDD_F] = GrunnlagMedl.FTL_2_5_1_LEDD_F
+            ftrlKap2OgSpesielleGrupperBestemmelserTilGrunnLagMedlTabell[Folketrygdloven_kap2_bestemmelser.FTRL_KAP2_2_5_FØRSTE_LEDD_G] = GrunnlagMedl.FTL_2_5_1_LEDD_G
+            ftrlKap2OgSpesielleGrupperBestemmelserTilGrunnLagMedlTabell[Folketrygdloven_kap2_bestemmelser.FTRL_KAP2_2_5_FØRSTE_LEDD_H] = GrunnlagMedl.FTL_2_5_1_LEDD_H
+            ftrlKap2OgSpesielleGrupperBestemmelserTilGrunnLagMedlTabell[Folketrygdloven_kap2_bestemmelser.FTRL_KAP2_2_5_ANDRE_LEDD] = GrunnlagMedl.FTL_2_5_2_LEDD
+            ftrlKap2OgSpesielleGrupperBestemmelserTilGrunnLagMedlTabell[Folketrygdloven_kap2_bestemmelser.FTRL_KAP2_2_7A] = GrunnlagMedl.FTL_2_7A
+            ftrlKap2OgSpesielleGrupperBestemmelserTilGrunnLagMedlTabell[Folketrygdloven_kap2_bestemmelser.FTRL_KAP2_2_7_FØRSTE_LEDD] = GrunnlagMedl.FTL_2_7_1_LEDD
+            ftrlKap2OgSpesielleGrupperBestemmelserTilGrunnLagMedlTabell[Folketrygdloven_kap2_bestemmelser.FTRL_KAP2_2_7_FJERDE_LEDD] = GrunnlagMedl.FTL_2_7_4_LEDD
+            ftrlKap2OgSpesielleGrupperBestemmelserTilGrunnLagMedlTabell[Folketrygdloven_kap2_bestemmelser.FTRL_KAP2_2_8_FØRSTE_LEDD_A] = GrunnlagMedl.FTL_2_8_1_LEDD_A
+            ftrlKap2OgSpesielleGrupperBestemmelserTilGrunnLagMedlTabell[Folketrygdloven_kap2_bestemmelser.FTRL_KAP2_2_8_FØRSTE_LEDD_B] = GrunnlagMedl.FTL_2_8_1_LEDD_B
+            ftrlKap2OgSpesielleGrupperBestemmelserTilGrunnLagMedlTabell[Folketrygdloven_kap2_bestemmelser.FTRL_KAP2_2_8_FØRSTE_LEDD_C] = GrunnlagMedl.FTL_2_8_1_LEDD_C
+            ftrlKap2OgSpesielleGrupperBestemmelserTilGrunnLagMedlTabell[Folketrygdloven_kap2_bestemmelser.FTRL_KAP2_2_8_ANDRE_LEDD] = GrunnlagMedl.FTL_2_8_2_LEDD
+            ftrlKap2OgSpesielleGrupperBestemmelserTilGrunnLagMedlTabell[Folketrygdloven_kap2_bestemmelser.FTRL_KAP2_2_8_FJERDE_LEDD] = GrunnlagMedl.FTL_2_8_4_LEDD
+            ftrlKap2OgSpesielleGrupperBestemmelserTilGrunnLagMedlTabell[Folketrygdloven_kap2_bestemmelser.FTRL_KAP2_2_15_ANDRE_LEDD] = GrunnlagMedl.FTL_2_15_2_LEDD
+            ftrlKap2OgSpesielleGrupperBestemmelserTilGrunnLagMedlTabell[Vertslandsavtale_bestemmelser.ARKTISK_RÅDS_SEKRETARIAT_ART16] = GrunnlagMedl.ARKTISK_RÅDS_SEKRETARIAT_16
+            ftrlKap2OgSpesielleGrupperBestemmelserTilGrunnLagMedlTabell[Vertslandsavtale_bestemmelser
+                .DET_INTERNASJONALE_BARENTSSEKRETARIATET_ART14] = GrunnlagMedl.DET_INTERNASJONALE_BARENTSSEKRETARIATET_14
+            ftrlKap2OgSpesielleGrupperBestemmelserTilGrunnLagMedlTabell[Vertslandsavtale_bestemmelser
+                .DEN_NORDATLANTISKE_SJØPATTEDYRKOMMISJON_ART16] = GrunnlagMedl.DEN_NORDATLANTISKE_SJØPATTEDYRKOMMISJONEN_16
+            ftrlKap2OgSpesielleGrupperBestemmelserTilGrunnLagMedlTabell[Vertslandsavtale_bestemmelser.TILLEGGSAVTALE_NATO] = GrunnlagMedl.TILLEGGSAVTALE_NATO
         }
 
         @JvmStatic
@@ -269,6 +277,7 @@ class MedlPeriodeKonverter private constructor() {
                 Trygdedekninger.FTRL_2_9_FØRSTE_LEDD_C_TREDJE_LEDD_HELSE_PENSJON_YRKESSKADE -> DekningMedl.FTRL_2_9_3_LEDD_1C
                 Trygdedekninger.FTRL_2_9_FØRSTE_LEDD_C_HELSE_PENSJON -> DekningMedl.FTRL_2_9_1_LEDD_C
                 Trygdedekninger.FTRL_2_9_FØRSTE_LEDD_C_ANDRE_LEDD_HELSE_PENSJON_SYKE_FORELDREPENGER -> DekningMedl.FTRL_2_9_2_LEDD_1C
+                Trygdedekninger.TILLEGGSAVTALE_NATO_HELSEDEL -> DekningMedl.TILLEGSAVTALE_NATO_DEKNING
                 else -> throw TekniskException("Dekningstype støttes ikke for FTRL: ${dekning.kode}")
             }
 
@@ -287,7 +296,7 @@ class MedlPeriodeKonverter private constructor() {
 
         @JvmStatic
         fun tilGrunnlagMedltype(bestemmelse: Folketrygdloven_kap2_bestemmelser): GrunnlagMedl =
-            Optional.ofNullable(ftrlKap2BestemmelserTilGrunnLagMedlTabell[bestemmelse])
+            Optional.ofNullable(ftrlKap2OgSpesielleGrupperBestemmelserTilGrunnLagMedlTabell[bestemmelse])
                 .orElseThrow {
                     TekniskException(
                         "Folketrygdloven bestemmelse støttes ikke. Kode: ${bestemmelse.kode} Beskrivelse: ${bestemmelse.beskrivelse}"
