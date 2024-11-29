@@ -4,7 +4,6 @@ package no.nav.melosys.service.avgift
 
 import no.nav.melosys.domain.Behandlingsresultat
 import no.nav.melosys.domain.ErPeriode
-import no.nav.melosys.domain.Medlemskapsperiode
 import no.nav.melosys.domain.avgift.Inntektsperiode
 import no.nav.melosys.domain.avgift.SkatteforholdTilNorge
 import no.nav.melosys.domain.kodeverk.Skatteplikttype
@@ -42,18 +41,20 @@ object TrygdeavgiftsberegningValidering {
         validerMedlemskapsperioder(behandlingsresultat)
 
         val innvilgedeMedlemskapsperioder = behandlingsresultat.medlemskapsperioder.filter { it.erInnvilget() }
-        validerAtSkatteforholdTilNorgeDekkerInnvilgedeMedlemskapsperioderOgOverlapperIkke(
+
+
+        harOverlapp(skatteforholdsPerioder, SKATTEFORHOLDSPERIODENE_KAN_IKKE_OVERLAPPE)
+
+        validerPerioderDekkerSammenlignetPeriode(
             skatteforholdsPerioder,
-            innvilgedeMedlemskapsperioder
+            innvilgedeMedlemskapsperioder,
+            SKATTEFORHOLDSPERIODE_DEKKER_IKKE_HELE_PERIODEN
         )
 
         val erPliktigMedlem = innvilgedeMedlemskapsperioder.all { it.erPliktig() }
         val erSkattepliktigIHelePerioden = skatteforholdsPerioder.all { it.skatteplikttype == Skatteplikttype.SKATTEPLIKTIG }
         if (!(erPliktigMedlem && erSkattepliktigIHelePerioden)) {
-            validerAtInntekstperioderDekkerInnvilgedeMedlemskapsperioder(
-                inntektsPerioder,
-                innvilgedeMedlemskapsperioder
-            )
+            validerPerioderDekkerSammenlignetPeriode(inntektsPerioder, innvilgedeMedlemskapsperioder, INNTEKTSPERIODE_DEKKER_IKKE_HELE_PERIODEN)
         }
     }
 
@@ -72,63 +73,41 @@ object TrygdeavgiftsberegningValidering {
             ?: throw FunksjonellException(UTLED_MEDLEMSKAPSPERIODE_TOM_MANGLER)
     }
 
-    private fun validerAtInntekstperioderDekkerInnvilgedeMedlemskapsperioder(
-        inntektsperioder: List<Inntektsperiode>,
-        innvilgedeMedlemskapsperioder: List<Medlemskapsperiode>
-    ) {
-        val periodeErDekket = validerPerioderDekkerSammenlignetPeriode(inntektsperioder, innvilgedeMedlemskapsperioder)
-        if (!periodeErDekket) {
-            throw FunksjonellException(INNTEKTSPERIODE_DEKKER_IKKE_HELE_PERIODEN)
-        }
-    }
-
-    private fun validerAtSkatteforholdTilNorgeDekkerInnvilgedeMedlemskapsperioderOgOverlapperIkke(
-        skatteforholdTilNorge: List<SkatteforholdTilNorge>,
-        innvilgedeMedlemskapsperioder: List<Medlemskapsperiode>
-    ) {
-        val harOverlapp = harOverlapp(skatteforholdTilNorge)
-        if (harOverlapp) {
-            throw FunksjonellException(SKATTEFORHOLDSPERIODENE_KAN_IKKE_OVERLAPPE)
-        }
-
-        val periodeErDekket = validerPerioderDekkerSammenlignetPeriode(skatteforholdTilNorge, innvilgedeMedlemskapsperioder)
-        if (!periodeErDekket) {
-            throw FunksjonellException(SKATTEFORHOLDSPERIODE_DEKKER_IKKE_HELE_PERIODEN)
-        }
-    }
-
-
     private fun validerPerioderDekkerSammenlignetPeriode(
         kildeperioder: List<ErPeriode>,
-        medlemskapsperioder: List<ErPeriode>
-    ): Boolean {
+        medlemskapsperioder: List<ErPeriode>,
+        feilmelding: String
+    ) {
         val sorterteKildeperioder = kildeperioder.map { LocalDateRange.of(it.fom, it.tom) }.sortedBy { it.start }
         val sorterteMedlemskapsperioder = medlemskapsperioder.map { LocalDateRange.of(it.fom, it.tom) }.sortedBy { it.start }
 
-        if (sorterteMedlemskapsperioder.isEmpty()) return true
+        if (sorterteMedlemskapsperioder.isEmpty()) return
 
         var startDato = sorterteMedlemskapsperioder.first().start
         var kildeIndex = 0
 
-        for (periode in sorterteMedlemskapsperioder) {
+        sorterteMedlemskapsperioder.forEach { periode ->
             while (kildeIndex < sorterteKildeperioder.size && sorterteKildeperioder[kildeIndex].start <= startDato) {
                 startDato = maxOf(startDato, sorterteKildeperioder[kildeIndex].end.plusDays(1))
                 kildeIndex++
             }
 
-            if (startDato <= periode.end) return false
+            if (startDato <= periode.end)
+                throw FunksjonellException(feilmelding)
 
             startDato = maxOf(startDato, periode.start)
         }
-
-        return true
     }
 
-    private fun harOverlapp(dateRanges: List<ErPeriode>): Boolean {
-        return dateRanges
+    private fun harOverlapp(dateRanges: List<ErPeriode>, feilmelding: String) {
+        val harOverlapp = dateRanges
             .map { LocalDateRange.of(it.fom, it.tom) }
             .sortedBy { it.start }
             .zipWithNext()
             .any { (current, next) -> current.end >= next.start }
+
+        if (harOverlapp) {
+            throw FunksjonellException(feilmelding)
+        }
     }
 }
