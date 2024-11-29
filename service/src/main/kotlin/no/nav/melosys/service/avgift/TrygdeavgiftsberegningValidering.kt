@@ -105,30 +105,28 @@ object TrygdeavgiftsberegningValidering {
         }
     }
 
-    private fun validerPerioderDekkerSammenlignetPeriode(kildeRanges: List<ErPeriode>, targetRanges: List<ErPeriode>): Boolean {
-        val dateRangeSource = kildeRanges.sortedBy { it.fom }
-            .map { skatteforhold -> LocalDateRange.of(skatteforhold.fom, skatteforhold.tom) }
 
-        val dateRangeTarget = targetRanges.sortedBy { it.fom }
-            .map { skatteforhold -> LocalDateRange.of(skatteforhold.fom, skatteforhold.tom) }
+    private fun validerPerioderDekkerSammenlignetPeriode(
+        kildeRanges: List<ErPeriode>,
+        targetRanges: List<ErPeriode>
+    ): Boolean {
+        val sortedSourceRanges = kildeRanges.map { LocalDateRange.of(it.fom, it.tom) }.sortedBy { it.start }
+        val sortedTargetRanges = targetRanges.map { LocalDateRange.of(it.fom, it.tom) }.sortedBy { it.start }
 
-        val sortedSourceRanges = dateRangeSource.sortedBy { it.start }
-        val sortedTargetRanges = dateRangeTarget.sortedBy { it.start }
+        if (sortedTargetRanges.isEmpty()) return true
 
-        var currentSourceIndex = 0
-        var currentDate = sortedTargetRanges.firstOrNull()?.start ?: return true
+        var currentDate = sortedTargetRanges.first().start
+        var sourceIndex = 0
 
         for (targetRange in sortedTargetRanges) {
-            while (currentSourceIndex < sortedSourceRanges.size &&
-                sortedSourceRanges[currentSourceIndex].start <= targetRange.endInclusive
-            ) {
-                currentDate = maxOf(currentDate, sortedSourceRanges[currentSourceIndex].endInclusive.plusDays(1))
-                currentSourceIndex++
+            while (sourceIndex < sortedSourceRanges.size && sortedSourceRanges[sourceIndex].start <= currentDate) {
+                currentDate = maxOf(currentDate, sortedSourceRanges[sourceIndex].end.plusDays(1))
+                sourceIndex++
             }
 
-            if (currentDate <= targetRange.endInclusive) {
-                return false
-            }
+            if (currentDate <= targetRange.end) return false
+
+            currentDate = maxOf(currentDate, targetRange.start)
         }
 
         return true
