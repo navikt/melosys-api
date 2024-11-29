@@ -100,14 +100,11 @@ object TrygdeavgiftsberegningValidering {
     }
 
     private fun harOverlapp(dateRanges: List<ErPeriode>, feilmelding: String) {
-        val harOverlapp = dateRanges
+        dateRanges
             .map { LocalDateRange.ofClosed(it.fom, it.tom) }
             .sortedBy { it.start }
             .zipWithNext()
-            .any { (current, next) -> current.overlaps(next) }
-
-        if (harOverlapp) {
-            throw FunksjonellException(feilmelding)
-        }
+            .firstOrNull { (current, next) -> current.overlaps(next) }
+            ?.let { throw FunksjonellException(feilmelding) }
     }
 }
