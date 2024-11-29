@@ -1,8 +1,5 @@
 package no.nav.melosys.service.kontroll.regler;
 
-import java.util.List;
-import java.util.Objects;
-
 import no.nav.melosys.domain.ErPeriode;
 import no.nav.melosys.domain.Lovvalgsperiode;
 import no.nav.melosys.domain.Medlemskapsperiode;
@@ -10,9 +7,11 @@ import no.nav.melosys.domain.PeriodeOmLovvalg;
 import no.nav.melosys.domain.dokument.medlemskap.MedlemskapDokument;
 import no.nav.melosys.domain.dokument.medlemskap.Medlemsperiode;
 import no.nav.melosys.domain.dokument.sed.SedDokument;
-import no.nav.melosys.domain.kodeverk.Trygdeavgift_typer;
 import no.nav.melosys.integrasjon.medl.PeriodestatusMedl;
 import no.nav.melosys.service.kontroll.feature.ferdigbehandling.data.MedlemskapsperiodeData;
+
+import java.util.List;
+import java.util.Objects;
 
 public final class OverlappendeMedlemskapsperioderRegler {
 
@@ -56,13 +55,24 @@ public final class OverlappendeMedlemskapsperioderRegler {
         );
     }
 
-    public static boolean harOverlappendePeriodeMedForskuddsvisFakturering(MedlemskapsperiodeData medlemskapsperiodeData) {
-        return medlemskapsperiodeData.getNyeMedlemskapsperioderMedAvgift().stream().anyMatch(kontrollperiode ->
-            medlemskapsperiodeData.getTidligereMedlemskapsperioderForBukerMedAvgift().stream()
-                .anyMatch(medlemsperiode ->
-                    PeriodeRegler.periodeOverlapper(kontrollperiode, medlemsperiode) && (kontrollperiode.getMedlPeriodeID() == null || !Objects.equals(kontrollperiode.getMedlPeriodeID(), medlemsperiode.getId()))
-                )
-        );
+    public static boolean harOverlappendePeriodeMedForskuddsvisFaktureringIAndreFagsaker(
+            MedlemskapsperiodeData medlemskapsperiodeData, String gjeldendeSaksnummer) {
+
+        List<Medlemskapsperiode> tidligereMedlemskapsperioderIandreFagsaker = medlemskapsperiodeData
+                .getTidligereMedlemskapsperioderForBukerMedAvgift().stream()
+                .filter(medlemsperiode ->
+                        !medlemsperiode.getBehandlingsresultat().getBehandling().getFagsak().getSaksnummer().equals(gjeldendeSaksnummer))
+                .toList();
+
+        return medlemskapsperiodeData.getNyeMedlemskapsperioderMedAvgift().stream()
+                .anyMatch(nyMedlemskapsperiode -> harOverlappMedTidligerePerioder(nyMedlemskapsperiode, tidligereMedlemskapsperioderIandreFagsaker));
+    }
+
+    private static boolean harOverlappMedTidligerePerioder(
+            Medlemskapsperiode nyMedlemskapsPeriode, List<Medlemskapsperiode> tidligereMedlemskapsperioder) {
+
+        return tidligereMedlemskapsperioder.stream()
+                .anyMatch(tidligereMedlemskapsperiode -> PeriodeRegler.periodeOverlapper(nyMedlemskapsPeriode, tidligereMedlemskapsperiode));
     }
 
     public static boolean harOverlappendeUnntaksperiode(MedlemskapDokument medlemskapDokument,

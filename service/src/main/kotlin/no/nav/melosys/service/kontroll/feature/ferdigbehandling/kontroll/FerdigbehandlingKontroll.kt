@@ -29,6 +29,24 @@ import no.nav.melosys.service.validering.Kontrollfeil
 import java.time.LocalDate
 
 object FerdigbehandlingKontroll {
+
+    fun harOverlappendePeriodeMedForskuddsvisFaktureringIAnnenSak(kontrollData: FerdigbehandlingKontrollData): Kontrollfeil? {
+        val medlemskapsperiodeData = kontrollData.medlemskapsperiodeData
+        if (medlemskapsperiodeData != null && medlemskapsperiodeData.harNyeMedlemskapsperioder()) {
+
+            if (OverlappendeMedlemskapsperioderRegler.harOverlappendePeriodeMedForskuddsvisFaktureringIAndreFagsaker(medlemskapsperiodeData, kontrollData.fagsak?.saksnummer)
+            ) {
+                return Kontrollfeil(
+                    Kontroll_begrunnelser.OVERLAPPENDE_PERIODE_MED_FORSKUDDSVIS_FAKTURERUNG,
+                    KontrolldataFeilType.ADVARSEL
+                )
+            }
+        }
+
+        return null
+    }
+
+
     fun overlappendePeriode(kontrollData: FerdigbehandlingKontrollData): Kontrollfeil? {
         val medlemskapDokument = kontrollData.medlemskapDokument
         val medlemskapsperiodeData = kontrollData.medlemskapsperiodeData
@@ -36,10 +54,6 @@ object FerdigbehandlingKontroll {
         if (medlemskapsperiodeData != null && medlemskapsperiodeData.harNyeMedlemskapsperioder()) {
              if (OverlappendeMedlemskapsperioderRegler.harOverlappendePeriode(medlemskapDokument, medlemskapsperiodeData))
                 return Kontrollfeil(Kontroll_begrunnelser.OVERLAPPENDE_MEDL_PERIODER, KontrolldataFeilType.FEIL)
-
-            if (OverlappendeMedlemskapsperioderRegler.harOverlappendePeriodeMedForskuddsvisFakturering(medlemskapsperiodeData)) {
-                return Kontrollfeil(Kontroll_begrunnelser.OVERLAPPENDE_PERIODE_MED_FORSKUDDSVIS_FAKTURERUNG, KontrolldataFeilType.ADVARSEL)
-            }
 
             return null
         }
