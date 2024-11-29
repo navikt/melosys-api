@@ -18,9 +18,7 @@ object TrygdeavgiftsberegningValidering {
     val INNTEKTSPERIODER_EMPTY = "Kan ikke beregne trygdeavgift uten inntektsperioder"
     val SKATTEFORHOLDSPERIODER_EMPTY = "Kan ikke beregne trygdeavgift uten skatteforholdTilNorge"
     val SKATTEPLIKTTYPE_LIK_FOR_ALLE_PERIODER = "Alle skatteforholdsperiodene har samme svar på spørsmålet om skatteplikt"
-
     val SKATTEFORHOLDSPERIODENE_KAN_IKKE_OVERLAPPE = "Skatteforholdsperiodene kan ikke overlappe"
-    val INNTEKTSPERIODENE_KAN_IKKE_OVERLAPPE = "Inntektsperiodene kan ikke overlappe"
     val SKATTEFORHOLDSPERIODE_DEKKER_IKKE_HELE_PERIODEN = "Skatteforholdsperioden(e) du har lagt inn dekker ikke hele medlemskapsperioden(e)"
     val INNTEKTSPERIODE_DEKKER_IKKE_HELE_PERIODEN = "Inntektsperioden(e) du har lagt inn dekker ikke hele medlemskapsperioden(e)"
 
@@ -78,12 +76,6 @@ object TrygdeavgiftsberegningValidering {
         inntektsperioder: List<Inntektsperiode>,
         innvilgedeMedlemskapsperioder: List<Medlemskapsperiode>
     ) {
-
-        val harOverlapp = harOverlapp(inntektsperioder)
-        if (harOverlapp) {
-            throw FunksjonellException(INNTEKTSPERIODENE_KAN_IKKE_OVERLAPPE)
-        }
-
         val periodeErDekket = validerPerioderDekkerSammenlignetPeriode(inntektsperioder, innvilgedeMedlemskapsperioder)
         if (!periodeErDekket) {
             throw FunksjonellException(INNTEKTSPERIODE_DEKKER_IKKE_HELE_PERIODEN)
@@ -107,26 +99,26 @@ object TrygdeavgiftsberegningValidering {
 
 
     private fun validerPerioderDekkerSammenlignetPeriode(
-        kildeRanges: List<ErPeriode>,
-        targetRanges: List<ErPeriode>
+        kildeperioder: List<ErPeriode>,
+        medlemskapsperioder: List<ErPeriode>
     ): Boolean {
-        val sortedSourceRanges = kildeRanges.map { LocalDateRange.of(it.fom, it.tom) }.sortedBy { it.start }
-        val sortedTargetRanges = targetRanges.map { LocalDateRange.of(it.fom, it.tom) }.sortedBy { it.start }
+        val sorterteKildeperioder = kildeperioder.map { LocalDateRange.of(it.fom, it.tom) }.sortedBy { it.start }
+        val sorterteMedlemskapsperioder = medlemskapsperioder.map { LocalDateRange.of(it.fom, it.tom) }.sortedBy { it.start }
 
-        if (sortedTargetRanges.isEmpty()) return true
+        if (sorterteMedlemskapsperioder.isEmpty()) return true
 
-        var currentDate = sortedTargetRanges.first().start
-        var sourceIndex = 0
+        var startDato = sorterteMedlemskapsperioder.first().start
+        var kildeIndex = 0
 
-        for (targetRange in sortedTargetRanges) {
-            while (sourceIndex < sortedSourceRanges.size && sortedSourceRanges[sourceIndex].start <= currentDate) {
-                currentDate = maxOf(currentDate, sortedSourceRanges[sourceIndex].end.plusDays(1))
-                sourceIndex++
+        for (periode in sorterteMedlemskapsperioder) {
+            while (kildeIndex < sorterteKildeperioder.size && sorterteKildeperioder[kildeIndex].start <= startDato) {
+                startDato = maxOf(startDato, sorterteKildeperioder[kildeIndex].end.plusDays(1))
+                kildeIndex++
             }
 
-            if (currentDate <= targetRange.end) return false
+            if (startDato <= periode.end) return false
 
-            currentDate = maxOf(currentDate, targetRange.start)
+            startDato = maxOf(startDato, periode.start)
         }
 
         return true
