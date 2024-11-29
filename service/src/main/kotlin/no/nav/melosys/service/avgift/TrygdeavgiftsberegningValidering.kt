@@ -9,6 +9,7 @@ import no.nav.melosys.domain.avgift.SkatteforholdTilNorge
 import no.nav.melosys.domain.kodeverk.Skatteplikttype
 import no.nav.melosys.exception.FunksjonellException
 import org.threeten.extra.LocalDateRange
+import java.time.DateTimeException
 
 object TrygdeavgiftsberegningValidering {
     val MEDLEMSKAPSPERIODER_EMPTY = "Kan ikke beregne trygdeavgift uten medlemskapsperioder"
@@ -73,7 +74,53 @@ object TrygdeavgiftsberegningValidering {
             ?: throw FunksjonellException(UTLED_MEDLEMSKAPSPERIODE_TOM_MANGLER)
     }
 
+
+    private fun finnRangeForPerioderSamlet(periodeRanges: List<LocalDateRange>, feilmelding: String): LocalDateRange? {
+        var samletPeriodeDateRange: LocalDateRange? = null
+        try {
+            for (range in periodeRanges) {
+                samletPeriodeDateRange = if (samletPeriodeDateRange == null) {
+                    range
+                } else {
+                    samletPeriodeDateRange.union(range)
+                }
+            }
+        } catch (ex: DateTimeException) {
+            throw FunksjonellException(feilmelding)
+        }
+
+        return samletPeriodeDateRange
+    }
+
+    //
+
     private fun validerPerioderDekkerSammenlignetPeriode(
+        kildeperioder: List<ErPeriode>,
+        medlemskapsperioder: List<ErPeriode>,
+        feilmelding: String
+    ) {
+        val sorterteKildeperioder = kildeperioder.map { LocalDateRange.of(it.fom, it.tom) }.sortedBy { it.start }
+        val sorterteMedlemskapsperioder = medlemskapsperioder.map { LocalDateRange.of(it.fom, it.tom) }.sortedBy { it.start }
+
+        val startKildePeriode = sorterteKildeperioder.first().start
+        val endKildePeriode = sorterteKildeperioder.last().end
+
+        val startMedlPeriode = sorterteMedlemskapsperioder.first().start
+        val endMedlPeriode = sorterteMedlemskapsperioder.last().end
+
+
+        if (startKildePeriode > startMedlPeriode || endKildePeriode < endMedlPeriode) {
+            throw FunksjonellException(feilmelding)
+        }
+
+        sorterteKildeperioder.windowed(2).forEach { (current, next) ->
+            if (current.end.plusDays(1) != next.start) {
+                throw FunksjonellException(feilmelding)
+            }
+        }
+    }
+
+    private fun validerPerioderDekkerSammenlignetPeriodeOld(
         kildeperioder: List<ErPeriode>,
         medlemskapsperioder: List<ErPeriode>,
         feilmelding: String
