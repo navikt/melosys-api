@@ -107,33 +107,19 @@ class FerdigbehandlingKontrollTest {
     fun `overlappende periode med forskuddsvis fakturering skal gi advarsel`() {
         val medlemskapsperiodeData = MedlemskapsperiodeData(
             nyeMedlemskapsperioderMedAvgift = listOf(
-                Medlemskapsperiode().apply {
-                    fom = LocalDate.of(1990, 9, 9)
-                    tom = fom.plusDays(3)
-                    medlPeriodeID = 2
-                }
+                lagMedlemskapsperiode(LocalDate.of(1990, 9, 9), LocalDate.of(1990, 9, 9).plusDays(3))
             ),
             tidligereMedlemskapsperioderForBukerMedAvgift = listOf(
-                Medlemskapsperiode().apply {
-                    fom = LocalDate.of(1990, 9, 10)
-                    tom = fom.plusDays(1).minusDays(2)
-                    medlPeriodeID = 1
-                }
-            ),
-            nyeMedlemskapsperioder = listOf(
-                Medlemskapsperiode().apply {
-                    fom = LocalDate.of(1990, 9, 9)
-                    tom = fom.plusDays(3)
-                    medlPeriodeID = 2
-                }
+                lagMedlemskapsperiode(LocalDate.of(1990, 9, 5), LocalDate.of(1990, 9, 10))
             )
         )
 
         val medlemskapDokument = MedlemskapDokument()
 
-        val kontrollData = lagFerdigbehandlingKontrollData(medlemskapsperiodeData = medlemskapsperiodeData, medlemskapDokument = medlemskapDokument)
+        val kontrollData = lagFerdigbehandlingKontrollData(medlemskapsperiodeData = medlemskapsperiodeData, medlemskapDokument = medlemskapDokument,
+            fagsak = Fagsak(saksnummer = "test-321", status = Saksstatuser.OPPRETTET, tema = Sakstemaer.MEDLEMSKAP_LOVVALG, type = Sakstyper.FTRL))
 
-        val kontrollfeil = FerdigbehandlingKontroll.overlappendePeriode(kontrollData)
+        val kontrollfeil = FerdigbehandlingKontroll.harOverlappendePeriodeMedForskuddsvisFaktureringIAnnenSak(kontrollData)
 
         kontrollfeil.shouldNotBeNull().kode.shouldBe(Kontroll_begrunnelser.OVERLAPPENDE_PERIODE_MED_FORSKUDDSVIS_FAKTURERUNG)
     }

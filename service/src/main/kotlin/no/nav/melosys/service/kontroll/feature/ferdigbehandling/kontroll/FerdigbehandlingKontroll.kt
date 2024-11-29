@@ -32,7 +32,7 @@ object FerdigbehandlingKontroll {
 
     fun harOverlappendePeriodeMedForskuddsvisFaktureringIAnnenSak(kontrollData: FerdigbehandlingKontrollData): Kontrollfeil? {
         val medlemskapsperiodeData = kontrollData.medlemskapsperiodeData
-        if (medlemskapsperiodeData != null && medlemskapsperiodeData.harNyeMedlemskapsperioder()) {
+        if (medlemskapsperiodeData != null && medlemskapsperiodeData.harNyeMedlemskapsperioderMedAvgift()) {
 
             if (OverlappendeMedlemskapsperioderRegler.harOverlappendePeriodeMedForskuddsvisFaktureringIAndreFagsaker(medlemskapsperiodeData, kontrollData.fagsak?.saksnummer)
             ) {

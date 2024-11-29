@@ -13,6 +13,10 @@ data class MedlemskapsperiodeData(
         return nyeMedlemskapsperioder.isNotEmpty()
     }
 
+    fun harNyeMedlemskapsperioderMedAvgift(): Boolean {
+        return nyeMedlemskapsperioderMedAvgift.isNotEmpty()
+    }
+
     fun medlIdEksistererPåTidligereMedlemskapsperiode(medlId: Long): Boolean {
         return tidligereMedlemskapsperioder.any { medlemskapsperiode -> medlemskapsperiode.medlPeriodeID == (medlId) }
     }
