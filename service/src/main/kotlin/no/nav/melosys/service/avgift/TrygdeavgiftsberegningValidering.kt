@@ -94,20 +94,20 @@ object TrygdeavgiftsberegningValidering {
         val startMedlPeriode = sorterteMedlemskapsperioder.first().start
         val endMedlPeriode = sorterteMedlemskapsperioder.last().end
 
-
         if (startKildePeriode > startMedlPeriode || endKildePeriode < endMedlPeriode) {
             throw FunksjonellException(feilmelding)
         }
 
         sorterteKildeperioder.windowed(2).forEach { (current, next) ->
             run {
-                if (!kanOverlappe && current.end.plusDays(1) != next.start) {
+                if (kanOverlappe && current.end.plusDays(1) < next.start) {
                     throw FunksjonellException(feilmelding)
-                } else if (current.end.plusDays(1) < next.start) {
+                }
+
+                if (!kanOverlappe && current.end.plusDays(1) != next.start) {
                     throw FunksjonellException(feilmelding)
                 }
             }
-
         }
     }
 
