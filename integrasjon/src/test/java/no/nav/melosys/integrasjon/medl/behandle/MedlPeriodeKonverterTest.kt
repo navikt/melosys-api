@@ -1,105 +1,142 @@
-package no.nav.melosys.integrasjon.medl.behandle;
+package no.nav.melosys.integrasjon.medl.behandle
 
-import no.nav.melosys.domain.Lovvalgsperiode;
-import no.nav.melosys.domain.kodeverk.Folketrygdloven_kap2_bestemmelser;
-import no.nav.melosys.domain.kodeverk.LovvalgBestemmelse;
-import no.nav.melosys.domain.kodeverk.Trygdedekninger;
-import no.nav.melosys.domain.kodeverk.Vertslandsavtale_bestemmelser;
-import no.nav.melosys.domain.kodeverk.lovvalgsbestemmelser.*;
-import no.nav.melosys.domain.kodeverk.lovvalgsbestemmelser.trygdeavtale.Lovvalgsbestemmelser_trygdeavtale_gb;
-import no.nav.melosys.exception.TekniskException;
-import no.nav.melosys.integrasjon.medl.DekningMedl;
-import no.nav.melosys.integrasjon.medl.GrunnlagMedl;
-import no.nav.melosys.integrasjon.medl.MedlPeriodeKonverter;
-import org.junit.jupiter.api.Test;
+import no.nav.melosys.domain.Lovvalgsperiode
+import no.nav.melosys.domain.kodeverk.Folketrygdloven_kap2_bestemmelser
+import no.nav.melosys.domain.kodeverk.LovvalgBestemmelse
+import no.nav.melosys.domain.kodeverk.Trygdedekninger
+import no.nav.melosys.domain.kodeverk.Vertslandsavtale_bestemmelser
+import no.nav.melosys.domain.kodeverk.lovvalgsbestemmelser.*
+import no.nav.melosys.domain.kodeverk.lovvalgsbestemmelser.trygdeavtale.Lovvalgsbestemmelser_trygdeavtale_gb
+import no.nav.melosys.exception.TekniskException
+import no.nav.melosys.integrasjon.medl.DekningMedl
+import no.nav.melosys.integrasjon.medl.GrunnlagMedl
+import no.nav.melosys.integrasjon.medl.MedlPeriodeKonverter.hentLovvalgBestemmelse
+import no.nav.melosys.integrasjon.medl.MedlPeriodeKonverter.tilGrunnlagMedltype
+import no.nav.melosys.integrasjon.medl.MedlPeriodeKonverter.tilLovvalgBestemmelse
+import no.nav.melosys.integrasjon.medl.MedlPeriodeKonverter.tilMedlTrygdeDekning
+import no.nav.melosys.integrasjon.medl.MedlPeriodeKonverter.tilMedlTrygdedekningForFtrl
+import org.assertj.core.api.Assertions
+import org.junit.jupiter.api.Test
 
-import static org.assertj.core.api.Assertions.assertThat;
-import static org.assertj.core.api.Assertions.assertThatExceptionOfType;
-
-class MedlPeriodeKonverterTest {
-
+internal class MedlPeriodeKonverterTest {
     @Test
-    void tilGrunnlagMedltype() {
-        assertThat(MedlPeriodeKonverter.tilGrunnlagMedltype(Lovvalgbestemmelser_883_2004.FO_883_2004_ART12_2))
-            .isEqualTo(GrunnlagMedl.FO_12_2);
-        assertThat(MedlPeriodeKonverter.tilGrunnlagMedltype(Lovvalgbestemmelser_883_2004.FO_883_2004_ART16_1))
-            .isEqualTo(GrunnlagMedl.FO_16);
-        assertThat(MedlPeriodeKonverter.tilGrunnlagMedltype(Lovvalgbestemmelser_883_2004.FO_883_2004_ART16_2))
-            .isEqualTo(GrunnlagMedl.FO_16);
-        assertThat(MedlPeriodeKonverter.tilGrunnlagMedltype(Lovvalgsbestemmelser_trygdeavtale_gb.UK_ART7_3))
-            .isEqualTo(GrunnlagMedl.STORBRIT_NIRLAND_7_3);
-        assertThat(MedlPeriodeKonverter.tilGrunnlagMedltype(Lovvalgbestemmelser_987_2009.FO_987_2009_ART14_11))
-            .isEqualTo(GrunnlagMedl.FO_987_2009_14_11);
+    fun tilGrunnlagMedltype() {
+        Assertions.assertThat(tilGrunnlagMedltype(Lovvalgbestemmelser_883_2004.FO_883_2004_ART12_2))
+            .isEqualTo(GrunnlagMedl.FO_12_2)
+        Assertions.assertThat(tilGrunnlagMedltype(Lovvalgbestemmelser_883_2004.FO_883_2004_ART16_1))
+            .isEqualTo(GrunnlagMedl.FO_16)
+        Assertions.assertThat(tilGrunnlagMedltype(Lovvalgbestemmelser_883_2004.FO_883_2004_ART16_2))
+            .isEqualTo(GrunnlagMedl.FO_16)
+        Assertions.assertThat(tilGrunnlagMedltype(Lovvalgsbestemmelser_trygdeavtale_gb.UK_ART7_3))
+            .isEqualTo(GrunnlagMedl.STORBRIT_NIRLAND_7_3)
+        Assertions.assertThat(tilGrunnlagMedltype(Lovvalgbestemmelser_987_2009.FO_987_2009_ART14_11))
+            .isEqualTo(GrunnlagMedl.FO_987_2009_14_11)
 
-        assertThatExceptionOfType(TekniskException.class)
-            .isThrownBy(() -> MedlPeriodeKonverter.tilGrunnlagMedltype(Lovvalgbestemmelser_883_2004.FO_883_2004_ART11_1))
-            .withMessageContaining("støttes ikke i MEDL");
+        Assertions.assertThatExceptionOfType(TekniskException::class.java)
+            .isThrownBy { tilGrunnlagMedltype(Lovvalgbestemmelser_883_2004.FO_883_2004_ART11_1) }
+            .withMessageContaining("støttes ikke i MEDL")
     }
 
     @Test
-    void tilGrunnlagMedltype_FtrlOgSpesielleGrupper() {
-        assertThat(MedlPeriodeKonverter.tilGrunnlagMedltype(Folketrygdloven_kap2_bestemmelser.FTRL_KAP2_2_8_FØRSTE_LEDD_A)).isEqualTo(GrunnlagMedl.FTL_2_8_1_LEDD_A);
-        assertThat(MedlPeriodeKonverter.tilGrunnlagMedltype(Vertslandsavtale_bestemmelser.TILLEGGSAVTALE_NATO))
-            .isEqualTo(GrunnlagMedl.TILLEGGSAVTALE_NATO);
-        assertThat(MedlPeriodeKonverter.tilGrunnlagMedltype(Folketrygdloven_kap2_bestemmelser.FTRL_KAP2_2_8_FØRSTE_LEDD_B))
-            .isEqualTo(GrunnlagMedl.FTL_2_8_1_LEDD_B);
-        assertThat(MedlPeriodeKonverter.tilGrunnlagMedltype(Vertslandsavtale_bestemmelser.DET_INTERNASJONALE_BARENTSSEKRETARIATET_ART14))
-            .isEqualTo(GrunnlagMedl.DET_INTERNASJONALE_BARENTSSEKRETARIATET_14);
+    fun tilGrunnlagMedltype_FtrlOgSpesielleGrupper() {
+        Assertions.assertThat(tilGrunnlagMedltype(Folketrygdloven_kap2_bestemmelser.FTRL_KAP2_2_8_FØRSTE_LEDD_A))
+            .isEqualTo(GrunnlagMedl.FTL_2_8_1_LEDD_A)
+        Assertions.assertThat(tilGrunnlagMedltype(Vertslandsavtale_bestemmelser.TILLEGGSAVTALE_NATO))
+            .isEqualTo(GrunnlagMedl.TILLEGGSAVTALE_NATO)
+        Assertions.assertThat(tilGrunnlagMedltype(Folketrygdloven_kap2_bestemmelser.FTRL_KAP2_2_8_FØRSTE_LEDD_B))
+            .isEqualTo(GrunnlagMedl.FTL_2_8_1_LEDD_B)
+        Assertions.assertThat(tilGrunnlagMedltype(Vertslandsavtale_bestemmelser.DET_INTERNASJONALE_BARENTSSEKRETARIATET_ART14))
+            .isEqualTo(GrunnlagMedl.DET_INTERNASJONALE_BARENTSSEKRETARIATET_14)
 
-        assertThatExceptionOfType(TekniskException.class)
-            .isThrownBy(() -> MedlPeriodeKonverter.tilGrunnlagMedltype(Folketrygdloven_kap2_bestemmelser.FTRL_KAP2_2_5))
-            .withMessageContaining("Folketrygdloven bestemmelse støttes ikke.");
+        Assertions.assertThatExceptionOfType(TekniskException::class.java)
+            .isThrownBy { tilGrunnlagMedltype(Folketrygdloven_kap2_bestemmelser.FTRL_KAP2_2_5) }
+            .withMessageContaining("Folketrygdloven bestemmelse støttes ikke.")
     }
 
     @Test
-    void tilLovvalgBestemmelse() {
-        assertThat(MedlPeriodeKonverter.tilLovvalgBestemmelse(GrunnlagMedl.FO_12_2))
-            .isEqualTo(Lovvalgbestemmelser_883_2004.FO_883_2004_ART12_2);
-        assertThat(MedlPeriodeKonverter.tilLovvalgBestemmelse(GrunnlagMedl.FO_16))
-            .isEqualTo(Lovvalgbestemmelser_883_2004.FO_883_2004_ART16_1);
+    fun tilLovvalgBestemmelse() {
+        Assertions.assertThat(tilLovvalgBestemmelse(GrunnlagMedl.FO_12_2))
+            .isEqualTo(Lovvalgbestemmelser_883_2004.FO_883_2004_ART12_2)
+        Assertions.assertThat(tilLovvalgBestemmelse(GrunnlagMedl.FO_16))
+            .isEqualTo(Lovvalgbestemmelser_883_2004.FO_883_2004_ART16_1)
 
-        assertThatExceptionOfType(TekniskException.class)
-            .isThrownBy(() -> MedlPeriodeKonverter.tilLovvalgBestemmelse(GrunnlagMedl.MEDFT))
-            .withMessageContaining("GrunnlagMedlKode er ukjent");
+        Assertions.assertThatExceptionOfType(TekniskException::class.java)
+            .isThrownBy { tilLovvalgBestemmelse(GrunnlagMedl.MEDFT) }
+            .withMessageContaining("GrunnlagMedlKode er ukjent")
     }
 
     @Test
-    void tilMedlTrygdedekningForFtrl() {
-        assertThat(MedlPeriodeKonverter.tilMedlTrygdedekningForFtrl(Trygdedekninger.TILLEGGSAVTALE_NATO_HELSEDEL))
-            .isEqualTo(DekningMedl.TILLEGSAVTALE_NATO_DEKNING);
+    fun tilMedlTrygdedekningForFtrl() {
+        Assertions.assertThat(tilMedlTrygdedekningForFtrl(Trygdedekninger.TILLEGGSAVTALE_NATO_HELSEDEL))
+            .isEqualTo(DekningMedl.TILLEGSAVTALE_NATO_DEKNING)
 
-        assertThatExceptionOfType(TekniskException.class)
-            .isThrownBy(() -> MedlPeriodeKonverter.tilMedlTrygdedekningForFtrl(Trygdedekninger.UNNTATT_USA_5_2_G))
-            .withMessageContaining("Dekningstype støttes ikke for FTRL: %s".formatted(Trygdedekninger.UNNTATT_USA_5_2_G.getKode()));
+        Assertions.assertThatExceptionOfType(TekniskException::class.java)
+            .isThrownBy { tilMedlTrygdedekningForFtrl(Trygdedekninger.UNNTATT_USA_5_2_G) }
+            .withMessageContaining("Dekningstype støttes ikke for FTRL: %s".formatted(Trygdedekninger.UNNTATT_USA_5_2_G.kode))
     }
 
     @Test
-    void hentFellesKodeForDekningtype() {
-        Trygdedekninger trygdeDekning = Trygdedekninger.UTEN_DEKNING;
-        DekningMedl dekningMedl = MedlPeriodeKonverter.tilMedlTrygdeDekning(trygdeDekning);
-        assertThat(dekningMedl).isEqualTo(DekningMedl.UNNTATT);
+    fun hentFellesKodeForDekningtype() {
+        val trygdeDekning = Trygdedekninger.UTEN_DEKNING
+        val dekningMedl = tilMedlTrygdeDekning(trygdeDekning)
+        Assertions.assertThat(dekningMedl).isEqualTo(DekningMedl.UNNTATT)
     }
 
     @Test
-    void hentLovvalgbestemmelse() {
-        assertThat(MedlPeriodeKonverter.hentLovvalgBestemmelse(lovvalgsperiode(Lovvalgbestemmelser_883_2004.FO_883_2004_ART12_1, null)))
-            .isEqualTo(Lovvalgbestemmelser_883_2004.FO_883_2004_ART12_1);
-        assertThat(MedlPeriodeKonverter.hentLovvalgBestemmelse(lovvalgsperiode(Lovvalgbestemmelser_883_2004.FO_883_2004_ART12_1, Tilleggsbestemmelser_883_2004.FO_883_2004_ART11_5)))
-            .isEqualTo(Lovvalgbestemmelser_883_2004.FO_883_2004_ART12_1);
-        assertThat(MedlPeriodeKonverter.hentLovvalgBestemmelse(lovvalgsperiode(Lovvalgbestemmelser_883_2004.FO_883_2004_ART12_1, Tilleggsbestemmelser_883_2004.FO_883_2004_ART11_4_1)))
-            .isEqualTo(Lovvalgbestemmelser_883_2004.FO_883_2004_ART12_1);
-        assertThat(MedlPeriodeKonverter.hentLovvalgBestemmelse(lovvalgsperiode(Lovvalgbestemmelser_konv_efta_storbritannia.KONV_EFTA_STORBRITANNIA_ART13_3A, Tilleggsbestemmelser_konv_efta_storbritannia.KONV_EFTA_STORBRITANNIA_ART13_4_1)))
-            .isEqualTo(Tilleggsbestemmelser_konv_efta_storbritannia.KONV_EFTA_STORBRITANNIA_ART13_4_1);
-        assertThat(MedlPeriodeKonverter.hentLovvalgBestemmelse(lovvalgsperiode(Lovvalgbestemmelser_883_2004.FO_883_2004_ART11_3A, Tilleggsbestemmelser_883_2004.FO_883_2004_ART11_4_1)))
-            .isEqualTo(Tilleggsbestemmelser_883_2004.FO_883_2004_ART11_4_1);
-        assertThat(MedlPeriodeKonverter.hentLovvalgBestemmelse(lovvalgsperiode(Lovvalgbestemmelser_883_2004.FO_883_2004_ART11_3A, Tilleggsbestemmelser_883_2004.FO_883_2004_ART11_5)))
-            .isEqualTo(Tilleggsbestemmelser_883_2004.FO_883_2004_ART11_5);
+    fun hentLovvalgbestemmelse() {
+        Assertions.assertThat(hentLovvalgBestemmelse(lovvalgsperiode(Lovvalgbestemmelser_883_2004.FO_883_2004_ART12_1, null)))
+            .isEqualTo(Lovvalgbestemmelser_883_2004.FO_883_2004_ART12_1)
+        Assertions.assertThat(
+            hentLovvalgBestemmelse(
+                lovvalgsperiode(
+                    Lovvalgbestemmelser_883_2004.FO_883_2004_ART12_1,
+                    Tilleggsbestemmelser_883_2004.FO_883_2004_ART11_5
+                )
+            )
+        )
+            .isEqualTo(Lovvalgbestemmelser_883_2004.FO_883_2004_ART12_1)
+        Assertions.assertThat(
+            hentLovvalgBestemmelse(
+                lovvalgsperiode(
+                    Lovvalgbestemmelser_883_2004.FO_883_2004_ART12_1,
+                    Tilleggsbestemmelser_883_2004.FO_883_2004_ART11_4_1
+                )
+            )
+        )
+            .isEqualTo(Lovvalgbestemmelser_883_2004.FO_883_2004_ART12_1)
+        Assertions.assertThat(
+            hentLovvalgBestemmelse(
+                lovvalgsperiode(
+                    Lovvalgbestemmelser_konv_efta_storbritannia.KONV_EFTA_STORBRITANNIA_ART13_3A,
+                    Tilleggsbestemmelser_konv_efta_storbritannia.KONV_EFTA_STORBRITANNIA_ART13_4_1
+                )
+            )
+        )
+            .isEqualTo(Tilleggsbestemmelser_konv_efta_storbritannia.KONV_EFTA_STORBRITANNIA_ART13_4_1)
+        Assertions.assertThat(
+            hentLovvalgBestemmelse(
+                lovvalgsperiode(
+                    Lovvalgbestemmelser_883_2004.FO_883_2004_ART11_3A,
+                    Tilleggsbestemmelser_883_2004.FO_883_2004_ART11_4_1
+                )
+            )
+        )
+            .isEqualTo(Tilleggsbestemmelser_883_2004.FO_883_2004_ART11_4_1)
+        Assertions.assertThat(
+            hentLovvalgBestemmelse(
+                lovvalgsperiode(
+                    Lovvalgbestemmelser_883_2004.FO_883_2004_ART11_3A,
+                    Tilleggsbestemmelser_883_2004.FO_883_2004_ART11_5
+                )
+            )
+        )
+            .isEqualTo(Tilleggsbestemmelser_883_2004.FO_883_2004_ART11_5)
     }
 
-    private Lovvalgsperiode lovvalgsperiode(LovvalgBestemmelse lovvalgBestemmelse, LovvalgBestemmelse tilleggBestemmelse) {
-        var lovvalgsperiode = new Lovvalgsperiode();
-        lovvalgsperiode.setBestemmelse(lovvalgBestemmelse);
-        lovvalgsperiode.setTilleggsbestemmelse(tilleggBestemmelse);
-        return lovvalgsperiode;
+    private fun lovvalgsperiode(lovvalgBestemmelse: LovvalgBestemmelse, tilleggBestemmelse: LovvalgBestemmelse?): Lovvalgsperiode {
+        val lovvalgsperiode = Lovvalgsperiode()
+        lovvalgsperiode.bestemmelse = lovvalgBestemmelse
+        lovvalgsperiode.tilleggsbestemmelse = tilleggBestemmelse
+        return lovvalgsperiode
     }
 }
