@@ -1,6 +1,6 @@
-package no.nav.melosys.tjenester.gui.ftrl.medlemskapsperiode.dto;
+package no.nav.melosys.tjenester.gui.ftrl.medlemskapsperiode.dto
 
-import no.nav.melosys.domain.kodeverk.Folketrygdloven_kap2_bestemmelser;
+import no.nav.melosys.domain.kodeverk.Folketrygdloven_kap2_bestemmelser
 
-public record BestemmelseDto(Folketrygdloven_kap2_bestemmelser bestemmelse) {
-}
+@JvmRecord
+data class BestemmelseDto(val bestemmelse: Folketrygdloven_kap2_bestemmelser)
