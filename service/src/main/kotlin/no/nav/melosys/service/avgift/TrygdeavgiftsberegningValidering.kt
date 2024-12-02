@@ -99,8 +99,6 @@ object TrygdeavgiftsberegningValidering {
             throw FunksjonellException(feilmelding)
         }
 
-
-
         sorterteKildeperioder.windowed(2).forEach { (current, next) ->
             run {
                 if (!kanOverlappe && current.end.plusDays(1) != next.start) {
