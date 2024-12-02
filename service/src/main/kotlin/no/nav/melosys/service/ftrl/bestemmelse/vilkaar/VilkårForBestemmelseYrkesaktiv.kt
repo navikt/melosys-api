@@ -83,6 +83,13 @@ class VilkårForBestemmelseYrkesaktiv(val mottatteOpplysningerService: MottatteO
                 Vilkår(FTRL_2_8_FØRSTE_LEDD_NÆR_TILKNYTNING_NORGE)
             )
 
+            FTRL_KAP2_2_8_FØRSTE_LEDD_B -> listOf(
+                Vilkår(FTRL_2_1A_TRYGDEKOORDINGERING),
+                Vilkår(FTRL_2_8_STUDENT_UVIVERSITET_HØGSKOLE),
+                Vilkår(FTRL_FORUTGÅENDE_TRYGDETID),
+                Vilkår(FTRL_2_8_NÆR_TILKNYTNING_NORGE)
+            )
+
             FTRL_KAP2_2_8_ANDRE_LEDD -> listOf(
                 Vilkår(FTRL_2_1A_TRYGDEKOORDINGERING),
                 Vilkår(FTRL_FORUTGÅENDE_TRYGDETID),

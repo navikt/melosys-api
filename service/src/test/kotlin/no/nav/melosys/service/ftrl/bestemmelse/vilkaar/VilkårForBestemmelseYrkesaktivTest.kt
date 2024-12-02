@@ -359,4 +359,29 @@ class VilkårForBestemmelseYrkesaktivTest {
             1L
         ).shouldContainExactly(Vilkår(Vilkaar.TILLEGGSAVTALE_NATO_SIVILT_ANSATT))
     }
+
+    @Test
+    fun `vilkår for FTRL_KAP2_2_8_FØRSTE_LEDD_B`() {
+        val vilkår = vilkårForBestemmelse.hentVilkår(
+            Folketrygdloven_kap2_bestemmelser.FTRL_KAP2_2_8_FØRSTE_LEDD_B,
+            emptyMap(),
+            1L
+        )
+
+
+        vilkår.shouldContainExactly(
+            Vilkår(
+                Vilkaar.FTRL_2_1A_TRYGDEKOORDINGERING
+            ),
+            Vilkår(
+                Vilkaar.FTRL_2_8_STUDENT_UVIVERSITET_HØGSKOLE
+            ),
+            Vilkår(
+                Vilkaar.FTRL_FORUTGÅENDE_TRYGDETID
+            ),
+            Vilkår(
+                Vilkaar.FTRL_2_8_NÆR_TILKNYTNING_NORGE
+            ),
+        )
+    }
 }
