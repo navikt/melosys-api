@@ -154,6 +154,51 @@ class TrygdeavgiftsberegningValideringTest {
         }
 
         fun valideringsDataperiodermedFeilScenarios(): List<ValideringsInput> = listOf(
+            ValideringsInput(                                                       // Inntektskilder dekker ikke hele perioden kaster exception
+                listOf(Medlemskapsperiode().apply {
+                    innvilgelsesresultat = InnvilgelsesResultat.INNVILGET
+                    fom = LocalDate.now()
+                    tom = LocalDate.now().plusDays(5)
+                }),
+                listOf(
+                    SkatteforholdTilNorge().apply {
+                        fomDato = LocalDate.now()
+                        tomDato = LocalDate.now().plusDays(5)
+                        skatteplikttype = Skatteplikttype.SKATTEPLIKTIG
+                    }
+                ), listOf(Inntektsperiode().apply {
+                    fomDato = LocalDate.now()
+                    tomDato = LocalDate.now().plusDays(2)
+                    type = Inntektskildetype.ARBEIDSINNTEKT
+                }, Inntektsperiode().apply {
+                    fomDato = LocalDate.now().plusDays(4)
+                    tomDato = LocalDate.now().plusDays(5)
+                    type = Inntektskildetype.ARBEIDSINNTEKT
+                }), TrygdeavgiftsberegningValidering.INNTEKTSPERIODE_DEKKER_IKKE_HELE_PERIODEN
+            ),
+            ValideringsInput(                                                       // Skatteforhold dekker ikke hele perioden kaster exception
+                listOf(Medlemskapsperiode().apply {
+                    innvilgelsesresultat = InnvilgelsesResultat.INNVILGET
+                    fom = LocalDate.now()
+                    tom = LocalDate.now().plusDays(5)
+                }),
+                listOf(
+                    SkatteforholdTilNorge().apply {
+                        fomDato = LocalDate.now()
+                        tomDato = LocalDate.now().plusDays(2)
+                        skatteplikttype = Skatteplikttype.SKATTEPLIKTIG
+                    },
+                    SkatteforholdTilNorge().apply {
+                        fomDato = LocalDate.now().plusDays(4)
+                        tomDato = LocalDate.now().plusDays(5)
+                        skatteplikttype = Skatteplikttype.IKKE_SKATTEPLIKTIG
+                    }
+                ), listOf(Inntektsperiode().apply {
+                    fomDato = LocalDate.now()
+                    tomDato = LocalDate.now().plusDays(5)
+                    type = Inntektskildetype.ARBEIDSINNTEKT
+                }), TrygdeavgiftsberegningValidering.SKATTEFORHOLDSPERIODE_DEKKER_IKKE_HELE_PERIODEN
+            ),
             ValideringsInput(                                                               // skatteforhold overlapper samme dag
                 listOf(Medlemskapsperiode().apply {
                     innvilgelsesresultat = InnvilgelsesResultat.INNVILGET
@@ -240,6 +285,29 @@ class TrygdeavgiftsberegningValideringTest {
         )
 
         fun valideringsDataPerioderDekkesScenarios(): List<ValideringsInput> = listOf(
+            ValideringsInput(                                                       // Inntektsperioder skal kunne overlappe
+                listOf(Medlemskapsperiode().apply {
+                    innvilgelsesresultat = InnvilgelsesResultat.INNVILGET
+                    fom = LocalDate.now()
+                    tom = LocalDate.now().plusDays(5)
+                }),
+                listOf(
+                    SkatteforholdTilNorge().apply {
+                        fomDato = LocalDate.now()
+                        tomDato = LocalDate.now().plusDays(5)
+                        skatteplikttype = Skatteplikttype.SKATTEPLIKTIG
+                    }
+                ), listOf(Inntektsperiode().apply {
+                    fomDato = LocalDate.now()
+                    tomDato = LocalDate.now().plusDays(3)
+                    type = Inntektskildetype.ARBEIDSINNTEKT
+                }, Inntektsperiode().apply {
+                    fomDato = LocalDate.now().plusDays(2)
+                    tomDato = LocalDate.now().plusDays(5)
+                    type = Inntektskildetype.ARBEIDSINNTEKT
+                }), ""
+            ),
+
             ValideringsInput(
                 listOf(Medlemskapsperiode().apply {
                     innvilgelsesresultat = InnvilgelsesResultat.INNVILGET

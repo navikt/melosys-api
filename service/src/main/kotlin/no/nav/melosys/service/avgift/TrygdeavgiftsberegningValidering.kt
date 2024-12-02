@@ -9,7 +9,6 @@ import no.nav.melosys.domain.avgift.SkatteforholdTilNorge
 import no.nav.melosys.domain.kodeverk.Skatteplikttype
 import no.nav.melosys.exception.FunksjonellException
 import org.threeten.extra.LocalDateRange
-import java.time.DateTimeException
 
 object TrygdeavgiftsberegningValidering {
     val MEDLEMSKAPSPERIODER_EMPTY = "Kan ikke beregne trygdeavgift uten medlemskapsperioder"
@@ -47,6 +46,7 @@ object TrygdeavgiftsberegningValidering {
         harOverlapp(skatteforholdsPerioder, SKATTEFORHOLDSPERIODENE_KAN_IKKE_OVERLAPPE)
 
         validerPerioderDekkerSammenlignetPeriode(
+            kanOverlappe = false,
             skatteforholdsPerioder,
             innvilgedeMedlemskapsperioder,
             SKATTEFORHOLDSPERIODE_DEKKER_IKKE_HELE_PERIODEN
@@ -55,7 +55,12 @@ object TrygdeavgiftsberegningValidering {
         val erPliktigMedlem = innvilgedeMedlemskapsperioder.all { it.erPliktig() }
         val erSkattepliktigIHelePerioden = skatteforholdsPerioder.all { it.skatteplikttype == Skatteplikttype.SKATTEPLIKTIG }
         if (!(erPliktigMedlem && erSkattepliktigIHelePerioden)) {
-            validerPerioderDekkerSammenlignetPeriode(inntektsPerioder, innvilgedeMedlemskapsperioder, INNTEKTSPERIODE_DEKKER_IKKE_HELE_PERIODEN)
+            validerPerioderDekkerSammenlignetPeriode(
+                kanOverlappe = true,
+                inntektsPerioder,
+                innvilgedeMedlemskapsperioder,
+                INNTEKTSPERIODE_DEKKER_IKKE_HELE_PERIODEN
+            )
         }
     }
 
@@ -74,27 +79,8 @@ object TrygdeavgiftsberegningValidering {
             ?: throw FunksjonellException(UTLED_MEDLEMSKAPSPERIODE_TOM_MANGLER)
     }
 
-
-    private fun finnRangeForPerioderSamlet(periodeRanges: List<LocalDateRange>, feilmelding: String): LocalDateRange? {
-        var samletPeriodeDateRange: LocalDateRange? = null
-        try {
-            for (range in periodeRanges) {
-                samletPeriodeDateRange = if (samletPeriodeDateRange == null) {
-                    range
-                } else {
-                    samletPeriodeDateRange.union(range)
-                }
-            }
-        } catch (ex: DateTimeException) {
-            throw FunksjonellException(feilmelding)
-        }
-
-        return samletPeriodeDateRange
-    }
-
-    //
-
     private fun validerPerioderDekkerSammenlignetPeriode(
+        kanOverlappe: Boolean,
         kildeperioder: List<ErPeriode>,
         medlemskapsperioder: List<ErPeriode>,
         feilmelding: String
@@ -113,10 +99,17 @@ object TrygdeavgiftsberegningValidering {
             throw FunksjonellException(feilmelding)
         }
 
+
+
         sorterteKildeperioder.windowed(2).forEach { (current, next) ->
-            if (current.end.plusDays(1) != next.start) {
-                throw FunksjonellException(feilmelding)
+            run {
+                if (!kanOverlappe && current.end.plusDays(1) != next.start) {
+                    throw FunksjonellException(feilmelding)
+                } else if (current.end.plusDays(1) < next.start) {
+                    throw FunksjonellException(feilmelding)
+                }
             }
+
         }
     }
 
