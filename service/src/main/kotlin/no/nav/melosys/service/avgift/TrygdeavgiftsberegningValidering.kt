@@ -99,15 +99,14 @@ object TrygdeavgiftsberegningValidering {
         }
 
         sorterteKildeperioder.windowed(2).forEach { (current, next) ->
-            run {
-                if (kanOverlappe && current.end.plusDays(1) < next.start) {
-                    throw FunksjonellException(feilmelding)
-                }
-
-                if (!kanOverlappe && current.end.plusDays(1) != next.start) {
-                    throw FunksjonellException(feilmelding)
-                }
+            if (kanOverlappe && current.end.plusDays(1) < next.start) {
+                throw FunksjonellException(feilmelding)
             }
+
+            if (!kanOverlappe && current.end.plusDays(1) != next.start) {
+                throw FunksjonellException(feilmelding)
+            }
+
         }
     }
 
