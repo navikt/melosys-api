@@ -4,6 +4,7 @@ import no.nav.melosys.domain.Lovvalgsperiode;
 import no.nav.melosys.domain.kodeverk.Folketrygdloven_kap2_bestemmelser;
 import no.nav.melosys.domain.kodeverk.LovvalgBestemmelse;
 import no.nav.melosys.domain.kodeverk.Trygdedekninger;
+import no.nav.melosys.domain.kodeverk.Vertslandsavtale_bestemmelser;
 import no.nav.melosys.domain.kodeverk.lovvalgsbestemmelser.*;
 import no.nav.melosys.domain.kodeverk.lovvalgsbestemmelser.trygdeavtale.Lovvalgsbestemmelser_trygdeavtale_gb;
 import no.nav.melosys.exception.TekniskException;
@@ -36,8 +37,14 @@ class MedlPeriodeKonverterTest {
     }
 
     @Test
-    void tilGrunnlagMedltype_Ftrl() {
+    void tilGrunnlagMedltype_FtrlOgSpesielleGrupper() {
         assertThat(MedlPeriodeKonverter.tilGrunnlagMedltype(Folketrygdloven_kap2_bestemmelser.FTRL_KAP2_2_8_FØRSTE_LEDD_A)).isEqualTo(GrunnlagMedl.FTL_2_8_1_LEDD_A);
+        assertThat(MedlPeriodeKonverter.tilGrunnlagMedltype(Vertslandsavtale_bestemmelser.TILLEGGSAVTALE_NATO))
+            .isEqualTo(GrunnlagMedl.TILLEGGSAVTALE_NATO);
+        assertThat(MedlPeriodeKonverter.tilGrunnlagMedltype(Folketrygdloven_kap2_bestemmelser.FTRL_KAP2_2_8_FØRSTE_LEDD_B))
+            .isEqualTo(GrunnlagMedl.FTL_2_8_1_LEDD_B);
+        assertThat(MedlPeriodeKonverter.tilGrunnlagMedltype(Vertslandsavtale_bestemmelser.DET_INTERNASJONALE_BARENTSSEKRETARIATET_ART14))
+            .isEqualTo(GrunnlagMedl.DET_INTERNASJONALE_BARENTSSEKRETARIATET_14);
 
         assertThatExceptionOfType(TekniskException.class)
             .isThrownBy(() -> MedlPeriodeKonverter.tilGrunnlagMedltype(Folketrygdloven_kap2_bestemmelser.FTRL_KAP2_2_5))
@@ -54,6 +61,16 @@ class MedlPeriodeKonverterTest {
         assertThatExceptionOfType(TekniskException.class)
             .isThrownBy(() -> MedlPeriodeKonverter.tilLovvalgBestemmelse(GrunnlagMedl.MEDFT))
             .withMessageContaining("GrunnlagMedlKode er ukjent");
+    }
+
+    @Test
+    void tilMedlTrygdedekningForFtrl() {
+        assertThat(MedlPeriodeKonverter.tilMedlTrygdedekningForFtrl(Trygdedekninger.TILLEGGSAVTALE_NATO_HELSEDEL))
+            .isEqualTo(DekningMedl.TILLEGSAVTALE_NATO_DEKNING);
+
+        assertThatExceptionOfType(TekniskException.class)
+            .isThrownBy(() -> MedlPeriodeKonverter.tilMedlTrygdedekningForFtrl(Trygdedekninger.UNNTATT_USA_5_2_G))
+            .withMessageContaining("Dekningstype støttes ikke for FTRL: %s".formatted(Trygdedekninger.UNNTATT_USA_5_2_G.getKode()));
     }
 
     @Test
