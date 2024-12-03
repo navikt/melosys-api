@@ -116,13 +116,13 @@ enum class GrunnlagMedl(@JvmField val kode: String) {
 
     ITALIA("Italia"),
 
-    KORATIA("Kroatia"),
-    KORATIA_3("Kroatia_3"),
-    KORATIA_4("Kroatia_4"),
-    KORATIA_4_A("Kroatia_4_a"),
-    KORATIA_5("Kroatia_5"),
-    KORATIA_6("Kroatia_6"),
-    KORATIA_7("Kroatia_7"),
+    KROATIA("Kroatia"),
+    KROATIA_3("Kroatia_3"),
+    KROATIA_4("Kroatia_4"),
+    KROATIA_4_A("Kroatia_4_a"),
+    KROATIA_5("Kroatia_5"),
+    KROATIA_6("Kroatia_6"),
+    KROATIA_7("Kroatia_7"),
 
     MONTENEGRO("Montenegro"),
     MONTENEGRO_3("Montenegro_3"),
