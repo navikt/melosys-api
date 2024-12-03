@@ -7,14 +7,15 @@ import java.util.Set;
 
 import jakarta.persistence.*;
 import no.nav.melosys.domain.avgift.Trygdeavgiftsperiode;
-import no.nav.melosys.domain.kodeverk.Folketrygdloven_kap2_bestemmelser;
+import no.nav.melosys.domain.jpa.MedlemskapBestemmelsekonverter;
+import no.nav.melosys.domain.kodeverk.Bestemmelse;
 import no.nav.melosys.domain.kodeverk.InnvilgelsesResultat;
 import no.nav.melosys.domain.kodeverk.Medlemskapstyper;
 import no.nav.melosys.domain.kodeverk.Trygdedekninger;
 
 @Entity
 @Table(name = "medlemskapsperiode")
-public class Medlemskapsperiode implements ErPeriode, HarBestemmelse<Folketrygdloven_kap2_bestemmelser> {
+public class Medlemskapsperiode implements ErPeriode, HarBestemmelse<Bestemmelse> {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
@@ -42,8 +43,8 @@ public class Medlemskapsperiode implements ErPeriode, HarBestemmelse<Folketrygdl
     private Trygdedekninger trygdedekning;
 
     @Column(name = "bestemmelse", nullable = false)
-    @Enumerated(EnumType.STRING)
-    private Folketrygdloven_kap2_bestemmelser bestemmelse;
+    @Convert(converter = MedlemskapBestemmelsekonverter.class)
+    private Bestemmelse bestemmelse;
 
     @OneToMany(mappedBy = "grunnlagMedlemskapsperiode", cascade = CascadeType.ALL, fetch = FetchType.EAGER, orphanRemoval = true)
     private Set<Trygdeavgiftsperiode> trygdeavgiftsperioder = new HashSet<>(1);
@@ -107,11 +108,11 @@ public class Medlemskapsperiode implements ErPeriode, HarBestemmelse<Folketrygdl
         this.trygdedekning = trygdedekning;
     }
 
-    public Folketrygdloven_kap2_bestemmelser getBestemmelse() {
+    public Bestemmelse getBestemmelse() {
         return bestemmelse;
     }
 
-    public void setBestemmelse(Folketrygdloven_kap2_bestemmelser bestemmelse) {
+    public void setBestemmelse(Bestemmelse bestemmelse) {
         this.bestemmelse = bestemmelse;
     }
 

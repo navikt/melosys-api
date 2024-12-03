@@ -21,7 +21,7 @@ class InnvilgelseFtrlYrkesaktivFrivillig(
     val avgiftsperioder: List<AvgiftsperiodeDto>,
     @JsonInclude(JsonInclude.Include.NON_NULL)
     val medlemskapsperioder: List<MedlemskapsperiodeDto>,
-    val bestemmelse: Folketrygdloven_kap2_bestemmelser?,
+    val bestemmelse: Bestemmelse?,
     val avslåttMedlemskapsperiodeFørMottaksdatoHelsedel: Boolean,
     val avslåttMedlemskapsperiodeFørMottaksdatoFullDekning: Boolean,
     val trygdeavgiftMottaker: Trygdeavgiftmottaker?,
@@ -47,7 +47,7 @@ class InnvilgelseFtrlYrkesaktivFrivillig(
         behandlingstype: Behandlingstyper,
         avgiftsperioder: List<AvgiftsperiodeDto>,
         medlemskapsperioder: List<MedlemskapsperiodeDto>,
-        bestemmelse: Folketrygdloven_kap2_bestemmelser,
+        bestemmelse: Bestemmelse,
         avslåttMedlemskapsperiodeFørMottaksdatoHelsedel: Boolean,
         avslåttMedlemskapsperiodeFørMottaksdatoFullDekning: Boolean,
         trygdeavgiftMottaker: Trygdeavgiftmottaker?,

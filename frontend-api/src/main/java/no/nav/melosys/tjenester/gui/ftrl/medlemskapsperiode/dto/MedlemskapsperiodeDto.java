@@ -1,17 +1,17 @@
 package no.nav.melosys.tjenester.gui.ftrl.medlemskapsperiode.dto;
 
+import java.time.LocalDate;
+
 import no.nav.melosys.domain.Medlemskapsperiode;
-import no.nav.melosys.domain.kodeverk.Folketrygdloven_kap2_bestemmelser;
+import no.nav.melosys.domain.kodeverk.Bestemmelse;
 import no.nav.melosys.domain.kodeverk.InnvilgelsesResultat;
 import no.nav.melosys.domain.kodeverk.Medlemskapstyper;
 import no.nav.melosys.domain.kodeverk.Trygdedekninger;
 
-import java.time.LocalDate;
-
 public record MedlemskapsperiodeDto(long id,
                                     LocalDate fomDato,
                                     LocalDate tomDato,
-                                    Folketrygdloven_kap2_bestemmelser bestemmelse,
+                                    Bestemmelse bestemmelse,
                                     InnvilgelsesResultat innvilgelsesResultat,
                                     Trygdedekninger trygdedekning,
                                     Medlemskapstyper medlemskapstype) {

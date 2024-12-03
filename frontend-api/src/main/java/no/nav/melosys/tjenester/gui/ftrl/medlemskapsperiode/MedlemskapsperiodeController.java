@@ -4,6 +4,7 @@ import java.util.Collection;
 import java.util.stream.Collectors;
 
 import io.swagger.annotations.Api;
+import no.nav.melosys.domain.jpa.MedlemskapBestemmelsekonverter;
 import no.nav.melosys.service.ftrl.medlemskapsperiode.MedlemskapsperiodeService;
 import no.nav.melosys.service.ftrl.medlemskapsperiode.OpprettForslagMedlemskapsperiodeService;
 import no.nav.melosys.service.tilgang.Aksesskontroll;
@@ -26,9 +27,11 @@ public class MedlemskapsperiodeController {
     private final OpprettForslagMedlemskapsperiodeService opprettForslagMedlemskapsperiodeService;
     private final Aksesskontroll aksesskontroll;
 
+    private static final MedlemskapBestemmelsekonverter medlemskapBestemmelsekonverter = new MedlemskapBestemmelsekonverter();
+
     public MedlemskapsperiodeController(MedlemskapsperiodeService medlemskapsperiodeService,
-                                      OpprettForslagMedlemskapsperiodeService opprettForslagMedlemskapsperiodeService,
-                                      Aksesskontroll aksesskontroll) {
+                                        OpprettForslagMedlemskapsperiodeService opprettForslagMedlemskapsperiodeService,
+                                        Aksesskontroll aksesskontroll) {
         this.medlemskapsperiodeService = medlemskapsperiodeService;
         this.opprettForslagMedlemskapsperiodeService = opprettForslagMedlemskapsperiodeService;
         this.aksesskontroll = aksesskontroll;
@@ -57,7 +60,7 @@ public class MedlemskapsperiodeController {
                     medlemskapsperiodeOppdateringDto.tomDato(),
                     medlemskapsperiodeOppdateringDto.innvilgelsesResultat(),
                     medlemskapsperiodeOppdateringDto.trygdedekning(),
-                    medlemskapsperiodeOppdateringDto.bestemmelse())
+                    medlemskapBestemmelsekonverter.convertToEntityAttribute(medlemskapsperiodeOppdateringDto.bestemmelse()))
             )
         );
     }
@@ -76,7 +79,7 @@ public class MedlemskapsperiodeController {
                     medlemskapsperiodeOppdateringDto.tomDato(),
                     medlemskapsperiodeOppdateringDto.innvilgelsesResultat(),
                     medlemskapsperiodeOppdateringDto.trygdedekning(),
-                    medlemskapsperiodeOppdateringDto.bestemmelse()
+                    medlemskapBestemmelsekonverter.convertToEntityAttribute(medlemskapsperiodeOppdateringDto.bestemmelse())
                 )
             )
         );
@@ -103,7 +106,7 @@ public class MedlemskapsperiodeController {
         aksesskontroll.autoriserSkriv(behandlingID);
 
         return ResponseEntity.ok(
-            opprettForslagMedlemskapsperiodeService.opprettForslagPåMedlemskapsperioder(behandlingID, bestemmelseDto.bestemmelse())
+            opprettForslagMedlemskapsperiodeService.opprettForslagPåMedlemskapsperioder(behandlingID, medlemskapBestemmelsekonverter.convertToEntityAttribute(bestemmelseDto.bestemmelse()))
                 .stream()
                 .map(MedlemskapsperiodeDto::av)
                 .collect(Collectors.toSet())

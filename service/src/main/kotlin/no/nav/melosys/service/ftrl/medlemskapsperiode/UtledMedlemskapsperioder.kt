@@ -3,9 +3,10 @@ package no.nav.melosys.service.ftrl.medlemskapsperiode
 import no.nav.melosys.domain.ErPeriode
 import no.nav.melosys.domain.Medlemskapsperiode
 import no.nav.melosys.domain.dokument.felles.Periode
-import no.nav.melosys.domain.kodeverk.Folketrygdloven_kap2_bestemmelser
+import no.nav.melosys.domain.kodeverk.Bestemmelse
 import no.nav.melosys.domain.kodeverk.InnvilgelsesResultat
 import no.nav.melosys.domain.kodeverk.Trygdedekninger
+import no.nav.melosys.domain.kodeverk.Vertslandsavtale_bestemmelser
 import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingstyper
 import no.nav.melosys.exception.FunksjonellException
 import no.nav.melosys.service.ftrl.bestemmelse.LovligeKombinasjonerTrygdedekningBestemmelse
@@ -47,7 +48,7 @@ object UtledMedlemskapsperioder {
             bestemmelseErParagraf(dto.bestemmelse, "2_8") ->
                 lagMedlemskapsperioderFor2_8(dto)
 
-            dto.bestemmelse in PliktigeMedlemskapsbestemmelser.bestemmelser ->
+            dto.bestemmelse in PliktigeMedlemskapsbestemmelser.bestemmelserMedSpesielleGrupper ->
                 lagMedlemskapsperioderForPliktige(dto)
 
             else -> throw FunksjonellException("Støtter ikke bestemmelse ${dto.bestemmelse}")
@@ -101,7 +102,7 @@ object UtledMedlemskapsperioder {
         return setOf(
             lagPeriode(
                 dto.søknadsperiode,
-                Trygdedekninger.FULL_DEKNING_FTRL,
+                if (dto.bestemmelse == Vertslandsavtale_bestemmelser.TILLEGGSAVTALE_NATO) Trygdedekninger.TILLEGGSAVTALE_NATO_HELSEDEL else Trygdedekninger.FULL_DEKNING_FTRL,
                 InnvilgelsesResultat.INNVILGET,
                 dto.bestemmelse
             )
@@ -272,7 +273,7 @@ object UtledMedlemskapsperioder {
         søknadsperiode: ErPeriode,
         trygdedekning: Trygdedekninger,
         innvilgelsesResultat: InnvilgelsesResultat,
-        bestemmelse: Folketrygdloven_kap2_bestemmelser
+        bestemmelse: Bestemmelse
     ): Medlemskapsperiode =
         Medlemskapsperiode().apply {
             this.fom = søknadsperiode.fom
@@ -293,7 +294,7 @@ object UtledMedlemskapsperioder {
     private fun datoErTidligereEnn2ÅrFørMottaksdato(dato: LocalDate, mottaksdato: LocalDate) =
         dato.isBefore(mottaksdato.minusYears(2))
 
-    private fun bestemmelseErParagraf(bestemmelse: Folketrygdloven_kap2_bestemmelser, paragraf: String): Boolean =
+    private fun bestemmelseErParagraf(bestemmelse: Bestemmelse, paragraf: String): Boolean =
         bestemmelse.kode.startsWith("FTRL_KAP2_$paragraf")
 
 

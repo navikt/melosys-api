@@ -69,7 +69,7 @@ class MedlemskapsperiodeControllerTest {
         when(opprettForslagMedlemskapsperiodeService.opprettForslagPåMedlemskapsperioder(behandlingID, Folketrygdloven_kap2_bestemmelser.FTRL_KAP2_2_5_FØRSTE_LEDD_E))
             .thenReturn(Collections.singleton(lagMedlemskapsperiode()));
 
-        var res = medlemskapsperiodeController.opprettForslagPåMedlemskapsperioder(behandlingID, new BestemmelseDto(Folketrygdloven_kap2_bestemmelser.FTRL_KAP2_2_5_FØRSTE_LEDD_E));
+        var res = medlemskapsperiodeController.opprettForslagPåMedlemskapsperioder(behandlingID, new BestemmelseDto(Folketrygdloven_kap2_bestemmelser.FTRL_KAP2_2_5_FØRSTE_LEDD_E.name()));
 
         assertThat(res.getStatusCode()).isEqualTo(HttpStatus.OK);
     }

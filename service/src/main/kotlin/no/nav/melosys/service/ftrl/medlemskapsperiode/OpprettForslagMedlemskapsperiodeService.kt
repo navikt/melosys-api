@@ -3,7 +3,7 @@ package no.nav.melosys.service.ftrl.medlemskapsperiode
 import no.nav.melosys.domain.Behandlingsresultat
 import no.nav.melosys.domain.Fagsak
 import no.nav.melosys.domain.Medlemskapsperiode
-import no.nav.melosys.domain.kodeverk.Folketrygdloven_kap2_bestemmelser
+import no.nav.melosys.domain.kodeverk.Bestemmelse
 import no.nav.melosys.domain.kodeverk.Trygdedekninger
 import no.nav.melosys.domain.kodeverk.Vilkaar
 import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingstema
@@ -28,7 +28,7 @@ class OpprettForslagMedlemskapsperiodeService(
 ) {
 
     @Transactional
-    fun opprettForslagPåMedlemskapsperioder(behandlingID: Long, bestemmelse: Folketrygdloven_kap2_bestemmelser?): Collection<Medlemskapsperiode> {
+    fun opprettForslagPåMedlemskapsperioder(behandlingID: Long, bestemmelse: Bestemmelse?): Collection<Medlemskapsperiode> {
         val behandlingsresultat = behandlingsresultatService.hentBehandlingsresultat(behandlingID)
         val behandling = behandlingsresultat.behandling
 
@@ -45,7 +45,7 @@ class OpprettForslagMedlemskapsperiodeService(
 
             if (behandling.erAndregangsbehandling() && opprinneligBehandling != null) {
                 val opprinneligeMedlemskapsperioder = behandlingsresultatService.hentBehandlingsresultat(opprinneligBehandling.id)
-                    ?.medlemskapsperioder ?: emptyList()
+                    .medlemskapsperioder ?: emptyList()
                 medlemskapsperioder = UtledMedlemskapsperioder.lagMedlemskapsperioderForAndregangsbehandling(
                     UtledMedlemskapsperioderDto(søknad.periode, søknad.trygdedekning, null, bestemmelse),
                     opprinneligeMedlemskapsperioder,
@@ -79,7 +79,7 @@ class OpprettForslagMedlemskapsperiodeService(
         }
     }
 
-    private fun validerBestemmelse(bestemmelse: Folketrygdloven_kap2_bestemmelser?, trygdedekning: Trygdedekninger) {
+    private fun validerBestemmelse(bestemmelse: Bestemmelse?, trygdedekning: Trygdedekninger) {
         if (bestemmelse == null) {
             throw FunksjonellException("Bestemmelse er ikke satt. Krever bestemmelse ved opprettelse av forslag for medlemskapsperioder.")
         }
@@ -89,7 +89,7 @@ class OpprettForslagMedlemskapsperiodeService(
         }
     }
 
-    private fun validerVilkår(behandlingsresultat: Behandlingsresultat, bestemmelse: Folketrygdloven_kap2_bestemmelser) {
+    private fun validerVilkår(behandlingsresultat: Behandlingsresultat, bestemmelse: Bestemmelse) {
         val vilkårForBestemmelse = hentVilkårForBestemmelse(bestemmelse, behandlingsresultat.behandling.tema, behandlingsresultat.behandling.id)
         if (!behandlingsresultat.oppfyllerVilkår(vilkårForBestemmelse)) {
             throw FunksjonellException("Vilkår $vilkårForBestemmelse er påkrevd for bestemmelse $bestemmelse")
@@ -97,7 +97,7 @@ class OpprettForslagMedlemskapsperiodeService(
     }
 
     private fun hentVilkårForBestemmelse(
-        bestemmelse: Folketrygdloven_kap2_bestemmelser,
+        bestemmelse: Bestemmelse,
         behandlingstema: Behandlingstema,
         behandlingID: Long
     ): Collection<Vilkaar> {

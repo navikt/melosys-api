@@ -3,6 +3,7 @@ package no.nav.melosys.integrasjon.medl
 import com.google.common.collect.BiMap
 import com.google.common.collect.HashBiMap
 import no.nav.melosys.domain.PeriodeOmLovvalg
+import no.nav.melosys.domain.kodeverk.Bestemmelse
 import no.nav.melosys.domain.kodeverk.Folketrygdloven_kap2_bestemmelser
 import no.nav.melosys.domain.kodeverk.LovvalgBestemmelse
 import no.nav.melosys.domain.kodeverk.Trygdedekninger
@@ -286,7 +287,7 @@ class MedlPeriodeKonverter private constructor() {
             lovvalgsbestemmelseTilGrunnlagMedlTabell[overgangsregelbestemmelser]!!
 
         @JvmStatic
-        fun tilGrunnlagMedltype(bestemmelse: Folketrygdloven_kap2_bestemmelser): GrunnlagMedl =
+        fun tilGrunnlagMedltype(bestemmelse: Bestemmelse): GrunnlagMedl =
             Optional.ofNullable(ftrlKap2BestemmelserTilGrunnLagMedlTabell[bestemmelse])
                 .orElseThrow {
                     TekniskException(
