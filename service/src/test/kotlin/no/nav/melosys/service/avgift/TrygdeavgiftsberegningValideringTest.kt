@@ -305,7 +305,7 @@ class TrygdeavgiftsberegningValideringTest {
                     fomDato = LocalDate.now().plusDays(2)
                     tomDato = LocalDate.now().plusDays(5)
                     type = Inntektskildetype.ARBEIDSINNTEKT
-                }), "under test"
+                }), ""
             ),
 
 
