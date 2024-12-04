@@ -13,6 +13,7 @@ enum class DekningMedl(val kode: String) {
     FTRL_2_9_2_LEDD_3_LEDD_1C("FTL_2-9_2_ld_3_ld_jfr_1c"),
     FTRL_2_9_3_LEDD_1B("FTL_2-9_3_ld_jfr_1b"),
     FTRL_2_9_3_LEDD_1C("FTL_2-9_3_ld_jfr_1c"),
-    IKKE_PENSJONSDEL("IKKEPENDEL")
+    IKKE_PENSJONSDEL("IKKEPENDEL"),
+    TILLEGSAVTALE_NATO_DEKNING("Helsetjenester_sykepenger_sykdom_i_familie_svangerskap_fødsel_adopsjon")
 
 }

@@ -56,6 +56,11 @@ enum class GrunnlagMedl(@JvmField val kode: String) {
     FTL_2_8_4_LEDD("FTL_2-8_4_ledd"),
     FTL_2_15_2_LEDD("FTL_2-15_2_ledd"),
 
+    ARKTISK_RÅDS_SEKRETARIAT_16("Arktisk_råds_sekretariat_16"),
+    DET_INTERNASJONALE_BARENTSSEKRETARIATET_14("Det_internasjonale_barentssekretariatet_14"),
+    DEN_NORDATLANTISKE_SJØPATTEDYRKOMMISJONEN_16("Den_nordatlantiske_sjøpattedyrkommisjonen_16"),
+    TILLEGGSAVTALE_NATO("Tilleggsavtale_NATO"),
+
     AUSTRALIA("Australia"),
     AUS_9_2("Australia_9_2"),
     AUS_9_3("Australia_9_3"),
@@ -111,13 +116,13 @@ enum class GrunnlagMedl(@JvmField val kode: String) {
 
     ITALIA("Italia"),
 
-    KORATIA("Kroatia"),
-    KORATIA_3("Kroatia_3"),
-    KORATIA_4("Kroatia_4"),
-    KORATIA_4_A("Kroatia_4_a"),
-    KORATIA_5("Kroatia_5"),
-    KORATIA_6("Kroatia_6"),
-    KORATIA_7("Kroatia_7"),
+    KROATIA("Kroatia"),
+    KROATIA_3("Kroatia_3"),
+    KROATIA_4("Kroatia_4"),
+    KROATIA_4_A("Kroatia_4_a"),
+    KROATIA_5("Kroatia_5"),
+    KROATIA_6("Kroatia_6"),
+    KROATIA_7("Kroatia_7"),
 
     MONTENEGRO("Montenegro"),
     MONTENEGRO_3("Montenegro_3"),
