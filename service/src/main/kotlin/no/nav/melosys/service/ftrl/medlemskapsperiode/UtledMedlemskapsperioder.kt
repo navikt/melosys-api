@@ -58,7 +58,7 @@ object UtledMedlemskapsperioder {
     private fun lagMedlemskapsperioderFor2_7(dto: UtledMedlemskapsperioderDto): Collection<Medlemskapsperiode> {
         val søknadsperiode = dto.søknadsperiode
 
-        val enMånedFørMottaksdato = dto.mottaksdatoSøknad.minusMonths(1)
+        val enMånedFørMottaksdato = dto.mottaksdatoSøknadNotNull.minusMonths(1)
         if (søknadsperiode.fom == enMånedFørMottaksdato || søknadsperiode.fom.isAfter(enMånedFørMottaksdato)) {
             return setOf(
                 lagPeriode(
@@ -81,7 +81,7 @@ object UtledMedlemskapsperioder {
             )
         }
 
-        val splittetPeriode = splitPeriode(søknadsperiode, dto.mottaksdatoSøknad)
+        val splittetPeriode = splitPeriode(søknadsperiode, dto.mottaksdatoSøknadNotNull)
         return setOf(
             lagPeriode(
                 splittetPeriode.first,
@@ -111,9 +111,9 @@ object UtledMedlemskapsperioder {
 
     private fun lagMedlemskapsperioderFor2_8(dto: UtledMedlemskapsperioderDto): Collection<Medlemskapsperiode> {
         val søknadsperiode = dto.søknadsperiode
-        val enMånedFørMottaksdato = dto.mottaksdatoSøknad.minusMonths(1)
+        val enMånedFørMottaksdato = dto.mottaksdatoSøknadNotNull.minusMonths(1)
 
-        if (datoErTidligereEnn2ÅrFørMottaksdato(søknadsperiode.fom, dto.mottaksdatoSøknad)) {
+        if (datoErTidligereEnn2ÅrFørMottaksdato(søknadsperiode.fom, dto.mottaksdatoSøknadNotNull)) {
             return lagAvslåttPeriode(dto)
         }
 
@@ -195,7 +195,7 @@ object UtledMedlemskapsperioder {
             return lagMedlemskapsperioderForPeriodeFørMottaksdato(søknadsperiode, dto)
         }
 
-        val splittetPeriode = splitPeriode(søknadsperiode, dto.mottaksdatoSøknad)
+        val splittetPeriode = splitPeriode(søknadsperiode, dto.mottaksdatoSøknadNotNull)
         if (dto.trygdedekning in listOf(Trygdedekninger.FTRL_2_9_FØRSTE_LEDD_C_TREDJE_LEDD_HELSE_PENSJON_YRKESSKADE, Trygdedekninger.FTRL_2_9_FØRSTE_LEDD_C_ANDRE_LEDD_TREDJE_LEDD_HELSE_PENSJON_SYKE_FORELDREPENGER_YRKESSKADE)) {
             return lagSplittetYrkesskadeperioder(dto, splittetPeriode)
         }

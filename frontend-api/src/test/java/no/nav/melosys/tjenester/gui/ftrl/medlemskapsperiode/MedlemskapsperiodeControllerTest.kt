@@ -1,89 +1,104 @@
-package no.nav.melosys.tjenester.gui.ftrl.medlemskapsperiode;
+package no.nav.melosys.tjenester.gui.ftrl.medlemskapsperiode
 
-import java.time.LocalDate;
-import java.util.Collections;
-import java.util.List;
+import com.fasterxml.jackson.databind.ObjectMapper
+import com.ninjasquad.springmockk.MockkBean
+import io.mockk.every
+import io.mockk.justRun
+import no.nav.melosys.domain.Medlemskapsperiode
+import no.nav.melosys.domain.kodeverk.Folketrygdloven_kap2_bestemmelser.FTRL_KAP2_2_5_FØRSTE_LEDD_E
+import no.nav.melosys.domain.kodeverk.InnvilgelsesResultat
+import no.nav.melosys.domain.kodeverk.Medlemskapstyper
+import no.nav.melosys.domain.kodeverk.Trygdedekninger
+import no.nav.melosys.service.ftrl.medlemskapsperiode.MedlemskapsperiodeService
+import no.nav.melosys.service.ftrl.medlemskapsperiode.OpprettForslagMedlemskapsperiodeService
+import no.nav.melosys.service.tilgang.Aksesskontroll
+import no.nav.melosys.tjenester.gui.ftrl.medlemskapsperiode.dto.BestemmelseDto
+import org.junit.jupiter.api.Test
+import org.springframework.beans.factory.annotation.Autowired
+import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest
+import org.springframework.http.MediaType
+import org.springframework.test.web.servlet.MockMvc
+import org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get
+import org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post
+import org.springframework.test.web.servlet.result.MockMvcResultMatchers.content
+import org.springframework.test.web.servlet.result.MockMvcResultMatchers.status
+import java.time.LocalDate
 
-import no.nav.melosys.domain.Medlemskapsperiode;
-import no.nav.melosys.domain.kodeverk.Folketrygdloven_kap2_bestemmelser;
-import no.nav.melosys.domain.kodeverk.InnvilgelsesResultat;
-import no.nav.melosys.domain.kodeverk.Medlemskapstyper;
-import no.nav.melosys.domain.kodeverk.Trygdedekninger;
-import no.nav.melosys.service.ftrl.medlemskapsperiode.MedlemskapsperiodeService;
-import no.nav.melosys.service.ftrl.medlemskapsperiode.OpprettForslagMedlemskapsperiodeService;
-import no.nav.melosys.service.tilgang.Aksesskontroll;
-import no.nav.melosys.tjenester.gui.ftrl.medlemskapsperiode.dto.BestemmelseDto;
-import no.nav.melosys.tjenester.gui.ftrl.medlemskapsperiode.dto.MedlemskapsperiodeDto;
-import org.junit.jupiter.api.BeforeEach;
-import org.junit.jupiter.api.Test;
-import org.junit.jupiter.api.extension.ExtendWith;
-import org.mockito.Mock;
-import org.mockito.junit.jupiter.MockitoExtension;
-import org.springframework.http.HttpStatus;
+@WebMvcTest(MedlemskapsperiodeController::class)
+internal class MedlemskapsperiodeControllerTest {
 
-import static org.assertj.core.api.Assertions.assertThat;
-import static org.mockito.Mockito.when;
+    @MockkBean
+    private lateinit var medlemskapsperiodeService: MedlemskapsperiodeService
 
-@ExtendWith(MockitoExtension.class)
-class MedlemskapsperiodeControllerTest {
+    @MockkBean
+    private lateinit var aksesskontroll: Aksesskontroll
 
-    @Mock
-    private MedlemskapsperiodeService medlemskapsperiodeService;
-    @Mock
-    private Aksesskontroll aksesskontroll;
-    @Mock
-    private OpprettForslagMedlemskapsperiodeService opprettForslagMedlemskapsperiodeService;
+    @MockkBean
+    private lateinit var opprettForslagMedlemskapsperiodeService: OpprettForslagMedlemskapsperiodeService
 
-    private MedlemskapsperiodeController medlemskapsperiodeController;
+    @Autowired
+    private lateinit var mockMvc: MockMvc
 
-    private final long behandlingID = 1231;
+    @Autowired
+    private lateinit var objectMapper: ObjectMapper
 
-    @BeforeEach
-    void setup() {
-        medlemskapsperiodeController = new MedlemskapsperiodeController(medlemskapsperiodeService, opprettForslagMedlemskapsperiodeService, aksesskontroll);
+    private val BASE_URL = "/api"
+    private val behandlingID: Long = 1231
+
+    @Test
+    fun hentMedlemskapsperioder_validerSchema() {
+        justRun { aksesskontroll.autoriser(behandlingID) }
+        every { medlemskapsperiodeService.hentMedlemskapsperioder(behandlingID) } returns listOf(lagMedlemskapsperiode())
+
+        val expectedJson = """[{
+            "id":1231,
+            "bestemmelse": "FTRL_KAP2_2_5_FØRSTE_LEDD_E",
+            "fomDato": "2024-12-03",
+            "tomDato": "2025-12-03",
+            "innvilgelsesResultat": "DELVIS_INNVILGET",
+            "trygdedekning": "FTRL_2_9_FØRSTE_LEDD_C_HELSE_PENSJON",
+            "medlemskapstype": "FRIVILLIG"
+        }
+        ]""".trimIndent()
+
+        mockMvc.perform(
+            get(BASE_URL + "/behandlinger/{behandlingID}/medlemskapsperioder", behandlingID)
+                .contentType(MediaType.APPLICATION_JSON)
+        )
+            .andExpect(status().isOk())
+            .andExpect(content().json(expectedJson, true))
     }
 
     @Test
-    void hentMedlemskapsperioder_validerSchema() {
-        final var medlemskapsperiode = lagMedlemskapsperiode();
-        when(medlemskapsperiodeService.hentMedlemskapsperioder(behandlingID))
-            .thenReturn(List.of(medlemskapsperiode));
+    fun opprettForslagPåMedlemskapsperioder() {
+        justRun { aksesskontroll.autoriserSkriv(behandlingID) }
+        every {
+            opprettForslagMedlemskapsperiodeService.opprettForslagPåMedlemskapsperioder(
+                behandlingID,
+                FTRL_KAP2_2_5_FØRSTE_LEDD_E
+            )
+        } returns setOf(lagMedlemskapsperiode())
 
-        var res = medlemskapsperiodeController.hentMedlemskapsperioder(behandlingID);
-        assertThat(res.getStatusCode()).isEqualTo(HttpStatus.OK);
+        val req = BestemmelseDto(FTRL_KAP2_2_5_FØRSTE_LEDD_E.name)
 
-        assertThat(res.getBody()).hasSize(1)
-            .flatExtracting(
-                MedlemskapsperiodeDto::id, MedlemskapsperiodeDto::bestemmelse,
-                MedlemskapsperiodeDto::fomDato, MedlemskapsperiodeDto::tomDato, MedlemskapsperiodeDto::trygdedekning,
-                MedlemskapsperiodeDto::innvilgelsesResultat, MedlemskapsperiodeDto::medlemskapstype)
-            .containsExactly(
-                medlemskapsperiode.getId(), medlemskapsperiode.getBestemmelse(),
-                medlemskapsperiode.getFom(), medlemskapsperiode.getTom(), medlemskapsperiode.getTrygdedekning(),
-                medlemskapsperiode.getInnvilgelsesresultat(), medlemskapsperiode.getMedlemskapstype()
-            );
+
+        mockMvc.perform(
+            post(BASE_URL + "/behandlinger/{behandlingID}/medlemskapsperioder/forslag", behandlingID)
+                .content(objectMapper.writeValueAsString(req))
+                .contentType(MediaType.APPLICATION_JSON)
+        )
+            .andExpect(status().isOk())
     }
 
-    @Test
-    void opprettForslagPåMedlemskapsperioder() {
-        when(opprettForslagMedlemskapsperiodeService.opprettForslagPåMedlemskapsperioder(behandlingID, Folketrygdloven_kap2_bestemmelser.FTRL_KAP2_2_5_FØRSTE_LEDD_E))
-            .thenReturn(Collections.singleton(lagMedlemskapsperiode()));
-
-        var res = medlemskapsperiodeController.opprettForslagPåMedlemskapsperioder(behandlingID, new BestemmelseDto(Folketrygdloven_kap2_bestemmelser.FTRL_KAP2_2_5_FØRSTE_LEDD_E.name()));
-
-        assertThat(res.getStatusCode()).isEqualTo(HttpStatus.OK);
+    private fun lagMedlemskapsperiode(): Medlemskapsperiode {
+        val medlemskapsperiode = Medlemskapsperiode()
+        medlemskapsperiode.id = behandlingID
+        medlemskapsperiode.fom = LocalDate.of(2024, 12, 3)
+        medlemskapsperiode.tom = LocalDate.of(2025, 12, 3)
+        medlemskapsperiode.innvilgelsesresultat = InnvilgelsesResultat.DELVIS_INNVILGET
+        medlemskapsperiode.medlemskapstype = Medlemskapstyper.FRIVILLIG
+        medlemskapsperiode.trygdedekning = Trygdedekninger.FTRL_2_9_FØRSTE_LEDD_C_HELSE_PENSJON
+        medlemskapsperiode.bestemmelse = FTRL_KAP2_2_5_FØRSTE_LEDD_E
+        return medlemskapsperiode
     }
-
-    private Medlemskapsperiode lagMedlemskapsperiode() {
-        Medlemskapsperiode medlemskapsperiode = new Medlemskapsperiode();
-        medlemskapsperiode.setId(1L);
-        medlemskapsperiode.setFom(LocalDate.now());
-        medlemskapsperiode.setTom(LocalDate.now().plusYears(1));
-        medlemskapsperiode.setInnvilgelsesresultat(InnvilgelsesResultat.DELVIS_INNVILGET);
-        medlemskapsperiode.setMedlemskapstype(Medlemskapstyper.FRIVILLIG);
-        medlemskapsperiode.setTrygdedekning(Trygdedekninger.FTRL_2_9_FØRSTE_LEDD_C_HELSE_PENSJON);
-        medlemskapsperiode.setBestemmelse(Folketrygdloven_kap2_bestemmelser.FTRL_KAP2_2_5_FØRSTE_LEDD_E);
-        return medlemskapsperiode;
-    }
-
 }

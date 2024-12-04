@@ -1,4 +1,3 @@
-package no.nav.melosys.tjenester.gui.ftrl.medlemskapsperiode.dto;
+package no.nav.melosys.tjenester.gui.ftrl.medlemskapsperiode.dto
 
-public record BestemmelseDto(String bestemmelse) {
-}
+data class BestemmelseDto(val bestemmelse: String)
