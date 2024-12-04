@@ -10,6 +10,7 @@ import java.util.Set;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import io.getunleash.FakeUnleash;
 import no.nav.melosys.domain.Behandling;
 import no.nav.melosys.domain.Lovvalgsperiode;
 import no.nav.melosys.domain.avklartefakta.AvklartVirksomhet;
@@ -84,15 +85,19 @@ class TrygdeavtaleMapperTest {
     @Mock
     private UtledMottaksdato utledMottaksdato;
 
+    private final FakeUnleash unleash = new FakeUnleash();
+
     private TrygdeavtaleMapper trygdeavtaleMapper;
 
     @BeforeEach
     void setup() {
+        unleash.enableAll();
         trygdeavtaleMapper = new TrygdeavtaleMapper(
             mockAvklarteMedfolgendeFamilieService,
             mockAvklarteVirksomheterService,
             mockLovvalgsperiodeService,
-            utledMottaksdato);
+            utledMottaksdato,
+            unleash);
     }
 
     @Test
