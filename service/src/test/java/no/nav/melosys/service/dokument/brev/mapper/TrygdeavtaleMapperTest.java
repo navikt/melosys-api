@@ -120,6 +120,32 @@ class TrygdeavtaleMapperTest {
         assertThat(innvilgelseOgAttestTrygdeavtale.getNyVurderingBakgrunn()).isEqualTo(brevbestilling.getNyVurderingBakgrunn());
     }
 
+    @Test
+    void map_utenlandske_virksomheter_populererFelter() throws JsonProcessingException {
+        mockMedfølgendeFamilieDefaultCase();
+        mockAvklartFamilieDefaultCase();
+        mockHappyCase();
+
+        InnvilgelseBrevbestilling brevbestilling = lagStorbritanniaBrevbestilling(medPeriode(lagTrygdeavtaleBehandling()));
+
+        InnvilgelseOgAttestTrygdeavtale innvilgelseOgAttestTrygdeavtale = trygdeavtaleMapper.map(brevbestilling, Land_iso2.GB);
+
+        String jsonInnvilgelse = new ObjectMapper().writerWithDefaultPrettyPrinter().writeValueAsString(innvilgelseOgAttestTrygdeavtale.getInnvilgelse());
+        String resultatInnvilgelse = jsonInnvilgelse.replaceAll("(\"dagensDato\" :)(.*)", "$1 \"Fjernet for test\",");
+
+        assertThat(innvilgelseOgAttestTrygdeavtale.isSkalHaAttest()).isTrue();
+        assertThat(resultatInnvilgelse).isEqualToIgnoringNewLines(FORVENTEDE_FELTER_FOR_INNVILGELSE_STORBRITANNIA_MAPPING);
+
+        String jsonAttest = new ObjectMapper().writerWithDefaultPrettyPrinter().writeValueAsString(innvilgelseOgAttestTrygdeavtale.getAttest());
+        String resultatAttest = jsonAttest.replaceAll("(\"dagensDato\" :)(.*)", "$1 \"Fjernet for test\",");
+
+        assertThat(innvilgelseOgAttestTrygdeavtale.isSkalHaInnvilgelse()).isTrue();
+        assertThat(resultatAttest).isEqualToIgnoringNewLines(FORVENTEDE_FELTER_FOR_ATTEST_STORBRITANNIA_MAPPING);
+
+        assertThat(innvilgelseOgAttestTrygdeavtale.isSkalHaInfoOmRettigheter()).isTrue();
+        assertThat(innvilgelseOgAttestTrygdeavtale.getNyVurderingBakgrunn()).isEqualTo(brevbestilling.getNyVurderingBakgrunn());
+    }
+
     private static List<Arguments> sjekkAdresser() {
         return TrygdeavtaleAdresseSjekkerTest.sjekkAdresser();
     }
