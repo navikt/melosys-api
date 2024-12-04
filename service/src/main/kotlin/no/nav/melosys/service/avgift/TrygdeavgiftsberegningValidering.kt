@@ -85,16 +85,15 @@ object TrygdeavgiftsberegningValidering {
         medlemskapsperioder: List<ErPeriode>,
         feilmelding: String
     ) {
+        val kildeStart = kildeperioder.minOf { it.fom }
+        val kildeEnd = kildeperioder.maxOf { it.tom }
+
+        val medlemskapsPeriodestart = medlemskapsperioder.minOf { it.fom }
+        val medlemskapsPeriodeEnd = medlemskapsperioder.maxOf { it.tom }
+
         val sorterteKildeperioder = kildeperioder.map { LocalDateRange.of(it.fom, it.tom) }.sortedBy { it.start }
-        val sorterteMedlemskapsperioder = medlemskapsperioder.map { LocalDateRange.of(it.fom, it.tom) }.sortedBy { it.start }
 
-        val startKildePeriode = sorterteKildeperioder.first().start
-        val endKildePeriode = sorterteKildeperioder.last().end
-
-        val startMedlPeriode = sorterteMedlemskapsperioder.first().start
-        val endMedlPeriode = sorterteMedlemskapsperioder.last().end
-
-        if (startKildePeriode > startMedlPeriode || endKildePeriode < endMedlPeriode) {
+        if (!(kildeStart.isEqual(medlemskapsPeriodestart) && kildeEnd.isEqual(medlemskapsPeriodeEnd))) {
             throw FunksjonellException(feilmelding)
         }
 
