@@ -1,13 +1,5 @@
 package no.nav.melosys.service.dokument.brev.mapper;
 
-import java.time.Instant;
-import java.time.LocalDate;
-import java.time.ZoneId;
-import java.util.Collections;
-import java.util.List;
-import java.util.Map;
-import java.util.Set;
-
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import io.getunleash.FakeUnleash;
@@ -46,12 +38,20 @@ import org.junit.jupiter.params.provider.MethodSource;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 
+import java.time.Instant;
+import java.time.LocalDate;
+import java.time.ZoneId;
+import java.util.Collections;
+import java.util.List;
+import java.util.Map;
+import java.util.Set;
+
 import static no.nav.melosys.domain.kodeverk.brev.Produserbaredokumenter.TRYGDEAVTALE_GB;
 import static no.nav.melosys.service.dokument.DokgenTestData.*;
 import static no.nav.melosys.service.dokument.brev.mapper.DokgenMalMapperTest.SOKNADSDATO;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.AssertionsForClassTypes.assertThatExceptionOfType;
-import static org.junit.jupiter.api.Assertions.assertDoesNotThrow;
+import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyLong;
@@ -133,9 +133,11 @@ class TrygdeavtaleMapperTest {
         when(mockAvklarteVirksomheterService.hentNorskeArbeidsgivere(any())).thenReturn(Collections.emptyList());
         when(mockAvklarteVirksomheterService.hentUtenlandskeVirksomheter(any())).thenReturn(lagAvklarteVirksomheter());
 
-        assertDoesNotThrow(() ->
-            trygdeavtaleMapper.map(lagStorbritanniaBrevbestilling(lagTrygdeavtaleBehandling()), Land_iso2.GB)
-        );
+        var brevbestilling = lagStorbritanniaBrevbestilling(lagTrygdeavtaleBehandling());
+
+        var result = trygdeavtaleMapper.map(brevbestilling, Land_iso2.GB);
+
+        assertNotNull(result, "Resultat skal ikke være null");
     }
 
     private static List<Arguments> sjekkAdresser() {
@@ -181,10 +183,11 @@ class TrygdeavtaleMapperTest {
     }
 
     @Test
-    void map_ingenNorskeVirksomheter_kastFunksjonellException() {
+    void map_ingenVirksomheter_kastFunksjonellException() {
         mockLovvalgsperiode();
 
         when(mockAvklarteVirksomheterService.hentNorskeArbeidsgivere(any())).thenReturn(Collections.emptyList());
+        when(mockAvklarteVirksomheterService.hentUtenlandskeVirksomheter(any())).thenReturn(Collections.emptyList());
 
         assertThatExceptionOfType(FunksjonellException.class)
             .isThrownBy(() -> trygdeavtaleMapper.map(lagStorbritanniaBrevbestilling(lagTrygdeavtaleBehandling()), Land_iso2.GB))
