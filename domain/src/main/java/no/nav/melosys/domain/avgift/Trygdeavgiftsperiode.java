@@ -1,16 +1,16 @@
 package no.nav.melosys.domain.avgift;
 
-import java.math.BigDecimal;
-import java.time.LocalDate;
-import java.util.Objects;
-
 import jakarta.persistence.*;
 import no.nav.melosys.domain.ErPeriode;
 import no.nav.melosys.domain.Medlemskapsperiode;
 
+import java.math.BigDecimal;
+import java.time.LocalDate;
+import java.util.Objects;
+
 @Entity
 @Table(name = "trygdeavgiftsperiode")
-public class Trygdeavgiftsperiode implements ErPeriode {
+public class Trygdeavgiftsperiode implements ErPeriode { //TODO bruk denne
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)

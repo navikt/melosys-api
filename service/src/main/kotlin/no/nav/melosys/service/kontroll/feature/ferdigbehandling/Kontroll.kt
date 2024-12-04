@@ -149,7 +149,10 @@ class Kontroll(
             behandlingsresultatService.finnAlleTidligereBehandlingsresultatForAktør(behandling.fagsak.hentBrukersAktørID(), behandling.id)
                 .filter { trygdeavgiftService.harFakturerbarTrygdeavgift(it) }
 
+        val tidligereTrygdeavgiftsPerioder = tidligereBehandlingsresultaterMedAvgift.flatMap { it.trygdeavgiftsperioder }
+        //val tidligereTrygdeavgiftsPerioderMedFakturerbarAvgift = tidligereTrygdeavgiftsPerioder.filter { it.harAvgift() } //TODO skal vi sjekke om perioden har avgift?
         val tidligereMedlemskapsperioderMedAvgift = tidligereBehandlingsresultaterMedAvgift.flatMap { it.medlemskapsperioder }
+        val nyeTrygdeavgifsperioder = behandlingsresultatService.hentBehandlingsresultat(behandling.id).trygdeavgiftsperioder //TODO skal vi sjekke om perioden har avgift?
         val nyeMedlemskapsperioderMedAvgift = medlemskapsperioder.filter { trygdeavgiftService.harFakturerbarTrygdeavgift(it.behandlingsresultat) }
 
         return FerdigbehandlingKontrollData(
