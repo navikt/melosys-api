@@ -289,6 +289,30 @@ class TrygdeavgiftsberegningValideringTest {
                 listOf(Medlemskapsperiode().apply {
                     innvilgelsesresultat = InnvilgelsesResultat.INNVILGET
                     fom = LocalDate.now()
+                    tom = LocalDate.now().plusDays(30)
+                }),
+                listOf(
+                    SkatteforholdTilNorge().apply {
+                        fomDato = LocalDate.now()
+                        tomDato = LocalDate.now().plusDays(30)
+                        skatteplikttype = Skatteplikttype.SKATTEPLIKTIG
+                    }
+                ), listOf(Inntektsperiode().apply {
+                    fomDato = LocalDate.now()
+                    tomDato = LocalDate.now().plusDays(30)
+                    type = Inntektskildetype.ARBEIDSINNTEKT
+                }, Inntektsperiode().apply {
+                    fomDato = LocalDate.now().plusDays(2)
+                    tomDato = LocalDate.now().plusDays(5)
+                    type = Inntektskildetype.ARBEIDSINNTEKT
+                }), ""
+            ),
+
+
+            ValideringsInput(                                                       // Inntektsperioder skal kunne overlappe
+                listOf(Medlemskapsperiode().apply {
+                    innvilgelsesresultat = InnvilgelsesResultat.INNVILGET
+                    fom = LocalDate.now()
                     tom = LocalDate.now().plusDays(5)
                 }),
                 listOf(
