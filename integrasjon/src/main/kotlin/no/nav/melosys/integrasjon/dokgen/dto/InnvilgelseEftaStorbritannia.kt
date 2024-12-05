@@ -6,6 +6,7 @@ import com.fasterxml.jackson.datatype.jsr310.ser.LocalDateSerializer
 import no.nav.melosys.domain.brev.InnvilgelseEftaStorbritanniaBrevbestilling
 import no.nav.melosys.domain.dokument.felles.Periode
 import no.nav.melosys.domain.kodeverk.Mottakerroller
+import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingstema
 import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingstyper
 import java.time.LocalDate
 
@@ -16,6 +17,7 @@ class InnvilgelseEftaStorbritannia(
     val datoMottatt: LocalDate?,
     val navnVirksomheter: List<String>?,
     val behandlingstype: Behandlingstyper,
+    val behandlingstema: Behandlingstema,
     val nyVurderingBakgrunn: String?,
     val innvilgelseFritekst: String?,
     val lovvalgsbestemmelse: String?,
@@ -37,6 +39,7 @@ class InnvilgelseEftaStorbritannia(
         brevbestilling: InnvilgelseEftaStorbritanniaBrevbestilling,
         navnVirksomheter: List<String>?,
         behandlingstype: Behandlingstyper,
+        behandlingstema: Behandlingstema,
         nyVurderingBakgrunn: String?,
         innvilgelseFritekst: String?,
         lovvalgsbestemmelse: String?,
@@ -58,6 +61,7 @@ class InnvilgelseEftaStorbritannia(
         datoMottatt = instantTilLocalDate(brevbestilling.forsendelseMottatt),
         navnVirksomheter,
         behandlingstype,
+        behandlingstema,
         nyVurderingBakgrunn,
         innvilgelseFritekst,
         lovvalgsbestemmelse,
