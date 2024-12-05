@@ -24,6 +24,7 @@ internal class UtledMedlemskapsperioderTest {
     private val TRYGDEDEKNING_2_7 = Trygdedekninger.FULL_DEKNING_FTRL
     private val TRYGDEDEKNING_2_8 = Trygdedekninger.FTRL_2_9_FØRSTE_LEDD_A_HELSE
     private val MOTTAKSDATO = LocalDate.now()
+
     @Test
     fun lagMedlemskapsperioder_ukjentBestemmelse_kasterFeil() {
         shouldThrow<FunksjonellException> {
@@ -31,7 +32,7 @@ internal class UtledMedlemskapsperioderTest {
                 UtledMedlemskapsperioderDto(
                     Medlemskapsperiode(),
                     TRYGDEDEKNING_2_8,
-                    null,
+                    mottaksdatoSøknad = null,
                     Folketrygdloven_kap2_bestemmelser.FTRL_KAP2_2_15_ANDRE_LEDD
                 )
             )

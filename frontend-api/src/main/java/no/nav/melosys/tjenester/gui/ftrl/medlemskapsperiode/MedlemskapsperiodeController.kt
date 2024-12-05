@@ -1,6 +1,7 @@
 package no.nav.melosys.tjenester.gui.ftrl.medlemskapsperiode
 
 import io.swagger.annotations.Api
+import no.nav.melosys.domain.Medlemskapsperiode
 import no.nav.melosys.domain.jpa.MedlemskapBestemmelsekonverter
 import no.nav.melosys.service.ftrl.medlemskapsperiode.MedlemskapsperiodeService
 import no.nav.melosys.service.ftrl.medlemskapsperiode.OpprettForslagMedlemskapsperiodeService
@@ -28,7 +29,7 @@ class MedlemskapsperiodeController(
         aksesskontroll.autoriser(behandlingID)
         return ResponseEntity.ok(
             medlemskapsperiodeService.hentMedlemskapsperioder(behandlingID)
-                .map(MedlemskapsperiodeDto::av)
+                .map { it.toDto() }
         )
     }
 
@@ -39,16 +40,14 @@ class MedlemskapsperiodeController(
     ): ResponseEntity<MedlemskapsperiodeDto> {
         aksesskontroll.autoriserSkriv(behandlingID)
         return ResponseEntity.ok(
-            MedlemskapsperiodeDto.av(
-                medlemskapsperiodeService.opprettMedlemskapsperiode(
-                    behandlingID,
-                    medlemskapsperiodeOppdateringDto.fomDato,
-                    medlemskapsperiodeOppdateringDto.tomDato,
-                    medlemskapsperiodeOppdateringDto.innvilgelsesResultat,
-                    medlemskapsperiodeOppdateringDto.trygdedekning,
-                    medlemskapBestemmelsekonverter.convertToEntityAttribute(medlemskapsperiodeOppdateringDto.bestemmelse)
-                )
-            )
+            medlemskapsperiodeService.opprettMedlemskapsperiode(
+                behandlingID,
+                medlemskapsperiodeOppdateringDto.fomDato,
+                medlemskapsperiodeOppdateringDto.tomDato,
+                medlemskapsperiodeOppdateringDto.innvilgelsesResultat,
+                medlemskapsperiodeOppdateringDto.trygdedekning,
+                medlemskapBestemmelsekonverter.convertToEntityAttribute(medlemskapsperiodeOppdateringDto.bestemmelse)
+            ).toDto()
         )
     }
 
@@ -60,17 +59,15 @@ class MedlemskapsperiodeController(
     ): ResponseEntity<MedlemskapsperiodeDto> {
         aksesskontroll.autoriserSkriv(behandlingID)
         return ResponseEntity.ok(
-            MedlemskapsperiodeDto.av(
-                medlemskapsperiodeService.oppdaterMedlemskapsperiode(
-                    behandlingID,
-                    medlemskapsperiodeID,
-                    medlemskapsperiodeOppdateringDto.fomDato,
-                    medlemskapsperiodeOppdateringDto.tomDato,
-                    medlemskapsperiodeOppdateringDto.innvilgelsesResultat,
-                    medlemskapsperiodeOppdateringDto.trygdedekning,
-                    medlemskapBestemmelsekonverter.convertToEntityAttribute(medlemskapsperiodeOppdateringDto.bestemmelse)
-                )
-            )
+            medlemskapsperiodeService.oppdaterMedlemskapsperiode(
+                behandlingID,
+                medlemskapsperiodeID,
+                medlemskapsperiodeOppdateringDto.fomDato,
+                medlemskapsperiodeOppdateringDto.tomDato,
+                medlemskapsperiodeOppdateringDto.innvilgelsesResultat,
+                medlemskapsperiodeOppdateringDto.trygdedekning,
+                medlemskapBestemmelsekonverter.convertToEntityAttribute(medlemskapsperiodeOppdateringDto.bestemmelse)
+            ).toDto()
         )
     }
 
@@ -78,14 +75,14 @@ class MedlemskapsperiodeController(
     fun slettMedlemskapsperiode(
         @PathVariable("behandlingID") behandlingID: Long,
         @PathVariable("medlemskapsperiodeID") medlemskapsperiodeID: Long
-    ): ResponseEntity<Void> {
+    ): ResponseEntity<Unit> {
         aksesskontroll.autoriserSkriv(behandlingID)
         medlemskapsperiodeService.slettMedlemskapsperiode(behandlingID, medlemskapsperiodeID)
         return ResponseEntity.noContent().build()
     }
 
     @DeleteMapping("/behandlinger/{behandlingID}/medlemskapsperioder")
-    fun slettMedlemskapsperiode(@PathVariable("behandlingID") behandlingID: Long): ResponseEntity<Void> {
+    fun slettMedlemskapsperiode(@PathVariable("behandlingID") behandlingID: Long): ResponseEntity<Unit> {
         aksesskontroll.autoriserSkriv(behandlingID)
         medlemskapsperiodeService.slettMedlemskapsperioder(behandlingID)
         return ResponseEntity.noContent().build()
@@ -101,9 +98,12 @@ class MedlemskapsperiodeController(
             opprettForslagMedlemskapsperiodeService.opprettForslagPåMedlemskapsperioder(
                 behandlingID,
                 medlemskapBestemmelsekonverter.convertToEntityAttribute(bestemmelseDto.bestemmelse)
-            ).map(MedlemskapsperiodeDto::av)
+            ).map { it.toDto() }
         )
     }
+
+    private fun Medlemskapsperiode.toDto() =
+        MedlemskapsperiodeDto(id, fom, tom, bestemmelse, innvilgelsesresultat, trygdedekning, medlemskapstype)
 
     companion object {
         private val medlemskapBestemmelsekonverter = MedlemskapBestemmelsekonverter()

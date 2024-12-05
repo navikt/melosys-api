@@ -62,7 +62,7 @@ internal class MedlemskapsperiodeControllerTest {
         ]""".trimIndent()
 
         mockMvc.perform(
-            get(BASE_URL + "/behandlinger/{behandlingID}/medlemskapsperioder", behandlingID)
+            get("$BASE_URL/behandlinger/{behandlingID}/medlemskapsperioder", behandlingID)
                 .contentType(MediaType.APPLICATION_JSON)
         )
             .andExpect(status().isOk())
@@ -90,15 +90,13 @@ internal class MedlemskapsperiodeControllerTest {
             .andExpect(status().isOk())
     }
 
-    private fun lagMedlemskapsperiode(): Medlemskapsperiode {
-        val medlemskapsperiode = Medlemskapsperiode()
-        medlemskapsperiode.id = behandlingID
-        medlemskapsperiode.fom = LocalDate.of(2024, 12, 3)
-        medlemskapsperiode.tom = LocalDate.of(2025, 12, 3)
-        medlemskapsperiode.innvilgelsesresultat = InnvilgelsesResultat.DELVIS_INNVILGET
-        medlemskapsperiode.medlemskapstype = Medlemskapstyper.FRIVILLIG
-        medlemskapsperiode.trygdedekning = Trygdedekninger.FTRL_2_9_FØRSTE_LEDD_C_HELSE_PENSJON
-        medlemskapsperiode.bestemmelse = FTRL_KAP2_2_5_FØRSTE_LEDD_E
-        return medlemskapsperiode
+    private fun lagMedlemskapsperiode() = Medlemskapsperiode().apply {
+        id = behandlingID
+        fom = LocalDate.of(2024, 12, 3)
+        tom = LocalDate.of(2025, 12, 3)
+        innvilgelsesresultat = InnvilgelsesResultat.DELVIS_INNVILGET
+        medlemskapstype = Medlemskapstyper.FRIVILLIG
+        trygdedekning = Trygdedekninger.FTRL_2_9_FØRSTE_LEDD_C_HELSE_PENSJON
+        bestemmelse = FTRL_KAP2_2_5_FØRSTE_LEDD_E
     }
 }
