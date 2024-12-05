@@ -5,6 +5,7 @@ import io.kotest.matchers.nulls.shouldBeNull
 import io.kotest.matchers.nulls.shouldNotBeNull
 import io.kotest.matchers.shouldBe
 import no.nav.melosys.domain.*
+import no.nav.melosys.domain.avgift.Trygdeavgiftsperiode
 import no.nav.melosys.domain.brev.utkast.UtkastBrev
 import no.nav.melosys.domain.dokument.medlemskap.MedlemskapDokument
 import no.nav.melosys.domain.dokument.medlemskap.Medlemsperiode
@@ -24,6 +25,7 @@ import no.nav.melosys.exception.KontrolldataFeilType
 import no.nav.melosys.service.kontroll.feature.ferdigbehandling.data.FerdigbehandlingKontrollData
 import no.nav.melosys.service.kontroll.feature.ferdigbehandling.data.MedlemskapsperiodeData
 import no.nav.melosys.service.kontroll.feature.ferdigbehandling.data.SaksopplysningerData
+import no.nav.melosys.service.kontroll.feature.ferdigbehandling.data.TrygdeavgiftPeriodeData
 import no.nav.melosys.service.persondata.PersonopplysningerObjectFactory
 import org.junit.jupiter.api.Test
 import java.time.LocalDate
@@ -359,7 +361,8 @@ class FerdigbehandlingKontrollTest {
 
         val kontrollData = lagFerdigbehandlingKontrollData(
             medlemskapDokument = medlemskapsDokument,
-            medlemskapsperiodeData = MedlemskapsperiodeData(emptyList(), emptyList(), nyeMedlemskapsperioderMedAvgift, tidligereMedlemskapsperioderMedAvgift),
+            medlemskapsperiodeData = MedlemskapsperiodeData(emptyList(), emptyList(), ),
+            trygdeavgiftperiodeData = TrygdeavgiftPeriodeData(nyeMedlemskapsperioderMedAvgift, tidligereMedlemskapsperioderMedAvgift),
             fagsak = fagsak
         )
 
@@ -771,6 +774,13 @@ class FerdigbehandlingKontrollTest {
         return medlemskapsperiode
     }
 
+    private fun lagTrygdeavgiftPeriode(fraOgMed: LocalDate, tilOgMed: LocalDate): Trygdeavgiftsperiode {
+        return Trygdeavgiftsperiode().apply {
+            fom = fraOgMed
+            tom = tilOgMed
+        }
+    }
+
     private fun lagFerdigbehandlingKontrollData(
         medlemskapDokument: MedlemskapDokument? = null,
         persondata: Persondata = PersonopplysningerObjectFactory.lagPersonopplysninger(),
@@ -785,7 +795,8 @@ class FerdigbehandlingKontrollTest {
         medlemskapsperiodeData: MedlemskapsperiodeData? = null,
         brevUtkast: List<UtkastBrev> = emptyList(),
         antallArbeidsgivere: Int = 1,
-        fagsak: Fagsak = Fagsak(saksnummer = "test", status = Saksstatuser.OPPRETTET, tema = Sakstemaer.MEDLEMSKAP_LOVVALG, type = Sakstyper.FTRL)
+        fagsak: Fagsak = Fagsak(saksnummer = "test", status = Saksstatuser.OPPRETTET, tema = Sakstemaer.MEDLEMSKAP_LOVVALG, type = Sakstyper.FTRL),
+        trygdeavgiftperiodeData: TrygdeavgiftPeriodeData? = null,
     ) = FerdigbehandlingKontrollData(
         medlemskapDokument,
         persondata,
@@ -800,6 +811,7 @@ class FerdigbehandlingKontrollTest {
         medlemskapsperiodeData,
         brevUtkast,
         antallArbeidsgivere,
-        fagsak = fagsak
+        fagsak = fagsak,
+        trygdeavgiftperiodeData,
     )
 }

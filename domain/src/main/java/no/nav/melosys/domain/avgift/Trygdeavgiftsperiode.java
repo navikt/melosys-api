@@ -1,12 +1,12 @@
 package no.nav.melosys.domain.avgift;
 
-import jakarta.persistence.*;
-import no.nav.melosys.domain.ErPeriode;
-import no.nav.melosys.domain.Medlemskapsperiode;
-
 import java.math.BigDecimal;
 import java.time.LocalDate;
 import java.util.Objects;
+
+import jakarta.persistence.*;
+import no.nav.melosys.domain.ErPeriode;
+import no.nav.melosys.domain.Medlemskapsperiode;
 
 @Entity
 @Table(name = "trygdeavgiftsperiode")

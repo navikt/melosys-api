@@ -31,10 +31,10 @@ import java.time.LocalDate
 object FerdigbehandlingKontroll {
 
     fun harOverlappendePeriodeMedForskuddsvisFaktureringIAnnenSak(kontrollData: FerdigbehandlingKontrollData): Kontrollfeil? {
-        val medlemskapsperiodeData = kontrollData.medlemskapsperiodeData
-        if (medlemskapsperiodeData != null && medlemskapsperiodeData.harNyeMedlemskapsperioderMedAvgift()) {
+        val trygdeavgiftperiodeData = kontrollData.trygdeavgiftperiodeData
+        if (trygdeavgiftperiodeData != null && trygdeavgiftperiodeData.nyeTrygdeavgiftsperioder.isNotEmpty()) {
 
-            if (OverlappendeMedlemskapsperioderRegler.harOverlappendePeriodeMedForskuddsvisFaktureringIAndreFagsaker(medlemskapsperiodeData, kontrollData.fagsak?.saksnummer)
+            if (OverlappendeMedlemskapsperioderRegler.harOverlappendePeriodeMedForskuddsvisFaktureringIAndreFagsaker(trygdeavgiftperiodeData)
             ) {
                 return Kontrollfeil(
                     Kontroll_begrunnelser.OVERLAPPENDE_PERIODE_MED_FORSKUDDSVIS_FAKTURERUNG,
@@ -215,14 +215,10 @@ object FerdigbehandlingKontroll {
     }
 
     fun direkteForutgåendePeriode(kontrollData: FerdigbehandlingKontrollData): Kontrollfeil? {
-        val medlemskapsperiodeData = kontrollData.medlemskapsperiodeData ?: return null
-        val gjeldendeSaksnummer = kontrollData.fagsak?.saksnummer
-        val tidligereMedlemskapsperioderIandreFagsaker = medlemskapsperiodeData
-            .tidligereMedlemskapsperioderForBukerMedAvgift
-            .filter { it.behandlingsresultat.behandling.fagsak.saksnummer != gjeldendeSaksnummer }
+        val trygdeavgiftPeriodeData = kontrollData.trygdeavgiftperiodeData ?: return null
 
-        medlemskapsperiodeData.nyeMedlemskapsperioderMedAvgift.forEach { nyPeriode ->
-            if (tidligereMedlemskapsperioderIandreFagsaker.any { it.tom?.plusDays(1) == nyPeriode.fom }) {
+        trygdeavgiftPeriodeData.nyeTrygdeavgiftsperioder.forEach { nyPeriode ->
+            if (trygdeavgiftPeriodeData.tidligereTrygdeavgiftsperioder.any { it.tom?.plusDays(1) == nyPeriode.fom }) {
                 return Kontrollfeil(
                     Kontroll_begrunnelser.DIREKTE_FORUTGÅENDE_PERIODE,
                     KontrolldataFeilType.ADVARSEL

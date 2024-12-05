@@ -25,5 +25,5 @@ data class FerdigbehandlingKontrollData(
     val brevUtkast: List<UtkastBrev>,
     val antallArbeidsgivere: Int = 0,
     val fagsak: Fagsak? = null,
-    val trygdeavgiftssperiodeData: TrygdeavgiftsPeriodeData = null
+    val trygdeavgiftperiodeData: TrygdeavgiftPeriodeData? = null,
 )
