@@ -9,7 +9,8 @@ class MedlemskapBestemmelsekonverter : AttributeConverter<Bestemmelse, String> {
     override fun convertToDatabaseColumn(attribute: Bestemmelse?) =
         attribute?.name()
 
-    override fun convertToEntityAttribute(dbData: String?): Bestemmelse? =
+    override fun convertToEntityAttribute(dbData: String?): Bestemmelse =
         Folketrygdloven_kap2_bestemmelser.values().firstOrNull { it.name == dbData?.uppercase() }
             ?: Vertslandsavtale_bestemmelser.values().firstOrNull { it.name == dbData?.uppercase() }
+            ?: throw RuntimeException("Finner ingen bestemmelse for : $dbData")
 }
