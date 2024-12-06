@@ -2,8 +2,8 @@ package no.nav.melosys.tjenester.gui.ftrl.medlemskapsperiode
 
 import io.swagger.annotations.Api
 import io.swagger.annotations.ApiOperation
+import no.nav.melosys.domain.jpa.konverterTilBestemmelse
 import no.nav.melosys.domain.kodeverk.Bestemmelse
-import no.nav.melosys.domain.kodeverk.Folketrygdloven_kap2_bestemmelser
 import no.nav.melosys.domain.kodeverk.Trygdedekninger
 import no.nav.melosys.service.ftrl.bestemmelse.LovligeKombinasjonerTrygdedekningBestemmelse
 import no.nav.security.token.support.core.api.Protected
@@ -20,7 +20,8 @@ import org.springframework.web.context.WebApplicationContext
 @RequestMapping("/medlemskapsperioder")
 @Api(tags = ["lovlige-kombinasjoner", "medlemskapsperiode"])
 @Scope(value = WebApplicationContext.SCOPE_REQUEST)
-class LovligeKombinasjonerMedlemskapsperiodeController {
+class LovligeKombinasjonerMedlemskapsperiodeController(
+) {
 
     @GetMapping("/bestemmelse/lovlige-kombinasjoner")
     @ApiOperation(value = "Henter lovlige bestemmelser basert på trygdedekning")
@@ -41,9 +42,11 @@ class LovligeKombinasjonerMedlemskapsperiodeController {
         @RequestParam(
             "bestemmelse",
             required = true
-        ) bestemmelse: Folketrygdloven_kap2_bestemmelser
+        ) bestemmelse: String
     ): ResponseEntity<List<Trygdedekninger>> {
-        val trygdedekninger = LovligeKombinasjonerTrygdedekningBestemmelse.hentLovligeTrygdedekninger(bestemmelse)
+        val trygdedekninger = LovligeKombinasjonerTrygdedekningBestemmelse.hentLovligeTrygdedekninger(
+            konverterTilBestemmelse(bestemmelse)
+        )
 
         return ResponseEntity.ok(trygdedekninger)
     }

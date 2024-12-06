@@ -1,10 +1,8 @@
 package no.nav.melosys.tjenester.gui.ftrl.bestemmelser.avklartefakta
 
 import io.swagger.annotations.Api
+import no.nav.melosys.domain.jpa.konverterTilBestemmelse
 import no.nav.melosys.domain.kodeverk.Avklartefaktatyper
-import no.nav.melosys.domain.kodeverk.Bestemmelse
-import no.nav.melosys.domain.kodeverk.Folketrygdloven_kap2_bestemmelser
-import no.nav.melosys.domain.kodeverk.Vertslandsavtale_bestemmelser
 import no.nav.melosys.service.ftrl.bestemmelse.avklartefakta.AvklarteFaktaForBestemmelse
 import no.nav.security.token.support.core.api.Protected
 import org.springframework.http.ResponseEntity
@@ -29,15 +27,9 @@ class AvklarteFaktaForBestemmelseController(private val avklarteFaktaForBestemme
         return ResponseEntity.ok(AvklarteFaktaForBestemmelseDto(avklarteFaktaDtoList))
     }
 
-    private fun konverterTilBestemmelse(bestemmelse: String): Bestemmelse {
-        require(bestemmelse.isNotBlank()) { "Bestemmelse kode er påkrevd" }
-
-        return Folketrygdloven_kap2_bestemmelser.values().firstOrNull { it.name == bestemmelse.uppercase() }
-            ?: Vertslandsavtale_bestemmelser.values().firstOrNull { it.name == bestemmelse.uppercase() }
-            ?: throw IllegalArgumentException("Finner ikke kodeverk for Bestemmelse: $bestemmelse")
-    }
-
     data class AvklarteFaktaForBestemmelseDto(val avklarteFakta: List<AvklarteFaktaDto>)
 
     data class AvklarteFaktaDto(val faktaType: Avklartefaktatyper, val muligeFakta: List<String>)
+
 }
+

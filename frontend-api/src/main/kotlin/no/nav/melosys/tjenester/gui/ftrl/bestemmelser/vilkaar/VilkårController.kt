@@ -2,7 +2,9 @@ package no.nav.melosys.tjenester.gui.ftrl.bestemmelser.vilkaar
 
 import io.swagger.annotations.Api
 import mu.KotlinLogging
-import no.nav.melosys.domain.kodeverk.*
+import no.nav.melosys.domain.jpa.konverterTilBestemmelse
+import no.nav.melosys.domain.kodeverk.Avklartefaktatyper
+import no.nav.melosys.domain.kodeverk.Vilkaar
 import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingstema
 import no.nav.melosys.exception.FunksjonellException
 import no.nav.melosys.service.ftrl.bestemmelse.vilkaar.VilkårForBestemmelse
@@ -54,14 +56,6 @@ class VilkårController(
         return ResponseEntity.ok(VilkårForBestemmelseDto(vilkårDtoList))
     }
 
-    private fun konverterTilBestemmelse(bestemmelse: String): Bestemmelse {
-        require(bestemmelse.isNotBlank()) { "Bestemmelse kode er påkrevd" }
-
-        return Folketrygdloven_kap2_bestemmelser.values().firstOrNull { it.name == bestemmelse.uppercase() }
-            ?: Vertslandsavtale_bestemmelser.values().firstOrNull { it.name == bestemmelse.uppercase() }
-            ?: throw IllegalArgumentException("Finner ikke kodeverk for Bestemmelse: $bestemmelse")
-    }
-
     private fun validerRequestParams(queryParams: Map<String, String>) {
         val validKeys = listOf(BEHANDLING_ID, BEHANDLINGSTEMA) + avklartefaktatyperNavn
 
@@ -74,4 +68,5 @@ class VilkårController(
     data class VilkårForBestemmelseDto(val vilkår: List<VilkårOgBegrunnelserDto>)
 
     data class VilkårOgBegrunnelserDto(val vilkår: Vilkaar, val defaultOppfylt: Boolean?, val muligeBegrunnelser: Collection<String>)
+
 }

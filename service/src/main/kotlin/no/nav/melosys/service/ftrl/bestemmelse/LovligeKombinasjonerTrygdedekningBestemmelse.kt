@@ -54,8 +54,12 @@ object LovligeKombinasjonerTrygdedekningBestemmelse {
     fun hentLovligeBestemmelser(trygdedekning: Trygdedekninger): List<Bestemmelse> =
         lovligeKombinasjonerDekningBestemmelse[lovligeKombinasjonerDekningBestemmelse.keys.find { it.contains(trygdedekning) }] ?: emptyList()
 
-    fun hentLovligeTrygdedekninger(bestemmelse: Folketrygdloven_kap2_bestemmelser): List<Trygdedekninger> =
-        lovligeKombinasjonerDekningBestemmelse.filterValues { it.contains(bestemmelse) }.keys.flatten()
+    fun hentLovligeTrygdedekninger(bestemmelse: Bestemmelse?): List<Trygdedekninger> =
+        lovligeKombinasjonerDekningBestemmelse
+            .filterValues { it.contains(bestemmelse) }.keys.flatten()
+            .filterNot {
+                bestemmelse == Vertslandsavtale_bestemmelser.TILLEGGSAVTALE_NATO && it == Trygdedekninger.FULL_DEKNING_FTRL
+            }
 
     fun erGyldigKombinasjon(bestemmelse: Bestemmelse, trygdedekning: Trygdedekninger): Boolean =
         bestemmelse in hentLovligeBestemmelser(trygdedekning)

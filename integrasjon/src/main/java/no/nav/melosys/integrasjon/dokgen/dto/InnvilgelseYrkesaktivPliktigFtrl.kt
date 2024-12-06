@@ -21,7 +21,7 @@ class InnvilgelseYrkesaktivPliktigFtrl(
     val avgiftsperioder: List<AvgiftsperiodeDto>,
     @JsonInclude(JsonInclude.Include.NON_NULL)
     val medlemskapsperiode: MedlemskapsperiodeDto,
-    val bestemmelse: Folketrygdloven_kap2_bestemmelser?,
+    val bestemmelse: Bestemmelse?,
     val trygdeavgiftMottaker: Trygdeavgiftmottaker?,
     val fullmektigTrygdeavgift: String?,
     val skatteplikttype: Skatteplikttype?,
@@ -47,7 +47,7 @@ class InnvilgelseYrkesaktivPliktigFtrl(
         behandlingstype: Behandlingstyper,
         avgiftsperioder: List<AvgiftsperiodeDto>,
         medlemskapsperiode: MedlemskapsperiodeDto,
-        bestemmelse: Folketrygdloven_kap2_bestemmelser?,
+        bestemmelse: Bestemmelse?,
         trygdeavgiftMottaker: Trygdeavgiftmottaker?,
         fullmektigTrygdeavgift: String?,
         skatteplikttype: Skatteplikttype?,
