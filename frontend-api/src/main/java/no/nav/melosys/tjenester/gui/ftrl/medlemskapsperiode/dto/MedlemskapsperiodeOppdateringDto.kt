@@ -6,7 +6,7 @@ import java.time.LocalDate
 
 data class MedlemskapsperiodeOppdateringDto(
     val fomDato: LocalDate,
-    val tomDato: LocalDate,
+    val tomDato: LocalDate?,
     val bestemmelse: String,
     val trygdedekning: Trygdedekninger,
     val innvilgelsesResultat: InnvilgelsesResultat
