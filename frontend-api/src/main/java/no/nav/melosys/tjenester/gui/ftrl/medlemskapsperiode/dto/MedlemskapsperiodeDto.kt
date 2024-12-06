@@ -9,7 +9,7 @@ import java.time.LocalDate
 data class MedlemskapsperiodeDto(
     val id: Long,
     val fomDato: LocalDate,
-    val tomDato: LocalDate,
+    val tomDato: LocalDate?,
     val bestemmelse: Bestemmelse,
     val innvilgelsesResultat: InnvilgelsesResultat,
     val trygdedekning: Trygdedekninger,
