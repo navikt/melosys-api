@@ -13,7 +13,7 @@ class MedlemskapBestemmelsekonverter : AttributeConverter<Bestemmelse, String> {
         konverterTilBestemmelse(dbData)
 }
 
-fun konverterTilBestemmelse(kodeverk: String?): Bestemmelse =
-    Folketrygdloven_kap2_bestemmelser.values().firstOrNull { it.name == kodeverk?.uppercase() }
-        ?: Vertslandsavtale_bestemmelser.values().firstOrNull { it.name == kodeverk?.uppercase() }
+fun konverterTilBestemmelse(kodeverk: String): Bestemmelse =
+    Folketrygdloven_kap2_bestemmelser.values().firstOrNull { it.name == kodeverk.uppercase() }
+        ?: Vertslandsavtale_bestemmelser.values().firstOrNull { it.name == kodeverk.uppercase() }
         ?: throw RuntimeException("Finner ingen bestemmelse for : $kodeverk")
