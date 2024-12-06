@@ -9,8 +9,11 @@ class MedlemskapBestemmelsekonverter : AttributeConverter<Bestemmelse, String> {
     override fun convertToDatabaseColumn(attribute: Bestemmelse?) =
         attribute?.name()
 
-    override fun convertToEntityAttribute(dbData: String?): Bestemmelse =
-        Folketrygdloven_kap2_bestemmelser.values().firstOrNull { it.name == dbData?.uppercase() }
-            ?: Vertslandsavtale_bestemmelser.values().firstOrNull { it.name == dbData?.uppercase() }
-            ?: throw RuntimeException("Finner ingen bestemmelse for : $dbData")
+    override fun convertToEntityAttribute(dbData: String): Bestemmelse =
+        konverterTilBestemmelse(dbData)
 }
+
+fun konverterTilBestemmelse(kodeverk: String?): Bestemmelse =
+    Folketrygdloven_kap2_bestemmelser.values().firstOrNull { it.name == kodeverk?.uppercase() }
+        ?: Vertslandsavtale_bestemmelser.values().firstOrNull { it.name == kodeverk?.uppercase() }
+        ?: throw RuntimeException("Finner ingen bestemmelse for : $kodeverk")

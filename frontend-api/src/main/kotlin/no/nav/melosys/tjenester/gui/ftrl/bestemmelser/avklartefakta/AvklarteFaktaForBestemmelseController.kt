@@ -1,7 +1,7 @@
 package no.nav.melosys.tjenester.gui.ftrl.bestemmelser.avklartefakta
 
 import io.swagger.annotations.Api
-import no.nav.melosys.domain.jpa.MedlemskapBestemmelsekonverter
+import no.nav.melosys.domain.jpa.konverterTilBestemmelse
 import no.nav.melosys.domain.kodeverk.Avklartefaktatyper
 import no.nav.melosys.service.ftrl.bestemmelse.avklartefakta.AvklarteFaktaForBestemmelse
 import no.nav.security.token.support.core.api.Protected
@@ -22,7 +22,7 @@ class AvklarteFaktaForBestemmelseController(private val avklarteFaktaForBestemme
         @RequestParam("behandlingID", required = true) behandlingID: Long
     ): ResponseEntity<AvklarteFaktaForBestemmelseDto> {
         val avklarteFaktaDtoList =
-            avklarteFaktaForBestemmelse.hentAvklarteFakta(medlemskapBestemmelsekonverter.convertToEntityAttribute(bestemmelse), behandlingID)
+            avklarteFaktaForBestemmelse.hentAvklarteFakta(konverterTilBestemmelse(bestemmelse), behandlingID)
                 .map { AvklarteFaktaDto(it.type, it.muligeFakta) }
         return ResponseEntity.ok(AvklarteFaktaForBestemmelseDto(avklarteFaktaDtoList))
     }
@@ -31,8 +31,5 @@ class AvklarteFaktaForBestemmelseController(private val avklarteFaktaForBestemme
 
     data class AvklarteFaktaDto(val faktaType: Avklartefaktatyper, val muligeFakta: List<String>)
 
-    companion object {
-        private val medlemskapBestemmelsekonverter = MedlemskapBestemmelsekonverter()
-    }
 }
 

@@ -2,7 +2,7 @@ package no.nav.melosys.tjenester.gui.ftrl.bestemmelser.vilkaar
 
 import io.swagger.annotations.Api
 import mu.KotlinLogging
-import no.nav.melosys.domain.jpa.MedlemskapBestemmelsekonverter
+import no.nav.melosys.domain.jpa.konverterTilBestemmelse
 import no.nav.melosys.domain.kodeverk.Avklartefaktatyper
 import no.nav.melosys.domain.kodeverk.Vilkaar
 import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingstema
@@ -46,7 +46,7 @@ class VilkårController(
         val avklarteFakta = requestParams.filterKeys { k -> k in avklartefaktatyperNavn }
             .mapKeys { (k, _) -> Avklartefaktatyper.valueOf(k) }
         val vilkårDtoList = vilkårForBestemmelse.hentVilkår(
-            medlemskapBestemmelsekonverter.convertToEntityAttribute(bestemmelse),
+            konverterTilBestemmelse(bestemmelse),
             Behandlingstema.valueOf(behandlingstema),
             avklarteFakta,
             behandlingID
@@ -69,7 +69,4 @@ class VilkårController(
 
     data class VilkårOgBegrunnelserDto(val vilkår: Vilkaar, val defaultOppfylt: Boolean?, val muligeBegrunnelser: Collection<String>)
 
-    companion object {
-        private val medlemskapBestemmelsekonverter = MedlemskapBestemmelsekonverter()
-    }
 }

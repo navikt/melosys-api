@@ -2,7 +2,7 @@ package no.nav.melosys.tjenester.gui.ftrl.medlemskapsperiode
 
 import io.swagger.annotations.Api
 import no.nav.melosys.domain.Medlemskapsperiode
-import no.nav.melosys.domain.jpa.MedlemskapBestemmelsekonverter
+import no.nav.melosys.domain.jpa.konverterTilBestemmelse
 import no.nav.melosys.service.ftrl.medlemskapsperiode.MedlemskapsperiodeService
 import no.nav.melosys.service.ftrl.medlemskapsperiode.OpprettForslagMedlemskapsperiodeService
 import no.nav.melosys.service.tilgang.Aksesskontroll
@@ -46,7 +46,7 @@ class MedlemskapsperiodeController(
                 medlemskapsperiodeOppdateringDto.tomDato,
                 medlemskapsperiodeOppdateringDto.innvilgelsesResultat,
                 medlemskapsperiodeOppdateringDto.trygdedekning,
-                medlemskapBestemmelsekonverter.convertToEntityAttribute(medlemskapsperiodeOppdateringDto.bestemmelse)
+                konverterTilBestemmelse(medlemskapsperiodeOppdateringDto.bestemmelse)
             ).toDto()
         )
     }
@@ -66,7 +66,7 @@ class MedlemskapsperiodeController(
                 medlemskapsperiodeOppdateringDto.tomDato,
                 medlemskapsperiodeOppdateringDto.innvilgelsesResultat,
                 medlemskapsperiodeOppdateringDto.trygdedekning,
-                medlemskapBestemmelsekonverter.convertToEntityAttribute(medlemskapsperiodeOppdateringDto.bestemmelse)
+                konverterTilBestemmelse(medlemskapsperiodeOppdateringDto.bestemmelse)
             ).toDto()
         )
     }
@@ -97,7 +97,7 @@ class MedlemskapsperiodeController(
         return ResponseEntity.ok(
             opprettForslagMedlemskapsperiodeService.opprettForslagPåMedlemskapsperioder(
                 behandlingID,
-                medlemskapBestemmelsekonverter.convertToEntityAttribute(bestemmelseDto.bestemmelse)
+                konverterTilBestemmelse(bestemmelseDto.bestemmelse)
             ).map { it.toDto() }
         )
     }
@@ -105,7 +105,4 @@ class MedlemskapsperiodeController(
     private fun Medlemskapsperiode.toDto() =
         MedlemskapsperiodeDto(id, fom, tom, bestemmelse, innvilgelsesresultat, trygdedekning, medlemskapstype)
 
-    companion object {
-        private val medlemskapBestemmelsekonverter = MedlemskapBestemmelsekonverter()
-    }
 }
