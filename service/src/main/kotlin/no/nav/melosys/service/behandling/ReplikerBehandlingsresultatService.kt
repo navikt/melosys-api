@@ -3,7 +3,6 @@ package no.nav.melosys.service.behandling
 import no.nav.melosys.domain.*
 import no.nav.melosys.domain.avgift.Inntektsperiode
 import no.nav.melosys.domain.avgift.SkatteforholdTilNorge
-import no.nav.melosys.domain.avgift.Trygdeavgiftsperiode
 import no.nav.melosys.domain.avklartefakta.Avklartefakta
 import no.nav.melosys.domain.avklartefakta.AvklartefaktaRegistrering
 import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingsresultattyper
@@ -115,24 +114,24 @@ private fun replikerTrygdeavgift(
     behandlingsresultatReplika.medlemskapsperioder.forEach {
         it.trygdeavgiftsperioder = HashSet()
     }
-    for (trygdeavgiftsperiodeOriginal in behandlingsresultatOriginal.trygdeavgiftsperioder) {
-        val trygdeavgiftsperiodeReplika = BeanUtils.cloneBean(trygdeavgiftsperiodeOriginal) as Trygdeavgiftsperiode
 
-        trygdeavgiftsperiodeReplika.grunnlagMedlemskapsperiode = behandlingsresultatReplika.medlemskapsperioder
-            .find { it.id == trygdeavgiftsperiodeOriginal.grunnlagMedlemskapsperiode.id }
-        trygdeavgiftsperiodeReplika.grunnlagInntekstperiode =
-            inntektsperioderReplika.find { it.id == trygdeavgiftsperiodeOriginal.grunnlagInntekstperiode.id }
-        trygdeavgiftsperiodeReplika.grunnlagSkatteforholdTilNorge =
-            skatteforholdTilNorgeReplika.find { it.id == trygdeavgiftsperiodeOriginal.grunnlagSkatteforholdTilNorge.id }
-
-        trygdeavgiftsperiodeReplika.grunnlagMedlemskapsperiode.trygdeavgiftsperioder.add(trygdeavgiftsperiodeReplika)
-    }
-
-    behandlingsresultatReplika.trygdeavgiftsperioder.onEach {
-        it.id = null
-        it.grunnlagInntekstperiode?.id = null
-        it.grunnlagMedlemskapsperiode.id = null
-        it.grunnlagSkatteforholdTilNorge.id = null
+     behandlingsresultatOriginal.trygdeavgiftsperioder.forEach { trygdeavgiftsperiodeOriginal ->
+        trygdeavgiftsperiodeOriginal.copy(
+            id = null,
+            grunnlagMedlemskapsperiode = behandlingsresultatReplika.medlemskapsperioder
+                .find { it.id == trygdeavgiftsperiodeOriginal.grunnlagMedlemskapsperiode?.id }?.also { it.id = null }
+                ?: throw IllegalStateException("Medlemskapsperiode ikke funnet"),
+            grunnlagInntekstperiode = inntektsperioderReplika
+                .find { it.id == trygdeavgiftsperiodeOriginal.grunnlagInntekstperiode?.id }?.also { it.id = null }
+                ?: throw IllegalStateException("Inntektsperiode ikke funnet"),
+            grunnlagSkatteforholdTilNorge = skatteforholdTilNorgeReplika
+                .find { it.id == trygdeavgiftsperiodeOriginal.grunnlagSkatteforholdTilNorge?.id }?.also { it.id = null }
+                ?: throw IllegalStateException("SkatteforholdTilNorge ikke funnet"),
+        ).also {
+            it.grunnlagMedlemskapsperiode?.run {
+                trygdeavgiftsperioder.add(it)
+            }?: throw IllegalStateException("Medlemskapsperiode ikke funnet (dette skal ikke kunne skje)")
+        }
     }
 }
 

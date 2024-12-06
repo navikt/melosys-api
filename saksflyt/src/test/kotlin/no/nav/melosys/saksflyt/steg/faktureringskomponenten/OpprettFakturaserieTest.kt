@@ -107,7 +107,7 @@ class OpprettFakturaserieTest {
     fun `Opprett betalingsplan med riktige verdier når Inntektskildetype er PENSJON_UFØRETRYGD`() {
         lagTestData(setOf(lagAktoerBruker()))
         behandlingsresultat.trygdeavgiftsperioder.forEach {
-            it.grunnlagInntekstperiode.type = Inntektskildetype.PENSJON_UFØRETRYGD
+            it.grunnlagInntekstperiode!!.type = Inntektskildetype.PENSJON_UFØRETRYGD
         }
         every { behandlingsresultatService.hentBehandlingsresultat(BEHANDLING_ID) } returns behandlingsresultat
         every { behandlingService.hentBehandling(BEHANDLING_ID) } returns behandling
@@ -130,7 +130,7 @@ class OpprettFakturaserieTest {
     fun `Opprett betalingsplan med riktige verdier når Inntektskildetype er PENSJON_UFØRETRYGD_KILDESKATT`() {
         lagTestData(setOf(lagAktoerBruker()))
         behandlingsresultat.trygdeavgiftsperioder.forEach {
-            it.grunnlagInntekstperiode.type = Inntektskildetype.PENSJON_UFØRETRYGD_KILDESKATT
+            it.grunnlagInntekstperiode!!.type = Inntektskildetype.PENSJON_UFØRETRYGD_KILDESKATT
         }
         every { behandlingsresultatService.hentBehandlingsresultat(BEHANDLING_ID) } returns behandlingsresultat
         every { behandlingService.hentBehandling(BEHANDLING_ID) } returns behandling
@@ -181,8 +181,8 @@ class OpprettFakturaserieTest {
             behandlingsresultat.type = Behandlingsresultattyper.MEDLEM_I_FOLKETRYGDEN
             behandlingsresultat.fakturaserieReferanse = FAKTURASERIE_REFERANSE
             behandlingsresultat.trygdeavgiftsperioder.first().apply {
-                grunnlagInntekstperiode.isArbeidsgiversavgiftBetalesTilSkatt = true
-                grunnlagSkatteforholdTilNorge.skatteplikttype = Skatteplikttype.SKATTEPLIKTIG
+                grunnlagInntekstperiode!!.isArbeidsgiversavgiftBetalesTilSkatt = true
+                grunnlagSkatteforholdTilNorge!!.skatteplikttype = Skatteplikttype.SKATTEPLIKTIG
             }
         }
         val opprinneligBehandlingsresultat = Behandlingsresultat().apply { fakturaserieReferanse = behandlingsresultat.fakturaserieReferanse }
@@ -209,8 +209,8 @@ class OpprettFakturaserieTest {
             behandlingsresultat.type = Behandlingsresultattyper.MEDLEM_I_FOLKETRYGDEN
             behandlingsresultat.fakturaserieReferanse = FAKTURASERIE_REFERANSE
             behandlingsresultat.trygdeavgiftsperioder.first().apply {
-                grunnlagInntekstperiode.isArbeidsgiversavgiftBetalesTilSkatt = true
-                grunnlagSkatteforholdTilNorge.skatteplikttype = Skatteplikttype.SKATTEPLIKTIG
+                grunnlagInntekstperiode!!.isArbeidsgiversavgiftBetalesTilSkatt = true
+                grunnlagSkatteforholdTilNorge!!.skatteplikttype = Skatteplikttype.SKATTEPLIKTIG
             }
         }
         val opprinneligBehandlingsresultat = Behandlingsresultat().apply { fakturaserieReferanse = behandlingsresultat.fakturaserieReferanse }
@@ -279,10 +279,7 @@ class OpprettFakturaserieTest {
         lagTestData(setOf(lagAktoerBruker()))
         behandlingsresultat.medlemskapsperioder.first().apply {
             this.trygdeavgiftsperioder = setOf(this.trygdeavgiftsperioder.first(),
-                lagTrygdeavgift().apply {
-                this.trygdeavgiftsbeløpMd = Penger(0.0)
-                this.trygdesats = BigDecimal(0)
-            })
+                lagTrygdeavgift().copy(trygdeavgiftsbeløpMd = Penger(0.0), trygdesats = BigDecimal(0)))
         }
 
         behandlingsresultat.trygdeavgiftsperioder.size.shouldBe(2)
@@ -305,10 +302,7 @@ class OpprettFakturaserieTest {
     fun `Ikke opprett betalingsplan når behandling ikke har trygdeavgiftsperioder med avgift`() {
         lagTestData(emptySet())
         behandlingsresultat.medlemskapsperioder.first().apply {
-            this.trygdeavgiftsperioder = setOf(lagTrygdeavgift().apply {
-                this.trygdeavgiftsbeløpMd = Penger(0.0)
-                this.trygdesats = BigDecimal(0)
-            })
+            this.trygdeavgiftsperioder = setOf(lagTrygdeavgift().copy(trygdeavgiftsbeløpMd = Penger(0.0), trygdesats = BigDecimal(0)))
         }
 
         behandlingsresultat.trygdeavgiftsperioder.size.shouldBe(1)
@@ -423,21 +417,17 @@ class OpprettFakturaserieTest {
             tom = LocalDate.of(2023, 5, 31)
             bestemmelse = Folketrygdloven_kap2_bestemmelser.FTRL_KAP2_2_8
             trygdeavgiftsperioder = setOf(
-                lagTrygdeavgift().apply {
-                    grunnlagMedlemskapsperiode = medlemskapsperiode
-                })
+                lagTrygdeavgift().copy(grunnlagMedlemskapsperiode = medlemskapsperiode))
         })
     }
 
     private fun lagTrygdeavgift(): Trygdeavgiftsperiode {
-        return Trygdeavgiftsperiode().apply {
-            periodeFra = LocalDate.of(2023, 1, 1)
-            periodeTil = LocalDate.of(2023, 5, 1)
-            trygdeavgiftsbeløpMd = Penger(5000.0)
-            trygdesats = BigDecimal(3.5)
-            grunnlagInntekstperiode = lagInntektsperiode()
-            grunnlagSkatteforholdTilNorge = lagSkatteforholdTilNorge()
-        }
+        return Trygdeavgiftsperiode(periodeFra = LocalDate.of(2023, 1, 1),
+            periodeTil = LocalDate.of(2023, 5, 1),
+            trygdeavgiftsbeløpMd = Penger(5000.0),
+            trygdesats = BigDecimal(3.5),
+            grunnlagInntekstperiode = lagInntektsperiode(),
+            grunnlagSkatteforholdTilNorge = lagSkatteforholdTilNorge())
     }
 
     private fun lagInntektsperiode(): Inntektsperiode {

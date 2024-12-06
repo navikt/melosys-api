@@ -65,9 +65,7 @@ class ReplikerBehandlingsresultatServiceTest {
         val avslaattMedlemskapsperiode = opprettMedlemskapsperiode(InnvilgelsesResultat.AVSLAATT, 2L)
         val opphoertMedlemskapsperiode = opprettMedlemskapsperiode(InnvilgelsesResultat.OPPHØRT, 3L)
         innvilgetMedlemskapsperiode.trygdeavgiftsperioder.add(
-            lagTrygdeavgiftsperiode().apply {
-                grunnlagMedlemskapsperiode = innvilgetMedlemskapsperiode
-            }
+            lagTrygdeavgiftsperiode().copy(grunnlagMedlemskapsperiode = innvilgetMedlemskapsperiode)
         )
         behandlingsresultatOriginal.addMedlemskapsperiode(innvilgetMedlemskapsperiode)
         behandlingsresultatOriginal.addMedlemskapsperiode(avslaattMedlemskapsperiode)
@@ -221,12 +219,12 @@ class ReplikerBehandlingsresultatServiceTest {
             .matches { it.periodeTil == trygdeavgiftsperiodeOriginal.periodeTil }
             .matches { it.trygdeavgiftsbeløpMd == trygdeavgiftsperiodeOriginal.trygdeavgiftsbeløpMd }
             .matches { it.trygdesats == trygdeavgiftsperiodeOriginal.trygdesats }
-            .matches { it.grunnlagMedlemskapsperiode.id == null }
-            .matches { it.grunnlagMedlemskapsperiode.trygdedekning == innvilgetMedlemskapsperiodeOriginal.trygdedekning }
-            .matches { it.grunnlagInntekstperiode.id == null }
-            .matches { it.grunnlagInntekstperiode.avgiftspliktigMndInntekt == inntektsperiodeOriginal.avgiftspliktigMndInntekt }
-            .matches { it.grunnlagSkatteforholdTilNorge.id == null }
-            .matches { it.grunnlagSkatteforholdTilNorge.skatteplikttype == skatteforholdTilNorgeOriginal.skatteplikttype }
+            .matches { it.grunnlagMedlemskapsperiode!!.id == null }
+            .matches { it.grunnlagMedlemskapsperiode!!.trygdedekning == innvilgetMedlemskapsperiodeOriginal.trygdedekning }
+            .matches { it.grunnlagInntekstperiode!!.id == null }
+            .matches { it.grunnlagInntekstperiode!!.avgiftspliktigMndInntekt == inntektsperiodeOriginal.avgiftspliktigMndInntekt }
+            .matches { it.grunnlagSkatteforholdTilNorge!!.id == null }
+            .matches { it.grunnlagSkatteforholdTilNorge!!.skatteplikttype == skatteforholdTilNorgeOriginal.skatteplikttype }
     }
 
     @Test
@@ -256,9 +254,7 @@ class ReplikerBehandlingsresultatServiceTest {
         val avslaattMedlemskapsperiode = opprettMedlemskapsperiode(InnvilgelsesResultat.AVSLAATT, 2L)
         val opphoertMedlemskapsperiode = opprettMedlemskapsperiode(InnvilgelsesResultat.OPPHØRT, 3L)
         innvilgetMedlemskapsperiode.trygdeavgiftsperioder.add(
-            lagTrygdeavgiftsperiode().apply {
-                grunnlagMedlemskapsperiode = innvilgetMedlemskapsperiode
-            }
+            lagTrygdeavgiftsperiode().copy(grunnlagMedlemskapsperiode = innvilgetMedlemskapsperiode)
         )
         behandlingsresultatOriginal.addMedlemskapsperiode(innvilgetMedlemskapsperiode)
         behandlingsresultatOriginal.addMedlemskapsperiode(avslaattMedlemskapsperiode)
@@ -326,15 +322,14 @@ class ReplikerBehandlingsresultatServiceTest {
             skatteplikttype = Skatteplikttype.SKATTEPLIKTIG
         }
 
-          return  Trygdeavgiftsperiode().apply {
-                id = 1L
-                periodeFra = LocalDate.now()
-                periodeTil = LocalDate.now()
-                trygdeavgiftsbeløpMd = Penger(500.0)
-                trygdesats = BigDecimal(50)
-                grunnlagInntekstperiode = inntektsperiode
-                grunnlagSkatteforholdTilNorge = skatteforholdTilNorge
-            }
+          return  Trygdeavgiftsperiode(id = 1L,
+              periodeFra = LocalDate.now(),
+              periodeTil = LocalDate.now(),
+              trygdeavgiftsbeløpMd = Penger(500.0),
+              trygdesats = BigDecimal(50),
+              grunnlagInntekstperiode = inntektsperiode,
+              grunnlagSkatteforholdTilNorge = skatteforholdTilNorge
+          )
     }
 
     private fun opprettMedlemskapsperiode(innvilgelsesResultat: InnvilgelsesResultat, id: Long): Medlemskapsperiode {

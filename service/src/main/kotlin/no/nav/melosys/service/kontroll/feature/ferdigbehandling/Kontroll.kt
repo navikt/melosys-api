@@ -150,7 +150,7 @@ class Kontroll(
             behandlingsresultatService.finnAlleTidligereBehandlingsresultatForAktør(behandling.fagsak.hentBrukersAktørID(), behandling.id)
                 .filter { trygdeavgiftService.harFakturerbarTrygdeavgift(it) }
 
-        val tidligereTrygdeavgiftsPerioder = tidligereBehandlingsresultaterMedAvgift.flatMap { it.trygdeavgiftsperioder }
+        val tidligereTrygdeavgiftsPerioder = tidligereBehandlingsresultaterMedAvgift.flatMap { it.trygdeavgiftsperioder } //TODO filtrer ut tidligere perioder i samme fagsak.
         val nyeTrygdeavgifsperioder = behandlingsresultatService.hentBehandlingsresultat(behandling.id).trygdeavgiftsperioder.toList() //TODO skal vi sjekke om perioden har avgift?
 
         return FerdigbehandlingKontrollData(

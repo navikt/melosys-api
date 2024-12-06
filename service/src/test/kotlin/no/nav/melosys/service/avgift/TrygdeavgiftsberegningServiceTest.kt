@@ -364,7 +364,7 @@ internal class TrygdeavgiftsberegningServiceTest {
             periodeTil.shouldBe(TOM)
             trygdesats.shouldBe(BigDecimal.ZERO)
             trygdeavgiftsbeløpMd.shouldBe(Penger(BigDecimal.ZERO))
-            grunnlagSkatteforholdTilNorge.apply {
+            grunnlagSkatteforholdTilNorge?.apply {
                 fomDato.shouldBe(FOM)
                 tomDato.shouldBe(TOM)
                 skatteplikttype.shouldBe(Skatteplikttype.SKATTEPLIKTIG)
@@ -426,7 +426,7 @@ internal class TrygdeavgiftsberegningServiceTest {
             periodeTil.shouldBe(LocalDate.of(2021, 2, 1))
             trygdesats.shouldBe(BigDecimal.ZERO)
             trygdeavgiftsbeløpMd.shouldBe(Penger(BigDecimal.ZERO))
-            grunnlagSkatteforholdTilNorge.apply {
+            grunnlagSkatteforholdTilNorge?.apply {
                 fomDato.shouldBe(LocalDate.of(2021, 1, 1))
                 tomDato.shouldBe(LocalDate.of(2021, 2, 28))
                 skatteplikttype.shouldBe(Skatteplikttype.SKATTEPLIKTIG)
@@ -439,7 +439,7 @@ internal class TrygdeavgiftsberegningServiceTest {
             periodeTil.shouldBe(LocalDate.of(2021, 2, 28))
             trygdesats.shouldBe(BigDecimal.ZERO)
             trygdeavgiftsbeløpMd.shouldBe(Penger(BigDecimal.ZERO))
-            grunnlagSkatteforholdTilNorge.apply {
+            grunnlagSkatteforholdTilNorge?.apply {
                 fomDato.shouldBe(LocalDate.of(2021, 1, 1))
                 tomDato.shouldBe(LocalDate.of(2021, 2, 28))
                 skatteplikttype.shouldBe(Skatteplikttype.SKATTEPLIKTIG)
@@ -461,12 +461,11 @@ internal class TrygdeavgiftsberegningServiceTest {
 
         behandlingsresultat.medlemskapsperioder.add(Medlemskapsperiode().apply {
             id = 1L
-            trygdeavgiftsperioder.add(Trygdeavgiftsperiode().apply {
-                periodeFra = FOM
-                periodeTil = TOM
-                trygdeavgiftsbeløpMd = Penger(790.0)
-                trygdesats = BigDecimal.valueOf(7.9)
-            })
+            trygdeavgiftsperioder.add(Trygdeavgiftsperiode(periodeFra = FOM,
+                periodeTil = TOM,
+                trygdeavgiftsbeløpMd = Penger(790.0),
+                trygdesats = BigDecimal.valueOf(7.9))
+            )
         })
 
         val skatteforholdsperioder = listOf(
@@ -523,13 +522,12 @@ internal class TrygdeavgiftsberegningServiceTest {
 
         behandlingsresultat.medlemskapsperioder.add(Medlemskapsperiode().apply {
             id = 2L
-            trygdeavgiftsperioder.add(Trygdeavgiftsperiode().apply {
-                id = 1L
-                periodeFra = FOM
-                periodeTil = TOM
-                trygdeavgiftsbeløpMd = Penger(790.0)
-                trygdesats = BigDecimal.valueOf(7.9)
-            })
+            trygdeavgiftsperioder.add(Trygdeavgiftsperiode(id = 1L,
+                periodeFra = FOM,
+                periodeTil = TOM,
+                trygdeavgiftsbeløpMd = Penger(790.0),
+                trygdesats = BigDecimal.valueOf(7.9))
+            )
         })
 
         val skatteforholdsperioder = listOf(
@@ -575,13 +573,12 @@ internal class TrygdeavgiftsberegningServiceTest {
 
         behandlingsresultat.medlemskapsperioder.add(Medlemskapsperiode().apply {
             id = 2L
-            trygdeavgiftsperioder.add(Trygdeavgiftsperiode().apply {
-                id = 1L
-                periodeFra = FOM
-                periodeTil = TOM
-                trygdeavgiftsbeløpMd = Penger(790.0)
-                trygdesats = BigDecimal.valueOf(7.9)
-            })
+            trygdeavgiftsperioder.add(Trygdeavgiftsperiode(id = 1L,
+                periodeFra = FOM,
+                periodeTil = TOM,
+                trygdeavgiftsbeløpMd = Penger(790.0),
+                trygdesats = BigDecimal.valueOf(7.9))
+            )
         })
 
         val skatteforholdsperioder = listOf(

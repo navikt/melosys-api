@@ -107,16 +107,30 @@ class TrygdeavgiftsberegningService(
         skatteforholdsperioderMedUUID: List<Pair<UUID, SkatteforholdTilNorge>>,
         inntektsperioderMedUUID: List<Pair<UUID, Inntektsperiode>>,
         behandlingsresultat: Behandlingsresultat
-    ) = Trygdeavgiftsperiode().apply {
-        periodeFra = response.beregnetPeriode.periode.fom
-        periodeTil = response.beregnetPeriode.periode.tom
-        trygdesats = response.beregnetPeriode.sats
-        trygdeavgiftsbeløpMd = response.beregnetPeriode.månedsavgift.tilPenger()
-        grunnlagSkatteforholdTilNorge = skatteforholdsperioderMedUUID.find { it.first == response.grunnlag.skatteforholdsperiodeId }?.second
-        grunnlagInntekstperiode = inntektsperioderMedUUID.find { it.first == response.grunnlag.inntektsperiodeId }?.second
-        grunnlagMedlemskapsperiode = behandlingsresultat.medlemskapsperioder.first { idToUUid(it.id) == response.grunnlag.medlemskapsperiodeId }
+    ): Trygdeavgiftsperiode {
+        val grunnlagSkatteforholdTilNorge = skatteforholdsperioderMedUUID
+            .find { it.first == response.grunnlag.skatteforholdsperiodeId }?.second
+
+        val grunnlagInntekstperiode = inntektsperioderMedUUID
+            .find { it.first == response.grunnlag.inntektsperiodeId }?.second
+
+        val grunnlagMedlemskapsperiode = behandlingsresultat.medlemskapsperioder
+            .firstOrNull { idToUUid(it.id) == response.grunnlag.medlemskapsperiodeId }
             ?: throw IllegalStateException("Fant ikke medlemskapsperiode")
-        grunnlagMedlemskapsperiode.trygdeavgiftsperioder.add(this)
+
+        val trygdeavgiftsperiode = Trygdeavgiftsperiode(
+            periodeFra = response.beregnetPeriode.periode.fom,
+            periodeTil = response.beregnetPeriode.periode.tom,
+            trygdesats = response.beregnetPeriode.sats,
+            trygdeavgiftsbeløpMd = response.beregnetPeriode.månedsavgift.tilPenger(),
+            grunnlagSkatteforholdTilNorge = grunnlagSkatteforholdTilNorge,
+            grunnlagInntekstperiode = grunnlagInntekstperiode,
+            grunnlagMedlemskapsperiode = grunnlagMedlemskapsperiode
+        )
+
+        grunnlagMedlemskapsperiode.trygdeavgiftsperioder.add(trygdeavgiftsperiode)
+
+        return trygdeavgiftsperiode
     }
 
     private fun beregnTrygdeAvgift(
@@ -173,14 +187,16 @@ class TrygdeavgiftsberegningService(
                 tomDato = skatteforholdsperioder.first().tom
                 skatteplikttype = skatteforholdsperioder.first().skatteplikttype
             }
-            val trygdeavgiftsperiode = Trygdeavgiftsperiode().apply {
-                periodeFra = it.fom
-                periodeTil = it.tom
-                trygdesats = BigDecimal.ZERO
-                trygdeavgiftsbeløpMd = Penger(BigDecimal.ZERO)
-                grunnlagMedlemskapsperiode = it
+
+            val trygdeavgiftsperiode = Trygdeavgiftsperiode(
+                periodeFra = it.fom,
+                periodeTil = it.tom,
+                trygdesats = BigDecimal.ZERO,
+                trygdeavgiftsbeløpMd = Penger(BigDecimal.ZERO),
+                grunnlagMedlemskapsperiode = it,
                 grunnlagSkatteforholdTilNorge = skatteforholdTilNorge
-            }
+            )
+
             it.trygdeavgiftsperioder.add(trygdeavgiftsperiode)
 
             trygdeavgiftsperiode

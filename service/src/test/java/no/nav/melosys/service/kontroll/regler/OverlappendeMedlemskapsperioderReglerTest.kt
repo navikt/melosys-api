@@ -4,14 +4,19 @@ import io.kotest.assertions.throwables.shouldThrow
 import io.kotest.matchers.booleans.shouldBeFalse
 import io.kotest.matchers.booleans.shouldBeTrue
 import no.nav.melosys.domain.*
+import no.nav.melosys.domain.avgift.Penger
+import no.nav.melosys.domain.avgift.Trygdeavgiftsperiode
 import no.nav.melosys.domain.dokument.medlemskap.MedlemskapDokument
 import no.nav.melosys.domain.dokument.medlemskap.Medlemsperiode
 import no.nav.melosys.domain.dokument.medlemskap.Periode
 import no.nav.melosys.domain.dokument.sed.SedDokument
 import no.nav.melosys.domain.kodeverk.*
 import no.nav.melosys.integrasjon.medl.PeriodestatusMedl
+import no.nav.melosys.integrasjon.trygdeavgift.dto.NOK
 import no.nav.melosys.service.kontroll.feature.ferdigbehandling.data.MedlemskapsperiodeData
+import no.nav.melosys.service.kontroll.feature.ferdigbehandling.data.TrygdeavgiftPeriodeData
 import org.junit.jupiter.api.Test
+import java.math.BigDecimal
 import java.time.LocalDate
 
 internal class OverlappendeMedlemskapsperioderReglerTest {
@@ -316,29 +321,29 @@ internal class OverlappendeMedlemskapsperioderReglerTest {
 
     @Test
     fun harOverlappendePeriode_perioderMedForskuddsvisFakturering_treff() {
-        val kontrollMedlemskapsperioderMedAvgift = listOf(
-            lagMedlemskapsperiode(LocalDate.EPOCH, LocalDate.EPOCH.plusYears(2)),
+        val kontrollTrygdeavgiftperioder = listOf(
+            lagTrygdeavgiftPeriode(LocalDate.EPOCH, LocalDate.EPOCH.plusYears(2)),
         )
-        val tidligereMedlemskapsperioderMedAvgift = listOf(
-            lagMedlemskapsperiode(LocalDate.EPOCH, LocalDate.EPOCH.plusYears(2)),
+        val tidligereTrygdeavgiftsperioder = listOf(
+            lagTrygdeavgiftPeriode(LocalDate.EPOCH, LocalDate.EPOCH.plusYears(2)),
         )
 
         OverlappendeMedlemskapsperioderRegler.harOverlappendePeriodeMedForskuddsvisFaktureringIAndreFagsaker(
-            MedlemskapsperiodeData(emptyList(), emptyList(), kontrollMedlemskapsperioderMedAvgift, tidligereMedlemskapsperioderMedAvgift), "test-123"
+            TrygdeavgiftPeriodeData(kontrollTrygdeavgiftperioder, tidligereTrygdeavgiftsperioder)
         ).shouldBeTrue()
     }
 
     @Test
     fun harOverlappendePeriode_perioderMedForskuddsvisFakturering_ingenTreff() {
-        val kontrollMedlemskapsperioderMedAvgift = listOf(
-            lagMedlemskapsperiode(LocalDate.EPOCH, LocalDate.EPOCH.plusYears(2)),
+        val kontrollTrygdeavgiftperioder = listOf(
+            lagTrygdeavgiftPeriode(LocalDate.EPOCH, LocalDate.EPOCH.plusYears(2)),
         )
-        val tidligereMedlemskapsperioderMedAvgift = listOf(
-            lagMedlemskapsperiode(LocalDate.EPOCH.minusYears(3), LocalDate.EPOCH.minusYears(2)),
+        val tidligereTrygdeavgiftsperioder = listOf(
+            lagTrygdeavgiftPeriode(LocalDate.EPOCH.minusYears(3), LocalDate.EPOCH.minusYears(2)),
         )
 
         OverlappendeMedlemskapsperioderRegler.harOverlappendePeriodeMedForskuddsvisFaktureringIAndreFagsaker(
-            MedlemskapsperiodeData(emptyList(), emptyList(), kontrollMedlemskapsperioderMedAvgift, tidligereMedlemskapsperioderMedAvgift), "test-123"
+            TrygdeavgiftPeriodeData(kontrollTrygdeavgiftperioder, tidligereTrygdeavgiftsperioder)
         ).shouldBeFalse()
     }
 
@@ -430,5 +435,9 @@ internal class OverlappendeMedlemskapsperioderReglerTest {
             this.fom = fom
             this.tom = tom
         }
+    }
+
+    private fun lagTrygdeavgiftPeriode(fraOgMed: LocalDate, tilOgMed: LocalDate): Trygdeavgiftsperiode {
+        return Trygdeavgiftsperiode(periodeFra = fraOgMed, periodeTil = tilOgMed, trygdeavgiftsbeløpMd = Penger(BigDecimal(1000), NOK.kode), trygdesats = BigDecimal(5))
     }
 }

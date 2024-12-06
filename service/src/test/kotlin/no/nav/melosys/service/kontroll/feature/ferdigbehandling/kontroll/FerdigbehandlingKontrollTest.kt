@@ -5,6 +5,7 @@ import io.kotest.matchers.nulls.shouldBeNull
 import io.kotest.matchers.nulls.shouldNotBeNull
 import io.kotest.matchers.shouldBe
 import no.nav.melosys.domain.*
+import no.nav.melosys.domain.avgift.Penger
 import no.nav.melosys.domain.avgift.Trygdeavgiftsperiode
 import no.nav.melosys.domain.brev.utkast.UtkastBrev
 import no.nav.melosys.domain.dokument.medlemskap.MedlemskapDokument
@@ -22,12 +23,14 @@ import no.nav.melosys.domain.mottatteopplysninger.MottatteOpplysningerData
 import no.nav.melosys.domain.mottatteopplysninger.data.Soeknadsland
 import no.nav.melosys.domain.person.Persondata
 import no.nav.melosys.exception.KontrolldataFeilType
+import no.nav.melosys.integrasjon.trygdeavgift.dto.NOK
 import no.nav.melosys.service.kontroll.feature.ferdigbehandling.data.FerdigbehandlingKontrollData
 import no.nav.melosys.service.kontroll.feature.ferdigbehandling.data.MedlemskapsperiodeData
 import no.nav.melosys.service.kontroll.feature.ferdigbehandling.data.SaksopplysningerData
 import no.nav.melosys.service.kontroll.feature.ferdigbehandling.data.TrygdeavgiftPeriodeData
 import no.nav.melosys.service.persondata.PersonopplysningerObjectFactory
 import org.junit.jupiter.api.Test
+import java.math.BigDecimal
 import java.time.LocalDate
 
 class FerdigbehandlingKontrollTest {
@@ -107,18 +110,21 @@ class FerdigbehandlingKontrollTest {
 
     @Test
     fun `overlappende periode med forskuddsvis fakturering skal gi advarsel`() {
-        val medlemskapsperiodeData = MedlemskapsperiodeData(
-            nyeMedlemskapsperioderMedAvgift = listOf(
-                lagMedlemskapsperiode(LocalDate.of(1990, 9, 9), LocalDate.of(1990, 9, 9).plusDays(3))
-            ),
-            tidligereMedlemskapsperioderForBukerMedAvgift = listOf(
-                lagMedlemskapsperiode(LocalDate.of(1990, 9, 5), LocalDate.of(1990, 9, 10))
+        val nyeTrygdeavgiftperioder = listOf(
+            lagTrygdeavgiftPeriode(
+                LocalDate.now().plusDays(2), LocalDate.now().plusDays(10)
+            )
+        )
+
+        val tidligereTrygdeavgiftperioder = listOf(
+            lagTrygdeavgiftPeriode(
+                LocalDate.now(), LocalDate.now().plusDays(10)
             )
         )
 
         val medlemskapDokument = MedlemskapDokument()
 
-        val kontrollData = lagFerdigbehandlingKontrollData(medlemskapsperiodeData = medlemskapsperiodeData, medlemskapDokument = medlemskapDokument,
+        val kontrollData = lagFerdigbehandlingKontrollData(trygdeavgiftperiodeData = TrygdeavgiftPeriodeData(nyeTrygdeavgiftperioder, tidligereTrygdeavgiftperioder), medlemskapDokument = medlemskapDokument,
             fagsak = Fagsak(saksnummer = "test-321", status = Saksstatuser.OPPRETTET, tema = Sakstemaer.MEDLEMSKAP_LOVVALG, type = Sakstyper.FTRL))
 
         val kontrollfeil = FerdigbehandlingKontroll.harOverlappendePeriodeMedForskuddsvisFaktureringIAnnenSak(kontrollData)
@@ -283,7 +289,7 @@ class FerdigbehandlingKontrollTest {
         )
         val kontrollData = lagFerdigbehandlingKontrollData(
             medlemskapDokument = medlemskapsDokument,
-            medlemskapsperiodeData = MedlemskapsperiodeData(overlappendeMedlemskapsperioder, tidligereMedlemskapsperioder, emptyList(), emptyList()),
+            medlemskapsperiodeData = MedlemskapsperiodeData(overlappendeMedlemskapsperioder, tidligereMedlemskapsperioder),
         )
 
 
@@ -294,7 +300,7 @@ class FerdigbehandlingKontrollTest {
     }
 
     @Test
-    fun `medlemskapsperioder med direkte forutgående periode, skal gi kontrollfeil, dersom tidligere periode er en annen fagsak`() {
+    fun `trygdeavgiftsperioder med direkte forutgående periode, skal gi kontrollfeil, dersom tidligere periode er forutgående`() {
         val medlemskapsDokument = MedlemskapDokument().apply {
             medlemsperiode = listOf(
                 Medlemsperiode(periode = Periode(LocalDate.now(), LocalDate.now().plusDays(4))).apply {
@@ -305,23 +311,24 @@ class FerdigbehandlingKontrollTest {
             )
         }
 
-        val nyeMedlemskapsperioderMedAvgift = listOf(
-            lagMedlemskapsperiode(
+        val nyeTrygdeavgiftperioder = listOf(
+            lagTrygdeavgiftPeriode(
                 LocalDate.now().plusDays(2), LocalDate.now().plusDays(10)
             )
         )
 
-        val tidligereMedlemskapsperioderMedAvgift = listOf(
-            lagMedlemskapsperiode(
+        val tidligereTrygdeavgiftperioder = listOf(
+            lagTrygdeavgiftPeriode(
                 LocalDate.now(), LocalDate.now().plusDays(1)
-            ).apply { medlPeriodeID = 12345 }
+            )
         )
 
         val fagsak = Fagsak(saksnummer = "test1", status = Saksstatuser.OPPRETTET, tema = Sakstemaer.MEDLEMSKAP_LOVVALG, type = Sakstyper.FTRL)
 
         val kontrollData = lagFerdigbehandlingKontrollData(
             medlemskapDokument = medlemskapsDokument,
-            medlemskapsperiodeData = MedlemskapsperiodeData(emptyList(), emptyList(), nyeMedlemskapsperioderMedAvgift, tidligereMedlemskapsperioderMedAvgift),
+            medlemskapsperiodeData = MedlemskapsperiodeData(emptyList(), emptyList()),
+            trygdeavgiftperiodeData = TrygdeavgiftPeriodeData(nyeTrygdeavgiftperioder, tidligereTrygdeavgiftperioder),
             fagsak = fagsak
         )
 
@@ -334,35 +341,24 @@ class FerdigbehandlingKontrollTest {
     }
 
     @Test
-    fun `medlemskapsperioder med direkte forutgående periode, skal ikke gi kontrollfeil, dersom tidligere periode er i samme fagsak`() {
-        val medlemskapsDokument = MedlemskapDokument().apply {
-            medlemsperiode = listOf(
-                Medlemsperiode(periode = Periode(LocalDate.now(), LocalDate.now().plusDays(4))).apply {
-                    id = 12345
-                    land = "SWE"
-                    status = "GYLD"
-                }
-            )
-        }
-
-        val nyeMedlemskapsperioderMedAvgift = listOf(
-            lagMedlemskapsperiode(
-                LocalDate.now().plusDays(2), LocalDate.now().plusDays(10)
+    fun `trygdeavgiftsperioder med direkte forutgående periode, skal ikke gi kontrollfeil, dersom tidligere periode ikke er forutgående`() {
+        val nyeTrygdeavgiftperioder = listOf(
+            lagTrygdeavgiftPeriode(
+                LocalDate.now().plusDays(3), LocalDate.now().plusDays(10)
             )
         )
 
-        val tidligereMedlemskapsperioderMedAvgift = listOf(
-            lagMedlemskapsperiode(
+        val tidligereTrygdeavgiftperioder = listOf(
+            lagTrygdeavgiftPeriode(
                 LocalDate.now(), LocalDate.now().plusDays(1)
-            ).apply { medlPeriodeID = 12345 }
+            )
         )
 
         val fagsak = Fagsak(saksnummer = "test", status = Saksstatuser.OPPRETTET, tema = Sakstemaer.MEDLEMSKAP_LOVVALG, type = Sakstyper.FTRL)
 
         val kontrollData = lagFerdigbehandlingKontrollData(
-            medlemskapDokument = medlemskapsDokument,
             medlemskapsperiodeData = MedlemskapsperiodeData(emptyList(), emptyList(), ),
-            trygdeavgiftperiodeData = TrygdeavgiftPeriodeData(nyeMedlemskapsperioderMedAvgift, tidligereMedlemskapsperioderMedAvgift),
+            trygdeavgiftperiodeData = TrygdeavgiftPeriodeData(nyeTrygdeavgiftperioder, tidligereTrygdeavgiftperioder),
             fagsak = fagsak
         )
 
@@ -775,10 +771,7 @@ class FerdigbehandlingKontrollTest {
     }
 
     private fun lagTrygdeavgiftPeriode(fraOgMed: LocalDate, tilOgMed: LocalDate): Trygdeavgiftsperiode {
-        return Trygdeavgiftsperiode().apply {
-            fom = fraOgMed
-            tom = tilOgMed
-        }
+        return Trygdeavgiftsperiode(periodeFra = fraOgMed, periodeTil = tilOgMed, trygdeavgiftsbeløpMd = Penger(BigDecimal(1000), NOK.kode), trygdesats = BigDecimal(5))
     }
 
     private fun lagFerdigbehandlingKontrollData(

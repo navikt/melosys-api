@@ -115,7 +115,7 @@ object FerdigbehandlingKontroll {
     fun periodeOver24Mnd(kontrollData: FerdigbehandlingKontrollData): Kontrollfeil? {
         val lovvalgsperiode = kontrollData.hentLovvalgsperiode()
 
-        if (!lovvalgsperiode.erAvslått() && erBestemmelseDerInnvilgetMedlemskapsperiodeIkkeKanOverskride24mnd(lovvalgsperiode?.bestemmelse) &&
+        if (!lovvalgsperiode.erAvslått() && erBestemmelseDerInnvilgetMedlemskapsperiodeIkkeKanOverskride24mnd(lovvalgsperiode.bestemmelse) &&
             PeriodeRegler.periodeOver24Måneder(lovvalgsperiode.fom, lovvalgsperiode.tom)
         ) {
             return Kontrollfeil(Kontroll_begrunnelser.PERIODEN_OVER_24_MD)
@@ -218,7 +218,7 @@ object FerdigbehandlingKontroll {
         val trygdeavgiftPeriodeData = kontrollData.trygdeavgiftperiodeData ?: return null
 
         trygdeavgiftPeriodeData.nyeTrygdeavgiftsperioder.forEach { nyPeriode ->
-            if (trygdeavgiftPeriodeData.tidligereTrygdeavgiftsperioder.any { it.tom?.plusDays(1) == nyPeriode.fom }) {
+            if (trygdeavgiftPeriodeData.tidligereTrygdeavgiftsperioder.any { it.tom.plusDays(1) == nyPeriode.fom }) {
                 return Kontrollfeil(
                     Kontroll_begrunnelser.DIREKTE_FORUTGÅENDE_PERIODE,
                     KontrolldataFeilType.ADVARSEL

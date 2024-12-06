@@ -8,10 +8,10 @@ data class TrygdeavgiftsgrunnlagDto(
 ) {
 
     constructor(trygdeavgiftsperiode: Set<Trygdeavgiftsperiode>) : this(
-        trygdeavgiftsperiode.map { SkatteforholdTilNorgeDto(it.grunnlagSkatteforholdTilNorge) }.distinct(),
+        trygdeavgiftsperiode.map { SkatteforholdTilNorgeDto(it.grunnlagSkatteforholdTilNorge!!) }.distinct(),
         trygdeavgiftsperiode
             .filter { it.grunnlagInntekstperiode != null }
-            .map { InntektskildeDto(it.grunnlagInntekstperiode) }
+            .map { InntektskildeDto(it.grunnlagInntekstperiode!!) }
             .distinct()
     )
 }

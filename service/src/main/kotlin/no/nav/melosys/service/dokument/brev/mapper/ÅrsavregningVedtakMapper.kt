@@ -57,11 +57,11 @@ class ÅrsavregningVedtakMapper(
                     tom = trygdeavgiftsperiode.tom,
                     avgiftssats = trygdeavgiftsperiode.trygdesats,
                     avgiftPerMd = trygdeavgiftsperiode.trygdeavgiftsbeløpMd.verdi,
-                    avgiftspliktigInntektPerMd = trygdeavgiftsperiode.grunnlagInntekstperiode.kalkulertMndInntekt(),
-                    inntektskilde = trygdeavgiftsperiode.grunnlagInntekstperiode.type.beskrivelse,
-                    trygdedekning = trygdeavgiftsperiode.grunnlagMedlemskapsperiode.trygdedekning.beskrivelse,
-                    arbeidsgiveravgiftBetalt = trygdeavgiftsperiode.grunnlagInntekstperiode.isArbeidsgiversavgiftBetalesTilSkatt,
-                    skatteplikt = trygdeavgiftsperiode.grunnlagSkatteforholdTilNorge.skatteplikttype.equals(Skatteplikttype.SKATTEPLIKTIG)
+                    avgiftspliktigInntektPerMd = trygdeavgiftsperiode.grunnlagInntekstperiode!!.kalkulertMndInntekt(),
+                    inntektskilde = trygdeavgiftsperiode.grunnlagInntekstperiode!!.type.beskrivelse,
+                    trygdedekning = trygdeavgiftsperiode.grunnlagMedlemskapsperiode!!.trygdedekning.beskrivelse,
+                    arbeidsgiveravgiftBetalt = trygdeavgiftsperiode.grunnlagInntekstperiode!!.isArbeidsgiversavgiftBetalesTilSkatt,
+                    skatteplikt = trygdeavgiftsperiode.grunnlagSkatteforholdTilNorge!!.skatteplikttype.equals(Skatteplikttype.SKATTEPLIKTIG)
                 )
             )
         }

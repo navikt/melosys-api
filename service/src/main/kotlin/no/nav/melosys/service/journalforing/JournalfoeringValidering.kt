@@ -102,7 +102,6 @@ class JournalfoeringValidering(
         }
 
         val sistBehandling = fagsak.hentSistRegistrertBehandling()
-        val sistBehandlingsresultat = behandlingsresultatService.hentBehandlingsresultatMedAnmodningsperioder(sistBehandling.id)
         val muligeBehandlingstyper =
             lovligeKombinasjonerSaksbehandlingService.hentMuligeBehandlingstyperForKnyttTilSak(Aktoersroller.BRUKER, fagsak.saksnummer, nyttBehandlingstema)
 

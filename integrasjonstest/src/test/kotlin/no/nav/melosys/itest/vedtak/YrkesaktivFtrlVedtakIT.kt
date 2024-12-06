@@ -618,15 +618,13 @@ class YrkesaktivFtrlVedtakIT(
 
         val trygdeavgiftsperioder = HashSet<Trygdeavgiftsperiode>()
         trygdeavgiftsperioder.add(
-            Trygdeavgiftsperiode().apply {
-                periodeFra = LocalDate.of(2023, 1, 1)
-                periodeTil = LocalDate.of(2023, 2, 1)
-                trygdesats = 6.8.toBigDecimal()
-                trygdeavgiftsbeløpMd = Penger(1000.toBigDecimal(), "nok")
-                grunnlagMedlemskapsperiode = medlemskapsperiode
-                grunnlagSkatteforholdTilNorge = skatteforholdTilNorge
-                grunnlagInntekstperiode = inntektsperiode
-            }
+            Trygdeavgiftsperiode(periodeFra = LocalDate.of(2023, 1, 1),
+                periodeTil = LocalDate.of(2023, 2, 1),
+                trygdesats = 6.8.toBigDecimal(),
+                trygdeavgiftsbeløpMd = Penger(1000.toBigDecimal(), "nok"),
+                grunnlagMedlemskapsperiode = medlemskapsperiode,
+                grunnlagSkatteforholdTilNorge = skatteforholdTilNorge,
+                grunnlagInntekstperiode = inntektsperiode)
         )
 
         medlemskapsperiode.trygdeavgiftsperioder = trygdeavgiftsperioder
