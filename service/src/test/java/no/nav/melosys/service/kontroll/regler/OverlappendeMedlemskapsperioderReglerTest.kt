@@ -14,7 +14,6 @@ import no.nav.melosys.domain.kodeverk.*
 import no.nav.melosys.integrasjon.medl.PeriodestatusMedl
 import no.nav.melosys.integrasjon.trygdeavgift.dto.NOK
 import no.nav.melosys.service.kontroll.feature.ferdigbehandling.data.MedlemskapsperiodeData
-import no.nav.melosys.service.kontroll.feature.ferdigbehandling.data.TrygdeavgiftPeriodeData
 import org.junit.jupiter.api.Test
 import java.math.BigDecimal
 import java.time.LocalDate
@@ -317,34 +316,6 @@ internal class OverlappendeMedlemskapsperioderReglerTest {
             medlemskapDokument,
             MedlemskapsperiodeData(kontrollMedlemskapsperioder, emptyList())
         ).shouldBeTrue()
-    }
-
-    @Test
-    fun harOverlappendePeriode_perioderMedForskuddsvisFakturering_treff() {
-        val kontrollTrygdeavgiftperioder = listOf(
-            lagTrygdeavgiftPeriode(LocalDate.EPOCH, LocalDate.EPOCH.plusYears(2)),
-        )
-        val tidligereTrygdeavgiftsperioder = listOf(
-            lagTrygdeavgiftPeriode(LocalDate.EPOCH, LocalDate.EPOCH.plusYears(2)),
-        )
-
-        OverlappendeMedlemskapsperioderRegler.harOverlappendePeriodeMedForskuddsvisFaktureringIAndreFagsaker(
-            TrygdeavgiftPeriodeData(kontrollTrygdeavgiftperioder, tidligereTrygdeavgiftsperioder)
-        ).shouldBeTrue()
-    }
-
-    @Test
-    fun harOverlappendePeriode_perioderMedForskuddsvisFakturering_ingenTreff() {
-        val kontrollTrygdeavgiftperioder = listOf(
-            lagTrygdeavgiftPeriode(LocalDate.EPOCH, LocalDate.EPOCH.plusYears(2)),
-        )
-        val tidligereTrygdeavgiftsperioder = listOf(
-            lagTrygdeavgiftPeriode(LocalDate.EPOCH.minusYears(3), LocalDate.EPOCH.minusYears(2)),
-        )
-
-        OverlappendeMedlemskapsperioderRegler.harOverlappendePeriodeMedForskuddsvisFaktureringIAndreFagsaker(
-            TrygdeavgiftPeriodeData(kontrollTrygdeavgiftperioder, tidligereTrygdeavgiftsperioder)
-        ).shouldBeFalse()
     }
 
     @Test

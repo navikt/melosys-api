@@ -1,18 +1,15 @@
 package no.nav.melosys.service.kontroll.regler;
 
-import java.util.List;
 import java.util.Objects;
 
 import no.nav.melosys.domain.ErPeriode;
 import no.nav.melosys.domain.Lovvalgsperiode;
 import no.nav.melosys.domain.PeriodeOmLovvalg;
-import no.nav.melosys.domain.avgift.Trygdeavgiftsperiode;
 import no.nav.melosys.domain.dokument.medlemskap.MedlemskapDokument;
 import no.nav.melosys.domain.dokument.medlemskap.Medlemsperiode;
 import no.nav.melosys.domain.dokument.sed.SedDokument;
 import no.nav.melosys.integrasjon.medl.PeriodestatusMedl;
 import no.nav.melosys.service.kontroll.feature.ferdigbehandling.data.MedlemskapsperiodeData;
-import no.nav.melosys.service.kontroll.feature.ferdigbehandling.data.TrygdeavgiftPeriodeData;
 
 public final class OverlappendeMedlemskapsperioderRegler {
 
@@ -54,19 +51,6 @@ public final class OverlappendeMedlemskapsperioderRegler {
                         && (kontrollperiode.getMedlPeriodeID() == null || !Objects.equals(kontrollperiode.getMedlPeriodeID(), medlemsperiode.getId()))
                 )
         );
-    }
-
-    public static boolean harOverlappendePeriodeMedForskuddsvisFaktureringIAndreFagsaker(
-        TrygdeavgiftPeriodeData trygdeavgiftsPeriodeData) {
-
-        return trygdeavgiftsPeriodeData.getNyeTrygdeavgiftsperioder().stream()
-                .anyMatch(nyTrygdeavgiftPeriode -> harOverlappMedTidligerePerioder(nyTrygdeavgiftPeriode, trygdeavgiftsPeriodeData.getTidligereTrygdeavgiftsperioder()));
-    }
-
-    private static boolean harOverlappMedTidligerePerioder(
-        Trygdeavgiftsperiode nyTrygdeavgiftsperiode, List<Trygdeavgiftsperiode> tidligereMedlemskapsperioder) {
-        return tidligereMedlemskapsperioder.stream()
-                .anyMatch(tidligereMedlemskapsperiode -> PeriodeRegler.periodeOverlapper(nyTrygdeavgiftsperiode, tidligereMedlemskapsperiode));
     }
 
     public static boolean harOverlappendeUnntaksperiode(MedlemskapDokument medlemskapDokument,
