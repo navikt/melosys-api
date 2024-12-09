@@ -30,7 +30,7 @@ import java.time.LocalDate
 
 object FerdigbehandlingKontroll {
 
-    fun harOverlappendePeriodeMedForskuddsvisFaktureringIAnnenSak(kontrollData: FerdigbehandlingKontrollData): Kontrollfeil? {
+    fun harOverlappendePeriodeMedForskuddsvisFakturering(kontrollData: FerdigbehandlingKontrollData): Kontrollfeil? {
         val trygdeavgiftperiodeData = kontrollData.trygdeavgiftperiodeData
         if (trygdeavgiftperiodeData != null && trygdeavgiftperiodeData.nyeTrygdeavgiftsperioder.isNotEmpty()) {
 

@@ -103,7 +103,6 @@ class YrkesaktivFtrlVedtakIT(
 
     @BeforeEach
     fun setup() {
-        //fakturaserieReferanse = UlidCreator.getUlid().toString()
         MedlRepo.repo.clear()
         originalSubjectHandler = SubjectHandler.getInstance()
 

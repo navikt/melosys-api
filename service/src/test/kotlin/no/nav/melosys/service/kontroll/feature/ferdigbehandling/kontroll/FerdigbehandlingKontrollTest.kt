@@ -127,7 +127,7 @@ class FerdigbehandlingKontrollTest {
         val kontrollData = lagFerdigbehandlingKontrollData(trygdeavgiftperiodeData = TrygdeavgiftPeriodeData(nyeTrygdeavgiftperioder, tidligereTrygdeavgiftperioder), medlemskapDokument = medlemskapDokument,
             fagsak = Fagsak(saksnummer = "test-321", status = Saksstatuser.OPPRETTET, tema = Sakstemaer.MEDLEMSKAP_LOVVALG, type = Sakstyper.FTRL))
 
-        val kontrollfeil = FerdigbehandlingKontroll.harOverlappendePeriodeMedForskuddsvisFaktureringIAnnenSak(kontrollData)
+        val kontrollfeil = FerdigbehandlingKontroll.harOverlappendePeriodeMedForskuddsvisFakturering(kontrollData)
 
         kontrollfeil.shouldNotBeNull().kode.shouldBe(Kontroll_begrunnelser.OVERLAPPENDE_PERIODE_MED_FORSKUDDSVIS_FAKTURERUNG)
     }
