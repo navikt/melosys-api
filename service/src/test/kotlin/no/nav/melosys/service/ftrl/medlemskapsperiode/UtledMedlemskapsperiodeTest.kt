@@ -500,6 +500,27 @@ internal class UtledMedlemskapsperioderTest {
     }
 
     @Test
+    fun lagMedlemskapsperioderForAndregangsbehandling_nato_tilleggsavtale() {
+        val opprinneligeMedlemskapsperioder = listOf(
+            Medlemskapsperiode().apply {
+                innvilgelsesresultat = InnvilgelsesResultat.INNVILGET
+                bestemmelse = BESTEMMELSE_2_8
+                trygdedekning = TRYGDEDEKNING_2_8
+            })
+
+
+        val response = UtledMedlemskapsperioder.lagMedlemskapsperioderForAndregangsbehandling(
+            UtledMedlemskapsperioderDto(Periode(), TRYGDEDEKNING_2_8, null, Vertslandsavtale_bestemmelser.TILLEGGSAVTALE_NATO),
+            opprinneligeMedlemskapsperioder,
+            Behandlingstyper.NY_VURDERING
+        )
+
+
+        response.shouldHaveSize(1)
+            .single().trygdedekning.shouldBe(Trygdedekninger.TILLEGGSAVTALE_NATO_HELSEDEL)
+    }
+
+    @Test
     fun lagMedlemskapsperioderForAndregangsbehandling_fraFrivilligTilPliktig_lagerForslagPåPerioderPåNytt() {
         val søknadsperiode = Periode(MOTTAKSDATO.minusMonths(12), MOTTAKSDATO.minusMonths(6))
         val nySøknadsperiode = Periode(MOTTAKSDATO.minusMonths(8), MOTTAKSDATO.minusMonths(2))

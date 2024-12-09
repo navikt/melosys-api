@@ -20,7 +20,7 @@ object UtledMedlemskapsperioder {
         opprinneligeMedlemskapsperioder: Collection<Medlemskapsperiode>,
         type: Behandlingstyper
     ): Collection<Medlemskapsperiode> {
-        if (dto.bestemmelse in PliktigeMedlemskapsbestemmelser.bestemmelser) {
+        if (dto.bestemmelse in PliktigeMedlemskapsbestemmelser.bestemmelserMedSpesielleGrupper) {
             return lagMedlemskapsperioderForPliktige(dto)
         }
         return opprinneligeMedlemskapsperioder
