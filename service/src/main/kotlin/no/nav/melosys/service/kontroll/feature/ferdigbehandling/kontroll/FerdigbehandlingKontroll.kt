@@ -230,13 +230,16 @@ object FerdigbehandlingKontroll {
     private fun harOverlappendePeriodeMedForskuddsvisFakturering(
         trygdeavgiftsPeriodeData: TrygdeavgiftPeriodeData
     ): Boolean {
-        return trygdeavgiftsPeriodeData.nyeTrygdeavgiftsperioder.stream()
-            .anyMatch { nyTrygdeavgiftPeriode: Trygdeavgiftsperiode ->
-                harOverlappMedTidligerePerioder(
+        for (nyTrygdeavgiftPeriode in trygdeavgiftsPeriodeData.nyeTrygdeavgiftsperioder) {
+            if (harOverlappMedTidligerePerioder(
                     nyTrygdeavgiftPeriode,
                     trygdeavgiftsPeriodeData.tidligereTrygdeavgiftsperioder
                 )
+            ) {
+                return true
             }
+        }
+        return false
     }
 
     private fun harOverlappMedTidligerePerioder(
