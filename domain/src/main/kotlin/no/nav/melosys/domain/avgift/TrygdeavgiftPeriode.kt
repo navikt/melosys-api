@@ -8,7 +8,7 @@ import java.time.LocalDate
 
 @Entity
 @Table(name = "trygdeavgiftsperiode")
-class Trygdeavgiftsperiode(
+data class Trygdeavgiftsperiode(
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     var id: Long? = null,
@@ -50,5 +50,25 @@ class Trygdeavgiftsperiode(
     override fun toString(): String {
         return "Trygdeavgiftsperiode(id=$id, periodeFra=$periodeFra, periodeTil=$periodeTil, " +
             "trygdeavgiftsbeløpMd=$trygdeavgiftsbeløpMd, trygdesats=$trygdesats)"
+    }
+
+    override fun equals(other: Any?): Boolean {
+        if (this === other) return true
+        if (other == null || javaClass != other.javaClass) return false
+
+        other as Trygdeavgiftsperiode
+
+        if (id != null && other.id != null) {
+            return id == other.id
+        }
+
+        return periodeFra == other.periodeFra &&
+            periodeTil == other.periodeTil &&
+            trygdeavgiftsbeløpMd == other.trygdeavgiftsbeløpMd &&
+            trygdesats == other.trygdesats
+    }
+
+    override fun hashCode(): Int {
+        return id?.hashCode() ?: listOf(periodeFra, periodeTil, trygdeavgiftsbeløpMd, trygdesats).hashCode()
     }
 }
