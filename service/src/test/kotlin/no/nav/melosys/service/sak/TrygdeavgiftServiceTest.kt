@@ -57,11 +57,12 @@ class TrygdeavgiftServiceTest {
 
     @Test
     fun `harFagsakBehandlingerMedTrygdeavgift, med avgiftsperioder men uten mndBeløp, returnerer false`() {
-        val trygdeavgiftsperiode = Trygdeavgiftsperiode(trygdeavgiftsbeløpMd = Penger(0.0),
+        val trygdeavgiftsperiode = Trygdeavgiftsperiode(
+            trygdeavgiftsbeløpMd = Penger(0.0),
             trygdesats = BigDecimal(3.5),
             periodeFra = LocalDate.now(),
             periodeTil = LocalDate.now()
-            )
+        )
         behandlingsresultat.apply {
             medlemskapsperioder.add(
                 Medlemskapsperiode().apply {
@@ -76,7 +77,8 @@ class TrygdeavgiftServiceTest {
 
     @Test
     fun harFagsakBehandlingerMedTrygdeavgift_harTrygedavgiftsperiodeMenDenHarIkkeAvgift_returnererFalse() {
-        val trygdeavgiftsperiode = Trygdeavgiftsperiode(trygdeavgiftsbeløpMd = Penger(0.0),
+        val trygdeavgiftsperiode = Trygdeavgiftsperiode(
+            trygdeavgiftsbeløpMd = Penger(0.0),
             trygdesats = BigDecimal.ZERO,
             periodeFra = LocalDate.now(),
             periodeTil = LocalDate.now()
@@ -98,7 +100,8 @@ class TrygdeavgiftServiceTest {
         fagsak.apply {
             status = Saksstatuser.HENLAGT
         }
-        val trygdeavgiftsperiode = Trygdeavgiftsperiode(trygdeavgiftsbeløpMd = Penger(30000.0),
+        val trygdeavgiftsperiode = Trygdeavgiftsperiode(
+            trygdeavgiftsbeløpMd = Penger(30000.0),
             trygdesats = BigDecimal(3.56),
             periodeFra = LocalDate.now(),
             periodeTil = LocalDate.now()
@@ -118,10 +121,12 @@ class TrygdeavgiftServiceTest {
 
     @Test
     fun `harFagsakBehandlingerMedTrygdeavgift med sjekk av fakturaserie, trygedavgiftsperioder men ikke bestilt faktura, returnerer false`() {
-        val trygdeavgiftsperiode = Trygdeavgiftsperiode(trygdeavgiftsbeløpMd = Penger(2345.56),
+        val trygdeavgiftsperiode = Trygdeavgiftsperiode(
+            trygdeavgiftsbeløpMd = Penger(2345.56),
             trygdesats = BigDecimal(3.56),
             periodeFra = LocalDate.now(),
-            periodeTil = LocalDate.now())
+            periodeTil = LocalDate.now()
+        )
         behandlingsresultat.apply {
             medlemskapsperioder.add(
                 Medlemskapsperiode().apply {
@@ -136,10 +141,14 @@ class TrygdeavgiftServiceTest {
 
     @Test
     fun harFagsakBehandlingerMedTrygdeavgift_harTrygedavgiftsperioderBådeMedOgUtenAvgift_returnererTrue() {
-        val periodeUtenAvgift = lagTrygdeavgift().copy(trygdeavgiftsbeløpMd = Penger(0.0),
-            trygdesats = BigDecimal.ZERO)
-        val periodeMedAvgift = lagTrygdeavgift().copy(trygdeavgiftsbeløpMd = Penger(2345.56),
-            trygdesats = BigDecimal(3.56))
+        val periodeUtenAvgift = lagTrygdeavgift().copy(
+            trygdeavgiftsbeløpMd = Penger(0.0),
+            trygdesats = BigDecimal.ZERO
+        )
+        val periodeMedAvgift = lagTrygdeavgift().copy(
+            trygdeavgiftsbeløpMd = Penger(2345.56),
+            trygdesats = BigDecimal(3.56)
+        )
         behandlingsresultat.apply {
             medlemskapsperioder.add(
                 Medlemskapsperiode().apply {
@@ -169,7 +178,8 @@ class TrygdeavgiftServiceTest {
 
     @Test
     fun `harFakturerbarTrygdeavgift, ingen trygdeavgift, false`() {
-        val ingenAvgift = Trygdeavgiftsperiode( trygdeavgiftsbeløpMd = Penger(0.0),
+        val ingenAvgift = Trygdeavgiftsperiode(
+            trygdeavgiftsbeløpMd = Penger(0.0),
             trygdesats = BigDecimal.ZERO,
             periodeFra = LocalDate.now(),
             periodeTil = LocalDate.now()
@@ -186,12 +196,14 @@ class TrygdeavgiftServiceTest {
         trygdeavgiftService.harFakturerbarTrygdeavgift(behandlingsresultat).shouldBeFalse()
     }
 
-    private fun lagTrygdeavgift(): Trygdeavgiftsperiode = Trygdeavgiftsperiode(periodeFra = LocalDate.of(2023, 1, 1),
+    private fun lagTrygdeavgift(): Trygdeavgiftsperiode = Trygdeavgiftsperiode(
+        periodeFra = LocalDate.of(2023, 1, 1),
         periodeTil = LocalDate.of(2023, 5, 1),
         trygdeavgiftsbeløpMd = Penger(5000.0),
         trygdesats = BigDecimal(3.5),
         grunnlagInntekstperiode = lagInntektsperiode(),
-        grunnlagSkatteforholdTilNorge = lagSkatteforholdTilNorge())
+        grunnlagSkatteforholdTilNorge = lagSkatteforholdTilNorge()
+    )
 
     private fun lagInntektsperiode(): Inntektsperiode = Inntektsperiode().apply {
         fomDato = LocalDate.of(2023, 1, 1)
