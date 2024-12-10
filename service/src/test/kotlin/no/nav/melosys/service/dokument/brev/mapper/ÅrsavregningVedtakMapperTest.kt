@@ -167,7 +167,7 @@ class ÅrsavregningVedtakMapperTest {
     }
 
     private fun lagEndeligTrygdeavgiftsperiode(): Trygdeavgiftsperiode {
-        return Trygdeavgiftsperiode(// Initialize primary properties using setters or directly if accessible
+        return Trygdeavgiftsperiode(
             periodeFra = LocalDate.of(2023, 1, 1),
                 periodeTil = LocalDate.of(2023, 12, 31),
         trygdeavgiftsbeløpMd = Penger(BigDecimal(500)),
@@ -200,12 +200,10 @@ class ÅrsavregningVedtakMapperTest {
             isArbeidsgiversavgiftBetalesTilSkatt = false
         },
 
-        // Initialize nested Medlemskapsperiode using apply
         grunnlagMedlemskapsperiode = Medlemskapsperiode().apply {
             trygdedekning = Trygdedekninger.FULL_DEKNING
         },
 
-        // Initialize nested SkatteforholdTilNorge using apply
         grunnlagSkatteforholdTilNorge = SkatteforholdTilNorge().apply {
             skatteplikttype = Skatteplikttype.IKKE_SKATTEPLIKTIG
         })

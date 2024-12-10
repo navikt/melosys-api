@@ -34,7 +34,7 @@ object FerdigbehandlingKontroll {
 
     fun harOverlappendePeriodeMedForskuddsvisFakturering(kontrollData: FerdigbehandlingKontrollData): Kontrollfeil? {
         val trygdeavgiftperiodeData = kontrollData.trygdeavgiftperiodeData ?: return null
-        if(trygdeavgiftperiodeData.nyeTrygdeavgiftsperioder.isEmpty()) return null
+        if (trygdeavgiftperiodeData.nyeTrygdeavgiftsperioder.isEmpty()) return null
 
         return if (harOverlappendePeriodeMedForskuddsvisFakturering(trygdeavgiftperiodeData)) {
             Kontrollfeil(
@@ -45,13 +45,12 @@ object FerdigbehandlingKontroll {
     }
 
 
-
     fun overlappendePeriode(kontrollData: FerdigbehandlingKontrollData): Kontrollfeil? {
         val medlemskapDokument = kontrollData.medlemskapDokument
         val medlemskapsperiodeData = kontrollData.medlemskapsperiodeData
 
         if (medlemskapsperiodeData != null && medlemskapsperiodeData.harNyeMedlemskapsperioder()) {
-             if (OverlappendeMedlemskapsperioderRegler.harOverlappendePeriode(medlemskapDokument, medlemskapsperiodeData))
+            if (OverlappendeMedlemskapsperioderRegler.harOverlappendePeriode(medlemskapDokument, medlemskapsperiodeData))
                 return Kontrollfeil(Kontroll_begrunnelser.OVERLAPPENDE_MEDL_PERIODER, KontrolldataFeilType.FEIL)
 
             return null
@@ -238,15 +237,13 @@ object FerdigbehandlingKontroll {
 
     private fun harOverlappMedTidligerePerioder(
         nyTrygdeavgiftsperiode: Trygdeavgiftsperiode, tidligereTrygdeavgiftPerioder: List<Trygdeavgiftsperiode>
-    ): Boolean {
-        return tidligereTrygdeavgiftPerioder.stream()
-            .anyMatch { tidligereMedlemskapsperiode: Trygdeavgiftsperiode? ->
-                PeriodeRegler.periodeOverlapper(
-                    nyTrygdeavgiftsperiode,
-                    tidligereMedlemskapsperiode
-                )
-            }
+    ): Boolean = tidligereTrygdeavgiftPerioder.any { tidligereMedlemskapsperiode: Trygdeavgiftsperiode? ->
+        PeriodeRegler.periodeOverlapper(
+            nyTrygdeavgiftsperiode,
+            tidligereMedlemskapsperiode
+        )
     }
+
 
     fun åpentUtkastFinnes(kontrollData: FerdigbehandlingKontrollData): Kontrollfeil? =
         if (kontrollData.brevUtkast.isEmpty()) null else Kontrollfeil(Kontroll_begrunnelser.ÅPENT_UTKAST)

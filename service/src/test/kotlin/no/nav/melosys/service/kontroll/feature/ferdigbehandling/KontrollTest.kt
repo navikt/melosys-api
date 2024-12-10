@@ -294,18 +294,20 @@ internal class KontrollTest {
         behandling.fagsak.type = Sakstyper.FTRL
 
         //Mock nye trygdeavgiftsperioder
-        every { behandlingsresultatService.hentBehandlingsresultat(any()).trygdeavgiftsperioder } returns setOf(Trygdeavgiftsperiode(
-            periodeFra = LocalDate.of(2012,12,11),
-            periodeTil = LocalDate.of(2012,12,24),
-            trygdeavgiftsbeløpMd = Penger(BigDecimal.TEN, NOK.kode),
-            trygdesats = BigDecimal.TEN
-        ))
+        every { behandlingsresultatService.hentBehandlingsresultat(any()).trygdeavgiftsperioder } returns setOf(
+            Trygdeavgiftsperiode(
+                periodeFra = LocalDate.of(2012, 12, 11),
+                periodeTil = LocalDate.of(2012, 12, 24),
+                trygdeavgiftsbeløpMd = Penger(BigDecimal.TEN, NOK.kode),
+                trygdesats = BigDecimal.TEN
+            )
+        )
 
         val mockBehandlingsresultatMedTidligereTrygdeavgiftsperioder: Behandlingsresultat = mockk()
         every { mockBehandlingsresultatMedTidligereTrygdeavgiftsperioder.trygdeavgiftsperioder } returns setOf(
             Trygdeavgiftsperiode(
-                periodeFra = LocalDate.of(2012,12,1),
-                periodeTil = LocalDate.of(2012,12,10),
+                periodeFra = LocalDate.of(2012, 12, 1),
+                periodeTil = LocalDate.of(2012, 12, 10),
                 trygdeavgiftsbeløpMd = Penger(BigDecimal.TEN, NOK.kode),
                 trygdesats = BigDecimal.TEN
             )
@@ -320,11 +322,9 @@ internal class KontrollTest {
 
         val resultat = mockedKontroll.kontroller(behandlingID, Behandlingsresultattyper.MEDLEM_I_FOLKETRYGDEN, emptySet())
 
-        resultat.shouldNotBeEmpty()
-            .shouldHaveSize(1)
-            .run {
-                first().kode.shouldBe(Kontroll_begrunnelser.DIREKTE_FORUTGÅENDE_PERIODE)
-            }
+        resultat.shouldHaveSize(1)
+            .single()
+            .kode shouldBe Kontroll_begrunnelser.DIREKTE_FORUTGÅENDE_PERIODE
     }
 
     @Test
@@ -332,18 +332,20 @@ internal class KontrollTest {
         behandling.fagsak.type = Sakstyper.FTRL
 
         //Mock tidligere trygdeavgiftsperioder
-        every { behandlingsresultatService.hentBehandlingsresultat(any()).trygdeavgiftsperioder } returns setOf(Trygdeavgiftsperiode(
-            periodeFra = LocalDate.of(2012,12,1),
-            periodeTil = LocalDate.of(2012,12,20),
-            trygdeavgiftsbeløpMd = Penger(BigDecimal.TEN, NOK.kode),
-            trygdesats = BigDecimal.TEN
-        ))
+        every { behandlingsresultatService.hentBehandlingsresultat(any()).trygdeavgiftsperioder } returns setOf(
+            Trygdeavgiftsperiode(
+                periodeFra = LocalDate.of(2012, 12, 1),
+                periodeTil = LocalDate.of(2012, 12, 20),
+                trygdeavgiftsbeløpMd = Penger(BigDecimal.TEN, NOK.kode),
+                trygdesats = BigDecimal.TEN
+            )
+        )
 
         val mockBehandlingsresultatMedNyeTrygdeavgiftsperioder: Behandlingsresultat = mockk()
         every { mockBehandlingsresultatMedNyeTrygdeavgiftsperioder.trygdeavgiftsperioder } returns setOf(
             Trygdeavgiftsperiode(
-                periodeFra = LocalDate.of(2012,12,11),
-                periodeTil = LocalDate.of(2012,12,24),
+                periodeFra = LocalDate.of(2012, 12, 11),
+                periodeTil = LocalDate.of(2012, 12, 24),
                 trygdeavgiftsbeløpMd = Penger(BigDecimal.TEN, NOK.kode),
                 trygdesats = BigDecimal.TEN
             )
@@ -393,8 +395,7 @@ internal class KontrollTest {
         val resultat = mockedKontroll.kontroller(behandlingID, Behandlingsresultattyper.IKKE_FASTSATT, emptySet())
 
 
-        resultat.shouldNotBeEmpty()
-            .shouldHaveSize(1)
+        resultat.shouldHaveSize(1)
             .single().kode.shouldBe(Kontroll_begrunnelser.MANGLENDE_REGISTRERTE_ADRESSE_BRUKER)
     }
 
