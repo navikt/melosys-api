@@ -33,20 +33,17 @@ import java.time.LocalDate
 object FerdigbehandlingKontroll {
 
     fun harOverlappendePeriodeMedForskuddsvisFakturering(kontrollData: FerdigbehandlingKontrollData): Kontrollfeil? {
-        val trygdeavgiftperiodeData = kontrollData.trygdeavgiftperiodeData
-        if (trygdeavgiftperiodeData != null && trygdeavgiftperiodeData.nyeTrygdeavgiftsperioder.isNotEmpty()) {
+        val trygdeavgiftperiodeData = kontrollData.trygdeavgiftperiodeData ?: return null
+        if(trygdeavgiftperiodeData.nyeTrygdeavgiftsperioder.isEmpty()) return null
 
-            if (harOverlappendePeriodeMedForskuddsvisFakturering(trygdeavgiftperiodeData)
-            ) {
-                return Kontrollfeil(
-                    Kontroll_begrunnelser.OVERLAPPENDE_PERIODE_MED_FORSKUDDSVIS_FAKTURERUNG,
-                    KontrolldataFeilType.ADVARSEL
-                )
-            }
-        }
-
-        return null
+        return if (harOverlappendePeriodeMedForskuddsvisFakturering(trygdeavgiftperiodeData)) {
+            Kontrollfeil(
+                Kontroll_begrunnelser.OVERLAPPENDE_PERIODE_MED_FORSKUDDSVIS_FAKTURERUNG,
+                KontrolldataFeilType.ADVARSEL
+            )
+        } else null
     }
+
 
 
     fun overlappendePeriode(kontrollData: FerdigbehandlingKontrollData): Kontrollfeil? {

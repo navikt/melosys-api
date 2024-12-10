@@ -126,9 +126,7 @@ class TrygdeavgiftsberegningService(
             grunnlagSkatteforholdTilNorge = grunnlagSkatteforholdTilNorge,
             grunnlagInntekstperiode = grunnlagInntekstperiode,
             grunnlagMedlemskapsperiode = grunnlagMedlemskapsperiode
-        )
-
-        grunnlagMedlemskapsperiode.trygdeavgiftsperioder.add(trygdeavgiftsperiode)
+        ).also { grunnlagMedlemskapsperiode.trygdeavgiftsperioder.add(it) }
 
         return trygdeavgiftsperiode
     }
