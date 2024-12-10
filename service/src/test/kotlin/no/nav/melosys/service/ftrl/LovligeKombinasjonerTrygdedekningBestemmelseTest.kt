@@ -8,6 +8,7 @@ import io.kotest.matchers.collections.shouldHaveSize
 import io.kotest.matchers.nulls.shouldNotBeNull
 import no.nav.melosys.domain.kodeverk.Folketrygdloven_kap2_bestemmelser
 import no.nav.melosys.domain.kodeverk.Trygdedekninger
+import no.nav.melosys.domain.kodeverk.Vertslandsavtale_bestemmelser
 import no.nav.melosys.service.ftrl.bestemmelse.LovligeKombinasjonerTrygdedekningBestemmelse
 import no.nav.melosys.service.ftrl.medlemskapsperiode.PliktigeMedlemskapsbestemmelser
 import org.junit.jupiter.api.Test
@@ -18,8 +19,8 @@ class LovligeKombinasjonerTrygdedekningBestemmelseTest {
     fun hentLovligeBestemmelser_fullTrygdedekning_returnererAllePliktigeBestemmelseneSamtFlere() {
         LovligeKombinasjonerTrygdedekningBestemmelse.hentLovligeBestemmelser(Trygdedekninger.FULL_DEKNING_FTRL)
             .shouldNotBeNull()
-            .shouldHaveSize(15)
-            .shouldContainAll(PliktigeMedlemskapsbestemmelser.bestemmelser)
+            .shouldHaveSize(19)
+            .shouldContainAll(PliktigeMedlemskapsbestemmelser.bestemmelserMedSpesielleGrupper)
     }
 
 
@@ -80,5 +81,11 @@ class LovligeKombinasjonerTrygdedekningBestemmelseTest {
             Folketrygdloven_kap2_bestemmelser.FTRL_KAP2_2_1,
             Trygdedekninger.FTRL_2_7A_ANDRE_LEDD_B_HELSE_SYKE_FORELDREPENGER
         ).shouldBeTrue()
+    }
+
+    @Test
+    fun `hentLovligeTrygdedekninger for TILLEGGSAVTALE_NATO skal kun returnere TILLEGGSAVTALE_NATO_HELSEDEL`() {
+        LovligeKombinasjonerTrygdedekningBestemmelse.hentLovligeTrygdedekninger(Vertslandsavtale_bestemmelser.TILLEGGSAVTALE_NATO)
+            .shouldContainExactly(Trygdedekninger.TILLEGGSAVTALE_NATO_HELSEDEL)
     }
 }

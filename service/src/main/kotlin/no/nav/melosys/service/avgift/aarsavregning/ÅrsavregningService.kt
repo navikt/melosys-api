@@ -239,7 +239,7 @@ data class MedlemskapsperiodeForAvgift(
     val fom: LocalDate,
     val tom: LocalDate,
     val dekning: Trygdedekninger,
-    val bestemmelse: Folketrygdloven_kap2_bestemmelser,
+    val bestemmelse: Bestemmelse,
     val medlemskapstyper: Medlemskapstyper
 ) {
     constructor(medlemskapsperiode: Medlemskapsperiode) : this(

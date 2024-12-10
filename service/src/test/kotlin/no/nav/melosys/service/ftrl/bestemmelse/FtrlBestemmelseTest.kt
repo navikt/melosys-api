@@ -1,5 +1,6 @@
 package no.nav.melosys.service.ftrl.bestemmelse
 
+import io.getunleash.FakeUnleash
 import io.kotest.matchers.collections.shouldBeEmpty
 import io.kotest.matchers.collections.shouldContainExactly
 import io.kotest.matchers.collections.shouldHaveSize
@@ -15,23 +16,26 @@ import org.junit.jupiter.api.Test
 class FtrlBestemmelseTest {
     private lateinit var ftrlBestemmelser: FtrlBestemmelser
 
+    private val fakeUnleash = FakeUnleash()
+
     @BeforeEach
     fun setUp() {
-        ftrlBestemmelser = FtrlBestemmelser()
+        fakeUnleash.enableAll()
+        ftrlBestemmelser = FtrlBestemmelser(fakeUnleash)
     }
 
     @Test
     fun hentBestemmelser_yrkesaktiv_returnererYrkesaktivListe() {
         ftrlBestemmelser.hentBestemmelser(Behandlingstema.YRKESAKTIV, null)
             .shouldNotBeNull()
-            .shouldBeEqual(YrkesaktivBestemmelser.bestemmelser)
+            .shouldBeEqual(YrkesaktivBestemmelser.bestemmelserMedSpesielleGrupper)
     }
 
     @Test
     fun hentBestemmelser_yrkesaktivFullDekning_returnererFiltrertListe() {
         ftrlBestemmelser.hentBestemmelser(Behandlingstema.YRKESAKTIV, Trygdedekninger.FULL_DEKNING_FTRL)
             .shouldNotBeNull()
-            .shouldHaveSize(12)
+            .shouldHaveSize(16)
     }
 
     @Test
@@ -79,9 +83,10 @@ class FtrlBestemmelseTest {
     fun hentBestemmelser_yrkesaktiv2_8Dekning_returnererFiltrertListe() {
         ftrlBestemmelser.hentBestemmelser(Behandlingstema.YRKESAKTIV, Trygdedekninger.FTRL_2_9_FØRSTE_LEDD_A_HELSE)
             .shouldNotBeNull()
-            .shouldHaveSize(2)
+            .shouldHaveSize(3)
             .shouldContainExactly(
                 Folketrygdloven_kap2_bestemmelser.FTRL_KAP2_2_8_FØRSTE_LEDD_A,
+                Folketrygdloven_kap2_bestemmelser.FTRL_KAP2_2_8_FØRSTE_LEDD_B,
                 Folketrygdloven_kap2_bestemmelser.FTRL_KAP2_2_8_ANDRE_LEDD
             )
     }

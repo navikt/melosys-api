@@ -1,7 +1,7 @@
 package no.nav.melosys.service.ftrl
 
 import io.getunleash.Unleash
-import no.nav.melosys.domain.kodeverk.Folketrygdloven_kap2_bestemmelser
+import no.nav.melosys.domain.kodeverk.Bestemmelse
 import no.nav.melosys.domain.kodeverk.Trygdedekninger
 import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingstema
 import no.nav.melosys.exception.FunksjonellException
@@ -43,7 +43,7 @@ class GyldigeTrygdedekningerService(private val unleash: Unleash) {
         Trygdedekninger.TILLEGGSAVTALE_NATO_HELSEDEL,
     )
 
-    fun hentTrygdedekninger(behandlingstema: Behandlingstema, bestemmelse: Folketrygdloven_kap2_bestemmelser?): List<Trygdedekninger> {
+    fun hentTrygdedekninger(behandlingstema: Behandlingstema, bestemmelse: Bestemmelse?): List<Trygdedekninger> {
         valider(behandlingstema)
 
         val trygdedekningerFraBehandlingstema = trygdedekningerFraBehandlingstema(behandlingstema)

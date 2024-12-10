@@ -24,7 +24,7 @@ import no.nav.melosys.domain.kodeverk.lovvalgsbestemmelser.Tilleggsbestemmelser_
 import no.nav.melosys.exception.FunksjonellException
 import no.nav.melosys.exception.IkkeFunnetException
 import no.nav.melosys.integrasjon.medl.GrunnlagMedl
-import no.nav.melosys.integrasjon.medl.MedlPeriodeKonverter.Companion.tilLovvalgBestemmelse
+import no.nav.melosys.integrasjon.medl.MedlPeriodeKonverter.tilLovvalgBestemmelse
 import no.nav.melosys.integrasjon.medl.PeriodestatusMedl
 import no.nav.melosys.repository.BehandlingRepository
 import no.nav.melosys.repository.BehandlingsresultatRepository

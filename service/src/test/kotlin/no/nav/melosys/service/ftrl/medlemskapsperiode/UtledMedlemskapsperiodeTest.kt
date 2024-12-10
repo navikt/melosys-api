@@ -7,10 +7,7 @@ import io.kotest.matchers.nulls.shouldNotBeNull
 import io.kotest.matchers.shouldBe
 import io.kotest.matchers.string.shouldContain
 import no.nav.melosys.domain.Medlemskapsperiode
-import no.nav.melosys.domain.kodeverk.Folketrygdloven_kap2_bestemmelser
-import no.nav.melosys.domain.kodeverk.InnvilgelsesResultat
-import no.nav.melosys.domain.kodeverk.Medlemskapstyper
-import no.nav.melosys.domain.kodeverk.Trygdedekninger
+import no.nav.melosys.domain.kodeverk.*
 import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingstyper
 import no.nav.melosys.domain.mottatteopplysninger.data.Periode
 import no.nav.melosys.exception.FunksjonellException
@@ -27,11 +24,17 @@ internal class UtledMedlemskapsperioderTest {
     private val TRYGDEDEKNING_2_7 = Trygdedekninger.FULL_DEKNING_FTRL
     private val TRYGDEDEKNING_2_8 = Trygdedekninger.FTRL_2_9_FØRSTE_LEDD_A_HELSE
     private val MOTTAKSDATO = LocalDate.now()
+
     @Test
     fun lagMedlemskapsperioder_ukjentBestemmelse_kasterFeil() {
         shouldThrow<FunksjonellException> {
             UtledMedlemskapsperioder.lagMedlemskapsperioder(
-                UtledMedlemskapsperioderDto(null, null, null, Folketrygdloven_kap2_bestemmelser.FTRL_KAP2_2_15_ANDRE_LEDD)
+                UtledMedlemskapsperioderDto(
+                    Medlemskapsperiode(),
+                    TRYGDEDEKNING_2_8,
+                    mottaksdatoSøknad = null,
+                    Folketrygdloven_kap2_bestemmelser.FTRL_KAP2_2_15_ANDRE_LEDD
+                )
             )
         }.message.shouldContain("Støtter ikke bestemmelse")
     }
@@ -497,6 +500,27 @@ internal class UtledMedlemskapsperioderTest {
     }
 
     @Test
+    fun lagMedlemskapsperioderForAndregangsbehandling_nato_tilleggsavtale() {
+        val opprinneligeMedlemskapsperioder = listOf(
+            Medlemskapsperiode().apply {
+                innvilgelsesresultat = InnvilgelsesResultat.INNVILGET
+                bestemmelse = BESTEMMELSE_2_8
+                trygdedekning = TRYGDEDEKNING_2_8
+            })
+
+
+        val response = UtledMedlemskapsperioder.lagMedlemskapsperioderForAndregangsbehandling(
+            UtledMedlemskapsperioderDto(Periode(), TRYGDEDEKNING_2_8, null, Vertslandsavtale_bestemmelser.TILLEGGSAVTALE_NATO),
+            opprinneligeMedlemskapsperioder,
+            Behandlingstyper.NY_VURDERING
+        )
+
+
+        response.shouldHaveSize(1)
+            .single().trygdedekning.shouldBe(Trygdedekninger.TILLEGGSAVTALE_NATO_HELSEDEL)
+    }
+
+    @Test
     fun lagMedlemskapsperioderForAndregangsbehandling_fraFrivilligTilPliktig_lagerForslagPåPerioderPåNytt() {
         val søknadsperiode = Periode(MOTTAKSDATO.minusMonths(12), MOTTAKSDATO.minusMonths(6))
         val nySøknadsperiode = Periode(MOTTAKSDATO.minusMonths(8), MOTTAKSDATO.minusMonths(2))
@@ -707,6 +731,24 @@ internal class UtledMedlemskapsperioderTest {
             .shouldHaveSize(1)
             .single().run {
                 innvilgelsesresultat.shouldBe(InnvilgelsesResultat.AVSLAATT)
+            }
+    }
+
+    @Test
+    fun `lagMedlemskapsperioder tilleggsavtale med Nato skal gi dekning Nato Helsedel med innvilget`() {
+        val request = UtledMedlemskapsperioderDto(
+            Periode(MOTTAKSDATO.minusYears(1), MOTTAKSDATO.minusMonths(6)),
+            Trygdedekninger.TILLEGGSAVTALE_NATO_HELSEDEL,
+            MOTTAKSDATO,
+            Vertslandsavtale_bestemmelser.TILLEGGSAVTALE_NATO
+        )
+
+        UtledMedlemskapsperioder.lagMedlemskapsperioder(request)
+            .shouldHaveSize(1)
+            .single().run {
+                innvilgelsesresultat.shouldBe(InnvilgelsesResultat.INNVILGET)
+                trygdedekning.shouldBe(Trygdedekninger.TILLEGGSAVTALE_NATO_HELSEDEL)
+
             }
     }
 }

@@ -1,7 +1,7 @@
 package no.nav.melosys.service.ftrl.bestemmelse.vilkaar
 
 import no.nav.melosys.domain.kodeverk.Avklartefaktatyper
-import no.nav.melosys.domain.kodeverk.Folketrygdloven_kap2_bestemmelser
+import no.nav.melosys.domain.kodeverk.Bestemmelse
 import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingstema
 import org.springframework.stereotype.Component
 
@@ -11,7 +11,7 @@ class VilkårForBestemmelse(
     val vilkårForBestemmelseIkkeYrkesaktiv: VilkårForBestemmelseIkkeYrkesaktiv
 ) {
     fun hentVilkår(
-        bestemmelse: Folketrygdloven_kap2_bestemmelser,
+        bestemmelse: Bestemmelse,
         behandlingstema: Behandlingstema,
         avklarteFakta: Map<Avklartefaktatyper, String>,
         behandlingID: Long?

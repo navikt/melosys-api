@@ -1,10 +1,7 @@
 package no.nav.melosys.service.ftrl.medlemskapsperiode
 
 import no.nav.melosys.domain.Medlemskapsperiode
-import no.nav.melosys.domain.kodeverk.Folketrygdloven_kap2_bestemmelser
-import no.nav.melosys.domain.kodeverk.InnvilgelsesResultat
-import no.nav.melosys.domain.kodeverk.Land_iso2
-import no.nav.melosys.domain.kodeverk.Trygdedekninger
+import no.nav.melosys.domain.kodeverk.*
 import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingstema
 import no.nav.melosys.domain.mottatteopplysninger.SøknadNorgeEllerUtenforEØS
 import no.nav.melosys.exception.FunksjonellException
@@ -42,7 +39,7 @@ class MedlemskapsperiodeService(
         tom: LocalDate?,
         innvilgelsesResultat: InnvilgelsesResultat?,
         trygdedekning: Trygdedekninger?,
-        bestemmelse: Folketrygdloven_kap2_bestemmelser?
+        bestemmelse: Bestemmelse?
     ): Medlemskapsperiode {
         val behandlingsresultat = behandlingsresultatService.hentBehandlingsresultat(behandlingsresultatID)
         val søknad = behandlingsresultat.behandling.mottatteOpplysninger.mottatteOpplysningerData as SøknadNorgeEllerUtenforEØS
@@ -79,7 +76,7 @@ class MedlemskapsperiodeService(
         tom: LocalDate?,
         innvilgelsesResultat: InnvilgelsesResultat?,
         trygdedekning: Trygdedekninger?,
-        bestemmelse: Folketrygdloven_kap2_bestemmelser?
+        bestemmelse: Bestemmelse?
     ): Medlemskapsperiode {
         val behandlingsresultat = behandlingsresultatService.hentBehandlingsresultat(behandlingsresultatID)
         val søknad = behandlingsresultat.behandling.mottatteOpplysninger.mottatteOpplysningerData as SøknadNorgeEllerUtenforEØS
@@ -116,7 +113,7 @@ class MedlemskapsperiodeService(
         tom: LocalDate?,
         innvilgelsesResultat: InnvilgelsesResultat?,
         trygdedekning: Trygdedekninger?,
-        bestemmelse: Folketrygdloven_kap2_bestemmelser?,
+        bestemmelse: Bestemmelse?,
         land: List<String>
     ) {
         val nullTilOgMedDatoErTillatt =

@@ -4,7 +4,7 @@ import com.fasterxml.jackson.annotation.JsonFormat
 import com.fasterxml.jackson.annotation.JsonInclude
 import no.nav.melosys.domain.brev.DokgenBrevbestilling
 import no.nav.melosys.domain.dokument.felles.Periode
-import no.nav.melosys.domain.kodeverk.Folketrygdloven_kap2_bestemmelser
+import no.nav.melosys.domain.kodeverk.Bestemmelse
 import no.nav.melosys.domain.kodeverk.Mottakerroller
 import no.nav.melosys.domain.kodeverk.Sakstyper
 import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingstyper
@@ -19,7 +19,7 @@ class InnvilgelseFtrlIkkeYrkesaktivPliktig(
     val flereLandUkjentHvilke: Boolean,
     @JsonInclude(JsonInclude.Include.NON_NULL)
     val land: List<String>,
-    val bestemmelse: Folketrygdloven_kap2_bestemmelser,
+    val bestemmelse: Bestemmelse,
     val nyVurderingBakgrunn: String?,
     val innledningFritekst: String?,
     val begrunnelseFritekst: String?,
@@ -32,7 +32,7 @@ class InnvilgelseFtrlIkkeYrkesaktivPliktig(
         brevbestilling: DokgenBrevbestilling,
         flereLandUkjentHvilke: Boolean,
         land: List<String>,
-        bestemmelse: Folketrygdloven_kap2_bestemmelser,
+        bestemmelse: Bestemmelse,
         nyVurderingBakgrunn: String?,
         innledningFritekst: String?,
         begrunnelseFritekst: String?,

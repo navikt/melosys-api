@@ -41,6 +41,10 @@ class AvgiftsdekningerFraTrygdedekning {
                 Trygdedekninger.FTRL_2_9_FØRSTE_LEDD_C_ANDRE_LEDD_TREDJE_LEDD_HELSE_PENSJON_SYKE_FORELDREPENGER_YRKESSKADE ->
                     setOf(Avgiftsdekning.HELSEDEL_MED_SYKEPENGER, Avgiftsdekning.PENSJONSDEL_MED_YRKESSKADETRYGD)
 
+                // Dette brukes ikke, men vi må mappe det siden det er samme endepunkt som frivillig medlemskap i trygdeavgiftsberegning.
+                Trygdedekninger.TILLEGGSAVTALE_NATO_HELSEDEL ->
+                    setOf(Avgiftsdekning.HELSEDEL_MED_SYKEPENGER)
+
                 else -> throw FunksjonellException("Kan ikke finne avgiftsdekninger fra trygdedekning $trygdedekning")
             }
         }

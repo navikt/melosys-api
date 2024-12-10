@@ -1,8 +1,8 @@
 package no.nav.melosys.tjenester.gui.ftrl.bestemmelser.avklartefakta
 
 import io.swagger.annotations.Api
+import no.nav.melosys.domain.jpa.konverterTilBestemmelse
 import no.nav.melosys.domain.kodeverk.Avklartefaktatyper
-import no.nav.melosys.domain.kodeverk.Folketrygdloven_kap2_bestemmelser
 import no.nav.melosys.service.ftrl.bestemmelse.avklartefakta.AvklarteFaktaForBestemmelse
 import no.nav.security.token.support.core.api.Protected
 import org.springframework.http.ResponseEntity
@@ -18,15 +18,18 @@ class AvklarteFaktaForBestemmelseController(private val avklarteFaktaForBestemme
 
     @GetMapping("/ftrl/bestemmelser/{bestemmelse}/avklartefakta")
     fun hentAvklarteFakta(
-        @PathVariable bestemmelse: Folketrygdloven_kap2_bestemmelser,
+        @PathVariable bestemmelse: String,
         @RequestParam("behandlingID", required = true) behandlingID: Long
     ): ResponseEntity<AvklarteFaktaForBestemmelseDto> {
         val avklarteFaktaDtoList =
-            avklarteFaktaForBestemmelse.hentAvklarteFakta(bestemmelse, behandlingID).map { AvklarteFaktaDto(it.type, it.muligeFakta) }
+            avklarteFaktaForBestemmelse.hentAvklarteFakta(konverterTilBestemmelse(bestemmelse), behandlingID)
+                .map { AvklarteFaktaDto(it.type, it.muligeFakta) }
         return ResponseEntity.ok(AvklarteFaktaForBestemmelseDto(avklarteFaktaDtoList))
     }
 
     data class AvklarteFaktaForBestemmelseDto(val avklarteFakta: List<AvklarteFaktaDto>)
 
     data class AvklarteFaktaDto(val faktaType: Avklartefaktatyper, val muligeFakta: List<String>)
+
 }
+

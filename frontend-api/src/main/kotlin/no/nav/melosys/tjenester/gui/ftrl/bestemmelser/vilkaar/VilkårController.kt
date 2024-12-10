@@ -2,8 +2,8 @@ package no.nav.melosys.tjenester.gui.ftrl.bestemmelser.vilkaar
 
 import io.swagger.annotations.Api
 import mu.KotlinLogging
+import no.nav.melosys.domain.jpa.konverterTilBestemmelse
 import no.nav.melosys.domain.kodeverk.Avklartefaktatyper
-import no.nav.melosys.domain.kodeverk.Folketrygdloven_kap2_bestemmelser
 import no.nav.melosys.domain.kodeverk.Vilkaar
 import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingstema
 import no.nav.melosys.exception.FunksjonellException
@@ -32,7 +32,7 @@ class VilkårController(
 
     @GetMapping("/ftrl/bestemmelser/{bestemmelse}/vilkaar")
     fun hentVilkår(
-        @PathVariable bestemmelse: Folketrygdloven_kap2_bestemmelser,
+        @PathVariable bestemmelse: String,
         @RequestParam requestParams: Map<String, String>
     ): ResponseEntity<VilkårForBestemmelseDto> {
         validerRequestParams(requestParams)
@@ -46,7 +46,7 @@ class VilkårController(
         val avklarteFakta = requestParams.filterKeys { k -> k in avklartefaktatyperNavn }
             .mapKeys { (k, _) -> Avklartefaktatyper.valueOf(k) }
         val vilkårDtoList = vilkårForBestemmelse.hentVilkår(
-            bestemmelse,
+            konverterTilBestemmelse(bestemmelse),
             Behandlingstema.valueOf(behandlingstema),
             avklarteFakta,
             behandlingID
@@ -68,4 +68,5 @@ class VilkårController(
     data class VilkårForBestemmelseDto(val vilkår: List<VilkårOgBegrunnelserDto>)
 
     data class VilkårOgBegrunnelserDto(val vilkår: Vilkaar, val defaultOppfylt: Boolean?, val muligeBegrunnelser: Collection<String>)
+
 }

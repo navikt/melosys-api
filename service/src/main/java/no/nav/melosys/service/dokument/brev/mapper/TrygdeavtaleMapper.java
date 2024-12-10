@@ -1,22 +1,15 @@
 package no.nav.melosys.service.dokument.brev.mapper;
 
-import java.util.Collection;
-import java.util.List;
-import java.util.Map;
-import java.util.Optional;
-import java.util.stream.Stream;
+import io.getunleash.Unleash;
 import jakarta.transaction.Transactional;
-
 import no.nav.melosys.domain.Behandling;
 import no.nav.melosys.domain.Lovvalgsperiode;
-import no.nav.melosys.domain.adresse.StrukturertAdresse;
 import no.nav.melosys.domain.avklartefakta.AvklartVirksomhet;
 import no.nav.melosys.domain.brev.DokgenBrevbestilling;
 import no.nav.melosys.domain.brev.InnvilgelseBrevbestilling;
 import no.nav.melosys.domain.kodeverk.Land_iso2;
 import no.nav.melosys.domain.kodeverk.LovvalgBestemmelse;
 import no.nav.melosys.domain.kodeverk.begrunnelser.Kontroll_begrunnelser;
-import no.nav.melosys.domain.kodeverk.yrker.Yrkesaktivitetstyper;
 import no.nav.melosys.domain.mottatteopplysninger.MottatteOpplysninger;
 import no.nav.melosys.domain.mottatteopplysninger.SøknadNorgeEllerUtenforEØS;
 import no.nav.melosys.domain.mottatteopplysninger.data.IdentType;
@@ -24,6 +17,7 @@ import no.nav.melosys.domain.mottatteopplysninger.data.MedfolgendeFamilie;
 import no.nav.melosys.domain.person.Persondata;
 import no.nav.melosys.domain.person.familie.IkkeOmfattetFamilie;
 import no.nav.melosys.exception.FunksjonellException;
+import no.nav.melosys.featuretoggle.ToggleName;
 import no.nav.melosys.integrasjon.dokgen.dto.InnvilgelseOgAttestTrygdeavtale;
 import no.nav.melosys.integrasjon.dokgen.dto.felles.Innvilgelse;
 import no.nav.melosys.integrasjon.dokgen.dto.felles.Person;
@@ -34,6 +28,12 @@ import no.nav.melosys.service.avklartefakta.AvklarteMedfolgendeFamilieService;
 import no.nav.melosys.service.avklartefakta.AvklarteVirksomheterService;
 import no.nav.melosys.service.behandling.UtledMottaksdato;
 import org.springframework.stereotype.Component;
+
+import java.util.Collection;
+import java.util.List;
+import java.util.Map;
+import java.util.Optional;
+import java.util.stream.Stream;
 
 import static no.nav.melosys.domain.kodeverk.lovvalgsbestemmelser.trygdeavtale.Lovvalgsbestemmelser_trygdeavtale_gb.UK_ART8_2;
 import static no.nav.melosys.domain.kodeverk.lovvalgsbestemmelser.trygdeavtale.Lovvalgsbestemmelser_trygdeavtale_us.USA_ART5_1;
@@ -48,15 +48,18 @@ public class TrygdeavtaleMapper {
     private final AvklarteVirksomheterService avklarteVirksomheterService;
     private final LovvalgsperiodeService lovvalgsperiodeService;
     private final UtledMottaksdato utledMottaksdato;
+    private final Unleash unleash;
 
     public TrygdeavtaleMapper(AvklarteMedfolgendeFamilieService avklarteMedfølgendeFamilieService,
                               AvklarteVirksomheterService avklarteVirksomheterService,
                               LovvalgsperiodeService lovvalgsperiodeService,
-                              UtledMottaksdato utledMottaksdato) {
+                              UtledMottaksdato utledMottaksdato,
+                              Unleash unleash) {
         this.avklarteMedfølgendeFamilieService = avklarteMedfølgendeFamilieService;
         this.avklarteVirksomheterService = avklarteVirksomheterService;
         this.lovvalgsperiodeService = lovvalgsperiodeService;
         this.utledMottaksdato = utledMottaksdato;
+        this.unleash = unleash;
     }
 
     @Transactional
@@ -216,12 +219,23 @@ public class TrygdeavtaleMapper {
 
     private AvklartVirksomhet hentAvklartVirksomhet(Behandling behandling) {
         boolean skalHenteSelvstendigeForetak = lovvalgsperiodeService.harSelvstendigNæringsdrivendeLovvalgsbestemmelse(behandling.getId());
+
         var avklarteVirksomheter = skalHenteSelvstendigeForetak ?
             avklarteVirksomheterService.hentNorskeSelvstendigeForetak(behandling) : avklarteVirksomheterService.hentNorskeArbeidsgivere(behandling);
-        if (avklarteVirksomheter.size() != 1) {
-            throw new FunksjonellException("Fant " + avklarteVirksomheter.size() + " avklarte virksomheter for behandling: " + behandling + ". Må være 1 for trygdeavtale");
+
+        if (avklarteVirksomheter.size() == 1) {
+            return avklarteVirksomheter.get(0);
         }
-        return avklarteVirksomheter.get(0);
+
+        if(unleash.isEnabled(ToggleName.MELOSYS_6950)){
+            var avklarteUtenlandskeVirksomheter = avklarteVirksomheterService.hentUtenlandskeVirksomheter(behandling);
+
+            if (avklarteUtenlandskeVirksomheter.size() == 1) {
+                return avklarteUtenlandskeVirksomheter.get(0);
+            }
+        }
+
+        throw new FunksjonellException("Fant " + avklarteVirksomheter.size() + " avklarte virksomheter for behandling: " + behandling + ". Må være 1 for trygdeavtale");
     }
 
     private ArbeidsgiverNorge lagArbeidsgiverNorge(Behandling behandling) {
