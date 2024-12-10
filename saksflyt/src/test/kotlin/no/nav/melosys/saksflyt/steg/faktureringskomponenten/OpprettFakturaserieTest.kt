@@ -278,8 +278,10 @@ class OpprettFakturaserieTest {
     fun `Opprett betalingsplan kun for trygdeavgiftsperioder med avgift`() {
         lagTestData(setOf(lagAktoerBruker()))
         behandlingsresultat.medlemskapsperioder.first().apply {
-            this.trygdeavgiftsperioder = setOf(this.trygdeavgiftsperioder.first(),
-                lagTrygdeavgift().copy(trygdeavgiftsbeløpMd = Penger(0.0), trygdesats = BigDecimal(0)))
+            this.trygdeavgiftsperioder = setOf(
+                this.trygdeavgiftsperioder.first(),
+                lagTrygdeavgift().copy(trygdeavgiftsbeløpMd = Penger(0.0), trygdesats = BigDecimal(0))
+            )
         }
 
         behandlingsresultat.trygdeavgiftsperioder.size.shouldBe(2)
@@ -417,17 +419,20 @@ class OpprettFakturaserieTest {
             tom = LocalDate.of(2023, 5, 31)
             bestemmelse = Folketrygdloven_kap2_bestemmelser.FTRL_KAP2_2_8
             trygdeavgiftsperioder = setOf(
-                lagTrygdeavgift().copy(grunnlagMedlemskapsperiode = medlemskapsperiode))
+                lagTrygdeavgift().copy(grunnlagMedlemskapsperiode = medlemskapsperiode)
+            )
         })
     }
 
     private fun lagTrygdeavgift(): Trygdeavgiftsperiode {
-        return Trygdeavgiftsperiode(periodeFra = LocalDate.of(2023, 1, 1),
+        return Trygdeavgiftsperiode(
+            periodeFra = LocalDate.of(2023, 1, 1),
             periodeTil = LocalDate.of(2023, 5, 1),
             trygdeavgiftsbeløpMd = Penger(5000.0),
             trygdesats = BigDecimal(3.5),
             grunnlagInntekstperiode = lagInntektsperiode(),
-            grunnlagSkatteforholdTilNorge = lagSkatteforholdTilNorge())
+            grunnlagSkatteforholdTilNorge = lagSkatteforholdTilNorge()
+        )
     }
 
     private fun lagInntektsperiode(): Inntektsperiode {
