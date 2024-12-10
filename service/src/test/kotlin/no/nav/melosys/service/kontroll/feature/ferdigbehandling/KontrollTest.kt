@@ -293,7 +293,7 @@ internal class KontrollTest {
     fun `trygdeavgiftsperioder med direkte forutgående periode, skal gi kontrollfeil, dersom fagsak er i annen periode`() {
         behandling.fagsak.type = Sakstyper.FTRL
 
-        //Mock tidligere trygdeavgiftsperioder
+        //Mock nye trygdeavgiftsperioder
         every { behandlingsresultatService.hentBehandlingsresultat(any()).trygdeavgiftsperioder } returns setOf(Trygdeavgiftsperiode(
             periodeFra = LocalDate.of(2012,12,11),
             periodeTil = LocalDate.of(2012,12,24),
@@ -301,8 +301,8 @@ internal class KontrollTest {
             trygdesats = BigDecimal.TEN
         ))
 
-        val mockBehandlingsresultatMedNyeTrygdeavgiftsperioder: Behandlingsresultat = mockk()
-        every { mockBehandlingsresultatMedNyeTrygdeavgiftsperioder.trygdeavgiftsperioder } returns setOf(
+        val mockBehandlingsresultatMedTidligereTrygdeavgiftsperioder: Behandlingsresultat = mockk()
+        every { mockBehandlingsresultatMedTidligereTrygdeavgiftsperioder.trygdeavgiftsperioder } returns setOf(
             Trygdeavgiftsperiode(
                 periodeFra = LocalDate.of(2012,12,1),
                 periodeTil = LocalDate.of(2012,12,10),
@@ -315,8 +315,8 @@ internal class KontrollTest {
                 any(),
                 any()
             )
-        } returns listOf(mockBehandlingsresultatMedNyeTrygdeavgiftsperioder)
-        every { trygdeavgiftService.harFakturerbarTrygdeavgift(mockBehandlingsresultatMedNyeTrygdeavgiftsperioder) } returns true
+        } returns listOf(mockBehandlingsresultatMedTidligereTrygdeavgiftsperioder)
+        every { trygdeavgiftService.harFakturerbarTrygdeavgift(mockBehandlingsresultatMedTidligereTrygdeavgiftsperioder) } returns true
 
         val resultat = mockedKontroll.kontroller(behandlingID, Behandlingsresultattyper.MEDLEM_I_FOLKETRYGDEN, emptySet())
 
