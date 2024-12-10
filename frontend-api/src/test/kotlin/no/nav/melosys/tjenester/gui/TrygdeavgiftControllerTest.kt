@@ -19,10 +19,10 @@ import no.nav.melosys.tjenester.gui.behandlinger.trygdeavgift.TrygdeavgiftContro
 import no.nav.melosys.tjenester.gui.dto.trygdeavgift.*
 import no.nav.melosys.tjenester.gui.util.ResponseBodyMatchers.responseBody
 import org.junit.jupiter.api.Test
-import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest
 import org.springframework.http.MediaType
 import org.springframework.test.web.servlet.MockMvc
+import org.springframework.test.web.servlet.ResultActions
 import org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get
 import org.springframework.test.web.servlet.request.MockMvcRequestBuilders.put
 import org.springframework.test.web.servlet.result.MockMvcResultMatchers.status
@@ -30,7 +30,10 @@ import java.math.BigDecimal
 import java.time.LocalDate
 
 @WebMvcTest(controllers = [TrygdeavgiftController::class])
-class TrygdeavgiftControllerTest {
+class TrygdeavgiftControllerTest(
+    private val mockMvc: MockMvc,
+    private val objectMapper: ObjectMapper
+) {
 
     @MockkBean
     private lateinit var aksesskontroll: Aksesskontroll
@@ -44,12 +47,6 @@ class TrygdeavgiftControllerTest {
     @MockkBean
     private lateinit var trygdeavgiftMottakerService: TrygdeavgiftMottakerService
 
-    @Autowired
-    private lateinit var mockMvc: MockMvc
-
-    @Autowired
-    private lateinit var objectMapper: ObjectMapper
-
     private val BASE_URL = "/api/behandlinger/{behandlingID}/trygdeavgift"
     private val BEHANDLINGSRESULTAT_ID = 1L
     private val trygdeavgiftsperioder = lagTrygdeavgiftsperioder()
@@ -62,13 +59,7 @@ class TrygdeavgiftControllerTest {
         mockMvc.perform(get("$BASE_URL/beregning", 1L)
             .contentType(MediaType.APPLICATION_JSON))
             .andExpect(status().isOk)
-            .andExpect(
-                responseBody(objectMapper)
-                    .containsObjectAsJson(
-                        forventetBeregnetTrygdeavgiftDto(),
-                        BeregnetTrygdeavgiftDto::class.java
-                    )
-            )
+            .andExpectResponseBody(forventetBeregnetTrygdeavgiftDto())
     }
 
     @Test
@@ -91,13 +82,7 @@ class TrygdeavgiftControllerTest {
                 .contentType(MediaType.APPLICATION_JSON)
         )
             .andExpect(status().isOk)
-            .andExpect(
-                responseBody(objectMapper)
-                    .containsObjectAsJson(
-                        forventetBeregnetTrygdeavgiftDto(),
-                        BeregnetTrygdeavgiftDto::class.java
-                    )
-            )
+            .andExpectResponseBody(forventetBeregnetTrygdeavgiftDto())
     }
 
     @Test
@@ -109,13 +94,7 @@ class TrygdeavgiftControllerTest {
         mockMvc.perform(get("$BASE_URL/fakturamottaker", 1L)
             .contentType(MediaType.APPLICATION_JSON))
             .andExpect(status().isOk)
-            .andExpect(
-                responseBody(objectMapper)
-                    .containsObjectAsJson(
-                        FakturamottakerDto(MOTTAKER_NAVN),
-                        FakturamottakerDto::class.java
-                    )
-            )
+            .andExpectResponseBody(FakturamottakerDto(MOTTAKER_NAVN))
     }
 
     private fun forventetBeregnetTrygdeavgiftDto(): BeregnetTrygdeavgiftDto {
@@ -164,4 +143,9 @@ class TrygdeavgiftControllerTest {
 
         return setOf(trygdeavgift)
     }
+
+    private inline fun <reified T> ResultActions.andExpectResponseBody(expectedObject: T): ResultActions =
+        this.apply {
+            responseBody(objectMapper).containsObjectAsJson(expectedObject, T::class.java)
+        }
 }
