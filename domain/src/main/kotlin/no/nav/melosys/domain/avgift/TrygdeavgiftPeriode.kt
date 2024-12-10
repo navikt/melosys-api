@@ -8,7 +8,7 @@ import java.time.LocalDate
 
 @Entity
 @Table(name = "trygdeavgiftsperiode")
-data class Trygdeavgiftsperiode(
+class Trygdeavgiftsperiode(
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     var id: Long? = null,
