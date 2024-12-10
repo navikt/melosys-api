@@ -295,8 +295,8 @@ internal class KontrollTest {
 
         //Mock tidligere trygdeavgiftsperioder
         every { behandlingsresultatService.hentBehandlingsresultat(any()).trygdeavgiftsperioder } returns setOf(Trygdeavgiftsperiode(
-            periodeFra = LocalDate.of(2012,12,1),
-            periodeTil = LocalDate.of(2012,12,10),
+            periodeFra = LocalDate.of(2012,12,11),
+            periodeTil = LocalDate.of(2012,12,24),
             trygdeavgiftsbeløpMd = Penger(BigDecimal.TEN, NOK.kode),
             trygdesats = BigDecimal.TEN
         ))
@@ -304,8 +304,8 @@ internal class KontrollTest {
         val mockBehandlingsresultatMedNyeTrygdeavgiftsperioder: Behandlingsresultat = mockk()
         every { mockBehandlingsresultatMedNyeTrygdeavgiftsperioder.trygdeavgiftsperioder } returns setOf(
             Trygdeavgiftsperiode(
-                periodeFra = LocalDate.of(2012,12,11),
-                periodeTil = LocalDate.of(2012,12,24),
+                periodeFra = LocalDate.of(2012,12,1),
+                periodeTil = LocalDate.of(2012,12,10),
                 trygdeavgiftsbeløpMd = Penger(BigDecimal.TEN, NOK.kode),
                 trygdesats = BigDecimal.TEN
             )

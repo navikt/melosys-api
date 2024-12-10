@@ -167,8 +167,8 @@ class Kontroll(
             brevUtkast = utkastBrevService.hentUtkast(behandling.id),
             fagsak = behandling.fagsak,
             trygdeavgiftperiodeData = TrygdeavgiftPeriodeData(
-                tidligereTrygdeavgiftsPerioder,
-                nyeTrygdeavgifsperioder
+                nyeTrygdeavgifsperioder,
+                tidligereTrygdeavgiftsPerioder
             )
         )
     }
