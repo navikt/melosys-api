@@ -212,6 +212,7 @@ class InnvilgelseFtrlMapper(
     private fun hentBegrunnelse2_7(vilkaarsresultater: Set<Vilkaarsresultat>): Ftrl_2_7_begrunnelser? =
         vilkaarsresultater
             .filter { it.vilkaar == Vilkaar.FTRL_2_7_RIMELIGHETSVURDERING }
+            .filter { it.begrunnelser.isNotEmpty() }
             .map { it.begrunnelser.iterator().next().kode }
             .map { Ftrl_2_7_begrunnelser.valueOf(it) }
             .firstOrNull()
@@ -219,6 +220,7 @@ class InnvilgelseFtrlMapper(
     private fun hentBegrunnelse2_8(vilkaarsresultater: Set<Vilkaarsresultat>): Ftrl_2_8_naer_tilknytning_norge_begrunnelser? =
         vilkaarsresultater
             .filter { it.vilkaar == Vilkaar.FTRL_2_8_NÆR_TILKNYTNING_NORGE }
+            .filter { it.begrunnelser.isNotEmpty() }
             .map { it.begrunnelser.iterator().next().kode }
             .map { Ftrl_2_8_naer_tilknytning_norge_begrunnelser.valueOf(it) }
             .firstOrNull()
@@ -226,6 +228,7 @@ class InnvilgelseFtrlMapper(
     private fun hentSaerligBegrunnelseFritekst(vilkaarsresultater: Set<Vilkaarsresultat>): String? =
         vilkaarsresultater
             .filter { it.vilkaar == Vilkaar.FTRL_2_8_NÆR_TILKNYTNING_NORGE || it.vilkaar == Vilkaar.FTRL_2_7_RIMELIGHETSVURDERING }
+            .filter { it.begrunnelser.isNotEmpty() }
             .map { it.begrunnelser.iterator().next().vilkaarsresultat.begrunnelseFritekst }
             .firstOrNull()
 
