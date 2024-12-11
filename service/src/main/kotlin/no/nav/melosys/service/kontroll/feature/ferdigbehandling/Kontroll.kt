@@ -165,7 +165,6 @@ class Kontroll(
                 tidligereMedlemskapsperioder,
             ),
             brevUtkast = utkastBrevService.hentUtkast(behandling.id),
-            fagsak = behandling.fagsak,
             trygdeavgiftperiodeData = TrygdeavgiftPeriodeData(
                 nyeTrygdeavgifsperioder,
                 tidligereTrygdeavgiftsPerioder
