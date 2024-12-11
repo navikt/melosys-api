@@ -116,7 +116,7 @@ private fun replikerTrygdeavgift(
     }
 
      behandlingsresultatOriginal.trygdeavgiftsperioder.forEach { trygdeavgiftsperiodeOriginal ->
-        trygdeavgiftsperiodeOriginal.copy(
+        trygdeavgiftsperiodeOriginal.copyEntity(
             id = null,
             grunnlagMedlemskapsperiode = behandlingsresultatReplika.medlemskapsperioder
                 .find { it.id == trygdeavgiftsperiodeOriginal.grunnlagMedlemskapsperiode?.id }?.also { it.id = null }

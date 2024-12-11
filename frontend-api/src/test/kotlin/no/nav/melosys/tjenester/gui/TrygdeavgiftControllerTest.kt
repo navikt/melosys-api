@@ -19,6 +19,7 @@ import no.nav.melosys.tjenester.gui.behandlinger.trygdeavgift.TrygdeavgiftContro
 import no.nav.melosys.tjenester.gui.dto.trygdeavgift.*
 import no.nav.melosys.tjenester.gui.util.ResponseBodyMatchers.responseBody
 import org.junit.jupiter.api.Test
+import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest
 import org.springframework.http.MediaType
 import org.springframework.test.web.servlet.MockMvc
@@ -31,8 +32,8 @@ import java.time.LocalDate
 
 @WebMvcTest(controllers = [TrygdeavgiftController::class])
 class TrygdeavgiftControllerTest(
-    private val mockMvc: MockMvc,
-    private val objectMapper: ObjectMapper
+    @Autowired private val mockMvc: MockMvc,
+    @Autowired private val objectMapper: ObjectMapper
 ) {
 
     @MockkBean

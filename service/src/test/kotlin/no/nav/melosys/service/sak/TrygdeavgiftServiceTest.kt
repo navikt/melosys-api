@@ -141,11 +141,11 @@ class TrygdeavgiftServiceTest {
 
     @Test
     fun harFagsakBehandlingerMedTrygdeavgift_harTrygedavgiftsperioderBådeMedOgUtenAvgift_returnererTrue() {
-        val periodeUtenAvgift = lagTrygdeavgift().copy(
+        val periodeUtenAvgift = lagTrygdeavgift().copyEntity(
             trygdeavgiftsbeløpMd = Penger(0.0),
             trygdesats = BigDecimal.ZERO
         )
-        val periodeMedAvgift = lagTrygdeavgift().copy(
+        val periodeMedAvgift = lagTrygdeavgift().copyEntity(
             trygdeavgiftsbeløpMd = Penger(2345.56),
             trygdesats = BigDecimal(3.56)
         )

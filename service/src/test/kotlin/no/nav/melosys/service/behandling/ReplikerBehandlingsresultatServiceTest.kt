@@ -65,7 +65,7 @@ class ReplikerBehandlingsresultatServiceTest {
         val avslaattMedlemskapsperiode = opprettMedlemskapsperiode(InnvilgelsesResultat.AVSLAATT, 2L)
         val opphoertMedlemskapsperiode = opprettMedlemskapsperiode(InnvilgelsesResultat.OPPHØRT, 3L)
         innvilgetMedlemskapsperiode.trygdeavgiftsperioder.add(
-            lagTrygdeavgiftsperiode().copy(grunnlagMedlemskapsperiode = innvilgetMedlemskapsperiode)
+            lagTrygdeavgiftsperiode().copyEntity(grunnlagMedlemskapsperiode = innvilgetMedlemskapsperiode)
         )
         behandlingsresultatOriginal.addMedlemskapsperiode(innvilgetMedlemskapsperiode)
         behandlingsresultatOriginal.addMedlemskapsperiode(avslaattMedlemskapsperiode)
@@ -254,7 +254,7 @@ class ReplikerBehandlingsresultatServiceTest {
         val avslaattMedlemskapsperiode = opprettMedlemskapsperiode(InnvilgelsesResultat.AVSLAATT, 2L)
         val opphoertMedlemskapsperiode = opprettMedlemskapsperiode(InnvilgelsesResultat.OPPHØRT, 3L)
         innvilgetMedlemskapsperiode.trygdeavgiftsperioder.add(
-            lagTrygdeavgiftsperiode().copy(grunnlagMedlemskapsperiode = innvilgetMedlemskapsperiode)
+            lagTrygdeavgiftsperiode().copyEntity(grunnlagMedlemskapsperiode = innvilgetMedlemskapsperiode)
         )
         behandlingsresultatOriginal.addMedlemskapsperiode(innvilgetMedlemskapsperiode)
         behandlingsresultatOriginal.addMedlemskapsperiode(avslaattMedlemskapsperiode)
