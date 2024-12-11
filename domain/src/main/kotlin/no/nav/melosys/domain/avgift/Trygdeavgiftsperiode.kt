@@ -5,7 +5,6 @@ import no.nav.melosys.domain.ErPeriode
 import no.nav.melosys.domain.Medlemskapsperiode
 import java.math.BigDecimal
 import java.time.LocalDate
-import java.util.*
 
 @Entity
 @Table(name = "trygdeavgiftsperiode")
@@ -75,21 +74,21 @@ class Trygdeavgiftsperiode(
             "trygdeavgiftsbeløpMd=$trygdeavgiftsbeløpMd, trygdesats=$trygdesats)"
     }
 
-    override fun equals(o: Any?): Boolean {
-        if (this === o) return true
-        if (o == null || javaClass != o.javaClass) return false
-        val that = o as Trygdeavgiftsperiode
-        return Objects.equals(periodeFra, that.periodeFra) && Objects.equals(periodeTil, that.periodeTil) && Objects.equals(
-            trygdeavgiftsbeløpMd,
-            that.trygdeavgiftsbeløpMd
-        ) && Objects.equals(trygdesats, that.trygdesats) && Objects.equals(grunnlagInntekstperiode, that.grunnlagInntekstperiode) && Objects.equals(
-            grunnlagMedlemskapsperiode,
-            that.grunnlagMedlemskapsperiode
-        ) && Objects.equals(grunnlagSkatteforholdTilNorge, that.grunnlagSkatteforholdTilNorge)
+    override fun equals(other: Any?): Boolean {
+        if (this === other) return true
+        if (other !is Trygdeavgiftsperiode) return false
+
+        return periodeFra == other.periodeFra &&
+            periodeTil == other.periodeTil &&
+            trygdeavgiftsbeløpMd == other.trygdeavgiftsbeløpMd &&
+            trygdesats == other.trygdesats &&
+            grunnlagInntekstperiode == other.grunnlagInntekstperiode &&
+            grunnlagMedlemskapsperiode == other.grunnlagMedlemskapsperiode &&
+            grunnlagSkatteforholdTilNorge == other.grunnlagSkatteforholdTilNorge
     }
 
     override fun hashCode(): Int {
-        return Objects.hash(
+        return listOf(
             periodeFra,
             periodeTil,
             trygdeavgiftsbeløpMd,
@@ -97,6 +96,7 @@ class Trygdeavgiftsperiode(
             grunnlagInntekstperiode,
             grunnlagMedlemskapsperiode,
             grunnlagSkatteforholdTilNorge
-        )
+        ).hashCode()
     }
+
 }
