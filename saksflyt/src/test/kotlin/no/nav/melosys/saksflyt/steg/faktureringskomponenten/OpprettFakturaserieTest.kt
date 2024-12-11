@@ -280,7 +280,7 @@ class OpprettFakturaserieTest {
         behandlingsresultat.medlemskapsperioder.first().apply {
             this.trygdeavgiftsperioder = setOf(
                 this.trygdeavgiftsperioder.first(),
-                lagTrygdeavgift().copy(trygdeavgiftsbeløpMd = Penger(0.0), trygdesats = BigDecimal(0))
+                lagTrygdeavgift().copyEntity(trygdeavgiftsbeløpMd = Penger(0.0), trygdesats = BigDecimal(0))
             )
         }
 
@@ -304,7 +304,7 @@ class OpprettFakturaserieTest {
     fun `Ikke opprett betalingsplan når behandling ikke har trygdeavgiftsperioder med avgift`() {
         lagTestData(emptySet())
         behandlingsresultat.medlemskapsperioder.first().apply {
-            this.trygdeavgiftsperioder = setOf(lagTrygdeavgift().copy(trygdeavgiftsbeløpMd = Penger(0.0), trygdesats = BigDecimal(0)))
+            this.trygdeavgiftsperioder = setOf(lagTrygdeavgift().copyEntity(trygdeavgiftsbeløpMd = Penger(0.0), trygdesats = BigDecimal(0)))
         }
 
         behandlingsresultat.trygdeavgiftsperioder.size.shouldBe(1)
@@ -419,7 +419,7 @@ class OpprettFakturaserieTest {
             tom = LocalDate.of(2023, 5, 31)
             bestemmelse = Folketrygdloven_kap2_bestemmelser.FTRL_KAP2_2_8
             trygdeavgiftsperioder = setOf(
-                lagTrygdeavgift().copy(grunnlagMedlemskapsperiode = medlemskapsperiode)
+                lagTrygdeavgift().copyEntity(grunnlagMedlemskapsperiode = medlemskapsperiode)
             )
         })
     }
