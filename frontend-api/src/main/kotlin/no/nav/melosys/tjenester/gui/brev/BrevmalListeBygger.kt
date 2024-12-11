@@ -43,10 +43,12 @@ class BrevmalListeBygger(
         val produserbareDokumenter = brevmalListeService.hentMuligeProduserbaredokumenter(behandlingID, mottaker.rolle)
         val typer = produserbareDokumenter.mapNotNull {
             when (it) {
-                Produserbaredokumenter.MELDING_FORVENTET_SAKSBEHANDLINGSTID_SOKNAD, Produserbaredokumenter.MELDING_FORVENTET_SAKSBEHANDLINGSTID_KLAGE ->
+                Produserbaredokumenter.MELDING_FORVENTET_SAKSBEHANDLINGSTID_SOKNAD,
+                Produserbaredokumenter.MELDING_FORVENTET_SAKSBEHANDLINGSTID_KLAGE ->
                     lagBrevmalForMELDING_FORVENTET_SAKSBEHANDLINGSTID(it)
 
-                Produserbaredokumenter.MANGELBREV_BRUKER, Produserbaredokumenter.MANGELBREV_ARBEIDSGIVER ->
+                Produserbaredokumenter.MANGELBREV_BRUKER,
+                Produserbaredokumenter.MANGELBREV_ARBEIDSGIVER ->
                     lagBrevmalForMANGELBREV(it, behandlingID)
 
                 Produserbaredokumenter.INNHENTING_AV_INNTEKTSOPPLYSNINGER ->
@@ -241,11 +243,11 @@ class BrevmalListeBygger(
             .medType(produserbartdokument)
             .medFelter(
                 listOf(
-                    FELT_DISTRIBUSJONSTYPE,
                     lagBrevTittelFelt(hentBrevTittelValg(behandlingId)),
-                    FELT_DOKUMENT_TITTEL,
-                    FELT_STANDARDTEKST_SJEKKBOKS,
                     FELT_FRITEKST,
+                    FELT_STANDARDTEKST_SJEKKBOKS,
+                    FELT_DISTRIBUSJONSTYPE,
+                    FELT_DOKUMENT_TITTEL,
                     FELT_VEDLEGG,
                     FELT_FRITEKSTVEDLEGG
                 )
@@ -258,10 +260,10 @@ class BrevmalListeBygger(
             .medType(produserbartdokument)
             .medFelter(
                 listOf(
-                    FELT_DISTRIBUSJONSTYPE,
                     lagBrevTittelFelt(hentBrevTittelValg()),
-                    FELT_DOKUMENT_TITTEL,
                     FELT_FRITEKST,
+                    FELT_DISTRIBUSJONSTYPE,
+                    FELT_DOKUMENT_TITTEL,
                     FELT_VEDLEGG,
                     FELT_FRITEKSTVEDLEGG
                 )
@@ -276,10 +278,10 @@ class BrevmalListeBygger(
         val behandling = behandlingService.hentBehandling(behandlingId)
         val fagsak = behandling.fagsak
         val felter = mutableListOf(
-            FELT_DISTRIBUSJONSTYPE,
             lagBrevTittelFelt(hentBrevTittelValg(behandlingId)),
-            FELT_DOKUMENT_TITTEL,
             FELT_FRITEKST,
+            FELT_DISTRIBUSJONSTYPE,
+            FELT_DOKUMENT_TITTEL,
             FELT_VEDLEGG,
             FELT_FRITEKSTVEDLEGG
         )
