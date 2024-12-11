@@ -19,7 +19,7 @@ import no.nav.melosys.service.ftrl.medlemskapsperiode.MedlemskapsperiodeService
 import no.nav.melosys.service.kontroll.feature.ferdigbehandling.data.FerdigbehandlingKontrollData
 import no.nav.melosys.service.kontroll.feature.ferdigbehandling.data.MedlemskapsperiodeData
 import no.nav.melosys.service.kontroll.feature.ferdigbehandling.data.SaksopplysningerData
-import no.nav.melosys.service.kontroll.feature.ferdigbehandling.data.TrygdeavgiftPeriodeData
+import no.nav.melosys.service.kontroll.feature.ferdigbehandling.data.TrygdeavgiftsperiodeData
 import no.nav.melosys.service.kontroll.feature.ferdigbehandling.kontroll.FerdigbehandlingKontrollsett.hentRegelsettForAvslagOgHenleggelse
 import no.nav.melosys.service.kontroll.feature.ferdigbehandling.kontroll.FerdigbehandlingKontrollsett.hentRegelsettForVedtak
 import no.nav.melosys.service.persondata.PersondataFasade
@@ -165,7 +165,7 @@ class Kontroll(
                 tidligereMedlemskapsperioder,
             ),
             brevUtkast = utkastBrevService.hentUtkast(behandling.id),
-            trygdeavgiftperiodeData = TrygdeavgiftPeriodeData(
+            trygdeavgiftperiodeData = TrygdeavgiftsperiodeData(
                 nyeTrygdeavgifsperioder,
                 tidligereTrygdeavgiftsPerioder
             )

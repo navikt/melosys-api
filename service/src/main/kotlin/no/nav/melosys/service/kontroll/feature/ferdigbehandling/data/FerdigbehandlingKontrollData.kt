@@ -23,5 +23,5 @@ data class FerdigbehandlingKontrollData(
     val medlemskapsperiodeData: MedlemskapsperiodeData? = null,
     val brevUtkast: List<UtkastBrev>,
     val antallArbeidsgivere: Int = 0,
-    val trygdeavgiftperiodeData: TrygdeavgiftPeriodeData? = null,
+    val trygdeavgiftperiodeData: TrygdeavgiftsperiodeData? = null,
 )

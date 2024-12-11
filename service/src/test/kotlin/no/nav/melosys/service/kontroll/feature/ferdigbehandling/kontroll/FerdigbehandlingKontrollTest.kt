@@ -27,7 +27,7 @@ import no.nav.melosys.integrasjon.trygdeavgift.dto.NOK
 import no.nav.melosys.service.kontroll.feature.ferdigbehandling.data.FerdigbehandlingKontrollData
 import no.nav.melosys.service.kontroll.feature.ferdigbehandling.data.MedlemskapsperiodeData
 import no.nav.melosys.service.kontroll.feature.ferdigbehandling.data.SaksopplysningerData
-import no.nav.melosys.service.kontroll.feature.ferdigbehandling.data.TrygdeavgiftPeriodeData
+import no.nav.melosys.service.kontroll.feature.ferdigbehandling.data.TrygdeavgiftsperiodeData
 import no.nav.melosys.service.persondata.PersonopplysningerObjectFactory
 import org.junit.jupiter.api.Test
 import java.math.BigDecimal
@@ -124,8 +124,7 @@ class FerdigbehandlingKontrollTest {
 
         val medlemskapDokument = MedlemskapDokument()
 
-        val kontrollData = lagFerdigbehandlingKontrollData(trygdeavgiftperiodeData = TrygdeavgiftPeriodeData(nyeTrygdeavgiftperioder, tidligereTrygdeavgiftperioder), medlemskapDokument = medlemskapDokument,
-            fagsak = Fagsak(saksnummer = "test-321", status = Saksstatuser.OPPRETTET, tema = Sakstemaer.MEDLEMSKAP_LOVVALG, type = Sakstyper.FTRL))
+        val kontrollData = lagFerdigbehandlingKontrollData(trygdeavgiftperiodeData = TrygdeavgiftsperiodeData(nyeTrygdeavgiftperioder, tidligereTrygdeavgiftperioder), medlemskapDokument = medlemskapDokument)
 
         val kontrollfeil = FerdigbehandlingKontroll.harOverlappendePeriodeMedForskuddsvisFakturering(kontrollData)
 
@@ -323,13 +322,10 @@ class FerdigbehandlingKontrollTest {
             )
         )
 
-        val fagsak = Fagsak(saksnummer = "test1", status = Saksstatuser.OPPRETTET, tema = Sakstemaer.MEDLEMSKAP_LOVVALG, type = Sakstyper.FTRL)
-
         val kontrollData = lagFerdigbehandlingKontrollData(
             medlemskapDokument = medlemskapsDokument,
             medlemskapsperiodeData = MedlemskapsperiodeData(emptyList(), emptyList()),
-            trygdeavgiftperiodeData = TrygdeavgiftPeriodeData(nyeTrygdeavgiftperioder, tidligereTrygdeavgiftperioder),
-            fagsak = fagsak
+            trygdeavgiftperiodeData = TrygdeavgiftsperiodeData(nyeTrygdeavgiftperioder, tidligereTrygdeavgiftperioder),
         )
 
         val kontrollfeil = FerdigbehandlingKontroll.direkteForutgåendePeriode(kontrollData)
@@ -354,12 +350,9 @@ class FerdigbehandlingKontrollTest {
             )
         )
 
-        val fagsak = Fagsak(saksnummer = "test", status = Saksstatuser.OPPRETTET, tema = Sakstemaer.MEDLEMSKAP_LOVVALG, type = Sakstyper.FTRL)
-
         val kontrollData = lagFerdigbehandlingKontrollData(
             medlemskapsperiodeData = MedlemskapsperiodeData(emptyList(), emptyList(), ),
-            trygdeavgiftperiodeData = TrygdeavgiftPeriodeData(nyeTrygdeavgiftperioder, tidligereTrygdeavgiftperioder),
-            fagsak = fagsak
+            trygdeavgiftperiodeData = TrygdeavgiftsperiodeData(nyeTrygdeavgiftperioder, tidligereTrygdeavgiftperioder),
         )
 
         val kontrollfeil = FerdigbehandlingKontroll.direkteForutgåendePeriode(kontrollData)
@@ -788,8 +781,7 @@ class FerdigbehandlingKontrollTest {
         medlemskapsperiodeData: MedlemskapsperiodeData? = null,
         brevUtkast: List<UtkastBrev> = emptyList(),
         antallArbeidsgivere: Int = 1,
-        fagsak: Fagsak = Fagsak(saksnummer = "test", status = Saksstatuser.OPPRETTET, tema = Sakstemaer.MEDLEMSKAP_LOVVALG, type = Sakstyper.FTRL),
-        trygdeavgiftperiodeData: TrygdeavgiftPeriodeData? = null,
+        trygdeavgiftperiodeData: TrygdeavgiftsperiodeData? = null,
     ) = FerdigbehandlingKontrollData(
         medlemskapDokument,
         persondata,
@@ -804,7 +796,6 @@ class FerdigbehandlingKontrollTest {
         medlemskapsperiodeData,
         brevUtkast,
         antallArbeidsgivere,
-        fagsak = fagsak,
         trygdeavgiftperiodeData,
     )
 }

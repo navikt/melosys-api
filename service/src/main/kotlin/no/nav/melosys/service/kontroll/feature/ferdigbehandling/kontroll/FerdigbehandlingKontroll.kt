@@ -22,7 +22,7 @@ import no.nav.melosys.service.kontroll.feature.arbeidutland.kontroll.ArbeidUtlan
 import no.nav.melosys.service.kontroll.feature.arbeidutland.kontroll.ArbeidUtlandKontroll.Companion.offshoreArbeidsstedManglerFelter
 import no.nav.melosys.service.kontroll.feature.arbeidutland.kontroll.ArbeidUtlandKontroll.Companion.selvstendigUtlandManglerFelter
 import no.nav.melosys.service.kontroll.feature.ferdigbehandling.data.FerdigbehandlingKontrollData
-import no.nav.melosys.service.kontroll.feature.ferdigbehandling.data.TrygdeavgiftPeriodeData
+import no.nav.melosys.service.kontroll.feature.ferdigbehandling.data.TrygdeavgiftsperiodeData
 import no.nav.melosys.service.kontroll.regler.ArbeidsstedRegler
 import no.nav.melosys.service.kontroll.regler.OverlappendeMedlemskapsperioderRegler
 import no.nav.melosys.service.kontroll.regler.PeriodeRegler
@@ -227,17 +227,17 @@ object FerdigbehandlingKontroll {
     }
 
     private fun harOverlappendePeriodeMedForskuddsvisFakturering(
-        trygdeavgiftsPeriodeData: TrygdeavgiftPeriodeData
-    ): Boolean = trygdeavgiftsPeriodeData.nyeTrygdeavgiftsperioder.any { nyTrygdeavgiftPeriode ->
+        trygdeavgiftsperiodeData: TrygdeavgiftsperiodeData
+    ): Boolean = trygdeavgiftsperiodeData.nyeTrygdeavgiftsperioder.any { nyTrygdeavgiftsperiode ->
         harOverlappMedTidligerePerioder(
-            nyTrygdeavgiftPeriode,
-            trygdeavgiftsPeriodeData.tidligereTrygdeavgiftsperioder
+            nyTrygdeavgiftsperiode,
+            trygdeavgiftsperiodeData.tidligereTrygdeavgiftsperioder
         )
     }
 
     private fun harOverlappMedTidligerePerioder(
-        nyTrygdeavgiftsperiode: Trygdeavgiftsperiode, tidligereTrygdeavgiftPerioder: List<Trygdeavgiftsperiode>
-    ): Boolean = tidligereTrygdeavgiftPerioder.any { tidligereMedlemskapsperiode: Trygdeavgiftsperiode? ->
+        nyTrygdeavgiftsperiode: Trygdeavgiftsperiode, tidligereTrygdeavgiftsperioder: List<Trygdeavgiftsperiode>
+    ): Boolean = tidligereTrygdeavgiftsperioder.any { tidligereMedlemskapsperiode: Trygdeavgiftsperiode? ->
         PeriodeRegler.periodeOverlapper(
             nyTrygdeavgiftsperiode,
             tidligereMedlemskapsperiode
