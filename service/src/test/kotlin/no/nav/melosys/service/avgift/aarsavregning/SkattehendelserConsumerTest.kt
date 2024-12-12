@@ -18,7 +18,9 @@ import no.nav.melosys.domain.kodeverk.Sakstyper
 import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingsresultattyper
 import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingsstatus
 import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingstyper
+import no.nav.melosys.domain.kodeverk.Trygdeavgiftmottaker
 import no.nav.melosys.saksflytapi.ProsessinstansService
+import no.nav.melosys.service.avgift.TrygdeavgiftMottakerService
 import no.nav.melosys.service.behandling.BehandlingService
 import no.nav.melosys.service.behandling.BehandlingsresultatService
 import no.nav.melosys.service.sak.FagsakService
@@ -42,10 +44,13 @@ class SkattehendelserConsumerTest {
     private lateinit var behandlingService: BehandlingService
 
     @MockK
-    private lateinit var behandslingsresultatService: BehandlingsresultatService
+    private lateinit var behandlingsresultatService: BehandlingsresultatService
 
     @MockK
     private lateinit var årsavregningService: ÅrsavregningService
+
+    @MockK
+    private lateinit var trygdeavgiftMottakerService : TrygdeavgiftMottakerService
 
     private lateinit var skattehendelserConsumer: SkattehendelserConsumer
 
@@ -59,8 +64,9 @@ class SkattehendelserConsumerTest {
             unleash,
             fagsakService,
             behandlingService,
-            behandslingsresultatService,
-            årsavregningService
+            behandlingsresultatService,
+            årsavregningService,
+            trygdeavgiftMottakerService
         )
     }
 
@@ -121,7 +127,8 @@ class SkattehendelserConsumerTest {
         }
 
         every { fagsakService.hentFagsakerMedAktør(Aktoersroller.BRUKER, AKTØR_ID) } returns listOf(fagsak)
-        every { behandslingsresultatService.hentBehandlingsresultat(behandling.id) } returns behandlingsresultat
+        every { behandlingsresultatService.hentBehandlingsresultat(behandling.id) } returns behandlingsresultat
+
         val behandlingSlot = slot<Behandling>()
         every { behandlingService.lagre(capture(behandlingSlot)) } returns Unit
         every {
@@ -160,6 +167,56 @@ class SkattehendelserConsumerTest {
                 any()
             )
         } returns null
+
+
+        skattehendelserConsumer.lesSkattehendelser(
+            ConsumerRecord(
+                "topic", 1, 1, "key", Skattehendelse(
+                    gjelderPeriode = GJELDER_ÅR.toString(),
+                    identifikator = AKTØR_ID,
+                    hendelsetype = "ny"
+                )
+            )
+        )
+
+
+        verify { prosessinstansService wasNot Called }
+        verify { behandlingService wasNot Called }
+    }
+
+    @Test
+    fun `skal ikke opprette automatisk årsavregningoppgave dersom trygdeavgiften bare skal betales til Skatteetaten `() {
+        val behandling = lagBehandling {
+            status = Behandlingsstatus.AVSLUTTET
+            id = 123
+        }
+        val fagsak = lagFagsak {
+            this.leggTilBehandling(behandling)
+        }
+
+        val behandlingsresultat = Behandlingsresultat().apply {
+            this.behandling = behandling
+            id = 123
+            type = Behandlingsresultattyper.FERDIGBEHANDLET
+        }
+
+        //val sisteRegistrertBehandlingID = sakMedTrygdeavgift.hentSistRegistrertBehandlingIkkeÅrsavregning().id
+        //val sisteBehandlingsresultat = behandlingsresultatService.hentBehandlingsresultat(sisteRegistrertBehandlingID)
+
+        //every { fagsak.hentSistRegistrertBehandlingIkkeÅrsavregning().id } returns behandling.id
+        every { behandlingsresultatService.hentBehandlingsresultat(behandling.id) } returns behandlingsresultat
+
+        every { trygdeavgiftMottakerService.skalBetalesTilNav(behandlingsresultat)} returns false
+
+        every { fagsakService.hentFagsakerMedAktør(Aktoersroller.BRUKER, AKTØR_ID) } returns listOf(fagsak)
+        every {
+            årsavregningService.hentSisteBehandlingsresultatMedInnvilgetMedlemskapsperiodeOgAvgiftsgrunnlag(
+                SAKSNUMMER,
+                GJELDER_ÅR
+            )
+        } returns behandlingsresultat
+        every { prosessinstansService.opprettArsavregningsBehandlingProsessflyt(any(), any()) } returns mockk<UUID>()
+
 
 
         skattehendelserConsumer.lesSkattehendelser(

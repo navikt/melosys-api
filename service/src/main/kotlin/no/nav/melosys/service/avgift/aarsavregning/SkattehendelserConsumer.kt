@@ -11,6 +11,7 @@ import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingsstatus
 import no.nav.melosys.exception.TekniskException
 import no.nav.melosys.featuretoggle.ToggleName
 import no.nav.melosys.saksflytapi.ProsessinstansService
+import no.nav.melosys.service.avgift.TrygdeavgiftMottakerService
 import no.nav.melosys.service.behandling.BehandlingService
 import no.nav.melosys.service.behandling.BehandlingsresultatService
 import no.nav.melosys.service.sak.FagsakService
@@ -29,8 +30,9 @@ class SkattehendelserConsumer(
     @Autowired private val unleash: Unleash,
     @Autowired private val fagsakService: FagsakService,
     @Autowired private val behandlingService: BehandlingService,
-    @Autowired private val behandslingsresultatService: BehandlingsresultatService,
-    @Autowired private val årsavregningService: ÅrsavregningService
+    @Autowired private val behandlingsresultatService: BehandlingsresultatService,
+    @Autowired private val årsavregningService: ÅrsavregningService,
+    @Autowired private val trygdeavgiftMottakerService: TrygdeavgiftMottakerService,
 ) {
 
     @KafkaListener(
@@ -65,7 +67,22 @@ class SkattehendelserConsumer(
     }
 
     private fun skalOpprettArsavregningsBehandlingProsessflyt(sakMedTrygdeavgift: Fagsak, gjelderÅr: Int): Boolean {
+        val sisteRegistrertBehandlingID = sakMedTrygdeavgift.hentSistRegistrertBehandlingIkkeÅrsavregning().id
+        val sisteBehandlingsresultat = behandlingsresultatService.hentBehandlingsresultat(sisteRegistrertBehandlingID)
+
+
+
         val behandling = finnAktivÅrsavregningBehandling(sakMedTrygdeavgift, gjelderÅr) ?: return true
+
+        if(behandling == null){
+            if(!trygdeavgiftMottakerService.skalBetalesTilNav(sisteBehandlingsresultat)){
+                return false
+            }
+
+            return true
+        }
+
+
 
         log.info { "Årsavregning behandling(${behandling.id}) for sak: ${sakMedTrygdeavgift.saksnummer} og år: $gjelderÅr er allerede opprettet" }
         if (behandling.status != Behandlingsstatus.OPPRETTET) {
@@ -78,7 +95,7 @@ class SkattehendelserConsumer(
 
     private fun finnAktivÅrsavregningBehandling(sakMedTrygdeavgift: Fagsak, gjelderÅr: Int): Behandling? {
         val årsAvregninger = sakMedTrygdeavgift.hentAktiveÅrsavregninger()
-            .filter { behandslingsresultatService.hentBehandlingsresultat(it.id).årsavregning.aar == gjelderÅr }
+            .filter { behandlingsresultatService.hentBehandlingsresultat(it.id).årsavregning.aar == gjelderÅr }
 
         when {
             årsAvregninger.isEmpty() -> {
