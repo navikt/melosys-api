@@ -211,26 +211,26 @@ class InnvilgelseFtrlMapper(
 
     private fun hentBegrunnelse2_7(vilkaarsresultater: Set<Vilkaarsresultat>): Ftrl_2_7_begrunnelser? =
         vilkaarsresultater
-            .filter { it.vilkaar == Vilkaar.FTRL_2_7_RIMELIGHETSVURDERING }
-            .filter { it.begrunnelser.isNotEmpty() }
-            .map { it.begrunnelser.iterator().next().kode }
-            .map { Ftrl_2_7_begrunnelser.valueOf(it) }
-            .firstOrNull()
+            .firstOrNull {
+                it.vilkaar == Vilkaar.FTRL_2_7_RIMELIGHETSVURDERING && it.begrunnelser.isNotEmpty()
+            }
+            ?.begrunnelser?.firstOrNull()?.kode
+            ?.let { Ftrl_2_7_begrunnelser.valueOf(it) }
 
     private fun hentBegrunnelse2_8(vilkaarsresultater: Set<Vilkaarsresultat>): Ftrl_2_8_naer_tilknytning_norge_begrunnelser? =
         vilkaarsresultater
-            .filter { it.vilkaar == Vilkaar.FTRL_2_8_NÆR_TILKNYTNING_NORGE }
-            .filter { it.begrunnelser.isNotEmpty() }
-            .map { it.begrunnelser.iterator().next().kode }
-            .map { Ftrl_2_8_naer_tilknytning_norge_begrunnelser.valueOf(it) }
-            .firstOrNull()
+            .firstOrNull {
+                it.vilkaar == Vilkaar.FTRL_2_8_NÆR_TILKNYTNING_NORGE && it.begrunnelser.isNotEmpty()
+            }
+            ?.begrunnelser?.firstOrNull()?.kode
+            ?.let { Ftrl_2_8_naer_tilknytning_norge_begrunnelser.valueOf(it) }
 
     private fun hentSaerligBegrunnelseFritekst(vilkaarsresultater: Set<Vilkaarsresultat>): String? =
         vilkaarsresultater
-            .filter { it.vilkaar == Vilkaar.FTRL_2_8_NÆR_TILKNYTNING_NORGE || it.vilkaar == Vilkaar.FTRL_2_7_RIMELIGHETSVURDERING }
-            .filter { it.begrunnelser.isNotEmpty() }
-            .map { it.begrunnelser.iterator().next().vilkaarsresultat.begrunnelseFritekst }
-            .firstOrNull()
+            .firstOrNull {
+                it.vilkaar == Vilkaar.FTRL_2_8_NÆR_TILKNYTNING_NORGE || it.vilkaar == Vilkaar.FTRL_2_7_RIMELIGHETSVURDERING
+            }
+            ?.begrunnelseFritekst
 
     private fun hentArbeidsgivere(behandling: Behandling): List<String> = (
         avklarteVirksomheterService.hentNorskeArbeidsgivere(behandling) +
