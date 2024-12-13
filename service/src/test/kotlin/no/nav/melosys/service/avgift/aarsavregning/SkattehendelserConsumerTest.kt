@@ -66,7 +66,6 @@ class SkattehendelserConsumerTest {
             behandlingService,
             behandlingsresultatService,
             årsavregningService,
-            trygdeavgiftMottakerService
         )
     }
 
@@ -186,6 +185,7 @@ class SkattehendelserConsumerTest {
 
     @Test
     fun `skal ikke opprette automatisk årsavregningoppgave dersom trygdeavgiften bare skal betales til Skatteetaten `() {
+
         val behandling = lagBehandling {
             status = Behandlingsstatus.AVSLUTTET
             id = 123
@@ -200,23 +200,19 @@ class SkattehendelserConsumerTest {
             type = Behandlingsresultattyper.FERDIGBEHANDLET
         }
 
-        //val sisteRegistrertBehandlingID = sakMedTrygdeavgift.hentSistRegistrertBehandlingIkkeÅrsavregning().id
-        //val sisteBehandlingsresultat = behandlingsresultatService.hentBehandlingsresultat(sisteRegistrertBehandlingID)
-
-        //every { fagsak.hentSistRegistrertBehandlingIkkeÅrsavregning().id } returns behandling.id
-        every { behandlingsresultatService.hentBehandlingsresultat(behandling.id) } returns behandlingsresultat
-
+        every {behandlingsresultatService.hentBehandlingsresultat(behandling.id) } returns behandlingsresultat
         every { trygdeavgiftMottakerService.skalBetalesTilNav(behandlingsresultat)} returns false
-
         every { fagsakService.hentFagsakerMedAktør(Aktoersroller.BRUKER, AKTØR_ID) } returns listOf(fagsak)
+
         every {
             årsavregningService.hentSisteBehandlingsresultatMedInnvilgetMedlemskapsperiodeOgAvgiftsgrunnlag(
                 SAKSNUMMER,
                 GJELDER_ÅR
             )
-        } returns behandlingsresultat
-        every { prosessinstansService.opprettArsavregningsBehandlingProsessflyt(any(), any()) } returns mockk<UUID>()
+        } returns null
 
+
+        every { prosessinstansService.opprettArsavregningsBehandlingProsessflyt(any(), any()) } returns mockk<UUID>()
 
 
         skattehendelserConsumer.lesSkattehendelser(
