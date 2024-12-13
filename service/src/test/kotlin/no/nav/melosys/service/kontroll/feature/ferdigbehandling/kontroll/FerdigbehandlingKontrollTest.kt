@@ -124,7 +124,12 @@ class FerdigbehandlingKontrollTest {
 
         val medlemskapDokument = MedlemskapDokument()
 
-        val kontrollData = lagFerdigbehandlingKontrollData(trygdeavgiftperiodeData = TrygdeavgiftsperiodeData(nyeTrygdeavgiftperioder, tidligereTrygdeavgiftperioder), medlemskapDokument = medlemskapDokument)
+        val kontrollData = lagFerdigbehandlingKontrollData(
+            trygdeavgiftperiodeData = TrygdeavgiftsperiodeData(
+                nyeTrygdeavgiftperioder,
+                tidligereTrygdeavgiftperioder
+            ), medlemskapDokument = medlemskapDokument
+        )
 
         val kontrollfeil = FerdigbehandlingKontroll.harOverlappendePeriodeMedForskuddsvisFakturering(kontrollData)
 
@@ -351,7 +356,7 @@ class FerdigbehandlingKontrollTest {
         )
 
         val kontrollData = lagFerdigbehandlingKontrollData(
-            medlemskapsperiodeData = MedlemskapsperiodeData(emptyList(), emptyList(), ),
+            medlemskapsperiodeData = MedlemskapsperiodeData(emptyList(), emptyList()),
             trygdeavgiftperiodeData = TrygdeavgiftsperiodeData(nyeTrygdeavgiftperioder, tidligereTrygdeavgiftperioder),
         )
 
@@ -764,7 +769,12 @@ class FerdigbehandlingKontrollTest {
     }
 
     private fun lagTrygdeavgiftPeriode(fraOgMed: LocalDate, tilOgMed: LocalDate): Trygdeavgiftsperiode {
-        return Trygdeavgiftsperiode(periodeFra = fraOgMed, periodeTil = tilOgMed, trygdeavgiftsbeløpMd = Penger(BigDecimal(1000), NOK.kode), trygdesats = BigDecimal(5))
+        return Trygdeavgiftsperiode(
+            periodeFra = fraOgMed,
+            periodeTil = tilOgMed,
+            trygdeavgiftsbeløpMd = Penger(BigDecimal(1000), NOK.kode),
+            trygdesats = BigDecimal(5)
+        )
     }
 
     private fun lagFerdigbehandlingKontrollData(

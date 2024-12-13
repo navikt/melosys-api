@@ -340,16 +340,14 @@ internal class TrygdeavgiftMottakerServiceTest {
     fun lagTrygdeavgiftsperiode(
         skatteforholdTilNorge: SkatteforholdTilNorge,
         inntektsperiode: Inntektsperiode
-    ): Trygdeavgiftsperiode {
-        return Trygdeavgiftsperiode(
-            grunnlagInntekstperiode = inntektsperiode,
-            grunnlagSkatteforholdTilNorge = skatteforholdTilNorge,
-            periodeTil = LocalDate.now(),
-            periodeFra = LocalDate.now(),
-            trygdesats = BigDecimal(1),
-            trygdeavgiftsbeløpMd = Penger(BigDecimal(1), NOK.kode)
-        )
-    }
+    ) = Trygdeavgiftsperiode(
+        grunnlagInntekstperiode = inntektsperiode,
+        grunnlagSkatteforholdTilNorge = skatteforholdTilNorge,
+        periodeTil = LocalDate.now(),
+        periodeFra = LocalDate.now(),
+        trygdesats = BigDecimal(1),
+        trygdeavgiftsbeløpMd = Penger(BigDecimal(1), NOK.kode)
+    )
 
     fun lagInntektsperiode(
         arbeidsgiversavgiftBetalesTilSkatt: Boolean,

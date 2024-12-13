@@ -383,10 +383,6 @@ internal class OverlappendeMedlemskapsperioderReglerTest {
         }
     }
 
-    private fun lagMedlemskapsperiodeListe(vararg medlemskapsperioder: Medlemskapsperiode): List<Medlemskapsperiode> {
-        return listOf(*medlemskapsperioder)
-    }
-
     private fun lagMedlemskapsDokument(land: String): MedlemskapDokument {
         return MedlemskapDokument().apply {
             medlemsperiode = listOf(Medlemsperiode(periode = Periode(LocalDate.EPOCH, LocalDate.EPOCH.plusYears(2))).apply {

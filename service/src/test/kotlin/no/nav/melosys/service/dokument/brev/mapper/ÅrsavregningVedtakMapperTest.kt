@@ -188,8 +188,8 @@ class ÅrsavregningVedtakMapperTest {
             })
     }
 
-    private fun lagTidligereTrygdeavgiftsperiode(): Trygdeavgiftsperiode {
-        return Trygdeavgiftsperiode(
+    private fun lagTidligereTrygdeavgiftsperiode() =
+        Trygdeavgiftsperiode(
             periodeFra = LocalDate.of(2023, 1, 1),
             periodeTil = LocalDate.of(2023, 12, 31),
             trygdeavgiftsbeløpMd = Penger(BigDecimal(450)),
@@ -208,5 +208,4 @@ class ÅrsavregningVedtakMapperTest {
             grunnlagSkatteforholdTilNorge = SkatteforholdTilNorge().apply {
                 skatteplikttype = Skatteplikttype.IKKE_SKATTEPLIKTIG
             })
-    }
 }

@@ -279,12 +279,14 @@ internal class ÅrsavregningServiceTest {
         }
     }
 
-    private fun lagTrygdeavgift(start: String, slutt: String): Trygdeavgiftsperiode = Trygdeavgiftsperiode(periodeFra = LocalDate.parse(start),
+    private fun lagTrygdeavgift(start: String, slutt: String): Trygdeavgiftsperiode = Trygdeavgiftsperiode(
+        periodeFra = LocalDate.parse(start),
         periodeTil = LocalDate.parse(slutt),
         trygdeavgiftsbeløpMd = Penger(5000.0),
         trygdesats = BigDecimal(3.5),
         grunnlagInntekstperiode = lagInntektsperiode(start, slutt),
-    grunnlagSkatteforholdTilNorge = lagSkatteforholdTilNorge(start, slutt))
+        grunnlagSkatteforholdTilNorge = lagSkatteforholdTilNorge(start, slutt)
+    )
 
     private fun lagInntektsperiode(start: String, slutt: String): Inntektsperiode = Inntektsperiode().apply {
         fomDato = LocalDate.parse(start)

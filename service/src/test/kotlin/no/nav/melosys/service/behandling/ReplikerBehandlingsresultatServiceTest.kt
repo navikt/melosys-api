@@ -322,14 +322,15 @@ class ReplikerBehandlingsresultatServiceTest {
             skatteplikttype = Skatteplikttype.SKATTEPLIKTIG
         }
 
-          return  Trygdeavgiftsperiode(id = 1L,
-              periodeFra = LocalDate.now(),
-              periodeTil = LocalDate.now(),
-              trygdeavgiftsbeløpMd = Penger(500.0),
-              trygdesats = BigDecimal(50),
-              grunnlagInntekstperiode = inntektsperiode,
-              grunnlagSkatteforholdTilNorge = skatteforholdTilNorge
-          )
+        return Trygdeavgiftsperiode(
+            id = 1L,
+            periodeFra = LocalDate.now(),
+            periodeTil = LocalDate.now(),
+            trygdeavgiftsbeløpMd = Penger(500.0),
+            trygdesats = BigDecimal(50),
+            grunnlagInntekstperiode = inntektsperiode,
+            grunnlagSkatteforholdTilNorge = skatteforholdTilNorge
+        )
     }
 
     private fun opprettMedlemskapsperiode(innvilgelsesResultat: InnvilgelsesResultat, id: Long): Medlemskapsperiode {
