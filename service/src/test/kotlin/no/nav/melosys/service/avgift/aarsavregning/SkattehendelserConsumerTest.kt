@@ -18,7 +18,6 @@ import no.nav.melosys.domain.kodeverk.Sakstyper
 import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingsresultattyper
 import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingsstatus
 import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingstyper
-import no.nav.melosys.domain.kodeverk.Trygdeavgiftmottaker
 import no.nav.melosys.saksflytapi.ProsessinstansService
 import no.nav.melosys.service.avgift.TrygdeavgiftMottakerService
 import no.nav.melosys.service.behandling.BehandlingService
@@ -66,6 +65,7 @@ class SkattehendelserConsumerTest {
             behandlingService,
             behandlingsresultatService,
             årsavregningService,
+            trygdeavgiftMottakerService
         )
     }
 
@@ -89,6 +89,7 @@ class SkattehendelserConsumerTest {
             )
         } returns behandlingsresultat
         every { prosessinstansService.opprettArsavregningsBehandlingProsessflyt(any(), any()) } returns mockk<UUID>()
+        every { trygdeavgiftMottakerService.skalBetalesTilNav(behandlingsresultat)} returns true
 
 
         skattehendelserConsumer.lesSkattehendelser(
@@ -135,7 +136,8 @@ class SkattehendelserConsumerTest {
                 SAKSNUMMER,
                 GJELDER_ÅR
             )
-        } returns mockk()
+        } returns behandlingsresultat
+        every { trygdeavgiftMottakerService.skalBetalesTilNav(behandlingsresultat)} returns true
 
 
         skattehendelserConsumer.lesSkattehendelser(

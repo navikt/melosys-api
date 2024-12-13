@@ -44,15 +44,12 @@ internal class ÅrsavregningServiceTest {
 
     private lateinit var årsavregningService: ÅrsavregningService
 
-
-
     @BeforeEach
     fun setup() {
         årsavregningService = ÅrsavregningService(
             aarsavregningRepository,
             behandlingsresultatService,
             fagsakService,
-            trygdeavgiftMottakerService,
         )
         SpringSubjectHandler.set(TestSubjectHandler())
     }
@@ -214,7 +211,6 @@ internal class ÅrsavregningServiceTest {
         every { fagsakService.hentFagsak("123456") } returns aktivFagsak
         every { behandlingsresultatService.hentBehandlingsresultat(1) } returns eldreBehandlingsresultat
         every { behandlingsresultatService.hentBehandlingsresultat(2) } returns nyesteBehandlingsresultat
-        every { trygdeavgiftMottakerService.skalBetalesTilNav(nyesteBehandlingsresultat)} returns true
 
 
         årsavregningService.hentSisteBehandlingsresultatMedInnvilgetMedlemskapsperiodeOgAvgiftsgrunnlag("123456", 2023)
@@ -252,50 +248,11 @@ internal class ÅrsavregningServiceTest {
         every { fagsakService.hentFagsak("123456") } returns aktivFagsak
         every { behandlingsresultatService.hentBehandlingsresultat(1) } returns eldreBehandlingsresultat
         every { behandlingsresultatService.hentBehandlingsresultat(2) } returns nyesteBehandlingsresultat
-        every { trygdeavgiftMottakerService.skalBetalesTilNav(nyesteBehandlingsresultat)} returns true
 
 
         årsavregningService.hentSisteBehandlingsresultatMedInnvilgetMedlemskapsperiodeOgAvgiftsgrunnlag("123456", 2023)
             .shouldBe(eldreBehandlingsresultat)
         verify(exactly = 1) { behandlingsresultatService.hentBehandlingsresultat(any()) }
-    }
-
-    @Test
-    fun `henter ikke nyeste behandlingsresultat dersom trygdeavgiften bare skal betales til Skatteetaten `() {
-        val aktivFagsak = FagsakTestFactory.Builder().saksnummer("123456").build()
-
-        val eldreBehandlingsresultat = lagTidligereBehandlingsresultat().apply {
-            id = 1
-            behandling = Behandling().apply behandling@{
-                id = 1
-                status = Behandlingsstatus.AVSLUTTET
-                fagsak = aktivFagsak.apply { leggTilBehandling(this@behandling) }
-            }
-            registrertDato = LocalDate.of(2023, 1, 1).atStartOfDay().toInstant(ZoneOffset.UTC)
-            medlemskapsperioder = listOf(lagMedlemskapsperiode("2023-09-01", "2023-12-31").apply { trygdeavgiftsperioder = null })
-        }
-
-        val nyesteBehandlingsresultat = lagTidligereBehandlingsresultat().apply {
-            id = 2
-            behandling = Behandling().apply behandling@{
-                id = 2
-                status = Behandlingsstatus.AVSLUTTET
-                fagsak = aktivFagsak.apply { leggTilBehandling(this@behandling) }
-            }
-            registrertDato = LocalDate.of(2023, 1, 10).atStartOfDay().toInstant(ZoneOffset.UTC)
-            medlemskapsperioder = listOf(lagMedlemskapsperiode("2023-01-01", "2023-08-31").apply { trygdeavgiftsperioder = null })
-        }
-
-
-        every { fagsakService.hentFagsak("123456") } returns aktivFagsak
-        every { behandlingsresultatService.hentBehandlingsresultat(1) } returns eldreBehandlingsresultat
-        every { behandlingsresultatService.hentBehandlingsresultat(2) } returns nyesteBehandlingsresultat
-        every { trygdeavgiftMottakerService.skalBetalesTilNav(nyesteBehandlingsresultat)} returns false
-
-
-        årsavregningService.hentSisteBehandlingsresultatMedInnvilgetMedlemskapsperiodeOgAvgiftsgrunnlag("123456", 2023)
-            .shouldBe(null)
-        verify(exactly = 2) { behandlingsresultatService.hentBehandlingsresultat(any()) }
     }
 
     fun lagTidligereBehandlingsresultat(): Behandlingsresultat = Behandlingsresultat().apply {
