@@ -32,6 +32,7 @@ class SkattehendelserConsumer(
     @Autowired private val behandlingService: BehandlingService,
     @Autowired private val behandlingsresultatService: BehandlingsresultatService,
     @Autowired private val årsavregningService: ÅrsavregningService,
+    @Autowired private val trygdeavgiftMottakerService: TrygdeavgiftMottakerService,
 ) {
 
     @KafkaListener(
@@ -61,12 +62,14 @@ class SkattehendelserConsumer(
     private fun finnSakMedTrygdeavgift(aktørId: String, år: Int): List<Fagsak> {
         return fagsakService.hentFagsakerMedAktør(Aktoersroller.BRUKER, aktørId)
             .filter {
-                årsavregningService.hentSisteBehandlingsresultatMedInnvilgetMedlemskapsperiodeOgAvgiftsgrunnlag(it.saksnummer, år) != null
+                val behandlingsresultat =
+                    årsavregningService.hentSisteBehandlingsresultatMedInnvilgetMedlemskapsperiodeOgAvgiftsgrunnlag(it.saksnummer, år)
+                (behandlingsresultat != null && trygdeavgiftMottakerService.skalBetalesTilNav(behandlingsresultat))
             }
     }
 
     private fun skalOpprettArsavregningsBehandlingProsessflyt(sakMedTrygdeavgift: Fagsak, gjelderÅr: Int): Boolean {
-        val behandling = finnAktivÅrsavregningBehandling(sakMedTrygdeavgift, gjelderÅr)?: return true;
+        val behandling = finnAktivÅrsavregningBehandling(sakMedTrygdeavgift, gjelderÅr) ?: return true
 
         log.info { "Årsavregning behandling(${behandling.id}) for sak: ${sakMedTrygdeavgift.saksnummer} og år: $gjelderÅr er allerede opprettet" }
         if (behandling.status != Behandlingsstatus.OPPRETTET) {
