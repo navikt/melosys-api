@@ -211,7 +211,7 @@ class SkattehendelserConsumerTest {
                 SAKSNUMMER,
                 GJELDER_ÅR
             )
-        } returns null
+        } returns behandlingsresultat
 
 
         every { prosessinstansService.opprettArsavregningsBehandlingProsessflyt(any(), any()) } returns mockk<UUID>()
