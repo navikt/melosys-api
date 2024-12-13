@@ -67,22 +67,14 @@ class SkattehendelserConsumer(
     }
 
     private fun skalOpprettArsavregningsBehandlingProsessflyt(sakMedTrygdeavgift: Fagsak, gjelderÅr: Int): Boolean {
-        val sisteRegistrertBehandlingID = sakMedTrygdeavgift.hentSistRegistrertBehandlingIkkeÅrsavregning().id
-        val sisteBehandlingsresultat = behandlingsresultatService.hentBehandlingsresultat(sisteRegistrertBehandlingID)
+        val behandling = finnAktivÅrsavregningBehandling(sakMedTrygdeavgift, gjelderÅr)
 
+        if (behandling == null) {
+            val sisteRegistrertBehandlingID = sakMedTrygdeavgift.hentSistRegistrertBehandlingIkkeÅrsavregning().id ?: return true
+            val sisteBehandlingsresultat = behandlingsresultatService.hentBehandlingsresultat(sisteRegistrertBehandlingID)
 
-
-        val behandling = finnAktivÅrsavregningBehandling(sakMedTrygdeavgift, gjelderÅr) ?: return true
-
-        if(behandling == null){
-            if(!trygdeavgiftMottakerService.skalBetalesTilNav(sisteBehandlingsresultat)){
-                return false
-            }
-
-            return true
+            return trygdeavgiftMottakerService.skalBetalesTilNav(sisteBehandlingsresultat)
         }
-
-
 
         log.info { "Årsavregning behandling(${behandling.id}) for sak: ${sakMedTrygdeavgift.saksnummer} og år: $gjelderÅr er allerede opprettet" }
         if (behandling.status != Behandlingsstatus.OPPRETTET) {
