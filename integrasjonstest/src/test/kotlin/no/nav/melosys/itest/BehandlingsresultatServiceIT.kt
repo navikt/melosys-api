@@ -49,7 +49,7 @@ class BehandlingsresultatServiceIT(
     data class Behandlinger(val orginal: Behandling, val replika: Behandling)
 
     @Test
-    fun replikerBehandlingOgBehandlingsresultat_relasjonerBlirRiktigIDb() {
+    fun `id i database blir riktig etter replikerting`() {
         val behandlinger = lagFagsakMedBehandlinger()
 
         val behandlingsresultat = lagBehandlingsresultat(behandlinger.orginal)
@@ -78,6 +78,17 @@ class BehandlingsresultatServiceIT(
         assertThat(replikaResultat.vilkaarsresultater.flatMap { it.begrunnelser })
             .singleElement()
             .matches { it.vilkaarsresultat.id == replikaResultat.vilkaarsresultater.first().id }
+    }
+
+    @Test
+    fun `medlem av folketrygden skal kun ha innvilget når Behandlingstype ikke er MANGLENDE_INNBETALING_TRYGDEAVGIFT`() {
+        val behandlinger = lagFagsakMedBehandlinger()
+
+        val behandlingsresultat = lagBehandlingsresultat(behandlinger.orginal)
+        behandlingsresultatRepository.save(behandlingsresultat)
+        replikerBehandlingsresultatService.replikerBehandlingsresultat(behandlinger.orginal, behandlinger.replika)
+
+        val replikaResultat = behandlingsresultatRepository.findById(behandlinger.replika.id).get()
 
         assertThat(
             behandlingsresultat.toMap(
