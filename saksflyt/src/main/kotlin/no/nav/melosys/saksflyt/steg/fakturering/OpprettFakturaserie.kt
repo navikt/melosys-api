@@ -77,7 +77,9 @@ class OpprettFakturaserie(
         trygdeavgiftService.harFakturerbarTrygdeavgift(behandlingsresultat)
 
     private fun andregangsvurderingHarFjernetTrygdeavgift(behandling: Behandling, behandlingsresultat: Behandlingsresultat): Boolean =
-        behandling.erAndregangsbehandling() && harOpprinneligBehandlingFakturerbarTrygdeavgift(behandling) && !trygdeavgiftService.harFakturerbarTrygdeavgift(behandlingsresultat)
+        behandling.erAndregangsbehandling()
+            && harOpprinneligBehandlingFakturerbarTrygdeavgift(behandling)
+            && !trygdeavgiftService.harFakturerbarTrygdeavgift(behandlingsresultat)
 
     private fun harOpprinneligBehandlingFakturerbarTrygdeavgift(behandling: Behandling): Boolean =
         behandling.opprinneligBehandling?.let {
@@ -135,7 +137,7 @@ class OpprettFakturaserie(
             return DEFAULT_PENSJON_DEKNING_TEKST_HELSEDEL
         }
 
-        return trygdeavgiftsperiode.grunnlagMedlemskapsperiode!!.trygdedekning.beskrivelse
+        return trygdeavgiftsperiode.grunnlagMedlemskapsperiodeNotNull.trygdedekning.beskrivelse
     }
 
     companion object {

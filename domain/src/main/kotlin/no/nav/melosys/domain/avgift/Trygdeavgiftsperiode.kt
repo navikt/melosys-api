@@ -38,10 +38,11 @@ class Trygdeavgiftsperiode(
     val grunnlagSkatteforholdTilNorge: SkatteforholdTilNorge? = null
 ) : ErPeriode {
 
-    fun harAvgift(): Boolean {
-        return BigDecimal.ZERO.compareTo(trygdesats) != 0 &&
-            BigDecimal.ZERO.compareTo(trygdeavgiftsbeløpMd.verdi) != 0
-    }
+    val grunnlagMedlemskapsperiodeNotNull: Medlemskapsperiode
+        get() = grunnlagMedlemskapsperiode ?: throw IllegalStateException("grunnlagMedlemskapsperiode er null")
+
+    fun harAvgift(): Boolean =
+        BigDecimal.ZERO.compareTo(trygdesats) != 0 && BigDecimal.ZERO.compareTo(trygdeavgiftsbeløpMd.verdi) != 0
 
     override fun getFom(): LocalDate = periodeFra
 
@@ -56,18 +57,16 @@ class Trygdeavgiftsperiode(
         grunnlagInntekstperiode: Inntektsperiode? = this.grunnlagInntekstperiode,
         grunnlagMedlemskapsperiode: Medlemskapsperiode? = this.grunnlagMedlemskapsperiode,
         grunnlagSkatteforholdTilNorge: SkatteforholdTilNorge? = this.grunnlagSkatteforholdTilNorge
-    ): Trygdeavgiftsperiode {
-        return Trygdeavgiftsperiode(
-            id = id,
-            periodeFra = periodeFra,
-            periodeTil = periodeTil,
-            trygdeavgiftsbeløpMd = trygdeavgiftsbeløpMd,
-            trygdesats = trygdesats,
-            grunnlagInntekstperiode = grunnlagInntekstperiode,
-            grunnlagMedlemskapsperiode = grunnlagMedlemskapsperiode,
-            grunnlagSkatteforholdTilNorge = grunnlagSkatteforholdTilNorge
-        )
-    }
+    ) = Trygdeavgiftsperiode(
+        id = id,
+        periodeFra = periodeFra,
+        periodeTil = periodeTil,
+        trygdeavgiftsbeløpMd = trygdeavgiftsbeløpMd,
+        trygdesats = trygdesats,
+        grunnlagInntekstperiode = grunnlagInntekstperiode,
+        grunnlagMedlemskapsperiode = grunnlagMedlemskapsperiode,
+        grunnlagSkatteforholdTilNorge = grunnlagSkatteforholdTilNorge
+    )
 
     override fun toString(): String {
         return "Trygdeavgiftsperiode(id=$id, periodeFra=$periodeFra, periodeTil=$periodeTil, " +
@@ -98,5 +97,4 @@ class Trygdeavgiftsperiode(
             grunnlagSkatteforholdTilNorge
         ).hashCode()
     }
-
 }

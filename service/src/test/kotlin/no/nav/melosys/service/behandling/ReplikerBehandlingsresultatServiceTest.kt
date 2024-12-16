@@ -219,8 +219,8 @@ class ReplikerBehandlingsresultatServiceTest {
             .matches { it.periodeTil == trygdeavgiftsperiodeOriginal.periodeTil }
             .matches { it.trygdeavgiftsbeløpMd == trygdeavgiftsperiodeOriginal.trygdeavgiftsbeløpMd }
             .matches { it.trygdesats == trygdeavgiftsperiodeOriginal.trygdesats }
-            .matches { it.grunnlagMedlemskapsperiode!!.id == null }
-            .matches { it.grunnlagMedlemskapsperiode!!.trygdedekning == innvilgetMedlemskapsperiodeOriginal.trygdedekning }
+            .matches { it.grunnlagMedlemskapsperiodeNotNull.id == null }
+            .matches { it.grunnlagMedlemskapsperiodeNotNull.trygdedekning == innvilgetMedlemskapsperiodeOriginal.trygdedekning }
             .matches { it.grunnlagInntekstperiode!!.id == null }
             .matches { it.grunnlagInntekstperiode!!.avgiftspliktigMndInntekt == inntektsperiodeOriginal.avgiftspliktigMndInntekt }
             .matches { it.grunnlagSkatteforholdTilNorge!!.id == null }
