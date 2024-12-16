@@ -120,7 +120,7 @@ internal class OppdaterOgFerdigstillJournalpostTest {
     @Test
     fun utfør_mottakerKanalErEessi_setterIkkeAvsender() {
         val prosessinstans = lagProsessinstans().apply {
-            setData(ProsessDataKey.MOTTAKSKANAL_ER_EESSI, true)
+            setData(ProsessDataKey.MOTTAKSKANAL_ER_ELEKTRONISK, true)
         }
 
 
