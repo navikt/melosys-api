@@ -76,7 +76,7 @@ class JournalfoeringService(
             utledMottaksdato(journalfoeringDto.mottattDato, journalpost),
             UtledBehandlingsaarsak.utledÅrsaktype(journalpost, sakstema, behandlingstema, behandlingstype),
             finnInstitusjonIdEllerNull(journalfoeringDto.avsenderID),
-            journalpost.mottaksKanalErEessi()
+            journalpost.mottaksKanalErElektronisk()
         )
         log.info("Ny sak bestilt etter journalføring av journalpost {}", journalfoeringDto.journalpostID)
     }
@@ -95,7 +95,7 @@ class JournalfoeringService(
             saksnummer,
             fagsak,
             finnInstitusjonIdEllerNull(journalfoeringDto.avsenderID),
-            journalpost.mottaksKanalErEessi()
+            journalpost.mottaksKanalErElektronisk()
         )
     }
 
@@ -123,7 +123,7 @@ class JournalfoeringService(
             UtledBehandlingsaarsak.utledÅrsaktype(journalpost, fagsak.tema, behandlingstema, behandlingstype),
             utledMottaksdato(journalfoeringDto.mottattDato, journalpost),
             finnInstitusjonIdEllerNull(journalfoeringDto.avsenderID),
-            journalpost.mottaksKanalErEessi()
+            journalpost.mottaksKanalErElektronisk()
         )
     }
 
