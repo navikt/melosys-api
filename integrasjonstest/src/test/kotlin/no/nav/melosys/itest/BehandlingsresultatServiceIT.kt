@@ -1,7 +1,15 @@
 package no.nav.melosys.itest
 
+import com.fasterxml.jackson.databind.JsonNode
+import com.fasterxml.jackson.databind.SerializationFeature
+import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule
+import com.fasterxml.jackson.module.kotlin.jacksonObjectMapper
 import io.getunleash.FakeUnleash
 import no.nav.melosys.domain.*
+import no.nav.melosys.domain.avgift.Inntektsperiode
+import no.nav.melosys.domain.avgift.Penger
+import no.nav.melosys.domain.avgift.SkatteforholdTilNorge
+import no.nav.melosys.domain.avgift.Trygdeavgiftsperiode
 import no.nav.melosys.domain.avklartefakta.Avklartefakta
 import no.nav.melosys.domain.avklartefakta.AvklartefaktaRegistrering
 import no.nav.melosys.domain.kodeverk.*
@@ -23,11 +31,12 @@ import org.assertj.core.api.Assertions.assertThat
 import org.junit.jupiter.api.Test
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.context.annotation.Import
+import java.math.BigDecimal
 import java.time.Instant
 import java.time.LocalDate
 
 @Import(value = [ReplikerBehandlingsresultatService::class, BehandlingsresultatService::class, SaksbehandlingRegler::class, FakeUnleash::class, VilkaarsresultatService::class])
-internal class BehandlingsresultatServiceIT(
+class BehandlingsresultatServiceIT(
     @Autowired
     private val behandlingRepository: BehandlingRepository,
     @Autowired
@@ -69,6 +78,14 @@ internal class BehandlingsresultatServiceIT(
         assertThat(replikaResultat.vilkaarsresultater.flatMap { it.begrunnelser })
             .singleElement()
             .matches { it.vilkaarsresultat.id == replikaResultat.vilkaarsresultater.first().id }
+
+        assertThat(
+            behandlingsresultat.toMap(
+            // Filterer bort medlemskapsperioder som ikke er innvilget siden dette ikke replikeres
+            medlemskapsperiodeFilter = { it.innvilgelsesresultat == InnvilgelsesResultat.INNVILGET }
+        ).toJsonSting).isEqualTo(
+            replikaResultat.toMap().toJsonSting
+        )
     }
 
     private fun lagFagsakMedBehandlinger(): Behandlinger {
@@ -203,11 +220,165 @@ internal class BehandlingsresultatServiceIT(
                     sendtUtland = LocalDate.now()
                 }
             )
+
+            val medlemskapsperiode = lagMedlemskapsperiode(InnvilgelsesResultat.INNVILGET)
+            medlemskapsperiode.trygdeavgiftsperioder.add(
+                lagTrygdeavgiftsperiode(grunnlagInntekstperiode = medlemskapsperiode)
+            )
+            br.addMedlemskapsperiode(medlemskapsperiode)
+            br.leggTilMedlemskapsperiode(InnvilgelsesResultat.AVSLAATT)
+            br.leggTilMedlemskapsperiode(InnvilgelsesResultat.OPPHØRT)
         }
+
+    private fun Behandlingsresultat.leggTilMedlemskapsperiode(innvilgelsesResultat: InnvilgelsesResultat): Medlemskapsperiode =
+        lagMedlemskapsperiode(innvilgelsesResultat).also {
+            this.addMedlemskapsperiode(it)
+        }
+
+    private fun lagMedlemskapsperiode(innvilgelsesResultat: InnvilgelsesResultat): Medlemskapsperiode =
+        Medlemskapsperiode().apply {
+            innvilgelsesresultat = innvilgelsesResultat
+            medlPeriodeID = 77L
+            fom = LocalDate.now()
+            tom = LocalDate.now()
+            medlemskapstype = Medlemskapstyper.PLIKTIG
+            trygdedekning = Trygdedekninger.FTRL_2_9_FØRSTE_LEDD_C_HELSE_PENSJON
+            medlPeriodeID = 123L
+            bestemmelse = Folketrygdloven_kap2_bestemmelser.FTRL_KAP2_2_8_FØRSTE_LEDD_A
+        }
+
+    private fun lagTrygdeavgiftsperiode(grunnlagInntekstperiode: Medlemskapsperiode) = Trygdeavgiftsperiode(
+        periodeFra = LocalDate.now(),
+        periodeTil = LocalDate.now(),
+        trygdeavgiftsbeløpMd = Penger(500.0),
+        trygdesats = BigDecimal(50),
+        grunnlagInntekstperiode = Inntektsperiode().apply {
+            fomDato = LocalDate.now()
+            tomDato = LocalDate.now()
+            type = Inntektskildetype.INNTEKT_FRA_UTLANDET
+            avgiftspliktigMndInntekt = Penger(1000.0)
+            isArbeidsgiversavgiftBetalesTilSkatt = false
+        },
+        grunnlagSkatteforholdTilNorge = SkatteforholdTilNorge().apply {
+            fomDato = LocalDate.now()
+            tomDato = LocalDate.now()
+            skatteplikttype = Skatteplikttype.SKATTEPLIKTIG
+        },
+        grunnlagMedlemskapsperiode = grunnlagInntekstperiode
+    )
 
     private fun RegistreringsInfo.leggTilRegisteringInfo() {
         registrertDato = Instant.now()
         endretDato = Instant.now()
         endretAv = "bla"
     }
+
+    fun Behandlingsresultat.toMap(
+        medlemskapsperiodeFilter: (Medlemskapsperiode) -> Boolean = { true }
+    ): Map<String, Any?> = mapOf(
+        "fastsattAvLand" to fastsattAvLand,
+        "begrunnelseFritekst" to begrunnelseFritekst,
+        "innledningFritekst" to innledningFritekst,
+        "trygdeavgiftFritekst" to trygdeavgiftFritekst,
+        "nyVurderingBakgrunn" to nyVurderingBakgrunn,
+        "fakturaserieReferanse" to fakturaserieReferanse,
+        "avklartefakta" to avklartefakta.map {
+            it.run {
+                mapOf(
+                    "type" to type,
+                    "referanse" to referanse,
+                    "subjekt" to subjekt,
+                    "fakta" to fakta,
+                    "begrunnelseFritekst" to begrunnelseFritekst,
+                    "registreringer" to registreringer.map { r ->
+                        r.run {
+                            mapOf(
+                                "begrunnelseKode" to begrunnelseKode,
+                            )
+                        }
+                    }
+                )
+            }
+        },
+        "lovvalgsperioder" to lovvalgsperioder.map {
+            it.run {
+                mapOf(
+                    "fom" to fom,
+                    "tom" to tom,
+                    "innvilgelsesresultat" to innvilgelsesresultat,
+                    "medlemskapstype" to medlemskapstype,
+                    "dekning" to dekning,
+                    "bestemmelse" to bestemmelse,
+                    "tilleggsbestemmelse" to tilleggsbestemmelse
+                )
+            }
+        },
+        "utpekingsperioder" to utpekingsperioder.map {
+            it.run {
+                mapOf(
+                    "fom" to fom,
+                    "tom" to tom,
+                    "lovvalgsland" to lovvalgsland,
+                    "bestemmelse" to bestemmelse,
+                    "tilleggsbestemmelse" to tilleggsbestemmelse,
+                )
+            }
+        },
+        "vilkaarsresultater" to vilkaarsresultater.map { vr ->
+            mapOf(
+                "vilkaar" to vr.vilkaar,
+                "oppfylt" to vr.isOppfylt,
+                "begrunnelser" to vr.begrunnelser.map { mapOf("kode" to it.kode) }
+            )
+        },
+        "kontrollresultater" to kontrollresultater.map { mapOf("begrunnelse" to it.begrunnelse) },
+        "medlemskapsperioder" to medlemskapsperioder.filter { medlemskapsperiodeFilter(it) }.map { mp ->
+            mp.run {
+                mapOf(
+                    "fom" to fom,
+                    "tom" to tom,
+                    "innvilgelsesresultat" to innvilgelsesresultat,
+                    "trygdedekning" to trygdedekning,
+                    "trygdeavgiftsperioder" to trygdeavgiftsperioder.map { tp ->
+                        mapOf(
+                            "grunnlagSkatteforholdTilNorge" to tp.grunnlagSkatteforholdTilNorge?.run {
+                                mapOf<String, Any>(
+                                    "fomDato" to fomDato,
+                                    "tomDato" to tomDato,
+                                    "skatteplikttype" to skatteplikttype
+                                )
+                            },
+                            "grunnlagInntekstperiode" to tp.grunnlagInntekstperiode?.run {
+                                mapOf(
+                                    "fomDato" to fomDato,
+                                    "tomDato" to tomDato,
+                                    "type" to type,
+                                    "avgiftspliktigMndInntekt" to avgiftspliktigMndInntekt.verdi,
+                                    "arbeidsgiversavgiftBetalesTilSkatt" to isArbeidsgiversavgiftBetalesTilSkatt
+                                )
+                            },
+                        )
+                    }
+                )
+            }
+        },
+        "behandlingsresultatBegrunnelser" to behandlingsresultatBegrunnelser.map { mapOf("kode" to it.kode) },
+        "årsavregning" to årsavregning?.run {
+            mapOf(
+                "aar" to aar,
+                "tidligereFakturertBeloep" to tidligereFakturertBeloep,
+                "nyttTotalbeloep" to nyttTotalbeloep,
+                "tilFaktureringBeloep" to tilFaktureringBeloep,
+            )
+        },
+        "trygdeavgiftType" to trygdeavgiftType
+    )
+
+    private val Any.toJsonSting: String
+        get() {
+            return jacksonObjectMapper()
+                .configure(SerializationFeature.WRITE_DATES_AS_TIMESTAMPS, false)
+                .registerModule(JavaTimeModule())
+                .valueToTree<JsonNode>(this).toPrettyString()
+        }
 }
