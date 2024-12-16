@@ -16,12 +16,6 @@ import java.lang.reflect.InvocationTargetException
 class ReplikerBehandlingsresultatService(val behandlingsresultatService: BehandlingsresultatService) {
 
     @Transactional(rollbackFor = [Exception::class])
-    @Throws(
-        InvocationTargetException::class,
-        NoSuchMethodException::class,
-        InstantiationException::class,
-        IllegalAccessException::class
-    )
     fun replikerBehandlingsresultat(tidligsteInaktiveBehandling: Behandling, behandlingReplika: Behandling) {
         val behandlingsresultatOriginal: Behandlingsresultat =
             behandlingsresultatService.hentBehandlingsresultat(tidligsteInaktiveBehandling.id)
@@ -68,12 +62,6 @@ class ReplikerBehandlingsresultatService(val behandlingsresultatService: Behandl
 
 }
 
-@Throws(
-    InvocationTargetException::class,
-    NoSuchMethodException::class,
-    InstantiationException::class,
-    IllegalAccessException::class
-)
 private fun replikerMedlemskapsperioderBasertPåBehandlingstype(
     behandlingsresultatOriginal: Behandlingsresultat,
     behandlingsresultatReplika: Behandlingsresultat,
@@ -94,12 +82,6 @@ private fun replikerMedlemskapsperioderBasertPåBehandlingstype(
     }
 }
 
-@Throws(
-    InvocationTargetException::class,
-    NoSuchMethodException::class,
-    InstantiationException::class,
-    IllegalAccessException::class
-)
 private fun replikerTrygdeavgift(
     behandlingsresultatOriginal: Behandlingsresultat,
     behandlingsresultatReplika: Behandlingsresultat,
@@ -115,7 +97,7 @@ private fun replikerTrygdeavgift(
         it.trygdeavgiftsperioder = HashSet()
     }
 
-     behandlingsresultatOriginal.trygdeavgiftsperioder.forEach { trygdeavgiftsperiodeOriginal ->
+    behandlingsresultatOriginal.trygdeavgiftsperioder.forEach { trygdeavgiftsperiodeOriginal ->
         trygdeavgiftsperiodeOriginal.copyEntity(
             id = null,
             grunnlagMedlemskapsperiode = behandlingsresultatReplika.medlemskapsperioder
@@ -127,20 +109,14 @@ private fun replikerTrygdeavgift(
             grunnlagSkatteforholdTilNorge = skatteforholdTilNorgeReplika
                 .find { it.id == trygdeavgiftsperiodeOriginal.grunnlagSkatteforholdTilNorge?.id }?.also { it.id = null }
                 ?: throw IllegalStateException("SkatteforholdTilNorge ikke funnet"),
-        ).also {
-            it.grunnlagMedlemskapsperiode?.run {
-                trygdeavgiftsperioder.add(it)
-            }?: throw IllegalStateException("Medlemskapsperiode ikke funnet (dette skal ikke kunne skje)")
+        ).also { trygdeavgiftsperiodeReplika ->
+            trygdeavgiftsperiodeReplika.grunnlagMedlemskapsperiode?.run {
+                trygdeavgiftsperioder.add(trygdeavgiftsperiodeReplika)
+            } ?: throw IllegalStateException("Medlemskapsperiode ikke funnet (dette skal ikke kunne skje)")
         }
     }
 }
 
-@Throws(
-    InvocationTargetException::class,
-    NoSuchMethodException::class,
-    InstantiationException::class,
-    IllegalAccessException::class
-)
 private fun replikerUtpekingsperioder(
     behandlingsresultatOrig: Behandlingsresultat,
     behandlingsresultatsReplika: Behandlingsresultat
@@ -156,12 +132,6 @@ private fun replikerUtpekingsperioder(
     }
 }
 
-@Throws(
-    InvocationTargetException::class,
-    NoSuchMethodException::class,
-    InstantiationException::class,
-    IllegalAccessException::class
-)
 private fun replikerAnmodningsperioder(
     behandlingsresultatOrig: Behandlingsresultat,
     behandlingsresultatReplika: Behandlingsresultat
@@ -178,12 +148,6 @@ private fun replikerAnmodningsperioder(
     }
 }
 
-@Throws(
-    IllegalAccessException::class,
-    InstantiationException::class,
-    InvocationTargetException::class,
-    NoSuchMethodException::class
-)
 private fun replikerVilkaarsresultat(
     behandlingsresultatOrig: Behandlingsresultat,
     behandlingsresultatReplika: Behandlingsresultat
@@ -270,12 +234,6 @@ private fun replikerAvklartefakta(
     }
 }
 
-@Throws(
-    InvocationTargetException::class,
-    NoSuchMethodException::class,
-    InstantiationException::class,
-    IllegalAccessException::class
-)
 private fun replikerKontrollResultater(
     behandlingsresultatOrig: Behandlingsresultat,
     behandlingsresultatReplika: Behandlingsresultat
