@@ -94,32 +94,28 @@ internal class ÅrsavregningControllerTest {
                 )
             ),
             tidligereAvgift = listOf(
-                Trygdeavgiftsperiode().apply {
-                    periodeFra = LocalDate.parse("2023-01-01")
-                    periodeTil = LocalDate.parse("2023-07-31")
+                Trygdeavgiftsperiode(periodeFra = LocalDate.parse("2023-01-01"),
+                    periodeTil = LocalDate.parse("2023-07-31"),
                     grunnlagInntekstperiode = Inntektsperiode().apply {
                         fomDato = LocalDate.parse("2023-01-01")
                         tomDato = LocalDate.parse("2023-07-31")
                         type = Inntektskildetype.ARBEIDSINNTEKT_FRA_NORGE
                         isArbeidsgiversavgiftBetalesTilSkatt = true
                         avgiftspliktigMndInntekt = Penger(40000.0)
-                    }
-                    trygdesats = BigDecimal(0.0)
-                    trygdeavgiftsbeløpMd = Penger(0.0)
-                },
-                Trygdeavgiftsperiode().apply {
-                    periodeFra = LocalDate.parse("2023-08-01")
-                    periodeTil = LocalDate.parse("2023-12-31")
+                    },
+                    trygdesats = BigDecimal(0.0),
+                    trygdeavgiftsbeløpMd = Penger(0.0)),
+                Trygdeavgiftsperiode(periodeFra = LocalDate.parse("2023-08-01"),
+                    periodeTil = LocalDate.parse("2023-12-31"),
                     grunnlagInntekstperiode = Inntektsperiode().apply {
-                        fomDato = LocalDate.parse("2023-01-01")
-                        tomDato = LocalDate.parse("2023-07-31")
-                        type = Inntektskildetype.INNTEKT_FRA_UTLANDET
-                        isArbeidsgiversavgiftBetalesTilSkatt = false
-                        avgiftspliktigMndInntekt = Penger(15000.0)
-                    }
-                    trygdesats = BigDecimal(42.2)
-                    trygdeavgiftsbeløpMd = Penger(6330.0)
-                }
+                    fomDato = LocalDate.parse("2023-01-01")
+                    tomDato = LocalDate.parse("2023-07-31")
+                    type = Inntektskildetype.INNTEKT_FRA_UTLANDET
+                    isArbeidsgiversavgiftBetalesTilSkatt = false
+                    avgiftspliktigMndInntekt = Penger(15000.0)
+                },
+                    trygdesats = BigDecimal(42.2),
+                    trygdeavgiftsbeløpMd = Penger(6330.0))
             ),
             nyttGrunnlag = null,
             endeligAvgift = emptyList(),
@@ -260,19 +256,19 @@ internal class ÅrsavregningControllerTest {
                 )
             ),
             tidligereAvgift = listOf(
-                Trygdeavgiftsperiode().apply {
-                    periodeFra = LocalDate.parse("2023-01-01")
-                    periodeTil = LocalDate.parse("2023-12-31")
+                Trygdeavgiftsperiode(
+                    periodeFra = LocalDate.parse("2023-01-01"),
+                    periodeTil = LocalDate.parse("2023-12-31"),
                     grunnlagInntekstperiode = Inntektsperiode().apply {
-                        fomDato = LocalDate.parse("2023-01-01")
-                        tomDato = LocalDate.parse("2023-12-31")
-                        type = Inntektskildetype.ARBEIDSINNTEKT
-                        isArbeidsgiversavgiftBetalesTilSkatt = false
-                        avgiftspliktigMndInntekt = Penger(85000.0)
-                    }
-                    trygdesats = BigDecimal(7.9)
+                    fomDato = LocalDate.parse("2023-01-01")
+                    tomDato = LocalDate.parse("2023-12-31")
+                    type = Inntektskildetype.ARBEIDSINNTEKT
+                    isArbeidsgiversavgiftBetalesTilSkatt = false
+                    avgiftspliktigMndInntekt = Penger(85000.0)
+                },
+                    trygdesats = BigDecimal(7.9),
                     trygdeavgiftsbeløpMd = Penger(6715.0)
-                }
+                )
             ),
             nyttGrunnlag = Trygdeavgiftsgrunnlag(
                 medlemskapsperioder = listOf(
@@ -304,27 +300,25 @@ internal class ÅrsavregningControllerTest {
                 )
 
             ),
-            endeligAvgift = listOf(Trygdeavgiftsperiode().apply {
-                id = 14
-                periodeFra = LocalDate.of(2023, 1, 1)
-                periodeTil = LocalDate.of(2023, 12, 31)
-                trygdeavgiftsbeløpMd = Penger(559.0)
-                trygdesats = 7.9.toBigDecimal()
+            endeligAvgift = listOf(Trygdeavgiftsperiode(id = 14,
+                periodeFra = LocalDate.of(2023, 1, 1),
+                periodeTil = LocalDate.of(2023, 12, 31),
+                trygdeavgiftsbeløpMd = Penger(559.0),
+                trygdesats = 7.9.toBigDecimal(),
                 grunnlagInntekstperiode = Inntektsperiode().apply {
-                    id = 14
-                    fomDato = LocalDate.of(2023, 1, 1)
-                    tomDato = LocalDate.of(2023, 12, 31)
-                    type = Inntektskildetype.ARBEIDSINNTEKT
-                    avgiftspliktigTotalinntekt = Penger(85000.0)
-                    isArbeidsgiversavgiftBetalesTilSkatt = false
-                }
+                id = 14
+                fomDato = LocalDate.of(2023, 1, 1)
+                tomDato = LocalDate.of(2023, 12, 31)
+                type = Inntektskildetype.ARBEIDSINNTEKT
+                avgiftspliktigTotalinntekt = Penger(85000.0)
+                isArbeidsgiversavgiftBetalesTilSkatt = false
+            },
                 grunnlagSkatteforholdTilNorge = SkatteforholdTilNorge().apply {
-                    id = 14
-                    fomDato = LocalDate.of(2023, 1, 1)
-                    tomDato = LocalDate.of(2023, 12, 31)
-                    skatteplikttype = Skatteplikttype.IKKE_SKATTEPLIKTIG
-                }
-            }),
+                id = 14
+                fomDato = LocalDate.of(2023, 1, 1)
+                tomDato = LocalDate.of(2023, 12, 31)
+                skatteplikttype = Skatteplikttype.IKKE_SKATTEPLIKTIG
+            })),
             tidligereFakturertBeloep = BigDecimal(80580.0),
             nyttTotalbeloep = BigDecimal(6708.0),
             tilFaktureringBeloep = BigDecimal(-73872.0)

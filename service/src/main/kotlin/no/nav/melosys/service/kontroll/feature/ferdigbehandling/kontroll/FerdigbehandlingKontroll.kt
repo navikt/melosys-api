@@ -1,6 +1,7 @@
 package no.nav.melosys.service.kontroll.feature.ferdigbehandling.kontroll
 
 import no.nav.melosys.domain.Lovvalgsperiode
+import no.nav.melosys.domain.avgift.Trygdeavgiftsperiode
 import no.nav.melosys.domain.kodeverk.LovvalgBestemmelse
 import no.nav.melosys.domain.kodeverk.begrunnelser.Kontroll_begrunnelser
 import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingsstatus
@@ -21,6 +22,7 @@ import no.nav.melosys.service.kontroll.feature.arbeidutland.kontroll.ArbeidUtlan
 import no.nav.melosys.service.kontroll.feature.arbeidutland.kontroll.ArbeidUtlandKontroll.Companion.offshoreArbeidsstedManglerFelter
 import no.nav.melosys.service.kontroll.feature.arbeidutland.kontroll.ArbeidUtlandKontroll.Companion.selvstendigUtlandManglerFelter
 import no.nav.melosys.service.kontroll.feature.ferdigbehandling.data.FerdigbehandlingKontrollData
+import no.nav.melosys.service.kontroll.feature.ferdigbehandling.data.TrygdeavgiftsperiodeData
 import no.nav.melosys.service.kontroll.regler.ArbeidsstedRegler
 import no.nav.melosys.service.kontroll.regler.OverlappendeMedlemskapsperioderRegler
 import no.nav.melosys.service.kontroll.regler.PeriodeRegler
@@ -29,17 +31,27 @@ import no.nav.melosys.service.validering.Kontrollfeil
 import java.time.LocalDate
 
 object FerdigbehandlingKontroll {
+
+    fun harOverlappendePeriodeMedForskuddsvisFakturering(kontrollData: FerdigbehandlingKontrollData): Kontrollfeil? {
+        val trygdeavgiftperiodeData = kontrollData.trygdeavgiftperiodeData ?: return null
+        if (trygdeavgiftperiodeData.nyeTrygdeavgiftsperioder.isEmpty()) return null
+
+        return if (harOverlappendePeriodeMedForskuddsvisFakturering(trygdeavgiftperiodeData)) {
+            Kontrollfeil(
+                Kontroll_begrunnelser.OVERLAPPENDE_PERIODE_MED_FORSKUDDSVIS_FAKTURERUNG,
+                KontrolldataFeilType.ADVARSEL
+            )
+        } else null
+    }
+
+
     fun overlappendePeriode(kontrollData: FerdigbehandlingKontrollData): Kontrollfeil? {
         val medlemskapDokument = kontrollData.medlemskapDokument
         val medlemskapsperiodeData = kontrollData.medlemskapsperiodeData
 
         if (medlemskapsperiodeData != null && medlemskapsperiodeData.harNyeMedlemskapsperioder()) {
-             if (OverlappendeMedlemskapsperioderRegler.harOverlappendePeriode(medlemskapDokument, medlemskapsperiodeData))
+            if (OverlappendeMedlemskapsperioderRegler.harOverlappendePeriode(medlemskapDokument, medlemskapsperiodeData))
                 return Kontrollfeil(Kontroll_begrunnelser.OVERLAPPENDE_MEDL_PERIODER, KontrolldataFeilType.FEIL)
-
-            if (OverlappendeMedlemskapsperioderRegler.harOverlappendePeriodeMedForskuddsvisFakturering(medlemskapsperiodeData)) {
-                return Kontrollfeil(Kontroll_begrunnelser.OVERLAPPENDE_PERIODE_MED_FORSKUDDSVIS_FAKTURERUNG, KontrolldataFeilType.ADVARSEL)
-            }
 
             return null
         }
@@ -101,7 +113,7 @@ object FerdigbehandlingKontroll {
     fun periodeOver24Mnd(kontrollData: FerdigbehandlingKontrollData): Kontrollfeil? {
         val lovvalgsperiode = kontrollData.hentLovvalgsperiode()
 
-        if (!lovvalgsperiode.erAvslått() && erBestemmelseDerInnvilgetMedlemskapsperiodeIkkeKanOverskride24mnd(lovvalgsperiode?.bestemmelse) &&
+        if (!lovvalgsperiode.erAvslått() && erBestemmelseDerInnvilgetMedlemskapsperiodeIkkeKanOverskride24mnd(lovvalgsperiode.bestemmelse) &&
             PeriodeRegler.periodeOver24Måneder(lovvalgsperiode.fom, lovvalgsperiode.tom)
         ) {
             return Kontrollfeil(Kontroll_begrunnelser.PERIODEN_OVER_24_MD)
@@ -201,20 +213,37 @@ object FerdigbehandlingKontroll {
     }
 
     fun direkteForutgåendePeriode(kontrollData: FerdigbehandlingKontrollData): Kontrollfeil? {
-        val medlemskapsperiodeData = kontrollData.medlemskapsperiodeData
+        val trygdeavgiftPeriodeData = kontrollData.trygdeavgiftperiodeData ?: return null
 
-        if (medlemskapsperiodeData != null) {
-            for (nyPeriode in medlemskapsperiodeData.nyeMedlemskapsperioderMedAvgift) {
-                for (tidligereMedlemskapsperiode in medlemskapsperiodeData.tidligereMedlemskapsperioderForBukerMedAvgift) {
-                    if (nyPeriode.fom == tidligereMedlemskapsperiode.tom?.plusDays(1)) {
-                        return Kontrollfeil(Kontroll_begrunnelser.DIREKTE_FORUTGÅENDE_PERIODE, KontrolldataFeilType.ADVARSEL)
-                    }
-                }
+        trygdeavgiftPeriodeData.nyeTrygdeavgiftsperioder.forEach { nyPeriode ->
+            if (trygdeavgiftPeriodeData.tidligereTrygdeavgiftsperioder.any { it.tom.plusDays(1) == nyPeriode.fom }) {
+                return Kontrollfeil(
+                    Kontroll_begrunnelser.DIREKTE_FORUTGÅENDE_PERIODE,
+                    KontrolldataFeilType.ADVARSEL
+                )
             }
         }
-
         return null
     }
+
+    private fun harOverlappendePeriodeMedForskuddsvisFakturering(
+        trygdeavgiftsperiodeData: TrygdeavgiftsperiodeData
+    ): Boolean = trygdeavgiftsperiodeData.nyeTrygdeavgiftsperioder.any { nyTrygdeavgiftsperiode ->
+        harOverlappMedTidligerePerioder(
+            nyTrygdeavgiftsperiode,
+            trygdeavgiftsperiodeData.tidligereTrygdeavgiftsperioder
+        )
+    }
+
+    private fun harOverlappMedTidligerePerioder(
+        nyTrygdeavgiftsperiode: Trygdeavgiftsperiode, tidligereTrygdeavgiftsperioder: List<Trygdeavgiftsperiode>
+    ): Boolean = tidligereTrygdeavgiftsperioder.any { tidligereMedlemskapsperiode: Trygdeavgiftsperiode? ->
+        PeriodeRegler.periodeOverlapper(
+            nyTrygdeavgiftsperiode,
+            tidligereMedlemskapsperiode
+        )
+    }
+
 
     fun åpentUtkastFinnes(kontrollData: FerdigbehandlingKontrollData): Kontrollfeil? =
         if (kontrollData.brevUtkast.isEmpty()) null else Kontrollfeil(Kontroll_begrunnelser.ÅPENT_UTKAST)

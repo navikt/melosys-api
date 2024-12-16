@@ -183,8 +183,8 @@ class InnvilgelseFtrlMapper(
                 it.periodeTil,
                 it.trygdesats,
                 it.trygdeavgiftsbeløpMd.verdi,
-                it.grunnlagInntekstperiode.type,
-                it.grunnlagInntekstperiode.avgiftspliktigMndInntekt?.verdi ?: BigDecimal.ZERO,
+                it.grunnlagInntekstperiode!!.type,
+                it.grunnlagInntekstperiode!!.avgiftspliktigMndInntekt?.verdi ?: BigDecimal.ZERO,
             )
         }.sortedByDescending { it.fom }
     }
@@ -197,7 +197,7 @@ class InnvilgelseFtrlMapper(
         if (trygdeavgiftmottaker == Trygdeavgiftmottaker.TRYGDEAVGIFT_BETALES_TIL_SKATT) {
             return true
         }
-        return behandlingsresultat.trygdeavgiftsperioder?.any { it.grunnlagInntekstperiode.isArbeidsgiversavgiftBetalesTilSkatt } ?: false
+        return behandlingsresultat.trygdeavgiftsperioder?.any { it.grunnlagInntekstperiode!!.isArbeidsgiversavgiftBetalesTilSkatt } ?: false
     }
 
     private fun finnFullmektigTrygdeavgift(behandling: Behandling): String? {

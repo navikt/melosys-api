@@ -100,14 +100,14 @@ class ÅrsavregningController(
                 AvgiftDto(
                     trygdeavgiftsperioder = trygdeavgiftsperioder.filter { it.grunnlagInntekstperiode != null }
                         .map {
-                            val avgiftspliktigMndInntekt = it.grunnlagInntekstperiode.kalkulertMndInntekt(verdiAvrundet = true)
+                            val avgiftspliktigMndInntekt = it.grunnlagInntekstperiode!!.kalkulertMndInntekt(verdiAvrundet = true)
 
                             TrygdeavgiftsperiodeDto(
                                 fom = it.fom,
                                 tom = it.tom,
-                                inntektskildetype = it.grunnlagInntekstperiode.type,
+                                inntektskildetype = it.grunnlagInntekstperiode!!.type,
                                 inntektPerMd = avgiftspliktigMndInntekt,
-                                arbeidsgiversavgiftBetales = it.grunnlagInntekstperiode.isArbeidsgiversavgiftBetalesTilSkatt,
+                                arbeidsgiversavgiftBetales = it.grunnlagInntekstperiode!!.isArbeidsgiversavgiftBetalesTilSkatt,
                                 avgiftssats = it.trygdesats.toDouble(),
                                 avgiftPerMd = it.trygdeavgiftsbeløpMd.verdi.intValueExact()
                             )

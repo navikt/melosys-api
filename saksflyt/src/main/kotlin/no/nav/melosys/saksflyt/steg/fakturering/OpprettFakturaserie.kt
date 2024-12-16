@@ -77,7 +77,9 @@ class OpprettFakturaserie(
         trygdeavgiftService.harFakturerbarTrygdeavgift(behandlingsresultat)
 
     private fun andregangsvurderingHarFjernetTrygdeavgift(behandling: Behandling, behandlingsresultat: Behandlingsresultat): Boolean =
-        behandling.erAndregangsbehandling() && harOpprinneligBehandlingFakturerbarTrygdeavgift(behandling) && !trygdeavgiftService.harFakturerbarTrygdeavgift(behandlingsresultat)
+        behandling.erAndregangsbehandling()
+            && harOpprinneligBehandlingFakturerbarTrygdeavgift(behandling)
+            && !trygdeavgiftService.harFakturerbarTrygdeavgift(behandlingsresultat)
 
     private fun harOpprinneligBehandlingFakturerbarTrygdeavgift(behandling: Behandling): Boolean =
         behandling.opprinneligBehandling?.let {
@@ -121,7 +123,7 @@ class OpprettFakturaserie(
                 it.trygdeavgiftsbeløpMd.verdi,
                 it.periodeFra,
                 it.periodeTil,
-                "Inntekt: ${it.grunnlagInntekstperiode.avgiftspliktigMndInntekt.verdi}, " +
+                "Inntekt: ${it.grunnlagInntekstperiode!!.avgiftspliktigMndInntekt.verdi}, " +
                     "Dekning: ${mapDekning(it)}, " +
                     "Sats: ${it.trygdesats} %"
             )
@@ -129,13 +131,13 @@ class OpprettFakturaserie(
     }
 
     private fun mapDekning(trygdeavgiftsperiode: Trygdeavgiftsperiode): String {
-        if (trygdeavgiftsperiode.grunnlagInntekstperiode.type === Inntektskildetype.PENSJON_UFØRETRYGD ||
-            trygdeavgiftsperiode.grunnlagInntekstperiode.type === Inntektskildetype.PENSJON_UFØRETRYGD_KILDESKATT
+        if (trygdeavgiftsperiode.grunnlagInntekstperiode!!.type === Inntektskildetype.PENSJON_UFØRETRYGD ||
+            trygdeavgiftsperiode.grunnlagInntekstperiode!!.type === Inntektskildetype.PENSJON_UFØRETRYGD_KILDESKATT
         ) {
             return DEFAULT_PENSJON_DEKNING_TEKST_HELSEDEL
         }
 
-        return trygdeavgiftsperiode.grunnlagMedlemskapsperiode.trygdedekning.beskrivelse
+        return trygdeavgiftsperiode.grunnlagMedlemskapsperiodeNotNull.trygdedekning.beskrivelse
     }
 
     companion object {

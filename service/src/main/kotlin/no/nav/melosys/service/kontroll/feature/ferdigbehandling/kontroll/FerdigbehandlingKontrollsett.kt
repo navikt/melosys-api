@@ -48,6 +48,7 @@ object FerdigbehandlingKontrollsett {
         Function { FerdigbehandlingKontroll.adresseRegistrert(it) },
         Function { FerdigbehandlingKontroll.overlappendePeriode(it) },
         Function { FerdigbehandlingKontroll.åpentUtkastFinnes(it) },
+        Function { FerdigbehandlingKontroll.harOverlappendePeriodeMedForskuddsvisFakturering(it) },
         Function { FerdigbehandlingKontroll.direkteForutgåendePeriode(it) })
 
     private val REGELSETT_TRYGDEAVTALER: Regelsett = setOf(

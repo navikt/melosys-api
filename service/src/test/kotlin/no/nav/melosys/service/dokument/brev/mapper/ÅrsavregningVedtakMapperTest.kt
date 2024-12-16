@@ -151,7 +151,7 @@ class ÅrsavregningVedtakMapperTest {
         val endeligAvgift = listOf(lagEndeligTrygdeavgiftsperiode())
         val tidligereAvgift = listOf(lagTidligereTrygdeavgiftsperiode())
 
-        val grunnlagMedlemskap = Trygdeavgiftsgrunnlag(emptyList(), emptyList(), emptyList());
+        val grunnlagMedlemskap = Trygdeavgiftsgrunnlag(emptyList(), emptyList(), emptyList())
 
         return ÅrsavregningModel(
             årsavregningID = 112,
@@ -167,58 +167,45 @@ class ÅrsavregningVedtakMapperTest {
     }
 
     private fun lagEndeligTrygdeavgiftsperiode(): Trygdeavgiftsperiode {
-        val periode = Trygdeavgiftsperiode()
-        periode.periodeFra = LocalDate.of(2023, 1, 1)
-        periode.periodeTil = LocalDate.of(2023, 12, 31)
+        return Trygdeavgiftsperiode(
+            periodeFra = LocalDate.of(2023, 1, 1),
+            periodeTil = LocalDate.of(2023, 12, 31),
+            trygdeavgiftsbeløpMd = Penger(BigDecimal(500)),
+            trygdesats = BigDecimal(1000),
 
-        val penger = Penger()
-        penger.verdi = BigDecimal(500)
-        periode.trygdeavgiftsbeløpMd = penger
+            grunnlagInntekstperiode = Inntektsperiode().apply {
+                avgiftspliktigMndInntekt = Penger(BigDecimal(2800), NOK.kode)
+                type = Inntektskildetype.INNTEKT_FRA_UTLANDET
+                isArbeidsgiversavgiftBetalesTilSkatt = true
+            },
 
-        periode.trygdesats = BigDecimal(1000)
+            grunnlagMedlemskapsperiode = Medlemskapsperiode().apply {
+                trygdedekning = Trygdedekninger.FULL_DEKNING
+            },
 
-        val inntektsperiode = Inntektsperiode()
-        inntektsperiode.avgiftspliktigMndInntekt = Penger(BigDecimal(2800), NOK.kode)
-        inntektsperiode.type = Inntektskildetype.INNTEKT_FRA_UTLANDET
-        inntektsperiode.isArbeidsgiversavgiftBetalesTilSkatt = true
-        periode.grunnlagInntekstperiode = inntektsperiode
-
-        val medlemskapsperiode = Medlemskapsperiode()
-        medlemskapsperiode.trygdedekning = Trygdedekninger.FULL_DEKNING
-        periode.grunnlagMedlemskapsperiode = medlemskapsperiode
-
-        val skatteforhold = SkatteforholdTilNorge()
-        skatteforhold.skatteplikttype = Skatteplikttype.SKATTEPLIKTIG
-        periode.grunnlagSkatteforholdTilNorge = skatteforhold
-
-        return periode
+            grunnlagSkatteforholdTilNorge = SkatteforholdTilNorge().apply {
+                skatteplikttype = Skatteplikttype.SKATTEPLIKTIG
+            })
     }
 
-    private fun lagTidligereTrygdeavgiftsperiode(): Trygdeavgiftsperiode {
-        val periode = Trygdeavgiftsperiode()
-        periode.periodeFra = LocalDate.of(2023, 1, 1)
-        periode.periodeTil = LocalDate.of(2023, 12, 31)
+    private fun lagTidligereTrygdeavgiftsperiode() =
+        Trygdeavgiftsperiode(
+            periodeFra = LocalDate.of(2023, 1, 1),
+            periodeTil = LocalDate.of(2023, 12, 31),
+            trygdeavgiftsbeløpMd = Penger(BigDecimal(450)),
+            trygdesats = BigDecimal(900),
 
-        val penger = Penger()
-        penger.verdi = BigDecimal(450)
-        periode.trygdeavgiftsbeløpMd = penger
+            grunnlagInntekstperiode = Inntektsperiode().apply {
+                avgiftspliktigMndInntekt = Penger(BigDecimal(2800), NOK.kode)
+                type = Inntektskildetype.INNTEKT_FRA_UTLANDET
+                isArbeidsgiversavgiftBetalesTilSkatt = false
+            },
 
-        periode.trygdesats = BigDecimal(900)
+            grunnlagMedlemskapsperiode = Medlemskapsperiode().apply {
+                trygdedekning = Trygdedekninger.FULL_DEKNING
+            },
 
-        val inntektsperiode = Inntektsperiode()
-        inntektsperiode.avgiftspliktigMndInntekt = Penger(BigDecimal(2800), NOK.kode)
-        inntektsperiode.type = Inntektskildetype.INNTEKT_FRA_UTLANDET
-        inntektsperiode.isArbeidsgiversavgiftBetalesTilSkatt = false
-        periode.grunnlagInntekstperiode = inntektsperiode
-
-        val medlemskapsperiode = Medlemskapsperiode()
-        medlemskapsperiode.trygdedekning = Trygdedekninger.FULL_DEKNING
-        periode.grunnlagMedlemskapsperiode = medlemskapsperiode
-
-        val skatteforhold = SkatteforholdTilNorge()
-        skatteforhold.skatteplikttype = Skatteplikttype.IKKE_SKATTEPLIKTIG
-        periode.grunnlagSkatteforholdTilNorge = skatteforhold
-
-        return periode
-    }
+            grunnlagSkatteforholdTilNorge = SkatteforholdTilNorge().apply {
+                skatteplikttype = Skatteplikttype.IKKE_SKATTEPLIKTIG
+            })
 }

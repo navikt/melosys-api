@@ -5,6 +5,7 @@ import io.mockk.impl.annotations.MockK
 import io.mockk.junit5.MockKExtension
 import no.nav.melosys.domain.Medlemskapsperiode
 import no.nav.melosys.domain.avgift.Inntektsperiode
+import no.nav.melosys.domain.avgift.Penger
 import no.nav.melosys.domain.avgift.SkatteforholdTilNorge
 import no.nav.melosys.domain.avgift.Trygdeavgiftsperiode
 import no.nav.melosys.domain.kodeverk.Inntektskildetype
@@ -12,11 +13,14 @@ import no.nav.melosys.domain.kodeverk.Inntektskildetype.*
 import no.nav.melosys.domain.kodeverk.Skatteplikttype
 import no.nav.melosys.domain.kodeverk.Trygdeavgiftmottaker.*
 import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingsresultattyper
+import no.nav.melosys.integrasjon.trygdeavgift.dto.NOK
 import no.nav.melosys.service.behandling.BehandlingsresultatService
 import no.nav.melosys.service.saksbehandling.lagBehandlingsresultat
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.extension.ExtendWith
+import java.math.BigDecimal
+import java.time.LocalDate
 
 @ExtendWith(MockKExtension::class)
 internal class TrygdeavgiftMottakerServiceTest {
@@ -336,13 +340,14 @@ internal class TrygdeavgiftMottakerServiceTest {
     fun lagTrygdeavgiftsperiode(
         skatteforholdTilNorge: SkatteforholdTilNorge,
         inntektsperiode: Inntektsperiode
-    ): Trygdeavgiftsperiode {
-        val trygdeavgiftsperiode = Trygdeavgiftsperiode().apply {
-            grunnlagInntekstperiode = inntektsperiode
-            grunnlagSkatteforholdTilNorge = skatteforholdTilNorge
-        }
-        return trygdeavgiftsperiode
-    }
+    ) = Trygdeavgiftsperiode(
+        grunnlagInntekstperiode = inntektsperiode,
+        grunnlagSkatteforholdTilNorge = skatteforholdTilNorge,
+        periodeTil = LocalDate.now(),
+        periodeFra = LocalDate.now(),
+        trygdesats = BigDecimal(1),
+        trygdeavgiftsbeløpMd = Penger(BigDecimal(1), NOK.kode)
+    )
 
     fun lagInntektsperiode(
         arbeidsgiversavgiftBetalesTilSkatt: Boolean,

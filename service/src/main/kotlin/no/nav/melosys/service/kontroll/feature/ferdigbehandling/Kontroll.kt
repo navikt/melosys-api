@@ -19,6 +19,7 @@ import no.nav.melosys.service.ftrl.medlemskapsperiode.MedlemskapsperiodeService
 import no.nav.melosys.service.kontroll.feature.ferdigbehandling.data.FerdigbehandlingKontrollData
 import no.nav.melosys.service.kontroll.feature.ferdigbehandling.data.MedlemskapsperiodeData
 import no.nav.melosys.service.kontroll.feature.ferdigbehandling.data.SaksopplysningerData
+import no.nav.melosys.service.kontroll.feature.ferdigbehandling.data.TrygdeavgiftsperiodeData
 import no.nav.melosys.service.kontroll.feature.ferdigbehandling.kontroll.FerdigbehandlingKontrollsett.hentRegelsettForAvslagOgHenleggelse
 import no.nav.melosys.service.kontroll.feature.ferdigbehandling.kontroll.FerdigbehandlingKontrollsett.hentRegelsettForVedtak
 import no.nav.melosys.service.persondata.PersondataFasade
@@ -149,8 +150,8 @@ class Kontroll(
             behandlingsresultatService.finnAlleTidligereBehandlingsresultatForAktør(behandling.fagsak.hentBrukersAktørID(), behandling.id)
                 .filter { trygdeavgiftService.harFakturerbarTrygdeavgift(it) }
 
-        val tidligereMedlemskapsperioderMedAvgift = tidligereBehandlingsresultaterMedAvgift.flatMap { it.medlemskapsperioder }
-        val nyeMedlemskapsperioderMedAvgift = medlemskapsperioder.filter { trygdeavgiftService.harFakturerbarTrygdeavgift(it.behandlingsresultat) }
+        val tidligereTrygdeavgiftsPerioder = tidligereBehandlingsresultaterMedAvgift.flatMap { it.trygdeavgiftsperioder }
+        val nyeTrygdeavgifsperioder = behandlingsresultatService.hentBehandlingsresultat(behandling.id).trygdeavgiftsperioder.toList()
 
         return FerdigbehandlingKontrollData(
             medlemskapDokument = medlemskapsdokument,
@@ -162,10 +163,12 @@ class Kontroll(
             medlemskapsperiodeData = MedlemskapsperiodeData(
                 medlemskapsperioder,
                 tidligereMedlemskapsperioder,
-                nyeMedlemskapsperioderMedAvgift,
-                tidligereMedlemskapsperioderMedAvgift
             ),
-            brevUtkast = utkastBrevService.hentUtkast(behandling.id)
+            brevUtkast = utkastBrevService.hentUtkast(behandling.id),
+            trygdeavgiftperiodeData = TrygdeavgiftsperiodeData(
+                nyeTrygdeavgifsperioder,
+                tidligereTrygdeavgiftsPerioder
+            )
         )
     }
 

@@ -3,7 +3,6 @@ package no.nav.melosys.service.behandling
 import no.nav.melosys.domain.*
 import no.nav.melosys.domain.avgift.Inntektsperiode
 import no.nav.melosys.domain.avgift.SkatteforholdTilNorge
-import no.nav.melosys.domain.avgift.Trygdeavgiftsperiode
 import no.nav.melosys.domain.avklartefakta.Avklartefakta
 import no.nav.melosys.domain.avklartefakta.AvklartefaktaRegistrering
 import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingsresultattyper
@@ -17,12 +16,6 @@ import java.lang.reflect.InvocationTargetException
 class ReplikerBehandlingsresultatService(val behandlingsresultatService: BehandlingsresultatService) {
 
     @Transactional(rollbackFor = [Exception::class])
-    @Throws(
-        InvocationTargetException::class,
-        NoSuchMethodException::class,
-        InstantiationException::class,
-        IllegalAccessException::class
-    )
     fun replikerBehandlingsresultat(tidligsteInaktiveBehandling: Behandling, behandlingReplika: Behandling) {
         val behandlingsresultatOriginal: Behandlingsresultat =
             behandlingsresultatService.hentBehandlingsresultat(tidligsteInaktiveBehandling.id)
@@ -69,12 +62,6 @@ class ReplikerBehandlingsresultatService(val behandlingsresultatService: Behandl
 
 }
 
-@Throws(
-    InvocationTargetException::class,
-    NoSuchMethodException::class,
-    InstantiationException::class,
-    IllegalAccessException::class
-)
 private fun replikerMedlemskapsperioderBasertPåBehandlingstype(
     behandlingsresultatOriginal: Behandlingsresultat,
     behandlingsresultatReplika: Behandlingsresultat,
@@ -95,12 +82,6 @@ private fun replikerMedlemskapsperioderBasertPåBehandlingstype(
     }
 }
 
-@Throws(
-    InvocationTargetException::class,
-    NoSuchMethodException::class,
-    InstantiationException::class,
-    IllegalAccessException::class
-)
 private fun replikerTrygdeavgift(
     behandlingsresultatOriginal: Behandlingsresultat,
     behandlingsresultatReplika: Behandlingsresultat,
@@ -115,33 +96,27 @@ private fun replikerTrygdeavgift(
     behandlingsresultatReplika.medlemskapsperioder.forEach {
         it.trygdeavgiftsperioder = HashSet()
     }
-    for (trygdeavgiftsperiodeOriginal in behandlingsresultatOriginal.trygdeavgiftsperioder) {
-        val trygdeavgiftsperiodeReplika = BeanUtils.cloneBean(trygdeavgiftsperiodeOriginal) as Trygdeavgiftsperiode
 
-        trygdeavgiftsperiodeReplika.grunnlagMedlemskapsperiode = behandlingsresultatReplika.medlemskapsperioder
-            .find { it.id == trygdeavgiftsperiodeOriginal.grunnlagMedlemskapsperiode.id }
-        trygdeavgiftsperiodeReplika.grunnlagInntekstperiode =
-            inntektsperioderReplika.find { it.id == trygdeavgiftsperiodeOriginal.grunnlagInntekstperiode.id }
-        trygdeavgiftsperiodeReplika.grunnlagSkatteforholdTilNorge =
-            skatteforholdTilNorgeReplika.find { it.id == trygdeavgiftsperiodeOriginal.grunnlagSkatteforholdTilNorge.id }
-
-        trygdeavgiftsperiodeReplika.grunnlagMedlemskapsperiode.trygdeavgiftsperioder.add(trygdeavgiftsperiodeReplika)
-    }
-
-    behandlingsresultatReplika.trygdeavgiftsperioder.onEach {
-        it.id = null
-        it.grunnlagInntekstperiode?.id = null
-        it.grunnlagMedlemskapsperiode.id = null
-        it.grunnlagSkatteforholdTilNorge.id = null
+    behandlingsresultatOriginal.trygdeavgiftsperioder.forEach { trygdeavgiftsperiodeOriginal ->
+        trygdeavgiftsperiodeOriginal.copyEntity(
+            id = null,
+            grunnlagMedlemskapsperiode = behandlingsresultatReplika.medlemskapsperioder
+                .find { it.id == trygdeavgiftsperiodeOriginal.grunnlagMedlemskapsperiode?.id }?.also { it.id = null }
+                ?: throw IllegalStateException("Medlemskapsperiode ikke funnet"),
+            grunnlagInntekstperiode = inntektsperioderReplika
+                .find { it.id == trygdeavgiftsperiodeOriginal.grunnlagInntekstperiode?.id }?.also { it.id = null }
+                ?: throw IllegalStateException("Inntektsperiode ikke funnet"),
+            grunnlagSkatteforholdTilNorge = skatteforholdTilNorgeReplika
+                .find { it.id == trygdeavgiftsperiodeOriginal.grunnlagSkatteforholdTilNorge?.id }?.also { it.id = null }
+                ?: throw IllegalStateException("SkatteforholdTilNorge ikke funnet"),
+        ).also { trygdeavgiftsperiodeReplika ->
+            trygdeavgiftsperiodeReplika.grunnlagMedlemskapsperiode?.run {
+                trygdeavgiftsperioder.add(trygdeavgiftsperiodeReplika)
+            } ?: throw IllegalStateException("Medlemskapsperiode ikke funnet (dette skal ikke kunne skje)")
+        }
     }
 }
 
-@Throws(
-    InvocationTargetException::class,
-    NoSuchMethodException::class,
-    InstantiationException::class,
-    IllegalAccessException::class
-)
 private fun replikerUtpekingsperioder(
     behandlingsresultatOrig: Behandlingsresultat,
     behandlingsresultatsReplika: Behandlingsresultat
@@ -157,12 +132,6 @@ private fun replikerUtpekingsperioder(
     }
 }
 
-@Throws(
-    InvocationTargetException::class,
-    NoSuchMethodException::class,
-    InstantiationException::class,
-    IllegalAccessException::class
-)
 private fun replikerAnmodningsperioder(
     behandlingsresultatOrig: Behandlingsresultat,
     behandlingsresultatReplika: Behandlingsresultat
@@ -179,12 +148,6 @@ private fun replikerAnmodningsperioder(
     }
 }
 
-@Throws(
-    IllegalAccessException::class,
-    InstantiationException::class,
-    InvocationTargetException::class,
-    NoSuchMethodException::class
-)
 private fun replikerVilkaarsresultat(
     behandlingsresultatOrig: Behandlingsresultat,
     behandlingsresultatReplika: Behandlingsresultat
@@ -271,12 +234,6 @@ private fun replikerAvklartefakta(
     }
 }
 
-@Throws(
-    InvocationTargetException::class,
-    NoSuchMethodException::class,
-    InstantiationException::class,
-    IllegalAccessException::class
-)
 private fun replikerKontrollResultater(
     behandlingsresultatOrig: Behandlingsresultat,
     behandlingsresultatReplika: Behandlingsresultat

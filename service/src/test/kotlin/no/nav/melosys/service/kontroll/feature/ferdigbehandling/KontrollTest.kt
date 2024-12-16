@@ -8,10 +8,10 @@ import io.mockk.every
 import io.mockk.impl.annotations.MockK
 import io.mockk.impl.annotations.RelaxedMockK
 import io.mockk.junit5.MockKExtension
-import no.nav.melosys.domain.Aktoer
-import no.nav.melosys.domain.Lovvalgsperiode
-import no.nav.melosys.domain.Saksopplysning
-import no.nav.melosys.domain.SaksopplysningType
+import io.mockk.mockk
+import no.nav.melosys.domain.*
+import no.nav.melosys.domain.avgift.Penger
+import no.nav.melosys.domain.avgift.Trygdeavgiftsperiode
 import no.nav.melosys.domain.dokument.medlemskap.MedlemskapDokument
 import no.nav.melosys.domain.dokument.medlemskap.Medlemsperiode
 import no.nav.melosys.domain.dokument.medlemskap.Periode
@@ -31,6 +31,7 @@ import no.nav.melosys.domain.mottatteopplysninger.data.ForetakUtland
 import no.nav.melosys.domain.mottatteopplysninger.data.arbeidssteder.FysiskArbeidssted
 import no.nav.melosys.exception.KontrolldataFeilType
 import no.nav.melosys.integrasjon.medl.PeriodestatusMedl
+import no.nav.melosys.integrasjon.trygdeavgift.dto.NOK
 import no.nav.melosys.service.LovvalgsperiodeService
 import no.nav.melosys.service.SaksbehandlingDataFactory
 import no.nav.melosys.service.avgift.TrygdeavgiftService
@@ -46,6 +47,7 @@ import no.nav.melosys.service.saksbehandling.SaksbehandlingRegler
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.extension.ExtendWith
+import java.math.BigDecimal
 import java.time.LocalDate
 
 
@@ -288,6 +290,84 @@ internal class KontrollTest {
     }
 
     @Test
+    fun `trygdeavgiftsperioder med direkte forutgående periode, skal gi kontrollfeil, dersom fagsak er i annen periode`() {
+        behandling.fagsak.type = Sakstyper.FTRL
+
+        //Mock nye trygdeavgiftsperioder
+        every { behandlingsresultatService.hentBehandlingsresultat(any()).trygdeavgiftsperioder } returns setOf(
+            Trygdeavgiftsperiode(
+                periodeFra = LocalDate.of(2012, 12, 11),
+                periodeTil = LocalDate.of(2012, 12, 24),
+                trygdeavgiftsbeløpMd = Penger(BigDecimal.TEN, NOK.kode),
+                trygdesats = BigDecimal.TEN
+            )
+        )
+
+        val mockBehandlingsresultatMedTidligereTrygdeavgiftsperioder: Behandlingsresultat = mockk()
+        every { mockBehandlingsresultatMedTidligereTrygdeavgiftsperioder.trygdeavgiftsperioder } returns setOf(
+            Trygdeavgiftsperiode(
+                periodeFra = LocalDate.of(2012, 12, 1),
+                periodeTil = LocalDate.of(2012, 12, 10),
+                trygdeavgiftsbeløpMd = Penger(BigDecimal.TEN, NOK.kode),
+                trygdesats = BigDecimal.TEN
+            )
+        )
+        every {
+            behandlingsresultatService.finnAlleTidligereBehandlingsresultatForAktør(
+                any(),
+                any()
+            )
+        } returns listOf(mockBehandlingsresultatMedTidligereTrygdeavgiftsperioder)
+        every { trygdeavgiftService.harFakturerbarTrygdeavgift(mockBehandlingsresultatMedTidligereTrygdeavgiftsperioder) } returns true
+
+        val resultat = mockedKontroll.kontroller(behandlingID, Behandlingsresultattyper.MEDLEM_I_FOLKETRYGDEN, emptySet())
+
+        resultat.shouldHaveSize(1)
+            .single()
+            .kode shouldBe Kontroll_begrunnelser.DIREKTE_FORUTGÅENDE_PERIODE
+    }
+
+    @Test
+    fun `trygdeavgiftsperioder med overlappende periode, skal gi kontrollfeil, dersom fagsak er i annen periode`() {
+        behandling.fagsak.type = Sakstyper.FTRL
+
+        //Mock tidligere trygdeavgiftsperioder
+        every { behandlingsresultatService.hentBehandlingsresultat(any()).trygdeavgiftsperioder } returns setOf(
+            Trygdeavgiftsperiode(
+                periodeFra = LocalDate.of(2012, 12, 1),
+                periodeTil = LocalDate.of(2012, 12, 20),
+                trygdeavgiftsbeløpMd = Penger(BigDecimal.TEN, NOK.kode),
+                trygdesats = BigDecimal.TEN
+            )
+        )
+
+        val mockBehandlingsresultatMedNyeTrygdeavgiftsperioder: Behandlingsresultat = mockk()
+        every { mockBehandlingsresultatMedNyeTrygdeavgiftsperioder.trygdeavgiftsperioder } returns setOf(
+            Trygdeavgiftsperiode(
+                periodeFra = LocalDate.of(2012, 12, 11),
+                periodeTil = LocalDate.of(2012, 12, 24),
+                trygdeavgiftsbeløpMd = Penger(BigDecimal.TEN, NOK.kode),
+                trygdesats = BigDecimal.TEN
+            )
+        )
+        every {
+            behandlingsresultatService.finnAlleTidligereBehandlingsresultatForAktør(
+                any(),
+                any()
+            )
+        } returns listOf(mockBehandlingsresultatMedNyeTrygdeavgiftsperioder)
+        every { trygdeavgiftService.harFakturerbarTrygdeavgift(mockBehandlingsresultatMedNyeTrygdeavgiftsperioder) } returns true
+
+        val resultat = mockedKontroll.kontroller(behandlingID, Behandlingsresultattyper.MEDLEM_I_FOLKETRYGDEN, emptySet())
+
+        resultat.shouldNotBeEmpty()
+            .shouldHaveSize(1)
+            .run {
+                first().kode.shouldBe(Kontroll_begrunnelser.OVERLAPPENDE_PERIODE_MED_FORSKUDDSVIS_FAKTURERUNG)
+            }
+    }
+
+    @Test
     fun kontroller_periodeOver3År_returnererKode() {
         mockLovvalgsperiodeService()
         lovvalgsperiode.apply {
@@ -315,8 +395,7 @@ internal class KontrollTest {
         val resultat = mockedKontroll.kontroller(behandlingID, Behandlingsresultattyper.IKKE_FASTSATT, emptySet())
 
 
-        resultat.shouldNotBeEmpty()
-            .shouldHaveSize(1)
+        resultat.shouldHaveSize(1)
             .single().kode.shouldBe(Kontroll_begrunnelser.MANGLENDE_REGISTRERTE_ADRESSE_BRUKER)
     }
 
