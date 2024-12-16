@@ -201,6 +201,8 @@ public class Journalpost {
     }
 
     public boolean mottaksKanalErElektronisk() {
+        if (mottaksKanal == null) return false;
+
         return List.of("NAV_NO", "EESSI", "ALTINN", "NAV_NO_CHAT").contains(mottaksKanal);
     }
 
