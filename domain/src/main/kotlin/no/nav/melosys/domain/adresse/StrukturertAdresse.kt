@@ -59,10 +59,6 @@ class StrukturertAdresse : Adresse {
     }
 
     override fun toList(): List<String?> {
-        if(!Land_iso2.values().any { it.kode == landkode }) {
-            return listOf("Resident outside of Norway")
-        }
-
         return mutableListOf(
             tilleggsnavn, Adresse.sammenslå(gatenavn, husnummerEtasjeLeilighet),
             postboks, postnummer, poststed, region,
