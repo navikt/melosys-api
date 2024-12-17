@@ -161,6 +161,7 @@ class Kontroll(
             }
 
         val tidligereTrygdeavgiftsPerioderIAndreFagsaker = tidligereBehandlingsresultaterMedAvgiftIAndreFagsaker.flatMap { it.trygdeavgiftsperioder }
+        val testNyeBehandlinger = behandlingsresultatService.hentBehandlingsresultat(behandling.id)
         val nyeTrygdeavgifsperioder = behandlingsresultatService.hentBehandlingsresultat(behandling.id).trygdeavgiftsperioder.toList()
 
         return FerdigbehandlingKontrollData(

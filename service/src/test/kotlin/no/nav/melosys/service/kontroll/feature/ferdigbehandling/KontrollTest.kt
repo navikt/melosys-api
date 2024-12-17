@@ -382,7 +382,7 @@ internal class KontrollTest {
 
         val mockBehandlingsresultaterFraAndreFagsakerMedTrygdeavgiftsperioder: Behandlingsresultat = mockk()
         every { mockBehandlingsresultaterFraAndreFagsakerMedTrygdeavgiftsperioder.behandling} returns Behandling().apply {
-            fagsak = Fagsak(saksnummer = "test-321", status = Saksstatuser.OPPRETTET, tema = Sakstemaer.TRYGDEAVGIFT, type = Sakstyper.FTRL)
+            fagsak = Fagsak(saksnummer = "MEL-test", status = Saksstatuser.OPPRETTET, tema = Sakstemaer.TRYGDEAVGIFT, type = Sakstyper.FTRL)
         }
         every { mockBehandlingsresultaterFraAndreFagsakerMedTrygdeavgiftsperioder.trygdeavgiftsperioder } returns setOf(
             Trygdeavgiftsperiode(
@@ -402,7 +402,7 @@ internal class KontrollTest {
 
         val mockBehandlingsresultatMedNyeTrygdeavgiftsperioder: Behandlingsresultat = mockk()
         every { mockBehandlingsresultatMedNyeTrygdeavgiftsperioder.behandling} returns Behandling().apply {
-            fagsak = Fagsak(saksnummer = "test-321", status = Saksstatuser.OPPRETTET, tema = Sakstemaer.TRYGDEAVGIFT, type = Sakstyper.FTRL)
+            fagsak = Fagsak(saksnummer = "MEL-test", status = Saksstatuser.OPPRETTET, tema = Sakstemaer.TRYGDEAVGIFT, type = Sakstyper.FTRL)
         }
         every { mockBehandlingsresultatMedNyeTrygdeavgiftsperioder.trygdeavgiftsperioder } returns setOf(
             Trygdeavgiftsperiode(
@@ -427,7 +427,7 @@ internal class KontrollTest {
 
         val mockBehandlingsresultaterFraAndreFagsakerMedTrygdeavgiftsperioder: Behandlingsresultat = mockk()
         every { mockBehandlingsresultaterFraAndreFagsakerMedTrygdeavgiftsperioder.behandling} returns Behandling().apply {
-            fagsak = Fagsak(saksnummer = "test-321", status = Saksstatuser.OPPRETTET, tema = Sakstemaer.TRYGDEAVGIFT, type = Sakstyper.FTRL)
+            fagsak = Fagsak(saksnummer = "MEL-test", status = Saksstatuser.OPPRETTET, tema = Sakstemaer.TRYGDEAVGIFT, type = Sakstyper.FTRL)
         }
         every { mockBehandlingsresultaterFraAndreFagsakerMedTrygdeavgiftsperioder.trygdeavgiftsperioder } returns setOf(
             Trygdeavgiftsperiode(
@@ -447,7 +447,7 @@ internal class KontrollTest {
 
         val mockBehandlingsresultatMedNyeTrygdeavgiftsperioder: Behandlingsresultat = mockk()
         every { mockBehandlingsresultatMedNyeTrygdeavgiftsperioder.behandling} returns Behandling().apply {
-            fagsak = Fagsak(saksnummer = "test-321", status = Saksstatuser.OPPRETTET, tema = Sakstemaer.TRYGDEAVGIFT, type = Sakstyper.FTRL)
+            fagsak = Fagsak(saksnummer = "MEL-test", status = Saksstatuser.OPPRETTET, tema = Sakstemaer.TRYGDEAVGIFT, type = Sakstyper.FTRL)
         }
         every { mockBehandlingsresultatMedNyeTrygdeavgiftsperioder.trygdeavgiftsperioder } returns setOf(
             Trygdeavgiftsperiode(
