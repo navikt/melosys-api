@@ -19,6 +19,12 @@ internal class StrukturertAdresseTest {
     }
 
     @Test
+    fun `toList skal kun returnere strengen -Resident outside of Norway- som formatert liste når landkode ikke ligger i Land_iso2`() {
+        StrukturertAdresse("", "Singapore gate", "5C", "CO GG", "2040", null, "Singapore region", "SG").toList()
+            .shouldBe(listOf("Resident outside of Norway"))
+    }
+
+    @Test
     fun `erTom - alle variabler er satt - false`() {
         StrukturertAdresse("Tilleggsnavn", "Haraldsgate", "5C", "CO GG", "2040", "Kløfta", "Viken", "NO").erTom()
             .shouldBe(false)
