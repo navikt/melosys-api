@@ -204,7 +204,7 @@ internal class JournalfoeringServiceTest {
         verify {
             prosessinstansService.opprettProsessinstansJournalføringNySak(
                 opprettDto.tilJournalfoeringOpprettRequest(), ProsessType.JFR_NY_SAK_BRUKER, true, LocalDate.EPOCH,
-                Behandlingsaarsaktyper.SØKNAD, null, journalpost.mottaksKanalErEessi()
+                Behandlingsaarsaktyper.SØKNAD, null, journalpost.mottaksKanalErElektronisk()
             )
         }
     }
@@ -228,7 +228,7 @@ internal class JournalfoeringServiceTest {
         verify {
             prosessinstansService.opprettProsessinstansJournalføringNySak(
                 opprettDto.tilJournalfoeringOpprettRequest(), ProsessType.JFR_NY_SAK_VIRKSOMHET, false, LocalDate.EPOCH,
-                Behandlingsaarsaktyper.HENVENDELSE, INSTITUSJON_ID, journalpost.mottaksKanalErEessi()
+                Behandlingsaarsaktyper.HENVENDELSE, INSTITUSJON_ID, journalpost.mottaksKanalErElektronisk()
             )
         }
     }
@@ -307,7 +307,7 @@ internal class JournalfoeringServiceTest {
         verify {
             prosessinstansService.opprettProsessinstansJournalføringNySak(
                 capture(journalfoeringOpprettRequestSlot), ProsessType.JFR_NY_SAK_BRUKER, true, LocalDate.EPOCH,
-                Behandlingsaarsaktyper.SØKNAD, null, journalpost.mottaksKanalErEessi()
+                Behandlingsaarsaktyper.SØKNAD, null, journalpost.mottaksKanalErElektronisk()
             )
         }
         journalfoeringOpprettRequestSlot.captured.shouldNotBeNull().shouldBe(opprettDto.tilJournalfoeringOpprettRequest())
@@ -331,7 +331,7 @@ internal class JournalfoeringServiceTest {
         verify {
             prosessinstansService.opprettProsessinstansJournalføringNySak(
                 capture(journalfoeringOpprettRequestSlot), ProsessType.JFR_NY_SAK_BRUKER, true, LocalDate.EPOCH,
-                Behandlingsaarsaktyper.SØKNAD, null, journalpost.mottaksKanalErEessi()
+                Behandlingsaarsaktyper.SØKNAD, null, journalpost.mottaksKanalErElektronisk()
             )
         }
         journalfoeringOpprettRequestSlot.captured.shouldNotBeNull().shouldBe(opprettDto.tilJournalfoeringOpprettRequest())
@@ -354,7 +354,7 @@ internal class JournalfoeringServiceTest {
         verify {
             prosessinstansService.opprettProsessinstansJournalføringNySak(
                 opprettDto.tilJournalfoeringOpprettRequest(), ProsessType.JFR_NY_SAK_BRUKER, false, LocalDate.EPOCH,
-                Behandlingsaarsaktyper.HENVENDELSE, INSTITUSJON_ID, journalpost.mottaksKanalErEessi()
+                Behandlingsaarsaktyper.HENVENDELSE, INSTITUSJON_ID, journalpost.mottaksKanalErElektronisk()
             )
         }
     }
@@ -373,7 +373,7 @@ internal class JournalfoeringServiceTest {
         verify {
             prosessinstansService.opprettProsessinstansJournalføringNySak(
                 opprettDto.tilJournalfoeringOpprettRequest(), ProsessType.JFR_NY_SAK_BRUKER, false, LocalDate.EPOCH,
-                Behandlingsaarsaktyper.SØKNAD, INSTITUSJON_ID, journalpost.mottaksKanalErEessi()
+                Behandlingsaarsaktyper.SØKNAD, INSTITUSJON_ID, journalpost.mottaksKanalErElektronisk()
             )
         }
     }
@@ -393,7 +393,7 @@ internal class JournalfoeringServiceTest {
         verify {
             prosessinstansService.opprettProsessinstansJournalføringNySak(
                 opprettDto.tilJournalfoeringOpprettRequest(), ProsessType.JFR_NY_SAK_BRUKER, false, LocalDate.EPOCH,
-                Behandlingsaarsaktyper.SØKNAD, INSTITUSJON_ID, journalpost.mottaksKanalErEessi()
+                Behandlingsaarsaktyper.SØKNAD, INSTITUSJON_ID, journalpost.mottaksKanalErElektronisk()
             )
         }
     }
@@ -431,7 +431,7 @@ internal class JournalfoeringServiceTest {
         verify {
             prosessinstansService.opprettProsessinstansJournalføringNySak(
                 opprettDto.tilJournalfoeringOpprettRequest(), ProsessType.JFR_NY_SAK_BRUKER,
-                true, LocalDate.EPOCH, Behandlingsaarsaktyper.SØKNAD, INSTITUSJON_ID, journalpost.mottaksKanalErEessi()
+                true, LocalDate.EPOCH, Behandlingsaarsaktyper.SØKNAD, INSTITUSJON_ID, journalpost.mottaksKanalErElektronisk()
             )
         }
     }
@@ -450,7 +450,7 @@ internal class JournalfoeringServiceTest {
         verify {
             prosessinstansService.opprettProsessinstansJournalføringNySak(
                 opprettDto.tilJournalfoeringOpprettRequest(), ProsessType.JFR_NY_SAK_BRUKER,
-                false, LocalDate.EPOCH, Behandlingsaarsaktyper.SØKNAD, INSTITUSJON_ID, journalpost.mottaksKanalErEessi()
+                false, LocalDate.EPOCH, Behandlingsaarsaktyper.SØKNAD, INSTITUSJON_ID, journalpost.mottaksKanalErElektronisk()
             )
         }
     }
@@ -635,7 +635,7 @@ internal class JournalfoeringServiceTest {
         verify {
             prosessinstansService.opprettProsessinstansJournalføringKnyttTilEksisterende(
                 tilordneDto.tilJournalfoeringTilordneRequest(), tilordneDto.saksnummer,
-                fagsak, INSTITUSJON_ID, journalpost.mottaksKanalErEessi()
+                fagsak, INSTITUSJON_ID, journalpost.mottaksKanalErElektronisk()
             )
         }
     }
@@ -656,7 +656,7 @@ internal class JournalfoeringServiceTest {
         verify {
             prosessinstansService.opprettProsessinstansJournalføringKnyttTilEksisterende(
                 tilordneDto.tilJournalfoeringTilordneRequest(), tilordneDto.saksnummer,
-                fagsak, null, journalpost.mottaksKanalErEessi()
+                fagsak, null, journalpost.mottaksKanalErElektronisk()
             )
         }
     }
@@ -727,7 +727,7 @@ internal class JournalfoeringServiceTest {
                 Behandlingsaarsaktyper.ANNET,
                 LocalDate.EPOCH,
                 null,
-                journalpost.mottaksKanalErEessi()
+                journalpost.mottaksKanalErElektronisk()
             )
         }
     }
@@ -762,7 +762,7 @@ internal class JournalfoeringServiceTest {
                 Behandlingsaarsaktyper.HENVENDELSE,
                 LocalDate.EPOCH,
                 null,
-                journalpost.mottaksKanalErEessi()
+                journalpost.mottaksKanalErElektronisk()
             )
         }
     }
@@ -801,7 +801,7 @@ internal class JournalfoeringServiceTest {
                 Behandlingsaarsaktyper.SØKNAD,
                 LocalDate.EPOCH,
                 null,
-                journalpost.mottaksKanalErEessi()
+                journalpost.mottaksKanalErElektronisk()
             )
         }
     }

@@ -41,7 +41,7 @@ public enum ProsessDataKey {
     LOVVALGSBESTEMMELSE("lovvalgsbestemmelse"),
     LOVVALGSLAND("lovvalgsland"),
     MOTTAKER("mottaker"),
-    MOTTAKSKANAL_ER_EESSI("mottakskanalErEessi"),
+    MOTTAKSKANAL_ER_ELEKTRONISK("mottakskanalErElektronisk"),
     MOTTATT_DATO("mottattDato"),
     MOTTATT_SOKNAD_ID("mottattSoknadID"),
     OPPGAVE_ID("oppgaveID"),

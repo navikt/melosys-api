@@ -51,8 +51,8 @@ class OppdaterOgFerdigstillJournalpost(private val joarkFasade: JoarkFasade, pri
 
     private fun utledAvsenderNavn(prosessinstans: Prosessinstans, avsenderID: String?): String? {
         var avsenderNavn = prosessinstans.getData(ProsessDataKey.AVSENDER_NAVN)
-        val mottakskanalErEessi = prosessinstans.getMottakskanalErEessi()
-        if (avsenderNavn == null && !mottakskanalErEessi) {
+        val mottakskanalErElektronisk = prosessinstans.getMottakskanalErElektronisk()
+        if (avsenderNavn == null && !mottakskanalErElektronisk) {
             if (avsenderID == null) {
                 throw FunksjonellException("Både avsenderID og AvsenderNavn er null. AvsenderNavn er påkrevd for å journalføre.")
             }
@@ -69,7 +69,7 @@ class OppdaterOgFerdigstillJournalpost(private val joarkFasade: JoarkFasade, pri
         ProsessDataKey.FYSISKE_VEDLEGG, object : TypeReference<Map<String, String>>() {}, emptyMap()
     )
 
-    private fun Prosessinstans.getMottakskanalErEessi() = this.getData(
-        ProsessDataKey.MOTTAKSKANAL_ER_EESSI, Boolean::class.java, false
+    private fun Prosessinstans.getMottakskanalErElektronisk() = this.getData(
+        ProsessDataKey.MOTTAKSKANAL_ER_ELEKTRONISK, Boolean::class.java, false
     )
 }

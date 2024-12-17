@@ -333,7 +333,7 @@ class ProsessinstansServiceTest {
     }
 
     @Test
-    void opprettProsessinstansJournalføring_mottakskanalErEessi_setterIkkeAvsenderIProsessinstans() {
+    void opprettProsessinstansJournalføring_mottakskanalErElektronisk_setterIkkeAvsenderIProsessinstans() {
         JournalfoeringOpprettRequest journalfoeringOpprettRequest = lagJournalfoeringOpprettRequest();
         journalfoeringOpprettRequest.setAvsenderType(Avsendertyper.UTENLANDSK_TRYGDEMYNDIGHET);
         journalfoeringOpprettRequest.setAvsenderID("DK");
@@ -344,7 +344,7 @@ class ProsessinstansServiceTest {
         Prosessinstans prosessinstans = prosessinstansService.lagJournalføringProsessinstans(ProsessType.JFR_NY_SAK_BRUKER, journalfoeringOpprettRequest, institusjonsIdForDk, true);
 
 
-        assertThat(prosessinstans.getData(ProsessDataKey.MOTTAKSKANAL_ER_EESSI, Boolean.class)).isTrue();
+        assertThat(prosessinstans.getData(ProsessDataKey.MOTTAKSKANAL_ER_ELEKTRONISK, Boolean.class)).isTrue();
         assertThat(prosessinstans.getData(ProsessDataKey.AVSENDER_ID)).isNull();
         assertThat(prosessinstans.getData(ProsessDataKey.AVSENDER_LAND)).isNull();
         assertThat(prosessinstans.getData(ProsessDataKey.AVSENDER_NAVN)).isNull();
