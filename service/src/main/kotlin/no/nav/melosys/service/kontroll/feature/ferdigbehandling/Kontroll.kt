@@ -146,11 +146,21 @@ class Kontroll(
         val tidligereMedlemskapsperioder = behandling.fagsak.hentInaktiveBehandlinger()
             .map { medlemskapsperiodeService.hentMedlemskapsperioder(it.id) }.flatten()
         val medlemskapsdokument = behandling.hentMedlemskapDokument()
-        val tidligereBehandlingsresultaterMedAvgift =
-            behandlingsresultatService.finnAlleTidligereBehandlingsresultatForAktør(behandling.fagsak.hentBrukersAktørID(), behandling.id)
-                .filter { trygdeavgiftService.harFakturerbarTrygdeavgift(it) }
 
-        val tidligereTrygdeavgiftsPerioder = tidligereBehandlingsresultaterMedAvgift.flatMap { it.trygdeavgiftsperioder }
+        val tidligereBehandlingsResultat = behandlingsresultatService.finnAlleTidligereBehandlingsresultatForAktør(behandling.fagsak.hentBrukersAktørID(), behandling.id)
+        val tidligereBehandlingsresultaterMedAvgiftIAndreFagsaker = tidligereBehandlingsResultat
+            .filter {
+                val isDifferent = it.behandling.fagsak.saksnummer != behandling.fagsak.saksnummer
+                println("Comparing: ${it.behandling.fagsak.saksnummer} != ${behandling.fagsak.saksnummer} -> $isDifferent")
+                isDifferent
+            }
+            .filter {
+                val hasFakturerbar = trygdeavgiftService.harFakturerbarTrygdeavgift(it)
+                println("Trygdeavgift check for ${it}: $hasFakturerbar")
+                hasFakturerbar
+            }
+
+        val tidligereTrygdeavgiftsPerioderIAndreFagsaker = tidligereBehandlingsresultaterMedAvgiftIAndreFagsaker.flatMap { it.trygdeavgiftsperioder }
         val nyeTrygdeavgifsperioder = behandlingsresultatService.hentBehandlingsresultat(behandling.id).trygdeavgiftsperioder.toList()
 
         return FerdigbehandlingKontrollData(
@@ -167,7 +177,7 @@ class Kontroll(
             brevUtkast = utkastBrevService.hentUtkast(behandling.id),
             trygdeavgiftperiodeData = TrygdeavgiftsperiodeData(
                 nyeTrygdeavgifsperioder,
-                tidligereTrygdeavgiftsPerioder
+                tidligereTrygdeavgiftsPerioderIAndreFagsaker
             )
         )
     }
