@@ -171,6 +171,24 @@ class TrygdeavtaleMapperTest {
     }
 
     @Test
+    void map_bostedadresseUtenforLandIso2_kasterFeil() {
+        mockHappyCase();
+
+        var persondata = TrygdeavtaleAdresseSjekkerTest.lagPersonopplysninger(Land_iso2.NO, Land_iso2.NO, Land_iso2.NO, Optional.of("SG"), Optional.of("SG"), Optional.of("SG"));
+        InnvilgelseBrevbestilling brevbestilling =
+            lagStorbritanniaBrevbestillingDefaultBuilder(medPeriode(lagTrygdeavtaleBehandling()))
+                .medPersonDokument(persondata)
+                .build();
+        InnvilgelseOgAttestTrygdeavtale innvilgelseOgAttestTrygdeavtale = trygdeavtaleMapper.map(brevbestilling, Land_iso2.US);
+        assertTrue(innvilgelseOgAttestTrygdeavtale.isSkalHaAttest());
+
+        AttestTrygdeavtale attest = innvilgelseOgAttestTrygdeavtale.getAttest();
+        List<String> bostedsadresse = attest.getArbeidstaker().bostedsadresse();
+
+        assertThat(bostedsadresse).isEqualTo(List.of(TrygdeavtaleAdresseSjekker.BOSTED_UTENFOR_NORGE));
+    }
+
+    @Test
     void map_ingenRepresentantIUtlandet_kastFunksjonellException() {
         mockHappyCase();
 
