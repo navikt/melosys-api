@@ -11,6 +11,7 @@ import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingsstatus
 import no.nav.melosys.exception.TekniskException
 import no.nav.melosys.featuretoggle.ToggleName
 import no.nav.melosys.saksflytapi.ProsessinstansService
+import no.nav.melosys.service.avgift.TrygdeavgiftMottakerService
 import no.nav.melosys.service.behandling.BehandlingService
 import no.nav.melosys.service.behandling.BehandlingsresultatService
 import no.nav.melosys.service.sak.FagsakService
@@ -29,8 +30,9 @@ class SkattehendelserConsumer(
     @Autowired private val unleash: Unleash,
     @Autowired private val fagsakService: FagsakService,
     @Autowired private val behandlingService: BehandlingService,
-    @Autowired private val behandslingsresultatService: BehandlingsresultatService,
-    @Autowired private val årsavregningService: ÅrsavregningService
+    @Autowired private val behandlingsresultatService: BehandlingsresultatService,
+    @Autowired private val årsavregningService: ÅrsavregningService,
+    @Autowired private val trygdeavgiftMottakerService: TrygdeavgiftMottakerService,
 ) {
 
     @KafkaListener(
@@ -60,7 +62,9 @@ class SkattehendelserConsumer(
     private fun finnSakMedTrygdeavgift(aktørId: String, år: Int): List<Fagsak> {
         return fagsakService.hentFagsakerMedAktør(Aktoersroller.BRUKER, aktørId)
             .filter {
-                årsavregningService.hentSisteBehandlingsresultatMedInnvilgetMedlemskapsperiodeOgAvgiftsgrunnlag(it.saksnummer, år) != null
+                årsavregningService.hentSisteBehandlingsresultatMedInnvilgetMedlemskapsperiodeOgAvgiftsgrunnlag(it.saksnummer, år)
+                    ?.let { behandlingsresultat -> trygdeavgiftMottakerService.skalBetalesTilNav(behandlingsresultat) }
+                    ?: false
             }
     }
 
@@ -78,7 +82,7 @@ class SkattehendelserConsumer(
 
     private fun finnAktivÅrsavregningBehandling(sakMedTrygdeavgift: Fagsak, gjelderÅr: Int): Behandling? {
         val årsAvregninger = sakMedTrygdeavgift.hentAktiveÅrsavregninger()
-            .filter { behandslingsresultatService.hentBehandlingsresultat(it.id).årsavregning.aar == gjelderÅr }
+            .filter { behandlingsresultatService.hentBehandlingsresultat(it.id).årsavregning.aar == gjelderÅr }
 
         when {
             årsAvregninger.isEmpty() -> {
