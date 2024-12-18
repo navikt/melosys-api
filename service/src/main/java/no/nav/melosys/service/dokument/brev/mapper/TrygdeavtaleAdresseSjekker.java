@@ -51,11 +51,11 @@ public class TrygdeavtaleAdresseSjekker {
 
     private List<String> findAdresseNårIkkeNorskEllerSoknadslandadresse() {
         return getPersonAdresser()
-            .filter(personAdresse -> hentStrukturertAdresse(personAdresse).getLandkode() != null)
+            .map(this::hentStrukturertAdresse)
+            .filter(strukturertAdresse -> strukturertAdresse.getLandkode() != null)
             .findFirst()
-            .map(personAdresse -> {
-                var strukturertAdresse = hentStrukturertAdresse(personAdresse);
-                if(Arrays.stream(Land_iso2.values()).noneMatch(landIso2 -> landIso2.getKode().equals(strukturertAdresse.getLandkode()))) {
+            .map(strukturertAdresse -> {
+                if (Arrays.stream(Land_iso2.values()).noneMatch(landIso2 -> landIso2.getKode().equals(strukturertAdresse.getLandkode()))) {
                     return Stream.of(BOSTED_UTENFOR_NORGE).toList();
                 }
                 return Stream.concat(
@@ -89,7 +89,7 @@ public class TrygdeavtaleAdresseSjekker {
         if (personAdresse.gyldigFraOgMed() == null) return false;
 
         if (lovvalgsperiode.getTom() != null && lovvalgsperiode.getTom().isBefore(personAdresse.gyldigFraOgMed())) return false;
-        if(personAdresse.gyldigTilOgMed() == null) return true;
+        if (personAdresse.gyldigTilOgMed() == null) return true;
         return !lovvalgsperiode.getFom().isAfter(personAdresse.gyldigTilOgMed());
     }
 }

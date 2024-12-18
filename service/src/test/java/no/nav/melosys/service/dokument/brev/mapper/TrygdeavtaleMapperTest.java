@@ -171,7 +171,7 @@ class TrygdeavtaleMapperTest {
     }
 
     @Test
-    void map_bostedadresseUtenforLandIso2_kasterFeil() {
+    void map_bostedadresseUtenforLandIso2_blirMappetKorrekt() {
         mockHappyCase();
 
         var persondata = TrygdeavtaleAdresseSjekkerTest.lagPersonopplysninger(Land_iso2.NO, Land_iso2.NO, Land_iso2.NO, Optional.of("SG"), Optional.of("SG"), Optional.of("SG"));
