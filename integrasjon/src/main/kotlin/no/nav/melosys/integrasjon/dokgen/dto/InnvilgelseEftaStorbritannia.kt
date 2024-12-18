@@ -6,6 +6,7 @@ import com.fasterxml.jackson.datatype.jsr310.ser.LocalDateSerializer
 import no.nav.melosys.domain.brev.InnvilgelseEftaStorbritanniaBrevbestilling
 import no.nav.melosys.domain.dokument.felles.Periode
 import no.nav.melosys.domain.kodeverk.Mottakerroller
+import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingstema
 import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingstyper
 import java.time.LocalDate
 
@@ -16,6 +17,8 @@ class InnvilgelseEftaStorbritannia(
     val datoMottatt: LocalDate?,
     val navnVirksomheter: List<String>?,
     val behandlingstype: Behandlingstyper,
+    val behandlingstema: Behandlingstema,
+    val sedAvsenderland: String?,
     val nyVurderingBakgrunn: String?,
     val innvilgelseFritekst: String?,
     val lovvalgsbestemmelse: String?,
@@ -32,11 +35,14 @@ class InnvilgelseEftaStorbritannia(
     val bosted: String?,
     val anmodningsperiodeSvarType: String?,
     val begrunnelseFritekst: String?,
+    val erArtikkel11_3_a_og_flereArbeidsland: Boolean?,
 ) : DokgenDto(brevbestilling, Mottakerroller.BRUKER) {
     constructor(
         brevbestilling: InnvilgelseEftaStorbritanniaBrevbestilling,
         navnVirksomheter: List<String>?,
         behandlingstype: Behandlingstyper,
+        behandlingstema: Behandlingstema,
+        sedAvsenderland: String?,
         nyVurderingBakgrunn: String?,
         innvilgelseFritekst: String?,
         lovvalgsbestemmelse: String?,
@@ -53,11 +59,14 @@ class InnvilgelseEftaStorbritannia(
         bosted: String?,
         anmodningsperiodeSvarType: String?,
         begrunnelseFritekst: String?,
+        erArtikkel11_3_a_og_flereArbeidsland: Boolean?,
     ) : this(
         brevbestilling,
         datoMottatt = instantTilLocalDate(brevbestilling.forsendelseMottatt),
         navnVirksomheter,
         behandlingstype,
+        behandlingstema,
+        sedAvsenderland,
         nyVurderingBakgrunn,
         innvilgelseFritekst,
         lovvalgsbestemmelse,
@@ -74,5 +83,6 @@ class InnvilgelseEftaStorbritannia(
         bosted,
         anmodningsperiodeSvarType,
         begrunnelseFritekst,
+        erArtikkel11_3_a_og_flereArbeidsland
     )
 }

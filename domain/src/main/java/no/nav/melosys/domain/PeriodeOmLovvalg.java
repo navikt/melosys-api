@@ -44,6 +44,11 @@ public interface PeriodeOmLovvalg extends ErPeriode, HarBestemmelse<LovvalgBeste
     default boolean erArtikkel13_3_a_eller_13_4() {
         return getBestemmelse() == KONV_EFTA_STORBRITANNIA_ART13_3A || getBestemmelse() == KONV_EFTA_STORBRITANNIA_ART13_4 || getBestemmelse() == KONV_EFTA_STORBRITANNIA_ART13_4_2;
     }
+
+    default boolean erArtikkel11_3_a() {
+        return  getBestemmelse() == FO_883_2004_ART11_3A;
+    }
+
     default boolean erArtikkel11_3_a_eller_13_3a() {
         return getBestemmelse() == KONV_EFTA_STORBRITANNIA_ART13_3A || getBestemmelse() == FO_883_2004_ART11_3A;
     }

@@ -15,6 +15,7 @@ import no.nav.melosys.service.avklartefakta.AvklartefaktaService
 import no.nav.melosys.service.behandling.VilkaarsresultatService
 import org.springframework.stereotype.Component
 import org.springframework.transaction.annotation.Transactional
+import kotlin.jvm.optionals.getOrNull
 
 @Component
 class InnvilgelseEftaStorbritanniaMapper(
@@ -33,6 +34,9 @@ class InnvilgelseEftaStorbritanniaMapper(
         val erNorskSkip = vilkaarsresultatService.finnVilkaarsresultat(behandlingsresultat.id, Vilkaar.FTRL_2_12_UNNTAK_TURISTSKIP)
         val erUnntakTuristskip = vilkaarsresultatService.oppfyllerVilkaar(behandlingsresultat.id, Vilkaar.FTRL_2_12_UNNTAK_TURISTSKIP)
         val bostedsland = landvelgerService.hentBostedsland(behandlingsresultat.behandling).landkodeobjekt
+        val sedAvsenderlandKode = behandlingsresultat.behandling.finnSedDokument().getOrNull()?.avsenderLandkode
+        val søknadsland = behandlingsresultat.behandling.finnMottatteOpplysningerData().getOrNull()?.soeknadsland
+        val er11_3_a_og_flereArbeidsland = (søknadsland?.landkoder?.size ?: 0) > 1 && lovvalgsperiode.erArtikkel11_3_a()
 
         val alleVirksomheterNorge = virksomheterService.hentAlleNorskeVirksomheter(behandlingsresultat.behandling)
         val alleVirksomheterUtlandet = virksomheterService.hentUtenlandskeVirksomheter(behandlingsresultat.behandling)
@@ -48,6 +52,8 @@ class InnvilgelseEftaStorbritanniaMapper(
             brevbestilling = brevbestilling,
             navnVirksomheter = navnVirksomheter,
             behandlingstype = behandlingsresultat.behandling.type,
+            behandlingstema = behandlingsresultat.behandling.tema,
+            sedAvsenderlandKode?.beskrivelse,
             nyVurderingBakgrunn = brevbestilling.nyVurderingBakgrunn,
             lovvalgsbestemmelse = lovvalgsperiode.bestemmelse.name(),
             erUnntakTuristskip = erUnntakTuristskip,
@@ -63,7 +69,8 @@ class InnvilgelseEftaStorbritanniaMapper(
             anmodningsperiodeSvarType = if (anmodningsperiode.isPresent) anmodningsperiode.get().anmodningsperiodeSvar.anmodningsperiodeSvarType.name else "",
             innvilgelseFritekst = brevbestilling.innvilgelseFritekst,
             innledningFritekst = brevbestilling.innledningFritekst,
-            begrunnelseFritekst = if(brevbestilling.begrunnelseFritekst.isNullOrEmpty()) behandlingsresultat.begrunnelseFritekst else brevbestilling.begrunnelseFritekst
+            begrunnelseFritekst = if(brevbestilling.begrunnelseFritekst.isNullOrEmpty()) behandlingsresultat.begrunnelseFritekst else brevbestilling.begrunnelseFritekst,
+            erArtikkel11_3_a_og_flereArbeidsland = er11_3_a_og_flereArbeidsland
         )
     }
 }
