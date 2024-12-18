@@ -325,7 +325,7 @@ internal class KontrollTest {
 
         val resultat = mockedKontroll.kontroller(behandlingID, Behandlingsresultattyper.MEDLEM_I_FOLKETRYGDEN, emptySet())
 
-        resultat.shouldHaveSize(1)
+        resultat.shouldNotBeEmpty()
             .single()
             .kode shouldBe Kontroll_begrunnelser.DIREKTE_FORUTGÅENDE_PERIODE
     }
@@ -370,10 +370,8 @@ internal class KontrollTest {
         val resultat = mockedKontroll.kontroller(behandlingID, Behandlingsresultattyper.MEDLEM_I_FOLKETRYGDEN, emptySet())
 
         resultat.shouldNotBeEmpty()
-            .shouldHaveSize(1)
-            .run {
-                first().kode.shouldBe(Kontroll_begrunnelser.OVERLAPPENDE_PERIODE_MED_FORSKUDDSVIS_FAKTURERUNG)
-            }
+            .single()
+            .kode shouldBe Kontroll_begrunnelser.OVERLAPPENDE_PERIODE_MED_FORSKUDDSVIS_FAKTURERUNG
     }
 
     @Test
