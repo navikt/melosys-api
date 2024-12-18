@@ -123,7 +123,7 @@ class SendFakturaÅrsavregningTest {
         every { pdlService.finnFolkeregisterident(behandling.fagsak.hentBrukersAktørID()) } returns Optional.of("123456789")
 
         val fakturaDtoSlot = slot<FakturaDto>()
-        every { faktureringskomponentenConsumer.lagFaktura(capture(fakturaDtoSlot), any()) } returns NyFakturaserieResponseDto(fakturaserieRef)
+        every { faktureringskomponentenConsumer.lagFaktura(capture(fakturaDtoSlot), SAKSBEHANDLER) } returns NyFakturaserieResponseDto(fakturaserieRef)
 
         val behandlingsresultatSlot = slot<Behandlingsresultat>()
         every { behandlingsresultatService.lagre(capture(behandlingsresultatSlot)) } returns any()
