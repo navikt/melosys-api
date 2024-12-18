@@ -14,28 +14,28 @@ class Trygdeavgiftsperiode(
     var id: Long? = null,
 
     @Column(name = "periode_fra", nullable = false)
-    var periodeFra: LocalDate,
+    val periodeFra: LocalDate,
 
     @Column(name = "periode_til", nullable = false)
-    var periodeTil: LocalDate,
+    val periodeTil: LocalDate,
 
     @Embedded
-    var trygdeavgiftsbeløpMd: Penger,
+    val trygdeavgiftsbeløpMd: Penger,
 
     @Column(name = "trygdesats", nullable = false)
-    var trygdesats: BigDecimal,
+    val trygdesats: BigDecimal,
 
     @ManyToOne(cascade = [CascadeType.ALL])
     @JoinColumn(name = "inntektsperiode_id")
-    var grunnlagInntekstperiode: Inntektsperiode? = null,
+    val grunnlagInntekstperiode: Inntektsperiode? = null,
 
     @ManyToOne
     @JoinColumn(name = "medlemskapsperiode_id")
-    var grunnlagMedlemskapsperiode: Medlemskapsperiode? = null,
+    val grunnlagMedlemskapsperiode: Medlemskapsperiode? = null,
 
     @ManyToOne(cascade = [CascadeType.ALL])
     @JoinColumn(name = "skatteforhold_id")
-    var grunnlagSkatteforholdTilNorge: SkatteforholdTilNorge? = null
+    val grunnlagSkatteforholdTilNorge: SkatteforholdTilNorge? = null
 ) : ErPeriode {
 
     val grunnlagMedlemskapsperiodeNotNull: Medlemskapsperiode
