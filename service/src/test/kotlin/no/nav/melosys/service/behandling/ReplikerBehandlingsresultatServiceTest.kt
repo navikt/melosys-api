@@ -68,7 +68,16 @@ class ReplikerBehandlingsresultatServiceTest {
             lagTrygdeavgiftsperiode().copyEntity(grunnlagMedlemskapsperiode = innvilgetMedlemskapsperiode)
         )
         innvilgetMedlemskapsperiode.trygdeavgiftsperioder.add(
-            lagTrygdeavgiftsperiode2().copyEntity(grunnlagMedlemskapsperiode = innvilgetMedlemskapsperiode)
+            lagTrygdeavgiftsperiode().copyEntity(
+                grunnlagMedlemskapsperiode = innvilgetMedlemskapsperiode,
+                grunnlagInntekstperiode = Inntektsperiode().apply {
+                    id = 2L
+                    fomDato = LocalDate.now()
+                    tomDato = LocalDate.now()
+                    type = Inntektskildetype.ARBEIDSINNTEKT
+                    avgiftspliktigMndInntekt = Penger(1000.0)
+                    isArbeidsgiversavgiftBetalesTilSkatt = false
+                })
         )
         behandlingsresultatOriginal.addMedlemskapsperiode(innvilgetMedlemskapsperiode)
         behandlingsresultatOriginal.addMedlemskapsperiode(avslaattMedlemskapsperiode)
@@ -325,33 +334,6 @@ class ReplikerBehandlingsresultatServiceTest {
             fomDato = LocalDate.now()
             tomDato = LocalDate.now()
             type = Inntektskildetype.INNTEKT_FRA_UTLANDET
-            avgiftspliktigMndInntekt = Penger(1000.0)
-            isArbeidsgiversavgiftBetalesTilSkatt = false
-        }
-        val skatteforholdTilNorge = SkatteforholdTilNorge().apply {
-            id = 1L
-            fomDato = LocalDate.now()
-            tomDato = LocalDate.now()
-            skatteplikttype = Skatteplikttype.SKATTEPLIKTIG
-        }
-
-        return Trygdeavgiftsperiode(
-            id = 1L,
-            periodeFra = LocalDate.now(),
-            periodeTil = LocalDate.now(),
-            trygdeavgiftsbeløpMd = Penger(500.0),
-            trygdesats = BigDecimal(50),
-            grunnlagInntekstperiode = inntektsperiode,
-            grunnlagSkatteforholdTilNorge = skatteforholdTilNorge
-        )
-    }
-
-    private fun lagTrygdeavgiftsperiode2(): Trygdeavgiftsperiode {
-        val inntektsperiode = Inntektsperiode().apply {
-            id = 2L
-            fomDato = LocalDate.now()
-            tomDato = LocalDate.now()
-            type = Inntektskildetype.ARBEIDSINNTEKT
             avgiftspliktigMndInntekt = Penger(1000.0)
             isArbeidsgiversavgiftBetalesTilSkatt = false
         }
