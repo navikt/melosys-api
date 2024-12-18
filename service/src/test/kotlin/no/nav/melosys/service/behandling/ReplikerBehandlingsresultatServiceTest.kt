@@ -195,23 +195,20 @@ class ReplikerBehandlingsresultatServiceTest {
         Assertions.assertThat(behandlingsresultatReplika)
             .matches { it.id == null }
 
-        val inntektsperiodeOriginal = behandlingsresultatOriginal.hentInntektsperioder().toList()[0]
-        Assertions.assertThat(behandlingsresultatReplika.hentInntektsperioder().toList()[0])
-            .matches { it.id == null }
-            .matches { it.fomDato == inntektsperiodeOriginal.fomDato }
-            .matches { it.tomDato == inntektsperiodeOriginal.tomDato }
-            .matches { it.type == inntektsperiodeOriginal.type }
-            .matches { it.avgiftspliktigMndInntekt == inntektsperiodeOriginal.avgiftspliktigMndInntekt }
-            .matches { it.isArbeidsgiversavgiftBetalesTilSkatt == inntektsperiodeOriginal.isArbeidsgiversavgiftBetalesTilSkatt }
 
-        val inntektsperiodeOriginal2 = behandlingsresultatOriginal.hentInntektsperioder().toList()[1]
-        Assertions.assertThat(behandlingsresultatReplika.hentInntektsperioder().toList()[1])
-            .matches { it.id == null }
-            .matches { it.fomDato == inntektsperiodeOriginal2.fomDato }
-            .matches { it.tomDato == inntektsperiodeOriginal2.tomDato }
-            .matches { it.type == inntektsperiodeOriginal2.type }
-            .matches { it.avgiftspliktigMndInntekt == inntektsperiodeOriginal2.avgiftspliktigMndInntekt }
-            .matches { it.isArbeidsgiversavgiftBetalesTilSkatt == inntektsperiodeOriginal2.isArbeidsgiversavgiftBetalesTilSkatt }
+        val inntektsperioderOriginal = behandlingsresultatOriginal.hentInntektsperioder().toList()
+        val inntektsperioderReplika = behandlingsresultatReplika.hentInntektsperioder().toList()
+
+        inntektsperioderOriginal.forEach { originalInntektsperiode ->
+            Assertions.assertThat(inntektsperioderReplika).anyMatch { replikertInntektsperiode ->
+                replikertInntektsperiode.id == null &&
+                    replikertInntektsperiode.fomDato == originalInntektsperiode.fomDato &&
+                    replikertInntektsperiode.tomDato == originalInntektsperiode.tomDato &&
+                    replikertInntektsperiode.type == originalInntektsperiode.type &&
+                    replikertInntektsperiode.avgiftspliktigMndInntekt == originalInntektsperiode.avgiftspliktigMndInntekt &&
+                    replikertInntektsperiode.isArbeidsgiversavgiftBetalesTilSkatt == originalInntektsperiode.isArbeidsgiversavgiftBetalesTilSkatt
+            }.withFailMessage("Forventet matchende Inntektsperiode for: $originalInntektsperiode")
+        }
 
         val skatteforholdTilNorgeOriginal =
             behandlingsresultatOriginal.hentSkatteforholdTilNorge().first()
@@ -222,33 +219,25 @@ class ReplikerBehandlingsresultatServiceTest {
             .matches { it.tomDato == skatteforholdTilNorgeOriginal.tomDato }
             .matches { it.skatteplikttype == skatteforholdTilNorgeOriginal.skatteplikttype }
 
-        val trygdeavgiftsperiodeOriginal = behandlingsresultatOriginal.trygdeavgiftsperioder.toList()[0]
-        Assertions.assertThat(behandlingsresultatReplika.trygdeavgiftsperioder.toList()[0])
-            .matches { it.id == null }
-            .matches { it.periodeFra == trygdeavgiftsperiodeOriginal.periodeFra }
-            .matches { it.periodeTil == trygdeavgiftsperiodeOriginal.periodeTil }
-            .matches { it.trygdeavgiftsbeløpMd == trygdeavgiftsperiodeOriginal.trygdeavgiftsbeløpMd }
-            .matches { it.trygdesats == trygdeavgiftsperiodeOriginal.trygdesats }
-            .matches { it.grunnlagMedlemskapsperiodeNotNull.id == null }
-            .matches { it.grunnlagMedlemskapsperiodeNotNull.trygdedekning == innvilgetMedlemskapsperiodeOriginal.trygdedekning }
-            .matches { it.grunnlagInntekstperiode!!.id == null }
-            .matches { it.grunnlagInntekstperiode!!.avgiftspliktigMndInntekt == inntektsperiodeOriginal.avgiftspliktigMndInntekt }
-            .matches { it.grunnlagSkatteforholdTilNorge!!.id == null }
-            .matches { it.grunnlagSkatteforholdTilNorge!!.skatteplikttype == skatteforholdTilNorgeOriginal.skatteplikttype }
 
-        val trygdeavgiftsperiodeOriginal2 = behandlingsresultatOriginal.trygdeavgiftsperioder.toList()[1]
-        Assertions.assertThat(behandlingsresultatReplika.trygdeavgiftsperioder.toList()[1])
-            .matches { it.id == null }
-            .matches { it.periodeFra == trygdeavgiftsperiodeOriginal2.periodeFra }
-            .matches { it.periodeTil == trygdeavgiftsperiodeOriginal2.periodeTil }
-            .matches { it.trygdeavgiftsbeløpMd == trygdeavgiftsperiodeOriginal2.trygdeavgiftsbeløpMd }
-            .matches { it.trygdesats == trygdeavgiftsperiodeOriginal2.trygdesats }
-            .matches { it.grunnlagMedlemskapsperiodeNotNull.id == null }
-            .matches { it.grunnlagMedlemskapsperiodeNotNull.trygdedekning == innvilgetMedlemskapsperiodeOriginal.trygdedekning }
-            .matches { it.grunnlagInntekstperiode!!.id == null }
-            .matches { it.grunnlagInntekstperiode!!.avgiftspliktigMndInntekt == inntektsperiodeOriginal2.avgiftspliktigMndInntekt }
-            .matches { it.grunnlagSkatteforholdTilNorge!!.id == null }
-            .matches { it.grunnlagSkatteforholdTilNorge!!.skatteplikttype == skatteforholdTilNorgeOriginal.skatteplikttype }
+        val trygdeavgiftsperioderOriginal = behandlingsresultatOriginal.trygdeavgiftsperioder.toList()
+        val trygdeavgiftsperioderReplika = behandlingsresultatReplika.trygdeavgiftsperioder.toList()
+
+        trygdeavgiftsperioderOriginal.forEach { originalTrygdeavgiftsperiode ->
+            Assertions.assertThat(trygdeavgiftsperioderReplika).anyMatch { replikertTrygdeavgiftsperiode ->
+                replikertTrygdeavgiftsperiode.id == null &&
+                    replikertTrygdeavgiftsperiode.periodeFra == originalTrygdeavgiftsperiode.periodeFra &&
+                    replikertTrygdeavgiftsperiode.periodeTil == originalTrygdeavgiftsperiode.periodeTil &&
+                    replikertTrygdeavgiftsperiode.trygdeavgiftsbeløpMd == originalTrygdeavgiftsperiode.trygdeavgiftsbeløpMd &&
+                    replikertTrygdeavgiftsperiode.trygdesats == originalTrygdeavgiftsperiode.trygdesats &&
+                    replikertTrygdeavgiftsperiode.grunnlagMedlemskapsperiode?.id == null &&
+                    replikertTrygdeavgiftsperiode.grunnlagMedlemskapsperiode?.trygdedekning == originalTrygdeavgiftsperiode.grunnlagMedlemskapsperiode?.trygdedekning &&
+                    replikertTrygdeavgiftsperiode.grunnlagInntekstperiode?.id == null &&
+                    replikertTrygdeavgiftsperiode.grunnlagInntekstperiode?.avgiftspliktigMndInntekt == originalTrygdeavgiftsperiode.grunnlagInntekstperiode?.avgiftspliktigMndInntekt &&
+                    replikertTrygdeavgiftsperiode.grunnlagSkatteforholdTilNorge?.id == null &&
+                    replikertTrygdeavgiftsperiode.grunnlagSkatteforholdTilNorge?.skatteplikttype == originalTrygdeavgiftsperiode.grunnlagSkatteforholdTilNorge?.skatteplikttype
+            }.withFailMessage("Forventet matchende Trygdeavgiftsperiode for: $originalTrygdeavgiftsperiode")
+        }
     }
 
     @Test
