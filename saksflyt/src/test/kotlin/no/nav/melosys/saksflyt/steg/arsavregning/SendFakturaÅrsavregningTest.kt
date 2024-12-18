@@ -26,7 +26,6 @@ import no.nav.melosys.service.persondata.PersondataService
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.extension.ExtendWith
-import org.mockito.kotlin.any
 import java.math.BigDecimal
 import java.time.Instant
 import java.time.LocalDate
@@ -123,10 +122,15 @@ class SendFakturaÅrsavregningTest {
         every { pdlService.finnFolkeregisterident(behandling.fagsak.hentBrukersAktørID()) } returns Optional.of("123456789")
 
         val fakturaDtoSlot = slot<FakturaDto>()
-        every { faktureringskomponentenConsumer.lagFaktura(capture(fakturaDtoSlot), SAKSBEHANDLER) } returns NyFakturaserieResponseDto(fakturaserieRef)
+        every {
+            faktureringskomponentenConsumer.lagFaktura(
+                capture(fakturaDtoSlot),
+                SAKSBEHANDLER
+            )
+        } returns NyFakturaserieResponseDto(fakturaserieRef)
 
         val behandlingsresultatSlot = slot<Behandlingsresultat>()
-        every { behandlingsresultatService.lagre(capture(behandlingsresultatSlot)) } returns any()
+        every { behandlingsresultatService.lagre(capture(behandlingsresultatSlot)) } returns behandlingsresultat
 
         sendFakturaÅrsavregning.utfør(prosessinstans)
 
