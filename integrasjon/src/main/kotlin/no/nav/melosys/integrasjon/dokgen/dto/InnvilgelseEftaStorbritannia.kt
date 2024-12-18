@@ -35,6 +35,7 @@ class InnvilgelseEftaStorbritannia(
     val bosted: String?,
     val anmodningsperiodeSvarType: String?,
     val begrunnelseFritekst: String?,
+    val erArtikkel11_3_a_og_flereArbeidsland: Boolean?,
 ) : DokgenDto(brevbestilling, Mottakerroller.BRUKER) {
     constructor(
         brevbestilling: InnvilgelseEftaStorbritanniaBrevbestilling,
@@ -58,6 +59,7 @@ class InnvilgelseEftaStorbritannia(
         bosted: String?,
         anmodningsperiodeSvarType: String?,
         begrunnelseFritekst: String?,
+        erArtikkel11_3_a_og_flereArbeidsland: Boolean?,
     ) : this(
         brevbestilling,
         datoMottatt = instantTilLocalDate(brevbestilling.forsendelseMottatt),
@@ -81,5 +83,6 @@ class InnvilgelseEftaStorbritannia(
         bosted,
         anmodningsperiodeSvarType,
         begrunnelseFritekst,
+        erArtikkel11_3_a_og_flereArbeidsland
     )
 }

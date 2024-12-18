@@ -35,6 +35,8 @@ class InnvilgelseEftaStorbritanniaMapper(
         val erUnntakTuristskip = vilkaarsresultatService.oppfyllerVilkaar(behandlingsresultat.id, Vilkaar.FTRL_2_12_UNNTAK_TURISTSKIP)
         val bostedsland = landvelgerService.hentBostedsland(behandlingsresultat.behandling).landkodeobjekt
         val sedAvsenderlandKode = behandlingsresultat.behandling.finnSedDokument().getOrNull()?.avsenderLandkode
+        val søknadsland = behandlingsresultat.behandling.finnMottatteOpplysningerData().getOrNull()?.soeknadsland
+        val er11_3_a_og_flereArbeidsland = (søknadsland?.landkoder?.size ?: 0) > 1 && lovvalgsperiode.erArtikkel11_3_a()
 
         val alleVirksomheterNorge = virksomheterService.hentAlleNorskeVirksomheter(behandlingsresultat.behandling)
         val alleVirksomheterUtlandet = virksomheterService.hentUtenlandskeVirksomheter(behandlingsresultat.behandling)
@@ -67,7 +69,8 @@ class InnvilgelseEftaStorbritanniaMapper(
             anmodningsperiodeSvarType = if (anmodningsperiode.isPresent) anmodningsperiode.get().anmodningsperiodeSvar.anmodningsperiodeSvarType.name else "",
             innvilgelseFritekst = brevbestilling.innvilgelseFritekst,
             innledningFritekst = brevbestilling.innledningFritekst,
-            begrunnelseFritekst = if(brevbestilling.begrunnelseFritekst.isNullOrEmpty()) behandlingsresultat.begrunnelseFritekst else brevbestilling.begrunnelseFritekst
+            begrunnelseFritekst = if(brevbestilling.begrunnelseFritekst.isNullOrEmpty()) behandlingsresultat.begrunnelseFritekst else brevbestilling.begrunnelseFritekst,
+            erArtikkel11_3_a_og_flereArbeidsland = er11_3_a_og_flereArbeidsland
         )
     }
 }
