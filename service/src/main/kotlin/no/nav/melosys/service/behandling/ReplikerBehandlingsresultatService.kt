@@ -124,6 +124,7 @@ private fun replikerTrygdeavgift(
         trygdeavgiftsperiodeReplika.id = null
         trygdeavgiftsperiodeReplika.grunnlagInntekstperiode?.id = null
         trygdeavgiftsperiodeReplika.grunnlagSkatteforholdTilNorge?.id = null
+        trygdeavgiftsperiodeReplika.grunnlagMedlemskapsperiode?.id = null
     }
 }
 
