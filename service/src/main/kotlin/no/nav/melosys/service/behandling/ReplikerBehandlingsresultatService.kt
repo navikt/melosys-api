@@ -116,10 +116,6 @@ private fun replikerTrygdeavgift(
         } ?: throw IllegalStateException("Medlemskapsperiode ikke funnet (dette skal ikke kunne skje)")
     }
 
-    behandlingsresultatReplika.medlemskapsperioder.forEach { medlemskapsperiodeReplika ->
-        medlemskapsperiodeReplika.id = null
-    }
-
     behandlingsresultatReplika.trygdeavgiftsperioder.forEach { trygdeavgiftsperiodeReplika ->
         trygdeavgiftsperiodeReplika.id = null
         trygdeavgiftsperiodeReplika.grunnlagInntekstperiode?.id = null
