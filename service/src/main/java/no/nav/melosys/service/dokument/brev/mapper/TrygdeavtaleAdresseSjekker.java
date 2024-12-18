@@ -1,5 +1,6 @@
 package no.nav.melosys.service.dokument.brev.mapper;
 
+import java.util.Arrays;
 import java.util.List;
 import java.util.Optional;
 import java.util.stream.Stream;
@@ -52,10 +53,16 @@ public class TrygdeavtaleAdresseSjekker {
         return getPersonAdresser()
             .filter(personAdresse -> hentStrukturertAdresse(personAdresse).getLandkode() != null)
             .findFirst()
-            .map(personAdresse -> Stream.concat(
-                Stream.of(BOSTED_UTENFOR_NORGE),
-                hentStrukturertAdresse(personAdresse).toList().stream()).toList()
-            )
+            .map(personAdresse -> {
+                var strukturertAdresse = hentStrukturertAdresse(personAdresse);
+                if(Arrays.stream(Land_iso2.values()).noneMatch(landIso2 -> landIso2.getKode().equals(strukturertAdresse.getLandkode()))) {
+                    return Stream.of(BOSTED_UTENFOR_NORGE).toList();
+                }
+                return Stream.concat(
+                    Stream.of(BOSTED_UTENFOR_NORGE),
+                    strukturertAdresse.toList().stream()
+                ).toList();
+            })
             .orElse(List.of(UKJENT));
     }
 

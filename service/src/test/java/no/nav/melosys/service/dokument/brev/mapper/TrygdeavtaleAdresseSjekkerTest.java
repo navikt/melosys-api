@@ -2,6 +2,7 @@ package no.nav.melosys.service.dokument.brev.mapper;
 
 import java.time.LocalDate;
 import java.util.List;
+import java.util.Optional;
 
 import no.nav.melosys.domain.Lovvalgsperiode;
 import no.nav.melosys.domain.adresse.SemistrukturertAdresse;
@@ -41,7 +42,7 @@ class TrygdeavtaleAdresseSjekkerTest {
         Land_iso2 soknadsland,
         String grunn) {
 
-        var persondata = lagPersonopplysninger(landkodeBosted, landkodeOpphold, landkodeKontakt);
+        var persondata = lagPersonopplysninger(landkodeBosted, landkodeOpphold, landkodeKontakt, Optional.empty(), Optional.empty(), Optional.empty());
         var trygdeavtaleAdresseSjekker = new TrygdeavtaleAdresseSjekker(persondata);
         var gyldigNorskAdresse = trygdeavtaleAdresseSjekker.finnGyldigNorskAdresse(soknadsland);
         var gyldigTrygdeavtaleAdresse = trygdeavtaleAdresseSjekker.finnGyldigTrygdeavtaleAdresse(LOVVALGSPERIODE, soknadsland);
@@ -91,23 +92,31 @@ class TrygdeavtaleAdresseSjekkerTest {
     static Persondata lagPersonopplysninger(
         Land_iso2 landkodeBosted,
         Land_iso2 landkodeOpphold,
-        Land_iso2 landkodeKontakt) {
+        Land_iso2 landkodeKontakt,
+        Optional<String> landkodeBostedValgfritt,
+        Optional<String> landkodeOppholdValgfritt,
+        Optional<String> landkodeKontaktValgfritt
+    ) {
 
         var gyldigFom = LOVVALGSPERIODE_FOM;
         var gyldigTom = LOVVALGSPERIODE_TOM;
 
+        var kunLandkodeBosted = landkodeBostedValgfritt.orElse(kodeEllerNull(landkodeBosted));
+        var kunLandkodeOpphold = landkodeOppholdValgfritt.orElse(kodeEllerNull(landkodeOpphold));
+        var kunLandkodeKontakt = landkodeKontaktValgfritt.orElse(kodeEllerNull(landkodeKontakt));
+
         final var bostedsadresse = new Bostedsadresse(
-            new StrukturertAdresse("bosted", "42 C", null, null, null, kodeEllerNull(landkodeBosted)),
+            new StrukturertAdresse("bosted", "42 C", null, null, null, kunLandkodeBosted),
             null, gyldigFom, gyldigTom, "PDL", null, false);
 
         final var kontaktadresse = new Kontaktadresse(
-            new StrukturertAdresse("kontakt 1", null, null, null, null, kodeEllerNull(landkodeKontakt)),
+            new StrukturertAdresse("kontakt 1", null, null, null, null, kunLandkodeKontakt),
             null, null, gyldigFom, gyldigTom, "PDL", null, null,
             false);
 
         final var oppholdsadresse = new Oppholdsadresse(
             new StrukturertAdresse("tilleggOpphold", "opphold 1", null, null, null,
-                null, null, kodeEllerNull(landkodeOpphold)), null,
+                null, null, kunLandkodeOpphold), null,
             LOVVALGSPERIODE_FOM, LOVVALGSPERIODE_TOM,
             "PDL", null, null, false);
 

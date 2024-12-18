@@ -1,5 +1,10 @@
 package no.nav.melosys.service.dokument.brev.mapper;
 
+import java.time.Instant;
+import java.time.LocalDate;
+import java.time.ZoneId;
+import java.util.*;
+
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import io.getunleash.FakeUnleash;
@@ -37,14 +42,6 @@ import org.junit.jupiter.params.provider.Arguments;
 import org.junit.jupiter.params.provider.MethodSource;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
-
-import java.time.Instant;
-import java.time.LocalDate;
-import java.time.ZoneId;
-import java.util.Collections;
-import java.util.List;
-import java.util.Map;
-import java.util.Set;
 
 import static no.nav.melosys.domain.kodeverk.brev.Produserbaredokumenter.TRYGDEAVTALE_GB;
 import static no.nav.melosys.service.dokument.DokgenTestData.*;
@@ -156,7 +153,7 @@ class TrygdeavtaleMapperTest {
         String grunn) {
 
         mockHappyCase();
-        var persondata = TrygdeavtaleAdresseSjekkerTest.lagPersonopplysninger(landkodeBosted, landkodeOpphold, landkodeKontakt);
+        var persondata = TrygdeavtaleAdresseSjekkerTest.lagPersonopplysninger(landkodeBosted, landkodeOpphold, landkodeKontakt, Optional.empty(), Optional.empty(), Optional.empty());
         InnvilgelseBrevbestilling brevbestilling =
             lagStorbritanniaBrevbestillingDefaultBuilder(medPeriode(lagTrygdeavtaleBehandling()))
                 .medPersonDokument(persondata)
