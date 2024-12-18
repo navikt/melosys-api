@@ -1,5 +1,6 @@
 package no.nav.melosys.service.dokument.brev.mapper;
 
+import java.util.Arrays;
 import java.util.List;
 import java.util.Optional;
 import java.util.stream.Stream;
@@ -50,12 +51,18 @@ public class TrygdeavtaleAdresseSjekker {
 
     private List<String> findAdresseNårIkkeNorskEllerSoknadslandadresse() {
         return getPersonAdresser()
-            .filter(personAdresse -> hentStrukturertAdresse(personAdresse).getLandkode() != null)
+            .map(this::hentStrukturertAdresse)
+            .filter(strukturertAdresse -> strukturertAdresse.getLandkode() != null)
             .findFirst()
-            .map(personAdresse -> Stream.concat(
-                Stream.of(BOSTED_UTENFOR_NORGE),
-                hentStrukturertAdresse(personAdresse).toList().stream()).toList()
-            )
+            .map(strukturertAdresse -> {
+                if (Arrays.stream(Land_iso2.values()).noneMatch(landIso2 -> landIso2.getKode().equals(strukturertAdresse.getLandkode()))) {
+                    return Stream.of(BOSTED_UTENFOR_NORGE).toList();
+                }
+                return Stream.concat(
+                    Stream.of(BOSTED_UTENFOR_NORGE),
+                    strukturertAdresse.toList().stream()
+                ).toList();
+            })
             .orElse(List.of(UKJENT));
     }
 
@@ -82,7 +89,7 @@ public class TrygdeavtaleAdresseSjekker {
         if (personAdresse.gyldigFraOgMed() == null) return false;
 
         if (lovvalgsperiode.getTom() != null && lovvalgsperiode.getTom().isBefore(personAdresse.gyldigFraOgMed())) return false;
-        if(personAdresse.gyldigTilOgMed() == null) return true;
+        if (personAdresse.gyldigTilOgMed() == null) return true;
         return !lovvalgsperiode.getFom().isAfter(personAdresse.gyldigTilOgMed());
     }
 }
