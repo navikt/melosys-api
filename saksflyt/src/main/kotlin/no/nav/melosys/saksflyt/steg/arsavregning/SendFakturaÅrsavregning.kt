@@ -12,7 +12,7 @@ import no.nav.melosys.saksflyt.steg.StegBehandler
 import no.nav.melosys.saksflytapi.domain.ProsessDataKey
 import no.nav.melosys.saksflytapi.domain.ProsessSteg
 import no.nav.melosys.saksflytapi.domain.Prosessinstans
-import no.nav.melosys.service.avgift.aarsavregning.ÅrsavregningKonstanter
+import no.nav.melosys.service.avgift.aarsavregning.ÅrsavregningKonstanter.MINIMUM_BELØP_FAKTURERING
 import no.nav.melosys.service.behandling.BehandlingService
 import no.nav.melosys.service.behandling.BehandlingsresultatService
 import no.nav.melosys.service.persondata.PersondataService
@@ -47,12 +47,12 @@ class SendFakturaÅrsavregning(
             behandlingsresultatService.lagre(behandlingsresultat)
             log.info("Oppretter årsavregningfaktura for behandling: $behandlingsId")
         } else {
-            log.info("Belop til fakturering er mindre enn 100 kr for behandling: $behandlingsId, faktura sendes ikke")
+            log.info("Belop til fakturering er mindre enn ${MINIMUM_BELØP_FAKTURERING.beløp} kr for behandling: $behandlingsId, faktura sendes ikke")
         }
     }
 
     private fun tilFaktureringBelopErStørreEllerLikMinimumBeløp(behandlingsresultat: Behandlingsresultat): Boolean {
-        return behandlingsresultat.årsavregning.tilFaktureringBeloep.abs() >= ÅrsavregningKonstanter.MINIMUM_BELØP_FAKTURERING.beløp
+        return behandlingsresultat.årsavregning.tilFaktureringBeloep.abs() >= MINIMUM_BELØP_FAKTURERING.beløp
     }
 
     private fun mapFakturaserieDto(behandlingsresultat: Behandlingsresultat): FakturaDto {
