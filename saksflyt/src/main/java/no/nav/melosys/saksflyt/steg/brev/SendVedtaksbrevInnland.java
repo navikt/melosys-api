@@ -110,7 +110,7 @@ public class SendVedtaksbrevInnland implements StegBehandler {
         } else if (resultat.erInnvilgelse()) {
             boolean erUtsendtArbeidstakerEllerSelvstendig = behandling.getTema() == Behandlingstema.UTSENDT_ARBEIDSTAKER || behandling.getTema() == Behandlingstema.UTSENDT_SELVSTENDIG || behandling.getTema() == Behandlingstema.ARBEID_KUN_NORGE;
             boolean erStorbritanniaBestemmelse = lovvalgsperiode.erEftaStorbritannia() && erUtsendtArbeidstakerEllerSelvstendig;
-            boolean erBeslutningOmNorskLovvalgOgBestemmelse11_3aOgToggleAktivert = behandling.getTema() == Behandlingstema.BESLUTNING_LOVVALG_NORGE && lovvalgsperiode.erArtikkel11_3_a_eller_13_3a() && unleash.isEnabled(ToggleName.MELOSYS_11_3_A_NORGE_ER_UTPEKT);
+            boolean erBeslutningOmNorskLovvalgOgBestemmelse11_3aOgToggleAktivert = behandling.getTema() == Behandlingstema.BESLUTNING_LOVVALG_NORGE && lovvalgsperiode.erArtikkel11_3_a() && unleash.isEnabled(ToggleName.MELOSYS_11_3_A_NORGE_ER_UTPEKT);
             boolean erArbeidKunNorge = erUtsendtArbeidstakerEllerSelvstendig && lovvalgsperiode.erArbeidKunNorge() && resultat.getAvklartefakta().stream().anyMatch(fakta -> fakta.getType() == Avklartefaktatyper.YRKESGRUPPE && fakta.getFakta().equals(AvklartYrkesgruppeType.ORDINAER.name()));
 
             sendInnvilgelsesbrev(behandling, resultat, saksbehandler, begrunnelseKode, fritekst, erStorbritanniaBestemmelse || erArbeidKunNorge || erBeslutningOmNorskLovvalgOgBestemmelse11_3aOgToggleAktivert);
