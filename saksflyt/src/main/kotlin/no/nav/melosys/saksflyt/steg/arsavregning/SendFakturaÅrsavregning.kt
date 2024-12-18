@@ -12,11 +12,11 @@ import no.nav.melosys.saksflyt.steg.StegBehandler
 import no.nav.melosys.saksflytapi.domain.ProsessDataKey
 import no.nav.melosys.saksflytapi.domain.ProsessSteg
 import no.nav.melosys.saksflytapi.domain.Prosessinstans
+import no.nav.melosys.service.avgift.aarsavregning.ÅrsavregningKonstanter
 import no.nav.melosys.service.behandling.BehandlingService
 import no.nav.melosys.service.behandling.BehandlingsresultatService
 import no.nav.melosys.service.persondata.PersondataService
 import org.springframework.stereotype.Component
-import java.math.BigDecimal
 import java.time.ZoneId
 import java.time.format.DateTimeFormatter
 
@@ -29,7 +29,7 @@ class SendFakturaÅrsavregning(
     private val faktureringskomponentenConsumer: FaktureringskomponentenConsumer,
     private val pdlService: PersondataService,
 ) : StegBehandler {
-    private val dateTimeFormatter = DateTimeFormatter.ofPattern("dd.MM.yyyy").withZone(ZoneId.systemDefault())
+
     override fun inngangsSteg(): ProsessSteg {
         return ProsessSteg.SEND_FAKTURA_AARSAVREGNING
     }
@@ -40,7 +40,7 @@ class SendFakturaÅrsavregning(
         val saksbehandlerIdent = prosessinstans.getData(ProsessDataKey.SAKSBEHANDLER)
 
 
-        if (tilFaktureringBelopErStørreEllerLik100(behandlingsresultat)) {
+        if (tilFaktureringBelopErStørreEllerLikMinimumBeløp(behandlingsresultat)) {
             val fakturaDto = mapFakturaserieDto(behandlingsresultat)
             val responseDto = faktureringskomponentenConsumer.lagFaktura(fakturaDto, saksbehandlerIdent)
             behandlingsresultat.fakturaserieReferanse = responseDto.fakturaserieReferanse
@@ -51,8 +51,8 @@ class SendFakturaÅrsavregning(
         }
     }
 
-    private fun tilFaktureringBelopErStørreEllerLik100(behandlingsresultat: Behandlingsresultat): Boolean {
-        return behandlingsresultat.årsavregning.tilFaktureringBeloep.abs() >= BigDecimal(100)
+    private fun tilFaktureringBelopErStørreEllerLikMinimumBeløp(behandlingsresultat: Behandlingsresultat): Boolean {
+        return behandlingsresultat.årsavregning.tilFaktureringBeloep.abs() >= ÅrsavregningKonstanter.MINIMUM_BELØP_FAKTURERING.beløp
     }
 
     private fun mapFakturaserieDto(behandlingsresultat: Behandlingsresultat): FakturaDto {
@@ -62,7 +62,7 @@ class SendFakturaÅrsavregning(
         val fullmektig = fagsak.finnFullmektig(Fullmaktstype.FULLMEKTIG_TRYGDEAVGIFT)
         val foedselsNr = pdlService.finnFolkeregisterident(fagsak.hentBrukersAktørID())
             .orElseThrow { FunksjonellException("Kunne ikke finne fødselsnummer fra PDL") }
-        val vedtaksdato = dateTimeFormatter.format(behandlingsresultat.vedtakMetadata.vedtaksdato)
+        val vedtaksdato = FORMATTER.format(behandlingsresultat.vedtakMetadata.vedtaksdato)
         val startDato = behandlingsresultat.trygdeavgiftsperioder.minBy { trygdeavgiftsperiode -> trygdeavgiftsperiode.periodeFra }.periodeFra
         val sluttDato = behandlingsresultat.trygdeavgiftsperioder.maxBy { trygdeavgiftsperiode -> trygdeavgiftsperiode.periodeTil }.periodeTil
         val harTidligereÅrsavregning = årsavregning.tidligereBehandlingsresultat.behandling.erÅrsavregning()
@@ -79,5 +79,11 @@ class SendFakturaÅrsavregning(
             sluttDato = sluttDato,
             beskrivelse = "Medlemskapsperiode $startDato - $sluttDato, endelig beregnet trygdeavgift ${årsavregning.nyttTotalbeloep} - forskuddsvis fakturert trygdeavgift ${årsavregning.tidligereFakturertBeloep}"
         )
+
+
+    }
+
+    companion object {
+        private val FORMATTER = DateTimeFormatter.ofPattern("dd.MM.yyyy").withZone(ZoneId.systemDefault())
     }
 }
