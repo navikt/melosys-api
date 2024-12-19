@@ -287,7 +287,7 @@ internal class KontrollTest {
     }
 
     @Test
-    fun `trygdeavgiftsperioder med direkte forutgående periode, skal gi kontrollfeil, dersom periode er i annen fagsak og har trygdeavgift`() {
+    fun `tidligere trygdeavgiftsperioder som avsluttes dagen før en ny trygdeavgiftsperiode, skal gi kontrollfeil, dersom periode er i annen fagsak og har trygdeavgift`() {
         behandling.fagsak.type = Sakstyper.FTRL
 
         val mockBehandlingsresultaterFraAndreFagsakerMedTrygdeavgiftsperioder: Behandlingsresultat = mockk()
@@ -373,7 +373,7 @@ internal class KontrollTest {
     }
 
     @Test
-    fun `trygdeavgiftsperioder med direkte forutgående periode, skal ikke gi kontrollfeil, dersom periode er i samme fagsak`() {
+    fun `tidligere trygdeavgiftsperioder som avsluttes dagen før en ny trygdeavgiftsperiode, skal ikke gi kontrollfeil, dersom periode er i samme fagsak`() {
         behandling.fagsak.type = Sakstyper.FTRL
 
         val mockBehandlingsresultaterFraAndreFagsakerMedTrygdeavgiftsperioder: Behandlingsresultat = mockk()

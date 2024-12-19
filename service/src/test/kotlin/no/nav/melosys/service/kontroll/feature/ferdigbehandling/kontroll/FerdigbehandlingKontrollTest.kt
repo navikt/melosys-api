@@ -304,7 +304,7 @@ class FerdigbehandlingKontrollTest {
     }
 
     @Test
-    fun `trygdeavgiftsperioder med direkte forutgående periode, skal gi kontrollfeil, dersom tidligere periode er forutgående`() {
+    fun `tidligere trygdeavgiftsperioder som avsluttes dagen før en ny trygdeavgiftsperiode, skal gi kontrollfeil, dersom tidligere periode er forutgående`() {
         val medlemskapsDokument = MedlemskapDokument().apply {
             medlemsperiode = listOf(
                 Medlemsperiode(periode = Periode(LocalDate.now(), LocalDate.now().plusDays(4))).apply {
@@ -342,7 +342,7 @@ class FerdigbehandlingKontrollTest {
     }
 
     @Test
-    fun `trygdeavgiftsperioder med direkte forutgående periode, skal ikke gi kontrollfeil, dersom tidligere periode ikke er forutgående`() {
+    fun `tidligere trygdeavgiftsperioder som avsluttes dagen før en ny trygdeavgiftsperiode, skal ikke gi kontrollfeil, dersom tidligere periode ikke er forutgående`() {
         val nyeTrygdeavgiftperioder = listOf(
             lagTrygdeavgiftPeriode(
                 LocalDate.now().plusDays(3), LocalDate.now().plusDays(10)
