@@ -172,8 +172,7 @@ class Kontroll(
 
     private fun hentTidligereTrygdeavgiftsperioderIAndreFagsaker(behandling: Behandling): List<Trygdeavgiftsperiode> {
         val tidligereBehandlingsResultat = behandlingsresultatService.finnAlleBehandlingsresultatForAktør(
-            behandling.fagsak.hentBrukersAktørID(),
-            behandling.id
+            behandling.fagsak.hentBrukersAktørID()
         )
 
         val filtrerteResultaterMedAvgift = tidligereBehandlingsResultat
