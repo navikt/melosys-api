@@ -148,8 +148,8 @@ class Kontroll(
             .map { medlemskapsperiodeService.hentMedlemskapsperioder(it.id) }.flatten()
         val medlemskapsdokument = behandling.hentMedlemskapDokument()
 
-        val nyeTrygdeavgifsperioder = behandlingsresultatService.hentBehandlingsresultat(behandling.id).trygdeavgiftsperioder.toList()
-        val tidligereTrygdeavgiftsPerioderIAndreFagsaker = hentTidligereTrygdeavgiftsPerioderIAndreFagsaker(behandling)
+        val nyeTrygdeavgiftsperioder = behandlingsresultatService.hentBehandlingsresultat(behandling.id).trygdeavgiftsperioder.toList()
+        val tidligereTrygdeavgiftsperioderIAndreFagsaker = hentTidligereTrygdeavgiftsperioderIAndreFagsaker(behandling)
 
         return FerdigbehandlingKontrollData(
             medlemskapDokument = medlemskapsdokument,
@@ -164,14 +164,14 @@ class Kontroll(
             ),
             brevUtkast = utkastBrevService.hentUtkast(behandling.id),
             trygdeavgiftperiodeData = TrygdeavgiftsperiodeData(
-                nyeTrygdeavgifsperioder,
-                tidligereTrygdeavgiftsPerioderIAndreFagsaker
+                nyeTrygdeavgiftsperioder,
+                tidligereTrygdeavgiftsperioderIAndreFagsaker
             )
         )
     }
 
-    private fun hentTidligereTrygdeavgiftsPerioderIAndreFagsaker(behandling: Behandling): List<Trygdeavgiftsperiode> {
-        val tidligereBehandlingsResultat = behandlingsresultatService.finnAlleTidligereBehandlingsresultatForAktør(
+    private fun hentTidligereTrygdeavgiftsperioderIAndreFagsaker(behandling: Behandling): List<Trygdeavgiftsperiode> {
+        val tidligereBehandlingsResultat = behandlingsresultatService.finnAlleBehandlingsresultatForAktør(
             behandling.fagsak.hentBrukersAktørID(),
             behandling.id
         )

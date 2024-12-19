@@ -304,8 +304,7 @@ internal class KontrollTest {
         )
 
         every {
-            behandlingsresultatService.finnAlleTidligereBehandlingsresultatForAktør(
-                any(),
+            behandlingsresultatService.finnAlleBehandlingsresultatForAktør(
                 any()
             )
         } returns listOf(mockBehandlingsresultaterFraAndreFagsakerMedTrygdeavgiftsperioder)
@@ -348,8 +347,7 @@ internal class KontrollTest {
         )
 
         every {
-            behandlingsresultatService.finnAlleTidligereBehandlingsresultatForAktør(
-                any(),
+            behandlingsresultatService.finnAlleBehandlingsresultatForAktør(
                 any()
             )
         } returns listOf(mockBehandlingsresultaterFraAndreFagsakerMedTrygdeavgiftsperioder)
@@ -392,8 +390,7 @@ internal class KontrollTest {
         )
 
         every {
-            behandlingsresultatService.finnAlleTidligereBehandlingsresultatForAktør(
-                any(),
+            behandlingsresultatService.finnAlleBehandlingsresultatForAktør(
                 any()
             )
         } returns listOf(mockBehandlingsresultaterFraAndreFagsakerMedTrygdeavgiftsperioder)
@@ -437,8 +434,7 @@ internal class KontrollTest {
         )
 
         every {
-            behandlingsresultatService.finnAlleTidligereBehandlingsresultatForAktør(
-                any(),
+            behandlingsresultatService.finnAlleBehandlingsresultatForAktør(
                 any()
             )
         } returns listOf(mockBehandlingsresultaterFraAndreFagsakerMedTrygdeavgiftsperioder)

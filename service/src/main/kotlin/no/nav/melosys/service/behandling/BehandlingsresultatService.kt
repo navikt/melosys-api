@@ -55,15 +55,12 @@ class BehandlingsresultatService(
     fun finnAlleBehandlingsresultatMedFakturaserieReferanse(fakturaserieReferanse: String): List<Behandlingsresultat> =
         behandlingsresultatRepository.findAllByFakturaserieReferanse(fakturaserieReferanse)
 
-    fun finnAlleTidligereBehandlingsresultatForAktør(aktørId: String, behandlingsresultatId: Long): List<Behandlingsresultat> =
-        behandlingsresultatRepository.findAllByAktorIdExceptCurrent(aktørId, behandlingsresultatId)
+    fun finnAlleBehandlingsresultatForAktør(aktørId: String): List<Behandlingsresultat> =
+        behandlingsresultatRepository.findAllByAktorId(aktørId)
 
     fun hentBehandlingsresultatMedAnmodningsperioder(behandlingsid: Long): Behandlingsresultat =
         behandlingsresultatRepository.findWithAnmodningsperioderById(behandlingsid)
             .orElseThrowIkkeFunnetException(behandlingsid)
-
-    fun finnResultatMedMedlemskapOgLovvalg(behandlingsid: Long): Behandlingsresultat? =
-        behandlingsresultatRepository.findWithLovvalgOgMedlemskapsperioderById(behandlingsid).orElse(null)
 
     fun hentResultatMedMedlemskapOgLovvalg(behandlingsid: Long): Behandlingsresultat =
         behandlingsresultatRepository.findWithLovvalgOgMedlemskapsperioderById(behandlingsid)

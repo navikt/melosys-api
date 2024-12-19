@@ -31,8 +31,7 @@ public interface BehandlingsresultatRepository extends JpaRepository<Behandlings
             JOIN behandling.fagsak fagsak
             JOIN fagsak.aktører aktør
             WHERE aktør.aktørId = :aktorId
-            AND b.id <> :behandlingsresultatId
         """
     )
-    List<Behandlingsresultat> findAllByAktorIdExceptCurrent(String aktorId, Long behandlingsresultatId);
+    List<Behandlingsresultat> findAllByAktorId(String aktorId);
 }
