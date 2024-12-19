@@ -304,7 +304,7 @@ class FerdigbehandlingKontrollTest {
     }
 
     @Test
-    fun `tidligere trygdeavgiftsperioder som avsluttes dagen før en ny trygdeavgiftsperiode, skal gi kontrollfeil, dersom tidligere periode er forutgående`() {
+    fun `tidligere trygdeavgiftsperioder som avsluttes dagen før en ny trygdeavgiftsperiode, skal gi kontrollfeil`() {
         val medlemskapsDokument = MedlemskapDokument().apply {
             medlemsperiode = listOf(
                 Medlemsperiode(periode = Periode(LocalDate.now(), LocalDate.now().plusDays(4))).apply {
