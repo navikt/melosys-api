@@ -15,10 +15,7 @@ import no.nav.melosys.domain.avgift.Trygdeavgiftsperiode
 import no.nav.melosys.domain.dokument.medlemskap.MedlemskapDokument
 import no.nav.melosys.domain.dokument.medlemskap.Medlemsperiode
 import no.nav.melosys.domain.dokument.medlemskap.Periode
-import no.nav.melosys.domain.kodeverk.Aktoersroller
-import no.nav.melosys.domain.kodeverk.Fullmaktstype
-import no.nav.melosys.domain.kodeverk.InnvilgelsesResultat
-import no.nav.melosys.domain.kodeverk.Sakstyper
+import no.nav.melosys.domain.kodeverk.*
 import no.nav.melosys.domain.kodeverk.begrunnelser.Kontroll_begrunnelser
 import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingsresultattyper
 import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingstema
@@ -290,49 +287,14 @@ internal class KontrollTest {
     }
 
     @Test
-    fun `trygdeavgiftsperioder med direkte forutgående periode, skal gi kontrollfeil, dersom fagsak er i annen periode`() {
+    fun `tidligere trygdeavgiftsperioder som avsluttes dagen før en ny trygdeavgiftsperiode, skal gi kontrollfeil, dersom periode er i annen fagsak og har trygdeavgift`() {
         behandling.fagsak.type = Sakstyper.FTRL
 
-        //Mock nye trygdeavgiftsperioder
-        every { behandlingsresultatService.hentBehandlingsresultat(any()).trygdeavgiftsperioder } returns setOf(
-            Trygdeavgiftsperiode(
-                periodeFra = LocalDate.of(2012, 12, 11),
-                periodeTil = LocalDate.of(2012, 12, 24),
-                trygdeavgiftsbeløpMd = Penger(BigDecimal.TEN, NOK.kode),
-                trygdesats = BigDecimal.TEN
-            )
-        )
-
-        val mockBehandlingsresultatMedTidligereTrygdeavgiftsperioder: Behandlingsresultat = mockk()
-        every { mockBehandlingsresultatMedTidligereTrygdeavgiftsperioder.trygdeavgiftsperioder } returns setOf(
-            Trygdeavgiftsperiode(
-                periodeFra = LocalDate.of(2012, 12, 1),
-                periodeTil = LocalDate.of(2012, 12, 10),
-                trygdeavgiftsbeløpMd = Penger(BigDecimal.TEN, NOK.kode),
-                trygdesats = BigDecimal.TEN
-            )
-        )
-        every {
-            behandlingsresultatService.finnAlleTidligereBehandlingsresultatForAktør(
-                any(),
-                any()
-            )
-        } returns listOf(mockBehandlingsresultatMedTidligereTrygdeavgiftsperioder)
-        every { trygdeavgiftService.harFakturerbarTrygdeavgift(mockBehandlingsresultatMedTidligereTrygdeavgiftsperioder) } returns true
-
-        val resultat = mockedKontroll.kontroller(behandlingID, Behandlingsresultattyper.MEDLEM_I_FOLKETRYGDEN, emptySet())
-
-        resultat.shouldHaveSize(1)
-            .single()
-            .kode shouldBe Kontroll_begrunnelser.DIREKTE_FORUTGÅENDE_PERIODE
-    }
-
-    @Test
-    fun `trygdeavgiftsperioder med overlappende periode, skal gi kontrollfeil, dersom fagsak er i annen periode`() {
-        behandling.fagsak.type = Sakstyper.FTRL
-
-        //Mock tidligere trygdeavgiftsperioder
-        every { behandlingsresultatService.hentBehandlingsresultat(any()).trygdeavgiftsperioder } returns setOf(
+        val mockBehandlingsresultaterFraAndreFagsakerMedTrygdeavgiftsperioder: Behandlingsresultat = mockk()
+        every { mockBehandlingsresultaterFraAndreFagsakerMedTrygdeavgiftsperioder.behandling} returns Behandling().apply {
+            fagsak = Fagsak(saksnummer = "test-321", status = Saksstatuser.OPPRETTET, tema = Sakstemaer.TRYGDEAVGIFT, type = Sakstyper.FTRL)
+        }
+        every { mockBehandlingsresultaterFraAndreFagsakerMedTrygdeavgiftsperioder.trygdeavgiftsperioder } returns setOf(
             Trygdeavgiftsperiode(
                 periodeFra = LocalDate.of(2012, 12, 1),
                 periodeTil = LocalDate.of(2012, 12, 20),
@@ -341,8 +303,41 @@ internal class KontrollTest {
             )
         )
 
+        every {
+            behandlingsresultatService.finnAlleBehandlingsresultatForAktør(
+                any()
+            )
+        } returns listOf(mockBehandlingsresultaterFraAndreFagsakerMedTrygdeavgiftsperioder)
+
         val mockBehandlingsresultatMedNyeTrygdeavgiftsperioder: Behandlingsresultat = mockk()
         every { mockBehandlingsresultatMedNyeTrygdeavgiftsperioder.trygdeavgiftsperioder } returns setOf(
+            Trygdeavgiftsperiode(
+                periodeFra = LocalDate.of(2012, 12, 21),
+                periodeTil = LocalDate.of(2012, 12, 24),
+                trygdeavgiftsbeløpMd = Penger(BigDecimal.TEN, NOK.kode),
+                trygdesats = BigDecimal.TEN
+            )
+        )
+        every { behandlingsresultatService.hentBehandlingsresultat(any()) } returns mockBehandlingsresultatMedNyeTrygdeavgiftsperioder
+
+        every { trygdeavgiftService.harFakturerbarTrygdeavgift(any()) } returns true
+
+        val resultat = mockedKontroll.kontroller(behandlingID, Behandlingsresultattyper.MEDLEM_I_FOLKETRYGDEN, emptySet())
+
+        resultat.shouldNotBeEmpty()
+            .single()
+            .kode shouldBe Kontroll_begrunnelser.DIREKTE_FORUTGÅENDE_PERIODE
+    }
+
+    @Test
+    fun `trygdeavgiftsperioder med overlappende periode, skal gi kontrollfeil, dersom periode er i annen fagsak og har trygdeavgift`() {
+        behandling.fagsak.type = Sakstyper.FTRL
+
+        val mockBehandlingsresultaterFraAndreFagsakerMedTrygdeavgiftsperioder: Behandlingsresultat = mockk()
+        every { mockBehandlingsresultaterFraAndreFagsakerMedTrygdeavgiftsperioder.behandling} returns Behandling().apply {
+            fagsak = Fagsak(saksnummer = "test-321", status = Saksstatuser.OPPRETTET, tema = Sakstemaer.TRYGDEAVGIFT, type = Sakstyper.FTRL)
+        }
+        every { mockBehandlingsresultaterFraAndreFagsakerMedTrygdeavgiftsperioder.trygdeavgiftsperioder } returns setOf(
             Trygdeavgiftsperiode(
                 periodeFra = LocalDate.of(2012, 12, 11),
                 periodeTil = LocalDate.of(2012, 12, 24),
@@ -350,21 +345,119 @@ internal class KontrollTest {
                 trygdesats = BigDecimal.TEN
             )
         )
+
         every {
-            behandlingsresultatService.finnAlleTidligereBehandlingsresultatForAktør(
-                any(),
+            behandlingsresultatService.finnAlleBehandlingsresultatForAktør(
                 any()
             )
-        } returns listOf(mockBehandlingsresultatMedNyeTrygdeavgiftsperioder)
-        every { trygdeavgiftService.harFakturerbarTrygdeavgift(mockBehandlingsresultatMedNyeTrygdeavgiftsperioder) } returns true
+        } returns listOf(mockBehandlingsresultaterFraAndreFagsakerMedTrygdeavgiftsperioder)
+
+        val mockBehandlingsresultatMedNyeTrygdeavgiftsperioder: Behandlingsresultat = mockk()
+        every { mockBehandlingsresultatMedNyeTrygdeavgiftsperioder.trygdeavgiftsperioder } returns setOf(
+            Trygdeavgiftsperiode(
+                periodeFra = LocalDate.of(2012, 12, 1),
+                periodeTil = LocalDate.of(2012, 12, 20),
+                trygdeavgiftsbeløpMd = Penger(BigDecimal.TEN, NOK.kode),
+                trygdesats = BigDecimal.TEN
+            )
+        )
+        every { behandlingsresultatService.hentBehandlingsresultat(any()) } returns mockBehandlingsresultatMedNyeTrygdeavgiftsperioder
+
+        every { trygdeavgiftService.harFakturerbarTrygdeavgift(any()) } returns true
 
         val resultat = mockedKontroll.kontroller(behandlingID, Behandlingsresultattyper.MEDLEM_I_FOLKETRYGDEN, emptySet())
 
         resultat.shouldNotBeEmpty()
-            .shouldHaveSize(1)
-            .run {
-                first().kode.shouldBe(Kontroll_begrunnelser.OVERLAPPENDE_PERIODE_MED_FORSKUDDSVIS_FAKTURERUNG)
-            }
+            .single()
+            .kode shouldBe Kontroll_begrunnelser.OVERLAPPENDE_PERIODE_MED_FORSKUDDSVIS_FAKTURERUNG
+    }
+
+    @Test
+    fun `tidligere trygdeavgiftsperioder som avsluttes dagen før en ny trygdeavgiftsperiode, skal ikke gi kontrollfeil, dersom periode er i samme fagsak`() {
+        behandling.fagsak.type = Sakstyper.FTRL
+
+        val mockBehandlingsresultaterFraAndreFagsakerMedTrygdeavgiftsperioder: Behandlingsresultat = mockk()
+        every { mockBehandlingsresultaterFraAndreFagsakerMedTrygdeavgiftsperioder.behandling} returns Behandling().apply {
+            fagsak = Fagsak(saksnummer = "MEL-test", status = Saksstatuser.OPPRETTET, tema = Sakstemaer.TRYGDEAVGIFT, type = Sakstyper.FTRL)
+        }
+        every { mockBehandlingsresultaterFraAndreFagsakerMedTrygdeavgiftsperioder.trygdeavgiftsperioder } returns setOf(
+            Trygdeavgiftsperiode(
+                periodeFra = LocalDate.of(2012, 12, 1),
+                periodeTil = LocalDate.of(2012, 12, 20),
+                trygdeavgiftsbeløpMd = Penger(BigDecimal.TEN, NOK.kode),
+                trygdesats = BigDecimal.TEN
+            )
+        )
+
+        every {
+            behandlingsresultatService.finnAlleBehandlingsresultatForAktør(
+                any()
+            )
+        } returns listOf(mockBehandlingsresultaterFraAndreFagsakerMedTrygdeavgiftsperioder)
+
+        val mockBehandlingsresultatMedNyeTrygdeavgiftsperioder: Behandlingsresultat = mockk()
+        every { mockBehandlingsresultatMedNyeTrygdeavgiftsperioder.behandling} returns Behandling().apply {
+            fagsak = Fagsak(saksnummer = "MEL-test", status = Saksstatuser.OPPRETTET, tema = Sakstemaer.TRYGDEAVGIFT, type = Sakstyper.FTRL)
+        }
+        every { mockBehandlingsresultatMedNyeTrygdeavgiftsperioder.trygdeavgiftsperioder } returns setOf(
+            Trygdeavgiftsperiode(
+                periodeFra = LocalDate.of(2012, 12, 21),
+                periodeTil = LocalDate.of(2012, 12, 24),
+                trygdeavgiftsbeløpMd = Penger(BigDecimal.TEN, NOK.kode),
+                trygdesats = BigDecimal.TEN
+            )
+        )
+        every { behandlingsresultatService.hentBehandlingsresultat(any()) } returns mockBehandlingsresultatMedNyeTrygdeavgiftsperioder
+
+        every { trygdeavgiftService.harFakturerbarTrygdeavgift(any()) } returns true
+
+        val resultat = mockedKontroll.kontroller(behandlingID, Behandlingsresultattyper.MEDLEM_I_FOLKETRYGDEN, emptySet())
+
+        resultat.shouldBeEmpty()
+    }
+
+    @Test
+    fun `trygdeavgiftsperioder med overlappende periode, skal ikke gi kontrollfeil, dersom periode er i samme fagsak og har trygdeavgift`() {
+        behandling.fagsak.type = Sakstyper.FTRL
+
+        val mockBehandlingsresultaterFraAndreFagsakerMedTrygdeavgiftsperioder: Behandlingsresultat = mockk()
+        every { mockBehandlingsresultaterFraAndreFagsakerMedTrygdeavgiftsperioder.behandling} returns Behandling().apply {
+            fagsak = Fagsak(saksnummer = "MEL-test", status = Saksstatuser.OPPRETTET, tema = Sakstemaer.TRYGDEAVGIFT, type = Sakstyper.FTRL)
+        }
+        every { mockBehandlingsresultaterFraAndreFagsakerMedTrygdeavgiftsperioder.trygdeavgiftsperioder } returns setOf(
+            Trygdeavgiftsperiode(
+                periodeFra = LocalDate.of(2012, 12, 11),
+                periodeTil = LocalDate.of(2012, 12, 24),
+                trygdeavgiftsbeløpMd = Penger(BigDecimal.TEN, NOK.kode),
+                trygdesats = BigDecimal.TEN
+            )
+        )
+
+        every {
+            behandlingsresultatService.finnAlleBehandlingsresultatForAktør(
+                any()
+            )
+        } returns listOf(mockBehandlingsresultaterFraAndreFagsakerMedTrygdeavgiftsperioder)
+
+        val mockBehandlingsresultatMedNyeTrygdeavgiftsperioder: Behandlingsresultat = mockk()
+        every { mockBehandlingsresultatMedNyeTrygdeavgiftsperioder.behandling} returns Behandling().apply {
+            fagsak = Fagsak(saksnummer = "MEL-test", status = Saksstatuser.OPPRETTET, tema = Sakstemaer.TRYGDEAVGIFT, type = Sakstyper.FTRL)
+        }
+        every { mockBehandlingsresultatMedNyeTrygdeavgiftsperioder.trygdeavgiftsperioder } returns setOf(
+            Trygdeavgiftsperiode(
+                periodeFra = LocalDate.of(2012, 12, 1),
+                periodeTil = LocalDate.of(2012, 12, 20),
+                trygdeavgiftsbeløpMd = Penger(BigDecimal.TEN, NOK.kode),
+                trygdesats = BigDecimal.TEN
+            )
+        )
+        every { behandlingsresultatService.hentBehandlingsresultat(any()) } returns mockBehandlingsresultatMedNyeTrygdeavgiftsperioder
+
+        every { trygdeavgiftService.harFakturerbarTrygdeavgift(any()) } returns true
+
+        val resultat = mockedKontroll.kontroller(behandlingID, Behandlingsresultattyper.MEDLEM_I_FOLKETRYGDEN, emptySet())
+
+        resultat.shouldBeEmpty()
     }
 
     @Test

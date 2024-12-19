@@ -3,6 +3,7 @@ package no.nav.melosys.service.kontroll.feature.ferdigbehandling
 import mu.KotlinLogging
 import no.nav.melosys.domain.Aktoer
 import no.nav.melosys.domain.Behandling
+import no.nav.melosys.domain.avgift.Trygdeavgiftsperiode
 import no.nav.melosys.domain.dokument.organisasjon.OrganisasjonDokument
 import no.nav.melosys.domain.kodeverk.Fullmaktstype
 import no.nav.melosys.domain.kodeverk.Sakstyper
@@ -146,12 +147,9 @@ class Kontroll(
         val tidligereMedlemskapsperioder = behandling.fagsak.hentInaktiveBehandlinger()
             .map { medlemskapsperiodeService.hentMedlemskapsperioder(it.id) }.flatten()
         val medlemskapsdokument = behandling.hentMedlemskapDokument()
-        val tidligereBehandlingsresultaterMedAvgift =
-            behandlingsresultatService.finnAlleTidligereBehandlingsresultatForAktør(behandling.fagsak.hentBrukersAktørID(), behandling.id)
-                .filter { trygdeavgiftService.harFakturerbarTrygdeavgift(it) }
 
-        val tidligereTrygdeavgiftsPerioder = tidligereBehandlingsresultaterMedAvgift.flatMap { it.trygdeavgiftsperioder }
-        val nyeTrygdeavgifsperioder = behandlingsresultatService.hentBehandlingsresultat(behandling.id).trygdeavgiftsperioder.toList()
+        val nyeTrygdeavgiftsperioder = behandlingsresultatService.hentBehandlingsresultat(behandling.id).trygdeavgiftsperioder.toList()
+        val tidligereTrygdeavgiftsperioderIAndreFagsaker = hentTidligereTrygdeavgiftsperioderIAndreFagsaker(behandling)
 
         return FerdigbehandlingKontrollData(
             medlemskapDokument = medlemskapsdokument,
@@ -166,10 +164,26 @@ class Kontroll(
             ),
             brevUtkast = utkastBrevService.hentUtkast(behandling.id),
             trygdeavgiftperiodeData = TrygdeavgiftsperiodeData(
-                nyeTrygdeavgifsperioder,
-                tidligereTrygdeavgiftsPerioder
+                nyeTrygdeavgiftsperioder,
+                tidligereTrygdeavgiftsperioderIAndreFagsaker
             )
         )
+    }
+
+    private fun hentTidligereTrygdeavgiftsperioderIAndreFagsaker(behandling: Behandling): List<Trygdeavgiftsperiode> {
+        val tidligereBehandlingsResultat = behandlingsresultatService.finnAlleBehandlingsresultatForAktør(
+            behandling.fagsak.hentBrukersAktørID()
+        )
+
+        val filtrerteResultaterMedAvgift = tidligereBehandlingsResultat
+            .filter { tidligereResultat ->
+                tidligereResultat.behandling.fagsak.saksnummer != behandling.fagsak.saksnummer
+            }
+            .filter { tidligereResultat ->
+                trygdeavgiftService.harFakturerbarTrygdeavgift(tidligereResultat)
+            }
+
+        return filtrerteResultaterMedAvgift.flatMap { it.trygdeavgiftsperioder }
     }
 
     private fun hentPersondata(behandling: Behandling): Persondata = persondataFasade.hentPerson(behandling.fagsak.hentBrukersAktørID())
