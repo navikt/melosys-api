@@ -44,9 +44,19 @@ class InnvilgelseEftaStorbritanniaMapper(
 
         val navnVirksomheter = alleVirksomheter.stream().map { it.navn }.toList()
 
-        val erOrdinaerYrkesgruppe = behandlingsresultat.avklartefakta.find { it.type == Avklartefaktatyper.YRKESGRUPPE && it.fakta == Yrkesgrupper.ORDINAER.name } != null
+        val erOrdinaerYrkesgruppe =
+            behandlingsresultat.avklartefakta.find { it.type == Avklartefaktatyper.YRKESGRUPPE && it.fakta == Yrkesgrupper.ORDINAER.name } != null
 
-        val arbeidINorge = if(unleash.isEnabled(ToggleName.MELOSYS_ARBEID_KUN_NORGE)) bostedsland.kode == Land_iso2.NO.name && erOrdinaerYrkesgruppe else false
+        val arbeidINorge =
+            if (unleash.isEnabled(ToggleName.MELOSYS_ARBEID_KUN_NORGE)) bostedsland.kode == Land_iso2.NO.name && erOrdinaerYrkesgruppe else false
+
+        val er11_3_a_eller_13_a_arbeid_norge = if (arbeidINorge) {
+            lovvalgsperiode.erArtikkel11_3_a_eller_13_3a()
+        } else {
+            lovvalgsperiode.erArtikkel11_3_a() && behandlingsresultat.behandling.erNorgeUtpekt() && !er11_3_a_og_flereArbeidsland && unleash.isEnabled(
+                ToggleName.MELOSYS_11_3_A_NORGE_ER_UTPEKT
+            )
+        }
 
         return InnvilgelseEftaStorbritannia(
             brevbestilling = brevbestilling,
@@ -60,8 +70,8 @@ class InnvilgelseEftaStorbritanniaMapper(
             erNorskSkip = erNorskSkip != null,
             lovvalgsperiode = Periode(lovvalgsperiode.fom, lovvalgsperiode.tom),
             tilleggsbestemmelse = if (lovvalgsperiode.tilleggsbestemmelse != null) lovvalgsperiode.tilleggsbestemmelse.name() else "",
-            erArtikkel11_3_a_eller_13_3_a_arbeid_norge = if(arbeidINorge) lovvalgsperiode.erArtikkel11_3_a_eller_13_3a() else false,
-            erArtikkel13_3_a_eller_13_4 = if(!arbeidINorge) lovvalgsperiode.erArtikkel13_3_a_eller_13_4() else false,
+            erArtikkel11_3_a_eller_13_3_a_arbeid_norge = er11_3_a_eller_13_a_arbeid_norge,
+            erArtikkel13_3_a_eller_13_4 = if (!arbeidINorge) lovvalgsperiode.erArtikkel13_3_a_eller_13_4() else false,
             erArtikkel14_1_eller_14_2 = lovvalgsperiode.erArtikkel14_1_eller_14_2(),
             erArtikkel16_1_eller_16_3 = lovvalgsperiode.erArtikkel16_1_eller_16_3(),
             erArtikkel18_1 = lovvalgsperiode.erArtikkel18_1(),
@@ -69,7 +79,7 @@ class InnvilgelseEftaStorbritanniaMapper(
             anmodningsperiodeSvarType = if (anmodningsperiode.isPresent) anmodningsperiode.get().anmodningsperiodeSvar.anmodningsperiodeSvarType.name else "",
             innvilgelseFritekst = brevbestilling.innvilgelseFritekst,
             innledningFritekst = brevbestilling.innledningFritekst,
-            begrunnelseFritekst = if(brevbestilling.begrunnelseFritekst.isNullOrEmpty()) behandlingsresultat.begrunnelseFritekst else brevbestilling.begrunnelseFritekst,
+            begrunnelseFritekst = if (brevbestilling.begrunnelseFritekst.isNullOrEmpty()) behandlingsresultat.begrunnelseFritekst else brevbestilling.begrunnelseFritekst,
             erArtikkel11_3_a_og_flereArbeidsland = er11_3_a_og_flereArbeidsland
         )
     }
