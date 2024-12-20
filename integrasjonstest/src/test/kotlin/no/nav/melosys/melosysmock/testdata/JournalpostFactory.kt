@@ -6,8 +6,7 @@ import no.nav.melosys.melosysmock.person.PersonRepo
 import org.springframework.stereotype.Component
 import java.time.LocalDate
 
-@Component
-class JournalPostService {
+object JournalpostFactory {
     fun lagJournalPost(forVirksomhet: Boolean = false): OpprettJournalpostRequest =
         OpprettJournalpostRequest(
             journalpostType = JournalpostType.INNGAAENDE,
@@ -27,7 +26,7 @@ class JournalPostService {
                         DokumentVariant(
                             filtype = JournalpostFiltype.PDFA,
                             variantformat = "ARKIV",
-                            fysiskDokument = JournalPostService::class.java.getResource("/dummy.pdf").readBytes()
+                            fysiskDokument = JournalpostFactory::class.java.getResource("/dummy.pdf").readBytes()
                         )
                     )
                 )

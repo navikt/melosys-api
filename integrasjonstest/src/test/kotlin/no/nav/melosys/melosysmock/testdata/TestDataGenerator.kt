@@ -17,8 +17,7 @@ import java.time.LocalDate
 @RequestMapping("/testdata")
 class TestDataGenerator(
     private val journalpostApi: JournalpostApi,
-    private val oppgaveApi: OppgaveApi,
-    private val journalPostService: JournalPostService
+    private val oppgaveApi: OppgaveApi
 ) {
 
     @PostMapping("/jfr-oppgave")
@@ -29,7 +28,7 @@ class TestDataGenerator(
     }
 
     fun opprettJfrOppgave(tilordnetRessurs: String, forVirksomhet: Boolean): Oppgave {
-        val opprettJournalpostRequest = journalPostService.lagJournalPost(forVirksomhet)
+        val opprettJournalpostRequest = JournalpostFactory.lagJournalPost(forVirksomhet)
         val journalpostMap = journalpostApi.opprettJournalpost(opprettJournalpostRequest, false)
         return opprettJfrOppgave(
             opprettJournalpostRequest = opprettJournalpostRequest,
