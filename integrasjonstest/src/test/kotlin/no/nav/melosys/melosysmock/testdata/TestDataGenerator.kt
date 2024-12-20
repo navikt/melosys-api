@@ -6,27 +6,18 @@ import no.nav.melosys.melosysmock.journalpost.journalpostapi.OpprettJournalpostR
 import no.nav.melosys.melosysmock.oppgave.Oppgave
 import no.nav.melosys.melosysmock.oppgave.OppgaveApi
 import no.nav.melosys.melosysmock.person.PersonRepo
+import org.springframework.stereotype.Component
 import org.springframework.web.bind.annotation.PostMapping
 import org.springframework.web.bind.annotation.RequestBody
 import org.springframework.web.bind.annotation.RequestMapping
 import org.springframework.web.bind.annotation.RestController
 import java.time.LocalDate
 
-
-@RestController
-@RequestMapping("/testdata")
+@Component
 class TestDataGenerator(
     private val journalpostApi: JournalpostApi,
     private val oppgaveApi: OppgaveApi
 ) {
-
-    @PostMapping("/jfr-oppgave")
-    fun lagJournalføringsoppgave(@RequestBody request: OpprettJfrOppgaveRequest) {
-        for (i in 0 until request.antall) {
-            opprettJfrOppgave(request.tilordnetRessurs, request.forVirksomhet)
-        }
-    }
-
     fun opprettJfrOppgave(tilordnetRessurs: String, forVirksomhet: Boolean): Oppgave {
         val opprettJournalpostRequest = JournalpostFactory.lagJournalPost(forVirksomhet)
         val journalpostMap = journalpostApi.opprettJournalpost(opprettJournalpostRequest, false)
@@ -58,11 +49,5 @@ class TestDataGenerator(
             aktivDato = LocalDate.now(),
             fristFerdigstillelse = LocalDate.now()
         )
-    )
-
-    data class OpprettJfrOppgaveRequest(
-        val antall: Int,
-        val tilordnetRessurs: String,
-        val forVirksomhet: Boolean = false
     )
 }
