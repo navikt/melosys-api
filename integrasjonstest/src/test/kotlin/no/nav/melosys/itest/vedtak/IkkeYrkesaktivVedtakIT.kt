@@ -29,7 +29,7 @@ import no.nav.melosys.integrasjon.hendelser.VedtakHendelseMelding
 import no.nav.melosys.itest.JournalfoeringBase
 import no.nav.melosys.itest.MelosysHendelseKafkaConsumer
 import no.nav.melosys.melosysmock.medl.MedlRepo
-import no.nav.melosys.melosysmock.testdata.TestDataGenerator
+import no.nav.melosys.melosysmock.testdata.JournalføringsoppgaveGenerator
 import no.nav.melosys.repository.BehandlingRepository
 import no.nav.melosys.saksflytapi.domain.ProsessType
 import no.nav.melosys.service.LovvalgsperiodeService
@@ -48,7 +48,7 @@ import org.springframework.beans.factory.annotation.Autowired
 import java.time.LocalDate
 
 class IkkeYrkesaktivVedtakIT(
-    @Autowired testDataGenerator: TestDataGenerator,
+    @Autowired journalføringsoppgaveGenerator: JournalføringsoppgaveGenerator,
     @Autowired journalføringService: JournalfoeringService,
     @Autowired oppgaveService: OppgaveService,
     @Autowired private val behandlingsresultatService: BehandlingsresultatService,
@@ -60,7 +60,7 @@ class IkkeYrkesaktivVedtakIT(
     @Autowired private val vedtaksfattingFasade: VedtaksfattingFasade,
     @Autowired private val unleash: FakeUnleash,
     @Autowired private val melosysHendelseKafkaConsumer: MelosysHendelseKafkaConsumer
-) : JournalfoeringBase(testDataGenerator, journalføringService, oppgaveService) {
+) : JournalfoeringBase(journalføringsoppgaveGenerator, journalføringService, oppgaveService) {
 
 
     @AfterEach

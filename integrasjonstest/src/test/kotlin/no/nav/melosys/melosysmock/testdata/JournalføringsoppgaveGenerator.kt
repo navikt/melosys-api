@@ -7,14 +7,10 @@ import no.nav.melosys.melosysmock.oppgave.Oppgave
 import no.nav.melosys.melosysmock.oppgave.OppgaveApi
 import no.nav.melosys.melosysmock.person.PersonRepo
 import org.springframework.stereotype.Component
-import org.springframework.web.bind.annotation.PostMapping
-import org.springframework.web.bind.annotation.RequestBody
-import org.springframework.web.bind.annotation.RequestMapping
-import org.springframework.web.bind.annotation.RestController
 import java.time.LocalDate
 
 @Component
-class TestDataGenerator(
+class JournalføringsoppgaveGenerator(
     private val journalpostApi: JournalpostApi,
     private val oppgaveApi: OppgaveApi
 ) {

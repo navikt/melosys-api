@@ -24,7 +24,7 @@ import no.nav.melosys.domain.mottatteopplysninger.data.Periode
 import no.nav.melosys.domain.mottatteopplysninger.data.Soeknadsland
 import no.nav.melosys.itest.JournalfoeringBase
 import no.nav.melosys.melosysmock.medl.MedlRepo
-import no.nav.melosys.melosysmock.testdata.TestDataGenerator
+import no.nav.melosys.melosysmock.testdata.JournalføringsoppgaveGenerator
 import no.nav.melosys.repository.BehandlingRepository
 import no.nav.melosys.saksflytapi.domain.ProsessType
 import no.nav.melosys.service.LovvalgsperiodeService
@@ -53,13 +53,12 @@ import no.nav.melosys.statistikk.utstedt_a1.integrasjon.dto.Lovvalgsbestemmelse
 import no.nav.melosys.statistikk.utstedt_a1.integrasjon.dto.UtstedtA1Melding
 import org.junit.jupiter.api.AfterEach
 import org.junit.jupiter.api.BeforeEach
-import org.junit.jupiter.api.Disabled
 import org.junit.jupiter.api.Test
 import org.springframework.beans.factory.annotation.Autowired
 import java.time.LocalDate
 
 class YrkesaktivEosVedtakIT(
-    @Autowired testDataGenerator: TestDataGenerator,
+    @Autowired journalføringsoppgaveGenerator: JournalføringsoppgaveGenerator,
     @Autowired journalføringService: JournalfoeringService,
     @Autowired oppgaveService: OppgaveService,
     @Autowired private val avklartefaktaService: AvklartefaktaService,
@@ -74,7 +73,7 @@ class YrkesaktivEosVedtakIT(
     @Autowired private val vedtaksfattingFasade: VedtaksfattingFasade,
     @Autowired private val unleash: FakeUnleash,
     @Autowired private val opprettSak: OpprettSak
-) : JournalfoeringBase(testDataGenerator, journalføringService, oppgaveService) {
+) : JournalfoeringBase(journalføringsoppgaveGenerator, journalføringService, oppgaveService) {
 
     @MockkBean
     private lateinit var utstedtA1AivenProducer: UtstedtA1AivenProducer
@@ -274,7 +273,7 @@ class YrkesaktivEosVedtakIT(
         }
 
         val behandling = executeAndWait(mapOf(ProsessType.OPPRETT_SAK to 1)) {
-            opprettSak.opprettNySakOgBehandling(opprettSakDto);
+            opprettSak.opprettNySakOgBehandling(opprettSakDto)
         }.behandling
 
         val mottatteOpplysninger =

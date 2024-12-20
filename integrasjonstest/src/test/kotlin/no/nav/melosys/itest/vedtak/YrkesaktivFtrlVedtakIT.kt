@@ -32,7 +32,7 @@ import no.nav.melosys.integrasjon.trygdeavgift.dto.DatoPeriodeDto
 import no.nav.melosys.itest.JournalfoeringBase
 import no.nav.melosys.itest.MelosysHendelseKafkaConsumer
 import no.nav.melosys.melosysmock.medl.MedlRepo
-import no.nav.melosys.melosysmock.testdata.TestDataGenerator
+import no.nav.melosys.melosysmock.testdata.JournalføringsoppgaveGenerator
 import no.nav.melosys.repository.BehandlingRepository
 import no.nav.melosys.repository.FagsakRepository
 import no.nav.melosys.saksflytapi.domain.ProsessType
@@ -63,7 +63,7 @@ import org.springframework.kafka.core.KafkaTemplate
 import java.time.LocalDate
 
 class YrkesaktivFtrlVedtakIT(
-    @Autowired testDataGenerator: TestDataGenerator,
+    @Autowired journalføringsoppgaveGenerator: JournalføringsoppgaveGenerator,
     @Autowired journalføringService: JournalfoeringService,
     @Autowired oppgaveService: OppgaveService,
     @Autowired private val avklartefaktaService: AvklartefaktaService,
@@ -82,7 +82,7 @@ class YrkesaktivFtrlVedtakIT(
     @Autowired private val unleash: FakeUnleash,
     @Autowired private val melosysHendelseKafkaConsumer: MelosysHendelseKafkaConsumer,
 ) : JournalfoeringBase(
-    testDataGenerator, journalføringService, oppgaveService,
+    journalføringsoppgaveGenerator, journalføringService, oppgaveService,
     DynamiskTrygdeavgiftsberegningTransformer()
 ) {
 

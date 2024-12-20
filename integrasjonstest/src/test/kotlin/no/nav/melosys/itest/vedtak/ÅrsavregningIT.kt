@@ -30,7 +30,7 @@ import no.nav.melosys.integrasjon.trygdeavgift.dto.DatoPeriodeDto
 import no.nav.melosys.itest.JournalfoeringBase
 import no.nav.melosys.itest.MelosysHendelseKafkaConsumer
 import no.nav.melosys.melosysmock.medl.MedlRepo
-import no.nav.melosys.melosysmock.testdata.TestDataGenerator
+import no.nav.melosys.melosysmock.testdata.JournalføringsoppgaveGenerator
 import no.nav.melosys.repository.BehandlingRepository
 import no.nav.melosys.repository.BehandlingsresultatRepository
 import no.nav.melosys.repository.FagsakRepository
@@ -63,7 +63,7 @@ import java.math.BigDecimal
 import java.time.LocalDate
 
 class ÅrsavregningIT(
-    @Autowired testDataGenerator: TestDataGenerator,
+    @Autowired journalføringsoppgaveGenerator: JournalføringsoppgaveGenerator,
     @Autowired journalføringService: JournalfoeringService,
     @Autowired oppgaveService: OppgaveService,
     @Autowired private val avklartefaktaService: AvklartefaktaService,
@@ -84,7 +84,7 @@ class ÅrsavregningIT(
     @Autowired private val melosysHendelseKafkaConsumer: MelosysHendelseKafkaConsumer,
     @Autowired private val årsavregningService: ÅrsavregningService
 ) : JournalfoeringBase(
-    testDataGenerator, journalføringService, oppgaveService,
+    journalføringsoppgaveGenerator, journalføringService, oppgaveService,
     DynamiskTrygdeavgiftsberegningTransformer()
 ) {
 
