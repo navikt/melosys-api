@@ -171,69 +171,6 @@ class YrkesaktivFtrlVedtakIT(
     }
 
     @Test
-    fun `Håndtere manglende innbetaling i sak som allerede har en åpen behandling`() {
-        val saksnummer = lagFørstegangsBehandling(Skatteplikttype.IKKE_SKATTEPLIKTIG, false)
-
-        val behandlingsId = executeAndWait(
-            mapOf(
-                ProsessType.OPPRETT_REPLIKERT_BEHANDLING_FOR_SAK to 1
-            )
-        ) {
-            opprettBehandlingForSak.opprettBehandling(
-                saksnummer,
-                lagOpprettSakDto()
-            )
-        }.behandling.id
-
-        executeAndWait(
-            mapOf(
-                ProsessType.OPPRETT_NY_BEHANDLING_MANGLENDE_INNBETALING to 1,
-                ProsessType.OPPRETT_OG_DISTRIBUER_BREV to 1
-            )
-        ) {
-            val kafkaMelding = ManglendeFakturabetalingMelding(
-                fakturaserieReferanse = fakturaserieReferanse,
-                betalingsstatus = Betalingsstatus.IKKE_BETALT,
-                datoMottatt = LocalDate.of(2023, 12, 13),
-                fakturanummer = "23004119"
-            )
-            manglendeFakturabetalingMeldingTemplate.send(kafkaTopic, kafkaMelding)
-        }
-
-        fagsakRepository.findBySaksnummer(saksnummer)
-            .shouldBePresent().run {
-                behandlinger.shouldHaveSize(2)
-                finnAktivBehandlingIkkeÅrsavregning().shouldNotBeNull().run {
-                    tema shouldBe Behandlingstema.YRKESAKTIV
-                    type shouldBe Behandlingstyper.MANGLENDE_INNBETALING_TRYGDEAVGIFT
-                    behandlingsårsak.type shouldBe Behandlingsaarsaktyper.SØKNAD
-                }
-            }
-
-        behandlingsresultatService.hentBehandlingsresultat(behandlingsId).run {
-            type shouldBe Behandlingsresultattyper.IKKE_FASTSATT
-            behandlingsmåte shouldBe Behandlingsmaate.MANUELT
-            fastsattAvLand shouldBe Land_iso2.NO
-        }
-        behandlingRepository.findById(behandlingsId).shouldBePresent()
-            .run {
-                withClue("Behandlingsstatus skal være OPPRETTET") {
-                    status shouldBe Behandlingsstatus.OPPRETTET
-                }
-                fagsak.apply {
-                    withClue("Saksstatus skal være LOVVALG_AVKLART") {
-                        status shouldBe Saksstatuser.LOVVALG_AVKLART
-                    }
-                }
-            }
-
-        mockServer.verify(
-            1,
-            WireMock.postRequestedFor(WireMock.urlEqualTo("/api/v1/mal/varsel_manglende_innbetaling/lag-pdf?somKopi=false&utkast=false"))
-        )
-    }
-
-    @Test
     fun `yrkesaktiv vedtak - FTRL - opprett fakturaserie for førstegangsbehandling og kanseller fakturaserie i ny vurdering`() {
         val saksnummer = lagFørstegangsBehandling(Skatteplikttype.IKKE_SKATTEPLIKTIG, false)
 
@@ -326,6 +263,69 @@ class YrkesaktivFtrlVedtakIT(
 
         mockServer.verify(1, WireMock.postRequestedFor(WireMock.urlEqualTo("/fakturaserier")))
         mockServer.verify(1, WireMock.deleteRequestedFor(WireMock.urlEqualTo("/fakturaserier/$fakturaserieReferanse")))
+    }
+
+    @Test
+    fun `Håndtere manglende innbetaling i sak som allerede har en åpen behandling`() {
+        val saksnummer = lagFørstegangsBehandling(Skatteplikttype.IKKE_SKATTEPLIKTIG, false)
+
+        val behandlingsId = executeAndWait(
+            mapOf(
+                ProsessType.OPPRETT_REPLIKERT_BEHANDLING_FOR_SAK to 1
+            )
+        ) {
+            opprettBehandlingForSak.opprettBehandling(
+                saksnummer,
+                lagOpprettSakDto()
+            )
+        }.behandling.id
+
+        executeAndWait(
+            mapOf(
+                ProsessType.OPPRETT_NY_BEHANDLING_MANGLENDE_INNBETALING to 1,
+                ProsessType.OPPRETT_OG_DISTRIBUER_BREV to 1
+            )
+        ) {
+            val kafkaMelding = ManglendeFakturabetalingMelding(
+                fakturaserieReferanse = fakturaserieReferanse,
+                betalingsstatus = Betalingsstatus.IKKE_BETALT,
+                datoMottatt = LocalDate.of(2023, 12, 13),
+                fakturanummer = "23004119"
+            )
+            manglendeFakturabetalingMeldingTemplate.send(kafkaTopic, kafkaMelding)
+        }
+
+        fagsakRepository.findBySaksnummer(saksnummer)
+            .shouldBePresent().run {
+                behandlinger.shouldHaveSize(2)
+                finnAktivBehandlingIkkeÅrsavregning().shouldNotBeNull().run {
+                    tema shouldBe Behandlingstema.YRKESAKTIV
+                    type shouldBe Behandlingstyper.MANGLENDE_INNBETALING_TRYGDEAVGIFT
+                    behandlingsårsak.type shouldBe Behandlingsaarsaktyper.SØKNAD
+                }
+            }
+
+        behandlingsresultatService.hentBehandlingsresultat(behandlingsId).run {
+            type shouldBe Behandlingsresultattyper.IKKE_FASTSATT
+            behandlingsmåte shouldBe Behandlingsmaate.MANUELT
+            fastsattAvLand shouldBe Land_iso2.NO
+        }
+        behandlingRepository.findById(behandlingsId).shouldBePresent()
+            .run {
+                withClue("Behandlingsstatus skal være OPPRETTET") {
+                    status shouldBe Behandlingsstatus.OPPRETTET
+                }
+                fagsak.apply {
+                    withClue("Saksstatus skal være LOVVALG_AVKLART") {
+                        status shouldBe Saksstatuser.LOVVALG_AVKLART
+                    }
+                }
+            }
+
+        mockServer.verify(
+            1,
+            WireMock.postRequestedFor(WireMock.urlEqualTo("/api/v1/mal/varsel_manglende_innbetaling/lag-pdf?somKopi=false&utkast=false"))
+        )
     }
 
     @Test
