@@ -19,7 +19,7 @@ import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingstema
 import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingstyper
 import no.nav.melosys.melosysmock.journalpost.JournalpostRepo
 import no.nav.melosys.melosysmock.oppgave.OppgaveRepo
-import no.nav.melosys.melosysmock.testdata.TestDataGenerator
+import no.nav.melosys.melosysmock.testdata.JournalføringsoppgaveGenerator
 import no.nav.melosys.repository.BehandlingRepository
 import no.nav.melosys.repository.FagsakRepository
 import no.nav.melosys.saksflytapi.domain.ProsessType
@@ -47,10 +47,10 @@ class SedMottakBehandlngsTypeIT(
     @Autowired private val fagsakRepository: FagsakRepository,
     @Autowired private val unleash: FakeUnleash,
 
-    @Autowired testDataGenerator: TestDataGenerator,
+    @Autowired journalføringsoppgaveGenerator: JournalføringsoppgaveGenerator,
     @Autowired journalføringService: JournalfoeringService,
     @Autowired oppgaveService: OppgaveService,
-) : JournalfoeringBase(testDataGenerator, journalføringService, oppgaveService) {
+) : JournalfoeringBase(journalføringsoppgaveGenerator, journalføringService, oppgaveService) {
 
     private val kafkaTopic = "teammelosys.eessi.v1-local"
 

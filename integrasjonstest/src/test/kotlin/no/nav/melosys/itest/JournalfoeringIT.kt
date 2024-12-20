@@ -17,7 +17,7 @@ import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingstyper
 import no.nav.melosys.domain.mottatteopplysninger.Soeknad
 import no.nav.melosys.domain.mottatteopplysninger.data.Periode
 import no.nav.melosys.melosysmock.journalpost.JournalpostRepo
-import no.nav.melosys.melosysmock.testdata.TestDataGenerator
+import no.nav.melosys.melosysmock.testdata.JournalføringsoppgaveGenerator
 import no.nav.melosys.repository.BehandlingRepository
 import no.nav.melosys.repository.BehandlingsresultatRepository
 import no.nav.melosys.repository.FagsakRepository
@@ -32,7 +32,7 @@ import org.springframework.beans.factory.annotation.Autowired
 
 @TestInstance(TestInstance.Lifecycle.PER_CLASS)
 class JournalfoeringIT(
-    @Autowired testDataGenerator: TestDataGenerator,
+    @Autowired journalføringsoppgaveGenerator: JournalføringsoppgaveGenerator,
     @Autowired journalføringService: JournalfoeringService,
     @Autowired oppgaveService: OppgaveService,
     @Autowired private val behandlingRepository: BehandlingRepository,
@@ -40,7 +40,7 @@ class JournalfoeringIT(
     @Autowired private val fagsakRepository: FagsakRepository,
     @Autowired private val unleash: FakeUnleash,
     @Autowired private val journalpostRepo: JournalpostRepo
-) : JournalfoeringBase(testDataGenerator, journalføringService, oppgaveService) {
+) : JournalfoeringBase(journalføringsoppgaveGenerator, journalføringService, oppgaveService) {
 
     @BeforeEach
     fun setup() {

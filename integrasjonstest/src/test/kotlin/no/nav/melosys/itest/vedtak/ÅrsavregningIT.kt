@@ -19,24 +19,24 @@ import no.nav.melosys.domain.avgift.Inntektsperiode
 import no.nav.melosys.domain.avgift.Penger
 import no.nav.melosys.domain.avgift.SkatteforholdTilNorge
 import no.nav.melosys.domain.avgift.Trygdeavgiftsperiode
+import no.nav.melosys.domain.avgift.aarsavregning.Skattehendelse
 import no.nav.melosys.domain.kodeverk.*
 import no.nav.melosys.domain.kodeverk.behandlinger.*
-import no.nav.melosys.domain.manglendebetaling.Betalingsstatus
-import no.nav.melosys.domain.manglendebetaling.ManglendeFakturabetalingMelding
 import no.nav.melosys.domain.mottatteopplysninger.SøknadNorgeEllerUtenforEØS
 import no.nav.melosys.domain.mottatteopplysninger.data.Periode
 import no.nav.melosys.domain.mottatteopplysninger.data.Soeknadsland
 import no.nav.melosys.integrasjon.faktureringskomponenten.NyFakturaserieResponseDto
-import no.nav.melosys.integrasjon.hendelser.VedtakHendelseMelding
 import no.nav.melosys.integrasjon.trygdeavgift.dto.DatoPeriodeDto
 import no.nav.melosys.itest.JournalfoeringBase
 import no.nav.melosys.itest.MelosysHendelseKafkaConsumer
 import no.nav.melosys.melosysmock.medl.MedlRepo
 import no.nav.melosys.melosysmock.testdata.JournalføringsoppgaveGenerator
 import no.nav.melosys.repository.BehandlingRepository
+import no.nav.melosys.repository.BehandlingsresultatRepository
 import no.nav.melosys.repository.FagsakRepository
 import no.nav.melosys.saksflytapi.domain.ProsessType
 import no.nav.melosys.service.avgift.TrygdeavgiftsberegningService
+import no.nav.melosys.service.avgift.aarsavregning.ÅrsavregningService
 import no.nav.melosys.service.avklartefakta.AvklartefaktaDto
 import no.nav.melosys.service.avklartefakta.AvklartefaktaService
 import no.nav.melosys.service.behandling.BehandlingsresultatService
@@ -58,11 +58,11 @@ import org.junit.jupiter.api.AfterEach
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
 import org.springframework.beans.factory.annotation.Autowired
-import org.springframework.beans.factory.annotation.Qualifier
 import org.springframework.kafka.core.KafkaTemplate
+import java.math.BigDecimal
 import java.time.LocalDate
 
-class YrkesaktivFtrlVedtakIT(
+class ÅrsavregningIT(
     @Autowired journalføringsoppgaveGenerator: JournalføringsoppgaveGenerator,
     @Autowired journalføringService: JournalfoeringService,
     @Autowired oppgaveService: OppgaveService,
@@ -78,16 +78,17 @@ class YrkesaktivFtrlVedtakIT(
     @Autowired private val vedtaksfattingFasade: VedtaksfattingFasade,
     @Autowired private val opprettBehandlingForSak: OpprettBehandlingForSak,
     @Autowired private val trygdeavgiftsberegningService: TrygdeavgiftsberegningService,
-    @Autowired @Qualifier("manglendeFakturabetalingMelding") private val manglendeFakturabetalingMeldingTemplate: KafkaTemplate<String, ManglendeFakturabetalingMelding>,
+    @Autowired private val skatteHendelseMeldingKafkaTemplate: KafkaTemplate<String, Skattehendelse>,
+    @Autowired private val behandlingsresultatRepository: BehandlingsresultatRepository,
     @Autowired private val unleash: FakeUnleash,
     @Autowired private val melosysHendelseKafkaConsumer: MelosysHendelseKafkaConsumer,
+    @Autowired private val årsavregningService: ÅrsavregningService
 ) : JournalfoeringBase(
     journalføringsoppgaveGenerator, journalføringService, oppgaveService,
     DynamiskTrygdeavgiftsberegningTransformer()
 ) {
 
     private var originalSubjectHandler: SubjectHandler? = null
-    private val kafkaTopic = "teammelosys.manglende-fakturabetaling-local"
     private val fakturaserieReferanse: String = "01J17B5NTTDYKFB5DZTSSQEHJ0"
 
     @BeforeEach
@@ -151,23 +152,62 @@ class YrkesaktivFtrlVedtakIT(
     }
 
     @Test
-    fun `Yrkesaktiv vedtak - FTRL - opprett fakturaserie for førstegangsbehandling og kanseller fakturaserie i ny vurdering`() {
+    fun `oppretter prosess og påfølgende årsavregningsbehandling for alle saker knyttet til en skattehendelse `() {
+        val saksnummer1 = lagFørstegangsBehandling(Skatteplikttype.IKKE_SKATTEPLIKTIG, false)
+        val saksnummer2 = lagFørstegangsBehandling(Skatteplikttype.IKKE_SKATTEPLIKTIG, false)
+
+
+        executeAndWait(
+            mapOf(
+                ProsessType.OPPRETT_NY_BEHANDLING_AARSAVREGNING to 2
+            )
+        ) {
+            skatteHendelseMeldingKafkaTemplate.send(
+                "teammelosys.skattehendelser.v1-local",
+                Skattehendelse("2023", "30056928150", "ny")
+            )
+        }
+
+
+        listOf(saksnummer1, saksnummer2).forEach { saksnummer ->
+            fagsakRepository.findBySaksnummer(saksnummer)
+                .shouldBePresent().run {
+                    behandlinger.shouldHaveSize(2)
+                        .firstOrNull { it.type == Behandlingstyper.ÅRSAVREGNING }
+                        .shouldNotBeNull()
+                        .run {
+                            behandlingsresultatRepository.findById(id)
+                                .shouldBePresent()
+                                .årsavregning
+                                .shouldNotBeNull()
+                                .run {
+                                    aar shouldBe 2023
+                                }
+                        }
+                }
+        }
+    }
+
+    @Test
+    fun `fatter vedtak om årsavregning`() {
         val saksnummer = lagFørstegangsBehandling(Skatteplikttype.IKKE_SKATTEPLIKTIG, false)
 
-        val behandlingsId = executeAndWait(
+        val årsavregningBehandlingID = executeAndWait(
             mapOf(
-                ProsessType.OPPRETT_REPLIKERT_BEHANDLING_FOR_SAK to 1
+                ProsessType.OPPRETT_NY_BEHANDLING_FOR_SAK to 1
             )
         ) {
             opprettBehandlingForSak.opprettBehandling(
                 saksnummer,
-                lagOpprettSakDto()
+                lagOpprettSakDtoÅrsavregning()
             )
         }.behandling.id
-
+        val tidligereFakturertBeloep = BigDecimal(1000)
+        val nyttTotalbeloep = BigDecimal(2000)
+        årsavregningService.opprettÅrsavregning(årsavregningBehandlingID, 2023)
+        val årsavregning =
+            behandlingsresultatRepository.findWithLovvalgOgMedlemskapsperioderById(årsavregningBehandlingID).shouldBePresent().årsavregning
         val periode = DatoPeriodeDto(LocalDate.of(2023, 1, 1), LocalDate.of(2023, 2, 1))
-
-
         val skattefordholdsperioder = listOf(
             SkatteforholdTilNorge().apply {
                 fomDato = periode.fom
@@ -182,138 +222,55 @@ class YrkesaktivFtrlVedtakIT(
                 type = Inntektskildetype.INNTEKT_FRA_UTLANDET
                 isArbeidsgiversavgiftBetalesTilSkatt = true
                 avgiftspliktigMndInntekt = Penger(10000.toBigDecimal())
+                avgiftspliktigTotalinntekt = Penger(10000.toBigDecimal())
             }
         )
+        trygdeavgiftsberegningService.beregnOgLagreTrygdeavgift(årsavregningBehandlingID, skattefordholdsperioder, inntektsforholdsperioder)
+        årsavregningService.oppdater(årsavregningBehandlingID, årsavregning.id, tidligereFakturertBeloep, nyttTotalbeloep)
 
-        trygdeavgiftsberegningService.beregnOgLagreTrygdeavgift(behandlingsId, skattefordholdsperioder, inntektsforholdsperioder)
-
-        val vedtakRequest = FattVedtakRequest.Builder()
-            .medBehandlingsresultatType(Behandlingsresultattyper.MEDLEM_I_FOLKETRYGDEN)
-            .medVedtakstype(Vedtakstyper.ENDRINGSVEDTAK)
+        val vedtakRequestÅrsavregning = FattVedtakRequest.Builder()
+            .medBehandlingsresultatType(Behandlingsresultattyper.FERDIGBEHANDLET)
+            .medVedtakstype(Vedtakstyper.FØRSTEGANGSVEDTAK)
             .medBestillersId("komponent test")
             .build()
 
         executeAndWait(
             mapOf(
-                ProsessType.IVERKSETT_VEDTAK_FTRL to 1,
+                ProsessType.IVERKSETT_VEDTAK_AARSAVREGNING to 1,
                 ProsessType.OPPRETT_OG_DISTRIBUER_BREV to 1
             )
         ) {
-            vedtaksfattingFasade.fattVedtak(behandlingsId, vedtakRequest)
+            vedtaksfattingFasade.fattVedtak(årsavregningBehandlingID, vedtakRequestÅrsavregning)
         }
 
 
-        behandlingsresultatService.hentBehandlingsresultat(behandlingsId).run {
-            type shouldBe Behandlingsresultattyper.MEDLEM_I_FOLKETRYGDEN
+        behandlingsresultatService.hentBehandlingsresultat(årsavregningBehandlingID).run {
+            type shouldBe Behandlingsresultattyper.FERDIGBEHANDLET
             behandlingsmåte shouldBe Behandlingsmaate.MANUELT
-            fastsattAvLand shouldBe Land_iso2.NO
+            this.årsavregning.aar shouldBe 2023
+            this.årsavregning.tidligereFakturertBeloep shouldBe tidligereFakturertBeloep
+            this.årsavregning.nyttTotalbeloep shouldBe nyttTotalbeloep
+            this.årsavregning.tilFaktureringBeloep shouldBe nyttTotalbeloep - tidligereFakturertBeloep
+            fakturaserieReferanse shouldBe this@ÅrsavregningIT.fakturaserieReferanse
         }
-        behandlingRepository.findById(behandlingsId)
+        behandlingRepository.findById(årsavregningBehandlingID)
             .shouldBePresent().run {
                 withClue("Behandlingsstatus skal være AVSLUTTET") {
+                    type shouldBe Behandlingstyper.ÅRSAVREGNING
                     status shouldBe Behandlingsstatus.AVSLUTTET
                 }
-                fagsak.run {
-                    withClue("Saksstatus skal være LOVVALG_AVKLART") {
-                        status shouldBe Saksstatuser.LOVVALG_AVKLART
-                    }
-                }
             }
-
-        melosysHendelseKafkaConsumer.melosysHendelser.shouldHaveSize(2)
-            .last().value()
-            .melding.shouldBeInstanceOf<VedtakHendelseMelding>()
-            .shouldBe(
-                VedtakHendelseMelding(
-                    folkeregisterIdent = "30056928150",
-                    sakstype = Sakstyper.FTRL,
-                    sakstema = Sakstemaer.MEDLEMSKAP_LOVVALG,
-                    behandligsresultatType = Behandlingsresultattyper.MEDLEM_I_FOLKETRYGDEN,
-                    vedtakstype = Vedtakstyper.ENDRINGSVEDTAK,
-                    medlemskapsperioder = listOf(
-                        no.nav.melosys.integrasjon.hendelser.Periode(
-                            LocalDate.of(2023, 1, 1),
-                            LocalDate.of(2023, 2, 1),
-                            InnvilgelsesResultat.INNVILGET
-                        )
-                    ),
-                    lovvalgsperioder = listOf()
-                )
-            )
-
         mockServer.verify(1, WireMock.postRequestedFor(WireMock.urlEqualTo("/fakturaserier")))
-        mockServer.verify(1, WireMock.deleteRequestedFor(WireMock.urlEqualTo("/fakturaserier/$fakturaserieReferanse")))
     }
 
-    @Test
-    fun `Håndtere manglende innbetaling i sak som allerede har en åpen behandling`() {
-        val saksnummer = lagFørstegangsBehandling(Skatteplikttype.IKKE_SKATTEPLIKTIG, false)
-
-        val behandlingID = executeAndWait(
-            mapOf(
-                ProsessType.OPPRETT_REPLIKERT_BEHANDLING_FOR_SAK to 1
-            )
-        ) {
-            opprettBehandlingForSak.opprettBehandling(
-                saksnummer,
-                lagOpprettSakDto()
-            )
-        }.behandling.id
-
-        executeAndWait(
-            mapOf(
-                ProsessType.OPPRETT_NY_BEHANDLING_MANGLENDE_INNBETALING to 1,
-                ProsessType.OPPRETT_OG_DISTRIBUER_BREV to 1
-            )
-        ) {
-            val kafkaMelding = ManglendeFakturabetalingMelding(
-                fakturaserieReferanse = fakturaserieReferanse,
-                betalingsstatus = Betalingsstatus.IKKE_BETALT,
-                datoMottatt = LocalDate.of(2023, 12, 13),
-                fakturanummer = "23004119"
-            )
-            manglendeFakturabetalingMeldingTemplate.send(kafkaTopic, kafkaMelding)
-        }
-
-        fagsakRepository.findBySaksnummer(saksnummer)
-            .shouldBePresent().run {
-                behandlinger.shouldHaveSize(2)
-                finnAktivBehandlingIkkeÅrsavregning().shouldNotBeNull().run {
-                    tema shouldBe Behandlingstema.YRKESAKTIV
-                    type shouldBe Behandlingstyper.MANGLENDE_INNBETALING_TRYGDEAVGIFT
-                    behandlingsårsak.type shouldBe Behandlingsaarsaktyper.SØKNAD
-                }
-            }
-
-        behandlingsresultatService.hentBehandlingsresultat(behandlingID).run {
-            type shouldBe Behandlingsresultattyper.IKKE_FASTSATT
-            behandlingsmåte shouldBe Behandlingsmaate.MANUELT
-            fastsattAvLand shouldBe Land_iso2.NO
-        }
-        behandlingRepository.findById(behandlingID).shouldBePresent()
-            .run {
-                withClue("Behandlingsstatus skal være OPPRETTET") {
-                    status shouldBe Behandlingsstatus.OPPRETTET
-                }
-                fagsak.apply {
-                    withClue("Saksstatus skal være LOVVALG_AVKLART") {
-                        status shouldBe Saksstatuser.LOVVALG_AVKLART
-                    }
-                }
-            }
-
-        mockServer.verify(
-            1,
-            WireMock.postRequestedFor(WireMock.urlEqualTo("/api/v1/mal/varsel_manglende_innbetaling/lag-pdf?somKopi=false&utkast=false"))
-        )
-    }
-
-    private fun lagOpprettSakDto(): OpprettSakDto {
+    private fun lagOpprettSakDtoÅrsavregning(): OpprettSakDto {
         val opprettsakdto = OpprettSakDto()
+        opprettsakdto.sakstema = Sakstemaer.MEDLEMSKAP_LOVVALG
+        opprettsakdto.sakstype = Sakstyper.FTRL
         opprettsakdto.behandlingstema = Behandlingstema.YRKESAKTIV
-        opprettsakdto.behandlingstype = Behandlingstyper.NY_VURDERING
-        opprettsakdto.mottaksdato = LocalDate.now()
-        opprettsakdto.behandlingsaarsakType = Behandlingsaarsaktyper.SØKNAD
+        opprettsakdto.behandlingstype = Behandlingstyper.ÅRSAVREGNING
+        opprettsakdto.mottaksdato = LocalDate.of(2023, 1, 1)
+        opprettsakdto.behandlingsaarsakType = Behandlingsaarsaktyper.HENVENDELSE
         return opprettsakdto
     }
 

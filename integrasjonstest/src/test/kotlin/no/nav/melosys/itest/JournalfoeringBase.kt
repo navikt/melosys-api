@@ -13,7 +13,7 @@ import no.nav.melosys.domain.kodeverk.ForvaltningsmeldingMottaker
 import no.nav.melosys.domain.kodeverk.Landkoder
 import no.nav.melosys.melosysmock.oppgave.Oppgave
 import no.nav.melosys.melosysmock.sak.SakRepo
-import no.nav.melosys.melosysmock.testdata.TestDataGenerator
+import no.nav.melosys.melosysmock.testdata.JournalføringsoppgaveGenerator
 import no.nav.melosys.saksflytapi.domain.ProsessType
 import no.nav.melosys.saksflytapi.domain.Prosessinstans
 import no.nav.melosys.service.felles.dto.SoeknadslandDto
@@ -28,7 +28,7 @@ import java.time.LocalDate
 import java.util.*
 
 class JournalfoeringBase(
-    protected val testDataGenerator: TestDataGenerator,
+    protected val journalføringsoppgaveGenerator: JournalføringsoppgaveGenerator,
     protected val journalføringService: JournalfoeringService,
     protected val oppgaveService: OppgaveService,
     extensionForWireMock: Extension? = null
@@ -101,7 +101,7 @@ class JournalfoeringBase(
     ): Prosessinstans = prosessinstansTestManager.executeAndWait(waitForProsesses, returnProsessOfType, process)
 
     protected fun lagJfrOppgave(): Oppgave =
-        testDataGenerator.opprettJfrOppgave(tilordnetRessurs = "Z123456", forVirksomhet = false)
+        journalføringsoppgaveGenerator.opprettJfrOppgave(tilordnetRessurs = "Z123456", forVirksomhet = false)
 
     protected fun lagJournalfoeringOpprettDto(
         jfrOppgave: Oppgave,
