@@ -152,7 +152,7 @@ class ÅrsavregningIT(
     }
 
     @Test
-    fun `oppretter prosess og påfølgende årsavregningsbehandling for alle saker knyttet til skattehendelse `() {
+    fun `oppretter prosess og påfølgende årsavregningsbehandling for alle saker knyttet til en skattehendelse `() {
         val saksnummer1 = lagFørstegangsBehandling(Skatteplikttype.IKKE_SKATTEPLIKTIG, false)
         val saksnummer2 = lagFørstegangsBehandling(Skatteplikttype.IKKE_SKATTEPLIKTIG, false)
 
@@ -189,10 +189,24 @@ class ÅrsavregningIT(
     }
 
     @Test
-    fun `oppretter og fatter vedtak årsavregning`() {
+    fun `fatter vedtak om årsavregning`() {
         val saksnummer = lagFørstegangsBehandling(Skatteplikttype.IKKE_SKATTEPLIKTIG, false)
-        val behandling = fagsakRepository.findBySaksnummer(saksnummer).get().hentSistRegistrertBehandling()
 
+        val årsavregningBehandlingID = executeAndWait(
+            mapOf(
+                ProsessType.OPPRETT_NY_BEHANDLING_FOR_SAK to 1
+            )
+        ) {
+            opprettBehandlingForSak.opprettBehandling(
+                saksnummer,
+                lagOpprettSakDtoÅrsavregning()
+            )
+        }.behandling.id
+        val tidligereFakturertBeloep = BigDecimal(1000)
+        val nyttTotalbeloep = BigDecimal(2000)
+        årsavregningService.opprettÅrsavregning(årsavregningBehandlingID, 2023)
+        val årsavregning =
+            behandlingsresultatRepository.findWithLovvalgOgMedlemskapsperioderById(årsavregningBehandlingID).shouldBePresent().årsavregning
         val periode = DatoPeriodeDto(LocalDate.of(2023, 1, 1), LocalDate.of(2023, 2, 1))
         val skattefordholdsperioder = listOf(
             SkatteforholdTilNorge().apply {
@@ -211,25 +225,8 @@ class ÅrsavregningIT(
                 avgiftspliktigTotalinntekt = Penger(10000.toBigDecimal())
             }
         )
-        trygdeavgiftsberegningService.beregnOgLagreTrygdeavgift(behandling.id, skattefordholdsperioder, inntektsforholdsperioder)
-
-        val årsavregningBehandlingID = executeAndWait(
-            mapOf(
-                ProsessType.OPPRETT_NY_BEHANDLING_FOR_SAK to 1
-            )
-        ) {
-            opprettBehandlingForSak.opprettBehandling(
-                behandling.fagsak.saksnummer,
-                lagOpprettSakDtoÅrsavregning()
-            )
-        }.behandling.id
-        val tidligereFakturertBeloep = BigDecimal(1000)
-        val nyttTotalbeloep = BigDecimal(2000)
-        årsavregningService.opprettÅrsavregning(årsavregningBehandlingID, 2023)
-        val årsavregning =
-            behandlingsresultatRepository.findWithLovvalgOgMedlemskapsperioderById(årsavregningBehandlingID).shouldBePresent().årsavregning
-        årsavregningService.oppdater(årsavregningBehandlingID, årsavregning.id, tidligereFakturertBeloep, nyttTotalbeloep)
         trygdeavgiftsberegningService.beregnOgLagreTrygdeavgift(årsavregningBehandlingID, skattefordholdsperioder, inntektsforholdsperioder)
+        årsavregningService.oppdater(årsavregningBehandlingID, årsavregning.id, tidligereFakturertBeloep, nyttTotalbeloep)
 
         val vedtakRequestÅrsavregning = FattVedtakRequest.Builder()
             .medBehandlingsresultatType(Behandlingsresultattyper.FERDIGBEHANDLET)
