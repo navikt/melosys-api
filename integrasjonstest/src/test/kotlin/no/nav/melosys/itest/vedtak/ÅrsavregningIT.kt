@@ -260,6 +260,7 @@ class ÅrsavregningIT(
                     status shouldBe Behandlingsstatus.AVSLUTTET
                 }
             }
+        mockServer.verify(1, WireMock.postRequestedFor(WireMock.urlEqualTo("/fakturaserier")))
     }
 
     private fun lagOpprettSakDtoÅrsavregning(): OpprettSakDto {
