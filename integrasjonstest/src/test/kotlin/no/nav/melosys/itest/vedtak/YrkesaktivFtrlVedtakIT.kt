@@ -5,9 +5,6 @@ import com.fasterxml.jackson.databind.SerializationFeature
 import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule
 import com.fasterxml.jackson.module.kotlin.jacksonObjectMapper
 import com.github.tomakehurst.wiremock.client.WireMock
-import com.github.tomakehurst.wiremock.extension.ResponseTransformerV2
-import com.github.tomakehurst.wiremock.http.Response
-import com.github.tomakehurst.wiremock.stubbing.ServeEvent
 import io.getunleash.FakeUnleash
 import io.kotest.assertions.withClue
 import io.kotest.matchers.collections.shouldHaveSize
@@ -139,15 +136,6 @@ class YrkesaktivFtrlVedtakIT(
                         .withStatus(200)
                         .withHeader("Content-Type", "application/json")
                         .withBody(fakturaResponse.toJsonNode.toString())
-                )
-        )
-        mockServer.stubFor(
-            WireMock.post(WireMock.urlMatching("/totalbeloep/beregn"))
-                .willReturn(
-                    WireMock.aResponse()
-                        .withStatus(200)
-                        .withHeader("Content-Type", "application/json")
-                        .withBody(BigDecimal.valueOf(42).toString())
                 )
         )
         mockServer.stubFor(
