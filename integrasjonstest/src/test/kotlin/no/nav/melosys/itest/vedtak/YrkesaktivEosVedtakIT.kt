@@ -100,6 +100,156 @@ class YrkesaktivEosVedtakIT(
     }
 
     @Test
+    fun `yrkesaktiv vedtak - eøs - innvigelse med bestemmelse FO_883_2004_ART12_1`() {
+        val behandling = journalførOgVentTilProsesserErFerdige(
+            defaultJournalføringDto().apply {
+                fagsak.sakstype = Sakstyper.EU_EOS.kode
+                fagsak.sakstema = Sakstemaer.MEDLEMSKAP_LOVVALG.kode
+                behandlingstypeKode = Behandlingstyper.FØRSTEGANG.kode
+                behandlingstemaKode = Behandlingstema.UTSENDT_ARBEIDSTAKER.kode
+            },
+            mapOf(
+                ProsessType.JFR_NY_SAK_BRUKER to 1,
+                ProsessType.OPPRETT_OG_DISTRIBUER_BREV to 1
+            )
+        ).behandling
+
+        val mottatteOpplysninger =
+            mottatteOpplysningerService.hentEllerOpprettMottatteOpplysninger(behandling.id, true)
+                .shouldNotBeNull()
+                .mottatteOpplysningerData.apply {
+                    periode = Periode(
+                        LocalDate.of(2023, 1, 1),
+                        LocalDate.of(2023, 2, 1),
+                    )
+                    soeknadsland = Soeknadsland(listOf(Landkoder.BE.kode), false)
+                }
+        mottatteOpplysningerService.oppdaterMottatteOpplysninger(behandling.id, mottatteOpplysninger.toJsonNode)
+        oppfriskSaksopplysningerService.oppfriskSaksopplysning(behandling.id, false)
+
+        val yrkesgruppe = AvklartefaktaDto(
+            listOf("ORDINAER"), "YRKESGRUPPE"
+        ).apply {
+            avklartefaktaType = Avklartefaktatyper.YRKESGRUPPE
+            subjektID = null
+            begrunnelseKoder = emptyList()
+            begrunnelseFritekst = null
+        }
+        val virksomhet = AvklartefaktaDto(
+            listOf("TRUE"), "VIRKSOMHET"
+        ).apply {
+            avklartefaktaType = Avklartefaktatyper.VIRKSOMHET
+            subjektID = "999999999"
+            begrunnelseKoder = emptyList()
+            begrunnelseFritekst = null
+        }
+        val yrkesaktivitet = AvklartefaktaDto(
+            listOf("ORDINAER_ARBEIDSTAKER"), "YRKESAKTIVITET"
+        ).apply {
+            avklartefaktaType = null
+            subjektID = null
+            begrunnelseKoder = emptyList()
+            begrunnelseFritekst = null
+        }
+        avklartefaktaService.lagreAvklarteFakta(behandling.id, setOf(yrkesgruppe, virksomhet, yrkesaktivitet))
+
+        val forutgåendeMedlemskap = VilkaarDto().apply {
+            vilkaar = Vilkaar.FORUTGAAENDE_MEDLEMSKAP.kode
+            isOppfylt = true
+        }
+        val vesentlingVirksomhet = VilkaarDto().apply {
+            vilkaar = Vilkaar.VESENTLIG_VIRKSOMHET.kode
+            isOppfylt = true
+        }
+        val art12_1 = VilkaarDto().apply {
+            vilkaar = Vilkaar.FO_883_2004_ART12_1.kode
+            isOppfylt = true
+        }
+        vilkaarsresultatService.registrerVilkår(behandling.id, listOf(forutgåendeMedlemskap, vesentlingVirksomhet, art12_1))
+
+        lovvalgsperiodeService.lagreLovvalgsperioder(behandling.id, listOf(Lovvalgsperiode().apply {
+            innvilgelsesresultat = InnvilgelsesResultat.INNVILGET
+            bestemmelse = Lovvalgbestemmelser_883_2004.FO_883_2004_ART12_1
+            lovvalgsland = Land_iso2.BE
+            medlemskapstype = Medlemskapstyper.PLIKTIG
+            dekning = Trygdedekninger.FULL_DEKNING
+
+            fom = LocalDate.of(2023, 1, 1)
+            tom = LocalDate.of(2023, 2, 1)
+        }))
+
+        ferdigbehandlingKontrollFacade.kontroller(behandling.id, false, null, setOf())
+
+        val vedtakRequest = FattVedtakRequest.Builder()
+            .medBehandlingsresultatType(Behandlingsresultattyper.FASTSATT_LOVVALGSLAND)
+            .medVedtakstype(Vedtakstyper.FØRSTEGANGSVEDTAK)
+            .medBestillersId("komponent test")
+            .build()
+
+        val utstedtA1MeldingCapturingSlot = slot<UtstedtA1Melding>()
+        every { utstedtA1AivenProducer.produserMelding(capture(utstedtA1MeldingCapturingSlot)) } returns mockk<UtstedtA1Melding>()
+
+
+        executeAndWait(
+            mapOf(
+                ProsessType.IVERKSETT_VEDTAK_EOS to 1,
+                ProsessType.SEND_BREV to 3,
+                ProsessType.OPPRETT_OG_DISTRIBUER_BREV to 1
+            )
+        ) {
+            vedtaksfattingFasade.fattVedtak(behandling.id, vedtakRequest)
+        }
+
+
+        verify(exactly = 1) { utstedtA1AivenProducer.produserMelding(any()) }
+        utstedtA1MeldingCapturingSlot.captured.apply {
+            behandlingId.shouldBe(behandling.id)
+            artikkel.shouldBe(Lovvalgsbestemmelse.ART_12_1)
+        }
+
+        behandlingsresultatService.hentBehandlingsresultat(behandling.id).apply {
+            type shouldBe Behandlingsresultattyper.FASTSATT_LOVVALGSLAND
+            behandlingsmåte shouldBe Behandlingsmaate.MANUELT
+            fastsattAvLand shouldBe Land_iso2.NO
+        }
+        lovvalgsperiodeService.hentLovvalgsperiode(behandling.id).apply {
+            innvilgelsesresultat shouldBe InnvilgelsesResultat.INNVILGET
+            bestemmelse shouldBe Lovvalgbestemmelser_883_2004.FO_883_2004_ART12_1
+            lovvalgsland shouldBe Land_iso2.BE
+            medlemskapstype shouldBe Medlemskapstyper.PLIKTIG
+            dekning shouldBe Trygdedekninger.FULL_DEKNING
+            fom shouldBe LocalDate.of(2023, 1, 1)
+            tom shouldBe LocalDate.of(2023, 2, 1)
+        }
+        behandlingRepository.findById(behandling.id).orElse(null)
+            .shouldNotBeNull().apply {
+                withClue("Behandlingsstatus skal være AVSLUTTET") {
+                    status shouldBe Behandlingsstatus.AVSLUTTET
+                }
+                fagsak.apply {
+                    withClue("Saksstatus skal være LOVVALG_AVKLART") {
+                        status shouldBe Saksstatuser.LOVVALG_AVKLART
+                    }
+                }
+            }
+
+        MedlRepo.repo.values
+            .shouldHaveSize(1)
+            .first()
+            .apply {
+                fraOgMed shouldBe LocalDate.of(2023, 1, 1)
+                tilOgMed shouldBe LocalDate.of(2023, 2, 1)
+                status shouldBe "GYLD"
+                dekning shouldBe "Full"
+                medlem shouldBe true
+                lovvalgsland shouldBe "BEL"
+                lovvalg shouldBe "ENDL"
+                grunnlag shouldBe "FO_12_1"
+                sporingsinformasjon?.kildedokument shouldBe "Henv_Soknad"
+            }
+    }
+
+    @Test
     fun `yrkesaktiv vedtak - eøs - innvilgelse med selvstendig virksomhet i flere land, artikkel 13`() {
         val opprettSakDto = OpprettSakDto().apply {
             hovedpart = Aktoersroller.BRUKER
@@ -281,157 +431,6 @@ class YrkesaktivEosVedtakIT(
                 sporingsinformasjon?.kildedokument shouldBe "Henv_Soknad"
             }
     }
-
-    @Test
-    fun `yrkesaktiv vedtak - eøs - innvigelse med bestemmelse FO_883_2004_ART12_1`() {
-        val behandling = journalførOgVentTilProsesserErFerdige(
-            defaultJournalføringDto().apply {
-                fagsak.sakstype = Sakstyper.EU_EOS.kode
-                fagsak.sakstema = Sakstemaer.MEDLEMSKAP_LOVVALG.kode
-                behandlingstypeKode = Behandlingstyper.FØRSTEGANG.kode
-                behandlingstemaKode = Behandlingstema.UTSENDT_ARBEIDSTAKER.kode
-            },
-            mapOf(
-                ProsessType.JFR_NY_SAK_BRUKER to 1,
-                ProsessType.OPPRETT_OG_DISTRIBUER_BREV to 1
-            )
-        ).behandling
-
-        val mottatteOpplysninger =
-            mottatteOpplysningerService.hentEllerOpprettMottatteOpplysninger(behandling.id, true)
-                .shouldNotBeNull()
-                .mottatteOpplysningerData.apply {
-                    periode = Periode(
-                        LocalDate.of(2023, 1, 1),
-                        LocalDate.of(2023, 2, 1),
-                    )
-                    soeknadsland = Soeknadsland(listOf(Landkoder.BE.kode), false)
-                }
-        mottatteOpplysningerService.oppdaterMottatteOpplysninger(behandling.id, mottatteOpplysninger.toJsonNode)
-        oppfriskSaksopplysningerService.oppfriskSaksopplysning(behandling.id, false)
-
-        val yrkesgruppe = AvklartefaktaDto(
-            listOf("ORDINAER"), "YRKESGRUPPE"
-        ).apply {
-            avklartefaktaType = Avklartefaktatyper.YRKESGRUPPE
-            subjektID = null
-            begrunnelseKoder = emptyList()
-            begrunnelseFritekst = null
-        }
-        val virksomhet = AvklartefaktaDto(
-            listOf("TRUE"), "VIRKSOMHET"
-        ).apply {
-            avklartefaktaType = Avklartefaktatyper.VIRKSOMHET
-            subjektID = "999999999"
-            begrunnelseKoder = emptyList()
-            begrunnelseFritekst = null
-        }
-        val yrkesaktivitet = AvklartefaktaDto(
-            listOf("ORDINAER_ARBEIDSTAKER"), "YRKESAKTIVITET"
-        ).apply {
-            avklartefaktaType = null
-            subjektID = null
-            begrunnelseKoder = emptyList()
-            begrunnelseFritekst = null
-        }
-        avklartefaktaService.lagreAvklarteFakta(behandling.id, setOf(yrkesgruppe, virksomhet, yrkesaktivitet))
-
-        val forutgåendeMedlemskap = VilkaarDto().apply {
-            vilkaar = Vilkaar.FORUTGAAENDE_MEDLEMSKAP.kode
-            isOppfylt = true
-        }
-        val vesentlingVirksomhet = VilkaarDto().apply {
-            vilkaar = Vilkaar.VESENTLIG_VIRKSOMHET.kode
-            isOppfylt = true
-        }
-        val art12_1 = VilkaarDto().apply {
-            vilkaar = Vilkaar.FO_883_2004_ART12_1.kode
-            isOppfylt = true
-        }
-        vilkaarsresultatService.registrerVilkår(behandling.id, listOf(forutgåendeMedlemskap, vesentlingVirksomhet, art12_1))
-
-        lovvalgsperiodeService.lagreLovvalgsperioder(behandling.id, listOf(Lovvalgsperiode().apply {
-            innvilgelsesresultat = InnvilgelsesResultat.INNVILGET
-            bestemmelse = Lovvalgbestemmelser_883_2004.FO_883_2004_ART12_1
-            lovvalgsland = Land_iso2.BE
-            medlemskapstype = Medlemskapstyper.PLIKTIG
-            dekning = Trygdedekninger.FULL_DEKNING
-
-            fom = LocalDate.of(2023, 1, 1)
-            tom = LocalDate.of(2023, 2, 1)
-        }))
-
-        ferdigbehandlingKontrollFacade.kontroller(behandling.id, false, null, setOf())
-
-        val vedtakRequest = FattVedtakRequest.Builder()
-            .medBehandlingsresultatType(Behandlingsresultattyper.FASTSATT_LOVVALGSLAND)
-            .medVedtakstype(Vedtakstyper.FØRSTEGANGSVEDTAK)
-            .medBestillersId("komponent test")
-            .build()
-
-        val utstedtA1MeldingCapturingSlot = slot<UtstedtA1Melding>()
-        every { utstedtA1AivenProducer.produserMelding(capture(utstedtA1MeldingCapturingSlot)) } returns mockk<UtstedtA1Melding>()
-
-
-        executeAndWait(
-            mapOf(
-                ProsessType.IVERKSETT_VEDTAK_EOS to 1,
-                ProsessType.SEND_BREV to 3,
-                ProsessType.OPPRETT_OG_DISTRIBUER_BREV to 1
-            )
-        ) {
-            vedtaksfattingFasade.fattVedtak(behandling.id, vedtakRequest)
-        }
-
-
-        verify(exactly = 1) { utstedtA1AivenProducer.produserMelding(any()) }
-        utstedtA1MeldingCapturingSlot.captured.apply {
-            behandlingId.shouldBe(behandling.id)
-            artikkel.shouldBe(Lovvalgsbestemmelse.ART_12_1)
-        }
-
-        behandlingsresultatService.hentBehandlingsresultat(behandling.id).apply {
-            type shouldBe Behandlingsresultattyper.FASTSATT_LOVVALGSLAND
-            behandlingsmåte shouldBe Behandlingsmaate.MANUELT
-            fastsattAvLand shouldBe Land_iso2.NO
-        }
-        lovvalgsperiodeService.hentLovvalgsperiode(behandling.id).apply {
-            innvilgelsesresultat shouldBe InnvilgelsesResultat.INNVILGET
-            bestemmelse shouldBe Lovvalgbestemmelser_883_2004.FO_883_2004_ART12_1
-            lovvalgsland shouldBe Land_iso2.BE
-            medlemskapstype shouldBe Medlemskapstyper.PLIKTIG
-            dekning shouldBe Trygdedekninger.FULL_DEKNING
-            fom shouldBe LocalDate.of(2023, 1, 1)
-            tom shouldBe LocalDate.of(2023, 2, 1)
-        }
-        behandlingRepository.findById(behandling.id).orElse(null)
-            .shouldNotBeNull().apply {
-                withClue("Behandlingsstatus skal være AVSLUTTET") {
-                    status shouldBe Behandlingsstatus.AVSLUTTET
-                }
-                fagsak.apply {
-                    withClue("Saksstatus skal være LOVVALG_AVKLART") {
-                        status shouldBe Saksstatuser.LOVVALG_AVKLART
-                    }
-                }
-            }
-
-        MedlRepo.repo.values
-            .shouldHaveSize(1)
-            .first()
-            .apply {
-                fraOgMed shouldBe LocalDate.of(2023, 1, 1)
-                tilOgMed shouldBe LocalDate.of(2023, 2, 1)
-                status shouldBe "GYLD"
-                dekning shouldBe "Full"
-                medlem shouldBe true
-                lovvalgsland shouldBe "BEL"
-                lovvalg shouldBe "ENDL"
-                grunnlag shouldBe "FO_12_1"
-                sporingsinformasjon?.kildedokument shouldBe "Henv_Soknad"
-            }
-    }
-
 
     private val Any.toJsonNode: JsonNode
         get() {
