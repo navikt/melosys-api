@@ -152,7 +152,7 @@ class YrkesaktivFtrlVedtakIT(
 
     @Test
     fun `Yrkesaktiv vedtak - FTRL - opprett fakturaserie for førstegangsbehandling og kanseller fakturaserie i ny vurdering`() {
-        val saksnummer = lagFørstegangsBehandling(Skatteplikttype.IKKE_SKATTEPLIKTIG, false)
+        val saksnummer = lagFørstegangsbehandling(Skatteplikttype.IKKE_SKATTEPLIKTIG, false)
 
         val behandlingsId = executeAndWait(
             mapOf(
@@ -247,7 +247,7 @@ class YrkesaktivFtrlVedtakIT(
 
     @Test
     fun `Håndtere manglende innbetaling i sak som allerede har en åpen behandling`() {
-        val saksnummer = lagFørstegangsBehandling(Skatteplikttype.IKKE_SKATTEPLIKTIG, false)
+        val saksnummer = lagFørstegangsbehandling(Skatteplikttype.IKKE_SKATTEPLIKTIG, false)
 
         val behandlingID = executeAndWait(
             mapOf(
@@ -317,7 +317,7 @@ class YrkesaktivFtrlVedtakIT(
         return opprettsakdto
     }
 
-    fun lagFørstegangsBehandling(skatteplikttype: Skatteplikttype, arbeidsgiversavgiftBetales: Boolean): String {
+    fun lagFørstegangsbehandling(skatteplikttype: Skatteplikttype, arbeidsgiversavgiftBetales: Boolean): String {
         val behandling = journalførOgVentTilProsesserErFerdige(
             defaultJournalføringDto().apply {
                 fagsak.sakstype = Sakstyper.FTRL.name
