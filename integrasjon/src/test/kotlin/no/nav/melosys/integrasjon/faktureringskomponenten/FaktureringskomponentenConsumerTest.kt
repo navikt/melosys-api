@@ -59,9 +59,6 @@ class FaktureringskomponentenConsumerTest(
     @BeforeAll
     fun beforeAll() {
         ThreadLocalAccessInfo.beforeExecuteProcess(processUUID, "prossesSteg")
-        serviceUnderTestMockServer.addMockServiceRequestListener { request, response ->
-            println("Request Body: " + request.getBodyAsString())
-        }
         serviceUnderTestMockServer.start()
         oAuthMockServer.start()
         oAuthMockServer.reset()
