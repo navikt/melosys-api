@@ -197,4 +197,9 @@ public class Medlemskapsperiode implements ErPeriode, HarBestemmelse<Bestemmelse
             this.fom = LocalDate.of(gjelderÅr, 1, 1);
         }
     }
+
+    public void clearTrygdeavgiftsperioder() {
+        trygdeavgiftsperioder.stream().forEach(t -> t.setGrunnlagMedlemskapsperiode(null));
+        trygdeavgiftsperioder.clear();
+    }
 }

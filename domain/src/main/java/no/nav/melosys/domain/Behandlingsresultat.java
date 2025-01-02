@@ -269,9 +269,15 @@ public class Behandlingsresultat extends RegistreringsInfo {
         medlemskapsperiode.setBehandlingsresultat(this);
     }
 
-    public void removeMedlemskapsperioder(Medlemskapsperiode medlemskapsperiode) {
+    public void removeMedlemskapsperiode(Medlemskapsperiode medlemskapsperiode) {
         this.medlemskapsperioder.remove(medlemskapsperiode);
         medlemskapsperiode.setBehandlingsresultat(null);
+    }
+
+    public void clearMedlemskapsperioder() {
+        medlemskapsperioder.forEach(medlemskapsperiode -> medlemskapsperiode.setBehandlingsresultat(null));
+        medlemskapsperioder.forEach(Medlemskapsperiode::clearTrygdeavgiftsperioder);
+        medlemskapsperioder.clear();
     }
 
     public Skatteplikttype utledSkatteplikttype() {
@@ -331,7 +337,7 @@ public class Behandlingsresultat extends RegistreringsInfo {
     }
 
     public void clearTrygdeavgiftsperioder() {
-        medlemskapsperioder.forEach(medlemskapsperiode -> medlemskapsperiode.getTrygdeavgiftsperioder().clear());
+        medlemskapsperioder.forEach(Medlemskapsperiode::clearTrygdeavgiftsperioder);
     }
 
     public Set<SkatteforholdTilNorge> hentSkatteforholdTilNorge() {

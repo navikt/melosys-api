@@ -28,10 +28,9 @@ class BehandlingsresultatService(
 
         behandlingsresultatRepository.findById(behandlingID)
             .orElseThrowIkkeFunnetException(behandlingID).apply {
+                clearMedlemskapsperioder()
                 avklartefakta.clear()
                 lovvalgsperioder.clear()
-                medlemskapsperioder.clear()
-                trygdeavgiftsperioder.clear()
                 vilkaarsresultater.clear()
                 utfallRegistreringUnntak = null
                 begrunnelseFritekst = null
@@ -45,7 +44,7 @@ class BehandlingsresultatService(
 
     @Transactional
     fun tømMedlemskapsperioder(behandlingID: Long) {
-        hentBehandlingsresultat(behandlingID).medlemskapsperioder.clear()
+        hentBehandlingsresultat(behandlingID).clearMedlemskapsperioder()
     }
 
     fun hentBehandlingsresultat(behandlingsid: Long): Behandlingsresultat =
