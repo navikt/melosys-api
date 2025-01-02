@@ -14,7 +14,6 @@ import io.mockk.mockk
 import no.nav.melosys.domain.avgift.Inntektsperiode
 import no.nav.melosys.domain.avgift.Penger
 import no.nav.melosys.domain.avgift.SkatteforholdTilNorge
-import no.nav.melosys.domain.avgift.Trygdeavgiftsperiode
 import no.nav.melosys.domain.kodeverk.*
 import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingsresultattyper
 import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingstema
@@ -23,7 +22,6 @@ import no.nav.melosys.domain.mottatteopplysninger.SøknadNorgeEllerUtenforEØS
 import no.nav.melosys.domain.mottatteopplysninger.data.Periode
 import no.nav.melosys.domain.mottatteopplysninger.data.Soeknadsland
 import no.nav.melosys.integrasjon.faktureringskomponenten.NyFakturaserieResponseDto
-import no.nav.melosys.integrasjon.trygdeavgift.dto.DatoPeriodeDto
 import no.nav.melosys.itest.JournalfoeringBase
 import no.nav.melosys.itest.MelosysHendelseKafkaConsumer
 import no.nav.melosys.melosysmock.medl.MedlRepo
@@ -34,12 +32,10 @@ import no.nav.melosys.service.avgift.satsendring.SatsendringFinner
 import no.nav.melosys.service.avklartefakta.AvklartefaktaDto
 import no.nav.melosys.service.avklartefakta.AvklartefaktaService
 import no.nav.melosys.service.behandling.VilkaarsresultatService
-import no.nav.melosys.service.ftrl.medlemskapsperiode.MedlemskapsperiodeService
 import no.nav.melosys.service.ftrl.medlemskapsperiode.OpprettForslagMedlemskapsperiodeService
 import no.nav.melosys.service.journalforing.JournalfoeringService
 import no.nav.melosys.service.mottatteopplysninger.MottatteOpplysningerService
 import no.nav.melosys.service.oppgave.OppgaveService
-import no.nav.melosys.service.saksopplysninger.OppfriskSaksopplysningerService
 import no.nav.melosys.service.vedtak.FattVedtakRequest
 import no.nav.melosys.service.vedtak.VedtaksfattingFasade
 import no.nav.melosys.service.vilkaar.VilkaarDto
@@ -56,9 +52,7 @@ class SatsendringIT(
     @Autowired journalføringService: JournalfoeringService,
     @Autowired oppgaveService: OppgaveService,
     @Autowired private val avklartefaktaService: AvklartefaktaService,
-    @Autowired private val medlemskapsperiodeService: MedlemskapsperiodeService,
     @Autowired private val mottatteOpplysningerService: MottatteOpplysningerService,
-    @Autowired private val oppfriskSaksopplysningerService: OppfriskSaksopplysningerService,
     @Autowired private val opprettForslagMedlemskapsperiodeService: OpprettForslagMedlemskapsperiodeService,
     @Autowired private val trygdeavgiftsberegningService: TrygdeavgiftsberegningService,
     @Autowired private val vedtaksfattingFasade: VedtaksfattingFasade,
@@ -117,15 +111,16 @@ class SatsendringIT(
 
     @Test
     fun `Satsendring etter yrkesaktiv FTRL vedtak`() {
-        lagFørstegangsbehandling(harSatsendring = false)
-        val saksnummerMedSatsendring = lagFørstegangsbehandling(harSatsendring = true)
+        // Lag 2 saker, en med satsendring og en uten
+        lagFørstegangsbehandling(harSatsendringEtterÅrsskiftet = false)
+        val saksnummerMedSatsendring = lagFørstegangsbehandling(harSatsendringEtterÅrsskiftet = true)
 
         // Skal finne saken med satsendring
         satsendringFinner.finn() shouldBe saksnummerMedSatsendring
     }
 
 
-    fun lagFørstegangsbehandling(harSatsendring: Boolean): String {
+    fun lagFørstegangsbehandling(harSatsendringEtterÅrsskiftet: Boolean): String {
         val behandling = journalførOgVentTilProsesserErFerdige(
             defaultJournalføringDto().apply {
                 fagsak.sakstype = Sakstyper.FTRL.name
@@ -139,6 +134,9 @@ class SatsendringIT(
             )
         ).behandling.shouldNotBeNull()
 
+        val startDato = LocalDate.now().minusYears(1).withDayOfYear(1)
+        val sluttDato = LocalDate.now().minusYears(1).withMonth(12).withDayOfMonth(31)
+
         val mottatteOpplysninger =
             mottatteOpplysningerService.hentEllerOpprettMottatteOpplysninger(behandling.id, true)
                 .shouldNotBeNull()
@@ -146,12 +144,9 @@ class SatsendringIT(
                     mottatteOpplysningerData
                         .shouldBeInstanceOf<SøknadNorgeEllerUtenforEØS>()
                         .apply {
-                            periode = Periode(
-                                LocalDate.of(2023, 1, 1),
-                                LocalDate.of(2023, 2, 1),
-                            )
+                            periode = Periode(startDato, sluttDato)
                             soeknadsland = Soeknadsland(listOf("AF"), false)
-                            trygdedekning = Trygdedekninger.FTRL_2_9_FØRSTE_LEDD_A_HELSE
+                            trygdedekning = Trygdedekninger.FTRL_2_9_FØRSTE_LEDD_B_PENSJON
                         }
                 }
         mottatteOpplysningerService.oppdaterMottatteOpplysninger(behandling.id, mottatteOpplysninger.mottatteOpplysningerData.toJsonNode)
@@ -178,7 +173,7 @@ class SatsendringIT(
         })
         vilkaarsresultatService.registrerVilkår(behandling.id, vilkår)
 
-        setupTrygdeavgift(behandling.id, Skatteplikttype.IKKE_SKATTEPLIKTIG, false)
+        setupTrygdeavgift(behandling.id, Periode(startDato, sluttDato))
 
         val vedtakRequest = FattVedtakRequest.Builder()
             .medBehandlingsresultatType(Behandlingsresultattyper.MEDLEM_I_FOLKETRYGDEN)
@@ -202,27 +197,17 @@ class SatsendringIT(
         }
     }
 
-    private fun setupTrygdeavgift(behandlingID: Long, skatteplikttype: Skatteplikttype, arbeidsgiversavgiftBetales: Boolean) {
-        val medlemskapsperiodeID = opprettForslagMedlemskapsperiodeService.opprettForslagPåMedlemskapsperioder(
+    private fun setupTrygdeavgift(behandlingID: Long, periode: Periode) {
+        opprettForslagMedlemskapsperiodeService.opprettForslagPåMedlemskapsperioder(
             behandlingID,
             Folketrygdloven_kap2_bestemmelser.FTRL_KAP2_2_8_FØRSTE_LEDD_A
         ).single().id
 
-        val medlemskapsperiode = medlemskapsperiodeService.oppdaterMedlemskapsperiode(
-            behandlingID,
-            medlemskapsperiodeID,
-            LocalDate.of(2023, 1, 1),
-            LocalDate.of(2023, 2, 1),
-            InnvilgelsesResultat.INNVILGET,
-            Trygdedekninger.FTRL_2_9_FØRSTE_LEDD_A_HELSE,
-            Folketrygdloven_kap2_bestemmelser.FTRL_KAP2_2_8_FØRSTE_LEDD_A
-        )
-        val periode = DatoPeriodeDto(LocalDate.of(2023, 1, 1), LocalDate.of(2023, 2, 1))
         val skattefordholdsperioder = listOf(
             SkatteforholdTilNorge().apply {
                 fomDato = periode.fom
                 tomDato = periode.tom
-                this.skatteplikttype = skatteplikttype
+                this.skatteplikttype = Skatteplikttype.IKKE_SKATTEPLIKTIG
             }
         )
         val inntektsforholdsperioder = listOf(
@@ -230,41 +215,13 @@ class SatsendringIT(
                 fomDato = periode.fom
                 tomDato = periode.tom
                 this.type = Inntektskildetype.INNTEKT_FRA_UTLANDET
-                isArbeidsgiversavgiftBetalesTilSkatt = arbeidsgiversavgiftBetales
+                isArbeidsgiversavgiftBetalesTilSkatt = false
                 avgiftspliktigMndInntekt = Penger(10000.toBigDecimal())
                 avgiftspliktigTotalinntekt = Penger(10000.toBigDecimal())
             }
         )
 
         trygdeavgiftsberegningService.beregnOgLagreTrygdeavgift(behandlingID, skattefordholdsperioder, inntektsforholdsperioder)
-
-
-        val skatteforholdTilNorge = SkatteforholdTilNorge().apply {
-            fomDato = LocalDate.of(2023, 1, 1)
-            tomDato = LocalDate.of(2023, 2, 1)
-            this@apply.skatteplikttype = skatteplikttype
-        }
-
-        val inntektsperiode = Inntektsperiode().apply {
-            fomDato = LocalDate.of(2023, 1, 1)
-            tomDato = LocalDate.of(2023, 2, 1)
-            type = Inntektskildetype.INNTEKT_FRA_UTLANDET
-            isArbeidsgiversavgiftBetalesTilSkatt = arbeidsgiversavgiftBetales
-            avgiftspliktigMndInntekt = Penger(10000.toBigDecimal(), "nok")
-        }
-
-        val trygdeavgiftsperioder = HashSet<Trygdeavgiftsperiode>()
-        trygdeavgiftsperioder.add(
-            Trygdeavgiftsperiode(periodeFra = LocalDate.of(2023, 1, 1),
-                periodeTil = LocalDate.of(2023, 2, 1),
-                trygdesats = 6.8.toBigDecimal(),
-                trygdeavgiftsbeløpMd = Penger(1000.toBigDecimal(), "nok"),
-                grunnlagMedlemskapsperiode = medlemskapsperiode,
-                grunnlagSkatteforholdTilNorge = skatteforholdTilNorge,
-                grunnlagInntekstperiode = inntektsperiode)
-        )
-
-        medlemskapsperiode.trygdeavgiftsperioder = trygdeavgiftsperioder
     }
 
     private val Any.toJsonNode: JsonNode
