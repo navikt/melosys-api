@@ -9,7 +9,7 @@ import static org.assertj.core.api.Assertions.assertThat;
 
 class PeriodeReglerTest {
 
-    private final static LocalDate DATO = LocalDate.parse("2024-01-01");
+    private static final LocalDate DATO = LocalDate.parse("2024-01-01");
 
     @Test
     void feilIPeriode_erGyldigPeriode_false() {
@@ -109,7 +109,7 @@ class PeriodeReglerTest {
 
     @Test
     void periodeOver1ÅrFremITid_periodeOm2År_true() {
-        assertThat(PeriodeRegler.datoOver1ÅrFremITid(DATO.plusYears(2))).isTrue();
+        assertThat(PeriodeRegler.datoOver1ÅrFremITid(LocalDate.now().plusYears(2))).isTrue();
     }
 
     @Test
