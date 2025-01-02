@@ -59,6 +59,9 @@ class FaktureringskomponentenConsumerTest(
     @BeforeAll
     fun beforeAll() {
         ThreadLocalAccessInfo.beforeExecuteProcess(processUUID, "prossesSteg")
+        serviceUnderTestMockServer.addMockServiceRequestListener { request, response ->
+            println("Request Body: " + request.getBodyAsString())
+        }
         serviceUnderTestMockServer.start()
         oAuthMockServer.start()
         oAuthMockServer.reset()
@@ -201,8 +204,8 @@ class FaktureringskomponentenConsumerTest(
         referanseNav: String = "NAV Medlemskap og avgift",
         fakturaGjelder: Innbetalingstype = Innbetalingstype.TRYGDEAVGIFT,
         belop: BigDecimal = BigDecimal.valueOf(2000),
-        startDato: LocalDate = LocalDate.of(LocalDate.now().year, 1, 1),
-        sluttDato: LocalDate = LocalDate.of(LocalDate.now().year, 12, 31),
+        startDato: LocalDate = LocalDate.of(2024, 1, 1),
+        sluttDato: LocalDate = LocalDate.of(2024, 12, 31),
     ): FakturaDto {
         return FakturaDto(
             fodselsnummer,
