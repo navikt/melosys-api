@@ -200,12 +200,12 @@ class MedlemskapsperiodeService(
             .firstOrNull { it.id == medlemskapsperiodeID }
             ?: throw IkkeFunnetException("Finner ingen medlemskapsperiode med id $medlemskapsperiodeID for behandling $behandlingsresultatID")
 
-        behandlingsresultat.removeMedlemskapsperioder(medlemskapsperiode)
+        behandlingsresultat.removeMedlemskapsperiode(medlemskapsperiode)
     }
 
     @Transactional
     fun slettMedlemskapsperioder(behandlingsresultatID: Long) {
         val behandlingsresultat = behandlingsresultatService.hentBehandlingsresultat(behandlingsresultatID)
-        behandlingsresultat.medlemskapsperioder.clear()
+        behandlingsresultat.clearMedlemskapsperioder()
     }
 }

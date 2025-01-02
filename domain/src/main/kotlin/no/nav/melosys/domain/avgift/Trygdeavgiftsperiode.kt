@@ -31,7 +31,7 @@ class Trygdeavgiftsperiode(
 
     @ManyToOne
     @JoinColumn(name = "medlemskapsperiode_id")
-    val grunnlagMedlemskapsperiode: Medlemskapsperiode? = null,
+    var grunnlagMedlemskapsperiode: Medlemskapsperiode? = null,
 
     @ManyToOne(cascade = [CascadeType.ALL])
     @JoinColumn(name = "skatteforhold_id")
