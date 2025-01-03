@@ -3,6 +3,9 @@ package no.nav.melosys.service.saksopplysninger;
 import java.time.LocalDate;
 import java.time.Month;
 import java.util.Optional;
+import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.locks.Lock;
+import java.util.concurrent.locks.ReentrantLock;
 
 import no.nav.melosys.domain.Behandling;
 import no.nav.melosys.domain.ErPeriode;
@@ -26,6 +29,8 @@ import org.springframework.transaction.annotation.Transactional;
 @Service
 public class OppfriskSaksopplysningerService {
     private static final Logger log = LoggerFactory.getLogger(OppfriskSaksopplysningerService.class);
+
+    private final ConcurrentHashMap<Long, Lock> locks = new ConcurrentHashMap<>();
 
     private final AnmodningsperiodeService anmodningsperiodeService;
     private final BehandlingService behandlingService;
@@ -76,7 +81,7 @@ public class OppfriskSaksopplysningerService {
         RegisteropplysningerRequest nyRegisteropplysningerRequest = lagRegisteropplysningerRequest(behandling, periodeOver5år, brukerID, periode);
 
         log.info("Starter oppfrisking av behandlingID: {} ", behandlingID);
-        tilbakestillBehandling(behandlingID, nyRegisteropplysningerRequest);
+        executeWithLock(behandlingID, () -> tilbakestillBehandling(behandlingID, nyRegisteropplysningerRequest));
 
         if (behandling.erBehandlingAvSed()) {
             ufmKontrollService.utførKontrollerOgRegistrerFeil(behandlingID);
@@ -106,6 +111,19 @@ public class OppfriskSaksopplysningerService {
             .tom(periode.getTom())
             .hentOpplysningerFor5aar(periodeOver5år)
             .build();
+    }
+
+    private void executeWithLock(long behandlingID, Runnable action) {
+        Lock lock = locks.computeIfAbsent(behandlingID, k -> new ReentrantLock());
+        if (!lock.tryLock()) {
+            throw new IllegalStateException("En annen tråd er allerede i gang med  behandlingID: " + behandlingID);
+        }
+        try {
+            action.run();
+        } finally {
+            lock.unlock();
+            locks.remove(behandlingID, lock);
+        }
     }
 
     private void tilbakestillBehandling(long behandlingID, RegisteropplysningerRequest registeropplysningerRequest) {
