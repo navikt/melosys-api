@@ -66,8 +66,8 @@ public class OppfriskSaksopplysningerService {
                 behandlingID) + "Det er ikke lenger mulig å endre mottatteOpplysninger og saksopplysninger");
         }
 
-        Optional<String> aktørIdOptional = Optional.ofNullable(behandling.getFagsak().finnBrukersAktørID());
-        String brukerID = aktørIdOptional.map(persondataFasade::hentFolkeregisterident).orElse(null);
+        String aktørId = behandling.getFagsak().finnBrukersAktørID();
+        String brukerID = aktørId != null ? persondataFasade.hentFolkeregisterident(aktørId) : null;
 
         //OK om perioden er tom. Ikke alle behandlingstema krever periode.
         ErPeriode periode = behandling.erÅrsavregning() ?
@@ -107,17 +107,13 @@ public class OppfriskSaksopplysningerService {
     }
 
     private ErPeriode hentPeriodeForÅrsavregning(Long behandlingID) {
-        Integer gjeldendeÅrForÅrsavregning = årsavregningService.finnGjeldendeÅrForÅrsavregning(behandlingID);
-        int år = gjeldendeÅrForÅrsavregning == null ? LocalDate.now().getYear() : gjeldendeÅrForÅrsavregning;
+        int år = Optional.ofNullable(årsavregningService.finnGjeldendeÅrForÅrsavregning(behandlingID))
+            .orElse(LocalDate.now().getYear());
 
         return new Periode(LocalDate.of(år, Month.JANUARY, 1), hentTomForÅrsavregning(år));
     }
 
     private LocalDate hentTomForÅrsavregning(int år) {
-        LocalDate now = LocalDate.now();
-        if (now.getYear() == år) {
-            return now;
-        }
-        return LocalDate.of(år, Month.DECEMBER, 31);
+        return LocalDate.now().getYear() == år ? LocalDate.now() : LocalDate.of(år, Month.DECEMBER, 31);
     }
 }
