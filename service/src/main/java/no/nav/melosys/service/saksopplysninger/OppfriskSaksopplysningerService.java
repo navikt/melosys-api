@@ -58,7 +58,7 @@ public class OppfriskSaksopplysningerService {
     }
 
     @Transactional
-    public void oppfriskSaksopplysning(long behandlingID, boolean periodeOver5aar) {
+    public void oppfriskSaksopplysning(long behandlingID, boolean periodeOver5år) {
         Behandling behandling = behandlingService.hentBehandling(behandlingID);
 
         if (behandling.erUtsending() && anmodningsperiodeService.harSendtAnmodningsperiode(behandlingID)) {
@@ -73,24 +73,10 @@ public class OppfriskSaksopplysningerService {
         ErPeriode periode = behandling.erÅrsavregning() ?
             hentPeriodeForÅrsavregning(behandlingID) : behandling.finnPeriode().orElse(new Periode());
 
-        RegisteropplysningerRequest registeropplysningerRequest = RegisteropplysningerRequest.builder()
-            .behandlingID(behandlingID)
-            .saksopplysningTyper(registeropplysningerFactory.utledSaksopplysningTyper(
-                behandling.getFagsak().getType(),
-                behandling.getFagsak().getTema(),
-                behandling.getTema(),
-                behandling.getType()
-            ))
-            .fnr(brukerID)
-            .fom(periode.getFom())
-            .tom(periode.getTom())
-            .hentOpplysningerFor5aar(periodeOver5aar)
-            .build();
+        RegisteropplysningerRequest nyRegisteropplysningerRequest = lagRegisteropplysningerRequest(behandling, periodeOver5år, brukerID, periode);
 
         log.info("Starter oppfrisking av behandlingID: {} ", behandlingID);
-        registeropplysningerService.slettRegisterOpplysninger(behandlingID);
-        registeropplysningerService.hentOgLagreOpplysninger(registeropplysningerRequest);
-        behandlingsresultatService.tømBehandlingsresultat(behandlingID);
+        tilbakestillBehandling(behandlingID, nyRegisteropplysningerRequest);
 
         if (behandling.erBehandlingAvSed()) {
             ufmKontrollService.utførKontrollerOgRegistrerFeil(behandlingID);
@@ -104,6 +90,28 @@ public class OppfriskSaksopplysningerService {
                 periode
             );
         }
+    }
+
+    private RegisteropplysningerRequest lagRegisteropplysningerRequest(Behandling behandling, boolean periodeOver5år, String brukerID, ErPeriode periode) {
+        return RegisteropplysningerRequest.builder()
+            .behandlingID(behandling.getId())
+            .saksopplysningTyper(registeropplysningerFactory.utledSaksopplysningTyper(
+                behandling.getFagsak().getType(),
+                behandling.getFagsak().getTema(),
+                behandling.getTema(),
+                behandling.getType()
+            ))
+            .fnr(brukerID)
+            .fom(periode.getFom())
+            .tom(periode.getTom())
+            .hentOpplysningerFor5aar(periodeOver5år)
+            .build();
+    }
+
+    private void tilbakestillBehandling(long behandlingID, RegisteropplysningerRequest registeropplysningerRequest) {
+        registeropplysningerService.slettRegisterOpplysninger(behandlingID);
+        registeropplysningerService.hentOgLagreOpplysninger(registeropplysningerRequest);
+        behandlingsresultatService.tømBehandlingsresultat(behandlingID);
     }
 
     private ErPeriode hentPeriodeForÅrsavregning(Long behandlingID) {
