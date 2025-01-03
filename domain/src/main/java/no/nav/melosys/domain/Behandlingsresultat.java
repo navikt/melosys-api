@@ -275,8 +275,8 @@ public class Behandlingsresultat extends RegistreringsInfo {
     }
 
     public void clearMedlemskapsperioder() {
-        medlemskapsperioder.forEach(medlemskapsperiode -> medlemskapsperiode.setBehandlingsresultat(null));
         medlemskapsperioder.forEach(Medlemskapsperiode::clearTrygdeavgiftsperioder);
+        medlemskapsperioder.forEach(medlemskapsperiode -> medlemskapsperiode.setBehandlingsresultat(null));
         medlemskapsperioder.clear();
     }
 
@@ -286,7 +286,7 @@ public class Behandlingsresultat extends RegistreringsInfo {
         if (trygdeavgiftsperiode.isEmpty() && erÅpenSluttdato) {
             return Skatteplikttype.SKATTEPLIKTIG;
         } else if (trygdeavgiftsperiode.isEmpty()) {
-            throw new RuntimeException("Trygdeavgiftsperiode ikke funnet, og det er ikke åpen sluttdato, id = " + id);
+            throw new FunksjonellException("Trygdeavgiftsperiode ikke funnet, og det er ikke åpen sluttdato, behandlingsresultatID = " + id);
         }
 
         return trygdeavgiftsperiode.get().getGrunnlagSkatteforholdTilNorge().getSkatteplikttype();

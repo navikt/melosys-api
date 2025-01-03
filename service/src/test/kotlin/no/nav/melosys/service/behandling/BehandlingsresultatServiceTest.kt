@@ -57,7 +57,7 @@ class BehandlingsresultatServiceTest {
         }
 
         every { behandlingsresultatRepo.findById(any()) } returns Optional.of(behandlingsresultat)
-        every { behandlingsresultatRepo.save(behandlingsresultat) } returns behandlingsresultat
+        every { behandlingsresultatRepo.saveAndFlush(behandlingsresultat) } returns behandlingsresultat
 
 
         behandlingsresultatService.tømBehandlingsresultat(1L)
@@ -73,7 +73,7 @@ class BehandlingsresultatServiceTest {
             trygdeavgiftFritekst.shouldBeNull()
             vilkaarsresultater.shouldBeEmpty()
         }
-        verify(exactly = 1) { behandlingsresultatRepo.save(behandlingsresultat) }
+        verify(exactly = 1) { behandlingsresultatRepo.saveAndFlush(behandlingsresultat) }
     }
 
     @Test

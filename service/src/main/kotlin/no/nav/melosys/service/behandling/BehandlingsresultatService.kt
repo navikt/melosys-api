@@ -38,7 +38,7 @@ class BehandlingsresultatService(
                 nyVurderingBakgrunn = null
                 trygdeavgiftFritekst = null
             }.also {
-                behandlingsresultatRepository.save(it)
+                behandlingsresultatRepository.saveAndFlush(it)
             }
     }
 
