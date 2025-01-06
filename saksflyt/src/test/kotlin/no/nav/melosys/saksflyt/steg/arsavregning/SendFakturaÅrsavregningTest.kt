@@ -105,10 +105,7 @@ class SendFakturaÅrsavregningTest {
             medlemskapsperioder = listOf(
                 lagMedlemskapsPeriode {
                     trygdeavgiftsperioder = setOf(
-                        lagTrygdeavgiftsperiode {
-                            periodeFra = LocalDate.now()
-                            periodeTil = LocalDate.now().plusYears(1)
-                        }
+                        lagTrygdeavgiftsperiode()
                     )
                 }
             )
