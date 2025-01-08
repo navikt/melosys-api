@@ -33,16 +33,19 @@ public class AvklartefaktaController {
     private final AvklartFamilieRelasjonTypeService avklartFamilieRelasjonTypeService;
     private final AvklartArbeidssituasjonTypeService avklartArbeidssituasjonTypeService;
     private final AvklartOppholdTypeService avklartOppholdTypeService;
+    private final AvklartUkjentSluttdatoService avklartUkjentSluttdatoService;
+
     private final Aksesskontroll aksesskontroll;
 
     public AvklartefaktaController(AvklartefaktaService avklartefaktaService,
-                                 AvklarteVirksomheterService avklarteVirksomheterService,
-                                 AvklarteFaktaArbeidslandService avklarteFaktaArbeidslandService,
-                                 AvklartArbeidssituasjonTypeService avklartArbeidssituasjonTypeService,
-                                 Aksesskontroll aksesskontroll,
-                                 AvklartManglendeInnbetalingService avklartManglendeInnbetalingService,
-                                 AvklartFamilieRelasjonTypeService avklartFamilieRelasjonTypeService,
-                                 AvklartOppholdTypeService avklartOppholdTypeService) {
+                                   AvklarteVirksomheterService avklarteVirksomheterService,
+                                   AvklarteFaktaArbeidslandService avklarteFaktaArbeidslandService,
+                                   AvklartArbeidssituasjonTypeService avklartArbeidssituasjonTypeService,
+                                   Aksesskontroll aksesskontroll,
+                                   AvklartManglendeInnbetalingService avklartManglendeInnbetalingService,
+                                   AvklartFamilieRelasjonTypeService avklartFamilieRelasjonTypeService,
+                                   AvklartOppholdTypeService avklartOppholdTypeService,
+                                   AvklartUkjentSluttdatoService avklartUkjentSluttdatoService) {
         this.avklartefaktaService = avklartefaktaService;
         this.avklarteVirksomheterService = avklarteVirksomheterService;
         this.avklarteFaktaArbeidslandService = avklarteFaktaArbeidslandService;
@@ -51,6 +54,7 @@ public class AvklartefaktaController {
         this.avklartManglendeInnbetalingService = avklartManglendeInnbetalingService;
         this.avklartFamilieRelasjonTypeService = avklartFamilieRelasjonTypeService;
         this.avklartOppholdTypeService = avklartOppholdTypeService;
+        this.avklartUkjentSluttdatoService = avklartUkjentSluttdatoService;
     }
 
     @GetMapping("{behandlingID}")
@@ -94,7 +98,7 @@ public class AvklartefaktaController {
     @PostMapping("{behandlingID}/innbetalingsstatus")
     @ApiOperation(value = "Lagre manglende innbetalingsstatus som avklartfakta", response = AvklartefaktaOppsummeringDto.class)
     public AvklartefaktaOppsummeringDto lagreFullstendigManglendeInnbetalingSomAvklartFakta(@PathVariable("behandlingID") long behandlingID,
-                                                                          @RequestBody Boolean fullstendigManglendeInnbetaling) {
+                                                                                            @RequestBody Boolean fullstendigManglendeInnbetaling) {
         aksesskontroll.autoriserSkrivTilRessurs(behandlingID, Ressurs.AVKLARTE_FAKTA);
 
         avklartManglendeInnbetalingService.lagreFullstendigManglendeInnbetalingSomAvklartFakta(behandlingID,
@@ -117,7 +121,7 @@ public class AvklartefaktaController {
     @DeleteMapping("{behandlingID}/{avklartefaktatype}")
     @ApiOperation(value = "Slett avklartefakta", response = AvklartefaktaOppsummeringDto.class)
     public AvklartefaktaOppsummeringDto slettAvklarteFakta(@PathVariable("behandlingID") long behandlingID,
-                                                                                  @PathVariable Avklartefaktatyper avklartefaktatype) {
+                                                           @PathVariable Avklartefaktatyper avklartefaktatype) {
         aksesskontroll.autoriserSkrivTilRessurs(behandlingID, Ressurs.AVKLARTE_FAKTA);
 
         avklartefaktaService.slettAvklarteFakta(behandlingID, avklartefaktatype);
@@ -151,11 +155,23 @@ public class AvklartefaktaController {
     @PostMapping("{behandlingID}/oppholdstype")
     @ApiOperation(value = "Lagre oppholdstype for ikke yrkesaktive som avklartefakta", response = AvklartefaktaOppsummeringDto.class)
     public AvklartefaktaOppsummeringDto lagreOppholdstypeSomAvklarteFakta(@PathVariable("behandlingID") long behandlingID,
-                                                                         @RequestBody Ikkeyrkesaktivoppholdtype ikkeyrkesaktivoppholdtype) {
+                                                                          @RequestBody Ikkeyrkesaktivoppholdtype ikkeyrkesaktivoppholdtype) {
         aksesskontroll.autoriserSkrivTilRessurs(behandlingID, Ressurs.AVKLARTE_FAKTA);
 
         avklartOppholdTypeService.lagreOppholdstypeSomAvklarteFakta(behandlingID, ikkeyrkesaktivoppholdtype);
 
         return new AvklartefaktaOppsummeringDto(avklartefaktaService.hentAlleAvklarteFakta(behandlingID));
     }
+
+    @PostMapping("{behandlingID}/ukjent-sluttdato")
+    @ApiOperation(value = "Lagre ukjent sluttdato som avklartefakta", response = AvklartefaktaOppsummeringDto.class)
+    public AvklartefaktaOppsummeringDto lagreUkjentSluttdatoSomAvklarteFakta(@PathVariable("behandlingID") long behandlingID,
+                                                                             @RequestBody boolean ukjentSluttdato) {
+        aksesskontroll.autoriserSkrivTilRessurs(behandlingID, Ressurs.AVKLARTE_FAKTA);
+
+        avklartUkjentSluttdatoService.lagreUkjentSluttdatoSomAvklartefakta(behandlingID, ukjentSluttdato);
+
+        return new AvklartefaktaOppsummeringDto(avklartefaktaService.hentAlleAvklarteFakta(behandlingID));
+    }
+
 }
