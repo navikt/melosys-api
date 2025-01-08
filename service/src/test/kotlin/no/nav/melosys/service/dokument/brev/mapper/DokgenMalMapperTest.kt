@@ -656,7 +656,8 @@ internal class DokgenMalMapperTest {
             flereLandUkjentHvilke = false,
             land = listOf(Land_iso2.US.kode),
             trygdeavtaleLand = emptyList(),
-            betalerArbeidsgiveravgift = true
+            betalerArbeidsgiveravgift = true,
+            ukjentSluttdato = true,
         )
     }
 
@@ -689,6 +690,7 @@ internal class DokgenMalMapperTest {
             betalerArbeidsgiveravgift = true,
             harLavSatsPgaAlder = false,
             arbeidssituasjontype = null,
+            ukjentSluttdato = true,
         )
     }
 
