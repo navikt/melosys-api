@@ -5,6 +5,7 @@ public class InnvilgelseFtrlYrkesaktivFrivilligBrevbestilling extends DokgenBrev
     private String innledningFritekst;
     private String begrunnelseFritekst;
     private String trygdeavgiftFritekst;
+    private String ukjentSluttdato;
 
     public InnvilgelseFtrlYrkesaktivFrivilligBrevbestilling() {
         super();
@@ -17,6 +18,7 @@ public class InnvilgelseFtrlYrkesaktivFrivilligBrevbestilling extends DokgenBrev
         this.innledningFritekst = builder.innledningFritekst;
         this.begrunnelseFritekst = builder.begrunnelseFritekst;
         this.trygdeavgiftFritekst = builder.trygdeavgiftFritekst;
+        this.ukjentSluttdato = builder.ukjentSluttdato;
     }
 
     public String getInnledningFritekst() {
@@ -39,11 +41,16 @@ public class InnvilgelseFtrlYrkesaktivFrivilligBrevbestilling extends DokgenBrev
         return nyVurderingBakgrunn;
     }
 
+    public String getUkjentSluttdato() {
+        return ukjentSluttdato;
+    }
+
     public static final class Builder extends DokgenBrevbestilling.Builder<Builder> {
         private String nyVurderingBakgrunn;
         private String innledningFritekst;
         private String begrunnelseFritekst;
         private String trygdeavgiftFritekst;
+        private String ukjentSluttdato;
 
         public Builder() {
         }
@@ -54,6 +61,7 @@ public class InnvilgelseFtrlYrkesaktivFrivilligBrevbestilling extends DokgenBrev
             this.innledningFritekst = brevbestilling.innledningFritekst;
             this.begrunnelseFritekst = brevbestilling.begrunnelseFritekst;
             this.trygdeavgiftFritekst = brevbestilling.trygdeavgiftFritekst;
+            this.ukjentSluttdato = brevbestilling.ukjentSluttdato;
         }
 
         public Builder medInnledningFritekst(String innledningFritekst) {
@@ -73,6 +81,11 @@ public class InnvilgelseFtrlYrkesaktivFrivilligBrevbestilling extends DokgenBrev
 
         public Builder medNyVurderingBakgrunn(String nyVurderingBakgrunn) {
             this.nyVurderingBakgrunn = nyVurderingBakgrunn;
+            return this;
+        }
+
+        public Builder medUkjentSluttdato(String ukjentSluttdato) {
+            this.ukjentSluttdato = ukjentSluttdato;
             return this;
         }
 
