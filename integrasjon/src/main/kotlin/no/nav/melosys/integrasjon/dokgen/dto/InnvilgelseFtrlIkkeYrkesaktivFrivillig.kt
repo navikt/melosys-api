@@ -28,7 +28,7 @@ class InnvilgelseFtrlIkkeYrkesaktivFrivillig(
     val avslåttMedlemskapsperiodeFørMottaksdatoFullDekning: Boolean,
     @JsonInclude(JsonInclude.Include.NON_NULL)
     val medlemskapsperioder: List<MedlemskapsperiodeDto>,
-    ukjentSluttdato: Boolean,
+    val ukjentSluttdato: Boolean,
 ) : DokgenDto(brevbestilling, Mottakerroller.BRUKER) {
 
     constructor(

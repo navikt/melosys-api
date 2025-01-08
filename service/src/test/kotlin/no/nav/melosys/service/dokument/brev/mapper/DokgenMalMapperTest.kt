@@ -370,6 +370,7 @@ internal class DokgenMalMapperTest {
             .medKontaktopplysning(DokgenTestData.lagKontaktOpplysning())
             .medForsendelseMottatt(Instant.now())
             .medInnledningFritekst("Dummy")
+            .medUkjentSluttdato(true)
             .build()
 
         dokgenMalMapper.mapBehandling(

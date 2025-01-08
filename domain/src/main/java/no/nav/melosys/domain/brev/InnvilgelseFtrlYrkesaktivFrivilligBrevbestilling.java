@@ -5,7 +5,7 @@ public class InnvilgelseFtrlYrkesaktivFrivilligBrevbestilling extends DokgenBrev
     private String innledningFritekst;
     private String begrunnelseFritekst;
     private String trygdeavgiftFritekst;
-    private String ukjentSluttdato;
+    private Boolean ukjentSluttdato;
 
     public InnvilgelseFtrlYrkesaktivFrivilligBrevbestilling() {
         super();
@@ -41,7 +41,7 @@ public class InnvilgelseFtrlYrkesaktivFrivilligBrevbestilling extends DokgenBrev
         return nyVurderingBakgrunn;
     }
 
-    public String getUkjentSluttdato() {
+    public Boolean getUkjentSluttdato() {
         return ukjentSluttdato;
     }
 
@@ -50,7 +50,7 @@ public class InnvilgelseFtrlYrkesaktivFrivilligBrevbestilling extends DokgenBrev
         private String innledningFritekst;
         private String begrunnelseFritekst;
         private String trygdeavgiftFritekst;
-        private String ukjentSluttdato;
+        private Boolean ukjentSluttdato;
 
         public Builder() {
         }
@@ -84,7 +84,7 @@ public class InnvilgelseFtrlYrkesaktivFrivilligBrevbestilling extends DokgenBrev
             return this;
         }
 
-        public Builder medUkjentSluttdato(String ukjentSluttdato) {
+        public Builder medUkjentSluttdato(Boolean ukjentSluttdato) {
             this.ukjentSluttdato = ukjentSluttdato;
             return this;
         }
