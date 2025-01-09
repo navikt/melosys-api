@@ -8,11 +8,11 @@ import org.springframework.stereotype.Service
 @Service
 class AvklartUkjentSluttdatoService(private val avklartefaktaService: AvklartefaktaService) {
     fun lagreUkjentSluttdatoSomAvklartefakta(behandlingID: Long, ukjentSluttdato: Boolean) {
-        avklartefaktaService.slettAvklarteFakta(behandlingID, Avklartefaktatyper.UKJENT_SLUTTDATO)
+        avklartefaktaService.slettAvklarteFakta(behandlingID, Avklartefaktatyper.UKJENT_SLUTTDATO_MEDLEMSKAPSPERIODE)
         avklartefaktaService.leggTilAvklarteFakta(
             behandlingID,
-            Avklartefaktatyper.UKJENT_SLUTTDATO,
-            Avklartefaktatyper.UKJENT_SLUTTDATO.kode,
+            Avklartefaktatyper.UKJENT_SLUTTDATO_MEDLEMSKAPSPERIODE,
+            Avklartefaktatyper.UKJENT_SLUTTDATO_MEDLEMSKAPSPERIODE.kode,
             null,
             ukjentSluttdato.toString()
         )
@@ -20,7 +20,7 @@ class AvklartUkjentSluttdatoService(private val avklartefaktaService: Avklartefa
 
     fun hentUkjentSluttdato(behandlingID: Long): Boolean? {
         return avklartefaktaService.hentAlleAvklarteFakta(behandlingID)
-            .filter { Avklartefaktatyper.UKJENT_SLUTTDATO.kode == it.referanse && Avklartefaktatyper.UKJENT_SLUTTDATO == it.avklartefaktaType }
+            .filter { Avklartefaktatyper.UKJENT_SLUTTDATO_MEDLEMSKAPSPERIODE.kode == it.referanse && Avklartefaktatyper.UKJENT_SLUTTDATO_MEDLEMSKAPSPERIODE == it.avklartefaktaType }
             .map { it.fakta.single().toBoolean() }
             .firstOrNull()
     }

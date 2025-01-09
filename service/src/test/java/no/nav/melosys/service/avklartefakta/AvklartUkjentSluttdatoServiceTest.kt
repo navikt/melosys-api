@@ -37,8 +37,8 @@ class AvklartUkjentSluttdatoServiceTest {
     @Test
     fun `hentUkjentSluttdato kaster IllegalArgumentException ved flere fakta verdier`() {
         val behandlingId = 1L
-        val avklartFaktaDto = AvklartefaktaDto(listOf("true", "false"), Avklartefaktatyper.UKJENT_SLUTTDATO.kode).apply {
-            avklartefaktaType = Avklartefaktatyper.UKJENT_SLUTTDATO
+        val avklartFaktaDto = AvklartefaktaDto(listOf("true", "false"), Avklartefaktatyper.UKJENT_SLUTTDATO_MEDLEMSKAPSPERIODE.kode).apply {
+            avklartefaktaType = Avklartefaktatyper.UKJENT_SLUTTDATO_MEDLEMSKAPSPERIODE
         }
 
         every { avklartefaktaService.hentAlleAvklarteFakta(behandlingId) } returns setOf(avklartFaktaDto)
@@ -51,8 +51,8 @@ class AvklartUkjentSluttdatoServiceTest {
     @Test
     fun `lagreOgHent ukjent sluttdato som true`() {
         val behandlingId = 1L
-        val avklartFaktaDto = AvklartefaktaDto(listOf("true"), Avklartefaktatyper.UKJENT_SLUTTDATO.kode).apply {
-            avklartefaktaType = Avklartefaktatyper.UKJENT_SLUTTDATO
+        val avklartFaktaDto = AvklartefaktaDto(listOf("true"), Avklartefaktatyper.UKJENT_SLUTTDATO_MEDLEMSKAPSPERIODE.kode).apply {
+            avklartefaktaType = Avklartefaktatyper.UKJENT_SLUTTDATO_MEDLEMSKAPSPERIODE
         }
 
         every { avklartefaktaService.hentAlleAvklarteFakta(behandlingId) } returns setOf(avklartFaktaDto)
@@ -61,11 +61,11 @@ class AvklartUkjentSluttdatoServiceTest {
         service.hentUkjentSluttdato(behandlingId)?.shouldBeTrue()
 
         verify {
-            avklartefaktaService.slettAvklarteFakta(behandlingId, Avklartefaktatyper.UKJENT_SLUTTDATO)
+            avklartefaktaService.slettAvklarteFakta(behandlingId, Avklartefaktatyper.UKJENT_SLUTTDATO_MEDLEMSKAPSPERIODE)
             avklartefaktaService.leggTilAvklarteFakta(
                 behandlingId,
-                Avklartefaktatyper.UKJENT_SLUTTDATO,
-                Avklartefaktatyper.UKJENT_SLUTTDATO.kode,
+                Avklartefaktatyper.UKJENT_SLUTTDATO_MEDLEMSKAPSPERIODE,
+                Avklartefaktatyper.UKJENT_SLUTTDATO_MEDLEMSKAPSPERIODE.kode,
                 null,
                 "true"
             )
@@ -75,8 +75,8 @@ class AvklartUkjentSluttdatoServiceTest {
     @Test
     fun `lagreOgHent ukjent sluttdato som false`() {
         val behandlingId = 1L
-        val avklartFaktaDto = AvklartefaktaDto(listOf("false"), Avklartefaktatyper.UKJENT_SLUTTDATO.kode).apply {
-            avklartefaktaType = Avklartefaktatyper.UKJENT_SLUTTDATO
+        val avklartFaktaDto = AvklartefaktaDto(listOf("false"), Avklartefaktatyper.UKJENT_SLUTTDATO_MEDLEMSKAPSPERIODE.kode).apply {
+            avklartefaktaType = Avklartefaktatyper.UKJENT_SLUTTDATO_MEDLEMSKAPSPERIODE
         }
 
         every { avklartefaktaService.hentAlleAvklarteFakta(behandlingId) } returns setOf(avklartFaktaDto)
@@ -85,11 +85,11 @@ class AvklartUkjentSluttdatoServiceTest {
         service.hentUkjentSluttdato(behandlingId)?.shouldBeFalse()
 
         verify {
-            avklartefaktaService.slettAvklarteFakta(behandlingId, Avklartefaktatyper.UKJENT_SLUTTDATO)
+            avklartefaktaService.slettAvklarteFakta(behandlingId, Avklartefaktatyper.UKJENT_SLUTTDATO_MEDLEMSKAPSPERIODE)
             avklartefaktaService.leggTilAvklarteFakta(
                 behandlingId,
-                Avklartefaktatyper.UKJENT_SLUTTDATO,
-                Avklartefaktatyper.UKJENT_SLUTTDATO.kode,
+                Avklartefaktatyper.UKJENT_SLUTTDATO_MEDLEMSKAPSPERIODE,
+                Avklartefaktatyper.UKJENT_SLUTTDATO_MEDLEMSKAPSPERIODE.kode,
                 null,
                 "false"
             )

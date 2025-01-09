@@ -42,7 +42,7 @@ data class AvklartefaktaOppsummeringDto internal constructor(
         }?.fakta?.firstOrNull()
 
         private fun hentUkjentSluttdato(avklartefakta: Set<AvklartefaktaDto>): Boolean = avklartefakta.firstOrNull {
-            it.avklartefaktaType == Avklartefaktatyper.UKJENT_SLUTTDATO
+            it.avklartefaktaType == Avklartefaktatyper.UKJENT_SLUTTDATO_MEDLEMSKAPSPERIODE
         }?.fakta?.single().toBoolean()
     }
 }
