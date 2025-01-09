@@ -116,7 +116,7 @@ internal class InnvilgelseFtrlYrkesaktivFrivilligMapperTest {
                 land.shouldContainOnly(Landkoder.AT.beskrivelse)
                 trygdeavtaleLand.shouldBeEmpty()
                 betalerArbeidsgiveravgift.shouldBeTrue()
-                ukjentSluttdato.shouldBeTrue()
+                ukjentSluttdatoMedlemskapsperiode.shouldBeTrue()
             }
     }
 
@@ -210,7 +210,7 @@ internal class InnvilgelseFtrlYrkesaktivFrivilligMapperTest {
                     land.shouldContainOnly(Landkoder.AT.beskrivelse)
                     trygdeavtaleLand.shouldBeEmpty()
                     betalerArbeidsgiveravgift.shouldBeTrue()
-                    ukjentSluttdato.shouldBeTrue()
+                    ukjentSluttdatoMedlemskapsperiode.shouldBeTrue()
                 }
         }
     }
@@ -292,7 +292,7 @@ internal class InnvilgelseFtrlYrkesaktivFrivilligMapperTest {
                 land.shouldContainOnly(Landkoder.AT.beskrivelse)
                 trygdeavtaleLand.shouldBeEmpty()
                 betalerArbeidsgiveravgift.shouldBeTrue()
-                ukjentSluttdato.shouldBeTrue()
+                ukjentSluttdatoMedlemskapsperiode.shouldBeTrue()
             }
     }
 
