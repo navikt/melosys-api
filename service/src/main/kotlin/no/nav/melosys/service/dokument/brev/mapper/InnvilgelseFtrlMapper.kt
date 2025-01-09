@@ -18,7 +18,7 @@ import no.nav.melosys.integrasjon.dokgen.dto.InnvilgelseYrkesaktivPliktigFtrl
 import no.nav.melosys.integrasjon.dokgen.dto.innvilgelseftrl.AvgiftsperiodeDto
 import no.nav.melosys.service.avgift.TrygdeavgiftMottakerService
 import no.nav.melosys.service.avgift.TrygdeavgiftsberegningService
-import no.nav.melosys.service.avklartefakta.AvklartUkjentSluttdatoService
+import no.nav.melosys.service.avklartefakta.AvklartUkjentSluttdatoMedlemskapsperiodeService
 import no.nav.melosys.service.avklartefakta.AvklarteVirksomheterService
 import org.springframework.stereotype.Component
 import java.math.BigDecimal
@@ -29,7 +29,7 @@ import java.time.ZoneId
 @Component
 class InnvilgelseFtrlMapper(
     private val avklarteVirksomheterService: AvklarteVirksomheterService,
-    private val avklarteUkjentSluttdatoService: AvklartUkjentSluttdatoService,
+    private val avklartUkjentSluttdatoMedlemskapsperiodeService: AvklartUkjentSluttdatoMedlemskapsperiodeService,
     private val dokgenMapperDatahenter: DokgenMapperDatahenter,
     private val trygdeavgiftMottakerService: TrygdeavgiftMottakerService,
     private val trygdeavgiftsberegningService: TrygdeavgiftsberegningService,
@@ -42,7 +42,7 @@ class InnvilgelseFtrlMapper(
             mapAvslåttMedlemskapsperiodeFørMottaksdatoHelsedel(behandlingsresultat, brevbestilling.forsendelseMottatt)
         val avslåttMedlemskapsperiodeFørMottaksdatoFullDekning =
             mapAvslåttMedlemskapsperiodeFørMottaksdatoFullDekning(behandlingsresultat, brevbestilling.forsendelseMottatt)
-        val ukjentSluttdato = hentUkjentSluttdatoAvklartFakta(behandlingsresultat.behandling.id)
+        val ukjentSluttdatoMedlemskapsperiode = hentUkjentSluttdatoMedlemskapsperiodeAvklartFakta(behandlingsresultat.behandling.id)
 
         return InnvilgelseFtrlYrkesaktivFrivillig(
             brevbestilling = brevbestilling,
@@ -66,7 +66,7 @@ class InnvilgelseFtrlMapper(
             land = søknadsland.landkoder.map { dokgenMapperDatahenter.hentLandnavnFraLandkode(it) },
             trygdeavtaleLand = mapTrygdeavtaleLand(søknadsland.landkoder),
             betalerArbeidsgiveravgift = erBetalerArbeidsgiveravgift(behandlingsresultat),
-            ukjentSluttdato = ukjentSluttdato
+            ukjentSluttdatoMedlemskapsperiode = ukjentSluttdatoMedlemskapsperiode
         )
     }
 
@@ -77,7 +77,7 @@ class InnvilgelseFtrlMapper(
             mapAvslåttMedlemskapsperiodeFørMottaksdatoHelsedel(behandlingsresultat, brevbestilling.forsendelseMottatt)
         val avslåttMedlemskapsperiodeFørMottaksdatoFullDekning =
             mapAvslåttMedlemskapsperiodeFørMottaksdatoFullDekning(behandlingsresultat, brevbestilling.forsendelseMottatt)
-        val ukjentSluttdato = hentUkjentSluttdatoAvklartFakta(behandlingsresultat.behandling.id)
+        val ukjentSluttdatoMedlemskapsperiode = hentUkjentSluttdatoMedlemskapsperiodeAvklartFakta(behandlingsresultat.behandling.id)
 
         return InnvilgelseFtrlIkkeYrkesaktivFrivillig(
             brevbestilling = brevbestilling,
@@ -91,7 +91,7 @@ class InnvilgelseFtrlMapper(
             avslåttMedlemskapsperiodeFørMottaksdatoHelsedel = avslåttMedlemskapsperiodeFørMottaksdatoHelsedel,
             avslåttMedlemskapsperiodeFørMottaksdatoFullDekning = avslåttMedlemskapsperiodeFørMottaksdatoFullDekning,
             medlemskapsperioder = mapMedlemskapsPerioder(behandlingsresultat),
-            ukjentSluttdato = ukjentSluttdato
+            ukjentSluttdatoMedlemskapsperiode = ukjentSluttdatoMedlemskapsperiode
         )
     }
 
@@ -102,7 +102,7 @@ class InnvilgelseFtrlMapper(
             behandlingsresultat.utledMedlemskapsperiodeFom(),
             behandlingsresultat.utledMedlemskapsperiodeTom()
         )
-        val ukjentSluttdato = hentUkjentSluttdatoAvklartFakta(behandlingsresultat.behandling.id)
+        val ukjentSluttdatoMedlemskapsperiode = hentUkjentSluttdatoMedlemskapsperiodeAvklartFakta(behandlingsresultat.behandling.id)
 
         return InnvilgelseFtrlIkkeYrkesaktivPliktig(
             brevbestilling = brevbestilling,
@@ -115,7 +115,7 @@ class InnvilgelseFtrlMapper(
             ikkeYrkesaktivOppholdType = hentAvklartFakta(behandlingsresultat, Avklartefaktatyper.IKKE_YRKESAKTIV_FTRL_2_1_OPPHOLD),
             ikkeYrkesaktivRelasjonType = hentAvklartFakta(behandlingsresultat, Avklartefaktatyper.IKKE_YRKESAKTIV_RELASJON),
             medlemskapsperiode = medlemskapsperiode,
-            ukjentSluttdato = ukjentSluttdato
+            ukjentSluttdatoMedlemskapsperiode = ukjentSluttdatoMedlemskapsperiode
         )
     }
 
@@ -125,7 +125,7 @@ class InnvilgelseFtrlMapper(
         val søknadsland = behandling.mottatteOpplysninger.mottatteOpplysningerData.soeknadsland
         val medlemskapsperiode = behandlingsresultat.medlemskapsperioder.single()
         val harLavSatsPgaAlder = harLavSatsPgaAlderIMinstEnPeriode(dokgenMapperDatahenter.hentPersondata(behandling).fødselsdato, medlemskapsperiode)
-        val ukjentSluttdato = hentUkjentSluttdatoAvklartFakta(behandlingsresultat.behandling.id)
+        val ukjentSluttdatoMedlemskapsperiode = hentUkjentSluttdatoMedlemskapsperiodeAvklartFakta(behandlingsresultat.behandling.id)
 
         return InnvilgelseYrkesaktivPliktigFtrl(
             brevbestilling = brevbestilling,
@@ -149,12 +149,12 @@ class InnvilgelseFtrlMapper(
             land = søknadsland.landkoder.map { dokgenMapperDatahenter.hentLandnavnFraLandkode(it) },
             trygdeavtaleLand = mapTrygdeavtaleLand(søknadsland.landkoder),
             betalerArbeidsgiveravgift = erBetalerArbeidsgiveravgift(behandlingsresultat),
-            ukjentSluttdato = ukjentSluttdato
+            ukjentSluttdatoMedlemskapsperiode = ukjentSluttdatoMedlemskapsperiode
         )
     }
 
-    private fun hentUkjentSluttdatoAvklartFakta(behandlingID: Long): Boolean {
-        return avklarteUkjentSluttdatoService.hentUkjentSluttdato(behandlingID) ?: false
+    private fun hentUkjentSluttdatoMedlemskapsperiodeAvklartFakta(behandlingID: Long): Boolean {
+        return avklartUkjentSluttdatoMedlemskapsperiodeService.hentUkjentSluttdatoMedlemskapsperiode(behandlingID) ?: false
     }
 
     private fun hentAvklartFakta(behandlingsresultat: Behandlingsresultat, type: Avklartefaktatyper): String? =

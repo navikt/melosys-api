@@ -12,7 +12,7 @@ data class AvklartefaktaOppsummeringDto internal constructor(
     val ikkeYrkesaktivFamilieRelasjonstype: String?,
     val ikkeYrkesaktivOppholdstype: String?,
     val arbeidssituasjonType: String?,
-    val ukjentSluttdato: Boolean?
+    val ukjentSluttdatoMedlemskapsperiode: Boolean?
 ) {
     constructor(avklartefakta: Set<AvklartefaktaDto>) : this(
         virksomheter = VirksomheterDto.av(avklartefakta),
@@ -21,7 +21,7 @@ data class AvklartefaktaOppsummeringDto internal constructor(
         ikkeYrkesaktivFamilieRelasjonstype = hentFamileRelasjonType(avklartefakta),
         ikkeYrkesaktivOppholdstype = hentOppholdType(avklartefakta),
         arbeidssituasjonType = hentArbeidssituasjonType(avklartefakta),
-        ukjentSluttdato = hentUkjentSluttdato(avklartefakta)
+        ukjentSluttdatoMedlemskapsperiode = hentUkjentSluttdatoMedlemskapsperiode(avklartefakta)
     )
 
     companion object {
@@ -41,7 +41,7 @@ data class AvklartefaktaOppsummeringDto internal constructor(
             it.avklartefaktaType == Avklartefaktatyper.IKKE_YRKESAKTIV_FTRL_2_1_OPPHOLD
         }?.fakta?.firstOrNull()
 
-        private fun hentUkjentSluttdato(avklartefakta: Set<AvklartefaktaDto>): Boolean = avklartefakta.firstOrNull {
+        private fun hentUkjentSluttdatoMedlemskapsperiode(avklartefakta: Set<AvklartefaktaDto>): Boolean = avklartefakta.firstOrNull {
             it.avklartefaktaType == Avklartefaktatyper.UKJENT_SLUTTDATO_MEDLEMSKAPSPERIODE
         }?.fakta?.single().toBoolean()
     }

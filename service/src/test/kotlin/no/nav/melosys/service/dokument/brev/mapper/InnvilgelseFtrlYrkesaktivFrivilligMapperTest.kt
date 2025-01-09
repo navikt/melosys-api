@@ -29,7 +29,7 @@ import no.nav.melosys.domain.mottatteopplysninger.data.Soeknadsland
 import no.nav.melosys.integrasjon.dokgen.dto.felles.SaksinfoBruker
 import no.nav.melosys.service.avgift.TrygdeavgiftMottakerService
 import no.nav.melosys.service.avgift.TrygdeavgiftsberegningService
-import no.nav.melosys.service.avklartefakta.AvklartUkjentSluttdatoService
+import no.nav.melosys.service.avklartefakta.AvklartUkjentSluttdatoMedlemskapsperiodeService
 import no.nav.melosys.service.avklartefakta.AvklarteVirksomheterService
 import no.nav.melosys.service.behandling.BehandlingsresultatService
 import no.nav.melosys.service.dokument.DokgenTestData
@@ -49,7 +49,7 @@ internal class InnvilgelseFtrlYrkesaktivFrivilligMapperTest {
     private lateinit var mockAvklarteVirksomheterService: AvklarteVirksomheterService
 
     @MockK
-    private lateinit var mockAvklartUkjentSluttdatoService: AvklartUkjentSluttdatoService
+    private lateinit var mockAvklartUkjentSluttdatoMedlemskapsperiodeService: AvklartUkjentSluttdatoMedlemskapsperiodeService
 
     @MockK
     private lateinit var mockDokgenMapperDatahenter: DokgenMapperDatahenter
@@ -69,7 +69,7 @@ internal class InnvilgelseFtrlYrkesaktivFrivilligMapperTest {
         trygdeavgiftMottakerService = TrygdeavgiftMottakerService(mockBehandlingsresultatService)
         innvilgelseFtrlMapper = InnvilgelseFtrlMapper(
             mockAvklarteVirksomheterService,
-            mockAvklartUkjentSluttdatoService,
+            mockAvklartUkjentSluttdatoMedlemskapsperiodeService,
             mockDokgenMapperDatahenter,
             trygdeavgiftMottakerService,
             trygdeavgiftsberegningService,
@@ -406,7 +406,7 @@ internal class InnvilgelseFtrlYrkesaktivFrivilligMapperTest {
         every { mockDokgenMapperDatahenter.hentLandnavnFraLandkode(Landkoder.AT.kode) } returns Landkoder.AT.beskrivelse
         every { mockDokgenMapperDatahenter.hentFullmektigNavn(any(), any()) } returns null
         every { mockBehandlingsresultatService.hentBehandlingsresultat(ofType()) } returns behandlingsresultat
-        every { mockAvklartUkjentSluttdatoService.hentUkjentSluttdato(any()) } returns true
+        every { mockAvklartUkjentSluttdatoMedlemskapsperiodeService.hentUkjentSluttdatoMedlemskapsperiode(any()) } returns true
     }
 
     companion object {

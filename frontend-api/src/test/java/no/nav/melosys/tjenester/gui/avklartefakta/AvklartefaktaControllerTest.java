@@ -41,7 +41,7 @@ class AvklartefaktaControllerTest {
     @MockBean
     private AvklarteMedfolgendeFamilieService avklarteMedfolgendeFamilieService;
     @MockBean
-    private AvklartUkjentSluttdatoService avklartUkjentSluttdatoService;
+    private AvklartUkjentSluttdatoMedlemskapsperiodeService avklartUkjentSluttdatoMedlemskapsperiodeService;
     @MockBean
     private Aksesskontroll aksesskontroll;
     @MockBean

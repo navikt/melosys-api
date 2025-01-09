@@ -40,7 +40,7 @@ class InnvilgelseFtrlYrkesaktivFrivillig(
     @JsonInclude(JsonInclude.Include.NON_NULL)
     val trygdeavtaleLand: List<String>,
     val betalerArbeidsgiveravgift: Boolean,
-    val ukjentSluttdato: Boolean,
+    val ukjentSluttdatoMedlemskapsperiode: Boolean,
 ) : DokgenDto(brevbestilling, Mottakerroller.BRUKER) {
 
     constructor(
@@ -65,7 +65,7 @@ class InnvilgelseFtrlYrkesaktivFrivillig(
         land: List<String>,
         trygdeavtaleLand: List<String>,
         betalerArbeidsgiveravgift: Boolean,
-        ukjentSluttdato: Boolean
+        ukjentSluttdatoMedlemskapsperiode: Boolean
     ) : this(
         brevbestilling,
         behandlingstype,
@@ -89,6 +89,6 @@ class InnvilgelseFtrlYrkesaktivFrivillig(
         land,
         trygdeavtaleLand,
         betalerArbeidsgiveravgift,
-        ukjentSluttdato
+        ukjentSluttdatoMedlemskapsperiode
     )
 }

@@ -33,7 +33,7 @@ public class AvklartefaktaController {
     private final AvklartFamilieRelasjonTypeService avklartFamilieRelasjonTypeService;
     private final AvklartArbeidssituasjonTypeService avklartArbeidssituasjonTypeService;
     private final AvklartOppholdTypeService avklartOppholdTypeService;
-    private final AvklartUkjentSluttdatoService avklartUkjentSluttdatoService;
+    private final AvklartUkjentSluttdatoMedlemskapsperiodeService avklartUkjentSluttdatoMedlemskapsperiodeService;
 
     private final Aksesskontroll aksesskontroll;
 
@@ -45,7 +45,7 @@ public class AvklartefaktaController {
                                    AvklartManglendeInnbetalingService avklartManglendeInnbetalingService,
                                    AvklartFamilieRelasjonTypeService avklartFamilieRelasjonTypeService,
                                    AvklartOppholdTypeService avklartOppholdTypeService,
-                                   AvklartUkjentSluttdatoService avklartUkjentSluttdatoService) {
+                                   AvklartUkjentSluttdatoMedlemskapsperiodeService avklartUkjentSluttdatoMedlemskapsperiodeService) {
         this.avklartefaktaService = avklartefaktaService;
         this.avklarteVirksomheterService = avklarteVirksomheterService;
         this.avklarteFaktaArbeidslandService = avklarteFaktaArbeidslandService;
@@ -54,7 +54,7 @@ public class AvklartefaktaController {
         this.avklartManglendeInnbetalingService = avklartManglendeInnbetalingService;
         this.avklartFamilieRelasjonTypeService = avklartFamilieRelasjonTypeService;
         this.avklartOppholdTypeService = avklartOppholdTypeService;
-        this.avklartUkjentSluttdatoService = avklartUkjentSluttdatoService;
+        this.avklartUkjentSluttdatoMedlemskapsperiodeService = avklartUkjentSluttdatoMedlemskapsperiodeService;
     }
 
     @GetMapping("{behandlingID}")
@@ -165,11 +165,11 @@ public class AvklartefaktaController {
 
     @PostMapping("{behandlingID}/ukjent-sluttdato-medlemskapsperiode")
     @ApiOperation(value = "Lagre ukjent sluttdato som avklartefakta", response = AvklartefaktaOppsummeringDto.class)
-    public AvklartefaktaOppsummeringDto lagreUkjentSluttdatoSomAvklarteFakta(@PathVariable("behandlingID") long behandlingID,
-                                                                             @RequestBody boolean ukjentSluttdato) {
+    public AvklartefaktaOppsummeringDto lagreUkjentSluttdatoMedlemskapsperiodeSomAvklarteFakta(@PathVariable("behandlingID") long behandlingID,
+                                                                                               @RequestBody boolean ukjentSluttdato) {
         aksesskontroll.autoriserSkrivTilRessurs(behandlingID, Ressurs.AVKLARTE_FAKTA);
 
-        avklartUkjentSluttdatoService.lagreUkjentSluttdatoSomAvklartefakta(behandlingID, ukjentSluttdato);
+        avklartUkjentSluttdatoMedlemskapsperiodeService.lagreUkjentSluttdatoMedlemskapsperiodeSomAvklartefakta(behandlingID, ukjentSluttdato);
 
         return new AvklartefaktaOppsummeringDto(avklartefaktaService.hentAlleAvklarteFakta(behandlingID));
     }

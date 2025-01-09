@@ -1,13 +1,11 @@
 package no.nav.melosys.service.avklartefakta
 
-import no.nav.melosys.domain.kodeverk.Arbeidssituasjontype
 import no.nav.melosys.domain.kodeverk.Avklartefaktatyper
-import no.nav.melosys.domain.kodeverk.Ikkeyrkesaktivrelasjontype
 import org.springframework.stereotype.Service
 
 @Service
-class AvklartUkjentSluttdatoService(private val avklartefaktaService: AvklartefaktaService) {
-    fun lagreUkjentSluttdatoSomAvklartefakta(behandlingID: Long, ukjentSluttdato: Boolean) {
+class AvklartUkjentSluttdatoMedlemskapsperiodeService(private val avklartefaktaService: AvklartefaktaService) {
+    fun lagreUkjentSluttdatoMedlemskapsperiodeSomAvklartefakta(behandlingID: Long, ukjentSluttdato: Boolean) {
         avklartefaktaService.slettAvklarteFakta(behandlingID, Avklartefaktatyper.UKJENT_SLUTTDATO_MEDLEMSKAPSPERIODE)
         avklartefaktaService.leggTilAvklarteFakta(
             behandlingID,
@@ -18,7 +16,7 @@ class AvklartUkjentSluttdatoService(private val avklartefaktaService: Avklartefa
         )
     }
 
-    fun hentUkjentSluttdato(behandlingID: Long): Boolean? {
+    fun hentUkjentSluttdatoMedlemskapsperiode(behandlingID: Long): Boolean? {
         return avklartefaktaService.hentAlleAvklarteFakta(behandlingID)
             .filter { Avklartefaktatyper.UKJENT_SLUTTDATO_MEDLEMSKAPSPERIODE.kode == it.referanse && Avklartefaktatyper.UKJENT_SLUTTDATO_MEDLEMSKAPSPERIODE == it.avklartefaktaType }
             .map { it.fakta.single().toBoolean() }

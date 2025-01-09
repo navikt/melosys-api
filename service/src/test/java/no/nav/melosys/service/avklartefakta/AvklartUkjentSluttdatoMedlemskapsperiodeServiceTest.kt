@@ -14,28 +14,28 @@ import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.extension.ExtendWith
 
 @ExtendWith(MockKExtension::class)
-class AvklartUkjentSluttdatoServiceTest {
+class AvklartUkjentSluttdatoMedlemskapsperiodeServiceTest {
 
     @MockK(relaxed = true)
     private lateinit var avklartefaktaService: AvklartefaktaService
 
-    private lateinit var service: AvklartUkjentSluttdatoService
+    private lateinit var service: AvklartUkjentSluttdatoMedlemskapsperiodeService
 
     @BeforeEach
     fun setUp() {
-        service = AvklartUkjentSluttdatoService(avklartefaktaService)
+        service = AvklartUkjentSluttdatoMedlemskapsperiodeService(avklartefaktaService)
     }
 
     @Test
-    fun `hentUkjentSluttdato returnerer null når avklart fakta ikke finnes`() {
+    fun `hentUkjentSluttdatoMedlemskapsperiode returnerer null når avklart fakta ikke finnes`() {
         val behandlingId = 1L
         every { avklartefaktaService.hentAlleAvklarteFakta(behandlingId) } returns emptySet()
 
-        service.hentUkjentSluttdato(behandlingId).shouldBeNull()
+        service.hentUkjentSluttdatoMedlemskapsperiode(behandlingId).shouldBeNull()
     }
 
     @Test
-    fun `hentUkjentSluttdato kaster IllegalArgumentException ved flere fakta verdier`() {
+    fun `hentUkjentSluttdatoMedlemskapsperiode kaster IllegalArgumentException ved flere fakta verdier`() {
         val behandlingId = 1L
         val avklartFaktaDto = AvklartefaktaDto(listOf("true", "false"), Avklartefaktatyper.UKJENT_SLUTTDATO_MEDLEMSKAPSPERIODE.kode).apply {
             avklartefaktaType = Avklartefaktatyper.UKJENT_SLUTTDATO_MEDLEMSKAPSPERIODE
@@ -44,7 +44,7 @@ class AvklartUkjentSluttdatoServiceTest {
         every { avklartefaktaService.hentAlleAvklarteFakta(behandlingId) } returns setOf(avklartFaktaDto)
 
         shouldThrow<IllegalArgumentException> {
-            service.hentUkjentSluttdato(behandlingId)
+            service.hentUkjentSluttdatoMedlemskapsperiode(behandlingId)
         }
     }
 
@@ -57,8 +57,8 @@ class AvklartUkjentSluttdatoServiceTest {
 
         every { avklartefaktaService.hentAlleAvklarteFakta(behandlingId) } returns setOf(avklartFaktaDto)
 
-        service.lagreUkjentSluttdatoSomAvklartefakta(behandlingId, true)
-        service.hentUkjentSluttdato(behandlingId)?.shouldBeTrue()
+        service.lagreUkjentSluttdatoMedlemskapsperiodeSomAvklartefakta(behandlingId, true)
+        service.hentUkjentSluttdatoMedlemskapsperiode(behandlingId)?.shouldBeTrue()
 
         verify {
             avklartefaktaService.slettAvklarteFakta(behandlingId, Avklartefaktatyper.UKJENT_SLUTTDATO_MEDLEMSKAPSPERIODE)
@@ -81,8 +81,8 @@ class AvklartUkjentSluttdatoServiceTest {
 
         every { avklartefaktaService.hentAlleAvklarteFakta(behandlingId) } returns setOf(avklartFaktaDto)
 
-        service.lagreUkjentSluttdatoSomAvklartefakta(behandlingId, false)
-        service.hentUkjentSluttdato(behandlingId)?.shouldBeFalse()
+        service.lagreUkjentSluttdatoMedlemskapsperiodeSomAvklartefakta(behandlingId, false)
+        service.hentUkjentSluttdatoMedlemskapsperiode(behandlingId)?.shouldBeFalse()
 
         verify {
             avklartefaktaService.slettAvklarteFakta(behandlingId, Avklartefaktatyper.UKJENT_SLUTTDATO_MEDLEMSKAPSPERIODE)
