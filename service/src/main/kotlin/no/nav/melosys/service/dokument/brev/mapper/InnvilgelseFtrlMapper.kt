@@ -42,7 +42,7 @@ class InnvilgelseFtrlMapper(
             mapAvslåttMedlemskapsperiodeFørMottaksdatoHelsedel(behandlingsresultat, brevbestilling.forsendelseMottatt)
         val avslåttMedlemskapsperiodeFørMottaksdatoFullDekning =
             mapAvslåttMedlemskapsperiodeFørMottaksdatoFullDekning(behandlingsresultat, brevbestilling.forsendelseMottatt)
-        val ukjentSluttdato = avklarteUkjentSluttdatoService.hentUkjentSluttdato(behandlingsresultat.behandling.id)
+        val ukjentSluttdato = avklarteUkjentSluttdatoService.hentUkjentSluttdato(behandlingsresultat.behandling.id) ?: false
 
         return InnvilgelseFtrlYrkesaktivFrivillig(
             brevbestilling = brevbestilling,
@@ -77,7 +77,7 @@ class InnvilgelseFtrlMapper(
             mapAvslåttMedlemskapsperiodeFørMottaksdatoHelsedel(behandlingsresultat, brevbestilling.forsendelseMottatt)
         val avslåttMedlemskapsperiodeFørMottaksdatoFullDekning =
             mapAvslåttMedlemskapsperiodeFørMottaksdatoFullDekning(behandlingsresultat, brevbestilling.forsendelseMottatt)
-        val ukjentSluttdato = avklarteUkjentSluttdatoService.hentUkjentSluttdato(behandlingsresultat.behandling.id)
+        val ukjentSluttdato = avklarteUkjentSluttdatoService.hentUkjentSluttdato(behandlingsresultat.behandling.id) ?: false
 
         return InnvilgelseFtrlIkkeYrkesaktivFrivillig(
             brevbestilling = brevbestilling,
@@ -102,7 +102,7 @@ class InnvilgelseFtrlMapper(
             behandlingsresultat.utledMedlemskapsperiodeFom(),
             behandlingsresultat.utledMedlemskapsperiodeTom()
         )
-        val ukjentSluttdato = avklarteUkjentSluttdatoService.hentUkjentSluttdato(behandlingsresultat.behandling.id)
+        val ukjentSluttdato = avklarteUkjentSluttdatoService.hentUkjentSluttdato(behandlingsresultat.behandling.id) ?: false
 
         return InnvilgelseFtrlIkkeYrkesaktivPliktig(
             brevbestilling = brevbestilling,
@@ -125,7 +125,7 @@ class InnvilgelseFtrlMapper(
         val søknadsland = behandling.mottatteOpplysninger.mottatteOpplysningerData.soeknadsland
         val medlemskapsperiode = behandlingsresultat.medlemskapsperioder.single()
         val harLavSatsPgaAlder = harLavSatsPgaAlderIMinstEnPeriode(dokgenMapperDatahenter.hentPersondata(behandling).fødselsdato, medlemskapsperiode)
-        val ukjentSluttdato = avklarteUkjentSluttdatoService.hentUkjentSluttdato(behandlingsresultat.behandling.id)
+        val ukjentSluttdato = avklarteUkjentSluttdatoService.hentUkjentSluttdato(behandlingsresultat.behandling.id) ?: false
 
         return InnvilgelseYrkesaktivPliktigFtrl(
             brevbestilling = brevbestilling,

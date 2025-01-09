@@ -18,10 +18,10 @@ class AvklartUkjentSluttdatoService(private val avklartefaktaService: Avklartefa
         )
     }
 
-    fun hentUkjentSluttdato(behandlingID: Long): Boolean {
+    fun hentUkjentSluttdato(behandlingID: Long): Boolean? {
         return avklartefaktaService.hentAlleAvklarteFakta(behandlingID)
             .filter { Avklartefaktatyper.UKJENT_SLUTTDATO_MEDLEMSKAPSPERIODE.kode == it.referanse && Avklartefaktatyper.UKJENT_SLUTTDATO_MEDLEMSKAPSPERIODE == it.avklartefaktaType }
             .map { it.fakta.single().toBoolean() }
-            .firstOrNull() ?: false
+            .firstOrNull()
     }
 }
