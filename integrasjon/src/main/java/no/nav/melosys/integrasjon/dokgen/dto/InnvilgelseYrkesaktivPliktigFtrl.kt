@@ -40,6 +40,7 @@ class InnvilgelseYrkesaktivPliktigFtrl(
     val betalerArbeidsgiveravgift: Boolean,
     val harLavSatsPgaAlder: Boolean,
     val arbeidssituasjontype: String?,
+    val ukjentSluttdatoMedlemskapsperiode: Boolean,
 ) : DokgenDto(brevbestilling, Mottakerroller.BRUKER) {
 
     constructor(
@@ -64,6 +65,7 @@ class InnvilgelseYrkesaktivPliktigFtrl(
         betalerArbeidsgiveravgift: Boolean,
         harLavSatsPgaAlder: Boolean,
         arbeidssituasjontype: String?,
+        ukjentSluttdatoMedlemskapsperiode: Boolean
     ) : this(
         brevbestilling,
         behandlingstype,
@@ -87,5 +89,6 @@ class InnvilgelseYrkesaktivPliktigFtrl(
         betalerArbeidsgiveravgift,
         harLavSatsPgaAlder,
         arbeidssituasjontype,
+        ukjentSluttdatoMedlemskapsperiode
     )
 }

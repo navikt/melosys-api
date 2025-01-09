@@ -18,6 +18,7 @@ import no.nav.melosys.integrasjon.dokgen.dto.InnvilgelseYrkesaktivPliktigFtrl
 import no.nav.melosys.integrasjon.dokgen.dto.innvilgelseftrl.AvgiftsperiodeDto
 import no.nav.melosys.service.avgift.TrygdeavgiftMottakerService
 import no.nav.melosys.service.avgift.TrygdeavgiftsberegningService
+import no.nav.melosys.service.avklartefakta.AvklartUkjentSluttdatoMedlemskapsperiodeService
 import no.nav.melosys.service.avklartefakta.AvklarteVirksomheterService
 import org.springframework.stereotype.Component
 import java.math.BigDecimal
@@ -28,6 +29,7 @@ import java.time.ZoneId
 @Component
 class InnvilgelseFtrlMapper(
     private val avklarteVirksomheterService: AvklarteVirksomheterService,
+    private val avklartUkjentSluttdatoMedlemskapsperiodeService: AvklartUkjentSluttdatoMedlemskapsperiodeService,
     private val dokgenMapperDatahenter: DokgenMapperDatahenter,
     private val trygdeavgiftMottakerService: TrygdeavgiftMottakerService,
     private val trygdeavgiftsberegningService: TrygdeavgiftsberegningService,
@@ -40,6 +42,7 @@ class InnvilgelseFtrlMapper(
             mapAvslåttMedlemskapsperiodeFørMottaksdatoHelsedel(behandlingsresultat, brevbestilling.forsendelseMottatt)
         val avslåttMedlemskapsperiodeFørMottaksdatoFullDekning =
             mapAvslåttMedlemskapsperiodeFørMottaksdatoFullDekning(behandlingsresultat, brevbestilling.forsendelseMottatt)
+        val ukjentSluttdatoMedlemskapsperiode = hentUkjentSluttdatoMedlemskapsperiodeAvklartFakta(behandlingsresultat.behandling.id)
 
         return InnvilgelseFtrlYrkesaktivFrivillig(
             brevbestilling = brevbestilling,
@@ -62,7 +65,8 @@ class InnvilgelseFtrlMapper(
             flereLandUkjentHvilke = søknadsland.isFlereLandUkjentHvilke,
             land = søknadsland.landkoder.map { dokgenMapperDatahenter.hentLandnavnFraLandkode(it) },
             trygdeavtaleLand = mapTrygdeavtaleLand(søknadsland.landkoder),
-            betalerArbeidsgiveravgift = erBetalerArbeidsgiveravgift(behandlingsresultat)
+            betalerArbeidsgiveravgift = erBetalerArbeidsgiveravgift(behandlingsresultat),
+            ukjentSluttdatoMedlemskapsperiode = ukjentSluttdatoMedlemskapsperiode
         )
     }
 
@@ -73,6 +77,7 @@ class InnvilgelseFtrlMapper(
             mapAvslåttMedlemskapsperiodeFørMottaksdatoHelsedel(behandlingsresultat, brevbestilling.forsendelseMottatt)
         val avslåttMedlemskapsperiodeFørMottaksdatoFullDekning =
             mapAvslåttMedlemskapsperiodeFørMottaksdatoFullDekning(behandlingsresultat, brevbestilling.forsendelseMottatt)
+        val ukjentSluttdatoMedlemskapsperiode = hentUkjentSluttdatoMedlemskapsperiodeAvklartFakta(behandlingsresultat.behandling.id)
 
         return InnvilgelseFtrlIkkeYrkesaktivFrivillig(
             brevbestilling = brevbestilling,
@@ -85,7 +90,8 @@ class InnvilgelseFtrlMapper(
             ikkeYrkesaktivRelasjonType = hentAvklartFakta(behandlingsresultat, Avklartefaktatyper.IKKE_YRKESAKTIV_RELASJON),
             avslåttMedlemskapsperiodeFørMottaksdatoHelsedel = avslåttMedlemskapsperiodeFørMottaksdatoHelsedel,
             avslåttMedlemskapsperiodeFørMottaksdatoFullDekning = avslåttMedlemskapsperiodeFørMottaksdatoFullDekning,
-            medlemskapsperioder = mapMedlemskapsPerioder(behandlingsresultat)
+            medlemskapsperioder = mapMedlemskapsPerioder(behandlingsresultat),
+            ukjentSluttdatoMedlemskapsperiode = ukjentSluttdatoMedlemskapsperiode
         )
     }
 
@@ -96,6 +102,7 @@ class InnvilgelseFtrlMapper(
             behandlingsresultat.utledMedlemskapsperiodeFom(),
             behandlingsresultat.utledMedlemskapsperiodeTom()
         )
+        val ukjentSluttdatoMedlemskapsperiode = hentUkjentSluttdatoMedlemskapsperiodeAvklartFakta(behandlingsresultat.behandling.id)
 
         return InnvilgelseFtrlIkkeYrkesaktivPliktig(
             brevbestilling = brevbestilling,
@@ -107,7 +114,8 @@ class InnvilgelseFtrlMapper(
             begrunnelseFritekst = behandlingsresultat.begrunnelseFritekst,
             ikkeYrkesaktivOppholdType = hentAvklartFakta(behandlingsresultat, Avklartefaktatyper.IKKE_YRKESAKTIV_FTRL_2_1_OPPHOLD),
             ikkeYrkesaktivRelasjonType = hentAvklartFakta(behandlingsresultat, Avklartefaktatyper.IKKE_YRKESAKTIV_RELASJON),
-            medlemskapsperiode = medlemskapsperiode
+            medlemskapsperiode = medlemskapsperiode,
+            ukjentSluttdatoMedlemskapsperiode = ukjentSluttdatoMedlemskapsperiode
         )
     }
 
@@ -117,6 +125,7 @@ class InnvilgelseFtrlMapper(
         val søknadsland = behandling.mottatteOpplysninger.mottatteOpplysningerData.soeknadsland
         val medlemskapsperiode = behandlingsresultat.medlemskapsperioder.single()
         val harLavSatsPgaAlder = harLavSatsPgaAlderIMinstEnPeriode(dokgenMapperDatahenter.hentPersondata(behandling).fødselsdato, medlemskapsperiode)
+        val ukjentSluttdatoMedlemskapsperiode = hentUkjentSluttdatoMedlemskapsperiodeAvklartFakta(behandlingsresultat.behandling.id)
 
         return InnvilgelseYrkesaktivPliktigFtrl(
             brevbestilling = brevbestilling,
@@ -140,7 +149,12 @@ class InnvilgelseFtrlMapper(
             land = søknadsland.landkoder.map { dokgenMapperDatahenter.hentLandnavnFraLandkode(it) },
             trygdeavtaleLand = mapTrygdeavtaleLand(søknadsland.landkoder),
             betalerArbeidsgiveravgift = erBetalerArbeidsgiveravgift(behandlingsresultat),
+            ukjentSluttdatoMedlemskapsperiode = ukjentSluttdatoMedlemskapsperiode
         )
+    }
+
+    private fun hentUkjentSluttdatoMedlemskapsperiodeAvklartFakta(behandlingID: Long): Boolean {
+        return avklartUkjentSluttdatoMedlemskapsperiodeService.hentUkjentSluttdatoMedlemskapsperiode(behandlingID) ?: false
     }
 
     private fun hentAvklartFakta(behandlingsresultat: Behandlingsresultat, type: Avklartefaktatyper): String? =

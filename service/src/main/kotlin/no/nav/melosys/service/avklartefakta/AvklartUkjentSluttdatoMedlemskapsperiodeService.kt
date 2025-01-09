@@ -1,0 +1,25 @@
+package no.nav.melosys.service.avklartefakta
+
+import no.nav.melosys.domain.kodeverk.Avklartefaktatyper
+import org.springframework.stereotype.Service
+
+@Service
+class AvklartUkjentSluttdatoMedlemskapsperiodeService(private val avklartefaktaService: AvklartefaktaService) {
+    fun lagreUkjentSluttdatoMedlemskapsperiodeSomAvklartefakta(behandlingID: Long, ukjentSluttdato: Boolean) {
+        avklartefaktaService.slettAvklarteFakta(behandlingID, Avklartefaktatyper.UKJENT_SLUTTDATO_MEDLEMSKAPSPERIODE)
+        avklartefaktaService.leggTilAvklarteFakta(
+            behandlingID,
+            Avklartefaktatyper.UKJENT_SLUTTDATO_MEDLEMSKAPSPERIODE,
+            Avklartefaktatyper.UKJENT_SLUTTDATO_MEDLEMSKAPSPERIODE.kode,
+            null,
+            ukjentSluttdato.toString()
+        )
+    }
+
+    fun hentUkjentSluttdatoMedlemskapsperiode(behandlingID: Long): Boolean? {
+        return avklartefaktaService.hentAlleAvklarteFakta(behandlingID)
+            .filter { Avklartefaktatyper.UKJENT_SLUTTDATO_MEDLEMSKAPSPERIODE.kode == it.referanse && Avklartefaktatyper.UKJENT_SLUTTDATO_MEDLEMSKAPSPERIODE == it.avklartefaktaType }
+            .map { it.fakta.single().toBoolean() }
+            .firstOrNull()
+    }
+}

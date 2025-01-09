@@ -370,6 +370,7 @@ internal class DokgenMalMapperTest {
             .medKontaktopplysning(DokgenTestData.lagKontaktOpplysning())
             .medForsendelseMottatt(Instant.now())
             .medInnledningFritekst("Dummy")
+            .medUkjentSluttdatoMedlemskapsperiode(true)
             .build()
 
         dokgenMalMapper.mapBehandling(
@@ -655,7 +656,8 @@ internal class DokgenMalMapperTest {
             flereLandUkjentHvilke = false,
             land = listOf(Land_iso2.US.kode),
             trygdeavtaleLand = emptyList(),
-            betalerArbeidsgiveravgift = true
+            betalerArbeidsgiveravgift = true,
+            ukjentSluttdatoMedlemskapsperiode = true,
         )
     }
 
@@ -688,6 +690,7 @@ internal class DokgenMalMapperTest {
             betalerArbeidsgiveravgift = true,
             harLavSatsPgaAlder = false,
             arbeidssituasjontype = null,
+            ukjentSluttdatoMedlemskapsperiode = true,
         )
     }
 

@@ -5,6 +5,7 @@ public class InnvilgelseFtrlYrkesaktivFrivilligBrevbestilling extends DokgenBrev
     private String innledningFritekst;
     private String begrunnelseFritekst;
     private String trygdeavgiftFritekst;
+    private Boolean ukjentSluttdatoMedlemskapsperiode;
 
     public InnvilgelseFtrlYrkesaktivFrivilligBrevbestilling() {
         super();
@@ -17,6 +18,7 @@ public class InnvilgelseFtrlYrkesaktivFrivilligBrevbestilling extends DokgenBrev
         this.innledningFritekst = builder.innledningFritekst;
         this.begrunnelseFritekst = builder.begrunnelseFritekst;
         this.trygdeavgiftFritekst = builder.trygdeavgiftFritekst;
+        this.ukjentSluttdatoMedlemskapsperiode = builder.ukjentSluttdatoMedlemskapsperiode;
     }
 
     public String getInnledningFritekst() {
@@ -39,11 +41,16 @@ public class InnvilgelseFtrlYrkesaktivFrivilligBrevbestilling extends DokgenBrev
         return nyVurderingBakgrunn;
     }
 
+    public Boolean getUkjentSluttdatoMedlemskapsperiode() {
+        return ukjentSluttdatoMedlemskapsperiode;
+    }
+
     public static final class Builder extends DokgenBrevbestilling.Builder<Builder> {
         private String nyVurderingBakgrunn;
         private String innledningFritekst;
         private String begrunnelseFritekst;
         private String trygdeavgiftFritekst;
+        private Boolean ukjentSluttdatoMedlemskapsperiode;
 
         public Builder() {
         }
@@ -54,6 +61,7 @@ public class InnvilgelseFtrlYrkesaktivFrivilligBrevbestilling extends DokgenBrev
             this.innledningFritekst = brevbestilling.innledningFritekst;
             this.begrunnelseFritekst = brevbestilling.begrunnelseFritekst;
             this.trygdeavgiftFritekst = brevbestilling.trygdeavgiftFritekst;
+            this.ukjentSluttdatoMedlemskapsperiode = brevbestilling.ukjentSluttdatoMedlemskapsperiode;
         }
 
         public Builder medInnledningFritekst(String innledningFritekst) {
@@ -73,6 +81,11 @@ public class InnvilgelseFtrlYrkesaktivFrivilligBrevbestilling extends DokgenBrev
 
         public Builder medNyVurderingBakgrunn(String nyVurderingBakgrunn) {
             this.nyVurderingBakgrunn = nyVurderingBakgrunn;
+            return this;
+        }
+
+        public Builder medUkjentSluttdatoMedlemskapsperiode(Boolean ukjentSluttdatoMedlemskapsperiode) {
+            this.ukjentSluttdatoMedlemskapsperiode = ukjentSluttdatoMedlemskapsperiode;
             return this;
         }
 

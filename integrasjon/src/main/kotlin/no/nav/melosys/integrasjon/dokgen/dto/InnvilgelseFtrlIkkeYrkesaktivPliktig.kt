@@ -25,7 +25,8 @@ class InnvilgelseFtrlIkkeYrkesaktivPliktig(
     val begrunnelseFritekst: String?,
     val ikkeYrkesaktivOppholdType: String?,
     val ikkeYrkesaktivRelasjonType: String?,
-    val medlemskapsperiode: Periode
+    val medlemskapsperiode: Periode,
+    ukjentSluttdatoMedlemskapsperiode: Boolean,
 ) : DokgenDto(brevbestilling, Mottakerroller.BRUKER) {
 
     constructor(
@@ -38,7 +39,8 @@ class InnvilgelseFtrlIkkeYrkesaktivPliktig(
         begrunnelseFritekst: String?,
         ikkeYrkesaktivOppholdType: String?,
         ikkeYrkesaktivRelasjonType: String?,
-        medlemskapsperiode: Periode
+        medlemskapsperiode: Periode,
+        ukjentSluttdatoMedlemskapsperiode: Boolean,
     ) : this(
         brevbestilling = brevbestilling,
         behandlingstype = brevbestilling.behandling.type,
@@ -52,6 +54,7 @@ class InnvilgelseFtrlIkkeYrkesaktivPliktig(
         begrunnelseFritekst = begrunnelseFritekst,
         ikkeYrkesaktivOppholdType = ikkeYrkesaktivOppholdType,
         ikkeYrkesaktivRelasjonType = ikkeYrkesaktivRelasjonType,
-        medlemskapsperiode = medlemskapsperiode
+        medlemskapsperiode = medlemskapsperiode,
+        ukjentSluttdatoMedlemskapsperiode = ukjentSluttdatoMedlemskapsperiode
     )
 }

@@ -52,7 +52,7 @@ class DokgenBrevbestillingTest {
 
         for (var a : type.getDeclaredFields()) {
             node.put(a.getName(), a.getType().getSimpleName());
-            if (a.getType().getSimpleName().equals("boolean")) {
+            if (a.getType().getSimpleName().equals("boolean") || a.getType().getSimpleName().equals("Boolean")) {
                 node.put(a.getName(), false);
             } else if (a.getType().getSimpleName().equals("LocalDate")) {
                 node.put(a.getName(), "2022-02-02");

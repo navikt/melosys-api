@@ -41,6 +41,8 @@ class AvklartefaktaControllerTest {
     @MockBean
     private AvklarteMedfolgendeFamilieService avklarteMedfolgendeFamilieService;
     @MockBean
+    private AvklartUkjentSluttdatoMedlemskapsperiodeService avklartUkjentSluttdatoMedlemskapsperiodeService;
+    @MockBean
     private Aksesskontroll aksesskontroll;
     @MockBean
     private AvklartManglendeInnbetalingService avklartManglendeInnbetalingService;
@@ -136,6 +138,7 @@ class AvklartefaktaControllerTest {
         avklartefakta.setType(type);
         avklartefakta.setReferanse(type.getKode());
         avklartefakta.setBegrunnelseFritekst(begrunnelseFritekst);
+
         if (fakta) {
             avklartefakta.setFakta(Avklartefakta.VALGT_FAKTA);
         } else {
