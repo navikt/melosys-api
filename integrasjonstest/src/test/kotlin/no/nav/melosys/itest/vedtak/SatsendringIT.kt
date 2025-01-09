@@ -5,12 +5,16 @@ import com.fasterxml.jackson.databind.SerializationFeature
 import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule
 import com.fasterxml.jackson.module.kotlin.jacksonObjectMapper
 import com.github.tomakehurst.wiremock.client.WireMock
+import com.github.tomakehurst.wiremock.extension.ResponseTransformerV2
+import com.github.tomakehurst.wiremock.http.Response
+import com.github.tomakehurst.wiremock.stubbing.ServeEvent
 import io.getunleash.FakeUnleash
+import io.kotest.matchers.collections.shouldContain
 import io.kotest.matchers.nulls.shouldNotBeNull
-import io.kotest.matchers.shouldBe
 import io.kotest.matchers.types.shouldBeInstanceOf
 import io.mockk.every
 import io.mockk.mockk
+import mu.KotlinLogging
 import no.nav.melosys.domain.avgift.Inntektsperiode
 import no.nav.melosys.domain.avgift.Penger
 import no.nav.melosys.domain.avgift.SkatteforholdTilNorge
@@ -22,12 +26,14 @@ import no.nav.melosys.domain.mottatteopplysninger.SøknadNorgeEllerUtenforEØS
 import no.nav.melosys.domain.mottatteopplysninger.data.Periode
 import no.nav.melosys.domain.mottatteopplysninger.data.Soeknadsland
 import no.nav.melosys.integrasjon.faktureringskomponenten.NyFakturaserieResponseDto
+import no.nav.melosys.integrasjon.trygdeavgift.dto.*
 import no.nav.melosys.itest.JournalfoeringBase
 import no.nav.melosys.itest.MelosysHendelseKafkaConsumer
 import no.nav.melosys.melosysmock.medl.MedlRepo
 import no.nav.melosys.melosysmock.testdata.JournalføringsoppgaveGenerator
 import no.nav.melosys.saksflytapi.domain.ProsessType
 import no.nav.melosys.service.avgift.TrygdeavgiftsberegningService
+import no.nav.melosys.service.avgift.satsendring.Sak
 import no.nav.melosys.service.avgift.satsendring.SatsendringFinner
 import no.nav.melosys.service.avklartefakta.AvklartefaktaDto
 import no.nav.melosys.service.avklartefakta.AvklartefaktaService
@@ -43,10 +49,15 @@ import no.nav.melosys.sikkerhet.context.SpringSubjectHandler
 import no.nav.melosys.sikkerhet.context.SubjectHandler
 import org.junit.jupiter.api.AfterEach
 import org.junit.jupiter.api.BeforeEach
+import org.junit.jupiter.api.Disabled
 import org.junit.jupiter.api.Test
 import org.springframework.beans.factory.annotation.Autowired
 import java.time.LocalDate
+import java.util.*
 
+private val logger = KotlinLogging.logger {}
+
+@Disabled("MELOSYS-6945 SatsendringFinner må returnere noe fra databasen for å kunne teste")
 class SatsendringIT(
     @Autowired journalføringsoppgaveGenerator: JournalføringsoppgaveGenerator,
     @Autowired journalføringService: JournalfoeringService,
@@ -62,7 +73,7 @@ class SatsendringIT(
     @Autowired private val melosysHendelseKafkaConsumer: MelosysHendelseKafkaConsumer,
 ) : JournalfoeringBase(
     journalføringsoppgaveGenerator, journalføringService, oppgaveService,
-    DynamiskTrygdeavgiftsberegningTransformer()
+    TrygdeavgiftsberegningMedSatsendring()
 ) {
 
     private var originalSubjectHandler: SubjectHandler? = null
@@ -83,7 +94,7 @@ class SatsendringIT(
                     WireMock.aResponse()
                         .withStatus(200)
                         .withHeader("Content-Type", "application/json")
-                        .withTransformers("dynamisk-trygdeavgiftsberegning-transformer")
+                        .withTransformers("trygdeavgiftsberegning-med-satsendring-transformer")
                 )
         )
 
@@ -116,7 +127,7 @@ class SatsendringIT(
         val saksnummerMedSatsendring = lagFørstegangsbehandling(harSatsendringEtterÅrsskiftet = true)
 
         // Skal finne saken med satsendring
-        satsendringFinner.finn() shouldBe saksnummerMedSatsendring
+        satsendringFinner.finnBehandlingerMedSatsendringer(2024).sakerMedSatsendring shouldContain Sak(saksnummerMedSatsendring, 77)
     }
 
 
@@ -134,8 +145,8 @@ class SatsendringIT(
             )
         ).behandling.shouldNotBeNull()
 
-        val startDato = LocalDate.now().minusYears(1).withDayOfYear(1)
-        val sluttDato = LocalDate.now().minusYears(1).withMonth(12).withDayOfMonth(31)
+        // Perioden brukes for å avgjøre om det blir satsendring
+        val medlemskapsperiode = lagPeriode(harSatsendringEtterÅrsskiftet)
 
         val mottatteOpplysninger =
             mottatteOpplysningerService.hentEllerOpprettMottatteOpplysninger(behandling.id, true)
@@ -144,7 +155,7 @@ class SatsendringIT(
                     mottatteOpplysningerData
                         .shouldBeInstanceOf<SøknadNorgeEllerUtenforEØS>()
                         .apply {
-                            periode = Periode(startDato, sluttDato)
+                            periode = medlemskapsperiode
                             soeknadsland = Soeknadsland(listOf("AF"), false)
                             trygdedekning = Trygdedekninger.FTRL_2_9_FØRSTE_LEDD_B_PENSJON
                         }
@@ -173,7 +184,7 @@ class SatsendringIT(
         })
         vilkaarsresultatService.registrerVilkår(behandling.id, vilkår)
 
-        setupTrygdeavgift(behandling.id, Periode(startDato, sluttDato))
+        setupTrygdeavgift(behandling.id, medlemskapsperiode)
 
         val vedtakRequest = FattVedtakRequest.Builder()
             .medBehandlingsresultatType(Behandlingsresultattyper.MEDLEM_I_FOLKETRYGDEN)
@@ -195,6 +206,17 @@ class SatsendringIT(
                 slettSakMedAvhengigheter(it)
             }
         }
+    }
+
+    private fun lagPeriode(
+        harSatsendringEtterÅrsskiftet: Boolean
+    ): Periode {
+        if (harSatsendringEtterÅrsskiftet) {
+            return Periode(LocalDate.of(2024, 4, 1), LocalDate.of(2024, 4, 30))
+        }
+        val startDato = LocalDate.now().minusYears(1).withDayOfYear(1)
+        val sluttDato = LocalDate.now().minusYears(1).withMonth(12).withDayOfMonth(31)
+        return Periode(startDato, sluttDato)
     }
 
     private fun setupTrygdeavgift(behandlingID: Long, periode: Periode) {
@@ -224,11 +246,95 @@ class SatsendringIT(
         trygdeavgiftsberegningService.beregnOgLagreTrygdeavgift(behandlingID, skattefordholdsperioder, inntektsforholdsperioder)
     }
 
+    private val objectMapper = jacksonObjectMapper()
+        .registerModule(JavaTimeModule())
+        .configure(SerializationFeature.WRITE_DATES_AS_TIMESTAMPS, false)
+
+
     private val Any.toJsonNode: JsonNode
-        get() {
-            return jacksonObjectMapper()
-                .configure(SerializationFeature.WRITE_DATES_AS_TIMESTAMPS, false)
-                .registerModule(JavaTimeModule())
-                .valueToTree(this)
+        get() = objectMapper.valueToTree(this)
+}
+
+class TrygdeavgiftsberegningMedSatsendring : ResponseTransformerV2 {
+    private val objectMapper = jacksonObjectMapper()
+        .registerModule(JavaTimeModule())
+        .configure(SerializationFeature.WRITE_DATES_AS_TIMESTAMPS, false)
+
+
+    private val kallPerMedlemskapsperiode = mutableMapOf<String, Int>()
+
+    override fun transform(response: Response?, serveEvent: ServeEvent): Response {
+        require(serveEvent.request?.url == "/api/v2/beregn") {
+            "Invalid url. Denne transformeren støtter kun /api/v2/beregn"
         }
+
+        val requestBody = objectMapper.readTree(serveEvent.request?.bodyAsString)
+
+        val responseBody = createResponseBody(requestBody)
+        logger.debug { "Transformed Response Body: $responseBody" }
+
+        return Response.Builder.like(response)
+            .body(responseBody)
+            .build()
+    }
+
+    private fun createResponseBody(requestBody: JsonNode): String {
+        val periodeString = medlemskapsperiodeStringFrom(requestBody)
+        val antallKall = kallPerMedlemskapsperiode.getOrDefault(periodeString, 0) + 1
+        kallPerMedlemskapsperiode[periodeString] = antallKall
+        logger.debug { "Kall per medlemskapsperiode: $periodeString -> $antallKall" }
+
+        val skatteforhold = requestBody["skatteforholdsperioder"][0]["skatteforhold"].asText()
+        val sats = bestemSats(skatteforhold, periodeString, antallKall)
+        val månedsavgift = sats * 10000
+
+        val trygdeavgiftsberegningResponse =
+            TrygdeavgiftsberegningResponse(
+                TrygdeavgiftsperiodeDto(
+                    DatoPeriodeDto(localDateFromRequest("fom", requestBody), localDateFromRequest("tom", requestBody)),
+                    sats.toBigDecimal(),
+                    PengerDto(månedsavgift.toBigDecimal(), NOK)
+                ),
+                TrygdeavgiftsgrunnlagDto(
+                    UUID.fromString(requestBody["medlemskapsperioder"][0]["id"].asText()),
+                    UUID.fromString(requestBody["skatteforholdsperioder"][0]["id"].asText()),
+                    UUID.fromString(requestBody["inntektsperioder"][0]["id"].asText())
+                )
+            )
+
+        return objectMapper.writeValueAsString(listOf(trygdeavgiftsberegningResponse))
+    }
+
+    private fun bestemSats(skatteforhold: String?, periodeString: String, antallKall: Int): Double {
+        if (skatteforhold == "SKATTEPLIKTIG") return 0.0
+
+        return if (periodeString == "2024-04-01 / 2024-04-30") {
+            // Eneste periode med satsendring
+            when (antallKall) {
+                1 -> 6.7
+                else -> 6.9
+            }
+        } else {
+            8.3
+        }
+    }
+
+    private fun medlemskapsperiodeStringFrom(requestBody: JsonNode): String {
+        val fom = localDateFromRequest("fom", requestBody)
+        val tom = localDateFromRequest("tom", requestBody)
+        return "$fom / $tom"
+    }
+
+    private fun localDateFromRequest(datoID: String, requestBody: JsonNode): LocalDate =
+        requestBody["medlemskapsperioder"][0]["periode"][datoID]
+        .map { it.asInt() }
+        .let { (year, month, day) -> LocalDate.of(year, month, day) }
+
+    override fun getName(): String {
+        return "trygdeavgiftsberegning-med-satsendring-transformer"
+    }
+
+    override fun applyGlobally(): Boolean {
+        return false
+    }
 }

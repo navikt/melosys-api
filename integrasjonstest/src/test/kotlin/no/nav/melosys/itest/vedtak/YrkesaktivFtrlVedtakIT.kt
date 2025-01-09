@@ -83,7 +83,7 @@ class YrkesaktivFtrlVedtakIT(
     @Autowired private val melosysHendelseKafkaConsumer: MelosysHendelseKafkaConsumer,
 ) : JournalfoeringBase(
     journalføringsoppgaveGenerator, journalføringService, oppgaveService,
-    DynamiskTrygdeavgiftsberegningTransformer()
+    TrygdeavgiftsberegningTransformer()
 ) {
 
     private var originalSubjectHandler: SubjectHandler? = null

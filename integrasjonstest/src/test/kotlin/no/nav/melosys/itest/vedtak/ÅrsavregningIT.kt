@@ -85,7 +85,7 @@ class ÅrsavregningIT(
     @Autowired private val årsavregningService: ÅrsavregningService
 ) : JournalfoeringBase(
     journalføringsoppgaveGenerator, journalføringService, oppgaveService,
-    DynamiskTrygdeavgiftsberegningTransformer()
+    TrygdeavgiftsberegningTransformer()
 ) {
 
     private var originalSubjectHandler: SubjectHandler? = null
