@@ -163,7 +163,7 @@ public class AvklartefaktaController {
         return new AvklartefaktaOppsummeringDto(avklartefaktaService.hentAlleAvklarteFakta(behandlingID));
     }
 
-    @PostMapping("{behandlingID}/ukjent-sluttdato")
+    @PostMapping("{behandlingID}/ukjent-sluttdato-medlemskapsperiode")
     @ApiOperation(value = "Lagre ukjent sluttdato som avklartefakta", response = AvklartefaktaOppsummeringDto.class)
     public AvklartefaktaOppsummeringDto lagreUkjentSluttdatoSomAvklarteFakta(@PathVariable("behandlingID") long behandlingID,
                                                                              @RequestBody boolean ukjentSluttdato) {
