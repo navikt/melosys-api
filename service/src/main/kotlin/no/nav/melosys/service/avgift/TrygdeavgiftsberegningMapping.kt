@@ -9,7 +9,7 @@ import no.nav.melosys.integrasjon.trygdeavgift.dto.*
 import no.nav.melosys.service.avgift.aarsavregning.totalbeloep.TotalbeløpBeregner
 import java.util.*
 
-fun List<Medlemskapsperiode>.tilMedlemskapsperiodeDtos(): Set<MedlemskapsperiodeDto> {
+fun List<Medlemskapsperiode>.tilMedlemskapsperiodeDtoSet(): Set<MedlemskapsperiodeDto> {
     return map {
         MedlemskapsperiodeDto(
             idToUUid(it.id),
