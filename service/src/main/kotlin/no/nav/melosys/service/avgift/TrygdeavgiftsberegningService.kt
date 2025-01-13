@@ -48,7 +48,7 @@ class TrygdeavgiftsberegningService(
     private fun nullstillTrygdeavgiftsperioder(behandlingsresultat: Behandlingsresultat) {
         behandlingsresultat.trygdeavgiftType = Trygdeavgift_typer.FORELØPIG
         behandlingsresultat.medlemskapsperioder.forEach {
-            it.trygdeavgiftsperioder.clear()
+            it.clearTrygdeavgiftsperioder()
         }
 
         behandlingsresultatService.lagreOgFlush(behandlingsresultat)
