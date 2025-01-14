@@ -41,19 +41,14 @@ import java.util.*
 
 @ExtendWith(MockKExtension::class)
 internal class TrygdeavgiftsberegningServiceTest {
-
     @MockK
     private lateinit var mockBehandlingService: BehandlingService
-
     @MockK
     private lateinit var mockEregFasade: EregFasade
-
     @MockK
     private lateinit var mockTrygdeavgiftConsumer: TrygdeavgiftConsumer
-
     @MockK
     lateinit var mockBehandlingsresultatService: BehandlingsresultatService
-
     @MockK
     private lateinit var mockPersondataService: PersondataService
 
