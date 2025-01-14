@@ -148,16 +148,16 @@ class ÅrsavregningService(
             return null
         }
 
+        val behandlingsresultattyper = listOf(
+            Behandlingsresultattyper.FASTSATT_TRYGDEAVGIFT,
+            Behandlingsresultattyper.FASTSATT_LOVVALGSLAND,
+            Behandlingsresultattyper.MEDLEM_I_FOLKETRYGDEN
+        )
+
         return fagsak.behandlinger
             .filter { it.erAvsluttet() }
             .map { behandlingsresultatService.hentBehandlingsresultat(it.id) }
-            .filter {
-                it.type in listOf(
-                    Behandlingsresultattyper.FASTSATT_TRYGDEAVGIFT,
-                    Behandlingsresultattyper.FASTSATT_LOVVALGSLAND,
-                    Behandlingsresultattyper.MEDLEM_I_FOLKETRYGDEN
-                )
-            }
+            .filter { it.type in behandlingsresultattyper }
             .filter { it.harInnvilgetMedlemskapsperiodeSomOverlapperMedÅr(år) }
 
             .sortedBy { it.registrertDato }
