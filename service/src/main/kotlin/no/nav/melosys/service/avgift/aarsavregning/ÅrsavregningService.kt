@@ -152,8 +152,7 @@ class ÅrsavregningService(
             .filter { it.erAvsluttet() }
             .map { behandlingsresultatService.hentBehandlingsresultat(it.id) }
             .filter { it.harInnvilgetMedlemskapsperiodeSomOverlapperMedÅr(år) }
-            .filterNot { it.type == Behandlingsresultattyper.FERDIGBEHANDLET }
-            .filterNot { it.type == Behandlingsresultattyper.HENLEGGELSE_BORTFALT }
+            .filterNot { it.type == Behandlingsresultattyper.FERDIGBEHANDLET || it.type == Behandlingsresultattyper.HENLEGGELSE_BORTFALT }
 
             .sortedBy { it.registrertDato }
             .lastOrNull()
