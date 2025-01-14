@@ -151,7 +151,13 @@ class ÅrsavregningService(
         return fagsak.behandlinger
             .filter { it.erAvsluttet() }
             .map { behandlingsresultatService.hentBehandlingsresultat(it.id) }
-            .filterNot { it.type == Behandlingsresultattyper.FERDIGBEHANDLET || it.type == Behandlingsresultattyper.HENLEGGELSE_BORTFALT }
+            .filter {
+                it.type in listOf(
+                    Behandlingsresultattyper.FASTSATT_TRYGDEAVGIFT,
+                    Behandlingsresultattyper.FASTSATT_LOVVALGSLAND,
+                    Behandlingsresultattyper.MEDLEM_I_FOLKETRYGDEN
+                )
+            }
             .filter { it.harInnvilgetMedlemskapsperiodeSomOverlapperMedÅr(år) }
 
             .sortedBy { it.registrertDato }
