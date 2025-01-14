@@ -66,16 +66,32 @@ class TrygdeavgiftsberegningService(
         val inntektsperioderMedUUID = inntektsperioder.map { UUID.randomUUID() to it }
         val skatteforholdsperioderMedUUID = skatteforholdsperioder.map { UUID.randomUUID() to it }
 
-        val beregnetTrygdeavgift = beregnTrygdeavgift(behandlingsresultat, skatteforholdsperioderMedUUID, inntektsperioderMedUUID)
+        val beregnetTrygdeavgiftList = beregnTrygdeavgift(behandlingsresultat, skatteforholdsperioderMedUUID, inntektsperioderMedUUID)
 
-        val nyeTrygdeavgiftsperioder = beregnetTrygdeavgift.map { response ->
-            lagTrygdeavgiftsperiode(response, skatteforholdsperioderMedUUID, inntektsperioderMedUUID, behandlingsresultat)
-        }.toSet()
+        val nyeTrygdeavgiftsperioder = beregnetTrygdeavgiftList.map { beregnetAvgiftPerPeriode ->
+            lagTrygdeavgiftsperiode(beregnetAvgiftPerPeriode, skatteforholdsperioderMedUUID, inntektsperioderMedUUID, behandlingsresultat)
+        }
 
-        sjekkTrygdeavgiftSkalBetalesTilNav(behandlingsresultat, beregnetTrygdeavgift)
+        sjekkTrygdeavgiftSkalBetalesTilNav(behandlingsresultat, beregnetTrygdeavgiftList)
         behandlingsresultatService.lagreOgFlush(behandlingsresultat)
 
-        return nyeTrygdeavgiftsperioder
+        return nyeTrygdeavgiftsperioder.toSet()
+    }
+
+    private fun erPliktigMedlemskapSkattepliktig(
+        skatteforholdsperioder: List<SkatteforholdTilNorge>,
+        inntektsPerioder: List<Inntektsperiode>,
+        behandlingsresultat: Behandlingsresultat
+    ): Boolean {
+        val erPliktigMedlemskap = behandlingsresultat.medlemskapsperioder
+            .filter { it.erInnvilget() }
+            .all { it.erPliktig() }
+
+        val inntektskilderErTomt = inntektsPerioder.isEmpty()
+        val alleSkatteforholdErSkattepliktige =
+            skatteforholdsperioder.all { it.skatteplikttype == Skatteplikttype.SKATTEPLIKTIG }
+
+        return erPliktigMedlemskap && inntektskilderErTomt && alleSkatteforholdErSkattepliktige
     }
 
     private fun leggTilTrygdeavgiftsperiodeForPliktigMedlemskapSkattepliktig(
@@ -138,33 +154,6 @@ class TrygdeavgiftsberegningService(
         return null
     }
 
-    private fun sjekkTrygdeavgiftSkalBetalesTilNav(
-        behandlingsresultat: Behandlingsresultat,
-        beregnetTrygdeavgift: List<TrygdeavgiftsberegningResponse>
-    ) {
-        val erAlleTrygdeavgiftNullBeløp = beregnetTrygdeavgift.all { it.beregnetPeriode.månedsavgift.verdi.compareTo(BigDecimal.ZERO) == 0 }
-        val skalKunBetalesTilSkatt =
-            trygdeavgiftMottakerService.getTrygdeavgiftMottaker(behandlingsresultat) == Trygdeavgiftmottaker.TRYGDEAVGIFT_BETALES_TIL_SKATT
-        check(!(skalKunBetalesTilSkatt && !erAlleTrygdeavgiftNullBeløp)) { "Trygdeavgift skal ikke betales til NAV. Beregnet trygdeavgift må derfor være 0." }
-    }
-
-    @Transactional(readOnly = true)
-    fun hentTrygdeavgiftsberegning(behandlingsresultatID: Long): Set<Trygdeavgiftsperiode> {
-        return behandlingsresultatService.hentBehandlingsresultat(behandlingsresultatID)
-            .trygdeavgiftsperioder
-    }
-
-    @Transactional(readOnly = true)
-    fun hentOpprinneligTrygdeavgiftsperioder(behandlingsresultatID: Long): Set<Trygdeavgiftsperiode> {
-        val behandlingsresultat = behandlingsresultatService.hentBehandlingsresultat(behandlingsresultatID)
-        val behandling = behandlingsresultat.behandling
-        behandling.opprinneligBehandling?.let {
-            return behandlingsresultatService.hentBehandlingsresultat(it.id).trygdeavgiftsperioder
-                ?: emptySet()
-        }
-        return emptySet()
-    }
-
     private fun lagTrygdeavgiftsperiode(
         response: TrygdeavgiftsberegningResponse,
         skatteforholdsperioderMedUUID: List<Pair<UUID, SkatteforholdTilNorge>>,
@@ -194,20 +183,31 @@ class TrygdeavgiftsberegningService(
         return trygdeavgiftsperiode
     }
 
-    private fun erPliktigMedlemskapSkattepliktig(
-        skatteforholdsperioder: List<SkatteforholdTilNorge>,
-        inntektsPerioder: List<Inntektsperiode>,
-        behandlingsresultat: Behandlingsresultat
-    ): Boolean {
-        val erPliktigMedlemskap = behandlingsresultat.medlemskapsperioder
-            .filter { it.erInnvilget() }
-            .all { it.erPliktig() }
+    private fun sjekkTrygdeavgiftSkalBetalesTilNav(
+        behandlingsresultat: Behandlingsresultat,
+        beregnetTrygdeavgift: List<TrygdeavgiftsberegningResponse>
+    ) {
+        val erAlleTrygdeavgiftNullBeløp = beregnetTrygdeavgift.all { it.beregnetPeriode.månedsavgift.verdi.compareTo(BigDecimal.ZERO) == 0 }
+        val skalKunBetalesTilSkatt =
+            trygdeavgiftMottakerService.getTrygdeavgiftMottaker(behandlingsresultat) == Trygdeavgiftmottaker.TRYGDEAVGIFT_BETALES_TIL_SKATT
+        check(!(skalKunBetalesTilSkatt && !erAlleTrygdeavgiftNullBeløp)) { "Trygdeavgift skal ikke betales til NAV. Beregnet trygdeavgift må derfor være 0." }
+    }
 
-        val inntektskilderErTomt = inntektsPerioder.isEmpty()
-        val alleSkatteforholdErSkattepliktige =
-            skatteforholdsperioder.all { it.skatteplikttype == Skatteplikttype.SKATTEPLIKTIG }
+    @Transactional(readOnly = true)
+    fun hentTrygdeavgiftsberegning(behandlingsresultatID: Long): Set<Trygdeavgiftsperiode> {
+        return behandlingsresultatService.hentBehandlingsresultat(behandlingsresultatID)
+            .trygdeavgiftsperioder
+    }
 
-        return erPliktigMedlemskap && inntektskilderErTomt && alleSkatteforholdErSkattepliktige
+    @Transactional(readOnly = true)
+    fun hentOpprinneligTrygdeavgiftsperioder(behandlingsresultatID: Long): Set<Trygdeavgiftsperiode> {
+        val behandlingsresultat = behandlingsresultatService.hentBehandlingsresultat(behandlingsresultatID)
+        val behandling = behandlingsresultat.behandling
+        behandling.opprinneligBehandling?.let {
+            return behandlingsresultatService.hentBehandlingsresultat(it.id).trygdeavgiftsperioder
+                ?: emptySet()
+        }
+        return emptySet()
     }
 
     // Metoden ser ikke ut til å høre hjemme her
