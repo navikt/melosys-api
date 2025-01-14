@@ -160,24 +160,29 @@ class TrygdeavgiftsberegningService(
         inntektsperioderMedUUID: List<Pair<UUID, Inntektsperiode>>,
         behandlingsresultat: Behandlingsresultat
     ): Trygdeavgiftsperiode {
-        val grunnlagSkatteforholdTilNorge = skatteforholdsperioderMedUUID
-            .find { it.first == response.grunnlag.skatteforholdsperiodeId }?.second
-
-        val grunnlagInntekstperiode = inntektsperioderMedUUID
-            .find { it.first == response.grunnlag.inntektsperiodeId }?.second
-
+        val medlemskapsperiodeID = response.grunnlag.medlemskapsperiodeId
         val grunnlagMedlemskapsperiode = behandlingsresultat.medlemskapsperioder
-            .firstOrNull { idToUUid(it.id) == response.grunnlag.medlemskapsperiodeId }
-            ?: throw IllegalStateException("Fant ikke medlemskapsperiode")
+            .firstOrNull { idToUUid(it.id) == medlemskapsperiodeID }
+            ?: throw IllegalStateException("Fant ikke medlemskapsperiode $medlemskapsperiodeID")
+
+        val skatteforholdsperiodeID =  response.grunnlag.skatteforholdsperiodeId
+        val grunnlagSkatteforholdTilNorge = skatteforholdsperioderMedUUID
+            .find { it.first == skatteforholdsperiodeID }?.second
+            ?: throw IllegalStateException("Fant ikke skatteforholdsperiode $skatteforholdsperiodeID")
+
+        val inntektsperiodeID = response.grunnlag.inntektsperiodeId
+        val grunnlagInntekstperiode = inntektsperioderMedUUID
+            .find { it.first == inntektsperiodeID }?.second
+            ?: throw IllegalStateException("Fant ikke inntektsperiode $inntektsperiodeID")
 
         val trygdeavgiftsperiode = Trygdeavgiftsperiode(
             periodeFra = response.beregnetPeriode.periode.fom,
             periodeTil = response.beregnetPeriode.periode.tom,
             trygdesats = response.beregnetPeriode.sats,
             trygdeavgiftsbeløpMd = response.beregnetPeriode.månedsavgift.tilPenger(),
+            grunnlagMedlemskapsperiode = grunnlagMedlemskapsperiode,
             grunnlagSkatteforholdTilNorge = grunnlagSkatteforholdTilNorge,
-            grunnlagInntekstperiode = grunnlagInntekstperiode,
-            grunnlagMedlemskapsperiode = grunnlagMedlemskapsperiode
+            grunnlagInntekstperiode = grunnlagInntekstperiode
         ).also { grunnlagMedlemskapsperiode.trygdeavgiftsperioder.add(it) }
 
         return trygdeavgiftsperiode
