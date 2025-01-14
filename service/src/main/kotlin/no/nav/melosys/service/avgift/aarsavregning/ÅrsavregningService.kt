@@ -151,8 +151,8 @@ class ÅrsavregningService(
         return fagsak.behandlinger
             .filter { it.erAvsluttet() }
             .map { behandlingsresultatService.hentBehandlingsresultat(it.id) }
-            .filter { it.harInnvilgetMedlemskapsperiodeSomOverlapperMedÅr(år) }
             .filterNot { it.type == Behandlingsresultattyper.FERDIGBEHANDLET || it.type == Behandlingsresultattyper.HENLEGGELSE_BORTFALT }
+            .filter { it.harInnvilgetMedlemskapsperiodeSomOverlapperMedÅr(år) }
 
             .sortedBy { it.registrertDato }
             .lastOrNull()
