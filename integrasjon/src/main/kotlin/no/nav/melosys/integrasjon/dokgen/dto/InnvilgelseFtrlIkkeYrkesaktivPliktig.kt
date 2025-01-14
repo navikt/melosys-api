@@ -26,7 +26,7 @@ class InnvilgelseFtrlIkkeYrkesaktivPliktig(
     val ikkeYrkesaktivOppholdType: String?,
     val ikkeYrkesaktivRelasjonType: String?,
     val medlemskapsperiode: Periode,
-    ukjentSluttdatoMedlemskapsperiode: Boolean,
+    val ukjentSluttdatoMedlemskapsperiode: Boolean,
 ) : DokgenDto(brevbestilling, Mottakerroller.BRUKER) {
 
     constructor(
