@@ -11,6 +11,7 @@ import org.springframework.transaction.annotation.Transactional;
 
 import static no.nav.melosys.domain.kodeverk.brev.Produserbaredokumenter.*;
 
+//TODO: Kotlinize
 @Component
 public class ProduserBrevService {
 

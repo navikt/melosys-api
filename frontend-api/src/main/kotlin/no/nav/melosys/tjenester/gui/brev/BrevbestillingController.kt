@@ -3,6 +3,7 @@ package no.nav.melosys.tjenester.gui.brev
 import io.swagger.annotations.Api
 import io.swagger.annotations.ApiOperation
 import no.nav.melosys.domain.brev.NorskMyndighet
+import no.nav.melosys.domain.brev.StandardvedleggType
 import no.nav.melosys.service.brev.BrevbestillingFasade
 import no.nav.melosys.service.tilgang.Aksesskontroll
 import no.nav.melosys.tjenester.gui.dto.brev.*
@@ -45,6 +46,16 @@ class BrevbestillingController(
         return HentMuligeBrevmottakereResponse.av(brevbestillingFasade.hentMuligeMottakere(hentMuligeMottakereRequestDto))
     }
 
+    @GetMapping(value = ["/standardvedlegg"], produces = [MediaType.APPLICATION_JSON_VALUE])
+    @ApiOperation(
+        value = "Henter alle tilgjengelige standardvedlegg",
+        response = StandardvedleggType::class,
+        responseContainer = "List"
+    )
+    fun hentStandardvedlegg(): List<StandardvedleggType> {
+        return StandardvedleggType.values().toList()
+    }
+
     @PostMapping(
         value = ["pdf/brev/utkast/{behandlingID}"],
         consumes = [MediaType.APPLICATION_JSON_VALUE],
@@ -73,6 +84,16 @@ class BrevbestillingController(
         val brevbestillingDto = brevbestillingRequest.tilBrevbestillingDto()
         brevbestillingFasade.produserBrev(behandlingID, brevbestillingDto)
     }
+
+    @PostMapping("opprett/standardvedlegg/{standardvedleggType}")
+    @ApiOperation(value = "Produser standardvedlegg gjennom melosys-dokgen")
+    fun produserStandardvedlegg(
+        @PathVariable("standardvedleggType") standardvedleggType: StandardvedleggType
+    ): ResponseEntity<ByteArray> {
+        val pdfInBytes = brevbestillingFasade.produserStandardvedleggPdf(standardvedleggType)
+        return ResponseEntity(pdfInBytes, genPdfHeaders("standardvedlegg_${standardvedleggType.tittel}"), HttpStatus.OK)
+    }
+
 
     @PostMapping(
         value = ["/mulige-mottakere-norske-myndigheter/{behandlingID}"],

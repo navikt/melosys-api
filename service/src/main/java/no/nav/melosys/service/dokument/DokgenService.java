@@ -20,6 +20,7 @@ import no.nav.melosys.domain.kodeverk.Mottakerroller;
 import no.nav.melosys.domain.kodeverk.brev.Produserbaredokumenter;
 import no.nav.melosys.featuretoggle.ToggleName;
 import no.nav.melosys.integrasjon.dokgen.DokgenConsumer;
+import no.nav.melosys.integrasjon.dokgen.dto.standardvedlegg.Standardvedlegg;
 import no.nav.melosys.integrasjon.ereg.EregFasade;
 import no.nav.melosys.integrasjon.joark.JoarkFasade;
 import no.nav.melosys.saksflytapi.ProsessinstansService;
@@ -128,6 +129,14 @@ public class DokgenService {
 
         var dokgenDto = dokgenMalMapper.mapBehandling(builder.build(), mottaker);
         return dokgenConsumer.lagPdf(malnavn, dokgenDto, brevbestilling.isBestillKopi(), brevbestilling.isBestillUtkast());
+    }
+
+    public byte[] produserStandardvedlegg(StandardvedleggType standardvedleggType) {
+        return produserStandardvedlegg(standardvedleggType, null);
+    }
+
+    public byte[] produserStandardvedlegg(StandardvedleggType standardvedleggType, Standardvedlegg standardvedlegg) {
+        return dokgenConsumer.lagPdfForStandardvedlegg(standardvedleggType.getMalnavn(), standardvedlegg);
     }
 
     @Transactional
