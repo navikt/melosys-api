@@ -5,7 +5,6 @@ import no.nav.melosys.domain.Medlemskapsperiode
 import no.nav.melosys.domain.avgift.*
 import no.nav.melosys.domain.kodeverk.*
 import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingsresultattyper
-import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingstyper
 import no.nav.melosys.exception.FunksjonellException
 import no.nav.melosys.exception.IkkeFunnetException
 import no.nav.melosys.repository.AarsavregningRepository
@@ -149,11 +148,18 @@ class ÅrsavregningService(
             return null
         }
 
+        val behandlingsresultattyper = listOf(
+            Behandlingsresultattyper.FASTSATT_TRYGDEAVGIFT,
+            Behandlingsresultattyper.FASTSATT_LOVVALGSLAND,
+            Behandlingsresultattyper.MEDLEM_I_FOLKETRYGDEN
+        )
+
         return fagsak.behandlinger
             .filter { it.erAvsluttet() }
-            .filter { it.type != Behandlingstyper.ÅRSAVREGNING }
             .map { behandlingsresultatService.hentBehandlingsresultat(it.id) }
+            .filter { it.type in behandlingsresultattyper }
             .filter { it.harInnvilgetMedlemskapsperiodeSomOverlapperMedÅr(år) }
+
             .sortedBy { it.registrertDato }
             .lastOrNull()
     }
