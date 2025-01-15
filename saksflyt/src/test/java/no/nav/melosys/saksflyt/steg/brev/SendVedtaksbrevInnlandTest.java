@@ -20,11 +20,9 @@ import no.nav.melosys.domain.kodeverk.begrunnelser.Endretperiode;
 import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingsresultattyper;
 import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingstema;
 import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingstyper;
-import no.nav.melosys.domain.kodeverk.lovvalgsbestemmelser.Lovvalgbestemmelser_883_2004;
 import no.nav.melosys.domain.kodeverk.lovvalgsbestemmelser.Lovvalgbestemmelser_konv_efta_storbritannia;
 import no.nav.melosys.domain.kodeverk.lovvalgsbestemmelser.Tilleggsbestemmelser_883_2004;
 import no.nav.melosys.domain.kodeverk.yrker.Yrkesaktivitetstyper;
-import no.nav.melosys.domain.kodeverk.yrker.Yrkesgrupper;
 import no.nav.melosys.domain.mottatteopplysninger.MottatteOpplysninger;
 import no.nav.melosys.domain.mottatteopplysninger.Soeknad;
 import no.nav.melosys.domain.mottatteopplysninger.data.ForetakUtland;
@@ -47,7 +45,8 @@ import org.mockito.Captor;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 
-import static no.nav.melosys.domain.kodeverk.Mottakerroller.*;
+import static no.nav.melosys.domain.kodeverk.Mottakerroller.ARBEIDSGIVER;
+import static no.nav.melosys.domain.kodeverk.Mottakerroller.BRUKER;
 import static no.nav.melosys.domain.kodeverk.brev.Produserbaredokumenter.*;
 import static no.nav.melosys.domain.kodeverk.lovvalgsbestemmelser.Lovvalgbestemmelser_883_2004.*;
 import static no.nav.melosys.domain.kodeverk.lovvalgsbestemmelser.Lovvalgbestemmelser_konv_efta_storbritannia.KONV_EFTA_STORBRITANNIA_ART18_1;
@@ -371,6 +370,30 @@ class SendVedtaksbrevInnlandTest {
         verify(prosessinstansService).opprettProsessinstanserSendBrev(eq(behandling), doksysBrevbestillingArgumentCaptor.capture(), eq(mottakere));
         assertThat(doksysBrevbestillingArgumentCaptor.getValue().getProduserbartdokument()).isEqualTo(INNVILGELSE_YRKESAKTIV_FLERE_LAND);
     }
+
+
+    @Test
+    void utfør_innvilgelse11_3_AMedSelvstendigUtenlandskForetak_senderIkkeBrevTilStatligSkatteoppkreving() {
+        fakeUnleash.enable(ToggleName.MELOSYS_KONVENSJON_EFTA_LAND_OG_STORBRITANNIA);
+
+        when(behandlingsresultatService.hentBehandlingsresultat(BEHANDLINGID))
+            .thenReturn(lagBehandlingsresultatMedAvklarteFakta(lagInnvilgetLovvalgsperiode(FO_883_2004_ART11_3A), Set.of(lagAvklarteFakta(Avklartefaktatyper.YRKESGRUPPE, AvklartYrkesgruppeType.ORDINAER.name(), ""))));
+        when(behandlingsresultatService.hentBehandlingsresultat(BEHANDLINGID))
+            .thenReturn(lagBehandlingsresultatMedAvklarteFakta(lagInnvilgetLovvalgsperiode(FO_883_2004_ART11_3A), Set.of(lagAvklarteFakta(Avklartefaktatyper.YRKESGRUPPE, AvklartYrkesgruppeType.ORDINAER.name(), ""))));
+        ForetakUtland arbeidsgiverUtland = new ForetakUtland();
+        arbeidsgiverUtland.setSelvstendigNæringsvirksomhet(true);
+        behandling.getMottatteOpplysninger().getMottatteOpplysningerData().foretakUtland.add(arbeidsgiverUtland);
+
+        sendVedtaksbrevInnland.utfør(lagProsessinstans());
+        var mottakere = List.of(Mottaker.medRolle(BRUKER));
+        verify(prosessinstansService, times(2)).opprettProsessinstanserSendBrev(eq(behandling), doksysBrevbestillingArgumentCaptor.capture(), eq(mottakere));
+
+        List<DoksysBrevbestilling> capturedValues = doksysBrevbestillingArgumentCaptor.getAllValues();
+        assertThat(capturedValues).hasSize(2);
+        assertThat(capturedValues.get(0).getProduserbartdokument()).isEqualTo(INNVILGELSE_EFTA_STORBRITANNIA);
+        assertThat(capturedValues.get(1).getProduserbartdokument()).isEqualTo(ATTEST_A1);
+    }
+
 
     @Test
     void utfør_innvilgelse16_1MedUtenlandskSelvstendigArbeid_senderIkkeBrevTilStatligSkatteoppkreving() {
