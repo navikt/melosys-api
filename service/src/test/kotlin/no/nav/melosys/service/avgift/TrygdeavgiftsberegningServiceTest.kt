@@ -719,7 +719,7 @@ internal class TrygdeavgiftsberegningServiceTest {
 
         shouldThrow<FunksjonellException> {
             trygdeavgiftsberegningService.beregnOgLagreTrygdeavgift(BEHANDLING_ID, skatteforholdsperioder, inntektsperioder)
-        }.message.shouldContain("Klarte ikke finne startdatoen på medlemskapet")
+        }.message.shouldContain("Det kreves en innvilget medlemskapsiode med startdato")
     }
 
 

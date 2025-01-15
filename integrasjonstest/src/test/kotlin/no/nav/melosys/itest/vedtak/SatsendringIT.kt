@@ -15,6 +15,7 @@ import io.kotest.matchers.types.shouldBeInstanceOf
 import io.mockk.every
 import io.mockk.mockk
 import mu.KotlinLogging
+import no.nav.melosys.domain.Behandling
 import no.nav.melosys.domain.avgift.Inntektsperiode
 import no.nav.melosys.domain.avgift.Penger
 import no.nav.melosys.domain.avgift.SkatteforholdTilNorge
@@ -49,7 +50,6 @@ import no.nav.melosys.sikkerhet.context.SpringSubjectHandler
 import no.nav.melosys.sikkerhet.context.SubjectHandler
 import org.junit.jupiter.api.AfterEach
 import org.junit.jupiter.api.BeforeEach
-import org.junit.jupiter.api.Disabled
 import org.junit.jupiter.api.Test
 import org.springframework.beans.factory.annotation.Autowired
 import java.time.LocalDate
@@ -57,7 +57,6 @@ import java.util.*
 
 private val logger = KotlinLogging.logger {}
 
-@Disabled("MELOSYS-6945 SatsendringFinner må returnere noe fra databasen for å kunne teste")
 class SatsendringIT(
     @Autowired journalføringsoppgaveGenerator: JournalføringsoppgaveGenerator,
     @Autowired journalføringService: JournalfoeringService,
@@ -75,7 +74,6 @@ class SatsendringIT(
     journalføringsoppgaveGenerator, journalføringService, oppgaveService,
     TrygdeavgiftsberegningMedSatsendring()
 ) {
-
     private var originalSubjectHandler: SubjectHandler? = null
 
     @BeforeEach
@@ -122,31 +120,40 @@ class SatsendringIT(
 
     @Test
     fun `Satsendring etter yrkesaktiv FTRL vedtak`() {
-        // Lag 2 saker, en med satsendring og en uten
+        // Lag 1 behandling utenfor SATSENDRING_ÅR
+        lagFørstegangsbehandling(år = SATSENDRING_ÅR - 1)
+        // Lag 2 behandlinger for SATSENDRING_ÅR, en med satsendring og en uten
+        val behandlingMedSatsendring = lagFørstegangsbehandling(harSatsendringEtterÅrsskiftet = true)
         lagFørstegangsbehandling(harSatsendringEtterÅrsskiftet = false)
-        val saksnummerMedSatsendring = lagFørstegangsbehandling(harSatsendringEtterÅrsskiftet = true)
 
-        // Skal finne saken med satsendring
-        satsendringFinner.finnBehandlingerMedSatsendringer(2024).sakerMedSatsendring shouldContain Sak(saksnummerMedSatsendring, 77)
+
+        // Skal finne behandling med satsendring
+        satsendringFinner.finnBehandlingerMedSatsendringer(SATSENDRING_ÅR).sakerMedSatsendring shouldContain Sak(
+            behandlingMedSatsendring.fagsak.saksnummer,
+            behandlingMedSatsendring.id,
+            Behandlingstyper.FØRSTEGANG,
+            true
+        )
     }
 
 
-    fun lagFørstegangsbehandling(harSatsendringEtterÅrsskiftet: Boolean): String {
+    fun lagFørstegangsbehandling(år: Int = SATSENDRING_ÅR, harSatsendringEtterÅrsskiftet: Boolean = false): Behandling {
+        // Perioden brukes for å avgjøre om det blir satsendring
+        val medlemskapsperiode = lagPeriode(år, harSatsendringEtterÅrsskiftet)
+
         val behandling = journalførOgVentTilProsesserErFerdige(
             defaultJournalføringDto().apply {
                 fagsak.sakstype = Sakstyper.FTRL.name
                 fagsak.sakstema = Sakstemaer.MEDLEMSKAP_LOVVALG.name
                 behandlingstypeKode = Behandlingstyper.FØRSTEGANG.kode
                 behandlingstemaKode = Behandlingstema.YRKESAKTIV.name
+                mottattDato = medlemskapsperiode.fom?.minusDays(7)
             },
             mapOf(
                 ProsessType.JFR_NY_SAK_BRUKER to 1,
                 ProsessType.OPPRETT_OG_DISTRIBUER_BREV to 1
             )
         ).behandling.shouldNotBeNull()
-
-        // Perioden brukes for å avgjøre om det blir satsendring
-        val medlemskapsperiode = lagPeriode(harSatsendringEtterÅrsskiftet)
 
         val mottatteOpplysninger =
             mottatteOpplysningerService.hentEllerOpprettMottatteOpplysninger(behandling.id, true)
@@ -201,21 +208,22 @@ class SatsendringIT(
             vedtaksfattingFasade.fattVedtak(behandling.id, vedtakRequest)
         }
 
-        return behandling.fagsak.saksnummer.also {
+        return behandling.also {
             addCleanUpAction {
-                slettSakMedAvhengigheter(it)
+                slettSakMedAvhengigheter(it.fagsak.saksnummer)
             }
         }
     }
 
     private fun lagPeriode(
+        år: Int = SATSENDRING_ÅR,
         harSatsendringEtterÅrsskiftet: Boolean
     ): Periode {
         if (harSatsendringEtterÅrsskiftet) {
             return Periode(LocalDate.of(2024, 4, 1), LocalDate.of(2024, 4, 30))
         }
-        val startDato = LocalDate.now().minusYears(1).withDayOfYear(1)
-        val sluttDato = LocalDate.now().minusYears(1).withMonth(12).withDayOfMonth(31)
+        val startDato = LocalDate.of(år, 1, 1)
+        val sluttDato = LocalDate.of(år, 3, 31)
         return Periode(startDato, sluttDato)
     }
 
@@ -223,7 +231,7 @@ class SatsendringIT(
         opprettForslagMedlemskapsperiodeService.opprettForslagPåMedlemskapsperioder(
             behandlingID,
             Folketrygdloven_kap2_bestemmelser.FTRL_KAP2_2_8_FØRSTE_LEDD_A
-        ).single().id
+        )
 
         val skattefordholdsperioder = listOf(
             SkatteforholdTilNorge().apply {
@@ -253,6 +261,10 @@ class SatsendringIT(
 
     private val Any.toJsonNode: JsonNode
         get() = objectMapper.valueToTree(this)
+
+    companion object {
+        private const val SATSENDRING_ÅR = 2024
+    }
 }
 
 class TrygdeavgiftsberegningMedSatsendring : ResponseTransformerV2 {
