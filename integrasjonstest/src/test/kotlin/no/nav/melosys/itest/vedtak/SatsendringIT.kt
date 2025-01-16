@@ -34,7 +34,6 @@ import no.nav.melosys.melosysmock.medl.MedlRepo
 import no.nav.melosys.melosysmock.testdata.JournalføringsoppgaveGenerator
 import no.nav.melosys.saksflytapi.domain.ProsessType
 import no.nav.melosys.service.avgift.TrygdeavgiftsberegningService
-import no.nav.melosys.service.avgift.satsendring.Sak
 import no.nav.melosys.service.avgift.satsendring.SatsendringFinner
 import no.nav.melosys.service.avklartefakta.AvklartefaktaDto
 import no.nav.melosys.service.avklartefakta.AvklartefaktaService
@@ -128,9 +127,9 @@ class SatsendringIT(
 
 
         // Skal finne behandling med satsendring
-        satsendringFinner.finnBehandlingerMedSatsendringer(SATSENDRING_ÅR).sakerMedSatsendring shouldContain Sak(
-            behandlingMedSatsendring.fagsak.saksnummer,
+        satsendringFinner.finnBehandlingerMedSatsendringer(SATSENDRING_ÅR).behandlingerMedSatsendring shouldContain SatsendringFinner.Behandling(
             behandlingMedSatsendring.id,
+            behandlingMedSatsendring.fagsak.saksnummer,
             Behandlingstyper.FØRSTEGANG,
             true
         )
