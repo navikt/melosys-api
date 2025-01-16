@@ -10,7 +10,7 @@ import com.github.tomakehurst.wiremock.extension.ResponseTransformerV2
 import com.github.tomakehurst.wiremock.http.Response
 import com.github.tomakehurst.wiremock.stubbing.ServeEvent
 import io.getunleash.FakeUnleash
-import io.kotest.matchers.collections.shouldContain
+import io.kotest.matchers.collections.shouldContainOnly
 import io.kotest.matchers.nulls.shouldNotBeNull
 import io.kotest.matchers.types.shouldBeInstanceOf
 import io.mockk.every
@@ -129,11 +129,13 @@ class SatsendringIT(
 
 
         // Skal finne behandling med satsendring
-        satsendringFinner.finnBehandlingerMedSatsendring(SATSENDRING_ÅR).behandlingerMedSatsendring shouldContain SatsendringFinner.BehandlingForSatstendring(
-            behandlingMedSatsendring.id,
-            behandlingMedSatsendring.fagsak.saksnummer,
-            Behandlingstyper.FØRSTEGANG,
-            true
+        satsendringFinner.finnBehandlingerMedSatsendring(SATSENDRING_ÅR).behandlingerMedSatsendring.shouldContainOnly(
+            SatsendringFinner.BehandlingForSatstendring(
+                behandlingMedSatsendring.id,
+                behandlingMedSatsendring.fagsak.saksnummer,
+                Behandlingstyper.FØRSTEGANG,
+                true
+            )
         )
     }
 
