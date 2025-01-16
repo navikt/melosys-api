@@ -118,7 +118,7 @@ public class SendVedtaksbrevInnland implements StegBehandler {
                 || unleash.isEnabled(ToggleName.MELOSYS_ARBEID_KUN_NORGE)
                 || (unleash.isEnabled(ToggleName.MELOSYS_ARBEID_KUN_NORGE) && lovvalgsperiode.erArtikkel11_3_a_eller_13_3a()))
                 && (erStorbritanniaBestemmelse || erArbeidKunNorge || erBeslutningOmNorskLovvalgOgBestemmelse11_3aOgToggleAktivert)) {
-                sendAttestA1(behandling, saksbehandler, begrunnelseKode, fritekst);
+                sendAttestA1(behandling, resultat, saksbehandler, begrunnelseKode, fritekst);
             }
             log.info("Sendt innvilgelsesbrev for behandling {}", behandling.getId());
             if (prosessinstans.getData(ProsessDataKey.ARBEIDSGIVER_SKAL_HA_KOPI, Boolean.class, true)) {
@@ -178,6 +178,7 @@ public class SendVedtaksbrevInnland implements StegBehandler {
     }
 
     private void sendAttestA1(Behandling behandling,
+                              Behandlingsresultat resultat,
                               String saksbehandler,
                               String begrunnelseKode,
                               String fritekst) {
@@ -189,7 +190,10 @@ public class SendVedtaksbrevInnland implements StegBehandler {
             mottakerListe.add(Mottaker.medRolle(Mottakerroller.FULLMEKTIG));
         }
 
-        if (!avklarteVirksomheterService.hentUtenlandskeVirksomheter(behandling).isEmpty()) {
+        if (brevSendesTilStatligSkatteoppkreving(
+            resultat.hentLovvalgsperiode(),
+            behandling.getMottatteOpplysninger()
+        )) {
             mottakerListe.add(Mottaker.av(NorskMyndighet.SKATTEINNKREVER_UTLAND));
         }
 
