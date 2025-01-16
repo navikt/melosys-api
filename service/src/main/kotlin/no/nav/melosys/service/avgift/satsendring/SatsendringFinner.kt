@@ -32,7 +32,7 @@ class SatsendringFinner(
         return AvgiftSatsendringInfo(
             år = år,
             behandlingerMedSatsendring = behandlingList.filter { it.harSatsendring && it.behandlingstype != NY_VURDERING },
-            behandlingerMedSatsendringOgNyVurdering = behandlingList.filter { it.harSatsendring && it.behandlingstype != NY_VURDERING },
+            behandlingerMedSatsendringOgNyVurdering = behandlingList.filter { it.harSatsendring && it.behandlingstype == NY_VURDERING },
             behandlingerUtenSatsendring = behandlingList.filterNot { it.harSatsendring }
         )
     }
