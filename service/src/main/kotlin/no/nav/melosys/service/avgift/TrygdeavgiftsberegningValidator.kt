@@ -12,7 +12,7 @@ import org.threeten.extra.LocalDateRange
 
 object TrygdeavgiftsberegningValidator {
     const val MEDLEMSKAPSPERIODER_EMPTY = "Kan ikke beregne trygdeavgift uten medlemskapsperioder"
-    const val UTLED_MEDLEMSKAPSPERIODE_FOM_MANGLER = "Det kreves en innvilget medlemskapsiode med startdato"
+    const val UTLED_MEDLEMSKAPSPERIODE_FOM_MANGLER = "Det kreves en innvilget medlemskapsperiode med startdato"
     const val UTLED_MEDLEMSKAPSPERIODE_TOM_MANGLER = "Skatteforholdsperiode/inntektsperiode kan ikke ha sluttdato når medlemskapsperiode ikke har sluttdato"
     const val INNTEKTSPERIODER_EMPTY = "Kan ikke beregne trygdeavgift uten inntektsperioder"
     const val SKATTEFORHOLDSPERIODER_EMPTY = "Kan ikke beregne trygdeavgift uten skatteforholdTilNorge"
