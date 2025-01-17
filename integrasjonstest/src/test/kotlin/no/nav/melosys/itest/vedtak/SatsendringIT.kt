@@ -129,7 +129,7 @@ class SatsendringIT(
 
 
         // Skal finne behandling med satsendring
-        satsendringFinner.finnBehandlingerMedSatsendringer(SATSENDRING_ÅR).behandlingerMedSatsendring shouldContain SatsendringFinner.Behandling(
+        satsendringFinner.finnBehandlingerMedSatsendringer(SATSENDRING_ÅR).behandlingerMedSatsendring shouldContain SatsendringFinner.BehandlingForSatstendring(
             behandlingMedSatsendring.id,
             behandlingMedSatsendring.fagsak.saksnummer,
             Behandlingstyper.FØRSTEGANG,

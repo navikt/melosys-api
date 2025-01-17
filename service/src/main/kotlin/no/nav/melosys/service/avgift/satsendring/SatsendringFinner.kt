@@ -23,17 +23,17 @@ class SatsendringFinner(
         val behandlingsresultatList = behandlingsresultatService.finnResultaterMedMedlemskapseriodeOverlappendeMed(år)
             .filter { trygdeavgiftService.harFakturerbarTrygdeavgift(it) }
 
-        val behandlingList = behandlingsresultatList.map { behandlingService.hentBehandling(it.id) to harSatsendring(it) }.map {
-            Behandling(
+        val behandlingerForSatsendring = behandlingsresultatList.map { behandlingService.hentBehandling(it.id) to harSatsendring(it) }.map {
+            BehandlingForSatstendring(
                 it.first.id, it.first.fagsak.saksnummer, it.first.type, it.second
             )
         }
 
         return AvgiftSatsendringInfo(
             år = år,
-            behandlingerMedSatsendring = behandlingList.filter { it.harSatsendring && it.behandlingstype != NY_VURDERING },
-            behandlingerMedSatsendringOgNyVurdering = behandlingList.filter { it.harSatsendring && it.behandlingstype == NY_VURDERING },
-            behandlingerUtenSatsendring = behandlingList.filterNot { it.harSatsendring }
+            behandlingerMedSatsendring = behandlingerForSatsendring.filter { it.harSatsendring && it.behandlingstype != NY_VURDERING },
+            behandlingerMedSatsendringOgNyVurdering = behandlingerForSatsendring.filter { it.harSatsendring && it.behandlingstype == NY_VURDERING },
+            behandlingerUtenSatsendring = behandlingerForSatsendring.filterNot { it.harSatsendring }
         )
     }
 
@@ -41,7 +41,7 @@ class SatsendringFinner(
         return true // TODO: Implementer
     }
 
-    data class Behandling(
+    data class BehandlingForSatstendring(
         val behandlingID: Long,
         val saksnummer: String,
         val behandlingstype: Behandlingstyper,
@@ -50,8 +50,8 @@ class SatsendringFinner(
 
     data class AvgiftSatsendringInfo(
         val år: Int,
-        val behandlingerMedSatsendring: List<Behandling>,
-        val behandlingerMedSatsendringOgNyVurdering: List<Behandling>,
-        val behandlingerUtenSatsendring: List<Behandling>
+        val behandlingerMedSatsendring: List<BehandlingForSatstendring>,
+        val behandlingerMedSatsendringOgNyVurdering: List<BehandlingForSatstendring>,
+        val behandlingerUtenSatsendring: List<BehandlingForSatstendring>
     )
 }
