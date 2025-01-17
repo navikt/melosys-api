@@ -24,9 +24,10 @@ class SatsendringFinner(
         val behandlingsresultatList = behandlingsresultatService.finnResultaterMedMedlemskapseriodeOverlappendeMed(år)
             .filter { trygdeavgiftService.harFakturerbarTrygdeavgift(it) }
 
-        val behandlingerForSatsendring = behandlingsresultatList.map { behandlingService.hentBehandling(it.id) to harSatsendring(it) }.map {
+        val behandlingerForSatsendring = behandlingsresultatList.map {
+            val behandling = behandlingService.hentBehandling(it.id)
             BehandlingForSatstendring(
-                it.first.id, it.first.fagsak.saksnummer, it.first.type, it.second
+                behandling.id, behandling.fagsak.saksnummer, behandling.type, harSatsendring(it)
             )
         }
 
