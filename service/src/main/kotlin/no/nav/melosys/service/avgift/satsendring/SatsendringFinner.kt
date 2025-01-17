@@ -18,7 +18,7 @@ class SatsendringFinner(
     private val trygdeavgiftsberegningService: TrygdeavgiftsberegningService
 ) {
     @Transactional(readOnly = true)
-    fun finnBehandlingerMedSatsendringer(år: Int): AvgiftSatsendringInfo {
+    fun finnBehandlingerMedSatsendring(år: Int): AvgiftSatsendringInfo {
         // Finn alle resultater med vedtak + trygdeavgift i oppgitt år
         val behandlingsresultatList = behandlingsresultatService.finnResultaterMedMedlemskapseriodeOverlappendeMed(år)
             .filter { trygdeavgiftService.harFakturerbarTrygdeavgift(it) }
