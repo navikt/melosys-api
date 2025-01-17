@@ -12,6 +12,7 @@ import com.github.tomakehurst.wiremock.stubbing.ServeEvent
 import io.getunleash.FakeUnleash
 import io.kotest.matchers.collections.shouldContainOnly
 import io.kotest.matchers.nulls.shouldNotBeNull
+import io.kotest.matchers.shouldBe
 import io.kotest.matchers.types.shouldBeInstanceOf
 import io.mockk.every
 import io.mockk.mockk
@@ -36,6 +37,7 @@ import no.nav.melosys.melosysmock.testdata.JournalføringsoppgaveGenerator
 import no.nav.melosys.saksflytapi.domain.ProsessType
 import no.nav.melosys.service.avgift.TrygdeavgiftsberegningService
 import no.nav.melosys.service.avgift.satsendring.SatsendringFinner
+import no.nav.melosys.service.avgift.satsendring.SatsendringFinner.*
 import no.nav.melosys.service.avklartefakta.AvklartefaktaDto
 import no.nav.melosys.service.avklartefakta.AvklartefaktaService
 import no.nav.melosys.service.behandling.VilkaarsresultatService
@@ -120,21 +122,32 @@ class SatsendringIT(
     }
 
     @Test
-    fun `Satsendring etter yrkesaktiv FTRL vedtak`() {
+    fun `Satsendring etter yrkesaktiv FTRL vedtak oppdages`() {
         // Lag 1 behandling utenfor SATSENDRING_ÅR
         lagFørstegangsbehandling(år = SATSENDRING_ÅR - 1)
         // Lag 2 behandlinger for SATSENDRING_ÅR, en med satsendring og en uten
         val behandlingMedSatsendring = lagFørstegangsbehandling(harSatsendringEtterÅrsskiftet = true)
-        lagFørstegangsbehandling(harSatsendringEtterÅrsskiftet = false)
+        val behandlingUtenSatsendring = lagFørstegangsbehandling(harSatsendringEtterÅrsskiftet = false)
 
 
-        // Skal finne behandling med satsendring
-        satsendringFinner.finnBehandlingerMedSatsendring(SATSENDRING_ÅR).behandlingerMedSatsendring.shouldContainOnly(
-            SatsendringFinner.BehandlingForSatstendring(
+        val avgiftSatsendringInfo = satsendringFinner.finnBehandlingerMedSatsendring(SATSENDRING_ÅR)
+
+
+        avgiftSatsendringInfo.år shouldBe SATSENDRING_ÅR
+        avgiftSatsendringInfo.behandlingerMedSatsendring.shouldContainOnly(
+            BehandlingForSatstendring(
                 behandlingMedSatsendring.id,
                 behandlingMedSatsendring.fagsak.saksnummer,
                 Behandlingstyper.FØRSTEGANG,
                 true
+            )
+        )
+        avgiftSatsendringInfo.behandlingerUtenSatsendring.shouldContainOnly(
+            BehandlingForSatstendring(
+                behandlingUtenSatsendring.id,
+                behandlingUtenSatsendring.fagsak.saksnummer,
+                Behandlingstyper.FØRSTEGANG,
+                false
             )
         )
     }
