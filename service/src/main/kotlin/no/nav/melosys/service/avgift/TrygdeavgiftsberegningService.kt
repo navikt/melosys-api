@@ -193,10 +193,11 @@ class TrygdeavgiftsberegningService(
         beregnetTrygdeavgift: List<TrygdeavgiftsberegningResponse>
     ) {
         val erAlleTrygdeavgiftNullBeløp = beregnetTrygdeavgift.all { it.beregnetPeriode.månedsavgift.verdi.compareTo(BigDecimal.ZERO) == 0 }
-        val skalKunBetalesTilSkatt =
-            trygdeavgiftMottakerService.getTrygdeavgiftMottaker(behandlingsresultat) == Trygdeavgiftmottaker.TRYGDEAVGIFT_BETALES_TIL_SKATT
-        check(!(skalKunBetalesTilSkatt && !erAlleTrygdeavgiftNullBeløp)) { "Trygdeavgift skal ikke betales til NAV. Beregnet trygdeavgift må derfor være 0." }
+        check(erAlleTrygdeavgiftNullBeløp || !skalKunBetalesTilSkatt(behandlingsresultat)) { "Trygdeavgift skal ikke betales til NAV. Beregnet trygdeavgift må derfor være 0." }
     }
+
+    private fun skalKunBetalesTilSkatt(behandlingsresultat: Behandlingsresultat) =
+        trygdeavgiftMottakerService.getTrygdeavgiftMottaker(behandlingsresultat) == Trygdeavgiftmottaker.TRYGDEAVGIFT_BETALES_TIL_SKATT
 
     @Transactional(readOnly = true)
     fun hentTrygdeavgiftsberegning(behandlingsresultatID: Long): Set<Trygdeavgiftsperiode> {
