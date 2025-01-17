@@ -3,14 +3,13 @@ package no.nav.melosys.service.avgift.satsendring
 import no.nav.melosys.domain.Behandlingsresultat
 import no.nav.melosys.domain.avgift.Trygdeavgiftsperiode
 import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingstyper
-import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingstyper.*
+import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingstyper.NY_VURDERING
 import no.nav.melosys.service.avgift.TrygdeavgiftService
 import no.nav.melosys.service.avgift.TrygdeavgiftsberegningService
 import no.nav.melosys.service.behandling.BehandlingService
 import no.nav.melosys.service.behandling.BehandlingsresultatService
 import org.springframework.stereotype.Component
 import org.springframework.transaction.annotation.Transactional
-import java.util.UUID
 
 @Component
 class SatsendringFinner(
@@ -40,13 +39,10 @@ class SatsendringFinner(
     }
 
     private fun harSatsendring(behandlingsresultat: Behandlingsresultat): Boolean {
-        val skatteforholdsperioderMedUUID = behandlingsresultat.hentSkatteforholdTilNorge().map { UUID.randomUUID() to it }
-        val inntektsperioderMedUUID = behandlingsresultat.hentInntektsperioder().map { UUID.randomUUID() to it }
-
         val nyeTrygdeavgiftsperioder = trygdeavgiftsberegningService.beregnTrygdeavgift(
             behandlingsresultat,
-            skatteforholdsperioderMedUUID,
-            inntektsperioderMedUUID
+            behandlingsresultat.hentSkatteforholdTilNorge().toList(),
+            behandlingsresultat.hentInntektsperioder().toList(),
         )
 
         return sammenlignTrygdeavgiftsperioder(behandlingsresultat.trygdeavgiftsperioder, nyeTrygdeavgiftsperioder)

@@ -63,10 +63,7 @@ class TrygdeavgiftsberegningService(
             return leggTilTrygdeavgiftsperiodeForPliktigMedlemskapSkattepliktig(behandlingsresultat, skatteforholdsperioder)
         }
 
-        val inntektsperioderMedUUID = inntektsperioder.map { UUID.randomUUID() to it }
-        val skatteforholdsperioderMedUUID = skatteforholdsperioder.map { UUID.randomUUID() to it }
-
-        val nyeTrygdeavgiftsperioder = beregnTrygdeavgift(behandlingsresultat, skatteforholdsperioderMedUUID, inntektsperioderMedUUID)
+        val nyeTrygdeavgiftsperioder = beregnTrygdeavgift(behandlingsresultat, skatteforholdsperioder, inntektsperioder)
         nyeTrygdeavgiftsperioder.forEach { it.grunnlagMedlemskapsperiodeNotNull.trygdeavgiftsperioder.add(it) }
 
         sjekkTrygdeavgiftSkalBetalesTilNav(behandlingsresultat, nyeTrygdeavgiftsperioder)
@@ -125,18 +122,22 @@ class TrygdeavgiftsberegningService(
     @Transactional(readOnly = true)
     fun beregnTrygdeavgift(
         behandlingsresultat: Behandlingsresultat,
-        skatteforholdsperioderMedUUID: List<Pair<UUID, SkatteforholdTilNorge>>,
-        inntektsperioderMedUUID: List<Pair<UUID, Inntektsperiode>>
+        skatteforholdsperioder: List<SkatteforholdTilNorge>,
+        inntektsperioder: List<Inntektsperiode>
     ): List<Trygdeavgiftsperiode> {
+        // UUID brukes til å identifisere periodene som danner grunnlag for trygdeavgiftsberegningen
+        val inntektsperioderMedUUID = inntektsperioder.map { UUID.randomUUID() to it }
+        val skatteforholdsperioderMedUUID = skatteforholdsperioder.map { UUID.randomUUID() to it }
+
         val innvilgedeMedlemskapsperioder = behandlingsresultat.medlemskapsperioder.filter { it.erInnvilget() }
+        val skatteforholdsperiodeDtoSet = skatteforholdsperioderMedUUID.map { it.second.tilSkatteforholdDto(it.first) }.toSet()
         val inntektsperiodeDtoList = inntektsperioderMedUUID.map { it.second.tilInntektsperiodeDto(it.first) }
-        val skatteforholdsperiodeDtoList = skatteforholdsperioderMedUUID.map { it.second.tilSkatteforholdDto(it.first) }
         val foedselDato = hentFødselsdatoOmViHarTjenstligBehov(behandlingsresultat.id, innvilgedeMedlemskapsperioder)
 
         val beregnetTrygdeavgiftList = trygdeavgiftConsumer.beregnTrygdeavgift(
             TrygdeavgiftsberegningRequest(
                 innvilgedeMedlemskapsperioder.tilMedlemskapsperiodeDtoSet(),
-                skatteforholdsperiodeDtoList.toSet(),
+                skatteforholdsperiodeDtoSet,
                 inntektsperiodeDtoList,
                 foedselDato
             )
