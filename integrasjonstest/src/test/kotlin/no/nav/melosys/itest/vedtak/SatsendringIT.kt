@@ -1,6 +1,7 @@
 package no.nav.melosys.itest.vedtak
 
 import com.fasterxml.jackson.databind.JsonNode
+import com.fasterxml.jackson.databind.ObjectMapper
 import com.fasterxml.jackson.databind.SerializationFeature
 import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule
 import com.fasterxml.jackson.module.kotlin.jacksonObjectMapper
@@ -67,8 +68,9 @@ class SatsendringIT(
     @Autowired private val vedtaksfattingFasade: VedtaksfattingFasade,
     @Autowired private val vilkaarsresultatService: VilkaarsresultatService,
     @Autowired private val satsendringFinner: SatsendringFinner,
+    @Autowired private val objectMapper: ObjectMapper,
     @Autowired private val unleash: FakeUnleash,
-    @Autowired private val melosysHendelseKafkaConsumer: MelosysHendelseKafkaConsumer,
+    @Autowired private val melosysHendelseKafkaConsumer: MelosysHendelseKafkaConsumer
 ) : JournalfoeringBase(
     journalføringsoppgaveGenerator, journalføringService, oppgaveService,
     TrygdeavgiftsberegningMedSatsendring()
@@ -252,11 +254,6 @@ class SatsendringIT(
 
         trygdeavgiftsberegningService.beregnOgLagreTrygdeavgift(behandlingID, skattefordholdsperioder, inntektsforholdsperioder)
     }
-
-    private val objectMapper = jacksonObjectMapper()
-        .registerModule(JavaTimeModule())
-        .configure(SerializationFeature.WRITE_DATES_AS_TIMESTAMPS, false)
-
 
     private val Any.toJsonNode: JsonNode
         get() = objectMapper.valueToTree(this)
