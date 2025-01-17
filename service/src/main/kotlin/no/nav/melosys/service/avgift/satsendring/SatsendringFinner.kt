@@ -1,15 +1,11 @@
 package no.nav.melosys.service.avgift.satsendring
 
 import no.nav.melosys.domain.Behandlingsresultat
-import no.nav.melosys.domain.avgift.Inntektsperiode
-import no.nav.melosys.domain.avgift.SkatteforholdTilNorge
 import no.nav.melosys.domain.avgift.Trygdeavgiftsperiode
 import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingstyper
 import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingstyper.*
-import no.nav.melosys.integrasjon.trygdeavgift.dto.TrygdeavgiftsberegningResponse
 import no.nav.melosys.service.avgift.TrygdeavgiftService
 import no.nav.melosys.service.avgift.TrygdeavgiftsberegningService
-import no.nav.melosys.service.avgift.idToUUid
 import no.nav.melosys.service.behandling.BehandlingService
 import no.nav.melosys.service.behandling.BehandlingsresultatService
 import org.springframework.stereotype.Component
@@ -47,15 +43,11 @@ class SatsendringFinner(
         val skatteforholdsperioderMedUUID = behandlingsresultat.hentSkatteforholdTilNorge().map { UUID.randomUUID() to it }
         val inntektsperioderMedUUID = behandlingsresultat.hentInntektsperioder().map { UUID.randomUUID() to it }
 
-        val beregnetTrygdeavgiftList = trygdeavgiftsberegningService.beregnTrygdeavgift(
+        val nyeTrygdeavgiftsperioder = trygdeavgiftsberegningService.beregnTrygdeavgift(
             behandlingsresultat,
             skatteforholdsperioderMedUUID,
             inntektsperioderMedUUID
         )
-
-        val nyeTrygdeavgiftsperioder = beregnetTrygdeavgiftList.map { beregnetAvgiftPerPeriode ->
-            lagTrygdeavgiftsperiode(beregnetAvgiftPerPeriode, skatteforholdsperioderMedUUID, inntektsperioderMedUUID, behandlingsresultat)
-        }
 
         return sammenlignTrygdeavgiftsperioder(behandlingsresultat.trygdeavgiftsperioder, nyeTrygdeavgiftsperioder)
     }
@@ -68,44 +60,6 @@ class SatsendringFinner(
             println("Ny: $nyeTrygdeavgiftsperioder")
         }
         return erForskjellige
-    }
-
-    // TODO: bør nok ikke være her
-    private fun lagTrygdeavgiftsperiode(
-        response: TrygdeavgiftsberegningResponse,
-        skatteforholdsperioderMedUUID: List<Pair<UUID, SkatteforholdTilNorge>>,
-        inntektsperioderMedUUID: List<Pair<UUID, Inntektsperiode>>,
-        behandlingsresultat: Behandlingsresultat
-    ): Trygdeavgiftsperiode {
-        val medlemskapsperiodeID = response.grunnlag.medlemskapsperiodeId
-        val grunnlagMedlemskapsperiode = behandlingsresultat.medlemskapsperioder
-            .firstOrNull { idToUUid(it.id) == medlemskapsperiodeID }
-            ?: throw IllegalStateException("Fant ikke medlemskapsperiode $medlemskapsperiodeID")
-
-        val skatteforholdsperiodeID =  response.grunnlag.skatteforholdsperiodeId
-        val grunnlagSkatteforholdTilNorge = skatteforholdsperioderMedUUID
-            .find { it.first == skatteforholdsperiodeID }?.second
-            ?: throw IllegalStateException("Fant ikke skatteforholdsperiode $skatteforholdsperiodeID")
-
-        val inntektsperiodeID = response.grunnlag.inntektsperiodeId
-        val grunnlagInntekstperiode = inntektsperioderMedUUID
-            .find { it.first == inntektsperiodeID }?.second
-            ?: throw IllegalStateException("Fant ikke inntektsperiode $inntektsperiodeID")
-
-        val trygdeavgiftsperiode = Trygdeavgiftsperiode(
-            periodeFra = response.beregnetPeriode.periode.fom,
-            periodeTil = response.beregnetPeriode.periode.tom,
-            trygdesats = response.beregnetPeriode.sats,
-            trygdeavgiftsbeløpMd = response.beregnetPeriode.månedsavgift.tilPenger(),
-            grunnlagMedlemskapsperiode = grunnlagMedlemskapsperiode,
-            grunnlagSkatteforholdTilNorge = grunnlagSkatteforholdTilNorge,
-            grunnlagInntekstperiode = grunnlagInntekstperiode
-        )
-
-        // Ingen sideEffekt her!
-        // .also { grunnlagMedlemskapsperiode.trygdeavgiftsperioder.add(it) }
-
-        return trygdeavgiftsperiode
     }
 
     data class BehandlingForSatstendring(
