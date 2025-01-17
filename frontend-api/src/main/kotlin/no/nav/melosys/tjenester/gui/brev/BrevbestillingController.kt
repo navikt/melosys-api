@@ -52,6 +52,7 @@ class BrevbestillingController(
         response = StandardvedleggType::class,
         responseContainer = "List"
     )
+    //TODO: Lag egen DTO som kun inneholder frontendtittel og enum key
     fun hentStandardvedlegg(): List<StandardvedleggType> {
         return StandardvedleggType.values().toList()
     }

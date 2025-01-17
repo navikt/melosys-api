@@ -20,7 +20,7 @@ import no.nav.melosys.domain.kodeverk.Mottakerroller;
 import no.nav.melosys.domain.kodeverk.brev.Produserbaredokumenter;
 import no.nav.melosys.featuretoggle.ToggleName;
 import no.nav.melosys.integrasjon.dokgen.DokgenConsumer;
-import no.nav.melosys.integrasjon.dokgen.dto.standardvedlegg.Standardvedlegg;
+import no.nav.melosys.integrasjon.dokgen.dto.standardvedlegg.StandardvedleggDto;
 import no.nav.melosys.integrasjon.ereg.EregFasade;
 import no.nav.melosys.integrasjon.joark.JoarkFasade;
 import no.nav.melosys.saksflytapi.ProsessinstansService;
@@ -135,7 +135,7 @@ public class DokgenService {
         return produserStandardvedlegg(standardvedleggType, null);
     }
 
-    public byte[] produserStandardvedlegg(StandardvedleggType standardvedleggType, Standardvedlegg standardvedlegg) {
+    public byte[] produserStandardvedlegg(StandardvedleggType standardvedleggType, StandardvedleggDto standardvedlegg) {
         return dokgenConsumer.lagPdfForStandardvedlegg(standardvedleggType.getMalnavn(), standardvedlegg);
     }
 
