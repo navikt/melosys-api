@@ -1,7 +1,6 @@
 package no.nav.melosys.service.avgift.satsendring
 
 import no.nav.melosys.domain.Behandlingsresultat
-import no.nav.melosys.domain.avgift.Trygdeavgiftsperiode
 import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingstyper
 import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingstyper.NY_VURDERING
 import no.nav.melosys.service.avgift.TrygdeavgiftService
@@ -40,30 +39,20 @@ class SatsendringFinner(
     }
 
     private fun harSatsendring(behandlingsresultat: Behandlingsresultat): Boolean {
-        val nyeTrygdeavgiftsperioder = trygdeavgiftsberegningService.beregnTrygdeavgift(
-            behandlingsresultat,
-            behandlingsresultat.hentSkatteforholdTilNorge().toList(),
-            behandlingsresultat.hentInntektsperioder().toList(),
-        )
+        val erEndret = beregnNyeTrygdeavgiftsperioder(behandlingsresultat).toSet() != behandlingsresultat.trygdeavgiftsperioder
 
-        return sammenlignTrygdeavgiftsperioder(behandlingsresultat.trygdeavgiftsperioder, nyeTrygdeavgiftsperioder)
-    }
-
-    private fun sammenlignTrygdeavgiftsperioder(trygdeavgiftsperioder: Set<Trygdeavgiftsperiode>, nyeTrygdeavgiftsperioder: List<Trygdeavgiftsperiode>): Boolean {
-        val erForskjellige = nyeTrygdeavgiftsperioder.size != trygdeavgiftsperioder.size || !trygdeavgiftsperioder.containsAll(nyeTrygdeavgiftsperioder)
-        if (erForskjellige) {
+        if (erEndret) {
             println("Forskjell i trygdeavgiftsperioder")
-            println("Gammel: $trygdeavgiftsperioder")
-            println("Ny: $nyeTrygdeavgiftsperioder")
+            println("Gammel: ${behandlingsresultat.trygdeavgiftsperioder}")
+            println("Ny: ${beregnNyeTrygdeavgiftsperioder(behandlingsresultat)}")
         }
-        return erForskjellige
+        return erEndret
     }
 
-    data class BehandlingForSatstendring(
-        val behandlingID: Long,
-        val saksnummer: String,
-        val behandlingstype: Behandlingstyper,
-        val harSatsendring: Boolean
+    private fun beregnNyeTrygdeavgiftsperioder(behandlingsresultat: Behandlingsresultat) = trygdeavgiftsberegningService.beregnTrygdeavgift(
+        behandlingsresultat,
+        behandlingsresultat.hentSkatteforholdTilNorge().toList(),
+        behandlingsresultat.hentInntektsperioder().toList(),
     )
 
     data class AvgiftSatsendringInfo(
@@ -71,5 +60,12 @@ class SatsendringFinner(
         val behandlingerMedSatsendring: List<BehandlingForSatstendring>,
         val behandlingerMedSatsendringOgNyVurdering: List<BehandlingForSatstendring>,
         val behandlingerUtenSatsendring: List<BehandlingForSatstendring>
+    )
+
+    data class BehandlingForSatstendring(
+        val behandlingID: Long,
+        val saksnummer: String,
+        val behandlingstype: Behandlingstyper,
+        val harSatsendring: Boolean
     )
 }
