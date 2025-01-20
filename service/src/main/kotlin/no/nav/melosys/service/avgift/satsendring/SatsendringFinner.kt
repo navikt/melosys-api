@@ -1,5 +1,6 @@
 package no.nav.melosys.service.avgift.satsendring
 
+import mu.KotlinLogging
 import no.nav.melosys.domain.Behandlingsresultat
 import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingstyper
 import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingstyper.NY_VURDERING
@@ -17,6 +18,8 @@ class SatsendringFinner(
     private val trygdeavgiftService: TrygdeavgiftService,
     private val trygdeavgiftsberegningService: TrygdeavgiftsberegningService
 ) {
+    private val log = KotlinLogging.logger { }
+
     @Transactional(readOnly = true)
     fun finnBehandlingerMedSatsendring(år: Int): AvgiftSatsendringInfo {
         // Finn alle resultater med vedtak + trygdeavgift i oppgitt år
@@ -39,12 +42,13 @@ class SatsendringFinner(
     }
 
     private fun harSatsendring(behandlingsresultat: Behandlingsresultat): Boolean {
-        val erEndret = beregnNyeTrygdeavgiftsperioder(behandlingsresultat).toSet() != behandlingsresultat.trygdeavgiftsperioder
+        val nyeTrygdeavgiftsperioder = beregnNyeTrygdeavgiftsperioder(behandlingsresultat).toSet()
+
+        val erEndret = nyeTrygdeavgiftsperioder != behandlingsresultat.trygdeavgiftsperioder
 
         if (erEndret) {
-            println("Forskjell i trygdeavgiftsperioder")
-            println("Gammel: ${behandlingsresultat.trygdeavgiftsperioder}")
-            println("Ny: ${beregnNyeTrygdeavgiftsperioder(behandlingsresultat)}")
+            log.debug { "Forskjell i trygdeavgiftsperioder. Eksisterende: ${behandlingsresultat.trygdeavgiftsperioder}" }
+            log.debug { "Nye trygdeavgiftsperioder: $nyeTrygdeavgiftsperioder" }
         }
         return erEndret
     }
