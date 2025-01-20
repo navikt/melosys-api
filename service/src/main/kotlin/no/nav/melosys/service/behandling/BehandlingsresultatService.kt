@@ -43,19 +43,20 @@ class BehandlingsresultatService(
     }
 
     @Transactional
-    fun tømMedlemskapsperioder(behandlingID: Long) {
-        hentBehandlingsresultat(behandlingID).clearMedlemskapsperioder()
-    }
+    fun tømMedlemskapsperioder(behandlingID: Long) = hentBehandlingsresultat(behandlingID).clearMedlemskapsperioder()
 
-    fun hentBehandlingsresultat(behandlingsid: Long): Behandlingsresultat =
-        behandlingsresultatRepository.findById(behandlingsid)
-            .orElseThrowIkkeFunnetException(behandlingsid)
+    fun finnAlleBehandlingsresultatForAktør(aktørId: String): List<Behandlingsresultat> =
+        behandlingsresultatRepository.findAllByAktorId(aktørId)
 
     fun finnAlleBehandlingsresultatMedFakturaserieReferanse(fakturaserieReferanse: String): List<Behandlingsresultat> =
         behandlingsresultatRepository.findAllByFakturaserieReferanse(fakturaserieReferanse)
 
-    fun finnAlleBehandlingsresultatForAktør(aktørId: String): List<Behandlingsresultat> =
-        behandlingsresultatRepository.findAllByAktorId(aktørId)
+    fun finnResultaterMedMedlemskapseriodeOverlappendeMed(år: Int): List<Behandlingsresultat> =
+        behandlingsresultatRepository.findAllWithMedlemskapsperiodeOverlappingYear(år)
+
+    fun hentBehandlingsresultat(behandlingsid: Long): Behandlingsresultat =
+        behandlingsresultatRepository.findById(behandlingsid)
+            .orElseThrowIkkeFunnetException(behandlingsid)
 
     fun hentBehandlingsresultatMedAnmodningsperioder(behandlingsid: Long): Behandlingsresultat =
         behandlingsresultatRepository.findWithAnmodningsperioderById(behandlingsid)

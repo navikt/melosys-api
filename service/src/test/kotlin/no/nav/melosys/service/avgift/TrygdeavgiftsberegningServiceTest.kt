@@ -41,19 +41,14 @@ import java.util.*
 
 @ExtendWith(MockKExtension::class)
 internal class TrygdeavgiftsberegningServiceTest {
-
     @MockK
     private lateinit var mockBehandlingService: BehandlingService
-
     @MockK
     private lateinit var mockEregFasade: EregFasade
-
     @MockK
     private lateinit var mockTrygdeavgiftConsumer: TrygdeavgiftConsumer
-
     @MockK
     lateinit var mockBehandlingsresultatService: BehandlingsresultatService
-
     @MockK
     private lateinit var mockPersondataService: PersondataService
 
@@ -724,7 +719,7 @@ internal class TrygdeavgiftsberegningServiceTest {
 
         shouldThrow<FunksjonellException> {
             trygdeavgiftsberegningService.beregnOgLagreTrygdeavgift(BEHANDLING_ID, skatteforholdsperioder, inntektsperioder)
-        }.message.shouldContain("Klarte ikke finne startdatoen på medlemskapet")
+        }.message.shouldContain("Det kreves en innvilget medlemskapsperiode med startdato")
     }
 
 

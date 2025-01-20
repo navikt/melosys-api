@@ -85,7 +85,7 @@ class ÅrsavregningIT(
     @Autowired private val årsavregningService: ÅrsavregningService
 ) : JournalfoeringBase(
     journalføringsoppgaveGenerator, journalføringService, oppgaveService,
-    DynamiskTrygdeavgiftsberegningTransformer()
+    TrygdeavgiftsberegningTransformer()
 ) {
 
     private var originalSubjectHandler: SubjectHandler? = null
@@ -153,8 +153,8 @@ class ÅrsavregningIT(
 
     @Test
     fun `oppretter prosess og påfølgende årsavregningsbehandling for alle saker knyttet til en skattehendelse `() {
-        val saksnummer1 = lagFørstegangsBehandling(Skatteplikttype.IKKE_SKATTEPLIKTIG, false)
-        val saksnummer2 = lagFørstegangsBehandling(Skatteplikttype.IKKE_SKATTEPLIKTIG, false)
+        val saksnummer1 = lagFørstegangsbehandling(Skatteplikttype.IKKE_SKATTEPLIKTIG, false)
+        val saksnummer2 = lagFørstegangsbehandling(Skatteplikttype.IKKE_SKATTEPLIKTIG, false)
 
 
         executeAndWait(
@@ -190,7 +190,7 @@ class ÅrsavregningIT(
 
     @Test
     fun `fatter vedtak om årsavregning`() {
-        val saksnummer = lagFørstegangsBehandling(Skatteplikttype.IKKE_SKATTEPLIKTIG, false)
+        val saksnummer = lagFørstegangsbehandling(Skatteplikttype.IKKE_SKATTEPLIKTIG, false)
 
         val årsavregningBehandlingID = executeAndWait(
             mapOf(
@@ -215,7 +215,7 @@ class ÅrsavregningIT(
                 skatteplikttype = Skatteplikttype.SKATTEPLIKTIG
             }
         )
-        val inntektsforholdsperioder = listOf(
+        val inntektsperioder = listOf(
             Inntektsperiode().apply {
                 fomDato = periode.fom
                 tomDato = periode.tom
@@ -225,7 +225,7 @@ class ÅrsavregningIT(
                 avgiftspliktigTotalinntekt = Penger(10000.toBigDecimal())
             }
         )
-        trygdeavgiftsberegningService.beregnOgLagreTrygdeavgift(årsavregningBehandlingID, skattefordholdsperioder, inntektsforholdsperioder)
+        trygdeavgiftsberegningService.beregnOgLagreTrygdeavgift(årsavregningBehandlingID, skattefordholdsperioder, inntektsperioder)
         årsavregningService.oppdater(årsavregningBehandlingID, årsavregning.id, tidligereFakturertBeloep, nyttTotalbeloep)
 
         val vedtakRequestÅrsavregning = FattVedtakRequest.Builder()
@@ -274,7 +274,7 @@ class ÅrsavregningIT(
         return opprettsakdto
     }
 
-    fun lagFørstegangsBehandling(skatteplikttype: Skatteplikttype, arbeidsgiversavgiftBetales: Boolean): String {
+    fun lagFørstegangsbehandling(skatteplikttype: Skatteplikttype, arbeidsgiversavgiftBetales: Boolean): String {
         val behandling = journalførOgVentTilProsesserErFerdige(
             defaultJournalføringDto().apply {
                 fagsak.sakstype = Sakstyper.FTRL.name
