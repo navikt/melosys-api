@@ -64,7 +64,8 @@ class TrygdeavgiftsberegningService(
         }
 
         val nyeTrygdeavgiftsperioder = beregnTrygdeavgift(behandlingsresultat, skatteforholdsperioder, inntektsperioder)
-        nyeTrygdeavgiftsperioder.forEach { it.grunnlagMedlemskapsperiodeNotNull.trygdeavgiftsperioder.add(it) }
+        // Knytter trygdeavgiftsperiodene til deres medlemskapsperiode før sjekken om trygdeavgift skal betales til Nav
+        nyeTrygdeavgiftsperioder.forEach { it.grunnlagMedlemskapsperiodeNotNull.addTrygdeavgiftsperiode(it) }
 
         sjekkTrygdeavgiftSkalBetalesTilNav(behandlingsresultat, nyeTrygdeavgiftsperioder)
         behandlingsresultatService.lagreOgFlush(behandlingsresultat)
