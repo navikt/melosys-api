@@ -24,13 +24,13 @@ import kotlin.test.Test
 @ExtendWith(MockKExtension::class)
 class SatsendringFinnerTest {
     @MockK
-    lateinit var behandlingService: BehandlingService
+    private lateinit var behandlingService: BehandlingService
     @MockK
-    lateinit var behandlingsresultatService: BehandlingsresultatService
+    private lateinit var behandlingsresultatService: BehandlingsresultatService
     @MockK
-    lateinit var trygdeavgiftService: TrygdeavgiftService
+    private lateinit var trygdeavgiftService: TrygdeavgiftService
     @MockK
-    lateinit var trygdeavgiftsberegningService: TrygdeavgiftsberegningService
+    private lateinit var trygdeavgiftsberegningService: TrygdeavgiftsberegningService
 
     private lateinit var satsendringFinner: SatsendringFinner
 

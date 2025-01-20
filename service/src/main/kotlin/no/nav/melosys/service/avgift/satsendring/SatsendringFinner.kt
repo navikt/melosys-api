@@ -11,6 +11,8 @@ import no.nav.melosys.service.behandling.BehandlingsresultatService
 import org.springframework.stereotype.Component
 import org.springframework.transaction.annotation.Transactional
 
+private val log = KotlinLogging.logger { }
+
 @Component
 class SatsendringFinner(
     private val behandlingService: BehandlingService,
@@ -18,8 +20,6 @@ class SatsendringFinner(
     private val trygdeavgiftService: TrygdeavgiftService,
     private val trygdeavgiftsberegningService: TrygdeavgiftsberegningService
 ) {
-    private val log = KotlinLogging.logger { }
-
     @Transactional(readOnly = true)
     fun finnBehandlingerMedSatsendring(år: Int): AvgiftSatsendringInfo {
         // Finn alle resultater med vedtak + trygdeavgift i oppgitt år
