@@ -1,7 +1,6 @@
 package no.nav.melosys.domain.avgift;
 
 import java.math.BigDecimal;
-import java.math.RoundingMode;
 import java.util.Objects;
 
 import jakarta.persistence.Column;
@@ -39,10 +38,6 @@ public class Penger {
         return verdi;
     }
 
-    public BigDecimal getVerdiAvrundet() {
-        return verdi.setScale(0, RoundingMode.HALF_UP);
-    }
-
     public void setVerdi(BigDecimal verdi) {
         this.verdi = verdi;
     }
@@ -60,13 +55,13 @@ public class Penger {
         if (this == o) return true;
         if (o == null || getClass() != o.getClass()) return false;
         Penger that = (Penger) o;
-        return Objects.equals(verdi, that.verdi)
+        return verdi.compareTo(that.verdi) == 0
             && Objects.equals(valuta, that.valuta);
     }
 
     @Override
     public int hashCode() {
-        return Objects.hash(verdi, valuta);
+        return Objects.hash(verdi.stripTrailingZeros(), valuta);
     }
 
     @Override
