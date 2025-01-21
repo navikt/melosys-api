@@ -207,14 +207,12 @@ class TrygdeavgiftsberegningService(
     }
 
     @Transactional(readOnly = true)
-    fun hentOpprinneligTrygdeavgiftsperioder(behandlingsresultatID: Long): Set<Trygdeavgiftsperiode> {
-        val behandlingsresultat = behandlingsresultatService.hentBehandlingsresultat(behandlingsresultatID)
-        val behandling = behandlingsresultat.behandling
-        behandling.opprinneligBehandling?.let {
-            return behandlingsresultatService.hentBehandlingsresultat(it.id).trygdeavgiftsperioder
-                ?: emptySet()
-        }
-        return emptySet()
+    fun hentOpprinneligTrygdeavgiftsperioder(behandlingID: Long): Set<Trygdeavgiftsperiode> {
+        val behandling = behandlingService.hentBehandling(behandlingID)
+
+        return behandling.opprinneligBehandling?.let {
+            behandlingsresultatService.hentBehandlingsresultat(it.id).trygdeavgiftsperioder
+        } ?: emptySet()
     }
 
     // Metoden ser ikke ut til å høre hjemme her
