@@ -30,9 +30,18 @@ public class DokgenConsumer {
 
     public byte[] lagPdfForStandardvedlegg(String malNavn, StandardvedleggDto standardvedlegg) {
         log.info("Produserer standardvedlegg-PDF i melosys-dokgen. Mal: {}", malNavn);
-        return webClient.post()
-            .uri("/mal/{malNavn}/lag-pdf?somKopi=false&utkast=false", malNavn)
-            .bodyValue(standardvedlegg)
+        var request = webClient.post()
+            .uri("/mal/{malNavn}/lag-pdf?somKopi=false&utkast=false", malNavn);
+
+        if (standardvedlegg != null) {
+            return
+                request.bodyValue(standardvedlegg)
+                    .retrieve()
+                    .bodyToMono(byte[].class)
+                    .block();
+        }
+        return request
+            .header("Content-Type", "application/json")
             .retrieve()
             .bodyToMono(byte[].class)
             .block();

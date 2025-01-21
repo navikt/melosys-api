@@ -52,9 +52,10 @@ class BrevbestillingController(
         response = StandardvedleggType::class,
         responseContainer = "List"
     )
-    //TODO: Lag egen DTO som kun inneholder frontendtittel og enum key
-    fun hentStandardvedlegg(): List<StandardvedleggType> {
-        return StandardvedleggType.values().toList()
+    fun hentStandardvedlegg(): List<StandardbrevDto> {
+        return StandardvedleggType.values().map {
+            StandardbrevDto(it, it.frontendTittel, it.tittel)
+        }
     }
 
     @PostMapping(
@@ -74,6 +75,15 @@ class BrevbestillingController(
         return ResponseEntity(pdfInBytes, genPdfHeaders("utkast_$behandlingID"), HttpStatus.OK)
     }
 
+    @GetMapping("pdf/utkast/standardvedlegg/{standardvedleggType}")
+    @ApiOperation(value = "Produser standardvedlegg gjennom melosys-dokgen")
+    fun hentStandardvedleggUtkast(
+        @PathVariable("standardvedleggType") standardvedleggType: StandardvedleggType
+    ): ResponseEntity<ByteArray> {
+        val pdfInBytes = brevbestillingFasade.produserStandardvedleggPdf(standardvedleggType)
+        return ResponseEntity(pdfInBytes, genPdfHeaders("standardvedlegg_${standardvedleggType.tittel}"), HttpStatus.OK)
+    }
+
     @PostMapping("opprett/{behandlingID}")
     @ApiOperation(value = "Produser brev gjennom melosys-dokgen")
     fun produserBrev(
@@ -85,16 +95,6 @@ class BrevbestillingController(
         val brevbestillingDto = brevbestillingRequest.tilBrevbestillingDto()
         brevbestillingFasade.produserBrev(behandlingID, brevbestillingDto)
     }
-
-    @PostMapping("opprett/standardvedlegg/{standardvedleggType}")
-    @ApiOperation(value = "Produser standardvedlegg gjennom melosys-dokgen")
-    fun produserStandardvedlegg(
-        @PathVariable("standardvedleggType") standardvedleggType: StandardvedleggType
-    ): ResponseEntity<ByteArray> {
-        val pdfInBytes = brevbestillingFasade.produserStandardvedleggPdf(standardvedleggType)
-        return ResponseEntity(pdfInBytes, genPdfHeaders("standardvedlegg_${standardvedleggType.tittel}"), HttpStatus.OK)
-    }
-
 
     @PostMapping(
         value = ["/mulige-mottakere-norske-myndigheter/{behandlingID}"],
