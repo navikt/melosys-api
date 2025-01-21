@@ -47,11 +47,10 @@ class HentMuligeProduserbaredokumenterServiceTest {
     fun hentMuligeProduserbaredokumenter_tilBruker_returnererKorrektListe() {
         hentMuligeProduserbaredokumenterService.hentMuligeProduserbaredokumenter(BEHANDLING_ID, Mottakerroller.BRUKER)
             .shouldNotBeNull()
-            .shouldHaveSize(3)
+            .shouldHaveSize(2)
             .shouldContainInOrder(
                 Produserbaredokumenter.MANGELBREV_BRUKER,
-                Produserbaredokumenter.INNHENTING_AV_INNTEKTSOPPLYSNINGER,
-                Produserbaredokumenter.GENERELT_FRITEKSTBREV_BRUKER
+                Produserbaredokumenter.GENERELT_FRITEKSTBREV_BRUKER,
             )
     }
 
@@ -87,12 +86,11 @@ class HentMuligeProduserbaredokumenterServiceTest {
 
         hentMuligeProduserbaredokumenterService.hentMuligeProduserbaredokumenter(BEHANDLING_ID, Mottakerroller.BRUKER)
             .shouldNotBeNull()
-            .shouldHaveSize(4)
+            .shouldHaveSize(3)
             .shouldContainInOrder(
                 Produserbaredokumenter.MELDING_FORVENTET_SAKSBEHANDLINGSTID_SOKNAD,
                 Produserbaredokumenter.MANGELBREV_BRUKER,
-                Produserbaredokumenter.INNHENTING_AV_INNTEKTSOPPLYSNINGER,
-                Produserbaredokumenter.GENERELT_FRITEKSTBREV_BRUKER
+                Produserbaredokumenter.GENERELT_FRITEKSTBREV_BRUKER,
             )
     }
 
@@ -104,11 +102,10 @@ class HentMuligeProduserbaredokumenterServiceTest {
 
         hentMuligeProduserbaredokumenterService.hentMuligeProduserbaredokumenter(BEHANDLING_ID, Mottakerroller.BRUKER)
             .shouldNotBeNull()
-            .shouldHaveSize(4)
+            .shouldHaveSize(3)
             .shouldContainInOrder(
                 Produserbaredokumenter.MELDING_FORVENTET_SAKSBEHANDLINGSTID_SOKNAD,
                 Produserbaredokumenter.MANGELBREV_BRUKER,
-                Produserbaredokumenter.INNHENTING_AV_INNTEKTSOPPLYSNINGER,
                 Produserbaredokumenter.GENERELT_FRITEKSTBREV_BRUKER
             )
     }
@@ -167,11 +164,24 @@ class HentMuligeProduserbaredokumenterServiceTest {
 
         hentMuligeProduserbaredokumenterService.hentMuligeProduserbaredokumenter(BEHANDLING_ID, Mottakerroller.BRUKER)
             .shouldNotBeNull()
+            .shouldHaveSize(2)
+            .shouldContainInOrder(
+                Produserbaredokumenter.MANGELBREV_BRUKER,
+                Produserbaredokumenter.GENERELT_FRITEKSTBREV_BRUKER
+            )
+    }
+
+    @Test
+    fun hentMuligeProduserbaredokumenter_behandling_erÅrsavregning() {
+        behandling.type = Behandlingstyper.ÅRSAVREGNING
+
+        hentMuligeProduserbaredokumenterService.hentMuligeProduserbaredokumenter(BEHANDLING_ID, Mottakerroller.BRUKER)
+            .shouldNotBeNull()
             .shouldHaveSize(3)
             .shouldContainInOrder(
                 Produserbaredokumenter.MANGELBREV_BRUKER,
+                Produserbaredokumenter.GENERELT_FRITEKSTBREV_BRUKER,
                 Produserbaredokumenter.INNHENTING_AV_INNTEKTSOPPLYSNINGER,
-                Produserbaredokumenter.GENERELT_FRITEKSTBREV_BRUKER
             )
     }
 

@@ -4,6 +4,7 @@ import jakarta.transaction.Transactional
 import no.nav.melosys.domain.Behandlingsresultat
 import no.nav.melosys.domain.brev.InnhentingAvInntektsopplysningerBrevbestilling
 import no.nav.melosys.domain.kodeverk.InnvilgelsesResultat
+import no.nav.melosys.exception.FunksjonellException
 import no.nav.melosys.integrasjon.dokgen.dto.InnhentingAvInntektsopplysninger
 import org.springframework.stereotype.Component
 import java.time.LocalDate
@@ -16,7 +17,12 @@ class InnhentingAvInntektsopplysningerMapper(
     internal fun map(brevbestilling: InnhentingAvInntektsopplysningerBrevbestilling): InnhentingAvInntektsopplysninger {
         val behandlingsresultat = dokgenMapperDatahenter.hentBehandlingsresultat(brevbestilling.behandlingId)
 
+        if(behandlingsresultat.årsavregning == null){
+            throw FunksjonellException("Årsavregningsår er ikke valgt")
+        }
+
         val årsavregningsår = behandlingsresultat.årsavregning.aar
+
         val fristdato = LocalDate.now().plusWeeks(4)
         val medlemskapsperiode = hentFørsteOgSisteMedlemskapsperiode(behandlingsresultat, årsavregningsår)
 

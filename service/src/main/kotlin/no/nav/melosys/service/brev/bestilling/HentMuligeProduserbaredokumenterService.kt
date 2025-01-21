@@ -53,23 +53,22 @@ class HentMuligeProduserbaredokumenterService(private val behandlingService: Beh
         if (behandling.erManglendeInnbetalingTrygdeavgift()) {
             return listOf(Produserbaredokumenter.GENERELT_FRITEKSTBREV_BRUKER)
         }
-        val defaultProduserbaredokumenter = getDefaultProduserbareDokumenter()
+
+        val muligeProduserbareDokumenter = hentDefaultMuligeForBruker()
+
+        if (behandling.erÅrsavregning()) {
+            muligeProduserbareDokumenter.add(Produserbaredokumenter.INNHENTING_AV_INNTEKTSOPPLYSNINGER)
+        }
 
         if (fagsak.tema == Sakstemaer.MEDLEMSKAP_LOVVALG && (behandling.erFørstegangsvurdering() || behandling.erAndregangsbehandling())) {
-            return listOf(Produserbaredokumenter.MELDING_FORVENTET_SAKSBEHANDLINGSTID_SOKNAD) + defaultProduserbaredokumenter
+            return listOf(Produserbaredokumenter.MELDING_FORVENTET_SAKSBEHANDLINGSTID_SOKNAD) + muligeProduserbareDokumenter
         }
-        return defaultProduserbaredokumenter
+
+        return muligeProduserbareDokumenter
     }
 
-    private fun getDefaultProduserbareDokumenter(): List<Produserbaredokumenter> =
-        if (unleash.isEnabled(ToggleName.MELOSYS_KONVENSJON_EFTA_LAND_OG_STORBRITANNIA))
-            listOf(
-                Produserbaredokumenter.MANGELBREV_BRUKER,
-                Produserbaredokumenter.INNHENTING_AV_INNTEKTSOPPLYSNINGER,
-                Produserbaredokumenter.GENERELT_FRITEKSTBREV_BRUKER
-            )
-        else listOf(
-            Produserbaredokumenter.MANGELBREV_BRUKER,
-            Produserbaredokumenter.GENERELT_FRITEKSTBREV_BRUKER
-        )
+    private fun hentDefaultMuligeForBruker() = mutableListOf(
+        Produserbaredokumenter.MANGELBREV_BRUKER,
+        Produserbaredokumenter.GENERELT_FRITEKSTBREV_BRUKER
+    )
 }
