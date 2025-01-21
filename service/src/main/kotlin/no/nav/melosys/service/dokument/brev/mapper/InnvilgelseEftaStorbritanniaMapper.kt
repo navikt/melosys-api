@@ -64,7 +64,7 @@ class InnvilgelseEftaStorbritanniaMapper(
             behandlingstype = behandlingsresultat.behandling.type,
             behandlingstema = behandlingsresultat.behandling.tema,
             sedAvsenderlandKode?.beskrivelse,
-            nyVurderingBakgrunn = brevbestilling.nyVurderingBakgrunn,
+            nyVurderingBakgrunn = if (brevbestilling.nyVurderingBakgrunn.isNullOrEmpty()) behandlingsresultat.nyVurderingBakgrunn else brevbestilling.nyVurderingBakgrunn,
             lovvalgsbestemmelse = lovvalgsperiode.bestemmelse.name(),
             erUnntakTuristskip = erUnntakTuristskip,
             erNorskSkip = erNorskSkip != null,
