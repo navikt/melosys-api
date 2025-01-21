@@ -133,23 +133,25 @@ class SatsendringIT(
         val avgiftSatsendringInfo = satsendringFinner.finnBehandlingerMedSatsendring(SATSENDRING_ÅR)
 
 
-        avgiftSatsendringInfo.år shouldBe SATSENDRING_ÅR
-        avgiftSatsendringInfo.behandlingerMedSatsendring.shouldContainOnly(
-            BehandlingForSatstendring(
-                behandlingMedSatsendring.id,
-                behandlingMedSatsendring.fagsak.saksnummer,
-                Behandlingstyper.FØRSTEGANG,
-                true
+        avgiftSatsendringInfo.run {
+            år shouldBe SATSENDRING_ÅR
+            behandlingerMedSatsendring.shouldContainOnly(
+                BehandlingForSatstendring(
+                    behandlingMedSatsendring.id,
+                    behandlingMedSatsendring.fagsak.saksnummer,
+                    Behandlingstyper.FØRSTEGANG,
+                    true
+                )
             )
-        )
-        avgiftSatsendringInfo.behandlingerUtenSatsendring.shouldContainOnly(
-            BehandlingForSatstendring(
-                behandlingUtenSatsendring.id,
-                behandlingUtenSatsendring.fagsak.saksnummer,
-                Behandlingstyper.FØRSTEGANG,
-                false
+            behandlingerUtenSatsendring.shouldContainOnly(
+                BehandlingForSatstendring(
+                    behandlingUtenSatsendring.id,
+                    behandlingUtenSatsendring.fagsak.saksnummer,
+                    Behandlingstyper.FØRSTEGANG,
+                    false
+                )
             )
-        )
+        }
     }
 
 
