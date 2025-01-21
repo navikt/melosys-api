@@ -1,20 +1,16 @@
 package no.nav.melosys.tjenester.gui.satsendring
 
 import no.nav.melosys.service.avgift.satsendring.SatsendringFinner
-import no.nav.melosys.service.avgift.satsendring.SatsendringFinner.BehandlingForSatstendring
 import no.nav.security.token.support.core.api.Protected
-import org.springframework.context.annotation.Scope
 import org.springframework.http.ResponseEntity
 import org.springframework.web.bind.annotation.GetMapping
 import org.springframework.web.bind.annotation.PathVariable
 import org.springframework.web.bind.annotation.RequestMapping
 import org.springframework.web.bind.annotation.RestController
-import org.springframework.web.context.WebApplicationContext
 
 @Protected
 @RestController
 @RequestMapping("/satsendringer")
-@Scope(value = WebApplicationContext.SCOPE_REQUEST)
 class SatsendringController(private val satsendringFinner: SatsendringFinner) {
 
 
@@ -24,15 +20,30 @@ class SatsendringController(private val satsendringFinner: SatsendringFinner) {
         val satsendringRapportDto = SatsendringRapportDto(
             finnBehandlingerMedSatsendringer.år,
             behandlingerMedSatsendring = BehandlingerMedTotalDto(
-                finnBehandlingerMedSatsendringer.behandlingerMedSatsendring,
+                finnBehandlingerMedSatsendringer.behandlingerMedSatsendring.map { it ->
+                    BehandlingForSatstendringDto(
+                        it.behandlingID,
+                        it.saksnummer
+                    )
+                },
                 finnBehandlingerMedSatsendringer.behandlingerMedSatsendring.size
             ),
             behandlingerMedSatsendringOgNyVurdering = BehandlingerMedTotalDto(
-                finnBehandlingerMedSatsendringer.behandlingerMedSatsendringOgNyVurdering,
+                finnBehandlingerMedSatsendringer.behandlingerMedSatsendringOgNyVurdering.map { it ->
+                    BehandlingForSatstendringDto(
+                        it.behandlingID,
+                        it.saksnummer
+                    )
+                },
                 finnBehandlingerMedSatsendringer.behandlingerMedSatsendringOgNyVurdering.size
             ),
             behandlingerUtenSatsendring = BehandlingerMedTotalDto(
-                finnBehandlingerMedSatsendringer.behandlingerUtenSatsendring,
+                finnBehandlingerMedSatsendringer.behandlingerUtenSatsendring.map { it ->
+                    BehandlingForSatstendringDto(
+                        it.behandlingID,
+                        it.saksnummer
+                    )
+                },
                 finnBehandlingerMedSatsendringer.behandlingerUtenSatsendring.size
             )
         )
@@ -50,6 +61,11 @@ data class SatsendringRapportDto(
 )
 
 data class BehandlingerMedTotalDto(
-    val behandlinger: List<BehandlingForSatstendring>,
-    val total: Number
+    val behandlinger: List<BehandlingForSatstendringDto>,
+    val total: Int
+)
+
+data class BehandlingForSatstendringDto(
+    val behandlingID: Long,
+    val saksnummer: String,
 )

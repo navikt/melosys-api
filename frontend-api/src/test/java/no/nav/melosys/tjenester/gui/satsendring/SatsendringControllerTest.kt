@@ -34,12 +34,7 @@ class SatsendringControllerTest {
               "behandlinger":[
                 {
                   "behandlingID":1,
-                  "saksnummer":"MEL-1",
-                  "behandlingstype":{
-                    "kode":"SATSENDRING",
-                    "term":"Satsendring"
-                  },
-                  "harSatsendring":true
+                  "saksnummer":"MEL-1"
                 }
               ],
               "total":1
@@ -48,12 +43,7 @@ class SatsendringControllerTest {
               "behandlinger":[
                 {
                   "behandlingID":22,
-                  "saksnummer":"MEL-22",
-                  "behandlingstype":{
-                    "kode":"SATSENDRING",
-                    "term":"Satsendring"
-                  },
-                  "harSatsendring":true
+                  "saksnummer":"MEL-22"
                 }
               ],
               "total":1
@@ -62,12 +52,7 @@ class SatsendringControllerTest {
               "behandlinger":[
                 {
                   "behandlingID":333,
-                  "saksnummer":"MEL-333",
-                  "behandlingstype":{
-                    "kode":"SATSENDRING",
-                    "term":"Satsendring"
-                  },
-                  "harSatsendring":false
+                  "saksnummer":"MEL-333"
                 }
               ],
               "total":1
