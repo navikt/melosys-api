@@ -12,7 +12,7 @@ import org.springframework.stereotype.Component
 import org.springframework.transaction.annotation.Transactional
 
 @Component
-class HentMuligeProduserbaredokumenterService(private val behandlingService: BehandlingService, private val unleash: Unleash) {
+class HentMuligeProduserbaredokumenterService(private val behandlingService: BehandlingService) {
 
     @Transactional
     fun hentMuligeProduserbaredokumenter(behandlingId: Long, mottakerroller: Mottakerroller): List<Produserbaredokumenter> {
