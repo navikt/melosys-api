@@ -3,6 +3,7 @@ package no.nav.melosys.tjenester.gui.satsendring
 import com.ninjasquad.springmockk.MockkBean
 import io.mockk.every
 import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingstyper
+import no.nav.melosys.service.AdminController
 import no.nav.melosys.service.avgift.satsendring.SatsendringFinner
 import no.nav.melosys.service.avgift.satsendring.SatsendringFinner.AvgiftSatsendringInfo
 import no.nav.melosys.service.avgift.satsendring.SatsendringFinner.BehandlingForSatstendring
@@ -15,8 +16,8 @@ import org.springframework.test.web.servlet.request.MockMvcRequestBuilders
 import org.springframework.test.web.servlet.result.MockMvcResultMatchers.content
 import org.springframework.test.web.servlet.result.MockMvcResultMatchers.status
 
-@WebMvcTest(controllers = [SatsendringController::class])
-class SatsendringControllerTest {
+@WebMvcTest(controllers = [SatsendringAdminController::class], properties = ["Melosys-admin.apikey=Dummy"])
+class SatsendringAdminControllerTest {
 
     @Autowired
     private lateinit var mockMvc: MockMvc
@@ -62,6 +63,7 @@ class SatsendringControllerTest {
         mockMvc.perform(
             MockMvcRequestBuilders.get("$BASE_URL/$ÅR/rapport")
                 .contentType(MediaType.APPLICATION_JSON)
+                .header(AdminController.API_KEY_HEADER, "Dummy")
         ).andExpect(status().isOk)
             .andExpect(content().json(expectedJson))
     }
@@ -87,7 +89,7 @@ class SatsendringControllerTest {
         )
 
     companion object {
-        private const val BASE_URL = "/api/satsendringer"
+        private const val BASE_URL = "/api/admin/satsendringer"
         private const val ÅR = 2025
     }
 
