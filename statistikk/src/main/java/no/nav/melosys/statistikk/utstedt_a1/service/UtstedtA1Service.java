@@ -1,14 +1,16 @@
 package no.nav.melosys.statistikk.utstedt_a1.service;
 
-import io.getunleash.Unleash;
+import java.time.LocalDate;
+import java.time.ZoneId;
+import java.util.Arrays;
+import java.util.Collection;
+
 import no.nav.melosys.domain.*;
 import no.nav.melosys.domain.kodeverk.Land_iso2;
 import no.nav.melosys.domain.kodeverk.lovvalgsbestemmelser.Lovvalgbestemmelser_konv_efta_storbritannia;
 import no.nav.melosys.exception.FunksjonellException;
-import no.nav.melosys.featuretoggle.ToggleName;
 import no.nav.melosys.service.LandvelgerService;
 import no.nav.melosys.service.behandling.BehandlingsresultatService;
-import no.nav.melosys.service.dokument.brev.mapper.felles.KonvEftaStorbritanniaLovvalgbestemmelser;
 import no.nav.melosys.statistikk.utstedt_a1.integrasjon.UtstedtA1AivenProducer;
 import no.nav.melosys.statistikk.utstedt_a1.integrasjon.dto.A1TypeUtstedelse;
 import no.nav.melosys.statistikk.utstedt_a1.integrasjon.dto.Lovvalgsbestemmelse;
@@ -19,11 +21,6 @@ import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-import java.time.LocalDate;
-import java.time.ZoneId;
-import java.util.Arrays;
-import java.util.Collection;
-
 @Service
 public class UtstedtA1Service {
     private static final Logger log = LoggerFactory.getLogger(UtstedtA1Service.class);
@@ -31,16 +28,13 @@ public class UtstedtA1Service {
     private final UtstedtA1AivenProducer utstedtA1AivenProducer;
     private final BehandlingsresultatService behandlingsresultatService;
     private final LandvelgerService landvelgerService;
-    private final Unleash unleash;
 
     public UtstedtA1Service(UtstedtA1AivenProducer utstedtA1AivenProducer,
                             BehandlingsresultatService behandlingsresultatService,
-                            LandvelgerService landvelgerService,
-                            Unleash unleash) {
+                            LandvelgerService landvelgerService) {
         this.utstedtA1AivenProducer = utstedtA1AivenProducer;
         this.behandlingsresultatService = behandlingsresultatService;
         this.landvelgerService = landvelgerService;
-        this.unleash = unleash;
     }
 
     @Transactional(readOnly = true)
@@ -50,13 +44,9 @@ public class UtstedtA1Service {
             var lovvalgsbestemmelse = behandlingsresultat.finnLovvalgsperiode().map(Lovvalgsperiode::getBestemmelse).orElse(null);
             var erStorbritannia = Arrays.stream(Lovvalgbestemmelser_konv_efta_storbritannia.values()).anyMatch(bestemmelse -> bestemmelse == lovvalgsbestemmelse);
 
-            if (unleash.isEnabled(ToggleName.MELOSYS_KONVENSJON_EFTA_LAND_OG_STORBRITANNIA) && erStorbritannia) {
+            if (erStorbritannia) {
                 log.info("Produserer melding om utstedt A1(GB-bestemmelser) for behandling {}, med bestemmelse {}", behandlingID, lovvalgsbestemmelse);
                 sendMeldingOmUtstedtA1(behandlingsresultat);
-            }
-            if (!unleash.isEnabled(ToggleName.MELOSYS_KONVENSJON_EFTA_LAND_OG_STORBRITANNIA) && erStorbritannia) {
-                log.info("Produserer ikke melding om utstedt A1 for behandling {} siden vi ikke støtter GB-bestemmelser enda", behandlingID);
-                return;
             }
 
             log.info("Produserer melding om utstedt A1 for behandling {}", behandlingID);
