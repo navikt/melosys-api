@@ -18,6 +18,8 @@ import no.nav.melosys.domain.kodeverk.Sakstyper;
 import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingstyper;
 import no.nav.melosys.domain.person.Persondata;
 import no.nav.melosys.integrasjon.dokgen.dto.MangelbrevBruker;
+import no.nav.melosys.integrasjon.dokgen.dto.standardvedlegg.InnvilgelseRettigheterPlikterStandardvedlegg;
+import no.nav.melosys.integrasjon.dokgen.dto.standardvedlegg.StandardvedleggDto;
 import org.junit.jupiter.api.AfterAll;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
@@ -89,6 +91,34 @@ class DokgenConsumerTest {
         );
 
         assertThat(dokgenConsumer.lagPdf("mangelbrev_bruker", getMangelbrevBruker(), true, true)).isNotNull();
+    }
+
+    @Test
+    void lagPdfForStandardvedlegg_medData_skalBestilleBrev() {
+        StandardvedleggDto standardvedlegg = new InnvilgelseRettigheterPlikterStandardvedlegg("Hei");
+        wireMockServer.stubFor(post(urlPathEqualTo("/mal/standardvedlegg/lag-pdf"))
+            .withQueryParam("somKopi", equalTo("false"))
+            .withQueryParam("utkast", equalTo("false"))
+            .willReturn(aResponse()
+                .withStatus(200)
+                .withBody("pdf".getBytes(StandardCharsets.UTF_8)))
+        );
+
+        assertThat(dokgenConsumer.lagPdfForStandardvedlegg("standardvedlegg", standardvedlegg)).isNotNull();
+    }
+
+    @Test
+    void lagPdfForStandardvedlegg_utenData_skalBestilleBrev() {
+        wireMockServer.stubFor(post(urlPathEqualTo("/mal/standardvedlegg/lag-pdf"))
+            .withQueryParam("somKopi", equalTo("false"))
+            .withQueryParam("utkast", equalTo("false"))
+            .withHeader("Content-Type", equalTo("application/json"))
+            .willReturn(aResponse()
+                .withStatus(200)
+                .withBody("pdf".getBytes(StandardCharsets.UTF_8)))
+        );
+
+        assertThat(dokgenConsumer.lagPdfForStandardvedlegg("standardvedlegg", null)).isNotNull();
     }
 
     private MangelbrevBruker getMangelbrevBruker() {
