@@ -1,10 +1,8 @@
 package no.nav.melosys.service.behandling
 
-import io.getunleash.FakeUnleash
 import io.kotest.assertions.throwables.shouldThrow
 import io.kotest.matchers.collections.shouldBeEmpty
 import io.kotest.matchers.collections.shouldHaveSize
-import io.kotest.matchers.nulls.shouldBeNull
 import io.kotest.matchers.nulls.shouldNotBeNull
 import io.kotest.matchers.shouldBe
 import io.mockk.every
@@ -20,7 +18,6 @@ import no.nav.melosys.domain.kodeverk.begrunnelser.Utsendt_arbeidstaker_begrunne
 import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingstema
 import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingstyper
 import no.nav.melosys.exception.FunksjonellException
-import no.nav.melosys.featuretoggle.ToggleName
 import no.nav.melosys.repository.BehandlingsresultatRepository
 import no.nav.melosys.service.saksbehandling.SaksbehandlingRegler
 import no.nav.melosys.service.vilkaar.VilkaarDto
@@ -40,13 +37,11 @@ internal class VilkaarsresultatServiceTest {
     @MockK
     private lateinit var behandlingsresultatRepo: BehandlingsresultatRepository
 
-    private val unleash = FakeUnleash()
-
     private lateinit var vilkaarsresultatService: VilkaarsresultatService
 
     @BeforeEach
     fun setUp() {
-        vilkaarsresultatService = VilkaarsresultatService(behandlingsresultatRepo, saksbehandlingRegler, unleash)
+        vilkaarsresultatService = VilkaarsresultatService(behandlingsresultatRepo, saksbehandlingRegler)
     }
 
     @Test
@@ -108,23 +103,7 @@ internal class VilkaarsresultatServiceTest {
     }
 
     @Test
-    fun finnUnntaksVilkaarsresultat_artikkel18_1ToggleIkkePå_finnerIkkeVilkaarsresultat() {
-        unleash.disable(ToggleName.MELOSYS_KONVENSJON_EFTA_LAND_OG_STORBRITANNIA)
-        val behandlingsresultat = lagBehandlingsresultat().apply {
-            vilkaarsresultater = setOf(Vilkaarsresultat().apply { vilkaar = Vilkaar.KONV_EFTA_STORBRITANNIA_ART18_1 })
-        }
-        every { behandlingsresultatRepo.findById(BEHANDLING_ID) } returns Optional.of(behandlingsresultat)
-
-
-        val response = vilkaarsresultatService.finnUnntaksVilkaarsresultat(BEHANDLING_ID)
-
-
-        response.shouldBeNull()
-    }
-
-    @Test
-    fun finnUnntaksVilkaarsresultat_artikkel18_1TogglePå_finnerVilkaarsresultat() {
-        unleash.enable(ToggleName.MELOSYS_KONVENSJON_EFTA_LAND_OG_STORBRITANNIA)
+    fun finnUnntaksVilkaarsresultat_artikkel18_1_finnerVilkaarsresultat() {
         val behandlingsresultat = lagBehandlingsresultat().apply {
             vilkaarsresultater = setOf(Vilkaarsresultat().apply { vilkaar = Vilkaar.KONV_EFTA_STORBRITANNIA_ART18_1 })
         }
