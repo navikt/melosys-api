@@ -28,9 +28,7 @@ import java.util.*
 
 
 @ExtendWith(MockKExtension::class)
-internal class VilkaarsresultatServiceTest {
-    private val BEHANDLING_ID = 1L
-
+class VilkaarsresultatServiceTest {
     @RelaxedMockK
     private lateinit var saksbehandlingRegler: SaksbehandlingRegler
 
@@ -259,5 +257,8 @@ internal class VilkaarsresultatServiceTest {
             }
         }
 
+    companion object {
+        const val BEHANDLING_ID = 1L
+    }
 }
 
