@@ -1,21 +1,28 @@
 package no.nav.melosys.tjenester.gui.satsendring
 
+import no.nav.melosys.service.AdminController
 import no.nav.melosys.service.avgift.satsendring.SatsendringFinner
-import no.nav.security.token.support.core.api.Protected
+import no.nav.security.token.support.core.api.Unprotected
+import org.springframework.beans.factory.annotation.Value
 import org.springframework.http.ResponseEntity
-import org.springframework.web.bind.annotation.GetMapping
-import org.springframework.web.bind.annotation.PathVariable
-import org.springframework.web.bind.annotation.RequestMapping
-import org.springframework.web.bind.annotation.RestController
+import org.springframework.web.bind.annotation.*
 
-@Protected
+@Unprotected
 @RestController
-@RequestMapping("/satsendringer")
-class SatsendringController(private val satsendringFinner: SatsendringFinner) {
+@RequestMapping("/admin/satsendringer")
+class SatsendringAdminController(
+    private val satsendringFinner: SatsendringFinner,
+    @Value("\${Melosys-admin.apikey}") private val apiKey: String
+) : AdminController {
 
 
     @GetMapping("/{aar}/rapport")
-    fun lagRapport(@PathVariable("aar") aar: Int): ResponseEntity<SatsendringRapportDto> {
+    fun lagRapport(
+        @PathVariable("aar") aar: Int,
+        @RequestHeader(AdminController.API_KEY_HEADER) apiKey: String?
+    ): ResponseEntity<SatsendringRapportDto> {
+        validerApikey(apiKey)
+
         val finnBehandlingerMedSatsendringer = satsendringFinner.finnBehandlingerMedSatsendring(aar)
         val satsendringRapportDto = SatsendringRapportDto(
             finnBehandlingerMedSatsendringer.år,
@@ -48,6 +55,10 @@ class SatsendringController(private val satsendringFinner: SatsendringFinner) {
             )
         )
         return ResponseEntity.ok(satsendringRapportDto)
+    }
+
+    override fun getApiKey(): String {
+        return apiKey
     }
 
 
