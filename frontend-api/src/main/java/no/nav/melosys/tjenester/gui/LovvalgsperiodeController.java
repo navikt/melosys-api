@@ -95,10 +95,8 @@ public class LovvalgsperiodeController {
         List<Lovvalgsperiode> lovvalgsperioder = lovvalgsperiodeDtoer.stream()
             .map(LovvalgsperiodeDto::til)
             .toList();
-        var nyeLovvalgsperiodeDtoer = lovvalgsperiodeService.lagreLovvalgsperioder(behandlingsid, lovvalgsperioder)            .stream()
-            .map(LovvalgsperiodeDto::av)
-            .toList();
-        return ResponseEntity.ok(nyeLovvalgsperiodeDtoer);
+        lovvalgsperiodeService.lagreLovvalgsperioder(behandlingsid, lovvalgsperioder);
+        return ResponseEntity.ok(lovvalgsperiodeDtoer);
     }
 
     @GetMapping("/lovvalgsperioder/{behandlingID}/opprinnelig")
