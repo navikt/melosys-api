@@ -342,6 +342,7 @@ class DokgenServiceTest {
         var brevbestillingDto = new BrevbestillingDto();
         brevbestillingDto.setProduserbardokument(MANGELBREV_BRUKER);
         brevbestillingDto.setMottaker(Mottakerroller.BRUKER);
+        brevbestillingDto.setStandardvedleggType(StandardvedleggType.VIKTIG_INFORMASJON_RETTIGHETER_PLIKTER_INNVILGELSE);
         brevbestillingDto.setBestillersId("Z123456");
 
 
@@ -357,8 +358,9 @@ class DokgenServiceTest {
         assertThat(brevbestilling).extracting(
             DokgenBrevbestilling::getProduserbartdokument,
             DokgenBrevbestilling::getBehandlingId,
-            DokgenBrevbestilling::getSaksbehandlerNavn
-        ).containsExactly(MANGELBREV_BRUKER, 123L, "Saksbehandler, Ole");
+            DokgenBrevbestilling::getSaksbehandlerNavn,
+            DokgenBrevbestilling::getStandardvedleggType
+        ).containsExactly(MANGELBREV_BRUKER, 123L, "Saksbehandler, Ole", StandardvedleggType.VIKTIG_INFORMASJON_RETTIGHETER_PLIKTER_INNVILGELSE);
     }
 
     @Test
