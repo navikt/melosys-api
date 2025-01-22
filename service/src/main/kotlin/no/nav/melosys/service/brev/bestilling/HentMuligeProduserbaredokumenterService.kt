@@ -12,7 +12,7 @@ import org.springframework.stereotype.Component
 import org.springframework.transaction.annotation.Transactional
 
 @Component
-class HentMuligeProduserbaredokumenterService(private val behandlingService: BehandlingService) {
+class HentMuligeProduserbaredokumenterService(private val behandlingService: BehandlingService, private val unleash: Unleash) {
 
     @Transactional
     fun hentMuligeProduserbaredokumenter(behandlingId: Long, mottakerroller: Mottakerroller): List<Produserbaredokumenter> {
@@ -51,18 +51,22 @@ class HentMuligeProduserbaredokumenterService(private val behandlingService: Beh
         if (behandling.erManglendeInnbetalingTrygdeavgift()) {
             return listOf(Produserbaredokumenter.GENERELT_FRITEKSTBREV_BRUKER)
         }
-        val defaultProduserbaredokumenter = getDefaultProduserbareDokumenter()
+
+        val muligeProduserbareDokumenter = hentDefaultMuligeForBruker()
+
+        if (behandling.erÅrsavregning()) {
+            muligeProduserbareDokumenter.add(Produserbaredokumenter.INNHENTING_AV_INNTEKTSOPPLYSNINGER)
+        }
 
         if (fagsak.tema == Sakstemaer.MEDLEMSKAP_LOVVALG && (behandling.erFørstegangsvurdering() || behandling.erAndregangsbehandling())) {
-            return listOf(Produserbaredokumenter.MELDING_FORVENTET_SAKSBEHANDLINGSTID_SOKNAD) + defaultProduserbaredokumenter
+            return listOf(Produserbaredokumenter.MELDING_FORVENTET_SAKSBEHANDLINGSTID_SOKNAD) + muligeProduserbareDokumenter
         }
-        return defaultProduserbaredokumenter
+
+        return muligeProduserbareDokumenter
     }
 
-    private fun getDefaultProduserbareDokumenter(): List<Produserbaredokumenter> =
-        listOf(
-            Produserbaredokumenter.MANGELBREV_BRUKER,
-            Produserbaredokumenter.INNHENTING_AV_INNTEKTSOPPLYSNINGER,
-            Produserbaredokumenter.GENERELT_FRITEKSTBREV_BRUKER
-        )
+    private fun hentDefaultMuligeForBruker() = mutableListOf(
+        Produserbaredokumenter.MANGELBREV_BRUKER,
+        Produserbaredokumenter.GENERELT_FRITEKSTBREV_BRUKER
+    )
 }

@@ -1,5 +1,6 @@
 package no.nav.melosys.service.dokument.brev.mapper
 
+import io.kotest.assertions.throwables.shouldThrow
 import io.kotest.matchers.nulls.shouldBeNull
 import io.kotest.matchers.shouldBe
 import io.mockk.every
@@ -16,6 +17,7 @@ import no.nav.melosys.domain.kodeverk.InnvilgelsesResultat
 import no.nav.melosys.domain.kodeverk.Sakstyper
 import no.nav.melosys.domain.kodeverk.Trygdedekninger
 import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingstema
+import no.nav.melosys.exception.FunksjonellException
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.extension.ExtendWith
@@ -58,6 +60,26 @@ internal class InnhentingAvInntektsopplysningerMapperTest {
             medlemskapsperiodeFom.shouldBe(LocalDate.of(2023, 1, 1))
             medlemskapsperiodeTom.shouldBe(LocalDate.of(2023, 9, 1))
         }
+    }
+
+    @Test
+    fun `hent inntektsopplysninger for årsavregning skal kaste feil når årsavregning er null`() {
+        every { mockDokgenMapperDatahenter.hentBehandlingsresultat(ofType()) } returns Behandlingsresultat().apply { årsavregning = null }
+
+        val brevbestilling =
+            InnhentingAvInntektsopplysningerBrevbestilling.Builder()
+                .medBehandling(lagBehandling())
+                .medPersonDokument(PersonDokument().apply {
+                    sammensattNavn = "Hei Test"
+                })
+                .medPersonMottaker(PersonDokument().apply {
+                    sammensattNavn = "Hei Test"
+                })
+                .build()
+
+        shouldThrow<FunksjonellException> {
+            innhentingAvInntektsopplysningerMapper.map(brevbestilling)
+        }.message.shouldBe("Årsavregningsår er ikke valgt")
     }
 
     private fun lagBehandling() =
