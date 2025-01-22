@@ -118,7 +118,7 @@ public class SendVedtaksbrevInnland implements StegBehandler {
             }
             log.info("Sendt innvilgelsesbrev for behandling {}", behandling.getId());
             if (Boolean.TRUE.equals(prosessinstans.getData(ProsessDataKey.ARBEIDSGIVER_SKAL_HA_KOPI, Boolean.class, true)) && !erSelvstendig) {
-                sendOrienteringTilArbeidsgiverEFTATogglet(behandling, resultat, saksbehandler);
+                sendOrienteringTilArbeidsgiverEFTA(behandling, resultat, saksbehandler);
                 log.info("Sendt orienteringsbrev til arbeidsgiver for behandling {}", behandling.getId());
             }
         } else {
@@ -227,7 +227,7 @@ public class SendVedtaksbrevInnland implements StegBehandler {
             && bestemmelse != KONV_EFTA_STORBRITANNIA_ART16_3;
     }
 
-    private void sendOrienteringTilArbeidsgiverEFTATogglet(Behandling behandling, Behandlingsresultat resultat, String saksbehandler) {
+    private void sendOrienteringTilArbeidsgiverEFTA(Behandling behandling, Behandlingsresultat resultat, String saksbehandler) {
         if (harArtikkelRelevantForStatligSkatteoppkreving(behandling, resultat)) {
             DoksysBrevbestilling brevbestilling = new DoksysBrevbestilling.Builder()
                 .medProduserbartDokument(ORIENTERING_TIL_ARBEIDSGIVER_OM_VEDTAK)
