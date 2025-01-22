@@ -94,12 +94,11 @@ internal class BrevmalListeByggerTest {
                     MottakerType.NORSK_MYNDIGHET.beskrivelse
                 )
             first().brevTyper
-                .shouldHaveSize(4)
+                .shouldHaveSize(3)
                 .map(BrevmalTypeDto::getType)
                 .shouldContainExactly(
                     Produserbaredokumenter.MELDING_FORVENTET_SAKSBEHANDLINGSTID_SOKNAD,
                     Produserbaredokumenter.MANGELBREV_BRUKER,
-                    Produserbaredokumenter.INNHENTING_AV_INNTEKTSOPPLYSNINGER,
                     Produserbaredokumenter.GENERELT_FRITEKSTBREV_BRUKER
                 )
             elementAt(1).brevTyper
@@ -183,13 +182,12 @@ internal class BrevmalListeByggerTest {
 
         tilgjengeligeMaler.shouldHaveSize(5)
             .first().brevTyper.run {
-                this.shouldHaveSize(4)
+                this.shouldHaveSize(3)
                     .map(BrevmalTypeDto::getType)
                     .shouldContainExactly(
                         listOf(
                             Produserbaredokumenter.MELDING_FORVENTET_SAKSBEHANDLINGSTID_SOKNAD,
                             Produserbaredokumenter.MANGELBREV_BRUKER,
-                            Produserbaredokumenter.INNHENTING_AV_INNTEKTSOPPLYSNINGER,
                             Produserbaredokumenter.GENERELT_FRITEKSTBREV_BRUKER
                         )
                     )
@@ -355,7 +353,7 @@ internal class BrevmalListeByggerTest {
 
         tilgjengeligeMaler
             .shouldHaveSize(5)
-            .first().brevTyper[3].felter[0].valg.valgAlternativer
+            .first().brevTyper[2].felter[0].valg.valgAlternativer
             .shouldHaveSize(2).run {
                 first().run {
                     kode.shouldBe(FeltvalgAlternativKode.HENVENDELSE_OM_TRYGDETILHØRLIGHET.kode)
@@ -378,7 +376,7 @@ internal class BrevmalListeByggerTest {
 
         tilgjengeligeMaler
             .shouldHaveSize(5)
-            .first().brevTyper[3].felter[3].valg.valgAlternativer
+            .first().brevTyper[2].felter[3].valg.valgAlternativer
             .shouldHaveSize(3).run {
                 first().run {
                     kode.shouldBe(Distribusjonstype.VEDTAK.kode)
@@ -404,7 +402,7 @@ internal class BrevmalListeByggerTest {
 
         tilgjengeligeMaler
             .shouldHaveSize(4)
-            .first().brevTyper[3].felter.first().valg.valgAlternativer
+            .first().brevTyper[2].felter.first().valg.valgAlternativer
             .shouldHaveSize(4).run {
                 first().run {
                     kode.shouldBe(FeltvalgAlternativKode.CONFIRMATION_OF_MEMBERSHIP.kode)
@@ -434,7 +432,7 @@ internal class BrevmalListeByggerTest {
 
         tilgjengeligeMaler
             .shouldHaveSize(4)
-            .first().brevTyper[3].felter[3].valg.valgAlternativer
+            .first().brevTyper[2].felter[3].valg.valgAlternativer
             .shouldHaveSize(3).run {
                 first().run {
                     kode.shouldBe(Distribusjonstype.VEDTAK.kode)
@@ -466,7 +464,7 @@ internal class BrevmalListeByggerTest {
         val tilgjengeligeMaler = brevmalListeBygger.byggBrevmalDtoListe(123L)
 
         tilgjengeligeMaler.shouldHaveSize(5)
-            .first().brevTyper[3].felter[0].valg.valgAlternativer
+            .first().brevTyper[2].felter[0].valg.valgAlternativer
             .shouldHaveSize(2).run {
                 first().run {
                     kode.shouldBe(FeltvalgAlternativKode.ENGELSK_FRITEKSTBREV.kode)
@@ -495,7 +493,7 @@ internal class BrevmalListeByggerTest {
 
         tilgjengeligeMaler
             .shouldHaveSize(5)
-            .first().brevTyper[3].felter[3].valg.valgAlternativer
+            .first().brevTyper[2].felter[3].valg.valgAlternativer
             .shouldHaveSize(3).run {
                 first().run {
                     kode.shouldBe(Distribusjonstype.VEDTAK.kode)

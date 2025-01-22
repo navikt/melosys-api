@@ -172,7 +172,7 @@ class HentMuligeProduserbaredokumenterServiceTest {
     }
 
     @Test
-    fun hentMuligeProduserbaredokumenter_behandling_erÅrsavregning() {
+    fun `Mulige produserbare dokumenter skal inkludere INNHENTING_AV_INNTEKTSOPPLYSNINGER for behandlinger av typen Årsavregning`() {
         behandling.type = Behandlingstyper.ÅRSAVREGNING
 
         hentMuligeProduserbaredokumenterService.hentMuligeProduserbaredokumenter(BEHANDLING_ID, Mottakerroller.BRUKER)
