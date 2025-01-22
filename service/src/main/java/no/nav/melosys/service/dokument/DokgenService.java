@@ -151,6 +151,7 @@ public class DokgenService {
             .medBehandlingId(behandlingId)
             .medSaksvedleggBestilling(lagSaksvedleggBestilling(brevbestillingDto.getSaksVedlegg()))
             .medSaksbehandlerNavn(hentSaksbehandlerNavn(brevbestillingDto.getBestillersId()))
+            .medStandardvedleggBestilling(brevbestillingDto.getStandardvedleggType())
             .medFritekstvedleggBestilling(lagFritekstvedleggBestilling(brevbestillingDto.getFritekstvedlegg()));
 
         List<Mottaker> mottakere = hentMottakere(brevbestillingDto, produserbartDokument, behandling);

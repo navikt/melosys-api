@@ -6,6 +6,7 @@ import java.util.List;
 import java.util.Objects;
 
 import no.nav.melosys.domain.arkiv.Distribusjonstype;
+import no.nav.melosys.domain.brev.StandardvedleggType;
 import no.nav.melosys.domain.brev.utkast.BrevbestillingUtkast;
 import no.nav.melosys.domain.kodeverk.Mottakerroller;
 import no.nav.melosys.domain.kodeverk.brev.Produserbaredokumenter;
@@ -32,6 +33,7 @@ public final class BrevbestillingDto {
     private boolean skalViseStandardTekstOmkontaktopplysninger;
     private String nyVurderingBakgrunn;
     private List<SaksvedleggDto> saksVedlegg;
+    private StandardvedleggType standardvedleggType;
     private List<FritekstvedleggDto> fritekstvedlegg;
     private String dokumentTittel;
     private String saksbehandlerNrToIdent;
@@ -70,6 +72,7 @@ public final class BrevbestillingDto {
         boolean skalViseStandardTekstOmkontaktopplysninger,
         String nyVurderingBakgrunn,
         List<SaksvedleggDto> saksVedlegg,
+        StandardvedleggType standardvedleggType,
         List<FritekstvedleggDto> fritekstvedlegg,
         String dokumentTittel,
         String saksbehandlerNrToIdent,
@@ -104,6 +107,7 @@ public final class BrevbestillingDto {
         this.skalViseStandardTekstOmkontaktopplysninger = skalViseStandardTekstOmkontaktopplysninger;
         this.nyVurderingBakgrunn = nyVurderingBakgrunn;
         this.saksVedlegg = saksVedlegg;
+        this.standardvedleggType = standardvedleggType;
         this.fritekstvedlegg = fritekstvedlegg;
         this.dokumentTittel = dokumentTittel;
         this.saksbehandlerNrToIdent = saksbehandlerNrToIdent;
@@ -147,6 +151,7 @@ public final class BrevbestillingDto {
             brevbestillingUtkast.kontaktopplysninger(),
             brevbestillingUtkast.nyVurderingBakgrunn(),
             brevbestillingUtkast.saksVedlegg().stream().map(SaksvedleggDto::av).toList(),
+            brevbestillingUtkast.standardvedleggType(),
             brevbestillingUtkast.fritekstVedlegg().stream().map(FritekstvedleggDto::av).toList(),
             brevbestillingUtkast.dokumentTittel(),
             brevbestillingUtkast.saksbehandlerNrToIdent(),
@@ -241,6 +246,10 @@ public final class BrevbestillingDto {
 
     public void setSaksVedlegg(List<SaksvedleggDto> saksVedlegg) {
         this.saksVedlegg = saksVedlegg;
+    }
+
+    public void setStandardvedleggType(StandardvedleggType standardvedleggType) {
+        this.standardvedleggType = standardvedleggType;
     }
 
     public void setFritekstvedlegg(List<FritekstvedleggDto> fritekstvedlegg) {
@@ -358,6 +367,10 @@ public final class BrevbestillingDto {
             saksVedlegg = new ArrayList<>();
         }
         return saksVedlegg;
+    }
+
+    public StandardvedleggType getStandardvedleggType() {
+        return standardvedleggType;
     }
 
     public List<FritekstvedleggDto> getFritekstvedlegg() {
