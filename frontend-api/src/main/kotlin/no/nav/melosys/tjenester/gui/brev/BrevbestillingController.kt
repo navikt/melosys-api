@@ -54,7 +54,7 @@ class BrevbestillingController(
     )
     fun hentStandardvedlegg(): List<StandardbrevDto> {
         return StandardvedleggType.values().map {
-            StandardbrevDto(it, it.frontendTittel, it.tittel)
+            StandardbrevDto(it, it.frontendTittel, it.journalføringstittel)
         }
     }
 
@@ -81,7 +81,7 @@ class BrevbestillingController(
         @PathVariable("standardvedleggType") standardvedleggType: StandardvedleggType
     ): ResponseEntity<ByteArray> {
         val pdfInBytes = brevbestillingFasade.produserStandardvedleggPdf(standardvedleggType)
-        return ResponseEntity(pdfInBytes, genPdfHeaders("standardvedlegg_${standardvedleggType.tittel}"), HttpStatus.OK)
+        return ResponseEntity(pdfInBytes, genPdfHeaders("standardvedlegg_${standardvedleggType.journalføringstittel}"), HttpStatus.OK)
     }
 
     @PostMapping("opprett/{behandlingID}")

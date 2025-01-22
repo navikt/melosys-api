@@ -1,5 +1,5 @@
 package no.nav.melosys.integrasjon.dokgen.dto.standardvedlegg
 
-class InnvilgelseRettigheterPlikterStandardvedlegg : StandardvedleggDto {
+data class InnvilgelseRettigheterPlikterStandardvedlegg(
     val bestemmelse: String? = null
-}
+) : StandardvedleggDto
