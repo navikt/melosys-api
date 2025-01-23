@@ -65,7 +65,7 @@ class SendFakturaÅrsavregning(
         val vedtaksdato = FORMATTER.format(behandlingsresultat.vedtakMetadata.vedtaksdato)
         val startDato = behandlingsresultat.trygdeavgiftsperioder.minBy { trygdeavgiftsperiode -> trygdeavgiftsperiode.periodeFra }.periodeFra
         val sluttDato = behandlingsresultat.trygdeavgiftsperioder.maxBy { trygdeavgiftsperiode -> trygdeavgiftsperiode.periodeTil }.periodeTil
-        val harTidligereÅrsavregning = årsavregning.tidligereBehandlingsresultat.behandling.erÅrsavregning()
+        val harTidligereÅrsavregning = årsavregning.tidligereBehandlingsresultat?.behandling?.erÅrsavregning() ?: false
 
         return FakturaDto(
             fodselsnummer = foedselsNr,
