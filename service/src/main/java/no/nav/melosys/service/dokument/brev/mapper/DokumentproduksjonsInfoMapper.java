@@ -193,7 +193,6 @@ public class DokumentproduksjonsInfoMapper {
         VARSEL_OPPHØRT_MEDLEMSKAP("Varsel om opphør av frivillig medlemskap"),
         AVSLAG_EFTA_STORBRITANNIA("Avslag på søknad om medlemskap"),
         AARSAVREGNING_VEDTAKSBREV("Vedtak om årsavregning");
-        //TODO
 
         private final String tittel;
 
