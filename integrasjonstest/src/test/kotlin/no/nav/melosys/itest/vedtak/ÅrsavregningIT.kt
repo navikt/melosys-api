@@ -44,10 +44,13 @@ import no.nav.melosys.service.behandling.VilkaarsresultatService
 import no.nav.melosys.service.ftrl.medlemskapsperiode.MedlemskapsperiodeService
 import no.nav.melosys.service.ftrl.medlemskapsperiode.OpprettForslagMedlemskapsperiodeService
 import no.nav.melosys.service.journalforing.JournalfoeringService
+import no.nav.melosys.service.journalforing.dto.PeriodeDto
 import no.nav.melosys.service.mottatteopplysninger.MottatteOpplysningerService
 import no.nav.melosys.service.oppgave.OppgaveService
 import no.nav.melosys.service.sak.OpprettBehandlingForSak
+import no.nav.melosys.service.sak.OpprettSak
 import no.nav.melosys.service.sak.OpprettSakDto
+import no.nav.melosys.service.sak.SøknadDto
 import no.nav.melosys.service.saksopplysninger.OppfriskSaksopplysningerService
 import no.nav.melosys.service.vedtak.FattVedtakRequest
 import no.nav.melosys.service.vedtak.VedtaksfattingFasade
@@ -82,7 +85,8 @@ class ÅrsavregningIT(
     @Autowired private val behandlingsresultatRepository: BehandlingsresultatRepository,
     @Autowired private val unleash: FakeUnleash,
     @Autowired private val melosysHendelseKafkaConsumer: MelosysHendelseKafkaConsumer,
-    @Autowired private val årsavregningService: ÅrsavregningService
+    @Autowired private val årsavregningService: ÅrsavregningService,
+    @Autowired private val opprettSak: OpprettSak
 ) : JournalfoeringBase(
     journalføringsoppgaveGenerator, journalføringService, oppgaveService,
     TrygdeavgiftsberegningTransformer()
@@ -186,6 +190,100 @@ class ÅrsavregningIT(
                         }
                 }
         }
+    }
+
+    @Test
+    fun `fatter vedtak om årsavregning, uten tidligere grunnlag i melosys`() {
+        val opprettSakDto = OpprettSakDto().apply {
+            hovedpart = Aktoersroller.BRUKER
+            brukerID = "30056928150"
+            sakstype = Sakstyper.FTRL
+            sakstema = Sakstemaer.MEDLEMSKAP_LOVVALG
+            behandlingstema = Behandlingstema.YRKESAKTIV
+            behandlingstype = Behandlingstyper.ÅRSAVREGNING
+            behandlingsaarsakType = Behandlingsaarsaktyper.SØKNAD
+            soknadDto = SøknadDto().apply {
+                periode = PeriodeDto(
+                    LocalDate.of(2021, 10, 1),
+                    LocalDate.of(2021, 10, 2)
+                )
+            }
+            mottaksdato = LocalDate.of(2021, 10, 24)
+            skalTilordnes = true
+        }
+
+        val årsavregningBehandlingID = executeAndWait(mapOf(ProsessType.OPPRETT_SAK to 1)) {
+            opprettSak.opprettNySakOgBehandling(opprettSakDto)
+        }.behandling.id
+
+
+        årsavregningService.opprettÅrsavregning(årsavregningBehandlingID, 2023)
+        val årsavregning =
+            behandlingsresultatRepository.findWithLovvalgOgMedlemskapsperioderById(årsavregningBehandlingID).shouldBePresent().årsavregning
+        val periode = DatoPeriodeDto(LocalDate.of(2023, 1, 1), LocalDate.of(2023, 2, 1))
+        val skattefordholdsperioder = listOf(
+            SkatteforholdTilNorge().apply {
+                fomDato = periode.fom
+                tomDato = periode.tom
+                skatteplikttype = Skatteplikttype.SKATTEPLIKTIG
+            }
+        )
+        val inntektsperioder = listOf(
+            Inntektsperiode().apply {
+                fomDato = periode.fom
+                tomDato = periode.tom
+                type = Inntektskildetype.INNTEKT_FRA_UTLANDET
+                isArbeidsgiversavgiftBetalesTilSkatt = true
+                avgiftspliktigMndInntekt = Penger(10000.toBigDecimal())
+                avgiftspliktigTotalinntekt = Penger(10000.toBigDecimal())
+            }
+        )
+        val tidligereFakturertBeloep = BigDecimal(1000)
+        val nyttTotalbeloep = BigDecimal(2000)
+        medlemskapsperiodeService.opprettMedlemskapsperiode(
+            behandlingsresultatID = årsavregningBehandlingID,
+                fom = periode.fom,
+                tom = periode.tom,
+                innvilgelsesResultat = InnvilgelsesResultat.INNVILGET,
+                trygdedekning = Trygdedekninger.FULL_DEKNING_FTRL,
+                bestemmelse = Folketrygdloven_kap2_bestemmelser.FTRL_KAP2_2_5_FØRSTE_LEDD_A,
+        )
+        trygdeavgiftsberegningService.beregnOgLagreTrygdeavgift(årsavregningBehandlingID, skattefordholdsperioder, inntektsperioder)
+        årsavregningService.oppdater(årsavregningBehandlingID, årsavregning.id, tidligereFakturertBeloep, nyttTotalbeloep)
+
+        val vedtakRequestÅrsavregning = FattVedtakRequest.Builder()
+            .medBehandlingsresultatType(Behandlingsresultattyper.FERDIGBEHANDLET)
+            .medVedtakstype(Vedtakstyper.FØRSTEGANGSVEDTAK)
+            .medBestillersId("komponent test")
+            .build()
+
+        executeAndWait(
+            mapOf(
+                ProsessType.IVERKSETT_VEDTAK_AARSAVREGNING to 1,
+                ProsessType.OPPRETT_OG_DISTRIBUER_BREV to 1
+            )
+        ) {
+            vedtaksfattingFasade.fattVedtak(årsavregningBehandlingID, vedtakRequestÅrsavregning)
+        }
+
+
+        behandlingsresultatService.hentBehandlingsresultat(årsavregningBehandlingID).run {
+            type shouldBe Behandlingsresultattyper.FERDIGBEHANDLET
+            behandlingsmåte shouldBe Behandlingsmaate.MANUELT
+            this.årsavregning.aar shouldBe 2023
+            this.årsavregning.tidligereFakturertBeloep shouldBe tidligereFakturertBeloep
+            this.årsavregning.nyttTotalbeloep shouldBe nyttTotalbeloep
+            this.årsavregning.tilFaktureringBeloep shouldBe nyttTotalbeloep - tidligereFakturertBeloep
+            fakturaserieReferanse shouldBe this@ÅrsavregningIT.fakturaserieReferanse
+        }
+        behandlingRepository.findById(årsavregningBehandlingID)
+            .shouldBePresent().run {
+                withClue("Behandlingsstatus skal være AVSLUTTET") {
+                    type shouldBe Behandlingstyper.ÅRSAVREGNING
+                    status shouldBe Behandlingsstatus.AVSLUTTET
+                }
+            }
+        mockServer.verify(1, WireMock.postRequestedFor(WireMock.urlEqualTo("/fakturaer")))
     }
 
     @Test
