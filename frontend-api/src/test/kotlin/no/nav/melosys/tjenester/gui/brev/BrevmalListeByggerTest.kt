@@ -1,6 +1,5 @@
 package no.nav.melosys.tjenester.gui.brev
 
-import io.getunleash.FakeUnleash
 import io.kotest.matchers.booleans.shouldBeFalse
 import io.kotest.matchers.booleans.shouldBeTrue
 import io.kotest.matchers.collections.shouldBeEmpty
@@ -57,14 +56,11 @@ internal class BrevmalListeByggerTest {
     @MockK
     private lateinit var utenlandskMyndighetService: UtenlandskMyndighetService
 
-    private val fakeUnleash = FakeUnleash()
-
     private lateinit var brevmalListeBygger: BrevmalListeBygger
 
     @BeforeEach
     fun init() {
-        fakeUnleash.enableAll()
-        val hentMuligeProduserbaredokumenterService = HentMuligeProduserbaredokumenterService(behandlingService, fakeUnleash)
+        val hentMuligeProduserbaredokumenterService = HentMuligeProduserbaredokumenterService(behandlingService)
         val brevmalListeService = BrevmalListeService(hentMuligeProduserbaredokumenterService, hentBrevAdresseTilMottakereService)
         brevmalListeBygger = BrevmalListeBygger(
             brevmalListeService,

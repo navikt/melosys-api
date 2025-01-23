@@ -5,7 +5,6 @@ import java.time.LocalDate;
 import java.util.Arrays;
 import java.util.List;
 
-import io.getunleash.FakeUnleash;
 import no.nav.melosys.domain.Behandling;
 import no.nav.melosys.domain.FellesKodeverk;
 import no.nav.melosys.domain.Saksopplysning;
@@ -122,7 +121,7 @@ class DokgenServiceTest {
             new DokgenMalMapper(dokgenMapperDatahenter, mockInnvilgelseFtrlMapper, mockInnvilgelseEftaStorbritanniaMapper, mockInnhentingAvInntektsopplysningerMapper, mockTrygdeavtaleMapper, orienteringAnmodningUnntakMapper, orienteringTilArbeidsgiverOmVedtakMapper, årsavregningVedtakMapper),
             mockBehandlingsService, mockEregFasade, mockKontaktOpplysningService,
             mockBrevMottakerService, mockProsessinstansService, mockSaksbehandlerService,
-            mockUtenlandskMyndighetService, mockUtledMottaksdato, new FakeUnleash());
+            mockUtenlandskMyndighetService, mockUtledMottaksdato);
 
         reset(mockDokgenConsumer);
     }

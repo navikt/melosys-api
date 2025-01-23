@@ -1,6 +1,5 @@
 package no.nav.melosys.service.brev.bestilling
 
-import io.getunleash.FakeUnleash
 import io.kotest.matchers.collections.shouldBeEmpty
 import io.kotest.matchers.collections.shouldContainInOrder
 import io.kotest.matchers.collections.shouldHaveSize
@@ -28,8 +27,6 @@ class HentMuligeProduserbaredokumenterServiceTest {
     @MockK
     private lateinit var behandlingService: BehandlingService
 
-    private val fakeUnleash = FakeUnleash()
-
     private lateinit var hentMuligeProduserbaredokumenterService: HentMuligeProduserbaredokumenterService
 
     private lateinit var behandling: Behandling
@@ -37,8 +34,7 @@ class HentMuligeProduserbaredokumenterServiceTest {
 
     @BeforeEach
     fun setUp() {
-        fakeUnleash.enableAll()
-        hentMuligeProduserbaredokumenterService = HentMuligeProduserbaredokumenterService(behandlingService, fakeUnleash)
+        hentMuligeProduserbaredokumenterService = HentMuligeProduserbaredokumenterService(behandlingService)
         behandling = lagBehandling()
         every { behandlingService.hentBehandlingMedSaksopplysninger(BEHANDLING_ID) } returns behandling
     }

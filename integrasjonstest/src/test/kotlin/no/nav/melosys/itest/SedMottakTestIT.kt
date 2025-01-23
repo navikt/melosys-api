@@ -1,5 +1,9 @@
 package no.nav.melosys.itest
 
+import com.github.tomakehurst.wiremock.WireMockServer
+import com.github.tomakehurst.wiremock.client.WireMock
+import com.github.tomakehurst.wiremock.client.WireMock.equalTo
+import com.github.tomakehurst.wiremock.core.WireMockConfiguration
 import com.ninjasquad.springmockk.MockkBean
 import io.getunleash.FakeUnleash
 import io.kotest.assertions.extracting
@@ -69,6 +73,12 @@ class SedMottakTestIT(
 
     private val randomUUID = UUID.randomUUID()
 
+    // TODO: Vi har dette i JournalfoeringBase også, så burde se på å få noe felles her
+    protected val mockServer: WireMockServer =
+        WireMockServer(
+            WireMockConfiguration.options().port(8094)
+        )
+
     @MockkBean
     private lateinit var utstedtA1AivenProducer: UtstedtA1AivenProducer
 
@@ -80,6 +90,20 @@ class SedMottakTestIT(
         oppgaveRepo.repo.clear()
         MelosysEessiRepo.sedRepo.clear()
         unleash.resetAll()
+        mockServer.start()
+
+        mockServer.stubFor(
+            WireMock.post(WireMock.urlPathMatching("/api/v1/mal/.*/lag-pdf"))
+                .withQueryParam("somKopi", equalTo("false"))
+                .withQueryParam("utkast", equalTo("false"))
+                .willReturn(
+                    WireMock.aResponse()
+                        .withStatus(200)
+                        .withHeader("Content-Type", "application/json")
+                        .withBody(ByteArray(0))
+                )
+        )
+
     }
 
     @AfterEach
@@ -87,6 +111,7 @@ class SedMottakTestIT(
         ThreadLocalAccessInfo.afterExecuteProcess(randomUUID)
         oppgaveRepo.repo.clear()
         prosessinstansTestManager.clear()
+        mockServer.stop()
     }
 
     @Test
@@ -482,7 +507,8 @@ class SedMottakTestIT(
         val vedtaksProsessInstans = prosessinstansTestManager.executeAndWait(
             mapOf(
                 ProsessType.IVERKSETT_VEDTAK_EOS to 1,
-                ProsessType.SEND_BREV to 2
+                ProsessType.SEND_BREV to 2,
+                ProsessType.OPPRETT_OG_DISTRIBUER_BREV to 1
             )
         ) {
             vedtaksfattingFasade.fattVedtak(
@@ -532,6 +558,11 @@ class SedMottakTestIT(
             behandlingsresultatRepository.findWithLovvalgOgMedlemskapsperioderById(id).shouldBePresent()
                 .type.shouldBe(Behandlingsresultattyper.FORELOEPIG_FASTSATT_LOVVALGSLAND)
         }
+
+        mockServer.verify(
+            1,
+            WireMock.postRequestedFor(WireMock.urlEqualTo("/api/v1/mal/orientering_til_arbeidsgiver_om_vedtak/lag-pdf?somKopi=false&utkast=false"))
+        )
     }
 
     @Test
@@ -623,7 +654,8 @@ class SedMottakTestIT(
         val vedtaksProsessInstans = prosessinstansTestManager.executeAndWait(
             mapOf(
                 ProsessType.IVERKSETT_VEDTAK_EOS to 1,
-                ProsessType.SEND_BREV to 2
+                ProsessType.SEND_BREV to 2,
+                ProsessType.OPPRETT_OG_DISTRIBUER_BREV to 1
             )
         ) {
             vedtaksfattingFasade.fattVedtak(
@@ -651,6 +683,12 @@ class SedMottakTestIT(
                 Behandlingsresultattyper.FORELOEPIG_FASTSATT_LOVVALGSLAND
             )
         }
+
+        mockServer.verify(
+            1,
+            WireMock.postRequestedFor(WireMock.urlEqualTo("/api/v1/mal/orientering_til_arbeidsgiver_om_vedtak/lag-pdf?somKopi=false&utkast=false"))
+        )
+
     }
 
     @Test

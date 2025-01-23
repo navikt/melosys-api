@@ -11,9 +11,7 @@ import no.nav.melosys.domain.kodeverk.*;
 import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingsresultattyper;
 import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingsstatus;
 import no.nav.melosys.domain.kodeverk.lovvalgsbestemmelser.Lovvalgbestemmelser_883_2004;
-import no.nav.melosys.domain.kodeverk.lovvalgsbestemmelser.Lovvalgbestemmelser_konv_efta_storbritannia;
 import no.nav.melosys.domain.kodeverk.lovvalgsbestemmelser.Tilleggsbestemmelser_883_2004;
-import no.nav.melosys.featuretoggle.ToggleName;
 import no.nav.melosys.service.LandvelgerService;
 import no.nav.melosys.service.behandling.BehandlingsresultatService;
 import no.nav.melosys.statistikk.utstedt_a1.integrasjon.UtstedtA1AivenProducer;
@@ -54,27 +52,7 @@ class UtstedtA1ServiceTest {
     @BeforeEach
     void setUp() {
         unleash.resetAll();
-        utstedtA1Service = new UtstedtA1Service(utstedtA1AivenProducer, behandlingsresultatService, landvelgerService, unleash);
-    }
-
-    @Test
-    void sendMeldingOmUtstedtA1() {
-        when(behandlingsresultatService.hentBehandlingsresultat(BEHANDLING_ID)).thenReturn(lagBehandlingsresultat());
-        when(landvelgerService.hentUtenlandskTrygdemyndighetsland(BEHANDLING_ID)).thenReturn(List.of(Land_iso2.SE));
-        when(utstedtA1AivenProducer.produserMelding(any(UtstedtA1Melding.class))).thenAnswer(returnsFirstArg());
-
-        utstedtA1Service.sendMeldingOmUtstedtA1(BEHANDLING_ID);
-
-        verify(behandlingsresultatService).hentBehandlingsresultat(BEHANDLING_ID);
-        verify(landvelgerService).hentUtenlandskTrygdemyndighetsland(BEHANDLING_ID);
-        verify(utstedtA1AivenProducer).produserMelding(captor.capture());
-
-        UtstedtA1Melding melding = captor.getValue();
-        assertThat(melding).isNotNull();
-        assertThat(melding.getSerienummer()).isEqualTo("MEL-123123");
-        assertThat(melding.getUtsendtTilLand()).isEqualTo("SE");
-        assertThat(melding.getArtikkel()).isEqualTo(Lovvalgsbestemmelse.ART_12_1);
-        assertThat(melding.getTypeUtstedelse()).isEqualTo(A1TypeUtstedelse.FØRSTEGANG);
+        utstedtA1Service = new UtstedtA1Service(utstedtA1AivenProducer, behandlingsresultatService, landvelgerService);
     }
 
     @Test
