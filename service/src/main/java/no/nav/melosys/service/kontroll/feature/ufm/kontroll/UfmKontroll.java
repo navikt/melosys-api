@@ -150,13 +150,8 @@ class UfmKontroll {
             Kontroll_begrunnelser.BOSATT_I_NORGE_I_PERIODEN : null;
     }
 
-    static Kontroll_begrunnelser arbeidssted(UfmKontrollData kontrollData) {
-        return ArbeidsstedRegler.erArbeidsstedFraSvalbardOgJanMayen(kontrollData.sedDokument()) ?
-            Kontroll_begrunnelser.ARBEIDSSTED_UTENFOR_EOS : null;
-    }
-
     static Kontroll_begrunnelser arbeidsland(UfmKontrollData kontrollData) {
-        return ArbeidsstedRegler.erArbeidsstedFraSvalbardOgJanMayen4_3(kontrollData.sedDokument()) ?
+        return ArbeidsstedRegler.erArbeidsstedFraSvalbardOgJanMayen(kontrollData.sedDokument()) ?
             Kontroll_begrunnelser.ARBEIDSSTED_UTENFOR_EOS : null;
     }
 
