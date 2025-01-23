@@ -54,7 +54,7 @@ class SedMottakTestIT(
     @Autowired private val behandlingsresultatRepository: BehandlingsresultatRepository,
     @Autowired private val unleash: FakeUnleash,
     @Autowired private val avklartefaktaService: AvklartefaktaService,
-    ) : ComponentTestBaseWithMockServerAndProsessinstansAware() {
+) : ComponentTestBaseWithMockServerAndProsessinstansAware() {
 
     private val kafkaTopic = "teammelosys.eessi.v1-local"
 
