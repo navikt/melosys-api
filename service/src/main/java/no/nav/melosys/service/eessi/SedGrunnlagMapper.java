@@ -10,7 +10,6 @@ import no.nav.melosys.domain.mottatteopplysninger.data.Periode;
 import no.nav.melosys.domain.mottatteopplysninger.data.UtenlandskIdent;
 import no.nav.melosys.domain.mottatteopplysninger.data.arbeidssteder.FysiskArbeidssted;
 import no.nav.melosys.exception.FunksjonellException;
-import no.nav.melosys.featuretoggle.ToggleName;
 import org.springframework.util.CollectionUtils;
 
 import java.util.List;
@@ -27,10 +26,8 @@ public class SedGrunnlagMapper {
 
         sedGrunnlag.personOpplysninger = tilPersonopplysninger(sedGrunnlagDto.getUtenlandskIdent());
         var arbeidsland = sedGrunnlagDto.getArbeidsland();
-        if (unleash.isEnabled(ToggleName.MELOSYS_CDM_4_3) && !arbeidsland.isEmpty()) {
-            sedGrunnlag.arbeidPaaLand.setFysiskeArbeidssteder(tilFysiskeArbeidssteder4_3(sedGrunnlagDto.getArbeidsland()));
-        } else {
-            sedGrunnlag.arbeidPaaLand.setFysiskeArbeidssteder(tilFysiskeArbeidssteder(sedGrunnlagDto.getArbeidssteder()));
+        if (!arbeidsland.isEmpty()) {
+            sedGrunnlag.arbeidPaaLand.setFysiskeArbeidssteder(tilFysiskeArbeidssteder(sedGrunnlagDto.getArbeidsland()));
         }
         sedGrunnlag.foretakUtland = tilForetakUtland(sedGrunnlagDto.getArbeidsgivendeVirksomheter(), sedGrunnlagDto.getSelvstendigeVirksomheter());
         sedGrunnlag.periode = tilPeriode(sedGrunnlagDto.getLovvalgsperioder());
@@ -82,11 +79,7 @@ public class SedGrunnlagMapper {
         return utenlandskIdent.stream().map(Ident::tilUtenlandskIdent).toList();
     }
 
-    private static List<FysiskArbeidssted> tilFysiskeArbeidssteder(List<no.nav.melosys.domain.eessi.sed.Arbeidssted> arbeidssteder) {
-        return arbeidssteder.stream().map(no.nav.melosys.domain.eessi.sed.Arbeidssted::tilFysiskArbeidssted).toList();
-    }
-
-    private static List<FysiskArbeidssted> tilFysiskeArbeidssteder4_3(List<no.nav.melosys.domain.eessi.sed.Arbeidsland> arbeidsland) {
+    private static List<FysiskArbeidssted> tilFysiskeArbeidssteder(List<no.nav.melosys.domain.eessi.sed.Arbeidsland> arbeidsland) {
         return arbeidsland.stream().flatMap(arbLand -> arbLand.getArbeidssted().stream().map(arbeidssted -> {
             arbeidssted.getAdresse().setLand(arbLand.getLand());
             return arbeidssted.tilFysiskArbeidssted();
