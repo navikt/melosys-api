@@ -238,8 +238,7 @@ class ÅrsavregningIT(
                 avgiftspliktigTotalinntekt = Penger(10000.toBigDecimal())
             }
         )
-        val tidligereFakturertBeloep = BigDecimal(1000)
-        val nyttTotalbeloep = BigDecimal(2000)
+
         medlemskapsperiodeService.opprettMedlemskapsperiode(
             behandlingsresultatID = årsavregningBehandlingID,
                 fom = periode.fom,
@@ -249,6 +248,9 @@ class ÅrsavregningIT(
                 bestemmelse = Folketrygdloven_kap2_bestemmelser.FTRL_KAP2_2_5_FØRSTE_LEDD_A,
         )
         trygdeavgiftsberegningService.beregnOgLagreTrygdeavgift(årsavregningBehandlingID, skattefordholdsperioder, inntektsperioder)
+
+        val tidligereFakturertBeloep = BigDecimal(1000)
+        val nyttTotalbeloep = BigDecimal(2000)
         årsavregningService.oppdater(årsavregningBehandlingID, årsavregning.id, tidligereFakturertBeloep, nyttTotalbeloep)
 
         val vedtakRequestÅrsavregning = FattVedtakRequest.Builder()
