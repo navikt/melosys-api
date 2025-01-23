@@ -104,8 +104,7 @@ private fun replikerTrygdeavgift(
                 .find { it.id == trygdeavgiftsperiodeOriginal.grunnlagMedlemskapsperiode?.id }
                 ?: throw IllegalStateException("Medlemskapsperiode ikke funnet"),
             grunnlagInntekstperiode = inntektsperioderReplika
-                .find { it.id == trygdeavgiftsperiodeOriginal.grunnlagInntekstperiode?.id }
-                ?: throw IllegalStateException("Inntektsperiode ikke funnet"),
+                .find { it.id == trygdeavgiftsperiodeOriginal.grunnlagInntekstperiode?.id },
             grunnlagSkatteforholdTilNorge = skatteforholdTilNorgeReplika
                 .find { it.id == trygdeavgiftsperiodeOriginal.grunnlagSkatteforholdTilNorge?.id }
                 ?: throw IllegalStateException("SkatteforholdTilNorge ikke funnet"),
