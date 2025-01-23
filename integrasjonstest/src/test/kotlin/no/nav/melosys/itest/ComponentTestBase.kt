@@ -1,7 +1,11 @@
 package no.nav.melosys.itest
 
 import no.nav.melosys.Application
+import no.nav.melosys.melosysmock.medl.MedlRepo
+import no.nav.melosys.melosysmock.melosyseessi.MelosysEessiRepo
+import no.nav.melosys.melosysmock.sak.SakRepo
 import no.nav.security.token.support.spring.test.EnableMockOAuth2Server
+import org.junit.jupiter.api.AfterEach
 import org.springframework.boot.test.autoconfigure.jdbc.AutoConfigureTestDatabase
 import org.springframework.boot.test.context.SpringBootTest
 import org.springframework.context.annotation.Import
@@ -26,4 +30,12 @@ import org.springframework.test.context.ActiveProfiles
 )
 @DirtiesContext
 @EnableMockOAuth2Server
-class ComponentTestBase : OracleTestContainerBase()
+class ComponentTestBase : OracleTestContainerBase() {
+
+    @AfterEach
+    fun afterEachComponentTestBase() {
+        SakRepo.clear()
+        MedlRepo.repo.clear()
+        MelosysEessiRepo.sedRepo.clear()
+    }
+}
