@@ -103,9 +103,9 @@ private fun replikerTrygdeavgift(
             grunnlagMedlemskapsperiode = behandlingsresultatReplika.medlemskapsperioder
                 .find { it.id == trygdeavgiftsperiodeOriginal.grunnlagMedlemskapsperiode?.id }
                 ?: throw IllegalStateException("Medlemskapsperiode ikke funnet"),
+            // I de tilfellene bruker ikke skal betale avgift til Nav, er det ikke krav om at inntektsperioder må være satt.
             grunnlagInntekstperiode = inntektsperioderReplika
-                .find { it.id == trygdeavgiftsperiodeOriginal.grunnlagInntekstperiode?.id }
-                ?: throw IllegalStateException("Inntektsperiode ikke funnet"),
+                .find { it.id == trygdeavgiftsperiodeOriginal.grunnlagInntekstperiode?.id },
             grunnlagSkatteforholdTilNorge = skatteforholdTilNorgeReplika
                 .find { it.id == trygdeavgiftsperiodeOriginal.grunnlagSkatteforholdTilNorge?.id }
                 ?: throw IllegalStateException("SkatteforholdTilNorge ikke funnet"),

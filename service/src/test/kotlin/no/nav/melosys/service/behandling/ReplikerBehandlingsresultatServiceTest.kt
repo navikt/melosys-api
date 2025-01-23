@@ -79,6 +79,12 @@ class ReplikerBehandlingsresultatServiceTest {
                     isArbeidsgiversavgiftBetalesTilSkatt = false
                 })
         )
+        innvilgetMedlemskapsperiode.trygdeavgiftsperioder.add(
+            lagTrygdeavgiftsperiode().copyEntity(
+                grunnlagMedlemskapsperiode = innvilgetMedlemskapsperiode,
+                grunnlagInntekstperiode = null,
+                )
+        )
         behandlingsresultatOriginal.addMedlemskapsperiode(innvilgetMedlemskapsperiode)
         behandlingsresultatOriginal.addMedlemskapsperiode(avslaattMedlemskapsperiode)
         behandlingsresultatOriginal.addMedlemskapsperiode(opphoertMedlemskapsperiode)
