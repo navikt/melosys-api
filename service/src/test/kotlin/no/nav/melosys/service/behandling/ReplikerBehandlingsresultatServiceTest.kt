@@ -21,6 +21,7 @@ import no.nav.melosys.domain.kodeverk.lovvalgsbestemmelser.Tilleggsbestemmelser_
 import org.assertj.core.api.Assertions
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
+import org.junit.jupiter.api.assertThrows
 import java.lang.reflect.InvocationTargetException
 import java.math.BigDecimal
 import java.time.Instant
@@ -332,6 +333,58 @@ class ReplikerBehandlingsresultatServiceTest {
                     bestemmelse.shouldBe(opphørtMedlemskapsperiodeOriginal.bestemmelse)
                 }
             }
+    }
+
+    @Test
+    fun `replikering av behandlingsresultat - manglende skatteforholdsperiode kaster exception`() {
+        val tidligsteInaktiveBehandling = Behandling()
+        tidligsteInaktiveBehandling.id = 1L
+        behandlingsresultatOriginal = opprettBehandlingsresultatMedData(tidligsteInaktiveBehandling)
+
+        val innvilgetMedlemskapsperiode = opprettMedlemskapsperiode(InnvilgelsesResultat.INNVILGET, 1L)
+        val trygdeavgiftsperiode = lagTrygdeavgiftsperiode().copyEntity(
+            grunnlagMedlemskapsperiode = innvilgetMedlemskapsperiode,
+            grunnlagInntekstperiode = null,
+            grunnlagSkatteforholdTilNorge = null
+        )
+        innvilgetMedlemskapsperiode.trygdeavgiftsperioder.add(trygdeavgiftsperiode)
+        behandlingsresultatOriginal.addMedlemskapsperiode(innvilgetMedlemskapsperiode)
+
+        val behandlingReplika = Behandling()
+        behandlingReplika.id = 2L
+        behandlingReplika.type = Behandlingstyper.NY_VURDERING
+
+        every { behandlingsresultatService.hentBehandlingsresultat(tidligsteInaktiveBehandling.id) } returns behandlingsresultatOriginal
+        val slot = slot<Behandlingsresultat>()
+        every { behandlingsresultatService.lagre(capture(slot)) } returnsArgument 0
+
+        assertThrows<IllegalStateException> {
+            replikerBehandlingsresultatService.replikerBehandlingsresultat(tidligsteInaktiveBehandling, behandlingReplika)
+        }.message shouldBe "SkatteforholdTilNorge ikke funnet"
+    }
+
+    @Test
+    fun `replikering av behandlingsresultat - manglende medlemskapsperiode kaster exception`() {
+        val tidligsteInaktiveBehandling = Behandling()
+        tidligsteInaktiveBehandling.id = 1L
+        behandlingsresultatOriginal = opprettBehandlingsresultatMedData(tidligsteInaktiveBehandling)
+
+        val innvilgetMedlemskapsperiode = opprettMedlemskapsperiode(InnvilgelsesResultat.INNVILGET, 1L)
+        val trygdeavgiftsperiode = lagTrygdeavgiftsperiode()
+
+        innvilgetMedlemskapsperiode.trygdeavgiftsperioder.add(trygdeavgiftsperiode)
+        behandlingsresultatOriginal.addMedlemskapsperiode(innvilgetMedlemskapsperiode)
+
+        val behandlingReplika = Behandling()
+        behandlingReplika.id = 2L
+        behandlingReplika.type = Behandlingstyper.NY_VURDERING
+
+        every { behandlingsresultatService.hentBehandlingsresultat(tidligsteInaktiveBehandling.id) } returns behandlingsresultatOriginal
+        every { behandlingsresultatService.lagre(any()) } returnsArgument 0
+
+        assertThrows<IllegalStateException> {
+            replikerBehandlingsresultatService.replikerBehandlingsresultat(tidligsteInaktiveBehandling, behandlingReplika)
+        }.message shouldBe "Medlemskapsperiode ikke funnet"
     }
 
     private fun lagTrygdeavgiftsperiode(): Trygdeavgiftsperiode {

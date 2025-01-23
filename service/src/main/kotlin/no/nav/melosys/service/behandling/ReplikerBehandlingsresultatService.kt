@@ -89,7 +89,7 @@ private fun replikerTrygdeavgift(
     val inntektsperioderReplika = behandlingsresultatOriginal.hentInntektsperioder().map {
         BeanUtils.cloneBean(it) as Inntektsperiode
     }
-    val skatteforholdTilNorgeReplika = behandlingsresultatOriginal.hentSkatteforholdTilNorge().map {
+    val skatteforholdTilNorgeReplika = behandlingsresultatOriginal.hentSkatteforholdTilNorge().filterNotNull().map {
         BeanUtils.cloneBean(it) as SkatteforholdTilNorge
     }
 
