@@ -75,53 +75,6 @@ class ArbeidsstedReglerTest {
             "Germany"))).isFalse();
     }
 
-    @Test
-    void arbeidstedSvalbardOgJanMayen_landErSJ_true_4_3() {
-        assertThat(ArbeidsstedRegler.erArbeidsstedFraSvalbardOgJanMayen(lagSedDokument("SJ", "by"))).isTrue();
-    }
-
-    @Test
-    void arbeidstedSvalbardOgJanMayen_landErIkkeSJ_false_4_3() {
-        assertThat(ArbeidsstedRegler.erArbeidsstedFraSvalbardOgJanMayen(lagSedDokument("JS", "by"))).isFalse();
-    }
-
-    @Test
-    void arbeidstedSvalbardOgJanMayen_likByFraSvalbard_true_4_3() {
-        assertThat(ArbeidsstedRegler.erArbeidsstedFraSvalbardOgJanMayen(lagSedDokument("NO", "Hopen"))).isTrue();
-    }
-
-    @Test
-    void arbeidstedSvalbardOgJanMayen_ikkeÅlesundMenAlesund_true_4_3() {
-        assertThat(ArbeidsstedRegler.erArbeidsstedFraSvalbardOgJanMayen(lagSedDokument("NO", "Ny-Alesund"))).isTrue();
-    }
-
-    @Test
-    void arbeidstedSvalbardOgJanMayen_caseInsensitive_true_4_3() {
-        assertThat(ArbeidsstedRegler.erArbeidsstedFraSvalbardOgJanMayen(lagSedDokument("NO", " NY-ÅLESUND "))).isTrue();
-    }
-
-    @Test
-    void arbeidstedSvalbardOgJanMayen_byIkkeFraSvalbard_false_4_3() {
-        assertThat(ArbeidsstedRegler.erArbeidsstedFraSvalbardOgJanMayen(lagSedDokument("JS", "New-Holesound"))).isFalse();
-    }
-
-    @Test
-    void arbeidstedSvalbardOgJanMayen_tekstInneholderSenjahopen_false_4_3() {
-        assertThat(ArbeidsstedRegler.erArbeidsstedFraSvalbardOgJanMayen(lagSedDokument("NO", "Senjahopen"))).isFalse();
-    }
-
-    @Test
-    void arbeidstedSvalbardOgJanMayen_tekstInneholderByFraSvalbardIkkeHopen_true_4_3() {
-        assertThat(ArbeidsstedRegler.erArbeidsstedFraSvalbardOgJanMayen(lagSedDokument("NO", "Longyearbyen, Svalbard, " +
-            "Norway"))).isTrue();
-    }
-
-    @Test
-    void arbeidstedSvalbardOgJanMayen_tekstInneholderHopenMenIkkeHopen_false_4_3() {
-        assertThat(ArbeidsstedRegler.erArbeidsstedFraSvalbardOgJanMayen(lagSedDokument("NO", "Hopener Mühlenbach, " +
-            "Germany"))).isFalse();
-    }
-
     private RepresentantIUtlandet lagRepresentantIUtlandet(String navn) {
         var representantIUtlandet = new RepresentantIUtlandet();
         representantIUtlandet.setRepresentantNavn(navn);

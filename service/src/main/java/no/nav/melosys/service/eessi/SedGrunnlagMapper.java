@@ -21,7 +21,7 @@ public class SedGrunnlagMapper {
         throw new IllegalStateException("Utility");
     }
 
-    public static SedGrunnlag tilSedGrunnlag(SedGrunnlagDto sedGrunnlagDto, Unleash unleash) {
+    public static SedGrunnlag tilSedGrunnlag(SedGrunnlagDto sedGrunnlagDto) {
         SedGrunnlag sedGrunnlag = new SedGrunnlag();
 
         sedGrunnlag.personOpplysninger = tilPersonopplysninger(sedGrunnlagDto.getUtenlandskIdent());

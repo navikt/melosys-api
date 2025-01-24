@@ -6,6 +6,8 @@ public class Arbeidsland {
     private String land;
     private List<Arbeidssted> arbeidssted;
 
+    public Arbeidsland() {}
+
     public Arbeidsland(String land, List<Arbeidssted> arbeidssted) {
         this.land = land;
         this.arbeidssted = arbeidssted;

@@ -24,7 +24,7 @@ class SedGrunnlagMapperTest {
 
     @Test
     void mapSedGrunnlag() throws IOException, URISyntaxException {
-        SedGrunnlag sedGrunnlag = SedGrunnlagMapper.tilSedGrunnlag(lagSedGrunnlag("eessi/sedGrunnlag.json"), fakeUnleash);
+        SedGrunnlag sedGrunnlag = SedGrunnlagMapper.tilSedGrunnlag(lagSedGrunnlag("eessi/sedGrunnlag.json"));
 
         assertThat(sedGrunnlag)
             .isNotNull()
@@ -62,7 +62,7 @@ class SedGrunnlagMapperTest {
 
     @Test
     void lagSedGrunnlagA001() throws Exception{
-        SedGrunnlag sedGrunnlag = SedGrunnlagMapper.tilSedGrunnlag(lagSedGrunnlag("eessi/sedGrunnlagA001.json"), fakeUnleash);
+        SedGrunnlag sedGrunnlag = SedGrunnlagMapper.tilSedGrunnlag(lagSedGrunnlag("eessi/sedGrunnlagA001.json"));
 
         assertThat(sedGrunnlag)
             .isNotNull()
