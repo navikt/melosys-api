@@ -20,10 +20,11 @@ import no.nav.melosys.service.behandling.BehandlingsresultatService
 import no.nav.melosys.service.dokument.DokgenService
 import no.nav.melosys.service.oppgave.OppgaveService
 import no.nav.melosys.sikkerhet.context.SubjectHandler
-import org.junit.jupiter.api.Disabled
+import no.nav.melosys.sikkerhet.context.TestSubjectHandler
+import org.junit.jupiter.api.BeforeAll
 import org.junit.jupiter.api.Test
-
 import org.junit.jupiter.api.extension.ExtendWith
+
 
 @ExtendWith(MockKExtension::class)
 class ÅrsavregningVedtakServiceTest {
@@ -42,7 +43,12 @@ class ÅrsavregningVedtakServiceTest {
     @RelaxedMockK
     private lateinit var dokgenService: DokgenService
 
-    @Disabled("Denne testen gir feil i github: MockK no answer found for: SpringSubjectHandler(#3247).getUserID(). Kjører lokalt. Rune vil fikse dette i egen branch.")
+    @BeforeAll
+    fun setup() {
+        SubjectHandler.set(TestSubjectHandler())
+    }
+
+
     @Test
     fun fattVedtak_medBehandlingTypeÅrsavregning_fatterVedtak() {
         val BEH_ID = 123L
