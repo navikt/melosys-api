@@ -43,11 +43,6 @@ class ÅrsavregningVedtakServiceTest {
     @RelaxedMockK
     private lateinit var dokgenService: DokgenService
 
-    @BeforeAll
-    fun setup() {
-        SubjectHandler.set(TestSubjectHandler())
-    }
-
 
     @Test
     fun fattVedtak_medBehandlingTypeÅrsavregning_fatterVedtak() {
@@ -109,5 +104,13 @@ class ÅrsavregningVedtakServiceTest {
         FattVedtakRequest.Builder().medBestillersId(SubjectHandler.getInstance().getUserID()).medBehandlingsresultatType(behandlingsResultattype)
             .medNyVurderingBakgrunn(nyVurderingBakgrunn).medVedtakstype(vedtakstype).medBegrunnelseFritekst(begrunnelseFritekst)
             .medInnledningFritekst(innledningFritekst).medTrygdeavgiftFritekst(trygdeavgiftFritekst).build()
+
+    companion object {
+        @JvmStatic
+        @BeforeAll
+        fun setup(): Unit {
+            SubjectHandler.set(TestSubjectHandler())
+        }
+    }
 
 }
