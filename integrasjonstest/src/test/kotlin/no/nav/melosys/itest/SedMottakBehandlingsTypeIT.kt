@@ -18,7 +18,6 @@ import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingsstatus
 import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingstema
 import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingstyper
 import no.nav.melosys.melosysmock.journalpost.JournalpostRepo
-import no.nav.melosys.melosysmock.oppgave.OppgaveRepo
 import no.nav.melosys.melosysmock.testdata.JournalføringsoppgaveGenerator
 import no.nav.melosys.repository.BehandlingRepository
 import no.nav.melosys.repository.FagsakRepository
@@ -37,11 +36,10 @@ import org.springframework.kafka.core.KafkaTemplate
 import java.time.LocalDate
 import java.util.*
 
-class SedMottakBehandlngsTypeIT(
+class SedMottakBehandlingTypeIT(
     @Autowired @Qualifier("melosysEessiMelding") private val melosysEessiMeldingKafkaTemplate: KafkaTemplate<String, MelosysEessiMelding>,
     @Autowired private val eessiMeldingTestDataFactory: EessiMeldingTestDataFactory,
     @Autowired private val opprettBehandlingForSak: OpprettBehandlingForSak,
-    @Autowired private val oppgaveRepo: OppgaveRepo,
     @Autowired private val journalpostRepo: JournalpostRepo,
     @Autowired private val behandlingRepository: BehandlingRepository,
     @Autowired private val fagsakRepository: FagsakRepository,
@@ -56,7 +54,6 @@ class SedMottakBehandlngsTypeIT(
 
     @BeforeEach
     fun setup() {
-        oppgaveRepo.repo.clear()
         unleash.resetAll()
     }
 
