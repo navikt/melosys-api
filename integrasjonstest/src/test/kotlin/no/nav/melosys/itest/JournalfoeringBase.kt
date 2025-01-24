@@ -21,7 +21,7 @@ class JournalfoeringBase(
     protected val journalføringService: JournalfoeringService,
     protected val oppgaveService: OppgaveService,
     extensionForWireMock: Extension? = null
-) : ComponentTestBaseWithMockServerAndProsessinstansAware(extensionForWireMock) {
+) : MockServerTestBaseWithProsessManager(extensionForWireMock) {
 
     protected fun journalførOgVentTilProsesserErFerdige(
         journalfoeringOpprettDto: JournalfoeringOpprettDto,

@@ -13,7 +13,7 @@ import org.junit.jupiter.api.BeforeEach
 import org.springframework.beans.factory.annotation.Autowired
 import java.util.*
 
-class ComponentTestBaseWithMockServerAndProsessinstansAware(
+class MockServerTestBaseWithProsessManager(
     extensionForWireMock: Extension? = null
 ) : ComponentTestBase() {
 
