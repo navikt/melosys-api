@@ -6,7 +6,7 @@ public class Arbeidsland {
     private String land;
     private List<Arbeidssted> arbeidssted;
 
-    // Tester klager på at den ikke har en default konstruktør.
+    // SedGrunnlagMapperTest.lagSedGrunnlag trenger default konstruktør for deserialisere testdata til SedGrunnlagDto. Kan fjerne dette når vi konvertere til Kotlin
     public Arbeidsland() {}
 
     public Arbeidsland(String land, List<Arbeidssted> arbeidssted) {
