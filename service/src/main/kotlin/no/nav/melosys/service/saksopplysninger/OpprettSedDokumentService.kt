@@ -33,9 +33,7 @@ class OpprettSedDokumentService(
     fun opprettSedSaksopplysning(melosysEessiMelding: MelosysEessiMelding, behandling: Behandling): Saksopplysning {
         val now = Instant.now()
         val saksopplysning = Saksopplysning().apply {
-            dokument = if (unleash.isEnabled(ToggleName.MELOSYS_CDM_4_3)) opprettSedDokument4_3(melosysEessiMelding) else opprettSedDokument(
-                melosysEessiMelding
-            )
+            dokument = opprettSedDokument(melosysEessiMelding)
             type = SaksopplysningType.SEDOPPL
             this.behandling = behandling
             versjon = SED_DOKUMENT_VERSJON
@@ -52,23 +50,6 @@ class OpprettSedDokumentService(
     }
 
     private fun opprettSedDokument(melosysEessiMelding: MelosysEessiMelding): SedDokument =
-        SedDokument().apply {
-            avsenderLandkode = Landkoder.valueOf(melosysEessiMelding.avsender.landkode)
-            lovvalgslandKode = Landkoder.valueOf(melosysEessiMelding.lovvalgsland)
-            lovvalgBestemmelse = Bestemmelse.fraBestemmelseString(melosysEessiMelding.artikkel).tilMelosysBestemmelse()
-            unntakFraLovvalgslandKode = hentUnntakFraLovvalgsland(melosysEessiMelding)
-            unntakFraLovvalgBestemmelse = hentUnntakFraLovvalgBestemmelse(melosysEessiMelding)
-            rinaSaksnummer = melosysEessiMelding.rinaSaksnummer
-            lovvalgsperiode = tilMedlemskapPeriode(melosysEessiMelding.periode)
-            rinaDokumentID = melosysEessiMelding.sedId
-            statsborgerskapKoder = melosysEessiMelding.statsborgerskap.map { it.landkode }
-            arbeidssteder = melosysEessiMelding.arbeidssteder
-            erEndring = melosysEessiMelding.erEndring
-            sedType = SedType.valueOf(melosysEessiMelding.sedType)
-            bucType = BucType.valueOf(melosysEessiMelding.bucType)
-        }
-
-    private fun opprettSedDokument4_3(melosysEessiMelding: MelosysEessiMelding): SedDokument =
         SedDokument().apply {
             avsenderLandkode = Landkoder.valueOf(melosysEessiMelding.avsender.landkode)
             lovvalgslandKode = Landkoder.valueOf(melosysEessiMelding.lovvalgsland)

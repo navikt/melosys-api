@@ -66,32 +66,40 @@
       "orgnr": "Testselvstendignummer"
     }
   ],
-  "arbeidssteder": [
+  "arbeidsland": [
     {
-      "navn": "Testarbeidsstednavn",
-      "adresse": {
-        "poststed": "Testarbeidsstedby",
-        "postnr": "Testarbeidsstedpostkode",
-        "land": "EE",
-        "gateadresse": "Testarbeidsstedgate Testarbeidsstedbygning",
-        "region": "Testarbeidsstedregion",
-        "adressetype": null
-      },
-      "fysisk": false,
-      "hjemmebase": "Testarbeidsstedbase"
+      "land": "EE",
+      "arbeidssted": [
+        {"navn": "Testarbeidsstednavn",
+          "adresse": {
+            "poststed": "Testarbeidsstedby",
+            "postnr": "Testarbeidsstedpostkode",
+            "land": "EE",
+            "gateadresse": "Testarbeidsstedgate Testarbeidsstedbygning",
+            "region": "Testarbeidsstedregion",
+            "adressetype": null
+          },
+          "fysisk": false,
+          "hjemmebase": "Testarbeidsstedbase"}
+      ]
     },
     {
-      "navn": "Testarbeidsstednavn2",
-      "adresse": {
-        "poststed": "Testarbeidsstedby2",
-        "postnr": null,
-        "land": "CY",
-        "gateadresse": "Testarbeidsstedgate2 Testarbeidsstedbygning2",
-        "region": null,
-        "adressetype": null
-      },
-      "fysisk": true,
-      "hjemmebase": "Testarbeidsstedbase2"
+      "land": "CY",
+      "arbeidssted": [
+        {
+          "navn": "Testarbeidsstednavn2",
+          "adresse": {
+            "poststed": "Testarbeidsstedby2",
+            "postnr": null,
+            "land": "CY",
+            "gateadresse": "Testarbeidsstedgate2 Testarbeidsstedbygning2",
+            "region": null,
+            "adressetype": null
+          },
+          "fysisk": true,
+          "hjemmebase": "Testarbeidsstedbase2"
+        }
+      ]
     }
   ],
   "lovvalgsperioder": [

@@ -106,7 +106,7 @@ class OpprettSedDokumentServiceTest {
                 "SE"
               ],
               "arbeidssteder": null,
-              "arbeidsland": []
+              "arbeidsland": null
             }
         """
     }

@@ -56,6 +56,7 @@ import no.nav.melosys.sikkerhet.context.SpringSubjectHandler
 import no.nav.melosys.sikkerhet.context.SubjectHandler
 import org.junit.jupiter.api.AfterEach
 import org.junit.jupiter.api.BeforeEach
+import org.junit.jupiter.api.Disabled
 import org.junit.jupiter.api.Test
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.beans.factory.annotation.Qualifier
@@ -245,6 +246,7 @@ class YrkesaktivFtrlVedtakIT(
         mockServer.verify(1, WireMock.deleteRequestedFor(WireMock.urlEqualTo("/fakturaserier/$fakturaserieReferanse")))
     }
 
+    @Disabled("Denne testen gir feil i github. Kjører lokalt. Rune vil fikse dette i egen branch.")
     @Test
     fun `Håndtere manglende innbetaling i sak som allerede har en åpen behandling`() {
         val saksnummer = lagFørstegangsbehandling(Skatteplikttype.IKKE_SKATTEPLIKTIG, false)

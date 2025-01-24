@@ -106,9 +106,8 @@ class UfmKontrollService(
     }
 
     private fun utførKontroller(kontrollData: UfmKontrollData, sedType: SedType): List<Kontroll_begrunnelser> {
-        val CDM4_3ToggleEnabled = unleash.isEnabled(ToggleName.MELOSYS_CDM_4_3)
 
-        return UfmKontrollsett.hentRegelsettForSedType(sedType, CDM4_3ToggleEnabled).stream()
+        return UfmKontrollsett.hentRegelsettForSedType(sedType).stream()
             .map { f: Function<UfmKontrollData?, Kontroll_begrunnelser> ->
                 f.apply(
                     kontrollData
