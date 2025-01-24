@@ -217,7 +217,7 @@ internal class ÅrsavregningControllerTest {
 }"""
 
         mockMvc.perform(
-            MockMvcRequestBuilders.get("$BASE_URL/{behandlingID}/aarsavregninger/{aarsavregningID}", 1, 1).contentType(MediaType.APPLICATION_JSON)
+            MockMvcRequestBuilders.get("$BASE_URL/{behandlingID}/aarsavregninger", 1).contentType(MediaType.APPLICATION_JSON)
         ).andExpect(status().isOk()).andExpect(content().json(expectedJson, true))
     }
 
@@ -432,7 +432,7 @@ internal class ÅrsavregningControllerTest {
 }"""
 
         mockMvc.perform(
-            MockMvcRequestBuilders.get("$BASE_URL/{behandlingID}/aarsavregninger/{aarsavregningID}", 1, 1).contentType(MediaType.APPLICATION_JSON)
+            MockMvcRequestBuilders.get("$BASE_URL/{behandlingID}/aarsavregninger", 1).contentType(MediaType.APPLICATION_JSON)
         ).andExpect(status().isOk()).andExpect(content().json(expectedJson, true))
     }
 
