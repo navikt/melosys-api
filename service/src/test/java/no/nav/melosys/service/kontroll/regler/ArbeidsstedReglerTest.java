@@ -30,48 +30,48 @@ class ArbeidsstedReglerTest {
 
     @Test
     void arbeidstedSvalbardOgJanMayen_landErSJ_true() {
-        assertThat(ArbeidsstedRegler.erArbeidsstedFraSvalbardOgJanMayen(lagSedDokument("SJ", "by"))).isTrue();
+        assertThat(ArbeidsstedRegler.erArbeidslandFraSvalbardOgJanMayen(lagSedDokument("SJ", "by"))).isTrue();
     }
 
     @Test
     void arbeidstedSvalbardOgJanMayen_landErIkkeSJ_false() {
-        assertThat(ArbeidsstedRegler.erArbeidsstedFraSvalbardOgJanMayen(lagSedDokument("JS", "by"))).isFalse();
+        assertThat(ArbeidsstedRegler.erArbeidslandFraSvalbardOgJanMayen(lagSedDokument("JS", "by"))).isFalse();
     }
 
     @Test
     void arbeidstedSvalbardOgJanMayen_likByFraSvalbard_true() {
-        assertThat(ArbeidsstedRegler.erArbeidsstedFraSvalbardOgJanMayen(lagSedDokument("NO", "Hopen"))).isTrue();
+        assertThat(ArbeidsstedRegler.erArbeidslandFraSvalbardOgJanMayen(lagSedDokument("NO", "Hopen"))).isTrue();
     }
 
     @Test
     void arbeidstedSvalbardOgJanMayen_ikkeÅlesundMenAlesund_true() {
-        assertThat(ArbeidsstedRegler.erArbeidsstedFraSvalbardOgJanMayen(lagSedDokument("NO", "Ny-Alesund"))).isTrue();
+        assertThat(ArbeidsstedRegler.erArbeidslandFraSvalbardOgJanMayen(lagSedDokument("NO", "Ny-Alesund"))).isTrue();
     }
 
     @Test
     void arbeidstedSvalbardOgJanMayen_caseInsensitive_true() {
-        assertThat(ArbeidsstedRegler.erArbeidsstedFraSvalbardOgJanMayen(lagSedDokument("NO", " NY-ÅLESUND "))).isTrue();
+        assertThat(ArbeidsstedRegler.erArbeidslandFraSvalbardOgJanMayen(lagSedDokument("NO", " NY-ÅLESUND "))).isTrue();
     }
 
     @Test
     void arbeidstedSvalbardOgJanMayen_byIkkeFraSvalbard_false() {
-        assertThat(ArbeidsstedRegler.erArbeidsstedFraSvalbardOgJanMayen(lagSedDokument("JS", "New-Holesound"))).isFalse();
+        assertThat(ArbeidsstedRegler.erArbeidslandFraSvalbardOgJanMayen(lagSedDokument("JS", "New-Holesound"))).isFalse();
     }
 
     @Test
     void arbeidstedSvalbardOgJanMayen_tekstInneholderSenjahopen_false() {
-        assertThat(ArbeidsstedRegler.erArbeidsstedFraSvalbardOgJanMayen(lagSedDokument("NO", "Senjahopen"))).isFalse();
+        assertThat(ArbeidsstedRegler.erArbeidslandFraSvalbardOgJanMayen(lagSedDokument("NO", "Senjahopen"))).isFalse();
     }
 
     @Test
     void arbeidstedSvalbardOgJanMayen_tekstInneholderByFraSvalbardIkkeHopen_true() {
-        assertThat(ArbeidsstedRegler.erArbeidsstedFraSvalbardOgJanMayen(lagSedDokument("NO", "Longyearbyen, Svalbard, " +
+        assertThat(ArbeidsstedRegler.erArbeidslandFraSvalbardOgJanMayen(lagSedDokument("NO", "Longyearbyen, Svalbard, " +
             "Norway"))).isTrue();
     }
 
     @Test
     void arbeidstedSvalbardOgJanMayen_tekstInneholderHopenMenIkkeHopen_false() {
-        assertThat(ArbeidsstedRegler.erArbeidsstedFraSvalbardOgJanMayen(lagSedDokument("NO", "Hopener Mühlenbach, " +
+        assertThat(ArbeidsstedRegler.erArbeidslandFraSvalbardOgJanMayen(lagSedDokument("NO", "Hopener Mühlenbach, " +
             "Germany"))).isFalse();
     }
 

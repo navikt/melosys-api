@@ -38,7 +38,7 @@ object ArbeidsstedRegler {
     }
 
     @JvmStatic
-    fun erArbeidsstedFraSvalbardOgJanMayen(sedDokument: SedDokument): Boolean {
+    fun erArbeidslandFraSvalbardOgJanMayen(sedDokument: SedDokument): Boolean {
         return sedDokument.arbeidsland.any(ARBEIDSLAND_ARBEIDSSTED_SVALBARD_JAN_MAIEN)
     }
 }

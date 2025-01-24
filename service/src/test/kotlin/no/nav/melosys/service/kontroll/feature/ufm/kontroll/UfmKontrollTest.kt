@@ -128,6 +128,11 @@ class UfmKontrollTest {
     }
 
     @Test
+    fun arbeidssted_erSvalbard_verifiserBegrunnelse() {
+        Assertions.assertThat(UfmKontroll.arbeidsland(kontrollData())).isEqualTo(Kontroll_begrunnelser.ARBEIDSSTED_UTENFOR_EOS)
+    }
+
+    @Test
     fun arbeidsland_erSvalbard_verifiserBegrunnelse() {
         Assertions.assertThat(UfmKontroll.arbeidsland(kontrollData())).isEqualTo(Kontroll_begrunnelser.ARBEIDSSTED_UTENFOR_EOS)
     }

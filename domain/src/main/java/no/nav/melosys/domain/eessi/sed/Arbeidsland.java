@@ -6,6 +6,7 @@ public class Arbeidsland {
     private String land;
     private List<Arbeidssted> arbeidssted;
 
+    // Tester klager på at den ikke har en default konstruktør.
     public Arbeidsland() {}
 
     public Arbeidsland(String land, List<Arbeidssted> arbeidssted) {

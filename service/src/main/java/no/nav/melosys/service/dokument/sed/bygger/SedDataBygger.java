@@ -173,7 +173,6 @@ public class SedDataBygger {
             .map(land -> {
 
                 List<Arbeidssted> arbeidsstedILandet = arbeidssteder.stream()
-
                     .filter(arbeidssted -> {
                         if (StringUtils.isEmpty(arbeidssted.getAdresse().getLand())) {
                             throw new FunksjonellException("Feltet land er ikke utfylt for arbeidssted " + arbeidssted.getNavn());
