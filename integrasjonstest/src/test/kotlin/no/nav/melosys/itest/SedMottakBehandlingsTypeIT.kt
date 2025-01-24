@@ -36,7 +36,7 @@ import org.springframework.kafka.core.KafkaTemplate
 import java.time.LocalDate
 import java.util.*
 
-class SedMottakBehandlngsTypeIT(
+class SedMottakBehandlingTypeIT(
     @Autowired @Qualifier("melosysEessiMelding") private val melosysEessiMeldingKafkaTemplate: KafkaTemplate<String, MelosysEessiMelding>,
     @Autowired private val eessiMeldingTestDataFactory: EessiMeldingTestDataFactory,
     @Autowired private val opprettBehandlingForSak: OpprettBehandlingForSak,
