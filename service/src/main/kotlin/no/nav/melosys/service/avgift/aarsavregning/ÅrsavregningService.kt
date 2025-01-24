@@ -5,6 +5,7 @@ import no.nav.melosys.domain.Medlemskapsperiode
 import no.nav.melosys.domain.avgift.*
 import no.nav.melosys.domain.kodeverk.*
 import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingsresultattyper
+import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingsstatus
 import no.nav.melosys.exception.FunksjonellException
 import no.nav.melosys.exception.IkkeFunnetException
 import no.nav.melosys.repository.AarsavregningRepository
@@ -212,6 +213,37 @@ class ÅrsavregningService(
 
     companion object {
         private const val ANTALL_ÅR_TILBAKE_I_TID = 7  //Fjoråret - 6 år
+    }
+
+    @Transactional
+    fun endre(
+        saksnummer: String,
+        behandlingID: Long,
+        aarsavregningId: Long,
+        nyBehandlingsstatus: Behandlingsstatus,
+        nyMottaksdato: LocalDate?
+    ){
+        val årsavregning = hentÅrsavregning(aarsavregningId)
+        val behandlingsresultat = behandlingsresultatService.hentBehandlingsresultat(behandlingID)
+
+        //val årsavregninger = finnÅrsavregningerPåFagsak(saksnummer)
+
+        if (årsavregning.behandlingsresultat != behandlingsresultat) {
+            throw RuntimeException("Årsavregning med id: $aarsavregningId hører ikke til Behandling med Id: $behandlingID")
+        }
+
+        val fagsak = fagsakService.hentFagsak(saksnummer)
+
+
+        if (nyBehandlingsstatus != årsavregning.status || nyMottaksdato != behandlingsresultat.mottaksdato) {
+            behandlingsresultat.status = nyBehandlingsstatus
+            behandlingsresultat.mottaksdato = nyMottaksdato
+            behandlingsresultatService.lagreOgFlush(behandlingsresultat)
+        }
+
+
+
+
     }
 }
 

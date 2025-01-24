@@ -1,6 +1,7 @@
 package no.nav.melosys.tjenester.gui.aarsavregning
 
 import io.swagger.annotations.Api
+import io.swagger.annotations.ApiOperation
 import no.nav.melosys.domain.avgift.Trygdeavgiftsperiode
 import no.nav.melosys.domain.kodeverk.Inntektskildetype
 import no.nav.melosys.domain.kodeverk.InnvilgelsesResultat
@@ -9,6 +10,7 @@ import no.nav.melosys.service.avgift.aarsavregning.totalbeloep.TotalbeløpBeregn
 import no.nav.melosys.service.avgift.aarsavregning.totalbeloep.TotalbeløpBeregner.kalkulertMndInntekt
 import no.nav.melosys.service.avgift.aarsavregning.ÅrsavregningModel
 import no.nav.melosys.service.avgift.aarsavregning.ÅrsavregningService
+import no.nav.melosys.service.sak.EndreSakDto
 import no.nav.melosys.service.tilgang.Aksesskontroll
 import no.nav.melosys.tjenester.gui.dto.trygdeavgift.InntektskildeDto
 import no.nav.melosys.tjenester.gui.dto.trygdeavgift.SkatteforholdTilNorgeDto
@@ -70,6 +72,22 @@ class ÅrsavregningController(
             årsavregningOppdaterRequest.avregning.nyttTotalbeloep
         )
 
+        return ResponseEntity.ok(
+            lagÅrsavregningResponse(årsavregning)
+        )
+    }
+
+    @PostMapping("/{aarsavregningID}")
+    @ApiOperation("Endre årsavregning")
+    fun endreÅrsavregning(
+        @PathVariable("behandlingID") behandlingID: Long,
+        @PathVariable("aarsavregningID") aarsavregningID: Long,
+        @PathVariable("saksnummer") saksnummer: String,
+        @RequestBody endreDto:EndreSakDto
+    ): ResponseEntity<ÅrsavregningResponse> {
+        aksesskontroll.autoriserSkriv(behandlingID)
+
+        val årsavregning = null
         return ResponseEntity.ok(
             lagÅrsavregningResponse(årsavregning)
         )
