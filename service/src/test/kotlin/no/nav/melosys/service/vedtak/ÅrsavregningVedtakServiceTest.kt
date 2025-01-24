@@ -23,9 +23,11 @@ import no.nav.melosys.sikkerhet.context.SubjectHandler
 import no.nav.melosys.sikkerhet.context.TestSubjectHandler
 import org.junit.jupiter.api.BeforeAll
 import org.junit.jupiter.api.Test
+import org.junit.jupiter.api.TestInstance
 import org.junit.jupiter.api.extension.ExtendWith
 
 
+@TestInstance(TestInstance.Lifecycle.PER_CLASS)
 @ExtendWith(MockKExtension::class)
 class ÅrsavregningVedtakServiceTest {
     @RelaxedMockK
@@ -42,6 +44,11 @@ class ÅrsavregningVedtakServiceTest {
 
     @RelaxedMockK
     private lateinit var dokgenService: DokgenService
+
+    @BeforeAll
+    fun beforeAll() {
+        SubjectHandler.set(TestSubjectHandler())
+    }
 
 
     @Test
@@ -104,13 +111,5 @@ class ÅrsavregningVedtakServiceTest {
         FattVedtakRequest.Builder().medBestillersId(SubjectHandler.getInstance().getUserID()).medBehandlingsresultatType(behandlingsResultattype)
             .medNyVurderingBakgrunn(nyVurderingBakgrunn).medVedtakstype(vedtakstype).medBegrunnelseFritekst(begrunnelseFritekst)
             .medInnledningFritekst(innledningFritekst).medTrygdeavgiftFritekst(trygdeavgiftFritekst).build()
-
-    companion object {
-        @JvmStatic
-        @BeforeAll
-        fun setup(): Unit {
-            SubjectHandler.set(TestSubjectHandler())
-        }
-    }
 
 }
