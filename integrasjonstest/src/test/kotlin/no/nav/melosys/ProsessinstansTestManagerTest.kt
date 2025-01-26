@@ -57,6 +57,22 @@ class ProsessinstansTestManagerTest {
         val prosessinstanser = CopyOnWriteArrayList<Prosessinstans>()
         var awaitCheckForDoneCount = 0
 
+        val thread = Thread {
+            Thread.sleep(10)
+            log.info("prosessinstanser.add(jfrKnytt)")
+            prosessinstanser.add(jfrKnytt)
+            Thread.sleep(10)
+            log.info("prosessinstanser.add(iverksettVedtakEos)")
+            prosessinstanser.add(iverksettVedtakEos)
+
+            Thread.sleep(600)
+            log.info("jfrKnytt.status = ProsessStatus.FERDIG")
+            jfrKnytt.status = ProsessStatus.FERDIG
+            Thread.sleep(600)
+            log.info("iverksettVedtakEos.status = ProsessStatus.FERDIG")
+            iverksettVedtakEos.status = ProsessStatus.FERDIG
+        }
+
         LoggingTestUtils.withLogCapture { logItems ->
             ProsessinstansTestManager(prosessinstanser, prosessinstanser).executeAndWait(
                 waitForProsesses = mapOf(
@@ -68,21 +84,7 @@ class ProsessinstansTestManagerTest {
                     log.info { "awaitCheckForDoneCount:$awaitCheckForDoneCount" }
                 }
             ) {
-                Thread {
-                    Thread.sleep(10)
-                    log.info("prosessinstanser.add(jfrKnytt)")
-                    prosessinstanser.add(jfrKnytt)
-                    Thread.sleep(10)
-                    log.info("prosessinstanser.add(iverksettVedtakEos)")
-                    prosessinstanser.add(iverksettVedtakEos)
-
-                    Thread.sleep(600)
-                    log.info("jfrKnytt.status = ProsessStatus.FERDIG")
-                    jfrKnytt.status = ProsessStatus.FERDIG
-                    Thread.sleep(600)
-                    log.info("iverksettVedtakEos.status = ProsessStatus.FERDIG")
-                    iverksettVedtakEos.status = ProsessStatus.FERDIG
-                }.start()
+                thread.start()
             }
 
             jfrKnytt.status shouldBe ProsessStatus.FERDIG
@@ -98,22 +100,22 @@ class ProsessinstansTestManagerTest {
                         acc.add(current)
                     }
                     acc
-                }.shouldBe(
-                    listOf(
-                        "Thread-0" to "prosessinstanser.add(jfrKnytt)",
-                        "Thread-0" to "prosessinstanser.add(iverksettVedtakEos)",
-                        "main" to "prosessinstanser started [JFR_KNYTT, IVERKSETT_VEDTAK_EOS]",
-                        "awaitility-thread" to "awaitCheckForDoneCount",
-                        "Thread-0" to "jfrKnytt.status = ProsessStatus.FERDIG",
-                        "awaitility-thread" to "awaitCheckForDoneCount",
-                        "main" to "prosessinstanse ferdig JFR_KNYTT",
-                        "awaitility-thread" to "awaitCheckForDoneCount",
-                        "Thread-0" to "iverksettVedtakEos.status = ProsessStatus.FERDIG",
-                        "awaitility-thread" to "awaitCheckForDoneCount",
-                        "main" to "prosessinstanse ferdig IVERKSETT_VEDTAK_EOS"
-                    )
-                )
+                } shouldBe listOf(
+                thread.name to "prosessinstanser.add(jfrKnytt)",
+                thread.name to "prosessinstanser.add(iverksettVedtakEos)",
+                "main" to "prosessinstanser started [JFR_KNYTT, IVERKSETT_VEDTAK_EOS]",
+                "awaitility-thread" to "awaitCheckForDoneCount",
+                thread.name to "jfrKnytt.status = ProsessStatus.FERDIG",
+                "awaitility-thread" to "awaitCheckForDoneCount",
+                "main" to "prosessinstanse ferdig JFR_KNYTT",
+                "awaitility-thread" to "awaitCheckForDoneCount",
+                thread.name to "iverksettVedtakEos.status = ProsessStatus.FERDIG",
+                "awaitility-thread" to "awaitCheckForDoneCount",
+                "main" to "prosessinstanse ferdig IVERKSETT_VEDTAK_EOS"
+            )
+
             awaitCheckForDoneCount shouldBeGreaterThan 5
+            thread.join()
         }
     }
 
