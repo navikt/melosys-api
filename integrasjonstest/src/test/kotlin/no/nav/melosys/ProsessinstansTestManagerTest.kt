@@ -1,8 +1,10 @@
 package no.nav.melosys
 
 import io.kotest.assertions.throwables.shouldThrow
+import io.kotest.matchers.ints.shouldBeGreaterThan
 import io.kotest.matchers.longs.shouldBeLessThan
 import io.kotest.matchers.shouldBe
+import mu.KotlinLogging
 import no.nav.melosys.saksflytapi.domain.ProsessStatus
 import no.nav.melosys.saksflytapi.domain.ProsessType
 import no.nav.melosys.saksflytapi.domain.Prosessinstans
@@ -12,9 +14,12 @@ import org.junit.jupiter.api.TestInstance
 import java.time.Duration
 import java.time.LocalDateTime
 import java.util.*
+import java.util.concurrent.CopyOnWriteArrayList
 import kotlin.system.measureTimeMillis
 import kotlin.test.Test
 
+
+private val log = KotlinLogging.logger { }
 
 @TestInstance(TestInstance.Lifecycle.PER_CLASS)
 class ProsessinstansTestManagerTest {
@@ -30,6 +35,86 @@ class ProsessinstansTestManagerTest {
     @AfterAll
     fun tearDown() {
         ProsessinstansTestManager.reset()
+    }
+
+    @Test
+    fun `vent til prosessinstanser er ferdige`() {
+        ProsessinstansTestManager.reset()
+        ProsessinstansTestManager.timeOut = Duration.ofMillis(2000)
+
+        val jfrKnytt = Prosessinstans().apply {
+            id = UUID.randomUUID()
+            type = ProsessType.JFR_KNYTT
+            status = ProsessStatus.KLAR
+            registrertDato = LocalDateTime.now().plusMinutes(1)
+        }
+        val iverksettVedtakEos = Prosessinstans().apply {
+            id = UUID.randomUUID()
+            type = ProsessType.IVERKSETT_VEDTAK_EOS
+            status = ProsessStatus.KLAR
+            registrertDato = LocalDateTime.now().plusMinutes(1)
+        }
+        val prosessinstanser = CopyOnWriteArrayList<Prosessinstans>()
+        var awaitCheckForDoneCount = 0
+
+        LoggingTestUtils.withLogCapture { logItems ->
+            ProsessinstansTestManager(prosessinstanser, prosessinstanser).executeAndWait(
+                waitForProsesses = mapOf(
+                    ProsessType.JFR_KNYTT to 1,
+                    ProsessType.IVERKSETT_VEDTAK_EOS to 1
+                ),
+                onWaitUntil = {
+                    awaitCheckForDoneCount++
+                    log.info { "awaitCheckForDoneCount:$awaitCheckForDoneCount" }
+                }
+            ) {
+                Thread {
+                    Thread.sleep(10)
+                    log.info("prosessinstanser.add(jfrKnytt)")
+                    prosessinstanser.add(jfrKnytt)
+                    Thread.sleep(10)
+                    log.info("prosessinstanser.add(iverksettVedtakEos)")
+                    prosessinstanser.add(iverksettVedtakEos)
+
+                    Thread.sleep(600)
+                    log.info("jfrKnytt.status = ProsessStatus.FERDIG")
+                    jfrKnytt.status = ProsessStatus.FERDIG
+                    Thread.sleep(600)
+                    log.info("iverksettVedtakEos.status = ProsessStatus.FERDIG")
+                    iverksettVedtakEos.status = ProsessStatus.FERDIG
+                }.start()
+            }
+
+            jfrKnytt.status shouldBe ProsessStatus.FERDIG
+            iverksettVedtakEos.status shouldBe ProsessStatus.FERDIG
+
+            logItems.map { it.threadName to it.formattedMessage }
+                .fold(mutableListOf<Pair<String, String>>()) { acc, current ->
+                    if (current.first == "awaitility-thread") {
+                        if (acc.lastOrNull()?.first != "awaitility-thread") {
+                            acc.add("awaitility-thread" to "awaitCheckForDoneCount")
+                        }
+                    } else {
+                        acc.add(current)
+                    }
+                    acc
+                }.shouldBe(
+                    listOf(
+                        "Thread-0" to "prosessinstanser.add(jfrKnytt)",
+                        "Thread-0" to "prosessinstanser.add(iverksettVedtakEos)",
+                        "main" to "prosessinstanser started [JFR_KNYTT, IVERKSETT_VEDTAK_EOS]",
+                        "awaitility-thread" to "awaitCheckForDoneCount",
+                        "Thread-0" to "jfrKnytt.status = ProsessStatus.FERDIG",
+                        "awaitility-thread" to "awaitCheckForDoneCount",
+                        "main" to "prosessinstanse ferdig JFR_KNYTT",
+                        "awaitility-thread" to "awaitCheckForDoneCount",
+                        "Thread-0" to "iverksettVedtakEos.status = ProsessStatus.FERDIG",
+                        "awaitility-thread" to "awaitCheckForDoneCount",
+                        "main" to "prosessinstanse ferdig IVERKSETT_VEDTAK_EOS"
+                    )
+                )
+            awaitCheckForDoneCount shouldBeGreaterThan 5
+        }
     }
 
     @Test
