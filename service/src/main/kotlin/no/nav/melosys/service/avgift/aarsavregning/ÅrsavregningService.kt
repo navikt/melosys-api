@@ -235,11 +235,11 @@ class ÅrsavregningService(
         val fagsak = fagsakService.hentFagsak(saksnummer)
 
 
-        if (nyBehandlingsstatus != årsavregning.status || nyMottaksdato != behandlingsresultat.mottaksdato) {
-            behandlingsresultat.status = nyBehandlingsstatus
-            behandlingsresultat.mottaksdato = nyMottaksdato
-            behandlingsresultatService.lagreOgFlush(behandlingsresultat)
-        }
+//        if (nyBehandlingsstatus != årsavregning.status || nyMottaksdato != behandlingsresultat.mottaksdato) {
+//            behandlingsresultat.status = nyBehandlingsstatus
+//            behandlingsresultat.mottaksdato = nyMottaksdato
+//            behandlingsresultatService.lagreOgFlush(behandlingsresultat)
+//        }
 
 
 

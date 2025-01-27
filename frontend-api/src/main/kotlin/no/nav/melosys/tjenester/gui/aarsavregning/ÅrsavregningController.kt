@@ -77,21 +77,20 @@ class ÅrsavregningController(
         )
     }
 
-    @PostMapping("/{aarsavregningID}")
-    @ApiOperation("Endre årsavregning")
-    fun endreÅrsavregning(
-        @PathVariable("behandlingID") behandlingID: Long,
-        @PathVariable("aarsavregningID") aarsavregningID: Long,
-        @PathVariable("saksnummer") saksnummer: String,
-        @RequestBody endreDto:EndreSakDto
-    ): ResponseEntity<ÅrsavregningResponse> {
-        aksesskontroll.autoriserSkriv(behandlingID)
-
-        val årsavregning = null
-        return ResponseEntity.ok(
-            lagÅrsavregningResponse(årsavregning)
-        )
-    }
+//    @PostMapping("/{aarsavregningID}")
+//    @ApiOperation("Endre årsavregning")
+//    fun endreÅrsavregning(
+//        @PathVariable("behandlingID") behandlingID: Long,
+//        @PathVariable("aarsavregningID") aarsavregningID: Long,
+//        @RequestBody endreDto:EndreSakDto
+//    ): ResponseEntity<ÅrsavregningResponse> {
+//        aksesskontroll.autoriserSkriv(behandlingID)
+//
+//        val årsavregning = null
+//        return ResponseEntity.ok(
+//            lagÅrsavregningResponse(årsavregning)
+//        )
+//    }
 
     private fun lagÅrsavregningResponse(årsavregningModel: ÅrsavregningModel) =
         ÅrsavregningResponse(
