@@ -93,7 +93,7 @@ class ÅrsavregningIT(
 ) {
 
     private var originalSubjectHandler: SubjectHandler? = null
-    private val fakturaserieReferanse: String = "01J17B5NTTDYKFB5DZTSSQEHJ0"
+    private val fakturaserieReferanse: String = "AAJ17B5NTTDYKFB5DZTSSQEHZZ"
 
     @BeforeEach
     fun setup() {

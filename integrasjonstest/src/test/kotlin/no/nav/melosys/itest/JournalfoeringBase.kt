@@ -40,7 +40,10 @@ class JournalfoeringBase(
         waitForProsesses: Map<ProsessType, Int>,
         returnProsessOfType: ProsessType = waitForProsesses.keys.first(),
         process: () -> Unit
-    ): Prosessinstans = prosessinstansTestManager.executeAndWait(waitForProsesses, returnProsessOfType, process)
+    ): Prosessinstans = prosessinstansTestManager.executeAndWait(
+        waitForProsesses = waitForProsesses,
+        returnProsessOfType = returnProsessOfType,
+        process = process)
 
     protected fun lagJfrOppgave(): Oppgave =
         journalføringsoppgaveGenerator.opprettJfrOppgave(tilordnetRessurs = "Z123456", forVirksomhet = false)
