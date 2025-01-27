@@ -26,10 +26,9 @@ import no.nav.melosys.domain.manglendebetaling.ManglendeFakturabetalingMelding
 import no.nav.melosys.domain.mottatteopplysninger.SøknadNorgeEllerUtenforEØS
 import no.nav.melosys.domain.mottatteopplysninger.data.Periode
 import no.nav.melosys.domain.mottatteopplysninger.data.Soeknadsland
-import no.nav.melosys.integrasjon.faktureringskomponenten.NyFakturaserieResponseDto
 import no.nav.melosys.integrasjon.hendelser.VedtakHendelseMelding
 import no.nav.melosys.integrasjon.trygdeavgift.dto.DatoPeriodeDto
-import no.nav.melosys.itest.JournalfoeringBase
+import no.nav.melosys.itest.MockForFakturaTestBase
 import no.nav.melosys.itest.MelosysHendelseKafkaConsumer
 import no.nav.melosys.melosysmock.medl.MedlRepo
 import no.nav.melosys.repository.BehandlingRepository
@@ -59,7 +58,7 @@ import org.springframework.beans.factory.annotation.Qualifier
 import org.springframework.kafka.core.KafkaTemplate
 import java.time.LocalDate
 
-class YrkesaktivFtrlVedtakIT(
+class YrkesaktivMockForFakturaTestIT(
     @Autowired private val avklartefaktaService: AvklartefaktaService,
     @Autowired private val fagsakRepository: FagsakRepository,
     @Autowired private val behandlingsresultatService: BehandlingsresultatService,
@@ -75,11 +74,11 @@ class YrkesaktivFtrlVedtakIT(
     @Autowired @Qualifier("manglendeFakturabetalingMelding") private val manglendeFakturabetalingMeldingTemplate: KafkaTemplate<String, ManglendeFakturabetalingMelding>,
     @Autowired private val unleash: FakeUnleash,
     @Autowired private val melosysHendelseKafkaConsumer: MelosysHendelseKafkaConsumer,
-) : JournalfoeringBase(TrygdeavgiftsberegningTransformer()) {
+) : MockForFakturaTestBase(TrygdeavgiftsberegningTransformer()) {
 
     private var originalSubjectHandler: SubjectHandler? = null
     private val kafkaTopic = "teammelosys.manglende-fakturabetaling-local"
-    private val fakturaserieReferanse: String = "01J17B5NTTDYKFB5DZTSSQEHJ0"
+    override val fakturaserieReferanse: String = "01J17B5NTTDYKFB5DZTSSQEHJ0"
 
     @BeforeEach
     fun setup() {
@@ -91,54 +90,13 @@ class YrkesaktivFtrlVedtakIT(
         every { mockHandler.userID } returns "Z123456"
         every { mockHandler.userName } returns "test"
 
-        mockServer.stubFor(
-            WireMock.post("/api/v2/beregn")
-                .willReturn(
-                    WireMock.aResponse()
-                        .withStatus(200)
-                        .withHeader("Content-Type", "application/json")
-                        .withTransformers("dynamisk-trygdeavgiftsberegning-transformer")
-                )
-        )
-
-        val fakturaResponse = NyFakturaserieResponseDto(fakturaserieReferanse)
-
-        mockServer.stubFor(
-            WireMock.post("/fakturaserier")
-                .willReturn(
-                    WireMock.aResponse()
-                        .withStatus(200)
-                        .withHeader("Content-Type", "application/json")
-                        .withBody(fakturaResponse.toJsonNode.toString())
-                )
-        )
-        mockServer.stubFor(
-            WireMock.delete(WireMock.urlMatching("/fakturaserier/.*"))
-                .willReturn(
-                    WireMock.aResponse()
-                        .withStatus(200)
-                        .withHeader("Content-Type", "application/json")
-                        .withBody(fakturaResponse.toJsonNode.toString())
-                )
-        )
-        mockServer.stubFor(
-            WireMock.post(WireMock.urlMatching("/fakturaer"))
-                .willReturn(
-                    WireMock.aResponse()
-                        .withStatus(200)
-                        .withHeader("Content-Type", "application/json")
-                        .withBody(fakturaResponse.toJsonNode.toString())
-                )
-        )
         unleash.enableAll()
     }
 
     @AfterEach
     fun afterEach() {
         melosysHendelseKafkaConsumer.clear()
-        MedlRepo.repo.clear()
         SubjectHandler.set(originalSubjectHandler)
-
     }
 
     @Test
