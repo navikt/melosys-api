@@ -44,6 +44,6 @@ class DBCleanup(
     }
 }
 
-interface MedlemskapsperiodeRepositoryForTest : JpaRepository<Medlemskapsperiode?, Long?> {
+interface MedlemskapsperiodeRepositoryForTest : JpaRepository<Medlemskapsperiode, Long> {
     fun findByBehandlingsresultatId(id: Long): List<Medlemskapsperiode>
 }
