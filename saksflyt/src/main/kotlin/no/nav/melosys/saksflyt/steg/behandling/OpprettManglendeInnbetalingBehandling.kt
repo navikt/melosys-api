@@ -1,6 +1,5 @@
 package no.nav.melosys.saksflyt.steg.behandling
 
-import mu.KotlinLogging
 import no.nav.melosys.domain.Behandling
 import no.nav.melosys.domain.Behandlingsaarsak
 import no.nav.melosys.domain.Fagsak
@@ -101,7 +100,7 @@ class OpprettManglendeInnbetalingBehandling(
     private fun lagNyBehandling(prosessinstans: Prosessinstans, fagsak: Fagsak, mottaksDato: LocalDate?) {
         val behandlingBruktForReplikering = saksbehandlingRegler.finnBehandlingSomKanReplikeres(fagsak)
             ?: throw FunksjonellException(
-                "Finner ikke behandling som skal brukes til replikering. fra fagsag: ${fagsak.saksnummer}" +
+                "Finner ikke behandling som skal brukes til replikering. fra fagsak: ${fagsak.saksnummer}" +
                     "Forventer at behandling som bestilte fakturering kan bli replikert fra."
             )
 
