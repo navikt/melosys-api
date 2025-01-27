@@ -5,7 +5,7 @@ import no.nav.melosys.service.behandling.BehandlingsresultatService
 import org.springframework.stereotype.Component
 
 @Component
-class RettigheterOgPlikterStandardbrevMapper(
+class RettigheterOgPlikterStandardvedleggMapper(
     private val behandlingsresultatService: BehandlingsresultatService
 ) {
 

@@ -15,7 +15,6 @@ import no.nav.melosys.domain.kodeverk.brev.Produserbaredokumenter;
 import no.nav.melosys.exception.FunksjonellException;
 import no.nav.melosys.exception.IkkeFunnetException;
 import no.nav.melosys.integrasjon.dokgen.dto.standardvedlegg.InnvilgelseRettigheterPlikterStandardvedlegg;
-import no.nav.melosys.integrasjon.dokgen.dto.standardvedlegg.StandardvedleggDto;
 import no.nav.melosys.integrasjon.ereg.EregFasade;
 import no.nav.melosys.integrasjon.joark.JoarkFasade;
 import no.nav.melosys.saksflyt.TestdataFactory;
@@ -29,7 +28,7 @@ import no.nav.melosys.service.dokument.BrevmottakerService;
 import no.nav.melosys.service.dokument.DokgenService;
 import no.nav.melosys.service.dokument.DokumentHentingService;
 import no.nav.melosys.service.dokument.brev.mapper.DokumentproduksjonsInfoMapper;
-import no.nav.melosys.service.dokument.brev.mapper.standardvedlegg.RettigheterOgPlikterStandardbrevMapper;
+import no.nav.melosys.service.dokument.brev.mapper.standardvedlegg.RettigheterOgPlikterStandardvedleggMapper;
 import no.nav.melosys.service.ftrl.medlemskapsperiode.MedlemskapsperiodeService;
 import no.nav.melosys.service.oppgave.OppgaveFactory;
 import no.nav.melosys.service.persondata.PersondataFasade;
@@ -71,7 +70,7 @@ class OpprettOgJournalforBrevTest {
     @Mock
     private LovvalgsperiodeService mockLovvalgsperiodeService;
     @Mock
-    RettigheterOgPlikterStandardbrevMapper mockRettigheterOgPlikterStandardbrevMapper;
+    RettigheterOgPlikterStandardvedleggMapper mockRettigheterOgPlikterStandardvedleggMapper;
 
     @Captor
     ArgumentCaptor<OpprettJournalpost> opprettJournalpostCaptor;
@@ -86,7 +85,7 @@ class OpprettOgJournalforBrevTest {
     @BeforeEach
     void init() {
         dokumentNavnService = new DokumentNavnService(mock(BrevmottakerService.class), mock(DokgenService.class), mockLovvalgsperiodeService, mock(MedlemskapsperiodeService.class));
-        opprettJournalforBrev = new OpprettOgJournalforBrev(mockBehandlingService, mockDokgenService, mockRettigheterOgPlikterStandardbrevMapper,
+        opprettJournalforBrev = new OpprettOgJournalforBrev(mockBehandlingService, mockDokgenService, mockRettigheterOgPlikterStandardvedleggMapper,
             mockUtenlandskMyndighetService, mockJoarkFasade, mockPersondataFasade, mockEregFasade,
             dokumentNavnService, mockDokumentHentingService, oppgaveFactory);
     }
@@ -500,7 +499,7 @@ class OpprettOgJournalforBrevTest {
         when(mockBehandlingService.hentBehandling(anyLong())).thenReturn(behandling);
         when(mockJoarkFasade.opprettJournalpost(any(), anyBoolean())).thenReturn("12234");
         when(mockDokgenService.hentDokumentInfo(any())).thenReturn(TestdataFactory.lagDokumentInfo());
-        when(mockRettigheterOgPlikterStandardbrevMapper.mapInnvilgelse(anyLong(), anyBoolean()))
+        when(mockRettigheterOgPlikterStandardvedleggMapper.mapInnvilgelse(anyLong(), anyBoolean()))
             .thenReturn(new InnvilgelseRettigheterPlikterStandardvedlegg());
         byte[] standardvedleggPdf = {5, 6};
         when(mockDokgenService.produserStandardvedlegg(any(), any())).thenReturn(standardvedleggPdf);
@@ -589,7 +588,7 @@ class OpprettOgJournalforBrevTest {
         when(mockBehandlingService.hentBehandling(anyLong())).thenReturn(behandling);
         when(mockJoarkFasade.opprettJournalpost(any(), anyBoolean())).thenReturn("12234");
         when(mockDokgenService.hentDokumentInfo(any())).thenReturn(TestdataFactory.lagDokumentInfo());
-        when(mockRettigheterOgPlikterStandardbrevMapper.mapInnvilgelse(anyLong(), anyBoolean()))
+        when(mockRettigheterOgPlikterStandardvedleggMapper.mapInnvilgelse(anyLong(), anyBoolean()))
             .thenReturn(new InnvilgelseRettigheterPlikterStandardvedlegg());
         byte[] standardvedleggPdf = {5, 6};
         when(mockDokgenService.produserStandardvedlegg(any(), any())).thenReturn(standardvedleggPdf);

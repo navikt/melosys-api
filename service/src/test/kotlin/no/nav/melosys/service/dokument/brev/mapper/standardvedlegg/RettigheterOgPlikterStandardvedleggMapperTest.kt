@@ -18,16 +18,16 @@ import org.junit.jupiter.api.extension.ExtendWith
 import java.time.LocalDate
 
 @ExtendWith(MockKExtension::class)
-internal class RettigheterOgPlikterStandardbrevMapperTest {
+internal class RettigheterOgPlikterStandardvedleggMapperTest {
 
     @MockK
     private lateinit var mockBehandlingsresultatService: BehandlingsresultatService
 
-    private lateinit var mapper: RettigheterOgPlikterStandardbrevMapper
+    private lateinit var mapper: RettigheterOgPlikterStandardvedleggMapper
 
     @BeforeEach
     fun setup() {
-        mapper = RettigheterOgPlikterStandardbrevMapper(mockBehandlingsresultatService)
+        mapper = RettigheterOgPlikterStandardvedleggMapper(mockBehandlingsresultatService)
     }
 
     @Test

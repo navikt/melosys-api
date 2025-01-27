@@ -52,9 +52,9 @@ class BrevbestillingController(
         response = StandardvedleggType::class,
         responseContainer = "List"
     )
-    fun hentStandardvedlegg(): List<StandardbrevDto> {
+    fun hentStandardvedlegg(): List<StandardvedleggDto> {
         return StandardvedleggType.values().map {
-            StandardbrevDto(it, it.frontendTittel, it.journalføringstittel)
+            StandardvedleggDto(it, it.frontendTittel, it.journalføringstittel)
         }
     }
 

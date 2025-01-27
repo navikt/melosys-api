@@ -24,7 +24,7 @@ import no.nav.melosys.service.behandling.BehandlingService;
 import no.nav.melosys.service.brev.DokumentNavnService;
 import no.nav.melosys.service.dokument.DokgenService;
 import no.nav.melosys.service.dokument.DokumentHentingService;
-import no.nav.melosys.service.dokument.brev.mapper.standardvedlegg.RettigheterOgPlikterStandardbrevMapper;
+import no.nav.melosys.service.dokument.brev.mapper.standardvedlegg.RettigheterOgPlikterStandardvedleggMapper;
 import no.nav.melosys.service.oppgave.OppgaveFactory;
 import no.nav.melosys.service.persondata.PersondataFasade;
 import org.slf4j.Logger;
@@ -41,7 +41,7 @@ public class OpprettOgJournalforBrev implements StegBehandler {
 
     private final BehandlingService behandlingService;
     private final DokgenService dokgenService;
-    private final RettigheterOgPlikterStandardbrevMapper rettigheterOgPlikterStandardbrevMapper;
+    private final RettigheterOgPlikterStandardvedleggMapper rettigheterOgPlikterStandardvedleggMapper;
     private final UtenlandskMyndighetService utenlandskMyndighetService;
     private final JoarkFasade joarkFasade;
     private final PersondataFasade persondataFasade;
@@ -52,7 +52,7 @@ public class OpprettOgJournalforBrev implements StegBehandler {
 
     public OpprettOgJournalforBrev(BehandlingService behandlingService,
                                    DokgenService dokgenService,
-                                   RettigheterOgPlikterStandardbrevMapper rettigheterOgPlikterStandardbrevMapper,
+                                   RettigheterOgPlikterStandardvedleggMapper rettigheterOgPlikterStandardvedleggMapper,
                                    UtenlandskMyndighetService utenlandskMyndighetService,
                                    JoarkFasade joarkFasade,
                                    PersondataFasade persondataFasade,
@@ -62,7 +62,7 @@ public class OpprettOgJournalforBrev implements StegBehandler {
                                    OppgaveFactory oppgaveFactory) {
         this.behandlingService = behandlingService;
         this.dokgenService = dokgenService;
-        this.rettigheterOgPlikterStandardbrevMapper = rettigheterOgPlikterStandardbrevMapper;
+        this.rettigheterOgPlikterStandardvedleggMapper = rettigheterOgPlikterStandardvedleggMapper;
         this.utenlandskMyndighetService = utenlandskMyndighetService;
         this.joarkFasade = joarkFasade;
         this.persondataFasade = persondataFasade;
@@ -231,7 +231,7 @@ public class OpprettOgJournalforBrev implements StegBehandler {
         switch (brevbestilling.getStandardvedleggType()) {
             case VIKTIG_INFORMASJON_RETTIGHETER_PLIKTER_INNVILGELSE -> {
                 boolean skalMappeBestemmelse = !(brevbestilling instanceof FritekstbrevBrevbestilling);
-                return rettigheterOgPlikterStandardbrevMapper.mapInnvilgelse(brevbestilling.getBehandlingId(), skalMappeBestemmelse);
+                return rettigheterOgPlikterStandardvedleggMapper.mapInnvilgelse(brevbestilling.getBehandlingId(), skalMappeBestemmelse);
             }
             case VIKTIG_INFORMASJON_RETTIGHETER_PLIKTER_AVSLAG -> {
                 return null;
