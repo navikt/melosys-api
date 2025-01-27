@@ -30,7 +30,6 @@ import no.nav.melosys.integrasjon.trygdeavgift.dto.DatoPeriodeDto
 import no.nav.melosys.itest.JournalfoeringBase
 import no.nav.melosys.itest.MelosysHendelseKafkaConsumer
 import no.nav.melosys.melosysmock.medl.MedlRepo
-import no.nav.melosys.melosysmock.testdata.JournalføringsoppgaveGenerator
 import no.nav.melosys.repository.BehandlingRepository
 import no.nav.melosys.repository.BehandlingsresultatRepository
 import no.nav.melosys.repository.FagsakRepository
@@ -43,10 +42,8 @@ import no.nav.melosys.service.behandling.BehandlingsresultatService
 import no.nav.melosys.service.behandling.VilkaarsresultatService
 import no.nav.melosys.service.ftrl.medlemskapsperiode.MedlemskapsperiodeService
 import no.nav.melosys.service.ftrl.medlemskapsperiode.OpprettForslagMedlemskapsperiodeService
-import no.nav.melosys.service.journalforing.JournalfoeringService
 import no.nav.melosys.service.journalforing.dto.PeriodeDto
 import no.nav.melosys.service.mottatteopplysninger.MottatteOpplysningerService
-import no.nav.melosys.service.oppgave.OppgaveService
 import no.nav.melosys.service.sak.OpprettBehandlingForSak
 import no.nav.melosys.service.sak.OpprettSak
 import no.nav.melosys.service.sak.OpprettSakDto
@@ -66,9 +63,6 @@ import java.math.BigDecimal
 import java.time.LocalDate
 
 class ÅrsavregningIT(
-    @Autowired journalføringsoppgaveGenerator: JournalføringsoppgaveGenerator,
-    @Autowired journalføringService: JournalfoeringService,
-    @Autowired oppgaveService: OppgaveService,
     @Autowired private val avklartefaktaService: AvklartefaktaService,
     @Autowired private val fagsakRepository: FagsakRepository,
     @Autowired private val behandlingsresultatService: BehandlingsresultatService,
@@ -88,7 +82,6 @@ class ÅrsavregningIT(
     @Autowired private val årsavregningService: ÅrsavregningService,
     @Autowired private val opprettSak: OpprettSak
 ) : JournalfoeringBase(
-    journalføringsoppgaveGenerator, journalføringService, oppgaveService,
     TrygdeavgiftsberegningTransformer()
 ) {
 
@@ -241,11 +234,11 @@ class ÅrsavregningIT(
 
         medlemskapsperiodeService.opprettMedlemskapsperiode(
             behandlingsresultatID = årsavregningBehandlingID,
-                fom = periode.fom,
-                tom = periode.tom,
-                innvilgelsesResultat = InnvilgelsesResultat.INNVILGET,
-                trygdedekning = Trygdedekninger.FULL_DEKNING_FTRL,
-                bestemmelse = Folketrygdloven_kap2_bestemmelser.FTRL_KAP2_2_5_FØRSTE_LEDD_A,
+            fom = periode.fom,
+            tom = periode.tom,
+            innvilgelsesResultat = InnvilgelsesResultat.INNVILGET,
+            trygdedekning = Trygdedekninger.FULL_DEKNING_FTRL,
+            bestemmelse = Folketrygdloven_kap2_bestemmelser.FTRL_KAP2_2_5_FØRSTE_LEDD_A,
         )
         trygdeavgiftsberegningService.beregnOgLagreTrygdeavgift(årsavregningBehandlingID, skattefordholdsperioder, inntektsperioder)
 
@@ -522,13 +515,15 @@ class ÅrsavregningIT(
 
         val trygdeavgiftsperioder = HashSet<Trygdeavgiftsperiode>()
         trygdeavgiftsperioder.add(
-            Trygdeavgiftsperiode(periodeFra = LocalDate.of(2023, 1, 1),
+            Trygdeavgiftsperiode(
+                periodeFra = LocalDate.of(2023, 1, 1),
                 periodeTil = LocalDate.of(2023, 2, 1),
                 trygdesats = 6.8.toBigDecimal(),
                 trygdeavgiftsbeløpMd = Penger(1000.toBigDecimal(), "nok"),
                 grunnlagMedlemskapsperiode = medlemskapsperiode,
                 grunnlagSkatteforholdTilNorge = skatteforholdTilNorge,
-                grunnlagInntekstperiode = inntektsperiode)
+                grunnlagInntekstperiode = inntektsperiode
+            )
         )
 
         medlemskapsperiode.trygdeavgiftsperioder = trygdeavgiftsperioder

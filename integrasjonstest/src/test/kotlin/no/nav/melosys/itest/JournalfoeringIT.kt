@@ -17,13 +17,10 @@ import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingstyper
 import no.nav.melosys.domain.mottatteopplysninger.Soeknad
 import no.nav.melosys.domain.mottatteopplysninger.data.Periode
 import no.nav.melosys.melosysmock.journalpost.JournalpostRepo
-import no.nav.melosys.melosysmock.testdata.JournalføringsoppgaveGenerator
 import no.nav.melosys.repository.BehandlingRepository
 import no.nav.melosys.repository.BehandlingsresultatRepository
 import no.nav.melosys.repository.FagsakRepository
 import no.nav.melosys.saksflytapi.domain.ProsessType
-import no.nav.melosys.service.journalforing.JournalfoeringService
-import no.nav.melosys.service.oppgave.OppgaveService
 import org.junit.jupiter.api.AfterEach
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
@@ -32,15 +29,12 @@ import org.springframework.beans.factory.annotation.Autowired
 
 @TestInstance(TestInstance.Lifecycle.PER_CLASS)
 class JournalfoeringIT(
-    @Autowired journalføringsoppgaveGenerator: JournalføringsoppgaveGenerator,
-    @Autowired journalføringService: JournalfoeringService,
-    @Autowired oppgaveService: OppgaveService,
     @Autowired private val behandlingRepository: BehandlingRepository,
     @Autowired private val behandlingsresultatRepository: BehandlingsresultatRepository,
     @Autowired private val fagsakRepository: FagsakRepository,
     @Autowired private val unleash: FakeUnleash,
     @Autowired private val journalpostRepo: JournalpostRepo
-) : JournalfoeringBase(journalføringsoppgaveGenerator, journalføringService, oppgaveService) {
+) : JournalfoeringBase() {
 
     @BeforeEach
     fun setup() {
