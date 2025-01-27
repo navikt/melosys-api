@@ -218,19 +218,16 @@ public class OpprettOgJournalforBrev implements StegBehandler {
     }
 
     private Vedlegg produserStandardvedlegg(DokgenBrevbestilling brevbestilling) {
-        if (brevbestilling.getStandardvedleggType() == null) {
+        var standardvedleggType = brevbestilling.getStandardvedleggType();
+        if (standardvedleggType == null) {
             return null;
         }
-        var standardvedleggType = brevbestilling.getStandardvedleggType();
         var pdf = dokgenService.produserStandardvedlegg(standardvedleggType, hentStandardvedleggDto(brevbestilling));
 
         return new Vedlegg(pdf, standardvedleggType.getJournalføringstittel());
     }
 
     private StandardvedleggDto hentStandardvedleggDto(DokgenBrevbestilling brevbestilling) {
-        if (brevbestilling.getStandardvedleggType() == null) {
-            return null;
-        }
         switch (brevbestilling.getStandardvedleggType()) {
             case VIKTIG_INFORMASJON_RETTIGHETER_PLIKTER_INNVILGELSE -> {
                 boolean skalMappeBestemmelse = !(brevbestilling instanceof FritekstbrevBrevbestilling);
