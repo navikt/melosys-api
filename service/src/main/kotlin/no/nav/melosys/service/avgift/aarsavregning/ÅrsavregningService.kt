@@ -1,5 +1,6 @@
 package no.nav.melosys.service.avgift.aarsavregning
 
+import no.nav.melosys.domain.Behandling
 import no.nav.melosys.domain.Behandlingsresultat
 import no.nav.melosys.domain.Medlemskapsperiode
 import no.nav.melosys.domain.avgift.*
@@ -218,17 +219,29 @@ class ÅrsavregningService(
     }
 
     @Transactional
-    fun endre(
+    fun endreOppsummering(
         aarsavregningId: Long,
+        behandlingID: Long,
         nyBehandlingsstatus: Behandlingsstatus,
         nyMottaksdato: LocalDate?
     ): ÅrsavregningModel{
         val årsavregning = hentÅrsavregning(aarsavregningId)
-        val behandlingID = årsavregning.behandlingsresultat.behandling.id
+        validerBehandling(årsavregning.behandlingsresultat.behandling)
 
         behandlingService.endreBehandling(behandlingID, null, null, nyBehandlingsstatus, nyMottaksdato)
 
         return lagÅrsavregningModelFraÅrsavregning(årsavregning)
+    }
+
+    private fun validerBehandling(behandling: Behandling) {
+        if (setOf(
+                Behandlingsstatus.AVSLUTTET,
+                Behandlingsstatus.IVERKSETTER_VEDTAK,
+                Behandlingsstatus.MIDLERTIDIG_LOVVALGSBESLUTNING
+            ).contains(behandling.status)
+        ) {
+            throw FunksjonellException("Behandling ${behandling.id} med status ${behandling.status} kan ikke endres")
+        }
     }
 }
 
@@ -329,3 +342,4 @@ data class InntektsperioderForAvgift(
         erMaanedsbelop = inntektsperiode.erMaanedsbelop()
     )
 }
+

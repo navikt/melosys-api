@@ -12,6 +12,7 @@ import no.nav.melosys.domain.kodeverk.*
 import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingsresultattyper
 import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingsstatus
 import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingstyper
+import no.nav.melosys.domain.mottatteopplysninger.MottatteOpplysninger
 import no.nav.melosys.exception.FunksjonellException
 import no.nav.melosys.repository.AarsavregningRepository
 import no.nav.melosys.service.behandling.BehandlingService
@@ -328,6 +329,32 @@ internal class ÅrsavregningServiceTest {
             årsavregningService.hentSisteBehandlingsresultatMedInnvilgetMedlemskapsperiodeOgAvgiftsgrunnlag("123456", 2023)
                 .shouldBe(vedtattAarsavregningsresultat)
             verify(exactly = 3) { behandlingsresultatService.hentBehandlingsresultat(any()) }
+        }
+    }
+
+    @Nested
+    inner class endreÅrsavregningOppsummering{
+        @Test
+        fun `oppdaterer mottaksdato og behandlingsstatus for årsavregning oppsummering`(){
+
+            val behandlingsresultat = Behandlingsresultat().apply resultat@{
+                behandling = Behandling().apply {
+                    id = 1
+                    type = Behandlingstyper.ÅRSAVREGNING
+                    status = Behandlingsstatus.UNDER_BEHANDLING
+                    behandlingsårsak = Behandlingsaarsak().apply {
+                        mottaksdato = LocalDate.of(2023, 1, 1)
+                    }
+                }
+
+                årsavregning = Årsavregning().apply {
+                    id = 1
+                    aar = 2023
+                    behandlingsresultat = this@resultat
+                }
+            }
+
+
         }
     }
 

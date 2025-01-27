@@ -78,7 +78,7 @@ class ÅrsavregningController(
         )
     }
 
-    @PostMapping("/{aarsavregningID}")
+    @PutMapping("/endre/{aarsavregningID}")
     @ApiOperation("Endre årsavregning")
     fun endreÅrsavregning(
         @PathVariable("behandlingID") behandlingID: Long,
@@ -86,12 +86,10 @@ class ÅrsavregningController(
         @RequestBody endreRequest:AarsavregningEndreRequest
     ): ResponseEntity<ÅrsavregningResponse> {
 
-        //Riktig autorisering?
         aksesskontroll.autoriserSkriv(behandlingID)
 
-        val årsavregning = årsavregningService.endre(aarsavregningID,endreRequest.behandlingsstatus, endreRequest.mottaksdato)
+        val årsavregning = årsavregningService.endreOppsummering(behandlingID,aarsavregningID,endreRequest.behandlingsstatus, endreRequest.mottaksdato)
 
-        //TODO Muligens denne trenger en egen response eller returner ingenting
         return ResponseEntity.ok(
             lagÅrsavregningResponse(årsavregning)
         )
