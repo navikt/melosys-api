@@ -6,6 +6,7 @@ import com.fasterxml.jackson.annotation.JsonAutoDetect;
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.databind.annotation.JsonSerialize;
 import no.nav.melosys.domain.arkiv.Distribusjonstype;
+import no.nav.melosys.domain.brev.StandardvedleggType;
 import no.nav.melosys.domain.kodeverk.Mottakerroller;
 import no.nav.melosys.domain.kodeverk.brev.Produserbaredokumenter;
 
@@ -31,6 +32,7 @@ public record BrevbestillingUtkast(
     boolean kontaktopplysninger,
     String nyVurderingBakgrunn,
     List<Utkast.Saksvedlegg> saksVedlegg,
+    StandardvedleggType standardvedleggType,
     List<Utkast.FritekstVedlegg> fritekstVedlegg,
     String dokumentTittel,
     String saksbehandlerNrToIdent,

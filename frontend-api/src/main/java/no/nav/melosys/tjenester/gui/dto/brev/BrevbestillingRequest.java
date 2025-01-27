@@ -6,6 +6,7 @@ import java.util.List;
 import java.util.function.Function;
 
 import no.nav.melosys.domain.arkiv.Distribusjonstype;
+import no.nav.melosys.domain.brev.StandardvedleggType;
 import no.nav.melosys.domain.brev.utkast.BrevbestillingUtkast;
 import no.nav.melosys.domain.kodeverk.Mottakerroller;
 import no.nav.melosys.domain.kodeverk.brev.Produserbaredokumenter;
@@ -37,6 +38,7 @@ public record BrevbestillingRequest(
     boolean skalViseStandardTekstOmkontaktopplysninger,
     String nyVurderingBakgrunn,
     List<SaksvedleggDto> saksvedlegg,
+    StandardvedleggType standardvedleggType,
     List<FritekstvedleggDto> fritekstvedlegg,
     String dokumentTittel,
     String saksbehandlerNrToIdent,
@@ -68,6 +70,7 @@ public record BrevbestillingRequest(
             this.skalViseStandardTekstOmkontaktopplysninger,
             this.nyVurderingBakgrunn,
             this.saksvedlegg,
+            this.standardvedleggType,
             this.fritekstvedlegg,
             this.dokumentTittel,
             this.saksbehandlerNrToIdent,
@@ -109,6 +112,7 @@ public record BrevbestillingRequest(
             this.skalViseStandardTekstOmkontaktopplysninger(),
             this.nyVurderingBakgrunn(),
             konverterListeTil(this.saksvedlegg(), SaksvedleggDto::tilUtkast),
+            this.standardvedleggType(),
             konverterListeTil(this.fritekstvedlegg(), FritekstvedleggDto::tilUtkast),
             this.dokumentTittel(),
             this.saksbehandlerNrToIdent(),
@@ -137,6 +141,7 @@ public record BrevbestillingRequest(
             utkast.kontaktopplysninger(),
             utkast.nyVurderingBakgrunn(),
             utkast.saksVedlegg().stream().map(SaksvedleggDto::av).toList(),
+            utkast.standardvedleggType(),
             utkast.fritekstVedlegg().stream().map(FritekstvedleggDto::av).toList(),
             utkast.dokumentTittel(),
             utkast.saksbehandlerNrToIdent(),

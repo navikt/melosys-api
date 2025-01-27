@@ -18,6 +18,7 @@ import no.nav.melosys.domain.kodeverk.Land_iso2;
 import no.nav.melosys.domain.kodeverk.Mottakerroller;
 import no.nav.melosys.domain.kodeverk.brev.Produserbaredokumenter;
 import no.nav.melosys.integrasjon.dokgen.DokgenConsumer;
+import no.nav.melosys.integrasjon.dokgen.dto.standardvedlegg.StandardvedleggDto;
 import no.nav.melosys.integrasjon.ereg.EregFasade;
 import no.nav.melosys.integrasjon.joark.JoarkFasade;
 import no.nav.melosys.saksflytapi.ProsessinstansService;
@@ -126,6 +127,14 @@ public class DokgenService {
         return dokgenConsumer.lagPdf(malnavn, dokgenDto, brevbestilling.isBestillKopi(), brevbestilling.isBestillUtkast());
     }
 
+    public byte[] produserStandardvedlegg(StandardvedleggType standardvedleggType) {
+        return produserStandardvedlegg(standardvedleggType, null);
+    }
+
+    public byte[] produserStandardvedlegg(StandardvedleggType standardvedleggType, StandardvedleggDto standardvedlegg) {
+        return dokgenConsumer.lagPdfForStandardvedlegg(standardvedleggType.getMalnavn(), standardvedlegg);
+    }
+
     @Transactional
     public void produserOgDistribuerBrev(long behandlingId, BrevbestillingDto brevbestillingDto) {
         Produserbaredokumenter produserbartDokument = brevbestillingDto.getProduserbardokument();
@@ -138,6 +147,7 @@ public class DokgenService {
             .medBehandlingId(behandlingId)
             .medSaksvedleggBestilling(lagSaksvedleggBestilling(brevbestillingDto.getSaksVedlegg()))
             .medSaksbehandlerNavn(hentSaksbehandlerNavn(brevbestillingDto.getBestillersId()))
+            .medStandardvedleggBestilling(brevbestillingDto.getStandardvedleggType())
             .medFritekstvedleggBestilling(lagFritekstvedleggBestilling(brevbestillingDto.getFritekstvedlegg()));
 
         List<Mottaker> mottakere = hentMottakere(brevbestillingDto, produserbartDokument, behandling);
