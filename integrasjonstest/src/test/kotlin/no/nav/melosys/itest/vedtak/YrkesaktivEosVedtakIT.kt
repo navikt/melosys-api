@@ -5,7 +5,6 @@ import com.fasterxml.jackson.databind.SerializationFeature
 import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule
 import com.fasterxml.jackson.module.kotlin.jacksonObjectMapper
 import com.ninjasquad.springmockk.MockkBean
-import io.getunleash.FakeUnleash
 import io.kotest.assertions.withClue
 import io.kotest.matchers.collections.shouldHaveSize
 import io.kotest.matchers.nulls.shouldNotBeNull
@@ -65,7 +64,6 @@ class YrkesaktivEosVedtakIT(
     @Autowired private val oppfriskSaksopplysningerService: OppfriskSaksopplysningerService,
     @Autowired private val utpekingService: UtpekingService,
     @Autowired private val vedtaksfattingFasade: VedtaksfattingFasade,
-    @Autowired private val unleash: FakeUnleash,
     @Autowired private val opprettSak: OpprettSak
 ) : JournalfoeringBase() {
 

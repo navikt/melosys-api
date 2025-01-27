@@ -9,7 +9,6 @@ import com.github.tomakehurst.wiremock.client.WireMock
 import com.github.tomakehurst.wiremock.extension.ResponseTransformerV2
 import com.github.tomakehurst.wiremock.http.Response
 import com.github.tomakehurst.wiremock.stubbing.ServeEvent
-import io.getunleash.FakeUnleash
 import io.kotest.matchers.collections.shouldContainOnly
 import io.kotest.matchers.nulls.shouldNotBeNull
 import io.kotest.matchers.shouldBe
@@ -65,7 +64,6 @@ class SatsendringIT(
     @Autowired private val vilkaarsresultatService: VilkaarsresultatService,
     @Autowired private val satsendringFinner: SatsendringFinner,
     @Autowired private val objectMapper: ObjectMapper,
-    @Autowired private val unleash: FakeUnleash,
     @Autowired private val melosysHendelseKafkaConsumer: MelosysHendelseKafkaConsumer
 ) : JournalfoeringBase(TrygdeavgiftsberegningMedSatsendring()) {
     private var originalSubjectHandler: SubjectHandler? = null

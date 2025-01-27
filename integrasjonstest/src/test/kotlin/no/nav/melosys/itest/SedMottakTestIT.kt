@@ -2,7 +2,6 @@ package no.nav.melosys.itest
 
 import com.github.tomakehurst.wiremock.client.WireMock
 import com.ninjasquad.springmockk.MockkBean
-import io.getunleash.FakeUnleash
 import io.kotest.assertions.extracting
 import io.kotest.matchers.collections.shouldContainExactly
 import io.kotest.matchers.collections.shouldContainInOrder
@@ -52,7 +51,6 @@ class SedMottakTestIT(
     @Autowired private val opprettBehandlingForSak: OpprettBehandlingForSak,
     @Autowired private val lovvalgsperiodeService: LovvalgsperiodeService,
     @Autowired private val behandlingsresultatRepository: BehandlingsresultatRepository,
-    @Autowired private val unleash: FakeUnleash,
     @Autowired private val avklartefaktaService: AvklartefaktaService,
 ) : MockServerTestBaseWithProsessManager() {
 

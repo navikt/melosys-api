@@ -5,15 +5,12 @@ import com.fasterxml.jackson.databind.SerializationFeature
 import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule
 import com.fasterxml.jackson.module.kotlin.jacksonObjectMapper
 import com.github.tomakehurst.wiremock.client.WireMock
-import io.getunleash.FakeUnleash
 import io.kotest.assertions.withClue
 import io.kotest.matchers.collections.shouldHaveSize
 import io.kotest.matchers.nulls.shouldNotBeNull
 import io.kotest.matchers.optional.shouldBePresent
 import io.kotest.matchers.shouldBe
 import io.kotest.matchers.types.shouldBeInstanceOf
-import io.mockk.every
-import io.mockk.mockk
 import no.nav.melosys.domain.Behandlingsmaate
 import no.nav.melosys.domain.avgift.Inntektsperiode
 import no.nav.melosys.domain.avgift.Penger
@@ -28,9 +25,8 @@ import no.nav.melosys.domain.mottatteopplysninger.data.Periode
 import no.nav.melosys.domain.mottatteopplysninger.data.Soeknadsland
 import no.nav.melosys.integrasjon.hendelser.VedtakHendelseMelding
 import no.nav.melosys.integrasjon.trygdeavgift.dto.DatoPeriodeDto
-import no.nav.melosys.itest.MockForFakturaTestBase
 import no.nav.melosys.itest.MelosysHendelseKafkaConsumer
-import no.nav.melosys.melosysmock.medl.MedlRepo
+import no.nav.melosys.itest.MockForFakturaTestBase
 import no.nav.melosys.repository.BehandlingRepository
 import no.nav.melosys.repository.FagsakRepository
 import no.nav.melosys.saksflytapi.domain.ProsessType
@@ -48,10 +44,7 @@ import no.nav.melosys.service.saksopplysninger.OppfriskSaksopplysningerService
 import no.nav.melosys.service.vedtak.FattVedtakRequest
 import no.nav.melosys.service.vedtak.VedtaksfattingFasade
 import no.nav.melosys.service.vilkaar.VilkaarDto
-import no.nav.melosys.sikkerhet.context.SpringSubjectHandler
-import no.nav.melosys.sikkerhet.context.SubjectHandler
 import org.junit.jupiter.api.AfterEach
-import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.beans.factory.annotation.Qualifier
@@ -72,31 +65,15 @@ class YrkesaktivMockForFakturaTestIT(
     @Autowired private val opprettBehandlingForSak: OpprettBehandlingForSak,
     @Autowired private val trygdeavgiftsberegningService: TrygdeavgiftsberegningService,
     @Autowired @Qualifier("manglendeFakturabetalingMelding") private val manglendeFakturabetalingMeldingTemplate: KafkaTemplate<String, ManglendeFakturabetalingMelding>,
-    @Autowired private val unleash: FakeUnleash,
     @Autowired private val melosysHendelseKafkaConsumer: MelosysHendelseKafkaConsumer,
 ) : MockForFakturaTestBase(TrygdeavgiftsberegningTransformer()) {
 
-    private var originalSubjectHandler: SubjectHandler? = null
     private val kafkaTopic = "teammelosys.manglende-fakturabetaling-local"
     override val fakturaserieReferanse: String = "01J17B5NTTDYKFB5DZTSSQEHJ0"
-
-    @BeforeEach
-    fun setup() {
-        MedlRepo.repo.clear()
-        originalSubjectHandler = SubjectHandler.getInstance()
-
-        val mockHandler = mockk<SpringSubjectHandler>()
-        SubjectHandler.set(mockHandler)
-        every { mockHandler.userID } returns "Z123456"
-        every { mockHandler.userName } returns "test"
-
-        unleash.enableAll()
-    }
 
     @AfterEach
     fun afterEach() {
         melosysHendelseKafkaConsumer.clear()
-        SubjectHandler.set(originalSubjectHandler)
     }
 
     @Test

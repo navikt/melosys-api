@@ -1,11 +1,13 @@
 package no.nav.melosys.itest
 
+import io.getunleash.FakeUnleash
 import no.nav.melosys.Application
 import no.nav.melosys.melosysmock.medl.MedlRepo
 import no.nav.melosys.melosysmock.melosyseessi.MelosysEessiRepo
 import no.nav.melosys.melosysmock.sak.SakRepo
 import no.nav.security.token.support.spring.test.EnableMockOAuth2Server
 import org.junit.jupiter.api.AfterEach
+import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.boot.test.autoconfigure.jdbc.AutoConfigureTestDatabase
 import org.springframework.boot.test.context.SpringBootTest
 import org.springframework.context.annotation.Import
@@ -31,6 +33,9 @@ import org.springframework.test.context.ActiveProfiles
 @DirtiesContext
 @EnableMockOAuth2Server
 class ComponentTestBase : OracleTestContainerBase() {
+
+    @Autowired
+    protected lateinit var unleash: FakeUnleash
 
     @AfterEach
     fun afterEachComponentTestBase() {

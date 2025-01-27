@@ -6,7 +6,12 @@ import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule
 import com.fasterxml.jackson.module.kotlin.jacksonObjectMapper
 import com.github.tomakehurst.wiremock.client.WireMock
 import com.github.tomakehurst.wiremock.extension.Extension
+import io.mockk.every
+import io.mockk.mockk
 import no.nav.melosys.integrasjon.faktureringskomponenten.NyFakturaserieResponseDto
+import no.nav.melosys.sikkerhet.context.SpringSubjectHandler
+import no.nav.melosys.sikkerhet.context.SubjectHandler
+import org.junit.jupiter.api.AfterEach
 import org.junit.jupiter.api.BeforeEach
 
 abstract class MockForFakturaTestBase(
@@ -15,8 +20,18 @@ abstract class MockForFakturaTestBase(
 
     protected abstract val fakturaserieReferanse: String
 
+    private var originalSubjectHandler: SubjectHandler? = null
+
     @BeforeEach
     fun beforeMockForFakturaTestBase() {
+        originalSubjectHandler = SubjectHandler.getInstance()
+        unleash.enableAll()
+
+        val mockHandler = mockk<SpringSubjectHandler>()
+        SubjectHandler.set(mockHandler)
+        every { mockHandler.userID } returns "Z123456"
+        every { mockHandler.userName } returns "test"
+
         mockServer.stubFor(
             WireMock.post("/api/v2/beregn")
                 .willReturn(
@@ -56,6 +71,11 @@ abstract class MockForFakturaTestBase(
                         .withBody(fakturaResponse.toJsonNode.toString())
                 )
         )
+    }
+
+    @AfterEach
+    fun afterMockForFakturaTestBase() {
+        SubjectHandler.set(originalSubjectHandler)
     }
 
     private val Any.toJsonNode: JsonNode

@@ -1,6 +1,5 @@
 package no.nav.melosys.itest
 
-import io.getunleash.FakeUnleash
 import io.kotest.matchers.collections.shouldHaveSize
 import io.kotest.matchers.equality.FieldsEqualityCheckConfig
 import io.kotest.matchers.equality.shouldBeEqualToComparingFields
@@ -32,7 +31,6 @@ class JournalfoeringIT(
     @Autowired private val behandlingRepository: BehandlingRepository,
     @Autowired private val behandlingsresultatRepository: BehandlingsresultatRepository,
     @Autowired private val fagsakRepository: FagsakRepository,
-    @Autowired private val unleash: FakeUnleash,
     @Autowired private val journalpostRepo: JournalpostRepo
 ) : JournalfoeringBase() {
 

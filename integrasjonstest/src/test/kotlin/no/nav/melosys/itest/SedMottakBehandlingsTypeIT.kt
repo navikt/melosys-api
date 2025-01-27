@@ -4,7 +4,6 @@ import com.fasterxml.jackson.databind.JsonNode
 import com.fasterxml.jackson.databind.SerializationFeature
 import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule
 import com.fasterxml.jackson.module.kotlin.jacksonObjectMapper
-import io.getunleash.FakeUnleash
 import io.kotest.matchers.collections.shouldHaveSize
 import io.kotest.matchers.shouldBe
 import io.kotest.matchers.string.shouldContain
@@ -40,7 +39,6 @@ class SedMottakBehandlingTypeIT(
     @Autowired private val journalpostRepo: JournalpostRepo,
     @Autowired private val behandlingRepository: BehandlingRepository,
     @Autowired private val fagsakRepository: FagsakRepository,
-    @Autowired private val unleash: FakeUnleash,
 ) : JournalfoeringBase() {
 
     private val kafkaTopic = "teammelosys.eessi.v1-local"
