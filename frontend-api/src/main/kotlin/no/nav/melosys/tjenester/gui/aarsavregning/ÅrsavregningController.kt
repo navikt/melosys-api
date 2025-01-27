@@ -5,12 +5,13 @@ import io.swagger.annotations.ApiOperation
 import no.nav.melosys.domain.avgift.Trygdeavgiftsperiode
 import no.nav.melosys.domain.kodeverk.Inntektskildetype
 import no.nav.melosys.domain.kodeverk.InnvilgelsesResultat
+import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingsstatus
 import no.nav.melosys.service.avgift.aarsavregning.Trygdeavgiftsgrunnlag
 import no.nav.melosys.service.avgift.aarsavregning.totalbeloep.TotalbeløpBeregner
 import no.nav.melosys.service.avgift.aarsavregning.totalbeloep.TotalbeløpBeregner.kalkulertMndInntekt
 import no.nav.melosys.service.avgift.aarsavregning.ÅrsavregningModel
 import no.nav.melosys.service.avgift.aarsavregning.ÅrsavregningService
-import no.nav.melosys.service.sak.EndreSakDto
+import no.nav.melosys.service.sak.*
 import no.nav.melosys.service.tilgang.Aksesskontroll
 import no.nav.melosys.tjenester.gui.dto.trygdeavgift.InntektskildeDto
 import no.nav.melosys.tjenester.gui.dto.trygdeavgift.SkatteforholdTilNorgeDto
@@ -77,20 +78,24 @@ class ÅrsavregningController(
         )
     }
 
-//    @PostMapping("/{aarsavregningID}")
-//    @ApiOperation("Endre årsavregning")
-//    fun endreÅrsavregning(
-//        @PathVariable("behandlingID") behandlingID: Long,
-//        @PathVariable("aarsavregningID") aarsavregningID: Long,
-//        @RequestBody endreDto:EndreSakDto
-//    ): ResponseEntity<ÅrsavregningResponse> {
-//        aksesskontroll.autoriserSkriv(behandlingID)
-//
-//        val årsavregning = null
-//        return ResponseEntity.ok(
-//            lagÅrsavregningResponse(årsavregning)
-//        )
-//    }
+    @PostMapping("/{aarsavregningID}")
+    @ApiOperation("Endre årsavregning")
+    fun endreÅrsavregning(
+        @PathVariable("behandlingID") behandlingID: Long,
+        @PathVariable("aarsavregningID") aarsavregningID: Long,
+        @RequestBody endreRequest:AarsavregningEndreRequest
+    ): ResponseEntity<ÅrsavregningResponse> {
+
+        //Riktig autorisering?
+        aksesskontroll.autoriserSkriv(behandlingID)
+
+        val årsavregning = årsavregningService.endre(aarsavregningID,endreRequest.behandlingsstatus, endreRequest.mottaksdato)
+
+        //TODO Muligens denne trenger en egen response eller returner ingenting
+        return ResponseEntity.ok(
+            lagÅrsavregningResponse(årsavregning)
+        )
+    }
 
     private fun lagÅrsavregningResponse(årsavregningModel: ÅrsavregningModel) =
         ÅrsavregningResponse(
@@ -224,4 +229,10 @@ data class AvregningDto(
     val nyttTotalbeloep: BigDecimal?,
     val tidligereFakturertBeloep: BigDecimal?,
     val tilFaktureringBeloep: BigDecimal?,
+)
+
+data class AarsavregningEndreRequest(
+    val saksnummer: String,
+    val behandlingsstatus: Behandlingsstatus,
+    val mottaksdato: LocalDate?
 )

@@ -10,6 +10,7 @@ import no.nav.melosys.exception.FunksjonellException
 import no.nav.melosys.exception.IkkeFunnetException
 import no.nav.melosys.repository.AarsavregningRepository
 import no.nav.melosys.service.avgift.aarsavregning.totalbeloep.TotalbeløpBeregner
+import no.nav.melosys.service.behandling.BehandlingService
 import no.nav.melosys.service.behandling.BehandlingsresultatService
 import no.nav.melosys.service.sak.FagsakService
 import no.nav.melosys.service.sak.FagsakService.UGYLDIGE_SAKSSTATUSER_FOR_TRYGDEAVGIFT
@@ -24,6 +25,7 @@ class ÅrsavregningService(
     private val aarsavregningRepository: AarsavregningRepository,
     private val behandlingsresultatService: BehandlingsresultatService,
     private val fagsakService: FagsakService,
+    private val behandlingService: BehandlingService,
 ) {
     fun hentÅrsavregning(aarsavregningId: Long): Årsavregning =
         aarsavregningRepository.findById(aarsavregningId).orElseThrow { IkkeFunnetException("Finner ingen årsavregning for id: $aarsavregningId") }
@@ -217,33 +219,16 @@ class ÅrsavregningService(
 
     @Transactional
     fun endre(
-        saksnummer: String,
-        behandlingID: Long,
         aarsavregningId: Long,
         nyBehandlingsstatus: Behandlingsstatus,
         nyMottaksdato: LocalDate?
-    ){
+    ): ÅrsavregningModel{
         val årsavregning = hentÅrsavregning(aarsavregningId)
-        val behandlingsresultat = behandlingsresultatService.hentBehandlingsresultat(behandlingID)
+        val behandlingID = årsavregning.behandlingsresultat.behandling.id
 
-        //val årsavregninger = finnÅrsavregningerPåFagsak(saksnummer)
+        behandlingService.endreBehandling(behandlingID, null, null, nyBehandlingsstatus, nyMottaksdato)
 
-        if (årsavregning.behandlingsresultat != behandlingsresultat) {
-            throw RuntimeException("Årsavregning med id: $aarsavregningId hører ikke til Behandling med Id: $behandlingID")
-        }
-
-        val fagsak = fagsakService.hentFagsak(saksnummer)
-
-
-//        if (nyBehandlingsstatus != årsavregning.status || nyMottaksdato != behandlingsresultat.mottaksdato) {
-//            behandlingsresultat.status = nyBehandlingsstatus
-//            behandlingsresultat.mottaksdato = nyMottaksdato
-//            behandlingsresultatService.lagreOgFlush(behandlingsresultat)
-//        }
-
-
-
-
+        return lagÅrsavregningModelFraÅrsavregning(årsavregning)
     }
 }
 
