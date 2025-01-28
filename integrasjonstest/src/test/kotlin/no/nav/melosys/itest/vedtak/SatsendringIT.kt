@@ -94,7 +94,7 @@ class SatsendringIT(
                     WireMock.aResponse()
                         .withStatus(200)
                         .withHeader("Content-Type", "application/json")
-                        .withBody(fakturaResponse.toJson.toString())
+                        .withBody(fakturaResponse.toJsonNode.toString())
                 )
         )
 
@@ -172,7 +172,7 @@ class SatsendringIT(
                             trygdedekning = Trygdedekninger.FTRL_2_9_FØRSTE_LEDD_B_PENSJON
                         }
                 }
-        mottatteOpplysningerService.oppdaterMottatteOpplysninger(behandling.id, mottatteOpplysninger.mottatteOpplysningerData.toJson)
+        mottatteOpplysningerService.oppdaterMottatteOpplysninger(behandling.id, mottatteOpplysninger.mottatteOpplysningerData.toJsonNode)
 
         val virksomhet = AvklartefaktaDto(
             listOf("TRUE"), "VIRKSOMHET"
@@ -258,9 +258,6 @@ class SatsendringIT(
 
         trygdeavgiftsberegningService.beregnOgLagreTrygdeavgift(behandlingID, skattefordholdsperioder, inntektsforholdsperioder)
     }
-
-    private val Any.toJson: JsonNode
-        get() = objectMapper.valueToTree<JsonNode?>(this)
 
     companion object {
         private const val SATSENDRING_ÅR = 2024
