@@ -97,8 +97,6 @@ class SatsendringIT(
                         .withBody(fakturaResponse.toJsonNode.toString())
                 )
         )
-
-        unleash.enableAll()
     }
 
     @AfterEach

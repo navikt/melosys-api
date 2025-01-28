@@ -67,7 +67,6 @@ class IkkeYrkesaktivVedtakIT(
             )
         )
         MedlRepo.repo.clear()
-        unleash.enableAll()
     }
 
     @Test

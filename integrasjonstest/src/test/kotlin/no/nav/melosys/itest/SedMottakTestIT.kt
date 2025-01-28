@@ -645,7 +645,6 @@ class SedMottakTestIT(
 
     @Test
     fun `A003 skal virke med arbeidssted=null`() {
-        unleash.enableAll()
         val ref = Random().nextInt(100000).toString()
         val journalpostId = eessiMeldingTestDataFactory.opprettEessiJournalpost(ref)
 

@@ -21,7 +21,6 @@ import no.nav.melosys.repository.BehandlingsresultatRepository
 import no.nav.melosys.repository.FagsakRepository
 import no.nav.melosys.saksflytapi.domain.ProsessType
 import org.junit.jupiter.api.AfterEach
-import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.TestInstance
 import org.springframework.beans.factory.annotation.Autowired
@@ -34,10 +33,6 @@ class JournalfoeringIT(
     @Autowired private val journalpostRepo: JournalpostRepo
 ) : JournalfoeringBase() {
 
-    @BeforeEach
-    fun setup() {
-        unleash.enableAll()
-    }
 
     @AfterEach
     fun afterEach() {

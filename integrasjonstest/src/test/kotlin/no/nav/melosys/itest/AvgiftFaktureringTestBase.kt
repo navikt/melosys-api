@@ -21,7 +21,6 @@ abstract class AvgiftFaktureringTestBase(
     @BeforeEach
     fun beforeMockForFakturaTestBase() {
         originalSubjectHandler = SubjectHandler.getInstance()
-        unleash.enableAll()
 
         val mockHandler = mockk<SpringSubjectHandler>()
         SubjectHandler.set(mockHandler)
