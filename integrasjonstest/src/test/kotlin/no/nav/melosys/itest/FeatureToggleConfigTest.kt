@@ -1,4 +1,4 @@
-package no.nav.melosys.featuretoggle
+package no.nav.melosys.itest
 
 import io.getunleash.FakeUnleash
 import io.getunleash.Unleash
