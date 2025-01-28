@@ -48,7 +48,7 @@ import org.springframework.beans.factory.annotation.Qualifier
 import org.springframework.kafka.core.KafkaTemplate
 import java.time.LocalDate
 
-class YrkesaktivMockForFakturaTestIT(
+class YrkesaktivFtrlVedtakIT(
     @Autowired private val avklartefaktaService: AvklartefaktaService,
     @Autowired private val fagsakRepository: FagsakRepository,
     @Autowired private val behandlingsresultatService: BehandlingsresultatService,
