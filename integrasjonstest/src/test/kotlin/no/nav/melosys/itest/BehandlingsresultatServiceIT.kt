@@ -1,9 +1,5 @@
 package no.nav.melosys.itest
 
-import com.fasterxml.jackson.databind.JsonNode
-import com.fasterxml.jackson.databind.SerializationFeature
-import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule
-import com.fasterxml.jackson.module.kotlin.jacksonObjectMapper
 import io.getunleash.FakeUnleash
 import no.nav.melosys.domain.*
 import no.nav.melosys.domain.avgift.Inntektsperiode
@@ -27,6 +23,7 @@ import no.nav.melosys.service.behandling.BehandlingsresultatService
 import no.nav.melosys.service.behandling.ReplikerBehandlingsresultatService
 import no.nav.melosys.service.behandling.VilkaarsresultatService
 import no.nav.melosys.service.saksbehandling.SaksbehandlingRegler
+import no.nav.melosys.toJsonSting
 import org.assertj.core.api.Assertions.assertThat
 import org.junit.jupiter.api.Test
 import org.springframework.beans.factory.annotation.Autowired
@@ -384,12 +381,4 @@ class BehandlingsresultatServiceIT(
         },
         "trygdeavgiftType" to trygdeavgiftType
     )
-
-    private val Any.toJsonSting: String
-        get() {
-            return jacksonObjectMapper()
-                .configure(SerializationFeature.WRITE_DATES_AS_TIMESTAMPS, false)
-                .registerModule(JavaTimeModule())
-                .valueToTree<JsonNode>(this).toPrettyString()
-        }
 }
