@@ -47,8 +47,7 @@ class InnvilgelseEftaStorbritanniaMapper(
         val erOrdinaerYrkesgruppe =
             behandlingsresultat.avklartefakta.find { it.type == Avklartefaktatyper.YRKESGRUPPE && it.fakta == Yrkesgrupper.ORDINAER.name } != null
 
-        val arbeidINorge =
-            if (unleash.isEnabled(ToggleName.MELOSYS_ARBEID_KUN_NORGE)) bostedsland.kode == Land_iso2.NO.name && erOrdinaerYrkesgruppe else false
+        val arbeidINorge = bostedsland.kode == Land_iso2.NO.name && erOrdinaerYrkesgruppe
 
         val er11_3_a_eller_13_a_arbeid_norge = if (arbeidINorge) {
             lovvalgsperiode.erArtikkel11_3_a_eller_13_3a()

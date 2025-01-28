@@ -147,7 +147,6 @@ class SendVedtaksbrevInnlandTest {
 
     @Test
     void utfør_innvilgelse11_3_SokkelSkip_vedtak() {
-        fakeUnleash.enable(ToggleName.MELOSYS_ARBEID_KUN_NORGE);
         when(behandlingsresultatService.hentBehandlingsresultat(BEHANDLINGID))
             .thenReturn(lagBehandlingsresultatMedAvklarteFakta(lagInnvilgetLovvalgsperiode(FO_883_2004_ART11_3A), Set.of(lagAvklarteFakta(Avklartefaktatyper.YRKESGRUPPE, AvklartYrkesgruppeType.SOKKEL_ELLER_SKIP.name(), ""))));
 
@@ -164,7 +163,6 @@ class SendVedtaksbrevInnlandTest {
 
     @Test
     void utfør_innvilgelse11_3_Yrkesaktiv_vedtak() {
-        fakeUnleash.enable(ToggleName.MELOSYS_ARBEID_KUN_NORGE);
         when(behandlingsresultatService.hentBehandlingsresultat(BEHANDLINGID))
             .thenReturn(lagBehandlingsresultatMedAvklarteFakta(lagInnvilgetLovvalgsperiode(FO_883_2004_ART11_3A), Set.of(lagAvklarteFakta(Avklartefaktatyper.YRKESGRUPPE, AvklartYrkesgruppeType.ORDINAER.name(), ""))));
 

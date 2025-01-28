@@ -81,10 +81,8 @@ class SaksbehandlingRegler(private val behandlingsresultatRepository: Behandling
             UNNTAK_MEDLEMSKAP,
             FORESPØRSEL_TRYGDEMYNDIGHET,
             TRYGDETID,
-            A1_ANMODNING_OM_UNNTAK_PAPIR
+            A1_ANMODNING_OM_UNNTAK_PAPIR,
             -> true
-
-            ARBEID_KUN_NORGE -> !unleash.isEnabled(ToggleName.MELOSYS_ARBEID_KUN_NORGE)
 
             ANMODNING_OM_UNNTAK_HOVEDREGEL -> sakstype == Sakstyper.TRYGDEAVTALE
 

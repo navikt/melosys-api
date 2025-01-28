@@ -35,10 +35,6 @@ public class RegisteropplysningerFactory {
             return hentSaksopplysningTyperForRegistreringUnntakFraMedlemskap();
         }
 
-        if(behandlingstema == Behandlingstema.ARBEID_KUN_NORGE && unleash.isEnabled(ToggleName.MELOSYS_ARBEID_KUN_NORGE)) { //legg til i switch case når vi fjerner toggle
-            return hentSaksopplysningTyperForBehandlingAvSøknad();
-        }
-
         return switch (behandlingstema) {
             case UTSENDT_ARBEIDSTAKER,
                 UTSENDT_SELVSTENDIG,
@@ -46,6 +42,7 @@ public class RegisteropplysningerFactory {
                 ARBEID_TJENESTEPERSON_ELLER_FLY,
                 ARBEID_NORGE_BOSATT_ANNET_LAND,
                 IKKE_YRKESAKTIV,
+                ARBEID_KUN_NORGE,
                 YRKESAKTIV -> hentSaksopplysningTyperForBehandlingAvSøknad();
             case REGISTRERING_UNNTAK_NORSK_TRYGD_UTSTASJONERING, REGISTRERING_UNNTAK_NORSK_TRYGD_ØVRIGE ->
                 hentSaksopplysningTyperForRegistreringAvUnntak();
