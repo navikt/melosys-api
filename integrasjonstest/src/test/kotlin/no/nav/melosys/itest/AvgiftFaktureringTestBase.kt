@@ -10,7 +10,7 @@ import no.nav.melosys.sikkerhet.context.SubjectHandler
 import org.junit.jupiter.api.AfterEach
 import org.junit.jupiter.api.BeforeEach
 
-abstract class MockForFakturaTestBase(
+abstract class AvgiftFaktureringTestBase(
     extensionForWireMock: Extension? = null
 ) : JournalfoeringBase(extensionForWireMock) {
 

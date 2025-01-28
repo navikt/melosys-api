@@ -22,7 +22,7 @@ import no.nav.melosys.domain.mottatteopplysninger.data.Soeknadsland
 import no.nav.melosys.integrasjon.hendelser.VedtakHendelseMelding
 import no.nav.melosys.integrasjon.trygdeavgift.dto.DatoPeriodeDto
 import no.nav.melosys.itest.MelosysHendelseKafkaConsumer
-import no.nav.melosys.itest.MockForFakturaTestBase
+import no.nav.melosys.itest.AvgiftFaktureringTestBase
 import no.nav.melosys.repository.BehandlingRepository
 import no.nav.melosys.repository.FagsakRepository
 import no.nav.melosys.saksflytapi.domain.ProsessType
@@ -62,7 +62,7 @@ class YrkesaktivFtrlVedtakIT(
     @Autowired private val trygdeavgiftsberegningService: TrygdeavgiftsberegningService,
     @Autowired @Qualifier("manglendeFakturabetalingMelding") private val manglendeFakturabetalingMeldingTemplate: KafkaTemplate<String, ManglendeFakturabetalingMelding>,
     @Autowired private val melosysHendelseKafkaConsumer: MelosysHendelseKafkaConsumer,
-) : MockForFakturaTestBase(TrygdeavgiftsberegningTransformer()) {
+) : AvgiftFaktureringTestBase(TrygdeavgiftsberegningTransformer()) {
 
     private val kafkaTopic = "teammelosys.manglende-fakturabetaling-local"
     override val fakturaserieReferanse: String = "01J17B5NTTDYKFB5DZTSSQEHJ0"
