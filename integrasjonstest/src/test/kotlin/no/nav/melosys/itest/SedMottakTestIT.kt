@@ -456,8 +456,8 @@ class SedMottakTestIT(
         val vedtaksProsessInstans = prosessinstansTestManager.executeAndWait(
             mapOf(
                 ProsessType.IVERKSETT_VEDTAK_EOS to 1,
-                ProsessType.SEND_BREV to 2,
-                ProsessType.OPPRETT_OG_DISTRIBUER_BREV to 1
+                ProsessType.SEND_BREV to 3,
+                ProsessType.OPPRETT_OG_DISTRIBUER_BREV to 2
             )
         ) {
             vedtaksfattingFasade.fattVedtak(
@@ -606,8 +606,8 @@ class SedMottakTestIT(
         val vedtaksProsessInstans = prosessinstansTestManager.executeAndWait(
             mapOf(
                 ProsessType.IVERKSETT_VEDTAK_EOS to 1,
-                ProsessType.SEND_BREV to 2,
-                ProsessType.OPPRETT_OG_DISTRIBUER_BREV to 1
+                ProsessType.SEND_BREV to 3,
+                ProsessType.OPPRETT_OG_DISTRIBUER_BREV to 2
             )
         ) {
             vedtaksfattingFasade.fattVedtak(
