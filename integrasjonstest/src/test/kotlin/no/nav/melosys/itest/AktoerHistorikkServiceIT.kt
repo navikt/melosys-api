@@ -8,7 +8,6 @@ import no.nav.melosys.repository.FagsakRepository
 import no.nav.melosys.service.aktoer.AktoerDto
 import no.nav.melosys.service.aktoer.AktoerHistorikkService
 import no.nav.melosys.service.aktoer.AktoerService
-import org.junit.jupiter.api.AfterEach
 import org.junit.jupiter.api.Test
 import org.springframework.beans.factory.annotation.Autowired
 
@@ -48,7 +47,13 @@ class AktoerHistorikkServiceIT(
     private fun lagFagsak(saksnummer: String): Fagsak {
         return Fagsak(
             saksnummer, null, Sakstyper.EU_EOS, Sakstemaer.MEDLEMSKAP_LOVVALG, Saksstatuser.OPPRETTET
-        ).apply { leggTilRegisteringInfo() }.also { fagsakRepository.save(it) }.also { addCleanUpAction { it.saksnummer } }
+        ).apply { leggTilRegisteringInfo() }
+            .also { fagsakRepository.save(it) }
+            .also {
+                addCleanUpAction {
+                    slettSakMedAvhengigheter(it.saksnummer)
+                }
+            }
     }
 
     private fun RegistreringsInfo.leggTilRegisteringInfo() {
