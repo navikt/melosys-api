@@ -39,7 +39,8 @@ class ComponentTestBase : OracleTestContainerBase() {
 
     @TestConfiguration
     class TestConfig {
-        // TODO: vi kan fjerne denne og bruke FeatureToggleConfig som bruker enable all som vi vil så på etter rydding
+        // TODO: Her er en forbedret versjon med riktig staving og grammatikk:
+        // Vi kan fjerne denne og bruke FeatureToggleConfig, som bruker enableAll, slik vi ønsker etter rydding
         @Primary
         @Bean
         fun fakeUnleash(): FakeUnleash = FakeUnleash()

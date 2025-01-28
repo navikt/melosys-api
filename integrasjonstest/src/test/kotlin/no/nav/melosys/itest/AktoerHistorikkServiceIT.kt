@@ -21,11 +21,6 @@ class AktoerHistorikkServiceIT(
 ) : ComponentTestBase() {
     val saksnummer = "MEL-aktoerhistorikk"
 
-    @AfterEach
-    fun clean() {
-        dbCleanup?.slettSakMedAvhengigheter(saksnummer)
-    }
-
     @Test
     fun testAktoerHistorikk() {
         val fagSak = lagFagsak(saksnummer)
@@ -53,7 +48,7 @@ class AktoerHistorikkServiceIT(
     private fun lagFagsak(saksnummer: String): Fagsak {
         return Fagsak(
             saksnummer, null, Sakstyper.EU_EOS, Sakstemaer.MEDLEMSKAP_LOVVALG, Saksstatuser.OPPRETTET
-        ).apply { leggTilRegisteringInfo() }.also { fagsakRepository.save(it) }
+        ).apply { leggTilRegisteringInfo() }.also { fagsakRepository.save(it) }.also { addCleanUpAction { it.saksnummer } }
     }
 
     private fun RegistreringsInfo.leggTilRegisteringInfo() {
