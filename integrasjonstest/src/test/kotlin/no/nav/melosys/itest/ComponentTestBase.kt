@@ -36,13 +36,13 @@ import org.springframework.test.context.ActiveProfiles
 @EnableMockOAuth2Server
 class ComponentTestBase : OracleTestContainerBase() {
     @Autowired
-    private lateinit var unleashReal: Unleash
+    private lateinit var unleash: Unleash
 
     @Autowired
     protected lateinit var objectMapper: ObjectMapper
 
-    val unleash: FakeUnleash by lazy {
-        unleashReal.shouldBeInstanceOf<FakeUnleash>()
+    val fakeUnleash: FakeUnleash by lazy {
+        unleash.shouldBeInstanceOf<FakeUnleash>()
     }
 
     @AfterEach
@@ -50,7 +50,7 @@ class ComponentTestBase : OracleTestContainerBase() {
         SakRepo.clear()
         MedlRepo.repo.clear()
         MelosysEessiRepo.sedRepo.clear()
-        unleash.enableAll()
+        fakeUnleash.enableAll()
     }
 
     val Any.toJsonNode: JsonNode

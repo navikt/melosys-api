@@ -33,7 +33,6 @@ class JournalfoeringIT(
     @Autowired private val journalpostRepo: JournalpostRepo
 ) : JournalfoeringBase() {
 
-
     @AfterEach
     fun afterEach() {
         journalpostRepo.repo.clear()
