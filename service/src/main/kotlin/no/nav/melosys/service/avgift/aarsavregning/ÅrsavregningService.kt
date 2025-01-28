@@ -224,13 +224,11 @@ class ÅrsavregningService(
         behandlingID: Long,
         nyBehandlingsstatus: Behandlingsstatus,
         nyMottaksdato: LocalDate?
-    ): ÅrsavregningModel{
+    ){
         val årsavregning = hentÅrsavregning(aarsavregningId)
         validerBehandling(årsavregning.behandlingsresultat.behandling)
 
         behandlingService.endreBehandling(behandlingID, null, null, nyBehandlingsstatus, nyMottaksdato)
-
-        return lagÅrsavregningModelFraÅrsavregning(årsavregning)
     }
 
     private fun validerBehandling(behandling: Behandling) {

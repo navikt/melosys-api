@@ -11,7 +11,6 @@ import no.nav.melosys.service.avgift.aarsavregning.totalbeloep.TotalbeløpBeregn
 import no.nav.melosys.service.avgift.aarsavregning.totalbeloep.TotalbeløpBeregner.kalkulertMndInntekt
 import no.nav.melosys.service.avgift.aarsavregning.ÅrsavregningModel
 import no.nav.melosys.service.avgift.aarsavregning.ÅrsavregningService
-import no.nav.melosys.service.sak.*
 import no.nav.melosys.service.tilgang.Aksesskontroll
 import no.nav.melosys.tjenester.gui.dto.trygdeavgift.InntektskildeDto
 import no.nav.melosys.tjenester.gui.dto.trygdeavgift.SkatteforholdTilNorgeDto
@@ -84,15 +83,13 @@ class ÅrsavregningController(
         @PathVariable("behandlingID") behandlingID: Long,
         @PathVariable("aarsavregningID") aarsavregningID: Long,
         @RequestBody endreRequest:AarsavregningEndreRequest
-    ): ResponseEntity<ÅrsavregningResponse> {
+    ): ResponseEntity<Void> {
 
         aksesskontroll.autoriserSkriv(behandlingID)
 
-        val årsavregning = årsavregningService.endreOppsummering(behandlingID,aarsavregningID,endreRequest.behandlingsstatus, endreRequest.mottaksdato)
+        årsavregningService.endreOppsummering(behandlingID,aarsavregningID,endreRequest.behandlingsstatus, endreRequest.mottaksdato)
 
-        return ResponseEntity.ok(
-            lagÅrsavregningResponse(årsavregning)
-        )
+        return ResponseEntity.noContent().build()
     }
 
     private fun lagÅrsavregningResponse(årsavregningModel: ÅrsavregningModel) =
@@ -230,7 +227,6 @@ data class AvregningDto(
 )
 
 data class AarsavregningEndreRequest(
-    val saksnummer: String,
     val behandlingsstatus: Behandlingsstatus,
     val mottaksdato: LocalDate?
 )

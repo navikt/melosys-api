@@ -12,7 +12,6 @@ import no.nav.melosys.domain.kodeverk.*
 import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingsresultattyper
 import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingsstatus
 import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingstyper
-import no.nav.melosys.domain.mottatteopplysninger.MottatteOpplysninger
 import no.nav.melosys.exception.FunksjonellException
 import no.nav.melosys.repository.AarsavregningRepository
 import no.nav.melosys.service.behandling.BehandlingService
@@ -336,24 +335,30 @@ internal class ÅrsavregningServiceTest {
     inner class endreÅrsavregningOppsummering{
         @Test
         fun `oppdaterer mottaksdato og behandlingsstatus for årsavregning oppsummering`(){
-
-            val behandlingsresultat = Behandlingsresultat().apply resultat@{
-                behandling = Behandling().apply {
-                    id = 1
-                    type = Behandlingstyper.ÅRSAVREGNING
-                    status = Behandlingsstatus.UNDER_BEHANDLING
-                    behandlingsårsak = Behandlingsaarsak().apply {
-                        mottaksdato = LocalDate.of(2023, 1, 1)
+            val årsavregning = Årsavregning().apply {
+                id = 11L
+                aar = 2023
+                behandlingsresultat = Behandlingsresultat().apply {
+                    behandling = Behandling().apply {
+                        id = 11L
+                        type = Behandlingstyper.ÅRSAVREGNING
+                        status = Behandlingsstatus.UNDER_BEHANDLING
+                        behandlingsårsak = Behandlingsaarsak().apply {
+                            mottaksdato = LocalDate.now()
+                        }
                     }
-                }
-
-                årsavregning = Årsavregning().apply {
-                    id = 1
-                    aar = 2023
-                    behandlingsresultat = this@resultat
                 }
             }
 
+            every { aarsavregningRepository.findById(11L) }.returns(Optional.of(årsavregning))
+            every { behandlingService.hentBehandling(11L) }.returns(årsavregning.behandlingsresultat.behandling)
+
+            val MOTTAKSDATO = LocalDate.now().plusMonths(1)
+            val BEHANDLING_STATUS = Behandlingsstatus.AVVENT_DOK_PART
+
+            årsavregningService.endreOppsummering(11L, 11L, BEHANDLING_STATUS, MOTTAKSDATO)
+
+            verify { behandlingService.endreBehandling(11L, null, null, BEHANDLING_STATUS, MOTTAKSDATO)}
 
         }
     }
