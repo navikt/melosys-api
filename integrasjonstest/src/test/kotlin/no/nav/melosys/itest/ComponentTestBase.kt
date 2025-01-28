@@ -2,7 +2,6 @@ package no.nav.melosys.itest
 
 import io.getunleash.FakeUnleash
 import no.nav.melosys.Application
-import no.nav.melosys.melosysmock.config.SoapConfig
 import no.nav.melosys.melosysmock.medl.MedlRepo
 import no.nav.melosys.melosysmock.melosyseessi.MelosysEessiRepo
 import no.nav.melosys.melosysmock.sak.SakRepo
@@ -31,7 +30,7 @@ import org.springframework.test.context.ActiveProfiles
         "teammelosys.fattetvedtak.v1-local", "teammelosys.manglende-fakturabetaling-local", "teammelosys.melosys-hendelse-local"],
     brokerProperties = ["offsets.topic.replication.factor=1", "transaction.state.log.replication.factor=1", "transaction.state.log.min.isr=1"]
 )
-@Import(SoapConfig::class, KafkaTestConfig::class, ComponentTestBase.TestConfig::class)
+@Import(KafkaTestConfig::class, ComponentTestBase.TestConfig::class)
 @DirtiesContext
 @EnableMockOAuth2Server
 class ComponentTestBase : OracleTestContainerBase() {

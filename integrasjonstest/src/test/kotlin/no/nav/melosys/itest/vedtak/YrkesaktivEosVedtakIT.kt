@@ -51,8 +51,11 @@ import org.junit.jupiter.api.AfterEach
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
 import org.springframework.beans.factory.annotation.Autowired
+import org.springframework.context.annotation.Import
 import java.time.LocalDate
 
+import no.nav.melosys.melosysmock.config.SoapConfig
+@Import(SoapConfig::class)
 class YrkesaktivEosVedtakIT(
     @Autowired private val avklartefaktaService: AvklartefaktaService,
     @Autowired private val behandlingsresultatService: BehandlingsresultatService,
