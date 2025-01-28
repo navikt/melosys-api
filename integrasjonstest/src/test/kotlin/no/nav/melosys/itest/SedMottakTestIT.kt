@@ -431,7 +431,7 @@ class SedMottakTestIT(
             .sortedBy { it.endretDato }
 
         lovvalgsperiodeService.lagreLovvalgsperioder(
-            prosessinstanserSortert.get(1).behandling.id,
+            prosessinstanserSortert.shouldHaveSize(2).last().behandling.id,
             listOf(Lovvalgsperiode().apply {
                 fom = datoOmToÅr
                 tom = datoOmToÅr.plusDays(1)
@@ -443,7 +443,7 @@ class SedMottakTestIT(
         )
 
         avklartefaktaService.lagreAvklarteFakta(
-            prosessinstanserSortert.get(1).behandling.id, setOf(
+            prosessinstanserSortert.shouldHaveSize(2).last().behandling.id, setOf(
                 AvklartefaktaDto(
                     listOf("TRUE"), "VIRKSOMHET"
                 ).apply {
@@ -558,17 +558,19 @@ class SedMottakTestIT(
         prosessinstansTestManager.executeAndWait(
             mapOf(ProsessType.UTPEKING_AVVIS to 1)
         ) {
-            utpekingService.avvisUtpeking(prosessinstanserSortert.get(1).behandling.id, UtpekingAvvis().apply {
-                begrunnelse = "lol"
-                etterspørInformasjon = false
-            })
+            utpekingService.avvisUtpeking(
+                prosessinstanserSortert
+                    .shouldHaveSize(2).last().behandling.id, UtpekingAvvis().apply {
+                    begrunnelse = "lol"
+                    etterspørInformasjon = false
+                })
         }
 
         val opprettNyVurderingProsessinstans = prosessinstansTestManager.executeAndWait(
             mapOf(ProsessType.OPPRETT_REPLIKERT_BEHANDLING_FOR_SAK to 1)
         ) {
             opprettBehandlingForSak.opprettBehandling(
-                prosessinstanserSortert.get(1).behandling.fagsak.saksnummer,
+                prosessinstanserSortert.shouldHaveSize(2).last().behandling.fagsak.saksnummer,
                 OpprettSakDto().apply {
                     behandlingstema = Behandlingstema.BESLUTNING_LOVVALG_NORGE
                     behandlingstype = Behandlingstyper.NY_VURDERING

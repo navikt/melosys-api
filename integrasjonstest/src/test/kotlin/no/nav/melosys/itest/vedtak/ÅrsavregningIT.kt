@@ -283,15 +283,13 @@ class ÅrsavregningIT(
         mockServer.verify(1, WireMock.postRequestedFor(WireMock.urlEqualTo("/fakturaserier")))
     }
 
-    private fun lagOpprettSakDtoÅrsavregning(): OpprettSakDto {
-        val opprettsakdto = OpprettSakDto()
-        opprettsakdto.sakstema = Sakstemaer.MEDLEMSKAP_LOVVALG
-        opprettsakdto.sakstype = Sakstyper.FTRL
-        opprettsakdto.behandlingstema = Behandlingstema.YRKESAKTIV
-        opprettsakdto.behandlingstype = Behandlingstyper.ÅRSAVREGNING
-        opprettsakdto.mottaksdato = LocalDate.of(2023, 1, 1)
-        opprettsakdto.behandlingsaarsakType = Behandlingsaarsaktyper.HENVENDELSE
-        return opprettsakdto
+    private fun lagOpprettSakDtoÅrsavregning() = OpprettSakDto().apply {
+        sakstema = Sakstemaer.MEDLEMSKAP_LOVVALG
+        sakstype = Sakstyper.FTRL
+        behandlingstema = Behandlingstema.YRKESAKTIV
+        behandlingstype = Behandlingstyper.ÅRSAVREGNING
+        mottaksdato = LocalDate.of(2023, 1, 1)
+        behandlingsaarsakType = Behandlingsaarsaktyper.HENVENDELSE
     }
 
     fun lagFørstegangsbehandling(skatteplikttype: Skatteplikttype, arbeidsgiversavgiftBetales: Boolean): String {
@@ -440,20 +438,18 @@ class ÅrsavregningIT(
             avgiftspliktigMndInntekt = Penger(10000.toBigDecimal(), "nok")
         }
 
-        val trygdeavgiftsperioder = HashSet<Trygdeavgiftsperiode>()
-        trygdeavgiftsperioder.add(
-            Trygdeavgiftsperiode(
-                periodeFra = LocalDate.of(2023, 1, 1),
-                periodeTil = LocalDate.of(2023, 2, 1),
-                trygdesats = 6.8.toBigDecimal(),
-                trygdeavgiftsbeløpMd = Penger(1000.toBigDecimal(), "nok"),
-                grunnlagMedlemskapsperiode = medlemskapsperiode,
-                grunnlagSkatteforholdTilNorge = skatteforholdTilNorge,
-                grunnlagInntekstperiode = inntektsperiode
+        medlemskapsperiode.trygdeavgiftsperioder =
+            setOf(
+                Trygdeavgiftsperiode(
+                    periodeFra = LocalDate.of(2023, 1, 1),
+                    periodeTil = LocalDate.of(2023, 2, 1),
+                    trygdesats = 6.8.toBigDecimal(),
+                    trygdeavgiftsbeløpMd = Penger(1000.toBigDecimal(), "nok"),
+                    grunnlagMedlemskapsperiode = medlemskapsperiode,
+                    grunnlagSkatteforholdTilNorge = skatteforholdTilNorge,
+                    grunnlagInntekstperiode = inntektsperiode
+                )
             )
-        )
-
-        medlemskapsperiode.trygdeavgiftsperioder = trygdeavgiftsperioder
     }
 
     private val Any.toJsonNode: JsonNode
