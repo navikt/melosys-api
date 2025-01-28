@@ -14,14 +14,21 @@ import no.nav.melosys.service.felles.dto.SoeknadslandDto
 import no.nav.melosys.service.journalforing.JournalfoeringService
 import no.nav.melosys.service.journalforing.dto.*
 import no.nav.melosys.service.oppgave.OppgaveService
+import org.springframework.beans.factory.annotation.Autowired
 import java.time.LocalDate
 
 class JournalfoeringBase(
-    protected val journalføringsoppgaveGenerator: JournalføringsoppgaveGenerator,
-    protected val journalføringService: JournalfoeringService,
-    protected val oppgaveService: OppgaveService,
     extensionForWireMock: Extension? = null
 ) : MockServerTestBaseWithProsessManager(extensionForWireMock) {
+
+    @Autowired
+    protected lateinit var journalføringsoppgaveGenerator: JournalføringsoppgaveGenerator
+
+    @Autowired
+    protected lateinit var journalføringService: JournalfoeringService
+
+    @Autowired
+    protected lateinit var oppgaveService: OppgaveService
 
     protected fun journalførOgVentTilProsesserErFerdige(
         journalfoeringOpprettDto: JournalfoeringOpprettDto,
@@ -43,7 +50,8 @@ class JournalfoeringBase(
     ): Prosessinstans = prosessinstansTestManager.executeAndWait(
         waitForProsesses = waitForProsesses,
         returnProsessOfType = returnProsessOfType,
-        process = process)
+        process = process
+    )
 
     protected fun lagJfrOppgave(): Oppgave =
         journalføringsoppgaveGenerator.opprettJfrOppgave(tilordnetRessurs = "Z123456", forVirksomhet = false)

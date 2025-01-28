@@ -1,14 +1,21 @@
 package no.nav.melosys.itest
 
+import com.fasterxml.jackson.databind.JsonNode
+import com.fasterxml.jackson.databind.ObjectMapper
+import io.getunleash.FakeUnleash
 import no.nav.melosys.Application
 import no.nav.melosys.melosysmock.medl.MedlRepo
 import no.nav.melosys.melosysmock.melosyseessi.MelosysEessiRepo
 import no.nav.melosys.melosysmock.sak.SakRepo
 import no.nav.security.token.support.spring.test.EnableMockOAuth2Server
 import org.junit.jupiter.api.AfterEach
+import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.boot.test.autoconfigure.jdbc.AutoConfigureTestDatabase
 import org.springframework.boot.test.context.SpringBootTest
+import org.springframework.boot.test.context.TestConfiguration
+import org.springframework.context.annotation.Bean
 import org.springframework.context.annotation.Import
+import org.springframework.context.annotation.Primary
 import org.springframework.kafka.test.context.EmbeddedKafka
 import org.springframework.test.annotation.DirtiesContext
 import org.springframework.test.context.ActiveProfiles
@@ -25,12 +32,25 @@ import org.springframework.test.context.ActiveProfiles
         "teammelosys.fattetvedtak.v1-local", "teammelosys.manglende-fakturabetaling-local", "teammelosys.melosys-hendelse-local"],
     brokerProperties = ["offsets.topic.replication.factor=1", "transaction.state.log.replication.factor=1", "transaction.state.log.min.isr=1"]
 )
-@Import(
-    ComponentTestConfig::class
-)
+@Import(KafkaTestConfig::class, ComponentTestBase.TestConfig::class)
 @DirtiesContext
 @EnableMockOAuth2Server
 class ComponentTestBase : OracleTestContainerBase() {
+
+    @TestConfiguration
+    class TestConfig {
+        // TODO: Her er en forbedret versjon med riktig staving og grammatikk:
+        // Vi kan fjerne denne og bruke FeatureToggleConfig, som bruker enableAll, slik vi ønsker etter rydding
+        @Primary
+        @Bean
+        fun fakeUnleash(): FakeUnleash = FakeUnleash()
+    }
+
+    @Autowired
+    protected lateinit var unleash: FakeUnleash
+
+    @Autowired
+    protected lateinit var objectMapper: ObjectMapper
 
     @AfterEach
     fun afterEachComponentTestBase() {
@@ -38,4 +58,7 @@ class ComponentTestBase : OracleTestContainerBase() {
         MedlRepo.repo.clear()
         MelosysEessiRepo.sedRepo.clear()
     }
+
+    val Any.toJsonNode: JsonNode
+        get() = objectMapper.valueToTree(this)
 }

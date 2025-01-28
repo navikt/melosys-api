@@ -1,11 +1,6 @@
 package no.nav.melosys.itest.vedtak
 
-import com.fasterxml.jackson.databind.JsonNode
-import com.fasterxml.jackson.databind.SerializationFeature
-import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule
-import com.fasterxml.jackson.module.kotlin.jacksonObjectMapper
 import com.ninjasquad.springmockk.MockkBean
-import io.getunleash.FakeUnleash
 import io.kotest.assertions.withClue
 import io.kotest.matchers.collections.shouldHaveSize
 import io.kotest.matchers.nulls.shouldNotBeNull
@@ -23,8 +18,8 @@ import no.nav.melosys.domain.kodeverk.lovvalgsbestemmelser.Lovvalgbestemmelser_8
 import no.nav.melosys.domain.mottatteopplysninger.data.Periode
 import no.nav.melosys.domain.mottatteopplysninger.data.Soeknadsland
 import no.nav.melosys.itest.JournalfoeringBase
+import no.nav.melosys.melosysmock.config.SoapConfig
 import no.nav.melosys.melosysmock.medl.MedlRepo
-import no.nav.melosys.melosysmock.testdata.JournalføringsoppgaveGenerator
 import no.nav.melosys.repository.BehandlingRepository
 import no.nav.melosys.saksflytapi.domain.ProsessType
 import no.nav.melosys.service.LovvalgsperiodeService
@@ -33,11 +28,9 @@ import no.nav.melosys.service.avklartefakta.AvklartefaktaService
 import no.nav.melosys.service.behandling.BehandlingsresultatService
 import no.nav.melosys.service.behandling.VilkaarsresultatService
 import no.nav.melosys.service.felles.dto.SoeknadslandDto
-import no.nav.melosys.service.journalforing.JournalfoeringService
 import no.nav.melosys.service.journalforing.dto.PeriodeDto
 import no.nav.melosys.service.kontroll.feature.ferdigbehandling.FerdigbehandlingKontrollFacade
 import no.nav.melosys.service.mottatteopplysninger.MottatteOpplysningerService
-import no.nav.melosys.service.oppgave.OppgaveService
 import no.nav.melosys.service.sak.OpprettSak
 import no.nav.melosys.service.sak.OpprettSakDto
 import no.nav.melosys.service.sak.SøknadDto
@@ -55,12 +48,11 @@ import org.junit.jupiter.api.AfterEach
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
 import org.springframework.beans.factory.annotation.Autowired
+import org.springframework.context.annotation.Import
 import java.time.LocalDate
 
+@Import(SoapConfig::class)
 class YrkesaktivEosVedtakIT(
-    @Autowired journalføringsoppgaveGenerator: JournalføringsoppgaveGenerator,
-    @Autowired journalføringService: JournalfoeringService,
-    @Autowired oppgaveService: OppgaveService,
     @Autowired private val avklartefaktaService: AvklartefaktaService,
     @Autowired private val behandlingsresultatService: BehandlingsresultatService,
     @Autowired private val behandlingRepository: BehandlingRepository,
@@ -71,9 +63,8 @@ class YrkesaktivEosVedtakIT(
     @Autowired private val oppfriskSaksopplysningerService: OppfriskSaksopplysningerService,
     @Autowired private val utpekingService: UtpekingService,
     @Autowired private val vedtaksfattingFasade: VedtaksfattingFasade,
-    @Autowired private val unleash: FakeUnleash,
     @Autowired private val opprettSak: OpprettSak
-) : JournalfoeringBase(journalføringsoppgaveGenerator, journalføringService, oppgaveService) {
+) : JournalfoeringBase() {
 
     @MockkBean
     private lateinit var utstedtA1AivenProducer: UtstedtA1AivenProducer
@@ -430,12 +421,4 @@ class YrkesaktivEosVedtakIT(
                 sporingsinformasjon?.kildedokument shouldBe "Henv_Soknad"
             }
     }
-
-    private val Any.toJsonNode: JsonNode
-        get() {
-            return jacksonObjectMapper()
-                .configure(SerializationFeature.WRITE_DATES_AS_TIMESTAMPS, false)
-                .registerModule(JavaTimeModule())
-                .valueToTree(this)
-        }
 }

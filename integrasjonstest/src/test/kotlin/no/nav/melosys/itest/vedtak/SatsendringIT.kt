@@ -1,7 +1,6 @@
 package no.nav.melosys.itest.vedtak
 
 import com.fasterxml.jackson.databind.JsonNode
-import com.fasterxml.jackson.databind.ObjectMapper
 import com.fasterxml.jackson.databind.SerializationFeature
 import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule
 import com.fasterxml.jackson.module.kotlin.jacksonObjectMapper
@@ -9,7 +8,6 @@ import com.github.tomakehurst.wiremock.client.WireMock
 import com.github.tomakehurst.wiremock.extension.ResponseTransformerV2
 import com.github.tomakehurst.wiremock.http.Response
 import com.github.tomakehurst.wiremock.stubbing.ServeEvent
-import io.getunleash.FakeUnleash
 import io.kotest.matchers.collections.shouldContainOnly
 import io.kotest.matchers.nulls.shouldNotBeNull
 import io.kotest.matchers.shouldBe
@@ -33,18 +31,15 @@ import no.nav.melosys.integrasjon.trygdeavgift.dto.*
 import no.nav.melosys.itest.JournalfoeringBase
 import no.nav.melosys.itest.MelosysHendelseKafkaConsumer
 import no.nav.melosys.melosysmock.medl.MedlRepo
-import no.nav.melosys.melosysmock.testdata.JournalføringsoppgaveGenerator
 import no.nav.melosys.saksflytapi.domain.ProsessType
 import no.nav.melosys.service.avgift.TrygdeavgiftsberegningService
 import no.nav.melosys.service.avgift.satsendring.SatsendringFinner
-import no.nav.melosys.service.avgift.satsendring.SatsendringFinner.*
+import no.nav.melosys.service.avgift.satsendring.SatsendringFinner.BehandlingForSatstendring
 import no.nav.melosys.service.avklartefakta.AvklartefaktaDto
 import no.nav.melosys.service.avklartefakta.AvklartefaktaService
 import no.nav.melosys.service.behandling.VilkaarsresultatService
 import no.nav.melosys.service.ftrl.medlemskapsperiode.OpprettForslagMedlemskapsperiodeService
-import no.nav.melosys.service.journalforing.JournalfoeringService
 import no.nav.melosys.service.mottatteopplysninger.MottatteOpplysningerService
-import no.nav.melosys.service.oppgave.OppgaveService
 import no.nav.melosys.service.vedtak.FattVedtakRequest
 import no.nav.melosys.service.vedtak.VedtaksfattingFasade
 import no.nav.melosys.service.vilkaar.VilkaarDto
@@ -60,9 +55,6 @@ import java.util.*
 private val logger = KotlinLogging.logger {}
 
 class SatsendringIT(
-    @Autowired journalføringsoppgaveGenerator: JournalføringsoppgaveGenerator,
-    @Autowired journalføringService: JournalfoeringService,
-    @Autowired oppgaveService: OppgaveService,
     @Autowired private val avklartefaktaService: AvklartefaktaService,
     @Autowired private val mottatteOpplysningerService: MottatteOpplysningerService,
     @Autowired private val opprettForslagMedlemskapsperiodeService: OpprettForslagMedlemskapsperiodeService,
@@ -70,13 +62,8 @@ class SatsendringIT(
     @Autowired private val vedtaksfattingFasade: VedtaksfattingFasade,
     @Autowired private val vilkaarsresultatService: VilkaarsresultatService,
     @Autowired private val satsendringFinner: SatsendringFinner,
-    @Autowired private val objectMapper: ObjectMapper,
-    @Autowired private val unleash: FakeUnleash,
     @Autowired private val melosysHendelseKafkaConsumer: MelosysHendelseKafkaConsumer
-) : JournalfoeringBase(
-    journalføringsoppgaveGenerator, journalføringService, oppgaveService,
-    TrygdeavgiftsberegningMedSatsendring()
-) {
+) : JournalfoeringBase(TrygdeavgiftsberegningMedSatsendring()) {
     private var originalSubjectHandler: SubjectHandler? = null
 
     @BeforeEach
@@ -272,9 +259,6 @@ class SatsendringIT(
         trygdeavgiftsberegningService.beregnOgLagreTrygdeavgift(behandlingID, skattefordholdsperioder, inntektsforholdsperioder)
     }
 
-    private val Any.toJsonNode: JsonNode
-        get() = objectMapper.valueToTree(this)
-
     companion object {
         private const val SATSENDRING_ÅR = 2024
     }
@@ -352,8 +336,8 @@ class TrygdeavgiftsberegningMedSatsendring : ResponseTransformerV2 {
 
     private fun localDateFromRequest(datoID: String, requestBody: JsonNode): LocalDate =
         requestBody["medlemskapsperioder"][0]["periode"][datoID]
-        .map { it.asInt() }
-        .let { (year, month, day) -> LocalDate.of(year, month, day) }
+            .map { it.asInt() }
+            .let { (year, month, day) -> LocalDate.of(year, month, day) }
 
     override fun getName(): String {
         return "trygdeavgiftsberegning-med-satsendring-transformer"

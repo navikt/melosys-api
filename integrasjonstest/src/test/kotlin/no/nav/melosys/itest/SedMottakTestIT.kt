@@ -2,7 +2,6 @@ package no.nav.melosys.itest
 
 import com.github.tomakehurst.wiremock.client.WireMock
 import com.ninjasquad.springmockk.MockkBean
-import io.getunleash.FakeUnleash
 import io.kotest.assertions.extracting
 import io.kotest.matchers.collections.shouldContainExactly
 import io.kotest.matchers.collections.shouldContainInOrder
@@ -20,6 +19,7 @@ import no.nav.melosys.domain.eessi.melding.UtpekingAvvis
 import no.nav.melosys.domain.kodeverk.*
 import no.nav.melosys.domain.kodeverk.behandlinger.*
 import no.nav.melosys.domain.kodeverk.lovvalgsbestemmelser.Lovvalgbestemmelser_883_2004
+import no.nav.melosys.melosysmock.config.SoapConfig
 import no.nav.melosys.melosysmock.melosyseessi.MelosysEessiRepo
 import no.nav.melosys.repository.BehandlingsresultatRepository
 import no.nav.melosys.saksflyt.ProsessinstansRepository
@@ -38,10 +38,12 @@ import no.nav.melosys.statistikk.utstedt_a1.integrasjon.dto.UtstedtA1Melding
 import org.junit.jupiter.api.Test
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.beans.factory.annotation.Qualifier
+import org.springframework.context.annotation.Import
 import org.springframework.kafka.core.KafkaTemplate
 import java.time.LocalDate
 import java.util.*
 
+@Import(SoapConfig::class)
 class SedMottakTestIT(
     @Autowired private val eessiMeldingTestDataFactory: EessiMeldingTestDataFactory,
     @Autowired @Qualifier("melosysEessiMelding") private val melosysEessiMeldingKafkaTemplate: KafkaTemplate<String, MelosysEessiMelding>,
@@ -52,7 +54,6 @@ class SedMottakTestIT(
     @Autowired private val opprettBehandlingForSak: OpprettBehandlingForSak,
     @Autowired private val lovvalgsperiodeService: LovvalgsperiodeService,
     @Autowired private val behandlingsresultatRepository: BehandlingsresultatRepository,
-    @Autowired private val unleash: FakeUnleash,
     @Autowired private val avklartefaktaService: AvklartefaktaService,
 ) : MockServerTestBaseWithProsessManager() {
 
@@ -430,7 +431,7 @@ class SedMottakTestIT(
             .sortedBy { it.endretDato }
 
         lovvalgsperiodeService.lagreLovvalgsperioder(
-            prosessinstanserSortert.get(1).behandling.id,
+            prosessinstanserSortert.shouldHaveSize(2).last().behandling.id,
             listOf(Lovvalgsperiode().apply {
                 fom = datoOmToÅr
                 tom = datoOmToÅr.plusDays(1)
@@ -442,7 +443,7 @@ class SedMottakTestIT(
         )
 
         avklartefaktaService.lagreAvklarteFakta(
-            prosessinstanserSortert.get(1).behandling.id, setOf(
+            prosessinstanserSortert.shouldHaveSize(2).last().behandling.id, setOf(
                 AvklartefaktaDto(
                     listOf("TRUE"), "VIRKSOMHET"
                 ).apply {
@@ -557,17 +558,19 @@ class SedMottakTestIT(
         prosessinstansTestManager.executeAndWait(
             mapOf(ProsessType.UTPEKING_AVVIS to 1)
         ) {
-            utpekingService.avvisUtpeking(prosessinstanserSortert.get(1).behandling.id, UtpekingAvvis().apply {
-                begrunnelse = "lol"
-                etterspørInformasjon = false
-            })
+            utpekingService.avvisUtpeking(
+                prosessinstanserSortert
+                    .shouldHaveSize(2).last().behandling.id, UtpekingAvvis().apply {
+                    begrunnelse = "lol"
+                    etterspørInformasjon = false
+                })
         }
 
         val opprettNyVurderingProsessinstans = prosessinstansTestManager.executeAndWait(
             mapOf(ProsessType.OPPRETT_REPLIKERT_BEHANDLING_FOR_SAK to 1)
         ) {
             opprettBehandlingForSak.opprettBehandling(
-                prosessinstanserSortert.get(1).behandling.fagsak.saksnummer,
+                prosessinstanserSortert.shouldHaveSize(2).last().behandling.fagsak.saksnummer,
                 OpprettSakDto().apply {
                     behandlingstema = Behandlingstema.BESLUTNING_LOVVALG_NORGE
                     behandlingstype = Behandlingstyper.NY_VURDERING

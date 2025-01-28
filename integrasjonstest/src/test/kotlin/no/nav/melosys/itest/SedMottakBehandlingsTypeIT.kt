@@ -1,10 +1,5 @@
 package no.nav.melosys.itest
 
-import com.fasterxml.jackson.databind.JsonNode
-import com.fasterxml.jackson.databind.SerializationFeature
-import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule
-import com.fasterxml.jackson.module.kotlin.jacksonObjectMapper
-import io.getunleash.FakeUnleash
 import io.kotest.matchers.collections.shouldHaveSize
 import io.kotest.matchers.shouldBe
 import io.kotest.matchers.string.shouldContain
@@ -18,13 +13,10 @@ import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingsstatus
 import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingstema
 import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingstyper
 import no.nav.melosys.melosysmock.journalpost.JournalpostRepo
-import no.nav.melosys.melosysmock.testdata.JournalføringsoppgaveGenerator
 import no.nav.melosys.repository.BehandlingRepository
 import no.nav.melosys.repository.FagsakRepository
 import no.nav.melosys.saksflytapi.domain.ProsessType
-import no.nav.melosys.service.journalforing.JournalfoeringService
 import no.nav.melosys.service.oppgave.OppgaveBehandlingstema
-import no.nav.melosys.service.oppgave.OppgaveService
 import no.nav.melosys.service.sak.OpprettBehandlingForSak
 import no.nav.melosys.service.sak.OpprettSakDto
 import org.junit.jupiter.api.BeforeEach
@@ -43,12 +35,7 @@ class SedMottakBehandlingTypeIT(
     @Autowired private val journalpostRepo: JournalpostRepo,
     @Autowired private val behandlingRepository: BehandlingRepository,
     @Autowired private val fagsakRepository: FagsakRepository,
-    @Autowired private val unleash: FakeUnleash,
-
-    @Autowired journalføringsoppgaveGenerator: JournalføringsoppgaveGenerator,
-    @Autowired journalføringService: JournalfoeringService,
-    @Autowired oppgaveService: OppgaveService,
-) : JournalfoeringBase(journalføringsoppgaveGenerator, journalføringService, oppgaveService) {
+) : JournalfoeringBase() {
 
     private val kafkaTopic = "teammelosys.eessi.v1-local"
 
@@ -154,13 +141,4 @@ class SedMottakBehandlingTypeIT(
             println(it.toJsonNode.toPrettyString())
         }
     }
-
-
-    private val Any.toJsonNode: JsonNode
-        get() {
-            return jacksonObjectMapper()
-                .configure(SerializationFeature.WRITE_DATES_AS_TIMESTAMPS, false)
-                .registerModule(JavaTimeModule())
-                .valueToTree(this)
-        }
 }
