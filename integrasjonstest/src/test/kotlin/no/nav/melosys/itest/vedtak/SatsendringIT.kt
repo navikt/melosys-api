@@ -1,7 +1,6 @@
 package no.nav.melosys.itest.vedtak
 
 import com.fasterxml.jackson.databind.JsonNode
-import com.fasterxml.jackson.databind.ObjectMapper
 import com.fasterxml.jackson.databind.SerializationFeature
 import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule
 import com.fasterxml.jackson.module.kotlin.jacksonObjectMapper
@@ -63,7 +62,6 @@ class SatsendringIT(
     @Autowired private val vedtaksfattingFasade: VedtaksfattingFasade,
     @Autowired private val vilkaarsresultatService: VilkaarsresultatService,
     @Autowired private val satsendringFinner: SatsendringFinner,
-    @Autowired private val objectMapper: ObjectMapper,
     @Autowired private val melosysHendelseKafkaConsumer: MelosysHendelseKafkaConsumer
 ) : JournalfoeringBase(TrygdeavgiftsberegningMedSatsendring()) {
     private var originalSubjectHandler: SubjectHandler? = null
@@ -96,7 +94,7 @@ class SatsendringIT(
                     WireMock.aResponse()
                         .withStatus(200)
                         .withHeader("Content-Type", "application/json")
-                        .withBody(fakturaResponse.toJsonNode.toString())
+                        .withBody(fakturaResponse.toJson.toString())
                 )
         )
 
@@ -174,7 +172,7 @@ class SatsendringIT(
                             trygdedekning = Trygdedekninger.FTRL_2_9_FØRSTE_LEDD_B_PENSJON
                         }
                 }
-        mottatteOpplysningerService.oppdaterMottatteOpplysninger(behandling.id, mottatteOpplysninger.mottatteOpplysningerData.toJsonNode)
+        mottatteOpplysningerService.oppdaterMottatteOpplysninger(behandling.id, mottatteOpplysninger.mottatteOpplysningerData.toJson)
 
         val virksomhet = AvklartefaktaDto(
             listOf("TRUE"), "VIRKSOMHET"
@@ -261,8 +259,8 @@ class SatsendringIT(
         trygdeavgiftsberegningService.beregnOgLagreTrygdeavgift(behandlingID, skattefordholdsperioder, inntektsforholdsperioder)
     }
 
-    private val Any.toJsonNode: JsonNode
-        get() = objectMapper.valueToTree(this)
+    private val Any.toJson: JsonNode
+        get() = objectMapper.valueToTree<JsonNode?>(this)
 
     companion object {
         private const val SATSENDRING_ÅR = 2024

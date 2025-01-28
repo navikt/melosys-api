@@ -1,5 +1,7 @@
 package no.nav.melosys.itest
 
+import com.fasterxml.jackson.databind.JsonNode
+import com.fasterxml.jackson.databind.ObjectMapper
 import io.getunleash.FakeUnleash
 import no.nav.melosys.Application
 import no.nav.melosys.melosysmock.medl.MedlRepo
@@ -47,10 +49,16 @@ class ComponentTestBase : OracleTestContainerBase() {
     @Autowired
     protected lateinit var unleash: FakeUnleash
 
+    @Autowired
+    protected lateinit var objectMapper: ObjectMapper
+
     @AfterEach
     fun afterEachComponentTestBase() {
         SakRepo.clear()
         MedlRepo.repo.clear()
         MelosysEessiRepo.sedRepo.clear()
     }
+
+    val Any.toJsonNode: JsonNode
+        get() = objectMapper.valueToTree(this)
 }
