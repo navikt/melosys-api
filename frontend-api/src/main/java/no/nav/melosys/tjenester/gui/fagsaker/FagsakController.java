@@ -11,6 +11,7 @@ import no.nav.melosys.domain.Behandling;
 import no.nav.melosys.domain.Behandlingsresultat;
 import no.nav.melosys.domain.Fagsak;
 import no.nav.melosys.domain.kodeverk.Aktoersroller;
+import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingstyper;
 import no.nav.melosys.exception.FunksjonellException;
 import no.nav.melosys.service.behandling.BehandlingsresultatService;
 import no.nav.melosys.service.mottatteopplysninger.MottatteOpplysningerService;
@@ -120,14 +121,20 @@ public class FagsakController {
         return ResponseEntity.noContent().build();
     }
 
-    @PostMapping("/{saksnr}/endre")
+    @PutMapping("/{saksnr}")
     @ApiOperation(value = "Endre en sak.")
     public ResponseEntity<Void> endreFagsak(@PathVariable("saksnr") String saksnummer, @RequestBody EndreSakDto endreDto) {
         log.debug("Saksbehandler {} ber om å endre fagsak {} med sakstype {}, sakstema {}",
             SubjectHandler.getInstance().getUserID(), saksnummer, endreDto.getSakstype(), endreDto.getSakstema());
         aksesskontroll.autoriserSakstilgang(saksnummer);
-        endreSakService.endre(saksnummer, endreDto.getSakstype(), endreDto.getSakstema(), endreDto.getBehandlingstema(),
-            endreDto.getBehandlingstype(), endreDto.getBehandlingsstatus(), endreDto.getMottaksdato());
+
+        if(endreDto.getBehandlingstype() == Behandlingstyper.ÅRSAVREGNING && endreDto.getBehandlingID() != null) {
+            endreSakService.endreÅrsavregningOppsummering(endreDto.getBehandlingID(), endreDto.getBehandlingsstatus(), endreDto.getMottaksdato());
+        } else {
+            endreSakService.endre(saksnummer, endreDto.getSakstype(), endreDto.getSakstema(), endreDto.getBehandlingstema(),
+                endreDto.getBehandlingstype(), endreDto.getBehandlingsstatus(), endreDto.getMottaksdato());
+        }
+
         return ResponseEntity.noContent().build();
     }
 

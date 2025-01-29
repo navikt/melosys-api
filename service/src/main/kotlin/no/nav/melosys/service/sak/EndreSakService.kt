@@ -25,6 +25,7 @@ import org.springframework.context.ApplicationEventPublisher
 import org.springframework.stereotype.Service
 import java.time.LocalDate
 import jakarta.transaction.Transactional
+import no.nav.melosys.service.behandling.BehandlingService
 
 private val log = KotlinLogging.logger { }
 
@@ -36,7 +37,8 @@ class EndreSakService(
     private val mottatteOpplysningerService: MottatteOpplysningerService,
     private val oppfriskSaksopplysningerService: OppfriskSaksopplysningerService,
     private val applicationEventPublisher: ApplicationEventPublisher,
-    private val saksbehandlingRegler: SaksbehandlingRegler
+    private val saksbehandlingRegler: SaksbehandlingRegler,
+    private val behandlingService: BehandlingService
 ) {
     @Transactional
     fun endre(
@@ -109,6 +111,17 @@ class EndreSakService(
         }
 
         log.debug { "Ferdig med endring av sak $saksnummer (type: $nySakstype, tema: $nySakstema)" }
+    }
+
+    @Transactional
+    fun endreÅrsavregningOppsummering(
+        behandlingID: Long,
+        nyBehandlingsstatus: Behandlingsstatus,
+        nyMottaksdato: LocalDate?
+    ){
+        val behandling = behandlingService.hentBehandling(behandlingID)
+        validerBehandling(behandling)
+        behandlingService.endreBehandling(behandlingID, null, null, nyBehandlingsstatus, nyMottaksdato)
     }
 
     private fun validerSak(fagsak: Fagsak, nySakstype: Sakstyper, nySakstema: Sakstemaer) {

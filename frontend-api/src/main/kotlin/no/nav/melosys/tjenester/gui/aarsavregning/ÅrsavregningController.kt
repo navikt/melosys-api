@@ -1,20 +1,15 @@
 package no.nav.melosys.tjenester.gui.aarsavregning
 
 import io.swagger.annotations.Api
-import io.swagger.annotations.ApiOperation
-import no.nav.melosys.domain.Behandling
 import no.nav.melosys.domain.avgift.Trygdeavgiftsperiode
 import no.nav.melosys.domain.kodeverk.Inntektskildetype
 import no.nav.melosys.domain.kodeverk.InnvilgelsesResultat
-import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingsstatus
-import no.nav.melosys.exception.FunksjonellException
 import no.nav.melosys.service.avgift.aarsavregning.Trygdeavgiftsgrunnlag
 import no.nav.melosys.service.avgift.aarsavregning.totalbeloep.TotalbeløpBeregner
 import no.nav.melosys.service.avgift.aarsavregning.totalbeloep.TotalbeløpBeregner.kalkulertMndInntekt
 import no.nav.melosys.service.avgift.aarsavregning.ÅrsavregningModel
 import no.nav.melosys.service.avgift.aarsavregning.ÅrsavregningService
 import no.nav.melosys.service.behandling.BehandlingService
-import no.nav.melosys.service.behandling.BehandlingsresultatService
 import no.nav.melosys.service.tilgang.Aksesskontroll
 import no.nav.melosys.tjenester.gui.dto.trygdeavgift.InntektskildeDto
 import no.nav.melosys.tjenester.gui.dto.trygdeavgift.SkatteforholdTilNorgeDto
@@ -33,7 +28,7 @@ class ÅrsavregningController(
     private val årsavregningService: ÅrsavregningService,
     private val aksesskontroll: Aksesskontroll,
     private val behandlingService: BehandlingService,
-    ) {
+) {
     @GetMapping
     fun hentÅrsavregning(
         @PathVariable("behandlingID") behandlingID: Long
@@ -79,20 +74,6 @@ class ÅrsavregningController(
         return ResponseEntity.ok(
             lagÅrsavregningResponse(årsavregning)
         )
-    }
-
-    @PutMapping("/oppsummering")
-    @ApiOperation("Endre oppsummeringen for årsavregningsbehandling")
-    fun endreÅrsavregningOppsummering(
-        @PathVariable("behandlingID") behandlingID: Long,
-        @RequestBody endreRequest:AarsavregningEndreRequest
-    ): ResponseEntity<Void> {
-        aksesskontroll.autoriserSkriv(behandlingID)
-
-        validerBehandling(behandlingService.hentBehandling(behandlingID))
-        behandlingService.endreBehandling(behandlingID, null, null, endreRequest.behandlingsstatus, endreRequest.mottaksdato)
-
-        return ResponseEntity.noContent().build()
     }
 
     private fun lagÅrsavregningResponse(årsavregningModel: ÅrsavregningModel) =
@@ -176,17 +157,6 @@ class ÅrsavregningController(
                 )
             }.orEmpty()
         )
-
-    private fun validerBehandling(behandling: Behandling) {
-        if (setOf(
-                Behandlingsstatus.AVSLUTTET,
-                Behandlingsstatus.IVERKSETTER_VEDTAK,
-                Behandlingsstatus.MIDLERTIDIG_LOVVALGSBESLUTNING
-            ).contains(behandling.status)
-        ) {
-            throw FunksjonellException("Behandling ${behandling.id} med status ${behandling.status} kan ikke endres")
-        }
-    }
 }
 
 data class LagÅrsavregningRequest(
@@ -238,9 +208,4 @@ data class AvregningDto(
     val nyttTotalbeloep: BigDecimal?,
     val tidligereFakturertBeloep: BigDecimal?,
     val tilFaktureringBeloep: BigDecimal?,
-)
-
-data class AarsavregningEndreRequest(
-    val behandlingsstatus: Behandlingsstatus,
-    val mottaksdato: LocalDate?
 )
