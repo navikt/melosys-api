@@ -91,19 +91,24 @@ internal object BrevFelt {
     }
 
     fun lagErstatterStandardtekstRadioFritekst(vararg feltvalgAlternativDtos: FeltvalgAlternativDto?): BrevmalFeltDto {
-        val feltvalgAlternativ = mutableListOf(
-            *feltvalgAlternativDtos,
-            FeltvalgAlternativDto(
-                FeltvalgAlternativKode.FRITEKST.kode,
-                "Fritekst (erstatter standardtekst)",
-                true
-            )
-        )
+        val valg = if (feltvalgAlternativDtos.isNotEmpty()) {
+            FeltValgDto(mutableListOf(
+                *feltvalgAlternativDtos,
+                FeltvalgAlternativDto(
+                    FeltvalgAlternativKode.FRITEKST.kode,
+                    "Fritekst (erstatter standardtekst)",
+                    true
+                )
+            ), FeltValgType.RADIO)
+        } else {
+            null
+        }
+
         return BrevmalFeltDto.Builder()
             .medKodeOgBeskrivelse(BrevmalFeltKode.INNLEDNING_FRITEKST)
             .medFeltType(FeltType.FRITEKST)
             .erPåkrevd()
-            .medValg(FeltValgDto(feltvalgAlternativ, FeltValgType.RADIO))
+            .medValg(valg)
             .build()
     }
 
