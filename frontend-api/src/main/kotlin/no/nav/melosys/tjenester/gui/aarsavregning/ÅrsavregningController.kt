@@ -81,7 +81,7 @@ class ÅrsavregningController(
         )
     }
 
-    @PutMapping("/{aarsavregningID}/oppsummering")
+    @PutMapping("/oppsummering")
     @ApiOperation("Endre oppsummeringen for årsavregningsbehandling")
     fun endreÅrsavregningOppsummering(
         @PathVariable("behandlingID") behandlingID: Long,
