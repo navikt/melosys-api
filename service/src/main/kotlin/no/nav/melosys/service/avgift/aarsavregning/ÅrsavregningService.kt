@@ -217,30 +217,6 @@ class ÅrsavregningService(
     companion object {
         private const val ANTALL_ÅR_TILBAKE_I_TID = 7  //Fjoråret - 6 år
     }
-
-    @Transactional
-    fun endreOppsummering(
-        aarsavregningId: Long,
-        behandlingID: Long,
-        nyBehandlingsstatus: Behandlingsstatus,
-        nyMottaksdato: LocalDate?
-    ){
-        val årsavregning = hentÅrsavregning(aarsavregningId)
-        validerBehandling(årsavregning.behandlingsresultat.behandling)
-
-        behandlingService.endreBehandling(behandlingID, null, null, nyBehandlingsstatus, nyMottaksdato)
-    }
-
-    private fun validerBehandling(behandling: Behandling) {
-        if (setOf(
-                Behandlingsstatus.AVSLUTTET,
-                Behandlingsstatus.IVERKSETTER_VEDTAK,
-                Behandlingsstatus.MIDLERTIDIG_LOVVALGSBESLUTNING
-            ).contains(behandling.status)
-        ) {
-            throw FunksjonellException("Behandling ${behandling.id} med status ${behandling.status} kan ikke endres")
-        }
-    }
 }
 
 data class ÅrsavregningModel(

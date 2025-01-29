@@ -331,39 +331,6 @@ internal class ÅrsavregningServiceTest {
         }
     }
 
-    @Nested
-    inner class endreÅrsavregningOppsummering{
-        @Test
-        fun `oppdaterer mottaksdato og behandlingsstatus for årsavregning oppsummering`(){
-            val årsavregning = Årsavregning().apply {
-                id = 11L
-                aar = 2023
-                behandlingsresultat = Behandlingsresultat().apply {
-                    behandling = Behandling().apply {
-                        id = 11L
-                        type = Behandlingstyper.ÅRSAVREGNING
-                        status = Behandlingsstatus.UNDER_BEHANDLING
-                        behandlingsårsak = Behandlingsaarsak().apply {
-                            mottaksdato = LocalDate.now()
-                        }
-                    }
-                }
-            }
-
-            every { aarsavregningRepository.findById(11L) }.returns(Optional.of(årsavregning))
-            every { behandlingService.hentBehandling(11L) }.returns(årsavregning.behandlingsresultat.behandling)
-
-            val MOTTAKSDATO = LocalDate.now().plusMonths(1)
-            val BEHANDLING_STATUS = Behandlingsstatus.AVVENT_DOK_PART
-
-            årsavregningService.endreOppsummering(11L, 11L, BEHANDLING_STATUS, MOTTAKSDATO)
-
-            verify { behandlingService.endreBehandling(11L, null, null, BEHANDLING_STATUS, MOTTAKSDATO)}
-
-        }
-    }
-
-
     fun lagTidligereBehandlingsresultat(): Behandlingsresultat = Behandlingsresultat().apply {
         id = 1L
         type = Behandlingsresultattyper.FERDIGBEHANDLET
