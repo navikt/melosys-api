@@ -319,13 +319,7 @@ internal class BrevmalListeByggerTest {
                     isPaakrevd.shouldBeTrue()
                     hjelpetekst.shouldBeNull()
                     tegnBegrensning.shouldBeNull()
-                    valg.run {
-                        valgType.shouldBe(FeltValgType.RADIO)
-                        valgAlternativer.shouldHaveSize(1).first().run {
-                            kode.shouldBe(FeltvalgAlternativKode.FRITEKST.kode)
-                            isVisFelt.shouldBeTrue()
-                        }
-                    }
+                    valg.shouldBeNull()
                 }
                 elementAt(1).run {
                     kode.shouldBe(BrevmalFeltKode.MANGLER_FRITEKST.kode)
