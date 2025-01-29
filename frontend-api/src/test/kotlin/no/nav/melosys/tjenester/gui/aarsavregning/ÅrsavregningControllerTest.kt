@@ -13,6 +13,7 @@ import no.nav.melosys.domain.kodeverk.Medlemskapstyper
 import no.nav.melosys.domain.kodeverk.Skatteplikttype
 import no.nav.melosys.domain.kodeverk.Trygdedekninger
 import no.nav.melosys.service.avgift.aarsavregning.*
+import no.nav.melosys.service.behandling.BehandlingService
 import no.nav.melosys.service.tilgang.Aksesskontroll
 import org.junit.jupiter.api.Test
 import org.springframework.beans.factory.annotation.Autowired
@@ -33,6 +34,9 @@ internal class ÅrsavregningControllerTest {
 
     @MockkBean
     private lateinit var årsavregningService: ÅrsavregningService
+
+    @MockkBean
+    private lateinit var behandlingService: BehandlingService
 
     @MockBean
     private lateinit var aksesskontroll: Aksesskontroll
