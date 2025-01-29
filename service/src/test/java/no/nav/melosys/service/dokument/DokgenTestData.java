@@ -87,8 +87,11 @@ public final class DokgenTestData {
         }
         return fagsak;
     }
-
     public static Persondata lagPersondata() {
+        return lagPersondata(null);
+    }
+
+    public static Persondata lagPersondata(LocalDate fødselsdato) {
         final var bostedsadresse = new Bostedsadresse(
             new StrukturertAdresse(ADRESSELINJE_1_BRUKER, "42 C", POSTNR_BRUKER, null, null, Landkoder.NO.getKode()),
             null, null, null, "PDL", null, false);
@@ -99,7 +102,7 @@ public final class DokgenTestData {
             false);
 
         return new Personopplysninger(Collections.emptyList(), bostedsadresse, null, null,
-            new Foedsel(null, null, null, null),
+            new Foedsel(fødselsdato, null, null, null),
             new Folkeregisteridentifikator(FNR_BRUKER), null,
 
             // For å få testene til å funke som med brukt med PersonDokument må fornavn og etternavn bytte plass.
