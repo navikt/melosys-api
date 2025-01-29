@@ -19,7 +19,6 @@ import no.nav.melosys.saksflytapi.domain.ProsessType
 import no.nav.melosys.service.oppgave.OppgaveBehandlingstema
 import no.nav.melosys.service.sak.OpprettBehandlingForSak
 import no.nav.melosys.service.sak.OpprettSakDto
-import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Disabled
 import org.junit.jupiter.api.Test
 import org.springframework.beans.factory.annotation.Autowired
@@ -38,11 +37,6 @@ class SedMottakBehandlingTypeIT(
 ) : JournalfoeringBase() {
 
     private val kafkaTopic = "teammelosys.eessi.v1-local"
-
-    @BeforeEach
-    fun setup() {
-        unleash.resetAll()
-    }
 
     @Test
     fun `A003 skal føre til riktig oppgave i gosys`() {

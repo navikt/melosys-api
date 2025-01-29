@@ -78,7 +78,6 @@ class YrkesaktivEosVedtakIT(
         every { mockHandler.userID } returns "Z123456"
         every { mockHandler.userName } returns "test"
 
-        unleash.enableAll()
         MedlRepo.repo.clear()
     }
 

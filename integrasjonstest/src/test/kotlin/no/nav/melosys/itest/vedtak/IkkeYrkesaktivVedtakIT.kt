@@ -50,7 +50,6 @@ class IkkeYrkesaktivVedtakIT(
     @Autowired private val melosysHendelseKafkaConsumer: MelosysHendelseKafkaConsumer
 ) : JournalfoeringBase() {
 
-
     @AfterEach
     fun cleanup() {
         melosysHendelseKafkaConsumer.clear()
@@ -67,7 +66,6 @@ class IkkeYrkesaktivVedtakIT(
             )
         )
         MedlRepo.repo.clear()
-        unleash.enableAll()
     }
 
     @Test
