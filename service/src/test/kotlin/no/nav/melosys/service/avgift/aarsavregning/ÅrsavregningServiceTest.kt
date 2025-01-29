@@ -42,9 +42,6 @@ internal class ÅrsavregningServiceTest {
     @RelaxedMockK
     private lateinit var fagsakService: FagsakService
 
-    @RelaxedMockK
-    private lateinit var behandlingService: BehandlingService
-
     private lateinit var årsavregningService: ÅrsavregningService
 
     @BeforeEach
@@ -53,7 +50,6 @@ internal class ÅrsavregningServiceTest {
             aarsavregningRepository,
             behandlingsresultatService,
             fagsakService,
-            behandlingService
         )
         SpringSubjectHandler.set(TestSubjectHandler())
     }
