@@ -1,8 +1,10 @@
 package no.nav.melosys
 
 import io.kotest.matchers.optional.shouldBePresent
+import no.nav.melosys.domain.Medlemskapsperiode
 import no.nav.melosys.repository.*
 import no.nav.melosys.saksflyt.ProsessinstansRepository
+import org.springframework.data.jpa.repository.JpaRepository
 import org.springframework.stereotype.Component
 
 @Component
@@ -12,8 +14,9 @@ class DBCleanup(
     private val aarsavregningRepository: AarsavregningRepository,
     private val behandlingsResultRepository: BehandlingsresultatRepository,
     private val prosessinstansRepository: ProsessinstansRepository,
-    private val behandlingRepository: BehandlingRepository
-    ) {
+    private val behandlingRepository: BehandlingRepository,
+    private val medlemskapsperiodeRepository: MedlemskapsperiodeRepositoryForTest
+) {
 
     fun slettSakMedAvhengigheter(saksnummer: String) {
         fagsakRepository.findBySaksnummer(saksnummer).shouldBePresent()
@@ -28,6 +31,9 @@ class DBCleanup(
                     avklarteFaktaRepository.findByBehandlingsresultatId(behandling.id).forEach {
                         avklarteFaktaRepository.delete(it)
                     }
+                    medlemskapsperiodeRepository.findByBehandlingsresultatId(behandling.id).forEach {
+                        medlemskapsperiodeRepository.delete(it)
+                    }
                     behandlingsResultRepository.findById(behandling.id).shouldBePresent().also {
                         behandlingsResultRepository.delete(it)
                     }
@@ -36,4 +42,8 @@ class DBCleanup(
                 }
             }.also { fagsakRepository.delete(it) }
     }
+}
+
+interface MedlemskapsperiodeRepositoryForTest : JpaRepository<Medlemskapsperiode, Long> {
+    fun findByBehandlingsresultatId(id: Long): List<Medlemskapsperiode>
 }

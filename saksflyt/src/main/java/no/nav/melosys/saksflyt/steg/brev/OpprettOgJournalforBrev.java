@@ -13,6 +13,7 @@ import no.nav.melosys.domain.kodeverk.Mottakerroller;
 import no.nav.melosys.domain.kodeverk.brev.Produserbaredokumenter;
 import no.nav.melosys.exception.FunksjonellException;
 import no.nav.melosys.exception.IkkeFunnetException;
+import no.nav.melosys.integrasjon.dokgen.dto.standardvedlegg.StandardvedleggDto;
 import no.nav.melosys.integrasjon.ereg.EregFasade;
 import no.nav.melosys.integrasjon.joark.JoarkFasade;
 import no.nav.melosys.saksflyt.steg.StegBehandler;
@@ -23,6 +24,7 @@ import no.nav.melosys.service.behandling.BehandlingService;
 import no.nav.melosys.service.brev.DokumentNavnService;
 import no.nav.melosys.service.dokument.DokgenService;
 import no.nav.melosys.service.dokument.DokumentHentingService;
+import no.nav.melosys.service.dokument.brev.mapper.standardvedlegg.RettigheterOgPlikterStandardvedleggMapper;
 import no.nav.melosys.service.oppgave.OppgaveFactory;
 import no.nav.melosys.service.persondata.PersondataFasade;
 import org.slf4j.Logger;
@@ -39,6 +41,7 @@ public class OpprettOgJournalforBrev implements StegBehandler {
 
     private final BehandlingService behandlingService;
     private final DokgenService dokgenService;
+    private final RettigheterOgPlikterStandardvedleggMapper rettigheterOgPlikterStandardvedleggMapper;
     private final UtenlandskMyndighetService utenlandskMyndighetService;
     private final JoarkFasade joarkFasade;
     private final PersondataFasade persondataFasade;
@@ -49,6 +52,7 @@ public class OpprettOgJournalforBrev implements StegBehandler {
 
     public OpprettOgJournalforBrev(BehandlingService behandlingService,
                                    DokgenService dokgenService,
+                                   RettigheterOgPlikterStandardvedleggMapper rettigheterOgPlikterStandardvedleggMapper,
                                    UtenlandskMyndighetService utenlandskMyndighetService,
                                    JoarkFasade joarkFasade,
                                    PersondataFasade persondataFasade,
@@ -58,6 +62,7 @@ public class OpprettOgJournalforBrev implements StegBehandler {
                                    OppgaveFactory oppgaveFactory) {
         this.behandlingService = behandlingService;
         this.dokgenService = dokgenService;
+        this.rettigheterOgPlikterStandardvedleggMapper = rettigheterOgPlikterStandardvedleggMapper;
         this.utenlandskMyndighetService = utenlandskMyndighetService;
         this.joarkFasade = joarkFasade;
         this.persondataFasade = persondataFasade;
@@ -178,8 +183,17 @@ public class OpprettOgJournalforBrev implements StegBehandler {
 
     private List<Vedlegg> hentVedlegg(DokgenBrevbestilling brevbestilling, String saksnummer, Mottaker mottaker) {
         List<Vedlegg> fritekstvedlegg = produserFritekstvedlegg(brevbestilling, mottaker);
+        Vedlegg standardvedlegg = produserStandardvedlegg(brevbestilling); // nullable
         List<Vedlegg> vedleggFraJoark = hentVedleggDokumenterFraJoark(brevbestilling, saksnummer);
-        return Stream.concat(fritekstvedlegg.stream(), vedleggFraJoark.stream()).toList();
+
+        if (standardvedlegg != null) {
+            return Stream.of(fritekstvedlegg, List.of(standardvedlegg), vedleggFraJoark)
+                .flatMap(List::stream)
+                .toList();
+        }
+        return Stream.of(fritekstvedlegg, vedleggFraJoark)
+            .flatMap(List::stream)
+            .toList();
     }
 
     private List<Vedlegg> produserFritekstvedlegg(DokgenBrevbestilling brevbestilling, Mottaker mottaker) {
@@ -201,6 +215,29 @@ public class OpprettOgJournalforBrev implements StegBehandler {
                 .build();
             return new Vedlegg(dokgenService.produserBrev(mottaker, vedleggBestilling), vedlegg.tittel());
         }).toList();
+    }
+
+    private Vedlegg produserStandardvedlegg(DokgenBrevbestilling brevbestilling) {
+        var standardvedleggType = brevbestilling.getStandardvedleggType();
+        if (standardvedleggType == null) {
+            return null;
+        }
+        var pdf = dokgenService.produserStandardvedlegg(standardvedleggType, hentStandardvedleggDto(brevbestilling));
+
+        return new Vedlegg(pdf, standardvedleggType.getJournalføringstittel());
+    }
+
+    private StandardvedleggDto hentStandardvedleggDto(DokgenBrevbestilling brevbestilling) {
+        switch (brevbestilling.getStandardvedleggType()) {
+            case VIKTIG_INFORMASJON_RETTIGHETER_PLIKTER_INNVILGELSE -> {
+                boolean skalMappeBestemmelse = !(brevbestilling instanceof FritekstbrevBrevbestilling);
+                return rettigheterOgPlikterStandardvedleggMapper.mapInnvilgelse(brevbestilling.getBehandlingId(), skalMappeBestemmelse);
+            }
+            case VIKTIG_INFORMASJON_RETTIGHETER_PLIKTER_AVSLAG -> {
+                return null;
+            }
+            default -> throw new FunksjonellException("Ukjent standardvedleggtype");
+        }
     }
 
     private List<Vedlegg> hentVedleggDokumenterFraJoark(DokgenBrevbestilling brevbestilling, String fagsaknummer) {

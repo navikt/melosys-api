@@ -1,10 +1,6 @@
 package no.nav.melosys.service.dokument.brev.datagrunnlag;
 
-import java.util.ArrayList;
-import java.util.Collection;
-import java.util.List;
-import java.util.Set;
-import java.util.stream.Collectors;
+import java.util.*;
 
 import no.nav.melosys.domain.Behandling;
 import no.nav.melosys.domain.avklartefakta.AvklartVirksomhet;
@@ -58,13 +54,13 @@ public class AvklarteVirksomheterGrunnlag {
     public List<AvklartVirksomhet> hentUtenlandskeArbeidsgivere() {
         return hentUtenlandskeVirksomheter().stream()
             .filter(AvklartVirksomhet::erArbeidsgiver)
-            .collect(Collectors.toList());
+            .toList();
     }
 
     public List<AvklartVirksomhet> hentUtenlandskeSelvstendige() {
         return hentUtenlandskeVirksomheter().stream()
             .filter(AvklartVirksomhet::erSelvstendigForetak)
-            .collect(Collectors.toList());
+            .toList();
     }
 
     public Set<String> hentNorskeArbeidsgivendeOrgnumre() {
@@ -72,10 +68,17 @@ public class AvklarteVirksomheterGrunnlag {
     }
 
     public AvklartVirksomhet hentHovedvirksomhet() {
-        if (!hentAlleNorskeVirksomheterMedAdresse().isEmpty()) {
-            return hentAlleNorskeVirksomheterMedAdresse().iterator().next();
+        List<AvklartVirksomhet> alleNorskeVirksomheterList = hentAlleNorskeVirksomheterMedAdresse();
+        List<AvklartVirksomhet> utenlandskeVirksomheterList = hentUtenlandskeVirksomheter();
+
+        if (!alleNorskeVirksomheterList.isEmpty()) {
+            return alleNorskeVirksomheterList.stream()
+                .min(Comparator.comparing(AvklartVirksomhet::getNavn))
+                .orElse(null);
         } else {
-            return hentUtenlandskeVirksomheter().iterator().next();
+            return utenlandskeVirksomheterList.stream()
+                .min(Comparator.comparing(AvklartVirksomhet::getNavn))
+                .orElse(null);
         }
     }
 

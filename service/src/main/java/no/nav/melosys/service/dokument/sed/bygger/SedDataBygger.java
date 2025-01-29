@@ -18,7 +18,6 @@ import no.nav.melosys.domain.person.Persondata;
 import no.nav.melosys.domain.person.familie.Familiemedlem;
 import no.nav.melosys.domain.person.familie.Familierelasjon;
 import no.nav.melosys.exception.FunksjonellException;
-import no.nav.melosys.featuretoggle.ToggleName;
 import no.nav.melosys.service.LandvelgerService;
 import no.nav.melosys.service.LovvalgsperiodeService;
 import no.nav.melosys.service.behandling.BehandlingsresultatService;
@@ -112,13 +111,11 @@ public class SedDataBygger {
         sedDataDto.setSelvstendigeVirksomheter(lagSelvstendigeVirksomheter(grunnlagMedSøknad));
         sedDataDto.setArbeidssteder(hentArbeidssteder(grunnlagMedSøknad));
 
-        if (unleash.isEnabled(ToggleName.MELOSYS_CDM_4_3)) {
-            var arbeidsland = hentArbeidsland(grunnlagMedSøknad);
-            sedDataDto.setArbeidsland(arbeidsland);
-            sedDataDto.setHarFastArbeidssted(
-                arbeidsland.stream().anyMatch(Arbeidsland::harFastArbeidssted)
-            );
-        }
+        var arbeidsland = hentArbeidsland(grunnlagMedSøknad);
+        sedDataDto.setArbeidsland(arbeidsland);
+        sedDataDto.setHarFastArbeidssted(
+            arbeidsland.stream().anyMatch(Arbeidsland::harFastArbeidssted)
+        );
 
         sedDataDto.setAvklartBostedsland(
             landvelgerService.hentBostedsland(grunnlagMedSøknad.getBehandling().getId(), grunnlagMedSøknad.getMottatteOpplysningerData()).landkode()
@@ -174,8 +171,14 @@ public class SedDataBygger {
 
         return alleLand.stream()
             .map(land -> {
+
                 List<Arbeidssted> arbeidsstedILandet = arbeidssteder.stream()
-                    .filter(arbeidssted -> arbeidssted.getAdresse().getLand().equals(land))
+                    .filter(arbeidssted -> {
+                        if (StringUtils.isEmpty(arbeidssted.getAdresse().getLand())) {
+                            throw new FunksjonellException("Feltet land er ikke utfylt for arbeidssted " + arbeidssted.getNavn());
+                        }
+                        return arbeidssted.getAdresse().getLand().equals(land);
+                    })
                     .toList();
 
                 return new Arbeidsland(land, arbeidsstedILandet);

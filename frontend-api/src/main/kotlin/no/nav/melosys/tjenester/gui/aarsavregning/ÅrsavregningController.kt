@@ -34,10 +34,9 @@ class ÅrsavregningController(
     private val aksesskontroll: Aksesskontroll,
     private val behandlingService: BehandlingService,
     ) {
-    @GetMapping("/{aarsavregningID}")
+    @GetMapping
     fun hentÅrsavregning(
-        @PathVariable("behandlingID") behandlingID: Long,
-        @PathVariable("aarsavregningID") aarsavregningID: Long
+        @PathVariable("behandlingID") behandlingID: Long
     ): ResponseEntity<ÅrsavregningResponse> {
         aksesskontroll.autoriser(behandlingID)
 

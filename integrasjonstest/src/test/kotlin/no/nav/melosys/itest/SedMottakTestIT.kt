@@ -1,11 +1,7 @@
 package no.nav.melosys.itest
 
-import com.github.tomakehurst.wiremock.WireMockServer
 import com.github.tomakehurst.wiremock.client.WireMock
-import com.github.tomakehurst.wiremock.client.WireMock.equalTo
-import com.github.tomakehurst.wiremock.core.WireMockConfiguration
 import com.ninjasquad.springmockk.MockkBean
-import io.getunleash.FakeUnleash
 import io.kotest.assertions.extracting
 import io.kotest.matchers.collections.shouldContainExactly
 import io.kotest.matchers.collections.shouldContainInOrder
@@ -16,7 +12,6 @@ import io.mockk.every
 import io.mockk.mockk
 import io.mockk.slot
 import io.mockk.verify
-import no.nav.melosys.ProsessinstansTestManager
 import no.nav.melosys.domain.Lovvalgsperiode
 import no.nav.melosys.domain.eessi.*
 import no.nav.melosys.domain.eessi.melding.MelosysEessiMelding
@@ -24,10 +19,8 @@ import no.nav.melosys.domain.eessi.melding.UtpekingAvvis
 import no.nav.melosys.domain.kodeverk.*
 import no.nav.melosys.domain.kodeverk.behandlinger.*
 import no.nav.melosys.domain.kodeverk.lovvalgsbestemmelser.Lovvalgbestemmelser_883_2004
-import no.nav.melosys.melosysmock.medl.MedlRepo
+import no.nav.melosys.melosysmock.config.SoapConfig
 import no.nav.melosys.melosysmock.melosyseessi.MelosysEessiRepo
-import no.nav.melosys.melosysmock.oppgave.OppgaveRepo
-import no.nav.melosys.melosysmock.sak.SakRepo
 import no.nav.melosys.repository.BehandlingsresultatRepository
 import no.nav.melosys.saksflyt.ProsessinstansRepository
 import no.nav.melosys.saksflytapi.domain.ProsessType
@@ -39,19 +32,18 @@ import no.nav.melosys.service.sak.OpprettSakDto
 import no.nav.melosys.service.utpeking.UtpekingService
 import no.nav.melosys.service.vedtak.FattVedtakRequest
 import no.nav.melosys.service.vedtak.VedtaksfattingFasade
-import no.nav.melosys.sikkerhet.context.ThreadLocalAccessInfo
 import no.nav.melosys.statistikk.utstedt_a1.integrasjon.UtstedtA1AivenProducer
 import no.nav.melosys.statistikk.utstedt_a1.integrasjon.dto.Lovvalgsbestemmelse
 import no.nav.melosys.statistikk.utstedt_a1.integrasjon.dto.UtstedtA1Melding
-import org.junit.jupiter.api.AfterEach
-import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.beans.factory.annotation.Qualifier
+import org.springframework.context.annotation.Import
 import org.springframework.kafka.core.KafkaTemplate
 import java.time.LocalDate
 import java.util.*
 
+@Import(SoapConfig::class)
 class SedMottakTestIT(
     @Autowired private val eessiMeldingTestDataFactory: EessiMeldingTestDataFactory,
     @Autowired @Qualifier("melosysEessiMelding") private val melosysEessiMeldingKafkaTemplate: KafkaTemplate<String, MelosysEessiMelding>,
@@ -62,57 +54,13 @@ class SedMottakTestIT(
     @Autowired private val opprettBehandlingForSak: OpprettBehandlingForSak,
     @Autowired private val lovvalgsperiodeService: LovvalgsperiodeService,
     @Autowired private val behandlingsresultatRepository: BehandlingsresultatRepository,
-    @Autowired private val unleash: FakeUnleash,
     @Autowired private val avklartefaktaService: AvklartefaktaService,
-    @Autowired private val prosessinstansTestManager: ProsessinstansTestManager,
-    @Autowired private val oppgaveRepo: OppgaveRepo,
-
-    ) : ComponentTestBase() {
+) : MockServerTestBaseWithProsessManager() {
 
     private val kafkaTopic = "teammelosys.eessi.v1-local"
 
-    private val randomUUID = UUID.randomUUID()
-
-    // TODO: Vi har dette i JournalfoeringBase også, så burde se på å få noe felles her
-    protected val mockServer: WireMockServer =
-        WireMockServer(
-            WireMockConfiguration.options().port(8094)
-        )
-
     @MockkBean
     private lateinit var utstedtA1AivenProducer: UtstedtA1AivenProducer
-
-    @BeforeEach
-    fun setup() {
-        ThreadLocalAccessInfo.beforeExecuteProcess(randomUUID, "steg")
-        SakRepo.clear()
-        MedlRepo.repo.clear()
-        oppgaveRepo.repo.clear()
-        MelosysEessiRepo.sedRepo.clear()
-        unleash.resetAll()
-        mockServer.start()
-
-        mockServer.stubFor(
-            WireMock.post(WireMock.urlPathMatching("/api/v1/mal/.*/lag-pdf"))
-                .withQueryParam("somKopi", equalTo("false"))
-                .withQueryParam("utkast", equalTo("false"))
-                .willReturn(
-                    WireMock.aResponse()
-                        .withStatus(200)
-                        .withHeader("Content-Type", "application/json")
-                        .withBody(ByteArray(0))
-                )
-        )
-
-    }
-
-    @AfterEach
-    fun after() {
-        ThreadLocalAccessInfo.afterExecuteProcess(randomUUID)
-        oppgaveRepo.repo.clear()
-        prosessinstansTestManager.clear()
-        mockServer.stop()
-    }
 
     @Test
     fun `A009 med etterfølgende X008 skal gi fagsak annullert`() {
@@ -483,7 +431,7 @@ class SedMottakTestIT(
             .sortedBy { it.endretDato }
 
         lovvalgsperiodeService.lagreLovvalgsperioder(
-            prosessinstanserSortert.get(1).behandling.id,
+            prosessinstanserSortert.shouldHaveSize(2).last().behandling.id,
             listOf(Lovvalgsperiode().apply {
                 fom = datoOmToÅr
                 tom = datoOmToÅr.plusDays(1)
@@ -495,13 +443,14 @@ class SedMottakTestIT(
         )
 
         avklartefaktaService.lagreAvklarteFakta(
-            prosessinstanserSortert.get(1).behandling.id, setOf(AvklartefaktaDto(
-                listOf("TRUE"), "VIRKSOMHET"
-            ).apply {
-                avklartefaktaType = Avklartefaktatyper.VIRKSOMHET
-                subjektID = "999999999"
-                begrunnelseKoder = emptyList()
-            })
+            prosessinstanserSortert.shouldHaveSize(2).last().behandling.id, setOf(
+                AvklartefaktaDto(
+                    listOf("TRUE"), "VIRKSOMHET"
+                ).apply {
+                    avklartefaktaType = Avklartefaktatyper.VIRKSOMHET
+                    subjektID = "999999999"
+                    begrunnelseKoder = emptyList()
+                })
         )
 
         val vedtaksProsessInstans = prosessinstansTestManager.executeAndWait(
@@ -609,17 +558,19 @@ class SedMottakTestIT(
         prosessinstansTestManager.executeAndWait(
             mapOf(ProsessType.UTPEKING_AVVIS to 1)
         ) {
-            utpekingService.avvisUtpeking(prosessinstanserSortert.get(1).behandling.id, UtpekingAvvis().apply {
-                begrunnelse = "lol"
-                etterspørInformasjon = false
-            })
+            utpekingService.avvisUtpeking(
+                prosessinstanserSortert
+                    .shouldHaveSize(2).last().behandling.id, UtpekingAvvis().apply {
+                    begrunnelse = "lol"
+                    etterspørInformasjon = false
+                })
         }
 
         val opprettNyVurderingProsessinstans = prosessinstansTestManager.executeAndWait(
             mapOf(ProsessType.OPPRETT_REPLIKERT_BEHANDLING_FOR_SAK to 1)
         ) {
             opprettBehandlingForSak.opprettBehandling(
-                prosessinstanserSortert.get(1).behandling.fagsak.saksnummer,
+                prosessinstanserSortert.shouldHaveSize(2).last().behandling.fagsak.saksnummer,
                 OpprettSakDto().apply {
                     behandlingstema = Behandlingstema.BESLUTNING_LOVVALG_NORGE
                     behandlingstype = Behandlingstyper.NY_VURDERING
@@ -642,13 +593,14 @@ class SedMottakTestIT(
         )
 
         avklartefaktaService.lagreAvklarteFakta(
-            opprettNyVurderingProsessinstans.behandling.id, setOf(AvklartefaktaDto(
-                listOf("TRUE"), "VIRKSOMHET"
-            ).apply {
-                avklartefaktaType = Avklartefaktatyper.VIRKSOMHET
-                subjektID = "999999999"
-                begrunnelseKoder = emptyList()
-            })
+            opprettNyVurderingProsessinstans.behandling.id, setOf(
+                AvklartefaktaDto(
+                    listOf("TRUE"), "VIRKSOMHET"
+                ).apply {
+                    avklartefaktaType = Avklartefaktatyper.VIRKSOMHET
+                    subjektID = "999999999"
+                    begrunnelseKoder = emptyList()
+                })
         )
 
         val vedtaksProsessInstans = prosessinstansTestManager.executeAndWait(

@@ -24,7 +24,6 @@ import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingstema
 import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingstyper
 import no.nav.melosys.integrasjon.joark.saf.SafConsumer
 import no.nav.melosys.integrasjon.joark.saf.dto.journalpost.*
-import no.nav.melosys.melosysmock.sak.SakRepo
 import no.nav.melosys.repository.BehandlingRepository
 import no.nav.melosys.repository.FagsakRepository
 import no.nav.melosys.saksflyt.ProsessinstansRepository
@@ -34,7 +33,6 @@ import no.nav.melosys.saksflytapi.domain.ProsessType
 import no.nav.melosys.saksflytapi.domain.Prosessinstans
 import no.nav.security.token.support.spring.test.EnableMockOAuth2Server
 import org.junit.jupiter.api.AfterEach
-import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.boot.context.event.ApplicationReadyEvent
@@ -51,7 +49,7 @@ import java.time.LocalDateTime
 
 @ActiveProfiles("test")
 @SpringBootTest(
-    classes = [Application::class, SaksflytTestConfig::class],
+    classes = [Application::class],
     webEnvironment = SpringBootTest.WebEnvironment.DEFINED_PORT
 )
 @EmbeddedKafka(
@@ -62,7 +60,7 @@ import java.time.LocalDateTime
 @AutoConfigureTestDatabase(replace = AutoConfigureTestDatabase.Replace.NONE)
 @DirtiesContext
 @EnableMockOAuth2Server
-internal class SaksflytOppstartIT(
+class SaksflytOppstartIT(
     @Autowired private val fagsakRepository: FagsakRepository,
     @Autowired private val behandlingRepository: BehandlingRepository,
     @Autowired private val prosessinstansRepository: ProsessinstansRepository,
@@ -71,11 +69,6 @@ internal class SaksflytOppstartIT(
 
     @MockkBean
     lateinit var safConsumer: SafConsumer
-
-    @BeforeEach
-    fun before() {
-        SakRepo.clear()
-    }
 
     @AfterEach
     fun after() {
@@ -207,8 +200,7 @@ internal class SaksflytOppstartIT(
     }
 
     companion object {
-        val LÅSREFERANSE_PROSESSINSTANS_SOM_IKKE_SKAL_REKJØRES_ENDA = "234_dummy_2"
-        val LÅSREFERANSE_PROSESSINSTANS_SOM_TRENGER_REKJØRING = "123_dummy_1"
-
+        const val LÅSREFERANSE_PROSESSINSTANS_SOM_IKKE_SKAL_REKJØRES_ENDA = "234_dummy_2"
+        const val LÅSREFERANSE_PROSESSINSTANS_SOM_TRENGER_REKJØRING = "123_dummy_1"
     }
 }

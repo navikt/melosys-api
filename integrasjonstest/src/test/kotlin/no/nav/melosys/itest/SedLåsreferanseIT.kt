@@ -32,7 +32,7 @@ import org.springframework.test.context.ActiveProfiles
 
 @ActiveProfiles("test")
 @SpringBootTest(
-    classes = [Application::class, SaksflytTestConfig::class],
+    classes = [Application::class],
     webEnvironment = SpringBootTest.WebEnvironment.DEFINED_PORT
 )
 @EmbeddedKafka(
@@ -44,7 +44,7 @@ import org.springframework.test.context.ActiveProfiles
 @DirtiesContext
 @EnableMockOAuth2Server
 @Import(SedLåsreferanseIT.TestConfig::class)
-internal class SedLåsreferanseIT(
+class SedLåsreferanseIT(
     @Autowired private val prosessinstansService: ProsessinstansService,
     @Autowired private val prosessRegister: ProsessRegister,
     @Autowired private val prosessinstansTestManager: ProsessinstansTestManager

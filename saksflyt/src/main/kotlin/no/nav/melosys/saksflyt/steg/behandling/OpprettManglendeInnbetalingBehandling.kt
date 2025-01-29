@@ -100,7 +100,7 @@ class OpprettManglendeInnbetalingBehandling(
     private fun lagNyBehandling(prosessinstans: Prosessinstans, fagsak: Fagsak, mottaksDato: LocalDate?) {
         val behandlingBruktForReplikering = saksbehandlingRegler.finnBehandlingSomKanReplikeres(fagsak)
             ?: throw FunksjonellException(
-                "Finner ikke behandling som skal brukes til replikering. " +
+                "Finner ikke behandling som skal brukes til replikering. fra fagsak: ${fagsak.saksnummer}" +
                     "Forventer at behandling som bestilte fakturering kan bli replikert fra."
             )
 

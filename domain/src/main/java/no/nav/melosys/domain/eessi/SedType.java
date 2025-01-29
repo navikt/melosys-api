@@ -40,6 +40,7 @@ public enum SedType {
     H020,
     H061,
     H065,
+    H066,
     H070,
     H120,
     H121,

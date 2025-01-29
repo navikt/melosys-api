@@ -1,6 +1,5 @@
 package no.nav.melosys.saksflyt.steg.brev;
 
-import java.util.Collections;
 import java.util.List;
 import java.util.UUID;
 
@@ -15,6 +14,7 @@ import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingstyper;
 import no.nav.melosys.domain.kodeverk.brev.Produserbaredokumenter;
 import no.nav.melosys.exception.FunksjonellException;
 import no.nav.melosys.exception.IkkeFunnetException;
+import no.nav.melosys.integrasjon.dokgen.dto.standardvedlegg.InnvilgelseRettigheterPlikterStandardvedlegg;
 import no.nav.melosys.integrasjon.ereg.EregFasade;
 import no.nav.melosys.integrasjon.joark.JoarkFasade;
 import no.nav.melosys.saksflyt.TestdataFactory;
@@ -28,6 +28,7 @@ import no.nav.melosys.service.dokument.BrevmottakerService;
 import no.nav.melosys.service.dokument.DokgenService;
 import no.nav.melosys.service.dokument.DokumentHentingService;
 import no.nav.melosys.service.dokument.brev.mapper.DokumentproduksjonsInfoMapper;
+import no.nav.melosys.service.dokument.brev.mapper.standardvedlegg.RettigheterOgPlikterStandardvedleggMapper;
 import no.nav.melosys.service.ftrl.medlemskapsperiode.MedlemskapsperiodeService;
 import no.nav.melosys.service.oppgave.OppgaveFactory;
 import no.nav.melosys.service.persondata.PersondataFasade;
@@ -68,6 +69,9 @@ class OpprettOgJournalforBrevTest {
     private DokumentHentingService mockDokumentHentingService;
     @Mock
     private LovvalgsperiodeService mockLovvalgsperiodeService;
+    @Mock
+    RettigheterOgPlikterStandardvedleggMapper mockRettigheterOgPlikterStandardvedleggMapper;
+
     @Captor
     ArgumentCaptor<OpprettJournalpost> opprettJournalpostCaptor;
 
@@ -81,7 +85,7 @@ class OpprettOgJournalforBrevTest {
     @BeforeEach
     void init() {
         dokumentNavnService = new DokumentNavnService(mock(BrevmottakerService.class), mock(DokgenService.class), mockLovvalgsperiodeService, mock(MedlemskapsperiodeService.class));
-        opprettJournalforBrev = new OpprettOgJournalforBrev(mockBehandlingService, mockDokgenService,
+        opprettJournalforBrev = new OpprettOgJournalforBrev(mockBehandlingService, mockDokgenService, mockRettigheterOgPlikterStandardvedleggMapper,
             mockUtenlandskMyndighetService, mockJoarkFasade, mockPersondataFasade, mockEregFasade,
             dokumentNavnService, mockDokumentHentingService, oppgaveFactory);
     }
@@ -487,6 +491,145 @@ class OpprettOgJournalforBrevTest {
                 ArkivDokument::getTittel)
             .containsExactly(Tuple.tuple(new byte[]{1, 2}, "tittel 1"),
                 Tuple.tuple(new byte[]{3, 4}, "tittel 2"));
+    }
+
+    @Test
+    void utfør_medStandardvedleggOgFritekstvedlegg_kombinerVedlegg() {
+        Behandling behandling = TestdataFactory.lagBehandling();
+        when(mockBehandlingService.hentBehandling(anyLong())).thenReturn(behandling);
+        when(mockJoarkFasade.opprettJournalpost(any(), anyBoolean())).thenReturn("12234");
+        when(mockDokgenService.hentDokumentInfo(any())).thenReturn(TestdataFactory.lagDokumentInfo());
+        when(mockRettigheterOgPlikterStandardvedleggMapper.mapInnvilgelse(anyLong(), anyBoolean()))
+            .thenReturn(new InnvilgelseRettigheterPlikterStandardvedlegg());
+        byte[] standardvedleggPdf = {5, 6};
+        when(mockDokgenService.produserStandardvedlegg(any(), any())).thenReturn(standardvedleggPdf);
+
+        List<FritekstvedleggBestilling> fritekstvedleggBestilling = List.of(
+            new FritekstvedleggBestilling("Tittel 1", "Tekst 1")
+        );
+
+        FritekstbrevBrevbestilling brevbestilling = new FritekstbrevBrevbestilling.Builder()
+            .medProduserbartdokument(GENERELT_FRITEKSTBREV_BRUKER)
+            .medFritekstTittel("Hovedtittel")
+            .medFritekst("Innhold")
+            .medFritekstvedleggBestilling(fritekstvedleggBestilling)
+            .medStandardvedleggBestilling(StandardvedleggType.VIKTIG_INFORMASJON_RETTIGHETER_PLIKTER_INNVILGELSE)
+            .medBehandlingId(1L)
+            .build();
+
+        Prosessinstans prosessinstans = lagProsessinstans(behandling, brevbestilling);
+
+        opprettJournalforBrev.utfør(prosessinstans);
+
+        verify(mockJoarkFasade).opprettJournalpost(opprettJournalpostCaptor.capture(), anyBoolean());
+
+        OpprettJournalpost captured = opprettJournalpostCaptor.getValue();
+        assertThat(captured.getVedlegg())
+            .hasSize(2)
+            .extracting(ArkivDokument::getTittel)
+            .containsExactly("Tittel 1", "Viktig informasjon om rettigheter og plikter");
+    }
+
+    @Test
+    void utfør_standardvedleggTypeNull_ingenStandardvedlegg() {
+        Behandling behandling = TestdataFactory.lagBehandling();
+        when(mockBehandlingService.hentBehandling(anyLong())).thenReturn(behandling);
+        when(mockJoarkFasade.opprettJournalpost(any(), anyBoolean())).thenReturn("12234");
+        when(mockDokgenService.hentDokumentInfo(any())).thenReturn(TestdataFactory.lagDokumentInfo());
+
+        FritekstbrevBrevbestilling brevbestilling = new FritekstbrevBrevbestilling.Builder()
+            .medProduserbartdokument(GENERELT_FRITEKSTBREV_BRUKER)
+            .medFritekstTittel("Hovedtittel")
+            .medFritekst("Innhold")
+            .medStandardvedleggBestilling(null)
+            .build();
+
+        Prosessinstans prosessinstans = lagProsessinstans(behandling, brevbestilling);
+
+        opprettJournalforBrev.utfør(prosessinstans);
+
+        verify(mockJoarkFasade).opprettJournalpost(opprettJournalpostCaptor.capture(), anyBoolean());
+
+        OpprettJournalpost captured = opprettJournalpostCaptor.getValue();
+        assertThat(captured.getVedlegg()).isEmpty();
+    }
+
+    @Test
+    void utfør_avslagStandardvedlegg_returnerAvslagVedlegg() {
+        Behandling behandling = TestdataFactory.lagBehandling();
+        when(mockBehandlingService.hentBehandling(anyLong())).thenReturn(behandling);
+        when(mockJoarkFasade.opprettJournalpost(any(), anyBoolean())).thenReturn("12234");
+        when(mockDokgenService.hentDokumentInfo(any())).thenReturn(TestdataFactory.lagDokumentInfo());
+
+        FritekstbrevBrevbestilling brevbestilling = new FritekstbrevBrevbestilling.Builder()
+            .medProduserbartdokument(GENERELT_FRITEKSTBREV_BRUKER)
+            .medFritekstTittel("Hovedtittel")
+            .medFritekst("Innhold")
+            .medStandardvedleggBestilling(StandardvedleggType.VIKTIG_INFORMASJON_RETTIGHETER_PLIKTER_AVSLAG)
+            .build();
+
+        Prosessinstans prosessinstans = lagProsessinstans(behandling, brevbestilling);
+
+        opprettJournalforBrev.utfør(prosessinstans);
+
+        verify(mockJoarkFasade).opprettJournalpost(opprettJournalpostCaptor.capture(), anyBoolean());
+
+        OpprettJournalpost captured = opprettJournalpostCaptor.getValue();
+        assertThat(captured.getVedlegg())
+            .hasSize(1)
+            .extracting(ArkivDokument::getTittel)
+            .containsExactly(
+                "Viktig informasjon om rettigheter og plikter"
+            );    }
+
+    @Test
+    void utfør_alleVedleggstyper_kombinerAlleVedlegg() {
+        Behandling behandling = TestdataFactory.lagBehandling();
+        when(mockBehandlingService.hentBehandling(anyLong())).thenReturn(behandling);
+        when(mockJoarkFasade.opprettJournalpost(any(), anyBoolean())).thenReturn("12234");
+        when(mockDokgenService.hentDokumentInfo(any())).thenReturn(TestdataFactory.lagDokumentInfo());
+        when(mockRettigheterOgPlikterStandardvedleggMapper.mapInnvilgelse(anyLong(), anyBoolean()))
+            .thenReturn(new InnvilgelseRettigheterPlikterStandardvedlegg());
+        byte[] standardvedleggPdf = {5, 6};
+        when(mockDokgenService.produserStandardvedlegg(any(), any())).thenReturn(standardvedleggPdf);
+
+        when(mockDokumentHentingService.hentJournalposter("MEL-test")).thenReturn(
+            List.of(lagJournalpost("1", "2", "Joark tittel"))
+        );
+        when(mockJoarkFasade.hentDokument("1", "2")).thenReturn(new byte[]{1, 2});
+
+        List<FritekstvedleggBestilling> fritekstvedleggBestilling = List.of(
+            new FritekstvedleggBestilling("Fritekst tittel", "Tekst")
+        );
+        List<SaksvedleggBestilling> saksvedleggBestilling = List.of(
+            new SaksvedleggBestilling("1", "2")
+        );
+
+        FritekstbrevBrevbestilling brevbestilling = new FritekstbrevBrevbestilling.Builder()
+            .medProduserbartdokument(GENERELT_FRITEKSTBREV_BRUKER)
+            .medFritekstTittel("Hovedtittel")
+            .medFritekst("Innhold")
+            .medFritekstvedleggBestilling(fritekstvedleggBestilling)
+            .medSaksvedleggBestilling(saksvedleggBestilling)
+            .medStandardvedleggBestilling(StandardvedleggType.VIKTIG_INFORMASJON_RETTIGHETER_PLIKTER_INNVILGELSE)
+            .medBehandlingId(1L)
+            .build();
+
+        Prosessinstans prosessinstans = lagProsessinstans(behandling, brevbestilling);
+
+        opprettJournalforBrev.utfør(prosessinstans);
+
+        verify(mockJoarkFasade).opprettJournalpost(opprettJournalpostCaptor.capture(), anyBoolean());
+
+        OpprettJournalpost captured = opprettJournalpostCaptor.getValue();
+        assertThat(captured.getVedlegg())
+            .hasSize(3)
+            .extracting(ArkivDokument::getTittel)
+            .containsExactly(
+                "Fritekst tittel",
+                "Viktig informasjon om rettigheter og plikter",
+                "Joark tittel"
+            );
     }
 
     private static List<Arguments> hentProduserbaredokumenter() {

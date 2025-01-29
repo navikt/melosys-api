@@ -1,6 +1,5 @@
 package no.nav.melosys.itest
 
-import io.kotest.matchers.shouldBe
 import io.mockk.every
 import io.mockk.mockk
 import no.nav.melosys.Application
@@ -13,6 +12,7 @@ import no.nav.melosys.saksflytapi.ProsessinstansService
 import no.nav.melosys.saksflytapi.domain.ProsessSteg
 import no.nav.melosys.saksflytapi.domain.ProsessType
 import no.nav.security.token.support.spring.test.EnableMockOAuth2Server
+import org.awaitility.kotlin.await
 import org.junit.jupiter.api.AfterEach
 import org.junit.jupiter.api.Disabled
 import org.junit.jupiter.api.Test
@@ -30,7 +30,7 @@ import org.springframework.test.context.ActiveProfiles
 
 @ActiveProfiles("test")
 @SpringBootTest(
-    classes = [Application::class, SaksflytTestConfig::class],
+    classes = [Application::class],
     webEnvironment = SpringBootTest.WebEnvironment.DEFINED_PORT
 )
 @EmbeddedKafka(
@@ -43,7 +43,7 @@ import org.springframework.test.context.ActiveProfiles
 @EnableMockOAuth2Server
 @Import(SaksflyThreadPoolTaskExecutorIT.TestConfig::class)
 @Disabled("Brukes lokalt for å teste at saksflytThreadPoolTaskExecutor fungerer som forventet")
-internal class SaksflyThreadPoolTaskExecutorIT(
+class SaksflyThreadPoolTaskExecutorIT(
     @Autowired private val prosessinstansService: ProsessinstansService,
     @Autowired private val prosessinstansTestManager: ProsessinstansTestManager,
     @Autowired @Qualifier("saksflytThreadPoolTaskExecutor") private val taskExecutor: ThreadPoolTaskExecutor
@@ -76,9 +76,8 @@ internal class SaksflyThreadPoolTaskExecutorIT(
         events.filter { it.formattedMessage.contains("Antall prosessinstanser i saksflytThreadPoolTaskExecutor") }.forEach {
             println(it.formattedMessage)
         }
-        taskExecutor.threadPoolExecutor.queue.run {
-            size shouldBe 0
-            remainingCapacity() shouldBe Int.MAX_VALUE
+        await.atMost(java.time.Duration.ofSeconds(2)).until {
+            taskExecutor.threadPoolExecutor.queue.size == 0
         }
     }
 
@@ -89,7 +88,7 @@ internal class SaksflyThreadPoolTaskExecutorIT(
         fun opprettSedMottakRutingTest(): SedMottakRuting = mockk<SedMottakRuting>().apply {
             every { inngangsSteg() } returns ProsessSteg.SED_MOTTAK_RUTING
             every { utfør(any()) } answers {
-                Thread.sleep(1000)
+                Thread.sleep(500)
 
             }
         }
