@@ -114,6 +114,9 @@
         <hibernate.version>6.2.4.Final</hibernate.version>
         <antlr4.version>4.10.1</antlr4.version>
 
+        <!-- Bump JUnit versjon for å kunne bruke argumentSetName, denne kan muligens fjernes når vi bumper spring neste gang -->
+        <junit-jupiter.version>5.11.3</junit-jupiter.version>
+
         <!-- Transitive avhengigheter -->
         <asm.version>9.6</asm.version>
         <joda-time.version>2.10.14</joda-time.version>
