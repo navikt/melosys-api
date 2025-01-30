@@ -125,7 +125,8 @@ class SatsendringIT(
                     behandlingMedSatsendring.id,
                     behandlingMedSatsendring.fagsak.saksnummer,
                     Behandlingstyper.FØRSTEGANG,
-                    true
+                    harSatsendring = true,
+                    harAktivNyVurdering = false
                 )
             )
             behandlingerUtenSatsendring.shouldContainOnly(
@@ -133,7 +134,8 @@ class SatsendringIT(
                     behandlingUtenSatsendring.id,
                     behandlingUtenSatsendring.fagsak.saksnummer,
                     Behandlingstyper.FØRSTEGANG,
-                    false
+                    harSatsendring = false,
+                    harAktivNyVurdering = false
                 )
             )
         }

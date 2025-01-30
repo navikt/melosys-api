@@ -1,6 +1,7 @@
 package no.nav.melosys.service.avgift.satsendring
 
 import mu.KotlinLogging
+import no.nav.melosys.domain.Behandling
 import no.nav.melosys.domain.Behandlingsresultat
 import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingstyper
 import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingstyper.NY_VURDERING
@@ -28,15 +29,16 @@ class SatsendringFinner(
 
         val behandlingerForSatsendring = behandlingsresultatList.map {
             val behandling = behandlingService.hentBehandling(it.id)
+
             BehandlingForSatstendring(
-                behandling.id, behandling.fagsak.saksnummer, behandling.type, harSatsendring(it)
+                behandling.id, behandling.fagsak.saksnummer, behandling.type, harSatsendring(it), harAktivNyVurdering(behandling)
             )
         }
 
         return AvgiftSatsendringInfo(
             år = år,
-            behandlingerMedSatsendring = behandlingerForSatsendring.filter { it.harSatsendring && it.behandlingstype != NY_VURDERING },
-            behandlingerMedSatsendringOgNyVurdering = behandlingerForSatsendring.filter { it.harSatsendring && it.behandlingstype == NY_VURDERING },
+            behandlingerMedSatsendring = behandlingerForSatsendring.filter { it.harSatsendring && !it.harAktivNyVurdering },
+            behandlingerMedSatsendringOgNyVurdering = behandlingerForSatsendring.filter { it.harSatsendring && it.harAktivNyVurdering },
             behandlingerUtenSatsendring = behandlingerForSatsendring.filterNot { it.harSatsendring }
         )
     }
@@ -59,6 +61,8 @@ class SatsendringFinner(
         behandlingsresultat.hentInntektsperioder().toList(),
     )
 
+    private fun harAktivNyVurdering(behandling: Behandling): Boolean = behandling.fagsak.finnAktivBehandlingIkkeÅrsavregning()?.type == NY_VURDERING
+
     data class AvgiftSatsendringInfo(
         val år: Int,
         val behandlingerMedSatsendring: List<BehandlingForSatstendring>,
@@ -70,6 +74,7 @@ class SatsendringFinner(
         val behandlingID: Long,
         val saksnummer: String,
         val behandlingstype: Behandlingstyper,
-        val harSatsendring: Boolean
+        val harSatsendring: Boolean,
+        val harAktivNyVurdering: Boolean
     )
 }

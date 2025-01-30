@@ -73,17 +73,17 @@ class SatsendringAdminControllerTest {
             2025,
             behandlingerMedSatsendring = listOf(
                 BehandlingForSatstendring(
-                    1, "MEL-1", Behandlingstyper.SATSENDRING, true
+                    1, "MEL-1", Behandlingstyper.SATSENDRING, true, false
                 )
             ),
             behandlingerMedSatsendringOgNyVurdering = listOf(
                 BehandlingForSatstendring(
-                    22, "MEL-22", Behandlingstyper.SATSENDRING, true
+                    22, "MEL-22", Behandlingstyper.SATSENDRING, true, true
                 )
             ),
             behandlingerUtenSatsendring = listOf(
                 BehandlingForSatstendring(
-                    333, "MEL-333", Behandlingstyper.SATSENDRING, false
+                    333, "MEL-333", Behandlingstyper.SATSENDRING, false, false
                 ),
             )
         )
