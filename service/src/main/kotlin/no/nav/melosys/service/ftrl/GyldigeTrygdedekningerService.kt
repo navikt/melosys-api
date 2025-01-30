@@ -21,6 +21,9 @@ class GyldigeTrygdedekningerService(private val unleash: Unleash) {
         Trygdedekninger.FTRL_2_9_FØRSTE_LEDD_C_ANDRE_LEDD_HELSE_PENSJON_SYKE_FORELDREPENGER,
         Trygdedekninger.FTRL_2_7_TREDJE_LEDD_B_HELSE_SYKE_FORELDREPENGER,
         Trygdedekninger.FTRL_2_7A_ANDRE_LEDD_B_HELSE_SYKE_FORELDREPENGER,
+        Trygdedekninger.FTRL_2_9_FØRSTE_LEDD_B_TREDJE_LEDD_PENSJON_YRKESSKADE,
+        Trygdedekninger.FTRL_2_9_FØRSTE_LEDD_C_TREDJE_LEDD_HELSE_PENSJON_YRKESSKADE,
+        Trygdedekninger.FTRL_2_9_FØRSTE_LEDD_C_ANDRE_LEDD_TREDJE_LEDD_HELSE_PENSJON_SYKE_FORELDREPENGER_YRKESSKADE,
         Trygdedekninger.TILLEGGSAVTALE_NATO_HELSEDEL,
     )
 
@@ -33,13 +36,11 @@ class GyldigeTrygdedekningerService(private val unleash: Unleash) {
         Trygdedekninger.FTRL_2_9_FØRSTE_LEDD_C_ANDRE_LEDD_HELSE_PENSJON_SYKE_FORELDREPENGER,
         Trygdedekninger.FTRL_2_7_TREDJE_LEDD_B_HELSE_SYKE_FORELDREPENGER,
         Trygdedekninger.TILLEGGSAVTALE_NATO_HELSEDEL,
-    )
-
-    private val TILLEGG_GYLDIGE_TRYGDEDEKNINGER_YRESSKADEFORDEL = listOf(
         Trygdedekninger.FTRL_2_9_FØRSTE_LEDD_B_TREDJE_LEDD_PENSJON_YRKESSKADE,
         Trygdedekninger.FTRL_2_9_FØRSTE_LEDD_C_TREDJE_LEDD_HELSE_PENSJON_YRKESSKADE,
         Trygdedekninger.FTRL_2_9_FØRSTE_LEDD_C_ANDRE_LEDD_TREDJE_LEDD_HELSE_PENSJON_SYKE_FORELDREPENGER_YRKESSKADE,
     )
+
 
     fun hentTrygdedekninger(behandlingstema: Behandlingstema, bestemmelse: Bestemmelse?): List<Trygdedekninger> {
         valider(behandlingstema)
@@ -51,8 +52,7 @@ class GyldigeTrygdedekningerService(private val unleash: Unleash) {
             return trygdedekningerFraBehandlingstema
                 .toMutableList()
                 .apply {
-                    if (unleash.isEnabled(ToggleName.MELOSYS_FTRL_YRKESSKADEFORDEL))
-                        add(Trygdedekninger.FTRL_2_9_TREDJE_LEDD_YRKESSKADE)
+                    add(Trygdedekninger.FTRL_2_9_TREDJE_LEDD_YRKESSKADE)
                 }.intersect(trygdedekningerFraBestemmelse).toList()
         }
 
@@ -65,9 +65,7 @@ class GyldigeTrygdedekningerService(private val unleash: Unleash) {
             Behandlingstema.YRKESAKTIV -> GYLDIGE_TRYGDEDEKNINGER_YRKESAKTIV
             else -> throw FunksjonellException("Finnes ikke gyldige trygdedekninger for behandlingstema $behandlingstema")
         }
-        if (unleash.isEnabled(ToggleName.MELOSYS_FTRL_YRKESSKADEFORDEL)) {
-            trygdedekninger = trygdedekninger + TILLEGG_GYLDIGE_TRYGDEDEKNINGER_YRESSKADEFORDEL
-        }
+
         return trygdedekninger
     }
 
