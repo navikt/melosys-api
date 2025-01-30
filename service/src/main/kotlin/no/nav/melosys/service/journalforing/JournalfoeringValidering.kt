@@ -8,7 +8,6 @@ import no.nav.melosys.domain.kodeverk.*
 import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingstema
 import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingstyper
 import no.nav.melosys.exception.FunksjonellException
-import no.nav.melosys.featuretoggle.ToggleName.MELOSYS_HINDRE_JOURNALFOERING_AV_FERDIGSTILTE_JOURNALPOSTER
 import no.nav.melosys.service.behandling.BehandlingsresultatService
 import no.nav.melosys.service.dokument.sed.EessiService
 import no.nav.melosys.service.journalforing.dto.JournalfoeringDto
@@ -69,9 +68,7 @@ class JournalfoeringValidering(
     }
 
     internal fun validerJournalførOgKnyttTilEksisterendeSak(journalfoeringDto: JournalfoeringTilordneDto, journalpost: Journalpost, fagsak: Fagsak) {
-        if (unleash.isEnabled(MELOSYS_HINDRE_JOURNALFOERING_AV_FERDIGSTILTE_JOURNALPOSTER)) {
-            validerJournalpostIkkeAlleredeFerdigstilt(journalpost)
-        }
+        validerJournalpostIkkeAlleredeFerdigstilt(journalpost)
 
         if (journalpost.mottaksKanalErEessi()) {
             val melosysEessiMelding = eessiService.hentSedTilknyttetJournalpost(journalpost.journalpostId)
@@ -97,13 +94,15 @@ class JournalfoeringValidering(
         nyttBehandlingstema: Behandlingstema,
         nyBehandlingstype: Behandlingstyper
     ) {
-        if (unleash.isEnabled(MELOSYS_HINDRE_JOURNALFOERING_AV_FERDIGSTILTE_JOURNALPOSTER)) {
-            validerJournalpostIkkeAlleredeFerdigstilt(journalpost)
-        }
+        validerJournalpostIkkeAlleredeFerdigstilt(journalpost)
 
         val sistBehandling = fagsak.hentSistRegistrertBehandling()
         val muligeBehandlingstyper =
-            lovligeKombinasjonerSaksbehandlingService.hentMuligeBehandlingstyperForKnyttTilSak(Aktoersroller.BRUKER, fagsak.saksnummer, nyttBehandlingstema)
+            lovligeKombinasjonerSaksbehandlingService.hentMuligeBehandlingstyperForKnyttTilSak(
+                Aktoersroller.BRUKER,
+                fagsak.saksnummer,
+                nyttBehandlingstema
+            )
 
         if (!muligeBehandlingstyper.contains(nyBehandlingstype)) {
             throw FunksjonellException("Behandlingstype $nyBehandlingstype er ikke tillatt for behandlingstema $nyttBehandlingstema og fagsak ${fagsak.saksnummer}")
