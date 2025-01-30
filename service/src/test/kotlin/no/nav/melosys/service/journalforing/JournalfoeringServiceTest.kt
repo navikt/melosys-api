@@ -570,7 +570,6 @@ internal class JournalfoeringServiceTest {
 
     @Test
     fun journalførOgKnyttTilEksisterendeSak_journalpostErFerdigstilt_kasterExceptionNårToggleErPå() {
-        unleash.enable(ToggleName.MELOSYS_HINDRE_JOURNALFOERING_AV_FERDIGSTILTE_JOURNALPOSTER)
         journalpost.isErFerdigstilt = true
         every { fagsakService.hentFagsak(any()) } returns lagFagsak()
         every { joarkFasade.hentJournalpost(journalpost.journalpostId) } returns journalpost
@@ -578,18 +577,6 @@ internal class JournalfoeringServiceTest {
 
         shouldThrow<FunksjonellException> { journalfoeringService.journalførOgKnyttTilEksisterendeSak(tilordneDto) }
             .message.shouldBe("Journalposten er allerede ferdigstilt!")
-    }
-
-    @Test
-    fun journalførOgKnyttTilEksisterendeSak_journalpostErFerdigstilt_kasterIkkeExceptionNårToggleErAv() {
-        unleash.disable(ToggleName.MELOSYS_HINDRE_JOURNALFOERING_AV_FERDIGSTILTE_JOURNALPOSTER)
-        journalpost.isErFerdigstilt = true
-        every { fagsakService.hentFagsak(any()) } returns lagFagsak()
-        every { utenlandskMyndighetService.finnInstitusjonID(any()) } returns Optional.of(INSTITUSJON_ID)
-        every { joarkFasade.hentJournalpost(journalpost.journalpostId) } returns journalpost
-
-
-        shouldNotThrow<FunksjonellException> { journalfoeringService.journalførOgKnyttTilEksisterendeSak(tilordneDto) }
     }
 
     @Test
