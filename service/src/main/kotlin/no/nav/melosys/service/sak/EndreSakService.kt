@@ -114,7 +114,7 @@ class EndreSakService(
     }
 
     @Transactional
-    fun endreÅrsavregningOppsummering(
+    fun endreÅrsavregningBehandling(
         behandlingID: Long,
         nyBehandlingsstatus: Behandlingsstatus,
         nyMottaksdato: LocalDate?

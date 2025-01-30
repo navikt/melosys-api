@@ -129,7 +129,7 @@ public class FagsakController {
         aksesskontroll.autoriserSakstilgang(saksnummer);
 
         if (endreDto.getBehandlingstype() == Behandlingstyper.ÅRSAVREGNING && endreDto.getBehandlingID() != null) {
-            endreSakService.endreÅrsavregningOppsummering(endreDto.getBehandlingID(), endreDto.getBehandlingsstatus(), endreDto.getMottaksdato());
+            endreSakService.endreÅrsavregningBehandling(endreDto.getBehandlingID(), endreDto.getBehandlingsstatus(), endreDto.getMottaksdato());
         } else {
             endreSakService.endre(saksnummer, endreDto.getSakstype(), endreDto.getSakstema(), endreDto.getBehandlingstema(),
                 endreDto.getBehandlingstype(), endreDto.getBehandlingsstatus(), endreDto.getMottaksdato());
