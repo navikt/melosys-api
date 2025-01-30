@@ -34,6 +34,7 @@ import no.nav.melosys.sikkerhet.context.ThreadLocalAccessInfo;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Qualifier;
+import org.springframework.cglib.core.Local;
 import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.scheduling.concurrent.ThreadPoolTaskExecutor;
 import org.springframework.stereotype.Service;
@@ -109,6 +110,16 @@ public class ProsessinstansService {
         prosessinstans.setData(SKAL_TILORDNES, opprettSakRequest.getSkalTilordnes());
 
         lagre(prosessinstans);
+    }
+
+    @Transactional
+    public UUID opprettSatsendringBehandling(Behandling behandling) {
+        Prosessinstans prosessinstans = new Prosessinstans();
+        prosessinstans.setBehandling(behandling);
+
+        prosessinstans.setType(ProsessType.BEHANDLE_SATSENDRING);
+
+        return lagre(prosessinstans);
     }
 
     Prosessinstans lagJournalføringProsessinstans(ProsessType type, JournalfoeringRequest journalfoeringRequest, String institusjonID, boolean mottaksKanalErElektronisk) {

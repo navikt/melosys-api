@@ -18,6 +18,8 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Component;
 
+import java.util.Arrays;
+
 import static no.nav.melosys.saksflytapi.domain.ProsessSteg.AVSLUTT_SAK_OG_BEHANDLING;
 
 @Component
@@ -53,8 +55,8 @@ public class AvsluttFagsakOgBehandling implements StegBehandler {
 
         if (behandlingsresultat.erGodkjenningEllerInnvilgelseArt13() && !saksbehandlingRegler.harRegistreringUnntakFraMedlemskapFlyt(behandlingsresultat.getBehandling())) {
             behandlingService.endreStatus(behandlingID, Behandlingsstatus.MIDLERTIDIG_LOVVALGSBESLUTNING);
-        } else if (prosessinstans.getType() == ProsessType.IVERKSETT_VEDTAK_AARSAVREGNING) {
-            avsluttÅrsavregning(fagsak, behandling);
+        } else if (Arrays.asList(ProsessType.IVERKSETT_VEDTAK_AARSAVREGNING, ProsessType.BEHANDLE_SATSENDRING).contains(prosessinstans.getType())) {
+            avsluttÅrsavregningEllerSatsendring(fagsak, behandling);
         } else {
             avsluttFagsak(prosessinstans, behandlingID, fagsak);
         }
@@ -66,7 +68,7 @@ public class AvsluttFagsakOgBehandling implements StegBehandler {
         fagsakService.avsluttFagsakOgBehandling(fagsak, saksstatus);
     }
 
-    private void avsluttÅrsavregning(Fagsak fagsak, Behandling behandling) {
+    private void avsluttÅrsavregningEllerSatsendring(Fagsak fagsak, Behandling behandling) {
         boolean sakLukkes = fagsak.erEnesteBehandling(behandling.getId());
         if (sakLukkes) {
             fagsakService.avsluttFagsakOgBehandling(fagsak, behandling, Saksstatuser.AVSLUTTET);

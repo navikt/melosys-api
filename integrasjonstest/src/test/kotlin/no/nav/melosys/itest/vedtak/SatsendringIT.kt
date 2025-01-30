@@ -10,21 +10,22 @@ import com.github.tomakehurst.wiremock.extension.ResponseTransformerV2
 import com.github.tomakehurst.wiremock.http.Response
 import com.github.tomakehurst.wiremock.stubbing.ServeEvent
 import io.getunleash.FakeUnleash
+import io.kotest.assertions.throwables.shouldThrow
 import io.kotest.matchers.collections.shouldContainOnly
+import io.kotest.matchers.collections.shouldHaveSize
 import io.kotest.matchers.nulls.shouldNotBeNull
 import io.kotest.matchers.shouldBe
 import io.kotest.matchers.types.shouldBeInstanceOf
 import io.mockk.every
 import io.mockk.mockk
 import mu.KotlinLogging
+import no.nav.melosys.ProsessinstansTestManager
 import no.nav.melosys.domain.Behandling
 import no.nav.melosys.domain.avgift.Inntektsperiode
 import no.nav.melosys.domain.avgift.Penger
 import no.nav.melosys.domain.avgift.SkatteforholdTilNorge
 import no.nav.melosys.domain.kodeverk.*
-import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingsresultattyper
-import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingstema
-import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingstyper
+import no.nav.melosys.domain.kodeverk.behandlinger.*
 import no.nav.melosys.domain.mottatteopplysninger.SøknadNorgeEllerUtenforEØS
 import no.nav.melosys.domain.mottatteopplysninger.data.Periode
 import no.nav.melosys.domain.mottatteopplysninger.data.Soeknadsland
@@ -34,12 +35,19 @@ import no.nav.melosys.itest.JournalfoeringBase
 import no.nav.melosys.itest.MelosysHendelseKafkaConsumer
 import no.nav.melosys.melosysmock.medl.MedlRepo
 import no.nav.melosys.melosysmock.testdata.JournalføringsoppgaveGenerator
+import no.nav.melosys.saksflyt.ProsessinstansRepository
+import no.nav.melosys.saksflytapi.ProsessinstansService
+import no.nav.melosys.saksflytapi.domain.ProsessDataKey
+import no.nav.melosys.saksflytapi.domain.ProsessStatus
 import no.nav.melosys.saksflytapi.domain.ProsessType
+import no.nav.melosys.saksflytapi.domain.Prosessinstans
 import no.nav.melosys.service.avgift.TrygdeavgiftsberegningService
 import no.nav.melosys.service.avgift.satsendring.SatsendringFinner
 import no.nav.melosys.service.avgift.satsendring.SatsendringFinner.*
 import no.nav.melosys.service.avklartefakta.AvklartefaktaDto
 import no.nav.melosys.service.avklartefakta.AvklartefaktaService
+import no.nav.melosys.service.behandling.BehandlingService
+import no.nav.melosys.service.behandling.BehandlingsresultatService
 import no.nav.melosys.service.behandling.VilkaarsresultatService
 import no.nav.melosys.service.ftrl.medlemskapsperiode.OpprettForslagMedlemskapsperiodeService
 import no.nav.melosys.service.journalforing.JournalfoeringService
@@ -55,6 +63,7 @@ import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
 import org.springframework.beans.factory.annotation.Autowired
 import java.time.LocalDate
+import java.time.LocalDateTime
 import java.util.*
 
 private val logger = KotlinLogging.logger {}
@@ -72,7 +81,10 @@ class SatsendringIT(
     @Autowired private val satsendringFinner: SatsendringFinner,
     @Autowired private val objectMapper: ObjectMapper,
     @Autowired private val unleash: FakeUnleash,
-    @Autowired private val melosysHendelseKafkaConsumer: MelosysHendelseKafkaConsumer
+    @Autowired private val melosysHendelseKafkaConsumer: MelosysHendelseKafkaConsumer,
+    @Autowired private val prosessinstansService: ProsessinstansService,
+    @Autowired private val behandlingService: BehandlingService,
+    @Autowired private val behandlingsresultatService: BehandlingsresultatService
 ) : JournalfoeringBase(
     journalføringsoppgaveGenerator, journalføringService, oppgaveService,
     TrygdeavgiftsberegningMedSatsendring()
@@ -154,6 +166,69 @@ class SatsendringIT(
         }
     }
 
+    @Test
+    fun `oppretter prosess og påfølgende satsendringbehandling som iverksettes og sender faktura`() {
+        val førstegangsbehandling = lagFørstegangsbehandling(harSatsendringEtterÅrsskiftet = true)
+
+        val satsendringID = executeAndWait(
+            mapOf(
+                ProsessType.BEHANDLE_SATSENDRING to 1
+            )
+        ) {
+            prosessinstansService.opprettSatsendringBehandling(førstegangsbehandling)
+
+        }.behandling.id
+
+        // trygdeberegning, hvilken perioder
+        val satsendring = behandlingService.hentBehandling(satsendringID)
+        val satsendingBehandlingresultat = behandlingsresultatService.hentResultatMedMedlemskapOgLovvalg(satsendringID)
+        val førstegangsBehandlingsresultat = behandlingsresultatService.hentResultatMedMedlemskapOgLovvalg(førstegangsbehandling.id)
+
+        satsendring.run {
+            status shouldBe Behandlingsstatus.AVSLUTTET
+            type shouldBe Behandlingstyper.SATSENDRING
+            tema shouldBe Behandlingstema.YRKESAKTIV
+            behandlingsårsak.type shouldBe Behandlingsaarsaktyper.ÅRLIG_SATSOPPDATERING
+            oppgaveId shouldBe null
+            fagsak.saksnummer shouldBe førstegangsbehandling.fagsak.saksnummer
+
+        }
+
+        satsendingBehandlingresultat.run {
+            type shouldBe Behandlingsresultattyper.FASTSATT_TRYGDEAVGIFT
+            vedtakMetadata.vedtakstype shouldBe Vedtakstyper.ENDRINGSVEDTAK
+            trygdeavgiftsperioder.run {
+                shouldHaveSize(1)
+                first().run {
+                    periodeFra.shouldNotBeNull() shouldBe førstegangsBehandlingsresultat.trygdeavgiftsperioder.first().periodeFra
+                    periodeTil.shouldNotBeNull() shouldBe førstegangsBehandlingsresultat.trygdeavgiftsperioder.first().periodeTil
+                    trygdesats shouldBe 6.9.toBigDecimal()
+                    trygdeavgiftsbeløpMd shouldBe Penger(69000.toBigDecimal())
+                }
+            }
+
+        }
+
+
+//        listOf(saksnummer1, saksnummer2).forEach { saksnummer ->
+//            fagsakRepository.findBySaksnummer(saksnummer)
+//                .shouldBePresent().run {
+//                    behandlinger.shouldHaveSize(2)
+//                        .firstOrNull { it.type == Behandlingstyper.ÅRSAVREGNING }
+//                        .shouldNotBeNull()
+//                        .run {
+//                            behandlingsresultatRepository.findById(id)
+//                                .shouldBePresent()
+//                                .årsavregning
+//                                .shouldNotBeNull()
+//                                .run {
+//                                    aar shouldBe 2023
+//                                }
+//                        }
+//                }
+
+    }
+
 
     fun lagFørstegangsbehandling(år: Int = SATSENDRING_ÅR, harSatsendringEtterÅrsskiftet: Boolean = false): Behandling {
         // Perioden brukes for å avgjøre om det blir satsendring
@@ -226,11 +301,7 @@ class SatsendringIT(
             vedtaksfattingFasade.fattVedtak(behandling.id, vedtakRequest)
         }
 
-        return behandling.also {
-            addCleanUpAction {
-                slettSakMedAvhengigheter(it.fagsak.saksnummer)
-            }
-        }
+        return behandling
     }
 
     private fun lagPeriode(
@@ -352,8 +423,8 @@ class TrygdeavgiftsberegningMedSatsendring : ResponseTransformerV2 {
 
     private fun localDateFromRequest(datoID: String, requestBody: JsonNode): LocalDate =
         requestBody["medlemskapsperioder"][0]["periode"][datoID]
-        .map { it.asInt() }
-        .let { (year, month, day) -> LocalDate.of(year, month, day) }
+            .map { it.asInt() }
+            .let { (year, month, day) -> LocalDate.of(year, month, day) }
 
     override fun getName(): String {
         return "trygdeavgiftsberegning-med-satsendring-transformer"
