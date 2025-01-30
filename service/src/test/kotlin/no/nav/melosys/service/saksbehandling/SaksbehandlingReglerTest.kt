@@ -179,7 +179,6 @@ class SaksbehandlingReglerTest {
         behandlingstema: Behandlingstema,
         expected: Boolean
     ) {
-        unleash.enable(ToggleName.MELOSYS_ARBEID_KUN_NORGE)
         val result = saksbehandlingRegler.harIngenFlyt(sakstype, sakstema, behandlingstype, behandlingstema)
 
         result.shouldBe(expected)
@@ -193,7 +192,6 @@ class SaksbehandlingReglerTest {
         land: Land_iso2,
         expected: Boolean,
     ) {
-        unleash.enable(ToggleName.MELOSYS_ARBEID_KUN_NORGE)
         val result = saksbehandlingRegler.harUtsendtArbeidsTakerKunNorgeFlyt(erSakstypeEøs, behandlingstema, land)
 
         result.shouldBe(expected)
