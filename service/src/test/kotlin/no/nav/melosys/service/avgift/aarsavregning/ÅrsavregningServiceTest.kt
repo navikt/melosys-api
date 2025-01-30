@@ -48,7 +48,7 @@ internal class ÅrsavregningServiceTest {
         årsavregningService = ÅrsavregningService(
             aarsavregningRepository,
             behandlingsresultatService,
-            fagsakService
+            fagsakService,
         )
         SpringSubjectHandler.set(TestSubjectHandler())
     }
@@ -325,7 +325,6 @@ internal class ÅrsavregningServiceTest {
             verify(exactly = 3) { behandlingsresultatService.hentBehandlingsresultat(any()) }
         }
     }
-
 
     fun lagTidligereBehandlingsresultat(): Behandlingsresultat = Behandlingsresultat().apply {
         id = 1L

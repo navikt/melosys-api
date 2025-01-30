@@ -25,7 +25,7 @@ import java.time.LocalDate
 @RequestMapping("/behandlinger/{behandlingID}/aarsavregninger")
 class ÅrsavregningController(
     private val årsavregningService: ÅrsavregningService,
-    private val aksesskontroll: Aksesskontroll
+    private val aksesskontroll: Aksesskontroll,
 ) {
     @GetMapping
     fun hentÅrsavregning(

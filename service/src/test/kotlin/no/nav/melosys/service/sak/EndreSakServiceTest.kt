@@ -1,6 +1,7 @@
 package no.nav.melosys.service.sak
 
 import io.kotest.assertions.throwables.shouldThrow
+import io.kotest.matchers.be
 import io.kotest.matchers.nulls.shouldNotBeNull
 import io.kotest.matchers.shouldBe
 import io.mockk.called
@@ -27,6 +28,7 @@ import no.nav.melosys.domain.mottatteopplysninger.data.Periode
 import no.nav.melosys.domain.mottatteopplysninger.data.Soeknadsland
 import no.nav.melosys.exception.FunksjonellException
 import no.nav.melosys.service.SaksbehandlingDataFactory
+import no.nav.melosys.service.behandling.BehandlingService
 import no.nav.melosys.service.behandling.BehandlingsresultatService
 import no.nav.melosys.service.lovligekombinasjoner.LovligeKombinasjonerSaksbehandlingService
 import no.nav.melosys.service.mottatteopplysninger.MottatteOpplysningerService
@@ -38,6 +40,7 @@ import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.extension.ExtendWith
 import org.springframework.context.ApplicationEventPublisher
 import java.time.Instant
+import java.time.LocalDate
 import java.util.*
 
 @ExtendWith(MockKExtension::class)
@@ -47,6 +50,9 @@ internal class EndreSakServiceTest {
 
     @RelaxedMockK
     lateinit var fagsakService: FagsakService
+
+    @RelaxedMockK
+    lateinit var behandlingService: BehandlingService
 
     @RelaxedMockK
     lateinit var behandlingsresultatService: BehandlingsresultatService
@@ -74,7 +80,8 @@ internal class EndreSakServiceTest {
             mottatteOpplysningerService,
             oppfriskSaksopplysningerService,
             applicationEventPublisher,
-            saksbehandlingRegler
+            saksbehandlingRegler,
+            behandlingService,
         )
     }
 
@@ -423,6 +430,34 @@ internal class EndreSakServiceTest {
         verify { mottatteOpplysningerService.opprettSøknadEllerAnmodningEllerAttest(aktivBehandling, any(), any()) }
         verify { applicationEventPublisher.publishEvent(any()) }
         aktivBehandling.opprinneligBehandling.shouldNotBeNull().shouldBe(gammelBehandling)
+    }
+
+    @Test
+    fun `endring av behandlingstatus og mottaksdato til oppsumering til årsavregningsbehandling`(){
+        val sak = lagFagsak(TRYGDEAVTALE, MEDLEMSKAP_LOVVALG)
+        val behandling = SaksbehandlingDataFactory.lagBehandling(sak)
+
+        val NY_MOTTAKSDATO = LocalDate.now()
+        val NY_BEHANDLINGSTATUS = AVVENT_FAGLIG_AVKLARING
+
+        sak.leggTilBehandling(behandling)
+        every { behandlingService.hentBehandling(FagsakTestFactory.BEHANDLING_ID) } returns behandling
+
+
+        endreSakService.endreÅrsavregningBehandling(
+            FagsakTestFactory.BEHANDLING_ID,
+            NY_BEHANDLINGSTATUS,
+            NY_MOTTAKSDATO
+        )
+
+        verify {
+            behandlingService.endreBehandling(
+                FagsakTestFactory.BEHANDLING_ID,
+                null,
+                null,
+                NY_BEHANDLINGSTATUS,
+                NY_MOTTAKSDATO)
+        }
     }
 
     private fun lagFagsak(sakstype: Sakstyper, sakstema: Sakstemaer) =

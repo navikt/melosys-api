@@ -58,6 +58,7 @@ class FagsakControllerTest {
     private static final String BASE_URL = "/api/fagsaker";
     private static final LocalDate FOM = LocalDate.now();
     private static final LocalDate TOM = LocalDate.now();
+    private static final LocalDate MOTTAKSDATO = LocalDate.now();
     private static final LovvalgsperiodeDto FORVENTET_LOVVALGSPERIODE = new LovvalgsperiodeDto(
         "1L", new PeriodeDto(FOM, TOM),
         Lovvalgbestemmelser_883_2004.FO_883_2004_ART16_2,
@@ -329,10 +330,10 @@ class FagsakControllerTest {
 
     @Test
     void endreSak() throws Exception {
-        EndreSakDto endreSakDto = new EndreSakDto(Sakstyper.TRYGDEAVTALE, Sakstemaer.UNNTAK,
+        EndreSakDto endreSakDto = new EndreSakDto(null, Sakstyper.TRYGDEAVTALE, Sakstemaer.UNNTAK,
             Behandlingstema.FORESPØRSEL_TRYGDEMYNDIGHET, Behandlingstyper.NY_VURDERING, Behandlingsstatus.OPPRETTET, null);
 
-        mockMvc.perform(post(BASE_URL + "/{saksnr}/endre", SAKSNUMMER)
+        mockMvc.perform(put(BASE_URL + "/{saksnr}", SAKSNUMMER)
                 .content(objectMapper.writeValueAsString(endreSakDto))
                 .contentType(MediaType.APPLICATION_JSON))
             .andExpect(status().isNoContent());
@@ -340,6 +341,20 @@ class FagsakControllerTest {
         verify(aksesskontroll).autoriserSakstilgang(SAKSNUMMER);
         verify(endreSakService).endre(SAKSNUMMER, Sakstyper.TRYGDEAVTALE, Sakstemaer.UNNTAK,
             Behandlingstema.FORESPØRSEL_TRYGDEMYNDIGHET, Behandlingstyper.NY_VURDERING, Behandlingsstatus.OPPRETTET, null);
+    }
+
+    @Test
+    void endreÅrsavregningOppsummering() throws Exception {
+        EndreSakDto endreSakDto = new EndreSakDto(BEHANDLING_ID, Sakstyper.TRYGDEAVTALE, Sakstemaer.MEDLEMSKAP_LOVVALG,
+            Behandlingstema.YRKESAKTIV, Behandlingstyper.ÅRSAVREGNING, Behandlingsstatus.UNDER_BEHANDLING, MOTTAKSDATO);
+
+        mockMvc.perform(put(BASE_URL + "/{saksnr}", SAKSNUMMER)
+                .content(objectMapper.writeValueAsString(endreSakDto))
+                .contentType(MediaType.APPLICATION_JSON))
+            .andExpect(status().isNoContent());
+
+        verify(aksesskontroll).autoriserSakstilgang(SAKSNUMMER);
+        verify(endreSakService).endreÅrsavregningBehandling(BEHANDLING_ID, Behandlingsstatus.UNDER_BEHANDLING, MOTTAKSDATO);
     }
 
     @Test
