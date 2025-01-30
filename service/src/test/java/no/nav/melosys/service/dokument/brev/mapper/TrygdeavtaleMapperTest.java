@@ -82,19 +82,16 @@ class TrygdeavtaleMapperTest {
     @Mock
     private UtledMottaksdato utledMottaksdato;
 
-    private final FakeUnleash unleash = new FakeUnleash();
-
     private TrygdeavtaleMapper trygdeavtaleMapper;
 
     @BeforeEach
     void setup() {
-        unleash.enableAll();
         trygdeavtaleMapper = new TrygdeavtaleMapper(
             mockAvklarteMedfolgendeFamilieService,
             mockAvklarteVirksomheterService,
             mockLovvalgsperiodeService,
-            utledMottaksdato,
-            unleash);
+            utledMottaksdato
+        );
     }
 
     @Test
