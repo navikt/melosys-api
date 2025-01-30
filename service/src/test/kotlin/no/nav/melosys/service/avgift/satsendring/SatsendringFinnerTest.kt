@@ -10,6 +10,7 @@ import no.nav.melosys.domain.FagsakTestFactory
 import no.nav.melosys.domain.Medlemskapsperiode
 import no.nav.melosys.domain.avgift.Penger
 import no.nav.melosys.domain.avgift.Trygdeavgiftsperiode
+import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingsstatus
 import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingstyper
 import no.nav.melosys.service.avgift.TrygdeavgiftService
 import no.nav.melosys.service.avgift.TrygdeavgiftsberegningService
@@ -45,14 +46,23 @@ class SatsendringFinnerTest {
     }
 
     @Test
-    fun `lag AvgiftSatsendringInfo for ny vurdering`() {
+    fun `AvgiftSatsendringInfo når det finnes både satsendring og en aktiv ny vurdering i en sak`() {
         val år = 2023
         val fagsak = FagsakTestFactory.lagFagsak()
-        val behandling = Behandling().apply {
+        val behandlingMedSatsendring = Behandling().apply {
             id = 1L
-            type = Behandlingstyper.NY_VURDERING
+            type = Behandlingstyper.FØRSTEGANG
+            status = Behandlingsstatus.AVSLUTTET
             this.fagsak = fagsak
         }
+        val behandlingNyVurdering = Behandling().apply {
+            id = 2L
+            type = Behandlingstyper.NY_VURDERING
+            status = Behandlingsstatus.UNDER_BEHANDLING
+            this.fagsak = fagsak
+        }
+        fagsak.behandlinger.addAll(listOf(behandlingMedSatsendring, behandlingNyVurdering))
+
         val opprinneligSats = 5.9
         val nySats = 6.3
         val behandlingsresultat = Behandlingsresultat().apply {
@@ -62,7 +72,7 @@ class SatsendringFinnerTest {
             })
         }
 
-        every { behandlingService.hentBehandling(behandlingsresultat.id) } returns behandling
+        every { behandlingService.hentBehandling(behandlingsresultat.id) } returns behandlingMedSatsendring
         every { behandlingsresultatService.finnResultaterMedMedlemskapseriodeOverlappendeMed(år) } returns listOf(behandlingsresultat)
         every { trygdeavgiftService.harFakturerbarTrygdeavgift(behandlingsresultat) } returns true
         every { trygdeavgiftsberegningService.beregnTrygdeavgift(behandlingsresultat, any(), any()) } returns listOf(lagTrygdeavgiftsperiode(nySats))
@@ -78,8 +88,9 @@ class SatsendringFinnerTest {
                 SatsendringFinner.BehandlingForSatstendring(
                     behandlingID = 1L,
                     saksnummer = FagsakTestFactory.SAKSNUMMER,
-                    behandlingstype = Behandlingstyper.NY_VURDERING,
-                    harSatsendring = true
+                    behandlingstype = Behandlingstyper.FØRSTEGANG,
+                    harSatsendring = true,
+                    harAktivNyVurdering = true
                 )
             ),
             behandlingerUtenSatsendring = emptyList()
