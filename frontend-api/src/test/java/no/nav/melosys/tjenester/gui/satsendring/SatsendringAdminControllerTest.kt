@@ -68,7 +68,7 @@ class SatsendringAdminControllerTest {
             .andExpect(content().json(expectedJson))
     }
 
-    fun lagAvgiftSatsendringInfo() =
+    private fun lagAvgiftSatsendringInfo() =
         AvgiftSatsendringInfo(
             2025,
             behandlingerMedSatsendring = listOf(

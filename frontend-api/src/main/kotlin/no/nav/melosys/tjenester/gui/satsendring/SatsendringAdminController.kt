@@ -15,7 +15,6 @@ class SatsendringAdminController(
     @Value("\${Melosys-admin.apikey}") private val apiKey: String
 ) : AdminController {
 
-
     @GetMapping("/{aar}/rapport")
     fun lagRapport(
         @PathVariable("aar") aar: Int,
@@ -23,45 +22,28 @@ class SatsendringAdminController(
     ): ResponseEntity<SatsendringRapportDto> {
         validerApikey(apiKey)
 
-        val finnBehandlingerMedSatsendringer = satsendringFinner.finnBehandlingerMedSatsendring(aar)
+        val avgiftSatsendringInfo = satsendringFinner.finnBehandlingerMedSatsendring(aar)
         val satsendringRapportDto = SatsendringRapportDto(
-            finnBehandlingerMedSatsendringer.år,
-            behandlingerMedSatsendring = BehandlingerMedTotalDto(
-                finnBehandlingerMedSatsendringer.behandlingerMedSatsendring.map { it ->
-                    BehandlingForSatstendringDto(
-                        it.behandlingID,
-                        it.saksnummer
-                    )
-                },
-                finnBehandlingerMedSatsendringer.behandlingerMedSatsendring.size
-            ),
-            behandlingerMedSatsendringOgNyVurdering = BehandlingerMedTotalDto(
-                finnBehandlingerMedSatsendringer.behandlingerMedSatsendringOgNyVurdering.map { it ->
-                    BehandlingForSatstendringDto(
-                        it.behandlingID,
-                        it.saksnummer
-                    )
-                },
-                finnBehandlingerMedSatsendringer.behandlingerMedSatsendringOgNyVurdering.size
-            ),
-            behandlingerUtenSatsendring = BehandlingerMedTotalDto(
-                finnBehandlingerMedSatsendringer.behandlingerUtenSatsendring.map { it ->
-                    BehandlingForSatstendringDto(
-                        it.behandlingID,
-                        it.saksnummer
-                    )
-                },
-                finnBehandlingerMedSatsendringer.behandlingerUtenSatsendring.size
-            )
+            avgiftSatsendringInfo.år,
+            behandlingerMedSatsendring = behandlingerMedTotalDto(avgiftSatsendringInfo.behandlingerMedSatsendring),
+            behandlingerMedSatsendringOgNyVurdering = behandlingerMedTotalDto(avgiftSatsendringInfo.behandlingerMedSatsendringOgNyVurdering),
+            behandlingerUtenSatsendring = behandlingerMedTotalDto(avgiftSatsendringInfo.behandlingerUtenSatsendring)
         )
         return ResponseEntity.ok(satsendringRapportDto)
     }
 
-    override fun getApiKey(): String {
-        return apiKey
-    }
+    private fun behandlingerMedTotalDto(behandlinger: List<SatsendringFinner.BehandlingForSatstendring>) =
+        BehandlingerMedTotalDto(
+            behandlinger.map {
+                BehandlingForSatstendringDto(
+                    it.behandlingID,
+                    it.saksnummer
+                )
+            },
+            behandlinger.size
+        )
 
-
+    override fun getApiKey(): String = apiKey
 }
 
 data class SatsendringRapportDto(
