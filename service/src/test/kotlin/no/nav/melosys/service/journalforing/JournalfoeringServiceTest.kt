@@ -569,7 +569,7 @@ internal class JournalfoeringServiceTest {
     }
 
     @Test
-    fun journalførOgKnyttTilEksisterendeSak_journalpostErFerdigstilt_kasterExceptionNårToggleErPå() {
+    fun journalførOgKnyttTilEksisterendeSak_journalpostErFerdigstilt_kasterException() {
         journalpost.isErFerdigstilt = true
         every { fagsakService.hentFagsak(any()) } returns lagFagsak()
         every { joarkFasade.hentJournalpost(journalpost.journalpostId) } returns journalpost
