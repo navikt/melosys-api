@@ -354,7 +354,7 @@ class FagsakControllerTest {
             .andExpect(status().isNoContent());
 
         verify(aksesskontroll).autoriserSakstilgang(SAKSNUMMER);
-        verify(endreSakService).endreÅrsavregningOppsummering(BEHANDLING_ID, Behandlingsstatus.UNDER_BEHANDLING, MOTTAKSDATO);
+        verify(endreSakService).endreÅrsavregningBehandling(BEHANDLING_ID, Behandlingsstatus.UNDER_BEHANDLING, MOTTAKSDATO);
     }
 
     @Test

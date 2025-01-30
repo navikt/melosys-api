@@ -444,7 +444,7 @@ internal class EndreSakServiceTest {
         every { behandlingService.hentBehandling(FagsakTestFactory.BEHANDLING_ID) } returns behandling
 
 
-        endreSakService.endreÅrsavregningOppsummering(
+        endreSakService.endreÅrsavregningBehandling(
             FagsakTestFactory.BEHANDLING_ID,
             NY_BEHANDLINGSTATUS,
             NY_MOTTAKSDATO
