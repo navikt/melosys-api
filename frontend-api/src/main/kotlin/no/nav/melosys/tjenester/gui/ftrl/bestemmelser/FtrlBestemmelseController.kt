@@ -5,7 +5,6 @@ import io.swagger.annotations.Api
 import no.nav.melosys.domain.kodeverk.Bestemmelse
 import no.nav.melosys.domain.kodeverk.Trygdedekninger
 import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingstema
-import no.nav.melosys.featuretoggle.ToggleName
 import no.nav.melosys.service.ftrl.bestemmelse.FtrlBestemmelser
 import no.nav.melosys.service.ftrl.medlemskapsperiode.PliktigeMedlemskapsbestemmelser
 import no.nav.security.token.support.core.api.Protected
@@ -35,9 +34,6 @@ class FtrlBestemmelseController(
 
     @GetMapping("/ftrl/bestemmelser/pliktige")
     fun hentBestemmelser(): ResponseEntity<FtrlBestemmelserDto> {
-        if (unleash.isEnabled(ToggleName.MELOSYS_SPESIELLE_GRUPPER)) {
-            return ResponseEntity.ok(FtrlBestemmelserDto(PliktigeMedlemskapsbestemmelser.bestemmelserMedSpesielleGrupper))
-        }
         return ResponseEntity.ok(FtrlBestemmelserDto(PliktigeMedlemskapsbestemmelser.bestemmelser))
     }
 

@@ -28,7 +28,7 @@ class FtrlBestemmelseTest {
     fun hentBestemmelser_yrkesaktiv_returnererYrkesaktivListe() {
         ftrlBestemmelser.hentBestemmelser(Behandlingstema.YRKESAKTIV, null)
             .shouldNotBeNull()
-            .shouldBeEqual(YrkesaktivBestemmelser.bestemmelserMedSpesielleGrupper)
+            .shouldBeEqual(YrkesaktivBestemmelser.bestemmelser)
     }
 
     @Test

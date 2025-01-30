@@ -20,7 +20,7 @@ object UtledMedlemskapsperioder {
         opprinneligeMedlemskapsperioder: Collection<Medlemskapsperiode>,
         type: Behandlingstyper
     ): Collection<Medlemskapsperiode> {
-        if (dto.bestemmelse in PliktigeMedlemskapsbestemmelser.bestemmelserMedSpesielleGrupper) {
+        if (dto.bestemmelse in PliktigeMedlemskapsbestemmelser.bestemmelser) {
             return lagMedlemskapsperioderForPliktige(dto)
         }
         return opprinneligeMedlemskapsperioder
@@ -48,7 +48,7 @@ object UtledMedlemskapsperioder {
             bestemmelseErParagraf(dto.bestemmelse, "2_8") ->
                 lagMedlemskapsperioderFor2_8(dto)
 
-            dto.bestemmelse in PliktigeMedlemskapsbestemmelser.bestemmelserMedSpesielleGrupper ->
+            dto.bestemmelse in PliktigeMedlemskapsbestemmelser.bestemmelser ->
                 lagMedlemskapsperioderForPliktige(dto)
 
             else -> throw FunksjonellException("Støtter ikke bestemmelse ${dto.bestemmelse}")

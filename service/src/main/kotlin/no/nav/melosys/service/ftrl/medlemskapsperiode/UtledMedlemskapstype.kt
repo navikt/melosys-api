@@ -10,7 +10,7 @@ object UtledMedlemskapstype {
         if (bestemmelse === Folketrygdloven_kap2_bestemmelser.FTRL_KAP2_2_15_ANDRE_LEDD) {
             return Medlemskapstyper.FRIVILLIG
         }
-        if (bestemmelse in PliktigeMedlemskapsbestemmelser.bestemmelserMedSpesielleGrupper) {
+        if (bestemmelse in PliktigeMedlemskapsbestemmelser.bestemmelser) {
             return Medlemskapstyper.PLIKTIG
         }
         return Medlemskapstyper.FRIVILLIG

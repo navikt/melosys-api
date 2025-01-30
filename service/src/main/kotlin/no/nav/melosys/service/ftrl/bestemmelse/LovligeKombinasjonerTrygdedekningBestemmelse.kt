@@ -13,7 +13,7 @@ object LovligeKombinasjonerTrygdedekningBestemmelse {
             Folketrygdloven_kap2_bestemmelser.FTRL_KAP2_2_7_FØRSTE_LEDD,
             Folketrygdloven_kap2_bestemmelser.FTRL_KAP2_2_7_FJERDE_LEDD,
             Folketrygdloven_kap2_bestemmelser.FTRL_KAP2_2_7A,
-            *PliktigeMedlemskapsbestemmelser.bestemmelserMedSpesielleGrupper.toTypedArray()
+            *PliktigeMedlemskapsbestemmelser.bestemmelser.toTypedArray()
         ),
 
         listOf(Trygdedekninger.FTRL_2_7_TREDJE_LEDD_B_HELSE_SYKE_FORELDREPENGER) to listOf(
@@ -65,7 +65,7 @@ object LovligeKombinasjonerTrygdedekningBestemmelse {
         bestemmelse in hentLovligeBestemmelser(trygdedekning)
 
     fun erBestemmelseGyldigForTrygdedekning(bestemmelse: Bestemmelse, trygdedekning: Trygdedekninger): Boolean {
-        if (bestemmelse in PliktigeMedlemskapsbestemmelser.bestemmelserMedSpesielleGrupper) {
+        if (bestemmelse in PliktigeMedlemskapsbestemmelser.bestemmelser) {
             return true
         }
         return erGyldigKombinasjon(bestemmelse, trygdedekning)
