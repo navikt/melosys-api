@@ -1,6 +1,5 @@
 package no.nav.melosys.service.dokument.brev.mapper;
 
-import io.getunleash.Unleash;
 import jakarta.transaction.Transactional;
 import no.nav.melosys.domain.Behandling;
 import no.nav.melosys.domain.Lovvalgsperiode;
@@ -17,7 +16,6 @@ import no.nav.melosys.domain.mottatteopplysninger.data.MedfolgendeFamilie;
 import no.nav.melosys.domain.person.Persondata;
 import no.nav.melosys.domain.person.familie.IkkeOmfattetFamilie;
 import no.nav.melosys.exception.FunksjonellException;
-import no.nav.melosys.featuretoggle.ToggleName;
 import no.nav.melosys.integrasjon.dokgen.dto.InnvilgelseOgAttestTrygdeavtale;
 import no.nav.melosys.integrasjon.dokgen.dto.felles.Innvilgelse;
 import no.nav.melosys.integrasjon.dokgen.dto.felles.Person;
@@ -48,18 +46,15 @@ public class TrygdeavtaleMapper {
     private final AvklarteVirksomheterService avklarteVirksomheterService;
     private final LovvalgsperiodeService lovvalgsperiodeService;
     private final UtledMottaksdato utledMottaksdato;
-    private final Unleash unleash;
 
     public TrygdeavtaleMapper(AvklarteMedfolgendeFamilieService avklarteMedfølgendeFamilieService,
                               AvklarteVirksomheterService avklarteVirksomheterService,
                               LovvalgsperiodeService lovvalgsperiodeService,
-                              UtledMottaksdato utledMottaksdato,
-                              Unleash unleash) {
+                              UtledMottaksdato utledMottaksdato) {
         this.avklarteMedfølgendeFamilieService = avklarteMedfølgendeFamilieService;
         this.avklarteVirksomheterService = avklarteVirksomheterService;
         this.lovvalgsperiodeService = lovvalgsperiodeService;
         this.utledMottaksdato = utledMottaksdato;
-        this.unleash = unleash;
     }
 
     @Transactional
@@ -227,12 +222,10 @@ public class TrygdeavtaleMapper {
             return avklarteVirksomheter.get(0);
         }
 
-        if(unleash.isEnabled(ToggleName.MELOSYS_6950)){
-            var avklarteUtenlandskeVirksomheter = avklarteVirksomheterService.hentUtenlandskeVirksomheter(behandling);
+        var avklarteUtenlandskeVirksomheter = avklarteVirksomheterService.hentUtenlandskeVirksomheter(behandling);
 
-            if (avklarteUtenlandskeVirksomheter.size() == 1) {
-                return avklarteUtenlandskeVirksomheter.get(0);
-            }
+        if (avklarteUtenlandskeVirksomheter.size() == 1) {
+            return avklarteUtenlandskeVirksomheter.get(0);
         }
 
         throw new FunksjonellException("Fant " + avklarteVirksomheter.size() + " avklarte virksomheter for behandling: " + behandling + ". Må være 1 for trygdeavtale");
