@@ -9,7 +9,6 @@ import no.nav.melosys.service.avgift.aarsavregning.totalbeloep.TotalbeløpBeregn
 import no.nav.melosys.service.avgift.aarsavregning.totalbeloep.TotalbeløpBeregner.kalkulertMndInntekt
 import no.nav.melosys.service.avgift.aarsavregning.ÅrsavregningModel
 import no.nav.melosys.service.avgift.aarsavregning.ÅrsavregningService
-import no.nav.melosys.service.behandling.BehandlingService
 import no.nav.melosys.service.tilgang.Aksesskontroll
 import no.nav.melosys.tjenester.gui.dto.trygdeavgift.InntektskildeDto
 import no.nav.melosys.tjenester.gui.dto.trygdeavgift.SkatteforholdTilNorgeDto
@@ -27,7 +26,6 @@ import java.time.LocalDate
 class ÅrsavregningController(
     private val årsavregningService: ÅrsavregningService,
     private val aksesskontroll: Aksesskontroll,
-    private val behandlingService: BehandlingService,
 ) {
     @GetMapping
     fun hentÅrsavregning(

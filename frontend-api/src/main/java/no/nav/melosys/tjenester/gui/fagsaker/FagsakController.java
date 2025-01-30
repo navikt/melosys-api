@@ -128,7 +128,7 @@ public class FagsakController {
             SubjectHandler.getInstance().getUserID(), saksnummer, endreDto.getSakstype(), endreDto.getSakstema());
         aksesskontroll.autoriserSakstilgang(saksnummer);
 
-        if(endreDto.getBehandlingstype() == Behandlingstyper.ÅRSAVREGNING && endreDto.getBehandlingID() != null) {
+        if (endreDto.getBehandlingstype() == Behandlingstyper.ÅRSAVREGNING && endreDto.getBehandlingID() != null) {
             endreSakService.endreÅrsavregningOppsummering(endreDto.getBehandlingID(), endreDto.getBehandlingsstatus(), endreDto.getMottaksdato());
         } else {
             endreSakService.endre(saksnummer, endreDto.getSakstype(), endreDto.getSakstema(), endreDto.getBehandlingstema(),
