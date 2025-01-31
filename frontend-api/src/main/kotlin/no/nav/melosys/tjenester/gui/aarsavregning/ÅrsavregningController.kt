@@ -79,7 +79,7 @@ class ÅrsavregningController(
             aarsavregningID = årsavregningModel.årsavregningID,
             aar = årsavregningModel.år,
             tidligereGrunnlagsopplysninger = hentGrunnlagsopplysninger(årsavregningModel.tidligereGrunnlag, årsavregningModel.tidligereAvgift),
-            avvikFunnet = årsavregningModel.nyttGrunnlag != null,
+            avvikFunnet = årsavregningModel.tilFaktureringBeloep != BigDecimal.ZERO,
             nyttGrunnlag = hentGrunnlagsopplysninger(årsavregningModel.nyttGrunnlag, årsavregningModel.endeligAvgift),
             endeligAvgift = null,
             avregning = AvregningDto(
