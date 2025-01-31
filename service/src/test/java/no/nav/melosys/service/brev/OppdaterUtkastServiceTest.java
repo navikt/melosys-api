@@ -73,7 +73,7 @@ class OppdaterUtkastServiceTest {
             UTKAST_BREV_ID,
             1L,
             "Z123123",
-            new BrevbestillingUtkast(null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, false, null, null, null, null, null, true)
+            new BrevbestillingUtkast(null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, false, null, null, null, null, null, null, true)
         );
     }
 }

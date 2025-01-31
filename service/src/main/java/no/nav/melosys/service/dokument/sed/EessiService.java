@@ -24,7 +24,6 @@ import no.nav.melosys.domain.kodeverk.lovvalgsbestemmelser.Lovvalgbestemmelser_k
 import no.nav.melosys.domain.mottatteopplysninger.SedGrunnlag;
 import no.nav.melosys.exception.FunksjonellException;
 import no.nav.melosys.exception.IkkeFunnetException;
-import no.nav.melosys.featuretoggle.ToggleName;
 import no.nav.melosys.integrasjon.eessi.EessiConsumer;
 import no.nav.melosys.integrasjon.eessi.dto.OpprettSedDto;
 import no.nav.melosys.integrasjon.eessi.dto.SaksrelasjonDto;
@@ -286,7 +285,7 @@ public class EessiService {
         var bestemmelseErStorbritanniaBestemmelse = bestemmelse != null && Arrays
             .stream(Lovvalgbestemmelser_konv_efta_storbritannia.values())
             .anyMatch(kodeTerm -> Objects.equals(kodeTerm.getKode(), bestemmelse.getKode()));
-        if (unleash.isEnabled(ToggleName.MELOSYS_KONVENSJON_EFTA_LAND_OG_STORBRITANNIA) && bestemmelseErStorbritanniaBestemmelse) {
+        if (bestemmelseErStorbritanniaBestemmelse) {
             var tekstGBKonv = "Issued under the EEA EFTA Convention.";
             return fritekst == null ? tekstGBKonv : tekstGBKonv + " " + fritekst;
         }
@@ -382,7 +381,7 @@ public class EessiService {
     }
 
     public SedGrunnlag hentSedGrunnlag(String rinaSaksnummer, String rinaDokumentID) {
-        return SedGrunnlagMapper.tilSedGrunnlag(eessiConsumer.hentSedGrunnlag(rinaSaksnummer, rinaDokumentID), unleash);
+        return SedGrunnlagMapper.tilSedGrunnlag(eessiConsumer.hentSedGrunnlag(rinaSaksnummer, rinaDokumentID));
     }
 
     public void lukkBuc(String rinaSaksnummer) {

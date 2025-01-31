@@ -21,6 +21,7 @@ import no.nav.melosys.domain.avgift.Trygdeavgiftsperiode
 import no.nav.melosys.domain.avklartefakta.AvklartVirksomhet
 import no.nav.melosys.domain.brev.InnvilgelseFtrlYrkesaktivFrivilligBrevbestilling
 import no.nav.melosys.domain.kodeverk.*
+import no.nav.melosys.domain.kodeverk.Vertslandsavtale_bestemmelser.TILLEGGSAVTALE_NATO
 import no.nav.melosys.domain.kodeverk.begrunnelser.folketrygdloven.Ftrl_2_7_begrunnelser
 import no.nav.melosys.domain.kodeverk.begrunnelser.folketrygdloven.Ftrl_2_8_naer_tilknytning_norge_begrunnelser
 import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingstyper
@@ -294,6 +295,168 @@ internal class InnvilgelseFtrlYrkesaktivFrivilligMapperTest {
                 betalerArbeidsgiveravgift.shouldBeTrue()
                 ukjentSluttdatoMedlemskapsperiode.shouldBeTrue()
             }
+    }
+
+    @Test
+    fun `mapYrkesaktivPliktig - bruker 68 år gammel har ikke lav sats`() {
+        mockHappyCase(Case.paragraf_2_8)
+        val behandlingsresultat = lagBehandlingsResultat(Case.paragraf_2_8)
+
+        val foedselsdato = LocalDate.of(1955, 1, 1)
+        val medlemskapsperiode = Medlemskapsperiode().apply {
+            fom = LocalDate.of(2023, 1, 1)  // Alder: 68
+            tom = LocalDate.of(2023, 12, 31) // Alder: 68
+            innvilgelsesresultat = InnvilgelsesResultat.INNVILGET
+            medlemskapstype = Medlemskapstyper.PLIKTIG
+            trygdedekning = Trygdedekninger.FULL_DEKNING
+            bestemmelse = Folketrygdloven_kap2_bestemmelser.FTRL_KAP2_2_8
+            this.behandlingsresultat = behandlingsresultat
+            this.trygdeavgiftsperioder = lagTrygdeavgiftsperioder()
+        }
+
+        behandlingsresultat.medlemskapsperioder = listOf(medlemskapsperiode)
+
+        every { mockDokgenMapperDatahenter.hentBehandlingsresultat(ofType()) } returns behandlingsresultat
+        every { mockDokgenMapperDatahenter.hentPersondata(any()) } returns DokgenTestData.lagPersondata(foedselsdato)
+
+        val resultat = innvilgelseFtrlMapper.mapYrkesaktivPliktig(lagBrevbestilling())
+
+        resultat.harLavSatsPgaAlder.shouldBeFalse()
+    }
+
+    @Test
+    fun `mapYrkesaktivPliktig - bruker 69 år gammel har ikke lav sats pga TILLEGGSAVTALE_NATO`() {
+        mockHappyCase(Case.paragraf_2_8)
+        val behandlingsresultat = lagBehandlingsResultat(Case.paragraf_2_8)
+
+        val foedselsdato = LocalDate.of(1954, 1, 1)
+        val medlemskapsperiode = Medlemskapsperiode().apply {
+            fom = LocalDate.of(2023, 1, 1)  // Alder: 69
+            tom = LocalDate.of(2023, 12, 31) // Alder: 69
+            innvilgelsesresultat = InnvilgelsesResultat.INNVILGET
+            medlemskapstype = Medlemskapstyper.PLIKTIG
+            trygdedekning = Trygdedekninger.FULL_DEKNING
+            bestemmelse = TILLEGGSAVTALE_NATO
+            this.behandlingsresultat = behandlingsresultat
+            this.trygdeavgiftsperioder = lagTrygdeavgiftsperioder()
+        }
+
+        behandlingsresultat.medlemskapsperioder = listOf(medlemskapsperiode)
+
+        every { mockDokgenMapperDatahenter.hentBehandlingsresultat(ofType()) } returns behandlingsresultat
+        every { mockDokgenMapperDatahenter.hentPersondata(any()) } returns DokgenTestData.lagPersondata(foedselsdato)
+
+        val resultat = innvilgelseFtrlMapper.mapYrkesaktivPliktig(lagBrevbestilling())
+
+        resultat.harLavSatsPgaAlder.shouldBeFalse()
+    }
+
+    @Test
+    fun `mapYrkesaktivPliktig - bruker 69 år gammel har lav sats`() {
+        mockHappyCase(Case.paragraf_2_8)
+        val behandlingsresultat = lagBehandlingsResultat(Case.paragraf_2_8)
+
+        val foedselsdato = LocalDate.of(1954, 1, 1)
+        val medlemskapsperiode = Medlemskapsperiode().apply {
+            fom = LocalDate.of(2023, 1, 1)  // Alder: 69
+            tom = LocalDate.of(2023, 12, 31) // Alder: 69
+            innvilgelsesresultat = InnvilgelsesResultat.INNVILGET
+            medlemskapstype = Medlemskapstyper.PLIKTIG
+            trygdedekning = Trygdedekninger.FULL_DEKNING
+            bestemmelse = Folketrygdloven_kap2_bestemmelser.FTRL_KAP2_2_8
+            this.behandlingsresultat = behandlingsresultat
+            this.trygdeavgiftsperioder = lagTrygdeavgiftsperioder()
+        }
+
+        behandlingsresultat.medlemskapsperioder = listOf(medlemskapsperiode)
+
+        every { mockDokgenMapperDatahenter.hentBehandlingsresultat(ofType()) } returns behandlingsresultat
+        every { mockDokgenMapperDatahenter.hentPersondata(any()) } returns DokgenTestData.lagPersondata(foedselsdato)
+
+        val resultat = innvilgelseFtrlMapper.mapYrkesaktivPliktig(lagBrevbestilling())
+
+        resultat.harLavSatsPgaAlder.shouldBeTrue()
+    }
+
+    @Test
+    fun `mapYrkesaktivPliktig - bruker 17 år gammel har ikke lav sats`() {
+        mockHappyCase(Case.paragraf_2_8)
+        val behandlingsresultat = lagBehandlingsResultat(Case.paragraf_2_8)
+
+        val foedselsdato = LocalDate.of(2006, 1, 1)
+        val medlemskapsperiode = Medlemskapsperiode().apply {
+            fom = LocalDate.of(2023, 1, 1)  // Alder: 17
+            tom = LocalDate.of(2023, 12, 31) // Alder: 17
+            innvilgelsesresultat = InnvilgelsesResultat.INNVILGET
+            medlemskapstype = Medlemskapstyper.PLIKTIG
+            trygdedekning = Trygdedekninger.FULL_DEKNING
+            bestemmelse = Folketrygdloven_kap2_bestemmelser.FTRL_KAP2_2_8
+            this.behandlingsresultat = behandlingsresultat
+            this.trygdeavgiftsperioder = lagTrygdeavgiftsperioder()
+        }
+
+        behandlingsresultat.medlemskapsperioder = listOf(medlemskapsperiode)
+
+        every { mockDokgenMapperDatahenter.hentBehandlingsresultat(ofType()) } returns behandlingsresultat
+        every { mockDokgenMapperDatahenter.hentPersondata(any()) } returns DokgenTestData.lagPersondata(foedselsdato)
+
+        val resultat = innvilgelseFtrlMapper.mapYrkesaktivPliktig(lagBrevbestilling())
+
+        resultat.harLavSatsPgaAlder.shouldBeFalse()
+    }
+
+    @Test
+    fun `mapYrkesaktivPliktig - bruker 16 år gammel har lav sats`() {
+        mockHappyCase(Case.paragraf_2_8)
+        val behandlingsresultat = lagBehandlingsResultat(Case.paragraf_2_8)
+
+        val foedselsdato = LocalDate.of(2007, 1, 1)
+        val medlemskapsperiode = Medlemskapsperiode().apply {
+            fom = LocalDate.of(2023, 1, 1)  // Alder: 17
+            tom = LocalDate.of(2023, 12, 31) // Alder: 17
+            innvilgelsesresultat = InnvilgelsesResultat.INNVILGET
+            medlemskapstype = Medlemskapstyper.PLIKTIG
+            trygdedekning = Trygdedekninger.FULL_DEKNING
+            bestemmelse = Folketrygdloven_kap2_bestemmelser.FTRL_KAP2_2_8
+            this.behandlingsresultat = behandlingsresultat
+            this.trygdeavgiftsperioder = lagTrygdeavgiftsperioder()
+        }
+
+        behandlingsresultat.medlemskapsperioder = listOf(medlemskapsperiode)
+
+        every { mockDokgenMapperDatahenter.hentBehandlingsresultat(ofType()) } returns behandlingsresultat
+        every { mockDokgenMapperDatahenter.hentPersondata(any()) } returns DokgenTestData.lagPersondata(foedselsdato)
+
+        val resultat = innvilgelseFtrlMapper.mapYrkesaktivPliktig(lagBrevbestilling())
+
+        resultat.harLavSatsPgaAlder.shouldBeTrue()
+    }
+
+    @Test
+    fun `mapYrkesaktivPliktig - bruker med forskjellig alder i perioden hvor en er utenfor intervall har lav sats`() {
+        mockHappyCase(Case.paragraf_2_8)
+        val behandlingsresultat = lagBehandlingsResultat(Case.paragraf_2_8)
+
+        val foedselsdato = LocalDate.of(1953, 7, 1)
+        val medlemskapsperiode = Medlemskapsperiode().apply {
+            fom = LocalDate.of(2023, 1, 1)  // Alder: 69
+            tom = LocalDate.of(2024, 1, 1)  // Alder: 70
+            innvilgelsesresultat = InnvilgelsesResultat.INNVILGET
+            medlemskapstype = Medlemskapstyper.PLIKTIG
+            trygdedekning = Trygdedekninger.FULL_DEKNING
+            bestemmelse = Folketrygdloven_kap2_bestemmelser.FTRL_KAP2_2_8
+            this.behandlingsresultat = behandlingsresultat
+            this.trygdeavgiftsperioder = lagTrygdeavgiftsperioder()
+        }
+
+        behandlingsresultat.medlemskapsperioder = listOf(medlemskapsperiode)
+
+        every { mockDokgenMapperDatahenter.hentBehandlingsresultat(ofType()) } returns behandlingsresultat
+        every { mockDokgenMapperDatahenter.hentPersondata(any()) } returns DokgenTestData.lagPersondata(foedselsdato)
+
+        val resultat = innvilgelseFtrlMapper.mapYrkesaktivPliktig(lagBrevbestilling())
+
+        resultat.harLavSatsPgaAlder.shouldBeTrue()
     }
 
     private fun lagBrevbestilling(): InnvilgelseFtrlYrkesaktivFrivilligBrevbestilling {

@@ -1,7 +1,7 @@
 package no.nav.melosys.itest
 
+import com.github.tomakehurst.wiremock.client.WireMock
 import com.ninjasquad.springmockk.MockkBean
-import io.getunleash.FakeUnleash
 import io.kotest.assertions.extracting
 import io.kotest.matchers.collections.shouldContainExactly
 import io.kotest.matchers.collections.shouldContainInOrder
@@ -12,7 +12,6 @@ import io.mockk.every
 import io.mockk.mockk
 import io.mockk.slot
 import io.mockk.verify
-import no.nav.melosys.ProsessinstansTestManager
 import no.nav.melosys.domain.Lovvalgsperiode
 import no.nav.melosys.domain.eessi.*
 import no.nav.melosys.domain.eessi.melding.MelosysEessiMelding
@@ -20,10 +19,8 @@ import no.nav.melosys.domain.eessi.melding.UtpekingAvvis
 import no.nav.melosys.domain.kodeverk.*
 import no.nav.melosys.domain.kodeverk.behandlinger.*
 import no.nav.melosys.domain.kodeverk.lovvalgsbestemmelser.Lovvalgbestemmelser_883_2004
-import no.nav.melosys.melosysmock.medl.MedlRepo
+import no.nav.melosys.melosysmock.config.SoapConfig
 import no.nav.melosys.melosysmock.melosyseessi.MelosysEessiRepo
-import no.nav.melosys.melosysmock.oppgave.OppgaveRepo
-import no.nav.melosys.melosysmock.sak.SakRepo
 import no.nav.melosys.repository.BehandlingsresultatRepository
 import no.nav.melosys.saksflyt.ProsessinstansRepository
 import no.nav.melosys.saksflytapi.domain.ProsessType
@@ -35,19 +32,21 @@ import no.nav.melosys.service.sak.OpprettSakDto
 import no.nav.melosys.service.utpeking.UtpekingService
 import no.nav.melosys.service.vedtak.FattVedtakRequest
 import no.nav.melosys.service.vedtak.VedtaksfattingFasade
-import no.nav.melosys.sikkerhet.context.ThreadLocalAccessInfo
 import no.nav.melosys.statistikk.utstedt_a1.integrasjon.UtstedtA1AivenProducer
 import no.nav.melosys.statistikk.utstedt_a1.integrasjon.dto.Lovvalgsbestemmelse
 import no.nav.melosys.statistikk.utstedt_a1.integrasjon.dto.UtstedtA1Melding
-import org.junit.jupiter.api.AfterEach
-import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
+import org.junit.jupiter.params.ParameterizedTest
+import org.junit.jupiter.params.provider.Arguments.argumentSet
+import org.junit.jupiter.params.provider.MethodSource
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.beans.factory.annotation.Qualifier
+import org.springframework.context.annotation.Import
 import org.springframework.kafka.core.KafkaTemplate
 import java.time.LocalDate
 import java.util.*
 
+@Import(SoapConfig::class)
 class SedMottakTestIT(
     @Autowired private val eessiMeldingTestDataFactory: EessiMeldingTestDataFactory,
     @Autowired @Qualifier("melosysEessiMelding") private val melosysEessiMeldingKafkaTemplate: KafkaTemplate<String, MelosysEessiMelding>,
@@ -58,36 +57,13 @@ class SedMottakTestIT(
     @Autowired private val opprettBehandlingForSak: OpprettBehandlingForSak,
     @Autowired private val lovvalgsperiodeService: LovvalgsperiodeService,
     @Autowired private val behandlingsresultatRepository: BehandlingsresultatRepository,
-    @Autowired private val unleash: FakeUnleash,
     @Autowired private val avklartefaktaService: AvklartefaktaService,
-    @Autowired private val prosessinstansTestManager: ProsessinstansTestManager,
-    @Autowired private val oppgaveRepo: OppgaveRepo,
-
-    ) : ComponentTestBase() {
+) : MockServerTestBaseWithProsessManager() {
 
     private val kafkaTopic = "teammelosys.eessi.v1-local"
 
-    private val randomUUID = UUID.randomUUID()
-
     @MockkBean
     private lateinit var utstedtA1AivenProducer: UtstedtA1AivenProducer
-
-    @BeforeEach
-    fun setup() {
-        ThreadLocalAccessInfo.beforeExecuteProcess(randomUUID, "steg")
-        SakRepo.clear()
-        MedlRepo.repo.clear()
-        oppgaveRepo.repo.clear()
-        MelosysEessiRepo.sedRepo.clear()
-        unleash.resetAll()
-    }
-
-    @AfterEach
-    fun after() {
-        ThreadLocalAccessInfo.afterExecuteProcess(randomUUID)
-        oppgaveRepo.repo.clear()
-        prosessinstansTestManager.clear()
-    }
 
     @Test
     fun `A009 med etterfølgende X008 skal gi fagsak annullert`() {
@@ -420,8 +396,11 @@ class SedMottakTestIT(
             )
     }
 
-    @Test
-    fun `Motta A003, godkjenne med A012, ugyldiggjøre godkjenning A012 med X008 for så å sende en A004`() {
+    @ParameterizedTest(name = "{argumentSetName} - {0}")
+    @MethodSource("toggleMedForventetdResultatForA003SendBrev")
+    fun `Motta A003, godkjenne med A012, ugyldiggjøre godkjenning A012 med X008 for så å sende en A004`(forventedeProsessTyper: Pair<Boolean, Map<ProsessType, Int>>) {
+        if (forventedeProsessTyper.first) fakeUnleash.enableAll() else fakeUnleash.disableAll()
+
         val utstedtA1MeldingCapturingSlot = slot<UtstedtA1Melding>()
         every { utstedtA1AivenProducer.produserMelding(capture(utstedtA1MeldingCapturingSlot)) } returns mockk<UtstedtA1Melding>()
 
@@ -458,7 +437,7 @@ class SedMottakTestIT(
             .sortedBy { it.endretDato }
 
         lovvalgsperiodeService.lagreLovvalgsperioder(
-            prosessinstanserSortert.get(1).behandling.id,
+            prosessinstanserSortert.shouldHaveSize(2).last().behandling.id,
             listOf(Lovvalgsperiode().apply {
                 fom = datoOmToÅr
                 tom = datoOmToÅr.plusDays(1)
@@ -470,20 +449,18 @@ class SedMottakTestIT(
         )
 
         avklartefaktaService.lagreAvklarteFakta(
-            prosessinstanserSortert.get(1).behandling.id, setOf(AvklartefaktaDto(
-                listOf("TRUE"), "VIRKSOMHET"
-            ).apply {
-                avklartefaktaType = Avklartefaktatyper.VIRKSOMHET
-                subjektID = "999999999"
-                begrunnelseKoder = emptyList()
-            })
+            prosessinstanserSortert.shouldHaveSize(2).last().behandling.id, setOf(
+                AvklartefaktaDto(
+                    listOf("TRUE"), "VIRKSOMHET"
+                ).apply {
+                    avklartefaktaType = Avklartefaktatyper.VIRKSOMHET
+                    subjektID = "999999999"
+                    begrunnelseKoder = emptyList()
+                })
         )
 
         val vedtaksProsessInstans = prosessinstansTestManager.executeAndWait(
-            mapOf(
-                ProsessType.IVERKSETT_VEDTAK_EOS to 1,
-                ProsessType.SEND_BREV to 2
-            )
+            forventedeProsessTyper.second
         ) {
             vedtaksfattingFasade.fattVedtak(
                 prosessinstanserSortert.get(1).behandling.id, FattVedtakRequest.Builder()
@@ -532,10 +509,19 @@ class SedMottakTestIT(
             behandlingsresultatRepository.findWithLovvalgOgMedlemskapsperioderById(id).shouldBePresent()
                 .type.shouldBe(Behandlingsresultattyper.FORELOEPIG_FASTSATT_LOVVALGSLAND)
         }
+
+        mockServer.verify(
+            1,
+            WireMock.postRequestedFor(WireMock.urlEqualTo("/api/v1/mal/orientering_til_arbeidsgiver_om_vedtak/lag-pdf?somKopi=false&utkast=false"))
+        )
     }
 
-    @Test
-    fun `Motta A003, avvise med A004, ugyldiggjøre avvisning A004 med X008 for så å sende en A012`() {
+
+    @ParameterizedTest
+    @MethodSource("toggleMedForventetdResultatForA003SendBrev")
+    fun `Motta A003, avvise med A004, ugyldiggjøre avvisning A004 med X008 for så å sende en A012`(forventedeProsessTyper: Pair<Boolean, Map<ProsessType, Int>>) {
+        if (forventedeProsessTyper.first) fakeUnleash.enableAll() else fakeUnleash.disableAll()
+
         val utstedtA1MeldingCapturingSlot = slot<UtstedtA1Melding>()
         every { utstedtA1AivenProducer.produserMelding(capture(utstedtA1MeldingCapturingSlot)) } returns mockk<UtstedtA1Melding>()
 
@@ -578,17 +564,19 @@ class SedMottakTestIT(
         prosessinstansTestManager.executeAndWait(
             mapOf(ProsessType.UTPEKING_AVVIS to 1)
         ) {
-            utpekingService.avvisUtpeking(prosessinstanserSortert.get(1).behandling.id, UtpekingAvvis().apply {
-                begrunnelse = "lol"
-                etterspørInformasjon = false
-            })
+            utpekingService.avvisUtpeking(
+                prosessinstanserSortert
+                    .shouldHaveSize(2).last().behandling.id, UtpekingAvvis().apply {
+                    begrunnelse = "lol"
+                    etterspørInformasjon = false
+                })
         }
 
         val opprettNyVurderingProsessinstans = prosessinstansTestManager.executeAndWait(
             mapOf(ProsessType.OPPRETT_REPLIKERT_BEHANDLING_FOR_SAK to 1)
         ) {
             opprettBehandlingForSak.opprettBehandling(
-                prosessinstanserSortert.get(1).behandling.fagsak.saksnummer,
+                prosessinstanserSortert.shouldHaveSize(2).last().behandling.fagsak.saksnummer,
                 OpprettSakDto().apply {
                     behandlingstema = Behandlingstema.BESLUTNING_LOVVALG_NORGE
                     behandlingstype = Behandlingstyper.NY_VURDERING
@@ -611,20 +599,18 @@ class SedMottakTestIT(
         )
 
         avklartefaktaService.lagreAvklarteFakta(
-            opprettNyVurderingProsessinstans.behandling.id, setOf(AvklartefaktaDto(
-                listOf("TRUE"), "VIRKSOMHET"
-            ).apply {
-                avklartefaktaType = Avklartefaktatyper.VIRKSOMHET
-                subjektID = "999999999"
-                begrunnelseKoder = emptyList()
-            })
+            opprettNyVurderingProsessinstans.behandling.id, setOf(
+                AvklartefaktaDto(
+                    listOf("TRUE"), "VIRKSOMHET"
+                ).apply {
+                    avklartefaktaType = Avklartefaktatyper.VIRKSOMHET
+                    subjektID = "999999999"
+                    begrunnelseKoder = emptyList()
+                })
         )
 
         val vedtaksProsessInstans = prosessinstansTestManager.executeAndWait(
-            mapOf(
-                ProsessType.IVERKSETT_VEDTAK_EOS to 1,
-                ProsessType.SEND_BREV to 2
-            )
+            forventedeProsessTyper.second
         ) {
             vedtaksfattingFasade.fattVedtak(
                 opprettNyVurderingProsessinstans.behandling.id, FattVedtakRequest.Builder()
@@ -651,11 +637,15 @@ class SedMottakTestIT(
                 Behandlingsresultattyper.FORELOEPIG_FASTSATT_LOVVALGSLAND
             )
         }
+
+        mockServer.verify(
+            1,
+            WireMock.postRequestedFor(WireMock.urlEqualTo("/api/v1/mal/orientering_til_arbeidsgiver_om_vedtak/lag-pdf?somKopi=false&utkast=false"))
+        )
     }
 
     @Test
     fun `A003 skal virke med arbeidssted=null`() {
-        unleash.enableAll()
         val ref = Random().nextInt(100000).toString()
         val journalpostId = eessiMeldingTestDataFactory.opprettEessiJournalpost(ref)
 
@@ -719,5 +709,27 @@ class SedMottakTestIT(
                     .shouldBePresent()
                     .type shouldBe Behandlingsresultattyper.IKKE_FASTSATT
             }
+
+    }
+
+    companion object {
+        @JvmStatic
+        fun toggleMedForventetdResultatForA003SendBrev() = listOf(
+            argumentSet(
+                "toggle på", true to mapOf(
+                    ProsessType.IVERKSETT_VEDTAK_EOS to 1,
+                    ProsessType.SEND_BREV to 3,
+                    ProsessType.OPPRETT_OG_DISTRIBUER_BREV to 2
+                )
+            ),
+            argumentSet(
+                "toggle av",
+                false to mapOf(
+                    ProsessType.IVERKSETT_VEDTAK_EOS to 1,
+                    ProsessType.SEND_BREV to 2,
+                    ProsessType.OPPRETT_OG_DISTRIBUER_BREV to 1
+                )
+            )
+        )
     }
 }

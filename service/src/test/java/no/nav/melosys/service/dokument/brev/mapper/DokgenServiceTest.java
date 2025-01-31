@@ -5,7 +5,6 @@ import java.time.LocalDate;
 import java.util.Arrays;
 import java.util.List;
 
-import io.getunleash.FakeUnleash;
 import no.nav.melosys.domain.Behandling;
 import no.nav.melosys.domain.FellesKodeverk;
 import no.nav.melosys.domain.Saksopplysning;
@@ -122,7 +121,7 @@ class DokgenServiceTest {
             new DokgenMalMapper(dokgenMapperDatahenter, mockInnvilgelseFtrlMapper, mockInnvilgelseEftaStorbritanniaMapper, mockInnhentingAvInntektsopplysningerMapper, mockTrygdeavtaleMapper, orienteringAnmodningUnntakMapper, orienteringTilArbeidsgiverOmVedtakMapper, årsavregningVedtakMapper),
             mockBehandlingsService, mockEregFasade, mockKontaktOpplysningService,
             mockBrevMottakerService, mockProsessinstansService, mockSaksbehandlerService,
-            mockUtenlandskMyndighetService, mockUtledMottaksdato, new FakeUnleash());
+            mockUtenlandskMyndighetService, mockUtledMottaksdato);
 
         reset(mockDokgenConsumer);
     }
@@ -342,6 +341,7 @@ class DokgenServiceTest {
         var brevbestillingDto = new BrevbestillingDto();
         brevbestillingDto.setProduserbardokument(MANGELBREV_BRUKER);
         brevbestillingDto.setMottaker(Mottakerroller.BRUKER);
+        brevbestillingDto.setStandardvedleggType(StandardvedleggType.VIKTIG_INFORMASJON_RETTIGHETER_PLIKTER_INNVILGELSE);
         brevbestillingDto.setBestillersId("Z123456");
 
 
@@ -357,8 +357,9 @@ class DokgenServiceTest {
         assertThat(brevbestilling).extracting(
             DokgenBrevbestilling::getProduserbartdokument,
             DokgenBrevbestilling::getBehandlingId,
-            DokgenBrevbestilling::getSaksbehandlerNavn
-        ).containsExactly(MANGELBREV_BRUKER, 123L, "Saksbehandler, Ole");
+            DokgenBrevbestilling::getSaksbehandlerNavn,
+            DokgenBrevbestilling::getStandardvedleggType
+        ).containsExactly(MANGELBREV_BRUKER, 123L, "Saksbehandler, Ole", StandardvedleggType.VIKTIG_INFORMASJON_RETTIGHETER_PLIKTER_INNVILGELSE);
     }
 
     @Test

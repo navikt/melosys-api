@@ -1,7 +1,6 @@
 package no.nav.melosys.itest.vedtak
 
 import com.fasterxml.jackson.databind.JsonNode
-import com.fasterxml.jackson.databind.ObjectMapper
 import com.fasterxml.jackson.databind.SerializationFeature
 import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule
 import com.fasterxml.jackson.module.kotlin.jacksonObjectMapper
@@ -10,7 +9,6 @@ import com.github.tomakehurst.wiremock.client.WireMock.*
 import com.github.tomakehurst.wiremock.extension.ResponseTransformerV2
 import com.github.tomakehurst.wiremock.http.Response
 import com.github.tomakehurst.wiremock.stubbing.ServeEvent
-import io.getunleash.FakeUnleash
 import io.kotest.matchers.collections.shouldContainOnly
 import io.kotest.matchers.collections.shouldHaveSize
 import io.kotest.matchers.nulls.shouldNotBeNull
@@ -45,9 +43,7 @@ import no.nav.melosys.service.behandling.BehandlingService
 import no.nav.melosys.service.behandling.BehandlingsresultatService
 import no.nav.melosys.service.behandling.VilkaarsresultatService
 import no.nav.melosys.service.ftrl.medlemskapsperiode.OpprettForslagMedlemskapsperiodeService
-import no.nav.melosys.service.journalforing.JournalfoeringService
 import no.nav.melosys.service.mottatteopplysninger.MottatteOpplysningerService
-import no.nav.melosys.service.oppgave.OppgaveService
 import no.nav.melosys.service.vedtak.FattVedtakRequest
 import no.nav.melosys.service.vedtak.VedtaksfattingFasade
 import no.nav.melosys.service.vilkaar.VilkaarDto
@@ -64,9 +60,6 @@ import java.util.*
 private val logger = KotlinLogging.logger {}
 
 class SatsendringIT(
-    @Autowired journalføringsoppgaveGenerator: JournalføringsoppgaveGenerator,
-    @Autowired journalføringService: JournalfoeringService,
-    @Autowired oppgaveService: OppgaveService,
     @Autowired private val avklartefaktaService: AvklartefaktaService,
     @Autowired private val mottatteOpplysningerService: MottatteOpplysningerService,
     @Autowired private val opprettForslagMedlemskapsperiodeService: OpprettForslagMedlemskapsperiodeService,
@@ -74,16 +67,11 @@ class SatsendringIT(
     @Autowired private val vedtaksfattingFasade: VedtaksfattingFasade,
     @Autowired private val vilkaarsresultatService: VilkaarsresultatService,
     @Autowired private val satsendringFinner: SatsendringFinner,
-    @Autowired private val objectMapper: ObjectMapper,
-    @Autowired private val unleash: FakeUnleash,
     @Autowired private val melosysHendelseKafkaConsumer: MelosysHendelseKafkaConsumer,
     @Autowired private val prosessinstansService: ProsessinstansService,
     @Autowired private val behandlingService: BehandlingService,
     @Autowired private val behandlingsresultatService: BehandlingsresultatService
-) : JournalfoeringBase(
-    journalføringsoppgaveGenerator, journalføringService, oppgaveService,
-    TrygdeavgiftsberegningMedSatsendring()
-) {
+) : JournalfoeringBase(TrygdeavgiftsberegningMedSatsendring()) {
     private var originalSubjectHandler: SubjectHandler? = null
 
     @BeforeEach
@@ -117,8 +105,6 @@ class SatsendringIT(
                         .withBody(fakturaResponse.toJsonNode.toString())
                 )
         )
-
-        unleash.enableAll()
     }
 
     @AfterEach
@@ -147,7 +133,8 @@ class SatsendringIT(
                     behandlingMedSatsendring.id,
                     behandlingMedSatsendring.fagsak.saksnummer,
                     Behandlingstyper.FØRSTEGANG,
-                    true
+                    harSatsendring = true,
+                    harAktivNyVurdering = false
                 )
             )
             behandlingerUtenSatsendring.shouldContainOnly(
@@ -155,7 +142,8 @@ class SatsendringIT(
                     behandlingUtenSatsendring.id,
                     behandlingUtenSatsendring.fagsak.saksnummer,
                     Behandlingstyper.FØRSTEGANG,
-                    false
+                    harSatsendring = false,
+                    harAktivNyVurdering = false
                 )
             )
         }
@@ -339,7 +327,11 @@ class SatsendringIT(
             vedtaksfattingFasade.fattVedtak(behandling.id, vedtakRequest)
         }
 
-        return behandling
+        return behandling.also {
+            addCleanUpAction {
+                slettSakMedAvhengigheter(it.fagsak.saksnummer)
+            }
+        }
     }
 
     private fun lagPeriode(
@@ -380,9 +372,6 @@ class SatsendringIT(
 
         trygdeavgiftsberegningService.beregnOgLagreTrygdeavgift(behandlingID, skattefordholdsperioder, inntektsforholdsperioder)
     }
-
-    private val Any.toJsonNode: JsonNode
-        get() = objectMapper.valueToTree(this)
 
     companion object {
         private const val SATSENDRING_ÅR = 2024

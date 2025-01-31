@@ -44,15 +44,17 @@ class ProsessinstansTestManager(
     fun executeAndWait(
         waitForProsesses: Map<ProsessType, Int>,
         returnProsessOfType: ProsessType = waitForProsesses.keys.first(),
+        onWaitUntil: () -> Unit = {},
         process: () -> Unit
     ): Prosessinstans {
         try {
             process()
             waitForProcessesToStart(waitForProsesses)
             val prosessTypes = waitForProsesses.map { it.key }
+            log.info { "prosessinstanser started $prosessTypes" }
             return withClue("Wait for $prosessTypes") {
                 prosessTypes
-                    .map { waitForAndReturnProcess(it) }
+                    .map { waitForAndReturnProcess(it, onWaitUntil) }
                     .firstOrNull { it.type == returnProsessOfType } ?: error("Fant ikke prosess for $returnProsessOfType")
             }.also {
                 // Vi sjekker dette igjen siden vi kan få false positive første gang vi sjekker
@@ -85,7 +87,7 @@ class ProsessinstansTestManager(
         }
     }
 
-    private fun waitForAndReturnProcess(prosessType: ProsessType): Prosessinstans {
+    private fun waitForAndReturnProcess(prosessType: ProsessType, onWaitUntil: () -> Unit = {}): Prosessinstans {
         withClue("wait for prosees type:$prosessType to have status FERDIG") {
             return AwaitUtil.awaitWithFailOnLogErrors {
                 var current: Prosessinstans? = null
@@ -101,17 +103,19 @@ class ProsessinstansTestManager(
                         }
                     }
                     .waitUntil(abort = { prosessinstanserOpprettet.any { it.status == ProsessStatus.FEILET } }) {
+                        onWaitUntil()
                         current = prosessinstanserFerdig.firstOrNull { it.type == prosessType && it.status == ProsessStatus.FERDIG }
                         current != null
                     }
                 current.shouldNotBeNull()
+            }.also {
+                log.info { "prosessinstanse ferdig $prosessType" }
             }
         }
+
     }
 
-    private fun List<Prosessinstans>.toTypeToCountMap(): Map<ProsessType, Int> {
-        return groupBy { it.type }.mapValues { it.value.size }
-    }
+    private fun List<Prosessinstans>.toTypeToCountMap(): Map<ProsessType, Int> = groupBy { it.type }.mapValues { it.value.size }
 
     companion object {
         private val defaultTimeOut: Duration = Duration.ofSeconds(30)

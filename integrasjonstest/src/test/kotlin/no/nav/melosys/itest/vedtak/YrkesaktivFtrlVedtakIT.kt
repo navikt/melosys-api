@@ -1,19 +1,12 @@
 package no.nav.melosys.itest.vedtak
 
-import com.fasterxml.jackson.databind.JsonNode
-import com.fasterxml.jackson.databind.SerializationFeature
-import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule
-import com.fasterxml.jackson.module.kotlin.jacksonObjectMapper
 import com.github.tomakehurst.wiremock.client.WireMock
-import io.getunleash.FakeUnleash
 import io.kotest.assertions.withClue
 import io.kotest.matchers.collections.shouldHaveSize
 import io.kotest.matchers.nulls.shouldNotBeNull
 import io.kotest.matchers.optional.shouldBePresent
 import io.kotest.matchers.shouldBe
 import io.kotest.matchers.types.shouldBeInstanceOf
-import io.mockk.every
-import io.mockk.mockk
 import no.nav.melosys.domain.Behandlingsmaate
 import no.nav.melosys.domain.avgift.Inntektsperiode
 import no.nav.melosys.domain.avgift.Penger
@@ -26,13 +19,10 @@ import no.nav.melosys.domain.manglendebetaling.ManglendeFakturabetalingMelding
 import no.nav.melosys.domain.mottatteopplysninger.SøknadNorgeEllerUtenforEØS
 import no.nav.melosys.domain.mottatteopplysninger.data.Periode
 import no.nav.melosys.domain.mottatteopplysninger.data.Soeknadsland
-import no.nav.melosys.integrasjon.faktureringskomponenten.NyFakturaserieResponseDto
 import no.nav.melosys.integrasjon.hendelser.VedtakHendelseMelding
 import no.nav.melosys.integrasjon.trygdeavgift.dto.DatoPeriodeDto
-import no.nav.melosys.itest.JournalfoeringBase
 import no.nav.melosys.itest.MelosysHendelseKafkaConsumer
-import no.nav.melosys.melosysmock.medl.MedlRepo
-import no.nav.melosys.melosysmock.testdata.JournalføringsoppgaveGenerator
+import no.nav.melosys.itest.AvgiftFaktureringTestBase
 import no.nav.melosys.repository.BehandlingRepository
 import no.nav.melosys.repository.FagsakRepository
 import no.nav.melosys.saksflytapi.domain.ProsessType
@@ -43,19 +33,14 @@ import no.nav.melosys.service.behandling.BehandlingsresultatService
 import no.nav.melosys.service.behandling.VilkaarsresultatService
 import no.nav.melosys.service.ftrl.medlemskapsperiode.MedlemskapsperiodeService
 import no.nav.melosys.service.ftrl.medlemskapsperiode.OpprettForslagMedlemskapsperiodeService
-import no.nav.melosys.service.journalforing.JournalfoeringService
 import no.nav.melosys.service.mottatteopplysninger.MottatteOpplysningerService
-import no.nav.melosys.service.oppgave.OppgaveService
 import no.nav.melosys.service.sak.OpprettBehandlingForSak
 import no.nav.melosys.service.sak.OpprettSakDto
 import no.nav.melosys.service.saksopplysninger.OppfriskSaksopplysningerService
 import no.nav.melosys.service.vedtak.FattVedtakRequest
 import no.nav.melosys.service.vedtak.VedtaksfattingFasade
 import no.nav.melosys.service.vilkaar.VilkaarDto
-import no.nav.melosys.sikkerhet.context.SpringSubjectHandler
-import no.nav.melosys.sikkerhet.context.SubjectHandler
 import org.junit.jupiter.api.AfterEach
-import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.beans.factory.annotation.Qualifier
@@ -63,9 +48,6 @@ import org.springframework.kafka.core.KafkaTemplate
 import java.time.LocalDate
 
 class YrkesaktivFtrlVedtakIT(
-    @Autowired journalføringsoppgaveGenerator: JournalføringsoppgaveGenerator,
-    @Autowired journalføringService: JournalfoeringService,
-    @Autowired oppgaveService: OppgaveService,
     @Autowired private val avklartefaktaService: AvklartefaktaService,
     @Autowired private val fagsakRepository: FagsakRepository,
     @Autowired private val behandlingsresultatService: BehandlingsresultatService,
@@ -79,75 +61,15 @@ class YrkesaktivFtrlVedtakIT(
     @Autowired private val opprettBehandlingForSak: OpprettBehandlingForSak,
     @Autowired private val trygdeavgiftsberegningService: TrygdeavgiftsberegningService,
     @Autowired @Qualifier("manglendeFakturabetalingMelding") private val manglendeFakturabetalingMeldingTemplate: KafkaTemplate<String, ManglendeFakturabetalingMelding>,
-    @Autowired private val unleash: FakeUnleash,
     @Autowired private val melosysHendelseKafkaConsumer: MelosysHendelseKafkaConsumer,
-) : JournalfoeringBase(
-    journalføringsoppgaveGenerator, journalføringService, oppgaveService,
-    TrygdeavgiftsberegningTransformer()
-) {
+) : AvgiftFaktureringTestBase(TrygdeavgiftsberegningTransformer()) {
 
-    private var originalSubjectHandler: SubjectHandler? = null
     private val kafkaTopic = "teammelosys.manglende-fakturabetaling-local"
-    private val fakturaserieReferanse: String = "01J17B5NTTDYKFB5DZTSSQEHJ0"
-
-    @BeforeEach
-    fun setup() {
-        MedlRepo.repo.clear()
-        originalSubjectHandler = SubjectHandler.getInstance()
-
-        val mockHandler = mockk<SpringSubjectHandler>()
-        SubjectHandler.set(mockHandler)
-        every { mockHandler.userID } returns "Z123456"
-        every { mockHandler.userName } returns "test"
-
-        mockServer.stubFor(
-            WireMock.post("/api/v2/beregn")
-                .willReturn(
-                    WireMock.aResponse()
-                        .withStatus(200)
-                        .withHeader("Content-Type", "application/json")
-                        .withTransformers("dynamisk-trygdeavgiftsberegning-transformer")
-                )
-        )
-
-        val fakturaResponse = NyFakturaserieResponseDto(fakturaserieReferanse)
-
-        mockServer.stubFor(
-            WireMock.post("/fakturaserier")
-                .willReturn(
-                    WireMock.aResponse()
-                        .withStatus(200)
-                        .withHeader("Content-Type", "application/json")
-                        .withBody(fakturaResponse.toJsonNode.toString())
-                )
-        )
-        mockServer.stubFor(
-            WireMock.delete(WireMock.urlMatching("/fakturaserier/.*"))
-                .willReturn(
-                    WireMock.aResponse()
-                        .withStatus(200)
-                        .withHeader("Content-Type", "application/json")
-                        .withBody(fakturaResponse.toJsonNode.toString())
-                )
-        )
-        mockServer.stubFor(
-            WireMock.post(WireMock.urlMatching("/fakturaer"))
-                .willReturn(
-                    WireMock.aResponse()
-                        .withStatus(200)
-                        .withHeader("Content-Type", "application/json")
-                        .withBody(fakturaResponse.toJsonNode.toString())
-                )
-        )
-        unleash.enableAll()
-    }
+    override val fakturaserieReferanse: String = "01J17B5NTTDYKFB5DZTSSQEHJ0"
 
     @AfterEach
     fun afterEach() {
         melosysHendelseKafkaConsumer.clear()
-        MedlRepo.repo.clear()
-        SubjectHandler.set(originalSubjectHandler)
-
     }
 
     @Test
@@ -465,24 +387,17 @@ class YrkesaktivFtrlVedtakIT(
 
         val trygdeavgiftsperioder = HashSet<Trygdeavgiftsperiode>()
         trygdeavgiftsperioder.add(
-            Trygdeavgiftsperiode(periodeFra = LocalDate.of(2023, 1, 1),
+            Trygdeavgiftsperiode(
+                periodeFra = LocalDate.of(2023, 1, 1),
                 periodeTil = LocalDate.of(2023, 2, 1),
                 trygdesats = 6.8.toBigDecimal(),
                 trygdeavgiftsbeløpMd = Penger(1000.toBigDecimal(), "nok"),
                 grunnlagMedlemskapsperiode = medlemskapsperiode,
                 grunnlagSkatteforholdTilNorge = skatteforholdTilNorge,
-                grunnlagInntekstperiode = inntektsperiode)
+                grunnlagInntekstperiode = inntektsperiode
+            )
         )
 
         medlemskapsperiode.trygdeavgiftsperioder = trygdeavgiftsperioder
     }
-
-    private val Any.toJsonNode: JsonNode
-        get() {
-            return jacksonObjectMapper()
-                .configure(SerializationFeature.WRITE_DATES_AS_TIMESTAMPS, false)
-                .registerModule(JavaTimeModule())
-                .valueToTree(this)
-        }
 }
-

@@ -53,6 +53,7 @@ public class DokgenBrevbestilling extends Brevbestilling {
     private Persondata persondokument;
     private Persondata personMottaker;
     private List<SaksvedleggBestilling> saksvedleggBestilling;
+    private StandardvedleggType standardvedleggType;
     private Distribusjonstype distribusjonstype;
     private List<FritekstvedleggBestilling> fritekstvedleggBestilling;
 
@@ -78,6 +79,7 @@ public class DokgenBrevbestilling extends Brevbestilling {
         this.persondokument = builder.persondokument;
         this.personMottaker = builder.personMottaker;
         this.saksvedleggBestilling = builder.saksvedleggBestilling;
+        this.standardvedleggType = builder.standardvedleggType;
         this.distribusjonstype = builder.distribusjonstype;
         this.fritekstvedleggBestilling = builder.fritekstvedleggBestilling;
     }
@@ -142,6 +144,10 @@ public class DokgenBrevbestilling extends Brevbestilling {
         return saksvedleggBestilling;
     }
 
+    public StandardvedleggType getStandardvedleggType() {
+        return standardvedleggType;
+    }
+
     public List<FritekstvedleggBestilling> getFritekstvedleggBestilling() {
         return fritekstvedleggBestilling;
     }
@@ -175,6 +181,7 @@ public class DokgenBrevbestilling extends Brevbestilling {
         private Persondata persondokument;
         private Persondata personMottaker;
         private List<SaksvedleggBestilling> saksvedleggBestilling;
+        private StandardvedleggType standardvedleggType;
         private Distribusjonstype distribusjonstype;
         private List<FritekstvedleggBestilling> fritekstvedleggBestilling;
 
@@ -201,6 +208,7 @@ public class DokgenBrevbestilling extends Brevbestilling {
             this.persondokument = brevbestilling.persondokument;
             this.personMottaker = brevbestilling.personMottaker;
             this.saksvedleggBestilling = brevbestilling.saksvedleggBestilling;
+            this.standardvedleggType = brevbestilling.standardvedleggType;
             this.distribusjonstype = brevbestilling.distribusjonstype;
             this.fritekstvedleggBestilling = brevbestilling.fritekstvedleggBestilling;
         }
@@ -299,6 +307,11 @@ public class DokgenBrevbestilling extends Brevbestilling {
 
         public T medSaksvedleggBestilling(List<SaksvedleggBestilling> saksvedleggBestilling) {
             this.saksvedleggBestilling = saksvedleggBestilling;
+            return (T) this;
+        }
+
+        public T medStandardvedleggBestilling(StandardvedleggType standardvedleggType) {
+            this.standardvedleggType = standardvedleggType;
             return (T) this;
         }
 

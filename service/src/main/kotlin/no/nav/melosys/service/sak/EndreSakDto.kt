@@ -8,6 +8,7 @@ import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingstyper
 import java.time.LocalDate
 
 data class EndreSakDto(
+    val behandlingID: Long?,
     val sakstype: Sakstyper,
     val sakstema: Sakstemaer,
     val behandlingstema: Behandlingstema,

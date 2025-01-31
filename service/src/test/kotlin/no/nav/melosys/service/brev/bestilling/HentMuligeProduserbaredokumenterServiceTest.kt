@@ -1,6 +1,5 @@
 package no.nav.melosys.service.brev.bestilling
 
-import io.getunleash.FakeUnleash
 import io.kotest.matchers.collections.shouldBeEmpty
 import io.kotest.matchers.collections.shouldContainInOrder
 import io.kotest.matchers.collections.shouldHaveSize
@@ -28,8 +27,6 @@ class HentMuligeProduserbaredokumenterServiceTest {
     @MockK
     private lateinit var behandlingService: BehandlingService
 
-    private val fakeUnleash = FakeUnleash()
-
     private lateinit var hentMuligeProduserbaredokumenterService: HentMuligeProduserbaredokumenterService
 
     private lateinit var behandling: Behandling
@@ -37,8 +34,7 @@ class HentMuligeProduserbaredokumenterServiceTest {
 
     @BeforeEach
     fun setUp() {
-        fakeUnleash.enableAll()
-        hentMuligeProduserbaredokumenterService = HentMuligeProduserbaredokumenterService(behandlingService, fakeUnleash)
+        hentMuligeProduserbaredokumenterService = HentMuligeProduserbaredokumenterService(behandlingService)
         behandling = lagBehandling()
         every { behandlingService.hentBehandlingMedSaksopplysninger(BEHANDLING_ID) } returns behandling
     }
@@ -47,11 +43,10 @@ class HentMuligeProduserbaredokumenterServiceTest {
     fun hentMuligeProduserbaredokumenter_tilBruker_returnererKorrektListe() {
         hentMuligeProduserbaredokumenterService.hentMuligeProduserbaredokumenter(BEHANDLING_ID, Mottakerroller.BRUKER)
             .shouldNotBeNull()
-            .shouldHaveSize(3)
+            .shouldHaveSize(2)
             .shouldContainInOrder(
                 Produserbaredokumenter.MANGELBREV_BRUKER,
-                Produserbaredokumenter.INNHENTING_AV_INNTEKTSOPPLYSNINGER,
-                Produserbaredokumenter.GENERELT_FRITEKSTBREV_BRUKER
+                Produserbaredokumenter.GENERELT_FRITEKSTBREV_BRUKER,
             )
     }
 
@@ -87,12 +82,11 @@ class HentMuligeProduserbaredokumenterServiceTest {
 
         hentMuligeProduserbaredokumenterService.hentMuligeProduserbaredokumenter(BEHANDLING_ID, Mottakerroller.BRUKER)
             .shouldNotBeNull()
-            .shouldHaveSize(4)
+            .shouldHaveSize(3)
             .shouldContainInOrder(
                 Produserbaredokumenter.MELDING_FORVENTET_SAKSBEHANDLINGSTID_SOKNAD,
                 Produserbaredokumenter.MANGELBREV_BRUKER,
-                Produserbaredokumenter.INNHENTING_AV_INNTEKTSOPPLYSNINGER,
-                Produserbaredokumenter.GENERELT_FRITEKSTBREV_BRUKER
+                Produserbaredokumenter.GENERELT_FRITEKSTBREV_BRUKER,
             )
     }
 
@@ -104,11 +98,10 @@ class HentMuligeProduserbaredokumenterServiceTest {
 
         hentMuligeProduserbaredokumenterService.hentMuligeProduserbaredokumenter(BEHANDLING_ID, Mottakerroller.BRUKER)
             .shouldNotBeNull()
-            .shouldHaveSize(4)
+            .shouldHaveSize(3)
             .shouldContainInOrder(
                 Produserbaredokumenter.MELDING_FORVENTET_SAKSBEHANDLINGSTID_SOKNAD,
                 Produserbaredokumenter.MANGELBREV_BRUKER,
-                Produserbaredokumenter.INNHENTING_AV_INNTEKTSOPPLYSNINGER,
                 Produserbaredokumenter.GENERELT_FRITEKSTBREV_BRUKER
             )
     }
@@ -167,11 +160,24 @@ class HentMuligeProduserbaredokumenterServiceTest {
 
         hentMuligeProduserbaredokumenterService.hentMuligeProduserbaredokumenter(BEHANDLING_ID, Mottakerroller.BRUKER)
             .shouldNotBeNull()
+            .shouldHaveSize(2)
+            .shouldContainInOrder(
+                Produserbaredokumenter.MANGELBREV_BRUKER,
+                Produserbaredokumenter.GENERELT_FRITEKSTBREV_BRUKER
+            )
+    }
+
+    @Test
+    fun `Mulige produserbare dokumenter skal inkludere INNHENTING_AV_INNTEKTSOPPLYSNINGER for behandlinger av typen Årsavregning`() {
+        behandling.type = Behandlingstyper.ÅRSAVREGNING
+
+        hentMuligeProduserbaredokumenterService.hentMuligeProduserbaredokumenter(BEHANDLING_ID, Mottakerroller.BRUKER)
+            .shouldNotBeNull()
             .shouldHaveSize(3)
             .shouldContainInOrder(
                 Produserbaredokumenter.MANGELBREV_BRUKER,
+                Produserbaredokumenter.GENERELT_FRITEKSTBREV_BRUKER,
                 Produserbaredokumenter.INNHENTING_AV_INNTEKTSOPPLYSNINGER,
-                Produserbaredokumenter.GENERELT_FRITEKSTBREV_BRUKER
             )
     }
 

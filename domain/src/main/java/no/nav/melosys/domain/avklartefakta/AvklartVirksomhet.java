@@ -37,6 +37,10 @@ public class AvklartVirksomhet {
         this.opphoersdato = opphoersdato;
     }
 
+    public String getNavn() {
+        return navn;
+    }
+
     public String getOrgnr() {
         return orgnr;
     }

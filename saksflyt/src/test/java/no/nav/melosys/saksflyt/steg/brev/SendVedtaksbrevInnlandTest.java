@@ -49,6 +49,7 @@ import static no.nav.melosys.domain.kodeverk.Mottakerroller.ARBEIDSGIVER;
 import static no.nav.melosys.domain.kodeverk.Mottakerroller.BRUKER;
 import static no.nav.melosys.domain.kodeverk.brev.Produserbaredokumenter.*;
 import static no.nav.melosys.domain.kodeverk.lovvalgsbestemmelser.Lovvalgbestemmelser_883_2004.*;
+import static no.nav.melosys.domain.kodeverk.lovvalgsbestemmelser.Lovvalgbestemmelser_konv_efta_storbritannia.KONV_EFTA_STORBRITANNIA_ART13_3A;
 import static no.nav.melosys.domain.kodeverk.lovvalgsbestemmelser.Lovvalgbestemmelser_konv_efta_storbritannia.KONV_EFTA_STORBRITANNIA_ART18_1;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatExceptionOfType;
@@ -129,9 +130,8 @@ class SendVedtaksbrevInnlandTest {
 
     @Test
     void utfør_innvilgelseEfta_vedtak() {
-        fakeUnleash.enable(ToggleName.MELOSYS_KONVENSJON_EFTA_LAND_OG_STORBRITANNIA);
         when(behandlingsresultatService.hentBehandlingsresultat(BEHANDLINGID))
-            .thenReturn(lagBehandlingsresultat(lagInnvilgetLovvalgsperiode(Lovvalgbestemmelser_konv_efta_storbritannia.KONV_EFTA_STORBRITANNIA_ART13_3A)));
+            .thenReturn(lagBehandlingsresultat(lagInnvilgetLovvalgsperiode(KONV_EFTA_STORBRITANNIA_ART13_3A)));
 
 
         sendVedtaksbrevInnland.utfør(lagProsessinstans());
@@ -147,7 +147,6 @@ class SendVedtaksbrevInnlandTest {
 
     @Test
     void utfør_innvilgelse11_3_SokkelSkip_vedtak() {
-        fakeUnleash.enable(ToggleName.MELOSYS_ARBEID_KUN_NORGE);
         when(behandlingsresultatService.hentBehandlingsresultat(BEHANDLINGID))
             .thenReturn(lagBehandlingsresultatMedAvklarteFakta(lagInnvilgetLovvalgsperiode(FO_883_2004_ART11_3A), Set.of(lagAvklarteFakta(Avklartefaktatyper.YRKESGRUPPE, AvklartYrkesgruppeType.SOKKEL_ELLER_SKIP.name(), ""))));
 
@@ -164,7 +163,6 @@ class SendVedtaksbrevInnlandTest {
 
     @Test
     void utfør_innvilgelse11_3_Yrkesaktiv_vedtak() {
-        fakeUnleash.enable(ToggleName.MELOSYS_ARBEID_KUN_NORGE);
         when(behandlingsresultatService.hentBehandlingsresultat(BEHANDLINGID))
             .thenReturn(lagBehandlingsresultatMedAvklarteFakta(lagInnvilgetLovvalgsperiode(FO_883_2004_ART11_3A), Set.of(lagAvklarteFakta(Avklartefaktatyper.YRKESGRUPPE, AvklartYrkesgruppeType.ORDINAER.name(), ""))));
 
@@ -182,7 +180,6 @@ class SendVedtaksbrevInnlandTest {
 
     @Test
     void utfør_innvilgelseEfta_vedtak_SenderIkkeORIENTERING_TIL_ARBEIDSGIVER_OM_VEDTAKNårSelvstendigLovvalgsbestemmelse() {
-        fakeUnleash.enable(ToggleName.MELOSYS_KONVENSJON_EFTA_LAND_OG_STORBRITANNIA);
         when(behandlingsresultatService.hentBehandlingsresultat(BEHANDLINGID))
             .thenReturn(lagBehandlingsresultat(lagInnvilgetLovvalgsperiode(Lovvalgbestemmelser_konv_efta_storbritannia.KONV_EFTA_STORBRITANNIA_ART14_2)));
 
@@ -203,7 +200,6 @@ class SendVedtaksbrevInnlandTest {
 
     @Test
     void utfør_innvilgelseEfta_vedtak_SenderORIENTERING_TIL_ARBEIDSGIVER_OM_VEDTAK() {
-        fakeUnleash.enable(ToggleName.MELOSYS_KONVENSJON_EFTA_LAND_OG_STORBRITANNIA);
         when(behandlingsresultatService.hentBehandlingsresultat(BEHANDLINGID))
             .thenReturn(lagBehandlingsresultat(lagInnvilgetLovvalgsperiode(Lovvalgbestemmelser_konv_efta_storbritannia.KONV_EFTA_STORBRITANNIA_ART13_4)));
 
@@ -223,7 +219,6 @@ class SendVedtaksbrevInnlandTest {
 
     @Test
     void utfør_innvilgelseEfta_vedtak_SenderIkkeORIENTERING_TIL_ARBEIDSGIVER_OM_VEDTAK_nårMottakerErSelvstendig() {
-        fakeUnleash.enable(ToggleName.MELOSYS_KONVENSJON_EFTA_LAND_OG_STORBRITANNIA);
         when(behandlingsresultatService.hentBehandlingsresultat(BEHANDLINGID))
             .thenReturn(lagBehandlingsresultat(lagInnvilgetLovvalgsperiode(KONV_EFTA_STORBRITANNIA_ART18_1)));
 
@@ -237,13 +232,12 @@ class SendVedtaksbrevInnlandTest {
 
         List<DoksysBrevbestilling> capturedValues = doksysBrevbestillingArgumentCaptor.getAllValues();
         assertThat(capturedValues).hasSize(1);
-        assertThat(capturedValues.get(0).getProduserbartdokument() == INNVILGELSE_EFTA_STORBRITANNIA);
+        assertThat(capturedValues.get(0).getProduserbartdokument()).isEqualTo(ORIENTERING_TIL_ARBEIDSGIVER_OM_VEDTAK);
 
     }
 
     @Test
-    void utfør_avslagEfta118_vedtak_sender_avslag_efta_storbritannia_brev_naar_toggled() {
-        fakeUnleash.enable(ToggleName.MELOSYS_KONVENSJON_EFTA_LAND_OG_STORBRITANNIA);
+    void utfør_avslagEfta118_vedtak_sender_avslag_efta_storbritannia_brev() {
         when(behandlingsresultatService.hentBehandlingsresultat(BEHANDLINGID))
             .thenReturn(lagBehandlingsresultat(lagLovvalgsperiode(KONV_EFTA_STORBRITANNIA_ART18_1, LocalDate.now(), Land_iso2.HR, false)));
 
@@ -257,29 +251,10 @@ class SendVedtaksbrevInnlandTest {
         verify(prosessinstansService, times(1)).opprettProsessinstansSendBrev(eq(behandling), doksysBrevbestillingArgumentCaptor.capture(), eq(Mottaker.medRolle(ARBEIDSGIVER)));
 
         var doksysCaptor = doksysBrevbestillingArgumentCaptor.getAllValues();
-        assertThat(doksysCaptor.get(0).getProduserbartdokument() == AVSLAG_EFTA_STORBRITANNIA);
-        assertThat(doksysCaptor.get(1).getProduserbartdokument() == AVSLAG_ARBEIDSGIVER);
+        assertThat(doksysCaptor.get(0).getProduserbartdokument()).isEqualTo(AVSLAG_EFTA_STORBRITANNIA);
+        assertThat(doksysCaptor.get(1).getProduserbartdokument()).isEqualTo(ORIENTERING_TIL_ARBEIDSGIVER_OM_VEDTAK);
     }
 
-    @Test
-    void utfør_avslagEfta118_vedtak_sender_avslag_efta_storbritanni_brev_naar_ikke_toggled() {
-        fakeUnleash.disable(ToggleName.MELOSYS_KONVENSJON_EFTA_LAND_OG_STORBRITANNIA);
-        when(behandlingsresultatService.hentBehandlingsresultat(BEHANDLINGID))
-            .thenReturn(lagBehandlingsresultat(lagLovvalgsperiode(KONV_EFTA_STORBRITANNIA_ART18_1, LocalDate.now(), Land_iso2.HR, false)));
-
-
-        sendVedtaksbrevInnland.utfør(lagProsessinstans());
-
-
-        var mottakere = List.of(Mottaker.medRolle(Mottakerroller.BRUKER), Mottaker.av(NorskMyndighet.HELFO), Mottaker.av(NorskMyndighet.SKATTEETATEN));
-
-        verify(prosessinstansService, times(1)).opprettProsessinstanserSendBrev(eq(behandling), doksysBrevbestillingArgumentCaptor.capture(), eq(mottakere));
-        verify(prosessinstansService, times(1)).opprettProsessinstansSendBrev(eq(behandling), doksysBrevbestillingArgumentCaptor.capture(), eq(Mottaker.medRolle(ARBEIDSGIVER)));
-
-        var doksysCaptor = doksysBrevbestillingArgumentCaptor.getAllValues();
-        assertThat(doksysCaptor.get(0).getProduserbartdokument() == AVSLAG_YRKESAKTIV);
-        assertThat(doksysCaptor.get(1).getProduserbartdokument() == AVSLAG_ARBEIDSGIVER);
-    }
 
     @Test
     void utfør_innvilgelse11_4_senderIkkeOrienteringTilArbeidsgiver() {
@@ -374,8 +349,6 @@ class SendVedtaksbrevInnlandTest {
 
     @Test
     void utfør_innvilgelse11_3_AMedSelvstendigUtenlandskForetak_senderIkkeBrevTilStatligSkatteoppkreving() {
-        fakeUnleash.enable(ToggleName.MELOSYS_KONVENSJON_EFTA_LAND_OG_STORBRITANNIA);
-
         when(behandlingsresultatService.hentBehandlingsresultat(BEHANDLINGID))
             .thenReturn(lagBehandlingsresultatMedAvklarteFakta(lagInnvilgetLovvalgsperiode(FO_883_2004_ART11_3A), Set.of(lagAvklarteFakta(Avklartefaktatyper.YRKESGRUPPE, AvklartYrkesgruppeType.ORDINAER.name(), ""))));
         when(behandlingsresultatService.hentBehandlingsresultat(BEHANDLINGID))
@@ -453,7 +426,7 @@ class SendVedtaksbrevInnlandTest {
 
 
         verify(prosessinstansService).opprettProsessinstansSendBrev(eq(behandling), doksysBrevbestillingArgumentCaptor.capture(), eq(Mottaker.medRolle(ARBEIDSGIVER)));
-        assertThat(doksysBrevbestillingArgumentCaptor.getValue().getProduserbartdokument()).isEqualTo(INNVILGELSE_ARBEIDSGIVER);
+        assertThat(doksysBrevbestillingArgumentCaptor.getValue().getProduserbartdokument()).isEqualTo(ORIENTERING_TIL_ARBEIDSGIVER_OM_VEDTAK);
     }
 
     @Test
@@ -484,12 +457,12 @@ class SendVedtaksbrevInnlandTest {
 
 
         verify(prosessinstansService).opprettProsessinstansSendBrev(eq(behandling), doksysBrevbestillingArgumentCaptor.capture(), eq(Mottaker.medRolle(ARBEIDSGIVER)));
-        assertThat(doksysBrevbestillingArgumentCaptor.getValue().getProduserbartdokument()).isEqualTo(AVSLAG_ARBEIDSGIVER);
+        assertThat(doksysBrevbestillingArgumentCaptor.getValue().getProduserbartdokument()).isEqualTo(ORIENTERING_TIL_ARBEIDSGIVER_OM_VEDTAK);
     }
 
 
     @Test
-    void utfør_PåInnvilgelsesBrevBestemtAv12_2_senderBrevTilSkattOgKopiTilArbeidsgiver() {
+    void utfør_PåInnvilgelsesBrevBestemtAv12_2_senderBrevTilArbeidsgiver_MenIkkeKopiTilSkatt() {
         when(behandlingsresultatService.hentBehandlingsresultat(BEHANDLINGID))
             .thenReturn(lagBehandlingsresultat(lagInnvilgetLovvalgsperiode(FO_883_2004_ART12_2)));
 
@@ -499,8 +472,27 @@ class SendVedtaksbrevInnlandTest {
 
         var mottakere = List.of(Mottaker.medRolle(BRUKER));
         verify(prosessinstansService).opprettProsessinstanserSendBrev(eq(behandling), any(DoksysBrevbestilling.class), eq(mottakere));
+    }
+
+    @Test
+    void utfør_PåInnvilgelsesBrevBestemtART13_3A_senderBrevTilSkattOgKopiTilArbeidsgiver() {
+        when(behandlingsresultatService.hentBehandlingsresultat(BEHANDLINGID))
+            .thenReturn(lagBehandlingsresultat(lagInnvilgetLovvalgsperiode(KONV_EFTA_STORBRITANNIA_ART13_3A)));
+        ArgumentCaptor<DoksysBrevbestilling> doksysBrevbestillingCaptor = ArgumentCaptor.forClass(DoksysBrevbestilling.class);
+
+
+        sendVedtaksbrevInnland.utfør(lagProsessinstans());
+
+
+        var mottakere = List.of(Mottaker.medRolle(BRUKER));
+        verify(prosessinstansService, times(2)).opprettProsessinstanserSendBrev(eq(behandling), doksysBrevbestillingCaptor.capture(), eq(mottakere));
+        List<DoksysBrevbestilling> capturedValues = doksysBrevbestillingCaptor.getAllValues();
+        assertThat(capturedValues).hasSize(2);
+        assertThat(capturedValues.get(0).getProduserbartdokument()).isEqualTo(INNVILGELSE_EFTA_STORBRITANNIA);
+        assertThat(capturedValues.get(1).getProduserbartdokument()).isEqualTo(ATTEST_A1);
+
         verify(prosessinstansService).opprettProsessinstansSendBrev(eq(behandling), doksysBrevbestillingArgumentCaptor.capture(), eq(Mottaker.medRolle(ARBEIDSGIVER)));
-        assertThat(doksysBrevbestillingArgumentCaptor.getValue().getProduserbartdokument()).isEqualTo(INNVILGELSE_ARBEIDSGIVER);
+        assertThat(doksysBrevbestillingArgumentCaptor.getValue().getProduserbartdokument()).isEqualTo(ORIENTERING_TIL_ARBEIDSGIVER_OM_VEDTAK);
     }
 
     @Test
@@ -664,15 +656,5 @@ class SendVedtaksbrevInnlandTest {
         arbeidsgiverFaktum.setType(type);
         arbeidsgiverFaktum.setFakta(fakta);
         return arbeidsgiverFaktum;
-    }
-
-    private static AvklartVirksomhet lagNorskSelvstendigVirksomhet() {
-        StrukturertAdresse addr = new StrukturertAdresse();
-        addr.setGatenavn("Strukturert Gate");
-        addr.setHusnummerEtasjeLeilighet("12B");
-        addr.setPoststed("Poststed");
-        addr.setPostnummer("4321");
-        addr.setLandkode(Landkoder.BG.getKode());
-        return new AvklartVirksomhet("Bedrift AS", "123456789", addr, Yrkesaktivitetstyper.SELVSTENDIG);
     }
 }

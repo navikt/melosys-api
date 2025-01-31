@@ -61,7 +61,10 @@ public class Penger {
 
     @Override
     public int hashCode() {
-        return Objects.hash(verdi.stripTrailingZeros(), valuta);
+        return Objects.hash(
+            verdi != null ? verdi.stripTrailingZeros() : null,
+            valuta
+        );
     }
 
     @Override

@@ -20,10 +20,14 @@ import no.nav.melosys.service.behandling.BehandlingsresultatService
 import no.nav.melosys.service.dokument.DokgenService
 import no.nav.melosys.service.oppgave.OppgaveService
 import no.nav.melosys.sikkerhet.context.SubjectHandler
+import no.nav.melosys.sikkerhet.context.TestSubjectHandler
+import org.junit.jupiter.api.BeforeAll
 import org.junit.jupiter.api.Test
-
+import org.junit.jupiter.api.TestInstance
 import org.junit.jupiter.api.extension.ExtendWith
 
+
+@TestInstance(TestInstance.Lifecycle.PER_CLASS)
 @ExtendWith(MockKExtension::class)
 class ÅrsavregningVedtakServiceTest {
     @RelaxedMockK
@@ -40,6 +44,11 @@ class ÅrsavregningVedtakServiceTest {
 
     @RelaxedMockK
     private lateinit var dokgenService: DokgenService
+
+    @BeforeAll
+    fun beforeAll() {
+        SubjectHandler.set(TestSubjectHandler())
+    }
 
 
     @Test

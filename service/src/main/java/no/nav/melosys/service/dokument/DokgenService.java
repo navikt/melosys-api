@@ -8,7 +8,6 @@ import java.util.Collection;
 import java.util.Collections;
 import java.util.List;
 
-import io.getunleash.Unleash;
 import no.nav.melosys.domain.Behandling;
 import no.nav.melosys.domain.arkiv.Distribusjonstype;
 import no.nav.melosys.domain.arkiv.Journalpost;
@@ -18,8 +17,8 @@ import no.nav.melosys.domain.dokument.organisasjon.OrganisasjonDokument;
 import no.nav.melosys.domain.kodeverk.Land_iso2;
 import no.nav.melosys.domain.kodeverk.Mottakerroller;
 import no.nav.melosys.domain.kodeverk.brev.Produserbaredokumenter;
-import no.nav.melosys.featuretoggle.ToggleName;
 import no.nav.melosys.integrasjon.dokgen.DokgenConsumer;
+import no.nav.melosys.integrasjon.dokgen.dto.standardvedlegg.StandardvedleggDto;
 import no.nav.melosys.integrasjon.ereg.EregFasade;
 import no.nav.melosys.integrasjon.joark.JoarkFasade;
 import no.nav.melosys.saksflytapi.ProsessinstansService;
@@ -54,7 +53,6 @@ public class DokgenService {
     private final SaksbehandlerService saksbehandlerService;
     private final UtenlandskMyndighetService utenlandskMyndighetService;
     private final UtledMottaksdato utledMottaksdato;
-    private final Unleash unleash;
 
     public DokgenService(DokgenConsumer dokgenConsumer,
                          DokumentproduksjonsInfoMapper dokumentproduksjonsInfoMapper,
@@ -67,7 +65,7 @@ public class DokgenService {
                          ProsessinstansService prosessinstansService,
                          SaksbehandlerService saksbehandlerService,
                          UtenlandskMyndighetService utenlandskMyndighetService,
-                         UtledMottaksdato utledMottaksdato, Unleash unleash) {
+                         UtledMottaksdato utledMottaksdato) {
         this.dokgenConsumer = dokgenConsumer;
         this.dokumentproduksjonsInfoMapper = dokumentproduksjonsInfoMapper;
         this.joarkFasade = joarkFasade;
@@ -80,7 +78,6 @@ public class DokgenService {
         this.saksbehandlerService = saksbehandlerService;
         this.utenlandskMyndighetService = utenlandskMyndighetService;
         this.utledMottaksdato = utledMottaksdato;
-        this.unleash = unleash;
     }
 
     @Transactional
@@ -130,6 +127,14 @@ public class DokgenService {
         return dokgenConsumer.lagPdf(malnavn, dokgenDto, brevbestilling.isBestillKopi(), brevbestilling.isBestillUtkast());
     }
 
+    public byte[] produserStandardvedlegg(StandardvedleggType standardvedleggType) {
+        return produserStandardvedlegg(standardvedleggType, null);
+    }
+
+    public byte[] produserStandardvedlegg(StandardvedleggType standardvedleggType, StandardvedleggDto standardvedlegg) {
+        return dokgenConsumer.lagPdfForStandardvedlegg(standardvedleggType.getMalnavn(), standardvedlegg);
+    }
+
     @Transactional
     public void produserOgDistribuerBrev(long behandlingId, BrevbestillingDto brevbestillingDto) {
         Produserbaredokumenter produserbartDokument = brevbestillingDto.getProduserbardokument();
@@ -142,6 +147,7 @@ public class DokgenService {
             .medBehandlingId(behandlingId)
             .medSaksvedleggBestilling(lagSaksvedleggBestilling(brevbestillingDto.getSaksVedlegg()))
             .medSaksbehandlerNavn(hentSaksbehandlerNavn(brevbestillingDto.getBestillersId()))
+            .medStandardvedleggBestilling(brevbestillingDto.getStandardvedleggType())
             .medFritekstvedleggBestilling(lagFritekstvedleggBestilling(brevbestillingDto.getFritekstvedlegg()));
 
         List<Mottaker> mottakere = hentMottakere(brevbestillingDto, produserbartDokument, behandling);
@@ -223,15 +229,7 @@ public class DokgenService {
     }
 
     public boolean erTilgjengeligDokgenmal(Produserbaredokumenter produserbartDokument) {
-        return dokumentproduksjonsInfoMapper.tilgjengeligeMalerIDokgen().contains(produserbartDokument) && erTogglet(produserbartDokument);
-    }
-
-    private boolean erTogglet(Produserbaredokumenter produserbartDokument) {
-        return switch (produserbartDokument) {
-            case INNHENTING_AV_INNTEKTSOPPLYSNINGER, ORIENTERING_ANMODNING_UNNTAK, AVSLAG_EFTA_STORBRITANNIA, INNVILGELSE_EFTA_STORBRITANNIA,
-                 ORIENTERING_TIL_ARBEIDSGIVER_OM_VEDTAK -> unleash.isEnabled(ToggleName.MELOSYS_KONVENSJON_EFTA_LAND_OG_STORBRITANNIA);
-            default -> true;
-        };
+        return dokumentproduksjonsInfoMapper.tilgjengeligeMalerIDokgen().contains(produserbartDokument);
     }
 
     private void settOrganisasjonsOpplysninger(Behandling behandling, String orgnr,
