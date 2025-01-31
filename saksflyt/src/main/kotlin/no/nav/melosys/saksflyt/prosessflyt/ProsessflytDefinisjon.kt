@@ -136,12 +136,6 @@ object ProsessflytDefinisjon {
             REPLIKER_BEHANDLING,
             OPPRETT_OPPGAVE
         ),
-        SATSENDRING to ProsessFlyt(
-            prosessType = SATSENDRING,
-            OPPRETT_SATSBEHANDLING,
-            BEREGN_OG_SEND_FAKTURA,
-            AVSLUTT_SAK_OG_BEHANDLING
-        ),
         OPPRETT_NY_BEHANDLING_FOR_SAK to ProsessFlyt(
             prosessType = OPPRETT_NY_BEHANDLING_FOR_SAK,
             OPPRETT_NY_BEHANDLING,
@@ -149,6 +143,18 @@ object ProsessflytDefinisjon {
             HENT_REGISTEROPPLYSNINGER,
             VURDER_INNGANGSVILKÅR,
             OPPRETT_OPPGAVE
+        ),
+        SATSENDRING to ProsessFlyt(
+            prosessType = SATSENDRING,
+            OPPRETT_SATSBEHANDLING,
+            BEREGN_OG_SEND_FAKTURA,
+            AVSLUTT_SAK_OG_BEHANDLING
+        ),
+        SATSENDRING_TILBAKESTILL_NY_VURDERING to ProsessFlyt(
+            prosessType = SATSENDRING_TILBAKESTILL_NY_VURDERING,
+            OPPRETT_SATSBEHANDLING,
+            BEREGN_OG_SEND_FAKTURA,
+            AVSLUTT_SAK_OG_BEHANDLING
         ),
         IVERKSETT_VEDTAK_AARSAVREGNING to ProsessFlyt(
             prosessType = IVERKSETT_VEDTAK_AARSAVREGNING,
