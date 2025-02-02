@@ -125,8 +125,10 @@ class AvsluttFagsakOgBehandlingTest {
     void utfør_fattIverksettVedtakÅrsavregningProsess_MedFlereEnnEnBehandlingAvslutterKunBehandling() {
         prosessinstans.setType(ProsessType.IVERKSETT_VEDTAK_AARSAVREGNING);
 
+        behandling.setType(Behandlingstyper.ÅRSAVREGNING);
         var behandling2 = new Behandling();
         behandling2.setId(1234L);
+        behandling2.setType(Behandlingstyper.ÅRSAVREGNING);
         fagsak.getBehandlinger().add(behandling2);
 
         when(fagsakService.hentFagsak(FagsakTestFactory.SAKSNUMMER)).thenReturn(fagsak);
@@ -141,6 +143,7 @@ class AvsluttFagsakOgBehandlingTest {
     @Test
     void utfør_fattIverksettVedtakÅrsavregningProsess_MedKunEnBehandlingAvslutterKunSakOgBehandling() {
         prosessinstans.setType(ProsessType.IVERKSETT_VEDTAK_AARSAVREGNING);
+        behandling.setType(Behandlingstyper.ÅRSAVREGNING);
 
         when(fagsakService.hentFagsak(FagsakTestFactory.SAKSNUMMER)).thenReturn(fagsak);
 
