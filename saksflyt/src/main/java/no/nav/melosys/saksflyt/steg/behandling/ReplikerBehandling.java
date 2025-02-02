@@ -88,6 +88,6 @@ public class ReplikerBehandling implements StegBehandler {
 
         var behandlingsårsak = new Behandlingsaarsak(behandlingsårsaktype, behandlingsårsakFritekst, mottaksdato);
         nyBehandling.settBehandlingsårsak(behandlingsårsak);
-        nyBehandling.setBehandlingsfrist(nyBehandling.getType() == Behandlingstyper.SATSENDRING ? LocalDate.now() : Behandling.utledBehandlingsfrist(nyBehandling, mottaksdato));
+        nyBehandling.setBehandlingsfrist(Behandling.utledBehandlingsfrist(nyBehandling, mottaksdato));
     }
 }

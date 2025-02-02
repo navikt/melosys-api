@@ -1,14 +1,16 @@
 package no.nav.melosys.saksflyt.steg.behandling;
 
+import java.util.Arrays;
+
 import no.nav.melosys.domain.Behandling;
 import no.nav.melosys.domain.Behandlingsresultat;
 import no.nav.melosys.domain.Fagsak;
 import no.nav.melosys.domain.kodeverk.Saksstatuser;
 import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingsstatus;
+import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingstyper;
 import no.nav.melosys.saksflyt.steg.StegBehandler;
 import no.nav.melosys.saksflytapi.domain.ProsessDataKey;
 import no.nav.melosys.saksflytapi.domain.ProsessSteg;
-import no.nav.melosys.saksflytapi.domain.ProsessType;
 import no.nav.melosys.saksflytapi.domain.Prosessinstans;
 import no.nav.melosys.service.behandling.BehandlingService;
 import no.nav.melosys.service.behandling.BehandlingsresultatService;
@@ -17,8 +19,6 @@ import no.nav.melosys.service.saksbehandling.SaksbehandlingRegler;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Component;
-
-import java.util.Arrays;
 
 import static no.nav.melosys.saksflytapi.domain.ProsessSteg.AVSLUTT_SAK_OG_BEHANDLING;
 
@@ -55,7 +55,7 @@ public class AvsluttFagsakOgBehandling implements StegBehandler {
 
         if (behandlingsresultat.erGodkjenningEllerInnvilgelseArt13() && !saksbehandlingRegler.harRegistreringUnntakFraMedlemskapFlyt(behandlingsresultat.getBehandling())) {
             behandlingService.endreStatus(behandlingID, Behandlingsstatus.MIDLERTIDIG_LOVVALGSBESLUTNING);
-        } else if (Arrays.asList(ProsessType.IVERKSETT_VEDTAK_AARSAVREGNING, ProsessType.BEHANDLE_SATSENDRING).contains(prosessinstans.getType())) {
+        } else if (Arrays.asList(Behandlingstyper.SATSENDRING, Behandlingstyper.ÅRSAVREGNING).contains(behandling.getType())) {
             avsluttÅrsavregningEllerSatsendring(fagsak, behandling);
         } else {
             avsluttFagsak(prosessinstans, behandlingID, fagsak);

@@ -8,7 +8,6 @@ import no.nav.melosys.domain.kodeverk.Vedtakstyper
 import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingsaarsaktyper
 import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingsresultattyper
 import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingstyper
-import no.nav.melosys.exception.FunksjonellException
 import no.nav.melosys.saksflyt.steg.StegBehandler
 import no.nav.melosys.saksflytapi.domain.ProsessSteg
 import no.nav.melosys.saksflytapi.domain.Prosessinstans
@@ -30,10 +29,12 @@ class OpprettSatsbehandling(
     }
 
     override fun utfør(prosessinstans: Prosessinstans) {
-        val behandlingSomSkalReplikeres = prosessinstans.behandling ?: throw FunksjonellException("Behandling mangler i prosessinstans: ${prosessinstans.id}")
-        val behandlingstype = Behandlingstyper.SATSENDRING
-
-        val nyBehandling: Behandling = behandlingService.replikerBehandlingOgBehandlingsresultat(behandlingSomSkalReplikeres, behandlingstype)
+        val behandlingSomSkalReplikeres =
+            requireNotNull(prosessinstans.behandling) { "Behandling mangler i prosessinstans: ${prosessinstans.id}" }
+        val nyBehandling: Behandling = behandlingService.replikerBehandlingOgBehandlingsresultat(
+            behandlingSomSkalReplikeres,
+            Behandlingstyper.SATSENDRING
+        )
 
         val behandlingsårsak = Behandlingsaarsak(Behandlingsaarsaktyper.ÅRLIG_SATSOPPDATERING, null, LocalDate.now())
         nyBehandling.settBehandlingsårsak(behandlingsårsak)

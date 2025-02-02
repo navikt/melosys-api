@@ -70,7 +70,7 @@ public enum ProsessSteg {
     OPPRETT_AARSAVREGNING_BEHANDLING("OPPRETT_ARSAVREGNING_BEHANDLING", "Oppretter ny behandling for årsavregning"),
     SEND_FAKTURA_AARSAVREGNING("SEND_FAKTURA_AARSAVREGNING", "Sender faktura for årsavregning"),
     BEREGN_OG_SEND_FAKTURA("BEREGN_OG_SEND_FAKTURA","Beregner trygdeavgift og sender faktura"),
-    OPPRETT_SATSBEHANDLING("OPPRETT_SATSBEHANDLING","Oppretter satsbehandling");
+    OPPRETT_SATSBEHANDLING("OPPRETT_SATSBEHANDLING", "Oppretter satsendringsbehandling basert på tidligere behandling");
 
 
     private final String kode;
