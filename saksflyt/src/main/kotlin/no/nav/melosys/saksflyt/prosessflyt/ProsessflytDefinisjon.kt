@@ -136,8 +136,8 @@ object ProsessflytDefinisjon {
             REPLIKER_BEHANDLING,
             OPPRETT_OPPGAVE
         ),
-        BEHANDLE_SATSENDRING to ProsessFlyt(
-            prosessType = BEHANDLE_SATSENDRING,
+        SATSENDRING to ProsessFlyt(
+            prosessType = SATSENDRING,
             OPPRETT_SATSBEHANDLING,
             BEREGN_OG_SEND_FAKTURA,
             AVSLUTT_SAK_OG_BEHANDLING

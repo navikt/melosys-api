@@ -31,7 +31,6 @@ import no.nav.melosys.integrasjon.trygdeavgift.dto.*
 import no.nav.melosys.itest.JournalfoeringBase
 import no.nav.melosys.itest.MelosysHendelseKafkaConsumer
 import no.nav.melosys.melosysmock.medl.MedlRepo
-import no.nav.melosys.melosysmock.testdata.JournalføringsoppgaveGenerator
 import no.nav.melosys.saksflytapi.ProsessinstansService
 import no.nav.melosys.saksflytapi.domain.ProsessType
 import no.nav.melosys.service.avgift.TrygdeavgiftsberegningService
@@ -156,7 +155,7 @@ class SatsendringIT(
 
         val satsendringID = executeAndWait(
             mapOf(
-                ProsessType.BEHANDLE_SATSENDRING to 1
+                ProsessType.SATSENDRING to 1
             )
         ) {
             prosessinstansService.opprettSatsendringBehandling(førstegangsbehandling)
