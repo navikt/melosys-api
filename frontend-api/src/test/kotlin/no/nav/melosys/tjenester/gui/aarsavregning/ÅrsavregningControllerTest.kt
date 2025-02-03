@@ -210,7 +210,7 @@ internal class ÅrsavregningControllerTest {
       "totalAvgift": 31650.0
     }
   },
-  "avvikFunnet": false,
+  "avvikFunnet": true,
   "nyttGrunnlag": null,
   "endeligAvgift": null,
   "avregning": {
