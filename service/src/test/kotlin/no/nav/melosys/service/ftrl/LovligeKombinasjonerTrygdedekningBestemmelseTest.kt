@@ -20,7 +20,7 @@ class LovligeKombinasjonerTrygdedekningBestemmelseTest {
         LovligeKombinasjonerTrygdedekningBestemmelse.hentLovligeBestemmelser(Trygdedekninger.FULL_DEKNING_FTRL)
             .shouldNotBeNull()
             .shouldHaveSize(19)
-            .shouldContainAll(PliktigeMedlemskapsbestemmelser.bestemmelserMedSpesielleGrupper)
+            .shouldContainAll(PliktigeMedlemskapsbestemmelser.bestemmelser)
     }
 
 
