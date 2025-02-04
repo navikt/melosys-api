@@ -12,7 +12,8 @@ data class AvklartefaktaOppsummeringDto internal constructor(
     val ikkeYrkesaktivFamilieRelasjonstype: String?,
     val ikkeYrkesaktivOppholdstype: String?,
     val arbeidssituasjonType: String?,
-    val ukjentSluttdatoMedlemskapsperiode: Boolean?
+    val ukjentSluttdatoMedlemskapsperiode: Boolean?,
+    val opplysningerFraAvgiftsystemet: Boolean?
 ) {
     constructor(avklartefakta: Set<AvklartefaktaDto>) : this(
         virksomheter = VirksomheterDto.av(avklartefakta),
@@ -21,7 +22,8 @@ data class AvklartefaktaOppsummeringDto internal constructor(
         ikkeYrkesaktivFamilieRelasjonstype = hentFamileRelasjonType(avklartefakta),
         ikkeYrkesaktivOppholdstype = hentOppholdType(avklartefakta),
         arbeidssituasjonType = hentArbeidssituasjonType(avklartefakta),
-        ukjentSluttdatoMedlemskapsperiode = hentUkjentSluttdatoMedlemskapsperiode(avklartefakta)
+        ukjentSluttdatoMedlemskapsperiode = hentUkjentSluttdatoMedlemskapsperiode(avklartefakta),
+        opplysningerFraAvgiftsystemet = hentOpplysningerFraAvgiftsystemet(avklartefakta)
     )
 
     companion object {
@@ -43,6 +45,10 @@ data class AvklartefaktaOppsummeringDto internal constructor(
 
         private fun hentUkjentSluttdatoMedlemskapsperiode(avklartefakta: Set<AvklartefaktaDto>): Boolean = avklartefakta.firstOrNull {
             it.avklartefaktaType == Avklartefaktatyper.UKJENT_SLUTTDATO_MEDLEMSKAPSPERIODE
+        }?.fakta?.single().toBoolean()
+
+        private fun hentOpplysningerFraAvgiftsystemet(avklartefakta: Set<AvklartefaktaDto>): Boolean = avklartefakta.firstOrNull {
+            it.avklartefaktaType == Avklartefaktatyper.OPPLYSNINGER_FRA_AVGIFTSYSTEMET
         }?.fakta?.single().toBoolean()
     }
 }

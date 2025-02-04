@@ -34,6 +34,7 @@ public class AvklartefaktaController {
     private final AvklartArbeidssituasjonTypeService avklartArbeidssituasjonTypeService;
     private final AvklartOppholdTypeService avklartOppholdTypeService;
     private final AvklartUkjentSluttdatoMedlemskapsperiodeService avklartUkjentSluttdatoMedlemskapsperiodeService;
+    private final AvklartOpplysningerFraAvgiftsystemetService avklartOpplysningerFraAvgiftsystemetService;
 
     private final Aksesskontroll aksesskontroll;
 
@@ -45,7 +46,8 @@ public class AvklartefaktaController {
                                    AvklartManglendeInnbetalingService avklartManglendeInnbetalingService,
                                    AvklartFamilieRelasjonTypeService avklartFamilieRelasjonTypeService,
                                    AvklartOppholdTypeService avklartOppholdTypeService,
-                                   AvklartUkjentSluttdatoMedlemskapsperiodeService avklartUkjentSluttdatoMedlemskapsperiodeService) {
+                                   AvklartUkjentSluttdatoMedlemskapsperiodeService avklartUkjentSluttdatoMedlemskapsperiodeService,
+                                   AvklartOpplysningerFraAvgiftsystemetService avklartOpplysningerFraAvgiftsystemetService) {
         this.avklartefaktaService = avklartefaktaService;
         this.avklarteVirksomheterService = avklarteVirksomheterService;
         this.avklarteFaktaArbeidslandService = avklarteFaktaArbeidslandService;
@@ -55,6 +57,7 @@ public class AvklartefaktaController {
         this.avklartFamilieRelasjonTypeService = avklartFamilieRelasjonTypeService;
         this.avklartOppholdTypeService = avklartOppholdTypeService;
         this.avklartUkjentSluttdatoMedlemskapsperiodeService = avklartUkjentSluttdatoMedlemskapsperiodeService;
+        this.avklartOpplysningerFraAvgiftsystemetService = avklartOpplysningerFraAvgiftsystemetService;
     }
 
     @GetMapping("{behandlingID}")
@@ -103,6 +106,18 @@ public class AvklartefaktaController {
 
         avklartManglendeInnbetalingService.lagreFullstendigManglendeInnbetalingSomAvklartFakta(behandlingID,
             fullstendigManglendeInnbetaling);
+
+        return new AvklartefaktaOppsummeringDto(avklartefaktaService.hentAlleAvklarteFakta(behandlingID));
+    }
+
+    @PostMapping("{behandlingID}/opplysninger-avgiftsystem")
+    @ApiOperation(value = "Lagre om behandlingen har opplysninger fra avgiftsystemet som avklartfakta", response = AvklartefaktaOppsummeringDto.class)
+    public AvklartefaktaOppsummeringDto lagreOpplysningerFraAvgiftsystemetSomAvklartFakta(@PathVariable("behandlingID") long behandlingID,
+                                                                                            @RequestBody Boolean opplysningerFraAvgiftsystemet) {
+        aksesskontroll.autoriserSkrivTilRessurs(behandlingID, Ressurs.AVKLARTE_FAKTA);
+
+        avklartOpplysningerFraAvgiftsystemetService.lagreOpplysningerFraAvgiftsystemetSomAvklartFakta(behandlingID,
+            opplysningerFraAvgiftsystemet);
 
         return new AvklartefaktaOppsummeringDto(avklartefaktaService.hentAlleAvklarteFakta(behandlingID));
     }
