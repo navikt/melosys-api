@@ -52,8 +52,7 @@ class BeregnOgSendFaktura(
         val fullmektig = fagsak.finnFullmektig(Fullmaktstype.FULLMEKTIG_TRYGDEAVGIFT)
         val foedselsNr = pdlService.finnFolkeregisterident(fagsak.hentBrukersAktørID())
             .orElseThrow { FunksjonellException("Kunne ikke finne fødselsnummer fra PDL") }
-        val vedtaksdato =
-            DateTimeFormatter.ofPattern("dd.MM.yyyy").withZone(ZoneId.systemDefault()).format(behandlingsresultat.vedtakMetadata.vedtaksdato)
+        val vedtaksdato = FORMATTER.format(behandlingsresultat.vedtakMetadata.vedtaksdato)
 
         return FakturaserieDto(
             fodselsnummer = foedselsNr,
@@ -100,6 +99,7 @@ class BeregnOgSendFaktura(
 
     companion object {
         const val DEFAULT_PENSJON_DEKNING_TEKST_HELSEDEL = "Helsedel"
+        private val FORMATTER = DateTimeFormatter.ofPattern("dd.MM.yyyy").withZone(ZoneId.systemDefault())
     }
 
 }

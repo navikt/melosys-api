@@ -164,6 +164,7 @@ class SatsendringIT(
 
 
         val satsendring = behandlingService.hentBehandling(satsendringID)
+        // Henter behandling på nytt siden førstegangsbehandling blir returnert før ApplicationEvents i Avsluttfagsak kjører async
         val førstegangsbehandlingRefresh = behandlingService.hentBehandling(førstegangsbehandling.id)
         val satsendingBehandlingresultat = behandlingsresultatService.hentResultatMedMedlemskapOgLovvalg(satsendringID)
         val førstegangsBehandlingsresultat = behandlingsresultatService.hentResultatMedMedlemskapOgLovvalg(førstegangsbehandling.id)
