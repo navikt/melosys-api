@@ -136,6 +136,12 @@ object ProsessflytDefinisjon {
             REPLIKER_BEHANDLING,
             OPPRETT_OPPGAVE
         ),
+        SATSENDRING to ProsessFlyt(
+            prosessType = SATSENDRING,
+            OPPRETT_SATSBEHANDLING,
+            BEREGN_OG_SEND_FAKTURA,
+            AVSLUTT_SAK_OG_BEHANDLING
+        ),
         OPPRETT_NY_BEHANDLING_FOR_SAK to ProsessFlyt(
             prosessType = OPPRETT_NY_BEHANDLING_FOR_SAK,
             OPPRETT_NY_BEHANDLING,

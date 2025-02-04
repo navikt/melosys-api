@@ -111,6 +111,16 @@ public class ProsessinstansService {
         lagre(prosessinstans);
     }
 
+    @Transactional
+    public UUID opprettSatsendringBehandling(Behandling behandling) {
+        Prosessinstans prosessinstans = new Prosessinstans();
+        prosessinstans.setBehandling(behandling);
+
+        prosessinstans.setType(ProsessType.SATSENDRING);
+
+        return lagre(prosessinstans);
+    }
+
     Prosessinstans lagJournalføringProsessinstans(ProsessType type, JournalfoeringRequest journalfoeringRequest, String institusjonID, boolean mottaksKanalErElektronisk) {
         Prosessinstans prosessinstans = new Prosessinstans();
         prosessinstans.setType(type);

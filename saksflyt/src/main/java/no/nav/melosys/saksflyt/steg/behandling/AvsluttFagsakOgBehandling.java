@@ -1,14 +1,16 @@
 package no.nav.melosys.saksflyt.steg.behandling;
 
+import java.util.Arrays;
+
 import no.nav.melosys.domain.Behandling;
 import no.nav.melosys.domain.Behandlingsresultat;
 import no.nav.melosys.domain.Fagsak;
 import no.nav.melosys.domain.kodeverk.Saksstatuser;
 import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingsstatus;
+import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingstyper;
 import no.nav.melosys.saksflyt.steg.StegBehandler;
 import no.nav.melosys.saksflytapi.domain.ProsessDataKey;
 import no.nav.melosys.saksflytapi.domain.ProsessSteg;
-import no.nav.melosys.saksflytapi.domain.ProsessType;
 import no.nav.melosys.saksflytapi.domain.Prosessinstans;
 import no.nav.melosys.service.behandling.BehandlingService;
 import no.nav.melosys.service.behandling.BehandlingsresultatService;
@@ -53,8 +55,8 @@ public class AvsluttFagsakOgBehandling implements StegBehandler {
 
         if (behandlingsresultat.erGodkjenningEllerInnvilgelseArt13() && !saksbehandlingRegler.harRegistreringUnntakFraMedlemskapFlyt(behandlingsresultat.getBehandling())) {
             behandlingService.endreStatus(behandlingID, Behandlingsstatus.MIDLERTIDIG_LOVVALGSBESLUTNING);
-        } else if (prosessinstans.getType() == ProsessType.IVERKSETT_VEDTAK_AARSAVREGNING) {
-            avsluttÅrsavregning(fagsak, behandling);
+        } else if (Arrays.asList(Behandlingstyper.SATSENDRING, Behandlingstyper.ÅRSAVREGNING).contains(behandling.getType())) {
+            avsluttÅrsavregningEllerSatsendring(fagsak, behandling);
         } else {
             avsluttFagsak(prosessinstans, behandlingID, fagsak);
         }
@@ -66,7 +68,7 @@ public class AvsluttFagsakOgBehandling implements StegBehandler {
         fagsakService.avsluttFagsakOgBehandling(fagsak, saksstatus);
     }
 
-    private void avsluttÅrsavregning(Fagsak fagsak, Behandling behandling) {
+    private void avsluttÅrsavregningEllerSatsendring(Fagsak fagsak, Behandling behandling) {
         boolean sakLukkes = fagsak.erEnesteBehandling(behandling.getId());
         if (sakLukkes) {
             fagsakService.avsluttFagsakOgBehandling(fagsak, behandling, Saksstatuser.AVSLUTTET);
