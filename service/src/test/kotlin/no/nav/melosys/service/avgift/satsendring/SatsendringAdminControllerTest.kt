@@ -1,10 +1,9 @@
-package no.nav.melosys.tjenester.gui.satsendring
+package no.nav.melosys.service.avgift.satsendring
 
 import com.ninjasquad.springmockk.MockkBean
 import io.mockk.every
 import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingstyper
 import no.nav.melosys.service.AdminController
-import no.nav.melosys.service.avgift.satsendring.SatsendringFinner
 import no.nav.melosys.service.avgift.satsendring.SatsendringFinner.AvgiftSatsendringInfo
 import no.nav.melosys.service.avgift.satsendring.SatsendringFinner.BehandlingForSatstendring
 import org.junit.jupiter.api.Test
@@ -89,7 +88,7 @@ class SatsendringAdminControllerTest {
         )
 
     companion object {
-        private const val BASE_URL = "/api/admin/satsendringer"
+        private const val BASE_URL = "/admin/satsendringer"
         private const val ÅR = 2025
     }
 
