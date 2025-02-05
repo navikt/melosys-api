@@ -15,12 +15,17 @@ import io.mockk.verify
 import no.nav.melosys.domain.Behandling
 import no.nav.melosys.domain.Behandlingsresultat
 import no.nav.melosys.domain.Medlemskapsperiode
+import no.nav.melosys.domain.avgift.Inntektsperiode
+import no.nav.melosys.domain.avgift.Penger
+import no.nav.melosys.domain.avgift.SkatteforholdTilNorge
+import no.nav.melosys.domain.avgift.Trygdeavgiftsperiode
 import no.nav.melosys.domain.kodeverk.*
 import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingstema
 import no.nav.melosys.domain.mottatteopplysninger.MottatteOpplysninger
 import no.nav.melosys.domain.mottatteopplysninger.SøknadNorgeEllerUtenforEØS
 import no.nav.melosys.domain.mottatteopplysninger.data.Soeknadsland
 import no.nav.melosys.exception.FunksjonellException
+import no.nav.melosys.integrasjon.trygdeavgift.dto.NOK
 import no.nav.melosys.repository.MedlemskapsperiodeRepository
 import no.nav.melosys.service.behandling.BehandlingsresultatService
 import no.nav.melosys.service.ftrl.GyldigeTrygdedekningerService
@@ -28,6 +33,7 @@ import no.nav.melosys.service.medl.MedlPeriodeService
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.extension.ExtendWith
+import java.math.BigDecimal
 import java.time.LocalDate
 
 @ExtendWith(MockKExtension::class)
@@ -130,8 +136,15 @@ class MedlemskapsperiodeServiceTest {
     @Test
     fun oppdaterMedlemskapsperiode_medlemskapsperiodeFinnes_oppdateres() {
         every { gyldigeTrygdedekningerService.hentTrygdedekninger(any(), any()) } returns listOf(*Trygdedekninger.values())
+
+        val trygdeavgiftsperiode = lagTrygdeavgiftsperiode(SkatteforholdTilNorge(), Inntektsperiode())
+        val medlemskapsperiode = Medlemskapsperiode().apply {
+            id = MEDLEMSKAPSPERIODE_ID_1
+            trygdeavgiftsperioder = mutableSetOf(trygdeavgiftsperiode)
+        }
+
         val behandlingsresultat = lagBehandlingsresultat().apply {
-            medlemskapsperioder = listOf(Medlemskapsperiode().apply { id = MEDLEMSKAPSPERIODE_ID_1 })
+            medlemskapsperioder = listOf(medlemskapsperiode)
         }
         every { behandlingsresultatService.hentBehandlingsresultat(BEHANDLING_ID_1) } returns behandlingsresultat
         every { medlemskapsperiodeRepository.saveAndFlush(any()) } returnsArgument 0
@@ -155,6 +168,7 @@ class MedlemskapsperiodeServiceTest {
             innvilgelsesresultat.shouldBe(InnvilgelsesResultat.AVSLAATT)
             trygdedekning.shouldBe(Trygdedekninger.FTRL_2_9_FØRSTE_LEDD_C_ANDRE_LEDD_HELSE_PENSJON_SYKE_FORELDREPENGER)
             bestemmelse.shouldBe(Folketrygdloven_kap2_bestemmelser.FTRL_KAP2_2_1)
+            trygdeavgiftsperioder.shouldBeEmpty()
         }
     }
 
@@ -634,4 +648,16 @@ class MedlemskapsperiodeServiceTest {
             }
         }
     }
+
+    private fun lagTrygdeavgiftsperiode(
+        skatteforholdTilNorge: SkatteforholdTilNorge,
+        inntektsperiode: Inntektsperiode
+    ) = Trygdeavgiftsperiode(
+        grunnlagInntekstperiode = inntektsperiode,
+        grunnlagSkatteforholdTilNorge = skatteforholdTilNorge,
+        periodeTil = LocalDate.now(),
+        periodeFra = LocalDate.now(),
+        trygdesats = BigDecimal(1),
+        trygdeavgiftsbeløpMd = Penger(BigDecimal(1), NOK.kode)
+    )
 }
