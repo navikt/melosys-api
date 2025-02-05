@@ -154,6 +154,7 @@ object ProsessflytDefinisjon {
             prosessType = SATSENDRING_TILBAKESTILL_NY_VURDERING,
             OPPRETT_SATSBEHANDLING,
             BEREGN_OG_SEND_FAKTURA,
+            TILBAKESTILL_TRYGDEAVGIFT,
             AVSLUTT_SAK_OG_BEHANDLING
         ),
         IVERKSETT_VEDTAK_AARSAVREGNING to ProsessFlyt(
