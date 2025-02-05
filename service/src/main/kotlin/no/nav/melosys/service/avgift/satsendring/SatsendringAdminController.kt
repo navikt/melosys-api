@@ -1,7 +1,6 @@
-package no.nav.melosys.tjenester.gui.satsendring
+package no.nav.melosys.service.avgift.satsendring
 
 import no.nav.melosys.service.AdminController
-import no.nav.melosys.service.avgift.satsendring.SatsendringFinner
 import no.nav.security.token.support.core.api.Unprotected
 import org.springframework.beans.factory.annotation.Value
 import org.springframework.http.ResponseEntity
