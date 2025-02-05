@@ -97,8 +97,8 @@ class MedlemskapsperiodeService(
             this.bestemmelse = bestemmelse
             medlemskapstype = UtledMedlemskapstype.av(bestemmelse!!)
         }
+        medlemskapsperiode.clearTrygdeavgiftsperioder()
 
-        behandlingsresultat.trygdeavgiftsperioder?.clear()
         return medlemskapsperiodeRepository.saveAndFlush(medlemskapsperiode)
     }
 
