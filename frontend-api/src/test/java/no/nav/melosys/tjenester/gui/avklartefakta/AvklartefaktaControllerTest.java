@@ -52,8 +52,6 @@ class AvklartefaktaControllerTest {
     private AvklartArbeidssituasjonTypeService avklartArbeidssituasjonTypeService;
     @MockBean
     private AvklartOppholdTypeService avklartOppholdTypeService;
-    @MockBean
-    private AvklartOpplysningerFraAvgiftsystemetService avklartOpplysningerFraAvgiftsystemetService;
 
     @Autowired
     private MockMvc mockMvc;
