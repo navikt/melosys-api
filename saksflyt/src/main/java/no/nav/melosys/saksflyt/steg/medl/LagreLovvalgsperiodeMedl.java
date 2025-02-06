@@ -3,6 +3,7 @@ package no.nav.melosys.saksflyt.steg.medl;
 import java.util.Optional;
 
 import no.nav.melosys.domain.Behandling;
+import no.nav.melosys.domain.Behandlingsresultat;
 import no.nav.melosys.domain.Lovvalgsperiode;
 import no.nav.melosys.domain.kodeverk.Utfallregistreringunntak;
 import no.nav.melosys.exception.FunksjonellException;
@@ -15,6 +16,8 @@ import no.nav.melosys.service.saksbehandling.SaksbehandlingRegler;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Component;
+
+import static no.nav.melosys.domain.kodeverk.Vilkaar.FTRL_2_12_UNNTAK_TURISTSKIP;
 
 @Component
 public class LagreLovvalgsperiodeMedl implements StegBehandler {
@@ -43,16 +46,23 @@ public class LagreLovvalgsperiodeMedl implements StegBehandler {
     public void utfør(Prosessinstans prosessinstans) {
         final long behandlingID = prosessinstans.getBehandling().getId();
         final var behandlingsresultat = behandlingsresultatService.hentBehandlingsresultat(behandlingID);
-        if (erIkkeGodkjentRegistreringUnntakFraMedlemskap(prosessinstans.getBehandling(), behandlingsresultat.getUtfallRegistreringUnntak())) {
+        final var behandling = prosessinstans.getBehandling();
+        final var lovvalgsperiode = behandlingsresultat.hentLovvalgsperiode();
+
+        if (erIkkeGodkjentRegistreringUnntakFraMedlemskap(prosessinstans.getBehandling(), behandlingsresultat.getUtfallRegistreringUnntak()) ||
+            erUnntakTuristSkip(behandlingsresultat) && behandling.erFørstegangsvurdering()) {
             return;
         }
 
-        final var lovvalgsperiode = behandlingsresultat.hentLovvalgsperiode();
-        final var behandling = prosessinstans.getBehandling();
         if (behandling.erNyVurdering()) {
             lovvalgsperiode.setMedlPeriodeID(finnOpprinneligMedlPeriodeID(behandling).orElse(null));
         }
+
         oppdaterLovvalgsperiode(behandling, lovvalgsperiode);
+    }
+
+    private boolean erUnntakTuristSkip(Behandlingsresultat behandlingsresultat) {
+        return behandlingsresultat.oppfyllerVilkår(FTRL_2_12_UNNTAK_TURISTSKIP);
     }
 
     private boolean erIkkeGodkjentRegistreringUnntakFraMedlemskap(Behandling behandling, Utfallregistreringunntak utfallregistreringunntak) {

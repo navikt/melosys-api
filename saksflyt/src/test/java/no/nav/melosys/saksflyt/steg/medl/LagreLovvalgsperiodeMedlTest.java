@@ -1,6 +1,8 @@
 package no.nav.melosys.saksflyt.steg.medl;
 
+import java.util.HashSet;
 import java.util.NoSuchElementException;
+import java.util.Set;
 
 import no.nav.melosys.domain.*;
 import no.nav.melosys.domain.kodeverk.*;
@@ -251,6 +253,26 @@ class LagreLovvalgsperiodeMedlTest {
             .withMessageContaining("Ukjent eller ikke-eksisterende innvilgelsesresultat");
     }
 
+    @Test
+    void utfør_ikke_opprett_lovvalgsperiode_dersom_unntak_turistskip_er_oppfylt(){
+        Behandling behandling = TestdataFactory.lagBehandling();
+        Lovvalgsperiode lovvalgsperiode = lagLovvalgsperiode(1L, Lovvalgbestemmelser_883_2004.FO_883_2004_ART13_1A, InnvilgelsesResultat.INNVILGET);
+
+        prosessinstans.setBehandling(behandling);
+
+        Vilkaarsresultat vilkaarsresultat = new Vilkaarsresultat();
+        vilkaarsresultat.setVilkaar(Vilkaar.FTRL_2_12_UNNTAK_TURISTSKIP);
+        vilkaarsresultat.setOppfylt(true);
+
+        behandlingsresultat.getLovvalgsperioder().add(lovvalgsperiode);
+        behandlingsresultat.getVilkaarsresultater().add(vilkaarsresultat);
+
+        when(behandlingsresultatService.hentBehandlingsresultat(behandling.getId())).thenReturn(behandlingsresultat);
+        lagreLovvalgsperiodeMedl.utfør(prosessinstans);
+
+        verifyNoInteractions(medlPeriodeService);
+    }
+
     private Lovvalgsperiode lagLovvalgsperiode(Long medlPeriodeID,
                                                LovvalgBestemmelse lovvalgBestemmelse,
                                                InnvilgelsesResultat innvilgelsesResultat) {
@@ -260,4 +282,5 @@ class LagreLovvalgsperiodeMedlTest {
         lovvalgsperiode.setInnvilgelsesresultat(innvilgelsesResultat);
         return lovvalgsperiode;
     }
+
 }
