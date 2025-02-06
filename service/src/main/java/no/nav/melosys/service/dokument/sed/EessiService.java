@@ -220,7 +220,9 @@ public class EessiService {
         log.info("Sender svar på A003 for behandling {}", behandlingID);
         final var behandling = behandlingService.hentBehandling(behandlingID);
 
-        annullerSedForNyVurderingMedSendtVedtak(behandling);
+        if (behandling.erNyVurdering()) {
+            annullerSedForNyVurderingMedSendtVedtak(behandling);
+        }
         sendSedPåEksisterendeBehandling(behandlingID, PeriodeType.LOVVALGSPERIODE, br -> SedType.A012, ytterligereInformasjon);
     }
 
@@ -240,7 +242,10 @@ public class EessiService {
             utpekingAvvis.getEtterspørInformasjon()
         ));
 
-        annullerSedForNyVurderingMedSendtVedtak(behandling);
+
+        if (behandling.erNyVurdering()) {
+            annullerSedForNyVurderingMedSendtVedtak(behandling);
+        }
 
         eessiConsumer.sendSedPåEksisterendeBuc(sedDataDto, rinaSaksnummer, SedType.A004);
     }

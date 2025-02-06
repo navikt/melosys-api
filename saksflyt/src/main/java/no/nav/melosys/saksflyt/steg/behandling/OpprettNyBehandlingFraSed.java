@@ -65,7 +65,7 @@ public class OpprettNyBehandlingFraSed implements StegBehandler {
         avsluttTidligereBehandling(fagsak);
         var behandling = behandlingService.nyBehandling(
             fagsak, Behandlingsstatus.UNDER_BEHANDLING,
-            Behandlingstyper.FØRSTEGANG,
+            Behandlingstyper.NY_VURDERING,
             behandlingstema, eessiMelding.getJournalpostId(), eessiMelding.getDokumentId(),
             joarkFasade.hentMottaksDatoForJournalpost(eessiMelding.getJournalpostId()),
             Behandlingsaarsaktyper.SED, null);

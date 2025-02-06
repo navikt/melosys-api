@@ -109,7 +109,7 @@ class OpprettNyBehandlingFraSedTest {
         verify(behandlingService).avsluttBehandling(behandling.getId());
         verify(behandlingsresultatService).oppdaterBehandlingsresultattype(behandling.getId(), Behandlingsresultattyper.FERDIGBEHANDLET);
         verify(behandlingService).nyBehandling(
-            fagsak, Behandlingsstatus.UNDER_BEHANDLING, Behandlingstyper.FØRSTEGANG, behandlingstema, journalpostID, dokumentID,
+            fagsak, Behandlingsstatus.UNDER_BEHANDLING, Behandlingstyper.NY_VURDERING, behandlingstema, journalpostID, dokumentID,
             mottaksdato, Behandlingsaarsaktyper.SED, null);
         assertThat(prosessinstans.getBehandling()).isNotNull();
     }
