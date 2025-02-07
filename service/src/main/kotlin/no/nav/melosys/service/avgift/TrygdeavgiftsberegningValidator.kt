@@ -4,6 +4,7 @@ package no.nav.melosys.service.avgift
 
 import no.nav.melosys.domain.Behandlingsresultat
 import no.nav.melosys.domain.ErPeriode
+import no.nav.melosys.domain.Medlemskapsperiode
 import no.nav.melosys.domain.avgift.Inntektsperiode
 import no.nav.melosys.domain.avgift.SkatteforholdTilNorge
 import no.nav.melosys.domain.kodeverk.Skatteplikttype
@@ -14,12 +15,15 @@ object TrygdeavgiftsberegningValidator {
     const val MEDLEMSKAPSPERIODER_EMPTY = "Kan ikke beregne trygdeavgift uten medlemskapsperioder"
     const val UTLED_MEDLEMSKAPSPERIODE_FOM_MANGLER = "Det kreves en innvilget medlemskapsperiode med startdato"
     const val UTLED_MEDLEMSKAPSPERIODE_TOM_MANGLER = "Skatteforholdsperiode/inntektsperiode kan ikke ha sluttdato når medlemskapsperiode ikke har sluttdato"
+    const val MEDLEMSKAPSPERIODER_HAR_FORSKJELLIGE_BESTEMMELSER = "Det er ikke lov med forskjellige bestemmelser"
+
     const val INNTEKTSPERIODER_EMPTY = "Kan ikke beregne trygdeavgift uten inntektsperioder"
     const val SKATTEFORHOLDSPERIODER_EMPTY = "Kan ikke beregne trygdeavgift uten skatteforholdTilNorge"
     const val SKATTEPLIKTTYPE_LIK_FOR_ALLE_PERIODER = "Alle skatteforholdsperiodene har samme svar på spørsmålet om skatteplikt"
     const val SKATTEFORHOLDSPERIODENE_KAN_IKKE_OVERLAPPE = "Skatteforholdsperiodene kan ikke overlappe"
     const val SKATTEFORHOLDSPERIODE_DEKKER_IKKE_HELE_PERIODEN = "Skatteforholdsperioden(e) du har lagt inn dekker ikke hele medlemskapsperioden(e)"
     const val INNTEKTSPERIODE_DEKKER_IKKE_HELE_PERIODEN = "Inntektsperioden(e) du har lagt inn dekker ikke hele medlemskapsperioden(e)"
+    const val INNTEKTSPERIODE_ER_UTENFOR_MEDLEMSKAPSPERIODE = "Inntektsperioden(e) du har lagt inn er utenfor medlemskapsperioden(e)"
 
 
     fun validerForTrygdeavgiftberegning(
@@ -42,7 +46,6 @@ object TrygdeavgiftsberegningValidator {
 
         val innvilgedeMedlemskapsperioder = behandlingsresultat.medlemskapsperioder.filter { it.erInnvilget() }
 
-
         harOverlapp(skatteforholdsPerioder, SKATTEFORHOLDSPERIODENE_KAN_IKKE_OVERLAPPE)
 
         validerPerioderDekkerSammenlignetPeriode(
@@ -51,6 +54,8 @@ object TrygdeavgiftsberegningValidator {
             innvilgedeMedlemskapsperioder,
             SKATTEFORHOLDSPERIODE_DEKKER_IKKE_HELE_PERIODEN
         )
+
+        validerInntektPerioderIkkeErUtenforMedlemskapPeriode(inntektsPerioder, innvilgedeMedlemskapsperioder, INNTEKTSPERIODE_ER_UTENFOR_MEDLEMSKAPSPERIODE)
 
         val erPliktigMedlem = innvilgedeMedlemskapsperioder.all { it.erPliktig() }
         val erSkattepliktigIHelePerioden = skatteforholdsPerioder.all { it.skatteplikttype == Skatteplikttype.SKATTEPLIKTIG }
@@ -62,6 +67,18 @@ object TrygdeavgiftsberegningValidator {
                 INNTEKTSPERIODE_DEKKER_IKKE_HELE_PERIODEN
             )
         }
+
+    }
+
+    private fun validerInntektPerioderIkkeErUtenforMedlemskapPeriode(kildeperioder: List<ErPeriode>, medlemskapsperioder: List<ErPeriode>, feilmelding: String) {
+        val kildeperiodeStart = kildeperioder.minOf { it.fom }
+        val kildeperiodeEnd = kildeperioder.maxOf { it.tom }
+
+        val medlemskapsPeriodestart = medlemskapsperioder.minOf { it.fom }
+        val medlemskapsPeriodeEnd = medlemskapsperioder.maxOf { it.tom }
+
+        if (kildeperiodeStart.isBefore(medlemskapsPeriodestart)) throw FunksjonellException(feilmelding)
+        if (kildeperiodeEnd.isAfter(medlemskapsPeriodeEnd)) throw FunksjonellException(feilmelding)
     }
 
     fun erAllePerioderSkattepliktige(skatteforholdsPerioder: List<SkatteforholdTilNorge>): Boolean {
@@ -72,11 +89,19 @@ object TrygdeavgiftsberegningValidator {
         if (behandlingsresultat.medlemskapsperioder.isEmpty()) {
             throw FunksjonellException(MEDLEMSKAPSPERIODER_EMPTY)
         }
+        alleMedlemskapsperioderHarSammeBestemmelse(behandlingsresultat.medlemskapsperioder)
+
         behandlingsresultat.utledMedlemskapsperiodeFom()
             ?: throw FunksjonellException(UTLED_MEDLEMSKAPSPERIODE_FOM_MANGLER)
 
         behandlingsresultat.utledMedlemskapsperiodeTom()
             ?: throw FunksjonellException(UTLED_MEDLEMSKAPSPERIODE_TOM_MANGLER)
+    }
+
+    private fun alleMedlemskapsperioderHarSammeBestemmelse(medlemskapsperioder: Collection<Medlemskapsperiode>) {
+        val referenceValue = medlemskapsperioder.first().bestemmelse.toString()
+         if (!medlemskapsperioder.all { it.bestemmelse.toString() == referenceValue })
+             throw FunksjonellException(MEDLEMSKAPSPERIODER_HAR_FORSKJELLIGE_BESTEMMELSER)
     }
 
     private fun validerPerioderDekkerSammenlignetPeriode(
