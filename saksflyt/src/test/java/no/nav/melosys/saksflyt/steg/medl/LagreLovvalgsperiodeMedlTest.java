@@ -268,7 +268,10 @@ class LagreLovvalgsperiodeMedlTest {
         behandlingsresultat.getVilkaarsresultater().add(vilkaarsresultat);
 
         when(behandlingsresultatService.hentBehandlingsresultat(behandling.getId())).thenReturn(behandlingsresultat);
+
+
         lagreLovvalgsperiodeMedl.utfør(prosessinstans);
+
 
         verifyNoInteractions(medlPeriodeService);
     }
@@ -292,7 +295,6 @@ class LagreLovvalgsperiodeMedlTest {
 
         when(behandlingsresultatService.hentBehandlingsresultat(opprinneligBehandling.getId())).thenReturn(opprinneligResultat);
 
-
         Behandling behandling = TestdataFactory.lagBehandlingNyVurdering();
         behandling.setOpprinneligBehandling(opprinneligBehandling);
 
@@ -305,7 +307,9 @@ class LagreLovvalgsperiodeMedlTest {
 
         when(behandlingsresultatService.hentBehandlingsresultat(behandling.getId())).thenReturn(behandlingsresultat);
 
+
         lagreLovvalgsperiodeMedl.utfør(prosessinstans);
+
 
         verify(medlPeriodeService).avvisPeriodeFeilregistrert(opprinneligLovvalgsperiode.getMedlPeriodeID());
         verifyNoMoreInteractions(medlPeriodeService);
