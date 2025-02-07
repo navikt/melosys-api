@@ -34,7 +34,7 @@ public class Årsavregning {
     @Column(name = "til_fakturering_beloep")
     private BigDecimal tilFaktureringBeloep;
 
-    @Column(name = "har_delt_grunnlag")
+    @Column(name = "har_data_fra_avgiftssystemet")
     private Boolean harDeltGrunnlag;
 
     public Boolean getHarDeltGrunnlag() {

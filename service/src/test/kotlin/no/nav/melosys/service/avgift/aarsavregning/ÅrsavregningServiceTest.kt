@@ -171,7 +171,10 @@ internal class ÅrsavregningServiceTest {
             every { aarsavregningRepository.findById(1L) }.returns(Optional.of(behandlingsresultat.årsavregning))
             every { behandlingsresultatService.hentBehandlingsresultat(1L) }.returns(behandlingsresultat)
 
+
             årsavregningService.oppdater(1L, 1L, BigDecimal.valueOf(12.4), BigDecimal.valueOf(5.2))
+
+
             behandlingsresultat.årsavregning.tilFaktureringBeloep shouldBe BigDecimal.valueOf(-7.2)
         }
 
@@ -188,7 +191,10 @@ internal class ÅrsavregningServiceTest {
             every { aarsavregningRepository.findById(1L) }.returns(Optional.of(behandlingsresultat.årsavregning))
             every { behandlingsresultatService.hentBehandlingsresultat(1L) }.returns(behandlingsresultat)
 
+
             årsavregningService.oppdater(1L, 1L, null, BigDecimal.ONE)
+
+
             behandlingsresultat.årsavregning.tilFaktureringBeloep shouldBe null
         }
 
@@ -204,9 +210,12 @@ internal class ÅrsavregningServiceTest {
             }
             every { aarsavregningRepository.findById(1L) }.returns(Optional.of(behandlingsresultat.årsavregning))
             every { behandlingsresultatService.hentBehandlingsresultat(1L) }.returns(behandlingsresultat)
-
             behandlingsresultat.årsavregning.harDeltGrunnlag shouldBe null
+
+
             årsavregningService.oppdater(1L, 1L, null, BigDecimal.ONE, true)
+
+
             behandlingsresultat.årsavregning.harDeltGrunnlag shouldBe true
         }
 
@@ -223,7 +232,11 @@ internal class ÅrsavregningServiceTest {
             every { aarsavregningRepository.findById(1L) }.returns(Optional.of(behandlingsresultat.årsavregning))
             every { behandlingsresultatService.hentBehandlingsresultat(1L) }.returns(behandlingsresultat)
             behandlingsresultat.årsavregning.harDeltGrunnlag shouldBe null
+
+
             årsavregningService.oppdater(1L, 1L, null, BigDecimal.ONE)
+
+
             behandlingsresultat.årsavregning.harDeltGrunnlag shouldBe null
         }
     }

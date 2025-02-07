@@ -1,2 +1,2 @@
 ALTER TABLE aarsavregning
-    ADD har_delt_grunnlag NUMBER(1) NULL;
+    ADD har_data_fra_avgiftssystemet NUMBER(1) NULL;
