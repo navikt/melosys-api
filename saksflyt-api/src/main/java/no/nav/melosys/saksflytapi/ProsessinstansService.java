@@ -489,7 +489,6 @@ public class ProsessinstansService {
             prosessinstans.setData(ORGNR, mottaker.getOrgnr());
         }
         if (hasText(mottaker.getInstitusjonID())) {
-            // TODO Parsing av variabelen feiler pga ":". Burde fikses på en skikkelig måte
             prosessinstans.setData(INSTITUSJON_ID, String.format("\"%s\"", mottaker.getInstitusjonID()));
         }
         prosessinstans.setBehandling(behandling);
