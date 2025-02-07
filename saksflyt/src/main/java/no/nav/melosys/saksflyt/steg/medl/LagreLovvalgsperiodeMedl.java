@@ -45,15 +45,14 @@ public class LagreLovvalgsperiodeMedl implements StegBehandler {
     @Override
     public void utfør(Prosessinstans prosessinstans) {
         final var behandling = prosessinstans.getBehandling();
-        final long behandlingID = behandling.getId();
-
-        final var behandlingsresultat = behandlingsresultatService.hentBehandlingsresultat(behandlingID);
-        final var lovvalgsperiode = behandlingsresultat.hentLovvalgsperiode();
+        final var behandlingsresultat = behandlingsresultatService.hentBehandlingsresultat(behandling.getId());
 
         if (erIkkeGodkjentRegistreringUnntakFraMedlemskap(behandling, behandlingsresultat.getUtfallRegistreringUnntak()) ||
             erUnntakTuristSkip(behandlingsresultat) && behandling.erFørstegangsvurdering()) {
             return;
         }
+
+        final var lovvalgsperiode = behandlingsresultat.hentLovvalgsperiode();
 
         if (behandling.erNyVurdering()) {
             lovvalgsperiode.setMedlPeriodeID(finnOpprinneligMedlPeriodeID(behandling).orElse(null));
