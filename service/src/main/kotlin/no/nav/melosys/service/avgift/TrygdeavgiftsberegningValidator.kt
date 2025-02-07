@@ -55,7 +55,11 @@ object TrygdeavgiftsberegningValidator {
             SKATTEFORHOLDSPERIODE_DEKKER_IKKE_HELE_PERIODEN
         )
 
-        validerInntektPerioderIkkeErUtenforMedlemskapPeriode(inntektsPerioder, innvilgedeMedlemskapsperioder, INNTEKTSPERIODE_ER_UTENFOR_MEDLEMSKAPSPERIODE)
+        if (inntektsPerioder.isNotEmpty()) {
+            validerInntektPerioderIkkeErUtenforMedlemskapPeriode(
+                inntektsPerioder, innvilgedeMedlemskapsperioder, INNTEKTSPERIODE_ER_UTENFOR_MEDLEMSKAPSPERIODE
+            )
+        }
 
         val erPliktigMedlem = innvilgedeMedlemskapsperioder.all { it.erPliktig() }
         val erSkattepliktigIHelePerioden = skatteforholdsPerioder.all { it.skatteplikttype == Skatteplikttype.SKATTEPLIKTIG }
