@@ -191,6 +191,41 @@ internal class ÅrsavregningServiceTest {
             årsavregningService.oppdater(1L, 1L, null, BigDecimal.ONE)
             behandlingsresultat.årsavregning.tilFaktureringBeloep shouldBe null
         }
+
+        @Test
+        fun `harDeltGrunnlag skal settes`() {
+            val behandlingsresultat = Behandlingsresultat().apply resultat@{
+                behandling = Behandling()
+                årsavregning = Årsavregning().apply {
+                    id = 1L
+                    aar = 2023
+                    behandlingsresultat = this@resultat
+                }
+            }
+            every { aarsavregningRepository.findById(1L) }.returns(Optional.of(behandlingsresultat.årsavregning))
+            every { behandlingsresultatService.hentBehandlingsresultat(1L) }.returns(behandlingsresultat)
+
+            behandlingsresultat.årsavregning.harDeltGrunnlag shouldBe null
+            årsavregningService.oppdater(1L, 1L, null, BigDecimal.ONE, true)
+            behandlingsresultat.årsavregning.harDeltGrunnlag shouldBe true
+        }
+
+        @Test
+        fun `harDeltGrunnlag skal ikke settes hvis null`() {
+            val behandlingsresultat = Behandlingsresultat().apply resultat@{
+                behandling = Behandling()
+                årsavregning = Årsavregning().apply {
+                    id = 1L
+                    aar = 2023
+                    behandlingsresultat = this@resultat
+                }
+            }
+            every { aarsavregningRepository.findById(1L) }.returns(Optional.of(behandlingsresultat.årsavregning))
+            every { behandlingsresultatService.hentBehandlingsresultat(1L) }.returns(behandlingsresultat)
+            behandlingsresultat.årsavregning.harDeltGrunnlag shouldBe null
+            årsavregningService.oppdater(1L, 1L, null, BigDecimal.ONE)
+            behandlingsresultat.årsavregning.harDeltGrunnlag shouldBe null
+        }
     }
 
     @Nested
