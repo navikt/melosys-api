@@ -34,6 +34,17 @@ public class Årsavregning {
     @Column(name = "til_fakturering_beloep")
     private BigDecimal tilFaktureringBeloep;
 
+    @Column(name = "har_delt_grunnlag")
+    private Boolean harDeltGrunnlag;
+
+    public Boolean getHarDeltGrunnlag() {
+        return harDeltGrunnlag;
+    }
+
+    public void setHarDeltGrunnlag(Boolean harDeltGrunnlag) {
+        this.harDeltGrunnlag = harDeltGrunnlag;
+    }
+
     public Long getId() {
         return id;
     }

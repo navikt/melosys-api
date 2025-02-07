@@ -101,7 +101,8 @@ internal class ÅrsavregningServiceTest {
                 endeligAvgift = emptyList(),
                 tidligereFakturertBeloep = null,
                 nyttTotalbeloep = null,
-                tilFaktureringBeloep = null
+                tilFaktureringBeloep = null,
+                harDeltGrunnlag = null
             )
         }
 
@@ -149,7 +150,8 @@ internal class ÅrsavregningServiceTest {
                 endeligAvgift = emptyList(),
                 tidligereFakturertBeloep = null,
                 nyttTotalbeloep = null,
-                tilFaktureringBeloep = null
+                tilFaktureringBeloep = null,
+                harDeltGrunnlag = null
             )
         }
     }

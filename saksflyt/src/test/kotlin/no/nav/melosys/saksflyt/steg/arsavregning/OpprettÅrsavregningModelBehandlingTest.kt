@@ -108,6 +108,7 @@ class OpprettÅrsavregningModelBehandlingTest {
             emptyList(),
             null,
             null,
+            null,
             null
         )
 

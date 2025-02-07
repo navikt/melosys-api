@@ -125,7 +125,8 @@ internal class ÅrsavregningControllerTest {
             endeligAvgift = emptyList(),
             tidligereFakturertBeloep = BigDecimal(21170.0),
             nyttTotalbeloep = BigDecimal(24280.0),
-            tilFaktureringBeloep = BigDecimal(3110.0)
+            tilFaktureringBeloep = BigDecimal(3110.0),
+            harDeltGrunnlag = false
         )
 
 
@@ -217,7 +218,8 @@ internal class ÅrsavregningControllerTest {
     "nyttTotalbeloep": 24280,
     "tidligereFakturertBeloep": 21170,
     "tilFaktureringBeloep": 3110
-  }
+  },
+  "harDeltGrunnlag": false
 }"""
 
         mockMvc.perform(
@@ -325,7 +327,8 @@ internal class ÅrsavregningControllerTest {
             })),
             tidligereFakturertBeloep = BigDecimal(80580.0),
             nyttTotalbeloep = BigDecimal(6708.0),
-            tilFaktureringBeloep = BigDecimal(-73872.0)
+            tilFaktureringBeloep = BigDecimal(-73872.0),
+            harDeltGrunnlag = false
         )
 
 
@@ -432,7 +435,8 @@ internal class ÅrsavregningControllerTest {
         "nyttTotalbeloep": 6708,
         "tidligereFakturertBeloep": 80580,
         "tilFaktureringBeloep": -73872
-    }
+    },
+    "harDeltGrunnlag": false
 }"""
 
         mockMvc.perform(
