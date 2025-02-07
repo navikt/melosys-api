@@ -26,13 +26,13 @@ class ProsessinstansTestManager(
 ) {
     @EventListener
     private fun prosessinstansOpprettet(prosessinstansOpprettetEvent: ProsessinstansOpprettetEvent) {
-        log.info("Prosessinstans Opprettet - ${prosessinstansOpprettetEvent.hentProsessinstans().type}")
+        log.info("Prosessinstans ${prosessinstansOpprettetEvent.hentProsessinstans().type} - Opprettet")
         prosessinstanserOpprettet.add(prosessinstansOpprettetEvent.hentProsessinstans())
     }
 
     @EventListener
     private fun prosessinstansFerdig(prosessinstansFerdigEvent: ProsessinstansFerdigEvent) {
-        log.info("Prosessinstans Ferdig - ${prosessinstansFerdigEvent.hentProsessinstans().type}")
+        log.info("Prosessinstans ${prosessinstansFerdigEvent.hentProsessinstans().type} - Ferdig")
         prosessinstanserFerdig.add(prosessinstansFerdigEvent.hentProsessinstans())
     }
 
@@ -109,7 +109,7 @@ class ProsessinstansTestManager(
                     }
                 current.shouldNotBeNull()
             }.also {
-                log.info { "prosessinstanse ferdig $prosessType" }
+                log.info { "$prosessType ferdig" }
             }
         }
 

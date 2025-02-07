@@ -115,58 +115,6 @@ public class ProsessinstansService {
     }
 
     @Transactional
-    public UUID opprettSatsendringBehandling(Behandling behandling) {
-        Prosessinstans prosessinstans = new Prosessinstans();
-        prosessinstans.setBehandling(behandling);
-
-        prosessinstans.setType(ProsessType.SATSENDRING);
-
-        return lagre(prosessinstans);
-    }
-
-    Prosessinstans lagJournalføringProsessinstans(ProsessType type, JournalfoeringRequest journalfoeringRequest, String institusjonID, boolean mottaksKanalErElektronisk) {
-        Prosessinstans prosessinstans = new Prosessinstans();
-        prosessinstans.setType(type);
-
-        prosessinstans.setData(ProsessDataKey.JOURNALPOST_ID, journalfoeringRequest.getJournalpostID());
-        prosessinstans.setData(ProsessDataKey.DOKUMENT_ID, journalfoeringRequest.getHoveddokument().getDokumentID());
-        prosessinstans.setData(ProsessDataKey.OPPGAVE_ID, journalfoeringRequest.getOppgaveID());
-        prosessinstans.setData(ProsessDataKey.BRUKER_ID, journalfoeringRequest.getBrukerID());
-        prosessinstans.setData(ProsessDataKey.VIRKSOMHET_ORGNR, journalfoeringRequest.getVirksomhetOrgnr());
-        prosessinstans.setData(ProsessDataKey.MOTTAKSKANAL_ER_ELEKTRONISK, mottaksKanalErElektronisk);
-
-        if (!mottaksKanalErElektronisk) {
-            prosessinstans.setData(ProsessDataKey.AVSENDER_TYPE, journalfoeringRequest.getAvsenderType());
-            if (journalfoeringRequest.getAvsenderType() == Avsendertyper.UTENLANDSK_TRYGDEMYNDIGHET) {
-                prosessinstans.setData(ProsessDataKey.AVSENDER_ID, institusjonID);
-                prosessinstans.setData(ProsessDataKey.AVSENDER_LAND, journalfoeringRequest.getAvsenderID());
-            } else {
-                prosessinstans.setData(ProsessDataKey.AVSENDER_ID, journalfoeringRequest.getAvsenderID());
-            }
-            prosessinstans.setData(ProsessDataKey.AVSENDER_NAVN, journalfoeringRequest.getAvsenderNavn());
-        }
-
-        prosessinstans.setData(ProsessDataKey.HOVEDDOKUMENT_TITTEL, journalfoeringRequest.getHoveddokument().getTittel());
-        prosessinstans.setData(ProsessDataKey.SKAL_TILORDNES, journalfoeringRequest.getSkalTilordnes());
-        prosessinstans.setData(ProsessDataKey.FORVALTNINGSMELDING_MOTTAKER, journalfoeringRequest.getForvaltningsmeldingMottaker());
-
-        if (journalfoeringRequest.getMottattDato() != null) {
-            prosessinstans.setData(ProsessDataKey.MOTTATT_DATO, journalfoeringRequest.getMottattDato());
-        }
-
-        if (!CollectionUtils.isEmpty(journalfoeringRequest.getHoveddokument().getLogiskeVedlegg())) {
-            prosessinstans.setData(ProsessDataKey.LOGISKE_VEDLEGG_TITLER, journalfoeringRequest.getHoveddokument().getLogiskeVedlegg());
-        }
-
-        if (!CollectionUtils.isEmpty(journalfoeringRequest.getVedlegg())) {
-            prosessinstans.setData(ProsessDataKey.FYSISKE_VEDLEGG,
-                journalfoeringRequest.getVedlegg().stream().collect(Collectors.toMap(DokumentRequest::getDokumentID, DokumentRequest::getTittel)));
-        }
-
-        return prosessinstans;
-    }
-
-    @Transactional
     public UUID opprettManglendeInnbetalingProsessflyt(ManglendeFakturabetalingMelding manglendeFakturabetalingMelding) {
         Prosessinstans prosessinstans = new Prosessinstans();
         prosessinstans.setType(ProsessType.OPPRETT_NY_BEHANDLING_MANGLENDE_INNBETALING);
@@ -245,6 +193,48 @@ public class ProsessinstansService {
         }
 
         lagre(prosessinstans);
+    }
+
+    Prosessinstans lagJournalføringProsessinstans(ProsessType type, JournalfoeringRequest journalfoeringRequest, String institusjonID, boolean mottaksKanalErElektronisk) {
+        Prosessinstans prosessinstans = new Prosessinstans();
+        prosessinstans.setType(type);
+
+        prosessinstans.setData(ProsessDataKey.JOURNALPOST_ID, journalfoeringRequest.getJournalpostID());
+        prosessinstans.setData(ProsessDataKey.DOKUMENT_ID, journalfoeringRequest.getHoveddokument().getDokumentID());
+        prosessinstans.setData(ProsessDataKey.OPPGAVE_ID, journalfoeringRequest.getOppgaveID());
+        prosessinstans.setData(ProsessDataKey.BRUKER_ID, journalfoeringRequest.getBrukerID());
+        prosessinstans.setData(ProsessDataKey.VIRKSOMHET_ORGNR, journalfoeringRequest.getVirksomhetOrgnr());
+        prosessinstans.setData(ProsessDataKey.MOTTAKSKANAL_ER_ELEKTRONISK, mottaksKanalErElektronisk);
+
+        if (!mottaksKanalErElektronisk) {
+            prosessinstans.setData(ProsessDataKey.AVSENDER_TYPE, journalfoeringRequest.getAvsenderType());
+            if (journalfoeringRequest.getAvsenderType() == Avsendertyper.UTENLANDSK_TRYGDEMYNDIGHET) {
+                prosessinstans.setData(ProsessDataKey.AVSENDER_ID, institusjonID);
+                prosessinstans.setData(ProsessDataKey.AVSENDER_LAND, journalfoeringRequest.getAvsenderID());
+            } else {
+                prosessinstans.setData(ProsessDataKey.AVSENDER_ID, journalfoeringRequest.getAvsenderID());
+            }
+            prosessinstans.setData(ProsessDataKey.AVSENDER_NAVN, journalfoeringRequest.getAvsenderNavn());
+        }
+
+        prosessinstans.setData(ProsessDataKey.HOVEDDOKUMENT_TITTEL, journalfoeringRequest.getHoveddokument().getTittel());
+        prosessinstans.setData(ProsessDataKey.SKAL_TILORDNES, journalfoeringRequest.getSkalTilordnes());
+        prosessinstans.setData(ProsessDataKey.FORVALTNINGSMELDING_MOTTAKER, journalfoeringRequest.getForvaltningsmeldingMottaker());
+
+        if (journalfoeringRequest.getMottattDato() != null) {
+            prosessinstans.setData(ProsessDataKey.MOTTATT_DATO, journalfoeringRequest.getMottattDato());
+        }
+
+        if (!CollectionUtils.isEmpty(journalfoeringRequest.getHoveddokument().getLogiskeVedlegg())) {
+            prosessinstans.setData(ProsessDataKey.LOGISKE_VEDLEGG_TITLER, journalfoeringRequest.getHoveddokument().getLogiskeVedlegg());
+        }
+
+        if (!CollectionUtils.isEmpty(journalfoeringRequest.getVedlegg())) {
+            prosessinstans.setData(ProsessDataKey.FYSISKE_VEDLEGG,
+                journalfoeringRequest.getVedlegg().stream().collect(Collectors.toMap(DokumentRequest::getDokumentID, DokumentRequest::getTittel)));
+        }
+
+        return prosessinstans;
     }
 
     private static String getSaksbehandlerIdent() {
@@ -738,5 +728,25 @@ public class ProsessinstansService {
         prosessinstans.setData(SAKSNUMMER, behandling.getFagsak().getSaksnummer());
 
         lagre(prosessinstans);
+    }
+
+    @Transactional
+    public UUID opprettSatsendringBehandling(Behandling behandling) {
+        Prosessinstans prosessinstans = new Prosessinstans();
+        prosessinstans.setBehandling(behandling);
+
+        prosessinstans.setType(ProsessType.SATSENDRING);
+
+        return lagre(prosessinstans);
+    }
+
+    @Transactional
+    public UUID opprettSatsendringBehandlingNyVurdering(Behandling behandling) {
+        Prosessinstans prosessinstans = new Prosessinstans();
+        prosessinstans.setBehandling(behandling);
+
+        prosessinstans.setType(ProsessType.SATSENDRING_TILBAKESTILL_NY_VURDERING);
+
+        return lagre(prosessinstans);
     }
 }
