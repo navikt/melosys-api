@@ -44,12 +44,13 @@ public class LagreLovvalgsperiodeMedl implements StegBehandler {
 
     @Override
     public void utfør(Prosessinstans prosessinstans) {
-        final long behandlingID = prosessinstans.getBehandling().getId();
-        final var behandlingsresultat = behandlingsresultatService.hentBehandlingsresultat(behandlingID);
         final var behandling = prosessinstans.getBehandling();
+        final long behandlingID = behandling.getId();
+
+        final var behandlingsresultat = behandlingsresultatService.hentBehandlingsresultat(behandlingID);
         final var lovvalgsperiode = behandlingsresultat.hentLovvalgsperiode();
 
-        if (erIkkeGodkjentRegistreringUnntakFraMedlemskap(prosessinstans.getBehandling(), behandlingsresultat.getUtfallRegistreringUnntak()) ||
+        if (erIkkeGodkjentRegistreringUnntakFraMedlemskap(behandling, behandlingsresultat.getUtfallRegistreringUnntak()) ||
             erUnntakTuristSkip(behandlingsresultat) && behandling.erFørstegangsvurdering()) {
             return;
         }
@@ -110,10 +111,17 @@ public class LagreLovvalgsperiodeMedl implements StegBehandler {
     }
 
     private void oppdaterMedlPeriode(Behandling behandling, Lovvalgsperiode lovvalgsperiode) {
-        if (lovvalgsperiode.erArtikkel13() && !saksbehandlingRegler.harRegistreringUnntakFraMedlemskapFlyt(behandling)) {
+        final var behandlingsresultat = behandlingsresultatService.hentBehandlingsresultat(behandling.getId());
+
+        if (erUnntakTuristSkip(behandlingsresultat)) {
+            medlPeriodeService.avvisPeriodeFeilregistrert(lovvalgsperiode.getMedlPeriodeID());
+
+        } else if (lovvalgsperiode.erArtikkel13() && !saksbehandlingRegler.harRegistreringUnntakFraMedlemskapFlyt(behandling)) {
             medlPeriodeService.oppdaterPeriodeForeløpig(lovvalgsperiode);
+
         } else {
             medlPeriodeService.oppdaterPeriodeEndelig(lovvalgsperiode);
         }
+
     }
 }

@@ -273,6 +273,52 @@ class LagreLovvalgsperiodeMedlTest {
         verifyNoInteractions(medlPeriodeService);
     }
 
+    @Test
+    void slett_lovvalgsperiode_ved_ny_vurdering_dersom_unntak_turistskip_er_oppfylt(){
+        Behandling opprinneligBehandling = TestdataFactory.lagBehandling();
+
+        Vilkaarsresultat opprinneligVilkaarsresultat = lagVilkaarsresultat(Vilkaar.FTRL_2_12_UNNTAK_TURISTSKIP, false);
+
+        Behandlingsresultat opprinneligResultat = new Behandlingsresultat();
+
+        Lovvalgsperiode opprinneligLovvalgsperiode = lagLovvalgsperiode(
+            777L,
+            Lovvalgbestemmelser_883_2004.FO_883_2004_ART13_1A,
+            InnvilgelsesResultat.INNVILGET
+        );
+
+        opprinneligResultat.getLovvalgsperioder().add(opprinneligLovvalgsperiode);
+        opprinneligResultat.getVilkaarsresultater().add(opprinneligVilkaarsresultat);
+
+        when(behandlingsresultatService.hentBehandlingsresultat(opprinneligBehandling.getId())).thenReturn(opprinneligResultat);
+
+
+        Behandling behandling = TestdataFactory.lagBehandlingNyVurdering();
+        behandling.setOpprinneligBehandling(opprinneligBehandling);
+
+        prosessinstans.setBehandling(behandling);
+
+        Vilkaarsresultat nyVilkaarsresultat = lagVilkaarsresultat(Vilkaar.FTRL_2_12_UNNTAK_TURISTSKIP, true);
+
+        behandlingsresultat.getLovvalgsperioder().add(opprinneligLovvalgsperiode);
+        behandlingsresultat.getVilkaarsresultater().add(nyVilkaarsresultat);
+
+        when(behandlingsresultatService.hentBehandlingsresultat(behandling.getId())).thenReturn(behandlingsresultat);
+
+        lagreLovvalgsperiodeMedl.utfør(prosessinstans);
+
+        verify(medlPeriodeService).avvisPeriodeFeilregistrert(opprinneligLovvalgsperiode.getMedlPeriodeID());
+        verifyNoMoreInteractions(medlPeriodeService);
+
+    }
+
+    private Vilkaarsresultat lagVilkaarsresultat(Vilkaar vilkaar, boolean oppfylt) {
+        Vilkaarsresultat vilkaarsresultat = new Vilkaarsresultat();
+        vilkaarsresultat.setVilkaar(vilkaar);
+        vilkaarsresultat.setOppfylt(oppfylt);
+        return vilkaarsresultat;
+    }
+
     private Lovvalgsperiode lagLovvalgsperiode(Long medlPeriodeID,
                                                LovvalgBestemmelse lovvalgBestemmelse,
                                                InnvilgelsesResultat innvilgelsesResultat) {
