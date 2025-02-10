@@ -59,7 +59,7 @@ object TrygdeavgiftsberegningValidator {
         )
 
         if (unleash.isEnabled(ToggleName.MELOSYS_ÅRSAVREGNING) && inntektsPerioder.isNotEmpty()) {
-            validerInntektPerioderIkkeErUtenforMedlemskapPeriode(
+            validerinntektsperioderErIkkeUtenforMedlemskapPeriode(
                 inntektsPerioder, innvilgedeMedlemskapsperioder, INNTEKTSPERIODE_ER_UTENFOR_MEDLEMSKAPSPERIODE
             )
         }
@@ -77,7 +77,7 @@ object TrygdeavgiftsberegningValidator {
 
     }
 
-    private fun validerInntektPerioderIkkeErUtenforMedlemskapPeriode(kildeperioder: List<ErPeriode>, medlemskapsperioder: List<ErPeriode>, feilmelding: String) {
+    private fun validerinntektsperioderErIkkeUtenforMedlemskapPeriode(kildeperioder: List<ErPeriode>, medlemskapsperioder: List<ErPeriode>, feilmelding: String) {
         val kildeperiodeStart = kildeperioder.minOf { it.fom }
         val kildeperiodeEnd = kildeperioder.maxOf { it.tom }
 
