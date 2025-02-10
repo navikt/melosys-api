@@ -74,7 +74,7 @@ class SatsendringFinner(
 
     private fun harSatsendring(behandlingsresultat: Behandlingsresultat): Boolean {
         val nyTrygdeavgift = trygdeavgiftsberegningService.beregnTrygdeavgift(
-            behandlingsresultat,
+            behandlingsresultat.id,
             behandlingsresultat.medlemskapsperioder,
             behandlingsresultat.hentSkatteforholdTilNorge().toList(),
             behandlingsresultat.hentInntektsperioder().toList(),

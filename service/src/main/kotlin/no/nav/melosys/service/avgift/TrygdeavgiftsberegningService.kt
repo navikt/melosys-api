@@ -52,7 +52,7 @@ class TrygdeavgiftsberegningService(
 
         nullstillTrygdeavgiftsperioder(behandlingsresultat)
         val nyeTrygdeavgiftsperioder =
-            beregnTrygdeavgift(behandlingsresultat, behandlingsresultat.medlemskapsperioder, skatteforholdsperioder, inntektsperioder)
+            beregnTrygdeavgift(behandlingsresultat.id, behandlingsresultat.medlemskapsperioder, skatteforholdsperioder, inntektsperioder)
         // Knytter trygdeavgiftsperiodene til deres medlemskapsperiode før sjekken om trygdeavgift skal betales til Nav
         nyeTrygdeavgiftsperioder.forEach { it.grunnlagMedlemskapsperiodeNotNull.addTrygdeavgiftsperiode(it) }
 
@@ -121,7 +121,7 @@ class TrygdeavgiftsberegningService(
 
     @Transactional(readOnly = true)
     fun beregnTrygdeavgift(
-        behandlingsresultat: Behandlingsresultat,
+        behandlingsresultatId: Long,
         medlemskapsperioder: Collection<Medlemskapsperiode>,
         skatteforholdsperioder: List<SkatteforholdTilNorge>,
         inntektsperioder: List<Inntektsperiode>
@@ -133,7 +133,7 @@ class TrygdeavgiftsberegningService(
         val innvilgedeMedlemskapsperioder = medlemskapsperioder.filter { it.erInnvilget() }
         val skatteforholdsperiodeDtoSet = skatteforholdsperioderMedUUID.map { it.second.tilSkatteforholdDto(it.first) }.toSet()
         val inntektsperiodeDtoList = inntektsperioderMedUUID.map { it.second.tilInntektsperiodeDto(it.first) }
-        val foedselDato = hentFødselsdatoOmViHarTjenstligBehov(behandlingsresultat.id, innvilgedeMedlemskapsperioder)
+        val foedselDato = hentFødselsdatoOmViHarTjenstligBehov(behandlingsresultatId, innvilgedeMedlemskapsperioder)
 
         val beregnetTrygdeavgiftList = trygdeavgiftConsumer.beregnTrygdeavgift(
             TrygdeavgiftsberegningRequest(
@@ -149,7 +149,7 @@ class TrygdeavgiftsberegningService(
                 beregnetAvgiftPerPeriode,
                 skatteforholdsperioderMedUUID,
                 inntektsperioderMedUUID,
-                behandlingsresultat.medlemskapsperioder
+                medlemskapsperioder
             )
         }
     }

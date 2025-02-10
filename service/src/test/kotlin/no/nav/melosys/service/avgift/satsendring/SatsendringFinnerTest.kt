@@ -78,7 +78,7 @@ class SatsendringFinnerTest {
         every { behandlingService.hentBehandling(behandlingsresultat.id) } returns behandlingMedSatsendring
         every { behandlingsresultatService.finnResultaterMedMedlemskapseriodeOverlappendeMed(år) } returns listOf(behandlingsresultat)
         every { trygdeavgiftService.harFakturerbarTrygdeavgift(behandlingsresultat) } returns true
-        every { trygdeavgiftsberegningService.beregnTrygdeavgift(behandlingsresultat, any(), any(), any()) } returns listOf(
+        every { trygdeavgiftsberegningService.beregnTrygdeavgift(behandlingsresultat.id, any(), any(), any()) } returns listOf(
             lagTrygdeavgiftsperiode(
                 nySats
             )
@@ -137,7 +137,7 @@ class SatsendringFinnerTest {
         every { trygdeavgiftService.harFakturerbarTrygdeavgift(behandlingsresultat) } returns true
         every {
             trygdeavgiftsberegningService.beregnTrygdeavgift(
-                behandlingsresultat,
+                behandlingsresultat.id,
                 any(),
                 any(),
                 any()
