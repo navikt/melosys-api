@@ -1,125 +1,118 @@
-package no.nav.melosys.saksflyt.steg.medl;
+package no.nav.melosys.saksflyt.steg.medl
 
-import java.util.Optional;
+import mu.KotlinLogging
+import org.springframework.stereotype.Component
 
-import no.nav.melosys.domain.Behandling;
-import no.nav.melosys.domain.Behandlingsresultat;
-import no.nav.melosys.domain.Lovvalgsperiode;
-import no.nav.melosys.domain.kodeverk.Utfallregistreringunntak;
-import no.nav.melosys.exception.FunksjonellException;
-import no.nav.melosys.saksflyt.steg.StegBehandler;
-import no.nav.melosys.saksflytapi.domain.ProsessSteg;
-import no.nav.melosys.saksflytapi.domain.Prosessinstans;
-import no.nav.melosys.service.behandling.BehandlingsresultatService;
-import no.nav.melosys.service.medl.MedlPeriodeService;
-import no.nav.melosys.service.saksbehandling.SaksbehandlingRegler;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-import org.springframework.stereotype.Component;
+import no.nav.melosys.domain.Behandling
+import no.nav.melosys.domain.Behandlingsresultat
+import no.nav.melosys.domain.Lovvalgsperiode
+import no.nav.melosys.domain.kodeverk.Utfallregistreringunntak
+import no.nav.melosys.domain.kodeverk.Vilkaar
+import no.nav.melosys.exception.FunksjonellException
+import no.nav.melosys.saksflyt.steg.StegBehandler
+import no.nav.melosys.saksflytapi.domain.ProsessSteg
+import no.nav.melosys.saksflytapi.domain.Prosessinstans
+import no.nav.melosys.service.behandling.BehandlingsresultatService
+import no.nav.melosys.service.medl.MedlPeriodeService
+import no.nav.melosys.service.saksbehandling.SaksbehandlingRegler
+import kotlin.jvm.optionals.getOrNull
 
-import static no.nav.melosys.domain.kodeverk.Vilkaar.FTRL_2_12_UNNTAK_TURISTSKIP;
+
+private val log = KotlinLogging.logger { }
 
 @Component
-public class LagreLovvalgsperiodeMedl implements StegBehandler {
+class LagreLovvalgsperiodeMedl(
+    private val behandlingsresultatService: BehandlingsresultatService,
+    private val medlPeriodeService: MedlPeriodeService,
+    private val saksbehandlingRegler: SaksbehandlingRegler
+) : StegBehandler {
 
-    private static final Logger log = LoggerFactory.getLogger(LagreLovvalgsperiodeMedl.class);
+    override fun inngangsSteg(): ProsessSteg = ProsessSteg.LAGRE_LOVVALGSPERIODE_MEDL
 
-    private final BehandlingsresultatService behandlingsresultatService;
-    private final MedlPeriodeService medlPeriodeService;
-    private final SaksbehandlingRegler saksbehandlingRegler;
+    override fun utfør(prosessinstans: Prosessinstans) {
+        val behandling = prosessinstans.behandling
+        val behandlingsresultat = behandlingsresultatService.hentBehandlingsresultat(behandling.id)
 
-
-    public LagreLovvalgsperiodeMedl(BehandlingsresultatService behandlingsresultatService,
-                                    MedlPeriodeService medlPeriodeService,
-                                    SaksbehandlingRegler saksbehandlingRegler) {
-        this.behandlingsresultatService = behandlingsresultatService;
-        this.medlPeriodeService = medlPeriodeService;
-        this.saksbehandlingRegler = saksbehandlingRegler;
-    }
-
-    @Override
-    public ProsessSteg inngangsSteg() {
-        return ProsessSteg.LAGRE_LOVVALGSPERIODE_MEDL;
-    }
-
-    @Override
-    public void utfør(Prosessinstans prosessinstans) {
-        final var behandling = prosessinstans.getBehandling();
-        final var behandlingsresultat = behandlingsresultatService.hentBehandlingsresultat(behandling.getId());
-
-        if (erIkkeGodkjentRegistreringUnntakFraMedlemskap(behandling, behandlingsresultat.getUtfallRegistreringUnntak()) ||
-            erUnntakTuristSkip(behandlingsresultat) && behandling.erFørstegangsvurdering()) {
-            return;
+        if (erIkkeGodkjentRegistreringUnntakFraMedlemskap(behandling, behandlingsresultat.utfallRegistreringUnntak) ||
+            (erUnntakTuristSkip(behandlingsresultat) && behandling.erFørstegangsvurdering())
+        ) {
+            return
         }
 
-        final var lovvalgsperiode = behandlingsresultat.hentLovvalgsperiode();
+        val lovvalgsperiode = behandlingsresultat.hentLovvalgsperiode()
 
         if (behandling.erNyVurdering()) {
-            lovvalgsperiode.setMedlPeriodeID(finnOpprinneligMedlPeriodeID(behandling).orElse(null));
+            lovvalgsperiode.medlPeriodeID = finnOpprinneligMedlPeriodeID(behandling)
         }
 
-        oppdaterLovvalgsperiode(behandling, lovvalgsperiode);
+        oppdaterLovvalgsperiode(behandling, lovvalgsperiode)
     }
 
-    private boolean erUnntakTuristSkip(Behandlingsresultat behandlingsresultat) {
-        return behandlingsresultat.oppfyllerVilkår(FTRL_2_12_UNNTAK_TURISTSKIP);
-    }
+    private fun erUnntakTuristSkip(behandlingsresultat: Behandlingsresultat): Boolean =
+        behandlingsresultat.oppfyllerVilkår(Vilkaar.FTRL_2_12_UNNTAK_TURISTSKIP)
 
-    private boolean erIkkeGodkjentRegistreringUnntakFraMedlemskap(Behandling behandling, Utfallregistreringunntak utfallregistreringunntak) {
-        return saksbehandlingRegler.harRegistreringUnntakFraMedlemskapFlyt(behandling) && Utfallregistreringunntak.IKKE_GODKJENT == utfallregistreringunntak;
-    }
+    private fun erIkkeGodkjentRegistreringUnntakFraMedlemskap(
+        behandling: Behandling,
+        utfallregistreringunntak: Utfallregistreringunntak?
+    ): Boolean =
+        saksbehandlingRegler.harRegistreringUnntakFraMedlemskapFlyt(behandling) &&
+                utfallregistreringunntak == Utfallregistreringunntak.IKKE_GODKJENT
 
-    private Optional<Long> finnOpprinneligMedlPeriodeID(Behandling behandling) {
-        if (behandling.getOpprinneligBehandling() == null) {
-            log.warn("opprinneligBehandling er null for behandling {}", behandling.getId());
-            return Optional.empty();
+    private fun finnOpprinneligMedlPeriodeID(behandling: Behandling): Long? {
+        val opprinneligBehandling = behandling.opprinneligBehandling ?: run {
+            log.warn { "opprinneligBehandling er null for behandling ${behandling.id}" }
+            return null
         }
 
-        var opprinnelingResultat = behandlingsresultatService.hentBehandlingsresultat(
-            behandling.getOpprinneligBehandling().getId());
-        return opprinnelingResultat.finnLovvalgsperiode().map(Lovvalgsperiode::getMedlPeriodeID);
+
+        val opprinneligResultat = behandlingsresultatService.hentBehandlingsresultat(opprinneligBehandling.id)
+
+        return opprinneligResultat.finnLovvalgsperiode().getOrNull()?.medlPeriodeID
     }
 
-    private void oppdaterLovvalgsperiode(Behandling behandling, Lovvalgsperiode lovvalgsperiode) {
+    private fun oppdaterLovvalgsperiode(behandling: Behandling, lovvalgsperiode: Lovvalgsperiode) {
         if (lovvalgsperiode.erAvslått()) {
-            if (lovvalgsperiode.getMedlPeriodeID() != null) {
-                medlPeriodeService.avvisPeriode(lovvalgsperiode.getMedlPeriodeID());
+            if (lovvalgsperiode.medlPeriodeID != null) {
+                medlPeriodeService.avvisPeriode(lovvalgsperiode.medlPeriodeID)
             }
         } else if (lovvalgsperiode.erInnvilget()) {
-            opprettEllerOppdaterMedlPeriode(behandling, lovvalgsperiode);
+            opprettEllerOppdaterMedlPeriode(behandling, lovvalgsperiode)
         } else {
-            throw new FunksjonellException(
-                "Ukjent eller ikke-eksisterende innvilgelsesresultat for en lovvalgsperiode: " + lovvalgsperiode.getInnvilgelsesresultat());
+            throw FunksjonellException(
+                "Ukjent eller ikke-eksisterende innvilgelsesresultat for en lovvalgsperiode: ${lovvalgsperiode.innvilgelsesresultat}"
+            )
         }
     }
 
-    private void opprettEllerOppdaterMedlPeriode(Behandling behandling, Lovvalgsperiode lovvalgsperiode) {
-        if (lovvalgsperiode.getMedlPeriodeID() == null) {
-            opprettMedlPeriode(behandling, lovvalgsperiode);
+    private fun opprettEllerOppdaterMedlPeriode(behandling: Behandling, lovvalgsperiode: Lovvalgsperiode) {
+        if (lovvalgsperiode.medlPeriodeID == null) {
+            opprettMedlPeriode(behandling, lovvalgsperiode)
         } else {
-            oppdaterMedlPeriode(behandling, lovvalgsperiode);
+            oppdaterMedlPeriode(behandling, lovvalgsperiode)
         }
     }
 
-    private void opprettMedlPeriode(Behandling behandling, Lovvalgsperiode lovvalgsperiode) {
+    private fun opprettMedlPeriode(behandling: Behandling, lovvalgsperiode: Lovvalgsperiode) {
+        val behandlingID = behandling.id
         if (lovvalgsperiode.erArtikkel13() && !saksbehandlingRegler.harRegistreringUnntakFraMedlemskapFlyt(behandling)) {
-            medlPeriodeService.opprettPeriodeForeløpig(lovvalgsperiode, behandling.getId());
+            medlPeriodeService.opprettPeriodeForeløpig(lovvalgsperiode, behandlingID)
         } else {
-            medlPeriodeService.opprettPeriodeEndelig(lovvalgsperiode, behandling.getId());
+            medlPeriodeService.opprettPeriodeEndelig(lovvalgsperiode, behandlingID)
         }
     }
 
-    private void oppdaterMedlPeriode(Behandling behandling, Lovvalgsperiode lovvalgsperiode) {
-        final var behandlingsresultat = behandlingsresultatService.hentBehandlingsresultat(behandling.getId());
+    private fun oppdaterMedlPeriode(behandling: Behandling, lovvalgsperiode: Lovvalgsperiode) {
+        val behandlingsresultat = behandlingsresultatService.hentBehandlingsresultat(behandling.id)
 
         if (erUnntakTuristSkip(behandlingsresultat)) {
-            medlPeriodeService.avvisPeriodeFeilregistrert(lovvalgsperiode.getMedlPeriodeID());
-
-        } else if (lovvalgsperiode.erArtikkel13() && !saksbehandlingRegler.harRegistreringUnntakFraMedlemskapFlyt(behandling)) {
-            medlPeriodeService.oppdaterPeriodeForeløpig(lovvalgsperiode);
-
+            medlPeriodeService.avvisPeriodeFeilregistrert(lovvalgsperiode.medlPeriodeID)
+        } else if (lovvalgsperiode.erArtikkel13() && !saksbehandlingRegler.harRegistreringUnntakFraMedlemskapFlyt(
+                behandling
+            )
+        ) {
+            medlPeriodeService.oppdaterPeriodeForeløpig(lovvalgsperiode)
         } else {
-            medlPeriodeService.oppdaterPeriodeEndelig(lovvalgsperiode);
+            medlPeriodeService.oppdaterPeriodeEndelig(lovvalgsperiode)
         }
 
     }

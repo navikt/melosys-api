@@ -1,336 +1,421 @@
-package no.nav.melosys.saksflyt.steg.medl;
+package no.nav.melosys.saksflyt.steg.medl
 
-import java.util.HashSet;
-import java.util.NoSuchElementException;
-import java.util.Set;
+import io.kotest.assertions.throwables.shouldThrow
+import io.kotest.matchers.string.shouldContain
+import io.mockk.Called
+import io.mockk.every
+import io.mockk.impl.annotations.RelaxedMockK
+import io.mockk.junit5.MockKExtension
+import io.mockk.verify
 
-import no.nav.melosys.domain.*;
-import no.nav.melosys.domain.kodeverk.*;
-import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingsresultattyper;
-import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingstema;
-import no.nav.melosys.domain.kodeverk.lovvalgsbestemmelser.Lovvalgbestemmelser_883_2004;
-import no.nav.melosys.exception.FunksjonellException;
-import no.nav.melosys.saksflyt.TestdataFactory;
-import no.nav.melosys.saksflytapi.domain.Prosessinstans;
-import no.nav.melosys.service.behandling.BehandlingsresultatService;
-import no.nav.melosys.service.medl.MedlPeriodeService;
-import no.nav.melosys.service.saksbehandling.SaksbehandlingRegler;
-import org.junit.jupiter.api.BeforeEach;
-import org.junit.jupiter.api.Test;
-import org.junit.jupiter.api.extension.ExtendWith;
-import org.mockito.ArgumentCaptor;
-import org.mockito.Captor;
-import org.mockito.Mock;
-import org.mockito.junit.jupiter.MockitoExtension;
+import no.nav.melosys.domain.Behandling
+import no.nav.melosys.domain.Behandlingsresultat
+import no.nav.melosys.domain.FagsakTestFactory
+import no.nav.melosys.domain.Lovvalgsperiode
+import no.nav.melosys.domain.Vilkaarsresultat
+import no.nav.melosys.domain.kodeverk.*
+import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingsresultattyper
+import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingstema
+import no.nav.melosys.domain.kodeverk.lovvalgsbestemmelser.Lovvalgbestemmelser_883_2004
+import no.nav.melosys.exception.FunksjonellException
+import no.nav.melosys.saksflyt.TestdataFactory
+import no.nav.melosys.saksflytapi.domain.Prosessinstans
+import no.nav.melosys.service.behandling.BehandlingsresultatService
+import no.nav.melosys.service.medl.MedlPeriodeService
+import no.nav.melosys.service.saksbehandling.SaksbehandlingRegler
 
-import static org.assertj.core.api.Assertions.assertThat;
-import static org.assertj.core.api.Assertions.assertThatExceptionOfType;
-import static org.mockito.Mockito.*;
+import org.junit.jupiter.api.BeforeEach
+import org.junit.jupiter.api.Test
+import org.junit.jupiter.api.extension.ExtendWith
 
-@ExtendWith(MockitoExtension.class)
-class LagreLovvalgsperiodeMedlTest {
+@ExtendWith(MockKExtension::class)
+internal class LagreLovvalgsperiodeMedlTest {
 
-    @Mock
-    private BehandlingsresultatService behandlingsresultatService;
-    @Mock
-    private MedlPeriodeService medlPeriodeService;
-    @Mock
-    private SaksbehandlingRegler saksbehandlingRegler;
-    @Captor
-    private ArgumentCaptor<Lovvalgsperiode> lovvalgsperiodeArgumentCaptor;
+    @RelaxedMockK
+    lateinit var behandlingsresultatService: BehandlingsresultatService
 
-    private LagreLovvalgsperiodeMedl lagreLovvalgsperiodeMedl;
+    @RelaxedMockK
+    lateinit var medlPeriodeService: MedlPeriodeService
 
-    private final long behandlingID = 2434L;
-    private final Prosessinstans prosessinstans = new Prosessinstans();
-    private final Behandling behandling = new Behandling();
-    private final Behandlingsresultat behandlingsresultat = new Behandlingsresultat();
+    @RelaxedMockK
+    lateinit var saksbehandlingRegler: SaksbehandlingRegler
+
+    private lateinit var lagreLovvalgsperiodeMedl: LagreLovvalgsperiodeMedl
+
+    private val behandlingID = 2434L
+    private val prosessinstans = Prosessinstans()
+    private val behandling = Behandling()
+    private val behandlingsresultat = Behandlingsresultat()
 
     @BeforeEach
-    public void setup() {
-        lagreLovvalgsperiodeMedl = new LagreLovvalgsperiodeMedl(behandlingsresultatService, medlPeriodeService, saksbehandlingRegler);
-        Fagsak fagsak = FagsakTestFactory.builder().type(Sakstyper.TRYGDEAVTALE).tema(Sakstemaer.UNNTAK).build();
+    fun setup() {
+        lagreLovvalgsperiodeMedl = LagreLovvalgsperiodeMedl(
+            behandlingsresultatService,
+            medlPeriodeService,
+            saksbehandlingRegler
+        )
 
-        behandling.setId(behandlingID);
-        behandling.setTema(Behandlingstema.UTSENDT_ARBEIDSTAKER);
-        behandling.setFagsak(fagsak);
-        prosessinstans.setBehandling(behandling);
+        behandling.apply {
+            id = behandlingID
+            tema = Behandlingstema.UTSENDT_ARBEIDSTAKER
+            fagsak = FagsakTestFactory.builder().type(Sakstyper.TRYGDEAVTALE).tema(Sakstemaer.UNNTAK).build()
+
+        }
+
+        prosessinstans.behandling = behandling
     }
 
     @Test
-    void utfør_erAvslagMedLovvalgsperiodeMedMedlID_avviserMedlPeriode() {
-        Lovvalgsperiode lovvalgsperiode = lagLovvalgsperiode(11L, Lovvalgbestemmelser_883_2004.FO_883_2004_ART12_1, InnvilgelsesResultat.AVSLAATT);
-        behandlingsresultat.getLovvalgsperioder().add(lovvalgsperiode);
-        behandlingsresultat.setType(Behandlingsresultattyper.FASTSATT_LOVVALGSLAND);
-        when(behandlingsresultatService.hentBehandlingsresultat(behandlingID)).thenReturn(behandlingsresultat);
+    fun utfør_erAvslagMedLovvalgsperiodeMedMedlID_avviserMedlPeriode() {
+        val lovvalgsperiode =
+            lagLovvalgsperiode(
+                11L,
+                Lovvalgbestemmelser_883_2004.FO_883_2004_ART12_1,
+                InnvilgelsesResultat.AVSLAATT
+            )
+
+        behandlingsresultat.lovvalgsperioder.add(lovvalgsperiode)
+        behandlingsresultat.type = Behandlingsresultattyper.FASTSATT_LOVVALGSLAND
+
+        every { behandlingsresultatService.hentBehandlingsresultat(behandlingID) } returns behandlingsresultat
 
 
-        lagreLovvalgsperiodeMedl.utfør(prosessinstans);
+        lagreLovvalgsperiodeMedl.utfør(prosessinstans)
 
 
-        verify(medlPeriodeService).avvisPeriode(lovvalgsperiode.getMedlPeriodeID());
-        verifyNoMoreInteractions(medlPeriodeService);
+        verify { medlPeriodeService.avvisPeriode(lovvalgsperiode.medlPeriodeID) }
     }
 
     @Test
-    void utfør_erInnvilgelseArt13IngenMedlID_oppretterForeløpigPeriode() {
-        Lovvalgsperiode lovvalgsperiode = lagLovvalgsperiode(null, Lovvalgbestemmelser_883_2004.FO_883_2004_ART13_1A, InnvilgelsesResultat.INNVILGET);
-        behandlingsresultat.getLovvalgsperioder().add(lovvalgsperiode);
-        when(behandlingsresultatService.hentBehandlingsresultat(behandlingID)).thenReturn(behandlingsresultat);
+    fun utfør_erInnvilgelseArt13IngenMedlID_oppretterForeløpigPeriode() {
+        val lovvalgsperiode =
+            lagLovvalgsperiode(
+                null,
+                Lovvalgbestemmelser_883_2004.FO_883_2004_ART13_1A,
+                InnvilgelsesResultat.INNVILGET
+            )
+
+        behandlingsresultat.lovvalgsperioder.add(lovvalgsperiode)
+        every { behandlingsresultatService.hentBehandlingsresultat(behandlingID) } returns behandlingsresultat
 
 
-        lagreLovvalgsperiodeMedl.utfør(prosessinstans);
+        lagreLovvalgsperiodeMedl.utfør(prosessinstans)
 
 
-        verify(medlPeriodeService).opprettPeriodeForeløpig(lovvalgsperiode, behandlingID);
+        verify { medlPeriodeService.opprettPeriodeForeløpig(lovvalgsperiode, behandlingID) }
     }
 
     @Test
-    void utfør_erInnvilgelseArt13MedMedlID_oppdatererTilForeløpigPeriode() {
-        Lovvalgsperiode lovvalgsperiode = lagLovvalgsperiode(11L, Lovvalgbestemmelser_883_2004.FO_883_2004_ART13_1A, InnvilgelsesResultat.INNVILGET);
-        behandlingsresultat.getLovvalgsperioder().add(lovvalgsperiode);
-        when(behandlingsresultatService.hentBehandlingsresultat(behandlingID)).thenReturn(behandlingsresultat);
+    fun utfør_erInnvilgelseArt13MedMedlID_oppdatererTilForeløpigPeriode() {
+        val lovvalgsperiode =
+            lagLovvalgsperiode(
+                11L,
+                Lovvalgbestemmelser_883_2004.FO_883_2004_ART13_1A,
+                InnvilgelsesResultat.INNVILGET
+            )
+
+        behandlingsresultat.lovvalgsperioder.add(lovvalgsperiode)
+        every { behandlingsresultatService.hentBehandlingsresultat(behandlingID) } returns behandlingsresultat
 
 
-        lagreLovvalgsperiodeMedl.utfør(prosessinstans);
+        lagreLovvalgsperiodeMedl.utfør(prosessinstans)
 
 
-        verify(medlPeriodeService).oppdaterPeriodeForeløpig(lovvalgsperiode);
+        verify { medlPeriodeService.oppdaterPeriodeForeløpig(lovvalgsperiode) }
     }
 
     @Test
-    void utfør_erInnvilgelseArt13IngenMedlIDUnntaksflyt_oppretterEndeligPeriode() {
-        Lovvalgsperiode lovvalgsperiode = lagLovvalgsperiode(null, Lovvalgbestemmelser_883_2004.FO_883_2004_ART13_1A, InnvilgelsesResultat.INNVILGET);
-        behandlingsresultat.getLovvalgsperioder().add(lovvalgsperiode);
-        when(behandlingsresultatService.hentBehandlingsresultat(behandlingID)).thenReturn(behandlingsresultat);
-        when(saksbehandlingRegler.harRegistreringUnntakFraMedlemskapFlyt(behandling)).thenReturn(true);
+    fun utfør_erInnvilgelseArt13IngenMedlIDUnntaksflyt_oppretterEndeligPeriode() {
+        val lovvalgsperiode =
+            lagLovvalgsperiode(
+                null,
+                Lovvalgbestemmelser_883_2004.FO_883_2004_ART13_1A,
+                InnvilgelsesResultat.INNVILGET
+            )
 
-        lagreLovvalgsperiodeMedl.utfør(prosessinstans);
+        behandlingsresultat.lovvalgsperioder.add(lovvalgsperiode)
+        every { behandlingsresultatService.hentBehandlingsresultat(behandlingID) } returns behandlingsresultat
+        every { saksbehandlingRegler.harRegistreringUnntakFraMedlemskapFlyt(behandling) } returns true
 
 
-        verify(medlPeriodeService).opprettPeriodeEndelig(lovvalgsperiode, behandlingID);
+        lagreLovvalgsperiodeMedl.utfør(prosessinstans)
+
+
+        verify { medlPeriodeService.opprettPeriodeEndelig(lovvalgsperiode, behandlingID) }
     }
 
     @Test
-    void utfør_erInnvilgelseArt13MedMedlIDUnntaksflyt_oppdatererTilEndeligPeriode() {
-        Lovvalgsperiode lovvalgsperiode = lagLovvalgsperiode(11L, Lovvalgbestemmelser_883_2004.FO_883_2004_ART13_1A, InnvilgelsesResultat.INNVILGET);
-        behandlingsresultat.getLovvalgsperioder().add(lovvalgsperiode);
-        when(behandlingsresultatService.hentBehandlingsresultat(behandlingID)).thenReturn(behandlingsresultat);
-        when(saksbehandlingRegler.harRegistreringUnntakFraMedlemskapFlyt(behandling)).thenReturn(true);
+    fun utfør_erInnvilgelseArt13MedMedlIDUnntaksflyt_oppdatererTilEndeligPeriode() {
+        val lovvalgsperiode =
+            lagLovvalgsperiode(
+                11L,
+                Lovvalgbestemmelser_883_2004.FO_883_2004_ART13_1A,
+                InnvilgelsesResultat.INNVILGET
+            )
 
-        lagreLovvalgsperiodeMedl.utfør(prosessinstans);
+        behandlingsresultat.lovvalgsperioder.add(lovvalgsperiode)
+        every { behandlingsresultatService.hentBehandlingsresultat(behandlingID) } returns behandlingsresultat
+        every { saksbehandlingRegler.harRegistreringUnntakFraMedlemskapFlyt(behandling) } returns true
 
 
-        verify(medlPeriodeService).oppdaterPeriodeEndelig(lovvalgsperiode);
+        lagreLovvalgsperiodeMedl.utfør(prosessinstans)
+
+
+        verify { medlPeriodeService.oppdaterPeriodeEndelig(lovvalgsperiode) }
     }
 
     @Test
-    void utfør_erInnvilgelseArt12IngenMedlID_oppretterEndeligPeriode() {
-        Lovvalgsperiode lovvalgsperiode = lagLovvalgsperiode(null, Lovvalgbestemmelser_883_2004.FO_883_2004_ART12_1, InnvilgelsesResultat.INNVILGET);
-        behandlingsresultat.getLovvalgsperioder().add(lovvalgsperiode);
-        when(behandlingsresultatService.hentBehandlingsresultat(behandlingID)).thenReturn(behandlingsresultat);
+    fun utfør_erInnvilgelseArt12IngenMedlID_oppretterEndeligPeriode() {
+        val lovvalgsperiode =
+            lagLovvalgsperiode(
+                null,
+                Lovvalgbestemmelser_883_2004.FO_883_2004_ART12_1,
+                InnvilgelsesResultat.INNVILGET
+            )
+
+        behandlingsresultat.lovvalgsperioder.add(lovvalgsperiode)
+        every { behandlingsresultatService.hentBehandlingsresultat(behandlingID) } returns behandlingsresultat
 
 
-        lagreLovvalgsperiodeMedl.utfør(prosessinstans);
+        lagreLovvalgsperiodeMedl.utfør(prosessinstans)
 
 
-        verify(medlPeriodeService).opprettPeriodeEndelig(lovvalgsperiode, behandlingID);
+        verify { medlPeriodeService.opprettPeriodeEndelig(lovvalgsperiode, behandlingID) }
     }
 
     @Test
-    void utfør_erInnvilgelseArt12MedMedlID_oppdatererTilEndeligPeriode() {
-        Lovvalgsperiode lovvalgsperiode = lagLovvalgsperiode(11L, Lovvalgbestemmelser_883_2004.FO_883_2004_ART12_1, InnvilgelsesResultat.INNVILGET);
-        behandlingsresultat.getLovvalgsperioder().add(lovvalgsperiode);
-        when(behandlingsresultatService.hentBehandlingsresultat(behandlingID)).thenReturn(behandlingsresultat);
+    fun utfør_erInnvilgelseArt12MedMedlID_oppdatererTilEndeligPeriode() {
+        val lovvalgsperiode =
+            lagLovvalgsperiode(
+                11L,
+                Lovvalgbestemmelser_883_2004.FO_883_2004_ART12_1,
+                InnvilgelsesResultat.INNVILGET
+            )
+
+        behandlingsresultat.lovvalgsperioder.add(lovvalgsperiode)
+        every { behandlingsresultatService.hentBehandlingsresultat(behandlingID) } returns behandlingsresultat
 
 
-        lagreLovvalgsperiodeMedl.utfør(prosessinstans);
+        lagreLovvalgsperiodeMedl.utfør(prosessinstans)
 
 
-        verify(medlPeriodeService).oppdaterPeriodeEndelig(lovvalgsperiode);
+        every { medlPeriodeService.oppdaterPeriodeEndelig(lovvalgsperiode) }
     }
 
     @Test
-    void utfør_nyVurderingOgPeriodeFinnes_oppdaterPeriode() {
-        Behandling behandling = TestdataFactory.lagBehandlingNyVurdering();
-        prosessinstans.setBehandling(behandling);
-        Behandling opprinneligBehandling = TestdataFactory.lagBehandling();
-        behandling.setOpprinneligBehandling(opprinneligBehandling);
-        Behandlingsresultat opprinneligResultat = new Behandlingsresultat();
-        Lovvalgsperiode opprinneligLovvalgsperiode = lagLovvalgsperiode(777L, Lovvalgbestemmelser_883_2004.FO_883_2004_ART12_1,
-            InnvilgelsesResultat.INNVILGET);
-        opprinneligResultat.getLovvalgsperioder().add(opprinneligLovvalgsperiode);
-        when(behandlingsresultatService.hentBehandlingsresultat(opprinneligBehandling.getId())).thenReturn(opprinneligResultat);
-        Lovvalgsperiode nyLovvalgsperiode = lagLovvalgsperiode(null, Lovvalgbestemmelser_883_2004.FO_883_2004_ART12_1,
-            InnvilgelsesResultat.INNVILGET);
-        behandlingsresultat.getLovvalgsperioder().add(nyLovvalgsperiode);
-        when(behandlingsresultatService.hentBehandlingsresultat(behandling.getId())).thenReturn(behandlingsresultat);
+    fun utfør_nyVurderingOgPeriodeFinnes_oppdaterPeriode() {
+        val behandling = TestdataFactory.lagBehandlingNyVurdering()
+        prosessinstans.behandling = behandling
+
+        val opprinneligBehandling = TestdataFactory.lagBehandling()
+        behandling.opprinneligBehandling = opprinneligBehandling
+        val opprinneligResultat = Behandlingsresultat()
+
+        val opprinneligLovvalgsperiode = lagLovvalgsperiode(
+            777L,
+            Lovvalgbestemmelser_883_2004.FO_883_2004_ART12_1,
+            InnvilgelsesResultat.INNVILGET
+        )
+
+        opprinneligResultat.lovvalgsperioder.add(opprinneligLovvalgsperiode)
+        every { behandlingsresultatService.hentBehandlingsresultat(opprinneligBehandling.id) } returns opprinneligResultat
+
+        val nyLovvalgsperiode = lagLovvalgsperiode(
+            null,
+            Lovvalgbestemmelser_883_2004.FO_883_2004_ART12_1,
+            InnvilgelsesResultat.INNVILGET
+        )
+
+        behandlingsresultat.lovvalgsperioder.add(nyLovvalgsperiode)
+
+        every { behandlingsresultatService.hentBehandlingsresultat(behandling.id) } returns behandlingsresultat
 
 
-        lagreLovvalgsperiodeMedl.utfør(prosessinstans);
+        lagreLovvalgsperiodeMedl.utfør(prosessinstans)
 
 
-        verify(medlPeriodeService).oppdaterPeriodeEndelig(lovvalgsperiodeArgumentCaptor.capture());
-        assertThat(lovvalgsperiodeArgumentCaptor.getValue().getMedlPeriodeID()).isEqualTo((opprinneligLovvalgsperiode.getMedlPeriodeID()));
+        verify {
+            medlPeriodeService.oppdaterPeriodeEndelig(
+                match { it.medlPeriodeID == opprinneligLovvalgsperiode.medlPeriodeID }
+            )
+        }
     }
 
     @Test
-    void utfør_nyVurderingOgPeriodeFinnesIkke_opprettPeriode() {
-        Behandling behandling = TestdataFactory.lagBehandlingNyVurdering();
-        prosessinstans.setBehandling(behandling);
-        Behandling opprinneligBehandling = TestdataFactory.lagBehandling();
-        behandling.setOpprinneligBehandling(opprinneligBehandling);
-        Behandlingsresultat opprinneligResultat = new Behandlingsresultat();
+    fun utfør_nyVurderingOgPeriodeFinnesIkke_opprettPeriode() {
+        val behandling = TestdataFactory.lagBehandlingNyVurdering()
+        prosessinstans.behandling = behandling
 
-        when(behandlingsresultatService.hentBehandlingsresultat(opprinneligBehandling.getId())).thenReturn(opprinneligResultat);
-        Lovvalgsperiode nyLovvalgsperiode = lagLovvalgsperiode(null, Lovvalgbestemmelser_883_2004.FO_883_2004_ART12_1,
-            InnvilgelsesResultat.INNVILGET);
-        behandlingsresultat.getLovvalgsperioder().add(nyLovvalgsperiode);
-        when(behandlingsresultatService.hentBehandlingsresultat(behandling.getId())).thenReturn(behandlingsresultat);
+        val opprinneligBehandling = TestdataFactory.lagBehandling()
+        behandling.opprinneligBehandling = opprinneligBehandling
+
+        every { behandlingsresultatService.hentBehandlingsresultat(opprinneligBehandling.id) } returns Behandlingsresultat()
+
+        val nyLovvalgsperiode = lagLovvalgsperiode(
+            null,
+            Lovvalgbestemmelser_883_2004.FO_883_2004_ART12_1,
+            InnvilgelsesResultat.INNVILGET
+        )
+
+        behandlingsresultat.lovvalgsperioder.add(nyLovvalgsperiode)
+        every { behandlingsresultatService.hentBehandlingsresultat(behandling.id) } returns behandlingsresultat
 
 
-        lagreLovvalgsperiodeMedl.utfør(prosessinstans);
+        lagreLovvalgsperiodeMedl.utfør(prosessinstans)
 
 
-        verify(medlPeriodeService).opprettPeriodeEndelig(nyLovvalgsperiode, behandling.getId());
+        every { medlPeriodeService.opprettPeriodeEndelig(nyLovvalgsperiode, behandling.id) }
     }
 
     @Test
-    void utfør_nyVurderingOgOpprinneligBehandlingFinnesIkke_opprettPeriode() {
-        Behandling behandling = TestdataFactory.lagBehandlingNyVurdering();
-        prosessinstans.setBehandling(behandling);
-        behandling.setOpprinneligBehandling(null);
+    fun utfør_nyVurderingOgOpprinneligBehandlingFinnesIkke_opprettPeriode() {
+        val behandling = TestdataFactory.lagBehandlingNyVurdering()
+        prosessinstans.behandling = behandling
+        behandling.opprinneligBehandling = null
 
-        Lovvalgsperiode nyLovvalgsperiode = lagLovvalgsperiode(null, Lovvalgbestemmelser_883_2004.FO_883_2004_ART12_1, InnvilgelsesResultat.INNVILGET);
-        behandlingsresultat.getLovvalgsperioder().add(nyLovvalgsperiode);
-        when(behandlingsresultatService.hentBehandlingsresultat(behandling.getId())).thenReturn(behandlingsresultat);
+        val nyLovvalgsperiode =
+            lagLovvalgsperiode(
+                null,
+                Lovvalgbestemmelser_883_2004.FO_883_2004_ART12_1,
+                InnvilgelsesResultat.INNVILGET
+            )
+
+        behandlingsresultat.lovvalgsperioder.add(nyLovvalgsperiode)
+        every { behandlingsresultatService.hentBehandlingsresultat(behandling.id) } returns behandlingsresultat
 
 
-        lagreLovvalgsperiodeMedl.utfør(prosessinstans);
+        lagreLovvalgsperiodeMedl.utfør(prosessinstans)
 
 
-        verify(medlPeriodeService).opprettPeriodeEndelig(nyLovvalgsperiode, behandling.getId());
+        every { medlPeriodeService.opprettPeriodeEndelig(nyLovvalgsperiode, behandling.id) }
     }
 
     @Test
-    void utfør_ikkeGodkjentRegistreringUnntak_oppretterIkkeLovvalgsperiode() {
-        Fagsak fagsak = FagsakTestFactory.builder().type(Sakstyper.TRYGDEAVTALE).tema(Sakstemaer.UNNTAK).build();
+    fun utfør_ikkeGodkjentRegistreringUnntak_oppretterIkkeLovvalgsperiode() {
+        val fagsak = FagsakTestFactory.builder().type(Sakstyper.TRYGDEAVTALE).tema(Sakstemaer.UNNTAK).build()
 
-        Behandling behandling = TestdataFactory.lagBehandling();
-        behandling.setFagsak(fagsak);
-        behandling.setTema(Behandlingstema.REGISTRERING_UNNTAK);
-        prosessinstans.setBehandling(behandling);
+        val behandling = TestdataFactory.lagBehandling()
+        behandling.fagsak = fagsak
+        behandling.tema = Behandlingstema.REGISTRERING_UNNTAK
+        prosessinstans.behandling = behandling
 
-        behandlingsresultat.setUtfallRegistreringUnntak(Utfallregistreringunntak.IKKE_GODKJENT);
-        when(behandlingsresultatService.hentBehandlingsresultat(behandling.getId())).thenReturn(behandlingsresultat);
-        when(saksbehandlingRegler.harRegistreringUnntakFraMedlemskapFlyt(any())).thenReturn(true);
+        behandlingsresultat.utfallRegistreringUnntak = Utfallregistreringunntak.IKKE_GODKJENT
 
-
-        lagreLovvalgsperiodeMedl.utfør(prosessinstans);
+        every { behandlingsresultatService.hentBehandlingsresultat(behandling.id) } returns behandlingsresultat
+        every { saksbehandlingRegler.harRegistreringUnntakFraMedlemskapFlyt(behandling) } returns true
 
 
-        verifyNoInteractions(medlPeriodeService);
+        lagreLovvalgsperiodeMedl.utfør(prosessinstans)
+
+
+        verify { medlPeriodeService wasNot Called }
     }
 
     @Test
-    void utfør_typeFastsattLovvalgslandIngenLovvalgsperiode_forventException() {
-        behandlingsresultat.setType(Behandlingsresultattyper.FASTSATT_LOVVALGSLAND);
-        when(behandlingsresultatService.hentBehandlingsresultat(behandlingID)).thenReturn(behandlingsresultat);
+    fun utfør_typeFastsattLovvalgslandIngenLovvalgsperiode_forventException() {
+        behandlingsresultat.type = Behandlingsresultattyper.FASTSATT_LOVVALGSLAND
+        every { behandlingsresultatService.hentBehandlingsresultat(behandlingID) } returns behandlingsresultat
 
-        assertThatExceptionOfType(NoSuchElementException.class)
-            .isThrownBy(() -> lagreLovvalgsperiodeMedl.utfør(prosessinstans))
-            .withMessageContaining("Ingen lovvalgsperiode");
+
+        shouldThrow<NoSuchElementException> {
+            lagreLovvalgsperiodeMedl.utfør(prosessinstans)
+        }.message.shouldContain("Ingen lovvalgsperiode")
     }
 
     @Test
-    void utfør_lovvalgsperiodeFinnesInnvilgelsesresultatDelvisInnvilget_forventException() {
-        Lovvalgsperiode lovvalgsperiode = lagLovvalgsperiode(11L, Lovvalgbestemmelser_883_2004.FO_883_2004_ART12_1, InnvilgelsesResultat.DELVIS_INNVILGET);
-        behandlingsresultat.getLovvalgsperioder().add(lovvalgsperiode);
-        when(behandlingsresultatService.hentBehandlingsresultat(behandlingID)).thenReturn(behandlingsresultat);
+    fun utfør_lovvalgsperiodeFinnesInnvilgelsesresultatDelvisInnvilget_forventException() {
+        val lovvalgsperiode = lagLovvalgsperiode(
+            11L,
+            Lovvalgbestemmelser_883_2004.FO_883_2004_ART12_1,
+            InnvilgelsesResultat.DELVIS_INNVILGET
+        )
+        behandlingsresultat.lovvalgsperioder.add(lovvalgsperiode)
+        every { behandlingsresultatService.hentBehandlingsresultat(behandlingID) } returns behandlingsresultat
 
-        assertThatExceptionOfType(FunksjonellException.class)
-            .isThrownBy(() -> lagreLovvalgsperiodeMedl.utfør(prosessinstans))
-            .withMessageContaining("Ukjent eller ikke-eksisterende innvilgelsesresultat");
+
+        shouldThrow<FunksjonellException> {
+            lagreLovvalgsperiodeMedl.utfør(prosessinstans)
+        }.message.shouldContain("Ukjent eller ikke-eksisterende innvilgelsesresultat")
     }
 
     @Test
-    void utfør_ikke_opprett_lovvalgsperiode_dersom_unntak_turistskip_er_oppfylt(){
-        Behandling behandling = TestdataFactory.lagBehandling();
-        Lovvalgsperiode lovvalgsperiode = lagLovvalgsperiode(1L, Lovvalgbestemmelser_883_2004.FO_883_2004_ART13_1A, InnvilgelsesResultat.INNVILGET);
+    fun utfør_ikke_opprett_lovvalgsperiode_dersom_unntak_turistskip_er_oppfylt() {
+        val behandling = TestdataFactory.lagBehandling()
 
-        prosessinstans.setBehandling(behandling);
+        val lovvalgsperiode =
+            lagLovvalgsperiode(
+                1L,
+                Lovvalgbestemmelser_883_2004.FO_883_2004_ART13_1A,
+                InnvilgelsesResultat.INNVILGET
+            )
 
-        Vilkaarsresultat vilkaarsresultat = new Vilkaarsresultat();
-        vilkaarsresultat.setVilkaar(Vilkaar.FTRL_2_12_UNNTAK_TURISTSKIP);
-        vilkaarsresultat.setOppfylt(true);
+        prosessinstans.behandling = behandling
 
-        behandlingsresultat.getLovvalgsperioder().add(lovvalgsperiode);
-        behandlingsresultat.getVilkaarsresultater().add(vilkaarsresultat);
+        val vilkaarsresultat = Vilkaarsresultat()
+        vilkaarsresultat.vilkaar = Vilkaar.FTRL_2_12_UNNTAK_TURISTSKIP
+        vilkaarsresultat.isOppfylt = true
 
-        when(behandlingsresultatService.hentBehandlingsresultat(behandling.getId())).thenReturn(behandlingsresultat);
+        behandlingsresultat.lovvalgsperioder.add(lovvalgsperiode)
+        behandlingsresultat.vilkaarsresultater.add(vilkaarsresultat)
+
+        every { behandlingsresultatService.hentBehandlingsresultat(behandling.id) } returns behandlingsresultat
 
 
-        lagreLovvalgsperiodeMedl.utfør(prosessinstans);
+        lagreLovvalgsperiodeMedl.utfør(prosessinstans)
 
 
-        verifyNoInteractions(medlPeriodeService);
+        verify { medlPeriodeService wasNot Called }
     }
 
     @Test
-    void slett_lovvalgsperiode_ved_ny_vurdering_dersom_unntak_turistskip_er_oppfylt(){
-        Behandling opprinneligBehandling = TestdataFactory.lagBehandling();
+    fun slett_lovvalgsperiode_ved_ny_vurdering_dersom_unntak_turistskip_er_oppfylt() {
+        val opprinneligBehandling = TestdataFactory.lagBehandling()
+        val opprinneligVilkaarsresultat = lagVilkaarsresultat(Vilkaar.FTRL_2_12_UNNTAK_TURISTSKIP, false)
+        val opprinneligResultat = Behandlingsresultat()
 
-        Vilkaarsresultat opprinneligVilkaarsresultat = lagVilkaarsresultat(Vilkaar.FTRL_2_12_UNNTAK_TURISTSKIP, false);
-
-        Behandlingsresultat opprinneligResultat = new Behandlingsresultat();
-
-        Lovvalgsperiode opprinneligLovvalgsperiode = lagLovvalgsperiode(
+        val opprinneligLovvalgsperiode = lagLovvalgsperiode(
             777L,
             Lovvalgbestemmelser_883_2004.FO_883_2004_ART13_1A,
             InnvilgelsesResultat.INNVILGET
-        );
+        )
 
-        opprinneligResultat.getLovvalgsperioder().add(opprinneligLovvalgsperiode);
-        opprinneligResultat.getVilkaarsresultater().add(opprinneligVilkaarsresultat);
+        opprinneligResultat.lovvalgsperioder.add(opprinneligLovvalgsperiode)
+        opprinneligResultat.vilkaarsresultater.add(opprinneligVilkaarsresultat)
 
-        when(behandlingsresultatService.hentBehandlingsresultat(opprinneligBehandling.getId())).thenReturn(opprinneligResultat);
+        every { behandlingsresultatService.hentBehandlingsresultat(opprinneligBehandling.id) } returns opprinneligResultat
 
-        Behandling behandling = TestdataFactory.lagBehandlingNyVurdering();
-        behandling.setOpprinneligBehandling(opprinneligBehandling);
+        val behandling = TestdataFactory.lagBehandlingNyVurdering()
+        behandling.opprinneligBehandling = opprinneligBehandling
 
-        prosessinstans.setBehandling(behandling);
+        prosessinstans.behandling = behandling
 
-        Vilkaarsresultat nyVilkaarsresultat = lagVilkaarsresultat(Vilkaar.FTRL_2_12_UNNTAK_TURISTSKIP, true);
+        val nyVilkaarsresultat = lagVilkaarsresultat(Vilkaar.FTRL_2_12_UNNTAK_TURISTSKIP, true)
 
-        behandlingsresultat.getLovvalgsperioder().add(opprinneligLovvalgsperiode);
-        behandlingsresultat.getVilkaarsresultater().add(nyVilkaarsresultat);
+        behandlingsresultat.lovvalgsperioder.add(opprinneligLovvalgsperiode)
+        behandlingsresultat.vilkaarsresultater.add(nyVilkaarsresultat)
 
-        when(behandlingsresultatService.hentBehandlingsresultat(behandling.getId())).thenReturn(behandlingsresultat);
-
-
-        lagreLovvalgsperiodeMedl.utfør(prosessinstans);
+        every { behandlingsresultatService.hentBehandlingsresultat(behandling.id) } returns behandlingsresultat
 
 
-        verify(medlPeriodeService).avvisPeriodeFeilregistrert(opprinneligLovvalgsperiode.getMedlPeriodeID());
-        verifyNoMoreInteractions(medlPeriodeService);
+        lagreLovvalgsperiodeMedl.utfør(prosessinstans)
 
+
+        verify { medlPeriodeService.avvisPeriodeFeilregistrert(opprinneligLovvalgsperiode.medlPeriodeID) }
     }
 
-    private Vilkaarsresultat lagVilkaarsresultat(Vilkaar vilkaar, boolean oppfylt) {
-        Vilkaarsresultat vilkaarsresultat = new Vilkaarsresultat();
-        vilkaarsresultat.setVilkaar(vilkaar);
-        vilkaarsresultat.setOppfylt(oppfylt);
-        return vilkaarsresultat;
+    private fun lagVilkaarsresultat(vilkaar: Vilkaar?, oppfylt: Boolean) = Vilkaarsresultat().apply {
+        this.vilkaar = vilkaar
+        this.isOppfylt = oppfylt
     }
 
-    private Lovvalgsperiode lagLovvalgsperiode(Long medlPeriodeID,
-                                               LovvalgBestemmelse lovvalgBestemmelse,
-                                               InnvilgelsesResultat innvilgelsesResultat) {
-        Lovvalgsperiode lovvalgsperiode = new Lovvalgsperiode();
-        lovvalgsperiode.setMedlPeriodeID(medlPeriodeID);
-        lovvalgsperiode.setBestemmelse(lovvalgBestemmelse);
-        lovvalgsperiode.setInnvilgelsesresultat(innvilgelsesResultat);
-        return lovvalgsperiode;
+    private fun lagLovvalgsperiode(
+        medlPeriodeID: Long?,
+        lovvalgBestemmelse: LovvalgBestemmelse?,
+        innvilgelsesResultat: InnvilgelsesResultat?
+    ) = Lovvalgsperiode().apply {
+        this.medlPeriodeID = medlPeriodeID
+        this.bestemmelse = lovvalgBestemmelse
+        this.innvilgelsesresultat = innvilgelsesResultat
     }
 
 }
