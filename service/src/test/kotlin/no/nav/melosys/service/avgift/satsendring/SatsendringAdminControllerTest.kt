@@ -56,6 +56,16 @@ class SatsendringAdminControllerTest {
                 }
               ],
               "total":1
+            },
+            "behandlingerSomFeilet":{
+              "behandlinger":[
+                {
+                  "behandlingID":444,
+                  "saksnummer":"MEL-444",
+                  "feilAarsak":"Feilet mot beregning"
+                }
+              ],
+              "total":1
             }
         }""".trimIndent()
 
@@ -84,7 +94,12 @@ class SatsendringAdminControllerTest {
                 BehandlingForSatstendring(
                     333, "MEL-333", Behandlingstyper.SATSENDRING, false, false
                 ),
-            )
+            ),
+            behandlingerSomFeilet = listOf(
+                BehandlingForSatstendring(
+                    444, "MEL-444", Behandlingstyper.SATSENDRING, false, false, feilAarsak = "Feilet mot beregning"
+                ),
+            ),
         )
 
     companion object {

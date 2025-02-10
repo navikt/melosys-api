@@ -26,10 +26,13 @@ import kotlin.test.Test
 class SatsendringFinnerTest {
     @MockK
     private lateinit var behandlingService: BehandlingService
+
     @MockK
     private lateinit var behandlingsresultatService: BehandlingsresultatService
+
     @MockK
     private lateinit var trygdeavgiftService: TrygdeavgiftService
+
     @MockK
     private lateinit var trygdeavgiftsberegningService: TrygdeavgiftsberegningService
 
@@ -93,7 +96,62 @@ class SatsendringFinnerTest {
                     harAktivNyVurdering = true
                 )
             ),
-            behandlingerUtenSatsendring = emptyList()
+            behandlingerUtenSatsendring = emptyList(),
+            behandlingerSomFeilet = emptyList()
+        )
+    }
+
+    @Test
+    fun `AvgiftSatsendringInfo når det feiler mot beregn trygdeavgift`() {
+        val år = 2023
+        val fagsak = FagsakTestFactory.lagFagsak()
+        val behandlingMedSatsendring = Behandling().apply {
+            id = 1L
+            type = Behandlingstyper.FØRSTEGANG
+            status = Behandlingsstatus.AVSLUTTET
+            this.fagsak = fagsak
+        }
+        val behandlingNyVurdering = Behandling().apply {
+            id = 2L
+            type = Behandlingstyper.NY_VURDERING
+            status = Behandlingsstatus.UNDER_BEHANDLING
+            this.fagsak = fagsak
+        }
+        fagsak.behandlinger.addAll(listOf(behandlingMedSatsendring, behandlingNyVurdering))
+
+        val opprinneligSats = 5.9
+        val nySats = 6.3
+        val behandlingsresultat = Behandlingsresultat().apply {
+            id = 1L
+            medlemskapsperioder = listOf(Medlemskapsperiode().apply {
+                trygdeavgiftsperioder = setOf(lagTrygdeavgiftsperiode(opprinneligSats))
+            })
+        }
+
+        every { behandlingService.hentBehandling(behandlingsresultat.id) } returns behandlingMedSatsendring
+        every { behandlingsresultatService.finnResultaterMedMedlemskapseriodeOverlappendeMed(år) } returns listOf(behandlingsresultat)
+        every { trygdeavgiftService.harFakturerbarTrygdeavgift(behandlingsresultat) } returns true
+        every { trygdeavgiftsberegningService.beregnTrygdeavgift(behandlingsresultat, any(), any()) } throws RuntimeException("Feiler mot beregning")
+
+
+        val satsendringInfo = satsendringFinner.finnBehandlingerMedSatsendring(år)
+
+
+        satsendringInfo shouldBe SatsendringFinner.AvgiftSatsendringInfo(
+            år = år,
+            behandlingerMedSatsendring = emptyList(),
+            behandlingerMedSatsendringOgNyVurdering = emptyList(),
+            behandlingerUtenSatsendring = emptyList(),
+            behandlingerSomFeilet = listOf(
+                SatsendringFinner.BehandlingForSatstendring(
+                    behandlingID = 1L,
+                    saksnummer = FagsakTestFactory.SAKSNUMMER,
+                    behandlingstype = Behandlingstyper.FØRSTEGANG,
+                    harSatsendring = false,
+                    harAktivNyVurdering = true,
+                    feilAarsak = "Feiler mot beregning"
+                )
+            )
         )
     }
 

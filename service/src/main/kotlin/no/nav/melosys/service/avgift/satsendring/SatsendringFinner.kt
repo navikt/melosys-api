@@ -23,43 +23,63 @@ class SatsendringFinner(
 ) {
     @Transactional(readOnly = true)
     fun finnBehandlingerMedSatsendring(år: Int): AvgiftSatsendringInfo {
-        // Finn alle resultater med vedtak + trygdeavgift i oppgitt år
         val behandlingsresultatList = behandlingsresultatService.finnResultaterMedMedlemskapseriodeOverlappendeMed(år)
             .filter { trygdeavgiftService.harFakturerbarTrygdeavgift(it) }
 
         val behandlingerForSatsendring = behandlingsresultatList.map {
             val behandling = behandlingService.hentBehandling(it.id)
 
-            BehandlingForSatstendring(
-                behandling.id, behandling.fagsak.saksnummer, behandling.type, harSatsendring(it), harAktivNyVurdering(behandling)
-            )
+            try {
+                val harEndring = harSatsendring(it)
+
+                BehandlingForSatstendring(
+                    behandlingID = behandling.id,
+                    saksnummer = behandling.fagsak.saksnummer,
+                    behandlingstype = behandling.type,
+                    harSatsendring = harEndring,
+                    harAktivNyVurdering = harAktivNyVurdering(behandling)
+                )
+            } catch (e: Exception) {
+                log.warn { "SatsendringFinner feiler med behandlingID: ${it.id}: ${e.message}" }
+                BehandlingForSatstendring(
+                    behandlingID = behandling.id,
+                    saksnummer = behandling.fagsak.saksnummer,
+                    behandlingstype = behandling.type,
+                    harSatsendring = false,
+                    harAktivNyVurdering = harAktivNyVurdering(behandling),
+                    feilAarsak = e.message
+                )
+            }
         }
+
+        val (behandlingForSatstendringerOk, behandlingForSatstendringerFeilet) = behandlingerForSatsendring.partition { it.feilAarsak == null }
 
         return AvgiftSatsendringInfo(
             år = år,
-            behandlingerMedSatsendring = behandlingerForSatsendring.filter { it.harSatsendring && !it.harAktivNyVurdering },
-            behandlingerMedSatsendringOgNyVurdering = behandlingerForSatsendring.filter { it.harSatsendring && it.harAktivNyVurdering },
-            behandlingerUtenSatsendring = behandlingerForSatsendring.filterNot { it.harSatsendring }
+            behandlingerMedSatsendring = behandlingForSatstendringerOk.filter { it.harSatsendring && !it.harAktivNyVurdering },
+            behandlingerMedSatsendringOgNyVurdering = behandlingForSatstendringerOk.filter { it.harSatsendring && it.harAktivNyVurdering },
+            behandlingerUtenSatsendring = behandlingForSatstendringerOk.filterNot { it.harSatsendring },
+            behandlingerSomFeilet = behandlingForSatstendringerFeilet
         )
     }
 
     private fun harSatsendring(behandlingsresultat: Behandlingsresultat): Boolean {
-        val nyeTrygdeavgiftsperioder = beregnNyeTrygdeavgiftsperioder(behandlingsresultat).toSet()
+        val nyTrygdeavgift = trygdeavgiftsberegningService.beregnTrygdeavgift(
+            behandlingsresultat,
+            behandlingsresultat.hentSkatteforholdTilNorge().toList(),
+            behandlingsresultat.hentInntektsperioder().toList(),
+        )
 
-        val erEndret = nyeTrygdeavgiftsperioder != behandlingsresultat.trygdeavgiftsperioder
+        val nyeTrygdeavgiftsperioder = nyTrygdeavgift.toSet()
+        val erSatsEndret = nyeTrygdeavgiftsperioder != behandlingsresultat.trygdeavgiftsperioder
 
-        if (erEndret) {
+        if (erSatsEndret) {
             log.debug { "Forskjell i trygdeavgiftsperioder. Eksisterende: ${behandlingsresultat.trygdeavgiftsperioder}" }
             log.debug { "Nye trygdeavgiftsperioder: $nyeTrygdeavgiftsperioder" }
         }
-        return erEndret
-    }
 
-    private fun beregnNyeTrygdeavgiftsperioder(behandlingsresultat: Behandlingsresultat) = trygdeavgiftsberegningService.beregnTrygdeavgift(
-        behandlingsresultat,
-        behandlingsresultat.hentSkatteforholdTilNorge().toList(),
-        behandlingsresultat.hentInntektsperioder().toList(),
-    )
+        return erSatsEndret
+    }
 
     private fun harAktivNyVurdering(behandling: Behandling): Boolean = behandling.fagsak.finnAktivBehandlingIkkeÅrsavregning()?.type == NY_VURDERING
 
@@ -67,7 +87,8 @@ class SatsendringFinner(
         val år: Int,
         val behandlingerMedSatsendring: List<BehandlingForSatstendring>,
         val behandlingerMedSatsendringOgNyVurdering: List<BehandlingForSatstendring>,
-        val behandlingerUtenSatsendring: List<BehandlingForSatstendring>
+        val behandlingerUtenSatsendring: List<BehandlingForSatstendring>,
+        val behandlingerSomFeilet: List<BehandlingForSatstendring>
     )
 
     data class BehandlingForSatstendring(
@@ -75,6 +96,7 @@ class SatsendringFinner(
         val saksnummer: String,
         val behandlingstype: Behandlingstyper,
         val harSatsendring: Boolean,
-        val harAktivNyVurdering: Boolean
+        val harAktivNyVurdering: Boolean,
+        val feilAarsak: String? = null
     )
 }
