@@ -100,7 +100,7 @@ class ÅrsavregningController(
             aarsavregningID = årsavregningModel.årsavregningID,
             aar = årsavregningModel.år,
             tidligereGrunnlagsopplysninger = hentGrunnlagsopplysninger(årsavregningModel.tidligereGrunnlag, årsavregningModel.tidligereAvgift),
-            avvikFunnet = årsavregningModel.tilFaktureringBeloep != BigDecimal.ZERO, //TODO koble dette opp mot frontend i ny oppgave. MELOSYS-7118
+            harAvvik = årsavregningModel.harAvvik,
             nyttGrunnlag = hentGrunnlagsopplysninger(årsavregningModel.nyttGrunnlag, årsavregningModel.endeligAvgift),
             endeligAvgift = null,
             avregning = AvregningDto(
@@ -191,7 +191,7 @@ data class ÅrsavregningResponse(
     val aarsavregningID: Long,
     val aar: Int,
     val tidligereGrunnlagsopplysninger: GrunnlagsOpplysningerDto?,
-    val avvikFunnet: Boolean?,
+    val harAvvik: Boolean?,
     val nyttGrunnlag: GrunnlagsOpplysningerDto?,
     val endeligAvgift: AvgiftDto?,
     val avregning: AvregningDto?,

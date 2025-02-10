@@ -135,7 +135,8 @@ class ÅrsavregningService(
             tidligereFakturertBeloep = årsavregning.tidligereFakturertBeloep,
             nyttTotalbeloep = årsavregning.nyttTotalbeloep,
             tilFaktureringBeloep = årsavregning.tilFaktureringBeloep,
-            harDeltGrunnlag = årsavregning.harDeltGrunnlag
+            harDeltGrunnlag = årsavregning.harDeltGrunnlag,
+            harAvvik = årsavregning.harAvvik
         )
     }
 
@@ -198,6 +199,7 @@ class ÅrsavregningService(
         tidligereFakturertBeloep: BigDecimal?,
         nyttTotalbeloep: BigDecimal?,
         harDeltGrunnlag: Boolean? = null,
+        harAvvik: Boolean? = null
     ): ÅrsavregningModel {
         val årsavregning = hentÅrsavregning(aarsavregningId)
         val årsavregningViaBehandlingsresultat = behandlingsresultatService.hentBehandlingsresultat(behandlingID).årsavregning
@@ -208,6 +210,8 @@ class ÅrsavregningService(
         if (tidligereFakturertBeloep != null) årsavregning.tidligereFakturertBeloep = tidligereFakturertBeloep
         if (nyttTotalbeloep != null) årsavregning.nyttTotalbeloep = nyttTotalbeloep
         if (harDeltGrunnlag != null) årsavregning.harDeltGrunnlag = harDeltGrunnlag
+        if (harAvvik != null) årsavregning.harAvvik = harAvvik
+
         årsavregning.beregnTilFaktureringsBeloep()
 
         return lagÅrsavregningModelFraÅrsavregning(årsavregning)
@@ -228,7 +232,8 @@ data class ÅrsavregningModel(
     val tidligereFakturertBeloep: BigDecimal?,
     val nyttTotalbeloep: BigDecimal?,
     val tilFaktureringBeloep: BigDecimal?,
-    val harDeltGrunnlag: Boolean?
+    val harDeltGrunnlag: Boolean?,
+    val harAvvik: Boolean?
 )
 
 data class Trygdeavgiftsgrunnlag(
