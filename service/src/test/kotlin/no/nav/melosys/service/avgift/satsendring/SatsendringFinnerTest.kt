@@ -148,7 +148,7 @@ class SatsendringFinnerTest {
                     saksnummer = FagsakTestFactory.SAKSNUMMER,
                     behandlingstype = Behandlingstyper.FØRSTEGANG,
                     harSatsendring = false,
-                    harAktivNyVurdering = true,
+                    harAktivNyVurdering = false,
                     feilAarsak = "Feiler mot beregning"
                 )
             )

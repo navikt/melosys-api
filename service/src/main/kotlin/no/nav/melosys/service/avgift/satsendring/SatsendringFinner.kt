@@ -23,44 +23,50 @@ class SatsendringFinner(
 ) {
     @Transactional(readOnly = true, noRollbackFor = [Throwable::class])
     fun finnBehandlingerMedSatsendring(år: Int): AvgiftSatsendringInfo {
+        log.info { "Søker satsendringer for år: $år" }
+
         val behandlingsresultatList = behandlingsresultatService.finnResultaterMedMedlemskapseriodeOverlappendeMed(år)
             .filter { trygdeavgiftService.harFakturerbarTrygdeavgift(it) }
+
+        log.info { "Fant ${behandlingsresultatList.size} behandlingsresultater for år: $år" }
 
         val behandlingerForSatsendring = behandlingsresultatList.map {
             val behandling = behandlingService.hentBehandling(it.id)
 
             try {
-                val harEndring = harSatsendring(it)
-
                 BehandlingForSatstendring(
                     behandlingID = behandling.id,
                     saksnummer = behandling.fagsak.saksnummer,
                     behandlingstype = behandling.type,
-                    harSatsendring = harEndring,
+                    harSatsendring = harSatsendring(it),
                     harAktivNyVurdering = harAktivNyVurdering(behandling)
                 )
-            } catch (e: Exception) {
-                log.error { "SatsendringFinner feiler med behandlingID: ${it.id}: ${e.message}" }
+            } catch (t: Throwable) {
+                log.error { "SatsendringFinner feiler for behandlingID: ${it.id}: $t" }
                 BehandlingForSatstendring(
                     behandlingID = behandling.id,
                     saksnummer = behandling.fagsak.saksnummer,
                     behandlingstype = behandling.type,
                     harSatsendring = false,
-                    harAktivNyVurdering = harAktivNyVurdering(behandling),
-                    feilAarsak = e.message
+                    harAktivNyVurdering = false,
+                    feilAarsak = t.message
                 )
             }
         }
 
         val (behandlingForSatstendringerOk, behandlingForSatstendringerFeilet) = behandlingerForSatsendring.partition { it.feilAarsak == null }
-
-        return AvgiftSatsendringInfo(
+        val avgiftSatsendringInfo = AvgiftSatsendringInfo(
             år = år,
             behandlingerMedSatsendring = behandlingForSatstendringerOk.filter { it.harSatsendring && !it.harAktivNyVurdering },
             behandlingerMedSatsendringOgNyVurdering = behandlingForSatstendringerOk.filter { it.harSatsendring && it.harAktivNyVurdering },
             behandlingerUtenSatsendring = behandlingForSatstendringerOk.filterNot { it.harSatsendring },
             behandlingerSomFeilet = behandlingForSatstendringerFeilet
         )
+
+        log.info { "Fant ${avgiftSatsendringInfo.behandlingerMedSatsendring.size} behandlinger med satsendring" }
+        log.info { "Fant ${avgiftSatsendringInfo.behandlingerMedSatsendringOgNyVurdering.size} behandlinger med satsendring og ny vurdering" }
+
+        return avgiftSatsendringInfo
     }
 
     private fun harSatsendring(behandlingsresultat: Behandlingsresultat): Boolean {
