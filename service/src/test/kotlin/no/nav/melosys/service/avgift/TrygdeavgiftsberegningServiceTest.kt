@@ -1,5 +1,6 @@
 package no.nav.melosys.service.avgift
 
+import io.getunleash.FakeUnleash
 import io.kotest.assertions.throwables.shouldThrow
 import io.kotest.matchers.collections.shouldBeEmpty
 import io.kotest.matchers.collections.shouldHaveSize
@@ -59,6 +60,8 @@ internal class TrygdeavgiftsberegningServiceTest {
     private lateinit var behandling: Behandling
     private lateinit var behandlingsresultat: Behandlingsresultat
 
+    private val unleash: FakeUnleash = FakeUnleash()
+
     private val FOM: LocalDate = LocalDate.now()
     private val TOM: LocalDate = LocalDate.now().plusMonths(2)
     private val BEHANDLING_ID: Long = 1L
@@ -72,6 +75,7 @@ internal class TrygdeavgiftsberegningServiceTest {
 
     @BeforeEach
     fun setup() {
+        unleash.enableAll()
         trygdeavgiftMottakerService = TrygdeavgiftMottakerService(mockBehandlingsresultatService)
         trygdeavgiftsberegningService = TrygdeavgiftsberegningService(
             mockBehandlingService,
@@ -80,6 +84,7 @@ internal class TrygdeavgiftsberegningServiceTest {
             trygdeavgiftMottakerService,
             mockPersondataService,
             mockTrygdeavgiftConsumer,
+            unleash
         )
         behandlingsresultat = lagBehandlingsresultat(Behandlingsresultattyper.IKKE_FASTSATT).get()
 

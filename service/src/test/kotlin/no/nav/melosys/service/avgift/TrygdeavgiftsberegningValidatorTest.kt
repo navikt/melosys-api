@@ -1,5 +1,6 @@
 package no.nav.melosys.service.avgift
 
+import io.getunleash.FakeUnleash
 import io.kotest.assertions.throwables.shouldNotThrow
 import io.kotest.assertions.throwables.shouldThrow
 import io.kotest.matchers.shouldBe
@@ -18,6 +19,7 @@ import no.nav.melosys.exception.FunksjonellException
 import no.nav.melosys.service.avgift.TrygdeavgiftsberegningValidator.INNTEKTSPERIODER_EMPTY
 import no.nav.melosys.service.avgift.TrygdeavgiftsberegningValidator.SKATTEFORHOLDSPERIODER_EMPTY
 import no.nav.melosys.service.avgift.TrygdeavgiftsberegningValidator.SKATTEPLIKTTYPE_LIK_FOR_ALLE_PERIODER
+import org.junit.jupiter.api.BeforeAll
 import org.junit.jupiter.api.Nested
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.TestInstance
@@ -44,9 +46,16 @@ data class ValideringsInput(
 
 class TrygdeavgiftsberegningValidatorTest {
 
+    val unleash: FakeUnleash = FakeUnleash()
+
     @Nested
     @TestInstance(TestInstance.Lifecycle.PER_CLASS)
     inner class ValiderForTrygdeavgiftberegning {
+
+        @BeforeAll
+        fun setup() {
+            unleash.enableAll()
+        }
 
         @Test
         fun shouldThrowFunksjonellExceptionWhenMedlemskapsPerioderIsEmpty() {
@@ -66,7 +75,8 @@ class TrygdeavgiftsberegningValidatorTest {
                 TrygdeavgiftsberegningValidator.validerForTrygdeavgiftberegning(
                     behandlingsresultatMock,
                     skatteforholdsPerioder,
-                    emptyList()
+                    emptyList(),
+                    unleash
                 )
             }.message shouldBe TrygdeavgiftsberegningValidator.MEDLEMSKAPSPERIODER_EMPTY
         }
@@ -86,7 +96,7 @@ class TrygdeavgiftsberegningValidatorTest {
             )
 
             shouldThrow<FunksjonellException> {
-                TrygdeavgiftsberegningValidator.validerForTrygdeavgiftberegning(behandlingsresultatMock, skatteforholdsPerioder, listOf())
+                TrygdeavgiftsberegningValidator.validerForTrygdeavgiftberegning(behandlingsresultatMock, skatteforholdsPerioder, listOf(), unleash)
             }.message shouldBe TrygdeavgiftsberegningValidator.UTLED_MEDLEMSKAPSPERIODE_FOM_MANGLER
         }
 
@@ -106,7 +116,7 @@ class TrygdeavgiftsberegningValidatorTest {
             )
 
             shouldThrow<FunksjonellException> {
-                TrygdeavgiftsberegningValidator.validerForTrygdeavgiftberegning(behandlingsresultatMock, skatteforholdsPerioder, listOf())
+                TrygdeavgiftsberegningValidator.validerForTrygdeavgiftberegning(behandlingsresultatMock, skatteforholdsPerioder, listOf(), unleash)
             }.message shouldBe TrygdeavgiftsberegningValidator.UTLED_MEDLEMSKAPSPERIODE_TOM_MANGLER
         }
 
@@ -121,7 +131,8 @@ class TrygdeavgiftsberegningValidatorTest {
                 TrygdeavgiftsberegningValidator.validerForTrygdeavgiftberegning(
                     behandlingsresultat,
                     valideringsInput.skatteforholdsperioder,
-                    valideringsInput.inntektsperioder
+                    valideringsInput.inntektsperioder,
+                    unleash
                 )
             }.message shouldBe valideringsInput.feilmelding
         }
@@ -137,7 +148,8 @@ class TrygdeavgiftsberegningValidatorTest {
                 TrygdeavgiftsberegningValidator.validerForTrygdeavgiftberegning(
                     behandlingsresultat,
                     valideringsInput.skatteforholdsperioder,
-                    valideringsInput.inntektsperioder
+                    valideringsInput.inntektsperioder,
+                    unleash
                 )
             }
         }
@@ -150,7 +162,7 @@ class TrygdeavgiftsberegningValidatorTest {
             val inntektsperioder = valideringsInput.inntektsperioder
 
             shouldThrow<FunksjonellException> {
-                TrygdeavgiftsberegningValidator.validerForTrygdeavgiftberegning(behandlingsresultatMock, skatteforholdsperioder, inntektsperioder)
+                TrygdeavgiftsberegningValidator.validerForTrygdeavgiftberegning(behandlingsresultatMock, skatteforholdsperioder, inntektsperioder, unleash)
             }.message shouldBe valideringsInput.feilmelding
         }
 

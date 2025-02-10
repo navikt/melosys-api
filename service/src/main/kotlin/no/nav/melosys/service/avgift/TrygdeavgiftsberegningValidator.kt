@@ -2,6 +2,7 @@
 
 package no.nav.melosys.service.avgift
 
+import io.getunleash.Unleash
 import no.nav.melosys.domain.Behandlingsresultat
 import no.nav.melosys.domain.ErPeriode
 import no.nav.melosys.domain.Medlemskapsperiode
@@ -9,6 +10,7 @@ import no.nav.melosys.domain.avgift.Inntektsperiode
 import no.nav.melosys.domain.avgift.SkatteforholdTilNorge
 import no.nav.melosys.domain.kodeverk.Skatteplikttype
 import no.nav.melosys.exception.FunksjonellException
+import no.nav.melosys.featuretoggle.ToggleName
 import org.threeten.extra.LocalDateRange
 
 object TrygdeavgiftsberegningValidator {
@@ -29,7 +31,8 @@ object TrygdeavgiftsberegningValidator {
     fun validerForTrygdeavgiftberegning(
         behandlingsresultat: Behandlingsresultat,
         skatteforholdsPerioder: List<SkatteforholdTilNorge>,
-        inntektsPerioder: List<Inntektsperiode>
+        inntektsPerioder: List<Inntektsperiode>,
+        unleash: Unleash
     ) {
         if (inntektsPerioder.isEmpty() && !erAllePerioderSkattepliktige(skatteforholdsPerioder)) {
             throw FunksjonellException(INNTEKTSPERIODER_EMPTY)
@@ -42,7 +45,7 @@ object TrygdeavgiftsberegningValidator {
             throw FunksjonellException(SKATTEPLIKTTYPE_LIK_FOR_ALLE_PERIODER)
         }
 
-        validerMedlemskapsperioder(behandlingsresultat)
+        validerMedlemskapsperioder(behandlingsresultat, unleash)
 
         val innvilgedeMedlemskapsperioder = behandlingsresultat.medlemskapsperioder.filter { it.erInnvilget() }
 
@@ -55,7 +58,7 @@ object TrygdeavgiftsberegningValidator {
             SKATTEFORHOLDSPERIODE_DEKKER_IKKE_HELE_PERIODEN
         )
 
-        if (inntektsPerioder.isNotEmpty()) {
+        if (unleash.isEnabled(ToggleName.MELOSYS_ÅRSAVREGNING) && inntektsPerioder.isNotEmpty()) {
             validerInntektPerioderIkkeErUtenforMedlemskapPeriode(
                 inntektsPerioder, innvilgedeMedlemskapsperioder, INNTEKTSPERIODE_ER_UTENFOR_MEDLEMSKAPSPERIODE
             )
@@ -89,11 +92,11 @@ object TrygdeavgiftsberegningValidator {
         return skatteforholdsPerioder.all { it.skatteplikttype == Skatteplikttype.SKATTEPLIKTIG }
     }
 
-    private fun validerMedlemskapsperioder(behandlingsresultat: Behandlingsresultat) {
+    private fun validerMedlemskapsperioder(behandlingsresultat: Behandlingsresultat, unleash: Unleash) {
         if (behandlingsresultat.medlemskapsperioder.isEmpty()) {
             throw FunksjonellException(MEDLEMSKAPSPERIODER_EMPTY)
         }
-        alleMedlemskapsperioderHarSammeBestemmelse(behandlingsresultat.medlemskapsperioder)
+        if (unleash.isEnabled(ToggleName.MELOSYS_ÅRSAVREGNING)) alleMedlemskapsperioderHarSammeBestemmelse(behandlingsresultat.medlemskapsperioder)
 
         behandlingsresultat.utledMedlemskapsperiodeFom()
             ?: throw FunksjonellException(UTLED_MEDLEMSKAPSPERIODE_FOM_MANGLER)
