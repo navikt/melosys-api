@@ -40,7 +40,7 @@ class SatsendringFinner(
                     harAktivNyVurdering = harAktivNyVurdering(behandling)
                 )
             } catch (e: Exception) {
-                log.warn("Kall mot trygdeavgift feiler med behandlingID: ${it.id}: ${e.message}")
+                log.warn { "SatsendringFinner feiler med behandlingID: ${it.id}: ${e.message}" }
                 BehandlingForSatstendring(
                     behandlingID = behandling.id,
                     saksnummer = behandling.fagsak.saksnummer,
