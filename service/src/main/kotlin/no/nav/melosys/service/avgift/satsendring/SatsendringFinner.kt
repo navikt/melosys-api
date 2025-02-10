@@ -55,16 +55,19 @@ class SatsendringFinner(
         }
 
         val (behandlingForSatstendringerOk, behandlingForSatstendringerFeilet) = behandlingerForSatsendring.partition { it.feilAarsak == null }
+        val (behandlingerMedSatsendringer, behandlingerUtenSatsendringer) = behandlingForSatstendringerOk.partition { it.harSatsendring }
+        val (behandlingerMedSatsendringOgNyVurdering, behandlingerMedKunSatsendringer) = behandlingerMedSatsendringer.partition { it.harAktivNyVurdering }
+
         val avgiftSatsendringInfo = AvgiftSatsendringInfo(
             år = år,
-            behandlingerMedSatsendring = behandlingForSatstendringerOk.filter { it.harSatsendring && !it.harAktivNyVurdering },
-            behandlingerMedSatsendringOgNyVurdering = behandlingForSatstendringerOk.filter { it.harSatsendring && it.harAktivNyVurdering },
-            behandlingerUtenSatsendring = behandlingForSatstendringerOk.filterNot { it.harSatsendring },
+            behandlingerMedSatsendring = behandlingerMedKunSatsendringer,
+            behandlingerMedSatsendringOgNyVurdering = behandlingerMedSatsendringOgNyVurdering,
+            behandlingerUtenSatsendring = behandlingerUtenSatsendringer,
             behandlingerSomFeilet = behandlingForSatstendringerFeilet
         )
 
-        log.info { "Fant ${avgiftSatsendringInfo.behandlingerMedSatsendring.size} behandlinger med satsendring" }
-        log.info { "Fant ${avgiftSatsendringInfo.behandlingerMedSatsendringOgNyVurdering.size} behandlinger med satsendring og ny vurdering" }
+        log.info { "Fant ${avgiftSatsendringInfo.behandlingerMedSatsendring.size} behandlinger med satsendring, uten ny vurdering" }
+        log.info { "Fant ${avgiftSatsendringInfo.behandlingerMedSatsendringOgNyVurdering.size} behandlinger med satsendring og aktiv ny vurdering" }
 
         return avgiftSatsendringInfo
     }
