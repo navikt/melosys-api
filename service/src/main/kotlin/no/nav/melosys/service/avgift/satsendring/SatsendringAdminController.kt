@@ -1,6 +1,7 @@
 package no.nav.melosys.service.avgift.satsendring
 
 import no.nav.melosys.service.AdminController
+import no.nav.melosys.service.avgift.satsendring.SatsendringFinner.BehandlingForSatstendring
 import no.nav.security.token.support.core.api.Unprotected
 import org.springframework.beans.factory.annotation.Value
 import org.springframework.http.ResponseEntity
@@ -26,17 +27,19 @@ class SatsendringAdminController(
             avgiftSatsendringInfo.år,
             behandlingerMedSatsendring = behandlingerMedTotalDto(avgiftSatsendringInfo.behandlingerMedSatsendring),
             behandlingerMedSatsendringOgNyVurdering = behandlingerMedTotalDto(avgiftSatsendringInfo.behandlingerMedSatsendringOgNyVurdering),
-            behandlingerUtenSatsendring = behandlingerMedTotalDto(avgiftSatsendringInfo.behandlingerUtenSatsendring)
+            behandlingerUtenSatsendring = behandlingerMedTotalDto(avgiftSatsendringInfo.behandlingerUtenSatsendring),
+            behandlingerSomFeilet = behandlingerMedTotalDto(avgiftSatsendringInfo.behandlingerSomFeilet)
         )
         return ResponseEntity.ok(satsendringRapportDto)
     }
 
-    private fun behandlingerMedTotalDto(behandlinger: List<SatsendringFinner.BehandlingForSatstendring>) =
+    private fun behandlingerMedTotalDto(behandlinger: List<BehandlingForSatstendring>) =
         BehandlingerMedTotalDto(
             behandlinger.map {
                 BehandlingForSatstendringDto(
                     it.behandlingID,
-                    it.saksnummer
+                    it.saksnummer,
+                    it.feilAarsak
                 )
             },
             behandlinger.size
@@ -49,7 +52,8 @@ data class SatsendringRapportDto(
     val år: Int,
     val behandlingerMedSatsendring: BehandlingerMedTotalDto,
     val behandlingerMedSatsendringOgNyVurdering: BehandlingerMedTotalDto,
-    val behandlingerUtenSatsendring: BehandlingerMedTotalDto
+    val behandlingerUtenSatsendring: BehandlingerMedTotalDto,
+    val behandlingerSomFeilet: BehandlingerMedTotalDto
 )
 
 data class BehandlingerMedTotalDto(
@@ -60,4 +64,5 @@ data class BehandlingerMedTotalDto(
 data class BehandlingForSatstendringDto(
     val behandlingID: Long,
     val saksnummer: String,
+    val feilAarsak: String? = null
 )
