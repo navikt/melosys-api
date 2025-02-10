@@ -21,7 +21,7 @@ class SatsendringFinner(
     private val trygdeavgiftService: TrygdeavgiftService,
     private val trygdeavgiftsberegningService: TrygdeavgiftsberegningService
 ) {
-    @Transactional(readOnly = true, noRollbackFor = [Exception::class])
+    @Transactional(readOnly = true, rollbackFor = [])
     fun finnBehandlingerMedSatsendring(år: Int): AvgiftSatsendringInfo {
         val behandlingsresultatList = behandlingsresultatService.finnResultaterMedMedlemskapseriodeOverlappendeMed(år)
             .filter { trygdeavgiftService.harFakturerbarTrygdeavgift(it) }
@@ -40,7 +40,7 @@ class SatsendringFinner(
                     harAktivNyVurdering = harAktivNyVurdering(behandling)
                 )
             } catch (e: Exception) {
-                log.warn { "SatsendringFinner feiler med behandlingID: ${it.id}: ${e.message}" }
+                log.error { "SatsendringFinner feiler med behandlingID: ${it.id}: ${e.message}" }
                 BehandlingForSatstendring(
                     behandlingID = behandling.id,
                     saksnummer = behandling.fagsak.saksnummer,
