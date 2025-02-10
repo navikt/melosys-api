@@ -126,7 +126,8 @@ internal class ÅrsavregningControllerTest {
             tidligereFakturertBeloep = BigDecimal(21170.0),
             nyttTotalbeloep = BigDecimal(24280.0),
             tilFaktureringBeloep = BigDecimal(3110.0),
-            harDeltGrunnlag = false
+            harDeltGrunnlag = false,
+            harAvvik = null
         )
 
 
@@ -211,7 +212,6 @@ internal class ÅrsavregningControllerTest {
       "totalAvgift": 31650.0
     }
   },
-  "avvikFunnet": true,
   "nyttGrunnlag": null,
   "endeligAvgift": null,
   "avregning": {
@@ -219,7 +219,8 @@ internal class ÅrsavregningControllerTest {
     "tidligereFakturertBeloep": 21170,
     "tilFaktureringBeloep": 3110
   },
-  "harDeltGrunnlag": false
+  "harDeltGrunnlag": false,
+  "harAvvik": null
 }"""
 
         mockMvc.perform(
@@ -328,7 +329,8 @@ internal class ÅrsavregningControllerTest {
             tidligereFakturertBeloep = BigDecimal(80580.0),
             nyttTotalbeloep = BigDecimal(6708.0),
             tilFaktureringBeloep = BigDecimal(-73872.0),
-            harDeltGrunnlag = false
+            harDeltGrunnlag = false,
+            harAvvik = null
         )
 
 
@@ -382,7 +384,6 @@ internal class ÅrsavregningControllerTest {
             "totalAvgift": 80580.00
         }
     },
-    "avvikFunnet": true,
     "nyttGrunnlag": {
         "trygdeavgiftsgrunnlag": {
             "medlemskapsperioder": [
@@ -436,7 +437,8 @@ internal class ÅrsavregningControllerTest {
         "tidligereFakturertBeloep": 80580,
         "tilFaktureringBeloep": -73872
     },
-    "harDeltGrunnlag": false
+    "harDeltGrunnlag": false,
+    "harAvvik": null
 }"""
 
         mockMvc.perform(
