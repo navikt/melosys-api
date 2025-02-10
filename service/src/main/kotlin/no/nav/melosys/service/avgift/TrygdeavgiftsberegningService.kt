@@ -145,7 +145,12 @@ class TrygdeavgiftsberegningService(
         )
 
         return beregnetTrygdeavgiftList.map { beregnetAvgiftPerPeriode ->
-            lagTrygdeavgiftsperiode(beregnetAvgiftPerPeriode, skatteforholdsperioderMedUUID, inntektsperioderMedUUID, behandlingsresultat)
+            lagTrygdeavgiftsperiode(
+                beregnetAvgiftPerPeriode,
+                skatteforholdsperioderMedUUID,
+                inntektsperioderMedUUID,
+                behandlingsresultat.medlemskapsperioder
+            )
         }
     }
 
@@ -161,10 +166,10 @@ class TrygdeavgiftsberegningService(
         response: TrygdeavgiftsberegningResponse,
         skatteforholdsperioderMedUUID: List<Pair<UUID, SkatteforholdTilNorge>>,
         inntektsperioderMedUUID: List<Pair<UUID, Inntektsperiode>>,
-        behandlingsresultat: Behandlingsresultat
+        medlemskapsperioder: Collection<Medlemskapsperiode>
     ): Trygdeavgiftsperiode {
         val medlemskapsperiodeID = response.grunnlag.medlemskapsperiodeId
-        val grunnlagMedlemskapsperiode = behandlingsresultat.medlemskapsperioder
+        val grunnlagMedlemskapsperiode = medlemskapsperioder
             .firstOrNull { idToUUid(it.id) == medlemskapsperiodeID }
             ?: throw IllegalStateException("Fant ikke medlemskapsperiode $medlemskapsperiodeID")
 
