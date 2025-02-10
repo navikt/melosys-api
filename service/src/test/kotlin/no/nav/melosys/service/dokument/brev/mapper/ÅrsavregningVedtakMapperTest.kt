@@ -163,7 +163,8 @@ class ÅrsavregningVedtakMapperTest {
             nyttTotalbeloep = nyttTotalbeloep,
             tidligereFakturertBeloep = tidligereFakturertBeloep,
             tidligereGrunnlag = grunnlagMedlemskap,
-            harDeltGrunnlag = false
+            harDeltGrunnlag = false,
+            harAvvik = null
         )
     }
 
