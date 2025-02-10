@@ -44,7 +44,6 @@ class TrygdeavgiftsberegningService(
         val behandlingsresultat = behandlingsresultatService.hentBehandlingsresultat(behandlingsresultatID)
         TrygdeavgiftsberegningValidator.validerForTrygdeavgiftberegning(behandlingsresultat, skatteforholdsperioder, inntektsperioder, unleash)
 
-
         if (erPliktigMedlemskapSkattepliktig(skatteforholdsperioder, inntektsperioder, behandlingsresultat)) {
             nullstillTrygdeavgiftsperioder(behandlingsresultat)
             return leggTilTrygdeavgiftsperiodeForPliktigMedlemskapSkattepliktig(behandlingsresultat, skatteforholdsperioder)
@@ -61,6 +60,70 @@ class TrygdeavgiftsberegningService(
 
 
         return nyeTrygdeavgiftsperioder.toSet()
+    }
+
+    @Transactional(readOnly = true)
+    fun beregnTrygdeavgift(
+        behandlingsresultatId: Long,
+        medlemskapsperioder: Collection<Medlemskapsperiode>,
+        skatteforholdsperioder: List<SkatteforholdTilNorge>,
+        inntektsperioder: List<Inntektsperiode>
+    ): List<Trygdeavgiftsperiode> {
+        // UUID brukes til å identifisere periodene som danner grunnlag for trygdeavgiftsberegningen
+        val inntektsperioderMedUUID = inntektsperioder.map { UUID.randomUUID() to it }
+        val skatteforholdsperioderMedUUID = skatteforholdsperioder.map { UUID.randomUUID() to it }
+
+        val innvilgedeMedlemskapsperioder = medlemskapsperioder.filter { it.erInnvilget() }
+        val skatteforholdsperiodeDtoSet = skatteforholdsperioderMedUUID.map { it.second.tilSkatteforholdDto(it.first) }.toSet()
+        val inntektsperiodeDtoList = inntektsperioderMedUUID.map { it.second.tilInntektsperiodeDto(it.first) }
+        val foedselDato = hentFødselsdatoOmViHarTjenstligBehov(behandlingsresultatId, innvilgedeMedlemskapsperioder)
+
+        val beregnetTrygdeavgiftList = trygdeavgiftConsumer.beregnTrygdeavgift(
+            TrygdeavgiftsberegningRequest(
+                innvilgedeMedlemskapsperioder.tilMedlemskapsperiodeDtoSet(),
+                skatteforholdsperiodeDtoSet,
+                inntektsperiodeDtoList,
+                foedselDato
+            )
+        )
+
+        return beregnetTrygdeavgiftList.map { beregnetAvgiftPerPeriode ->
+            lagTrygdeavgiftsperiode(
+                beregnetAvgiftPerPeriode,
+                skatteforholdsperioderMedUUID,
+                inntektsperioderMedUUID,
+                medlemskapsperioder
+            )
+        }
+    }
+
+    @Transactional(readOnly = true)
+    fun hentTrygdeavgiftsberegning(behandlingsresultatID: Long): Set<Trygdeavgiftsperiode> {
+        return behandlingsresultatService.hentBehandlingsresultat(behandlingsresultatID)
+            .trygdeavgiftsperioder
+    }
+
+    @Transactional(readOnly = true)
+    fun hentOpprinneligTrygdeavgiftsperioder(behandlingID: Long): Set<Trygdeavgiftsperiode> {
+        val behandling = behandlingService.hentBehandling(behandlingID)
+
+        return behandling.opprinneligBehandling?.let {
+            behandlingsresultatService.hentBehandlingsresultat(it.id).trygdeavgiftsperioder
+        } ?: emptySet()
+    }
+
+    // Metoden ser ikke ut til å høre hjemme her
+    @Transactional(readOnly = true)
+    fun finnFakturamottakerNavn(behandlingID: Long): String {
+        val fagsak = behandlingService.hentBehandling(behandlingID).fagsak
+        fagsak.finnFullmektig(Fullmaktstype.FULLMEKTIG_TRYGDEAVGIFT)
+            .let {
+                if (it == null)
+                    return persondataService.hentSammensattNavn(fagsak.hentBrukersAktørID())
+                if (it.erPerson())
+                    return persondataService.hentSammensattNavn(it.personIdent)
+                return eregFasade.hentOrganisasjonNavn(it.orgnr)
+            }
     }
 
     private fun nullstillTrygdeavgiftsperioder(behandlingsresultat: Behandlingsresultat) {
@@ -119,41 +182,6 @@ class TrygdeavgiftsberegningService(
         return result.toSet()
     }
 
-    @Transactional(readOnly = true)
-    fun beregnTrygdeavgift(
-        behandlingsresultatId: Long,
-        medlemskapsperioder: Collection<Medlemskapsperiode>,
-        skatteforholdsperioder: List<SkatteforholdTilNorge>,
-        inntektsperioder: List<Inntektsperiode>
-    ): List<Trygdeavgiftsperiode> {
-        // UUID brukes til å identifisere periodene som danner grunnlag for trygdeavgiftsberegningen
-        val inntektsperioderMedUUID = inntektsperioder.map { UUID.randomUUID() to it }
-        val skatteforholdsperioderMedUUID = skatteforholdsperioder.map { UUID.randomUUID() to it }
-
-        val innvilgedeMedlemskapsperioder = medlemskapsperioder.filter { it.erInnvilget() }
-        val skatteforholdsperiodeDtoSet = skatteforholdsperioderMedUUID.map { it.second.tilSkatteforholdDto(it.first) }.toSet()
-        val inntektsperiodeDtoList = inntektsperioderMedUUID.map { it.second.tilInntektsperiodeDto(it.first) }
-        val foedselDato = hentFødselsdatoOmViHarTjenstligBehov(behandlingsresultatId, innvilgedeMedlemskapsperioder)
-
-        val beregnetTrygdeavgiftList = trygdeavgiftConsumer.beregnTrygdeavgift(
-            TrygdeavgiftsberegningRequest(
-                innvilgedeMedlemskapsperioder.tilMedlemskapsperiodeDtoSet(),
-                skatteforholdsperiodeDtoSet,
-                inntektsperiodeDtoList,
-                foedselDato
-            )
-        )
-
-        return beregnetTrygdeavgiftList.map { beregnetAvgiftPerPeriode ->
-            lagTrygdeavgiftsperiode(
-                beregnetAvgiftPerPeriode,
-                skatteforholdsperioderMedUUID,
-                inntektsperioderMedUUID,
-                medlemskapsperioder
-            )
-        }
-    }
-
     private fun hentFødselsdatoOmViHarTjenstligBehov(behandlingsresultatID: Long, medlemskapsperioder: List<Medlemskapsperiode>): LocalDate? {
         if (medlemskapsperioder.any { it.erPliktig() }) {
             val fagsak = behandlingService.hentBehandling(behandlingsresultatID).fagsak
@@ -204,33 +232,4 @@ class TrygdeavgiftsberegningService(
 
     private fun skalKunBetalesTilSkatt(behandlingsresultat: Behandlingsresultat) =
         trygdeavgiftMottakerService.getTrygdeavgiftMottaker(behandlingsresultat) == Trygdeavgiftmottaker.TRYGDEAVGIFT_BETALES_TIL_SKATT
-
-    @Transactional(readOnly = true)
-    fun hentTrygdeavgiftsberegning(behandlingsresultatID: Long): Set<Trygdeavgiftsperiode> {
-        return behandlingsresultatService.hentBehandlingsresultat(behandlingsresultatID)
-            .trygdeavgiftsperioder
-    }
-
-    @Transactional(readOnly = true)
-    fun hentOpprinneligTrygdeavgiftsperioder(behandlingID: Long): Set<Trygdeavgiftsperiode> {
-        val behandling = behandlingService.hentBehandling(behandlingID)
-
-        return behandling.opprinneligBehandling?.let {
-            behandlingsresultatService.hentBehandlingsresultat(it.id).trygdeavgiftsperioder
-        } ?: emptySet()
-    }
-
-    // Metoden ser ikke ut til å høre hjemme her
-    @Transactional(readOnly = true)
-    fun finnFakturamottakerNavn(behandlingID: Long): String {
-        val fagsak = behandlingService.hentBehandling(behandlingID).fagsak
-        fagsak.finnFullmektig(Fullmaktstype.FULLMEKTIG_TRYGDEAVGIFT)
-            .let {
-                if (it == null)
-                    return persondataService.hentSammensattNavn(fagsak.hentBrukersAktørID())
-                if (it.erPerson())
-                    return persondataService.hentSammensattNavn(it.personIdent)
-                return eregFasade.hentOrganisasjonNavn(it.orgnr)
-            }
-    }
 }
