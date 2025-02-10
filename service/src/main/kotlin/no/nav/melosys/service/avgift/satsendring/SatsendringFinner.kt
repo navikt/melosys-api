@@ -21,7 +21,7 @@ class SatsendringFinner(
     private val trygdeavgiftService: TrygdeavgiftService,
     private val trygdeavgiftsberegningService: TrygdeavgiftsberegningService
 ) {
-    @Transactional(readOnly = true, rollbackFor = [])
+    @Transactional(readOnly = true, noRollbackFor = [Throwable::class])
     fun finnBehandlingerMedSatsendring(år: Int): AvgiftSatsendringInfo {
         val behandlingsresultatList = behandlingsresultatService.finnResultaterMedMedlemskapseriodeOverlappendeMed(år)
             .filter { trygdeavgiftService.harFakturerbarTrygdeavgift(it) }
