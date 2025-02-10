@@ -74,6 +74,27 @@ class ÅrsavregningController(
         )
     }
 
+    @PutMapping("/{aarsavregningID}/grunnlagstype")
+    fun oppdaterHarDeltGrunnlag(
+        @PathVariable("behandlingID") behandlingID: Long,
+        @PathVariable("aarsavregningID") aarsavregningID: Long,
+        @RequestBody harDeltGrunnlagRequest: HarDeltGrunnlagRequest
+    ): ResponseEntity<ÅrsavregningResponse> {
+        aksesskontroll.autoriserSkriv(behandlingID)
+
+        val årsavregning = årsavregningService.oppdater(
+            behandlingID,
+            aarsavregningID,
+            null,
+            null,
+            harDeltGrunnlagRequest.harDeltGrunnlag
+        )
+
+        return ResponseEntity.ok(
+            lagÅrsavregningResponse(årsavregning)
+        )
+    }
+
     private fun lagÅrsavregningResponse(årsavregningModel: ÅrsavregningModel) =
         ÅrsavregningResponse(
             aarsavregningID = årsavregningModel.årsavregningID,
@@ -86,7 +107,8 @@ class ÅrsavregningController(
                 nyttTotalbeloep = årsavregningModel.nyttTotalbeloep,
                 tidligereFakturertBeloep = årsavregningModel.tidligereFakturertBeloep,
                 tilFaktureringBeloep = årsavregningModel.tilFaktureringBeloep,
-            )
+            ),
+            harDeltGrunnlag = årsavregningModel.harDeltGrunnlag
         )
 
     private fun hentGrunnlagsopplysninger(
@@ -161,6 +183,10 @@ data class LagÅrsavregningRequest(
     val aar: Int,
 )
 
+data class HarDeltGrunnlagRequest(
+    val harDeltGrunnlag: Boolean
+)
+
 data class ÅrsavregningResponse(
     val aarsavregningID: Long,
     val aar: Int,
@@ -168,7 +194,8 @@ data class ÅrsavregningResponse(
     val avvikFunnet: Boolean?,
     val nyttGrunnlag: GrunnlagsOpplysningerDto?,
     val endeligAvgift: AvgiftDto?,
-    val avregning: AvregningDto?
+    val avregning: AvregningDto?,
+    val harDeltGrunnlag: Boolean?
 )
 
 data class ÅrsavregningOppdaterRequest(

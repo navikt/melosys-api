@@ -101,7 +101,8 @@ internal class ÅrsavregningServiceTest {
                 endeligAvgift = emptyList(),
                 tidligereFakturertBeloep = null,
                 nyttTotalbeloep = null,
-                tilFaktureringBeloep = null
+                tilFaktureringBeloep = null,
+                harDeltGrunnlag = null
             )
         }
 
@@ -149,7 +150,8 @@ internal class ÅrsavregningServiceTest {
                 endeligAvgift = emptyList(),
                 tidligereFakturertBeloep = null,
                 nyttTotalbeloep = null,
-                tilFaktureringBeloep = null
+                tilFaktureringBeloep = null,
+                harDeltGrunnlag = null
             )
         }
     }
@@ -169,7 +171,10 @@ internal class ÅrsavregningServiceTest {
             every { aarsavregningRepository.findById(1L) }.returns(Optional.of(behandlingsresultat.årsavregning))
             every { behandlingsresultatService.hentBehandlingsresultat(1L) }.returns(behandlingsresultat)
 
+
             årsavregningService.oppdater(1L, 1L, BigDecimal.valueOf(12.4), BigDecimal.valueOf(5.2))
+
+
             behandlingsresultat.årsavregning.tilFaktureringBeloep shouldBe BigDecimal.valueOf(-7.2)
         }
 
@@ -186,8 +191,53 @@ internal class ÅrsavregningServiceTest {
             every { aarsavregningRepository.findById(1L) }.returns(Optional.of(behandlingsresultat.årsavregning))
             every { behandlingsresultatService.hentBehandlingsresultat(1L) }.returns(behandlingsresultat)
 
+
             årsavregningService.oppdater(1L, 1L, null, BigDecimal.ONE)
+
+
             behandlingsresultat.årsavregning.tilFaktureringBeloep shouldBe null
+        }
+
+        @Test
+        fun `harDeltGrunnlag skal settes`() {
+            val behandlingsresultat = Behandlingsresultat().apply resultat@{
+                behandling = Behandling()
+                årsavregning = Årsavregning().apply {
+                    id = 1L
+                    aar = 2023
+                    behandlingsresultat = this@resultat
+                }
+            }
+            every { aarsavregningRepository.findById(1L) }.returns(Optional.of(behandlingsresultat.årsavregning))
+            every { behandlingsresultatService.hentBehandlingsresultat(1L) }.returns(behandlingsresultat)
+            behandlingsresultat.årsavregning.harDeltGrunnlag shouldBe null
+
+
+            årsavregningService.oppdater(1L, 1L, null, BigDecimal.ONE, true)
+
+
+            behandlingsresultat.årsavregning.harDeltGrunnlag shouldBe true
+        }
+
+        @Test
+        fun `harDeltGrunnlag skal ikke settes hvis null`() {
+            val behandlingsresultat = Behandlingsresultat().apply resultat@{
+                behandling = Behandling()
+                årsavregning = Årsavregning().apply {
+                    id = 1L
+                    aar = 2023
+                    behandlingsresultat = this@resultat
+                }
+            }
+            every { aarsavregningRepository.findById(1L) }.returns(Optional.of(behandlingsresultat.årsavregning))
+            every { behandlingsresultatService.hentBehandlingsresultat(1L) }.returns(behandlingsresultat)
+            behandlingsresultat.årsavregning.harDeltGrunnlag shouldBe null
+
+
+            årsavregningService.oppdater(1L, 1L, null, BigDecimal.ONE)
+
+
+            behandlingsresultat.årsavregning.harDeltGrunnlag shouldBe null
         }
     }
 
