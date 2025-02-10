@@ -78,7 +78,11 @@ class SatsendringFinnerTest {
         every { behandlingService.hentBehandling(behandlingsresultat.id) } returns behandlingMedSatsendring
         every { behandlingsresultatService.finnResultaterMedMedlemskapseriodeOverlappendeMed(år) } returns listOf(behandlingsresultat)
         every { trygdeavgiftService.harFakturerbarTrygdeavgift(behandlingsresultat) } returns true
-        every { trygdeavgiftsberegningService.beregnTrygdeavgift(behandlingsresultat, any(), any()) } returns listOf(lagTrygdeavgiftsperiode(nySats))
+        every { trygdeavgiftsberegningService.beregnTrygdeavgift(behandlingsresultat, any(), any(), any()) } returns listOf(
+            lagTrygdeavgiftsperiode(
+                nySats
+            )
+        )
 
 
         val satsendringInfo = satsendringFinner.finnBehandlingerMedSatsendring(år)
@@ -131,7 +135,14 @@ class SatsendringFinnerTest {
         every { behandlingService.hentBehandling(behandlingsresultat.id) } returns behandlingMedSatsendring
         every { behandlingsresultatService.finnResultaterMedMedlemskapseriodeOverlappendeMed(år) } returns listOf(behandlingsresultat)
         every { trygdeavgiftService.harFakturerbarTrygdeavgift(behandlingsresultat) } returns true
-        every { trygdeavgiftsberegningService.beregnTrygdeavgift(behandlingsresultat, any(), any()) } throws RuntimeException("Feiler mot beregning")
+        every {
+            trygdeavgiftsberegningService.beregnTrygdeavgift(
+                behandlingsresultat,
+                any(),
+                any(),
+                any()
+            )
+        } throws RuntimeException("Feiler mot beregning")
 
 
         val satsendringInfo = satsendringFinner.finnBehandlingerMedSatsendring(år)
