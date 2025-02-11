@@ -330,7 +330,7 @@ internal class ÅrsavregningControllerTest {
             nyttTotalbeloep = BigDecimal(6708.0),
             tilFaktureringBeloep = BigDecimal(-73872.0),
             harDeltGrunnlag = false,
-            harAvvik = null
+            harAvvik = true
         )
 
 
@@ -438,7 +438,7 @@ internal class ÅrsavregningControllerTest {
         "tilFaktureringBeloep": -73872
     },
     "harDeltGrunnlag": false,
-    "harAvvik": null
+    "harAvvik": true
 }"""
 
         mockMvc.perform(
