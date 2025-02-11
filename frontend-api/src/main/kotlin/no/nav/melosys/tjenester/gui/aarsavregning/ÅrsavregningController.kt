@@ -95,6 +95,27 @@ class ÅrsavregningController(
         )
     }
 
+    @PutMapping("/{aarsavregningID}/harAvvik/{harAvvik}")
+    fun oppdaterHarAvvik(
+        @PathVariable("behandlingID") behandlingID: Long,
+        @PathVariable("aarsavregningID") aarsavregningID: Long,
+        @PathVariable("harAvvik") harAvvik: Boolean
+    ): ResponseEntity<ÅrsavregningResponse> {
+        aksesskontroll.autoriserSkriv(behandlingID)
+
+        val årsavregning = årsavregningService.oppdater(
+            behandlingID,
+            aarsavregningID,
+            null,
+            null,
+            harAvvik = harAvvik
+        )
+
+        return ResponseEntity.ok(
+            lagÅrsavregningResponse(årsavregning)
+        )
+    }
+
     private fun lagÅrsavregningResponse(årsavregningModel: ÅrsavregningModel) =
         ÅrsavregningResponse(
             aarsavregningID = årsavregningModel.årsavregningID,
