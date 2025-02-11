@@ -49,7 +49,6 @@ class SatsendringFinnerTest {
         )
     }
 
-    @Disabled("Inntil feil med transaksjonsrollback er løst")
     @Test
     fun `AvgiftSatsendringInfo når det finnes både satsendring og en aktiv ny vurdering i en sak`() {
         val år = 2023
@@ -103,7 +102,6 @@ class SatsendringFinnerTest {
         )
     }
 
-    @Disabled("Inntil feil med transaksjonsrollback er løst")
     @Test
     fun `AvgiftSatsendringInfo når det feiler mot beregn trygdeavgift`() {
         val år = 2023

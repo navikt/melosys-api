@@ -123,7 +123,7 @@ class TrygdeavgiftsberegningService(
         return result.toSet()
     }
 
-    @Transactional(readOnly = true)
+    @Transactional(readOnly = true, noRollbackFor = [Throwable::class])
     fun beregnTrygdeavgift(
         behandlingsresultat: Behandlingsresultat,
         skatteforholdsperioder: List<SkatteforholdTilNorge>,
