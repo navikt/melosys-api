@@ -3,6 +3,8 @@ package no.nav.melosys.service.kontroll.feature.ferdigbehandling.kontroll
 import no.nav.melosys.domain.Lovvalgsperiode
 import no.nav.melosys.domain.avgift.Trygdeavgiftsperiode
 import no.nav.melosys.domain.kodeverk.LovvalgBestemmelse
+import no.nav.melosys.domain.kodeverk.Trygdeavgiftmottaker
+import no.nav.melosys.domain.kodeverk.Vertslandsavtale_bestemmelser.*
 import no.nav.melosys.domain.kodeverk.begrunnelser.Kontroll_begrunnelser
 import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingsstatus
 import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingstema
@@ -39,6 +41,23 @@ object FerdigbehandlingKontroll {
         return if (harOverlappendePeriodeMedForskuddsvisFakturering(trygdeavgiftperiodeData)) {
             Kontrollfeil(
                 Kontroll_begrunnelser.OVERLAPPENDE_PERIODE_MED_FORSKUDDSVIS_FAKTURERUNG,
+                KontrolldataFeilType.ADVARSEL
+            )
+        } else null
+    }
+
+    fun sjekkFullmektigForMedlemEtterVertslandsAvtale(kontrollData: FerdigbehandlingKontrollData): Kontrollfeil? {
+        val filtrerteBestemmelser =
+            listOf(DET_INTERNASJONALE_BARENTSSEKRETARIATET_ART14, DEN_NORDATLANTISKE_SJØPATTEDYRKOMMISJON_ART16, ARKTISK_RÅDS_SEKRETARIAT_ART16)
+
+        val bestemmelseErIFiltrertListe = kontrollData.medlemskapsperiodeData?.nyeMedlemskapsperioder?.any { filtrerteBestemmelser.contains(it.bestemmelse) }
+
+        val trygdeavgiftBetalesTilNav = kontrollData.trygdeavgiftMottaker == Trygdeavgiftmottaker.TRYGDEAVGIFT_BETALES_TIL_NAV
+
+
+        return if (bestemmelseErIFiltrertListe == true && trygdeavgiftBetalesTilNav && kontrollData.fullmektig == null) {
+            Kontrollfeil(
+                Kontroll_begrunnelser.MANGLENDE_FULLMEKTIG_MEDLEM_ETTER_VERTSLANDSAVTALE,
                 KontrolldataFeilType.ADVARSEL
             )
         } else null
