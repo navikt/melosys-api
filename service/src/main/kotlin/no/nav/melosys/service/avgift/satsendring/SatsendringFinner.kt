@@ -22,17 +22,17 @@ class SatsendringFinner(
     private val trygdeavgiftService: TrygdeavgiftService,
     private val trygdeavgiftsberegningService: TrygdeavgiftsberegningService
 ) {
-    @Transactional(readOnly = true, rollbackFor = [], noRollbackFor = [Throwable::class])
+    @Transactional(readOnly = true, noRollbackFor = [Throwable::class])
     fun finnBehandlingerMedSatsendring(år: Int): AvgiftSatsendringInfo {
         log.info { "Søker satsendringer for år: $år" }
-        log.info("Transaction rollback-only: ${TransactionAspectSupport.currentTransactionStatus().isRollbackOnly}")
+        log.info("Start - Transaction rollback-only: ${TransactionAspectSupport.currentTransactionStatus().isRollbackOnly}")
 
         val behandlingsresultatList = behandlingsresultatService.finnResultaterMedMedlemskapseriodeOverlappendeMed(år)
             .filter { trygdeavgiftService.harFakturerbarTrygdeavgift(it) }
 
         log.info { "Fant ${behandlingsresultatList.size} behandlingsresultater for år: $år" }
 
-        log.info("Transaction rollback-only: ${TransactionAspectSupport.currentTransactionStatus().isRollbackOnly}")
+        log.info("Før beregning - Transaction rollback-only: ${TransactionAspectSupport.currentTransactionStatus().isRollbackOnly}")
         val behandlingerForSatsendring = behandlingsresultatList.map {
             val behandling = behandlingService.hentBehandling(it.id)
 
@@ -45,7 +45,7 @@ class SatsendringFinner(
                     harAktivNyVurdering = harAktivNyVurdering(behandling)
                 )
             } catch (t: Throwable) {
-                log.info("Transaction rollback-only: ${TransactionAspectSupport.currentTransactionStatus().isRollbackOnly}")
+                log.info("Feil - Transaction rollback-only: ${TransactionAspectSupport.currentTransactionStatus().isRollbackOnly}")
                 log.error { "SatsendringFinner feiler for behandlingID: ${it.id}: $t" }
                 BehandlingForSatstendring(
                     behandlingID = behandling.id,
@@ -75,7 +75,7 @@ class SatsendringFinner(
         if (avgiftSatsendringInfo.behandlingerSomFeilet.isNotEmpty()) {
             log.warn { "${avgiftSatsendringInfo.behandlingerSomFeilet.size} behandlinger feiler når ev. satsendring sjekkes" }
         }
-        log.info("Transaction rollback-only: ${TransactionAspectSupport.currentTransactionStatus().isRollbackOnly}")
+        log.info("Slutt - Transaction rollback-only: ${TransactionAspectSupport.currentTransactionStatus().isRollbackOnly}")
 
         return avgiftSatsendringInfo
     }
