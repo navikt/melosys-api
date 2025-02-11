@@ -11,6 +11,7 @@ import no.nav.melosys.service.behandling.BehandlingService
 import no.nav.melosys.service.behandling.BehandlingsresultatService
 import org.springframework.stereotype.Component
 import org.springframework.transaction.annotation.Transactional
+import org.springframework.transaction.interceptor.TransactionAspectSupport
 
 private val log = KotlinLogging.logger { }
 
@@ -21,15 +22,17 @@ class SatsendringFinner(
     private val trygdeavgiftService: TrygdeavgiftService,
     private val trygdeavgiftsberegningService: TrygdeavgiftsberegningService
 ) {
-    @Transactional(readOnly = true, noRollbackFor = [Throwable::class])
+    @Transactional(readOnly = true, rollbackFor = [], noRollbackFor = [Throwable::class])
     fun finnBehandlingerMedSatsendring(år: Int): AvgiftSatsendringInfo {
         log.info { "Søker satsendringer for år: $år" }
+        log.info("Transaction rollback-only: ${TransactionAspectSupport.currentTransactionStatus().isRollbackOnly}")
 
         val behandlingsresultatList = behandlingsresultatService.finnResultaterMedMedlemskapseriodeOverlappendeMed(år)
             .filter { trygdeavgiftService.harFakturerbarTrygdeavgift(it) }
 
         log.info { "Fant ${behandlingsresultatList.size} behandlingsresultater for år: $år" }
 
+        log.info("Transaction rollback-only: ${TransactionAspectSupport.currentTransactionStatus().isRollbackOnly}")
         val behandlingerForSatsendring = behandlingsresultatList.map {
             val behandling = behandlingService.hentBehandling(it.id)
 
@@ -42,6 +45,7 @@ class SatsendringFinner(
                     harAktivNyVurdering = harAktivNyVurdering(behandling)
                 )
             } catch (t: Throwable) {
+                log.info("Transaction rollback-only: ${TransactionAspectSupport.currentTransactionStatus().isRollbackOnly}")
                 log.error { "SatsendringFinner feiler for behandlingID: ${it.id}: $t" }
                 BehandlingForSatstendring(
                     behandlingID = behandling.id,
@@ -68,6 +72,10 @@ class SatsendringFinner(
 
         log.info { "Fant ${avgiftSatsendringInfo.behandlingerMedSatsendring.size} behandlinger med satsendring, uten ny vurdering" }
         log.info { "Fant ${avgiftSatsendringInfo.behandlingerMedSatsendringOgNyVurdering.size} behandlinger med satsendring og aktiv ny vurdering" }
+        if (avgiftSatsendringInfo.behandlingerSomFeilet.isNotEmpty()) {
+            log.warn { "${avgiftSatsendringInfo.behandlingerSomFeilet.size} behandlinger feiler når ev. satsendring sjekkes" }
+        }
+        log.info("Transaction rollback-only: ${TransactionAspectSupport.currentTransactionStatus().isRollbackOnly}")
 
         return avgiftSatsendringInfo
     }
