@@ -82,7 +82,7 @@ internal class TrygdeavgiftsberegningServiceTest {
     @BeforeEach
     fun setup() {
         unleash.enableAll()
-        erstattTrygdeavgiftsperioderService = ErstattTrygdeavgiftsperioderService()
+        erstattTrygdeavgiftsperioderService = ErstattTrygdeavgiftsperioderService(mockBehandlingsresultatService)
         trygdeavgiftMottakerService = TrygdeavgiftMottakerService(mockBehandlingsresultatService)
         trygdeavgiftsberegningService = TrygdeavgiftsberegningService(
             mockBehandlingService,

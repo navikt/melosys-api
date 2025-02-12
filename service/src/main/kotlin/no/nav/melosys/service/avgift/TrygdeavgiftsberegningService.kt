@@ -46,7 +46,6 @@ class TrygdeavgiftsberegningService(
         // hvis medlemskappliktig håndter
         val behandlingsresultat = behandlingsresultatService.hentBehandlingsresultat(behandlingsresultatID)
         TrygdeavgiftsberegningValidator.validerForTrygdeavgiftberegning(behandlingsresultat, skatteforholdsperioder, inntektsperioder, unleash)
-        nullstillTrygdeavgiftsperioder(behandlingsresultat)
 
         if (erPliktigMedlemskapSkattepliktig(skatteforholdsperioder, inntektsperioder, behandlingsresultat)) {
             return erstattTrygdeavgiftsperioderService.leggTilTrygdeavgiftsperiodeForPliktigMedlemskapSkattepliktig(
@@ -55,6 +54,8 @@ class TrygdeavgiftsberegningService(
             )
         }
 
+
+        nullstillTrygdeavgiftsperioder(behandlingsresultat)
         return leggTilNyeTrygdeavgiftsperioder(behandlingsresultat, skatteforholdsperioder, inntektsperioder)
     }
 
