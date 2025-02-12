@@ -41,9 +41,6 @@ class TrygdeavgiftsberegningService(
         skatteforholdsperioder: List<SkatteforholdTilNorge> = emptyList(),
         inntektsperioder: List<Inntektsperiode> = emptyList(),
     ): Set<Trygdeavgiftsperiode> {
-        // hent behandlingsresultat
-        // sjekk for medlemskapPliktig
-        // hvis medlemskappliktig håndter
         val behandlingsresultat = behandlingsresultatService.hentBehandlingsresultat(behandlingsresultatID)
         TrygdeavgiftsberegningValidator.validerForTrygdeavgiftberegning(behandlingsresultat, skatteforholdsperioder, inntektsperioder, unleash)
 
