@@ -56,7 +56,16 @@ class TrygdeavgiftsberegningService(
 
 
         nullstillTrygdeavgiftsperioder(behandlingsresultat)
-        return leggTilNyeTrygdeavgiftsperioder(behandlingsresultat, skatteforholdsperioder, inntektsperioder)
+        val nyeTrygdeavgiftsperioder = beregnTrygdeavgift(behandlingsresultat, skatteforholdsperioder, inntektsperioder)
+        // Knytter trygdeavgiftsperiodene til deres medlemskapsperiode før sjekken om trygdeavgift skal betales til Nav
+        nyeTrygdeavgiftsperioder.forEach { it.grunnlagMedlemskapsperiodeNotNull.addTrygdeavgiftsperiode(it) }
+
+        sjekkTrygdeavgiftSkalBetalesTilNav(behandlingsresultat, nyeTrygdeavgiftsperioder)
+        behandlingsresultatService.lagreOgFlush(behandlingsresultat)
+
+
+
+        return nyeTrygdeavgiftsperioder.toSet()
     }
 
     private fun nullstillTrygdeavgiftsperioder(behandlingsresultat: Behandlingsresultat) {
@@ -66,21 +75,6 @@ class TrygdeavgiftsberegningService(
         }
 
         behandlingsresultatService.lagreOgFlush(behandlingsresultat)
-    }
-
-    private fun leggTilNyeTrygdeavgiftsperioder(
-        behandlingsresultat: Behandlingsresultat,
-        skatteforholdsperioder: List<SkatteforholdTilNorge>,
-        inntektsperioder: List<Inntektsperiode>
-    ): Set<Trygdeavgiftsperiode> {
-        val nyeTrygdeavgiftsperioder = beregnTrygdeavgift(behandlingsresultat, skatteforholdsperioder, inntektsperioder)
-        // Knytter trygdeavgiftsperiodene til deres medlemskapsperiode før sjekken om trygdeavgift skal betales til Nav
-        nyeTrygdeavgiftsperioder.forEach { it.grunnlagMedlemskapsperiodeNotNull.addTrygdeavgiftsperiode(it) }
-
-        sjekkTrygdeavgiftSkalBetalesTilNav(behandlingsresultat, nyeTrygdeavgiftsperioder)
-        behandlingsresultatService.lagreOgFlush(behandlingsresultat)
-
-        return nyeTrygdeavgiftsperioder.toSet()
     }
 
     private fun erPliktigMedlemskapSkattepliktig(
