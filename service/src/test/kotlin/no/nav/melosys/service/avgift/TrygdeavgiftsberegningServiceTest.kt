@@ -44,14 +44,20 @@ import java.util.*
 internal class TrygdeavgiftsberegningServiceTest {
     @MockK
     private lateinit var mockBehandlingService: BehandlingService
+
     @MockK
     private lateinit var mockEregFasade: EregFasade
+
     @MockK
     private lateinit var mockTrygdeavgiftConsumer: TrygdeavgiftConsumer
+
     @MockK
     lateinit var mockBehandlingsresultatService: BehandlingsresultatService
+
     @MockK
     private lateinit var mockPersondataService: PersondataService
+
+    private lateinit var erstattTrygdeavgiftsperioderService: ErstattTrygdeavgiftsperioderService
 
     private lateinit var trygdeavgiftMottakerService: TrygdeavgiftMottakerService
 
@@ -76,11 +82,13 @@ internal class TrygdeavgiftsberegningServiceTest {
     @BeforeEach
     fun setup() {
         unleash.enableAll()
+        erstattTrygdeavgiftsperioderService = ErstattTrygdeavgiftsperioderService()
         trygdeavgiftMottakerService = TrygdeavgiftMottakerService(mockBehandlingsresultatService)
         trygdeavgiftsberegningService = TrygdeavgiftsberegningService(
             mockBehandlingService,
             mockEregFasade,
             mockBehandlingsresultatService,
+            erstattTrygdeavgiftsperioderService,
             trygdeavgiftMottakerService,
             mockPersondataService,
             mockTrygdeavgiftConsumer,
@@ -379,6 +387,8 @@ internal class TrygdeavgiftsberegningServiceTest {
             grunnlagMedlemskapsperiode.shouldBe(behandlingsresultat.medlemskapsperioder.first())
         }
     }
+
+    // Tester for pliktig medlem og skattepliktig::
 
     @Test
     fun `beregnTrygdeavgift for pliktig medlem og skattepliktig skal beregne og lagre flere trygdeavgift når det er flere medlemskapsperioder`() {
@@ -792,7 +802,8 @@ internal class TrygdeavgiftsberegningServiceTest {
                 }, Aktoer().apply {
                     aktørId = FULLMEKTIG_AKTØR_ID
                     rolle = Aktoersroller.FULLMEKTIG
-                    fullmakter = setOf(Fullmakt().apply { type = Fullmaktstype.FULLMEKTIG_SØKNAD },
+                    fullmakter = setOf(
+                        Fullmakt().apply { type = Fullmaktstype.FULLMEKTIG_SØKNAD },
                         Fullmakt().apply { type = Fullmaktstype.FULLMEKTIG_ARBEIDSGIVER })
                 })
             ).build()
