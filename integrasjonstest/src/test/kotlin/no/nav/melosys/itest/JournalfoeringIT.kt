@@ -275,7 +275,8 @@ class JournalfoeringIT(
 
     @Test
     fun journalførOgOpprettAndregangsBehandling_fraIngenFlyt_flytMedPeriodeOgLand() {
-        fakeUnleash.disable(ToggleName.MELOSYS_PENSJONIST)
+        fakeUnleash.disableAll()
+
         val journalfoeringOpprettDto = defaultJournalføringDto().apply {
             fagsak.sakstype = Sakstyper.EU_EOS.kode
             fagsak.sakstema = Sakstemaer.MEDLEMSKAP_LOVVALG.kode
