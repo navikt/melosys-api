@@ -35,6 +35,10 @@ public class RegisteropplysningerFactory {
             return hentSaksopplysningTyperForRegistreringUnntakFraMedlemskap();
         }
 
+        if(behandlingstema == Behandlingstema.PENSJONIST && unleash.isEnabled(ToggleName.MELOSYS_PENSJONIST)) {
+            return hentSaksopplysningTyperForBehandlingAvSøknad();
+        }
+
         return switch (behandlingstema) {
             case UTSENDT_ARBEIDSTAKER,
                 UTSENDT_SELVSTENDIG,
