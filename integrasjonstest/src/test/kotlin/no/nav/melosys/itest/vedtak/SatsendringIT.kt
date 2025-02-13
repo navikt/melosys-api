@@ -8,6 +8,7 @@ import com.github.tomakehurst.wiremock.client.WireMock.*
 import com.github.tomakehurst.wiremock.extension.ResponseTransformerV2
 import com.github.tomakehurst.wiremock.http.Response
 import com.github.tomakehurst.wiremock.stubbing.ServeEvent
+import io.kotest.matchers.collections.shouldBeEmpty
 import io.kotest.matchers.collections.shouldContainOnly
 import io.kotest.matchers.collections.shouldHaveSize
 import io.kotest.matchers.nulls.shouldNotBeNull
@@ -29,6 +30,8 @@ import no.nav.melosys.integrasjon.faktureringskomponenten.NyFakturaserieResponse
 import no.nav.melosys.integrasjon.trygdeavgift.dto.*
 import no.nav.melosys.itest.JournalfoeringBase
 import no.nav.melosys.itest.MelosysHendelseKafkaConsumer
+import no.nav.melosys.itest.vedtak.SatsendringIT.Companion.GAMMEL_SATS
+import no.nav.melosys.itest.vedtak.SatsendringIT.Companion.NY_SATS
 import no.nav.melosys.melosysmock.medl.MedlRepo
 import no.nav.melosys.saksflytapi.ProsessinstansService
 import no.nav.melosys.saksflytapi.domain.ProsessType
@@ -118,7 +121,7 @@ class SatsendringIT(
     }
 
     @Test
-    fun `Satsendring etter yrkesaktiv FTRL vedtak oppdages`() {
+    fun `Finn satsendring etter yrkesaktiv FTRL vedtak`() {
         // Lag 1 behandling utenfor SATSENDRING_ÅR
         lagFørstegangsbehandling(år = SATSENDRING_ÅR - 1)
         // Lag 2 behandlinger for SATSENDRING_ÅR, en med satsendring og en uten
@@ -180,13 +183,13 @@ class SatsendringIT(
         }.behandling.id
 
 
-        val satsendring = behandlingService.hentBehandling(satsendringID)
-        // Henter behandling på nytt siden førstegangsbehandling blir returnert før ApplicationEvents i Avsluttfagsak kjører async
+        val satsendringBehandling = behandlingService.hentBehandling(satsendringID)
+        // Henter behandling på nytt siden førstegangsbehandling returneres før ApplicationEvent i Avsluttfagsak (kjører async)
         val førstegangsbehandlingRefresh = behandlingService.hentBehandling(førstegangsbehandling.id)
-        val satsendingBehandlingresultat = behandlingsresultatService.hentResultatMedMedlemskapOgLovvalg(satsendringID)
-        val førstegangsBehandlingsresultat = behandlingsresultatService.hentResultatMedMedlemskapOgLovvalg(førstegangsbehandling.id)
+        val satsendringBehandlingresultat = behandlingsresultatService.hentResultatMedMedlemskapOgLovvalg(satsendringID)
+        val førstegangBehandlingsresultat = behandlingsresultatService.hentResultatMedMedlemskapOgLovvalg(førstegangsbehandling.id)
 
-        satsendring.run {
+        satsendringBehandling.run {
             status shouldBe Behandlingsstatus.AVSLUTTET
             type shouldBe Behandlingstyper.SATSENDRING
             tema shouldBe Behandlingstema.YRKESAKTIV
@@ -196,49 +199,49 @@ class SatsendringIT(
             fagsak.status shouldBe førstegangsbehandlingRefresh.fagsak.status shouldBe Saksstatuser.LOVVALG_AVKLART
         }
 
-        satsendingBehandlingresultat.run {
+        satsendringBehandlingresultat.run {
             type shouldBe Behandlingsresultattyper.FASTSATT_TRYGDEAVGIFT
             vedtakMetadata.vedtakstype shouldBe Vedtakstyper.ENDRINGSVEDTAK
             trygdeavgiftsperioder.run {
                 shouldHaveSize(1)
                 first().run {
-                    periodeFra.shouldNotBeNull() shouldBe førstegangsBehandlingsresultat.trygdeavgiftsperioder.first().periodeFra
-                    periodeTil.shouldNotBeNull() shouldBe førstegangsBehandlingsresultat.trygdeavgiftsperioder.first().periodeTil
-                    trygdesats shouldBe 6.9.toBigDecimal()
-                    trygdeavgiftsbeløpMd shouldBe Penger(69000.toBigDecimal())
+                    periodeFra.shouldNotBeNull() shouldBe førstegangBehandlingsresultat.trygdeavgiftsperioder.first().periodeFra
+                    periodeTil.shouldNotBeNull() shouldBe førstegangBehandlingsresultat.trygdeavgiftsperioder.first().periodeTil
+                    trygdesats shouldBe NY_SATS.toBigDecimal()
+                    trygdeavgiftsbeløpMd shouldBe Penger((NY_SATS * 10000).toBigDecimal())
                 }
             }
 
             medlemskapsperioder.run {
                 shouldHaveSize(1)
                 first().run {
-                    fom.shouldNotBeNull() shouldBe førstegangsBehandlingsresultat.medlemskapsperioder.first().fom
-                    tom.shouldNotBeNull() shouldBe førstegangsBehandlingsresultat.medlemskapsperioder.first().tom
-                    innvilgelsesresultat shouldBe førstegangsBehandlingsresultat.medlemskapsperioder.first().innvilgelsesresultat
-                    medlemskapstype shouldBe førstegangsBehandlingsresultat.medlemskapsperioder.first().medlemskapstype
-                    trygdedekning shouldBe førstegangsBehandlingsresultat.medlemskapsperioder.first().trygdedekning
-                    medlPeriodeID shouldBe førstegangsBehandlingsresultat.medlemskapsperioder.first().medlPeriodeID
-                    bestemmelse shouldBe førstegangsBehandlingsresultat.medlemskapsperioder.first().bestemmelse
+                    fom.shouldNotBeNull() shouldBe førstegangBehandlingsresultat.medlemskapsperioder.first().fom
+                    tom.shouldNotBeNull() shouldBe førstegangBehandlingsresultat.medlemskapsperioder.first().tom
+                    innvilgelsesresultat shouldBe førstegangBehandlingsresultat.medlemskapsperioder.first().innvilgelsesresultat
+                    medlemskapstype shouldBe førstegangBehandlingsresultat.medlemskapsperioder.first().medlemskapstype
+                    trygdedekning shouldBe førstegangBehandlingsresultat.medlemskapsperioder.first().trygdedekning
+                    medlPeriodeID shouldBe førstegangBehandlingsresultat.medlemskapsperioder.first().medlPeriodeID
+                    bestemmelse shouldBe førstegangBehandlingsresultat.medlemskapsperioder.first().bestemmelse
                 }
             }
 
             hentInntektsperioder().run {
                 shouldHaveSize(1)
                 first().run {
-                    fom.shouldNotBeNull() shouldBe førstegangsBehandlingsresultat.hentInntektsperioder().first().fom
-                    tom.shouldNotBeNull() shouldBe førstegangsBehandlingsresultat.hentInntektsperioder().first().tom
-                    type shouldBe førstegangsBehandlingsresultat.hentInntektsperioder().first().type
-                    avgiftspliktigMndInntekt shouldBe førstegangsBehandlingsresultat.hentInntektsperioder().first().avgiftspliktigMndInntekt
-                    avgiftspliktigTotalinntekt shouldBe førstegangsBehandlingsresultat.hentInntektsperioder().first().avgiftspliktigTotalinntekt
+                    fom.shouldNotBeNull() shouldBe førstegangBehandlingsresultat.hentInntektsperioder().first().fom
+                    tom.shouldNotBeNull() shouldBe førstegangBehandlingsresultat.hentInntektsperioder().first().tom
+                    type shouldBe førstegangBehandlingsresultat.hentInntektsperioder().first().type
+                    avgiftspliktigMndInntekt shouldBe førstegangBehandlingsresultat.hentInntektsperioder().first().avgiftspliktigMndInntekt
+                    avgiftspliktigTotalinntekt shouldBe førstegangBehandlingsresultat.hentInntektsperioder().first().avgiftspliktigTotalinntekt
                 }
             }
 
             hentSkatteforholdTilNorge().run {
                 shouldHaveSize(1)
                 first().run {
-                    fomDato.shouldNotBeNull() shouldBe førstegangsBehandlingsresultat.hentSkatteforholdTilNorge().first().fomDato
-                    tomDato.shouldNotBeNull() shouldBe førstegangsBehandlingsresultat.hentSkatteforholdTilNorge().first().tomDato
-                    skatteplikttype shouldBe førstegangsBehandlingsresultat.hentSkatteforholdTilNorge().first().skatteplikttype
+                    fomDato.shouldNotBeNull() shouldBe førstegangBehandlingsresultat.hentSkatteforholdTilNorge().first().fomDato
+                    tomDato.shouldNotBeNull() shouldBe førstegangBehandlingsresultat.hentSkatteforholdTilNorge().first().tomDato
+                    skatteplikttype shouldBe førstegangBehandlingsresultat.hentSkatteforholdTilNorge().first().skatteplikttype
                 }
             }
         }
@@ -273,7 +276,7 @@ class SatsendringIT(
         if (prosessType == ProsessType.SATSENDRING_TILBAKESTILL_NY_VURDERING) {
             nyVurderingBehandling.shouldNotBeNull()
             val nyVurderingBehandlingsresultat = behandlingsresultatService.hentResultatMedMedlemskapOgLovvalg(nyVurderingBehandling.id)
-            nyVurderingBehandlingsresultat.trygdeavgiftsperioder.shouldHaveSize(0)
+            nyVurderingBehandlingsresultat.trygdeavgiftsperioder.shouldBeEmpty()
         }
     }
 
@@ -413,6 +416,8 @@ class SatsendringIT(
 
     companion object {
         private const val SATSENDRING_ÅR = 2024
+        const val GAMMEL_SATS = 6.7
+        const val NY_SATS = 6.9
     }
 }
 
@@ -472,8 +477,8 @@ class TrygdeavgiftsberegningMedSatsendring : ResponseTransformerV2 {
         return if (periodeString == "2024-04-01 / 2024-04-30") {
             // Eneste periode med satsendring
             when (antallKall) {
-                1 -> 6.7
-                else -> 6.9
+                1 -> GAMMEL_SATS
+                else -> NY_SATS
             }
         } else {
             8.3
