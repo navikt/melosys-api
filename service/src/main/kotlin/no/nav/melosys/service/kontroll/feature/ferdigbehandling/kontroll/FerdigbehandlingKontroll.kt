@@ -47,15 +47,15 @@ object FerdigbehandlingKontroll {
     }
 
     fun sjekkFullmektigForMedlemEtterVertslandsAvtale(kontrollData: FerdigbehandlingKontrollData): Kontrollfeil? {
-        val filtrerteBestemmelser =
+        val vertslandavtaleBestemmelser =
             listOf(DET_INTERNASJONALE_BARENTSSEKRETARIATET_ART14, DEN_NORDATLANTISKE_SJØPATTEDYRKOMMISJON_ART16, ARKTISK_RÅDS_SEKRETARIAT_ART16)
 
-        val bestemmelseErIFiltrertListe = kontrollData.medlemskapsperiodeData?.nyeMedlemskapsperioder?.any { filtrerteBestemmelser.contains(it.bestemmelse) }
+        val erVertslandsavtaleBestemmelse = kontrollData.medlemskapsperiodeData?.nyeMedlemskapsperioder?.any { vertslandavtaleBestemmelser.contains(it.bestemmelse) }
 
         val trygdeavgiftBetalesTilNav = kontrollData.trygdeavgiftMottaker == Trygdeavgiftmottaker.TRYGDEAVGIFT_BETALES_TIL_NAV
 
 
-        return if (bestemmelseErIFiltrertListe == true && trygdeavgiftBetalesTilNav && kontrollData.fullmektig == null) {
+        return if (erVertslandsavtaleBestemmelse == true && trygdeavgiftBetalesTilNav && kontrollData.fullmektig == null) {
             Kontrollfeil(
                 Kontroll_begrunnelser.MANGLENDE_FULLMEKTIG_MEDLEM_ETTER_VERTSLANDSAVTALE,
                 KontrolldataFeilType.ADVARSEL
