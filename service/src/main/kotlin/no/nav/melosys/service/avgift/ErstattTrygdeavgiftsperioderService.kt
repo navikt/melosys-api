@@ -36,28 +36,28 @@ class ErstattTrygdeavgiftsperioderService(private val behandlingsresultatService
 
     @Transactional(propagation = Propagation.REQUIRES_NEW)
     fun erstatt(behandlingsresultatId: Long, trygdeavgiftsperioder: List<Trygdeavgiftsperiode>) {
-        var behandlingsresultat = behandlingsresultatService.hentBehandlingsresultat(behandlingsresultatId)
+        val behandlingsresultat = behandlingsresultatService.hentBehandlingsresultat(behandlingsresultatId)
         nullstillTrygdeavgiftsperioder(behandlingsresultat)
 
         behandlingsresultat.medlemskapsperioder.forEach { mp ->
-            val match = trygdeavgiftsperioder.find { tp -> tp.grunnlagMedlemskapsperiode?.id == mp.id }
-            if (match != null) {
-                mp.addTrygdeavgiftsperiode(match)
+            trygdeavgiftsperioder.forEach { tp ->
+                if (tp.grunnlagMedlemskapsperiode?.id == mp.id) {
+                    mp.addTrygdeavgiftsperiode(tp)
+                }
             }
         }
     }
 
-    @Transactional
+    @Transactional(propagation = Propagation.REQUIRES_NEW)
     fun leggTilTrygdeavgiftsperiodeForPliktigMedlemskapSkattepliktig(
-        behandlingsresultat: Behandlingsresultat,
+        behandlingsresultatId: Long,
         skatteforholdsperioder: List<SkatteforholdTilNorge>,
     ): Set<Trygdeavgiftsperiode> {
         require(skatteforholdsperioder.size == 1) { "Det skal ikke være flere enn en skatteforholdsperiode når medlemskapet er pliktig og skattepliktig" }
+        var behandlingsresultat = behandlingsresultatService.hentBehandlingsresultat(behandlingsresultatId)
         nullstillTrygdeavgiftsperioder(behandlingsresultat)
-        val result = mutableSetOf<Trygdeavgiftsperiode>()
 
-        val innvilgedeMedlemskapsperioder = behandlingsresultat.medlemskapsperioder.filter { it.erInnvilget() }
-        innvilgedeMedlemskapsperioder.forEach {
+        return behandlingsresultat.medlemskapsperioder.filter { it.erInnvilget() }.map { mp ->
             val skatteforholdTilNorge = SkatteforholdTilNorge().apply {
                 fomDato = skatteforholdsperioder.first().fom
                 tomDato = skatteforholdsperioder.first().tom
@@ -65,19 +65,17 @@ class ErstattTrygdeavgiftsperioderService(private val behandlingsresultatService
             }
 
             val trygdeavgiftsperiode = Trygdeavgiftsperiode(
-                periodeFra = it.fom,
-                periodeTil = it.tom,
+                periodeFra = mp.fom,
+                periodeTil = mp.tom,
                 trygdesats = BigDecimal.ZERO,
                 trygdeavgiftsbeløpMd = Penger(BigDecimal.ZERO),
-                grunnlagMedlemskapsperiode = it,
+                grunnlagMedlemskapsperiode = mp,
                 grunnlagSkatteforholdTilNorge = skatteforholdTilNorge
             )
 
-            it.trygdeavgiftsperioder.add(trygdeavgiftsperiode)
-            result.add(trygdeavgiftsperiode)
-        }
-
-        return result.toSet()
+            mp.addTrygdeavgiftsperiode(trygdeavgiftsperiode)
+            trygdeavgiftsperiode
+        }.toSet()
     }
 
     private fun nullstillTrygdeavgiftsperioder(behandlingsresultat: Behandlingsresultat) {
@@ -86,6 +84,6 @@ class ErstattTrygdeavgiftsperioderService(private val behandlingsresultatService
             it.clearTrygdeavgiftsperioder()
         }
 
-        behandlingsresultatService.lagreOgFlush(behandlingsresultat)
+        //behandlingsresultatService.lagreOgFlush(behandlingsresultat)
     }
 }

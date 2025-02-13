@@ -45,16 +45,14 @@ class TrygdeavgiftsberegningService(
 
         if (erstattTrygdeavgiftsperioderService.erPliktigMedlemskapSkattepliktig(skatteforholdsperioder, inntektsperioder, behandlingsresultatID)) {
             return erstattTrygdeavgiftsperioderService.leggTilTrygdeavgiftsperiodeForPliktigMedlemskapSkattepliktig(
-                behandlingsresultat,
+                behandlingsresultatID,
                 skatteforholdsperioder
             )
         }
-
         val nyeTrygdeavgiftsperioder = beregnTrygdeavgift(behandlingsresultat, skatteforholdsperioder, inntektsperioder)
         // Knytter trygdeavgiftsperiodene til deres medlemskapsperiode før sjekken om trygdeavgift skal betales til Nav
-        nyeTrygdeavgiftsperioder.forEach { it.grunnlagMedlemskapsperiodeNotNull.addTrygdeavgiftsperiode(it) }
+        //nyeTrygdeavgiftsperioder.forEach { it.grunnlagMedlemskapsperiodeNotNull.addTrygdeavgiftsperiode(it) }
 
-        // TODO rekkefølge
         sjekkTrygdeavgiftSkalBetalesTilNav(behandlingsresultat, nyeTrygdeavgiftsperioder)
 
         erstattTrygdeavgiftsperioderService.erstatt(behandlingsresultatID, nyeTrygdeavgiftsperioder)
@@ -143,12 +141,18 @@ class TrygdeavgiftsberegningService(
     }
 
 
+    //  // TODO har aldri hatt noen effekt for vi clearer trygdeavgiftsperioder før vi sjekker om det skal betales
     private fun sjekkTrygdeavgiftSkalBetalesTilNav(
         behandlingsresultat: Behandlingsresultat,
         trygdeavgiftsperioder: List<Trygdeavgiftsperiode>
     ) {
-        val erAlleTrygdeavgiftNullBeløp = trygdeavgiftsperioder.all { it.trygdeavgiftsbeløpMd.verdi.compareTo(BigDecimal.ZERO) == 0 }
-        check(erAlleTrygdeavgiftNullBeløp || !skalKunBetalesTilSkatt(behandlingsresultat)) { "Trygdeavgift skal ikke betales til NAV. Beregnet trygdeavgift må derfor være 0." }
+        val ingenFakturerbareBeløp = trygdeavgiftsperioder.all { it.trygdeavgiftsbeløpMd.verdi.compareTo(BigDecimal.ZERO) == 0 }
+        check(!ingenFakturerbareBeløp) { "Trygdeavgift skal ikke betales til NAV. Beregnet trygdeavgift må derfor være 0." }
+        //  val erAlleTrygdeavgiftNullBeløp = trygdeavgiftsperioder.all { it.trygdeavgiftsbeløpMd.verdi.compareTo(BigDecimal.ZERO) == 0 }
+        // hvis false så kast exception
+        //  check(erAlleTrygdeavgiftNullBeløp) { "Trygdeavgift skal ikke betales til NAV. Beregnet trygdeavgift må derfor være 0." }
+        // val skalKunBetalesTilSkatt = skalKunBetalesTilSkatt(behandlingsresultat)
+//        check(skalKunBetalesTilSkatt) { "Trygdeavgift skal ikke betales til NAV. Beregnet trygdeavgift må derfor være 0." }
     }
 
     private fun skalKunBetalesTilSkatt(behandlingsresultat: Behandlingsresultat) =
