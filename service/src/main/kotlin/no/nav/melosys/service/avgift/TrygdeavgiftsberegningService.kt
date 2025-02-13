@@ -7,7 +7,6 @@ import no.nav.melosys.domain.avgift.Inntektsperiode
 import no.nav.melosys.domain.avgift.SkatteforholdTilNorge
 import no.nav.melosys.domain.avgift.Trygdeavgiftsperiode
 import no.nav.melosys.domain.kodeverk.Fullmaktstype
-import no.nav.melosys.domain.kodeverk.Trygdeavgift_typer
 import no.nav.melosys.domain.kodeverk.Trygdeavgiftmottaker
 import no.nav.melosys.integrasjon.ereg.EregFasade
 import no.nav.melosys.integrasjon.trygdeavgift.TrygdeavgiftConsumer
@@ -50,23 +49,12 @@ class TrygdeavgiftsberegningService(
             )
         }
         val nyeTrygdeavgiftsperioder = beregnTrygdeavgift(behandlingsresultat, skatteforholdsperioder, inntektsperioder)
-        // Knytter trygdeavgiftsperiodene til deres medlemskapsperiode før sjekken om trygdeavgift skal betales til Nav
-        //nyeTrygdeavgiftsperioder.forEach { it.grunnlagMedlemskapsperiodeNotNull.addTrygdeavgiftsperiode(it) }
 
-        sjekkTrygdeavgiftSkalBetalesTilNav(behandlingsresultat, nyeTrygdeavgiftsperioder)
+        sjekkTrygdeavgiftSkalBetalesTilNav(nyeTrygdeavgiftsperioder)
 
         erstattTrygdeavgiftsperioderService.erstatt(behandlingsresultatID, nyeTrygdeavgiftsperioder)
 
         return nyeTrygdeavgiftsperioder.toSet()
-    }
-
-    private fun nullstillTrygdeavgiftsperioder(behandlingsresultat: Behandlingsresultat) {
-        behandlingsresultat.trygdeavgiftType = Trygdeavgift_typer.FORELØPIG
-        behandlingsresultat.medlemskapsperioder.forEach {
-            it.clearTrygdeavgiftsperioder()
-        }
-
-        behandlingsresultatService.lagreOgFlush(behandlingsresultat)
     }
 
     @Transactional(readOnly = true)
@@ -140,23 +128,14 @@ class TrygdeavgiftsberegningService(
         return null
     }
 
+    private fun sjekkTrygdeavgiftSkalBetalesTilNav(trygdeavgiftsperioder: List<Trygdeavgiftsperiode>) {
+        val erAlleTrygdeavgiftNullBeløp = trygdeavgiftsperioder.all { it.trygdeavgiftsbeløpMd.verdi.compareTo(BigDecimal.ZERO) == 0 }
 
-    //  // TODO har aldri hatt noen effekt for vi clearer trygdeavgiftsperioder før vi sjekker om det skal betales
-    private fun sjekkTrygdeavgiftSkalBetalesTilNav(
-        behandlingsresultat: Behandlingsresultat,
-        trygdeavgiftsperioder: List<Trygdeavgiftsperiode>
-    ) {
-        val ingenFakturerbareBeløp = trygdeavgiftsperioder.all { it.trygdeavgiftsbeløpMd.verdi.compareTo(BigDecimal.ZERO) == 0 }
-        check(!ingenFakturerbareBeløp) { "Trygdeavgift skal ikke betales til NAV. Beregnet trygdeavgift må derfor være 0." }
-        //  val erAlleTrygdeavgiftNullBeløp = trygdeavgiftsperioder.all { it.trygdeavgiftsbeløpMd.verdi.compareTo(BigDecimal.ZERO) == 0 }
-        // hvis false så kast exception
-        //  check(erAlleTrygdeavgiftNullBeløp) { "Trygdeavgift skal ikke betales til NAV. Beregnet trygdeavgift må derfor være 0." }
-        // val skalKunBetalesTilSkatt = skalKunBetalesTilSkatt(behandlingsresultat)
-//        check(skalKunBetalesTilSkatt) { "Trygdeavgift skal ikke betales til NAV. Beregnet trygdeavgift må derfor være 0." }
+        val skalKunBetalesTilSkatt = trygdeavgiftMottakerService
+            .getTrygdeavgiftMottaker(trygdeavgiftsperioder) == Trygdeavgiftmottaker.TRYGDEAVGIFT_BETALES_TIL_SKATT
+
+        check(erAlleTrygdeavgiftNullBeløp || !skalKunBetalesTilSkatt) { "Trygdeavgift skal ikke betales til NAV. Beregnet trygdeavgift må derfor være 0." }
     }
-
-    private fun skalKunBetalesTilSkatt(behandlingsresultat: Behandlingsresultat) =
-        trygdeavgiftMottakerService.getTrygdeavgiftMottaker(behandlingsresultat) == Trygdeavgiftmottaker.TRYGDEAVGIFT_BETALES_TIL_SKATT
 
     @Transactional(readOnly = true)
     fun hentTrygdeavgiftsberegning(behandlingsresultatID: Long): Set<Trygdeavgiftsperiode> {
