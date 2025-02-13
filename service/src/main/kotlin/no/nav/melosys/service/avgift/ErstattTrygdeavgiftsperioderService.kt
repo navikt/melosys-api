@@ -35,7 +35,7 @@ class ErstattTrygdeavgiftsperioderService(private val behandlingsresultatService
     }
 
     @Transactional(propagation = Propagation.REQUIRES_NEW)
-    fun erstatt(behandlingsresultatId: Long, trygdeavgiftsperioder: List<Trygdeavgiftsperiode>) {
+    fun erstattTrygdeavgiftsperioder(behandlingsresultatId: Long, trygdeavgiftsperioder: List<Trygdeavgiftsperiode>) {
         val behandlingsresultat = behandlingsresultatService.hentBehandlingsresultat(behandlingsresultatId)
         nullstillTrygdeavgiftsperioder(behandlingsresultat)
 
@@ -83,7 +83,5 @@ class ErstattTrygdeavgiftsperioderService(private val behandlingsresultatService
         behandlingsresultat.medlemskapsperioder.forEach {
             it.clearTrygdeavgiftsperioder()
         }
-
-        //behandlingsresultatService.lagreOgFlush(behandlingsresultat)
     }
 }

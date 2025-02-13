@@ -182,7 +182,7 @@ internal class TrygdeavgiftsberegningServiceTest {
 
         verify { mockTrygdeavgiftConsumer.beregnTrygdeavgift(ofType(TrygdeavgiftsberegningRequest::class)) }
 
-        verify { erstattTrygdeavgiftsperioderService.erstatt(BEHANDLING_ID, match { it.isNotEmpty() }) }
+        verify { erstattTrygdeavgiftsperioderService.erstattTrygdeavgiftsperioder(BEHANDLING_ID, match { it.isNotEmpty() }) }
 
         verify(exactly = 0) { mockPersondataService.hentPerson(BRUKER_AKTØR_ID) }
         behandlingsresultat.trygdeavgiftsperioder.shouldNotBeEmpty()
@@ -325,7 +325,7 @@ internal class TrygdeavgiftsberegningServiceTest {
         trygdeavgiftsberegningService.beregnOgLagreTrygdeavgift(BEHANDLING_ID, skatteforholdsperioder, inntektsperioder)
             .shouldNotBeNull().shouldNotBeEmpty()
 
-        verify { erstattTrygdeavgiftsperioderService.erstatt(BEHANDLING_ID, match { it.isNotEmpty() }) }
+        verify { erstattTrygdeavgiftsperioderService.erstattTrygdeavgiftsperioder(BEHANDLING_ID, match { it.isNotEmpty() }) }
 
         verify(exactly = 1) { mockPersondataService.hentPerson(BRUKER_AKTØR_ID) }
         behandlingsresultat.trygdeavgiftsperioder.shouldNotBeEmpty()

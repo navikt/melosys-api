@@ -52,7 +52,7 @@ class TrygdeavgiftsberegningService(
 
         sjekkTrygdeavgiftSkalBetalesTilNav(nyeTrygdeavgiftsperioder)
 
-        erstattTrygdeavgiftsperioderService.erstatt(behandlingsresultatID, nyeTrygdeavgiftsperioder)
+        erstattTrygdeavgiftsperioderService.erstattTrygdeavgiftsperioder(behandlingsresultatID, nyeTrygdeavgiftsperioder)
 
         return nyeTrygdeavgiftsperioder.toSet()
     }
