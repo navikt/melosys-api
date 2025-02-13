@@ -11,6 +11,7 @@ import no.nav.melosys.domain.kodeverk.begrunnelser.Kontroll_begrunnelser
 import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingsresultattyper
 import no.nav.melosys.domain.person.Persondata
 import no.nav.melosys.service.LovvalgsperiodeService
+import no.nav.melosys.service.avgift.TrygdeavgiftMottakerService
 import no.nav.melosys.service.avgift.TrygdeavgiftService
 import no.nav.melosys.service.avklartefakta.AvklarteVirksomheterService
 import no.nav.melosys.service.behandling.BehandlingService
@@ -42,7 +43,8 @@ class Kontroll(
     private val medlemskapsperiodeService: MedlemskapsperiodeService,
     private val utkastBrevService: UtkastBrevService,
     private val behandlingsresultatService: BehandlingsresultatService,
-    private val trygdeavgiftService: TrygdeavgiftService
+    private val trygdeavgiftService: TrygdeavgiftService,
+    private val trygdeavgiftMottakerService: TrygdeavgiftMottakerService
 ) {
     internal fun kontroller(
         behandlingId: Long,
@@ -148,8 +150,11 @@ class Kontroll(
             .map { medlemskapsperiodeService.hentMedlemskapsperioder(it.id) }.flatten()
         val medlemskapsdokument = behandling.hentMedlemskapDokument()
 
-        val nyeTrygdeavgiftsperioder = behandlingsresultatService.hentBehandlingsresultat(behandling.id).trygdeavgiftsperioder.toList()
+        val behandlingsresultat = behandlingsresultatService.hentBehandlingsresultat(behandling.id);
+        val nyeTrygdeavgiftsperioder = behandlingsresultat.trygdeavgiftsperioder.toList()
         val tidligereTrygdeavgiftsperioderIAndreFagsaker = hentTidligereTrygdeavgiftsperioderIAndreFagsaker(behandling)
+
+        val trygdeavgiftMottaker = trygdeavgiftMottakerService.getTrygdeavgiftMottaker(behandlingsresultat)
 
         return FerdigbehandlingKontrollData(
             medlemskapDokument = medlemskapsdokument,
@@ -166,7 +171,8 @@ class Kontroll(
             trygdeavgiftperiodeData = TrygdeavgiftsperiodeData(
                 nyeTrygdeavgiftsperioder,
                 tidligereTrygdeavgiftsperioderIAndreFagsaker
-            )
+            ),
+            trygdeavgiftMottaker = trygdeavgiftMottaker
         )
     }
 

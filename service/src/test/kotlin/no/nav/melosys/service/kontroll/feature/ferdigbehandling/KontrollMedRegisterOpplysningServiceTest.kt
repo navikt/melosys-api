@@ -22,6 +22,7 @@ import no.nav.melosys.domain.kodeverk.lovvalgsbestemmelser.Lovvalgbestemmelser_8
 import no.nav.melosys.domain.mottatteopplysninger.MottatteOpplysningerData
 import no.nav.melosys.service.LovvalgsperiodeService
 import no.nav.melosys.service.SaksbehandlingDataFactory
+import no.nav.melosys.service.avgift.TrygdeavgiftMottakerService
 import no.nav.melosys.service.avgift.TrygdeavgiftService
 import no.nav.melosys.service.avklartefakta.AvklarteVirksomheterService
 import no.nav.melosys.service.behandling.BehandlingService
@@ -74,6 +75,9 @@ internal class KontrollMedRegisterOpplysningServiceTest {
     @RelaxedMockK
     lateinit var trygdeavgiftService: TrygdeavgiftService
 
+    @RelaxedMockK
+    lateinit var trygdeagiftMottakerService: TrygdeavgiftMottakerService
+
     lateinit var mockedKontrollMedRegisterOpplysning: KontrollMedRegisteropplysning
 
     private val BEHANDLING_ID = 1L
@@ -94,7 +98,8 @@ internal class KontrollMedRegisterOpplysningServiceTest {
             medlemskapsperiodeService,
             utkastBrevService,
             behandlingsresultatService,
-            trygdeavgiftService
+            trygdeavgiftService,
+            trygdeagiftMottakerService
         )
         mockedKontrollMedRegisterOpplysning =
             KontrollMedRegisteropplysning(behandlingService, persondataFasade, registeropplysningerService, mockedKontroll)
