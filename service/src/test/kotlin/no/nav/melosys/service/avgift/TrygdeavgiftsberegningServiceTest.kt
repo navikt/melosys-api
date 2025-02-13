@@ -9,12 +9,9 @@ import io.kotest.matchers.nulls.shouldBeNull
 import io.kotest.matchers.nulls.shouldNotBeNull
 import io.kotest.matchers.shouldBe
 import io.kotest.matchers.string.shouldContain
-import io.mockk.every
+import io.mockk.*
 import io.mockk.impl.annotations.MockK
 import io.mockk.junit5.MockKExtension
-import io.mockk.mockkStatic
-import io.mockk.unmockkStatic
-import io.mockk.verify
 import no.nav.melosys.domain.*
 import no.nav.melosys.domain.FagsakTestFactory.BRUKER_AKTØR_ID
 import no.nav.melosys.domain.avgift.Inntektsperiode
@@ -27,7 +24,6 @@ import no.nav.melosys.exception.FunksjonellException
 import no.nav.melosys.integrasjon.ereg.EregFasade
 import no.nav.melosys.integrasjon.trygdeavgift.TrygdeavgiftConsumer
 import no.nav.melosys.integrasjon.trygdeavgift.dto.*
-
 import no.nav.melosys.service.behandling.BehandlingService
 import no.nav.melosys.service.behandling.BehandlingsresultatService
 import no.nav.melosys.service.persondata.PersondataService
@@ -82,7 +78,7 @@ internal class TrygdeavgiftsberegningServiceTest {
     @BeforeEach
     fun setup() {
         unleash.enableAll()
-        erstattTrygdeavgiftsperioderService = ErstattTrygdeavgiftsperioderService(mockBehandlingsresultatService)
+        erstattTrygdeavgiftsperioderService = spyk(ErstattTrygdeavgiftsperioderService(mockBehandlingsresultatService))
         trygdeavgiftMottakerService = TrygdeavgiftMottakerService(mockBehandlingsresultatService)
         trygdeavgiftsberegningService = TrygdeavgiftsberegningService(
             mockBehandlingService,
@@ -127,7 +123,6 @@ internal class TrygdeavgiftsberegningServiceTest {
         trygdeavgiftsberegningService.hentTrygdeavgiftsberegning(BEHANDLING_ID).shouldNotBeNull().shouldBeEmpty()
     }
 
-    // TODO verifiser resultatet fra lagring av behandlingsresultat
     @Test
     fun beregnTrygdeavgift_skalBetaleTrygeavgiftFrivilligMedlem_beregnerOgLagrerTrygdeavgift() {
         behandling.apply {
@@ -186,7 +181,9 @@ internal class TrygdeavgiftsberegningServiceTest {
 
 
         verify { mockTrygdeavgiftConsumer.beregnTrygdeavgift(ofType(TrygdeavgiftsberegningRequest::class)) }
-//        verify { mockBehandlingsresultatService.lagreOgFlush(behandlingsresultat) }
+
+        verify { erstattTrygdeavgiftsperioderService.erstatt(BEHANDLING_ID, match { it.isNotEmpty() }) }
+
         verify(exactly = 0) { mockPersondataService.hentPerson(BRUKER_AKTØR_ID) }
         behandlingsresultat.trygdeavgiftsperioder.shouldNotBeEmpty()
     }
@@ -269,7 +266,6 @@ internal class TrygdeavgiftsberegningServiceTest {
         }.message.shouldContain("Skatteforholdsperioden(e) du har lagt inn dekker ikke hele medlemskapsperioden(e)")
     }
 
-    // TODO verifiser lagring av behandlingsresultatet
     @Test
     fun beregnTrygdeavgift_skalBetaleTrygeavgiftPliktigMedlem_beregnerOgLagrerTrygdeavgift() {
         behandling.apply {
@@ -329,14 +325,14 @@ internal class TrygdeavgiftsberegningServiceTest {
         trygdeavgiftsberegningService.beregnOgLagreTrygdeavgift(BEHANDLING_ID, skatteforholdsperioder, inntektsperioder)
             .shouldNotBeNull().shouldNotBeEmpty()
 
+        verify { erstattTrygdeavgiftsperioderService.erstatt(BEHANDLING_ID, match { it.isNotEmpty() }) }
 
-        // verify { mockTrygdeavgiftConsumer.beregnTrygdeavgift(ofType(TrygdeavgiftsberegningRequest::class)) }
-        // verify { mockBehandlingsresultatService.lagreOgFlush(behandlingsresultat) }
         verify(exactly = 1) { mockPersondataService.hentPerson(BRUKER_AKTØR_ID) }
         behandlingsresultat.trygdeavgiftsperioder.shouldNotBeEmpty()
     }
 
-    // TODO sjekk at vi verifiserer det lagrede resultatet
+    // Tester for pliktig medlem og skattepliktig::
+
     @Test
     fun `beregnTrygdeavgift for pliktig medlem og skattepliktig skal beregne og lagre trygdeavgift`() {
         behandling.apply {
@@ -371,6 +367,11 @@ internal class TrygdeavgiftsberegningServiceTest {
 
         verify(exactly = 0) { mockTrygdeavgiftConsumer.beregnTrygdeavgift(ofType(TrygdeavgiftsberegningRequest::class)) }
         verify(exactly = 0) { mockPersondataService.hentPerson(BRUKER_AKTØR_ID) }
+        verify {
+            erstattTrygdeavgiftsperioderService.leggTilTrygdeavgiftsperiodeForPliktigMedlemskapSkattepliktig(
+                BEHANDLING_ID,
+                match { it.isNotEmpty() })
+        }
         behandlingsresultat.trygdeavgiftsperioder.shouldHaveSize(1)
         behandlingsresultat.trygdeavgiftsperioder.first().apply {
             periodeFra.shouldBe(FOM)
@@ -387,9 +388,6 @@ internal class TrygdeavgiftsberegningServiceTest {
         }
     }
 
-    // Tester for pliktig medlem og skattepliktig::
-
-    // TODO verifiser resultatet av lagring av behandlingsresultatet
     @Test
     fun `beregnTrygdeavgift for pliktig medlem og skattepliktig skal beregne og lagre flere trygdeavgift når det er flere medlemskapsperioder`() {
         behandling.apply {
@@ -435,7 +433,11 @@ internal class TrygdeavgiftsberegningServiceTest {
             .shouldNotBeNull().shouldNotBeEmpty()
 
 
-//        verify { mockBehandlingsresultatService.lagreOgFlush(behandlingsresultat) }
+        verify {
+            erstattTrygdeavgiftsperioderService.leggTilTrygdeavgiftsperiodeForPliktigMedlemskapSkattepliktig(
+                BEHANDLING_ID,
+                match { it.isNotEmpty() })
+        }
         verify(exactly = 0) { mockTrygdeavgiftConsumer.beregnTrygdeavgift(ofType(TrygdeavgiftsberegningRequest::class)) }
         verify(exactly = 0) { mockPersondataService.hentPerson(BRUKER_AKTØR_ID) }
         behandlingsresultat.trygdeavgiftsperioder.shouldHaveSize(2)
