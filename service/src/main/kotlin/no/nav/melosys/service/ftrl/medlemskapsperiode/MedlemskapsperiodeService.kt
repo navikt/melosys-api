@@ -1,8 +1,8 @@
 package no.nav.melosys.service.ftrl.medlemskapsperiode
 
+import no.nav.melosys.domain.Behandlingsresultat
 import no.nav.melosys.domain.Medlemskapsperiode
 import no.nav.melosys.domain.kodeverk.*
-import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingstema
 import no.nav.melosys.domain.mottatteopplysninger.SøknadNorgeEllerUtenforEØS
 import no.nav.melosys.exception.FunksjonellException
 import no.nav.melosys.exception.IkkeFunnetException
@@ -40,7 +40,7 @@ class MedlemskapsperiodeService(
         val søknad = behandlingsresultat.behandling.mottatteOpplysninger.mottatteOpplysningerData as SøknadNorgeEllerUtenforEØS
 
         validerFelt(
-            behandlingsresultat.behandling.tema,
+            behandlingsresultat,
             fom,
             tom,
             innvilgelsesResultat,
@@ -77,7 +77,7 @@ class MedlemskapsperiodeService(
         val søknad = behandlingsresultat.behandling.mottatteOpplysninger.mottatteOpplysningerData as SøknadNorgeEllerUtenforEØS
 
         validerFelt(
-            behandlingsresultat.behandling.tema,
+            behandlingsresultat,
             fom,
             tom,
             innvilgelsesResultat,
@@ -102,8 +102,15 @@ class MedlemskapsperiodeService(
         return medlemskapsperiodeRepository.saveAndFlush(medlemskapsperiode)
     }
 
+    private fun datoErInnenforÅr(dato: LocalDate, år: Int): Boolean {
+        val førsteDagIÅr = LocalDate.of(år, 1, 1)
+        val sisteDagIÅr = LocalDate.of(år, 12, 31)
+
+        return !dato.isBefore(førsteDagIÅr) && !dato.isAfter(sisteDagIÅr)
+    }
+
     private fun validerFelt(
-        behandlingstema: Behandlingstema,
+        behandlingsresultat: Behandlingsresultat,
         fom: LocalDate?,
         tom: LocalDate?,
         innvilgelsesResultat: InnvilgelsesResultat?,
@@ -121,6 +128,18 @@ class MedlemskapsperiodeService(
         } else if (fom == null || innvilgelsesResultat == null || bestemmelse == null || trygdedekning == null) {
             throw FunksjonellException("Fom-dato, innvilgelsesresultat, bestemmelse og trygdedekning er påkrevd")
         }
+
+        if (behandlingsresultat.årsavregning != null) {
+            val år = behandlingsresultat.årsavregning.aar
+            if (tom != null) {
+                if (!datoErInnenforÅr(tom, år) || !datoErInnenforÅr(fom, år))
+                    throw FunksjonellException("Utenfor valgt år")
+            } else {
+                throw FunksjonellException("Til-og-med dato er påkrevd for årsavregning")
+            }
+        }
+
+        val behandlingstema = behandlingsresultat.behandling.tema
         val gyldigeTrygdedekninger = gyldigeTrygdedekningerService.hentTrygdedekninger(
             behandlingstema,
             if (bestemmelse == Folketrygdloven_kap2_bestemmelser.FTRL_KAP2_2_15_ANDRE_LEDD) null else bestemmelse
