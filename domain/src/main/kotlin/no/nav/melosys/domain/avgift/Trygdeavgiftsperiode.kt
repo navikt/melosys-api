@@ -91,7 +91,7 @@ class Trygdeavgiftsperiode(
             periodeFra,
             periodeTil,
             trygdeavgiftsbeløpMd,
-            trygdesats,
+            trygdesats.stripTrailingZeros(),
             grunnlagInntekstperiode,
             grunnlagMedlemskapsperiode,
             grunnlagSkatteforholdTilNorge
