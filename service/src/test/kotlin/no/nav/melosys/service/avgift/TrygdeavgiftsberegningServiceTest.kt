@@ -53,7 +53,7 @@ internal class TrygdeavgiftsberegningServiceTest {
     @MockK
     private lateinit var mockPersondataService: PersondataService
 
-    private lateinit var erstattTrygdeavgiftsperioderService: ErstattTrygdeavgiftsperioderService
+    private lateinit var trygdeavgiftperiodeErstatter: TrygdeavgiftperiodeErstatter
 
     private lateinit var trygdeavgiftMottakerService: TrygdeavgiftMottakerService
 
@@ -78,13 +78,13 @@ internal class TrygdeavgiftsberegningServiceTest {
     @BeforeEach
     fun setup() {
         unleash.enableAll()
-        erstattTrygdeavgiftsperioderService = spyk(ErstattTrygdeavgiftsperioderService(mockBehandlingsresultatService))
+        trygdeavgiftperiodeErstatter = spyk(TrygdeavgiftperiodeErstatter(mockBehandlingsresultatService))
         trygdeavgiftMottakerService = TrygdeavgiftMottakerService(mockBehandlingsresultatService)
         trygdeavgiftsberegningService = TrygdeavgiftsberegningService(
             mockBehandlingService,
             mockEregFasade,
             mockBehandlingsresultatService,
-            erstattTrygdeavgiftsperioderService,
+            trygdeavgiftperiodeErstatter,
             trygdeavgiftMottakerService,
             mockPersondataService,
             mockTrygdeavgiftConsumer,
@@ -182,7 +182,7 @@ internal class TrygdeavgiftsberegningServiceTest {
 
         verify { mockTrygdeavgiftConsumer.beregnTrygdeavgift(ofType(TrygdeavgiftsberegningRequest::class)) }
 
-        verify { erstattTrygdeavgiftsperioderService.erstattTrygdeavgiftsperioder(BEHANDLING_ID, match { it.isNotEmpty() }) }
+        verify { trygdeavgiftperiodeErstatter.erstattTrygdeavgiftsperioder(BEHANDLING_ID, match { it.isNotEmpty() }) }
 
         verify(exactly = 0) { mockPersondataService.hentPerson(BRUKER_AKTØR_ID) }
         behandlingsresultat.trygdeavgiftsperioder.shouldNotBeEmpty()
@@ -325,7 +325,7 @@ internal class TrygdeavgiftsberegningServiceTest {
         trygdeavgiftsberegningService.beregnOgLagreTrygdeavgift(BEHANDLING_ID, skatteforholdsperioder, inntektsperioder)
             .shouldNotBeNull().shouldNotBeEmpty()
 
-        verify { erstattTrygdeavgiftsperioderService.erstattTrygdeavgiftsperioder(BEHANDLING_ID, match { it.isNotEmpty() }) }
+        verify { trygdeavgiftperiodeErstatter.erstattTrygdeavgiftsperioder(BEHANDLING_ID, match { it.isNotEmpty() }) }
 
         verify(exactly = 1) { mockPersondataService.hentPerson(BRUKER_AKTØR_ID) }
         behandlingsresultat.trygdeavgiftsperioder.shouldNotBeEmpty()
@@ -368,7 +368,7 @@ internal class TrygdeavgiftsberegningServiceTest {
         verify(exactly = 0) { mockTrygdeavgiftConsumer.beregnTrygdeavgift(ofType(TrygdeavgiftsberegningRequest::class)) }
         verify(exactly = 0) { mockPersondataService.hentPerson(BRUKER_AKTØR_ID) }
         verify {
-            erstattTrygdeavgiftsperioderService.leggTilTrygdeavgiftsperiodeForPliktigMedlemskapSkattepliktig(
+            trygdeavgiftperiodeErstatter.leggTilTrygdeavgiftsperiodeForPliktigMedlemskapSkattepliktig(
                 BEHANDLING_ID,
                 match { it.isNotEmpty() })
         }
@@ -434,7 +434,7 @@ internal class TrygdeavgiftsberegningServiceTest {
 
 
         verify {
-            erstattTrygdeavgiftsperioderService.leggTilTrygdeavgiftsperiodeForPliktigMedlemskapSkattepliktig(
+            trygdeavgiftperiodeErstatter.leggTilTrygdeavgiftsperiodeForPliktigMedlemskapSkattepliktig(
                 BEHANDLING_ID,
                 match { it.isNotEmpty() })
         }

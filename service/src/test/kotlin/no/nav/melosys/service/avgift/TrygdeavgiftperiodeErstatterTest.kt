@@ -19,12 +19,12 @@ import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.extension.ExtendWith
 
 @ExtendWith(MockKExtension::class)
-class ErstattTrygdeavgiftsperioderServiceTest() {
+class TrygdeavgiftperiodeErstatterTest() {
     @MockK
     private lateinit var behandlingsresultatService: BehandlingsresultatService
 
     @InjectMockKs
-    private lateinit var erstattTrygdeavgiftsperioderService: ErstattTrygdeavgiftsperioderService
+    private lateinit var trygdeavgiftperiodeErstatter: TrygdeavgiftperiodeErstatter
 
     @Nested
     inner class ErstattTrygdeavgiftsperioderTest {
@@ -43,7 +43,7 @@ class ErstattTrygdeavgiftsperioderServiceTest() {
             val nyeTrygdeavgiftsperioder = listOf(nyTrygdeavgiftsperiode)
 
             // Act
-            erstattTrygdeavgiftsperioderService.erstattTrygdeavgiftsperioder(1337L, nyeTrygdeavgiftsperioder)
+            trygdeavgiftperiodeErstatter.erstattTrygdeavgiftsperioder(1337L, nyeTrygdeavgiftsperioder)
 
             // Assert
             behandlingsresultat.trygdeavgiftType shouldBeEqual Trygdeavgift_typer.FORELØPIG
@@ -71,7 +71,7 @@ class ErstattTrygdeavgiftsperioderServiceTest() {
             val nyeTrygdeavgiftsperioder = nyTrygdeavgiftsperioder1 + nyTrygdeavgiftsperioder2
 
             // Act
-            erstattTrygdeavgiftsperioderService.erstattTrygdeavgiftsperioder(1337L, nyeTrygdeavgiftsperioder)
+            trygdeavgiftperiodeErstatter.erstattTrygdeavgiftsperioder(1337L, nyeTrygdeavgiftsperioder)
 
             // Assert
             medlemskap1.trygdeavgiftsperioder shouldContainExactly nyTrygdeavgiftsperioder1.toSet()

@@ -8,13 +8,13 @@ import no.nav.melosys.domain.avgift.Trygdeavgiftsperiode
 import no.nav.melosys.domain.kodeverk.Skatteplikttype
 import no.nav.melosys.domain.kodeverk.Trygdeavgift_typer
 import no.nav.melosys.service.behandling.BehandlingsresultatService
-import org.springframework.stereotype.Service
+import org.springframework.stereotype.Component
 import org.springframework.transaction.annotation.Propagation
 import org.springframework.transaction.annotation.Transactional
 import java.math.BigDecimal
 
-@Service
-class ErstattTrygdeavgiftsperioderService(private val behandlingsresultatService: BehandlingsresultatService) {
+@Component
+class TrygdeavgiftperiodeErstatter(private val behandlingsresultatService: BehandlingsresultatService) {
 
     @Transactional(readOnly = true)
     fun erPliktigMedlemskapSkattepliktig(

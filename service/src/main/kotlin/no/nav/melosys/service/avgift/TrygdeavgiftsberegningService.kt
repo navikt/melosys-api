@@ -26,7 +26,7 @@ class TrygdeavgiftsberegningService(
     private val behandlingService: BehandlingService,
     private val eregFasade: EregFasade,
     private val behandlingsresultatService: BehandlingsresultatService,
-    private val erstattTrygdeavgiftsperioderService: ErstattTrygdeavgiftsperioderService,
+    private val trygdeavgiftperiodeErstatter: TrygdeavgiftperiodeErstatter,
     private val trygdeavgiftMottakerService: TrygdeavgiftMottakerService,
     private val persondataService: PersondataService,
     private val trygdeavgiftConsumer: TrygdeavgiftConsumer,
@@ -42,8 +42,8 @@ class TrygdeavgiftsberegningService(
         val behandlingsresultat = behandlingsresultatService.hentBehandlingsresultat(behandlingsresultatID)
         TrygdeavgiftsberegningValidator.validerForTrygdeavgiftberegning(behandlingsresultat, skatteforholdsperioder, inntektsperioder, unleash)
 
-        if (erstattTrygdeavgiftsperioderService.erPliktigMedlemskapSkattepliktig(skatteforholdsperioder, inntektsperioder, behandlingsresultatID)) {
-            return erstattTrygdeavgiftsperioderService.leggTilTrygdeavgiftsperiodeForPliktigMedlemskapSkattepliktig(
+        if (trygdeavgiftperiodeErstatter.erPliktigMedlemskapSkattepliktig(skatteforholdsperioder, inntektsperioder, behandlingsresultatID)) {
+            return trygdeavgiftperiodeErstatter.leggTilTrygdeavgiftsperiodeForPliktigMedlemskapSkattepliktig(
                 behandlingsresultatID,
                 skatteforholdsperioder
             )
@@ -52,7 +52,7 @@ class TrygdeavgiftsberegningService(
 
         sjekkTrygdeavgiftSkalBetalesTilNav(nyeTrygdeavgiftsperioder)
 
-        erstattTrygdeavgiftsperioderService.erstattTrygdeavgiftsperioder(behandlingsresultatID, nyeTrygdeavgiftsperioder)
+        trygdeavgiftperiodeErstatter.erstattTrygdeavgiftsperioder(behandlingsresultatID, nyeTrygdeavgiftsperioder)
 
         return nyeTrygdeavgiftsperioder.toSet()
     }
