@@ -91,11 +91,6 @@ class VilkårForBestemmelsePensjonist(val mottatteOpplysningerService: MottatteO
     private fun ftrlKap2_5VilkårForAvklarteFakta(avklarteFakta: Map<Avklartefaktatyper, String>): List<Vilkår> {
         val familieRelasjon = hentFamilieRelasjonFraFakta(avklarteFakta)
         return when (familieRelasjon) {
-            Ikkeyrkesaktivrelasjontype.BARN_2_5_ANDRE_LEDD -> listOf(
-                Vilkår(FTRL_2_5_MEDFØLGENDE_A_E),
-                Vilkår(FTRL_2_5_FORSØRGET_FAMILIEMEDLEM)
-            )
-
             Ikkeyrkesaktivrelasjontype.EKTEFELLE_2_5_ANDRE_LEDD_A_TIL_B -> listOf(
                 Vilkår(FTRL_2_5_MEDFØLGENDE_A_E, defaultOppfylt = true),
                 Vilkår(FTRL_2_5_FORSØRGET_FAMILIEMEDLEM),
