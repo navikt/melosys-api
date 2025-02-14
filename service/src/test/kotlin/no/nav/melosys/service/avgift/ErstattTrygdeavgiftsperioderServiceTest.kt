@@ -1,5 +1,6 @@
 package no.nav.melosys.service.avgift
 
+import io.kotest.matchers.collections.shouldContainExactly
 import io.kotest.matchers.equals.shouldBeEqual
 import io.kotest.matchers.shouldBe
 import io.mockk.every
@@ -29,50 +30,83 @@ class ErstattTrygdeavgiftsperioderServiceTest() {
     inner class ErstattTrygdeavgiftsperioderTest {
         @Test
         fun `erstatter eksisterende Trygdeavgiftsperioder`() {
-            val eksisterendeId = 1L
-            val nyId = 2L
             val medlId = 3L
 
-            val eksisterendeTrygdeavgiftsperiodeMock = mockk<Trygdeavgiftsperiode>(relaxed = true).apply {
-                every { id } returns eksisterendeId
-                every { grunnlagMedlemskapsperiode?.id } returns medlId
-            }
-            val nyTrygdeavgiftsperiodeMock = mockk<Trygdeavgiftsperiode>(relaxed = true).apply {
-                every { id } returns nyId
-                every { grunnlagMedlemskapsperiode?.id } returns medlId
-            }
+            val eksisterendeTrygdeavgiftsperiode = createTrygdeavgiftsperioder(medlId, 1L).single()
+            val nyTrygdeavgiftsperiode = createTrygdeavgiftsperioder(medlId, 2L).single()
 
-            val medlemskap = Medlemskapsperiode().apply { this.id = medlId }
-            medlemskap.addTrygdeavgiftsperiode(eksisterendeTrygdeavgiftsperiodeMock)
-
-            val behandlingsresultat = Behandlingsresultat().apply {
-                behandling = Behandling()
-                medlemskapsperioder = listOf(medlemskap)
-            }
+            val medlemskap = createMedlemskap(medlId, listOf(eksisterendeTrygdeavgiftsperiode))
+            val behandlingsresultat = createBehandlingsresultat(medlemskap)
 
             every { behandlingsresultatService.hentBehandlingsresultat(any()) } returns behandlingsresultat
 
-            val nyeTrygdeavgiftsperioder = listOf(nyTrygdeavgiftsperiodeMock)
+            val nyeTrygdeavgiftsperioder = listOf(nyTrygdeavgiftsperiode)
 
-
+            // Act
             erstattTrygdeavgiftsperioderService.erstattTrygdeavgiftsperioder(1337L, nyeTrygdeavgiftsperioder)
 
-
+            // Assert
             behandlingsresultat.trygdeavgiftType shouldBeEqual Trygdeavgift_typer.FORELØPIG
-            medlemskap.trygdeavgiftsperioder shouldBe nyeTrygdeavgiftsperioder
+            medlemskap.trygdeavgiftsperioder shouldContainExactly nyeTrygdeavgiftsperioder.toSet()
         }
 
         @Test
-        fun erPliktigMedlemskapSkattepliktig() {
-        }
+        fun `erstatter flere eksisterende Trygdeavgiftsperioder for flere medlemskap`() {
+            val medlId1 = 1L
+            val medlId2 = 2L
 
-        @Test
-        fun erstattTrygdeavgiftsperioder() {
-        }
+            val eksisterendeTrygdeavgiftsperioder1 = createTrygdeavgiftsperioder(medlId1, 101L, 102L)
+            val eksisterendeTrygdeavgiftsperioder2 = createTrygdeavgiftsperioder(medlId2, 103L, 104L)
 
+            val nyTrygdeavgiftsperioder1 = createTrygdeavgiftsperioder(medlId1, 201L, 202L)
+            val nyTrygdeavgiftsperioder2 = createTrygdeavgiftsperioder(medlId2, 203L, 204L)
+
+            val medlemskap1 = createMedlemskap(medlId1, eksisterendeTrygdeavgiftsperioder1)
+            val medlemskap2 = createMedlemskap(medlId2, eksisterendeTrygdeavgiftsperioder2)
+
+            val behandlingsresultat = createBehandlingsresultat(medlemskap1, medlemskap2)
+
+            every { behandlingsresultatService.hentBehandlingsresultat(any()) } returns behandlingsresultat
+
+            val nyeTrygdeavgiftsperioder = nyTrygdeavgiftsperioder1 + nyTrygdeavgiftsperioder2
+
+            // Act
+            erstattTrygdeavgiftsperioderService.erstattTrygdeavgiftsperioder(1337L, nyeTrygdeavgiftsperioder)
+
+            // Assert
+            medlemskap1.trygdeavgiftsperioder shouldContainExactly nyTrygdeavgiftsperioder1.toSet()
+            medlemskap2.trygdeavgiftsperioder shouldContainExactly nyTrygdeavgiftsperioder2.toSet()
+            behandlingsresultat.trygdeavgiftType shouldBe Trygdeavgift_typer.FORELØPIG
+        }
+    }
+
+    @Nested
+    inner class LeggTilTrygdeavgiftsperiodeForPliktigMedlemskapSkattepliktigTest {
         @Test
         fun leggTilTrygdeavgiftsperiodeForPliktigMedlemskapSkattepliktig() {
         }
+    }
 
+    private fun createTrygdeavgiftsperioder(medlemskapId: Long, vararg ids: Long): List<Trygdeavgiftsperiode> {
+        return ids.map { periodeId ->
+            mockk<Trygdeavgiftsperiode>(relaxed = true).apply {
+                every { id } returns periodeId
+                every { grunnlagMedlemskapsperiode?.id } returns medlemskapId
+            }
+        }
+    }
+
+    private fun createMedlemskap(medlemskapId: Long, trygdeavgiftsperioder: List<Trygdeavgiftsperiode>): Medlemskapsperiode {
+        return Medlemskapsperiode().apply {
+            id = medlemskapId
+            trygdeavgiftsperioder.forEach { addTrygdeavgiftsperiode(it) }
+        }
+    }
+
+    private fun createBehandlingsresultat(vararg medlemskapsperioder: Medlemskapsperiode): Behandlingsresultat {
+        return Behandlingsresultat().apply {
+            behandling = Behandling()
+            this.medlemskapsperioder = medlemskapsperioder.toList()
+        }
     }
 }
