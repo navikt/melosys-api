@@ -86,8 +86,9 @@ class SatsendringFinner(
         val erSatsEndret = nyeTrygdeavgiftsperioder != behandlingsresultat.trygdeavgiftsperioder
 
         if (erSatsEndret) {
-            log.debug { "Forskjell i trygdeavgiftsperioder. Eksisterende: ${behandlingsresultat.trygdeavgiftsperioder}" }
-            log.debug { "Nye trygdeavgiftsperioder: $nyeTrygdeavgiftsperioder" }
+            log.info { "Satsendring i behandling ${behandlingsresultat.id}" }
+            log.info { "Nye trygdeavgiftsperioder beregnet: $nyeTrygdeavgiftsperioder" }
+            log.info { "Eksisterende trygdeavgiftsperioder: ${behandlingsresultat.trygdeavgiftsperioder}" }
         }
 
         return erSatsEndret
