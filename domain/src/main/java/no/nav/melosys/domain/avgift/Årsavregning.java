@@ -37,12 +37,23 @@ public class Årsavregning {
     @Column(name = "har_data_fra_avgiftssystemet")
     private Boolean harDeltGrunnlag;
 
+    @Column(name = "har_avvik", nullable = true)
+    private Boolean harAvvik;
+
     public Boolean getHarDeltGrunnlag() {
         return harDeltGrunnlag;
     }
 
     public void setHarDeltGrunnlag(Boolean harDeltGrunnlag) {
         this.harDeltGrunnlag = harDeltGrunnlag;
+    }
+
+    public Boolean getHarAvvik() {
+        return harAvvik;
+    }
+
+    public void setHarAvvik(Boolean harAvvik) {
+        this.harAvvik = harAvvik;
     }
 
     public Long getId() {
