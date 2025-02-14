@@ -102,7 +102,8 @@ internal class ÅrsavregningServiceTest {
                 tidligereFakturertBeloep = null,
                 nyttTotalbeloep = null,
                 tilFaktureringBeloep = null,
-                harDeltGrunnlag = null
+                harDeltGrunnlag = null,
+                harAvvik = null
             )
         }
 
@@ -151,7 +152,8 @@ internal class ÅrsavregningServiceTest {
                 tidligereFakturertBeloep = null,
                 nyttTotalbeloep = null,
                 tilFaktureringBeloep = null,
-                harDeltGrunnlag = null
+                harDeltGrunnlag = null,
+                harAvvik = null
             )
         }
     }

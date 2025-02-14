@@ -31,6 +31,7 @@ import no.nav.melosys.integrasjon.medl.PeriodestatusMedl
 import no.nav.melosys.integrasjon.trygdeavgift.dto.NOK
 import no.nav.melosys.service.LovvalgsperiodeService
 import no.nav.melosys.service.SaksbehandlingDataFactory
+import no.nav.melosys.service.avgift.TrygdeavgiftMottakerService
 import no.nav.melosys.service.avgift.TrygdeavgiftService
 import no.nav.melosys.service.avklartefakta.AvklarteVirksomheterService
 import no.nav.melosys.service.behandling.BehandlingService
@@ -80,6 +81,9 @@ internal class KontrollTest {
     @RelaxedMockK
     lateinit var trygdeavgiftService: TrygdeavgiftService
 
+    @RelaxedMockK
+    lateinit var trygdeavgiftMottakerService: TrygdeavgiftMottakerService
+
     private val behandlingID = 1L
     private val lovvalgsperiode = Lovvalgsperiode().apply {
         tom = LocalDate.now()
@@ -110,7 +114,8 @@ internal class KontrollTest {
             medlemskapsperiodeService,
             utkastBrevService,
             behandlingsresultatService,
-            trygdeavgiftService
+            trygdeavgiftService,
+            trygdeavgiftMottakerService
         )
     }
 
