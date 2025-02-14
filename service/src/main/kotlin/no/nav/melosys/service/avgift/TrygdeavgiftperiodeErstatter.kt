@@ -2,7 +2,6 @@ package no.nav.melosys.service.avgift
 
 import no.nav.melosys.domain.Behandlingsresultat
 import no.nav.melosys.domain.avgift.Inntektsperiode
-import no.nav.melosys.domain.avgift.Penger
 import no.nav.melosys.domain.avgift.SkatteforholdTilNorge
 import no.nav.melosys.domain.avgift.Trygdeavgiftsperiode
 import no.nav.melosys.domain.kodeverk.Skatteplikttype
@@ -11,7 +10,6 @@ import no.nav.melosys.service.behandling.BehandlingsresultatService
 import org.springframework.stereotype.Component
 import org.springframework.transaction.annotation.Propagation
 import org.springframework.transaction.annotation.Transactional
-import java.math.BigDecimal
 
 @Component
 class TrygdeavgiftperiodeErstatter(private val behandlingsresultatService: BehandlingsresultatService) {
@@ -48,16 +46,16 @@ class TrygdeavgiftperiodeErstatter(private val behandlingsresultatService: Behan
         }
     }
 
+    /*
     @Transactional(propagation = Propagation.REQUIRES_NEW)
-    fun leggTilTrygdeavgiftsperiodeForPliktigMedlemskapSkattepliktig(
+    fun erstattTrygdeavgiftsperiodeForPliktigMedlemskapSkattepliktig(
         behandlingsresultatId: Long,
         skatteforholdsperioder: List<SkatteforholdTilNorge>,
     ): Set<Trygdeavgiftsperiode> {
         require(skatteforholdsperioder.size == 1) { "Det skal ikke være flere enn en skatteforholdsperiode når medlemskapet er pliktig og skattepliktig" }
         var behandlingsresultat = behandlingsresultatService.hentBehandlingsresultat(behandlingsresultatId)
-        nullstillTrygdeavgiftsperioder(behandlingsresultat)
 
-        return behandlingsresultat.medlemskapsperioder.filter { it.erInnvilget() }.map { mp ->
+        val trygdeavgiftsperioder = behandlingsresultat.medlemskapsperioder.filter { it.erInnvilget() }.map { mp ->
             val skatteforholdTilNorge = SkatteforholdTilNorge().apply {
                 fomDato = skatteforholdsperioder.first().fom
                 tomDato = skatteforholdsperioder.first().tom
@@ -73,10 +71,14 @@ class TrygdeavgiftperiodeErstatter(private val behandlingsresultatService: Behan
                 grunnlagSkatteforholdTilNorge = skatteforholdTilNorge
             )
 
-            mp.addTrygdeavgiftsperiode(trygdeavgiftsperiode)
             trygdeavgiftsperiode
-        }.toSet()
+        }
+
+        erstattTrygdeavgiftsperioder(behandlingsresultatId, trygdeavgiftsperioder)
+        return trygdeavgiftsperioder.toSet()
     }
+
+     */
 
     private fun nullstillTrygdeavgiftsperioder(behandlingsresultat: Behandlingsresultat) {
         behandlingsresultat.trygdeavgiftType = Trygdeavgift_typer.FORELØPIG

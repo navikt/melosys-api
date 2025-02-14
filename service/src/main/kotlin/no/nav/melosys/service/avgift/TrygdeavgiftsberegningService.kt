@@ -4,6 +4,7 @@ import io.getunleash.Unleash
 import no.nav.melosys.domain.Behandlingsresultat
 import no.nav.melosys.domain.Medlemskapsperiode
 import no.nav.melosys.domain.avgift.Inntektsperiode
+import no.nav.melosys.domain.avgift.Penger
 import no.nav.melosys.domain.avgift.SkatteforholdTilNorge
 import no.nav.melosys.domain.avgift.Trygdeavgiftsperiode
 import no.nav.melosys.domain.kodeverk.Fullmaktstype
@@ -42,22 +43,40 @@ class TrygdeavgiftsberegningService(
         val behandlingsresultat = behandlingsresultatService.hentBehandlingsresultat(behandlingsresultatID)
         TrygdeavgiftsberegningValidator.validerForTrygdeavgiftberegning(behandlingsresultat, skatteforholdsperioder, inntektsperioder, unleash)
 
+        // TODO refaktoriser resten i ny metode erstattTrygdeavgiftsperioder
         if (trygdeavgiftperiodeErstatter.erPliktigMedlemskapSkattepliktig(skatteforholdsperioder, inntektsperioder, behandlingsresultatID)) {
-            return trygdeavgiftperiodeErstatter.leggTilTrygdeavgiftsperiodeForPliktigMedlemskapSkattepliktig(
-                behandlingsresultatID,
-                skatteforholdsperioder
-            )
+            require(skatteforholdsperioder.size == 1) { "Det skal ikke være flere enn en skatteforholdsperiode når medlemskapet er pliktig og skattepliktig" }
+            val trygdeavgiftsperioder = behandlingsresultat.medlemskapsperioder.filter { it.erInnvilget() }.map { mp ->
+                val skatteforholdTilNorge = SkatteforholdTilNorge().apply {
+                    fomDato = skatteforholdsperioder.first().fom
+                    tomDato = skatteforholdsperioder.first().tom
+                    skatteplikttype = skatteforholdsperioder.first().skatteplikttype
+                }
+
+                val trygdeavgiftsperiode = Trygdeavgiftsperiode(
+                    periodeFra = mp.fom,
+                    periodeTil = mp.tom,
+                    trygdesats = BigDecimal.ZERO,
+                    trygdeavgiftsbeløpMd = Penger(BigDecimal.ZERO),
+                    grunnlagMedlemskapsperiode = mp,
+                    grunnlagSkatteforholdTilNorge = skatteforholdTilNorge
+                )
+
+                trygdeavgiftsperiode
+            }
+
+            trygdeavgiftperiodeErstatter.erstattTrygdeavgiftsperioder(behandlingsresultatID, trygdeavgiftsperioder)
+            return trygdeavgiftsperioder.toSet()
         }
+
         val nyeTrygdeavgiftsperioder = beregnTrygdeavgift(behandlingsresultat, skatteforholdsperioder, inntektsperioder)
-
         sjekkTrygdeavgiftSkalBetalesTilNav(nyeTrygdeavgiftsperioder)
-
         trygdeavgiftperiodeErstatter.erstattTrygdeavgiftsperioder(behandlingsresultatID, nyeTrygdeavgiftsperioder)
 
         return nyeTrygdeavgiftsperioder.toSet()
     }
 
-    @Transactional(readOnly = true)
+    @Transactional(readOnly = true, noRollbackFor = [Throwable::class])
     fun beregnTrygdeavgift(
         behandlingsresultat: Behandlingsresultat,
         skatteforholdsperioder: List<SkatteforholdTilNorge>,
