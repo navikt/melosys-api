@@ -42,6 +42,16 @@ class GyldigeTrygdedekningerService(private val unleash: Unleash) {
     )
 
 
+    private val GYLDIGE_TRYGDEDEKNINGER_PENSJONIST = listOf(
+        Trygdedekninger.FULL_DEKNING_FTRL,
+        Trygdedekninger.FTRL_2_9_FØRSTE_LEDD_A_HELSE,
+        Trygdedekninger.FTRL_2_9_FØRSTE_LEDD_A_ANDRE_LEDD_HELSE_SYKE_FORELDREPENGER,
+        Trygdedekninger.FTRL_2_9_FØRSTE_LEDD_B_PENSJON,
+        Trygdedekninger.FTRL_2_9_FØRSTE_LEDD_C_HELSE_PENSJON,
+        Trygdedekninger.FTRL_2_9_FØRSTE_LEDD_C_ANDRE_LEDD_HELSE_PENSJON_SYKE_FORELDREPENGER,
+        Trygdedekninger.FTRL_2_7_TREDJE_LEDD_B_HELSE_SYKE_FORELDREPENGER,
+    )
+
     fun hentTrygdedekninger(behandlingstema: Behandlingstema, bestemmelse: Bestemmelse?): List<Trygdedekninger> {
         valider(behandlingstema)
 
@@ -63,6 +73,7 @@ class GyldigeTrygdedekningerService(private val unleash: Unleash) {
         var trygdedekninger = when (behandlingstema) {
             Behandlingstema.IKKE_YRKESAKTIV -> GYLDIGE_TRYGDEDEKNINGER_IKKE_YRKESAKTIV
             Behandlingstema.YRKESAKTIV -> GYLDIGE_TRYGDEDEKNINGER_YRKESAKTIV
+            Behandlingstema.PENSJONIST -> GYLDIGE_TRYGDEDEKNINGER_PENSJONIST
             else -> throw FunksjonellException("Finnes ikke gyldige trygdedekninger for behandlingstema $behandlingstema")
         }
 
@@ -70,7 +81,7 @@ class GyldigeTrygdedekningerService(private val unleash: Unleash) {
     }
 
     private fun valider(behandlingstema: Behandlingstema) {
-        if (behandlingstema !in listOf(Behandlingstema.YRKESAKTIV, Behandlingstema.IKKE_YRKESAKTIV)) {
+        if (behandlingstema !in listOf(Behandlingstema.YRKESAKTIV, Behandlingstema.IKKE_YRKESAKTIV, Behandlingstema.PENSJONIST)) {
             throw FunksjonellException("Behandling med behandlingstema $behandlingstema har ikke gyldige trygdedekninger")
         }
     }
