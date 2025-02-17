@@ -44,6 +44,7 @@ class TrygdeavgiftperiodeErstatter(private val behandlingsresultatService: Behan
                 }
             }
         }
+        behandlingsresultatService.lagre(behandlingsresultat)
     }
 
     /*
