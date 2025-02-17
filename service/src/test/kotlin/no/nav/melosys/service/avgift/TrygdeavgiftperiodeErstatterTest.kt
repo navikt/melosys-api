@@ -20,7 +20,7 @@ import org.junit.jupiter.api.extension.ExtendWith
 
 @ExtendWith(MockKExtension::class)
 class TrygdeavgiftperiodeErstatterTest() {
-    @MockK
+    @MockK(relaxed = true)
     private lateinit var behandlingsresultatService: BehandlingsresultatService
 
     @InjectMockKs
@@ -96,7 +96,10 @@ class TrygdeavgiftperiodeErstatterTest() {
         }
     }
 
-    private fun createMedlemskap(medlemskapId: Long, trygdeavgiftsperioder: List<Trygdeavgiftsperiode>): Medlemskapsperiode {
+    private fun createMedlemskap(
+        medlemskapId: Long,
+        trygdeavgiftsperioder: List<Trygdeavgiftsperiode>
+    ): Medlemskapsperiode {
         return Medlemskapsperiode().apply {
             id = medlemskapId
             trygdeavgiftsperioder.forEach { addTrygdeavgiftsperiode(it) }
