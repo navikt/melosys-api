@@ -47,7 +47,7 @@ internal class TrygdeavgiftsberegningServiceTest {
     @MockK
     private lateinit var mockTrygdeavgiftConsumer: TrygdeavgiftConsumer
 
-    @MockK
+    @MockK(relaxed = true)
     lateinit var mockBehandlingsresultatService: BehandlingsresultatService
 
     @MockK
