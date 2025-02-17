@@ -28,6 +28,7 @@ import no.nav.melosys.service.behandling.BehandlingsresultatService
 import no.nav.melosys.service.behandling.UtledMottaksdato
 import no.nav.melosys.service.ftrl.bestemmelse.vilkaar.VilkårForBestemmelse
 import no.nav.melosys.service.ftrl.bestemmelse.vilkaar.VilkårForBestemmelseIkkeYrkesaktiv
+import no.nav.melosys.service.ftrl.bestemmelse.vilkaar.VilkårForBestemmelsePensjonist
 import no.nav.melosys.service.ftrl.bestemmelse.vilkaar.VilkårForBestemmelseYrkesaktiv
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
@@ -46,7 +47,7 @@ class OpprettForslagMedlemskapsperiodeServiceTest {
     @RelaxedMockK
     private lateinit var avklartefaktaService: AvklartefaktaService
 
-    private val vilkårForBestemmelse = VilkårForBestemmelse(VilkårForBestemmelseYrkesaktiv(mockk()), VilkårForBestemmelseIkkeYrkesaktiv(mockk()))
+    private val vilkårForBestemmelse = VilkårForBestemmelse(VilkårForBestemmelseYrkesaktiv(mockk()), VilkårForBestemmelseIkkeYrkesaktiv(mockk()), VilkårForBestemmelsePensjonist(mockk()))
 
     private lateinit var opprettForslagMedlemskapsperiodeService: OpprettForslagMedlemskapsperiodeService
 

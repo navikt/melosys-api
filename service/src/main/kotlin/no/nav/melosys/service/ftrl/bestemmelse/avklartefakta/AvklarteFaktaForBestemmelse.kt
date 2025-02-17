@@ -15,12 +15,13 @@ class AvklarteFaktaForBestemmelse(
 ) {
 
     fun hentAvklarteFakta(bestemmelse: Bestemmelse, behandlingID: Long): List<AvklarteFaktaType> {
-        val erIkkeYrkesaktiv = behandlingService.hentBehandling(behandlingID).tema == Behandlingstema.IKKE_YRKESAKTIV
+        val behandlingstema = behandlingService.hentBehandling(behandlingID).tema
 
-        return if (erIkkeYrkesaktiv) hentAvklarteFaktaIkkeYrkesaktiv(bestemmelse, behandlingID) else hentAvklarteFaktaYrkesaktiv(
-            bestemmelse,
-            behandlingID
-        )
+        return when (behandlingstema) {
+            Behandlingstema.IKKE_YRKESAKTIV -> hentAvklarteFaktaIkkeYrkesaktiv(bestemmelse, behandlingID)
+            Behandlingstema.PENSJONIST -> hentAvklarteFaktaPensjonist(bestemmelse, behandlingID)
+            else -> hentAvklarteFaktaYrkesaktiv(bestemmelse, behandlingID)
+        }
     }
 
     fun hentAvklarteFaktaIkkeYrkesaktiv(bestemmelse: Bestemmelse, behandlingID: Long): List<AvklarteFaktaType> {
@@ -42,6 +43,22 @@ class AvklarteFaktaForBestemmelse(
                     Avklartefaktatyper.IKKE_YRKESAKTIV_RELASJON, listOf(
                         Ikkeyrkesaktivrelasjontype.BARN_2_8_FJERDE_LEDD,
                         Ikkeyrkesaktivrelasjontype.EKTEFELLE_2_8_FJERDE_LEDD,
+                    ).map(Ikkeyrkesaktivrelasjontype::name)
+                )
+            )
+
+            else -> emptyList()
+        }
+    }
+
+    fun hentAvklarteFaktaPensjonist(bestemmelse: Bestemmelse, behandlingID: Long): List<AvklarteFaktaType> {
+        return when (bestemmelse) {
+            FTRL_KAP2_2_1 -> ftrlKap2_1AvklarteFaktaForBehandling(behandlingID, Behandlingstema.IKKE_YRKESAKTIV)
+            FTRL_KAP2_2_5_ANDRE_LEDD -> listOf(
+                AvklarteFaktaType(
+                    Avklartefaktatyper.IKKE_YRKESAKTIV_RELASJON, listOf(
+                        Ikkeyrkesaktivrelasjontype.EKTEFELLE_2_5_ANDRE_LEDD_A_TIL_B,
+                        Ikkeyrkesaktivrelasjontype.EKTEFELLE_2_5_ANDRE_LEDD_C_TIL_E,
                     ).map(Ikkeyrkesaktivrelasjontype::name)
                 )
             )

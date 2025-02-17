@@ -80,7 +80,7 @@ class Trygdeavgiftsperiode(
         return periodeFra == other.periodeFra &&
             periodeTil == other.periodeTil &&
             trygdeavgiftsbeløpMd == other.trygdeavgiftsbeløpMd &&
-            trygdesats == other.trygdesats &&
+            trygdesats.compareTo(other.trygdesats) == 0 &&
             grunnlagInntekstperiode == other.grunnlagInntekstperiode &&
             grunnlagMedlemskapsperiode == other.grunnlagMedlemskapsperiode &&
             grunnlagSkatteforholdTilNorge == other.grunnlagSkatteforholdTilNorge
@@ -91,7 +91,7 @@ class Trygdeavgiftsperiode(
             periodeFra,
             periodeTil,
             trygdeavgiftsbeløpMd,
-            trygdesats,
+            trygdesats.stripTrailingZeros(),
             grunnlagInntekstperiode,
             grunnlagMedlemskapsperiode,
             grunnlagSkatteforholdTilNorge

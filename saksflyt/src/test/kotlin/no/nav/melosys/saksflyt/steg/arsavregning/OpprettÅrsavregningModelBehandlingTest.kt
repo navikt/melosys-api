@@ -109,6 +109,7 @@ class OpprettÅrsavregningModelBehandlingTest {
             null,
             null,
             null,
+            null,
             null
         )
 

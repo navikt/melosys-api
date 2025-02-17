@@ -75,15 +75,15 @@ class SaksbehandlingRegler(private val behandlingsresultatRepository: Behandling
             )
         ) return false
 
+
         return when (behandlingstema) {
-            PENSJONIST,
             REGISTRERING_UNNTAK,
             UNNTAK_MEDLEMSKAP,
             FORESPØRSEL_TRYGDEMYNDIGHET,
             TRYGDETID,
             A1_ANMODNING_OM_UNNTAK_PAPIR,
             -> true
-
+            PENSJONIST -> !unleash.isEnabled(ToggleName.MELOSYS_PENSJONIST)
             ANMODNING_OM_UNNTAK_HOVEDREGEL -> sakstype == Sakstyper.TRYGDEAVTALE
 
             else -> return false

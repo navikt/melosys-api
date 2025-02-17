@@ -8,7 +8,8 @@ import org.springframework.stereotype.Component
 @Component
 class VilkårForBestemmelse(
     val vilkårForBestemmelseYrkesaktiv: VilkårForBestemmelseYrkesaktiv,
-    val vilkårForBestemmelseIkkeYrkesaktiv: VilkårForBestemmelseIkkeYrkesaktiv
+    val vilkårForBestemmelseIkkeYrkesaktiv: VilkårForBestemmelseIkkeYrkesaktiv,
+    val vilkårForBestemmelsePensjonist: VilkårForBestemmelsePensjonist
 ) {
     fun hentVilkår(
         bestemmelse: Bestemmelse,
@@ -16,6 +17,7 @@ class VilkårForBestemmelse(
         avklarteFakta: Map<Avklartefaktatyper, String>,
         behandlingID: Long?
     ): List<Vilkår> = when (behandlingstema) {
+        Behandlingstema.PENSJONIST -> vilkårForBestemmelsePensjonist.hentVilkår(bestemmelse, avklarteFakta, behandlingID)
         Behandlingstema.IKKE_YRKESAKTIV -> vilkårForBestemmelseIkkeYrkesaktiv.hentVilkår(bestemmelse, avklarteFakta, behandlingID)
         Behandlingstema.YRKESAKTIV -> vilkårForBestemmelseYrkesaktiv.hentVilkår(bestemmelse, avklarteFakta, behandlingID)
         else -> emptyList()

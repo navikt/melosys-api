@@ -14,6 +14,7 @@ import no.nav.melosys.domain.dokument.medlemskap.Periode
 import no.nav.melosys.domain.dokument.organisasjon.OrganisasjonDokument
 import no.nav.melosys.domain.dokument.organisasjon.adresse.SemistrukturertAdresse
 import no.nav.melosys.domain.kodeverk.*
+import no.nav.melosys.domain.kodeverk.Vertslandsavtale_bestemmelser.DET_INTERNASJONALE_BARENTSSEKRETARIATET_ART14
 import no.nav.melosys.domain.kodeverk.begrunnelser.Kontroll_begrunnelser
 import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingstema
 import no.nav.melosys.domain.kodeverk.lovvalgsbestemmelser.Lovvalgbestemmelser_883_2004
@@ -134,6 +135,27 @@ class FerdigbehandlingKontrollTest {
         val kontrollfeil = FerdigbehandlingKontroll.harOverlappendePeriodeMedForskuddsvisFakturering(kontrollData)
 
         kontrollfeil.shouldNotBeNull().kode.shouldBe(Kontroll_begrunnelser.OVERLAPPENDE_PERIODE_MED_FORSKUDDSVIS_FAKTURERUNG)
+    }
+
+    @Test
+    fun `manglende fullmektig, medlem etter vertslandsavtale skal gi advarsel`() {
+        val medlemskapDokument = MedlemskapDokument()
+        val ikkeOverlappendeMedlemskapsperioder = listOf(
+            lagMedlemskapsperiode(
+                LocalDate.now().plusDays(5), LocalDate.now().plusDays(10)
+            ).apply { bestemmelse = DET_INTERNASJONALE_BARENTSSEKRETARIATET_ART14 }
+        )
+
+        val kontrollData = lagFerdigbehandlingKontrollData(
+            medlemskapDokument = medlemskapDokument,
+            medlemskapsperiodeData = MedlemskapsperiodeData(ikkeOverlappendeMedlemskapsperioder, emptyList()),
+            fullmektig = null,
+            trygdeavgiftMottaker = Trygdeavgiftmottaker.TRYGDEAVGIFT_BETALES_TIL_NAV
+        )
+
+        val kontrollfeil = FerdigbehandlingKontroll.sjekkFullmektigForMedlemEtterVertslandsAvtale(kontrollData)
+
+        kontrollfeil.shouldNotBeNull().kode.shouldBe(Kontroll_begrunnelser.MANGLENDE_FULLMEKTIG_MEDLEM_ETTER_VERTSLANDSAVTALE)
     }
 
     @Test
@@ -792,6 +814,7 @@ class FerdigbehandlingKontrollTest {
         brevUtkast: List<UtkastBrev> = emptyList(),
         antallArbeidsgivere: Int = 1,
         trygdeavgiftperiodeData: TrygdeavgiftsperiodeData? = null,
+        trygdeavgiftMottaker: Trygdeavgiftmottaker? = null,
     ) = FerdigbehandlingKontrollData(
         medlemskapDokument,
         persondata,
@@ -807,5 +830,6 @@ class FerdigbehandlingKontrollTest {
         brevUtkast,
         antallArbeidsgivere,
         trygdeavgiftperiodeData,
+        trygdeavgiftMottaker
     )
 }
