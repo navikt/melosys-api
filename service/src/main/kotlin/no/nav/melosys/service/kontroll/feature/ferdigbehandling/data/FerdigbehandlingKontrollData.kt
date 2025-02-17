@@ -26,4 +26,5 @@ data class FerdigbehandlingKontrollData(
     val antallArbeidsgivere: Int = 0,
     val trygdeavgiftperiodeData: TrygdeavgiftsperiodeData? = null,
     val trygdeavgiftMottaker: Trygdeavgiftmottaker? = null,
+    val fullmektigTrygdeavgift: Aktoer? = null,
 )

@@ -149,7 +149,7 @@ class FerdigbehandlingKontrollTest {
         val kontrollData = lagFerdigbehandlingKontrollData(
             medlemskapDokument = medlemskapDokument,
             medlemskapsperiodeData = MedlemskapsperiodeData(ikkeOverlappendeMedlemskapsperioder, emptyList()),
-            fullmektig = null,
+            fullmektigTrygdeavgift = null,
             trygdeavgiftMottaker = Trygdeavgiftmottaker.TRYGDEAVGIFT_BETALES_TIL_NAV
         )
 
@@ -157,6 +157,28 @@ class FerdigbehandlingKontrollTest {
 
         kontrollfeil.shouldNotBeNull().kode.shouldBe(Kontroll_begrunnelser.MANGLENDE_FULLMEKTIG_MEDLEM_ETTER_VERTSLANDSAVTALE)
     }
+
+    @Test
+    fun `ikke manglende fullmektig, medlem etter vertslandsavtale skal ikke gi advarsel`() {
+        val medlemskapDokument = MedlemskapDokument()
+        val ikkeOverlappendeMedlemskapsperioder = listOf(
+            lagMedlemskapsperiode(
+                LocalDate.now().plusDays(5), LocalDate.now().plusDays(10)
+            ).apply { bestemmelse = DET_INTERNASJONALE_BARENTSSEKRETARIATET_ART14 }
+        )
+
+        val kontrollData = lagFerdigbehandlingKontrollData(
+            medlemskapDokument = medlemskapDokument,
+            medlemskapsperiodeData = MedlemskapsperiodeData(ikkeOverlappendeMedlemskapsperioder, emptyList()),
+            fullmektigTrygdeavgift = lagAktoerFullmektigPerson(),
+            trygdeavgiftMottaker = Trygdeavgiftmottaker.TRYGDEAVGIFT_BETALES_TIL_NAV
+        )
+
+        val kontrollfeil = FerdigbehandlingKontroll.sjekkFullmektigForMedlemEtterVertslandsAvtale(kontrollData)
+
+        kontrollfeil.shouldBeNull()
+    }
+
 
     @Test
     fun `medlemskapsperioder uten overlapping skal ikke gi kontrollfeil`() {
@@ -815,6 +837,7 @@ class FerdigbehandlingKontrollTest {
         antallArbeidsgivere: Int = 1,
         trygdeavgiftperiodeData: TrygdeavgiftsperiodeData? = null,
         trygdeavgiftMottaker: Trygdeavgiftmottaker? = null,
+        fullmektigTrygdeavgift: Aktoer? = null,
     ) = FerdigbehandlingKontrollData(
         medlemskapDokument,
         persondata,
@@ -830,6 +853,7 @@ class FerdigbehandlingKontrollTest {
         brevUtkast,
         antallArbeidsgivere,
         trygdeavgiftperiodeData,
-        trygdeavgiftMottaker
+        trygdeavgiftMottaker,
+        fullmektigTrygdeavgift
     )
 }
