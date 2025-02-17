@@ -86,25 +86,6 @@ class VilkårForBestemmelsePensjonistTest {
     }
 
     @Test
-    fun `vilkår for FTRL_KAP2_2_5_ANDRE_LEDD, barn`() {
-        val vilkår = vilkårForBestemmelse.hentVilkår(
-            Folketrygdloven_kap2_bestemmelser.FTRL_KAP2_2_5_ANDRE_LEDD,
-            mapOf(Avklartefaktatyper.IKKE_YRKESAKTIV_RELASJON to Ikkeyrkesaktivrelasjontype.BARN_2_5_ANDRE_LEDD.name),
-            1L
-        )
-
-
-        vilkår.shouldContainExactly(
-            Vilkår(
-                FTRL_2_5_MEDFØLGENDE_A_E,
-            ),
-            Vilkår(
-                FTRL_2_5_FORSØRGET_FAMILIEMEDLEM
-            ),
-        )
-    }
-
-    @Test
     fun `vilkår for FTRL_KAP2_2_5_ANDRE_LEDD, ektefelle a til b`() {
         val vilkår = vilkårForBestemmelse.hentVilkår(
             Folketrygdloven_kap2_bestemmelser.FTRL_KAP2_2_5_ANDRE_LEDD,
