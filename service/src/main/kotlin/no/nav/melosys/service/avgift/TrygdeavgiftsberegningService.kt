@@ -4,7 +4,6 @@ import io.getunleash.Unleash
 import no.nav.melosys.domain.Behandlingsresultat
 import no.nav.melosys.domain.Medlemskapsperiode
 import no.nav.melosys.domain.avgift.Inntektsperiode
-import no.nav.melosys.domain.avgift.Penger
 import no.nav.melosys.domain.avgift.SkatteforholdTilNorge
 import no.nav.melosys.domain.avgift.Trygdeavgiftsperiode
 import no.nav.melosys.domain.kodeverk.Fullmaktstype
@@ -45,25 +44,10 @@ class TrygdeavgiftsberegningService(
 
         // TODO refaktoriser resten i ny metode erstattTrygdeavgiftsperioder
         if (trygdeavgiftperiodeErstatter.erPliktigMedlemskapSkattepliktig(skatteforholdsperioder, inntektsperioder, behandlingsresultatID)) {
-            require(skatteforholdsperioder.size == 1) { "Det skal ikke være flere enn en skatteforholdsperiode når medlemskapet er pliktig og skattepliktig" }
-            val trygdeavgiftsperioder = behandlingsresultat.medlemskapsperioder.filter { it.erInnvilget() }.map { mp ->
-                val skatteforholdTilNorge = SkatteforholdTilNorge().apply {
-                    fomDato = skatteforholdsperioder.first().fom
-                    tomDato = skatteforholdsperioder.first().tom
-                    skatteplikttype = skatteforholdsperioder.first().skatteplikttype
-                }
+            require(behandlingsresultat.medlemskapsperioder.size == 1 && skatteforholdsperioder.size == 1) { "Det skal ikke være flere enn en skatteforholdsperiode når medlemskapet er pliktig og skattepliktig" }
 
-                val trygdeavgiftsperiode = Trygdeavgiftsperiode(
-                    periodeFra = mp.fom,
-                    periodeTil = mp.tom,
-                    trygdesats = BigDecimal.ZERO,
-                    trygdeavgiftsbeløpMd = Penger(BigDecimal.ZERO),
-                    grunnlagMedlemskapsperiode = mp,
-                    grunnlagSkatteforholdTilNorge = skatteforholdTilNorge
-                )
-
-                trygdeavgiftsperiode
-            }
+            val trygdeavgiftsperioder =
+                TrygdeavgiftOppretter.skattepliktigTrygdeavgiftsperioderAvMedlemskapsperioder(behandlingsresultat.medlemskapsperioder.filter { it.erInnvilget() })
 
             trygdeavgiftperiodeErstatter.erstattTrygdeavgiftsperioder(behandlingsresultatID, trygdeavgiftsperioder)
             return trygdeavgiftsperioder.toSet()

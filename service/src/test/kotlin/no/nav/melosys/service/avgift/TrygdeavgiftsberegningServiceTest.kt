@@ -367,14 +367,12 @@ internal class TrygdeavgiftsberegningServiceTest {
 
         verify(exactly = 0) { mockTrygdeavgiftConsumer.beregnTrygdeavgift(ofType(TrygdeavgiftsberegningRequest::class)) }
         verify(exactly = 0) { mockPersondataService.hentPerson(BRUKER_AKTØR_ID) }
-        /* TODO fix
+
         verify {
-            trygdeavgiftperiodeErstatter.erstattTrygdeavgiftsperiodeForPliktigMedlemskapSkattepliktig(
-                BEHANDLING_ID,
-                match { it.isNotEmpty() })
+            trygdeavgiftperiodeErstatter.erstattTrygdeavgiftsperioder(BEHANDLING_ID, match { it.isNotEmpty() })
         }
 
-         */
+
         behandlingsresultat.trygdeavgiftsperioder.shouldHaveSize(1)
         behandlingsresultat.trygdeavgiftsperioder.first().apply {
             periodeFra.shouldBe(FOM)
@@ -388,89 +386,6 @@ internal class TrygdeavgiftsberegningServiceTest {
             }
             grunnlagInntekstperiode.shouldBeNull()
             grunnlagMedlemskapsperiode.shouldBe(behandlingsresultat.medlemskapsperioder.first())
-        }
-    }
-
-    @Test
-    fun `beregnTrygdeavgift for pliktig medlem og skattepliktig skal beregne og lagre flere trygdeavgift når det er flere medlemskapsperioder`() {
-        behandling.apply {
-            fagsak = FagsakTestFactory.builder().medBruker().build()
-        }
-        behandlingsresultat.apply {
-            medlemskapsperioder = listOf(Medlemskapsperiode().apply {
-                id = 1L
-                fom = LocalDate.of(2021, 1, 1)
-                tom = LocalDate.of(2021, 2, 1)
-                trygdedekning = Trygdedekninger.FTRL_2_9_FØRSTE_LEDD_C_ANDRE_LEDD_HELSE_PENSJON_SYKE_FORELDREPENGER
-                innvilgelsesresultat = InnvilgelsesResultat.INNVILGET
-                medlemskapstype = Medlemskapstyper.PLIKTIG
-                bestemmelse = Folketrygdloven_kap2_bestemmelser.FTRL_KAP2_2_3_ANDRE_LEDD
-            }, Medlemskapsperiode().apply {
-                id = 2L
-                fom = LocalDate.of(2021, 2, 2)
-                tom = LocalDate.of(2021, 2, 28)
-                trygdedekning = Trygdedekninger.FULL_DEKNING_FTRL
-                innvilgelsesresultat = InnvilgelsesResultat.INNVILGET
-                medlemskapstype = Medlemskapstyper.PLIKTIG
-                bestemmelse = Folketrygdloven_kap2_bestemmelser.FTRL_KAP2_2_3_ANDRE_LEDD
-            })
-        }
-
-        val skatteforholdsperioder = listOf(
-            SkatteforholdTilNorge().apply {
-                fomDato = LocalDate.of(2021, 1, 1)
-                tomDato = LocalDate.of(2021, 2, 28)
-                skatteplikttype = Skatteplikttype.SKATTEPLIKTIG
-            }
-        )
-
-        val notSoRandomUuid = UUID.randomUUID()
-        mockkStatic(UUID::class)
-        every { UUID.randomUUID() } returns notSoRandomUuid
-
-        every { mockBehandlingsresultatService.lagre(any()) }.returns(behandlingsresultat)
-        every { mockBehandlingsresultatService.lagreOgFlush(behandlingsresultat) }.returns(behandlingsresultat)
-
-
-        trygdeavgiftsberegningService.beregnOgLagreTrygdeavgift(BEHANDLING_ID, skatteforholdsperioder, emptyList())
-            .shouldNotBeNull().shouldNotBeEmpty()
-
-        /* TODO fix
-            verify {
-                trygdeavgiftperiodeErstatter.erstattTrygdeavgiftsperiodeForPliktigMedlemskapSkattepliktig(
-                    BEHANDLING_ID,
-                    match { it.isNotEmpty() })
-            }
-
-         */
-        verify(exactly = 0) { mockTrygdeavgiftConsumer.beregnTrygdeavgift(ofType(TrygdeavgiftsberegningRequest::class)) }
-        verify(exactly = 0) { mockPersondataService.hentPerson(BRUKER_AKTØR_ID) }
-        behandlingsresultat.trygdeavgiftsperioder.shouldHaveSize(2)
-        behandlingsresultat.trygdeavgiftsperioder.sortedBy { it.periodeFra }.first().apply {
-            periodeFra.shouldBe(LocalDate.of(2021, 1, 1))
-            periodeTil.shouldBe(LocalDate.of(2021, 2, 1))
-            trygdesats.shouldBe(BigDecimal.ZERO)
-            trygdeavgiftsbeløpMd.shouldBe(Penger(BigDecimal.ZERO))
-            grunnlagSkatteforholdTilNorge.shouldNotBeNull().run {
-                fomDato.shouldBe(LocalDate.of(2021, 1, 1))
-                tomDato.shouldBe(LocalDate.of(2021, 2, 28))
-                skatteplikttype.shouldBe(Skatteplikttype.SKATTEPLIKTIG)
-            }
-            grunnlagInntekstperiode.shouldBeNull()
-            grunnlagMedlemskapsperiode.shouldBe(behandlingsresultat.medlemskapsperioder.first())
-        }
-        behandlingsresultat.trygdeavgiftsperioder.sortedBy { it.periodeFra }.last().apply {
-            periodeFra.shouldBe(LocalDate.of(2021, 2, 2))
-            periodeTil.shouldBe(LocalDate.of(2021, 2, 28))
-            trygdesats.shouldBe(BigDecimal.ZERO)
-            trygdeavgiftsbeløpMd.shouldBe(Penger(BigDecimal.ZERO))
-            grunnlagSkatteforholdTilNorge.shouldNotBeNull().run {
-                fomDato.shouldBe(LocalDate.of(2021, 1, 1))
-                tomDato.shouldBe(LocalDate.of(2021, 2, 28))
-                skatteplikttype.shouldBe(Skatteplikttype.SKATTEPLIKTIG)
-            }
-            grunnlagInntekstperiode.shouldBeNull()
-            grunnlagMedlemskapsperiode.shouldBe(behandlingsresultat.medlemskapsperioder.last())
         }
     }
 
