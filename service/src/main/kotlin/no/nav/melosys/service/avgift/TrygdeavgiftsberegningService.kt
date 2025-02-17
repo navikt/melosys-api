@@ -7,6 +7,7 @@ import no.nav.melosys.domain.avgift.Inntektsperiode
 import no.nav.melosys.domain.avgift.SkatteforholdTilNorge
 import no.nav.melosys.domain.avgift.Trygdeavgiftsperiode
 import no.nav.melosys.domain.kodeverk.Fullmaktstype
+import no.nav.melosys.domain.kodeverk.Skatteplikttype
 import no.nav.melosys.domain.kodeverk.Trygdeavgiftmottaker
 import no.nav.melosys.integrasjon.ereg.EregFasade
 import no.nav.melosys.integrasjon.trygdeavgift.TrygdeavgiftConsumer
@@ -41,7 +42,7 @@ class TrygdeavgiftsberegningService(
         val behandlingsresultat = behandlingsresultatService.hentBehandlingsresultat(behandlingsresultatID)
         TrygdeavgiftsberegningValidator.validerForTrygdeavgiftberegning(behandlingsresultat, skatteforholdsperioder, inntektsperioder, unleash)
 
-        if (trygdeavgiftperiodeErstatter.erPliktigMedlemskapSkattepliktig(skatteforholdsperioder, inntektsperioder, behandlingsresultatID)) {
+        if (erPliktigMedlemskapSkattepliktig(skatteforholdsperioder, inntektsperioder, behandlingsresultatID)) {
             require(behandlingsresultat.medlemskapsperioder.size == 1 && skatteforholdsperioder.size == 1) { "Det skal ikke være flere enn en skatteforholdsperiode når medlemskapet er pliktig og skattepliktig" }
             return erstattTrygdeavgiftsperioderForPliktigMedlemskapSkattepliktig(behandlingsresultat)
         }
@@ -51,6 +52,24 @@ class TrygdeavgiftsberegningService(
 
         return nyeTrygdeavgiftsperioder.toSet()
     }
+
+    private fun erPliktigMedlemskapSkattepliktig(
+        skatteforholdsperioder: List<SkatteforholdTilNorge>,
+        inntektsPerioder: List<Inntektsperiode>,
+        behandlingsresultatID: Long
+    ): Boolean {
+        val behandlingsresultat = behandlingsresultatService.hentBehandlingsresultat(behandlingsresultatID)
+        val erPliktigMedlemskap = behandlingsresultat.medlemskapsperioder
+            .filter { it.erInnvilget() }
+            .all { it.erPliktig() }
+
+        val inntektskilderErTomt = inntektsPerioder.isEmpty()
+        val alleSkatteforholdErSkattepliktige =
+            skatteforholdsperioder.all { it.skatteplikttype == Skatteplikttype.SKATTEPLIKTIG }
+
+        return erPliktigMedlemskap && inntektskilderErTomt && alleSkatteforholdErSkattepliktige
+    }
+
 
     private fun erstattTrygdeavgiftsperioderForPliktigMedlemskapSkattepliktig(behandlingsresultat: Behandlingsresultat): Set<Trygdeavgiftsperiode> {
         val trygdeavgiftsperioder =
