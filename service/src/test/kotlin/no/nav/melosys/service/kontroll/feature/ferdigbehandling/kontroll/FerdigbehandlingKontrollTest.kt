@@ -149,7 +149,7 @@ class FerdigbehandlingKontrollTest {
         val kontrollData = lagFerdigbehandlingKontrollData(
             medlemskapDokument = medlemskapDokument,
             medlemskapsperiodeData = MedlemskapsperiodeData(ikkeOverlappendeMedlemskapsperioder, emptyList()),
-            fullmektigTrygdeavgift = null,
+            fullmektigSomBetalerTrygdeavgift = null,
             trygdeavgiftMottaker = Trygdeavgiftmottaker.TRYGDEAVGIFT_BETALES_TIL_NAV
         )
 
@@ -170,7 +170,7 @@ class FerdigbehandlingKontrollTest {
         val kontrollData = lagFerdigbehandlingKontrollData(
             medlemskapDokument = medlemskapDokument,
             medlemskapsperiodeData = MedlemskapsperiodeData(ikkeOverlappendeMedlemskapsperioder, emptyList()),
-            fullmektigTrygdeavgift = lagAktoerFullmektigPerson(),
+            fullmektigSomBetalerTrygdeavgift = lagAktoerFullmektigPerson(),
             trygdeavgiftMottaker = Trygdeavgiftmottaker.TRYGDEAVGIFT_BETALES_TIL_NAV
         )
 
@@ -837,7 +837,7 @@ class FerdigbehandlingKontrollTest {
         antallArbeidsgivere: Int = 1,
         trygdeavgiftperiodeData: TrygdeavgiftsperiodeData? = null,
         trygdeavgiftMottaker: Trygdeavgiftmottaker? = null,
-        fullmektigTrygdeavgift: Aktoer? = null,
+        fullmektigSomBetalerTrygdeavgift: Aktoer? = null,
     ) = FerdigbehandlingKontrollData(
         medlemskapDokument,
         persondata,
@@ -854,6 +854,6 @@ class FerdigbehandlingKontrollTest {
         antallArbeidsgivere,
         trygdeavgiftperiodeData,
         trygdeavgiftMottaker,
-        fullmektigTrygdeavgift
+        fullmektigSomBetalerTrygdeavgift
     )
 }

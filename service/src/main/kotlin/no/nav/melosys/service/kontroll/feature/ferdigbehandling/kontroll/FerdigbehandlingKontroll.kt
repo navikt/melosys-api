@@ -2,7 +2,6 @@ package no.nav.melosys.service.kontroll.feature.ferdigbehandling.kontroll
 
 import no.nav.melosys.domain.Lovvalgsperiode
 import no.nav.melosys.domain.avgift.Trygdeavgiftsperiode
-import no.nav.melosys.domain.kodeverk.Fullmaktstype
 import no.nav.melosys.domain.kodeverk.LovvalgBestemmelse
 import no.nav.melosys.domain.kodeverk.Trygdeavgiftmottaker
 import no.nav.melosys.domain.kodeverk.Vertslandsavtale_bestemmelser.*
@@ -55,7 +54,7 @@ object FerdigbehandlingKontroll {
 
         val trygdeavgiftBetalesTilNav = kontrollData.trygdeavgiftMottaker == Trygdeavgiftmottaker.TRYGDEAVGIFT_BETALES_TIL_NAV
 
-        return if (erVertslandsavtaleBestemmelse == true && trygdeavgiftBetalesTilNav && kontrollData.fullmektigTrygdeavgift == null) {
+        return if (erVertslandsavtaleBestemmelse == true && trygdeavgiftBetalesTilNav && kontrollData.fullmektigSomBetalerTrygdeavgift == null) {
             Kontrollfeil(
                 Kontroll_begrunnelser.MANGLENDE_FULLMEKTIG_MEDLEM_ETTER_VERTSLANDSAVTALE,
                 KontrolldataFeilType.ADVARSEL

@@ -155,7 +155,7 @@ class Kontroll(
         val tidligereTrygdeavgiftsperioderIAndreFagsaker = hentTidligereTrygdeavgiftsperioderIAndreFagsaker(behandling)
 
         val trygdeavgiftMottaker = trygdeavgiftMottakerService.getTrygdeavgiftMottaker(behandlingsresultat)
-        val fullmektigTrygdeavgift = behandling.fagsak.finnFullmektig(Fullmaktstype.FULLMEKTIG_TRYGDEAVGIFT)
+        val fullmektigSomBetalerTrygdeavgift = behandling.fagsak.finnFullmektig(Fullmaktstype.FULLMEKTIG_TRYGDEAVGIFT)
 
         return FerdigbehandlingKontrollData(
             medlemskapDokument = medlemskapsdokument,
@@ -174,7 +174,7 @@ class Kontroll(
                 tidligereTrygdeavgiftsperioderIAndreFagsaker
             ),
             trygdeavgiftMottaker = trygdeavgiftMottaker,
-            fullmektigTrygdeavgift = fullmektigTrygdeavgift
+            fullmektigSomBetalerTrygdeavgift = fullmektigSomBetalerTrygdeavgift
         )
     }
 
