@@ -54,8 +54,7 @@ object FerdigbehandlingKontroll {
 
         val trygdeavgiftBetalesTilNav = kontrollData.trygdeavgiftMottaker == Trygdeavgiftmottaker.TRYGDEAVGIFT_BETALES_TIL_NAV
 
-
-        return if (erVertslandsavtaleBestemmelse == true && trygdeavgiftBetalesTilNav && kontrollData.fullmektig == null) {
+        return if (erVertslandsavtaleBestemmelse == true && trygdeavgiftBetalesTilNav && kontrollData.fullmektigSomBetalerTrygdeavgift == null) {
             Kontrollfeil(
                 Kontroll_begrunnelser.MANGLENDE_FULLMEKTIG_MEDLEM_ETTER_VERTSLANDSAVTALE,
                 KontrolldataFeilType.ADVARSEL
