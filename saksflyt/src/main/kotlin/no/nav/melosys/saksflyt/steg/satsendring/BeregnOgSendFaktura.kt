@@ -37,16 +37,17 @@ class BeregnOgSendFaktura(
         val behandlingsresultat = behandlingsresultatService.hentBehandlingsresultat(behandling.id)
         val saksbehandlerIdent = prosessinstans.getData(ProsessDataKey.SAKSBEHANDLER)
 
-        trygdeavgiftsberegningService.beregnOgLagreTrygdeavgift(
+        val nyTrygdeavgift = trygdeavgiftsberegningService.beregnOgLagreTrygdeavgift(
             behandlingsresultat.id,
             behandlingsresultat.hentSkatteforholdTilNorge().toList(),
             behandlingsresultat.hentInntektsperioder().toList()
         )
 
-        faktureringskomponentenConsumer.lagFakturaserie(mapFakturaserieDto(behandlingsresultat), saksbehandlerIdent)
+        val fakturaserieDto = mapFakturaserieDto(behandlingsresultat, nyTrygdeavgift)
+        faktureringskomponentenConsumer.lagFakturaserie(fakturaserieDto, saksbehandlerIdent)
     }
 
-    private fun mapFakturaserieDto(behandlingsresultat: Behandlingsresultat): FakturaserieDto {
+    private fun mapFakturaserieDto(behandlingsresultat: Behandlingsresultat, trygdeavgiftsperioder: Set<Trygdeavgiftsperiode>): FakturaserieDto {
         val behandling = behandlingService.hentBehandling(behandlingsresultat.id)
         val fagsak = behandling.fagsak
         val fullmektig = fagsak.finnFullmektig(Fullmaktstype.FULLMEKTIG_TRYGDEAVGIFT)
@@ -62,7 +63,7 @@ class BeregnOgSendFaktura(
             fakturaGjelderInnbetalingstype = Innbetalingstype.TRYGDEAVGIFT,
             intervall = FaktureringIntervall.KVARTAL,
             referanseBruker = "Vedtak om satsendring datert $vedtaksdato",
-            perioder = mapFakturaseriePeriodeDto(behandlingsresultat.trygdeavgiftsperioder.filter { it.harAvgift() })
+            perioder = mapFakturaseriePeriodeDto(trygdeavgiftsperioder.filter { it.harAvgift() })
         )
     }
 
