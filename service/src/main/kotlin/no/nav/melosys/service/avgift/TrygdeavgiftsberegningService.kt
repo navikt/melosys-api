@@ -48,7 +48,7 @@ class TrygdeavgiftsberegningService(
         }
 
         val nyeTrygdeavgiftsperioder = beregnTrygdeavgift(behandlingsresultat, skatteforholdsperioder, inntektsperioder)
-        erstattTrygdeavgiftsperioderMedBeregnetTrygdeavgift(behandlingsresultat, nyeTrygdeavgiftsperioder)
+        erstattTrygdeavgiftsperioderMedBeregnetTrygdeavgift(behandlingsresultat.id, nyeTrygdeavgiftsperioder)
 
         return nyeTrygdeavgiftsperioder.toSet()
     }
@@ -80,11 +80,11 @@ class TrygdeavgiftsberegningService(
     }
 
     private fun erstattTrygdeavgiftsperioderMedBeregnetTrygdeavgift(
-        behandlingsresultat: Behandlingsresultat,
+        behandlingsresultatId: Long,
         nyeTrygdeavgiftsperioder: List<Trygdeavgiftsperiode>
     ) {
         sjekkTrygdeavgiftSkalBetalesTilNav(nyeTrygdeavgiftsperioder)
-        trygdeavgiftperiodeErstatter.erstattTrygdeavgiftsperioder(behandlingsresultat.id, nyeTrygdeavgiftsperioder)
+        trygdeavgiftperiodeErstatter.erstattTrygdeavgiftsperioder(behandlingsresultatId, nyeTrygdeavgiftsperioder)
     }
 
     @Transactional(readOnly = true, noRollbackFor = [Throwable::class])
