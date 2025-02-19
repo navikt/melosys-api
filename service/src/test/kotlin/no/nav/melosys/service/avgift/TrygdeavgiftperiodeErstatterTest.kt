@@ -4,7 +4,6 @@ import io.kotest.matchers.collections.shouldContainExactly
 import io.kotest.matchers.equals.shouldBeEqual
 import io.kotest.matchers.shouldBe
 import io.mockk.every
-import io.mockk.impl.annotations.InjectMockKs
 import io.mockk.impl.annotations.MockK
 import io.mockk.junit5.MockKExtension
 import io.mockk.mockk
@@ -14,6 +13,7 @@ import no.nav.melosys.domain.Medlemskapsperiode
 import no.nav.melosys.domain.avgift.Trygdeavgiftsperiode
 import no.nav.melosys.domain.kodeverk.Trygdeavgift_typer
 import no.nav.melosys.service.behandling.BehandlingsresultatService
+import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Nested
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.extension.ExtendWith
@@ -22,9 +22,12 @@ import org.junit.jupiter.api.extension.ExtendWith
 class TrygdeavgiftperiodeErstatterTest() {
     @MockK(relaxed = true)
     private lateinit var behandlingsresultatService: BehandlingsresultatService
-
-    @InjectMockKs
     private lateinit var trygdeavgiftperiodeErstatter: TrygdeavgiftperiodeErstatter
+
+    @BeforeEach
+    fun beforeEach() {
+        trygdeavgiftperiodeErstatter = TrygdeavgiftperiodeErstatter(behandlingsresultatService)
+    }
 
     @Nested
     inner class ErstattTrygdeavgiftsperioderTest {
