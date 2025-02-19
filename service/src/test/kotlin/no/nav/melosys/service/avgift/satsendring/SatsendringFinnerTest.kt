@@ -17,7 +17,6 @@ import no.nav.melosys.service.avgift.TrygdeavgiftsberegningService
 import no.nav.melosys.service.behandling.BehandlingService
 import no.nav.melosys.service.behandling.BehandlingsresultatService
 import org.junit.jupiter.api.BeforeEach
-import org.junit.jupiter.api.Disabled
 import org.junit.jupiter.api.extension.ExtendWith
 import java.math.BigDecimal
 import java.time.LocalDate
@@ -75,11 +74,22 @@ class SatsendringFinnerTest {
                 trygdeavgiftsperioder = setOf(lagTrygdeavgiftsperiode(opprinneligSats))
             })
         }
+        val behandlingsresultatNyVurdering = Behandlingsresultat().apply {
+            id = 2L
+            medlemskapsperioder = listOf(Medlemskapsperiode().apply {
+                trygdeavgiftsperioder = setOf(lagTrygdeavgiftsperiode(opprinneligSats))
+            })
+        }
 
         every { behandlingService.hentBehandling(behandlingsresultat.id) } returns behandlingMedSatsendring
-        every { behandlingsresultatService.finnResultaterMedMedlemskapseriodeOverlappendeMed(år) } returns listOf(behandlingsresultat)
-        every { trygdeavgiftService.harFakturerbarTrygdeavgift(behandlingsresultat) } returns true
-        every { trygdeavgiftsberegningService.beregnTrygdeavgift(behandlingsresultat, any(), any()) } returns listOf(lagTrygdeavgiftsperiode(nySats))
+        every { behandlingService.hentBehandling(behandlingsresultatNyVurdering.id) } returns behandlingNyVurdering
+
+        every { behandlingsresultatService.finnResultaterMedMedlemskapseriodeOverlappendeMed(år) } returns listOf(
+            behandlingsresultat,
+            behandlingsresultatNyVurdering
+        )
+        every { trygdeavgiftService.harFakturerbarTrygdeavgift(any()) } returns true
+        every { trygdeavgiftsberegningService.beregnTrygdeavgift(any(), any(), any()) } returns listOf(lagTrygdeavgiftsperiode(nySats))
 
 
         val satsendringInfo = satsendringFinner.finnBehandlingerMedSatsendring(år)

@@ -30,8 +30,12 @@ class SatsendringFinner(
 
         log.debug { "Fant ${behandlingsresultatList.size} behandlingsresultater for år: $år" }
 
-        val behandlingerForSatsendring = behandlingsresultatList.map {
+        val behandlingerForSatsendring = behandlingsresultatList.mapNotNull {
             val behandling = behandlingService.hentBehandling(it.id)
+
+            if (behandling.erAktiv() && behandling.type == NY_VURDERING) {
+                return@mapNotNull null
+            }
 
             try {
                 BehandlingForSatstendring(
