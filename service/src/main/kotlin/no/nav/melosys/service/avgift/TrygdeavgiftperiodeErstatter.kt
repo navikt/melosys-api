@@ -16,10 +16,10 @@ class TrygdeavgiftperiodeErstatter(private val behandlingsresultatService: Behan
         val behandlingsresultat = behandlingsresultatService.hentBehandlingsresultat(behandlingsresultatId)
         nullstillTrygdeavgiftsperioder(behandlingsresultat)
 
-        behandlingsresultat.medlemskapsperioder.forEach { mp ->
-            trygdeavgiftsperioder.forEach { tp ->
-                if (tp.grunnlagMedlemskapsperiode?.id == mp.id) {
-                    mp.addTrygdeavgiftsperiode(tp)
+        behandlingsresultat.medlemskapsperioder.forEach { medlemskapsperiode ->
+            trygdeavgiftsperioder.forEach { trygdeavgiftsperiode ->
+                if (trygdeavgiftsperiode.grunnlagMedlemskapsperiode?.id == medlemskapsperiode.id) {
+                    medlemskapsperiode.addTrygdeavgiftsperiode(trygdeavgiftsperiode)
                 }
             }
         }
