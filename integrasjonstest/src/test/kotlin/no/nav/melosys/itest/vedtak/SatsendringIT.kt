@@ -157,6 +157,44 @@ class SatsendringIT(
         }
     }
 
+    @Test
+    fun `Finn satsendring etter yrkesaktiv FTRL vedtak med ny vurdering`() {
+        // Lag 1 behandling utenfor SATSENDRING_ÅR
+        lagFørstegangsbehandling(år = SATSENDRING_ÅR - 1)
+        // Lag 3 behandlinger for SATSENDRING_ÅR, en med satsendring og en uten og en ny vurdering
+        val behandlingMedSatsendring = lagFørstegangsbehandling(harSatsendringEtterÅrsskiftet = true)
+        lagNyVurderingBehandling(behandlingMedSatsendring)
+        val behandlingUtenSatsendring = lagFørstegangsbehandling(harSatsendringEtterÅrsskiftet = false)
+
+
+        val avgiftSatsendringInfo = satsendringFinner.finnBehandlingerMedSatsendring(SATSENDRING_ÅR)
+
+
+        avgiftSatsendringInfo.run {
+            år shouldBe SATSENDRING_ÅR
+            behandlingerMedSatsendringOgNyVurdering.shouldContainOnly(
+                BehandlingForSatstendring(
+                    behandlingMedSatsendring.id,
+                    behandlingMedSatsendring.fagsak.saksnummer,
+                    Behandlingstyper.FØRSTEGANG,
+                    harSatsendring = true,
+                    harAktivNyVurdering = true,
+                    feilAarsak = null
+                )
+            )
+            behandlingerUtenSatsendring.shouldContainOnly(
+                BehandlingForSatstendring(
+                    behandlingUtenSatsendring.id,
+                    behandlingUtenSatsendring.fagsak.saksnummer,
+                    Behandlingstyper.FØRSTEGANG,
+                    harSatsendring = false,
+                    harAktivNyVurdering = false,
+                    feilAarsak = null
+                )
+            )
+        }
+    }
+
     @ParameterizedTest
     @EnumSource(value = ProsessType::class, names = ["SATSENDRING", "SATSENDRING_TILBAKESTILL_NY_VURDERING"])
     fun `oppretter prosess og påfølgende satsendringbehandling som iverksettes og sender faktura`(prosessType: ProsessType) {
