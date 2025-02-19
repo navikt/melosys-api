@@ -4,11 +4,11 @@ import com.fasterxml.jackson.databind.JsonNode
 import com.fasterxml.jackson.databind.SerializationFeature
 import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule
 import com.fasterxml.jackson.module.kotlin.jacksonObjectMapper
-import com.github.tomakehurst.wiremock.client.WireMock
 import com.github.tomakehurst.wiremock.client.WireMock.*
 import com.github.tomakehurst.wiremock.extension.ResponseTransformerV2
 import com.github.tomakehurst.wiremock.http.Response
 import com.github.tomakehurst.wiremock.stubbing.ServeEvent
+import io.kotest.matchers.collections.shouldBeEmpty
 import io.kotest.matchers.collections.shouldContainOnly
 import io.kotest.matchers.collections.shouldHaveSize
 import io.kotest.matchers.nulls.shouldNotBeNull
@@ -30,6 +30,8 @@ import no.nav.melosys.integrasjon.faktureringskomponenten.NyFakturaserieResponse
 import no.nav.melosys.integrasjon.trygdeavgift.dto.*
 import no.nav.melosys.itest.JournalfoeringBase
 import no.nav.melosys.itest.MelosysHendelseKafkaConsumer
+import no.nav.melosys.itest.vedtak.SatsendringIT.Companion.GAMMEL_SATS
+import no.nav.melosys.itest.vedtak.SatsendringIT.Companion.NY_SATS
 import no.nav.melosys.melosysmock.medl.MedlRepo
 import no.nav.melosys.saksflytapi.ProsessinstansService
 import no.nav.melosys.saksflytapi.domain.ProsessType
@@ -43,6 +45,8 @@ import no.nav.melosys.service.behandling.BehandlingsresultatService
 import no.nav.melosys.service.behandling.VilkaarsresultatService
 import no.nav.melosys.service.ftrl.medlemskapsperiode.OpprettForslagMedlemskapsperiodeService
 import no.nav.melosys.service.mottatteopplysninger.MottatteOpplysningerService
+import no.nav.melosys.service.sak.OpprettBehandlingForSak
+import no.nav.melosys.service.sak.OpprettSakDto
 import no.nav.melosys.service.vedtak.FattVedtakRequest
 import no.nav.melosys.service.vedtak.VedtaksfattingFasade
 import no.nav.melosys.service.vilkaar.VilkaarDto
@@ -51,6 +55,8 @@ import no.nav.melosys.sikkerhet.context.SubjectHandler
 import org.junit.jupiter.api.AfterEach
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
+import org.junit.jupiter.params.ParameterizedTest
+import org.junit.jupiter.params.provider.EnumSource
 import org.springframework.beans.factory.annotation.Autowired
 import java.time.LocalDate
 import java.time.format.DateTimeFormatter
@@ -60,16 +66,17 @@ private val logger = KotlinLogging.logger {}
 
 class SatsendringIT(
     @Autowired private val avklartefaktaService: AvklartefaktaService,
+    @Autowired private val behandlingService: BehandlingService,
+    @Autowired private val behandlingsresultatService: BehandlingsresultatService,
+    @Autowired private val melosysHendelseKafkaConsumer: MelosysHendelseKafkaConsumer,
     @Autowired private val mottatteOpplysningerService: MottatteOpplysningerService,
+    @Autowired private val opprettBehandlingForSak: OpprettBehandlingForSak,
     @Autowired private val opprettForslagMedlemskapsperiodeService: OpprettForslagMedlemskapsperiodeService,
+    @Autowired private val prosessinstansService: ProsessinstansService,
+    @Autowired private val satsendringFinner: SatsendringFinner,
     @Autowired private val trygdeavgiftsberegningService: TrygdeavgiftsberegningService,
     @Autowired private val vedtaksfattingFasade: VedtaksfattingFasade,
     @Autowired private val vilkaarsresultatService: VilkaarsresultatService,
-    @Autowired private val satsendringFinner: SatsendringFinner,
-    @Autowired private val melosysHendelseKafkaConsumer: MelosysHendelseKafkaConsumer,
-    @Autowired private val prosessinstansService: ProsessinstansService,
-    @Autowired private val behandlingService: BehandlingService,
-    @Autowired private val behandlingsresultatService: BehandlingsresultatService
 ) : JournalfoeringBase(TrygdeavgiftsberegningMedSatsendring()) {
     private var originalSubjectHandler: SubjectHandler? = null
 
@@ -84,9 +91,9 @@ class SatsendringIT(
         every { mockHandler.userName } returns "test"
 
         mockServer.stubFor(
-            WireMock.post("/api/v2/beregn")
+            post("/api/v2/beregn")
                 .willReturn(
-                    WireMock.aResponse()
+                    aResponse()
                         .withStatus(200)
                         .withHeader("Content-Type", "application/json")
                         .withTransformers("trygdeavgiftsberegning-med-satsendring-transformer")
@@ -96,9 +103,9 @@ class SatsendringIT(
         val fakturaResponse = NyFakturaserieResponseDto("fakturaserieReferanse")
 
         mockServer.stubFor(
-            WireMock.post("/fakturaserier")
+            post("/fakturaserier")
                 .willReturn(
-                    WireMock.aResponse()
+                    aResponse()
                         .withStatus(200)
                         .withHeader("Content-Type", "application/json")
                         .withBody(fakturaResponse.toJsonNode.toString())
@@ -114,7 +121,7 @@ class SatsendringIT(
     }
 
     @Test
-    fun `Satsendring etter yrkesaktiv FTRL vedtak oppdages`() {
+    fun `Finn satsendring etter yrkesaktiv FTRL vedtak`() {
         // Lag 1 behandling utenfor SATSENDRING_ÅR
         lagFørstegangsbehandling(år = SATSENDRING_ÅR - 1)
         // Lag 2 behandlinger for SATSENDRING_ÅR, en med satsendring og en uten
@@ -150,28 +157,39 @@ class SatsendringIT(
         }
     }
 
-    @Test
-    fun `oppretter prosess og påfølgende satsendringbehandling som iverksettes og sender faktura`() {
+    @ParameterizedTest
+    @EnumSource(value = ProsessType::class, names = ["SATSENDRING", "SATSENDRING_TILBAKESTILL_NY_VURDERING"])
+    fun `oppretter prosess og påfølgende satsendringbehandling som iverksettes og sender faktura`(prosessType: ProsessType) {
         val førstegangsbehandling = lagFørstegangsbehandling(harSatsendringEtterÅrsskiftet = true)
 
+        val nyVurderingBehandling = if (prosessType == ProsessType.SATSENDRING_TILBAKESTILL_NY_VURDERING) {
+            // Opprett ny vurdering behandling med trygdeavgift for å teste at trygdeavgiftsperioder nullstilles
+            lagNyVurderingBehandling(førstegangsbehandling).also {
+                setupTrygdeavgift(it.id, lagPeriode(harSatsendringEtterÅrsskiftet = true))
+            }
+        } else null
 
         val satsendringID = executeAndWait(
             mapOf(
-                ProsessType.SATSENDRING to 1
+                prosessType to 1
             )
         ) {
-            prosessinstansService.opprettSatsendringBehandling(førstegangsbehandling)
+            if (prosessType == ProsessType.SATSENDRING_TILBAKESTILL_NY_VURDERING) {
+                prosessinstansService.opprettSatsendringBehandlingNyVurdering(førstegangsbehandling)
+            } else {
+                prosessinstansService.opprettSatsendringBehandling(førstegangsbehandling)
+            }
 
         }.behandling.id
 
 
-        val satsendring = behandlingService.hentBehandling(satsendringID)
-        // Henter behandling på nytt siden førstegangsbehandling blir returnert før ApplicationEvents i Avsluttfagsak kjører async
+        val satsendringBehandling = behandlingService.hentBehandling(satsendringID)
+        // Henter behandling på nytt siden førstegangsbehandling returneres før ApplicationEvent i Avsluttfagsak (kjører async)
         val førstegangsbehandlingRefresh = behandlingService.hentBehandling(førstegangsbehandling.id)
-        val satsendingBehandlingresultat = behandlingsresultatService.hentResultatMedMedlemskapOgLovvalg(satsendringID)
-        val førstegangsBehandlingsresultat = behandlingsresultatService.hentResultatMedMedlemskapOgLovvalg(førstegangsbehandling.id)
+        val satsendringBehandlingresultat = behandlingsresultatService.hentResultatMedMedlemskapOgLovvalg(satsendringID)
+        val førstegangBehandlingsresultat = behandlingsresultatService.hentResultatMedMedlemskapOgLovvalg(førstegangsbehandling.id)
 
-        satsendring.run {
+        satsendringBehandling.run {
             status shouldBe Behandlingsstatus.AVSLUTTET
             type shouldBe Behandlingstyper.SATSENDRING
             tema shouldBe Behandlingstema.YRKESAKTIV
@@ -181,53 +199,52 @@ class SatsendringIT(
             fagsak.status shouldBe førstegangsbehandlingRefresh.fagsak.status shouldBe Saksstatuser.LOVVALG_AVKLART
         }
 
-        satsendingBehandlingresultat.run {
+        satsendringBehandlingresultat.run {
             type shouldBe Behandlingsresultattyper.FASTSATT_TRYGDEAVGIFT
             vedtakMetadata.vedtakstype shouldBe Vedtakstyper.ENDRINGSVEDTAK
             trygdeavgiftsperioder.run {
                 shouldHaveSize(1)
                 first().run {
-                    periodeFra.shouldNotBeNull() shouldBe førstegangsBehandlingsresultat.trygdeavgiftsperioder.first().periodeFra
-                    periodeTil.shouldNotBeNull() shouldBe førstegangsBehandlingsresultat.trygdeavgiftsperioder.first().periodeTil
-                    trygdesats shouldBe 6.9.toBigDecimal()
-                    trygdeavgiftsbeløpMd shouldBe Penger(69000.toBigDecimal())
+                    periodeFra.shouldNotBeNull() shouldBe førstegangBehandlingsresultat.trygdeavgiftsperioder.first().periodeFra
+                    periodeTil.shouldNotBeNull() shouldBe førstegangBehandlingsresultat.trygdeavgiftsperioder.first().periodeTil
+                    trygdesats shouldBe NY_SATS.toBigDecimal()
+                    trygdeavgiftsbeløpMd shouldBe Penger((NY_SATS * 10000).toBigDecimal())
                 }
             }
 
             medlemskapsperioder.run {
                 shouldHaveSize(1)
                 first().run {
-                    fom.shouldNotBeNull() shouldBe førstegangsBehandlingsresultat.medlemskapsperioder.first().fom
-                    tom.shouldNotBeNull() shouldBe førstegangsBehandlingsresultat.medlemskapsperioder.first().tom
-                    innvilgelsesresultat shouldBe førstegangsBehandlingsresultat.medlemskapsperioder.first().innvilgelsesresultat
-                    medlemskapstype shouldBe førstegangsBehandlingsresultat.medlemskapsperioder.first().medlemskapstype
-                    trygdedekning shouldBe førstegangsBehandlingsresultat.medlemskapsperioder.first().trygdedekning
-                    medlPeriodeID shouldBe førstegangsBehandlingsresultat.medlemskapsperioder.first().medlPeriodeID
-                    bestemmelse shouldBe førstegangsBehandlingsresultat.medlemskapsperioder.first().bestemmelse
+                    fom.shouldNotBeNull() shouldBe førstegangBehandlingsresultat.medlemskapsperioder.first().fom
+                    tom.shouldNotBeNull() shouldBe førstegangBehandlingsresultat.medlemskapsperioder.first().tom
+                    innvilgelsesresultat shouldBe førstegangBehandlingsresultat.medlemskapsperioder.first().innvilgelsesresultat
+                    medlemskapstype shouldBe førstegangBehandlingsresultat.medlemskapsperioder.first().medlemskapstype
+                    trygdedekning shouldBe førstegangBehandlingsresultat.medlemskapsperioder.first().trygdedekning
+                    medlPeriodeID shouldBe førstegangBehandlingsresultat.medlemskapsperioder.first().medlPeriodeID
+                    bestemmelse shouldBe førstegangBehandlingsresultat.medlemskapsperioder.first().bestemmelse
                 }
             }
 
             hentInntektsperioder().run {
                 shouldHaveSize(1)
                 first().run {
-                    fom.shouldNotBeNull() shouldBe førstegangsBehandlingsresultat.hentInntektsperioder().first().fom
-                    tom.shouldNotBeNull() shouldBe førstegangsBehandlingsresultat.hentInntektsperioder().first().tom
-                    type shouldBe førstegangsBehandlingsresultat.hentInntektsperioder().first().type
-                    avgiftspliktigMndInntekt shouldBe førstegangsBehandlingsresultat.hentInntektsperioder().first().avgiftspliktigMndInntekt
-                    avgiftspliktigTotalinntekt shouldBe førstegangsBehandlingsresultat.hentInntektsperioder().first().avgiftspliktigTotalinntekt
+                    fom.shouldNotBeNull() shouldBe førstegangBehandlingsresultat.hentInntektsperioder().first().fom
+                    tom.shouldNotBeNull() shouldBe førstegangBehandlingsresultat.hentInntektsperioder().first().tom
+                    type shouldBe førstegangBehandlingsresultat.hentInntektsperioder().first().type
+                    avgiftspliktigMndInntekt shouldBe førstegangBehandlingsresultat.hentInntektsperioder().first().avgiftspliktigMndInntekt
+                    avgiftspliktigTotalinntekt shouldBe førstegangBehandlingsresultat.hentInntektsperioder().first().avgiftspliktigTotalinntekt
                 }
             }
 
             hentSkatteforholdTilNorge().run {
                 shouldHaveSize(1)
                 first().run {
-                    fomDato.shouldNotBeNull() shouldBe førstegangsBehandlingsresultat.hentSkatteforholdTilNorge().first().fomDato
-                    tomDato.shouldNotBeNull() shouldBe førstegangsBehandlingsresultat.hentSkatteforholdTilNorge().first().tomDato
-                    skatteplikttype shouldBe førstegangsBehandlingsresultat.hentSkatteforholdTilNorge().first().skatteplikttype
+                    fomDato.shouldNotBeNull() shouldBe førstegangBehandlingsresultat.hentSkatteforholdTilNorge().first().fomDato
+                    tomDato.shouldNotBeNull() shouldBe førstegangBehandlingsresultat.hentSkatteforholdTilNorge().first().tomDato
+                    skatteplikttype shouldBe førstegangBehandlingsresultat.hentSkatteforholdTilNorge().first().skatteplikttype
                 }
             }
         }
-
 
         val jsonDato = LocalDate.now().format(DateTimeFormatter.ofPattern("dd.MM.yyyy"))
         val fakturaserieRequestJson = """
@@ -255,10 +272,15 @@ class SatsendringIT(
             postRequestedFor(urlEqualTo("/fakturaserier"))
                 .withRequestBody(equalToJson(fakturaserieRequestJson, true, true))
         )
+
+        if (prosessType == ProsessType.SATSENDRING_TILBAKESTILL_NY_VURDERING) {
+            nyVurderingBehandling.shouldNotBeNull()
+            val nyVurderingBehandlingsresultat = behandlingsresultatService.hentResultatMedMedlemskapOgLovvalg(nyVurderingBehandling.id)
+            nyVurderingBehandlingsresultat.trygdeavgiftsperioder.shouldBeEmpty()
+        }
     }
 
-
-    fun lagFørstegangsbehandling(år: Int = SATSENDRING_ÅR, harSatsendringEtterÅrsskiftet: Boolean = false): Behandling {
+    private fun lagFørstegangsbehandling(år: Int = SATSENDRING_ÅR, harSatsendringEtterÅrsskiftet: Boolean = false): Behandling {
         // Perioden brukes for å avgjøre om det blir satsendring
         val medlemskapsperiode = lagPeriode(år, harSatsendringEtterÅrsskiftet)
 
@@ -338,7 +360,7 @@ class SatsendringIT(
 
     private fun lagPeriode(
         år: Int = SATSENDRING_ÅR,
-        harSatsendringEtterÅrsskiftet: Boolean
+        harSatsendringEtterÅrsskiftet: Boolean = false
     ): Periode {
         if (harSatsendringEtterÅrsskiftet) {
             return Periode(LocalDate.of(2024, 4, 1), LocalDate.of(2024, 4, 30))
@@ -375,8 +397,27 @@ class SatsendringIT(
         trygdeavgiftsberegningService.beregnOgLagreTrygdeavgift(behandlingID, skattefordholdsperioder, inntektsforholdsperioder)
     }
 
+    private fun lagNyVurderingBehandling(førstegangsbehandling: Behandling) =
+        executeAndWait(
+            mapOf(
+                ProsessType.OPPRETT_REPLIKERT_BEHANDLING_FOR_SAK to 1
+            )
+        ) {
+            opprettBehandlingForSak.opprettBehandling(
+                førstegangsbehandling.fagsak.saksnummer,
+                OpprettSakDto().apply {
+                    behandlingstema = Behandlingstema.YRKESAKTIV
+                    behandlingstype = Behandlingstyper.NY_VURDERING
+                    mottaksdato = LocalDate.now()
+                    behandlingsaarsakType = Behandlingsaarsaktyper.ANNET
+                }
+            )
+        }.behandling
+
     companion object {
         private const val SATSENDRING_ÅR = 2024
+        const val GAMMEL_SATS = 6.7
+        const val NY_SATS = 6.9
     }
 }
 
@@ -436,8 +477,8 @@ class TrygdeavgiftsberegningMedSatsendring : ResponseTransformerV2 {
         return if (periodeString == "2024-04-01 / 2024-04-30") {
             // Eneste periode med satsendring
             when (antallKall) {
-                1 -> 6.7
-                else -> 6.9
+                1 -> GAMMEL_SATS
+                else -> NY_SATS
             }
         } else {
             8.3

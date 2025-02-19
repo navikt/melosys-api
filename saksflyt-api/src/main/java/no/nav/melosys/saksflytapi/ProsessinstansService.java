@@ -61,6 +61,7 @@ public class ProsessinstansService {
         this.saksflytThreadPoolTaskExecutor = saksflytThreadPoolTaskExecutor;
     }
 
+    @Transactional
     public void opprettNySakOgBehandling(OpprettSakRequest opprettSakRequest) {
         Prosessinstans prosessinstans = new Prosessinstans();
         prosessinstans.setType(ProsessType.OPPRETT_SAK);
@@ -81,6 +82,7 @@ public class ProsessinstansService {
         lagre(prosessinstans);
     }
 
+    @Transactional
     public void opprettOgReplikerBehandlingForSak(String saksnummer, OpprettSakRequest opprettSakRequest) {
         Prosessinstans prosessinstans = new Prosessinstans();
         prosessinstans.setType(ProsessType.OPPRETT_REPLIKERT_BEHANDLING_FOR_SAK);
@@ -96,6 +98,7 @@ public class ProsessinstansService {
         lagre(prosessinstans);
     }
 
+    @Transactional
     public void opprettNyBehandlingForSak(String saksnummer, OpprettSakRequest opprettSakRequest) {
         Prosessinstans prosessinstans = new Prosessinstans();
         prosessinstans.setType(ProsessType.OPPRETT_NY_BEHANDLING_FOR_SAK);
@@ -112,13 +115,84 @@ public class ProsessinstansService {
     }
 
     @Transactional
-    public UUID opprettSatsendringBehandling(Behandling behandling) {
+    public UUID opprettManglendeInnbetalingProsessflyt(ManglendeFakturabetalingMelding manglendeFakturabetalingMelding) {
         Prosessinstans prosessinstans = new Prosessinstans();
-        prosessinstans.setBehandling(behandling);
+        prosessinstans.setType(ProsessType.OPPRETT_NY_BEHANDLING_MANGLENDE_INNBETALING);
 
-        prosessinstans.setType(ProsessType.SATSENDRING);
+        prosessinstans.setData(MOTTATT_DATO, manglendeFakturabetalingMelding.getDatoMottatt());
+        prosessinstans.setData(FAKTURASERIE_REFERANSE, manglendeFakturabetalingMelding.getFakturaserieReferanse());
+        prosessinstans.setData(BETALINGSSTATUS, manglendeFakturabetalingMelding.getBetalingsstatus());
+        prosessinstans.setData(FAKTURANUMMER, manglendeFakturabetalingMelding.getFakturanummer());
+        prosessinstans.setLåsReferanse(LåsReferanseFactory.lagString(manglendeFakturabetalingMelding));
 
         return lagre(prosessinstans);
+    }
+
+    @Transactional
+    public UUID opprettArsavregningsBehandlingProsessflyt(String saksnummer, String gjelderPeriode) {
+        Prosessinstans prosessinstans = new Prosessinstans();
+        prosessinstans.setType(ProsessType.OPPRETT_NY_BEHANDLING_AARSAVREGNING);
+
+        prosessinstans.setData(GJELDER_ÅR, gjelderPeriode);
+        prosessinstans.setData(SAKSNUMMER, saksnummer);
+
+        return lagre(prosessinstans);
+    }
+
+    @Transactional
+    public void opprettAnnullerFagsakProsessflyt(Behandling behandling) {
+        Prosessinstans prosessinstans = new Prosessinstans();
+        prosessinstans.setBehandling(behandling);
+        prosessinstans.setType(ProsessType.ANNULLER_SAK);
+        prosessinstans.setData(ProsessDataKey.SAKSSTATUS, Saksstatuser.ANNULLERT);
+        lagre(prosessinstans);
+    }
+
+    @Transactional
+    public void opprettProsessinstansJournalføringKnyttTilEksisterende(JournalfoeringTilordneRequest journalfoeringRequest, String saksnummer,
+                                                                       Fagsak fagsak, String institusjonID, boolean mottaksKanalErElektronisk) {
+        Prosessinstans prosessinstans = lagJournalføringProsessinstans(ProsessType.JFR_KNYTT, journalfoeringRequest, institusjonID, mottaksKanalErElektronisk);
+        prosessinstans.setBehandling(fagsak.hentSistAktivBehandlingIkkeÅrsavregning());
+        prosessinstans.setData(ProsessDataKey.SAKSNUMMER, saksnummer);
+        prosessinstans.setData(ProsessDataKey.JFR_INGEN_VURDERING, journalfoeringRequest.getIngenVurdering());
+
+        lagre(prosessinstans);
+    }
+
+    @Transactional
+    public void journalførOgOpprettAndregangsBehandling(ProsessType prosessTypeForAndregangsbehandling, Behandlingstema behandlingstema,
+                                                        Behandlingstyper behandlingstype, JournalfoeringTilordneRequest journalfoeringRequest,
+                                                        Behandlingsaarsaktyper behandlingsaarsaktyper, LocalDate mottaksdato, String institusjonID,
+                                                        boolean mottaksKanalErElektronisk) {
+        Prosessinstans prosessinstans = lagJournalføringProsessinstans(prosessTypeForAndregangsbehandling, journalfoeringRequest, institusjonID, mottaksKanalErElektronisk);
+        prosessinstans.setData(ProsessDataKey.BEHANDLINGSTEMA, behandlingstema);
+        prosessinstans.setData(ProsessDataKey.BEHANDLINGSTYPE, behandlingstype);
+        prosessinstans.setData(ProsessDataKey.BEHANDLINGSÅRSAKTYPE, behandlingsaarsaktyper);
+        prosessinstans.setData(ProsessDataKey.MOTTATT_DATO, mottaksdato);
+        prosessinstans.setData(ProsessDataKey.SAKSNUMMER, journalfoeringRequest.getSaksnummer());
+
+        lagre(prosessinstans);
+    }
+
+    @Transactional
+    public void opprettProsessinstansJournalføringNySak(JournalfoeringOpprettRequest journalfoeringRequest, ProsessType prosessType,
+                                                        boolean skalSetteSøknadslandOgPeriode, LocalDate mottaksdato,
+                                                        Behandlingsaarsaktyper behandlingsaarsaktype, String institusjonID,
+                                                        boolean mottaksKanalErElektronisk) {
+        Prosessinstans prosessinstans = lagJournalføringProsessinstans(prosessType, journalfoeringRequest, institusjonID, mottaksKanalErElektronisk);
+        prosessinstans.setData(ProsessDataKey.SAKSTYPE, Sakstyper.valueOf(journalfoeringRequest.getFagsak().getSakstype()));
+        prosessinstans.setData(ProsessDataKey.SAKSTEMA, Sakstemaer.valueOf(journalfoeringRequest.getFagsak().getSakstema()));
+        prosessinstans.setData(ProsessDataKey.BEHANDLINGSTYPE, Behandlingstyper.valueOf(journalfoeringRequest.getBehandlingstypeKode()));
+        prosessinstans.setData(ProsessDataKey.BEHANDLINGSÅRSAKTYPE, behandlingsaarsaktype);
+        prosessinstans.setData(ProsessDataKey.MOTTATT_DATO, mottaksdato);
+        prosessinstans.setData(ProsessDataKey.BEHANDLINGSTEMA, Behandlingstema.valueOf(journalfoeringRequest.getBehandlingstemaKode()));
+
+        if (skalSetteSøknadslandOgPeriode) {
+            prosessinstans.setData(ProsessDataKey.SØKNADSLAND, journalfoeringRequest.getFagsak().getLand());
+            prosessinstans.setData(ProsessDataKey.SØKNADSPERIODE, journalfoeringRequest.getFagsak().getSoknadsperiode());
+        }
+
+        lagre(prosessinstans);
     }
 
     Prosessinstans lagJournalføringProsessinstans(ProsessType type, JournalfoeringRequest journalfoeringRequest, String institusjonID, boolean mottaksKanalErElektronisk) {
@@ -161,84 +235,6 @@ public class ProsessinstansService {
         }
 
         return prosessinstans;
-    }
-
-    @Transactional
-    public UUID opprettManglendeInnbetalingProsessflyt(ManglendeFakturabetalingMelding manglendeFakturabetalingMelding) {
-        Prosessinstans prosessinstans = new Prosessinstans();
-        prosessinstans.setType(ProsessType.OPPRETT_NY_BEHANDLING_MANGLENDE_INNBETALING);
-
-        prosessinstans.setData(MOTTATT_DATO, manglendeFakturabetalingMelding.getDatoMottatt());
-        prosessinstans.setData(FAKTURASERIE_REFERANSE, manglendeFakturabetalingMelding.getFakturaserieReferanse());
-        prosessinstans.setData(BETALINGSSTATUS, manglendeFakturabetalingMelding.getBetalingsstatus());
-        prosessinstans.setData(FAKTURANUMMER, manglendeFakturabetalingMelding.getFakturanummer());
-        prosessinstans.setLåsReferanse(LåsReferanseFactory.lagString(manglendeFakturabetalingMelding));
-
-        return lagre(prosessinstans);
-    }
-
-    @Transactional
-    public UUID opprettArsavregningsBehandlingProsessflyt(String saksnummer, String gjelderPeriode) {
-        Prosessinstans prosessinstans = new Prosessinstans();
-        prosessinstans.setType(ProsessType.OPPRETT_NY_BEHANDLING_AARSAVREGNING);
-
-        prosessinstans.setData(GJELDER_ÅR, gjelderPeriode);
-        prosessinstans.setData(SAKSNUMMER, saksnummer);
-
-        return lagre(prosessinstans);
-    }
-
-    @Transactional
-    public void opprettAnnullerFagsakProsessflyt(Behandling behandling) {
-        Prosessinstans prosessinstans = new Prosessinstans();
-        prosessinstans.setBehandling(behandling);
-        prosessinstans.setType(ProsessType.ANNULLER_SAK);
-        prosessinstans.setData(ProsessDataKey.SAKSSTATUS, Saksstatuser.ANNULLERT);
-        lagre(prosessinstans);
-    }
-
-    public void opprettProsessinstansJournalføringKnyttTilEksisterende(JournalfoeringTilordneRequest journalfoeringRequest, String saksnummer,
-                                                                       Fagsak fagsak, String institusjonID, boolean mottaksKanalErElektronisk) {
-        Prosessinstans prosessinstans = lagJournalføringProsessinstans(ProsessType.JFR_KNYTT, journalfoeringRequest, institusjonID, mottaksKanalErElektronisk);
-        prosessinstans.setBehandling(fagsak.hentSistAktivBehandlingIkkeÅrsavregning());
-        prosessinstans.setData(ProsessDataKey.SAKSNUMMER, saksnummer);
-        prosessinstans.setData(ProsessDataKey.JFR_INGEN_VURDERING, journalfoeringRequest.getIngenVurdering());
-
-        lagre(prosessinstans);
-    }
-
-    public void journalførOgOpprettAndregangsBehandling(ProsessType prosessTypeForAndregangsbehandling, Behandlingstema behandlingstema,
-                                                        Behandlingstyper behandlingstype, JournalfoeringTilordneRequest journalfoeringRequest,
-                                                        Behandlingsaarsaktyper behandlingsaarsaktyper, LocalDate mottaksdato, String institusjonID,
-                                                        boolean mottaksKanalErElektronisk) {
-        Prosessinstans prosessinstans = lagJournalføringProsessinstans(prosessTypeForAndregangsbehandling, journalfoeringRequest, institusjonID, mottaksKanalErElektronisk);
-        prosessinstans.setData(ProsessDataKey.BEHANDLINGSTEMA, behandlingstema);
-        prosessinstans.setData(ProsessDataKey.BEHANDLINGSTYPE, behandlingstype);
-        prosessinstans.setData(ProsessDataKey.BEHANDLINGSÅRSAKTYPE, behandlingsaarsaktyper);
-        prosessinstans.setData(ProsessDataKey.MOTTATT_DATO, mottaksdato);
-        prosessinstans.setData(ProsessDataKey.SAKSNUMMER, journalfoeringRequest.getSaksnummer());
-
-        lagre(prosessinstans);
-    }
-
-    public void opprettProsessinstansJournalføringNySak(JournalfoeringOpprettRequest journalfoeringRequest, ProsessType prosessType,
-                                                        boolean skalSetteSøknadslandOgPeriode, LocalDate mottaksdato,
-                                                        Behandlingsaarsaktyper behandlingsaarsaktype, String institusjonID,
-                                                        boolean mottaksKanalErElektronisk) {
-        Prosessinstans prosessinstans = lagJournalføringProsessinstans(prosessType, journalfoeringRequest, institusjonID, mottaksKanalErElektronisk);
-        prosessinstans.setData(ProsessDataKey.SAKSTYPE, Sakstyper.valueOf(journalfoeringRequest.getFagsak().getSakstype()));
-        prosessinstans.setData(ProsessDataKey.SAKSTEMA, Sakstemaer.valueOf(journalfoeringRequest.getFagsak().getSakstema()));
-        prosessinstans.setData(ProsessDataKey.BEHANDLINGSTYPE, Behandlingstyper.valueOf(journalfoeringRequest.getBehandlingstypeKode()));
-        prosessinstans.setData(ProsessDataKey.BEHANDLINGSÅRSAKTYPE, behandlingsaarsaktype);
-        prosessinstans.setData(ProsessDataKey.MOTTATT_DATO, mottaksdato);
-        prosessinstans.setData(ProsessDataKey.BEHANDLINGSTEMA, Behandlingstema.valueOf(journalfoeringRequest.getBehandlingstemaKode()));
-
-        if (skalSetteSøknadslandOgPeriode) {
-            prosessinstans.setData(ProsessDataKey.SØKNADSLAND, journalfoeringRequest.getFagsak().getLand());
-            prosessinstans.setData(ProsessDataKey.SØKNADSPERIODE, journalfoeringRequest.getFagsak().getSoknadsperiode());
-        }
-
-        lagre(prosessinstans);
     }
 
     private static String getSaksbehandlerIdent() {
@@ -304,6 +300,7 @@ public class ProsessinstansService {
         return prosessinstans.getId();
     }
 
+    @Transactional
     public void opprettProsessinstansAnmodningOmUnntak(Behandling behandling, Set<String> mottakerInstitusjon,
                                                        Set<DokumentReferanse> vedleggReferanserTilSed,
                                                        String ytterligereInformasjonSed, String begrunnelseFritekst) {
@@ -319,6 +316,7 @@ public class ProsessinstansService {
         lagre(prosessinstans);
     }
 
+    @Transactional
     public void opprettProsessinstansAnmodningOmUnntakMottakSvar(Behandling behandling, String ytterligereInfo) {
         Prosessinstans prosessinstans = new ProsessinstansBuilder()
             .medType(ProsessType.ANMODNING_OM_UNNTAK_MOTTAK_SVAR)
@@ -329,6 +327,7 @@ public class ProsessinstansService {
         lagre(prosessinstans);
     }
 
+    @Transactional
     public void opprettProsessinstansFagsakHenlagt(Behandling sistAktiveBehandling) {
         Prosessinstans prosessinstans = new ProsessinstansBuilder()
             .medBehandling(sistAktiveBehandling)
@@ -338,6 +337,7 @@ public class ProsessinstansService {
         lagre(prosessinstans);
     }
 
+    @Transactional
     public void opprettProsessinstansIverksettVedtakEos(Behandling behandling, Behandlingsresultattyper behandlingsresultatType,
                                                         String fritekst, String fritekstSed, Set<String> mottakerinstitusjoner,
                                                         boolean arbeidsgiverSkalHaKopi) {
@@ -356,6 +356,7 @@ public class ProsessinstansService {
         lagre(prosessinstans);
     }
 
+    @Transactional
     public void opprettProsessinstansIverksettVedtakFTRL(Behandling behandling, VedtakRequest request, Saksstatuser saksstatus) {
         Prosessinstans prosessinstans = new ProsessinstansBuilder()
             .medType(ProsessType.IVERKSETT_VEDTAK_FTRL)
@@ -368,6 +369,7 @@ public class ProsessinstansService {
         lagre(prosessinstans);
     }
 
+    @Transactional
     public void opprettProsessinstansIverksettVedtakTrygdeavtale(Behandling behandling) {
         Prosessinstans prosessinstans = new ProsessinstansBuilder()
             .medType(ProsessType.IVERKSETT_VEDTAK_TRYGDEAVTALE)
@@ -377,6 +379,7 @@ public class ProsessinstansService {
         lagre(prosessinstans);
     }
 
+    @Transactional
     public void opprettProsessinstansIverksettVedtakÅrsavregning(Behandling behandling) {
         Prosessinstans prosessinstans = new ProsessinstansBuilder()
             .medType(ProsessType.IVERKSETT_VEDTAK_AARSAVREGNING)
@@ -386,6 +389,7 @@ public class ProsessinstansService {
         lagre(prosessinstans);
     }
 
+    @Transactional
     public void opprettProsessinstansNySakEØS(String journalpostID, OpprettSakRequest opprettSakRequest) {
         Prosessinstans prosessinstans = new Prosessinstans();
 
@@ -411,6 +415,7 @@ public class ProsessinstansService {
         lagre(prosessinstans);
     }
 
+    @Transactional
     public void opprettProsessinstansNySakFTRLTrygdeavtale(String journalpostID, OpprettSakRequest opprettSakRequest) {
         Prosessinstans prosessinstans = new Prosessinstans();
 
@@ -430,6 +435,7 @@ public class ProsessinstansService {
         lagre(prosessinstans);
     }
 
+    @Transactional
     public void opprettProsessinstansRegistrerUnntakFraMedlemskap(Behandling behandling, Saksstatuser saksstatus) {
         Prosessinstans prosessinstans = new ProsessinstansBuilder()
             .medBehandling(behandling)
@@ -441,6 +447,7 @@ public class ProsessinstansService {
         lagre(prosessinstans);
     }
 
+    @Transactional
     public void opprettProsessinstansIverksettIkkeYrkesaktiv(Behandling behandling) {
         Prosessinstans prosessinstans = new ProsessinstansBuilder()
             .medBehandling(behandling)
@@ -452,6 +459,7 @@ public class ProsessinstansService {
         lagre(prosessinstans);
     }
 
+    @Transactional
     public void opprettProsessinstansGodkjennUnntaksperiode(Behandling behandling, boolean varsleUtland, String fritekst, MelosysEessiMelding melosysEessiMelding) {
         Prosessinstans prosessinstans = new ProsessinstansBuilder()
             .medBehandling(behandling)
@@ -464,6 +472,7 @@ public class ProsessinstansService {
         lagre(prosessinstans);
     }
 
+    @Transactional
     public void opprettProsessinstansUnntaksperiodeAvvist(Behandling behandling, String begrunnelseFritekst) {
         Prosessinstans prosessinstans = new ProsessinstansBuilder()
             .medType(ProsessType.REGISTRERING_UNNTAK_AVVIS)
@@ -474,6 +483,7 @@ public class ProsessinstansService {
         lagre(prosessinstans);
     }
 
+    @Transactional
     public void opprettProsessinstansOpprettOgDistribuerBrev(Behandling behandling, Mottaker mottaker, DokgenBrevbestilling brevbestilling) {
         Prosessinstans prosessinstans = new Prosessinstans();
         prosessinstans.setType(ProsessType.OPPRETT_OG_DISTRIBUER_BREV);
@@ -489,7 +499,6 @@ public class ProsessinstansService {
             prosessinstans.setData(ORGNR, mottaker.getOrgnr());
         }
         if (hasText(mottaker.getInstitusjonID())) {
-            // TODO Parsing av variabelen feiler pga ":". Burde fikses på en skikkelig måte
             prosessinstans.setData(INSTITUSJON_ID, String.format("\"%s\"", mottaker.getInstitusjonID()));
         }
         prosessinstans.setBehandling(behandling);
@@ -503,6 +512,7 @@ public class ProsessinstansService {
         return lagre(prosessinstans);
     }
 
+    @Transactional
     public void opprettProsessinstansSedMottak(MelosysEessiMelding eessiMelding, String aktørID) {
         Prosessinstans prosessinstans = prosessinstansForSedMottak(eessiMelding);
         prosessinstans.setData(ProsessDataKey.AKTØR_ID, aktørID);
@@ -523,6 +533,7 @@ public class ProsessinstansService {
         return prosessinstans;
     }
 
+    @Transactional
     public void opprettProsessinstansVideresendSoknad(Behandling behandling, @Nullable String mottakerInstitusjon,
                                                       String fritekstBrev,
                                                       Set<DokumentReferanse> vedleggReferanser) {
@@ -539,6 +550,7 @@ public class ProsessinstansService {
         lagre(prosessinstans);
     }
 
+    @Transactional
     public void opprettProsessinstansUtpekAnnetLand(Behandling behandling,
                                                     Land_iso2 utpektLand,
                                                     Set<String> mottakerinstitusjoner,
@@ -574,6 +586,7 @@ public class ProsessinstansService {
         }
     }
 
+    @Transactional
     public void opprettProsessinstansAvvisUtpeking(Behandling behandling, UtpekingAvvis utpekingAvvis) {
         Prosessinstans prosessinstans = new ProsessinstansBuilder()
             .medType(ProsessType.UTPEKING_AVVIS)
@@ -584,6 +597,7 @@ public class ProsessinstansService {
         lagre(prosessinstans);
     }
 
+    @Transactional
     public UUID opprettProsessinstansSedJournalføring(Behandling behandling, MelosysEessiMelding melosysEessiMelding) {
         Prosessinstans prosessinstans = new ProsessinstansBuilder()
             .medType(ProsessType.MOTTAK_SED_JOURNALFØRING)
@@ -594,6 +608,7 @@ public class ProsessinstansService {
         return lagre(prosessinstans);
     }
 
+    @Transactional
     public void opprettProsessinstansMottattSvarAnmodningUnntak(Behandling behandling, MelosysEessiMelding melosysEessiMelding) {
         Prosessinstans prosessinstans = new ProsessinstansBuilder()
             .medType(ProsessType.ANMODNING_OM_UNNTAK_SVAR)
@@ -604,6 +619,7 @@ public class ProsessinstansService {
         lagre(prosessinstans);
     }
 
+    @Transactional
     public UUID opprettProsessinstansNySakUnntaksregistrering(MelosysEessiMelding melosysEessiMelding, Behandlingstema behandlingstema, String aktørID) {
         Prosessinstans prosessinstans = new ProsessinstansBuilder()
             .medType(ProsessType.REGISTRERING_UNNTAK_NY_SAK)
@@ -616,6 +632,7 @@ public class ProsessinstansService {
         return lagre(prosessinstans);
     }
 
+    @Transactional
     public void opprettProsessinstansNyBehandlingUnntaksregistrering(MelosysEessiMelding melosysEessiMelding, Behandlingstema behandlingstema, Long arkivsakID) {
         Prosessinstans prosessinstans = new ProsessinstansBuilder()
             .medType(ProsessType.REGISTRERING_UNNTAK_NY_BEHANDLING)
@@ -627,6 +644,7 @@ public class ProsessinstansService {
         lagre(prosessinstans);
     }
 
+    @Transactional
     public void opprettProsessinstansNySakArbeidFlereLand(MelosysEessiMelding melosysEessiMelding, Sakstemaer sakstema,
                                                           Behandlingstema behandlingstema, String aktørID) {
         Prosessinstans prosessinstans = new ProsessinstansBuilder()
@@ -640,6 +658,7 @@ public class ProsessinstansService {
         lagre(prosessinstans);
     }
 
+    @Transactional
     public void opprettProsessinstansNyBehandlingArbeidFlereLand(MelosysEessiMelding melosysEessiMelding, Behandlingstema behandlingstema, Long arkivsakID) {
         Prosessinstans prosessinstans = new ProsessinstansBuilder()
             .medType(ProsessType.ARBEID_FLERE_LAND_NY_BEHANDLING)
@@ -651,6 +670,7 @@ public class ProsessinstansService {
         lagre(prosessinstans);
     }
 
+    @Transactional
     public void opprettProsessinstansNySakMottattAnmodningOmUnntak(MelosysEessiMelding eessiMelding, String aktørID) {
         Prosessinstans prosessinstans = new ProsessinstansBuilder()
             .medType(ProsessType.ANMODNING_OM_UNNTAK_MOTTAK_NY_SAK)
@@ -663,6 +683,7 @@ public class ProsessinstansService {
         lagre(prosessinstans);
     }
 
+    @Transactional
     public void opprettProsessinstansNyBehandlingMottattAnmodningUnntak(MelosysEessiMelding melosysEessiMelding, Long arkivsakID) {
         Prosessinstans prosessinstans = new ProsessinstansBuilder()
             .medType(ProsessType.ANMODNING_OM_UNNTAK_MOTTAK_NY_BEHANDLING)
@@ -674,13 +695,19 @@ public class ProsessinstansService {
         lagre(prosessinstans);
     }
 
+    @Transactional
     public void opprettProsessinstanserSendBrev(Behandling behandling, DoksysBrevbestilling brevbestilling, List<Mottaker> mottakere) {
         for (Mottaker mottaker : mottakere) {
-            opprettProsessinstansSendBrev(behandling, brevbestilling, mottaker);
+            prosessForSendBrev(behandling, brevbestilling, mottaker);
         }
     }
 
+    @Transactional
     public void opprettProsessinstansSendBrev(Behandling behandling, DoksysBrevbestilling brevbestilling, Mottaker mottaker) {
+        prosessForSendBrev(behandling, brevbestilling, mottaker);
+    }
+
+    private UUID prosessForSendBrev(Behandling behandling, DoksysBrevbestilling brevbestilling, Mottaker mottaker) {
         brevbestilling.settMottaker(mottaker);
 
         Prosessinstans prosessinstans = new ProsessinstansBuilder()
@@ -689,9 +716,10 @@ public class ProsessinstansService {
             .build();
         prosessinstans.setData(BREVBESTILLING, brevbestilling);
 
-        lagre(prosessinstans);
+        return lagre(prosessinstans);
     }
 
+    @Transactional
     public void opprettProsessinstansOppdaterFaktura(Behandling behandling) {
         Prosessinstans prosessinstans = new ProsessinstansBuilder()
             .medType(ProsessType.OPPDATER_FAKTURAMOTTAKER)
@@ -700,5 +728,25 @@ public class ProsessinstansService {
         prosessinstans.setData(SAKSNUMMER, behandling.getFagsak().getSaksnummer());
 
         lagre(prosessinstans);
+    }
+
+    @Transactional
+    public UUID opprettSatsendringBehandling(Behandling behandling) {
+        Prosessinstans prosessinstans = new Prosessinstans();
+        prosessinstans.setBehandling(behandling);
+
+        prosessinstans.setType(ProsessType.SATSENDRING);
+
+        return lagre(prosessinstans);
+    }
+
+    @Transactional
+    public UUID opprettSatsendringBehandlingNyVurdering(Behandling behandling) {
+        Prosessinstans prosessinstans = new Prosessinstans();
+        prosessinstans.setBehandling(behandling);
+
+        prosessinstans.setType(ProsessType.SATSENDRING_TILBAKESTILL_NY_VURDERING);
+
+        return lagre(prosessinstans);
     }
 }

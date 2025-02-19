@@ -13,12 +13,10 @@ public class VedtaksfattingFasade {
     private final BehandlingService behandlingService;
     private final FattVedtakVelger fattVedtakVelger;
     public static final int FRIST_KLAGE_UKER = 6;
-    private final EosVedtakService eosVedtakService;
 
     public VedtaksfattingFasade(BehandlingService behandlingService,
-                                FattVedtakVelger fattVedtakVelger, EosVedtakService eosVedtakService) {
+                                FattVedtakVelger fattVedtakVelger) {
         this.behandlingService = behandlingService;
-        this.eosVedtakService = eosVedtakService;
         this.fattVedtakVelger = fattVedtakVelger;
     }
 

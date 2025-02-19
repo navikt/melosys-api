@@ -51,7 +51,7 @@ class VedtaksfattingFasadeTest {
 
     @BeforeEach
     void init() {
-        vedtaksfattingFasade = new VedtaksfattingFasade(mockBehandlingService, new FattVedtakVelger(mockEosVedtakService, mockFtrlVedtakService, trygdeavtaleVedtakService, årsavregningVedtakService), mockEosVedtakService);
+        vedtaksfattingFasade = new VedtaksfattingFasade(mockBehandlingService, new FattVedtakVelger(mockEosVedtakService, mockFtrlVedtakService, trygdeavtaleVedtakService, årsavregningVedtakService));
         behandling = lagBehandling();
 
         SpringSubjectHandler.set(new TestSubjectHandler());
@@ -121,18 +121,18 @@ class VedtaksfattingFasadeTest {
     }
 
     private Behandling lagBehandling() {
-        Behandling behandling = new Behandling();
-        behandling.setId(behandlingID);
-        behandling.setStatus(Behandlingsstatus.AVSLUTTET);
-        behandling.setType(Behandlingstyper.FØRSTEGANG);
-        behandling.setTema(Behandlingstema.UTSENDT_ARBEIDSTAKER);
+        Behandling nyBehandling = new Behandling();
+        nyBehandling.setId(behandlingID);
+        nyBehandling.setStatus(Behandlingsstatus.AVSLUTTET);
+        nyBehandling.setType(Behandlingstyper.FØRSTEGANG);
+        nyBehandling.setTema(Behandlingstema.UTSENDT_ARBEIDSTAKER);
 
         Behandlingsresultat behandlingsresultat = new Behandlingsresultat();
         behandlingsresultat.setId(behandlingID);
-        behandlingsresultat.setBehandling(behandling);
+        behandlingsresultat.setBehandling(nyBehandling);
 
         Fagsak fagsak = FagsakTestFactory.lagFagsak();
-        behandling.setFagsak(fagsak);
+        nyBehandling.setFagsak(fagsak);
 
         Lovvalgsperiode lovvalgsperiode = new Lovvalgsperiode();
         lovvalgsperiode.setBestemmelse(Lovvalgbestemmelser_883_2004.FO_883_2004_ART12_1);
@@ -141,7 +141,7 @@ class VedtaksfattingFasadeTest {
         lovvalgsperiode.setMedlPeriodeID(123L);
         behandlingsresultat.getLovvalgsperioder().add(lovvalgsperiode);
 
-        return behandling;
+        return nyBehandling;
     }
 
     private void setFagsakPåBehandling(Sakstyper sakstype) {

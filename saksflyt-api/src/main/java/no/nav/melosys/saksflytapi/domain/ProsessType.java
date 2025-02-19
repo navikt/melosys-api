@@ -40,10 +40,11 @@ public enum ProsessType {
     REGISTRERING_UNNTAK_GODKJENN("REGISTRERING_UNNTAK_GODKJENN", "Godkjenner en untaksperiode og avslutter behandling"),
     REGISTRERING_UNNTAK_NY_BEHANDLING("REGISTRERING_UNNTAK_NY_BEHANDLING", "Registrering av unntak - ny behandling"),
     REGISTRERING_UNNTAK_NY_SAK("REGISTRERING_UNNTAK_NY_SAK", "Registrering av unntak - ny sak"),
+    SATSENDRING("SATSENDRING", "Oppretter og behandler en satsendring - iverksetter og fakturerer"),
+    SATSENDRING_TILBAKESTILL_NY_VURDERING("SATSENDRING_TILBAKESTILL_NY_VURDERING", "Behandler satsendring hvor aktiv ny vurdering tilbakestilles, slik at nye satser brukes"),
     SEND_BREV("SEND_BREV", "Send brev til én mottaker via doksys"),
     UTPEKING_AVVIS("UTPEKING_AVVIS", "Avviser utpeking mottatt i en A003"),
-    VIDERESEND_SOKNAD("VIDERESEND_SOKNAD", "Videresend søknad"),
-    SATSENDRING("SATSENDRING", "Oppretter og behandler en satsendring - iverksetter og fakturerer");
+    VIDERESEND_SOKNAD("VIDERESEND_SOKNAD", "Videresend søknad");
 
     private final String kode;
     private final String beskrivelse;
