@@ -26,34 +26,24 @@ class TrygdeavgiftMottakerService(private val behandlingsresultatService: Behand
         return getTrygdeavgiftMottaker(behandlingsresultat)
     }
 
-    fun getTrygdeavgiftMottaker(trygdeavgiftsperioder: List<Trygdeavgiftsperiode>): Trygdeavgiftmottaker {
-        val skatteforhold = trygdeavgiftsperioder.mapNotNull { it.grunnlagSkatteforholdTilNorge }.toSet()
-        val inntektsperioder = trygdeavgiftsperioder.mapNotNull { it.grunnlagInntekstperiode }.toSet()
+    fun getTrygdeavgiftMottaker(trygdeavgiftsperioder: List<Trygdeavgiftsperiode>) =
+        getTrygdeavgiftMottaker(
+            trygdeavgiftsperioder.mapNotNull { it.grunnlagSkatteforholdTilNorge }.toSet(),
+            trygdeavgiftsperioder.mapNotNull { it.grunnlagInntekstperiode }.toSet()
+        )
 
-        return when {
-            betalerKunTrygdeavgiftTilSkatt(skatteforhold, inntektsperioder) ->
-                Trygdeavgiftmottaker.TRYGDEAVGIFT_BETALES_TIL_SKATT
+    fun getTrygdeavgiftMottaker(behandlingsresultat: Behandlingsresultat) =
+        getTrygdeavgiftMottaker(
+            behandlingsresultat.hentSkatteforholdTilNorge(),
+            behandlingsresultat.hentInntektsperioder()
+        )
 
-            betalerKunTrygdeavgiftTilNav(skatteforhold, inntektsperioder) ->
-                Trygdeavgiftmottaker.TRYGDEAVGIFT_BETALES_TIL_NAV
-
+    private fun getTrygdeavgiftMottaker(skatteforhold: Set<SkatteforholdTilNorge>, inntektsperioder: Set<Inntektsperiode>) =
+        when {
+            betalerKunTrygdeavgiftTilSkatt(skatteforhold, inntektsperioder) -> Trygdeavgiftmottaker.TRYGDEAVGIFT_BETALES_TIL_SKATT
+            betalerKunTrygdeavgiftTilNav(skatteforhold, inntektsperioder) -> Trygdeavgiftmottaker.TRYGDEAVGIFT_BETALES_TIL_NAV
             else -> Trygdeavgiftmottaker.TRYGDEAVGIFT_BETALES_TIL_NAV_OG_SKATT
         }
-    }
-
-    fun getTrygdeavgiftMottaker(behandlingsresultat: Behandlingsresultat) = when {
-        betalerKunTrygdeavgiftTilSkatt(
-            behandlingsresultat.hentSkatteforholdTilNorge(),
-            behandlingsresultat.hentInntektsperioder()
-        ) -> Trygdeavgiftmottaker.TRYGDEAVGIFT_BETALES_TIL_SKATT
-
-        betalerKunTrygdeavgiftTilNav(
-            behandlingsresultat.hentSkatteforholdTilNorge(),
-            behandlingsresultat.hentInntektsperioder()
-        ) -> Trygdeavgiftmottaker.TRYGDEAVGIFT_BETALES_TIL_NAV
-
-        else -> Trygdeavgiftmottaker.TRYGDEAVGIFT_BETALES_TIL_NAV_OG_SKATT
-    }
 
     private fun betalerKunTrygdeavgiftTilSkatt(skatteforholdTilNorge: Set<SkatteforholdTilNorge>, inntektsperioder: Set<Inntektsperiode>): Boolean =
         skatteforholdTilNorge.all { it.skatteplikttype == Skatteplikttype.SKATTEPLIKTIG }
