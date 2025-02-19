@@ -14,7 +14,6 @@ import no.nav.melosys.domain.avgift.Trygdeavgiftsperiode
 import no.nav.melosys.domain.kodeverk.Trygdeavgift_typer
 import no.nav.melosys.service.behandling.BehandlingsresultatService
 import org.junit.jupiter.api.BeforeEach
-import org.junit.jupiter.api.Nested
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.extension.ExtendWith
 
@@ -29,66 +28,57 @@ class TrygdeavgiftperiodeErstatterTest() {
         trygdeavgiftperiodeErstatter = TrygdeavgiftperiodeErstatter(behandlingsresultatService)
     }
 
-    @Nested
-    inner class ErstattTrygdeavgiftsperioderTest {
-        @Test
-        fun `erstatter eksisterende Trygdeavgiftsperioder`() {
-            val medlId = 3L
+    @Test
+    fun `erstatter eksisterende Trygdeavgiftsperioder`() {
+        val medlId = 3L
 
-            val eksisterendeTrygdeavgiftsperiode = createTrygdeavgiftsperioder(medlId, 1L).single()
-            val nyTrygdeavgiftsperiode = createTrygdeavgiftsperioder(medlId, 2L).single()
+        val eksisterendeTrygdeavgiftsperiode = createTrygdeavgiftsperioder(medlId, 1L).single()
+        val nyTrygdeavgiftsperiode = createTrygdeavgiftsperioder(medlId, 2L).single()
 
-            val medlemskap = createMedlemskap(medlId, listOf(eksisterendeTrygdeavgiftsperiode))
-            val behandlingsresultat = createBehandlingsresultat(medlemskap)
+        val medlemskap = createMedlemskap(medlId, listOf(eksisterendeTrygdeavgiftsperiode))
+        val behandlingsresultat = createBehandlingsresultat(medlemskap)
 
-            every { behandlingsresultatService.hentBehandlingsresultat(any()) } returns behandlingsresultat
+        every { behandlingsresultatService.hentBehandlingsresultat(any()) } returns behandlingsresultat
 
-            val nyeTrygdeavgiftsperioder = listOf(nyTrygdeavgiftsperiode)
+        val nyeTrygdeavgiftsperioder = listOf(nyTrygdeavgiftsperiode)
 
-            // Act
-            trygdeavgiftperiodeErstatter.erstattTrygdeavgiftsperioder(1337L, nyeTrygdeavgiftsperioder)
+        // Act
+        trygdeavgiftperiodeErstatter.erstattTrygdeavgiftsperioder(1337L, nyeTrygdeavgiftsperioder)
 
-            // Assert
-            behandlingsresultat.trygdeavgiftType shouldBeEqual Trygdeavgift_typer.FORELØPIG
-            medlemskap.trygdeavgiftsperioder shouldContainExactly nyeTrygdeavgiftsperioder.toSet()
-        }
-
-        @Test
-        fun `erstatter flere eksisterende Trygdeavgiftsperioder for flere medlemskap`() {
-            val medlId1 = 1L
-            val medlId2 = 2L
-
-            val eksisterendeTrygdeavgiftsperioder1 = createTrygdeavgiftsperioder(medlId1, 101L, 102L)
-            val eksisterendeTrygdeavgiftsperioder2 = createTrygdeavgiftsperioder(medlId2, 103L, 104L)
-
-            val nyTrygdeavgiftsperioder1 = createTrygdeavgiftsperioder(medlId1, 201L, 202L)
-            val nyTrygdeavgiftsperioder2 = createTrygdeavgiftsperioder(medlId2, 203L, 204L)
-
-            val medlemskap1 = createMedlemskap(medlId1, eksisterendeTrygdeavgiftsperioder1)
-            val medlemskap2 = createMedlemskap(medlId2, eksisterendeTrygdeavgiftsperioder2)
-
-            val behandlingsresultat = createBehandlingsresultat(medlemskap1, medlemskap2)
-
-            every { behandlingsresultatService.hentBehandlingsresultat(any()) } returns behandlingsresultat
-
-            val nyeTrygdeavgiftsperioder = nyTrygdeavgiftsperioder1 + nyTrygdeavgiftsperioder2
-
-            // Act
-            trygdeavgiftperiodeErstatter.erstattTrygdeavgiftsperioder(1337L, nyeTrygdeavgiftsperioder)
-
-            // Assert
-            medlemskap1.trygdeavgiftsperioder shouldContainExactly nyTrygdeavgiftsperioder1.toSet()
-            medlemskap2.trygdeavgiftsperioder shouldContainExactly nyTrygdeavgiftsperioder2.toSet()
-            behandlingsresultat.trygdeavgiftType shouldBe Trygdeavgift_typer.FORELØPIG
-        }
+        // Assert
+        behandlingsresultat.trygdeavgiftType shouldBeEqual Trygdeavgift_typer.FORELØPIG
+        medlemskap.trygdeavgiftsperioder shouldContainExactly nyeTrygdeavgiftsperioder.toSet()
     }
 
-    @Nested
-    inner class LeggTilTrygdeavgiftsperiodeForPliktigMedlemskapSkattepliktigTest {
-        @Test
-        fun leggTilTrygdeavgiftsperiodeForPliktigMedlemskapSkattepliktig() {
-        }
+    @Test
+    fun `erstatter flere eksisterende Trygdeavgiftsperioder for flere medlemskap`() {
+        val medlId1 = 1L
+        val medlId2 = 2L
+
+        val eksisterendeTrygdeavgiftsperioder1 = createTrygdeavgiftsperioder(medlId1, 101L, 102L)
+        val eksisterendeTrygdeavgiftsperioder2 = createTrygdeavgiftsperioder(medlId2, 103L, 104L)
+
+        val nyTrygdeavgiftsperioder1 = createTrygdeavgiftsperioder(medlId1, 201L, 202L)
+        val nyTrygdeavgiftsperioder2 = createTrygdeavgiftsperioder(medlId2, 203L, 204L)
+
+        val medlemskap1 = createMedlemskap(medlId1, eksisterendeTrygdeavgiftsperioder1)
+        val medlemskap2 = createMedlemskap(medlId2, eksisterendeTrygdeavgiftsperioder2)
+
+        val behandlingsresultat = createBehandlingsresultat(medlemskap1, medlemskap2)
+
+        every { behandlingsresultatService.hentBehandlingsresultat(any()) } returns behandlingsresultat
+
+        val nyeTrygdeavgiftsperioder = nyTrygdeavgiftsperioder1 + nyTrygdeavgiftsperioder2
+
+        // Act
+        trygdeavgiftperiodeErstatter.erstattTrygdeavgiftsperioder(1337L, nyeTrygdeavgiftsperioder)
+
+        // Assert
+        medlemskap1.trygdeavgiftsperioder shouldContainExactly nyTrygdeavgiftsperioder1.toSet()
+        medlemskap2.trygdeavgiftsperioder shouldContainExactly nyTrygdeavgiftsperioder2.toSet()
+        behandlingsresultat.trygdeavgiftType shouldBe Trygdeavgift_typer.FORELØPIG
     }
+
 
     private fun createTrygdeavgiftsperioder(medlemskapId: Long, vararg ids: Long): List<Trygdeavgiftsperiode> {
         return ids.map { periodeId ->
