@@ -42,23 +42,32 @@ class TrygdeavgiftsberegningService(
         val behandlingsresultat = behandlingsresultatService.hentBehandlingsresultat(behandlingsresultatID)
         TrygdeavgiftsberegningValidator.validerForTrygdeavgiftberegning(behandlingsresultat, skatteforholdsperioder, inntektsperioder, unleash)
 
-        if (erPliktigMedlemskapSkattepliktig(skatteforholdsperioder, inntektsperioder, behandlingsresultatID)) {
-            require(behandlingsresultat.medlemskapsperioder.size == 1 && skatteforholdsperioder.size == 1) { "Det skal ikke være flere enn en skatteforholdsperiode når medlemskapet er pliktig og skattepliktig" }
-            return erstattTrygdeavgiftsperioderForPliktigMedlemskapSkattepliktig(behandlingsresultat)
-        }
-
-        val nyeTrygdeavgiftsperioder = beregnTrygdeavgift(behandlingsresultat, skatteforholdsperioder, inntektsperioder)
-        erstattTrygdeavgiftsperioderMedBeregnetTrygdeavgift(behandlingsresultat.id, nyeTrygdeavgiftsperioder)
+        val nyeTrygdeavgiftsperioder = lagNyeTrygeavgiftsperioder(behandlingsresultat, skatteforholdsperioder, inntektsperioder)
+        trygdeavgiftperiodeErstatter.erstattTrygdeavgiftsperioder(behandlingsresultatID, nyeTrygdeavgiftsperioder)
 
         return nyeTrygdeavgiftsperioder.toSet()
+    }
+
+    private fun lagNyeTrygeavgiftsperioder(
+        behandlingsresultat: Behandlingsresultat,
+        skatteforholdsperioder: List<SkatteforholdTilNorge>,
+        inntektsperioder: List<Inntektsperiode>
+    ): List<Trygdeavgiftsperiode> {
+        if (erPliktigMedlemskapSkattepliktig(skatteforholdsperioder, inntektsperioder, behandlingsresultat)) {
+            require(behandlingsresultat.medlemskapsperioder.size == 1 && skatteforholdsperioder.size == 1) { "Det skal ikke være flere enn en skatteforholdsperiode når medlemskapet er pliktig og skattepliktig" }
+            return TrygdeavgiftOppretter.skattepliktigTrygdeavgiftsperioderAvMedlemskapsperioder(behandlingsresultat.medlemskapsperioder.filter { it.erInnvilget() })
+        }
+        val nyeTrygdeavgiftsperioder = beregnTrygdeavgift(behandlingsresultat, skatteforholdsperioder, inntektsperioder)
+        sjekkTrygdeavgiftSkalBetalesTilNav(nyeTrygdeavgiftsperioder)
+
+        return nyeTrygdeavgiftsperioder
     }
 
     private fun erPliktigMedlemskapSkattepliktig(
         skatteforholdsperioder: List<SkatteforholdTilNorge>,
         inntektsPerioder: List<Inntektsperiode>,
-        behandlingsresultatID: Long
+        behandlingsresultat: Behandlingsresultat
     ): Boolean {
-        val behandlingsresultat = behandlingsresultatService.hentBehandlingsresultat(behandlingsresultatID)
         val erPliktigMedlemskap = behandlingsresultat.medlemskapsperioder
             .filter { it.erInnvilget() }
             .all { it.erPliktig() }
@@ -68,23 +77,6 @@ class TrygdeavgiftsberegningService(
             skatteforholdsperioder.all { it.skatteplikttype == Skatteplikttype.SKATTEPLIKTIG }
 
         return erPliktigMedlemskap && inntektskilderErTomt && alleSkatteforholdErSkattepliktige
-    }
-
-
-    private fun erstattTrygdeavgiftsperioderForPliktigMedlemskapSkattepliktig(behandlingsresultat: Behandlingsresultat): Set<Trygdeavgiftsperiode> {
-        val trygdeavgiftsperioder =
-            TrygdeavgiftOppretter.skattepliktigTrygdeavgiftsperioderAvMedlemskapsperioder(behandlingsresultat.medlemskapsperioder.filter { it.erInnvilget() })
-
-        trygdeavgiftperiodeErstatter.erstattTrygdeavgiftsperioder(behandlingsresultat.id, trygdeavgiftsperioder)
-        return trygdeavgiftsperioder.toSet()
-    }
-
-    private fun erstattTrygdeavgiftsperioderMedBeregnetTrygdeavgift(
-        behandlingsresultatId: Long,
-        nyeTrygdeavgiftsperioder: List<Trygdeavgiftsperiode>
-    ) {
-        sjekkTrygdeavgiftSkalBetalesTilNav(nyeTrygdeavgiftsperioder)
-        trygdeavgiftperiodeErstatter.erstattTrygdeavgiftsperioder(behandlingsresultatId, nyeTrygdeavgiftsperioder)
     }
 
     @Transactional(readOnly = true, noRollbackFor = [Throwable::class])
