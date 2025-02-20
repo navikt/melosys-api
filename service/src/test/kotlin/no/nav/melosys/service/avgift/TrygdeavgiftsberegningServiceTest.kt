@@ -88,9 +88,15 @@ internal class TrygdeavgiftsberegningServiceTest {
             mockTrygdeavgiftConsumer,
             unleash
         )
-        behandlingsresultat = lagBehandlingsresultat(Behandlingsresultattyper.IKKE_FASTSATT).get()
+        behandling = Behandling().apply {
+            tema = Behandlingstema.YRKESAKTIV
+        }
+        behandlingsresultat = Behandlingsresultat().apply {
+            id = 1L
+            behandling = this@TrygdeavgiftsberegningServiceTest.behandling
+            type = Behandlingsresultattyper.IKKE_FASTSATT
+        }
 
-        behandling = Behandling()
         behandlingsresultat.medlemskapsperioder.add(Medlemskapsperiode().apply {
             id = 1L
             fom = FOM
