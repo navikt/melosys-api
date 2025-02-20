@@ -86,8 +86,6 @@ class TrygdeavgiftsberegningValidatorTest {
         @Test
         fun shouldThrowFunksjonellExceptionWhenInntektsperioderIsPensjon() {
             val behandlingsresultatMock = lagGyldigBehandlingsresultat()
-            every { behandlingsresultatMock.medlemskapsperioder } returns emptyList()
-            every { behandlingsresultatMock.utledMedlemskapsperiodeFom() } returns LocalDate.now()
 
             val skatteforholdsPerioder = listOf(
                 SkatteforholdTilNorge().apply {
@@ -406,7 +404,7 @@ class TrygdeavgiftsberegningValidatorTest {
             ),
         )
 
-        fun valideringsDataPerioderDekkesScenarios(): List<ValideringInput> = listOf(
+        private fun valideringsDataPerioderDekkesScenarios(): List<ValideringInput> = listOf(
             ValideringInput(                                                       // Inntektsperioder skal kunne overlappe
                 listOf(Medlemskapsperiode().apply {
                     innvilgelsesresultat = InnvilgelsesResultat.INNVILGET
@@ -665,11 +663,14 @@ class TrygdeavgiftsberegningValidatorTest {
             )
         )
 
-        private fun lagGyldigBehandlingsresultat() = mockk<Behandlingsresultat>().apply {
-            every { medlemskapsperioder } returns listOf(Medlemskapsperiode())
-            every { utledMedlemskapsperiodeFom() } returns LocalDate.now()
-            every { utledMedlemskapsperiodeTom() } returns LocalDate.now()
-            every { behandling } returns Behandling()
+        private fun lagGyldigBehandlingsresultat() = Behandlingsresultat().apply {
+            medlemskapsperioder = listOf(
+                Medlemskapsperiode(
+                ).apply {
+                    fom = LocalDate.now()
+                    tom = LocalDate.now().plusDays(5)
+                })
+            behandling = Behandling()
         }
     }
 
