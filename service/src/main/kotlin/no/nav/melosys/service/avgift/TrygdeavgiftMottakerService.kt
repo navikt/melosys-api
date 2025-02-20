@@ -32,6 +32,7 @@ class TrygdeavgiftMottakerService(private val behandlingsresultatService: Behand
             trygdeavgiftsperioder.mapNotNull { it.grunnlagInntekstperiode }.toSet()
         )
 
+    @Deprecated("Behøver kun trygdeavgiftsperioder")
     fun getTrygdeavgiftMottaker(behandlingsresultat: Behandlingsresultat) =
         getTrygdeavgiftMottaker(
             behandlingsresultat.hentSkatteforholdTilNorge(),
