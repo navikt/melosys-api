@@ -127,7 +127,8 @@ internal class ÅrsavregningControllerTest {
             nyttTotalbeloep = BigDecimal(24280.0),
             tilFaktureringBeloep = BigDecimal(3110.0),
             harDeltGrunnlag = false,
-            harAvvik = null
+            harAvvik = null,
+            tidligereFakturertBeloepAvgiftssystem = null
         )
 
 
@@ -217,7 +218,8 @@ internal class ÅrsavregningControllerTest {
   "avregning": {
     "nyttTotalbeloep": 24280,
     "tidligereFakturertBeloep": 21170,
-    "tilFaktureringBeloep": 3110
+    "tilFaktureringBeloep": 3110,
+    "tidligereFakturertBeloepAvgiftssystem": null
   },
   "harDeltGrunnlag": false,
   "harAvvik": null
@@ -330,7 +332,8 @@ internal class ÅrsavregningControllerTest {
             nyttTotalbeloep = BigDecimal(6708.0),
             tilFaktureringBeloep = BigDecimal(-73872.0),
             harDeltGrunnlag = false,
-            harAvvik = true
+            harAvvik = true,
+            tidligereFakturertBeloepAvgiftssystem = null
         )
 
 
@@ -435,7 +438,8 @@ internal class ÅrsavregningControllerTest {
     "avregning": {
         "nyttTotalbeloep": 6708,
         "tidligereFakturertBeloep": 80580,
-        "tilFaktureringBeloep": -73872
+        "tilFaktureringBeloep": -73872,
+        "tidligereFakturertBeloepAvgiftssystem": null
     },
     "harDeltGrunnlag": false,
     "harAvvik": true
