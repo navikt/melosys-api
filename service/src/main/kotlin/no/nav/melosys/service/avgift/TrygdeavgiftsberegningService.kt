@@ -60,7 +60,12 @@ class TrygdeavgiftsberegningService(
         skatteforholdsperioder: List<SkatteforholdTilNorge>,
         inntektsperioder: List<Inntektsperiode>
     ): List<Trygdeavgiftsperiode> {
-        if (erPliktigMedlemskapSkattepliktig(skatteforholdsperioder, inntektsperioder, behandlingsresultat)) {
+        if (erPliktigMedlemskapSkattepliktig(
+                skatteforholdsperioder,
+                inntektsperioder,
+                behandlingsresultat.medlemskapsperioder
+            )
+        ) {
             require(behandlingsresultat.medlemskapsperioder.size == 1 && skatteforholdsperioder.size == 1) { "Det skal ikke være flere enn en skatteforholdsperiode når medlemskapet er pliktig og skattepliktig" }
             return TrygdeavgiftOppretter.skattepliktigTrygdeavgiftsperioderAvMedlemskapsperioder(behandlingsresultat.medlemskapsperioder.filter { it.erInnvilget() })
         }
@@ -74,9 +79,9 @@ class TrygdeavgiftsberegningService(
     private fun erPliktigMedlemskapSkattepliktig(
         skatteforholdsperioder: List<SkatteforholdTilNorge>,
         inntektsPerioder: List<Inntektsperiode>,
-        behandlingsresultat: Behandlingsresultat
+        medlemskapsperioder: Collection<Medlemskapsperiode>
     ): Boolean {
-        val erPliktigMedlemskap = behandlingsresultat.medlemskapsperioder
+        val erPliktigMedlemskap = medlemskapsperioder
             .filter { it.erInnvilget() }
             .all { it.erPliktig() }
 
