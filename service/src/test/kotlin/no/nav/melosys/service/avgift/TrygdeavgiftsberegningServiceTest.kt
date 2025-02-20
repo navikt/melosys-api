@@ -1,6 +1,7 @@
 package no.nav.melosys.service.avgift
 
 import io.getunleash.FakeUnleash
+import io.kotest.assertions.throwables.shouldNotThrow
 import io.kotest.assertions.throwables.shouldThrow
 import io.kotest.matchers.collections.shouldBeEmpty
 import io.kotest.matchers.collections.shouldHaveSize
@@ -23,6 +24,7 @@ import no.nav.melosys.domain.avgift.SkatteforholdTilNorge
 import no.nav.melosys.domain.avgift.Trygdeavgiftsperiode
 import no.nav.melosys.domain.kodeverk.*
 import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingsresultattyper
+import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingstema
 import no.nav.melosys.exception.FunksjonellException
 import no.nav.melosys.integrasjon.ereg.EregFasade
 import no.nav.melosys.integrasjon.trygdeavgift.TrygdeavgiftConsumer
@@ -739,6 +741,105 @@ internal class TrygdeavgiftsberegningServiceTest {
         }.message.shouldContain("Det kreves en innvilget medlemskapsperiode med startdato")
     }
 
+    @Test
+    fun beregnTrygdeavgift_erPensjonist_kasterIkkeFeil() {
+        val medlemskapsperiode = behandlingsresultat.medlemskapsperioder.first()
+        medlemskapsperiode.fom = FOM
+        medlemskapsperiode.bestemmelse = Folketrygdloven_kap2_bestemmelser.FTRL_KAP2_2_3_ANDRE_LEDD
+        val behandling1 = Behandling().apply {
+            tema = Behandlingstema.PENSJONIST
+            fagsak = FagsakTestFactory.builder().medBruker().build()
+
+        }
+
+        behandlingsresultat.apply {
+            behandling = behandling1
+
+        }
+        every { mockBehandlingService.hentBehandling(BEHANDLING_ID) }.returns(behandling1)
+
+        every { mockBehandlingsresultatService.lagreOgFlush(behandlingsresultat) }.returns(behandlingsresultat)
+
+        val skatteforholdsperioder = listOf(
+            SkatteforholdTilNorge().apply {
+                fomDato = FOM
+                tomDato = TOM
+                skatteplikttype = Skatteplikttype.IKKE_SKATTEPLIKTIG
+            }
+        )
+
+        val inntektsperioder = listOf(
+            Inntektsperiode().apply {
+                fomDato = FOM
+                tomDato = TOM
+                type = Inntektskildetype.INNTEKT_FRA_UTLANDET
+                isArbeidsgiversavgiftBetalesTilSkatt = true
+                avgiftspliktigMndInntekt = Penger(BigDecimal(0))
+            }
+        )
+        val notSoRandomUuid = UUID.randomUUID()
+        mockkStatic(UUID::class)
+        every { UUID.randomUUID() } returns notSoRandomUuid
+
+        every { mockTrygdeavgiftConsumer.beregnTrygdeavgift(ofType(TrygdeavgiftsberegningRequest::class)) }.returns(
+            listOf(
+                TrygdeavgiftsberegningResponse(
+                    TrygdeavgiftsperiodeDto(
+                        DatoPeriodeDto(FOM, TOM), BigDecimal.valueOf(7.9), PengerDto(BigDecimal.valueOf(790), NOK)
+                    ), TrygdeavgiftsgrunnlagDto(
+                        idToUUid(behandlingsresultat.medlemskapsperioder.first().id),
+                        notSoRandomUuid,
+                        notSoRandomUuid
+                    )
+                )
+            )
+        )
+
+        shouldNotThrow<FunksjonellException> {
+            trygdeavgiftsberegningService.beregnOgLagreTrygdeavgift(BEHANDLING_ID, skatteforholdsperioder, inntektsperioder)
+        }
+    }
+
+    @Test
+    fun beregnTrygdeavgift_erIkkePensjonist_kasterFeil() {
+        val medlemskapsperiode = behandlingsresultat.medlemskapsperioder.first()
+        medlemskapsperiode.fom = FOM
+        medlemskapsperiode.bestemmelse = Folketrygdloven_kap2_bestemmelser.FTRL_KAP2_2_3_ANDRE_LEDD
+        val behandling1 = Behandling().apply {
+            tema = Behandlingstema.YRKESAKTIV
+            fagsak = FagsakTestFactory.builder().medBruker().build()
+        }
+
+        behandlingsresultat.apply {
+            behandling = behandling1
+
+        }
+        every { mockBehandlingService.hentBehandling(BEHANDLING_ID) }.returns(behandling1)
+
+        every { mockBehandlingsresultatService.lagreOgFlush(behandlingsresultat) }.returns(behandlingsresultat)
+
+        val skatteforholdsperioder = listOf(
+            SkatteforholdTilNorge().apply {
+                fomDato = FOM
+                tomDato = TOM
+                skatteplikttype = Skatteplikttype.IKKE_SKATTEPLIKTIG
+            }
+        )
+
+        val inntektsperioder = listOf(
+            Inntektsperiode().apply {
+                fomDato = FOM
+                tomDato = TOM
+                type = Inntektskildetype.PENSJON_UFØRETRYGD
+                isArbeidsgiversavgiftBetalesTilSkatt = true
+                avgiftspliktigMndInntekt = Penger(BigDecimal(0))
+            }
+        )
+
+        shouldThrow<FunksjonellException> {
+            trygdeavgiftsberegningService.beregnOgLagreTrygdeavgift(BEHANDLING_ID, skatteforholdsperioder, inntektsperioder)
+        }.message.shouldContain("Du må oppgi minst en annen inntekt i tillegg til pensjon/uføretrygd")
+    }
 
     @Test
     fun finnFakturamottaker_harIkkeFullmektig_mottakerErBruker() {
