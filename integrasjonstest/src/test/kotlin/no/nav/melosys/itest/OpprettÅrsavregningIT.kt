@@ -62,7 +62,7 @@ class OpprettÅrsavregningIT @Autowired constructor(
         shouldThrow<FunksjonellException> {
             årsavregningService.opprettÅrsavregning(behandlingsresultat2.id, 2024)
         }.message shouldBe "Det finnes en annen åpen årsavregningsbehandling for samme år på saken. " +
-            "Vurder hvilke behandling du vil fortsette med og avslutt den uaktuelle behandlingen via behandlingsmeny."
+            "Vurder hvilken behandling du vil fortsette med og avslutt den som ikke er aktuell via behandlingsmenyen."
     }
 
     @Test
