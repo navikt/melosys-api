@@ -37,16 +37,16 @@ object TrygdeavgiftsberegningValidator {
         inntektsperioder: List<Inntektsperiode>,
         unleash: Unleash
     ) {
-
-        if (
-            inntektsperioder.isNotEmpty() && inntektsperioder.all { listOf(PENSJON_UFØRETRYGD, PENSJON_UFØRETRYGD_KILDESKATT, PENSJON, UFØRETRYGD).contains(it.type) } &&
-            behandlingsresultat.behandling?.tema != PENSJONIST
-        )
-            throw FunksjonellException(MINST_EN_ANNEN_INNTEKT_I_TILLEGG_TIL_PENSJON)
-
         if (inntektsperioder.isEmpty() && !erAllePerioderSkattepliktige(skatteforholdsperioder)) {
             throw FunksjonellException(INNTEKTSPERIODER_EMPTY)
         }
+
+        if (inntektsperioder.isNotEmpty() && behandlingsresultat.behandling.tema != PENSJONIST
+            && inntektsperioder.all { listOf(PENSJON_UFØRETRYGD, PENSJON_UFØRETRYGD_KILDESKATT, PENSJON, UFØRETRYGD).contains(it.type) }
+        ) {
+            throw FunksjonellException(MINST_EN_ANNEN_INNTEKT_I_TILLEGG_TIL_PENSJON)
+        }
+
         if (skatteforholdsperioder.isEmpty()) {
             throw FunksjonellException(SKATTEFORHOLDSPERIODER_EMPTY)
         }

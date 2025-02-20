@@ -16,6 +16,7 @@ import no.nav.melosys.domain.kodeverk.Folketrygdloven_kap2_bestemmelser
 import no.nav.melosys.domain.kodeverk.Inntektskildetype
 import no.nav.melosys.domain.kodeverk.InnvilgelsesResultat
 import no.nav.melosys.domain.kodeverk.Skatteplikttype
+import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingstema
 import no.nav.melosys.exception.FunksjonellException
 import no.nav.melosys.service.avgift.TrygdeavgiftsberegningValidator.INNTEKTSPERIODER_EMPTY
 import no.nav.melosys.service.avgift.TrygdeavgiftsberegningValidator.SKATTEFORHOLDSPERIODER_EMPTY
@@ -28,7 +29,7 @@ import org.junit.jupiter.params.ParameterizedTest
 import org.junit.jupiter.params.provider.MethodSource
 import java.time.LocalDate
 
-data class ValideringsInput(
+data class ValideringInput(
     val medlemskapsperioder: List<Medlemskapsperiode>,
     val skatteforholdsperioder: List<SkatteforholdTilNorge>,
     val inntektsperioder: List<Inntektsperiode>,
@@ -157,8 +158,11 @@ class TrygdeavgiftsberegningValidatorTest {
 
         @ParameterizedTest
         @MethodSource("valideringsDataperiodermedFeilScenarios")
-        fun shouldThrowExceptionWhenPerioderHarFeil(valideringsInput: ValideringsInput) {
+        fun shouldThrowExceptionWhenPerioderHarFeil(valideringsInput: ValideringInput) {
             val behandlingsresultat = Behandlingsresultat().apply {
+                behandling = Behandling().apply {
+                    tema = Behandlingstema.PENSJONIST
+                }
                 medlemskapsperioder = valideringsInput.medlemskapsperioder
             }
 
@@ -174,16 +178,19 @@ class TrygdeavgiftsberegningValidatorTest {
 
         @ParameterizedTest
         @MethodSource("valideringsDataPerioderDekkesScenarios")
-        fun shouldBeValidPeriodeWhenInntektsperioderDekkerHelePerioden(valideringsInput: ValideringsInput) {
+        fun shouldBeValidPeriodeWhenInntektsperioderDekkerHelePerioden(valideringInput: ValideringInput) {
             val behandlingsresultat = Behandlingsresultat().apply {
-                medlemskapsperioder = valideringsInput.medlemskapsperioder
+                behandling = Behandling().apply {
+                    tema = Behandlingstema.ARBEID_KUN_NORGE
+                }
+                medlemskapsperioder = valideringInput.medlemskapsperioder
             }
 
             shouldNotThrow<FunksjonellException> {
                 TrygdeavgiftsberegningValidator.validerForTrygdeavgiftberegning(
                     behandlingsresultat,
-                    valideringsInput.skatteforholdsperioder,
-                    valideringsInput.inntektsperioder,
+                    valideringInput.skatteforholdsperioder,
+                    valideringInput.inntektsperioder,
                     unleash
                 )
             }
@@ -191,7 +198,7 @@ class TrygdeavgiftsberegningValidatorTest {
 
         @ParameterizedTest
         @MethodSource("valideringsData")
-        fun shouldThrowFunksjonellExceptionWhenInntektsperioderIsEmpty(valideringsInput: ValideringsInput) {
+        fun shouldThrowFunksjonellExceptionWhenInntektsperioderIsEmpty(valideringsInput: ValideringInput) {
             val behandlingsresultatMock = lagGyldigBehandlingsresultat()
             val skatteforholdsperioder = valideringsInput.skatteforholdsperioder
             val inntektsperioder = valideringsInput.inntektsperioder
@@ -206,8 +213,8 @@ class TrygdeavgiftsberegningValidatorTest {
             }.message shouldBe valideringsInput.feilmelding
         }
 
-        fun valideringsDataperiodermedFeilScenarios(): List<ValideringsInput> = listOf(
-            ValideringsInput(                                                       // Inntektskilder dekker ikke hele perioden kaster exception
+        fun valideringsDataperiodermedFeilScenarios(): List<ValideringInput> = listOf(
+            ValideringInput(                                                       // Inntektskilder dekker ikke hele perioden kaster exception
                 listOf(Medlemskapsperiode().apply {
                     innvilgelsesresultat = InnvilgelsesResultat.INNVILGET
                     fom = LocalDate.now()
@@ -230,7 +237,7 @@ class TrygdeavgiftsberegningValidatorTest {
                     type = Inntektskildetype.ARBEIDSINNTEKT
                 }), TrygdeavgiftsberegningValidator.INNTEKTSPERIODE_DEKKER_IKKE_HELE_PERIODEN
             ),
-            ValideringsInput(                                                       // Skatteforhold dekker ikke hele perioden kaster exception
+            ValideringInput(                                                       // Skatteforhold dekker ikke hele perioden kaster exception
                 listOf(Medlemskapsperiode().apply {
                     innvilgelsesresultat = InnvilgelsesResultat.INNVILGET
                     fom = LocalDate.now()
@@ -254,7 +261,7 @@ class TrygdeavgiftsberegningValidatorTest {
                     type = Inntektskildetype.ARBEIDSINNTEKT
                 }), TrygdeavgiftsberegningValidator.SKATTEFORHOLDSPERIODE_DEKKER_IKKE_HELE_PERIODEN
             ),
-            ValideringsInput(                                                               // skatteforhold overlapper samme dag
+            ValideringInput(                                                               // skatteforhold overlapper samme dag
                 listOf(Medlemskapsperiode().apply {
                     innvilgelsesresultat = InnvilgelsesResultat.INNVILGET
                     fom = LocalDate.now()
@@ -279,7 +286,7 @@ class TrygdeavgiftsberegningValidatorTest {
                 }), TrygdeavgiftsberegningValidator.SKATTEFORHOLDSPERIODENE_KAN_IKKE_OVERLAPPE
             ),
 
-            ValideringsInput(                                                               // Skatteforholdsperiodene kan ikke overlappe
+            ValideringInput(                                                               // Skatteforholdsperiodene kan ikke overlappe
                 listOf(Medlemskapsperiode().apply {
                     innvilgelsesresultat = InnvilgelsesResultat.INNVILGET
                     fom = LocalDate.now()
@@ -302,7 +309,7 @@ class TrygdeavgiftsberegningValidatorTest {
                 }), TrygdeavgiftsberegningValidator.SKATTEFORHOLDSPERIODENE_KAN_IKKE_OVERLAPPE
             ),
 
-            ValideringsInput(                                                               // Inntektsperiode kan ikke være utenfor periode
+            ValideringInput(                                                               // Inntektsperiode kan ikke være utenfor periode
                 listOf(Medlemskapsperiode().apply {
                     innvilgelsesresultat = InnvilgelsesResultat.INNVILGET
                     fom = LocalDate.now()
@@ -325,7 +332,7 @@ class TrygdeavgiftsberegningValidatorTest {
                 }), TrygdeavgiftsberegningValidator.INNTEKTSPERIODE_ER_UTENFOR_MEDLEMSKAPSPERIODE
             ),
 
-            ValideringsInput(                                                               // Bestemmelser kan ikke være ulike for medlemskapsperioder kan ikke være utenfor periode
+            ValideringInput(                                                               // Bestemmelser kan ikke være ulike for medlemskapsperioder kan ikke være utenfor periode
                 listOf(Medlemskapsperiode().apply {
                     innvilgelsesresultat = InnvilgelsesResultat.INNVILGET
                     fom = LocalDate.now()
@@ -353,7 +360,7 @@ class TrygdeavgiftsberegningValidatorTest {
             ),
 
 
-            ValideringsInput(                                                               // Skatteforhold dekker ikke hele perioden
+            ValideringInput(                                                               // Skatteforhold dekker ikke hele perioden
                 listOf(Medlemskapsperiode().apply {
                     innvilgelsesresultat = InnvilgelsesResultat.INNVILGET
                     fom = LocalDate.now()
@@ -376,7 +383,7 @@ class TrygdeavgiftsberegningValidatorTest {
                 }), TrygdeavgiftsberegningValidator.SKATTEFORHOLDSPERIODE_DEKKER_IKKE_HELE_PERIODEN
             ),
 
-            ValideringsInput(                                                               // Inntektsperioder dekker ikke hele perioden
+            ValideringInput(                                                               // Inntektsperioder dekker ikke hele perioden
                 listOf(Medlemskapsperiode().apply {
                     innvilgelsesresultat = InnvilgelsesResultat.INNVILGET
                     fom = LocalDate.now()
@@ -399,8 +406,8 @@ class TrygdeavgiftsberegningValidatorTest {
             ),
         )
 
-        fun valideringsDataPerioderDekkesScenarios(): List<ValideringsInput> = listOf(
-            ValideringsInput(                                                       // Inntektsperioder skal kunne overlappe
+        fun valideringsDataPerioderDekkesScenarios(): List<ValideringInput> = listOf(
+            ValideringInput(                                                       // Inntektsperioder skal kunne overlappe
                 listOf(Medlemskapsperiode().apply {
                     innvilgelsesresultat = InnvilgelsesResultat.INNVILGET
                     fom = LocalDate.now()
@@ -425,7 +432,7 @@ class TrygdeavgiftsberegningValidatorTest {
             ),
 
 
-            ValideringsInput(                                                       // Inntektsperioder skal kunne overlappe
+            ValideringInput(                                                       // Inntektsperioder skal kunne overlappe
                 listOf(Medlemskapsperiode().apply {
                     innvilgelsesresultat = InnvilgelsesResultat.INNVILGET
                     fom = LocalDate.now()
@@ -449,7 +456,7 @@ class TrygdeavgiftsberegningValidatorTest {
                 }), ""
             ),
 
-            ValideringsInput(
+            ValideringInput(
                 listOf(Medlemskapsperiode().apply {
                     innvilgelsesresultat = InnvilgelsesResultat.INNVILGET
                     fom = LocalDate.of(2023, 3, 3)
@@ -481,7 +488,7 @@ class TrygdeavgiftsberegningValidatorTest {
                 }), ""
             ),
 
-            ValideringsInput(
+            ValideringInput(
                 listOf(Medlemskapsperiode().apply {
                     innvilgelsesresultat = InnvilgelsesResultat.INNVILGET
                     fom = LocalDate.of(2023, 1, 1)
@@ -509,7 +516,7 @@ class TrygdeavgiftsberegningValidatorTest {
                 }), ""
             ),
 
-            ValideringsInput(                                                               // SammePeriodeForAllePerioder
+            ValideringInput(                                                               // SammePeriodeForAllePerioder
                 listOf(Medlemskapsperiode().apply {
                     fom = LocalDate.of(2023, 1, 1)
                     tom = LocalDate.of(2023, 1, 8)
@@ -530,7 +537,7 @@ class TrygdeavgiftsberegningValidatorTest {
                     }
                 ), ""),
 
-            ValideringsInput(                                                               // EnMedlemskapOgInntektPeriodeToSkatteforholdPerioder
+            ValideringInput(                                                               // EnMedlemskapOgInntektPeriodeToSkatteforholdPerioder
                 listOf(Medlemskapsperiode().apply {
                     fom = LocalDate.of(2023, 1, 1)
                     tom = LocalDate.of(2023, 1, 8)
@@ -556,7 +563,7 @@ class TrygdeavgiftsberegningValidatorTest {
                     }
                 ), ""),
 
-            ValideringsInput(                                                               // EnMedlemskapOgSkatteforholdPeriodeToInntektsperioder
+            ValideringInput(                                                               // EnMedlemskapOgSkatteforholdPeriodeToInntektsperioder
                 listOf(Medlemskapsperiode().apply {
                     fom = LocalDate.of(2023, 1, 1)
                     tom = LocalDate.of(2023, 1, 8)
@@ -582,7 +589,7 @@ class TrygdeavgiftsberegningValidatorTest {
                     }
                 ), ""),
 
-            ValideringsInput(                                                               // ToMedlemskapOgToSkatteforholdPeriodeOgToInntektsperioder
+            ValideringInput(                                                               // ToMedlemskapOgToSkatteforholdPeriodeOgToInntektsperioder
                 listOf(Medlemskapsperiode().apply {
                     fom = LocalDate.of(2023, 1, 1)
                     tom = LocalDate.of(2023, 1, 4)
@@ -619,9 +626,9 @@ class TrygdeavgiftsberegningValidatorTest {
                 ), "")
         )
 
-        fun valideringsData(): List<ValideringsInput> = listOf(
+        fun valideringsData(): List<ValideringInput> = listOf(
 
-            ValideringsInput(
+            ValideringInput(
                 listOf(
                     SkatteforholdTilNorge().apply {
                         fomDato = LocalDate.now()
@@ -632,14 +639,14 @@ class TrygdeavgiftsberegningValidatorTest {
                 emptyList(),
                 INNTEKTSPERIODER_EMPTY
             ),
-            ValideringsInput(
+            ValideringInput(
                 emptyList(),
                 listOf(Inntektsperiode().apply {
                     type = Inntektskildetype.ARBEIDSINNTEKT
                 }),
                 SKATTEFORHOLDSPERIODER_EMPTY
             ),
-            ValideringsInput(
+            ValideringInput(
                 listOf(
                     SkatteforholdTilNorge().apply {
                         fomDato = LocalDate.now()
@@ -658,7 +665,7 @@ class TrygdeavgiftsberegningValidatorTest {
             )
         )
 
-        fun lagGyldigBehandlingsresultat() = mockk<Behandlingsresultat>().apply {
+        private fun lagGyldigBehandlingsresultat() = mockk<Behandlingsresultat>().apply {
             every { medlemskapsperioder } returns listOf(Medlemskapsperiode())
             every { utledMedlemskapsperiodeFom() } returns LocalDate.now()
             every { utledMedlemskapsperiodeTom() } returns LocalDate.now()
