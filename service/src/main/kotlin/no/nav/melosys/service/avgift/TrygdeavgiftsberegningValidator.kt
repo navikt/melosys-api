@@ -29,7 +29,7 @@ object TrygdeavgiftsberegningValidator {
     const val SKATTEFORHOLDSPERIODE_DEKKER_IKKE_HELE_PERIODEN = "Skatteforholdsperioden(e) du har lagt inn dekker ikke hele medlemskapsperioden(e)"
     const val INNTEKTSPERIODE_DEKKER_IKKE_HELE_PERIODEN = "Inntektsperioden(e) du har lagt inn dekker ikke hele medlemskapsperioden(e)"
     const val INNTEKTSPERIODE_ER_UTENFOR_MEDLEMSKAPSPERIODE = "Inntektsperioden(e) du har lagt inn er utenfor medlemskapsperioden(e)"
-
+    const val MINST_EN_ANNEN_INNTEKT_I_TILLEGG_TIL_PENSJON = "Du må oppgi minst en annen inntekt i tillegg til pensjon/uføretrygd"
 
     fun validerForTrygdeavgiftberegning(
         behandlingsresultat: Behandlingsresultat,
@@ -42,7 +42,7 @@ object TrygdeavgiftsberegningValidator {
             inntektsPerioder.isNotEmpty() && inntektsPerioder.all { listOf(PENSJON_UFØRETRYGD, PENSJON_UFØRETRYGD_KILDESKATT, PENSJON, UFØRETRYGD).contains(it.type) } &&
             behandlingsresultat.behandling?.tema != PENSJONIST
         )
-            throw FunksjonellException("Du må oppgi minst en annen inntekt i tillegg til pensjon/uføretrygd")
+            throw FunksjonellException(MINST_EN_ANNEN_INNTEKT_I_TILLEGG_TIL_PENSJON)
 
         if (inntektsPerioder.isEmpty() && !erAllePerioderSkattepliktige(skatteforholdsPerioder)) {
             throw FunksjonellException(INNTEKTSPERIODER_EMPTY)
