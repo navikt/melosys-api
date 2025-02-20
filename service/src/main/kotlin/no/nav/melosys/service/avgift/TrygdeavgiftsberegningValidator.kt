@@ -8,7 +8,12 @@ import no.nav.melosys.domain.ErPeriode
 import no.nav.melosys.domain.Medlemskapsperiode
 import no.nav.melosys.domain.avgift.Inntektsperiode
 import no.nav.melosys.domain.avgift.SkatteforholdTilNorge
+import no.nav.melosys.domain.kodeverk.Inntektskildetype.PENSJON
+import no.nav.melosys.domain.kodeverk.Inntektskildetype.PENSJON_UFØRETRYGD
+import no.nav.melosys.domain.kodeverk.Inntektskildetype.PENSJON_UFØRETRYGD_KILDESKATT
+import no.nav.melosys.domain.kodeverk.Inntektskildetype.UFØRETRYGD
 import no.nav.melosys.domain.kodeverk.Skatteplikttype
+import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingstema.PENSJONIST
 import no.nav.melosys.exception.FunksjonellException
 import no.nav.melosys.featuretoggle.ToggleName
 import org.threeten.extra.LocalDateRange
@@ -34,6 +39,11 @@ object TrygdeavgiftsberegningValidator {
         inntektsPerioder: List<Inntektsperiode>,
         unleash: Unleash
     ) {
+
+        if (inntektsPerioder.all { listOf(PENSJON_UFØRETRYGD, PENSJON_UFØRETRYGD_KILDESKATT, PENSJON, UFØRETRYGD).contains(it.type) } &&
+            behandlingsresultat.behandling.tema != PENSJONIST)
+            throw FunksjonellException("Du må oppgi minst en annen inntekt i tillegg til pensjon/uføretrygd")
+
         if (inntektsPerioder.isEmpty() && !erAllePerioderSkattepliktige(skatteforholdsPerioder)) {
             throw FunksjonellException(INNTEKTSPERIODER_EMPTY)
         }
