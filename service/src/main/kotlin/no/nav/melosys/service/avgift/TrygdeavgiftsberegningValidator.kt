@@ -33,25 +33,25 @@ object TrygdeavgiftsberegningValidator {
 
     fun validerForTrygdeavgiftberegning(
         behandlingsresultat: Behandlingsresultat,
-        skatteforholdsPerioder: List<SkatteforholdTilNorge>,
-        inntektsPerioder: List<Inntektsperiode>,
+        skatteforholdsperioder: List<SkatteforholdTilNorge>,
+        inntektsperioder: List<Inntektsperiode>,
         unleash: Unleash
     ) {
 
         if (
-            inntektsPerioder.isNotEmpty() && inntektsPerioder.all { listOf(PENSJON_UFØRETRYGD, PENSJON_UFØRETRYGD_KILDESKATT, PENSJON, UFØRETRYGD).contains(it.type) } &&
+            inntektsperioder.isNotEmpty() && inntektsperioder.all { listOf(PENSJON_UFØRETRYGD, PENSJON_UFØRETRYGD_KILDESKATT, PENSJON, UFØRETRYGD).contains(it.type) } &&
             behandlingsresultat.behandling?.tema != PENSJONIST
         )
             throw FunksjonellException(MINST_EN_ANNEN_INNTEKT_I_TILLEGG_TIL_PENSJON)
 
-        if (inntektsPerioder.isEmpty() && !erAllePerioderSkattepliktige(skatteforholdsPerioder)) {
+        if (inntektsperioder.isEmpty() && !erAllePerioderSkattepliktige(skatteforholdsperioder)) {
             throw FunksjonellException(INNTEKTSPERIODER_EMPTY)
         }
-        if (skatteforholdsPerioder.isEmpty()) {
+        if (skatteforholdsperioder.isEmpty()) {
             throw FunksjonellException(SKATTEFORHOLDSPERIODER_EMPTY)
         }
 
-        if (skatteforholdsPerioder.size > 1 && skatteforholdsPerioder.groupBy { it.skatteplikttype }.size == 1) {
+        if (skatteforholdsperioder.size > 1 && skatteforholdsperioder.groupBy { it.skatteplikttype }.size == 1) {
             throw FunksjonellException(SKATTEPLIKTTYPE_LIK_FOR_ALLE_PERIODER)
         }
 
@@ -59,27 +59,27 @@ object TrygdeavgiftsberegningValidator {
 
         val innvilgedeMedlemskapsperioder = behandlingsresultat.medlemskapsperioder.filter { it.erInnvilget() }
 
-        harOverlapp(skatteforholdsPerioder, SKATTEFORHOLDSPERIODENE_KAN_IKKE_OVERLAPPE)
+        harOverlapp(skatteforholdsperioder, SKATTEFORHOLDSPERIODENE_KAN_IKKE_OVERLAPPE)
 
         validerPerioderDekkerSammenlignetPeriode(
             kanOverlappe = false,
-            skatteforholdsPerioder,
+            skatteforholdsperioder,
             innvilgedeMedlemskapsperioder,
             SKATTEFORHOLDSPERIODE_DEKKER_IKKE_HELE_PERIODEN
         )
 
-        if (unleash.isEnabled(ToggleName.MELOSYS_ÅRSAVREGNING) && inntektsPerioder.isNotEmpty()) {
+        if (unleash.isEnabled(ToggleName.MELOSYS_ÅRSAVREGNING) && inntektsperioder.isNotEmpty()) {
             validerinntektsperioderErIkkeUtenforMedlemskapPeriode(
-                inntektsPerioder, innvilgedeMedlemskapsperioder, INNTEKTSPERIODE_ER_UTENFOR_MEDLEMSKAPSPERIODE
+                inntektsperioder, innvilgedeMedlemskapsperioder, INNTEKTSPERIODE_ER_UTENFOR_MEDLEMSKAPSPERIODE
             )
         }
 
         val erPliktigMedlem = innvilgedeMedlemskapsperioder.all { it.erPliktig() }
-        val erSkattepliktigIHelePerioden = skatteforholdsPerioder.all { it.skatteplikttype == Skatteplikttype.SKATTEPLIKTIG }
+        val erSkattepliktigIHelePerioden = skatteforholdsperioder.all { it.skatteplikttype == Skatteplikttype.SKATTEPLIKTIG }
         if (!(erPliktigMedlem && erSkattepliktigIHelePerioden)) {
             validerPerioderDekkerSammenlignetPeriode(
                 kanOverlappe = true,
-                inntektsPerioder,
+                inntektsperioder,
                 innvilgedeMedlemskapsperioder,
                 INNTEKTSPERIODE_DEKKER_IKKE_HELE_PERIODEN
             )
