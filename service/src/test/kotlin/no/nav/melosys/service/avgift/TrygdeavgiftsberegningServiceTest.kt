@@ -333,6 +333,13 @@ internal class TrygdeavgiftsberegningServiceTest {
 
     // Tester for pliktig medlem og skattepliktig::
 
+
+    // TODO
+    @Test
+    fun `beregnTrygdeavgift for pliktig medlem og skattepliktig skal ikke godta flere medlemskapsperioder`() {
+
+    }
+
     @Test
     fun `beregnTrygdeavgift for pliktig medlem og skattepliktig skal beregne og lagre trygdeavgift`() {
         behandling.apply {
