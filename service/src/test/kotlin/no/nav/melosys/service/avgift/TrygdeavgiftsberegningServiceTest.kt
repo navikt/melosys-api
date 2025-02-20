@@ -31,6 +31,7 @@ import no.nav.melosys.service.saksbehandling.lagBehandlingsresultat
 import org.junit.jupiter.api.AfterEach
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
+import org.junit.jupiter.api.assertThrows
 import org.junit.jupiter.api.extension.ExtendWith
 import java.math.BigDecimal
 import java.time.LocalDate
@@ -333,11 +334,51 @@ internal class TrygdeavgiftsberegningServiceTest {
 
     // Tester for pliktig medlem og skattepliktig::
 
-
-    // TODO
     @Test
     fun `beregnTrygdeavgift for pliktig medlem og skattepliktig skal ikke godta flere medlemskapsperioder`() {
+        behandling.apply {
+            fagsak = FagsakTestFactory.builder().medBruker().build()
+        }
 
+        behandlingsresultat.addMedlemskapsperiode(Medlemskapsperiode().apply {
+            id = 1L
+            fom = FOM
+            tom = TOM
+            trygdedekning = Trygdedekninger.FTRL_2_9_FØRSTE_LEDD_C_ANDRE_LEDD_HELSE_PENSJON_SYKE_FORELDREPENGER
+            innvilgelsesresultat = InnvilgelsesResultat.INNVILGET
+            medlemskapstype = Medlemskapstyper.PLIKTIG
+            bestemmelse = Folketrygdloven_kap2_bestemmelser.FTRL_KAP2_2_3_ANDRE_LEDD
+        })
+        behandlingsresultat.addMedlemskapsperiode(Medlemskapsperiode().apply {
+            id = 2L
+            fom = FOM
+            tom = TOM
+            trygdedekning = Trygdedekninger.FTRL_2_9_FØRSTE_LEDD_C_ANDRE_LEDD_HELSE_PENSJON_SYKE_FORELDREPENGER
+            innvilgelsesresultat = InnvilgelsesResultat.INNVILGET
+            medlemskapstype = Medlemskapstyper.PLIKTIG
+            bestemmelse = Folketrygdloven_kap2_bestemmelser.FTRL_KAP2_2_3_ANDRE_LEDD
+        })
+
+
+        val skatteforholdsperioder = listOf(
+            SkatteforholdTilNorge().apply {
+                fomDato = FOM
+                tomDato = TOM
+                skatteplikttype = Skatteplikttype.SKATTEPLIKTIG
+            }
+        )
+        val notSoRandomUuid = UUID.randomUUID()
+        mockkStatic(UUID::class)
+        every { UUID.randomUUID() } returns notSoRandomUuid
+
+
+        assertThrows<IllegalArgumentException> {
+            trygdeavgiftsberegningService.beregnOgLagreTrygdeavgift(
+                BEHANDLING_ID,
+                skatteforholdsperioder,
+                emptyList()
+            )
+        }.message == "Det skal ikke være flere enn en medlem og skatteforholdsperiode når medlemskapet er pliktig og skattepliktig"
     }
 
     @Test
