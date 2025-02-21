@@ -216,9 +216,8 @@ internal class TrygdeavgiftsberegningServiceTest {
                 fomDato = FOM
                 tomDato = TOM.minusMonths(1)
                 type = Inntektskildetype.INNTEKT_FRA_UTLANDET
+                avgiftspliktigMndInntekt = Penger(BigDecimal(10000.0))
                 isArbeidsgiversavgiftBetalesTilSkatt = false
-                Penger(BigDecimal(10000.0))
-                true
             }
         )
 
@@ -255,9 +254,8 @@ internal class TrygdeavgiftsberegningServiceTest {
                 fomDato = FOM
                 tomDato = TOM.minusMonths(1)
                 type = Inntektskildetype.INNTEKT_FRA_UTLANDET
+                avgiftspliktigMndInntekt = Penger(BigDecimal(10000.0))
                 isArbeidsgiversavgiftBetalesTilSkatt = false
-                Penger(BigDecimal(10000.0))
-                true
             }
         )
 
