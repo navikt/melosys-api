@@ -107,11 +107,11 @@ class ProsessinstansTestManagerTest {
                 "awaitility-thread" to "awaitCheckForDoneCount",
                 thread.name to "jfrKnytt.status = ProsessStatus.FERDIG",
                 "awaitility-thread" to "awaitCheckForDoneCount",
-                "main" to "prosessinstanse ferdig JFR_KNYTT",
+                "main" to "JFR_KNYTT ferdig",
                 "awaitility-thread" to "awaitCheckForDoneCount",
                 thread.name to "iverksettVedtakEos.status = ProsessStatus.FERDIG",
                 "awaitility-thread" to "awaitCheckForDoneCount",
-                "main" to "prosessinstanse ferdig IVERKSETT_VEDTAK_EOS"
+                "main" to "IVERKSETT_VEDTAK_EOS ferdig"
             )
 
             awaitCheckForDoneCount shouldBeGreaterThan 5
