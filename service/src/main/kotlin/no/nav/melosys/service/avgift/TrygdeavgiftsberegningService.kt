@@ -68,7 +68,7 @@ class TrygdeavgiftsberegningService(
                 behandlingsresultat.medlemskapsperioder
             )
         ) {
-            require(behandlingsresultat.medlemskapsperioder.size == 1 && skatteforholdsperioder.size == 1) { "Det skal ikke være flere enn en medlem og skatteforholdsperiode når medlemskapet er pliktig og skattepliktig" }
+            require(behandlingsresultat.medlemskapsperioder.size == 1 && skatteforholdsperioder.size == 1) { "Det skal ikke være flere enn en medlem- og skatteforholdsperiode når medlemskapet er pliktig og skattepliktig" }
             return skattepliktigTrygdeavgiftsperioderAvMedlemskapsperioder(behandlingsresultat.medlemskapsperioder.filter { it.erInnvilget() })
         }
 

@@ -378,7 +378,7 @@ internal class TrygdeavgiftsberegningServiceTest {
                 skatteforholdsperioder,
                 emptyList()
             )
-        }.message.shouldContain("Det skal ikke være flere enn en medlem og skatteforholdsperiode når medlemskapet er pliktig og skattepliktig")
+        }.message.shouldContain("Det skal ikke være flere enn en medlem- og skatteforholdsperiode når medlemskapet er pliktig og skattepliktig")
     }
 
     @Test
