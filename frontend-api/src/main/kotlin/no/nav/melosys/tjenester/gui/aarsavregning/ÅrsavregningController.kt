@@ -140,16 +140,16 @@ class ÅrsavregningController(
             GrunnlagsOpplysningerDto(
                 mapTrygdeavgiftsgrunnlag(trygdeavgiftsgrunnlag),
                 AvgiftDto(
-                    trygdeavgiftsperioder = trygdeavgiftsperioder.filter { it.grunnlagInntekstperiode != null }
+                    trygdeavgiftsperioder = trygdeavgiftsperioder
                         .map {
-                            val avgiftspliktigMndInntekt = it.grunnlagInntekstperiode!!.kalkulertMndInntekt(verdiAvrundet = true)
+                            val avgiftspliktigMndInntekt = it.grunnlagInntekstperiode?.kalkulertMndInntekt(verdiAvrundet = true)?: BigDecimal.ZERO
 
                             TrygdeavgiftsperiodeDto(
                                 fom = it.fom,
                                 tom = it.tom,
-                                inntektskildetype = it.grunnlagInntekstperiode!!.type,
+                                inntektskildetype = it.grunnlagInntekstperiode?.type,
                                 inntektPerMd = avgiftspliktigMndInntekt,
-                                arbeidsgiversavgiftBetales = it.grunnlagInntekstperiode!!.isArbeidsgiversavgiftBetalesTilSkatt,
+                                arbeidsgiversavgiftBetales = it.grunnlagInntekstperiode?.isArbeidsgiversavgiftBetalesTilSkatt,
                                 avgiftssats = it.trygdesats.toDouble(),
                                 avgiftPerMd = it.trygdeavgiftsbeløpMd.verdi.intValueExact()
                             )
@@ -243,8 +243,8 @@ data class AvgiftDto(
 data class TrygdeavgiftsperiodeDto(
     val fom: LocalDate,
     val tom: LocalDate,
-    val inntektskildetype: Inntektskildetype,
-    val arbeidsgiversavgiftBetales: Boolean,
+    val inntektskildetype: Inntektskildetype?,
+    val arbeidsgiversavgiftBetales: Boolean?,
     val inntektPerMd: BigDecimal,
     val avgiftssats: Double,
     val avgiftPerMd: Int
