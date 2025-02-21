@@ -378,7 +378,7 @@ internal class TrygdeavgiftsberegningServiceTest {
                 skatteforholdsperioder,
                 emptyList()
             )
-        }.message == "Det skal ikke være flere enn en medlem og skatteforholdsperiode når medlemskapet er pliktig og skattepliktig"
+        }.message.shouldContain("Det skal ikke være flere enn en medlem og skatteforholdsperiode når medlemskapet er pliktig og skattepliktig")
     }
 
     @Test
@@ -781,7 +781,7 @@ internal class TrygdeavgiftsberegningServiceTest {
         trygdeavgiftsberegningService.finnFakturamottakerNavn(BEHANDLING_ID).shouldBe(BRUKER_NAVN)
     }
 
-    fun idToUUid(id: Long): UUID = UUID.nameUUIDFromBytes(id.toString().toByteArray())
+    private fun idToUUid(id: Long): UUID = UUID.nameUUIDFromBytes(id.toString().toByteArray())
 }
 
 
